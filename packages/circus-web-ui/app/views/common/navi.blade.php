@@ -3,53 +3,53 @@
 	<ul id="gnavi">
 		<li class="gnavi_cell">
 			<a href="{{{asset('/home')}}}">
-				<span class="gnavi_btn_ico">H</span>
-				<span class="gnavi_btn_main_txt">Home</span>
+				<span class="gnavi_btn_ico">{{Form::label('H')}}</span>
+				<span class="gnavi_btn_main_txt">{{Form::label('Home')}}</span>
 				<div class="clear">&nbsp;</div>
 			</a>
 		</li>
 		<li class="gnavi_cell">
 			<a href="{{{asset('/case/search')}}}">
-				<span class="gnavi_btn_ico">C</span>
-				<span class="gnavi_btn_main_txt">Case</span>
+				<span class="gnavi_btn_ico">{{Form::label('C')}}</span>
+				<span class="gnavi_btn_main_txt">{{Form::label('Case')}}</span>
 				<div class="clear">&nbsp;</div>
 			</a>
 			<div class="gnavi_cell_inner">
 				<ul class="gnavi_cell_inner_body">
-					<li><a href="{{{asset('/case/search')}}}">Case Search</a></li>
-					<li><a href="{{{asset('/case/search_result')}}}">User set condition 01</a></li>
-					<li><a href="{{{asset('/case/search_result')}}}">User set condition 02</a></li>
-					<li><a href="{{{asset('/case/search_result')}}}">User set condition 03</a></li>
+					<li>{{HTML::link(asset('/case/search'), 'Case Search')}}</li>
+					<li>{{HTML::link(asset('/case/search'), 'User set condition 01')}}</li>
+					<li>{{HTML::link(asset('/case/search'), 'User set condition 02')}}</li>
+					<li>{{HTML::link(asset('/case/search'), 'User set condition 03')}}</li>
 				</ul>
 			</div>
 		</li>
 		<li class="gnavi_cell">
 			<a href="{{{asset('/series/search')}}}">
-				<span class="gnavi_btn_ico">S</span>
-				<span class="gnavi_btn_main_txt">Series</span>
+				<span class="gnavi_btn_ico">{{Form::label('S')}}</span>
+				<span class="gnavi_btn_main_txt">{{Form::label('Series')}}</span>
 				<div class="clear">&nbsp;</div>
 			</a>
 			<div class="gnavi_cell_inner">
 				<ul class="gnavi_cell_inner_body">
-					<li><a href="{{{asset('/series/search')}}}">Series Search</a></li>
-					<li><a href="{{{asset('/series/import')}}}">Series Import</a></li>
-					<li><a href="{{{asset('/series/search_result')}}}">User set condition 01</a></li>
-					<li><a href="{{{asset('/series/search_result')}}}">User set condition 02</a></li>
-					<li><a href="{{{asset('/series/search_result')}}}">User set condition 03</a></li>
+					<li>{{HTML::link(asset('/series/search'), 'Series Search')}}</li>
+					<li>{{HTML::link(asset('/series/import'), 'Series Import')}}</li>
+					<li>{{HTML::link(asset('/series/search'), 'User set condition 01')}}</li>
+					<li>{{HTML::link(asset('/series/search'), 'User set condition 02')}}</li>
+					<li>{{HTML::link(asset('/series/search'), 'User set condition 03')}}</li>
 				</ul>
 			</div>
 		</li>
 		<li class="gnavi_cell">
 			<a href="{{{asset('/admin')}}}">
-				<span class="gnavi_btn_ico">A</span>
-				<span class="gnavi_btn_main_txt">Admin</span>
+				<span class="gnavi_btn_ico">{{Form::label('A')}}</span>
+				<span class="gnavi_btn_main_txt">{{Form::label('Admin')}}</span>
 				<div class="clear">&nbsp;</div>
 			</a>
 			<div class="gnavi_cell_inner">
 				<ul class="gnavi_cell_inner_body">
-					<li><a href="{{{asset('/admin/policy')}}}">Policy</a></li>
-					<li><a href="{{{asset('/admin/group')}}}">Group</a></li>
-					<li><a href="{{{asset('/admin/user')}}}">User</a></li>
+					<li>{{HTML::link(asset('/admin/policy'), 'Policy')}}</li>
+					<li>{{HTML::link(asset('/admin/group'), 'Group')}}</li>
+					<li>{{HTML::link(asset('/admin/user'), 'User')}}</li>
 				</ul>
 			</div>
 		</li>

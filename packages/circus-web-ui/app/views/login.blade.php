@@ -34,11 +34,9 @@
 					Sign Up
 				</button>
 			</p>
-			<br>
-			<span class="text_arlert"><?php $error_msg; ?></span>
+			<span class="text_arlert"><br><?php $error_msg; ?></span>
 		{{Form::close()}}
 	</div>
-</div>
 </div>
 @stop
 @include('common.footer')

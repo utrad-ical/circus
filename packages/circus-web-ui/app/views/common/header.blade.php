@@ -1,16 +1,26 @@
 @section('header')
-<!DOCTYPE html>
-<html lang="ja">
+<!DOCTYPE HTML>
+<html>
 <head>
     <meta charset="utf-8">
     <title>{{{isset($title) ? $title : 'Hello'}}}</title>
 	<link rel="stylesheet" type="text/css" href="{{{asset('../bootstrap/css/common.css')}}}">
 	<link rel="stylesheet" type="text/css" href="{{{asset('../bootstrap/css/layout.css')}}}">
 	<link rel="stylesheet" type="text/css" href="{{{asset('../bootstrap/css/color.css')}}}">
-	<!-- ここにページ固有CSS。SNSHSmarty参照 -->
+	<!-- ページ固有CSS -->
+	@if (isset($css))
+		@foreach ($css as $cssrec)
+			<link rel="stylesheet" type="text/css" href="{{{asset('../bootstrap/'.$cssrec)}}}">
+		@endforeach
+	@endif
 	<script type="text/javascript" src="{{{asset('../bootstrap/js/jquery-1.11.1.min.js')}}}"></script>
 	<script type="text/javascript" src="{{{asset('../bootstrap/js/common.js')}}}"></script>
-	<!-- ここにページ固有JS。SNSHSmarty参照 -->
+	<!-- ページ固有JS -->
+	@if (isset($js))
+		@foreach ($js as $jsrec)
+			<script type="text/javascript" src="{{{asset('../bootstrap/'.$jsrec)}}}"></script>
+		@endforeach
+	@endif
 </head>
 <body class="mode_white">
 	<div id="wrapper">
@@ -38,8 +48,8 @@
 								<p id="setting_switch">settings</p>
 								<div id="settings_main_wrap">
 									<ul id="settings_list">
-										<li><a href="{{{asset('/home')}}}">Home</a></li>
-										<li><a href="{{{asset('/logout')}}}">Logout</a></li>
+										<li>{{HTML::link(asset('/home'), 'Home')}}</li>
+										<li>{{HTML::link(asset('/logout'), 'Logout')}}</li>
 									</ul>
 								</div>
 							</div>

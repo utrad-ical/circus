@@ -15,16 +15,11 @@
 Route::get('/', function()
 {
 	//return View::make('login');
-	echo "Called!!";
+	//echo "Called!!";
 	return Redirect::to('login');
 });
-/*
-Route::get('login', function(){
-//	return View::make('login');
-});
-*/
-Route::get('login', 'Logincontroller@getIndex');
 
+Route::get('login', 'Logincontroller@getIndex');
 Route::post('login', 'LoginController@login');
 
 //トップページ
@@ -34,6 +29,7 @@ Route::get('home', 'TopController@getIndex');
 //ケース検索
 Route::get('case/search', 'CaseController@getIndex');
 Route::post('case/search', 'CaseController@search');
+//Route::post('case/detail', 'CaseController@detail');
 
 /*
 //シリーズ検索

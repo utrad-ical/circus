@@ -2,12 +2,16 @@ $(function(){
 
 	//背景色切替
 	$('#btn_area').find('.color_select').change(function(){
+		console.log("Color Change");
 		var mode_flg	=	$('#btn_area').find('.color_select:checked').val();
+		console.log("mode::"+mode_flg);
 		if(mode_flg==0){
+			console.log("Mode::Black");
 			//白背景モード
 			$('body').removeClass('mode_black')
 				.addClass('mode_white');
 		}else{
+			console.log("Mode::White");
 			//黒背景モード
 			$('body').removeClass('mode_white')
 				.addClass('mode_black');

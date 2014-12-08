@@ -32,7 +32,8 @@ ClassLoader::addDirectories(array(
 */
 
 //Log::useFiles(storage_path().'/logs/laravel.log');
-Log::useFiles(storage_path().'/logs/debug.log');
+//Log::useFiles(storage_path().'/logs/debug.log');
+Log::useDailyFiles(storage_path() . '/logs/debug.log');
 
 /*
 |--------------------------------------------------------------------------
@@ -78,5 +79,22 @@ App::down(function()
 | definitions instead of putting them all in the main routes file.
 |
 */
+
+Event::listen('illuminate.query', function($query, $bindings, $time, $name)
+{
+    $data = compact('bindings', 'time', 'name');
+    foreach ($bindings as $i => $binding)
+    {
+        if($binding instanceof \DateTime)
+        {
+            $bindings[$i] = $binding->format('\'Y-m-d H:i:s\'');
+        }elseif(is_string($binding)){
+            $bindings[$i] = "'$binding'";
+        }
+    }
+    $query = str_replace(array('%', '?'), array('%%', '%s'), $query);
+    $query = vsprintf($query, $bindings);
+    Log::info($query, $data);
+});
 
 require app_path().'/filters.php';

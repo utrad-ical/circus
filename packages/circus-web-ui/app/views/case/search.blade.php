@@ -30,7 +30,6 @@
 			$('#search_condition_outer').find('input,select,textarea').clone().appendTo('#temporaly_form')
 
 			var form_data	=	$('#temporaly_form').serializeArray();
-			console.log(form_data);
 			$('#temporaly_form').remove();
 
 			//本来はシリアライズした検索条件群をサーバーに渡して必要な項目をロードする
@@ -46,7 +45,7 @@
 			<div class="search_form_wrap">
 				<h2 class="con_ttl">Search Condition</h2>
 				<div id="search_condition_outer">
-					{{Form::open(['url' => '/case/search', 'method' => 'POST', 'class' => 'common_form'])}}
+					{{Form::open(['url' => '/case/search', 'method' => 'POST', 'class' => 'common_form', 'id' => 'form_search'])}}
 					<table class="common_table al_l mar_b_10">
 						<colgroup>
 							<col width="15%">
@@ -57,78 +56,37 @@
 						<tr>
 							<th>{{Form::label('project ID')}}</th>
 							<td>
-								{{Form::select('project', $project_list, '', array("class" => "multi_select", "multiple" => "multiple"))}}
+								{{Form::select('project[]', $project_list, isset($inputs["project"]) ? $inputs["project"] : null, array("class" => "multi_select", "multiple" => "multiple"))}}
 							</td>
 							<th>{{Form::label('Case ID')}}</th>
-							<td>{{Form::text('caseID', isset($caseID) ? $caseID : '', array("class" => "common_input_text w_200"))}}</td>
+							<td>{{Form::text('caseID', isset($inputs["caseID"]) ? $inputs["caseID"] : '', array("class" => "common_input_text w_200"))}}</td>
 						</tr>
 						<tr>
 							<th>{{Form::label('Patient ID')}}</th>
-							<td>{{Form::text('patientID', isset($patientID) ? $patientID : '', array("class" => "common_input_text w_200"))}}</td>
+							<td>{{Form::text('patientID', isset($inputs["patientID"]) ? $inputs["patientID"] : '', array("class" => "common_input_text w_200"))}}</td>
 							<th>{{Form::label('Patient Name')}}</th>
-							<td>{{Form::text('patientName', isset($patientName) ? $patientName : '', array("class" => "common_input_text w_200"))}}</td>
+							<td>{{Form::text('patientName', isset($inputs["patientName"]) ? $inputs["patientName"] : '', array("class" => "common_input_text w_200"))}}</td>
 						</tr>
 						<tr>
 							<th>{{Form::label('Inspection date')}}</th>
-							<td colspan="3">{{Form::text('insepctionDate', isset($insepctionDate) ? $insepctionDate : '', array("class" => "common_input_text w_200 datepicker"))}}</td>
+							<td colspan="3">{{Form::text('inspectionDate', isset($inputs["inspectionDate"]) ? $inputs["inspectionDate"] : '', array("class" => "common_input_text w_200 datepicker"))}}</td>
 						</tr>
 					</table>
 					{{Form::button('Show More Options', array("class" => "common_btn mar_b_10", "onClick" => "$('#search_condition').toggleClass('hidden');"))}}
 					<div id="search_condition" class="hidden">
 					</div>
-					<p class="submit_area">
-						{{Form::button('reset', array("class" => "common_btn common_btn_green"))}}
-						{{Form::button('Search', array("class" => "common_btn common_btn_gray", "id" => "btn_submit", "type" => "submit"))}}
-						{{Form::button('Save settings', array("class" => "common_btn common_btn_gray", "id" => "save-button"))}}
-					</p>
+						<p class="submit_area">
+							{{Form::button('Reset', array("class" => "common_btn common_btn_green", "type" => "reset"))}}
+							{{Form::button('Search', array("class" => "common_btn common_btn_gray", "id" => "btn_submit", "type" => "button"))}}
+							{{Form::button('Save settings', array("class" => "common_btn common_btn_gray", "id" => "save-button", "type" => "button"))}}
+						</p>
 					{{Form::close()}}
 				</div>
 			</div>
 		</div>
 		@if ($search_flg)
 			<div class="search_result pad_tb_5">
-				<ul class="common_pager clearfix">
-					<li class="pager_btn pager_previous">
-						<a href="#">Prev</a>
-					</li>
-					<li class="pager_btn ">
-						<a href="#">1</a>
-					</li>
-					<li class="pager_btn pager_omission">
-						…
-					</li>
-					<li class="pager_btn current_page">
-						10
-					</li>
-					<li class="pager_btn ">
-						<a href="#">11</a>
-					</li>
-					<li class="pager_btn active">
-						<a href="#">12</a>
-					</li>
-					<li class="pager_btn ">
-						<a href="#">13</a>
-					</li>
-					<li class="pager_btn ">
-						<a href="#">14</a>
-					</li>
-					<li class="pager_btn pager_omission">
-						…
-					</li>
-					<li class="pager_btn ">
-						<a href="#">81</a>
-					</li>
-					<li class="pager_btn pager_next">
-						<a href="#">Next</a>
-					</li>
-					<li class="pager_sort_order">
-						{{Form::select('sort', array('' => 'Sort Order', 'lastUpdate' => 'Last Update', 'id' => 'ID'), '',array("class" => "w_max"))}}
-					</li>
-					<li class="pager_disp_num">
-						{{Form::select('disp', array('' => 'display num', '10' => 10, '50' => 50, '100' => 100, 'all' => 'all'), '', array("class" => "w_max"))}}
-					</li>
-				</ul>
-
+				{{$list_pager->links()}}
 				<table class="result_table common_table">
 					<colgroup>
 						<col width="20%">
@@ -178,48 +136,7 @@
 						</tr>
 					@endif
 				</table>
-
-				<ul class="common_pager clearfix">
-					<li class="pager_btn pager_previous">
-						{{HTML::link('#', 'Prev')}}
-					</li>
-					<li class="pager_btn ">
-						{{HTML::link('#', 1)}}
-					</li>
-					<li class="pager_btn pager_omission">
-						…
-					</li>
-					<li class="pager_btn current_page">
-						10
-					</li>
-					<li class="pager_btn ">
-						{{HTML::link('#', 11)}}
-					</li>
-					<li class="pager_btn active">
-						{{HTML::link('#', 12)}}
-					</li>
-					<li class="pager_btn ">
-						{{HTML::link('#', 13)}}
-					</li>
-					<li class="pager_btn ">
-						{{HTML::link('#', 14)}}
-					</li>
-					<li class="pager_btn pager_omission">
-						…
-					</li>
-					<li class="pager_btn ">
-						{{HTML::link('#', 81)}}
-					</li>
-					<li class="pager_btn pager_next">
-						{{HTML::link('#', 'Next')}}
-					</li>
-					<li class="pager_sort_order">
-						{{Form::select('sort', array('' => 'Sort Order', 'lastUpdate' => 'Last Update', 'caseID' => 'ID'), '', array('class' => 'w_max'))}}
-					</li>
-					<li class="pager_disp_num">
-						{{Form::select('disp', array('' => 'display num', 10 => 10, 50 => 50, 100 => 100, 'all' => 'all'), '', array('class' => 'w_max'))}}
-					</li>
-				</ul>
+				{{$list_pager->links()}}
 			</div>
 		@endif
 	</div>

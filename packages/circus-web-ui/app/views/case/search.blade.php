@@ -52,10 +52,8 @@
 		});
 
 		$('.link_detail').click(function(){
-			alert("飛ぶで!");
 			//送信するフォームIDを取得
 			var target_form = $(this).attr('target_elm');
-			alert(target_form);
 			$('#'+target_form).submit();
 		});
 

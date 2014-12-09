@@ -12,12 +12,7 @@
 */
 
 //ログイン画面
-Route::get('/', function()
-{
-	//return View::make('login');
-	//echo "Called!!";
-	return Redirect::to('login');
-});
+Route::get('/', function(){return Redirect::to('login');});
 
 Route::get('login', 'Logincontroller@getIndex');
 Route::post('login', 'LoginController@login');
@@ -29,10 +24,12 @@ Route::get('home', 'TopController@getIndex');
 //ケース検索
 Route::get('case/search', 'CaseController@getIndex');
 Route::post('case/search', 'CaseController@search');
-//Route::post('case/detail', 'CaseController@detail');
+Route::post('case/detail', 'CaseController@detail');
+Route::post('case/revision', 'CaseController@revision');
+Route::post('case/edit', 'CaseController@edit');
+Route::get('case/input', 'CaseController@input');
 
-/*
 //シリーズ検索
 Route::get('series/search', 'SeriesController@getIndex');
 Route::post('series/search', 'SeriesController@search');
-*/
+Route::post('series/detail', 'SeriesController@detail');

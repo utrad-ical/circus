@@ -7,11 +7,11 @@
 			<h1 class="page_ttl">Case Detail (Revision 0003)</h1>
 				<div class="al_l mar_b_10 w_600 fl_l">
 					{{HTML::link(asset('/case/search'), 'Back to Case Search Result')}}
-<!--
-					<a class="common_btn" href="input.html">
-						Edit Case
-					</a>
-					-->
+					@if ($edit_flg)
+						<a class="common_btn" href="input.html">
+							Edit Case
+						</a>
+					@endif
 					@if (isset($edit_flg))
 						{{Form::open(["url" => asset('/case/edit'), "method" => "POST"])}}
 							{{Form::hidden('caseID', $caseID)}}
@@ -21,7 +21,7 @@
 				</div>
 				<div class="al_r mar_b_10 w_300 fl_r">
 					{{Form::select('revision', array(3 => 'Revision003', 2 => 'Revision002', 1 => 'Revision001'), 3, array("class" => "select w_180"))}}
-					{{HTML::link(asset('/case/revision/list'), 'Revision List')}}
+					{{HTML::link(asset('/case/revision'), 'Revision List')}}
 				</div>
 				<div class="clear">&nbsp;</div>
 				<table class="common_table al_l mar_b_10">
@@ -32,13 +32,13 @@
 						<col width="30%">
 					</colgroup>
 					<tr>
-						<th>{{Form::label('Case ID')}}</th>
+						<th>Case ID</th>
 						<td colspan="3">12344-1234556-18374</td>
 					</tr>
 					<tr>
-						<th>{{Form::label('Project ID')}}</th>
+						<th>Project ID</th>
 						<td>829374-29392-18291</td>
-						<th>{{Form::label('Project Name')}}</th>
+						<th>Project Name</th>
 						<td>???病</td>
 					</tr>
 					<tr>
@@ -205,47 +205,48 @@
 						<li class="pager_btn pager_omission">
 							…
 						</li>
-	<li class="pager_btn current_page">
-		10
-	</li>
-	<li class="pager_btn ">
-		<a href="#">11</a>
-	</li>
-	<li class="pager_btn active">
-		<a href="#">12</a>
-	</li>
-	<li class="pager_btn ">
-		<a href="#">13</a>
-	</li>
-	<li class="pager_btn ">
-		<a href="#">14</a>
-	</li>
-	<li class="pager_btn pager_omission">
-		…
-	</li>
-	<li class="pager_btn ">
-		<a href="#">81</a>
-	</li>
-	<li class="pager_btn pager_next">
-		<a href="#">Next</a>
-	</li>
-	<li class="pager_sort_order">
-		<select class="w_max">
-			<option>Sort Order</option>
-			<option>Last Update</option>
-			<option>ID</option>
-		</select>
-	</li>
-	<li class="pager_disp_num">
-		<select class="w_max">
-			<option>display num</option>
-			<option>10</option>
-			<option>50</option>
-			<option>100</option>
-			<option>all</option>
-		</select>
-	</li>
-</ul><!-- #EndLibraryItem --><div class="pad_tb_10">
+						<li class="pager_btn current_page">
+							10
+						</li>
+						<li class="pager_btn ">
+							<a href="#">11</a>
+						</li>
+						<li class="pager_btn active">
+							<a href="#">12</a>
+						</li>
+						<li class="pager_btn ">
+							<a href="#">13</a>
+						</li>
+						<li class="pager_btn ">
+							<a href="#">14</a>
+						</li>
+						<li class="pager_btn pager_omission">
+							…
+						</li>
+						<li class="pager_btn ">
+							<a href="#">81</a>
+						</li>
+						<li class="pager_btn pager_next">
+							<a href="#">Next</a>
+						</li>
+						<li class="pager_sort_order">
+							<select class="w_max">
+								<option>Sort Order</option>
+								<option>Last Update</option>
+								<option>ID</option>
+							</select>
+						</li>
+						<li class="pager_disp_num">
+							<select class="w_max">
+								<option>display num</option>
+								<option>10</option>
+								<option>50</option>
+								<option>100</option>
+								<option>all</option>
+							</select>
+						</li>
+					</ul>
+					<div class="pad_tb_10">
 						<table class="result_table common_table al_c">
 							<colgroup>
 								<col width="14%">

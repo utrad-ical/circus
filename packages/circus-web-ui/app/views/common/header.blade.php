@@ -56,7 +56,7 @@
 						</li>
 						<li id="user_info_area">
 							<span class="font_red">
-								<?php echo $user_name; ?>
+								{{Auth::user()->description}}
 							</span>
 						</li>
 					@endif

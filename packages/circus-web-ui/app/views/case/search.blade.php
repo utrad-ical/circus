@@ -26,6 +26,13 @@
 		});
 
 		$('#btn_submit').click(function(){
+			console.log(arguments);
+			var btnName = arguments[1] ? arguments[1] : "btnSearch";
+			console.log("btnName::");
+			console.log(btnName);
+			var elm = $("<input>", {type:"hidden", name:btnName, value:btnName});
+			$('#form_search').append(elm);
+
 			$('body').append('<form id="temporaly_form" class="hidden"></form>');
 			$('#search_condition_outer').find('input,select,textarea').clone().appendTo('#temporaly_form');
 
@@ -39,26 +46,37 @@
 
 		$('.change_select').change(function(){
 			// 変更するコンボIDを取得
-			var change_select = $(this).attr('data-target_dom');
+			var change_select = $(this).attr('data-target-dom');
 			// selectedにするvalueを取得
 			var select_value = $("select[name='"+$(this).attr('name')+"']").val();
 			// コンボのselectedを変更
 			$('#'+change_select).find('option').each(function(){
-					var this_num = $(this).val();
-					if(this_num==select_value){
-						$(this).attr('selected','selected');
-					}
+				var this_num = $(this).val();
+				if(this_num == select_value){
+					$(this).attr('selected','selected');
+				}
 			});
+
+			//検索を行うのでhidden要素を追加する
+			var sort = $("select[name='sort']").val();
+			var disp = $("select[name='disp']").val();
+			var sort_elm = $("<input>", {type:"hidden", name:"sort", value:sort});
+			$('#form_search').append(sort_elm);
+			var disp_elm = $("<input>", {type:"hidden", name:"disp", value:disp});
+			$('#form_search').append(disp_elm);
+			//イベント発火
+			$('#btn_submit').trigger('click');
 		});
 
 		$('.link_detail').click(function(){
 			//送信するフォームIDを取得
-			var target_form = $(this).attr('target_elm');
-			$('#'+target_form).submit();
+			$(this).closest('tr').find('.form_case_detail').submit();
+			return false;
 		});
 
 		$('#btn_reset').click(function(){
-			 $(".clearForm").closest("#search_condition_outer").find("textarea,:text,select").val("").end().find(":checked").prop("checked",false);
+			//イベント発火
+			$('#btn_submit').trigger('click', ["btnReset"]);
 		});
 
 	});
@@ -120,10 +138,10 @@
 				<ul class="common_pager clearfix">
 					{{$list_pager->links()}}
 					<li class="pager_sort_order">
-						{{Form::select('sort', array('' => 'Sort Order', 'lastUpdate' => 'Last Update', 'caseID' => 'ID'), isset($sort) ? $sort : '', array('class' => 'w_max change_select', 'data-target_dom' => 'sort_order_down', 'id' => 'sort_order_up'))}}
+						{{Form::select('sort', array('' => 'Sort Order', 'lastUpdate' => 'Last Update', 'caseID' => 'ID'), isset($sort) ? $sort : '', array('class' => 'w_max change_select', 'data-target-dom' => 'sort_order_down', 'id' => 'sort_order_up'))}}
 					</li>
 					<li class="pager_disp_num">
-						{{Form::select('disp', array('' => 'display num', 10 => 10, 50 => 50, 100 => 100, 'all' => 'all'), isset($disp) ? $disp : '', array('class' => 'w_max change_select', 'data-target_dom' => 'display_num_down', 'id' => 'display_num_up'))}}
+						{{Form::select('disp', array('' => 'display num', 10 => 10, 50 => 50, 100 => 100, 'all' => 'all'), isset($disp) ? $disp : '', array('class' => 'w_max change_select', 'data-target-dom' => 'display_num_down', 'id' => 'display_num_up'))}}
 					</li>
 				</ul>
 				<table class="result_table common_table">
@@ -136,14 +154,14 @@
 						<col width="7%">
 					</colgroup>
 					<tr>
-						<th>{{Form::label('Case')}}</th>
-						<th>{{Form::label('Project')}}</th>
+						<th>Case</th>
+						<th>Project</th>
 						<th>
-							{{Form::label('Patient Id')}}<br>
-							{{Form::label('Patient Name')}}
+							Patient Id<br>
+							Patient Name
 						</th>
-						<th>{{Form::label('Inspection Date')}}</th>
-						<th>{{Form::label('Latest Revision')}}</th>
+						<th>Update Date</th>
+						<th>Latest Revision</th>
 						<th></th>
 					</tr>
 					@if (count($list) > 0)
@@ -156,20 +174,19 @@
 									<br>
 									{{$rec["patientName"]}}
 								</td>
-								<td>2014/08/02</td>
+								<td>{{$rec["updateDate"]}}</td>
 								<td>
-									<a href=""  target_elm="form_detail_{{$rec['caseID']}}" class='link_detail'>
-										{{$rec["latest_date"]}}
-										<br>
-										{{$rec["creator"]}}
+									<a href=""  class='link_detail'>
+										{{$rec["latestDate"]}}
+										<br>{{$rec["creator"]}}
 									</a>
-									{{Form::open(['url' => asset('/case/detail'), 'method' => 'post', 'id' => 'form_detail_'.$rec["caseID"]])}}
+									{{Form::open(['url' => asset('/case/detail'), 'method' => 'post', 'class' => 'form_case_detail'])}}
 										{{Form::hidden('caseID', $rec["caseID"])}}
-										{{Form::hidden('revisionNo', '')}}
+										{{Form::hidden('mode', 'detail')}}
 									{{Form::close()}}
 								</td>
 								<td class="al_c">
-									{{HTML::link('', 'View', array("target_elm" => "form_detail_".$rec["caseID"], "class" => "link_detail"))}}
+									{{HTML::link('', 'View', array("class" => "link_detail common_btn"))}}
 								</td>
 							</tr>
 						@endforeach
@@ -182,18 +199,17 @@
 				<ul class="common_pager clearfix">
 					{{$list_pager->links()}}
 					<li class="pager_sort_order">
-						{{Form::select('sort', array('' => 'Sort Order', 'lastUpdate' => 'Last Update', 'caseID' => 'ID'), isset($sort) ? $sort : '', array('class' => 'w_max change_select', "data-target_dom" => "sort_order_up", "id" => "sort_order_down"))}}
+						{{Form::select('sort', array('' => 'Sort Order', 'lastUpdate' => 'Last Update', 'caseID' => 'ID'), isset($sort) ? $sort : '', array('class' => 'w_max change_select', "data-target-dom" => "sort_order_up", "id" => "sort_order_down"))}}
 					</li>
 					<li class="pager_disp_num">
-						{{Form::select('disp', array('' => 'display num', 10 => 10, 50 => 50, 100 => 100, 'all' => 'all'), isset($disp) ? $disp : '', array('class' => 'w_max change_select', "data-target_dom" => "display_num_up", "id" => "display_num_down"))}}
+						{{Form::select('disp', array('' => 'display num', 10 => 10, 50 => 50, 100 => 100, 'all' => 'all'), isset($disp) ? $disp : '', array('class' => 'w_max change_select', "data-target-dom" => "display_num_up", "id" => "display_num_down"))}}
 					</li>
 				</ul>
 			</div>
 		@endif
 	</div>
 @include('common.navi')
-</div><!--/.page_unique-->
+</div>
 <div class="clear">&nbsp;</div>
-
 @stop
 @include('common.footer')

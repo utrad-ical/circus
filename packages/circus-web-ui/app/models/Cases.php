@@ -29,11 +29,7 @@ class Cases extends Eloquent {
 			$query->whereIn('projectID', $projects);
 		} else {
 			//デフォルト条件::ログインユーザが所属しているグループが閲覧可能なプロジェクト
-			$project_ids = Projects::getProjectList(Projects::AUTH_TYPE_VIEW);
-			$projects = array();
-			foreach ($project_ids as $prj) {
-				$projects[] = $prj->projectID;
-			}
+			$projects = Projects::getProjectList(Projects::AUTH_TYPE_VIEW);
 			$query->whereIn('projectID', $projects);
 		}
 
@@ -56,36 +52,54 @@ class Cases extends Eloquent {
 
 		//CreateDate 作成日
 		if (isset($input['createDate']) && $input['createDate']) {
-			Log::debug('作成日Where句生成');
-			$yesterday = date("Y/m/d", strtotime($input['createDate']. "-1 day"));
-			$tomorrow = date("Y/m/d", strtotime($input['createDate']. "+1 day"));
-			$query->where('createTime', "=", array('$gt' => $yesterday, '$lt' => $tomorrow));
+			$query->where(
+				'createTime', "=",
+				array(
+					'$gte' => new MongoDate(strtotime($input['createDate'])),
+					'$lte' => new MongoDate(strtotime($input['createDate']." +1 day"))
+				)
+			);
 		}
 
 		//UpdateDate 更新日
 		if (isset($input['updateDate']) && $input['updateDate']) {
-			Log::debug('更新日Where句生成');
-			$yesterday = date("Y/m/d", strtotime($input['updateDate']. "-1 day"));
-			$tomorrow = date("Y/m/d", strtotime($input['updateDate']. "+1 day"));
-			$query->where('updateTime', "=", array('$gt' => $yesterday, '$lt' => $tomorrow));
+			$query->where(
+				'updateTime', "=",
+				array(
+					'$gte' => new MongoDate(strtotime($input['updateDate'])),
+					'$lte' => new MongoDate(strtotime($input['updateDate']." +1 day"))
+				)
+			);
 		}
 
 		//caseDate ケース作成日
 		if (isset($input['caseDate']) && $input['caseDate']) {
-			Log::debug("ケース作成日Where句生成");
-			$yesterday = date("Y/m/d", strtotime($input['caseDate']. "-1 day"));
-			$tomorrow = date("Y/m/d", strtotime($input['caseDate']. "+1 day"));
-			$query->where('revisions.latest.date', "=", array('$gt' => $yesterday, '$lt' => $tomorrow));
+			$query->where(
+				'revisions.latest.date', "=",
+				array(
+					'$gte' => new MongoDate(strtotime($input['caseDate'])),
+					'$lte' => new MongoDate(strtotime($input['caseDate']." +1 day"))
+				)
+			);
 		}
 
 		//RevisionNo リビジョン番号
 		if (isset($input['revisionNo']) && $input['revisionNo']) {
-			Log::debug("リビジョン番号Where句作成");
 			$query->where('revisions', "=", $input["revisionNo"]);
 		}
 
 		return $query;
 	}
 
-
+	//バリデーションルール
+	public static $rules = array(
+		'caseID'						=>	'required',
+		'incrementalID'					=>	'required',
+		'projectID'						=>	'required',
+		'date'							=>	'required',
+		'patientInfoCache.patientID'	=>	'required',
+		'patientInfoCache.age'			=>	'required',
+		'patientInfoCache.birthday'		=>	'required',
+		'patientInfoCache.sex'			=>	'required'
+	);
 }

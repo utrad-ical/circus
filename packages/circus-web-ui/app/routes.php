@@ -11,25 +11,39 @@
 |
 */
 
-//ログイン画面
+//ログイン/ログアウト
 Route::get('/', function(){return Redirect::to('login');});
-
 Route::get('login', 'Logincontroller@getIndex');
 Route::post('login', 'LoginController@login');
+Route::get('logout', 'LoginController@logout');
+Route::get('support/forget_password', 'SupportController@forgetPassword');
 
 //トップページ
 Route::post('home', 'TopController@getIndex');
 Route::get('home', 'TopController@getIndex');
 
-//ケース検索
+//ケース
 Route::get('case/search', 'CaseController@getIndex');
 Route::post('case/search', 'CaseController@search');
 Route::post('case/detail', 'CaseController@detail');
 Route::post('case/revision', 'CaseController@revision');
 Route::post('case/edit', 'CaseController@edit');
-Route::get('case/input', 'CaseController@input');
 
-//シリーズ検索
+//シリーズ
 Route::get('series/search', 'SeriesController@getIndex');
 Route::post('series/search', 'SeriesController@search');
 Route::post('series/detail', 'SeriesController@detail');
+
+//ユーザー
+Route::get('user/regist', 'UserController@regist');
+
+//テストデータ登録
+Route::get('test', 'TestController@getIndex');
+Route::get('test/case', 'TestController@getIndexCase');
+Route::post('test/case', 'TestController@registCase');
+Route::get('test/series', 'TestController@getIndexSeries');
+Route::post('test/series', 'TestController@registSeries');
+Route::get('test/project', 'TestController@getIndexProject');
+Route::post('test/project', 'TestController@registProject');
+Route::get('test/user', 'TestController@getIndexUser');
+Route::post('test/user', 'TestController@registUser');

@@ -27,26 +27,31 @@ class Projects extends Eloquent {
 	 * @author stani
 	 * @since 2014/12/08
 	 */
-	//public static function getProjectList($auth_gp = 'viewGroups', $make_combo = true){
 	public static function getProjectList($auth_gp, $make_combo = false){
-		//$project_list = self::whereIn('viewGroups', Auth::user()->groups)->get();
 		$project_list = self::whereIn($auth_gp, Auth::user()->groups)
 							->get(array('projectID', 'projectName'));
-		if (!$make_combo) return $project_list;
-
-		//コンボ生成用
 		$projects = array();
+		//コンボ生成用
 		if ($project_list) {
 			foreach ($project_list as $project) {
-				$projects[$project->projectID] = $project->projectName;
+				if ($make_combo)
+					$projects[$project->projectID] = $project->projectName;
+				else
+					$projects[] = $project->projectID;
 			}
 		}
 		return $projects;
 	}
 
+	/**
+	 * プロジェクト名を取得する
+	 * @param $projectID プロジェクトID
+	 * @return プロジェクト名
+	 * @author stani
+	 * @since 2014/12/08
+	 */
 	public static function getProjectName($projectID) {
 		$project = self::whereRaw("projectID", "=", $projectID)->get("projectName");
-
 		return $project;
 	}
 

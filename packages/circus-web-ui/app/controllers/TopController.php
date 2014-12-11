@@ -19,8 +19,6 @@ class TopController extends BaseController {
 
 		//ログインしているのでホーム画面の表示処理を行う
 		$result = array();
-//		$result["user_name"] = Auth::user()->loginID;
-		$result["user_name"] = Auth::user()->description;
 		$result["title"] = "ホーム";
 		$result["url"] = "home";
 

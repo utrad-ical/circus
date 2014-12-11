@@ -42,7 +42,7 @@
 							{{Form::radio('color_mode', '1', false, array('class' => 'color_select', 'id' => 'color_mode_black'))}}
 						</label>
 					</li>
-					@if (isset($user_name))
+					@if (Auth::check())
 						<li class="btn_settings">
 							<div id="settings_wrap">
 								<p id="setting_switch">settings</p>

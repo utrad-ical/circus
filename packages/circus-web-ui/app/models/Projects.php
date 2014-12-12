@@ -51,8 +51,33 @@ class Projects extends Eloquent {
 	 * @since 2014/12/08
 	 */
 	public static function getProjectName($projectID) {
-		$project = self::whereRaw("projectID", "=", $projectID)->get("projectName");
+		$project = self::whereRaw('projectID', '=', $projectID)->get("projectName");
 		return $project;
+	}
+
+	/**
+	 * Validationルール
+	 * @var rules Validateルール配列
+	 * @author stani
+	 * @since 2014/12/12
+	 */
+	public static $rules = array(
+		'projectID'		=>	'required|integer',
+		'projectName'	=>	'required'
+	);
+
+	/**
+	 * isValidが使えるようになったらこのメソッドは消す
+	 * Validateルールを取得する
+	 * @return Validateルール配列
+	 * @author stani
+	 * @since 2014/12/12
+	 */
+	public static function getValidateRules() {
+		return array(
+			'projectID'		=>	'required|integer',
+			'projectName'	=>	'required'
+		);
 	}
 
 }

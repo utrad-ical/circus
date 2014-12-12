@@ -23,7 +23,8 @@ Route::post('home', 'TopController@getIndex');
 Route::get('home', 'TopController@getIndex');
 
 //ケース
-Route::get('case/search', 'CaseController@getIndex');
+//Route::get('case/search', 'CaseController@getIndex');
+Route::get('case/search', 'CaseController@search');
 Route::post('case/search', 'CaseController@search');
 Route::post('case/detail', 'CaseController@detail');
 Route::post('case/revision', 'CaseController@revision');
@@ -47,3 +48,5 @@ Route::get('test/project', 'TestController@getIndexProject');
 Route::post('test/project', 'TestController@registProject');
 Route::get('test/user', 'TestController@getIndexUser');
 Route::post('test/user', 'TestController@registUser');
+Route::get('test/group', 'TestController@getIndexGroup');
+Route::post('test/group', 'TestController@registGroup');

@@ -4,7 +4,7 @@
 <div class="page_contents page_area">
 	<div class="page_unique">
 		<h1 class="page_ttl">Case Regist Test</h1>
-		{{Form::open(['url' => asset('/test/case_regist', 'method' => 'POST', 'id' => 'form_case_regist'])}}
+		{{Form::open(['url' => asset('/test/case'), 'method' => 'POST', 'id' => 'form_case_regist'])}}
 			<div class="w_500 m_auto al_c">
 				<table class="common_table al_l">
 					<colgroup>
@@ -14,36 +14,36 @@
 					<tr>
 						<th>CaseID</th>
 						<td>
-							{{Form::text('caseID', isset($inputs["caseID"]) ? $inputs["caseID"] : '', array("class" => "common_input_text w_300"))}}
-							@if (isset($error["caseID"])
-								<br><span class="text_alert">{{$error["caseID"]}}</span>
+							{{Form::text('caseID', isset($inputs['caseID']) ? $inputs['caseID'] : '', array('class' => 'common_input_text w_300'))}}
+							@if (isset($errors) && $errors->has('caseID'))
+								<br><span class="text_alert">{{$errors->first('caseID')}}</span>
 							@endif
 						</td>
 					</tr>
 					<tr>
 						<th>incrementalID</th>
 						<td>
-							{{Form::text('incrementalID', isset($inputs["incrementalID"]) ? $inputs["incrementalID"] : '', array("class" => "common_input_text w_300"))}}
-							@if (isset($error["incrementalID"])
-								<br><span class="text_alert">{{$error["incrementalID"]}}</span>
+							{{Form::text('incrementalID', isset($inputs['incrementalID']) ? $inputs['incrementalID'] : '', array('class' => 'common_input_text w_300'))}}
+							@if (isset($errors) && $errors->has('incrementalID'))
+								<br><span class="text_alert">{{$errors->first('incrementalID')}}</span>
 							@endif
 						</td>
 					</tr>
 					<tr>
 						<th>projectID</th>
 						<td>
-							{{Form::select('projectID', $project_list, isset($inputs["projectID"]) ? $inputs["projectID"] : null, array("class" => "common_select"))}}
-							@if (isset($error["projectID"])
-								<br><span class="text_alert">{{$error["projectID"]}}</span>
+							{{Form::select('projectID', $project_list, isset($inputs['projectID']) ? $inputs['projectID'] : null, array('class' => 'common_select'))}}
+							@if (isset($errors) && $errors->has('projectID'))
+								<br><span class="text_alert">{{$errors->first('projectID')}}</span>
 							@endif
 						</td>
 					</tr>
 					<tr>
 						<th>date</th>
 						<td>
-							{{Form::text('date', isset($inputs["date"]) ? $inputs["date"] : '', array("class" => "common_input_text w_200 datepicker"))}}
-							@if (isset($error["date"])
-								<br><span class="text_alert">{{$error["date"]}}</span>
+							{{Form::text('date', isset($inputs['date']) ? $inputs['date'] : '', array('class' => 'common_input_text w_200 datepicker'))}}
+							@if (isset($errors) && $errors->has('date'))
+								<br><span class="text_alert">{{$errors->first('date')}}</span>
 							@endif
 						</td>
 					</tr>
@@ -53,61 +53,59 @@
 					<tr>
 						<th>patientID</th>
 						<td>
-							{{Form:;text('patientID', isset($inputs["patientID"]) ? $inputs["patientID"] : '', array("class" => "common_input_text w_200"))}}
-							@if (isset($errors["patientID"])
-								<br><span class="text_alert">{{$errors["patientID"]}}</span>
+							{{Form::text('patientInfoCache.patientID', isset($inputs['patientInfoCache.patientID']) ? $inputs['patientInfoCache.patientID'] : '', array('class' => 'common_input_text w_200'))}}
+							@if (isset($errors) && $errors->has('patientInfoCache.patientID'))
+								<br><span class="text_alert">{{$errors->first('patientInfoCache.patientID')}}</span>
 							@endif
 						</td>
 					</tr>
 					<tr>
 						<th>name</th>
 						<td>
-							{{Form::text('name', isset($inputs['name']) ? $inputs['name'] : '', array('class' => 'common_input_text w_100'))}}
-							@if (isset($error["name"])
-								<br><span class="text_alert">{{$error["name"]}}</span>
+							{{Form::text('patientInfoCache.name', isset($inputs['patientInfoCache.name']) ? $inputs['patientInfoCache.name'] : '', array('class' => 'common_input_text w_100'))}}
+							@if (isset($errors) && $errors->has('patientInfoCache.name'))
+								<br><span class="text_alert">{{$errors->first('patientInfoCache.name')}}</span>
 							@endif
 						</td>
+					</tr>
+					<tr>
 						<th>age</th>
 						<td>
-							{{Form::text('age', isset($inputs['age']) ? $inputs['age'] : '', array('class' => 'common_input_txt w_100'))}}
-							@if (isset($errors["age"])
-								<br><span class="text_alert">{{$errors["age"]}}</span>
+							{{Form::text('patientInfoCache.age', isset($inputs['patientInfoCache.age']) ? $inputs['patientInfoCache.age'] : '', array('class' => 'common_input_txt w_100'))}}
+							@if (isset($errors) && $errors->has('patientInfoCache.age'))
+								<br><span class="text_alert">{{$errors->first('patientInfoCache.age')}}</span>
 							@endif
 						</td>
 					</tr>
 					<tr>
 						<th>birthday</th>
 						<td>
-							{{Form::text('birthday', isset($inputs["birthday"]) ? $inputs["birthday"] : '', array("class" => "common_input_text w_200 datepicker"))}}
-							@if (isset($errors["birthday"])
-								<br><span class="text_alert">{{$errors["birthday"]}}</span>
+							{{Form::text('patientInfoCache.birthday', isset($inputs['patientInfoCache.birthday']) ? $inputs['patientInfoCache.birthday'] : '', array('class' => 'common_input_text w_200 datepicker'))}}
+							@if (isset($errors) && $errors->has('patientInfoCache.birthday'))
+								<br><span class="text_alert">{{$errors->first('patientInfoCache.birthday')}}</span>
 							@endif
 						</td>
+					</tr>
+					<tr>
 						<th>sex</th>
 						<td>
 							<label>
-								{{Form::radio('sex', 'm', isset($inputs['sex']) && inputs['sex'] == 'm' ? true : false))}}
+								{{Form::radio('patientInfoCache.sex', 'm', isset($inputs['patientInfoCache.sex']) && $inputs['patientInfoCache.sex'] == 'm' ? true : false)}}
 								male
 							</label>
 							<label>
-								{{Form::radio('sex', 'f', isset($inputs['sex']) && inputs['sex'] == 'm' ? true : false))}}
+								{{Form::radio('patientInfoCache.sex', 'f', isset($inputs['patientInfoCache.sex']) && $inputs['patientInfoCache.sex'] == 'f' ? true : false)}}
 								female
 							</label>
-							@if (isset($errors["sex"])
-								<br><span class="text_alert">{{$errors["sex"]}}</span>
+							@if (isset($errors) && $errors->has('patientInfoCache.sex'))
+								<br><span class="text_alert">{{$errors->first('patientInfoCache.sex')}}</span>
 							@endif
 						</td>
 					</tr>
 				</table>
 			</div>
 			<p class="submit_area">
-				{{Form::button("Login", array("class" => "common_btn mar_r_5", "onClick" => "document.getElementById('form_login').submit();"))}}
-				<button type="button" value="Sign Up" class="common_btn">
-					Sign Up
-				</button>
-				@if (isset($error_msg))
-					<br><span class="al_c txt_alert">{{$error_msg}}</span>
-				@endif
+				{{Form::button("Regist", array("class" => "common_btn mar_r_5", "onClick" => "document.getElementById('form_case_regist').submit();"))}}
 			</p>
 		{{Form::close()}}
 	</div>

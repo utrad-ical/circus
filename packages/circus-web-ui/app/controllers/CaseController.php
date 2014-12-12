@@ -10,6 +10,7 @@ class CaseController extends BaseController {
 	 * @author stani
 	 * @since 2014/12/02
 	 */
+	/*
 	public function getIndex() {
 		Log::debug("Get Search");
 		//ログインチェック
@@ -18,7 +19,9 @@ class CaseController extends BaseController {
 			return Redirect::to('login');
 		}
 
-		//Getアクセスなので初期化
+		//Getアクセスなのでページ番号が付与されていない場合は初期化
+		$inputs = Input::all();
+
 		Session::forget('case.search');
 
 		//ログインしているのでケース検索画面の表示処理を行う
@@ -34,6 +37,7 @@ class CaseController extends BaseController {
 
 		return View::make('case.search', $result);
 	}
+	*/
 
 	/**
 	 * ケース検索結果
@@ -53,29 +57,26 @@ class CaseController extends BaseController {
 		$result = array();
 
 		//入力値取得
-		$inputs = Input::only(
-			array(
-				"project", "caseID", "patientID", "patientName",
-				"updateDate", "createDate", "caseDate",
-				"btnReset", "btnSearch", "btnBack",
-				"sort", "disp"
-			)
-		);
+		$inputs = Input::all();
 
-		//Resetボタン押下時
-		if ($inputs["btnReset"]) {
+		//Resetor初期表示ボタン押下時
+		if (array_key_exists ('btnReset', $inputs) !== FALSE || !$inputs) {
 			$search_flg = false;
 			Session::forget('case.search');
-		} else if ($inputs["btnSearch"]) {
+		//検索ボタン押下時
+		} else if (array_key_exists ('btnSearch', $inputs) !== FALSE) {
+			if (array_key_exists ('disp', $inputs) === FALSE) $inputs['disp'] = Config::get('const.page_display');
+			if (array_key_exists ('sort', $inputs) === FALSE) $inputs['sort'] = 'updateTime';
 			Session::put('case.search', $inputs);
+		} else if (array_key_exists('page', $inputs) !== FALSE) {
+			$tmp = Session::get('case.search');
+			$tmp['perPage'] = $inputs['page'];
+			Session::put('case.search', $tmp);
 		}
 
 		if ($search_flg) {
 			//検索条件をセッションから取得
 			$search_data = Session::get('case.search');
-
-			Log::debug("===== Case Search Data ===== ");
-			Log::debug($search_data);
 
 			//検索条件生成＆データ取得
 			//取得カラムの設定
@@ -86,10 +87,14 @@ class CaseController extends BaseController {
 				'updateTime'
 			);
 
+			//総件数取得
+			$case_count = Cases::addWhere($search_data)
+								->count();
+
 			//paginate(10)という風にpaginateを使う場合はget(select句)が指定できない
-			$order = isset($search_data["order"]) ? $search_data["order"] : 'updateTime';
 			$case_list = Cases::addWhere($search_data)
-								->orderby($order, 'desc')
+								->orderby($search_data['sort'], 'desc')
+								->addLimit($search_data)
 								->get($select_col);
 
 			//表示用に整形
@@ -100,43 +105,43 @@ class CaseController extends BaseController {
 
 				//曜日取得
 				$revision = $rec->revisions;
-				$dt = $revision["latest"]["date"];
+				$dt = $revision['latest']['date'];
 				$w = self::getWeekDay(date('w', strtotime($dt)));
 
 				//プロジェクト名
-				$project = Projects::where("projectID", "=", $rec->projectID)->get();
+				$project = Projects::where('projectID', '=', $rec->projectID)->get();
 
 				//表示用に整形する
 				$list[] = array(
-					"incrementalID" =>	$rec->incrementalID,
-					"caseID"		=>	$rec->caseID,
-					"projectID"		=>	$rec->projectID,
-					"patientID"		=>	$patient["patientID"],
-					"patientName" 	=>	$patient["name"],
-					"latestDate" 	=>	date('Y/m/d('.$w.') H:i', $dt->sec),
-					"creator"		=>	$revision["latest"]["creator"],
-					"projectName"	=>	$project ? $project[0]->projectName : '',
-					"updateDate"	=>	date('Y/m/d', $rec->updateTime->sec)
+					'incrementalID' =>	$rec->incrementalID,
+					'caseID'		=>	$rec->caseID,
+					'projectID'		=>	$rec->projectID,
+					'patientID'		=>	$patient['patientID'],
+					'patientName' 	=>	$patient['name'],
+					'latestDate' 	=>	date('Y/m/d('.$w.') H:i', $dt->sec),
+					'creator'		=>	$revision['latest']['creator'],
+					'projectName'	=>	$project ? $project[0]->projectName : '',
+					'updateDate'	=>	date('Y/m/d', $rec->updateTime->sec)
 				);
 				$result["list"] = $list;
 				//ページャーの設定
 				$case_pager = Paginator::make(
 					$list,
-					count($case_list),
-					isset($search_data["disp"]) ? $search_data["disp"] : 50
+				//	count($case_list),
+					$case_count,
+					$search_data['disp']
 				);
-				$result["list_pager"] = $case_pager;
-				$result["inputs"] = $search_data;
+				$result['list_pager'] = $case_pager;
+				$result['inputs'] = $search_data;
 			}
 		}
 
-		$result["title"] = "Case Search";
-		$result["url"] = "case/search";
-		$result["search_flg"] = $search_flg;
-		$result["css"] = self::cssSetting();
-		$result["js"] = self::jsSetting();
-		$result["project_list"] = self::getProjectList(true);
-
+		$result['title'] = 'Case Search';
+		$result['url'] = 'case/search';
+		$result['search_flg'] = $search_flg;
+		$result['css'] = self::cssSetting();
+		$result['js'] = self::jsSetting();
+		$result['project_list'] = self::getProjectList(true);
 
 		return View::make('case/search', $result);
 	}
@@ -148,7 +153,7 @@ class CaseController extends BaseController {
 	 */
 	public function detail() {
 		//ログインチェック
-		if (!Auth::user()) {
+		if (!Auth::check()) {
 			//ログインしていないのでログイン画面に強制リダイレクト
 			return Redirect::to('login');
 		}
@@ -158,26 +163,30 @@ class CaseController extends BaseController {
 		$result = array();
 
 		//POSTデータ取得
-		$inputs = Input::only(array("caseID", "revisionNo", "disp", "sort", "mode"));
+//		$inputs = Input::only(array("caseID", "revisionNo", "disp", "sort", "mode"));
+		$inputs = Input::all();
 
-		if (!$inputs["caseID"]) {
-			$error_msg = "ケースIDを指定してください。";
-		}
+
+//		if (!$inputs["caseID"]) {
+		if (array_key_exists('caseID', $inputs) === FALSE)
+			$error_msg = 'ケースIDを指定してください。';
 
 		if (!$error_msg) {
+			if (array_key_exists('disp', $inputs) === FALSE) $inputs['disp'] = Config::get('const.search_display');
+			if (array_key_exists('sort', $inputs) === FALSE) $inputs['sort'] = 'date';
 			//存在するケースIDかチェック
 			$case_info = Cases::addWhere($inputs)
 								->get();
 
 			if (!$case_info) {
-				$error_msg = "存在しないケースIDです。";
+				$error_msg = '存在しないケースIDです。';
 			} else {
 				$case_data = $case_info[0];
 				//権限チェック
 				//ケース閲覧権限
 				$auth_view = Projects::getProjectList(Projects::AUTH_TYPE_VIEW, false);
 				if (!$auth_view || array_search($case_data->projectID, $auth_view) === FALSE) {
-					$error_msg = "該当のケースを参照する権限がありません。";
+					$error_msg = '該当のケースを参照する権限がありません。';
 				}
 			}
 		}
@@ -186,39 +195,40 @@ class CaseController extends BaseController {
 		if (!$error_msg) {
 			//ケース編集権限
 			$auth_edit = Projects::getProjectList(Projects::AUTH_TYPE_UPDATE, false);
-			$result["edit_flg"] = ($auth_edit && array_search($case_data->projectID, $auth_edit) !== FALSE) ?
+			$result['edit_flg'] = ($auth_edit && array_search($case_data->projectID, $auth_edit) !== FALSE) ?
 						true: false;
 			//ケース情報を表示用に整形
 			//プロジェクト名
 			$project = Projects::where("projectID", "=", $case_data->projectID)->get();
 			$case_detail = array(
-				"caseID"		=>	$case_data->caseID,
-				"projectID"		=>	$case_data->projectID,
-				"projectName"	=>	$project ? $project[0]->projectName : '',
-				"patientID"		=>	$case_data->patientInfoCache["patientID"],
-				"patientName"	=>	$case_data->patientInfoCache["name"],
-				"birthday"		=>	$case_data->patientInfoCache["birthday"],
-				"sex"			=>	$case_data->patientInfoCache["sex"]
+				'caseID'		=>	$case_data->caseID,
+				'projectID'		=>	$case_data->projectID,
+				'projectName'	=>	$project ? $project[0]->projectName : '',
+				'patientID'		=>	$case_data->patientInfoCache['patientID'],
+				'patientName'	=>	$case_data->patientInfoCache['name'],
+				'birthday'		=>	$case_data->patientInfoCache['birthday'],
+				'sex'			=>	self::getSex($case_data->patientInfoCache['sex'])
 			);
 
 			//Revision情報を表示用に整形
 			$revision_list = array();
+			$revision_no_list = array();
 			$max_revision = 0;
 			foreach($case_data->revisions as $key => $value) {
 				//keyがlatestのものはCloneなので対象外とする
-				if ($key !== "latest") {
+				if ($key !== 'latest') {
 					//Revision番号が大きい場合はセット
 					if ($max_revision < $key)
 						$max_revision = $key;
 
 					//ラベル数を求める
 					$label_cnt = 0;
-					foreach ($value["series"] as $rec) {
-						$label_cnt += count($rec["labels"]);
+					foreach ($value['series'] as $rec) {
+						$label_cnt += count($rec['labels']);
 					}
 
 					//曜日を求める
-					$w = self::getWeekDay(date('w', $value["date"]->sec));
+					$w = self::getWeekDay(date('w', $value['date']->sec));
 
 					//表示用にリスト作成
 					$revision_list[] = array(
@@ -230,11 +240,16 @@ class CaseController extends BaseController {
 						"creator"		=>	$value["creator"],
 						"memo"			=>	$value["memo"]
 					);
+					$revision_no_list[] = $key;
 				}
 			}
 			$case_detail["revisionNo"] = isset($inputs["revisionNo"]) ? $inputs["revisionNo"] : $max_revision;
 			$result["case_detail"] = $case_detail;
 			$result["revision_list"] = $revision_list;
+			$result['revision_no_list'] = $revision_no_list;
+
+			//シリーズリスト作成
+			$result['series_list'] = self::getSeriesList($case_data->revisions[$case_detail["revisionNo"]]);
 
 			//ページャーの設定
 			$revision_pager = Paginator::make(
@@ -314,7 +329,34 @@ class CaseController extends BaseController {
 	 * @since 2014/12/11
 	 */
 	function getWeekDay($w) {
-		$week = array('日', '月', '火', '水', '木', '金', '土');
+		$week = Config::get('const.week_day');
 		return $week[$w];
+	}
+
+	/**
+	 * 表示用の性別を取得する
+	 * @param $sex 性別の値
+	 * @return 性別表示用文字列
+	 * @author stani
+	 * @since 2014/12/12
+	 */
+	function getSex($sex) {
+		$sexes = Config::get('const.patient_sex');
+		return $sexes[$sex];
+	}
+
+	/**
+	 * シリーズコンボ作成用
+	 * @param $data 選択されているRevisionデータ
+	 * @return Revisionに紐づくシリーズリスト
+	 * @author stani
+	 * @since 2014/12/12
+	 */
+	function getSeriesList($data) {
+		$series_list = array();
+		foreach ($data["series"] as $key => $value) {
+			$series_list[$value["seriesUID"]] = $value["seriesUID"];
+		}
+		return $series_list;
 	}
 }

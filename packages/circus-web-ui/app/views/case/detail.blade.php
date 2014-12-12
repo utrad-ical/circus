@@ -56,7 +56,7 @@ $(function() {
 <div class="page_contents_outer">
 	<div class="page_contents_inner">
 		<div class="page_unique" id="page_case_detail">
-			<h1 class="page_ttl">Case Detail (Revision 0003)</h1>
+			<h1 class="page_ttl">Case Detail (Revision {{$case_detail['revisionNo']}})</h1>
 			<div class="al_l mar_b_10 w_600 fl_l">
 				{{HTML::link(asset('/case/search'), 'Back to Case Search Result', array('class' => 'common_btn', 'id' => 'btnBack'))}}
 				@if (isset($edit_flg))
@@ -69,8 +69,8 @@ $(function() {
 				@endif
 			</div>
 			<div class="al_r mar_b_10 w_300 fl_r">
-				{{Form::select('revision', array(3 => 'Revision003', 2 => 'Revision002', 1 => 'Revision001'), 3, array("class" => "select w_180"))}}
-				{{HTML::link(asset('/case/revision'), 'Revision List')}}
+				{{Form::select('revision', $revision_no_list, $case_detail['revisionNo'], array("class" => "select w_180"))}}
+				{{HTML::link(asset('/case/revision'), 'Revision List', array('class' => 'common_btn'))}}
 			</div>
 			<div class="clear">&nbsp;</div>
 			<table class="common_table al_l mar_b_10">
@@ -92,7 +92,7 @@ $(function() {
 				</tr>
 			</table>
 			<div class="w_400 fl_l">
-				{{Form::select('seriesUID', array('seriesA' => 'Series A', 'seriesB' => 'Series B', 'seriesC' => 'Series C', 'seriesD' => 'Series D'))}}
+				{{Form::select('seriesUID', $series_list, isset($case_detail['seriesUID']) ? $case_detail['seriesUID'] : '')}}
 				<label class="common_btn" for="img_mode_view">
 					{{Form::radio('img_mode', 1, false, array('class' => 'img_mode', 'id' => 'img_mode_view'))}}
 					View
@@ -243,10 +243,10 @@ $(function() {
 				<ul class="common_pager clearfix">
 					{{$list_pager->links()}}
 					<li class="pager_sort_order">
-						{{Form::select('sort', array('' => 'Sort Order', 'lastUpdate' => 'Last Update', 'caseID' => 'ID'), isset($sort) ? $sort : '', array('class' => 'w_max change_select', 'data-target-dom' => 'sort_order_down', 'id' => 'sort_order_up'))}}
+						{{Form::select('sort', Config::get('const.search_revision_sort'), isset($inputs['sort']) ? $inputs['sort'] : '', array('class' => 'w_max change_select', 'data-target-dom' => 'sort_order_down', 'id' => 'sort_order_up'))}}
 					</li>
 					<li class="pager_disp_num">
-						{{Form::select('disp', array('' => 'display num', 10 => 10, 50 => 50, 100 => 100, 'all' => 'all'), isset($disp) ? $disp : '', array('class' => 'w_max change_select', 'data-target-dom' => 'display_num_down', 'id' => 'display_num_up'))}}
+						{{Form::select('disp', Config::get('const.search_display'), isset($inputs['disp']) ? $inputs['disp'] : '', array('class' => 'w_max change_select', 'data-target-dom' => 'display_num_down', 'id' => 'display_num_up'))}}
 					</li>
 				</ul>
 				<div class="pad_tb_10">
@@ -301,10 +301,10 @@ $(function() {
 				<ul class="common_pager clearfix">
 					{{$list_pager->links()}}
 					<li class="pager_sort_order">
-						{{Form::select('sort', array('' => 'Sort Order', 'lastUpdate' => 'Last Update', 'caseID' => 'ID'), isset($sort) ? $sort : '', array('class' => 'w_max change_select', 'data-target-dom' => 'sort_order_up', 'id' => 'sort_order_down'))}}
+						{{Form::select('sort', Config::get('const.search_revision_sort'), isset($inputs['sort']) ? $inputs['sort'] : '', array('class' => 'w_max change_select', 'data-target-dom' => 'sort_order_up', 'id' => 'sort_order_down'))}}
 					</li>
 					<li class="pager_disp_num">
-						{{Form::select('disp', array('' => 'display num', 10 => 10, 50 => 50, 100 => 100, 'all' => 'all'), isset($disp) ? $disp : '', array('class' => 'w_max change_select', 'data-target-dom' => 'display_num_up', 'id' => 'display_num_down'))}}
+						{{Form::select('disp', Config::get('const.search_display'), isset($inputs['disp']) ? $inputs['disp'] : '', array('class' => 'w_max change_select', 'data-target-dom' => 'display_num_up', 'id' => 'display_num_down'))}}
 					</li>
 				</ul>
 			</div>

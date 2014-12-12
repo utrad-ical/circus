@@ -23,6 +23,12 @@ class TestController extends BaseController {
 		$result["css"] = self::cssSetting();
 		$result["js"] = self::jsSetting();
 
+		//完了メッセージ取得
+		$msg = Session::get("complete.msg");
+		$result["msg"] = $msg;
+		//Session破棄
+		Session::forget("complet.msg");
+
 		return View::make('test.index', $result);
 	}
 
@@ -33,17 +39,17 @@ class TestController extends BaseController {
 	 */
 	public function getIndexCase() {
 		//ログインチェック
-		if (!Auth::user()) {
+		if (!Auth::check()) {
 			//ログインしていないのでログイン画面に強制リダイレクト
 			return Redirect::to('login');
 		}
 
 		$result = array();
-		$result["title"] = "Case Dummy Data Regist";
-		$result["url"] = "/test/case";
-		$result["css"] = self::cssSetting();
-		$result["js"] = self::jsSetting();
-
+		$result['title'] = 'Case Dummy Data Regist';
+		$result['url'] = '/test/case';
+		$result['css'] = self::cssSetting();
+		$result['js'] = self::jsSetting();
+		$result['project_list'] = Projects::getProjectList(Projects::AUTH_TYPE_CREATE, true);
 		return View::make('test.case', $result);
 	}
 
@@ -63,29 +69,51 @@ class TestController extends BaseController {
 		$result = array();
 
 		//入力値取得
-		$inputs = Input::only(
-			array(
-				"caseID", "incrementalID", "projectID", "caseDate",
-				"patientID", "patientName", "age", "birthday", "sex"
-			)
+		$inputs = Input::all();
+		/*
+		Log::debug("入力値(CaseRegist)");
+		Log::debug($inputs);
+		*/
+
+		//Validateチェック用オブジェクト生成
+		$case_obj = App::make('Cases');
+		//Validateチェック用の値を設定
+		$case_obj->caseID = $inputs['caseID'];
+		$case_obj->incrementalID = $inputs['incrementalID'];
+		$case_obj->projectID = $inputs['projectID'];
+		$case_obj->date = $inputs['date'];
+		$case_obj->patientInfoCache = array(
+			'patientID'	=>	$inputs['patientInfoCache_patientID'],
+			'name'		=>	$inputs['patientInfoCache_name'],
+			'age'		=>	$inputs['patientInfoCache_age'],
+			'birthday'	=>	$inputs['patientInfoCache_birthday'],
+			'sex'		=>	$inputs['patientInfoCache_sex']
 		);
 
-		Log::debug("入力値(Case Dummy)");
-		Log::debug($inputs);
-
-		if (Cases::isValid()) {
+		//ValidateCheck
+		$validator = Validator::make($inputs, Cases::getValidateRules());
+	//	if ($case_obj->isValid()){
+		if (!$validator->fails()) {
+			Log::debug("エラーなかったよ！");
 			//Validate成功時の処理
 			//エラーがないので登録する
-			Cases::save();
-			return Redirect::to('test.index', array("msg" => "ケースの登録が完了しました。"));
+			$dt = new MongoDate(strtotime(date('Y-m-d H:i:s')));
+			$case_obj->updateTime = $dt;
+			$case_obj->createTime = $dt;
+			$case_obj->creator = Auth::user()->loginID;
+			$case_obj->save();
+			Session::put("complete.msg", "ケース情報の登録が完了しました。");
+			return Redirect::to('test');
 		} else {
 			//Validateエラー時の処理
+			$result['errors'] = $validator->messages();
 		}
 
-		$result["title"] = "Case Dummy Data Regist";
-		$result["url"] = "/test/case";
-		$result["css"] = self::cssSetting();
-		$result["js"] = self::jsSetting();
+		$result['title'] = 'Case Dummy Data Regist';
+		$result['url'] = '/test/case';
+		$result['css'] = self::cssSetting();
+		$result['js'] = self::jsSetting();
+		$result['project_list'] = Projects::getProjectList(Projects::AUTH_TYPE_CREATE, true);
 
 		return View::make('test.case', $result);
 	}
@@ -103,10 +131,11 @@ class TestController extends BaseController {
 		}
 
 		$result = array();
-		$result["title"] = "Series Dummy Data Regist";
-		$result["url"] = "/test/series";
-		$result["css"] = self::cssSetting();
-		$result["js"] = self::jsSetting();
+		$result['title'] = 'Series Dummy Data Regist';
+		$result['url'] = '/test/series';
+		$result['css'] = self::cssSetting();
+		$result['js'] = self::jsSetting();
+		//$result['errors'] = array();
 
 		return View::make('test.series', $result);
 	}
@@ -127,35 +156,53 @@ class TestController extends BaseController {
 		$result = array();
 
 		//入力値取得
-		$inputs = Input::only(
-			array(
-				"studyUID", "seriesUID","storageID",
-				"patientID", "patientName", "age",
-				"birthday", "sex", "patientHeight", "patientWeight",
-				"width", "height", "modality", "seriesDescription",
-				"bodyPart", "images", "stationName", "modelName",
-				"menufacturer", "parameters", "domain"
-			)
+		$inputs = Input::all();
+		//Validateチェック用オブジェクト生成
+		$series_obj = App::make('Serieses');
+		//Validateチェック用の値を設定
+		$series_obj->caseID = $inputs['studyUID'];
+		$series_obj->incrementalID = $inputs['seriesUID'];
+		$series_obj->projectID = $inputs['storageID'];
+		$series_obj->width = $inputs['width'];
+		$series_obj->height = $inputs['height'];
+		$series_obj->modality = $inputs['modality'];
+		$series_obj->seriesDescription = $inputs['seriesDescription'];
+		$series_obj->bodyPart = $inputs['bodyPart'];
+		$series_obj->images = $inputs['images'];
+		$series_obj->stationName = $inputs['stationName'];
+		$series_obj->modelName = $inputs['modelName'];
+		$series_obj->manufacturer = $inputs['manufacturer'];
+		$series_obj->domain = $inputs['domain'];
+		$series_obj->patientInfo = array(
+			'patientID'		=>	$inputs['patientInfo_patientID'],
+			'patientName'	=>	$inputs['patientInfo_patientName'],
+			'age'			=>	$inputs['patientInfo_age'],
+			'birthday'		=>	$inputs['patientInfo_birthday'],
+			'sex'			=>	$inputs['patientInfo_sex'],
+			'height'		=>	$inputs['patientInfo_height'],
+			'weight'		=>	$inputs['patientInfo_weight']
 		);
 
-		Log::debug("入力値(Series Dummy)");
-		Log::debug($inputs);
-
-		if (Serieses::isValid()) {
+		//ValidateCheck
+		$validator = Validator::make($inputs, Cases::getValidateRules());
+	//	if ($case_obj->isValid()){
+		if (!$validator->fails()) {
 			//Validate成功時の処理
 			//エラーがないので登録する
-			Serieses::save();
-			return Redirect::to('test.index', array("msg" => "シリーズの登録が完了しました。"));
+			$case_obj->save();
+			return Redirect::to('test.index', array('msg' => 'ケースの登録が完了しました。'));
 		} else {
 			//Validateエラー時の処理
+			$result['errors'] = $validator->messages();
 		}
 
-		$result["title"] = "Series Dummy Data Regist";
-		$result["url"] = "/test/series";
-		$result["css"] = self::cssSetting();
-		$result["js"] = self::jsSetting();
+		$result['title'] = 'Case Dummy Data Regist';
+		$result['url'] = '/test/case';
+		$result['css'] = self::cssSetting();
+		$result['js'] = self::jsSetting();
+		$result['project_list'] = Projects::getProjectList(Projects::AUTH_TYPE_CREATE, true);
 
-		return View::make('test.series', $result);
+		return View::make('test.case', $result);
 	}
 
 	/**
@@ -239,6 +286,7 @@ class TestController extends BaseController {
 		$result["url"] = "/test/user";
 		$result["css"] = self::cssSetting();
 		$result["js"] = self::jsSetting();
+	//	$result["errors"] = array();
 
 		return View::make('test.user', $result);
 	}

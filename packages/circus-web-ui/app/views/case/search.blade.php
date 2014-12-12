@@ -78,7 +78,6 @@
 			//イベント発火
 			$('#btn_submit').trigger('click', ["btnReset"]);
 		});
-
 	});
 </script>
 <div class="page_contents_outer">
@@ -112,22 +111,22 @@
 						</tr>
 						<tr>
 							<th>Create Date</th>
-							<td>{{Form::text('createDate', isset($inputs["createDate"]) ? $inputs["createDate"] : '', array("class" => "common_input_text w_200 datepicker"))}}</td>
+							<td>{{Form::text('createDate', isset($inputs['createDate']) ? $inputs['createDate'] : '', array('class' => 'common_input_text w_200 datepicker'))}}</td>
 							<th>Update Date</th>
-							<td>{{Form::text('updateDate', isset($inputs["updateDate"]) ? $inputs["updateDate"] : '', array("class" => "common_input_text w_200 datepicker"))}}</td>
+							<td>{{Form::text('updateDate', isset($inputs['updateDate']) ? $inputs['updateDate'] : '', array('class' => 'common_input_text w_200 datepicker'))}}</td>
 						</tr>
 						<tr>
 							<th>Case Date</th>
-							<td colspan="3">{{Form::text('caseDate', isset($inputs["caseDate"]) ? $inputs["caseDate"] : '', array("class" => "common_input_text w_200 datepicker"))}}</td>
+							<td colspan="3">{{Form::text('caseDate', isset($inputs['caseDate']) ? $inputs["caseDate"] : '', array('class' => 'common_input_text w_200 datepicker'))}}</td>
 						</tr>
 					</table>
-					{{Form::button('Show More Options', array("class" => "common_btn mar_b_10", "onClick" => "$('#search_condition').toggleClass('hidden');"))}}
+					{{Form::button('Show More Options', array('class' => 'common_btn mar_b_10', 'onClick' => "$('#search_condition').toggleClass('hidden');"))}}
 					<div id="search_condition" class="hidden">
 					</div>
 						<p class="submit_area">
-							{{Form::button('Reset', array("class" => "common_btn common_btn_green clearForm", "type" => "reset", "id" => "btn_reset", "name" => "btnReset"))}}
-							{{Form::button('Search', array("class" => "common_btn common_btn_gray", "id" => "btn_submit", "type" => "button", "name" => "btnSubmit"))}}
-							{{Form::button('Save settings', array("class" => "common_btn common_btn_gray", "id" => "save-button", "type" => "button", "name" => "btnSave"))}}
+							{{Form::button('Reset', array('class' => 'common_btn common_btn_green clearForm', 'type' => 'reset', 'id' => 'btn_reset', 'name' => 'btnReset'))}}
+							{{Form::button('Search', array('class' => 'common_btn common_btn_gray', 'id' => 'btn_submit', 'type' => 'button', 'name' => 'btnSubmit'))}}
+							{{Form::button('Save settings', array('class' => 'common_btn common_btn_gray', 'id' => 'save-button', 'type' => 'button', 'name' => 'btnSave'))}}
 						</p>
 					{{Form::close()}}
 				</div>
@@ -138,10 +137,10 @@
 				<ul class="common_pager clearfix">
 					{{$list_pager->links()}}
 					<li class="pager_sort_order">
-						{{Form::select('sort', array('' => 'Sort Order', 'lastUpdate' => 'Last Update', 'caseID' => 'ID'), isset($sort) ? $sort : '', array('class' => 'w_max change_select', 'data-target-dom' => 'sort_order_down', 'id' => 'sort_order_up'))}}
+						{{Form::select('sort', Config::get('const.search_case_sort'), isset($inputs['sort']) ? $inputs['sort'] : '', array('class' => 'w_max change_select', 'data-target-dom' => 'sort_order_down', 'id' => 'sort_order_up'))}}
 					</li>
 					<li class="pager_disp_num">
-						{{Form::select('disp', array('' => 'display num', 10 => 10, 50 => 50, 100 => 100, 'all' => 'all'), isset($disp) ? $disp : '', array('class' => 'w_max change_select', 'data-target-dom' => 'display_num_down', 'id' => 'display_num_up'))}}
+						{{Form::select('disp', Config::get('const.search_display'), isset($inputs['disp']) ? $inputs['disp'] : '', array('class' => 'w_max change_select', 'data-target-dom' => 'display_num_down', 'id' => 'display_num_up'))}}
 					</li>
 				</ul>
 				<table class="result_table common_table">
@@ -199,10 +198,10 @@
 				<ul class="common_pager clearfix">
 					{{$list_pager->links()}}
 					<li class="pager_sort_order">
-						{{Form::select('sort', array('' => 'Sort Order', 'lastUpdate' => 'Last Update', 'caseID' => 'ID'), isset($sort) ? $sort : '', array('class' => 'w_max change_select', "data-target-dom" => "sort_order_up", "id" => "sort_order_down"))}}
+						{{Form::select('sort', Config::get('const.search_case_sort'), isset($inputs['sort']) ? $inputs['sort'] : '', array('class' => 'w_max change_select', "data-target-dom" => "sort_order_up", "id" => "sort_order_down"))}}
 					</li>
 					<li class="pager_disp_num">
-						{{Form::select('disp', array('' => 'display num', 10 => 10, 50 => 50, 100 => 100, 'all' => 'all'), isset($disp) ? $disp : '', array('class' => 'w_max change_select', "data-target-dom" => "display_num_up", "id" => "display_num_down"))}}
+						{{Form::select('disp', Config::get('const.search_display'), isset($inputs['disp']) ? $inputs['disp'] : '', array('class' => 'w_max change_select', "data-target-dom" => "display_num_up", "id" => "display_num_down"))}}
 					</li>
 				</ul>
 			</div>

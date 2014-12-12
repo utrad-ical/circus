@@ -91,15 +91,56 @@ class Cases extends Eloquent {
 		return $query;
 	}
 
-	//バリデーションルール
+	/**
+	 * Limit/Offset設定
+	 * @param $query Queryオブジェクト
+	 * @param $input 検索条件
+	 * @return $query Queryオブジェクト
+	 * @author stani
+	 * @since 2014/12/12
+	 */
+	public function scopeAddLimit($query, $input) {
+		if (isset($input['perPage']) && $input['perPage']) {
+			$query->skip(intval($input['disp'])*(intval($input['perPage'])-1));
+		}
+		$query->take($input['disp']);
+
+		return $query;
+	}
+
+	/**
+	 * バリデーションルール
+	 * @author stani
+	 * @since 2014/12/12
+	 */
 	public static $rules = array(
 		'caseID'						=>	'required',
-		'incrementalID'					=>	'required',
-		'projectID'						=>	'required',
-		'date'							=>	'required',
+		'incrementalID'					=>	'required|integer',
+		'projectID'						=>	'required|integer',
+		'date'							=>	'required|date',
 		'patientInfoCache.patientID'	=>	'required',
-		'patientInfoCache.age'			=>	'required',
-		'patientInfoCache.birthday'		=>	'required',
+		'patientInfoCache.age'			=>	'required|integer',
+		'patientInfoCache.birthday'		=>	'required|date',
 		'patientInfoCache.sex'			=>	'required'
 	);
+
+	/**
+	 * Validateルールを取得する
+	 * isValidが使えるようになったらこのメソッドは削除する
+	 * @return Validateルール配列
+	 * @author stani
+	 * @since 2014/12/12
+	 */
+	public static function getValidateRules() {
+ 		return array(
+			'caseID'						=>	'required',
+			'incrementalID'					=>	'required|integer',
+			'projectID'						=>	'required|integer',
+			'date'							=>	'required|date',
+			'patientInfoCache_patientID'	=>	'required',
+			'patientInfoCache_age'			=>	'required|integer',
+			'patientInfoCache_birthday'		=>	'required|date',
+			'patientInfoCache_sex'			=>	'required'
+		);
+	}
 }

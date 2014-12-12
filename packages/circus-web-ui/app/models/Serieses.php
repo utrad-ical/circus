@@ -62,4 +62,49 @@ class Serieses extends Eloquent {
 
 		return $query;
 	}
+
+	/**
+	 * Limit/Offset設定
+	 * @param $query Queryオブジェクト
+	 * @param $input 検索条件
+	 * @return $query Queryオブジェクト
+	 * @author stani
+	 * @since 2014/12/12
+	 */
+	public function scopeAddLimit($query, $input) {
+		if (isset($input['perPage']) && $input['perPage']) {
+			$query->skip(intval($input['disp'])*(intval($input['perPage'])-1));
+		}
+		$query->take($input['disp']);
+
+		return $query;
+	}
+
+	/**
+	 * バリデーションルール
+	 * @author stani
+	 * @since 2014/12/12
+	 */
+	public static $rules = array(
+		'studyUID'				=>	'required',
+		'seriesUID'				=>	'required',
+		'storageID'				=>	'required',
+		'patientInfo.patientID'	=>	'required',
+		'patientInfo.age'		=>	'required',
+		'patientInfo.birthday'	=>	'required',
+		'patientInfo.sex'		=>	'required',
+		'patientInfo.height'	=>	'required',
+		'patientInfo.weight'	=>	'required',
+		'width'					=>	'required',
+		'height'				=>	'required',
+		'seriesDate'			=>	'required',
+		'modality'				=>	'required',
+		'seriesDescription'		=>	'required',
+		'bodyPart'				=>	'required',
+		'images'				=>	'required',
+		'stationName'			=>	'required',
+		'modelName'				=>	'required',
+		'manufacturer'			=>	'required',
+		'domain'				=>	'required'
+	);
 }

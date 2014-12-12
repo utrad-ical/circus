@@ -44,7 +44,7 @@
 			$('#btn_submit').trigger('click');
 		});
 
-		$('.link_detail').click(function(){
+		$('.link_series_detail').click(function(){
 			//送信するフォームIDを取得
 			$(this).closest('tr').find('.form_series_detail').submit();
 			return false;
@@ -52,7 +52,7 @@
 
 		$('#btn_reset').click(function(){
 			//イベント発火
-			$('#btn_submit').trigger('click', ["btnReset"]);
+			$('#btn_submit').trigger('click', ['btnReset']);
 		});
 	});
 </script>
@@ -118,7 +118,7 @@
 						</tr>
 					</table>
 					<p class="al_c">
-						{{Form::button('Reset', array('class' => 'common_btn common_btn_green', 'id' => 'btnReset'))}}
+						{{Form::button('Reset', array('class' => 'common_btn common_btn_green', 'id' => 'btn_reset'))}}
 						{{Form::button('Search', array('class' => 'common_btn', 'type' => 'submit', 'id' => 'btn_submit'))}}
 						{{Form::button('Save settings', array('class' => 'common_btn common_btn_gray', 'type' => 'submit', 'id' => 'btnSave'))}}
 					</p>
@@ -131,10 +131,10 @@
 						<ul class="common_pager clearfix">
 							{{$list_pager->links()}}
 							<li class="pager_sort_order">
-								{{Form::select('sort', array('' => 'Sort Order', 'lastUpdate' => 'Last Update', 'seriesUID' => 'ID'), isset($sort) ? $sort : '', array('class' => 'w_max change_select', 'data-target-dom' => 'sort_order_down', 'id' => 'sort_order_up'))}}
+								{{Form::select('sort', Config::get('const.search_series_sort'), isset($inputs['sort']) ? $inputs['sort'] : '', array('class' => 'w_max change_select', 'data-target-dom' => 'sort_order_down', 'id' => 'sort_order_up'))}}
 							</li>
 							<li class="pager_disp_num">
-								{{Form::select('disp', array('' => 'display num', 10 => 10, 50 => 50, 100 => 100, 'all' => 'all'), isset($disp) ? $disp : '', array('class' => 'w_max change_select', 'data-target-dom' => 'display_num_down', 'id' => 'display_num_up'))}}
+								{{Form::select('disp', Config::get('const.search_display'), isset($inputs['disp']) ? $inputs['disp'] : '', array('class' => 'w_max change_select', 'data-target-dom' => 'display_num_down', 'id' => 'display_num_up'))}}
 							</li>
 						</ul>
 					</div>
@@ -167,11 +167,11 @@
 							@if (count($list) > 0)
 								@foreach ($list as $rec)
 									<tr>
-										<td>{{$rec["seriesID"]}}</td>
-										<td>{{$rec["seriesName"]}}</td>
+										<td>{{$rec['seriesID']}}</td>
+										<td>{{$rec['seriesName']}}</td>
 										<td>
-											{{$rec["patientName"]}} ({{$rec["patientID"]}})
-											<br>{{$rec["patientBirthday"]}} {{$rec["patientSex"]}}
+											{{$rec['patientName']}} ({{$rec['patientID']}})
+											<br>{{$rec['patientBirthday']}} {{$rec['patientSex']}}
 										</td>
 										<td class="al_c">
 											{{HTML::link(asset('/series/detail'), 'View', array('class' => 'common_btn link_series_detail'))}}
@@ -191,10 +191,10 @@
 					<ul class="common_pager clearfix">
 						{{$list_pager->links()}}
 						<li class="pager_sort_order">
-							{{Form::select('sort', array('' => 'Sort Order', 'lastUpdate' => 'Last Update', 'seriesUID' => 'ID'), isset($sort) ? $sort : '', array('class' => 'w_max change_select', 'data-target-dom' => 'sort_order_up', 'id' => 'sort_order_down'))}}
+							{{Form::select('sort', Config::get('const.search_series_sort'), isset($inputs['sort']) ? $inputs['sort'] : '', array('class' => 'w_max change_select', 'data-target-dom' => 'sort_order_up', 'id' => 'sort_order_down'))}}
 						</li>
 						<li class="pager_disp_num">
-							{{Form::select('disp', array('' => 'display num', 10 => 10, 50 => 50, 100 => 100, 'all' => 'all'), isset($disp) ? $disp : '', array('class' => 'w_max change_select', 'data-target-dom' => 'display_num_up', 'id' => 'display_num_down'))}}
+							{{Form::select('disp', Config::get('const.search_display'), isset($inputs['disp']) ? $inputs['disp'] : '', array('class' => 'w_max change_select', 'data-target-dom' => 'display_num_up', 'id' => 'display_num_down'))}}
 						</li>
 					</ul>
 				{{Form::close()}}

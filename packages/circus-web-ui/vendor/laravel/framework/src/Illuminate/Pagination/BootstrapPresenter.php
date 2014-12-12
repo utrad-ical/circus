@@ -10,18 +10,10 @@ class BootstrapPresenter extends Presenter {
 	 * @param  string  $rel
 	 * @return string
 	 */
-	/*
-	public function getPageLinkWrapper($url, $page, $rel = null)
-	{
-		$rel = is_null($rel) ? '' : ' rel="'.$rel.'"';
-
-		return '<li><a href="'.$url.'"'.$rel.'>'.$page.'</a></li>';
-	}
-	*/
 	public function getPageLinkWrapper($url, $page, $rel = null)
     {
     	$rel = is_null($rel) ? '' : ' rel="'.$rel.'"';
-        return '<li class="pager_btn"><a href="'.$rel.'">'.$page.'</a></li>';
+        return '<li class="pager_btn"><a href="'.$url.'"'.$rel.'>'.$page.'</a></li>';
     }
 
 
@@ -31,12 +23,6 @@ class BootstrapPresenter extends Presenter {
 	 * @param  string  $text
 	 * @return string
 	 */
-    /*
-	public function getDisabledTextWrapper($text)
-	{
-		return '<li class="disabled"><span>'.$text.'</span></li>';
-	}
-	*/
 	public function getDisabledTextWrapper($text)
     {
         return;
@@ -48,15 +34,8 @@ class BootstrapPresenter extends Presenter {
 	 * @param  string  $text
 	 * @return string
 	 */
-    /*
-	public function getActivePageWrapper($text)
-	{
-		return '<li class="active"><span>'.$text.'</span></li>';
-	}
-	*/
 	public function getActivePageWrapper($text)
     {
-       // return '<li class="current">'.$text.'</li>';
        return '<li class="pager_btn current_page">'.$text.'</li>';
     }
 

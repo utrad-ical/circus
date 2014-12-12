@@ -49,45 +49,50 @@ class SeriesController extends BaseController {
 		$result = array();
 
 		//入力値取得
-		$inputs = Input::only(
-			array(
-				"seriesUID", "seriesName", "patientID",
-				"patientName", "minAge", "maxAge",
-				"sex", "sort", "disp",
-				"btnReset", "btnSearch", "btnBack"
-			)
-		);
+		$inputs = Input::all();
 
-		//Resetボタン押下時の挙動
-		if ($inputs["btnReset"]) {
-//			$inputs = array();
-			Session::forget('series.search');
+		//Resetor初期表示ボタン押下時
+		if (array_key_exists ('btnReset', $inputs) !== FALSE || !$inputs) {
 			$search_flg = false;
-		} else if ($inputs["btnSearch"]) {
-			Session::put("series.search", $inputs);
+			Session::forget('series.search');
+			$result["inputs"] = array("sex" => "all");
+		//検索ボタン押下時
+		} else if (array_key_exists('btnSearch', $inputs) !== FALSE) {
+			if (array_key_exists ('disp', $inputs) === FALSE) $inputs['disp'] = Config::get('const.page_display');
+			if (array_key_exists ('sort', $inputs) === FALSE) $inputs['sort'] = 'updateTime';
+			Session::put('series.search', $inputs);
+		} else if (array_key_exists('page', $inputs) !== FALSE) {
+			$tmp = Session::get('series.search');
+			$tmp['perPage'] = $inputs['page'];
+			Session::put('series.search', $tmp);
 		}
 
 		//検索
 		if ($search_flg) {
-			$search_data = Session::get("series.search");
+			$search_data = Session::get('series.search');
 			//検索条件生成＆データ取得
 			//取得カラムの設定
 			$select_col = array(
-				"seriesUID",
-				"patientInfo.patientID", "patientInfo.patientName",
-				"patientInfo.sex", "patientInfo.birthday"
+				'seriesUID',
+				'patientInfo.patientID', 'patientInfo.patientName',
+				'patientInfo.sex', 'patientInfo.birthday'
 			);
 
-			Log::debug("検索条件");
-			Log::debug($search_data);
-			Log::debug("入力値");
-			Log::debug($inputs);
-
+			/*
 			//シリーズ一覧取得
-			$order = isset($search_data["sort"]) ? $search_data["sort"] : "updateTime";
 			$series_list = Serieses::addWhere($search_data)
-							->orderby($order, 'desc')
+							->orderby($search_data['sort'], 'desc')
 							->get($select_col);
+							*/
+			//総件数取得
+			$series_count = Serieses::addWhere($search_data)
+									->count();
+
+			//paginate(10)という風にpaginateを使う場合はget(select句)が指定できない
+			$series_list = Serieses::addWhere($search_data)
+									->orderby($search_data['sort'], 'desc')
+									->addLimit($search_data)
+									->get($select_col);
 			$query_log = DB::getQueryLog();
 
 			//表示用に整形
@@ -98,30 +103,31 @@ class SeriesController extends BaseController {
 
 				//表示用に整形する
 				$list[] = array(
-					"seriesID"			=>	$rec->seriesUID,
-					"seriesName"		=>	"Series AAA",
-					"patientID"			=>	$patient["patientID"],
-					"patientName" 		=>	$patient["patientName"],
-					"patientBirthday"	=>	$patient["birthday"],
-					"patientSex"		=>	$patient["sex"]
+					'seriesID'			=>	$rec->seriesUID,
+					'seriesName'		=>	'Series AAA',
+					'patientID'			=>	$patient['patientID'],
+					'patientName' 		=>	$patient['patientName'],
+					'patientBirthday'	=>	$patient['birthday'],
+					'patientSex'		=>	$patient['sex']
 				);
 			}
 			$result["list"] = $list;
 			//ページャーの設定
 			$case_pager = Paginator::make(
 				$list,
-				count($list),
-				isset($inputs["disp"]) ? $inputs["disp"] : Config::get('const.page_display')
+				//count($list),
+				$series_count,
+				$search_data['disp']
 			);
-			$result["list_pager"] = $case_pager;
+			$result['list_pager'] = $case_pager;
+			$result['inputs'] = $search_data;
 		}
 
-		$result["title"] = "Series Search";
-		$result["url"] = "series/search";
-		$result["search_flg"] = $search_flg;
-		$result["css"] = self::cssSetting();
-		$result["js"] = self::jsSetting();
-		$result["inputs"] = $inputs;
+		$result['title'] = 'Series Search';
+		$result['url'] = 'series/search';
+		$result['search_flg'] = $search_flg;
+		$result['css'] = self::cssSetting();
+		$result['js'] = self::jsSetting();
 
 		return View::make('series/search', $result);
 	}
@@ -132,13 +138,57 @@ class SeriesController extends BaseController {
 	 * @since 2014/12/11
 	 */
 	function detail() {
+		//ログインチェック
+		if (!Auth::check()) {
+			//ログインしていないのでログイン画面に強制リダイレクト
+			return Redirect::to('login');
+		}
+
+		//エラーメッセージ初期化
+		$error_msg = "";
 		$result = array();
+
+		//POSTデータ取得
+		$inputs = Input::only(array("seriesUID", "disp", "sort"));
+
+		if (!$inputs["seriesUID"]) {
+			$error_msg = "シリーズIDを指定してください。";
+		}
+
+		if (!$error_msg) {
+			//存在するケースIDかチェック
+			$series_info = Serieses::addWhere($inputs)
+								->get();
+
+			if (!$series_info) {
+				$error_msg = "存在しないシリーズIDです。";
+			} else {
+				$series_data = $series_info[0];
+			}
+		}
+
+		//エラーメッセージがない場合はケース詳細情報を表示する
+		if (!$error_msg) {
+			//シリーズ情報を表示用に整形
+
+			$series_detail = array(
+				"seriesUID"			=>	$series_data->seriesUID,
+				"patientID"			=>	$series_data->patientInfo["patientID"],
+				"patientName"		=>	$series_data->patientInfo["patientName"],
+				"patientBirthday"	=>	$series_data->patientInfo["birthday"],
+				"patientSex"		=>	$series_data->patientInfo["sex"],
+				"LastUpdate"		=>	date('Y/m/d h:i', $series_data->updateTime->sec),
+				"creator"			=>	'Yukihiro Nomura'
+			);
+			$result["series_detail"] = $series_detail;
+		} else {
+			$result["error_msg"] = $error_msg;
+		}
 		$result["title"] = "Series Detail";
 		$result["url"] = "series/detail";
 		$result["css"] = self::cssSetting();
 		$result["js"] = self::jsSetting();
-
-		return View::make('series/detail', $result);
+		return View::make("/series/detail", $result);
 	}
 
 	/**

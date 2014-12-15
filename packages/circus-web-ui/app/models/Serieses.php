@@ -107,4 +107,36 @@ class Serieses extends Eloquent {
 		'manufacturer'			=>	'required',
 		'domain'				=>	'required'
 	);
+
+	/**
+	 * Validateルールを取得する
+	 * isValidが使えるようになったらこのメソッドは削除する
+	 * @return Validateルール配列
+	 * @author stani
+	 * @since 2014/12/15
+	 */
+	public static function getValidateRules() {
+ 		return array(
+			'studyUID'				=>	'required',
+			'seriesUID'				=>	'required',
+			'storageID'				=>	'required',
+			'patientInfo.patientID'	=>	'required',
+			'patientInfo.age'		=>	'required',
+			'patientInfo.birthday'	=>	'required',
+			'patientInfo.sex'		=>	'required',
+			'patientInfo.height'	=>	'required|integer',
+			'patientInfo.weight'	=>	'required|integer',
+			'width'					=>	'required|integer',
+			'height'				=>	'required|integer',
+			'seriesDate'			=>	'required',
+			'modality'				=>	'required',
+			'seriesDescription'		=>	'required',
+			'bodyPart'				=>	'required',
+			'images'				=>	'required',
+			'stationName'			=>	'required',
+			'modelName'				=>	'required',
+			'manufacturer'			=>	'required',
+			'domain'				=>	'required'
+		);
+	}
 }

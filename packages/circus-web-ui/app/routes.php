@@ -23,20 +23,29 @@ Route::post('home', 'TopController@getIndex');
 Route::get('home', 'TopController@getIndex');
 
 //ケース
-//Route::get('case/search', 'CaseController@getIndex');
 Route::get('case/search', 'CaseController@search');
 Route::post('case/search', 'CaseController@search');
 Route::post('case/detail', 'CaseController@detail');
+Route::post('case/edit', 'CaseController@input');
+Route::post('case/input', 'CaseController@input');
+Route::post('case/confirm', 'CaseController@confirm');
+Route::post('case/complete', 'CaseController@complete');
 Route::post('case/revision', 'CaseController@revision');
-Route::post('case/edit', 'CaseController@edit');
+
 
 //シリーズ
 Route::get('series/search', 'SeriesController@getIndex');
 Route::post('series/search', 'SeriesController@search');
 Route::post('series/detail', 'SeriesController@detail');
+Route::get('series/input', 'SeriesController@input');
+Route::post('series/edit', 'SeriesController@input');
+Route::post('series/confirm', 'SeriesController@confirm');
+Route::post('series/complete', 'SeriesController@complete');
 
 //ユーザー
 Route::get('user/regist', 'UserController@regist');
+Route::get('user/confirm', 'UserController@confirm');
+Route::get('user/complete', 'UserController@complete');
 
 //テストデータ登録
 Route::get('test', 'TestController@getIndex');

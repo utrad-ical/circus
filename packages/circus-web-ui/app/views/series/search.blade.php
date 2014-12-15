@@ -54,6 +54,34 @@
 			//イベント発火
 			$('#btn_submit').trigger('click', ['btnReset']);
 		});
+
+		//CheckboxCookie処理
+		var COOKIE_NAME = "seriesCookie";
+		if(typeof $.cookie(COOKIE_NAME) === "undefined"){
+			var first_array = [];
+			$.cookie(COOKIE_NAME , first_array , { expires: 1 });
+		}
+		var series_num_array = [];
+
+		$(".chk_series").click(function () {
+			alert("Cookie積むよ");
+			var target_number = $(this).val();
+			var num_idx = $.inArray(target_number , series_num_array);
+
+			if($(this).prop('checked')){
+				// チェックが外された場合に、印刷対象としてクッキーに追加
+				if(num_idx == -1){
+					series_num_array.push(target_number);
+					$.cookie(COOKIE_NAME , series_num_array.join("_") , { expires: 1 });
+				}
+			} else {
+				// チェックが入れられた場合に、印刷対象外としてクッキーから削除
+				if(num_idx != -1){
+					series_num_array.splice(num_idx , 1);
+					$.cookie(COOKIE_NAME , series_num_array.join("_") , { expires: 1 });
+				}
+			}
+		});
 	});
 </script>
 <div class="page_contents_outer">
@@ -62,7 +90,7 @@
 			<h1 class="page_ttl">Series Search</h1>
 			{{Form::open(['url' => asset('/series/search'), 'id' => 'form_search', 'method' => 'post', 'class' => 'mar_b_20'])}}
 				<div class="al_l mar_b_10">
-					{{HTML::link(asset('/series/import'), 'Series Import', array("class" => "common_btn"))}}
+					{{HTML::link(asset('/series/import'), 'Series Import', array('class' => 'common_btn'))}}
 				</div>
 				<div class="search_form_wrap">
 					<h2 class="con_ttl">Search Condition</h2>
@@ -177,8 +205,12 @@
 											{{HTML::link(asset('/series/detail'), 'View', array('class' => 'common_btn link_series_detail'))}}
 										</td>
 										<td class="al_c">
-											{{Form::checkbox('chk_series', $rec["seriesID"])}}
+											{{Form::checkbox('chk_series', $rec['seriesID'], false, array('class' => 'chk_series'))}}
 										</td>
+										{{Form::open(['url' => asset('/series/detail'), 'method' => 'post', 'class' => 'form_series_detail'])}}
+											{{Form::hidden('seriesUID', $rec['seriesID'])}}
+											{{Form::hidden('mode', 'detail')}}
+										{{Form::close()}}
 									</tr>
 								@endforeach
 							@else

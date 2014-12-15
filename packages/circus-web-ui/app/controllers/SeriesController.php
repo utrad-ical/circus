@@ -47,6 +47,8 @@ class SeriesController extends BaseController {
 		//初期化
 		$search_flg = true;
 		$result = array();
+		//Cookie初期化
+		setcookie('seriesCookie', '', time() - 3600);
 
 		//入力値取得
 		$inputs = Input::all();
@@ -78,12 +80,6 @@ class SeriesController extends BaseController {
 				'patientInfo.sex', 'patientInfo.birthday'
 			);
 
-			/*
-			//シリーズ一覧取得
-			$series_list = Serieses::addWhere($search_data)
-							->orderby($search_data['sort'], 'desc')
-							->get($select_col);
-							*/
 			//総件数取得
 			$series_count = Serieses::addWhere($search_data)
 									->count();
@@ -108,14 +104,13 @@ class SeriesController extends BaseController {
 					'patientID'			=>	$patient['patientID'],
 					'patientName' 		=>	$patient['patientName'],
 					'patientBirthday'	=>	$patient['birthday'],
-					'patientSex'		=>	$patient['sex']
+					'patientSex'		=>	self::getSex($patient['sex'])
 				);
 			}
 			$result["list"] = $list;
 			//ページャーの設定
 			$case_pager = Paginator::make(
 				$list,
-				//count($list),
 				$series_count,
 				$search_data['disp']
 			);
@@ -209,6 +204,19 @@ class SeriesController extends BaseController {
 	 */
 	function jsSetting() {
 		$js = array();
+		$js["jquery.cookie.js"] = "js/jquery.cookie.js";
 		return $js;
+	}
+
+	/**
+	 * 表示用の性別を取得する
+	 * @param $sex 性別の値
+	 * @return 性別表示用文字列
+	 * @author stani
+	 * @since 2014/12/12
+	 */
+	function getSex($sex) {
+		$sexes = Config::get('const.patient_sex');
+		return $sexes[$sex];
 	}
 }

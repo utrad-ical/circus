@@ -6,46 +6,11 @@
  */
 class CaseController extends BaseController {
 	/**
-	 * ケース検索画面
-	 * @author stani
-	 * @since 2014/12/02
-	 */
-	/*
-	public function getIndex() {
-		Log::debug("Get Search");
-		//ログインチェック
-		if (!Auth::check()) {
-			//ログインしていないのでログイン画面に強制リダイレクト
-			return Redirect::to('login');
-		}
-
-		//Getアクセスなのでページ番号が付与されていない場合は初期化
-		$inputs = Input::all();
-
-		Session::forget('case.search');
-
-		//ログインしているのでケース検索画面の表示処理を行う
-		$result = array();
-		$result["title"] = "Case Search";
-		$result["url"] = "case/search";
-		$result["search_flg"] = false;
-		$result["css"] = self::cssSetting();
-		$result["js"] = self::jsSetting();
-
-		//ログインユーザのグループが参照可能なプロジェクト一覧を取得
-		$result["project_list"] = self::getProjectList(true);
-
-		return View::make('case.search', $result);
-	}
-	*/
-
-	/**
 	 * ケース検索結果
 	 * @author stani
 	 * @since 2014/12/02
 	 */
 	public function search() {
-		Log::debug("Post Search");
 		//ログインチェック
 		if (!Auth::check()) {
 			//ログインしていないのでログイン画面に強制リダイレクト
@@ -127,7 +92,6 @@ class CaseController extends BaseController {
 				//ページャーの設定
 				$case_pager = Paginator::make(
 					$list,
-				//	count($case_list),
 					$case_count,
 					$search_data['disp']
 				);
@@ -147,6 +111,140 @@ class CaseController extends BaseController {
 	}
 
 	/**
+	 * リビジョン検索結果
+	 * @author stani
+	 * @since 2014/12/15
+	 */
+	public function revision() {
+		//ログインチェック
+		if (!Auth::check()) {
+			//ログインしていないのでログイン画面に強制リダイレクト
+			return Redirect::to('login');
+		}
+
+		//初期設定
+		$search_flg = true;
+		$result = array();
+
+		//入力値取得
+		$inputs = Input::all();
+/*
+		Log::debug("入力項目");
+		Log::debug($inputs);
+*/
+		if (!$inputs) {
+			$search_flg = false;
+			Session::forget('revision.search');
+		} else if (array_key_exists('page', $inputs) !== FALSE) {
+			$tmp = Session::get('revision.search');
+			$tmp['perPage'] = $inputs['page'];
+			Session::put('revision.search', $tmp);
+		} else {
+			if (array_key_exists ('disp', $inputs) === FALSE) $inputs['disp'] = Config::get('const.page_display');
+			if (array_key_exists ('sort', $inputs) === FALSE) $inputs['sort'] = 'revision.date';
+			Session::put('revision.search', $inputs);
+		}
+
+		if ($search_flg) {
+			//検索条件をセッションから取得
+			$search_data = Session::get('revision.search');
+		//	Log::debug()
+
+			//検索条件生成＆データ取得
+			//取得カラムの設定
+			$select_col = array(
+				'caseID', 'projectID',
+				'patientInfoCache.patientID', 'patientInfoCache.name',
+				'patientInfoCache.birthday', 'patientInfoCache.sex',
+				'revisions'
+			);
+
+			//総件数取得
+			$case_count = Cases::addWhere($search_data)
+								->count();
+
+			//paginate(10)という風にpaginateを使う場合はget(select句)が指定できない
+			$case_list = Cases::addWhere($search_data)
+								->orderby($search_data['sort'], 'desc')
+								->addLimit($search_data)
+								->get($select_col);
+			$query_log = DB::getQueryLog();
+			/*
+			Log::debug($query_log);
+			Log::debug("取得結果");
+			Log::debug($case_list);
+			Log::debug("プロジェクトID");
+			*/
+			$case_data = $case_list[0];
+
+			//表示用に整形
+			$list = array();
+
+			//プロジェクト名
+			$project = Projects::where('projectID', '=', $case_data->projectID)->get();
+			$case_detail = array(
+				'caseID'		=>	$case_data->caseID,
+				'projectID'		=>	$case_data->projectID,
+				'projectName'	=>	$project ? $project[0]->projectName : '',
+				'patientID'		=>	$case_data->patientInfoCache['patientID'],
+				'patientName'	=>	$case_data->patientInfoCache['name'],
+				'birthday'		=>	$case_data->patientInfoCache['birthday'],
+				'sex'			=>	self::getSex($case_data->patientInfoCache['sex'])
+			);
+
+			//Revision情報を表示用に整形
+			$revision_list = array();
+
+			foreach($case_data->revisions as $key => $value) {
+				//keyがlatestのものはCloneなので対象外とする
+				if ($key !== 'latest') {
+					//ラベル数を求める
+					$label_cnt = 0;
+					foreach ($value['series'] as $rec) {
+						$label_cnt += count($rec['labels']);
+					}
+
+					//曜日を求める
+					$w = self::getWeekDay(date('w', $value['date']->sec));
+
+					//表示用にリスト作成
+					$revision_list[] = array(
+						'revisionNo'	=>	$key,
+						'editDate'		=>	date('Y/m/d('.$w.')', $value['date']->sec),
+						'editTime'		=>	date('H:i', $value['date']->sec),
+						'seriesCount'	=>	count($value['series']),
+						'labelCount'	=>	$label_cnt,
+						'creator'		=>	$value['creator'],
+						'memo'			=>	$value['memo']
+					);
+				}
+			}
+			$result['case_detail'] = $case_detail;
+			$result['revision_list'] = $revision_list;
+
+			Log::debug("リビジョンリスト");
+			Log::debug($revision_list);
+
+			//ページャーの設定
+			$revision_pager = Paginator::make(
+				$revision_list,
+				count($revision_list),
+				$search_data['disp']
+			);
+			$result['list_pager'] = $revision_pager;
+			$result['inputs'] = $search_data;
+		}
+
+		$result['title'] = 'Revision List';
+		$result['url'] = 'case/revision';
+		$result['search_flg'] = $search_flg;
+		$result['css'] = self::cssSetting();
+		$result['js'] = self::jsSetting();
+
+		return View::make('case/revision', $result);
+	}
+
+	/**
 	 * ケース詳細画面
 	 * @author stani
 	 * @since 2014/12/09
@@ -163,20 +261,28 @@ class CaseController extends BaseController {
 		$result = array();
 
 		//POSTデータ取得
-//		$inputs = Input::only(array("caseID", "revisionNo", "disp", "sort", "mode"));
 		$inputs = Input::all();
 
+		Log::debug("入力情報");
+		Log::debug($inputs);
 
-//		if (!$inputs["caseID"]) {
 		if (array_key_exists('caseID', $inputs) === FALSE)
 			$error_msg = 'ケースIDを指定してください。';
 
 		if (!$error_msg) {
-			if (array_key_exists('disp', $inputs) === FALSE) $inputs['disp'] = Config::get('const.search_display');
+			if (array_key_exists('disp', $inputs) === FALSE) $inputs['disp'] = Config::get('const.page_display');
 			if (array_key_exists('sort', $inputs) === FALSE) $inputs['sort'] = 'date';
+
+			Session::put('case.detail', $inputs);
+			$search_data = Session::get('case.detail');
+
 			//存在するケースIDかチェック
-			$case_info = Cases::addWhere($inputs)
+			$case_info = Cases::addWhere($search_data)
 								->get();
+			$query_log = DB::getQueryLog();
+			Log::debug($query_log);
+			Log::debug("ケース情報");
+			Log::debug($case_info);
 
 			if (!$case_info) {
 				$error_msg = '存在しないケースIDです。';
@@ -232,41 +338,232 @@ class CaseController extends BaseController {
 
 					//表示用にリスト作成
 					$revision_list[] = array(
-						"revisionNo"	=>	$key,
-						"editDate"		=>	date('Y/m/d('.$w.')', $value["date"]->sec),
-						"editTime"		=>	date('H:i', $value["date"]->sec),
-						"seriesCount"	=>	count($value["series"]),
-						"labelCount"	=>	$label_cnt,
-						"creator"		=>	$value["creator"],
-						"memo"			=>	$value["memo"]
+						'revisionNo'	=>	$key,
+						'editDate'		=>	date('Y/m/d('.$w.')', $value['date']->sec),
+						'editTime'		=>	date('H:i', $value['date']->sec),
+						'seriesCount'	=>	count($value['series']),
+						'labelCount'	=>	$label_cnt,
+						'creator'		=>	$value['creator'],
+						'memo'			=>	$value['memo']
 					);
 					$revision_no_list[] = $key;
 				}
 			}
-			$case_detail["revisionNo"] = isset($inputs["revisionNo"]) ? $inputs["revisionNo"] : $max_revision;
-			$result["case_detail"] = $case_detail;
-			$result["revision_list"] = $revision_list;
+			$case_detail['revisionNo'] = isset($inputs['revisionNo']) ? $inputs['revisionNo'] : $max_revision;
+			$result['case_detail'] = $case_detail;
+			$result['revision_list'] = $revision_list;
 			$result['revision_no_list'] = $revision_no_list;
 
 			//シリーズリスト作成
-			$result['series_list'] = self::getSeriesList($case_data->revisions[$case_detail["revisionNo"]]);
+			Log::debug("ケース詳細情報");
+			Log::debug($case_detail);
+			Log::debug("ケース情報");
+			Log::debug($case_data);
+
+			$result['series_list'] = self::getSeriesList($case_data->revisions[$case_detail['revisionNo']]);
 
 			//ページャーの設定
 			$revision_pager = Paginator::make(
 				$revision_list,
 				count($revision_list),
-				isset($inputs["disp"]) ? $inputs["disp"] : 50
+				$search_data['disp']
 			);
-			$result["list_pager"] = $revision_pager;
+			$result['list_pager'] = $revision_pager;
+			$result['inputs'] = $search_data;
 		} else {
-			$result["error_msg"] = $error_msg;
+			$result['error_msg'] = $error_msg;
 		}
-		$result["title"] = "Case Detail";
-		$result["url"] = "case/detail";
-		$result["css"] = self::cssSetting();
-		$result["js"] = self::jsSetting('detail');
-		$result["mode"] = $inputs["mode"];
-		return View::make("/case/detail", $result);
+		$result['title'] = 'Case Detail';
+		$result['url'] = 'case/detail';
+		$result['css'] = self::cssSetting();
+		$result['js'] = self::jsSetting('detail');
+		$result['mode'] = $inputs['mode'];
+		return View::make('/case/detail', $result);
+	}
+
+	/**
+	 * ケース登録入力
+	 * @author stani
+	 * @since 2014/12/15
+	 */
+	function input() {
+		//ログインチェック
+		if (!Auth::check()) {
+			//ログインしていないのでログイン画面に強制リダイレクト
+			return Redirect::to('login');
+		}
+
+		//初期設定
+		$result = array();
+		$series_list = array();
+		//入力値取得
+		$inputs = Input::all();
+
+		//ページ設定
+		$result['title'] = 'Add new Case';
+		$result['url'] = '/case/input';
+		$result['back_url'] = '/series/search';
+		$result['css'] = self::cssSetting();
+		$result['js'] = self::jsSetting();
+		$result['project_list'] = Projects::getProjectList(Projects::AUTH_TYPE_CREATE, true);
+
+		if (array_key_exists('caseID', $inputs)) {
+			$case_data = Cases::addWhere($inputs)
+					->get();
+			if ($case_data) {
+				$result['inputs'] = $case_data[0];
+				Session::put('id', $case_data[0]->_id);
+			}
+
+			Log::debug("ケース情報");
+			Log::debug($case_data);
+			Log::debug("RevisionNo");
+			Log::debug($inputs["revisionNo"]);
+			Log::debug("Revision情報");
+			Log::debug($case_data->revisions);
+
+			$series_list = self::getSeriesList($case_data->revisions[$inputs['revisionNo']]);
+		} else {
+			$result['inputs'] = array('caseID' => self::createCaseID());
+
+			//CookieからシリーズUID取得
+			Log::debug("Cookie全体::");
+			Log::debug($_COOKIE);
+			$cookie_series = Cookie::get('seriesCookie');
+			Log::debug("Cookie::");
+			Log::debug($cookie_series);
+
+			$series_exclude_ary = split("-" , $cookie_series);
+			foreach ($series_exclude_ary as $rec) {
+				$series_list[$rec] = $rec;
+			}
+		}
+		$result["series_list"] = $series_list;
+
+		return View::make('/case/input', $result);
+	}
+
+	/**
+	 * ケース登録確認
+	 */
+	function confirm() {
+		//ログインチェック
+		if (!Auth::check()) {
+			//ログインしていないのでログイン画面に強制リダイレクト
+			return Redirect::to('login');
+		}
+
+		//初期設定
+		$result = array();
+		$result['css'] = self::cssSetting();
+		$result['js'] = self::jsSetting();
+
+		//入力値取得
+		$inputs = Input::all();
+		Session::put('case.input', $inputs);
+
+		//セッション情報取得
+		$id = Session::get('id');
+
+		//Validateチェック用オブジェクト生成
+		$case_obj = $case_id ?
+			Cases::find($id) : App::make('Cases');
+
+		//Validateチェック用の値を設定
+		$case_obj->caseID = $inputs['caseID'];
+		$case_obj->incrementalID = $inputs['incrementalID'];
+		$case_obj->projectID = $inputs['projectID'];
+		$case_obj->date = $inputs['date'];
+		$case_obj->patientInfoCache = array(
+			'patientID'	=>	$inputs['patientInfoCache_patientID'],
+			'name'		=>	$inputs['patientInfoCache_name'],
+			'age'		=>	$inputs['patientInfoCache_age'],
+			'birthday'	=>	$inputs['patientInfoCache_birthday'],
+			'sex'		=>	$inputs['patientInfoCache_sex']
+		);
+
+		//ValidateCheck
+		$validator = Validator::make($inputs, Cases::getValidateRules());
+		if ($validator->fails()) {
+			//Validateエラー時の処理
+			$result['title'] = 'Add new Case';
+			$result['url'] = '/case/input';
+			$result['back_url'] = '/series/search';
+			$result['project_list'] = Projects::getProjectList(Projects::AUTH_TYPE_CREATE, true);
+			$result['errors'] = $validator->messages();
+			return View::make('/case/input', $result);
+		} else {
+			//エラーがないので確認画面を表示
+			$result['title'] = 'Add new Case Confirmation';
+			$result['url'] = '/case/confirm';
+			return View::make('/case/confirm', $result);
+		}
+	}
+
+	/**
+	 * ケース登録
+	 * @author stani
+	 * @since 2014/12/15
+	 */
+	function regist(){
+		//ログインチェック
+		if (!Auth::check()) {
+			//ログインしていないのでログイン画面に強制リダイレクト
+			return Redirect::to('login');
+		}
+
+		//初期設定
+		$result = array();
+
+		//入力値取得
+		$inputs = Input::all();
+		$result['back_url'] = '/series/search';
+		$result['css'] = self::cssSetting();
+		$result['js'] = self::jsSetting();
+
+		//Validateチェック用オブジェクト生成
+		$case_obj = App::make('Cases');
+		//Validateチェック用の値を設定
+		$case_obj->caseID = $inputs['caseID'];
+		$case_obj->incrementalID = $inputs['incrementalID'];
+		$case_obj->projectID = $inputs['projectID'];
+		$case_obj->date = $inputs['date'];
+		$case_obj->patientInfoCache = array(
+			'patientID'	=>	$inputs['patientInfoCache_patientID'],
+			'name'		=>	$inputs['patientInfoCache_name'],
+			'age'		=>	$inputs['patientInfoCache_age'],
+			'birthday'	=>	$inputs['patientInfoCache_birthday'],
+			'sex'		=>	$inputs['patientInfoCache_sex']
+		);
+
+		//ValidateCheck
+		$validator = Validator::make($inputs, Cases::getValidateRules());
+		if (!$validator->fails()) {
+			//Validate成功時の処理
+			//エラーがないので登録する
+			$dt = new MongoDate(strtotime(date('Y-m-d H:i:s')));
+			$case_obj->updateTime = $dt;
+			$case_obj->createTime = $dt;
+			$case_obj->creator = Auth::user()->loginID;
+			$case_obj->save();
+			if (Session::get("id"))
+				$result['title'] = 'Case Edit Complete';
+			else
+				$result['title'] = 'Add new Case Complete';
+			$result['url'] = '/case/complete';
+			$result["msg"] = "ケース情報の登録が完了しました。";
+			return View::make('/case/complete', $result);
+		} else {
+			//Validateエラー時の処理
+			$result['errors'] = $validator->messages();
+			if (Session::get("id"))
+				$result['title'] = 'Add new Case';
+			else
+				$result['title'] = 'Case Edit';
+			$result['url'] = '/case/input';
+			$result['project_list'] = Projects::getProjectList(Projects::AUTH_TYPE_CREATE, true);
+			return View::make('/case/input', $result);
+		}
 	}
 
 	/**
@@ -274,10 +571,19 @@ class CaseController extends BaseController {
 	 * @author stani
 	 * @since 2014/12/04
 	 */
-	function cssSetting() {
+	function cssSetting($mode = 'search') {
 		$css = array();
 	  	$css["ui-lightness/jquery-ui-1.10.4.custom.min.css"] = "css/ui-lightness/jquery-ui-1.10.4.custom.min.css";
 		$css["page.css"] = "css/page.css";
+
+		switch($mode) {
+			case 'search':
+				break;
+			case 'detail':
+			case 'edit':
+				$css["color.css"] = "css/color.css";
+				break;
+		}
 	  	return $css;
 	}
 
@@ -289,23 +595,17 @@ class CaseController extends BaseController {
 	 */
 	function jsSetting($mode = 'search') {
 		$js = array();
-		$js["jquery-ui.min.js"] = "js/jquery-ui.min.js";
+		$js['jquery-ui.min.js'] = 'js/jquery-ui.min.js';
 
 		switch ($mode) {
 			case 'search':
-				$js["jquery.multiselect.min.js"] = "js/jquery.multiselect.min.js";
-				$js["jquery.formserializer.js"] = "js/jquery.formserializer.js";
-				$js["jquery.ruleseteditor.js"] = "js/jquery.ruleseteditor.js";
+				$js['jquery.multiselect.min.js'] = 'js/jquery.multiselect.min.js';
+				$js['jquery.formserializer.js'] = 'js/jquery.formserializer.js';
+				$js['jquery.ruleseteditor.js'] = 'js/jquery.ruleseteditor.js';
 				break;
 			case 'detail':
 			case 'edit':
-				$js["img_edit.js"] = "js/img_edit.js";
-				break;
-			case 'revision':
-				$js["jquery.simple-color-picker.js"] = "/js/jquery.simple-color-picker.js";
-				$js["voxelContainer.js"] = "/js/voxelContainer.js";
-				$js["imageViewer.js"] = "/js/imageViewer.js";
-				$js["imageViewerController.js"] = "/js/imageViewerController.js";
+			//	$js['img_edit.js'] = 'js/img_edit.js';
 				break;
 		}
 		return $js;
@@ -358,5 +658,48 @@ class CaseController extends BaseController {
 			$series_list[$value["seriesUID"]] = $value["seriesUID"];
 		}
 		return $series_list;
+	}
+
+	/**
+	 * ケースID作成(SHA256+uniqid)
+	 * @return uniqidをSHA256でHash化した文字列(ケースID)
+	 * @author stani
+	 * @since 2014/12/15
+	 */
+	function createCaseID(){
+		return hash_hmac('sha256', uniqid(), Config::get('const.hash_key'));
+	}
+
+	function getRevision($case_data) {
+		//$max_revision = 0;
+		foreach($case_data->revisions as $key => $value) {
+			//keyがlatestのものはCloneなので対象外とする
+			if ($key !== 'latest') {
+				//Revision番号が大きい場合はセット
+			//	if ($max_revision < $key)
+			//		$max_revision = $key;
+
+				//ラベル数を求める
+				$label_cnt = 0;
+				foreach ($value['series'] as $rec) {
+					$label_cnt += count($rec['labels']);
+				}
+
+				//曜日を求める
+				$w = self::getWeekDay(date('w', $value['date']->sec));
+
+				//表示用にリスト作成
+				$revision_list = array(
+					'revisionNo'	=>	$key,
+					'editDate'		=>	date('Y/m/d('.$w.')', $value['date']->sec),
+					'editTime'		=>	date('H:i', $value['date']->sec),
+					'seriesCount'	=>	count($value['series']),
+					'labelCount'	=>	$label_cnt,
+					'creator'		=>	$value['creator'],
+					'memo'			=>	$value['memo']
+				);
+			//	$revision_no_list[] = $key;
+			}
+		}
 	}
 }

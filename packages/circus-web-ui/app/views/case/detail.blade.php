@@ -2,56 +2,58 @@
 @include('common.header')
 @section('content')
 <script type="text/javascript">
-$(function() {
-	$('.link_case_edit').click(function(){
-		//modeを設定
-		$(this).closest('form').find('.view_mode').val("edit");
-
-		//送信するフォームIDを取得
-		$(this).closest('form').find('.form_case_detail').submit();
-		return false;
-	});
-
-	$('.link_case_detail').click(function(){
-		//modeを設定
-		$(this).closest('form').find('.view_mode').val("view");
-
-		//送信するフォームIDを取得
-		$(this).closest('form').find('.form_case_detail').submit();
-		return false;
-	});
-
-	$('#btnBack').click(function() {
-		$('body').append('<form action="./search" method="POST" class="hidden" id="frm_back"></form>');
-		$('#frm_back').append('<input type="hidden" name="btnBack" value="">');
-		$('#frm_back').submit();
-		return false;
-	});
-
-	$('.change_select').change(function(){
-		// 変更するコンボIDを取得
-		var change_select = $(this).attr('data-target-dom');
-		// selectedにするvalueを取得
-		var select_value = $("select[name='"+$(this).attr('name')+"']").val();
-		// コンボのselectedを変更
-		$('#'+change_select).find('option').each(function(){
-			var this_num = $(this).val();
-			if(this_num == select_value){
-				$(this).attr('selected','selected');
-			}
+	$(function() {
+		$('#link_case_edit').click(function(){
+			//送信するフォームIDを取得
+			$(this).closest('div').find('.frm_case_edit').submit();
+			return false;
 		});
 
-		//検索を行うのでhidden要素を追加する
-		var sort = $("select[name='sort']").val();
-		var disp = $("select[name='disp']").val();
-		var sort_elm = $("<input>", {type:"hidden", name:"sort", value:sort});
-		$('#form_search').append(sort_elm);
-		var disp_elm = $("<input>", {type:"hidden", name:"disp", value:disp});
-		$('#form_search').append(disp_elm);
-		//イベント発火
-		$('#btn_submit').trigger('click');
+		$('.link_case_detail').click(function(){
+			//modeを設定
+			$(this).closest('td').find('.view_mode').val("view");
+
+			//送信するフォームIDを取得
+			$(this).closest('td').find('.form_case_detail').submit();
+			return false;
+		});
+
+		$('.link_revision_list').click(function(){
+			$(this).closest('div').find('.frm_revision_list').submit();
+			return false;
+		});
+
+		$('#btnBack').click(function() {
+			$('body').append('<form action="./search" method="POST" class="hidden" id="frm_back"></form>');
+			$('#frm_back').append('<input type="hidden" name="btnBack" value="">');
+			$('#frm_back').submit();
+			return false;
+		});
+
+		$('.change_select').change(function(){
+			// 変更するコンボIDを取得
+			var change_select = $(this).attr('data-target-dom');
+			// selectedにするvalueを取得
+			var select_value = $("select[name='"+$(this).attr('name')+"']").val();
+			// コンボのselectedを変更
+			$('#'+change_select).find('option').each(function(){
+				var this_num = $(this).val();
+				if(this_num == select_value){
+					$(this).attr('selected','selected');
+				}
+			});
+
+			//検索を行うのでhidden要素を追加する
+			var sort = $("select[name='sort']").val();
+			var disp = $("select[name='disp']").val();
+			var sort_elm = $("<input>", {type:"hidden", name:"sort", value:sort});
+			$('#form_search').append(sort_elm);
+			var disp_elm = $("<input>", {type:"hidden", name:"disp", value:disp});
+			$('#form_search').append(disp_elm);
+			//イベント発火
+			$('#btn_submit').trigger('click');
+		});
 	});
-});
 </script>
 <div class="page_contents_outer">
 	<div class="page_contents_inner">
@@ -60,17 +62,19 @@ $(function() {
 			<div class="al_l mar_b_10 w_600 fl_l">
 				{{HTML::link(asset('/case/search'), 'Back to Case Search Result', array('class' => 'common_btn', 'id' => 'btnBack'))}}
 				@if (isset($edit_flg))
-					{{HTML::link(asset('/case/detail'), 'Edit Case', array('class' => 'common_btn link_case_edit'))}}
-					{{Form::open(["url" => asset('/case/detail'), "method" => 'POST', 'class' => 'form_case_detail'])}}
+					{{HTML::link('', 'Edit Case', array('class' => 'common_btn', 'id' => 'link_case_edit'))}}
+					{{Form::open(['url' => asset('/case/edit'), 'method' => 'POST', 'class' => 'frm_case_edit'])}}
 						{{Form::hidden('caseID', $case_detail['caseID'])}}
-						{{Form::hidden('revisionNo', $case_detail["revisionNo"])}}
-						{{Form::hidden('mode', 'edit', array('class' => 'view_mode'))}}
+						{{Form::hidden('revisionNo', $case_detail['revisionNo'])}}
 					{{Form::close()}}
 				@endif
 			</div>
 			<div class="al_r mar_b_10 w_300 fl_r">
-				{{Form::select('revision', $revision_no_list, $case_detail['revisionNo'], array("class" => "select w_180"))}}
-				{{HTML::link(asset('/case/revision'), 'Revision List', array('class' => 'common_btn'))}}
+				{{Form::select('revision', $revision_no_list, $case_detail['revisionNo'], array('class' => 'select w_180'))}}
+				{{HTML::link(asset('/case/revision'), 'Revision List', array('class' => 'common_btn link_revision_list'))}}
+				{{Form::open(['url' => asset('/case/revision'), 'method' => 'POST', 'class' => 'frm_revision_list'])}}
+					{{Form::hidden('caseID', $case_detail['caseID'])}}
+				{{Form::close()}}
 			</div>
 			<div class="clear">&nbsp;</div>
 			<table class="common_table al_l mar_b_10">
@@ -82,23 +86,23 @@ $(function() {
 				</colgroup>
 				<tr>
 					<th>Case ID</th>
-					<td colspan="3">{{$case_detail["caseID"]}}</td>
+					<td colspan="3">{{$case_detail['caseID']}}</td>
 				</tr>
 				<tr>
 					<th>Project ID</th>
-					<td>{{$case_detail["projectID"]}}</td>
+					<td>{{$case_detail['projectID']}}</td>
 					<th>Project Name</th>
-					<td>{{$case_detail["projectName"]}}</td>
+					<td>{{$case_detail['projectName']}}</td>
 				</tr>
 			</table>
 			<div class="w_400 fl_l">
 				{{Form::select('seriesUID', $series_list, isset($case_detail['seriesUID']) ? $case_detail['seriesUID'] : '')}}
 				<label class="common_btn" for="img_mode_view">
-					{{Form::radio('img_mode', 1, false, array('class' => 'img_mode', 'id' => 'img_mode_view'))}}
+					{{Form::radio('img_mode', 1, $mode == 'detail' ? true : false, array('class' => 'img_mode', 'id' => 'img_mode_view'))}}
 					View
 				</label>
 				<label class="common_btn" for="img_mode_draw">
-					{{Form::radio('img_mode', 1, true, array('class' => 'img_mode', 'id' => 'img_mode_draw'))}}
+					{{Form::radio('img_mode', 1, $mode == 'edit' ? true : false, array('class' => 'img_mode', 'id' => 'img_mode_draw'))}}
 					Draw
 				</label>
 				{{Form::button('Save', array('type' => 'submit', 'class' => 'common_btn'))}}
@@ -106,7 +110,7 @@ $(function() {
 			<div class="w_500 fl_r">
 				<div class="info_area ">
 					<p class="pad_10">
-						{{$case_detail["patientName"]}} ({{$case_detail["patientID"]}})
+						{{$case_detail['patientName']}} ({{$case_detail['patientID']}})
 						<br>{{$case_detail["birthday"]}} {{$case_detail["sex"]}}
 					</p>
 				</div>
@@ -282,8 +286,9 @@ $(function() {
 									<td>{{$rec["creator"]}}</td>
 									<td class="al_l">{{$rec["memo"]}}</td>
 									<td class="">
-										{{Form::open(['url' => asset('/case/detail'), 'method' => 'post'])}}
+										{{Form::open(['url' => asset('/case/detail'), 'method' => 'post', 'class' => 'form_case_detail'])}}
 											{{Form::hidden('mode', $mode)}}
+											{{Form::hidden('caseID', $case_detail['caseID'])}}
 											{{Form::hidden('revisionNo', $rec["revisionNo"])}}
 											{{Form::button('View', array('class' => 'common_btn link_case_detail'))}}
 											{{HTML::link(asset('/case/detail'), 'Edit', array('class' => 'common_btn mar_t_5 link_case_detail'))}}

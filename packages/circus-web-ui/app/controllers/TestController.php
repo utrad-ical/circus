@@ -70,10 +70,6 @@ class TestController extends BaseController {
 
 		//入力値取得
 		$inputs = Input::all();
-		/*
-		Log::debug("入力値(CaseRegist)");
-		Log::debug($inputs);
-		*/
 
 		//Validateチェック用オブジェクト生成
 		$case_obj = App::make('Cases');
@@ -92,9 +88,8 @@ class TestController extends BaseController {
 
 		//ValidateCheck
 		$validator = Validator::make($inputs, Cases::getValidateRules());
-	//	if ($case_obj->isValid()){
 		if (!$validator->fails()) {
-			Log::debug("エラーなかったよ！");
+			//Log::debug("エラーなかったよ！");
 			//Validate成功時の処理
 			//エラーがないので登録する
 			$dt = new MongoDate(strtotime(date('Y-m-d H:i:s')));
@@ -135,8 +130,7 @@ class TestController extends BaseController {
 		$result['url'] = '/test/series';
 		$result['css'] = self::cssSetting();
 		$result['js'] = self::jsSetting();
-		//$result['errors'] = array();
-
+		$result['project_list'] = Projects::getProjectList(Projects::AUTH_TYPE_CREATE, true);
 		return View::make('test.series', $result);
 	}
 
@@ -184,25 +178,25 @@ class TestController extends BaseController {
 		);
 
 		//ValidateCheck
-		$validator = Validator::make($inputs, Cases::getValidateRules());
-	//	if ($case_obj->isValid()){
+		//$validator = Validator::make($inputs, Cases::getValidateRules());
+		$validator = Validator::make($inputs, Serieses::getValidateRules());
 		if (!$validator->fails()) {
 			//Validate成功時の処理
 			//エラーがないので登録する
-			$case_obj->save();
-			return Redirect::to('test.index', array('msg' => 'ケースの登録が完了しました。'));
+			$series_obj->save();
+			return Redirect::to('test.index', array('msg' => 'シリーズの登録が完了しました。'));
 		} else {
 			//Validateエラー時の処理
 			$result['errors'] = $validator->messages();
 		}
 
-		$result['title'] = 'Case Dummy Data Regist';
-		$result['url'] = '/test/case';
+		$result['title'] = 'Series Dummy Data Regist';
+		$result['url'] = '/test/series';
 		$result['css'] = self::cssSetting();
 		$result['js'] = self::jsSetting();
 		$result['project_list'] = Projects::getProjectList(Projects::AUTH_TYPE_CREATE, true);
 
-		return View::make('test.case', $result);
+		return View::make('test.series', $result);
 	}
 
 	/**
@@ -242,29 +236,34 @@ class TestController extends BaseController {
 		$result = array();
 
 		//入力値取得
-		$inputs = Input::only(
-			array(
-				"projectID", "projectName",
-				"createGroups", "viewGroups", "updateGroups", "reviwGroups", "deleteGroups"
-			)
-		);
+		$inputs = Input::all();
+		//Validateチェック用オブジェクト生成
+		$project_obj = App::make('Projects');
+		//Validateチェック用の値を設定
+		$project_obj->projectID = $inputs['projectID'];
+		$project_obj->projectName = $inputs['projectName'];
+		$project_obj->createGroups = $inputs['createGroups'];
+		$project_obj->viewGroups = $inputs['viewGroups'];
+		$project_obj->updateGruops = $inputs['updateGruops'];
+		$project_obj->reviewGroups = $inputs['reviewGroups'];
+		$project_obj->deleteGroups = $inputs['deleteGroups'];
 
-		Log::debug("入力値(Project Dummy)");
-		Log::debug($inputs);
-
-		if (Serieses::isValid()) {
+		//ValidateCheck
+		$validator = Validator::make($inputs, Projects::getValidateRules());
+		if (!$validator->fails()) {
 			//Validate成功時の処理
 			//エラーがないので登録する
-			Project::save();
-			return Redirect::to('test.index', array("msg" => "プロジェクトの登録が完了しました。"));
+			$project_obj->save();
+			return Redirect::to('test.index', array('msg' => 'プロジェクトの登録が完了しました。'));
 		} else {
 			//Validateエラー時の処理
+			$result['errors'] = $validator->messages();
 		}
 
-		$result["title"] = "Project Dummy Data Regist";
-		$result["url"] = "/test/project";
-		$result["css"] = self::cssSetting();
-		$result["js"] = self::jsSetting();
+		$result['title'] = 'Project Dummy Data Regist';
+		$result['url'] = '/test/project';
+		$result['css'] = self::cssSetting();
+		$result['js'] = self::jsSetting();
 
 		return View::make('test.project', $result);
 	}
@@ -286,7 +285,57 @@ class TestController extends BaseController {
 		$result["url"] = "/test/user";
 		$result["css"] = self::cssSetting();
 		$result["js"] = self::jsSetting();
-	//	$result["errors"] = array();
+
+		return View::make('test.user', $result);
+	}
+
+	/**
+	 * ユーザダミーデータ登録(登録)
+	 * @author stani
+	 * @since 2014/12/15
+	 */
+	public function registUser() {
+		//ログインチェック
+		if (!Auth::check()) {
+			//ログインしていないのでログイン画面に強制リダイレクト
+			return Redirect::to('login');
+		}
+
+		//初期設定
+		$result = array();
+
+		//入力値取得
+		$inputs = Input::all();
+		//Validateチェック用オブジェクト生成
+		$user_obj = App::make('Users');
+		//Validateチェック用の値を設定
+		$user_obj->userID = $inputs['userID'];
+		$user_obj->loginID = $inputs['loginID'];
+		$user_obj->password = $inputs['password'];
+		$user_obj->groups = $inputs['groups'];
+		$user_obj->description = $inputs['description'];
+		$user_obj->loginEnabled = $inputs['loginEnabled'];
+		$user_obj->preferences = array(
+			'theme'			=>	$inputs['preferences_theme'],
+			'personalView'	=>	$inputs['preferences_personalView']
+		);
+
+		//ValidateCheck
+		$validator = Validator::make($inputs, Users::getValidateRules());
+		if (!$validator->fails()) {
+			//Validate成功時の処理
+			//エラーがないので登録する
+			$user_obj->save();
+			return Redirect::to('test.index', array('msg' => 'ユーザ情報の登録が完了しました。'));
+		} else {
+			//Validateエラー時の処理
+			$result['errors'] = $validator->messages();
+		}
+
+		$result['title'] = 'User Dummy Data Regist';
+		$result['url'] = '/test/project';
+		$result['css'] = self::cssSetting();
+		$result['js'] = self::jsSetting();
 
 		return View::make('test.user', $result);
 	}
@@ -309,7 +358,6 @@ class TestController extends BaseController {
 	 * @author stani
 	 * @since 2014/12/04
 	 */
-	//function jsSetting($mode = 'search') {
 	function jsSetting() {
 		$js = array();
 		$js["jquery-ui.min.js"] = "js/jquery-ui.min.js";

@@ -105,7 +105,7 @@
 				</table>
 			</div>
 			<p class="submit_area">
-				{{Form::button("Regist", array("class" => "common_btn mar_r_5", "onClick" => "document.getElementById('form_case_regist').submit();"))}}
+				{{Form::button('Regist', array('class' => 'common_btn mar_r_5', 'onClick' => 'document.getElementById("form_case_regist").submit();'))}}
 			</p>
 		{{Form::close()}}
 	</div>

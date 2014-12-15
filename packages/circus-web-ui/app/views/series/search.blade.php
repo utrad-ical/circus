@@ -64,7 +64,7 @@
 		var series_num_array = [];
 
 		$(".chk_series").click(function () {
-			alert("Cookie積むよ");
+			//alert("Cookie積むよ");
 			var target_number = $(this).val();
 			var num_idx = $.inArray(target_number , series_num_array);
 

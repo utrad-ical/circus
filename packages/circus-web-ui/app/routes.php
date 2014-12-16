@@ -29,9 +29,7 @@ Route::post('case/detail', 'CaseController@detail');
 Route::post('case/edit', 'CaseController@input');
 Route::post('case/input', 'CaseController@input');
 Route::post('case/confirm', 'CaseController@confirm');
-Route::post('case/complete', 'CaseController@complete');
-Route::post('case/revision', 'CaseController@revision');
-
+Route::post('case/complete', 'CaseController@regist');
 
 //シリーズ
 Route::get('series/search', 'SeriesController@getIndex');
@@ -40,12 +38,25 @@ Route::post('series/detail', 'SeriesController@detail');
 Route::get('series/input', 'SeriesController@input');
 Route::post('series/edit', 'SeriesController@input');
 Route::post('series/confirm', 'SeriesController@confirm');
-Route::post('series/complete', 'SeriesController@complete');
+Route::post('series/complete', 'SeriesController@regist');
 
-//ユーザー
-Route::get('user/regist', 'UserController@regist');
-Route::get('user/confirm', 'UserController@confirm');
-Route::get('user/complete', 'UserController@complete');
+//管理画面
+Route::get('admin', 'AdminController@getIndex');
+//管理画面/グループ
+Route::get('admin/group/search', 'GroupController@search');
+Route::post('admin/group/search', 'GroupController@search');
+Route::get('admin/group/input', 'GroupController@input');
+Route::post('admin/group/input', 'GroupController@input');
+Route::post('admin/group/confirm', 'GroupController@confirm');
+Route::post('admin/group/complete', 'GroupController@regist');
+Route::post('admin/group/detail', 'GroupController@detail');
+//管理画面/ユーザ
+Route::get('admin/user/search', 'UserController@search');
+Route::post('admin/user/search', 'UserController@search');
+Route::get('admin/user/input', 'UserController@input');
+Route::post('admin/user/confirm', 'UserController@confirm');
+Route::post('admin/user/complete', 'UserController@regist');
+Route::post('admin/user/detail', 'UserController@detail');
 
 //テストデータ登録
 Route::get('test', 'TestController@getIndex');

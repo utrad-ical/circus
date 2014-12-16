@@ -82,12 +82,6 @@ class Cases extends Eloquent {
 				)
 			);
 		}
-
-		//RevisionNo リビジョン番号
-		if (isset($input['revisionNo'])) {
-			$query->where('revisions', "=", $input["revisionNo"]);
-		}
-
 		return $query;
 	}
 

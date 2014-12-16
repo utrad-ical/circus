@@ -58,13 +58,13 @@
 		//CheckboxCookie処理
 		var COOKIE_NAME = "seriesCookie";
 		if(typeof $.cookie(COOKIE_NAME) === "undefined"){
+			console.log('cookie undefined!!');
 			var first_array = [];
-			$.cookie(COOKIE_NAME , first_array , { expires: 1 });
+			$.cookie(COOKIE_NAME , first_array , { expires: 1, path:'/' });
 		}
 		var series_num_array = [];
 
 		$(".chk_series").click(function () {
-			//alert("Cookie積むよ");
 			var target_number = $(this).val();
 			var num_idx = $.inArray(target_number , series_num_array);
 
@@ -72,13 +72,13 @@
 				// チェックが外された場合に、印刷対象としてクッキーに追加
 				if(num_idx == -1){
 					series_num_array.push(target_number);
-					$.cookie(COOKIE_NAME , series_num_array.join("_") , { expires: 1 });
+					$.cookie(COOKIE_NAME , series_num_array.join("_") , { expires: 1, path:'/'  });
 				}
 			} else {
 				// チェックが入れられた場合に、印刷対象外としてクッキーから削除
 				if(num_idx != -1){
 					series_num_array.splice(num_idx , 1);
-					$.cookie(COOKIE_NAME , series_num_array.join("_") , { expires: 1 });
+					$.cookie(COOKIE_NAME , series_num_array.join("_") , { expires: 1, path:'/'  });
 				}
 			}
 		});
@@ -106,9 +106,9 @@
 							<td>
 								{{Form::text('seriesUID', isset($inputs['seriesUID']) ? $inputs['seriesUID'] : '', array('class' => 'common_input_text w_150'))}}
 							</td>
-							<th>Series Name</th>
+							<th>Series Description</th>
 							<td>
-								{{Form::text('seriesName', isset($inputs['seriesName']) ? $inputs['seriesName'] : '', array('class' => 'common_input_text w_150'))}}
+								{{Form::text('seriesDescription', isset($inputs['seriesDescription']) ? $inputs['seriesDescription'] : '', array('class' => 'common_input_text w_150'))}}
 							</td>
 						</tr>
 						<tr>
@@ -196,7 +196,7 @@
 								@foreach ($list as $rec)
 									<tr>
 										<td>{{$rec['seriesID']}}</td>
-										<td>{{$rec['seriesName']}}</td>
+										<td>{{$rec['seriesDescription']}}</td>
 										<td>
 											{{$rec['patientName']}} ({{$rec['patientID']}})
 											<br>{{$rec['patientBirthday']}} {{$rec['patientSex']}}

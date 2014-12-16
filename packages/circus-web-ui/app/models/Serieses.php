@@ -21,12 +21,13 @@ class Serieses extends Eloquent {
 		//seriesID シリーズID
 		if (isset($input['seriesUID']) && $input['seriesUID']) {
 			//シリーズテーブルのシリーズUID
-			$query->where('seriesUID', 'like', '%'.$input['seriesUID'].'%');
+			$query->whereIn('seriesUID', $input['seriesUID']);
 		}
 
-		//seriesName シリーズ名
-		if (isset($input['seriesName']) && $input['seriesName']) {
-			//シリーズテーブルにいらっしゃらない・・・
+		//seriesDescription seriesDescription
+		if (isset($input['seriesDescription']) && $input['seriesDescription']) {
+			//シリーズテーブルのseriesDescription
+			$query->where('seriesDescription', 'like', '%'.$input['seriesDescription'].'%');
 		}
 
 		//patientID 患者ID

@@ -48,7 +48,8 @@ class SeriesController extends BaseController {
 		$search_flg = true;
 		$result = array();
 		//Cookie初期化
-		setcookie('seriesCookie', '', time() - 3600);
+		$series_cookie = Cookie::make('seriesCookie2', '', time() - 3600);
+		$series_cookie2 = Cookie::queue('seriesCookie3', '', time() - 3600);
 
 		//入力値取得
 		$inputs = Input::all();
@@ -75,7 +76,7 @@ class SeriesController extends BaseController {
 			//検索条件生成＆データ取得
 			//取得カラムの設定
 			$select_col = array(
-				'seriesUID',
+				'seriesUID', 'seriesDescription',
 				'patientInfo.patientID', 'patientInfo.patientName',
 				'patientInfo.sex', 'patientInfo.birthday'
 			);
@@ -100,7 +101,7 @@ class SeriesController extends BaseController {
 				//表示用に整形する
 				$list[] = array(
 					'seriesID'			=>	$rec->seriesUID,
-					'seriesName'		=>	'Series AAA',
+					'seriesDescription'	=>	$rec->seriesDescription,
 					'patientID'			=>	$patient['patientID'],
 					'patientName' 		=>	$patient['patientName'],
 					'patientBirthday'	=>	$patient['birthday'],
@@ -124,7 +125,9 @@ class SeriesController extends BaseController {
 		$result['css'] = self::cssSetting();
 		$result['js'] = self::jsSetting();
 
-		return View::make('series/search', $result);
+		return View::make('series/search', $result)
+					->withCookie($series_cookie2)
+					->withCookie($series_cookie);
 	}
 
 	/**
@@ -144,14 +147,14 @@ class SeriesController extends BaseController {
 		$result = array();
 
 		//POSTデータ取得
-		$inputs = Input::only(array("seriesUID", "disp", "sort"));
+		$inputs = Input::all();
 
 		if (!$inputs["seriesUID"]) {
 			$error_msg = "シリーズIDを指定してください。";
 		}
 
 		if (!$error_msg) {
-			//存在するケースIDかチェック
+			//存在するシリーズIDかチェック
 			$series_info = Serieses::addWhere($inputs)
 								->get();
 

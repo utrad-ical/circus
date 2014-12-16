@@ -71,10 +71,7 @@
 			</div>
 			<div class="al_r mar_b_10 w_300 fl_r">
 				{{Form::select('revision', $revision_no_list, $case_detail['revisionNo'], array('class' => 'select w_180'))}}
-				{{HTML::link(asset('/case/revision'), 'Revision List', array('class' => 'common_btn link_revision_list'))}}
-				{{Form::open(['url' => asset('/case/revision'), 'method' => 'POST', 'class' => 'frm_revision_list'])}}
-					{{Form::hidden('caseID', $case_detail['caseID'])}}
-				{{Form::close()}}
+				{{HTML::link(asset('/case/detail#revision'), 'Revision List', array('class' => 'common_btn'))}}
 			</div>
 			<div class="clear">&nbsp;</div>
 			<table class="common_table al_l mar_b_10">
@@ -243,7 +240,7 @@
 			</div>
 			<div class="clear">&nbsp;</div>
 			<div class="search_result">
-				<h2 class="con_ttl">Revision</h2>
+				<h2 class="con_ttl"><a name='revision'>Revision</a></h2>
 				<ul class="common_pager clearfix">
 					{{$list_pager->links()}}
 					<li class="pager_sort_order">

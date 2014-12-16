@@ -128,10 +128,7 @@ class CaseController extends BaseController {
 
 		//入力値取得
 		$inputs = Input::all();
-/*
-		Log::debug("入力項目");
-		Log::debug($inputs);
-*/
+
 		if (!$inputs) {
 			$search_flg = false;
 			Session::forget('revision.search');
@@ -148,7 +145,6 @@ class CaseController extends BaseController {
 		if ($search_flg) {
 			//検索条件をセッションから取得
 			$search_data = Session::get('revision.search');
-		//	Log::debug()
 
 			//検索条件生成＆データ取得
 			//取得カラムの設定
@@ -169,12 +165,7 @@ class CaseController extends BaseController {
 								->addLimit($search_data)
 								->get($select_col);
 			$query_log = DB::getQueryLog();
-			/*
-			Log::debug($query_log);
-			Log::debug("取得結果");
-			Log::debug($case_list);
-			Log::debug("プロジェクトID");
-			*/
+
 			$case_data = $case_list[0];
 
 			//表示用に整形
@@ -222,9 +213,6 @@ class CaseController extends BaseController {
 			$result['case_detail'] = $case_detail;
 			$result['revision_list'] = $revision_list;
 
-			Log::debug("リビジョンリスト");
-			Log::debug($revision_list);
-
 			//ページャーの設定
 			$revision_pager = Paginator::make(
 				$revision_list,
@@ -263,9 +251,6 @@ class CaseController extends BaseController {
 		//POSTデータ取得
 		$inputs = Input::all();
 
-		Log::debug("入力情報");
-		Log::debug($inputs);
-
 		if (array_key_exists('caseID', $inputs) === FALSE)
 			$error_msg = 'ケースIDを指定してください。';
 
@@ -280,9 +265,6 @@ class CaseController extends BaseController {
 			$case_info = Cases::addWhere($search_data)
 								->get();
 			$query_log = DB::getQueryLog();
-			Log::debug($query_log);
-			Log::debug("ケース情報");
-			Log::debug($case_info);
 
 			if (!$case_info) {
 				$error_msg = '存在しないケースIDです。';
@@ -355,12 +337,15 @@ class CaseController extends BaseController {
 			$result['revision_no_list'] = $revision_no_list;
 
 			//シリーズリスト作成
-			Log::debug("ケース詳細情報");
-			Log::debug($case_detail);
-			Log::debug("ケース情報");
-			Log::debug($case_data);
-
-			$result['series_list'] = self::getSeriesList($case_data->revisions[$case_detail['revisionNo']]);
+			foreach ($case_data->revisions as $key => $value) {
+				if ($key != 'latest') {
+					$series[] = $value['seriesUID'];
+				}
+			}
+			$inputs['seriesUID'] = $series;
+			$serieses = Serieses::addWhere($inputs)
+								->get($select_col);
+			$result['series_list'] = self::getSeriesList($serieses);
 
 			//ページャーの設定
 			$revision_pager = Paginator::make(
@@ -396,6 +381,7 @@ class CaseController extends BaseController {
 		//初期設定
 		$result = array();
 		$series_list = array();
+		$error_msg = '';
 		//入力値取得
 		$inputs = Input::all();
 
@@ -415,31 +401,52 @@ class CaseController extends BaseController {
 				Session::put('id', $case_data[0]->_id);
 			}
 
-			Log::debug("ケース情報");
-			Log::debug($case_data);
-			Log::debug("RevisionNo");
-			Log::debug($inputs["revisionNo"]);
-			Log::debug("Revision情報");
-			Log::debug($case_data->revisions);
-
-			$series_list = self::getSeriesList($case_data->revisions[$inputs['revisionNo']]);
+			$series = array();
+			foreach ($case_data->revisions as $key => $value) {
+				if ($key != 'latest') {
+					$series[] = $value['seriesUID'];
+				}
+			}
+			$inputs['seriesUID'] = $series;
+			$serieses = Serieses::addWhere($inputs)
+							->get($select_col);
 		} else {
 			$result['inputs'] = array('caseID' => self::createCaseID());
 
 			//CookieからシリーズUID取得
-			Log::debug("Cookie全体::");
-			Log::debug($_COOKIE);
-			$cookie_series = Cookie::get('seriesCookie');
-			Log::debug("Cookie::");
-			Log::debug($cookie_series);
+			$cookie_series = $_COOKIE['seriesCookie'];
+			$series_exclude_ary = explode("_" , $cookie_series);
 
-			$series_exclude_ary = split("-" , $cookie_series);
-			foreach ($series_exclude_ary as $rec) {
-				$series_list[$rec] = $rec;
-			}
+			$inputs["seriesUID"] = $series_exclude_ary;
+			$select_col = array(
+				'seriesUID', 'seriesDescription',
+				'patientInfo.patientID', 'patientInfo.age',
+				'patientInfo.sex', 'patientInfo.patientName'
+			);
+			$series = Serieses::addWhere($inputs)
+							->get($select_col);
 		}
-		$result["series_list"] = $series_list;
 
+		//患者ID重複チェック
+		$error_msg = self::checkDuplicatePatientID($series, $series_list);
+
+		//エラーメッセージがなければシリーズ一覧を設定
+		if ($error_msg) {
+			$result['error_msg'] = $error_msg;
+		} else {
+			$result['series_list'] = $series_list;
+			$patient = $series[0]->patientInfo;
+			$patient['sex'] = self::getSex($patient['sex']);
+			$result['patientInfo'] = $patient;
+
+			//セッションに固定情報を格納
+			$case_info = array(
+				'caseID'	=>	$result['input']['caseID'],
+				'series'	=>	$series,
+				'patient'	=>	$patient
+			);
+			Session::put('case.input', $case_info);
+		}
 		return View::make('/case/input', $result);
 	}
 
@@ -460,26 +467,27 @@ class CaseController extends BaseController {
 
 		//入力値取得
 		$inputs = Input::all();
-		Session::put('case.input', $inputs);
 
 		//セッション情報取得
 		$id = Session::get('id');
+		$case_info = Session::get('case.input');
+		$case_info['projectID'] = $inputs['projectID'];
 
 		//Validateチェック用オブジェクト生成
-		$case_obj = $case_id ?
+		$case_obj = $id ?
 			Cases::find($id) : App::make('Cases');
 
 		//Validateチェック用の値を設定
-		$case_obj->caseID = $inputs['caseID'];
-		$case_obj->incrementalID = $inputs['incrementalID'];
-		$case_obj->projectID = $inputs['projectID'];
-		$case_obj->date = $inputs['date'];
+		$case_obj->caseID = $case_info['caseID'];
+		$case_obj->incrementalID = 1;	//いったん固定
+		$case_obj->projectID = $case_info['projectID'];
+		$case_obj->date = new MongoDate(strtotime(date('Y-m-d H:i:s')));
 		$case_obj->patientInfoCache = array(
-			'patientID'	=>	$inputs['patientInfoCache_patientID'],
-			'name'		=>	$inputs['patientInfoCache_name'],
-			'age'		=>	$inputs['patientInfoCache_age'],
-			'birthday'	=>	$inputs['patientInfoCache_birthday'],
-			'sex'		=>	$inputs['patientInfoCache_sex']
+			'patientID'	=>	$case_info['patient']['patientID'],
+			'name'		=>	$case_info['patient']['patientName'],
+			'age'		=>	$case_info['patient']['age'],
+			'birthday'	=>	$case_info['patient']['birthday'],
+			'sex'		=>	$case_info['patient']['sex']
 		);
 
 		//ValidateCheck
@@ -655,7 +663,7 @@ class CaseController extends BaseController {
 	function getSeriesList($data) {
 		$series_list = array();
 		foreach ($data["series"] as $key => $value) {
-			$series_list[$value["seriesUID"]] = $value["seriesUID"];
+			$series_list[$value["seriesUID"]] = $value["seriesDescription"];
 		}
 		return $series_list;
 	}
@@ -698,8 +706,31 @@ class CaseController extends BaseController {
 					'creator'		=>	$value['creator'],
 					'memo'			=>	$value['memo']
 				);
-			//	$revision_no_list[] = $key;
 			}
 		}
+	}
+
+
+	/**
+	 * 患者ID重複チェック
+	 * 重複がない場合は表示用のシリーズ一覧を格納する
+	 * @param $list 患者ID重複対象のシリーズ一覧
+	 * @param $series_list エラーがない場合の格納先シリーズ一覧
+	 * @return $error_msg エラーメッセージ
+	 * @author stani
+	 * @since 2014/12/16
+	 */
+	function checkDuplicatePatientID($list, &$series_list = array()) {
+		$error_msg = '';
+
+		$patientID = $list[0]->patientID;
+		foreach ($list as $rec) {
+			if ($patientID != $rec->patientID) {
+				$error_msg = '1ケースに登録できるシリーズは同一患者のみです。\n同一患者のシリーズを選択してください。';
+				break;
+			}
+			$series_list[$rec->seriesUID] = $rec->seriesDescription;
+		}
+		return $error_msg;
 	}
 }

@@ -10,5 +10,5 @@ return array(
 	'search_revision_sort'	=>	array('' => 'Sort Order', 'date' => 'Last Update', 'revisionNo' => 'Revision No'),	//検索結果ソート順(ケース)
 	'hash_key'				=>	'todai_test',
 	'search_revision_sort'	=>	array('' => 'Sort Order', 'revision.date' => 'Edit Time', 'revisionNo' => 'revisionNo'),	//検索結果ソート順(ケース)
-
+	'crypt_secret_key'		=>	'todai_project'
 );

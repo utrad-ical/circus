@@ -4,8 +4,9 @@
 <script type="text/javascript">
 	$(function() {
 		$('.link_user_detail').click(function(){
+			console.log("links");
 			//送信するフォームIDを取得
-			$(this).closest('p').find('.frm_user_detail').submit();
+			$(this).closest('div').find('.frm_user_detail').submit();
 			return false;
 		});
 	});

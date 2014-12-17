@@ -2,7 +2,7 @@
 @include('common.header')
 @section('content')
 <script type="text/javascript">
-	$(function(){
+	$(function() {
 		$('#btn_submit').click(function(){
 			var btnName = arguments[1] ? arguments[1] : "btnSearch";
 			console.log(btnName);
@@ -45,8 +45,11 @@
 		});
 
 		$('.link_series_detail').click(function(){
+			console.log('series_detail');
 			//送信するフォームIDを取得
-			$(this).closest('tr').find('.form_series_detail').submit();
+			var seriesUID = $(this).closest('td').find('.seriesUID').val();
+			$(this).closest('body').find('.series_detail_serisUID').val(seriesUID);
+			$(this).closest('body').find('.frm_series_detail').submit();
 			return false;
 		});
 
@@ -207,10 +210,6 @@
 										<td class="al_c">
 											{{Form::checkbox('chk_series', $rec['seriesID'], false, array('class' => 'chk_series'))}}
 										</td>
-										{{Form::open(['url' => asset('/series/detail'), 'method' => 'post', 'class' => 'form_series_detail'])}}
-											{{Form::hidden('seriesUID', $rec['seriesID'])}}
-											{{Form::hidden('mode', 'detail')}}
-										{{Form::close()}}
 									</tr>
 								@endforeach
 							@else
@@ -229,6 +228,10 @@
 							{{Form::select('disp', Config::get('const.search_display'), isset($inputs['disp']) ? $inputs['disp'] : '', array('class' => 'w_max change_select', 'data-target-dom' => 'display_num_up', 'id' => 'display_num_down'))}}
 						</li>
 					</ul>
+				{{Form::close()}}
+				{{Form::open(['url' => asset('/series/detail'), 'method' => 'post', 'class' => 'frm_series_detail'])}}
+					{{Form::hidden('seriesUID', '')}}
+					{{Form::hidden('mode', 'detail')}}
 				{{Form::close()}}
 			@endif
 		</div>

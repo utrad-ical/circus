@@ -20,6 +20,10 @@ class GroupController extends BaseController {
 		//初期設定
 		$result = array();
 
+		//セッション破棄
+		Session::forget('group_input');
+		Session::forget('GroupID');
+
 		//入力値取得
 		$inputs = Input::all();
 
@@ -61,27 +65,20 @@ class GroupController extends BaseController {
 
 		//POSTデータ取得
 		$inputs = Input::all();
-
 		if (array_key_exists('GroupID', $inputs) === FALSE)
 			$error_msg = 'グループIDを指定してください。';
 
 		if (!$error_msg) {
-			$group_info = Groups::addWhere($inputs)
-								->get();
-
+			$group_info = Groups::find($inputs['GroupID']);
+			$query_log = DB::getQueryLog();
 			if (!$group_info) {
 				$error_msg = '存在しないグループIDです。';
-			} else {
-				$group_data = $group_info[0];
 			}
 		}
 
-		Log::debug("グループ情報");
-		Log::debug($group_data);
 		//エラーメッセージがない場合はグループ詳細情報を表示する
-		Log::debug($error_msg);
 		if (!$error_msg) {
-			$result['group_detail'] = $group_data;
+			$result['group_detail'] = $group_info;
 		} else {
 			$result['error_msg'] = $error_msg;
 		}
@@ -89,7 +86,6 @@ class GroupController extends BaseController {
 		$result['url'] = 'admin/group/detail';
 		$result['css'] = self::cssSetting();
 		$result['js'] = self::jsSetting();
-		Log::debug($result);
 		return View::make('/admin/group/detail', $result);
 	}
 
@@ -119,13 +115,26 @@ class GroupController extends BaseController {
 		$result['css'] = self::cssSetting();
 		$result['js'] = self::jsSetting();
 
-		if (array_key_exists('GroupID', $inputs)) {
-			$group_data = Groups::addWhere($inputs)
-								->get();
-			if ($group_data) {
-				$result['inputs'] = $group_data[0];
-				Session::put('id', $group_data[0]->_id);
+		if (array_key_exists('btnBack', $inputs)) {
+			$result['inputs'] = Session::get('group_input');
+			if (array_key_exists('GroupID', $inputs))
+				$result['title'] = 'Edit Group';
+		} else if (array_key_exists('GroupID', $inputs)) {
+			$group_data = Groups::find($inputs['GroupID']);
+			//$result['inputs'] = $group_data;
+			$result['inputs'] = array(
+				'GroupID'		=>	$group_data->GroupID,
+				'GroupName'		=>	$group_data->GroupName,
+				'updateTime'	=>	$group_data->updateTime,
+				'createTime'	=>	$group_data->createTime
+			);
+
+			if (count($group_data->priviledges) > 0) {
+				foreach ($group_data->priviledges as $rec) {
+					$result['inputs']['priviledges_'.$rec] = 1;
+				}
 			}
+			Session::put('GroupID', $inputs['GroupID']);
 		} else {
 			$result['inputs'] = array('GroupID' => self::createGroupID());
 		}
@@ -134,7 +143,8 @@ class GroupController extends BaseController {
 		if ($error_msg) {
 			$result["error_msg"] = $error_msg;
 		} else {
-			Session::put('group.input', $result['inputs']);
+			Session::put('group_input', $result['inputs']);
+			$result['group_detail'] = $result['inputs'];
 		}
 		return View::make('/admin/group/input', $result);
 	}
@@ -158,21 +168,19 @@ class GroupController extends BaseController {
 
 		//入力値取得
 		$inputs = Input::all();
-		$group_data = Session::get('group.input', $inputs);
+		$group_data = Session::get('group_input');
 		$inputs['GroupID'] = $group_data['GroupID'];
-		Session::put('group.input', $inputs);
+		Session::put('group_input', $inputs);
 
 		$result['inputs'] = $inputs;
 
-		Log::debug('入力値');
-		Log::debug($inputs);
-
 		//セッション情報取得
-		$id = Session::get('id');
+		$groupID = Session::get('GroupID');
 
 		//Validateチェック用オブジェクト生成
-		$group_obj = $id ?
-			Groups::find($id) : App::make('Groups');
+		$group_obj = $groupID ?
+						Groups::find($groupID) :
+						App::make('Groups');
 
 		//Validateチェック用の値を設定
 		$group_obj->GroupID = $inputs['GroupID'];
@@ -209,19 +217,17 @@ class GroupController extends BaseController {
 		//初期設定
 		$result = array();
 
-		//入力値取得
-		//$inputs = Input::all();
 		//セッションから情報取得
-		$inputs = Session::get('group.input');
-
-		Log::debug("入力値(Complete)");
-		Log::debug($inputs);
+		$inputs = Session::get('group_input');
+		$groupID = Session::get('GroupID');
 
 		$result['css'] = self::cssSetting();
 		$result['js'] = self::jsSetting();
 
 		//Validateチェック用オブジェクト生成
-		$group_obj = App::make('Groups');
+		$group_obj = $groupID ?
+						Groups::find($groupID) :
+						App::make('Groups');
 		//Validateチェック用の値を設定
 		$group_obj->GroupID = $inputs['GroupID'];
 		$group_obj->GroupName = $inputs['GroupName'];
@@ -252,9 +258,9 @@ class GroupController extends BaseController {
 			$result['url'] = '/admin/group/complete';
 			$result['msg'] = "グル―プ情報の登録が完了しました。";
 			$result['GroupID'] = $inputs['GroupID'];
-			//セッション破棄
-			Session::remove('group.input');
-			return View::make('/admin/group/complete', $result);
+			//登録が完了したので完了画面に遷移する
+			Session::put('group_complete', $result);
+			return Redirect::to('/admin/group/complete');
 		} else {
 			//Validateエラー時の処理
 			$result['errors'] = $validator->messages();
@@ -266,6 +272,29 @@ class GroupController extends BaseController {
 			$result['url'] = '/admin/group/input';
 			return View::make('/admin/group/input', $result);
 		}
+	}
+
+	/**
+	 * グループ登録/更新完了画面
+	 * @author stani
+	 * @since 2014/12/17
+	 */
+	public function complete(){
+		//ログインチェック
+		if (!Auth::check()) {
+			//ログインしていないのでログイン画面に強制リダイレクト
+			return Redirect::to('login');
+		}
+
+		//セッションから表示情報取得
+		$result = Session::get('group_complete');
+
+		//セッション破棄
+		Session::forget('group_input');
+		Session::forget('GroupID');
+		Session::forget('group_complete');
+
+		return View::make('/admin/group/complete', $result);
 	}
 
 	/**

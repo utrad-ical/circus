@@ -43,19 +43,24 @@ Route::post('series/complete', 'SeriesController@regist');
 //管理画面
 Route::get('admin', 'AdminController@getIndex');
 //管理画面/グループ
+Route::get('admin/group/', function(){return Redirect::to('admin/group/search');});
 Route::get('admin/group/search', 'GroupController@search');
 Route::post('admin/group/search', 'GroupController@search');
 Route::get('admin/group/input', 'GroupController@input');
 Route::post('admin/group/input', 'GroupController@input');
 Route::post('admin/group/confirm', 'GroupController@confirm');
 Route::post('admin/group/complete', 'GroupController@regist');
+Route::get('admin/group/complete', 'GroupController@complete');
 Route::post('admin/group/detail', 'GroupController@detail');
 //管理画面/ユーザ
+Route::get('admin/user/', function(){return Redirect::to('admin/user/search');});
 Route::get('admin/user/search', 'UserController@search');
 Route::post('admin/user/search', 'UserController@search');
 Route::get('admin/user/input', 'UserController@input');
+Route::post('admin/user/input', 'UserController@input');
 Route::post('admin/user/confirm', 'UserController@confirm');
 Route::post('admin/user/complete', 'UserController@regist');
+Route::get('admin/user/complete', 'UserController@complete');
 Route::post('admin/user/detail', 'UserController@detail');
 
 //テストデータ登録

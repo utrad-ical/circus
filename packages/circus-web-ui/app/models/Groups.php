@@ -20,7 +20,19 @@ class Groups extends Eloquent {
 		//GroupID グループID
 		if (isset($input['GroupID']) && $input['GroupID']) {
 			//GroupテーブルのGroupID
-			$query->where('GroupID', 'like', '%'.$input['GroupID'].'%');
+		//	$query->where('GroupID', 'like', '%'.$input['GroupID'].'%');
+
+			Log::debug('グループID一覧');
+			Log::debug($input['GroupID']);
+			/*
+			$groups = array();
+			foreach ($input['GroupID'] as $gp){
+			//	Log::debug($gp);
+				$groups[] = $gp;
+			}
+			Log::debug($groups);
+			*/
+			$query->whereIn('GroupID', $input['GroupID']);
 		}
 
 		//GroupName グループ名

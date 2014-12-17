@@ -5,7 +5,7 @@
 	$(function() {
 		$('.link_group_input').click(function(){
 			//送信するフォームIDを取得
-			$(this).closest('p').find('.frm_back').submit();
+			$(this).closest('div').find('.frm_back').submit();
 			return false;
 		});
 	});
@@ -42,7 +42,7 @@
 						<tr>
 							<th>Create Project</th>
 							<td>
-								@if ($inputs['priviledges_createProject'] == 1)
+								@if (isset($inputs['priviledges_createProject']) && $inputs['priviledges_createProject'] == 1)
 									Yes
 								@else
 									No
@@ -52,7 +52,7 @@
 						<tr>
 							<th>Create Case</th>
 							<td>
-								@if ($inputs['priviledges_createCase'] == 1)
+								@if (isset($inputs['priviledges_createCase']) && $inputs['priviledges_createCase'] == 1)
 									Yes
 								@else
 									No
@@ -66,7 +66,7 @@
 					{{Form::button('Save', array('class' => 'common_btn', 'type' => 'submit'))}}
 				</p>
 			{{Form::close()}}
-			{{Form::open(['url' => asset('admin/group/input'), 'method' => 'POST', 'id' => 'frm_back'])}}
+			{{Form::open(['url' => asset('admin/group/input'), 'method' => 'POST', 'class' => 'frm_back'])}}
 				{{Form::hidden('btnBack', 'btnBack')}}
 			{{Form::close()}}
 		</div>

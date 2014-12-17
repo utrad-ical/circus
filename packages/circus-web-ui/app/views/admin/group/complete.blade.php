@@ -4,8 +4,9 @@
 <script type="text/javascript">
 	$(function() {
 		$('.link_group_detail').click(function(){
+		//	console.log('called');
 			//送信するフォームIDを取得
-			$(this).closest('p').find('.frm_group_detail').submit();
+			$(this).closest('div').find('.frm_group_detail').submit();
 			return false;
 		});
 	});

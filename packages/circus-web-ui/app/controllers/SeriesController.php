@@ -155,13 +155,9 @@ class SeriesController extends BaseController {
 
 		if (!$error_msg) {
 			//存在するシリーズIDかチェック
-			$series_info = Serieses::addWhere($inputs)
-								->get();
-
-			if (!$series_info) {
+			$series_data = Serieses::find($inputs['seriesUID']);
+			if (!$series_data) {
 				$error_msg = "存在しないシリーズIDです。";
-			} else {
-				$series_data = $series_info[0];
 			}
 		}
 

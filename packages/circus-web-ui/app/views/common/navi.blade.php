@@ -47,7 +47,6 @@
 			</a>
 			<div class="gnavi_cell_inner">
 				<ul class="gnavi_cell_inner_body">
-					<li>{{HTML::link(asset('/admin/policy'), 'Policy')}}</li>
 					<li>{{HTML::link(asset('/admin/group'), 'Group')}}</li>
 					<li>{{HTML::link(asset('/admin/user'), 'User')}}</li>
 				</ul>

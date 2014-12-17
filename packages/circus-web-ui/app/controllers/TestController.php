@@ -89,7 +89,6 @@ class TestController extends BaseController {
 		//ValidateCheck
 		$validator = Validator::make($inputs, Cases::getValidateRules());
 		if (!$validator->fails()) {
-			//Log::debug("エラーなかったよ！");
 			//Validate成功時の処理
 			//エラーがないので登録する
 			$dt = new MongoDate(strtotime(date('Y-m-d H:i:s')));

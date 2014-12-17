@@ -34,13 +34,13 @@
 					@if (count($user_list) > 0)
 						@foreach ($user_list as $rec)
 							<tr>
-								<td>{$rec->userID}</td>
-								<td>{$rec->description}}</td>
-								<td>{$rec['groups']}</td>
+								<td>{{$rec['userID']}}</td>
+								<td>{{$rec['description']}}</td>
+								<td>{{$rec['groupName']}}</td>
 								<td class="al_c">
 									{{HTML::link(asset('admin/user/detail'), 'View', array('class' => 'common_btn link_user_detail'))}}
 									{{Form::open(['url' => asset('admin/user/detail'), 'method' => 'POST', 'class' => 'frm_user_detail'])}}
-										{{Form::hidden('userID', $rec->userID)}}
+										{{Form::hidden('userID', $rec['userID'])}}
 									{{Form::close()}}
 								</td>
 							</tr>

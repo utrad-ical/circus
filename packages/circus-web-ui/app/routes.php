@@ -11,18 +11,18 @@
 |
 */
 
-//ログイン/ログアウト
+//Login / logout
 Route::get('/', function(){return Redirect::to('login');});
 Route::get('login', 'Logincontroller@getIndex');
 Route::post('login', 'LoginController@login');
 Route::get('logout', 'LoginController@logout');
 Route::get('support/forget_password', 'SupportController@forgetPassword');
 
-//トップページ
+//Front page
 Route::post('home', 'TopController@getIndex');
 Route::get('home', 'TopController@getIndex');
 
-//ケース
+//Case
 Route::get('case/search', 'CaseController@search');
 Route::post('case/search', 'CaseController@search');
 Route::post('case/detail', 'CaseController@detail');
@@ -30,9 +30,11 @@ Route::post('case/edit', 'CaseController@input');
 Route::post('case/input', 'CaseController@input');
 Route::post('case/confirm', 'CaseController@confirm');
 Route::post('case/complete', 'CaseController@regist');
+//Case (for Ajax)
+Route::any('case/revision', 'CaseController@revision_ajax');
 
-//シリーズ
-Route::get('series/search', 'SeriesController@getIndex');
+//Series
+Route::get('series/search', 'SeriesController@search');
 Route::post('series/search', 'SeriesController@search');
 Route::post('series/detail', 'SeriesController@detail');
 Route::get('series/input', 'SeriesController@input');
@@ -40,19 +42,20 @@ Route::post('series/edit', 'SeriesController@input');
 Route::post('series/confirm', 'SeriesController@confirm');
 Route::post('series/complete', 'SeriesController@regist');
 
-//管理画面
+//Management screen
 Route::get('admin', 'AdminController@getIndex');
-//管理画面/グループ
+//Management screen / group
 Route::get('admin/group/', function(){return Redirect::to('admin/group/search');});
 Route::get('admin/group/search', 'GroupController@search');
 Route::post('admin/group/search', 'GroupController@search');
-Route::get('admin/group/input', 'GroupController@input');
-Route::post('admin/group/input', 'GroupController@input');
-Route::post('admin/group/confirm', 'GroupController@confirm');
-Route::post('admin/group/complete', 'GroupController@regist');
-Route::get('admin/group/complete', 'GroupController@complete');
 Route::post('admin/group/detail', 'GroupController@detail');
-//管理画面/ユーザ
+//Management screen / group (for Ajax)
+Route::any('admin/group/input', 'GroupController@input');
+Route::any('admin/group/confirm', 'GroupController@confirm');
+Route::any('admin/group/complete', 'GroupController@regist');
+Route::any('admin/group/detail', 'GroupController@detail_ajax');
+
+//Management screen / user
 Route::get('admin/user/', function(){return Redirect::to('admin/user/search');});
 Route::get('admin/user/search', 'UserController@search');
 Route::post('admin/user/search', 'UserController@search');
@@ -62,8 +65,13 @@ Route::post('admin/user/confirm', 'UserController@confirm');
 Route::post('admin/user/complete', 'UserController@regist');
 Route::get('admin/user/complete', 'UserController@complete');
 Route::post('admin/user/detail', 'UserController@detail');
+//Management screen / user (for Ajax)
+Route::any('admin/user/input', 'UserController@input_ajax');
+Route::any('admin/user/confirm', 'UserController@confirm_ajax');
+Route::any('admin/user/complete', 'UserController@regist_ajax');
+Route::any('admin/user/detail', 'UserController@detail_ajax');
 
-//テストデータ登録
+//Test data register
 Route::get('test', 'TestController@getIndex');
 Route::get('test/case', 'TestController@getIndexCase');
 Route::post('test/case', 'TestController@registCase');

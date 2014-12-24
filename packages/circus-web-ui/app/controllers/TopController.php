@@ -1,26 +1,24 @@
 <?php
 /**
- * ホーム画面の操作を行うクラス
- * @author stani
+ * Class to perform the operation of the home screen
  * @since 2014/12/02
  */
 class TopController extends BaseController {
 	/**
-	 * ホーム画面
-	 * @author stani
+	 * Home screen
 	 * @since 2014/12/02
 	 */
 	public function getIndex() {
-		//ログインチェック
-		if (!Auth::user()) {
-			//ログインしていないのでログイン画面に強制リダイレクト
+		//Login check
+		if (!Auth::check()) {
+			//Forced redirected to the login screen because not logged in
 			return Redirect::to('login');
 		}
 
-		//ログインしているのでホーム画面の表示処理を行う
+		//To perform the display processing of the home screen so are logged in
 		$result = array();
-		$result["title"] = "ホーム";
-		$result["url"] = "home";
+		$result['title'] = 'Home';
+		$result['url'] = 'home';
 
 		return View::make('home', $result);
 	}

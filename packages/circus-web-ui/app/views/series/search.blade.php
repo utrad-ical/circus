@@ -15,17 +15,15 @@
 			var form_data	=	$('#temporaly_form').serializeArray();
 			$('#temporaly_form').remove();
 
-			//本来はシリアライズした検索条件群をサーバーに渡して必要な項目をロードする
-			//モック状態での暫定的な結果画面遷移
 			$('#form_search').submit();
 		});
 
 		$('.change_select').change(function(){
-			// 変更するコンボIDを取得
+			// Get the combo ID you want to change
 			var change_select = $(this).attr('data-target-dom');
-			// selectedにするvalueを取得
+			// Get the value you want to selected
 			var select_value = $("select[name='"+$(this).attr('name')+"']").val();
-			// コンボのselectedを変更
+			// Change selected in the combo
 			$('#'+change_select).find('option').each(function(){
 				var this_num = $(this).val();
 				if(this_num == select_value){
@@ -33,32 +31,33 @@
 				}
 			});
 
-			//検索を行うのでhidden要素を追加する
+			//Add a hidden element so do a search
 			var sort = $("select[name='sort']").val();
 			var disp = $("select[name='disp']").val();
 			var sort_elm = $("<input>", {type:"hidden", name:"sort", value:sort});
 			$('#form_search').append(sort_elm);
 			var disp_elm = $("<input>", {type:"hidden", name:"disp", value:disp});
 			$('#form_search').append(disp_elm);
-			//イベント発火
+			//Event firing
 			$('#btn_submit').trigger('click');
 		});
 
 		$('.link_series_detail').click(function(){
 			console.log('series_detail');
-			//送信するフォームIDを取得
+			//Get the form ID to be sent
 			var seriesUID = $(this).closest('td').find('.seriesUID').val();
-			$(this).closest('body').find('.series_detail_serisUID').val(seriesUID);
+			console.log(seriesUID);
+			$(this).closest('body').find('.series_detail_seriesUID').val(seriesUID);
 			$(this).closest('body').find('.frm_series_detail').submit();
 			return false;
 		});
 
 		$('#btn_reset').click(function(){
-			//イベント発火
+			//Event firing
 			$('#btn_submit').trigger('click', ['btnReset']);
 		});
 
-		//CheckboxCookie処理
+		//CheckboxCookie processing
 		var COOKIE_NAME = "seriesCookie";
 		if(typeof $.cookie(COOKIE_NAME) === "undefined"){
 			console.log('cookie undefined!!');
@@ -72,16 +71,16 @@
 			var num_idx = $.inArray(target_number , series_num_array);
 
 			if($(this).prop('checked')){
-				// チェックが外された場合に、印刷対象としてクッキーに追加
+				// If the check was placed, Add to cookies as a case be registered
 				if(num_idx == -1){
 					series_num_array.push(target_number);
-					$.cookie(COOKIE_NAME , series_num_array.join("_") , { expires: 1, path:'/'  });
+					$.cookie(COOKIE_NAME , series_num_array.join('_') , { expires: 1, path:'/'  });
 				}
 			} else {
-				// チェックが入れられた場合に、印刷対象外としてクッキーから削除
+				// If the check is removed, remove from cookie as outside of the case be registered
 				if(num_idx != -1){
 					series_num_array.splice(num_idx , 1);
-					$.cookie(COOKIE_NAME , series_num_array.join("_") , { expires: 1, path:'/'  });
+					$.cookie(COOKIE_NAME , series_num_array.join('_') , { expires: 1, path:'/'  });
 				}
 			}
 		});
@@ -206,6 +205,7 @@
 										</td>
 										<td class="al_c">
 											{{HTML::link(asset('/series/detail'), 'View', array('class' => 'common_btn link_series_detail'))}}
+											{{Form::hidden('seriesUID', $rec['seriesID'], array('class' => 'seriesUID'))}}
 										</td>
 										<td class="al_c">
 											{{Form::checkbox('chk_series', $rec['seriesID'], false, array('class' => 'chk_series'))}}
@@ -214,7 +214,7 @@
 								@endforeach
 							@else
 								<tr>
-									<td colspan="5">検索結果は0件です。</td>
+									<td colspan="5">Search results 0.</td>
 								</tr>
 							@endif
 						</table>
@@ -230,7 +230,7 @@
 					</ul>
 				{{Form::close()}}
 				{{Form::open(['url' => asset('/series/detail'), 'method' => 'post', 'class' => 'frm_series_detail'])}}
-					{{Form::hidden('seriesUID', '')}}
+					{{Form::hidden('seriesUID', '', array('class' => 'series_detail_seriesUID'))}}
 					{{Form::hidden('mode', 'detail')}}
 				{{Form::close()}}
 			@endif

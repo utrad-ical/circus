@@ -1,13 +1,11 @@
 <?php
 /**
- * ログイン画面の操作を行うクラス
- * @author stani
+ * Class to perform the operation of the login screen
  * @since 2014/12/02
  */
 class LoginController extends BaseController {
 	/**
-	 * ログイン画面表示
-	 * @author stani
+	 * Login screen display
 	 * @since 2014/12/02
 	 */
 	public function getIndex() {
@@ -17,59 +15,56 @@ class LoginController extends BaseController {
 	}
 
 	/**
-	 * ログイン処理
-	 * @author stani
+	 * Login process
 	 * @since 2014/12/02
 	 */
 	public function login() {
 		$result = array();
 		self::setCommonSettings($result);
 
-		//入力値取得
+		//Input value acquisition
 		$inputs = Input::only(array('loginID', 'password'));
-		$result["loginID"] = $inputs["loginID"];
+		$result['loginID'] = $inputs['loginID'];
 
-		//ID/PWともに入力ある
-		if ($inputs["loginID"] && $inputs["password"]) {
-			//ユーザ情報があるかチェック
+		//Some ID / PW both input
+		if ($inputs['loginID'] && $inputs['password']) {
+			//Check whether there is user information
 			if (!Auth::attempt($inputs)){
-				$result["error_msg"] = "IDまたはパスワードが間違っています。";
+				$result['error_msg'] = 'ID or password is incorrect.';
 				return View::make('login', $result);
 			} else {
-				//データ取得
+				//Data acquisition
 				$user = Auth::user();
-				$user->lastLoginDate = new MongoDate(strtotime(date("Y-m-d h:i:s")));
-				$user->lastLoginIP =  $_SERVER["REMOTE_ADDR"];
+				$user->lastLoginDate = new MongoDate(strtotime(date('Y-m-d h:i:s')));
+				$user->lastLoginIP =  $_SERVER['REMOTE_ADDR'];
 				$user->save();
 				return Redirect::to('home');
 			}
 		} else {
-			$result["error_msg"] = "IDおよびパスワードを入力してください。";
+			$result['error_msg'] = 'Please enter the ID and password.';
 			return View::make('login', $result);
 		}
 	}
 
 	/**
-	 * ログアウト処理
-	 * @author stani
+	 * Log-out processing
 	 * @since 2014/12/11
 	 */
 	public function logout() {
-		//ログアウト処理
+		//Log-out processing
 		Auth::logout();
 
-		//ログイン画面にリダイレクト
+		//And redirected to the login screen
 		return Redirect::to('login');
 	}
 
 	/**
-	 * 共通設定
-	 * @param $ary 結果セット配列
-	 * @author stani
+	 * Common setting
+	 * @param $ary Result set array
 	 * @since 2014/12/11
 	 */
 	public function setCommonSettings(&$ary) {
-		$ary["title"] = "ログイン";
-		$ary["url"] = "login";
+		$ary['title'] = 'Sign in';
+		$ary['url'] = 'login';
 	}
 }

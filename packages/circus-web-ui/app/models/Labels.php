@@ -4,8 +4,7 @@
 use Jenssegers\Mongodb\Model as Eloquent;
 
 /**
- * Labelテーブル操作クラス
- * @author stani
+ * Label table manipulation class
  * @since 2014/12/11
  */
 class Labels extends Eloquent {
@@ -15,11 +14,10 @@ class Labels extends Eloquent {
 	protected $primaryKey = 'labelID';
 
 	/**
-	 * 検索条件構築
-	 * @param $query Queryオブジェクト
-	 * @param $input 入力値
-	 * @return Queryオブジェクト
-	 * @author stani
+	 * Search conditions Building
+	 * @param $query Query Object
+	 * @param $input Input value
+	 * @return Query Object
 	 * @since 2014/12/11
 	 */
 	public function scopeAddWhere($query, $input) {

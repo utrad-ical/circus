@@ -1,40 +1,38 @@
 <?php
 /**
- * グループの操作を行うクラス
- * @author stani
+ * Class to perform the operation of group
  * @since 2014/12/16
  */
 class GroupController extends BaseController {
 	/**
-	 * グループ検索結果
-	 * @author stani
+	 * Group results
 	 * @since 2014/12/16
 	 */
 	public function search() {
-		//ログインチェック
+		//Login check
 		if (!Auth::check()) {
-			//ログインしていないのでログイン画面に強制リダイレクト
+			//Forced redirected to the login screen because not logged in
 			return Redirect::to('login');
 		}
 
-		//初期設定
+		//Initial setting
 		$result = array();
 
-		//セッション破棄
+		//Session discarded
 		Session::forget('group_input');
 		Session::forget('GroupID');
 
-		//入力値取得
+		//Input value acquisition
 		$inputs = Input::all();
 
-		//データ取得
-		//取得カラムの設定
+		//Data acquisition
+		//Setting of acquisition column
 		$select_col = array('GroupID', 'GroupName');
 
-		//総件数取得
+		//Total number acquisition
 		$group_count = Groups::count();
 
-		//paginate(10)という風にpaginateを使う場合はget(select句)が指定できない
+		//Search result acquisition
 		$group_list = Groups::orderby('updateTime', 'desc')
 							->get($select_col);
 
@@ -43,40 +41,41 @@ class GroupController extends BaseController {
 		$result['css'] = self::cssSetting();
 		$result['js'] = self::jsSetting();
 		$result['group_list'] = $group_list;
+		$result['inputs'] = array();
 
 		return View::make('admin/group/search', $result);
 	}
 
 	/**
-	 * グループ詳細画面
-	 * @author stani
-	 * @since 2014/12/16
+	 * Group Details screen
+	 * @since 2014/12/24
 	 */
-	public function detail() {
-		//ログインチェック
+	public function detail_ajax() {
+		//Login check
 		if (!Auth::check()) {
-			//ログインしていないのでログイン画面に強制リダイレクト
+			//Forced redirected to the login screen because not logged in
 			return Redirect::to('login');
 		}
 
-		//エラーメッセージ初期化
-		$error_msg = "";
+		//Error message initialization
+		$error_msg = '';
 		$result = array();
 
-		//POSTデータ取得
+		//POST data acquisition
 		$inputs = Input::all();
+
 		if (array_key_exists('GroupID', $inputs) === FALSE)
-			$error_msg = 'グループIDを指定してください。';
+			$error_msg = 'Please specify the group ID.';
 
 		if (!$error_msg) {
 			$group_info = Groups::find($inputs['GroupID']);
 			$query_log = DB::getQueryLog();
 			if (!$group_info) {
-				$error_msg = '存在しないグループIDです。';
+				$error_msg = 'Does not exist group ID.';
 			}
 		}
 
-		//エラーメッセージがない場合はグループ詳細情報を表示する
+		//I want to display the group detail information if there is no error message
 		if (!$error_msg) {
 			$result['group_detail'] = $group_info;
 		} else {
@@ -86,42 +85,42 @@ class GroupController extends BaseController {
 		$result['url'] = 'admin/group/detail';
 		$result['css'] = self::cssSetting();
 		$result['js'] = self::jsSetting();
-		return View::make('/admin/group/detail', $result);
+
+		$tmp = View::make('/admin/group/detail_ajax', $result);
+
+		header('Content-Type: application/json; charset=UTF-8');
+		$res = json_encode(array('result' => true, 'message' => '', 'response' => "$tmp"));
+		echo $res;
 	}
 
 	/**
-	 * グループ登録入力
-	 * @author stani
-	 * @since 2014/12/16
+	 * Group registration input(Ajax)
+	 * @since 2014/12/22
 	 */
 	public function input() {
-		//ログインチェック
+		//Login check
 		if (!Auth::check()) {
-			//ログインしていないのでログイン画面に強制リダイレクト
+			//Forced redirected to the login screen because not logged in
 			return Redirect::to('login');
 		}
 
-		//初期設定
+		//Initial setting
 		$result = array();
-		$series_list = array();
 		$error_msg = '';
-		//入力値取得
+
+		//Input value acquisition
 		$inputs = Input::all();
 
-		//ページ設定
 		$result['title'] = 'Add new Group';
-		$result['url'] = '/admin/group/input';
-		$result['back_url'] = '/group/search';
-		$result['css'] = self::cssSetting();
-		$result['js'] = self::jsSetting();
+		$result['url'] = '/admin/group/search';
 
+		//Settings page
 		if (array_key_exists('btnBack', $inputs)) {
 			$result['inputs'] = Session::get('group_input');
 			if (array_key_exists('GroupID', $inputs))
 				$result['title'] = 'Edit Group';
 		} else if (array_key_exists('GroupID', $inputs)) {
 			$group_data = Groups::find($inputs['GroupID']);
-			//$result['inputs'] = $group_data;
 			$result['inputs'] = array(
 				'GroupID'		=>	$group_data->GroupID,
 				'GroupName'		=>	$group_data->GroupName,
@@ -139,34 +138,38 @@ class GroupController extends BaseController {
 			$result['inputs'] = array('GroupID' => self::createGroupID());
 		}
 
-		//エラーメッセージの設定
+		//Set of error messages
 		if ($error_msg) {
-			$result["error_msg"] = $error_msg;
+			$result['error_msg'] = $error_msg;
 		} else {
 			Session::put('group_input', $result['inputs']);
 			$result['group_detail'] = $result['inputs'];
 		}
-		return View::make('/admin/group/input', $result);
+
+		$tmp = View::make('/admin/group/input_ajax', $result);
+
+		header('Content-Type: application/json; charset=UTF-8');
+		$res = json_encode(array('result' => true, 'message' => '', 'response' => "$tmp"));
+		echo $res;
 	}
 
 	/**
-	 * グループ登録確認
-	 * @author stani
-	 * @since 2014/12/16
+	 * Group registration confirm(Ajax)
+	 * @since 2014/12/26
 	 */
 	public function confirm() {
-		//ログインチェック
+		//Login check
 		if (!Auth::check()) {
-			//ログインしていないのでログイン画面に強制リダイレクト
+			//Forced redirected to the login screen because not logged in
 			return Redirect::to('login');
 		}
 
-		//初期設定
+		//Initial setting
 		$result = array();
 		$result['css'] = self::cssSetting();
 		$result['js'] = self::jsSetting();
 
-		//入力値取得
+		//Input value acquisition
 		$inputs = Input::all();
 		$group_data = Session::get('group_input');
 		$inputs['GroupID'] = $group_data['GroupID'];
@@ -174,69 +177,72 @@ class GroupController extends BaseController {
 
 		$result['inputs'] = $inputs;
 
-		//セッション情報取得
+		//Session information acquisition
 		$groupID = Session::get('GroupID');
 
-		//Validateチェック用オブジェクト生成
+		//Validate check for object creation
 		$group_obj = $groupID ?
 						Groups::find($groupID) :
 						App::make('Groups');
 
-		//Validateチェック用の値を設定
+		//Set the value for the Validate check
 		$group_obj->GroupID = $inputs['GroupID'];
 		$group_obj->GroupName = $inputs['GroupName'];
 
 		//ValidateCheck
 		$validator = Validator::make($inputs, Groups::getValidateRules());
 		if ($validator->fails()) {
-			//Validateエラー時の処理
+			//Process at the time of Validate error
 			$result['title'] = 'Add new Group';
 			$result['url'] = '/admin/group/input';
 			$result['errors'] = $validator->messages();
-			return View::make('/admin/group/input', $result);
+			$tmp = View::make('/admin/group/input_ajax', $result);
 		} else {
-			//エラーがないので確認画面を表示
+			//And displays a confirmation screen because there is no error
 			$result['title'] = 'Add new Group Confirmation';
 			$result['url'] = '/admin/group/confirm';
-			return View::make('/admin/group/confirm', $result);
+			$tmp = View::make('/admin/group/confirm_ajax', $result);
 		}
+
+		header('Content-Type: application/json; charset=UTF-8');
+		$res = json_encode(array('result' => true, 'message' => '', 'response' => "$tmp"));
+		echo $res;
 	}
 
 	/**
-	 * グループ登録
-	 * @author stani
-	 * @since 2014/12/16
+	 * Group registration
+	 * @since 2014/12/24
 	 */
 	public function regist(){
-		//ログインチェック
+		//Login check
 		if (!Auth::check()) {
-			//ログインしていないのでログイン画面に強制リダイレクト
+			//Forced redirected to the login screen because not logged in
 			return Redirect::to('login');
 		}
 
-		//初期設定
+		//Initial setting
 		$result = array();
 
-		//セッションから情報取得
+		//Information obtained from the session
 		$inputs = Session::get('group_input');
 		$groupID = Session::get('GroupID');
 
 		$result['css'] = self::cssSetting();
 		$result['js'] = self::jsSetting();
 
-		//Validateチェック用オブジェクト生成
+		//Validate check for object creation
 		$group_obj = $groupID ?
 						Groups::find($groupID) :
 						App::make('Groups');
-		//Validateチェック用の値を設定
+		//Set the value for the Validate check
 		$group_obj->GroupID = $inputs['GroupID'];
 		$group_obj->GroupName = $inputs['GroupName'];
 
 		//ValidateCheck
 		$validator = Validator::make($inputs, Groups::getValidateRules());
 		if (!$validator->fails()) {
-			//Validate成功時の処理
-			//エラーがないので登録する
+			//Validate process at the time of success
+			//I registered because there is no error
 			$dt = new MongoDate(strtotime(date('Y-m-d H:i:s')));
 			$group_obj->updateTime = $dt;
 			$group_obj->createTime = $dt;
@@ -251,68 +257,51 @@ class GroupController extends BaseController {
 			$group_obj->domains = array();
 			$group_obj->save();
 
-			if (Session::get("id"))
+			if (Session::get('id'))
 				$result['title'] = 'Group Edit Complete';
 			else
 				$result['title'] = 'Add new Group Complete';
 			$result['url'] = '/admin/group/complete';
-			$result['msg'] = "グル―プ情報の登録が完了しました。";
+			$result['msg'] = 'Registration of group information is now complete.';
 			$result['GroupID'] = $inputs['GroupID'];
-			//登録が完了したので完了画面に遷移する
-			Session::put('group_complete', $result);
-			return Redirect::to('/admin/group/complete');
+
+			//Session discarded
+			Session::forget('group_input');
+			Session::forget('GroupID');
+
+			$tmp = View::make('/admin/group/complete_ajax', $result);
 		} else {
-			//Validateエラー時の処理
+			//Process at the time of Validate error
 			$result['errors'] = $validator->messages();
 			$result['inputs'] = $inputs;
-			if (Session::get("id"))
+			if (Session::get('id'))
 				$result['title'] = 'Add new Group';
 			else
 				$result['title'] = 'Group Edit';
 			$result['url'] = '/admin/group/input';
-			return View::make('/admin/group/input', $result);
+			$tmp = View::make('/admin/group/input_ajax', $result);
 		}
+
+		header('Content-Type: application/json; charset=UTF-8');
+		$res = json_encode(array('result' => true, 'message' => '', 'response' => "$tmp"));
+		echo $res;
 	}
 
 	/**
-	 * グループ登録/更新完了画面
-	 * @author stani
-	 * @since 2014/12/17
-	 */
-	public function complete(){
-		//ログインチェック
-		if (!Auth::check()) {
-			//ログインしていないのでログイン画面に強制リダイレクト
-			return Redirect::to('login');
-		}
-
-		//セッションから表示情報取得
-		$result = Session::get('group_complete');
-
-		//セッション破棄
-		Session::forget('group_input');
-		Session::forget('GroupID');
-		Session::forget('group_complete');
-
-		return View::make('/admin/group/complete', $result);
-	}
-
-	/**
-	 * ページ個別CSS設定
-	 * @author stani
+	 * Page individual CSS setting
+	 * @return Page individual CSS configuration array
 	 * @since 2014/12/16
 	 */
-	public function cssSetting($mode = 'search') {
+	public function cssSetting() {
 		$css = array();
-		$css["page.css"] = "css/page.css";
-		$css["color.css"] = "css/color.css";
+		$css['page.css'] = 'css/page.css';
+		$css['color.css'] = 'css/color.css';
 	  	return $css;
 	}
 
 	/**
-	 * ページ個別のJSの設定を行う
-	 * @return ページ個別のJS設定配列
-	 * @author stani
+	 * Page individual JS setting
+	 * @return Page individual JS configuration array
 	 * @since 2014/12/16
 	 */
 	public function jsSetting() {
@@ -321,9 +310,8 @@ class GroupController extends BaseController {
 	}
 
 	/**
-	 * グループID作成(SHA256+uniqid)
-	 * @return uniqidをSHA256でHash化した文字列(ケースID)
-	 * @author stani
+	 * Creating group ID(SHA256+uniqid)
+	 * @return string that was turned into Hash in SHA256 the uniqid (case ID)
 	 * @since 2014/12/16
 	 */
 	public function createGroupID(){

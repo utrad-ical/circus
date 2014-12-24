@@ -1,34 +1,32 @@
 <?php
 /**
- * ケース検索画面の操作を行うクラス
- * @author stani
+ * Classes for operating the case
  * @since 2014/12/02
  */
 class CaseController extends BaseController {
 	/**
-	 * ケース検索結果
-	 * @author stani
+	 * Case Search Results
 	 * @since 2014/12/02
 	 */
 	public function search() {
-		//ログインチェック
+		//Login check
 		if (!Auth::check()) {
-			//ログインしていないのでログイン画面に強制リダイレクト
+			//Forced redirected to the login screen because not logged in
 			return Redirect::to('login');
 		}
 
-		//初期設定
+		//Initial setting
 		$search_flg = true;
 		$result = array();
 
-		//入力値取得
+		//Input value acquisition
 		$inputs = Input::all();
 
-		//Resetボタン or 初期表示押下時
+		//Reset button or the initial display when pressed
 		if (array_key_exists ('btnReset', $inputs) !== FALSE || !$inputs) {
 			$search_flg = false;
 			Session::forget('case.search');
-		//検索ボタン押下時
+		//Search button is pressed during
 		} else if (array_key_exists ('btnSearch', $inputs) !== FALSE) {
 			if (array_key_exists ('disp', $inputs) === FALSE) $inputs['disp'] = Config::get('const.page_display');
 			if (array_key_exists ('sort', $inputs) === FALSE) $inputs['sort'] = 'updateTime';
@@ -40,11 +38,11 @@ class CaseController extends BaseController {
 		}
 
 		if ($search_flg) {
-			//検索条件をセッションから取得
+			//Get the search criteria from the session
 			$search_data = Session::get('case.search');
 
-			//検索条件生成＆データ取得
-			//取得カラムの設定
+			//Search conditions generation and data acquisition
+			//Setting of acquisition column
 			$select_col = array(
 				'caseID', 'projectID', 'incrementalID',
 				'patientInfoCache.patientID', 'patientInfoCache.name',
@@ -52,31 +50,31 @@ class CaseController extends BaseController {
 				'updateTime'
 			);
 
-			//総件数取得
+			//Total number acquisition
 			$case_count = Cases::addWhere($search_data)
 								->count();
 
-			//検索結果取得
+			//Search result acquisition
 			$case_list = Cases::addWhere($search_data)
 								->orderby($search_data['sort'], 'desc')
 								->addLimit($search_data)
 								->get($select_col);
 
-			//表示用に整形
+			//The formatting for display
 			$list = array();
 			foreach($case_list as $rec) {
-				//患者情報
+				//Patient information
 				$patient = $rec->patientInfoCache;
 
-				//曜日取得
+				//Day of the week get
 				$revision = $rec->revisions;
 				$dt = $revision['latest']['date'];
 				$w = self::getWeekDay(date('w', strtotime($dt)));
 
-				//プロジェクト名
+				//Project name
 				$project = Projects::where('projectID', '=', $rec->projectID)->get();
 
-				//表示用に整形する
+				//I shaping for display
 				$list[] = array(
 					'incrementalID' =>	$rec->incrementalID,
 					'caseID'		=>	$rec->caseID,
@@ -88,8 +86,8 @@ class CaseController extends BaseController {
 					'projectName'	=>	$project ? $project[0]->projectName : '',
 					'updateDate'	=>	date('Y/m/d', $rec->updateTime->sec)
 				);
-				$result["list"] = $list;
-				//ページャーの設定
+				$result['list'] = $list;
+				//Setting the pager
 				$case_pager = Paginator::make(
 					$list,
 					$case_count,
@@ -111,60 +109,58 @@ class CaseController extends BaseController {
 	}
 
 	/**
-	 * ケース詳細画面
-	 * @author stani
+	 * Case Details screen
 	 * @since 2014/12/09
 	 */
 	public function detail() {
-		//ログインチェック
+		//Login check
 		if (!Auth::check()) {
-			//ログインしていないのでログイン画面に強制リダイレクト
+			//Forced redirected to the login screen because not logged in
 			return Redirect::to('login');
 		}
 
-		//エラーメッセージ初期化
-		$error_msg = "";
+		//Error message initialization
+		$error_msg = '';
 		$result = array();
 
-		//POSTデータ取得
+		//POST data acquisition
 		$inputs = Input::all();
 
 		if (array_key_exists('caseID', $inputs) === FALSE)
-			$error_msg = 'ケースIDを指定してください。';
+			$error_msg = 'Please specify a case ID.';
 
 		if (!$error_msg) {
 			if (array_key_exists('disp', $inputs) === FALSE) $inputs['disp'] = Config::get('const.page_display');
-			if (array_key_exists('sort', $inputs) === FALSE) $inputs['sort'] = 'date';
+			if (array_key_exists('sort', $inputs) === FALSE) $inputs['sort'] = 'revision.date';
 
 			Session::put('case.detail', $inputs);
 			$search_data = Session::get('case.detail');
 
-			//存在するケースIDかチェック
+			//Check whether the case ID that exists
 			$case_info = Cases::addWhere($search_data)
 								->get();
-			$query_log = DB::getQueryLog();
 
 			if (!$case_info) {
-				$error_msg = '存在しないケースIDです。';
+				$error_msg = 'Case ID does not exist.';
 			} else {
 				$case_data = $case_info[0];
-				//権限チェック
-				//ケース閲覧権限
+				//Authority check
+				//Case viewing rights
 				$auth_view = Projects::getProjectList(Projects::AUTH_TYPE_VIEW, false);
 				if (!$auth_view || array_search($case_data->projectID, $auth_view) === FALSE) {
-					$error_msg = '該当のケースを参照する権限がありません。';
+					$error_msg = 'You do not have permission to refer to the appropriate case.';
 				}
 			}
 		}
 
-		//エラーメッセージがない場合はケース詳細情報を表示する
+		//I want to display the case detailed information if there is no error message
 		if (!$error_msg) {
-			//ケース編集権限
+			//Case edit authority
 			$auth_edit = Projects::getProjectList(Projects::AUTH_TYPE_UPDATE, false);
 			$result['edit_flg'] = ($auth_edit && array_search($case_data->projectID, $auth_edit) !== FALSE) ?
 						true: false;
-			//ケース情報を表示用に整形
-			//プロジェクト名
+			//And shape the case information for display
+			//Project name
 			$project = Projects::where("projectID", "=", $case_data->projectID)->get();
 			$case_detail = array(
 				'caseID'		=>	$case_data->caseID,
@@ -176,12 +172,12 @@ class CaseController extends BaseController {
 				'sex'			=>	self::getSex($case_data->patientInfoCache['sex'])
 			);
 
-			//Revision情報を表示用に整形
+			//The shaping Revision information for display
 			$revision_list = array();
 			$revision_no_list = array();
 			$max_revision = 0;
 			foreach($case_data->revisions as $key => $value) {
-				//keyがlatestのものはCloneなので対象外とする
+				//key is excluded so Clone thing of latest
 				if ($key !== 'latest') {
 					//Revision番号が大きい場合はセット
 					if ($max_revision < $key)
@@ -193,10 +189,10 @@ class CaseController extends BaseController {
 						$label_cnt += count($rec['labels']);
 					}
 
-					//曜日を求める
+					//I ask the day of the week
 					$w = self::getWeekDay(date('w', $value['date']->sec));
 
-					//表示用にリスト作成
+					//The list created for display
 					$revision_list[] = array(
 						'revisionNo'	=>	$key,
 						'editDate'		=>	date('Y/m/d('.$w.')', $value['date']->sec),
@@ -204,17 +200,24 @@ class CaseController extends BaseController {
 						'seriesCount'	=>	count($value['series']),
 						'labelCount'	=>	$label_cnt,
 						'creator'		=>	$value['creator'],
-						'memo'			=>	$value['memo']
+						'memo'			=>	$value['memo'],
+						'sortEditTime'	=>	date('Y-m-d H:i:s', $value['date']->sec)
 					);
 					$revision_no_list[] = $key;
 				}
 			}
 			$case_detail['revisionNo'] = isset($inputs['revisionNo']) ? $inputs['revisionNo'] : $max_revision;
 			$result['case_detail'] = $case_detail;
-			$result['revision_list'] = $revision_list;
+
+			//$res_revision =
+			//Revisionソート順適応
+			$result['revision_list'] = self::sortRevision($revision_list, $search_data['sort']);
+
+		//	Log::debug("最終ソート結果");
+		//	Log::debug($res_revision);
 			$result['revision_no_list'] = $revision_no_list;
 
-			//シリーズリスト作成
+			//Series list created
 			$series = array();
 
 			foreach ($case_data->revisions as $key => $value) {
@@ -252,25 +255,131 @@ class CaseController extends BaseController {
 	}
 
 	/**
-	 * ケース登録入力
-	 * @author stani
-	 * @since 2014/12/15
+	 * Revision list acquisition
+	 * @since 2014/12/24
 	 */
-	function input() {
-		//ログインチェック
+	public function revision_ajax() {
+		//Login check
 		if (!Auth::check()) {
-			//ログインしていないのでログイン画面に強制リダイレクト
+			//Forced redirected to the login screen because not logged in
 			return Redirect::to('login');
 		}
 
-		//初期設定
+		//Error message initialization
+		$error_msg = '';
+		$result = array();
+
+		//POST data acquisition
+		$inputs = Input::all();
+
+		if (array_key_exists('caseID', $inputs) === FALSE)
+			$error_msg = 'Please specify a case ID.';
+
+		if (!$error_msg) {
+			if (array_key_exists('disp', $inputs) === FALSE) $inputs['disp'] = Config::get('const.page_display');
+			if (array_key_exists('sort', $inputs) === FALSE) $inputs['sort'] = 'revision.date';
+
+			//Check whether the case ID that exists
+			$case_info = Cases::addWhere($inputs)
+								->get();
+			$query_log = DB::getQueryLog();
+
+			if (!$case_info) {
+				$error_msg = 'Case ID does not exist.';
+			} else {
+				$case_data = $case_info[0];
+				//Authority check
+				//Case viewing rights
+				$auth_view = Projects::getProjectList(Projects::AUTH_TYPE_VIEW, false);
+				if (!$auth_view || array_search($case_data->projectID, $auth_view) === FALSE) {
+					$error_msg = 'You do not have permission to refer to the appropriate case.';
+				}
+			}
+		}
+
+		//I want to display the case detailed information if there is no error message
+		if (!$error_msg) {
+			//The shaping Revision information for display
+			$revision_list = array();
+			$revision_no_list = array();
+			$max_revision = 0;
+			foreach($case_data->revisions as $key => $value) {
+				//key is excluded so Clone thing of latest
+				if ($key !== 'latest') {
+					//Revision番号が大きい場合はセット
+					if ($max_revision < $key)
+						$max_revision = $key;
+
+					//ラベル数を求める
+					$label_cnt = 0;
+					foreach ($value['series'] as $rec) {
+						$label_cnt += count($rec['labels']);
+					}
+
+					//I ask the day of the week
+					$w = self::getWeekDay(date('w', $value['date']->sec));
+
+					//The list created for display
+					$revision_list[] = array(
+						'revisionNo'	=>	$key,
+						'editDate'		=>	date('Y/m/d('.$w.')', $value['date']->sec),
+						'editTime'		=>	date('H:i', $value['date']->sec),
+						'seriesCount'	=>	count($value['series']),
+						'labelCount'	=>	$label_cnt,
+						'creator'		=>	$value['creator'],
+						'memo'			=>	$value['memo'],
+						'sortEditTime'	=>	date('Y-m-d H:i:s', $value['date']->sec)
+					);
+					$revision_no_list[] = $key;
+				}
+			}
+
+			//Revisionソート順適応
+			$result['revision_list'] = self::sortRevision($revision_list, $search_data['sort']);
+			$result['revision_no_list'] = $revision_no_list;
+
+			//Series list created
+			$series = array();
+
+			//ページャーの設定
+			$revision_pager = Paginator::make(
+				$revision_list,
+				count($revision_list),
+				$search_data['disp']
+			);
+			$result['list_pager'] = $revision_pager;
+			$result['inputs'] = $inputs;
+		} else {
+			$result['error_msg'] = $error_msg;
+		}
+
+		$tmp = View::make('/case/revision', $result);
+
+		header('Content-Type: application/json; charset=UTF-8');
+		$res = json_encode(array('result' => true, 'message' => '', 'response' => "$tmp"));
+		echo $res;
+	}
+
+	/**
+	 * Case registration input
+	 * @since 2014/12/15
+	 */
+	function input() {
+		//Login check
+		if (!Auth::check()) {
+			//Forced redirected to the login screen because not logged in
+			return Redirect::to('login');
+		}
+
+		//Initial setting
 		$result = array();
 		$series_list = array();
 		$error_msg = '';
-		//入力値取得
+
+		//Input value acquisition
 		$inputs = Input::all();
 
-		//ページ設定
+		//Settings page
 		$result['title'] = 'Add new Case';
 		$result['url'] = '/case/input';
 		$result['back_url'] = '/series/search';
@@ -298,37 +407,38 @@ class CaseController extends BaseController {
 		} else {
 			$result['inputs'] = array('caseID' => self::createCaseID());
 
-			//CookieからシリーズUID取得
+			//Series UID obtained from the Cookie
 			$cookie_series = $_COOKIE['seriesCookie'];
-			$series_exclude_ary = explode("_" , $cookie_series);
+			$series_exclude_ary = explode('_' , $cookie_series);
 		}
 
-		$inputs["seriesUID"] = $series_exclude_ary;
+		$inputs['seriesUID'] = $series_exclude_ary;
 		$select_col = array(
 			'seriesUID', 'seriesDescription',
 			'patientInfo.patientID', 'patientInfo.age',
-			'patientInfo.sex', 'patientInfo.patientName'
+			'patientInfo.sex', 'patientInfo.patientName',
+			'patientInfo.birthday'
 		);
 		$series = Serieses::addWhere($inputs)
 							->get($select_col);
 
-		//患者ID重複チェック
+		//Patient ID duplication check
 		$error_msg = self::checkDuplicatePatientID($series, $series_list);
 
-		//エラーメッセージがなければシリーズ一覧を設定
+		//Set Series List if there is no error message
 		if ($error_msg) {
 			$result['error_msg'] = $error_msg;
 		} else {
 			$result['series_list'] = $series_list;
 			$patient = $series[0]->patientInfo;
 			$patient['sex'] = self::getSex($patient['sex']);
-			$result['patientInfo'] = $patient;
+			$result['inputs']['patientInfo'] = $patient;
 
-			//セッションに固定情報を格納
+			//The store fixed information in session
 			$case_info = array(
-				'caseID'	=>	$result['inputs']['caseID'],
-				'series'	=>	$series,
-				'patient'	=>	$patient
+				'caseID'		=>	$result['inputs']['caseID'],
+				'series_list'	=>	$series_list,
+				'patientInfo'	=>	$patient
 			);
 			Session::put('case.input', $case_info);
 		}
@@ -336,21 +446,22 @@ class CaseController extends BaseController {
 	}
 
 	/**
-	 * ケース登録確認
+	 * Case registration confirmation
+	 * @since 2014/12/22
 	 */
 	function confirm() {
-		//ログインチェック
+		//Login check
 		if (!Auth::check()) {
-			//ログインしていないのでログイン画面に強制リダイレクト
+			//Forced redirected to the login screen because not logged in
 			return Redirect::to('login');
 		}
 
-		//初期設定
+		//Initial setting
 		$result = array();
 		$result['css'] = self::cssSetting();
 		$result['js'] = self::jsSetting();
 
-		//入力値取得
+		//Input value acquisition
 		$inputs = Input::all();
 
 		//セッション情報取得
@@ -363,31 +474,37 @@ class CaseController extends BaseController {
 					Cases::addWhere(array('caseID' => $caseID))->get() :
 					App::make('Cases');
 
-		//Validateチェック用の値を設定
+		//Set the value for the Validate check
 		$case_obj->caseID = $case_info['caseID'];
-		$case_obj->incrementalID = 1;	//いったん固定
+		$case_obj->incrementalID = 1;
 		$case_obj->projectID = $case_info['projectID'];
 		$case_obj->date = new MongoDate(strtotime(date('Y-m-d H:i:s')));
 		$case_obj->patientInfoCache = array(
-			'patientID'	=>	$case_info['patient']['patientID'],
-			'name'		=>	$case_info['patient']['patientName'],
-			'age'		=>	$case_info['patient']['age'],
-		//	'birthday'	=>	$case_info['patient']['birthday'],
-			'sex'		=>	$case_info['patient']['sex']
+			'patientID'	=>	$case_info['patientInfo']['patientID'],
+			'name'		=>	$case_info['patientInfo']['patientName'],
+			'age'		=>	$case_info['patientInfo']['age'],
+			'sex'		=>	$case_info['patientInfo']['sex']
 		);
 
 		//ValidateCheck
-		$validator = Validator::make($inputs, Cases::getValidateRules());
+		//$validator = Validator::make($inputs, Cases::getValidateRules());
+		$validator = Validator::make(self::setCaseValidate($case_info), Cases::getValidateRules());
+		$result['inputs'] = $case_info;
+		$result['series_list'] = $case_info['series_list'];
 		if ($validator->fails()) {
-			//Validateエラー時の処理
+			//Process at the time of Validate error
 			$result['title'] = 'Add new Case';
 			$result['url'] = '/case/input';
 			$result['back_url'] = '/series/search';
 			$result['project_list'] = Projects::getProjectList(Projects::AUTH_TYPE_CREATE, true);
 			$result['errors'] = $validator->messages();
+/*
+			Log::debug('Case Input Errors::');
+			Log::debug($result);
+			*/
 			return View::make('/case/input', $result);
 		} else {
-			//エラーがないので確認画面を表示
+			//And displays a confirmation screen because there is no error
 			$result['title'] = 'Add new Case Confirmation';
 			$result['url'] = '/case/confirm';
 			return View::make('/case/confirm', $result);
@@ -395,21 +512,20 @@ class CaseController extends BaseController {
 	}
 
 	/**
-	 * ケース登録
-	 * @author stani
+	 * Case registered
 	 * @since 2014/12/15
 	 */
 	function regist(){
-		//ログインチェック
+		//Login check
 		if (!Auth::check()) {
-			//ログインしていないのでログイン画面に強制リダイレクト
+			//Forced redirected to the login screen because not logged in
 			return Redirect::to('login');
 		}
 
-		//初期設定
+		//Initial setting
 		$result = array();
 
-		//入力値取得
+		//Input value acquisition
 		$inputs = Input::all();
 		$caseID = Session::get('caseID');
 
@@ -417,11 +533,11 @@ class CaseController extends BaseController {
 		$result['css'] = self::cssSetting();
 		$result['js'] = self::jsSetting();
 
-		//Validateチェック用オブジェクト生成
+		//Validate check for object creation
 		$case_obj = $caseID ?
 					Cases::addWhere(array('caseID' => $caseID))->get() :
 					App::make('Cases');
-		//Validateチェック用の値を設定
+		//Set the value for the Validate check
 		$case_obj->caseID = $inputs['caseID'];
 		$case_obj->incrementalID = $inputs['incrementalID'];
 		$case_obj->projectID = $inputs['projectID'];
@@ -437,24 +553,24 @@ class CaseController extends BaseController {
 		//ValidateCheck
 		$validator = Validator::make($inputs, Cases::getValidateRules());
 		if (!$validator->fails()) {
-			//Validate成功時の処理
-			//エラーがないので登録する
+			//Validate process at the time of success
+			//I registered because there is no error
 			$dt = new MongoDate(strtotime(date('Y-m-d H:i:s')));
 			$case_obj->updateTime = $dt;
 			$case_obj->createTime = $dt;
 			$case_obj->creator = Auth::user()->loginID;
 			$case_obj->save();
-			if (Session::get("caseID"))
+			if (Session::get('caseID'))
 				$result['title'] = 'Case Edit Complete';
 			else
 				$result['title'] = 'Add new Case Complete';
 			$result['url'] = '/case/complete';
-			$result["msg"] = "ケース情報の登録が完了しました。";
+			$result['msg'] = 'Registration of case information is now complete.';
 			return View::make('/case/complete', $result);
 		} else {
-			//Validateエラー時の処理
+			//Process at the time of Validate error
 			$result['errors'] = $validator->messages();
-			if (Session::get("caseID"))
+			if (Session::get('caseID'))
 				$result['title'] = 'Add new Case';
 			else
 				$result['title'] = 'Case Edit';
@@ -465,30 +581,29 @@ class CaseController extends BaseController {
 	}
 
 	/**
-	 * ページ個別CSS設定
-	 * @author stani
+	 * Page individual CSS setting
+	 * @return Page individual CSS configuration array
 	 * @since 2014/12/04
 	 */
 	function cssSetting($mode = 'search') {
 		$css = array();
-	  	$css["ui-lightness/jquery-ui-1.10.4.custom.min.css"] = "css/ui-lightness/jquery-ui-1.10.4.custom.min.css";
-		$css["page.css"] = "css/page.css";
+	  	$css['ui-lightness/jquery-ui-1.10.4.custom.min.css'] = 'css/ui-lightness/jquery-ui-1.10.4.custom.min.css';
+		$css['page.css'] = 'css/page.css';
 
 		switch($mode) {
 			case 'search':
 				break;
 			case 'detail':
 			case 'edit':
-				$css["color.css"] = "css/color.css";
+				$css['color.css'] = 'css/color.css';
 				break;
 		}
 	  	return $css;
 	}
 
 	/**
-	 * ページ個別のJSの設定を行う
-	 * @return ページ個別のJS設定配列
-	 * @author stani
+	 * Page individual JS setting
+	 * @return Page individual JS configuration array
 	 * @since 2014/12/04
 	 */
 	function jsSetting($mode = 'search') {
@@ -510,8 +625,8 @@ class CaseController extends BaseController {
 	}
 
 	/**
-	 * ログインユーザが閲覧可能なプロジェクトの一覧を取得する
-	 * @return ログインユーザが閲覧可能なプロジェクトの一覧
+	 * Login user I get a list of viewable project
+	 * @return List login user is viewable project
 	 * @author stani
 	 * @since 2014/12/08
 	 */
@@ -520,9 +635,9 @@ class CaseController extends BaseController {
 	}
 
 	/**
-	 * 曜日を取得する
-	 * @param $w 曜日を表す数値
-	 * @return 日本語表記の曜日
+	 * I get the week
+	 * @param $w Numeric value that represents the day of the week
+	 * @return Day of the week in Japanese notation
 	 * @author stani
 	 * @since 2014/12/11
 	 */
@@ -532,9 +647,9 @@ class CaseController extends BaseController {
 	}
 
 	/**
-	 * 表示用の性別を取得する
-	 * @param $sex 性別の値
-	 * @return 性別表示用文字列
+	 * I get the sex for display
+	 * @param $sex Gender of value
+	 * @return Gender display string
 	 * @author stani
 	 * @since 2014/12/12
 	 */
@@ -544,25 +659,22 @@ class CaseController extends BaseController {
 	}
 
 	/**
-	 * シリーズコンボ作成用
-	 * @param $data 選択されているRevisionデータ
-	 * @return Revisionに紐づくシリーズリスト
-	 * @author stani
+	 * For Series combo created
+	 * @param $data Revision data that are selected
+	 * @return Series list brute string to Revision
 	 * @since 2014/12/12
 	 */
 	function getSeriesList($data) {
 		$series_list = array();
-		//foreach ($data["series"] as $key => $value) {
 		foreach ($data as $rec) {
-			$series_list[$rec["seriesUID"]] = $rec["seriesDescription"];
+			$series_list[$rec['seriesUID']] = $rec['seriesDescription'];
 		}
 		return $series_list;
 	}
 
 	/**
-	 * ケースID作成(SHA256+uniqid)
-	 * @return uniqidをSHA256でHash化した文字列(ケースID)
-	 * @author stani
+	 * Case ID created (SHA256 + uniqid)
+	 * @return string that was turned into Hash in SHA256 the uniqid (case ID)
 	 * @since 2014/12/15
 	 */
 	function createCaseID(){
@@ -570,26 +682,24 @@ class CaseController extends BaseController {
 	}
 
 	/**
-	 * リビジョン一覧を作成する
-	 * @param $case_data ケース情報
-	 * @author stani
+	 * I want to create a list of revisions
+	 * @param $case_data Case information
 	 * @since 2014/12/17
 	 */
 	function getRevision($case_data) {
-		//$max_revision = 0;
 		foreach($case_data->revisions as $key => $value) {
-			//keyがlatestのものはCloneなので対象外とする
+			//key is excluded so Clone thing of latest
 			if ($key !== 'latest') {
-				//ラベル数を求める
+				//I ask the number of label
 				$label_cnt = 0;
 				foreach ($value['series'] as $rec) {
 					$label_cnt += count($rec['labels']);
 				}
 
-				//曜日を求める
+				//I ask the day of the week
 				$w = self::getWeekDay(date('w', $value['date']->sec));
 
-				//表示用にリスト作成
+				//The list created for display
 				$revision_list = array(
 					'revisionNo'	=>	$key,
 					'editDate'		=>	date('Y/m/d('.$w.')', $value['date']->sec),
@@ -597,19 +707,19 @@ class CaseController extends BaseController {
 					'seriesCount'	=>	count($value['series']),
 					'labelCount'	=>	$label_cnt,
 					'creator'		=>	$value['creator'],
-					'memo'			=>	$value['memo']
+					'memo'			=>	$value['memo']//,
+					//'sortEditTime'	=>	date('Y-m-d H:i:s', $value['date']->sec)
 				);
 			}
 		}
 	}
 
 	/**
-	 * 患者ID重複チェック
-	 * 重複がない場合は表示用のシリーズ一覧を格納する
-	 * @param $list 患者ID重複対象のシリーズ一覧
-	 * @param $series_list エラーがない場合の格納先シリーズ一覧
-	 * @return $error_msg エラーメッセージ
-	 * @author stani
+	 * Patient ID duplication check
+	 * If there is no overlap I store the series list for display
+	 * @param $list Series List of patient ID overlapping subject
+	 * @param $series_list Destination Series List of if there is no error
+	 * @return $error_msg Error message
 	 * @since 2014/12/16
 	 */
 	function checkDuplicatePatientID($list, &$series_list = array()) {
@@ -618,11 +728,104 @@ class CaseController extends BaseController {
 		$patientID = $list[0]->patientID;
 		foreach ($list as $rec) {
 			if ($patientID != $rec->patientID) {
-				$error_msg = '1ケースに登録できるシリーズは同一患者のみです。\n同一患者のシリーズを選択してください。';
+				$error_msg = 'Series that can be registered in one case only the same patient.\nPlease select the same patient in the series.';
 				break;
 			}
 			$series_list[$rec->seriesUID] = $rec->seriesDescription;
 		}
 		return $error_msg;
+	}
+
+	/**
+	 * I sort by Revision final editing time
+	 * @param $a ソート用配列(小さい値)
+	 * @param $b Sort array (large value)
+	 * @return ソート結果 0:同等 -1:bが大きい 1:aが大きい
+	 * @since 2014/12/24
+	 */
+	function sortEditTime($a, $b) {
+		//更新日時が新しい順
+		Log::debug('[EditTime]ソート確認用[a]');
+		Log::debug($a);
+		Log::debug('[EditTime]ソート確認用[b]');
+		Log::debug($b);
+
+		$a_time = $a['sortEditTime'];
+		$b_time = $b['sortEditTime'];
+
+		Log::debug("a::".strtotime($a_time));
+		Log::debug("b::".strtotime($b_time));
+
+		if (strtotime($a_time) == strtotime($b_time))
+			return 0;
+
+		return strtotime($a_time) > strtotime($b_time) ? -1 : 1;
+	}
+
+	/**
+	 * I sort by RevisionNo
+	 * @param $a Sort array (small value)
+	 * @param $b ソート用配列(大きい値)
+	 * @return ソート結果 0:同等 -1:bが大きい 1:aが大きい
+	 * @since 2014/12/24
+	 */
+	function sortRevisionNo($a, $b){
+		//Revisionが古い順
+		Log::debug('[RevisionNo]ソート確認用[a]');
+		Log::debug($a);
+		Log::debug('[RevisionNo]ソート確認用[b]');
+		Log::debug($b);
+
+		$a_no = $a['revisionNo'];
+		$b_no = $b['revisionNo'];
+
+		if (strtotime($a_no) == strtotime($b_no))
+			return 0;
+
+		return strtotime($a_no) < strtotime($b_no) ? 1 : -1;
+	}
+
+	/**
+	 * I sort the Revision list
+	 * @param $list Revsion list
+	 * @param $sort Sorting method
+	 * @return Sort the Revision list
+	 * @since 2014/12/24
+	 */
+	function sortRevision($list, $sort) {
+		switch ($sort) {
+			case 'revision.date':	//Edit Date desc
+				$res = usort($list, 'self::sortEditTime');
+				return $list;
+			case 'revisionNo':		//RevisionNo asc
+				$res = uasort($list, 'self::sortRevisionNo');
+				return $list;
+		}
+		return $list;
+	}
+
+	/**
+	 * I want to create an array for the Validate
+	 * @param $data Validate checked the data
+	 * @return Validate check for array
+	 * @since 2014/12/24
+	 */
+	function setCaseValidate($data) {
+		$valid_ary = array();
+
+		$valid_ary['caseID'] = $data['caseID'];
+		$valid_ary['projectID'] = $data['projectID'];
+		$valid_ary['patientInfoCache_patientID'] = $data['patientInfo']['patientID'];
+		$valid_ary['patientInfoCache_name'] = $data['patientInfo']['patientName'];
+		$valid_ary['patientInfoCache_age'] = $data['patientInfo']['age'];
+		$valid_ary['patientInfoCache_sex'] = $data['patientInfo']['sex'];
+		$valid_ary['patientInfoCache_birthday'] = $data['patientInfo']['birthday'];
+		$valid_ary['date'] = new MongoDate(strtotime(date('Y-m-d H:i:s')));
+		$valid_ary['incrementalID'] = 1;
+
+		Log::debug('For input check array [Case Input]::');
+		Log::debug($valid_ary);
+
+		return $valid_ary;
 	}
 }

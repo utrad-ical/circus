@@ -2,23 +2,21 @@
 <!DOCTYPE HTML>
 <html>
 <head>
-    <meta charset="utf-8">
-    <title>{{{isset($title) ? $title : 'Hello'}}}</title>
-	<link rel="stylesheet" type="text/css" href="{{{asset('../bootstrap/css/common.css')}}}">
-	<link rel="stylesheet" type="text/css" href="{{{asset('../bootstrap/css/layout.css')}}}">
-	<link rel="stylesheet" type="text/css" href="{{{asset('../bootstrap/css/color.css')}}}">
-	<!-- ページ固有CSS -->
+	<meta charset="utf-8">
+	<title>{{{isset($title) ? $title : 'Hello'}}}</title>
+	<link rel="stylesheet" type="text/css" href="{{asset('../bootstrap/css/common.css')}}">
+	<link rel="stylesheet" type="text/css" href="{{asset('../bootstrap/css/layout.css')}}">
+	<link rel="stylesheet" type="text/css" href="{{asset('../bootstrap/css/color.css')}}">
 	@if (isset($css))
 		@foreach ($css as $cssrec)
-			<link rel="stylesheet" type="text/css" href="{{{asset('../bootstrap/'.$cssrec)}}}">
+			<link rel="stylesheet" type="text/css" href="{{asset('../bootstrap/'.$cssrec)}}">
 		@endforeach
 	@endif
-	<script type="text/javascript" src="{{{asset('../bootstrap/js/jquery-1.11.1.min.js')}}}"></script>
-	<script type="text/javascript" src="{{{asset('../bootstrap/js/common.js')}}}"></script>
-	<!-- ページ固有JS -->
+	<script type="text/javascript" src="{{asset('../bootstrap/js/jquery-1.11.1.min.js')}}"></script>
+	<script type="text/javascript" src="{{asset('../bootstrap/js/common.js')}}"></script>
 	@if (isset($js))
 		@foreach ($js as $jsrec)
-			<script type="text/javascript" src="{{{asset('../bootstrap/'.$jsrec)}}}"></script>
+			<script type="text/javascript" src="{{asset('../bootstrap/'.$jsrec)}}"></script>
 		@endforeach
 	@endif
 </head>
@@ -26,8 +24,8 @@
 	<div id="wrapper">
 		<div id="header">
 			<div class="header_logo">
-				<a href="{{{asset('/home')}}}">
-					<img src="{{{asset('../bootstrap/img/common/header_logo.png')}}}" width="192" height="40" alt="CIRCUS">
+				<a href="{{asset('/home')}}">
+					<img src="{{asset('../bootstrap/img/common/header_logo.png')}}" width="192" height="40" alt="CIRCUS">
 				</a>
 			</div>
 			{{Form::open(['url' => $url, 'method' => 'POST'])}}

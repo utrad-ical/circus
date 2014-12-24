@@ -3,9 +3,49 @@
 @section('content')
 <script type="text/javascript">
 	$(function() {
+		//Process at the time of details button is pressed
 		$('.link_user_detail').click(function(){
-			//送信するフォームIDを取得
-			$(this).closest('td').find('.frm_user_detail').submit();
+			//Get the form ID to be sent
+			var post_data = $(this).closest('td').find('.frm_user_id').serializeArray();
+			var target_elm = $('.frm_user_input');
+
+			$.ajax({
+				url: "{{asset('/admin/user/detail')}}",
+				type: 'POST',
+				data: post_data,
+				dataType: 'json',
+				error: function(){
+					alert('I failed to communicate.');
+				},
+				success: function(res){
+					target_elm.empty();
+					target_elm.append(res.response);
+					target_elm.attr('style', 'display:inline;');
+				}
+			});
+			return false;
+		});
+
+		//When new registration button is pressed
+		$('.frm_user_enable').click(function(){
+			var post_data = '{"mode":"regist"}';
+			post_data = JSON.parse(post_data);
+			var target_elm = $('.frm_user_input');
+
+			$.ajax({
+				url: "{{asset('/admin/user/input')}}",
+				type: 'POST',
+				data: post_data,
+				dataType: 'json',
+				error: function(){
+					alert('I failed to communicate.');
+				},
+				success: function(res){
+					target_elm.empty();
+					target_elm.append(res.response);
+					target_elm.attr('style', 'display:inline;');
+				}
+			});
 			return false;
 		});
 	});
@@ -15,7 +55,7 @@
 		<div class="page_unique">
 			<h1 class="page_ttl">User</h1>
 			<div class="al_l mar_b_10">
-				{{HTML::link(asset('admin/user/input'), 'Add new User', array('class' => 'common_btn'))}}
+				{{HTML::link(asset('admin/user/input'), 'Add new User', array('class' => 'common_btn frm_user_enable'))}}
 			</div>
 			<div class="search_result">
 				<table class="result_table common_table">
@@ -47,10 +87,12 @@
 						@endforeach
 					@else
 						<tr>
-							<td colspan="4">ユーザが登録されていません。</td>
+							<td colspan="4">User is not registered.</td>
 						</tr>
 					@endif
 				</table>
+			</div>
+			<div class="frm_user_input" style="display:none;">
 			</div>
 		</div>
 	</div>

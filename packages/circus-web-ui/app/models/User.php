@@ -5,6 +5,10 @@ use Illuminate\Auth\UserInterface;
 
 use Jenssegers\Mongodb\Model as Eloquent;
 
+/**
+ * User table manipulation class
+ * @since 2014/12/17
+ */
 class User extends Eloquent implements UserInterface {
 	use UserTrait;
 
@@ -12,17 +16,19 @@ class User extends Eloquent implements UserInterface {
 	protected $collection = 'User';
 	protected $primaryKey = 'userID';
 
+	/**
+	 * Validateルール
+	 * @var $rules Validateルール
+	 */
 	public static $rules = array(
         'loginID'	=>	'required',
 		'password'	=>	'required'
     );
 
-
     /**
-     * パスワードAES256暗号化
-     * @param $pwd パスワード
-     * @return $encrypt_pwd AES256暗号化されたパスワード
-     * @author stani
+     * Password AES256 encryption
+     * @param $pwd Password
+     * @return $encrypt_pwd The AES256 encrypted password
      * @since 2014/12/17
      */
     public static function encryptPassword($pwd) {
@@ -30,10 +36,9 @@ class User extends Eloquent implements UserInterface {
     }
 
     /**
-     * パスワードAES256復号化
-     * @param $pwd 復号化対象のパスワード
-     * @return $decrypt_pwd 復号化したパスワード
-     * @author stani
+     * Password AES256 decryption
+     * @param $pwd Decoded password
+     * @return $decrypt_pwd The decrypted password
      * @since 2014/12/17
      */
     public static function decryptPassword($pwd) {
@@ -41,10 +46,9 @@ class User extends Eloquent implements UserInterface {
     }
 
 	/**
-	 * Validateルールを取得する
-	 * isValidが使えるようになったらこのメソッドは削除する
-	 * @return Validateルール配列
-	 * @author stani
+	 * I get the Validate rules
+	 * This method When isValid now can use I delete
+	 * @return Validate rules array
 	 * @since 2014/12/17
 	 */
 	public static function getValidateRules() {

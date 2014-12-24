@@ -4,34 +4,32 @@
 use Jenssegers\Mongodb\Model as Eloquent;
 
 /**
- * プロジェクトテーブルモデル
- * @author stani
+ * Class to perform the project table operation
  * @since 2014/12/08
  */
 class Projects extends Eloquent {
 	protected $connection = 'mongodb';
 	protected $collection = 'Project';
 
-	//権限定数
-	const AUTH_TYPE_CREATE = 'createGroups';	//ケース作成権限
-	const AUTH_TYPE_VIEW = 'viewGroups';		//ケース閲覧権限
-	const AUTH_TYPE_UPDATE = 'updateGroups';	//ケース更新権限
-	const AUTH_TYPE_REVIEW = 'reviewGroups';	//ケースレビュー権限
-	const AUTH_TYPE_DELETE = 'deleteGroups';	//ケース削除権限
+	//Authority constant
+	const AUTH_TYPE_CREATE = 'createGroups';	//Case creation authority
+	const AUTH_TYPE_VIEW = 'viewGroups';		//Case viewing authority
+	const AUTH_TYPE_UPDATE = 'updateGroups';	//Case update authority
+	const AUTH_TYPE_REVIEW = 'reviewGroups';	//Case Review authority
+	const AUTH_TYPE_DELETE = 'deleteGroups';	//Case Delete authority
 
 	/**
-	 * ログインユーザが操作可能なプロジェクト一覧を取得する
-	 * @return ログインユーザが閲覧可能なプロジェクト一覧
-	 * @param $auth_gp 権限タイプ
-	 * @param $make_combo コンボ要素生成フラグ
-	 * @author stani
+	 * Login user to get a list of projects that can be operated
+	 * @return Project login user operable List
+	 * @param $auth_gp Authority type
+	 * @param $make_combo Combo element generation flag
 	 * @since 2014/12/08
 	 */
 	public static function getProjectList($auth_gp, $make_combo = false){
 		$project_list = self::whereIn($auth_gp, Auth::user()->groups)
 							->get(array('projectID', 'projectName'));
 		$projects = array();
-		//コンボ生成用
+		//Combo generation
 		if ($project_list) {
 			foreach ($project_list as $project) {
 				if ($make_combo)
@@ -44,21 +42,19 @@ class Projects extends Eloquent {
 	}
 
 	/**
-	 * プロジェクト名を取得する
-	 * @param $projectID プロジェクトID
-	 * @return プロジェクト名
-	 * @author stani
+	 * I get the project name
+	 * @param $projectID Project ID
+	 * @return Project name
 	 * @since 2014/12/08
 	 */
 	public static function getProjectName($projectID) {
-		$project = self::whereRaw('projectID', '=', $projectID)->get("projectName");
+		$project = self::whereRaw('projectID', '=', $projectID)->get('projectName');
 		return $project;
 	}
 
 	/**
-	 * Validationルール
-	 * @var rules Validateルール配列
-	 * @author stani
+	 * Validation rules
+	 * @var rules Validate rules array
 	 * @since 2014/12/12
 	 */
 	public static $rules = array(
@@ -67,10 +63,9 @@ class Projects extends Eloquent {
 	);
 
 	/**
-	 * isValidが使えるようになったらこのメソッドは消す
-	 * Validateルールを取得する
-	 * @return Validateルール配列
-	 * @author stani
+	 * This method When isValid now can use to erase
+	 * I get the Validate rules
+	 * @return Validate rules array
 	 * @since 2014/12/12
 	 */
 	public static function getValidateRules() {

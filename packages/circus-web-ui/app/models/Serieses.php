@@ -3,6 +3,10 @@
 
 use Jenssegers\Mongodb\Model as Eloquent;
 
+/**
+ * Series table operation
+ * @since 2014/12/05
+ */
 class Serieses extends Eloquent {
 	protected $connection = 'mongodb';
 	protected $collection = 'Series';
@@ -10,66 +14,68 @@ class Serieses extends Eloquent {
 	protected $primaryKey = 'seriesUID';
 
 	/**
-	 * 検索条件構築
-	 * @param $query Queryオブジェクト
-	 * @param $input 入力値
-	 * @return Queryオブジェクト
-	 * @author stani
+	 * Search conditions Building
+	 * @param $query Query object
+	 * @param $input Input value
+	 * @return Query object
 	 * @since 2014/12/05
 	 */
 	public function scopeAddWhere($query, $input) {
-		//seriesID シリーズID
+
+		//seriesID Series ID
 		if (isset($input['seriesUID']) && $input['seriesUID']) {
-			//シリーズテーブルのシリーズUID
-			$query->whereIn('seriesUID', $input['seriesUID']);
+			//Series table of series UID
+			if (is_array($input['seriesUID']))
+				$query->whereIn('seriesUID', $input['seriesUID']);
+			else
+				$query->where('seriesUID', 'like', '%'.$input['seriesUID'].'%');
 		}
 
 		//seriesDescription seriesDescription
 		if (isset($input['seriesDescription']) && $input['seriesDescription']) {
-			//シリーズテーブルのseriesDescription
+			//SeriesDescription series table
 			$query->where('seriesDescription', 'like', '%'.$input['seriesDescription'].'%');
 		}
 
-		//patientID 患者ID
+		//patientID Patient ID
 		if (isset($input['patientID']) && $input['patientID']) {
-			//シリーズテーブルのpatientInfo.patientID
+			//PatientInfo.patientID series table
 			$query->where('patientInfo.patientID', 'like', '%'.$input['patientID'].'%');
 		}
 
-		//patientName 患者名
+		//patientName Name of patient
 		if (isset($input['patientName']) && $input['patientName']) {
-			//シリーズテーブルのpatientInfo.patientName
+			//PatientInfo.patientName series table
 			$query->where('patientInfo.patientName', 'like', '%'.$input['patientName'].'%');
 		}
 
-		//minAge 患者の年齢(開始)
+		//minAge The age of the patient (start)
 		if (isset($input['minAge']) && $input['minAge']) {
-			//シリーズテーブルのpatientInfo.age
+			//PatientInfo.age series table
 			$query->where('patientInfo.age', '>=', intval($input['minAge']));
 		}
 
-		//maxAge 患者の年齢(終了)
+		//maxAge The age of the patient (the end)
 		if (isset($input['maxAge']) && $input['maxAge']) {
-			//シリーズテーブルのpatientInfo.age
+			//PatientInfo.age series table
 			$query->where('patientInfo.age', '<=', intval($input['maxAge']));
 		}
 
-		//sex 患者の性別
+		//sex Patient sex
 		if (isset($input['sex']) && $input['sex']) {
-			//シリーズテーブルのpatientInfo.sex
+			//PatientInfo.sex series table
 			if ($input['sex'] != 'all')
-				$query->where('patientInfo.sex', "=", $input['sex']);
+				$query->where('patientInfo.sex', '=', $input['sex']);
 		}
 
 		return $query;
 	}
 
 	/**
-	 * Limit/Offset設定
-	 * @param $query Queryオブジェクト
-	 * @param $input 検索条件
-	 * @return $query Queryオブジェクト
-	 * @author stani
+	 * Limit / Offset setting
+	 * @param $query Query object
+	 * @param $input Retrieval conditions
+	 * @return $query Query object
 	 * @since 2014/12/12
 	 */
 	public function scopeAddLimit($query, $input) {
@@ -82,8 +88,7 @@ class Serieses extends Eloquent {
 	}
 
 	/**
-	 * バリデーションルール
-	 * @author stani
+	 * Validation rules
 	 * @since 2014/12/12
 	 */
 	public static $rules = array(
@@ -110,10 +115,9 @@ class Serieses extends Eloquent {
 	);
 
 	/**
-	 * Validateルールを取得する
-	 * isValidが使えるようになったらこのメソッドは削除する
-	 * @return Validateルール配列
-	 * @author stani
+	 * I get the Validate rules
+	 * This method When isValid now can use I delete
+	 * @return Validate rules array
 	 * @since 2014/12/15
 	 */
 	public static function getValidateRules() {

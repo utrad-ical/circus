@@ -2,6 +2,10 @@
 
 use Jenssegers\Mongodb\Model as Eloquent;
 
+/**
+ * Group table operation
+ * @since 2014/12/16
+ */
 class Groups extends Eloquent {
 	protected $connection = 'mongodb';
 	protected $collection = 'Group';
@@ -9,35 +13,21 @@ class Groups extends Eloquent {
 	protected $primaryKey = 'GroupID';
 
 	/**
-	 * 検索条件構築
-	 * @param $query Queryオブジェクト
-	 * @param $input 入力値
-	 * @return Queryオブジェクト
-	 * @author stani
+	 * Search conditions Building
+	 * @param $query Query Object
+	 * @param $input Input value
+	 * @return Query Object
 	 * @since 2014/12/16
 	 */
 	public function scopeAddWhere($query, $input) {
-		//GroupID グループID
+		//GroupID Group ID
 		if (isset($input['GroupID']) && $input['GroupID']) {
-			//GroupテーブルのGroupID
-		//	$query->where('GroupID', 'like', '%'.$input['GroupID'].'%');
-
-			Log::debug('グループID一覧');
-			Log::debug($input['GroupID']);
-			/*
-			$groups = array();
-			foreach ($input['GroupID'] as $gp){
-			//	Log::debug($gp);
-				$groups[] = $gp;
-			}
-			Log::debug($groups);
-			*/
 			$query->whereIn('GroupID', $input['GroupID']);
 		}
 
-		//GroupName グループ名
+		//GroupName Group Name
 		if (isset($input['GroupName']) && $input['GroupName']) {
-			//GroupテーブルのGroupName
+			//GroupName of Group table
 			$query->where('GroupName', 'like', '%'.$input['GroupName'].'%');
 		}
 
@@ -45,11 +35,10 @@ class Groups extends Eloquent {
 	}
 
 	/**
-	 * Limit/Offset設定
-	 * @param $query Queryオブジェクト
-	 * @param $input 検索条件
-	 * @return $query Queryオブジェクト
-	 * @author stani
+	 * Limit / Offset setting
+	 * @param $query Query Object
+	 * @param $input Retrieval conditions
+	 * @return $query Query Object
 	 * @since 2014/12/16
 	 */
 	public function scopeAddLimit($query, $input) {
@@ -62,8 +51,7 @@ class Groups extends Eloquent {
 	}
 
 	/**
-	 * バリデーションルール
-	 * @author stani
+	 * Validation rules
 	 * @since 2014/12/16
 	 */
 	public static $rules = array(
@@ -72,10 +60,9 @@ class Groups extends Eloquent {
 	);
 
 	/**
-	 * Validateルールを取得する
-	 * isValidが使えるようになったらこのメソッドは削除する
-	 * @return Validateルール配列
-	 * @author stani
+	 * I get the Validate rules
+	 * This method When isValid now can use I delete
+	 * @return Validate rules array
 	 * @since 2014/12/16
 	 */
 	public static function getValidateRules() {

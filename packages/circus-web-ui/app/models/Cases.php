@@ -3,6 +3,10 @@
 
 use Jenssegers\Mongodb\Model as Eloquent;
 
+/**
+ * Case table operation
+ * @since 2014/12/05
+ */
 class Cases extends Eloquent {
 	protected $connection = 'mongodb';
 	protected $collection = 'Case';
@@ -10,75 +14,74 @@ class Cases extends Eloquent {
 	protected $primaryKey = 'caseID';
 
 	/**
-	 * 検索条件構築
-	 * @param $query Queryオブジェクト
-	 * @param $input 入力値
-	 * @return Queryオブジェクト
-	 * @author stani
+	 * Search conditions Building
+	 * @param $query Query object
+	 * @param $input Input value
+	 * @return Query object
 	 * @since 2014/12/05
 	 */
 	public function scopeAddWhere($query, $input) {
-		//projectID プロジェクトID
+		//projectID Project ID
 		if (isset($input['project']) && $input['project']) {
-			//ケーステーブルのプロジェクトID
-			//int型なのでint型に変更する
+			//Project ID of the case table
+			//Since the int type that I want to change to int type
 			$projects = array();
 			foreach ($input['project'] as $prj){
 				$projects[] = intval($prj);
 			}
 			$query->whereIn('projectID', $projects);
 		} else {
-			//デフォルト条件::ログインユーザが所属しているグループが閲覧可能なプロジェクト
+			//Default condition :: login user can browse the groups that belong project
 			$projects = Projects::getProjectList(Projects::AUTH_TYPE_VIEW);
 			$query->whereIn('projectID', $projects);
 		}
 
-		//caseID ケースID
+		//caseID Case ID
 		if (isset($input['caseID']) && $input['caseID']) {
-			//ケーステーブルのcaseID
+			//Of the case table caseID
 			$query->where('caseID', 'like', '%'.$input['caseID'].'%');
 		}
-		//patientID 患者ID
+		//patientID Patient ID
 		if (isset($input['patientID']) && $input['patientID']) {
-			//CaseテーブルのpatientInfoCacheオブジェクト内のpatientID
+			//PatientID of patientInfoCache in the objects of the Case table
 			$query->where('patientInfoCache.patientID', 'like', '%'.$input['patientID'].'%');
 		}
 
-		//patientName 患者名
+		//patientName Name of patient
 		if (isset($input['patientName']) && $input['patientName']) {
-			//CaseテーブルのpatientInfoCacheオブジェクト内のname
+			//Name of patientInfoCache in the objects of the Case table
 			$query->where('patientInfoCache.name', 'like', '%'.$input['patientName'].'%');
 		}
 
-		//CreateDate 作成日
+		//CreateDate Created Date
 		if (isset($input['createDate']) && $input['createDate']) {
 			$query->where(
-				'createTime', "=",
+				'createTime', '=',
 				array(
 					'$gte' => new MongoDate(strtotime($input['createDate'])),
-					'$lte' => new MongoDate(strtotime($input['createDate']." +1 day"))
+					'$lte' => new MongoDate(strtotime($input['createDate'].' +1 day'))
 				)
 			);
 		}
 
-		//UpdateDate 更新日
+		//UpdateDate Updated date
 		if (isset($input['updateDate']) && $input['updateDate']) {
 			$query->where(
-				'updateTime', "=",
+				'updateTime', '=',
 				array(
 					'$gte' => new MongoDate(strtotime($input['updateDate'])),
-					'$lte' => new MongoDate(strtotime($input['updateDate']." +1 day"))
+					'$lte' => new MongoDate(strtotime($input['updateDate'].' +1 day'))
 				)
 			);
 		}
 
-		//caseDate ケース作成日
+		//caseDate Case creation date
 		if (isset($input['caseDate']) && $input['caseDate']) {
 			$query->where(
-				'revisions.latest.date', "=",
+				'revisions.latest.date', '=',
 				array(
 					'$gte' => new MongoDate(strtotime($input['caseDate'])),
-					'$lte' => new MongoDate(strtotime($input['caseDate']." +1 day"))
+					'$lte' => new MongoDate(strtotime($input['caseDate'].' +1 day'))
 				)
 			);
 		}
@@ -86,11 +89,10 @@ class Cases extends Eloquent {
 	}
 
 	/**
-	 * Limit/Offset設定
-	 * @param $query Queryオブジェクト
-	 * @param $input 検索条件
-	 * @return $query Queryオブジェクト
-	 * @author stani
+	 * Limit / Offset setting
+	 * @param $query Query object
+	 * @param $input Retrieval conditions
+	 * @return $query Query object
 	 * @since 2014/12/12
 	 */
 	public function scopeAddLimit($query, $input) {
@@ -103,15 +105,13 @@ class Cases extends Eloquent {
 	}
 
 	/**
-	 * バリデーションルール
-	 * @author stani
+	 * Validation rules
 	 * @since 2014/12/12
 	 */
 	public static $rules = array(
 		'caseID'						=>	'required',
 		'incrementalID'					=>	'required|integer',
 		'projectID'						=>	'required|integer',
-		'date'							=>	'required|date',
 		'patientInfoCache.patientID'	=>	'required',
 		'patientInfoCache.age'			=>	'required|integer',
 		'patientInfoCache.birthday'		=>	'required|date',
@@ -119,10 +119,9 @@ class Cases extends Eloquent {
 	);
 
 	/**
-	 * Validateルールを取得する
-	 * isValidが使えるようになったらこのメソッドは削除する
-	 * @return Validateルール配列
-	 * @author stani
+	 * I get the Validate rules
+	 * This method When isValid now can use I delete
+	 * @return Validate rules array
 	 * @since 2014/12/12
 	 */
 	public static function getValidateRules() {
@@ -130,7 +129,6 @@ class Cases extends Eloquent {
 			'caseID'						=>	'required',
 			'incrementalID'					=>	'required|integer',
 			'projectID'						=>	'required|integer',
-			'date'							=>	'required|date',
 			'patientInfoCache_patientID'	=>	'required',
 			'patientInfoCache_age'			=>	'required|integer',
 			'patientInfoCache_birthday'		=>	'required|date',

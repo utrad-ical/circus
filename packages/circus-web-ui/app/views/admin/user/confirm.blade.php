@@ -4,7 +4,7 @@
 <script type="text/javascript">
 	$(function() {
 		$('.link_frm_input').click(function(){
-			//送信するフォームIDを取得
+			//Get the form ID to be sent
 			$(this).closest('div').find('.frm_back').submit();
 			return false;
 		});

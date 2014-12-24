@@ -1,46 +1,43 @@
 <?php
 /**
- * テストデータ登録クラス
- * @author stani
+ * Test data register class
  * @since 2014/12/11
  */
 class TestController extends BaseController {
 	/**
-	 * テストデータ登録トップ画面
-	 * @author stani
+	 * Test data register top screen
 	 * @since 2014/12/11
 	 */
 	public function getIndex() {
-		//ログインチェック
-		if (!Auth::user()) {
-			//ログインしていないのでログイン画面に強制リダイレクト
+		//Login check
+		if (!Auth::check()) {
+			//Forced redirected to the login screen because not logged in
 			return Redirect::to('login');
 		}
 
 		$result = array();
-		$result["title"] = "ダミーデータ登録";
-		$result["url"] = "test";
-		$result["css"] = self::cssSetting();
-		$result["js"] = self::jsSetting();
+		$result['title'] = 'Dummy data registration';
+		$result['url'] = 'test';
+		$result['css'] = self::cssSetting();
+		$result['js'] = self::jsSetting();
 
-		//完了メッセージ取得
-		$msg = Session::get("complete.msg");
-		$result["msg"] = $msg;
-		//Session破棄
-		Session::forget("complet.msg");
+		//Completion message retrieval
+		$msg = Session::get('complete.msg');
+		$result['msg'] = $msg;
+		//Session discarded
+		Session::forget('complet.msg');
 
 		return View::make('test.index', $result);
 	}
 
 	/**
-	 * ケースダミーデータ登録(初期表示)
-	 * @author stani
+	 * Case dummy data registration (initial display)
 	 * @since 2014/12/11
 	 */
 	public function getIndexCase() {
-		//ログインチェック
+		//Login check
 		if (!Auth::check()) {
-			//ログインしていないのでログイン画面に強制リダイレクト
+			//Forced redirected to the login screen because not logged in
 			return Redirect::to('login');
 		}
 
@@ -54,26 +51,25 @@ class TestController extends BaseController {
 	}
 
 	/**
-	 * ケースダミーデータ登録(登録)
-	 * @author stani
+	 * Case dummy data registration (registration)
 	 * @since 2014/12/11
 	 */
 	public function registCase() {
-		//ログインチェック
+		//Login check
 		if (!Auth::check()) {
-			//ログインしていないのでログイン画面に強制リダイレクト
+			//Forced redirected to the login screen because not logged in
 			return Redirect::to('login');
 		}
 
-		//初期設定
+		//Initial setting
 		$result = array();
 
-		//入力値取得
+		//Input value acquisition
 		$inputs = Input::all();
 
-		//Validateチェック用オブジェクト生成
+		//Validate check for object creation
 		$case_obj = App::make('Cases');
-		//Validateチェック用の値を設定
+		//Set the value for the Validate check
 		$case_obj->caseID = $inputs['caseID'];
 		$case_obj->incrementalID = $inputs['incrementalID'];
 		$case_obj->projectID = $inputs['projectID'];
@@ -89,17 +85,17 @@ class TestController extends BaseController {
 		//ValidateCheck
 		$validator = Validator::make($inputs, Cases::getValidateRules());
 		if (!$validator->fails()) {
-			//Validate成功時の処理
-			//エラーがないので登録する
+			//Validate process at the time of success
+			//I registered because there is no error
 			$dt = new MongoDate(strtotime(date('Y-m-d H:i:s')));
 			$case_obj->updateTime = $dt;
 			$case_obj->createTime = $dt;
 			$case_obj->creator = Auth::user()->loginID;
 			$case_obj->save();
-			Session::put("complete.msg", "ケース情報の登録が完了しました。");
+			Session::put('complete.msg', 'Registration of case information is now complete.');
 			return Redirect::to('test');
 		} else {
-			//Validateエラー時の処理
+			//Process at the time of Validate error
 			$result['errors'] = $validator->messages();
 		}
 
@@ -113,12 +109,11 @@ class TestController extends BaseController {
 	}
 
 	/**
-	 * シリーズダミーデータ登録(初期表示)
-	 * @author stani
+	 * Series dummy data registration (initial display)
 	 * @since 2014/12/11
 	 */
 	public function getIndexSeries() {
-		//ログインチェック
+		//Login check
 		if (!Auth::check()) {
 			//ログインしていないのでログイン画面に強制リダイレクト
 			return Redirect::to('login');
@@ -211,34 +206,33 @@ class TestController extends BaseController {
 		}
 
 		$result = array();
-		$result["title"] = "Project Dummy Data Regist";
-		$result["url"] = "/test/project";
-		$result["css"] = self::cssSetting();
-		$result["js"] = self::jsSetting();
+		$result['title'] = 'Project Dummy Data Regist';
+		$result['url'] = '/test/project';
+		$result['css'] = self::cssSetting();
+		$result['js'] = self::jsSetting();
 
 		return View::make('test.project', $result);
 	}
 
 	/**
-	 * プロジェクトダミーデータ登録(登録)
-	 * @author stani
+	 * Project dummy data registration (registration)
 	 * @since 2014/12/11
 	 */
 	public function registProject() {
-		//ログインチェック
+		//Login check
 		if (!Auth::check()) {
-			//ログインしていないのでログイン画面に強制リダイレクト
+			//Forced redirected to the login screen because not logged in
 			return Redirect::to('login');
 		}
 
-		//初期設定
+		//Initial setting
 		$result = array();
 
-		//入力値取得
+		//Input value acquisition
 		$inputs = Input::all();
-		//Validateチェック用オブジェクト生成
+		//Validate check for object creation
 		$project_obj = App::make('Projects');
-		//Validateチェック用の値を設定
+		//Set the value for the Validate check
 		$project_obj->projectID = $inputs['projectID'];
 		$project_obj->projectName = $inputs['projectName'];
 		$project_obj->createGroups = $inputs['createGroups'];
@@ -250,12 +244,12 @@ class TestController extends BaseController {
 		//ValidateCheck
 		$validator = Validator::make($inputs, Projects::getValidateRules());
 		if (!$validator->fails()) {
-			//Validate成功時の処理
-			//エラーがないので登録する
+			//Validate process at the time of success
+			//I registered because there is no error
 			$project_obj->save();
-			return Redirect::to('test.index', array('msg' => 'プロジェクトの登録が完了しました。'));
+			return Redirect::to('test.index', array('msg' => 'Registration of the project has been completed.'));
 		} else {
-			//Validateエラー時の処理
+			//Process at the time of Validate error
 			$result['errors'] = $validator->messages();
 		}
 
@@ -268,46 +262,44 @@ class TestController extends BaseController {
 	}
 
 	/**
-	 * ユーザダミーデータ登録(初期表示)
-	 * @author stani
+	 * User dummy data registration (initial display)
 	 * @since 2014/12/11
 	 */
 	public function getIndexUser() {
-		//ログインチェック
+		//Login check
 		if (!Auth::check()) {
-			//ログインしていないのでログイン画面に強制リダイレクト
+			//Forced redirected to the login screen because not logged in
 			return Redirect::to('login');
 		}
 
 		$result = array();
-		$result["title"] = "User Dummy Data Regist";
-		$result["url"] = "/test/user";
-		$result["css"] = self::cssSetting();
-		$result["js"] = self::jsSetting();
+		$result['title'] = 'User Dummy Data Regist';
+		$result['url'] = '/test/user';
+		$result['css'] = self::cssSetting();
+		$result['js'] = self::jsSetting();
 
 		return View::make('test.user', $result);
 	}
 
 	/**
-	 * ユーザダミーデータ登録(登録)
-	 * @author stani
+	 * User dummy data registration (registration)
 	 * @since 2014/12/15
 	 */
 	public function registUser() {
-		//ログインチェック
+		//Login check
 		if (!Auth::check()) {
-			//ログインしていないのでログイン画面に強制リダイレクト
+			//Forced redirected to the login screen because not logged in
 			return Redirect::to('login');
 		}
 
-		//初期設定
+		//Initial setting
 		$result = array();
 
-		//入力値取得
+		//Input value acquisition
 		$inputs = Input::all();
-		//Validateチェック用オブジェクト生成
+		//Validate check for object creation
 		$user_obj = App::make('Users');
-		//Validateチェック用の値を設定
+		//Set the value for the Validate check
 		$user_obj->userID = $inputs['userID'];
 		$user_obj->loginID = $inputs['loginID'];
 		$user_obj->password = $inputs['password'];
@@ -322,12 +314,12 @@ class TestController extends BaseController {
 		//ValidateCheck
 		$validator = Validator::make($inputs, Users::getValidateRules());
 		if (!$validator->fails()) {
-			//Validate成功時の処理
-			//エラーがないので登録する
+			//Validate process at the time of success
+			//I registered because there is no error
 			$user_obj->save();
-			return Redirect::to('test.index', array('msg' => 'ユーザ情報の登録が完了しました。'));
+			return Redirect::to('test.index', array('msg' => 'Registration of the user information is now complete.'));
 		} else {
-			//Validateエラー時の処理
+			//Process at the time of Validate error
 			$result['errors'] = $validator->messages();
 		}
 
@@ -340,8 +332,8 @@ class TestController extends BaseController {
 	}
 
 	/**
-	 * ページ個別CSS設定
-	 * @author stani
+	 * Page individual CSS setting
+	 * @return Page individual CSS configuration array
 	 * @since 2014/12/04
 	 */
 	function cssSetting() {
@@ -352,9 +344,8 @@ class TestController extends BaseController {
 	}
 
 	/**
-	 * ページ個別のJSの設定を行う
-	 * @return ページ個別のJS設定配列
-	 * @author stani
+	 * Page individual JS setting
+	 * @return Page individual JS configuration array
 	 * @since 2014/12/04
 	 */
 	function jsSetting() {

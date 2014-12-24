@@ -4,16 +4,16 @@
 <script type="text/javascript">
 	$(function() {
 		$('#link_case_edit').click(function(){
-			//送信するフォームIDを取得
+			//Get the form ID to be sent
 			$(this).closest('div').find('.frm_case_edit').submit();
 			return false;
 		});
 
 		$('.link_case_detail').click(function(){
-			//modeを設定
-			$(this).closest('td').find('.view_mode').val("view");
+			//Set mode
+			$(this).closest('td').find('.view_mode').val('view');
 
-			//送信するフォームIDを取得
+			//Get the form ID to be sent
 			$(this).closest('td').find('.form_case_detail').submit();
 			return false;
 		});
@@ -31,11 +31,11 @@
 		});
 
 		$('.change_select').change(function(){
-			// 変更するコンボIDを取得
+			// Get the combo ID you want to change
 			var change_select = $(this).attr('data-target-dom');
-			// selectedにするvalueを取得
+			// Get the value you want to selected
 			var select_value = $("select[name='"+$(this).attr('name')+"']").val();
-			// コンボのselectedを変更
+			// Change selected in the combo
 			$('#'+change_select).find('option').each(function(){
 				var this_num = $(this).val();
 				if(this_num == select_value){
@@ -43,15 +43,31 @@
 				}
 			});
 
-			//検索を行うのでhidden要素を追加する
+			//Add a hidden element so do a search
 			var sort = $("select[name='sort']").val();
 			var disp = $("select[name='disp']").val();
 			var sort_elm = $("<input>", {type:"hidden", name:"sort", value:sort});
 			$('#form_search').append(sort_elm);
 			var disp_elm = $("<input>", {type:"hidden", name:"disp", value:disp});
 			$('#form_search').append(disp_elm);
-			//イベント発火
-			$('#btn_submit').trigger('click');
+			//Event firing
+			var post_data = $('#form_search').serializeArray();
+			var target_elm = $('.result_revision_list');
+
+			$.ajax({
+				url: "{{asset('/case/revision')}}",
+				type: 'POST',
+				data: post_data,
+				dataType: 'json',
+				error: function(){
+					alert('I failed to communicate.');
+				},
+				success: function(res){
+					target_elm.empty();
+					target_elm.append(res.response);
+				}
+			});
+			return false;
 		});
 	});
 </script>
@@ -114,7 +130,7 @@
 					<div class="info_area ">
 						<p class="pad_10">
 							{{$case_detail['patientName']}} ({{$case_detail['patientID']}})
-							<br>{{$case_detail["birthday"]}} {{$case_detail["sex"]}}
+							<br>{{$case_detail['birthday']}} {{$case_detail['sex']}}
 						</p>
 					</div>
 				</div>
@@ -138,9 +154,9 @@
 							</p>
 							<div class="img_toolbar_wrap">
 								<ul class="img_toolbar" data-target-element="img_axial">
-									<li class="toolbar_btn">{{HTML::link('', '描')}}</li>
-									<li class="toolbar_btn">{{HTML::link('', '手')}}</li>
-									<li class="toolbar_btn">{{HTML::link('', '大')}}</li>
+									<li class="toolbar_btn">{{HTML::link('', 'Drawing')}}</li>
+									<li class="toolbar_btn">{{HTML::link('', 'Hand')}}</li>
+									<li class="toolbar_btn">{{HTML::link('', 'Large')}}</li>
 									<li class="toolbar_btn">{{HTML::link('', '小')}}</li>
 								</ul>
 							</div>
@@ -164,9 +180,9 @@
 							</p>
 							<div class="img_toolbar_wrap">
 								<ul class="img_toolbar" data-target-element="img_sagital">
-									<li class="toolbar_btn">{{HTML::link('', '描')}}</li>
-									<li class="toolbar_btn">{{HTML::link('', '手')}}</li>
-									<li class="toolbar_btn">{{HTML::link('', '大')}}</li>
+									<li class="toolbar_btn">{{HTML::link('', 'Drawing')}}</li>
+									<li class="toolbar_btn">{{HTML::link('', 'Hand')}}</li>
+									<li class="toolbar_btn">{{HTML::link('', 'Large')}}</li>
 									<li class="toolbar_btn">{{HTML::link('', '小')}}</li>
 								</ul>
 							</div>
@@ -191,8 +207,8 @@
 							</p>
 							<div class="img_toolbar_wrap">
 								<ul class="img_toolbar" data-target-element="img_coronal">
-									<li class="toolbar_btn">{{HTML::link('', '描')}}</li>
-									<li class="toolbar_btn">{{HTML::link('', '手')}}</li>
+									<li class="toolbar_btn">{{HTML::link('', 'Drawing')}}</li>
+									<li class="toolbar_btn">{{HTML::link('', 'Hand')}}</li>
 									<li class="toolbar_btn">{{HTML::link('', '大')}}</li>
 									<li class="toolbar_btn">{{HTML::link('', '小')}}</li>
 								</ul>
@@ -256,7 +272,7 @@
 							{{Form::select('disp', Config::get('const.search_display'), isset($inputs['disp']) ? $inputs['disp'] : '', array('class' => 'w_max change_select', 'data-target-dom' => 'display_num_down', 'id' => 'display_num_up'))}}
 						</li>
 					</ul>
-					<div class="pad_tb_10">
+					<div class="pad_tb_10 result_revision_list">
 						<table class="result_table common_table al_c">
 							<colgroup>
 								<col width="14%">
@@ -277,22 +293,22 @@
 							@if (count($revision_list))
 								@foreach ($revision_list as $rec)
 									<tr>
-										<td>{{$rec["revisionNo"]}}</td>
+										<td>{{$rec['revisionNo']}}</td>
 										<td>
-											{{$rec["editDate"]}}<br>
-											{{$rec["editTime"]}}
+											{{$rec['editDate']}}<br>
+											{{$rec['editTime']}}
 										</td>
 										<td>
-											{{$rec["seriesCount"]}} series<br>
-											{{$rec["labelCount"]}} label
+											{{$rec['seriesCount']}} series<br>
+											{{$rec['labelCount']}} label
 										</td>
-										<td>{{$rec["creator"]}}</td>
-										<td class="al_l">{{$rec["memo"]}}</td>
+										<td>{{$rec['creator']}}</td>
+										<td class="al_l">{{$rec['memo']}}</td>
 										<td class="">
 											{{Form::open(['url' => asset('/case/detail'), 'method' => 'post', 'class' => 'form_case_detail'])}}
 												{{Form::hidden('mode', $mode)}}
 												{{Form::hidden('caseID', $case_detail['caseID'])}}
-												{{Form::hidden('revisionNo', $rec["revisionNo"])}}
+												{{Form::hidden('revisionNo', $rec['revisionNo'])}}
 												{{Form::button('View', array('class' => 'common_btn link_case_detail'))}}
 												{{HTML::link(asset('/case/detail'), 'Edit', array('class' => 'common_btn mar_t_5 link_case_detail'))}}
 											{{Form::close()}}
@@ -301,7 +317,7 @@
 								@endforeach
 							@else
 								<tr>
-									<td colspan="6">Revisionが登録されていません。</td>
+									<td colspan="6">Revision is not registered.</td>
 								</tr>
 							@endif
 						</table>

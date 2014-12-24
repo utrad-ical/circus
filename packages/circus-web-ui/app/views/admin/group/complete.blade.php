@@ -4,8 +4,7 @@
 <script type="text/javascript">
 	$(function() {
 		$('.link_group_detail').click(function(){
-		//	console.log('called');
-			//送信するフォームIDを取得
+			//Get the form ID to be sent
 			$(this).closest('div').find('.frm_group_detail').submit();
 			return false;
 		});

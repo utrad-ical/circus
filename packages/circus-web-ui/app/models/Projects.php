@@ -48,8 +48,8 @@ class Projects extends Eloquent {
 	 * @since 2014/12/08
 	 */
 	public static function getProjectName($projectID) {
-		$project = self::whereRaw('projectID', '=', $projectID)->get('projectName');
-		return $project;
+		$project = self::where('projectID', '=', intval($projectID))->get(array('projectName'));
+		return $project ? $project[0]->projectName : '';
 	}
 
 	/**

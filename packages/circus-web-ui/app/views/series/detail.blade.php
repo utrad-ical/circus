@@ -45,6 +45,7 @@ $(function() {
 
 				{{HTML::link(asset('case/input'), 'Edit New Case', array('class' => 'common_btn fl_l disp_b link_new_case'))}}
 				{{Form::open(['url' => asset('/case/input'), 'method' => 'post', 'id' => 'form_edit_new_case'])}}
+					{{Form::hidden('back_url', 'series_detail')}}
 				{{Form::close()}}
 				<div class="info_area w_500 fl_r mar_b_10">
 					<p class="pad_10">

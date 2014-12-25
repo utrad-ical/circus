@@ -114,8 +114,14 @@ class SeriesController extends BaseController {
 		//POST data acquisition
 		$inputs = Input::all();
 
-
-		if (!$inputs['seriesUID']) {
+		if (array_key_exists('btnBack', $inputs) !== FALSE) {
+			//ID retrieved from the session
+			$cases = Session::get('case_input');
+			$ids = array_keys($cases['series_list']);
+			$inputs['seriesUID'] = $ids[0];
+			//Session discarded
+			Session::forget('case_input');
+		} else if (!$inputs['seriesUID']) {
 			$error_msg = 'Please specify the series ID.';
 		}
 

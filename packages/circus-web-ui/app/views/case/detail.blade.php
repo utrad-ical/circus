@@ -88,6 +88,7 @@
 						{{Form::open(['url' => asset('/case/edit'), 'method' => 'POST', 'class' => 'frm_case_edit'])}}
 							{{Form::hidden('caseID', $case_detail['caseID'])}}
 							{{Form::hidden('revisionNo', $case_detail['revisionNo'])}}
+							{{Form::hidden('back_url', 'case_detail')}}
 						{{Form::close()}}
 					@endif
 				</div>
@@ -157,7 +158,7 @@
 									<li class="toolbar_btn">{{HTML::link('', 'Drawing')}}</li>
 									<li class="toolbar_btn">{{HTML::link('', 'Hand')}}</li>
 									<li class="toolbar_btn">{{HTML::link('', 'Large')}}</li>
-									<li class="toolbar_btn">{{HTML::link('', '小')}}</li>
+									<li class="toolbar_btn">{{HTML::link('', 'Small')}}</li>
 								</ul>
 							</div>
 						</div>
@@ -183,7 +184,7 @@
 									<li class="toolbar_btn">{{HTML::link('', 'Drawing')}}</li>
 									<li class="toolbar_btn">{{HTML::link('', 'Hand')}}</li>
 									<li class="toolbar_btn">{{HTML::link('', 'Large')}}</li>
-									<li class="toolbar_btn">{{HTML::link('', '小')}}</li>
+									<li class="toolbar_btn">{{HTML::link('', 'Small')}}</li>
 								</ul>
 							</div>
 						</div>
@@ -209,8 +210,8 @@
 								<ul class="img_toolbar" data-target-element="img_coronal">
 									<li class="toolbar_btn">{{HTML::link('', 'Drawing')}}</li>
 									<li class="toolbar_btn">{{HTML::link('', 'Hand')}}</li>
-									<li class="toolbar_btn">{{HTML::link('', '大')}}</li>
-									<li class="toolbar_btn">{{HTML::link('', '小')}}</li>
+									<li class="toolbar_btn">{{HTML::link('', 'Large')}}</li>
+									<li class="toolbar_btn">{{HTML::link('', 'Small')}}</li>
 								</ul>
 							</div>
 						</div>
@@ -218,7 +219,7 @@
 					<div class="img_area fl_r" id="panel_wrap">
 						<div id="layer_panel">
 							<div class="pad_10">
-								<h2 class="layer_panel_ttl">レイヤー情報</h2>
+								<h2 class="layer_panel_ttl">Layer information</h2>
 								<p class="layer_panel_switch">
 									<span class="switch_main" id="opener">▼</span>
 									<span class="switch_main" id="closer">▲</span>

@@ -31,7 +31,7 @@
 					</tr>
 					<tr>
 						<th colspan="2">Project ID</th>
-						<td colspan="3">{{$inputs['projectID']}}</td>
+						<td colspan="3">{{$inputs['projectName']}}</td>
 					</tr>
 					<tr>
 						<th rowspan="2">Patient</th>

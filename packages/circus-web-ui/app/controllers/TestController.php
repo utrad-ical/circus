@@ -115,7 +115,7 @@ class TestController extends BaseController {
 	public function getIndexSeries() {
 		//Login check
 		if (!Auth::check()) {
-			//ログインしていないのでログイン画面に強制リダイレクト
+			//Forced redirected to the login screen because not logged in
 			return Redirect::to('login');
 		}
 
@@ -129,25 +129,24 @@ class TestController extends BaseController {
 	}
 
 	/**
-	 * シリーズダミーデータ登録(登録)
-	 * @author stani
+	 * Series dummy data registration (registration)
 	 * @since 2014/12/11
 	 */
 	public function registSeries() {
-		//ログインチェック
+		//Login check
 		if (!Auth::check()) {
-			//ログインしていないのでログイン画面に強制リダイレクト
+			//Forced redirected to the login screen because not logged in
 			return Redirect::to('login');
 		}
 
-		//初期設定
+		//Initial setting
 		$result = array();
 
-		//入力値取得
+		//Input value acquisition
 		$inputs = Input::all();
-		//Validateチェック用オブジェクト生成
+		//Validate check for object creation
 		$series_obj = App::make('Serieses');
-		//Validateチェック用の値を設定
+		//Set the value for the Validate check
 		$series_obj->caseID = $inputs['studyUID'];
 		$series_obj->incrementalID = $inputs['seriesUID'];
 		$series_obj->projectID = $inputs['storageID'];
@@ -175,12 +174,12 @@ class TestController extends BaseController {
 		//$validator = Validator::make($inputs, Cases::getValidateRules());
 		$validator = Validator::make($inputs, Serieses::getValidateRules());
 		if (!$validator->fails()) {
-			//Validate成功時の処理
-			//エラーがないので登録する
+			//Validate process at the time of success
+			//I registered because there is no error
 			$series_obj->save();
-			return Redirect::to('test.index', array('msg' => 'シリーズの登録が完了しました。'));
+			return Redirect::to('test.index', array('msg' => 'Registration of the series is now complete.'));
 		} else {
-			//Validateエラー時の処理
+			//Process at the time of Validate error
 			$result['errors'] = $validator->messages();
 		}
 
@@ -194,14 +193,13 @@ class TestController extends BaseController {
 	}
 
 	/**
-	 * プロジェクトダミーデータ登録(初期表示)
-	 * @author stani
+	 * Project dummy data registration (initial display)
 	 * @since 2014/12/11
 	 */
 	public function getIndexProject() {
-		//ログインチェック
+		//Login check
 		if (!Auth::check()) {
-			//ログインしていないのでログイン画面に強制リダイレクト
+			//Forced redirected to the login screen because not logged in
 			return Redirect::to('login');
 		}
 
@@ -338,8 +336,8 @@ class TestController extends BaseController {
 	 */
 	function cssSetting() {
 		$css = array();
-	  	$css["ui-lightness/jquery-ui-1.10.4.custom.min.css"] = "css/ui-lightness/jquery-ui-1.10.4.custom.min.css";
-		$css["page.css"] = "css/page.css";
+	  	$css['ui-lightness/jquery-ui-1.10.4.custom.min.css'] = 'css/ui-lightness/jquery-ui-1.10.4.custom.min.css';
+		$css['page.css'] = 'css/page.css';
 	  	return $css;
 	}
 
@@ -350,7 +348,7 @@ class TestController extends BaseController {
 	 */
 	function jsSetting() {
 		$js = array();
-		$js["jquery-ui.min.js"] = "js/jquery-ui.min.js";
+		$js['jquery-ui.min.js'] = 'js/jquery-ui.min.js';
 
 		return $js;
 	}

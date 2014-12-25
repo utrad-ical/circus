@@ -19,8 +19,14 @@
 <div class="page_contents_outer">
 	<div class="page_contents_inner">
 		<div class="page_unique">
-			<h1 class="page_ttl">Case Edit Complete</h1>
-			<p class="pad_tb_40 al_c">Case Edit is completed.</p>
+			<h1 class="page_ttl">{{$title}}</h1>
+			<p class="pad_tb_40 al_c">
+				@if (isset($msg))
+					{{$msg}}
+				@elseif (isset($error_msg))
+					<span class="txt_alert">{{$error_msg}}</span>
+				@endif
+			</p>
 			<p class="al_c">
 				{{HTML::link(asset('series/search'), 'View Series', array('class' => 'common_btn link_series_search'))}}
 				{{HTML::link(asset('case/search'), 'View Cases', array('class' => 'common_btn'))}}

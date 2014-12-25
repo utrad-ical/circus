@@ -30,6 +30,7 @@ Route::post('case/edit', 'CaseController@input');
 Route::post('case/input', 'CaseController@input');
 Route::post('case/confirm', 'CaseController@confirm');
 Route::post('case/complete', 'CaseController@regist');
+Route::get('case/complete', 'CaseController@complete');
 //Case (for Ajax)
 Route::any('case/revision', 'CaseController@revision_ajax');
 
@@ -48,28 +49,21 @@ Route::get('admin', 'AdminController@getIndex');
 Route::get('admin/group/', function(){return Redirect::to('admin/group/search');});
 Route::get('admin/group/search', 'GroupController@search');
 Route::post('admin/group/search', 'GroupController@search');
-Route::post('admin/group/detail', 'GroupController@detail');
 //Management screen / group (for Ajax)
 Route::any('admin/group/input', 'GroupController@input');
 Route::any('admin/group/confirm', 'GroupController@confirm');
 Route::any('admin/group/complete', 'GroupController@regist');
-Route::any('admin/group/detail', 'GroupController@detail_ajax');
+Route::any('admin/group/detail', 'GroupController@detail');
 
 //Management screen / user
 Route::get('admin/user/', function(){return Redirect::to('admin/user/search');});
 Route::get('admin/user/search', 'UserController@search');
 Route::post('admin/user/search', 'UserController@search');
-Route::get('admin/user/input', 'UserController@input');
-Route::post('admin/user/input', 'UserController@input');
-Route::post('admin/user/confirm', 'UserController@confirm');
-Route::post('admin/user/complete', 'UserController@regist');
-Route::get('admin/user/complete', 'UserController@complete');
-Route::post('admin/user/detail', 'UserController@detail');
 //Management screen / user (for Ajax)
-Route::any('admin/user/input', 'UserController@input_ajax');
-Route::any('admin/user/confirm', 'UserController@confirm_ajax');
-Route::any('admin/user/complete', 'UserController@regist_ajax');
-Route::any('admin/user/detail', 'UserController@detail_ajax');
+Route::any('admin/user/input', 'UserController@input');
+Route::any('admin/user/confirm', 'UserController@confirm');
+Route::any('admin/user/complete', 'UserController@regist');
+Route::any('admin/user/detail', 'UserController@detail');
 
 //Test data register
 Route::get('test', 'TestController@getIndex');

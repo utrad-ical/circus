@@ -157,6 +157,7 @@
 
 			@if ($search_flg)
 				{{Form::open(['url' => asset('/case/input'), 'method' => 'post', 'id' => 'form_edit_new_case'])}}
+					{{Form::hidden('back_url', 'case_search')}}
 					<div class="w_900 fl_l">
 						<ul class="common_pager clearfix">
 							{{$list_pager->links()}}

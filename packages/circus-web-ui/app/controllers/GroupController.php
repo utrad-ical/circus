@@ -50,7 +50,7 @@ class GroupController extends BaseController {
 	 * Group Details screen
 	 * @since 2014/12/24
 	 */
-	public function detail_ajax() {
+	public function detail() {
 		//Login check
 		if (!Auth::check()) {
 			//Forced redirected to the login screen because not logged in
@@ -86,7 +86,7 @@ class GroupController extends BaseController {
 		$result['css'] = self::cssSetting();
 		$result['js'] = self::jsSetting();
 
-		$tmp = View::make('/admin/group/detail_ajax', $result);
+		$tmp = View::make('/admin/group/detail', $result);
 
 		header('Content-Type: application/json; charset=UTF-8');
 		$res = json_encode(array('result' => true, 'message' => '', 'response' => "$tmp"));
@@ -111,14 +111,11 @@ class GroupController extends BaseController {
 		//Input value acquisition
 		$inputs = Input::all();
 
-		$result['title'] = 'Add new Group';
 		$result['url'] = '/admin/group/search';
 
 		//Settings page
 		if (array_key_exists('btnBack', $inputs)) {
 			$result['inputs'] = Session::get('group_input');
-			if (array_key_exists('GroupID', $inputs))
-				$result['title'] = 'Edit Group';
 		} else if (array_key_exists('GroupID', $inputs)) {
 			$group_data = Groups::find($inputs['GroupID']);
 			$result['inputs'] = array(
@@ -134,9 +131,15 @@ class GroupController extends BaseController {
 				}
 			}
 			Session::put('GroupID', $inputs['GroupID']);
+			Session::put('mode', 'Edit');
 		} else {
 			$result['inputs'] = array('GroupID' => self::createGroupID());
+			Session::put('mode', 'Add new');
 		}
+
+		//Setting of title
+		$mode = Session::get('mode');
+		$result['title'] = $mode.' Group';
 
 		//Set of error messages
 		if ($error_msg) {
@@ -146,7 +149,7 @@ class GroupController extends BaseController {
 			$result['group_detail'] = $result['inputs'];
 		}
 
-		$tmp = View::make('/admin/group/input_ajax', $result);
+		$tmp = View::make('/admin/group/input', $result);
 
 		header('Content-Type: application/json; charset=UTF-8');
 		$res = json_encode(array('result' => true, 'message' => '', 'response' => "$tmp"));
@@ -168,6 +171,7 @@ class GroupController extends BaseController {
 		$result = array();
 		$result['css'] = self::cssSetting();
 		$result['js'] = self::jsSetting();
+		$mode = Session::get('mode');
 
 		//Input value acquisition
 		$inputs = Input::all();
@@ -191,17 +195,16 @@ class GroupController extends BaseController {
 
 		//ValidateCheck
 		$validator = Validator::make($inputs, Groups::getValidateRules());
+		$result['title'] = $mode.' Group Confirmation';
 		if ($validator->fails()) {
 			//Process at the time of Validate error
-			$result['title'] = 'Add new Group';
 			$result['url'] = '/admin/group/input';
 			$result['errors'] = $validator->messages();
-			$tmp = View::make('/admin/group/input_ajax', $result);
+			$tmp = View::make('/admin/group/input', $result);
 		} else {
 			//And displays a confirmation screen because there is no error
-			$result['title'] = 'Add new Group Confirmation';
 			$result['url'] = '/admin/group/confirm';
-			$tmp = View::make('/admin/group/confirm_ajax', $result);
+			$tmp = View::make('/admin/group/confirm', $result);
 		}
 
 		header('Content-Type: application/json; charset=UTF-8');
@@ -226,6 +229,7 @@ class GroupController extends BaseController {
 		//Information obtained from the session
 		$inputs = Session::get('group_input');
 		$groupID = Session::get('GroupID');
+		$mode = Session::get('mode');
 
 		$result['css'] = self::cssSetting();
 		$result['js'] = self::jsSetting();
@@ -257,29 +261,24 @@ class GroupController extends BaseController {
 			$group_obj->domains = array();
 			$group_obj->save();
 
-			if (Session::get('id'))
-				$result['title'] = 'Group Edit Complete';
-			else
-				$result['title'] = 'Add new Group Complete';
 			$result['url'] = '/admin/group/complete';
 			$result['msg'] = 'Registration of group information is now complete.';
 			$result['GroupID'] = $inputs['GroupID'];
+			$result['title'] = $mode.' Group Complete';
 
 			//Session discarded
 			Session::forget('group_input');
 			Session::forget('GroupID');
+			Session::forget('mode');
 
-			$tmp = View::make('/admin/group/complete_ajax', $result);
+			$tmp = View::make('/admin/group/complete', $result);
 		} else {
 			//Process at the time of Validate error
 			$result['errors'] = $validator->messages();
 			$result['inputs'] = $inputs;
-			if (Session::get('id'))
-				$result['title'] = 'Add new Group';
-			else
-				$result['title'] = 'Group Edit';
+			$result['title'] = $mode.' Group';
 			$result['url'] = '/admin/group/input';
-			$tmp = View::make('/admin/group/input_ajax', $result);
+			$tmp = View::make('/admin/group/input', $result);
 		}
 
 		header('Content-Type: application/json; charset=UTF-8');

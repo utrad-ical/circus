@@ -1,12 +1,23 @@
 @extends('common.layout')
 @include('common.header')
 @section('content')
+<script type="text/javascript">
+	$(function(){
+		$('#btnBack').click(function(){
+			$(this).closest('div').find('.frmBack').submit();
+			return false;
+		});
+	});
+</script>
 <div class="page_contents_outer">
 	<div class="page_contents_inner">
 		<div class="page_unique" id="page_case_input">
-			<h1 class="page_ttl">Add new Case</h1>
+			<h1 class="page_ttl">{{$title}}</h1>
 			<div class="al_l mar_b_10">
-				{{HTML::link(asset($back_url), 'Back to Case Search', array('class' => 'common_btn', 'id' => 'btnBack'))}}
+				{{HTML::link(asset($back_url), $back_label, array('class' => 'common_btn', 'id' => 'btnBack'))}}
+				{{Form::open(['url' => asset($back_url), 'method' => 'post', 'class' => 'frmBack'])}}
+					{{Form::hidden('btnBack', 'btnBack')}}
+				{{Form::close()}}
 			</div>
 			@if (isset($error_msg))
 				<span class="txt_alert">{{$error_msg}}</span>

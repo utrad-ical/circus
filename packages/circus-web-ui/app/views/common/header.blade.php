@@ -3,7 +3,7 @@
 <html>
 <head>
 	<meta charset="utf-8">
-	<title>{{{isset($title) ? $title : 'Hello'}}}</title>
+	<title>{{$title}}</title>
 	<link rel="stylesheet" type="text/css" href="{{asset('../bootstrap/css/common.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{asset('../bootstrap/css/layout.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{asset('../bootstrap/css/color.css')}}">

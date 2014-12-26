@@ -16,7 +16,7 @@ class SeriesController extends BaseController {
 		}
 
 		//Initialization
-		$search_flg = true;
+		$search_flg = false;
 		$result = array();
 
 		//Input value acquisition
@@ -24,7 +24,6 @@ class SeriesController extends BaseController {
 
 		//Reset or initial display button is pressed during
 		if (array_key_exists ('btnReset', $inputs) !== FALSE || !$inputs) {
-			$search_flg = false;
 			Session::forget('series.search');
 			$result['inputs'] = array('sex' => 'all');
 		//Search button is pressed during
@@ -38,9 +37,11 @@ class SeriesController extends BaseController {
 			Session::put('series.search', $tmp);
 		}
 
+		$search_data = Session::get('series.search');
+
 		//Search
-		if ($search_flg) {
-			$search_data = Session::get('series.search');
+		if ($search_data) {
+			$search_flg = true;
 			//Search conditions generation and data acquisition
 			//Setting of acquisition column
 			$select_col = array(
@@ -77,6 +78,7 @@ class SeriesController extends BaseController {
 				);
 			}
 			$result['list'] = $list;
+
 			//Setting the pager
 			$case_pager = Paginator::make(
 				$list,
@@ -84,8 +86,12 @@ class SeriesController extends BaseController {
 				$search_data['disp']
 			);
 			$result['list_pager'] = $case_pager;
-			$result['inputs'] = $search_data;
+		} else {
+			//デフォルト設定
+			$search_data['sex'] = 'all';
 		}
+
+		$result['inputs'] = $search_data;
 
 		$result['title'] = 'Series Search';
 		$result['url'] = 'series/search';
@@ -159,6 +165,98 @@ class SeriesController extends BaseController {
 	}
 
 	/**
+	 * Series registration screen
+	 * @since 2014/12/26
+	 */
+	function input(){
+		//Login check
+		if (!Auth::check()) {
+			//Forced redirected to the login screen because not logged in
+			return Redirect::to('login');
+		}
+
+		//Error message initialization
+		$result = array();
+
+		//POST data acquisition
+		$inputs = Input::all();
+
+		$result['title'] = 'Series Import';
+		$result['url'] = 'series/input';
+		$result['css'] = self::cssSetting('input');
+		$result['js'] = self::jsSetting();
+
+		return View::make('/series/input', $result);
+	}
+
+	/**
+	 * Series registration
+	 * データ形式がわからないため、チェックしようがないのでファイルアップロードのみでデータ登録なし
+	 * データ形式が明確になり次第エラーチェックを追加予定
+	 * @since 2014/12/26
+	 */
+	function regist() {
+		//Login check
+		if (!Auth::check()) {
+			//Forced redirected to the login screen because not logged in
+			return Redirect::to('login');
+		}
+
+		//Error message initialization
+		$error_msg = '';
+		$result = array();
+
+		//POST data acquisition
+		$inputs = Input::all();
+
+		//Not selected file
+		if (array_key_exists('upload_file', $inputs) === FALSE) {
+			$error_msg = "Please select the file.";
+		} else {
+			//Upload file information acquisition
+			$uploads = Input::file('upload_file');
+		}
+
+		//$validator = Validator::make(self::setSeriesValidate($inputs), Serieses::getValidateRules());
+		//if ($validator->fails()){
+		if ($error_msg) {
+			//Processing in the case where there is an error
+			$result['title'] = 'Series Import';
+			$result['url'] = '/series/import';
+			$result['css'] = self::cssSetting('input');
+			$result['js'] = self::jsSetting();
+			//$result['errors'] = $validator->messages();
+			$result['error_msg'] = $error_msg;
+			return View::make('/series/input', $result);
+		} else {
+			//Processing in the case where there is no error
+			//本来はここに登録処理
+			$result['title'] = 'Series Import Complete';
+			$result['url'] = '/series/complete';
+			$result['css'] = self::cssSetting();
+			$result['js'] = self::jsSetting();
+			$result['msg'] = 'Registration of series information is now complete.';
+			Session::put('complete', $result);
+			return Redirect::to('/series/complete');
+		}
+	}
+
+	/**
+	 * Series registration completion screen
+	 * @since 2014/12/26
+	 */
+	function complete(){
+		//Session information acquisition
+		$result = Session::get('complete');
+
+		//Session information discarded
+		Session::forget('complete');
+
+		//Screen display
+		return View::make('series/complete', $result);
+	}
+
+	/**
 	 * Page individual CSS setting
 	 * @return Page individual CSS configuration array
 	 * @since 2014/12/04
@@ -166,9 +264,14 @@ class SeriesController extends BaseController {
 	function cssSetting($screen = 'search') {
 		$css = array();
 
-		if ($screen == 'detail') {
-			$css['page.css'] = 'css/page.css';
-			$css['ui-lightness/jquery-ui-1.10.4.custom.min.css'] = 'css/ui-lightness/jquery-ui-1.10.4.custom.min.css';
+		switch ($screen) {
+			case 'detail':
+			case 'input':
+				$css['page.css'] = 'css/page.css';
+				$css['ui-lightness/jquery-ui-1.10.4.custom.min.css'] = 'css/ui-lightness/jquery-ui-1.10.4.custom.min.css';
+				break;
+			case 'search':
+				break;
 		}
 	  	return $css;
 	}
@@ -180,10 +283,17 @@ class SeriesController extends BaseController {
 	 */
 	function jsSetting($screen = 'search') {
 		$js = array();
-		$js['jquery.cookie.js'] = 'js/jquery.cookie.js';
 
-		if ($screen == 'detail'){
-			$js['img_edit.js'] = 'js/img_edit.js';
+		switch ($screen) {
+			case 'search':
+				$js['jquery.cookie.js'] = 'js/jquery.cookie.js';
+				break;
+			case 'detail':
+				$js['jquery.cookie.js'] = 'js/jquery.cookie.js';
+				$js['img_edit.js'] = 'js/img_edit.js';
+				break;
+			case 'input':
+				break;
 		}
 		return $js;
 	}
@@ -197,5 +307,19 @@ class SeriesController extends BaseController {
 	function getSex($sex) {
 		$sexes = Config::get('const.patient_sex');
 		return $sexes[$sex];
+	}
+
+	/**
+	 * I set to an array for Validate analyzes the uploaded file
+	 * アップロードされる形式等の詳細が不明なため、枠だけ作成
+	 * @param $input Input value
+	 * @return Validate用配列
+	 * @since 2014/12/26
+	 */
+	function setSeriesValidate($input){
+		$list = array();
+
+		//ここに設定値
+		return $list;
 	}
 }

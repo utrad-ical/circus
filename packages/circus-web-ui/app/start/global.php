@@ -31,8 +31,6 @@ ClassLoader::addDirectories(array(
 |
 */
 
-//Log::useFiles(storage_path().'/logs/laravel.log');
-//Log::useFiles(storage_path().'/logs/debug.log');
 Log::useDailyFiles(storage_path() . '/logs/debug.log');
 
 /*
@@ -51,6 +49,12 @@ Log::useDailyFiles(storage_path() . '/logs/debug.log');
 App::error(function(Exception $exception, $code)
 {
 	Log::error($exception);
+	$result = array();
+	$result['url'] = 'home';
+	$result['error_msg'] = $exception->getMessage() ? $exception->getMessage() : '';
+//	Log::debug("エラーメッセージ");
+//	Log::debug($exception->getMessage());
+	return Response::view('error', $result, $code);
 });
 
 /*

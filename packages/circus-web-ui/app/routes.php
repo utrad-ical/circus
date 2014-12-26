@@ -38,10 +38,9 @@ Route::any('case/revision', 'CaseController@revision_ajax');
 Route::get('series/search', 'SeriesController@search');
 Route::post('series/search', 'SeriesController@search');
 Route::post('series/detail', 'SeriesController@detail');
-Route::get('series/input', 'SeriesController@input');
-Route::post('series/edit', 'SeriesController@input');
-Route::post('series/confirm', 'SeriesController@confirm');
+Route::get('series/import', 'SeriesController@input');
 Route::post('series/complete', 'SeriesController@regist');
+Route::get('series/complete', 'SeriesController@complete');
 
 //Management screen
 Route::get('admin', 'AdminController@getIndex');
@@ -54,7 +53,6 @@ Route::any('admin/group/input', 'GroupController@input');
 Route::any('admin/group/confirm', 'GroupController@confirm');
 Route::any('admin/group/complete', 'GroupController@regist');
 Route::any('admin/group/detail', 'GroupController@detail');
-
 //Management screen / user
 Route::get('admin/user/', function(){return Redirect::to('admin/user/search');});
 Route::get('admin/user/search', 'UserController@search');
@@ -65,15 +63,8 @@ Route::any('admin/user/confirm', 'UserController@confirm');
 Route::any('admin/user/complete', 'UserController@regist');
 Route::any('admin/user/detail', 'UserController@detail');
 
-//Test data register
-Route::get('test', 'TestController@getIndex');
-Route::get('test/case', 'TestController@getIndexCase');
-Route::post('test/case', 'TestController@registCase');
-Route::get('test/series', 'TestController@getIndexSeries');
-Route::post('test/series', 'TestController@registSeries');
-Route::get('test/project', 'TestController@getIndexProject');
-Route::post('test/project', 'TestController@registProject');
-Route::get('test/user', 'TestController@getIndexUser');
-Route::post('test/user', 'TestController@registUser');
-Route::get('test/group', 'TestController@getIndexGroup');
-Route::post('test/group', 'TestController@registGroup');
+//404 pages
+Event::listen('404', function()
+{
+    return App::abort(404);
+});

@@ -157,7 +157,7 @@ class GroupController extends BaseController {
 	}
 
 	/**
-	 * Group registration confirm(Ajax)
+	 * Group registration confirm
 	 * @since 2014/12/26
 	 */
 	public function confirm() {

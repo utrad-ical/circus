@@ -7,8 +7,8 @@ return array(
 	'search_case_sort'		=>	array('' => 'Sort Order', 'updateTime' => 'Last Update', 'caseID' => 'ID'),	//検索結果ソート順(ケース)
 	'week_day'				=>	array('日', '月', '火', '水', '木', '金', '土'),	//曜日(日本語表記)
 	'search_series_sort'	=>	array('' => 'Sort Order', 'updateTime' => 'Last Update', 'seriesUID' => 'ID'),	//検索結果ソート順(シリーズ)
-	//'search_revision_sort'	=>	array('' => 'Sort Order', 'date' => 'Last Update', 'revisionNo' => 'Revision No'),	//検索結果ソート順(ケース)
 	'hash_key'				=>	'todai_test',
 	'search_revision_sort'	=>	array('' => 'Sort Order', 'revision.date' => 'Edit Time', 'revisionNo' => 'revisionNo'),	//検索結果ソート順(ケース)
-	'crypt_secret_key'		=>	'todai_project'
+	'crypt_secret_key'		=>	'todai_project',
+	'upload_path'			=>	dirname(__FILE__).'/../uploads/'
 );

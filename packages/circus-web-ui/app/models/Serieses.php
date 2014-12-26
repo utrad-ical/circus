@@ -21,7 +21,6 @@ class Serieses extends Eloquent {
 	 * @since 2014/12/05
 	 */
 	public function scopeAddWhere($query, $input) {
-
 		//seriesID Series ID
 		if (isset($input['seriesUID']) && $input['seriesUID']) {
 			//Series table of series UID
@@ -99,10 +98,10 @@ class Serieses extends Eloquent {
 		'patientInfo.age'		=>	'required',
 		'patientInfo.birthday'	=>	'required',
 		'patientInfo.sex'		=>	'required',
-		'patientInfo.height'	=>	'required',
-		'patientInfo.weight'	=>	'required',
-		'width'					=>	'required',
-		'height'				=>	'required',
+		'patientInfo.height'	=>	'required|integer',
+		'patientInfo.weight'	=>	'required|integer',
+		'width'					=>	'required|integer',
+		'height'				=>	'required|integer',
 		'seriesDate'			=>	'required',
 		'modality'				=>	'required',
 		'seriesDescription'		=>	'required',

@@ -16,20 +16,20 @@ class CaseController extends BaseController {
 		}
 
 		//Initial setting
-		$search_flg = true;
+		$search_flg = false;
 		$result = array();
 
 		//Input value acquisition
 		$inputs = Input::all();
 
 		//Reset button or the initial display when pressed
-		if (array_key_exists ('btnReset', $inputs) !== FALSE || !$inputs) {
-			$search_flg = false;
+		if (array_key_exists('btnReset', $inputs) !== FALSE || !$inputs) {
+		//	$search_flg = false;
 			Session::forget('case.search');
 		//Search button is pressed during
 		} else if (array_key_exists ('btnSearch', $inputs) !== FALSE) {
-			if (array_key_exists ('disp', $inputs) === FALSE) $inputs['disp'] = Config::get('const.page_display');
-			if (array_key_exists ('sort', $inputs) === FALSE) $inputs['sort'] = 'updateTime';
+			if (array_key_exists('disp', $inputs) === FALSE) $inputs['disp'] = Config::get('const.page_display');
+			if (array_key_exists('sort', $inputs) === FALSE) $inputs['sort'] = 'updateTime';
 			Session::put('case.search', $inputs);
 		} else if (array_key_exists('page', $inputs) !== FALSE) {
 			$tmp = Session::get('case.search');
@@ -37,9 +37,11 @@ class CaseController extends BaseController {
 			Session::put('case.search', $tmp);
 		}
 
-		if ($search_flg) {
+		$search_data = Session::get('case.search');
+
+		if ($search_data) {
+			$search_flg = true;
 			//Get the search criteria from the session
-			$search_data = Session::get('case.search');
 
 			//Search conditions generation and data acquisition
 			//Setting of acquisition column
@@ -170,11 +172,11 @@ class CaseController extends BaseController {
 						true: false;
 			//And shape the case information for display
 			//Project name
-			$project = Projects::where("projectID", "=", $case_data->projectID)->get();
+			$project = Projects::find($case_data->projectID);
 			$case_detail = array(
 				'caseID'		=>	$case_data->caseID,
 				'projectID'		=>	$case_data->projectID,
-				'projectName'	=>	$project ? $project[0]->projectName : '',
+				'projectName'	=>	$project ? $project->projectName : '',
 				'patientID'		=>	$case_data->patientInfoCache['patientID'],
 				'patientName'	=>	$case_data->patientInfoCache['name'],
 				'birthday'		=>	$case_data->patientInfoCache['birthday'],
@@ -225,7 +227,7 @@ class CaseController extends BaseController {
 			//Series list created
 			$series = array();
 			foreach ($case_data->revisions as $key => $value) {
-				if ($key !== "latest") {
+				if ($key !== 'latest') {
 					for ($i = 0; $i < count($value['series']); $i++){
 						$series[] = $value['series'][$i]['seriesUID'];
 					}
@@ -309,11 +311,11 @@ class CaseController extends BaseController {
 			foreach($case_data->revisions as $key => $value) {
 				//key is excluded so Clone thing of latest
 				if ($key !== 'latest') {
-					//Revision番号が大きい場合はセット
+					//The set if Revision number is large
 					if ($max_revision < $key)
 						$max_revision = $key;
 
-					//ラベル数を求める
+					//I ask the number of label
 					$label_cnt = 0;
 					foreach ($value['series'] as $rec) {
 						$label_cnt += count($rec['labels']);
@@ -337,14 +339,14 @@ class CaseController extends BaseController {
 				}
 			}
 
-			//Revisionソート順適応
+			//Revision sort order adaptation
 			$result['revision_list'] = self::sortRevision($revision_list, $search_data['sort']);
 			$result['revision_no_list'] = $revision_no_list;
 
 			//Series list created
 			$series = array();
 
-			//ページャーの設定
+			//Setting the pager
 			$revision_pager = Paginator::make(
 				$revision_list,
 				count($revision_list),
@@ -396,16 +398,17 @@ class CaseController extends BaseController {
 		//Edit mode
 		} else if (array_key_exists('caseID', $inputs) !== FALSE) {
 			$case_data = Cases::find($inputs['caseID']);
-							//	->get();
 
+			//Set case information
 			if ($case_data) {
-				$result['inputs'] = $case_data[0];
-				Session::put('caseID', $case_data[0]->caseID);
+				$result['inputs'] = $case_data;
+				Session::put('caseID', $case_data->caseID);
 			}
 
+			//Stores series information
 			$series_exclude_ary = array();
 			foreach ($result['inputs']->revisions as $key => $value) {
-				if ($key != 'latest') {
+				if ($key !== 'latest') {
 					for($i = 0; $i < count($value['series']); $i++){
 						$series_exclude_ary[] = $value['series'][$i]['seriesUID'];
 					}
@@ -414,7 +417,7 @@ class CaseController extends BaseController {
 			Session::put('mode', 'Edit');
 		//New registration mode
 		} else {
-			//セッション初期化
+			//Session initialization
 			Session::forget('caseID');
 			$result['inputs'] = array('caseID' => self::createCaseID());
 
@@ -424,9 +427,9 @@ class CaseController extends BaseController {
 			Session::put('mode', 'Add new');
 		}
 
-		//タイトルの設定
+		//Setting of title
 		$mode = Session::get('mode');
-		$result['title'] = $mode." Case";
+		$result['title'] = $mode.' Case';
 
 		$inputs['seriesUID'] = $series_exclude_ary;
 		$select_col = array(
@@ -459,7 +462,7 @@ class CaseController extends BaseController {
 			Session::put('case_input', $case_info);
 		}
 
-		//戻り先の設定
+		//Setting the return destination
 		self::setBackUrl($inputs, $result);
 		return View::make('/case/input', $result);
 	}
@@ -490,9 +493,24 @@ class CaseController extends BaseController {
 		$mode = Session::get('mode');
 
 		$case_info['projectID'] = $inputs['projectID'];
-		//入力値をセッションに保存
+		//シリーズの設定
+		$case_info['seriesUID'] = $inputs['series'];
+		$select_col = array(
+			'seriesUID', 'seriesDescription',
+			'patientInfo.patientID', 'patientInfo.age',
+			'patientInfo.sex', 'patientInfo.patientName',
+			'patientInfo.birthday'
+		);
+		$series = Serieses::addWhere($case_info)
+							->get($select_col);
+
+		//Patient ID duplication check
+		$error_msg = self::checkDuplicatePatientID($series, $series_list);
+		if (!$error_msg)
+			$case_info['series_list'] = self::sortSeriesList($series_list, $inputs['series']);
+
+		//Save the input value to the session
 		Session::put('case_input', $case_info);
-		//Log::debug();
 		$case_info['projectName'] = Projects::getProjectName($inputs['projectID']);
 
 		//Validate check for object creation
@@ -521,7 +539,6 @@ class CaseController extends BaseController {
 			//Process at the time of Validate error
 			$result['title'] = $mode.' Case';
 			$result['url'] = '/case/input';
-			//$result['back_url'] = '/series/search';
 			$result['project_list'] = Projects::getProjectList(Projects::AUTH_TYPE_CREATE, true);
 			$result['errors'] = $validator->messages();
 			return View::make('/case/input', $result);
@@ -552,18 +569,12 @@ class CaseController extends BaseController {
 		$caseID = Session::get('caseID');
 		$mode = Session::get('mode');
 
-		Log::debug("入力値::");
-		Log::debug($inputs);
-		//$result['back_url'] = '/series/search';
 		$result['css'] = self::cssSetting();
 		$result['js'] = self::jsSetting();
 		self::setBackUrl($inputs, $result);
 
 		//Validate check for object creation
-		Log::debug("caseID::".$caseID);
 		$case_obj = $caseID ?
-				//	Cases::addWhere(array('caseID' => $caseID))->get() :
-				//	App::make('Cases');
 					Cases::find($caseID) :
 					App::make('Cases');
 
@@ -573,7 +584,7 @@ class CaseController extends BaseController {
 		$case_obj->projectID = intval($inputs['projectID']);
 		$case_obj->date = new MongoDate(strtotime(date('Y-m-d H:i:s')));
 
-		//患者情報の設定
+		//Setting of patient information
 		$case_obj->patientInfoCache = array(
 			'patientID'	=>	$inputs['patientInfo']['patientID'],
 			'name'		=>	$inputs['patientInfo']['patientName'],
@@ -589,7 +600,6 @@ class CaseController extends BaseController {
 			0			=>	$series_list
 		);
 
-
 		//ValidateCheck
 		$validator = Validator::make(self::setCaseValidate($inputs), Cases::getValidateRules());
 		if (!$validator->fails()) {
@@ -601,31 +611,20 @@ class CaseController extends BaseController {
 			$case_obj->creator = Auth::user()->loginID;
 			$case_obj->save();
 
-			/*
-			if (Session::get('caseID'))
-				$result['title'] = 'Case Edit Complete';
-			else
-				$result['title'] = 'Add new Case Complete';
-				*/
 			$result['title'] = $mode.' Case Complete';
 			$result['url'] = '/case/complete';
 			$result['msg'] = 'Registration of case information is now complete.';
 			$result['caseID'] = $inputs['caseID'];
 
-			//セッション情報削除
+			//Session information Delete
 			Session::forget('caseID');
 			Session::forget('case_input');
 			Session::forget('mode');
 
-			//return View::make('/case/complete', $result);
-			//完了画面に必要なパラメータをセッションに積む
+			//I gain the necessary parameters on the screen to complete the session
 			Session::put('complete', $result);
 			return Redirect::to('/case/complete');
 		} else {
-			/*
-			Log::debug("エラー内容");
-			Log::debug($validator->messages());
-			*/
 			//Process at the time of Validate error
 			$result['errors'] = $validator->messages();
 			$result['url'] = '/case/input';
@@ -638,14 +637,14 @@ class CaseController extends BaseController {
 	}
 
 	/**
-	 * 完了画面を表示する
+	 * I want to display the complete screen
 	 * @since 2014/12/25
 	 */
 	function complete() {
-		//セッション情報取得
+		//Session information acquisition
 		$result = Session::get('complete');
 
-		//セッション情報破棄
+		//Session information discarded
 		Session::forget('complete');
 
 		//画面表示
@@ -804,17 +803,13 @@ class CaseController extends BaseController {
 	 * @since 2014/12/16
 	 */
 	function checkDuplicatePatientID($list, &$series_list = array()) {
-		$error_msg = '';
-
-		$patientID = $list[0]->patientID;
+		$patientID = $list[0]->patientInfo['patientID'];
 		foreach ($list as $rec) {
-			if ($patientID != $rec->patientID) {
-				$error_msg = 'Series that can be registered in one case only the same patient.\nPlease select the same patient in the series.';
-				break;
+			if ($patientID != $rec->patientInfo['patientID']) {
+				return 'Series that can be registered in one case only the same patient.<br>Please select the same patient in the series.';
 			}
 			$series_list[$rec->seriesUID] = $rec->seriesDescription;
 		}
-		return $error_msg;
 	}
 
 	/**
@@ -839,11 +834,11 @@ class CaseController extends BaseController {
 	 * I sort by RevisionNo
 	 * @param $a Sort array (large value)
 	 * @param $b Sort array (small value)
-	 * @return ソート結果 0:同等 -1:bが大きい 1:aが大きい
+	 * @return Sort Result 0: equal -1: b is greater 1: a large
 	 * @since 2014/12/24
 	 */
 	function sortRevisionNo($a, $b){
-		//Revisionが古い順
+		//Revision old order
 		$a_no = $a['revisionNo'];
 		$b_no = $b['revisionNo'];
 
@@ -950,5 +945,25 @@ class CaseController extends BaseController {
 		}
 		$revision['series'] = $series;
 		return $revision;
+	}
+
+	/**
+	 * And rearranges the series listed in the specified order
+	 * @param $list Series List
+	 * @param $order Sort ordering
+	 * @return Sort the Series List
+	 * @since 2014/12/26
+	 */
+	function sortSeriesList($list, $order) {
+		$ary = array();
+
+		for ($i = 0; $i < count($order); $i++) {
+			foreach ($list as $key => $val){
+				if ($key == $order[$i]) {
+					$ary[$key] = $val;
+				}
+			}
+		}
+		return $ary;
 	}
 }

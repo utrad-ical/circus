@@ -68,7 +68,7 @@ class UserController extends BaseController {
 		}
 
 		//Error message initialization
-		$error_msg = "";
+		$error_msg = '';
 		$result = array();
 
 		//POST data acquisition
@@ -168,7 +168,7 @@ class UserController extends BaseController {
 
 		//Set of error messages
 		if ($error_msg) {
-			$result["error_msg"] = $error_msg;
+			$result['error_msg'] = $error_msg;
 		} else {
 			$result['group_list'] = self::getGroupList();
 			Session::put('user_input', $result['inputs']);
@@ -185,8 +185,6 @@ class UserController extends BaseController {
 	 * @since 2014/12/17
 	 */
 	public function confirm() {
-		Log::debug("確認画面");
-		//Login check
 		if (!Auth::check()) {
 			//Forced redirected to the login screen because not logged in
 			return Redirect::to('login');
@@ -199,8 +197,6 @@ class UserController extends BaseController {
 
 		//Input value acquisition
 		$inputs = Input::all();
-		Log::debug("入力値::");
-		Log::debug($inputs);
 		$user_data = Session::get('user_input');
 		$inputs['userID'] = $user_data['userID'];
 
@@ -269,6 +265,7 @@ class UserController extends BaseController {
 		//Information obtained from the session
 		$inputs = Session::get('user_input');
 		$userID = Session::get('userID');
+		$mode = Session::get('mode');
 
 		$result['css'] = self::cssSetting();
 		$result['js'] = self::jsSetting();
@@ -298,12 +295,9 @@ class UserController extends BaseController {
 			$user_obj->createTime = $dt;
 			$user_obj->save();
 
-			if (Session::get('userID'))
-				$result['title'] = 'User Edit Complete';
-			else
-				$result['title'] = 'Add new User Complete';
+			$result['title'] = $mode.' User Complete';
 			$result['url'] = '/admin/user/complete';
-			$result['msg'] = "Registration of the user information is now complete.";
+			$result['msg'] = 'Registration of the user information is now complete.';
 			$result['userID'] = $inputs['userID'];
 			//I transitions to complete screen because registration is complete
 			Session::put('user_complete', $result);;
@@ -313,10 +307,7 @@ class UserController extends BaseController {
 			$result['errors'] = $validator->messages();
 			$result['inputs'] = $inputs;
 			$result['group_list'] = self::getGroupList();
-			if (Session::get("userID"))
-				$result['title'] = 'Add new User';
-			else
-				$result['title'] = 'User Edit';
+			$result['title'] = $mode.' User';
 			$result['url'] = '/admin/user/input';
 			$tmp = View::make('/admin/user/input', $result);
 		}

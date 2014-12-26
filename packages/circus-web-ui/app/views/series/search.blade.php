@@ -5,7 +5,6 @@
 	$(function() {
 		$('#btn_submit').click(function(){
 			var btnName = arguments[1] ? arguments[1] : "btnSearch";
-			console.log(btnName);
 			var elm = $("<input>", {type:"hidden", name:btnName, value:btnName});
 			$('#form_search').append(elm);
 
@@ -43,10 +42,8 @@
 		});
 
 		$('.link_series_detail').click(function(){
-			console.log('series_detail');
 			//Get the form ID to be sent
 			var seriesUID = $(this).closest('td').find('.seriesUID').val();
-			console.log(seriesUID);
 			$(this).closest('body').find('.series_detail_seriesUID').val(seriesUID);
 			$(this).closest('body').find('.frm_series_detail').submit();
 			return false;
@@ -60,7 +57,6 @@
 		//CheckboxCookie processing
 		var COOKIE_NAME = "seriesCookie";
 		if(typeof $.cookie(COOKIE_NAME) === "undefined"){
-			console.log('cookie undefined!!');
 			var first_array = [];
 			$.cookie(COOKIE_NAME , first_array , { expires: 1, path:'/' });
 		}
@@ -157,7 +153,7 @@
 
 			@if ($search_flg)
 				{{Form::open(['url' => asset('/case/input'), 'method' => 'post', 'id' => 'form_edit_new_case'])}}
-					{{Form::hidden('back_url', 'case_search')}}
+					{{Form::hidden('back_url', 'series_search')}}
 					<div class="w_900 fl_l">
 						<ul class="common_pager clearfix">
 							{{$list_pager->links()}}

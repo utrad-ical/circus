@@ -3,12 +3,6 @@
 @section('content')
 <script type="text/javascript">
 	$(function() {
-		//Back button is pressed during
-		$('.link_series_search').click(function(){
-			$('.frmSeriesSearch').submit();
-			return false;
-		});
-
 		//Case Details button is pressed during
 		$('.link_case_detail').click(function(){
 			$('.frmCaseDetail').submit();
@@ -28,15 +22,13 @@
 				@endif
 			</p>
 			<p class="al_c">
-				{{HTML::link(asset('series/search'), 'View Series', array('class' => 'common_btn link_series_search'))}}
+				{{HTML::link(asset('series/search'), 'View Series', array('class' => 'common_btn'))}}
 				{{HTML::link(asset('case/search'), 'View Cases', array('class' => 'common_btn'))}}
-				{{HTML::link(asset('case/detail'), 'View added Case', array('class' => 'common_btn link_series_detail'))}}
+				{{HTML::link(asset('case/detail'), 'View added Case', array('class' => 'common_btn link_case_detail'))}}
 
 				{{Form::open(['url' => asset('case/detail'), 'method' => 'POST', 'class' => 'frmCaseDetail'])}}
 					{{Form::hidden('caseID', $caseID)}}
-				{{Form::close()}}
-				{{Form::open(['url' => asset('series/search'), 'method' => 'POST', 'class' => 'frmSeriesSearch'])}}
-					{{Form::hidden('btnBack', 'btnBack')}}
+					{{Form::hidden('mode', 'detail')}}
 				{{Form::close()}}
 			</p>
 		</div>

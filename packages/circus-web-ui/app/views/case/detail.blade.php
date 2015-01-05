@@ -128,7 +128,7 @@
 					{{Form::button('Save', array('type' => 'submit', 'class' => 'common_btn'))}}
 				</div>
 				<div class="w_500 fl_r">
-					<div class="info_area ">
+					<div class="info_area">
 						<p class="pad_10">
 							{{$case_detail['patientName']}} ({{$case_detail['patientID']}})
 							<br>{{$case_detail['birthday']}} {{$case_detail['sex']}}
@@ -144,7 +144,7 @@
 						<div class="slider_outer">
 							<div id="slider_axial" class="slider_elm"></div>
 						</div>
-						<div class="btn_next common_btn common_btn_green"data-target-elm="slider_axial">
+						<div class="btn_next common_btn common_btn_green" data-target-elm="slider_axial">
 							Next
 						</div>
 						<div class="clear">&nbsp;</div>

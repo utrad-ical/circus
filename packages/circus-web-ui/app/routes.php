@@ -33,6 +33,8 @@ Route::post('case/complete', 'CaseController@regist');
 Route::get('case/complete', 'CaseController@complete');
 //Case (for Ajax)
 Route::any('case/revision', 'CaseController@revision_ajax');
+Route::any('case/search_result', 'CaseController@search_ajax');
+Route::any('case/save_search', 'CaseController@save_search');
 
 //Series
 Route::get('series/search', 'SeriesController@search');

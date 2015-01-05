@@ -17,9 +17,11 @@
 			<div class="gnavi_cell_inner">
 				<ul class="gnavi_cell_inner_body">
 					<li>{{HTML::link(asset('/case/search'), 'Case Search')}}</li>
-					<li>{{HTML::link(asset('/case/search'), 'User set condition 01')}}</li>
-					<li>{{HTML::link(asset('/case/search'), 'User set condition 02')}}</li>
-					<li>{{HTML::link(asset('/case/search'), 'User set condition 03')}}</li>
+					@if (Session::has('case_detail_search'))
+						@foreach(Session::get('case_detail_search') as $rec_key => $rec_val)
+							<li>{{HTML::link(asset('/series/search'), 'User set condition'.$rec_key)}}</li>
+						@endforeach
+					@endif
 				</ul>
 			</div>
 		</li>

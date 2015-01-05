@@ -22,6 +22,9 @@ class CaseController extends BaseController {
 		//Input value acquisition
 		$inputs = Input::all();
 
+		Log::debug("入力値");
+		Log::debug($inputs);
+
 		//Reset button or the initial display when pressed
 		if (array_key_exists('btnReset', $inputs) !== FALSE || !$inputs) {
 		//	$search_flg = false;
@@ -111,6 +114,202 @@ class CaseController extends BaseController {
 	}
 
 	/**
+	 * Case Search Results(Ajax)
+	 * @since 2015/01/05
+	 */
+	public function search_ajax() {
+		//Login check
+		if (!Auth::check()) {
+			//Forced redirected to the login screen because not logged in
+			return Redirect::to('login');
+		}
+
+		//Initial setting
+		$search_flg = false;
+		$result = array();
+
+		//Input value acquisition
+		$inputs = Input::all();
+
+		Log::debug("Ajax入力値");
+		Log::debug($inputs);
+
+		//MongoDataとプロジェクトIDはjson_decodeをかける
+		$inputs["mongo_data"] = json_decode($inputs["mongo_data"]);
+		$inputs["project"] = json_decode($inputs["project"]);
+
+		Log::debug("JsonDecode後");
+		Log::debug($inputs);
+
+		//Reset button or the initial display when pressed
+		if (array_key_exists('btnReset', $inputs) !== FALSE || !$inputs) {
+			Session::forget('case.search');
+		//Search button is pressed during
+		} else if (array_key_exists ('btnSearch', $inputs) !== FALSE) {
+			if (array_key_exists('disp', $inputs) === FALSE) $inputs['disp'] = Config::get('const.page_display');
+			if (array_key_exists('sort', $inputs) === FALSE) $inputs['sort'] = 'updateTime';
+			Session::put('case.search', $inputs);
+		} else if (array_key_exists('page', $inputs) !== FALSE) {
+			$tmp = Session::get('case.search');
+			$tmp['perPage'] = $inputs['page'];
+			Session::put('case.search', $tmp);
+		}
+
+		$search_data = Session::get('case.search');
+
+		if ($search_data) {
+			$search_flg = true;
+			//Get the search criteria from the session
+
+			//Search conditions generation and data acquisition
+			//Setting of acquisition column
+			$select_col = array(
+				'caseID', 'projectID', 'incrementalID',
+				'patientInfoCache.patientID', 'patientInfoCache.name',
+				'revisions.latest.date', 'revisions.latest.creator',
+				'updateTime'
+			);
+
+			//Total number acquisition
+			$case_count = Cases::addWhere($search_data)
+								->count();
+
+			//Search result acquisition
+			$case_list = Cases::addWhere($search_data)
+								->orderby($search_data['sort'], 'desc')
+								->addLimit($search_data)
+								->get($select_col);
+			$query_log = DB::getQueryLog();
+			Log::debug($query_log);
+
+			//The formatting for display
+			$list = array();
+			foreach($case_list as $rec) {
+				//Patient information
+				$patient = $rec->patientInfoCache;
+
+				//Day of the week get
+				$revision = $rec->revisions;
+				$dt = $revision['latest']['date'];
+				$w = self::getWeekDay(date('w', strtotime($dt)));
+
+				//Project name
+				$project = Projects::where('projectID', '=', $rec->projectID)->get();
+
+				//I shaping for display
+				$list[] = array(
+					'incrementalID' =>	$rec->incrementalID,
+					'caseID'		=>	$rec->caseID,
+					'projectID'		=>	$rec->projectID,
+					'patientID'		=>	$patient['patientID'],
+					'patientName' 	=>	$patient['name'],
+					'latestDate' 	=>	date('Y/m/d('.$w.') H:i', $dt->sec),
+					'creator'		=>	$revision['latest']['creator'],
+					'projectName'	=>	$project ? $project[0]->projectName : '',
+					'updateDate'	=>	date('Y/m/d', $rec->updateTime->sec)
+				);
+				$result['list'] = $list;
+				//Setting the pager
+				$case_pager = Paginator::make(
+					$list,
+					$case_count,
+					$search_data['disp']
+				);
+				$result['list_pager'] = $case_pager;
+				$result['inputs'] = $search_data;
+			}
+		}
+		$result['search_flg'] = $search_flg;
+
+		$tmp = View::make('/case/search_result', $result);
+
+		header('Content-Type: application/json; charset=UTF-8');
+		$res = json_encode(array('result' => true, 'message' => '', 'response' => "$tmp"));
+		echo $res;
+	}
+
+	/**
+	 * 検索条件保存(Ajax)
+	 * @since 2015/01/05
+	 */
+	public function search_save() {
+		//Login check
+		if (!Auth::check()) {
+			//Forced redirected to the login screen because not logged in
+			return Redirect::to('login');
+		}
+
+		//Initial setting
+		$search_flg = false;
+		$result = array();
+
+		//Input value acquisition
+		$inputs = Input::all();
+
+		Log::debug("検索条件保存Ajax入力値");
+		Log::debug($inputs);
+/*
+		if ($search_data) {
+			//The formatting for display
+			$list = array();
+			foreach($case_list as $rec) {
+				//Patient information
+				$patient = $rec->patientInfoCache;
+
+				//Day of the week get
+				$revision = $rec->revisions;
+				$dt = $revision['latest']['date'];
+				$w = self::getWeekDay(date('w', strtotime($dt)));
+
+				//Project name
+				$project = Projects::where('projectID', '=', $rec->projectID)->get();
+
+				//I shaping for display
+				$list[] = array(
+					'incrementalID' =>	$rec->incrementalID,
+					'caseID'		=>	$rec->caseID,
+					'projectID'		=>	$rec->projectID,
+					'patientID'		=>	$patient['patientID'],
+					'patientName' 	=>	$patient['name'],
+					'latestDate' 	=>	date('Y/m/d('.$w.') H:i', $dt->sec),
+					'creator'		=>	$revision['latest']['creator'],
+					'projectName'	=>	$project ? $project[0]->projectName : '',
+					'updateDate'	=>	date('Y/m/d', $rec->updateTime->sec)
+				);
+				$result['list'] = $list;
+				//Setting the pager
+				$case_pager = Paginator::make(
+					$list,
+					$case_count,
+					$search_data['disp']
+				);
+				$result['list_pager'] = $case_pager;
+				$result['inputs'] = $search_data;
+			}
+		}
+
+		$result['search_flg'] = true;
+		$tmp = View::make('/case/case', $result);
+
+		header('Content-Type: application/json; charset=UTF-8');
+		$res = json_encode(array('result' => true, 'message' => '', 'response' => "$tmp"));
+		echo $res;
+		*/
+
+		//セッションから既存の保存検索条件取得
+		$save_case_search = Session::get('case_detail_search');
+
+		//セッションに保存されている検索条件がない場合は空配列作成
+		if (count($save_case_search) == 0)
+			$save_case_search = array();
+
+		//セッションに検索条件を保存する
+		array_push($save_case_search, $inputs);
+		Session::put('case_detail_search'. $save_case_search);
+
+	}
+
+	/**
 	 * Case Details screen
 	 * @since 2014/12/09
 	 */
@@ -144,9 +343,6 @@ class CaseController extends BaseController {
 			Session::put('case.detail', $inputs);
 			$search_data = Session::get('case.detail');
 
-			//Check whether the case ID that exists
-			//$case_info = Cases::addWhere($search_data)
-			//					->get();
 			$case_info = Cases::find($inputs['caseID']);
 
 			if (!$case_info) {
@@ -647,7 +843,7 @@ class CaseController extends BaseController {
 		//Session information discarded
 		Session::forget('complete');
 
-		//画面表示
+		//Screen display
 		return View::make('case/complete', $result);
 	}
 
@@ -663,6 +859,7 @@ class CaseController extends BaseController {
 
 		switch($mode) {
 			case 'search':
+				$css['jquery.flexforms.css'] = 'css/jquery.flexforms.css';
 				break;
 			case 'detail':
 			case 'edit':
@@ -684,8 +881,9 @@ class CaseController extends BaseController {
 		switch ($mode) {
 			case 'search':
 				$js['jquery.multiselect.min.js'] = 'js/jquery.multiselect.min.js';
-				$js['jquery.formserializer.js'] = 'js/jquery.formserializer.js';
+				//$js['jquery.formserializer.js'] = 'js/jquery.formserializer.js';
 				$js['jquery.ruleseteditor.js'] = 'js/jquery.ruleseteditor.js';
+				$js['jquery.flexforms.js'] = 'js/jquery.flexforms.js';
 				break;
 			case 'detail':
 			case 'edit':

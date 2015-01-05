@@ -4,43 +4,133 @@
 <script type="text/javascript">
 	$(function() {
 		// Initialization parameter
-		var options = {
-		  keys: [{value: "modality"}, {value:"manufacturer"}, {value: "model_name"}]
-		};
-
-		// Create editor
-		var filter = $('#search_condition').filtereditor(options)
-		.on('filterchange', function() {
+		var keys = [
+			{
+	//			key: 'name',
+				key: 'detail_patient_name',
+				label: 'Patient name',
+				type: 'text',
+				spec: {
+					default: 'Sample Name'
+				}
+			},
+			{
+	//			key: 'age',
+				key: 'detail_patient_age',
+				label: 'Patient age',
+				type: 'number'
+			},
+			{
+	//			key: 'modality',
+				key: 'detail_modality',
+				label: 'Modality',
+				type: 'select',
+				spec: {
+					options: ['MR', 'CT', 'PT', 'CR', 'XR']
+				}
+			},
+			{
+	//			key: 'birthday',
+				key: 'detail_birthday',
+				label: 'Birthday',
+				type: 'date'
+			}
+		];
+		var filter = $('#search_condition')
+		.filtereditor({keys: keys})
+		.on('filterchange', function () {
 			var data = filter.filtereditor('option', 'filter');
-			$('#json').val(JSON.stringify(data, null, '  '));
-			var mongo = filter.filtereditor('createMongoCondFromElement');
-			$('#mongo').val(JSON.stringify(mongo, null, '  '));
+			var node = JSON.stringify(data, null, '  ');
+			$('#json_value').val(node);
+			console.debug(data);
 		});
 		filter.trigger('filterchange');
 
-		// Textarea to Editor (write)
-		$('#write').on('click', function() {
-		  var obj = JSON.parse($('#json').val());
-		  if (!obj) { alert('Invalid'); return; }
-		  filter.filtereditor('option', 'filter', obj);
+		//Save Settings押下時の処理
+		$('#save-button').click(function(){
+		//	var mongo_data = filter.filtereditor('exportMongo');
+			$.ajax({
+				url: "{{asset('/case/save_search')}}",
+				type: 'POST',
+				//data: form_data,
+				data:setAjaxSearchVal(),
+				dataType: 'json',
+				error: function(){
+					alert('I failed to communicate.');
+				},
+				success: function(res){
+					alert(res.response);
+				}
+			});
+			return false;
 		});
 
 		$('#btn_submit').click(function(){
-			console.log(arguments);
+			/*
+			Ajax
+			var target_elm = $('#result_case_list');
 			var btnName = arguments[1] ? arguments[1] : "btnSearch";
-			console.log("btnName::");
-			console.log(btnName);
+			var json_data = setAjaxSearchVal(btnName);
+			//json_data[
+			$.ajax({
+				url: "{{asset('/case/search_result')}}",
+				type: 'POST',
+				data: json_data,
+				dataType: 'json',
+				error: function(){
+					alert('I failed to communicate.');
+				},
+				success: function(res){
+					target_elm.empty();
+					target_elm.append(res.response);
+				}
+			});
+			$('#temporaly_form').remove();
+			*/
+			var btnName = arguments[1] ? arguments[1] : "btnSearch";
+			//$('#form_search').append("<input>", {type:"hidden", name:btnName, value:btnName});
 			var elm = $("<input>", {type:"hidden", name:btnName, value:btnName});
 			$('#form_search').append(elm);
-
-			$('body').append('<form id="temporaly_form" class="hidden"></form>');
-			$('#search_condition_outer').find('input,select,textarea').clone().appendTo('#temporaly_form');
-
-			var form_data	=	$('#temporaly_form').serializeArray();
-			$('#temporaly_form').remove();
-
+			//var form_data = $('#form_search').serializeArray();
 			$('#form_search').submit();
+			return false;
 		});
+
+		function setAjaxSearchVal(btnName) {
+			var form_data = $('#form_search').serializeArray();
+			console.log("送信データ2");
+			console.log(form_data);
+
+			//プロジェクトIDの条件生成
+			var project_id_ary = [];
+			for (var i = 0; i < form_data.length; i++) {
+				if (form_data[i]["name"] == "project") {
+					project_id_ary.push(form_data[i]["value"]);
+					delete form_data[i];
+				}
+			}
+			//var mongo_val = filter.filtereditor('exportMongo');
+			var mongo_val = filter.filtereditor('option', 'filter');
+			var tmp_mongo_data = {"name":"mongo_data","value" : JSON.stringify(mongo_val)};
+			console.log("Mongo");
+			console.log(tmp_mongo_data);
+			var tmp_project_data = {"name":"project", "value" : JSON.stringify(project_id_ary)};
+			console.log("Project");
+			console.log(tmp_project_data);
+			var tmp_action_btn_data = {"name":btnName, "value":btnName};
+
+			var tmp_ary_data = [tmp_mongo_data, tmp_project_data,tmp_action_btn_data];
+			//var tmp_data = $.extend(true, form_data, tmp_ary_data);
+			var tmp_data = $.extend(true,form_data, tmp_ary_data);
+/*
+			console.log("Mongoデータ1");
+			console.log(tmp_mongo_data);
+
+			console.log("送信データ3");
+			console.log(tmp_data);
+*/
+			return tmp_data;
+		};
 
 		$('.change_select').change(function(){
 			// Get the combo ID you want to change
@@ -68,6 +158,7 @@
 
 		$('.link_detail').click(function(){
 			//Get the form ID to be sent
+			console.log("呼ばれてはいる");
 			$(this).closest('tr').find('.form_case_detail').submit();
 			return false;
 		});
@@ -86,41 +177,41 @@
 				<h2 class="con_ttl">Search Condition</h2>
 				<div id="search_condition_outer">
 					{{Form::open(['url' => '/case/search', 'method' => 'POST', 'class' => 'common_form', 'id' => 'form_search'])}}
-					<table class="common_table al_l mar_b_10">
-						<colgroup>
-							<col width="15%">
-							<col width="35%">
-							<col width="15%">
-							<col width="35%">
-						</colgroup>
-						<tr>
-							<th>project ID</th>
-							<td>
-								{{Form::select('project[]', $project_list, isset($inputs['project']) ? $inputs['project'] : null, array('class' => 'multi_select', 'multiple' => 'multiple'))}}
-							</td>
-							<th>Case ID</th>
-							<td>{{Form::text('caseID', isset($inputs['caseID']) ? $inputs['caseID'] : '', array('class' => 'common_input_text w_200'))}}</td>
-						</tr>
-						<tr>
-							<th>Patient ID</th>
-							<td>{{Form::text('patientID', isset($inputs['patientID']) ? $inputs['patientID'] : '', array('class' => 'common_input_text w_200'))}}</td>
-							<th>Patient Name</th>
-							<td>{{Form::text('patientName', isset($inputs['patientName']) ? $inputs['patientName'] : '', array('class' => 'common_input_text w_200'))}}</td>
-						</tr>
-						<tr>
-							<th>Create Date</th>
-							<td>{{Form::text('createDate', isset($inputs['createDate']) ? $inputs['createDate'] : '', array('class' => 'common_input_text w_200 datepicker'))}}</td>
-							<th>Update Date</th>
-							<td>{{Form::text('updateDate', isset($inputs['updateDate']) ? $inputs['updateDate'] : '', array('class' => 'common_input_text w_200 datepicker'))}}</td>
-						</tr>
-						<tr>
-							<th>Case Date</th>
-							<td colspan="3">{{Form::text('caseDate', isset($inputs['caseDate']) ? $inputs['caseDate'] : '', array('class' => 'common_input_text w_200 datepicker'))}}</td>
-						</tr>
-					</table>
-					{{Form::button('Show More Options', array('class' => 'common_btn mar_b_10', 'onClick' => "$('#search_condition').toggleClass('hidden');"))}}
-					<div id="search_condition" class="hidden">
-					</div>
+						<table class="common_table al_l mar_b_10">
+							<colgroup>
+								<col width="15%">
+								<col width="35%">
+								<col width="15%">
+								<col width="35%">
+							</colgroup>
+							<tr>
+								<th>project ID</th>
+								<td>
+									{{Form::select('project', $project_list, isset($inputs['project']) ? $inputs['project'] : null, array('class' => 'multi_select', 'multiple' => 'multiple'))}}
+								</td>
+								<th>Case ID</th>
+								<td>{{Form::text('caseID', isset($inputs['caseID']) ? $inputs['caseID'] : '', array('class' => 'common_input_text w_200'))}}</td>
+							</tr>
+							<tr>
+								<th>Patient ID</th>
+								<td>{{Form::text('patientID', isset($inputs['patientID']) ? $inputs['patientID'] : '', array('class' => 'common_input_text w_200'))}}</td>
+								<th>Patient Name</th>
+								<td>{{Form::text('patientName', isset($inputs['patientName']) ? $inputs['patientName'] : '', array('class' => 'common_input_text w_200'))}}</td>
+							</tr>
+							<tr>
+								<th>Create Date</th>
+								<td>{{Form::text('createDate', isset($inputs['createDate']) ? $inputs['createDate'] : '', array('class' => 'common_input_text w_200 datepicker'))}}</td>
+								<th>Update Date</th>
+								<td>{{Form::text('updateDate', isset($inputs['updateDate']) ? $inputs['updateDate'] : '', array('class' => 'common_input_text w_200 datepicker'))}}</td>
+							</tr>
+							<tr>
+								<th>Case Date</th>
+								<td colspan="3">{{Form::text('caseDate', isset($inputs['caseDate']) ? $inputs['caseDate'] : '', array('class' => 'common_input_text w_200 datepicker'))}}</td>
+							</tr>
+						</table>
+						{{Form::button('Show More Options', array('class' => 'common_btn mar_b_10', 'onClick' => "$('#search_condition').toggleClass('hidden');"))}}
+						<div id="search_condition" class="hidden">
+						</div>
 						<p class="submit_area">
 							{{Form::button('Reset', array('class' => 'common_btn common_btn_green clearForm', 'type' => 'reset', 'id' => 'btn_reset', 'name' => 'btnReset'))}}
 							{{Form::button('Search', array('class' => 'common_btn common_btn_gray', 'id' => 'btn_submit', 'type' => 'button', 'name' => 'btnSubmit'))}}
@@ -130,8 +221,9 @@
 				</div>
 			</div>
 		</div>
-		@if ($search_flg)
-			<div class="search_result pad_tb_5">
+		<div class="search_result pad_tb_5" id="result_case_list">
+			<!-- @include('case.case') -->
+			@if ($search_flg)
 				<ul class="common_pager clearfix">
 					{{$list_pager->links()}}
 					<li class="pager_sort_order">
@@ -173,7 +265,7 @@
 								</td>
 								<td>{{$rec['updateDate']}}</td>
 								<td>
-									<a href=""  class="link_detail">
+									<a href="" class="link_detail">
 										{{$rec['latestDate']}}
 										<br>{{$rec['creator']}}
 									</a>
@@ -202,8 +294,8 @@
 						{{Form::select('disp', Config::get('const.search_display'), isset($inputs['disp']) ? $inputs['disp'] : '', array('class' => 'w_max change_select', 'data-target-dom' => 'display_num_up', 'id' => 'display_num_down'))}}
 					</li>
 				</ul>
-			</div>
-		@endif
+			@endif
+		</div>
 	</div>
 @include('common.navi')
 </div>

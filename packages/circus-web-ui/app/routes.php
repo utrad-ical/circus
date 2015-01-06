@@ -54,7 +54,6 @@ Route::post('admin/group/search', 'GroupController@search');
 Route::any('admin/group/input', 'GroupController@input');
 Route::any('admin/group/confirm', 'GroupController@confirm');
 Route::any('admin/group/complete', 'GroupController@regist');
-Route::any('admin/group/detail', 'GroupController@detail');
 //Management screen / user
 Route::get('admin/user/', function(){return Redirect::to('admin/user/search');});
 Route::get('admin/user/search', 'UserController@search');
@@ -63,7 +62,6 @@ Route::post('admin/user/search', 'UserController@search');
 Route::any('admin/user/input', 'UserController@input');
 Route::any('admin/user/confirm', 'UserController@confirm');
 Route::any('admin/user/complete', 'UserController@regist');
-Route::any('admin/user/detail', 'UserController@detail');
 
 //404 pages
 Event::listen('404', function()

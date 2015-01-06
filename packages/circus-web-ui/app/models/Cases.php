@@ -84,35 +84,6 @@ class Cases extends Eloquent {
 				)
 			);
 		}
-
-		//患者の年齢
-		if (isset($input['detail_patient_age']) && $input['detail_patient_age']) {
-			//Age of patientInfoCache in the objects of the Case table
-			$query->where('patientInfoCache.age', '=', $input['detail_patient_age']);
-		}
-
-		//患者の生年月日
-		if (isset($input['detail_patient_birthday']) && $input['detail_patient_birthday']) {
-			//Birthday of patientInfoCache in the objects of the Case table
-			$query->where(
-				'patientInfoCache.birthday', '=', $input['detail_patient_birthday']
-			);
-		}
-
-		//シリーズの作成種別
-		if (isset($input['detail_modality']) && $input['detail_modality']) {
-			/*
-			//シリーズUIDを取得する
-			$ids = Serieses::addWhere($input)
-							->get(array("seriesUID"));
-			$serieses = array();
-			foreach ($ids as $id) {
-				$serieses[] = $ids->seriesUID;
-			}
-			$query->whereIn('revisions.latest.seriesUID', $serieses);
-			*/
-		}
-
 		return $query;
 	}
 

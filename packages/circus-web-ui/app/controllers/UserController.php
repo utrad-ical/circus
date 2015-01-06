@@ -27,7 +27,7 @@ class UserController extends BaseController {
 
 		//Data acquisition
 		//Setting of acquisition column
-		$select_col = array('userID', 'description', 'groups');
+		$select_col = array('userID', 'description', 'groups', 'loginID');
 
 		//Total number acquisition
 		$user_count = User::count();
@@ -41,6 +41,7 @@ class UserController extends BaseController {
 			foreach ($user_list as $rec) {
 				$list[] = array(
 					'userID'		=>	$rec->userID,
+					'loginID'		=>	$rec->loginID,
 					'description'	=>	$rec->description,
 					'groupName'		=>	self::getGroupNameDisp($rec->groups)
 				);
@@ -150,7 +151,7 @@ class UserController extends BaseController {
 					'createTime'				=>	$user_data->createTime,
 					'description'				=>	$user_data->description,
 					'loginEnabled'				=>	$user_data->loginEnabled,
-					'groups'					=>	implode(',', $user_data->groups),
+					'groups'					=>	$user_data->groups,
 					'preferences_theme'			=>	$user_data->preferences['theme'],
 					'preferences_personalView'	=>	$user_data->preferences['personalView']
 				);
@@ -267,6 +268,12 @@ class UserController extends BaseController {
 		$userID = Session::get('userID');
 		$mode = Session::get('mode');
 
+		//暗号化キー取得
+		$secret_key = Config::get('const.hash_key');
+		$encrypt_password = openssl_encrypt($inputs['password'],'aes-256-ecb',$secret_key);
+		Log::debug("暗号化前PWD::".$inputs['password']);
+		Log::debug("暗号化後PWD::".$encrypt_password);
+
 		$result['css'] = self::cssSetting();
 		$result['js'] = self::jsSetting();
 
@@ -277,7 +284,8 @@ class UserController extends BaseController {
 		//Set the value for the Validate check
 		$user_obj->userID = $inputs['userID'];
 		$user_obj->loginID = $inputs['loginID'];
-		$user_obj->password = Hash::make($inputs['password']);
+	//	$user_obj->password = Hash::make($inputs['password']);
+		$user_obj->password = Hash::make($encrypt_password);
 		$user_obj->groups = $inputs['groups'];
 		$user_obj->description = $inputs['description'];
 		$user_obj->loginEnabled = $inputs['loginEnabled'];

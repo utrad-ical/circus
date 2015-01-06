@@ -47,53 +47,6 @@ class GroupController extends BaseController {
 	}
 
 	/**
-	 * Group Details screen
-	 * @since 2014/12/24
-	 */
-	public function detail() {
-		//Login check
-		if (!Auth::check()) {
-			//Forced redirected to the login screen because not logged in
-			return Redirect::to('login');
-		}
-
-		//Error message initialization
-		$error_msg = '';
-		$result = array();
-
-		//POST data acquisition
-		$inputs = Input::all();
-
-		if (array_key_exists('GroupID', $inputs) === FALSE)
-			$error_msg = 'Please specify the group ID.';
-
-		if (!$error_msg) {
-			$group_info = Groups::find($inputs['GroupID']);
-			$query_log = DB::getQueryLog();
-			if (!$group_info) {
-				$error_msg = 'Does not exist group ID.';
-			}
-		}
-
-		//I want to display the group detail information if there is no error message
-		if (!$error_msg) {
-			$result['group_detail'] = $group_info;
-		} else {
-			$result['error_msg'] = $error_msg;
-		}
-		$result['title'] = 'Group Detail';
-		$result['url'] = 'admin/group/detail';
-		$result['css'] = self::cssSetting();
-		$result['js'] = self::jsSetting();
-
-		$tmp = View::make('/admin/group/detail', $result);
-
-		header('Content-Type: application/json; charset=UTF-8');
-		$res = json_encode(array('result' => true, 'message' => '', 'response' => "$tmp"));
-		echo $res;
-	}
-
-	/**
 	 * Group registration input(Ajax)
 	 * @since 2014/12/22
 	 */
@@ -200,6 +153,7 @@ class GroupController extends BaseController {
 			//Process at the time of Validate error
 			$result['url'] = '/admin/group/input';
 			$result['errors'] = $validator->messages();
+			Log::debug($result['errors']);
 			$tmp = View::make('/admin/group/input', $result);
 		} else {
 			//And displays a confirmation screen because there is no error

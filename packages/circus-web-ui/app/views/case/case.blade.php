@@ -69,4 +69,13 @@
 			{{Form::select('disp', Config::get('const.search_display'), isset($inputs['disp']) ? $inputs['disp'] : '', array('class' => 'w_max change_select', 'data-target-dom' => 'display_num_up', 'id' => 'display_num_down'))}}
 		</li>
 	</ul>
+<script type="text/javascript">
+	$(function() {
+		$('.link_detail').click(function(){
+			//Get the form ID to be sent
+			$(this).closest('tr').find('.form_case_detail').submit();
+			return false;
+		});
+	});
+</script>
 @endif

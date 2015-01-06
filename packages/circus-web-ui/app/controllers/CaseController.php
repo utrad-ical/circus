@@ -21,13 +21,8 @@ class CaseController extends BaseController {
 
 		//Input value acquisition
 		$inputs = Input::all();
-
-		Log::debug("入力値");
-		Log::debug($inputs);
-
 		//Reset button or the initial display when pressed
 		if (array_key_exists('btnReset', $inputs) !== FALSE || !$inputs) {
-		//	$search_flg = false;
 			Session::forget('case.search');
 		//Search button is pressed during
 		} else if (array_key_exists ('btnSearch', $inputs) !== FALSE) {
@@ -110,6 +105,15 @@ class CaseController extends BaseController {
 		$result['js'] = self::jsSetting();
 		$result['project_list'] = self::getProjectList(true);
 
+		//JsonFile読み込み
+		try {
+			$file_path = dirname(dirname(__FILE__))."/config/case_detail_search.json";
+			$handle = fopen($file_path, 'r');
+			$result['detail_search_settings'] = fread($handle, filesize($file_path));
+			fclose($handle);
+		} catch (Exception $e){
+			Log::debug($e->getMessage());
+		}
 		return View::make('case/search', $result);
 	}
 
@@ -135,7 +139,8 @@ class CaseController extends BaseController {
 		Log::debug($inputs);
 
 		//MongoDataとプロジェクトIDはjson_decodeをかける
-		$inputs["mongo_data"] = json_decode($inputs["mongo_data"]);
+		if (array_key_exists("mongo_data", $inputs) !== FALSE)
+			$inputs["mongo_data"] = json_decode($inputs["mongo_data"]);
 		$inputs["project"] = json_decode($inputs["project"]);
 
 		Log::debug("JsonDecode後");
@@ -170,15 +175,42 @@ class CaseController extends BaseController {
 				'updateTime'
 			);
 
-			//Total number acquisition
-			$case_count = Cases::addWhere($search_data)
-								->count();
 
-			//Search result acquisition
-			$case_list = Cases::addWhere($search_data)
-								->orderby($search_data['sort'], 'desc')
-								->addLimit($search_data)
-								->get($select_col);
+			//簡易検索
+			Log::debug("検索条件");
+			Log::debug($search_data);
+			Log::debug("Mongo検索");
+			Log::debug(array_key_exists('mongo_data', $search_data));
+		//	if (array_key_exists('mongo_data', $search_data) === FALSE) {
+			if ($search_data["search_mode"] == 0) {
+				Log::debug("簡易検索");
+				//Total number acquisition
+				$case_count = Cases::addWhere($search_data)
+								//	->whereRaw($search_data["mongo_data"])
+									->count();
+
+				//Search result acquisition
+				$case_list = Cases::addWhere($search_data)
+								//	->whereRaw($search_data["mongo_data"])
+									->orderby($search_data['sort'], 'desc')
+									->addLimit($search_data)
+									->get($select_col);
+
+			} else {
+				Log::debug("詳細検索");
+				//詳細検索
+				//Total number acquisition
+				$case_count = Cases::addWhere($search_data)
+									->whereRaw($search_data["mongo_data"])
+									->count();
+
+				//Search result acquisition
+				$case_list = Cases::addWhere($search_data)
+									->whereRaw($search_data["mongo_data"])
+									->orderby($search_data['sort'], 'desc')
+									->addLimit($search_data)
+									->get($select_col);
+			}
 			$query_log = DB::getQueryLog();
 			Log::debug($query_log);
 
@@ -884,6 +916,7 @@ class CaseController extends BaseController {
 				//$js['jquery.formserializer.js'] = 'js/jquery.formserializer.js';
 				$js['jquery.ruleseteditor.js'] = 'js/jquery.ruleseteditor.js';
 				$js['jquery.flexforms.js'] = 'js/jquery.flexforms.js';
+				$js['more_search.js'] = 'js/more_search.js';
 				break;
 			case 'detail':
 			case 'edit':

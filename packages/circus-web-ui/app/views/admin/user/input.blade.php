@@ -1,29 +1,8 @@
 @extends('common.layout')
 @section('content')
+<script type="text/javascript" src="{{asset('../bootstrap/js/ajax/user.js')}}"></script>
 <script type="text/javascript">
 	$(function() {
-		//Confirmation button is pressed during processing
-		$('.user_confirm').click(function(){
-			var post_data = $('.frm_user_confirm').serializeArray();
-			var target_elm = $('.frm_user_input');
-
-			$.ajax({
-				url: "{{asset('/admin/user/confirm')}}",
-				type: 'POST',
-				data: post_data,
-				dataType: 'json',
-				error: function(){
-					alert('I failed to communicate.');
-				},
-				success: function(res){
-					target_elm.empty();
-					target_elm.append(res.response);
-					target_elm.attr('style', 'display:inline;');
-				}
-			});
-			return false;
-		});
-
 		//Cancel button is pressed at the time of processing
 		$('.user_cancel').click(function(){
 			if (window.confirm('Do you input content but you sure will be destroyed?')){
@@ -74,7 +53,7 @@
 					</td>
 				</tr>
 				<tr>
-					<th>User Name</th>
+					<th>Description</th>
 					<td>
 						{{Form::text('description', isset($inputs['description']) && $inputs['description'] ? $inputs['description'] : '', array('class' => 'common_input_text w_300'))}}
 						@if (isset($errors) && $errors->has('description'))

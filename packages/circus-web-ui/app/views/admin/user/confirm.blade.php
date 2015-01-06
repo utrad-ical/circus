@@ -1,54 +1,6 @@
 @extends('common.layout')
 @section('content')
-<script type="text/javascript">
-$(function() {
-	$('.link_user_input').click(function(){
-		//Get the form ID to be sent
-		var post_data = '{"btnBack":"btnBack"}';
-		post_data = JSON.parse(post_data);
-
-		var target_elm = $('.frm_user_input');
-
-		$.ajax({
-			url: "{{asset('/admin/user/input')}}",
-			type: 'POST',
-			data: post_data,
-			dataType: 'json',
-			error: function(){
-				alert('I failed to communicate.');
-			},
-			success: function(res){
-				target_elm.empty();
-				target_elm.append(res.response);
-				target_elm.attr('style', 'display:inline;');
-			}
-		});
-		return false;
-	});
-
-	//Processing at the time of registration button is pressed
-	$('.user_complete').click(function(){
-		var post_data = $('.frm_user_complete').serializeArray();
-		var target_elm = $('.frm_user_input');
-
-		$.ajax({
-			url: "{{asset('/admin/user/complete')}}",
-			type: 'POST',
-			data: post_data,
-			dataType: 'json',
-			error: function(){
-				alert('I failed to communicate.');
-			},
-			success: function(res){
-				target_elm.empty();
-				target_elm.append(res.response);
-				target_elm.attr('style', 'display:inline;');
-			}
-		});
-		return false;
-	});
-});
-</script>
+<script type="text/javascript" src="{{asset('../bootstrap/js/ajax/user.js')}}"></script>
 <div class="page_unique">
 	<h1 class="page_ttl">Add new User Confirmation</h1>
 	{{Form::open(['url' => asset('admin/user/complete'), 'method' => 'post'])}}
@@ -66,7 +18,7 @@ $(function() {
 				<td>{{$inputs['loginID']}}</td>
 			</tr>
 			<tr>
-				<th>User Name</th>
+				<th>Description</th>
 				<td>{{$inputs['description']}}</td>
 			</tr>
 			<tr>

@@ -3,27 +3,6 @@
 <script type="text/javascript">
 	$(function() {
 		//Confirmation button is pressed during processing
-		$('.group_confirm').click(function(){
-			var post_data = $('.frm_group_confirm').serializeArray();
-			var target_elm = $('.frm_group_input');
-
-			$.ajax({
-				url: "{{asset('/admin/group/confirm')}}",
-				type: 'POST',
-				data: post_data,
-				dataType: 'json',
-				error: function(){
-					alert('I failed to communicate.');
-				},
-				success: function(res){
-					target_elm.empty();
-					target_elm.append(res.response);
-					target_elm.attr('style', 'display:inline;');
-				}
-			});
-			return false;
-		});
-
 		//Cancel button is pressed at the time of processing
 		$('.group_cancel').click(function(){
 			if (window.confirm('Do you input content but you sure will be destroyed?')){
@@ -34,6 +13,7 @@
 		});
 	});
 </script>
+<script type="text/javascript" src="{{asset('../bootstrap/js/ajax/group.js')}}"></script>
 <div class="page_unique">
 	<h1 class="page_ttl">{{$title}}</h1>
 	@if (isset($error_msg))

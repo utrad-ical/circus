@@ -66,15 +66,6 @@ class Serieses extends Eloquent {
 			if ($input['sex'] != 'all')
 				$query->where('patientInfo.sex', '=', $input['sex']);
 		}
-
-		//作成種別
-		if (isset($input['detail_modality']) && $input['detail_modality']) {
-			//作成種別
-			$query->where(
-				'modality', '=', $input['detail_modality']
-			);
-		}
-
 		return $query;
 	}
 

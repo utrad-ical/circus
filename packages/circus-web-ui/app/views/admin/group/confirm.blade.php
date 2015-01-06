@@ -1,54 +1,6 @@
 @extends('common.layout')
 @section('content')
-<script type="text/javascript">
-	$(function() {
-		$('.link_group_input').click(function(){
-			//Get the form ID to be sent
-			var post_data = '{"btnBack":"btnBack"}';
-			post_data = JSON.parse(post_data);
-
-			var target_elm = $('.frm_group_input');
-
-			$.ajax({
-				url: "{{asset('/admin/group/input')}}",
-				type: 'POST',
-				data: post_data,
-				dataType: 'json',
-				error: function(){
-					alert('I failed to communicate.');
-				},
-				success: function(res){
-					target_elm.empty();
-					target_elm.append(res.response);
-					target_elm.attr('style', 'display:inline;');
-				}
-			});
-			return false;
-		});
-
-		//Processing at the time of registration button is pressed
-		$('.group_complete').click(function(){
-			var post_data = $('.frm_group_complete').serializeArray();
-			var target_elm = $('.frm_group_input');
-
-			$.ajax({
-				url: "{{asset('/admin/group/complete')}}",
-				type: 'POST',
-				data: post_data,
-				dataType: 'json',
-				error: function(){
-					alert('I failed to communicate.');
-				},
-				success: function(res){
-					target_elm.empty();
-					target_elm.append(res.response);
-					target_elm.attr('style', 'display:inline;');
-				}
-			});
-			return false;
-		});
-	});
-</script>
+<script type="text/javascript" src="{{asset('../bootstrap/js/ajax/group.js')}}"></script>
 <div class="page_unique">
 	<h1 class="page_ttl">{{$title}}</h1>
 	{{Form::open(['url' => '', 'method' => 'post', 'class' => 'frm_group_complete'])}}

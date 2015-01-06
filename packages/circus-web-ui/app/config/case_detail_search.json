@@ -1,0 +1,20 @@
+[
+	{
+		"key": "patientInfoCache.name",
+		"label": "Patient name",
+		"type": "text",
+		"spec": {
+			"default": "Sample Name"
+		}
+	},
+	{
+		"key": "patientInfoCache.age",
+		"label": "Patient age",
+		"type": "number"
+	},
+	{
+		"key": "patientInfoCache.birthday",
+		"label": "Birthday",
+		"type": "date"
+	}
+]

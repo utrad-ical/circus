@@ -175,13 +175,7 @@ class CaseController extends BaseController {
 				'updateTime'
 			);
 
-
 			//簡易検索
-			Log::debug("検索条件");
-			Log::debug($search_data);
-			Log::debug("Mongo検索");
-			Log::debug(array_key_exists('mongo_data', $search_data));
-		//	if (array_key_exists('mongo_data', $search_data) === FALSE) {
 			if ($search_data["search_mode"] == 0) {
 				Log::debug("簡易検索");
 				//Total number acquisition
@@ -211,8 +205,6 @@ class CaseController extends BaseController {
 									->addLimit($search_data)
 									->get($select_col);
 			}
-			$query_log = DB::getQueryLog();
-			Log::debug($query_log);
 
 			//The formatting for display
 			$list = array();
@@ -280,53 +272,6 @@ class CaseController extends BaseController {
 
 		Log::debug("検索条件保存Ajax入力値");
 		Log::debug($inputs);
-/*
-		if ($search_data) {
-			//The formatting for display
-			$list = array();
-			foreach($case_list as $rec) {
-				//Patient information
-				$patient = $rec->patientInfoCache;
-
-				//Day of the week get
-				$revision = $rec->revisions;
-				$dt = $revision['latest']['date'];
-				$w = self::getWeekDay(date('w', strtotime($dt)));
-
-				//Project name
-				$project = Projects::where('projectID', '=', $rec->projectID)->get();
-
-				//I shaping for display
-				$list[] = array(
-					'incrementalID' =>	$rec->incrementalID,
-					'caseID'		=>	$rec->caseID,
-					'projectID'		=>	$rec->projectID,
-					'patientID'		=>	$patient['patientID'],
-					'patientName' 	=>	$patient['name'],
-					'latestDate' 	=>	date('Y/m/d('.$w.') H:i', $dt->sec),
-					'creator'		=>	$revision['latest']['creator'],
-					'projectName'	=>	$project ? $project[0]->projectName : '',
-					'updateDate'	=>	date('Y/m/d', $rec->updateTime->sec)
-				);
-				$result['list'] = $list;
-				//Setting the pager
-				$case_pager = Paginator::make(
-					$list,
-					$case_count,
-					$search_data['disp']
-				);
-				$result['list_pager'] = $case_pager;
-				$result['inputs'] = $search_data;
-			}
-		}
-
-		$result['search_flg'] = true;
-		$tmp = View::make('/case/case', $result);
-
-		header('Content-Type: application/json; charset=UTF-8');
-		$res = json_encode(array('result' => true, 'message' => '', 'response' => "$tmp"));
-		echo $res;
-		*/
 
 		//セッションから既存の保存検索条件取得
 		$save_case_search = Session::get('case_detail_search');

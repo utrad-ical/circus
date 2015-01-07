@@ -13,7 +13,7 @@
 		});
 	});
 </script>
-<script type="text/javascript" src="{{asset('../bootstrap/js/ajax/group.js')}}"></script>
+{{HTML::script('/js/ajax/group.js')}}
 <div class="page_unique">
 	<h1 class="page_ttl">{{$title}}</h1>
 	@if (isset($error_msg))

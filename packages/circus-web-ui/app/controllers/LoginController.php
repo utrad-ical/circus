@@ -31,11 +31,6 @@ class LoginController extends BaseController {
 			//Check whether there is user information
 			$secret_key = Config::get('const.hash_key');
 			$encrypt_password = openssl_encrypt($inputs['password'],'aes-256-ecb',$secret_key);
-			/*
-			Log::debug("暗号化前PWD::".$inputs['password']);
-			Log::debug("暗号化後PWD::".$encrypt_password);
-			//$encrypt_password = $inputs['password'];
-			*/
 			$inputs['password'] = $encrypt_password;
 			if (!Auth::attempt($inputs)){
 				$result['error_msg'] = 'ID or password is incorrect.';

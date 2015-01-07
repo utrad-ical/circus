@@ -262,6 +262,8 @@ class UserController extends BaseController {
 
 		//Initial setting
 		$result = array();
+		$result['css'] = self::cssSetting();
+		$result['js'] = self::jsSetting();
 
 		//Information obtained from the session
 		$inputs = Session::get('user_input');
@@ -271,11 +273,6 @@ class UserController extends BaseController {
 		//暗号化キー取得
 		$secret_key = Config::get('const.hash_key');
 		$encrypt_password = openssl_encrypt($inputs['password'],'aes-256-ecb',$secret_key);
-		Log::debug("暗号化前PWD::".$inputs['password']);
-		Log::debug("暗号化後PWD::".$encrypt_password);
-
-		$result['css'] = self::cssSetting();
-		$result['js'] = self::jsSetting();
 
 		//Validate check for object creation
 		$user_obj = $userID ?
@@ -284,7 +281,6 @@ class UserController extends BaseController {
 		//Set the value for the Validate check
 		$user_obj->userID = $inputs['userID'];
 		$user_obj->loginID = $inputs['loginID'];
-	//	$user_obj->password = Hash::make($inputs['password']);
 		$user_obj->password = Hash::make($encrypt_password);
 		$user_obj->groups = $inputs['groups'];
 		$user_obj->description = $inputs['description'];

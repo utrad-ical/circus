@@ -1,6 +1,6 @@
 @extends('common.layout')
 @section('content')
-<script type="text/javascript" src="{{asset('../bootstrap/js/ajax/user.js')}}"></script>
+<script type="text/javascript" src="{{asset('/js/ajax/user.js')}}"></script>
 <script type="text/javascript">
 	$(function() {
 		//Cancel button is pressed at the time of processing

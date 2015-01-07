@@ -1,6 +1,6 @@
 @extends('common.layout')
 @section('content')
-<script type="text/javascript" src="{{asset('../bootstrap/js/ajax/user.js')}}"></script>
+<script type="text/javascript" src="{{asset('/js/ajax/user.js')}}"></script>
 <div class="page_unique">
 	<h1 class="page_ttl">Add new User Confirmation</h1>
 	{{Form::open(['url' => asset('admin/user/complete'), 'method' => 'post'])}}

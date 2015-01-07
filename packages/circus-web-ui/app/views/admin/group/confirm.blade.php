@@ -1,6 +1,6 @@
 @extends('common.layout')
 @section('content')
-<script type="text/javascript" src="{{asset('../bootstrap/js/ajax/group.js')}}"></script>
+<script type="text/javascript" src="{{asset('/js/ajax/group.js')}}"></script>
 <div class="page_unique">
 	<h1 class="page_ttl">{{$title}}</h1>
 	{{Form::open(['url' => '', 'method' => 'post', 'class' => 'frm_group_complete'])}}

@@ -4,19 +4,19 @@
 <head>
 	<meta charset="utf-8">
 	<title>{{$title}}</title>
-	<link rel="stylesheet" type="text/css" href="{{asset('../bootstrap/css/common.css')}}">
-	<link rel="stylesheet" type="text/css" href="{{asset('../bootstrap/css/layout.css')}}">
-	<link rel="stylesheet" type="text/css" href="{{asset('../bootstrap/css/color.css')}}">
+	{{HTML::style('css/common.css')}}
+	{{HTML::style('css/layout.css')}}
+	{{HTML::style('css/color.css')}}
 	@if (isset($css))
 		@foreach ($css as $cssrec)
-			<link rel="stylesheet" type="text/css" href="{{asset('../bootstrap/'.$cssrec)}}">
+			{{HTML::style($cssrec)}}
 		@endforeach
 	@endif
-	<script type="text/javascript" src="{{asset('../bootstrap/js/jquery-1.11.1.min.js')}}"></script>
-	<script type="text/javascript" src="{{asset('../bootstrap/js/common.js')}}"></script>
+	{{HTML::script('/js/jquery-1.11.1.min.js')}}
+	{{HTML::script('/js/common.js')}}
 	@if (isset($js))
 		@foreach ($js as $jsrec)
-			<script type="text/javascript" src="{{asset('../bootstrap/'.$jsrec)}}"></script>
+			{{HTML::script($jsrec)}}
 		@endforeach
 	@endif
 </head>
@@ -25,7 +25,7 @@
 		<div id="header">
 			<div class="header_logo">
 				<a href="{{asset('/home')}}">
-					<img src="{{asset('../bootstrap/img/common/header_logo.png')}}" width="192" height="40" alt="CIRCUS">
+					<img src="{{asset('/img/common/header_logo.png')}}" width="192" height="40" alt="CIRCUS">
 				</a>
 			</div>
 			{{Form::open(['url' => $url, 'method' => 'POST'])}}

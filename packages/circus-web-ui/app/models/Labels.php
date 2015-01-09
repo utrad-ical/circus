@@ -24,4 +24,26 @@ class Labels extends Eloquent {
 
 		return $query;
 	}
+
+	/**
+	 * Validate Rules
+	 * @since 2015/01/07
+	 */
+	private $rules = array(
+	);
+
+	/**
+	 * Validate Check
+	 * @param $data Validate checked
+	 * @return Error content
+	 * @since 2015/01/07
+	 */
+	public function validate($data) {
+		$validator = Validator::make($data, $this->rules);
+
+		if ($validator->fails()) {
+			return $validator->messages();
+		}
+		return;
+	}
 }

@@ -89,7 +89,7 @@ class Serieses extends Eloquent {
 	 * Validation rules
 	 * @since 2014/12/12
 	 */
-	public static $rules = array(
+	private $rules = array(
 		'studyUID'				=>	'required',
 		'seriesUID'				=>	'required',
 		'storageID'				=>	'required',
@@ -113,34 +113,17 @@ class Serieses extends Eloquent {
 	);
 
 	/**
-	 * I get the Validate rules
-	 * This method When isValid now can use I delete
-	 * @return Validate rules array
-	 * @since 2014/12/15
+	 * Validate Check
+	 * @param $data Validate checked
+	 * @return Error content
+	 * @since 2015/01/07
 	 */
-	public static function getValidateRules() {
- 		return array(
-			'studyUID'				=>	'required',
-			'seriesUID'				=>	'required',
-			'storageID'				=>	'required',
-			'patientInfo.patientID'	=>	'required',
-			'patientInfo.age'		=>	'required',
-			'patientInfo.birthday'	=>	'required',
-			'patientInfo.sex'		=>	'required',
-			'patientInfo.height'	=>	'required|integer',
-			'patientInfo.weight'	=>	'required|integer',
-			'width'					=>	'required|integer',
-			'height'				=>	'required|integer',
-			'seriesDate'			=>	'required',
-			'modality'				=>	'required',
-			'seriesDescription'		=>	'required',
-			'bodyPart'				=>	'required',
-			'images'				=>	'required',
-			'stationName'			=>	'required',
-			'modelName'				=>	'required',
-			'manufacturer'			=>	'required',
-			'domain'				=>	'required'
-		);
-	}
+	public function validate($data) {
+		$validator = Validator::make($data, $this->rules);
 
+		if ($validator->fails()) {
+			return $validator->messages();
+		}
+		return;
+	}
 }

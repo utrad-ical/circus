@@ -3,8 +3,8 @@
 <script type="text/javascript">
 	$(function() {
 		//View added Group pressed
-		$('.link_group_edit').click(function(){
-			var post_data = $('.frm_group_edit').serializeArray();
+		$('.link_group_edit_complete').click(function(){
+			var post_data = $('.frm_group_edit_complete').serializeArray();
 			var target_elm = $('.frm_group_input');
 
 			sendAjax(post_data, target_elm);
@@ -50,9 +50,9 @@
 		@endif
 	</p>
 	<p class="al_c">
-		{{HTML::link(asset('admin/group/input'), 'View added Group', array('class' => 'common_btn link_group_edit'))}}
+		{{HTML::link(asset('admin/group/input'), 'View added Group', array('class' => 'common_btn link_group_edit_complete'))}}
 		{{HTML::link(asset('admin/group/input'), 'Add new Group', array('class' => 'common_btn group_input'))}}
-		{{Form::open(['url' => asset('admin/group/detail'), 'method' => 'POST', 'class' => 'frm_group_edit'])}}
+		{{Form::open(['url' => asset('admin/group/detail'), 'method' => 'POST', 'class' => 'frm_group_edit_complete'])}}
 			{{Form::hidden('GroupID', $GroupID)}}
 		{{Form::close()}}
 	</p>

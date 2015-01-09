@@ -105,33 +105,30 @@ class Cases extends Eloquent {
 
 	/**
 	 * Validation rules
-	 * @since 2014/12/12
+	 * @since 2015/01/07
 	 */
-	public static $rules = array(
+	private $rules = array(
 		'caseID'						=>	'required',
 		'incrementalID'					=>	'required|integer',
 		'projectID'						=>	'required|integer',
-		'patientInfoCache.patientID'	=>	'required',
-		'patientInfoCache.age'			=>	'required|integer',
-		'patientInfoCache.birthday'		=>	'required|date',
-		'patientInfoCache.sex'			=>	'required'
+		'patientInfoCache_patientID'	=>	'required',
+		'patientInfoCache_age'			=>	'required|integer',
+		'patientInfoCache_birthday'		=>	'required|date',
+		'patientInfoCache_sex'			=>	'required'
 	);
 
 	/**
-	 * I get the Validate rules
-	 * This method When isValid now can use I delete
-	 * @return Validate rules array
-	 * @since 2014/12/12
+	 * Validate Check
+	 * @param $data Validate checked
+	 * @return Error content
+	 * @since 2015/01/07
 	 */
-	public static function getValidateRules() {
- 		return array(
-			'caseID'						=>	'required',
-			'incrementalID'					=>	'required|integer',
-			'projectID'						=>	'required|integer',
-			'patientInfoCache_patientID'	=>	'required',
-			'patientInfoCache_age'			=>	'required|integer',
-			'patientInfoCache_birthday'		=>	'required|date',
-			'patientInfoCache_sex'			=>	'required'
-		);
+	public function validate($data) {
+		$validator = Validator::make($data, $this->rules);
+
+		if ($validator->fails()) {
+			return $validator->messages();
+		}
+		return;
 	}
 }

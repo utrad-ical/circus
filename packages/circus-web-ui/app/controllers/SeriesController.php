@@ -35,6 +35,12 @@ class SeriesController extends BaseController {
 			$tmp = Session::get('series.search');
 			$tmp['perPage'] = $inputs['page'];
 			Session::put('series.search', $tmp);
+		} else if (array_key_exists('condition_id', $inputs) !== FALSE){
+			$detail_search_session = Session::get('series_detail_search');
+			$detail_search = $detail_search_session[$inputs["condition_id"]];
+			$detail_search['disp'] = Config::get('const.page_display');
+			$detail_search['sort'] = 'updateTime';
+			Session::put('series.search', $detail_search);
 		}
 
 		$search_data = Session::get('series.search');
@@ -100,6 +106,47 @@ class SeriesController extends BaseController {
 		$result['js'] = self::jsSetting();
 
 		return View::make('series/search', $result);
+	}
+
+	/**
+	 * Search conditions save(Ajax)
+	 * @since 2015/01/09
+	 */
+	public function save_search() {
+		//Login check
+		if (!Auth::check()) {
+			//Forced redirected to the login screen because not logged in
+			return Redirect::to('login');
+		}
+
+		//Initial setting
+		$search_flg = false;
+		$result = array();
+
+		//Input value acquisition
+		$inputs = Input::all();
+
+		//I want to save your search criteria in the session
+		if (Session::has('series_detail_search')) {
+			$save_series_search = Session::get('series_detail_search');
+			$before_cnt = count($save_series_search);
+			array_push($save_series_search, $inputs);
+			Session::put('series_detail_search', $save_series_search);
+		} else {
+			Session::put('series_detail_search', array($inputs));
+			$before_cnt = 0;
+		}
+
+		$after_cnt = count(Session::get('series_detail_search'));
+
+		if ($before_cnt+1 === $after_cnt) {
+			$msg = 'Save search criteria has been completed.';
+		} else {
+			$msg = 'I failed to save the search criteria.';
+		}
+		header('Content-Type: application/json; charset=UTF-8');
+		$res = json_encode(array('result' => true, 'message' => $msg));
+		echo $res;
 	}
 
 	/**
@@ -215,6 +262,47 @@ class SeriesController extends BaseController {
 		} else {
 			//Upload file information acquisition
 			$uploads = Input::file('upload_file');
+			Log::debug("アップロードしたファイル");
+			Log::debug($uploads);
+
+			// ファイル名を生成し画像をアップロード
+			//$name = md5(sha1(uniqid(mt_rand(), true))).'.'.$image->getClientOriginalExtension();
+			try{
+				Log::debug("ファイル名::");
+				foreach ($uploads as $upload) {
+					$res = $upload->move('uploads', $upload->getClientOriginalName());
+					Log::debug("アップロード結果");
+					Log::debug($res);
+
+					//拡張子がZipの場合は解凍して保存する
+					$ext = $upload->getClientOriginalExtension();
+					Log::debug("拡張子::".$ext);
+
+					if ($ext == 'zip'){
+						Log::debug("拡張子がZipなので解凍処理を行う");
+						$zip = new ZipArchive();
+						//Zipファイルオープン
+						$zip_path = asset('uploads').$upload->getClientOriginalName();
+						Log::debug("Zipファイルのパス");
+						Log::debug($zip_path);
+						$res = $zip->open($zip_path);
+
+						Log::debug("Zipファイルオープン結果");
+						Log::debug($res);
+						//Zipファイルオープンに成功
+						if ($res === true){
+							//Zipファイル内のすべてのファイルを解凍し保存する
+							//解凍フォルダ名はファイル名にしておく
+								//TODO::ここに解凍フォルダを作る処理
+							$zip->extractTo(asset('uploads'));
+							//Zipファイルクローズ
+							$zip->close();
+						}
+					}
+				}
+			} catch (Exception $e){
+				$error_msg = $e->getMessage();
+			}
 		}
 
 		//$validator = Validator::make(self::setSeriesValidate($inputs), Serieses::getValidateRules());

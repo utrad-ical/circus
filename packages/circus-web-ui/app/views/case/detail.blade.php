@@ -73,6 +73,10 @@
 </script>
 <div class="page_contents_outer">
 	<div class="page_contents_inner">
+	<?php
+		//デバッグ用
+		$sel_seriesUID = isset($case_detail['seriesUID']) ? $case_detail['seriesUID'] : "LIDC-IDRI-0002";
+	?>
 		<div class="page_unique" id="page_case_detail">
 			<h1 class="page_ttl">Case Detail (Revision {{$case_detail['revisionNo']}})</h1>
 			@if (isset($error_msg))
@@ -89,6 +93,7 @@
 							{{Form::hidden('caseID', $case_detail['caseID'])}}
 							{{Form::hidden('revisionNo', $case_detail['revisionNo'])}}
 							{{Form::hidden('back_url', 'case_detail')}}
+							{{Form::hidden('view_mode', $mode)}}
 						{{Form::close()}}
 					@endif
 				</div>
@@ -149,7 +154,9 @@
 						</div>
 						<div class="clear">&nbsp;</div>
 						<div id="img_area_axial" class="img_wrap">
-							<img src="http://www.spiritek.co.jp/todaitestimg/img.php?id=4&amp;count=001" id="img_axial">
+
+							<img src="http://160.16.56.191:3000/?mode=axial&target=1&series={{$sel_seriesUID}}"  id="img_axial">
+
 							<p class="al_c disp_num">
 								<span id="current_num_txt_axial">1</span>
 							</p>
@@ -175,7 +182,7 @@
 						</div>
 						<div class="clear">&nbsp;</div>
 						<div id="img_area_sagital" class="img_wrap">
-							<img src="http://www.spiritek.co.jp/todaitestimg/img.php?id=6&amp;count=001" id="img_sagital">
+							<img src="http://160.16.56.191:3000/?mode=axial&target=1&series={{$sel_seriesUID}}" id="img_axial">
 							<p class="al_c disp_num">
 								<span id="current_num_txt_sagital">1</span>
 							</p>
@@ -202,7 +209,7 @@
 						</div>
 						<div class="clear">&nbsp;</div>
 						<div id="img_area_coronal" class="img_wrap">
-							<img src="http://www.spiritek.co.jp/todaitestimg/img.php?id=5&amp;count=001" id="img_coronal">
+							<img src="http://160.16.56.191:3000/?mode=axial&target=1&series={{$sel_seriesUID}}" id="img_axial">
 							<p class="al_c disp_num">
 								<span id="current_num_txt_coronal">1</span>
 							</p>

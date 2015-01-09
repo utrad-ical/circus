@@ -1,7 +1,33 @@
 @extends('common.layout')
 @include('common.header')
 @section('content')
-<script type="text/javascript" src="{{asset('/js/ajax/group.js')}}"></script>
+<script tyep="text/javascript">
+	$(function() {
+		$('.link_group_edit').click(function(){
+			//Get the form ID to be sent
+			var post_data = $(this).closest('td').find('.frm_group_id').serializeArray();
+			var target_elm = $('.frm_group_input');
+
+			console.log(post_data);
+
+			$.ajax({
+				url: "./input",
+				type: 'POST',
+				data: post_data,
+				dataType: 'json',
+				error: function(){
+					alert('I failed to communicate.');
+				},
+				success: function(res){
+					target_elm.empty();
+					target_elm.append(res.response);
+					target_elm.attr('style', 'display:inline;');
+				}
+			});
+			return false;
+		});
+	});
+</script>
 <div class="page_contents_outer">
 	<div class="page_contents_inner">
 		<div class="page_unique">

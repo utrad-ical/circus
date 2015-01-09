@@ -33,6 +33,17 @@ class CaseController extends BaseController {
 			$tmp = Session::get('case.search');
 			$tmp['perPage'] = $inputs['page'];
 			Session::put('case.search', $tmp);
+		} else if (array_key_exists('condition_id', $inputs) !== FALSE){
+			$detail_search_session = Session::get('case_detail_search');
+			$detail_search = $detail_search_session[$inputs["condition_id"]];
+			$detail_search["project"] = json_decode($detail_search["project"]);
+			if (array_key_exists("mongo_data", $detail_search) !== FALSE) {
+				$detail_search["mongo_search_data"] = json_decode($detail_search["mongo_search_data"]);
+				$detail_search["mongo_data"] = json_decode($detail_search["mongo_data"]);
+			}
+			$detail_search['disp'] = Config::get('const.page_display');
+			$detail_search['sort'] = 'updateTime';
+			Session::put('case.search', $detail_search);
 		}
 
 		$search_data = Session::get('case.search');
@@ -50,53 +61,76 @@ class CaseController extends BaseController {
 				'updateTime'
 			);
 
-			//Total number acquisition
-			$case_count = Cases::addWhere($search_data)
-								->count();
+			//Simple Search
+			if ($search_data["search_mode"] == 0) {
+				//Total number acquisition
+				$case_count = Cases::addWhere($search_data)
+									->count();
 
-			//Search result acquisition
-			$case_list = Cases::addWhere($search_data)
-								->orderby($search_data['sort'], 'desc')
-								->addLimit($search_data)
-								->get($select_col);
+				//Search result acquisition
+				if ($case_count > 0)
+					$case_list = Cases::addWhere($search_data)
+									->orderby($search_data['sort'], 'desc')
+									->addLimit($search_data)
+									->get($select_col);
+			} else {
+				//詳細検索
+				//Total number acquisition
+				$case_count = Cases::addWhere($search_data)
+									->whereRaw($search_data["mongo_data"])
+									->count();
+
+				//Search result acquisition
+				if ($case_count > 0)
+					$case_list = Cases::addWhere($search_data)
+									->whereRaw($search_data["mongo_data"])
+									->orderby($search_data['sort'], 'desc')
+									->addLimit($search_data)
+									->get($select_col);
+			}
 
 			//The formatting for display
 			$list = array();
-			foreach($case_list as $rec) {
-				//Patient information
-				$patient = $rec->patientInfoCache;
+			if ($case_count > 0) {
+				foreach($case_list as $rec) {
+					//Patient information
+					$patient = $rec->patientInfoCache;
 
-				//Day of the week get
-				$revision = $rec->revisions;
-				$dt = $revision['latest']['date'];
-				$w = self::getWeekDay(date('w', strtotime($dt)));
+					//Day of the week get
+					$revision = $rec->revisions;
+					$dt = $revision['latest']['date'];
+					$w = self::getWeekDay(date('w', strtotime($dt)));
 
-				//Project name
-				$project = Projects::where('projectID', '=', $rec->projectID)->get();
+					//Project name
+					$project = Projects::where('projectID', '=', $rec->projectID)->get();
 
-				//I shaping for display
-				$list[] = array(
-					'incrementalID' =>	$rec->incrementalID,
-					'caseID'		=>	$rec->caseID,
-					'projectID'		=>	$rec->projectID,
-					'patientID'		=>	$patient['patientID'],
-					'patientName' 	=>	$patient['name'],
-					'latestDate' 	=>	date('Y/m/d('.$w.') H:i', $dt->sec),
-					'creator'		=>	$revision['latest']['creator'],
-					'projectName'	=>	$project ? $project[0]->projectName : '',
-					'updateDate'	=>	date('Y/m/d', $rec->updateTime->sec)
-				);
-				$result['list'] = $list;
-				//Setting the pager
-				$case_pager = Paginator::make(
-					$list,
-					$case_count,
-					$search_data['disp']
-				);
-				$result['list_pager'] = $case_pager;
-				$result['inputs'] = $search_data;
+					//I shaping for display
+					$list[] = array(
+						'incrementalID' =>	$rec->incrementalID,
+						'caseID'		=>	$rec->caseID,
+						'projectID'		=>	$rec->projectID,
+						'patientID'		=>	$patient['patientID'],
+						'patientName' 	=>	$patient['name'],
+						'latestDate' 	=>	date('Y/m/d('.$w.') H:i', $dt->sec),
+						'creator'		=>	$revision['latest']['creator'],
+						'projectName'	=>	$project ? $project[0]->projectName : '',
+						'updateDate'	=>	date('Y/m/d', $rec->updateTime->sec)
+					);
+				}
 			}
+			$result['list'] = $list;
+			//Setting the pager
+			$case_pager = Paginator::make(
+				$list,
+				$case_count,
+				$search_data['disp']
+			);
+			$result['list_pager'] = $case_pager;
+
 		}
+		Log::debug("検索条件");
+		$result['inputs'] = $search_data;
+		Log::debug($search_data);
 
 		$result['title'] = 'Case Search';
 		$result['url'] = 'case/search';
@@ -105,7 +139,7 @@ class CaseController extends BaseController {
 		$result['js'] = self::jsSetting();
 		$result['project_list'] = self::getProjectList(true);
 
-		//JsonFile読み込み
+		//JsonFile read
 		try {
 			$file_path = dirname(dirname(__FILE__))."/config/case_detail_search.json";
 			$handle = fopen($file_path, 'r');
@@ -135,16 +169,10 @@ class CaseController extends BaseController {
 		//Input value acquisition
 		$inputs = Input::all();
 
-		Log::debug("Ajax入力値");
-		Log::debug($inputs);
-
 		//MongoDataとプロジェクトIDはjson_decodeをかける
 		if (array_key_exists("mongo_data", $inputs) !== FALSE)
 			$inputs["mongo_data"] = json_decode($inputs["mongo_data"]);
 		$inputs["project"] = json_decode($inputs["project"]);
-
-		Log::debug("JsonDecode後");
-		Log::debug($inputs);
 
 		//Reset button or the initial display when pressed
 		if (array_key_exists('btnReset', $inputs) !== FALSE || !$inputs) {
@@ -175,31 +203,30 @@ class CaseController extends BaseController {
 				'updateTime'
 			);
 
-			//簡易検索
+			Log::debug("検索条件");
+			Log::debug($search_data);
+			//Simple Search
 			if ($search_data["search_mode"] == 0) {
-				Log::debug("簡易検索");
 				//Total number acquisition
 				$case_count = Cases::addWhere($search_data)
-								//	->whereRaw($search_data["mongo_data"])
 									->count();
 
 				//Search result acquisition
-				$case_list = Cases::addWhere($search_data)
-								//	->whereRaw($search_data["mongo_data"])
+				if ($case_count > 0)
+					$case_list = Cases::addWhere($search_data)
 									->orderby($search_data['sort'], 'desc')
 									->addLimit($search_data)
 									->get($select_col);
-
 			} else {
-				Log::debug("詳細検索");
-				//詳細検索
+				//Advanced Search
 				//Total number acquisition
 				$case_count = Cases::addWhere($search_data)
 									->whereRaw($search_data["mongo_data"])
 									->count();
 
 				//Search result acquisition
-				$case_list = Cases::addWhere($search_data)
+				if ($case_count > 0)
+					$case_list = Cases::addWhere($search_data)
 									->whereRaw($search_data["mongo_data"])
 									->orderby($search_data['sort'], 'desc')
 									->addLimit($search_data)
@@ -208,42 +235,47 @@ class CaseController extends BaseController {
 
 			//The formatting for display
 			$list = array();
-			foreach($case_list as $rec) {
-				//Patient information
-				$patient = $rec->patientInfoCache;
+			if ($case_count > 0) {
+				foreach($case_list as $rec) {
+					//Patient information
+					$patient = $rec->patientInfoCache;
 
-				//Day of the week get
-				$revision = $rec->revisions;
-				$dt = $revision['latest']['date'];
-				$w = self::getWeekDay(date('w', strtotime($dt)));
+					//Day of the week get
+					$revision = $rec->revisions;
+					$dt = $revision['latest']['date'];
+					$w = self::getWeekDay(date('w', strtotime($dt)));
 
-				//Project name
-				$project = Projects::where('projectID', '=', $rec->projectID)->get();
+					//Project name
+					$project = Projects::where('projectID', '=', $rec->projectID)->get();
 
-				//I shaping for display
-				$list[] = array(
-					'incrementalID' =>	$rec->incrementalID,
-					'caseID'		=>	$rec->caseID,
-					'projectID'		=>	$rec->projectID,
-					'patientID'		=>	$patient['patientID'],
-					'patientName' 	=>	$patient['name'],
-					'latestDate' 	=>	date('Y/m/d('.$w.') H:i', $dt->sec),
-					'creator'		=>	$revision['latest']['creator'],
-					'projectName'	=>	$project ? $project[0]->projectName : '',
-					'updateDate'	=>	date('Y/m/d', $rec->updateTime->sec)
-				);
-				$result['list'] = $list;
-				//Setting the pager
-				$case_pager = Paginator::make(
-					$list,
-					$case_count,
-					$search_data['disp']
-				);
-				$result['list_pager'] = $case_pager;
-				$result['inputs'] = $search_data;
+					//I shaping for display
+					$list[] = array(
+						'incrementalID' =>	$rec->incrementalID,
+						'caseID'		=>	$rec->caseID,
+						'projectID'		=>	$rec->projectID,
+						'patientID'		=>	$patient['patientID'],
+						'patientName' 	=>	$patient['name'],
+						'latestDate' 	=>	date('Y/m/d('.$w.') H:i', $dt->sec),
+						'creator'		=>	$revision['latest']['creator'],
+						'projectName'	=>	$project ? $project[0]->projectName : '',
+						'updateDate'	=>	date('Y/m/d', $rec->updateTime->sec)
+					);
+					$result['list'] = $list;
+					$result['inputs'] = $search_data;
+				}
+			} else {
+				$result['list'] = array();
 			}
 		}
 		$result['search_flg'] = $search_flg;
+
+		//Setting the pager
+		$case_pager = Paginator::make(
+			$list,
+			$case_count,
+			$search_data['disp']
+		);
+		$result['list_pager'] = $case_pager;
 
 		$tmp = View::make('/case/search_result', $result);
 
@@ -256,7 +288,7 @@ class CaseController extends BaseController {
 	 * 検索条件保存(Ajax)
 	 * @since 2015/01/05
 	 */
-	public function search_save() {
+	public function save_search() {
 		//Login check
 		if (!Auth::check()) {
 			//Forced redirected to the login screen because not logged in
@@ -270,20 +302,27 @@ class CaseController extends BaseController {
 		//Input value acquisition
 		$inputs = Input::all();
 
-		Log::debug("検索条件保存Ajax入力値");
-		Log::debug($inputs);
-
-		//セッションから既存の保存検索条件取得
-		$save_case_search = Session::get('case_detail_search');
-
-		//セッションに保存されている検索条件がない場合は空配列作成
-		if (count($save_case_search) == 0)
-			$save_case_search = array();
-
 		//セッションに検索条件を保存する
-		array_push($save_case_search, $inputs);
-		Session::put('case_detail_search'. $save_case_search);
+		if (Session::has('case_detail_search')) {
+			$save_case_search = Session::get('case_detail_search');
+			$before_cnt = count($save_case_search);
+			array_push($save_case_search, $inputs);
+			Session::put('case_detail_search', $save_case_search);
+		} else {
+			Session::put('case_detail_search', array($inputs));
+			$before_cnt = 0;
+		}
 
+		$after_cnt = count(Session::get('case_detail_search'));
+
+		if ($before_cnt+1 === $after_cnt) {
+			$msg = 'Save search criteria has been completed.';
+		} else {
+			$msg = 'I failed to save the search criteria.';
+		}
+		header('Content-Type: application/json; charset=UTF-8');
+		$res = json_encode(array('result' => true, 'message' => $msg));
+		echo $res;
 	}
 
 	/**
@@ -306,9 +345,11 @@ class CaseController extends BaseController {
 
 		if (array_key_exists('btnBack', $inputs)) {
 			//Session discarded
-			Session.forget('case_input');
+			if (Session::has('case_input'))
+				Session::forget('case_input');
 			//CaseID acquisition
-			$inputs['caseID'] = Session.get('caseID');
+			$inputs['caseID'] = Session::get('caseID');
+			$inputs['mode'] = Session::get('view_mode');
 		} else if (array_key_exists('caseID', $inputs) === FALSE) {
 			$error_msg = 'Please specify a case ID.';
 		}
@@ -325,9 +366,7 @@ class CaseController extends BaseController {
 			if (!$case_info) {
 				$error_msg = 'Case ID does not exist.';
 			} else {
-			//	$case_data = $case_info[0];
 				$case_data = $case_info;
-			//	Log::
 				//Authority check
 				//Case viewing rights
 				$auth_view = Projects::getProjectList(Projects::AUTH_TYPE_VIEW, false);
@@ -429,6 +468,7 @@ class CaseController extends BaseController {
 		$result['css'] = self::cssSetting();
 		$result['js'] = self::jsSetting('detail');
 		$result['mode'] = $inputs['mode'];
+		Session::put('view_mode', $inputs['mode']);
 		return View::make('/case/detail', $result);
 	}
 
@@ -688,7 +728,8 @@ class CaseController extends BaseController {
 
 		//Validate check for object creation
 		$case_obj = $caseID ?
-					Cases::addWhere(array('caseID' => $caseID))->get() :
+					//Cases::addWhere(array('caseID' => $caseID))->get() :
+					Cases::find($caseID) :
 					App::make('Cases');
 
 		//Set the value for the Validate check
@@ -704,16 +745,15 @@ class CaseController extends BaseController {
 		);
 
 		//ValidateCheck
-		//$validator = Validator::make($inputs, Cases::getValidateRules());
-		$validator = Validator::make(self::setCaseValidate($case_info), Cases::getValidateRules());
+		$errors = $case_obj->validate(self::setCaseValidate($case_info));
 		$result['inputs'] = $case_info;
 		$result['series_list'] = $case_info['series_list'];
-		if ($validator->fails()) {
+		if ($errors) {
 			//Process at the time of Validate error
 			$result['title'] = $mode.' Case';
 			$result['url'] = '/case/input';
 			$result['project_list'] = Projects::getProjectList(Projects::AUTH_TYPE_CREATE, true);
-			$result['errors'] = $validator->messages();
+			$result['errors'] = $errors;
 			return View::make('/case/input', $result);
 		} else {
 			//And displays a confirmation screen because there is no error
@@ -774,8 +814,9 @@ class CaseController extends BaseController {
 		);
 
 		//ValidateCheck
-		$validator = Validator::make(self::setCaseValidate($inputs), Cases::getValidateRules());
-		if (!$validator->fails()) {
+		//Validate check for object creation
+		$errors = $case_obj->validate(self::setCaseValidate($inputs));
+		if (!$errors) {
 			//Validate process at the time of success
 			//I registered because there is no error
 			$dt = new MongoDate(strtotime(date('Y-m-d H:i:s')));
@@ -799,7 +840,7 @@ class CaseController extends BaseController {
 			return Redirect::to('/case/complete');
 		} else {
 			//Process at the time of Validate error
-			$result['errors'] = $validator->messages();
+			$result['errors'] = $errors;
 			$result['url'] = '/case/input';
 			$result['title'] = $mode.' Case';
 			$result['inputs'] = $inputs;

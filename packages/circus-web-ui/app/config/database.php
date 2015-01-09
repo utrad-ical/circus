@@ -1,5 +1,16 @@
 <?php
 
+//Database設定JSONファイル読み込み
+try {
+	$file_path = dirname(__FILE__)."/db_config.json";
+	$handle = fopen($file_path, 'r');
+	$mongo_db_settings = fread($handle, filesize($file_path));
+	$mongo_db_settings = json_decode($mongo_db_settings);
+	fclose($handle);
+} catch (Exception $e){
+	Log::debug($e->getMessage());
+}
+
 return array(
 
 	/*
@@ -82,16 +93,14 @@ return array(
 			'password' => '',
 			'prefix'   => '',
 		),
-
 		'mongodb' => array(
-		    'driver'   => 'mongodb',
-		    'host'     => 'localhost',
-		    'port'     => 27017,
-		    'username' => 'stani',
-		    'password' => 'tani',
-		    'database' => 'todai'
+			'driver'   => $mongo_db_settings->driver,
+		    'host'     => $mongo_db_settings->host,
+		    'port'     => $mongo_db_settings->port,
+		    'username' => $mongo_db_settings->username,
+		    'password' => $mongo_db_settings->password,
+		    'database' => $mongo_db_settings->database
 		),
-
 	),
 
 	/*

@@ -58,13 +58,14 @@ class GroupController extends BaseController {
 		}
 
 		//Initial setting
+		//$error_msg = '';
 		$result = array();
-		$error_msg = '';
+		$result['url'] = '/admin/group/search';
+		$result['role_list'] = Config::get('config.group_authority');
+
 
 		//Input value acquisition
 		$inputs = Input::all();
-
-		$result['url'] = '/admin/group/search';
 
 		//Settings page
 		if (array_key_exists('btnBack', $inputs)) {
@@ -94,13 +95,9 @@ class GroupController extends BaseController {
 		$mode = Session::get('mode');
 		$result['title'] = $mode.' Group';
 
-		//Set of error messages
-		if ($error_msg) {
-			$result['error_msg'] = $error_msg;
-		} else {
-			Session::put('group_input', $result['inputs']);
-			$result['group_detail'] = $result['inputs'];
-		}
+		//グループ情報をセッションに保持する
+		Session::put('group_input', $result['inputs']);
+		$result['group_detail'] = $result['inputs'];
 
 		$tmp = View::make('/admin/group/input', $result);
 
@@ -124,6 +121,8 @@ class GroupController extends BaseController {
 		$result = array();
 		$result['css'] = self::cssSetting();
 		$result['js'] = self::jsSetting();
+		$result['role_list'] = Config::get('config.group_authority');
+
 		$mode = Session::get('mode');
 
 		//Input value acquisition
@@ -147,15 +146,18 @@ class GroupController extends BaseController {
 		$group_obj->GroupName = $inputs['GroupName'];
 
 		//ValidateCheck
-		$validator = Validator::make($inputs, Groups::getValidateRules());
-		$result['title'] = $mode.' Group Confirmation';
-		if ($validator->fails()) {
-			//Process at the time of Validate error
+		//$errors = Groups::validate($inputs);
+		$errors = $group_obj->validate($inputs);
+
+		//エラーがある場合の処理
+		if ($errors) {
+			$result['title'] = $mode.' Group';
 			$result['url'] = '/admin/group/input';
-			$result['errors'] = $validator->messages();
-			Log::debug($result['errors']);
+			$result['errors'] = $errors;
 			$tmp = View::make('/admin/group/input', $result);
 		} else {
+			//エラーがない場合の処理
+			$result['title'] = $mode.' Group Confirmation';
 			//And displays a confirmation screen because there is no error
 			$result['url'] = '/admin/group/confirm';
 			$tmp = View::make('/admin/group/confirm', $result);
@@ -187,6 +189,7 @@ class GroupController extends BaseController {
 
 		$result['css'] = self::cssSetting();
 		$result['js'] = self::jsSetting();
+		$role_list = Config::get('config.group_authority');	//権限一覧
 
 		//Validate check for object creation
 		$group_obj = $groupID ?
@@ -197,20 +200,25 @@ class GroupController extends BaseController {
 		$group_obj->GroupName = $inputs['GroupName'];
 
 		//ValidateCheck
-		$validator = Validator::make($inputs, Groups::getValidateRules());
-		if (!$validator->fails()) {
+		//$validator = Validator::make($inputs, Groups::getValidateRules());
+		$errors = $group_obj->validate($inputs);
+
+		if (!$errors) {
 			//Validate process at the time of success
 			//I registered because there is no error
 			$dt = new MongoDate(strtotime(date('Y-m-d H:i:s')));
 			$group_obj->updateTime = $dt;
 			$group_obj->createTime = $dt;
+
+			//権限情報の設定
 			$priviledges = array();
-			if (array_key_exists('priviledges_createProject', $inputs) !== FALSE){
-				$priviledges[] = 'createProject';
+			$role_keys = array_keys($role_list);
+			foreach ($role_keys as $role_key){
+				if (array_key_exists('priviledges_'.$role_key, $inputs) !== FALSE) {
+					$priviledges[] = $role_key;
+				}
 			}
-			if (array_key_exists('priviledges_createCase', $inputs) !== FALSE) {
-				$priviledges[] = 'createCase';
-			}
+
 			$group_obj->priviledges = $priviledges;
 			$group_obj->domains = array();
 			$group_obj->save();
@@ -228,10 +236,11 @@ class GroupController extends BaseController {
 			$tmp = View::make('/admin/group/complete', $result);
 		} else {
 			//Process at the time of Validate error
-			$result['errors'] = $validator->messages();
+			$result['errors'] = $errors;
 			$result['inputs'] = $inputs;
 			$result['title'] = $mode.' Group';
 			$result['url'] = '/admin/group/input';
+			$result['role_list'] = $role_list;
 			$tmp = View::make('/admin/group/input', $result);
 		}
 

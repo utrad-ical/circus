@@ -50,6 +50,7 @@ App::error(function(Exception $exception, $code)
 {
 	Log::error($exception);
 	$result = array();
+	$result['title'] = 'error';
 	$result['url'] = 'home';
 	$result['error_msg'] = $exception->getMessage() ? $exception->getMessage() : '';
 //	Log::debug("エラーメッセージ");
@@ -83,8 +84,9 @@ App::down(function()
 | definitions instead of putting them all in the main routes file.
 |
 */
-
-Event::listen('illuminate.query', function($query, $bindings, $time, $name)
+$myLogger = new Illuminate\Log\Writer( new Monolog\Logger( 'SQL log' ) );
+$myLogger->useDailyFiles( app_path().'/storage/logs/sql.log' );
+Event::listen('illuminate.query', function($query, $bindings, $time, $name) use($myLogger)
 {
     $data = compact('bindings', 'time', 'name');
     foreach ($bindings as $i => $binding)
@@ -98,7 +100,7 @@ Event::listen('illuminate.query', function($query, $bindings, $time, $name)
     }
     $query = str_replace(array('%', '?'), array('%%', '%s'), $query);
     $query = vsprintf($query, $bindings);
-    Log::info($query, $data);
+    $myLogger->info($query, $data);
 });
 
 require app_path().'/filters.php';

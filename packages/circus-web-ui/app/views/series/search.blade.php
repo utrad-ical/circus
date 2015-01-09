@@ -80,6 +80,47 @@
 				}
 			}
 		});
+
+		//Save Settings depression during treatment
+		$('#save-button').click(function(){
+			sendAjax("{{asset('/series/save_search')}}", setAjaxSearchVal("btnSave"));
+			return false;
+		});
+
+		//I want to create a data for Ajax communication
+		function setAjaxSearchVal(btnName) {
+			var form_data = $('#form_search').serializeArray();
+			//Get search mode
+			var search_mode = $('#search_mode').val();
+			var tmp_action_btn_data = {"name":btnName, "value":btnName};
+			var tmp_ary_data = [tmp_action_btn_data];
+
+			var tmp_data = $.extend(true,form_data, tmp_ary_data);
+			return tmp_data;
+		}
+
+		//Ajax communication
+		function sendAjax(post_url, post_data) {
+			var target_elm = arguments[2] ? arguments[2] : "";
+			$.ajax({
+				url: post_url,
+				type: 'POST',
+				data: post_data,
+				dataType: 'json',
+				error: function(){
+					alert('I failed to communicate.');
+				},
+				success: function(res){
+				//	console.log(target_elm);
+					if (target_elm) {
+						target_elm.empty();
+						target_elm.append(res.response);
+					} else {
+						alert(res.message);
+					}
+				}
+			});
+		}
 	});
 </script>
 <div class="page_contents_outer">
@@ -146,7 +187,7 @@
 					<p class="al_c">
 						{{Form::button('Reset', array('class' => 'common_btn common_btn_green', 'id' => 'btn_reset'))}}
 						{{Form::button('Search', array('class' => 'common_btn', 'type' => 'submit', 'id' => 'btn_submit'))}}
-						{{Form::button('Save settings', array('class' => 'common_btn common_btn_gray', 'type' => 'submit', 'id' => 'btnSave'))}}
+						{{Form::button('Save settings', array('class' => 'common_btn common_btn_gray', 'type' => 'submit', 'id' => 'save-button'))}}
 					</p>
 				</div>
 			{{Form::close()}}

@@ -11,24 +11,12 @@
 			var data = filter.filtereditor('option', 'filter');
 			var node = JSON.stringify(data, null, '  ');
 			$('#json_value').val(node);
-			console.debug(data);
 		});
 		filter.trigger('filterchange');
 
-		//Save Settings押下時の処理
+		//Save Settings depression during treatment
 		$('#save-button').click(function(){
-			$.ajax({
-				url: "{{asset('/case/save_search')}}",
-				type: 'POST',
-				data:setAjaxSearchVal("btnSave"),
-				dataType: 'json',
-				error: function(){
-					alert('I failed to communicate.');
-				},
-				success: function(res){
-					alert(res.response);
-				}
-			});
+			sendAjax("{{asset('/case/save_search')}}", setAjaxSearchVal("btnSave"));
 			return false;
 		});
 
@@ -36,25 +24,12 @@
 			//Ajax
 			var target_elm = $('#result_case_list');
 			var btnName = arguments[1] ? arguments[1] : "btnSearch";
-			var json_data = setAjaxSearchVal(btnName);
-			$.ajax({
-				url: "{{asset('/case/search_result')}}",
-				type: 'POST',
-				data: json_data,
-				dataType: 'json',
-				error: function(){
-					alert('I failed to communicate.');
-				},
-				success: function(res){
-					target_elm.empty();
-					target_elm.append(res.response);
-				}
-			});
+			sendAjax("{{asset('/case/search_result')}}", setAjaxSearchVal(btnName), target_elm);
 			$('#temporaly_form').remove();
 			return false;
 		});
 
-		//Ajax通信用のデータを作成する
+		//I want to create a data for Ajax communication
 		function setAjaxSearchVal(btnName) {
 			var form_data = $('#form_search').serializeArray();
 			//プロジェクトIDの条件生成
@@ -74,15 +49,18 @@
 			var tmp_search_mode_data = {"name":"search_mode", "value":search_mode};
 
 			//詳細検索
-			if (search_mode) {
-				console.log("詳細検索");
+			if (search_mode == 1) {
 				var mongo_val = filter.filtereditor('exportMongo');
-				//var mongo_val = filter.filtereditor('option', 'filter');
 				var tmp_mongo_data = {"name":"mongo_data","value" : JSON.stringify(mongo_val)};
-				tmp_ary_data= [tmp_mongo_data, tmp_project_data,tmp_action_btn_data,tmp_search_mode_data];
+				if (btnName == "btnSave") {
+					var mongo_search_val = filter.filtereditor('option', 'filter');
+					var tmp_mongo_search_data = {"name":"mongo_search_data","value" : JSON.stringify(mongo_search_val)};
+					tmp_ary_data= [tmp_mongo_data, tmp_project_data,tmp_action_btn_data,tmp_search_mode_data, tmp_mongo_search_data];
+				} else {
+					tmp_ary_data= [tmp_mongo_data, tmp_project_data,tmp_action_btn_data,tmp_search_mode_data];
+				}
 			} else {
 			//簡易検索
-				console.log("簡易検索");
 				tmp_ary_data = [tmp_project_data,tmp_action_btn_data,tmp_search_mode_data];
 			}
 			var tmp_data = $.extend(true,form_data, tmp_ary_data);
@@ -117,8 +95,32 @@
 			//Event firing
 			$('#btn_submit').trigger('click', ["btnReset"]);
 		});
+
+		//Ajax通信
+		function sendAjax(post_url, post_data) {
+			var target_elm = arguments[2] ? arguments[2] : "";
+			$.ajax({
+				url: post_url,
+				type: 'POST',
+				data: post_data,
+				dataType: 'json',
+				error: function(){
+					alert('I failed to communicate.');
+				},
+				success: function(res){
+					console.log(target_elm);
+					if (target_elm) {
+						target_elm.empty();
+						target_elm.append(res.response);
+					} else {
+						alert(res.message);
+					}
+				}
+			});
+		}
 	});
 </script>
+
 <div class="page_contents_outer">
 	<div class="page_contents_inner">
 		<div class="page_unique">
@@ -142,7 +144,11 @@
 								</td>
 							</tr>
 						</table>
-						<div id="easy_search">
+						@if (!isset($inputs['search_mode']) || (isset($inputs['search_mode']) && $inputs['search_mode'] == 0))
+							<div id="easy_search">
+						@else
+							<div id="easy_search" class="hidden">
+						@endif
 							<table class="common_table al_l mar_b_10">
 								<tr>
 									<th>Case ID</th>
@@ -164,12 +170,12 @@
 								</tr>
 							</table>
 						</div>
-						<!--
-						{{Form::button('Show More Options', array('class' => 'common_btn mar_b_10', 'onClick' => "$('#search_condition').toggleClass('hidden');"))}}
-						-->
-						{{Form::button('Show More Options', array('id' => 'search_detail', 'class' => 'common_btn mar_b_10', 'onClick' => "more_search(1);"))}}
-						{{Form::button('Hidden More Options', array('id' => 'search_easy', 'class' => 'common_btn mar_b_10', 'onClick' => "more_search(0);", 'style' => "display:none;"))}}
-						<div id="search_condition" class="hidden">
+						{{Form::button($inputs['search_mode'] == 0 ? 'Show More Options' : 'Hidden More Options', array('id' => 'search_detail', 'class' => 'common_btn mar_b_10', 'onClick' => "more_search();"))}}
+						@if (isset($inputs['search_mode']) && $inputs['search_mode'] == 1)
+							<div id="search_condition">
+						@else
+							<div id="search_condition" class="hidden">
+						@endif
 						</div>
 						<p class="submit_area">
 							{{Form::button('Reset', array('class' => 'common_btn common_btn_green clearForm', 'type' => 'reset', 'id' => 'btn_reset', 'name' => 'btnReset'))}}
@@ -184,7 +190,7 @@
 			@include('case.case')
 		</div>
 	</div>
-@include('common.navi')
+	@include('common.navi')
 </div>
 <div class="clear">&nbsp;</div>
 @stop

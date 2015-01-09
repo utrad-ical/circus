@@ -229,12 +229,15 @@ class UserController extends BaseController {
 		);
 
 		//ValidateCheck
-		$validator = Validator::make($inputs, User::getValidateRules());
-		if ($validator->fails()) {
+	//	$validator = Validator::make($inputs, User::getValidateRules());
+	//	if ($validator->fails()) {
+		$errors = $user_obj->validate($inputs);
+		if ($errors) {
 			//Process at the time of Validate error
 			$result['title'] = 'Add new User';
 			$result['url'] = '/admin/user/input';
-			$result['errors'] = $validator->messages();
+			//$result['errors'] = $validator->messages();
+			$result['errors'] = $errors;
 			$result['group_list'] = self::getGroupList();
 			$tmp =  View::make('/admin/user/input', $result);
 		} else {
@@ -290,8 +293,10 @@ class UserController extends BaseController {
 			'personalView'	=>	$inputs['preferences_personalView']
 		);
 		//ValidateCheck
-		$validator = Validator::make($inputs, User::getValidateRules());
-		if (!$validator->fails()) {
+		//$validator = Validator::make($inputs, User::getValidateRules());
+		$errors = $user_obj->validate($inputs);
+//		if (!$validator->fails()) {
+		if (!$errors) {
 			//Validate process at the time of success
 			//I registered because there is no error
 			$dt = new MongoDate(strtotime(date('Y-m-d H:i:s')));
@@ -308,7 +313,8 @@ class UserController extends BaseController {
 			$tmp = View::make('/admin/user/complete', $result);
 		} else {
 			//Process at the time of Validate error
-			$result['errors'] = $validator->messages();
+		//	$result['errors'] = $validator->messages();
+			$result['errors'] = $errors;
 			$result['inputs'] = $inputs;
 			$result['group_list'] = self::getGroupList();
 			$result['title'] = $mode.' User';
@@ -342,6 +348,226 @@ class UserController extends BaseController {
 		Session::forget('mode');
 
 		return View::make('/admin/user/complete', $result);
+	}
+
+	/**
+	 * Preferences情報変更(テーマ/個人情報表示可否)
+	 * @since 2015/01/08
+	 */
+	public function inputPreferences() {
+		//Login check
+		if (!Auth::check()) {
+			//Forced redirected to the login screen because not logged in
+			return Redirect::to('login');
+		}
+
+		//Initial setting
+		$result = array();
+		$error_msg = '';
+		//Input value acquisition
+		$inputs = Input::all();
+
+		//Settings page
+		$result['url'] = '/preferences/input';
+		$result['css'] = self::cssSetting();
+		$result['js'] = self::jsSetting();
+
+		//User information acquisition
+		if (array_key_exists('btnBack', $inputs)) {
+			$result['inputs'] = Session::get('user_input');
+		} else {
+			$user_data = User::find(Auth::user()->userID);
+			if (!$user_data) {
+				$error_msg = 'There is a user ID that does not.';
+			} else {
+				$result['inputs'] = json_decode($user_data, true);
+				$result['inputs']['preferences_theme'] = $user_data->preferences['theme'];
+				$result['inputs']['preferences_personalView'] = $user_data->preferences['personalView'];
+			}
+		}
+
+		//Setting of title
+		$mode = Session::get('mode');
+		$result['title'] = $mode.' User';
+
+		//Set of error messages
+		if ($error_msg) {
+			$result['error_msg'] = $error_msg;
+		} else {
+			$result['group_list'] = self::getGroupList();
+			Session::put('user_input', $result['inputs']);
+		}
+
+		return View::make('/preferences/input', $result);
+	}
+
+	/**
+	 * Prferences情報の変更(確認画面)
+	 * @since 2015/01/08
+	 */
+	public function confirmPreferences() {
+		if (!Auth::check()) {
+			//Forced redirected to the login screen because not logged in
+			return Redirect::to('login');
+		}
+
+		//Initial setting
+		$result = array();
+		$result['css'] = self::cssSetting();
+		$result['js'] = self::jsSetting();
+
+		//Input value acquisition
+		$user_data = Session::get('user_input');
+		$inputs = Input::all();
+		//Set of Checkbox system
+		$user_data['preferences_theme'] = $inputs['preferences_theme'];
+		$user_data['preferences_personalView'] =
+			//isset($inputs['preferences_personalView']) ? $inputs['preferences_personalView'] : "0";
+			array_key_exists('preferences_personalView', $inputs) ?
+				$inputs['preferences_personalView'] : "false";
+		Session::put('user_input', $user_data);
+
+		//Object作成
+		$user_obj = User::find(Auth::user()->userID);
+
+		//Set the value for the Validate check
+		$user_obj->preferences = array(
+			'preferences_theme' 		=>	$user_data['preferences_theme'],
+			'preferences_personalView'	=>	$user_data['preferences_personalView']
+		);
+
+		//ValidateCheck
+		$errors = $user_obj->validate($user_data);
+		Log::debug("エラー内容");
+		Log::debug($errors);
+		$result['inputs'] = $user_data;
+		if ($errors) {
+			//Process at the time of Validate error
+			$result['title'] = 'Edit Preferences';
+			$result['url'] = '/preferences/input';
+			$result['errors'] = $errors;
+			return View::make('/preferences/input', $result);
+		} else {
+			//And displays a confirmation screen because there is no error
+			$result['title'] = 'Edit Preferences Confirmation';
+			$result['url'] = '/preferences/confirm';
+			return View::make('/preferences/confirm', $result);
+		}
+	}
+
+	/**
+	 * Preferences情報更新
+	 * @since 2015/01/08
+	 */
+	public function registPreferences(){
+		//Login check
+		if (!Auth::check()) {
+			//Forced redirected to the login screen because not logged in
+			return Redirect::to('login');
+		}
+
+		//Initial setting
+		$result = array();
+		$result['css'] = self::cssSetting();
+		$result['js'] = self::jsSetting();
+
+		//Information obtained from the session
+		$inputs = Session::get('user_input');
+
+		//Validate check for object creation
+		$user_obj = User::find(Auth::user()->userID);
+		//Set the value for the Validate check
+		$user_obj->preferences = array(
+			'theme' 		=>	$inputs['preferences_theme'],
+			'personalView'	=>	$inputs['preferences_personalView'] == "true" ? true : false
+		);
+		//ValidateCheck
+		$errors = $user_obj->validate($inputs);
+
+		if (!$errors) {
+			//Validate process at the time of success
+			//I registered because there is no error
+			$dt = new MongoDate(strtotime(date('Y-m-d H:i:s')));
+			$user_obj->updateTime = $dt;
+			$user_obj->save();
+
+			$result['title'] = 'Edit Preferences Complete';
+			$result['url'] = '/preferences/complete';
+			$result['msg'] = 'Registration of the preferences information is now complete.';
+			//I transitions to complete screen because registration is complete
+			Session::put('user_complete', $result);;
+			return View::make('/preferences/complete', $result);
+		} else {
+			//Process at the time of Validate error
+			$result['errors'] = $errors;
+			$result['inputs'] = $inputs;
+			$result['title'] = 'Edit Preferences';
+			$result['url'] = '/preferences/input';
+			return View::make('/preferences/input', $result);
+		}
+	}
+
+	/**
+	 * Preferences information update completion (completion screen)
+	 * @since 2015/01/08
+	 */
+	public function completePreferences(){
+		//Login check
+		if (!Auth::check()) {
+			//Forced redirected to the login screen because not logged in
+			return Redirect::to('login');
+		}
+
+		//Display information retrieved from the session
+		$result = Session::get('user_complete');
+
+		//Session discarded
+		Session::forget('user_input');
+		Session::forget('user_complete');
+
+
+		return View::make('/preferences/complete', $result);
+	}
+
+	/**
+	 * テーマの変更(Ajax)
+	 * @since 2015/01/09
+	 */
+	public function changeTheme(){
+		//Login check
+		if (!Auth::check()) {
+			//Forced redirected to the login screen because not logged in
+			return Redirect::to('login');
+		}
+
+		//POST情報取得
+		$inputs = Input::all();
+
+		//ユーザ情報取得
+		$user_obj = User::find(Auth::user()->userID);
+
+		//テーマの変更
+		$prf = $user_obj->preferences;
+		$user_obj->preferences = array(
+			"theme"			=>	$inputs['preferences_theme'],
+			"personalView"	=>	$prf["personalView"]
+		);
+
+		//Validate
+		$errors = $user_obj->validate(json_decode($user_obj, true));
+		if (!$errors) {
+			$dt = new MongoDate(strtotime(date('Y-m-d H:i:s')));
+			$user_obj->updateTime = $dt;
+			$user_obj->save();
+
+			$msg = 'Change of theme has been completed.';
+		} else {
+			$msg = "Change of theme has failed.";
+		}
+
+		header('Content-Type: application/json; charset=UTF-8');
+		$res = json_encode(array('result' => true, 'message' => $msg));
+		echo $res;
 	}
 
 	/**

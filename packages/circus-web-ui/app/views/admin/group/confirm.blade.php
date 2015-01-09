@@ -28,26 +28,18 @@
 				<col width="80%">
 			</colgroup>
 			<tbody>
-				<tr>
-					<th>Create Project</th>
-					<td>
-						@if (isset($inputs['priviledges_createProject']) && $inputs['priviledges_createProject'] == 1)
-							Yes
-						@else
-							No
-						@endif
-					</td>
-				</tr>
-				<tr>
-					<th>Create Case</th>
-					<td>
-						@if (isset($inputs['priviledges_createCase']) && $inputs['priviledges_createCase'] == 1)
-							Yes
-						@else
-							No
-						@endif
-					</td>
-				</tr>
+				@foreach ($role_list as $role_key => $role_val)
+					<tr>
+						<th>{{$role_val}}</th>
+						<td>
+							@if (isset($inputs['priviledges_'.$role_key]) && $inputs['priviledges_'.$role_key] == 1)
+								Yes
+							@else
+								No
+							@endif
+						</td>
+					</tr>
+				@endforeach
 			</tbody>
 		</table>
 		<p class="submit_area">

@@ -2,18 +2,36 @@ $(function(){
 
 	//背景色切替
 	$('#btn_area').find('.color_select').change(function(){
-		console.log("Color Change");
 		var mode_flg	=	$('#btn_area').find('.color_select:checked').val();
-		console.log("mode::"+mode_flg);
+		var select_color_mode = "";
 		if(mode_flg==0){
 			//白背景モード
 			$('body').removeClass('mode_black')
 				.addClass('mode_white');
+			select_color_mode = 'mode_white';
 		}else{
 			//黒背景モード
 			$('body').removeClass('mode_white')
 				.addClass('mode_black');
+			select_color_mode = 'mode_black';
 		}
+		console.log(select_color_mode);
+		var post_data = '{"preferences_theme":"'+select_color_mode+'"}';
+		post_data = JSON.parse(post_data);
+		console.log(post_data);
+
+		$.ajax({
+			url: "/preferences/theme",
+			type: 'POST',
+			data: post_data,
+			dataType: 'json',
+			error: function(){
+				alert('I failed to communicate.');
+			},
+			success: function(res){
+				console.log(res.message);
+			}
+		});
 	});
 
 

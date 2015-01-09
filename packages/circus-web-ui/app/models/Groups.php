@@ -51,24 +51,27 @@ class Groups extends Eloquent {
 	}
 
 	/**
-	 * Validation rules
-	 * @since 2014/12/16
+	 * Validate Rules
+	 * @since 2015/01/07
 	 */
-	public static $rules = array(
+	private $rules = array(
 		'GroupID'	=>	'required',
-		'GroupName'	=>	'required'
+		'GroupName'	=>	'required|unique:Group,GroupName'
 	);
 
 	/**
-	 * I get the Validate rules
-	 * This method When isValid now can use I delete
-	 * @return Validate rules array
-	 * @since 2014/12/16
+	 * Validate Check
+	 * @param $data Validate checked
+	 * @return Error content
+	 * @since 2015/01/07
 	 */
-	public static function getValidateRules() {
- 		return array(
-			'GroupID'	=>	'required',
-			'GroupName'	=>	'required'
-		);
+	public function validate($data) {
+		$this->rules["GroupName"] = 'required|unique:Group,GroupName,'.$data["GroupID"].",GroupID";
+		$validator = Validator::make($data, $this->rules);
+
+		if ($validator->fails()) {
+			return $validator->messages();
+		}
+		return;
 	}
 }

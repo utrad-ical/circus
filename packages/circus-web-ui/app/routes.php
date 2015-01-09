@@ -18,6 +18,15 @@ Route::post('login', 'LoginController@login');
 Route::get('logout', 'LoginController@logout');
 Route::get('support/forget_password', 'SupportController@forgetPassword');
 
+//テーマ/個人情報表示変更
+Route::get('preferences/input', 'UserController@inputPreferences');
+Route::post('preferences/input', 'UserController@inputPreferences');
+Route::post('preferences/confirm', 'UserController@confirmPreferences');
+Route::post('preferences/complete', 'UserController@registPreferences');
+Route::get('preferences/complete', 'UserController@completePreferences');
+//for Ajax
+Route::any('preferences/theme', 'UserController@changeTheme');
+
 //Front page
 Route::post('home', 'TopController@getIndex');
 Route::get('home', 'TopController@getIndex');
@@ -43,6 +52,8 @@ Route::post('series/detail', 'SeriesController@detail');
 Route::get('series/import', 'SeriesController@input');
 Route::post('series/complete', 'SeriesController@regist');
 Route::get('series/complete', 'SeriesController@complete');
+//Series (for Ajax)
+Route::any('series/save_search', 'SeriesController@save_search');
 
 //Management screen
 Route::get('admin', 'AdminController@getIndex');

@@ -67,27 +67,7 @@ $(function() {
 		return false;
 	});
 
-	$('.link_group_edit').click(function(){
-		//Get the form ID to be sent
-		var post_data = $(this).closest('td').find('.frm_group_id').serializeArray();
-		var target_elm = $('.frm_group_input');
 
-		$.ajax({
-			url: "./input",
-			type: 'POST',
-			data: post_data,
-			dataType: 'json',
-			error: function(){
-				alert('I failed to communicate.');
-			},
-			success: function(res){
-				target_elm.empty();
-				target_elm.append(res.response);
-				target_elm.attr('style', 'display:inline;');
-			}
-		});
-		return false;
-	});
 
 	//When new registration button is pressed
 	$('.frm_group_enable').click(function(){

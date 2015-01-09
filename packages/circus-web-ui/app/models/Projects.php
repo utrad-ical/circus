@@ -57,22 +57,24 @@ class Projects extends Eloquent {
 	 * @var rules Validate rules array
 	 * @since 2014/12/12
 	 */
-	public static $rules = array(
+	private $rules = array(
 		'projectID'		=>	'required|integer',
 		'projectName'	=>	'required'
 	);
 
 	/**
-	 * This method When isValid now can use to erase
-	 * I get the Validate rules
-	 * @return Validate rules array
-	 * @since 2014/12/12
+	 * Validate Check
+	 * @param $data Validate checked
+	 * @return Error content
+	 * @since 2015/01/07
 	 */
-	public static function getValidateRules() {
-		return array(
-			'projectID'		=>	'required|integer',
-			'projectName'	=>	'required'
-		);
+	public function validate($data) {
+		$validator = Validator::make($data, $this->rules);
+
+		if ($validator->fails()) {
+			return $validator->messages();
+		}
+		return;
 	}
 
 }

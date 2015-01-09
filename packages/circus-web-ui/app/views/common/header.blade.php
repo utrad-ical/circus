@@ -20,7 +20,15 @@
 		@endforeach
 	@endif
 </head>
-<body class="mode_white">
+@if (Auth::check())
+<?php
+	$user_pref = Auth::user()->preferences;
+	$class_theme = $user_pref['theme'];
+?>
+	<body class="{{$class_theme}}">
+@else
+	<body class="mode_white">
+@endif
 	<div id="wrapper">
 		<div id="header">
 			<div class="header_logo">
@@ -32,12 +40,12 @@
 				<ul id="btn_area">
 					<li class="color_btn color_btn_white">
 						<label>
-							{{Form::radio('color_mode', '0', true, array('class' => 'color_select', 'id' => 'color_mode_white'))}}
+							{{Form::radio('color_mode', '0', isset($class_theme) && ($class_theme == 'mode_white') ? true : false, array('class' => 'color_select', 'id' => 'color_mode_white'))}}
 						</label>
 					</li>
 					<li class="color_btn color_btn_black">
 						<label>
-							{{Form::radio('color_mode', '1', false, array('class' => 'color_select', 'id' => 'color_mode_black'))}}
+							{{Form::radio('color_mode', '1', isset($class_theme) && ($class_theme == 'mode_black') ? true : false, array('class' => 'color_select', 'id' => 'color_mode_black'))}}
 						</label>
 					</li>
 					@if (Auth::check())
@@ -48,6 +56,7 @@
 									<ul id="settings_list">
 										<li>{{HTML::link(asset('/home'), 'Home')}}</li>
 										<li>{{HTML::link(asset('/logout'), 'Logout')}}</li>
+										<li>{{HTML::link(asset('/preferences/input'), 'Preferences')}}</li>
 									</ul>
 								</div>
 							</div>

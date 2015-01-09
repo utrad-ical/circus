@@ -17,50 +17,28 @@ class User extends Eloquent implements UserInterface {
 	protected $primaryKey = 'userID';
 
 	/**
-	 * Validateルール
-	 * @var $rules Validateルール
+	 * Validate rules
+	 * @var $rules Validate rules
+	 * @since 2015/01/07
 	 */
-	public static $rules = array(
+	private $rules = array(
         'loginID'	=>	'required',
 		'password'	=>	'required'
     );
 
-    /**
-     * Password AES256 encryption
-     * @param $pwd Password
-     * @return $encrypt_pwd The AES256 encrypted password
-     * @since 2014/12/17
-     */
-    public static function encryptPassword($pwd) {
-    	//$salt = openssl_random_pseudo_bytes(16)
-    }
-
-    /**
-     * Password AES256 decryption
-     * @param $pwd Decoded password
-     * @return $decrypt_pwd The decrypted password
-     * @since 2014/12/17
-     */
-    public static function decryptPassword($pwd) {
-
-    }
-
 	/**
-	 * I get the Validate rules
-	 * This method When isValid now can use I delete
-	 * @return Validate rules array
-	 * @since 2014/12/17
+	 * Validate Check
+	 * @param $data Validate checked
+	 * @return Error content
+	 * @since 2015/01/07
 	 */
-	public static function getValidateRules() {
- 		return array(
-			'userID'					=>	'required|integer',
-			'loginID'					=>	'required',
-			'password'					=>	'required',
-			'description'				=>	'required',
-			'loginEnabled'				=>	'required|boolean',
-			'preferences_theme'			=>	'required',
-			'preferences_personalView'	=>	'required|boolean'
-		);
+    public function validate($data) {
+		$validator = Validator::make($data, $this->rules);
+
+		if ($validator->fails()) {
+			return $validator->messages();
+		}
+		return;
 	}
 
 }

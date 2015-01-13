@@ -22,7 +22,7 @@
 			<h1 class="page_ttl">Series Import</h1>
 			{{HTML::link(asset('series/search'), 'Back to Series Search', array('class' => 'common_btn mar_b_20 link_series_search'))}}
 			{{Form::open(['url' => asset('series/complete'), 'method' => 'POST', 'files' => true, 'id' => 'frmSeriesConfirm'])}}
-				<div class="droppable_area" id="" draggable="true">
+				<div class="droppable_area" id=""  draggable="true">
 					<p class="mar_b_10">Choose files to upload.
 						<br>You can select more than one file at a time.
 						<br>You can also drag and drop files anywhere on this gray box to start uploading.

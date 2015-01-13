@@ -7,7 +7,7 @@ use Jenssegers\Mongodb\Model as Eloquent;
  * Series table operation
  * @since 2014/12/05
  */
-class Serieses extends Eloquent {
+class Series extends Eloquent {
 	protected $connection = 'mongodb';
 	protected $collection = 'Series';
 

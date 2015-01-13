@@ -1,15 +1,27 @@
 @extends('common.layout')
 @include('common.header')
 @section('content')
+@if (isset($inputs['mongo_search_data']))
+<script type="text/javascript">
+	var detail_keys = {{$inputs['mongo_search_data']}};
+</script>
+@endif
 <script type="text/javascript">
 	$(function() {
 		// Initialization parameter
 		var keys = {{$detail_search_settings}};
+
+		console.log(keys);
 		var filter = $('#search_condition')
 		.filtereditor({keys: keys})
 		.on('filterchange', function () {
-			var data = filter.filtereditor('option', 'filter');
-			var node = JSON.stringify(data, null, '  ');
+			var data;
+			if (typeof detail_keys != 'undefined') {
+				data = filter.filtereditor('option', 'filter', detail_keys);
+			} else {
+				data = filter.filtereditor('option', 'filter');
+				var node = JSON.stringify(data, null, '  ');
+			}
 			$('#json_value').val(node);
 		});
 		filter.trigger('filterchange');
@@ -32,7 +44,7 @@
 		//I want to create a data for Ajax communication
 		function setAjaxSearchVal(btnName) {
 			var form_data = $('#form_search').serializeArray();
-			//プロジェクトIDの条件生成
+			//Condition generation of project ID
 			var project_id_ary = [];
 			for (var i = 0; i < form_data.length; i++) {
 				if (form_data[i]["name"] == "project") {
@@ -40,7 +52,7 @@
 					delete form_data[i];
 				}
 			}
-			//検索モードを取得
+			//Get search mode
 			var search_mode = $('#search_mode').val();
 			var tmp_ary_data = [];
 
@@ -48,7 +60,7 @@
 			var tmp_action_btn_data = {"name":btnName, "value":btnName};
 			var tmp_search_mode_data = {"name":"search_mode", "value":search_mode};
 
-			//詳細検索
+			//�ڍ׌���
 			if (search_mode == 1) {
 				var mongo_val = filter.filtereditor('exportMongo');
 				var tmp_mongo_data = {"name":"mongo_data","value" : JSON.stringify(mongo_val)};
@@ -60,7 +72,7 @@
 					tmp_ary_data= [tmp_mongo_data, tmp_project_data,tmp_action_btn_data,tmp_search_mode_data];
 				}
 			} else {
-			//簡易検索
+			//�ȈՌ���
 				tmp_ary_data = [tmp_project_data,tmp_action_btn_data,tmp_search_mode_data];
 			}
 			var tmp_data = $.extend(true,form_data, tmp_ary_data);
@@ -96,7 +108,7 @@
 			$('#btn_submit').trigger('click', ["btnReset"]);
 		});
 
-		//Ajax通信
+		//Ajax�ʐM
 		function sendAjax(post_url, post_data) {
 			var target_elm = arguments[2] ? arguments[2] : "";
 			$.ajax({

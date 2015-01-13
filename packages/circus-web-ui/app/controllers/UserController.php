@@ -438,8 +438,6 @@ class UserController extends BaseController {
 
 		//ValidateCheck
 		$errors = $user_obj->validate($user_data);
-		Log::debug("エラー内容");
-		Log::debug($errors);
 		$result['inputs'] = $user_data;
 		if ($errors) {
 			//Process at the time of Validate error
@@ -611,7 +609,7 @@ class UserController extends BaseController {
 	 */
 	public function getGroupList(){
 		//Acquisition of group list
-		$group_list = Groups::get();
+		$group_list = Group::get();
 		$list = array();
 		foreach ($group_list as $rec) {
 			$list[$rec->GroupID] = $rec['GroupName'];
@@ -626,7 +624,7 @@ class UserController extends BaseController {
 	 * @since 2014/12/17
 	 */
 	public function getGroupNameDisp($gids = array()) {
-		$group_names = Groups::addWhere(array('GroupID' => $gids))
+		$group_names = Group::addWhere(array('GroupID' => $gids))
 							->get(array('GroupName'));
 		$group_name = array();
 		foreach ($group_names as $group) {

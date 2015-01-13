@@ -38,7 +38,10 @@ class CaseController extends BaseController {
 			$detail_search = $detail_search_session[$inputs["condition_id"]];
 			$detail_search["project"] = json_decode($detail_search["project"]);
 			if (array_key_exists("mongo_data", $detail_search) !== FALSE) {
-				$detail_search["mongo_search_data"] = json_decode($detail_search["mongo_search_data"]);
+				$file_path = dirname(dirname(__FILE__))."/saves/".Auth::user()->loginID."_case_".($inputs["condition_id"]+1).".json";
+				$handle = fopen($file_path, 'r');
+				$detail_search['mongo_search_data'] = fread($handle, filesize($file_path));
+
 				$detail_search["mongo_data"] = json_decode($detail_search["mongo_data"]);
 			}
 			$detail_search['disp'] = Config::get('const.page_display');
@@ -102,7 +105,7 @@ class CaseController extends BaseController {
 					$w = self::getWeekDay(date('w', strtotime($dt)));
 
 					//Project name
-					$project = Projects::where('projectID', '=', $rec->projectID)->get();
+					$project = Project::where('projectID', '=', $rec->projectID)->get();
 
 					//I shaping for display
 					$list[] = array(
@@ -246,7 +249,7 @@ class CaseController extends BaseController {
 					$w = self::getWeekDay(date('w', strtotime($dt)));
 
 					//Project name
-					$project = Projects::where('projectID', '=', $rec->projectID)->get();
+					$project = Project::where('projectID', '=', $rec->projectID)->get();
 
 					//I shaping for display
 					$list[] = array(
@@ -298,6 +301,7 @@ class CaseController extends BaseController {
 		//Initial setting
 		$search_flg = false;
 		$result = array();
+		$error_flg = false;
 
 		//Input value acquisition
 		$inputs = Input::all();
@@ -313,9 +317,22 @@ class CaseController extends BaseController {
 			$before_cnt = 0;
 		}
 
+		//Jsonファイルの保存
+		$file_name = dirname(dirname(__FILE__))."/saves/".Auth::user()->loginID."_case_".($before_cnt+1).".json";
+		if (!file_exists($file_name)) {
+			touch($file_name);
+			$data = json_decode($inputs["mongo_search_data"]);
+			file_put_contents($file_name, $inputs["mongo_search_data"]);
+		} else {
+			Log::debug("既にファイルが存在します。");
+			$error_flg = true;
+			//exit();
+		}
+
+
 		$after_cnt = count(Session::get('case_detail_search'));
 
-		if ($before_cnt+1 === $after_cnt) {
+		if (!$error_flg && $before_cnt+1 === $after_cnt) {
 			$msg = 'Save search criteria has been completed.';
 		} else {
 			$msg = 'I failed to save the search criteria.';
@@ -369,7 +386,7 @@ class CaseController extends BaseController {
 				$case_data = $case_info;
 				//Authority check
 				//Case viewing rights
-				$auth_view = Projects::getProjectList(Projects::AUTH_TYPE_VIEW, false);
+				$auth_view = Project::getProjectList(Project::AUTH_TYPE_VIEW, false);
 				if (!$auth_view || array_search($case_data->projectID, $auth_view) === FALSE) {
 					$error_msg = 'You do not have permission to refer to the appropriate case.';
 				}
@@ -379,12 +396,12 @@ class CaseController extends BaseController {
 		//I want to display the case detailed information if there is no error message
 		if (!$error_msg) {
 			//Case edit authority
-			$auth_edit = Projects::getProjectList(Projects::AUTH_TYPE_UPDATE, false);
+			$auth_edit = Project::getProjectList(Project::AUTH_TYPE_UPDATE, false);
 			$result['edit_flg'] = ($auth_edit && array_search($case_data->projectID, $auth_edit) !== FALSE) ?
 						true: false;
 			//And shape the case information for display
 			//Project name
-			$project = Projects::find($case_data->projectID);
+			$project = Project::find($case_data->projectID);
 			$case_detail = array(
 				'caseID'		=>	$case_data->caseID,
 				'projectID'		=>	$case_data->projectID,
@@ -447,7 +464,7 @@ class CaseController extends BaseController {
 			}
 			$inputs['seriesUID'] = $series;
 			$select_col = array('seriesUID', 'seriesDescription');
-			$serieses = Serieses::addWhere($inputs)
+			$serieses = Series::addWhere($inputs)
 								->get($select_col);
 
 			$result['series_list'] = self::getSeriesList($serieses);
@@ -508,7 +525,7 @@ class CaseController extends BaseController {
 				$case_data = $case_info[0];
 				//Authority check
 				//Case viewing rights
-				$auth_view = Projects::getProjectList(Projects::AUTH_TYPE_VIEW, false);
+				$auth_view = Project::getProjectList(Project::AUTH_TYPE_VIEW, false);
 				if (!$auth_view || array_search($case_data->projectID, $auth_view) === FALSE) {
 					$error_msg = 'You do not have permission to refer to the appropriate case.';
 				}
@@ -602,7 +619,7 @@ class CaseController extends BaseController {
 
 		$result['css'] = self::cssSetting();
 		$result['js'] = self::jsSetting();
-		$result['project_list'] = Projects::getProjectList(Projects::AUTH_TYPE_CREATE, true);
+		$result['project_list'] = Project::getProjectList(Project::AUTH_TYPE_CREATE, true);
 
 		//Back button is pressed during
 		if (array_key_exists('btnBack', $inputs)) {
@@ -651,8 +668,8 @@ class CaseController extends BaseController {
 			'patientInfo.sex', 'patientInfo.patientName',
 			'patientInfo.birthday'
 		);
-		$series = Serieses::addWhere($inputs)
-							->get($select_col);
+		$series = Series::addWhere($inputs)
+						->get($select_col);
 
 		//Patient ID duplication check
 		$error_msg = self::checkDuplicatePatientID($series, $series_list);
@@ -724,7 +741,7 @@ class CaseController extends BaseController {
 
 		//Save the input value to the session
 		Session::put('case_input', $case_info);
-		$case_info['projectName'] = Projects::getProjectName($inputs['projectID']);
+		$case_info['projectName'] = Project::getProjectName($inputs['projectID']);
 
 		//Validate check for object creation
 		$case_obj = $caseID ?
@@ -752,7 +769,7 @@ class CaseController extends BaseController {
 			//Process at the time of Validate error
 			$result['title'] = $mode.' Case';
 			$result['url'] = '/case/input';
-			$result['project_list'] = Projects::getProjectList(Projects::AUTH_TYPE_CREATE, true);
+			$result['project_list'] = Project::getProjectList(Project::AUTH_TYPE_CREATE, true);
 			$result['errors'] = $errors;
 			return View::make('/case/input', $result);
 		} else {
@@ -845,7 +862,7 @@ class CaseController extends BaseController {
 			$result['title'] = $mode.' Case';
 			$result['inputs'] = $inputs;
 			$result['series_list'] = $inputs['series_list'];
-			$result['project_list'] = Projects::getProjectList(Projects::AUTH_TYPE_CREATE, true);
+			$result['project_list'] = Project::getProjectList(Project::AUTH_TYPE_CREATE, true);
 			return View::make('/case/input', $result);
 		}
 	}
@@ -900,13 +917,13 @@ class CaseController extends BaseController {
 			case 'search':
 				$js['jquery.multiselect.min.js'] = 'js/jquery.multiselect.min.js';
 				//$js['jquery.formserializer.js'] = 'js/jquery.formserializer.js';
-				$js['jquery.ruleseteditor.js'] = 'js/jquery.ruleseteditor.js';
+				//$js['jquery.ruleseteditor.js'] = 'js/jquery.ruleseteditor.js';
 				$js['jquery.flexforms.js'] = 'js/jquery.flexforms.js';
 				$js['more_search.js'] = 'js/more_search.js';
 				break;
 			case 'detail':
 			case 'edit':
-			//	$js['img_edit.js'] = 'js/img_edit.js';
+				$js['img_edit.js'] = 'js/img_edit.js';
 				break;
 		}
 		return $js;
@@ -918,7 +935,7 @@ class CaseController extends BaseController {
 	 * @since 2014/12/08
 	 */
 	function getProjectList($make_combo_flg){
-		return Projects::getProjectList(Projects::AUTH_TYPE_VIEW, $make_combo_flg);
+		return Project::getProjectList(Project::AUTH_TYPE_VIEW, $make_combo_flg);
 	}
 
 	/**

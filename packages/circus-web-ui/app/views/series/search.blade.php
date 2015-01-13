@@ -111,7 +111,6 @@
 					alert('I failed to communicate.');
 				},
 				success: function(res){
-				//	console.log(target_elm);
 					if (target_elm) {
 						target_elm.empty();
 						target_elm.append(res.response);

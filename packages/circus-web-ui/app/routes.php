@@ -13,7 +13,7 @@
 
 //Login / logout
 Route::get('/', function(){return Redirect::to('login');});
-Route::get('login', 'Logincontroller@getIndex');
+Route::get('login', 'LoginController@getIndex');
 Route::post('login', 'LoginController@login');
 Route::get('logout', 'LoginController@logout');
 Route::get('support/forget_password', 'SupportController@forgetPassword');

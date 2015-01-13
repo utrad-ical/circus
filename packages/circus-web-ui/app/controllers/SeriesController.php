@@ -57,11 +57,11 @@ class SeriesController extends BaseController {
 			);
 
 			//Total number acquisition
-			$series_count = Serieses::addWhere($search_data)
+			$series_count = Series::addWhere($search_data)
 									->count();
 
 			//Search result acquisition
-			$series_list = Serieses::addWhere($search_data)
+			$series_list = Series::addWhere($search_data)
 									->orderby($search_data['sort'], 'desc')
 									->addLimit($search_data)
 									->get($select_col);
@@ -180,7 +180,7 @@ class SeriesController extends BaseController {
 
 		if (!$error_msg) {
 			//Check series ID that exists
-			$series_data = Serieses::find($inputs['seriesUID']);
+			$series_data = Series::find($inputs['seriesUID']);
 			if (!$series_data) {
 				$error_msg = 'Series ID does not exist.';
 			}
@@ -262,41 +262,30 @@ class SeriesController extends BaseController {
 		} else {
 			//Upload file information acquisition
 			$uploads = Input::file('upload_file');
-			Log::debug("アップロードしたファイル");
-			Log::debug($uploads);
 
-			// ファイル名を生成し画像をアップロード
-			//$name = md5(sha1(uniqid(mt_rand(), true))).'.'.$image->getClientOriginalExtension();
 			try{
-				Log::debug("ファイル名::");
 				foreach ($uploads as $upload) {
 					$res = $upload->move('uploads', $upload->getClientOriginalName());
-					Log::debug("アップロード結果");
-					Log::debug($res);
 
 					//拡張子がZipの場合は解凍して保存する
 					$ext = $upload->getClientOriginalExtension();
-					Log::debug("拡張子::".$ext);
+					$upload_dir = Config::get("const.upload_path");
 
 					if ($ext == 'zip'){
-						Log::debug("拡張子がZipなので解凍処理を行う");
 						$zip = new ZipArchive();
 						//Zipファイルオープン
-						$zip_path = asset('uploads').$upload->getClientOriginalName();
-						Log::debug("Zipファイルのパス");
-						Log::debug($zip_path);
+						$zip_path = $upload_dir.$upload->getClientOriginalName();
 						$res = $zip->open($zip_path);
 
-						Log::debug("Zipファイルオープン結果");
-						Log::debug($res);
 						//Zipファイルオープンに成功
 						if ($res === true){
 							//Zipファイル内のすべてのファイルを解凍し保存する
 							//解凍フォルダ名はファイル名にしておく
-								//TODO::ここに解凍フォルダを作る処理
-							$zip->extractTo(asset('uploads'));
+							$zip->extractTo($upload_dir);
 							//Zipファイルクローズ
 							$zip->close();
+						} else {
+							$error_msg = "Upload Failed.[Error Code ".$res."]";
 						}
 					}
 				}
@@ -305,8 +294,6 @@ class SeriesController extends BaseController {
 			}
 		}
 
-		//$validator = Validator::make(self::setSeriesValidate($inputs), Serieses::getValidateRules());
-		//if ($validator->fails()){
 		if ($error_msg) {
 			//Processing in the case where there is an error
 			$result['title'] = 'Series Import';

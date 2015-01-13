@@ -8,7 +8,7 @@ use Jenssegers\Mongodb\Model as Eloquent;
  */
 class Cases extends Eloquent {
 	protected $connection = 'mongodb';
-	protected $collection = 'Case';
+	protected $collection = 'Cases';
 
 	protected $primaryKey = 'caseID';
 
@@ -31,7 +31,7 @@ class Cases extends Eloquent {
 			$query->whereIn('projectID', $projects);
 		} else {
 			//Default condition :: login user can browse the groups that belong project
-			$projects = Projects::getProjectList(Projects::AUTH_TYPE_VIEW);
+			$projects = Project::getProjectList(Project::AUTH_TYPE_VIEW);
 			$query->whereIn('projectID', $projects);
 		}
 

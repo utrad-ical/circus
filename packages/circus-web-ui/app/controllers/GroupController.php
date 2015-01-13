@@ -30,10 +30,10 @@ class GroupController extends BaseController {
 		$select_col = array('GroupID', 'GroupName');
 
 		//Total number acquisition
-		$group_count = Groups::count();
+		$group_count = Group::count();
 
 		//Search result acquisition
-		$group_list = Groups::orderby('updateTime', 'desc')
+		$group_list = Group::orderby('updateTime', 'desc')
 							->get($select_col);
 
 		$result['title'] = 'Group';
@@ -71,7 +71,7 @@ class GroupController extends BaseController {
 		if (array_key_exists('btnBack', $inputs)) {
 			$result['inputs'] = Session::get('group_input');
 		} else if (array_key_exists('GroupID', $inputs)) {
-			$group_data = Groups::find($inputs['GroupID']);
+			$group_data = Group::find($inputs['GroupID']);
 			$result['inputs'] = array(
 				'GroupID'		=>	$group_data->GroupID,
 				'GroupName'		=>	$group_data->GroupName,
@@ -138,15 +138,15 @@ class GroupController extends BaseController {
 
 		//Validate check for object creation
 		$group_obj = $groupID ?
-						Groups::find($groupID) :
-						App::make('Groups');
+						Group::find($groupID) :
+						App::make('Group');
 
 		//Set the value for the Validate check
 		$group_obj->GroupID = $inputs['GroupID'];
 		$group_obj->GroupName = $inputs['GroupName'];
 
 		//ValidateCheck
-		//$errors = Groups::validate($inputs);
+		//$errors = Group::validate($inputs);
 		$errors = $group_obj->validate($inputs);
 
 		//エラーがある場合の処理
@@ -193,14 +193,14 @@ class GroupController extends BaseController {
 
 		//Validate check for object creation
 		$group_obj = $groupID ?
-						Groups::find($groupID) :
-						App::make('Groups');
+						Group::find($groupID) :
+						App::make('Group');
 		//Set the value for the Validate check
 		$group_obj->GroupID = $inputs['GroupID'];
 		$group_obj->GroupName = $inputs['GroupName'];
 
 		//ValidateCheck
-		//$validator = Validator::make($inputs, Groups::getValidateRules());
+		//$validator = Validator::make($inputs, Group::getValidateRules());
 		$errors = $group_obj->validate($inputs);
 
 		if (!$errors) {

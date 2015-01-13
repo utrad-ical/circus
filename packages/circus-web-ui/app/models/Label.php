@@ -7,9 +7,9 @@ use Jenssegers\Mongodb\Model as Eloquent;
  * Label table manipulation class
  * @since 2014/12/11
  */
-class Labels extends Eloquent {
+class Label extends Eloquent {
 	protected $connection = 'mongodb';
-	protected $collection = 'Label';
+	protected $collection = 'Labels';
 
 	protected $primaryKey = 'labelID';
 

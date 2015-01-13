@@ -1,0 +1,165 @@
+@charset "utf-8";
+/* ===================================================================
+CSS information
+
+ file name  :layout.admin.css
+
+ theme color : #8a3b2b(accent),#ebbe8c,#ffd
+
+=================================================================== */
+
+/* ===================================================
+	#leftside
+		LOGO Border color
+		#menu
+			Background color
+			Button Background image
+			Calendar
+ =================================================== */
+
+#leftside h1 img {
+	border-color: #8a3b2b;
+}
+
+#container {
+	background: url(../img_common/btn/admin/menu_bk.gif) left repeat-y;
+}
+
+.topmenu { background-image: url(../img_common/btn/admin/menu.png); }
+.topmenu.hi { background-image: url(../img_common/btn/admin/menu-hi.png); }
+.topmenu-today { color: #8a3b2b; }
+
+/* ===================================================
+	#content
+ =================================================== */
+
+#content h2 {
+	color: #8a3b2b;
+}
+#content h3 {
+	background-color: #8a3b2b;
+	border-bottom:2px solid #ebbe8c;
+}
+
+
+/* ===================================================
+	TABLE
+ =================================================== */
+table.col-tbl th {
+	background-color: #8a3b2b;
+	border: 1px solid #ebbe8c;
+}
+table.col-tbl tr td {
+	border: 1px solid #ebbe8c;
+}
+table.col-tbl tr.column td {
+	background-color: #ffd;
+}
+.trim01 {
+	border-left: 2px solid #8a3b2b;
+}
+
+
+/* ===================================================
+	 Toggle buttons for search.html
+ =================================================== */
+
+a:link.btn-search,a:active.btn-search,a:visited.btn-search {
+	color: #000;
+	background: url(../img_common/btn/admin/btn-bk1.jpg) repeat-x;
+	text-decoration: none;
+}
+a:hover.btn-search {
+	color: #8a3b2b;
+	background: url(../img_common/btn/admin/btn-bk2.jpg) repeat-x;
+}
+.selected-btn-search {
+	color: #ffffff;
+	background: url(../img_common/btn/admin/btn-bk0.jpg) repeat-x;
+	text-decoration: none;
+}
+
+
+/* ===================================================
+	 TAB
+	 	Border color
+	 	Background image
+		Link style
+			Detail PANEL color
+ =================================================== */
+.tab-content {
+	border-color:#8a3b2b;
+}
+a.btn-tab {
+	color: #8a3b2b;
+	background: url(../img_common/btn/admin/tab.gif) no-repeat;
+}
+a:hover.btn-tab,a.btn-tab.btn-tab-active {
+	color: #fff;
+	background: url(../img_common/btn/admin/tab0.gif) no-repeat;
+}
+p.add-favorite {
+	border-color: #8a3b2b;
+}
+
+/*
+	Detail PANEL
+---------------------------------------------------- */
+.detail-panel {
+	background-color: #ffd;
+}
+
+
+/* ===================================================
+	 Buttons for CAD Result Page
+ =================================================== */
+/* Radio button (normal size) */
+.radio-to-button {
+	background-image:url(../img_common/btn/admin/radio-to-button_white2.jpg);
+}
+/* Radio button (large size) */
+.radio-to-button.radio-to-button-l {
+	background-image:url(../img_common/btn/admin/radio-to-button-l_white2.jpg);
+}
+
+.radio-to-button-normal {
+	color: #333 !important;
+	border: 1px solid #333 !important;
+}
+.radio-to-button-hover {
+	color: #ff6600 !important;
+	border: 1px solid #ff6600 !important;
+}
+.radio-to-button-checked {
+	color: #fff !important;
+	border: 1px solid #8a3b2b !important;
+}
+.radio-to-button-disabled {
+	color: #aaa !important;
+	border: 1px solid #808080 !important;
+}
+
+.form-btn {
+	border: 1px solid #8a3b2b;
+	color: #000;
+	background-color: #ebbe8c;
+}
+.form-btn:hover {
+	color: #fff;
+	background-color: #8a3b2b;
+}
+.form-btn[disabled] {
+	color: #ccc;
+	background-color: #999;
+}
+
+
+/* ===================================================
+	General theme color
+ ===================================================*/
+.themeColor {
+	color: #8a3b2b;
+}
+.themeBackground {
+	background-color: #8a3b2b;
+}

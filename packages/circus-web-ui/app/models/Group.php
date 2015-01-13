@@ -6,9 +6,9 @@ use Jenssegers\Mongodb\Model as Eloquent;
  * Group table operation
  * @since 2014/12/16
  */
-class Groups extends Eloquent {
+class Group extends Eloquent {
 	protected $connection = 'mongodb';
-	protected $collection = 'Group';
+	protected $collection = 'Groups';
 
 	protected $primaryKey = 'GroupID';
 
@@ -56,7 +56,7 @@ class Groups extends Eloquent {
 	 */
 	private $rules = array(
 		'GroupID'	=>	'required',
-		'GroupName'	=>	'required|unique:Group,GroupName'
+		'GroupName'	=>	'required|unique:Groups,GroupName'
 	);
 
 	/**
@@ -66,7 +66,7 @@ class Groups extends Eloquent {
 	 * @since 2015/01/07
 	 */
 	public function validate($data) {
-		$this->rules["GroupName"] = 'required|unique:Group,GroupName,'.$data["GroupID"].",GroupID";
+		$this->rules["GroupName"] = 'required|unique:Groups,GroupName,'.$data["GroupID"].",GroupID";
 		$validator = Validator::make($data, $this->rules);
 
 		if ($validator->fails()) {

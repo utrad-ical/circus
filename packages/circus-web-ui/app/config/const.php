@@ -10,5 +10,5 @@ return array(
 	'hash_key'				=>	'todai_test',
 	'search_revision_sort'	=>	array('' => 'Sort Order', 'revision.date' => 'Edit Time', 'revisionNo' => 'revisionNo'),	//検索結果ソート順(ケース)
 	'crypt_secret_key'		=>	'todai_project',
-	'upload_path'			=>	dirname(__FILE__).'/../uploads/'
+	'upload_path'			=>	dirname(dirname(dirname(__FILE__))).'/public/uploads/'
 );

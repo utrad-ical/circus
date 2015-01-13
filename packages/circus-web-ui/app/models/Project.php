@@ -7,9 +7,10 @@ use Jenssegers\Mongodb\Model as Eloquent;
  * Class to perform the project table operation
  * @since 2014/12/08
  */
-class Projects extends Eloquent {
+class Project extends Eloquent {
 	protected $connection = 'mongodb';
-	protected $collection = 'Project';
+	protected $collection = 'Projects';
+	protected $primaryKey = 'projectID';
 
 	//Authority constant
 	const AUTH_TYPE_CREATE = 'createGroups';	//Case creation authority

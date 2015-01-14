@@ -2,100 +2,163 @@
 @include('common.header')
 @section('content')
 <script type="text/javascript">
-	$(function() {
-		$('#link_case_edit').click(function(){
-			//Get the form ID to be sent
-			$(this).closest('div').find('.frm_case_edit').submit();
-			return false;
-		});
+	//コントローラ・ビューアーウィジェットをコントロールするための案件固有の機能群
+	$(function(){
+		//ページロード直後にコントローラを発火させるときに渡すデータ群
+		//複数ビューアーを連動させる１グループにつき１コントローラ
+		var	voxel_container	=	new voxelContainer();	//ラベル情報格納用オブジェクト(3面共用)
+		voxel_container.name	=	'my_voxel';
 
-		$('.link_case_detail').click(function(){
-			//Set mode
-			$(this).closest('td').find('.view_mode').val('view');
+		//var	the_domain	=	'http://todai/';
+		//var the_domain = 'http://{{$_SERVER["SERVER_NAME"]}}:3000/';
+		//var	the_domain	=	'http://ndp.spiritek.co.jp/';
+		var the_domain = 'http://160.16.56.191:3000/';
+		var	initInfo	=	[
+			{
+				baseUrl : 'http://160.16.56.191:3000/', //画像格納ディレクトリ
+				//baseUrl : 	'http://ndp.spiritek.co.jp/insight/todai_img', //外用でinsight参照の場合
+				series : {{$series_list}},
+				control : {
+					window : {
+						panel : false
+					}
+				},
+				elements : {
+					parent : 'page_case_detail',
+					panel : 'the_panel_inner',
+					label : 'the_panel_inner'
+				},
+				viewer : [
+					{//1枚目
+						elementId : 'img_area_axial',
+						orientation : 'axial',
+						container : voxel_container,
+						number:{
+							maximum : 260, //何枚の断面が格納されているか
+							current : 44	//初期の表示番号
+						},
+						window: {
+							level: {current : 1000, maximum : 50000, minimum : -5000},
+							width: {current : 6000, maximum : 9000, 	minimum : 1},
+							preset : [
+								{label: 'ソースからaxialだけに適用'	, level: 0000	, width : 2000},
+							]
+						},
+					},
+					{//2枚目
+						elementId : 'img_area_sagital',
+						orientation : 'sagital',
+						container : voxel_container,
+						number:{
+							maximum : 511, //何枚の断面が格納されているか
+							current : 90	//初期の表示番号
+						}
+					},
+					{//3枚目
+						elementId : 'img_area_coronal',
+						orientation : 'coronal',
+						container : voxel_container,
+						number:{
+							maximum : 511, //何枚の断面が格納されているか
+							current : 90	//初期の表示番号
+						}
+					}
+				]
+			}
+		];
 
-			//Get the form ID to be sent
-			$(this).closest('td').find('.form_case_detail').submit();
-			return false;
-		});
-
-		$('.link_revision_list').click(function(){
-			$(this).closest('div').find('.frm_revision_list').submit();
-			return false;
-		});
-
-		$('#btnBack').click(function() {
-			$('body').append('<form action="./search" method="POST" class="hidden" id="frm_back"></form>');
-			$('#frm_back').append('<input type="hidden" name="btnBack" value="">');
-			$('#frm_back').submit();
-			return false;
-		});
-
-		$('.change_select').change(function(){
-			// Get the combo ID you want to change
-			var change_select = $(this).attr('data-target-dom');
-			// Get the value you want to selected
-			var select_value = $("select[name='"+$(this).attr('name')+"']").val();
-			// Change selected in the combo
-			$('#'+change_select).find('option').each(function(){
-				var this_num = $(this).val();
-				if(this_num == select_value){
-					$(this).attr('selected','selected');
-				}
-			});
-
-			//Add a hidden element so do a search
-			var sort = $("select[name='sort']").val();
-			var disp = $("select[name='disp']").val();
-			var sort_elm = $("<input>", {type:"hidden", name:"sort", value:sort});
-			$('#form_search').append(sort_elm);
-			var disp_elm = $("<input>", {type:"hidden", name:"disp", value:disp});
-			$('#form_search').append(disp_elm);
-			//Event firing
-			var post_data = $('#form_search').serializeArray();
-			var target_elm = $('.result_revision_list');
-
+		//seriesの個数分のajaxを行ってnode.jsからseries情報をもらう
+		var ajax_cnt = 0;
+		var initAjax= function(){
+			var tmp_series = initInfo[0].series[ajax_cnt];
 			$.ajax({
-				url: "{{asset('/case/revision')}}",
-				type: 'POST',
-				data: post_data,
+				//url: the_domain+'insight/todai_img',
+				//url: the_domain,
+				url: "{{asset('series/get_series')}}",
+				type: 'GET',
+				data: {
+					mode : 'metadata',
+					target:60,
+					series : tmp_series.image.id
+				},//送信データ
 				dataType: 'json',
 				error: function(){
 					alert('I failed to communicate.');
 				},
-				success: function(res){
-					target_elm.empty();
-					target_elm.append(res.response);
+				success: function(response){
+
+					if(typeof response.allow_mode != 'undefined'){
+						tmp_series.allow_mode = $.extend(true,tmp_series.allow_mode ,response.allow_mode);
+					}
+
+					if(typeof tmp_series.image.voxel != 'object'){
+						tmp_series.image.voxel = new Object();
+					}
+
+					if(typeof response.voxel_x == 'number'){
+						tmp_series.image.voxel.voxel_x = response.voxel_x;
+					};
+
+					if(typeof response.voxel_y == 'number'){
+						tmp_series.image.voxel.voxel_y = response.voxel_y;
+					};
+
+					if(typeof response.voxel_z == 'number'){
+						tmp_series.image.voxel.voxel_z = response.voxel_z;
+					};
+
+					if(typeof response.x == 'number'){
+						tmp_series.image.voxel.x = response.x;
+					};
+
+					if(typeof response.y == 'number'){
+						tmp_series.image.voxel.y = response.y;
+					};
+
+					if(typeof response.z == 'number'){
+						tmp_series.image.voxel.z = response.z;
+					};
+
+					if(typeof response.window_level == 'number'){
+						tmp_series.image.window.level.current = response.y;
+					};
+
+					if(typeof response.window_width == 'number'){
+						tmp_series.image.window.width.current = response.window_width;
+					};
+
+					if(ajax_cnt==initInfo[0].series.length-1){
+						controllerRun();
+					}else{
+						ajax_cnt++;
+						initAjax();
+					}
 				}
 			});
-			return false;
-		});
+		}
+		initAjax();//ajax発火
+
+		var	controllerRun	=	function(){
+			//連動シリーズ１つにつき１つずつコントローラ発行
+			for(var j=0;	j<initInfo.length;	j++){
+				$('#'+initInfo[j].wrapElementId).imageViewerController('init',initInfo[j]);
+			}
+		}
+
 	});
 </script>
 <div class="page_contents_outer">
 	<div class="page_contents_inner">
-	<?php
-		//デバッグ用
-		$sel_seriesUID = isset($case_detail['seriesUID']) ? $case_detail['seriesUID'] : "LIDC-IDRI-0002";
-	?>
 		<div class="page_unique" id="page_case_detail">
-			<h1 class="page_ttl">Case Detail (Revision {{$case_detail['revisionNo']}})</h1>
+			<h1 class="page_ttl">Case Detail ({{$case_detail['revisionNo']}})</h1>
 			@if (isset($error_msg))
 				<div class="al_l mar_b_10 w_600 fl_l">
 					{{HTML::link(asset('/case/search'), 'Back to Case Search Result', array('class' => 'common_btn', 'id' => 'btnBack'))}}
-					<span class="text_alert">{{$error_msg}}</span>
 				</div>
+				<span class="text_alert">{{$error_msg}}</span>
 			@else
 				<div class="al_l mar_b_10 w_600 fl_l">
 					{{HTML::link(asset('/case/search'), 'Back to Case Search Result', array('class' => 'common_btn', 'id' => 'btnBack'))}}
-					@if (isset($edit_flg))
-						{{HTML::link('', 'Edit Case', array('class' => 'common_btn', 'id' => 'link_case_edit'))}}
-						{{Form::open(['url' => asset('/case/edit'), 'method' => 'POST', 'class' => 'frm_case_edit'])}}
-							{{Form::hidden('caseID', $case_detail['caseID'])}}
-							{{Form::hidden('revisionNo', $case_detail['revisionNo'])}}
-							{{Form::hidden('back_url', 'case_detail')}}
-							{{Form::hidden('view_mode', $mode)}}
-						{{Form::close()}}
-					@endif
 				</div>
 				<div class="al_r mar_b_10 w_300 fl_r">
 					{{Form::select('revision', $revision_no_list, $case_detail['revisionNo'], array('class' => 'select w_180'))}}
@@ -121,7 +184,6 @@
 					</tr>
 				</table>
 				<div class="w_400 fl_l">
-					{{Form::select('seriesUID', $series_list, isset($case_detail['seriesUID']) ? $case_detail['seriesUID'] : '')}}
 					<label class="common_btn" for="img_mode_view">
 						{{Form::radio('img_mode', 1, $mode == 'detail' ? true : false, array('class' => 'img_mode', 'id' => 'img_mode_view'))}}
 						View
@@ -130,7 +192,10 @@
 						{{Form::radio('img_mode', 1, $mode == 'edit' ? true : false, array('class' => 'img_mode', 'id' => 'img_mode_draw'))}}
 						Draw
 					</label>
-					{{Form::button('Save', array('type' => 'submit', 'class' => 'common_btn'))}}
+					<button type='submit' class='common_btn' name='btnSave'>
+						<span style="background:url({{asset('/img/common/ico_save.png')}}) no-repeat; width:22px; height:22px; display:inline-block; margin-bottom:-7px; margin-right:4px;"></span>
+						Save
+					</button>
 				</div>
 				<div class="w_500 fl_r">
 					<div class="info_area">
@@ -141,136 +206,20 @@
 					</div>
 				</div>
 				<div class="clear">&nbsp;</div>
-				<div class=" img_view_area pad_t_10">
-					<div class="img_area fl_l" id="area_axial">
-						<div class="btn_prev common_btn common_btn_green" data-target-elm="slider_axial">
-							Prev
-						</div>
-						<div class="slider_outer">
-							<div id="slider_axial" class="slider_elm"></div>
-						</div>
-						<div class="btn_next common_btn common_btn_green" data-target-elm="slider_axial">
-							Next
-						</div>
-						<div class="clear">&nbsp;</div>
-						<div id="img_area_axial" class="img_wrap">
-
-							<img src="http://160.16.56.191:3000/?mode=axial&target=1&series={{$sel_seriesUID}}"  id="img_axial">
-
-							<p class="al_c disp_num">
-								<span id="current_num_txt_axial">1</span>
-							</p>
-							<div class="img_toolbar_wrap">
-								<ul class="img_toolbar" data-target-element="img_axial">
-									<li class="toolbar_btn">{{HTML::link('', 'Drawing')}}</li>
-									<li class="toolbar_btn">{{HTML::link('', 'Hand')}}</li>
-									<li class="toolbar_btn">{{HTML::link('', 'Large')}}</li>
-									<li class="toolbar_btn">{{HTML::link('', 'Small')}}</li>
-								</ul>
-							</div>
-						</div>
-					</div>
-					<div class="img_area fl_r" id="area_sagital">
-						<div class="btn_prev common_btn common_btn_blue" data-target-elm="slider_sagital">
-							Prev
-						</div>
-						<div class="slider_outer">
-							<div id="slider_sagital" class="slider_elm"></div>
-						</div>
-						<div class="btn_next common_btn common_btn_blue" data-target-elm="slider_sagital">
-							Next
-						</div>
-						<div class="clear">&nbsp;</div>
-						<div id="img_area_sagital" class="img_wrap">
-							<img src="http://160.16.56.191:3000/?mode=axial&target=1&series={{$sel_seriesUID}}" id="img_axial">
-							<p class="al_c disp_num">
-								<span id="current_num_txt_sagital">1</span>
-							</p>
-							<div class="img_toolbar_wrap">
-								<ul class="img_toolbar" data-target-element="img_sagital">
-									<li class="toolbar_btn">{{HTML::link('', 'Drawing')}}</li>
-									<li class="toolbar_btn">{{HTML::link('', 'Hand')}}</li>
-									<li class="toolbar_btn">{{HTML::link('', 'Large')}}</li>
-									<li class="toolbar_btn">{{HTML::link('', 'Small')}}</li>
-								</ul>
-							</div>
-						</div>
-					</div>
-					<div class="clear">&nbsp;</div>
-					<div class="img_area fl_l" id="area_coronal">
-						<div class="btn_prev common_btn common_btn_pink" data-target-elm="slider_coronal">
-							Prev
-						</div>
-						<div class="slider_outer">
-							<div id="slider_coronal" class="slider_elm"></div>
-						</div>
-						<div class="btn_next common_btn common_btn_pink" data-target-elm="slider_coronal">
-							Next
-						</div>
-						<div class="clear">&nbsp;</div>
-						<div id="img_area_coronal" class="img_wrap">
-							<img src="http://160.16.56.191:3000/?mode=axial&target=1&series={{$sel_seriesUID}}" id="img_axial">
-							<p class="al_c disp_num">
-								<span id="current_num_txt_coronal">1</span>
-							</p>
-							<div class="img_toolbar_wrap">
-								<ul class="img_toolbar" data-target-element="img_coronal">
-									<li class="toolbar_btn">{{HTML::link('', 'Drawing')}}</li>
-									<li class="toolbar_btn">{{HTML::link('', 'Hand')}}</li>
-									<li class="toolbar_btn">{{HTML::link('', 'Large')}}</li>
-									<li class="toolbar_btn">{{HTML::link('', 'Small')}}</li>
-								</ul>
-							</div>
-						</div>
-					</div>
-					<div class="img_area fl_r" id="panel_wrap">
-						<div id="layer_panel">
-							<div class="pad_10">
-								<h2 class="layer_panel_ttl">Layer information</h2>
-								<p class="layer_panel_switch">
-									<span class="switch_main" id="opener">▼</span>
-									<span class="switch_main" id="closer">▲</span>
-								</p>
-								<div class="clear">&nbsp;</div>
-								<ul id="layer_list">
-									<li class="layer_cell">
-										<label class="layer_cell_label">
-											{{Form::checkbox('layer', 5, false, array('class' => 'layer_cell_input'))}}
-											Layer 5
-										</label>
-									</li>
-									<li class="layer_cell">
-										<label class="layer_cell_label">
-											{{Form::checkbox('layer', 4, false, array('class' => 'layer_cell_input'))}}
-											Layer 4
-										</label>
-									</li>
-									<li class="layer_cell">
-										<label class="layer_cell_label">
-											{{Form::checkbox('layer', 2, false, array('class' => 'layer_cell_input'))}}
-											Layer 2
-										</label>
-									</li>
-									<li class="layer_cell">
-										<label class="layer_cell_label">
-											{{Form::checkbox('layer', 1, false, array('class' => 'layer_cell_input'))}}
-											Layer 1
-										</label>
-									</li>
-									<li class="layer_cell">
-										<label class="layer_cell_label">
-											{{Form::checkbox('layer', 3, true, array('class' => 'layer_cell_input'))}}
-											Layer 3
-										</label>
-									</li>
-								</ul>
-							</div>
-						</div>
+				<div class="control_panel mar_tb_10" id="the_panel">
+					<div class="control_panel_inner" id="the_panel_inner">
 					</div>
 				</div>
-				<div class="clear">&nbsp;</div>
+				<div class=" img_view_area">
+					<div class="img_area fl_l mar_b_20" id="img_area_axial"></div>
+					<div class="img_area fl_r mar_b_20" id="img_area_sagital"></div>
+					<div class="clear">&nbsp;</div>
+					<div class="img_area fl_l mar_b_20" id="img_area_coronal"></div>
+					<div class="clear">&nbsp;</div>
+				</div>
 				<div class="search_result">
-					<h2 class="con_ttl"><a name='revision'>Revision</a></h2>
+					<a name="revision"></a>
+					<h2 class="con_ttl">Revision</h2>
 					<ul class="common_pager clearfix">
 						{{$list_pager->links()}}
 						<li class="pager_sort_order">

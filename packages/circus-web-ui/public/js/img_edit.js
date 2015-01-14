@@ -627,12 +627,12 @@ $(function(){
 						//描画または消しゴムの場合
 						clearGuide();
 						guide_elm_ctx.scale(1,1);	//縦横比クリア
-
+						
 						var	tmp_mouse_x	=	e.clientX;
 						var	tmp_mouse_y	=	e.clientY;
 						var	out_flg	=	0;	//領域外に行ったら座標は積まない
 
-						//領域外に出ても繋がる
+						//領域外に出ても繋がる						
 						if(canvas_elm_obj.getBoundingClientRect().width		+	canvas_elm_obj.getBoundingClientRect().left<	tmp_mouse_x){
 							tmp_mouse_x	=	canvas_elm_obj.getBoundingClientRect().width	+	canvas_elm_obj.getBoundingClientRect().left;
 							out_flg++;
@@ -640,7 +640,7 @@ $(function(){
 							tmp_mouse_x	=	0;
 							out_flg++;
 						}
-
+						
 						if(canvas_elm_obj.getBoundingClientRect().height	+	canvas_elm_obj.getBoundingClientRect().top	<	tmp_mouse_y){
 							tmp_mouse_y	=	canvas_elm_obj.getBoundingClientRect().height	+	canvas_elm_obj.getBoundingClientRect().top;
 							out_flg++;
@@ -656,7 +656,7 @@ $(function(){
 
 						tmp_x	=	Math.round(tmp_x);	//元画像上での座標は必ず整数
 						tmp_y	=	Math.round(tmp_y);
-
+						
 						if(	Math.abs(tmp_x-pre_x)>1	||	Math.abs(tmp_y	-	pre_y	)>1	){
 							//中間点群を取得するため,この直前のマウスイベントでマウスが居た位置座標を呼び出す
 							//現在の座標との間に格納するための座標群を算出
@@ -664,18 +664,18 @@ $(function(){
 							var stopvers_array	=	getStopover(pre_x,pre_y,tmp_x,tmp_y);
 							for (i = 0; i < stopvers_array.length; i++) {
 							//	draw_info.point.current.push(stopvers_array[i]);
-							}
+							}							
 							//中間座標群の算出・埋め込みここまで
 						}
 
-
+	
 						draw_info.point.current.push({"x":tmp_x,"y":tmp_y});	//現在地点
 						draw_info.point.current	=	removeOuterPoints(draw_info.point.current,img_disp_info);
-
+						
 						//中間座標の追加が済んだので次のmousemoveイベントに備えてpre_x/pre_yを更新
 						pre_x	=	tmp_x;
 						pre_y	=	tmp_y;
-
+	
 						if(mouse_mode	==	'draw'){
 							//描画モード,ガイドに線を描いていく
 							drawCommon(draw_info,guide_elm_ctx);
@@ -685,7 +685,7 @@ $(function(){
 						}
 					}
 					draw_info.point.goal	=	{"x":tmp_x,"y":tmp_y};	//ゴール地点は常に更新
-
+					
 				}else if(mouse_mode	==	'image_window'){//ウインドウレベル等の変更モードの場合
 					img_src_info.ww	=	(e.clientX	-	cursor_info.start.X)	*	image_window_ratio	+	start_X	;	//ウインドウサイズ
 					img_src_info.wl	=	(e.clientY	-	cursor_info.start.Y)	*	image_window_ratio	+	start_Y	;	//ウインドウレベル
@@ -936,7 +936,7 @@ var	removeOuterPoints	=	function(target_array,limit_array){
 		if(limit_array.sx		>	target_array[i].x){
 				delete_flg++;
 		}
-		if(limit_array.sx	+	limit_array.sw	<	target_array[i].x){
+		if(limit_array.sx	+	limit_array.sw	<	target_array[i].x){	
 				delete_flg++;
 		}
 

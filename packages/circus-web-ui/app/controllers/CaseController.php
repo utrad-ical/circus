@@ -1,12 +1,10 @@
 <?php
 /**
  * Classes for operating the case
- * @since 2014/12/02
  */
 class CaseController extends BaseController {
 	/**
 	 * Case Search Results
-	 * @since 2014/12/02
 	 */
 	public function search() {
 		//Login check
@@ -21,6 +19,7 @@ class CaseController extends BaseController {
 
 		//Input value acquisition
 		$inputs = Input::all();
+
 		//Reset button or the initial display when pressed
 		if (array_key_exists('btnReset', $inputs) !== FALSE || !$inputs) {
 			Session::forget('case.search');
@@ -43,6 +42,7 @@ class CaseController extends BaseController {
 				$detail_search['mongo_search_data'] = fread($handle, filesize($file_path));
 
 				$detail_search["mongo_data"] = json_decode($detail_search["mongo_data"]);
+
 			}
 			$detail_search['disp'] = Config::get('const.page_display');
 			$detail_search['sort'] = 'updateTime';
@@ -67,25 +67,25 @@ class CaseController extends BaseController {
 			//Simple Search
 			if ($search_data["search_mode"] == 0) {
 				//Total number acquisition
-				$case_count = Cases::addWhere($search_data)
+				$case_count = ClinicalCase::addWhere($search_data)
 									->count();
 
 				//Search result acquisition
 				if ($case_count > 0)
-					$case_list = Cases::addWhere($search_data)
+					$case_list = ClinicalCase::addWhere($search_data)
 									->orderby($search_data['sort'], 'desc')
 									->addLimit($search_data)
 									->get($select_col);
 			} else {
-				//詳細検索
+				//Advanced Search
 				//Total number acquisition
-				$case_count = Cases::addWhere($search_data)
+				$case_count = ClinicalCase::addWhere($search_data)
 									->whereRaw($search_data["mongo_data"])
 									->count();
 
 				//Search result acquisition
 				if ($case_count > 0)
-					$case_list = Cases::addWhere($search_data)
+					$case_list = ClinicalCase::addWhere($search_data)
 									->whereRaw($search_data["mongo_data"])
 									->orderby($search_data['sort'], 'desc')
 									->addLimit($search_data)
@@ -131,9 +131,7 @@ class CaseController extends BaseController {
 			$result['list_pager'] = $case_pager;
 
 		}
-		Log::debug("検索条件");
 		$result['inputs'] = $search_data;
-		Log::debug($search_data);
 
 		$result['title'] = 'Case Search';
 		$result['url'] = 'case/search';
@@ -156,7 +154,6 @@ class CaseController extends BaseController {
 
 	/**
 	 * Case Search Results(Ajax)
-	 * @since 2015/01/05
 	 */
 	public function search_ajax() {
 		//Login check
@@ -206,30 +203,28 @@ class CaseController extends BaseController {
 				'updateTime'
 			);
 
-			Log::debug("検索条件");
-			Log::debug($search_data);
 			//Simple Search
 			if ($search_data["search_mode"] == 0) {
 				//Total number acquisition
-				$case_count = Cases::addWhere($search_data)
+				$case_count = ClinicalCase::addWhere($search_data)
 									->count();
 
 				//Search result acquisition
 				if ($case_count > 0)
-					$case_list = Cases::addWhere($search_data)
+					$case_list = ClinicalCase::addWhere($search_data)
 									->orderby($search_data['sort'], 'desc')
 									->addLimit($search_data)
 									->get($select_col);
 			} else {
 				//Advanced Search
 				//Total number acquisition
-				$case_count = Cases::addWhere($search_data)
+				$case_count = ClinicalCase::addWhere($search_data)
 									->whereRaw($search_data["mongo_data"])
 									->count();
 
 				//Search result acquisition
 				if ($case_count > 0)
-					$case_list = Cases::addWhere($search_data)
+					$case_list = ClinicalCase::addWhere($search_data)
 									->whereRaw($search_data["mongo_data"])
 									->orderby($search_data['sort'], 'desc')
 									->addLimit($search_data)
@@ -263,22 +258,20 @@ class CaseController extends BaseController {
 						'projectName'	=>	$project ? $project[0]->projectName : '',
 						'updateDate'	=>	date('Y/m/d', $rec->updateTime->sec)
 					);
-					$result['list'] = $list;
 					$result['inputs'] = $search_data;
+
+					//Setting the pager
+					$case_pager = Paginator::make(
+						$list,
+						$case_count,
+						$search_data['disp']
+					);
+					$result['list_pager'] = $case_pager;
 				}
-			} else {
-				$result['list'] = array();
 			}
+			$result['list'] = $list;
 		}
 		$result['search_flg'] = $search_flg;
-
-		//Setting the pager
-		$case_pager = Paginator::make(
-			$list,
-			$case_count,
-			$search_data['disp']
-		);
-		$result['list_pager'] = $case_pager;
 
 		$tmp = View::make('/case/search_result', $result);
 
@@ -288,8 +281,7 @@ class CaseController extends BaseController {
 	}
 
 	/**
-	 * 検索条件保存(Ajax)
-	 * @since 2015/01/05
+	 * Search conditions save(Ajax)
 	 */
 	public function save_search() {
 		//Login check
@@ -324,11 +316,8 @@ class CaseController extends BaseController {
 			$data = json_decode($inputs["mongo_search_data"]);
 			file_put_contents($file_name, $inputs["mongo_search_data"]);
 		} else {
-			Log::debug("既にファイルが存在します。");
 			$error_flg = true;
-			//exit();
 		}
-
 
 		$after_cnt = count(Session::get('case_detail_search'));
 
@@ -344,7 +333,6 @@ class CaseController extends BaseController {
 
 	/**
 	 * Case Details screen
-	 * @since 2014/12/09
 	 */
 	public function detail() {
 		//Login check
@@ -378,7 +366,7 @@ class CaseController extends BaseController {
 			Session::put('case.detail', $inputs);
 			$search_data = Session::get('case.detail');
 
-			$case_info = Cases::find($inputs['caseID']);
+			$case_info = ClinicalCase::find($inputs['caseID']);
 
 			if (!$case_info) {
 				$error_msg = 'Case ID does not exist.';
@@ -447,6 +435,7 @@ class CaseController extends BaseController {
 				}
 			}
 			$case_detail['revisionNo'] = isset($inputs['revisionNo']) ? $inputs['revisionNo'] : $max_revision;
+
 			$result['case_detail'] = $case_detail;
 
 			//Revision sort order adaptation
@@ -455,10 +444,12 @@ class CaseController extends BaseController {
 
 			//Series list created
 			$series = array();
+			$sel_seriesUID = "";
 			foreach ($case_data->revisions as $key => $value) {
-				if ($key !== 'latest') {
+				if ($key == $case_detail['revisionNo']) {
 					for ($i = 0; $i < count($value['series']); $i++){
 						$series[] = $value['series'][$i]['seriesUID'];
+						if (!$sel_seriesUID) $sel_seriesUID = $value['series'][$i]['seriesUID'];
 					}
 				}
 			}
@@ -466,7 +457,7 @@ class CaseController extends BaseController {
 			$select_col = array('seriesUID', 'seriesDescription');
 			$serieses = Series::addWhere($inputs)
 								->get($select_col);
-
+			//シリーズリストの整形
 			$result['series_list'] = self::getSeriesList($serieses);
 
 			//Setting the pager
@@ -482,7 +473,7 @@ class CaseController extends BaseController {
 		}
 		$result['title'] = 'Case Detail';
 		$result['url'] = 'case/detail';
-		$result['css'] = self::cssSetting();
+		$result['css'] = self::cssSetting('detail');
 		$result['js'] = self::jsSetting('detail');
 		$result['mode'] = $inputs['mode'];
 		Session::put('view_mode', $inputs['mode']);
@@ -491,7 +482,6 @@ class CaseController extends BaseController {
 
 	/**
 	 * Revision list acquisition
-	 * @since 2014/12/24
 	 */
 	public function revision_ajax() {
 		//Login check
@@ -515,7 +505,7 @@ class CaseController extends BaseController {
 			if (array_key_exists('sort', $inputs) === FALSE) $inputs['sort'] = 'revision.date';
 
 			//Check whether the case ID that exists
-			$case_info = Cases::addWhere($inputs)
+			$case_info = ClinicalCase::addWhere($inputs)
 								->get();
 			$query_log = DB::getQueryLog();
 
@@ -597,7 +587,6 @@ class CaseController extends BaseController {
 
 	/**
 	 * Case registration input
-	 * @since 2014/12/15
 	 */
 	function input() {
 		//Login check
@@ -627,7 +616,7 @@ class CaseController extends BaseController {
 			$series_exclude_ary = array_keys($result['inputs']['series_list']);
 		//Edit mode
 		} else if (array_key_exists('caseID', $inputs) !== FALSE) {
-			$case_data = Cases::find($inputs['caseID']);
+			$case_data = ClinicalCase::find($inputs['caseID']);
 
 			//Set case information
 			if ($case_data) {
@@ -699,7 +688,6 @@ class CaseController extends BaseController {
 
 	/**
 	 * Case registration confirmation
-	 * @since 2014/12/22
 	 */
 	function confirm() {
 		//Login check
@@ -723,7 +711,7 @@ class CaseController extends BaseController {
 		$mode = Session::get('mode');
 
 		$case_info['projectID'] = $inputs['projectID'];
-		//シリーズの設定
+		//Set of series
 		$case_info['seriesUID'] = $inputs['series'];
 		$select_col = array(
 			'seriesUID', 'seriesDescription',
@@ -731,7 +719,7 @@ class CaseController extends BaseController {
 			'patientInfo.sex', 'patientInfo.patientName',
 			'patientInfo.birthday'
 		);
-		$series = Serieses::addWhere($case_info)
+		$series = Series::addWhere($case_info)
 							->get($select_col);
 
 		//Patient ID duplication check
@@ -745,9 +733,8 @@ class CaseController extends BaseController {
 
 		//Validate check for object creation
 		$case_obj = $caseID ?
-					//Cases::addWhere(array('caseID' => $caseID))->get() :
-					Cases::find($caseID) :
-					App::make('Cases');
+					ClinicalCase::find($caseID) :
+					App::make('ClinicalCase');
 
 		//Set the value for the Validate check
 		$case_obj->caseID = $case_info['caseID'];
@@ -782,9 +769,8 @@ class CaseController extends BaseController {
 
 	/**
 	 * Case registered
-	 * @since 2014/12/15
 	 */
-	function regist(){
+	function register(){
 		//Login check
 		if (!Auth::check()) {
 			//Forced redirected to the login screen because not logged in
@@ -805,8 +791,8 @@ class CaseController extends BaseController {
 
 		//Validate check for object creation
 		$case_obj = $caseID ?
-					Cases::find($caseID) :
-					App::make('Cases');
+					ClinicalCase::find($caseID) :
+					App::make('ClinicalCase');
 
 		//Set the value for the Validate check
 		$case_obj->caseID = $inputs['caseID'];
@@ -823,7 +809,7 @@ class CaseController extends BaseController {
 			'sex'		=>	self::setSex($inputs['patientInfo']['sex'])
 		);
 
-		//Revision情報の初期設定
+		//Initial setting of Revision information
 		$series_list = self::createRevision($inputs['series_list']);
 		$case_obj->revisions = array(
 			'latest'	=>	$series_list,
@@ -869,7 +855,6 @@ class CaseController extends BaseController {
 
 	/**
 	 * I want to display the complete screen
-	 * @since 2014/12/25
 	 */
 	function complete() {
 		//Session information acquisition
@@ -885,20 +870,24 @@ class CaseController extends BaseController {
 	/**
 	 * Page individual CSS setting
 	 * @return Page individual CSS configuration array
-	 * @since 2014/12/04
 	 */
 	function cssSetting($mode = 'search') {
 		$css = array();
 	  	$css['ui-lightness/jquery-ui-1.10.4.custom.min.css'] = 'css/ui-lightness/jquery-ui-1.10.4.custom.min.css';
-		$css['page.css'] = 'css/page.css';
+
 
 		switch($mode) {
 			case 'search':
 				$css['jquery.flexforms.css'] = 'css/jquery.flexforms.css';
+				$css['page.css'] = 'css/page.css';
 				break;
 			case 'detail':
 			case 'edit':
-				$css['color.css'] = 'css/color.css';
+				$css['page_lib.css'] = 'css/page_lib.css';
+				$css['jquery.simple-color-picker.cs'] = 'css/jquery.simple-color-picker.cs';
+				break;
+			default:
+				$css['page.css'] = 'css/page.css';
 				break;
 		}
 	  	return $css;
@@ -907,7 +896,6 @@ class CaseController extends BaseController {
 	/**
 	 * Page individual JS setting
 	 * @return Page individual JS configuration array
-	 * @since 2014/12/04
 	 */
 	function jsSetting($mode = 'search') {
 		$js = array();
@@ -916,14 +904,17 @@ class CaseController extends BaseController {
 		switch ($mode) {
 			case 'search':
 				$js['jquery.multiselect.min.js'] = 'js/jquery.multiselect.min.js';
-				//$js['jquery.formserializer.js'] = 'js/jquery.formserializer.js';
-				//$js['jquery.ruleseteditor.js'] = 'js/jquery.ruleseteditor.js';
+				$js['jquery.formserializer.js'] = 'js/jquery.formserializer.js';
 				$js['jquery.flexforms.js'] = 'js/jquery.flexforms.js';
 				$js['more_search.js'] = 'js/more_search.js';
 				break;
 			case 'detail':
 			case 'edit':
-				$js['img_edit.js'] = 'js/img_edit.js';
+				//$js['img_edit.js'] = 'js/img_edit.js';
+				$js['jquery.simple-color-picker.js'] = 'js/jquery.simple-color-picker.js';
+				$js['voxelContainer.js'] = 'js/voxelContainer.js';
+				$js['imageViewer.js'] = 'js/imageViewer.js';
+				$js['imageViewerController.js'] = 'js/imageViewerController.js';
 				break;
 		}
 		return $js;
@@ -932,7 +923,6 @@ class CaseController extends BaseController {
 	/**
 	 * Login user I get a list of viewable project
 	 * @return List login user is viewable project
-	 * @since 2014/12/08
 	 */
 	function getProjectList($make_combo_flg){
 		return Project::getProjectList(Project::AUTH_TYPE_VIEW, $make_combo_flg);
@@ -942,7 +932,6 @@ class CaseController extends BaseController {
 	 * I get the week
 	 * @param $w Numeric value that represents the day of the week
 	 * @return Day of the week in Japanese notation
-	 * @since 2014/12/11
 	 */
 	function getWeekDay($w) {
 		$week = Config::get('const.week_day');
@@ -953,7 +942,6 @@ class CaseController extends BaseController {
 	 * I get the sex for display
 	 * @param $sex Gender of value
 	 * @return Gender display string
-	 * @since 2014/12/12
 	 */
 	function getSex($sex) {
 		$sexes = Config::get('const.patient_sex');
@@ -964,32 +952,62 @@ class CaseController extends BaseController {
 	 * I set the sex for display
 	 * @param $sex Gender of value
 	 * @return Gender string
-	 * @since 2014/12/12
 	 */
 	function setSex($sex) {
 		$sexes = Config::get('const.patient_sex');
-	//	return $sexes[$sex];
 		return array_search($sex, $sexes);
 	}
 
 	/**
-	 * For Series combo created
+	 * Series List Json
 	 * @param $data Revision data that are selected
 	 * @return Series list brute string to Revision
-	 * @since 2014/12/12
 	 */
 	function getSeriesList($data) {
+		Log::debug("DocumentRoot");
+		Log::debug($_SERVER["DOCUMENT_ROOT"]);
 		$series_list = array();
 		foreach ($data as $rec) {
-			$series_list[$rec['seriesUID']] = $rec['seriesDescription'];
+			$series_list[] = array(
+				'image'		=>	array(
+					'description'	=>	$rec->seriesDescription,
+					'id'			=>	$rec->seriesUID,
+					'voxel'			=>	array(
+						'voxel_x'		=>	1,		//とりあえず固定値(実際はCaseのSeriesに紐づくlabelのlabelIDに紐づくラベル情報w
+						'voxel_y'		=>	1,		//とりあえず固定値(実際はCaseのSeriesに紐づくlabelのlabelIDに紐づくラベル情報h
+						'voxel_z'		=>	1,		//とりあえず固定値(実際はCaseのSeriesに紐づくlabelのlabelIDに紐づくラベル情報d
+						'x'				=>	512,	//とりあえず固定値(実際はCaseのSeriesに紐づくlabelのlabelIDに紐づくラベル情報x
+						'y'				=>	512,	//とりあえず固定値(実際はCaseのSeriesに紐づくlabelのlabelIDに紐づくラベル情報y
+						'z'				=>	512		//とりあえず固定値(実際はCaseのSeriesに紐づくlabelのlabelIDに紐づくラベル情報z
+					),
+					'window'		=>	array(
+						'level'		=>	array(
+							'current'	=>	1000,
+							'maximum'	=>	40000,
+							'minimum'	=>	-2000
+						),
+						'width'		=>	array(
+							'current'	=>	3500,
+							'maximum'	=>	8000,
+							'minimum'	=>	1
+						),
+						'preset'	=>	array(
+							array(
+								'label'	=>	'ソースからシリーズ共通用で入力',
+								'level'	=>	1000,
+								'width'	=>	2000
+							)
+						)
+					)
+				)
+			);
 		}
-		return $series_list;
+		return json_encode($series_list);
 	}
 
 	/**
 	 * Case ID created (SHA256 + uniqid)
 	 * @return string that was turned into Hash in SHA256 the uniqid (case ID)
-	 * @since 2014/12/15
 	 */
 	function createCaseID(){
 		return hash_hmac('sha256', uniqid(), Config::get('const.hash_key'));
@@ -998,7 +1016,6 @@ class CaseController extends BaseController {
 	/**
 	 * I want to create a list of revisions
 	 * @param $case_data Case information
-	 * @since 2014/12/17
 	 */
 	function getRevision($case_data) {
 		foreach($case_data->revisions as $key => $value) {
@@ -1021,8 +1038,7 @@ class CaseController extends BaseController {
 					'seriesCount'	=>	count($value['series']),
 					'labelCount'	=>	$label_cnt,
 					'creator'		=>	$value['creator'],
-					'memo'			=>	$value['memo']//,
-					//'sortEditTime'	=>	date('Y-m-d H:i:s', $value['date']->sec)
+					'memo'			=>	$value['memo']
 				);
 			}
 		}
@@ -1034,7 +1050,6 @@ class CaseController extends BaseController {
 	 * @param $list Series List of patient ID overlapping subject
 	 * @param $series_list Destination Series List of if there is no error
 	 * @return $error_msg Error message
-	 * @since 2014/12/16
 	 */
 	function checkDuplicatePatientID($list, &$series_list = array()) {
 		$patientID = $list[0]->patientInfo['patientID'];
@@ -1050,8 +1065,6 @@ class CaseController extends BaseController {
 	 * I sort by Revision final editing time
 	 * @param $a Sort array (large value)
 	 * @param $b Sort array (small value)
-	 * @return Sort Result 0: equal -1: b is greater 1: a large
-	 * @since 2014/12/24
 	 */
 	function sortEditTime($a, $b) {
 		//Modified the new order
@@ -1069,7 +1082,6 @@ class CaseController extends BaseController {
 	 * @param $a Sort array (large value)
 	 * @param $b Sort array (small value)
 	 * @return Sort Result 0: equal -1: b is greater 1: a large
-	 * @since 2014/12/24
 	 */
 	function sortRevisionNo($a, $b){
 		//Revision old order
@@ -1087,7 +1099,6 @@ class CaseController extends BaseController {
 	 * @param $list Revsion list
 	 * @param $sort Sorting method
 	 * @return Sort the Revision list
-	 * @since 2014/12/24
 	 */
 	function sortRevision($list, $sort) {
 		switch ($sort) {
@@ -1105,7 +1116,6 @@ class CaseController extends BaseController {
 	 * I want to create an array for the Validate
 	 * @param $data Validate checked the data
 	 * @return Validate check for array
-	 * @since 2014/12/24
 	 */
 	function setCaseValidate($data) {
 		$valid_ary = array();
@@ -1126,7 +1136,6 @@ class CaseController extends BaseController {
 	/**
 	 * I set the return destination of the URL
 	 * @param $input Input parameters
-	 * @since 2014/12/25
 	 */
 	function setBackUrl($input, &$result) {
 		if (array_key_exists('back_url', $input) === FALSE)
@@ -1152,9 +1161,8 @@ class CaseController extends BaseController {
 
 	/**
 	 * To create a Revision information (New)
-	 * @param $series_list シリーズ配列
-	 * @return Revision情報
-	 * @since 2014/12/25
+	 * @param $series_list Series array
+	 * @return Revision information
 	 */
 	function createRevision($series_list) {
 		$revision = array(
@@ -1170,7 +1178,7 @@ class CaseController extends BaseController {
 
 		$series = array();
 		foreach ($series_list as $key => $val) {
-			$series_info = Serieses::find($key);
+			$series_info = Series::find($key);
 			$series[] = array(
 				'seriesUID'	=>	$key,
 				'images'	=>	$series_info->images,
@@ -1186,7 +1194,6 @@ class CaseController extends BaseController {
 	 * @param $list Series List
 	 * @param $order Sort ordering
 	 * @return Sort the Series List
-	 * @since 2014/12/26
 	 */
 	function sortSeriesList($list, $order) {
 		$ary = array();

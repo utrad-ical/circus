@@ -22,7 +22,7 @@ Route::get('support/forget_password', 'SupportController@forgetPassword');
 Route::get('preferences/input', 'UserController@inputPreferences');
 Route::post('preferences/input', 'UserController@inputPreferences');
 Route::post('preferences/confirm', 'UserController@confirmPreferences');
-Route::post('preferences/complete', 'UserController@registPreferences');
+Route::post('preferences/complete', 'UserController@registerPreferences');
 Route::get('preferences/complete', 'UserController@completePreferences');
 //for Ajax
 Route::any('preferences/theme', 'UserController@changeTheme');
@@ -38,7 +38,7 @@ Route::post('case/detail', 'CaseController@detail');
 Route::post('case/edit', 'CaseController@input');
 Route::post('case/input', 'CaseController@input');
 Route::post('case/confirm', 'CaseController@confirm');
-Route::post('case/complete', 'CaseController@regist');
+Route::post('case/complete', 'CaseController@register');
 Route::get('case/complete', 'CaseController@complete');
 //Case (for Ajax)
 Route::any('case/revision', 'CaseController@revision_ajax');
@@ -50,10 +50,11 @@ Route::get('series/search', 'SeriesController@search');
 Route::post('series/search', 'SeriesController@search');
 Route::post('series/detail', 'SeriesController@detail');
 Route::get('series/import', 'SeriesController@input');
-Route::post('series/complete', 'SeriesController@regist');
+Route::post('series/complete', 'SeriesController@register');
 Route::get('series/complete', 'SeriesController@complete');
 //Series (for Ajax)
 Route::any('series/save_search', 'SeriesController@save_search');
+Route::get('series/get_series', 'SeriesController@get_series');
 
 //Management screen
 Route::get('admin', 'AdminController@getIndex');
@@ -64,7 +65,7 @@ Route::post('admin/group/search', 'GroupController@search');
 //Management screen / group (for Ajax)
 Route::any('admin/group/input', 'GroupController@input');
 Route::any('admin/group/confirm', 'GroupController@confirm');
-Route::any('admin/group/complete', 'GroupController@regist');
+Route::any('admin/group/complete', 'GroupController@register');
 //Management screen / user
 Route::get('admin/user/', function(){return Redirect::to('admin/user/search');});
 Route::get('admin/user/search', 'UserController@search');
@@ -72,10 +73,12 @@ Route::post('admin/user/search', 'UserController@search');
 //Management screen / user (for Ajax)
 Route::any('admin/user/input', 'UserController@input');
 Route::any('admin/user/confirm', 'UserController@confirm');
-Route::any('admin/user/complete', 'UserController@regist');
+Route::any('admin/user/complete', 'UserController@register');
 
 //404 pages
 Event::listen('404', function()
 {
     return App::abort(404);
 });
+
+

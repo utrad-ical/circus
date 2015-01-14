@@ -5,7 +5,6 @@ use Jenssegers\Mongodb\Model as Eloquent;
 
 /**
  * Series table operation
- * @since 2014/12/05
  */
 class Series extends Eloquent {
 	protected $connection = 'mongodb';
@@ -18,7 +17,6 @@ class Series extends Eloquent {
 	 * @param $query Query object
 	 * @param $input Input value
 	 * @return Query object
-	 * @since 2014/12/05
 	 */
 	public function scopeAddWhere($query, $input) {
 		//seriesID Series ID
@@ -74,7 +72,6 @@ class Series extends Eloquent {
 	 * @param $query Query object
 	 * @param $input Retrieval conditions
 	 * @return $query Query object
-	 * @since 2014/12/12
 	 */
 	public function scopeAddLimit($query, $input) {
 		if (isset($input['perPage']) && $input['perPage']) {
@@ -87,7 +84,6 @@ class Series extends Eloquent {
 
 	/**
 	 * Validation rules
-	 * @since 2014/12/12
 	 */
 	private $rules = array(
 		'studyUID'				=>	'required',
@@ -116,7 +112,6 @@ class Series extends Eloquent {
 	 * Validate Check
 	 * @param $data Validate checked
 	 * @return Error content
-	 * @since 2015/01/07
 	 */
 	public function validate($data) {
 		$validator = Validator::make($data, $this->rules);

@@ -91,7 +91,7 @@ $(function() {
 
 	//When new registration button is pressed
 	$('.frm_user_enable').click(function(){
-		var post_data = '{"mode":"regist"}';
+		var post_data = '{"mode":"register"}';
 		post_data = JSON.parse(post_data);
 		var target_elm = $('.frm_user_input');
 

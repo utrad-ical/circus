@@ -33,7 +33,7 @@
 					@if (Session::has('case_detail_search'))
 						@foreach(Session::get('case_detail_search') as $rec_key => $rec_val)
 							<li>
-								{{HTML::link(asset('/case/search'), 'User set condition '.str_pad($rec_key+1, 2, "0", STR_PAD_LEFT), array('class' => 'link_case_detail_search'))}}
+								{{HTML::link(asset('/case/search'), $rec_val['save_label'], array('class' => 'link_case_detail_search'))}}
 								{{Form::open(['url' => asset('/case/search'), 'method' => 'post', 'class' => 'frm_case_detail_search'])}}
 									{{Form::hidden('condition_id', $rec_key)}}
 								{{Form::close()}}
@@ -56,7 +56,7 @@
 					@if (Session::has('series_detail_search'))
 						@foreach(Session::get('series_detail_search') as $rec_key => $rec_val)
 							<li>
-								{{HTML::link(asset('/series/search'), 'User set condition '.str_pad($rec_key+1, 2, "0", STR_PAD_LEFT), array('class' => 'link_series_detail_search'))}}
+								{{HTML::link(asset('/series/search'), $rec_val['save_label'], array('class' => 'link_series_detail_search'))}}
 								{{Form::open(['url' => asset('/series/search'), 'method' => 'post', 'class' => 'frm_series_detail_search'])}}
 									{{Form::hidden('condition_id', $rec_key)}}
 								{{Form::close()}}

@@ -83,7 +83,13 @@
 
 		//Save Settings depression during treatment
 		$('#save-button').click(function(){
-			sendAjax("{{asset('/series/save_search')}}", setAjaxSearchVal("btnSave"));
+			//sendAjax("{{asset('/series/save_search')}}", setAjaxSearchVal("btnSave"));
+			var ret = prompt('Please display the save label name.', 'User set condition');
+			if (ret == null){
+				alert('Please display the save label name.');
+			} else {
+				sendAjax("{{asset('/series/save_search')}}", setAjaxSearchVal("btnSave", {"name":"save_label","value":ret}));
+			}
 			return false;
 		});
 
@@ -94,6 +100,11 @@
 			var search_mode = $('#search_mode').val();
 			var tmp_action_btn_data = {"name":btnName, "value":btnName};
 			var tmp_ary_data = [tmp_action_btn_data];
+
+			//Option
+			if (arguments[1]) {
+				tmp_ary_data.push(arguments[1]);
+			}
 
 			var tmp_data = $.extend(true,form_data, tmp_ary_data);
 			return tmp_data;
@@ -185,8 +196,8 @@
 					</table>
 					<p class="al_c">
 						{{Form::button('Reset', array('class' => 'common_btn common_btn_green', 'id' => 'btn_reset'))}}
-						{{Form::button('Search', array('class' => 'common_btn', 'type' => 'submit', 'id' => 'btn_submit'))}}
-						{{Form::button('Save settings', array('class' => 'common_btn common_btn_gray', 'type' => 'submit', 'id' => 'save-button'))}}
+						{{Form::button('Search', array('class' => 'common_btn', 'type' => 'button', 'id' => 'btn_submit'))}}
+						{{Form::button('Save settings', array('class' => 'common_btn common_btn_gray', 'type' => 'button', 'id' => 'save-button'))}}
 					</p>
 				</div>
 			{{Form::close()}}

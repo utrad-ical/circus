@@ -5,7 +5,6 @@ use Jenssegers\Mongodb\Model as Eloquent;
 
 /**
  * Class to perform the project table operation
- * @since 2014/12/08
  */
 class Project extends Eloquent {
 	protected $connection = 'mongodb';
@@ -24,7 +23,6 @@ class Project extends Eloquent {
 	 * @return Project login user operable List
 	 * @param $auth_gp Authority type
 	 * @param $make_combo Combo element generation flag
-	 * @since 2014/12/08
 	 */
 	public static function getProjectList($auth_gp, $make_combo = false){
 		$project_list = self::whereIn($auth_gp, Auth::user()->groups)
@@ -46,7 +44,6 @@ class Project extends Eloquent {
 	 * I get the project name
 	 * @param $projectID Project ID
 	 * @return Project name
-	 * @since 2014/12/08
 	 */
 	public static function getProjectName($projectID) {
 		$project = self::where('projectID', '=', intval($projectID))->get(array('projectName'));
@@ -56,7 +53,6 @@ class Project extends Eloquent {
 	/**
 	 * Validation rules
 	 * @var rules Validate rules array
-	 * @since 2014/12/12
 	 */
 	private $rules = array(
 		'projectID'		=>	'required|integer',
@@ -67,7 +63,6 @@ class Project extends Eloquent {
 	 * Validate Check
 	 * @param $data Validate checked
 	 * @return Error content
-	 * @since 2015/01/07
 	 */
 	public function validate($data) {
 		$validator = Validator::make($data, $this->rules);

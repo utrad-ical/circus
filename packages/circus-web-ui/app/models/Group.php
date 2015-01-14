@@ -4,7 +4,6 @@ use Jenssegers\Mongodb\Model as Eloquent;
 
 /**
  * Group table operation
- * @since 2014/12/16
  */
 class Group extends Eloquent {
 	protected $connection = 'mongodb';
@@ -17,7 +16,6 @@ class Group extends Eloquent {
 	 * @param $query Query Object
 	 * @param $input Input value
 	 * @return Query Object
-	 * @since 2014/12/16
 	 */
 	public function scopeAddWhere($query, $input) {
 		//GroupID Group ID
@@ -39,7 +37,6 @@ class Group extends Eloquent {
 	 * @param $query Query Object
 	 * @param $input Retrieval conditions
 	 * @return $query Query Object
-	 * @since 2014/12/16
 	 */
 	public function scopeAddLimit($query, $input) {
 		if (isset($input['perPage']) && $input['perPage']) {
@@ -52,7 +49,6 @@ class Group extends Eloquent {
 
 	/**
 	 * Validate Rules
-	 * @since 2015/01/07
 	 */
 	private $rules = array(
 		'GroupID'	=>	'required',
@@ -63,7 +59,6 @@ class Group extends Eloquent {
 	 * Validate Check
 	 * @param $data Validate checked
 	 * @return Error content
-	 * @since 2015/01/07
 	 */
 	public function validate($data) {
 		$this->rules["GroupName"] = 'required|unique:Groups,GroupName,'.$data["GroupID"].",GroupID";

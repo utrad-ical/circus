@@ -4,13 +4,13 @@
 use Jenssegers\Mongodb\Model as Eloquent;
 
 /**
- * Label table manipulation class
+ * Storage table manipulation class
  */
-class Label extends Eloquent {
+class Storage extends Eloquent {
 	protected $connection = 'mongodb';
-	protected $collection = 'Labels';
+	protected $collection = 'Storages';
 
-	protected $primaryKey = 'labelID';
+	protected $primaryKey = 'storageID';
 
 	/**
 	 * Search conditions Building
@@ -27,16 +27,9 @@ class Label extends Eloquent {
 	 * Validate Rules
 	 */
 	private $rules = array(
-		'labelID'	=>	'required|integer',
 		'storageID'	=>	'required',
-		'x'			=>	'required|integer',
-		'y'			=>	'required|integer',
-		'z'			=>	'required|integer',
-		'w'			=>	'integer',
-		'h'			=>	'integer',
-		'd'			=>	'integer',
-		'creator'	=>	'required',
-		'date'		=>	'required'
+		'path'		=>	'required',
+		'active'	=>	'required'
 	);
 
 	/**

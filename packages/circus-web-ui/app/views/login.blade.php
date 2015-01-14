@@ -3,9 +3,9 @@
 @section('content')
 <script type="text/javascript">
 	$(function(){
-		//新規登録
+		//New registration
 		$("#btnSignUp").click(function() {
-			$(location).attr("href", "./user/regist");
+			$(location).attr("href", "./user/register");
 		});
 	});
 </script>
@@ -26,7 +26,7 @@
 						</td>
 					</tr>
 					<tr>
-						<th>パスワード</th>
+						<th>Password</th>
 						<td>
 							{{Form::password('password', array('class' => 'common_input_text w_300'))}}
 							<br>

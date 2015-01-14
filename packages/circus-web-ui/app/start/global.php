@@ -17,6 +17,7 @@ ClassLoader::addDirectories(array(
 	app_path().'/controllers',
 	app_path().'/models',
 	app_path().'/database/seeds',
+	app_path().'/lib'
 
 ));
 
@@ -53,8 +54,6 @@ App::error(function(Exception $exception, $code)
 	$result['title'] = 'error';
 	$result['url'] = 'home';
 	$result['error_msg'] = $exception->getMessage() ? $exception->getMessage() : '';
-//	Log::debug("エラーメッセージ");
-//	Log::debug($exception->getMessage());
 	return Response::view('error', $result, $code);
 });
 
@@ -103,4 +102,10 @@ Event::listen('illuminate.query', function($query, $bindings, $time, $name) use(
     $myLogger->info($query, $data);
 });
 
+Auth::extend("eloquent", function() {
+    return new Illuminate\Auth\Guard(
+     	new \Illuminate\Auth\EloquentUserProvider(new CustomHasher(), "User"),
+        App::make('session.store')
+    );
+});
 require app_path().'/filters.php';

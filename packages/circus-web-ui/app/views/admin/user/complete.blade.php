@@ -5,7 +5,7 @@
 		//Details button is pressed during
 		$('.link_user_edit').click(function(){
 			//Get the form ID to be sent
-			var post_data = $('.frm_group_edit').serializeArray();
+			var post_data = $('.frm_user_edit').serializeArray();
 			var target_elm = $('.frm_user_input');
 
 			sendAjax(post_data, target_elm);
@@ -14,7 +14,7 @@
 
 		//When new registration button is pressed
 		$('.link_user_input').click(function(){
-			var post_data = '{"mode":"regist"}';
+			var post_data = '{"mode":"register"}';
 			post_data = JSON.parse(post_data);
 			var target_elm = $('.frm_user_input');
 
@@ -42,7 +42,7 @@
 	});
 </script>
 <div class="page_unique">
-	<h1 class="page_ttl">Add new User Complete</h1>
+	<h1 class="page_ttl">{{$title}}</h1>
 	<p class="pad_tb_40 al_c">
 		@if (isset($msg))
 			{{$msg}}

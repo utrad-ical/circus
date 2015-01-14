@@ -15,7 +15,6 @@ $(function() {
 	$('.link_new_case').click(function() {
 		var COOKIE_NAME = "seriesCookie";
 		if(typeof $.cookie(COOKIE_NAME) === "undefined"){
-			console.log('cookie undefined!!');
 			var first_array = [];
 			$.cookie(COOKIE_NAME , first_array , { expires: 1, path:'/' });
 		}

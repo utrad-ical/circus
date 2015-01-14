@@ -1,12 +1,10 @@
 <?php
 /**
  * Classes for user operation
- * @since 2014/12/17
  */
 class UserController extends BaseController {
 	/**
 	 * User search results
-	 * @since 2014/12/17
 	 */
 	public function search() {
 		//Login check
@@ -59,7 +57,6 @@ class UserController extends BaseController {
 
 	/**
 	 * User Details screen
-	 * @since 2014/12/24
 	 */
 	public function detail() {
 		//Login check
@@ -115,7 +112,6 @@ class UserController extends BaseController {
 
 	/**
 	 * User registration input
-	 * @since 2014/12/24
 	 */
 	public function input() {
 		//Login check
@@ -129,7 +125,6 @@ class UserController extends BaseController {
 		$error_msg = '';
 		//Input value acquisition
 		$inputs = Input::all();
-
 		//Settings page
 		$result['url'] = '/admin/user/input';
 		$result['back_url'] = '/user/search';
@@ -183,7 +178,6 @@ class UserController extends BaseController {
 
 	/**
 	 * User registration confirmation
-	 * @since 2014/12/17
 	 */
 	public function confirm() {
 		if (!Auth::check()) {
@@ -254,9 +248,8 @@ class UserController extends BaseController {
 
 	/**
 	 * User registration
-	 * @since 2014/12/24
 	 */
-	public function regist(){
+	public function register(){
 		//Login check
 		if (!Auth::check()) {
 			//Forced redirected to the login screen because not logged in
@@ -275,7 +268,7 @@ class UserController extends BaseController {
 
 		//暗号化キー取得
 		$secret_key = Config::get('const.hash_key');
-		$encrypt_password = openssl_encrypt($inputs['password'],'aes-256-ecb',$secret_key);
+		//$encrypt_password = openssl_encrypt($inputs['password'],'aes-256-ecb',$secret_key);
 
 		//Validate check for object creation
 		$user_obj = $userID ?
@@ -284,7 +277,8 @@ class UserController extends BaseController {
 		//Set the value for the Validate check
 		$user_obj->userID = $inputs['userID'];
 		$user_obj->loginID = $inputs['loginID'];
-		$user_obj->password = Hash::make($encrypt_password);
+		//$user_obj->password = Hash::make($encrypt_password);
+		$user_obj->password = Hash::make($inputs['password']);
 		$user_obj->groups = $inputs['groups'];
 		$user_obj->description = $inputs['description'];
 		$user_obj->loginEnabled = $inputs['loginEnabled'];
@@ -293,9 +287,7 @@ class UserController extends BaseController {
 			'personalView'	=>	$inputs['preferences_personalView']
 		);
 		//ValidateCheck
-		//$validator = Validator::make($inputs, User::getValidateRules());
 		$errors = $user_obj->validate($inputs);
-//		if (!$validator->fails()) {
 		if (!$errors) {
 			//Validate process at the time of success
 			//I registered because there is no error
@@ -313,7 +305,6 @@ class UserController extends BaseController {
 			$tmp = View::make('/admin/user/complete', $result);
 		} else {
 			//Process at the time of Validate error
-		//	$result['errors'] = $validator->messages();
 			$result['errors'] = $errors;
 			$result['inputs'] = $inputs;
 			$result['group_list'] = self::getGroupList();
@@ -329,7 +320,6 @@ class UserController extends BaseController {
 
 	/**
 	 * User registration / update completion screen
-	 * @since 2014/12/17
 	 */
 	public function complete(){
 		//Login check
@@ -351,8 +341,7 @@ class UserController extends BaseController {
 	}
 
 	/**
-	 * Preferences情報変更(テーマ/個人情報表示可否)
-	 * @since 2015/01/08
+	 * Preferences information changes (theme / personal information display propriety)
 	 */
 	public function inputPreferences() {
 		//Login check
@@ -402,8 +391,7 @@ class UserController extends BaseController {
 	}
 
 	/**
-	 * Prferences情報の変更(確認画面)
-	 * @since 2015/01/08
+	 * Change of Prferences information (confirmation screen)
 	 */
 	public function confirmPreferences() {
 		if (!Auth::check()) {
@@ -454,10 +442,9 @@ class UserController extends BaseController {
 	}
 
 	/**
-	 * Preferences情報更新
-	 * @since 2015/01/08
+	 * Preferences information update
 	 */
-	public function registPreferences(){
+	public function registerPreferences(){
 		//Login check
 		if (!Auth::check()) {
 			//Forced redirected to the login screen because not logged in
@@ -507,7 +494,6 @@ class UserController extends BaseController {
 
 	/**
 	 * Preferences information update completion (completion screen)
-	 * @since 2015/01/08
 	 */
 	public function completePreferences(){
 		//Login check
@@ -523,13 +509,11 @@ class UserController extends BaseController {
 		Session::forget('user_input');
 		Session::forget('user_complete');
 
-
 		return View::make('/preferences/complete', $result);
 	}
 
 	/**
-	 * テーマの変更(Ajax)
-	 * @since 2015/01/09
+	 * Change of theme (Ajax)
 	 */
 	public function changeTheme(){
 		//Login check
@@ -571,7 +555,6 @@ class UserController extends BaseController {
 	/**
 	 * Page individual CSS setting
 	 * @return Page individual CSS configuration array
-	 * @since 2014/12/16
 	 */
 	public function cssSetting($mode = 'search') {
 		$css = array();
@@ -584,7 +567,6 @@ class UserController extends BaseController {
 	/**
 	 * Page individual JS setting
 	 * @return Page individual JS configuration array
-	 * @since 2014/12/16
 	 */
 	public function jsSetting() {
 		$js = array();
@@ -596,7 +578,6 @@ class UserController extends BaseController {
 	/**
 	 * Create a user ID (SHA256 + uniqid)
 	 * @return string that was turned into Hash in SHA256 the uniqid (case ID)
-	 * @since 2014/12/17
 	 */
 	public function createUserID(){
 		return hash_hmac('sha256', uniqid(), Config::get('const.hash_key'));
@@ -605,7 +586,6 @@ class UserController extends BaseController {
 	/**
 	 * I get the group list
 	 * @return Group List
-	 * @since 2014/12/17
 	 */
 	public function getGroupList(){
 		//Acquisition of group list
@@ -621,7 +601,6 @@ class UserController extends BaseController {
 	 * I get the name of the group
 	 * @param $gids Group ID group
 	 * @return Group name array
-	 * @since 2014/12/17
 	 */
 	public function getGroupNameDisp($gids = array()) {
 		$group_names = Group::addWhere(array('GroupID' => $gids))

@@ -1,12 +1,10 @@
 <?php
 /**
  * Class to perform the operation of series
- * @since 2014/12/09
  */
 class SeriesController extends BaseController {
 	/**
 	 * Series Search Result
-	 * @since 2014/12/09
 	 */
 	public function search() {
 		//Login check
@@ -93,7 +91,7 @@ class SeriesController extends BaseController {
 			);
 			$result['list_pager'] = $case_pager;
 		} else {
-			//デフォルト設定
+			//Default configuration
 			$search_data['sex'] = 'all';
 		}
 
@@ -110,7 +108,6 @@ class SeriesController extends BaseController {
 
 	/**
 	 * Search conditions save(Ajax)
-	 * @since 2015/01/09
 	 */
 	public function save_search() {
 		//Login check
@@ -149,9 +146,29 @@ class SeriesController extends BaseController {
 		echo $res;
 	}
 
+	function get_series() {
+		//Login check
+		if (!Auth::check()) {
+			//Forced redirected to the login screen because not logged in
+			return Redirect::to('login');
+		}
+		try {
+			$file_path = dirname(dirname(__FILE__))."/config/testing/sample.json";
+			Log::debug($file_path);
+			$handle = fopen($file_path, 'r');
+			$data = fread($handle, filesize($file_path));
+			fclose($handle);
+		} catch (Exception $e){
+			Log::debug($e->getMessage());
+		}
+
+		$data = $data ? $data : json_encode(array("msg"=>"error"));
+		header('Content-Type: application/json; charset=UTF-8');
+		echo $data;
+	}
+
 	/**
 	 * Series detail page
-	 * @since 2014/12/11
 	 */
 	function detail() {
 		//Login check
@@ -213,7 +230,6 @@ class SeriesController extends BaseController {
 
 	/**
 	 * Series registration screen
-	 * @since 2014/12/26
 	 */
 	function input(){
 		//Login check
@@ -238,11 +254,8 @@ class SeriesController extends BaseController {
 
 	/**
 	 * Series registration
-	 * データ形式がわからないため、チェックしようがないのでファイルアップロードのみでデータ登録なし
-	 * データ形式が明確になり次第エラーチェックを追加予定
-	 * @since 2014/12/26
 	 */
-	function regist() {
+	function register(){
 		//Login check
 		if (!Auth::check()) {
 			//Forced redirected to the login screen because not logged in
@@ -267,7 +280,7 @@ class SeriesController extends BaseController {
 				foreach ($uploads as $upload) {
 					$res = $upload->move('uploads', $upload->getClientOriginalName());
 
-					//拡張子がZipの場合は解凍して保存する
+					//If extension of Zip to save unzip
 					$ext = $upload->getClientOriginalExtension();
 					$upload_dir = Config::get("const.upload_path");
 
@@ -318,7 +331,6 @@ class SeriesController extends BaseController {
 
 	/**
 	 * Series registration completion screen
-	 * @since 2014/12/26
 	 */
 	function complete(){
 		//Session information acquisition
@@ -334,7 +346,6 @@ class SeriesController extends BaseController {
 	/**
 	 * Page individual CSS setting
 	 * @return Page individual CSS configuration array
-	 * @since 2014/12/04
 	 */
 	function cssSetting($screen = 'search') {
 		$css = array();
@@ -354,7 +365,6 @@ class SeriesController extends BaseController {
 	/**
 	 * Page individual JS setting
 	 * @return Page individual JS configuration array
-	 * @since 2014/12/04
 	 */
 	function jsSetting($screen = 'search') {
 		$js = array();
@@ -377,7 +387,6 @@ class SeriesController extends BaseController {
 	 * Get the gender for display
 	 * @param $sex Gender of value
 	 * @return Gender display string
-	 * @since 2014/12/12
 	 */
 	function getSex($sex) {
 		$sexes = Config::get('const.patient_sex');
@@ -388,8 +397,7 @@ class SeriesController extends BaseController {
 	 * I set to an array for Validate analyzes the uploaded file
 	 * アップロードされる形式等の詳細が不明なため、枠だけ作成
 	 * @param $input Input value
-	 * @return Validate用配列
-	 * @since 2014/12/26
+	 * @return Validate for array
 	 */
 	function setSeriesValidate($input){
 		$list = array();

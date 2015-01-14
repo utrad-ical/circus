@@ -1,8 +1,8 @@
 @extends('common.layout')
 @section('content')
-<script type="text/javascript" src="{{asset('/js/ajax/user.js')}}"></script>
 <script type="text/javascript">
 	$(function() {
+		//Confirmation button is pressed during processing
 		//Cancel button is pressed at the time of processing
 		$('.user_cancel').click(function(){
 			if (window.confirm('Do you input content but you sure will be destroyed?')){
@@ -13,6 +13,7 @@
 		});
 	});
 </script>
+{{HTML::script('/js/ajax/user.js')}}
 <div class="page_unique">
 	<h1 class="page_ttl">{{$title}}</h1>
 	@if (isset($error_msg))
@@ -84,11 +85,11 @@
 					<th>Theme</th>
 					<td>
 						<label>
-							{{Form::radio('preferences_theme', 'mode_white', isset($inputs['preferences_theme']) && $inputs['preferences_theme'] == 0 ? true : false)}}
+							{{Form::radio('preferences_theme', 'mode_white', isset($inputs['preferences_theme']) && $inputs['preferences_theme'] == 'mode_white' ? true : false)}}
 							mode_white
 						</label>
 						<label>
-							{{Form::radio('preferences_theme', 'mode_black', isset($inputs['preferences_theme']) && $inputs['preferences_theme'] == 1 ? true : false)}}
+							{{Form::radio('preferences_theme', 'mode_black', isset($inputs['preferences_theme']) && $inputs['preferences_theme'] == 'mode_black' ? true : false)}}
 							mode_black
 						</label>
 						@if (isset($errors) && $errors->has('preferences_theme'))

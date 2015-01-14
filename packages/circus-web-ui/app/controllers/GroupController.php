@@ -1,12 +1,10 @@
 <?php
 /**
  * Class to perform the operation of group
- * @since 2014/12/16
  */
 class GroupController extends BaseController {
 	/**
 	 * Group results
-	 * @since 2014/12/16
 	 */
 	public function search() {
 		//Login check
@@ -48,7 +46,6 @@ class GroupController extends BaseController {
 
 	/**
 	 * Group registration input(Ajax)
-	 * @since 2014/12/22
 	 */
 	public function input() {
 		//Login check
@@ -58,11 +55,9 @@ class GroupController extends BaseController {
 		}
 
 		//Initial setting
-		//$error_msg = '';
 		$result = array();
 		$result['url'] = '/admin/group/search';
 		$result['role_list'] = Config::get('config.group_authority');
-
 
 		//Input value acquisition
 		$inputs = Input::all();
@@ -95,7 +90,7 @@ class GroupController extends BaseController {
 		$mode = Session::get('mode');
 		$result['title'] = $mode.' Group';
 
-		//グループ情報をセッションに保持する
+		//I hold the group information in the session
 		Session::put('group_input', $result['inputs']);
 		$result['group_detail'] = $result['inputs'];
 
@@ -108,7 +103,6 @@ class GroupController extends BaseController {
 
 	/**
 	 * Group registration confirm
-	 * @since 2014/12/26
 	 */
 	public function confirm() {
 		//Login check
@@ -146,17 +140,16 @@ class GroupController extends BaseController {
 		$group_obj->GroupName = $inputs['GroupName'];
 
 		//ValidateCheck
-		//$errors = Group::validate($inputs);
 		$errors = $group_obj->validate($inputs);
 
-		//エラーがある場合の処理
+		//Processing in the case where there is an error
 		if ($errors) {
 			$result['title'] = $mode.' Group';
 			$result['url'] = '/admin/group/input';
 			$result['errors'] = $errors;
 			$tmp = View::make('/admin/group/input', $result);
 		} else {
-			//エラーがない場合の処理
+			//Processing in the case where there is no error
 			$result['title'] = $mode.' Group Confirmation';
 			//And displays a confirmation screen because there is no error
 			$result['url'] = '/admin/group/confirm';
@@ -170,9 +163,8 @@ class GroupController extends BaseController {
 
 	/**
 	 * Group registration
-	 * @since 2014/12/24
 	 */
-	public function regist(){
+	public function register(){
 		//Login check
 		if (!Auth::check()) {
 			//Forced redirected to the login screen because not logged in
@@ -200,7 +192,6 @@ class GroupController extends BaseController {
 		$group_obj->GroupName = $inputs['GroupName'];
 
 		//ValidateCheck
-		//$validator = Validator::make($inputs, Group::getValidateRules());
 		$errors = $group_obj->validate($inputs);
 
 		if (!$errors) {
@@ -210,7 +201,7 @@ class GroupController extends BaseController {
 			$group_obj->updateTime = $dt;
 			$group_obj->createTime = $dt;
 
-			//権限情報の設定
+			//Setting permissions information
 			$priviledges = array();
 			$role_keys = array_keys($role_list);
 			foreach ($role_keys as $role_key){
@@ -252,7 +243,6 @@ class GroupController extends BaseController {
 	/**
 	 * Page individual CSS setting
 	 * @return Page individual CSS configuration array
-	 * @since 2014/12/16
 	 */
 	public function cssSetting() {
 		$css = array();
@@ -264,7 +254,6 @@ class GroupController extends BaseController {
 	/**
 	 * Page individual JS setting
 	 * @return Page individual JS configuration array
-	 * @since 2014/12/16
 	 */
 	public function jsSetting() {
 		$js = array();
@@ -274,7 +263,6 @@ class GroupController extends BaseController {
 	/**
 	 * Creating group ID(SHA256+uniqid)
 	 * @return string that was turned into Hash in SHA256 the uniqid (case ID)
-	 * @since 2014/12/16
 	 */
 	public function createGroupID(){
 		return hash_hmac('sha256', uniqid(), Config::get('const.hash_key'));

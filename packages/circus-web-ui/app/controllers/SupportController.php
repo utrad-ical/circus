@@ -1,12 +1,10 @@
 <?php
 /**
  * Class to perform the operation of support screen
- * @since 2014/12/11
  */
 class SupportController extends BaseController {
 	/**
 	 * Password reset screen
-	 * @since 2014/12/11
 	 */
 	public function forgetPassword() {
 		$result = array();
@@ -21,7 +19,6 @@ class SupportController extends BaseController {
 	/**
 	 * Individual CSS setting page
 	 * @return Page individual CSS configuration array
-	 * @since 2014/12/11
 	 */
 	function cssSetting() {
 		$css = array();
@@ -31,7 +28,6 @@ class SupportController extends BaseController {
 	/**
 	 * Individual JS setting page
 	 * @return Page individual JS configuration array
-	 * @since 2014/12/11
 	 */
 	function jsSetting() {
 		$js = array();

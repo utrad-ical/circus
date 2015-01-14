@@ -1,12 +1,10 @@
 <?php
 /**
  * Class to perform the operation of the management screen
- * @since 2014/12/16
  */
 class AdminController extends BaseController {
 	/**
 	 * Management screen
-	 * @since 2014/12/12
 	 */
 	public function getIndex() {
 		//Login check
@@ -29,7 +27,6 @@ class AdminController extends BaseController {
 	/**
 	 * Page individual CSS setting
 	 * @return Page individual CSS configuration array
-	 * @since 2014/12/16
 	 */
 	function cssSetting(){
 		$css = array();
@@ -41,7 +38,6 @@ class AdminController extends BaseController {
 	/**
 	 * Page individual JS setting
 	 * @return Page individual JS configuration array
-	 * @since 2014/12/16
 	 */
 	function jsSetting(){
 		$js = array();

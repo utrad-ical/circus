@@ -1,12 +1,10 @@
 <?php
 /**
  * Class to perform the operation of the home screen
- * @since 2014/12/02
  */
 class TopController extends BaseController {
 	/**
 	 * Home screen
-	 * @since 2014/12/02
 	 */
 	public function getIndex() {
 		//Login check

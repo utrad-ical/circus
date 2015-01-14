@@ -13,7 +13,7 @@
 
 		//When new registration button is pressed
 		$('.group_input').click(function(){
-			var post_data = '{"mode":"regist"}';
+			var post_data = '{"mode":"register"}';
 			post_data = JSON.parse(post_data);
 			var target_elm = $('.frm_group_input');
 

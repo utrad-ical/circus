@@ -1,12 +1,10 @@
 <?php
 /**
  * Class to perform the operation of the login screen
- * @since 2014/12/02
  */
 class LoginController extends BaseController {
 	/**
 	 * Login screen display
-	 * @since 2014/12/02
 	 */
 	public function getIndex() {
 		$result = array();
@@ -16,7 +14,6 @@ class LoginController extends BaseController {
 
 	/**
 	 * Login process
-	 * @since 2014/12/02
 	 */
 	public function login() {
 		$result = array();
@@ -30,8 +27,6 @@ class LoginController extends BaseController {
 		if ($inputs['loginID'] && $inputs['password']) {
 			//Check whether there is user information
 			$secret_key = Config::get('const.hash_key');
-			$encrypt_password = openssl_encrypt($inputs['password'],'aes-256-ecb',$secret_key);
-			$inputs['password'] = $encrypt_password;
 			if (!Auth::attempt($inputs)){
 				$result['error_msg'] = 'ID or password is incorrect.';
 				return View::make('login', $result);
@@ -51,10 +46,10 @@ class LoginController extends BaseController {
 
 	/**
 	 * Log-out processing
-	 * @since 2014/12/11
 	 */
 	public function logout() {
 		//Log-out processing
+		Session::flush();
 		Auth::logout();
 
 		//And redirected to the login screen
@@ -64,7 +59,6 @@ class LoginController extends BaseController {
 	/**
 	 * Common setting
 	 * @param $ary Result set array
-	 * @since 2014/12/11
 	 */
 	public function setCommonSettings(&$ary) {
 		$ary['title'] = 'Sign in';

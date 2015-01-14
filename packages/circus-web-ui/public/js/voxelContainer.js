@@ -7,7 +7,7 @@ var voxelContainer = function(n){
 
 
 //コンテナオブジェクトに新しいヒストリを追加
-voxelContainer.prototype.addHistory =  function(position_array,label_id,the_mode){
+voxelContainer.prototype.addHistory =  function(series_id,label_id,the_mode,position_array){
 
  /*
   第1引数 : １筆分の座標情報群 ( [x,y,z] が塗られたマスの分だけわたってくる)
@@ -22,7 +22,7 @@ voxelContainer.prototype.addHistory =  function(position_array,label_id,the_mode
 
  //1筆分をヒストリーに格納
  //ヒストリーに渡すためのオブジェクト用意
- var tmp_step_obj = { label : label_id , mode : the_mode , position : new Array(0)}; //１筆分の描画オブジェクトの入れ物
+ var tmp_step_obj = {series : series_id, label : label_id , mode : the_mode , position : new Array(0)}; //１筆分の描画オブジェクトの入れ物
  for(var i=position_array.length-1; i>=0; i--){
   tmp_step_obj.position[i] = [
    position_array[i][0],
@@ -37,36 +37,70 @@ voxelContainer.prototype.addHistory =  function(position_array,label_id,the_mode
 
 
 
+
+
 //ラベル追加、positionsがあればそれを追加
-voxelContainer.prototype.addLabel = function(label_id,position_array){
- var this_obj = this; //コンテナオブジェクト
- var this_data = this_obj.data; //データ実体
+voxelContainer.prototype.addLabel = function(series_id,label_id,position_array){
+	var this_obj = this; //コンテナオブジェクト
+	var this_data = this_obj.data; //データ実体
 
- var tmp_positions_array =  new Array(0);
- if(position_array){
-  tmp_positions_array =  position_array;
- }
+	var tmp_position_array =  new Array(0);
+	if(typeof position_array == 'object'){
+		tmp_position_array =  position_array;
+	}
+	
+	var tmp_label_obj = {
+		id : label_id,
+		position : tmp_position_array
+	}
+	
+	var tmp_series = this_obj.getSeriesObjectById(series_id);
 
- var tmp_label_obj = {
-  id : label_id,
-  position : tmp_positions_array
- }
- this_data.label.push(tmp_label_obj);
+	if(typeof tmp_series == 'undefined'){	
+		this_obj.addSeries(series_id);
+	}
+	var the_target_series =this_obj.getSeriesObjectById(series_id);
+	the_target_series.label.push(tmp_label_obj);
+ 
 };/*addLabel*/
 
 
 
+
+
 //ラベル追加、positionsがあればそれを追加
-voxelContainer.prototype.deleteLabel = function(label_id){
+voxelContainer.prototype.addSeries = function(series_id){
  var this_obj = this; //コンテナオブジェクト
  var this_data = this_obj.data; //データ実体
+ var tmp_series_obj = {
+		activeLabelId : '',
+		id : series_id,
+		label : new Array(0)
+	}
+	this_data.series.push(tmp_series_obj); 
+};/*addSeries*/
 
- for(var i=0; i<this_data.label.length; i++){
-  if(this_data.label[i].id ==label_id){
-   this_data.label.splice(i,1);
-  }
- }
-};/*addLabel*/
+
+
+
+
+//ラベル追加、positionsがあればそれを追加
+voxelContainer.prototype.deleteLabel = function(series_id,label_id){
+ var this_obj = this; //コンテナオブジェクト
+ var this_data = this_obj.data; //データ実体
+ 
+ var the_series = '';
+ 
+ for(var i = 0; i<this_data.series.length; i++){
+		if(this_data.series[i].id == series_id){
+		 for(var j=0; j<this_data.series[i].label.length; j++){
+			if(this_data.series[i].label[j].id ==label_id){
+			 this_data.label.splice(j,1);
+			}
+		 }
+		}
+	}
+};/*deleteLabel*/
 
 
 
@@ -74,20 +108,28 @@ voxelContainer.prototype.deleteLabel = function(label_id){
 
 //実データ格納オブジェクト
 voxelContainer.prototype.data = {
- history : {
-  main : new Array(0),
-  redo : new Array(0)
- },
- label : [
-      //今現在塗られている座標の集合がラベルの個数分だけ積まれる
-      /* [(imageObject-width=X,height=Y),.....]   */
- ],
- member : new Array(0), //共有しているビューアーの要素id一覧
- size : {
-  X : 512,
-  Y : 512,
-  Z : 512
- }
+	history : {
+		main : new Array(0),
+		redo : new Array(0)
+	},
+	
+	series : [
+		/*
+			{
+				activeLabelId : ''
+				id : '',
+				label : [
+					{id:'',positions: object }
+				]
+			}
+		*/
+	],
+	member : new Array(0), //共有しているビューアーの要素id一覧
+	size : {
+		X : 512,
+		Y : 512,
+		Z : 512
+	}
 };/*data*/
 
 
@@ -99,17 +141,21 @@ voxelContainer.prototype.getCurrentLabel = function(tmp_orientation,tmp_current_
  var this_obj = this; //コンテナオブジェクト
  var this_data = this_obj.data; //データ実体
  var return_array = new Array(0);
-
- for(var i = this_obj.data.label.length-1; i>=0; i--){
-  var position_array = this_obj.returnSlice(
-   this_obj.data.label[i].id,
-   tmp_orientation,
-   tmp_current_num
-  );
-  return_array.push({
-   'id' : this_obj.data.label[i].id,
-   'position' : position_array
-  })
+ for(var j = this_obj.data.series.length-1; j>=0; j--){
+	 var the_series = this_obj.data.series[j];
+	 for(var i = the_series.label.length-1; i>=0; i--){
+		var position_array = this_obj.returnSlice(
+		 the_series.id,
+		 the_series.label[i].id,
+		 tmp_orientation,
+		 tmp_current_num
+		);
+		return_array.push({
+		 'series' : the_series.id,
+		 'label' : the_series.label[i].id,
+		 'position' : position_array
+		})
+	 }
  }
  return return_array;
 };
@@ -118,18 +164,33 @@ voxelContainer.prototype.getCurrentLabel = function(tmp_orientation,tmp_current_
 
 
 
-/*idを指定して対象のラベルオブジェクトを返す*/
-voxelContainer.prototype.getTargetLabel = function(label_id){
- var this_obj = this; //コンテナオブジェクト
- var this_data = this_obj.data; //データ実体
- var tmp_target_label = '';
- for(var i = 0; i<this_data.label.length;  i++){
-  if(this_data.label[i].id == label_id){
-   tmp_target_label = this_data.label[i];
-   return tmp_target_label;
-  }
- }
-};
+voxelContainer.prototype.getSeriesObjectById = function(series_id){		
+	var this_obj = this; //コンテナオブジェクト
+	var this_data = this_obj.data; //データ実体
+
+	for(var j = this_data.series.length-1; j>=0; j--){
+		if(this_data.series[j].id == series_id){
+			return this_data.series[j];
+		}
+	}
+};/*getSeriesObjectById*/
+
+
+
+
+
+voxelContainer.prototype.getLabelObjectById = function(label_id,series_id){
+	var this_obj = this; //コンテナオブジェクト
+	var this_data = this_obj.data; //データ実体
+	var the_series =this_obj.getSeriesObjectById(series_id);
+
+	for(var i = the_series.label.length-1; i>=0; i--){
+		if(the_series.label[i].id ==label_id){
+			return the_series.label[i];
+		}
+	}
+};/*getLabelObjectById*/
+
 
 
 
@@ -137,66 +198,72 @@ voxelContainer.prototype.getTargetLabel = function(label_id){
 
 /*ひとつ手前に戻す*/
 voxelContainer.prototype.historyBack = function(){
- var this_obj = this; //コンテナオブジェクト
- var this_data = this_obj.data; //データ実体
-
- if(this_data.history.main.length>0){
-  //最後の1手順分をRedo用配列に移動
-  var tmp_move_array  = new Array(0);
-  $.extend(true,tmp_move_array,this_data.history.main[this_data.history.main.length-1]);
-  this_data.history.redo.push(tmp_move_array);
-  this_data.history.main.splice(this_data.history.main.length-1,1);
-
-  //全てのラベルを空にする
-  for(var i=this_obj.data.label.length-1; i>=0; i--){
-   this_obj.data.label[i].position = new Array(0);
-  }
-
-  //今現在のメインヒストリ配列の内容で再構築
-  for(var i= this_data.history.main.length-1; i>=0; i--){
-   var this_history = this_data.history.main[i];
-   this_obj.updateVoxel(
-     this_history.position,
-     this_history.label,
-     this_history.mode
-   );
-  }
- }
+	var this_obj = this; //コンテナオブジェクト
+	var this_data = this_obj.data; //データ実体
+	
+	if(this_data.history.main.length>0){
+	//最後の1手順分をRedo用配列に移動
+	var tmp_move_array  = new Array(0);
+	$.extend(true,tmp_move_array,this_data.history.main[this_data.history.main.length-1]);
+	this_data.history.redo.push(tmp_move_array);
+	this_data.history.main.splice(this_data.history.main.length-1,1);
+	
+	//全てのラベルを空にする
+	for(var i=this_obj.data.label.length-1; i>=0; i--){
+		this_obj.data.label[i].position = new Array(0);
+	}
+	
+	//今現在のメインヒストリ配列の内容で再構築
+	for(var i= this_data.history.main.length-1; i>=0; i--){
+		var this_history = this_data.history.main[i];
+		this_obj.updateVoxel(
+			this_history.series,
+			this_history.label,
+			this_history.label,
+			this_history.mode
+		);
+		}
+	}
 };
+
+
 
 
 
 /*戻すの１個取消*/
 voxelContainer.prototype.historyRedo = function(){
- var this_obj = this; //コンテナオブジェクト
- var this_data = this_obj.data; //データ実体
- if(this_data.history.redo.length>0){
-  var tmp_move_array  = new Array(0);
-  $.extend(true,tmp_move_array, this_data.history.redo[this_data.history.redo.length-1]);
-  this_data.history.main.push(tmp_move_array);
-  this_data.history.redo.splice(this_data.history.redo.length-1,1);
-
-  //全てのラベルを空にする
-  for(var i=this_obj.data.label.length-1; i>=0; i--){
-   this_obj.data.label[i].position = new Array(0);
-  }
-
-  //今現在のメインヒストリ配列の内容で再構築
-  for(var i= this_data.history.main.length-1; i>=0; i--){
-   var this_history = this_data.history.main[i];
-   this_obj.updateVoxel(
-     this_history.position,
-     this_history.label,
-     this_history.mode
-   );
-  }
- }
+	var this_obj = this; //コンテナオブジェクト
+	var this_data = this_obj.data; //データ実体
+	if(this_data.history.redo.length>0){
+	var tmp_move_array  = new Array(0);
+		$.extend(true,tmp_move_array, this_data.history.redo[this_data.history.redo.length-1]);
+		this_data.history.main.push(tmp_move_array);
+		this_data.history.redo.splice(this_data.history.redo.length-1,1);
+		
+		//全てのラベルを空にする
+		for(var i=this_obj.data.label.length-1; i>=0; i--){
+			this_obj.data.label[i].position = new Array(0);
+		}
+		
+		//今現在のメインヒストリ配列の内容で再構築
+		for(var i= this_data.history.main.length-1; i>=0; i--){
+			var this_history = this_data.history.main[i];
+			this_obj.updateVoxel(
+				this_history.series,
+				this_history.label,
+				this_history.label,
+				this_history.mode
+			);
+		}
+	}
 };
 
 
 
+
+
 //ある断面で塗るべきマスの情報を返す
-voxelContainer.prototype.returnSlice = function(label_id,tmp_orientation,tmp_current_num){
+voxelContainer.prototype.returnSlice = function(series_id,label_id,tmp_orientation,tmp_current_num){
 
  /*
   第1引数 : ラベルid
@@ -210,7 +277,7 @@ voxelContainer.prototype.returnSlice = function(label_id,tmp_orientation,tmp_cur
  var voxel_x = this_obj.data.size.X;
 
  //対象ラベル取得
- var tmp_target_label = this_obj.getTargetLabel(label_id);
+ var tmp_target_label = this_obj.getLabelObjectById(label_id,series_id);
 
  //各面で描くべき座標を返す(座標自体はvoxel XYZ座標)
  if(tmp_orientation == 'axial'){
@@ -281,31 +348,33 @@ voxelContainer.prototype.setSize = function(the_x,the_y,the_z){
 
 
 //ボクセル情報を1筆分だけ更新する関数
-voxelContainer.prototype.updateVoxel = function(positions_array,label_id,the_mode){
+voxelContainer.prototype.updateVoxel = function(series_id,label_id,the_mode,position_array){
 
- /*
-  第1引数 : 書き込むべき１筆分の座標情報群 ( [x,y,z] が塗られたマスの分だけわたってくる)
-  第2引数 : 対象ラベル
-  第3引数 : 描画か消しゴムか (pen / erase)
- */
+	/*
+		第1引数 : 書き込むべき１筆分の座標情報群 ( [x,y,z] が塗られたマスの分だけわたってくる)
+		第2引数 : 対象ラベル
+		第3引数 : 描画か消しゴムか (pen / erase)
+	*/
 
- var this_obj = this; //コンテナオブジェクト
- var this_data = this_obj.data; //データ実体
+	var this_obj = this; //コンテナオブジェクト
+	var this_data = this_obj.data; //データ実体
+	
+	//該当ラベルが無い場合は今回追加されたラベル用に配列を生成
+	var add_flg = true;
 
- //該当ラベルが無い場合は今回追加されたラベル用に配列を生成
- var add_flg = true;
- for(var i=0; i<this_data.label.length; i++){
-  if(this_data.label[i].id == label_id){
-   add_flg = false;
-   break;
-  }
- }
- if(add_flg == true){
-  this_obj.addLabel(label_id);
- }
+	//対象シリーズ取得
+	if(typeof this_obj.getSeriesObjectById(series_id)  != 'object'){
+		this_obj.addSeries(series_id,label_id);
+	}
+	var tmp_series = this_obj.getSeriesObjectById(series_id);
 
- //対象ラベル取得
- var tmp_target_label = this_obj.getTargetLabel(label_id);
+	//対象ラベル取得
+	var tmp_target_label = this_obj.getLabelObjectById(label_id,series_id);
+	if(typeof tmp_target_label != 'object'){
+		this_obj.addLabel(series_id,label_id);
+	}
+	tmp_target_label = this_obj.getLabelObjectById(label_id,series_id);
+
  var target_position_data = tmp_target_label.position;
 
  //座標情報をimageオブジェクトに格納
@@ -314,10 +383,10 @@ voxelContainer.prototype.updateVoxel = function(positions_array,label_id,the_mod
   input_value = 0;
  }
 
- for(var i=positions_array.length-1; i>=0; i--){
-  var tmp_x = positions_array[i][0];
-  var tmp_y = positions_array[i][1];
-  var tmp_z = positions_array[i][2];
+ for(var i=position_array.length-1; i>=0; i--){
+  var tmp_x = position_array[i][0];
+  var tmp_y = position_array[i][1];
+  var tmp_z = position_array[i][2];
 
   if(typeof target_position_data[tmp_z] != 'object'){
    target_position_data[tmp_z] = new Uint8Array(this_obj.data.size.X*this_obj.data.size.Y);

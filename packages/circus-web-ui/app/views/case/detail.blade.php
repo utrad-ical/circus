@@ -9,14 +9,14 @@
 		var	voxel_container	=	new voxelContainer();	//ラベル情報格納用オブジェクト(3面共用)
 		voxel_container.name	=	'my_voxel';
 
-		//var	the_domain	=	'http://todai/';
-		//var the_domain = 'http://{{$_SERVER["SERVER_NAME"]}}:3000/';
-		//var	the_domain	=	'http://ndp.spiritek.co.jp/';
-		var the_domain = 'http://160.16.56.191:3000/';
+		//var the_domain = 'http://160.16.56.191:3000/';
+		var the_domain = 'http://160.16.56.191/';
 		var	initInfo	=	[
 			{
+				//baseUrl : 'http://172.24.1.105:3000/', //画像格納ディレクトリ
 				baseUrl : 'http://160.16.56.191:3000/', //画像格納ディレクトリ
-				//baseUrl : 	'http://ndp.spiritek.co.jp/insight/todai_img', //外用でinsight参照の場合
+				postUrl : "{{asset('case/save_label')}}",	//画像格納サーバーと異なる場合はこちらを有効にする
+				caseId : "{{$case_detail['caseID']}}",
 				series : {{$series_list}},
 				control : {
 					window : {
@@ -41,7 +41,7 @@
 							level: {current : 1000, maximum : 50000, minimum : -5000},
 							width: {current : 6000, maximum : 9000, 	minimum : 1},
 							preset : [
-								{label: 'ソースからaxialだけに適用'	, level: 0000	, width : 2000},
+								 {label: 'ソースからaxialだけに適用'	, level: 0000	, width : 2000},
 							]
 						},
 					},
@@ -73,12 +73,12 @@
 			var tmp_series = initInfo[0].series[ajax_cnt];
 			$.ajax({
 				//url: the_domain+'insight/todai_img',
-				//url: the_domain,
 				url: "{{asset('series/get_series')}}",
+				//url : the_domain,
+				//url: the_domain + 'dicom_img',
 				type: 'GET',
 				data: {
 					mode : 'metadata',
-					target:60,
 					series : tmp_series.image.id
 				},//送信データ
 				dataType: 'json',
@@ -88,11 +88,11 @@
 				success: function(response){
 
 					if(typeof response.allow_mode != 'undefined'){
-						tmp_series.allow_mode = $.extend(true,tmp_series.allow_mode ,response.allow_mode);
+						tmp_series.allow_mode = 	$.extend(true,tmp_series.allow_mode ,response.allow_mode);
 					}
 
 					if(typeof tmp_series.image.voxel != 'object'){
-						tmp_series.image.voxel = new Object();
+						tmp_series.image.voxel =  new Object();
 					}
 
 					if(typeof response.voxel_x == 'number'){
@@ -145,12 +145,35 @@
 			}
 		}
 
+		$('#btnBack').click(function() {
+			$('body').append('<form action="./search" method="POST" class="hidden" id="frm_back"></form>');
+			$('#frm_back').append('<input type="hidden" name="btnBack" value="">');
+			$('#frm_back').submit();
+			return false;
+		});
+
+		$('.link_case_detail').click(function(){
+			console.log("Detail");
+			$(this).closest('td').find("input[name='mode']").val('detail');
+			console.log("Mode::"+$(this).closest('td').find("input[name='mode']").val());
+			//Get the form ID to be sent
+			$(this).closest('td').find('.form_case_detail').submit();
+			return false;
+		});
+
+		$('.link_case_edit').click(function(){
+			console.log("Edit");
+			$(this).closest('td').find("input[name='mode']").val('edit');
+			console.log("Mode::"+$(this).closest('td').find("input[name='mode']").val());
+			$(this).closest('td').find('.form_case_detail').submit();
+			return false;
+		});
 	});
 </script>
 <div class="page_contents_outer">
 	<div class="page_contents_inner">
 		<div class="page_unique" id="page_case_detail">
-			<h1 class="page_ttl">Case Detail ({{$case_detail['revisionNo']}})</h1>
+			<h1 class="page_ttl">Case Detail (Revision Case Detail ({{$case_detail['revisionNo']}}))</h1>
 			@if (isset($error_msg))
 				<div class="al_l mar_b_10 w_600 fl_l">
 					{{HTML::link(asset('/case/search'), 'Back to Case Search Result', array('class' => 'common_btn', 'id' => 'btnBack'))}}
@@ -184,18 +207,20 @@
 					</tr>
 				</table>
 				<div class="w_400 fl_l">
-					<label class="common_btn" for="img_mode_view">
-						{{Form::radio('img_mode', 1, $mode == 'detail' ? true : false, array('class' => 'img_mode', 'id' => 'img_mode_view'))}}
-						View
-					</label>
-					<label class="common_btn" for="img_mode_draw">
-						{{Form::radio('img_mode', 1, $mode == 'edit' ? true : false, array('class' => 'img_mode', 'id' => 'img_mode_draw'))}}
-						Draw
-					</label>
-					<button type='submit' class='common_btn' name='btnSave'>
-						<span style="background:url({{asset('/img/common/ico_save.png')}}) no-repeat; width:22px; height:22px; display:inline-block; margin-bottom:-7px; margin-right:4px;"></span>
-						Save
-					</button>
+					{{Form::open(['url' => asset('case/detail'), 'method' => 'post'])}}
+						<label class="common_btn" for="img_mode_view">
+							{{Form::radio('img_mode', 1, $mode == 'detail' ? true : false, array('class' => 'img_mode', 'id' => 'img_mode_view'))}}
+							View
+						</label>
+						<label class="common_btn" for="img_mode_draw">
+							{{Form::radio('img_mode', 1, $mode == 'edit' ? true : false, array('class' => 'img_mode', 'id' => 'img_mode_draw'))}}
+							Draw
+						</label>
+						<button type='submit' class='common_btn btn_save' name='btnSave'>
+							<span style="background:url({{asset('/img/common/ico_save.png')}}) no-repeat; width:22px; height:22px; display:inline-block; margin-bottom:-7px; margin-right:4px;"></span>
+							Save
+						</button>
+					{{Form::close()}}
 				</div>
 				<div class="w_500 fl_r">
 					<div class="info_area">
@@ -261,13 +286,13 @@
 										</td>
 										<td>{{$rec['creator']}}</td>
 										<td class="al_l">{{$rec['memo']}}</td>
-										<td class="">
+										<td>
 											{{Form::open(['url' => asset('/case/detail'), 'method' => 'post', 'class' => 'form_case_detail'])}}
 												{{Form::hidden('mode', $mode)}}
 												{{Form::hidden('caseID', $case_detail['caseID'])}}
 												{{Form::hidden('revisionNo', $rec['revisionNo'])}}
 												{{Form::button('View', array('class' => 'common_btn link_case_detail'))}}
-												{{HTML::link(asset('/case/detail'), 'Edit', array('class' => 'common_btn mar_t_5 link_case_detail'))}}
+												{{HTML::link(asset('/case/detail'), 'Edit', array('class' => 'common_btn mar_t_5 link_case_edit'))}}
 											{{Form::close()}}
 										</td>
 									</tr>
@@ -289,11 +314,6 @@
 						</li>
 					</ul>
 				</div>
-				{{Form::open(['url' => asset('/case/detail'), 'method' => 'post', 'id' => 'form_search'])}}
-					{{Form::hidden('revisionNo', $case_detail['revisionNo'])}}
-					{{Form::hidden('caseID', $case_detail['caseID'])}}
-					{{Form::hidden('mode', $mode)}}
-				{{Form::close()}}
 			@endif
 		</div>
 	</div>

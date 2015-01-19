@@ -444,21 +444,20 @@ class CaseController extends BaseController {
 
 			//Series list created
 			$series = array();
-			$sel_seriesUID = "";
+			$labels = array();
 			foreach ($case_data->revisions as $key => $value) {
 				if ($key == $case_detail['revisionNo']) {
 					for ($i = 0; $i < count($value['series']); $i++){
 						$series[] = $value['series'][$i]['seriesUID'];
-						if (!$sel_seriesUID) $sel_seriesUID = $value['series'][$i]['seriesUID'];
 					}
 				}
 			}
 			$inputs['seriesUID'] = $series;
-			$select_col = array('seriesUID', 'seriesDescription');
-			$serieses = Series::addWhere($inputs)
+			$select_col = array('seriesUID', 'seriesDescription', 'storageID');
+			$series_info = Series::addWhere($inputs)
 								->get($select_col);
 			//シリーズリストの整形
-			$result['series_list'] = self::getSeriesList($serieses);
+			$result['series_list'] = self::getSeriesList($series_info);
 
 			//Setting the pager
 			$revision_pager = Paginator::make(
@@ -583,6 +582,295 @@ class CaseController extends BaseController {
 		header('Content-Type: application/json; charset=UTF-8');
 		$res = json_encode(array('result' => true, 'message' => '', 'response' => "$tmp"));
 		echo $res;
+	}
+
+	/**
+	 * Label information storage (Ajax)
+	 */
+	function save_label() {
+		$error_msg = '';
+		$msg = '';
+		//Array for pseudo transaction
+		//Since there is no transaction function to MongoDB,
+		//to hold to be able to delete the data of registration ID in this array
+		$transaction = array();
+
+		try {
+			$inputs = Input::all();
+			$inputs = $inputs["data"];
+
+			Log::debug("受信データ");
+			Log::debug($inputs);
+
+			foreach ($inputs["series"] as $key => $val){
+				for ($i = 0; $i < count($val["label"]); $i++){
+					//Because there are cases where the image information does not come entered (case label set only),
+					//and performs decode processing only when the image information has been entered
+					if (strlen($val["label"][$i]["position"]) > 0)
+						$inputs["series"][$key]["label"][$i]["position"]
+							= base64_decode(str_replace(' ', '+',$val["label"][$i]["position"]));
+				}
+			}
+
+			$errors = self::validateSaveLabel($inputs);
+			if (count($errors) > 0)
+				$error_msg = implode("\n", $errors);
+
+			//I want to save the label information because the error message is not
+			if (!$error_msg){
+				$dt = new MongoDate(strtotime(date('Y-m-d H:i:s')));
+				$revision = array();
+				$series_list = array();
+
+				foreach ($inputs['series'] as $rec) {
+					$revision[$rec['id']] = array();
+					foreach ($rec['label'] as $rec2) {
+						//Storage registration of
+						$storage_id = Seq::getIncrementSeq('Storages');
+						$storage_obj = App::make('Storage');
+						$storage_obj->storageID = $storage_id;
+						$storage_obj->path = $rec2['position'];
+						$storage_obj->type = 'label';
+						$storage_obj->active = true;
+						$storage_obj->updateTime = $dt;
+						$storage_obj->createTime = $dt;
+
+						//Storage register before error checking
+						$errors = $storage_obj->validate(json_decode($storage_obj, true));
+
+						//Processing is interrupted because there is an error
+						if ($errors) {
+							Log::debug("Storage Validate Error");
+							$error_msg = implode("\n", $errors->all());
+							self::rollback($transaction);
+							break;
+						}
+
+						//I do registration of storage information because there is no error
+						$result = $storage_obj->save();
+
+						//登録成功したのでトランザクション配列に積む
+						if ($result) {
+							if (array_key_exists("storage", $transaction) === FALSE)
+								$transaction["storage"] = array();
+
+							$transaction["storage"][] = $storage_obj->storageID;
+						} else {
+							Log::debug("[Storage]Regist failed");
+							$error_msg = $result;
+							self::rollback($transaction);
+							break;
+						}
+
+						//I do the registration of the label information
+						//Storage ID to use the storage ID registered just before
+						$label_obj = App::make('Label');
+						$label_obj->labelID = $rec2['id'];
+						$label_obj->storageID = $storage_obj->storageID;
+						$label_obj->x = $rec2['offset'][0];
+						$label_obj->y = $rec2['offset'][1];
+						$label_obj->z = $rec2['offset'][2];
+						$label_obj->w = 0;
+						$label_obj->h = 0;
+						$label_obj->d = 0;
+						$label_obj->number = $rec2['number'];
+						$label_obj->creator = Auth::user()->loginID;
+						$label_obj->date = $dt;
+						$label_obj->updateTime = $dt;
+						$label_obj->createTime = $dt;
+
+						//ラベル情報登録前エラーチェック
+						$errors = $label_obj->validate(json_decode($label_obj, true));
+
+						//エラーがあるので登録したストレージのデータを削除する
+						if ($errors) {
+							Log::debug("Label Validate Error");
+							$error_msg = implode("\n", $errors->all());
+							self::rollback($transaction);
+							break;
+						}
+						//エラーがないのでラベル情報の登録を行う
+						$result = $label_obj->save();
+						//登録成功したのでトランザクション配列に積む
+						if ($result) {
+							if (array_key_exists("label", $transaction) === FALSE)
+								$transaction["label"] = array();
+
+							$transaction["label"][] = $label_obj->labelID;
+						} else {
+							Log::debug("[Label]Regist failed");
+							$error_msg = $result;
+							self::rollback($transaction);
+							break;
+						}
+
+						$revision[$rec['id']][] = array(
+								'id'			=>	$label_obj->labelID,
+								'attributes'	=>	array(
+							)
+						);
+					}
+					$series_info = self::getSeries($rec['id'], array('images'));
+					$series_list[] = array(
+						'seriesUID'	=>	$rec['id'],
+						'images'	=>	$series_info["images"],
+						'labels'	=>	$revision[$rec['id']]
+					);
+				}
+				//ケース情報の更新
+				//ケース情報取得
+				$case_obj = ClinicalCase::find($inputs["caseId"]);
+				//Revision情報取得
+				$revisions = $case_obj->revisions;
+				$next_index = count($revisions) > 0 ? count($revisions)-1 : 0;
+				Log::debug($next_index);
+				//Revision情報設定
+				$tmp_revision = array(
+					'date'			=>	$dt,
+					'creator'		=>	Auth::user()->loginID,
+					'memo'			=>	$inputs['memo'],
+					'attributes'	=>	array(),
+					'status'		=>	'draft',
+					'series'		=>	$series_list
+				);
+
+				$case_obj->updateTime = $dt;
+
+				//エラーチェック
+				$errors = $case_obj->validate(json_decode($case_obj, true), true);
+				//エラーがある場合はラベル情報とストレージ情報を削除する
+				if ($errors){
+					Log::debug("Case Validate Error");
+					$error_msg = implode("\n", $errors->all());
+					self::rollback($transaction);
+				} else {
+					$revision_data = array();
+					foreach ($revisions as $key => $val) {
+						Log::debug("[Revisions][".$key."]");
+						Log::debug($val);
+						if ($key !== 'latest') {
+							$revision_data[$key] = $val;
+						} else {
+							$revision_data['latest'] = $tmp_revision;
+						}
+					}
+					Log::debug("Tmp追加前");
+					Log::debug($revision_data);
+					$revision_data[$next_index] = $tmp_revision;
+					Log::debug("更新情報");
+					Log::debug($revision_data);
+					$case_obj->revisions = $revision_data;
+					//エラーがないので登録する
+					$case_obj->save();
+				}
+				$msg = "ラベル情報の登録が完了しました。";
+			}
+		} catch (Exception $e){
+			Log::debug("Exception Error");
+			$error_msg = $e->getMessage();
+		}
+		Log::debug("エラー内容::".$error_msg);
+
+		//JSON出力
+		header('Content-Type: application/json; charset=UTF-8');
+		$res = json_encode(array('result' => true, 'message' => $error_msg ? $error_msg : $msg, 'response' => ""));
+		echo $res;
+
+	}
+
+	function rollback($transaction) {
+		//登録に失敗したのでロールバック処理を行う
+
+		//Storageテーブルのロールバック処理
+		if (array_key_exists("storage", $transaction) !== FALSE) {
+			$storage_cnt = count($transaction["storage"]);
+			Log::debug("削除対象のストレージ件数::".$storage_cnt);
+			Log::debug("削除対象のストレージ一覧::");
+			Log::debug($transaction["storage"]);
+			$storage_delete_cnt = 0;
+
+			//トランザクション配列に積まれているストレージの削除処理を行う
+			foreach ($transaction["storage"] as $rec){
+				$delete = Storage::find($rec)->delete();
+				if ($delete) $storage_delete_cnt++;
+			}
+
+			Log::debug("[Storage]削除予定件数:".$storage_cnt."\t 削除件数:".$storage_delete_cnt);
+		}
+
+		//Labelテーブルのロールバック処理
+		if (array_key_exists("label", $transaction) !== FALSE) {
+			$label_cnt = count($transaction["label"]);
+			Log::debug("削除対象のラベル件数::".$label_cnt);
+			Log::debug("削除対象のラベル一覧::");
+			Log::debug($transaction["label"]);
+			$label_delete_cnt = 0;
+
+			//トランザクション配列に積まれているラベルの削除処理を行う
+			foreach ($transaction["label"] as $rec){
+				$delete = Label::find($rec)->delete();
+				if ($delete) $label_delete_cnt++;
+			}
+
+			Log::debug("[Label]削除予定件数:".$label_cnt."\t 削除件数:".$label_delete_cnt);
+		}
+	}
+
+	/**
+	 * シリーズに紐づくストレージIDを取得する
+	 * @param $seriesID シリーズID
+	 */
+	function getSeries($seriesID, $select_column){
+		$series = Series::addWhere(array("seriesUID" => $seriesID))
+							->get($select_column);
+		//return $series->storageID;
+		if (count($series) == 1)
+			return $series[0];
+		return;
+	}
+
+	/**
+	 * ラベル保存データ簡易Validate
+	 * @param $data ラベル保存データ
+	 */
+	function validateSaveLabel($data) {
+		$error = array();
+		//$info = array();
+		//ケースIDチェック
+		if (!$data["caseId"]) {
+			$error_msg[] = "ケースIDを設定してください。";
+		} else {
+			//ケース存在チェック
+			$case_data = ClinicalCase::find($data['caseId']);
+			if (!$case_data)
+				$error_msg[] = $rec["caseId"]."は存在しないケースIDです。";
+		//	else
+		//		$info["case_data"] = $case_data;
+		}
+
+		//シリーズIDチェック
+		if (count($data["series"] == 0)){
+			$error_msg[] = "シリーズ情報を設定してください。";
+		} else {
+			//$info["series"] = array();
+			foreach ($data["series"] as $rec) {
+				//シリーズIDチェック
+				if (!$rec["id"]) {
+					$error_msg[] = "シリーズIDを設定してください。";
+					break;
+				} else {
+					//シリーズID存在チェック
+					$series_data = Series::find($rec["id"]);
+					if (!$series_data) {
+						$error_msg[] = $rec["id"]."は存在しないシリーズIDです。";
+						break;
+					}
+				//	$info["series"][] = $series_data;
+				}
+			}
+		}
+	//	return array($error, $info);
+		return $error;
 	}
 
 	/**
@@ -884,7 +1172,7 @@ class CaseController extends BaseController {
 			case 'detail':
 			case 'edit':
 				$css['page_lib.css'] = 'css/page_lib.css';
-				$css['jquery.simple-color-picker.cs'] = 'css/jquery.simple-color-picker.cs';
+				$css['jquery.simple-color-picker.cs'] = 'css/jquery.simple-color-picker.css';
 				break;
 			default:
 				$css['page.css'] = 'css/page.css';
@@ -963,22 +1251,27 @@ class CaseController extends BaseController {
 	 * @param $data Revision data that are selected
 	 * @return Series list brute string to Revision
 	 */
-	function getSeriesList($data) {
-		Log::debug("DocumentRoot");
-		Log::debug($_SERVER["DOCUMENT_ROOT"]);
-		$series_list = array();
-		foreach ($data as $rec) {
-			$series_list[] = array(
+	function getSeriesList($series_list) {
+		$list = array();
+		Log::debug($series_list);
+		foreach ($series_list as $rec) {
+
+			//検索条件を設定
+			$search_data = array();
+			$labels = array();
+
+
+			$list[] = array(
 				'image'		=>	array(
 					'description'	=>	$rec->seriesDescription,
 					'id'			=>	$rec->seriesUID,
 					'voxel'			=>	array(
-						'voxel_x'		=>	1,		//とりあえず固定値(実際はCaseのSeriesに紐づくlabelのlabelIDに紐づくラベル情報w
-						'voxel_y'		=>	1,		//とりあえず固定値(実際はCaseのSeriesに紐づくlabelのlabelIDに紐づくラベル情報h
-						'voxel_z'		=>	1,		//とりあえず固定値(実際はCaseのSeriesに紐づくlabelのlabelIDに紐づくラベル情報d
-						'x'				=>	512,	//とりあえず固定値(実際はCaseのSeriesに紐づくlabelのlabelIDに紐づくラベル情報x
-						'y'				=>	512,	//とりあえず固定値(実際はCaseのSeriesに紐づくlabelのlabelIDに紐づくラベル情報y
-						'z'				=>	512		//とりあえず固定値(実際はCaseのSeriesに紐づくlabelのlabelIDに紐づくラベル情報z
+						'voxel_x'	=>	0,
+						'voxel_y'	=>	0,
+						'voxel_z'	=>	0,
+						'x'			=>	0,
+						'y'			=>	0,
+						'z'			=>	0
 					),
 					'window'		=>	array(
 						'level'		=>	array(
@@ -1002,7 +1295,7 @@ class CaseController extends BaseController {
 				)
 			);
 		}
-		return json_encode($series_list);
+		return json_encode($list);
 	}
 
 	/**

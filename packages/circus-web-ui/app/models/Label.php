@@ -19,7 +19,21 @@ class Label extends Eloquent {
 	 * @return Query Object
 	 */
 	public function scopeAddWhere($query, $input) {
+		//labelID
+		if (isset($input['labelID']) && $input['labelID']) {
+			//Of the Labels table labelID
+			$labels = array();
+			foreach ($input['labelID'] as $label){
+				$labels[] = intval($label);
+			}
+			$query->whereIn('labelID', $label);
+		}
 
+		//storageID
+		if (isset($inputs['storageID']) && $input['storageID']) {
+			//Of the Labels table storageID
+			$query->where('storageID', '=', intval($input['storageID']));
+		}
 		return $query;
 	}
 
@@ -27,14 +41,15 @@ class Label extends Eloquent {
 	 * Validate Rules
 	 */
 	private $rules = array(
-		'labelID'	=>	'required|integer',
-		'storageID'	=>	'required',
+		'labelID'	=>	'required',
+		'storageID'	=>	'required|integer',
 		'x'			=>	'required|integer',
 		'y'			=>	'required|integer',
 		'z'			=>	'required|integer',
 		'w'			=>	'integer',
 		'h'			=>	'integer',
 		'd'			=>	'integer',
+		'number'	=>	'integer',
 		'creator'	=>	'required',
 		'date'		=>	'required'
 	);

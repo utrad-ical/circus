@@ -1,6 +1,6 @@
 <?php
 
-//Database設定JSONファイル読み込み
+//Database configuration JSON file read
 try {
 	$file_path = dirname(__FILE__)."/db_config.json";
 	$handle = fopen($file_path, 'r');

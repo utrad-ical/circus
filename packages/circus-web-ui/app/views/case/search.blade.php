@@ -39,7 +39,8 @@
 			//Ajax
 			var target_elm = $('#result_case_list');
 			var btnName = arguments[1] ? arguments[1] : "btnSearch";
-			sendAjax("{{asset('/case/search_result')}}", setAjaxSearchVal(btnName), target_elm);
+			var sendData = setAjaxSearchVal(btnName);
+			sendAjax("{{asset('/case/search_result')}}", sendData, target_elm);
 			$('#temporaly_form').remove();
 			return false;
 		});
@@ -113,9 +114,8 @@
 			//Event firing
 			$('#btn_submit').trigger('click', "btnReset");
 		});
-		//Ajax通信
-		function sendAjax(post_url, post_data) {
-			var target_elm = arguments[2] ? arguments[2] : "";
+		//Ajax�ʐM
+		function sendAjax(post_url, post_data, target_elm) {
 			$.ajax({
 				url: post_url,
 				type: 'POST',
@@ -125,7 +125,7 @@
 					alert('I failed to communicate.');
 				},
 				success: function(res){
-					if (target_elm) {
+					if (typeof target_elm != "undefined") {
 						target_elm.empty();
 						target_elm.append(res.response);
 					} else {
@@ -152,12 +152,14 @@
 								<col width="15%">
 								<col width="35%">
 							</colgroup>
-							<tr>
-								<th>project ID</th>
-								<td colspan="3">
-									{{Form::select('project', $project_list, isset($inputs['project']) ? $inputs['project'] : null, array('class' => 'multi_select', 'multiple' => 'multiple'))}}
-								</td>
-							</tr>
+							<tbody>
+								<tr>
+									<th>project ID</th>
+									<td colspan="3">
+										{{Form::select('project', $project_list, isset($inputs['project']) ? $inputs['project'] : null, array('class' => 'multi_select', 'multiple' => 'multiple'))}}
+									</td>
+								</tr>
+							</tbody>
 						</table>
 						@if (!isset($inputs['search_mode']) || (isset($inputs['search_mode']) && $inputs['search_mode'] == 0))
 							<div id="easy_search">
@@ -165,24 +167,35 @@
 							<div id="easy_search" class="hidden">
 						@endif
 							<table class="common_table al_l mar_b_10">
-								<tr>
-									<th>Case ID</th>
-									<td>{{Form::text('caseID', isset($inputs['caseID']) ? $inputs['caseID'] : '', array('class' => 'common_input_text w_200'))}}</td>
-									<th>Patient ID</th>
-									<td>{{Form::text('patientID', isset($inputs['patientID']) ? $inputs['patientID'] : '', array('class' => 'common_input_text w_200'))}}</td>
-								</tr>
-								<tr>
-									<th>Patient Name</th>
-									<td>{{Form::text('patientName', isset($inputs['patientName']) ? $inputs['patientName'] : '', array('class' => 'common_input_text w_200'))}}</td>
-									<th>Create Date</th>
-									<td>{{Form::text('createDate', isset($inputs['createDate']) ? $inputs['createDate'] : '', array('class' => 'common_input_text w_200 datepicker'))}}</td>
-								</tr>
-								<tr>
-									<th>Update Date</th>
-									<td>{{Form::text('updateDate', isset($inputs['updateDate']) ? $inputs['updateDate'] : '', array('class' => 'common_input_text w_200 datepicker'))}}</td>
-									<th>Case Date</th>
-									<td>{{Form::text('caseDate', isset($inputs['caseDate']) ? $inputs['caseDate'] : '', array('class' => 'common_input_text w_200 datepicker'))}}</td>
-								</tr>
+								<colgroup>
+									<col width="15%">
+									<col width="35%">
+									<col width="15%">
+									<col width="35%">
+								</colgroup>
+								<tbody>
+									<tr>
+										<th>Case ID</th>
+										<td>
+											{{Form::hidden('dummyID', isset($inputs['caseID']) ? $inputs['caseID'] : '')}}
+											{{Form::text('caseID', isset($inputs['caseID']) ? $inputs['caseID'] : '', array('class' => 'common_input_text w_200'))}}
+										</td>
+										<th>Patient ID</th>
+										<td>{{Form::text('patientID', isset($inputs['patientID']) ? $inputs['patientID'] : '', array('class' => 'common_input_text w_200'))}}</td>
+									</tr>
+									<tr>
+										<th>Patient Name</th>
+										<td>{{Form::text('patientName', isset($inputs['patientName']) ? $inputs['patientName'] : '', array('class' => 'common_input_text w_200'))}}</td>
+										<th>Create Date</th>
+										<td>{{Form::text('createDate', isset($inputs['createDate']) ? $inputs['createDate'] : '', array('class' => 'common_input_text w_200 datepicker'))}}</td>
+									</tr>
+									<tr>
+										<th>Update Date</th>
+										<td>{{Form::text('updateDate', isset($inputs['updateDate']) ? $inputs['updateDate'] : '', array('class' => 'common_input_text w_200 datepicker'))}}</td>
+										<th>Case Date</th>
+										<td>{{Form::text('caseDate', isset($inputs['caseDate']) ? $inputs['caseDate'] : '', array('class' => 'common_input_text w_200 datepicker'))}}</td>
+									</tr>
+								</tbody>
 							</table>
 						</div>
 						{{Form::button($inputs['search_mode'] == 0 ? 'Show More Options' : 'Hidden More Options', array('id' => 'search_detail', 'class' => 'common_btn mar_b_10', 'onClick' => "more_search();"))}}

@@ -146,6 +146,10 @@ class SeriesController extends BaseController {
 		echo $res;
 	}
 
+	/**
+	 * シリーズリスト取得
+	 * Nodeが直接とれるようになったら不要になので削除予定
+	 */
 	function get_series() {
 		//Login check
 		if (!Auth::check()) {
@@ -154,7 +158,6 @@ class SeriesController extends BaseController {
 		}
 		try {
 			$file_path = dirname(dirname(__FILE__))."/config/testing/sample.json";
-			Log::debug($file_path);
 			$handle = fopen($file_path, 'r');
 			$data = fread($handle, filesize($file_path));
 			fclose($handle);
@@ -376,6 +379,7 @@ class SeriesController extends BaseController {
 			case 'detail':
 				$js['jquery.cookie.js'] = 'js/jquery.cookie.js';
 				$js['img_edit.js'] = 'js/img_edit.js';
+				$js['jquery-ui.min.js'] = 'js/jquery-ui.min.js';
 				break;
 			case 'input':
 				break;

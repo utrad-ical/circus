@@ -4,13 +4,13 @@
 use Jenssegers\Mongodb\Model as Eloquent;
 
 /**
- * Storage table manipulation class
+ * Seqs table manipulation class
  */
-class Storage extends Eloquent {
+class Seq extends Eloquent {
 	protected $connection = 'mongodb';
-	protected $collection = 'Storages';
+	protected $collection = 'Seqs';
 
-	protected $primaryKey = 'storageID';
+	protected $primaryKey = '_id';
 
 	/**
 	 * Search conditions Building
@@ -19,10 +19,9 @@ class Storage extends Eloquent {
 	 * @return Query Object
 	 */
 	public function scopeAddWhere($query, $input) {
-		//storageID
-		if (isset($inputs['storageID']) && $input['storageID']) {
-			//Of the Storages table storageID
-			$query->where('storageID', '=', intval($input['storageID']));
+		//Table name _id
+		if (isset($inputs['_id']) && $input['_id']) {
+			$query->where('_id', '=', $input['_id']);
 		}
 		return $query;
 	}
@@ -31,8 +30,8 @@ class Storage extends Eloquent {
 	 * Validate Rules
 	 */
 	private $rules = array(
-		'storageID'	=>	'required',
-		'active'	=>	'required'
+		'_id'		=>	'required',
+		'seq'		=>	'required|integer'
 	);
 
 	/**
@@ -47,5 +46,18 @@ class Storage extends Eloquent {
 			return $validator->messages();
 		}
 		return;
+	}
+
+	/**
+	 * I get the sequence number of the specified table
+	 * @param String $tbl Table name
+	 */
+	public static function getIncrementSeq($tbl){
+		$obj = self::find($tbl);
+		$obj->seq = $obj->seq+1;
+		$obj->save();
+
+		$seq = $obj->seq;
+		return $seq;
 	}
 }

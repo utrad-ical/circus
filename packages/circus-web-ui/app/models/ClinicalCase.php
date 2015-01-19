@@ -106,11 +106,7 @@ class ClinicalCase extends Eloquent {
 	private $rules = array(
 		'caseID'						=>	'required',
 		'incrementalID'					=>	'required|integer',
-		'projectID'						=>	'required|integer',
-		'patientInfoCache_patientID'	=>	'required',
-		'patientInfoCache_age'			=>	'required|integer',
-		'patientInfoCache_birthday'		=>	'required|date',
-		'patientInfoCache_sex'			=>	'required'
+		'projectID'						=>	'required|integer'
 	);
 
 	/**

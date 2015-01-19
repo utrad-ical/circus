@@ -7,13 +7,6 @@
 			var btnName = arguments[1] ? arguments[1] : "btnSearch";
 			var elm = $("<input>", {type:"hidden", name:btnName, value:btnName});
 			$('#form_search').append(elm);
-
-			$('body').append('<form id="temporaly_form" class="hidden"></form>');
-			$('#search_condition_outer').find('input,select,textarea').clone().appendTo('#temporaly_form');
-
-			var form_data	=	$('#temporaly_form').serializeArray();
-			$('#temporaly_form').remove();
-
 			$('#form_search').submit();
 		});
 

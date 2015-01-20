@@ -147,7 +147,7 @@ class SeriesController extends BaseController {
 	}
 
 	/**
-	 * Series list acquisition
+	 * シリーズリスト取得
 	 * Nodeが直接とれるようになったら不要になので削除予定
 	 */
 	function get_series() {
@@ -281,24 +281,24 @@ class SeriesController extends BaseController {
 
 			try{
 				foreach ($uploads as $upload) {
-					$upload_dir = dirname(dirname(__FILE__)).'/storage/uploads';
-					$res = $upload->move($upload_dir, $upload->getClientOriginalName());
+					$res = $upload->move('uploads', $upload->getClientOriginalName());
 
 					//If extension of Zip to save unzip
 					$ext = $upload->getClientOriginalExtension();
+					$upload_dir = Config::get("const.upload_path");
 
 					if ($ext == 'zip'){
 						$zip = new ZipArchive();
-						//Zip file open
-						$zip_path = $upload_dir."/".$upload->getClientOriginalName();
+						//Zipファイルオープン
+						$zip_path = $upload_dir.$upload->getClientOriginalName();
 						$res = $zip->open($zip_path);
 
-						//Successful Zip file open
+						//Zipファイルオープンに成功
 						if ($res === true){
-							//To save Unzip all the files in the Zip file
-							//Unzip the folder name I keep the file name
+							//Zipファイル内のすべてのファイルを解凍し保存する
+							//解凍フォルダ名はファイル名にしておく
 							$zip->extractTo($upload_dir);
-							//Zip file close
+							//Zipファイルクローズ
 							$zip->close();
 						} else {
 							$error_msg = "Upload Failed.[Error Code ".$res."]";
@@ -307,7 +307,6 @@ class SeriesController extends BaseController {
 				}
 			} catch (Exception $e){
 				$error_msg = $e->getMessage();
-				Log::debug("[Exception Error]".$error_msg);
 			}
 		}
 
@@ -317,10 +316,12 @@ class SeriesController extends BaseController {
 			$result['url'] = '/series/import';
 			$result['css'] = self::cssSetting('input');
 			$result['js'] = self::jsSetting();
+			//$result['errors'] = $validator->messages();
 			$result['error_msg'] = $error_msg;
 			return View::make('/series/input', $result);
 		} else {
 			//Processing in the case where there is no error
+			//本来はここに登録処理
 			$result['title'] = 'Series Import Complete';
 			$result['url'] = '/series/complete';
 			$result['css'] = self::cssSetting();

@@ -223,6 +223,8 @@ class UserController extends BaseController {
 		);
 
 		//ValidateCheck
+	//	$validator = Validator::make($inputs, User::getValidateRules());
+	//	if ($validator->fails()) {
 		$errors = $user_obj->validate($inputs);
 		if ($errors) {
 			//Process at the time of Validate error
@@ -264,6 +266,10 @@ class UserController extends BaseController {
 		$userID = Session::get('userID');
 		$mode = Session::get('mode');
 
+		//暗号化キー取得
+		$secret_key = Config::get('const.hash_key');
+		//$encrypt_password = openssl_encrypt($inputs['password'],'aes-256-ecb',$secret_key);
+
 		//Validate check for object creation
 		$user_obj = $userID ?
 						User::find(intval($userID)) :
@@ -271,6 +277,7 @@ class UserController extends BaseController {
 		//Set the value for the Validate check
 		$user_obj->userID = $inputs['userID'];
 		$user_obj->loginID = $inputs['loginID'];
+		//$user_obj->password = Hash::make($encrypt_password);
 		$user_obj->password = Hash::make($inputs['password']);
 		$user_obj->groups = $inputs['groups'];
 		$user_obj->description = $inputs['description'];
@@ -515,13 +522,13 @@ class UserController extends BaseController {
 			return Redirect::to('login');
 		}
 
-		//POST information acquisition
+		//POST情報取得
 		$inputs = Input::all();
 
-		//User information acquisition
+		//ユーザ情報取得
 		$user_obj = User::find(Auth::user()->userID);
 
-		//Change of theme
+		//テーマの変更
 		$prf = $user_obj->preferences;
 		$user_obj->preferences = array(
 			"theme"			=>	$inputs['preferences_theme'],

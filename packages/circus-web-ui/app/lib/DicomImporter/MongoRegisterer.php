@@ -123,7 +123,7 @@ class MongoRegisterer extends Registerer
 		$sr->storageID = $this->storage->storageID;
 		$sr->patientInfo = array(
 			'patientID' => $dicom_data['patientID'],
-			'name' => $dicom_data['patientName'],
+			'patientName' => $dicom_data['patientName'],
 			'birthday' => $this->normalizeDate($dicom_data['birthDate']),
 			'age' => (int)$dicom_data['age'],
 			'sex' => strtolower($dicom_data['sex']),

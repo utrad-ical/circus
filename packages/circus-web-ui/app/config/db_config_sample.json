@@ -1,0 +1,8 @@
+{
+	"driver"	:	"mongodb",
+	"host"		:	"localhost",
+	"port"		:	27017,
+	"username"	:	"username",
+	"password"	:	"my_password",
+	"database"	:	"circus_db"
+}

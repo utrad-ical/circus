@@ -595,6 +595,12 @@ class CaseController extends BaseController {
 		//to hold to be able to delete the data of registration ID in this array
 		$transaction = array();
 
+		//Login check
+		if (!Auth::check()) {
+			//Forced redirected to the login screen because not logged in
+			return Redirect::to('login');
+		}
+
 		try {
 			$inputs = Input::all();
 			$inputs = $inputs["data"];
@@ -603,12 +609,15 @@ class CaseController extends BaseController {
 			Log::debug($inputs);
 
 			foreach ($inputs["series"] as $key => $val){
-				for ($i = 0; $i < count($val["label"]); $i++){
-					//Because there are cases where the image information does not come entered (case label set only),
-					//and performs decode processing only when the image information has been entered
-					if (strlen($val["label"][$i]["position"]) > 0)
-						$inputs["series"][$key]["label"][$i]["position"]
-							= base64_decode(str_replace(' ', '+',$val["label"][$i]["position"]));
+				//ラベル情報がない場合はストレージの設定を無視する
+				if (array_key_exists('label', $val) !== FALSE) {
+					for ($i = 0; $i < count($val["label"]); $i++){
+						//Because there are cases where the image information does not come entered (case label set only),
+						//and performs decode processing only when the image information has been entered
+						if (strlen($val["label"][$i]["position"]) > 0)
+							$inputs["series"][$key]["label"][$i]["position"]
+								= base64_decode(str_replace(' ', '+',$val["label"][$i]["position"]));
+					}
 				}
 			}
 
@@ -624,6 +633,7 @@ class CaseController extends BaseController {
 
 				foreach ($inputs['series'] as $rec) {
 					$revision[$rec['id']] = array();
+					//TODO::ラベルがない場合の対応
 					foreach ($rec['label'] as $rec2) {
 						//Storage registration of
 						$storage_id = Seq::getIncrementSeq('Storages');
@@ -649,7 +659,7 @@ class CaseController extends BaseController {
 						//I do registration of storage information because there is no error
 						$result = $storage_obj->save();
 
-						//登録成功したのでトランザクション配列に積む
+						//To gain in the transaction array Now that you have registered success
 						if ($result) {
 							if (array_key_exists("storage", $transaction) === FALSE)
 								$transaction["storage"] = array();
@@ -667,13 +677,12 @@ class CaseController extends BaseController {
 						$label_obj = App::make('Label');
 						$label_obj->labelID = $rec2['id'];
 						$label_obj->storageID = $storage_obj->storageID;
-						$label_obj->x = $rec2['offset'][0];
-						$label_obj->y = $rec2['offset'][1];
-						$label_obj->z = $rec2['offset'][2];
-						$label_obj->w = 0;
-						$label_obj->h = 0;
-						$label_obj->d = 0;
-						$label_obj->number = $rec2['number'];
+						$label_obj->x = intval($rec2['offset'][0]);
+						$label_obj->y = intval($rec2['offset'][1]);
+						$label_obj->z = intval($rec2['offset'][2]);
+						$label_obj->w = isset($rec2['w']) ? intval($rec2['w']) : 0;
+						$label_obj->h = isset($rec2['h']) ? intval($rec2['h']) : 0;
+						$label_obj->d = intval($rec2['number']);
 						$label_obj->creator = Auth::user()->loginID;
 						$label_obj->date = $dt;
 						$label_obj->updateTime = $dt;
@@ -705,8 +714,9 @@ class CaseController extends BaseController {
 						}
 
 						$revision[$rec['id']][] = array(
-								'id'			=>	$label_obj->labelID,
-								'attributes'	=>	array(
+							'id'			=>	$label_obj->labelID,
+							'attributes'	=>	array(
+								'labelName'	=>	$rec2['name']
 							)
 						);
 					}
@@ -717,7 +727,7 @@ class CaseController extends BaseController {
 						'labels'	=>	$revision[$rec['id']]
 					);
 				}
-				//ケース情報の更新
+				//Update of case information
 				//ケース情報取得
 				$case_obj = ClinicalCase::find($inputs["caseId"]);
 				//Revision情報取得
@@ -754,13 +764,9 @@ class CaseController extends BaseController {
 							$revision_data['latest'] = $tmp_revision;
 						}
 					}
-					Log::debug("Tmp追加前");
-					Log::debug($revision_data);
 					$revision_data[$next_index] = $tmp_revision;
-					Log::debug("更新情報");
-					Log::debug($revision_data);
 					$case_obj->revisions = $revision_data;
-					//エラーがないので登録する
+					//I registered because there is no error
 					$case_obj->save();
 				}
 				$msg = "ラベル情報の登録が完了しました。";
@@ -778,6 +784,140 @@ class CaseController extends BaseController {
 
 	}
 
+	/**
+	 * ロード時のラベル情報取得(Ajax)
+	 */
+	function load_label() {
+		Log::debug("load_label");
+		//Login check
+		if (!Auth::check()) {
+			//Forced redirected to the login screen because not logged in
+			return Redirect::to('login');
+		}
+
+		//入力情報取得
+		//$inputs = Input::all();
+		//$inputs['data']
+		$inputs = Input::get('data');
+		Log::debug($inputs);
+
+		//初期設定
+		$error_msg = '';
+		$msg = '';
+		$data = array();
+
+		try {
+			//ケースIDの指定がない
+			if (array_key_exists('caseId', $inputs) === FALSE)
+				$error_msg = 'ケースIDを指定してください。';
+
+			if (!$error_msg) {
+				$data["caseId"] = $inputs["caseId"];
+				//ケースIDからケース情報を取得する
+				$case_info = ClinicalCase::find($inputs["caseId"]);
+
+				//ケースIDに紐づくケース情報がない
+				if (!$case_info) {
+					$error_msg = "存在しないケースIDです。";
+				} else {
+					$data["memo"] = $case_info->description;
+					Log::debug("ケース情報");
+					Log::debug($case_info);
+					//ケース情報が取れたのでケース情報からRevision情報取得
+					$max_revision = 0;
+
+					/*
+					 var data = {
+							"caseId"	:	"e3b8af3f79e3af403d0cbbab0fb632bc276970c2768ca6b8716e75958c136faa",
+							"memo"		:	$('#memo').val(),
+							"series" :	[
+								{
+									"id"	:	"LIDC-IDRI-0002",
+									"label"	:	[
+										{
+											"attributes"	:	{},
+											"id"			:	$('#labelID1').val(),
+											"name"			:	$('#labelName1').val(),
+											"number"		:	$('#drawNum1').val(),
+											"offset"		:	[$('#offsetX1').val(), $('#offsetY1').val(), $('#offsetZ1').val()],
+											"position"		:	$.base64.encode(tmp_src)
+										}
+									]
+								}
+							]
+						};
+					 */
+					$select_revision_no = 0;
+					if (array_key_exists('revisionNo', $inputs) !== FALSE) {
+						$select_revision_no = $inputs['revisionNo'];
+					} else {
+						$revision_indexs = array_keys($case_info->revisions);
+						Log::debug($revision_indexs);
+						$select_revision_no = max($revision_indexs);
+						Log::debug($select_revision_no);
+					}
+
+					$select_revision = $case_info->revisions[$select_revision_no];
+					Log::debug("取得対象のRevision情報");
+					Log::debug($select_revision);
+
+					$data["series"] = array();
+					foreach ($select_revision["series"] as $series) {
+						//ラベル情報整形
+						$series_info = array();
+						$series_info["id"] = $series["seriesUID"];
+						$series_info["label"] = array();
+
+						$label_list = array();
+						foreach ($series["labels"] as $rec){
+							$label = array();
+
+							//attributesの中にnameがない場合はラベルが未作成とみなし、ラベルは空オブジェクト
+							if (array_key_exists('labelName', $rec['attributes']) !== FALSE) {
+
+								$label["attributes"] = $rec["attributes"];
+								$label["id"] = $rec["id"];
+								$label["name"] = $rec["attributes"]["labelName"];
+
+								//ラベル情報取得
+								if ($rec["id"]) {
+									$label_info = Label::find($rec["id"]);
+									Log::debug("ラベル情報");
+									Log::debug($label_info);
+
+									$label["number"] = $label_info->d;
+									$label["offset"] = array($label_info->x, $label_info->y, $label_info->z);
+
+									//ストレージ情報取得
+									$storage_info = Storage::find($label_info->storageID);
+									Log::debug("ストレージ情報");
+									Log::debug($storage_info);
+
+									$label["position"] = base64_encode($storage_info->path);
+								}
+							}
+							$series_info["label"][] = $label;
+						}
+						$data["series"][] = $series_info;
+					}
+				}
+			}
+
+		} catch (Exception $e) {
+			$error_msg = $e->getMessage();
+			Log::debug("[ExceptionError]".$error_msg);
+		}
+
+		//JSON出力
+		header('Content-Type: application/json; charset=UTF-8');
+		$res = json_encode(array('result' => true, 'message' => $error_msg ? $error_msg : $msg, 'response' => json_encode($data,JSON_UNESCAPED_UNICODE)));
+		echo $res;
+	}
+
+	/**
+	 * 疑似トランザクションロールバック処理(新規登録のみ)
+	 * @param $transaction ロールバック対象
+	 */
 	function rollback($transaction) {
 		//登録に失敗したのでロールバック処理を行う
 

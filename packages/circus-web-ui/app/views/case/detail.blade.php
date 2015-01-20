@@ -2,19 +2,17 @@
 @include('common.header')
 @section('content')
 <script type="text/javascript">
-	//コントローラ・ビューアーウィジェットをコントロールするための案件固有の機能群
+	//Project-specific feature set to control the controller viewer widget
 	$(function(){
 		//ページロード直後にコントローラを発火させるときに渡すデータ群
 		//複数ビューアーを連動させる１グループにつき１コントローラ
 		var	voxel_container	=	new voxelContainer();	//ラベル情報格納用オブジェクト(3面共用)
 		voxel_container.name	=	'my_voxel';
 
-		//var the_domain = 'http://160.16.56.191:3000/';
-		var the_domain = 'http://160.16.56.191/';
+		var the_domain = "{{Config::get('config.domain')}}";
 		var	initInfo	=	[
 			{
-				//baseUrl : 'http://172.24.1.105:3000/', //画像格納ディレクトリ
-				baseUrl : 'http://160.16.56.191:3000/', //画像格納ディレクトリ
+				baseUrl : "{{Config::get('config.dicom_img_base_url')}}",
 				postUrl : "{{asset('case/save_label')}}",	//画像格納サーバーと異なる場合はこちらを有効にする
 				caseId : "{{$case_detail['caseID']}}",
 				series : {{$series_list}},

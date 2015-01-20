@@ -45,6 +45,7 @@ Route::any('case/revision', 'CaseController@revision_ajax');
 Route::any('case/search_result', 'CaseController@search_ajax');
 Route::any('case/save_search', 'CaseController@save_search');
 Route::any('case/save_label', 'CaseController@save_label');
+Route::any('case/load_label', 'CaseController@load_label');
 //test用
 Route::get('case/save_label', function(){
 	$js = array();
@@ -54,6 +55,15 @@ Route::get('case/save_label', function(){
 	$result['url'] = '/case/save_label';
 	return View::make('/sample/sample', $result);
 });
+Route::get('case/load_label', function(){
+	$js = array();
+	$js['jquery-ui.min.js'] = 'js/jquery-ui.min.js';
+	$result['js'] = $js;
+	$result['title'] = 'Label load test';
+	$result['url'] = '/case/load_label';
+	return View::make('/sample/load_sample', $result);
+});
+
 
 //Series
 Route::get('series/search', 'SeriesController@search');

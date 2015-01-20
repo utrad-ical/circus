@@ -114,8 +114,10 @@ class MongoRegisterer extends Registerer
 		$sr->patientInfo = array(
 			'patientID' => $dicom_data['patientID'],
 			'patientName' => $dicom_data['patientName'],
+			'birthDate' => $dicom_data['birthDate'],
+			'age' => $dicom_data['age'],
 			'sex' => $dicom_data['sex'],
-			'height' => $dicom_data['size'],
+			'size' => $dicom_data['size'],
 			'weight' => $dicom_data['weight']
 		);
 		$sr->images = (string)$dicom_data['instanceNumber'];

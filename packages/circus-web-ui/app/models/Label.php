@@ -46,10 +46,9 @@ class Label extends Eloquent {
 		'x'			=>	'required|integer',
 		'y'			=>	'required|integer',
 		'z'			=>	'required|integer',
-		'w'			=>	'integer',
-		'h'			=>	'integer',
-		'd'			=>	'integer',
-		'number'	=>	'integer',
+		'w'			=>	'required|integer',
+		'h'			=>	'required|integer',
+		'd'			=>	'required|integer',
 		'creator'	=>	'required',
 		'date'		=>	'required'
 	);

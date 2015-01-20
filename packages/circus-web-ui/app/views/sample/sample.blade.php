@@ -22,6 +22,7 @@
 									"name"			:	$('#labelName1').val(),
 									"number"		:	$('#drawNum1').val(),
 									"offset"		:	[$('#offsetX1').val(), $('#offsetY1').val(), $('#offsetZ1').val()],
+									"voxel"			:	[$('#boxcelW1').val(), $('#boxelH1').val()],
 									"position"		:	$.base64.encode(tmp_src)
 								},
 								{
@@ -29,8 +30,9 @@
 									"id"			:	$('#labelID2').val(),
 									"name"			:	$('#labelName2').val(),
 									"number"		:	$('#drawNum2').val(),
-									"offset"		:	[$('#offsetX2').val(), $('#offsetY1').val(), $('#offsetZ2').val()],
-									"position"		:	$.base64.encode(tmp_src)
+									"offset"		:	[$('#offsetX2').val(), $('#offsetY2').val(), $('#offsetZ2').val()],
+									"voxel"			:	[$('#boxcelW2').val(), $('#boxelH2').val()],
+									"position"		:	$.base64.encode(tmp_src2)
 								}
 							]
 						}
@@ -71,14 +73,16 @@
 							<td colspan="3">{{Form::text('labelName1', 'Sample Label', array('id' => 'labelName1'))}}</td>
 						</tr>
 						<tr>
-							<th>ラベル描画が行われている枚数</th>
-							<td colspan="3">{{Form::text('labelNumber1', 1, array('id' => 'drawNum1'))}}</td>
-						</tr>
-						<tr>
 							<th>始点</th>
 							<td>X:{{Form::text('offsetX1', 1, array('id' => 'offsetX1'))}}</td>
 							<td>Y:{{Form::text('offsetY1', 2, array('id' => 'offsetY1'))}}</td>
 							<td>Z:{{Form::text('offsetZ1', 3, array('id' => 'offsetZ1'))}}</td>
+						</tr>
+						<tr>
+							<th>Voxel</th>
+							<td>Width:{{Form::text('voxelW1', 1, array('id' => 'voxelW1'))}}</td>
+							<td>Height:{{Form::text('voxelH1', 1, array('id' => 'voxelH1'))}}</td>
+							<td>枚数:{{Form::text('labelNumber1', 1, array('id' => 'drawNum1'))}}</td>
 						</tr>
 						<tr>
 							<th>メモ</th>
@@ -95,14 +99,16 @@
 							<td colspan="3">{{Form::text('labelName2', 'Sample Label', array('id' => 'labelName2'))}}</td>
 						</tr>
 						<tr>
-							<th>ラベル描画が行われている枚数</th>
-							<td colspan="3">{{Form::text('labelNumber2', 1, array('id' => 'drawNum2'))}}</td>
-						</tr>
-						<tr>
 							<th>始点</th>
 							<td>X:{{Form::text('offsetX2', 1, array('id' => 'offsetX2'))}}</td>
 							<td>Y:{{Form::text('offsetY2', 2, array('id' => 'offsetY2'))}}</td>
 							<td>Z:{{Form::text('offsetZ2', 3, array('id' => 'offsetZ2'))}}</td>
+						</tr>
+						<tr>
+							<th>Voxel</th>
+							<td>Width:{{Form::text('voxelW2', 2, array('id' => 'voxelW2'))}}</td>
+							<td>Height:{{Form::text('voxelH2', 2, array('id' => 'voxelH2'))}}</td>
+							<td>枚数:{{Form::text('labelNumber2', 2, array('id' => 'drawNum2'))}}</td>
 						</tr>
 					</table>
 					<p class="al_c">

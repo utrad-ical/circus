@@ -127,7 +127,7 @@ class MongoRegisterer extends Registerer
 			'birthday' => $this->normalizeDate($dicom_data['birthDate']),
 			'age' => (int)$dicom_data['age'],
 			'sex' => strtolower($dicom_data['sex']),
-			'height' => (float)$dicom_data['height'],
+			'height' => (float)$dicom_data['size'],
 			'weight' => (float)$dicom_data['weight']
 		);
 		$sr->images = (string)$dicom_data['instanceNumber'];

@@ -42,8 +42,22 @@ class ImportDicom extends Command {
 		$path = $this->argument('path');
 		if (is_file($path)) {
 			$importer->importOne($path);
+			$this->info('Imported');
 		} elseif (is_dir($path)) {
-			$this->error('Directory importing not implemented');
+			if ($this->option('recursive')) {
+				$dir = new RecursiveDirectoryIterator($path);
+				$itr = new RecursiveIteratorIterator($dir);
+			} else {
+				$itr = new DirectoryIterator($path);
+			}
+			$files = array();
+			foreach ($itr as $file) {
+				if ($file->isFile()) {
+					$filename = $file->getRealPath();
+					$this->info($filename);
+					$importer->importOne($filename);
+				}
+			}
 		} else {
 			$this->error('Invalid path');
 		}

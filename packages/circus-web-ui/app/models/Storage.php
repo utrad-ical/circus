@@ -1,16 +1,47 @@
 <?php
 
-
 use Jenssegers\Mongodb\Model as Eloquent;
 
 /**
- * Storage table manipulation class
+ * Model class for Storage area.
+ *
+ * @property int storageID int Storage ID.
+ * @property string type Storage type, either 'dicom' or 'label'.
+ * @property string path Path to the storage area.
+ * @property bool active Whether this storage is in use.
  */
 class Storage extends Eloquent {
 	protected $connection = 'mongodb';
 	protected $collection = 'Storages';
 
 	protected $primaryKey = 'storageID';
+
+	/**
+	 * Indicates this storage area is for storing DICOM files.
+	 */
+	const DICOM_STORAGE = 'dicom';
+
+	/**
+	 * Indicates this storage area is for storing label data.
+	 */
+	const LABEL_STORAGE = 'label';
+
+	/**
+	 * @param $type string The storage type.
+	 * @return Storage The current active storage.
+	 */
+	static function getCurrentStorage($type) {
+		return self::where(array('active' => true, 'type' => $type))->firstOrFail();
+	}
+
+	function dicomStoragePath($series_uid) {
+		$hash = hash('sha256', trim($series_uid));
+		return $this->path . '/' . substr($hash, 0, 2) . '/' . substr($hash, 2, 2) . '/' . $series_uid;
+	}
+
+	function dicomFileName($instance_id) {
+		return sprintf('%08d.dcm', $instance_id);
+	}
 
 	/**
 	 * Search conditions Building
@@ -31,8 +62,10 @@ class Storage extends Eloquent {
 	 * Validate Rules
 	 */
 	private $rules = array(
-		'storageID'	=>	'required',
-		'active'	=>	'required'
+		'storageID'	=> 'required',
+		'type'		=> 'in:dicom,label',
+		'path'		=> 'required',
+		'active'	=> 'required'
 	);
 
 	/**

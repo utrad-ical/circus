@@ -21,7 +21,7 @@ class MongoRegisterer extends Registerer
 
 	public function utilityPath()
 	{
-		return app_path() . '/dicom_utility';
+		return app_path() . '/bin/dicom_utility';
 	}
 
 	public function __construct()

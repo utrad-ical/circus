@@ -2,6 +2,7 @@
 
 namespace DicomImporter;
 
+use MongoDate;
 use Monolog\Handler\RotatingFileHandler;
 use MultiRange;
 use Series;
@@ -97,6 +98,15 @@ class MongoRegisterer extends Registerer
 		}
 	}
 
+	protected function normalizeDate($input)
+	{
+		if (preg_match('/^(\d{4})(\d{2})(\d{2})$/', $input, $m)) {
+			return new MongoDate(strtotime($input));
+			// return "$m[1]-$m[2]-$m[3]";
+		}
+		return null;
+	}
+
 	public function registerNewSeries(array $dicom_data)
 	{
 		$sr = new Series();
@@ -113,12 +123,12 @@ class MongoRegisterer extends Registerer
 		$sr->storageID = $this->storage->storageID;
 		$sr->patientInfo = array(
 			'patientID' => $dicom_data['patientID'],
-			'patientName' => $dicom_data['patientName'],
-			'birthDate' => $dicom_data['birthDate'],
-			'age' => $dicom_data['age'],
-			'sex' => $dicom_data['sex'],
-			'size' => $dicom_data['size'],
-			'weight' => $dicom_data['weight']
+			'name' => $dicom_data['patientName'],
+			'birthday' => $this->normalizeDate($dicom_data['birthDate']),
+			'age' => (int)$dicom_data['age'],
+			'sex' => strtolower($dicom_data['sex']),
+			'height' => (float)$dicom_data['height'],
+			'weight' => (float)$dicom_data['weight']
 		);
 		$sr->images = (string)$dicom_data['instanceNumber'];
 		$sr->parameters = array();

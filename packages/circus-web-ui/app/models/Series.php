@@ -12,6 +12,10 @@ class Series extends Eloquent {
 
 	protected $primaryKey = 'seriesUID';
 
+	public function storage() {
+		return $this->belongsTo('Storage', 'storageID', 'storageID');
+	}
+
 	/**
 	 * Search conditions Building
 	 * @param $query Query object
@@ -80,6 +84,26 @@ class Series extends Eloquent {
 		$query->take($input['disp']);
 
 		return $query;
+	}
+
+	/**
+	 * Deletes this series from DB, and also delete all associated DICOM files.
+	 * @return bool|null
+	 * @throws Exception
+	 */
+	public function deleteAssociatedImageFiles() {
+		$path = $this->storage->dicomStoragePath($this->seriesUID);
+		foreach (new DirectoryIterator($path) as $file) {
+			if ($file->isFile()) {
+				if (!unlink($file->getRealPath())) {
+					return false;
+				}
+			}
+		}
+		if (!rmdir($path)) {
+			return false;
+		}
+		return true;
 	}
 
 	/**

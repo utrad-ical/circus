@@ -13,3 +13,4 @@
 
 Artisan::add(new ImportDicom);
 Artisan::add(new DeleteSeries);
+Artisan::add(new GetSeries);

@@ -131,7 +131,7 @@ class MongoRegisterer extends Registerer
 			'weight' => (float)$dicom_data['weight']
 		);
 		$sr->images = (string)$dicom_data['instanceNumber'];
-		$sr->parameters = array();
+		$this->setSeriesParameters($sr, $dicom_data);
 		$sr->domain = 'default'; // TODO: Implement domain handling
 		$sr->save();
 		$this->logger->log("Inserted new series in the database. Series UID=$sr->seriesUID");
@@ -144,6 +144,56 @@ class MongoRegisterer extends Registerer
 		$series->images = $mr->__toString();
 		$series->save();
 		$this->logger->log("Updated series in the database. Images=$series->images; Series UID=$series->seriesUID");
+	}
+
+	private function setSeriesParameters($series, array $dicom_data)
+	{
+		$series->parameters = array(
+			'pixelSpacingX' => $dicom_data['pixelSpacingX'],
+			'pixelSpacingY' => $dicom_data['pixelSpacingY'],
+			'dataCollectionDiameter' => $dicom_data['dataCollectionDiameter'],
+			'reconstructionDiameter' => $dicom_data['reconstructionDiameter']
+		);
+
+		switch ($dicom_data['modality'])
+		{
+			case "CT":
+				$series->parameters += array(
+					'kVP' => $dicom_data['kVP'],
+					'exposureTime' => $dicom_data['exposureTime'],
+					'xRayTubeCurrent' => $dicom_data['xRayTubeCurrent'],
+					'filterType' => $dicom_data['filterType'],
+					'convolutionKernel' => $dicom_data['convolutionKernel']
+				);
+				break;
+
+			case 'MR':
+				$series->parameters += array(
+					'scanningSequence' => $dicom_data['scanningSequence'],
+					'sequenceVariant' => $dicom_data['sequenceVariant'],
+					'mrAcquisitionType' => $dicom_data['mrAcquisitionType'],
+					'repetitionTime' => $dicom_data['repetitionTime'],
+					'echoTime' => $dicom_data['echoTime'],
+					'inversionTime' => $dicom_data['inversionTime'],
+					'inversionTime' => $dicom_data['inversionTime'],
+					'numberOfAverages' => $dicom_data['numberOfAverages'],
+					'imagingFrequency' => $dicom_data['imagingFrequency'],
+					'echoNumber' => $dicom_data['echoNumber'],
+					'magneticFieldStrength' => $dicom_data['magneticFieldStrength'],
+					'echoTrainLength' => $dicom_data['echoTrainLength'],
+					'flipAngle' => $dicom_data['flipAngle']
+				);
+				break;
+
+			case 'NM':
+			case 'PT':
+				$series->parameters += array(
+					'radiopharmaceutical' => $dicom_data['radiopharmaceutical'],
+					'radionuclideTotalDose' => $dicom_data['radionuclideTotalDose'],
+					'pixelValueUnits' => $dicom_data['pixelValueUnits']
+				);
+				break;
+		}
 	}
 }
 

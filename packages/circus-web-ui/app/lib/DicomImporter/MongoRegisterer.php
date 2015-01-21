@@ -86,7 +86,7 @@ class MongoRegisterer extends Registerer
 			foreach ($checkKeys as $c) {
 				list($objKey, $dicomKey) = strpos($c, '=') ? explode('=', $c) : array($c, $c);
 				if ($series->$objKey !== $dicom_data[$dicomKey]) {
-					$this->logger->error("DICOM metadata mismatch ($dicomKey). ".
+					$this->logger->error("DICOM metadata mismatch ($dicomKey). " .
 						"Imported: $series->objeKey; File: $dicom_data[$dicomKey]");
 					throw new ImporterException(
 						"Metadata '$dicomKey' of the new image does not match the existing data."
@@ -148,51 +148,44 @@ class MongoRegisterer extends Registerer
 
 	private function setSeriesParameters($series, array $dicom_data)
 	{
-		$series->parameters = array(
-			'pixelSpacingX' => $dicom_data['pixelSpacingX'],
-			'pixelSpacingY' => $dicom_data['pixelSpacingY'],
-			'dataCollectionDiameter' => $dicom_data['dataCollectionDiameter'],
-			'reconstructionDiameter' => $dicom_data['reconstructionDiameter']
+		$series->parameters = array();
+
+		$assignParameters = array(
+			'pixelSpacingX', 'pixelSpacingY',
+			'dataCollectionDiameter',
+			'reconstructionDiameter'
 		);
 
-		switch ($dicom_data['modality'])
-		{
+		switch ($dicom_data['modality']) {
 			case "CT":
-				$series->parameters += array(
-					'kVP' => $dicom_data['kVP'],
-					'exposureTime' => $dicom_data['exposureTime'],
-					'xRayTubeCurrent' => $dicom_data['xRayTubeCurrent'],
-					'filterType' => $dicom_data['filterType'],
-					'convolutionKernel' => $dicom_data['convolutionKernel']
+				$assignParameters += array(
+					'kVP', 'exposureTime', 'xRayTubeCurrent',
+					'filterType', 'convolutionKernel'
 				);
 				break;
 
 			case 'MR':
-				$series->parameters += array(
-					'scanningSequence' => $dicom_data['scanningSequence'],
-					'sequenceVariant' => $dicom_data['sequenceVariant'],
-					'mrAcquisitionType' => $dicom_data['mrAcquisitionType'],
-					'repetitionTime' => $dicom_data['repetitionTime'],
-					'echoTime' => $dicom_data['echoTime'],
-					'inversionTime' => $dicom_data['inversionTime'],
-					'inversionTime' => $dicom_data['inversionTime'],
-					'numberOfAverages' => $dicom_data['numberOfAverages'],
-					'imagingFrequency' => $dicom_data['imagingFrequency'],
-					'echoNumber' => $dicom_data['echoNumber'],
-					'magneticFieldStrength' => $dicom_data['magneticFieldStrength'],
-					'echoTrainLength' => $dicom_data['echoTrainLength'],
-					'flipAngle' => $dicom_data['flipAngle']
+				$assignParameters += array(
+					'scanningSequence', 'sequenceVariant', 'mrAcquisitionType',
+					'repetitionTime', 'echoTime', 'inversionTime',
+					'numberOfAverages', 'imagingFrequency', 'echoNumber',
+					'magneticFieldStrength', 'echoTrainLength', 'flipAngle'
 				);
 				break;
 
 			case 'NM':
 			case 'PT':
-				$series->parameters += array(
-					'radiopharmaceutical' => $dicom_data['radiopharmaceutical'],
-					'radionuclideTotalDose' => $dicom_data['radionuclideTotalDose'],
-					'pixelValueUnits' => $dicom_data['pixelValueUnits']
+				$assignParameters += array(
+					'radiopharmaceutical',
+					'radionuclideTotalDose',
+					'pixelValueUnits'
 				);
 				break;
+		}
+
+		foreach ($assignParameters as $c) {
+			list($objKey, $dicomKey) = strpos($c, '=') ? explode('=', $c) : array($c, $c);
+			$series->parameters += array($objKey => $dicom_data[$dicomKey]);
 		}
 	}
 }

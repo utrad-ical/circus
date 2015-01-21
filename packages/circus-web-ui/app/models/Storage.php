@@ -12,7 +12,9 @@ use Jenssegers\Mongodb\Model as Eloquent;
  */
 class Storage extends Eloquent {
 	protected $connection = 'mongodb';
-	protected $collection = 'Storages';
+
+	const COLLECTION = 'Storages';
+	protected $collection = self::COLLECTION;
 
 	protected $primaryKey = 'storageID';
 	public $timestamps = false;

@@ -8,7 +8,9 @@ use Jenssegers\Mongodb\Model as Eloquent;
  */
 class Label extends Eloquent {
 	protected $connection = 'mongodb';
-	protected $collection = 'Labels';
+
+	const COLLECTION = 'Labels';
+	protected $collection = self::COLLECTION;
 
 	protected $primaryKey = 'labelID';
 	public $timestamps = false;

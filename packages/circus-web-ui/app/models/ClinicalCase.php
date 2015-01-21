@@ -7,7 +7,9 @@ use Jenssegers\Mongodb\Model as Eloquent;
  */
 class ClinicalCase extends Eloquent {
 	protected $connection = 'mongodb';
-	protected $collection = 'Cases';
+
+	const COLLECTION = 'Cases';
+	protected $collection = self::COLLECTION;
 
 	protected $primaryKey = 'caseID';
 	public $timestamps = false;

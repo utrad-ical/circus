@@ -23,7 +23,7 @@
 									"number"		:	$('#drawNum1').val(),
 									"offset"		:	[$('#offsetX1').val(), $('#offsetY1').val(), $('#offsetZ1').val()],
 									"voxel"			:	[$('#boxcelW1').val(), $('#boxelH1').val()],
-									"position"		:	$.base64.encode(tmp_src)
+									"image"			:	$.base64.encode(tmp_src)
 								},
 								{
 									"attributes"	:	{},
@@ -32,7 +32,7 @@
 									"number"		:	$('#drawNum2').val(),
 									"offset"		:	[$('#offsetX2').val(), $('#offsetY2').val(), $('#offsetZ2').val()],
 									"voxel"			:	[$('#boxcelW2').val(), $('#boxelH2').val()],
-									"position"		:	$.base64.encode(tmp_src2)
+									"image"			:	$.base64.encode(tmp_src2)
 								}
 							]
 						}

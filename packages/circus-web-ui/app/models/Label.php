@@ -11,6 +11,7 @@ class Label extends Eloquent {
 	protected $collection = 'Labels';
 
 	protected $primaryKey = 'labelID';
+	public $timestamps = false;
 
 	/**
 	 * Search conditions Building

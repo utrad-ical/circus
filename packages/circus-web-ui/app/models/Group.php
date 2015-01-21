@@ -10,6 +10,7 @@ class Group extends Eloquent {
 	protected $collection = 'Groups';
 
 	protected $primaryKey = 'GroupID';
+	public $timestamps = false;
 
 	/**
 	 * Search conditions Building

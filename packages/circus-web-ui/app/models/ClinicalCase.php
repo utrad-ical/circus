@@ -10,6 +10,7 @@ class ClinicalCase extends Eloquent {
 	protected $collection = 'Cases';
 
 	protected $primaryKey = 'caseID';
+	public $timestamps = false;
 
 	/**
 	 * Search conditions Building

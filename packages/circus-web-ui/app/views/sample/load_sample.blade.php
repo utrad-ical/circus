@@ -5,6 +5,11 @@
 	$(function(){
 		$(".load_label").click(function() {
 			var data = {"caseId":$("#caseId").val()};
+			var revisionNo = $("#revisionNo").val();
+			console.log(revisionNo);
+			if (revisionNo != ""){
+				data['revisionNo'] = revisionNo;
+			}
 			console.log(data);
 			$.ajax({
 				url: "{{asset('case/load_label')}}",
@@ -40,6 +45,10 @@
 						<tr>
 							<th>caseID</th>
 							<td>{{Form::text('caseId', 'e3b8af3f79e3af403d0cbbab0fb632bc276970c2768ca6b8716e75958c136faa', array('id' => 'caseId', 'class' => 'w_500'))}}</td>
+						</tr>
+						<tr>
+							<th>RevisionNo</th>
+							<td>{{Form::text('revisionNo', 0, array('id' => 'revisionNo'))}}</td>
 						</tr>
 					</table>
 					<p class="al_c">

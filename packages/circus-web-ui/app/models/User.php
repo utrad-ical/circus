@@ -14,6 +14,7 @@ class User extends Eloquent implements UserInterface {
 	protected $connection = 'mongodb';
 	protected $collection = 'Users';
 	protected $primaryKey = 'userID';
+	public $timestamps = false;
 
 	/**
 	 * Validate rules

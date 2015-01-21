@@ -229,6 +229,7 @@
 					</div>
 				</div>
 				<div class="clear">&nbsp;</div>
+				<div class="control_panel_inner"  id="the_panel_attribute"></div>
 				<div class="control_panel mar_tb_10" id="the_panel">
 					<div class="control_panel_inner" id="the_panel_inner">
 					</div>

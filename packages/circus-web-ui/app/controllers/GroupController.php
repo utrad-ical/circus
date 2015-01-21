@@ -265,6 +265,7 @@ class GroupController extends BaseController {
 	 * @return string that was turned into Hash in SHA256 the uniqid (case ID)
 	 */
 	public function createGroupID(){
-		return hash_hmac('sha256', uniqid(), Config::get('const.hash_key'));
+		//return hash_hmac('sha256', uniqid(), Config::get('const.hash_key'));
+		return hash('sha256', uniqid());
 	}
 }

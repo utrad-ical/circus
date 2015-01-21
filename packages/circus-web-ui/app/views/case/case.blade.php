@@ -12,39 +12,38 @@
 	@endif
 	<table class="result_table common_table">
 		<colgroup>
-			<col width="20%">
-			<col width="20%">
-			<col width="20%">
-			<col width="15%">
-			<col width="18%">
-			<col width="7%">
+			<col width="13%">
+			<col width="13%">
+			<col width="13%">
+			<col width="13%">
+			<col width="13%">
+			<col width="13%">
+			<col width="13%">
+			<col width="13%">
+			<col width="9%">
 		</colgroup>
 		<tr>
-			<th>Case</th>
-			<th>Project</th>
-			<th>
-				Patient Id<br>
-				Patient Name
-			</th>
-			<th>Update Date</th>
-			<th>Latest Revision</th>
+			<th>projectName</th>
+			<th>patientID</th>
+			<th>patientName</th>
+			<th>age</th>
+			<th>sex</th>
+			<th>update Date</th>
+			<th>latest Revision</th>
 			<th></th>
 		</tr>
 		@if (count($list) > 0)
 			@foreach ($list as $rec)
 				<tr>
-					<td>{{$rec['incrementalID']}} - {{$rec['caseID']}}</td>
-					<td>{{$rec['projectID']}} - {{$rec['projectName']}}</td>
-					<td>
-						{{$rec['patientID']}}
-						<br>
-						{{$rec['patientName']}}
-					</td>
+					<td>{{$rec['projectName']}}</td>
+					<td>{{$rec['patientID']}}</td>
+					<td>{{$rec['patientName']}}</td>
+					<td>{{$rec['age']}}</td>
+					<td>{{$rec['sex']}}</td>
 					<td>{{$rec['updateDate']}}</td>
 					<td>
 						<a href="" class="link_detail">
 							{{$rec['latestDate']}}
-							<br>{{$rec['creator']}}
 						</a>
 						{{Form::open(['url' => asset('/case/detail'), 'method' => 'post', 'class' => 'form_case_detail'])}}
 							{{Form::hidden('caseID', $rec['caseID'])}}

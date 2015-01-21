@@ -403,7 +403,6 @@ class UserController extends BaseController {
 		//Set of Checkbox system
 		$user_data['preferences_theme'] = $inputs['preferences_theme'];
 		$user_data['preferences_personalView'] =
-			//isset($inputs['preferences_personalView']) ? $inputs['preferences_personalView'] : "0";
 			array_key_exists('preferences_personalView', $inputs) ?
 				$inputs['preferences_personalView'] : "false";
 		Session::put('user_input', $user_data);
@@ -566,14 +565,6 @@ class UserController extends BaseController {
 		$js['jquery-ui.min.js'] = 'js/jquery-ui.min.js';
 		$js['jquery.multiselect.min.js'] = 'js/jquery.multiselect.min.js';
 		return $js;
-	}
-
-	/**
-	 * Create a user ID (SHA256 + uniqid)
-	 * @return string that was turned into Hash in SHA256 the uniqid (case ID)
-	 */
-	public function createUserID(){
-		return hash_hmac('sha256', uniqid(), Config::get('const.hash_key'));
 	}
 
 	/**

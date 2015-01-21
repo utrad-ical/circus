@@ -811,7 +811,6 @@ class CaseController extends BaseController {
 				if (!$case_info) {
 					self::errorFinish('There is a case ID that does not.');
 				} else {
-					$data['memo'] = $case_info->description;
 					//Revision information obtained from the case information because case information was taken
 					$select_revision_no = 0;
 
@@ -828,7 +827,7 @@ class CaseController extends BaseController {
 					}
 
 					$select_revision = $case_info->revisions[$select_revision_no];
-
+					$data['memo'] = $select_revision['description'];
 					$data['series'] = array();
 					foreach ($select_revision['series'] as $series) {
 						//Label information corrective

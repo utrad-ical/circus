@@ -158,28 +158,36 @@ class MongoRegisterer extends Registerer
 
 		switch ($dicom_data['modality']) {
 			case "CT":
-				$assignParameters += array(
-					'kVP', 'exposureTime', 'xRayTubeCurrent',
-					'filterType', 'convolutionKernel'
-				);
+				$assignParameters = array_merge(
+					$assignParameters,
+					array(
+						'kVP', 'exposureTime', 'xRayTubeCurrent',
+						'filterType', 'convolutionKernel'
+					));
 				break;
 
 			case 'MR':
-				$assignParameters += array(
-					'scanningSequence', 'sequenceVariant', 'mrAcquisitionType',
-					'repetitionTime', 'echoTime', 'inversionTime',
-					'numberOfAverages', 'imagingFrequency', 'echoNumber',
-					'magneticFieldStrength', 'echoTrainLength', 'flipAngle'
-				);
+				$assignParameters = array_merge(
+					$assignParameters,
+					array(
+						'scanningSequence', 'sequenceVariant',
+						'mrAcquisitionType',
+						'repetitionTime', 'echoTime', 'inversionTime',
+						'numberOfAverages', 'imagingFrequency',
+						'echoNumber', 'magneticFieldStrength',
+						'echoTrainLength', 'flipAngle'
+					));
 				break;
 
 			case 'NM':
 			case 'PT':
-				$assignParameters += array(
-					'radiopharmaceutical',
-					'radionuclideTotalDose',
-					'pixelValueUnits'
-				);
+				$assignParameters = array_merge(
+					$assignParameters,
+					array(
+						'radiopharmaceutical',
+						'radionuclideTotalDose',
+						'pixelValueUnits'
+					));
 				break;
 		}
 

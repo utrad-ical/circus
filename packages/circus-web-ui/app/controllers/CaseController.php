@@ -624,12 +624,12 @@ class CaseController extends BaseController {
 					if (array_key_exists('label', $rec) !== FALSE) {
 						foreach ($rec['label'] as $rec2) {
 							//Register storage table and label table is not performed if there is no image
-							if ($rec2['position']) {
+							if ($rec2['image']) {
 								//Storage registration of
 								$storage_id = Seq::getIncrementSeq('Storages');
 								$storage_obj = App::make('Storage');
 								$storage_obj->storageID = $storage_id;
-								$storage_obj->path = base64_decode(str_replace(' ', '+',$rec2['position']));
+								$storage_obj->path = base64_decode(str_replace(' ', '+',$rec2['image']));
 								$storage_obj->type = 'label';
 								$storage_obj->active = true;
 								$storage_obj->updateTime = $dt;
@@ -854,7 +854,7 @@ class CaseController extends BaseController {
 									//Storage information acquisition
 									$storage_info = Storage::find($label_info->storageID);
 
-									$label['position'] = base64_encode($storage_info->path);
+									$label['image'] = base64_encode($storage_info->path);
 								}
 							}
 							$series_info['label'][] = $label;
@@ -885,8 +885,8 @@ class CaseController extends BaseController {
 		//Rollback processing of Storage table
 		if (array_key_exists('storage', $transaction) !== FALSE) {
 			$storage_cnt = count($transaction['storage']);
-			Log::debug('削除対象のストレージ件数::'.$storage_cnt);
-			Log::debug('削除対象のストレージ一覧::');
+			Log::debug('Storage number to be deleted::'.$storage_cnt);
+			Log::debug('Storage list of deleted::');
 			Log::debug($transaction['storage']);
 			$storage_delete_cnt = 0;
 
@@ -895,14 +895,14 @@ class CaseController extends BaseController {
 				$delete = Storage::find($rec)->delete();
 				if ($delete) $storage_delete_cnt++;
 			}
-			Log::debug('[Storage]削除予定件数:'.$storage_cnt.'\t 削除件数:'.$storage_delete_cnt);
+			Log::debug('[Storage] Delete plan number:'.$storage_cnt.'\t Delete number:'.$storage_delete_cnt);
 		}
 
 		//Rollback processing of Label table
 		if (array_key_exists('label', $transaction) !== FALSE) {
 			$label_cnt = count($transaction['label']);
-			Log::debug('削除対象のラベル件数::'.$label_cnt);
-			Log::debug('削除対象のラベル一覧::');
+			Log::debug('Label number to be deleted::'.$label_cnt);
+			Log::debug('Label list of deleted::');
 			Log::debug($transaction['label']);
 			$label_delete_cnt = 0;
 
@@ -911,14 +911,14 @@ class CaseController extends BaseController {
 				$delete = Label::find($rec)->delete();
 				if ($delete) $label_delete_cnt++;
 			}
-			Log::debug('[Label]削除予定件数:'.$label_cnt.'\t 削除件数:'.$label_delete_cnt);
+			Log::debug('[Label] Delete plan number:'.$label_cnt.'\t Delete number:'.$label_delete_cnt);
 		}
 	}
 
 	/**
 	 * I get the storage ID that brute string in series
 	 * @param $seriesID Series ID
-	 * @param $select_column 参照カラム
+	 * @param $select_column Reference column
 	 */
 	function getSeries($seriesID, $select_column){
 		$series = Series::addWhere(array('seriesUID' => $seriesID))
@@ -1291,11 +1291,11 @@ class CaseController extends BaseController {
 				break;
 			case 'detail':
 			case 'edit':
-				//$js['img_edit.js'] = 'js/img_edit.js';
 				$js['jquery.simple-color-picker.js'] = 'js/jquery.simple-color-picker.js';
 				$js['voxelContainer.js'] = 'js/voxelContainer.js';
 				$js['imageViewer.js'] = 'js/imageViewer.js';
 				$js['imageViewerController.js'] = 'js/imageViewerController.js';
+				$js['jquery.flexforms.js'] = 'js/jquery.flexforms.js';
 				break;
 		}
 		return $js;

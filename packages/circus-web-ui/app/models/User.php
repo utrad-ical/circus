@@ -12,7 +12,9 @@ class User extends Eloquent implements UserInterface {
 	use UserTrait;
 
 	protected $connection = 'mongodb';
-	protected $collection = 'Users';
+
+	const COLLECTION = 'Users';
+	protected $collection = self::COLLECTION;
 	protected $primaryKey = 'userID';
 	public $timestamps = false;
 

@@ -7,7 +7,9 @@ use Jenssegers\Mongodb\Model as Eloquent;
  */
 class Group extends Eloquent {
 	protected $connection = 'mongodb';
-	protected $collection = 'Groups';
+
+	const COLLECTION = 'Groups';
+	protected $collection = self::COLLECTION;
 
 	protected $primaryKey = 'GroupID';
 	public $timestamps = false;

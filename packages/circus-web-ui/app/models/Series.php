@@ -11,6 +11,7 @@ class Series extends Eloquent {
 	protected $collection = 'Series';
 
 	protected $primaryKey = 'seriesUID';
+	public $timestamps = false;
 
 	public function storage() {
 		return $this->belongsTo('Storage', 'storageID', 'storageID');

@@ -15,6 +15,7 @@ class Storage extends Eloquent {
 	protected $collection = 'Storages';
 
 	protected $primaryKey = 'storageID';
+	public $timestamps = false;
 
 	/**
 	 * Indicates this storage area is for storing DICOM files.

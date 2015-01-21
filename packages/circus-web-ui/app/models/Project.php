@@ -10,6 +10,7 @@ class Project extends Eloquent {
 	protected $connection = 'mongodb';
 	protected $collection = 'Projects';
 	protected $primaryKey = 'projectID';
+	public $timestamps = false;
 
 	//Authority constant
 	const AUTH_TYPE_CREATE = 'createGroups';	//Case creation authority

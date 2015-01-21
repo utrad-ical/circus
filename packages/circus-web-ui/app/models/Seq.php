@@ -11,6 +11,7 @@ class Seq extends Eloquent {
 	protected $collection = 'Seqs';
 
 	protected $primaryKey = '_id';
+	public $timestamps = false;
 
 	/**
 	 * Search conditions Building

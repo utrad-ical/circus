@@ -60,7 +60,8 @@ class CaseController extends BaseController {
 			$select_col = array(
 				'caseID', 'projectID', 'incrementalID',
 				'patientInfoCache.patientID', 'patientInfoCache.name',
-				'revisions.latest.date', 'revisions.latest.creator',
+				'patientInfoCache.age', 'patientInfoCache.sex',
+				'revisions.latest.date',
 				'updateTime'
 			);
 
@@ -109,13 +110,12 @@ class CaseController extends BaseController {
 
 					//I shaping for display
 					$list[] = array(
-						'incrementalID' =>	$rec->incrementalID,
 						'caseID'		=>	$rec->caseID,
-						'projectID'		=>	$rec->projectID,
 						'patientID'		=>	$patient['patientID'],
 						'patientName' 	=>	$patient['name'],
+						'sex'			=>	self::getSex($patient['sex']),
+						'age'			=>	$patient['age'],
 						'latestDate' 	=>	date('Y/m/d('.$w.') H:i', $dt->sec),
-						'creator'		=>	$revision['latest']['creator'],
 						'projectName'	=>	$project ? $project[0]->projectName : '',
 						'updateDate'	=>	date('Y/m/d', $rec->updateTime->sec)
 					);
@@ -199,7 +199,9 @@ class CaseController extends BaseController {
 			$select_col = array(
 				'caseID', 'projectID', 'incrementalID',
 				'patientInfoCache.patientID', 'patientInfoCache.name',
-				'revisions.latest.date', 'revisions.latest.creator',
+				'patientInfoCache.age', 'patientInfoCache.sex',
+				'revisions.latest.date',
+				//'revisions.latest.creator',
 				'updateTime'
 			);
 
@@ -248,13 +250,15 @@ class CaseController extends BaseController {
 
 					//I shaping for display
 					$list[] = array(
-						'incrementalID' =>	$rec->incrementalID,
+						//'incrementalID' =>	$rec->incrementalID,
 						'caseID'		=>	$rec->caseID,
-						'projectID'		=>	$rec->projectID,
+					//	'projectID'		=>	$rec->projectID,
 						'patientID'		=>	$patient['patientID'],
 						'patientName' 	=>	$patient['name'],
+						'age'			=>	$patient['age'],
+						'sex'			=>	self::getSex($patient['sex']),
 						'latestDate' 	=>	date('Y/m/d('.$w.') H:i', $dt->sec),
-						'creator'		=>	$revision['latest']['creator'],
+					//	'creator'		=>	$revision['latest']['creator'],
 						'projectName'	=>	$project ? $project[0]->projectName : '',
 						'updateDate'	=>	date('Y/m/d', $rec->updateTime->sec)
 					);
@@ -670,9 +674,9 @@ class CaseController extends BaseController {
 								$label_obj->x = intval($rec2['offset'][0]);
 								$label_obj->y = intval($rec2['offset'][1]);
 								$label_obj->z = intval($rec2['offset'][2]);
-								$label_obj->w = isset($rec2['w']) ? intval($rec2['w']) : 0;
-								$label_obj->h = isset($rec2['h']) ? intval($rec2['h']) : 0;
-								$label_obj->d = intval($rec2['number']);
+								$label_obj->w = intval($rec2['size'][0]);
+								$label_obj->h = intval($rec2['size'][1]);
+								$label_obj->d = intval($rec2['size'][2]);
 								$label_obj->creator = Auth::user()->loginID;
 								$label_obj->date = $dt;
 								$label_obj->updateTime = $dt;
@@ -734,7 +738,7 @@ class CaseController extends BaseController {
 					'date'			=>	$dt,
 					'creator'		=>	Auth::user()->loginID,
 					'description'	=>	$inputs['memo'],
-					'attributes'	=>	array(),
+					'attributes'	=>	json_decode($inputs['attribute']),
 					'status'		=>	'draft',
 					'series'		=>	$series_list
 				);
@@ -829,6 +833,7 @@ class CaseController extends BaseController {
 					$select_revision = $case_info->revisions[$select_revision_no];
 					$data['memo'] = $select_revision['description'];
 					$data['series'] = array();
+					$data["attributes"] = $select_revision["attributes"];
 					foreach ($select_revision['series'] as $series) {
 						//Label information corrective
 						$series_info = array();
@@ -848,7 +853,8 @@ class CaseController extends BaseController {
 								//Label information acquisition
 								if ($rec['id']) {
 									$label_info = Label::find($rec['id']);
-									$label['number'] = $label_info->d;
+									//$label['number'] = $label_info->d;
+									$label['size'] = array($label_info->w, $label_info->h, $label_info->d);
 									$label['offset'] = array($label_info->x, $label_info->y, $label_info->z);
 
 									//Storage information acquisition
@@ -1326,6 +1332,8 @@ class CaseController extends BaseController {
 	 */
 	function getSex($sex) {
 		$sexes = Config::get('const.patient_sex');
+		Log::debug($sexes);
+		Log::debug($sex);
 		return $sexes[$sex];
 	}
 
@@ -1396,7 +1404,7 @@ class CaseController extends BaseController {
 	 * @return string that was turned into Hash in SHA256 the uniqid (case ID)
 	 */
 	function createCaseID(){
-		return hash_hmac('sha256', uniqid(), Config::get('const.hash_key'));
+		return hash('sha256', uniqid());
 	}
 
 	/**

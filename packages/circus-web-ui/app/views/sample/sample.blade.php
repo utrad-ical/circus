@@ -2,42 +2,60 @@
 @include('common.header')
 @section('content')
 <script type="text/javascript" src="{{asset('js/jquery.base64.min.js')}}"></script>
+{{HTML::script('/js/jquery-ui.min.js')}}
+{{HTML::script('/js/jquery.flexforms.js')}}
 <script type="text/javascript">
 	$(function(){
+		var attribute_properties = [
+		            				{type: 'text', key: 'name', caption: 'Your Name'},
+		            				{type: 'text', key: 'zip', caption: 'Zip Code', spec: { regex: /^\d{3}\-\d{4}$/, placeholder: '???-????' }},
+		            				{type: 'number', key: 'age', caption: 'Age', spec: { default: 40, min: 10, max: 100 } },
+		            				{type: 'select', spec: {options: ['Male', 'Female']}, key: 'sex', caption: 'Sex'},
+		            				{type: 'select', spec: {options: ['1', '2', '3'], valueType: 'number'}, key: 'floor', caption: 'Floor'},
+		            				{type: 'date', key: 'birthday', caption: 'Birthday'},
+		            				{type: 'checkbox', key: 'enabled', caption: 'Enabled'},
+		            				{type: 'radio', key: 'agree', caption: 'Agreement', spec: {
+		            				options: ['yes:I agree', 'no:I disagree']
+		            				}}
+		            			];
+		            			var attribute_prop = $('#the_panel_attribute');
+		            			attribute_prop.propertyeditor({properties: attribute_properties});
+
 		$('.upload_file').click(function(){
 
 			var tmp_src = "http://todai/img/common/header_logo.png";
 			var tmp_src2 = "http://todai/img/common/footer_logo.png";
 
+						var revision_attributes = attribute_prop.propertyeditor('option', 'value')
+
 			var data = {
-					"caseId"	:	"e3b8af3f79e3af403d0cbbab0fb632bc276970c2768ca6b8716e75958c136faa",
-					"memo"		:	$('#memo').val(),
-					"series" :	[
-						{
-							"id"	:	"LIDC-IDRI-0002",
-							"label"	:	[
-								{
-									"attributes"	:	{},
-									"id"			:	$('#labelID1').val(),
-									"name"			:	$('#labelName1').val(),
-									"number"		:	$('#drawNum1').val(),
-									"offset"		:	[$('#offsetX1').val(), $('#offsetY1').val(), $('#offsetZ1').val()],
-									"voxel"			:	[$('#boxcelW1').val(), $('#boxelH1').val()],
-									"image"			:	$.base64.encode(tmp_src)
-								},
-								{
-									"attributes"	:	{},
-									"id"			:	$('#labelID2').val(),
-									"name"			:	$('#labelName2').val(),
-									"number"		:	$('#drawNum2').val(),
-									"offset"		:	[$('#offsetX2').val(), $('#offsetY2').val(), $('#offsetZ2').val()],
-									"voxel"			:	[$('#boxcelW2').val(), $('#boxelH2').val()],
-									"image"			:	$.base64.encode(tmp_src2)
-								}
-							]
-						}
-					]
-				};
+				"caseId"	:	"e3b8af3f79e3af403d0cbbab0fb632bc276970c2768ca6b8716e75958c136faa",
+				"memo"		:	$('#memo').val(),
+				"attribute"	:	JSON.stringify(revision_attributes),
+				"series" :	[
+					{
+						"id"	:	"LIDC-IDRI-0002",
+						"label"	:	[
+							{
+								"attributes"	:	{},
+								"id"			:	$('#labelID1').val(),
+								"name"			:	$('#labelName1').val(),
+								"offset"		:	[$('#offsetX1').val(), $('#offsetY1').val(), $('#offsetZ1').val()],
+								"size"			:	[$('#boxcelW1').val(), $('#boxelH1').val(), $('#drawNum1').val()],
+								"image"			:	$.base64.encode(tmp_src)
+							},
+							{
+								"attributes"	:	{},
+								"id"			:	$('#labelID2').val(),
+								"name"			:	$('#labelName2').val(),
+								"offset"		:	[$('#offsetX2').val(), $('#offsetY2').val(), $('#offsetZ2').val()],
+								"size"			:	[$('#boxcelW1').val(), $('#boxelH1').val(), $('#drawNum1').val()],
+								"image"			:	$.base64.encode(tmp_src2)
+							}
+						]
+					}
+				]
+			};
 
 			console.log(data);
 
@@ -111,6 +129,7 @@
 							<td>枚数:{{Form::text('labelNumber2', 2, array('id' => 'drawNum2'))}}</td>
 						</tr>
 					</table>
+					<div id="the_panel_attribute"></div>
 					<p class="al_c">
 						{{Form::button('Save', array('class' => 'common_btn upload_file mar_t_20'))}}
 					</p>

@@ -148,8 +148,6 @@ class MongoRegisterer extends Registerer
 
 	private function setSeriesParameters($series, array $dicom_data)
 	{
-		$series->parameters = array();
-
 		$assignParameters = array(
 			'pixelSpacingX', 'pixelSpacingY',
 			'dataCollectionDiameter',
@@ -158,43 +156,44 @@ class MongoRegisterer extends Registerer
 
 		switch ($dicom_data['modality']) {
 			case "CT":
-				$assignParameters = array_merge(
+				array_push(
 					$assignParameters,
-					array(
-						'kVP', 'exposureTime', 'xRayTubeCurrent',
-						'filterType', 'convolutionKernel'
-					));
+					'kVP', 'exposureTime', 'xRayTubeCurrent',
+					'filterType', 'convolutionKernel'
+				);
 				break;
 
 			case 'MR':
-				$assignParameters = array_merge(
+				array_push(
 					$assignParameters,
-					array(
-						'scanningSequence', 'sequenceVariant',
-						'mrAcquisitionType',
-						'repetitionTime', 'echoTime', 'inversionTime',
-						'numberOfAverages', 'imagingFrequency',
-						'echoNumber', 'magneticFieldStrength',
-						'echoTrainLength', 'flipAngle'
-					));
+					'scanningSequence', 'sequenceVariant',
+					'mrAcquisitionType',
+					'repetitionTime', 'echoTime', 'inversionTime',
+					'numberOfAverages', 'imagingFrequency',
+					'echoNumber', 'magneticFieldStrength',
+					'echoTrainLength', 'flipAngle'
+				);
 				break;
 
 			case 'NM':
 			case 'PT':
-				$assignParameters = array_merge(
+				array_push(
 					$assignParameters,
-					array(
-						'radiopharmaceutical',
-						'radionuclideTotalDose',
-						'pixelValueUnits'
-					));
+					'radiopharmaceutical',
+					'radionuclideTotalDose',
+					'pixelValueUnits'
+				);
 				break;
 		}
 
+		$parameters = array();
+
 		foreach ($assignParameters as $c) {
 			list($objKey, $dicomKey) = strpos($c, '=') ? explode('=', $c) : array($c, $c);
-			$series->parameters += array($objKey => $dicom_data[$dicomKey]);
+			$parameters[$objKey] = $dicom_data[$dicomKey];
 		}
+
+		$series->parameters = $parameters;
 	}
 }
 

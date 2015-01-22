@@ -226,8 +226,8 @@
 								<col width="10%">
 								<col width="16%">
 								<col width="5%">
-								<col width="5%">
-								<col width="24%">
+								<col width="10%">
+								<col width="19%">
 								<col width="13%">
 								<col width="13%">
 								<col width="10%">

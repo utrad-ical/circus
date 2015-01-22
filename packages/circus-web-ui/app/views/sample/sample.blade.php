@@ -23,8 +23,8 @@
 
 		$('.upload_file').click(function(){
 
-			var tmp_src = "http://todai/img/common/header_logo.png";
-			var tmp_src2 = "http://todai/img/common/footer_logo.png";
+			//var tmp_src = "http://todai/img/common/header_logo.png";
+			//var tmp_src2 = "http://todai/img/common/footer_logo.png";
 
 						var revision_attributes = attribute_prop.propertyeditor('option', 'value')
 
@@ -42,7 +42,7 @@
 								"name"			:	$('#labelName1').val(),
 								"offset"		:	[$('#offsetX1').val(), $('#offsetY1').val(), $('#offsetZ1').val()],
 								"size"			:	[$('#boxcelW1').val(), $('#boxelH1').val(), $('#drawNum1').val()],
-								"image"			:	$.base64.encode(tmp_src)
+								"image"			:	'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAkAAAAIAQMAAAARA0f2AAAABlBMVEUAAAD///+l2Z/dAAAAD0lEQVQI12OAg/8NUAQGAC/3BH7xHLr3AAAAAElFTkSuQmCC'
 							},
 							{
 								"attributes"	:	{},
@@ -50,7 +50,7 @@
 								"name"			:	$('#labelName2').val(),
 								"offset"		:	[$('#offsetX2').val(), $('#offsetY2').val(), $('#offsetZ2').val()],
 								"size"			:	[$('#boxcelW1').val(), $('#boxelH1').val(), $('#drawNum1').val()],
-								"image"			:	$.base64.encode(tmp_src2)
+								"image"			:	'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAkAAAAIAQMAAAARA0f2AAAABlBMVEUAAAD///+l2Z/dAAAAD0lEQVQI12OAg/8NUAQGAC/3BH7xHLr3AAAAAElFTkSuQmCC'
 							}
 						]
 					}

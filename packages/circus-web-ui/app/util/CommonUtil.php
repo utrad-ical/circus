@@ -22,6 +22,6 @@ class CommonUtil {
 	 * @return 自動生成したID
 	 */
 	public static function createID(){
-		return hash_hmac('sha256', uniqid(), Config::get('const.hash_key'));
+		return hash('sha256', uniqid());
 	}
 }

@@ -148,4 +148,9 @@ class Series extends Eloquent {
 		}
 		return;
 	}
+
+	public static function getSeriesDescription($id){
+		$series = self::find($id);
+		return $series ? $series->seriesDescription : '';
+	}
 }

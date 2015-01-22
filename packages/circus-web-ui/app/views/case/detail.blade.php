@@ -1,186 +1,208 @@
 @extends('common.layout')
 @include('common.header')
 @section('content')
+@if (!isset($error_msg))
 <script type="text/javascript">
-	//Project-specific feature set to control the controller viewer widget
-	$(function(){
-		//ページロード直後にコントローラを発火させるときに渡すデータ群
-		//複数ビューアーを連動させる１グループにつき１コントローラ
-		var	voxel_container	=	new voxelContainer();	//ラベル情報格納用オブジェクト(3面共用)
-		voxel_container.name	=	'my_voxel';
+//コントローラ・ビューアーウィジェットをコントロールするための案件固有の機能群
+$(function(){
+	//ページロード直後にコントローラを発火させるときに渡すデータ群
+	//複数ビューアーを連動させる１グループにつき１コントローラ
+	var	voxel_container	=	new voxelContainer();	//ラベル情報格納用オブジェクト(3面共用)
+	voxel_container.name	=	'my_voxel';
 
-		var the_domain = "{{Config::get('config.domain')}}";
-		var	initInfo	=	[
-			{
-				baseUrl : "{{Config::get('config.dicom_img_base_url')}}",
-				postUrl : "{{asset('case/save_label')}}",	//画像格納サーバーと異なる場合はこちらを有効にする
-				caseId : "{{$case_detail['caseID']}}",
-				series : {{$series_list}},
-				control : {
-					window : {
-						panel : false
-					}
-				},
-				elements : {
-					parent : 'page_case_detail',
-					panel : 'the_panel_inner',
-					label : 'the_panel_inner'
-				},
-				viewer : [
-					{//1枚目
-						elementId : 'img_area_axial',
-						orientation : 'axial',
-						container : voxel_container,
-						number:{
-							maximum : 260, //何枚の断面が格納されているか
-							current : 44	//初期の表示番号
-						},
-						window: {
-							level: {current : 1000, maximum : 50000, minimum : -5000},
-							width: {current : 6000, maximum : 9000, 	minimum : 1},
-							preset : [
-								 {label: 'ソースからaxialだけに適用'	, level: 0000	, width : 2000},
-							]
-						},
+	var	the_domain	=	'http://insight/';
+	//var	the_domain	=	'http://ndp.spiritek.co.jp/';
+	var	initInfo	=	[
+		{
+			baseUrl : "{{Config::get('config.dicom_img_base_url')}}",
+			postUrl : "{{asset('case/save_label')}}",	//画像格納サーバーと異なる場合はこちらを有効にする
+			caseId : "{{Session::get('caseID')}}",
+			attribute : {{$attribute}},
+			series : {{$series_list}},
+			control : {
+				window : {
+					panel : false
+				}
+			},
+			elements : {
+				parent : 'page_case_detail',
+				panel : 'the_panel_inner',
+				label : 'the_panel_inner'
+			},
+			viewer : [
+				{//1枚目
+					elementId : 'img_area_axial',
+					orientation : 'axial',
+					container : voxel_container,
+					number:{
+						maximum : 260, //何枚の断面が格納されているか
+						current : 44	//初期の表示番号
 					},
-					{//2枚目
-						elementId : 'img_area_sagital',
-						orientation : 'sagital',
-						container : voxel_container,
-						number:{
-							maximum : 511, //何枚の断面が格納されているか
-							current : 90	//初期の表示番号
-						}
+					window: {
+						level: {current : 1000, maximum : 50000, minimum : -5000},
+						width: {current : 6000, maximum : 9000, 	minimum : 1},
+						preset : [
+							 {label: 'ソースからaxialだけに適用'	, level: 0000	, width : 2000},
+						]
 					},
-					{//3枚目
-						elementId : 'img_area_coronal',
-						orientation : 'coronal',
-						container : voxel_container,
-						number:{
-							maximum : 511, //何枚の断面が格納されているか
-							current : 90	//初期の表示番号
-						}
-					}
-				]
-			}
-		];
-
-		//seriesの個数分のajaxを行ってnode.jsからseries情報をもらう
-		var ajax_cnt = 0;
-		var initAjax= function(){
-			var tmp_series = initInfo[0].series[ajax_cnt];
-			$.ajax({
-				//url: the_domain+'insight/todai_img',
-				url: "{{asset('series/get_series')}}",
-				//url : the_domain,
-				//url: the_domain + 'dicom_img',
-				type: 'GET',
-				data: {
-					mode : 'metadata',
-					series : tmp_series.image.id
-				},//送信データ
-				dataType: 'json',
-				error: function(){
-					alert('I failed to communicate.');
 				},
-				success: function(response){
-
-					if(typeof response.allow_mode != 'undefined'){
-						tmp_series.allow_mode = 	$.extend(true,tmp_series.allow_mode ,response.allow_mode);
+				{//2枚目
+					elementId : 'img_area_sagital',
+					orientation : 'sagital',
+					container : voxel_container,
+					number:{
+						maximum : 511, //何枚の断面が格納されているか
+						current : 90	//初期の表示番号
 					}
-
-					if(typeof tmp_series.image.voxel != 'object'){
-						tmp_series.image.voxel =  new Object();
-					}
-
-					if(typeof response.voxel_x == 'number'){
-						tmp_series.image.voxel.voxel_x = response.voxel_x;
-					};
-
-					if(typeof response.voxel_y == 'number'){
-						tmp_series.image.voxel.voxel_y = response.voxel_y;
-					};
-
-					if(typeof response.voxel_z == 'number'){
-						tmp_series.image.voxel.voxel_z = response.voxel_z;
-					};
-
-					if(typeof response.x == 'number'){
-						tmp_series.image.voxel.x = response.x;
-					};
-
-					if(typeof response.y == 'number'){
-						tmp_series.image.voxel.y = response.y;
-					};
-
-					if(typeof response.z == 'number'){
-						tmp_series.image.voxel.z = response.z;
-					};
-
-					if(typeof response.window_level == 'number'){
-						tmp_series.image.window.level.current = response.y;
-					};
-
-					if(typeof response.window_width == 'number'){
-						tmp_series.image.window.width.current = response.window_width;
-					};
-
-					if(ajax_cnt==initInfo[0].series.length-1){
-						controllerRun();
-					}else{
-						ajax_cnt++;
-						initAjax();
+				},
+				{//3枚目
+					elementId : 'img_area_coronal',
+					orientation : 'coronal',
+					container : voxel_container,
+					number:{
+						maximum : 511, //何枚の断面が格納されているか
+						current : 90	//初期の表示番号
 					}
 				}
-			});
+			]
 		}
-		initAjax();//ajax発火
+	];
 
-		var	controllerRun	=	function(){
-			//連動シリーズ１つにつき１つずつコントローラ発行
-			for(var j=0;	j<initInfo.length;	j++){
-				$('#'+initInfo[j].wrapElementId).imageViewerController('init',initInfo[j]);
+	//seriesの個数分のajaxを行ってnode.jsからseries情報をもらう
+	var ajax_cnt = 0;
+	var initAjax= function(){
+		var tmp_series = initInfo[0].series[ajax_cnt];
+		$.ajax({
+			//url: the_domain+'insight/todai_img',
+			url: "{{asset('series/get_series')}}",
+			type: 'GET',
+			data: {
+				mode : 'metadata',
+				series : tmp_series.id
+			},//送信データ
+			dataType: 'json',
+			error: function(){
+				alert('通信に失敗しました');
+			},
+			success: function(response){
+
+				if(typeof response.allow_mode != 'undefined'){
+					tmp_series.allow_mode = 	$.extend(true,tmp_series.allow_mode ,response.allow_mode);
+				}
+
+				if(typeof tmp_series.voxel != 'object'){
+					tmp_series.voxel =  new Object();
+				}
+
+				if(typeof response.voxel_x == 'number'){
+					tmp_series.voxel.voxel_x = response.voxel_x;
+				};
+
+				if(typeof response.voxel_y == 'number'){
+					tmp_series.voxel.voxel_y = response.voxel_y;
+				};
+
+				if(typeof response.voxel_z == 'number'){
+					tmp_series.voxel.voxel_z = response.voxel_z;
+				};
+
+				if(typeof response.x == 'number'){
+					tmp_series.voxel.x = response.x;
+				};
+
+				if(typeof response.y == 'number'){
+					tmp_series.voxel.y = response.y;
+				};
+
+				if(typeof response.z == 'number'){
+					tmp_series.voxel.z = response.z;
+				};
+
+				if(typeof response.window_level == 'number'){
+					tmp_series.window.level.current = response.y;
+				};
+
+				if(typeof response.window_width == 'number'){
+					tmp_series.window.width.current = response.window_width;
+				};
+
+				if(ajax_cnt==initInfo[0].series.length-1){
+					controllerRun();
+				}else{
+					ajax_cnt++;
+					initAjax();
+				}
 			}
+		});
+	}
+	initAjax();//ajax発火
+
+
+
+	var	controllerRun	=	function(){
+		//連動シリーズ１つにつき１つずつコントローラ発行
+		for(var j=0;	j<initInfo.length;	j++){
+			$('#'+initInfo[j].wrapElementId).imageViewerController('init',initInfo[j]);
 		}
+	}
 
-		$('#btnBack').click(function() {
-			$('body').append('<form action="./search" method="POST" class="hidden" id="frm_back"></form>');
-			$('#frm_back').append('<input type="hidden" name="btnBack" value="">');
-			$('#frm_back').submit();
-			return false;
-		});
-
-		$('.link_case_detail').click(function(){
-			console.log("Detail");
-			$(this).closest('td').find("input[name='mode']").val('detail');
-			console.log("Mode::"+$(this).closest('td').find("input[name='mode']").val());
-			//Get the form ID to be sent
-			$(this).closest('td').find('.form_case_detail').submit();
-			return false;
-		});
-
-		$('.link_case_edit').click(function(){
-			console.log("Edit");
-			$(this).closest('td').find("input[name='mode']").val('edit');
-			console.log("Mode::"+$(this).closest('td').find("input[name='mode']").val());
-			$(this).closest('td').find('.form_case_detail').submit();
-			return false;
-		});
+	$('#btnBack').click(function() {
+		$('body').append('<form action="./search" method="POST" class="hidden" id="frm_back"></form>');
+		$('#frm_back').append('<input type="hidden" name="btnBack" value="">');
+		$('#frm_back').submit();
+		return false;
 	});
+
+	$('.link_case_detail').click(function(){
+		console.log("Detail");
+		$(this).closest('td').find("input[name='mode']").val('detail');
+		console.log("Mode::"+$(this).closest('td').find("input[name='mode']").val());
+		//Get the form ID to be sent
+		$(this).closest('td').find('.form_case_detail').submit();
+		return false;
+	});
+
+	$('.link_case_edit').click(function(){
+		console.log("Edit");
+		$(this).closest('td').find("input[name='mode']").val('edit');
+		console.log("Mode::"+$(this).closest('td').find("input[name='mode']").val());
+		$(this).closest('td').find('.form_case_detail').submit();
+		return false;
+	});
+
+	//RevisionのAttribute情報設定
+	var attribute_properties = {{$label_attribute_settings}};
+	var attribute_prop = $('#the_panel_attribute');
+	attribute_prop.propertyeditor({properties: attribute_properties});
+	attribute_prop.on('valuechange', function () {
+		if (initInfo[0].attribute)
+			attribute_prop.propertyeditor('option', 'value', initInfo[0].attribute);
+		else
+			attribute_prop.propertyeditor('option', 'value');
+    });
+	attribute_prop.trigger('valuechange');
+
+
+});
+
 </script>
+@endif
 <div class="page_contents_outer">
 	<div class="page_contents_inner">
 		<div class="page_unique" id="page_case_detail">
-			<h1 class="page_ttl">Case Detail (Revision Case Detail ({{$case_detail['revisionNo']}}))</h1>
+			<h1 class="page_ttl">
+				@if (isset($error_msg))
+					Case Detail
+				@else
+					Case Detail (Revision {{$case_detail['revisionNo']}}))
+				@endif
+			</h1>
+			<div class="al_l mar_b_10 w_600 fl_l">
+				{{HTML::link(asset('/case/search'), 'Back to Case Search Result', array('class' => 'common_btn', 'id' => 'btnBack'))}}
+			</div>
 			@if (isset($error_msg))
-				<div class="al_l mar_b_10 w_600 fl_l">
-					{{HTML::link(asset('/case/search'), 'Back to Case Search Result', array('class' => 'common_btn', 'id' => 'btnBack'))}}
-				</div>
-				<span class="text_alert">{{$error_msg}}</span>
+				<br><span class="txt_alert">{{$error_msg}}</span>
 			@else
-				<div class="al_l mar_b_10 w_600 fl_l">
-					{{HTML::link(asset('/case/search'), 'Back to Case Search Result', array('class' => 'common_btn', 'id' => 'btnBack'))}}
-				</div>
 				<div class="al_r mar_b_10 w_300 fl_r">
 					{{Form::select('revision', $revision_no_list, $case_detail['revisionNo'], array('class' => 'select w_180'))}}
 					{{HTML::link(asset('/case/detail#revision'), 'Revision List', array('class' => 'common_btn'))}}
@@ -226,10 +248,10 @@
 							{{$case_detail['patientName']}} ({{$case_detail['patientID']}})
 							<br>{{$case_detail['birthday']}} {{$case_detail['sex']}}
 						</p>
+						<div class="control_panel_inner" id="the_panel_attribute"></div>
 					</div>
 				</div>
 				<div class="clear">&nbsp;</div>
-				<div class="control_panel_inner"  id="the_panel_attribute"></div>
 				<div class="control_panel mar_tb_10" id="the_panel">
 					<div class="control_panel_inner" id="the_panel_inner">
 					</div>
@@ -253,6 +275,7 @@
 							{{Form::select('disp', Config::get('const.search_display'), isset($inputs['disp']) ? $inputs['disp'] : '', array('class' => 'w_max change_select', 'data-target-dom' => 'display_num_down', 'id' => 'display_num_up'))}}
 						</li>
 					</ul>
+					<canvas id="dummy_canvas"></canvas>
 					<div class="pad_tb_10 result_revision_list">
 						<table class="result_table common_table al_c">
 							<colgroup>

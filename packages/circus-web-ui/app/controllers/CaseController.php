@@ -34,14 +34,14 @@ class CaseController extends BaseController {
 			Session::put('case.search', $tmp);
 		} else if (array_key_exists('condition_id', $inputs) !== FALSE){
 			$detail_search_session = Session::get('case_detail_search');
-			$detail_search = $detail_search_session[$inputs["condition_id"]];
-			$detail_search["project"] = json_decode($detail_search["project"]);
-			if (array_key_exists("mongo_data", $detail_search) !== FALSE) {
-				$file_path = dirname(dirname(__FILE__))."/saves/".Auth::user()->loginID."_case_".($inputs["condition_id"]+1).".json";
+			$detail_search = $detail_search_session[$inputs['condition_id']];
+			$detail_search['project'] = json_decode($detail_search['project']);
+			if (array_key_exists('mongo_data', $detail_search) !== FALSE) {
+				$file_path = dirname(dirname(__FILE__)).'/saves/'.Auth::user()->loginID.'_case_'.($inputs['condition_id']+1).'.json';
 				$handle = fopen($file_path, 'r');
 				$detail_search['mongo_search_data'] = fread($handle, filesize($file_path));
 
-				$detail_search["mongo_data"] = json_decode($detail_search["mongo_data"]);
+				$detail_search['mongo_data'] = json_decode($detail_search['mongo_data']);
 
 			}
 			$detail_search['disp'] = Config::get('const.page_display');
@@ -357,13 +357,15 @@ class CaseController extends BaseController {
 			if (Session::has('case_input'))
 				Session::forget('case_input');
 			//CaseID acquisition
-			$inputs['caseID'] = Session::get('caseID');
-			$inputs['mode'] = Session::get('view_mode');
 		} else if (array_key_exists('caseID', $inputs) === FALSE) {
 			$error_msg = 'Please specify a case ID.';
 		}
 
+		$inputs['caseID'] = isset($inputs['caseID']) ? $inputs['caseID'] : Session::get('caseID');
+		$inputs['mode'] = isset($inputs['mode']) ? $inputs['mode'] : Session::get('view_mode');
+
 		if (!$error_msg) {
+			Session::put('caseID', $inputs['caseID']);
 			if (array_key_exists('disp', $inputs) === FALSE) $inputs['disp'] = Config::get('const.page_display');
 			if (array_key_exists('sort', $inputs) === FALSE) $inputs['sort'] = 'revision.date';
 
@@ -438,7 +440,8 @@ class CaseController extends BaseController {
 					$revision_no_list[] = $key;
 				}
 			}
-			$case_detail['revisionNo'] = isset($inputs['revisionNo']) ? $inputs['revisionNo'] : $max_revision;
+			$select_revision = isset($inputs['revisionNo']) ? $inputs['revisionNo'] : $max_revision;
+			$case_detail['revisionNo'] = $select_revision;
 
 			$result['case_detail'] = $case_detail;
 
@@ -461,7 +464,9 @@ class CaseController extends BaseController {
 			$series_info = Series::addWhere($inputs)
 								->get($select_col);
 			//Shaping of the series list
-			$result['series_list'] = self::getSeriesList($series_info);
+			Log::debug('Revision number that has been selected::'.$select_revision);
+			$result['series_list'] = self::getSeriesList($case_data->revisions[$select_revision]);
+			$result['attribute'] = json_encode($case_data->revisions[$select_revision]['attributes']);
 
 			//Setting the pager
 			$revision_pager = Paginator::make(
@@ -480,6 +485,17 @@ class CaseController extends BaseController {
 		$result['js'] = self::jsSetting('detail');
 		$result['mode'] = $inputs['mode'];
 		Session::put('view_mode', $inputs['mode']);
+
+		//JsonFile read
+		try {
+			$file_path = dirname(dirname(__FILE__))."/config/label_settings.json";
+			$handle = fopen($file_path, 'r');
+			$result['label_attribute_settings'] = fread($handle, filesize($file_path));
+			fclose($handle);
+		} catch (Exception $e){
+			Log::debug($e->getMessage());
+		}
+
 		return View::make('/case/detail', $result);
 	}
 
@@ -614,171 +630,175 @@ class CaseController extends BaseController {
 
 			$errors = self::validateSaveLabel($inputs);
 			if (count($errors) > 0)
-				$error_msg = implode("\n", $errors);
+				self::errorFinish(implode("\n", $errors));
 
 			//I want to save the label information because the error message is not
-			if (!$error_msg){
-				$dt = new MongoDate(strtotime(date('Y-m-d H:i:s')));
-				$revision = array();
-				$series_list = array();
+			$dt = new MongoDate(strtotime(date('Y-m-d H:i:s')));
+			$revision = array();
+			$series_list = array();
+			$img_save_path = Config::get('const.label_img_save_path');
 
-				foreach ($inputs['series'] as $rec) {
-					$revision[$rec['id']] = array();
-					//If there is a label information
-					if (array_key_exists('label', $rec) !== FALSE) {
-						foreach ($rec['label'] as $rec2) {
-							//Register storage table and label table is not performed if there is no image
-							if ($rec2['image']) {
-								//Storage registration of
-								$storage_id = Seq::getIncrementSeq('Storages');
-								$storage_obj = App::make('Storage');
-								$storage_obj->storageID = $storage_id;
-								$storage_obj->path = base64_decode(str_replace(' ', '+',$rec2['image']));
-								$storage_obj->type = 'label';
-								$storage_obj->active = true;
-								$storage_obj->updateTime = $dt;
-								$storage_obj->createTime = $dt;
+			foreach ($inputs['series'] as $rec) {
+				$revision[$rec['id']] = array();
+				//If there is a label information
+				if (array_key_exists('label', $rec) !== FALSE) {
+					foreach ($rec['label'] as $rec2) {
+						//Register storage table and label table is not performed if there is no image
+						if ($rec2['image']) {
+							//Storage registration of
+							$storage_id = Seq::getIncrementSeq('Storages');
+							$storage_obj = App::make('Storage');
+							$storage_obj->storageID = $storage_id;
+							$decode_str = base64_decode(str_replace('data:image/png;base64,', '',$rec2['image']));
+							$file_put_result = file_put_contents($img_save_path.$storage_id.".png", $decode_str);
+							$storage_obj->path = $img_save_path.$storage_id.".png";
+							$storage_obj->type = 'label';
+							$storage_obj->active = true;
+							$storage_obj->updateTime = $dt;
+							$storage_obj->createTime = $dt;
 
-								//Storage register before error checking
-								$errors = $storage_obj->validate(json_decode($storage_obj, true));
+							//Storage register before error checking
+							$errors = $storage_obj->validate(json_decode($storage_obj, true));
 
-								//Processing is interrupted because there is an error
-								if ($errors) {
-									Log::debug('Storage Validate Error');
-									$error_msg = implode("\n", $errors->all());
-									self::rollback($transaction);
-									break;
-								}
-
-								//I do registration of storage information because there is no error
-								$result = $storage_obj->save();
-
-								//To gain in the transaction array Now that you have registered success
-								if ($result) {
-									if (array_key_exists('storage', $transaction) === FALSE)
-										$transaction['storage'] = array();
-
-									$transaction['storage'][] = $storage_obj->storageID;
-								} else {
-									Log::debug('[Storage]Regist failed');
-									$error_msg = $result;
-									self::rollback($transaction);
-									break;
-								}
-
-								//I do the registration of the label information
-								//Storage ID to use the storage ID registered just before
-								$label_obj = App::make('Label');
-								$label_obj->labelID = $rec2['id'];
-								$label_obj->storageID = $storage_obj->storageID;
-								$label_obj->x = intval($rec2['offset'][0]);
-								$label_obj->y = intval($rec2['offset'][1]);
-								$label_obj->z = intval($rec2['offset'][2]);
-								$label_obj->w = intval($rec2['size'][0]);
-								$label_obj->h = intval($rec2['size'][1]);
-								$label_obj->d = intval($rec2['size'][2]);
-								$label_obj->creator = Auth::user()->loginID;
-								$label_obj->date = $dt;
-								$label_obj->updateTime = $dt;
-								$label_obj->createTime = $dt;
-
-								//Label information before registration error checking
-								$errors = $label_obj->validate(json_decode($label_obj, true));
-
-								//I want to delete the data of the registered storage because there is an error
-								if ($errors) {
-									Log::debug('Label Validate Error');
-									$error_msg = implode("\n", $errors->all());
-									self::rollback($transaction);
-									break;
-								}
-								//I do the registration of the label information because there is no error
-								$result = $label_obj->save();
-								//To gain in the transaction array Now that you have registered success
-								if ($result) {
-									if (array_key_exists('label', $transaction) === FALSE)
-										$transaction['label'] = array();
-
-									$transaction['label'][] = $label_obj->labelID;
-								} else {
-									Log::debug('[Label]Regist failed');
-									$error_msg = $result;
-									self::rollback($transaction);
-									break;
-								}
-
-								$revision[$rec['id']][] = array(
-									'id'			=>	$label_obj->labelID,
-									'attributes'	=>	array(
-										'labelName'	=>	$rec2['name']
-									)
-								);
+							//Processing is interrupted because there is an error
+							if ($errors) {
+								Log::debug('Storage Validate Error');
+								self::rollback($transaction, implode("\n", $errors->all()));
+								break;
 							}
+
+							//I do registration of storage information because there is no error
+							$result = $storage_obj->save();
+
+							//To gain in the transaction array Now that you have registered success
+							if ($result) {
+								Log::debug('[Strorage]Regist success');
+								if (array_key_exists('storage', $transaction) === FALSE)
+									$transaction['storage'] = array();
+
+								$transaction['storage'][] = $storage_obj->storageID;
+							} else {
+								Log::debug('[Storage]Regist failed');
+								self::rollback($transaction, $result);
+								break;
+							}
+
+							//I do the registration of the label information
+							//Storage ID to use the storage ID registered just before
+							$label_obj = App::make('Label');
+							$label_obj->labelID = $rec2['id'];
+							$label_obj->storageID = $storage_obj->storageID;
+							$label_obj->x = intval($rec2['offset'][0]);
+							$label_obj->y = intval($rec2['offset'][1]);
+							$label_obj->z = intval($rec2['offset'][2]);
+							$label_obj->w = intval($rec2['size'][0]);
+							$label_obj->h = intval($rec2['size'][1]);
+							$label_obj->d = intval($rec2['size'][2]);
+							$label_obj->creator = Auth::user()->loginID;
+							$label_obj->date = $dt;
+							$label_obj->updateTime = $dt;
+							$label_obj->createTime = $dt;
+
+							//Label information before registration error checking
+							$errors = $label_obj->validate(json_decode($label_obj, true));
+
+							//I want to delete the data of the registered storage because there is an error
+							if ($errors) {
+								Log::debug('Label Validate Error');
+								self::rollback($transaction, implode("\n", $errors->all()));
+								break;
+							}
+							//I do the registration of the label information because there is no error
+							$result = $label_obj->save();
+							//To gain in the transaction array Now that you have registered success
+							if ($result) {
+								if (array_key_exists('label', $transaction) === FALSE)
+									$transaction['label'] = array();
+
+								$transaction['label'][] = $label_obj->labelID;
+							} else {
+								Log::debug('[Label]Regist failed');
+								self::rollback($transaction, $result);
+								break;
+							}
+
+							$revision[$rec['id']][] = array(
+								'id'			=>	$label_obj->labelID,
+							/*
+								'attributes'	=>	array(
+									'labelName'	=>	$rec2['name']
+								)
+								*/
+								'attributes'	=>	array()
+							);
 						}
-						$series_list[] = array(
-							'seriesUID'	=>	$rec['id'],
-							'labels'	=>	$revision[$rec['id']]
-						);
-					} else {
-						$series_list[] = array(
-							'seriesUID'	=>	$rec['id'],
-							'labels'	=>	array()
-						);
 					}
-				}
-				//Update of case information
-				//Case information acquisition
-				$case_obj = ClinicalCase::find($inputs['caseId']);
-				//Revision information acquisition
-				$revisions = $case_obj->revisions;
-				$next_index = count($revisions) > 0 ? count($revisions)-1 : 0;
-				Log::debug($next_index);
-				//Revision information setting
-				$tmp_revision = array(
-					'date'			=>	$dt,
-					'creator'		=>	Auth::user()->loginID,
-					'description'	=>	$inputs['memo'],
-					'attributes'	=>	json_decode($inputs['attribute']),
-					'status'		=>	'draft',
-					'series'		=>	$series_list
-				);
-
-				$case_obj->updateTime = $dt;
-
-				//Error checking
-				$errors = $case_obj->validate(json_decode($case_obj, true), true);
-				//Remove label information and storage information if there is an error
-				if ($errors){
-					Log::debug('Case Validate Error');
-					$error_msg = implode("\n", $errors->all());
-					self::rollback($transaction);
+					$series_list[] = array(
+						'seriesUID'	=>	$rec['id'],
+						'labels'	=>	$revision[$rec['id']]
+					);
 				} else {
-					$revision_data = array();
-					foreach ($revisions as $key => $val) {
-						if ($key !== 'latest') {
-							$revision_data[$key] = $val;
-						} else {
-							$revision_data['latest'] = $tmp_revision;
-						}
-					}
-
-					Log::debug('Registration will Revision number:'.$next_index);
-					$revision_data[$next_index] = $tmp_revision;
-					$case_obj->revisions = $revision_data;
-					//I registered because there is no error
-					$case_obj->save();
+					$series_list[] = array(
+						'seriesUID'	=>	$rec['id'],
+						'labels'	=>	array()
+					);
 				}
-				$msg = 'Registration of label information is now complete.';
 			}
+			//Update of case information
+			//Case information acquisition
+			$case_obj = ClinicalCase::find($inputs['caseId']);
+			//Revision information acquisition
+			$revisions = $case_obj->revisions;
+			$next_index = count($revisions) > 0 ? count($revisions)-1 : 0;
+
+			Log::debug('Add Revision No::'.$next_index);
+
+			//Revision information setting
+			$save_attribute = array_key_exists('attribute', $inputs) ?
+								json_decode($inputs['attribute']) : array();
+			$tmp_revision = array(
+				'date'			=>	$dt,
+				'creator'		=>	Auth::user()->loginID,
+				'description'	=>	$inputs['memo'],
+				'attributes'	=>	$save_attribute,
+				'status'		=>	'draft',
+				'series'		=>	$series_list
+			);
+
+			$case_obj->updateTime = $dt;
+
+			//Error checking
+			$errors = $case_obj->validate(json_decode($case_obj, true), true);
+			//Remove label information and storage information if there is an error
+			if ($errors){
+				Log::debug('Case Validate Error');
+				self::rollback($transaction, implode("\n", $errors->all()));
+			} else {
+				$revision_data = array();
+				foreach ($revisions as $key => $val) {
+					if ($key !== 'latest') {
+						$revision_data[$key] = $val;
+					} else {
+						$revision_data['latest'] = $tmp_revision;
+					}
+				}
+
+				$revision_data[$next_index] = $tmp_revision;
+				$case_obj->revisions = $revision_data;
+				//I registered because there is no error
+				$case_obj->save();
+			}
+			$msg = 'Registration of label information is now complete.';
 		} catch (Exception $e){
 			$error_msg = $e->getMessage();
 			Log::debug('[Exception Error]'.$error_msg);
+			self::errorFinish($error_msg);
 		}
 		Log::debug('Error content::'.$error_msg);
 
 		//JSON output
 		header('Content-Type: application/json; charset=UTF-8');
-		$res = json_encode(array('result' => true, 'message' => $error_msg ? $error_msg : $msg, 'response' => ""));
+		$res = json_encode(array('result' => true, 'message' => $msg, 'response' => ""));
 		echo $res;
 
 	}
@@ -807,7 +827,7 @@ class CaseController extends BaseController {
 				self::errorFinish('Please specify a case ID.');
 
 			if (!$error_msg) {
-				$data["caseId"] = $inputs['caseId'];
+				$data['caseId'] = $inputs['caseId'];
 				//I get the case information from the case ID
 				$case_info = ClinicalCase::find($inputs['caseId']);
 
@@ -833,7 +853,7 @@ class CaseController extends BaseController {
 					$select_revision = $case_info->revisions[$select_revision_no];
 					$data['memo'] = $select_revision['description'];
 					$data['series'] = array();
-					$data["attributes"] = $select_revision["attributes"];
+					$data['attributes'] = $select_revision['attributes'];
 					foreach ($select_revision['series'] as $series) {
 						//Label information corrective
 						$series_info = array();
@@ -885,7 +905,7 @@ class CaseController extends BaseController {
 	 * Pseudo transaction rollback processing (new registration only)
 	 * @param $transaction Roll back
 	 */
-	function rollback($transaction) {
+	function rollback($transaction, $error_msg) {
 		//To perform a rollback processing because failed to register
 
 		//Rollback processing of Storage table
@@ -919,6 +939,7 @@ class CaseController extends BaseController {
 			}
 			Log::debug('[Label] Delete plan number:'.$label_cnt.'\t Delete number:'.$label_delete_cnt);
 		}
+		self::errorFinish($error_msg);
 	}
 
 	/**
@@ -1298,6 +1319,7 @@ class CaseController extends BaseController {
 			case 'detail':
 			case 'edit':
 				$js['jquery.simple-color-picker.js'] = 'js/jquery.simple-color-picker.js';
+				$js['canvastool.pngencoder.min.js'] = 'js/canvastool.pngencoder.min.js';
 				$js['voxelContainer.js'] = 'js/voxelContainer.js';
 				$js['imageViewer.js'] = 'js/imageViewer.js';
 				$js['imageViewerController.js'] = 'js/imageViewerController.js';
@@ -1332,8 +1354,6 @@ class CaseController extends BaseController {
 	 */
 	function getSex($sex) {
 		$sexes = Config::get('const.patient_sex');
-		Log::debug($sexes);
-		Log::debug($sex);
 		return $sexes[$sex];
 	}
 
@@ -1352,51 +1372,77 @@ class CaseController extends BaseController {
 	 * @param $data Revision data that are selected
 	 * @return Series list brute string to Revision
 	 */
-	function getSeriesList($series_list) {
-		$list = array();
-		Log::debug($series_list);
-		foreach ($series_list as $rec) {
+	function getSeriesList($revision_info) {
+		$data = array();
+		$img_save_path = Config::get('const.label_img_save_path');
 
-			//検索条件を設定
-			$search_data = array();
-			$labels = array();
-
-
-			$list[] = array(
-				'image'		=>	array(
-					'description'	=>	$rec->seriesDescription,
-					'id'			=>	$rec->seriesUID,
-					'voxel'			=>	array(
-						'voxel_x'	=>	0,
-						'voxel_y'	=>	0,
-						'voxel_z'	=>	0,
-						'x'			=>	0,
-						'y'			=>	0,
-						'z'			=>	0
-					),
-					'window'		=>	array(
-						'level'		=>	array(
-							'current'	=>	1000,
-							'maximum'	=>	40000,
-							'minimum'	=>	-2000
-						),
-						'width'		=>	array(
-							'current'	=>	3500,
-							'maximum'	=>	8000,
-							'minimum'	=>	1
-						),
-						'preset'	=>	array(
-							array(
-								'label'	=>	'ソースからシリーズ共通用で入力',
-								'level'	=>	1000,
-								'width'	=>	2000
-							)
-						)
+		foreach ($revision_info['series'] as $series) {
+			//Label information corrective
+			$series_info = array();
+			$series_info['id'] = $series['seriesUID'];
+			$series_info['description'] = Series::getSeriesDescription($series['seriesUID']);
+			$series_info['label'] = array();
+			$series_info['voxel'] = array(
+				'voxel_x'	=>	0,
+				'voxel_y'	=>	0,
+				'voxel_z'	=>	0,
+				'x'			=>	0,
+				'y'			=>	0,
+				'z'			=>	0
+			);
+			$series_info['window'] = array(
+				'level'		=>	array(
+					'current'	=>	1000,
+					'maximum'	=>	40000,
+					'minimum'	=>	-2000
+				),
+				'width'		=>	array(
+					'current'	=>	3500,
+					'maximum'	=>	8000,
+					'minimum'	=>	1
+				),
+				'preset'	=>	array(
+					array(
+						'label'	=>	'ソースからシリーズ共通用で入力',
+						'level'	=>	1000,
+						'width'	=>	2000
 					)
 				)
 			);
+
+			$label_list = array();
+			foreach ($series['labels'] as $rec){
+				$label = array();
+
+				//considers the creation label is seen when there is no name in the attributes, label sky objects
+				//if (array_key_exists('labelName', $rec['attributes']) !== FALSE) {
+				if ($rec){
+					$label['attributes'] = $rec['attributes'];
+					$label['id'] = $rec["id"];
+					//$label['name'] = $rec['attributes']['labelName'];
+
+					//Label information acquisition
+					if ($rec['id']) {
+						$label_info = Label::find($rec['id']);
+						$label['size'] = array($label_info->w, $label_info->h, $label_info->d);
+						$label['offset'] = array($label_info->x, $label_info->y, $label_info->z);
+
+						//Storage information acquisition
+						$storage_info = Storage::find($label_info->storageID);
+					//	Log::debug("ストレージID:".$label_info->storageID);
+
+						$img_path = file_get_contents($storage_info->path);
+						$label['image'] = 'data:image/png;base64,'.base64_encode($img_path);
+					}
+				}
+				$series_info['label'][] = $label;
+			}
+			$data[] = $series_info;
 		}
-		return json_encode($list);
+
+		$json = json_encode($data);
+		$json = preg_replace('/\\\\\//', '/', $json);
+		return $json;
 	}
 
 	/**

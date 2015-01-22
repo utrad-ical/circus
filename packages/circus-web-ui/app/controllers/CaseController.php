@@ -1429,7 +1429,6 @@ class CaseController extends BaseController {
 
 						//Storage information acquisition
 						$storage_info = Storage::find($label_info->storageID);
-					//	Log::debug("ストレージID:".$label_info->storageID);
 
 						$img_path = file_get_contents($storage_info->path);
 						$label['image'] = 'data:image/png;base64,'.base64_encode($img_path);

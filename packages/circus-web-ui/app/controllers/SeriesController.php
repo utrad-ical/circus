@@ -78,10 +78,9 @@ class SeriesController extends BaseController {
 					'seriesDescription'	=>	$rec->seriesDescription,
 					'patientID'			=>	$patient['patientID'],
 					'patientName' 		=>	$patient['patientName'],
-				//	'patientBirthday'	=>	$patient['birthday'],
 					'patientSex'		=>	self::getSex($patient['sex']),
 					'age'				=>	$patient['age'],
-					'seriesDate'		=>	$rec->seriesDate,
+					'seriesDate'		=>	date('Y/m/d', $rec->seriesDate->sec),
 					'modality'			=>	$rec->modality
 				);
 			}

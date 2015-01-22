@@ -223,27 +223,35 @@
 					<div class="w_max pad_tb_5">
 						<table class="result_table common_table">
 							<colgroup>
-								<col width="20%">
-								<col width="20%">
-								<col width="45%">
 								<col width="10%">
+								<col width="16%">
 								<col width="5%">
+								<col width="5%">
+								<col width="24%">
+								<col width="13%">
+								<col width="13%">
+								<col width="10%">
 							</colgroup>
 							<tr>
-								<th>Series ID</th>
-								<th>SeriesName</th>
-								<th>Patient</th>
+								<th>patientID</th>
+								<th>patientName</th>
+								<th>age</th>
+								<th>sex</th>
+								<th>seriesDate</th>
+								<th>modality</th>
+								<th>seriesDescription</th>
 								<th colspan="2"></th>
 							</tr>
 							@if (count($list) > 0)
 								@foreach ($list as $rec)
 									<tr>
-										<td>{{$rec['seriesID']}}</td>
+										<td>{{$rec['patientID']}}</td>
+										<td>{{$rec['patientName']}}</td>
+										<td>{{$rec['age']}}</td>
+										<td>{{$rec['patientSex']}}</td>
+										<td>{{$rec['seriesDate']}}</td>
+										<td>{{$rec['modality']}}</td>
 										<td>{{$rec['seriesDescription']}}</td>
-										<td>
-											{{$rec['patientName']}} ({{$rec['patientID']}})
-											<br>{{$rec['patientBirthday']}} {{$rec['patientSex']}}
-										</td>
 										<td class="al_c">
 											{{HTML::link(asset('/series/detail'), 'View', array('class' => 'common_btn link_series_detail'))}}
 											{{Form::hidden('seriesUID', $rec['seriesID'], array('class' => 'seriesUID'))}}

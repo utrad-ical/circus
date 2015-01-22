@@ -51,7 +51,8 @@ class SeriesController extends BaseController {
 			$select_col = array(
 				'seriesUID', 'seriesDescription',
 				'patientInfo.patientID', 'patientInfo.patientName',
-				'patientInfo.sex', 'patientInfo.birthday'
+				'patientInfo.sex', 'patientInfo.birthday',
+				'patientInfo.age', 'modality', 'seriesDate'
 			);
 
 			//Total number acquisition
@@ -77,8 +78,11 @@ class SeriesController extends BaseController {
 					'seriesDescription'	=>	$rec->seriesDescription,
 					'patientID'			=>	$patient['patientID'],
 					'patientName' 		=>	$patient['patientName'],
-					'patientBirthday'	=>	$patient['birthday'],
-					'patientSex'		=>	self::getSex($patient['sex'])
+				//	'patientBirthday'	=>	$patient['birthday'],
+					'patientSex'		=>	self::getSex($patient['sex']),
+					'age'				=>	$patient['age'],
+					'seriesDate'		=>	$rec->seriesDate,
+					'modality'			=>	$rec->modality
 				);
 			}
 			$result['list'] = $list;
@@ -274,7 +278,7 @@ class SeriesController extends BaseController {
 
 		//Not selected file
 		if (array_key_exists('upload_file', $inputs) === FALSE) {
-			$error_msg = "Please select the file.";
+			$error_msg = 'Please select the file.';
 		} else {
 			//Upload file information acquisition
 			$uploads = Input::file('upload_file');
@@ -398,7 +402,6 @@ class SeriesController extends BaseController {
 
 	/**
 	 * I set to an array for Validate analyzes the uploaded file
-	 * アップロードされる形式等の詳細が不明なため、枠だけ作成
 	 * @param $input Input value
 	 * @return Validate for array
 	 */

@@ -1065,7 +1065,6 @@
 			//ボクセル情報を取得して現在のキャンバスを更新する
 			var	this_obj	=	this;
 			var	this_opts	=	this.options;
-			//console.log(this_opts.control.container.data.label);
 
 			this_obj._clearCanvas();//初期化
 

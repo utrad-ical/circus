@@ -8,7 +8,9 @@ use Jenssegers\Mongodb\Model as Eloquent;
  */
 class Seq extends Eloquent {
 	protected $connection = 'mongodb';
-	protected $collection = 'Seqs';
+
+	const COLLECTION = 'Seqs';
+	protected $collection = self::COLLECTION;
 
 	protected $primaryKey = '_id';
 	public $timestamps = false;

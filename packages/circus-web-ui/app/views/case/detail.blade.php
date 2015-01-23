@@ -173,15 +173,15 @@ $(function(){
 	//RevisionのAttribute情報設定
 	var attribute_properties = {{$label_attribute_settings}};
 	var attribute_prop = $('#the_panel_attribute');
-	attribute_prop.propertyeditor({properties: attribute_properties});
-	attribute_prop.on('valuechange', function () {
-		if (initInfo[0].attribute)
-			attribute_prop.propertyeditor('option', 'value', initInfo[0].attribute);
-		else
-			attribute_prop.propertyeditor('option', 'value');
-    });
-	attribute_prop.trigger('valuechange');
-
+	if (initInfo[0].attribute) {
+		attribute_prop.propertyeditor({properties: attribute_properties, value:initInfo[0].attribute});
+	}else {
+		attribute_prop.propertyeditor({properties: attribute_properties});
+	}
+	$('.link_add_series').click(function(){
+		$('.frm_add_series').submit();
+		return false;
+	});
 
 });
 
@@ -199,10 +199,15 @@ $(function(){
 			</h1>
 			<div class="al_l mar_b_10 w_600 fl_l">
 				{{HTML::link(asset('/case/search'), 'Back to Case Search Result', array('class' => 'common_btn', 'id' => 'btnBack'))}}
-			</div>
 			@if (isset($error_msg))
+				</div>
 				<br><span class="txt_alert">{{$error_msg}}</span>
 			@else
+					{{HTML::link(asset('/series/search'), 'Add Series', array('class' => 'common_btn link_add_series'))}}
+					{{Form::open(['url' => asset('series/search'), 'method' => 'POST', 'class' => 'frm_add_series'])}}
+						{{Form::hidden('edit_case_id', $case_detail['caseID'])}}
+					{{Form::close()}}
+				</div>
 				<div class="al_r mar_b_10 w_300 fl_r">
 					{{Form::select('revision', $revision_no_list, $case_detail['revisionNo'], array('class' => 'select w_180'))}}
 					{{HTML::link(asset('/case/detail#revision'), 'Revision List', array('class' => 'common_btn'))}}

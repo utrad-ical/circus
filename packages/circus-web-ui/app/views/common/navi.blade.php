@@ -76,6 +76,7 @@
 				<ul class="gnavi_cell_inner_body">
 					<li>{{HTML::link(asset('/admin/group'), 'Group')}}</li>
 					<li>{{HTML::link(asset('/admin/user'), 'User')}}</li>
+					<li>{{HTML::link(asset('/admin/storage'), 'Storage')}}</li>
 				</ul>
 			</div>
 		</li>

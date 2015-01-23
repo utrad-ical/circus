@@ -54,9 +54,21 @@ class Storage extends Eloquent {
 	 */
 	public function scopeAddWhere($query, $input) {
 		//storageID
-		if (isset($inputs['storageID']) && $input['storageID']) {
+		if (isset($input['storageID']) && $input['storageID']) {
 			//Of the Storages table storageID
 			$query->where('storageID', '=', intval($input['storageID']));
+		}
+
+		//type
+		if (isset($input['type']) && $input['type']) {
+			//Of the Storages table type
+			$query->where('type', '=', $input['type']);
+		}
+
+		//active
+		if (isset($input['active'])) {
+			//Of the active table active
+			$query->where('active', '=', $input['active']);
 		}
 		return $query;
 	}
@@ -66,7 +78,7 @@ class Storage extends Eloquent {
 	 */
 	private $rules = array(
 		'storageID'	=> 'required',
-		'type'		=> 'in:dicom,label',
+		'type'		=> 'required|in:dicom,label',
 		'path'		=> 'required',
 		'active'	=> 'required'
 	);

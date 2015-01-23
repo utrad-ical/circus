@@ -95,6 +95,15 @@ Route::any('admin/user/input', 'UserController@input');
 Route::any('admin/user/confirm', 'UserController@confirm');
 Route::any('admin/user/complete', 'UserController@register');
 
+//Management screen / storage
+Route::get('admin/storage/', function(){return Redirect::to('admin/storage/search');});
+Route::get('admin/storage/search', 'StorageController@search');
+Route::post('admin/storage/search', 'StorageController@search');
+//Management screen / storage (for Ajax)
+Route::any('admin/storage/input', 'StorageController@input');
+Route::any('admin/storage/confirm', 'StorageController@confirm');
+Route::any('admin/storage/complete', 'StorageController@register');
+
 //404 pages
 Event::listen('404', function()
 {

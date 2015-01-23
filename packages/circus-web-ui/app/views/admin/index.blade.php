@@ -7,6 +7,7 @@
 			<h1 class="page_ttl">Administrator</h1>
 			{{HTML::link(asset('admin/group/search'), 'Group List', array('class' => 'common_btn'))}}
 			{{HTML::link(asset('admin/user/search'), 'User List', array('class' => 'common_btn'))}}
+			{{HTML::link(asset('admin/storage/search'), 'Storage List', array('class' => 'common_btn'))}}
 		</div>
 	</div>
 	@include('common.navi')

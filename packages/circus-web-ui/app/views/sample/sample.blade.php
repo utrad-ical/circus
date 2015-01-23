@@ -1,33 +1,35 @@
 @extends('common.layout')
 @include('common.header')
 @section('content')
-<script type="text/javascript" src="{{asset('js/jquery.base64.min.js')}}"></script>
+
 {{HTML::script('/js/jquery-ui.min.js')}}
 {{HTML::script('/js/jquery.flexforms.js')}}
 <script type="text/javascript">
 	$(function(){
 		var attribute_properties = [
-		            				{type: 'text', key: 'name', caption: 'Your Name'},
-		            				{type: 'text', key: 'zip', caption: 'Zip Code', spec: { regex: /^\d{3}\-\d{4}$/, placeholder: '???-????' }},
-		            				{type: 'number', key: 'age', caption: 'Age', spec: { default: 40, min: 10, max: 100 } },
-		            				{type: 'select', spec: {options: ['Male', 'Female']}, key: 'sex', caption: 'Sex'},
-		            				{type: 'select', spec: {options: ['1', '2', '3'], valueType: 'number'}, key: 'floor', caption: 'Floor'},
-		            				{type: 'date', key: 'birthday', caption: 'Birthday'},
-		            				{type: 'checkbox', key: 'enabled', caption: 'Enabled'},
-		            				{type: 'radio', key: 'agree', caption: 'Agreement', spec: {
-		            				options: ['yes:I agree', 'no:I disagree']
-		            				}}
-		            			];
-		            			var attribute_prop = $('#the_panel_attribute');
-		            			attribute_prop.propertyeditor({properties: attribute_properties});
+			{type: 'text', key: 'name', caption: 'Your Name'},
+			{type: 'text', key: 'zip', caption: 'Zip Code', spec: { regex: /^\d{3}\-\d{4}$/, placeholder: '???-????' }},
+			{type: 'number', key: 'age', caption: 'Age', spec: { default: 40, min: 10, max: 100 } },
+			{type: 'select', spec: {options: ['Male', 'Female']}, key: 'sex', caption: 'Sex'},
+			{type: 'select', spec: {options: ['1', '2', '3'], valueType: 'number'}, key: 'floor', caption: 'Floor'},
+			{type: 'date', key: 'birthday', caption: 'Birthday'},
+			{type: 'checkbox', key: 'enabled', caption: 'Enabled'},
+			{type: 'radio', key: 'agree', caption: 'Agreement', spec: {
+				options: ['yes:I agree', 'no:I disagree']
+			}}
+		];
+		var attribute_prop = $('#the_panel_attribute');
+		attribute_prop.propertyeditor({properties: attribute_properties});
 
+		var format = 'YYYY-MM-DD-hh-mm-ss-SSS';
+		//var unix_time1 = $.now();
+		var dt1 = new Date();
+		var labelID1 = dt1.getFullYear()+"-"+("0"+(dt1.getMonth()+1)).slice(-2)+"-"+("0"+dt1.getDate()).slice(-2)+"-"+("0"+dt1.getHours()).slice(-2)+"-"+("0"+dt1.getMinutes()).slice(-2)+"-"+("0"+dt1.getSeconds()).slice(-2)+"-"+("00"+dt1.getMilliseconds()).slice(-3);
+		console.log(labelID1);
 		$('.upload_file').click(function(){
-
-			//var tmp_src = "http://todai/img/common/header_logo.png";
-			//var tmp_src2 = "http://todai/img/common/footer_logo.png";
-
-						var revision_attributes = attribute_prop.propertyeditor('option', 'value')
-
+			var revision_attributes = attribute_prop.propertyeditor('option', 'value')
+			var dt2 = new Date();
+			var labelID2 = dt2.getFullYear()+"-"+("0"+(dt2.getMonth()+1)).slice(-2)+"-"+("0"+dt2.getDate()).slice(-2)+"-"+("0"+dt2.getHours()).slice(-2)+"-"+("0"+dt2.getMinutes()).slice(-2)+"-"+("0"+dt2.getSeconds()).slice(-2)+"-"+("00"+dt2.getMilliseconds()).slice(-3);
 			var data = {
 				"caseId"	:	"e3b8af3f79e3af403d0cbbab0fb632bc276970c2768ca6b8716e75958c136faa",
 				"memo"		:	$('#memo').val(),
@@ -38,18 +40,20 @@
 						"label"	:	[
 							{
 								"attributes"	:	{},
-								"id"			:	$('#labelID1').val(),
+							//	"id"			:	$('#labelID1').val(),
+								"id"			:	labelID1,
 								"name"			:	$('#labelName1').val(),
 								"offset"		:	[$('#offsetX1').val(), $('#offsetY1').val(), $('#offsetZ1').val()],
-								"size"			:	[$('#boxcelW1').val(), $('#boxelH1').val(), $('#drawNum1').val()],
+								"size"			:	[$('#voxelW1').val(), $('#voxelH1').val(), $('#drawNum1').val()],
 								"image"			:	'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAkAAAAIAQMAAAARA0f2AAAABlBMVEUAAAD///+l2Z/dAAAAD0lEQVQI12OAg/8NUAQGAC/3BH7xHLr3AAAAAElFTkSuQmCC'
 							},
 							{
 								"attributes"	:	{},
-								"id"			:	$('#labelID2').val(),
+							//	"id"			:	$('#labelID2').val(),
+								"id"			:	labelID2,
 								"name"			:	$('#labelName2').val(),
 								"offset"		:	[$('#offsetX2').val(), $('#offsetY2').val(), $('#offsetZ2').val()],
-								"size"			:	[$('#boxcelW1').val(), $('#boxelH1').val(), $('#drawNum1').val()],
+								"size"			:	[$('#voxelW2').val(), $('#voxelH2').val(), $('#drawNum2').val()],
 								"image"			:	'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAkAAAAIAQMAAAARA0f2AAAABlBMVEUAAAD///+l2Z/dAAAAD0lEQVQI12OAg/8NUAQGAC/3BH7xHLr3AAAAAElFTkSuQmCC'
 							}
 						]
@@ -83,10 +87,6 @@
 				{{Form::open(['url' => asset('case/save_label'), 'method' => 'POST', 'files' => true, 'id' => 'frmSample'])}}
 					<table class="common_table mar_b_10">
 						<tr>
-							<th>ラベルID</th>
-							<td colspan="3">{{Form::text('labelID1', 'Label01', array('id' => 'labelID1'))}}</td>
-						</tr>
-						<tr>
 							<th>ラベル名</th>
 							<td colspan="3">{{Form::text('labelName1', 'Sample Label', array('id' => 'labelName1'))}}</td>
 						</tr>
@@ -108,10 +108,6 @@
 						</tr>
 					</table>
 					<table class="common_table mar_b_10">
-						<tr>
-							<th>ラベルID</th>
-							<td colspan="3">{{Form::text('labelID2', 'Label01', array('id' => 'labelID2'))}}</td>
-						</tr>
 						<tr>
 							<th>ラベル名</th>
 							<td colspan="3">{{Form::text('labelName2', 'Sample Label', array('id' => 'labelName2'))}}</td>

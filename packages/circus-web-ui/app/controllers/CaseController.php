@@ -466,7 +466,14 @@ class CaseController extends BaseController {
 			//Shaping of the series list
 			Log::debug('Revision number that has been selected::'.$select_revision);
 			$result['series_list'] = self::getSeriesList($case_data->revisions[$select_revision]);
-			$result['attribute'] = json_encode($case_data->revisions[$select_revision]['attributes']);
+			$revision_attribute = $case_data->revisions[$select_revision]['attributes'];
+			//datepickerが日付でない値(空文字など)設定するとおかしくなるのでそれの対処を入れる
+			if (array_key_exists('birthday', $revision_attribute) === FALSE || !$revision_attribute['birthday']) {
+				unset($revision_attribute['birthday']);
+			}
+
+			//$result['attribute'] = json_encode($case_data->revisions[$select_revision]['attributes']);
+			$result['attribute'] = json_encode($revision_attribute);
 
 			//Setting the pager
 			$revision_pager = Paginator::make(
@@ -624,8 +631,6 @@ class CaseController extends BaseController {
 		try {
 			$inputs = Input::all();
 			$inputs = $inputs['data'];
-
-			Log::debug('Received data');
 			Log::debug($inputs);
 
 			$errors = self::validateSaveLabel($inputs);
@@ -636,8 +641,64 @@ class CaseController extends BaseController {
 			$dt = new MongoDate(strtotime(date('Y-m-d H:i:s')));
 			$revision = array();
 			$series_list = array();
-			$img_save_path = Config::get('const.label_img_save_path');
+			$img_save_path = "";
 
+			//ラベル格納用のActiveなStorageがあるかチェック
+			//ない場合は新規に作成する
+			$storage_id = 0;
+
+			$storage_info = Storage::addWhere(array('type' => 'label','active' => true))
+									->get(array('storageID','path'));
+
+			if (count($storage_info) == 0) {
+				Log::debug("Storageが存在しない");
+				$img_save_path = "c:\\".Storage::LABEL_STORAGE."_storage\\";
+				//フォルダが存在しない場合は新規に作成する
+				if (!file_exists($img_save_path)){
+					mkdir($img_save_path, 0777);
+      				chmod($img_save_path, 0777);
+				}
+				//Storage registration of
+				$storage_id = Seq::getIncrementSeq('Storages');
+				$storage_obj = App::make('Storage');
+				$storage_obj->storageID = $storage_id;
+				$storage_obj->path = $img_save_path;
+				$storage_obj->type = 'label';
+				$storage_obj->active = true;
+				$storage_obj->updateTime = $dt;
+				$storage_obj->createTime = $dt;
+
+				//Storage register before error checking
+				$errors = $storage_obj->validate(json_decode($storage_obj, true));
+
+				//Processing is interrupted because there is an error
+				if ($errors) {
+					Log::debug('Storage Validate Error');
+					self::rollback($transaction, implode("\n", $errors->all()));
+					break;
+				}
+				//I do registration of storage information because there is no error
+				$result = $storage_obj->save();
+
+				//To gain in the transaction array Now that you have registered success
+				if ($result) {
+					Log::debug('[Strorage]Regist success');
+					if (array_key_exists('storage', $transaction) === FALSE)
+						$transaction['storage'] = array();
+
+					$transaction['storage'][] = $storage_obj->storageID;
+				} else {
+					Log::debug('[Storage]Regist failed');
+					self::rollback($transaction, $result);
+					break;
+				}
+			} else {
+				Log::debug("Storageが存在する");
+				$storage_id = $storage_info[0]->storageID;
+				$img_save_path = $storage_info[0]->path;
+			}
+
+			Log::debug("Storage Regist OK");
 			foreach ($inputs['series'] as $rec) {
 				$revision[$rec['id']] = array();
 				//If there is a label information
@@ -645,49 +706,13 @@ class CaseController extends BaseController {
 					foreach ($rec['label'] as $rec2) {
 						//Register storage table and label table is not performed if there is no image
 						if ($rec2['image']) {
-							//Storage registration of
-							$storage_id = Seq::getIncrementSeq('Storages');
-							$storage_obj = App::make('Storage');
-							$storage_obj->storageID = $storage_id;
-							$decode_str = base64_decode(str_replace('data:image/png;base64,', '',$rec2['image']));
-							$file_put_result = file_put_contents($img_save_path.$storage_id.".png", $decode_str);
-							$storage_obj->path = $img_save_path.$storage_id.".png";
-							$storage_obj->type = 'label';
-							$storage_obj->active = true;
-							$storage_obj->updateTime = $dt;
-							$storage_obj->createTime = $dt;
-
-							//Storage register before error checking
-							$errors = $storage_obj->validate(json_decode($storage_obj, true));
-
-							//Processing is interrupted because there is an error
-							if ($errors) {
-								Log::debug('Storage Validate Error');
-								self::rollback($transaction, implode("\n", $errors->all()));
-								break;
-							}
-
-							//I do registration of storage information because there is no error
-							$result = $storage_obj->save();
-
-							//To gain in the transaction array Now that you have registered success
-							if ($result) {
-								Log::debug('[Strorage]Regist success');
-								if (array_key_exists('storage', $transaction) === FALSE)
-									$transaction['storage'] = array();
-
-								$transaction['storage'][] = $storage_obj->storageID;
-							} else {
-								Log::debug('[Storage]Regist failed');
-								self::rollback($transaction, $result);
-								break;
-							}
-
+							Log::debug("==== REC2 ====");
+							Log::debug($rec2);
 							//I do the registration of the label information
 							//Storage ID to use the storage ID registered just before
 							$label_obj = App::make('Label');
-							$label_obj->labelID = $rec2['id'];
-							$label_obj->storageID = $storage_obj->storageID;
+							$label_obj->labelID = uniqid();
+							$label_obj->storageID = $storage_id;
 							$label_obj->x = intval($rec2['offset'][0]);
 							$label_obj->y = intval($rec2['offset'][1]);
 							$label_obj->z = intval($rec2['offset'][2]);
@@ -716,6 +741,9 @@ class CaseController extends BaseController {
 									$transaction['label'] = array();
 
 								$transaction['label'][] = $label_obj->labelID;
+								$decode_str = base64_decode(str_replace('data:image/png;base64,', '',$rec2['image']));
+								$label_id = $label_obj->labelID;
+								$file_put_result = file_put_contents($img_save_path.$label_id.".png", $decode_str);
 							} else {
 								Log::debug('[Label]Regist failed');
 								self::rollback($transaction, $result);
@@ -724,11 +752,6 @@ class CaseController extends BaseController {
 
 							$revision[$rec['id']][] = array(
 								'id'			=>	$label_obj->labelID,
-							/*
-								'attributes'	=>	array(
-									'labelName'	=>	$rec2['name']
-								)
-								*/
 								'attributes'	=>	array()
 							);
 						}
@@ -792,7 +815,7 @@ class CaseController extends BaseController {
 		} catch (Exception $e){
 			$error_msg = $e->getMessage();
 			Log::debug('[Exception Error]'.$error_msg);
-			self::errorFinish($error_msg);
+			self::rollback($transaction, $error_msg);
 		}
 		Log::debug('Error content::'.$error_msg);
 
@@ -1023,8 +1046,8 @@ class CaseController extends BaseController {
 			$result['inputs'] = Session::get('case_input');
 			$series_exclude_ary = array_keys($result['inputs']['series_list']);
 		//Edit mode
-		} else if (array_key_exists('caseID', $inputs) !== FALSE) {
-			$case_data = ClinicalCase::find($inputs['caseID']);
+		} else if (Session::has('edit_case_id')) {
+			$case_data = ClinicalCase::find(Session::get('edit_case_id'));
 
 			//Set case information
 			if ($case_data) {
@@ -1034,13 +1057,19 @@ class CaseController extends BaseController {
 
 			//Stores series information
 			$series_exclude_ary = array();
+			$tmp_series_exclude_ary = array();
 			foreach ($result['inputs']->revisions as $key => $value) {
 				if ($key !== 'latest') {
 					for($i = 0; $i < count($value['series']); $i++){
-						$series_exclude_ary[] = $value['series'][$i]['seriesUID'];
+						$tmp_series_exclude_ary[] = $value['series'][$i]['seriesUID'];
 					}
 				}
 			}
+
+			$cookie_series = $_COOKIE['seriesCookie'];
+			$add_series = explode('_' , $cookie_series);
+			$series_exclude_ary = array_merge($tmp_series_exclude_ary, $add_series);
+
 			Session::put('mode', 'Edit');
 		//New registration mode
 		} else {
@@ -1219,10 +1248,31 @@ class CaseController extends BaseController {
 
 		//Initial setting of Revision information
 		$series_list = self::createRevision($inputs['series_list']);
+		/*
 		$case_obj->revisions = array(
 			'latest'	=>	$series_list,
 			0			=>	$series_list
 		);
+		*/
+		$revision_data = array();
+		if ($caseID) {
+			$next_index = count($case_obj->revisions) > 0 ? count($case_obj->revisions)-1 : 0;
+			foreach ($case_obj->revisions as $key => $val) {
+				if ($key !== 'latest') {
+					$revision_data[$key] = $val;
+				} else {
+					$revision_data['latest'] = $series_list;
+				}
+				$revision_data[$next_index] = $series_list;
+			}
+		} else {
+			$revision_data['latest'] = $series_list;
+			$revision_data[0] = $series_list;
+		}
+
+		Log::debug('登録するRevision情報');
+		Log::debug($revision_data);
+		$case_obj->revisions = $revision_data;
 
 		//ValidateCheck
 		//Validate check for object creation
@@ -1429,9 +1479,12 @@ class CaseController extends BaseController {
 
 						//Storage information acquisition
 						$storage_info = Storage::find($label_info->storageID);
-
-						$img_path = file_get_contents($storage_info->path);
+						$storage_path = $storage_info->path;
+						Log::debug($storage_path.$label['id'].'.png');
+						$img_path = file_get_contents($storage_path.$label['id'].'.png');
+						//Log::debug($img_path);
 						$label['image'] = 'data:image/png;base64,'.base64_encode($img_path);
+						//Log::debug($label["image"]);
 					}
 				}
 				$series_info['label'][] = $label;
@@ -1607,10 +1660,8 @@ class CaseController extends BaseController {
 		$revision = array(
 			'date'			=>	new MongoDate(strtotime(date('Y-m-d H:i:s'))),
 			'creator'		=>	Auth::user()->loginID,
-			'description'	=>	'Create a new',
+			'description'	=>	'',
 			'attributes'	=>	array(
-				'calc'	=>	false,
-				'HBV'	=>	false
 			),
 			'status'		=>	'draft'
 		);

@@ -20,6 +20,12 @@ class SeriesController extends BaseController {
 		//Input value acquisition
 		$inputs = Input::all();
 
+
+		//The window for the series added to an existing case
+		if (array_key_exists('edit_case_id', $inputs)) {
+			Session::put('edit_case_id', $inputs['edit_case_id']);
+		}
+
 		//Reset or initial display button is pressed during
 		if (array_key_exists ('btnReset', $inputs) !== FALSE || !$inputs) {
 			Session::forget('series.search');

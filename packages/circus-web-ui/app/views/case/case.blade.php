@@ -13,13 +13,12 @@
 	<table class="result_table common_table">
 		<colgroup>
 			<col width="13%">
+			<col width="10%">
+			<col width="16%">
+			<col width="10%">
+			<col width="10%">
 			<col width="13%">
-			<col width="13%">
-			<col width="13%">
-			<col width="13%">
-			<col width="13%">
-			<col width="13%">
-			<col width="13%">
+			<col width="19%">
 			<col width="9%">
 		</colgroup>
 		<tr>
@@ -57,7 +56,7 @@
 			@endforeach
 		@else
 			<tr>
-				<td colspan="6">Search results 0.</td>
+				<td colspan="8">Search results 0.</td>
 			</tr>
 		@endif
 	</table>

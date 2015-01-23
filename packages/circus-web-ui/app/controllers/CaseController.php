@@ -651,6 +651,7 @@ class CaseController extends BaseController {
 									->get(array('storageID','path'));
 
 			if (count($storage_info) == 0) {
+				/*
 				Log::debug("Storageが存在しない");
 				$img_save_path = "c:\\".Storage::LABEL_STORAGE."_storage\\";
 				//フォルダが存在しない場合は新規に作成する
@@ -692,6 +693,8 @@ class CaseController extends BaseController {
 					self::rollback($transaction, $result);
 					break;
 				}
+				*/
+				self::errorFinish("Does not exist storage for label.\nPlease register the storage from the storage management screen.");
 			} else {
 				Log::debug("Storageが存在する");
 				$storage_id = $storage_info[0]->storageID;

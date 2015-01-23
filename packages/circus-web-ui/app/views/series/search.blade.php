@@ -230,7 +230,8 @@
 								<col width="19%">
 								<col width="13%">
 								<col width="13%">
-								<col width="10%">
+								<col width="7%">
+								<col width="7%">
 							</colgroup>
 							<tr>
 								<th>patientID</th>
@@ -263,7 +264,7 @@
 								@endforeach
 							@else
 								<tr>
-									<td colspan="5">Search results 0.</td>
+									<td colspan="9">Search results 0.</td>
 								</tr>
 							@endif
 						</table>

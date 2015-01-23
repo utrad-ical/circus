@@ -44,7 +44,7 @@ class Label extends Eloquent {
 	 * Validate Rules
 	 */
 	private $rules = array(
-		'labelID'	=>	'required',
+		'labelID'	=>	'required|unique:Labels,labelID',
 		'storageID'	=>	'required|integer',
 		'x'			=>	'required|integer',
 		'y'			=>	'required|integer',

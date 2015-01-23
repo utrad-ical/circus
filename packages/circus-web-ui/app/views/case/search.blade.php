@@ -76,15 +76,16 @@
 				}
 			} else {
 			//Simple Search
-				tmp_ary_data = [tmp_project_data,tmp_action_btn_data,tmp_search_mode_data];
+				var tmp_data = [tmp_project_data,tmp_action_btn_data,tmp_search_mode_data];
+				tmp_ary_data = $.extend(true,form_data, tmp_data);
 			}
 
 			//Option
 			if (arguments[1]) {
 				tmp_ary_data.push(arguments[1]);
 			}
-			var tmp_data = $.extend(true,form_data, tmp_ary_data);
-			return tmp_data;
+			//var tmp_data = $.extend(true,form_data, tmp_ary_data);
+			return tmp_ary_data;
 		}
 		$('.change_select').change(function(){
 			// Get the combo ID you want to change

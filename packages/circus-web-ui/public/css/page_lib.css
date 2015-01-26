@@ -123,6 +123,8 @@
 .img_view_area .image_window_controller{padding:5px;}
 .img_view_area .image_window_controller_erase{width:32px; margin-left:480px; height:32px; margin-bottom:-32px; cursor:pointer; text-align:center;}
 
+#ui-datepicker-div{z-index:1500 !important;}
+
 
 .toolbar_weight_wrap{width:60px; float:left; padding-top:3px; text-align:center;}
 

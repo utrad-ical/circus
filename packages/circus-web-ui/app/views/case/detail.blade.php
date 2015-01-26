@@ -154,18 +154,14 @@ $(function(){
 	});
 
 	$('.link_case_detail').click(function(){
-		console.log("Detail");
 		$(this).closest('td').find("input[name='mode']").val('detail');
-		console.log("Mode::"+$(this).closest('td').find("input[name='mode']").val());
 		//Get the form ID to be sent
 		$(this).closest('td').find('.form_case_detail').submit();
 		return false;
 	});
 
 	$('.link_case_edit').click(function(){
-		console.log("Edit");
 		$(this).closest('td').find("input[name='mode']").val('edit');
-		console.log("Mode::"+$(this).closest('td').find("input[name='mode']").val());
 		$(this).closest('td').find('.form_case_detail').submit();
 		return false;
 	});
@@ -194,7 +190,7 @@ $(function(){
 				@if (isset($error_msg))
 					Case Detail
 				@else
-					Case Detail (Revision {{$case_detail['revisionNo']}}))
+					Case Detail (Revision {{$case_detail['revisionNo']}})
 				@endif
 			</h1>
 			<div class="al_l mar_b_10 w_600 fl_l">

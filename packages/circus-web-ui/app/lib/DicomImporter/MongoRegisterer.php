@@ -80,7 +80,7 @@ class MongoRegisterer extends Registerer
 			// TODO: Lock database
 			// Ensure the metadata of the new image match the existing data
 			$checkKeys = array(
-				'studyUID=studyInstanceUID', 'seriesDate', 'modality', 'bodyPart',
+				'studyUID=studyInstanceUID', 'modality', 'bodyPart',
 				'stationName', 'modelName'
 			);
 			foreach ($checkKeys as $c) {
@@ -113,13 +113,17 @@ class MongoRegisterer extends Registerer
 		$assignProperties = array(
 			'studyUID=studyInstanceUID',
 			'seriesUID=seriesInstanceUID',
-			'width', 'height', 'seriesDate', 'modality', 'seriesDescription', 'bodyPart',
+			'width', 'height', 'modality', 'seriesDescription', 'bodyPart',
 			'stationName', 'modelName', 'manufacturer'
 		);
 		foreach ($assignProperties as $c) {
 			list($objKey, $dicomKey) = strpos($c, '=') ? explode('=', $c) : array($c, $c);
 			$sr->$objKey = $dicom_data[$dicomKey];
 		}
+		$sr->seriesDate = new MongoDate(strtotime($dicom_data['seriesDate'] . 't' .  $dicom_data['seriesTime']));
+		$sr->createDate = new MongoDate(); // TODO: Remove eventually
+		$sr->updateDate = new MongoDate(); // TODO: Remove eventually
+
 		$sr->storageID = $this->storage->storageID;
 		$sr->patientInfo = array(
 			'patientID' => $dicom_data['patientID'],
@@ -142,6 +146,7 @@ class MongoRegisterer extends Registerer
 		$mr = new MultiRange($series->images);
 		$mr->append($dicom_data['instanceNumber']);
 		$series->images = $mr->__toString();
+		$series->updateDate = new MongoDate(); // TODO: Remove eventually
 		$series->save();
 		$this->logger->log("Updated series in the database. Images=$series->images; Series UID=$series->seriesUID");
 	}

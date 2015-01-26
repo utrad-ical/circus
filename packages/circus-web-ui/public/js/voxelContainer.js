@@ -176,10 +176,11 @@ voxelContainer.prototype.createSaveData = function(series_id,label_id){
 		dumy_canvas_elm.setAttribute('height',png_height);
 		var dummy_canvas_ctx = dumy_canvas_elm.getContext('2d');
 		var tmp_img_data = dummy_canvas_ctx.createImageData(draw_w,png_height);
+		console.log(draw_w,png_height);
 
-		//まずはデータを全て白塗り
-		for(var i=tmp_img_data.data.length-1;  i>0; i--){
-			tmp_img_data.data[i] = 255;
+		//まずはデータを全て透明にする
+		for(var i=tmp_img_data.data.length-1; i>0; i--){
+			tmp_img_data.data[i] = 0;
 		}
 		
 		//uintArrayを1次元に変換
@@ -195,11 +196,13 @@ voxelContainer.prototype.createSaveData = function(series_id,label_id){
 					var this_z = z-min_z;
 					var the_index = 4*(this_x+ this_y*draw_w + this_z*draw_w*draw_h);
 
-					if(tmp_the_slice[i] != 1){
-						tmp_img_data.data[the_index+3] = 255;
-						tmp_img_data.data[the_index+2] = 0;
-						tmp_img_data.data[the_index+1] = 0;
-						tmp_img_data.data[the_index] = 0;
+					//いずれにしてもアルファ値はmax
+					tmp_img_data.data[the_index+3] = 255;
+					if(tmp_the_slice[i] == 1){
+						//描画されていた箇所のみ白塗り
+						tmp_img_data.data[the_index+2] = 255;
+						tmp_img_data.data[the_index+1] = 255;
+						tmp_img_data.data[the_index] = 255;
 					}
 				}
 			}

@@ -14,7 +14,7 @@ voxelContainer.prototype.addHistory = function(series_id,label_id,the_mode,posit
 		第2引数 : 対象ラベル
 		第3引数 : 描画か消しゴムか (pen / erase)
 	*/
-
+	
 	var this_obj = this;
 	var this_data = this_obj.data;
 
@@ -50,27 +50,27 @@ voxelContainer.prototype.addHistory = function(series_id,label_id,the_mode,posit
 voxelContainer.prototype.addLabel = function(series_id,label_id,position_array){
 	var this_obj = this;
 	var this_data = this_obj.data;
-
+	
 	var tmp_position_array =  new Array(0);
 	if(typeof position_array == 'object'){
 		tmp_position_array =  position_array;
 	}
-
-
+	
+	
 	var tmp_label_obj = {
 		id : label_id,
 		position : tmp_position_array
 	}
-
+	
 	var tmp_series = this_obj.getSeriesObjectById(series_id);
-
+	
 	//シリーズがなかったらそのシリーズを作る
-	if(typeof tmp_series == 'undefined'){
+	if(typeof tmp_series == 'undefined'){	
 		this_obj.addSeries(series_id);
 	}
 	var the_target_series =this_obj.getSeriesObjectById(series_id);
 	the_target_series.label.push(tmp_label_obj);
-
+ 
 };/*addLabel*/
 
 
@@ -85,7 +85,7 @@ voxelContainer.prototype.addSeries = function(series_id){
 		id : series_id,
 		label : new Array(0)
 	}
-	this_data.series.push(tmp_series_obj);
+	this_data.series.push(tmp_series_obj); 
 };
 
 
@@ -98,7 +98,7 @@ voxelContainer.prototype.createSaveData = function(series_id,label_id){
 	var this_data = this_obj.data;
 	var the_series = this_obj.getSeriesObjectById(series_id);
 	var the_label = this_obj.getLabelObjectById(label_id,series_id);
-
+	
 	//デフォルト。まだ何も描かれていないときはこれがそのまま返る
 	var return_obj = {
 		size : [0,0,0],
@@ -112,7 +112,7 @@ voxelContainer.prototype.createSaveData = function(series_id,label_id){
 		/*
 			var dumy_canvas_elm = document.getElementById('dummy_canvas');
 			var dummy_canvas_ctx = dumy_canvas_elm.getContext("2d");
-			var tmp_img_data = dummy_canvas_ctx.createImageData(2,2);
+			var tmp_img_data = dummy_canvas_ctx.createImageData(2,2); 
 			return_obj = dumy_canvas_elm.toDataURL();
 		*/
 
@@ -123,9 +123,9 @@ voxelContainer.prototype.createSaveData = function(series_id,label_id){
 		var min_y=Number.MAX_VALUE;
 		var max_z=0;
 		var min_z=Number.MAX_VALUE;
-
+		
 		var this_series_x = the_series.size.X;
-
+		
 		//z面を全部見る
 		for(var z=the_label.position.length-1;  z>=0; z--){
 			var tmp_the_slice = the_label.position[z];
@@ -134,19 +134,19 @@ voxelContainer.prototype.createSaveData = function(series_id,label_id){
 					if(tmp_the_slice[i] == 1){
 						var y = Math.floor(i/this_series_x);
 						var x = i- this_series_x*y;
-
+						
 						max_x = Math.max(max_x,x);
 						max_y = Math.max(max_y,y);
 						max_z = Math.max(max_z,z);
-
+						
 						min_x = Math.min(min_x,x);
 						min_y = Math.min(min_y,y);
 						min_z = Math.min(min_z,z);
-					}
+					}				
 				}
 			}
 		}
-
+		
 		//面はあっても全て消されていた場合,1枚も描かれていなかった場合等
 		if(min_z==Number.MAX_VALUE){
 			return_obj.size[2] =0;
@@ -166,10 +166,10 @@ voxelContainer.prototype.createSaveData = function(series_id,label_id){
 		//imaga描画ここから
 		var draw_w = max_x-min_x;//書き出すpngの横幅
 		var draw_h = max_y-min_y;//書き出すpngのz断面グループ1枚あたりの高さ。書き出しpngの高さはこれにnumberをかけたもの
-
+		
 		return_obj.size[0] = draw_w;
 		return_obj.size[1] = draw_h;
-
+		
 		var png_height = draw_h*return_obj.size[2];
 
 		//書き出しのための一時的キャンバス・imageオブジェクト生成
@@ -184,7 +184,7 @@ voxelContainer.prototype.createSaveData = function(series_id,label_id){
 		for(var i=tmp_img_data.data.length-1;  i>0; i--){
 			tmp_img_data.data[i] = 255;
 		}
-
+		
 		//uintArrayを1次元に変換
 		for(var z=min_z;  z<max_z; z++){
 			var tmp_the_slice = the_label.position[z];
@@ -192,8 +192,8 @@ voxelContainer.prototype.createSaveData = function(series_id,label_id){
 				for(var i =tmp_the_slice.length-1; i>=0; i--){
 					var y = Math.floor(i/this_series_x);
 					var x = i- this_series_x*y;
-
-					var this_x = x-min_x;
+					
+					var this_x = x-min_x; 
 					var this_y = y-min_y;
 					var this_z = z-min_z;
 					var the_index = 4*(this_x+ this_y*draw_w + this_z*draw_w*draw_h);
@@ -210,9 +210,10 @@ voxelContainer.prototype.createSaveData = function(series_id,label_id){
 		dummy_canvas_ctx.putImageData(tmp_img_data,0,0);
 
 		return_obj.image  = dumy_canvas_elm.toDataURL();
+		console.log(return_obj.image);
 	}
 	return return_obj;
-
+	
 };
 
 
@@ -223,7 +224,7 @@ voxelContainer.prototype.createSaveData = function(series_id,label_id){
 voxelContainer.prototype.deleteLabelObject = function(series_id,label_id){
 	var this_obj = this;
 	var this_data = this_obj.data;
-
+	
 	var the_series =this_obj.getSeriesObjectById(series_id);
 	for(var j=0; j<the_series.label.length; j++){
 	if(the_series.label[j].id ==label_id){
@@ -242,7 +243,7 @@ voxelContainer.prototype.data = {
 		main : new Array(0),
 		redo : new Array(0)
 	},
-
+	
 	series : [
 		/*
 			{
@@ -313,10 +314,10 @@ voxelContainer.prototype.getPositionDataFromImage = function(insertObject,series
 	var this_obj = this;
 	var this_data = this_obj.data;
 	var return_obj = new Array(0);
-
+	
 	var the_series_w = 512;
 	var the_series_h = 512;
-
+	
 	if(typeof series_w == 'number'){
 		the_series_w = series_w;
 	}
@@ -327,21 +328,21 @@ voxelContainer.prototype.getPositionDataFromImage = function(insertObject,series
 
 	var tmp_img = new Image();
 	tmp_img.src = insertObject.image;
-
+	
 	var img_original_w =tmp_img.width;
 	var img_original_h =tmp_img.height;
 
 	//書き出しのための一時的キャンバス・imageオブジェクト生成
 	var dumy_canvas_elm = document.getElementById('dummy_canvas');
 	dumy_canvas_elm.style.display = 'none';
-	dumy_canvas_elm.setAttribute('width',100);
-	dumy_canvas_elm.setAttribute('height',100);
+	dumy_canvas_elm.setAttribute('width',img_original_w);
+	dumy_canvas_elm.setAttribute('height',img_original_h);
 	var dummy_canvas_ctx = dumy_canvas_elm.getContext('2d');
 	dummy_canvas_ctx.drawImage(tmp_img,0,0,img_original_w,img_original_h)
 	var tmp_image_data = dummy_canvas_ctx.getImageData(0,0,img_original_w,img_original_h);
 
 	for(var i=3; i<tmp_image_data.data.length+1; i=i+4){
-
+	
 		//塗られているマスだけに着目
 		if(tmp_image_data.data[i-1]==0){
 
@@ -350,12 +351,12 @@ voxelContainer.prototype.getPositionDataFromImage = function(insertObject,series
 			//このマスが投入画像の中でどの座標に位置するか
 			var the_position_y = Math.floor(the_index / insertObject.size[0]);
 			var the_position_x = the_index-the_position_y*insertObject.size[0];
-
+	
 			//投入画像をaxial面でスライスして重ねたと仮定した座標
 			var slice_z = Math.floor(the_position_y/ insertObject.size[1]);
 			var slice_y = the_position_y - slice_z*insertObject.size[1];
 			var slice_x = the_position_x;
-
+		
 			//uintArrayでの座標
 			var true_z = slice_z + insertObject.offset[2];
 			var true_y = slice_y + insertObject.offset[1];
@@ -368,14 +369,14 @@ voxelContainer.prototype.getPositionDataFromImage = function(insertObject,series
 
 		}
 	}
-
+	
 	return return_obj;
 };/*getPositionDataFromImage*/
 
 
 
 
-voxelContainer.prototype.getSeriesObjectById = function(series_id){
+voxelContainer.prototype.getSeriesObjectById = function(series_id){		
 	var this_obj = this;
 	var this_data = this_obj.data;
 
@@ -394,21 +395,21 @@ voxelContainer.prototype.getSeriesObjectById = function(series_id){
 voxelContainer.prototype.historyBack = function(){
 	var this_obj = this;
 	var this_data = this_obj.data;
-
+	
 	if(this_data.history.main.length>0){
 	//最後の1手順分をRedo用配列に移動
 	var tmp_move_array  = new Array(0);
 	$.extend(true,tmp_move_array,this_data.history.main[this_data.history.main.length-1]);
 	this_data.history.redo.push(tmp_move_array);
 	this_data.history.main.splice(this_data.history.main.length-1,1);
-
+	
 	//全てのラベルを空にする
 	for(var i=this_obj.data.series.length-1; i>=0; i--){
 		for(var j=this_obj.data.series[i].label.length-1; j>=0; j--){
 			this_obj.data.series[i].label[j].position = new Array(0);
 		}
 	}
-
+	
 	//今現在のメインヒストリ配列の内容で再構築
 	for(var i= this_data.history.main.length-1; i>=0; i--){
 		var this_history = this_data.history.main[i];
@@ -435,19 +436,19 @@ voxelContainer.prototype.historyRedo = function(){
 		$.extend(true,tmp_move_array, this_data.history.redo[this_data.history.redo.length-1]);
 		this_data.history.main.push(tmp_move_array);
 		this_data.history.redo.splice(this_data.history.redo.length-1,1);
-
+		
 	//全てのラベルを空にする
 	for(var i=this_obj.data.series.length-1; i>=0; i--){
 		for(var j=this_obj.data.series[i].label.length-1; j>=0; j--){
 			this_obj.data.series[i].label[j].position = new Array(0);
 		}
 	}
-
+		
 		//今現在のメインヒストリ配列の内容で再構築
 		for(var i= this_data.history.main.length-1; i>=0; i--){
 			var this_history = this_data.history.main[i];
 			this_obj.updateVoxel(
-				this_history.series,
+				this_history.series,	
 				this_history.label,
 				this_history.mode,
 				this_history.position
@@ -473,7 +474,7 @@ voxelContainer.prototype.insertLabelData = function(insert_obj){
 		var the_zoom = 512 / tmp_series.voxel.x;
 		var series_w = the_zoom * tmp_series.voxel.x;
 		var series_h = the_zoom * tmp_series.voxel.y * tmp_series.voxel.voxel_y / tmp_series.voxel.voxel_x;
-
+		
 		if(typeof tmp_series.label =='object'){
 			for(var j=0; j< tmp_series.label.length; j++){
 				var tmp_label = tmp_series.label[j];
@@ -510,7 +511,7 @@ voxelContainer.prototype.returnSlice = function(series_id,label_id,tmp_orientati
   //axialのときはZが奥行に相当する
 
   if(typeof tmp_target_label.position[tmp_current_num] != 'undefined'){
-  	var the_data = tmp_target_label.position[tmp_current_num];
+  	var the_data = tmp_target_label.position[tmp_current_num];    
 
    for(var i=the_data.length-1; i>=0; i--){
     if(the_data[i]==1){
@@ -566,7 +567,7 @@ voxelContainer.prototype.setSize = function(series_id,the_x,the_y,the_z){
 	var this_obj = this;
 	var this_data = this_obj.data;
 	var tmp_series = this_obj.getSeriesObjectById(series_id);
-
+	
 	if(typeof tmp_series != 'object'){
 		tmp_series = new Object();
 		tmp_series.id = series_id;
@@ -601,7 +602,7 @@ voxelContainer.prototype.updateVoxel = function(series_id,label_id,the_mode,posi
 
 	var this_obj = this;
 	var this_data = this_obj.data;
-
+	
 	//該当ラベルが無い場合は今回追加されたラベル用に配列を生成
 	var add_flg = true;
 

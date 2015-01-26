@@ -405,7 +405,6 @@
 				controllerInfo.activeSeriesId = active_series.id;
 			}
 
-
 			for(var i=0; i<insert_obj.viewer.length; i++){
 				var tmp_win_obj = new Object;
 				var insert_obj_active_series = this_elm.imageViewerController('getSeriesObjectById',[controllerInfo.activeSeriesId]);
@@ -428,6 +427,7 @@
 				 maximum : controllerInfo.viewer[0].number.maximum,
 				 minimum : controllerInfo.viewer[0].number.minimum
 				}
+
 				tmp_viewer_param_array[i].elements = {
 				 slider : {
 					panel  : true,
@@ -468,7 +468,6 @@
 			//コントローラのデフォルトのオブジェクトとマージ
 
 			if(typeof controllerInfo.series =='object'){
-
 				for(var i=0; i<controllerInfo.series.length; i++){
 					var tmp_series = controllerInfo.series[i];
 					if(typeof tmp_series.label =='object'){
@@ -857,7 +856,6 @@
 			var saveData = new Object();
 			saveData.caseId =controllerInfo.caseId;
 			saveData.series = new Array(0);
-			saveData.memo = "test";
 			var revision_attributes = $('#the_panel_attribute').propertyeditor('option', 'value');
 			console.log(revision_attributes);
 			saveData.attribute = JSON.stringify(revision_attributes);
@@ -867,10 +865,6 @@
 					var tmp_insert_obj = new Object();
 					tmp_insert_obj.id = tmp_the_series.id;
 					tmp_insert_obj.label = new Array(0);
-
-
-
-
 
 					if(typeof tmp_the_series.label =='object'){
 						for(var j=0; j<tmp_the_series.label.length; j++){
@@ -895,23 +889,33 @@
 				return false;
 			}
 
-			console.log(saveData);
-			console.log("URL::");
-			console.log(controllerInfo.postUrl);
+			var tmp_input_memo = window.prompt('input Memo',controllerInfo.memo);
 
-			$.ajax({
-				url: controllerInfo.postUrl,
-				type: 'post',
-				data: {data : saveData},//送信データ
-				dataType: 'json',
-				error: function(){
-					alert('通信に失敗しました');
-				},
-				success: function(response){
-					//alert('save finished.');
-					alert(response.message);
-				}
-			});
+			if(tmp_input_memo){
+				saveData.memo = tmp_input_memo;
+				console.log(saveData);
+				console.log("URL::");
+				console.log(controllerInfo.postUrl);
+	
+				$.ajax({
+					url: controllerInfo.postUrl,
+					type: 'post',
+					data: {data : saveData},//送信データ
+					dataType: 'json',
+					error: function(){
+						alert('通信に失敗しました');
+					},
+					success: function(response){
+						//alert('save finished.');
+						alert(response.message);
+					}
+				});
+			
+			}else{
+				//キャンセル時
+			
+			
+			}
 			return false;
 		},
 
@@ -1119,7 +1123,7 @@
 				}
 
 				tmp_elm	=	tmp_elm+'<div class="series_wrap'+the_active_series_class+'" id="'+tmp_the_series.id+'">';
-				tmp_elm	=	tmp_elm+'<p class="series_name">'+tmp_the_series.id+'</p>';
+				tmp_elm	=	tmp_elm+'<p class="series_name">Series '+j+'</p>';
 				tmp_elm	=	tmp_elm+'<ul class="label_select_list">';
 
 				if(typeof tmp_the_series.label != 'undefined'){
@@ -1140,7 +1144,7 @@
 
 						tmp_elm = tmp_elm + '<input type="text" value="'+tmp_the_label.color+'" class="color_picker color_picker_diff_color" \
 						style="background-color:'+tmp_the_label.rgba+';" readonly id="'+tmp_the_label.id+'_cp">\
-						<label class="label_txt">'+tmp_the_label.name+'</label><label class="alpha_label"><input type="text" value="'+tmp_the_label.alpha+'" class="alpha_change">%</label>\
+						<label class="label_txt">Label '+i+'</label><label class="alpha_label"><input type="text" value="'+tmp_the_label.alpha+'" class="alpha_change">%</label>\
 						<label class="now_draw_label"></label><label class="delete_label"></label><div class="clear">&nbsp;</div></li>';
 
 						if(tmp_the_label.id ==tmp_the_series.activeLabelId){

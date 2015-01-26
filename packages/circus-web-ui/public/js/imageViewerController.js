@@ -395,7 +395,7 @@
 			//コントローラ呼び出し時の初期挙動
 			//insert_obj はhtmlからinit のvalue値で渡された情報json
 			var this_elm = this;
-			console.log(controllerInfo.series);
+
 			//入力データ内でウィンドウ情報をマージ
 			//シリーズ全体の適用とビューアごとの適応があるため
 
@@ -418,6 +418,7 @@
 			//デフォルトでviewer配列の個数が判断付かないため,デフォルト配列を複製してviewer個数分配置しておく
 			var tmp_viewer_param_array = new Array;
 			for(var i=0; i<insert_obj.viewer.length; i++){
+				
 				tmp_viewer_param_array[i] = new Object;
 				tmp_viewer_param_array[i].id = controllerInfo.viewer[0].id + i;
 				tmp_viewer_param_array[i].elementId = controllerInfo.viewer[0].elementId;
@@ -501,6 +502,7 @@
 					tmp_h = active_series.voxel.y * active_series.voxel.voxel_y / active_series.voxel.voxel_x;
 					tmp_ow = active_series.voxel.x;
 					tmp_oh = active_series.voxel.y;
+				
 				 }else if(tmp_orientation == 'sagital'){
 					tmp_w = active_series.voxel.y * active_series.voxel.voxel_y / active_series.voxel.voxel_x;
 					tmp_h = active_series.voxel.z * active_series.voxel.voxel_z / active_series.voxel.voxel_x;

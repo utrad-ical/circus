@@ -1,12 +1,6 @@
 [
-	{type: 'text', key: 'name', caption: 'Your Name'},
-	{type: 'text', key: 'zip', caption: 'Zip Code', spec: { regex: /^\d{3}\-\d{4}$/, placeholder: '???-????' }},
-	{type: 'number', key: 'age', caption: 'Age', spec: { default: 40, min: 10, max: 100 } },
-	{type: 'select', spec: {options: ['Male', 'Female']}, key: 'sex', caption: 'Sex'},
-	{type: 'select', spec: {options: ['1', '2', '3'], valueType: 'number'}, key: 'floor', caption: 'Floor'},
-	{type: 'date', key: 'birthday', caption: 'Birthday'},
-	{type: 'checkbox', key: 'enabled', caption: 'Enabled'},
-	{type: 'radio', key: 'agree', caption: 'Agreement', spec: {
-		options: ['yes:I agree', 'no:I disagree']
-	}}
+	{type: 'radio', key: 'hypertension', caption: 'Hypertension', spec: {
+		options: ['true:(+)', 'false:(-)']
+	}},
+	{type: 'text', key: 'comment', caption: 'Comment'}
 ]

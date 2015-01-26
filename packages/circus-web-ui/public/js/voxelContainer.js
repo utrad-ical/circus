@@ -4,8 +4,6 @@ var voxelContainer = function(n){
 
 
 
-
-
 //コンテナオブジェクトに新しいヒストリを追加
 voxelContainer.prototype.addHistory = function(series_id,label_id,the_mode,position_array){
 
@@ -19,7 +17,6 @@ voxelContainer.prototype.addHistory = function(series_id,label_id,the_mode,posit
 	var this_data = this_obj.data;
 
  //1筆の中での重複は除外する
-
  //1筆分をヒストリーに格納
  //ヒストリーに渡すためのオブジェクト用意
 	var tmp_step_obj = {
@@ -198,7 +195,7 @@ voxelContainer.prototype.createSaveData = function(series_id,label_id){
 					var this_z = z-min_z;
 					var the_index = 4*(this_x+ this_y*draw_w + this_z*draw_w*draw_h);
 
-					if(tmp_the_slice[i] == 1){
+					if(tmp_the_slice[i] != 1){
 						tmp_img_data.data[the_index+3] = 255;
 						tmp_img_data.data[the_index+2] = 0;
 						tmp_img_data.data[the_index+1] = 0;
@@ -344,10 +341,8 @@ voxelContainer.prototype.getPositionDataFromImage = function(insertObject,series
 	for(var i=3; i<tmp_image_data.data.length+1; i=i+4){
 	
 		//塗られているマスだけに着目
-		if(tmp_image_data.data[i-1]==0){
-
+		if(tmp_image_data.data[i-1]==255){
 			var the_index = (i-3)/4;
-
 			//このマスが投入画像の中でどの座標に位置するか
 			var the_position_y = Math.floor(the_index / insertObject.size[0]);
 			var the_position_x = the_index-the_position_y*insertObject.size[0];
@@ -556,6 +551,7 @@ voxelContainer.prototype.returnSlice = function(series_id,label_id,tmp_orientati
  }
 
  return return_array;
+
 };/*returnSlice*/
 
 

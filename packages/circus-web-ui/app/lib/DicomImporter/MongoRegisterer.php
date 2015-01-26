@@ -121,8 +121,8 @@ class MongoRegisterer extends Registerer
 			$sr->$objKey = $dicom_data[$dicomKey];
 		}
 		$sr->seriesDate = new MongoDate(strtotime($dicom_data['seriesDate'] . 't' .  $dicom_data['seriesTime']));
-		$sr->createDate = new MongoDate(); // TODO: Remove eventually
-		$sr->updateDate = new MongoDate(); // TODO: Remove eventually
+		$sr->createTime = new MongoDate(); // TODO: Remove eventually
+		$sr->updateTime = new MongoDate(); // TODO: Remove eventually
 
 		$sr->storageID = $this->storage->storageID;
 		$sr->patientInfo = array(

@@ -301,7 +301,6 @@
 			var this_obj = this;
 			var this_elm = this.element;
 			var this_opts = this.options;
-
 			//キャンバス要素群生成
 			var createCanvas = function(){
 				var tmp_elm = '';
@@ -542,9 +541,6 @@
 		//描画対象ラベルのチェック
 		var this_obj = this;
 		var this_opts = this.options;
-
-
-
 		var tmp_the_series = this_obj._getSeriesObjectById(series_id);
 
 /*		console.log(tmp_the_series);
@@ -558,6 +554,7 @@
 				break;
 			}
 		}
+
 	},
 
 
@@ -648,7 +645,6 @@
 				this_opts = $.extend(true,this_opts,insert_object);
 			}
 
-
 			//連動用コンテナに自分の要素idを登録
 			var this_id = this_elm.attr('id')
 			this_opts.control.container.data.member.push(this_id);
@@ -720,6 +716,8 @@
 			this_elm.bind('setOptions',function(e,tmpSetValues){
 				this_obj._setOptions(tmpSetValues);
 			});
+
+
 
 			//枚数送り関連要素
 			if(this_opts.control.slider==true){
@@ -846,7 +844,6 @@
 						this_opts.viewer.window.width.current = tmp_width;
 					}
 					this_obj._changeImgSrc();
-
 				}//windowValuesChange
 			}//ウインドウレベル・幅関係のイベント設置ここまで
 

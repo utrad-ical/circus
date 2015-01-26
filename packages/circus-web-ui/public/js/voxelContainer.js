@@ -176,7 +176,7 @@ voxelContainer.prototype.createSaveData = function(series_id,label_id){
 		dumy_canvas_elm.setAttribute('height',png_height);
 		var dummy_canvas_ctx = dumy_canvas_elm.getContext('2d');
 		var tmp_img_data = dummy_canvas_ctx.createImageData(draw_w,png_height);
-		console.log(draw_w,png_height);
+		//console.log(draw_w,png_height);
 
 		//まずはデータを全て透明にする
 		for(var i=tmp_img_data.data.length-1; i>0; i--){
@@ -210,7 +210,7 @@ voxelContainer.prototype.createSaveData = function(series_id,label_id){
 		dummy_canvas_ctx.putImageData(tmp_img_data,0,0);
 
 		return_obj.image  = dumy_canvas_elm.toDataURL();
-		console.log(return_obj.image);
+		//console.log(return_obj.image);
 	}
 	return return_obj;
 	
@@ -479,6 +479,8 @@ voxelContainer.prototype.insertLabelData = function(insert_obj){
 				var tmp_label = tmp_series.label[j];
 				var position_data = this_obj.getPositionDataFromImage(tmp_label,series_w,series_h);
 				this_obj.addLabel(tmp_series.id,tmp_label.id,position_data);
+				//初期データをヒストリーに積む？仕様確認
+				//this_obj.addHistory(tmp_series.id,tmp_label.id,'pen',position_data);
 			}
 		}
 	}
@@ -499,7 +501,6 @@ voxelContainer.prototype.returnSlice = function(series_id,label_id,tmp_orientati
 	var this_data = this_obj.data;
 	var return_array = new Array(0);
  	var tmp_target_series = this_obj.getSeriesObjectById(series_id);
-
 	var voxel_x = tmp_target_series.size.X;
 
  //対象ラベル取得

@@ -335,12 +335,14 @@ voxelContainer.prototype.getPositionDataFromImage = function(insertObject,series
 	dumy_canvas_elm.setAttribute('width',img_original_w);
 	dumy_canvas_elm.setAttribute('height',img_original_h);
 	var dummy_canvas_ctx = dumy_canvas_elm.getContext('2d');
+
+	
 	dummy_canvas_ctx.drawImage(tmp_img,0,0,img_original_w,img_original_h)
 	var tmp_image_data = dummy_canvas_ctx.getImageData(0,0,img_original_w,img_original_h);
 
 	for(var i=3; i<tmp_image_data.data.length+1; i=i+4){
-	
 		//塗られているマスだけに着目
+	//console.log(tmp_image_data.data[i-1]);
 		if(tmp_image_data.data[i-1]==255){
 			var the_index = (i-3)/4;
 			//このマスが投入画像の中でどの座標に位置するか
@@ -361,7 +363,6 @@ voxelContainer.prototype.getPositionDataFromImage = function(insertObject,series
 				return_obj[true_z] = new Uint8Array(the_series_w*the_series_h);
 			}
 			return_obj[true_z][the_series_w*true_y +true_x] = 1;
-
 		}
 	}
 	

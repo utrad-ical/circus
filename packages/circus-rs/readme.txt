@@ -21,5 +21,3 @@ change config.datadir to path for DICOM series stored.
 [CIRCUSDB_path_resolver]
 edit CIRCUSDB_path_resolver_config.js
 change config.config_path to CIRCUS DB database config file's path.
-but curently not worked.
-TO BE FIXED.

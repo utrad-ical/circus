@@ -3,19 +3,18 @@
 @section('content')
 @if (!isset($error_msg))
 <script type="text/javascript">
-//コントローラ・ビューアーウィジェットをコントロールするための案件固有の機能群
+//Project-specific feature set to control the controller viewer widget
 $(function(){
-	//ページロード直後にコントローラを発火させるときに渡すデータ群
-	//複数ビューアーを連動させる１グループにつき１コントローラ
-	var	voxel_container	=	new voxelContainer();	//ラベル情報格納用オブジェクト(3面共用)
+	//Data group to pass when you ignite the controller immediately after page load
+	//The controller 1 per group to be linked to multiple viewers
+	var	voxel_container	=	new voxelContainer();	//Label information storage object (three sides shared)
 	voxel_container.name	=	'my_voxel';
 
-	var	the_domain	=	'http://insight/';
-	//var	the_domain	=	'http://ndp.spiritek.co.jp/';
+	var the_domain = "{{Config::get('config.domain')}}";
 	var	initInfo	=	[
 		{
 			baseUrl : "{{Config::get('config.dicom_img_base_url')}}",
-			postUrl : "{{asset('case/save_label')}}",	//画像格納サーバーと異なる場合はこちらを有効にする
+			postUrl : "{{asset('case/save_label')}}",	//Enable here if it is different from the image storage server
 			caseId : "{{Session::get('caseID')}}",
 			attribute : {{$attribute}},
 			series : {{$series_list}},
@@ -30,59 +29,58 @@ $(function(){
 				label : 'the_panel_inner'
 			},
 			viewer : [
-				{//1枚目
+				{//First sheet
 					elementId : 'img_area_axial',
 					orientation : 'axial',
 					container : voxel_container,
 					number:{
-						maximum : 260, //何枚の断面が格納されているか
-						current : 44	//初期の表示番号
+						maximum : 260, //What sheets cross section is stored
+						current : 44	//Initial display number
 					},
 					window: {
 						level: {current : 1000, maximum : 50000, minimum : -5000},
 						width: {current : 6000, maximum : 9000, 	minimum : 1},
 						preset : [
-							 {label: 'ソースからaxialだけに適用'	, level: 0000	, width : 2000},
+							 {label: 'Apply from the source only to axial'	, level: 0000	, width : 2000},
 						]
 					},
 				},
-				{//2枚目
+				{//2nd sheet
 					elementId : 'img_area_sagital',
 					orientation : 'sagital',
 					container : voxel_container,
 					number:{
-						maximum : 511, //何枚の断面が格納されているか
-						current : 90	//初期の表示番号
+						maximum : 511, //What sheets cross section is stored
+						current : 90	//Initial display number
 					}
 				},
-				{//3枚目
+				{//2rd sheet
 					elementId : 'img_area_coronal',
 					orientation : 'coronal',
 					container : voxel_container,
 					number:{
-						maximum : 511, //何枚の断面が格納されているか
-						current : 90	//初期の表示番号
+					maximum : 511, //What sheets cross section is stored
+					current : 90	//Initial display number
 					}
 				}
 			]
 		}
 	];
 
-	//seriesの個数分のajaxを行ってnode.jsからseries情報をもらう
+	//accept a series information from node.js by performing a number worth of ajax of series
 	var ajax_cnt = 0;
 	var initAjax= function(){
 		var tmp_series = initInfo[0].series[ajax_cnt];
 		$.ajax({
-			//url: the_domain+'insight/todai_img',
-			url: "{{asset('series/get_series')}}",
+			url: the_domain + 'dicom_img',
 			type: 'GET',
 			data: {
 				mode : 'metadata',
 				series : tmp_series.id
-			},//送信データ
+			},//Transmitted data
 			dataType: 'json',
 			error: function(){
-				alert('通信に失敗しました');
+				alert('I failed to communicate');
 			},
 			success: function(response){
 
@@ -135,12 +133,10 @@ $(function(){
 			}
 		});
 	}
-	initAjax();//ajax発火
-
-
+	initAjax();//ajax firing
 
 	var	controllerRun	=	function(){
-		//連動シリーズ１つにつき１つずつコントローラ発行
+		//Controller issue interlocking series one per one
 		for(var j=0;	j<initInfo.length;	j++){
 			$('#'+initInfo[j].wrapElementId).imageViewerController('init',initInfo[j]);
 		}
@@ -166,7 +162,7 @@ $(function(){
 		return false;
 	});
 
-	//RevisionのAttribute情報設定
+	//Attribute information setting of Revision
 	var attribute_properties = {{$label_attribute_settings}};
 	var attribute_prop = $('#the_panel_attribute');
 	if (initInfo[0].attribute) {
@@ -212,17 +208,13 @@ $(function(){
 				<table class="common_table al_l mar_b_10">
 					<colgroup>
 						<col width="20%">
-						<col width="30%">
-						<col width="20%">
-						<col width="30%">
+						<col width="80%">
 					</colgroup>
 					<tr>
 						<th>Case ID</th>
-						<td colspan="3">{{$case_detail['caseID']}}</td>
+						<td>{{$case_detail['caseID']}}</td>
 					</tr>
 					<tr>
-						<th>Project ID</th>
-						<td>{{$case_detail['projectID']}}</td>
 						<th>Project Name</th>
 						<td>{{$case_detail['projectName']}}</td>
 					</tr>
@@ -267,16 +259,6 @@ $(function(){
 				<div class="search_result">
 					<a name="revision"></a>
 					<h2 class="con_ttl">Revision</h2>
-					<ul class="common_pager clearfix">
-						{{$list_pager->links()}}
-						<li class="pager_sort_order">
-							{{Form::select('sort', Config::get('const.search_revision_sort'), isset($inputs['sort']) ? $inputs['sort'] : '', array('class' => 'w_max change_select', 'data-target-dom' => 'sort_order_down', 'id' => 'sort_order_up'))}}
-						</li>
-						<li class="pager_disp_num">
-							{{Form::select('disp', Config::get('const.search_display'), isset($inputs['disp']) ? $inputs['disp'] : '', array('class' => 'w_max change_select', 'data-target-dom' => 'display_num_down', 'id' => 'display_num_up'))}}
-						</li>
-					</ul>
-					<canvas id="dummy_canvas"></canvas>
 					<div class="pad_tb_10 result_revision_list">
 						<table class="result_table common_table al_c">
 							<colgroup>
@@ -327,15 +309,6 @@ $(function(){
 							@endif
 						</table>
 					</div>
-					<ul class="common_pager clearfix">
-						{{$list_pager->links()}}
-						<li class="pager_sort_order">
-							{{Form::select('sort', Config::get('const.search_revision_sort'), isset($inputs['sort']) ? $inputs['sort'] : '', array('class' => 'w_max change_select', 'data-target-dom' => 'sort_order_up', 'id' => 'sort_order_down'))}}
-						</li>
-						<li class="pager_disp_num">
-							{{Form::select('disp', Config::get('const.search_display'), isset($inputs['disp']) ? $inputs['disp'] : '', array('class' => 'w_max change_select', 'data-target-dom' => 'display_num_up', 'id' => 'display_num_down'))}}
-						</li>
-					</ul>
 				</div>
 			@endif
 		</div>

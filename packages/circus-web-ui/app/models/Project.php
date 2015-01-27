@@ -1,10 +1,9 @@
 <?php
 
-
 use Jenssegers\Mongodb\Model as Eloquent;
 
 /**
- * Class to perform the project table operation
+ * Model class for projects.
  */
 class Project extends Eloquent {
 	protected $connection = 'mongodb';
@@ -15,17 +14,37 @@ class Project extends Eloquent {
 	public $timestamps = false;
 
 	//Authority constant
-	const AUTH_TYPE_CREATE = 'createGroups';	//Case creation authority
-	const AUTH_TYPE_VIEW = 'viewGroups';		//Case viewing authority
-	const AUTH_TYPE_UPDATE = 'updateGroups';	//Case update authority
-	const AUTH_TYPE_REVIEW = 'reviewGroups';	//Case Review authority
-	const AUTH_TYPE_DELETE = 'deleteGroups';	//Case Delete authority
 
 	/**
-	 * Login user to get a list of projects that can be operated
+	 * Case creation role
+	 */
+	const AUTH_TYPE_CREATE = 'createGroups';
+
+	/**
+	 * Case viewing role
+	 */
+	const AUTH_TYPE_VIEW = 'viewGroups';
+
+	/**
+	 * Case update role
+	 */
+	const AUTH_TYPE_UPDATE = 'updateGroups';
+
+	/**
+	 * Case reviewing role
+	 */
+	const AUTH_TYPE_REVIEW = 'reviewGroups';
+
+	/**
+	 * Case deleting role
+	 */
+	const AUTH_TYPE_DELETE = 'deleteGroups';
+
+	/**
+	 * List all projects where the current user has access with the given authority type.
 	 * @return Project login user operable List
-	 * @param $auth_gp Authority type
-	 * @param $make_combo Combo element generation flag
+	 * @param $auth_gp string Authority type
+	 * @param $make_combo bool Combo element generation flag
 	 */
 	public static function getProjectList($auth_gp, $make_combo = false){
 		$project_list = self::whereIn($auth_gp, Auth::user()->groups)
@@ -44,9 +63,9 @@ class Project extends Eloquent {
 	}
 
 	/**
-	 * I get the project name
-	 * @param $projectID Project ID
-	 * @return Project name
+	 * Returns the project name
+	 * @param $projectID int Project ID
+	 * @return string Project name
 	 */
 	public static function getProjectName($projectID) {
 		$project = self::where('projectID', '=', intval($projectID))->get(array('projectName'));

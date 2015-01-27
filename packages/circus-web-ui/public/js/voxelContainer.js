@@ -106,13 +106,6 @@ voxelContainer.prototype.createSaveData = function(series_id,label_id){
 	//描かれている者があればそれを反映する
 	if(typeof the_label =='object'){
 
-		/*
-			var dumy_canvas_elm = document.getElementById('dummy_canvas');
-			var dummy_canvas_ctx = dumy_canvas_elm.getContext("2d");
-			var tmp_img_data = dummy_canvas_ctx.createImageData(2,2); 
-			return_obj = dumy_canvas_elm.toDataURL();
-		*/
-
 		//まずは全面の全マスを見てxyz最大・最小を求める
 		var max_x=0;
 		var min_x=Number.MAX_VALUE;
@@ -170,12 +163,16 @@ voxelContainer.prototype.createSaveData = function(series_id,label_id){
 		var png_height = draw_h*return_obj.size[2];
 
 		//書き出しのための一時的キャンバス・imageオブジェクト生成
-		var dumy_canvas_elm = document.getElementById('dummy_canvas');
+		var dumy_canvas_elm = document.createElement('canvas');
+		dumy_canvas_elm.id = 'tmp_canvas';
+		document.getElementsByTagName("body").item(0).appendChild(dumy_canvas_elm); 
+	
+		dumy_canvas_elm = document.getElementById('tmp_canvas');
 		dumy_canvas_elm.style.display = 'none';
 		dumy_canvas_elm.setAttribute('width',draw_w);
 		dumy_canvas_elm.setAttribute('height',png_height);
-		var dummy_canvas_ctx = dumy_canvas_elm.getContext('2d');
-		var tmp_img_data = dummy_canvas_ctx.createImageData(draw_w,png_height);
+		var tmp_canvas_ctx = dumy_canvas_elm.getContext('2d');
+		var tmp_img_data = tmp_canvas_ctx.createImageData(draw_w,png_height);
 		//console.log(draw_w,png_height);
 
 		//まずはデータを全て透明にする
@@ -207,8 +204,8 @@ voxelContainer.prototype.createSaveData = function(series_id,label_id){
 				}
 			}
 		}
-		dummy_canvas_ctx.putImageData(tmp_img_data,0,0);
-
+		tmp_canvas_ctx.putImageData(tmp_img_data,0,0);
+		dumy_canvas_elm.parentNode.removeChild(dumy_canvas_elm);
 		return_obj.image  = dumy_canvas_elm.toDataURL();
 		//console.log(return_obj.image);
 	}
@@ -227,9 +224,9 @@ voxelContainer.prototype.deleteLabelObject = function(series_id,label_id){
 	
 	var the_series =this_obj.getSeriesObjectById(series_id);
 	for(var j=0; j<the_series.label.length; j++){
-	if(the_series.label[j].id ==label_id){
-		the_series.label.splice(j,1);
-	}
+		if(the_series.label[j].id ==label_id){
+			the_series.label.splice(j,1);
+		}
 	}
 };/*deleteLabel*/
 
@@ -333,15 +330,18 @@ voxelContainer.prototype.getPositionDataFromImage = function(insertObject,series
 	var img_original_h =tmp_img.height;
 
 	//書き出しのための一時的キャンバス・imageオブジェクト生成
-	var dumy_canvas_elm = document.getElementById('dummy_canvas');
+	var dumy_canvas_elm = document.createElement('canvas');
+	dumy_canvas_elm.id = 'tmp_canvas';
+	document.getElementsByTagName("body").item(0).appendChild(dumy_canvas_elm); 
+
+	dumy_canvas_elm = document.getElementById('tmp_canvas');
 	dumy_canvas_elm.style.display = 'none';
 	dumy_canvas_elm.setAttribute('width',img_original_w);
 	dumy_canvas_elm.setAttribute('height',img_original_h);
-	var dummy_canvas_ctx = dumy_canvas_elm.getContext('2d');
-
 	
-	dummy_canvas_ctx.drawImage(tmp_img,0,0,img_original_w,img_original_h)
-	var tmp_image_data = dummy_canvas_ctx.getImageData(0,0,img_original_w,img_original_h);
+	var tmp_canvas_ctx = dumy_canvas_elm.getContext('2d');
+	tmp_canvas_ctx.drawImage(tmp_img,0,0,img_original_w,img_original_h)
+	var tmp_image_data = tmp_canvas_ctx.getImageData(0,0,img_original_w,img_original_h);
 
 	for(var i=3; i<tmp_image_data.data.length+1; i=i+4){
 		//塗られているマスだけに着目
@@ -368,7 +368,8 @@ voxelContainer.prototype.getPositionDataFromImage = function(insertObject,series
 			return_obj[true_z][the_series_w*true_y +true_x] = 1;
 		}
 	}
-	
+	dumy_canvas_elm.parentNode.removeChild(dumy_canvas_elm);
+
 	return return_obj;
 };/*getPositionDataFromImage*/
 
@@ -396,28 +397,28 @@ voxelContainer.prototype.historyBack = function(){
 	var this_data = this_obj.data;
 	
 	if(this_data.history.main.length>0){
-	//最後の1手順分をRedo用配列に移動
-	var tmp_move_array  = new Array(0);
-	$.extend(true,tmp_move_array,this_data.history.main[this_data.history.main.length-1]);
-	this_data.history.redo.push(tmp_move_array);
-	this_data.history.main.splice(this_data.history.main.length-1,1);
-	
-	//全てのラベルを空にする
-	for(var i=this_obj.data.series.length-1; i>=0; i--){
-		for(var j=this_obj.data.series[i].label.length-1; j>=0; j--){
-			this_obj.data.series[i].label[j].position = new Array(0);
+		//最後の1手順分をRedo用配列に移動
+		var tmp_move_array  = new Array(0);
+		$.extend(true,tmp_move_array,this_data.history.main[this_data.history.main.length-1]);
+		this_data.history.redo.push(tmp_move_array);
+		this_data.history.main.splice(this_data.history.main.length-1,1);
+		
+		//全てのラベルを空にする
+		for(var i=this_obj.data.series.length-1; i>=0; i--){
+			for(var j=this_obj.data.series[i].label.length-1; j>=0; j--){
+				this_obj.data.series[i].label[j].position = new Array(0);
+			}
 		}
-	}
 	
-	//今現在のメインヒストリ配列の内容で再構築
-	for(var i= this_data.history.main.length-1; i>=0; i--){
-		var this_history = this_data.history.main[i];
-		this_obj.updateVoxel(
+		//今現在のメインヒストリ配列の内容で再構築
+		for(var i= this_data.history.main.length-1; i>=0; i--){
+			var this_history = this_data.history.main[i];
+			this_obj.updateVoxel(
 				this_history.series,
 				this_history.label,
 				this_history.mode,
 				this_history.position
-		);
+			);
 		}
 	}
 };
@@ -431,17 +432,17 @@ voxelContainer.prototype.historyRedo = function(){
 	var this_obj = this;
 	var this_data = this_obj.data;
 	if(this_data.history.redo.length>0){
-	var tmp_move_array = new Array(0);
-		$.extend(true,tmp_move_array, this_data.history.redo[this_data.history.redo.length-1]);
-		this_data.history.main.push(tmp_move_array);
-		this_data.history.redo.splice(this_data.history.redo.length-1,1);
-		
-	//全てのラベルを空にする
-	for(var i=this_obj.data.series.length-1; i>=0; i--){
-		for(var j=this_obj.data.series[i].label.length-1; j>=0; j--){
-			this_obj.data.series[i].label[j].position = new Array(0);
+		var tmp_move_array = new Array(0);
+			$.extend(true,tmp_move_array, this_data.history.redo[this_data.history.redo.length-1]);
+			this_data.history.main.push(tmp_move_array);
+			this_data.history.redo.splice(this_data.history.redo.length-1,1);
+			
+		//全てのラベルを空にする
+		for(var i=this_obj.data.series.length-1; i>=0; i--){
+			for(var j=this_obj.data.series[i].label.length-1; j>=0; j--){
+				this_obj.data.series[i].label[j].position = new Array(0);
+			}
 		}
-	}
 		
 		//今現在のメインヒストリ配列の内容で再構築
 		for(var i= this_data.history.main.length-1; i>=0; i--){
@@ -491,37 +492,37 @@ voxelContainer.prototype.insertLabelData = function(insert_obj){
 //ある断面で塗るべきマスの情報を返す
 voxelContainer.prototype.returnSlice = function(series_id,label_id,tmp_orientation,tmp_current_num){
 
- /*
-  第1引数 : ラベルid
-  第2引数 : 向き
-  第3引数 : その向きでの奥行
- */
+	/*
+		第1引数 : ラベルid
+		第2引数 : 向き
+		第3引数 : その向きでの奥行
+	*/
 
 	var this_obj = this;
 	var this_data = this_obj.data;
 	var return_array = new Array(0);
- 	var tmp_target_series = this_obj.getSeriesObjectById(series_id);
+	var tmp_target_series = this_obj.getSeriesObjectById(series_id);
 	var voxel_x = tmp_target_series.size.X;
-
- //対象ラベル取得
+	
+	//対象ラベル取得
 	var tmp_target_label = this_obj.getLabelObjectById(label_id,series_id);
 
- //各面で描くべき座標を返す(座標自体はvoxel XYZ座標)
- if(tmp_orientation == 'axial'){
-  //axialのときはZが奥行に相当する
-
-  if(typeof tmp_target_label.position[tmp_current_num] != 'undefined'){
-  	var the_data = tmp_target_label.position[tmp_current_num];    
-
-   for(var i=the_data.length-1; i>=0; i--){
-    if(the_data[i]==1){
-    	var tmp_y = Math.floor(i/voxel_x);
-    	var tmp_x = i-tmp_y *voxel_x;
-     return_array.push([tmp_x,tmp_y,tmp_current_num]);
-    }
-   }
-  }
- }else if(tmp_orientation == 'coronal'){
+	//各面で描くべき座標を返す(座標自体はvoxel XYZ座標)
+	if(tmp_orientation == 'axial'){
+		//axialのときはZが奥行に相当する
+	
+		if(typeof tmp_target_label.position[tmp_current_num] != 'undefined'){
+			var the_data = tmp_target_label.position[tmp_current_num];    
+	
+			for(var i=the_data.length-1; i>=0; i--){
+				if(the_data[i]==1){
+					var tmp_y = Math.floor(i/voxel_x);
+					var tmp_x = i-tmp_y *voxel_x;
+					return_array.push([tmp_x,tmp_y,tmp_current_num]);
+				}
+			}
+		}
+	}else if(tmp_orientation == 'coronal'){
   //coronalのときはyが奥行に相当する
   for(var i=tmp_target_label.position.length-1; i>=0; i--){ //z軸
    //各断面を調査

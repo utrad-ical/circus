@@ -9,7 +9,8 @@
 	var controllerInfo = {
 		activeSeriesId : '', //参照するシリーズid
 		baseUrl : 'http://your-website/', //画像格納ディレクトリ
-		defaultColorSet : ['#FF0000','#FF3300','#FF6600','#FFCC00','#0033FF','#0099FF','#00CCFF','#00FFFF','#00FF00','#00CC00','#009900','#006600','#3333CC','#CC3399','#CC6666','#FF9999'],
+		color_marker : 0,
+		defaultColorSet : ['#FF0000','#FFCC00','#0033FF','#0099FF','#00CCFF','#00FFFF','#00FF00','#00CC00','#009900','#006600','#FF6600','#FF3300','#3333CC','#CC3399','#CC6666','#FF9999'],
 		mode : 'pan', //pan,pen,erase,window
 		series: [
 			{
@@ -105,7 +106,9 @@
 				active_series.label =new Array();
 			}
 			var tmp_label_obj= new Object();
-			var label_default = this_elm.imageViewerController('getLabelDefault');
+			var tmp_color_index_num = active_series.label.length;
+
+			var label_default = this_elm.imageViewerController('getLabelDefault',tmp_color_index_num);
 			tmp_label_obj = $.extend(true,tmp_label_obj,label_default);
 
 			active_series.label.push(tmp_label_obj);
@@ -468,13 +471,16 @@
 			//コントローラのデフォルトのオブジェクトとマージ
 
 			if(typeof controllerInfo.series =='object'){
+							var tmp_color_index_num = 0;
+
 				for(var i=0; i<controllerInfo.series.length; i++){
 					var tmp_series = controllerInfo.series[i];
 					if(typeof tmp_series.label =='object'){
 						for(var j=0; j<tmp_series.label.length; j++){
 							var tmp_the_label = tmp_series.label[j];
-							var label_default = this_elm.imageViewerController('getLabelDefault');
+							var label_default = this_elm.imageViewerController('getLabelDefault',tmp_color_index_num);
 							tmp_series.label[j] = $.extend(true,label_default,tmp_the_label);
+							tmp_color_index_num++;
 						}
 					}
 				}
@@ -827,21 +833,29 @@
 		},
 
 
-		getLabelDefault : function() {
+		getLabelDefault : function(color_index) {
 
 			//ラベル新規生成
+			var this_elm = this;
 			var tmp_id = new Date();
 			tmp_id = tmp_id.getFullYear()+'_'+tmp_id.getMonth()+'_'+tmp_id.getDate()+'_'+tmp_id.getHours()+'_'+tmp_id.getMinutes()+'_'+tmp_id.getSeconds()+'_'+tmp_id.getMilliseconds();
-
+	
+			var index_number = 0;
+			if(color_index){
+				index_number = color_index;
+			}
+			var tmp_color = controllerInfo.defaultColorSet[index_number];
+			var tmp_rgba = this_elm.imageViewerController('getRgba',tmp_color,100);
+	
 			var return_obj  = {
 				//ラベル生成時のデフォルト
 				id : tmp_id,
 				alpha : 100,
 				attribute :'',
-				color : '#ff0000',  //todo初期は他のラベルで使われてない色をランダムで選ぶ
+				color : tmp_color,  //todo初期は他のラベルで使われてない色をランダムで選ぶ
 				description :'',
 				name : '名称未設定',
-				rgba : 'rgba(255,0,0,1)', //color/alphaを併せてcanvas適用用の値を作る
+				rgba : tmp_rgba, //color/alphaを併せてcanvas適用用の値を作る
 				visible : true
 			}
 			return return_obj;

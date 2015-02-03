@@ -57,7 +57,7 @@ class SeriesController extends BaseController {
 			$select_col = array(
 				'seriesUID', 'seriesDescription',
 				'patientInfo.patientID', 'patientInfo.patientName',
-				'patientInfo.sex', 'patientInfo.birthday',
+				'patientInfo.sex', 'patientInfo.birthDate',
 				'patientInfo.age', 'modality', 'seriesDate'
 			);
 
@@ -222,7 +222,7 @@ class SeriesController extends BaseController {
 				'seriesUID'			=>	$series_data->seriesUID,
 				'patientID'			=>	$series_data->patientInfo['patientID'],
 				'patientName'		=>	$series_data->patientInfo['patientName'],
-				'patientBirthday'	=>	$series_data->patientInfo['birthday'],
+				'patientBirthDate'	=>	$series_data->patientInfo['birthDate'],
 				'patientSex'		=>	$series_data->patientInfo['sex'],
 				'LastUpdate'		=>	date('Y/m/d h:i', $series_data->updateTime->sec),
 				'creator'			=>	$series_data->receiveMethod,

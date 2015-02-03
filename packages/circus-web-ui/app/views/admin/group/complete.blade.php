@@ -53,7 +53,7 @@
 		{{HTML::link(asset('admin/group/input'), 'View added Group', array('class' => 'common_btn link_group_edit_complete'))}}
 		{{HTML::link(asset('admin/group/input'), 'Add new Group', array('class' => 'common_btn group_input'))}}
 		{{Form::open(['url' => asset('admin/group/detail'), 'method' => 'POST', 'class' => 'frm_group_edit_complete'])}}
-			{{Form::hidden('GroupID', $GroupID)}}
+			{{Form::hidden('groupID', $groupID)}}
 		{{Form::close()}}
 	</p>
 </div>

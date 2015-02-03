@@ -78,7 +78,7 @@ class ClinicalCase extends Eloquent {
 		//caseDate Case creation date
 		if (isset($input['caseDate']) && $input['caseDate']) {
 			$query->where(
-				'revisions.latest.date', '=',
+				'latestRevision.date', '=',
 				array(
 					'$gte' => new MongoDate(strtotime($input['caseDate'])),
 					'$lte' => new MongoDate(strtotime($input['caseDate'].' +1 day'))

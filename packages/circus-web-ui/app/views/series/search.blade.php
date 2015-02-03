@@ -173,11 +173,11 @@
 							<th>Sex</th>
 							<td>
 								<label>
-									{{Form::radio('sex', 'm', $inputs['sex'] == 'm' ? true : false)}}
+									{{Form::radio('sex', 'M', $inputs['sex'] == 'M' ? true : false)}}
 									male
 								</label>
 								<label>
-									{{Form::radio('sex', 'f', $inputs['sex'] == 'f' ? true : false)}}
+									{{Form::radio('sex', 'F', $inputs['sex'] == 'F' ? true : false)}}
 									female
 								</label>
 								<label>

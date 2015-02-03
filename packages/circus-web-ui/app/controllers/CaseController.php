@@ -61,7 +61,7 @@ class CaseController extends BaseController {
 				'caseID', 'projectID', 'incrementalID',
 				'patientInfoCache.patientID', 'patientInfoCache.name',
 				'patientInfoCache.age', 'patientInfoCache.sex',
-				'revisions.latest.date',
+				'latestRevision.date',
 				'updateTime'
 			);
 
@@ -102,7 +102,7 @@ class CaseController extends BaseController {
 
 					//Day of the week get
 					$revision = $rec->revisions;
-					$dt = $revision['latest']['date'];
+					$dt = $rec->latestRevision['date'];
 					$w = self::getWeekDay(date('w', strtotime($dt)));
 
 					//Project name
@@ -112,7 +112,7 @@ class CaseController extends BaseController {
 					$list[] = array(
 						'caseID'		=>	$rec->caseID,
 						'patientID'		=>	$patient['patientID'],
-						'patientName' 	=>	$patient['name'],
+						'patientName' 	=>	$patient['patientName'],
 						'sex'			=>	self::getSex($patient['sex']),
 						'age'			=>	$patient['age'],
 						'latestDate' 	=>	date('Y/m/d('.$w.') H:i', $dt->sec),
@@ -198,9 +198,9 @@ class CaseController extends BaseController {
 			//Setting of acquisition column
 			$select_col = array(
 				'caseID', 'projectID', 'incrementalID',
-				'patientInfoCache.patientID', 'patientInfoCache.name',
+				'patientInfoCache.patientID', 'patientInfoCache.patientName',
 				'patientInfoCache.age', 'patientInfoCache.sex',
-				'revisions.latest.date',
+				'latestRevision.date',
 				//'revisions.latest.creator',
 				'updateTime'
 			);
@@ -241,8 +241,7 @@ class CaseController extends BaseController {
 					$patient = $rec->patientInfoCache;
 
 					//Day of the week get
-					$revision = $rec->revisions;
-					$dt = $revision['latest']['date'];
+					$dt = $rec->latestRevision['date'];
 					$w = self::getWeekDay(date('w', strtotime($dt)));
 
 					//Project name
@@ -254,7 +253,7 @@ class CaseController extends BaseController {
 						'caseID'		=>	$rec->caseID,
 					//	'projectID'		=>	$rec->projectID,
 						'patientID'		=>	$patient['patientID'],
-						'patientName' 	=>	$patient['name'],
+						'patientName' 	=>	$patient['patientName'],
 						'age'			=>	$patient['age'],
 						'sex'			=>	self::getSex($patient['sex']),
 						'latestDate' 	=>	date('Y/m/d('.$w.') H:i', $dt->sec),
@@ -401,8 +400,8 @@ class CaseController extends BaseController {
 				'projectID'		=>	$case_data->projectID,
 				'projectName'	=>	$project ? $project->projectName : '',
 				'patientID'		=>	$case_data->patientInfoCache['patientID'],
-				'patientName'	=>	$case_data->patientInfoCache['name'],
-				'birthday'		=>	$case_data->patientInfoCache['birthday'],
+				'patientName'	=>	$case_data->patientInfoCache['patientName'],
+				'birthDate'		=>	$case_data->patientInfoCache['birthDate'],
 				'sex'			=>	self::getSex($case_data->patientInfoCache['sex'])
 			);
 
@@ -411,34 +410,31 @@ class CaseController extends BaseController {
 			$revision_no_list = array();
 			$max_revision = 0;
 			foreach($case_data->revisions as $key => $value) {
-				//key is excluded so Clone thing of latest
-				if ($key !== 'latest') {
-					//The set if Revision number is large
-					if ($max_revision < $key)
-						$max_revision = $key;
+				//The set if Revision number is large
+				if ($max_revision < $key)
+					$max_revision = $key;
 
-					//I ask the number of label
-					$label_cnt = 0;
-					foreach ($value['series'] as $rec) {
-						$label_cnt += count($rec['labels']);
-					}
-
-					//I ask the day of the week
-					$w = self::getWeekDay(date('w', $value['date']->sec));
-
-					//The list created for display
-					$revision_list[] = array(
-						'revisionNo'	=>	$key,
-						'editDate'		=>	date('Y/m/d('.$w.')', $value['date']->sec),
-						'editTime'		=>	date('H:i', $value['date']->sec),
-						'seriesCount'	=>	count($value['series']),
-						'labelCount'	=>	$label_cnt,
-						'creator'		=>	$value['creator'],
-						'memo'			=>	$value['description'],
-						'sortEditTime'	=>	date('Y-m-d H:i:s', $value['date']->sec)
-					);
-					$revision_no_list[] = $key;
+				//I ask the number of label
+				$label_cnt = 0;
+				foreach ($value['series'] as $rec) {
+					$label_cnt += count($rec['labels']);
 				}
+
+				//I ask the day of the week
+				$w = self::getWeekDay(date('w', $value['date']->sec));
+
+				//The list created for display
+				$revision_list[] = array(
+					'revisionNo'	=>	$key,
+					'editDate'		=>	date('Y/m/d('.$w.')', $value['date']->sec),
+					'editTime'		=>	date('H:i', $value['date']->sec),
+					'seriesCount'	=>	count($value['series']),
+					'labelCount'	=>	$label_cnt,
+					'creator'		=>	$value['creator'],
+					'memo'			=>	$value['description'],
+					'sortEditTime'	=>	date('Y-m-d H:i:s', $value['date']->sec)
+				);
+				$revision_no_list[] = $key;
 			}
 			$select_revision = isset($inputs['revisionNo']) ? $inputs['revisionNo'] : $max_revision;
 			$case_detail['revisionNo'] = $select_revision;
@@ -468,8 +464,8 @@ class CaseController extends BaseController {
 			$result['series_list'] = self::getSeriesList($case_data->revisions[$select_revision]);
 			$revision_attribute = $case_data->revisions[$select_revision]['attributes'];
 			//datepickerが日付でない値(空文字など)設定するとおかしくなるのでそれの対処を入れる
-			if (array_key_exists('birthday', $revision_attribute) === FALSE || !$revision_attribute['birthday']) {
-				unset($revision_attribute['birthday']);
+			if (array_key_exists('birthDate', $revision_attribute) === FALSE || !$revision_attribute['birthDate']) {
+				unset($revision_attribute['birthDate']);
 			}
 
 			//$result['attribute'] = json_encode($case_data->revisions[$select_revision]['attributes']);
@@ -555,34 +551,31 @@ class CaseController extends BaseController {
 			$revision_no_list = array();
 			$max_revision = 0;
 			foreach($case_data->revisions as $key => $value) {
-				//key is excluded so Clone thing of latest
-				if ($key !== 'latest') {
-					//The set if Revision number is large
-					if ($max_revision < $key)
-						$max_revision = $key;
+				//The set if Revision number is large
+				if ($max_revision < $key)
+					$max_revision = $key;
 
-					//I ask the number of label
-					$label_cnt = 0;
-					foreach ($value['series'] as $rec) {
-						$label_cnt += count($rec['labels']);
-					}
-
-					//I ask the day of the week
-					$w = self::getWeekDay(date('w', $value['date']->sec));
-
-					//The list created for display
-					$revision_list[] = array(
-						'revisionNo'	=>	$key,
-						'editDate'		=>	date('Y/m/d('.$w.')', $value['date']->sec),
-						'editTime'		=>	date('H:i', $value['date']->sec),
-						'seriesCount'	=>	count($value['series']),
-						'labelCount'	=>	$label_cnt,
-						'creator'		=>	$value['creator'],
-						'memo'			=>	$value['memo'],
-						'sortEditTime'	=>	date('Y-m-d H:i:s', $value['date']->sec)
-					);
-					$revision_no_list[] = $key;
+				//I ask the number of label
+				$label_cnt = 0;
+				foreach ($value['series'] as $rec) {
+					$label_cnt += count($rec['labels']);
 				}
+
+				//I ask the day of the week
+				$w = self::getWeekDay(date('w', $value['date']->sec));
+
+				//The list created for display
+				$revision_list[] = array(
+					'revisionNo'	=>	$key,
+					'editDate'		=>	date('Y/m/d('.$w.')', $value['date']->sec),
+					'editTime'		=>	date('H:i', $value['date']->sec),
+					'seriesCount'	=>	count($value['series']),
+					'labelCount'	=>	$label_cnt,
+					'creator'		=>	$value['creator'],
+					'memo'			=>	$value['memo'],
+					'sortEditTime'	=>	date('Y-m-d H:i:s', $value['date']->sec)
+				);
+				$revision_no_list[] = $key;
 			}
 
 			//Revision sort order adaptation
@@ -773,11 +766,6 @@ class CaseController extends BaseController {
 			//Update of case information
 			//Case information acquisition
 			$case_obj = ClinicalCase::find($inputs['caseId']);
-			//Revision information acquisition
-			$revisions = $case_obj->revisions;
-			$next_index = count($revisions) > 0 ? count($revisions)-1 : 0;
-
-			Log::debug('Add Revision No::'.$next_index);
 
 			//Revision information setting
 			$save_attribute = array_key_exists('attribute', $inputs) ?
@@ -800,17 +788,10 @@ class CaseController extends BaseController {
 				Log::debug('Case Validate Error');
 				self::rollback($transaction, implode("\n", $errors->all()));
 			} else {
-				$revision_data = array();
-				foreach ($revisions as $key => $val) {
-					if ($key !== 'latest') {
-						$revision_data[$key] = $val;
-					} else {
-						$revision_data['latest'] = $tmp_revision;
-					}
-				}
-
-				$revision_data[$next_index] = $tmp_revision;
-				$case_obj->revisions = $revision_data;
+				$revisions = $case_obj->revisions;
+				$revisions[] = $tmp_revision;
+				$case_obj->revisions = $revisions;
+				$case_obj->latestRevision = $tmp_revision;
 				//I registered because there is no error
 				$case_obj->save();
 			}
@@ -1062,10 +1043,8 @@ class CaseController extends BaseController {
 			$series_exclude_ary = array();
 			$tmp_series_exclude_ary = array();
 			foreach ($result['inputs']->revisions as $key => $value) {
-				if ($key !== 'latest') {
-					for($i = 0; $i < count($value['series']); $i++){
-						$tmp_series_exclude_ary[] = $value['series'][$i]['seriesUID'];
-					}
+				for($i = 0; $i < count($value['series']); $i++){
+					$tmp_series_exclude_ary[] = $value['series'][$i]['seriesUID'];
 				}
 			}
 
@@ -1095,7 +1074,7 @@ class CaseController extends BaseController {
 			'seriesUID', 'seriesDescription',
 			'patientInfo.patientID', 'patientInfo.age',
 			'patientInfo.sex', 'patientInfo.patientName',
-			'patientInfo.birthday'
+			'patientInfo.birthDate'
 		);
 		$series = Series::addWhere($inputs)
 						->get($select_col);
@@ -1157,7 +1136,7 @@ class CaseController extends BaseController {
 			'seriesUID', 'seriesDescription',
 			'patientInfo.patientID', 'patientInfo.age',
 			'patientInfo.sex', 'patientInfo.patientName',
-			'patientInfo.birthday'
+			'patientInfo.birthDate'
 		);
 		$series = Series::addWhere($case_info)
 							->get($select_col);
@@ -1178,12 +1157,12 @@ class CaseController extends BaseController {
 
 		//Set the value for the Validate check
 		$case_obj->caseID = $case_info['caseID'];
-		$case_obj->incrementalID = 1;
+		$case_obj->incrementalID = 1; // This can be a dummy number only for validation
 		$case_obj->projectID = $case_info['projectID'];
 		$case_obj->date = new MongoDate(strtotime(date('Y-m-d H:i:s')));
 		$case_obj->patientInfoCache = array(
 			'patientID'	=>	$case_info['patientInfo']['patientID'],
-			'name'		=>	$case_info['patientInfo']['patientName'],
+			'patientName' => $case_info['patientInfo']['patientName'],
 			'age'		=>	$case_info['patientInfo']['age'],
 			'sex'		=>	$case_info['patientInfo']['sex']
 		);
@@ -1236,46 +1215,31 @@ class CaseController extends BaseController {
 
 		//Set the value for the Validate check
 		$case_obj->caseID = $inputs['caseID'];
-		$case_obj->incrementalID = 100;
+		$case_obj->incrementalID = Seq::getIncrementSeq('incrementalCaseID');
 		$case_obj->projectID = intval($inputs['projectID']);
 		$case_obj->date = new MongoDate(strtotime(date('Y-m-d H:i:s')));
 
 		//Setting of patient information
 		$case_obj->patientInfoCache = array(
 			'patientID'	=>	$inputs['patientInfo']['patientID'],
-			'name'		=>	$inputs['patientInfo']['patientName'],
+			'patientName' => $inputs['patientInfo']['patientName'],
 			'age'		=>	$inputs['patientInfo']['age'],
-			'birthday'	=>	$inputs['patientInfo']['birthday'],
+			'birthDate'	=>	$inputs['patientInfo']['birthDate'],
 			'sex'		=>	self::setSex($inputs['patientInfo']['sex'])
 		);
 
 		//Initial setting of Revision information
 		$series_list = self::createRevision($inputs['series_list']);
-		/*
-		$case_obj->revisions = array(
-			'latest'	=>	$series_list,
-			0			=>	$series_list
-		);
-		*/
-		$revision_data = array();
+
 		if ($caseID) {
-			$next_index = count($case_obj->revisions) > 0 ? count($case_obj->revisions)-1 : 0;
-			foreach ($case_obj->revisions as $key => $val) {
-				if ($key !== 'latest') {
-					$revision_data[$key] = $val;
-				} else {
-					$revision_data['latest'] = $series_list;
-				}
-				$revision_data[$next_index] = $series_list;
-			}
+			$revisions = $case_obj->revisions;
+			$revisions[] = $series_list;
+			$case_obj->revisions = $revisions;
 		} else {
-			$revision_data['latest'] = $series_list;
-			$revision_data[0] = $series_list;
+			$case_obj->revisions = array($series_list);
 		}
 
-		Log::debug('登録するRevision情報');
-		Log::debug($revision_data);
-		$case_obj->revisions = $revision_data;
+		$case_obj->latestRevision = $series_list;
 
 		//ValidateCheck
 		//Validate check for object creation
@@ -1287,6 +1251,7 @@ class CaseController extends BaseController {
 			$case_obj->updateTime = $dt;
 			$case_obj->createTime = $dt;
 			$case_obj->creator = Auth::user()->loginID;
+			Log::info($case_obj);
 			$case_obj->save();
 
 			$result['title'] = $mode.' Case Complete';
@@ -1621,7 +1586,7 @@ class CaseController extends BaseController {
 		$valid_ary['patientInfoCache_name'] = $data['patientInfo']['patientName'];
 		$valid_ary['patientInfoCache_age'] = $data['patientInfo']['age'];
 		$valid_ary['patientInfoCache_sex'] = $data['patientInfo']['sex'];
-		$valid_ary['patientInfoCache_birthday'] = $data['patientInfo']['birthday'];
+		$valid_ary['patientInfoCache_birthDate'] = $data['patientInfo']['birthDate'];
 		$valid_ary['date'] = new MongoDate(strtotime(date('Y-m-d H:i:s')));
 		$valid_ary['incrementalID'] = 1;
 

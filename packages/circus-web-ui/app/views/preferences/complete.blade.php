@@ -21,4 +21,4 @@
 </div>
 <div class="clear">&nbsp;</div>
 @stop
-@include('common.footer');
+@include('common.footer')

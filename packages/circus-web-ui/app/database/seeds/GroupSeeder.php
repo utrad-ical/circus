@@ -10,19 +10,18 @@ class GroupSeeder extends Seeder
 		// Ensure index for the groups collection
 		DB::table(Group::COLLECTION)->delete();
 		Schema::create(Group::COLLECTION, function ($collection) {
-			$collection->unique('GroupID');
+			$collection->unique('groupID');
+			$collection->unique('groupName');
 		});
 
 		Eloquent::unguard();
 
 		Group::create(array(
-			'GroupID' => 'admin', // TODO: Lowercase key
-			'GroupName' => 'admin', // TODO: Lowercase key
+			'groupID' => 1,
+			'groupName' => 'admin',
 			'privileges' => array(
 				'createProject',
 				'deleteProject',
-				'createCase',
-				'deleteCase',
 				'restartServer',
 				'personalInfoView'
 			),
@@ -31,17 +30,15 @@ class GroupSeeder extends Seeder
 			'createTime' => new MongoDate() // TODO: Remove eventually
 		));
 
-		/*
 		Group::create(array(
-			'GroupID' => 'user',
-			'GroupName' => 'user',
+			'groupID' => 2,
+			'groupName' => 'user',
 			'privileges' => array(
-				'createCase'
+				'personalInfoView'
 			),
 			'domains' => array(),
 			'updateTime' => new MongoDate(), // TODO: Remove eventually
 			'createTime' => new MongoDate() // TODO: Remove eventually
 		));
-		*/
 	}
 }

@@ -11,7 +11,7 @@ class Group extends Eloquent {
 	const COLLECTION = 'Groups';
 	protected $collection = self::COLLECTION;
 
-	protected $primaryKey = 'GroupID';
+	protected $primaryKey = 'groupID';
 	public $timestamps = false;
 
 	/**
@@ -21,15 +21,15 @@ class Group extends Eloquent {
 	 * @return Query Object
 	 */
 	public function scopeAddWhere($query, $input) {
-		//GroupID Group ID
-		if (isset($input['GroupID']) && $input['GroupID']) {
-			$query->whereIn('GroupID', $input['GroupID']);
+		// groupID Group ID
+		if (isset($input['groupID']) && $input['groupID']) {
+			$query->whereIn('groupID', $input['groupID']);
 		}
 
-		//GroupName Group Name
-		if (isset($input['GroupName']) && $input['GroupName']) {
-			//GroupName of Group table
-			$query->where('GroupName', 'like', '%'.$input['GroupName'].'%');
+		// groupName Group Name
+		if (isset($input['groupName']) && $input['groupName']) {
+			// groupName of Group table
+			$query->where('groupName', 'like', '%'.$input['groupName'].'%');
 		}
 
 		return $query;
@@ -54,8 +54,8 @@ class Group extends Eloquent {
 	 * Validate Rules
 	 */
 	private $rules = array(
-		'GroupID'	=>	'required',
-		'GroupName'	=>	'required|unique:Groups,GroupName'
+		'groupID'	=>	'required|integer',
+		'groupName'	=>	'required|unique:Groups,groupName'
 	);
 
 	/**
@@ -64,7 +64,7 @@ class Group extends Eloquent {
 	 * @return Error content
 	 */
 	public function validate($data) {
-		$this->rules["GroupName"] = 'required|unique:Groups,GroupName,'.$data["GroupID"].",GroupID";
+		$this->rules["groupName"] = 'required|unique:Groups,groupName,'.$data["groupID"].",groupID";
 		$validator = Validator::make($data, $this->rules);
 
 		if ($validator->fails()) {

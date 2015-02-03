@@ -1,0 +1,6 @@
+ var config={}
+
+// full path of configuration file for mongoDB connection settings
+config.config_path='<path_to_db_config_json>';
+
+module.exports = config;

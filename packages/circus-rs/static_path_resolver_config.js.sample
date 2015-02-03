@@ -1,0 +1,5 @@
+var config={}
+
+config.datadir='<path_to_dcm_folder>';
+
+module.exports = config;

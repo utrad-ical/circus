@@ -94,7 +94,7 @@ class UserController extends BaseController {
 				'loginEnabled'				=>	$user_data->loginEnabled,
 				'groupName'					=>	self::getGroupNameDisp($user_data->groups),
 				'preferences_theme'			=>	$user_data->preferences['theme'],
-				'preferences_personalView'	=>	$user_data->preferences['personalView']
+				'preferences_personalInfoView'	=>	$user_data->preferences['personalInfoView']
 			);
 		} else {
 			$result['error_msg'] = $error_msg;
@@ -148,7 +148,7 @@ class UserController extends BaseController {
 					'loginEnabled'				=>	$user_data->loginEnabled,
 					'groups'					=>	$user_data->groups,
 					'preferences_theme'			=>	$user_data->preferences['theme'],
-					'preferences_personalView'	=>	$user_data->preferences['personalView']
+					'preferences_personalInfoView'	=>	$user_data->preferences['personalInfoView']
 				);
 			}
 			Session::put('userID', $inputs['userID']);
@@ -197,7 +197,7 @@ class UserController extends BaseController {
 
 		//Set of Checkbox system
 		$inputs['loginEnabled'] = isset($inputs['loginEnabled']) ? $inputs['loginEnabled'] : false;
-		$inputs['preferences_personalView'] = isset($inputs['preferences_personalView']) ? $inputs['preferences_personalView'] : false;
+		$inputs['preferences_personalInfoView'] = isset($inputs['preferences_personalInfoView']) ? $inputs['preferences_personalInfoView'] : false;
 		Session::put('user_input', $inputs);
 
 		$result['inputs'] = $inputs;
@@ -216,10 +216,10 @@ class UserController extends BaseController {
 		$user_obj->password = $inputs['password'];
 		$user_obj->groups = $inputs['groups'];
 		$user_obj->description = $inputs['description'];
-		$user_obj->loginEnabled = $inputs['loginEnabled'];
+		$user_obj->loginEnabled = (bool)$inputs['loginEnabled'];
 		$user_obj->preferences = array(
 			'preferences_theme' 		=>	$inputs['preferences_theme'],
-			'preferences_personalView'	=>	$inputs['preferences_personalView']
+			'preferences_personalInfoView'	=>	(bool)$inputs['preferences_personalInfoView']
 		);
 
 		//ValidateCheck
@@ -274,10 +274,10 @@ class UserController extends BaseController {
 		$user_obj->password = Hash::make($inputs['password']);
 		$user_obj->groups = $inputs['groups'];
 		$user_obj->description = $inputs['description'];
-		$user_obj->loginEnabled = $inputs['loginEnabled'];
+		$user_obj->loginEnabled = (bool)$inputs['loginEnabled'];
 		$user_obj->preferences = array(
 			'theme' 		=>	$inputs['preferences_theme'],
-			'personalView'	=>	$inputs['preferences_personalView']
+			'personalInfoView'	=>	(bool)$inputs['preferences_personalInfoView']
 		);
 		//ValidateCheck
 		$errors = $user_obj->validate($inputs);
@@ -364,7 +364,7 @@ class UserController extends BaseController {
 			} else {
 				$result['inputs'] = json_decode($user_data, true);
 				$result['inputs']['preferences_theme'] = $user_data->preferences['theme'];
-				$result['inputs']['preferences_personalView'] = $user_data->preferences['personalView'];
+				$result['inputs']['preferences_personalInfoView'] = $user_data->preferences['personalInfoView'];
 			}
 		}
 
@@ -402,9 +402,9 @@ class UserController extends BaseController {
 		$inputs = Input::all();
 		//Set of Checkbox system
 		$user_data['preferences_theme'] = $inputs['preferences_theme'];
-		$user_data['preferences_personalView'] =
-			array_key_exists('preferences_personalView', $inputs) ?
-				$inputs['preferences_personalView'] : "false";
+		$user_data['preferences_personalInfoView'] =
+			array_key_exists('preferences_personalInfoView', $inputs) ?
+				$inputs['preferences_personalInfoView'] : "false";
 		Session::put('user_input', $user_data);
 
 		//Object作成
@@ -413,7 +413,7 @@ class UserController extends BaseController {
 		//Set the value for the Validate check
 		$user_obj->preferences = array(
 			'preferences_theme' 		=>	$user_data['preferences_theme'],
-			'preferences_personalView'	=>	$user_data['preferences_personalView']
+			'preferences_personalInfoView'	=>	$user_data['preferences_personalInfoView'] == 'true'
 		);
 
 		//ValidateCheck
@@ -456,7 +456,7 @@ class UserController extends BaseController {
 		//Set the value for the Validate check
 		$user_obj->preferences = array(
 			'theme' 		=>	$inputs['preferences_theme'],
-			'personalView'	=>	$inputs['preferences_personalView'] == "true" ? true : false
+			'personalInfoView'	=> $inputs['preferences_personalInfoView'] == 'true'
 		);
 		//ValidateCheck
 		$errors = $user_obj->validate($inputs);
@@ -472,7 +472,7 @@ class UserController extends BaseController {
 			$result['url'] = '/preferences/complete';
 			$result['msg'] = 'Registration of the preferences information is now complete.';
 			//I transitions to complete screen because registration is complete
-			Session::put('user_complete', $result);;
+			Session::put('user_complete', $result);
 			return View::make('/preferences/complete', $result);
 		} else {
 			//Process at the time of Validate error
@@ -524,7 +524,7 @@ class UserController extends BaseController {
 		$prf = $user_obj->preferences;
 		$user_obj->preferences = array(
 			"theme"			=>	$inputs['preferences_theme'],
-			"personalView"	=>	$prf["personalView"]
+			"personalInfoView"	=>	$prf["personalInfoView"]
 		);
 
 		//Validate
@@ -576,7 +576,7 @@ class UserController extends BaseController {
 		$group_list = Group::get();
 		$list = array();
 		foreach ($group_list as $rec) {
-			$list[$rec->GroupID] = $rec['GroupName'];
+			$list[$rec->groupID] = $rec['groupName'];
 		}
 		return $list;
 	}
@@ -587,11 +587,11 @@ class UserController extends BaseController {
 	 * @return Group name array
 	 */
 	public function getGroupNameDisp($gids = array()) {
-		$group_names = Group::addWhere(array('GroupID' => $gids))
-							->get(array('GroupName'));
+		$group_names = Group::addWhere(array('groupID' => $gids))
+							->get(array('groupName'));
 		$group_name = array();
 		foreach ($group_names as $group) {
-			$group_name[] = $group->GroupName;
+			$group_name[] = $group->groupName;
 		}
 		return implode(',', $group_name);
 	}

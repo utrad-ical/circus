@@ -13,7 +13,7 @@
 		"type": "number"
 	},
 	{
-		"key": "patientInfoCache.birthday",
+		"key": "patientInfoCache.birthDate",
 		"label": "Birthday",
 		"type": "date"
 	}

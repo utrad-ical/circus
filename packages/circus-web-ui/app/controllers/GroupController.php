@@ -18,14 +18,14 @@ class GroupController extends BaseController {
 
 		//Session discarded
 		Session::forget('group_input');
-		Session::forget('GroupID');
+		Session::forget('groupID');
 
 		//Input value acquisition
 		$inputs = Input::all();
 
 		//Data acquisition
 		//Setting of acquisition column
-		$select_col = array('GroupID', 'GroupName');
+		$select_col = array('groupID', 'groupName');
 
 		//Total number acquisition
 		$group_count = Group::count();
@@ -65,24 +65,24 @@ class GroupController extends BaseController {
 		//Settings page
 		if (array_key_exists('btnBack', $inputs)) {
 			$result['inputs'] = Session::get('group_input');
-		} else if (array_key_exists('GroupID', $inputs)) {
-			$group_data = Group::find($inputs['GroupID']);
+		} else if (array_key_exists('groupID', $inputs)) {
+			$group_data = Group::find(intval($inputs['groupID']));
 			$result['inputs'] = array(
-				'GroupID'		=>	$group_data->GroupID,
-				'GroupName'		=>	$group_data->GroupName,
+				'groupID'		=>	$group_data->groupID,
+				'groupName'		=>	$group_data->groupName,
 				'updateTime'	=>	$group_data->updateTime,
 				'createTime'	=>	$group_data->createTime
 			);
 
-			if (count($group_data->priviledges) > 0) {
-				foreach ($group_data->priviledges as $rec) {
-					$result['inputs']['priviledges_'.$rec] = 1;
+			if (count($group_data->privileges) > 0) {
+				foreach ($group_data->privileges as $rec) {
+					$result['inputs']['privileges_'.$rec] = 1;
 				}
 			}
-			Session::put('GroupID', $inputs['GroupID']);
+			Session::put('groupID', $inputs['groupID']);
 			Session::put('mode', 'Edit');
 		} else {
-			$result['inputs'] = array('GroupID' => self::createGroupID());
+			$result['inputs'] = array('groupID' => self::createGroupID());
 			Session::put('mode', 'Add new');
 		}
 
@@ -122,22 +122,22 @@ class GroupController extends BaseController {
 		//Input value acquisition
 		$inputs = Input::all();
 		$group_data = Session::get('group_input');
-		$inputs['GroupID'] = $group_data['GroupID'];
+		$inputs['groupID'] = $group_data['groupID'];
 		Session::put('group_input', $inputs);
 
 		$result['inputs'] = $inputs;
 
 		//Session information acquisition
-		$groupID = Session::get('GroupID');
+		$groupID = Session::get('groupID');
 
 		//Validate check for object creation
 		$group_obj = $groupID ?
-						Group::find($groupID) :
+						Group::findOrFail(intval($groupID)) :
 						App::make('Group');
 
 		//Set the value for the Validate check
-		$group_obj->GroupID = $inputs['GroupID'];
-		$group_obj->GroupName = $inputs['GroupName'];
+		$group_obj->groupID = $inputs['groupID'];
+		$group_obj->groupName = $inputs['groupName'];
 
 		//ValidateCheck
 		$errors = $group_obj->validate($inputs);
@@ -176,7 +176,7 @@ class GroupController extends BaseController {
 
 		//Information obtained from the session
 		$inputs = Session::get('group_input');
-		$groupID = Session::get('GroupID');
+		$groupID = intval(Session::get('groupID'));
 		$mode = Session::get('mode');
 
 		$result['css'] = self::cssSetting();
@@ -188,8 +188,8 @@ class GroupController extends BaseController {
 						Group::find($groupID) :
 						App::make('Group');
 		//Set the value for the Validate check
-		$group_obj->GroupID = $inputs['GroupID'];
-		$group_obj->GroupName = $inputs['GroupName'];
+		$group_obj->groupID = intval($inputs['groupID']);
+		$group_obj->groupName = $inputs['groupName'];
 
 		//ValidateCheck
 		$errors = $group_obj->validate($inputs);
@@ -202,26 +202,26 @@ class GroupController extends BaseController {
 			$group_obj->createTime = $dt;
 
 			//Setting permissions information
-			$priviledges = array();
+			$privileges = array();
 			$role_keys = array_keys($role_list);
 			foreach ($role_keys as $role_key){
-				if (array_key_exists('priviledges_'.$role_key, $inputs) !== FALSE) {
-					$priviledges[] = $role_key;
+				if (array_key_exists('privileges_'.$role_key, $inputs) !== FALSE) {
+					$privileges[] = $role_key;
 				}
 			}
 
-			$group_obj->priviledges = $priviledges;
+			$group_obj->privileges = $privileges;
 			$group_obj->domains = array();
 			$group_obj->save();
 
 			$result['url'] = '/admin/group/complete';
 			$result['msg'] = 'Registration of group information is now complete.';
-			$result['GroupID'] = $inputs['GroupID'];
+			$result['groupID'] = $inputs['groupID'];
 			$result['title'] = $mode.' Group Complete';
 
 			//Session discarded
 			Session::forget('group_input');
-			Session::forget('GroupID');
+			Session::forget('groupID');
 			Session::forget('mode');
 
 			$tmp = View::make('/admin/group/complete', $result);
@@ -261,11 +261,10 @@ class GroupController extends BaseController {
 	}
 
 	/**
-	 * Creating group ID(SHA256+uniqid)
-	 * @return string that was turned into Hash in SHA256 the uniqid (case ID)
+	 * Generate new group ID
+	 * @return string Generated group ID
 	 */
 	public function createGroupID(){
-		//return hash_hmac('sha256', uniqid(), Config::get('const.hash_key'));
-		return hash('sha256', uniqid());
+		return Seq::getIncrementSeq('Groups');
 	}
 }

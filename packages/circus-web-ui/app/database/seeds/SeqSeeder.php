@@ -12,13 +12,17 @@ class SeqSeeder extends Seeder
 
 		Eloquent::unguard();
 
-		Seq::create(array(
-			'_id' => 'Storages',
-			'seq' => Storage::count()
-		));
-		Seq::create(array(
-			'_id' => 'Users',
-			'seq' => User::count()
-		));
+		$collections = array(
+			Storage::COLLECTION => 'storageID',
+			User::COLLECTION => 'userID',
+			Group::COLLECTION => 'groupID'
+		);
+
+		foreach ($collections as $collection => $field) {
+			Seq::create(array(
+				'_id' => $collection,
+				'seq' => DB::table($collection)->max($field)
+			));
+		}
 	}
 }

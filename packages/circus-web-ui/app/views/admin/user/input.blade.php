@@ -98,11 +98,11 @@
 					</td>
 				</tr>
 				<tr>
-					<th>Personal View</th>
+					<th>Personal Information View</th>
 					<td>
-						{{Form::checkbox('preferences_personalView', true, isset($inputs['preferences_personalView']) && $inputs['preferences_personalView'] == true ? true : false)}}
-						@if (isset($errors) && $errors->has('preferences_personalView'))
-							<br><span class="txt_alert">{{$errors->first('preferences_personalView')}}</span>
+						{{Form::checkbox('preferences_personalInfoView', true, isset($inputs['preferences_personalInfoView']) && $inputs['preferences_personalInfoView'] == true ? true : false)}}
+						@if (isset($errors) && $errors->has('preferences_personalInfoView'))
+							<br><span class="txt_alert">{{$errors->first('preferences_personalInfoView')}}</span>
 						@endif
 					</td>
 				</tr>

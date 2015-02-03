@@ -33,7 +33,7 @@ class LoginController extends BaseController {
 			} else {
 				//Data acquisition
 				$user = Auth::user();
-				$user->lastLoginDate = new MongoDate(strtotime(date('Y-m-d h:i:s')));
+				$user->lastLoginTime = new MongoDate(strtotime(date('Y-m-d h:i:s')));
 				$user->lastLoginIP =  $_SERVER['REMOTE_ADDR'];
 				$user->save();
 				return Redirect::to('home');

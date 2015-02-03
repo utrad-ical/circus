@@ -22,11 +22,11 @@
 				@if (count($group_list) > 0)
 					@foreach ($group_list as $rec)
 						<tr>
-							<td>{{$rec->GroupName}}</td>
+							<td>{{{$rec->groupName}}}</td>
 							<td class="al_c">
 								{{HTML::link('/admin/group/input', 'Edit', array('class' => 'common_btn link_group_edit'))}}
 								{{Form::open(['url' => asset('admin/group/input'), 'method' => 'POST', 'class' => 'frm_group_edit'])}}
-									{{Form::hidden('GroupID', $rec->GroupID, array('class' => 'frm_group_id'))}}
+									{{Form::hidden('groupID', $rec->groupID, array('class' => 'frm_group_id'))}}
 								{{Form::close()}}
 							</td>
 						</tr>
@@ -45,10 +45,9 @@
 	@include('common.navi')
 	<div class="clear">&nbsp;</div>
 </div>
-<script tyep="text/javascript">
+<script type="text/javascript">
 	$(function() {
 		$('.link_group_edit').click(function(){
-			console.log("呼ばれた");
 			//Get the form ID to be sent
 			var post_data = $(this).closest('td').find('.frm_group_id').serializeArray();
 			var target_elm = $('.frm_group_input');

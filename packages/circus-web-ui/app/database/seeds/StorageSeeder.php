@@ -67,7 +67,7 @@ class StorageSeeder extends Seeder
 		Storage::create(array(
 			'storageID' => 2,
 			'path' => $label_path,
-			'type' => 'dicom',
+			'type' => 'label',
 			'active' => true,
 			'updateTime' => new MongoDate(), // TODO: Remove eventually
 			'createTime' => new MongoDate()  // TODO: Remove eventually

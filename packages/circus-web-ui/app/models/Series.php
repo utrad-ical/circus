@@ -118,7 +118,7 @@ class Series extends Eloquent {
 		'storageID'				=>	'required',
 		'patientInfo.patientID'	=>	'required',
 		'patientInfo.age'		=>	'required',
-		'patientInfo.birthday'	=>	'required',
+		'patientInfo.birthDate'	=>	'required',
 		'patientInfo.sex'		=>	'required',
 		'patientInfo.height'	=>	'required|integer',
 		'patientInfo.weight'	=>	'required|integer',

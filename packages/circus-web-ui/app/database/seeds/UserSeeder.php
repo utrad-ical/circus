@@ -17,15 +17,15 @@ class UserSeeder extends Seeder
 		Eloquent::unguard();
 
 		User::create(array(
-			'userID' => 0,
+			'userID' => 1,
 			'loginID' => 'circus',
 			'password' => (new CustomHasher())->make('circus'),
-			'groups' => array('admin'),
-			'lastLoginDate' => null,
+			'groups' => [Group::where(['groupName' => 'admin'])->firstOrFail()->groupID],
+			'lastLoginTime' => null,
 			'lastLoginIP' => null,
 			'description' => 'Default administrative user',
-			'loginEnabled' => "1",
-			'preferences' => array('theme' => 'mode_white', 'personalView' => "1"),
+			'loginEnabled' => true,
+			'preferences' => array('theme' => 'mode_white', 'personalInfoView' => true),
 			'updateTime' => new MongoDate(), // TODO: Remove eventually
 			'createTime' => new MongoDate() // TODO: Remove eventually
 		));

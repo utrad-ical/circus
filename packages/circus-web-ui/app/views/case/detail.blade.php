@@ -239,7 +239,7 @@ $(function(){
 					<div class="info_area">
 						<p class="pad_10">
 							{{$case_detail['patientName']}} ({{$case_detail['patientID']}})
-							<br>{{$case_detail['birthday']}} {{$case_detail['sex']}}
+							<br>{{$case_detail['birthDate']}} {{$case_detail['sex']}}
 						</p>
 						<div class="control_panel_inner" id="the_panel_attribute"></div>
 					</div>

@@ -42,9 +42,9 @@
 				<td>{{$inputs['preferences_theme']}}</td>
 			</tr>
 			<tr>
-				<th>Personal View</th>
+				<th>Personal Information View</th>
 				<td>
-					@if ($inputs['preferences_personalView'] == true)
+					@if ($inputs['preferences_personalInfoView'] == true)
 						true
 					@else
 						false

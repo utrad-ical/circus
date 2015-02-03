@@ -52,15 +52,20 @@ class Seq extends Eloquent {
 	}
 
 	/**
-	 * I get the sequence number of the specified table
-	 * @param String $tbl Table name
+	 * Generate new sequence number
+	 * @param string $sequence_id Sequence ID
 	 */
-	public static function getIncrementSeq($tbl){
-		$obj = self::find($tbl);
-		$obj->seq = $obj->seq+1;
-		$obj->save();
-
-		$seq = $obj->seq;
-		return $seq;
+	public static function getIncrementSeq($sequence_id){
+		if ($obj = self::find($sequence_id)) {
+			$obj->seq += 1;
+			$obj->save();
+			return $obj->seq;
+		} else {
+			$new_seq = App::make('Seq');
+			$new_seq->_id = $sequence_id;
+			$new_seq->seq = 1;
+			$new_seq->save();
+			return 1;
+		}
 	}
 }

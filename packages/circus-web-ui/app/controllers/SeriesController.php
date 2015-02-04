@@ -287,7 +287,7 @@ class SeriesController extends BaseController {
 		} else {
 			//Upload file information acquisition
 			$uploads = Input::file('upload_file');
-
+			$file_list = array();
 			try{
 				foreach ($uploads as $upload) {
 					$upload_dir = dirname(dirname(__FILE__)).'/storage/uploads';
@@ -309,10 +309,20 @@ class SeriesController extends BaseController {
 							$zip->extractTo($upload_dir);
 							//Zip file close
 							$zip->close();
+
+							//Zip解凍フォルダパスを格納
+							$file_list[] = mb_substr($zip_path, 0, mb_strlen($zip_path)-4);
 						} else {
 							$error_msg = "Upload Failed.[Error Code ".$res."]";
 						}
+					} else {
+						//image:import
+						$file_list[] = $upload_dir."/".$upload->getClientOriginalName();
 					}
+				}
+				//Dicomファイルインポート
+				foreach ($file_list as $file_path) {
+					Artisan::call('image:import', array("path" => $file_path));
 				}
 			} catch (Exception $e){
 				$error_msg = $e->getMessage();
@@ -349,6 +359,8 @@ class SeriesController extends BaseController {
 
 		//Session information discarded
 		Session::forget('complete');
+		if (Session::has('edit_case_id'))
+			Session::forget('edit_case_id');
 
 		//Screen display
 		return View::make('series/complete', $result);

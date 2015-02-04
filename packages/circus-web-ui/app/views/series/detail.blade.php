@@ -48,7 +48,7 @@ $(function() {
 				{{Form::close()}}
 				<div class="info_area w_500 fl_r mar_b_10">
 					<p class="pad_10">
-						Patient: {{$series_detail['patientName']}} ({{$series_detail['patientID']}}) {{$series_detail['patientBirthday']}} {{$series_detail['patientSex']}}
+						Patient: {{$series_detail['patientName']}} ({{$series_detail['patientID']}}) {{$series_detail['patientBirthDate']}} {{$series_detail['patientSex']}}
 						<br>Last Update: <span class="bold">{{$series_detail['LastUpdate']}}</span> by <span class="bold">{{$series_detail['creator']}}</span>
 					</p>
 				</div>

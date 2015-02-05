@@ -79,9 +79,10 @@ class GroupController extends BaseController {
 					$result['inputs']['privileges_'.$rec] = 1;
 				}
 			}
-			Session::put('groupID', $inputs['groupID']);
+			Session::put('groupID', intval($inputs['groupID']));
 			Session::put('mode', 'Edit');
 		} else {
+			Session::forget('groupID');
 			$result['inputs'] = array('groupID' => self::createGroupID());
 			Session::put('mode', 'Add new');
 		}
@@ -122,7 +123,7 @@ class GroupController extends BaseController {
 		//Input value acquisition
 		$inputs = Input::all();
 		$group_data = Session::get('group_input');
-		$inputs['groupID'] = $group_data['groupID'];
+		$inputs['groupID'] = intval($group_data['groupID']);
 		Session::put('group_input', $inputs);
 
 		$result['inputs'] = $inputs;
@@ -131,13 +132,18 @@ class GroupController extends BaseController {
 		$groupID = Session::get('groupID');
 
 		//Validate check for object creation
-		$group_obj = $groupID ?
-						Group::findOrFail(intval($groupID)) :
+		$group_obj = isset($groupID) ?
+						Group::find($groupID) :
 						App::make('Group');
 
 		//Set the value for the Validate check
-		$group_obj->groupID = $inputs['groupID'];
+		$group_obj->groupID = intval($inputs['groupID']);
 		$group_obj->groupName = $inputs['groupName'];
+
+		//�O���[�v���d���`�F�b�N�̂��߂ɐݒ肷��
+		if (isset($groupID)) {
+			$inputs['_id'] = $group_obj->_id;
+		}
 
 		//ValidateCheck
 		$errors = $group_obj->validate($inputs);
@@ -176,21 +182,25 @@ class GroupController extends BaseController {
 
 		//Information obtained from the session
 		$inputs = Session::get('group_input');
-		$groupID = intval(Session::get('groupID'));
+		$groupID = Session::get('groupID');
 		$mode = Session::get('mode');
 
 		$result['css'] = self::cssSetting();
 		$result['js'] = self::jsSetting();
-		$role_list = Config::get('config.group_authority');	//権限一覧
+		$role_list = Config::get('config.group_authority');	//Authority List
 
 		//Validate check for object creation
-		$group_obj = $groupID ?
+		$group_obj = isset($groupID) ?
 						Group::find($groupID) :
 						App::make('Group');
 		//Set the value for the Validate check
 		$group_obj->groupID = intval($inputs['groupID']);
 		$group_obj->groupName = $inputs['groupName'];
 
+		//�O���[�v���d���`�F�b�N�̂��߂ɐݒ肷��
+		if (isset($groupID)) {
+			$inputs['_id'] = $group_obj->_id;
+		}
 		//ValidateCheck
 		$errors = $group_obj->validate($inputs);
 
@@ -261,8 +271,8 @@ class GroupController extends BaseController {
 	}
 
 	/**
-	 * Generate new group ID
-	 * @return string Generated group ID
+	 * Creating group ID(Auto Increment)
+	 * @return int groupID(AI)
 	 */
 	public function createGroupID(){
 		return Seq::getIncrementSeq('Groups');

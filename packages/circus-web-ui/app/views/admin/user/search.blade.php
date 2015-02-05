@@ -1,9 +1,6 @@
 @extends('common.layout')
 @include('common.header')
 @section('content')
-<!--
-<script type="text/javascript" src="{{asset('/js/ajax/user.js')}}"></script>
--->
 <div class="page_contents_outer">
 	<div class="page_contents_inner">
 		<div class="page_unique">

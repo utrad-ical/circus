@@ -153,9 +153,9 @@ class UserController extends BaseController {
 			}
 			Session::put('userID', $inputs['userID']);
 		} else {
+			Session::forget('userID');
 			Session::put('mode', 'Add new');
-			$max_user_id = User::max('userID');
-			$result['inputs']['userID'] = $max_user_id+1;
+			$result['inputs']['userID'] = self::createUserID();
 		}
 
 		//Setting of title
@@ -207,7 +207,7 @@ class UserController extends BaseController {
 		$userID = Session::get('userID');
 
 		//Validate check for object creation
-		$user_obj = $userID ?
+		$user_obj = isset($userID) ?
 						User::find(intval($userID)) : App::make('User');
 
 		//Set the value for the Validate check
@@ -265,7 +265,7 @@ class UserController extends BaseController {
 		$mode = Session::get('mode');
 
 		//Validate check for object creation
-		$user_obj = $userID ?
+		$user_obj = isset($userID) ?
 						User::find(intval($userID)) :
 						App::make('User');
 		//Set the value for the Validate check
@@ -593,6 +593,14 @@ class UserController extends BaseController {
 		foreach ($group_names as $group) {
 			$group_name[] = $group->groupName;
 		}
+		Log::debug("===== GroupoID List =====");
+		Log::debug($gids);
+		Log::debug("===== GroupName List =====");
+		Log::debug($group_name);
 		return implode(',', $group_name);
+	}
+
+	public function createUserID(){
+		return Seq::getIncrementSeq("Users");
 	}
 }

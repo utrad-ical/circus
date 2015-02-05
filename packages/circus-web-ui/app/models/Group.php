@@ -21,14 +21,29 @@ class Group extends Eloquent {
 	 * @return Query Object
 	 */
 	public function scopeAddWhere($query, $input) {
-		// groupID Group ID
+		//groupID Group ID
 		if (isset($input['groupID']) && $input['groupID']) {
-			$query->whereIn('groupID', $input['groupID']);
+			$groups = array();
+			if (is_array($input['groupID'])) {
+				Log::debug("===== GroupID Array =====");
+				foreach ($input['groupID'] as $group){
+					Log::debug("GroupID::".$group);
+					$groups[] = intval($group);
+				}
+			} else {
+				Log::debug("===== GroupID One =====");
+				$groups[] = intval($input['groupID']);
+			}
+			Log::debug("===== SQL Bind Query =====");
+			Log::debug($groups);
+			//$query->whereIn('groupID', $input['groupID']);
+
+			$query->whereIn('groupID', $groups);
 		}
 
-		// groupName Group Name
+		//groupName Group Name
 		if (isset($input['groupName']) && $input['groupName']) {
-			// groupName of Group table
+			//groupName of Groups table
 			$query->where('groupName', 'like', '%'.$input['groupName'].'%');
 		}
 
@@ -64,7 +79,9 @@ class Group extends Eloquent {
 	 * @return Error content
 	 */
 	public function validate($data) {
-		$this->rules["groupName"] = 'required|unique:Groups,groupName,'.$data["groupID"].",groupID";
+		$this->rules['groupName'] = isset($data['_id']) ?
+										'required|unique:Groups,groupName,'.$data["_id"].',_id' :
+										$this->rules['groupName'];
 		$validator = Validator::make($data, $this->rules);
 
 		if ($validator->fails()) {

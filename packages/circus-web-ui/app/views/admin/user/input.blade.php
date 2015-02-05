@@ -11,9 +11,30 @@
 			}
 			return false;
 		});
+
+		//Confirmation button is pressed during processing
+		$('.user_confirm').click(function(){
+			var post_data = $('.frm_user_confirm').serializeArray();
+			var target_elm = $('.frm_user_input');
+
+			$.ajax({
+				url: "./confirm",
+				type: 'POST',
+				data: post_data,
+				dataType: 'json',
+				error: function(){
+					alert('I failed to communicate.');
+				},
+				success: function(res){
+					target_elm.empty();
+					target_elm.append(res.response);
+					target_elm.attr('style', 'display:inline;');
+				}
+			});
+			return false;
+		});
 	});
 </script>
-{{HTML::script('/js/ajax/user.js')}}
 <div class="page_unique">
 	<h1 class="page_ttl">{{$title}}</h1>
 	@if (isset($error_msg))

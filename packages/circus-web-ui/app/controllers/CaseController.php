@@ -37,7 +37,7 @@ class CaseController extends BaseController {
 			$detail_search = $detail_search_session[$inputs['condition_id']];
 			$detail_search['project'] = json_decode($detail_search['project']);
 			if (array_key_exists('mongo_data', $detail_search) !== FALSE) {
-				$file_path = dirname(dirname(__FILE__)).'/saves/'.Auth::user()->loginID.'_case_'.($inputs['condition_id']+1).'.json';
+				$file_path = dirname(dirname(__FILE__)).'/saves/'.Auth::user()->userID.'_case_'.($inputs['condition_id']+1).'.json';
 				$handle = fopen($file_path, 'r');
 				$detail_search['mongo_search_data'] = fread($handle, filesize($file_path));
 
@@ -313,7 +313,7 @@ class CaseController extends BaseController {
 		}
 
 		//Save Json file
-		$file_name = dirname(dirname(__FILE__))."/saves/".Auth::user()->loginID."_case_".($before_cnt+1).".json";
+		$file_name = dirname(dirname(__FILE__))."/saves/".Auth::user()->userID."_case_".($before_cnt+1).".json";
 		if (!file_exists($file_name)) {
 			touch($file_name);
 			$data = json_decode($inputs["mongo_search_data"]);
@@ -715,7 +715,7 @@ class CaseController extends BaseController {
 							$label_obj->w = intval($rec2['size'][0]);
 							$label_obj->h = intval($rec2['size'][1]);
 							$label_obj->d = intval($rec2['size'][2]);
-							$label_obj->creator = Auth::user()->loginID;
+							$label_obj->creator = Auth::user()->userID;
 							$label_obj->date = $dt;
 							$label_obj->updateTime = $dt;
 							$label_obj->createTime = $dt;
@@ -772,7 +772,7 @@ class CaseController extends BaseController {
 								json_decode($inputs['attribute']) : array();
 			$tmp_revision = array(
 				'date'			=>	$dt,
-				'creator'		=>	Auth::user()->loginID,
+				'creator'		=>	Auth::user()->userID,
 				'description'	=>	$inputs['memo'],
 				'attributes'	=>	$save_attribute,
 				'status'		=>	'draft',
@@ -1250,7 +1250,7 @@ class CaseController extends BaseController {
 			$dt = new MongoDate(strtotime(date('Y-m-d H:i:s')));
 			$case_obj->updateTime = $dt;
 			$case_obj->createTime = $dt;
-			$case_obj->creator = Auth::user()->loginID;
+			$case_obj->creator = Auth::user()->userID;
 			Log::info($case_obj);
 			$case_obj->save();
 
@@ -1627,7 +1627,7 @@ class CaseController extends BaseController {
 	function createRevision($series_list) {
 		$revision = array(
 			'date'			=>	new MongoDate(strtotime(date('Y-m-d H:i:s'))),
-			'creator'		=>	Auth::user()->loginID,
+			'creator'		=>	Auth::user()->userID,
 			'description'	=>	'',
 			'attributes'	=>	array(
 			),

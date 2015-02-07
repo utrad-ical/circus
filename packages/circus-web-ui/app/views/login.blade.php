@@ -29,8 +29,6 @@
 						<th>Password</th>
 						<td>
 							{{Form::password('password', array('class' => 'common_input_text w_300'))}}
-							<br>
-							{{HTML::link(asset('/support/forget_password'), 'forget Password??')}}
 						</td>
 					</tr>
 				</table>

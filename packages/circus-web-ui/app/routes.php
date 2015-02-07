@@ -16,7 +16,6 @@ Route::get('/', function(){return Redirect::to('login');});
 Route::get('login', 'LoginController@getIndex');
 Route::post('login', 'LoginController@login');
 Route::get('logout', 'LoginController@logout');
-Route::get('support/forget_password', 'SupportController@forgetPassword');
 
 //テーマ/個人情報表示変更
 Route::get('preferences/input', 'UserController@inputPreferences');

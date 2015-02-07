@@ -1,14 +1,6 @@
 @extends('common.layout')
 @include('common.header')
 @section('content')
-<script type="text/javascript">
-	$(function(){
-		//New registration
-		$("#btnSignUp").click(function() {
-			$(location).attr("href", "./user/register");
-		});
-	});
-</script>
 <div class="page_contents page_area">
 	<div class="page_unique">
 		<h1 class="page_ttl">Login</h1>
@@ -34,8 +26,7 @@
 				</table>
 			</div>
 			<p class="submit_area">
-				{{Form::button('Login', array('class' => 'common_btn mar_r_5', 'onClick' => 'document.getElementById("form_login").submit();'))}}
-				{{Form::button('Sign Up', array('class' => 'common_btn', 'id' => 'btnSignUp'))}}
+				{{Form::submit('Login', array('class' => 'common_btn mar_r_5'))}}
 				@if (isset($error_msg))
 					<br><span class="al_c txt_alert">{{$error_msg}}</span>
 				@endif

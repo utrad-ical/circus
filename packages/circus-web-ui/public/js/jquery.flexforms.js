@@ -16,16 +16,19 @@ var typedFieldWidget;
         createInput.call(this);
     }
     typedFieldWidget._create = _create;
+    var map = {
+        text: 'TextInput',
+        password: 'PasswordInput',
+        number: 'NumberInput',
+        select: 'Select',
+        selectmultiple: 'SelectMultiple',
+        checkboxgroup: 'CheckBoxGroup',
+        date: 'DatePicker',
+        checkbox: 'CheckBox',
+        radio: 'RadioGroup'
+    };
     function createInput() {
         var _this = this;
-        var map = {
-            text: 'TextInput',
-            number: 'NumberInput',
-            select: 'Select',
-            date: 'DatePicker',
-            checkbox: 'CheckBox',
-            radio: 'RadioGroup'
-        };
         this.element.empty();
         this.element.addClass('ui-typedfield');
         if (!(this.options.type in map)) {
@@ -74,6 +77,11 @@ var typedFieldWidget;
         _validate.call(this);
     }
     typedFieldWidget.setValue = setValue;
+    function reset() {
+        this.field.reset();
+        this.field.changed();
+    }
+    typedFieldWidget.reset = reset;
     function _setOption(key, value) {
         switch (key) {
             case 'type':
@@ -128,6 +136,23 @@ var typedField;
                 this.changed();
             }
         };
+        Base.prototype.convertScalar = function (data) {
+            if (!('spec' in this) || !('valueType' in this.spec)) {
+                return data;
+            }
+            switch (this.spec.valueType) {
+                case 'int':
+                    return parseInt(data);
+                case 'number':
+                    return parseFloat(data);
+                case 'boolean':
+                    return !!data;
+                case 'string':
+                    return data.toString();
+                default:
+                    return data;
+            }
+        };
         Base.prototype.createElement = function () {
             return null;
         };
@@ -144,6 +169,9 @@ var typedField;
         Base.prototype.get = function () {
         };
         Base.prototype.set = function (value) {
+        };
+        Base.prototype.reset = function () {
+            this.set('');
         };
         return Base;
     })();
@@ -196,6 +224,19 @@ var typedField;
         return TextInput;
     })(HtmlInputInput);
     typedField.TextInput = TextInput;
+    var PasswordInput = (function (_super) {
+        __extends(PasswordInput, _super);
+        function PasswordInput() {
+            _super.apply(this, arguments);
+        }
+        PasswordInput.prototype.createElement = function () {
+            _super.prototype.createElement.call(this);
+            this.element.attr('type', 'password');
+            return this.element;
+        };
+        return PasswordInput;
+    })(TextInput);
+    typedField.PasswordInput = PasswordInput;
     var NumberInput = (function (_super) {
         __extends(NumberInput, _super);
         function NumberInput() {
@@ -269,19 +310,65 @@ var typedField;
             return this.element;
         };
         Select.prototype.get = function () {
-            switch (this.spec.valueType) {
-                case 'number':
-                    return parseFloat(this.element.val());
-                case 'boolean':
-                    return !!this.element.val();
-                case 'string':
-                default:
-                    return this.element.val();
-            }
+            return this.convertScalar(this.element.val());
         };
         return Select;
     })(HtmlInputInput);
     typedField.Select = Select;
+    var SelectMultiple = (function (_super) {
+        __extends(SelectMultiple, _super);
+        function SelectMultiple() {
+            _super.apply(this, arguments);
+        }
+        SelectMultiple.prototype.createElement = function () {
+            var element = _super.prototype.createElement.call(this);
+            element.prop('multiple', true);
+            return element;
+        };
+        SelectMultiple.prototype.get = function () {
+            var values = this.element.val();
+            if (values === null)
+                return [];
+            var result = [];
+            for (var i = 0; i < values.length; i++) {
+                result.push(this.convertScalar(values[i]));
+            }
+            return result;
+        };
+        return SelectMultiple;
+    })(Select);
+    typedField.SelectMultiple = SelectMultiple;
+    var InputArrayBase = (function (_super) {
+        __extends(InputArrayBase, _super);
+        function InputArrayBase() {
+            _super.apply(this, arguments);
+            this.inputType = 'radio';
+        }
+        InputArrayBase.prototype.createElement = function () {
+            this.element = $('<div>');
+            if (!$.isArray(this.spec.options)) {
+                return this.element;
+            }
+            var options = this.spec.options;
+            for (var i = 0; i < options.length; i++) {
+                var tmp = this.splitKeyLabel(options[i]);
+                var input = $('<input>').prop('type', this.inputType).prop('value', tmp[0]);
+                var label = $('<label>').append(input).append(tmp[1]);
+                if (this.spec.vertical)
+                    label = $('<div>').append(label);
+                label.appendTo(this.element);
+            }
+            return this.element;
+        };
+        InputArrayBase.prototype.disable = function () {
+            this.element.find(':' + this.inputType).prop('disabled', true);
+        };
+        InputArrayBase.prototype.enable = function () {
+            this.element.find(':' + this.inputType).prop('disabled', false);
+        };
+        return InputArrayBase;
+    })(Base);
+    typedField.InputArrayBase = InputArrayBase;
     var RadioGroup = (function (_super) {
         __extends(RadioGroup, _super);
         function RadioGroup() {
@@ -289,35 +376,21 @@ var typedField;
         }
         RadioGroup.prototype.createElement = function () {
             var _this = this;
-            this.element = $('<span>');
-            if ($.isArray(this.spec.options)) {
-                var options = this.spec.options;
-                for (var i = 0; i < options.length; i++) {
-                    var tmp = this.splitKeyLabel(options[i]);
-                    var radio = $('<input type="radio">').prop('value', tmp[0]);
-                    $('<label>').append(radio).append(tmp[1]).appendTo(this.element);
-                }
-                this.element.on('click', '> label > :radio', function (event) {
-                    _this.element.find('> label > :radio').each(function (i, radio) {
-                        if (event.target !== radio)
-                            $(radio).prop('checked', false);
-                    });
-                    _this.triggerChanged();
+            _super.prototype.createElement.call(this);
+            this.element.on('click', '> label > :radio', function (event) {
+                _this.element.find('> label > :radio').each(function (i, radio) {
+                    if (event.target !== radio)
+                        $(radio).prop('checked', false);
                 });
-            }
+                _this.triggerChanged();
+            });
             return this.element;
         };
-        RadioGroup.prototype.disable = function () {
-            this.element.find('> label > :radio').prop('disabled', true);
-        };
-        RadioGroup.prototype.enable = function () {
-            this.element.find('> label > :radio').prop('disabled', false);
-        };
         RadioGroup.prototype.valid = function () {
-            return this.element.find('> label > :radio:checked').length > 0;
+            return this.element.find(':radio:checked').length > 0;
         };
         RadioGroup.prototype.get = function () {
-            return this.element.find('> label > :radio:checked').val();
+            return this.convertScalar(this.element.find('> label > :radio:checked').val());
         };
         RadioGroup.prototype.set = function (value) {
             this.element.find('> label > :radio').each(function (i, radio) {
@@ -325,8 +398,44 @@ var typedField;
             });
         };
         return RadioGroup;
-    })(Base);
+    })(InputArrayBase);
     typedField.RadioGroup = RadioGroup;
+    var CheckBoxGroup = (function (_super) {
+        __extends(CheckBoxGroup, _super);
+        function CheckBoxGroup() {
+            _super.apply(this, arguments);
+            this.inputType = 'checkbox';
+        }
+        CheckBoxGroup.prototype.createElement = function () {
+            var _this = this;
+            _super.prototype.createElement.call(this);
+            this.element.on('click', ':checkbox', function () {
+                _this.triggerChanged();
+            });
+            return this.element;
+        };
+        CheckBoxGroup.prototype.get = function () {
+            var _this = this;
+            var result = [];
+            this.element.find(':checkbox').each(function (i, item) {
+                var cb = $(item);
+                if ($(cb).is(':checked'))
+                    result.push(_this.convertScalar(cb.prop('value')));
+            });
+            return result;
+        };
+        CheckBoxGroup.prototype.set = function (value) {
+            var _this = this;
+            this.element.find(':checkbox').prop('checked', false);
+            if (!$.isArray(value))
+                return;
+            $.each(value, function (i, item) {
+                _this.element.find(':checkbox').filter(function (j, cb) { return $(cb).prop('value') == item; }).prop('checked', true);
+            });
+        };
+        return CheckBoxGroup;
+    })(InputArrayBase);
+    typedField.CheckBoxGroup = CheckBoxGroup;
     var DatePicker = (function (_super) {
         __extends(DatePicker, _super);
         function DatePicker() {
@@ -442,6 +551,33 @@ var propertyEditorWidget;
         this.options.disabled = true;
     }
     propertyEditorWidget.disable = disable;
+    function complain(messages) {
+        var _this = this;
+        var key;
+        this.undoComplain();
+        for (key in messages) {
+            messages[key].forEach(function (mes) {
+                if (!(key in _this.fields))
+                    return;
+                var message = $('<p>').addClass('ui-propertyeditor-error').text(mes);
+                _this.fields[key].closest('td.ui-propertyeditor-column').append(message);
+                _this.fields[key].closest('ui-propertyeditor-row').addClass('ui-propertyeditor-complained');
+            });
+        }
+    }
+    propertyEditorWidget.complain = complain;
+    function undoComplain() {
+        $('.ui-propertyeditor-row', this.element).removeClass('ui-propertyeditor.complained');
+        $('.ui-propertyeditor-error', this.element).remove();
+    }
+    propertyEditorWidget.undoComplain = undoComplain;
+    function clear() {
+        for (var key in this.fields) {
+            this.fields[key].typedfield('reset');
+        }
+        _refreshValues.call(this);
+    }
+    propertyEditorWidget.clear = clear;
     function _setOption(key, value) {
         switch (key) {
             case 'value':
@@ -470,6 +606,7 @@ var propertyEditorWidget;
         });
     }
     function _assignValues(value) {
+        this.undoComplain();
         for (var key in value) {
             if (typeof this.fields[key] === 'object') {
                 this.fields[key].typedfield('setValue', value[key]);

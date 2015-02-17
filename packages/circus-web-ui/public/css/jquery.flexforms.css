@@ -9,6 +9,10 @@
   font-weight: bold;
   width: 150px;
 }
+.ui-propertyeditor .ui-propertyeditor-error {
+  color: red;
+  margin: 0;
+}
 .ui-typedfield.ui-typedfield-invalid input {
   background-color: #ffcccc;
 }

@@ -71,6 +71,7 @@ a:hover{text-decoration:none;}
 .common_table td,.common_table th{border:1px solid #999; padding:8px;}
 .common_table th{background-color:#eee;}
 .common_table td{ background:#fff;}
+.common_table tr.highlight td{background-color:ivory;}
 .common_table_light{width:100%; margin:0 auto; border-collapse: collapse;}
 .common_table_light td,.common_table_light th{border-bottom:1px solid #ccc; padding:10px;}
 .common_input_text{padding:8px 0; font-size:1.2em; background:#d0e6e4; border:none; text-indent:8px;}

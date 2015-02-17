@@ -17,16 +17,13 @@ Route::get('login', 'LoginController@getIndex');
 Route::post('login', 'LoginController@login');
 Route::get('logout', 'LoginController@logout');
 
-//テーマ/個人情報表示変更
-Route::get('preferences/input', 'UserController@inputPreferences');
-Route::post('preferences/input', 'UserController@inputPreferences');
-Route::post('preferences/confirm', 'UserController@confirmPreferences');
-Route::post('preferences/complete', 'UserController@registerPreferences');
-Route::get('preferences/complete', 'UserController@completePreferences');
-//for Ajax
-Route::any('preferences/theme', 'UserController@changeTheme');
+// APIs
+Route::resource('api/user', 'UserApiController');
+Route::resource('api/group', 'GroupApiController');
+Route::resource('api/storage', 'StorageApiController');
+Route::put('api/storage/setactive/{storageID}', 'StorageApiController@setActive');
+Route::resource('api/preference', 'UserPreferenceApiController');
 
-//Front page
 Route::post('home', 'TopController@getIndex');
 Route::get('home', 'TopController@getIndex');
 
@@ -63,7 +60,6 @@ Route::get('case/load_label', function(){
 	return View::make('/sample/load_sample', $result);
 });
 
-
 //Series
 Route::get('series/search', 'SeriesController@search');
 Route::post('series/search', 'SeriesController@search');
@@ -75,33 +71,13 @@ Route::get('series/complete', 'SeriesController@complete');
 Route::any('series/save_search', 'SeriesController@save_search');
 Route::get('series/get_series', 'SeriesController@get_series');
 
-//Management screen
+// Management screen
 Route::get('admin', 'AdminController@getIndex');
-//Management screen / group
-Route::get('admin/group/', function(){return Redirect::to('admin/group/search');});
-Route::get('admin/group/search', 'GroupController@search');
-Route::post('admin/group/search', 'GroupController@search');
-//Management screen / group (for Ajax)
-Route::any('admin/group/input', 'GroupController@input');
-Route::any('admin/group/confirm', 'GroupController@confirm');
-Route::any('admin/group/complete', 'GroupController@register');
-//Management screen / user
-Route::get('admin/user/', function(){return Redirect::to('admin/user/search');});
-Route::get('admin/user/search', 'UserController@search');
-Route::post('admin/user/search', 'UserController@search');
-//Management screen / user (for Ajax)
-Route::any('admin/user/input', 'UserController@input');
-Route::any('admin/user/confirm', 'UserController@confirm');
-Route::any('admin/user/complete', 'UserController@register');
-
-//Management screen / storage
-Route::get('admin/storage/', function(){return Redirect::to('admin/storage/search');});
-Route::get('admin/storage/search', 'StorageController@search');
-Route::post('admin/storage/search', 'StorageController@search');
-//Management screen / storage (for Ajax)
-Route::any('admin/storage/input', 'StorageController@input');
-Route::any('admin/storage/confirm', 'StorageController@confirm');
-Route::any('admin/storage/complete', 'StorageController@register');
+// Individual Administration pages
+Route::get('administration/{adminkind}', ['before' => 'auth', 'uses' => 'AdministrationController@index'])
+	->where('adminkind', '^(user|group|storage|project)$');
+// Preference
+Route::get('preference', 'UserPreferenceController@index');
 
 //404 pages
 Event::listen('404', function()

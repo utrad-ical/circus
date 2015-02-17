@@ -11,7 +11,7 @@ class Group extends BaseModel
 	protected $collection = self::COLLECTION;
 
 	protected $primaryKey = 'groupID';
-	// public $timestamps = false;
+	public $timestamps = false;
 
 	/**
 	 * Search conditions Building

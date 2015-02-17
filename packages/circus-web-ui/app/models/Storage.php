@@ -15,7 +15,7 @@ class Storage extends BaseModel {
 	protected $collection = self::COLLECTION;
 
 	protected $primaryKey = 'storageID';
-	// public $timestamps = false;
+	public $timestamps = false;
 
 	/**
 	 * Indicates this storage area is for storing DICOM files.

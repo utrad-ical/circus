@@ -1,18 +1,17 @@
 <?php
 
-use Jenssegers\Mongodb\Model as Eloquent;
-
 /**
  * Group table operation
  */
-class Group extends Eloquent {
+class Group extends BaseModel
+{
 	protected $connection = 'mongodb';
 
 	const COLLECTION = 'Groups';
 	protected $collection = self::COLLECTION;
 
 	protected $primaryKey = 'groupID';
-	public $timestamps = false;
+	// public $timestamps = false;
 
 	/**
 	 * Search conditions Building
@@ -65,13 +64,25 @@ class Group extends Eloquent {
 		return $query;
 	}
 
+	const PROJECT_CREATE = 'createProject';
+	const PROJECT_DELETE = 'deleteProject';
+	const SERVER_MANAGE = 'manageServer';
+
+	public static $privilegeList = [
+		['privilege' => self::PROJECT_CREATE, 'caption' => 'Create Project'],
+		['privilege' => self::PROJECT_DELETE, 'caption' => 'Delete Project'],
+		['privilege' => self::SERVER_MANAGE, 'caption' => 'Manage Server']
+	];
+
 	/**
 	 * Validate Rules
 	 */
-	private $rules = array(
-		'groupID'	=>	'required|integer',
-		'groupName'	=>	'required|unique:Groups,groupName'
-	);
+	protected $rules = [
+		'groupID' => 'required|integer|min:0',
+		'groupName' => 'required|alpha_dash',
+		'privileges' => 'array_of_privileges'
+	];
+	protected $uniqueFields = ['groupName'];
 
 	/**
 	 * Validate Check
@@ -90,3 +101,15 @@ class Group extends Eloquent {
 		return;
 	}
 }
+
+
+Validator::extend('array_of_privileges', function ($attribute, $value, $parameters) {
+	if (!is_array($value)) return false;
+	foreach ($value as $privilege) {
+		$filtered = array_filter(Group::$privilegeList, function ($p) use ($privilege) {
+			return $p['privilege'] == $privilege;
+		});
+		if (empty($filtered)) return false;
+	}
+	return true;
+});

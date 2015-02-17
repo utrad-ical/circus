@@ -56,7 +56,7 @@
 									<ul id="settings_list">
 										<li>{{HTML::link(asset('/home'), 'Home')}}</li>
 										<li>{{HTML::link(asset('/logout'), 'Logout')}}</li>
-										<li>{{HTML::link(asset('/preferences/input'), 'Preferences')}}</li>
+										<li>{{HTML::link(asset('/preference'), 'Preferences')}}</li>
 									</ul>
 								</div>
 							</div>

@@ -126,8 +126,6 @@
 
 
 
-
-
 		changeActiveSeries : function(active_series_id){
 			var this_elm = this;
 			controllerInfo.activeSeriesId = active_series_id;
@@ -144,6 +142,28 @@
 				$(elmId).trigger('changeSeries',active_series_id);
 				$(elmId).trigger('sync');
 			}
+		},
+		
+		
+
+		checkLabelId : function(){
+			//書き換えがあったラベルのidを差し替える
+			var this_elm = this;
+		
+			for(var i=0; i<controllerInfo.series.length; i++){
+				var tmp_the_series = controllerInfo.series[i];
+				for(var j=0; j<tmp_the_series.label.length; j++){
+					var tmp_the_label = tmp_the_series.label[j];
+					if(typeof tmp_the_label.change_flg != 'undefined' && tmp_the_label.change_flg == true){
+//						tmp_the_label.id = aaaaa;
+					
+					
+					}
+				}			
+			}
+
+
+			//deleteLabelObject
 		},
 
 		//モード変更
@@ -838,8 +858,31 @@
 			//ラベル新規生成
 			var this_elm = this;
 			var tmp_id = new Date();
-			tmp_id = tmp_id.getFullYear()+'_'+tmp_id.getMonth()+'_'+tmp_id.getDate()+'_'+tmp_id.getHours()+'_'+tmp_id.getMinutes()+'_'+tmp_id.getSeconds()+'_'+tmp_id.getMilliseconds();
-	
+			var the_random = Math.random();
+
+			var the_month = 1+ tmp_id.getMonth();
+			the_month = this_elm.imageViewerController('zeroFormat',[the_month,2]);
+
+			var the_Date = tmp_id.getDate();
+			the_Date = this_elm.imageViewerController('zeroFormat',[the_Date,2]);
+
+			var the_Hours = tmp_id.getHours();
+			the_Hours = this_elm.imageViewerController('zeroFormat',[the_Hours,2]);
+			
+			var the_Minutes = 1+ tmp_id.getMinutes();
+			the_Minutes = this_elm.imageViewerController('zeroFormat',[the_Minutes,2]);
+			
+			var the_Seconds = 1+ tmp_id.getSeconds();
+			the_Seconds = this_elm.imageViewerController('zeroFormat',[the_Seconds,2]);
+
+			var the_Milliseconds = 1+ tmp_id.getMilliseconds();
+			the_Milliseconds = this_elm.imageViewerController('zeroFormat',[the_Milliseconds,3]);
+
+			var the_random = Math.random();
+			the_random = Math.floor(the_random*10000000000);
+
+			tmp_id = tmp_id.getFullYear()+the_month+the_Date+the_Hours+the_Minutes+the_Seconds+the_Milliseconds + '_'+the_random;
+
 			var index_number = 0;
 			if(color_index){
 				index_number = color_index;
@@ -866,8 +909,11 @@
 		saveData : function(){
 			//データ保存
 			var this_elm = this;
-
 			var saveData = new Object();
+
+			//書き換えが発生していたラベルについてはidを書き換える
+			this_elm.imageViewerController('checkLabelId');
+
 			saveData.caseId =controllerInfo.caseId;
 			saveData.series = new Array(0);
 			var revision_attributes = $('#the_panel_attribute').propertyeditor('option', 'value');
@@ -882,18 +928,22 @@
 
 					if(typeof tmp_the_series.label =='object'){
 						for(var j=0; j<tmp_the_series.label.length; j++){
+							
+							var tmp_the_label = tmp_the_series.label[j];
+							var container_data = $('#img_area_axial').imageViewer('createSaveData',tmp_the_series.id,tmp_the_label.id);
 
 							tmp_insert_obj.label[j] = new Object();
-							var container_data = $('#img_area_axial').imageViewer('createSaveData',tmp_the_series.id,tmp_the_series.label[j].id);
 							tmp_insert_obj.label[j].offset = container_data.offset;
 							tmp_insert_obj.label[j].sizes = container_data.size;
 
 							if(container_data.image.indexOf('data:image')==-1){
 								container_data.image = '';
 							};
+
 							tmp_insert_obj.label[j] = container_data;
-							tmp_insert_obj.label[j].id = tmp_the_series.label[j].id;
-							tmp_insert_obj.label[j].attribute = tmp_the_series.label[j].attribute;
+							tmp_insert_obj.label[j].id = tmp_the_label.id;
+							tmp_insert_obj.label[j].attribute = tmp_the_label.attribute;
+
 						}
 					}
 					saveData.series[i] = tmp_insert_obj;
@@ -1314,18 +1364,15 @@
 				}
 			});
 
-		}/*updateLabelElements*/
+		}/*updateLabelElements*/,
 
-		/*
-			描画イベントハンドラー（LABEL番号／描画座標の配列）
-			UNDO・REDO
-			保存用データ取得
-			ラベル表示／非表示（LABEL番号）
-			ラベル追加・削除
-			描画対象ラベル変更
-			ラベル色変更
-			表示・描画モード切り替え
-			*/
+		zeroFormat : function (input_array){
+			// input_array = [ num , num ] 
+			var e = input_array[0];
+			var t = input_array[1];
+			var n=String(e).length;if(t>n){return(new Array(t-n+1)).join(0)+e}else{return e}
+		}/*zeroFormat*/
+
 	}
 
 	// プラグインメイン

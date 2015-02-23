@@ -354,6 +354,23 @@
 			this_elm.imageViewerController('setEvents');
 
 		},//create
+		
+		
+		
+		createRandomStr : function(insert_array){
+			var n = insert_array[0];	//桁数
+			var b = insert_array[1] || '';
+			var a = 'abcdefghijklmnopqrstuvwxyz'
+				+ 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+				+ '0123456789'
+				+ b;
+			a = a.split('');
+			var s = '';
+			for (var i = 0; i < n; i++) {
+					s += a[Math.floor(Math.random() * a.length)];
+			}
+			return s;
+		},
 
 
 
@@ -878,8 +895,7 @@
 			var the_Milliseconds = 1+ tmp_id.getMilliseconds();
 			the_Milliseconds = this_elm.imageViewerController('zeroFormat',[the_Milliseconds,3]);
 
-			var the_random = Math.random();
-			the_random = Math.floor(the_random*10000000000);
+			var the_random = this_elm.imageViewerController('createRandomStr',[10]);
 
 			tmp_id = tmp_id.getFullYear()+the_month+the_Date+the_Hours+the_Minutes+the_Seconds+the_Milliseconds + '_'+the_random;
 

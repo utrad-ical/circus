@@ -13,8 +13,14 @@
   color: red;
   margin: 0;
 }
-.ui-typedfield.ui-typedfield-invalid input {
+.ui-typedfield.ui-typedfield-invalid input,
+.ui-typedfield.ui-typedfield-invalid textarea {
   background-color: #ffcccc;
+}
+.ui-typedfield-json {
+  width: 300px;
+  height: 5em;
+  resize: both;
 }
 .ui-filtereditor-node {
   margin-top: 2px;

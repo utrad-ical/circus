@@ -639,5 +639,5 @@ voxelContainer.prototype.updateVoxel = function(series_id,label_id,the_mode,posi
   }
   target_position_data[tmp_z][tmp_series.size.X*tmp_y + tmp_x] = input_value;
  }
-
+ 
 };/*updateVoxel*/

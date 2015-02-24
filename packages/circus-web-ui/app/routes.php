@@ -21,6 +21,7 @@ Route::get('logout', 'LoginController@logout');
 Route::resource('api/user', 'UserApiController');
 Route::resource('api/group', 'GroupApiController');
 Route::resource('api/storage', 'StorageApiController');
+Route::resource('api/project', 'ProjectApiController');
 Route::put('api/storage/setactive/{storageID}', 'StorageApiController@setActive');
 Route::resource('api/preference', 'UserPreferenceApiController');
 

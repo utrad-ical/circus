@@ -77,6 +77,7 @@
 					<li>{{HTML::link(asset('/administration/group'), 'Group')}}</li>
 					<li>{{HTML::link(asset('/administration/user'), 'User')}}</li>
 					<li>{{HTML::link(asset('/administration/storage'), 'Storage')}}</li>
+					<li>{{HTML::link(asset('/administration/project'), 'Project')}}</li>
 				</ul>
 			</div>
 		</li>

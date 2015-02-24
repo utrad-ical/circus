@@ -20,6 +20,7 @@ var typedFieldWidget;
         text: 'TextInput',
         password: 'PasswordInput',
         number: 'NumberInput',
+        json: 'Json',
         select: 'Select',
         selectmultiple: 'SelectMultiple',
         checkboxgroup: 'CheckBoxGroup',
@@ -289,6 +290,53 @@ var typedField;
         return NumberInput;
     })(HtmlInputInput);
     typedField.NumberInput = NumberInput;
+    var Json = (function (_super) {
+        __extends(Json, _super);
+        function Json() {
+            _super.apply(this, arguments);
+        }
+        Json.prototype.createElement = function () {
+            var _this = this;
+            this.element = $('<textarea>').addClass('ui-typedfield-textarea ui-typedfield-json');
+            this.element.on('change input keyup', function (event) {
+                _this.triggerChanged();
+                event.stopPropagation();
+            });
+            return this.element;
+        };
+        Json.prototype.enable = function () {
+            this.element.prop('disabled', false);
+        };
+        Json.prototype.disable = function () {
+            this.element.prop('disabled', true);
+        };
+        Json.prototype.disabled = function () {
+            return this.element.prop('disabled');
+        };
+        Json.prototype.valid = function () {
+            var val = this.element.val();
+            var tmp = null;
+            try {
+                tmp = JSON.parse(val);
+            }
+            catch (e) {
+                return false;
+            }
+            return true;
+        };
+        Json.prototype.get = function () {
+            var val = this.element.val();
+            return JSON.parse(val);
+        };
+        Json.prototype.set = function (value) {
+            this.element.val(JSON.stringify(value, null, '\t'));
+        };
+        Json.prototype.reset = function () {
+            this.set('');
+        };
+        return Json;
+    })(Base);
+    typedField.Json = Json;
     var Select = (function (_super) {
         __extends(Select, _super);
         function Select() {
@@ -975,4 +1023,3 @@ var filterEditor;
 $.widget('ui.filtereditor', filterEditor);
 // CIRCUS CS Flex Forms
 // TypeScript based project -- Do not directly edit the JavaScript file.
-//# sourceMappingURL=jquery.flexforms.js.map

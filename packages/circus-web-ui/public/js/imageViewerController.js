@@ -126,12 +126,13 @@
 
 
 
+
+
 		changeActiveSeries : function(active_series_id){
 			var this_elm = this;
 			controllerInfo.activeSeriesId = active_series_id;
 			this_elm.find('#'+active_series_id).addClass('active');
 			this_elm.imageViewerController('updateLabelElements');
-
 
 			//モードがペンで、対象シリーズにラベルがまだない場合
 			this_elm.imageViewerController('changeMode','pan');
@@ -143,28 +144,75 @@
 				$(elmId).trigger('sync');
 			}
 		},
-		
-		
 
-		checkLabelId : function(){
+
+
+
+
+		checkUpdateLabel : function(){
 			//書き換えがあったラベルのidを差し替える
 			var this_elm = this;
-		
+
 			for(var i=0; i<controllerInfo.series.length; i++){
-				var tmp_the_series = controllerInfo.series[i];
-				for(var j=0; j<tmp_the_series.label.length; j++){
-					var tmp_the_label = tmp_the_series.label[j];
-					if(typeof tmp_the_label.change_flg != 'undefined' && tmp_the_label.change_flg == true){
-//						tmp_the_label.id = aaaaa;
-					
-					
+				var tmp_the_controller_series = controllerInfo.series[i];
+
+				for(var j=0; j<tmp_the_controller_series.label.length; j++){
+					var tmp_the_label = tmp_the_controller_series.label[j];
+					var tmp_current_label_id = tmp_the_label.id + '';	//更新前のラベルid
+
+					//まだ書き込み時にラベルにフラグをたてるところは済んでいる
+					if(typeof tmp_the_label.update_flg != 'undefined' && tmp_the_label.update_flg == true){
+
+						var tmp_new_label_id = this_elm.imageViewerController('getLabelDefault').id;
+
+						//ビューアー内のラベルオブジェクトid書き換え
+						for(var k =0; k<controllerInfo.viewer.length; k++){
+							var tmp_the_viewer = controllerInfo.viewer[k];
+							var the_viewer_options = $('#'+tmp_the_viewer.elementId).imageViewer('option','viewer');
+							for(var l=0; l<the_viewer_options.draw.series.length; l++){
+								var the_viewer_series = the_viewer_options.draw.series[l];
+								if(the_viewer_series.activeLabelId == tmp_current_label_id){
+									the_viewer_series.activeLabelId = tmp_new_label_id;
+								}
+
+								for(var m=0; m<the_viewer_series.label.length; m++){
+									var the_viewer_label = the_viewer_series.label[m];
+									if(the_viewer_label.id == tmp_current_label_id){
+										the_viewer_label.id = tmp_new_label_id;
+									}
+								}
+							}
+						}
+
+						//コンテナ内部のラベルidを差し替え
+						var container_object = controllerInfo.viewer[0].container;
+						var target_container_label_obj = container_object.getLabelObjectById(tmp_current_label_id,tmp_the_controller_series.id);
+						target_container_label_obj.id = tmp_new_label_id;
+
+						//コントローラのラベルオブジェクトid書き換え
+						tmp_the_label.id = tmp_new_label_id;
+						if(tmp_the_controller_series.tmp_the_controller_series = 	tmp_current_label_id){
+							tmp_the_controller_series.tmp_the_controller_series = tmp_new_label_id;
+						}
+
+						tmp_the_label.update_flg = false;
 					}
-				}			
+				}
 			}
 
+			this_elm.imageViewerController('updateLabelElements');
 
-			//deleteLabelObject
-		},
+			//紐づくビューアーたちに伝播
+			for(var i=0; i<controllerInfo.viewer.length; i++){
+				var elmId = '#' + controllerInfo.viewer[i].elementId;
+				$(elmId).trigger('sync');
+			}
+
+		}/*checkUpdateLabel*/,
+
+
+
+
 
 		//モード変更
 		changeMode : function(new_mode){
@@ -354,9 +402,9 @@
 			this_elm.imageViewerController('setEvents');
 
 		},//create
-		
-		
-		
+
+
+
 		createRandomStr : function(insert_array){
 			var n = insert_array[0];	//桁数
 			var b = insert_array[1] || '';
@@ -457,7 +505,7 @@
 			//デフォルトでviewer配列の個数が判断付かないため,デフォルト配列を複製してviewer個数分配置しておく
 			var tmp_viewer_param_array = new Array;
 			for(var i=0; i<insert_obj.viewer.length; i++){
-				
+
 				tmp_viewer_param_array[i] = new Object;
 				tmp_viewer_param_array[i].id = controllerInfo.viewer[0].id + i;
 				tmp_viewer_param_array[i].elementId = controllerInfo.viewer[0].elementId;
@@ -544,7 +592,7 @@
 					tmp_h = active_series.voxel.y * active_series.voxel.voxel_y / active_series.voxel.voxel_x;
 					tmp_ow = active_series.voxel.x;
 					tmp_oh = active_series.voxel.y;
-				
+
 				 }else if(tmp_orientation == 'sagital'){
 					tmp_w = active_series.voxel.y * active_series.voxel.voxel_y / active_series.voxel.voxel_x;
 					tmp_h = active_series.voxel.z * active_series.voxel.voxel_z / active_series.voxel.voxel_x;
@@ -885,10 +933,10 @@
 
 			var the_Hours = tmp_id.getHours();
 			the_Hours = this_elm.imageViewerController('zeroFormat',[the_Hours,2]);
-			
+
 			var the_Minutes = 1+ tmp_id.getMinutes();
 			the_Minutes = this_elm.imageViewerController('zeroFormat',[the_Minutes,2]);
-			
+
 			var the_Seconds = 1+ tmp_id.getSeconds();
 			the_Seconds = this_elm.imageViewerController('zeroFormat',[the_Seconds,2]);
 
@@ -905,13 +953,13 @@
 			}
 			var tmp_color = controllerInfo.defaultColorSet[index_number];
 			var tmp_rgba = this_elm.imageViewerController('getRgba',tmp_color,100);
-	
+
 			var return_obj  = {
 				//ラベル生成時のデフォルト
 				id : tmp_id,
 				alpha : 100,
 				attribute :'',
-				color : tmp_color,  //todo初期は他のラベルで使われてない色をランダムで選ぶ
+				color : tmp_color, //todo初期は他のラベルで使われてない色をランダムで選ぶ
 				description :'',
 				name : '名称未設定',
 				rgba : tmp_rgba, //color/alphaを併せてcanvas適用用の値を作る
@@ -922,18 +970,52 @@
 
 
 
+
+
+		getLabelObjectById : function(label_id,series_id){
+
+			//描画対象ラベルのチェック
+			var this_elm = this;
+
+			if(series_id){
+				var tmp_the_series = this_elm.imageViewerController('getSeriesObjectById',[series_id]);
+				for(var i=tmp_the_series.label.length-1; i>=0; i--){
+					if(tmp_the_series.label[i].id ==	label_id){
+						return tmp_the_series.label[i];
+						break;
+					}
+				}
+
+			}else{
+				//series指定が無ければ全シリーズを端からみていく
+				for(var j=0; j<controllerInfo.series.length; j++){
+					var tmp_the_series = controllerInfo.series[j];
+					for(var i=tmp_the_series.label.length-1; i>=0; i--){
+						if(tmp_the_series.label[i].id ==	label_id){
+							return tmp_the_series.label[i];
+							break;
+						}
+					}
+				}
+			}
+		}/*getLabelObjectById*/,
+
+
+
+
+
 		saveData : function(){
 			//データ保存
 			var this_elm = this;
 			var saveData = new Object();
 
 			//書き換えが発生していたラベルについてはidを書き換える
-			this_elm.imageViewerController('checkLabelId');
+			this_elm.imageViewerController('checkUpdateLabel');
 
 			saveData.caseId =controllerInfo.caseId;
 			saveData.series = new Array(0);
 			var revision_attributes = $('#the_panel_attribute').propertyeditor('option', 'value');
-			console.log(revision_attributes);
+			//console.log(revision_attributes);
 			saveData.attribute = JSON.stringify(revision_attributes);
 			try {
 				for(var i=0; i<controllerInfo.series.length; i++){
@@ -944,7 +1026,7 @@
 
 					if(typeof tmp_the_series.label =='object'){
 						for(var j=0; j<tmp_the_series.label.length; j++){
-							
+
 							var tmp_the_label = tmp_the_series.label[j];
 							var container_data = $('#img_area_axial').imageViewer('createSaveData',tmp_the_series.id,tmp_the_label.id);
 
@@ -976,7 +1058,7 @@
 				console.log(saveData);
 				console.log("URL::");
 				console.log(controllerInfo.postUrl);
-	
+
 				$.ajax({
 					url: controllerInfo.postUrl,
 					type: 'post',
@@ -990,11 +1072,11 @@
 						alert(response.message);
 					}
 				});
-			
+
 			}else{
 				//キャンセル時
-			
-			
+
+
 			}
 			return false;
 		},
@@ -1086,6 +1168,12 @@
 				 }
 				});
 
+				//更新が発生した段階でフラグを立てる
+				$(tmp_elm).bind('onWritten',function(e,label_id,series_id){
+					var tmp_the_label =  this_elm.imageViewerController('getLabelObjectById',label_id,series_id)
+					tmp_the_label.update_flg = true;
+				});
+
 				//ある面でwindow情報が変更されたらそれを他の面にも適用させる
 				$(tmp_elm).find('.mouse_cover').bind('mouseup',function(){
 				 if(controllerInfo.mode == 'window'){
@@ -1098,20 +1186,10 @@
 				 var tmp_this_opts = $(this).closest('.img_area').imageViewer('getOptions');
 				 this_elm.imageViewerController('syncWindowInfo',tmp_this_opts.viewer.window);
 				});
+
 			}
 
-
 		}/*setViewerInnerEvents*/,
-
-
-
-
-
-		//３面共用のコントローラー情報群の書き換え
-		//必要な項目だけ与えてその項目だけマージ
-		setValues : function(insert_obj){
-			//controllerInfo = $.extend(true,controllerInfo,insert_obj);
-		},
 
 
 
@@ -1383,7 +1461,7 @@
 		}/*updateLabelElements*/,
 
 		zeroFormat : function (input_array){
-			// input_array = [ num , num ] 
+			// input_array = [ num , num ]
 			var e = input_array[0];
 			var t = input_array[1];
 			var n=String(e).length;if(t>n){return(new Array(t-n+1)).join(0)+e}else{return e}

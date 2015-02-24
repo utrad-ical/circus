@@ -10,6 +10,10 @@ class BaseModel extends Jenssegers\Mongodb\Model
 
 	protected $uniqueFields = [];
 
+	public function getRules() {
+		return $this->rules;
+	}
+
 	/**
 	 * Run self-validation for the containing data.
 	 * @return array Error content
@@ -46,6 +50,25 @@ Validator::extend('mongodate', function ($attribute, $value, $parameters) {
 	return $value instanceof MongoDate;
 });
 
+Validator::extend('strict_integer', function ($attribute, $value, $parameters) {
+	// Do not use is_numeric() which returns true for strings representing numeric
+	return is_int($value);
+});
+
+Validator::extend('strict_string', function ($attribute, $value, $parameters) {
+	return is_string($value);
+});
+
 Validator::extend('strict_bool', function ($attribute, $value, $parameters) {
 	return $value === true || $value === false;
+});
+
+Validator::extend('array_of_group_ids', function($attribute, $value, $parameters) {
+	if (!is_array($value)) return false;
+	foreach ($value as $groupID) {
+		if (!is_numeric($groupID) || !Group::find($groupID)) {
+			return false;
+		}
+	}
+	return true;
 });

@@ -19,11 +19,16 @@ class ProjectSeeder extends Seeder
 		Project::create(array(
 			'projectID' => 1,
 			'projectName' => 'Default',
-			'createGroups' => array('user'),
-			'viewGroups' => array('user'),
-			'updateGroups' => array('user'),
-			'reviewGroups' => array('user'),
-			'deleteGroups' => array('user'),
+			'createGroups' => array(2),
+			'viewGroups' => array(2),
+			'updateGroups' => array(2),
+			'reviewGroups' => array(2),
+			'deleteGroups' => array(1),
+			'personalInfoViewGroups' => array(2),
+			'windowPriority' => 'dicom,preset,auto',
+			'windowPresets' => array(),
+			'caseAttributesSchema' => array(),
+			'labelAttributesSchema' => array(),
 			'updateTime' => new MongoDate(), // TODO: Remove eventually
 			'createTime' => new MongoDate() // TODO: Remove eventually
 		));

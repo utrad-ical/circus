@@ -66,13 +66,3 @@ Validator::extend('preferences', function ($attribute, $value, $parameters) {
 		&& isset($value['personalInfoView'])
 		&& $value['personalInfoView'] === true || $value['personalInfoView'] === false;
 });
-
-Validator::extend('array_of_group_ids', function($attribute, $value, $parameters) {
-	if (!is_array($value)) return false;
-	foreach ($value as $groupID) {
-		if (!is_numeric($groupID) || !Group::find($groupID)) {
-			return false;
-		}
-	}
-	return true;
-});

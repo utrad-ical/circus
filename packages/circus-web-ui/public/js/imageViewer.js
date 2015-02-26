@@ -235,7 +235,7 @@
 			var this_elm = this.element;
 			var this_opts = this.options;
 
-			if(this_opts.control.mode	!=	new_mode){
+			if(this_opts.control.mode	!= new_mode){
 				this_opts.control.mode = new_mode;
 				this_elm.trigger('onModeChange',[this_opts.viewer.id,new_mode]);
 				//ここでは変更のあったビューアーのidと適用後のモードを生成して外から取れる状態にするだけ
@@ -255,17 +255,18 @@
 				}
 
 				//カーソル用クラス変更
-				this_elm.removeClass('mode_pan	mode_pen	mode_window	mode_erase');
-				if(this_opts.control.mode ==	'erase'){
+				this_elm.removeClass('mode_pan mode_pen mode_window	mode_erase');
+				if(this_opts.control.mode == 'erase'){
 					this_elm.addClass('mode_erase');
-				}else	if(this_opts.control.mode ==	'window'){
+				}else	if(this_opts.control.mode == 'window'){
 					this_elm.addClass('mode_window');
-				}else	if(this_opts.control.mode ==	'pen'){
+				}else	if(this_opts.control.mode == 'pen'){
 					this_elm.addClass('mode_pen');
-				}else	if(this_opts.control.mode ==	'pan'){
+				}else	if(this_opts.control.mode == 'pan'){
 					this_elm.addClass('mode_pan');
+				}else	if(this_opts.control.mode == 'measure'){
+					this_elm.addClass('mode_measure');
 				}
-
 			}
 		},
 		

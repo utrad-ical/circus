@@ -47,7 +47,17 @@
 			} //series１個分の情報群
 		],
 		control : {
-			show : true, //そもそもコントロールパネルを置くかどうか
+			boldness : {
+				active : true,
+				value : 1
+			}, //太さ変更
+			measure : {
+				active : true, //定規機能の有効・無効
+				panel : true, //定規表示パネルの有無
+			},
+			color : {
+				control : true //カラーピッカーの有無
+			},
 			pan : true, //手のひらツール
 			window : {
 				active : true,
@@ -58,13 +68,7 @@
 				panel : true, //ラベル情報表示パネルの有無
 
 			},
-			boldness : {
-				active : true,
-				value : 1
-			}, //太さ変更
-			color : {
-				control : true //カラーピッカーの有無
-			},
+			show : true, //そもそもコントロールパネルを置くかどうか
 			undo : true //戻す・やり直す一括
 		},
 		elements : {
@@ -216,7 +220,7 @@
 
 		//モード変更
 		changeMode : function(new_mode){
-
+			
 			controllerInfo.mode= new_mode;
 			var this_elm = this;
 			var active_series = this_elm.imageViewerController('getSeriesObjectById',[controllerInfo.activeSeriesId]);
@@ -258,6 +262,10 @@
 			}else if(controllerInfo.mode == 'window'){
 			//ウインドウ調整
 				tmp_panel_elm.find('.ico_detail_sprite_image_window').addClass('active')
+				.siblings().removeClass('active');
+			}else if(controllerInfo.mode == 'measure'){
+				//定規調整
+				tmp_panel_elm.find('.ico_detail_sprite_measure').addClass('active')
 				.siblings().removeClass('active');
 			};
 
@@ -367,6 +375,11 @@
 				 delete tmp_elments;
 				 delete tmp_panel_wrap;
 				}
+				
+				if(controllerInfo.control.measure.active == true){
+					var tmp_elments = '<li class="toolbar_btn ico_detail_sprite ico_detail_sprite_measure"></li>';
+					tmp_panel_wrap.append(tmp_elments);
+				}
 
 				/*ラベル表示領域*/
 				if(controllerInfo.control.pen.panel== true){
@@ -394,8 +407,12 @@
 				  </div></div><div class="clear">&nbsp;</div>';
 
 				 $('#'+controllerInfo.elements.label).append(tmp_info_elm);
-
 				}//ラベル関連
+				
+				
+				
+				
+				
 			}//control
 
 			//要素設置が済んだらイベント設置
@@ -869,6 +886,15 @@
 				 }
 				});
 			}
+			
+			/*ラベル表示領域*/
+			if(controllerInfo.control.measure.panel== true){
+				$('.ico_detail_sprite_measure').click(function(){
+					 this_elm.imageViewerController('changeMode','measure');
+				});
+			}
+			
+			
 
 			/*ラベル表示領域*/
 			if(controllerInfo.control.pen.panel== true){

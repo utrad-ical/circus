@@ -24,6 +24,10 @@
 .image_window_controller_wrap .btn_open{background-position:0 0; display:block; padding-left:20px; padding-right:5px;}
 .image_window_controller_wrap .btn_close{background-position:0 -20px; display:none; width:20px; }
 
+.ico_detail_sprite_measure{background-position: 0 -390px;}
+
+
+
 #the_panel .color_picker{width:28px; height:28px; border:none; display:block; float:left; margin-right:3px; cursor:pointer; border:1px solid #ccc; text-indent:-9999px;}
 #the_panel .visible_check_wrap{width:30px; height:30px; display:block; float:left; margin-right:3px; text-indent:-9999px; cursor:pointer; background-image:url(../img/common/ico_detail_sprite.png); background-repeat:no-repeat; background-position:0 -270px;}
 #the_panel .visible .visible_check_wrap{background-position:0	-300px;}

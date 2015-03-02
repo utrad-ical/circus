@@ -413,6 +413,7 @@ class SeriesController extends BaseController {
 	 * @return Gender display string
 	 */
 	function getSex($sex) {
+		if(!$sex) return '';
 		$sexes = Config::get('const.patient_sex');
 		return $sexes[$sex];
 	}

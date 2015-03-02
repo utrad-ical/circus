@@ -10,10 +10,10 @@ $(function(){
 	var	voxel_container	=	new voxelContainer();	//Label information storage object (three sides shared)
 	voxel_container.name	=	'my_voxel';
 
-	var the_domain = "{{Config::get('config.domain')}}";
+	var the_domain = "{{{$server_url['domain']}}}";
 	var	initInfo	=	[
 		{
-			baseUrl : "{{Config::get('config.dicom_img_base_url')}}",
+			baseUr : "{{{$server_url['dicom_img_base_url']}}}",
 			postUrl : "{{asset('case/save_label')}}",	//Enable here if it is different from the image storage server
 			caseId : "{{Session::get('caseID')}}",
 			attribute : {{$attribute}},

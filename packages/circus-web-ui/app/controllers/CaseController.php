@@ -256,7 +256,7 @@ class CaseController extends BaseController {
 						'patientName' 	=>	$patient['patientName'],
 						'age'			=>	$patient['age'],
 						'sex'			=>	self::getSex($patient['sex']),
-						'latestDate' 	=>	date('Y/m/d('.$w.') H:i', $dt->sec),
+						'latestDate' 	=>	$dt ? date('Y/m/d('.$w.') H:i', $dt->sec) : '',
 					//	'creator'		=>	$revision['latest']['creator'],
 						'projectName'	=>	$project ? $project[0]->projectName : '',
 						'updateDate'	=>	date('Y/m/d', $rec->updateTime->sec)
@@ -491,9 +491,14 @@ class CaseController extends BaseController {
 
 		//JsonFile read
 		try {
-			$file_path = dirname(dirname(__FILE__))."/config/label_settings.json";
+			$file_path = app_path()."/config/label_settings.json";
 			$handle = fopen($file_path, 'r');
 			$result['label_attribute_settings'] = fread($handle, filesize($file_path));
+			fclose($handle);
+			$file_path = app_path()."/config/server_config.json";
+			Log::debug($file_path);
+			$handle = fopen($file_path, 'r');
+			$result['server_url'] = json_decode(fread($handle, filesize($file_path)), true);
 			fclose($handle);
 		} catch (Exception $e){
 			Log::debug($e->getMessage());
@@ -1371,6 +1376,8 @@ class CaseController extends BaseController {
 	 * @return Gender display string
 	 */
 	function getSex($sex) {
+	//	Log::debug('性別コード::'.$sex);
+		if (!$sex) return '';
 		$sexes = Config::get('const.patient_sex');
 		return $sexes[$sex];
 	}

@@ -113,7 +113,7 @@
 
 
     _applyBoldness: function (insert_array) {
-      //ペンで描いた状態の座標情報群と現時点でのboldnessを踏まえ,塗るべきマス目の集合に変換する
+      //ペンで描いた状態の座標群と現時点での太さ指定を踏まえ,塗るべきマス目の集合に変換する
       var this_obj = this;
       var this_opts = this.options
       var rtn_array = new Array(0);
@@ -251,7 +251,7 @@
           this_elm.find('.image_window_controller_wrap').find('.btn_open').show();
         }
 
-        //カーソル用クラス変更
+        //カーソルcss用クラス変更
         this_elm.removeClass('mode_pan mode_pen mode_window	mode_erase');
         if (this_opts.control.mode == 'erase') {
           this_elm.addClass('mode_erase');
@@ -263,6 +263,8 @@
           this_elm.addClass('mode_pan');
         } else if (this_opts.control.mode == 'measure') {
           this_elm.addClass('mode_measure');
+        } else if (this_opts.control.mode == 'bucket') {
+          this_elm.addClass('mode_bucket');
         }
       }
     },
@@ -538,6 +540,96 @@
           break;
         }
       }
+
+    },
+
+
+    _getBucketFillPositions: function(series_id,label_id,pointed_position){
+   	 //バケツ発動用関数
+   	 // 第一引数: 対象シリーズid
+   	 // 第二引数: 対象ラベルid
+   	 // クリックされたポイントの縮尺ナシXYZ座標 [XY,Z]
+   	 console.log(series_id,label_id,pointed_position);
+   	 var this_obj = this;
+       var this_elm = this.element;
+       var this_opts = this.options;
+
+   	 //今の向き・奥行ですでに描画・格納されている情報をコンテナから取得
+       var the_painted_positions_in_target_slice = this_opts.control.container.returnSlice(
+   		 series_id,
+   		 label_id,
+          this_opts.viewer.orientation,
+          this_opts.viewer.number.current
+        );
+       //返ってくる形式
+       //[[X1,Y1,Z1],[X2,Y2,Z3]......]
+
+
+       /*ここからバケツフィル機能*/
+
+
+       /*バケツフィル機能ここまで*/
+
+       // バケツによって塗りつぶすべき座標群をarrayで作って下さい
+       // 形式 [[X1,Y1,Z1],[X2,Y2,Z3]......]
+
+       var target_position_array = [
+			[	200	,	300	,	44	],
+			[	201	,	301	,	44	],
+			[	202	,	302	,	44	],
+			[	203	,	303	,	44	],
+			[	204	,	304	,	44	],
+			[	205	,	305	,	44	],
+			[	206	,	306	,	44	],
+			[	207	,	307	,	44	],
+			[	208	,	308	,	44	],
+			[	209	,	309	,	44	],
+			[	210	,	310	,	44	],
+			[	201	,	300	,	44	],
+			[	202	,	301	,	44	],
+			[	203	,	302	,	44	],
+			[	204	,	303	,	44	],
+			[	205	,	304	,	44	],
+			[	206	,	305	,	44	],
+			[	207	,	306	,	44	],
+			[	208	,	307	,	44	],
+			[	209	,	308	,	44	],
+			[	210	,	309	,	44	],
+			[	211	,	310	,	44	],
+			[	202	,	300	,	44	],
+			[	203	,	301	,	44	],
+			[	204	,	302	,	44	],
+			[	205	,	303	,	44	],
+			[	206	,	304	,	44	],
+			[	207	,	305	,	44	],
+			[	208	,	306	,	44	],
+			[	209	,	307	,	44	],
+			[	210	,	308	,	44	],
+			[	211	,	309	,	44	],
+			[	212	,	310	,	44	]
+		];	//↑サンプル
+
+       //コンテナに積む
+       this_opts.control.container.updateVoxel(
+      	series_id,
+      	label_id,
+			'pen',
+			target_position_array
+		);
+
+       //ヒストリに積む
+       this_opts.control.container.addHistory(
+   		 series_id,
+       	label_id,
+ 			'pen',
+ 			target_position_array
+        );
+
+     //自分自身、同じボクセルを共用するビューアーに対してコンテナとの同期を促す
+	    var tmp_this_id = this_elm.attr('id');
+	    for (var i = this_opts.control.container.data.member.length - 1; i >= 0; i--) {
+	      $('#' + this_opts.control.container.data.member[i]).imageViewer('syncVoxel');
+	    }
 
     },
 
@@ -909,17 +1001,17 @@
         //トリミング領域の初期位置取得
         this_obj._tmpInfo.elementParam.start.X = this_opts.viewer.position.sx;
         this_obj._tmpInfo.elementParam.start.Y = this_opts.viewer.position.sy;
-      } else if (this_opts.control.mode == 'pen' || this_opts.control.mode == 'erase') {
-
+      } else if (this_opts.control.mode == 'pen' || this_opts.control.mode == 'erase' || this_opts.control.mode == 'bucket') {
 
         //ラベルを描くcanvas要素のオブジェクト
         var tmp_ctx = this_elm.find('.canvas_main_elm').get(0).getContext('2d');
-
         //重ね合わせの表現のため一時的に現在の(orientation,奥行)ですでに描かれているラベル座標群を確保する
         this_obj._tmpInfo.label_buffer = this_opts.control.container.getCurrentLabel(
           this_opts.viewer.orientation,
           this_opts.viewer.number.current
         );
+
+			var the_active_series = this_obj.getSeriesObjectById(this_opts.viewer.draw.activeSeriesId);
 
         //マウス位置
         this_obj._tmpInfo.elementParam.start.X = this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().left;
@@ -934,22 +1026,33 @@
         //画像トリミング分の補正
         this_obj._tmpInfo.cursor.current.X = this_obj._tmpInfo.cursor.current.X + this_opts.viewer.position.sx * this_opts.viewer.position.dw / this_opts.viewer.position.ow;
         this_obj._tmpInfo.cursor.current.Y = this_obj._tmpInfo.cursor.current.Y + this_opts.viewer.position.sy * this_opts.viewer.position.dh / this_opts.viewer.position.oh;
-        //太さを加味
-        var tmp_array = this_obj._applyBoldness([[this_obj._tmpInfo.cursor.current.X, this_obj._tmpInfo.cursor.current.Y]]);
 
-        //ボクセル座標に変換
-        this_obj._tmpInfo.label = this_obj._exchangePositionCtoV(tmp_array);
+				if (this_opts.control.mode == 'pen' || this_opts.control.mode == 'erase' ){
+					//太さを加味
+					var tmp_array = this_obj._applyBoldness([[this_obj._tmpInfo.cursor.current.X, this_obj._tmpInfo.cursor.current.Y]]);
 
-        var the_active_series = this_obj.getSeriesObjectById(this_opts.viewer.draw.activeSeriesId);
+					//ボクセル座標に変換
+					this_obj._tmpInfo.label = this_obj._exchangePositionCtoV(tmp_array);
 
-        this_opts.control.container.updateVoxel(
-          this_opts.viewer.draw.activeSeriesId,
-          the_active_series.activeLabelId,
-          this_opts.control.mode,
-          this_obj._tmpInfo.label
-        );
-        this_elm.imageViewer('syncVoxel');
-        this_obj._disableImageAlias(tmp_ctx, false);
+					this_opts.control.container.updateVoxel(
+						this_opts.viewer.draw.activeSeriesId,
+						the_active_series.activeLabelId,
+						this_opts.control.mode,
+						this_obj._tmpInfo.label
+					);
+					this_elm.imageViewer('syncVoxel');
+					this_obj._disableImageAlias(tmp_ctx, false);
+
+					}else{
+						//バケツ発動
+						var tmp_point_position = this_obj._exchangePositionCtoV([[this_obj._tmpInfo.cursor.current.X,this_obj._tmpInfo.cursor.current.Y]]);
+						this_obj._getBucketFillPositions(
+								this_opts.viewer.draw.activeSeriesId,
+								the_active_series.activeLabelId,
+								tmp_point_position[0]
+						);
+
+				}
 
       } else if (this_opts.control.mode == 'window') {
 
@@ -957,6 +1060,7 @@
         this_obj._tmpInfo.elementParam.start.X = this_opts.viewer.window.width.current;
         this_obj._tmpInfo.elementParam.start.Y = this_opts.viewer.window.level.current;
       }
+
     }/*_mousedownFunc*/,
 
 

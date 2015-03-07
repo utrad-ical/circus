@@ -51,6 +51,10 @@
         active: true,
         value: 1
       }, //太さ変更
+      bucket: {
+        active: true,
+        value: 1
+      }, //太さ変更
       measure: {
         active: true, //定規機能の有効・無効
         panel: true, //定規表示パネルの有無
@@ -225,7 +229,11 @@
       }
       tmp_panel_elm = $(tmp_panel_elm);
 
-      if (controllerInfo.mode == 'erase') {
+      if (controllerInfo.mode == 'bucket') {
+        //バケツ塗りつぶしモード
+        tmp_panel_elm.find('.ico_detail_sprite_bucket').addClass('active')
+          .siblings().removeClass('active');
+      } else if (controllerInfo.mode == 'erase') {
         //消しゴムモード
         tmp_panel_elm.find('.ico_detail_sprite_erase').addClass('active')
           .siblings().removeClass('active');
@@ -367,6 +375,11 @@
 
         if (controllerInfo.control.measure.active == true) {
           var tmp_elments = '<li class="toolbar_btn ico_detail_sprite ico_detail_sprite_measure"></li>';
+          tmp_panel_wrap.append(tmp_elments);
+        }
+
+        if (controllerInfo.control.bucket.active == true) {
+          var tmp_elments = '<li class="toolbar_btn ico_detail_sprite ico_detail_sprite_bucket"></li>';
           tmp_panel_wrap.append(tmp_elments);
         }
 
@@ -826,6 +839,11 @@
           this_elm.imageViewerController('changeMode', 'erase');
         });
 
+        //バケツ
+        tmp_panel_elm.find('.ico_detail_sprite_bucket').click(function () {
+          this_elm.imageViewerController('changeMode', 'bucket');
+        });
+
         //太さ変更
         tmp_panel_elm.find('.toolbar_weight').change(function (e) {
           var the_boldness = $(this).val();
@@ -837,8 +855,6 @@
         });
 
         //手前に戻す
-
-
         tmp_panel_elm.find('.draw_back').click(function () {
           for (var i = 0; i < 1; i++) {
             var elmId = '#' + controllerInfo.viewer[i].elementId;
@@ -861,7 +877,7 @@
         });
       }
 
-      /*ラベル表示領域*/
+      /*定規モード*/
       if (controllerInfo.control.measure.panel == true) {
         $('.ico_detail_sprite_measure').click(function () {
           this_elm.imageViewerController('changeMode', 'measure');

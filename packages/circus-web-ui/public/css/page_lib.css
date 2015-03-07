@@ -25,6 +25,7 @@
 .image_window_controller_wrap .btn_close{background-position:0 -20px; display:none; width:20px; }
 
 .ico_detail_sprite_measure{background-position: 0 -390px;}
+.ico_detail_sprite_bucket{background-position: 0 -420px;}
 
 
 
@@ -48,9 +49,9 @@
 	#the_panel_inner{position:absolute; top:0; left:-310px;}
 	#the_panel .img_toolbar_wrap{margin:0 0 20px auto; width:60px;}
 	#the_panel .toolbar_btn{float:left; width:30px;}
-	#the_panel	.toolbar_weight_wrap{text-align:center; clear:both; width:100%; padding:5px 0; border-bottom:1px solid #ccc; cursor:pointer;}
-	.toolbar_btn{border-bottom:1px solid #ccc;}
-	.label_select_wrap{float:none; margin-right:0;}
+	#the_panel .toolbar_weight_wrap{text-align:center; clear:both; width:100%; padding:5px 0; border-bottom:1px solid #ccc; cursor:pointer;}
+ .toolbar_btn{border-bottom:1px solid #ccc;}
+ .label_select_wrap{float:none; margin-right:0;}
 .label_info_wrap{padding-top:20px; float:none;}
 .label_info .label_description{width:100%; display:block;}
 
@@ -67,7 +68,7 @@
 
 .now_draw{background:#ddd;}
 .now_draw:hover{color:#FD3164;}
-.now_draw	.now_draw_label{background-position:0	-330px;}
+.now_draw .now_draw_label{background-position:0	-330px;}
 .delete_label{width:30px; height:30px; float:right; line-height:30px; display:block; cursor:pointer;
 	background-image:url(../img/common/ico_detail_sprite.png);
 	background-repeat:no-repeat;
@@ -97,11 +98,12 @@
 
 .img_view_area .canvas_elm.series_image_elm{position:relative;}
 .img_view_area .mouse_cover{width:512px; height:100%; position:absolute; left:0; top:0; z-index:200; background:rgba(0,0,0,0);}
-.mode_pan	.mouse_cover{cursor:move;}
-.mode_erase	.mouse_cover,
-.mode_pen	.mouse_cover{cursor:crosshair;}
-.mode_window	.mouse_cover{cursor:pointer;}
-.img_view_area.mode_image_window	.mouse_cover{cursor:default;}
+.mode_pan .mouse_cover{cursor:move;}
+.mode_bucket .mouse_cover,
+.mode_erase .mouse_cover,
+.mode_pen .mouse_cover{cursor:crosshair;}
+.mode_window .mouse_cover{cursor:pointer;}
+.img_view_area.mode_image_window .mouse_cover{cursor:default;}
 .img_view_area .img_wrap.now_move:active{cursor:all-scroll;}
 .img_view_area.mode_view .canvas_guide{display:none;}
 

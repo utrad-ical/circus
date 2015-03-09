@@ -2,7 +2,7 @@
 ;
 (function ($) {
 
-  //	プラグインメイン
+  //プラグインメイン
   $.widget('ui.imageViewer', {	//	ビューアーごとオプション、デフォルト値
     options: {
       control: {	//コントロール機能の有無

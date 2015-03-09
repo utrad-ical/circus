@@ -548,8 +548,8 @@
    	 //バケツ発動用関数
    	 // 第一引数: 対象シリーズid
    	 // 第二引数: 対象ラベルid
-   	 // クリックされたポイントの縮尺ナシXYZ座標 [XY,Z]
-   	 console.log(series_id,label_id,pointed_position);
+   	 // クリックされたポイントの縮尺ナシXYZ座標 [X,Y,Z]
+console.log(series_id,label_id,pointed_position);
    	 var this_obj = this;
        var this_elm = this.element;
        var this_opts = this.options;
@@ -561,54 +561,123 @@
           this_opts.viewer.orientation,
           this_opts.viewer.number.current
         );
+console.log(this_opts);
+console.log(the_painted_positions_in_target_slice);
        //返ってくる形式
        //[[X1,Y1,Z1],[X2,Y2,Z3]......]
 
 
        /*ここからバケツフィル機能*/
+// TODO forの処理を修正 コメント書く リファクタリング　バケツ全体
+      var max_x = 0;
+      var max_y = 0;
 
+      if (this_opts.viewer.orientation === 'axial') {
+        max_x = this_opts.viewer.voxel.x;
+        max_y = this_opts.viewer.voxel.y;
+      } else if (this_opts.viewer.orientation === 'coronal') {
+        max_x = this_opts.viewer.voxel.x;
+        max_y = this_opts.viewer.voxel.z;
+      } else if (this_opts.viewer.orientation === 'sagital') {
+        max_x = this_opts.viewer.voxel.y;
+        max_y = this_opts.viewer.voxel.z;
+      } 
+
+      var paint_map = new Array(max_y);
+      for (var count = paint_map.length-1; count >= 0; count--) {
+        paint_map[count] = new Uint8Array(max_x);
+      }
+
+      for (var count = the_painted_positions_in_target_slice.length-1; count >= 0; count--) {
+        if (this_opts.viewer.orientation === 'axial') {
+          paint_map[the_painted_positions_in_target_slice[count][1]][the_painted_positions_in_target_slice[count][0]] = 1;
+        } else if (this_opts.viewer.orientation === 'coronal') {
+          paint_map[the_painted_positions_in_target_slice[count][2]][the_painted_positions_in_target_slice[count][0]] = 1;
+        } else if (this_opts.viewer.orientation === 'sagital') {
+          paint_map[the_painted_positions_in_target_slice[count][2]][the_painted_positions_in_target_slice[count][1]] = 1;
+        }
+      }
+console.log(paint_map);
+//TODO 名前を変えること
+  var position_x = 0;
+  var position_y = 0;
+  var other = 0;
+
+    if (this_opts.viewer.orientation === 'axial') {
+      position_x = pointed_position[0];
+      position_y = pointed_position[1];
+      other = pointed_position[2];
+    } else if (this_opts.viewer.orientation === 'coronal') {
+      position_x = pointed_position[0];
+      position_y = pointed_position[2];
+      other = pointed_position[1];
+    } else if (this_opts.viewer.orientation === 'sagital') {
+      position_x = pointed_position[1];
+      position_y = pointed_position[2];
+      other = pointed_position[0];
+    }
+  
+  var point = new Array();
+  point.push(position_x);
+  point.push(position_y);
+
+  var position = new Array();
+  position.push(point);
+
+  while (position.length != 0) {
+    var point = position.shift();
+    if (paint_map[point[1]][point[0]+1] == 0) {
+      paint_map[point[1]][point[0]+1] = 1;
+      var next_point = [point[0]+1,point[1]];
+      position.push(next_point);
+    }
+    if (paint_map[point[1]+1][point[0]] == 0) {
+      paint_map[point[1]+1][point[0]] = 1;
+      var next_point = [point[0],point[1]+1];
+      position.push(next_point);
+    }
+    if (paint_map[point[1]][point[0]-1] == 0) {
+      paint_map[point[1]][point[0]-1] = 1;
+      var next_point = [point[0]-1,point[1]];
+      position.push(next_point);
+    }
+    if (paint_map[point[1]-1][point[0]] == 0) {
+      paint_map[point[1]-1][point[0]] = 1;
+      var next_point = [point[0],point[1]-1];
+      position.push(next_point);
+    }
+  }
+// TODO コメント書く、リファクタリング
+var target_position_array = new Array();
+
+  for (var row = paint_map.length-1; row >= 0; row--) {
+    for (var count = paint_map[row].length-1; count >= 0; count--) {
+      if (this_opts.viewer.orientation === 'axial') {
+        if (paint_map[row][count] == 1) {
+          target_position_array[target_position_array.length] = [count, row, other];
+        }
+      } else if (this_opts.viewer.orientation === 'coronal') {
+        if (paint_map[row][count] == 1) {
+          target_position_array[target_position_array.length] = [count, other, row];
+        }
+      } else if (this_opts.viewer.orientation === 'sagital') {
+        if (paint_map[row][count] == 1) {
+          target_position_array[target_position_array.length] = [other, count, row];
+        }
+      }
+    }
+  }
+
+console.log(target_position_array);
+
+//  var map = this_obj.getPaintPosition(position, paint_map);
 
        /*バケツフィル機能ここまで*/
 
        // バケツによって塗りつぶすべき座標群をarrayで作って下さい
        // 形式 [[X1,Y1,Z1],[X2,Y2,Z3]......]
 
-       var target_position_array = [
-			[	200	,	300	,	44	],
-			[	201	,	301	,	44	],
-			[	202	,	302	,	44	],
-			[	203	,	303	,	44	],
-			[	204	,	304	,	44	],
-			[	205	,	305	,	44	],
-			[	206	,	306	,	44	],
-			[	207	,	307	,	44	],
-			[	208	,	308	,	44	],
-			[	209	,	309	,	44	],
-			[	210	,	310	,	44	],
-			[	201	,	300	,	44	],
-			[	202	,	301	,	44	],
-			[	203	,	302	,	44	],
-			[	204	,	303	,	44	],
-			[	205	,	304	,	44	],
-			[	206	,	305	,	44	],
-			[	207	,	306	,	44	],
-			[	208	,	307	,	44	],
-			[	209	,	308	,	44	],
-			[	210	,	309	,	44	],
-			[	211	,	310	,	44	],
-			[	202	,	300	,	44	],
-			[	203	,	301	,	44	],
-			[	204	,	302	,	44	],
-			[	205	,	303	,	44	],
-			[	206	,	304	,	44	],
-			[	207	,	305	,	44	],
-			[	208	,	306	,	44	],
-			[	209	,	307	,	44	],
-			[	210	,	308	,	44	],
-			[	211	,	309	,	44	],
-			[	212	,	310	,	44	]
-		];	//↑サンプル
-
+      console.log('格納情報'+target_position_array);
        //コンテナに積む
        this_opts.control.container.updateVoxel(
       	series_id,
@@ -626,13 +695,12 @@
         );
 
      //自分自身、同じボクセルを共用するビューアーに対してコンテナとの同期を促す
-	    var tmp_this_id = this_elm.attr('id');
-	    for (var i = this_opts.control.container.data.member.length - 1; i >= 0; i--) {
-	      $('#' + this_opts.control.container.data.member[i]).imageViewer('syncVoxel');
-	    }
+		var tmp_this_id = this_elm.attr('id');
+		for (var i = this_opts.control.container.data.member.length - 1; i >= 0; i--) {
+		  $('#' + this_opts.control.container.data.member[i]).imageViewer('syncVoxel');
+		}
 
     },
-
 
     getSeriesObjectById: function (series_id) {
       //描画対象ラベルのチェック

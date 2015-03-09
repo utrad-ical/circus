@@ -10,10 +10,10 @@ $(function(){
 	var	voxel_container	=	new voxelContainer();	//Label information storage object (three sides shared)
 	voxel_container.name	=	'my_voxel';
 
-	var the_domain = "{{{$server_url['domain']}}}";
+	var the_domain = '{{{$server_url["domain"]}}}';
 	var	initInfo	=	[
 		{
-			baseUr : "{{{$server_url['dicom_img_base_url']}}}",
+			baseUrl : "{{{$server_url['dicom_img_base_url']}}}",
 			postUrl : "{{asset('case/save_label')}}",	//Enable here if it is different from the image storage server
 			caseId : "{{Session::get('caseID')}}",
 			attribute : {{$attribute}},
@@ -72,7 +72,7 @@ $(function(){
 	var initAjax= function(){
 		var tmp_series = initInfo[0].series[ajax_cnt];
 		$.ajax({
-			url: the_domain + 'dicom_img',
+			url: '{{{$server_url["series_path"]}}}',
 			type: 'GET',
 			data: {
 				mode : 'metadata',

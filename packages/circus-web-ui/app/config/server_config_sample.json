@@ -1,4 +1,5 @@
 {
 	"domain"				:	"http://160.16.56.191/",
-	"dicom_img_base_url"	:	"http://160.16.56.191:3000/"
+	"dicom_img_base_url"	:	"http://160.16.56.191:3000/",
+	"series_path"			:	"http://insight/insight/todai_img"
 }

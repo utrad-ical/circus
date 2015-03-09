@@ -629,9 +629,8 @@ class CaseController extends BaseController {
 		try {
 			$inputs = Input::all();
 			$inputs = $inputs['data'];
-			Log::debug($inputs);
-
 			$errors = self::validateSaveLabel($inputs);
+
 			if (count($errors) > 0)
 				self::errorFinish(implode("\n", $errors));
 
@@ -649,49 +648,6 @@ class CaseController extends BaseController {
 									->get(array('storageID','path'));
 
 			if (count($storage_info) == 0) {
-				/*
-				Log::debug("Storageが存在しない");
-				$img_save_path = "c:\\".Storage::LABEL_STORAGE."_storage\\";
-				//フォルダが存在しない場合は新規に作成する
-				if (!file_exists($img_save_path)){
-					mkdir($img_save_path, 0777);
-      				chmod($img_save_path, 0777);
-				}
-				//Storage registration of
-				$storage_id = Seq::getIncrementSeq('Storages');
-				$storage_obj = App::make('Storage');
-				$storage_obj->storageID = $storage_id;
-				$storage_obj->path = $img_save_path;
-				$storage_obj->type = 'label';
-				$storage_obj->active = true;
-				$storage_obj->updateTime = $dt;
-				$storage_obj->createTime = $dt;
-
-				//Storage register before error checking
-				$errors = $storage_obj->validate(json_decode($storage_obj, true));
-
-				//Processing is interrupted because there is an error
-				if ($errors) {
-					Log::debug('Storage Validate Error');
-					self::rollback($transaction, implode("\n", $errors->all()));
-					break;
-				}
-				//I do registration of storage information because there is no error
-				$result = $storage_obj->save();
-
-				//To gain in the transaction array Now that you have registered success
-				if ($result) {
-					Log::debug('[Strorage]Regist success');
-					if (array_key_exists('storage', $transaction) === FALSE)
-						$transaction['storage'] = array();
-
-					$transaction['storage'][] = $storage_obj->storageID;
-				} else {
-					Log::debug('[Storage]Regist failed');
-					self::rollback($transaction, $result);
-					break;
-				}
-				*/
 				self::errorFinish("Does not exist storage for label.\nPlease register the storage from the storage management screen.");
 			} else {
 				Log::debug("Storageが存在する");
@@ -712,7 +668,8 @@ class CaseController extends BaseController {
 							//I do the registration of the label information
 							//Storage ID to use the storage ID registered just before
 							$label_obj = App::make('Label');
-							$label_obj->labelID = uniqid();
+							//$label_obj->labelID = uniqid();
+							$label_obj->labelID = $rec2['id'];	//Save as what label ID you came from client
 							$label_obj->storageID = $storage_id;
 							$label_obj->x = intval($rec2['offset'][0]);
 							$label_obj->y = intval($rec2['offset'][1]);
@@ -803,6 +760,7 @@ class CaseController extends BaseController {
 			$msg = 'Registration of label information is now complete.';
 		} catch (Exception $e){
 			$error_msg = $e->getMessage();
+			Log::debug($e);
 			Log::debug('[Exception Error]'.$error_msg);
 			self::rollback($transaction, $error_msg);
 		}
@@ -980,7 +938,7 @@ class CaseController extends BaseController {
 			//Case presence check
 			$case_data = ClinicalCase::find($data['caseId']);
 			if (!$case_data)
-				$error_msg[] = $rec['caseId'].'is the case ID that does not exist.';
+				$error_msg[] = $data['caseId'].'is the case ID that does not exist.';
 		}
 
 		//Series ID check
@@ -1249,6 +1207,7 @@ class CaseController extends BaseController {
 		//ValidateCheck
 		//Validate check for object creation
 		$errors = $case_obj->validate(self::setCaseValidate($inputs));
+
 		if (!$errors) {
 			//Validate process at the time of success
 			//I registered because there is no error
@@ -1256,7 +1215,7 @@ class CaseController extends BaseController {
 			$case_obj->updateTime = $dt;
 			$case_obj->createTime = $dt;
 			$case_obj->creator = Auth::user()->userID;
-			Log::info($case_obj);
+
 			$case_obj->save();
 
 			$result['title'] = $mode.' Case Complete';

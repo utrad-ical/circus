@@ -10,7 +10,6 @@ $(function(){
 	var	voxel_container	=	new voxelContainer();	//Label information storage object (three sides shared)
 	voxel_container.name	=	'my_voxel';
 
-	var the_domain = '{{{$server_url["domain"]}}}';
 	var	initInfo	=	[
 		{
 			baseUrl : "{{{$server_url['dicom_img_base_url']}}}",

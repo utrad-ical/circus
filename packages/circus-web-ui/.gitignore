@@ -9,6 +9,6 @@ composer.phar
 Thumbs.db
 .buildpath
 .project
+.idea
 public/y/
-node_modules
-
+/node_modules

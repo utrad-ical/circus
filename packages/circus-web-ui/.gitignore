@@ -3,7 +3,6 @@
 /app/config/db_config.json
 /app/config/server_config.json
 composer.phar
-composer.lock
 .env.*.php
 .env.php
 .DS_Store

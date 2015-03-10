@@ -1,0 +1,24 @@
+{
+  "name": "circus-db-web-ui",
+  "version": "1.0.0",
+  "description": "Medical lesion database for CAD research",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@bitbucket.org:ical/circus_db_web_ui.git"
+  },
+  "keywords": [
+    "CAD"
+  ],
+  "author": "UTRAD ICAL",
+  "license": "ISC",
+  "devDependencies": {
+    "gulp": "^3.8.11",
+    "gulp-concat": "^2.5.2",
+    "gulp-less": "^3.0.1",
+    "gulp-typescript": "^2.4.2"
+  }
+}

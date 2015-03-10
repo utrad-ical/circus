@@ -11,3 +11,5 @@ Thumbs.db
 .buildpath
 .project
 public/y/
+node_modules
+

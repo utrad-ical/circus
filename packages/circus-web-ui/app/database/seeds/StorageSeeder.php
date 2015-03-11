@@ -59,18 +59,14 @@ class StorageSeeder extends Seeder
 			'storageID' => 1,
 			'path' => $dicom_path,
 			'type' => 'dicom',
-			'active' => true,
-			'updateTime' => new MongoDate(), // TODO: Remove eventually
-			'createTime' => new MongoDate()  // TODO: Remove eventually
+			'active' => true
 		));
 
 		Storage::create(array(
 			'storageID' => 2,
 			'path' => $label_path,
 			'type' => 'label',
-			'active' => true,
-			'updateTime' => new MongoDate(), // TODO: Remove eventually
-			'createTime' => new MongoDate()  // TODO: Remove eventually
+			'active' => true
 		));
 	}
 }

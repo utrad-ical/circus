@@ -1,12 +1,11 @@
 <?php
 
-
-use Jenssegers\Mongodb\Model as Eloquent;
-
 /**
- * Seqs table manipulation class
+ * Model class for seqs.
+ * @property string _id Table Name
+ * @property number seq Sequence number
  */
-class Seq extends Eloquent {
+class Seq extends BaseModel {
 	protected $connection = 'mongodb';
 
 	const COLLECTION = 'Seqs';
@@ -32,7 +31,7 @@ class Seq extends Eloquent {
 	/**
 	 * Validate Rules
 	 */
-	private $rules = array(
+	protected $rules = array(
 		'_id'		=>	'required',
 		'seq'		=>	'required|integer'
 	);

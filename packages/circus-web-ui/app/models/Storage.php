@@ -15,7 +15,6 @@ class Storage extends BaseModel {
 	protected $collection = self::COLLECTION;
 
 	protected $primaryKey = 'storageID';
-	public $timestamps = false;
 
 	/**
 	 * Indicates this storage area is for storing DICOM files.
@@ -75,10 +74,12 @@ class Storage extends BaseModel {
 	 * Validate Rules
 	 */
 	protected $rules = array(
-		'storageID'	=> 'required|integer|min:1',
-		'type'		=> 'required|in:dicom,label',
-		'path'		=> 'required|writable_directory',
-		'active'	=> 'required|strict_bool'
+		'storageID'		=> 'required|integer|min:1',
+		'type'			=> 'required|in:dicom,label',
+		'path'			=> 'required|writable_directory',
+		'active'		=> 'required|strict_bool',
+		'createTime'	=>	'mongodate',
+		'updateTime'	=>	'mongodate'
 	);
 
 	protected $messages = array(

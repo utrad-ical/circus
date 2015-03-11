@@ -120,8 +120,6 @@ class MongoRegisterer extends Registerer
 			$sr->$objKey = $dicom_data[$dicomKey];
 		}
 		$sr->seriesDate = new MongoDate(strtotime($dicom_data['seriesDate'] . 't' .  $dicom_data['seriesTime']));
-		$sr->createTime = new MongoDate(); // TODO: Remove eventually
-		$sr->updateTime = new MongoDate(); // TODO: Remove eventually
 
 		$sr->storageID = $this->storage->storageID;
 		$sr->patientInfo = array(
@@ -145,7 +143,6 @@ class MongoRegisterer extends Registerer
 		$mr = new MultiRange($series->images);
 		$mr->append($dicom_data['instanceNumber']);
 		$series->images = $mr->__toString();
-		$series->updateDate = new MongoDate(); // TODO: Remove eventually
 		$series->save();
 		$this->logger->log("Updated series in the database. Images=$series->images; Series UID=$series->seriesUID");
 	}

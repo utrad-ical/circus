@@ -1,7 +1,11 @@
 <?php
 
 /**
- * Group table operation
+ * Model class for groups.
+ * @property number groupID Group ID.
+ * @property string groupName Group name.
+ * @property array domains List of domain
+ * @property array priviledges List of priviledge
  */
 class Group extends BaseModel
 {
@@ -11,7 +15,6 @@ class Group extends BaseModel
 	protected $collection = self::COLLECTION;
 
 	protected $primaryKey = 'groupID';
-	public $timestamps = false;
 
 	/**
 	 * Search conditions Building
@@ -80,7 +83,9 @@ class Group extends BaseModel
 	protected $rules = [
 		'groupID' => 'required|integer|min:0',
 		'groupName' => 'required|alpha_dash',
-		'privileges' => 'array_of_privileges'
+		'privileges' => 'array_of_privileges',
+		'createTime'		=>	'mongodate',
+		'updateTime'		=>	'mongodate'
 	];
 	protected $uniqueFields = ['groupName'];
 

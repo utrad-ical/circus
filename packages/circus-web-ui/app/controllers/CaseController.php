@@ -59,7 +59,7 @@ class CaseController extends BaseController {
 			//Setting of acquisition column
 			$select_col = array(
 				'caseID', 'projectID', 'incrementalID',
-				'patientInfoCache.patientID', 'patientInfoCache.name',
+				'patientInfoCache.patientID', 'patientInfoCache.patientName',
 				'patientInfoCache.age', 'patientInfoCache.sex',
 				'latestRevision.date',
 				'updateTime'
@@ -111,13 +111,13 @@ class CaseController extends BaseController {
 					//I shaping for display
 					$list[] = array(
 						'caseID'		=>	$rec->caseID,
-						'patientID'		=>	$patient['patientID'],
-						'patientName' 	=>	$patient['patientName'],
-						'sex'			=>	self::getSex($patient['sex']),
-						'age'			=>	$patient['age'],
+						'patientID'		=>	$patient ? $patient['patientID'] : '',
+						'patientName' 	=>	$patient ? $patient['patientName'] : '',
+						'sex'			=>	$patient ? self::getSex($patient['sex']) : '',
+						'age'			=>	$patient ? $patient['age'] : '',
 						'latestDate' 	=>	date('Y/m/d('.$w.') H:i', $dt->sec),
 						'projectName'	=>	$project ? $project[0]->projectName : '',
-						'updateDate'	=>	date('Y/m/d', $rec->updateTime->sec)
+						'updateDate'	=>	date('Y/m/d', strtotime($rec->updateTime))
 					);
 				}
 			}
@@ -249,17 +249,14 @@ class CaseController extends BaseController {
 
 					//I shaping for display
 					$list[] = array(
-						//'incrementalID' =>	$rec->incrementalID,
 						'caseID'		=>	$rec->caseID,
-					//	'projectID'		=>	$rec->projectID,
 						'patientID'		=>	$patient['patientID'],
 						'patientName' 	=>	$patient['patientName'],
 						'age'			=>	$patient['age'],
 						'sex'			=>	self::getSex($patient['sex']),
 						'latestDate' 	=>	$dt ? date('Y/m/d('.$w.') H:i', $dt->sec) : '',
-					//	'creator'		=>	$revision['latest']['creator'],
 						'projectName'	=>	$project ? $project[0]->projectName : '',
-						'updateDate'	=>	date('Y/m/d', $rec->updateTime->sec)
+						'updateDate'	=>	date('Y/m/d', strtotime($rec->updateTime))
 					);
 					$result['inputs'] = $search_data;
 
@@ -496,7 +493,6 @@ class CaseController extends BaseController {
 			$result['label_attribute_settings'] = fread($handle, filesize($file_path));
 			fclose($handle);
 			$file_path = app_path()."/config/server_config.json";
-			Log::debug($file_path);
 			$handle = fopen($file_path, 'r');
 			$result['server_url'] = json_decode(fread($handle, filesize($file_path)), true);
 			fclose($handle);
@@ -650,12 +646,10 @@ class CaseController extends BaseController {
 			if (count($storage_info) == 0) {
 				self::errorFinish("Does not exist storage for label.\nPlease register the storage from the storage management screen.");
 			} else {
-				Log::debug("Storageが存在する");
 				$storage_id = $storage_info[0]->storageID;
 				$img_save_path = $storage_info[0]->path;
 			}
 
-			Log::debug("Storage Regist OK");
 			foreach ($inputs['series'] as $rec) {
 				$revision[$rec['id']] = array();
 				//If there is a label information
@@ -668,7 +662,6 @@ class CaseController extends BaseController {
 							//I do the registration of the label information
 							//Storage ID to use the storage ID registered just before
 							$label_obj = App::make('Label');
-							//$label_obj->labelID = uniqid();
 							$label_obj->labelID = $rec2['id'];	//Save as what label ID you came from client
 							$label_obj->storageID = $storage_id;
 							$label_obj->x = intval($rec2['offset'][0]);
@@ -679,8 +672,6 @@ class CaseController extends BaseController {
 							$label_obj->d = intval($rec2['size'][2]);
 							$label_obj->creator = Auth::user()->userID;
 							$label_obj->date = $dt;
-							$label_obj->updateTime = $dt;
-							$label_obj->createTime = $dt;
 
 							//Label information before registration error checking
 							$errors = $label_obj->validate(json_decode($label_obj, true));
@@ -758,10 +749,15 @@ class CaseController extends BaseController {
 				$case_obj->save();
 			}
 			$msg = 'Registration of label information is now complete.';
+		} catch (InvalidModelException $e) {
+			$error_msg = $e->getErrors();
+			Log::debug('[InvalidModelException Error]'.$error_msg);
+			Log::debug($e);
+			self::rollback($transaction, $error_msg);
 		} catch (Exception $e){
 			$error_msg = $e->getMessage();
-			Log::debug($e);
 			Log::debug('[Exception Error]'.$error_msg);
+			Log::debug($e);
 			self::rollback($transaction, $error_msg);
 		}
 		Log::debug('Error content::'.$error_msg);
@@ -1092,7 +1088,7 @@ class CaseController extends BaseController {
 		$case_info = Session::get('case_input');
 		$mode = Session::get('mode');
 
-		$case_info['projectID'] = $inputs['projectID'];
+		$case_info['projectID'] = intval($inputs['projectID']);
 		//Set of series
 		$case_info['seriesUID'] = $inputs['series'];
 		$select_col = array(
@@ -1111,42 +1107,73 @@ class CaseController extends BaseController {
 
 		//Save the input value to the session
 		Session::put('case_input', $case_info);
+
+		Log::debug('セッション値');
+		Log::debug(Session::get('case_input'));
 		$case_info['projectName'] = Project::getProjectName($inputs['projectID']);
 
-		//Validate check for object creation
-		$case_obj = $caseID ?
-					ClinicalCase::find($caseID) :
-					App::make('ClinicalCase');
+		try {
+			//Validate check for object creation
+			$case_obj = $caseID ?
+						ClinicalCase::find($caseID) :
+						App::make('ClinicalCase');
 
-		//Set the value for the Validate check
-		$case_obj->caseID = $case_info['caseID'];
-		$case_obj->incrementalID = 1; // This can be a dummy number only for validation
-		$case_obj->projectID = $case_info['projectID'];
-		$case_obj->date = new MongoDate(strtotime(date('Y-m-d H:i:s')));
-		$case_obj->patientInfoCache = array(
-			'patientID'	=>	$case_info['patientInfo']['patientID'],
-			'patientName' => $case_info['patientInfo']['patientName'],
-			'age'		=>	$case_info['patientInfo']['age'],
-			'sex'		=>	$case_info['patientInfo']['sex']
-		);
+			//Set the value for the Validate check
+			$case_obj->caseID = $case_info['caseID'];
+			$case_obj->incrementalID = 1; // This can be a dummy number only for validation
+			$case_obj->projectID = intval($case_info['projectID']);
+			//$case_obj->date = new MongoDate(strtotime(date('Y-m-d H:i:s')));
+			$case_obj->patientInfoCache = array(
+				'patientID'	=>	$case_info['patientInfo']['patientID'],
+				'patientName' => $case_info['patientInfo']['patientName'],
+				'age'		=>	$case_info['patientInfo']['age'],
+				'sex'		=>	$case_info['patientInfo']['sex']
+			);
+			Log::debug('ログインユーザID(Confirm)::'.Auth::user()->userID);
+			$case_obj->creator = Auth::user()->userID;
 
-		//ValidateCheck
-		$errors = $case_obj->validate(self::setCaseValidate($case_info));
-		$result['inputs'] = $case_info;
-		$result['series_list'] = $case_info['series_list'];
-		if ($errors) {
-			//Process at the time of Validate error
-			$result['title'] = $mode.' Case';
-			$result['url'] = '/case/input';
-			$result['project_list'] = Project::getProjectList(Project::AUTH_TYPE_CREATE, true);
-			$result['errors'] = $errors;
-			return View::make('/case/input', $result);
-		} else {
+			//ValidateCheck
+			//$errors = $case_obj->validate(self::setCaseValidate($case_info));
+			$validFlag = $case_obj->selfValidationFails($errors);
+			//$errors = $case_obj->selfValidationFails(self::setCaseValidate($case_info));
+			Log::debug('エラー内容');
+			Log::debug($errors);
+
+			$result['inputs'] = $case_info;
+			$result['series_list'] = $case_info['series_list'];
+			if ($errors)
+				return self::errorConfirmFinish($errors, $result, $mode);
+
 			//And displays a confirmation screen because there is no error
 			$result['title'] = $mode.' Case Confirmation';
 			$result['url'] = '/case/confirm';
 			return View::make('/case/confirm', $result);
+
+		} catch (InvalidModelException $e) {
+			return self::errorConfirmFinish($e->getErrors(), $result, $mode);
+		} catch (Exception $e) {
+			return self::errorConfirmFinish($e->getMessage(), $result, $mode);
 		}
+	}
+
+	/**
+	 * 確認画面エラーメッセージ出力
+	 * TODO::完了画面エラー出力と統合したい
+	 * @param $errorMsg エラーメッセージ
+	 * @param $result Bladeに設定するパラメータ
+	 * @param $mode 編集モード
+	 * @return View 入力画面のView
+	 */
+	function errorConfirmFinish($errorMsg, $result, $mode) {
+		//Process at the time of Validate error
+		$result['title'] = $mode.' Case';
+		$result['url'] = '/case/input';
+		$result['project_list'] = Project::getProjectList(Project::AUTH_TYPE_CREATE, true);
+		if (is_array($errorMsg))
+			$result['errors'] = $errorMsg;
+		else
+			$result['error_msg'] = $errorMsg;
+		return View::make('/case/input', $result);
 	}
 
 	/**
@@ -1164,6 +1191,8 @@ class CaseController extends BaseController {
 
 		//Input value acquisition
 		$inputs = Session::get('case_input');
+		Log::debug('ケースセッション::');
+		Log::debug($inputs);
 		$caseID = Session::get('caseID');
 		$mode = Session::get('mode');
 
@@ -1171,50 +1200,49 @@ class CaseController extends BaseController {
 		$result['js'] = self::jsSetting();
 		self::setBackUrl($inputs, $result);
 
-		//Validate check for object creation
-		$case_obj = $caseID ?
-					ClinicalCase::find($caseID) :
-					App::make('ClinicalCase');
+		try {
+			//Validate check for object creation
+			$case_obj = $caseID ?
+						ClinicalCase::find($caseID) :
+						App::make('ClinicalCase');
 
-		//Set the value for the Validate check
-		$case_obj->caseID = $inputs['caseID'];
-		$case_obj->incrementalID = Seq::getIncrementSeq('incrementalCaseID');
-		$case_obj->projectID = intval($inputs['projectID']);
-		$case_obj->date = new MongoDate(strtotime(date('Y-m-d H:i:s')));
+			//Set the value for the Validate check
+			$case_obj->caseID = $inputs['caseID'];
+			$case_obj->incrementalID = Seq::getIncrementSeq('incrementalCaseID');
+			$case_obj->projectID = $inputs['projectID'];
 
-		//Setting of patient information
-		$case_obj->patientInfoCache = array(
-			'patientID'	=>	$inputs['patientInfo']['patientID'],
-			'patientName' => $inputs['patientInfo']['patientName'],
-			'age'		=>	$inputs['patientInfo']['age'],
-			'birthDate'	=>	$inputs['patientInfo']['birthDate'],
-			'sex'		=>	self::setSex($inputs['patientInfo']['sex'])
-		);
+			//Setting of patient information
+			$case_obj->patientInfoCache = array(
+				'patientID'	=>	$inputs['patientInfo']['patientID'],
+				'patientName' => $inputs['patientInfo']['patientName'],
+				'age'		=>	$inputs['patientInfo']['age'],
+				'birthDate'	=>	$inputs['patientInfo']['birthDate'],
+				'sex'		=>	self::setSex($inputs['patientInfo']['sex'])
+			);
 
-		//Initial setting of Revision information
-		$series_list = self::createRevision($inputs['series_list']);
+			//Initial setting of Revision information
+			$series_list = self::createRevision($inputs['series_list']);
 
-		if ($caseID) {
-			$revisions = $case_obj->revisions;
-			$revisions[] = $series_list;
-			$case_obj->revisions = $revisions;
-		} else {
-			$case_obj->revisions = array($series_list);
-		}
+			if ($caseID) {
+				$revisions = $case_obj->revisions;
+				$revisions[] = $series_list;
+				$case_obj->revisions = $revisions;
+			} else {
+				$case_obj->revisions = array($series_list);
+			}
 
-		$case_obj->latestRevision = $series_list;
+			$case_obj->latestRevision = $series_list;
 
-		//ValidateCheck
-		//Validate check for object creation
-		$errors = $case_obj->validate(self::setCaseValidate($inputs));
+			//ValidateCheck
+			//Validate check for object creation
+			$case_obj->creator = Auth::user()->userID;
+			$validFlag = $case_obj->selfValidationFails($errors);
 
-		if (!$errors) {
+			if ($errors)
+				return self::errorConfirmFinish($errors, $result, $mode);
+
 			//Validate process at the time of success
 			//I registered because there is no error
-			$dt = new MongoDate(strtotime(date('Y-m-d H:i:s')));
-			$case_obj->updateTime = $dt;
-			$case_obj->createTime = $dt;
-			$case_obj->creator = Auth::user()->userID;
 
 			$case_obj->save();
 
@@ -1231,16 +1259,30 @@ class CaseController extends BaseController {
 			//I gain the necessary parameters on the screen to complete the session
 			Session::put('complete', $result);
 			return Redirect::to('/case/complete');
-		} else {
-			//Process at the time of Validate error
-			$result['errors'] = $errors;
-			$result['url'] = '/case/input';
-			$result['title'] = $mode.' Case';
-			$result['inputs'] = $inputs;
-			$result['series_list'] = $inputs['series_list'];
-			$result['project_list'] = Project::getProjectList(Project::AUTH_TYPE_CREATE, true);
-			return View::make('/case/input', $result);
+		} catch (InvalidModelException $e) {
+			return self::errorRedirectFinish($e->getErrors(), $result, $mode);
+		} catch (Exception $e) {
+			return self::errorRedirectFinish($e->getMessage(), $result, $mode);
 		}
+	}
+
+	/**
+	 * 完了画面エラーメッセージ出力
+	 * @param $errorMsg エラーメッセージ
+	 * @param $result Bladeに設定するパラメータ
+	 * @param $mode 編集モード
+	 */
+	function errorRedirectFinish($errorMsg, $result, $mode) {
+		$result['title'] = $mode.' Case Complete';
+		$result['url'] = '/case/complete';
+		$result['error_msg'] = $errorMsg;
+		$result['caseID'] = Session::get('caseID');
+		//Session information Delete
+		Session::forget('caseID');
+		Session::forget('case_input');
+		Session::forget('mode');
+		Session::put('complete', $result);
+		return Redirect::to('/case/complete');
 	}
 
 	/**
@@ -1638,7 +1680,7 @@ class CaseController extends BaseController {
 	 */
 	function errorFinish($msg) {
 		header('Content-Type: application/json; charset=UTF-8');
-		$res = json_encode(array('result' => true, 'message' => $msg, 'response' => ""));
+		$res = json_encode(array('result' => false, 'message' => $msg, 'response' => ""));
 		echo $res;
 		exit;
 	}

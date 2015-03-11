@@ -21,7 +21,6 @@ class User extends BaseModel implements UserInterface {
 	const COLLECTION = 'Users';
 	protected $collection = self::COLLECTION;
 	protected $primaryKey = 'userID';
-	public $timestamps = false;
 
 	protected $rules = array(
 		'userID' => 'required|integer|min:1',
@@ -31,7 +30,10 @@ class User extends BaseModel implements UserInterface {
 		'preferences' => 'required|preferences',
 		'loginEnabled' => 'required|strict_bool',
 		'lastLoginTime' => 'mongodate',
-		'lastLoginIP' => ''
+		'lastLoginIP' => '',
+		'description' => '',
+		'createTime'		=>	'mongodate',
+		'updateTime'		=>	'mongodate'
     );
 
 	protected $messages = array(

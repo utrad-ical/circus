@@ -22,7 +22,6 @@ class Project extends BaseModel
 	const COLLECTION = 'Projects';
 	protected $collection = self::COLLECTION;
 	protected $primaryKey = 'projectID';
-	public $timestamps = false;
 
 	//Authority constant
 
@@ -100,7 +99,9 @@ class Project extends BaseModel
 		'windowPriority' => 'required|strict_string',
  		'windowPresets' => 'array',
 		'caseAttributesSchema' => 'array',
-		'labelAttributesSchema' => 'array'
+		'labelAttributesSchema' => 'array',
+		'createTime'		=>	'mongodate',
+		'updateTime'		=>	'mongodate'
 	);
 
 	/**

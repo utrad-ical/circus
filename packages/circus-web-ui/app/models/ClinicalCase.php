@@ -1,18 +1,24 @@
 <?php
 
-use Jenssegers\Mongodb\Model as Eloquent;
 
 /**
- * Case table operation
+ * Model class for cases.
+ *
+ * @property string caseID Case ID
+ * @property number incrementalID
+ * @property number projectID ProjectID of projects
+ * @property array patientInfoCache Cache of Series patientInfo
+ * @property array latestRevision Latest revision
+ * @property array revisions List of revision
+ * @property number ceator Case creater ID
  */
-class ClinicalCase extends Eloquent {
+class ClinicalCase extends BaseModel {
 	protected $connection = 'mongodb';
 
 	const COLLECTION = 'Cases';
 	protected $collection = self::COLLECTION;
 
 	protected $primaryKey = 'caseID';
-	public $timestamps = false;
 
 	/**
 	 * Search conditions Building
@@ -50,7 +56,7 @@ class ClinicalCase extends Eloquent {
 		//patientName Name of patient
 		if (isset($input['patientName']) && $input['patientName']) {
 			//Name of patientInfoCache in the objects of the Case table
-			$query->where('patientInfoCache.name', 'like', '%'.$input['patientName'].'%');
+			$query->where('patientInfoCache.patientName', 'like', '%'.$input['patientName'].'%');
 		}
 
 		//CreateDate Created Date
@@ -106,10 +112,24 @@ class ClinicalCase extends Eloquent {
 	/**
 	 * Validation rules
 	 */
-	private $rules = array(
-		'caseID'						=>	'required',
-		'incrementalID'					=>	'required|integer',
-		'projectID'						=>	'required|integer'
+	protected $rules = array(
+		'caseID'			=>	'required',
+		'incrementalID'		=>	'required|strict_integer',
+		'projectID'			=>	'required|strict_integer',
+		'patientInfoCache'	=>	'array',
+		'latestRevision'	=>	'array',
+		'revisions'			=>	'array',
+		'creator'			=>	'required|integer',
+		'createTime'		=>	'mongodate',
+		'updateTime'		=>	'mongodate'
+	);
+
+	protected $messages = array(
+		'projectID.strict_integer' => 'Please be projectID is set in numeric type .',
+		'incrementalID.strict_integer' => 'Please be incrementalID is set in numeric type .',
+		'patientInfoCache.array' => 'Please set an array patient information.',
+		'latestRevision.array' => 'Please set an array latest revision.',
+		'revisions.array' => 'Please set an array revisions.'
 	);
 
 	/**
@@ -119,10 +139,15 @@ class ClinicalCase extends Eloquent {
 	 */
 	public function validate($data) {
 		$validator = Validator::make($data, $this->rules);
-
+/*
 		if ($validator->fails()) {
 			return $validator->messages();
 		}
 		return;
+		*/
+		$errMsg = '';
+		$validFlag = $validator->selfValidationFails($errMsg);
+
+		return !$validFlag ? $errMsg : null;
 	}
 }

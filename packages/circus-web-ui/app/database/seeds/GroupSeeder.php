@@ -25,9 +25,7 @@ class GroupSeeder extends Seeder
 				'restartServer',
 				'personalInfoView'
 			),
-			'domains' => array(),
-			'updateTime' => new MongoDate(), // TODO: Remove eventually
-			'createTime' => new MongoDate() // TODO: Remove eventually
+			'domains' => array()
 		));
 
 		Group::create(array(
@@ -36,9 +34,7 @@ class GroupSeeder extends Seeder
 			'privileges' => array(
 				'personalInfoView'
 			),
-			'domains' => array(),
-			'updateTime' => new MongoDate(), // TODO: Remove eventually
-			'createTime' => new MongoDate() // TODO: Remove eventually
+			'domains' => array()
 		));
 	}
 }

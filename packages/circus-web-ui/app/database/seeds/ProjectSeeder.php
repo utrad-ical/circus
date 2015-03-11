@@ -28,9 +28,7 @@ class ProjectSeeder extends Seeder
 			'windowPriority' => 'dicom,preset,auto',
 			'windowPresets' => array(),
 			'caseAttributesSchema' => array(),
-			'labelAttributesSchema' => array(),
-			'updateTime' => new MongoDate(), // TODO: Remove eventually
-			'createTime' => new MongoDate() // TODO: Remove eventually
+			'labelAttributesSchema' => array()
 		));
 	}
 }

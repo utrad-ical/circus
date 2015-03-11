@@ -10,6 +10,21 @@ class BaseModel extends Jenssegers\Mongodb\Model
 
 	protected $uniqueFields = [];
 
+
+	const CREATED_AT = 'createTime';
+
+
+	const UPDATED_AT = 'updateTime';
+
+
+	public function __set($key, $value)
+	{
+		if (array_key_exists($key, $this->rules) === FALSE)
+			throw new InvalidModelException($key.' is undefined column name to Validate rules ');
+
+		$this->setAttribute($key, $value);
+	}
+
 	public function getRules() {
 		return $this->rules;
 	}
@@ -71,4 +86,9 @@ Validator::extend('array_of_group_ids', function($attribute, $value, $parameters
 		}
 	}
 	return true;
+});
+
+Validator::extend('array', function($attribute, $value, $parameters) {
+	if (!is_array($value)) return true;
+	return false;
 });

@@ -1,19 +1,35 @@
 <?php
 
 
-use Jenssegers\Mongodb\Model as Eloquent;
+//use Jenssegers\Mongodb\Model as Eloquent;
 
 /**
- * Series table operation
+ * Model class for series.
+ * @property string studyUID
+ * @property string seriesUID Series ID
+ * @property number storageID ID indicating the storage location of the data
+ * @property array patientInfo Patient information
+ * @property number width Width of images
+ * @property number height Height of images
+ * @property string seriesDate Series creation date
+ * @property string modality Creating type
+ * @property string seriesDescription Description of series
+ * @property string bodyPart Body site
+ * @property string images Use image
+ * @property string stationName Image creation device name
+ * @property string modelName Image creation model name
+ * @property string manufacturer Equipment manufacturers
+ * @property array parameters Parameters
+ * @property string receiveMethod Origin
+ * @property string domain Domain
  */
-class Series extends Eloquent {
+class Series extends BaseModel {
 	protected $connection = 'mongodb';
 
 	const COLLECTION = 'Series';
 	protected $collection = self::COLLECTION;
 
 	protected $primaryKey = 'seriesUID';
-	public $timestamps = false;
 
 	public function storage() {
 		return $this->belongsTo('Storage', 'storageID', 'storageID');
@@ -112,7 +128,7 @@ class Series extends Eloquent {
 	/**
 	 * Validation rules
 	 */
-	private $rules = array(
+	protected $rules = array(
 		'studyUID'				=>	'required',
 		'seriesUID'				=>	'required',
 		'storageID'				=>	'required',
@@ -132,7 +148,9 @@ class Series extends Eloquent {
 		'stationName'			=>	'required',
 		'modelName'				=>	'required',
 		'manufacturer'			=>	'required',
-		'domain'				=>	'required'
+		'domain'				=>	'required',
+		'createTime'			=>	'mongodate',
+		'updateTime'			=>	'mongodate'
 	);
 
 	/**

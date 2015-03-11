@@ -274,72 +274,55 @@ class SeriesController extends BaseController {
 			return Redirect::to('login');
 		}
 
-		//Error message initialization
-		$error_msg = '';
-		$result = array();
-
 		//POST data acquisition
 		$inputs = Input::all();
 
-		//Not selected file
-		if (array_key_exists('upload_file', $inputs) === FALSE) {
-			$error_msg = 'Please select the file.';
-		} else {
+		try {
+			//Not selected file
+			if (array_key_exists('upload_file', $inputs) === FALSE) //{
+				throw new Exception('Please select the file.');
+
 			//Upload file information acquisition
 			$uploads = Input::file('upload_file');
 			$file_list = array();
-			try{
-				foreach ($uploads as $upload) {
-					$upload_dir = dirname(dirname(__FILE__)).'/storage/uploads';
-					$res = $upload->move($upload_dir, $upload->getClientOriginalName());
 
-					//If extension of Zip to save unzip
-					$ext = $upload->getClientOriginalExtension();
+			foreach ($uploads as $upload) {
+				$upload_dir = dirname(dirname(__FILE__)).'/storage/uploads';
+				$res = $upload->move($upload_dir, $upload->getClientOriginalName());
 
-					if ($ext == 'zip'){
-						$zip = new ZipArchive();
-						//Zip file open
-						$zip_path = $upload_dir."/".$upload->getClientOriginalName();
-						$res = $zip->open($zip_path);
+				//If extension of Zip to save unzip
+				$ext = $upload->getClientOriginalExtension();
 
-						//Successful Zip file open
-						if ($res === true){
-							//To save Unzip all the files in the Zip file
-							//Unzip the folder name I keep the file name
-							$zip->extractTo($upload_dir);
-							//Zip file close
-							$zip->close();
+				if ($ext == 'zip'){
+					$zip = new ZipArchive();
+					//Zip file open
+					$zip_path = $upload_dir."/".$upload->getClientOriginalName();
+					$res = $zip->open($zip_path);
 
-							//Zip解凍フォルダパスを格納
-							$file_list[] = mb_substr($zip_path, 0, mb_strlen($zip_path)-4);
-						} else {
-							$error_msg = "Upload Failed.[Error Code ".$res."]";
-						}
-					} else {
-						//image:import
-						$file_list[] = $upload_dir."/".$upload->getClientOriginalName();
-					}
+					//Successful Zip file open
+					if ($res !== true)
+						throw new Exception("Upload Failed.[Error Code ".$res."]");
+
+					//To save Unzip all the files in the Zip file
+					//Unzip the folder name I keep the file name
+					$zip->extractTo($upload_dir);
+					//Zip file close
+					$zip->close();
+
+					//Zip解凍フォルダパスを格納
+					$file_list[] = mb_substr($zip_path, 0, mb_strlen($zip_path)-4);
+				} else {
+					//image:import
+					$file_list[] = $upload_dir."/".$upload->getClientOriginalName();
 				}
-				//Dicomファイルインポート
-				foreach ($file_list as $file_path) {
-					Artisan::call('image:import', array("path" => $file_path));
-				}
-			} catch (Exception $e){
-				$error_msg = $e->getMessage();
-				Log::debug("[Exception Error]".$error_msg);
 			}
-		}
+			//Dicomファイルインポート
+			foreach ($file_list as $file_path) {
+				Artisan::call('image:import', array("path" => $file_path));
+			}
 
-		if ($error_msg) {
-			//Processing in the case where there is an error
-			$result['title'] = 'Series Import';
-			$result['url'] = '/series/import';
-			$result['css'] = self::cssSetting('input');
-			$result['js'] = self::jsSetting();
-			$result['error_msg'] = $error_msg;
-			return View::make('/series/input', $result);
-		} else {
 			//Processing in the case where there is no error
+			$result = array();
 			$result['title'] = 'Series Import Complete';
 			$result['url'] = '/series/complete';
 			$result['css'] = self::cssSetting();
@@ -347,7 +330,21 @@ class SeriesController extends BaseController {
 			$result['msg'] = 'Registration of series information is now complete.';
 			Session::put('complete', $result);
 			return Redirect::to('/series/complete');
+		} catch (InvalidModelException $e) {
+			return self::errorFinish($e->getErrors());
+		} catch (Exception $e) {
+			return self::errorFinish($e->getMessage());
 		}
+	}
+
+	function errorFinish($errMsg) {
+		$result = array();
+		$result['title'] = 'Series Import';
+		$result['url'] = '/series/import';
+		$result['css'] = self::cssSetting('input');
+		$result['js'] = self::jsSetting();
+		$result['error_msg'] = $errMsg;
+		return View::make('/series/input', $result);
 	}
 
 	/**

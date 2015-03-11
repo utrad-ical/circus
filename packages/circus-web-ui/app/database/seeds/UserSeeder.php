@@ -25,9 +25,7 @@ class UserSeeder extends Seeder
 			'lastLoginIP' => null,
 			'description' => 'Default administrative user',
 			'loginEnabled' => true,
-			'preferences' => array('theme' => 'mode_white', 'personalInfoView' => true),
-			'updateTime' => new MongoDate(), // TODO: Remove eventually
-			'createTime' => new MongoDate() // TODO: Remove eventually
+			'preferences' => array('theme' => 'mode_white', 'personalInfoView' => true)
 		));
 	}
 }

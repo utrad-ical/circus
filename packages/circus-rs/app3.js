@@ -2,9 +2,6 @@
 
   Image getter from DICOM image series
 
-
-  
-
 -----------------------------------------------*/
 
 // include require modules
@@ -41,6 +38,8 @@ function RawData() {
     this.vz = 1;
     this.wl = 1500;
     this.ww = 2000;
+    this.min = 65535;
+    this.max = -65535;
 }
 // set pixel dimension and allocate array.
 RawData.prototype.setDimension = function()
@@ -52,6 +51,8 @@ RawData.prototype.setDimension = function()
 
     this.data = new Array(this.z);
 	this.dataFlag = new Array(this.z, false);
+	this.pixelMin = new Array(this.z, 0);
+	this.pixelMax = new Array(this.z, 0);
 
 	console.log('x:' + this.x);
 	console.log('y:' + this.y);
@@ -139,6 +140,15 @@ RawData.prototype.addBlock = function(jsonSize, binarySize, data)
 			data.copy(voxelData, 0, jsonSize);
 			this.data[json.instanceNumber - 1] = voxelData;
 			this.dataFlag[json.instanceNumber - 1] = true;
+			this.pixelMin[json.instanceNumber - 1] = json.min;
+			this.pixelMax[json.instanceNumber - 1] = json.max;
+
+			if (this.min > json.min) {
+				this.min = json.min;
+			}
+			if (this.max < json.max) {
+				this.max = json.max;
+			}
 			//console.log('image size: ' + voxelData.length);
 		} else {
 			console.log(json.errorMessage);
@@ -669,6 +679,8 @@ try {
         response.voxel_z = raw.vz;
         response.window_width = raw.ww;
         response.window_level = raw.wl;
+        response.min = raw.min;
+        response.max = raw.max;
         switch(raw.type) {
         case 0:
             response.window_width_min = 1;
@@ -695,14 +707,12 @@ try {
             response.window_level_max = 32767;
             break;
         default:
-            buffer = makeCoronalInt16(raw, target, window_width, window_level);
-            png = new Png(buffer, out_width, out_height, 'gray', 8);
             break;
         }
 
         response.allow_mode=['axial', 'coronal', 'sagital'];
 
-        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
         res.end(JSON.stringify(response));
         return;
       } else if (mode == 'axial') {
@@ -802,7 +812,13 @@ try {
       console.log('create png');
 
       png.encode(function (png_data) {
-        res.writeHead(200, {'Content-Type': 'image/png'});
+        res.writeHead(200, 
+		{
+			'Content-Type': 'image/png',
+			'Access-Control-Allow-Origin': '*',
+			'X-DCM-min': raw.pixelMin[target],
+			'X-DCM-max': raw.pixelMax[target]
+		});
         res.end(png_data);
 
         buffer = null;

@@ -40,6 +40,42 @@ voxelContainer.prototype.addHistory = function (series_id, label_id, the_mode, p
 /*addHistory*/
 
 
+//ページロード時点ですでに描かれていたものを格納
+voxelContainer.prototype.addLoadedData = function (series_id, label_id, the_mode,position_array) {
+
+  var this_obj = this;
+  var this_data = this_obj.data;
+
+  //1筆の中での重複は除外する
+  //1筆分をヒストリーに格納
+  //ヒストリーに渡すためのオブジェクト用意
+  var tmp_step_obj = {
+    series: series_id,
+    label: label_id,
+    mode: the_mode,
+    position: new Array(0)
+  }; //１筆分の描画オブジェクトの入れ物
+
+	var tmp_series = this_obj.getSeriesObjectById(series_id);
+
+
+  for (var i = position_array.length - 1; i >= 0; i--) {
+		if(typeof position_array[i] != 'undefined'){
+			var this_slice = position_array[i];
+			for(var j =this_slice.length-1; j>-1; j--){
+				if(this_slice[j] ==1){
+					var tmp_x = j%tmp_series.size.X;
+					var tmp_y = j/tmp_series.size.Y;
+					tmp_y = Math.floor(tmp_y);
+					tmp_step_obj.position.push([tmp_x,tmp_y,i]);
+				}
+			}
+		}
+  }
+  this_data.history.init.push(tmp_step_obj);
+
+};
+/*addHistory*/
 
 
 
@@ -171,7 +207,6 @@ voxelContainer.prototype.createSaveData = function (series_id, label_id) {
     dumy_canvas_elm.setAttribute('height', png_height);
     var tmp_canvas_ctx = dumy_canvas_elm.getContext('2d');
     var tmp_img_data = tmp_canvas_ctx.createImageData(draw_w, png_height);
-    //console.log(draw_w,png_height);
 
     //まずはデータを全て透明にする
     for (var i = tmp_img_data.data.length - 1; i > 0; i--) {
@@ -205,7 +240,6 @@ voxelContainer.prototype.createSaveData = function (series_id, label_id) {
     tmp_canvas_ctx.putImageData(tmp_img_data, 0, 0);
     dumy_canvas_elm.parentNode.removeChild(dumy_canvas_elm);
     return_obj.image = dumy_canvas_elm.toDataURL();
-    //console.log(return_obj.image);
   }
   return return_obj;
 
@@ -233,6 +267,7 @@ voxelContainer.prototype.deleteLabelObject = function (series_id, label_id) {
 //実データ格納オブジェクト
 voxelContainer.prototype.data = {
   history: {
+    init: new Array(0),
     main: new Array(0),
     redo: new Array(0)
   },
@@ -338,7 +373,6 @@ voxelContainer.prototype.getPositionDataFromImage = function (insertObject, seri
 
   for (var i = 3; i < tmp_image_data.data.length + 1; i = i + 4) {
     //塗られているマスだけに着目
-    //console.log(tmp_image_data.data[i-1]);
     if (tmp_image_data.data[i - 1] == 255) {
       var the_index = (i - 3) / 4;
       //このマスが投入画像の中でどの座標に位置するか
@@ -403,6 +437,17 @@ voxelContainer.prototype.historyBack = function () {
       }
     }
 
+    //ロード時点で読み込まれていたデータをまず描画
+    for (var i = this_data.history.init.length - 1; i >= 0; i--) {
+      var this_history = this_data.history.init[i];
+      this_obj.updateVoxel(
+        this_history.series,
+        this_history.label,
+        this_history.mode,
+        this_history.position
+      );
+    }
+		
     //今現在のメインヒストリ配列の内容で再構築
     for (var i = this_data.history.main.length - 1; i >= 0; i--) {
       var this_history = this_data.history.main[i];
@@ -432,6 +477,17 @@ voxelContainer.prototype.historyRedo = function () {
       for (var j = this_obj.data.series[i].label.length - 1; j >= 0; j--) {
         this_obj.data.series[i].label[j].position = new Array(0);
       }
+    }
+
+    //ロード時点で読み込まれていたデータを描画
+    for (var i = this_data.history.init.length - 1; i >= 0; i--) {
+      var this_history = this_data.history.init[i];
+      this_obj.updateVoxel(
+        this_history.series,
+        this_history.label,
+        this_history.mode,
+        this_history.position
+      );
     }
 
     //今現在のメインヒストリ配列の内容で再構築
@@ -465,11 +521,16 @@ voxelContainer.prototype.insertLabelData = function (insert_obj) {
         var tmp_label = tmp_series.label[j];
         var position_data = this_obj.getPositionDataFromImage(tmp_label, series_w, series_h);
         this_obj.addLabel(tmp_series.id, tmp_label.id, position_data);
-        //初期データをヒストリーに積む？仕様確認
-        //this_obj.addHistory(tmp_series.id,tmp_label.id,'pen',position_data);
+        //初期データをヒストリーに積む
+				
+
+        this_obj.addLoadedData(tmp_series.id,tmp_label.id,'pen',position_data);
       }
     }
   }
+
+
+
 };
 
 

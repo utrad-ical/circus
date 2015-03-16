@@ -486,6 +486,14 @@
     },
 
 
+
+    //３面共用のコントローラー情報の取り出し
+    getValues: function () {
+      return controllerInfo;
+    },
+
+
+
     init: function (insert_obj) {
 
       //コントローラ呼び出し時の初期挙動
@@ -578,7 +586,6 @@
           }
         }
       }
-
 
       //コントローラ関連の要素生成発動
       this_elm.imageViewerController('create');
@@ -694,11 +701,6 @@
        */
     }/*init*/,
 
-
-    //３面共用のコントローラー情報の取り出し
-    getValues: function () {
-      return controllerInfo;
-    },
 
 
     //各種イベント設置
@@ -1054,7 +1056,7 @@
           saveData.series[i] = tmp_insert_obj;
         }
       } catch (e) {
-        console.log(e);
+        //console.log(e);
         return false;
       }
 
@@ -1062,9 +1064,9 @@
 
       if (tmp_input_memo) {
         saveData.memo = tmp_input_memo;
-        console.log(saveData);
-        console.log("URL::");
-        console.log(controllerInfo.postUrl);
+        //console.log(saveData);
+        //console.log("URL::");
+        //console.log(controllerInfo.postUrl);
 
         $.ajax({
           url: controllerInfo.postUrl,

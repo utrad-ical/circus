@@ -74,7 +74,7 @@ class Storage extends BaseModel {
 	 * Validate Rules
 	 */
 	protected $rules = array(
-		'storageID'		=> 'required|integer|min:1',
+		'storageID'		=> 'required|strict_integer|min:1',
 		'type'			=> 'required|in:dicom,label',
 		'path'			=> 'required|writable_directory',
 		'active'		=> 'required|strict_bool',
@@ -83,7 +83,9 @@ class Storage extends BaseModel {
 	);
 
 	protected $messages = array(
-		'path.writable_directory' => 'The path does not exist or it is not writable.'
+		'storageID.strict_integer' => 'Please be storageID is set in numeric type .',
+		'path.writable_directory' => 'The path does not exist or it is not writable.',
+		'active.strict_bool' => 'Please be active is set in bool type .'
 	);
 
 	/**

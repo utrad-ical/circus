@@ -51,8 +51,6 @@ RawData.prototype.setDimension = function()
 
     this.data = new Array(this.z);
 	this.dataFlag = new Array(this.z, false);
-	this.pixelMin = new Array(this.z, 0);
-	this.pixelMax = new Array(this.z, 0);
 
 	console.log('x:' + this.x);
 	console.log('y:' + this.y);
@@ -140,8 +138,6 @@ RawData.prototype.addBlock = function(jsonSize, binarySize, data)
 			data.copy(voxelData, 0, jsonSize);
 			this.data[json.instanceNumber - 1] = voxelData;
 			this.dataFlag[json.instanceNumber - 1] = true;
-			this.pixelMin[json.instanceNumber - 1] = json.min;
-			this.pixelMax[json.instanceNumber - 1] = json.max;
 
 			if (this.min > json.min) {
 				this.min = json.min;
@@ -815,9 +811,7 @@ try {
         res.writeHead(200, 
 		{
 			'Content-Type': 'image/png',
-			'Access-Control-Allow-Origin': '*',
-			'X-DCM-min': raw.pixelMin[target],
-			'X-DCM-max': raw.pixelMax[target]
+			'Access-Control-Allow-Origin': '*'
 		});
         res.end(png_data);
 

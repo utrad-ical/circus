@@ -161,9 +161,8 @@
           var tmp_the_label = tmp_the_controller_series.label[j];
           var tmp_current_label_id = tmp_the_label.id + '';	//更新前のラベルid
 
-          //まだ書き込み時にラベルにフラグをたてるところは済んでいる
-          if (typeof tmp_the_label.update_flg != 'undefined' && tmp_the_label.update_flg == true) {
 
+          if (typeof tmp_the_label.update_flg != 'undefined' && tmp_the_label.update_flg == true) {
             var tmp_new_label_id = this_elm.imageViewerController('getLabelDefault').id;
 
             //ビューアー内のラベルオブジェクトid書き換え
@@ -187,16 +186,16 @@
 
             //コンテナ内部のラベルidを差し替え
             var container_object = controllerInfo.viewer[0].container;
-            var target_container_label_obj = container_object.getLabelObjectById(tmp_current_label_id, tmp_the_controller_series.id);
-            target_container_label_obj.id = tmp_new_label_id;
+						container_object.changeLabelName(tmp_current_label_id, tmp_the_controller_series.id,tmp_new_label_id);
 
             //コントローラのラベルオブジェクトid書き換え
             tmp_the_label.id = tmp_new_label_id;
-            if (tmp_the_controller_series.tmp_the_controller_series = tmp_current_label_id) {
-              tmp_the_controller_series.tmp_the_controller_series = tmp_new_label_id;
+            if (tmp_the_controller_series.activeLabelId == tmp_current_label_id) {
+              tmp_the_controller_series.activeLabelId = tmp_new_label_id;
             }
 
             tmp_the_label.update_flg = false;
+
           }
         }
       }
@@ -689,8 +688,8 @@
       }
       /*
        //Attribute描画
-       console.log("Attribute描画");
-       console.log(insert_obj);
+       //console.log("Attribute描画");
+       //console.log(insert_obj);
        //var attribute_prop = $('#prop');
        attribute_prop.propertyeditor({properties: attribute_properties});
        attribute_prop.on('valuechange', function () {

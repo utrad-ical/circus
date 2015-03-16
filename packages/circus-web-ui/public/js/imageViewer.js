@@ -436,7 +436,6 @@
       var this_opts = this_obj.options;
       var tmp_ctx = this_elm.find('.canvas_main_elm').get(0).getContext('2d');
       var tmp_orientation = this_opts.viewer.orientation;
-
       //描画対象ラベルのチェック
       var target_label = this_obj.getLabelObjectById(label_id, series_id);
 

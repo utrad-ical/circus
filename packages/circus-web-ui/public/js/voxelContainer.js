@@ -123,6 +123,43 @@ voxelContainer.prototype.addSeries = function (series_id) {
 };
 
 
+
+
+
+//ラベル名変更
+voxelContainer.prototype.changeLabelName = function (current_label_id, series_id,new_label_id){
+  var this_obj = this;
+  var this_data = this_obj.data;
+
+	//ラベルオブジェクトのidを差し替え
+	var the_label = this_obj.getLabelObjectById(current_label_id, series_id);
+	the_label.id = new_label_id;
+
+	//積まれているヒストリーの中身も調査してラベル名を変更
+	for(var i=0; i<this_data.history.init.length; i++){
+		if(this_data.history.init[i].label == current_label_id){
+			this_data.history.init[i].label = new_label_id;
+		}
+	}
+	
+	for(var i=0; i<this_data.history.main.length; i++){
+		if(this_data.history.main[i].label == current_label_id){
+			this_data.history.main[i].label = new_label_id;
+		}
+	}
+	
+	for(var i=0; i<this_data.history.redo.length; i++){
+		if(this_data.history.redo[i].label == current_label_id){
+			this_data.history.redo[i].label = new_label_id;
+		}
+	}
+
+};
+
+
+
+
+
 //保存用データ生成
 voxelContainer.prototype.createSaveData = function (series_id, label_id) {
   var this_obj = this;

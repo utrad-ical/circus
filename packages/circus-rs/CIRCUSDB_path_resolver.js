@@ -65,7 +65,7 @@ function resolvPath(seriesUID, callback)
 			}
 
 			// find storage
-			Storages.find({ 'storageID' : series.storageID, 'type' : 'dicom' }, 'path active', function (err, storages) {
+			Storages.findOne({ 'storageID' : series.storageID, 'type' : 'dicom' }, 'path active', function (err, storage) {
 				if (err) {
 					console.log(err);
 					callback(null);
@@ -73,26 +73,20 @@ function resolvPath(seriesUID, callback)
 					return;
 				}
 
-				for (var i = 0; i < storages.length; i++ ) {
-					var storage = storages[i];
+				var hash = crypto.createHash('sha256');
+				hash.update(seriesUID);
+				var hashStr = hash.digest('hex');
 
-					if (storage.active) {
-						var hash = crypto.createHash('sha256');
-						hash.update(seriesUID);
-						var hashStr = hash.digest('hex');
+				// create path
+				var dcmdir = path.join(storage.path, hashStr.substring(0,2), hashStr.substring(2,4), seriesUID);
 
-						// create path
-						var dcmdir = path.join(storage.path, hashStr.substring(0,2), hashStr.substring(2,4), seriesUID);
-
-						// check if exists
-						if (!fs.existsSync(dcmdir)) {
-							console.log('not exists:' + dcmdir);
-						} else {
-							callback(dcmdir);
-							mongoose.disconnect();
-							return;
-						}
-					}
+				// check if exists
+				if (!fs.existsSync(dcmdir)) {
+					console.log('not exists:' + dcmdir);
+				} else {
+					callback(dcmdir);
+					mongoose.disconnect();
+					return;
 				}
 
 				console.log('no storage for storageID: ' + series.storageID);

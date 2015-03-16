@@ -123,6 +123,9 @@
 .img_view_area .disp_num{top:5px;}
 .img_view_area .disp_size{bottom:5px;}
 
+.img_view_area .disp_measure{bottom:40px; padding:10px; position:absolute; right:5px; color:#FF0; z-index:100; display:none;}
+.img_view_area .mode_measure .disp_measure{display:block;}
+ 
 .img_wrap .img_toolbar_wrap{width:60px; position:absolute; top:-1px; left:0; margin-right:1px; z-index:500;}
 .img_view_area .toolbar_btn:hover{filter:alpha(opacity=50);	  -moz-opacity:0.5;  opacity:0.5;}
 .img_view_area .image_window_controller_wrap{background:rgba(0,0,0,0.7); position:absolute; bottom:0; left:0; text-align:left; color:#fff; z-index:200; width:512px; display:none;}

@@ -27,18 +27,13 @@ class Group extends BaseModel
 		if (isset($input['groupID']) && $input['groupID']) {
 			$groups = array();
 			if (is_array($input['groupID'])) {
-				Log::debug("===== GroupID Array =====");
 				foreach ($input['groupID'] as $group){
 					Log::debug("GroupID::".$group);
 					$groups[] = intval($group);
 				}
 			} else {
-				Log::debug("===== GroupID One =====");
 				$groups[] = intval($input['groupID']);
 			}
-			Log::debug("===== SQL Bind Query =====");
-			Log::debug($groups);
-			//$query->whereIn('groupID', $input['groupID']);
 
 			$query->whereIn('groupID', $groups);
 		}
@@ -81,30 +76,22 @@ class Group extends BaseModel
 	 * Validate Rules
 	 */
 	protected $rules = [
-		'groupID' => 'required|integer|min:0',
+		'groupID' => 'required|strict_integer|min:0',
 		'groupName' => 'required|alpha_dash',
 		'privileges' => 'array_of_privileges',
-		'createTime'		=>	'mongodate',
-		'updateTime'		=>	'mongodate'
+		'createTime' => 'mongodate',
+		'updateTime' => 'mongodate'
 	];
+
+	protected $messages = array(
+		'groupID.strict_integer' => 'Please be groupID is set in numeric type .',
+		'privileges.array_of_privileges' => 'Please set an array privileges .',
+		'createTime.mongodate' => 'Please be createTime is set in mongodate type .',
+		'updateTime.mongodate' => 'Please be updateTime is set in mongodate type .'
+	);
+
 	protected $uniqueFields = ['groupName'];
 
-	/**
-	 * Validate Check
-	 * @param $data Validate checked
-	 * @return Error content
-	 */
-	public function validate($data) {
-		$this->rules['groupName'] = isset($data['_id']) ?
-										'required|unique:Groups,groupName,'.$data["_id"].',_id' :
-										$this->rules['groupName'];
-		$validator = Validator::make($data, $this->rules);
-
-		if ($validator->fails()) {
-			return $validator->messages();
-		}
-		return;
-	}
 }
 
 

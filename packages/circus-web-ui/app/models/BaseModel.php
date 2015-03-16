@@ -57,6 +57,19 @@ class BaseModel extends Jenssegers\Mongodb\Model
 		return $this->primaryKey;
 	}
 
+	/**
+     * DB保存
+     */
+    public function save(array $options = array())
+    {
+	    $errors = null;
+		if ($this->selfValidationFails($errors)) {
+			return $errors;
+		} else {
+			parent::save();
+			return;
+		}
+    }
 }
 
 // Custom validation rules
@@ -78,6 +91,15 @@ Validator::extend('strict_bool', function ($attribute, $value, $parameters) {
 	return $value === true || $value === false;
 });
 
+Validator::extend('strict_date', function ($attribute, $value, $parameters) {
+	list($y, $m, $d) = explode('-',$value);
+	return checkdate($m, $d, $y);
+});
+
+Validator::extend('strict_float', function($attribute, $value, $parameters) {
+	return is_float($value);
+});
+
 Validator::extend('array_of_group_ids', function($attribute, $value, $parameters) {
 	if (!is_array($value)) return false;
 	foreach ($value as $groupID) {
@@ -88,7 +110,15 @@ Validator::extend('array_of_group_ids', function($attribute, $value, $parameters
 	return true;
 });
 
-Validator::extend('array', function($attribute, $value, $parameters) {
-	if (!is_array($value)) return true;
-	return false;
+Validator::extend('strict_array', function($attribute, $value, $parameters) {
+	return is_array($value);
+});
+
+
+Validator::extend('is_user', function($attribute, $value, $parameters) {
+	return User::find($value) ? true : false;
+});
+
+Validator::extend('strict_json', function($attribute, $value, $parameters) {
+	return $value instanceof stdClass;
 });

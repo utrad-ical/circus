@@ -23,7 +23,7 @@ class User extends BaseModel implements UserInterface {
 	protected $primaryKey = 'userID';
 
 	protected $rules = array(
-		'userID' => 'required|integer|min:1',
+		'userID' => 'required|strict_integer|min:1',
         'loginID'	=>	'required|alpha_dash|max:20',
 		'password'	=>	'required',
 		'groups' => 'required|array_of_group_ids',
@@ -37,7 +37,9 @@ class User extends BaseModel implements UserInterface {
     );
 
 	protected $messages = array(
-		'groups.array_of_group_ids' => 'Invalid group ID list.'
+		'userID.strict_integer' => 'Please be userID is set in numeric type .',
+		'groups.array_of_group_ids' => 'Invalid group ID list.',
+		'loginEnabled.strict_bool' => 'Please be loginEnabled is set in bool type .'
 	);
 
 	public function groups() {

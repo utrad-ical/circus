@@ -32,8 +32,13 @@ class Seq extends BaseModel {
 	 * Validate Rules
 	 */
 	protected $rules = array(
-		'_id'		=>	'required',
-		'seq'		=>	'required|integer'
+		'_id'		=>	'required|strict_string',
+		'seq'		=>	'required|strict_integer'
+	);
+
+	protected $messages = array(
+		'_id.strict_string' => 'Please be _id is set in string type .',
+		'seq.strict_integer' => 'Please be seq is set in numeric type . '
 	);
 
 	/**

@@ -20,6 +20,8 @@ class Label extends BaseModel {
 
 	protected $primaryKey = 'labelID';
 
+	const UPDATED_AT = null;
+
 	/**
 	 * Search conditions Building
 	 * @param $query Query Object
@@ -49,31 +51,32 @@ class Label extends BaseModel {
 	 * Validate Rules
 	 */
 	protected $rules = array(
-		'labelID'		=>	'required|unique:Labels,labelID',
-		'storageID'		=>	'required|integer',
-		'x'				=>	'required|integer',
-		'y'				=>	'required|integer',
-		'z'				=>	'required|integer',
-		'w'				=>	'required|integer',
-		'h'				=>	'required|integer',
-		'd'				=>	'required|integer',
-		'creator'		=>	'required',
-		'date'			=>	'required',
-		'createTime'	=>	'mongodate',
-		'updateTime'	=>	'mongodate'
+		'labelID'		=>	'required',
+		'storageID'		=>	'required|strict_integer',
+		'x'				=>	'required|strict_integer',
+		'y'				=>	'required|strict_integer',
+		'z'				=>	'required|strict_integer',
+		'w'				=>	'required|strict_integer',
+		'h'				=>	'required|strict_integer',
+		'd'				=>	'required|strict_integer',
+		'creator'		=>	'required|is_user',
+		'createTime'	=>	'mongodate'
 	);
 
-	/**
-	 * Validate Check
-	 * @param $data Validate checked
-	 * @return Error content
-	 */
-	public function validate($data) {
-		$validator = Validator::make($data, $this->rules);
+	protected $uniqueFields = array(
+		'labelID'
+	);
 
-		if ($validator->fails()) {
-			return $validator->messages();
-		}
-		return;
-	}
+	protected $messages = array(
+		'storageID.strict_integer' => 'Please be storageID is set in numeric type .',
+		'x.strict_integer' => 'Please be x is set in numeric type .',
+		'y.strict_integer' => 'Please be y is set in numeric type .',
+		'z.strict_integer' => 'Please be z is set in numeric type .',
+		'w.strict_integer' => 'Please be w is set in numeric type .',
+		'h.strict_integer' => 'Please be h is set in numeric type .',
+		'd.strict_integer' => 'Please be d is set in numeric type .',
+		'creator.is_user' => 'Invalid creator',
+		'createTime.mongodate' => 'Please be createTime is set in mongodate type .'
+	);
+
 }

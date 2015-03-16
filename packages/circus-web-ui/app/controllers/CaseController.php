@@ -659,45 +659,41 @@ class CaseController extends BaseController {
 						if ($rec2['image']) {
 							Log::debug("==== REC2 ====");
 							Log::debug($rec2);
-							//I do the registration of the label information
-							//Storage ID to use the storage ID registered just before
-							$label_obj = App::make('Label');
-							$label_obj->labelID = $rec2['id'];	//Save as what label ID you came from client
-							$label_obj->storageID = $storage_id;
-							$label_obj->x = intval($rec2['offset'][0]);
-							$label_obj->y = intval($rec2['offset'][1]);
-							$label_obj->z = intval($rec2['offset'][2]);
-							$label_obj->w = intval($rec2['size'][0]);
-							$label_obj->h = intval($rec2['size'][1]);
-							$label_obj->d = intval($rec2['size'][2]);
-							$label_obj->creator = Auth::user()->userID;
-							$label_obj->date = $dt;
 
-							//Label information before registration error checking
-							$errors = $label_obj->validate(json_decode($label_obj, true));
+							//すでにラベルが存在するかチェックする
+							//存在する場合はラベルの登録を行わない
+							$label_obj = Label::find($rec2['id']);
+							if (!$label_obj) {
+								//I do the registration of the label information
+								//Storage ID to use the storage ID registered just before
+								$label_obj = App::make('Label');
+								$label_obj->labelID = $rec2['id'];	//Save as what label ID you came from client
+								$label_obj->storageID = $storage_id;
+								$label_obj->x = intval($rec2['offset'][0]);
+								$label_obj->y = intval($rec2['offset'][1]);
+								$label_obj->z = intval($rec2['offset'][2]);
+								$label_obj->w = intval($rec2['size'][0]);
+								$label_obj->h = intval($rec2['size'][1]);
+								$label_obj->d = intval($rec2['size'][2]);
+								$label_obj->creator = Auth::user()->userID;
 
-							//I want to delete the data of the registered storage because there is an error
-							if ($errors) {
-								Log::debug('Label Validate Error');
-								self::rollback($transaction, implode("\n", $errors->all()));
-								break;
+								$errors = $label_obj->save();
+								//To gain in the transaction array Now that you have registered success
+								if ($errors) {
+									Log::debug('[Label]Regist failed');
+									self::rollback($transaction, $errors);
+									break;
+								}
 							}
-							//I do the registration of the label information because there is no error
-							$result = $label_obj->save();
-							//To gain in the transaction array Now that you have registered success
-							if ($result) {
-								if (array_key_exists('label', $transaction) === FALSE)
-									$transaction['label'] = array();
 
-								$transaction['label'][] = $label_obj->labelID;
-								$decode_str = base64_decode(str_replace('data:image/png;base64,', '',$rec2['image']));
-								$label_id = $label_obj->labelID;
-								$file_put_result = file_put_contents($img_save_path.$label_id.".png", $decode_str);
-							} else {
-								Log::debug('[Label]Regist failed');
-								self::rollback($transaction, $result);
-								break;
-							}
+							//if ($result) {
+							if (array_key_exists('label', $transaction) === FALSE)
+								$transaction['label'] = array();
+
+							$transaction['label'][] = $label_obj->labelID;
+							$decode_str = base64_decode(str_replace('data:image/png;base64,', '',$rec2['image']));
+							$label_id = $label_obj->labelID;
+							$file_put_result = file_put_contents($img_save_path.$label_id.".png", $decode_str);
 
 							$revision[$rec['id']][] = array(
 								'id'			=>	$label_obj->labelID,
@@ -707,11 +703,13 @@ class CaseController extends BaseController {
 					}
 					$series_list[] = array(
 						'seriesUID'	=>	$rec['id'],
+						'images'	=>	Series::getImages($rec['id']),
 						'labels'	=>	$revision[$rec['id']]
 					);
 				} else {
 					$series_list[] = array(
 						'seriesUID'	=>	$rec['id'],
+						'images'	=>	Series::getImages($rec['id']),
 						'labels'	=>	array()
 					);
 				}
@@ -722,7 +720,7 @@ class CaseController extends BaseController {
 
 			//Revision information setting
 			$save_attribute = array_key_exists('attribute', $inputs) ?
-								json_decode($inputs['attribute']) : array();
+								json_decode($inputs['attribute'], true) : array();
 			$tmp_revision = array(
 				'date'			=>	$dt,
 				'creator'		=>	Auth::user()->userID,
@@ -732,21 +730,19 @@ class CaseController extends BaseController {
 				'series'		=>	$series_list
 			);
 
-			$case_obj->updateTime = $dt;
-
 			//Error checking
-			$errors = $case_obj->validate(json_decode($case_obj, true), true);
+			$revisions = $case_obj->revisions;
+			$revisions[] = $tmp_revision;
+			$case_obj->revisions = $revisions;
+			$case_obj->latestRevision = $tmp_revision;
+			$case_obj->selfValidationFails($errors);
 			//Remove label information and storage information if there is an error
+
+			$errors = $case_obj->save();
+
 			if ($errors){
 				Log::debug('Case Validate Error');
 				self::rollback($transaction, implode("\n", $errors->all()));
-			} else {
-				$revisions = $case_obj->revisions;
-				$revisions[] = $tmp_revision;
-				$case_obj->revisions = $revisions;
-				$case_obj->latestRevision = $tmp_revision;
-				//I registered because there is no error
-				$case_obj->save();
 			}
 			$msg = 'Registration of label information is now complete.';
 		} catch (InvalidModelException $e) {
@@ -1033,7 +1029,8 @@ class CaseController extends BaseController {
 			'seriesUID', 'seriesDescription',
 			'patientInfo.patientID', 'patientInfo.age',
 			'patientInfo.sex', 'patientInfo.patientName',
-			'patientInfo.birthDate'
+			'patientInfo.birthDate', 'patientInfo.size',
+			'patientInfo.weight'
 		);
 		$series = Series::addWhere($inputs)
 						->get($select_col);
@@ -1095,10 +1092,11 @@ class CaseController extends BaseController {
 			'seriesUID', 'seriesDescription',
 			'patientInfo.patientID', 'patientInfo.age',
 			'patientInfo.sex', 'patientInfo.patientName',
-			'patientInfo.birthDate'
+			'patientInfo.birthDate', 'patientInfo.size',
+			'patientInfo.weight'
 		);
 		$series = Series::addWhere($case_info)
-							->get($select_col);
+						->get($select_col);
 
 		//Patient ID duplication check
 		$error_msg = self::checkDuplicatePatientID($series, $series_list);
@@ -1108,8 +1106,6 @@ class CaseController extends BaseController {
 		//Save the input value to the session
 		Session::put('case_input', $case_info);
 
-		Log::debug('セッション値');
-		Log::debug(Session::get('case_input'));
 		$case_info['projectName'] = Project::getProjectName($inputs['projectID']);
 
 		try {
@@ -1124,20 +1120,18 @@ class CaseController extends BaseController {
 			$case_obj->projectID = intval($case_info['projectID']);
 			//$case_obj->date = new MongoDate(strtotime(date('Y-m-d H:i:s')));
 			$case_obj->patientInfoCache = array(
-				'patientID'	=>	$case_info['patientInfo']['patientID'],
+				'patientID'	  => $case_info['patientInfo']['patientID'],
 				'patientName' => $case_info['patientInfo']['patientName'],
-				'age'		=>	$case_info['patientInfo']['age'],
-				'sex'		=>	$case_info['patientInfo']['sex']
+				'age'		  => $case_info['patientInfo']['age'],
+				'sex'		  => self::setSex($case_info['patientInfo']['sex']),
+				'birthDate'	  => $case_info['patientInfo']['birthDate'],
+				'size'		  => $case_info['patientInfo']['size'],
+				'weight'	  => $case_info['patientInfo']['weight']
 			);
-			Log::debug('ログインユーザID(Confirm)::'.Auth::user()->userID);
 			$case_obj->creator = Auth::user()->userID;
 
 			//ValidateCheck
-			//$errors = $case_obj->validate(self::setCaseValidate($case_info));
-			$validFlag = $case_obj->selfValidationFails($errors);
-			//$errors = $case_obj->selfValidationFails(self::setCaseValidate($case_info));
-			Log::debug('エラー内容');
-			Log::debug($errors);
+			$case_obj->selfValidationFails($errors);
 
 			$result['inputs'] = $case_info;
 			$result['series_list'] = $case_info['series_list'];
@@ -1191,8 +1185,6 @@ class CaseController extends BaseController {
 
 		//Input value acquisition
 		$inputs = Session::get('case_input');
-		Log::debug('ケースセッション::');
-		Log::debug($inputs);
 		$caseID = Session::get('caseID');
 		$mode = Session::get('mode');
 
@@ -1213,11 +1205,13 @@ class CaseController extends BaseController {
 
 			//Setting of patient information
 			$case_obj->patientInfoCache = array(
-				'patientID'	=>	$inputs['patientInfo']['patientID'],
+				'patientID'	  => $inputs['patientInfo']['patientID'],
 				'patientName' => $inputs['patientInfo']['patientName'],
-				'age'		=>	$inputs['patientInfo']['age'],
-				'birthDate'	=>	$inputs['patientInfo']['birthDate'],
-				'sex'		=>	self::setSex($inputs['patientInfo']['sex'])
+				'age'		  => $inputs['patientInfo']['age'],
+				'birthDate'	  => $inputs['patientInfo']['birthDate'],
+				'sex'		  => self::setSex($inputs['patientInfo']['sex']),
+				'size'		  => $inputs['patientInfo']['size'],
+				'weight'	  => $inputs['patientInfo']['weight']
 			);
 
 			//Initial setting of Revision information
@@ -1236,15 +1230,10 @@ class CaseController extends BaseController {
 			//ValidateCheck
 			//Validate check for object creation
 			$case_obj->creator = Auth::user()->userID;
-			$validFlag = $case_obj->selfValidationFails($errors);
 
+			$errors = $case_obj->save();
 			if ($errors)
 				return self::errorConfirmFinish($errors, $result, $mode);
-
-			//Validate process at the time of success
-			//I registered because there is no error
-
-			$case_obj->save();
 
 			$result['title'] = $mode.' Case Complete';
 			$result['url'] = '/case/complete';
@@ -1377,7 +1366,6 @@ class CaseController extends BaseController {
 	 * @return Gender display string
 	 */
 	function getSex($sex) {
-	//	Log::debug('性別コード::'.$sex);
 		if (!$sex) return '';
 		$sexes = Config::get('const.patient_sex');
 		return $sexes[$sex];
@@ -1445,7 +1433,6 @@ class CaseController extends BaseController {
 				if ($rec){
 					$label['attributes'] = $rec['attributes'];
 					$label['id'] = $rec["id"];
-					//$label['name'] = $rec['attributes']['labelName'];
 
 					//Label information acquisition
 					if ($rec['id']) {
@@ -1456,11 +1443,8 @@ class CaseController extends BaseController {
 						//Storage information acquisition
 						$storage_info = Storage::find($label_info->storageID);
 						$storage_path = $storage_info->path;
-						Log::debug($storage_path.$label['id'].'.png');
 						$img_path = file_get_contents($storage_path.$label['id'].'.png');
-						//Log::debug($img_path);
 						$label['image'] = 'data:image/png;base64,'.base64_encode($img_path);
-						//Log::debug($label["image"]);
 					}
 				}
 				$series_info['label'][] = $label;

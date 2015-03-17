@@ -1021,8 +1021,8 @@
 
       saveData.caseId = controllerInfo.caseId;
       saveData.series = new Array(0);
-      var revision_attributes = $('#the_panel_attribute').propertyeditor('option', 'value');
       //console.log(revision_attributes);
+      var revision_attributes = $('#the_panel_case_attribute').propertyeditor('option', 'value');
       saveData.attribute = JSON.stringify(revision_attributes);
       try {
         for (var i = 0; i < controllerInfo.series.length; i++) {
@@ -1048,8 +1048,9 @@
 
               tmp_insert_obj.label[j] = container_data;
               tmp_insert_obj.label[j].id = tmp_the_label.id;
-              tmp_insert_obj.label[j].attribute = tmp_the_label.attribute;
 
+              var tmp_attributes = $('#the_panel_label_attribute_'+i+'_'+j).propertyeditor('option', 'value');
+              tmp_insert_obj.label[j].attribute = JSON.stringify(tmp_attributes);
             }
           }
           saveData.series[i] = tmp_insert_obj;

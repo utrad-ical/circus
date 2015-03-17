@@ -488,10 +488,12 @@ class CaseController extends BaseController {
 
 		//JsonFile read
 		try {
-			$file_path = app_path()."/config/label_settings.json";
-			$handle = fopen($file_path, 'r');
-			$result['label_attribute_settings'] = fread($handle, filesize($file_path));
-			fclose($handle);
+			$projects = Project::find($case_data->projectID);
+			Log::debug("プロジェクト情報::");
+			Log::debug($projects->toArray());
+			$result['label_attribute_settings'] = json_encode($projects->labelAttributesSchema);
+			$result['case_attribute_settings'] = json_encode($projects->caseAttributesSchema);
+
 			$file_path = app_path()."/config/server_config.json";
 			$handle = fopen($file_path, 'r');
 			$result['server_url'] = json_decode(fread($handle, filesize($file_path)), true);
@@ -624,6 +626,9 @@ class CaseController extends BaseController {
 
 		try {
 			$inputs = Input::all();
+			Log::debug('保存する内容::');
+			Log::debug($inputs);
+
 			$inputs = $inputs['data'];
 			$errors = self::validateSaveLabel($inputs);
 
@@ -657,9 +662,6 @@ class CaseController extends BaseController {
 					foreach ($rec['label'] as $rec2) {
 						//Register storage table and label table is not performed if there is no image
 						if ($rec2['image']) {
-							Log::debug("==== REC2 ====");
-							Log::debug($rec2);
-
 							//すでにラベルが存在するかチェックする
 							//存在する場合はラベルの登録を行わない
 							$label_obj = Label::find($rec2['id']);
@@ -681,23 +683,18 @@ class CaseController extends BaseController {
 								//To gain in the transaction array Now that you have registered success
 								if ($errors) {
 									Log::debug('[Label]Regist failed');
-									self::rollback($transaction, $errors);
+									self::errorFinish($errors);
 									break;
 								}
 							}
 
-							//if ($result) {
-							if (array_key_exists('label', $transaction) === FALSE)
-								$transaction['label'] = array();
-
-							$transaction['label'][] = $label_obj->labelID;
 							$decode_str = base64_decode(str_replace('data:image/png;base64,', '',$rec2['image']));
 							$label_id = $label_obj->labelID;
 							$file_put_result = file_put_contents($img_save_path.$label_id.".png", $decode_str);
 
 							$revision[$rec['id']][] = array(
 								'id'			=>	$label_obj->labelID,
-								'attributes'	=>	array()
+								'attributes'	=>	array_key_exists('attribute', $rec2) ? json_decode($rec2['attribute'], true) : array()
 							);
 						}
 					}
@@ -742,19 +739,19 @@ class CaseController extends BaseController {
 
 			if ($errors){
 				Log::debug('Case Validate Error');
-				self::rollback($transaction, implode("\n", $errors->all()));
+				self::errorFinish($errors);
 			}
 			$msg = 'Registration of label information is now complete.';
 		} catch (InvalidModelException $e) {
 			$error_msg = $e->getErrors();
 			Log::debug('[InvalidModelException Error]'.$error_msg);
 			Log::debug($e);
-			self::rollback($transaction, $error_msg);
+			self::errorFinish($error_msg);
 		} catch (Exception $e){
 			$error_msg = $e->getMessage();
 			Log::debug('[Exception Error]'.$error_msg);
 			Log::debug($e);
-			self::rollback($transaction, $error_msg);
+			self::errorFinish($error_msg);
 		}
 		Log::debug('Error content::'.$error_msg);
 
@@ -762,7 +759,6 @@ class CaseController extends BaseController {
 		header('Content-Type: application/json; charset=UTF-8');
 		$res = json_encode(array('result' => true, 'message' => $msg, 'response' => ""));
 		echo $res;
-
 	}
 
 	/**
@@ -1429,9 +1425,8 @@ class CaseController extends BaseController {
 				$label = array();
 
 				//considers the creation label is seen when there is no name in the attributes, label sky objects
-				//if (array_key_exists('labelName', $rec['attributes']) !== FALSE) {
 				if ($rec){
-					$label['attributes'] = $rec['attributes'];
+					$label['attribute'] = $rec['attributes'];
 					$label['id'] = $rec["id"];
 
 					//Label information acquisition

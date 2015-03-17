@@ -29,20 +29,19 @@ Route::post('home', 'TopController@getIndex');
 Route::get('home', 'TopController@getIndex');
 
 //Case
-Route::get('case/search', 'CaseController@search');
-Route::post('case/search', 'CaseController@search');
-Route::post('case/detail', 'CaseController@detail');
-Route::post('case/edit', 'CaseController@input');
-Route::post('case/input', 'CaseController@input');
-Route::post('case/confirm', 'CaseController@confirm');
-Route::post('case/complete', 'CaseController@register');
-Route::get('case/complete', 'CaseController@complete');
+Route::get('case/search', array('before' => 'auth', 'uses' => 'CaseController@search'));
+Route::post('case/search', array('before' => 'auth', 'uses' => 'CaseController@search'));
+Route::post('case/detail', array('before' => 'auth', 'uses' => 'CaseController@detail'));
+Route::post('case/edit', array('before' => 'auth', 'uses' => 'CaseController@input'));
+Route::post('case/input', array('before' => 'auth', 'uses' => 'CaseController@input'));
+Route::post('case/confirm', array('before' => 'auth', 'uses' => 'CaseController@confirm'));
+Route::post('case/complete', array('before' => 'auth' , 'uses' => 'CaseController@register'));
+Route::get('case/complete', array('before' => 'auth', 'uses' => 'CaseController@complete'));
 //Case (for Ajax)
-Route::any('case/revision', 'CaseController@revision_ajax');
-Route::any('case/search_result', 'CaseController@search_ajax');
-Route::any('case/save_search', 'CaseController@save_search');
-Route::any('case/save_label', 'CaseController@save_label');
-Route::any('case/load_label', 'CaseController@load_label');
+Route::any('case/search_result', array('before' => 'auth', 'uses' => 'CaseController@search_ajax'));
+Route::any('case/save_search', array('before' => 'auth', 'uses' => 'CaseController@save_search'));
+Route::any('case/save_label', array('before' => 'auth', 'uses' => 'CaseController@save_label'));
+Route::any('case/load_label', array('before' => 'auth', 'uses' => 'CaseController@load_label'));
 //test用
 Route::get('case/save_label', function(){
 	$js = array();

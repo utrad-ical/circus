@@ -16,6 +16,7 @@ $(function(){
 			postUrl : "{{asset('case/save_label')}}",	//Enable here if it is different from the image storage server
 			caseId : "{{Session::get('caseID')}}",
 			attribute : {{$attribute}},
+			label_attribute : {{$label_attribute_settings}},
 			series : {{$series_list}},
 			control : {
 				window : {
@@ -161,14 +162,40 @@ $(function(){
 		return false;
 	});
 
-	//Attribute information setting of Revision
-	var attribute_properties = {{$label_attribute_settings}};
-	var attribute_prop = $('#the_panel_attribute');
-	if (initInfo[0].attribute) {
-		attribute_prop.propertyeditor({properties: attribute_properties, value:initInfo[0].attribute});
-	}else {
-		attribute_prop.propertyeditor({properties: attribute_properties});
+
+	//ラベルAttribute
+	var label_attribute_properties = {{$label_attribute_settings}};
+	var label_attribute_prop = new Array();
+	for (var i = 0; i < initInfo[0].series.length; i++) {
+
+		var tmp_the_series = initInfo[0].series[i];
+		label_attribute_prop[i] = new Array();
+		if (typeof tmp_the_series.label == 'object') {
+			for (var j = 0; j < tmp_the_series.label.length; j++) {
+	            var tmp_the_label = tmp_the_series.label[j];
+	            var tmp_prop_id = 'the_panel_label_attribute_'+i+'_'+j;
+	            $('#the_panel_label_attribute').append('<div class="control_panel_inner" id="'+tmp_prop_id+'"></div>');
+	            label_attribute_prop[i][j] = $('#'+tmp_prop_id);
+
+				if (tmp_the_label.attribute) {
+					label_attribute_prop[i][j].propertyeditor({properties: label_attribute_properties, value:tmp_the_label.attribute});
+				}else {
+					label_attribute_prop[i][j].propertyeditor({properties: label_attribute_properties});
+				}
+			}
+		}
 	}
+
+
+	//RevisionAttribute
+	var case_attribute_properties = {{$case_attribute_settings}};
+	var case_attribute_prop = $('#the_panel_case_attribute');
+	if (initInfo[0].attribute) {
+		case_attribute_prop.propertyeditor({properties: case_attribute_properties, value:initInfo[0].attribute});
+	}else {
+		case_attribute_prop.propertyeditor({properties: case_attribute_properties});
+	}
+
 	$('.link_add_series').click(function(){
 		$('.frm_add_series').submit();
 		return false;
@@ -240,7 +267,10 @@ $(function(){
 							{{$case_detail['patientName']}} ({{$case_detail['patientID']}})
 							<br>{{$case_detail['birthDate']}} {{$case_detail['sex']}}
 						</p>
-						<div class="control_panel_inner" id="the_panel_attribute"></div>
+						<h2>Case Attribute</h2>
+						<div class="control_panel_inner" id="the_panel_case_attribute"></div>
+						<h2>Label Attribute</h2>
+						<div class="control_panel_inner" id="the_panel_label_attribute"></div>
 					</div>
 				</div>
 				<div class="clear">&nbsp;</div>

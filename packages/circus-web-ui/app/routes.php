@@ -29,19 +29,22 @@ Route::post('home', 'TopController@getIndex');
 Route::get('home', 'TopController@getIndex');
 
 //Case
-Route::get('case/search', array('before' => 'auth', 'uses' => 'CaseController@search'));
-Route::post('case/search', array('before' => 'auth', 'uses' => 'CaseController@search'));
-Route::post('case/detail', array('before' => 'auth', 'uses' => 'CaseController@detail'));
-Route::post('case/edit', array('before' => 'auth', 'uses' => 'CaseController@input'));
-Route::post('case/input', array('before' => 'auth', 'uses' => 'CaseController@input'));
-Route::post('case/confirm', array('before' => 'auth', 'uses' => 'CaseController@confirm'));
-Route::post('case/complete', array('before' => 'auth' , 'uses' => 'CaseController@register'));
-Route::get('case/complete', array('before' => 'auth', 'uses' => 'CaseController@complete'));
+Route::group(['before' => 'auth'], function() {
+	Route::get('case/search', 'CaseSearchController@search');
+	Route::post('case/search', 'CaseSearchController@search');
+	Route::post('case/detail', 'CaseDetailController@detail');
+	Route::post('case/edit', 'CaseRegisterController@input');
+	Route::post('case/input', 'CaseRegisterController@input');
+	Route::post('case/confirm', 'CaseRegisterController@confirm');
+	Route::post('case/complete', 'CaseRegisterController@register');
+	Route::get('case/complete', 'CaseRegisterController@complete');
+
 //Case (for Ajax)
-Route::any('case/search_result', array('before' => 'auth', 'uses' => 'CaseController@search_ajax'));
-Route::any('case/save_search', array('before' => 'auth', 'uses' => 'CaseController@save_search'));
-Route::any('case/save_label', array('before' => 'auth', 'uses' => 'CaseController@save_label'));
-Route::any('case/load_label', array('before' => 'auth', 'uses' => 'CaseController@load_label'));
+	Route::any('case/search_result', 'CaseSearchController@search_ajax');
+	Route::any('case/save_search', 'CaseSearchController@save_search');
+	Route::any('case/save_label', 'LabelRegisterController@save_label');
+});
+
 //test用
 Route::get('case/save_label', function(){
 	$js = array();
@@ -50,14 +53,6 @@ Route::get('case/save_label', function(){
 	$result['title'] = 'Label save test';
 	$result['url'] = '/case/save_label';
 	return View::make('/sample/sample', $result);
-});
-Route::get('case/load_label', function(){
-	$js = array();
-	$js['jquery-ui.min.js'] = 'js/jquery-ui.min.js';
-	$result['js'] = $js;
-	$result['title'] = 'Label load test';
-	$result['url'] = '/case/load_label';
-	return View::make('/sample/load_sample', $result);
 });
 
 //Series

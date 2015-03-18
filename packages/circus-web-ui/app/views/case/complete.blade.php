@@ -1,5 +1,14 @@
-@extends('common.layout')
-@include('common.header')
+@extends('common.new_layout')
+
+@section('page_css')
+{{HTML::style('css/ui-lightness/jquery-ui-1.10.4.custom.min.css')}}
+{{HTML::style('css/page.css')}}
+@stop
+
+@section('page_js')
+{{HTML::script('js/jquery-ui.min.js')}}
+@stop
+
 @section('content')
 <script type="text/javascript">
 	$(function() {
@@ -13,12 +22,12 @@
 <div class="page_contents_outer">
 	<div class="page_contents_inner">
 		<div class="page_unique">
-			<h1 class="page_ttl">{{$title}}</h1>
+			<h1 class="page_ttl">{{{$title}}}</h1>
 			<p class="pad_tb_40 al_c">
 				@if (isset($msg))
-					{{$msg}}
+					{{{$msg}}}
 				@elseif (isset($error_msg))
-					<span class="txt_alert">{{$error_msg}}</span>
+					<span class="txt_alert">{{{$error_msg}}}</span>
 				@endif
 			</p>
 			<p class="al_c">
@@ -37,4 +46,3 @@
 	<div class="clear">&nbsp;</div>
 </div>
 @stop
-@include('common.footer')

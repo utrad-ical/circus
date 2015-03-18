@@ -1,4 +1,4 @@
-@extends('common.layout')
+@extends('common.new_layout')
 @section('content')
 <colgroup>
 	<col width="14%">

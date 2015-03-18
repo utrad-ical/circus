@@ -1,5 +1,19 @@
-@extends('common.layout')
-@include('common.header')
+@extends('common.new_layout')
+
+@section('page_css')
+{{HTML::style('css/ui-lightness/jquery-ui-1.10.4.custom.min.css')}}
+{{HTML::style('css/jquery.flexforms.css')}}
+{{HTML::style('css/page.css')}}
+@stop
+
+@section('page_js')
+{{HTML::script('js/jquery-ui.min.js')}}
+{{HTML::script('js/jquery.multiselect.min.js')}}
+{{HTML::script('js/jquery.formserializer.js')}}
+{{HTML::script('js/jquery.flexforms.js')}}
+{{HTML::script('js/more_search.js')}}
+@stop
+
 @section('content')
 @if (isset($inputs['mongo_search_data']))
 <script type="text/javascript">
@@ -223,4 +237,3 @@
 </div>
 <div class="clear">&nbsp;</div>
 @stop
-@include('common.footer')

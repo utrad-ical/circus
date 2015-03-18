@@ -1,5 +1,14 @@
-@extends('common.layout')
-@include('common.header')
+@extends('common.new_layout')
+
+@section('page_css')
+{{HTML::style('css/ui-lightness/jquery-ui-1.10.4.custom.min.css')}}
+{{HTML::style('css/page.css')}}
+@stop
+
+@section('page_js')
+{{HTML::script('js/jquery-ui.min.js')}}
+@stop
+
 @section('content')
 <script type="text/javascript">
 	$(function(){
@@ -112,4 +121,3 @@
 	<div class="clear">&nbsp;</div>
 </div>
 @stop
-@include('common.footer')

@@ -1,5 +1,21 @@
-@extends('common.layout')
-@include('common.header')
+@extends('common.new_layout')
+
+@section('page_css')
+{{HTML::style('css/ui-lightness/jquery-ui-1.10.4.custom.min.css')}}
+{{HTML::style('css/page_lib.css')}}
+{{HTML::style('css/jquery.simple-color-picker.css')}}
+@stop
+
+@section('page_js')
+{{HTML::script('js/jquery-ui.min.js')}}
+{{HTML::script('js/jquery.simple-color-picker.js')}}
+{{HTML::script('js/canvastool.pngencoder.min.js')}}
+{{HTML::script('js/voxelContainer.js')}}
+{{HTML::script('js/imageViewer.js')}}
+{{HTML::script('js/imageViewerController.js')}}
+{{HTML::script('js/jquery.flexforms.js')}}
+@stop
+
 @section('content')
 @if (!isset($error_msg))
 <script type="text/javascript">
@@ -173,6 +189,7 @@ $(function(){
 		if (typeof tmp_the_series.label == 'object') {
 			for (var j = 0; j < tmp_the_series.label.length; j++) {
 	            var tmp_the_label = tmp_the_series.label[j];
+	            console.log(tmp_the_label);
 	            var tmp_prop_id = 'the_panel_label_attribute_'+i+'_'+j;
 	            $('#the_panel_label_attribute').append('<div class="control_panel_inner" id="'+tmp_prop_id+'"></div>');
 	            label_attribute_prop[i][j] = $('#'+tmp_prop_id);
@@ -346,4 +363,3 @@ $(function(){
 	<div class="clear">&nbsp;</div>
 </div>
 @stop
-@include('common.footer')

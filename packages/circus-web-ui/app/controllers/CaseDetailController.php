@@ -4,177 +4,122 @@
  */
 class CaseDetailController extends BaseController {
 	/**
-	 * Case Search Results(Ajax)
-	 */
-
-	/**
 	 * Case Details screen
 	 */
 	public function detail() {
-		//Login check
-		if (!Auth::check()) {
-			//Forced redirected to the login screen because not logged in
-			return Redirect::to('login');
-		}
-
-		//Error message initialization
-		$error_msg = '';
 		$result = array();
+	//	$result['title'] = 'Case Detail';
+	//	$result['url'] = 'case/detail';
 
 		//POST data acquisition
 		$inputs = Input::all();
 
-		if (array_key_exists('btnBack', $inputs)) {
-			//Session discarded
-			if (Session::has('case_input'))
-				Session::forget('case_input');
-			//CaseID acquisition
-		} else if (array_key_exists('caseID', $inputs) === FALSE) {
-			$error_msg = 'Please specify a case ID.';
-		}
+		try {
+			if (array_key_exists('caseID', $inputs) === FALSE)
+				throw new Exception('Please specify a case ID.');
 
-		$inputs['caseID'] = isset($inputs['caseID']) ? $inputs['caseID'] : Session::get('caseID');
-		$inputs['mode'] = isset($inputs['mode']) ? $inputs['mode'] : Session::get('view_mode');
+			if (array_key_exists('btnBack', $inputs)) {
+				//Session discarded
+				if (Session::has('case_input'))
+					Session::forget('case_input');
+			}
 
-		if (!$error_msg) {
+			$inputs['caseID'] = isset($inputs['caseID']) ? $inputs['caseID'] : Session::get('caseID');
+			$inputs['mode'] = isset($inputs['mode']) ? $inputs['mode'] : Session::get('view_mode');
+
+			$result['mode'] = $inputs['mode'];
+			Session::put('view_mode', $inputs['mode']);
 			Session::put('caseID', $inputs['caseID']);
-			if (array_key_exists('disp', $inputs) === FALSE) $inputs['disp'] = Config::get('const.page_display');
-			if (array_key_exists('sort', $inputs) === FALSE) $inputs['sort'] = 'revision.date';
-
 			Session::put('case.detail', $inputs);
-			$search_data = Session::get('case.detail');
 
 			$case_info = ClinicalCase::find($inputs['caseID']);
 
-			if (!$case_info) {
-				$error_msg = 'Case ID does not exist.';
-			} else {
-				$case_data = $case_info;
-				//Authority check
-				//Case viewing rights
-				$auth_view = Project::getProjectList(Project::AUTH_TYPE_VIEW, false);
-				if (!$auth_view || array_search($case_data->projectID, $auth_view) === FALSE) {
-					$error_msg = 'You do not have permission to refer to the appropriate case.';
-				}
-			}
-		}
+			if (!$case_info)
+				throw new Exception('Case ID does not exist.');
 
-		//I want to display the case detailed information if there is no error message
-		if (!$error_msg) {
+			//Authority check
+			//Case viewing rights
+			$auth_view = Project::getProjectList(Project::AUTH_TYPE_VIEW, false);
+			if (!$auth_view || array_search($case_info->projectID, $auth_view) === false) //{
+				throw new Exception('You do not have permission to refer to the appropriate case.');
+
 			//Case edit authority
 			$auth_edit = Project::getProjectList(Project::AUTH_TYPE_UPDATE, false);
-			$result['edit_flg'] = ($auth_edit && array_search($case_data->projectID, $auth_edit) !== FALSE) ?
+			$result['edit_flg'] = ($auth_edit && array_search($case_info->projectID, $auth_edit) !== false) ?
 						true: false;
-			//And shape the case information for display
-			//Project name
-			$project = Project::find($case_data->projectID);
-			$case_detail = array(
-				'caseID'		=>	$case_data->caseID,
-				'projectID'		=>	$case_data->projectID,
-				'projectName'	=>	$project ? $project->projectName : '',
-				'patientID'		=>	$case_data->patientInfoCache['patientID'],
-				'patientName'	=>	$case_data->patientInfoCache['patientName'],
-				'birthDate'		=>	$case_data->patientInfoCache['birthDate'],
-				'sex'			=>	self::getSex($case_data->patientInfoCache['sex'])
-			);
 
 			//The shaping Revision information for display
 			$revision_list = array();
 			$revision_no_list = array();
 			$max_revision = 0;
-			foreach($case_data->revisions as $key => $value) {
+			foreach($case_info->revisions as $key => $value) {
 				//The set if Revision number is large
 				if ($max_revision < $key)
 					$max_revision = $key;
 
-				//I ask the number of label
-				$label_cnt = 0;
-				foreach ($value['series'] as $rec) {
-					$label_cnt += count($rec['labels']);
-				}
-
-				//I ask the day of the week
-				$w = self::getWeekDay(date('w', $value['date']->sec));
-
-				//The list created for display
-				$revision_list[] = array(
-					'revisionNo'	=>	$key,
-					'editDate'		=>	date('Y/m/d('.$w.')', $value['date']->sec),
-					'editTime'		=>	date('H:i', $value['date']->sec),
-					'seriesCount'	=>	count($value['series']),
-					'labelCount'	=>	$label_cnt,
-					'creator'		=>	$value['creator'],
-					'memo'			=>	$value['description'],
-					'sortEditTime'	=>	date('Y-m-d H:i:s', $value['date']->sec)
-				);
+				$revision_list[] = self::getRevisionInfo($key, $value);
 				$revision_no_list[] = $key;
 			}
 			$select_revision = isset($inputs['revisionNo']) ? $inputs['revisionNo'] : $max_revision;
-			$case_detail['revisionNo'] = $select_revision;
+			$result['revisionNo'] = $select_revision;
 
-			$result['case_detail'] = $case_detail;
+			$result['case_detail'] = $case_info;
 
 			//Revision sort order adaptation
-			$result['revision_list'] = self::sortRevision($revision_list, $search_data['sort']);
+			$result['revision_list'] = self::sortRevision($revision_list, 'revision.date');
 			$result['revision_no_list'] = $revision_no_list;
 
 			//Series list created
-			$series = array();
-			$labels = array();
-			foreach ($case_data->revisions as $key => $value) {
-				if ($key == $case_detail['revisionNo']) {
-					for ($i = 0; $i < count($value['series']); $i++){
-						$series[] = $value['series'][$i]['seriesUID'];
-					}
+			$inputs['seriesUID'] = self::getSeriesIDList($case_info, $select_revision);
+			//Shaping of the series list
+			$result['series_list'] = self::getSeriesList($case_info->revisions[$select_revision]);
+			$result['attribute'] = json_encode($case_info->revisions[$select_revision]['attributes']);
+			$result['inputs'] = Session::get('case.detail');
+
+			//Attribute Settings
+			$result['label_attribute_settings'] = json_encode($case_info->project->labelAttributesSchema);
+			$result['case_attribute_settings'] = json_encode($case_info->project->caseAttributesSchema);
+
+			//JsonFile read
+			$result['server_url'] = ConfigHelper::getServerConfig();
+		} catch (Exception $e) {
+			Log::debug($e);
+			Log::debug($e->getMessage());
+			$result['error_msg'] = $e->getMessage();
+			$result['title'] = 'Case Detail';
+		}
+		return View::make('case/detail', $result);
+	}
+
+	function getSeriesIDList($case_info, $revision_no) {
+		$series = array();
+		foreach ($case_info->revisions as $key => $value) {
+			if ($key == $revision_no) {
+				for ($i = 0; $i < count($value['series']); $i++){
+					$series[] = $value['series'][$i]['seriesUID'];
 				}
 			}
-			$inputs['seriesUID'] = $series;
-			$select_col = array('seriesUID', 'seriesDescription', 'storageID');
-			$series_info = Series::addWhere($inputs)
-								->get($select_col);
-			//Shaping of the series list
-			Log::debug('Revision number that has been selected::'.$select_revision);
-			$result['series_list'] = self::getSeriesList($case_data->revisions[$select_revision]);
-			$revision_attribute = $case_data->revisions[$select_revision]['attributes'];
-			//datepickerが日付でない値(空文字など)設定するとおかしくなるのでそれの対処を入れる
-			if (array_key_exists('birthDate', $revision_attribute) === FALSE || !$revision_attribute['birthDate']) {
-				unset($revision_attribute['birthDate']);
-			}
-
-			//$result['attribute'] = json_encode($case_data->revisions[$select_revision]['attributes']);
-			$result['attribute'] = json_encode($revision_attribute);
-
-			//Setting the pager
-			$revision_pager = Paginator::make(
-				$revision_list,
-				count($revision_list),
-				$search_data['disp']
-			);
-			$result['list_pager'] = $revision_pager;
-			$result['inputs'] = $search_data;
-		} else {
-			$result['error_msg'] = $error_msg;
 		}
-		$result['title'] = 'Case Detail';
-		$result['url'] = 'case/detail';
-		$result['mode'] = $inputs['mode'];
-		Session::put('view_mode', $inputs['mode']);
+		return $series;
+	}
 
-		//JsonFile read
-		try {
-			$projects = Project::find($case_data->projectID);
-			$result['label_attribute_settings'] = json_encode($projects->labelAttributesSchema);
-			$result['case_attribute_settings'] = json_encode($projects->caseAttributesSchema);
-
-			$file_path = app_path()."/config/server_config.json";
-			$handle = fopen($file_path, 'r');
-			$result['server_url'] = json_decode(fread($handle, filesize($file_path)), true);
-			fclose($handle);
-		} catch (Exception $e){
-			Log::debug($e->getMessage());
+	function getRevisionInfo($key, $value) {
+		$label_cnt = 0;
+		foreach ($value['series'] as $rec) {
+			$label_cnt += count($rec['labels']);
 		}
+		$w = CommonHelper::getWeekDay(date('w', $value['date']->sec));
 
-		return View::make('/case/detail', $result);
+		return array(
+			'revisionNo'	=>	$key,
+			'editDate'		=>	date('Y/m/d('.$w.')', $value['date']->sec),
+			'editTime'		=>	date('H:i', $value['date']->sec),
+			'seriesCount'	=>	count($value['series']),
+			'labelCount'	=>	$label_cnt,
+			'creator'		=>	$value['creator'],
+			'memo'			=>	$value['description'],
+			'sortEditTime'	=>	date('Y-m-d H:i:s', $value['date']->sec)
+		);
 	}
 
 	/**
@@ -226,27 +171,6 @@ class CaseDetailController extends BaseController {
 			return 0;
 
 		return strtotime($a_no) < strtotime($b_no) ? 1 : -1;
-	}
-
-	/**
-	 * I get the week
-	 * @param $w Numeric value that represents the day of the week
-	 * @return Day of the week in Japanese notation
-	 */
-	function getWeekDay($w) {
-		$week = Config::get('const.week_day');
-		return $week[$w];
-	}
-
-	/**
-	 * I get the sex for display
-	 * @param $sex Gender of value
-	 * @return Gender display string
-	 */
-	function getSex($sex) {
-		if (!$sex) return '';
-		$sexes = Config::get('const.patient_sex');
-		return $sexes[$sex];
 	}
 
 	/**

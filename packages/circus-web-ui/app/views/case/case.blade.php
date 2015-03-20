@@ -34,18 +34,18 @@
 		@if (count($list) > 0)
 			@foreach ($list as $rec)
 				<tr>
-					<td>{{$rec['projectName']}}</td>
-					<td>{{$rec['patientID']}}</td>
-					<td>{{$rec['patientName']}}</td>
-					<td>{{$rec['age']}}</td>
-					<td>{{$rec['sex']}}</td>
-					<td>{{$rec['updateDate']}}</td>
+					<td>{{$rec->project->projectName}}</td>
+					<td>{{$rec->patientInfoCache['patientID']}}</td>
+					<td>{{$rec->patientInfoCache['patientName']}}</td>
+					<td>{{$rec->patientInfoCache['age']}}</td>
+					<td>{{CommonHelper::getSex($rec->patientInfoCache['sex'])}}</td>
+					<td>{{date('Y/m/d', strtotime($rec->updateTime))}}</td>
 					<td>
 						<a href="" class="link_detail">
-							{{$rec['latestDate']}}
+							{{date('Y/m/d('.CommonHelper::getWeekDay(date('w', $rec->latestRevision['date']->sec)).') H:i', $rec->latestRevision['date']->sec)}}
 						</a>
-						{{Form::open(['url' => asset('/case/detail'), 'method' => 'post', 'class' => 'form_case_detail'])}}
-							{{Form::hidden('caseID', $rec['caseID'])}}
+						{{Form::open(['url' => asset('case/detail'), 'method' => 'post', 'class' => 'form_case_detail'])}}
+							{{Form::hidden('caseID', $rec->caseID)}}
 							{{Form::hidden('mode', 'detail')}}
 						{{Form::close()}}
 					</td>
@@ -71,13 +71,37 @@
 			</li>
 		</ul>
 	@endif
-<script type="text/javascript">
-	$(function() {
-		$('.link_detail').click(function(){
-			//Get the form ID to be sent
-			$(this).closest('tr').find('.form_case_detail').submit();
-			return false;
+	<script type="text/javascript">
+		$(function() {
+			$('.link_detail').click(function(){
+				//Get the form ID to be sent
+				$(this).closest('tr').find('.form_case_detail').submit();
+				return false;
+			});
+
+			$('.change_select').change(function(){
+				// Get the combo ID you want to change
+				var change_select = $(this).attr('data-target-dom');
+				// Get the value you want to selected
+				var select_value = $("select[name='"+$(this).attr('name')+"']").val();
+				// Change selected in the combo
+				$('#'+change_select).find('option').each(function(){
+					var this_num = $(this).val();
+					if(this_num == select_value){
+						$(this).attr('selected','selected');
+					}
+				});
+
+				//Add a hidden element so do a search
+				var sort = $("select[name='sort']").val();
+				var disp = $("select[name='disp']").val();
+				var sort_elm = $("<input>", {type:"hidden", name:"sort", value:sort});
+				$('#form_case_search').append(sort_elm);
+				var disp_elm = $("<input>", {type:"hidden", name:"disp", value:disp});
+				$('#form_case_search').append(disp_elm);
+				//Event firing
+				$('#btn_submit').trigger('click');
+			});
 		});
-	});
-</script>
+	</script>
 @endif

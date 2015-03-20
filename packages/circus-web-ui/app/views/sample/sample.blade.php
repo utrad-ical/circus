@@ -1,7 +1,9 @@
 @extends('common.layout')
-@include('common.header')
-@section('content')
 
+@section('page_css')
+@stop
+
+@section('page_js')
 {{HTML::script('/js/jquery-ui.min.js')}}
 {{HTML::script('/js/jquery.flexforms.js')}}
 <script type="text/javascript">
@@ -31,12 +33,12 @@
 			var dt2 = new Date();
 			var labelID2 = dt2.getFullYear()+"-"+("0"+(dt2.getMonth()+1)).slice(-2)+"-"+("0"+dt2.getDate()).slice(-2)+"-"+("0"+dt2.getHours()).slice(-2)+"-"+("0"+dt2.getMinutes()).slice(-2)+"-"+("0"+dt2.getSeconds()).slice(-2)+"-"+("00"+dt2.getMilliseconds()).slice(-3);
 			var data = {
-				"caseId"	:	"e3b8af3f79e3af403d0cbbab0fb632bc276970c2768ca6b8716e75958c136faa",
+				"caseId"	:	"8683ab3077ac750329f5b85997203c09aa2e3733caff535865b40700e7a8b663",
 				"memo"		:	$('#memo').val(),
 				"attribute"	:	JSON.stringify(revision_attributes),
 				"series" :	[
 					{
-						"id"	:	"LIDC-IDRI-0002",
+						"id"	:	"1.3.6.1.4.1.14519.5.2.1.6279.6001.619372068417051974713149104919",
 						"label"	:	[
 							{
 								"attributes"	:	{},
@@ -79,63 +81,64 @@
 		});
 	});
 </script>
-<div class="page_contents_outer">
-	<div class="page_contents_inner">
-		<div class="page_unique">
-			<h1 class="page_ttl">Label Save Sample</h1>
-			<div class="al_l mar_b_10">
-				{{Form::open(['url' => asset('case/save_label'), 'method' => 'POST', 'files' => true, 'id' => 'frmSample'])}}
-					<table class="common_table mar_b_10">
-						<tr>
-							<th>ラベル名</th>
-							<td colspan="3">{{Form::text('labelName1', 'Sample Label', array('id' => 'labelName1'))}}</td>
-						</tr>
-						<tr>
-							<th>始点</th>
-							<td>X:{{Form::text('offsetX1', 1, array('id' => 'offsetX1'))}}</td>
-							<td>Y:{{Form::text('offsetY1', 2, array('id' => 'offsetY1'))}}</td>
-							<td>Z:{{Form::text('offsetZ1', 3, array('id' => 'offsetZ1'))}}</td>
-						</tr>
-						<tr>
-							<th>Voxel</th>
-							<td>Width:{{Form::text('voxelW1', 1, array('id' => 'voxelW1'))}}</td>
-							<td>Height:{{Form::text('voxelH1', 1, array('id' => 'voxelH1'))}}</td>
-							<td>枚数:{{Form::text('labelNumber1', 1, array('id' => 'drawNum1'))}}</td>
-						</tr>
-						<tr>
-							<th>メモ</th>
-							<td colspan="3">{{Form::text('memo','メモ', array('id' => 'memo'))}}</td>
-						</tr>
-					</table>
-					<table class="common_table mar_b_10">
-						<tr>
-							<th>ラベル名</th>
-							<td colspan="3">{{Form::text('labelName2', 'Sample Label', array('id' => 'labelName2'))}}</td>
-						</tr>
-						<tr>
-							<th>始点</th>
-							<td>X:{{Form::text('offsetX2', 1, array('id' => 'offsetX2'))}}</td>
-							<td>Y:{{Form::text('offsetY2', 2, array('id' => 'offsetY2'))}}</td>
-							<td>Z:{{Form::text('offsetZ2', 3, array('id' => 'offsetZ2'))}}</td>
-						</tr>
-						<tr>
-							<th>Voxel</th>
-							<td>Width:{{Form::text('voxelW2', 2, array('id' => 'voxelW2'))}}</td>
-							<td>Height:{{Form::text('voxelH2', 2, array('id' => 'voxelH2'))}}</td>
-							<td>枚数:{{Form::text('labelNumber2', 2, array('id' => 'drawNum2'))}}</td>
-						</tr>
-					</table>
-					<div id="the_panel_attribute"></div>
-					<p class="al_c">
-						{{Form::button('Save', array('class' => 'common_btn upload_file mar_t_20'))}}
-					</p>
-				{{Form::close()}}
+@stop
 
-			</div>
-		</div>
-	</div>
-	@include('common.navi')
-	<div class="clear">&nbsp;</div>
+@section('title')
+Save Label Sample
+@stop
+
+@section('page_title')
+Save Label Sample
+@stop
+
+@section('content')
+<div class="al_l mar_b_10">
+	{{Form::open(['url' => asset('case/save_label'), 'method' => 'POST', 'files' => true, 'id' => 'frmSample'])}}
+		<table class="common_table mar_b_10">
+			<tr>
+				<th>ラベル名</th>
+				<td colspan="3">{{Form::text('labelName1', 'Sample Label', array('id' => 'labelName1'))}}</td>
+			</tr>
+			<tr>
+				<th>始点</th>
+				<td>X:{{Form::text('offsetX1', 1, array('id' => 'offsetX1'))}}</td>
+				<td>Y:{{Form::text('offsetY1', 2, array('id' => 'offsetY1'))}}</td>
+				<td>Z:{{Form::text('offsetZ1', 3, array('id' => 'offsetZ1'))}}</td>
+			</tr>
+			<tr>
+				<th>Voxel</th>
+				<td>Width:{{Form::text('voxelW1', 1, array('id' => 'voxelW1'))}}</td>
+				<td>Height:{{Form::text('voxelH1', 1, array('id' => 'voxelH1'))}}</td>
+				<td>枚数:{{Form::text('labelNumber1', 1, array('id' => 'drawNum1'))}}</td>
+			</tr>
+			<tr>
+				<th>メモ</th>
+				<td colspan="3">{{Form::text('memo','メモ', array('id' => 'memo'))}}</td>
+			</tr>
+		</table>
+		<table class="common_table mar_b_10">
+			<tr>
+				<th>ラベル名</th>
+				<td colspan="3">{{Form::text('labelName2', 'Sample Label', array('id' => 'labelName2'))}}</td>
+			</tr>
+			<tr>
+				<th>始点</th>
+				<td>X:{{Form::text('offsetX2', 1, array('id' => 'offsetX2'))}}</td>
+				<td>Y:{{Form::text('offsetY2', 2, array('id' => 'offsetY2'))}}</td>
+				<td>Z:{{Form::text('offsetZ2', 3, array('id' => 'offsetZ2'))}}</td>
+			</tr>
+			<tr>
+				<th>Voxel</th>
+				<td>Width:{{Form::text('voxelW2', 2, array('id' => 'voxelW2'))}}</td>
+				<td>Height:{{Form::text('voxelH2', 2, array('id' => 'voxelH2'))}}</td>
+				<td>枚数:{{Form::text('labelNumber2', 2, array('id' => 'drawNum2'))}}</td>
+			</tr>
+		</table>
+		<div id="the_panel_attribute"></div>
+		<p class="al_c">
+			{{Form::button('Save', array('class' => 'common_btn upload_file mar_t_20'))}}
+		</p>
+	{{Form::close()}}
+
 </div>
 @stop
-@include('common.footer')

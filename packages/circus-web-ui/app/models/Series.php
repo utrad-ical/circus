@@ -36,76 +36,6 @@ class Series extends BaseModel {
 	}
 
 	/**
-	 * Search conditions Building
-	 * @param $query Query object
-	 * @param $input Input value
-	 * @return Query object
-	 */
-	public function scopeAddWhere($query, $input) {
-		//seriesID Series ID
-		if (isset($input['seriesUID']) && $input['seriesUID']) {
-			//Series table of series UID
-			if (is_array($input['seriesUID']))
-				$query->whereIn('seriesUID', $input['seriesUID']);
-			else
-				$query->where('seriesUID', 'like', '%'.$input['seriesUID'].'%');
-		}
-
-		//seriesDescription seriesDescription
-		if (isset($input['seriesDescription']) && $input['seriesDescription']) {
-			//SeriesDescription series table
-			$query->where('seriesDescription', 'like', '%'.$input['seriesDescription'].'%');
-		}
-
-		//patientID Patient ID
-		if (isset($input['patientID']) && $input['patientID']) {
-			//PatientInfo.patientID series table
-			$query->where('patientInfo.patientID', 'like', '%'.$input['patientID'].'%');
-		}
-
-		//patientName Name of patient
-		if (isset($input['patientName']) && $input['patientName']) {
-			//PatientInfo.patientName series table
-			$query->where('patientInfo.patientName', 'like', '%'.$input['patientName'].'%');
-		}
-
-		//minAge The age of the patient (start)
-		if (isset($input['minAge']) && $input['minAge']) {
-			//PatientInfo.age series table
-			$query->where('patientInfo.age', '>=', intval($input['minAge']));
-		}
-
-		//maxAge The age of the patient (the end)
-		if (isset($input['maxAge']) && $input['maxAge']) {
-			//PatientInfo.age series table
-			$query->where('patientInfo.age', '<=', intval($input['maxAge']));
-		}
-
-		//sex Patient sex
-		if (isset($input['sex']) && $input['sex']) {
-			//PatientInfo.sex series table
-			if ($input['sex'] != 'all')
-				$query->where('patientInfo.sex', '=', $input['sex']);
-		}
-		return $query;
-	}
-
-	/**
-	 * Limit / Offset setting
-	 * @param $query Query object
-	 * @param $input Retrieval conditions
-	 * @return $query Query object
-	 */
-	public function scopeAddLimit($query, $input) {
-		if (isset($input['perPage']) && $input['perPage']) {
-			$query->skip(intval($input['disp'])*(intval($input['perPage'])-1));
-		}
-		$query->take($input['disp']);
-
-		return $query;
-	}
-
-	/**
 	 * Deletes this series from DB, and also delete all associated DICOM files.
 	 * @return bool|null
 	 * @throws Exception
@@ -185,13 +115,73 @@ class Series extends BaseModel {
 		'updateTime.mongodate' => 'Please be updateTime is set in mongodate type . '
 	);
 
+	/**
+	 * シリーズイメージ範囲を取得する
+	 * @param String $id シリーズID
+	 * @return シリーズのイメージ範囲
+	 * @author stani
+	 * @since 2015/03/20
+	 */
 	public static function getImages($id) {
 		$series = Series::find($id);
 		return $series ? $series->images : '';
 	}
 
+	/**
+	 * シリーズ説明を取得する
+	 * @param Stirng $id シリーズID
+	 * @return シリーズ説明
+	 * @author stani
+	 * @since 2015/03/20
+	 */
 	public static function getSeriesDescription($id){
 		$series = self::find($id);
 		return $series ? $series->seriesDescription : '';
+	}
+
+	/**
+	 * シリーズの一覧を取得する
+	 * @param Array $ids シリーズID群
+	 * @return シリーズリスト
+	 * @author stani
+	 * @since 2015/03/20
+	 */
+	public static function getPluralSeries($ids) {
+		return self::whereIn('seriesUID', $ids)
+				   ->get();
+	}
+
+	/**
+	 * シリーズ一覧取得
+	 * @param Array $search_data 検索条件
+	 * @return シリーズ一覧
+	 * @author stani
+	 * @since 2015/03/20
+	 */
+	public static function getSeriesList($search_data) {
+		return self::where(function($query) use ($search_data) {
+							//seriesID Series ID
+							if ($search_data['seriesUID'])
+								$query->where('seriesUID', 'like', '%'.$search_data['seriesUID'].'%');
+
+							if ($search_data['seriesDescription'])
+								$query->where('seriesDescription', 'like', '%'.$search_data['seriesDescription'].'%');
+
+							if ($search_data['patientID'])
+								$query->where('patientInfo.patientID', 'like', '%'.$search_data['patientID'].'%');
+
+							if ($search_data['patientName'])
+								$query->where('patientInfo.patientName', 'like', '%'.$search_data['patientName'].'%');
+
+							if ($search_data['minAge'])
+								$query->where('patientInfo.age', '>=', intval($search_data['minAge']));
+
+							if ($search_data['maxAge'])
+								$query->where('patientInfo.age', '<=', intval($search_data['maxAge']));
+
+							if ($search_data['sex'] && $search_data['sex'] !== 'all')
+								$query->where('patientInfo.sex', '=', $input['sex']);
+					})
+					->get();
 	}
 }

@@ -43,6 +43,21 @@ Route::group(['before' => 'auth'], function() {
 	Route::any('case/search_result', 'CaseSearchController@search_ajax');
 	Route::any('case/save_search', 'CaseSearchController@save_search');
 	Route::any('case/save_label', 'LabelRegisterController@save_label');
+
+	//Series
+	Route::get('series/search', 'SeriesSearchController@search');
+	Route::post('series/search', 'SeriesSearchController@search');
+	Route::post('series/detail', 'SeriesDetailController@detail');
+	Route::get('series/import', 'SeriesRegisterController@input');
+	Route::post('series/complete', 'SeriesRegisterController@register');
+	Route::get('series/complete', 'SeriesRegisterController@complete');
+
+	//Series (for Ajax)
+	Route::any('series/save_search', 'SeriesSearchController@save_search');
+
+	// Individual Administration pages
+	Route::get('administration/{adminkind}', 'AdministrationController@index')
+		 ->where('adminkind', '^(user|group|storage|project)$');
 });
 
 //test用
@@ -55,22 +70,8 @@ Route::get('case/save_label', function(){
 	return View::make('/sample/sample', $result);
 });
 
-//Series
-Route::get('series/search', 'SeriesController@search');
-Route::post('series/search', 'SeriesController@search');
-Route::post('series/detail', 'SeriesController@detail');
-Route::get('series/import', 'SeriesController@input');
-Route::post('series/complete', 'SeriesController@register');
-Route::get('series/complete', 'SeriesController@complete');
-//Series (for Ajax)
-Route::any('series/save_search', 'SeriesController@save_search');
-Route::get('series/get_series', 'SeriesController@get_series');
-
 // Management screen
 Route::get('admin', 'AdminController@getIndex');
-// Individual Administration pages
-Route::get('administration/{adminkind}', ['before' => 'auth', 'uses' => 'AdministrationController@index'])
-	->where('adminkind', '^(user|group|storage|project)$');
 // Preference
 Route::get('preference', 'UserPreferenceController@index');
 

@@ -21,95 +21,6 @@ class ClinicalCase extends BaseModel {
 	protected $primaryKey = 'caseID';
 
 	/**
-	 * Search conditions Building
-	 * @param $query Query object
-	 * @param $input Input value
-	 * @return Query object
-	 */
-	public function scopeAddWhere($query, $input) {
-		//projectID Project ID
-		if (isset($input['project']) && $input['project']) {
-			//Project ID of the case table
-			//Since the int type that I want to change to int type
-			$projects = array();
-			foreach ($input['project'] as $prj){
-				$projects[] = intval($prj);
-			}
-			$query->whereIn('projectID', $projects);
-		} else {
-			//Default condition :: login user can browse the groups that belong project
-			$projects = Project::getProjectList(Project::AUTH_TYPE_VIEW);
-			$query->whereIn('projectID', $projects);
-		}
-
-		//caseID Case ID
-		if (isset($input['caseID']) && $input['caseID']) {
-			//Of the case table caseID
-			$query->where('caseID', 'like', '%'.$input['caseID'].'%');
-		}
-		//patientID Patient ID
-		if (isset($input['patientID']) && $input['patientID']) {
-			//PatientID of patientInfoCache in the objects of the Case table
-			$query->where('patientInfoCache.patientID', 'like', '%'.$input['patientID'].'%');
-		}
-
-		//patientName Name of patient
-		if (isset($input['patientName']) && $input['patientName']) {
-			//Name of patientInfoCache in the objects of the Case table
-			$query->where('patientInfoCache.patientName', 'like', '%'.$input['patientName'].'%');
-		}
-
-		//CreateDate Created Date
-		if (isset($input['createDate']) && $input['createDate']) {
-			$query->where(
-				'createTime', '=',
-				array(
-					'$gte' => new MongoDate(strtotime($input['createDate'])),
-					'$lte' => new MongoDate(strtotime($input['createDate'].' +1 day'))
-				)
-			);
-		}
-
-		//UpdateDate Updated date
-		if (isset($input['updateDate']) && $input['updateDate']) {
-			$query->where(
-				'updateTime', '=',
-				array(
-					'$gte' => new MongoDate(strtotime($input['updateDate'])),
-					'$lte' => new MongoDate(strtotime($input['updateDate'].' +1 day'))
-				)
-			);
-		}
-
-		//caseDate Case creation date
-		if (isset($input['caseDate']) && $input['caseDate']) {
-			$query->where(
-				'latestRevision.date', '=',
-				array(
-					'$gte' => new MongoDate(strtotime($input['caseDate'])),
-					'$lte' => new MongoDate(strtotime($input['caseDate'].' +1 day'))
-				)
-			);
-		}
-		return $query;
-	}
-
-	/**
-	 * Limit / Offset setting
-	 * @param $query Query object
-	 * @param $input Retrieval conditions
-	 * @return $query Query object
-	 */
-	public function scopeAddLimit($query, $input) {
-		if (isset($input['perPage']) && $input['perPage']) {
-			$query->skip(intval($input['disp'])*(intval($input['perPage'])-1));
-		}
-		$query->take($input['disp']);
-
-		return $query;
-	}
-
-	/**
 	 * Validation rules
 	 */
 	protected $rules = array(
@@ -221,6 +132,121 @@ class ClinicalCase extends BaseModel {
 		'status.strict_string'		=>	'Please be status of revision is set in string type .',
 		'series.strict_array'		=>	'Please set an array series of revision.',
 	);
+
+	/**
+	 * リレーション設定(ProjectID)
+	 * @author stani
+	 * @since 2015/03/20
+	 */
+	public function project()
+    {
+        return $this->belongsTo('Project', 'projectID', 'projectID');
+    }
+
+    /**
+     * ケース一覧取得
+     * @param Array $search_data 検索条件
+     * @return ケース一覧
+     * @author stani
+     * @since 2015/03/20
+     */
+    public static function getCaseList($search_data) {
+    	return self::where(function ($query) use ($search_data) {
+    					//ProjectID
+    					$search_data['project'] = json_decode($search_data['project'], true);
+    					if ($search_data['project']) {
+    						$projects = array();
+							foreach ($search_data['project'] as $prj){
+								$projects[] = intval($prj);
+							}
+    					} else {
+    						$projects = Project::getProjectList(Project::AUTH_TYPE_VIEW);
+    					}
+    					$query->whereIn('projectID', $projects);
+
+    					//CaseID
+    					if ($search_data['caseID'])
+    						$query->where('caseID', 'like', '%'.$search_data['caseID'].'%');
+
+    					//PatientID
+    					if ($search_data['patientID'])
+    						$query->where('patientInfoCache.patientID', 'like', '%'.$search_data['patientID'].'%');
+
+    					//PatientName
+    					if ($search_data['patientName'])
+    						$query->where('patientInfoCache.patientName', 'like', '%'.$search_data['patientName'].'%');
+
+    					//createDate
+    					if ($search_data['createDate']) {
+    						$query->where(
+								'createTime', '=',
+								array(
+									'$gte' => new MongoDate(strtotime($search_data['createDate'])),
+									'$lte' => new MongoDate(strtotime($search_data['createDate'].' +1 day'))
+								)
+							);
+    					}
+
+    					//updateDate
+    					if ($search_data['updateDate']) {
+    						$query->where(
+								'updateTime', '=',
+								array(
+									'$gte' => new MongoDate(strtotime($search_data['updateDate'])),
+									'$lte' => new MongoDate(strtotime($search_data['updateDate'].' +1 day'))
+								)
+							);
+    					}
+
+				    	//caseDate
+						if ($search_data['caseDate']) {
+							$query->where(
+								'latestRevision.date', '=',
+								array(
+									'$gte' => new MongoDate(strtotime($search_data['caseDate'])),
+									'$lte' => new MongoDate(strtotime($search_data['caseDate'].' +1 day'))
+								)
+							);
+						}
+
+						//詳細検索
+						if ($search_data['search_mode'])
+							$query->whereIn($search_data["mongo_data"]);
+    				})
+    				->orderby($search_data['sort'], 'desc')
+    				/*
+    				->skip(function($query) use ($search_data) {
+    					if (isset($search_data['perPage']))
+    						$query->skip(intval($search_data['disp'])*($search_data($input['perPage'])-1));
+    				})
+    				*/
+    				->take($search_data['disp'])
+    				->get();
+    }
+
+	/**
+	 * Case ID created (SHA256 + uniqid)
+	 * @return string that was turned into Hash in SHA256 the uniqid (case ID)
+	 */
+	function createCaseID(){
+		return hash('sha256', uniqid());
+	}
+
+	/**
+	 * Patient ID duplication check
+	 * If there is no overlap I store the series list for display
+	 * @param $list Series List of patient ID overlapping subject
+	 * @param $series_list Destination Series List of if there is no error
+	 * @return $error_msg Error message
+	 */
+	function checkDuplicatePatientID($list, &$series_list = array()) {
+		$patientID = $list[0]->patientInfo['patientID'];
+		foreach ($list as $rec) {
+			if ($patientID != $rec->patientInfo['patientID'])
+				return 'Series that can be registered in one case only the same patient.<br>Please select the same patient in the series.';
+			$series_list[$rec->seriesUID] = $rec->seriesDescription;
+		}
+	}
 
 }
 

@@ -164,54 +164,56 @@ class ClinicalCase extends BaseModel {
     					}
     					$query->whereIn('projectID', $projects);
 
-    					//CaseID
-    					if ($search_data['caseID'])
-    						$query->where('caseID', 'like', '%'.$search_data['caseID'].'%');
-
-    					//PatientID
-    					if ($search_data['patientID'])
-    						$query->where('patientInfoCache.patientID', 'like', '%'.$search_data['patientID'].'%');
-
-    					//PatientName
-    					if ($search_data['patientName'])
-    						$query->where('patientInfoCache.patientName', 'like', '%'.$search_data['patientName'].'%');
-
-    					//createDate
-    					if ($search_data['createDate']) {
-    						$query->where(
-								'createTime', '=',
-								array(
-									'$gte' => new MongoDate(strtotime($search_data['createDate'])),
-									'$lte' => new MongoDate(strtotime($search_data['createDate'].' +1 day'))
-								)
-							);
-    					}
-
-    					//updateDate
-    					if ($search_data['updateDate']) {
-    						$query->where(
-								'updateTime', '=',
-								array(
-									'$gte' => new MongoDate(strtotime($search_data['updateDate'])),
-									'$lte' => new MongoDate(strtotime($search_data['updateDate'].' +1 day'))
-								)
-							);
-    					}
-
-				    	//caseDate
-						if ($search_data['caseDate']) {
-							$query->where(
-								'latestRevision.date', '=',
-								array(
-									'$gte' => new MongoDate(strtotime($search_data['caseDate'])),
-									'$lte' => new MongoDate(strtotime($search_data['caseDate'].' +1 day'))
-								)
-							);
-						}
-
 						//詳細検索
-						if ($search_data['search_mode'])
-							$query->whereIn($search_data["mongo_data"]);
+						if ($search_data['search_mode']) {
+							$query->whereRaw(json_decode($search_data["mongo_data"]));
+						//簡易検索
+						} else {
+							//CaseID
+	    					if ($search_data['caseID'])
+	    						$query->where('caseID', 'like', '%'.$search_data['caseID'].'%');
+
+	    					//PatientID
+	    					if ($search_data['patientID'])
+	    						$query->where('patientInfoCache.patientID', 'like', '%'.$search_data['patientID'].'%');
+
+	    					//PatientName
+	    					if ($search_data['patientName'])
+	    						$query->where('patientInfoCache.patientName', 'like', '%'.$search_data['patientName'].'%');
+
+	    					//createDate
+	    					if ($search_data['createDate']) {
+	    						$query->where(
+									'createTime', '=',
+									array(
+										'$gte' => new MongoDate(strtotime($search_data['createDate'])),
+										'$lte' => new MongoDate(strtotime($search_data['createDate'].' +1 day'))
+									)
+								);
+	    					}
+
+							//updateDate
+	    					if ($search_data['updateDate']) {
+	    						$query->where(
+									'updateTime', '=',
+									array(
+										'$gte' => new MongoDate(strtotime($search_data['updateDate'])),
+										'$lte' => new MongoDate(strtotime($search_data['updateDate'].' +1 day'))
+									)
+								);
+	    					}
+
+					    	//caseDate
+							if ($search_data['caseDate']) {
+								$query->where(
+									'latestRevision.date', '=',
+									array(
+										'$gte' => new MongoDate(strtotime($search_data['caseDate'])),
+										'$lte' => new MongoDate(strtotime($search_data['caseDate'].' +1 day'))
+									)
+								);
+							}
+						}
     				})
     				->orderby($search_data['sort'], 'desc')
     				/*

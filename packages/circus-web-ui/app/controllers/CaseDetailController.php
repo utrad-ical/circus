@@ -84,7 +84,7 @@ class CaseDetailController extends BaseController {
 			Log::debug($e);
 			Log::debug($e->getMessage());
 			$result['error_msg'] = $e->getMessage();
-			$result['title'] = 'Case Detail';
+			//$result['title'] = 'Case Detail';
 		}
 		return View::make('case/detail', $result);
 	}

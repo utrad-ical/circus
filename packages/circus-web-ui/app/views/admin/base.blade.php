@@ -1,9 +1,31 @@
 @extends('common.layout')
 
 @section('page_css')
+{{HTML::style('css/ui-lightness/jquery-ui-1.10.4.custom.min.css')}}
+{{HTML::style('css/jquery.flexforms.css')}}
+<style>
+	.badge {
+		border: 1px solid silver;
+		display: inline-block;
+		margin-left: 5px;
+		padding: 0 2px;
+	}
+
+	.operation_cell {
+		text-align: center;
+	}
+
+	.ui-propertyeditor-row > td {
+		padding-bottom: 1em;
+	}
+</style>
 @stop
 
 @section('page_js')
+{{HTML::script('js/jquery-ui.min.js')}}
+{{HTML::script('js/jquery.flexforms.js')}}
+{{HTML::script('js/jquery.multiselect.min.js')}}
+{{HTML::script('js/adminEditor.js')}}
 @stop
 
 @section('title')
@@ -15,23 +37,6 @@
 @stop
 
 @section('content')
-	<style>
-		.badge {
-			border: 1px solid silver;
-			display: inline-block;
-			margin-left: 5px;
-			padding: 0 2px;
-		}
-
-		.operation_cell {
-			text-align: center;
-		}
-
-		.ui-propertyeditor-row > td {
-			padding-bottom: 1em;
-		}
-	</style>
-
 	<table id="list" class="common_table result_table">
 		<thead></thead>
 		<tbody></tbody>

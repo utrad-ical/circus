@@ -1,7 +1,12 @@
 @extends('common.layout')
 
+@section('page_css')
+{{HTML::style('css/page.css')}}
+{{HTML::style('css/color.css')}}
+@stop
+
 @section('title')
-{{{$title}}}
+Administrator
 @stop
 
 @section('page_title')

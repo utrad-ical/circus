@@ -2,12 +2,6 @@
 
 class UserPreferenceApiController extends BaseController
 {
-	public function __construct()
-	{
-		// TODO: Remove this function after setting up proper routes
-		$this->beforeFilter('auth');
-	}
-
 	public function index() {
 		$user = Auth::user();
 		$preferences = $user->preferences;

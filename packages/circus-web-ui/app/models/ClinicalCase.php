@@ -228,7 +228,7 @@ class ClinicalCase extends BaseModel {
 	 * Case ID created (SHA256 + uniqid)
 	 * @return string that was turned into Hash in SHA256 the uniqid (case ID)
 	 */
-	function createCaseID(){
+	public static function createCaseID(){
 		return hash('sha256', uniqid());
 	}
 
@@ -239,7 +239,7 @@ class ClinicalCase extends BaseModel {
 	 * @param $series_list Destination Series List of if there is no error
 	 * @return $error_msg Error message
 	 */
-	function checkDuplicatePatientID($list, &$series_list = array()) {
+	public static function checkDuplicatePatientID($list, &$series_list = array()) {
 		$patientID = $list[0]->patientInfo['patientID'];
 		foreach ($list as $rec) {
 			if ($patientID != $rec->patientInfo['patientID'])

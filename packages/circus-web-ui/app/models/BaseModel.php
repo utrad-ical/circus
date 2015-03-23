@@ -19,9 +19,9 @@ class BaseModel extends Jenssegers\Mongodb\Model
 
 	public function __set($key, $value)
 	{
-		if (array_key_exists($key, $this->rules) === FALSE)
+		if (array_key_exists($key, $this->rules) === false) {
 			throw new InvalidModelException($key.' is undefined column name to Validate rules ');
-
+		}
 		$this->setAttribute($key, $value);
 	}
 

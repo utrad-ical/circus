@@ -25,11 +25,13 @@ Route::resource('api/project', 'ProjectApiController');
 Route::put('api/storage/setactive/{storageID}', 'StorageApiController@setActive');
 Route::resource('api/preference', 'UserPreferenceApiController');
 
-Route::post('home', 'TopController@getIndex');
-Route::get('home', 'TopController@getIndex');
+
 
 //Case
 Route::group(['before' => 'auth'], function() {
+	Route::post('home', 'TopController@getIndex');
+	Route::get('home', 'TopController@getIndex');
+
 	Route::get('case/search', 'CaseSearchController@search');
 	Route::post('case/search', 'CaseSearchController@search');
 	Route::post('case/detail', 'CaseDetailController@detail');
@@ -58,6 +60,11 @@ Route::group(['before' => 'auth'], function() {
 	// Individual Administration pages
 	Route::get('administration/{adminkind}', 'AdministrationController@index')
 		 ->where('adminkind', '^(user|group|storage|project)$');
+
+	// Management screen
+	Route::get('admin', 'AdminController@getIndex');
+	// Preference
+	Route::get('preference', 'UserPreferenceController@index');
 });
 
 //test用
@@ -70,10 +77,7 @@ Route::get('case/save_label', function(){
 	return View::make('/sample/sample', $result);
 });
 
-// Management screen
-Route::get('admin', 'AdminController@getIndex');
-// Preference
-Route::get('preference', 'UserPreferenceController@index');
+
 
 //404 pages
 Event::listen('404', function()

@@ -21,7 +21,7 @@ class SeriesRegistController extends BaseController {
 
 		try {
 			//Not selected file
-			if (array_key_exists('upload_file', $inputs) === FALSE) //{
+			if (array_key_exists('upload_file', $inputs) === false)
 				throw new Exception('Please select the file.');
 
 			//Upload file information acquisition

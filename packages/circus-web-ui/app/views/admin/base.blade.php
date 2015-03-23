@@ -36,6 +36,10 @@
 {{{$title}}}
 @stop
 
+@section('yield')
+id="page_admin_home"
+@stop
+
 @section('content')
 	<table id="list" class="common_table result_table">
 		<thead></thead>

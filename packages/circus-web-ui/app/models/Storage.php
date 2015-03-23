@@ -44,33 +44,6 @@ class Storage extends BaseModel {
 	}
 
 	/**
-	 * Search conditions Building
-	 * @param $query Query Object
-	 * @param $input Input value
-	 * @return Query Object
-	 */
-	public function scopeAddWhere($query, $input) {
-		//storageID
-		if (isset($input['storageID']) && $input['storageID']) {
-			//Of the Storages table storageID
-			$query->where('storageID', '=', intval($input['storageID']));
-		}
-
-		//type
-		if (isset($input['type']) && $input['type']) {
-			//Of the Storages table type
-			$query->where('type', '=', $input['type']);
-		}
-
-		//active
-		if (isset($input['active'])) {
-			//Of the active table active
-			$query->where('active', '=', $input['active']);
-		}
-		return $query;
-	}
-
-	/**
 	 * Validate Rules
 	 */
 	protected $rules = array(

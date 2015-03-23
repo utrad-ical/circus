@@ -4,7 +4,7 @@ class ZipException extends \Exception{
 /**
  * シリーズ登録
  */
-class SeriesRegistController extends BaseController {
+class SeriesRegisterController extends BaseController {
 	/**
 	 * Series registration screen
 	 */

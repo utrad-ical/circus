@@ -15,20 +15,6 @@ class Seq extends BaseModel {
 	public $timestamps = false;
 
 	/**
-	 * Search conditions Building
-	 * @param $query Query Object
-	 * @param $input Input value
-	 * @return Query Object
-	 */
-	public function scopeAddWhere($query, $input) {
-		//Table name _id
-		if (isset($inputs['_id']) && $input['_id']) {
-			$query->where('_id', '=', $input['_id']);
-		}
-		return $query;
-	}
-
-	/**
 	 * Validate Rules
 	 */
 	protected $rules = array(

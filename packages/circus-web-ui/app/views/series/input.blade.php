@@ -23,13 +23,16 @@
 </script>
 @stop
 
-
 @section('title')
 Series Import
 @stop
 
 @section('page_title')
 Series Import
+@stop
+
+@section('page_id')
+id="page_series_import"
 @stop
 
 @section('content')

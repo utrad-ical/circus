@@ -145,7 +145,7 @@ class LabelRegisterController extends BaseController {
 	 */
 	function saveImage($label_id, $image, $path) {
 		$decode_str = base64_decode(str_replace('data:image/png;base64,', '',$image));
-		return file_put_contents($path.$label_id.".png", $decode_str);
+		return file_put_contents($path."/".$label_id.".png", $decode_str);
 	}
 
 	/**

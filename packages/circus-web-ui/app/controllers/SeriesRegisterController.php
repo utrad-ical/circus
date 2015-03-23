@@ -29,7 +29,7 @@ class SeriesRegisterController extends BaseController {
 			$file_list = array();
 
 			foreach ($uploads as $upload) {
-				$res = $upload->move($upload_dir, $upload->getClientOriginalName());
+				$res = $upload->move(storage_path()."/uploads/", $upload->getClientOriginalName());
 
 				//If extension of Zip to save unzip
 				$ext = $upload->getClientOriginalExtension();
@@ -48,13 +48,19 @@ class SeriesRegisterController extends BaseController {
 				Artisan::call('image:import', array("path" => $file_path));
 			}
 
-			return Redirect::to('series.complete')
+			return Redirect::to('series/complete')
 			               ->with('msg', 'Registration of series information is now complete.');
 		} catch (ZipException $e) {
+			Log::debug('[ZipException]');
+			Log::debug($e);
 			return self::errorFinish($e->getMessage());
 		} catch (InvalidModelException $e) {
+			Log::debug('[InvalidModelException]');
+			Log::debug($e);
 			return self::errorFinish($e->getErrors());
 		} catch (Exception $e) {
+			Log::debug('[Exception]');
+			Log::debug($e);
 			return self::errorFinish($e->getMessage());
 		}
 	}

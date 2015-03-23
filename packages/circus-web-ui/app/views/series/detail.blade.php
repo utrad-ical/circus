@@ -4,6 +4,7 @@
 @stop
 
 @section('page_js')
+{{HTML::script('js/jquery.cookie.js')}}
 <script type="text/javascript">
 $(function() {
 	//Button is pressed when you return to the series Search
@@ -50,20 +51,20 @@ $(function() {
 @stop
 
 @section('content')
-{HTML::link(asset('series/search'), 'Back to Sereis list', array('class' => 'common_btn fl_l mar_r_10 disp_b', 'id' => 'btnBack'))}}
+{{HTML::link(asset('series/search'), 'Back to Sereis list', array('class' => 'common_btn fl_l mar_r_10 disp_b', 'id' => 'btnBack'))}}
 @if (isset($error_msg))
 	<div class="w_500 mar_b_10">
 		<br><br><span class="txt_alert">{{$error_msg}}</span>
 	</div>
 @else
 	{{HTML::link(asset('case/input'), 'Edit New Case', array('class' => 'common_btn fl_l disp_b link_new_case'))}}
-	{{Form::open(['url' => asset('/case/input'), 'method' => 'post', 'id' => 'form_edit_new_case'])}}
+	{{Form::open(['url' => asset('case/input'), 'method' => 'post', 'id' => 'form_edit_new_case'])}}
 		{{Form::hidden('back_url', 'series_detail')}}
 	{{Form::close()}}
 	<div class="info_area w_500 fl_r mar_b_10">
 		<p class="pad_10">
 			Patient: {{$series_detail->patientInfo['patientName']}} ({{$series_detail->patientInfo['patientID']}}) {{$series_detail->patientInfo['birthDate']}} {{$series_detail->patientInfo['sex']}}
-			<br>Last Update: <span class="bold">{{date('Y/m/d h:i', $series_detail->updateTime->sec)}}</span> by <span class="bold">{{$series_detail->receiveMethod}}</span>
+			<br>Last Update: <span class="bold">{{date('Y/m/d h:i', strtotime($series_detail->updateTime))}}</span> by <span class="bold">{{$series_detail->receiveMethod}}</span>
 		</p>
 	</div>
 	<div class="clear">&nbsp;</div>

@@ -23,31 +23,6 @@ class Label extends BaseModel {
 	const UPDATED_AT = null;
 
 	/**
-	 * Search conditions Building
-	 * @param $query Query Object
-	 * @param $input Input value
-	 * @return Query Object
-	 */
-	public function scopeAddWhere($query, $input) {
-		//labelID
-		if (isset($input['labelID']) && $input['labelID']) {
-			//Of the Labels table labelID
-			$labels = array();
-			foreach ($input['labelID'] as $label){
-				$labels[] = intval($label);
-			}
-			$query->whereIn('labelID', $label);
-		}
-
-		//storageID
-		if (isset($inputs['storageID']) && $input['storageID']) {
-			//Of the Labels table storageID
-			$query->where('storageID', '=', intval($input['storageID']));
-		}
-		return $query;
-	}
-
-	/**
 	 * Validate Rules
 	 */
 	protected $rules = array(

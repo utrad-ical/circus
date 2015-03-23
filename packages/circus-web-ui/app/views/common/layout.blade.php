@@ -25,8 +25,8 @@
 	<div id="wrapper">
 		<div id="header">
 			<div class="header_logo">
-				<a href="{{asset('/home')}}">
-					<img src="{{asset('/img/common/header_logo.png')}}" width="192" height="40" alt="CIRCUS">
+				<a href="{{asset('home')}}">
+					<img src="{{asset('img/common/header_logo.png')}}" width="192" height="40" alt="CIRCUS">
 				</a>
 			</div>
 			{{Form::open(['url' => $_SERVER['REQUEST_URI'], 'method' => 'POST'])}}
@@ -66,7 +66,7 @@
 		</div>
 		<div class="page_contents_outer">
 			<div class="page_contents_inner">
-				<div class="page_unique">
+				<div class="page_unique" @yield('page_id')>
 					<h1 class="page_ttl">
 					@yield('page_title')
 					</h1>

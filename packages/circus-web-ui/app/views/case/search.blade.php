@@ -132,7 +132,7 @@
 Case Search
 @stop
 
-@section('page title')
+@section('page_title')
 Case Search
 @stop
 

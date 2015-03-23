@@ -25,6 +25,10 @@
 {{{Session::get('mode')}}} Case Confirmation
 @stop
 
+@section('page_id')
+id="page_case_input"
+@stop
+
 @section('content')
 <div class="al_l mar_b_10">
 	{{HTML::link(asset($back_url), $back_label, array('class' => 'common_btn', 'id' => 'btnBack'))}}

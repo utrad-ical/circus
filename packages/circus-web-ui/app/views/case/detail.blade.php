@@ -238,6 +238,10 @@ $(function(){
 @endif
 @stop
 
+@section('page_id')
+id="page_case_detail"
+@stop
+
 @section('content')
 <div class="al_l mar_b_10 w_600 fl_l">
 	{{HTML::link(asset('/case/search'), 'Back to Case Search Result', array('class' => 'common_btn', 'id' => 'btnBack'))}}

@@ -1,6 +1,6 @@
 [
 	{
-		"key": "patientInfoCache.name",
+		"key": "patientInfoCache.patientName",
 		"label": "Patient name",
 		"type": "text",
 		"spec": {

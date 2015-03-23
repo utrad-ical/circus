@@ -1,4 +1,4 @@
-@extends('common.new_layout')
+@extends('common.layout')
 
 @section('page_css')
 @stop

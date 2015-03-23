@@ -8,14 +8,12 @@ class CaseDetailController extends BaseController {
 	 */
 	public function detail() {
 		$result = array();
-	//	$result['title'] = 'Case Detail';
-	//	$result['url'] = 'case/detail';
 
 		//POST data acquisition
 		$inputs = Input::all();
 
 		try {
-			if (array_key_exists('caseID', $inputs) === FALSE)
+			if (array_key_exists('caseID', $inputs) === false)
 				throw new Exception('Please specify a case ID.');
 
 			if (array_key_exists('btnBack', $inputs)) {

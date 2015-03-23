@@ -56,7 +56,7 @@ class CaseRegisterController extends BaseController {
 
 			$result['series_list'] = $series_list;
 			$patient = $series[0]->patientInfo;
-			$result['inputs']['patientInfo'] = $patient;
+			$result['inputs']['patientInfoCache'] = $patient;
 
 			//The store fixed information in session
 			$case_info = array(
@@ -66,9 +66,10 @@ class CaseRegisterController extends BaseController {
 			);
 			Session::put('case_input', $case_info);
 		} catch (Exception $e) {
+			Log::debug($e);
 			$result['error_msg'] = $e->getMessage();
 		}
-		return View::make('/case/input', $result);
+		return View::make('case.input', $result);
 	}
 
 	/**
@@ -114,9 +115,9 @@ class CaseRegisterController extends BaseController {
 			$case_info['seriesUID'] = $inputs['series'];
 
 			//Patient ID duplication check
-			$error_msg = self::checkDuplicatePatientID(Series::getPluralSeries($inputs['series']), $series_list);
+			$error_msg = ClinicalCase::checkDuplicatePatientID(Series::getPluralSeries($inputs['series']), $case_info['series_list']);
 			if (!$error_msg)
-				$case_info['series_list'] = self::sortSeriesList($series_list, $inputs['series']);
+				$case_info['series_list'] = self::sortSeriesList($case_info['series_list'], $inputs['series']);
 
 			//Save the input value to the session
 			Session::put('case_input', $case_info);
@@ -165,7 +166,7 @@ class CaseRegisterController extends BaseController {
 				'patientID'	  => $patient['patientID'],
 				'patientName' => $patient['patientName'],
 				'age'		  => $patient['age'],
-				'sex'		  => CommonHelper::setSex($patient['sex']),
+				'sex'		  => $patient['sex'],
 				'birthDate'	  => $patient['birthDate'],
 				'size'		  => $patient['size'],
 				'weight'	  => $patient['weight']
@@ -242,7 +243,7 @@ class CaseRegisterController extends BaseController {
 
 			//I gain the necessary parameters on the screen to complete the session
 			Session::put('complete', $result);
-			return Redirect::to('case.complete');
+			return Redirect::to('case/complete');
 		} catch (InvalidModelException $e) {
 			return self::errorRedirectFinish($e->getErrors(), $result, $mode);
 		} catch (Exception $e) {
@@ -286,7 +287,7 @@ class CaseRegisterController extends BaseController {
 	 * @param $input Input parameters
 	 */
 	function setBackUrl($input, &$result) {
-		if (array_key_exists('back_url', $input) === FALSE)
+		if (array_key_exists('back_url', $input) === false)
 			$input['back_url'] = Session::get('back_url');
 
 		switch ($input['back_url']) {

@@ -36,7 +36,8 @@ class CommonHelper{
 	 * @author stani
 	 * @since 2015/03/20
 	 */
-	function setSex($sex) {
+	public static function setSex($sex) {
+		if (!$sex) return '';
 		$sexes = Config::get('const.patient_sex');
 		return array_search($sex, $sexes);
 	}

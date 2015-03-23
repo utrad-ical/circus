@@ -66,32 +66,32 @@
 				<th rowspan="2">Patient</th>
 				<th>ID</th>
 				<td>
-					{{$inputs['patientInfo']['patientID']}}
-					@if (isset($errors) && $errors->has('patientInfo_patientID'))
-						<br><span class="txt_alert">{{$errors->first('patientInfo_patientID')}}</span>
+					{{$inputs['patientInfoCache']['patientID']}}
+					@if (isset($errors) && $errors->has('patientInfoCache_patientID'))
+						<br><span class="txt_alert">{{$errors->first('patientInfoCahce_patientID')}}</span>
 					@endif
 				</td>
 				<th>Age</th>
 				<td>
-					{{$inputs['patientInfo']['age']}}
-					@if (isset($errors) && $errors->has('patientInfo_age'))
-						<br><span class="txt_alert">{{$errors->first('patientInfo_age')}}</span>
+					{{$inputs['patientInfoCache']['age']}}
+					@if (isset($errors) && $errors->has('patientInfoCache_age'))
+						<br><span class="txt_alert">{{$errors->first('patientInfoCache_age')}}</span>
 					@endif
 				</td>
 			</tr>
 			<tr>
 				<th>Name</th>
 				<td>
-					{{$inputs['patientInfo']['patientName']}}
-					@if (isset($errors) && $errors->has('patientInfo_patientName'))
-						<br><span class="txt_alert">{{$errors->first('patientInfo_patientName')}}</span>
+					{{$inputs['patientInfoCache']['patientName']}}
+					@if (isset($errors) && $errors->has('patientInfoCache_patientName'))
+						<br><span class="txt_alert">{{$errors->first('patientInfoCache_patientName')}}</span>
 					@endif
 				</td>
 				<th>Sex</th>
 				<td>
-					{{CommonHelper::getSex($inputs['patientInfo']['sex'])}}
-					@if (isset($errors) && $errors->has('patientInfo_sex'))
-						<br><span class="txt_alert">{{$errors->first('patientInfo_sex')}}</span>
+					{{CommonHelper::getSex($inputs['patientInfoCache']['sex'])}}
+					@if (isset($errors) && $errors->has('patientInfoCache_sex'))
+						<br><span class="txt_alert">{{$errors->first('patientInfoCache_sex')}}</span>
 					@endif
 				</td>
 			</tr>

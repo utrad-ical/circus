@@ -20,7 +20,7 @@
 <script type="text/javascript">
 	$(function() {
 		// Initialization parameter
-		var keys = {{ConfigHelper::getDetailSearchConfig()}};
+		var keys = {{Helper\ConfigHelper::getDetailSearchConfig()}};
 
 		var filter = $('#search_condition')
 		.filtereditor({keys: keys})

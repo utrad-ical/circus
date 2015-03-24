@@ -1,5 +1,7 @@
 <?php
 
+namespace Helper;
+
 class ConfigHelper {
 	/**
 	 * サーバー情報取得

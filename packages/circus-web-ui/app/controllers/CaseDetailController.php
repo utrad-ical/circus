@@ -79,7 +79,7 @@ class CaseDetailController extends BaseController {
 			$result['case_attribute_settings'] = json_encode($case_info->project->caseAttributesSchema);
 
 			//JsonFile read
-			$result['server_url'] = ConfigHelper::getServerConfig();
+			$result['server_url'] = Helper\ConfigHelper::getServerConfig();
 		} catch (Exception $e) {
 			Log::debug($e);
 			Log::debug($e->getMessage());

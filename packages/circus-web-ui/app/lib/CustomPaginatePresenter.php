@@ -1,5 +1,5 @@
 <?php
-namespace app\lib;
+
 use Illuminate\Pagination\Presenter;
 
 class CustomPaginatePresenter extends Presenter {

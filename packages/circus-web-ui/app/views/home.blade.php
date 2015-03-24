@@ -1,9 +1,22 @@
 @extends('common.layout')
 
 @section('page_css')
-@stop
+    <style>
+        #main_menu {
+            margin: 30px;
+        }
 
-@section('page_js')
+        #main_menu li {
+            display: inline-block;
+        }
+
+        #main_menu li a {
+            color: white;
+            width: 150px;
+            height: 30px;
+            line-height: 30px;
+        }
+    </style>
 @stop
 
 @section('title')
@@ -15,9 +28,12 @@ Home
 @stop
 
 @section('content')
-<p><span class="font_red">2</span>件の新着情報があります</p>
-<ul>
-	<li>2014/07/12 18:03 Revision 3124 が編集されました。</li>
-	<li>2014/07/12 17:21 Revision 3123 が編集されました。</li>
-</ul>
+    <div>Welcome to CIRCUS DB</div>
+    <nav id="main_menu">
+        <ul>
+            <li>{{HTML::link(asset('series/search'), 'Series Search', ['class' => 'common_btn'])}}</li>
+            <li>{{HTML::link(asset('series/import'), 'Series Import', ['class' => 'common_btn'])}}</li>
+            <li>{{HTML::link(asset('case/search'), 'Case Search', ['class' => 'common_btn'])}}</li>
+        </ul>
+    </nav>
 @stop

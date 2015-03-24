@@ -13,15 +13,15 @@
 	{{HTML::script('js/common.js')}}
 	@yield('page_js')
 </head>
-@if (Auth::check())
 <?php
-	$user_pref = Auth::user()->preferences;
-	$class_theme = $user_pref['theme'];
+if (Auth::check()) {
+    $user_pref = Auth::user()->preferences;
+    $class_theme = $user_pref['theme'];
+} else {
+    $class_theme = 'mode_white';
+}
 ?>
-	<body class="{{$class_theme}}">
-@else
-	<body class="mode_white">
-@endif
+<body class="{{$class_theme}}">
 	<div id="wrapper">
 		<div id="header">
 			<div class="header_logo">

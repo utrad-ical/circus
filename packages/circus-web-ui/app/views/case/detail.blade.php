@@ -16,7 +16,7 @@
 {{HTML::script('js/jquery.flexforms.js')}}
 
 @if (!isset($error_msg))
-<script type="text/javascript">
+<script>
 //Project-specific feature set to control the controller viewer widget
 $(function(){
 	//Data group to pass when you ignite the controller immediately after page load

@@ -6,7 +6,7 @@
 @stop
 
 @section('page_js')
-<script type="text/javascript">
+<script>
 	$(function(){
 		$('.upload_confirm').click(function(){
 			if (window.confirm('Do you want to upload a file?')){

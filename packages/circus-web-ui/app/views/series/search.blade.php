@@ -5,7 +5,7 @@
 
 @section('page_js')
 {{HTML::script('js/jquery.cookie.js')}}
-<script type="text/javascript">
+<script>
 	$(function() {
 		$('#btn_submit').click(function(){
 			var btnName = arguments[1] ? arguments[1] : "btnSearch";

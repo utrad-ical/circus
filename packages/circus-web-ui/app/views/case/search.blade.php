@@ -13,11 +13,11 @@
 {{HTML::script('js/jquery.flexforms.js')}}
 {{HTML::script('js/more_search.js')}}
 @if (isset($inputs['mongo_search_data']))
-<script type="text/javascript">
+<script>
 	var detail_keys = {{$inputs['mongo_search_data']}};
 </script>
 @endif
-<script type="text/javascript">
+<script>
 	$(function() {
 		// Initialization parameter
 		var keys = {{Helper\ConfigHelper::getDetailSearchConfig()}};

@@ -7,7 +7,7 @@
 
 @section('page_js')
 {{HTML::script('js/jquery-ui.min.js')}}
-<script type="text/javascript">
+<script>
 	$(function() {
 		//Back button is pressed during
 		$('.link_case_input').click(function(){

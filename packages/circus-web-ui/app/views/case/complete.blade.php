@@ -7,7 +7,7 @@
 
 @section('page_js')
 {{HTML::script('js/jquery-ui.min.js')}}
-<script type="text/javascript">
+<script>
 	$(function() {
 		//Case Details button is pressed during
 		$('.link_case_detail').click(function(){

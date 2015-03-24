@@ -4,7 +4,7 @@
 @stop
 
 @section('page_js')
-<script type="text/javascript">
+<script>
 	$(function(){
 		$('.link_series_search').click(function(){
 			$('#frmSeriesSearch').submit();

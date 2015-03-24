@@ -1,4 +1,4 @@
-<script type="text/javascript">
+<script>
 	$(function() {
 		$('.link_case_detail_search').click(function(){
 			$(this).closest('li').find('.frm_case_detail_search').submit();

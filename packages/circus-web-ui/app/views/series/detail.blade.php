@@ -5,7 +5,7 @@
 
 @section('page_js')
 {{HTML::script('js/jquery.cookie.js')}}
-<script type="text/javascript">
+<script>
 $(function() {
 	//Button is pressed when you return to the series Search
 	$('#btnBack').click(function() {

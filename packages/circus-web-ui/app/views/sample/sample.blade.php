@@ -6,7 +6,7 @@
 @section('page_js')
 {{HTML::script('/js/jquery-ui.min.js')}}
 {{HTML::script('/js/jquery.flexforms.js')}}
-<script type="text/javascript">
+<script>
 	$(function(){
 		var attribute_properties = [
 			{type: 'text', key: 'name', caption: 'Your Name'},

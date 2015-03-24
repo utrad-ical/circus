@@ -71,7 +71,7 @@
 			</li>
 		</ul>
 	@endif
-	<script type="text/javascript">
+	<script>
 		$(function() {
 			$('.link_detail').click(function(){
 				//Get the form ID to be sent

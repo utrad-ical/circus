@@ -7,7 +7,7 @@
 
 @section('page_js')
 {{HTML::script('js/jquery-ui.min.js')}}
-<script type="text/javascript">
+<script>
 	$(function(){
 		$('#btnBack').click(function(){
 			$(this).closest('div').find('.frmBack').submit();

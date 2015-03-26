@@ -22,7 +22,7 @@ class GroupSeeder extends Seeder
 			'privileges' => array(
 				'createProject',
 				'deleteProject',
-				'restartServer',
+				'manageServer',
 				'personalInfoView'
 			),
 			'domains' => array()

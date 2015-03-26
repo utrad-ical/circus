@@ -109,10 +109,12 @@ class MongoRegisterer extends Registerer
 	public function registerNewSeries(array $dicom_data)
 	{
 		$sr = new Series();
+		$sr->width = intval($dicom_data['width']);
+		$sr->height = intval($dicom_data['height']);
 		$assignProperties = array(
 			'studyUID=studyInstanceUID',
 			'seriesUID=seriesInstanceUID',
-			'width', 'height', 'modality', 'seriesDescription', 'bodyPart',
+			'modality', 'seriesDescription', 'bodyPart',
 			'stationName', 'modelName', 'manufacturer'
 		);
 		foreach ($assignProperties as $c) {

@@ -10,19 +10,15 @@ class BaseModel extends Jenssegers\Mongodb\Model
 
 	protected $uniqueFields = [];
 
-
 	const CREATED_AT = 'createTime';
-
-
 	const UPDATED_AT = 'updateTime';
-
 
 	public function __set($key, $value)
 	{
 		if (array_key_exists($key, $this->rules) === false) {
-			throw new InvalidModelException($key.' is undefined column name to Validate rules ');
+			throw new InvalidModelException("property '$key' is undefined");
 		}
-		$this->setAttribute($key, $value);
+		parent::__set($key, $value);
 	}
 
 	public function getRules() {
@@ -58,16 +54,15 @@ class BaseModel extends Jenssegers\Mongodb\Model
 	}
 
 	/**
-     * DB保存
+     * Override parent's save() method and adds self-validation.
      */
     public function save(array $options = array())
     {
 	    $errors = null;
 		if ($this->selfValidationFails($errors)) {
-			return $errors;
+			throw new InvalidModelException($errors);
 		} else {
-			parent::save();
-			return;
+			return parent::save();
 		}
     }
 }

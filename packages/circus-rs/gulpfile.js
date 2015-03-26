@@ -7,8 +7,9 @@ gulp.task('default', ['typescript']);
 gulp.task('typescript', function() {
 	gulp.src('src/*.ts')
 		.pipe(typescript({
-			sortOutput: true
+			sortOutput: true,
+			module: 'commonjs',
+			target: 'es6'
 		}))
-		.pipe(concat('circus-rs.js'))
 		.pipe(gulp.dest('.'));
 });

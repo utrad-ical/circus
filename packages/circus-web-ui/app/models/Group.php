@@ -40,13 +40,6 @@ class Group extends BaseModel
 		'domains' => 'array'
 	];
 
-	protected $messages = array(
-		'groupID.strict_integer' => 'Please be groupID is set in numeric type .',
-		'privileges.array_of_privileges' => 'Please set an array privileges .',
-		'createTime.mongodate' => 'Please be createTime is set in mongodate type .',
-		'updateTime.mongodate' => 'Please be updateTime is set in mongodate type .'
-	);
-
 	protected $uniqueFields = ['groupName'];
 
 }

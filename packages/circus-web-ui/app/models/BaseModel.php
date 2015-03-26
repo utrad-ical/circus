@@ -60,6 +60,7 @@ class BaseModel extends Jenssegers\Mongodb\Model
     {
 	    $errors = null;
 		if ($this->selfValidationFails($errors)) {
+			Log::debug($errors->all());
 			throw new InvalidModelException($errors);
 		} else {
 			return parent::save();

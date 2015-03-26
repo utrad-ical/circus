@@ -104,20 +104,4 @@ class Project extends BaseModel
 		'updateTime'		=>	'mongodate'
 	);
 
-	protected $messages = array(
-		'projectID.strict_integer' => 'Please be projectID is set in numeric type .',
-		'projectName.strict_string' => 'Please be projectName is set in string type .',
-		'createGroups.array_of_group_ids' => 'Please set an array createGroups .',
-		'viewGroups.array_of_group_ids' => 'Please set an array viewGroups .',
-		'updateGroups.array_of_group_ids' => 'Please set an array updateGroups .',
-		'reviewGroups.array_of_group_ids' => 'Please set an array reviewGroups .',
-		'deleteGroups.array_of_group_ids' => 'Please set an array deleteGroups .',
-		'personalInfoViewGroups.array_of_group_ids' => 'Please set an array personalInfoViewGroups .',
-		'windowPriority.strict_string' => 'Please be windowPriority is set string type .',
-		'windowPresets.strict_array' => 'Please set an array windowPresets .',
-		'caseAttributesSchema.strict_array' => 'Please set an array case AttributesSchema .',
-		'labelAttributesSchema.strict_array' => 'Please set an array label AttributesSchema .',
-		'createTime.mongodate' => 'Please be createTime is set mongodate type .',
-		'updateTime.mongodate' => 'Please be updateTime is set mongodate type .'
-	);
 }

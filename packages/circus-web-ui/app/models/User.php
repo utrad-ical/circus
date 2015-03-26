@@ -36,12 +36,6 @@ class User extends BaseModel implements UserInterface {
 		'updateTime'		=>	'mongodate'
     );
 
-	protected $messages = array(
-		'userID.strict_integer' => 'Please be userID is set in numeric type .',
-		'groups.array_of_group_ids' => 'Invalid group ID list.',
-		'loginEnabled.strict_bool' => 'Please be loginEnabled is set in bool type .'
-	);
-
 	public function groups() {
 		return $this->belongsToMany('Group', null, 'users', 'groups');
 	}

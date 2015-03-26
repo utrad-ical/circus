@@ -1,8 +1,5 @@
 <?php
 
-
-//use Jenssegers\Mongodb\Model as Eloquent;
-
 /**
  * Model class for series.
  * @property string studyUID
@@ -73,13 +70,13 @@ class Series extends BaseModel {
 		'width'					  => 'required|strict_integer',
 		'height'				  => 'required|strict_integer',
 		'seriesDate'			  => 'required|mongodate',
-		'modality'				  => 'required|strict_string',
-		'seriesDescription'		  => 'required|strict_string',
-		'bodyPart'				  => 'required|strict_string',
+		'modality'				  => 'strict_string',
+		'seriesDescription'		  => 'strict_string',
+		'bodyPart'				  => 'strict_string',
 		'images'				  => 'required|strict_string',
-		'stationName'			  => 'required|strict_string',
-		'modelName'				  => 'required|strict_string',
-		'manufacturer'			  => 'required|strict_string',
+		'stationName'			  => 'strict_string',
+		'modelName'				  => 'strict_string',
+		'manufacturer'			  => 'strict_string',
 		'parameters'			  => 'strict_array',
 		'receiveMethod'			  => 'strict_string',
 		'domain'				  => 'required|strict_string',
@@ -91,8 +88,6 @@ class Series extends BaseModel {
 	 * シリーズイメージ範囲を取得する
 	 * @param String $id シリーズID
 	 * @return シリーズのイメージ範囲
-	 * @author stani
-	 * @since 2015/03/20
 	 */
 	public static function getImages($id) {
 		$series = Series::find($id);
@@ -103,8 +98,6 @@ class Series extends BaseModel {
 	 * シリーズ説明を取得する
 	 * @param Stirng $id シリーズID
 	 * @return シリーズ説明
-	 * @author stani
-	 * @since 2015/03/20
 	 */
 	public static function getSeriesDescription($id){
 		$series = self::find($id);
@@ -115,8 +108,6 @@ class Series extends BaseModel {
 	 * シリーズの一覧を取得する
 	 * @param Array $ids シリーズID群
 	 * @return シリーズリスト
-	 * @author stani
-	 * @since 2015/03/20
 	 */
 	public static function getPluralSeries($ids) {
 		return self::whereIn('seriesUID', $ids)
@@ -127,8 +118,6 @@ class Series extends BaseModel {
 	 * シリーズ一覧取得
 	 * @param Array $search_data 検索条件
 	 * @return シリーズ一覧
-	 * @author stani
-	 * @since 2015/03/20
 	 */
 	public static function getSeriesList($search_data) {
 		return self::where(function($query) use ($search_data) {

@@ -73,6 +73,19 @@ return array(
 	"url"                  => "The :attribute format is invalid.",
 	"timezone"             => "The :attribute must be a valid zone.",
 
+	// Added for CIRCUS DB
+	"strict_integer" => "The :attribute must be an integer.",
+	"strict_bool" => "The :attribute field must be strictly true or false.",
+	"mongodate" => "The :attribute must be a valid Mongo date.",
+	"strict_string" => "The :attribute must be a string.",
+	"strict_float" => "The :attribute must be a float.",
+	"array_of_group_ids" => "The :attribute must be an array of group IDs.",
+	"is_user" => "The :attribute must be a valid user ID.",
+	"array_of_privileges" => "The :attribute must be an array of privileges.",
+	"array_revision" => "The :attribute must be an array of revision data.",
+	"array_labels" => "The :attribute must be an array of label data.",
+	"array_series" => "The :attribute must be an array of series data.",
+
 	/*
 	|--------------------------------------------------------------------------
 	| Custom Validation Language Lines

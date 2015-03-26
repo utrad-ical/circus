@@ -56,9 +56,7 @@ class Storage extends BaseModel {
 	);
 
 	protected $messages = array(
-		'storageID.strict_integer' => 'Please be storageID is set in numeric type .',
 		'path.writable_directory' => 'The path does not exist or it is not writable.',
-		'active.strict_bool' => 'Please be active is set in bool type .'
 	);
 
 	/**

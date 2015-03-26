@@ -42,16 +42,4 @@ class Label extends BaseModel {
 		'labelID'
 	);
 
-	protected $messages = array(
-		'storageID.strict_integer' => 'Please be storageID is set in numeric type .',
-		'x.strict_integer' => 'Please be x is set in numeric type .',
-		'y.strict_integer' => 'Please be y is set in numeric type .',
-		'z.strict_integer' => 'Please be z is set in numeric type .',
-		'w.strict_integer' => 'Please be w is set in numeric type .',
-		'h.strict_integer' => 'Please be h is set in numeric type .',
-		'd.strict_integer' => 'Please be d is set in numeric type .',
-		'creator.is_user' => 'Invalid creator',
-		'createTime.mongodate' => 'Please be createTime is set in mongodate type .'
-	);
-
 }

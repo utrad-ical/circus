@@ -87,34 +87,6 @@ class Series extends BaseModel {
 		'updateTime'			  => 'mongodate'
 	);
 
-	protected $messages = array(
-		'studyUID.strict_string' => 'Please be studyUID is set in string type .',
-		'seriesUID.strict_string' => 'Please be seriesUID is set in string type .',
-		'storageID.strict_integer' => 'Please be storageID is set in numeric type .',
-		'patientInfo.strict_array' => 'Please set an array patientInfo.',
-		'patientInfo.patientID.strict_string' => 'Please be patientID of patientInfo is set in string type .',
-		'patientInfo.patientName.strict_string' => 'Please be patientName of patientInfo is set in string type .',
-		'patientInfo.age.strict_integer' => 'Please be age of patientInfo is set in numeric type .',
-		'patientInfo.birthDate.strict_date' => 'Please be birthDate of patientInfo is set in date type .',
-		'patientInfo.size.strict_float' => 'Please be size of patientInfo is set in numeric type .',
-		'patientInfo.weight.strict_float' => 'Please be weight of patientInfo is set in numeric type ,',
-		'width.strict_integer' => 'Please be width is set in numeric type .',
-		'height.strict_integer' => 'Please be height is set in numeric type .',
-		'seriesDate.mongodate' => 'Please be seriesDate is set in mondodate type .',
-		'modality.strict_string' => 'Please be modality is set in string type .',
-		'seriesDescription.strict_string' => 'Please be seriesDescription is set in string type',
-		'bodyPart.strict_string' => 'Please be bodyPart is set in string type .',
-		'images.strict_string' => 'Please be images is set in string type .',
-		'stationName.strict_string' => 'Please be images is set in string type .',
-		'modelName.strict_string' => 'Please be modelName is set in string type .',
-		'manufacturer.strict_string' => 'Please be manufacturer is set in string type .',
-		'parameters.strict_array' => 'Please set an array parameters .',
-		'receiveMethod.strict_string' => 'Please be receiveMethod is set in string type .',
-		'domain.strict_string' => 'Please be domain is set in string type .',
-		'createTime.mongodate' => 'Please be createTime is set in mongodate type .',
-		'updateTime.mongodate' => 'Please be updateTime is set in mongodate type . '
-	);
-
 	/**
 	 * シリーズイメージ範囲を取得する
 	 * @param String $id シリーズID

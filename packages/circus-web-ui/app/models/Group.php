@@ -5,7 +5,8 @@
  * @property number groupID Group ID.
  * @property string groupName Group name.
  * @property array domains List of domain
- * @property array priviledges List of priviledge
+ * @property array privileges List of privileges
+ * @property array domains
  */
 class Group extends BaseModel
 {
@@ -19,11 +20,13 @@ class Group extends BaseModel
 	const PROJECT_CREATE = 'createProject';
 	const PROJECT_DELETE = 'deleteProject';
 	const SERVER_MANAGE = 'manageServer';
+	const PERSONAL_INFO_VIEW = 'personalInfoView';
 
 	public static $privilegeList = [
 		['privilege' => self::PROJECT_CREATE, 'caption' => 'Create Project'],
 		['privilege' => self::PROJECT_DELETE, 'caption' => 'Delete Project'],
-		['privilege' => self::SERVER_MANAGE, 'caption' => 'Manage Server']
+		['privilege' => self::SERVER_MANAGE, 'caption' => 'Manage Server'],
+		['privilege' => self::PERSONAL_INFO_VIEW, 'caption' => 'View Personal Info']
 	];
 
 	/**
@@ -34,7 +37,8 @@ class Group extends BaseModel
 		'groupName' => 'required|alpha_dash',
 		'privileges' => 'array_of_privileges',
 		'createTime' => 'mongodate',
-		'updateTime' => 'mongodate'
+		'updateTime' => 'mongodate',
+		'domains' => 'array'
 	];
 
 	protected $messages = array(

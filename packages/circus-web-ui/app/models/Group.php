@@ -6,7 +6,6 @@
  * @property string groupName Group name.
  * @property array domains List of domain
  * @property array privileges List of privileges
- * @property array domains
  */
 class Group extends BaseModel
 {

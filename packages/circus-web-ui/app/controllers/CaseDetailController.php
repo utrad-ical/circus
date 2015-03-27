@@ -70,13 +70,14 @@ class CaseDetailController extends BaseController {
 			//Series list created
 			$inputs['seriesUID'] = self::getSeriesIDList($case_info, $select_revision);
 			//Shaping of the series list
-			$result['series_list'] = self::getSeriesList($case_info->revisions[$select_revision]);
+			$result['series_list'] = self::getSeriesList($case_info->revisions[$select_revision], $case_info->project->windowPresets);
 			$result['attribute'] = json_encode($case_info->revisions[$select_revision]['attributes']);
 			$result['inputs'] = Session::get('case.detail');
 
 			//Attribute Settings
 			$result['label_attribute_settings'] = json_encode($case_info->project->labelAttributesSchema);
 			$result['case_attribute_settings'] = json_encode($case_info->project->caseAttributesSchema);
+			$result['window_presets'] = json_encode($case_info->project->windowPresets);
 
 			//JsonFile read
 			$result['server_url'] = Helper\ConfigHelper::getServerConfig();
@@ -84,7 +85,6 @@ class CaseDetailController extends BaseController {
 			Log::debug($e);
 			Log::debug($e->getMessage());
 			$result['error_msg'] = $e->getMessage();
-			//$result['title'] = 'Case Detail';
 		}
 		return View::make('case/detail', $result);
 	}
@@ -176,7 +176,7 @@ class CaseDetailController extends BaseController {
 	 * @param $data Revision data that are selected
 	 * @return Series list brute string to Revision
 	 */
-	function getSeriesList($revision_info) {
+	function getSeriesList($revision_info, $presets) {
 		$data = array();
 		$img_save_path = Config::get('const.label_img_save_path');
 
@@ -194,6 +194,7 @@ class CaseDetailController extends BaseController {
 				'y'			=>	0,
 				'z'			=>	0
 			);
+
 			$series_info['window'] = array(
 				'level'		=>	array(
 					'current'	=>	1000,
@@ -205,14 +206,11 @@ class CaseDetailController extends BaseController {
 					'maximum'	=>	8000,
 					'minimum'	=>	1
 				),
-				'preset'	=>	array(
-					array(
-						'label'	=>	'ソースからシリーズ共通用で入力',
-						'level'	=>	1000,
-						'width'	=>	2000
-					)
-				)
+				'preset'	=>	array()
 			);
+
+			if ($presets)
+				$series_info['window']['preset'] = $presets;
 
 			$label_list = array();
 			foreach ($series['labels'] as $rec){

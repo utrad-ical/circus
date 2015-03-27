@@ -56,12 +56,10 @@ class CaseSearchController extends BaseController {
 			} else if (array_key_exists('condition_id', $inputs) !== false){
 				$detail_search_session = Session::get('case_detail_search');
 				$detail_search = $detail_search_session[$inputs['condition_id']];
-				$detail_search['project'] = json_decode($detail_search['project']);
 				if (array_key_exists('mongo_data', $detail_search) !== false) {
-					$file_path = dirname(dirname(__FILE__)).'/saves/'.Auth::user()->userID.'_case_'.($inputs['condition_id']+1).'.json';
+					$file_path = storage_path()."/saves/".Auth::user()->userID.'_case_'.($inputs['condition_id']+1).'.json';
 					$handle = fopen($file_path, 'r');
 					$detail_search['mongo_search_data'] = fread($handle, filesize($file_path));
-					$detail_search['mongo_data'] = json_decode($detail_search['mongo_data']);
 				}
 				$detail_search['disp'] = Config::get('const.page_display');
 				$detail_search['sort'] = 'updateTime';

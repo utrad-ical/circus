@@ -41,10 +41,11 @@ class LabelRegisterController extends BaseController {
 							$label_obj = Label::find($rec2['id']);
 							if (!$label_obj) {
 								$label_obj = self::setLabel($rec2, $storage_info->storageID);
-								$errors = $label_obj->save();
+								$label_obj->save();
+								//$errors = $label_obj->save();
 
-								if ($errors)
-									throw new Exception($errors);
+								//if ($errors)
+								//	throw new Exception($errors);
 							}
 							$save_img_result = self::saveImage($label_obj->labelID, $rec2['image'], $storage_info->path);
 							$revision[$rec['id']][] = array(
@@ -58,7 +59,7 @@ class LabelRegisterController extends BaseController {
 					$series_list[] = self::createSeriesList($rec['id']);
 				}
 			}
-			Log::debug($series_list);
+			//Log::debug($series_list);
 			//Update of case information
 			//Case information acquisition
 			$case_obj = ClinicalCase::find($inputs['caseId']);
@@ -70,10 +71,10 @@ class LabelRegisterController extends BaseController {
 			$revisions[] = $tmp_revision;
 			$case_obj->revisions = $revisions;
 			$case_obj->latestRevision = $tmp_revision;
-
-			$errors = $case_obj->save();
-			if ($errors)
-				throw new Exception($errors);
+			$case_obj->save();
+			//$errors = $case_obj->save();
+			//if ($errors)
+			//	throw new Exception($errors);
 			//JSON output
 			return self::outputJson(true, 'Registration of label information is now complete.');
 		} catch (InvalidModelException $e) {

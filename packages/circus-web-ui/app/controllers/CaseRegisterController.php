@@ -201,6 +201,7 @@ class CaseRegisterController extends BaseController {
 		//Input value acquisition
 		$inputs = Session::get('case_input');
 		$caseID = Session::get('caseID');
+		$mode = Session::get('mode');
 		self::setBackUrl($inputs, $result);
 
 		try {
@@ -226,16 +227,9 @@ class CaseRegisterController extends BaseController {
 			} else {
 				$case_obj->revisions = array($series_list);
 			}
-
 			$case_obj->latestRevision = $series_list;
-
-			//ValidateCheck
-			//Validate check for object creation
 			$case_obj->creator = Auth::user()->userID;
-
-			$errors = $case_obj->save();
-			if ($errors)
-				return self::errorConfirmFinish($errors, $result, $mode);
+			$case_obj->save();
 
 			$result['msg'] = 'Registration of case information is now complete.';
 			$result['caseID'] = $inputs['caseID'];
@@ -262,7 +256,7 @@ class CaseRegisterController extends BaseController {
 		$result['error_msg'] = $errorMsg;
 		$result['caseID'] = Session::get('caseID');
 		Session::put('complete', $result);
-		return Redirect::to('/case/complete');
+		return Redirect::to('case/complete');
 	}
 
 	/**

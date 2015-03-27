@@ -50,14 +50,7 @@ $(function(){
 					number:{
 						maximum : 260, //What sheets cross section is stored
 						current : 44	//Initial display number
-					},
-					window: {
-						level: {current : 1000, maximum : 50000, minimum : -5000},
-						width: {current : 6000, maximum : 9000, 	minimum : 1},
-						preset : [
-							 {label: 'Apply from the source only to axial'	, level: 0000	, width : 2000},
-						]
-					},
+					}
 				},
 				{//2nd sheet
 					elementId : 'img_area_sagital',
@@ -187,7 +180,6 @@ $(function(){
 		if (typeof tmp_the_series.label == 'object') {
 			for (var j = 0; j < tmp_the_series.label.length; j++) {
 	            var tmp_the_label = tmp_the_series.label[j];
-	            console.log(tmp_the_label);
 	            var tmp_prop_id = 'the_panel_label_attribute_'+i+'_'+j;
 	            $('#the_panel_label_attribute').append('<div class="control_panel_inner" id="'+tmp_prop_id+'"></div>');
 	            label_attribute_prop[i][j] = $('#'+tmp_prop_id);

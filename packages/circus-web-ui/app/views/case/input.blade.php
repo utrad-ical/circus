@@ -18,11 +18,11 @@
 @stop
 
 @section('title')
-{{{Session::get('mode')}}} Case Confirmation
+{{{Session::get('mode')}}} Case
 @stop
 
 @section('page_title')
-{{{Session::get('mode')}}} Case Confirmation
+{{{Session::get('mode')}}} Case
 @stop
 
 @section('page_id')

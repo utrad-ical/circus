@@ -11,7 +11,7 @@ class Exporter
 		return app_path() . '/bin/dicom_voxel_dump';
 	}
 
-	public function exportOriginalVolume($series_uid, $range, $output_path, $mhd_only_flg)
+	public function exportOriginalVolume($series_uid, $range, $out_raw_file, $mhd_only_flg)
 	{
 		// Get path of DICOM files
 		$sr = Series::find($series_uid);
@@ -21,13 +21,12 @@ class Exporter
 		$args = array("raw", "--with-mhd");
 		$args[] = "--input-path=" . escapeshellarg($path->dicomStoragePath($series_uid));
 		$args[] = "--image-range=" . escapeshellarg($range);
-		$args[] = "--out=" . escapeshellarg($output_path . "/original.raw");
+		$args[] = "--out=" . escapeshellarg($out_raw_file);
 		if ($mhd_only_flg) {
 			$args[] = "--without-raw-data";
 		} else {
 			$args[] = "--with-tag-dump";
 		}
-		echo $this->dumperPath() . ' ' . implode(' ', $args);
 		exec($this->dumperPath() . ' ' . implode(' ', $args));
 
 		// Todo: Add check code (exported files exist or not).
@@ -87,6 +86,37 @@ class Exporter
 			file_put_contents($raw_file_name, $data);
 		}
 	}
+
+	public function compressFilesToZip($path, $file_name)
+	{
+		// Get file list in $path
+		$file_list = array();
+		if (is_dir($path)) {
+			if ($dir = opendir($path)) {
+				while (($file = readdir($dir)) !== false) {
+					if ($file == "." || $file == ".." || is_dir($file)) {
+						continue;
+					}
+					$file_list[] = $file;
+				}
+				closedir($dir);
+			}
+		}
+
+		if (count($file_list) > 0) {
+			$zip = new ZipArchive();
+			if ($zip->open($file_name, ZipArchive::OVERWRITE) === true) {
+				foreach ($file_list as $file) {
+					$path_parts = pathinfo($file);
+					$zip->addFile($file, $path_parts['basename']);
+				}
+				$zip->close();
+			} else {
+				throw new Exception("Failed to create zip file ($file_name)");
+			}
+		}
+	}
+
 
 	/**
 	 * Duplicate and modify meta header file (.mhd) for label volume.

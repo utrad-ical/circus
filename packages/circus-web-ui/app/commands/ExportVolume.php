@@ -37,34 +37,70 @@ class ExportVolume extends Command {
 	 */
 	public function fire()
 	{
-		// Get case information
-		$case_data = ClinicalCase::find($this->argument('caseID'));
-
-		if ($case_data == null) {
-			$this->error('Invalid caseID: ' . $this->argument('caseID'));
+		// Check mode
+		$mode = $this->argument('mode');
+		if ($mode != 'case' && $mode != 'series') {
+			$this->error("Invalid mode (Use 'case' or 'series').");
+			return;
 		}
 
-		// Check revision
+		// Check output path
+		if (!is_dir($this->argument('output-path'))) {
+			$this->error("Path (" . $this->argument('output-path') . ") is not found.");
+			return;
+		}
+		// Todo: check permission
+
+		if ($mode == 'case') {
+			$this->exportCaseData();
+		} else {
+			$this->exportSeriesData();
+		}
+	}
+
+	protected function exportCaseData()
+	{
+		// Check options
+		if($this->option('without-original') && $this->option('without-label')) {
+			$this->error('Option error: --without-original and --without-label are simultaneously set');
+			return;
+		}
+
+		// Get case information
+		$case_data = ClinicalCase::find($this->argument('targetID'));
+		if ($case_data == null) {
+			$this->error('Invalid caseID: ' . $this->argument('targetID'));
+			return false;
+		}
+
+		// Get revision information
+		$revision_index = $this->option('revision');
 		$revision_data = $case_data['latestRevision'];
-		if ($this->option('revision') != 'latest') {
-			if(array_key_exists($this->option('revision'), $case_data['revisions'])) {
-				$revision_data = $case_data['revisions'][$this->option('revision')];
+		if ($this->option('revision') == 'latest') {
+			foreach ($case_data['revisions'] as $key => $items) {
+				if ($items['date'] == $revision_data['date']) {
+					$revision_index = $key;
+					echo $key;
+					break;
+				}
+			}
+		} else {
+			if (array_key_exists($this->option('revision'), $revision_index)) {
+				$revision_data = $case_data['revisions'][$revision_index];
 			} else {
-				$this->error('Invalid revision: ' . $this->option('revision'));
-				return;
+				$this->error('Invalid revision: ' . $revision_index);
+				return false;
 			}
 		}
 
 		// Check series index
 		if (!array_key_exists($this->option('series_index'), $revision_data['series'])) {
 			$this->error('Invalid series index: ' . $this->option('series_index'));
-			return;
+			return false;
 		}
 		$series_data = $revision_data['series'][$this->option('series_index')];
 
-		// Todo: Export series_attributes.json (if found)
-
-		// Check map
+		// Check relation map (label index, voxel value)
 		$map_data = null;
 		// TODO: check the target series includes label data
 
@@ -73,55 +109,103 @@ class ExportVolume extends Command {
 			$this->option('map'));
 		if(!$this->option('without-label') && $map_data == null) {
 			$this->error('Invalid map:');
-			return;
+			return false;
 		}
-
-		if($this->option('without-original') && $this->option('without-label')) {
-			$this->error('Option error: --without-original and --without-label are simultaneously set');
-			return;
-		}
-
-		// Todo: Check output path
 
 		// Export original volume
-		$mhd_only_flg = $this->option('without-original');
 		$ex = new \VolumeExporter\Exporter();
 		$ex->exportOriginalVolume(
 			$series_data['seriesUID'],
 			$series_data['images'],
-			$this->option('output'),
-			$mhd_only_flg);
+			$this->argument('output-path') . "/original.raw",
+			$this->option('without-original'));
+
+		// Export case_attributes.json
+		if (array_key_exists('attributes', $revision_data))
+		{
+			$file_name = $this->argument('output-path') . "/case_attributes.json";
+			$attributes = array(
+				'caseID' => $this->argument('targetID'),
+				'revision' => $revision_index)
+				+ $revision_data['attributes'];
+			file_put_contents($file_name, json_encode($attributes));
+		}
 
 		// Export label volume
 		if (!$this->option('without-label')) {
 
 			// Create label info
 			$label_info = array();
+			$label_attributes = array(
+				'caseID' => $this->argument('targetID'),
+				'revision' => $revision_index
+			);
 
 			foreach ($map_data as $label_index => $voxel_value) {
 
 				$ld = Label::find($series_data['labels'][$label_index]['id'])->getAttributes();
 				$ld['path'] = Storage::find($ld['storageID'])->getAttribute('path');
 				$ld['voxel_value'] = $voxel_value;
-
 				$label_info[] = $ld;
+				$label_attributes[$voxel_value] = $series_data['labels'][$label_index]['attributes'];
 			}
 
 			$ex->createLabelVolume(
-				$this->option('output'),
+				$this->argument('output-path'),
 				$label_info,
 				$this->option('combined'));
 
-			// Todo: Export label_attributes.json
+			// Export label_attributes.json
+			$file_name = $this->argument('output-path') . "/label_attributes.json";
+			file_put_contents($file_name, json_encode($label_attributes));
 		}
 
-		if ($mhd_only_flg) {
-			unlink($this->option('output') . "/original.mhd");
+		if ($this->option('without-original')) {
+			unlink($this->argument('output-path') . "/original.mhd");
 		}
 
-		// Todo: compress to ZIP file?
-
+//		// Compress all exported file to ZIP file
+//		if ($this->option('compress')) {
+//			$file_name = sprintf("%s/%s_revison%d.zip",
+//				$this->argument('output-path'),
+//				$this->argument('targetID'),
+//				$revision_index);
+//			echo $file_name;
+//			$ex->compressFilesToZip($this->argument('output-path'), $file_name);
+//		}
+		return true;
 	}
+
+	protected function exportSeriesData()
+	{
+		// Get case information
+		$series_data = Series::find($this->argument('targetID'));
+		if ($series_data == null) {
+			$this->error('Invalid seriesUID: ' . $this->argument('targetID'));
+			return false;
+		}
+
+		// Export original volume
+		$ex = new \VolumeExporter\Exporter();
+		$ex->exportOriginalVolume(
+			$series_data['seriesUID'],
+			$series_data['images'],
+			$this->argument('output-path') . "/" . $series_data['seriesUID'] . ".raw",
+			$this->option('without-original'));
+
+
+//		// Compress all exported file to ZIP file
+//		if ($this->option('compress')) {
+//			$file_name = sprintf("%s/%s.zip",
+//				$this->argument('output-path'),
+//				$series_data['seriesUID']);
+//			echo $file_name;
+//			$ex->compressFilesToZip($this->argument('output-path'), $file_name);
+//		}
+
+		return true;
+	}
+
 
 	protected function checkRelationMap($series_data, $map)
 	{
@@ -163,7 +247,9 @@ class ExportVolume extends Command {
 	protected function getArguments()
 	{
 		return array(
-			array('caseID', InputArgument::REQUIRED, 'Target case ID.')
+			array('mode', InputArgument::REQUIRED, 'Process mode (case or series).'),
+			array('targetID', InputArgument::REQUIRED, 'Target ID (caseID or series UID).'),
+			array('output-path', InputArgument::REQUIRED, 'Output path.')
 		);
 	}
 
@@ -181,8 +267,7 @@ class ExportVolume extends Command {
 			array('combined', 'c', InputOption::VALUE_NONE, 'Combine all labels into one volume data.', null),
 			array('without-original', null, InputOption::VALUE_NONE, 'Without exporting original volume.', null),
 			array('without-label', null, InputOption::VALUE_NONE, 'Without exporting label volume.', null),
-			array('output', 'o', InputOption::VALUE_OPTIONAL, 'Output path.', null)
-			//array('output', 'o', InputOption::VALUE_OPTIONAL, 'Output file name (compressed by ZIP).', null)
+			//array('compress', null,  InputOption::VALUE_NONE, 'Compress all exported files to ZIP.', null)
 		);
 	}
 

@@ -3,6 +3,7 @@ namespace VolumeExporter;
 
 use Series;
 use Storage;
+use ZipArchive;
 
 class Exporter
 {
@@ -43,7 +44,7 @@ class Exporter
 
 		foreach ($label_info as $label) {
 
-			if(!$combined_flg) {
+			if (!$combined_flg) {
 				$mhd_file_name = $output_path . "/label_" . $label['voxel_value'] . ".mhd";
 				$raw_file_name = $output_path . "/label_" . $label['voxel_value'] . ".raw";
 			}
@@ -107,10 +108,16 @@ class Exporter
 			$zip = new ZipArchive();
 			if ($zip->open($file_name, ZipArchive::OVERWRITE) === true) {
 				foreach ($file_list as $file) {
-					$path_parts = pathinfo($file);
-					$zip->addFile($file, $path_parts['basename']);
+					$zip->addFile($path . "/". $file, $file);
 				}
 				$zip->close();
+
+				foreach ($file_list as $file) {
+					$tmp_file_name = $path . "/". $file;
+					if ($tmp_file_name != $file_name) {
+						unlink($tmp_file_name);
+					}
+				}
 			} else {
 				throw new Exception("Failed to create zip file ($file_name)");
 			}

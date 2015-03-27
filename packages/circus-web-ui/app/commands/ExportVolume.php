@@ -61,7 +61,7 @@ class ExportVolume extends Command {
 	protected function exportCaseData()
 	{
 		// Check options
-		if($this->option('without-original') && $this->option('without-label')) {
+		if ($this->option('without-original') && $this->option('without-label')) {
 			$this->error('Option error: --without-original and --without-label are simultaneously set');
 			return;
 		}
@@ -80,7 +80,6 @@ class ExportVolume extends Command {
 			foreach ($case_data['revisions'] as $key => $items) {
 				if ($items['date'] == $revision_data['date']) {
 					$revision_index = $key;
-					echo $key;
 					break;
 				}
 			}
@@ -107,7 +106,7 @@ class ExportVolume extends Command {
 		$map_data = $this->checkRelationMap(
 			$series_data,
 			$this->option('map'));
-		if(!$this->option('without-label') && $map_data == null) {
+		if (!$this->option('without-label') && $map_data == null) {
 			$this->error('Invalid map:');
 			return false;
 		}
@@ -121,8 +120,7 @@ class ExportVolume extends Command {
 			$this->option('without-original'));
 
 		// Export case_attributes.json
-		if (array_key_exists('attributes', $revision_data))
-		{
+		if (array_key_exists('attributes', $revision_data)) {
 			$file_name = $this->argument('output-path') . "/case_attributes.json";
 			$attributes = array(
 				'caseID' => $this->argument('targetID'),
@@ -142,7 +140,6 @@ class ExportVolume extends Command {
 			);
 
 			foreach ($map_data as $label_index => $voxel_value) {
-
 				$ld = Label::find($series_data['labels'][$label_index]['id'])->getAttributes();
 				$ld['path'] = Storage::find($ld['storageID'])->getAttribute('path');
 				$ld['voxel_value'] = $voxel_value;
@@ -164,15 +161,14 @@ class ExportVolume extends Command {
 			unlink($this->argument('output-path') . "/original.mhd");
 		}
 
-//		// Compress all exported file to ZIP file
-//		if ($this->option('compress')) {
-//			$file_name = sprintf("%s/%s_revison%d.zip",
-//				$this->argument('output-path'),
-//				$this->argument('targetID'),
-//				$revision_index);
-//			echo $file_name;
-//			$ex->compressFilesToZip($this->argument('output-path'), $file_name);
-//		}
+		// Compress all exported file to ZIP file
+		if ($this->option('compress')) {
+			$file_name = sprintf("%s/%s_revison%d.zip",
+				$this->argument('output-path'),
+				$this->argument('targetID'),
+				$revision_index);
+			$ex->compressFilesToZip($this->argument('output-path'), $file_name);
+		}
 		return true;
 	}
 
@@ -193,15 +189,13 @@ class ExportVolume extends Command {
 			$this->argument('output-path') . "/" . $series_data['seriesUID'] . ".raw",
 			$this->option('without-original'));
 
-
-//		// Compress all exported file to ZIP file
-//		if ($this->option('compress')) {
-//			$file_name = sprintf("%s/%s.zip",
-//				$this->argument('output-path'),
-//				$series_data['seriesUID']);
-//			echo $file_name;
-//			$ex->compressFilesToZip($this->argument('output-path'), $file_name);
-//		}
+		// Compress all exported file to ZIP file
+		if ($this->option('compress')) {
+			$file_name = sprintf("%s/%s.zip",
+				$this->argument('output-path'),
+				$series_data['seriesUID']);
+			$ex->compressFilesToZip($this->argument('output-path'), $file_name);
+		}
 
 		return true;
 	}
@@ -267,7 +261,7 @@ class ExportVolume extends Command {
 			array('combined', 'c', InputOption::VALUE_NONE, 'Combine all labels into one volume data.', null),
 			array('without-original', null, InputOption::VALUE_NONE, 'Without exporting original volume.', null),
 			array('without-label', null, InputOption::VALUE_NONE, 'Without exporting label volume.', null),
-			//array('compress', null,  InputOption::VALUE_NONE, 'Compress all exported files to ZIP.', null)
+			array('compress', null,  InputOption::VALUE_NONE, 'Compress all exported files to ZIP.', null)
 		);
 	}
 

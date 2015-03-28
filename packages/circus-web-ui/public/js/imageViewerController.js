@@ -33,7 +33,7 @@
             minimum: 1
           },
           preset: [
-            {label: 'your preset label', level: 1000, width: 4000}
+	//            {label: 'your preset label', level: 1000, width: 4000}
           ]
         },
         voxel: {
@@ -157,52 +157,7 @@
       //書き換えがあったラベルのidを差し替える
       var this_elm = this;
 
-      for (var i = 0; i < controllerInfo.series.length; i++) {
-        var tmp_the_controller_series = controllerInfo.series[i];
-
-        for (var j = 0; j < tmp_the_controller_series.label.length; j++) {
-          var tmp_the_label = tmp_the_controller_series.label[j];
-          var tmp_current_label_id = tmp_the_label.id + '';	//更新前のラベルid
-
-
-          if (typeof tmp_the_label.update_flg != 'undefined' && tmp_the_label.update_flg == true) {
-            var tmp_new_label_id = this_elm.imageViewerController('getLabelDefault').id;
-
-            //ビューアー内のラベルオブジェクトid書き換え
-            for (var k = 0; k < controllerInfo.viewer.length; k++) {
-              var tmp_the_viewer = controllerInfo.viewer[k];
-              var the_viewer_options = $('#' + tmp_the_viewer.elementId).imageViewer('option', 'viewer');
-              for (var l = 0; l < the_viewer_options.draw.series.length; l++) {
-                var the_viewer_series = the_viewer_options.draw.series[l];
-                if (the_viewer_series.activeLabelId == tmp_current_label_id) {
-                  the_viewer_series.activeLabelId = tmp_new_label_id;
-                }
-
-                for (var m = 0; m < the_viewer_series.label.length; m++) {
-                  var the_viewer_label = the_viewer_series.label[m];
-                  if (the_viewer_label.id == tmp_current_label_id) {
-                    the_viewer_label.id = tmp_new_label_id;
-                  }
-                }
-              }
-            }
-
-            //コンテナ内部のラベルidを差し替え
-            var container_object = controllerInfo.viewer[0].container;
-						container_object.changeLabelName(tmp_current_label_id, tmp_the_controller_series.id,tmp_new_label_id);
-
-            //コントローラのラベルオブジェクトid書き換え
-            tmp_the_label.id = tmp_new_label_id;
-            if (tmp_the_controller_series.activeLabelId == tmp_current_label_id) {
-              tmp_the_controller_series.activeLabelId = tmp_new_label_id;
-            }
-
-            tmp_the_label.update_flg = false;
-
-          }
-        }
-      }
-
+			//コントロールパネルに同期
       this_elm.imageViewerController('updateLabelElements');
 
       //紐づくビューアーたちに伝播
@@ -278,16 +233,6 @@
       }
 
     },
-
-
-
-		changeLabelAttribute : function(){
-		   var this_elm = this;
-
-
-
-		},
-
 
     //各種操作ボタン等の設置
     //jQuery UI widget とは異なり、initの中から呼ぶ
@@ -460,7 +405,6 @@
       //要素に反映
       this_elm.imageViewerController('updateLabelElements');
 
-
       for (var i = controllerInfo.viewer.length - 1; i >= 0; i--) {
         var elmId = '#' + controllerInfo.viewer[i].elementId;
 
@@ -487,13 +431,6 @@
       }
 
       return rtn_obj;
-    },
-
-
-
-    //３面共用のコントローラー情報の取り出し
-    getValues: function () {
-      return controllerInfo;
     },
 
 
@@ -668,11 +605,9 @@
           /*.imageViewer()*/
         }
 
-      }
-      /*viewerRun*/
+      }//viewerRun
 
       viewerRun();
-
 
       //ビューアー発火後に生成された要素にイベント設置
       this_elm.imageViewerController('setViewerInnerEvents');
@@ -1156,12 +1091,6 @@
           }
         });
 
-        //更新が発生した段階でフラグを立てる
-        $(tmp_elm).bind('onWritten', function (e, label_id, series_id) {
-          var tmp_the_label = this_elm.imageViewerController('getLabelObjectById', label_id, series_id)
-          tmp_the_label.update_flg = true;
-        });
-
         //ある面でwindow情報が変更されたらそれを他の面にも適用させる
         $(tmp_elm).find('.mouse_cover').bind('mouseup', function () {
           if (controllerInfo.mode == 'window') {
@@ -1250,7 +1179,6 @@
 					}
 				}
       }
-
 
       var tmp_elm = '';
 
@@ -1428,25 +1356,28 @@
         }
       });
 
-			//attribute change
+			//attribute
 			var insert_prop = {
 				properties: controllerInfo.defaultLabelAttribute
 			};
 
 			var tmp_active_series =  this_elm.imageViewerController('getSeriesObjectById',[controllerInfo.activeSeriesId]);
-			var tmp_the_label =  this_elm.imageViewerController('getLabelObjectById',tmp_active_series.activeLabelId,tmp_active_series.id);
-
-			if(typeof tmp_the_label.attribute =='object'){
-				insert_prop.value = tmp_the_label.attribute;
+			if(tmp_active_series.label.length>0){
+			
+				var tmp_the_label =  this_elm.imageViewerController('getLabelObjectById',tmp_active_series.activeLabelId,tmp_active_series.id);
+	
+				if(typeof tmp_the_label.attribute =='object'){
+					insert_prop.value = tmp_the_label.attribute;
+				}
+	
+				$('#' + controllerInfo.elements.label).find('.label_info_wrap').empty().append('<div class="label_attr_area"></div>');
+				$('#' + controllerInfo.elements.label).find('.label_attr_area').empty().propertyeditor(insert_prop)
+				.on('valuechange',function(event,obj){
+					//本来はここで記述内容をオブジェクトにしてコントローラにlabelオブジェクトのアトリビュートを更新する
+					//書き換え内容をオブジェクトに戻す措置を追加する
+					tmp_the_label.attribute = $(this).propertyeditor('option').value;
+				});
 			}
-
-			$('#' + controllerInfo.elements.label).find('.label_info_wrap').empty().append('<div class="label_attr_area"></div>');
-			$('#' + controllerInfo.elements.label).find('.label_attr_area').empty().propertyeditor(insert_prop)
-			.on('valuechange',function(event,obj){
-				//本来はここで記述内容をオブジェクトにしてコントローラにlabelオブジェクトのアトリビュートを更新する
-				//書き換え内容をオブジェクトに戻す措置を追加する
-				tmp_the_label.attribute = $(this).propertyeditor('option').value;
-			});
 
     }/*updateLabelElements*/,
 

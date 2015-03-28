@@ -751,6 +751,8 @@
 				'pen',
 				target_position_array
 			);
+			
+			this_elm.trigger('onWritten',[label_id,series_id]);
 
 			 //自分自身、同じボクセルを共用するビューアーに対してコンテナとの同期を促す
 			var tmp_this_id = this_elm.attr('id');

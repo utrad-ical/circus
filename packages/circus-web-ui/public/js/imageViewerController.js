@@ -11,6 +11,7 @@
     baseUrl: 'http://your-website/', //画像格納ディレクトリ
     color_marker: 0,
     defaultColorSet: ['#FF0000', '#FFCC00', '#0033FF', '#0099FF', '#00CCFF', '#00FFFF', '#00FF00', '#00CC00', '#009900', '#006600', '#FF6600', '#FF3300', '#3333CC', '#CC3399', '#CC6666', '#FF9999'],
+    defaultLabelAttribute: {},
     mode: 'pan', //pan,pen,erase,window
     series: [
       {
@@ -78,7 +79,9 @@
     elements: {
       parent: '', //複数のビューアーを全て囲う親要素id
       panel: '', //操作パネルを入れ込む要素id
-      label: '' //ラベルの操作ボタン等を入れ込む要素id
+      label: '', //ラベルの操作ボタン等を入れ込む要素id
+      labelAttribute: '', //ラベルの操作ボタン等を入れ込む要素id
+      revisionAttribute: '' //revision attribute
     },
     viewer: [ //展開するビューアーの情報
       {
@@ -277,6 +280,15 @@
     },
 
 
+
+		changeLabelAttribute : function(){
+		   var this_elm = this;
+
+
+
+		},
+
+
     //各種操作ボタン等の設置
     //jQuery UI widget とは異なり、initの中から呼ぶ
     create: function () {
@@ -392,25 +404,18 @@
             //ただしここではオブジェクトに追加するだけ。要素生成は別
             this_elm.imageViewerController('addLabelObject');
           }
-          this_elm.imageViewerController('updateLabelElements');
 
           //アクティブラベルの指定が無ければラベル配列の１番目を有効化
           if (active_series.activeLabelId == '') {
             active_series.activeLabelId = active_series.label[0].id;
           }
 
-          var tmp_info_elm = '<div class="label_info_wrap"><div class="label_info">\
-				  <span class="common_btn edit_activate">Edit</span>\
-				  <span class="common_btn edit_finish disabled">OK</span>\
-				  <input type="hidden" value="" class="label_id">\
-				  <input type="text" value="" class="label_title readonly>\
-				  <textarea value="" class="label_description" readonly></textarea>\
-				  </div></div><div class="clear">&nbsp;</div>';
-
+          var tmp_info_elm = '<div class="label_info_wrap"></div><div class="clear">&nbsp;</div>';
           $('#' + controllerInfo.elements.label).append(tmp_info_elm);
+
+          this_elm.imageViewerController('updateLabelElements');
+
         }//ラベル関連
-
-
       }//control
 
       //要素設置が済んだらイベント設置
@@ -668,6 +673,7 @@
 
       viewerRun();
 
+
       //ビューアー発火後に生成された要素にイベント設置
       this_elm.imageViewerController('setViewerInnerEvents');
 
@@ -686,18 +692,7 @@
         //配下ビューアー表示を同期
         $(elmId).trigger('sync');
       }
-      /*
-       //Attribute描画
-       //console.log("Attribute描画");
-       //console.log(insert_obj);
-       //var attribute_prop = $('#prop');
-       attribute_prop.propertyeditor({properties: attribute_properties});
-       attribute_prop.on('valuechange', function () {
 
-       attribute_prop.propertyeditor('option', 'value');
-       //    $('#value').val(JSON.stringify(value));
-       });
-       */
     }/*init*/,
 
 
@@ -889,27 +884,10 @@
       /*ラベル表示領域*/
       if (controllerInfo.control.pen.panel == true) {
         $('#' + controllerInfo.elements.label).find('.add_label').click(function () {
-
           this_elm.imageViewerController('addLabelObject');
           this_elm.imageViewerController('updateLabelElements');
         });
-
-        //現在フォーカス中ラベルの情報表示・書き換え
-        $('#' + controllerInfo.elements.label).find('.label_title,.label_description').change(function () {
-          var tmp_label_id = $(this).closest('.label_info_wrap').find('.label_id').val();
-
-          for (var i = 0; i < active_series.label.length; i++) {
-            var tmp_the_label = active_series.label[i];
-            if (tmp_the_label.id == tmp_label_id) {
-              tmp_the_label.name = $('#' + controllerInfo.elements.label).find('.label_title').val();
-              tmp_the_label.description = $('#' + controllerInfo.elements.label).find('.label_description').val();
-              break;
-            }
-          }
-          this_elm.imageViewerController('updateLabelElements');
-        });
       }
-
 
       //保存
       $('.btn_save').click(function () {
@@ -917,6 +895,7 @@
         return false;
       });
     },
+
 
 
     //color,alphaの値からRGBA値を計算する
@@ -983,7 +962,6 @@
 
 
     getLabelObjectById: function (label_id, series_id) {
-
       //描画対象ラベルのチェック
       var this_elm = this;
 
@@ -1021,9 +999,12 @@
 
       saveData.caseId = controllerInfo.caseId;
       saveData.series = new Array(0);
-      //console.log(revision_attributes);
-      var revision_attributes = $('#the_panel_case_attribute').propertyeditor('option', 'value');
-      saveData.attribute = JSON.stringify(revision_attributes);
+
+			if(controllerInfo.elements.revisionAttribute != ''){
+				var revision_attributes = $('#'+controllerInfo.elements.revisionAttribute).propertyeditor('option').value;
+				saveData.attribute = JSON.stringify(revision_attributes);
+			}
+			
       try {
         for (var i = 0; i < controllerInfo.series.length; i++) {
           var tmp_the_series = controllerInfo.series[i];
@@ -1043,14 +1024,14 @@
 
               if (container_data.image.indexOf('data:image') == -1) {
                 container_data.image = '';
-              }
-              ;
+              };
 
               tmp_insert_obj.label[j] = container_data;
               tmp_insert_obj.label[j].id = tmp_the_label.id;
-
-              var tmp_attributes = $('#the_panel_label_attribute_'+i+'_'+j).propertyeditor('option', 'value');
-              tmp_insert_obj.label[j].attribute = JSON.stringify(tmp_attributes);
+							
+							if(typeof  tmp_the_label.attribute == 'object'){
+								tmp_insert_obj.label[j].attritube = tmp_the_label.attribute;
+							}
             }
           }
           saveData.series[i] = tmp_insert_obj;
@@ -1067,6 +1048,7 @@
         //console.log(saveData);
         //console.log("URL::");
         //console.log(controllerInfo.postUrl);
+				console.log(saveData);
 
         $.ajax({
           url: controllerInfo.postUrl,
@@ -1258,6 +1240,18 @@
         controllerInfo.activeSeriesId = active_series.id;
       }
 
+			//全シリーズにてactiveLabelIdを決めておく。基本的には一番手前のもの
+      for (var i = controllerInfo.series.length - 1; i >= 0; i--) {
+        var the_series = controllerInfo.series[i];
+				if(the_series.activeLabelId == ''){
+					var label_id = '';
+					if(the_series.label.length>0){
+						the_series.activeLabelId = the_series.label[0].id;
+					}
+				}
+      }
+
+
       var tmp_elm = '';
 
       //関連要素は初期化
@@ -1306,17 +1300,11 @@
 						<label class="label_txt">Label ' + i + '</label><label class="alpha_label"><input type="text" value="' + tmp_the_label.alpha + '" class="alpha_change">%</label>\
 						<label class="now_draw_label"></label><label class="delete_label"></label><div class="clear">&nbsp;</div></li>';
 
-            if (tmp_the_label.id == tmp_the_series.activeLabelId) {
-              $('#' + controllerInfo.elements.label).find('.label_id').val(tmp_the_label.id);
-              $('#' + controllerInfo.elements.label).find('.label_title').val(tmp_the_label.name);
-              $('#' + controllerInfo.elements.label).find('.label_description').val(tmp_the_label.description);
-            }
-          }
+					}
         }
         tmp_elm = tmp_elm + '</ul></div>';
       }
       tmp_wrap_elm.prepend(tmp_elm);
-
 
       //イベント設置
       //カラーピッカー
@@ -1440,22 +1428,25 @@
         }
       });
 
-      $('#' + controllerInfo.elements.label).find('.edit_activate').click(function () {
-        if ($(this).hasClass('disabled') == false) {
-          $(this).addClass('disabled');
-          $(this).closest('.label_info_wrap').find('.edit_finish').removeClass('disabled');
-          $(this).closest('.label_info_wrap').find('.label_title,.label_description').removeAttr('readonly');
-        }
-      });
+			//attribute change
+			var insert_prop = {
+				properties: controllerInfo.defaultLabelAttribute
+			};
 
-      $('#' + controllerInfo.elements.label).find('.edit_finish').click(function () {
-        if ($(this).hasClass('disabled') == false) {
-          alert('changed textdata is not saved.\n they willbe saved when the [SAVE] operation.');
-          $(this).addClass('disabled');
-          $(this).closest('.label_info_wrap').find('.edit_activate').removeClass('disabled');
-          $(this).closest('.label_info_wrap').find('.label_title,.label_description').attr('readonly', 'readonly');
-        }
-      });
+			var tmp_active_series =  this_elm.imageViewerController('getSeriesObjectById',[controllerInfo.activeSeriesId]);
+			var tmp_the_label =  this_elm.imageViewerController('getLabelObjectById',tmp_active_series.activeLabelId,tmp_active_series.id);
+
+			if(typeof tmp_the_label.attribute =='object'){
+				insert_prop.value = tmp_the_label.attribute;
+			}
+
+			$('#' + controllerInfo.elements.label).find('.label_info_wrap').empty().append('<div class="label_attr_area"></div>');
+			$('#' + controllerInfo.elements.label).find('.label_attr_area').empty().propertyeditor(insert_prop)
+			.on('valuechange',function(event,obj){
+				//本来はここで記述内容をオブジェクトにしてコントローラにlabelオブジェクトのアトリビュートを更新する
+				//書き換え内容をオブジェクトに戻す措置を追加する
+				tmp_the_label.attribute = $(this).propertyeditor('option').value;
+			});
 
     }/*updateLabelElements*/,
 

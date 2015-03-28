@@ -372,6 +372,7 @@ voxelContainer.prototype.getLabelObjectById = function (label_id, series_id) {
 
 
 voxelContainer.prototype.getPositionDataFromImage = function (insertObject, series_w, series_h) {
+	
   //初期ロード時等、画像データからpositionデータを生成する
   var this_obj = this;
   var this_data = this_obj.data;

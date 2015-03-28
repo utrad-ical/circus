@@ -33,7 +33,7 @@
             minimum: 1
           },
           preset: [
-	//            {label: 'your preset label', level: 1000, width: 4000}
+            {label: 'your preset label', level: 1000, width: 4000}
           ]
         },
         voxel: {
@@ -107,6 +107,7 @@
       //ラベルの新規追加
       var this_elm = this;
       var active_series = this_elm.imageViewerController('getSeriesObjectById', [controllerInfo.activeSeriesId]);
+
       if (typeof active_series != 'object') {
         active_series = controllerInfo.series[0];
         controllerInfo.activeSeriesId = active_series.id;
@@ -120,11 +121,11 @@
 
       var label_default = this_elm.imageViewerController('getLabelDefault', tmp_color_index_num);
       tmp_label_obj = $.extend(true, tmp_label_obj, label_default);
-
       active_series.label.push(tmp_label_obj);
-      //activeLabelが空白のままなら、一番手前のものをactiveLabelとする
-      if (active_series.activeLabelId == '') {
-        active_series.activeLabelId = tmp_id;
+
+      //activeLabelが未定義なら今回追加したラベルを指定
+      if (typeof active_series.activeLabelId == 'undefined'|| active_series.activeLabelId == '') {
+        active_series.activeLabelId = active_series.label[0].id;
       }
 
       //配下ビューアーオプション情報を書き換えて再描画を発火させる
@@ -157,7 +158,53 @@
       //書き換えがあったラベルのidを差し替える
       var this_elm = this;
 
-			//コントロールパネルに同期
+      for (var i = 0; i < controllerInfo.series.length; i++) {
+				var tmp_the_controller_series = controllerInfo.series[i];
+	
+				if(typeof tmp_the_controller_series.label == 'object'){
+				
+						for (var j = 0; j < tmp_the_controller_series.label.length; j++) {
+							var tmp_the_label = tmp_the_controller_series.label[j];
+							var tmp_current_label_id = tmp_the_label.id + '';	//更新前のラベルid
+
+							//この条件の作り方を検討中
+							if (typeof tmp_the_label.update_flg != 'undefined' && tmp_the_label.update_flg == true) {
+								var tmp_new_label_id = this_elm.imageViewerController('getLabelDefault').id;
+		
+								//ビューアー内のラベルオブジェクトid書き換え
+								for (var k = 0; k < controllerInfo.viewer.length; k++) {
+									var tmp_the_viewer = controllerInfo.viewer[k];
+									var the_viewer_options = $('#' + tmp_the_viewer.elementId).imageViewer('option', 'viewer');
+									for (var l = 0; l < the_viewer_options.draw.series.length; l++) {
+										var the_viewer_series = the_viewer_options.draw.series[l];
+										if (the_viewer_series.activeLabelId == tmp_current_label_id) {
+											the_viewer_series.activeLabelId = tmp_new_label_id;
+										}
+		
+										for (var m = 0; m < the_viewer_series.label.length; m++) {
+											var the_viewer_label = the_viewer_series.label[m];
+											if (the_viewer_label.id == tmp_current_label_id) {
+												the_viewer_label.id = tmp_new_label_id;
+											}
+										}
+									}
+								}
+		
+								//コンテナ内部のラベルidを差し替え
+								var container_object = controllerInfo.viewer[0].container;
+								container_object.changeLabelName(tmp_current_label_id, tmp_the_controller_series.id,tmp_new_label_id);
+		
+								//コントローラのラベルオブジェクトid書き換え
+								tmp_the_label.id = tmp_new_label_id;
+								if (tmp_the_controller_series.activeLabelId == tmp_current_label_id) {
+									tmp_the_controller_series.activeLabelId = tmp_new_label_id;
+								}
+
+							}
+						}
+				}
+      }
+
       this_elm.imageViewerController('updateLabelElements');
 
       //紐づくビューアーたちに伝播
@@ -233,6 +280,16 @@
       }
 
     },
+
+
+
+		changeLabelAttribute : function(){
+		   var this_elm = this;
+
+
+
+		},
+
 
     //各種操作ボタン等の設置
     //jQuery UI widget とは異なり、initの中から呼ぶ
@@ -405,6 +462,7 @@
       //要素に反映
       this_elm.imageViewerController('updateLabelElements');
 
+
       for (var i = controllerInfo.viewer.length - 1; i >= 0; i--) {
         var elmId = '#' + controllerInfo.viewer[i].elementId;
 
@@ -421,16 +479,18 @@
     getSeriesObjectById: function (series_id) {
       //series ID を渡して,そのseriesのオブジェクトを返す
       //第一引数は1項目の配列, jQuery widget の呼び出しの都合上,配列で渡している
-
-      var rtn_obj = '';
       for (var i = controllerInfo.series.length - 1; i >= 0; i--) {
         if (controllerInfo.series[i].id == series_id[0]) {
-          rtn_obj = controllerInfo.series[i];
-          break;
+          return controllerInfo.series[i];
         }
       }
+    },
 
-      return rtn_obj;
+
+
+    //３面共用のコントローラー情報の取り出し
+    getValues: function () {
+      return controllerInfo;
     },
 
 
@@ -605,9 +665,11 @@
           /*.imageViewer()*/
         }
 
-      }//viewerRun
+      }
+      /*viewerRun*/
 
       viewerRun();
+
 
       //ビューアー発火後に生成された要素にイベント設置
       this_elm.imageViewerController('setViewerInnerEvents');
@@ -888,6 +950,7 @@
         attribute: '',
         color: tmp_color, //todo初期は他のラベルで使われてない色をランダムで選ぶ
         description: '',
+				image:'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAQMAAAAl21bKAAAAA1BMVEUAAACnej3aAAAAAXRSTlMAQObYZgAAAApJREFUCNdjYAAAAAIAAeIhvDMAAAAASUVORK5CYII=',
         name: '名称未設定',
         rgba: tmp_rgba, //color/alphaを併せてcanvas適用用の値を作る
         visible: true
@@ -897,11 +960,13 @@
 
 
     getLabelObjectById: function (label_id, series_id) {
+
       //描画対象ラベルのチェック
       var this_elm = this;
 
       if (series_id) {
         var tmp_the_series = this_elm.imageViewerController('getSeriesObjectById', [series_id]);
+
         for (var i = tmp_the_series.label.length - 1; i >= 0; i--) {
           if (tmp_the_series.label[i].id == label_id) {
             return tmp_the_series.label[i];
@@ -1091,6 +1156,13 @@
           }
         });
 
+        //更新が発生した段階でフラグを立てる
+        $(tmp_elm).bind('onWritten', function (e, label_id, series_id) {
+					var the_current_point = $('#' + controllerInfo.viewer[0].elementId).imageViewer('option').control.container.data.history.main.length;
+          var tmp_the_label = this_elm.imageViewerController('getLabelObjectById', label_id, series_id);
+					tmp_the_label.lastUpdate = the_current_point;
+        });
+
         //ある面でwindow情報が変更されたらそれを他の面にも適用させる
         $(tmp_elm).find('.mouse_cover').bind('mouseup', function () {
           if (controllerInfo.mode == 'window') {
@@ -1179,6 +1251,7 @@
 					}
 				}
       }
+
 
       var tmp_elm = '';
 
@@ -1356,14 +1429,14 @@
         }
       });
 
-			//attribute
+			//attribute change
 			var insert_prop = {
 				properties: controllerInfo.defaultLabelAttribute
 			};
 
 			var tmp_active_series =  this_elm.imageViewerController('getSeriesObjectById',[controllerInfo.activeSeriesId]);
-			if(tmp_active_series.label.length>0){
-			
+			if(typeof tmp_active_series.label =='object' && tmp_active_series.label.length>0){
+
 				var tmp_the_label =  this_elm.imageViewerController('getLabelObjectById',tmp_active_series.activeLabelId,tmp_active_series.id);
 	
 				if(typeof tmp_the_label.attribute =='object'){
@@ -1377,6 +1450,7 @@
 					//書き換え内容をオブジェクトに戻す措置を追加する
 					tmp_the_label.attribute = $(this).propertyeditor('option').value;
 				});
+				
 			}
 
     }/*updateLabelElements*/,

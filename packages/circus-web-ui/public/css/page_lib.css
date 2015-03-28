@@ -1,7 +1,7 @@
 @charset "utf-8";
 
 /* case detail*/
-#the_panel{width:100%; position:relative; background:#eee;}
+#the_panel{width:100%; position:relative;}
 .label_select_wrap{background:#ccc; width:305px; padding:5px 0; float:left; margin-right:20px;}
 .label_select_list{margin:0 1px 0 20px;}
 .label_select_cell{background:#eee; margin-bottom:2px; padding:3px 3px 2px; line-height:30px;}
@@ -34,11 +34,11 @@
 #the_panel .visible .visible_check_wrap{background-position:0	-300px;}
 .alpha_label{width:60px;  float:left; text-align:center; display:block; }
 #the_panel .alpha_change{width:30px; padding:0; height:26px; line-height:26px;baclkground:rgba(0,0,0,0);}
-
+#the_panel .info_area{width:300px; float:left; background:#ccc; margin-right:10px;}
 .img_toolbar_wrap{ background:#eee;}
 .label_txt{width:75px; float:left; display:block; overflow:hidden; height:30px; line-height:30px;}
 
-.label_info_wrap{width:280px; float:left; margin-bottom:10px;}
+.label_info_wrap{width:340px; float:left; margin-bottom:10px; background:#ccc;}
 .label_info{padding:10px; background:#ccc;}
 .label_info .label_title{width:100%; display:block; margin-bottom:6px;}
 .label_info .label_description{width:100%; display:block; resize:vertical;}
@@ -47,14 +47,14 @@
 
 @media screen and	(min-width:1500px){
 	#the_panel_inner{position:absolute; top:0; left:-310px;}
-	#the_panel .img_toolbar_wrap{margin:0 0 20px auto; width:60px;}
+	#the_panel .img_toolbar_wrap{margin:0 0 10px auto; width:60px;}
 	#the_panel .toolbar_btn{float:left; width:30px;}
 	#the_panel .toolbar_weight_wrap{text-align:center; clear:both; width:100%; padding:5px 0; border-bottom:1px solid #ccc; cursor:pointer;}
  .toolbar_btn{border-bottom:1px solid #ccc;}
- .label_select_wrap{float:none; margin-right:0;}
-.label_info_wrap{padding-top:20px; float:none;}
-.label_info .label_description{width:100%; display:block;}
-
+ .label_select_wrap{float:none; margin-right:0; margin-bottom:10px;}
+ .label_info_wrap{padding-top:20px; float:none; width:305px; background:#ccc;}
+ .label_info .label_description{width:100%; display:block;}
+	#the_panel .info_area{width:100%; float:none; margin-bottom:10px;}
 }
 
 .now_draw_label{

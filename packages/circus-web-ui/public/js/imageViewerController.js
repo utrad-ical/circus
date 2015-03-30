@@ -1030,7 +1030,7 @@
               tmp_insert_obj.label[j].id = tmp_the_label.id;
 							
 							if(typeof  tmp_the_label.attribute == 'object'){
-								tmp_insert_obj.label[j].attritube = tmp_the_label.attribute;
+								tmp_insert_obj.label[j].attribute = tmp_the_label.attribute;
 							}
             }
           }

@@ -28,7 +28,6 @@ class Exporter
 		} else {
 			$args[] = "--with-tag-dump";
 		}
-		chdir(app_path() . '/bin');
 		$result = system($this->dumperPath() . ' ' . implode(' ', $args));
 		if (strncmp($result, "Succeeded", 9) !== 0) {
 			throw new Exception("Failed to create original volume.");

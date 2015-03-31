@@ -63,7 +63,7 @@ class ExportVolume extends Command {
 		// Check options
 		if ($this->option('without-original') && $this->option('without-label')) {
 			$this->error('Option error: --without-original and --without-label are simultaneously set');
-			return;
+			return false;
 		}
 
 		// Get case information
@@ -111,66 +111,73 @@ class ExportVolume extends Command {
 			return false;
 		}
 
-		// Export original volume
-		$ex = new \VolumeExporter\Exporter();
-		$ex->exportOriginalVolume(
-			$series_data['seriesUID'],
-			$series_data['images'],
-			$this->argument('output-path') . "/original.raw",
-			$this->option('without-original'));
+		try {
+			// Export original volume
+			$ex = new \VolumeExporter\Exporter();
+			$ex->exportOriginalVolume(
+				$series_data['seriesUID'],
+				$series_data['images'],
+				$this->argument('output-path') . "/original.raw",
+				$this->option('without-original'));
 
-		// Export case_attributes.json
-		if (array_key_exists('attributes', $revision_data)) {
-			$file_name = $this->argument('output-path') . "/case_attributes.json";
-			$attributes = array(
-				'caseID' => $this->argument('targetID'),
-				'revision' => $revision_index)
-				+ $revision_data['attributes'];
-			file_put_contents($file_name, json_encode($attributes));
-		}
-
-		// Export label volume
-		if (!$this->option('without-label')) {
-
-			// Create label info
-			$label_info = array();
-			$label_attributes = array(
-				'caseID' => $this->argument('targetID'),
-				'revision' => $revision_index
-			);
-
-			foreach ($map_data as $label_index => $voxel_value) {
-				$ld = Label::find($series_data['labels'][$label_index]['id'])->getAttributes();
-				$ld['path'] = Storage::find($ld['storageID'])->getAttribute('path');
-				$ld['voxel_value'] = $voxel_value;
-				$label_info[] = $ld;
-				$label_attributes[$voxel_value] = $series_data['labels'][$label_index]['attributes'];
+			// Export case_attributes.json
+			if (array_key_exists('attributes', $revision_data)) {
+				$file_name = $this->argument('output-path') . "/case_attributes.json";
+				$attributes = array(
+					'caseID' => $this->argument('targetID'),
+					'revision' => $revision_index)
+					+ $revision_data['attributes'];
+				file_put_contents($file_name, json_encode($attributes));
 			}
 
-			$ex->createLabelVolume(
-				$this->argument('output-path'),
-				$label_info,
-				$this->option('combined'));
+			// Export label volume
+			if (!$this->option('without-label')) {
 
-			// Export label_attributes.json
-			$file_name = $this->argument('output-path') . "/label_attributes.json";
-			file_put_contents($file_name, json_encode($label_attributes));
-		}
+				// Create label info
+				$label_info = array();
+				$label_attributes = array(
+					'caseID' => $this->argument('targetID'),
+					'revision' => $revision_index
+				);
 
-		if ($this->option('without-original')) {
-			unlink($this->argument('output-path') . "/original.mhd");
-		}
+				foreach ($map_data as $label_index => $voxel_value) {
+					$ld = Label::find($series_data['labels'][$label_index]['id'])
+						->getAttributes();
+					$ld['path'] = Storage::find($ld['storageID'])->getAttribute('path');
+					$ld['voxel_value'] = $voxel_value;
+					$label_info[] = $ld;
+					$label_attributes[$voxel_value] = $series_data['labels'][$label_index]['attributes'];
+				}
 
-		// Compress all exported file to ZIP file
-		if ($this->option('compress')) {
-			$file_name = sprintf("%s/%s_revison%d.zip",
-				$this->argument('output-path'),
-				$this->argument('targetID'),
-				$revision_index);
-			$ex->compressFilesToZip($this->argument('output-path'), $file_name);
+				$ex->createLabelVolume(
+					$this->argument('output-path'),
+					$label_info,
+					$this->option('combined'));
+
+				// Export label_attributes.json
+				$file_name = $this->argument('output-path') . "/label_attributes.json";
+				file_put_contents($file_name, json_encode($label_attributes));
+			}
+
+			if ($this->option('without-original')) {
+				unlink($this->argument('output-path') . "/original.mhd");
+			}
+
+			// Compress all exported file to ZIP file
+			if ($this->option('compress')) {
+				$file_name = sprintf("%s/%s_revison%d.zip",
+					$this->argument('output-path'),
+					$this->argument('targetID'),
+					$revision_index);
+				$ex->compressFilesToZip($this->argument('output-path'), $file_name);
+			}
+		} catch (Exception $e) {
+			$this->error($e);
+			return false;
 		}
 		return true;
 	}
+
 
 	protected function exportSeriesData()
 	{
@@ -181,22 +188,26 @@ class ExportVolume extends Command {
 			return false;
 		}
 
-		// Export original volume
-		$ex = new \VolumeExporter\Exporter();
-		$ex->exportOriginalVolume(
-			$series_data['seriesUID'],
-			$series_data['images'],
-			$this->argument('output-path') . "/" . $series_data['seriesUID'] . ".raw",
-			$this->option('without-original'));
+		try {
+			// Export original volume
+			$ex = new \VolumeExporter\Exporter();
+			$ex->exportOriginalVolume(
+				$series_data['seriesUID'],
+				$series_data['images'],
+				$this->argument('output-path') . "/" . $series_data['seriesUID'] . ".raw",
+				$this->option('without-original'));
 
-		// Compress all exported file to ZIP file
-		if ($this->option('compress')) {
-			$file_name = sprintf("%s/%s.zip",
-				$this->argument('output-path'),
-				$series_data['seriesUID']);
-			$ex->compressFilesToZip($this->argument('output-path'), $file_name);
+			// Compress all exported file to ZIP file
+			if ($this->option('compress')) {
+				$file_name = sprintf("%s/%s.zip",
+					$this->argument('output-path'),
+					$series_data['seriesUID']);
+				$ex->compressFilesToZip($this->argument('output-path'), $file_name);
+			}
+		} catch (Exception $e) {
+			$this->error($e);
+			return false;
 		}
-
 		return true;
 	}
 

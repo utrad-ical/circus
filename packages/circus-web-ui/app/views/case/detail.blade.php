@@ -17,6 +17,14 @@
 
 @if (!isset($error_msg))
 <script>
+//Label attributes default
+var default_label_attr_prop = {{$label_attribute_settings}};
+
+//Revision Attribute Properties
+var default_attr_prop = {{$case_attribute_settings}};
+
+
+
 //Project-specific feature set to control the controller viewer widget
 $(function(){
 	//Data group to pass when you ignite the controller immediately after page load
@@ -30,7 +38,7 @@ $(function(){
 			postUrl : "{{asset('case/save_label')}}",	//Enable here if it is different from the image storage server
 			caseId : "{{Session::get('caseID')}}",
 			attribute : {{$attribute}},
-			label_attribute : {{$label_attribute_settings}},
+			defaultLabelAttribute :default_label_attr_prop,
 			series : {{$series_list}},
 			control : {
 				window : {
@@ -40,7 +48,9 @@ $(function(){
 			elements : {
 				parent : 'page_case_detail',
 				panel : 'the_panel_inner',
-				label : 'the_panel_inner'
+				label : 'the_panel_inner',
+				labelAttribute : 'the_panel_inner',
+				revisionAttribute : 'revision_attribute_wrap'
 			},
 			viewer : [
 				{//First sheet
@@ -143,9 +153,17 @@ $(function(){
 	initAjax();//ajax firing
 
 	var	controllerRun	=	function(){
-		//Controller issue interlocking series one per one
+		//fire the controllers to the once per synchronized eries
 		for(var j=0;	j<initInfo.length;	j++){
 			$('#'+initInfo[j].wrapElementId).imageViewerController('init',initInfo[j]);
+			//insert & display revision attribute
+			var insert_prop = {
+				properties: default_attr_prop
+			};
+			if (typeof initInfo[j].attribute != 'undefined') {
+				insert_prop.value = initInfo[j].attribute;
+			}
+			$('#'+initInfo[j].elements.revisionAttribute).propertyeditor(insert_prop);
 		}
 	}
 
@@ -168,40 +186,6 @@ $(function(){
 		$(this).closest('td').find('.form_case_detail').submit();
 		return false;
 	});
-
-
-	//ラベルAttribute
-	var label_attribute_properties = {{$label_attribute_settings}};
-	var label_attribute_prop = new Array();
-	for (var i = 0; i < initInfo[0].series.length; i++) {
-
-		var tmp_the_series = initInfo[0].series[i];
-		label_attribute_prop[i] = new Array();
-		if (typeof tmp_the_series.label == 'object') {
-			for (var j = 0; j < tmp_the_series.label.length; j++) {
-	            var tmp_the_label = tmp_the_series.label[j];
-	            var tmp_prop_id = 'the_panel_label_attribute_'+i+'_'+j;
-	            $('#the_panel_label_attribute').append('<div class="control_panel_inner" id="'+tmp_prop_id+'"></div>');
-	            label_attribute_prop[i][j] = $('#'+tmp_prop_id);
-
-				if (tmp_the_label.attribute) {
-					label_attribute_prop[i][j].propertyeditor({properties: label_attribute_properties, value:tmp_the_label.attribute});
-				}else {
-					label_attribute_prop[i][j].propertyeditor({properties: label_attribute_properties});
-				}
-			}
-		}
-	}
-
-
-	//RevisionAttribute
-	var case_attribute_properties = {{$case_attribute_settings}};
-	var case_attribute_prop = $('#the_panel_case_attribute');
-	if (initInfo[0].attribute) {
-		case_attribute_prop.propertyeditor({properties: case_attribute_properties, value:initInfo[0].attribute});
-	}else {
-		case_attribute_prop.propertyeditor({properties: case_attribute_properties});
-	}
 
 	$('.link_add_series').click(function(){
 		$('.frm_add_series').submit();
@@ -289,17 +273,19 @@ id="page_case_detail"
 				{{$case_detail->patientInfoCache['patientName']}} ({{$case_detail->patientInfoCache['patientID']}})
 				<br>{{$case_detail->patientInfoCache['birthDate']}} {{$case_detail->patientInfoCache['sex']}}
 			</p>
-			<h2>Case Attribute</h2>
-			<div class="control_panel_inner" id="the_panel_case_attribute"></div>
-			<h2>Label Attribute</h2>
-			<div class="control_panel_inner" id="the_panel_label_attribute"></div>
 		</div>
 	</div>
 	<div class="clear">&nbsp;</div>
 	<div class="control_panel mar_tb_10" id="the_panel">
 		<div class="control_panel_inner" id="the_panel_inner">
+			<div class="info_area">
+				<div class="control_panel_inner" id="revision_attribute_wrap"></div>
+			</div>
 		</div>
 	</div>
+
+
+	<div class="clear">&nbsp;</div>
 	<div class=" img_view_area">
 		<div class="img_area fl_l mar_b_20" id="img_area_axial"></div>
 		<div class="img_area fl_r mar_b_20" id="img_area_sagital"></div>

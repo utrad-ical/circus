@@ -42,15 +42,11 @@ class LabelRegisterController extends BaseController {
 							if (!$label_obj) {
 								$label_obj = self::setLabel($rec2, $storage_info->storageID);
 								$label_obj->save();
-								//$errors = $label_obj->save();
-
-								//if ($errors)
-								//	throw new Exception($errors);
 							}
 							$save_img_result = self::saveImage($label_obj->labelID, $rec2['image'], $storage_info->path);
 							$revision[$rec['id']][] = array(
 								'id'			=>	$label_obj->labelID,
-								'attributes'	=>	array_key_exists('attribute', $rec2) ? json_decode($rec2['attribute'], true) : array()
+								'attributes'	=>	array_key_exists('attribute', $rec2) ? $rec2['attribute'] : array()
 							);
 						}
 					}
@@ -59,7 +55,6 @@ class LabelRegisterController extends BaseController {
 					$series_list[] = self::createSeriesList($rec['id']);
 				}
 			}
-			//Log::debug($series_list);
 			//Update of case information
 			//Case information acquisition
 			$case_obj = ClinicalCase::find($inputs['caseId']);

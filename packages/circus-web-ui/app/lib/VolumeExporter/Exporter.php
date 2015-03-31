@@ -28,9 +28,11 @@ class Exporter
 		} else {
 			$args[] = "--with-tag-dump";
 		}
-		exec($this->dumperPath() . ' ' . implode(' ', $args));
-
-		// Todo: Add check code (exported files exist or not).
+		chdir(app_path() . '/bin');
+		$result = system($this->dumperPath() . ' ' . implode(' ', $args));
+		if (strncmp($result, "Succeeded", 9) !== 0) {
+			throw new Exception("Failed to create original volume.");
+		}
 	}
 
 	public function createLabelVolume($output_path, $label_info, $combined_flg)

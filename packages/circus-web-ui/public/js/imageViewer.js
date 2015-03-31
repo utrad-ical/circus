@@ -1347,6 +1347,7 @@
 					}
 					
 					var disp_txt = Math.sqrt( dist_w*dist_w + dist_h*dist_h );
+					disp_txt = disp_txt.toFixed(2);
 					this_elm.find('.disp_measure').find('.measure_num').text(disp_txt);
 
 

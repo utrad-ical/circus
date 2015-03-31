@@ -93,11 +93,12 @@ class ExportVolume extends Command {
 		}
 
 		// Check series index
-		if (!array_key_exists($this->option('series_index'), $revision_data['series'])) {
-			$this->error('Invalid series index: ' . $this->option('series_index'));
+		$series_index = $this->option('series_index');
+		if (!array_key_exists($series_index, $revision_data['series'])) {
+			$this->error('Invalid series index: ' . $series_index);
 			return false;
 		}
-		$series_data = $revision_data['series'][$this->option('series_index')];
+		$series_data = $revision_data['series'][$series_index];
 
 		// Check relation map (label index, voxel value)
 		$map_data = null;
@@ -165,9 +166,10 @@ class ExportVolume extends Command {
 
 			// Compress all exported file to ZIP file
 			if ($this->option('compress')) {
-				$file_name = sprintf("%s/%s_revison%d.zip",
+				$file_name = sprintf("%s/%s_series%d_revison%d.zip",
 					$this->argument('output-path'),
 					$this->argument('targetID'),
+					$series_index,
 					$revision_index);
 				$ex->compressFilesToZip($this->argument('output-path'), $file_name);
 			}

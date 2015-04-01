@@ -390,7 +390,14 @@ voxelContainer.prototype.getPositionDataFromImage = function (insertObject, seri
   }
 
   var tmp_img = new Image();
-  tmp_img.src = insertObject.image;
+	
+	if(typeof insertObject.image =='undefined'){
+ 		tmp_img.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAQMAAAAl21bKAAAAA1BMVEUAAACnej3aAAAAAXRSTlMAQObYZgAAAApJREFUCNdjYAAAAAIAAeIhvDMAAAAASUVORK5CYII=';
+	}else{
+		tmp_img.src = insertObject.image;
+	}
+  
+
 
   var img_original_w = tmp_img.width;
   var img_original_h = tmp_img.height;

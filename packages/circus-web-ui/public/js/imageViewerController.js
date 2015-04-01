@@ -33,7 +33,7 @@
             minimum: 1
           },
           preset: [
-            {label: 'your preset label', level: 1000, width: 4000}
+         //   {label: 'your preset label', level: 1000, width: 4000}
           ]
         },
         voxel: {
@@ -102,7 +102,6 @@
   //3枚連動のためのメソッド群
   var controller_methods = {
 
-
     addLabelObject: function () {
       //ラベルの新規追加
       var this_elm = this;
@@ -148,39 +147,42 @@
       //紐づくビューアーたちに伝播
       for (var i = 0; i < controllerInfo.viewer.length; i++) {
         var elmId = '#' + controllerInfo.viewer[i].elementId;
-        $(elmId).trigger('changeSeries', active_series_id);
-        $(elmId).trigger('sync');
+        $(elmId).trigger('changeSeries', active_series_id)
+								.trigger('sync');
       }
     },
 
 
-    checkUpdateLabel: function () {
+
+
+
+    changeUpdateLabelId: function () {
+
       //書き換えがあったラベルのidを差し替える
       var this_elm = this;
 
       for (var i = 0; i < controllerInfo.series.length; i++) {
 				var tmp_the_controller_series = controllerInfo.series[i];
-	
 				if(typeof tmp_the_controller_series.label == 'object'){
-				
-						for (var j = 0; j < tmp_the_controller_series.label.length; j++) {
-							var tmp_the_label = tmp_the_controller_series.label[j];
-							var tmp_current_label_id = tmp_the_label.id + '';	//更新前のラベルid
+			
+					for (var j = 0; j < tmp_the_controller_series.label.length; j++) {
+						var tmp_the_label = tmp_the_controller_series.label[j];
+						var tmp_current_label_id = tmp_the_label.id + '';	//更新前のラベルid
 
-							//この条件の作り方を検討中
-							if (typeof tmp_the_label.update_flg != 'undefined' && tmp_the_label.update_flg == true) {
-								var tmp_new_label_id = this_elm.imageViewerController('getLabelDefault').id;
-		
-								//ビューアー内のラベルオブジェクトid書き換え
-								for (var k = 0; k < controllerInfo.viewer.length; k++) {
-									var tmp_the_viewer = controllerInfo.viewer[k];
-									var the_viewer_options = $('#' + tmp_the_viewer.elementId).imageViewer('option', 'viewer');
-									for (var l = 0; l < the_viewer_options.draw.series.length; l++) {
-										var the_viewer_series = the_viewer_options.draw.series[l];
-										if (the_viewer_series.activeLabelId == tmp_current_label_id) {
-											the_viewer_series.activeLabelId = tmp_new_label_id;
-										}
-		
+						if (typeof tmp_the_label.update_flg != 'undefined' && tmp_the_label.update_flg == 1) {
+							var tmp_new_label_id = this_elm.imageViewerController('getLabelDefault').id;
+	
+							//ビューアー内のラベルオブジェクトid書き換え
+							for (var k = 0; k < controllerInfo.viewer.length; k++) {
+								var tmp_the_viewer = controllerInfo.viewer[k];
+								var the_viewer_options = $('#' + tmp_the_viewer.elementId).imageViewer('option', 'viewer');
+								for (var l = 0; l < the_viewer_options.draw.series.length; l++) {
+									var the_viewer_series = the_viewer_options.draw.series[l];
+									if (the_viewer_series.activeLabelId == tmp_current_label_id) {
+										the_viewer_series.activeLabelId = tmp_new_label_id;
+									}
+	
+									if(typeof the_viewer_series.label == 'object'){
 										for (var m = 0; m < the_viewer_series.label.length; m++) {
 											var the_viewer_label = the_viewer_series.label[m];
 											if (the_viewer_label.id == tmp_current_label_id) {
@@ -189,22 +191,24 @@
 										}
 									}
 								}
-		
-								//コンテナ内部のラベルidを差し替え
-								var container_object = controllerInfo.viewer[0].container;
-								container_object.changeLabelName(tmp_current_label_id, tmp_the_controller_series.id,tmp_new_label_id);
-		
-								//コントローラのラベルオブジェクトid書き換え
-								tmp_the_label.id = tmp_new_label_id;
-								if (tmp_the_controller_series.activeLabelId == tmp_current_label_id) {
-									tmp_the_controller_series.activeLabelId = tmp_new_label_id;
-								}
-
 							}
+	
+							//コンテナ内部のラベルidを差し替え
+							var container_object = controllerInfo.viewer[0].container;
+							container_object.changeLabelName(tmp_current_label_id, tmp_the_controller_series.id,tmp_new_label_id);
+	
+							//コントローラのラベルオブジェクトid書き換え
+							tmp_the_label.id = tmp_new_label_id;
+							if (tmp_the_controller_series.activeLabelId == tmp_current_label_id) {
+								tmp_the_controller_series.activeLabelId = tmp_new_label_id;
+							}
+							tmp_the_label.update_flg = 0;
 						}
+					}
 				}
       }
 
+			//周辺要素に適用
       this_elm.imageViewerController('updateLabelElements');
 
       //紐づくビューアーたちに伝播
@@ -213,7 +217,10 @@
         $(elmId).trigger('sync');
       }
 
-    }/*checkUpdateLabel*/,
+    },
+
+
+
 
 
     //モード変更
@@ -283,12 +290,27 @@
 
 
 
-		changeLabelAttribute : function(){
-		   var this_elm = this;
 
 
+		checkUpdateLabel: function() {
+			//ラベルが前回の保存時から変更されたか調査,更新があったラベルにはフラグを立てる
+      var this_elm = this;
+			var container_object = controllerInfo.viewer[0].container;
 
+			//ヒストリーを１つずつ見ていく
+			for(var i=container_object.data.history.main.length-1; i>-1; i--){
+				var tmp_label = this_elm.imageViewerController('getLabelObjectById',container_object.data.history.main[i].label);
+				//更新ポイント
+				if(tmp_label.update_flg == 0 && tmp_label.last_save_point != i+1){
+					tmp_label.last_save_point = i+1;
+					tmp_label.update_flg = 1;
+									console.log(tmp_label);
+				}
+			}
 		},
+
+
+
 
 
     //各種操作ボタン等の設置
@@ -314,7 +336,6 @@
 
         //ウインドウサイズ・レベル
         if (controllerInfo.control.window.active == true) {
-
           if (controllerInfo.control.window.panel == true) {
 
             var tmp_elments = '<li class="toolbar_btn ico_detail_sprite ico_detail_sprite_image_window">\
@@ -462,7 +483,6 @@
       //要素に反映
       this_elm.imageViewerController('updateLabelElements');
 
-
       for (var i = controllerInfo.viewer.length - 1; i >= 0; i--) {
         var elmId = '#' + controllerInfo.viewer[i].elementId;
 
@@ -498,55 +518,23 @@
     init: function (insert_obj) {
 
       //コントローラ呼び出し時の初期挙動
-      //insert_obj はhtmlからinit のvalue値で渡された情報json
+
       var this_elm = this;
 
-      //入力データ内でウィンドウ情報をマージ
-      //シリーズ全体の適用とビューアごとの適応があるため
+      //呼び出し時に渡されたオプション情報をマージ
+      $.extend(true, controllerInfo, insert_obj);
 
+			//初期表示シリーズを決める,明示的に指定が無ければ一番手前のシリーズ
       var active_series = this_elm.imageViewerController('getSeriesObjectById', [controllerInfo.activeSeriesId]);
       if (typeof active_series != 'object') {
         active_series = controllerInfo.series[0];
         controllerInfo.activeSeriesId = active_series.id;
       }
 
-      for (var i = 0; i < insert_obj.viewer.length; i++) {
-        var tmp_win_obj = new Object;
-        var insert_obj_active_series = this_elm.imageViewerController('getSeriesObjectById', [controllerInfo.activeSeriesId]);
-        tmp_win_obj = $.extend(true, tmp_win_obj, insert_obj_active_series.window);
-        tmp_win_obj = $.extend(true, tmp_win_obj, insert_obj.viewer[i].window);
-        insert_obj.viewer[i].window = tmp_win_obj;
-      }
-
-      //ビューアーオブジェクトは個別に整形
-      //デフォルトでviewer配列の個数が判断付かないため,デフォルト配列を複製してviewer個数分配置しておく
+      //初期表示シリーズのウインドウ情報をビューアーオブジェクトに渡す
       var tmp_viewer_param_array = new Array;
-      for (var i = 0; i < insert_obj.viewer.length; i++) {
-
-        tmp_viewer_param_array[i] = new Object;
-        tmp_viewer_param_array[i].id = controllerInfo.viewer[0].id + i;
-        tmp_viewer_param_array[i].elementId = controllerInfo.viewer[0].elementId;
-        tmp_viewer_param_array[i].orientation = controllerInfo.viewer[0].orientation;
-        tmp_viewer_param_array[i].number = {
-          current: controllerInfo.viewer[0].number.current,
-          maximum: controllerInfo.viewer[0].number.maximum,
-          minimum: controllerInfo.viewer[0].number.minimum
-        }
-
-        tmp_viewer_param_array[i].elements = {
-          slider: {
-            panel: true,
-            display: true
-          },
-          zoom: {
-            panel: true,
-            display: true
-          },
-          window: {
-            panel: true,
-          }
-        }
-        tmp_viewer_param_array[i].window = {
+      for (var i = 0; i < controllerInfo.viewer.length; i++) {
+        controllerInfo.viewer[i].window = {
           level: {
             current: active_series.window.level.current,
             maximum: active_series.window.level.maximum,
@@ -560,21 +548,11 @@
           preset: $.extend(true, '', active_series.window.preset)
         }
       }
-      controllerInfo.viewer = tmp_viewer_param_array;
-
-      //呼び出し時に渡されたオプション情報をマージ
-      $.extend(true, controllerInfo, insert_obj);
-
-      if (controllerInfo.activeSeriesId == '') {
-        controllerInfo.activeSeriesId = controllerInfo.series[0].id;
-      }
 
       //前回描かれていたラベル情報の読み込み
       //コントローラのデフォルトのオブジェクトとマージ
-
       if (typeof controllerInfo.series == 'object') {
         var tmp_color_index_num = 0;
-
         for (var i = 0; i < controllerInfo.series.length; i++) {
           var tmp_series = controllerInfo.series[i];
           if (typeof tmp_series.label == 'object') {
@@ -595,7 +573,6 @@
         //ビューアーオブジェクトの数だけビューアライブラリ発火
         for (var i = 0; i < controllerInfo.viewer.length; i++) {
 
-          var elmId = '#' + controllerInfo.viewer[i].elementId;
           var tmp_orientation = controllerInfo.viewer[i].orientation;
           var tmp_w = 512;
           var tmp_h = 512;
@@ -607,7 +584,6 @@
             tmp_h = active_series.voxel.y * active_series.voxel.voxel_y / active_series.voxel.voxel_x;
             tmp_ow = active_series.voxel.x;
             tmp_oh = active_series.voxel.y;
-
           } else if (tmp_orientation == 'sagital') {
             tmp_w = active_series.voxel.y * active_series.voxel.voxel_y / active_series.voxel.voxel_x;
             tmp_h = active_series.voxel.z * active_series.voxel.voxel_z / active_series.voxel.voxel_x;
@@ -629,8 +605,7 @@
             series: new Array(0)
           }
           init_label_info.series = $.extend(true, init_label_info.series, controllerInfo.series);
-
-          $(elmId).imageViewer({
+          $('#' + controllerInfo.viewer[i].elementId).imageViewer({
             'viewer': {
               'id': controllerInfo.viewer[i].id,
               'orientation': controllerInfo.viewer[i].orientation,
@@ -656,7 +631,6 @@
                 voxel_z: active_series.voxel.voxel_z,
               }
             },
-
             'control': {
               'container': controllerInfo.viewer[i].container
             }
@@ -665,9 +639,7 @@
           /*.imageViewer()*/
         }
 
-      }
-      /*viewerRun*/
-
+      }/*viewerRun*/
       viewerRun();
 
 
@@ -888,6 +860,15 @@
 
       //保存
       $('.btn_save').click(function () {
+				
+				//書き換えが発生していたラベルにフラグを立てる
+				this_elm.imageViewerController('checkUpdateLabel');
+	
+				//書き換えフラグのあるラベルのidを書き換える
+				this_elm.imageViewerController('changeUpdateLabelId');
+										
+				console.log(controllerInfo.series[0].label);
+	
         this_elm.imageViewerController('saveData');
         return false;
       });
@@ -949,10 +930,9 @@
         alpha: 100,
         attribute: '',
         color: tmp_color, //todo初期は他のラベルで使われてない色をランダムで選ぶ
-        description: '',
-				image:'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAQMAAAAl21bKAAAAA1BMVEUAAACnej3aAAAAAXRSTlMAQObYZgAAAApJREFUCNdjYAAAAAIAAeIhvDMAAAAASUVORK5CYII=',
-        name: '名称未設定',
+        last_save_point:0,
         rgba: tmp_rgba, //color/alphaを併せてcanvas適用用の値を作る
+        update_flg: 0,
         visible: true
       }
       return return_obj;
@@ -987,89 +967,101 @@
         }
       }
     }/*getLabelObjectById*/,
+		
+		
+
+
+
+		resetUpdateFlg : function(){
+			for (var i = 0; i < controllerInfo.series.length; i++) {
+				var tmp_the_controller_series = controllerInfo.series[i];
+				if(typeof tmp_the_controller_series.label == 'object'){
+					for (var j = 0; j < tmp_the_controller_series.label.length; j++) {
+						var tmp_the_label = tmp_the_controller_series.label[j];
+						tmp_the_label.update_flg =0;
+					}
+				}
+			}
+		},
 
 
     saveData: function () {
       //データ保存
       var this_elm = this;
-      var saveData = new Object();
-
-      //書き換えが発生していたラベルについてはidを書き換える
-      this_elm.imageViewerController('checkUpdateLabel');
-
-      saveData.caseId = controllerInfo.caseId;
-      saveData.series = new Array(0);
+      var save_data = new Object();
+			save_data.caseId = controllerInfo.caseId;
+			save_data.series = new Array(0);
 
 			if(controllerInfo.elements.revisionAttribute != ''){
 				var revision_attributes = $('#'+controllerInfo.elements.revisionAttribute).propertyeditor('option').value;
-				saveData.attribute = JSON.stringify(revision_attributes);
+				save_data.attribute = JSON.stringify(revision_attributes);
 			}
 			
-      try {
-        for (var i = 0; i < controllerInfo.series.length; i++) {
-          var tmp_the_series = controllerInfo.series[i];
-          var tmp_insert_obj = new Object();
-          tmp_insert_obj.id = tmp_the_series.id;
-          tmp_insert_obj.label = new Array(0);
+			try {
+				for (var i = 0; i < controllerInfo.series.length; i++) {
+					var tmp_the_series = controllerInfo.series[i];
+					var tmp_insert_obj = new Object();
+					tmp_insert_obj.id = tmp_the_series.id;
+					tmp_insert_obj.label = new Array(0);
 
-          if (typeof tmp_the_series.label == 'object') {
-            for (var j = 0; j < tmp_the_series.label.length; j++) {
+					if (typeof tmp_the_series.label == 'object') {
+						for (var j = 0; j < tmp_the_series.label.length; j++) {
 
-              var tmp_the_label = tmp_the_series.label[j];
-              var container_data = $('#img_area_axial').imageViewer('createSaveData', tmp_the_series.id, tmp_the_label.id);
+							var tmp_the_label = tmp_the_series.label[j];
+							var container_data = $('#img_area_axial').imageViewer('createSaveData', tmp_the_series.id, tmp_the_label.id);
 
-              tmp_insert_obj.label[j] = new Object();
-              tmp_insert_obj.label[j].offset = container_data.offset;
-              tmp_insert_obj.label[j].sizes = container_data.size;
+							tmp_insert_obj.label[j] = new Object();
+							tmp_insert_obj.label[j].offset = container_data.offset;
+							tmp_insert_obj.label[j].sizes = container_data.size;
 
-              if (container_data.image.indexOf('data:image') == -1) {
-                container_data.image = '';
-              };
+							if (container_data.image.indexOf('data:image') == -1) {
+								container_data.image = '';
+							};
 
-              tmp_insert_obj.label[j] = container_data;
-              tmp_insert_obj.label[j].id = tmp_the_label.id;
+							tmp_insert_obj.label[j] = container_data;
+							tmp_insert_obj.label[j].id = tmp_the_label.id;
 							
 							if(typeof  tmp_the_label.attribute == 'object'){
 								tmp_insert_obj.label[j].attribute = tmp_the_label.attribute;
 							}
-            }
-          }
-          saveData.series[i] = tmp_insert_obj;
-        }
-      } catch (e) {
-        //console.log(e);
-        return false;
-      }
+						}
+					}
+					save_data.series[i] = tmp_insert_obj;
+				}
+			} catch (e) {
+				//console.log(e);
+				return false;
+			}
 
-      var tmp_input_memo = window.prompt('input Memo', controllerInfo.memo);
+			var tmp_input_memo = window.prompt('input Memo', controllerInfo.memo);
 
-      if (tmp_input_memo) {
-        saveData.memo = tmp_input_memo;
-        //console.log(saveData);
-        //console.log("URL::");
-        //console.log(controllerInfo.postUrl);
-				console.log(saveData);
+			if (tmp_input_memo) {
+				save_data.memo = tmp_input_memo;
+				//console.log(save_data);
+				//console.log("URL::");
+				//console.log(controllerInfo.postUrl);
+				console.log(save_data);
 
-        $.ajax({
-          url: controllerInfo.postUrl,
-          type: 'post',
-          data: {data: saveData},//送信データ
-          dataType: 'json',
-          error: function () {
-            alert('通信に失敗しました');
-          },
-          success: function (response) {
-            //alert('save finished.');
-            alert(response.message);
-          }
-        });
+				$.ajax({
+					url: controllerInfo.postUrl,
+					type: 'post',
+					data: {data: save_data},//送信データ
+					dataType: 'json',
+					error: function () {
+						alert('通信に失敗しました');
+					},
+					success: function (response) {
+						//alert('save finished.');
+						alert(response.message);
+					}
+				});
 
-      } else {
-        //キャンセル時
+			} else {
+				//キャンセル時
 
+			}
+			return false;
 
-      }
-      return false;
     },
 
 
@@ -1160,7 +1152,6 @@
         $(tmp_elm).bind('onWritten', function (e, label_id, series_id) {
 					var the_current_point = $('#' + controllerInfo.viewer[0].elementId).imageViewer('option').control.container.data.history.main.length;
           var tmp_the_label = this_elm.imageViewerController('getLabelObjectById', label_id, series_id);
-					tmp_the_label.lastUpdate = the_current_point;
         });
 
         //ある面でwindow情報が変更されたらそれを他の面にも適用させる

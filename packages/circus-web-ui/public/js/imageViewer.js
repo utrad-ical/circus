@@ -278,7 +278,34 @@
       var this_elm = this.element;
       var this_opts = this.options;
       this_opts.viewer.draw.activeSeriesId = seriesId;
+			
+			var tmp_the_series = this_obj.getSeriesObjectById(seriesId);
 
+			this_opts.viewer.window = new Object();
+			this_opts.viewer.window = $.extend(true,this_opts.viewer.window,tmp_the_series.window);
+
+			this_elm.find('.image_window_level').val(this_opts.viewer.window.level.current);
+			this_elm.find('.label_level_min').val(this_opts.viewer.window.level.minimum);
+			this_elm.find('.label_level_max').val(this_opts.viewer.window.level.maximum);
+			this_elm.find('.image_window_width').val(this_opts.viewer.window.width.current);
+			this_elm.find('.label_width_min').val(this_opts.viewer.window.width.minimum);
+			this_elm.find('.label_width_max').val(this_opts.viewer.window.width.maximum);
+			this_elm.find('.image_window_level').trigger('change')
+		
+			var tmp_preset_array = this_opts.viewer.window.preset;
+			this_elm.find('.image_window_preset_select').empty();
+			if (typeof this_opts.viewer.window.preset != 'object'||this_opts.viewer.window.preset.length == 0) {
+				this_elm.find('.window_preset_wrap').addClass('hidden');
+			} else {
+				var tmp_elm = '<option	value="blank">select setting</option>';
+				for (var i = tmp_preset_array.length - 1; i >= 0; i--) {
+					tmp_elm = tmp_elm + '<option	value="' + tmp_preset_array[i].level + ',' + tmp_preset_array[i].width + '">' + tmp_preset_array[i].label + '</option>';
+				}
+				this_elm.find('.window_preset_wrap').removeClass('hidden');
+				this_elm.find('.image_window_preset_select').append(tmp_elm);
+			}
+		
+		
       this_obj.setCanvasSize();
       this_obj._changeImgSrc();
     },
@@ -334,17 +361,11 @@
 					<span	class="label_width_max">' + this_opts.viewer.window.width.maximum + '</span></li>';
 
         //プリセット
-        if (this_opts.viewer.window.preset.length > 0) {
-          var tmp_opts = '<option	value="blank">select	setting</option>';
-          for (var i = this_opts.viewer.window.preset.length - 1; i >= 0; i--) {
-            tmp_opts = tmp_opts + '<option	value="' + this_opts.viewer.window.preset[i].level + ',' + this_opts.viewer.window.preset[i].width + '">' + this_opts.viewer.window.preset[i].label + '</option>';
-          }
-          tmp_elm = tmp_elm + '<li	class="window_preset_wrap"><select	class="image_window_preset_select">' + tmp_opts + '</select></li>';
-        }
+        tmp_elm = tmp_elm + '<li	class="window_preset_wrap hidden"><select	class="image_window_preset_select"></select></li>';
 
         tmp_elm = tmp_elm + '</ul></div>';
         this_elm.find('.img_wrap').append(tmp_elm);
-        delete    tmp_elm;
+        delete tmp_elm;
       }
 
 
@@ -1091,6 +1112,8 @@
       }//ズーム機能ここまで
       this_elm.find('.current_size').text(100 * Number(this_opts.viewer.position.zoom)); //初期発火用
 
+      this_obj.changeSeries(this_opts.viewer.draw.series[0].id);
+
       //諸々のデータ群のセットが終わったところで描画機能発火
       this_obj._changeImgSrc();
 
@@ -1515,7 +1538,7 @@
         this_elm.find('.label_width_max').val(this_opts.viewer.window.width.maximum);
 
         var tmp_preset_array = this_opts.viewer.window.preset;
-        if (this_opts.viewer.window.preset.length == 0) {
+        if (typeof this_opts.viewer.window.preset != 'object'||this_opts.viewer.window.preset.length == 0) {
           this_elm.find('.image_window_preset_select').empty().append();
         } else {
           var tmp_elm = '<option	value="blank">select	setting</option>';

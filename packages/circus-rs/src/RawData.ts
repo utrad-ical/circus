@@ -19,6 +19,66 @@ export module utradical.circusrs {
         private dataFlag: boolean[];
 
         /**
+         * get pixel value
+         *
+         * z: series image number(0 based)
+         * offset: pixel position (y * width + x)
+         */
+        public getInt16Pixel(z:number, offset:number): number {
+            if (!this.dataFlag[z]) {
+                return 0;
+            }
+
+            return this.data[z].readInt16LE(offset * 2);
+        }
+
+
+        /**
+         * get pixel value
+         *
+         * z: series image number(0 based)
+         * offset: pixel position (y * width + x)
+         */
+        public getUInt16Pixel(z:number, offset:number): number {
+            if (!this.dataFlag[z]) {
+                return 0;
+            }
+
+            return this.data[z].readUInt16LE(offset * 2);
+        }
+
+
+        /**
+         * get pixel value
+         *
+         * z: series image number(0 based)
+         * offset: pixel position (y * width + x)
+         */
+        public getInt8Pixel(z:number, offset:number): number {
+            if (!this.dataFlag[z]) {
+                return 0;
+            }
+
+            return this.data[z].readInt8(offset);
+        }
+
+
+        /**
+         * get pixel value
+         *
+         * z: series image number(0 based)
+         * offset: pixel position (y * width + x)
+         */
+        public getUInt8Pixel(z:number, offset:number): number {
+            if (!this.dataFlag[z]) {
+                return 0;
+            }
+
+            return this.data[z].readUInt8(offset);
+        }
+
+
+        /**
          * set pixel dimension and allocate array.
          */
         public setDimension(): void {

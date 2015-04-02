@@ -28,8 +28,10 @@ class Exporter
 		} else {
 			$args[] = "--with-tag-dump";
 		}
-		$result = system($this->dumperPath() . ' ' . implode(' ', $args));
-		if (strncmp($result, "Succeeded", 9) !== 0) {
+		exec($this->dumperPath() . ' ' . implode(' ', $args), $output);
+
+		// Check exported file
+		if (count($output) > 0 && strncmp(end($output), "Succeeded", 9) !== 0) {
 			throw new Exception("Failed to create original volume.");
 		}
 	}

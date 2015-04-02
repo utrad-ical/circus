@@ -30,7 +30,7 @@ class Exporter
 		}
 		exec($this->dumperPath() . ' ' . implode(' ', $args), $output);
 
-		// Check exported file
+		// Checking whether 'dicom_voxel_cump' command successfully executed or not
 		if (count($output) > 0 && strncmp(end($output), "Succeeded", 9) !== 0) {
 			throw new Exception("Failed to create original volume.");
 		}

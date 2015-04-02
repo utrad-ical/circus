@@ -1,4 +1,5 @@
 /// <reference path="typings/node/node.d.ts" />
+/// <reference path="typings/log4js/log4js.d.ts" />
 /*----------------------------------------------
 
   Image getter from DICOM image series
@@ -9,21 +10,25 @@ var http = require('http');
 var url = require('url');
 var exec = require('child_process').exec;
 var Png = require('png').Png;
+var log4js = require('log4js');
+var logger = prepareLogger();
 var rawdata = require('./RawData');
 var RawData = rawdata.utradical.circusrs.RawData;
+logger.info('CIRCUS RS is starting up...');
 // include config modules
+logger.info('Loading configuration files');
 var config = require('./config');
 var resolver = require('./' + config.pathresolver);
 // create server process
 var server = http.createServer();
 server.on('request', doRequest);
 server.listen(config.port);
-console.log('Server running');
+logger.info('Server running on port ' + config.port);
 var execCounter = 0;
 // image cache
 var imageCache = {};
 function my_exec(command, rawData, callback) {
-    //	console.log('execute command');
+    logger.trace('execute command');
     var proc = exec(command, { encoding: 'binary', maxBuffer: config.bufferSize });
     var jsonLength = 0;
     var binaryLength = 0;
@@ -34,7 +39,7 @@ function my_exec(command, rawData, callback) {
     var headerBuffer = new Buffer(HEADER_LENGTH);
     var headerBufferOffset = 0;
     proc.stdout.on('data', function (chunk) {
-        //		console.log('read chunk len:' + chunk.length);
+        logger.trace('read chunk len:' + chunk.length);
         while (chunk.length > 0) {
             var len;
             if (!blockData && jsonLength == 0 && binaryLength == 0) {
@@ -79,13 +84,13 @@ function my_exec(command, rawData, callback) {
         }
     });
     proc.stdout.on('end', function () {
-        console.log('end');
+        logger.trace('end');
         callback(rawData);
     });
 }
 // read header/image from DICOM data.
 function readData(series, image, callback) {
-    console.log('readData: ' + series + ' image:' + image);
+    logger.info('readData: ' + series + ' image:' + image);
     resolver.resolvPath(series, function (dcmdir) {
         if (!dcmdir) {
             callback(null, 'not found');
@@ -93,7 +98,7 @@ function readData(series, image, callback) {
         }
         //
         if (execCounter > 0) {
-            console.log('waiting... ');
+            logger.trace('waiting... ');
             setTimeout(function () {
                 readData(series, image, callback);
             }, 500);
@@ -101,16 +106,16 @@ function readData(series, image, callback) {
         }
         var rawData;
         if (series in imageCache) {
-            console.log('cache found.');
+            logger.trace('cache found.');
             rawData = imageCache[series];
             if (rawData.containImage(image)) {
-                console.log('request images already cached.');
+                logger.trace('request images already cached.');
                 callback(rawData, null);
                 return;
             }
         }
         else {
-            console.log('no cache found.');
+            logger.trace('no cache found.');
             rawData = new RawData();
             imageCache[series] = rawData;
         }
@@ -118,7 +123,7 @@ function readData(series, image, callback) {
         if (image != 'all') {
             cmd += ' -image=' + image;
         }
-        console.log(cmd);
+        logger.trace(cmd);
         execCounter = 1;
         var child = my_exec(cmd, rawData, function (rawData) {
             callback(rawData, null);
@@ -192,7 +197,7 @@ function makeAxialInt16(raw, target, window_width, window_level) {
     var buffer = new Buffer(raw.x * raw.y);
     for (var y = 0; y < raw.y; y++) {
         for (var x = 0; x < raw.x; x++) {
-            //	console.log('x: ' + x + ' y:' + y + ' target:' + target);
+            //	logger.trace('x: ' + x + ' y:' + y + ' target:' + target);
             offset = y * raw.x + x;
             value = applyWindowInt16(window_width, window_level, offset, target, raw);
             buffer.writeUInt8(value, buffer_offset);
@@ -369,11 +374,20 @@ function makeSagitalUInt8(raw, target, window_width, window_level) {
     return buffer;
 }
 /////////////////////////////////////////////
+function prepareLogger() {
+    log4js.configure({
+        appenders: [
+            { type: 'console' },
+            { type: 'dateFile', filename: 'logs/debug.log', pattern: '-yyyyMMdd.log' }
+        ]
+    });
+    return log4js.getLogger();
+}
 function doRequest(req, res) {
-    console.log(req.method + ' ' + req.url);
+    logger.info(req.method + ' ' + req.url);
     var u = url.parse(req.url, true);
     var query = u.query;
-    console.log(query);
+    logger.trace(query);
     if (u.pathname != '/') {
         res.writeHead(404);
         res.end();
@@ -405,14 +419,14 @@ function doRequest(req, res) {
         image = query['image'];
     }
     if (series == '') {
-        console.log('no series in query');
+        logger.trace('no series in query');
         res.writeHead(500);
         res.end();
         return;
     }
     readData(series, image, function (raw, error) {
         if (error) {
-            console.log(error);
+            logger.trace(error);
             res.writeHead(500);
             res.end();
             return;
@@ -469,7 +483,7 @@ function doRequest(req, res) {
             }
             else if (mode == 'axial') {
                 // 天頂方向描画
-                console.log('axial(top)');
+                logger.trace('axial(top)');
                 out_width = raw.x;
                 out_height = raw.y;
                 switch (raw.type) {
@@ -496,7 +510,7 @@ function doRequest(req, res) {
                 }
             }
             else if (mode == 'coronal') {
-                console.log('coronal');
+                logger.trace('coronal');
                 // 前方向描画
                 out_width = raw.x;
                 out_height = raw.z;
@@ -524,7 +538,7 @@ function doRequest(req, res) {
                 }
             }
             else if (mode == 'sagital') {
-                console.log('sagital');
+                logger.trace('sagital');
                 // 横方向描画
                 out_width = raw.y;
                 out_height = raw.z;
@@ -552,12 +566,12 @@ function doRequest(req, res) {
                 }
             }
             else {
-                console.log('unknown mode');
+                logger.trace('unknown mode');
                 res.writeHead(500);
                 res.end();
                 return;
             }
-            console.log('create png');
+            logger.trace('create png');
             png.encode(function (png_data) {
                 res.writeHead(200, {
                     'Content-Type': 'image/png',
@@ -569,7 +583,7 @@ function doRequest(req, res) {
             });
         }
         catch (e) {
-            console.log(e);
+            logger.trace(e);
             res.writeHead(500);
             res.end();
         }

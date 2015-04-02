@@ -4,7 +4,7 @@ var config={}
 config.pathresolver = 'static_path_resolver';
 
 // path for DICOM data dumper tool.
-config.dumper = 'C:\\circus_db\\circus_db_web_ui\\app\\bin\\dicom_voxel_dump.exe';
+config.dumper = 'C:\\CIRCUS-DB\\circus_db_web_ui\\app\\bin\\dicom_voxel_dump.exe';
 
 // server port number
 config.port = 3000;

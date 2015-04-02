@@ -166,7 +166,7 @@ class ExportVolume extends Command {
 
 			// Compress all exported file to ZIP file
 			if ($this->option('compress')) {
-				$file_name = sprintf("%s/%s_series%d_revison%d.zip",
+				$file_name = sprintf("%s/%s_series%d_revision%d.zip",
 					$this->argument('output-path'),
 					$this->argument('targetID'),
 					$series_index,

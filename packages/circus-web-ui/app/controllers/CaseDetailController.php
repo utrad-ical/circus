@@ -176,7 +176,7 @@ class CaseDetailController extends BaseController {
 	 * @param $data Revision data that are selected
 	 * @return Series list brute string to Revision
 	 */
-	function getSeriesList($revision_info, $presets) {
+	function getSeriesList($revision_info, $presets = array()) {
 		$data = array();
 		$img_save_path = Config::get('const.label_img_save_path');
 
@@ -195,17 +195,8 @@ class CaseDetailController extends BaseController {
 				'z'			=>	0
 			);
 
+
 			$series_info['window'] = array(
-				'level'		=>	array(
-					'current'	=>	1000,
-					'maximum'	=>	40000,
-					'minimum'	=>	-2000
-				),
-				'width'		=>	array(
-					'current'	=>	3500,
-					'maximum'	=>	8000,
-					'minimum'	=>	1
-				),
 				'preset'	=>	array()
 			);
 

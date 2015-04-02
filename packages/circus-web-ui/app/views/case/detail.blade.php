@@ -76,8 +76,8 @@ $(function(){
 					orientation : 'coronal',
 					container : voxel_container,
 					number:{
-					maximum : 511, //What sheets cross section is stored
-					current : 90	//Initial display number
+						maximum : 511, //What sheets cross section is stored
+						current : 90	//Initial display number
 					}
 				}
 			]
@@ -100,11 +100,10 @@ $(function(){
 				alert('I failed to communicate');
 			},
 			success: function(response){
-
+				//console.log(response);
 				if(typeof response.allow_mode != 'undefined'){
 					tmp_series.allow_mode = 	$.extend(true,tmp_series.allow_mode ,response.allow_mode);
 				}
-
 				if(typeof tmp_series.voxel != 'object'){
 					tmp_series.voxel =  new Object();
 				}
@@ -133,13 +132,53 @@ $(function(){
 					tmp_series.voxel.z = response.z;
 				};
 
+				if(typeof tmp_series.window != 'object'){
+					tmp_series.window = new Object();
+				}
+
+				if(typeof tmp_series.window.level != 'object'){
+					tmp_series.window.level = new Object();
+				}
+
+				if(typeof tmp_series.window.width != 'object'){
+					tmp_series.window.width = new Object();
+				}
+
 				if(typeof response.window_level == 'number'){
-					tmp_series.window.level.current = response.y;
+					tmp_series.window.level.current = response.window_level;
+				};
+
+				if(typeof response.window_level_max == 'number'){
+					tmp_series.window.level.maximum = response.window_level_max;
+				};
+
+				if(typeof response.window_level_min == 'number'){
+					tmp_series.window.level.minimum = response.window_level_min;
 				};
 
 				if(typeof response.window_width == 'number'){
 					tmp_series.window.width.current = response.window_width;
 				};
+
+				if(typeof response.window_width_max == 'number'){
+					tmp_series.window.width.maximum = response.window_width_max;
+				};
+
+				if(typeof response.window_width_min == 'number'){
+					tmp_series.window.width.minimum = response.window_width_min;
+				};
+
+				for(var i=0; i<initInfo[0].viewer.length; i++){
+					var tmp_viewer = initInfo[0].viewer[i];
+
+					if(tmp_viewer.orientation == 'axial'){
+						tmp_viewer.number.maximum = response.z;
+					}else if(tmp_viewer.orientation == 'coronal'){
+						tmp_viewer.number.maximum = response.y;
+					}else if(tmp_viewer.orientation == 'sagital'){
+						tmp_viewer.number.maximum = response.x;
+					}
+				}
 
 				if(ajax_cnt==initInfo[0].series.length-1){
 					controllerRun();
@@ -149,6 +188,7 @@ $(function(){
 				}
 			}
 		});
+
 	}
 	initAjax();//ajax firing
 
@@ -184,6 +224,13 @@ $(function(){
 	$('.link_case_edit').click(function(){
 		$(this).closest('td').find("input[name='mode']").val('edit');
 		$(this).closest('td').find('.form_case_detail').submit();
+		return false;
+	});
+
+	$('.select_revision').change(function() {
+		var selected_val = $(this).val();
+		$('.change_revision').val(selected_val);
+		$('#frm_change_revision').submit();
 		return false;
 	});
 
@@ -233,7 +280,7 @@ id="page_case_detail"
 	<br><span class="txt_alert">{{$error_msg}}</span>
 @else
 	<div class="al_r mar_b_10 w_300 fl_r">
-		{{Form::select('revision', $revision_no_list, $revisionNo, array('class' => 'select w_180'))}}
+		{{Form::select('revision', $revision_no_list, $revisionNo, array('class' => 'select w_180 select_revision'))}}
 		{{HTML::link(asset('/case/detail#revision'), 'Revision List', array('class' => 'common_btn'))}}
 	</div>
 	<div class="clear">&nbsp;</div>
@@ -347,5 +394,10 @@ id="page_case_detail"
 			</table>
 		</div>
 	</div>
+	{{Form::open(['url' => asset('case/detail'), 'method' => 'post', 'id' => 'frm_change_revision'])}}
+		{{Form::hidden('revisionNo', $revisionNo, array('class' => 'change_revision'))}}
+		{{Form::hidden('caseID', $case_detail->caseID)}}
+		{{Form::hidden('mode', $mode)}}
+	{{Form::close()}}
 @endif
 @stop

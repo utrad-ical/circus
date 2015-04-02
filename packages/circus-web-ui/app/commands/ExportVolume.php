@@ -84,7 +84,7 @@ class ExportVolume extends Command {
 				}
 			}
 		} else {
-			if (array_key_exists($this->option('revision'), $revision_index)) {
+			if (array_key_exists($revision_index, $case_data['revisions'])) {
 				$revision_data = $case_data['revisions'][$revision_index];
 			} else {
 				$this->error('Invalid revision: ' . $revision_index);

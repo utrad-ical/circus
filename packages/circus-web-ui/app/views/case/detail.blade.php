@@ -23,6 +23,9 @@ var default_label_attr_prop = {{$label_attribute_settings}};
 //Revision Attribute Properties
 var default_attr_prop = {{$case_attribute_settings}};
 
+var revisionNo = {{{$revisionNo}}};
+
+var parentLabelList = "disp_label_list";
 
 
 //Project-specific feature set to control the controller viewer widget
@@ -36,6 +39,7 @@ $(function(){
 		{
 			baseUrl : "{{{$server_url['dicom_img_base_url']}}}",
 			postUrl : "{{asset('case/save_label')}}",	//Enable here if it is different from the image storage server
+			getLabelUrl : "{{asset('case/get_label_list')}}",
 			caseId : "{{Session::get('caseID')}}",
 			attribute : {{$attribute}},
 			defaultLabelAttribute :default_label_attr_prop,
@@ -267,9 +271,9 @@ id="page_case_detail"
 
 @section('content')
 <div class="al_l mar_b_10 w_600 fl_l">
-	{{HTML::link(asset('/case/search'), 'Back to Case Search Result', array('class' => 'common_btn', 'id' => 'btnBack'))}}
+	{{HTML::link(asset('case/search'), 'Back to Case Search Result', array('class' => 'common_btn', 'id' => 'btnBack'))}}
 	@if(!isset($error_msg))
-		{{HTML::link(asset('/series/search'), 'Add Series', array('class' => 'common_btn link_add_series'))}}
+		{{HTML::link(asset('series/search'), 'Add Series', array('class' => 'common_btn link_add_series'))}}
 		{{Form::open(['url' => asset('series/search'), 'method' => 'POST', 'class' => 'frm_add_series'])}}
 			{{Form::hidden('edit_case_id', $case_detail->caseID)}}
 		{{Form::close()}}
@@ -281,7 +285,7 @@ id="page_case_detail"
 @else
 	<div class="al_r mar_b_10 w_300 fl_r">
 		{{Form::select('revision', $revision_no_list, $revisionNo, array('class' => 'select w_180 select_revision'))}}
-		{{HTML::link(asset('/case/detail#revision'), 'Revision List', array('class' => 'common_btn'))}}
+		{{HTML::link(asset('case/detail#revision'), 'Revision List', array('class' => 'common_btn'))}}
 	</div>
 	<div class="clear">&nbsp;</div>
 	<table class="common_table al_l mar_b_10">
@@ -312,6 +316,9 @@ id="page_case_detail"
 				<span style="background:url({{asset('/img/common/ico_save.png')}}) no-repeat; width:22px; height:22px; display:inline-block; margin-bottom:-7px; margin-right:4px;"></span>
 				Save
 			</button>
+			<button type="button" class="common_btn btn_export">
+				Export
+			</button>
 		{{Form::close()}}
 	</div>
 	<div class="w_500 fl_r">
@@ -323,6 +330,11 @@ id="page_case_detail"
 		</div>
 	</div>
 	<div class="clear">&nbsp;</div>
+	<div class="export_area" style="display:none;">
+		<div class="pad_20">
+			@include('case.export')
+		</div>
+	</div>
 	<div class="control_panel mar_tb_10" id="the_panel">
 		<div class="control_panel_inner" id="the_panel_inner">
 			<div class="info_area">

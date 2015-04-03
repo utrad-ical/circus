@@ -45,6 +45,8 @@ Route::group(['before' => 'auth'], function() {
 	Route::any('case/search_result', 'CaseSearchController@search_ajax');
 	Route::any('case/save_search', 'CaseSearchController@save_search');
 	Route::any('case/save_label', 'LabelRegisterController@save_label');
+	Route::any('case/get_label_list', 'CaseDetailController@get_label_list');
+	Route::any('case/export', 'CaseExportController@export');
 
 	//Series
 	Route::get('series/search', 'SeriesSearchController@search');

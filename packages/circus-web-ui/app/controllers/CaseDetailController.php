@@ -24,6 +24,8 @@ class CaseDetailController extends BaseController {
 
 			$inputs['caseID'] = isset($inputs['caseID']) ? $inputs['caseID'] : Session::get('caseID');
 			$inputs['mode'] = isset($inputs['mode']) ? $inputs['mode'] : Session::get('view_mode');
+			$inputs['data_type'] = ClinicalCase::DATA_TYPE_ORIGINAL_LABEL;
+			$inputs['output_type'] = ClinicalCase::OUTPUT_TYPE_SEPARATE;
 
 			$result['mode'] = $inputs['mode'];
 			Session::put('view_mode', $inputs['mode']);
@@ -233,5 +235,13 @@ class CaseDetailController extends BaseController {
 		$json = json_encode($data);
 		$json = preg_replace('/\\\\\//', '/', $json);
 		return $json;
+	}
+	/**
+	 * Revisionの該当シリーズに紐づくラベル一覧取得(Ajax)
+	 */
+	function get_label_list() {
+		$inputs = Input::all();
+		$label_list = ClinicalCase::getLabelList($inputs);
+		return Response::json(["label_list" => $label_list]);
 	}
 }

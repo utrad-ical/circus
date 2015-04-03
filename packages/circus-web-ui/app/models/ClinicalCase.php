@@ -21,6 +21,19 @@ class ClinicalCase extends BaseModel {
 	protected $primaryKey = 'caseID';
 
 	/**
+	 * export data type
+	 */
+	const DATA_TYPE_ORIGINAL = 1;
+	const DATA_TYPE_LABEL = 2;
+	const DATA_TYPE_ORIGINAL_LABEL = 3;
+
+	/**
+	 * export output type
+	 */
+	const OUTPUT_TYPE_SEPARATE = 1;
+	const OUTPUT_TYPE_COMBI = 2;
+
+	/**
 	 * Validation rules
 	 */
 	protected $rules = array(
@@ -194,6 +207,23 @@ class ClinicalCase extends BaseModel {
 		}
 	}
 
+	public static function getLabelList($search_data) {
+		$case_info = ClinicalCase::find($search_data['caseID']);
+		$label_list = array();
+
+		foreach ($case_info->revisions as $idx => $revision) {
+			if ($idx === intval($search_data['revisionNo'])) {
+				foreach($revision['series'] as $series) {
+					if ($series['seriesUID'] === $search_data['seriesUID']) {
+						foreach ($series['labels'] as $label) {
+							$label_list[] = $label['id'];
+						}
+					}
+				}
+			}
+		}
+		return $label_list;
+	}
 }
 
 Validator::extend('is_series', function($attribute, $value, $parameters) {

@@ -18,9 +18,10 @@ class CaseExportController extends BaseController {
 			self::validate($inputs);
 
 			//create temporary folder
-			if (!mkdir(storage_path('cache').'/'.$inputs['caseID']))
+			$tmp_dir_path = storage_path('cache').'/'.time();
+			if (!mkdir($tmp_dir_path))
 				throw new Exception('Creating a temporary folder failed');
-			$tmp_dir_path = storage_path('cache/'.$inputs['caseID']);
+		//	$tmp_dir_path = storage_path('cache/'.$inputs['caseID']);
 
 			//delete trash files
 			self::deleteFiles();

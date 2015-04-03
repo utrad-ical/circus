@@ -77,7 +77,7 @@ class SeriesRegisterController extends BaseController {
 		try {
 			$zip = new ZipArchive();
 			//Zip file open
-			$zip_path = storage_path."/upload/".$file;
+			$zip_path = storage_path()."/uploads/".$file;
 			$res = $zip->open($zip_path);
 
 			//Successful Zip file open
@@ -86,7 +86,7 @@ class SeriesRegisterController extends BaseController {
 
 			//To save Unzip all the files in the Zip file
 			//Unzip the folder name I keep the file name
-			$zip->extractTo(storage_path."/upload/");
+			$zip->extractTo(storage_path()."/upload/");
 			//Zip file close
 			$zip->close();
 
@@ -104,7 +104,7 @@ class SeriesRegisterController extends BaseController {
 	 * @since 2015/03/20
 	 */
 	function errorFinish($errMsg) {
-		return View::make('series.input', array('error_msg', $errMsg));
+		return View::make('series.input', array('error_msg' => $errMsg));
 	}
 
 	/**

@@ -54,7 +54,7 @@ id="page_series_import"
 {{Form::close()}}
 @if (isset($error_msg))
 	<p class="al_c">
-		<br><span class="txt_alert">{{$error_msg}}</span>
+		<br><span class="font_red">{{$error_msg}}</span>
 	</p>
 @endif
 @stop

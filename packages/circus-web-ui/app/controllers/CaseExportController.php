@@ -56,6 +56,10 @@ class CaseExportController extends BaseController {
 			//download zip file
 			$zip_file_name = $inputs['caseID'].'_series'.$series_index.'_revision'.$inputs['revisionNo'].'.zip';
 			$zip_file_path = $tmp_dir_path.'/'.$zip_file_name;
+
+			if (!file_exists($zip_file_path))
+				throw new Exception('failed create zip file .');
+
 			header('Content-Type: application/zip; name="' . $zip_file_name . '"');
 			header('Content-Disposition: attachment; filename="' . $zip_file_name . '"');
 			header('Content-Length: '.filesize($zip_file_path));
@@ -77,12 +81,19 @@ class CaseExportController extends BaseController {
 			Log::debug($e);
 			Log::debug($e->getMessage());
 
-			if (isset($zip_file_path))
-				unlink($zip_file_path);
 
-			if (isset($tmp_dir_path))
-				rmdir($tmp_dir_path);
-
+			if (isset($tmp_dir_path)) {
+				if ($dir = opendir($tmp_dir_path)) {
+					while(($file = readdir($dir)) !== false) {
+						if ($file != "." && $file != "..") {
+							if (is_dir($file))
+								rmdir($file);
+							if (is_file($file))
+								unlink($file);
+						}
+					}
+				}
+			}
 			return $e->getMessage();
 		}
 	}
@@ -155,7 +166,7 @@ class CaseExportController extends BaseController {
 	function deleteFiles() {
 		$yesterday = strtotime('-1 day');
 		if ($dir = opendir(storage_path('cache'))) {
-			while(($file = readdir($dir)) !== FALSE) {
+			while(($file = readdir($dir)) !== false) {
 				if ($file != "." && $file != ".." && $file != ".gitignore") {
 					$file_last_ut = filemtime(storage_path('cache') . "/" . $file);
 					if ($yesterday > $file_last_ut) {

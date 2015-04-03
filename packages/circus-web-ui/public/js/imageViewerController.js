@@ -156,6 +156,24 @@
 
 
 
+		changedLabelNum : function(){
+
+			var rtn_num = 0;
+      var this_elm = this;
+
+      for (var i = 0; i < controllerInfo.series.length; i++) {
+				var tmp_the_controller_series = controllerInfo.series[i];
+				if(typeof tmp_the_controller_series.label == 'object'){
+					for (var j = 0; j < tmp_the_controller_series.label.length; j++) {
+						var tmp_the_label = tmp_the_controller_series.label[j];
+						if (typeof tmp_the_label.update_flg != 'undefined' && tmp_the_label.update_flg == 1) {
+							rtn_num++;
+						}
+					}
+				}
+      }
+			return rtn_num;
+		},
     changeUpdateLabelId: function () {
 
       //書き換えがあったラベルのidを差し替える
@@ -866,12 +884,62 @@
 	
 				//書き換えフラグのあるラベルのidを書き換える
 				this_elm.imageViewerController('changeUpdateLabelId');
-										
-				console.log(controllerInfo.series[0].label);
-	
         this_elm.imageViewerController('saveData');
         return false;
       });
+
+      //Export
+      $('.btn_export').click(function () {
+
+				//書き換えが発生していたラベルにフラグを立てる
+				this_elm.imageViewerController('checkUpdateLabel');
+				var changed_label_num = 0;
+					changed_label_num = this_elm.imageViewerController('changedLabelNum');
+					if(changed_label_num==0){
+						$('#export_err').empty();
+
+						var export_data = {caseID: controllerInfo.caseId, seriesUID:controllerInfo.activeSeriesId, revisionNo:revisionNo};
+						console.log(export_data);
+						//エクスポート処理
+						$.ajax({
+							url: controllerInfo.getLabelUrl,
+							type: 'post',
+							data: export_data,//送信データ
+							dataType: 'json',
+							error: function () {
+								alert('通信に失敗しました');
+							},
+							success: function (response) {
+								//alert('save finished.');
+								console.log(response['label_list']);
+
+								//初期化
+								$('#exportSeriesUID').empty();
+								$('.'+parentLabelList).empty();
+
+								$('#exportSeriesUID').append(controllerInfo.activeSeriesId);
+								$('.exportSeriesUID').val(controllerInfo.activeSeriesId);
+
+
+								$.each(response['label_list'], function(idx, val) {
+									var elm = '<li class="ui-state-dafault">';
+									elm += '<input type="checkbox" value="'+idx+'" id="export_label_idx'+idx+'" name="labels[]" class="export_labels">';
+									elm += '<label for="export_label_idx'+idx+'">Label '+idx+'</label></li>';
+									$('.'+parentLabelList).append(elm);
+								});
+							}
+						});
+
+						$('.export_area').slideDown();
+
+					}else{
+						$('.export_area').slideUp();
+						alert('There are unsaved data.\nplease do this operation\nafter Save.');
+					}
+        return false;
+      });
+
+
     },
 
 

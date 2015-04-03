@@ -1,5 +1,3 @@
-{{-- 取得方法がわからないのでいったん固定で入れておく --}}
-
 Export volume data (Series: <span id="exportSeriesUID"></span>, Revision: {{{$revisionNo}}})
 <hr>
 {{Form::open(['url' => asset('case/export'), 'method' => 'post', 'id' => 'frm_export'])}}

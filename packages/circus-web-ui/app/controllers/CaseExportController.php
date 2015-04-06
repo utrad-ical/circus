@@ -23,7 +23,7 @@ class CaseExportController extends BaseController {
 				throw new Exception('Creating a temporary folder failed');
 
 			//delete trash files
-			CommonHelper::deletePastTemporaryFiles();
+			CommonHelper::deletePastTemporaryFiles(storage_path('cache'));
 
 			$data_label = self::getDataTypeOption(intval($inputs['data_type']));
 			$output_label = self::getOutputTypeOption(intval($inputs['output_type']));

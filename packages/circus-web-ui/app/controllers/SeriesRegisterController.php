@@ -20,6 +20,9 @@ class SeriesRegisterController extends BaseController {
 		$inputs = Input::all();
 
 		try {
+			//delete temporary files
+			CommonHelper::deletePastTemporaryFiles(storage_path('uploads'));
+
 			//Not selected file
 			if (array_key_exists('upload_file', $inputs) === false)
 				throw new Exception('Please select the file.');
@@ -29,7 +32,7 @@ class SeriesRegisterController extends BaseController {
 			$file_list = array();
 
 			foreach ($uploads as $upload) {
-				$res = $upload->move(storage_path()."/uploads/", $upload->getClientOriginalName());
+				$res = $upload->move(storage_path('uploads')."/", $upload->getClientOriginalName());
 
 				//If extension of Zip to save unzip
 				$ext = $upload->getClientOriginalExtension();
@@ -40,7 +43,7 @@ class SeriesRegisterController extends BaseController {
 						throw new ZipException($errorMsg);
 				} else {
 					//image:import
-					$file_list[] = storage_path()."/uploads/".$upload->getClientOriginalName();
+					$file_list[] = storage_path('uploads')."/".$upload->getClientOriginalName();
 				}
 			}
 			//Dicomファイルインポート
@@ -77,7 +80,7 @@ class SeriesRegisterController extends BaseController {
 		try {
 			$zip = new ZipArchive();
 			//Zip file open
-			$zip_path = storage_path()."/uploads/".$file;
+			$zip_path = storage_path('uploads')."/".$file;
 			$res = $zip->open($zip_path);
 
 			//Successful Zip file open

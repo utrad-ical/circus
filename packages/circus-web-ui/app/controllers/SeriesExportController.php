@@ -23,7 +23,7 @@ class SeriesExportController extends BaseController {
 				throw new Exception('Creating a temporary folder failed');
 
 			//delete trash files
-			CommonHelper::deletePastTemporaryFiles();
+			CommonHelper::deletePastTemporaryFiles(storage_path('cache'));
 
 			//command execution
 			$cmd_ary = array(

@@ -42,14 +42,13 @@ class CommonHelper{
 	 * 一定期間以上経過したテンポラリファイルを削除する
 	 * @param string $past_term 経過時間 (Default:-1day)
 	 */
-	public static function deletePastTemporaryFiles($past_term = '-1 day') {
+	public static function deletePastTemporaryFiles($dir_path, $past_term = '-1 day') {
 		$past_dt = strtotime($past_term);
 		if ($dir = opendir(storage_path('cache'))) {
 			while(($file = readdir($dir)) !== false) {
 				if ($file != "." && $file != ".." && $file != ".gitignore") {
 					$file_last_ut = filemtime(storage_path('cache') . "/" . $file);
 					if ($past_dt > $file_last_ut) {
-					//	Log::debug('target delete file name::'.$file);
 						if (is_dir($file))
 							rmdir($file);
 						if (is_file($file))

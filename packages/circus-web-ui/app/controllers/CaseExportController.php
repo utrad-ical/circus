@@ -21,10 +21,9 @@ class CaseExportController extends BaseController {
 			$tmp_dir_path = storage_path('cache').'/'.time();
 			if (!mkdir($tmp_dir_path))
 				throw new Exception('Creating a temporary folder failed');
-		//	$tmp_dir_path = storage_path('cache/'.$inputs['caseID']);
 
 			//delete trash files
-			self::deleteFiles();
+			CommonHelper::deletePastTemporaryFiles();
 
 			$data_label = self::getDataTypeOption(intval($inputs['data_type']));
 			$output_label = self::getOutputTypeOption(intval($inputs['output_type']));
@@ -79,21 +78,9 @@ class CaseExportController extends BaseController {
 			exit();
 		} catch (Exception $e) {
 			Log::debug($e);
-			Log::debug($e->getMessage());
 
-
-			if (isset($tmp_dir_path)) {
-				if ($dir = opendir($tmp_dir_path)) {
-					while(($file = readdir($dir)) !== false) {
-						if ($file != "." && $file != "..") {
-							if (is_dir($file))
-								rmdir($file);
-							if (is_file($file))
-								unlink($file);
-						}
-					}
-				}
-			}
+			if (isset($tmp_dir_path))
+				CommonHelper::deleteTemporaryDirectory($tmp_dir_path);
 			return $e->getMessage();
 		}
 	}
@@ -155,28 +142,6 @@ class CaseExportController extends BaseController {
 				//label not found
 				if (!array_key_exists($idx, $series['labels']))
 					throw new Exception('The label does not exist .');
-			}
-		}
-
-	}
-
-	/**
-	 * remove files that are older than one day
-	 */
-	function deleteFiles() {
-		$yesterday = strtotime('-1 day');
-		if ($dir = opendir(storage_path('cache'))) {
-			while(($file = readdir($dir)) !== false) {
-				if ($file != "." && $file != ".." && $file != ".gitignore") {
-					$file_last_ut = filemtime(storage_path('cache') . "/" . $file);
-					if ($yesterday > $file_last_ut) {
-						Log::debug('target delete file name::'.$file);
-						if (is_dir($file))
-							rmdir($file);
-						if (is_file($file))
-							unlink($file);
-					}
-				}
 			}
 		}
 	}

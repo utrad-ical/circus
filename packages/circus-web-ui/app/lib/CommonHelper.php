@@ -20,8 +20,6 @@ class CommonHelper{
 	 * 性別(表示)を取得する
 	 * @param String $sex 性別コード(O/F/M)
 	 * @return String 性別ラベル
-	 * @author stani
-	 * @since 2015/03/20
 	 */
 	public static function getSex($sex) {
 		if (!$sex) return '';
@@ -33,12 +31,53 @@ class CommonHelper{
 	 * 性別をコード値に変換する
 	 * @param $sex 性別ラベル
 	 * @return String 性別のコード値
-	 * @author stani
-	 * @since 2015/03/20
 	 */
 	public static function setSex($sex) {
 		if (!$sex) return '';
 		$sexes = Config::get('const.patient_sex');
 		return array_search($sex, $sexes);
+	}
+
+	/**
+	 * 一定期間以上経過したテンポラリファイルを削除する
+	 * @param string $past_term 経過時間 (Default:-1day)
+	 */
+	public static function deletePastTemporaryFiles($past_term = '-1 day') {
+		$past_dt = strtotime($past_term);
+		if ($dir = opendir(storage_path('cache'))) {
+			while(($file = readdir($dir)) !== false) {
+				if ($file != "." && $file != ".." && $file != ".gitignore") {
+					$file_last_ut = filemtime(storage_path('cache') . "/" . $file);
+					if ($past_dt > $file_last_ut) {
+					//	Log::debug('target delete file name::'.$file);
+						if (is_dir($file))
+							rmdir($file);
+						if (is_file($file))
+							unlink($file);
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * テンポラリフォルダを削除する
+	 * @param string $dir_path 削除対象のフォルダパス
+	 */
+	public static function deleteTemporaryDirectory($dir_path) {
+		if (!file_exists($dir_path)) return;
+
+		if ($dir = opendir($dir_path)) {
+			while(($file = readdir($dir)) !== false) {
+				if ($file != "." && $file != "..") {
+					if (is_dir($file))
+						rmdir($file);
+					if (is_file($file))
+						unlink($file);
+				}
+			}
+		}
+
+		rmdir($dir_path);
 	}
 }

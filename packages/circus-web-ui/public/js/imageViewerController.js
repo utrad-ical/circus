@@ -891,38 +891,45 @@
 				if(changed_label_num==0){
 					$('#export_err').empty();
 
-					var export_data = {caseID: controllerInfo.caseId, seriesUID:controllerInfo.activeSeriesId, revisionNo:revisionNo};
-					//console.log(export_data);
-					//エクスポート処理
-					$.ajax({
-						url: controllerInfo.getLabelUrl,
-						type: 'post',
-						data: export_data,//送信データ
-						dataType: 'json',
-						error: function () {
-							alert('通信に失敗しました');
-						},
-						success: function (response) {
-							//alert('save finished.');
-							console.log(response['label_list']);
+					if (typeof revisionNo !== 'undefined') {
+						//ケース詳細
+						var export_data = {caseID: controllerInfo.caseId, seriesUID:controllerInfo.activeSeriesId, revisionNo:revisionNo};
+						//console.log(export_data);
+						//エクスポート処理
+						$.ajax({
+							url: controllerInfo.getLabelUrl,
+							type: 'post',
+							data: export_data,//送信データ
+							dataType: 'json',
+							error: function () {
+								alert('通信に失敗しました');
+							},
+							success: function (response) {
+								//alert('save finished.');
+								console.log(response['label_list']);
 
-							//初期化
-							$('#exportSeriesUID').empty();
-							$('.'+parentLabelList).empty();
+								//初期化
+								$('#exportSeriesUID').empty();
+								$('.'+parentLabelList).empty();
 
-							$('#exportSeriesUID').append(controllerInfo.activeSeriesId);
-							$('.exportSeriesUID').val(controllerInfo.activeSeriesId);
+								$('#exportSeriesUID').append(controllerInfo.activeSeriesId);
+								$('.exportSeriesUID').val(controllerInfo.activeSeriesId);
 
 
-							$.each(response['label_list'], function(idx, val) {
-								var elm = '<li class="ui-state-dafault">';
-								elm += '<input type="checkbox" value="'+idx+'" id="export_label_idx'+idx+'" name="labels[]" class="export_labels">';
-								elm += '<label for="export_label_idx'+idx+'">Label '+idx+'</label></li>';
-								$('.'+parentLabelList).append(elm);
-							});
-						}
-					});
-
+								$.each(response['label_list'], function(idx, val) {
+									var elm = '<li class="ui-state-dafault">';
+									elm += '<input type="checkbox" value="'+idx+'" id="export_label_idx'+idx+'" name="labels[]" class="export_labels">';
+									elm += '<label for="export_label_idx'+idx+'">Label '+idx+'</label></li>';
+									$('.'+parentLabelList).append(elm);
+								});
+							}
+						});
+					} else {
+						//シリーズ詳細
+						series_slider_max = controllerInfo.series[0].voxel.z;
+						$('#exportEdSeriesImg').val(series_slider_max);
+						sliderRun();
+					}
 					$('.export_area').slideDown();
 
 				}else{

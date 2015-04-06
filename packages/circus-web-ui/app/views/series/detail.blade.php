@@ -17,7 +17,8 @@
 {{HTML::script('js/jquery.flexforms.js')}}
 
 @if (!isset($error_msg))
-<script type="text/javascript">
+<script>
+var series_slider_max = 0;
 //Project-specific feature set to control the controller viewer widget
 $(function(){
 	//Data group to pass when you ignite the controller immediately after page load
@@ -234,7 +235,8 @@ id="page_series_detail"
 <div class="al_l mar_b_10 w_600 fl_l">
 	{{HTML::link(asset('series/search'), 'Back to Series Search Result', array('class' => 'common_btn mar_r_10', 'id' => 'btnBack'))}}
 	@if(!isset($error_msg))
-		{{HTML::link(asset('case/input'), 'Edit New Case', array('class' => 'common_btn fl_l disp_b link_new_case mar_r_10'))}}
+		{{HTML::link(asset('case/input'), 'Edit New Case', array('class' => 'common_btn fl_l link_new_case mar_r_10'))}}
+		{{HTML::link(asset('series/export'), 'Export', array('class' => 'common_btn btn_export mar_r_10'))}}
 		{{Form::open(['url' => asset('case/input'), 'method' => 'post', 'id' => 'form_edit_new_case'])}}
 			{{Form::hidden('back_url', 'series_detail')}}
 		{{Form::close()}}
@@ -254,6 +256,11 @@ id="page_series_detail"
 		</div>
 	</div>
 	<div class="clear">&nbsp;</div>
+	<div class="export_area" style="display:none;">
+		<div class="pad_20">
+			@include('series.export')
+		</div>
+	</div>
 	<div class="control_panel mar_tb_10" id="the_panel">
 		<div class="control_panel_inner" id="the_panel_inner">
 		</div>

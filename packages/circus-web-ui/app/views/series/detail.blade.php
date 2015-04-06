@@ -75,7 +75,7 @@ $(function(){
 					container : voxel_container,
 					number:{
 						maximum : 260, //What sheets cross section is stored
-						current : 44	//Initial display number
+						current : 0	//Initial display number
 					},
 					window: {
 						level: {current : 1000, maximum : 50000, minimum : -5000},
@@ -84,24 +84,6 @@ $(function(){
 							 {label: 'Apply from the source only to axial'	, level: 0000	, width : 2000},
 						]
 					},
-				},
-				{//2nd sheet
-					elementId : 'img_area_sagital',
-					orientation : 'sagital',
-					container : voxel_container,
-					number:{
-						maximum : 511, //What sheets cross section is stored
-						current : 90	//Initial display number
-					}
-				},
-				{//2rd sheet
-					elementId : 'img_area_coronal',
-					orientation : 'coronal',
-					container : voxel_container,
-					number:{
-						maximum : 511, //What sheets cross section is stored
-						current : 90	//Initial display number
-					}
 				}
 			]
 		}
@@ -248,12 +230,7 @@ id="page_series_detail"
 @else
 	<div class="clear">&nbsp;</div>
 	<div class="w_500 fl_r">
-		<div class="info_area">
-			<p class="pad_10">
-				{{$series_detail->patientInfo['patientName']}} ({{$series_detail->patientInfo['patientID']}})
-				<br>{{$series_detail->patientInfo['birthDate']}} {{CommonHelper::getSex($series_detail->patientInfo['sex'])}}
-			</p>
-		</div>
+		
 	</div>
 	<div class="clear">&nbsp;</div>
 	<div class="export_area" style="display:none;">
@@ -267,9 +244,14 @@ id="page_series_detail"
 	</div>
 	<div class=" img_view_area">
 		<div class="img_area fl_l mar_b_20" id="img_area_axial"></div>
-		<div class="img_area fl_r mar_b_20" id="img_area_sagital"></div>
-		<div class="clear">&nbsp;</div>
-		<div class="img_area fl_l mar_b_20" id="img_area_coronal"></div>
+		<div class="img_area fl_r mar_b_20" id="">
+			<div class="info_area">
+			<p class="pad_10">
+				{{$series_detail->patientInfo['patientName']}} ({{$series_detail->patientInfo['patientID']}})
+				<br>{{$series_detail->patientInfo['birthDate']}} {{CommonHelper::getSex($series_detail->patientInfo['sex'])}}
+			</p>
+		</div>
+		</div>
 		<div class="clear">&nbsp;</div>
 	</div>
 @endif

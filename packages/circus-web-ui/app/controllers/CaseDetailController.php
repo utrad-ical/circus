@@ -72,7 +72,7 @@ class CaseDetailController extends BaseController {
 			//Series list created
 			$inputs['seriesUID'] = self::getSeriesIDList($case_info, $select_revision);
 			//Shaping of the series list
-			$result['series_list'] = self::getSeriesList($case_info->revisions[$select_revision], $case_info->project->windowPresets);
+			$result['series_list'] = self::getSeriesList($case_info->revisions[$select_revision], $case_info->project->windowPriority, $case_info->project->windowPresets);
 			$result['attribute'] = json_encode($case_info->revisions[$select_revision]['attributes']);
 			$result['inputs'] = Session::get('case.detail');
 
@@ -178,7 +178,7 @@ class CaseDetailController extends BaseController {
 	 * @param $data Revision data that are selected
 	 * @return Series list brute string to Revision
 	 */
-	function getSeriesList($revision_info, $presets = array()) {
+	function getSeriesList($revision_info, $priority, $presets = array()) {
 		$data = array();
 		$img_save_path = Config::get('const.label_img_save_path');
 
@@ -197,9 +197,9 @@ class CaseDetailController extends BaseController {
 				'z'			=>	0
 			);
 
-
 			$series_info['window'] = array(
-				'preset'	=>	array()
+				'preset'	=>	array(),
+				'priority'	=> $priority
 			);
 
 			if ($presets)

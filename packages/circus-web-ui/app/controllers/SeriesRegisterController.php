@@ -89,7 +89,7 @@ class SeriesRegisterController extends BaseController {
 
 			//To save Unzip all the files in the Zip file
 			//Unzip the folder name I keep the file name
-			$zip->extractTo(storage_path()."/upload/");
+			$zip->extractTo(storage_path('uploads'));
 			//Zip file close
 			$zip->close();
 

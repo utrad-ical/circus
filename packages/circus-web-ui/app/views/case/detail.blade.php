@@ -304,14 +304,6 @@ id="page_case_detail"
 	</table>
 	<div class="w_400 fl_l">
 		{{Form::open(['url' => asset('case/detail'), 'method' => 'post'])}}
-			<label class="common_btn" for="img_mode_view">
-				{{Form::radio('img_mode', 1, $mode == 'detail' ? true : false, array('class' => 'img_mode', 'id' => 'img_mode_view'))}}
-				View
-			</label>
-			<label class="common_btn" for="img_mode_draw">
-				{{Form::radio('img_mode', 1, $mode == 'edit' ? true : false, array('class' => 'img_mode', 'id' => 'img_mode_draw'))}}
-				Draw
-			</label>
 			<button type='submit' class='common_btn btn_save' name='btnSave'>
 				<span style="background:url({{asset('/img/common/ico_save.png')}}) no-repeat; width:22px; height:22px; display:inline-block; margin-bottom:-7px; margin-right:4px;"></span>
 				Save
@@ -362,8 +354,8 @@ id="page_case_detail"
 					<col width="14%">
 					<col width="14%">
 					<col width="14%">
-					<col width="28%">
-					<col width="16%">
+					<col width="34%">
+					<col width="10%">
 				</colgroup>
 				<tr>
 					<th>Revision No.</th>
@@ -393,7 +385,6 @@ id="page_case_detail"
 									{{Form::hidden('caseID', $case_detail->caseID)}}
 									{{Form::hidden('revisionNo', $rec['revisionNo'])}}
 									{{Form::button('View', array('class' => 'common_btn link_case_detail'))}}
-									{{HTML::link(asset('/case/detail'), 'Edit', array('class' => 'common_btn mar_t_5 link_case_edit'))}}
 								{{Form::close()}}
 							</td>
 						</tr>

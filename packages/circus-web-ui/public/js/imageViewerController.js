@@ -20,7 +20,6 @@
         id: '',
         description: 'series name', //シリーズ名,今は特に使っていない
         number: 512, //何枚の断面が格納されているか
-        thickness: 1, //断面１枚あたりの厚さ todo 名前を要確認
         window: {
           level: {
             current: 1000,
@@ -315,7 +314,6 @@
 				if(tmp_label.update_flg == 0 && tmp_label.last_save_point != i+1){
 					tmp_label.last_save_point = i+1;
 					tmp_label.update_flg = 1;
-									console.log(tmp_label);
 				}
 			}
 		},
@@ -906,7 +904,7 @@
 							},
 							success: function (response) {
 								//alert('save finished.');
-								console.log(response['label_list']);
+								//console.log(response['label_list']);
 
 								//初期化
 								$('#exportSeriesUID').empty();

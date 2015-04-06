@@ -881,7 +881,7 @@
       this_obj.setCanvasSize();
 
       //以下各種イベント群
-      this_elm.bind('changeImageSrc', function () {
+      this_elm.bind('', function () {
         this_obj._changeImgSrc();
       })
         .bind('getOptions', function () {
@@ -1597,14 +1597,13 @@
         this_opts.viewer.number.current = tmp_num;
       }
 
-
       this_elm.find('.slider_elm').slider({
         value: this_opts.viewer.number.current,
         orientation: 'horizontal',
         min: this_opts.viewer.number.minimum,
         max: this_opts.viewer.number.maximum
       });
-
+        
       //キャンバスのサイズ定義
       this_elm.find('.series_image_elm,.canvas_main_elm').attr({
         width: this_opts.viewer.position.dw,

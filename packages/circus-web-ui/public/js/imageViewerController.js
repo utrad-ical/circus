@@ -174,69 +174,62 @@
       }
 			return rtn_num;
 		},
-    changeUpdateLabelId: function () {
-
-      //書き換えがあったラベルのidを差し替える
-      var this_elm = this;
-
-      for (var i = 0; i < controllerInfo.series.length; i++) {
-				var tmp_the_controller_series = controllerInfo.series[i];
-				if(typeof tmp_the_controller_series.label == 'object'){
-			
-					for (var j = 0; j < tmp_the_controller_series.label.length; j++) {
-						var tmp_the_label = tmp_the_controller_series.label[j];
-						var tmp_current_label_id = tmp_the_label.id + '';	//更新前のラベルid
-
-						if (typeof tmp_the_label.update_flg != 'undefined' && tmp_the_label.update_flg == 1) {
+		
+		
+		
+		
+		
+    changeUpdateLabelId: function() {
+			//書き換えがあったラベルのidを差し替える
+			var this_elm = this;
+			for (var i = 0; i < controllerInfo.series.length; i++) {
+				var tmp_controller_series = controllerInfo.series[i];
+				if (typeof tmp_controller_series.label == 'object') {
+					for (var j = 0; j < tmp_controller_series.label.length; j++) {
+						var tmp_label = tmp_controller_series.label[j];
+						var tmp_current_label_id = tmp_label.id + ''; //更新前のラベルid
+						if (typeof tmp_label.update_flg != 'undefined' && tmp_label.update_flg == 	1) {
+							tmp_label.update_flg = 0;
 							var tmp_new_label_id = this_elm.imageViewerController('getLabelDefault').id;
-	
 							//ビューアー内のラベルオブジェクトid書き換え
 							for (var k = 0; k < controllerInfo.viewer.length; k++) {
-								var tmp_the_viewer = controllerInfo.viewer[k];
-								var the_viewer_options = $('#' + tmp_the_viewer.elementId).imageViewer('option', 'viewer');
-								for (var l = 0; l < the_viewer_options.draw.series.length; l++) {
-									var the_viewer_series = the_viewer_options.draw.series[l];
-									if (the_viewer_series.activeLabelId == tmp_current_label_id) {
-										the_viewer_series.activeLabelId = tmp_new_label_id;
+								var tmp_viewer = controllerInfo.viewer[k];
+								var viewer_options = $('#' + tmp_viewer.elementId).imageViewer(	'option', 'viewer');
+								for (var l = 0; l < viewer_options.draw.series.length; l++) {
+									var viewer_series = viewer_options.draw.series[l];
+									if (viewer_series.activeLabelId == tmp_current_label_id) {
+										viewer_series.activeLabelId = tmp_new_label_id;
 									}
-	
-									if(typeof the_viewer_series.label == 'object'){
-										for (var m = 0; m < the_viewer_series.label.length; m++) {
-											var the_viewer_label = the_viewer_series.label[m];
-											if (the_viewer_label.id == tmp_current_label_id) {
-												the_viewer_label.id = tmp_new_label_id;
+									if (typeof viewer_series.label == 'object') {
+										for (var m = 0; m < viewer_series.label.length; m++) {
+											var viewer_label = viewer_series.label[m];
+											if (viewer_label.id == tmp_current_label_id) {
+												viewer_label.id = tmp_new_label_id;
 											}
 										}
 									}
 								}
 							}
-	
 							//コンテナ内部のラベルidを差し替え
 							var container_object = controllerInfo.viewer[0].container;
-							container_object.changeLabelName(tmp_current_label_id, tmp_the_controller_series.id,tmp_new_label_id);
-	
+							container_object.changeLabelName(tmp_current_label_id,tmp_controller_series.id, tmp_new_label_id);
 							//コントローラのラベルオブジェクトid書き換え
-							tmp_the_label.id = tmp_new_label_id;
-							if (tmp_the_controller_series.activeLabelId == tmp_current_label_id) {
-								tmp_the_controller_series.activeLabelId = tmp_new_label_id;
+							tmp_label.id = tmp_new_label_id;
+							if (tmp_controller_series.activeLabelId == tmp_current_label_id) {
+								tmp_controller_series.activeLabelId = tmp_new_label_id;
 							}
-							tmp_the_label.update_flg = 0;
 						}
 					}
 				}
-      }
-
+			}
 			//周辺要素に適用
-      this_elm.imageViewerController('updateLabelElements');
-
-      //紐づくビューアーたちに伝播
-      for (var i = 0; i < controllerInfo.viewer.length; i++) {
-        var elmId = '#' + controllerInfo.viewer[i].elementId;
-        $(elmId).trigger('sync');
-      }
-
-    },
-
+			this_elm.imageViewerController('updateLabelElements');
+			//紐づくビューアーたちに伝播
+			for (var i = 0; i < controllerInfo.viewer.length; i++) {
+				var elmId = '#' + controllerInfo.viewer[i].elementId;
+				$(elmId).trigger('sync');
+			}
+		},
 
 
 
@@ -876,7 +869,7 @@
         });
       }
 
-      //保存
+      //save
       $('.btn_save').click(function () {
 				
 				//書き換えが発生していたラベルにフラグを立てる
@@ -894,48 +887,48 @@
 				//書き換えが発生していたラベルにフラグを立てる
 				this_elm.imageViewerController('checkUpdateLabel');
 				var changed_label_num = 0;
-					changed_label_num = this_elm.imageViewerController('changedLabelNum');
-					if(changed_label_num==0){
-						$('#export_err').empty();
+				changed_label_num = this_elm.imageViewerController('changedLabelNum');
+				if(changed_label_num==0){
+					$('#export_err').empty();
 
-						var export_data = {caseID: controllerInfo.caseId, seriesUID:controllerInfo.activeSeriesId, revisionNo:revisionNo};
-						console.log(export_data);
-						//エクスポート処理
-						$.ajax({
-							url: controllerInfo.getLabelUrl,
-							type: 'post',
-							data: export_data,//送信データ
-							dataType: 'json',
-							error: function () {
-								alert('通信に失敗しました');
-							},
-							success: function (response) {
-								//alert('save finished.');
-								console.log(response['label_list']);
+					var export_data = {caseID: controllerInfo.caseId, seriesUID:controllerInfo.activeSeriesId, revisionNo:revisionNo};
+					//console.log(export_data);
+					//エクスポート処理
+					$.ajax({
+						url: controllerInfo.getLabelUrl,
+						type: 'post',
+						data: export_data,//送信データ
+						dataType: 'json',
+						error: function () {
+							alert('通信に失敗しました');
+						},
+						success: function (response) {
+							//alert('save finished.');
+							console.log(response['label_list']);
 
-								//初期化
-								$('#exportSeriesUID').empty();
-								$('.'+parentLabelList).empty();
+							//初期化
+							$('#exportSeriesUID').empty();
+							$('.'+parentLabelList).empty();
 
-								$('#exportSeriesUID').append(controllerInfo.activeSeriesId);
-								$('.exportSeriesUID').val(controllerInfo.activeSeriesId);
+							$('#exportSeriesUID').append(controllerInfo.activeSeriesId);
+							$('.exportSeriesUID').val(controllerInfo.activeSeriesId);
 
 
-								$.each(response['label_list'], function(idx, val) {
-									var elm = '<li class="ui-state-dafault">';
-									elm += '<input type="checkbox" value="'+idx+'" id="export_label_idx'+idx+'" name="labels[]" class="export_labels">';
-									elm += '<label for="export_label_idx'+idx+'">Label '+idx+'</label></li>';
-									$('.'+parentLabelList).append(elm);
-								});
-							}
-						});
+							$.each(response['label_list'], function(idx, val) {
+								var elm = '<li class="ui-state-dafault">';
+								elm += '<input type="checkbox" value="'+idx+'" id="export_label_idx'+idx+'" name="labels[]" class="export_labels">';
+								elm += '<label for="export_label_idx'+idx+'">Label '+idx+'</label></li>';
+								$('.'+parentLabelList).append(elm);
+							});
+						}
+					});
 
-						$('.export_area').slideDown();
+					$('.export_area').slideDown();
 
-					}else{
-						$('.export_area').slideUp();
-						alert('There are unsaved data.\nplease do this operation\nafter Save.');
-					}
+				}else{
+					$('.export_area').slideUp();
+					alert('There are unsaved data.\nplease do this operation\nafter Save.');
+				}
         return false;
       });
 

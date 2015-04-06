@@ -160,3 +160,8 @@
 
 /*series import*/
 #page_series_import .droppable_area{background:#eee; border:1px solid #ccc; padding:40px; margin:0 100px;}
+
+
+/*series deatil*/
+#page_series_detail .img_toolbar_wrap{margin:0;}
+#page_series_detail #the_panel_inner{position:relative; left:0;}

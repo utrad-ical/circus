@@ -44,10 +44,10 @@ class CommonHelper{
 	 */
 	public static function deletePastTemporaryFiles($dir_path, $past_term = '-1 day') {
 		$past_dt = strtotime($past_term);
-		if ($dir = opendir(storage_path('cache'))) {
+		if ($dir = opendir($dir_path)) {
 			while(($file = readdir($dir)) !== false) {
 				if ($file != "." && $file != ".." && $file != ".gitignore") {
-					$file_last_ut = filemtime(storage_path('cache') . "/" . $file);
+					$file_last_ut = filemtime($dir_path . "/" . $file);
 					if ($past_dt > $file_last_ut) {
 						if (is_dir($file))
 							rmdir($file);
@@ -66,17 +66,10 @@ class CommonHelper{
 	public static function deleteTemporaryDirectory($dir_path) {
 		if (!file_exists($dir_path)) return;
 
-		if ($dir = opendir($dir_path)) {
-			while(($file = readdir($dir)) !== false) {
-				if ($file != "." && $file != "..") {
-					if (is_dir($file))
-						rmdir($file);
-					if (is_file($file))
-						unlink($file);
-				}
-			}
+		$fileName = $dir_path.'/*';
+		foreach (glob($fileName) as $val) {
+		    unlink($val);
 		}
-
 		rmdir($dir_path);
 	}
 }

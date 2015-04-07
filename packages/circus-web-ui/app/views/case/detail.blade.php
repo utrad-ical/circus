@@ -219,23 +219,15 @@ $(function(){
 	});
 
 	$('.link_case_detail').click(function(){
-		$(this).closest('td').find("input[name='mode']").val('detail');
-		//Get the form ID to be sent
-		$(this).closest('td').find('.form_case_detail').submit();
-		return false;
+		changeRevision($(this).closest('td').find("input[name='revisionNo']").val(), 'detail');
 	});
 
 	$('.link_case_edit').click(function(){
-		$(this).closest('td').find("input[name='mode']").val('edit');
-		$(this).closest('td').find('.form_case_detail').submit();
-		return false;
+		changeRevision($(this).closest('td').find("input[name='revisionNo']").val(), 'edit');
 	});
 
 	$('.select_revision').change(function() {
-		var selected_val = $(this).val();
-		$('.change_revision').val(selected_val);
-		$('#frm_change_revision').submit();
-		return false;
+		changeRevision($(this).val());
 	});
 
 	$('.link_add_series').click(function(){
@@ -245,6 +237,75 @@ $(function(){
 
 });
 
+var changeRevision = function(index) {
+	if (arguments[1])
+		$('#frm_change_revision').find("input[name='mode']").val(arguments[1]);
+	$('.change_revision').val(index);
+	$('#frm_change_revision').submit();
+	return false;
+}
+
+var getRevisionList = function() {
+	var result_flag = $.ajax({
+		url: "{{{asset('case/get_revision_list')}}}",
+		type: 'post',
+		data: {caseID:"{{{$case_detail->caseID}}}"},//送信データ
+		dataType: 'json',
+		error: function () {
+			alert('Revision情報取得の通信に失敗しました');
+			return false;
+		},
+		success: function (res) {
+			console.log(res);
+			if (res.status === "OK") {
+				create_dom(res.response);
+				return true;
+			}
+			console.log(res.message);
+			return false;
+		}
+	});
+
+	var create_dom = function(insert_obj){
+		//Revisionコンボの設定
+		$('.select_revision').empty();
+		$('#exportRevisionNo').empty();
+		var parent = $('.select_revision');
+		var opt_tag = "";
+		for(var i = 0; i < insert_obj.revision_no_list.length; i++) {
+			if (i === insert_obj.revision_no_list.length - 1) {
+				opt_tag = parent.append("<option value='"+i+"' selected>"+i+"</option>");
+				$('#exportRevisionNo').append(i);
+				$('.exportRevisionNo').val(i);
+				revisionNo = i;
+			} else {
+				opt_tag = parent.append("<option value='"+i+"'>"+i+"</option>");
+			}
+		}
+
+		//Revisionリストの設定
+		$('.result_revision_list').empty();
+		$.each(insert_obj.revision_list, function(i, val) {
+			var tbl_tag = "<tr><td>"+val['revisionNo']+"</td>";
+			tbl_tag += "<td>"+val['editDate']+"<br>"+val['editTime']+"</td>";
+			tbl_tag += "<td>"+val['seriesCount']+" series<br>"+val['labelCount']+" label</td>";
+			tbl_tag += "<td>"+val['creator']+"</td>";
+			tbl_tag += "<td class='al_l'>"+val['memo']+"</td>";
+			tbl_tag += "<td><input type='hidden' name='revisionNo' value='"+val['revisionNo']+"'>";
+			tbl_tag += "<button type='button' class='common_btn link_case_detail'>View</button></td></tr>";
+			$('.result_revision_list').append(tbl_tag);
+		});
+
+		$('.link_case_detail').click(function(){
+			changeRevision($(this).closest('td').find("input[name='revisionNo']").val(), 'detail');
+		});
+
+		$('.link_case_edit').click(function(){
+			changeRevision($(this).closest('td').find("input[name='revisionNo']").val(), 'edit');
+		});
+	}
+	return result_flag;
+}
 </script>
 @endif
 @stop
@@ -347,53 +408,53 @@ id="page_case_detail"
 	<div class="search_result">
 		<a name="revision"></a>
 		<h2 class="con_ttl">Revision</h2>
-		<div class="pad_tb_10 result_revision_list">
+		<div class="pad_tb_10">
 			<table class="result_table common_table al_c">
-				<colgroup>
-					<col width="14%">
-					<col width="14%">
-					<col width="14%">
-					<col width="14%">
-					<col width="34%">
-					<col width="10%">
-				</colgroup>
-				<tr>
-					<th>Revision No.</th>
-					<th>Edit Datetime</th>
-					<th>Series/Label</th>
-					<th>Editor Name</th>
-					<th>Editor Memo</th>
-					<th></th>
-				</tr>
-				@if (count($revision_list))
-					@foreach ($revision_list as $rec)
-						<tr>
-							<td>{{$rec['revisionNo']}}</td>
-							<td>
-								{{$rec['editDate']}}<br>
-								{{$rec['editTime']}}
-							</td>
-							<td>
-								{{$rec['seriesCount']}} series<br>
-								{{$rec['labelCount']}} label
-							</td>
-							<td>{{$rec['creator']}}</td>
-							<td class="al_l">{{$rec['memo']}}</td>
-							<td>
-								{{Form::open(['url' => asset('/case/detail'), 'method' => 'post', 'class' => 'form_case_detail'])}}
-									{{Form::hidden('mode', $mode)}}
-									{{Form::hidden('caseID', $case_detail->caseID)}}
+				<thead>
+					<colgroup>
+						<col width="14%">
+						<col width="14%">
+						<col width="14%">
+						<col width="14%">
+						<col width="34%">
+						<col width="10%">
+					</colgroup>
+					<tr>
+						<th>Revision No.</th>
+						<th>Edit Datetime</th>
+						<th>Series/Label</th>
+						<th>Editor Name</th>
+						<th>Editor Memo</th>
+						<th></th>
+					</tr>
+				</thead>
+				<tbody class="result_revision_list">
+					@if (count($revision_list))
+						@foreach ($revision_list as $rec)
+							<tr>
+								<td>{{$rec['revisionNo']}}</td>
+								<td>
+									{{$rec['editDate']}}<br>
+									{{$rec['editTime']}}
+								</td>
+								<td>
+									{{$rec['seriesCount']}} series<br>
+									{{$rec['labelCount']}} label
+								</td>
+								<td>{{$rec['creator']}}</td>
+								<td class="al_l">{{$rec['memo']}}</td>
+								<td>
 									{{Form::hidden('revisionNo', $rec['revisionNo'])}}
 									{{Form::button('View', array('class' => 'common_btn link_case_detail'))}}
-								{{Form::close()}}
-							</td>
+								</td>
+							</tr>
+						@endforeach
+					@else
+						<tr>
+							<td colspan="6">Revision is not registered.</td>
 						</tr>
-					@endforeach
-				@else
-					<tr>
-						<td colspan="6">Revision is not registered.</td>
-					</tr>
-				@endif
+					@endif
+				</tbody>
 			</table>
 		</div>
 	</div>

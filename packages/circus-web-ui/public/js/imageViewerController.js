@@ -1117,8 +1117,11 @@
 						alert('通信に失敗しました');
 					},
 					success: function (response) {
-						//alert('save finished.');
-						alert(response.message);
+						var revisionRes = getRevisionList();
+						if (revisionRes)
+							alert(response.message);
+						else
+							alert('Failed to get revision information .');
 					}
 				});
 

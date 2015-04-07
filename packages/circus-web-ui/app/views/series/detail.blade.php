@@ -194,19 +194,11 @@ $(function(){
 @stop
 
 @section('title')
-@if(isset($error_msg))
 	Series Detail
-@else
-	{{{$series_detail->seriesDescription}}}
-@endif
 @stop
 
 @section('page_title')
-@if(isset($error_msg))
 	Series Detail
-@else
-	{{{$series_detail->seriesDescription}}}
-@endif
 @stop
 
 @section('page_id')
@@ -214,6 +206,9 @@ id="page_series_detail"
 @stop
 
 @section('content')
+<div>
+    {{{$series_detail->seriesDescription}}}
+</div>
 <div class="al_l mar_b_10 w_600 fl_l">
 	{{HTML::link(asset('series/search'), 'Back to Series Search Result', array('class' => 'common_btn mar_r_10', 'id' => 'btnBack'))}}
 	@if(!isset($error_msg))
@@ -230,7 +225,7 @@ id="page_series_detail"
 @else
 	<div class="clear">&nbsp;</div>
 	<div class="w_500 fl_r">
-		
+
 	</div>
 	<div class="clear">&nbsp;</div>
 	<div class="export_area" style="display:none;">

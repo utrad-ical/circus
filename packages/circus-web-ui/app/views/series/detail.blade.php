@@ -212,7 +212,7 @@ id="page_series_detail"
 <div class="al_l mar_b_10 w_600 fl_l">
 	{{HTML::link(asset('series/search'), 'Back to Series Search Result', array('class' => 'common_btn mar_r_10', 'id' => 'btnBack'))}}
 	@if(!isset($error_msg))
-		{{HTML::link(asset('case/input'), 'Edit New Case', array('class' => 'common_btn fl_l link_new_case mar_r_10'))}}
+		{{HTML::link(asset('case/input'), 'Add New Case', array('class' => 'common_btn fl_l link_new_case mar_r_10'))}}
 		{{HTML::link(asset('series/export'), 'Export', array('class' => 'common_btn btn_export mar_r_10'))}}
 		{{Form::open(['url' => asset('case/input'), 'method' => 'post', 'id' => 'form_edit_new_case'])}}
 			{{Form::hidden('back_url', 'series_detail')}}

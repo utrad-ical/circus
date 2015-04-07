@@ -2,6 +2,8 @@
 
 namespace DicomImporter;
 
+use Process;
+
 class ImporterException extends \Exception
 {
 
@@ -90,7 +92,7 @@ class Importer
 				}
 			}
 			$args[] = escapeshellarg($workfile);
-			exec($this->_registerer->utilityPath() . ' ' . implode(' ', $args));
+			Process::exec($this->_registerer->utilityPath() . ' ' . implode(' ', $args));
 
 			$json_file = preg_replace('/\\.tmp$/', '.json', $workfile);
 			if (!file_exists($json_file)) {

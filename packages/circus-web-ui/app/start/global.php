@@ -51,11 +51,13 @@ Log::useDailyFiles(storage_path() . '/logs/debug.log');
 App::error(function(Exception $exception, $code)
 {
 	Log::error($exception);
-	$result = array();
-	$result['title'] = 'error';
-	$result['url'] = 'home';
-	$result['error_msg'] = $exception->getMessage() ? $exception->getMessage() : '';
-	return Response::view('error', $result, $code);
+	if (isset($_SERVER['REQUEST_URI'])) {
+		$result = array();
+		$result['title'] = 'error';
+		$result['url'] = 'home';
+		$result['error_msg'] = $exception->getMessage() ? $exception->getMessage() : '';
+		return Response::view('error', $result, $code);
+	}
 });
 
 /*

@@ -1,8 +1,8 @@
-Export volume data (Series: <span id="exportSeriesUID"></span>, Revision: {{{$revisionNo}}})
+Export volume data (Series: <span id="exportSeriesUID"></span>, Revision: <span id="exportRevisionNo">{{{$revisionNo}}}</span>)
 <hr>
 {{Form::open(['url' => asset('case/export'), 'method' => 'post', 'id' => 'frm_export'])}}
 	{{Form::hidden('caseID', $case_detail->caseID)}}
-	{{Form::hidden('revisionNo', $revisionNo)}}
+	{{Form::hidden('revisionNo', $revisionNo, array('class' => 'exportRevisionNo'))}}
 	{{Form::hidden('seriesUID', '', array('class'=>'exportSeriesUID'))}}
 
 	(Data type)

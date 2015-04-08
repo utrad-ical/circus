@@ -59,7 +59,7 @@ $(function(){
 			      pan: true, //手のひらツール
 			      window: {
 			        active: true,
-			        panel: true
+			        panel: false
 			      },
 			      pen: {
 			        active: false, //描画機能の有効・無効
@@ -84,6 +84,7 @@ $(function(){
 							 {label: 'Apply from the source only to axial'	, level: 0000	, width : 2000},
 						]
 					},
+                    
 				}
 			]
 		}

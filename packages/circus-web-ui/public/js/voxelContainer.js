@@ -628,8 +628,8 @@ voxelContainer.prototype.returnSlice = function (series_id, label_id, tmp_orient
         }
       }
     }
-  } else if (tmp_orientation == 'sagital') {
-    //sagitalのときはxが奥行に相当する
+  } else if (tmp_orientation == 'sagittal') {
+    //sagittalのときはxが奥行に相当する
     for (var i = tmp_target_label.position.length - 1; i >= 0; i--) { //z軸
       //各断面を調査
       if (typeof tmp_target_label.position[i] != 'undefined') {

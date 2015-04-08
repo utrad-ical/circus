@@ -68,8 +68,8 @@ $(function(){
 					}
 				},
 				{//2nd sheet
-					elementId : 'img_area_sagital',
-					orientation : 'sagital',
+					elementId : 'img_area_sagittal',
+					orientation : 'sagittal',
 					container : voxel_container,
 					number:{
 						maximum : 511, //What sheets cross section is stored
@@ -180,7 +180,7 @@ $(function(){
 						tmp_viewer.number.maximum = response.z;
 					}else if(tmp_viewer.orientation == 'coronal'){
 						tmp_viewer.number.maximum = response.y;
-					}else if(tmp_viewer.orientation == 'sagital'){
+					}else if(tmp_viewer.orientation == 'sagittal'){
 						tmp_viewer.number.maximum = response.x;
 					}
 				}
@@ -401,7 +401,7 @@ id="page_case_detail"
 	<div class="clear">&nbsp;</div>
 	<div class=" img_view_area">
 		<div class="img_area fl_l mar_b_20" id="img_area_axial"></div>
-		<div class="img_area fl_r mar_b_20" id="img_area_sagital"></div>
+		<div class="img_area fl_r mar_b_20" id="img_area_sagittal"></div>
 		<div class="clear">&nbsp;</div>
 		<div class="img_area fl_l mar_b_20" id="img_area_coronal"></div>
 		<div class="clear">&nbsp;</div>

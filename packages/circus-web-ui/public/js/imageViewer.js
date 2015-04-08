@@ -223,6 +223,10 @@
       this_elm.find('.image_window_controller_wrap').find('.win_width_label').text(this_opts.viewer.window.width.current);
       this_elm.find('.image_window_controller_wrap').find('.image_window_controller').find('.image_window_level').val(this_opts.viewer.window.level.current);
       this_elm.find('.image_window_controller_wrap').find('.image_window_controller').find('.image_window_width').val(this_opts.viewer.window.width.current);
+      
+      if(this_opts.control.mode == 'measure'){
+            this_elm.imageViewer('changeMode', 'pan');
+      }
 
     }    /*_changeImgSrc*/,
 
@@ -475,7 +479,7 @@
           } else if (tmp_orientation == 'coronal') {
             tmp_x = positions_array[i][0];
             tmp_y = positions_array[i][2];
-          } else if (tmp_orientation == 'sagital') {
+          } else if (tmp_orientation == 'sagittal') {
             tmp_x = positions_array[i][1];
             tmp_y = positions_array[i][2];
           }
@@ -537,7 +541,7 @@
           tmp_obj[0] = Math.floor(insert_array[i][0] * this_opts.viewer.position.ow / this_opts.viewer.position.dw);
           tmp_obj[1] = tmp_number_index;
           tmp_obj[2] = Math.floor(insert_array[i][1] * this_opts.viewer.position.oh / this_opts.viewer.position.dh);
-        } else if (tmp_orientation == 'sagital') {
+        } else if (tmp_orientation == 'sagittal') {
           //正面から見て右側面からみた断面
           tmp_obj[0] = tmp_number_index;
           tmp_obj[1] = Math.floor(insert_array[i][0] * this_opts.viewer.position.ow / this_opts.viewer.position.dw);
@@ -600,7 +604,7 @@
       } else if (this_opts.viewer.orientation === 'coronal') {
         max_x = this_opts.viewer.voxel.x;
         max_y = this_opts.viewer.voxel.z;
-      } else if (this_opts.viewer.orientation === 'sagital') {
+      } else if (this_opts.viewer.orientation === 'sagittal') {
         max_x = this_opts.viewer.voxel.y;
         max_y = this_opts.viewer.voxel.z;
       }
@@ -615,7 +619,7 @@
           paint_map[the_painted_positions_in_target_slice[count][1]][the_painted_positions_in_target_slice[count][0]] = 1;
         } else if (this_opts.viewer.orientation === 'coronal') {
           paint_map[the_painted_positions_in_target_slice[count][2]][the_painted_positions_in_target_slice[count][0]] = 1;
-        } else if (this_opts.viewer.orientation === 'sagital') {
+        } else if (this_opts.viewer.orientation === 'sagittal') {
           paint_map[the_painted_positions_in_target_slice[count][2]][the_painted_positions_in_target_slice[count][1]] = 1;
         }
       }
@@ -632,7 +636,7 @@
         position_x = pointed_position[0];
         position_y = pointed_position[2];
         other = pointed_position[1];
-      } else if (this_opts.viewer.orientation === 'sagital') {
+      } else if (this_opts.viewer.orientation === 'sagittal') {
         position_x = pointed_position[1];
         position_y = pointed_position[2];
         other = pointed_position[0];
@@ -648,54 +652,6 @@
       while (position.length != 0) {
         //調査ポイントを取得
         var point = position.shift();
-        //ポイントから右上
-        if ((point[1]+1 < paint_map.length)&&(point[0]+1 < paint_map[point[1]+1].length)) {
-          if (paint_map[point[1]+1][point[0]+1] == 0) {
-            if ((paint_map[point[1]][point[0]+1] == 0) && (paint_map[point[1]+1][point[0]] == 0)) {
-              paint_map[point[1]+1][point[0]+1] = 1;
-              var next_point = [point[0]+1,point[1]+1];
-              position.push(next_point);
-            }
-          }
-        } else {
-          return 0;
-        }
-        //ポイントから左上
-        if ((point[0]-1 >= 0) && (point[1]+1 < paint_map.length)){
-          if (paint_map[point[1]+1][point[0]-1] == 0) {
-            if ((paint_map[point[1]][point[0]-1] == 0) && (paint_map[point[1]+1][point[0]] == 0)) {
-              paint_map[point[1]+1][point[0]-1] = 1;
-              var next_point = [point[0]+1,point[1]-1];
-              position.push(next_point);
-            }
-          }
-        } else {
-          return 0;
-        }
-        //ポイントから左下
-        if ((point[1]-1 >= 0) && (point[0]-1 >= 0)) {
-          if (paint_map[point[1]-1][point[0]-1] == 0) {
-            if ((paint_map[point[1]][point[0]-1] == 0) && (paint_map[point[1]-1][point[0]] == 0)) {
-              paint_map[point[1]-1][point[0]-1] = 1;
-              var next_point = [point[0]-1,point[1]-1];
-              position.push(next_point);
-            }
-          }
-        } else {
-          return 0;
-        }
-        //ポイントから右上
-        if ((point[1]-1 >= 0) && (point[0]+1 < paint_map[point[1]-1].length)){
-          if (paint_map[point[1]-1][point[0]+1] == 0) {
-            if ((paint_map[point[1]-1][point[0]] == 0) && (paint_map[point[1]][point[0]+1] == 0)) {
-              paint_map[point[1]-1][point[0]+1] = 1;
-              var next_point = [point[0]-1,point[1]+1];
-              position.push(next_point);
-            }
-          }
-        } else {
-          return 0;
-        }
         //ポイントから右
         if (point[0]+1 < paint_map[point[1]].length) {
           if (paint_map[point[1]][point[0]+1] == 0) {
@@ -749,7 +705,7 @@
             if (paint_map[row][count] == 1) {
               target_position_array[target_position_array.length] = [count, other, row];
             }
-          } else if (this_opts.viewer.orientation === 'sagital') {
+          } else if (this_opts.viewer.orientation === 'sagittal') {
             if (paint_map[row][count] == 1) {
               target_position_array[target_position_array.length] = [other, count, row];
             }
@@ -1364,7 +1320,7 @@
 					}else if(this_opts.viewer.orientation == 'coronal'){
 						dist_w = dist_w * this_opts.viewer.voxel.voxel_x;
 						dist_h = dist_h * this_opts.viewer.voxel.voxel_z;
-					}else if(this_opts.viewer.orientation == 'sagital'){
+					}else if(this_opts.viewer.orientation == 'sagittal'){
 						dist_w = dist_w * this_opts.viewer.voxel.voxel_y;
 						dist_h = dist_h * this_opts.viewer.voxel.voxel_z;
 					}
@@ -1571,7 +1527,7 @@
         tmp_ow = active_series.voxel.x;
         tmp_oh = active_series.voxel.y;
         tmp_num = active_series.voxel.z - 1;
-      } else if (this_opts.viewer.orientation == 'sagital') {
+      } else if (this_opts.viewer.orientation == 'sagittal') {
         tmp_w = active_series.voxel.y * active_series.voxel.voxel_y / active_series.voxel.voxel_x;
         tmp_h = active_series.voxel.z * active_series.voxel.voxel_z / active_series.voxel.voxel_x;
         tmp_ow = active_series.voxel.y;

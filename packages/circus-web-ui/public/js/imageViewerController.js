@@ -593,7 +593,7 @@
             tmp_h = active_series.voxel.y * active_series.voxel.voxel_y / active_series.voxel.voxel_x;
             tmp_ow = active_series.voxel.x;
             tmp_oh = active_series.voxel.y;
-          } else if (tmp_orientation == 'sagital') {
+          } else if (tmp_orientation == 'sagittal') {
             tmp_w = active_series.voxel.y * active_series.voxel.voxel_y / active_series.voxel.voxel_x;
             tmp_h = active_series.voxel.z * active_series.voxel.voxel_z / active_series.voxel.voxel_x;
             tmp_ow = active_series.voxel.y;

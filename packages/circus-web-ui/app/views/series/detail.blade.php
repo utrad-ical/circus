@@ -206,10 +206,8 @@ id="page_series_detail"
 @stop
 
 @section('content')
-<div>
-    {{{$series_detail->seriesDescription}}}
-</div>
-<div class="al_l mar_b_10 w_600 fl_l">
+
+<div class="al_l">
 	{{HTML::link(asset('series/search'), 'Back to Series Search Result', array('class' => 'common_btn mar_r_10', 'id' => 'btnBack'))}}
 	@if(!isset($error_msg))
 		{{HTML::link(asset('case/input'), 'Add New Case', array('class' => 'common_btn fl_l link_new_case mar_r_10'))}}
@@ -221,13 +219,9 @@ id="page_series_detail"
 </div>
 
 @if (isset($error_msg))
-	<br><span class="txt_alert">{{$error_msg}}</span>
+	<p class="txt_alert">{{$error_msg}}</p>
 @else
-	<div class="clear">&nbsp;</div>
-	<div class="w_500 fl_r">
 
-	</div>
-	<div class="clear">&nbsp;</div>
 	<div class="export_area" style="display:none;">
 		<div class="pad_20">
 			@include('series.export')
@@ -241,26 +235,26 @@ id="page_series_detail"
 		<div class="img_area fl_l mar_b_20" id="img_area_axial"></div>
 		<div class="img_area fl_r mar_b_20" id="">
 			<div class="info_area">
-            <div  class="pad_10">
-                <ul>
-                    <li>
-                        <p class="elm_name">Patient Name</p>
-                        <p class="elm_value">{{$series_detail->patientInfo['patientName']}}</p>
-                    </li>
-                    <li>
-                        <p class="elm_name">Patient ID</p>
-                        <p class="elm_value">{{$series_detail->patientInfo['patientID']}}</p>
-                    </li>
-                    <li>
-                        <p class="elm_name">Birth Date</p>
-                        <p class="elm_value">{{$series_detail->patientInfo['birthDate']}}</p>
-                    </li>
-                    <li>
-                        <p class="elm_name">Sex</p>
-                        <p class="elm_value">{{CommonHelper::getSex($series_detail->patientInfo['sex'])}}</p>
-                    </li>
-                </ul>
-            </div>
+					<div  class="pad_10">
+							<ul>
+									<li>
+											<p class="elm_name">Patient Name</p>
+											<p class="elm_value">{{$series_detail->patientInfo['patientName']}}</p>
+									</li>
+									<li>
+											<p class="elm_name">Patient ID</p>
+											<p class="elm_value">{{$series_detail->patientInfo['patientID']}}</p>
+									</li>
+									<li>
+											<p class="elm_name">Birth Date</p>
+											<p class="elm_value">{{$series_detail->patientInfo['birthDate']}}</p>
+									</li>
+									<li>
+											<p class="elm_name">Sex</p>
+											<p class="elm_value">{{CommonHelper::getSex($series_detail->patientInfo['sex'])}}</p>
+									</li>
+							</ul>
+					</div>
 		</div>
 		</div>
 		<div class="clear">&nbsp;</div>

@@ -103,12 +103,10 @@ var zeroFormat = function (input, width) {
 var startDownload = function(id) {
 	if($.cookie('download')) {
 		$(id).removeClass('disabled');
+		$.removeCookie('download');
+		$("#dialog").dialog('close');
 		return true;
 	}
+	setTimeout("startDownload('"+id+"')", 1000);
 	return false;
-};
-
-var endDownload = function(timer) {
-	crearTimeout(timer);
-	$.removeCookie('download');
 };

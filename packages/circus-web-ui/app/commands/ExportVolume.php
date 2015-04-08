@@ -174,7 +174,7 @@ class ExportVolume extends Command {
 				$ex->compressFilesToZip($this->argument('output-path'), $file_name);
 			}
 		} catch (Exception $e) {
-			Log::info($e->getMessage());
+			\Log::info($e->getMessage());
 			return false;
 		}
 		return true;
@@ -207,7 +207,7 @@ class ExportVolume extends Command {
 				$ex->compressFilesToZip($this->argument('output-path'), $file_name);
 			}
 		} catch (Exception $e) {
-			Log::info($e->getMessage());
+			\Log::info($e->getMessage());
 			return false;
 		}
 		return true;

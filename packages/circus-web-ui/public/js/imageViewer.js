@@ -33,7 +33,7 @@
         number: {
           current: 0,
           maximum: 512,
-          minimum: 1
+          minimum: 0
         },
         loadQue: {//画像ロードのずれ防止のためのキュー
           current: 0,

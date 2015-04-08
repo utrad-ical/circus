@@ -84,14 +84,10 @@ $(function(){
 			if (export_data_type == {{{ClinicalCase::DATA_TYPE_LABEL}}} ||
 				export_data_type == {{{ClinicalCase::DATA_TYPE_ORIGINAL_LABEL}}}) {
 				if ($('.export_labels:checked').length == 0) {
-					$('#export_err').append('Please select the label one or more .');
-					$(this).removeClass('disabled');
-					$("#dialog").dialog('close');
-					//clearTimeout(fileTimer);
+					closeDuringExportDialog('Please select the label one or more .');
 					return false;
 				}
 			}
-			//$('#frm_export').submit();
 			var export_data = $('#frm_export').serializeArray();
 			$.ajax({
 				url: "{{{asset('case/export')}}}",
@@ -100,42 +96,29 @@ $(function(){
 				dataType: 'json',
 				xhr : function(){
 		        	XHR = $.ajaxSettings.xhr();
-		            XHR.upload.addEventListener('progress',function(evt){
+		            XHR.addEventListener('progress',function(evt){
 		            	var percentComplete = parseInt(evt.loaded/evt.total*10000)/100;
-		            	console.log(evt.loaded);
-		            	console.log(evt.total);
 		            	$('#progressbar').progressbar({value:percentComplete});
-		            	console.log(percentComplete);
 			        })
 		       		return XHR;
 		      	},
 				error: function () {
-					//clearTimeout(fileTimer);
-					$("#dialog").dialog('close');
-					alert('通信に失敗しました');
+					closeDuringExportDialog('通信に失敗しました');
 				},
 				success: function (res) {
-					$('#btnCaseDownload').removeClass('disabled');
-					//$.removeCookie('download');
-					$("#dialog").dialog('close');
+					closeDuringExportDialog();
+					//create zip fail success
 					if (res.status === "OK") {
-						console.log(res.response);
-						var parent = $('#frmDownload');
-						parent.find('input[name="file_name"]').val(res.response.file_name);
-						parent.find('input[name="dir_name"]').val(res.response.dir_name);
-						parent.submit();
+						downloadVolume(res.response);
 						return false;
 					}
+					//create zip file failed
+					alert(res.messsage);
 				}
 			});
 		}
 		return false;
 	});
-
-	var donwloadVolume = function(res) {
-		console.log(res);
-		console.log('ダウンロード完了！');
-	}
 
 	$('#btnExportCancel').click(function() {
 		$('.export_area').slideUp();
@@ -150,4 +133,18 @@ $(function(){
 			$('.label_options_area').show();
 	});
 });
+
+var downloadVolume = function(data) {
+	var parent = $('#frmDownload');
+	parent.find('input[name="file_name"]').val(data.file_name);
+	parent.find('input[name="dir_name"]').val(data.dir_name);
+	parent.submit();
+}
+
+var closeDuringExportDialog = function() {
+	if (arguments[0])
+		$('#export_err').append(arguments);
+	$('#btnCaseDownload').removeClass('disabled');
+	$("#dialog").dialog('close');
+}
 </script>

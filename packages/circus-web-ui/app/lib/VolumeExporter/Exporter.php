@@ -3,6 +3,7 @@ namespace VolumeExporter;
 
 use Series;
 use Storage;
+use Process;
 use ZipArchive;
 
 class Exporter
@@ -28,7 +29,7 @@ class Exporter
 		} else {
 			$args[] = "--with-tag-dump";
 		}
-		exec($this->dumperPath() . ' ' . implode(' ', $args), $output);
+		Process::exec($this->dumperPath() . ' ' . implode(' ', $args), $output);
 
 		// Checking whether 'dicom_voxel_cump' command successfully executed or not
 		if (count($output) > 0 && strncmp(end($output), "Succeeded", 9) !== 0) {

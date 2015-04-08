@@ -241,10 +241,26 @@ id="page_series_detail"
 		<div class="img_area fl_l mar_b_20" id="img_area_axial"></div>
 		<div class="img_area fl_r mar_b_20" id="">
 			<div class="info_area">
-			<p class="pad_10">
-				{{$series_detail->patientInfo['patientName']}} ({{$series_detail->patientInfo['patientID']}})
-				<br>{{$series_detail->patientInfo['birthDate']}} {{CommonHelper::getSex($series_detail->patientInfo['sex'])}}
-			</p>
+            <div  class="pad_10">
+                <ul>
+                    <li>
+                        <p class="elm_name">Patient Name</p>
+                        <p class="elm_value">{{$series_detail->patientInfo['patientName']}}</p>
+                    </li>
+                    <li>
+                        <p class="elm_name">Patient ID</p>
+                        <p class="elm_value">{{$series_detail->patientInfo['patientID']}}</p>
+                    </li>
+                    <li>
+                        <p class="elm_name">Birth Date</p>
+                        <p class="elm_value">{{$series_detail->patientInfo['birthDate']}}</p>
+                    </li>
+                    <li>
+                        <p class="elm_name">Sex</p>
+                        <p class="elm_value">{{CommonHelper::getSex($series_detail->patientInfo['sex'])}}</p>
+                    </li>
+                </ul>
+            </div>
 		</div>
 		</div>
 		<div class="clear">&nbsp;</div>

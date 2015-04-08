@@ -99,3 +99,16 @@ var zeroFormat = function (input, width) {
     return input;
   }
 };
+
+var startDownload = function(id) {
+	if($.cookie('download')) {
+		$(id).removeClass('disabled');
+		return true;
+	}
+	return false;
+};
+
+var endDownload = function(timer) {
+	crearTimeout(timer);
+	$.removeCookie('download');
+};

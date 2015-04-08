@@ -14,6 +14,7 @@
 {{HTML::script('js/imageViewer.js')}}
 {{HTML::script('js/imageViewerController.js')}}
 {{HTML::script('js/jquery.flexforms.js')}}
+{{HTML::script('js/jquery.cookie.js')}}
 
 @if (!isset($error_msg))
 <script>

@@ -59,23 +59,15 @@ class CaseExportController extends BaseController {
 			if (!file_exists($zip_file_path))
 				throw new Exception('failed create zip file .');
 
-			header('Content-Type: application/zip; name="' . $zip_file_name . '"');
-			header('Content-Disposition: attachment; filename="' . $zip_file_name . '"');
-			header('Content-Length: '.filesize($zip_file_path));
-
-			$fp = fopen($zip_file_path, 'rb');
-			while(!feof($fp)) {
-			    $buf = fread($fp, 1048576);
-				echo $buf;
-				ob_flush();
-				flush();
-			}
-			fclose($fp);
-
-			//delete temporary file and folder
-			unlink($zip_file_path);
-			rmdir($tmp_dir_path);
-			exit();
+			$headers = array(
+	            'Content-Type' => 'application/zip',
+	            'Content-Disposition' => 'attachment; filename="'.$zip_file_name.'"',
+				'Content-Length' => filesize($zip_file_path)
+        	);
+        	setcookie('download', true);
+       		return Response::stream(function() use ($zip_file_path){readfile($zip_file_path);}
+                	, 200
+                	, $headers);
 		} catch (Exception $e) {
 			Log::debug($e);
 

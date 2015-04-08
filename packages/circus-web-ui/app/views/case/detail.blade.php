@@ -252,7 +252,7 @@ var getRevisionList = function() {
 		data: {caseID:"{{{$case_detail->caseID}}}"},//送信データ
 		dataType: 'json',
 		error: function () {
-			alert('Revision情報取得の通信に失敗しました');
+			alert('Revision information acquisition failed .');
 			return false;
 		},
 		success: function (res) {
@@ -267,7 +267,7 @@ var getRevisionList = function() {
 	});
 
 	var create_dom = function(insert_obj){
-		//Revisionコンボの設定
+		//setting revision combobox
 		$('.select_revision').empty();
 		$('#exportRevisionNo').empty();
 		var parent = $('.select_revision');
@@ -283,7 +283,7 @@ var getRevisionList = function() {
 			}
 		}
 
-		//Revisionリストの設定
+		//setting revision list
 		$('.result_revision_list').empty();
 		$.each(insert_obj.revision_list, function(i, val) {
 			var tbl_tag = "<tr><td>"+val['revisionNo']+"</td>";

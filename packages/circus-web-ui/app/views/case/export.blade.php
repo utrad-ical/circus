@@ -21,7 +21,7 @@ Export volume data (Series: <span id="exportSeriesUID"></span>, Revision: <span 
 		</li>
 	</ul>
 
-	<div class="input_form_area">
+	<div class="input_form_area label_options_area">
 		<h2 class="con_ttl">Label Options</h2>
 		<table class="common_table mar_b_10"">
 			<tr>
@@ -48,12 +48,12 @@ Export volume data (Series: <span id="exportSeriesUID"></span>, Revision: <span 
 				</td>
 			</tr>
 		</table>
-		<div class="al_r">
+	</div>
+	<div class="al_r">
 		{{Form::button('Download', array('class' => 'common_btn al_r', 'id' => 'btnCaseDownload'))}}
 		{{Form::button('Cancel', array('class' => 'common_btn al_r', 'id' => 'btnExportCancel'))}}
-		</div>
-		<span id="export_err" class="font_red"></span>
 	</div>
+	<span id="export_err" class="font_red"></span>
 {{Form::close()}}
 <script>
 $(function(){
@@ -75,6 +75,15 @@ $(function(){
 
 	$('#btnExportCancel').click(function() {
 		$('.export_area').slideUp();
+	});
+
+	$('.data_type').click(function() {
+		var export_data_type = $('.data_type:checked').val();
+
+		if (export_data_type == {{{ClinicalCase::DATA_TYPE_ORIGINAL}}})
+			$('.label_options_area').hide();
+		else
+			$('.label_options_area').show();
 	});
 });
 </script>

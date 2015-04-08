@@ -55,10 +55,21 @@ Export volume data (Series: <span id="exportSeriesUID"></span>, Revision: <span 
 	</div>
 	<span id="export_err" class="font_red"></span>
 {{Form::close()}}
+<div id="dialog" title="Downloading..." style="display:none;">
+  <p>
+      ダウンロードしています。<br>
+      もうしばらくお待ちください。
+  </p>
+  <div id="progressbar"></div>
+</div>
 <script>
 $(function(){
 	$('#btnCaseDownload').click(function() {
 		if($(this).hasClass('disabled') == false){
+			$('#dialog').slideDown();
+			$("#dialog").dialog({
+				closeText:""
+			});
 			$(this).addClass('disabled');
 			$('#export_err').empty();
 
@@ -74,9 +85,7 @@ $(function(){
 			}
 			$('#frm_export').submit();
 
-			var downloadTimer = setTimeout("startDownload('#btnCaseDownload')", 1000);
-			if (!downloadTimer)
-				endTimeout(downloadTimer);
+			setTimeout("startDownload('#btnCaseDownload')", 1000);
 		}
 		return false;
 	});

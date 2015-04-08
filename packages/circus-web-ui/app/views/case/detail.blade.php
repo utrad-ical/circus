@@ -64,7 +64,7 @@ $(function(){
 					container : voxel_container,
 					number:{
 						maximum : 260, //What sheets cross section is stored
-						current : 44	//Initial display number
+						current : 0	//Initial display number
 					}
 				},
 				{//2nd sheet
@@ -73,16 +73,16 @@ $(function(){
 					container : voxel_container,
 					number:{
 						maximum : 511, //What sheets cross section is stored
-						current : 90	//Initial display number
+						current : 0	//Initial display number
 					}
 				},
-				{//2rd sheet
+				{//3rd sheet
 					elementId : 'img_area_coronal',
 					orientation : 'coronal',
 					container : voxel_container,
 					number:{
 						maximum : 511, //What sheets cross section is stored
-						current : 90	//Initial display number
+						current : 0	//Initial display number
 					}
 				}
 			]

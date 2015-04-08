@@ -319,8 +319,8 @@ function doRequest(req, res)
                 out_width = raw.x;
                 out_height = raw.z;
                 buffer = MPR.makeCoronal(raw, target, window_width, window_level);
-            } else if (mode == 'sagital') {
-                logger.trace('sagital');
+            } else if (mode == 'sagittal') {
+                logger.trace('sagittal');
                 // 横方向描画
                 out_width = raw.y;
                 out_height = raw.z;

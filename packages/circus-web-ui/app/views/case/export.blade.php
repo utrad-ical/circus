@@ -62,17 +62,23 @@ Export volume data (Series: <span id="exportSeriesUID"></span>, Revision: <span 
   </p>
   <div id="progressbar"></div>
 </div>
+<form action="{{asset('case/download')}}" method="POST" id="frmDownload">
+	<input type="hidden" name="file_name" value="">
+	<input type="hidden" name="dir_name" value="">
+</form>
 <script>
+//var fileTimer;
 $(function(){
 	$('#btnCaseDownload').click(function() {
 		if($(this).hasClass('disabled') == false){
 			$('#dialog').slideDown();
+			$('#progressbar').progressbar();
 			$("#dialog").dialog({
 				closeText:""
 			});
 			$(this).addClass('disabled');
-			$('#export_err').empty();
 
+			$('#export_err').empty();
 			var export_data_type = $('.data_type:checked').val();
 
 			if (export_data_type == {{{ClinicalCase::DATA_TYPE_LABEL}}} ||
@@ -80,15 +86,56 @@ $(function(){
 				if ($('.export_labels:checked').length == 0) {
 					$('#export_err').append('Please select the label one or more .');
 					$(this).removeClass('disabled');
+					$("#dialog").dialog('close');
+					//clearTimeout(fileTimer);
 					return false;
 				}
 			}
-			$('#frm_export').submit();
-
-			setTimeout("startDownload('#btnCaseDownload')", 1000);
+			//$('#frm_export').submit();
+			var export_data = $('#frm_export').serializeArray();
+			$.ajax({
+				url: "{{{asset('case/export')}}}",
+				type: 'post',
+				data: export_data,//送信データ
+				dataType: 'json',
+				xhr : function(){
+		        	XHR = $.ajaxSettings.xhr();
+		            XHR.upload.addEventListener('progress',function(evt){
+		            	var percentComplete = parseInt(evt.loaded/evt.total*10000)/100;
+		            	console.log(evt.loaded);
+		            	console.log(evt.total);
+		            	$('#progressbar').progressbar({value:percentComplete});
+		            	console.log(percentComplete);
+			        })
+		       		return XHR;
+		      	},
+				error: function () {
+					//clearTimeout(fileTimer);
+					$("#dialog").dialog('close');
+					alert('通信に失敗しました');
+				},
+				success: function (res) {
+					$('#btnCaseDownload').removeClass('disabled');
+					//$.removeCookie('download');
+					$("#dialog").dialog('close');
+					if (res.status === "OK") {
+						console.log(res.response);
+						var parent = $('#frmDownload');
+						parent.find('input[name="file_name"]').val(res.response.file_name);
+						parent.find('input[name="dir_name"]').val(res.response.dir_name);
+						parent.submit();
+						return false;
+					}
+				}
+			});
 		}
 		return false;
 	});
+
+	var donwloadVolume = function(res) {
+		console.log(res);
+		console.log('ダウンロード完了！');
+	}
 
 	$('#btnExportCancel').click(function() {
 		$('.export_area').slideUp();

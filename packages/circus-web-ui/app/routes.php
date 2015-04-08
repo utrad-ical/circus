@@ -48,6 +48,7 @@ Route::group(['before' => 'auth'], function() {
 	Route::any('case/get_label_list', 'CaseDetailController@get_label_list');
 	Route::any('case/export', 'CaseExportController@export');
 	Route::any('case/get_revision_list', 'RevisionController@get_list');
+	Route::any('case/download', 'CaseExportController@download');
 
 	//Series
 	Route::get('series/search', 'SeriesSearchController@search');

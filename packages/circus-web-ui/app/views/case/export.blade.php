@@ -58,18 +58,26 @@ Export volume data (Series: <span id="exportSeriesUID"></span>, Revision: <span 
 <script>
 $(function(){
 	$('#btnCaseDownload').click(function() {
-		$('#export_err').empty();
+		if($(this).hasClass('disabled') == false){
+			$(this).addClass('disabled');
+			$('#export_err').empty();
 
-		var export_data_type = $('.data_type:checked').val();
+			var export_data_type = $('.data_type:checked').val();
 
-		if (export_data_type == {{{ClinicalCase::DATA_TYPE_LABEL}}} ||
-			export_data_type == {{{ClinicalCase::DATA_TYPE_ORIGINAL_LABEL}}}) {
-			if ($('.export_labels:checked').length == 0) {
-				$('#export_err').append('Please select the label one or more .');
-				return false;
+			if (export_data_type == {{{ClinicalCase::DATA_TYPE_LABEL}}} ||
+				export_data_type == {{{ClinicalCase::DATA_TYPE_ORIGINAL_LABEL}}}) {
+				if ($('.export_labels:checked').length == 0) {
+					$('#export_err').append('Please select the label one or more .');
+					$(this).removeClass('disabled');
+					return false;
+				}
 			}
+			$('#frm_export').submit();
+
+			var downloadTimer = setTimeout("startDownload('#btnCaseDownload')", 1000);
+			if (!downloadTimer)
+				endTimeout(downloadTimer);
 		}
-		$('#frm_export').submit();
 		return false;
 	});
 

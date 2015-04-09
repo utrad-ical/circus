@@ -63,7 +63,10 @@ $(function () {
 
   // UI sortable
   if ($('.ui-sortable').length > 0) {
-    $('.ui-sortable').sortable();
+    //$('.ui-sortable').sortable();
+	  $('.ui-sortable').sortable({
+		  axis: "y"
+	  });
   }
 
 });

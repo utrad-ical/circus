@@ -80,20 +80,6 @@ class CommonHelper{
 	}
 
 	/**
-	 * テンポラリフォルダを削除する
-	 * @param string $dir_path 削除対象のフォルダパス
-	 */
-	public static function deleteTemporaryDirectory($dir_path) {
-		if (!file_exists($dir_path)) return;
-
-		$fileName = $dir_path.'/*';
-		foreach (glob($fileName) as $val) {
-			unlink($val);
-		}
-		rmdir($dir_path);
-	}
-
-	/**
 	 * Zipファイルダウンロード
 	 * @param string $tmp_dir 対象フォルダ
 	 * @param string $file_name ファイル名
@@ -121,9 +107,8 @@ class CommonHelper{
 					}
 					fclose($fp);
 
-					//delete temporary file and folder
-					unlink($zip_file_path);
-					rmdir($tmp_dir);
+					//delete temporary folder recursively
+					File::deleteDirectory($tmp_dir);
 	   			}
 				, 200
 				, $headers);

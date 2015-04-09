@@ -143,7 +143,7 @@ var downloadVolume = function(data) {
 
 var closeDuringExportDialog = function() {
 	if (arguments[0])
-		$('#export_err').append(arguments);
+		$('#export_err').append(arguments[0]);
 	$('#btnCaseDownload').removeClass('disabled');
 	$("#dialog").dialog('close');
 }

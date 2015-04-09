@@ -38,45 +38,40 @@ class CommonHelper{
 		return array_search($sex, $sexes);
 	}
 
+
 	/**
-	 * 一定期間以上経過したテンポラリファイルを削除する
-	 * @param string $past_term 経過時間 (Default:-1 day)
+	 * Delete files which updated before the specified datetime in target directory (recursively).
+	 * @param string $target_dir Target directory to delete.
+	 * @param  bool  $preserve The flag to preserve $target_path itself (Default:false).
+	 * @param string $time date/time string (Default:null => delete all files)
 	 */
-	public static function deletePastTemporaryFiles($dir_path, $past_term = '-1 day') {
-		$past_dt = strtotime($past_term);
-		Log::debug('基準日::'.$past_dt);
+	public static function deleteOlderTemporaryFiles($target_dir, $preserve = false, $time = null)
+	{
+		if (!File::isDirectory($target_dir)) return false;
 
-		$files = new RecursiveIteratorIterator(
-			new RecursiveDirectoryIterator(
-				$dir_path,
-				FilesystemIterator::CURRENT_AS_FILEINFO |
-				FilesystemIterator::KEY_AS_PATHNAME |
-				FilesystemIterator::SKIP_DOTS
-			),
-			RecursiveIteratorIterator::SELF_FIRST
-		);
+		$th_datetime = strtotime($time);
+		if (!is_null($time) && $th_datetime == false) return false;
 
-		//ファイル削除
-		$delete_dir = array();
-		foreach($files as $path => $info){
-			$file_name = $info->getFileName();
-			if ($file_name != "." && $file_name != ".." && $file_name != ".gitignore") {
-				if($info->getMTime() < $past_dt){
-					Log::debug('削除対象ファイル::'.$path);
-					if (is_file($path))
-						unlink($path);
+		$items = new FilesystemIterator($target_dir);
 
-					//ファイルが空でないので、削除対象のフォルダを記録しておく
-					if (is_dir($path))
-						$delete_dir[] = $path;
-				}
+		foreach ($items as $item) {
+			if ($item->isDir()) {
+				self::deleteOlderTemporaryFiles(
+					$item->getPathname(),
+					false,
+					$time);
+			} else if ($item->getFilename() != ".gitignore") {
+				$file_name = $item->getPathname();
+				$file_datetime = File::lastModified($file_name);
+
+				if (is_null($time) || $th_datetime > $file_datetime)
+					File::delete($file_name);
 			}
 		}
 
-		//フォルダ削除
-		foreach ($delete_dir as $dir) {
-			rmdir($dir);
-		}
+		if (!$preserve) @rmdir($target_dir);
+
+		return true;
 	}
 
 	/**

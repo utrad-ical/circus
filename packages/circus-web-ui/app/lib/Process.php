@@ -47,7 +47,7 @@ class Process
 	{
 		if ($output == null) $output = [];
 		$return_var = self::execute($command, function ($line) use (&$output) {
-			if (is_array($output)) $output[] = rtrim($line);
+			if (strlen($line) && is_array($output)) $output[] = rtrim($line);
 		}, $last_line);
 		if ($return_var === false) return false; else return $last_line;
 	}

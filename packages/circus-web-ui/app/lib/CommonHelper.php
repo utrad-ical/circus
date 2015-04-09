@@ -40,20 +40,32 @@ class CommonHelper{
 
 	/**
 	 * 一定期間以上経過したテンポラリファイルを削除する
-	 * @param string $past_term 経過時間 (Default:-1day)
+	 * @param string $past_term 経過時間 (Default:-1 day)
 	 */
 	public static function deletePastTemporaryFiles($dir_path, $past_term = '-1 day') {
 		$past_dt = strtotime($past_term);
-		if ($dir = opendir($dir_path)) {
-			while(($file = readdir($dir)) !== false) {
-				if ($file != "." && $file != ".." && $file != ".gitignore") {
-					$file_last_ut = filemtime($dir_path . "/" . $file);
-					if ($past_dt > $file_last_ut) {
-						if (is_dir($file))
-							rmdir($file);
-						if (is_file($file))
-							unlink($file);
-					}
+		Log::debug('基準日::'.$past_dt);
+
+		$files = new RecursiveIteratorIterator(
+			new RecursiveDirectoryIterator(
+				$dir_path,
+				FilesystemIterator::CURRENT_AS_FILEINFO |
+				FilesystemIterator::KEY_AS_PATHNAME |
+				FilesystemIterator::SKIP_DOTS
+			),
+			RecursiveIteratorIterator::SELF_FIRST
+		);
+
+		//ファイル削除
+		foreach($files as $path => $info){
+			$file_name = $info->getFileName();
+			if ($file_name != "." && $file_name != ".." && $file_name != ".gitignore") {
+				if($info->getMTime() < $past_dt){
+					Log::debug('削除対象ファイル::'.$path);
+					if (is_file($path))
+						unlink($path);
+					if (is_dir($path))
+						rmdir($path);
 				}
 			}
 		}
@@ -68,8 +80,47 @@ class CommonHelper{
 
 		$fileName = $dir_path.'/*';
 		foreach (glob($fileName) as $val) {
-		    unlink($val);
+			unlink($val);
 		}
 		rmdir($dir_path);
+	}
+
+	/**
+	 * Zipファイルダウンロード
+	 * @param string $tmp_dir 対象フォルダ
+	 * @param string $file_name ファイル名
+	 */
+	public static function downloadZip($tmp_dir, $file_name) {
+		try {
+			if (!$tmp_dir || !$file_name)
+				throw new Exception('Please select download file .');
+
+			$headers = array(
+				'Content-Type' => 'application/zip',
+				'Content-Disposition' => 'attachment; filename="'.$file_name.'"',
+				'Content-Length' => filesize($tmp_dir.'/'.$file_name)
+			);
+
+	   		return Response::stream(
+	   			function() use ($file_name, $tmp_dir){
+	   				$zip_file_path = $tmp_dir.'/'.$file_name;
+	   				$fp = fopen($zip_file_path, 'rb');
+					while(!feof($fp)) {
+						$buf = fread($fp, 1048576);
+						echo $buf;
+						ob_flush();
+						flush();
+					}
+					fclose($fp);
+
+					//delete temporary file and folder
+					unlink($zip_file_path);
+					rmdir($tmp_dir);
+	   			}
+				, 200
+				, $headers);
+		} catch (Exception $e) {
+			Log::debug($e);
+		}
 	}
 }

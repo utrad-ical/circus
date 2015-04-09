@@ -55,11 +55,7 @@ Export volume data (Series: <span id="exportSeriesUID"></span>, Revision: <span 
 	</div>
 	<span id="export_err" class="font_red"></span>
 {{Form::close()}}
-@include('common.download_dialog')
-{{Form::open(['url' => asset('case/download'), 'method' => 'post', 'id' => 'frmDownload'])}}
-	{{Form::hidden('file_name', '')}}
-	{{Form::hidden('dir_name', '')}}
-{{Form::close()}}
+@include('common.download_volume')
 <script>
 $(function(){
 	$('#btnExportCancel').click(function() {

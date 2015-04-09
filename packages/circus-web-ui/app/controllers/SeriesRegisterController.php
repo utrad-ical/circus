@@ -21,7 +21,7 @@ class SeriesRegisterController extends BaseController {
 
 		try {
 			//delete temporary files
-			CommonHelper::deletePastTemporaryFiles(storage_path('uploads'));
+			CommonHelper::deleteOlderTemporaryFiles(storage_path('uploads'), true, '-1 day');
 
 			//Not selected file
 			if (array_key_exists('upload_file', $inputs) === false)

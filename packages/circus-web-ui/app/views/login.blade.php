@@ -1,11 +1,5 @@
 @extends('common.layout')
 
-@section('page_css')
-@stop
-
-@section('page_js')
-@stop
-
 @section('title')
 Login
 @stop
@@ -25,7 +19,7 @@ Login
 			<tr>
 				<th>ID</th>
 				<td>
-					{{Form::text('loginID', isset($loginID) ? $loginID : '', array('class' => 'common_input_text w_300'))}}
+					{{Form::text('loginID', isset($loginID) ? $loginID : '', array('class' => 'common_input_text w_300', 'autofocus' => 'autofocus'))}}
 				</td>
 			</tr>
 			<tr>

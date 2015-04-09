@@ -57,7 +57,7 @@ class SeriesExportController extends BaseController {
 			Log::debug($e);
 
 			if (isset($tmp_dir_path))
-				CommonHelper::deleteTemporaryDirectory($tmp_dir_path);
+				File::deleteDirectory($tmp_dir_path);
 			return Response::json(["status" => "NG", "message" => $e->getMessage()]);
 		}
 	}

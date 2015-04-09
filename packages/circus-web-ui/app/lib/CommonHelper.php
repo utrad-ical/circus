@@ -57,6 +57,7 @@ class CommonHelper{
 		);
 
 		//ファイル削除
+		$delete_dir = array();
 		foreach($files as $path => $info){
 			$file_name = $info->getFileName();
 			if ($file_name != "." && $file_name != ".." && $file_name != ".gitignore") {
@@ -64,10 +65,17 @@ class CommonHelper{
 					Log::debug('削除対象ファイル::'.$path);
 					if (is_file($path))
 						unlink($path);
+
+					//ファイルが空でないので、削除対象のフォルダを記録しておく
 					if (is_dir($path))
-						rmdir($path);
+						$delete_dir[] = $path;
 				}
 			}
+		}
+
+		//フォルダ削除
+		foreach ($delete_dir as $dir) {
+			rmdir($dir);
 		}
 	}
 

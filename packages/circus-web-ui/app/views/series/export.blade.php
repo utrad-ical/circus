@@ -26,12 +26,23 @@ Download Volume
 	</div>
 --}}
 	<div class="al_r">
-		{{Form::button('Download', array('class' => 'common_btn al_r', 'id' => 'btnSeriesDownload'))}}
-		{{Form::button('Close', array('class' => 'common_btn al_r', 'id' => 'btnExportCancel'))}}
+		{{Form::button('Download', array('class' => 'common_btn al_r btn_download'))}}
+		{{Form::button('Close', array('class' => 'common_btn al_r btn_export_cancel'))}}
 	</div>
 	<span id="export_err" class="font_red"></span>
 {{Form::close()}}
+@include('common.download_dialog')
+{{Form::open(['url' => asset('series/download'), 'method' => 'post', 'id' => 'frmDownload'])}}
+	{{Form::hidden('file_name', '')}}
+	{{Form::hidden('dir_name', '')}}
+{{Form::close()}}
 <script>
+var createSlider = function(slider_max) {
+	console.log(slider_max);
+    $('#exportEdSeriesImg').val(slider_max);
+    series_slider_max = slider_max;
+    sliderRun();
+}
 var sliderRun = function() {
 	$('#slider_export').slider({
 		min: 0,
@@ -46,7 +57,6 @@ var sliderRun = function() {
 		},
 		//スライダーの初期化時に、その値をテキストボックスにも反映
 		create: function(e, ui) {
-		//  $('#exportStSeriesImg').val($(this).slider('option', 'value'));
 			var values = $(this).slider('option', 'values');
 			$('#exportStSeriesImg').val(values[0]);
 			$('#exportEdSeriesImg').val(values[1]);
@@ -54,16 +64,6 @@ var sliderRun = function() {
 	});
 }
 $(function(){
-	$('#btnSeriesDownload').click(function() {
-		$('#export_err').empty();
-		$('#frm_export').submit();
-		return false;
-	});
-
-	$('#btnExportCancel').click(function() {
-		$('.export_area').slideUp();
-	});
-
 	$('#btnAll').click(function() {
 		sliderRun();
 	});
@@ -72,4 +72,11 @@ $(function(){
 		$('#slider_export').slider('values', [$('#exportStSeriesImg').val(), $('#exportEdSeriesImg').val()]);
 	});
 });
+
+var exportVolume = function() {
+	if($('.btn_download').hasClass('disabled') == false){
+		exportRun("{{{asset('series/export')}}}", false);
+	}
+	return false;
+}
 </script>

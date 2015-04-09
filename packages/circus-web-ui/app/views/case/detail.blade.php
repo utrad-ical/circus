@@ -14,7 +14,7 @@
 {{HTML::script('js/imageViewer.js')}}
 {{HTML::script('js/imageViewerController.js')}}
 {{HTML::script('js/jquery.flexforms.js')}}
-{{HTML::script('js/jquery.cookie.js')}}
+{{HTML::script('js/export-common.js')}}
 
 @if (!isset($error_msg))
 <script>
@@ -241,7 +241,7 @@ $(function(){
 var getLabelList = function(active_series_ld) {
 	$('#export_err').empty();
     var export_data = {caseID: "{{{$case_detail->caseID}}}", seriesUID:active_series_ld, revisionNo:revisionNo};
-    //エクスポート処理
+    //get label list of the revision
     $.ajax({
    	   url: "{{{asset('case/get_label_list')}}}",
        type: 'post',

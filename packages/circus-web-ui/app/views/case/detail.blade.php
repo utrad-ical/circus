@@ -40,7 +40,7 @@ $(function(){
 		{
 			baseUrl : "{{{$server_url['dicom_img_base_url']}}}",
 			postUrl : "{{asset('case/save_label')}}",	//Enable here if it is different from the image storage server
-			getLabelUrl : "{{asset('case/get_label_list')}}",
+			//getLabelUrl : "{{asset('case/get_label_list')}}",
 			caseId : "{{Session::get('caseID')}}",
 			attribute : {{$attribute}},
 			defaultLabelAttribute :default_label_attr_prop,
@@ -238,6 +238,39 @@ $(function(){
 
 });
 
+var getLabelList = function(active_series_ld) {
+	$('#export_err').empty();
+    var export_data = {caseID: "{{{$case_detail->caseID}}}", seriesUID:active_series_ld, revisionNo:revisionNo};
+    //エクスポート処理
+    $.ajax({
+   	   url: "{{{asset('case/get_label_list')}}}",
+       type: 'post',
+       data: export_data,//送信データ
+       dataType: 'json',
+       error: function () {
+         alert('I failed to communicate.');
+       },
+       success: function (response) {
+         createLabelList(response.label_list, active_series_ld);
+       }
+   });
+}
+
+
+var createLabelList = function(label_list, active_series_id) {
+	//初期化
+    $('#exportSeriesUID').empty();
+    $('.'+parentLabelList).empty();
+ 	$('#exportSeriesUID').append(active_series_id);
+ 	$('.exportSeriesUID').val(active_series_id);
+
+  	$.each(label_list, function(idx, val) {
+    	var elm = '<li class="ui-state-dafault">';
+      	elm += '<input type="checkbox" value="'+idx+'" id="export_label_idx'+idx+'" name="labels[]" class="export_labels">';
+      	elm += '<label for="export_label_idx'+idx+'">Label '+idx+'</label></li>';
+     	$('.'+parentLabelList).append(elm);
+    });
+}
 var changeRevision = function(index) {
 	if (arguments[1])
 		$('#frm_change_revision').find("input[name='mode']").val(arguments[1]);

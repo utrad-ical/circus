@@ -881,63 +881,43 @@
 
       //Export
       $('.btn_export').click(function () {
-
-				//書き換えが発生していたラベルにフラグを立てる
-				this_elm.imageViewerController('checkUpdateLabel');
-				var changed_label_num = 0;
-				changed_label_num = this_elm.imageViewerController('changedLabelNum');
-				if(changed_label_num==0){
-					$('#export_err').empty();
-
-					if (typeof revisionNo !== 'undefined') {
-						//ケース詳細
-						var export_data = {caseID: controllerInfo.caseId, seriesUID:controllerInfo.activeSeriesId, revisionNo:revisionNo};
-						//console.log(export_data);
-						//エクスポート処理
-						$.ajax({
-							url: controllerInfo.getLabelUrl,
-							type: 'post',
-							data: export_data,//送信データ
-							dataType: 'json',
-							error: function () {
-								alert('通信に失敗しました');
-							},
-							success: function (response) {
-								//alert('save finished.');
-								//console.log(response['label_list']);
-
-								//初期化
-								$('#exportSeriesUID').empty();
-								$('.'+parentLabelList).empty();
-
-								$('#exportSeriesUID').append(controllerInfo.activeSeriesId);
-								$('.exportSeriesUID').val(controllerInfo.activeSeriesId);
-
-
-								$.each(response['label_list'], function(idx, val) {
-									var elm = '<li class="ui-state-dafault">';
-									elm += '<input type="checkbox" value="'+idx+'" id="export_label_idx'+idx+'" name="labels[]" class="export_labels">';
-									elm += '<label for="export_label_idx'+idx+'">Label '+idx+'</label></li>';
-									$('.'+parentLabelList).append(elm);
-								});
-							}
-						});
-					} else {
-						//シリーズ詳細
-						series_slider_max = controllerInfo.series[0].voxel.z;
-						$('#exportEdSeriesImg').val(series_slider_max);
-						sliderRun();
-					}
-					$('.export_area').slideDown();
-
-				}else{
-					$('.export_area').slideUp();
-					alert('There are unsaved data.\nplease do this operation\nafter Save.');
-				}
-        return false;
+    	  var change_label_flag = this_elm.imageViewerController('isChangeLabel');
+    	  if (!change_label_flag) {
+		      $('#export_err').empty();
+		      if (typeof revisionNo !== 'undefined') {
+		    	  getLabelList(controllerInfo.activeSeriesId);
+	          } else {
+	            //シリーズ詳細
+	            series_slider_max = controllerInfo.series[0].voxel.z;
+	            $('#exportEdSeriesImg').val(series_slider_max);
+	            sliderRun();
+	          }
+	          $('.export_area').slideDown();
+	     }else{
+	         $('.export_area').slideUp();
+	         alert('There are unsaved data.\nplease do this operation\nafter Save.');
+	     }
+	     return false;
       });
 
 
+      //Download
+      $('.btn_download').click(function() {
+    	  var change_label_flag = this_elm.imageViewerController('isChangeLabel');
+    	  if (!change_label_flag) {
+    		  exportVolume();
+    	  }else{
+ 	         alert('There are unsaved data.\nplease do this operation\nafter Save.');
+ 	      }
+ 	      return false;
+      });
+    },
+    isChangeLabel: function() {
+        var this_elm = this;
+        this_elm.imageViewerController('checkUpdateLabel');
+        var changed_label_num = 0;
+        changed_label_num = this_elm.imageViewerController('changedLabelNum');
+        return changed_label_num == 0 ? false : true;
     },
 
 

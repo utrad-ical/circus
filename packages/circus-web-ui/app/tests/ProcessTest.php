@@ -1,20 +1,38 @@
 <?php
 
 class ProcessTest extends TestCase {
+	private $command;
+
+	public function setUp() {
+		parent::setUp();
+		$this->command = "php " . __DIR__ . '/ProcessTest_emitter.php';
+	}
 
 	public function testSystem() {
-		ob_start();
-		Process::system('php -v', $return_var);
-		$contents = ob_get_contents();
-		ob_end_clean();
-		$this->assertSame(0, $return_var);
-		$this->assertSame(1, preg_match("/PHP/", $contents));
+		for ($i = 1; $i <= 7; $i++) {
+			ob_start();
+			Process::system("$this->command $i", $return_var_my);
+			$contents_my = ob_get_contents();
+			ob_end_clean();
+
+			ob_start();
+			system("$this->command $i", $return_var_orig);
+			$contents_orig = ob_get_contents();
+			ob_end_clean();
+			$this->assertSame($contents_orig, $contents_my);
+			$this->assertSame($return_var_orig, $return_var_my);
+		}
 	}
 
 	public function testCommand() {
-		Process::exec('php -v', $result, $return_var);
-		$this->assertSame(0, $return_var);
-		$this->assertSame(1, preg_match("/PHP/", implode("\n", $result)));
+		for ($i = 1; $i <= 7; $i++) {
+			$lines_my = array();
+			$lines_orig = array();
+			Process::exec("$this->command $i", $lines_my, $return_var_my);
+			exec("$this->command $i", $lines_orig, $return_var_orig);
+			$this->assertSame($lines_orig, $lines_my);
+			$this->assertSame($return_var_orig, $return_var_my);
+		}
 	}
 
 	public function testCommandWarning() {

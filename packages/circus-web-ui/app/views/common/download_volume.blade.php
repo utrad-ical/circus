@@ -5,3 +5,7 @@
   </p>
   <div id="progressbar"></div>
 </div>
+{{Form::open(['url' => asset('download/volume'), 'method' => 'post', 'id' => 'frmDownload'])}}
+	{{Form::hidden('file_name', '')}}
+	{{Form::hidden('dir_name', '')}}
+{{Form::close()}}

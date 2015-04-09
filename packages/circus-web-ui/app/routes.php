@@ -48,7 +48,6 @@ Route::group(['before' => 'auth'], function() {
 	Route::any('case/get_label_list', 'CaseDetailController@get_label_list');
 	Route::any('case/export', 'CaseExportController@export');
 	Route::any('case/get_revision_list', 'RevisionController@get_list');
-	Route::any('case/download', 'CaseExportController@download');
 
 	//Series
 	Route::get('series/search', 'SeriesSearchController@search');
@@ -61,7 +60,12 @@ Route::group(['before' => 'auth'], function() {
 	//Series (for Ajax)
 	Route::any('series/save_search', 'SeriesSearchController@save_search');
 	Route::any('series/export', 'SeriesExportController@export');
-	Route::any('series/download', 'SeriesExportController@download');
+
+	//Common download volume data
+	Route::any('download/volume', function() {
+		$inputs = Input::all();
+		return CommonHelper::downloadZip(storage_path('cache').'/'.$inputs['dir_name'], $inputs['file_name']);
+	});
 
 	// Individual Administration pages
 	Route::get('administration/{adminkind}', 'AdministrationController@index')

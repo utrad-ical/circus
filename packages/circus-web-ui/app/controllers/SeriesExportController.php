@@ -18,7 +18,6 @@ class SeriesExportController extends BaseController {
 			self::validate($inputs);
 
 			//create temporary folder
-//			$tmp_dir_path = storage_path('cache').'/'.Str::random(32);
 			$tmp_dir = Str::random(32);
 			$tmp_dir_path = storage_path('cache').'/'.$tmp_dir;
 
@@ -59,46 +58,7 @@ class SeriesExportController extends BaseController {
 
 			if (isset($tmp_dir_path))
 				CommonHelper::deleteTemporaryDirectory($tmp_dir_path);
-			//return $e->getMessage();
 			return Response::json(["status" => "NG", "message" => $e->getMessage()]);
-		}
-	}
-
-	function download() {
-		try {
-			Log::debug('ダウンロード開始!');
-			$inputs = Input::all();
-			Log::debug($inputs);
-			$zip_file_name = $inputs['file_name'];
-			$tmp_dir_path = storage_path('cache').'/'.$inputs['dir_name'];
-			$zip_file_path = $tmp_dir_path.'/'.$zip_file_name;
-
-			$headers = array(
-	            'Content-Type' => 'application/zip',
-	            'Content-Disposition' => 'attachment; filename="'.$zip_file_name.'"',
-				'Content-Length' => filesize($zip_file_path)
-        	);
-        	//setcookie('download', true);
-        	Log::debug($zip_file_path);
-       		return Response::stream(
-       			function() use ($zip_file_path, $tmp_dir_path){
-       				$fp = fopen($zip_file_path, 'rb');
-					while(!feof($fp)) {
-					    $buf = fread($fp, 1048576);
-						echo $buf;
-						ob_flush();
-						flush();
-					}
-					fclose($fp);
-
-					//delete temporary file and folder
-					unlink($zip_file_path);
-					rmdir($tmp_dir_path);
-       			}
-                , 200
-                , $headers);
-		} catch (Exception $e) {
-			Log::debug($e);
 		}
 	}
 

@@ -31,14 +31,9 @@ Download Volume
 	</div>
 	<span id="export_err" class="font_red"></span>
 {{Form::close()}}
-@include('common.download_dialog')
-{{Form::open(['url' => asset('series/download'), 'method' => 'post', 'id' => 'frmDownload'])}}
-	{{Form::hidden('file_name', '')}}
-	{{Form::hidden('dir_name', '')}}
-{{Form::close()}}
+@include('common.download_volume')
 <script>
 var createSlider = function(slider_max) {
-	console.log(slider_max);
     $('#exportEdSeriesImg').val(slider_max);
     series_slider_max = slider_max;
     sliderRun();

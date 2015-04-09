@@ -40,7 +40,6 @@ $(function(){
 		{
 			baseUrl : "{{{$server_url['dicom_img_base_url']}}}",
 			postUrl : "{{asset('case/save_label')}}",	//Enable here if it is different from the image storage server
-			//getLabelUrl : "{{asset('case/get_label_list')}}",
 			caseId : "{{Session::get('caseID')}}",
 			attribute : {{$attribute}},
 			defaultLabelAttribute :default_label_attr_prop,

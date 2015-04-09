@@ -885,12 +885,10 @@
     	  if (!change_label_flag) {
 		      $('#export_err').empty();
 		      if (typeof revisionNo !== 'undefined') {
+		    	  //ケース詳細
 		    	  getLabelList(controllerInfo.activeSeriesId);
 	          } else {
-	            //シリーズ詳細
-	            series_slider_max = controllerInfo.series[0].voxel.z;
-	            $('#exportEdSeriesImg').val(series_slider_max);
-	            sliderRun();
+	        	  createSlider(controllerInfo.series[0].voxel.z);
 	          }
 	          $('.export_area').slideDown();
 	     }else{

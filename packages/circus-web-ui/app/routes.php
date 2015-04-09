@@ -61,6 +61,7 @@ Route::group(['before' => 'auth'], function() {
 	//Series (for Ajax)
 	Route::any('series/save_search', 'SeriesSearchController@save_search');
 	Route::any('series/export', 'SeriesExportController@export');
+	Route::any('series/download', 'SeriesExportController@download');
 
 	// Individual Administration pages
 	Route::get('administration/{adminkind}', 'AdministrationController@index')

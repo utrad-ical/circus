@@ -50,7 +50,7 @@ Export volume data (Series: <span id="exportSeriesUID"></span>, Revision: <span 
 		</table>
 	</div>
 	<div class="al_r">
-		{{Form::button('Download', array('class' => 'common_btn al_r', 'id' => 'btnCaseDownload'))}}
+		{{Form::button('Download', array('class' => 'common_btn al_r btn_download'))}}
 		{{Form::button('Cancel', array('class' => 'common_btn al_r', 'id' => 'btnExportCancel'))}}
 	</div>
 	<span id="export_err" class="font_red"></span>
@@ -67,59 +67,7 @@ Export volume data (Series: <span id="exportSeriesUID"></span>, Revision: <span 
 	<input type="hidden" name="dir_name" value="">
 </form>
 <script>
-//var fileTimer;
 $(function(){
-	$('#btnCaseDownload').click(function() {
-		if($(this).hasClass('disabled') == false){
-			$('#dialog').slideDown();
-			$('#progressbar').progressbar();
-			$("#dialog").dialog({
-				closeText:""
-			});
-			$(this).addClass('disabled');
-
-			$('#export_err').empty();
-			var export_data_type = $('.data_type:checked').val();
-
-			if (export_data_type == {{{ClinicalCase::DATA_TYPE_LABEL}}} ||
-				export_data_type == {{{ClinicalCase::DATA_TYPE_ORIGINAL_LABEL}}}) {
-				if ($('.export_labels:checked').length == 0) {
-					closeDuringExportDialog('Please select the label one or more .');
-					return false;
-				}
-			}
-			var export_data = $('#frm_export').serializeArray();
-			$.ajax({
-				url: "{{{asset('case/export')}}}",
-				type: 'post',
-				data: export_data,//送信データ
-				dataType: 'json',
-				xhr : function(){
-		        	XHR = $.ajaxSettings.xhr();
-		            XHR.addEventListener('progress',function(evt){
-		            	var percentComplete = parseInt(evt.loaded/evt.total*10000)/100;
-		            	$('#progressbar').progressbar({value:percentComplete});
-			        })
-		       		return XHR;
-		      	},
-				error: function () {
-					closeDuringExportDialog('通信に失敗しました');
-				},
-				success: function (res) {
-					closeDuringExportDialog();
-					//create zip fail success
-					if (res.status === "OK") {
-						downloadVolume(res.response);
-						return false;
-					}
-					//create zip file failed
-					alert(res.messsage);
-				}
-			});
-		}
-		return false;
-	});
-
 	$('#btnExportCancel').click(function() {
 		$('.export_area').slideUp();
 	});
@@ -134,6 +82,72 @@ $(function(){
 	});
 });
 
+var createDownloadDialog = function() {
+	$('#dialog').slideDown();
+	$('#progressbar').progressbar({
+		value:0
+	});
+	$("#dialog").dialog({
+		closeText:""
+	});
+}
+
+var validateExport = function() {
+	var export_data_type = $('.data_type:checked').val();
+
+	if (export_data_type == {{{ClinicalCase::DATA_TYPE_LABEL}}} ||
+		export_data_type == {{{ClinicalCase::DATA_TYPE_ORIGINAL_LABEL}}}) {
+		if ($('.export_labels:checked').length == 0) {
+			return false;
+		}
+	}
+	return true;
+}
+
+var exportVolume = function() {
+	if($('.btn_download').hasClass('disabled') == false){
+		createDownloadDialog();
+		$('.btn_download').addClass('disabled');
+
+		$('#export_err').empty();
+		if (!validateExport()) {
+			closeDuringExportDialog('Please select the label one or more .');
+			return false;
+		}
+
+		var export_data = $('#frm_export').serializeArray();
+		$.ajax({
+			url: "{{{asset('case/export')}}}",
+			type: 'post',
+			data: export_data,
+			dataType: 'json',
+			async:true,
+			xhr : function(){
+	        	XHR = $.ajaxSettings.xhr();
+	            XHR.addEventListener('progress',function(evt){
+	            	var percentComplete = parseInt(evt.loaded/evt.total*10000)/100;
+	            	$('#progressbar').progressbar({value:percentComplete});
+		        })
+	       		return XHR;
+	      	},
+			error: function () {
+				closeDuringExportDialog('I failed to communicate.');
+			},
+			success: function (res) {
+				closeDuringExportDialog();
+				//create zip fail success
+				if (res.status === "OK") {
+					downloadVolume(res.response);
+					return false;
+				}
+				//create zip file failed
+				alert(res.messsage);
+			}
+		});
+	}
+	return false;
+}
+
 var downloadVolume = function(data) {
 	var parent = $('#frmDownload');
 	parent.find('input[name="file_name"]').val(data.file_name);
@@ -144,7 +158,7 @@ var downloadVolume = function(data) {
 var closeDuringExportDialog = function() {
 	if (arguments[0])
 		$('#export_err').append(arguments[0]);
-	$('#btnCaseDownload').removeClass('disabled');
+	$('.btn_download').removeClass('disabled');
 	$("#dialog").dialog('close');
 }
 </script>

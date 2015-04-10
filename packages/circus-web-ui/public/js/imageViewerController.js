@@ -171,6 +171,7 @@
 					}
 				}
       }
+			console.log(rtn_num);
 			return rtn_num;
 		},
 		
@@ -875,47 +876,48 @@
 	
 				//書き換えフラグのあるラベルのidを書き換える
 				this_elm.imageViewerController('changeUpdateLabelId');
+				
+				//保存実行
         this_elm.imageViewerController('saveData');
         return false;
       });
 
       //Export
-      $('.btn_export').click(function () {
-    	  var change_label_flag = this_elm.imageViewerController('isChangeLabel');
-    	  if (!change_label_flag) {
-		      $('#export_err').empty();
-		      if (typeof revisionNo !== 'undefined') {
-		    	  //ケース詳細
-		    	  getLabelList(controllerInfo.activeSeriesId);
-	          } else {
-	        	  createSlider(controllerInfo.series[0].voxel.z);
-	          }
-	          $('.export_area').slideDown();
-	     }else{
-	         $('.export_area').slideUp();
-	         alert('There are unsaved data.\nplease do this operation\nafter Save.');
-	     }
-	     return false;
+      $('.btn_export').click(function() {
+        //書き換えが発生していたラベルにフラグを立てる
+        this_elm.imageViewerController('checkUpdateLabel');
+				
+        var changed_label_num = this_elm.imageViewerController('changedLabelNum');
+        if (changed_label_num == 0) {
+          $('#export_err').empty();
+          if (typeof revisionNo !== 'undefined') {
+            //ケース詳細
+            getLabelList(controllerInfo.activeSeriesId);
+          } else {
+            createSlider(controllerInfo.series[0].voxel.z);
+          }
+          $('.export_area').slideDown();
+        } else {
+          $('.export_area').slideUp();
+          alert('There are unsaved data.\nplease do this operation\nafter Save.');
+        }
+        return false;
       });
-
 
       //Download
       $('.btn_download').click(function() {
-    	  var change_label_flag = this_elm.imageViewerController('isChangeLabel');
-    	  if (!change_label_flag) {
+				
+				//書き換えが発生していたラベルにフラグを立てる
+				this_elm.imageViewerController('checkUpdateLabel');
+
+    	  var changed_label_num = this_elm.imageViewerController('changedLabelNum');
+    	  if (changed_label_num==0) {
     		  exportVolume();
     	  }else{
  	         alert('There are unsaved data.\nplease do this operation\nafter Save.');
  	      }
  	      return false;
       });
-    },
-    isChangeLabel: function() {
-        var this_elm = this;
-        this_elm.imageViewerController('checkUpdateLabel');
-        var changed_label_num = 0;
-        changed_label_num = this_elm.imageViewerController('changedLabelNum');
-        return changed_label_num == 0 ? false : true;
     },
 
 

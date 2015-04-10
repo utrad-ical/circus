@@ -119,8 +119,8 @@ class Series extends BaseModel {
 	 * @param Array $search_data 検索条件
 	 * @return シリーズ一覧
 	 */
-	public static function getSeriesList($search_data) {
-		return self::where(function($query) use ($search_data) {
+	public static function getSeriesList($search_data, $count = false) {
+		$sql = self::where(function($query) use ($search_data) {
 							//seriesID Series ID
 							if ($search_data['seriesUID'])
 								$query->where('seriesUID', 'like', '%'.$search_data['seriesUID'].'%');
@@ -141,8 +141,21 @@ class Series extends BaseModel {
 								$query->where('patientInfo.age', '<=', intval($search_data['maxAge']));
 
 							if ($search_data['sex'] && $search_data['sex'] !== 'all')
-								$query->where('patientInfo.sex', '=', $input['sex']);
-					})
-					->get();
+								$query->where('patientInfo.sex', '=', $search_data['sex']);
+					});
+		//件数取得
+    	if ($count)
+    		return $sql->count();
+
+    	//リスト取得
+    	//settings offset
+    	$offset = 0;
+    	if (isset($search_data['perPage']) && $search_data['perPage'])
+    		$offset = intval($search_data['disp'])*(intval($search_data['perPage'])-1);
+
+    	return $sql->orderby($search_data['sort'], 'desc')
+    			   ->take($search_data['disp'])
+    			   ->skip($offset)
+    			   ->get();
 	}
 }

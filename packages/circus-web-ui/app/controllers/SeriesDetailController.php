@@ -10,9 +10,7 @@ class SeriesDetailController extends BaseController {
 		$error_msg = '';
 		$result = array();
 		$inputs = Input::all();
-
 		try {
-			//Error message initialization
 			if (array_key_exists('btnBack', $inputs) !== false) {
 				//ID retrieved from the session
 				$cases = Session::get('case_input');
@@ -20,6 +18,8 @@ class SeriesDetailController extends BaseController {
 				$inputs['seriesUID'] = $ids[0];
 				//Session discarded
 				Session::forget('case_input');
+			} else {
+				Session::forget('edit_case_id');
 			}
 
 			if (!$inputs['seriesUID'])
@@ -31,13 +31,13 @@ class SeriesDetailController extends BaseController {
 				throw new Exception('Series ID does not exist.');
 
 			$result['series_detail'] = $series_data;
-			$result['series_list'] = self::formatSeries($series_data);
+			$result['series_list'] = $this->formatSeries($series_data);
 		} catch (Exception $e){
 			Log::debug($e->getMessage());
 			Log::debug($e);
 			$result['error_msg'] = $e->getMessage();
 		}
-		return View::make('/series/detail', $result);
+		return View::make('series/detail', $result);
 	}
 
 	/**
@@ -52,7 +52,6 @@ class SeriesDetailController extends BaseController {
 		$series_info = array();
 		$series_info['id'] = $series->seriesUID;
 		$series_info['description'] = $series->seriesDescription;
-	//	$series_info['label'] = array();
 		$series_info['voxel'] = array(
 			'voxel_x'	=>	0,
 			'voxel_y'	=>	0,

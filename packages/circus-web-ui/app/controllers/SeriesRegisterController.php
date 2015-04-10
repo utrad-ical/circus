@@ -38,7 +38,7 @@ class SeriesRegisterController extends BaseController {
 				$ext = $upload->getClientOriginalExtension();
 
 				if ($ext == 'zip'){
-					$file_list[] = self::thawZip($upload->getClientOriginalName(), $errorMsg);
+					$file_list[] = $this->thawZip($upload->getClientOriginalName(), $errorMsg);
 					if ($errorMsg)
 						throw new ZipException($errorMsg);
 				} else {
@@ -56,15 +56,15 @@ class SeriesRegisterController extends BaseController {
 		} catch (ZipException $e) {
 			Log::debug('[ZipException]');
 			Log::debug($e);
-			return self::errorFinish($e->getMessage());
+			return $this->errorFinish($e->getMessage());
 		} catch (InvalidModelException $e) {
 			Log::debug('[InvalidModelException]');
 			Log::debug($e);
-			return self::errorFinish($e->getErrors());
+			return $this->errorFinish($e->getErrors());
 		} catch (Exception $e) {
 			Log::debug('[Exception]');
 			Log::debug($e);
-			return self::errorFinish($e->getMessage());
+			return $this->errorFinish($e->getMessage());
 		}
 	}
 

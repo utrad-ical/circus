@@ -258,17 +258,18 @@ var getLabelList = function(active_series_ld) {
 
 var createLabelList = function(label_list, active_series_id) {
 	//初期化
-    $('#exportSeriesUID').empty();
-    $('.'+parentLabelList).empty();
- 	$('#exportSeriesUID').append(active_series_id);
- 	$('.exportSeriesUID').val(active_series_id);
-
+		$('#exportSeriesUID').empty()
+													.append(active_series_id);
+		$('.exportSeriesUID').val(active_series_id);
+		
+		$('.'+parentLabelList).empty();
+		var the_insert_elm = '';
   	$.each(label_list, function(idx, val) {
-    	var elm = '<li class="ui-state-dafault">';
-      	elm += '<input type="checkbox" value="'+idx+'" id="export_label_idx'+idx+'" name="labels[]" class="export_labels">';
-      	elm += '<label for="export_label_idx'+idx+'">Label '+idx+'</label></li>';
-     	$('.'+parentLabelList).append(elm);
+			the_insert_elm = the_insert_elm +'<li class="ui-state-dafault"><label>';
+			the_insert_elm = the_insert_elm +'<input type="checkbox" value="'+idx+'" id="export_label_idx'+idx+'" name="labels[]" class="export_labels">Label'+idx;
+			the_insert_elm = the_insert_elm +'</label></li>';
     });
+		$('.'+parentLabelList).append(the_insert_elm);
 }
 var changeRevision = function(index) {
 	if (arguments[1])

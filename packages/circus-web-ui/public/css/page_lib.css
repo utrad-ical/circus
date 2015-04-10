@@ -9,6 +9,10 @@
 .series_wrap{background:#bbb; margin:0 5px 5px;}
 .series_wrap.active{background-color:#FFC;}
 .series_name{padding:5px; font-weight:bold; cursor:pointer;}
+.export_area .disp_label_list li{background:#eee; margin-bottom:2px; cursor:pointer;}
+.export_area .disp_label_list input.export_labels{margin-right:5px;}
+.export_area .disp_label_list label{display:block; padding:5px;}
+
 .image_window_controller{position:absolute;	display:none;	cursor:default;	top:30px;		left:35px;	background:rgba(0,0,0,0.75); color:#fff;	text-indent:0;	z-index:1000;	width:360px;	text-align:left; padding-top:5px;}
 .image_window_controller li{padding:0px 5px 5px;}
 .image_window_controller_label{width:100px; display:inline-block;}
@@ -44,6 +48,8 @@
 .label_info .label_description{width:100%; display:block; resize:vertical;}
 .label_info .label_title[readonly],
 .label_info .label_description[readonly]{background:#ddd; color:#333;}
+
+
 
 @media screen and	(min-width:1500px){
 	#the_panel_inner{position:absolute; top:0; left:-310px;}

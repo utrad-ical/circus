@@ -101,6 +101,23 @@
 				$('#form_case_search').append(disp_elm);
 				//Event firing
 				$('#btn_submit').trigger('click');
+				return false;
+			});
+
+			$('.pager_btn').find('a').click(function() {
+				$.ajax({
+					url: $(this).attr('href'),
+					type: 'GET',
+					dataType: 'json',
+					error: function(){
+						alert('I failed to communicate.');
+					},
+					success: function(res){
+						$('#result_case_list').empty();
+						$('#result_case_list').append(res.response);
+					}
+				});
+				return false;
 			});
 		});
 	</script>

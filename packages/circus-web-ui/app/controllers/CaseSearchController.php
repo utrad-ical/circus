@@ -16,14 +16,19 @@ class CaseSearchController extends BaseController {
 		$inputs = Input::all();
 
 		try {
-			self::setSearchData($inputs);
+			$this->setSearchData($inputs);
 			$search_data = Session::get('case.search');
 
 			if ($search_data) {
 				$search_flg = true;
 				$result['list'] = ClinicalCase::getCaseList($search_data);
+				$list_count = ClinicalCase::getCaseList($search_data, true);
+
 				if ($result['list'])
-					$result['list_pager'] = Paginator::make($result['list']->toArray(), count($result['list']), $search_data['disp']);
+					$result['list_pager'] = Paginator::make(
+												$result['list']->toArray(),
+												$list_count,
+												$search_data['disp']);
 			}
 			$result['inputs'] = $search_data;
 			$result['search_flg'] = $search_flg;
@@ -42,29 +47,29 @@ class CaseSearchController extends BaseController {
 	 * @since 2015/03/20
 	 */
 	public function setSearchData($inputs) {
-	if (array_key_exists('btnReset', $inputs) !== false || !$inputs) {
-				Session::forget('case.search');
-			//Search button is pressed during
-			} else if (array_key_exists ('btnSearch', $inputs) !== false) {
-				if (array_key_exists('disp', $inputs) === false) $inputs['disp'] = Config::get('const.page_display');
-				if (array_key_exists('sort', $inputs) === false) $inputs['sort'] = 'updateTime';
-				Session::put('case.search', $inputs);
-			} else if (array_key_exists('page', $inputs) !== false) {
-				$tmp = Session::get('case.search');
-				$tmp['perPage'] = $inputs['page'];
-				Session::put('case.search', $tmp);
-			} else if (array_key_exists('condition_id', $inputs) !== false){
-				$detail_search_session = Session::get('case_detail_search');
-				$detail_search = $detail_search_session[$inputs['condition_id']];
-				if (array_key_exists('mongo_data', $detail_search) !== false) {
-					$file_path = storage_path()."/saves/".Auth::user()->userID.'_case_'.($inputs['condition_id']+1).'.json';
-					$handle = fopen($file_path, 'r');
-					$detail_search['mongo_search_data'] = fread($handle, filesize($file_path));
-				}
-				$detail_search['disp'] = Config::get('const.page_display');
-				$detail_search['sort'] = 'updateTime';
-				Session::put('case.search', $detail_search);
+		if (array_key_exists('btnReset', $inputs) !== false || !$inputs) {
+			Session::forget('case.search');
+		//Search button is pressed during
+		} else if (array_key_exists ('btnSearch', $inputs) !== false) {
+			if (array_key_exists('disp', $inputs) === false) $inputs['disp'] = Config::get('const.page_display');
+			if (array_key_exists('sort', $inputs) === false) $inputs['sort'] = 'updateTime';
+			Session::put('case.search', $inputs);
+		} else if (array_key_exists('page', $inputs) !== false) {
+			$tmp = Session::get('case.search');
+			$tmp['perPage'] = $inputs['page'];
+			Session::put('case.search', $tmp);
+		} else if (array_key_exists('condition_id', $inputs) !== false){
+			$detail_search_session = Session::get('case_detail_search');
+			$detail_search = $detail_search_session[$inputs['condition_id']];
+			if (array_key_exists('mongo_data', $detail_search) !== false) {
+				$file_path = storage_path()."/saves/".Auth::user()->userID.'_case_'.($inputs['condition_id']+1).'.json';
+				$handle = fopen($file_path, 'r');
+				$detail_search['mongo_search_data'] = fread($handle, filesize($file_path));
 			}
+			$detail_search['disp'] = Config::get('const.page_display');
+			$detail_search['sort'] = 'updateTime';
+			Session::put('case.search', $detail_search);
+		}
 	}
 
 	/**
@@ -79,26 +84,28 @@ class CaseSearchController extends BaseController {
 		$inputs = Input::all();
 
 		try {
-			self::setSearchData($inputs);
+			$this->setSearchData($inputs);
 
 			$search_data = Session::get('case.search');
 
 			if ($search_data) {
 				$search_flg = true;
 				$result['list'] = ClinicalCase::getCaseList($search_data);
+				$list_count = ClinicalCase::getCaseList($search_data, true);
 				if ($result['list'])
-					$result['list_pager'] = Paginator::make($result['list']->toArray(), count($result['list']), $search_data['disp']);
+					$result['list_pager'] = Paginator::make($result['list']->toArray(),
+															$list_count,
+															$search_data['disp']);
 			}
 			$result['search_flg'] = $search_flg;
+			$result['inputs'] = $search_data;
 			$tmp = View::make('case/case', $result);
 		} catch (Exception $e) {
 			Log::debug($e);
 			Log::debug($e->getMessage());
 			$tmp="";
 		}
-		header('Content-Type: application/json; charset=UTF-8');
-		$res = json_encode(array('result' => true, 'message' => '', 'response' => "$tmp"));
-		echo $res;
+		return Response::json(['result' => true, 'message' => '', 'response' => "$tmp"]);
 	}
 
 	/**

@@ -15,7 +15,7 @@ class CaseExportController extends BaseController {
 		Log::debug($inputs);
 		try {
 			//validate check
-			self::validate($inputs);
+			$this->validate($inputs);
 
 			//create temporary folder
 			$tmp_dir = Str::random(32);
@@ -26,9 +26,9 @@ class CaseExportController extends BaseController {
 			//delete trash files
 			CommonHelper::deleteOlderTemporaryFiles(storage_path('cache'), true, '-1 day');
 
-			$data_label = self::getDataTypeOption(intval($inputs['data_type']));
-			$output_label = self::getOutputTypeOption(intval($inputs['output_type']));
-			$series_index = self::getSeriesIndex($inputs['caseID'], $inputs['revisionNo'], $inputs['seriesUID']);
+			$data_label = $this->getDataTypeOption(intval($inputs['data_type']));
+			$output_label = $this->getOutputTypeOption(intval($inputs['output_type']));
+			$series_index = $this->getSeriesIndex($inputs['caseID'], $inputs['revisionNo'], $inputs['seriesUID']);
 
 			//command execution
 			$cmd_ary = array(
@@ -41,7 +41,7 @@ class CaseExportController extends BaseController {
 					);
 			//create label map
 			if (intval($inputs['data_type']) !== ClinicalCase::DATA_TYPE_ORIGINAL)
-				$cmd_ary['--map'] = self::createMap($inputs['labels']);
+				$cmd_ary['--map'] = $this->createMap($inputs['labels']);
 
 			if ($data_label)
 				$cmd_ary[$data_label] = true;

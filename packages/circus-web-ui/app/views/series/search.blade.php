@@ -157,6 +157,7 @@ Series Search
 			<tr>
 				<th>Series ID</th>
 				<td>
+					{{Form::hidden('dummy', '')}}
 					{{Form::text('seriesUID', isset($inputs['seriesUID']) ? $inputs['seriesUID'] : '', array('class' => 'common_input_text w_150'))}}
 				</td>
 				<th>Series Description</th>

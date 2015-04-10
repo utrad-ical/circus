@@ -17,7 +17,7 @@ class CaseRegisterController extends BaseController {
 
 		//Input value acquisition
 		$inputs = Input::all();
-		self::setBackUrl($inputs, $result);
+		$this->setBackUrl($inputs, $result);
 
 		try {
 			//Back button is pressed during
@@ -34,7 +34,7 @@ class CaseRegisterController extends BaseController {
 
 				$result['inputs'] = $case_data;
 				Session::put('caseID', $case_data->caseID);
-				$series_ids = self::getSeriesUIDList($result['inputs']);
+				$series_ids = $this->getSeriesUIDList($result['inputs']);
 				Session::put('mode', 'Edit');
 			//New registration mode
 			} else {
@@ -102,7 +102,7 @@ class CaseRegisterController extends BaseController {
 
 		//Input value acquisition
 		$inputs = Input::all();
-		self::setBackUrl($inputs, $result);
+		$this->setBackUrl($inputs, $result);
 
 		try {
 			//Session information acquisition
@@ -117,7 +117,7 @@ class CaseRegisterController extends BaseController {
 			//Patient ID duplication check
 			$error_msg = ClinicalCase::checkDuplicatePatientID(Series::getPluralSeries($inputs['series']), $case_info['series_list']);
 			if (!$error_msg)
-				$case_info['series_list'] = self::sortSeriesList($case_info['series_list'], $inputs['series']);
+				$case_info['series_list'] = $this->sortSeriesList($case_info['series_list'], $inputs['series']);
 
 			//Save the input value to the session
 			Session::put('case_input', $case_info);
@@ -133,7 +133,7 @@ class CaseRegisterController extends BaseController {
 			$case_obj->caseID = $case_info['caseID'];
 			$case_obj->incrementalID = 1; // This can be a dummy number only for validation
 			$case_obj->projectID = intval($case_info['projectID']);
-			$case_obj->patientInfoCache = self::setPatientInfo($case_info['patientInfo']);
+			$case_obj->patientInfoCache = $this->setPatientInfo($case_info['patientInfo']);
 			$case_obj->creator = Auth::user()->userID;
 
 			//ValidateCheck
@@ -142,15 +142,15 @@ class CaseRegisterController extends BaseController {
 			$result['inputs'] = $case_info;
 			$result['series_list'] = $case_info['series_list'];
 			if ($errors)
-				return self::errorConfirmFinish($errors, $result, $mode);
+				return $this->errorConfirmFinish($errors, $result, $mode);
 
 			//And displays a confirmation screen because there is no error
 			return View::make('case.confirm', $result);
 
 		} catch (InvalidModelException $e) {
-			return self::errorConfirmFinish($e->getErrors(), $result, $mode);
+			return $this->errorConfirmFinish($e->getErrors(), $result, $mode);
 		} catch (Exception $e) {
-			return self::errorConfirmFinish($e->getMessage(), $result, $mode);
+			return $this->errorConfirmFinish($e->getMessage(), $result, $mode);
 		}
 	}
 
@@ -202,7 +202,7 @@ class CaseRegisterController extends BaseController {
 		$inputs = Session::get('case_input');
 		$caseID = Session::get('caseID');
 		$mode = Session::get('mode');
-		self::setBackUrl($inputs, $result);
+		$this->setBackUrl($inputs, $result);
 
 		try {
 			//Validate check for object creation
@@ -215,10 +215,10 @@ class CaseRegisterController extends BaseController {
 			$case_obj->incrementalID = Seq::getIncrementSeq('incrementalCaseID');
 			$case_obj->projectID = $inputs['projectID'];
 			//Setting of patient information
-			$case_obj->patientInfoCache = self::setPatientInfo($inputs['patientInfo']);
+			$case_obj->patientInfoCache = $this->setPatientInfo($inputs['patientInfo']);
 
 			//Initial setting of Revision information
-			$series_list = self::createRevision($inputs['series_list']);
+			$series_list = $this->createRevision($inputs['series_list']);
 
 			if ($caseID) {
 				$revisions = $case_obj->revisions;
@@ -239,9 +239,9 @@ class CaseRegisterController extends BaseController {
 			Session::put('complete', $result);
 			return Redirect::to('case/complete');
 		} catch (InvalidModelException $e) {
-			return self::errorRedirectFinish($e->getErrors(), $result, $mode);
+			return $this->errorRedirectFinish($e->getErrors(), $result, $mode);
 		} catch (Exception $e) {
-			return self::errorRedirectFinish($e->getMessage(), $result, $mode);
+			return $this->errorRedirectFinish($e->getMessage(), $result, $mode);
 		}
 	}
 

@@ -15,7 +15,7 @@ class SeriesExportController extends BaseController {
 		Log::debug($inputs);
 		try {
 			//validate check
-			self::validate($inputs);
+			$this->validate($inputs);
 
 			//create temporary folder
 			$tmp_dir = Str::random(32);

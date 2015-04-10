@@ -107,8 +107,8 @@ class ClinicalCase extends BaseModel {
      * @author stani
      * @since 2015/03/20
      */
-    public static function getCaseList($search_data) {
-    	return self::where(function ($query) use ($search_data) {
+    public static function getCaseList($search_data, $count = false) {
+    	$sql = self::where(function ($query) use ($search_data) {
     					//ProjectID
     					$search_data['project'] = json_decode($search_data['project'], true);
     					if ($search_data['project']) {
@@ -171,16 +171,22 @@ class ClinicalCase extends BaseModel {
 								);
 							}
 						}
-    				})
-    				->orderby($search_data['sort'], 'desc')
-    				/*
-    				->skip(function($query) use ($search_data) {
-    					if (isset($search_data['perPage']))
-    						$query->skip(intval($search_data['disp'])*($search_data($input['perPage'])-1));
-    				})
-    				*/
-    				->take($search_data['disp'])
-    				->get();
+    				});
+
+    	//件数取得
+    	if ($count)
+    		return $sql->count();
+
+    	//リスト取得
+    	//settings offset
+    	$offset = 0;
+    	if (isset($search_data['perPage']) && $search_data['perPage'])
+    		$offset = intval($search_data['disp'])*(intval($search_data['perPage'])-1);
+
+    	return $sql->orderby($search_data['sort'], 'desc')
+    			   ->take($search_data['disp'])
+    			   ->skip($offset)
+    			   ->get();
     }
 
 	/**

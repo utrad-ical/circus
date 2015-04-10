@@ -57,7 +57,7 @@ class CaseDetailController extends BaseController {
 				if ($max_revision < $key)
 					$max_revision = $key;
 
-				$revision_list[] = self::getRevisionInfo($key, $value);
+				$revision_list[] = $this->getRevisionInfo($key, $value);
 				$revision_no_list[] = $key;
 			}
 			$select_revision = isset($inputs['revisionNo']) ? $inputs['revisionNo'] : $max_revision;
@@ -66,13 +66,15 @@ class CaseDetailController extends BaseController {
 			$result['case_detail'] = $case_info;
 
 			//Revision sort order adaptation
-			$result['revision_list'] = self::sortRevision($revision_list, 'revision.date');
+			$result['revision_list'] = $this->sortRevision($revision_list, 'revision.date');
 			$result['revision_no_list'] = $revision_no_list;
 
 			//Series list created
-			$inputs['seriesUID'] = self::getSeriesIDList($case_info, $select_revision);
+			$inputs['seriesUID'] = $this->getSeriesIDList($case_info, $select_revision);
 			//Shaping of the series list
-			$result['series_list'] = self::getSeriesList($case_info->revisions[$select_revision], $case_info->project->windowPriority, $case_info->project->windowPresets);
+			$result['series_list'] = $this->getSeriesList($case_info->revisions[$select_revision],
+														  $case_info->project->windowPriority,
+														  $case_info->project->windowPresets);
 			$result['attribute'] = json_encode($case_info->revisions[$select_revision]['attributes']);
 			$result['inputs'] = Session::get('case.detail');
 

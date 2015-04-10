@@ -17,7 +17,7 @@ class SeriesSearchController extends BaseController {
 		if (array_key_exists('edit_case_id', $inputs))
 			Session::put('edit_case_id', $inputs['edit_case_id']);
 
-		self::setSearchData($inputs, $result);
+		$this->setSearchData($inputs, $result);
 		$search_data = Session::get('series.search');
 
 		//Search
@@ -27,14 +27,15 @@ class SeriesSearchController extends BaseController {
 
 			//Setting the pager
 			if ($result['list'])
-				$result['list_pager'] = Paginator::make($result['list']->toArray(), count($result['list']), $search_data['disp']);
+				$result['list_pager'] = Paginator::make($result['list']->toArray(),
+														Series::getSeriesList($search_data, true),
+														$search_data['disp']);
 		} else {
 			$search_data['sex'] = 'all';
 		}
 
 		$result['inputs'] = $search_data;
 		$result['search_flg'] = $search_flg;
-
 		return View::make('series.search', $result);
 	}
 
@@ -56,7 +57,7 @@ class SeriesSearchController extends BaseController {
 		} else if (array_key_exists('page', $inputs) !== false) {
 			$search_data = Session::get('series.search');
 			$search_data['perPage'] = $inputs['page'];
-			Session::put('series.search', $tmp);
+			Session::put('series.search', $search_data);
 		} else if (array_key_exists('condition_id', $inputs) !== false){
 			$search_data = Session::get('series_detail_search');
 			$detail_search = $search_data[$inputs["condition_id"]];

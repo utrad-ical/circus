@@ -31,12 +31,12 @@ class RevisionController extends BaseController {
 				if ($max_revision < $key)
 					$max_revision = $key;
 
-				$revision_list[] = self::getRevisionInfo($key, $value);
+				$revision_list[] = $this->getRevisionInfo($key, $value);
 				$revision_no_list[] = $key;
 			}
 
 			//Revision sort order adaptation
-			$result['revision_list'] = self::sortRevision($revision_list, 'revision.date');
+			$result['revision_list'] = $this->sortRevision($revision_list, 'revision.date');
 			$result['revision_no_list'] = $revision_no_list;
 
 			//Series list created

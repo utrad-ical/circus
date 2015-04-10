@@ -7,14 +7,11 @@ class LabelRegisterController extends BaseController {
 	 * Label information storage (Ajax)
 	 */
 	function save_label() {
-		$error_msg = '';
-		$msg = '';
 		//Since there is no transaction function to MongoDB,
 		//to hold to be able to delete the data of registration ID in this array
 		try {
-			//$inputs = Input::all();
 			$inputs = Input::get('data');
-			$errors = self::validateSaveLabel($inputs);
+			$errors = $this->validateSaveLabel($inputs);
 
 			if (count($errors) > 0)
 				throw new Exception(implode("\n", $errors));
@@ -40,26 +37,26 @@ class LabelRegisterController extends BaseController {
 							//存在する場合はラベルの登録を行わない
 							$label_obj = Label::find($rec2['id']);
 							if (!$label_obj) {
-								$label_obj = self::setLabel($rec2, $storage_info->storageID);
+								$label_obj = $this->setLabel($rec2, $storage_info->storageID);
 								$label_obj->save();
 							}
-							$save_img_result = self::saveImage($label_obj->labelID, $rec2['image'], $storage_info->path);
+							$save_img_result = $this->saveImage($label_obj->labelID, $rec2['image'], $storage_info->path);
 							$revision[$rec['id']][] = array(
 								'id'			=>	$label_obj->labelID,
 								'attributes'	=>	array_key_exists('attribute', $rec2) ? $rec2['attribute'] : array()
 							);
 						}
 					}
-					$series_list[] = self::createSeriesList($rec['id'], $revision[$rec['id']]);
+					$series_list[] = $this->createSeriesList($rec['id'], $revision[$rec['id']]);
 				} else {
-					$series_list[] = self::createSeriesList($rec['id']);
+					$series_list[] = $this->createSeriesList($rec['id']);
 				}
 			}
 			//Update of case information
 			//Case information acquisition
 			$case_obj = ClinicalCase::find($inputs['caseId']);
 
-			$tmp_revision = self::createRevision($inputs, $series_list);
+			$tmp_revision = $this->createRevision($inputs, $series_list);
 
 			//Error checking
 			$revisions = $case_obj->revisions;
@@ -67,19 +64,16 @@ class LabelRegisterController extends BaseController {
 			$case_obj->revisions = $revisions;
 			$case_obj->latestRevision = $tmp_revision;
 			$case_obj->save();
-			//$errors = $case_obj->save();
-			//if ($errors)
-			//	throw new Exception($errors);
 			//JSON output
-			return self::outputJson(true, 'Registration of label information is now complete.');
+			return $this->outputJson(true, 'Registration of label information is now complete.');
 		} catch (InvalidModelException $e) {
 			Log::debug('InvalidModelException Error');
 			Log::debug($e);
-			return self::outputJson(false, $e->getErrors());
+			return $this->outputJson(false, $e->getErrors());
 		} catch (Exception $e){
 			Log::debug('Exception Error');
 			Log::debug($e);
-			return self::outputJson(false, $e->getMessage());
+			return $this->outputJson(false, $e->getMessage());
 		}
 	}
 

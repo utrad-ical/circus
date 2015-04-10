@@ -69,7 +69,11 @@ class CommonHelper{
 			}
 		}
 
-		if (!$preserve) @rmdir($target_dir);
+		if (!$preserve) {
+			$file_datetime = File::lastModified($target_dir);
+			if (is_null($time) || $th_datetime > $file_datetime)
+				@rmdir($target_dir);
+		}
 
 		return true;
 	}

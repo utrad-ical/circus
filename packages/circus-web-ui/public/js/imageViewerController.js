@@ -6,96 +6,96 @@
   //連動のために確保する情報群(デフォルト値)
   //コントローラ発動時にサーバーからもらった情報をマージして格納する
   //変更時にはこれを書き換えて、以降の処理時に参照する
-  var controllerInfo = {
-    activeSeriesId: '', //参照するシリーズid
-    baseUrl: 'http://your-website/', //画像格納ディレクトリ
-    color_marker: 0,
-    defaultColorSet: ['#FF0000', '#FFCC00', '#0033FF', '#0099FF', '#00CCFF', '#00FFFF', '#00FF00', '#00CC00', '#009900', '#006600', '#FF6600', '#FF3300', '#3333CC', '#CC3399', '#CC6666', '#FF9999'],
-    defaultLabelAttribute: {},
-    mode: 'pan', //pan,pen,erase,window
-    series: [
-      {
-        activeLabelId: '',
-        //ウインドウレベル・幅はシリーズに紐づかせるか否かはユーザー定義
-        id: '',
-        description: 'series name', //シリーズ名,今は特に使っていない
-        number: 512, //何枚の断面が格納されているか
-        window: {
-          level: {
-            current: 1000,
-            maximum: 4000,
-            minimum: 0
+      var controllerInfo = {
+      activeSeriesId: '', //参照するシリーズid
+      baseUrl: 'http://your-website/', //画像格納ディレクトリ
+      color_marker: 0,
+      defaultColorSet: ['#FF0000', '#FFCC00', '#0033FF', '#0099FF', '#00CCFF',
+        '#00FFFF', '#00FF00', '#00CC00', '#009900', '#006600', '#FF6600',
+        '#FF3300', '#3333CC', '#CC3399', '#CC6666', '#FF9999'
+      ],
+      defaultLabelAttribute: {},
+      mode: 'pan', //pan,pen,erase,window
+      series: [{
+          activeLabelId: '', //ウインドウレベル・幅はシリーズに紐づかせるか否かはユーザー定義
+          id: '',
+          description: 'series name', //シリーズ名,今は特に使っていない
+          number: 512, //何枚の断面が格納されているか
+          window: {
+            level: {
+              current: 1000,
+              maximum: 4000,
+              minimum: 0
+            },
+            width: {
+              current: 4000,
+              maximum: 2000,
+              minimum: 1
+            },
+            preset: [
+              //   {label: 'your preset label', level: 1000, width: 4000}
+            ]
           },
-          width: {
-            current: 4000,
-            maximum: 2000,
-            minimum: 1
-          },
-          preset: [
-         //   {label: 'your preset label', level: 1000, width: 4000}
-          ]
+          voxel: {
+            x: 512, //series画像での横ピクセル数
+            y: 512, //series画像での縦ピクセル数
+            z: 512, //seriesに含まれる画像の枚数
+            voxel_x: 1, //ボクセルの幅
+            voxel_y: 1, //ボクセルの奥行き
+            voxel_z: 1 //ボクセルの高さ
+          }
+          //todo xyzの方向によって表示するときの縮尺が違うようなことがある場合には,その縮尺に相当するパラメータを用意しよう
+        } //series１個分の情報群
+      ],
+      control: {
+        boldness: {
+          active: true,
+          value: 1
+        }, //太さ変更
+        bucket: {
+          active: true,
+          value: 1
+        }, //太さ変更
+        measure: {
+          active: true, //定規機能の有効・無効
+          panel: true, //定規表示パネルの有無
         },
-        voxel: {
-          x: 512, //series画像での横ピクセル数
-          y: 512, //series画像での縦ピクセル数
-          z: 512, //seriesに含まれる画像の枚数
-          voxel_x: 1, //ボクセルの幅
-          voxel_y: 1, //ボクセルの奥行き
-          voxel_z: 1 //ボクセルの高さ
+        color: {
+          control: true //カラーピッカーの有無
+        },
+        pan: true, //手のひらツール
+        window: {
+          active: true,
+          panel: true
+        },
+        pen: {
+          active: true, //描画機能の有効・無効
+          panel: true, //ラベル情報表示パネルの有無
+        },
+        show: true, //そもそもコントロールパネルを置くかどうか
+        undo: true //戻す・やり直す一括
+      },
+      elements: {
+        parent: '', //複数のビューアーを全て囲う親要素id
+        panel: '', //操作パネルを入れ込む要素id
+        label: '', //ラベルの操作ボタン等を入れ込む要素id
+        labelAttribute: '', //ラベルの操作ボタン等を入れ込む要素id
+        revisionAttribute: '' //revision attribute
+      },
+      viewer: [ //展開するビューアーの情報
+        {
+          id: 'viewer_', //内部的にビューアーに名前を付けておく
+          elementId: '',
+          orientation: 'axial',
+          window: {}, //ひな形の中身は active_series.window と共通
+          number: {
+            maximum: 512, //何枚の断面が格納されているか
+            minimum: 0, //何枚の断面が格納されているか
+            current: 0 //初期の表示番号
+          }
         }
-        //todo xyzの方向によって表示するときの縮尺が違うようなことがある場合には,その縮尺に相当するパラメータを用意しよう
-      } //series１個分の情報群
-    ],
-    control: {
-      boldness: {
-        active: true,
-        value: 1
-      }, //太さ変更
-      bucket: {
-        active: true,
-        value: 1
-      }, //太さ変更
-      measure: {
-        active: true, //定規機能の有効・無効
-        panel: true, //定規表示パネルの有無
-      },
-      color: {
-        control: true //カラーピッカーの有無
-      },
-      pan: true, //手のひらツール
-      window: {
-        active: true,
-        panel: true
-      },
-      pen: {
-        active: true, //描画機能の有効・無効
-        panel: true, //ラベル情報表示パネルの有無
-
-      },
-      show: true, //そもそもコントロールパネルを置くかどうか
-      undo: true //戻す・やり直す一括
-    },
-    elements: {
-      parent: '', //複数のビューアーを全て囲う親要素id
-      panel: '', //操作パネルを入れ込む要素id
-      label: '', //ラベルの操作ボタン等を入れ込む要素id
-      labelAttribute: '', //ラベルの操作ボタン等を入れ込む要素id
-      revisionAttribute: '' //revision attribute
-    },
-    viewer: [ //展開するビューアーの情報
-      {
-        id: 'viewer_',//内部的にビューアーに名前を付けておく
-        elementId: '',
-        orientation: 'axial',
-        window: {}, //ひな形の中身は active_series.window と共通
-        number: {
-          maximum: 512, //何枚の断面が格納されているか
-          minimum: 0, //何枚の断面が格納されているか
-          current: 0 //初期の表示番号
-        }
-      }
-    ]
-  }
+      ]
+    }
 
 
   //3枚連動のためのメソッド群
@@ -1027,91 +1027,87 @@
 				}
 			}
 		},
+		
 
 
-    saveData: function () {
+    saveData: function() {
       //データ保存
       var this_elm = this;
       var save_data = new Object();
-			save_data.caseId = controllerInfo.caseId;
-			save_data.series = new Array(0);
-
-			if(controllerInfo.elements.revisionAttribute != ''){
-				var revision_attributes = $('#'+controllerInfo.elements.revisionAttribute).propertyeditor('option').value;
-				save_data.attribute = JSON.stringify(revision_attributes);
-			}
-			
-			try {
-				for (var i = 0; i < controllerInfo.series.length; i++) {
-					var tmp_the_series = controllerInfo.series[i];
-					var tmp_insert_obj = new Object();
-					tmp_insert_obj.id = tmp_the_series.id;
-					tmp_insert_obj.label = new Array(0);
-
-					if (typeof tmp_the_series.label == 'object') {
-						for (var j = 0; j < tmp_the_series.label.length; j++) {
-
-							var tmp_the_label = tmp_the_series.label[j];
-							var container_data = $('#img_area_axial').imageViewer('createSaveData', tmp_the_series.id, tmp_the_label.id);
-
-							tmp_insert_obj.label[j] = new Object();
-							tmp_insert_obj.label[j].offset = container_data.offset;
-							tmp_insert_obj.label[j].sizes = container_data.size;
-
-							if (container_data.image.indexOf('data:image') == -1) {
-								container_data.image = '';
-							};
-
-							tmp_insert_obj.label[j] = container_data;
-							tmp_insert_obj.label[j].id = tmp_the_label.id;
-							
-							if(typeof  tmp_the_label.attribute == 'object'){
-								tmp_insert_obj.label[j].attribute = tmp_the_label.attribute;
+      save_data.caseId = controllerInfo.caseId;
+      save_data.series = new Array(0);
+      if (controllerInfo.elements.revisionAttribute != '') {
+        var revision_attributes = $('#' + controllerInfo.elements.revisionAttribute).propertyeditor('option').value;
+        save_data.attribute = JSON.stringify(revision_attributes);
+      }
+      try {
+        for (var i = 0; i < controllerInfo.series.length; i++) {
+          var tmp_the_series = controllerInfo.series[i];
+          var tmp_insert_obj = new Object();
+          tmp_insert_obj.id = tmp_the_series.id;
+          tmp_insert_obj.label = new Array(0);
+          if (typeof tmp_the_series.label == 'object') {
+            for (var j = 0; j < tmp_the_series.label.length; j++) {
+              var tmp_the_label = tmp_the_series.label[j];
+              var container_data = $('#img_area_axial').imageViewer('createSaveData', tmp_the_series.id, tmp_the_label.id);
+              tmp_insert_obj.label[j] = new Object();
+              tmp_insert_obj.label[j].offset = container_data.offset;
+              tmp_insert_obj.label[j].sizes = container_data.size;
+              if (container_data.image.indexOf('data:image') == -1) {
+                container_data.image = '';
+              };
+              tmp_insert_obj.label[j] = container_data;
+							if(tmp_insert_obj.label[j].size[0] != 0 && tmp_insert_obj.label[j].size[0] != 0 && tmp_insert_obj.label[j].size[0] != 0){
+								tmp_insert_obj.label[j].id = tmp_the_label.id;
+							}else{
+								tmp_insert_obj.label[j].id = '';
 							}
-						}
-					}
-					save_data.series[i] = tmp_insert_obj;
-				}
-			} catch (e) {
-				//console.log(e);
-				return false;
-			}
 
-			var tmp_input_memo = window.prompt('input Memo', controllerInfo.memo);
-
-			if (tmp_input_memo) {
-				save_data.memo = tmp_input_memo;
-				//console.log(save_data);
-				//console.log("URL::");
-				//console.log(controllerInfo.postUrl);
-				console.log(save_data);
-
-				$.ajax({
-					url: controllerInfo.postUrl,
-					type: 'post',
-					data: {data: save_data},//送信データ
-					dataType: 'json',
-					error: function () {
-						alert('通信に失敗しました');
-					},
-					success: function (response) {
-						var revisionRes = getRevisionList();
-						if (revisionRes)
-							alert(response.message);
-						else
-							alert('Failed to get revision information .');
-					}
-				});
-
-			} else {
-				//キャンセル時
-
-			}
-			return false;
-
+              if (typeof tmp_the_label.attribute == 'object') {
+                tmp_insert_obj.label[j].attribute = tmp_the_label.attribute;
+              }
+            }
+          }
+          save_data.series[i] = tmp_insert_obj;
+        }
+      } catch (e) {
+        //console.log(e);
+        return false;
+      }
+			
+      var tmp_input_memo = window.prompt('input Memo', controllerInfo.memo);
+      if (tmp_input_memo) {
+        save_data.memo = tmp_input_memo;
+        //console.log(save_data);
+        //console.log("URL::");
+        //console.log(controllerInfo.postUrl);
+        console.log(save_data);
+        $.ajax({
+          url: controllerInfo.postUrl,
+          type: 'post',
+          data: {
+            data: save_data
+          }, //送信データ
+          dataType: 'json',
+          error: function() {
+            alert('通信に失敗しました');
+          },
+          success: function(response) {
+            var revisionRes = getRevisionList();
+            if (revisionRes) alert(response.message);
+            else alert('Failed to get revision information .');
+          }
+        });
+      } else {
+        //キャンセル時
+      }
+      return false;
     },
-
-
+		
+		
+		
+		
+		
     setColorToViewer: function () {
       //コントローラの現在のラベル表示情報を、配下ビューアーに適用させる
       //id , rgba , visible を適用させる

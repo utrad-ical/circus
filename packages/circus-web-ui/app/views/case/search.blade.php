@@ -103,6 +103,9 @@
 		$('#btn_reset').click(function(){
 			//Event firing
 			$('#btn_submit').trigger('click', "btnReset");
+			//初期化
+			$('#form_case_search').find('select, :text').val('').end().find(':checked').prop('checked',false);
+			$('.multi_select').multiselect('refresh');
 		});
 		//Ajax通信
 		function sendAjax(post_url, post_data, target_elm) {
@@ -124,6 +127,11 @@
 				}
 			});
 		}
+/*
+		var initSearchVal = function() {
+
+		}
+		*/
 	});
 </script>
 @stop

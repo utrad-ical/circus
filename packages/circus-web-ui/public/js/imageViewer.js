@@ -952,6 +952,10 @@
         this_elm.find('.btn_prev,.btn_next').mousedown(function () {
           return false;
         });
+
+        this_elm.bind('changeImgSrc',function () {
+		      this_obj._changeImgSrc();
+        });
       }
 
       //ウインドウレベル・幅関係のイベント設置
@@ -1492,17 +1496,23 @@
         this_elm.find('.image_window_width').val(this_opts.viewer.window.width.current);
         this_elm.find('.label_width_min').val(this_opts.viewer.window.width.minimum);
         this_elm.find('.label_width_max').val(this_opts.viewer.window.width.maximum);
+				this_elm.find('.image_window_preset_select').empty();
 
         var tmp_preset_array = this_opts.viewer.window.preset;
-        if (typeof this_opts.viewer.window.preset != 'object'||this_opts.viewer.window.preset.length == 0) {
-          this_elm.find('.image_window_preset_select').empty().append();
-        } else {
-          var tmp_elm = '<option	value="blank">select	setting</option>';
+        var tmp_elm = '<option	value="blank">select	setting</option>';
+				var selected_opt = '';
+        if (typeof this_opts.viewer.window.preset == 'object'||this_opts.viewer.window.preset.length > 0) {
           for (var i = tmp_preset_array.length - 1; i >= 0; i--) {
+						if(this_opts.viewer.window.level.current == tmp_preset_array[i].level && this_opts.viewer.window.level.current == tmp_preset_array[i].level ) {
+							selected_opt= tmp_preset_array[i].level + ',' + tmp_preset_array[i].width;
+						}
             tmp_elm = tmp_elm + '<option	value="' + tmp_preset_array[i].level + ',' + tmp_preset_array[i].width + '">' + tmp_preset_array[i].label + '</option>';
           }
-          this_elm.find('.image_window_preset_select').empty().append(tmp_elm);
         }
+				this_elm.find('.image_window_preset_select').append(tmp_elm);
+				if(selected_opt !=''){
+					this_elm.find('.image_window_preset_select').val(selected_opt);
+				}				
       }
     }/*_setOptions*/,
 

@@ -320,8 +320,8 @@
 
 
 
-    //各種操作ボタン等の設置
-    //jQuery UI widget とは異なり、initの中から呼ぶ
+    //control buttons
+    //this function is called from init function
     create: function () {
 
       var this_elm = this;
@@ -337,11 +337,11 @@
       }
       tmp_panel_elm = $(tmp_panel_elm);
 
-      if (controllerInfo.control.show == true) { //コントロールパネル有無
+      if (controllerInfo.control.show == true) { //control panel display
         tmp_panel_elm.prepend('<div class="img_toolbar_wrap"><ul class="img_toolbar"></ul><div class="clear">&nbsp;</div></div>');
         var tmp_panel_wrap = tmp_panel_elm.find('.img_toolbar');
 
-        //ウインドウサイズ・レベル
+        //window level,width setting elements
         if (controllerInfo.control.window.active == true) {
           if (controllerInfo.control.window.panel == true) {
 
@@ -367,7 +367,7 @@
             tmp_panel_wrap.find('.image_window_controller').find('.window_level_wrap').append(tmp_elments_window_level);
             tmp_panel_wrap.find('.image_window_controller').find('.window_width_wrap').append(tmp_elments_window_width);
 
-            //プリセット
+            //window setting preset(s)
             if (active_series.window.preset.length > 0) {
               tmp_panel_wrap.find('.image_window_controller').append('<li class="window_preset_wrap"><select class="image_window_preset_select"></select></li>');
               var tmp_elments_window_preset = '<option value="blank">select setting</option>';
@@ -375,70 +375,65 @@
                 tmp_elments_window_preset = tmp_elments_window_preset + '<option value="' + active_series.window.preset[i].level + ',' + active_series.window.preset[i].width + '">' + active_series.window.preset[i].label + ' ' + active_series.window.preset[i].level + ',' + active_series.window.preset[i].width + '</option>';
               }
               tmp_panel_wrap.find('.image_window_preset_select').append(tmp_elments_window_preset);
-            } //プリセット
+            } //preset
             delete tmp_elments;
           } else {
-            var tmp_elments = '<li class="toolbar_btn ico_detail_sprite ico_detail_sprite_image_window"></li>';
-            tmp_panel_wrap.append(tmp_elments);
+            tmp_panel_wrap.append('<li class="toolbar_btn ico_detail_sprite ico_detail_sprite_image_window"></li>');
           }
         }
 				
-				//手のひらツール
+				//pan tool
         if (controllerInfo.control.pan == true) {
           tmp_panel_wrap.append( '<li class="toolbar_btn ico_detail_sprite ico_detail_sprite_pan"></li>');
 				}
 
-        //ペンツールボタン
+        //buttons about drawing
         if (controllerInfo.control.pen.active == true) {
 
-          //ペン切替
-          var tmp_elments = tmp_elments + '<li class="toolbar_btn ico_detail_sprite ico_detail_sprite_pen"></li>';
+          //pen button
+          var pen_elm = '<li class="toolbar_btn ico_detail_sprite ico_detail_sprite_pen"></li>';
 
-          //消しゴム
-          tmp_elments = tmp_elments + '<li class="toolbar_btn ico_detail_sprite ico_detail_sprite_erase"></li>';
+          //eraser button
+          pen_elm = pen_elm + '<li class="toolbar_btn ico_detail_sprite ico_detail_sprite_erase"></li>';
 
-          //太さ変更
+          //boldness select
           if (controllerInfo.control.boldness.active == true) {
-            var tmp_boldness_elm = '<li class="toolbar_param toolbar_weight_wrap"><select class="toolbar_weight">';
+            var bold_elm = '<li class="toolbar_param toolbar_weight_wrap"><select class="toolbar_weight">';
             for (var i = 1; i < 9; i++) {
-              tmp_boldness_elm = tmp_boldness_elm + '<option value="' + [i] + '">' + [i] + 'px</option>';
+              bold_elm = bold_elm + '<option value="' + [i] + '">' + [i] + 'px</option>';
             }
-            tmp_elments = tmp_elments + tmp_boldness_elm + '</select></li>';
-            delete tmp_boldness_elm;
+            pen_elm = pen_elm + bold_elm + '</select></li>';
           }
 
-          //手前に戻す・繰り返す(セット)
+          //undo and redo button
           if (controllerInfo.control.undo == true) {
-            tmp_elments = tmp_elments + '<li class="toolbar_btn ico_detail_sprite draw_back"></li><li class="toolbar_btn ico_detail_sprite draw_redo"></li>';
+            pen_elm = pen_elm + '<li class="toolbar_btn ico_detail_sprite draw_back"></li><li class="toolbar_btn ico_detail_sprite draw_redo"></li>';
           }
 
-          tmp_panel_wrap.append(tmp_elments);
-          delete tmp_elments;
+          tmp_panel_wrap.append(pen_elm);
+          delete pen_elm;
           delete tmp_panel_wrap;
         }
 
         if (controllerInfo.control.measure.active == true) {
-          var tmp_elments = '<li class="toolbar_btn ico_detail_sprite ico_detail_sprite_measure"></li>';
-          tmp_panel_wrap.append(tmp_elments);
+          tmp_panel_wrap.append('<li class="toolbar_btn ico_detail_sprite ico_detail_sprite_measure"></li>');
         }
 
         if (controllerInfo.control.bucket.active == true) {
-          var tmp_elments = '<li class="toolbar_btn ico_detail_sprite ico_detail_sprite_bucket"></li>';
-          tmp_panel_wrap.append(tmp_elments);
+          tmp_panel_wrap.append('<li class="toolbar_btn ico_detail_sprite ico_detail_sprite_bucket"></li>');
         }
 
-        /*ラベル表示領域*/
+        //about label
         if (controllerInfo.control.pen.panel == true) {
-          //各ラベル項目はsetEventsの後に発動するのでここは外枠と追加ボタンだけ
+					//in this scope, only the wrap elements and add button are set.
+          //each label's detail and event runs after (setEvents) function
           $('#' + controllerInfo.elements.label).append('<div class="label_select_wrap"><div class="add_label">新規ラベル追加</div></div>');
 
           if (typeof active_series.label != 'object' || active_series.label.length == 0) {
-            //ロード時にラベルがなければ一番手前のシリーズに１つだけデフォルトラベル生成
-            //ただしここではオブジェクトに追加するだけ。要素生成は別
+            //create elements is runs other scope
             this_elm.imageViewerController('addLabelObject');
           }
 
-          //アクティブラベルの指定が無ければラベル配列の１番目を有効化
           if (active_series.activeLabelId == '') {
             active_series.activeLabelId = active_series.label[0].id;
           }
@@ -448,10 +443,10 @@
 
           this_elm.imageViewerController('updateLabelElements');
 
-        }//ラベル関連
+        }
       }//control
 
-      //要素設置が済んだらイベント設置
+      //set Events after creating elements
       this_elm.imageViewerController('setEvents');
 
     },//create

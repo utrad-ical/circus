@@ -1156,12 +1156,15 @@
 
 					}else{
 						//バケツ発動
-						var tmp_point_position = this_obj._exchangePositionCtoV([[this_obj._tmpInfo.cursor.current.X,this_obj._tmpInfo.cursor.current.Y]]);
-						this_obj._getBucketFillPositions(
+						var the_active_series = this_obj.getSeriesObjectById(this_opts.viewer.draw.activeSeriesId);
+						if(typeof the_active_series.label != 'undefined' &&  the_active_series.label.length>0){
+							var tmp_point_position = this_obj._exchangePositionCtoV([[this_obj._tmpInfo.cursor.current.X,this_obj._tmpInfo.cursor.current.Y]]);
+							this_obj._getBucketFillPositions(
 								this_opts.viewer.draw.activeSeriesId,
 								the_active_series.activeLabelId,
 								tmp_point_position[0]
-						);
+							);
+						}
 
 				}
 
@@ -1179,7 +1182,6 @@
 					//初期位置(ズーム解除状態でのXY値)
 					this_obj._tmpInfo.cursor.start.X = tmp_cursor_x + this_opts.viewer.position.sx * this_opts.viewer.position.dw / this_opts.viewer.position.ow;
 					this_obj._tmpInfo.cursor.start.Y = tmp_cursor_y + this_opts.viewer.position.sy * this_opts.viewer.position.dh / this_opts.viewer.position.oh;
-
       }
 
     }/*_mousedownFunc*/,
@@ -1391,8 +1393,6 @@
         //ペンまたは消しゴムモード
         //ボクセル上での座標に変換
 
-        this_obj._tmpInfo.label = this_obj._reduceOverlap(this_obj._tmpInfo.label);
-
         //コンテナ書き込み
         if (this_obj._tmpInfo.label.length > 0) {
 
@@ -1459,28 +1459,6 @@
     }/*_mouseWheelFunc*/,
 
 
-    /*重複座標を除去する*/
-    //処理凍結中
-    _reduceOverlap: function (insert_array) {
-
-      var this_obj = this;
-      var this_elm = this.element;
-      var this_opts = this.options;
-      var tmp_orientation = this_opts.viewer.orientation;
-
-      /*
-       for(var i=insert_array.length-1; i>=0; i--){
-       for(var j=i-1; j>1; j--){
-       if(insert_array[j][0][1][2] ==	insert_array[i][0][1][2]){
-       insert_array.splice(j,1);
-       break;
-       }
-       }
-       }
-       */
-      return insert_array;
-    },
-
 
     _setOptions: function (tmpSetValues) {
       var this_obj = this;
@@ -1501,7 +1479,7 @@
         var tmp_preset_array = this_opts.viewer.window.preset;
         var tmp_elm = '<option	value="blank">select	setting</option>';
 				var selected_opt = '';
-        if (typeof this_opts.viewer.window.preset == 'object'||this_opts.viewer.window.preset.length > 0) {
+        if (typeof this_opts.viewer.window.preset == 'object' && this_opts.viewer.window.preset.length > 0) {
           for (var i = tmp_preset_array.length - 1; i >= 0; i--) {
 						if(this_opts.viewer.window.level.current == tmp_preset_array[i].level && this_opts.viewer.window.level.current == tmp_preset_array[i].level ) {
 							selected_opt= tmp_preset_array[i].level + ',' + tmp_preset_array[i].width;

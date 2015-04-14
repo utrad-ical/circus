@@ -60,7 +60,7 @@ $(function(){
 			      pan: true, //手のひらツール
 			      window: {
 			        active: true,
-			        panel: false
+			        panel: true
 			      },
 			      pen: {
 			        active: false, //描画機能の有効・無効

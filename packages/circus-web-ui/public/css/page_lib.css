@@ -169,6 +169,7 @@
 
 
 /*series deatil*/
+#page_series_detail #the_panel .img_toolbar_wrap{width:100%;}
 #page_series_detail .img_toolbar_wrap{margin:0;}
 #page_series_detail #the_panel_inner{position:relative; left:0;}
 #page_series_detail .info_area{background:#ddd;}

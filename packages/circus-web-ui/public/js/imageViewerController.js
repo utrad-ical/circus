@@ -382,14 +382,17 @@
             tmp_panel_wrap.append(tmp_elments);
           }
         }
+				
+				//手のひらツール
+        if (controllerInfo.control.pan == true) {
+          tmp_panel_wrap.append( '<li class="toolbar_btn ico_detail_sprite ico_detail_sprite_pan"></li>');
+				}
 
         //ペンツールボタン
         if (controllerInfo.control.pen.active == true) {
-          //パン切替
-          var tmp_elments = '<li class="toolbar_btn ico_detail_sprite ico_detail_sprite_pan"></li>';
 
           //ペン切替
-          tmp_elments = tmp_elments + '<li class="toolbar_btn ico_detail_sprite ico_detail_sprite_pen"></li>';
+          var tmp_elments = tmp_elments + '<li class="toolbar_btn ico_detail_sprite ico_detail_sprite_pen"></li>';
 
           //消しゴム
           tmp_elments = tmp_elments + '<li class="toolbar_btn ico_detail_sprite ico_detail_sprite_erase"></li>';

@@ -62,6 +62,18 @@ class Importer
 		'patientID' => '/^[A-Za-z0-9\\-_]{1,255}$/',
 	);
 
+	public function createTemporaryFileName($temp_dir = null)
+	{
+		do {
+			if (is_null($temp_dir)) {
+				$temp_dir = sys_get_temp_dir();
+			}
+			$name = md5(mt_rand());
+			$result = "$temp_dir/dcm_$name.dcm";
+		} while (file_exists($result));
+		return $result;
+	}
+
 	public function importOne($path, array $overrides = array())
 	{
 		try {
@@ -69,7 +81,7 @@ class Importer
 				throw new ImporterException('The specified file does not exist.');
 			}
 
-			$workfile = tempnam(sys_get_temp_dir(), 'dcm');
+			$workfile = $this->createTemporaryFileName();
 			if (!copy($path, $workfile)) {
 				throw new ImporterException('Error while preparing DICOM file ' .
 					'into temporary directory');
@@ -94,7 +106,7 @@ class Importer
 			$args[] = escapeshellarg($workfile);
 			Process::exec($this->_registerer->utilityPath() . ' ' . implode(' ', $args));
 
-			$json_file = preg_replace('/\\.tmp$/', '.json', $workfile);
+			$json_file = preg_replace('/\\.dcm/', '.json', $workfile);
 			if (!file_exists($json_file)) {
 				throw new ImporterException('Error while creating DICOM dump JSON file.');
 			}

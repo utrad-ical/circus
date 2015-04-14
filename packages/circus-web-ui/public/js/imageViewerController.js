@@ -730,7 +730,7 @@
 
           //select
           tmp_panel_elm.find('.image_window_preset_select').change(function () {
-            var tmp_value = $(this).val();  //value="32000,2000"
+            var tmp_value = $(this).val();
             if (tmp_value != 'blank') {
               $(this).closest('.image_window_controller').find('.image_window_level').val(tmp_value.split(',')[0]);
               $(this).closest('.image_window_controller').find('.image_window_width').val(tmp_value.split(',')[1]);
@@ -787,7 +787,7 @@
             for (var i = 0; i < controllerInfo.viewer.length; i++) {
               var elmId = '#' + controllerInfo.viewer[i].elementId;
               $(elmId).trigger('setOptions', [tmp_win_values])
-                .trigger('changeImageSrc');
+                .trigger('changeImgSrc');
             }
           }//chgWinValCtrl
         }
@@ -1227,7 +1227,6 @@
         controllerInfo.activeSeriesId = active_series.id;
       }
 
-
       var tmp_panel_elm = 'body';
       if (controllerInfo.elements.panel.length > 0) {
         tmp_panel_elm = '#' + controllerInfo.elements.panel;
@@ -1257,8 +1256,7 @@
       //値を渡してビュワー発火
       for (var i = 0; i < controllerInfo.viewer.length; i++) {
         var elmId = '#' + controllerInfo.viewer[i].elementId;
-        $(elmId).trigger('setOptions', [tmp_win_values])
-          .trigger('changeImageSrc');
+        $(elmId).trigger('setOptions', [tmp_win_values]).trigger('changeImgSrc');
       }
     }/*syncWindowInfo*/,
 

@@ -97,11 +97,26 @@ class Project extends BaseModel
 		self::AUTH_TYPE_DELETE => 'required|array_of_group_ids',
 		self::AUTH_TYPE_PERSONAL_INFO_VIEW => 'required|array_of_group_ids',
 		'windowPriority' => 'required|strict_string',
- 		'windowPresets' => 'strict_array',
+ 		'windowPresets' => 'window_presets',
 		'caseAttributesSchema' => 'strict_array',
 		'labelAttributesSchema' => 'strict_array',
 		'createTime'		=>	'mongodate',
 		'updateTime'		=>	'mongodate'
 	);
 
+	protected $messages = array(
+		'window_presets' => 'Invalid window presets.'
+	);
+
 }
+
+Validator::extend('window_presets', function ($attribute, $value, $parameters) {
+	if (!is_array($value)) return false;
+	foreach ($value as $preset) {
+		if (!is_array($preset) || count($preset) !== 3) return false;
+		if (!isset($preset['label']) || !is_string($preset['label'])) return false;
+		if (!isset($preset['level']) || !is_int($preset['level'])) return false;
+		if (!isset($preset['width']) || !is_int($preset['width'])) return false;
+	}
+	return true;
+});

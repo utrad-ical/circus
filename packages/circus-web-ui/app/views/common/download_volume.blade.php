@@ -1,7 +1,6 @@
-<div id="dialog" title="Downloading..." style="display:none;">
+<div id="dialog" title="Downloading..." style="display: none;">
   <p>
-      ダウンロードしています。<br>
-      もうしばらくお待ちください。
+      Preparing for download ...
   </p>
   <div id="progressbar"></div>
 </div>

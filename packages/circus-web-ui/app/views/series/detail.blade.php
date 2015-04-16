@@ -3,18 +3,15 @@
 @section('page_css')
 {{HTML::style('css/ui-lightness/jquery-ui-1.10.4.custom.min.css')}}
 {{HTML::style('css/page_lib.css')}}
-{{HTML::style('css/jquery.simple-color-picker.css')}}
 @stop
 
 @section('page_js')
 {{HTML::script('js/jquery.cookie.js')}}
 {{HTML::script('js/jquery-ui.min.js')}}
-{{HTML::script('js/jquery.simple-color-picker.js')}}
 {{HTML::script('js/canvastool.pngencoder.min.js')}}
 {{HTML::script('js/voxelContainer.js')}}
 {{HTML::script('js/imageViewer.js')}}
 {{HTML::script('js/imageViewerController.js')}}
-{{HTML::script('js/jquery.flexforms.js')}}
 {{HTML::script('js/export-common.js')}}
 
 @if (!isset($error_msg))
@@ -52,7 +49,7 @@ $(function(){
 			      }, //太さ変更
 			      measure: {
 			        active: true, //定規機能の有効・無効
-			        panel: true, //定規表示パネルの有無
+			        panel: true //定規表示パネルの有無
 			      },
 			      color: {
 			        control: false //カラーピッカーの有無
@@ -84,8 +81,7 @@ $(function(){
 						preset : [
 							 {label: 'Apply from the source only to axial'	, level: 0000	, width : 2000},
 						]
-					},
-                    
+					}
 				}
 			]
 		}
@@ -156,7 +152,7 @@ $(function(){
 				}
 			}
 		});
-	}
+	};
 	initAjax();//ajax firing
 
 	var	controllerRun	=	function(){
@@ -164,7 +160,7 @@ $(function(){
 		for(var j=0;	j<initInfo.length;	j++){
 			$('#'+initInfo[j].wrapElementId).imageViewerController('init',initInfo[j]);
 		}
-	}
+	};
 
 	//Button is pressed when you return to the series Search
 	$('#btnBack').click(function() {

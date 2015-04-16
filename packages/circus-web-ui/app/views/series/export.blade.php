@@ -1,9 +1,9 @@
-Download Volume
+<h2 class="con_ttl">Download Volume</h2>
 {{Form::open(['url' => asset('series/export'), 'method' => 'post', 'id' => 'frm_export'])}}
 	{{Form::hidden('seriesUID', $series_detail->seriesUID)}}
 
 	<div class="input_form_area">
-		<h2 class="con_ttl"> Range (image number) </h2>
+		<div> Range (image number) </div>
 		<div class="slider_outer" id="slider_export">
 		</div>
 		<div class="al_r">
@@ -16,15 +16,6 @@ Download Volume
 			{{Form::select('direction', array('auto' => 'Auto', 'forward' => 'Forward', 'reverse' => 'Reverse'), 'auto', array('class' => 'select w_180'))}}
 		</div>
 	</div>
-{{--
-	<div class="input_form_area">
-		<h2 class="con_ttl"> Options </h2>
-		<div>
-			Required private tags:
-			{{Form::text('tags', '')}}
-		</div>
-	</div>
---}}
 	<div class="al_r">
 		{{Form::button('Download', array('class' => 'common_btn al_r btn_download'))}}
 		{{Form::button('Close', array('class' => 'common_btn al_r btn_export_cancel'))}}
@@ -37,7 +28,7 @@ var createSlider = function(slider_max) {
     $('#exportEdSeriesImg').val(slider_max);
     series_slider_max = slider_max;
     sliderRun();
-}
+};
 var sliderRun = function() {
 	$('#slider_export').slider({
 		min: 0,
@@ -57,7 +48,7 @@ var sliderRun = function() {
 			$('#exportEdSeriesImg').val(values[1]);
 		}
 	});
-}
+};
 $(function(){
 	$('#btnAll').click(function() {
 		sliderRun();

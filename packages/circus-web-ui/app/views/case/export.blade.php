@@ -1,11 +1,12 @@
-Export volume data (Series: <span id="exportSeriesUID"></span>, Revision: <span id="exportRevisionNo">{{{$revisionNo}}}</span>)
+<h2 class="con_ttl">Export volume data</h2>
 <hr>
+<div>(Series: <span id="exportSeriesUID"></span>, Revision: <span id="exportRevisionNo">{{{$revisionNo}}}</span>)</div>
 {{Form::open(['url' => asset('case/export'), 'method' => 'post', 'id' => 'frm_export'])}}
   {{Form::hidden('caseID', $case_detail->caseID)}}
   {{Form::hidden('revisionNo', $revisionNo, array('class' => 'exportRevisionNo'))}}
   {{Form::hidden('seriesUID', '', array('class'=>'exportSeriesUID'))}}
 
-  (Data type)
+  <h3>Data type</h3>
   <ul>
     <li>
       {{Form::radio('data_type', ClinicalCase::DATA_TYPE_ORIGINAL, $inputs['data_type'] == ClinicalCase::DATA_TYPE_ORIGINAL ? true : false, array('id' => 'data_type_original', 'class' => 'data_type'))}}
@@ -22,7 +23,7 @@ Export volume data (Series: <span id="exportSeriesUID"></span>, Revision: <span 
   </ul>
 
   <div class="input_form_area label_options_area export_area">
-    <h2 class="con_ttl">Label Options</h2>
+    <h3>Label Options</h3>
     <table class="common_table mar_b_10">
       <tr>
         <th>Type:</th>
@@ -61,20 +62,20 @@ Export volume data (Series: <span id="exportSeriesUID"></span>, Revision: <span 
     $('#btnExportCancel').click(function() {
       $('.export_area').slideUp();
     });
-  
+
     $('.data_type').click(function() {
       var export_data_type = $('.data_type:checked').val();
-  
+
       if (export_data_type == {{{ClinicalCase::DATA_TYPE_ORIGINAL}}})
         $('.label_options_area').hide();
       else
         $('.label_options_area').show();
     });
   });
-  
+
   var validateExport = function() {
     var export_data_type = $('.data_type:checked').val();
-  
+
     if (export_data_type == {{{ClinicalCase::DATA_TYPE_LABEL}}} ||
       export_data_type == {{{ClinicalCase::DATA_TYPE_ORIGINAL_LABEL}}}) {
       if ($('.export_labels:checked').length == 0) {
@@ -83,7 +84,7 @@ Export volume data (Series: <span id="exportSeriesUID"></span>, Revision: <span 
     }
     return true;
   }
-  
+
   var exportVolume = function() {
     if($('.btn_download').hasClass('disabled') == false){
       exportRun("{{{asset('case/export')}}}", true);

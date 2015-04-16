@@ -17,6 +17,7 @@
 
 	.ui-propertyeditor-row > td {
 		padding-bottom: 1em;
+		width: 500px;
 	}
 </style>
 @stop

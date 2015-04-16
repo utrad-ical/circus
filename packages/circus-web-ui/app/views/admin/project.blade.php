@@ -44,7 +44,17 @@
                                 'auto,dicom,preset', 'auto,preset,dicom'
                             ]}
                         },
-                        {caption: 'Window Presets', key: 'windowPresets', type: 'json'},
+                        {caption: 'Window Presets', key: 'windowPresets', type: 'list', spec: {
+                            elementType: 'form',
+                            elementSpec: {
+                                form: $('#template .window-preset'),
+                                filter: function(data) {
+                                    data.width = parseInt(data.width);
+                                    data.level = parseInt(data.level);
+                                    return data;
+                                }
+                            }
+                        }},
                         {caption: 'Label Attributes', key: 'labelAttributesSchema', type: 'json'},
                         {caption: 'Case Attributes', key: 'caseAttributesSchema', type: 'json'}
                     ],
@@ -61,4 +71,13 @@
             });
         });
     </script>
+    <div id="template" style="display: none">
+        <span class="window-preset">
+            <label>
+                Preset Name: <input type="text" name="label" size="10" />
+                WL: <input type="text" name="level" size="5" />
+                WW: <input type="text" name="width" size="5" />
+            </label>
+        </span>
+    </div>
 @stop

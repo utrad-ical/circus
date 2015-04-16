@@ -41,20 +41,17 @@ a:hover{text-decoration:none;}
 
 #gnavi_wrap{width:30px; position:absolute; top:0; left:0; overflow:hidden; z-index:1000;}
 #gnavi_wrap:hover{width:300px; overflow:visible;}
-#gnavi .gnavi_cell{text-align:left; width:150px; border-top:1px solid #bbb; position:relative; overflow:visible; background-color:#eee;}
-#gnavi .gnavi_cell a{text-decoration:none; display:block; position:relative; height:40px; line-height:40px;}
-#gnavi .gnavi_cell a:hover{background:#ddd;}
-#gnavi .gnavi_cell a:after{content:"";  display: block; width:6px; height:6px; border-top:2px solid #333; border-right:2px solid #333; -webkit-transform: rotate(45deg); transform: rotate(45deg); position: absolute; right:8px; top:50%; margin-top:-4px;}
+#gnavi > li{text-align:left; width:150px; border-top:1px solid #bbb; position:relative; overflow:visible; background-color:#eee;}
+#gnavi > li a{text-decoration:none; display:block; position:relative; height:40px; line-height:40px;}
+#gnavi > li a:hover{background:#ddd;}
+#gnavi > li a:after{content:"";  display: block; width:6px; height:6px; border-top:2px solid #333; border-right:2px solid #333; -webkit-transform: rotate(45deg); transform: rotate(45deg); position: absolute; right:8px; top:50%; margin-top:-4px;}
 #gnavi_wrap #gnavi_wrap_switch{text-align:left; background-color:#eee; width:30px; height:40px; line-height:40px;}
 #gnavi_wrap:hover #gnavi_wrap_switch{width:150px;}
 #gnavi .gnavi_btn_ico{width:30px; height:40px; text-align:center; line-height:40px; display:block; float:left;}
 #gnavi .gnavi_btn_main_txt{width:120px; height:40px; text-align:left; line-height:40px; display:block; float:left;}
-#gnavi_wrap .gnavi_cell_inner{ position:absolute; top:0; left:150px; overflow:hidden; width:225px;}
-#gnavi_wrap .gnavi_cell_inner_head{height:40px; line-height:40px; width:100%; background-color:#eee; display:none;}
-#gnavi_wrap .gnavi_cell_inner_body{margin-left:0px; clear:both;}
+#gnavi_wrap .gnavi_cell_inner{ position:absolute; top:0; left:150px; overflow:hidden; width:225px; margin-left:0px; clear:both;}
 #gnavi_wrap .gnavi_cell_inner li{border-bottom:1px solid #bbb; height:40px; width:224px; background-color:#eee; display:none; text-indent:10px; border-right:1px solid #bbb;}
-#gnavi_wrap:hover .gnavi_cell:hover .gnavi_cell_inner li{display:block;}
-#gnavi_wrap:hover .gnavi_cell:hover .gnavi_cell_inner_head{display:block;}
+#gnavi_wrap:hover > #gnavi > li:hover .gnavi_cell_inner li{display:block;}
 
 .page_contents_outer{max-width:1084px; width:100%; position:relative; margin:0 auto;}
 .page_contents_inner{margin-left:40px; min-height:500px; text-align:left;}

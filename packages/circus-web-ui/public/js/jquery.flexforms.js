@@ -1,115 +1,10 @@
-/// <reference path="types/jquery/jquery.d.ts" />
-/// <reference path="types/jqueryui/jqueryui.d.ts" />
+/* jQuery flex forms (C)Soichiro Miki <smiki-tky@umin.ac.jp> */
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var typedFieldWidget;
-(function (typedFieldWidget) {
-    typedFieldWidget.options = {
-        type: 'text',
-        spec: {}
-    };
-    function _create() {
-        createInput.call(this);
-    }
-    typedFieldWidget._create = _create;
-    var map = {
-        text: 'TextInput',
-        password: 'PasswordInput',
-        number: 'NumberInput',
-        json: 'Json',
-        select: 'Select',
-        selectmultiple: 'SelectMultiple',
-        checkboxgroup: 'CheckBoxGroup',
-        date: 'DatePicker',
-        checkbox: 'CheckBox',
-        radio: 'RadioGroup'
-    };
-    function createInput() {
-        var _this = this;
-        this.element.empty();
-        this.element.addClass('ui-typedfield');
-        if (!(this.options.type in map)) {
-            throw 'Undefined field type';
-        }
-        this.field = new typedField[map[this.options.type]](this.options.spec);
-        var elem = this.field.createElement();
-        if ('value' in this.options) {
-            this.field.set(this.options.value);
-        }
-        else if ('default' in this.options.spec) {
-            this.field.set(this.options.spec.default);
-        }
-        _validate.call(this);
-        this.field.changed = function () {
-            _validate.call(_this);
-            _this.element.trigger('valuechange', [_this.field]);
-        };
-        elem.appendTo(this.element);
-    }
-    function _validate() {
-        var valid = this.field.valid();
-        this.element.toggleClass('ui-typedfield-invalid', !valid);
-        this.options.value = valid ? this.field.get() : null;
-    }
-    function enable() {
-        this.field.enable();
-        this.options.disabled = false;
-    }
-    typedFieldWidget.enable = enable;
-    function disable() {
-        this.field.disable();
-        this.options.disabled = true;
-    }
-    typedFieldWidget.disable = disable;
-    function getValue() {
-        return this.options.value;
-    }
-    typedFieldWidget.getValue = getValue;
-    function valid() {
-        return this.field.valid();
-    }
-    typedFieldWidget.valid = valid;
-    function setValue(value) {
-        this.field.set(value);
-        _validate.call(this);
-    }
-    typedFieldWidget.setValue = setValue;
-    function reset() {
-        this.field.reset();
-        this.field.changed();
-    }
-    typedFieldWidget.reset = reset;
-    function _setOption(key, value) {
-        switch (key) {
-            case 'type':
-                this.options.type = value;
-                createInput.call(this);
-                break;
-            case 'spec':
-                this.options.spec = value;
-                createInput.call(this);
-                break;
-            case 'value':
-                setValue.call(this, value);
-                break;
-            case 'disabled':
-                if (!!(value)) {
-                    this.enable();
-                }
-                else {
-                    this.disable();
-                }
-                break;
-            default:
-                this._super(key, value);
-        }
-    }
-    typedFieldWidget._setOption = _setOption;
-})(typedFieldWidget || (typedFieldWidget = {}));
 var typedField;
 (function (typedField) {
     var Base = (function () {
@@ -247,7 +142,7 @@ var typedField;
         NumberInput.prototype.htmlNumberSupported = function () {
             if (NumberInput.numberSupported === null) {
                 var tmp = $('<input type="number">');
-                NumberInput.numberSupported = tmp.prop('type') === 'number'; // supported!
+                NumberInput.numberSupported = tmp.prop('type') === 'number';
             }
             return NumberInput.numberSupported;
         };
@@ -550,123 +445,198 @@ var typedField;
         return CheckBox;
     })(Base);
     typedField.CheckBox = CheckBox;
-})(typedField || (typedField = {}));
-$.widget("ui.typedfield", typedFieldWidget);
-/// <reference path="types/jquery/jquery.d.ts" />
-/// <reference path="types/jqueryui/jqueryui.d.ts" />
-/// <reference path="jquery.typedfield.ts" />
-var propertyEditorWidget;
-(function (propertyEditorWidget) {
-    propertyEditorWidget.options = {
-        properties: [],
-        value: {},
-        useCaptions: true
-    };
-    function _create() {
-        _refreshForm.call(this);
-    }
-    propertyEditorWidget._create = _create;
-    function _refreshForm() {
-        var _this = this;
-        var props = this.options.properties;
-        this.element.empty().addClass('ui-propertyeditor');
-        var table = $('<table>').addClass('ui-propertyeditor-table').appendTo(this.element);
-        this.fields = {};
-        $.each(props, function (i, prop) {
-            if (prop.key in _this.fields) {
-                return;
+    var ArrayList = (function (_super) {
+        __extends(ArrayList, _super);
+        function ArrayList() {
+            _super.apply(this, arguments);
+            this.isDisabled = false;
+        }
+        ArrayList.prototype.createElement = function () {
+            var _this = this;
+            var elem = $('<div>');
+            this.add = $('<a>').addClass('ui-icon ui-icon-plusthick').appendTo(elem).on('click', function () {
+                _this.addElement();
+                _this.triggerChanged();
+            });
+            this.fields = $('<div>').addClass('ui-typedfield-field-list').appendTo(elem);
+            this.fields.sortable({
+                axis: 'y',
+                update: this.triggerChanged.bind(this),
+                handle: '.ui-typedfield-list-grip',
+                containment: this.fields
+            });
+            this.element = elem;
+            return elem;
+        };
+        ArrayList.prototype.addElement = function (value) {
+            var _this = this;
+            if (value === void 0) { value = undefined; }
+            var container = $('<div>').addClass('ui-typedfield-list-container').appendTo(this.fields);
+            $('<span>').addClass('ui-icon ui-typedfield-list-grip ui-icon-grip-dotted-vertical').appendTo(container);
+            $('<span>').addClass('ui-icon ui-typedfield-list-delete ui-icon-close').appendTo(container).on('click', function () {
+                container.remove();
+                _this.triggerChanged();
+            });
+            var field = $('<span>').typedfield({
+                type: this.spec.elementType,
+                spec: this.spec.elementSpec
+            }).appendTo(container);
+            if (typeof value !== 'undefined') {
+                field.typedfield('setValue', value);
             }
-            var row = $('<tr>').addClass('ui-propertyeditor-row');
-            var caption = $('<th>').addClass('ui-propertyeditor-caption').text(prop.caption);
-            var editor = $('<td>').addClass('ui-propertyeditor-column').typedfield({ type: prop.type, spec: prop.spec }).on('valuechange', function (event) {
-                _this.options.value[prop.key] = $(event.target).typedfield('getValue');
+            field.on('valuechange', function (event) {
+                event.stopPropagation();
+                _this.triggerChanged();
             });
-            row.append(caption).append(editor).appendTo(table);
-            _this.fields[prop.key] = editor;
-        });
-        _assignValues.call(this, this.options.value);
-        if (this.options.disabled) {
-            disable.call(this);
+        };
+        ArrayList.prototype.allFields = function () {
+            return this.fields.find('.ui-typedfield-list-container > .ui-typedfield');
+        };
+        ArrayList.prototype.reset = function () {
+            this.fields.empty();
+        };
+        ArrayList.prototype.get = function () {
+            var _this = this;
+            if (this.spec.key) {
+                var result = {};
+                this.allFields().get().forEach(function (f) {
+                    var data = $.extend({}, $(f).typedfield('getValue'));
+                    var key = data[_this.spec.key];
+                    delete data[_this.spec.key];
+                    result[key] = data;
+                });
+                return result;
+            }
+            else {
+                return this.allFields().get().map(function (f) { return $(f).typedfield('getValue'); });
+            }
+        };
+        ArrayList.prototype.set = function (value) {
+            var _this = this;
+            this.reset();
+            if (this.spec.key) {
+                if ($.isPlainObject(value)) {
+                    $.each(value, function (key, val) {
+                        val[_this.spec.key] = key;
+                        _this.addElement(val);
+                    });
+                }
+            }
+            else {
+                if ($.isArray(value)) {
+                    value.forEach(function (val) {
+                        _this.addElement(val);
+                    });
+                }
+            }
+        };
+        ArrayList.prototype.disable = function () {
+            this.allFields().each(function (i, f) {
+                $(f).typedfield('disable');
+            });
+            this.isDisabled = true;
+        };
+        ArrayList.prototype.enable = function () {
+            this.allFields().each(function (i, f) {
+                $(f).typedfield('enable');
+            });
+            this.isDisabled = false;
+        };
+        ArrayList.prototype.disabled = function () {
+            return this.isDisabled;
+        };
+        ArrayList.prototype.valid = function () {
+            return !this.allFields().get().some(function (f) {
+                return !$(f).typedfield('valid');
+            });
+        };
+        return ArrayList;
+    })(Base);
+    typedField.ArrayList = ArrayList;
+    var Form = (function (_super) {
+        __extends(Form, _super);
+        function Form() {
+            _super.apply(this, arguments);
+            this.isDisabled = false;
         }
-    }
-    function enable() {
-        this.element.find('.ui-propertyeditor-column').typedfield('enable');
-        this.options.disabled = false;
-    }
-    propertyEditorWidget.enable = enable;
-    function disable() {
-        this.element.find('.ui-propertyeditor-column').typedfield('disable');
-        this.options.disabled = true;
-    }
-    propertyEditorWidget.disable = disable;
-    function complain(messages) {
-        var _this = this;
-        var key;
-        this.undoComplain();
-        for (key in messages) {
-            messages[key].forEach(function (mes) {
-                if (!(key in _this.fields))
+        Form.prototype.createElement = function () {
+            var _this = this;
+            this.element = this.spec.form.clone();
+            this.element.on('change click keydown input', function (event) {
+                event.stopPropagation();
+                _this.triggerChanged();
+            });
+            return this.element;
+        };
+        Form.prototype.allFields = function () {
+            return this.element.find('[name]');
+        };
+        Form.prototype.get = function () {
+            var data = {};
+            $.each(this.allFields(), function () {
+                if (this.disabled)
                     return;
-                var message = $('<p>').addClass('ui-propertyeditor-error').text(mes);
-                _this.fields[key].closest('td.ui-propertyeditor-column').append(message);
-                _this.fields[key].closest('ui-propertyeditor-row').addClass('ui-propertyeditor-complained');
+                if (/select|textarea/i.test(this.nodeName) || /text|hidden|password/i.test(this.type)) {
+                    data[this.name] = $(this).val();
+                }
+                else if (this.checked) {
+                    if (data[this.name] == undefined)
+                        data[this.name] = [];
+                    data[this.name].push($(this).val());
+                }
             });
-        }
-    }
-    propertyEditorWidget.complain = complain;
-    function undoComplain() {
-        $('.ui-propertyeditor-row', this.element).removeClass('ui-propertyeditor.complained');
-        $('.ui-propertyeditor-error', this.element).remove();
-    }
-    propertyEditorWidget.undoComplain = undoComplain;
-    function clear() {
-        for (var key in this.fields) {
-            this.fields[key].typedfield('reset');
-        }
-        _refreshValues.call(this);
-    }
-    propertyEditorWidget.clear = clear;
-    function _setOption(key, value) {
-        switch (key) {
-            case 'value':
-                _assignValues.call(this, value);
-                break;
-            case 'disabled':
-                if (!!value) {
-                    this.disable();
+            if (typeof this.spec.filter === 'function') {
+                data = this.spec.filter(data);
+            }
+            return data;
+        };
+        Form.prototype.set = function (value) {
+            $.each(this.allFields(), function () {
+                if (value[this.name]) {
+                    var val = $(this).val();
+                    if (/checkbox|radio/i.test(this.type)) {
+                        $(this).prop('checked', $.isArray(value[this.name]) && value[this.name].some(function (v) { return v == val; }));
+                    }
+                    else {
+                        $(this).val(value[this.name]);
+                    }
                 }
                 else {
-                    this.enable();
+                    $(this).val(null);
                 }
-                break;
-            default:
-                this._super(key, value);
-        }
-    }
-    propertyEditorWidget._setOption = _setOption;
-    function _refreshValues() {
-        var _this = this;
-        this.options.value = {};
-        var props = this.options.properties;
-        $.each(props, function (i, prop) {
-            var field = _this.fields[prop.key];
-            _this.options.value[prop.key] = field.typedfield('valid') ? field.typedfield('getValue') : null;
-        });
-    }
-    function _assignValues(value) {
-        this.undoComplain();
-        for (var key in value) {
-            if (typeof this.fields[key] === 'object') {
-                this.fields[key].typedfield('setValue', value[key]);
+            });
+        };
+        Form.prototype.reset = function () {
+            this.set({});
+        };
+        Form.prototype.enable = function () {
+            $.each(this.allFields(), function () {
+                $(this).prop('disabled', false);
+            });
+            this.isDisabled = false;
+        };
+        Form.prototype.disable = function () {
+            $.each(this.allFields(), function () {
+                $(this).prop('disabled', true);
+            });
+            this.isDisabled = true;
+        };
+        Form.prototype.disabled = function () {
+            return this.isDisabled;
+        };
+        Form.prototype.valid = function () {
+            if (typeof this.spec.validator === 'function') {
+                return this.spec.validator();
             }
-        }
-        _refreshValues.call(this);
-    }
-})(propertyEditorWidget || (propertyEditorWidget = {}));
-$.widget("ui.propertyeditor", propertyEditorWidget);
-/// <reference path="types/jquery/jquery.d.ts" />
-/// <reference path="types/jqueryui/jqueryui.d.ts" />
-/// <reference path="jquery.typedfield.ts" />
+            else {
+                return true;
+            }
+        };
+        return Form;
+    })(Base);
+    typedField.Form = Form;
+})(typedField || (typedField = {}));
+
 var filterEditor;
 (function (filterEditor) {
     filterEditor.options = {
@@ -744,7 +714,6 @@ var filterEditor;
             if (this.hoveringNode)
                 this.hoveringNode.removeClass('ui-filtereditor-hover-node');
             if (node.parents('.ui-filtereditor-node').length == 0) {
-                // top level group cannot be changed
                 this.toolbar.hide();
                 this.hoveringNode = null;
             }
@@ -834,7 +803,6 @@ var filterEditor;
         }
         if (button.is('.ui-filtereditor-condition-delete')) {
             if (node.is('.ui-filtereditor-comparison-node')) {
-                // if this is the only node in a group, delete enclosing group instead
                 if (node.siblings('.ui-filtereditor-node').length == 0) {
                     var group = node.parent('.ui-filtereditor-group-node');
                     this._toolbuttonClicked(group, button);
@@ -842,7 +810,6 @@ var filterEditor;
                 }
             }
             if (node.get()[0] == this.root.get()[0]) {
-                // if the target is the top-level group, do nothing
                 return;
             }
             this.toolbar.hide().appendTo(this.element);
@@ -1021,5 +988,225 @@ var filterEditor;
     filterEditor.exportMongo = exportMongo;
 })(filterEditor || (filterEditor = {}));
 $.widget('ui.filtereditor', filterEditor);
-// CIRCUS CS Flex Forms
-// TypeScript based project -- Do not directly edit the JavaScript file.
+
+var propertyEditorWidget;
+(function (propertyEditorWidget) {
+    propertyEditorWidget.options = {
+        properties: [],
+        value: {},
+        useCaptions: true
+    };
+    function _create() {
+        _refreshForm.call(this);
+    }
+    propertyEditorWidget._create = _create;
+    function _refreshForm() {
+        var _this = this;
+        var props = this.options.properties;
+        this.element.empty().addClass('ui-propertyeditor');
+        var table = $('<table>').addClass('ui-propertyeditor-table').appendTo(this.element);
+        this.fields = {};
+        $.each(props, function (i, prop) {
+            if (prop.key in _this.fields) {
+                return;
+            }
+            var row = $('<tr>').addClass('ui-propertyeditor-row');
+            var caption = $('<th>').addClass('ui-propertyeditor-caption').text(prop.caption);
+            var editor = $('<td>').addClass('ui-propertyeditor-column').typedfield({ type: prop.type, spec: prop.spec }).on('valuechange', function (event) {
+                _this.options.value[prop.key] = $(event.target).typedfield('getValue');
+            });
+            row.append(caption).append(editor).appendTo(table);
+            _this.fields[prop.key] = editor;
+        });
+        _assignValues.call(this, this.options.value);
+        if (this.options.disabled) {
+            disable.call(this);
+        }
+    }
+    function enable() {
+        this.element.find('.ui-propertyeditor-column').typedfield('enable');
+        this.options.disabled = false;
+    }
+    propertyEditorWidget.enable = enable;
+    function disable() {
+        this.element.find('.ui-propertyeditor-column').typedfield('disable');
+        this.options.disabled = true;
+    }
+    propertyEditorWidget.disable = disable;
+    function complain(messages) {
+        var _this = this;
+        var key;
+        this.undoComplain();
+        for (key in messages) {
+            messages[key].forEach(function (mes) {
+                if (!(key in _this.fields))
+                    return;
+                var message = $('<p>').addClass('ui-propertyeditor-error').text(mes);
+                _this.fields[key].closest('td.ui-propertyeditor-column').append(message);
+                _this.fields[key].closest('ui-propertyeditor-row').addClass('ui-propertyeditor-complained');
+            });
+        }
+    }
+    propertyEditorWidget.complain = complain;
+    function undoComplain() {
+        $('.ui-propertyeditor-row', this.element).removeClass('ui-propertyeditor.complained');
+        $('.ui-propertyeditor-error', this.element).remove();
+    }
+    propertyEditorWidget.undoComplain = undoComplain;
+    function clear() {
+        for (var key in this.fields) {
+            this.fields[key].typedfield('reset');
+        }
+        _refreshValues.call(this);
+    }
+    propertyEditorWidget.clear = clear;
+    function _setOption(key, value) {
+        switch (key) {
+            case 'value':
+                _assignValues.call(this, value);
+                break;
+            case 'disabled':
+                if (!!value) {
+                    this.disable();
+                }
+                else {
+                    this.enable();
+                }
+                break;
+            default:
+                this._super(key, value);
+        }
+    }
+    propertyEditorWidget._setOption = _setOption;
+    function _refreshValues() {
+        var _this = this;
+        this.options.value = {};
+        var props = this.options.properties;
+        $.each(props, function (i, prop) {
+            var field = _this.fields[prop.key];
+            _this.options.value[prop.key] = field.typedfield('valid') ? field.typedfield('getValue') : null;
+        });
+    }
+    function _assignValues(value) {
+        this.undoComplain();
+        for (var key in value) {
+            if (typeof this.fields[key] === 'object') {
+                this.fields[key].typedfield('setValue', value[key]);
+            }
+        }
+        _refreshValues.call(this);
+    }
+})(propertyEditorWidget || (propertyEditorWidget = {}));
+$.widget("ui.propertyeditor", propertyEditorWidget);
+
+var typedFieldWidget;
+(function (typedFieldWidget) {
+    typedFieldWidget.options = {
+        type: 'text',
+        spec: {}
+    };
+    function _create() {
+        createInput.call(this);
+    }
+    typedFieldWidget._create = _create;
+    var map = {
+        text: typedField.TextInput,
+        password: typedField.PasswordInput,
+        number: typedField.NumberInput,
+        json: typedField.Json,
+        select: typedField.Select,
+        selectmultiple: typedField.SelectMultiple,
+        checkboxgroup: typedField.CheckBoxGroup,
+        date: typedField.DatePicker,
+        checkbox: typedField.CheckBox,
+        radio: typedField.RadioGroup,
+        list: typedField.ArrayList,
+        form: typedField.Form
+    };
+    function registerType(type, classDefinition) {
+        map[type] = classDefinition;
+    }
+    typedFieldWidget.registerType = registerType;
+    function createInput() {
+        var _this = this;
+        this.element.empty();
+        this.element.addClass('ui-typedfield ui-typedfield-' + this.options.type);
+        if (!(this.options.type in map)) {
+            throw 'Undefined field type';
+        }
+        this.field = new map[this.options.type](this.options.spec);
+        var elem = this.field.createElement();
+        if ('value' in this.options) {
+            this.field.set(this.options.value);
+        }
+        else if ('default' in this.options.spec) {
+            this.field.set(this.options.spec.default);
+        }
+        _validate.call(this);
+        this.field.changed = function () {
+            _validate.call(_this);
+            _this.element.trigger('valuechange', [_this.field]);
+        };
+        elem.appendTo(this.element);
+    }
+    function _validate() {
+        var valid = this.field.valid();
+        this.element.toggleClass('ui-typedfield-invalid', !valid);
+        this.options.value = valid ? this.field.get() : null;
+    }
+    function enable() {
+        this.field.enable();
+        this.options.disabled = false;
+    }
+    typedFieldWidget.enable = enable;
+    function disable() {
+        this.field.disable();
+        this.options.disabled = true;
+    }
+    typedFieldWidget.disable = disable;
+    function getValue() {
+        return this.options.value;
+    }
+    typedFieldWidget.getValue = getValue;
+    function valid() {
+        return this.field.valid();
+    }
+    typedFieldWidget.valid = valid;
+    function setValue(value) {
+        this.field.set(value);
+        _validate.call(this);
+    }
+    typedFieldWidget.setValue = setValue;
+    function reset() {
+        this.field.reset();
+        this.field.changed();
+    }
+    typedFieldWidget.reset = reset;
+    function _setOption(key, value) {
+        switch (key) {
+            case 'type':
+                this.options.type = value;
+                createInput.call(this);
+                break;
+            case 'spec':
+                this.options.spec = value;
+                createInput.call(this);
+                break;
+            case 'value':
+                setValue.call(this, value);
+                break;
+            case 'disabled':
+                if (!!(value)) {
+                    this.enable();
+                }
+                else {
+                    this.disable();
+                }
+                break;
+            default:
+                this._super(key, value);
+        }
+    }
+    typedFieldWidget._setOption = _setOption;
+})(typedFieldWidget || (typedFieldWidget = {}));
+$.widget("ui.typedfield", typedFieldWidget);

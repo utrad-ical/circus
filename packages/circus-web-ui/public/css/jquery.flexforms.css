@@ -17,10 +17,24 @@
 .ui-typedfield.ui-typedfield-invalid textarea {
   background-color: #ffcccc;
 }
+.ui-typedfield.ui-typedfield-invalid.ui-typedfield-list {
+  background-color: #ffcccc;
+}
 .ui-typedfield-json {
   width: 300px;
   height: 5em;
   resize: both;
+}
+.ui-typedfield-list-add {
+  cursor: pointer;
+}
+.ui-typedfield-list-grip {
+  display: inline-block;
+  cursor: ns-resize;
+}
+.ui-typedfield-list-delete {
+  display: inline-block;
+  cursor: pointer;
 }
 .ui-filtereditor-node {
   margin-top: 2px;

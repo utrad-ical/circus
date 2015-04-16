@@ -15,17 +15,11 @@
 	<h2 id="gnavi_wrap_switch">→</h2>
 	<ul id="gnavi">
 		<li>
-			<a href="{{{asset('home')}}}">
-				<span class="gnavi_btn_ico">{{Form::label('H')}}</span>
-				<span class="gnavi_btn_main_txt">{{Form::label('Home')}}</span>
-			</a>
+			<a href="{{{asset('home')}}}"><span class="home"></span>Home</a>
 		</li>
 		<li>
-			<a href="{{{asset('case/search')}}}">
-				<span class="gnavi_btn_ico">{{Form::label('C')}}</span>
-				<span class="gnavi_btn_main_txt">{{Form::label('Case')}}</span>
-			</a>
-			<ul class="gnavi_cell_inner">
+			<a href="{{{asset('case/search')}}}"><span class="case"></span>Case</a>
+			<ul>
 				<li>{{HTML::link(asset('case/search'), 'Case Search')}}</li>
 				@if (Session::has('case_detail_search'))
 					@foreach(Session::get('case_detail_search') as $rec_key => $rec_val)
@@ -40,11 +34,8 @@
 			</ul>
 		</li>
 		<li>
-			<a href="{{{asset('series/search')}}}">
-				<span class="gnavi_btn_ico">{{Form::label('S')}}</span>
-				<span class="gnavi_btn_main_txt">{{Form::label('Series')}}</span>
-			</a>
-			<ul class="gnavi_cell_inner">
+			<a href="{{{asset('series/search')}}}"><span class="series"></span>Series</a>
+			<ul>
 				<li>{{HTML::link(asset('series/search'), 'Series Search')}}</li>
 				<li>{{HTML::link(asset('series/import'), 'Series Import')}}</li>
 				@if (Session::has('series_detail_search'))
@@ -60,11 +51,8 @@
 			</ul>
 		</li>
 		<li>
-			<a href="{{{asset('/admin')}}}">
-				<span class="gnavi_btn_ico">{{Form::label('A')}}</span>
-				<span class="gnavi_btn_main_txt">{{Form::label('Admin')}}</span>
-			</a>
-			<ul class="gnavi_cell_inner">
+			<a href="{{{asset('/admin')}}}"><span class="admin"></span>Admin</a>
+			<ul>
 				<li>{{HTML::link(asset('administration/group'), 'Group')}}</li>
 				<li>{{HTML::link(asset('administration/user'), 'User')}}</li>
 				<li>{{HTML::link(asset('administration/storage'), 'Storage')}}</li>

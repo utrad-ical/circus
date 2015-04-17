@@ -183,10 +183,12 @@ class ClinicalCase extends BaseModel {
     	if (isset($search_data['perPage']) && $search_data['perPage'])
     		$offset = intval($search_data['disp'])*(intval($search_data['perPage'])-1);
 
-    	return $sql->orderby($search_data['sort'], 'desc')
-    			   ->take($search_data['disp'])
-    			   ->skip($offset)
-    			   ->get();
+    	$sql->orderby($search_data['sort'], 'desc');
+
+    	if ($search_data['disp'] !== 'all')
+    		$sql->take($search_data['disp']);
+
+    	return $sql->skip($offset)->get();
     }
 
 	/**

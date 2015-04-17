@@ -1,7 +1,9 @@
 @if ($search_flg)
 	@if (count($list) > 0)
 		<ul class="common_pager clearfix">
-			{{$list_pager->links()}}
+			@if (isset($list_pager))
+				{{$list_pager->links()}}
+			@endif
 			<li class="pager_sort_order">
 				{{Form::select('sort', Config::get('const.search_case_sort'), isset($inputs['sort']) ? $inputs['sort'] : '', array('class' => 'w_max change_select'))}}
 			</li>

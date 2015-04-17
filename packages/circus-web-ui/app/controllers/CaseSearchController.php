@@ -24,12 +24,16 @@ class CaseSearchController extends BaseController {
 				$result['list'] = ClinicalCase::getCaseList($search_data);
 				$list_count = ClinicalCase::getCaseList($search_data, true);
 
-				if ($result['list'])
+				if ($result['list'] && $search_data['disp'] !== 'all' )
 					$result['list_pager'] = Paginator::make(
 												$result['list']->toArray(),
 												$list_count,
 												$search_data['disp']);
+			} else {
+				$search_data['project'] = json_encode("");
+				$search_data['search_mode'] = 0;
 			}
+
 			$result['inputs'] = $search_data;
 			$result['search_flg'] = $search_flg;
 		} catch (Exception $e) {
@@ -82,17 +86,21 @@ class CaseSearchController extends BaseController {
 
 		//Input value acquisition
 		$inputs = Input::all();
+		Log::debug('入力値');
+		Log::debug($inputs);
 
 		try {
 			$this->setSearchData($inputs);
 
 			$search_data = Session::get('case.search');
+			Log::debug('検索条件::');
+			Log::debug($search_data);
 
 			if ($search_data) {
 				$search_flg = true;
 				$result['list'] = ClinicalCase::getCaseList($search_data);
 				$list_count = ClinicalCase::getCaseList($search_data, true);
-				if ($result['list'])
+				if ($result['list'] && $search_data['disp'] !== 'all' )
 					$result['list_pager'] = Paginator::make($result['list']->toArray(),
 															$list_count,
 															$search_data['disp']);
@@ -119,6 +127,9 @@ class CaseSearchController extends BaseController {
 
 		//Input value acquisition
 		$inputs = Input::all();
+
+		Log::debug('保存入力値::');
+		Log::debug($inputs);
 
 		//I want to save your search criteria in the session
 		if (Session::has('case_detail_search')) {

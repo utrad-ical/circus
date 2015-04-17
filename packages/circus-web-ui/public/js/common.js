@@ -54,6 +54,14 @@ $(function () {
 
   // UI multiple select
   if ($('.multi_select').length > 0) {
+	  if (typeof multi_selected_item !== undefined) {
+    	$('.multi_select').find('option').each(function(){
+    		if ($.inArray($(this).val(), multi_selected_item) !== -1) {
+    			$(this).attr('selected', 'selected');
+    		}
+    	});
+    }
+
     $('.multi_select').not('.active').multiselect({
       header: false,
       noneSelectedText: '(all)',
@@ -63,7 +71,6 @@ $(function () {
 
   // UI sortable
   if ($('.ui-sortable').length > 0) {
-    //$('.ui-sortable').sortable();
 	  $('.ui-sortable').sortable({
 		  axis: "y"
 	  });

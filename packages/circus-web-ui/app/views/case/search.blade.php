@@ -18,6 +18,7 @@
 </script>
 @endif
 <script>
+var multi_selected_item = {{$inputs['project']}};
 	$(function() {
 		// Initialization parameter
 		var keys = {{Helper\ConfigHelper::getDetailSearchConfig()}};
@@ -127,11 +128,6 @@
 				}
 			});
 		}
-/*
-		var initSearchVal = function() {
-
-		}
-		*/
 	});
 </script>
 @stop

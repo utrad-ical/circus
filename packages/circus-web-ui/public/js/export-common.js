@@ -17,9 +17,7 @@ var createDownloadDialog = function() {
 	$('#progressbar').progressbar({
 		value:0
 	});
-	$("#dialog").dialog({
-		closeText:""
-	});
+	$('#dialog').dialog('open');
 }
 
 var exportRun = function (export_url, validate_flag) {
@@ -76,5 +74,12 @@ var isExportRun = function(validate_flag) {
 $(function() {
 	$('.btn_export_cancel').click(function() {
 		$('.export_area').slideUp();
+	});
+
+	$("#dialog").dialog({
+		autoOpen: false,
+		closeOnEscape: false,
+		closeText:"",
+		height:100
 	});
 });

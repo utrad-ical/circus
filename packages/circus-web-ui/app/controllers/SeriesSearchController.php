@@ -26,7 +26,7 @@ class SeriesSearchController extends BaseController {
 			$result['list'] = Series::getSeriesList($search_data);
 
 			//Setting the pager
-			if ($result['list'])
+			if ($result['list'] && $search_data['disp'] !== 'all' )
 				$result['list_pager'] = Paginator::make($result['list']->toArray(),
 														Series::getSeriesList($search_data, true),
 														$search_data['disp']);
@@ -52,7 +52,7 @@ class SeriesSearchController extends BaseController {
 		//Search button is pressed during
 		} else if (array_key_exists('btnSearch', $inputs) !== false) {
 			if (array_key_exists('disp', $inputs) === false) $inputs['disp'] = Config::get('const.page_display');
-			if (array_key_exists('sort', $inputs) === false) $inputs['sort'] = 'updateTime';
+			if (array_key_exists('sort', $inputs) === false) $inputs['sort'] = 'updateTime,desc';
 			Session::put('series.search', $inputs);
 		} else if (array_key_exists('page', $inputs) !== false) {
 			$search_data = Session::get('series.search');
@@ -62,7 +62,7 @@ class SeriesSearchController extends BaseController {
 			$search_data = Session::get('series_detail_search');
 			$detail_search = $search_data[$inputs["condition_id"]];
 			$detail_search['disp'] = Config::get('const.page_display');
-			$detail_search['sort'] = 'updateTime';
+			$detail_search['sort'] = 'updateTime,desc';
 			Session::put('series.search', $detail_search);
 		}
 	}

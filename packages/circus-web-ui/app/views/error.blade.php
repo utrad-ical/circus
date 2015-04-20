@@ -10,7 +10,7 @@ Error
 
 @section('content')
 <p class="pad_tb_40 al_c">
-	<span class="txt_alert">
+	<span class="font_red">
 		@if ($error_msg)
 			{{$error_msg}}
 		@else

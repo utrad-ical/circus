@@ -30,7 +30,7 @@ class CaseRegisterController extends BaseController {
 
 				//Set case information
 				if (!$case_data)
-					throw new Exception('ケース情報が取得できません。');
+					throw new Exception('Case information can not be retrieved .');
 
 				$result['inputs'] = $case_data;
 				Session::put('caseID', $case_data->caseID);

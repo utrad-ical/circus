@@ -33,7 +33,7 @@ Login
 	<p class="submit_area">
 		{{Form::submit('Login', array('class' => 'common_btn mar_r_5'))}}
 		@if (isset($error_msg))
-			<br><span class="al_c txt_alert">{{$error_msg}}</span>
+			<br><span class="al_c font_red">{{$error_msg}}</span>
 		@endif
 	</p>
 {{Form::close()}}

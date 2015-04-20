@@ -211,7 +211,7 @@ class ClinicalCase extends BaseModel {
 		$patientID = $list[0]->patientInfo['patientID'];
 		foreach ($list as $rec) {
 			if ($patientID != $rec->patientInfo['patientID'])
-				return 'Series that can be registered in one case only the same patient.<br>Please select the same patient in the series.';
+				return "Series that can be registered in one case only the same patient.\nPlease select the same patient in the series. ";
 			$series_list[$rec->seriesUID] = $rec->seriesDescription;
 		}
 	}

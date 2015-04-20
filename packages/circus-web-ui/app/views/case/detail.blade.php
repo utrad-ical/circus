@@ -376,7 +376,7 @@ id="page_case_detail"
 </div>
 
 @if (isset($error_msg))
-	<br><span class="txt_alert">{{$error_msg}}</span>
+	<br><span class="font_red">{{$error_msg}}</span>
 @else
 	<div class="al_r mar_b_10 w_300 fl_r">
 		{{Form::select('revision', $revision_no_list, $revisionNo, array('class' => 'select w_180 select_revision'))}}

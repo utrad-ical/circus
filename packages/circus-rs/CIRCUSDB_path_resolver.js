@@ -26,10 +26,6 @@ var StorageSchema = new Schema({
   active: {type:Boolean}
 });
 
-// register schema
-mongoose.model('Series', SeriesSchema, 'Series');
-mongoose.model('Storages', StorageSchema, 'Storages');
-
 //
 // resolve DICOM file's path
 //
@@ -43,16 +39,19 @@ function resolvPath(seriesUID, callback)
 	var constr =
 		'mongodb://' + mongoconfig.username + ':' + mongoconfig.password + '@' + mongoconfig.host + ':' + mongoconfig.port + '/' + mongoconfig.database;
 
-	mongoose.connect(constr,
-	function(err) {
+    var db = mongoose.createConnection(constr, function(err) {
 		if (err) {
 			console.log('err:' + err);
 			callback(null);
 			return;
 		}
 
-		var Series = mongoose.model('Series');
-		var Storages = mongoose.model('Storages');
+        // register schema
+        db.model('Series', SeriesSchema, 'Series');
+        db.model('Storages', StorageSchema, 'Storages');
+
+		var Series = db.model('Series');
+		var Storages = db.model('Storages');
 
 		// find series.
 		Series.findOne({ 'seriesUID' : seriesUID }, 'seriesUID storageID', function (err, series) {
@@ -60,16 +59,16 @@ function resolvPath(seriesUID, callback)
 			if (err) {
 				console.log(err);
 				callback(null);
-				mongoose.disconnect();
+				db.close();
 				return;
 			}
 
 			// find storage
-			Storages.findOne({ 'storageID' : series.storageID, 'type' : 'dicom' }, 'path active', function (err, storage) {
+			Storages.findOne({ 'storageID' : series.storageID, 'type' : 'dicom' }, 'path', function (err, storage) {
 				if (err) {
 					console.log(err);
 					callback(null);
-					mongoose.disconnect();
+					db.close();
 					return;
 				}
 
@@ -85,17 +84,17 @@ function resolvPath(seriesUID, callback)
 					console.log('not exists:' + dcmdir);
 				} else {
 					callback(dcmdir);
-					mongoose.disconnect();
+					db.close();
 					return;
 				}
 
 				console.log('no storage for storageID: ' + series.storageID);
 				callback(null);
-				mongoose.disconnect();
+				db.close();
 
 			}); // Stroage.find
 		}); // Series.findOne
-	}); // mongodb.connect
+	}); // mongodb.createConnection
 }
 
 module.exports = {

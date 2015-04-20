@@ -139,31 +139,35 @@ function readData(series, image, callback)
 {
   logger.info('readData: ' + series +' image:' + image);
 
-  resolver.resolvPath(series, function(dcmdir) {
+  //
+  if (execCounter > 0) {
+    logger.trace('waiting... ');
+    setTimeout(function(){ readData(series, image, callback) }, 500);
+    return;
+  }
 
-      if (!dcmdir) {
-         callback(null, 'not found');
-         return;
-      }
+  execCounter = 1;
 
-      //
-      if (execCounter > 0) {
-        logger.trace('waiting... ');
-        setTimeout(function(){ readData(series, image, callback) }, 500);
+  var rawData = imageCache.get(series);
+  if (rawData != null) {
+    if (rawData.containImage(image)) {
+        logger.trace('request images already cached.');
+        callback(rawData, null);
+        execCounter = 0;
         return;
-      }
+    }
+  } else {
+    logger.trace('no cache found.');
+    rawData = new RawData();
+    imageCache.put(series, rawData);
+  }
 
-      var rawData = imageCache.get(series);
-      if (rawData != null) {
-        if (rawData.containImage(image)) {
-            logger.trace('request images already cached.');
-            callback(rawData, null);
-            return;
-        }
-      } else {
-        logger.trace('no cache found.');
-        rawData = new RawData();
-        imageCache.put(series, rawData);
+  resolver.resolvPath(series, function(dcmdir) {
+      if (!dcmdir) {
+         callback(null, 'cannot resolv path.');
+         imageCache.remove(series);
+         execCounter = 0;
+         return;
       }
 
       var cmd = config.dumper + ' combined --input-path="' + dcmdir + '" --stdout';
@@ -172,7 +176,6 @@ function readData(series, image, callback)
       }
       logger.trace(cmd);
 
-      execCounter = 1;
       var child = my_exec(cmd, rawData,
         function (rawData) {
             var err = null;
@@ -207,6 +210,7 @@ function doRequest(req, res)
     logger.trace(query);
 
     if (u.pathname != '/') {
+        logger.trace('not supported path.');
         res.writeHead(404);
         res.end();
         return;

@@ -217,7 +217,7 @@ id="page_series_detail"
 </div>
 
 @if (isset($error_msg))
-	<p class="txt_alert">{{$error_msg}}</p>
+	<p class="font_red">{{$error_msg}}</p>
 @else
 
 	<div class="export_area" style="display:none;">

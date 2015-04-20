@@ -27,7 +27,7 @@ Series Import Complete
 	@if (isset($msg))
 		{{$msg}}
 	@elseif (isset($error_msg))
-		<span class="txt_alert">{{$error_msg}}</span>
+		<span class="font_red">{{$error_msg}}</span>
 	@endif
 </p>
 <p class="al_c">

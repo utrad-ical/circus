@@ -64,7 +64,8 @@ var multi_selected_item = {{$inputs['project']}};
 			for (var i = 0; i < form_data.length; i++) {
 				if (form_data[i]["name"] == "project") {
 					project_id_ary.push(form_data[i]["value"]);
-					delete form_data[i];
+					form_data.splice(i,1);
+					break;
 				}
 			}
 			//Get search mode
@@ -86,6 +87,11 @@ var multi_selected_item = {{$inputs['project']}};
 				} else {
 					tmp_ary_data= [tmp_mongo_data, tmp_project_data,tmp_action_btn_data,tmp_search_mode_data];
 				}
+
+				$.each(form_data, function(key, val) {
+					if (val["name"] == "sort" || val["name"] == "disp")
+						tmp_ary_data.push(val);
+				});
 			} else {
 			//Simple Search
 				var tmp_data = [tmp_project_data,tmp_action_btn_data,tmp_search_mode_data];
@@ -96,7 +102,6 @@ var multi_selected_item = {{$inputs['project']}};
 			if (arguments[1]) {
 				tmp_ary_data.push(arguments[1]);
 			}
-			//var tmp_data = $.extend(true,form_data, tmp_ary_data);
 			return tmp_ary_data;
 		}
 

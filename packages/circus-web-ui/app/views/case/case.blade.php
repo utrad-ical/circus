@@ -75,7 +75,7 @@
 				var sort = $("select[name='sort']").val();
 				var disp = $("select[name='disp']").val();
 
-				//display_num または Sort Order指定時は検索が行わない
+				//display_num または Sort Order指定時は検索は行わない
 				if (sort.length && disp.length) {
 					var sort_elm = $("<input>", {type:"hidden", name:"sort", value:sort});
 					$('#form_case_search').append(sort_elm);

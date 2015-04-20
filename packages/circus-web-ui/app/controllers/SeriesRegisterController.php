@@ -31,8 +31,10 @@ class SeriesRegisterController extends BaseController {
 			$uploads = Input::file('upload_file');
 			$file_list = array();
 
+			$auth_sess_key = Auth::getSession()->getId();
 			foreach ($uploads as $upload) {
-				$res = $upload->move(storage_path('uploads')."/", $upload->getClientOriginalName());
+
+				$res = $upload->move(storage_path('uploads/'.$auth_sess_key)."/", $upload->getClientOriginalName());
 
 				//If extension of Zip to save unzip
 				$ext = $upload->getClientOriginalExtension();
@@ -43,7 +45,7 @@ class SeriesRegisterController extends BaseController {
 						throw new ZipException($errorMsg);
 				} else {
 					//image:import
-					$file_list[] = storage_path('uploads')."/".$upload->getClientOriginalName();
+					$file_list[] = storage_path('uploads/'.$auth_sess_key)."/".$upload->getClientOriginalName();
 				}
 			}
 			//Dicomファイルインポート
@@ -78,9 +80,10 @@ class SeriesRegisterController extends BaseController {
 	 */
 	function thawZip($file, &$error_msg) {
 		try {
+			$auth_sess_key = Auth::getSession()->getId();
 			$zip = new ZipArchive();
 			//Zip file open
-			$zip_path = storage_path('uploads')."/".$file;
+			$zip_path = storage_path('uploads/'.$auth_sess_key)."/".$file;
 			$res = $zip->open($zip_path);
 
 			//Successful Zip file open

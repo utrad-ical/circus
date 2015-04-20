@@ -30,12 +30,16 @@
 			//Add a hidden element so do a search
 			var sort = $("select[name='sort']").val();
 			var disp = $("select[name='disp']").val();
-			var sort_elm = $("<input>", {type:"hidden", name:"sort", value:sort});
-			$('#form_search').append(sort_elm);
-			var disp_elm = $("<input>", {type:"hidden", name:"disp", value:disp});
-			$('#form_search').append(disp_elm);
-			//Event firing
-			$('#btn_submit').trigger('click');
+			//display_num または Sort Order指定時は検索は行わない
+			if (sort.length && disp.length) {
+				var sort_elm = $("<input>", {type:"hidden", name:"sort", value:sort});
+				$('#form_search').append(sort_elm);
+				var disp_elm = $("<input>", {type:"hidden", name:"disp", value:disp});
+				$('#form_search').append(disp_elm);
+				//Event firing
+				$('#btn_submit').trigger('click');
+			}
+			return false;
 		});
 
 		$('.link_series_detail').click(function(){
@@ -141,9 +145,9 @@ Series Search
 @stop
 
 @section('content')
-{{Form::open(['url' => asset('/series/search'), 'id' => 'form_search', 'method' => 'post', 'class' => 'mar_b_20'])}}
+{{Form::open(['url' => asset('series/search'), 'id' => 'form_search', 'method' => 'post', 'class' => 'mar_b_20'])}}
 	<div class="al_l mar_b_10">
-		{{HTML::link(asset('/series/import'), 'Series Import', array('class' => 'common_btn'))}}
+		{{HTML::link(asset('series/import'), 'Series Import', array('class' => 'common_btn'))}}
 	</div>
 	<div class="search_form_wrap">
 		<h2 class="con_ttl">Search Condition</h2>
@@ -212,11 +216,13 @@ Series Search
 {{Form::close()}}
 
 @if ($search_flg)
-	{{Form::open(['url' => asset('/case/input'), 'method' => 'post', 'id' => 'form_edit_new_case'])}}
+	{{Form::open(['url' => asset('case/input'), 'method' => 'post', 'id' => 'form_edit_new_case'])}}
 		{{Form::hidden('back_url', 'series_search')}}
 		<div class="w_900 fl_l">
 			<ul class="common_pager clearfix">
-				{{$list_pager->links()}}
+				@if(isset($list_pager))
+					{{$list_pager->links()}}
+				@endif
 				<li class="pager_sort_order">
 					{{Form::select('sort', Config::get('const.search_series_sort'), isset($inputs['sort']) ? $inputs['sort'] : '', array('class' => 'w_max change_select', 'data-target-dom' => 'sort_order_down', 'id' => 'sort_order_up'))}}
 				</li>
@@ -286,7 +292,9 @@ Series Search
 			</table>
 		</div>
 		<ul class="common_pager clearfix">
-			{{$list_pager->links()}}
+			@if(isset($list_pager))
+				{{$list_pager->links()}}
+			@endif
 			<li class="pager_sort_order">
 				{{Form::select('sort', Config::get('const.search_series_sort'), isset($inputs['sort']) ? $inputs['sort'] : '', array('class' => 'w_max change_select', 'data-target-dom' => 'sort_order_up', 'id' => 'sort_order_down'))}}
 			</li>

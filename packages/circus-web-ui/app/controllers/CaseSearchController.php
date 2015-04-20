@@ -56,7 +56,7 @@ class CaseSearchController extends BaseController {
 		//Search button is pressed during
 		} else if (array_key_exists ('btnSearch', $inputs) !== false) {
 			if (array_key_exists('disp', $inputs) === false) $inputs['disp'] = Config::get('const.page_display');
-			if (array_key_exists('sort', $inputs) === false) $inputs['sort'] = 'updateTime';
+			if (array_key_exists('sort', $inputs) === false) $inputs['sort'] = 'updateTime,desc';
 			Session::put('case.search', $inputs);
 		} else if (array_key_exists('page', $inputs) !== false) {
 			$tmp = Session::get('case.search');
@@ -66,12 +66,12 @@ class CaseSearchController extends BaseController {
 			$detail_search_session = Session::get('case_detail_search');
 			$detail_search = $detail_search_session[$inputs['condition_id']];
 			if (array_key_exists('mongo_data', $detail_search) !== false) {
-				$file_path = storage_path()."/saves/".Auth::user()->userID.'_case_'.($inputs['condition_id']+1).'.json';
+				$file_path = storage_path('saves')."/".Auth::user()->userID.'_case_'.($inputs['condition_id']+1).'.json';
 				$handle = fopen($file_path, 'r');
 				$detail_search['mongo_search_data'] = fread($handle, filesize($file_path));
 			}
 			$detail_search['disp'] = Config::get('const.page_display');
-			$detail_search['sort'] = 'updateTime';
+			$detail_search['sort'] = 'updateTime,desc';
 			Session::put('case.search', $detail_search);
 		}
 	}
@@ -86,16 +86,10 @@ class CaseSearchController extends BaseController {
 
 		//Input value acquisition
 		$inputs = Input::all();
-		Log::debug('入力値');
-		Log::debug($inputs);
-
 		try {
 			$this->setSearchData($inputs);
 
 			$search_data = Session::get('case.search');
-			Log::debug('検索条件::');
-			Log::debug($search_data);
-
 			if ($search_data) {
 				$search_flg = true;
 				$result['list'] = ClinicalCase::getCaseList($search_data);
@@ -127,9 +121,6 @@ class CaseSearchController extends BaseController {
 
 		//Input value acquisition
 		$inputs = Input::all();
-
-		Log::debug('保存入力値::');
-		Log::debug($inputs);
 
 		//I want to save your search criteria in the session
 		if (Session::has('case_detail_search')) {

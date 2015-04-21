@@ -64,7 +64,7 @@ var isExportRun = function(validate_flag) {
 
 	if (validate_flag) {
 		if (!validateExport()) {
-			closeDuringExportDialog('Please select the label one or more .');
+			closeDuringExportDialog('Please select at least one label.');
 			return false;
 		}
 	}

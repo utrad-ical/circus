@@ -101,7 +101,7 @@ class CaseExportController extends BaseController {
 		if (($inputs['data_type'] == ClinicalCase::DATA_TYPE_LABEL ||
 			$inputs['data_type'] == ClinicalCase::DATA_TYPE_ORIGINAL_LABEL) &&
 			!array_key_exists('labels', $inputs))
-			throw new Exception('Please select the label one or more .');
+			throw new Exception('Please select at least one label.');
 
 		$case_info = ClinicalCase::find($inputs['caseID']);
 		//case not found

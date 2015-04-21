@@ -12,8 +12,7 @@
       color_marker: 0,
       defaultColorSet: ['#FF0000', '#FFCC00', '#0033FF', '#0099FF', '#00CCFF',
         '#00FFFF', '#00FF00', '#00CC00', '#009900', '#006600', '#FF6600',
-        '#FF3300', '#3333CC', '#CC3399', '#CC6666', '#FF9999'
-      ],
+        '#FF3300', '#3333CC', '#CC3399', '#CC6666', '#FF9999'],
       defaultLabelAttribute: {},
       mode: 'pan', //pan,pen,erase,window
       series: [{
@@ -1077,12 +1076,14 @@
       var tmp_input_memo = window.prompt('input Memo', controllerInfo.memo);
       if (tmp_input_memo) {
         save_data.memo = tmp_input_memo;
-        //console.log(save_data);
-        //console.log("URL::");
-        //console.log(controllerInfo.postUrl);
-        //console.log(save_data);
-        $.ajax({
-          url: controllerInfo.postUrl,
+      } 
+
+      //console.log(save_data);
+      //console.log("URL::");
+      //console.log(controllerInfo.postUrl);
+      //console.log(save_data);
+      $.ajax({
+        url: controllerInfo.postUrl,
           type: 'post',
           data: {
             data: save_data
@@ -1092,14 +1093,13 @@
             alert('通信に失敗しました');
           },
           success: function(response) {
-            var revisionRes = getRevisionList();
-            if (revisionRes) alert(response.message);
-            else alert('Failed to get revision information .');
+           var revisionRes = getRevisionList();
+           if (revisionRes) alert(response.message);
+           else alert('Failed to get revision information .');
           }
-        });
-      } else {
-        //キャンセル時
-      }
+      });
+
+
       return false;
     },
 

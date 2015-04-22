@@ -223,8 +223,10 @@ class ClinicalCase extends BaseModel {
 			if ($idx === intval($search_data['revisionNo'])) {
 				foreach($revision['series'] as $series) {
 					if ($series['seriesUID'] === $search_data['seriesUID']) {
-						foreach ($series['labels'] as $label) {
-							$label_list[] = $label['id'];
+						if (array_key_exists('labels', $series)) {
+							foreach ($series['labels'] as $label) {
+								$label_list[] = $label['id'];
+							}
 						}
 					}
 				}

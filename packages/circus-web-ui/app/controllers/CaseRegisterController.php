@@ -321,8 +321,7 @@ class CaseRegisterController extends BaseController {
 			$series_info = Series::find($key);
 			$series[] = array(
 				'seriesUID'	=>	$key,
-				'images'	=>	$series_info->images//,
-		//		'labels'	=>	array()
+				'images'	=>	$series_info->images
 			);
 		}
 		$revision['series'] = $series;

@@ -1,5 +1,5 @@
 <div id="dialog" title="Downloading..." style="display: none;">
-  <p>
+  <p class="mar_10">
       Preparing for download ...
   </p>
   <div id="progressbar"></div>

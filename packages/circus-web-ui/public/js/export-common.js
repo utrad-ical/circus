@@ -80,6 +80,7 @@ $(function() {
 		autoOpen: false,
 		closeOnEscape: false,
 		closeText:"",
-		height:100
+		height:80,
+		maxWidth:false
 	});
 });

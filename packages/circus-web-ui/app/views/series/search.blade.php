@@ -30,12 +30,12 @@
 			//Add a hidden element so do a search
 			var sort = $("select[name='sort']").val();
 			var disp = $("select[name='disp']").val();
+			var order_by = $("select[name='order_by']").val();
 			//display_num または Sort Order指定時は検索は行わない
 			if (sort.length && disp.length) {
-				var sort_elm = $("<input>", {type:"hidden", name:"sort", value:sort});
-				$('#form_search').append(sort_elm);
-				var disp_elm = $("<input>", {type:"hidden", name:"disp", value:disp});
-				$('#form_search').append(disp_elm);
+				setHiddenParams('form_search', 'sort', sort);
+				setHiddenParams('form_search', 'disp', disp);
+				setHiddenParams('form_search', 'order_by', order_by);
 				//Event firing
 				$('#btn_submit').trigger('click');
 			}
@@ -223,6 +223,9 @@ Series Search
 				@if(isset($list_pager))
 					{{$list_pager->links()}}
 				@endif
+				<li class="pager_sort_order_by">
+					{{Form::select('order_by', Config::get('const.search_sort'), isset($inputs['order_by']) ? $inputs['order_by'] : '', array('class' => 'w_max change_select'))}}
+				</li>
 				<li class="pager_sort_order">
 					{{Form::select('sort', Config::get('const.search_series_sort'), isset($inputs['sort']) ? $inputs['sort'] : '', array('class' => 'w_max change_select', 'data-target-dom' => 'sort_order_down', 'id' => 'sort_order_up'))}}
 				</li>
@@ -291,17 +294,6 @@ Series Search
 				@endif
 			</table>
 		</div>
-		<ul class="common_pager clearfix">
-			@if(isset($list_pager))
-				{{$list_pager->links()}}
-			@endif
-			<li class="pager_sort_order">
-				{{Form::select('sort', Config::get('const.search_series_sort'), isset($inputs['sort']) ? $inputs['sort'] : '', array('class' => 'w_max change_select', 'data-target-dom' => 'sort_order_up', 'id' => 'sort_order_down'))}}
-			</li>
-			<li class="pager_disp_num">
-				{{Form::select('disp', Config::get('const.search_display'), isset($inputs['disp']) ? $inputs['disp'] : '', array('class' => 'w_max change_select', 'data-target-dom' => 'display_num_up', 'id' => 'display_num_down'))}}
-			</li>
-		</ul>
 	{{Form::close()}}
 	{{Form::open(['url' => asset('series/detail'), 'method' => 'post', 'class' => 'frm_series_detail'])}}
 		{{Form::hidden('seriesUID', '', array('class' => 'series_detail_seriesUID'))}}

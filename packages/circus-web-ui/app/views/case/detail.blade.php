@@ -412,7 +412,7 @@ id="page_case_detail"
 		<div class="info_area">
 			<p class="pad_10">
 				{{$case_detail->patientInfoCache['patientName']}} ({{$case_detail->patientInfoCache['patientID']}})
-				<br>{{$case_detail->patientInfoCache['birthDate']}} {{$case_detail->patientInfoCache['sex']}}
+				<br>{{$case_detail->patientInfoCache['birthDate']}} {{CommonHelper::getSex($case_detail->patientInfoCache['sex'])}}
 			</p>
 		</div>
 	</div>

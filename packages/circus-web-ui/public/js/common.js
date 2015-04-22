@@ -109,3 +109,15 @@ var zeroFormat = function (input, width) {
     return input;
   }
 };
+
+
+var setHiddenParams = function (parent_id, elm_name, val) {
+	var elm = $('#'+parent_id).find("input[name='"+elm_name+"']");
+
+	if (!elm[0]) {
+		elm = $("<input>", {type:"hidden", name:elm_name, value:val});
+		$('#'+parent_id).append(elm);
+	} else {
+		$('#'+parent_id).find("input[name='"+elm_name+"']").val(val);
+	}
+};

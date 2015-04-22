@@ -29,6 +29,9 @@ class CaseSearchController extends BaseController {
 												$result['list']->toArray(),
 												$list_count,
 												$search_data['disp']);
+				$search_data['case_attributes'] = json_encode(
+													$this->getProjectCaseAttribute(json_decode($search_data['project'], true))
+												  );
 			} else {
 				$search_data['project'] = json_encode("");
 				$search_data['search_mode'] = 0;
@@ -100,6 +103,9 @@ class CaseSearchController extends BaseController {
 					$result['list_pager'] = Paginator::make($result['list']->toArray(),
 															$list_count,
 															$search_data['disp']);
+				$search_data['case_attributes'] = json_encode(
+													$this->getProjectCaseAttribute(json_decode($search_data['project'], true))
+												  );
 			}
 			$result['search_flg'] = $search_flg;
 			$result['inputs'] = $search_data;
@@ -156,5 +162,41 @@ class CaseSearchController extends BaseController {
 		header('Content-Type: application/json; charset=UTF-8');
 		$res = json_encode(array('result' => true, 'message' => $msg));
 		echo $res;
+	}
+
+	/**
+	 * プロジェクトに紐づくCase Attributeを取得する(Json)
+	 */
+	public function get_case_attribute() {
+		$inputs = Input::all();
+		try {
+			if (!array_key_exists('projectID', $inputs))
+				throw new Exception('Please specify the project .');
+
+			$case_attr = $this->getProjectCaseAttribute(array($inputs['projectID']));
+			return Response::json(['status' => 'OK', 'case_attr' => $case_attr]);
+		} catch (Exception $e) {
+			return Response::json(['status' => 'NG', 'message' => $e->getMessage()]);
+		}
+	}
+
+	/**
+	 * get the caseAttributesScheme of the project
+	 * @param Json $projects selected projects
+	 * @return Json the createAttributesSchema of the project
+	 */
+	private function getProjectCaseAttribute($projects) {
+		if (count($projects) === 1) {
+			$project = Project::find(intval($projects[0]));
+			if ($project->caseAttributesSchema) {
+				$case_attr = $project->caseAttributesSchema;
+				foreach ($case_attr as $key => $val) {
+					$case_attr[$key]['key'] = 'latestRevision.attributes.'.$val['key'];
+				}
+				return $case_attr;
+			}
+
+		}
+		return;
 	}
 }

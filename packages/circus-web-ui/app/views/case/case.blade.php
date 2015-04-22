@@ -4,6 +4,9 @@
 			@if (isset($list_pager))
 				{{$list_pager->links()}}
 			@endif
+			<li class="pager_sort_order_by">
+				{{Form::select('order_by', Config::get('const.search_sort'), isset($inputs['order_by']) ? $inputs['order_by'] : '', array('class' => 'w_max change_select'))}}
+			</li>
 			<li class="pager_sort_order">
 				{{Form::select('sort', Config::get('const.search_case_sort'), isset($inputs['sort']) ? $inputs['sort'] : '', array('class' => 'w_max change_select'))}}
 			</li>
@@ -74,13 +77,13 @@
 				//Add a hidden element so do a search
 				var sort = $("select[name='sort']").val();
 				var disp = $("select[name='disp']").val();
+				var order_by = $("select[name='order_by']").val();
 
 				//display_num または Sort Order指定時は検索は行わない
 				if (sort.length && disp.length) {
-					var sort_elm = $("<input>", {type:"hidden", name:"sort", value:sort});
-					$('#form_case_search').append(sort_elm);
-					var disp_elm = $("<input>", {type:"hidden", name:"disp", value:disp});
-					$('#form_case_search').append(disp_elm);
+					setHiddenParams('form_case_search', 'sort', sort);
+					setHiddenParams('form_case_search', 'disp', disp);
+					setHiddenParams('form_case_search', 'order_by', order_by);
 					//Event firing
 					$('#btn_submit').trigger('click');
 				}

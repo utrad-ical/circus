@@ -52,7 +52,8 @@ class SeriesSearchController extends BaseController {
 		//Search button is pressed during
 		} else if (array_key_exists('btnSearch', $inputs) !== false) {
 			if (array_key_exists('disp', $inputs) === false) $inputs['disp'] = Config::get('const.page_display');
-			if (array_key_exists('sort', $inputs) === false) $inputs['sort'] = 'updateTime,desc';
+			if (array_key_exists('sort', $inputs) === false) $inputs['sort'] = 'seriesDate';
+			if (array_key_exists('order_by', $inputs) === false) $inputs['order_by'] = 'desc';
 			Session::put('series.search', $inputs);
 		} else if (array_key_exists('page', $inputs) !== false) {
 			$search_data = Session::get('series.search');
@@ -62,7 +63,8 @@ class SeriesSearchController extends BaseController {
 			$search_data = Session::get('series_detail_search');
 			$detail_search = $search_data[$inputs["condition_id"]];
 			$detail_search['disp'] = Config::get('const.page_display');
-			$detail_search['sort'] = 'updateTime,desc';
+			$detail_search['sort'] = 'seriesDate';
+			$detail_search['order_by'] = 'desc';
 			Session::put('series.search', $detail_search);
 		}
 	}

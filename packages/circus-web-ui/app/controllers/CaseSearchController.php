@@ -56,7 +56,8 @@ class CaseSearchController extends BaseController {
 		//Search button is pressed during
 		} else if (array_key_exists ('btnSearch', $inputs) !== false) {
 			if (array_key_exists('disp', $inputs) === false) $inputs['disp'] = Config::get('const.page_display');
-			if (array_key_exists('sort', $inputs) === false) $inputs['sort'] = 'updateTime,desc';
+			if (array_key_exists('sort', $inputs) === false) $inputs['sort'] = 'updateTime';
+			if (array_key_exists('order_by', $inputs) === false) $inputs['order_by'] = 'desc';
 			Session::put('case.search', $inputs);
 		} else if (array_key_exists('page', $inputs) !== false) {
 			$tmp = Session::get('case.search');
@@ -71,7 +72,8 @@ class CaseSearchController extends BaseController {
 				$detail_search['mongo_search_data'] = fread($handle, filesize($file_path));
 			}
 			$detail_search['disp'] = Config::get('const.page_display');
-			$detail_search['sort'] = 'updateTime,desc';
+			$detail_search['sort'] = 'updateTime';
+			$detail_search['order_by'] = 'desc';
 			Session::put('case.search', $detail_search);
 		}
 	}

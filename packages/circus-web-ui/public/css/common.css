@@ -67,6 +67,7 @@ a:hover{text-decoration:none;}
 .pager_btn a:hover{border-color:#FD3164;}
 .common_pager .pager_btn.current_page{background:#000; border:1px solid #fff; color:#fff; padding:0 10px;}
 .common_pager .pager_disp_num,
+.common_pager .pager_sort_order_by,
 .common_pager .pager_sort_order{width:120px; float:right; margin-left:5px;}
 
 .common_table{width:100%; margin:0 auto; border-collapse: collapse;}

@@ -58,7 +58,8 @@ class RevisionController extends BaseController {
 	function getRevisionInfo($key, $value) {
 		$label_cnt = 0;
 		foreach ($value['series'] as $rec) {
-			$label_cnt += count($rec['labels']);
+			if (array_key_exists('labels', $rec))
+				$label_cnt += count($rec['labels']);
 		}
 		$w = CommonHelper::getWeekDay(date('w', $value['date']->sec));
 

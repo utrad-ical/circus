@@ -103,7 +103,7 @@ class LabelRegisterController extends BaseController {
 		return array(
 			'date'			=>	$dt,
 			'creator'		=>	Auth::user()->userID,
-			'description'	=>	$inputs['memo'],
+			'description'	=>	isset($inputs['memo']) ? $inputs['memo'] : '',
 			'attributes'	=>	$save_attribute,
 			'status'		=>	'draft',
 			'series'		=>	$series_list
@@ -118,11 +118,14 @@ class LabelRegisterController extends BaseController {
 	 * @since 2015/03/20
 	 */
 	function createSeriesList($series_id, $labels = array()) {
-		return array(
+		$series_list = array(
 			'seriesUID'	=>	$series_id,
-			'images'	=>	Series::getImages($series_id),
-			'labels'	=>	$labels
+			'images'	=>	Series::getImages($series_id)
 		);
+		if ($labels)
+			$series_list['lables'] = $labels;
+
+		return $series_list;
 	}
 
 	/**

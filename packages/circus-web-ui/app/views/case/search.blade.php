@@ -15,26 +15,39 @@
 @if (isset($inputs['mongo_search_data']))
 <script>
 	var detail_keys = {{$inputs['mongo_search_data']}};
+	var filter_set_flag = false;
+	var keys = {{$inputs['case_attributes']}};
 </script>
 @endif
 <script>
-var multi_selected_item = {{$inputs['project']}};
+	var filter = $('#search_condition').filtereditor();
+	var multi_selected_item = {{$inputs['project']}};
+	var getSelectedProjectIds = function() {
+		var selected_project_id;
+		var selected_cnt = 0;
+		var project_ids = $(".select_project option:selected");
+		for (var i = 0; i < project_ids.length; i++) {
+			selected_project_id = project_ids[i].value;
+			selected_cnt++;
+		}
+		return {'cnt':selected_cnt, 'id':selected_project_id};
+	}
 	$(function() {
-		// Initialization parameter
-		var keys = {{Helper\ConfigHelper::getDetailSearchConfig()}};
-
-		var filter = $('#search_condition')
-		.filtereditor({keys: keys})
-		.on('filterchange', function () {
-			var data;
-			if (typeof detail_keys != 'undefined') {
-				data = filter.filtereditor('option', 'filter', detail_keys);
-			} else {
-				data = filter.filtereditor('option', 'filter');
-				var node = JSON.stringify(data, null, '  ');
-			}
-		});
-		filter.trigger('filterchange');
+        // Initialization parameter
+        if (typeof keys != 'undefined') {
+        	filter = $('#search_condition')
+	        .filtereditor({keys: keys})
+	        .on('filterchange', function () {
+	            var data;
+	            if (typeof detail_keys != 'undefined') {
+	                data = filter.filtereditor('option', 'filter', detail_keys);
+	            } else {
+	                data = filter.filtereditor('option', 'filter');
+	                var node = JSON.stringify(data, null, '');
+	            }
+	        });
+	        filter.trigger('filterchange');
+        }
 
 		//Save Settings depression during treatment
 		$('#save-button').click(function(){
@@ -80,13 +93,9 @@ var multi_selected_item = {{$inputs['project']}};
 			if (search_mode == 1) {
 				var mongo_val = filter.filtereditor('exportMongo');
 				var tmp_mongo_data = {"name":"mongo_data","value" : JSON.stringify(mongo_val)};
-				if (btnName == "btnSave") {
-					var mongo_search_val = filter.filtereditor('option', 'filter');
-					var tmp_mongo_search_data = {"name":"mongo_search_data","value" : JSON.stringify(mongo_search_val)};
-					tmp_ary_data= [tmp_mongo_data, tmp_project_data,tmp_action_btn_data,tmp_search_mode_data, tmp_mongo_search_data];
-				} else {
-					tmp_ary_data= [tmp_mongo_data, tmp_project_data,tmp_action_btn_data,tmp_search_mode_data];
-				}
+				var mongo_search_val = filter.filtereditor('option', 'filter');
+				var tmp_mongo_search_data = {"name":"mongo_search_data","value" : JSON.stringify(mongo_search_val)};
+				tmp_ary_data= [tmp_mongo_data, tmp_project_data,tmp_action_btn_data,tmp_search_mode_data, tmp_mongo_search_data];
 
 				$.each(form_data, function(key, val) {
 					if (val["name"] == "sort" || val["name"] == "disp")
@@ -133,6 +142,55 @@ var multi_selected_item = {{$inputs['project']}};
 				}
 			});
 		}
+
+		$('.select_project').change(function(){
+			filter_set_flag = false;
+			$('#search_condition').empty();
+			var select_projects = getSelectedProjectIds();
+
+			//選択されているプロジェクトが1つの場合のみプロジェクトに設定されているケースAttribute情報を取得する
+			if (select_projects['cnt'] === 1) {
+				var post_data = {'projectID':select_projects['id']};
+				$.ajax({
+					url: "{{{asset('get_case_attribute')}}}",
+					type: 'POST',
+					data: post_data,
+					dataType: 'json',
+					error: function(){
+						alert('I failed to communicate.');
+					},
+					success: function(res){
+						if (res.status === "OK") {
+							var keys = res.case_attr;
+							if (keys != "") {
+								filter_set_flag = true;
+
+								filter = $('#search_condition')
+								.filtereditor({keys: keys})
+								.on('filterchange', function () {
+									var data;
+
+									if (typeof detail_keys != 'undefined') {
+										data = filter.filtereditor('option', 'filter', detail_keys);
+									} else {
+										data = filter.filtereditor('option', 'filter');
+										var node = JSON.stringify(data, null, '');
+									}
+								});
+
+								filter.trigger('filterchange');
+							}
+						} else {
+							$('#search_condition').append(res.message);
+						}
+					}
+				});
+			} else if (select_projects['cnt'] > 1) {
+				$('#search_condition').append('Detail Search selection of the project can only when one .');
+			} else {
+				$('#search_condition').append('Please specify the project .');
+			}
+		});
 	});
 </script>
 @stop
@@ -163,7 +221,7 @@ Case Search
 					<tr>
 						<th>project ID</th>
 						<td colspan="3">
-							{{Form::select('project', $project_list, isset($inputs['project']) ? $inputs['project'] : null, array('class' => 'multi_select', 'multiple' => 'multiple'))}}
+							{{Form::select('project', $project_list, isset($inputs['project']) ? $inputs['project'] : null, array('class' => 'multi_select select_project', 'multiple' => 'multiple'))}}
 						</td>
 					</tr>
 				</tbody>

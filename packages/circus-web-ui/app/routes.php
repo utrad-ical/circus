@@ -29,8 +29,15 @@ Route::resource('api/preference', 'UserPreferenceApiController');
 
 //Case
 Route::group(['before' => 'auth'], function() {
-	Route::post('home', 'TopController@getIndex');
-	Route::get('home', 'TopController@getIndex');
+
+	$staticView = function($uri, $view = null) {
+		if (is_null($view)) $view = $uri;
+		Route::any($uri, function() use($view) {
+			return View::make($view);
+		});
+	};
+
+	$staticView('home');
 
 	Route::get('case/search', 'CaseSearchController@search');
 	Route::post('case/search', 'CaseSearchController@search');
@@ -41,7 +48,7 @@ Route::group(['before' => 'auth'], function() {
 	Route::post('case/complete', 'CaseRegisterController@register');
 	Route::get('case/complete', 'CaseRegisterController@complete');
 
-//Case (for Ajax)
+	//Case (for Ajax)
 	Route::any('case/search_result', 'CaseSearchController@search_ajax');
 	Route::any('case/save_search', 'CaseSearchController@save_search');
 	Route::any('case/save_label', 'LabelRegisterController@save_label');
@@ -68,14 +75,12 @@ Route::group(['before' => 'auth'], function() {
 		return CommonHelper::downloadZip(storage_path('cache').'/'.$inputs['dir_name'], $inputs['file_name']);
 	});
 
-	// Individual Administration pages
+	// Administration
+	$staticView('admin', 'admin.index');
 	Route::get('administration/{adminkind}', 'AdministrationController@index')
 		 ->where('adminkind', '^(user|group|storage|project)$');
 
-	// Management screen
-	Route::get('admin', 'AdminController@getIndex');
-	// Preference
-	Route::get('preference', 'UserPreferenceController@index');
+	$staticView('preference');
 });
 
 //test用

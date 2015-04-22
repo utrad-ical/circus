@@ -108,6 +108,8 @@ class CaseDetailController extends BaseController {
 	function getRevisionInfo($key, $value) {
 		$label_cnt = 0;
 		foreach ($value['series'] as $rec) {
+			if (!array_key_exists('labels', $rec))
+				break;
 			$label_cnt += count($rec['labels']);
 		}
 		$w = CommonHelper::getWeekDay(date('w', $value['date']->sec));
@@ -208,28 +210,30 @@ class CaseDetailController extends BaseController {
 				$series_info['window']['preset'] = $presets;
 
 			$label_list = array();
-			foreach ($series['labels'] as $rec){
-				$label = array();
+			if (array_key_exists('labels', $series)) {
+				foreach ($series['labels'] as $rec){
+					$label = array();
 
-				//considers the creation label is seen when there is no name in the attributes, label sky objects
-				if ($rec){
-					$label['attribute'] = $rec['attributes'];
-					$label['id'] = $rec["id"];
+					//considers the creation label is seen when there is no name in the attributes, label sky objects
+					if ($rec){
+						$label['attribute'] = $rec['attributes'];
+						$label['id'] = $rec["id"];
 
-					//Label information acquisition
-					if ($rec['id']) {
-						$label_info = Label::find($rec['id']);
-						$label['size'] = array($label_info->w, $label_info->h, $label_info->d);
-						$label['offset'] = array($label_info->x, $label_info->y, $label_info->z);
+						//Label information acquisition
+						if ($rec['id']) {
+							$label_info = Label::find($rec['id']);
+							$label['size'] = array($label_info->w, $label_info->h, $label_info->d);
+							$label['offset'] = array($label_info->x, $label_info->y, $label_info->z);
 
-						//Storage information acquisition
-						$storage_info = Storage::find($label_info->storageID);
-						$storage_path = $storage_info->path;
-						$img_path = file_get_contents($storage_path."/".$label['id'].'.png');
-						$label['image'] = 'data:image/png;base64,'.base64_encode($img_path);
+							//Storage information acquisition
+							$storage_info = Storage::find($label_info->storageID);
+							$storage_path = $storage_info->path;
+							$img_path = file_get_contents($storage_path."/".$label['id'].'.png');
+							$label['image'] = 'data:image/png;base64,'.base64_encode($img_path);
+						}
 					}
+					$series_info['label'][] = $label;
 				}
-				$series_info['label'][] = $label;
 			}
 			$data[] = $series_info;
 		}

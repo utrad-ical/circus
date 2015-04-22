@@ -11,23 +11,13 @@
 |
 */
 
-//Login / logout
-Route::get('/', function(){return Redirect::to('login');});
+// Login / logout
+Route::get('/', function() { return Redirect::to('login'); });
 Route::get('login', 'LoginController@getIndex');
 Route::post('login', 'LoginController@login');
 Route::get('logout', 'LoginController@logout');
 
-// APIs
-Route::resource('api/user', 'UserApiController');
-Route::resource('api/group', 'GroupApiController');
-Route::resource('api/storage', 'StorageApiController');
-Route::resource('api/project', 'ProjectApiController');
-Route::put('api/storage/setactive/{storageID}', 'StorageApiController@setActive');
-Route::resource('api/preference', 'UserPreferenceApiController');
 
-
-
-//Case
 Route::group(['before' => 'auth'], function() {
 
 	$staticView = function($uri, $view = null) {
@@ -79,8 +69,15 @@ Route::group(['before' => 'auth'], function() {
 	$staticView('admin', 'admin.index');
 	Route::get('administration/{adminkind}', 'AdministrationController@index')
 		 ->where('adminkind', '^(user|group|storage|project)$');
+	Route::resource('api/user', 'UserApiController');
+	Route::resource('api/group', 'GroupApiController');
+	Route::resource('api/storage', 'StorageApiController');
+	Route::resource('api/project', 'ProjectApiController');
+	Route::put('api/storage/setactive/{storageID}', 'StorageApiController@setActive');
 
+	// Preference
 	$staticView('preference');
+	Route::resource('api/preference', 'UserPreferenceApiController');
 });
 
 //test用
@@ -92,8 +89,6 @@ Route::get('case/save_label', function(){
 	$result['url'] = '/case/save_label';
 	return View::make('/sample/sample', $result);
 });
-
-
 
 //404 pages
 Event::listen('404', function()

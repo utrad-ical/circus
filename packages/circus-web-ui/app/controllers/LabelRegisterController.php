@@ -123,7 +123,7 @@ class LabelRegisterController extends BaseController {
 			'images'	=>	Series::getImages($series_id)
 		);
 		if ($labels)
-			$series_list['lables'] = $labels;
+			$series_list['labels'] = $labels;
 
 		return $series_list;
 	}

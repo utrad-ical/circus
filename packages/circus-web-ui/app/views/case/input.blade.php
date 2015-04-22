@@ -3,6 +3,7 @@
 @section('page_css')
 {{HTML::style('css/ui-lightness/jquery-ui-1.10.4.custom.min.css')}}
 {{HTML::style('css/page.css')}}
+{{HTML::style('css/page_lib.css')}}
 @stop
 
 @section('page_js')
@@ -104,10 +105,10 @@ id="page_case_input"
 				<td colspan="3">
 					<p>Please correct the order of the series.</p>
 					<div id="series_order_wrap" class="w_500">
-						<ul class="ui-sortable">
+						<ul class="ui-sortable disp_series_list">
 							@foreach($series_list as $key => $value)
 								<li class="ui-state-dafault">{{$value}}
-									<input type="hidden" value="{{$key}}" name="series[]">
+									<input type="hidden" value="{{$key}}" name="series[]" class="series_labels">
 								</li>
 							@endforeach
 						</ul>

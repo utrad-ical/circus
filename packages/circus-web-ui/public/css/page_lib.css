@@ -175,10 +175,15 @@
 #page_series_detail .info_area{background:#ddd;}
 #page_series_detail .info_area .elm_name{width:120px; float:left; font-weight:bold;}
 #page_series_detail .info_area .elm_value{width:350px; float:right;}
-#page_series_detail .info_area li:after {  content: ".";     display: block;     height: 0;     clear: both;     visibility: hidden;  }  
-#page_series_detail .info_area li { display: inline-table; }  
-/* Hides from IE-mac \*/  
-* html #page_series_detail .info_area li { height: 1%; }  
-#page_series_detail .info_area li { display: block; }  
-/* End hide from IE-mac */ 
+#page_series_detail .info_area li:after {  content: ".";     display: block;     height: 0;     clear: both;     visibility: hidden;  }
+#page_series_detail .info_area li { display: inline-table; }
+
+/*case input*/
+#series_order_wrap .disp_series_list li{background:#eee; margin-bottom:2px; cursor:pointer;margin-right:5px;}
+#series_order_wrap .disp_series_list label{display:block; padding:5px;}
+
+/* Hides from IE-mac \*/
+* html #page_series_detail .info_area li { height: 1%; }
+#page_series_detail .info_area li { display: block; }
+/* End hide from IE-mac */
 

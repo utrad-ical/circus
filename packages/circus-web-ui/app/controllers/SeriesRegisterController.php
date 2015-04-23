@@ -1,130 +1,83 @@
 <?php
-class ZipException extends \Exception{
-}
+
 /**
- * シリーズ登録
+ * Series registration controller
  */
 class SeriesRegisterController extends BaseController {
 	/**
 	 * Series registration screen
 	 */
-	function input(){
-		return View::make('series.input');
+	public function import()
+	{
+		return View::make('series.input')
+			->with('max_filesize', ini_get('upload_max_filesize'));
 	}
 
 	/**
-	 * Series registration
+	 * Actual registration (AJAX)
 	 */
-	function register(){
-		//POST data acquisition
-		$inputs = Input::all();
-
+	public function register()
+	{
 		try {
-			//delete temporary files
+			// delete old temporary files
 			CommonHelper::deleteOlderTemporaryFiles(storage_path('uploads'), true, '-1 day');
 
-			//Not selected file
-			if (array_key_exists('upload_file', $inputs) === false)
-				throw new Exception('Please select the file.');
+			// Acquire information on the upload files
+			$uploads = Input::file('files');
+			if (!is_array($uploads)) throw new Exception('Upload files not specified.');
 
-			//Upload file information acquisition
-			$uploads = Input::file('upload_file');
-			$file_list = array();
-
+			$targets = array();
 			$auth_sess_key = Auth::getSession()->getId();
+			$tmp_dir = storage_path('uploads/' . $auth_sess_key);
+
 			foreach ($uploads as $upload) {
-
-				$res = $upload->move(storage_path('uploads/'.$auth_sess_key)."/", $upload->getClientOriginalName());
-
-				//If extension of Zip to save unzip
-				$ext = $upload->getClientOriginalExtension();
-
-				if ($ext == 'zip'){
-					$file_list[] = $this->thawZip($upload->getClientOriginalName(), $errorMsg);
-					if ($errorMsg)
-						throw new ZipException($errorMsg);
+				$ext = strtolower($upload->getClientOriginalExtension());
+				$target = "$tmp_dir/" . $upload->getClientOriginalName();
+				if ($ext == 'zip') {
+					// Extract the zip file into a temp dir and import it later
+					$this->thawZip($upload, $target);
+					$targets[] = $target;
 				} else {
-					//image:import
-					$file_list[] = storage_path('uploads/'.$auth_sess_key)."/".$upload->getClientOriginalName();
+					// Import a single DICOM file
+					$upload->move($tmp_dir, $upload->getClientOriginalName());
+					$targets[] = $target;
 				}
 			}
-			//Dicomファイルインポート
-			foreach ($file_list as $file_path) {
-				Artisan::call('image:import', array("path" => $file_path));
+			// invoke artisan command to import files
+			foreach ($targets as $target) {
+				Log::debug(['IMPORT', $target]);
+				Artisan::call('image:import', array('path' => $target, '--recursive' => true));
 			}
 
-			return Redirect::to('series/complete')
-			               ->with('msg', 'Registration of series information is now complete.');
-		} catch (ZipException $e) {
-			Log::debug('[ZipException]');
-			Log::debug($e);
-			return $this->errorFinish($e->getMessage());
-		} catch (InvalidModelException $e) {
-			Log::debug('[InvalidModelException]');
-			Log::debug($e);
-			return $this->errorFinish($e->getErrors());
+			Session::forget('edit_case_id'); // TODO: Do we really need this?
+
+			return Response::json(array(
+				'result' => true,
+				'targets' => $targets
+			));
 		} catch (Exception $e) {
-			Log::debug('[Exception]');
-			Log::debug($e);
-			return $this->errorFinish($e->getMessage());
+			Log::info('[' . get_class($e) . ']');
+			Log::info($e);
+			return Response::json(
+				array('result' => false, 'errorMessage' => $e->getMessage()),
+				400
+			);
 		}
 	}
 
 	/**
-	 * Zipを解凍し保存する
-	 * @param $file ZIPファイル名
-	 * @param $error_msg エラーメッセージ
-	 * @return Zip解凍フォルダパス
-	 * @author stani
-	 * @since 2015/03/20
+	 * Extract a zip file.
+	 * @param string $file Path to zip file
+	 * @return string Extracted folder path
 	 */
-	function thawZip($file, &$error_msg) {
-		try {
-			$auth_sess_key = Auth::getSession()->getId();
-			$zip = new ZipArchive();
-			//Zip file open
-			$zip_path = storage_path('uploads/'.$auth_sess_key)."/".$file;
-			$res = $zip->open($zip_path);
-
-			//Successful Zip file open
-			if ($res !== true)
-				throw new Exception("Upload Failed.[Error Code ".$res."]");
-
-			//To save Unzip all the files in the Zip file
-			//Unzip the folder name I keep the file name
-			$zip->extractTo(storage_path('uploads'));
-			//Zip file close
-			$zip->close();
-
-			//Zip解凍フォルダパスを格納
-			return mb_substr($zip_path, 0, mb_strlen($zip_path)-4);
-		} catch (Exception $e) {
-			$error_msg = $e->getMessage();
-		}
+	protected function thawZip($file, $dir)
+	{
+		$zip = new ZipArchive();
+		$res = $zip->open($file);
+		if ($res !== true)
+			throw new Exception("Error while extracting the zip file. [Error Code $res]");
+		$zip->extractTo($dir);
+		$zip->close();
 	}
 
-	/**
-	 * エラー時処理
-	 * @param $errMsg エラーメッセージ
-	 * @author stani
-	 * @since 2015/03/20
-	 */
-	function errorFinish($errMsg) {
-		return View::make('series.input', array('error_msg' => $errMsg));
-	}
-
-	/**
-	 * Series registration completion screen
-	 */
-	function complete(){
-		//Session information acquisition
-		$result = array();
-		$result['msg'] = Session::get('msg');
-
-		if (Session::has('edit_case_id'))
-			Session::forget('edit_case_id');
-
-		//Screen display
-		return View::make('series.complete', $result);
-	}
 }

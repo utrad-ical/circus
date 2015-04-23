@@ -92,4 +92,4 @@ image-rendering: -webkit-optimize-speed;
 
 /*series import*/
 #page_series_import .droppable_area{background:#eee; border:1px solid #ccc; padding:40px; margin:0 100px;}
-
+#page_series_import .droppable_area.active{border-color: red;}

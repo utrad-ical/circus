@@ -39,9 +39,9 @@
                             key: 'windowPriority',
                             type: 'select',
                             spec: {options: [
-                                'dicom,preset,auto', 'dicom,auto,preset',
-                                'preset,dicom,auto', 'preset,auto,dicom',
-                                'auto,dicom,preset', 'auto,preset,dicom'
+                                'dicom,preset,auto', 'dicom,auto',
+                                'preset,dicom,auto', 'preset,auto',
+                                'auto'
                             ]}
                         },
                         {caption: 'Window Presets', key: 'windowPresets', type: 'list', spec: {

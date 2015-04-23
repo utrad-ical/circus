@@ -134,7 +134,6 @@ class CaseRegisterController extends BaseController {
 			$case_obj->incrementalID = 1; // This can be a dummy number only for validation
 			$case_obj->projectID = intval($case_info['projectID']);
 			$case_obj->patientInfoCache = $this->setPatientInfo($case_info['patientInfo']);
-			$case_obj->creator = Auth::user()->userID;
 
 			//ValidateCheck
 			$case_obj->selfValidationFails($errors);
@@ -228,7 +227,6 @@ class CaseRegisterController extends BaseController {
 				$case_obj->revisions = array($series_list);
 			}
 			$case_obj->latestRevision = $series_list;
-			$case_obj->creator = Auth::user()->userID;
 			$case_obj->save();
 
 			$result['msg'] = 'Registration of case information is now complete.';

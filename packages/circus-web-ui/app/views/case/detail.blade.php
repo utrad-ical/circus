@@ -1,7 +1,7 @@
 @extends('common.layout')
 
 @section('page_css')
-{{HTML::style('css/ui-lightness/jquery-ui-1.10.4.custom.min.css')}}
+{{HTML::style('css/jquery-ui.css')}}
 {{HTML::style('css/page_lib.css')}}
 {{HTML::style('css/jquery.simple-color-picker.css')}}
 @stop
@@ -261,7 +261,7 @@ var createLabelList = function(label_list, active_series_id) {
 		$('#exportSeriesUID').empty()
 													.append(active_series_id);
 		$('.exportSeriesUID').val(active_series_id);
-		
+
 		$('.'+parentLabelList).empty();
 		var the_insert_elm = '';
   	$.each(label_list, function(idx, val) {

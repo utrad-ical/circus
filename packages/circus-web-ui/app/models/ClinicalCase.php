@@ -10,7 +10,6 @@
  * @property array patientInfoCache Cache of Series patientInfo
  * @property array latestRevision Latest revision
  * @property array revisions List of revision
- * @property number ceator Case creater ID
  */
 class ClinicalCase extends BaseModel {
 	protected $connection = 'mongodb';
@@ -82,7 +81,6 @@ class ClinicalCase extends BaseModel {
 	 */
 	public static $revision_rules = array(
 		'date'   		=> 'mongodate',
-		'creator'  		=> 'strict_integer',
 		'description' 	=> 'strict_string',
 		'attributes'  	=> 'strict_array',
 		'status'   		=> 'strict_string',

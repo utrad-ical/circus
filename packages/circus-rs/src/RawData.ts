@@ -12,8 +12,8 @@ export module utradical.circusrs {
         public vz: number = 1;
         public wl: number = 1500;
         public ww: number = 2000;
-        public min: number = 65535;
-        public max: number = -65535;
+        public dcm_wl : number;
+        public dcm_ww : number;
         private header: any;
         private data: any[];
         private dataFlag: boolean[];
@@ -176,12 +176,13 @@ export module utradical.circusrs {
                     this.data[json.instanceNumber - 1] = voxelData;
                     this.dataFlag[json.instanceNumber - 1] = true;
 
-                    if (this.min > json.min) {
-                        this.min = json.min;
+                    if (typeof json.windowLevel != "undefined" && this.dcm_wl == null) {
+                        this.dcm_wl = json.windowLevel;
                     }
-                    if (this.max < json.max) {
-                        this.max = json.max;
+                    if (typeof json.windowWidth != "undefined" && this.dcm_ww == null) {
+                        this.dcm_ww = json.windowWidth;
                     }
+
                     //console.log('image size: ' + voxelData.length);
                 } else {
                     console.log(json.errorMessage);

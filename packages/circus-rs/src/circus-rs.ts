@@ -275,8 +275,12 @@ function doRequest(req, res)
                 response.voxel_z = raw.vz;
                 response.window_width = raw.ww;
                 response.window_level = raw.wl;
-                response.min = raw.min;
-                response.max = raw.max;
+                if (raw.dcm_ww != null) {
+                    response.window_width_dicom = raw.dcm_ww;
+                }
+                if (raw.dcm_wl != null) {
+                    response.window_level_dicom = raw.dcm_wl;
+                }
                 switch(raw.type) {
                 case 0:
                     response.window_width_min = 1;

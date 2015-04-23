@@ -6,19 +6,97 @@
 @stop
 
 @section('page_js')
+{{HTML::script('js/jquery-ui.min.js')}}
 <script>
-	$(function(){
-		$('.upload_confirm').click(function(){
-			if (window.confirm('Do you want to upload a file?')){
-				$('#frmSeriesConfirm').submit();
-			}
-			return false;
+	$(function () {
+		var fileInput = document.getElementById('files');
+		var form = document.getElementById('form');
+
+		$('#confirm').click(function () {
+			upload(fileInput.files);
 		});
 
-		$('.link_series_search').click(function(){
-			$('#frmSeriesSearch').submit();
-			return false;
-		});
+		var progress = $('#progress').progressbar().hide();
+		var progressLabel = $('#progress-label');
+
+		jQuery.event.props.push('dataTransfer');
+		$('.droppable_area')
+			.on('drop', function (event) {
+				event.preventDefault();
+				$(event.target).removeClass('active');
+				upload(event.dataTransfer.files);
+			})
+			.on('dragover', false)
+			.on('dragenter', function (event) {
+				event.preventDefault();
+				$(event.target).addClass('active');
+			}).on('dragleave dragend', function (event) {
+				$(event.target).removeClass('active');
+				event.preventDefault();
+			});
+
+		function busy(bool) {
+			if (bool) $('#message').hide();
+			$('#form .common_btn').prop('disabled', bool);
+			progress.toggle(bool);
+			progressLabel.text('');
+		}
+
+		function myXhr() {
+			var xhr = new XMLHttpRequest();
+			xhr.upload.addEventListener('progress', function (event) {
+				if (event.lengthComputable) {
+					var percentComplete = Math.round((event.loaded * 100) / event.total);
+					progress.progressbar('value', percentComplete);
+					if (event.loaded == event.total) {
+						progressLabel.text('Processing the uploaded files...');
+					}
+				}
+			}, false);
+			return xhr;
+		}
+
+		function upload(files) {
+			var num = files && files.length;
+			if (typeof num != 'number' || num <= 0) {
+				return;
+			}
+
+			var fd = new FormData();
+			var size = 0;
+
+			for (var i = 0; i < files.length; i++) {
+				fd.append('files[]', files[i]);
+				size += files[i].size;
+			}
+
+			var prompt = num >= 2 ? 'these ' + num + ' files?' : 'this file?';
+			if (!confirm('Do you want to upload ' + prompt + ' (' + size + ' bytes)')) {
+				return;
+			}
+
+			busy(true);
+			var xhr = $.ajax({
+				url: $('#form').attr('action'),
+				type: "POST",
+				data: fd,
+				processData: false,
+				contentType: false,
+				dataType: 'json',
+				xhr: myXhr,
+				success: function (data) {
+					$('#message').text('Image data was successfully imported.').show();
+					form.reset();
+					busy(false);
+				},
+				error: function (data) {
+					alert(data.responseJSON.errorMessage);
+					busy(false);
+				}
+			});
+			console.log(xhr);
+		}
+
 	});
 </script>
 @stop
@@ -36,25 +114,20 @@ id="page_series_import"
 @stop
 
 @section('content')
-{{HTML::link(asset('series/search'), 'Back to Series Search', array('class' => 'common_btn mar_b_20 link_series_search'))}}
-{{Form::open(['url' => asset('series/complete'), 'method' => 'POST', 'files' => true, 'id' => 'frmSeriesConfirm'])}}
-	<div class="droppable_area" id=""  draggable="true">
-		<p class="mar_b_10">Choose files to upload.
-			<br>You can select more than one file at a time.
-			<br>You can also drag and drop files anywhere on this gray box to start uploading.
-		</p>
-		{{Form::file('upload_file[]', array('class' => 'upload_file_input_elm', 'multiple' => 'multiple', 'id' => 'form'))}}
+	{{HTML::link(asset('series/search'), 'Back to Series Search', array('class' => 'common_btn mar_b_20'))}}
+	{{Form::open(['url' => asset('series/register'), 'id' => 'form', 'method' => 'POST', 'files' => true])}}
+	<p>Choose DICOM files to upload (Maximum size: {{{$max_filesize}}}).<br>
+		You can select more than one file at a time.<br>
+		Zipped DICOM files are also supported.</p>
+	<p class="al_c mar_b_40">
+		{{Form::file('', array('multiple' => 'multiple', 'id' => 'files'))}}
+		{{Form::button('Upload', array('id' => 'confirm', 'class' => 'common_btn'))}}
+		{{Form::reset('Reset', array('class' => 'common_btn'))}}
+	</p>
+	{{Form::close()}}
+	<div class="droppable_area" draggable="true">
+		You can also drag and drop files on this box to start uploading.
 	</div>
-	<p class="al_c">
-		{{Form::button('Save', array('class' => 'common_btn upload_confirm mar_t_20'))}}
-	</p>
-{{Form::close()}}
-{{Form::open(['url' => asset('series/search'), 'method' => 'POST', 'id' => 'frmSeriesSearch'])}}
-	{{Form::hidden('btnBack', 'btnBack')}}
-{{Form::close()}}
-@if (isset($error_msg))
-	<p class="al_c">
-		<br><span class="font_red">{{$error_msg}}</span>
-	</p>
-@endif
+	<div id="progress"><div id="progress-label"></div></div>
+	<p id="message" class="ui-state-highlight" style="display: none;"></p>
 @stop

@@ -53,8 +53,8 @@ Route::group(['before' => 'auth'], function() {
 	Route::get('series/search', 'SeriesSearchController@search');
 	Route::post('series/search', 'SeriesSearchController@search');
 	Route::post('series/detail', 'SeriesDetailController@detail');
-	Route::get('series/import', 'SeriesRegisterController@input');
-	Route::post('series/complete', 'SeriesRegisterController@register');
+	Route::get('series/import', 'SeriesRegisterController@import');
+	Route::post('series/register', 'SeriesRegisterController@register');
 	Route::get('series/complete', 'SeriesRegisterController@complete');
 
 	//Series (for Ajax)

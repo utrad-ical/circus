@@ -313,7 +313,7 @@ function makeCoronalUInt8(raw, target, window_width, window_level) {
     return buffer;
 }
 /////////////////////////////////////////////
-function makeSagitalInt16(raw, target, window_width, window_level) {
+function makeSagittalInt16(raw, target, window_width, window_level) {
     var buffer_offset = 0;
     var offset;
     var value;
@@ -328,7 +328,7 @@ function makeSagitalInt16(raw, target, window_width, window_level) {
     }
     return buffer;
 }
-function makeSagitalUInt16(raw, target, window_width, window_level) {
+function makeSagittalUInt16(raw, target, window_width, window_level) {
     var buffer_offset = 0;
     var offset;
     var value;
@@ -343,7 +343,7 @@ function makeSagitalUInt16(raw, target, window_width, window_level) {
     }
     return buffer;
 }
-function makeSagitalInt8(raw, target, window_width, window_level) {
+function makeSagittalInt8(raw, target, window_width, window_level) {
     var buffer_offset = 0;
     var offset;
     var value;
@@ -358,7 +358,7 @@ function makeSagitalInt8(raw, target, window_width, window_level) {
     }
     return buffer;
 }
-function makeSagitalUInt8(raw, target, window_width, window_level) {
+function makeSagittalUInt8(raw, target, window_width, window_level) {
     var buffer_offset = 0;
     var offset;
     var value;
@@ -476,7 +476,7 @@ function doRequest(req, res) {
                     default:
                         break;
                 }
-                response.allow_mode = ['axial', 'coronal', 'sagital'];
+                response.allow_mode = ['axial', 'coronal', 'sagittal'];
                 res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
                 res.end(JSON.stringify(response));
                 return;
@@ -537,30 +537,30 @@ function doRequest(req, res) {
                         break;
                 }
             }
-            else if (mode == 'sagital') {
-                logger.trace('sagital');
+            else if (mode == 'sagittal') {
+                logger.trace('sagittal');
                 // 横方向描画
                 out_width = raw.y;
                 out_height = raw.z;
                 switch (raw.type) {
                     case 0:
-                        buffer = makeSagitalUInt8(raw, target, window_width, window_level);
+                        buffer = makeSagittalUInt8(raw, target, window_width, window_level);
                         png = new Png(buffer, out_width, out_height, 'gray', 8);
                         break;
                     case 1:
-                        buffer = makeSagitalInt8(raw, target, window_width, window_level);
+                        buffer = makeSagittalInt8(raw, target, window_width, window_level);
                         png = new Png(buffer, out_width, out_height, 'gray', 8);
                         break;
                     case 2:
-                        buffer = makeSagitalUInt16(raw, target, window_width, window_level);
+                        buffer = makeSagittalUInt16(raw, target, window_width, window_level);
                         png = new Png(buffer, out_width, out_height, 'gray', 8);
                         break;
                     case 3:
-                        buffer = makeSagitalInt16(raw, target, window_width, window_level);
+                        buffer = makeSagittalInt16(raw, target, window_width, window_level);
                         png = new Png(buffer, out_width, out_height, 'gray', 8);
                         break;
                     default:
-                        buffer = makeSagitalInt16(raw, target, window_width, window_level);
+                        buffer = makeSagittalInt16(raw, target, window_width, window_level);
                         png = new Png(buffer, out_width, out_height, 'gray', 8);
                         break;
                 }

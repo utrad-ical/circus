@@ -84,78 +84,57 @@ class Series extends BaseModel {
 		'updateTime'			  => 'mongodate'
 	);
 
-	/**
-	 * シリーズイメージ範囲を取得する
-	 * @param String $id シリーズID
-	 * @return シリーズのイメージ範囲
-	 */
 	public static function getImages($id) {
 		$series = Series::find($id);
 		return $series ? $series->images : '';
 	}
 
-	/**
-	 * シリーズ説明を取得する
-	 * @param Stirng $id シリーズID
-	 * @return シリーズ説明
-	 */
 	public static function getSeriesDescription($id){
 		$series = self::find($id);
 		return $series ? $series->seriesDescription : '';
 	}
 
-	/**
-	 * シリーズの一覧を取得する
-	 * @param Array $ids シリーズID群
-	 * @return シリーズリスト
-	 */
 	public static function getPluralSeries($ids) {
 		return self::whereIn('seriesUID', $ids)
 				   ->get();
 	}
 
-	/**
-	 * シリーズ一覧取得
-	 * @param Array $search_data 検索条件
-	 * @return シリーズ一覧
-	 */
-	public static function getSeriesList($search_data, $count = false) {
-		$sql = self::where(function($query) use ($search_data) {
-							//seriesID Series ID
-							if ($search_data['seriesUID'])
-								$query->where('seriesUID', 'like', '%'.$search_data['seriesUID'].'%');
+	public static function getSeriesList($search_data, $count = false)
+	{
+		$sql = self::where(function ($query) use ($search_data) {
+			//seriesID Series ID
+			if ($search_data['seriesUID'])
+				$query->where('seriesUID', 'like', '%' . $search_data['seriesUID'] . '%');
 
-							if ($search_data['seriesDescription'])
-								$query->where('seriesDescription', 'like', '%'.$search_data['seriesDescription'].'%');
+			if ($search_data['seriesDescription'])
+				$query->where('seriesDescription', 'like', '%' . $search_data['seriesDescription'] . '%');
 
-							if ($search_data['patientID'])
-								$query->where('patientInfo.patientID', 'like', '%'.$search_data['patientID'].'%');
+			if ($search_data['patientID'])
+				$query->where('patientInfo.patientID', 'like', '%' . $search_data['patientID'] . '%');
 
-							if ($search_data['patientName'])
-								$query->where('patientInfo.patientName', 'like', '%'.$search_data['patientName'].'%');
+			if ($search_data['patientName'])
+				$query->where('patientInfo.patientName', 'like', '%' . $search_data['patientName'] . '%');
 
-							if ($search_data['minAge'])
-								$query->where('patientInfo.age', '>=', intval($search_data['minAge']));
+			if ($search_data['minAge'])
+				$query->where('patientInfo.age', '>=', intval($search_data['minAge']));
 
-							if ($search_data['maxAge'])
-								$query->where('patientInfo.age', '<=', intval($search_data['maxAge']));
+			if ($search_data['maxAge'])
+				$query->where('patientInfo.age', '<=', intval($search_data['maxAge']));
 
-							if ($search_data['sex'] && $search_data['sex'] !== 'all')
-								$query->where('patientInfo.sex', '=', $search_data['sex']);
-					});
-		//件数取得
-    	if ($count)
-    		return $sql->count();
+			if ($search_data['sex'] && $search_data['sex'] !== 'all')
+				$query->where('patientInfo.sex', '=', $search_data['sex']);
+		});
 
-    	//リスト取得
-    	//settings offset
-    	$offset = 0;
-    	if (isset($search_data['perPage']) && $search_data['perPage'])
-    		$offset = intval($search_data['disp'])*(intval($search_data['perPage'])-1);
+		if ($count)
+			return $sql->count();
 
-    	return $sql->orderby($search_data['sort'], $search_data['order_by'])
-    			   ->take($search_data['disp'])
-    			   ->skip($offset)
-    			   ->get();
+		$offset = 0;
+		if (isset($search_data['perPage']) && $search_data['perPage'])
+			$offset = intval($search_data['disp']) * (intval($search_data['perPage']) - 1);
+
+		return $sql->orderby($search_data['sort'], $search_data['order_by'])
+			->take($search_data['disp'])
+			->skip($offset)
+			->get();
 	}
 }

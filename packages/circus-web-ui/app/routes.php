@@ -48,6 +48,8 @@ Route::group(['before' => 'auth'], function() {
 	Route::any('get_case_attribute', 'CaseSearchController@get_case_attribute');
 
 	//Series
+	Route::get('series/search/{preset_id}', 'SeriesSearchController@search')
+		->where('preset_id', '^\\d+$');
 	Route::get('series/search', 'SeriesSearchController@search');
 	Route::post('series/search', 'SeriesSearchController@search');
 	Route::post('series/detail', 'SeriesDetailController@detail');

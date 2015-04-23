@@ -4,11 +4,6 @@
 			$(this).closest('li').find('.frm_case_detail_search').submit();
 			return false;
 		});
-
-		$('.link_series_detail_search').click(function(){
-			$(this).closest('li').find('.frm_series_detail_search').submit();
-			return false;
-		});
 	});
 </script>
 <div id="gnavi_wrap">
@@ -38,14 +33,9 @@
 			<ul>
 				<li>{{HTML::link(asset('series/search'), 'Series Search')}}</li>
 				<li>{{HTML::link(asset('series/import'), 'Series Import')}}</li>
-				@if (Session::has('series_detail_search'))
-					@foreach(Session::get('series_detail_search') as $rec_key => $rec_val)
-						<li>
-							{{HTML::link(asset('series/search'), $rec_val['save_label'], array('class' => 'link_series_detail_search'))}}
-							{{Form::open(['url' => asset('series/search'), 'method' => 'post', 'class' => 'frm_series_detail_search'])}}
-								{{Form::hidden('condition_id', $rec_key)}}
-							{{Form::close()}}
-						</li>
+				@if (isset(Auth::user()->preferences['seriesSearchPresets']))
+					@foreach(Auth::user()->preferences['seriesSearchPresets'] as $index => $val)
+						<li>{{HTML::link(asset('series/search/' . $index), $val['save_label'])}}</li>
 					@endforeach
 				@endif
 			</ul>

@@ -92,8 +92,8 @@ Validator::extend('strict_date', function ($attribute, $value, $parameters) {
 	return checkdate($m, $d, $y);
 });
 
-Validator::extend('strict_float', function($attribute, $value, $parameters) {
-	return is_float($value);
+Validator::extend('strict_numeric', function($attribute, $value, $parameters) {
+	return is_numeric($value);
 });
 
 Validator::extend('array_of_group_ids', function($attribute, $value, $parameters) {

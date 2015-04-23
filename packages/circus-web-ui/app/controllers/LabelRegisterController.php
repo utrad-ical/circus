@@ -45,6 +45,11 @@ class LabelRegisterController extends BaseController {
 								'id'			=>	$label_obj->labelID,
 								'attributes'	=>	array_key_exists('attribute', $rec2) ? $rec2['attribute'] : array()
 							);
+						} else {
+							$revision[$rec['id']][] = array(
+								'id'			=>	$rec2['id'],
+								'attributes'	=>	array_key_exists('attribute', $rec2) ? $rec2['attribute'] : array()
+							);
 						}
 					}
 					$series_list[] = $this->createSeriesList($rec['id'], $revision[$rec['id']]);

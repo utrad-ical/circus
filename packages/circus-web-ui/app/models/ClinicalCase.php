@@ -56,7 +56,6 @@ class ClinicalCase extends BaseModel {
 		'latestRevision.status'			=>	'strict_string',
 		'latestRevision.series'			=>	'strict_array|array_series',
 		'revisions'						=>	'strict_array|array_revision',
-		'creator'						=>	'required|strict_integer|is_user',
 		'createTime'					=>	'mongodate',
 		'updateTime'					=>	'mongodate'
 	);

@@ -93,7 +93,7 @@ Validator::extend('strict_date', function ($attribute, $value, $parameters) {
 });
 
 Validator::extend('strict_numeric', function($attribute, $value, $parameters) {
-	return is_numeric($value);
+	return is_float($value) || is_int($value);
 });
 
 Validator::extend('array_of_group_ids', function($attribute, $value, $parameters) {

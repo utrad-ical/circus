@@ -1,7 +1,7 @@
 @extends('common.layout')
 
 @section('page_css')
-{{HTML::style('css/ui-lightness/jquery-ui-1.10.4.custom.min.css')}}
+{{HTML::style('css/jquery-ui.css')}}
 {{HTML::style('css/page_lib.css')}}
 @stop
 

@@ -78,7 +78,7 @@ return array(
 	"strict_bool" => "The :attribute field must be strictly true or false.",
 	"mongodate" => "The :attribute must be a valid Mongo date.",
 	"strict_string" => "The :attribute must be a string.",
-	"strict_float" => "The :attribute must be a float.",
+	"strict_numeric" => "The :attribute must be a number.",
 	"array_of_group_ids" => "The :attribute must be an array of group IDs.",
 	"is_user" => "The :attribute must be a valid user ID.",
 	"array_of_privileges" => "The :attribute must be an array of privileges.",

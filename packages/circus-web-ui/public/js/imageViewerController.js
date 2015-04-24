@@ -522,6 +522,9 @@
             for (var j = 0; j < tmp_series.label.length; j++) {
               var tmp_the_label = tmp_series.label[j];
               var label_default = this_elm.imageViewerController('getLabelDefault', tmp_color_index_num);
+              if (tmp_the_label.id === '') {
+                tmp_the_label.id = label_default.id
+              }
               tmp_series.label[j] = $.extend(true, label_default, tmp_the_label);
               tmp_color_index_num++;
             }

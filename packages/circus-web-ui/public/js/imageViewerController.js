@@ -261,20 +261,10 @@
         tmp_panel_elm.find('.ico_detail_sprite_pan').addClass('active')
           .siblings().removeClass('active');
 
-        if (typeof active_series.label != 'object') {
-          //ペンモードにしたときにそのシリーズにまだラベルが紐づいていないときは新規作成
-          this_elm.imageViewerController('addLabelObject');
-          this_elm.imageViewerController('updateLabelElements');
-        }
-
       } else if (controllerInfo.mode == 'pen') {
         //ペン
         tmp_panel_elm.find('.ico_detail_sprite_pen').addClass('active')
           .siblings().removeClass('active');
-
-        if (active_series.label.length == 0) {
-          tmp_panel_elm.find('.add_label').trigger('click');
-        };
 
       } else if (controllerInfo.mode == 'window') {
         //ウインドウ調整
@@ -430,11 +420,11 @@
 
           if (typeof active_series.label != 'object' || active_series.label.length == 0) {
             //create elements is runs other scope
-            this_elm.imageViewerController('addLabelObject');
+            //this_elm.imageViewerController('addLabelObject');
           }
 
           if (active_series.activeLabelId == '') {
-            active_series.activeLabelId = active_series.label[0].id;
+            //active_series.activeLabelId = active_series.label[0].id;
           }
 
           var tmp_info_elm = '<div class="label_info_wrap"></div><div class="clear">&nbsp;</div>';
@@ -469,6 +459,7 @@
 
     deleteLabelObject: function (series_id, label_id) {
       //ラベルオブジェクトから該当項目を削除
+
       var this_elm = this;
       var tmp_target_series = this_elm.imageViewerController('getSeriesObjectById', [controllerInfo.activeSeriesId]);
 
@@ -478,10 +469,10 @@
           break;
         }
       }
-
       //ラベルが無かったら手のひらモードに切り替える
       if (tmp_target_series.label.length == 0) {
         this_elm.imageViewerController('changeMode', 'pan');
+				tmp_target_series.activeLabelId = '';
       }
 
       //要素に反映
@@ -800,17 +791,29 @@
 
         //ペン切替
         tmp_panel_elm.find('.ico_detail_sprite_pen').click(function () {
-          this_elm.imageViewerController('changeMode', 'pen');
+					if (active_series.label.length == 0) {
+						alert('there is no drawable Label.\nPlease select draw mode after adding label.');
+					}else{
+						this_elm.imageViewerController('changeMode', 'pen');
+					};
         });
 
         //消しゴム
         tmp_panel_elm.find('.ico_detail_sprite_erase').click(function () {
-          this_elm.imageViewerController('changeMode', 'erase');
+					if (active_series.label.length == 0) {
+						alert('there is no drawable Label.\nPlease select draw mode after adding label.');
+					}else{
+						this_elm.imageViewerController('changeMode', 'erase');
+					};
         });
 
         //バケツ
         tmp_panel_elm.find('.ico_detail_sprite_bucket').click(function () {
-          this_elm.imageViewerController('changeMode', 'bucket');
+					if (active_series.label.length == 0) {
+						alert('there is no drawable Label.\nPlease select draw mode after adding label.');
+					}else{
+						this_elm.imageViewerController('changeMode', 'bucket');
+					};
         });
 
         //太さ変更
@@ -873,8 +876,6 @@
 
          //保存実行
         this_elm.imageViewerController('saveData');
-				
-				console.log(controllerInfo.series[0].label);
 
         return false;
       });
@@ -1466,16 +1467,18 @@
 			};
 
 			var tmp_active_series =  this_elm.imageViewerController('getSeriesObjectById',[controllerInfo.activeSeriesId]);
+			
+			$('#' + controllerInfo.elements.label).find('.label_info_wrap').empty();
+			$('#' + controllerInfo.elements.label).find('.label_attr_area').empty();
 			if(typeof tmp_active_series.label =='object' && tmp_active_series.label.length>0){
-
 				var tmp_the_label =  this_elm.imageViewerController('getLabelObjectById',tmp_active_series.activeLabelId,tmp_active_series.id);
 
 				if(typeof tmp_the_label.attribute =='object'){
 					insert_prop.value = tmp_the_label.attribute;
 				}
 
-				$('#' + controllerInfo.elements.label).find('.label_info_wrap').empty().append('<div class="label_attr_area"></div>');
-				$('#' + controllerInfo.elements.label).find('.label_attr_area').empty().propertyeditor(insert_prop)
+				$('#' + controllerInfo.elements.label).find('.label_info_wrap').append('<div class="label_attr_area"></div>');
+				$('#' + controllerInfo.elements.label).find('.label_attr_area').propertyeditor(insert_prop)
 				.on('valuechange',function(event,obj){
 					//本来はここで記述内容をオブジェクトにしてコントローラにlabelオブジェクトのアトリビュートを更新する
 					//書き換え内容をオブジェクトに戻す措置を追加する

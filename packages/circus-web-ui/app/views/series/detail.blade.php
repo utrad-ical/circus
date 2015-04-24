@@ -53,11 +53,11 @@ $(function(){
 			      },
 			      color: {
 			        control: false //カラーピッカーの有無
-			      },
+			      }, 
 			      pan: true, //手のひらツール
 			      window: {
-			        active: true,
-			        panel: true
+                    active : true,
+			        panel: false
 			      },
 			      pen: {
 			        active: false, //描画機能の有効・無効

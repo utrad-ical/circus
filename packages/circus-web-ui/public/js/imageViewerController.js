@@ -1432,31 +1432,32 @@
         }
       });
 
-			//attribute change
-			var insert_prop = {
-				properties: controllerInfo.defaultLabelAttribute
-			};
+        //attribute change
+        var insert_prop = {
+            properties: controllerInfo.defaultLabelAttribute
+        };
 
-			var tmp_active_series =  this_elm.imageViewerController('getSeriesObjectById',[controllerInfo.activeSeriesId]);
+        var tmp_active_series =  this_elm.imageViewerController('getSeriesObjectById',[controllerInfo.activeSeriesId]);
 
-			$('#' + controllerInfo.elements.label).find('.label_info_wrap').empty();
-			$('#' + controllerInfo.elements.label).find('.label_attr_area').empty();
-			if(typeof tmp_active_series.label =='object' && tmp_active_series.label.length>0){
-				var tmp_the_label =  this_elm.imageViewerController('getLabelObjectById',tmp_active_series.activeLabelId,tmp_active_series.id);
+        $('#' + controllerInfo.elements.label).find('.label_info_wrap').empty();
+        $('#' + controllerInfo.elements.label).find('.label_attr_area').empty();
+        if(typeof tmp_active_series.label =='object' && tmp_active_series.label.length>0){
+            var tmp_the_label =  this_elm.imageViewerController('getLabelObjectById',tmp_active_series.activeLabelId,tmp_active_series.id);
 
-				if(typeof tmp_the_label.attribute =='object'){
-					insert_prop.value = tmp_the_label.attribute;
-				}
+            if(typeof tmp_the_label.attribute =='object'){
+                insert_prop.value = tmp_the_label.attribute;
+            }
 
-				$('#' + controllerInfo.elements.label).find('.label_info_wrap').append('<div class="label_attr_area"></div>');
-				$('#' + controllerInfo.elements.label).find('.label_attr_area').propertyeditor(insert_prop)
-				.on('valuechange',function(event,obj){
-					//本来はここで記述内容をオブジェクトにしてコントローラにlabelオブジェクトのアトリビュートを更新する
-					//書き換え内容をオブジェクトに戻す措置を追加する
-					tmp_the_label.attribute = $(this).propertyeditor('option').value;
-				});
+            $('#' + controllerInfo.elements.label).find('.label_info_wrap').append('<div class="label_attr_area"></div>');
+            $('#' + controllerInfo.elements.label).find('.label_attr_area').propertyeditor(insert_prop)
+            .on('valuechange',function(event,obj){
+                //本来はここで記述内容をオブジェクトにしてコントローラにlabelオブジェクトのアトリビュートを更新する
+                //書き換え内容をオブジェクトに戻す措置を追加する
+                tmp_the_label.attribute = $(this).propertyeditor('option').value;
+                tmp_the_label.update_flg = 1;
+            });
 
-			}
+        }
 
     }/*updateLabelElements*/,
 

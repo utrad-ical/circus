@@ -1075,9 +1075,11 @@
       }
 
       var tmp_input_memo = window.prompt('input Memo', controllerInfo.memo);
-      if (tmp_input_memo) {
+      if (tmp_input_memo != null) {
         save_data.memo = tmp_input_memo;
-      } 
+      } else{
+				return;
+			}
 
       //console.log(save_data);
       //console.log("URL::");

@@ -153,25 +153,22 @@
 
 
 
-
-		changedLabelNum : function(){
-			var rtn_num = 0;
-			var this_elm = this;
-
-	      for (var i = 0; i < controllerInfo.series.length; i++) {
-				var tmp_the_controller_series = controllerInfo.series[i];
-				if(typeof tmp_the_controller_series.label == 'object'){
-					for (var j = 0; j < tmp_the_controller_series.label.length; j++) {
-						var tmp_the_label = tmp_the_controller_series.label[j];
-						if (typeof tmp_the_label.update_flg != 'undefined' && tmp_the_label.update_flg == 1) {
-							rtn_num++;
-						}
-					}
-				}
-	      }
-			return rtn_num;
-		},
-
+    changedLabelNum: function() {
+        var rtn_num = 0;
+        var this_elm = this;
+        for (var i = 0; i < controllerInfo.series.length; i++) {
+            var tmp_the_controller_series = controllerInfo.series[i];
+            if (typeof tmp_the_controller_series.label == 'object') {
+                for (var j = 0; j < tmp_the_controller_series.label.length; j++) {
+                    var tmp_the_label = tmp_the_controller_series.label[j];
+                    if (typeof tmp_the_label.update_flg != 'undefined' && tmp_the_label.update_flg == 1) {
+                        rtn_num++;
+                    }
+                }
+            }
+        }
+        return rtn_num;
+    },
 
 
 
@@ -231,9 +228,8 @@
 
 
 
-     //モード変更
     changeMode: function(new_mode) {
-      //コントローラ側で人しk知恵切るモードの場合のみ発火
+      //check mode
       if (new_mode == 'bucket' || new_mode == 'erase' || new_mode == 'pan' || new_mode == 'pen' || new_mode == 'measure' || new_mode == 'window') {
         controllerInfo.mode = new_mode;
       } else {
@@ -246,7 +242,7 @@
       tmp_panel_elm = $(tmp_panel_elm);
       var tmp_btn_class = '.ico_detail_sprite_' + controllerInfo.mode;
       tmp_panel_elm.find(tmp_btn_class).addClass('active').siblings().removeClass('active');
-      //紐づくビューアーたちにモード変更を伝播
+      //sync mode of the viewers
       for (var i = 0; i < controllerInfo.viewer.length; i++) {
         var elmId = '#' + controllerInfo.viewer[i].elementId;
         $(elmId).imageViewer('changeMode', controllerInfo.mode);
@@ -338,7 +334,7 @@
             tmp_panel_wrap.append('<li class="toolbar_btn ico_detail_sprite ico_detail_sprite_window"></li>');
           }
         }
-				
+
 				//pan tool
         if (controllerInfo.control.pan == true) {
           tmp_panel_wrap.append( '<li class="toolbar_btn ico_detail_sprite ico_detail_sprite_pan"></li>');
@@ -756,8 +752,8 @@
     //パン切替
     tmp_panel_elm.find('.ico_detail_sprite_pan').click(function () {
       this_elm.imageViewerController('changeMode', 'pan');
-    });        
-        
+    });
+
       //ペンツールボタン
       if (controllerInfo.control.pen.active == true) {
 
@@ -1442,7 +1438,7 @@
 			};
 
 			var tmp_active_series =  this_elm.imageViewerController('getSeriesObjectById',[controllerInfo.activeSeriesId]);
-			
+
 			$('#' + controllerInfo.elements.label).find('.label_info_wrap').empty();
 			$('#' + controllerInfo.elements.label).find('.label_attr_area').empty();
 			if(typeof tmp_active_series.label =='object' && tmp_active_series.label.length>0){

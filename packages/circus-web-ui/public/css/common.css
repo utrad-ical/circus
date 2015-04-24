@@ -90,7 +90,7 @@ input[type="password"]{font-family:Verdana, sans-serif; font-size:1.5em; line-he
 .ico_detail_sprite_pan{background-position:0 -30px;}
 .ico_detail_sprite_resize_large{background-position:0 -60px;}
 .ico_detail_sprite_resize_short{background-position:0 -90px;}
-.ico_detail_sprite_image_window{background-position:0 -120px;}
+.ico_detail_sprite_window{background-position:0 -120px;}
 .ico_detail_sprite_erase{background-position:0 -240px;}
 
 .draw_back{background-position:0 -150px;}

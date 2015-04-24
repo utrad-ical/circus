@@ -22,7 +22,7 @@
 .img_view_area .img_area .image_window_controller_wrap{bottom:0; top:auto; width:auto; max-width:500px; padding:5px 0; margin-left:1px; z-index:450; display:block;}
 .img_view_area .img_area .image_window_controller{display:none; position:relative; background:none; top:auto; width:100%; left:0;}
 
-.ico_detail_sprite_image_window .btn_close{cursor:pointer; width:20px; height:20px; background-image:url(../img/common/panek_btn_sprite.png);background-repeat:no-repeat; background-position:0 0; display:block;}
+.ico_detail_sprite_window .btn_close{cursor:pointer; width:20px; height:20px; background-image:url(../img/common/panek_btn_sprite.png);background-repeat:no-repeat; background-position:0 0; display:block;}
 .image_window_controller_wrap .btn_close,
 .image_window_controller_wrap .btn_open{cursor:pointer;height:20px; background-image:url(../img/common/panek_btn_sprite.png);background-repeat:no-repeat;}
 .image_window_controller_wrap .btn_open{background-position:0 0; display:block; padding-left:20px; padding-right:5px;}

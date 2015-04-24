@@ -231,79 +231,47 @@
 
 
 
-    //モード変更
-    changeMode: function (new_mode) {
-
-      controllerInfo.mode = new_mode;
-      var this_elm = this;
-      var active_series = this_elm.imageViewerController('getSeriesObjectById', [controllerInfo.activeSeriesId]);
-      if (typeof active_series != 'object') {
-        active_series = controllerInfo.series[0];
-        controllerInfo.activeSeriesId = active_series.id;
+     //モード変更
+    changeMode: function(new_mode) {
+      //コントローラ側で人しk知恵切るモードの場合のみ発火
+      if (new_mode == 'bucket' || new_mode == 'erase' || new_mode == 'pan' || new_mode == 'pen' || new_mode == 'measure' || new_mode == 'window') {
+        controllerInfo.mode = new_mode;
+      } else {
+        return;
       }
-
       var tmp_panel_elm = 'body';
       if (controllerInfo.elements.panel.length > 0) {
         tmp_panel_elm = '#' + controllerInfo.elements.panel;
       }
       tmp_panel_elm = $(tmp_panel_elm);
-
-      if (controllerInfo.mode == 'bucket') {
-        //バケツ塗りつぶしモード
-        tmp_panel_elm.find('.ico_detail_sprite_bucket').addClass('active')
-          .siblings().removeClass('active');
-      } else if (controllerInfo.mode == 'erase') {
-        //消しゴムモード
-        tmp_panel_elm.find('.ico_detail_sprite_erase').addClass('active')
-          .siblings().removeClass('active');
-      } else if (controllerInfo.mode == 'pan') {
-        //手のひら・ズーム
-        tmp_panel_elm.find('.ico_detail_sprite_pan').addClass('active')
-          .siblings().removeClass('active');
-
-      } else if (controllerInfo.mode == 'pen') {
-        //ペン
-        tmp_panel_elm.find('.ico_detail_sprite_pen').addClass('active')
-          .siblings().removeClass('active');
-
-      } else if (controllerInfo.mode == 'window') {
-        //ウインドウ調整
-        tmp_panel_elm.find('.ico_detail_sprite_image_window').addClass('active')
-          .siblings().removeClass('active');
-      } else if (controllerInfo.mode == 'measure') {
-        //定規調整
-        tmp_panel_elm.find('.ico_detail_sprite_measure').addClass('active')
-          .siblings().removeClass('active');
-      }
-      ;
-
+      var tmp_btn_class = '.ico_detail_sprite_' + controllerInfo.mode;
+      tmp_panel_elm.find(tmp_btn_class).addClass('active').siblings().removeClass('active');
       //紐づくビューアーたちにモード変更を伝播
       for (var i = 0; i < controllerInfo.viewer.length; i++) {
         var elmId = '#' + controllerInfo.viewer[i].elementId;
         $(elmId).imageViewer('changeMode', controllerInfo.mode);
       }
-
     },
 
 
 
 
 
-		checkUpdateLabel: function() {
-			//ラベルが前回の保存時から変更されたか調査,更新があったラベルにはフラグを立てる
-			var this_elm = this;
-			var container_object = controllerInfo.viewer[0].container;
+    checkUpdateLabel: function() {
+        //ラベルが前回の保存時から変更されたか調査,更新があったラベルにはフラグを立てる
+        var this_elm = this;
+        var container_object = controllerInfo.viewer[0].container;
 
-			//ヒストリーを１つずつ見ていく
-			for(var i=container_object.data.history.main.length-1; i>-1; i--){
-				var tmp_label = this_elm.imageViewerController('getLabelObjectById',container_object.data.history.main[i].label);
-				//更新ポイント
-				if(tmp_label.update_flg == 0 && tmp_label.last_save_point != i+1){
-					tmp_label.last_save_point = i+1;
-					tmp_label.update_flg = 1;
-				}
-			}
-		},
+        //ヒストリーを１つずつ見ていく
+        for(var i=container_object.data.history.main.length-1; i>-1; i--){
+            var tmp_label = this_elm.imageViewerController('getLabelObjectById',container_object.data.history.main[i].label);
+            //更新ポイント
+            if(tmp_label.update_flg == 0 && tmp_label.last_save_point != i+1){
+                tmp_label.last_save_point = i+1;
+                tmp_label.update_flg = 1;
+            }
+        }
+    },
 
 
 
@@ -334,7 +302,7 @@
         if (controllerInfo.control.window.active == true) {
           if (controllerInfo.control.window.panel == true) {
 
-            var tmp_elments = '<li class="toolbar_btn ico_detail_sprite ico_detail_sprite_image_window">\
+            var tmp_elments = '<li class="toolbar_btn ico_detail_sprite ico_detail_sprite_window">\
 				   <ul class="image_window_controller"><li><p class="btn_open"></p><p class="btn_close"></p></li></ul>\
 				   </li>';
             tmp_panel_wrap.append(tmp_elments);
@@ -367,14 +335,14 @@
             } //preset
             delete tmp_elments;
           } else {
-            tmp_panel_wrap.append('<li class="toolbar_btn ico_detail_sprite ico_detail_sprite_image_window"></li>');
+            tmp_panel_wrap.append('<li class="toolbar_btn ico_detail_sprite ico_detail_sprite_window"></li>');
           }
         }
 				
 				//pan tool
         if (controllerInfo.control.pan == true) {
           tmp_panel_wrap.append( '<li class="toolbar_btn ico_detail_sprite ico_detail_sprite_pan"></li>');
-				}
+        }
 
         //buttons about drawing
         if (controllerInfo.control.pen.active == true) {
@@ -695,7 +663,7 @@
         if (controllerInfo.control.window.active == true) {
 
           //パネルの表示・非表示操作
-          tmp_panel_elm.find('.ico_detail_sprite_image_window').click(function (e) {
+          tmp_panel_elm.find('.ico_detail_sprite_window').click(function (e) {
             $(this).find('.image_window_controller').show(300);
             this_elm.imageViewerController('changeMode', 'window');
           });
@@ -781,13 +749,15 @@
         }
       }
 
+
+    //パン切替
+    tmp_panel_elm.find('.ico_detail_sprite_pan').click(function () {
+      this_elm.imageViewerController('changeMode', 'pan');
+    });        
+        
       //ペンツールボタン
       if (controllerInfo.control.pen.active == true) {
 
-        //パン切替
-        tmp_panel_elm.find('.ico_detail_sprite_pan').click(function () {
-          this_elm.imageViewerController('changeMode', 'pan');
-        });
 
         //ペン切替
         tmp_panel_elm.find('.ico_detail_sprite_pen').click(function () {

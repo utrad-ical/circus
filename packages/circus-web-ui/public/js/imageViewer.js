@@ -230,6 +230,9 @@
       this_elm.find('.image_window_controller_wrap').find('.image_window_controller').find('.image_window_level').val(this_opts.viewer.window.level.current);
       this_elm.find('.image_window_controller_wrap').find('.image_window_controller').find('.image_window_width').val(this_opts.viewer.window.width.current);
 
+			 this_elm.find('.disp_measure').removeClass('active');
+
+
     }/*_changeImgSrc*/,
 
 
@@ -265,19 +268,18 @@
         this_elm.removeClass(function (index, css) {
 						return (css.match (/\bmode_\S+/g) || []).join(' ');
 				});
-        if (this_opts.control.mode == 'erase') {
-          this_elm.addClass('mode_erase');
-        } else if (this_opts.control.mode == 'window') {
-          this_elm.addClass('mode_window');
-        } else if (this_opts.control.mode == 'pen') {
-          this_elm.addClass('mode_pen');
-        } else if (this_opts.control.mode == 'pan') {
-          this_elm.addClass('mode_pan');
-        } else if (this_opts.control.mode == 'measure') {
-          this_elm.addClass('mode_measure');
-        } else if (this_opts.control.mode == 'bucket') {
-          this_elm.addClass('mode_bucket');
-        }
+				
+				if(	this_opts.control.mode == 'erase' || 
+						this_opts.control.mode == 'window'	||
+						this_opts.control.mode == 'pen'	||
+						this_opts.control.mode == 'pan'	||
+						this_opts.control.mode == 'measure' ||
+						this_opts.control.mode == 'bucket'){
+							var tmp_class_name = 'mode_'+this_opts.control.mode;
+							this_elm.addClass(tmp_class_name);
+				}
+ 			  this_elm.find('.disp_measure').removeClass('active');
+
       }
     },
 
@@ -607,7 +609,7 @@
    	 // 第二引数: 対象ラベルid
    	 // クリックされたポイントの縮尺ナシXYZ座標 [X,Y,Z]
 
-   	  var this_obj = this;
+   	var this_obj = this;
       var this_elm = this.element;
       var this_opts = this.options;
 
@@ -1367,6 +1369,9 @@
             this_opts.viewer.measure.goal_y = (this_obj._tmpInfo.cursor.current.Y - this_opts.viewer.position.sy * this_opts.viewer.position.dh / this_opts.viewer.position.oh)*this_opts.viewer.position.zoom;
 
             this_elm.trigger('sync');
+						this_elm.imageViewer('drawMeasure');
+						this_elm.find('.disp_measure').addClass('active');
+
         }
       }
     }/*_mousemoveFunc*/,
@@ -1597,12 +1602,6 @@
             }
           }
         }
-      }
-      if(this_opts.control.mode == 'measure' ){
-          this_elm.imageViewer('drawMeasure');
-          this_elm.find('.disp_measure').addClass('active');
-      }else{
-          this_elm.find('.disp_measure').removeClass('active');
       }
     }/*syncVoxel*/,
 

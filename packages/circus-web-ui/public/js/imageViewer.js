@@ -1128,7 +1128,7 @@
       var this_opts = this.options;
       e.preventDefault();
 			
-			if(event.which==3){
+			if(e.which==3){
 				return	
 			};
 
@@ -1137,6 +1137,8 @@
       //マウスの初期位置取得
       this_obj._tmpInfo.cursor.start.X = e.clientX;
       this_obj._tmpInfo.cursor.start.Y = e.clientY;
+			
+			console.log(e.clientX);
 
       if (this_opts.control.mode == 'pan') {
         //トリミング領域の初期位置取得

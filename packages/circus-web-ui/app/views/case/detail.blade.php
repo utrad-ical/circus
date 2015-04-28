@@ -18,328 +18,373 @@
 
 @if (!isset($error_msg))
 <script>
-//Label attributes default
-var default_label_attr_prop = {{$label_attribute_settings}};
+    //Label attributes default
+    var default_label_attr_prop = {{$label_attribute_settings}};
 
-//Revision Attribute Properties
-var default_attr_prop = {{$case_attribute_settings}};
+    //Revision Attribute Properties
+    var default_attr_prop = {{$case_attribute_settings}};
+    var revisionNo = {{{$revisionNo}}};
+    var parentLabelList = "disp_label_list";
 
-var revisionNo = {{{$revisionNo}}};
+    //Project-specific feature set to control the controller viewer widget
+    $(function(){
+        //Data group to pass when you ignite the controller immediately after page load
+        //The controller 1 per group to be linked to multiple viewers
+        var	voxel_container	= new voxelContainer();	//Label information storage object (three sides shared)
+        voxel_container.name = 'my_voxel';
 
-var parentLabelList = "disp_label_list";
+        var	initInfo	=	[
+            {
+                baseUrl : "{{{$server_url['dicom_img_base_url']}}}",
+                postUrl : "{{asset('case/save_label')}}",	//Enable here if it is different from the image storage server
+                caseId : "{{Session::get('caseID')}}",
+                attribute : {{$attribute}},
+                defaultLabelAttribute :default_label_attr_prop,
+                series : {{$series_list}},
+                control : {
+                    window : {
+                        panel : false
+                    }
+                },
+                elements : {
+                    parent : 'page_case_detail',
+                    panel : 'the_panel_inner',
+                    label : 'the_panel_inner',
+                    labelAttribute : 'the_panel_inner',
+                    revisionAttribute : 'revision_attribute_wrap'
+                },
+                viewer : [
+                    {//First sheet
+                        elementId : 'img_area_axial',
+                        orientation : 'axial',
+                        container : voxel_container,
+                        number:{
+                            maximum : 260, //What sheets cross section is stored
+                            current : 0	//Initial display number
+                        }
+                    },
+                    {//2nd sheet
+                        elementId : 'img_area_sagittal',
+                        orientation : 'sagittal',
+                        container : voxel_container,
+                        number:{
+                            maximum : 511, //What sheets cross section is stored
+                            current : 0	//Initial display number
+                        }
+                    },
+                    {//3rd sheet
+                        elementId : 'img_area_coronal',
+                        orientation : 'coronal',
+                        container : voxel_container,
+                        number:{
+                            maximum : 511, //What sheets cross section is stored
+                            current : 0	//Initial display number
+                        }
+                    }
+                ]
+            }
+        ]; //initInfo
 
+        //accept a series information from node.js by performing a number worth of ajax of series
+        var ajax_cnt = 0;
+        var initAjax= function(){
+            var tmp_series = initInfo[0].series[ajax_cnt];
+            $.ajax({
+                url: '{{{$server_url["series_path"]}}}',
+                type: 'GET',
+                data: {
+                    mode : 'metadata',
+                    series : tmp_series.id
+                },//Transmitted data
+                dataType: 'json',
+                error: function(){
+                    alert('I failed to communicate');
+                },
+                success: function(response){
+                    //console.log(response);
+                    if(typeof response.allow_mode != 'undefined'){
+                        tmp_series.allow_mode = $.extend(true,tmp_series.allow_mode ,response.allow_mode);
+                    }
 
-//Project-specific feature set to control the controller viewer widget
-$(function(){
-	//Data group to pass when you ignite the controller immediately after page load
-	//The controller 1 per group to be linked to multiple viewers
-	var	voxel_container	=	new voxelContainer();	//Label information storage object (three sides shared)
-	voxel_container.name	=	'my_voxel';
+                    //set 3D length settings
+                    if(typeof tmp_series.voxel != 'object'){
+                        tmp_series.voxel = new Object();
+                    }
 
-	var	initInfo	=	[
-		{
-			baseUrl : "{{{$server_url['dicom_img_base_url']}}}",
-			postUrl : "{{asset('case/save_label')}}",	//Enable here if it is different from the image storage server
-			caseId : "{{Session::get('caseID')}}",
-			attribute : {{$attribute}},
-			defaultLabelAttribute :default_label_attr_prop,
-			series : {{$series_list}},
-			control : {
-				window : {
-					panel : false
-				}
-			},
-			elements : {
-				parent : 'page_case_detail',
-				panel : 'the_panel_inner',
-				label : 'the_panel_inner',
-				labelAttribute : 'the_panel_inner',
-				revisionAttribute : 'revision_attribute_wrap'
-			},
-			viewer : [
-				{//First sheet
-					elementId : 'img_area_axial',
-					orientation : 'axial',
-					container : voxel_container,
-					number:{
-						maximum : 260, //What sheets cross section is stored
-						current : 0	//Initial display number
-					}
-				},
-				{//2nd sheet
-					elementId : 'img_area_sagittal',
-					orientation : 'sagittal',
-					container : voxel_container,
-					number:{
-						maximum : 511, //What sheets cross section is stored
-						current : 0	//Initial display number
-					}
-				},
-				{//3rd sheet
-					elementId : 'img_area_coronal',
-					orientation : 'coronal',
-					container : voxel_container,
-					number:{
-						maximum : 511, //What sheets cross section is stored
-						current : 0	//Initial display number
-					}
-				}
-			]
-		}
-	];
+                    if(typeof response.voxel_x == 'number'){
+                        tmp_series.voxel.voxel_x = response.voxel_x;
+                    };
 
-	//accept a series information from node.js by performing a number worth of ajax of series
-	var ajax_cnt = 0;
-	var initAjax= function(){
-		var tmp_series = initInfo[0].series[ajax_cnt];
-		$.ajax({
-			url: '{{{$server_url["series_path"]}}}',
-			type: 'GET',
-			data: {
-				mode : 'metadata',
-				series : tmp_series.id
-			},//Transmitted data
-			dataType: 'json',
-			error: function(){
-				alert('I failed to communicate');
-			},
-			success: function(response){
-				//console.log(response);
-				if(typeof response.allow_mode != 'undefined'){
-					tmp_series.allow_mode = 	$.extend(true,tmp_series.allow_mode ,response.allow_mode);
-				}
-				if(typeof tmp_series.voxel != 'object'){
-					tmp_series.voxel =  new Object();
-				}
+                    if(typeof response.voxel_y == 'number'){
+                        tmp_series.voxel.voxel_y = response.voxel_y;
+                    };
 
-				if(typeof response.voxel_x == 'number'){
-					tmp_series.voxel.voxel_x = response.voxel_x;
-				};
+                    if(typeof response.voxel_z == 'number'){
+                        tmp_series.voxel.voxel_z = response.voxel_z;
+                    };
 
-				if(typeof response.voxel_y == 'number'){
-					tmp_series.voxel.voxel_y = response.voxel_y;
-				};
+                    if(typeof response.x == 'number'){
+                        tmp_series.voxel.x = response.x;
+                    };
 
-				if(typeof response.voxel_z == 'number'){
-					tmp_series.voxel.voxel_z = response.voxel_z;
-				};
+                    if(typeof response.y == 'number'){
+                        tmp_series.voxel.y = response.y;
+                    };
 
-				if(typeof response.x == 'number'){
-					tmp_series.voxel.x = response.x;
-				};
+                    if(typeof response.z == 'number'){
+                        tmp_series.voxel.z = response.z;
+                    };
 
-				if(typeof response.y == 'number'){
-					tmp_series.voxel.y = response.y;
-				};
+                    //set window settings
 
-				if(typeof response.z == 'number'){
-					tmp_series.voxel.z = response.z;
-				};
+                    if(typeof tmp_series.window != 'object'){
+                        tmp_series.window = new Object();
+                    }
 
-				if(typeof tmp_series.window != 'object'){
-					tmp_series.window = new Object();
-				}
+                    if(typeof tmp_series.window.level != 'object'){
+                        tmp_series.window.level = new Object();
+                    }
 
-				if(typeof tmp_series.window.level != 'object'){
-					tmp_series.window.level = new Object();
-				}
+                    if(typeof tmp_series.window.width != 'object'){
+                        tmp_series.window.width = new Object();
+                    }
 
-				if(typeof tmp_series.window.width != 'object'){
-					tmp_series.window.width = new Object();
-				}
+                    if(typeof response.window_level == 'number'){
+                        tmp_series.window.level.current = response.window_level;
+                    };
 
-				if(typeof response.window_level == 'number'){
-					tmp_series.window.level.current = response.window_level;
-				};
+                    if(typeof response.window_width == 'number'){
+                        tmp_series.window.width.current = response.window_width;
+                    };               
 
-				if(typeof response.window_level_max == 'number'){
-					tmp_series.window.level.maximum = response.window_level_max;
-				};
+                    //set init window settings by Series Window Priority.
+                    var priority_array = ['preset','dicom','auto']; //priority default
+                    
+                    if(typeof tmp_series.window.priority == 'string'){
+                        priority_array = tmp_series.window.priority.split(',');
+                    }
+                    
+                    for(var i=0; i<priority_array.length; i++){
+                        if(priority_array[i] == 'preset' && typeof tmp_series.window.preset == 'object' && tmp_series.window.preset.length>0){
+                            tmp_series.window.level.current = tmp_series.window.preset[0].level;
+                            tmp_series.window.width.current = tmp_series.window.preset[0].width;
+                            break;
+                        }else if(priority_array[i] == 'dicom' && typeof response.window_level_dicom == 'number' && typeof response.window_width_dicom == 'number'){
+                            tmp_series.window.level.current = response.window_level_dicom;
+                            tmp_series.window.width.current = response.window_width_dicom;
+                            break;
+                        }else if(priority_array[i] == 'auto' && typeof response.window_level == 'number' && typeof response.window_width == 'number'){
+                            tmp_series.window.level.current = response.window_level;
+                            tmp_series.window.width.current = response.window_width;
+                            break;
+                        }
+                    }
+                    
+                    if(typeof tmp_series.window.preset != 'object'){
+                        tmp_series.window.preset = new Array(0);
+                    }
+                    
+                    //set dicom-written-info into the last of Preset array.
+                    if(typeof response.window_level_dicom == 'number' && typeof response.window_width_dicom == 'number'){
+                        var tmp_preset_dicom = {
+                            label: 'dicom' ,
+                            level: response.window_level_dicom ,
+                            width: response.window_width_dicom                        
+                        }
+                        tmp_series.window.preset.push(tmp_preset_dicom);
+                    };    
+                    
+                    //set auto-info into the last of Preset array.
+                    if(typeof response.window_level == 'number' && typeof response.window_width == 'number'){
+                        var tmp_preset_auto = {
+                            label: 'auto' ,
+                            level: response.window_level ,
+                            width: response.window_width                        
+                        }
+                        tmp_series.window.preset.push(tmp_preset_auto);
+                    };    
 
-				if(typeof response.window_level_min == 'number'){
-					tmp_series.window.level.minimum = response.window_level_min;
-				};
+                    if(typeof response.window_level_max == 'number'){
+                        tmp_series.window.level.maximum = response.window_level_max;
+                    };
 
-				if(typeof response.window_width == 'number'){
-					tmp_series.window.width.current = response.window_width;
-				};
+                    if(typeof response.window_level_min == 'number'){
+                        tmp_series.window.level.minimum = response.window_level_min;
+                    };
 
-				if(typeof response.window_width_max == 'number'){
-					tmp_series.window.width.maximum = response.window_width_max;
-				};
+                    if(typeof response.window_width_max == 'number'){
+                        tmp_series.window.width.maximum = response.window_width_max;
+                    };
 
-				if(typeof response.window_width_min == 'number'){
-					tmp_series.window.width.minimum = response.window_width_min;
-				};
+                    if(typeof response.window_width_min == 'number'){
+                        tmp_series.window.width.minimum = response.window_width_min;
+                    };
 
-				for(var i=0; i<initInfo[0].viewer.length; i++){
-					var tmp_viewer = initInfo[0].viewer[i];
+                    for(var i=0; i<initInfo[0].viewer.length; i++){
+                        var tmp_viewer = initInfo[0].viewer[i];
+                        if(tmp_viewer.orientation == 'axial'){
+                            tmp_viewer.number.maximum = response.z;
+                        }else if(tmp_viewer.orientation == 'coronal'){
+                            tmp_viewer.number.maximum = response.y;
+                        }else if(tmp_viewer.orientation == 'sagittal'){
+                            tmp_viewer.number.maximum = response.x;
+                        }
+                    }
 
-					if(tmp_viewer.orientation == 'axial'){
-						tmp_viewer.number.maximum = response.z;
-					}else if(tmp_viewer.orientation == 'coronal'){
-						tmp_viewer.number.maximum = response.y;
-					}else if(tmp_viewer.orientation == 'sagittal'){
-						tmp_viewer.number.maximum = response.x;
-					}
-				}
+                    if(ajax_cnt==initInfo[0].series.length-1){
+                        controllerRun();
+                    }else{
+                        ajax_cnt++;
+                        initAjax();
+                    }
+                }
+            });
 
-				if(ajax_cnt==initInfo[0].series.length-1){
-					controllerRun();
-				}else{
-					ajax_cnt++;
-					initAjax();
-				}
-			}
-		});
+        }//initAjax
+        initAjax();//ajax firing
 
-	}
-	initAjax();//ajax firing
+        var	controllerRun	=	function(){
+            //fire the controllers to the once per synchronized eries
+            for(var j=0;	j<initInfo.length;	j++){
+                $('#'+initInfo[j].wrapElementId).imageViewerController('init',initInfo[j]);
+                //insert & display revision attribute
+                var insert_prop = {
+                    properties: default_attr_prop
+                };
+                if (typeof initInfo[j].attribute != 'undefined') {
+                    insert_prop.value = initInfo[j].attribute;
+                }
+                $('#'+initInfo[j].elements.revisionAttribute).propertyeditor(insert_prop);
+            }
+        }
 
-	var	controllerRun	=	function(){
-		//fire the controllers to the once per synchronized eries
-		for(var j=0;	j<initInfo.length;	j++){
-			$('#'+initInfo[j].wrapElementId).imageViewerController('init',initInfo[j]);
-			//insert & display revision attribute
-			var insert_prop = {
-				properties: default_attr_prop
-			};
-			if (typeof initInfo[j].attribute != 'undefined') {
-				insert_prop.value = initInfo[j].attribute;
-			}
-			$('#'+initInfo[j].elements.revisionAttribute).propertyeditor(insert_prop);
-		}
-	}
+        $('#btnBack').click(function() {
+            $('body').append('<form action="./search" method="POST" class="hidden" id="frm_back"></form>');
+            $('#frm_back').append('<input type="hidden" name="btnBack" value="">');
+            $('#frm_back').submit();
+            return false;
+        });
 
-	$('#btnBack').click(function() {
-		$('body').append('<form action="./search" method="POST" class="hidden" id="frm_back"></form>');
-		$('#frm_back').append('<input type="hidden" name="btnBack" value="">');
-		$('#frm_back').submit();
-		return false;
-	});
+        $('.link_case_detail').click(function(){
+            changeRevision($(this).closest('td').find("input[name='revisionNo']").val(), 'detail');
+        });
 
-	$('.link_case_detail').click(function(){
-		changeRevision($(this).closest('td').find("input[name='revisionNo']").val(), 'detail');
-	});
+        $('.link_case_edit').click(function(){
+            changeRevision($(this).closest('td').find("input[name='revisionNo']").val(), 'edit');
+        });
 
-	$('.link_case_edit').click(function(){
-		changeRevision($(this).closest('td').find("input[name='revisionNo']").val(), 'edit');
-	});
+        $('.select_revision').change(function() {
+            changeRevision($(this).val());
+        });
 
-	$('.select_revision').change(function() {
-		changeRevision($(this).val());
-	});
+        $('.link_add_series').click(function(){
+            $('.frm_add_series').submit();
+            return false;
+        });
 
-	$('.link_add_series').click(function(){
-		$('.frm_add_series').submit();
-		return false;
-	});
-
-});
-
-var getLabelList = function(active_series_ld) {
-	$('#export_err').empty();
-    var export_data = {caseID: "{{{$case_detail->caseID}}}", seriesUID:active_series_ld, revisionNo:revisionNo};
-    //get label list of the revision
-    $.ajax({
-   	   url: "{{{asset('case/get_label_list')}}}",
-       type: 'post',
-       data: export_data,//送信データ
-       dataType: 'json',
-       error: function () {
-         alert('I failed to communicate.');
-       },
-       success: function (response) {
-         createLabelList(response.label_list, active_series_ld);
-       }
-   });
-}
-
-
-var createLabelList = function(label_list, active_series_id) {
-	//初期化
-		$('#exportSeriesUID').empty()
-													.append(active_series_id);
-		$('.exportSeriesUID').val(active_series_id);
-
-		$('.'+parentLabelList).empty();
-		var the_insert_elm = '';
-  	$.each(label_list, function(idx, val) {
-			the_insert_elm = the_insert_elm +'<li class="ui-state-dafault"><label>';
-			the_insert_elm = the_insert_elm +'<input type="checkbox" value="'+idx+'" id="export_label_idx'+idx+'" name="labels[]" class="export_labels">Label'+idx;
-			the_insert_elm = the_insert_elm +'</label></li>';
     });
-		$('.'+parentLabelList).append(the_insert_elm);
-}
-var changeRevision = function(index) {
-	if (arguments[1])
-		$('#frm_change_revision').find("input[name='mode']").val(arguments[1]);
-	$('.change_revision').val(index);
-	$('#frm_change_revision').submit();
-	return false;
-}
 
-var getRevisionList = function() {
-	var result_flag = $.ajax({
-		url: "{{{asset('case/get_revision_list')}}}",
-		type: 'post',
-		data: {caseID:"{{{$case_detail->caseID}}}"},//送信データ
-		dataType: 'json',
-		error: function () {
-			alert('Revision information acquisition failed .');
-			return false;
-		},
-		success: function (res) {
-			console.log(res);
-			if (res.status === "OK") {
-				create_dom(res.response);
-				return true;
-			}
-			console.log(res.message);
-			return false;
-		}
-	});
+    var getLabelList = function(active_series_ld) {
+        $('#export_err').empty();
+        var export_data = {caseID: "{{{$case_detail->caseID}}}", seriesUID:active_series_ld, revisionNo:revisionNo};
+        //get label list of the revision
+        $.ajax({
+           url: "{{{asset('case/get_label_list')}}}",
+           type: 'post',
+           data: export_data,//送信データ
+           dataType: 'json',
+           error: function () {
+             alert('I failed to communicate.');
+           },
+           success: function (response) {
+             createLabelList(response.label_list, active_series_ld);
+           }
+       });
+    }
 
-	var create_dom = function(insert_obj){
-		//setting revision combobox
-		$('.select_revision').empty();
-		$('#exportRevisionNo').empty();
-		var parent = $('.select_revision');
-		var opt_tag = "";
-		for(var i = 0; i < insert_obj.revision_no_list.length; i++) {
-			if (i === insert_obj.revision_no_list.length - 1) {
-				opt_tag = parent.append("<option value='"+i+"' selected>"+i+"</option>");
-				$('#exportRevisionNo').append(i);
-				$('.exportRevisionNo').val(i);
-				revisionNo = i;
-			} else {
-				opt_tag = parent.append("<option value='"+i+"'>"+i+"</option>");
-			}
-		}
 
-		//setting revision list
-		$('.result_revision_list').empty();
-		$.each(insert_obj.revision_list, function(i, val) {
-			var tbl_tag = "<tr><td>"+val['revisionNo']+"</td>";
-			tbl_tag += "<td>"+val['editDate']+"<br>"+val['editTime']+"</td>";
-			tbl_tag += "<td>"+val['seriesCount']+" series<br>"+val['labelCount']+" label</td>";
-			tbl_tag += "<td>"+val['creator']+"</td>";
-			tbl_tag += "<td class='al_l'>"+val['memo']+"</td>";
-			tbl_tag += "<td><input type='hidden' name='revisionNo' value='"+val['revisionNo']+"'>";
-			tbl_tag += "<button type='button' class='common_btn link_case_detail'>View</button></td></tr>";
-			$('.result_revision_list').append(tbl_tag);
-		});
+    var createLabelList = function(label_list, active_series_id) {
+        //初期化
+            $('#exportSeriesUID').empty().append(active_series_id);
+            $('.exportSeriesUID').val(active_series_id);
+            $('.'+parentLabelList).empty();
+            var the_insert_elm = '';
+            $.each(label_list, function(idx, val) {
+                    the_insert_elm = the_insert_elm +'<li class="ui-state-dafault"><label>';
+                    the_insert_elm = the_insert_elm +'<input type="checkbox" value="'+idx+'" id="export_label_idx'+idx+'" name="labels[]" class="export_labels">Label'+idx;
+                    the_insert_elm = the_insert_elm +'</label></li>';
+            });
+            $('.'+parentLabelList).append(the_insert_elm);
+    }
+    var changeRevision = function(index) {
+        if (arguments[1])
+            $('#frm_change_revision').find("input[name='mode']").val(arguments[1]);
+        $('.change_revision').val(index);
+        $('#frm_change_revision').submit();
+        return false;
+    }
 
-		$('.link_case_detail').click(function(){
-			changeRevision($(this).closest('td').find("input[name='revisionNo']").val(), 'detail');
-		});
+    var getRevisionList = function() {
+        var result_flag = $.ajax({
+            url: "{{{asset('case/get_revision_list')}}}",
+            type: 'post',
+            data: {caseID:"{{{$case_detail->caseID}}}"},//送信データ
+            dataType: 'json',
+            error: function () {
+                alert('Revision information acquisition failed .');
+                return false;
+            },
+            success: function (res) {
+                console.log(res);
+                if (res.status === "OK") {
+                    create_dom(res.response);
+                    return true;
+                }
+                console.log(res.message);
+                return false;
+            }
+        });
 
-		$('.link_case_edit').click(function(){
-			changeRevision($(this).closest('td').find("input[name='revisionNo']").val(), 'edit');
-		});
-	}
-	return result_flag;
-}
+        var create_dom = function(insert_obj){
+            //setting revision combobox
+            $('.select_revision').empty();
+            $('#exportRevisionNo').empty();
+            var parent = $('.select_revision');
+            var opt_tag = "";
+            for(var i = 0; i < insert_obj.revision_no_list.length; i++) {
+                if (i === insert_obj.revision_no_list.length - 1) {
+                    opt_tag = parent.append("<option value='"+i+"' selected>"+i+"</option>");
+                    $('#exportRevisionNo').append(i);
+                    $('.exportRevisionNo').val(i);
+                    revisionNo = i;
+                } else {
+                    opt_tag = parent.append("<option value='"+i+"'>"+i+"</option>");
+                }
+            }
+
+            //setting revision list
+            $('.result_revision_list').empty();
+            $.each(insert_obj.revision_list, function(i, val) {
+                var tbl_tag = "<tr><td>"+val['revisionNo']+"</td>";
+                tbl_tag += "<td>"+val['editDate']+"<br>"+val['editTime']+"</td>";
+                tbl_tag += "<td>"+val['seriesCount']+" series<br>"+val['labelCount']+" label</td>";
+                tbl_tag += "<td>"+val['creator']+"</td>";
+                tbl_tag += "<td class='al_l'>"+val['memo']+"</td>";
+                tbl_tag += "<td><input type='hidden' name='revisionNo' value='"+val['revisionNo']+"'>";
+                tbl_tag += "<button type='button' class='common_btn link_case_detail'>View</button></td></tr>";
+                $('.result_revision_list').append(tbl_tag);
+            });
+
+            $('.link_case_detail').click(function(){
+                changeRevision($(this).closest('td').find("input[name='revisionNo']").val(), 'detail');
+            });
+
+            $('.link_case_edit').click(function(){
+                changeRevision($(this).closest('td').find("input[name='revisionNo']").val(), 'edit');
+            });
+        }
+        return result_flag;
+    }
 </script>
 @endif
 @stop

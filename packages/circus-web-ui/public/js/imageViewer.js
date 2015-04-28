@@ -291,7 +291,7 @@
       this_opts.viewer.draw.activeSeriesId = seriesId;
 
 			var tmp_the_series = this_obj.getSeriesObjectById(seriesId);
-	
+
 			this_opts.viewer.window = new Object();
 			this_opts.viewer.window = $.extend(true,this_opts.viewer.window,tmp_the_series.window);
 
@@ -1127,9 +1127,9 @@
       var this_elm = this.element;
       var this_opts = this.options;
       e.preventDefault();
-			
-			if(e.which==3){
-				return	
+
+			if(e.which!=1){
+				return
 			};
 
       this_obj._tmpInfo.cursor.touch_flg = 1;
@@ -1137,7 +1137,7 @@
       //マウスの初期位置取得
       this_obj._tmpInfo.cursor.start.X = e.clientX;
       this_obj._tmpInfo.cursor.start.Y = e.clientY;
-			
+
 			console.log(e.clientX);
 
       if (this_opts.control.mode == 'pan') {

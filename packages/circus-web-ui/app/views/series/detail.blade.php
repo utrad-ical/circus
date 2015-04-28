@@ -149,9 +149,7 @@
                             tmp_series.window.width = new Object();
                         }
 
-                        console.log(tmp_series);
-
-                        if(typeof response.window_level == 'number'){
+                    if(typeof response.window_level == 'number'){
                             tmp_series.window.level.current = response.window_level;
                         };
 
@@ -164,7 +162,7 @@
                         //set dicom-written-info into the last of Preset array.
                         if(typeof response.window_level_dicom == 'number' && typeof response.window_width_dicom == 'number'){
                             var tmp_preset_dicom = {
-                                label: 'DICOM' ,
+                                label: 'dicom' ,
                                 level: response.window_level_dicom ,
                                 width: response.window_width_dicom
                             }
@@ -174,7 +172,7 @@
                         //set auto-info into the last of Preset array.
                         if(typeof response.window_level == 'number' && typeof response.window_width == 'number'){
                             var tmp_preset_auto = {
-                                label: 'AUTO' ,
+                                label: 'auto' ,
                                 level: response.window_level ,
                                 width: response.window_width
                             }
@@ -205,7 +203,7 @@
 
         var	controllerRun	=	function(){
             //Controller issue interlocking series one per one
-            for(var j=0;	j<initInfo.length;	j++){
+            for(var j=0; j<initInfo.length; j++){
                 $('#'+initInfo[j].wrapElementId).imageViewerController('init',initInfo[j]);
             }
         };

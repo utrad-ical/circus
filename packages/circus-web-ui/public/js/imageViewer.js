@@ -275,8 +275,8 @@
 						this_opts.control.mode == 'pan'	||
 						this_opts.control.mode == 'measure' ||
 						this_opts.control.mode == 'bucket'){
-							var tmp_class_name = 'mode_'+this_opts.control.mode;
-							this_elm.addClass(tmp_class_name);
+						var tmp_class_name = 'mode_'+this_opts.control.mode;
+						this_elm.addClass(tmp_class_name);
 				}
  			  this_elm.find('.disp_measure').removeClass('active');
 
@@ -290,31 +290,33 @@
       var this_opts = this.options;
       this_opts.viewer.draw.activeSeriesId = seriesId;
 
-		var tmp_the_series = this_obj.getSeriesObjectById(seriesId);
+			var tmp_the_series = this_obj.getSeriesObjectById(seriesId);
+	
+			this_opts.viewer.window = new Object();
+			this_opts.viewer.window = $.extend(true,this_opts.viewer.window,tmp_the_series.window);
 
-		this_opts.viewer.window = new Object();
-		this_opts.viewer.window = $.extend(true,this_opts.viewer.window,tmp_the_series.window);
+			this_opts.viewer.voxel = $.extend(true,this_opts.viewer.voxel,tmp_the_series.voxel);
 
-		this_elm.find('.image_window_level').val(this_opts.viewer.window.level.current);
-		this_elm.find('.label_level_min').val(this_opts.viewer.window.level.minimum);
-		this_elm.find('.label_level_max').val(this_opts.viewer.window.level.maximum);
-		this_elm.find('.image_window_width').val(this_opts.viewer.window.width.current);
-		this_elm.find('.label_width_min').val(this_opts.viewer.window.width.minimum);
-		this_elm.find('.label_width_max').val(this_opts.viewer.window.width.maximum);
-		this_elm.find('.image_window_level').trigger('change')
+			this_elm.find('.image_window_level').val(this_opts.viewer.window.level.current);
+			this_elm.find('.label_level_min').val(this_opts.viewer.window.level.minimum);
+			this_elm.find('.label_level_max').val(this_opts.viewer.window.level.maximum);
+			this_elm.find('.image_window_width').val(this_opts.viewer.window.width.current);
+			this_elm.find('.label_width_min').val(this_opts.viewer.window.width.minimum);
+			this_elm.find('.label_width_max').val(this_opts.viewer.window.width.maximum);
+			this_elm.find('.image_window_level').trigger('change')
 
-		var tmp_preset_array = this_opts.viewer.window.preset;
-		this_elm.find('.image_window_preset_select').empty();
-		if (typeof this_opts.viewer.window.preset != 'object'||this_opts.viewer.window.preset.length == 0) {
-			this_elm.find('.window_preset_wrap').addClass('hidden');
-		} else {
-			var tmp_elm = '<option	value="blank">select setting</option>';
-			for (var i = 0; i < tmp_preset_array.length; i++) {
-				tmp_elm = tmp_elm + '<option	value="' + tmp_preset_array[i].level + ',' + tmp_preset_array[i].width + '">' + tmp_preset_array[i].label + '</option>';
+			var tmp_preset_array = this_opts.viewer.window.preset;
+			this_elm.find('.image_window_preset_select').empty();
+			if (typeof this_opts.viewer.window.preset != 'object'||this_opts.viewer.window.preset.length == 0) {
+				this_elm.find('.window_preset_wrap').addClass('hidden');
+			} else {
+				var tmp_elm = '<option	value="blank">select setting</option>';
+				for (var i = 0; i < tmp_preset_array.length; i++) {
+					tmp_elm = tmp_elm + '<option	value="' + tmp_preset_array[i].level + ',' + tmp_preset_array[i].width + '">' + tmp_preset_array[i].label + '</option>';
+				}
+				this_elm.find('.window_preset_wrap').removeClass('hidden');
+				this_elm.find('.image_window_preset_select').append(tmp_elm);
 			}
-			this_elm.find('.window_preset_wrap').removeClass('hidden');
-			this_elm.find('.image_window_preset_select').append(tmp_elm);
-		}
 
       this_obj.setCanvasSize();
       this_obj._changeImgSrc();
@@ -857,7 +859,6 @@
         );
       }
 
-
       //キャンバス整形
       this_obj.setCanvasSize();
 
@@ -1126,6 +1127,10 @@
       var this_elm = this.element;
       var this_opts = this.options;
       e.preventDefault();
+			
+			if(event.which==3){
+				return	
+			};
 
       this_obj._tmpInfo.cursor.touch_flg = 1;
 

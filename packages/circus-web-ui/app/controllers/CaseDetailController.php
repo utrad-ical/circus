@@ -221,14 +221,16 @@ class CaseDetailController extends BaseController {
 						//Label information acquisition
 						if ($rec['id']) {
 							$label_info = Label::find($rec['id']);
-							$label['size'] = array($label_info->w, $label_info->h, $label_info->d);
-							$label['offset'] = array($label_info->x, $label_info->y, $label_info->z);
+							if ($label_info) {
+								$label['size'] = array($label_info->w, $label_info->h, $label_info->d);
+								$label['offset'] = array($label_info->x, $label_info->y, $label_info->z);
 
-							//Storage information acquisition
-							$storage_info = Storage::find($label_info->storageID);
-							$storage_path = $storage_info->path;
-							$img_path = file_get_contents($storage_path."/".$label['id'].'.png');
-							$label['image'] = 'data:image/png;base64,'.base64_encode($img_path);
+								//Storage information acquisition
+								$storage_info = Storage::find($label_info->storageID);
+								$storage_path = $storage_info->path;
+								$img_path = file_get_contents($storage_path."/".$label['id'].'.png');
+								$label['image'] = 'data:image/png;base64,'.base64_encode($img_path);
+							}
 						}
 					}
 					$series_info['label'][] = $label;

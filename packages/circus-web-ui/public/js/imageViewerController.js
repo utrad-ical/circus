@@ -31,9 +31,7 @@
               maximum: 2000,
               minimum: 1
             },
-            preset: [
-              //   {label: 'your preset label', level: 1000, width: 4000}
-            ]
+            preset: []
           },
           voxel: {
             x: 512, //series画像での横ピクセル数

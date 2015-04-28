@@ -760,29 +760,32 @@
 
         //ペン切替
         tmp_panel_elm.find('.ico_detail_sprite_pen').click(function () {
-					if (active_series.label.length == 0) {
-						alert('there is no drawable Label.\nPlease select draw mode after adding label.');
-					}else{
-						this_elm.imageViewerController('changeMode', 'pen');
-					};
+      	  	active_series = this_elm.imageViewerController('getSeriesObjectById', [controllerInfo.activeSeriesId]);
+				if (active_series.label.length == 0) {
+					alert('there is no drawable Label.\nPlease select draw mode after adding label.');
+				}else{
+					this_elm.imageViewerController('changeMode', 'pen');
+				};
         });
 
         //消しゴム
         tmp_panel_elm.find('.ico_detail_sprite_erase').click(function () {
-					if (active_series.label.length == 0) {
-						alert('there is no drawable Label.\nPlease select draw mode after adding label.');
-					}else{
-						this_elm.imageViewerController('changeMode', 'erase');
-					};
+      		active_series = this_elm.imageViewerController('getSeriesObjectById', [controllerInfo.activeSeriesId]);
+				if (active_series.label.length == 0) {
+					alert('there is no drawable Label.\nPlease select draw mode after adding label.');
+				}else{
+					this_elm.imageViewerController('changeMode', 'erase');
+				};
         });
 
         //バケツ
         tmp_panel_elm.find('.ico_detail_sprite_bucket').click(function () {
-					if (active_series.label.length == 0) {
-						alert('there is no drawable Label.\nPlease select draw mode after adding label.');
-					}else{
-						this_elm.imageViewerController('changeMode', 'bucket');
-					};
+      		active_series = this_elm.imageViewerController('getSeriesObjectById', [controllerInfo.activeSeriesId]);
+				if (active_series.label.length == 0) {
+					alert('there is no drawable Label.\nPlease select draw mode after adding label.');
+				}else{
+					this_elm.imageViewerController('changeMode', 'bucket');
+				};
         });
 
         //太さ変更

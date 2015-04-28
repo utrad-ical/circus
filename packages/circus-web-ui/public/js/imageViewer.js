@@ -914,6 +914,10 @@
         this_obj._setOptions(tmpSetValues);
       });
 
+      // Disable to display context menu
+      this_elm.bind('contextmenu', function (e) {
+        return false;
+      });
 
       //枚数送り関連要素
       if (this_opts.control.slider == true) {

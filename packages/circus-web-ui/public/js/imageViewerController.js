@@ -323,7 +323,11 @@
               tmp_panel_wrap.find('.image_window_controller').append('<li class="window_preset_wrap"><select class="image_window_preset_select"></select></li>');
               var tmp_elments_window_preset = '<option value="blank">select setting</option>';
               for (var i = 0; i < active_series.window.preset.length; i++) {
-                tmp_elments_window_preset = tmp_elments_window_preset + '<option value="' + active_series.window.preset[i].level + ',' + active_series.window.preset[i].width + '">' + active_series.window.preset[i].label + ' ' + active_series.window.preset[i].level + ',' + active_series.window.preset[i].width + '</option>';
+								var isSelected = '';
+								if(active_series.window.level.current == active_series.window.preset[i].level && active_series.window.width.current == active_series.window.preset[i].width){
+									isSelected = 'selected';
+								}
+                tmp_elments_window_preset = tmp_elments_window_preset + '<option value="' + active_series.window.preset[i].level + ',' + active_series.window.preset[i].width + '" '+isSelected+'>' + active_series.window.preset[i].label+'</option>';
               }
               tmp_panel_wrap.find('.image_window_preset_select').append(tmp_elments_window_preset);
             } //preset

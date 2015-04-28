@@ -295,30 +295,34 @@
 			this_opts.viewer.window = new Object();
 			this_opts.viewer.window = $.extend(true,this_opts.viewer.window,tmp_the_series.window);
 
-			this_opts.viewer.voxel = $.extend(true,this_opts.viewer.voxel,tmp_the_series.voxel);
-
 			this_elm.find('.image_window_level').val(this_opts.viewer.window.level.current);
 			this_elm.find('.label_level_min').val(this_opts.viewer.window.level.minimum);
 			this_elm.find('.label_level_max').val(this_opts.viewer.window.level.maximum);
 			this_elm.find('.image_window_width').val(this_opts.viewer.window.width.current);
 			this_elm.find('.label_width_min').val(this_opts.viewer.window.width.minimum);
 			this_elm.find('.label_width_max').val(this_opts.viewer.window.width.maximum);
-			this_elm.find('.image_window_level').trigger('change')
+			this_elm.find('.image_window_level').trigger('change');
 
 			var tmp_preset_array = this_opts.viewer.window.preset;
 			this_elm.find('.image_window_preset_select').empty();
-			if (typeof this_opts.viewer.window.preset != 'object'||this_opts.viewer.window.preset.length == 0) {
+			if (typeof this_opts.viewer.window.preset != 'object' || this_opts.viewer.window.preset.length == 0) {
 				this_elm.find('.window_preset_wrap').addClass('hidden');
 			} else {
-				var tmp_elm = '<option	value="blank">select setting</option>';
+				var tmp_elm = '<option value="blank">select setting</option>';
 				for (var i = 0; i < tmp_preset_array.length; i++) {
-					tmp_elm = tmp_elm + '<option	value="' + tmp_preset_array[i].level + ',' + tmp_preset_array[i].width + '">' + tmp_preset_array[i].label + '</option>';
+					var isSelected = '';
+					if(this_opts.viewer.window.level.current == tmp_preset_array[i].level && this_opts.viewer.window.width.current == tmp_preset_array[i].width){
+						isSelected = 'selected';
+					}
+					tmp_elm = tmp_elm + '<option value="' + tmp_preset_array[i].level + ',' + tmp_preset_array[i].width + '" '+isSelected+'>' + tmp_preset_array[i].label + '</option>';
 				}
 				this_elm.find('.window_preset_wrap').removeClass('hidden');
 				this_elm.find('.image_window_preset_select').append(tmp_elm);
 			}
-
+			
+			this_opts.viewer.voxel = $.extend(true,this_opts.viewer.voxel,tmp_the_series.voxel);
       this_obj.setCanvasSize();
+			
       this_obj._changeImgSrc();
     },
 
@@ -361,22 +365,23 @@
 					<p class="btn_close"></p><ul class="image_window_controller">';
 
         //レベル
-        tmp_elm = tmp_elm + '<li	class="window_level_wrap"><span	class="image_window_controller_label">window	level</span>\
+        tmp_elm = tmp_elm + '<li class="window_level_wrap"><span	class="image_window_controller_label">window	level</span>\
 					<input	type="text"	class="image_window_level"	value="' + this_opts.viewer.window.level.current + '">\
 					<span	class="label_level_min">' + this_opts.viewer.window.level.minimum + '</span>	～	\
 					<span	class="label_level_max">' + this_opts.viewer.window.level.maximum + '</span></li>';
 
         //幅
-        tmp_elm = tmp_elm + '<li	class="window_width_wrap"><span	class="image_window_controller_label">window	width</span>\
+        tmp_elm = tmp_elm + '<li class="window_width_wrap"><span	class="image_window_controller_label">window	width</span>\
 					<input	type="text"	class="image_window_width"	value="' + this_opts.viewer.window.width.current + '">\
 					<span	class="label_width_min">' + this_opts.viewer.window.width.minimum + '</span>	-	\
 					<span	class="label_width_max">' + this_opts.viewer.window.width.maximum + '</span></li>';
 
         //プリセット
-        tmp_elm = tmp_elm + '<li	class="window_preset_wrap hidden"><select	class="image_window_preset_select"></select></li>';
+        tmp_elm = tmp_elm + '<li class="window_preset_wrap hidden"><select	class="image_window_preset_select"></select></li>';
 
         tmp_elm = tmp_elm + '</ul></div>';
         this_elm.find('.img_wrap').append(tmp_elm);
+
         delete tmp_elm;
       }
 
@@ -407,8 +412,8 @@
       //ズーム機能関連要素
       if (this_opts.viewer.elements.zoom.panel == true) {
         var tmp_elm = '<div	class="img_toolbar_wrap"><ul class="img_toolbar">\
-											<li	class="toolbar_btn	ico_detail_sprite ico_detail_sprite_resize_large"></li>\
-											<li	class="toolbar_btn	ico_detail_sprite ico_detail_sprite_resize_short"></li>\
+											<li class="toolbar_btn	ico_detail_sprite ico_detail_sprite_resize_large"></li>\
+											<li class="toolbar_btn	ico_detail_sprite ico_detail_sprite_resize_short"></li>\
 										</ul></div>';
         this_elm.find('.img_wrap').prepend(tmp_elm);
         delete tmp_elm;
@@ -874,7 +879,7 @@
           this_obj.syncVoxel();
         });
 
-      var mousewheelevent = 'onwheel' in    document ? 'wheel' : 'onmousewheel' in    document ? 'mousewheel' : 'DOMMouseScroll';
+      var mousewheelevent = 'onwheel' in document ? 'wheel' : 'onmousewheel' in    document ? 'mousewheel' : 'DOMMouseScroll';
 
       //マウスによるパン・描画関連
       this_elm.find('.mouse_cover')
@@ -1135,14 +1140,12 @@
 			if(e.which!=1){
 				return
 			};
-
+			
       this_obj._tmpInfo.cursor.touch_flg = 1;
 
       //マウスの初期位置取得
       this_obj._tmpInfo.cursor.start.X = e.clientX;
       this_obj._tmpInfo.cursor.start.Y = e.clientY;
-
-			console.log(e.clientX);
 
       if (this_opts.control.mode == 'pan') {
         //トリミング領域の初期位置取得

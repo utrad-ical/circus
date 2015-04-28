@@ -1138,8 +1138,6 @@
 				return
 			};
 			
-			var voxel_zoom =this_opts.viewer.voxel.x / 512;
-			
       this_obj._tmpInfo.cursor.touch_flg = 1;
 
       //マウスの初期位置取得
@@ -1167,8 +1165,8 @@
         //this_obj._tmpInfo.elementParam.start.Y = Math.round(this_obj._tmpInfo.elementParam.start.Y);
 
         //canvas要素の左端を起点としたときのマウス位置(ズーム解除状態でのXY値)
-        this_obj._tmpInfo.cursor.current.X = (e.clientX  - this_obj._tmpInfo.elementParam.start.X) * voxel_zoom / this_opts.viewer.position.zoom;
-        this_obj._tmpInfo.cursor.current.Y = (e.clientY  - this_obj._tmpInfo.elementParam.start.Y) * voxel_zoom / this_opts.viewer.position.zoom;
+        this_obj._tmpInfo.cursor.current.X = (e.clientX  - this_obj._tmpInfo.elementParam.start.X) / this_opts.viewer.position.zoom;
+        this_obj._tmpInfo.cursor.current.Y = (e.clientY  - this_obj._tmpInfo.elementParam.start.Y) / this_opts.viewer.position.zoom;
 
         //画像トリミング分の補正
         this_obj._tmpInfo.cursor.current.X = this_obj._tmpInfo.cursor.current.X + this_opts.viewer.position.sx * this_opts.viewer.position.dw / this_opts.viewer.position.ow;
@@ -1213,8 +1211,8 @@
       } else if (this_opts.control.mode == 'measure') {
 					//定規モード
 					//マウス位置取得
-					var tmp_cursor_x = (e.clientX  - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().left) * voxel_zoom / this_opts.viewer.position.zoom;
-					var tmp_cursor_y = (e.clientY  - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().top) * voxel_zoom / this_opts.viewer.position.zoom;
+					var tmp_cursor_x = (e.clientX  - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().left) / this_opts.viewer.position.zoom;
+					var tmp_cursor_y = (e.clientY  - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().top) / this_opts.viewer.position.zoom;
 
 					//初期位置(ズーム解除状態でのXY値)
 					this_obj._tmpInfo.cursor.start.X = tmp_cursor_x + this_opts.viewer.position.sx * this_opts.viewer.position.dw / this_opts.viewer.position.ow;
@@ -1228,7 +1226,6 @@
       var this_obj = this;
       var this_elm = this.element;
       var this_opts = this.options;
-			var voxel_zoom =this_opts.viewer.voxel.x / 512;
       //手のひらツール
       if (this_opts.control.mode == 'pan') {
         if (this_obj._tmpInfo.cursor.touch_flg == 1) {
@@ -1236,8 +1233,8 @@
           var series_image_elm_ctx = this_elm.find('.series_image_elm').get(0).getContext('2d');
 
           //手のひらツール
-          var tmp_x = (e.clientX  - this_obj._tmpInfo.cursor.start.X) * voxel_zoom / this_opts.viewer.position.zoom;
-          var tmp_y = (e.clientY  - this_obj._tmpInfo.cursor.start.Y) * voxel_zoom / this_opts.viewer.position.zoom;
+          var tmp_x = (e.clientX  - this_obj._tmpInfo.cursor.start.X) / this_opts.viewer.position.zoom;
+          var tmp_y = (e.clientY  - this_obj._tmpInfo.cursor.start.Y) / this_opts.viewer.position.zoom;
 
           tmp_x = this_obj._tmpInfo.elementParam.start.X - tmp_x * this_opts.viewer.position.ow / this_opts.viewer.position.dw;
           tmp_y = this_obj._tmpInfo.elementParam.start.Y - tmp_y * this_opts.viewer.position.oh / this_opts.viewer.position.dh;
@@ -1256,8 +1253,8 @@
             var tmp_ctx = this_elm.find('.canvas_main_elm').get(0).getContext('2d');
 
             //新しいマウス位置(ズーム解除状態に換算した際のXY値)
-            var tmp_x = (e.clientX  - this_obj._tmpInfo.elementParam.start.X) * voxel_zoom / this_opts.viewer.position.zoom;
-            var tmp_y = (e.clientY  - this_obj._tmpInfo.elementParam.start.Y) * voxel_zoom / this_opts.viewer.position.zoom;
+            var tmp_x = (e.clientX  - this_obj._tmpInfo.elementParam.start.X) / this_opts.viewer.position.zoom;
+            var tmp_y = (e.clientY  - this_obj._tmpInfo.elementParam.start.Y) / this_opts.viewer.position.zoom;
 
             //トリミング分の補正
             tmp_x = tmp_x + this_opts.viewer.position.sx * this_opts.viewer.position.dw / this_opts.viewer.position.ow;
@@ -1303,8 +1300,8 @@
           } else {
 
             //新しいマウス位置(ズーム解除状態に換算した際のXY値)
-            var tmp_x = (e.clientX  - this_obj._tmpInfo.elementParam.start.X) * voxel_zoom / this_opts.viewer.position.zoom;
-            var tmp_y = (e.clientY  - this_obj._tmpInfo.elementParam.start.Y) * voxel_zoom / this_opts.viewer.position.zoom;
+            var tmp_x = (e.clientX  - this_obj._tmpInfo.elementParam.start.X) / this_opts.viewer.position.zoom;
+            var tmp_y = (e.clientY  - this_obj._tmpInfo.elementParam.start.Y) / this_opts.viewer.position.zoom;
 
             //トリミング分の補正
             tmp_x = tmp_x + this_opts.viewer.position.sx * this_opts.viewer.position.dw / this_opts.viewer.position.ow;
@@ -1341,8 +1338,8 @@
         if (this_obj._tmpInfo.cursor.touch_flg == 1) {
             //定規モード
             //マウス位置取得(ズーム解除状態でのXY値)
-            var tmp_cursor_x = (e.clientX  - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().left) * voxel_zoom / this_opts.viewer.position.zoom;
-            var tmp_cursor_y = (e.clientY  - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().top) * voxel_zoom / this_opts.viewer.position.zoom;
+            var tmp_cursor_x = (e.clientX  - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().left) / this_opts.viewer.position.zoom;
+            var tmp_cursor_y = (e.clientY  - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().top) / this_opts.viewer.position.zoom;
 
             //画像トリミング分の補正
             this_obj._tmpInfo.cursor.current.X = tmp_cursor_x + this_opts.viewer.position.sx * this_opts.viewer.position.dw / this_opts.viewer.position.ow;

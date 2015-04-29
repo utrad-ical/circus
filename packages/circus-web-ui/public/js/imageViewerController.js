@@ -6,94 +6,91 @@
   //連動のために確保する情報群(デフォルト値)
   //コントローラ発動時にサーバーからもらった情報をマージして格納する
   //変更時にはこれを書き換えて、以降の処理時に参照する
-      var controllerInfo = {
-      activeSeriesId: '', //参照するシリーズid
-      baseUrl: 'http://your-website/', //画像格納ディレクトリ
-      color_marker: 0,
-      defaultColorSet: ['#FF0000', '#FFCC00', '#0033FF', '#0099FF', '#00CCFF',
-        '#00FFFF', '#00FF00', '#00CC00', '#009900', '#006600', '#FF6600',
-        '#FF3300', '#3333CC', '#CC3399', '#CC6666', '#FF9999'],
-      defaultLabelAttribute: {},
-      mode: 'pan', //pan,pen,erase,window
-      series: [{
-          activeLabelId: '', //ウインドウレベル・幅はシリーズに紐づかせるか否かはユーザー定義
-          id: '',
-          description: 'series name', //シリーズ名,今は特に使っていない
-          number: 512, //何枚の断面が格納されているか
-          window: {
-            level: {
-              current: 1000,
-              maximum: 4000,
-              minimum: 0
-            },
-            width: {
-              current: 4000,
-              maximum: 2000,
-              minimum: 1
-            },
-            preset: []
-          },
-          voxel: {
-            x: 512, //series画像での横ピクセル数
-            y: 512, //series画像での縦ピクセル数
-            z: 512, //seriesに含まれる画像の枚数
-            voxel_x: 1, //ボクセルの幅
-            voxel_y: 1, //ボクセルの奥行き
-            voxel_z: 1 //ボクセルの高さ
-          }
-          //todo xyzの方向によって表示するときの縮尺が違うようなことがある場合には,その縮尺に相当するパラメータを用意しよう
-        } //series１個分の情報群
-      ],
-      control: {
-        boldness: {
-          active: true,
-          value: 1
-        }, //太さ変更
-        bucket: {
-          active: true,
-          value: 1
-        }, //太さ変更
-        measure: {
-          active: true, //定規機能の有効・無効
-          panel: true, //定規表示パネルの有無
-        },
-        color: {
-          control: true //カラーピッカーの有無
-        },
-        pan: true, //手のひらツール
-        window: {
-          active: true,
-          panel: true
-        },
-        pen: {
-          active: true, //描画機能の有効・無効
-          panel: true, //ラベル情報表示パネルの有無
-        },
-        show: true, //そもそもコントロールパネルを置くかどうか
-        undo: true //戻す・やり直す一括
-      },
-      elements: {
-        parent: '', //複数のビューアーを全て囲う親要素id
-        panel: '', //操作パネルを入れ込む要素id
-        label: '', //ラベルの操作ボタン等を入れ込む要素id
-        labelAttribute: '', //ラベルの操作ボタン等を入れ込む要素id
-        revisionAttribute: '' //revision attribute
-      },
-      viewer: [ //展開するビューアーの情報
-        {
-          id: 'viewer_', //内部的にビューアーに名前を付けておく
-          elementId: '',
-          orientation: 'axial',
-          window: {}, //ひな形の中身は active_series.window と共通
-          number: {
-            maximum: 512, //何枚の断面が格納されているか
-            minimum: 0, //何枚の断面が格納されているか
-            current: 0 //初期の表示番号
-          }
-        }
-      ]
-    }
-
+	var controllerInfo = {
+		activeSeriesId: '', //参照するシリーズid
+		baseUrl: 'http://your-website/', //画像格納ディレクトリ
+		color_marker: 0,
+		defaultColorSet: ['#FF0000', '#FFCC00', '#0033FF', '#0099FF', '#00CCFF', '#00FFFF', '#00FF00', '#00CC00', '#009900', '#006600', '#FF6600', '#FF3300', '#3333CC', '#CC3399', '#CC6666', '#FF9999'],
+		defaultLabelAttribute: {},
+		mode: 'pan', //pan,pen,erase,window
+		series: [{
+				activeLabelId: '', //ウインドウレベル・幅はシリーズに紐づかせるか否かはユーザー定義
+				id: '',
+				description: 'series name', //シリーズ名,今は特に使っていない
+				number: 512, //何枚の断面が格納されているか
+				window: {
+					level: {
+						current: 1000,
+						maximum: 4000,
+						minimum: 0
+					},
+					width: {
+						current: 4000,
+						maximum: 2000,
+						minimum: 1
+					},
+					preset: []
+				},
+				voxel: {
+					x: 512, //series画像での横ピクセル数
+					y: 512, //series画像での縦ピクセル数
+					z: 512, //seriesに含まれる画像の枚数
+					voxel_x: 1, //ボクセルの幅
+					voxel_y: 1, //ボクセルの奥行き
+					voxel_z: 1 //ボクセルの高さ
+				}
+				//todo xyzの方向によって表示するときの縮尺が違うようなことがある場合には,その縮尺に相当するパラメータを用意しよう
+			} //series１個分の情報群
+		],
+		control: {
+			boldness: {
+				active: true,
+				value: 1
+			}, //太さ変更
+			bucket: {
+				active: true,
+				value: 1
+			}, //太さ変更
+			measure: {
+				active: true, //定規機能の有効・無効
+				panel: true, //定規表示パネルの有無
+			},
+			color: {
+				control: true //カラーピッカーの有無
+			},
+			pan: true, //手のひらツール
+			window: {
+				active: true,
+				panel: true
+			},
+			pen: {
+				active: true, //描画機能の有効・無効
+				panel: true, //ラベル情報表示パネルの有無
+			},
+			show: true, //そもそもコントロールパネルを置くかどうか
+			undo: true //戻す・やり直す一括
+		},
+		elements: {
+			parent: '', //複数のビューアーを全て囲う親要素id
+			panel: '', //操作パネルを入れ込む要素id
+			label: '', //ラベルの操作ボタン等を入れ込む要素id
+			labelAttribute: '', //ラベルの操作ボタン等を入れ込む要素id
+			revisionAttribute: '' //revision attribute
+		},
+		viewer: [ //展開するビューアーの情報
+			{
+				id: 'viewer_', //内部的にビューアーに名前を付けておく
+				elementId: '',
+				orientation: 'axial',
+				window: {}, //ひな形の中身は active_series.window と共通
+				number: {
+					maximum: 512, //何枚の断面が格納されているか
+					minimum: 0, //何枚の断面が格納されているか
+					current: 0 //初期の表示番号
+				}
+			}
+		]
+	}
 
   //3枚連動のためのメソッド群
   var controller_methods = {
@@ -760,7 +757,6 @@
       //ペンツールボタン
       if (controllerInfo.control.pen.active == true) {
 
-
         //ペン切替
         tmp_panel_elm.find('.ico_detail_sprite_pen').click(function () {
       	  	active_series = this_elm.imageViewerController('getSeriesObjectById', [controllerInfo.activeSeriesId]);
@@ -861,6 +857,7 @@
         this_elm.imageViewerController('checkUpdateLabel');
 
         var changed_label_num = this_elm.imageViewerController('changedLabelNum');
+				console.log(changed_label_num);
 
         if (changed_label_num == 0) {
           $('#export_err').empty();
@@ -1017,26 +1014,25 @@
       try {
         for (var i = 0; i < controllerInfo.series.length; i++) {
           var tmp_the_series = controllerInfo.series[i];
-          var tmp_insert_obj = new Object();
+          var tmp_insert_obj = {};
           tmp_insert_obj.id = tmp_the_series.id;
           tmp_insert_obj.label = new Array(0);
           if (typeof tmp_the_series.label == 'object') {
             for (var j = 0; j < tmp_the_series.label.length; j++) {
               var tmp_the_label = tmp_the_series.label[j];
               var container_data = $('#img_area_axial').imageViewer('createSaveData', tmp_the_series.id, tmp_the_label.id);
-              tmp_insert_obj.label[j] = new Object();
+              tmp_insert_obj.label[j] = {};
               tmp_insert_obj.label[j].offset = container_data.offset;
               tmp_insert_obj.label[j].sizes = container_data.size;
               if (container_data.image.indexOf('data:image') == -1) {
                 container_data.image = '';
-              };
+              }
               tmp_insert_obj.label[j] = container_data;
-							if(tmp_insert_obj.label[j].size[0] != 0 && tmp_insert_obj.label[j].size[0] != 0 && tmp_insert_obj.label[j].size[0] != 0){
-								tmp_insert_obj.label[j].id = tmp_the_label.id;
-							}else{
-								tmp_insert_obj.label[j].id = '';
-							}
-
+              if (tmp_insert_obj.label[j].size[0] !== 0 && tmp_insert_obj.label[j].size[0] !== 0 && tmp_insert_obj.label[j].size[0] !== 0) {
+                tmp_insert_obj.label[j].id = tmp_the_label.id;
+              } else {
+                tmp_insert_obj.label[j].id = '';
+              }
               if (typeof tmp_the_label.attribute == 'object') {
                 tmp_insert_obj.label[j].attribute = tmp_the_label.attribute;
               }
@@ -1048,38 +1044,36 @@
         //console.log(e);
         return false;
       }
-
+			
+			
+			
       var tmp_input_memo = window.prompt('input Memo', controllerInfo.memo);
-      if (tmp_input_memo != null) {
-        save_data.memo = tmp_input_memo;
-      } else{
-				return;
-			}
-
-      //console.log(save_data);
-      //console.log("URL::");
-      //console.log(controllerInfo.postUrl);
-      //console.log(save_data);
-      $.ajax({
-        url: controllerInfo.postUrl,
-          type: 'post',
-          data: {
-            data: save_data
-          }, //送信データ
-          dataType: 'json',
-          error: function() {
-            alert('通信に失敗しました');
-          },
-          success: function(response) {
-           var revisionRes = getRevisionList();
-           if (revisionRes) alert(response.message);
-           else alert('Failed to get revision information .');
-          }
-      });
-
-
+      if (tmp_input_memo !== null) {
+          //save
+          //console.log(save_data);
+          //console.log("URL::");
+          //console.log(controllerInfo.postUrl);
+          //console.log(save_data);
+          save_data.memo = tmp_input_memo;
+          $.ajax({
+              url: controllerInfo.postUrl,
+              type: 'post',
+              data: {
+                  data: save_data
+              }, //送信データ
+              dataType: 'json',
+              error: function() {
+                  alert('通信に失敗しました');
+              },
+              success: function(response) {
+                  var revisionRes = getRevisionList();
+                  if (revisionRes) alert(response.message);
+                  else alert('Failed to get revision information .');
+              }
+          });
+      }
       return false;
-    },
+    },//saveData
 
 
 
@@ -1192,8 +1186,7 @@
     }/*setViewerInnerEvents*/,
 
 
-    //３面のウインドウレベル・幅を同期する
-    //第一引数：変更されたウインドウの情報
+    //Synchronize the window settings of viewers
     syncWindowInfo: function (tmp_this_opts) {
 
       var this_elm = this;
@@ -1202,39 +1195,36 @@
         active_series = controllerInfo.series[0];
         controllerInfo.activeSeriesId = active_series.id;
       }
-
       var tmp_panel_elm = 'body';
       if (controllerInfo.elements.panel.length > 0) {
         tmp_panel_elm = '#' + controllerInfo.elements.panel;
       }
       tmp_panel_elm = $(tmp_panel_elm);
-
       active_series.window.level.current = tmp_this_opts.level.current + 0;
       active_series.window.width.current = tmp_this_opts.width.current + 0;
       tmp_panel_elm.find('.image_window_level').val(active_series.window.level.current);
       tmp_panel_elm.find('.image_window_width').val(active_series.window.width.current);
-
-      //配下ビューアーオプション情報を書き換えて再描画を発火させる
-      //まずは適用させる値を用意
+       //配下ビューアーオプション情報を書き換えて再描画を発火させる
+       //まずは適用させる値を用意
       var tmp_win_values = {
-        viewer: {
-          window: {
-            level: {
-              current: active_series.window.level.current,
-            },
-            width: {
-              current: active_series.window.width.current,
+          viewer: {
+            window: {
+              level: {
+                current: active_series.window.level.current,
+              },
+              width: {
+                current: active_series.window.width.current,
+              }
             }
           }
         }
-      }
-
-      //値を渡してビュワー発火
+        //値を渡してビュワー発火
       for (var i = 0; i < controllerInfo.viewer.length; i++) {
         var elmId = '#' + controllerInfo.viewer[i].elementId;
         $(elmId).trigger('setOptions', [tmp_win_values]).trigger('changeImgSrc');
       }
-    }/*syncWindowInfo*/,
+    },//syncWindowInfo
+
 
 
     updateLabelElements: function () {
@@ -1260,7 +1250,6 @@
 					}
 				}
       }
-
 
       var tmp_elm = '';
 
@@ -1467,18 +1456,17 @@
 
     }, //updateLabelElements
 
-    zeroFormat: function (input_array) {
-      // input_array = [ num , num ]
-      var e = input_array[0];
-      var t = input_array[1];
-      var n = String(e).length;
-      if (t > n) {
-        return (new Array(t - n + 1)).join(0) + e
-      } else {
-        return e
-      }
-    }//zeroFormat
-
+    zeroFormat: function(input_array) {
+			// input_array = [ num , num ]
+			var e = input_array[0];
+			var t = input_array[1];
+			var n = String(e).length;
+			if (t > n) {
+				return (new Array(t - n + 1)).join(0) + e
+			} else {
+				return e
+			}
+		} //zeroFormat
   }
 
   // プラグインメイン

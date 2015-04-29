@@ -58,7 +58,6 @@ voxelContainer.prototype.addLoadedData = function (series_id, label_id, the_mode
 
 	var tmp_series = this_obj.getSeriesObjectById(series_id);
 
-
   for (var i = position_array.length - 1; i >= 0; i--) {
 		if(typeof position_array[i] != 'undefined'){
 			var this_slice = position_array[i];
@@ -549,34 +548,32 @@ voxelContainer.prototype.historyRedo = function () {
 };
 
 
+
 voxelContainer.prototype.insertLabelData = function (insert_obj) {
-  /*ラベルデータをオブジェクトとして直接入れる*/
-  /*主にページロード時のデータロード用*/
+  // insert Label data directry
+  // this function is call for insert loaded Label data into container
+	
   var this_obj = this;
   var this_data = this_obj.data;
 
   for (var i = 0; i < insert_obj.length; i++) {
     var tmp_series = insert_obj[i];
-    var the_zoom = 512 / tmp_series.voxel.x;
-    var series_w = the_zoom * tmp_series.voxel.x;
-    var series_h = the_zoom * tmp_series.voxel.y * tmp_series.voxel.voxel_y / tmp_series.voxel.voxel_x;
+    var series_w = tmp_series.voxel.x;
+    var series_h = tmp_series.voxel.y * tmp_series.voxel.voxel_y / tmp_series.voxel.voxel_x;
 
     if (typeof tmp_series.label == 'object') {
       for (var j = 0; j < tmp_series.label.length; j++) {
         var tmp_label = tmp_series.label[j];
         var position_data = this_obj.getPositionDataFromImage(tmp_label, series_w, series_h);
         this_obj.addLabel(tmp_series.id, tmp_label.id, position_data);
-        //初期データをヒストリーに積む
-				
 
+        //put loaded data into History object.
         this_obj.addLoadedData(tmp_series.id,tmp_label.id,'pen',position_data);
       }
     }
   }
-
-
-
 };
+
 
 
 //ある断面で塗るべきマスの情報を返す

@@ -59,22 +59,15 @@
           dw: 512, dh: 512, //貼りつけサイズ(基本的にはキャンバスの領域いっぱいに表示する)	todo:シリーズ情報から参照して上書き
           zoom: 1				//元画像に対しての拡大率
         },
-        draw: {
-          activeSeriesId: '',
-          boldness: 1,
-          series: [
-            {
-              activeLabelId: '', //現在の描画対象ラベル
-              id: '',
-              label: [
-                /*
-                 描画情報格納用,今現在表示しているz軸で塗られているxy座標の集合を格納する。ラベルにつき１項目ずつ
-                 {	id : 'label_1', rgba : rgba(0,0,0,1),position:[] ,visible : true				}
-                 */
-              ]
-            }
-          ]
-        },
+        activeSeriesId: '',
+        boldness: 1,
+				series: [
+					{
+						activeLabelId: '', //現在の描画対象ラベル
+						id: '',
+						label: [] //sample { id : 'label_1', rgba : rgba(0,0,0,1),position:[] ,visible : true}
+					}
+				],
 				measure : {
 				 start_x : 0,
 				 start_y : 0,
@@ -124,7 +117,7 @@
       var this_obj = this;
       var this_opts = this.options
       var rtn_array = new Array(0);
-      var the_boldness = this_opts.viewer.draw.boldness;
+      var the_boldness = this_opts.viewer.boldness;
 
       for (var i = insert_array.length - 1; i >= 0; i--) {
         for (var k = the_boldness - 1; k >= 0; k--) {	//x軸
@@ -165,7 +158,7 @@
       this_opts.viewer.position.sy = Math.max(this_opts.viewer.position.sy, 0);
 
       //以下、画像src差し替え
-      var src_url = this_opts.viewer.src + '?series=' + this_opts.viewer.draw.activeSeriesId + '&mode=' + this_opts.viewer.orientation + '&wl=' + this_opts.viewer.window.level.current + '&ww=' + this_opts.viewer.window.width.current + '&target=' + this_opts.viewer.number.current;
+      var src_url = this_opts.viewer.src + '?series=' + this_opts.viewer.activeSeriesId + '&mode=' + this_opts.viewer.orientation + '&wl=' + this_opts.viewer.window.level.current + '&ww=' + this_opts.viewer.window.width.current + '&target=' + this_opts.viewer.number.current;
 
       var tmp_img_obj = new Image;
       var changeMain = function () {
@@ -208,7 +201,7 @@
           tmp_img_obj.onload = function () {
             this_opts.viewer.loadQue.current--;
             //ロード完了時点でその画像がまだ参照先として指定されたものであればキャンバスを書き換え
-            if (tmp_img_obj.src == this_opts.viewer.src + '?series=' + this_opts.viewer.draw.activeSeriesId + '&mode=' + this_opts.orientation + '&wl=' + this_opts.viewer.window.level.current + '&ww=' + this_opts.viewer.window.width.current + '&target=' + this_opts.viewer.number.current) {
+            if (tmp_img_obj.src == this_opts.viewer.src + '?series=' + this_opts.viewer.activeSeriesId + '&mode=' + this_opts.orientation + '&wl=' + this_opts.viewer.window.level.current + '&ww=' + this_opts.viewer.window.width.current + '&target=' + this_opts.viewer.number.current) {
               changeMain();
             } else {
               this_obj._changeImgSrc();
@@ -286,7 +279,7 @@
       var this_obj = this;
       var this_elm = this.element;
       var this_opts = this.options;
-      this_opts.viewer.draw.activeSeriesId = seriesId;
+      this_opts.viewer.activeSeriesId = seriesId;
 			var tmp_the_series = this_obj.getSeriesObjectById(seriesId);
 
 			this_opts.viewer.window = new Object();
@@ -454,7 +447,6 @@
       //第2引数 : 適用するステータス(trueまたはfalse)
       target_context.mozImageSmoothingEnabled = state;
       target_context.oImageSmoothingEnabled = state;
-      target_context.webkitImageSmoothingEnabled = state;
       target_context.imageSmoothingEnabled = state;
       target_context.antialias = 'none';
       target_context.patternQuality = 'fast';
@@ -463,8 +455,6 @@
 
     drawLabel: function (series_id, label_id, positions_array) {
       //塗り機能
-      //第1引数 : 対象ラベル
-      //第2引数 : 塗る点の集合の配列	[x,y,z],[x2,y2,z2]...
 
       var this_obj = this;
       var this_elm = this_obj.element;
@@ -506,35 +496,31 @@
 
 
     drawMeasure : function(){
-        var this_obj = this;
-        var this_elm = this.element;
-        var this_opts = this.options;
+			var this_obj = this;
+			var this_elm = this.element;
+			var this_opts = this.options;
 
-        //ラベルを描くcanvas要素のオブジェクト
-        var tmp_ctx = this_elm.find('.canvas_main_elm').get(0).getContext('2d');
-        tmp_ctx.beginPath();
-        tmp_ctx.strokeStyle = 'rgb(155, 187, 89)';
-        tmp_ctx.fillStyle = 'rgb(155, 187, 89)';
-        tmp_ctx.moveTo(this_opts.viewer.measure.start_x,this_opts.viewer.measure.start_y);
-        tmp_ctx.lineTo(this_opts.viewer.measure.goal_x,this_opts.viewer.measure.goal_y);
-        tmp_ctx.stroke();
-        tmp_ctx.fillRect(this_opts.viewer.measure.start_x-2, this_opts.viewer.measure.start_y-2, 4, 4);
-        tmp_ctx.fillRect(this_opts.viewer.measure.goal_x-2, this_opts.viewer.measure.goal_y-2, 4, 4);
-        tmp_ctx.closePath();
+			//ラベルを描くcanvas要素のオブジェクト
+			var tmp_ctx = this_elm.find('.canvas_main_elm').get(0).getContext('2d');
+			tmp_ctx.beginPath();
+			tmp_ctx.strokeStyle = 'rgb(155, 187, 89)';
+			tmp_ctx.fillStyle = 'rgb(155, 187, 89)';
+			tmp_ctx.moveTo(this_opts.viewer.measure.start_x,this_opts.viewer.measure.start_y);
+			tmp_ctx.lineTo(this_opts.viewer.measure.goal_x,this_opts.viewer.measure.goal_y);
+			tmp_ctx.stroke();
+			tmp_ctx.fillRect(this_opts.viewer.measure.start_x-2, this_opts.viewer.measure.start_y-2, 4, 4);
+			tmp_ctx.fillRect(this_opts.viewer.measure.goal_x-2, this_opts.viewer.measure.goal_y-2, 4, 4);
+			tmp_ctx.closePath();
     },
 
 
     eraseLabel: function (series_id, label_id, positions_array) {
-      //塗り機能
-      //第1引数 : 対象ラベル
-      //第2引数 : 塗る点の集合の配列(boxel上でのxy値)
 
       var this_obj = this;
       var this_elm = this.element;
       var this_opts = this.options;
       var tmp_ctx = this_elm.find('.canvas_main_elm').get(0).getContext('2d');
 
-      //描画対象ラベルのチェック
       var target_label = this_obj.getLabelObjectById(label_id, series_id);
       var array_num = positions_array.length;
       var tmp_zoom = this_opts.viewer.position.zoom;
@@ -546,8 +532,7 @@
         tmp_ctx.clearRect(tmp_x, tmp_y, tmp_zoom, tmp_zoom);
       }
       tmp_ctx.closePath();
-
-    },//drawCommon	キャンバス描画ここまで
+    },//eraseLabel
 
 
     _exchangePositionCtoV: function (insert_array) {
@@ -581,7 +566,7 @@
       }
 
       return rtn_array;
-    },
+    },//_exchangePositionCtoV
 
 
     getOptions: function () {
@@ -761,9 +746,9 @@
     getSeriesObjectById: function (series_id) {
       //描画対象ラベルのチェック
       var this_opts = this.options;
-      for (var i = this_opts.viewer.draw.series.length - 1; i >= 0; i--) {
-        if (this_opts.viewer.draw.series[i].id == series_id) {
-          return this_opts.viewer.draw.series[i];
+      for (var i = this_opts.viewer.series.length - 1; i >= 0; i--) {
+        if (this_opts.viewer.series[i].id == series_id) {
+          return this_opts.viewer.series[i];
         }
       }
     },
@@ -842,8 +827,8 @@
       delete this_id;
 
       //ある分だけシリーズサイズをコンテナに送り込む
-      for (var i = 0; i < this_opts.viewer.draw.series.length; i++) {
-        var tmp_series = this_opts.viewer.draw.series[i];
+      for (var i = 0; i < this_opts.viewer.series.length; i++) {
+        var tmp_series = this_opts.viewer.series[i];
         this_opts.control.container.setSize(
           tmp_series.id,
           tmp_series.voxel.x,
@@ -1095,7 +1080,7 @@
       }//ズーム機能ここまで
       this_elm.find('.current_size').text(100 * Number(this_opts.viewer.position.zoom)); //初期発火用
 
-      this_obj.changeSeries(this_opts.viewer.draw.series[0].id);
+      this_obj.changeSeries(this_opts.viewer.series[0].id);
 
       //諸々のデータ群のセットが終わったところで描画機能発火
       this_obj._changeImgSrc();
@@ -1110,7 +1095,7 @@
       var this_elm = this.element;
       var this_opts = this.options;
 
-      var put_data = this_opts.viewer.draw.series;
+      var put_data = this_opts.viewer.series;
       if (typeof insert_obj != 'undefined') {
         put_data = insert_obj;
       }
@@ -1163,7 +1148,7 @@
         this_obj._tmpInfo.cursor.current.X = this_obj._tmpInfo.cursor.current.X + this_opts.viewer.position.sx * this_opts.viewer.position.dw / this_opts.viewer.position.ow;
         this_obj._tmpInfo.cursor.current.Y = this_obj._tmpInfo.cursor.current.Y + this_opts.viewer.position.sy * this_opts.viewer.position.dh / this_opts.viewer.position.oh;
 
-				var the_active_series = this_obj.getSeriesObjectById(this_opts.viewer.draw.activeSeriesId);
+				var the_active_series = this_obj.getSeriesObjectById(this_opts.viewer.activeSeriesId);
 
 				if (this_opts.control.mode == 'pen' || this_opts.control.mode == 'erase' ){
 					//太さを加味
@@ -1173,7 +1158,7 @@
 					this_obj._tmpInfo.label = this_obj._exchangePositionCtoV(tmp_array);
 
 					this_opts.control.container.updateVoxel(
-						this_opts.viewer.draw.activeSeriesId,
+						this_opts.viewer.activeSeriesId,
 						the_active_series.activeLabelId,
 						this_opts.control.mode,
 						this_obj._tmpInfo.label
@@ -1183,11 +1168,11 @@
 
 				}else{
 						//bucket
-						var the_active_series = this_obj.getSeriesObjectById(this_opts.viewer.draw.activeSeriesId);
+						var the_active_series = this_obj.getSeriesObjectById(this_opts.viewer.activeSeriesId);
 						if(typeof the_active_series.label != 'undefined' &&  the_active_series.label.length>0){
 							var tmp_point_position = this_obj._exchangePositionCtoV([[this_obj._tmpInfo.cursor.current.X,this_obj._tmpInfo.cursor.current.Y]]);
 							this_obj._getBucketFillPositions(
-								this_opts.viewer.draw.activeSeriesId,
+								this_opts.viewer.activeSeriesId,
 								the_active_series.activeLabelId,
 								tmp_point_position[0]
 							);
@@ -1282,10 +1267,10 @@
 
             this_obj._tmpInfo.label = this_obj._tmpInfo.label.concat(tmp_array);
 
-            var the_active_series = this_obj.getSeriesObjectById(this_opts.viewer.draw.activeSeriesId);
+            var the_active_series = this_obj.getSeriesObjectById(this_opts.viewer.activeSeriesId);
 
             this_opts.control.container.updateVoxel(
-              this_opts.viewer.draw.activeSeriesId,
+              this_opts.viewer.activeSeriesId,
               the_active_series.activeLabelId,
               this_opts.control.mode,
               this_obj._tmpInfo.label
@@ -1419,9 +1404,9 @@
         if (this_obj._tmpInfo.label.length > 0) {
 
           //ヒストリ
-          var the_active_series = this_obj.getSeriesObjectById(this_opts.viewer.draw.activeSeriesId);
+          var the_active_series = this_obj.getSeriesObjectById(this_opts.viewer.activeSeriesId);
           this_opts.control.container.addHistory(
-            this_opts.viewer.draw.activeSeriesId,
+            this_opts.viewer.activeSeriesId,
             the_active_series.activeLabelId,
             this_opts.control.mode,
             this_obj._tmpInfo.label
@@ -1429,7 +1414,7 @@
 
           //描画
           this_opts.control.container.updateVoxel(
-            this_opts.viewer.draw.activeSeriesId,
+            this_opts.viewer.activeSeriesId,
             the_active_series.activeLabelId,
             this_opts.control.mode,
             this_obj._tmpInfo.label
@@ -1447,9 +1432,9 @@
         }
 
         //ペンまたは消しゴムで触れられたことを他に伝えるためにイベント発行
-        if (typeof this_opts.viewer.draw.activeSeriesId != 'undefined' && typeof the_active_series != 'undefined') {
-          var the_target_label = this_obj.getLabelObjectById(the_active_series.activeLabelId, this_opts.viewer.draw.activeSeriesId);
-          this_elm.trigger('onWritten', [the_active_series.activeLabelId, this_opts.viewer.draw.activeSeriesId]);
+        if (typeof this_opts.viewer.activeSeriesId != 'undefined' && typeof the_active_series != 'undefined') {
+          var the_target_label = this_obj.getLabelObjectById(the_active_series.activeLabelId, this_opts.viewer.activeSeriesId);
+          this_elm.trigger('onWritten', [the_active_series.activeLabelId, this_opts.viewer.activeSeriesId]);
         }
 
       }
@@ -1530,7 +1515,7 @@
       var tmp_oh = 512;
       var tmp_num = 512;
 
-      var active_series = this_obj.getSeriesObjectById(this_opts.viewer.draw.activeSeriesId);
+      var active_series = this_obj.getSeriesObjectById(this_opts.viewer.activeSeriesId);
 
       if (this_opts.viewer.orientation == 'axial') {
         tmp_w = active_series.voxel.x;
@@ -1600,7 +1585,7 @@
         var tmp_the_series = this_opts.control.container.data.series[i];
 
         //現在のシリーズのラベルだけ表示
-        if (tmp_the_series.id == this_opts.viewer.draw.activeSeriesId) {
+        if (tmp_the_series.id == this_opts.viewer.activeSeriesId) {
           for (var j = tmp_the_series.label.length - 1; j >= 0; j--) {
             var tmp_the_label = tmp_the_series.label[j];
             var tmp_array = this_opts.control.container.returnSlice(

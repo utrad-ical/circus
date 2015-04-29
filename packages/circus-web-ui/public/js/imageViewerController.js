@@ -141,29 +141,27 @@
       //紐づくビューアーたちに伝播
       for (var i = 0; i < controllerInfo.viewer.length; i++) {
         var elmId = '#' + controllerInfo.viewer[i].elementId;
-        $(elmId).trigger('changeSeries', active_series_id)
-								.trigger('sync');
+        $(elmId).trigger('changeSeries', active_series_id).trigger('sync');
       }
     },
 
 
 
-
     changedLabelNum: function() {
-        var rtn_num = 0;
-        var this_elm = this;
-        for (var i = 0; i < controllerInfo.series.length; i++) {
-            var tmp_the_controller_series = controllerInfo.series[i];
-            if (typeof tmp_the_controller_series.label == 'object') {
-                for (var j = 0; j < tmp_the_controller_series.label.length; j++) {
-                    var tmp_the_label = tmp_the_controller_series.label[j];
-                    if (typeof tmp_the_label.update_flg != 'undefined' && tmp_the_label.update_flg == 1) {
-                        rtn_num++;
-                    }
-                }
-            }
-        }
-        return rtn_num;
+			var rtn_num = 0;
+			var this_elm = this;
+			for (var i = 0; i < controllerInfo.series.length; i++) {
+				var tmp_the_controller_series = controllerInfo.series[i];
+				if (typeof tmp_the_controller_series.label == 'object') {
+					for (var j = 0; j < tmp_the_controller_series.label.length; j++) {
+						var tmp_the_label = tmp_the_controller_series.label[j];
+						if (typeof tmp_the_label.update_flg != 'undefined' && tmp_the_label.update_flg == 1) {
+							rtn_num++;
+						}
+					}
+				}
+			}
+			return rtn_num;
     },
 
 
@@ -185,8 +183,8 @@
 						for (var k = 0; k < controllerInfo.viewer.length; k++) {
 							var tmp_viewer = controllerInfo.viewer[k];
 							var viewer_options = $('#' + tmp_viewer.elementId).imageViewer(	'option', 'viewer');
-							for (var l = 0; l < viewer_options.draw.series.length; l++) {
-								var viewer_series = viewer_options.draw.series[l];
+							for (var l = 0; l < viewer_options.series.length; l++) {
+								var viewer_series = viewer_options.series[l];
 								if (viewer_series.activeLabelId == tmp_current_label_id) {
 									viewer_series.activeLabelId = tmp_new_label_id;
 								}
@@ -247,25 +245,20 @@
 
 
 
-
-
     checkUpdateLabel: function() {
-        //ラベルが前回の保存時から変更されたか調査,更新があったラベルにはフラグを立てる
-        var this_elm = this;
-        var container_object = controllerInfo.viewer[0].container;
-
-        //ヒストリーを１つずつ見ていく
-        for(var i=container_object.data.history.main.length-1; i>-1; i--){
-            var tmp_label = this_elm.imageViewerController('getLabelObjectById',container_object.data.history.main[i].label);
-            //更新ポイント
-            if(tmp_label.update_flg == 0 && tmp_label.last_save_point != i+1){
-                tmp_label.last_save_point = i+1;
-                tmp_label.update_flg = 1;
-            }
-        }
-    },
-
-
+			 //ラベルが前回の保存時から変更されたか調査,更新があったラベルにはフラグを立てる
+			var this_elm = this;
+			var container_object = controllerInfo.viewer[0].container;
+			 //ヒストリーを１つずつ見ていく
+			for (var i = container_object.data.history.main.length - 1; i > -1; i--) {
+				var tmp_label = this_elm.imageViewerController('getLabelObjectById', container_object.data.history.main[i].label);
+				//更新ポイント
+				if (tmp_label.update_flg === 0 && tmp_label.last_save_point != i + 1) {
+					tmp_label.last_save_point = i + 1;
+					tmp_label.update_flg = 1;
+				}
+			}
+    },//checkUpdateLabel
 
 
 
@@ -467,13 +460,6 @@
 
 
 
-    //３面共用のコントローラー情報の取り出し
-    getValues: function () {
-      return controllerInfo;
-    },
-
-
-
     init: function (insert_obj) {
 
       //コントローラ呼び出し時の初期挙動
@@ -583,7 +569,8 @@
                 dw: tmp_w,
                 dh: tmp_h
               },
-              'draw': init_label_info,
+							'activeSeriesId' : init_label_info.activeSeriesId,
+							'series' : init_label_info.series,
               'voxel': {
                 x: active_series.voxel.x,
                 y: active_series.voxel.y,
@@ -597,13 +584,11 @@
               'container': controllerInfo.viewer[i].container
             }
 
-          });
-          /*.imageViewer()*/
+          });//.imageViewer()
         }
 
-      }/*viewerRun*/
+      }//viewerRun
       viewerRun();
-
 
       //ビューアー発火後に生成された要素にイベント設置
       this_elm.imageViewerController('setViewerInnerEvents');
@@ -616,7 +601,6 @@
       //操作対象のビューアを格納しておく
       //連動シリーズの1個目だけ発動でよい
       $('#' + controllerInfo.viewer[0].elementId).imageViewer('insertLabelData');
-
 
       for (var i = controllerInfo.viewer.length - 1; i >= 0; i--) {
         var elmId = '#' + controllerInfo.viewer[i].elementId;

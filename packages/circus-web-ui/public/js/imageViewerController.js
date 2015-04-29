@@ -131,6 +131,7 @@
     },
 
 
+
     changeActiveSeries: function (active_series_id) {
       var this_elm = this;
       controllerInfo.activeSeriesId = active_series_id;
@@ -859,8 +860,8 @@
         //書き換えが発生していたラベルにフラグを立てる
         this_elm.imageViewerController('checkUpdateLabel');
 
-
         var changed_label_num = this_elm.imageViewerController('changedLabelNum');
+
         if (changed_label_num == 0) {
           $('#export_err').empty();
           if (typeof revisionNo !== 'undefined') {
@@ -1464,7 +1465,7 @@
 
         }
 
-    }/*updateLabelElements*/,
+    }, //updateLabelElements
 
     zeroFormat: function (input_array) {
       // input_array = [ num , num ]
@@ -1476,7 +1477,7 @@
       } else {
         return e
       }
-    }/*zeroFormat*/
+    }//zeroFormat
 
   }
 

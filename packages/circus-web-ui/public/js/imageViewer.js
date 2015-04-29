@@ -287,8 +287,6 @@
       var this_elm = this.element;
       var this_opts = this.options;
       this_opts.viewer.draw.activeSeriesId = seriesId;
-			
-
 			var tmp_the_series = this_obj.getSeriesObjectById(seriesId);
 
 			this_opts.viewer.window = new Object();
@@ -322,7 +320,6 @@
 			this_opts.viewer.voxel = $.extend(true,this_opts.viewer.voxel,tmp_the_series.voxel);
 			
       this_obj.setCanvasSize();
-			
       this_obj._changeImgSrc();
     },
 
@@ -1575,9 +1572,9 @@
         max: this_opts.viewer.number.maximum
       });
 			
-			this_obj._tmpInfo.voxel_zoom = 512 / this_opts.viewer.voxel.x;
-			this_opts.viewer.position.dw = Math.floor(this_opts.viewer.position.dw * this_obj._tmpInfo.voxel_zoom);
-			this_opts.viewer.position.dh = Math.floor(this_opts.viewer.position.dh * this_obj._tmpInfo.voxel_zoom);
+			var tmp_voxel_zoom = 512 / this_opts.viewer.voxel.x;
+			this_opts.viewer.position.dw = Math.floor(this_opts.viewer.position.dw * tmp_voxel_zoom);
+			this_opts.viewer.position.dh = Math.floor(this_opts.viewer.position.dh * tmp_voxel_zoom);
 
       //キャンバスのサイズ定義
       this_elm.find('.series_image_elm,.canvas_main_elm').attr({
@@ -1637,8 +1634,7 @@
       },
       imgCache: [],
       label: [], //ペンモードでマウスが一度触れてから離れるまでの描画内容の保存用
-      label_buffer: [],	//今の自分のorientation,枚数で既に描かれているラベルの情報、重複防止に活用
-      voxel_zoom: 1
+      label_buffer: []	//今の自分のorientation,枚数で既に描かれているラベルの情報、重複防止に活用
     }/*_tmpInfo*/
   });
 

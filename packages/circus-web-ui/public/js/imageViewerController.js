@@ -141,71 +141,73 @@
       //紐づくビューアーたちに伝播
       for (var i = 0; i < controllerInfo.viewer.length; i++) {
         var elmId = '#' + controllerInfo.viewer[i].elementId;
-        $(elmId).trigger('changeSeries', active_series_id).trigger('sync');
+        $(elmId).trigger('changeSeries', active_series_id)
+								.trigger('sync');
       }
     },
 
 
 
+
     changedLabelNum: function() {
-			var rtn_num = 0;
-			var this_elm = this;
-			for (var i = 0; i < controllerInfo.series.length; i++) {
-				var tmp_the_controller_series = controllerInfo.series[i];
-				if (typeof tmp_the_controller_series.label == 'object') {
-					for (var j = 0; j < tmp_the_controller_series.label.length; j++) {
-						var tmp_the_label = tmp_the_controller_series.label[j];
-						if (typeof tmp_the_label.update_flg != 'undefined' && tmp_the_label.update_flg == 1) {
-							rtn_num++;
-						}
-					}
-				}
-			}
-			return rtn_num;
+        var rtn_num = 0;
+        var this_elm = this;
+        for (var i = 0; i < controllerInfo.series.length; i++) {
+            var tmp_the_controller_series = controllerInfo.series[i];
+            if (typeof tmp_the_controller_series.label == 'object') {
+                for (var j = 0; j < tmp_the_controller_series.label.length; j++) {
+                    var tmp_the_label = tmp_the_controller_series.label[j];
+                    if (typeof tmp_the_label.update_flg != 'undefined' && tmp_the_label.update_flg == 1) {
+                        rtn_num++;
+                    }
+                }
+            }
+        }
+        return rtn_num;
     },
 
 
 
 
     changeUpdateLabelId: function() {
-		//書き換えがあったラベルのidを差し替える
-		var this_elm = this;
-		for (var i = 0; i < controllerInfo.series.length; i++) {
-			var tmp_controller_series = controllerInfo.series[i];
-			if (typeof tmp_controller_series.label == 'object') {
-				for (var j = 0; j < tmp_controller_series.label.length; j++) {
-					var tmp_label = tmp_controller_series.label[j];
-					var tmp_current_label_id = tmp_label.id + ''; //更新前のラベルid
-					if (typeof tmp_label.update_flg != 'undefined' && tmp_label.update_flg == 	1) {
-						var tmp_new_label_id = this_elm.imageViewerController('getLabelDefault').id + '';
-						tmp_label.update_flg = 0;
-						//ビューアー内のラベルオブジェクトid書き換え
-						for (var k = 0; k < controllerInfo.viewer.length; k++) {
-							var tmp_viewer = controllerInfo.viewer[k];
-							var viewer_options = $('#' + tmp_viewer.elementId).imageViewer(	'option', 'viewer');
-							for (var l = 0; l < viewer_options.series.length; l++) {
-								var viewer_series = viewer_options.series[l];
-								if (viewer_series.activeLabelId == tmp_current_label_id) {
-									viewer_series.activeLabelId = tmp_new_label_id;
-								}
-								if (typeof viewer_series.label == 'object') {
-									for (var m = 0; m < viewer_series.label.length; m++) {
-										var viewer_label = viewer_series.label[m];
-										if (viewer_label.id == tmp_current_label_id) {
-											viewer_label.id = tmp_new_label_id;
-										}
-									}
-								}
+		  //書き換えがあったラベルのidを差し替える
+	  	var this_elm = this;
+		  for (var i = 0; i < controllerInfo.series.length; i++) {
+	  		var tmp_controller_series = controllerInfo.series[i];
+		  	if (typeof tmp_controller_series.label == 'object') {
+		  		for (var j = 0; j < tmp_controller_series.label.length; j++) {
+		  			var tmp_label = tmp_controller_series.label[j];
+			  		var tmp_current_label_id = tmp_label.id + ''; //更新前のラベルid
+				  	if (typeof tmp_label.update_flg != 'undefined' && tmp_label.update_flg == 	1) {
+					  	var tmp_new_label_id = this_elm.imageViewerController('getLabelDefault').id + '';
+  						tmp_label.update_flg = 0;
+  						//ビューアー内のラベルオブジェクトid書き換え
+  						for (var k = 0; k < controllerInfo.viewer.length; k++) {
+  							var tmp_viewer = controllerInfo.viewer[k];
+  							var viewer_options = $('#' + tmp_viewer.elementId).imageViewer(	'option', 'viewer');
+  							for (var l = 0; l < viewer_options.draw.series.length; l++) {
+  								var viewer_series = viewer_options.draw.series[l];
+  								if (viewer_series.activeLabelId == tmp_current_label_id) {
+  									viewer_series.activeLabelId = tmp_new_label_id;
+  								}
+  								if (typeof viewer_series.label == 'object') {
+  									for (var m = 0; m < viewer_series.label.length; m++) {
+  										var viewer_label = viewer_series.label[m];
+  										if (viewer_label.id == tmp_current_label_id) {
+  											viewer_label.id = tmp_new_label_id;
+  										}
+  									}
+  								}
+  							}
+  						}
+  						//コンテナ内部のラベルidを差し替え
+							var container_object = controllerInfo.viewer[0].container;
+							container_object.changeLabelName(tmp_current_label_id,tmp_controller_series.id, tmp_new_label_id);
+							//コントローラのラベルオブジェクトid書き換え
+							tmp_label.id = tmp_new_label_id;
+							if (tmp_controller_series.activeLabelId == tmp_current_label_id) {
+								tmp_controller_series.activeLabelId = tmp_new_label_id;
 							}
-						}
-						//コンテナ内部のラベルidを差し替え
-						var container_object = controllerInfo.viewer[0].container;
-						container_object.changeLabelName(tmp_current_label_id,tmp_controller_series.id, tmp_new_label_id);
-						//コントローラのラベルオブジェクトid書き換え
-						tmp_label.id = tmp_new_label_id;
-						if (tmp_controller_series.activeLabelId == tmp_current_label_id) {
-							tmp_controller_series.activeLabelId = tmp_new_label_id;
-						}
 					}
 				}
 			}
@@ -245,20 +247,25 @@
 
 
 
+
+
     checkUpdateLabel: function() {
-			 //ラベルが前回の保存時から変更されたか調査,更新があったラベルにはフラグを立てる
-			var this_elm = this;
-			var container_object = controllerInfo.viewer[0].container;
-			 //ヒストリーを１つずつ見ていく
-			for (var i = container_object.data.history.main.length - 1; i > -1; i--) {
-				var tmp_label = this_elm.imageViewerController('getLabelObjectById', container_object.data.history.main[i].label);
-				//更新ポイント
-				if (tmp_label.update_flg === 0 && tmp_label.last_save_point != i + 1) {
-					tmp_label.last_save_point = i + 1;
-					tmp_label.update_flg = 1;
-				}
-			}
-    },//checkUpdateLabel
+        //ラベルが前回の保存時から変更されたか調査,更新があったラベルにはフラグを立てる
+        var this_elm = this;
+        var container_object = controllerInfo.viewer[0].container;
+
+        //ヒストリーを１つずつ見ていく
+        for(var i=container_object.data.history.main.length-1; i>-1; i--){
+            var tmp_label = this_elm.imageViewerController('getLabelObjectById',container_object.data.history.main[i].label);
+            //更新ポイント
+            if(tmp_label.update_flg == 0 && tmp_label.last_save_point != i+1){
+                tmp_label.last_save_point = i+1;
+                tmp_label.update_flg = 1;
+            }
+        }
+    },
+
+
 
 
 
@@ -460,6 +467,13 @@
 
 
 
+    //３面共用のコントローラー情報の取り出し
+    getValues: function () {
+      return controllerInfo;
+    },
+
+
+
     init: function (insert_obj) {
 
       //コントローラ呼び出し時の初期挙動
@@ -569,8 +583,7 @@
                 dw: tmp_w,
                 dh: tmp_h
               },
-							'activeSeriesId' : init_label_info.activeSeriesId,
-							'series' : init_label_info.series,
+              'draw': init_label_info,
               'voxel': {
                 x: active_series.voxel.x,
                 y: active_series.voxel.y,
@@ -584,11 +597,13 @@
               'container': controllerInfo.viewer[i].container
             }
 
-          });//.imageViewer()
+          });
+          /*.imageViewer()*/
         }
 
-      }//viewerRun
+      }/*viewerRun*/
       viewerRun();
+
 
       //ビューアー発火後に生成された要素にイベント設置
       this_elm.imageViewerController('setViewerInnerEvents');
@@ -601,6 +616,7 @@
       //操作対象のビューアを格納しておく
       //連動シリーズの1個目だけ発動でよい
       $('#' + controllerInfo.viewer[0].elementId).imageViewer('insertLabelData');
+
 
       for (var i = controllerInfo.viewer.length - 1; i >= 0; i--) {
         var elmId = '#' + controllerInfo.viewer[i].elementId;

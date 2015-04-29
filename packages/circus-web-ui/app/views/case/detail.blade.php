@@ -243,10 +243,10 @@
         }//initAjax
         initAjax();//ajax firing
 
-        var	controllerRun	=	function(){
+        var controllerRun = function() {
             //fire the controllers to the once per synchronized eries
-            for(var j=0;	j<initInfo.length;	j++){
-                $('#'+initInfo[j].wrapElementId).imageViewerController('init',initInfo[j]);
+            for (var j = 0; j < initInfo.length; j++) {
+                $('#' + initInfo[j].wrapElementId).imageViewerController('init', initInfo[j]);
                 //insert & display revision attribute
                 var insert_prop = {
                     properties: default_attr_prop
@@ -254,17 +254,42 @@
                 if (typeof initInfo[j].attribute != 'undefined') {
                     insert_prop.value = initInfo[j].attribute;
                 }
-                $('#'+initInfo[j].elements.revisionAttribute).propertyeditor(insert_prop);
+                $('#' + initInfo[j].elements.revisionAttribute).propertyeditor(insert_prop);
             }
-        }
-
+        }//controllerRun
+				
+				
+				
         $('#btnBack').click(function() {
-            $('body').append('<form action="./search" method="POST" class="hidden" id="frm_back"></form>');
-            $('#frm_back').append('<input type="hidden" name="btnBack" value="">');
-            $('#frm_back').submit();
+            var this_elm = $(this);
+            $('#' + initInfo[0].wrapElementId).imageViewerController('checkUpdateLabel');
+            var tmp_changed_label_num = $('#' + initInfo[0].wrapElementId).imageViewerController('changedLabelNum');
+            var runBtnBackSubmit = function() {
+                $('body').append('<form action="./search" method="POST" class="hidden" id="frm_back"></form>');
+                $('#frm_back').append('<input type="hidden" name="btnBack" value="">').submit();
+            }
+            if (tmp_changed_label_num == 0) {
+                runBtnBackSubmit();
+            } else {
+                $('#unload_dialog').dialog({
+                    buttons: [{
+                        text: "ignore",
+                        click: function() {
+                            runBtnBackSubmit();
+                        }
+                    }, {
+                        text: "stay",
+                        click: function() {
+                            $('#unload_dialog').dialog('close');
+                        }
+                    }]
+                }); //#unload_dialog .dialog
+            }
             return false;
         });
-
+				
+				
+				
         $('.link_case_detail').click(function(){
             changeRevision($(this).closest('td').find("input[name='revisionNo']").val(), 'detail');
         });
@@ -273,9 +298,42 @@
             changeRevision($(this).closest('td').find("input[name='revisionNo']").val(), 'edit');
         });
 
+
+
+				$('.select_revision').focus(function(){
+						var this_elm = $(this);
+						var before_change_value = this_elm.val();
+						this_elm.attr('before-change-value',before_change_value)
+				});
+
+
+
         $('.select_revision').change(function() {
-            changeRevision($(this).val());
+            var this_elm = $(this);
+            $('#' + initInfo[0].wrapElementId).imageViewerController('checkUpdateLabel');
+            var tmp_changed_label_num = $('#' + initInfo[0].wrapElementId).imageViewerController('changedLabelNum');
+            if (tmp_changed_label_num == 0) {
+                changeRevision(this_elm.val());
+            } else {
+                $('#unload_dialog').dialog({
+                    beforeClose: function() {
+                        this_elm.val(this_elm.attr('before-change-value'));
+                    },
+                    buttons: [{
+                        text: "ignore",
+                        click: function() {
+                            changeRevision(this_elm.val());
+                        }
+                    }, {
+                        text: "stay",
+                        click: function() {
+                            $('#unload_dialog').dialog('close');
+                        }
+                    }]
+                }); //#unload_dialog .dialog
+            }
         });
+
 
         $('.link_add_series').click(function(){
             $('.frm_add_series').submit();
@@ -305,16 +363,16 @@
 
     var createLabelList = function(label_list, active_series_id) {
         //初期化
-            $('#exportSeriesUID').empty().append(active_series_id);
-            $('.exportSeriesUID').val(active_series_id);
-            $('.'+parentLabelList).empty();
-            var the_insert_elm = '';
-            $.each(label_list, function(idx, val) {
-                    the_insert_elm = the_insert_elm +'<li class="ui-state-dafault"><label>';
-                    the_insert_elm = the_insert_elm +'<input type="checkbox" value="'+idx+'" id="export_label_idx'+idx+'" name="labels[]" class="export_labels">Label'+idx;
-                    the_insert_elm = the_insert_elm +'</label></li>';
-            });
-            $('.'+parentLabelList).append(the_insert_elm);
+				$('#exportSeriesUID').empty().append(active_series_id);
+				$('.exportSeriesUID').val(active_series_id);
+				$('.'+parentLabelList).empty();
+				var the_insert_elm = '';
+				$.each(label_list, function(idx, val) {
+					the_insert_elm = the_insert_elm +'<li class="ui-state-dafault"><label>';
+					the_insert_elm = the_insert_elm +'<input type="checkbox" value="'+idx+'" id="export_label_idx'+idx+'" name="labels[]" class="export_labels">Label'+idx;
+					the_insert_elm = the_insert_elm +'</label></li>';
+				});
+				$('.'+parentLabelList).append(the_insert_elm);
     }
     var changeRevision = function(index) {
         if (arguments[1])
@@ -385,6 +443,7 @@
         }
         return result_flag;
     }
+
 </script>
 @endif
 @stop
@@ -536,6 +595,10 @@ id="page_case_detail"
 				</tbody>
 			</table>
 		</div>
+	</div>
+	<div id="unload_dialog">
+		There are unsaved data.
+		<br>are you sure move to other page?
 	</div>
 	{{Form::open(['url' => asset('case/detail'), 'method' => 'post', 'id' => 'frm_change_revision'])}}
 		{{Form::hidden('revisionNo', $revisionNo, array('class' => 'change_revision'))}}

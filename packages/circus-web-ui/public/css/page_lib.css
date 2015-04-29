@@ -142,6 +142,7 @@
 
 
 .toolbar_weight_wrap{width:60px; float:left; padding-top:3px; text-align:center;}
+.ui-dialog{z-index:1000;}
 
 /*admin home*/
 #page_admin_home .page_admin_home_menu_cell{width:198px; margin:0 10px 10px 0; float:left; border:1px solid #ccc;}

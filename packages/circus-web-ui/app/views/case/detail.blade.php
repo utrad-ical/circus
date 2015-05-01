@@ -393,12 +393,12 @@
                 return false;
             },
             success: function (res) {
-                console.log(res);
+                //console.log(res);
                 if (res.status === "OK") {
                     create_dom(res.response);
                     return true;
                 }
-                console.log(res.message);
+                //console.log(res.message);
                 return false;
             }
         });
@@ -503,7 +503,7 @@ id="page_case_detail"
 	</table>
 	<div class="w_400 fl_l">
 		{{Form::open(['url' => asset('case/detail'), 'method' => 'post'])}}
-			<button type='submit' class='common_btn btn_save' name='btnSave'>
+			<button type='button' class='common_btn btn_save' name='btnSave'>
 				<span style="background:url({{asset('/img/common/ico_save.png')}}) no-repeat; width:22px; height:22px; display:inline-block; margin-bottom:-7px; margin-right:4px;"></span>
 				Save
 			</button>

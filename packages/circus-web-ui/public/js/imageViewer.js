@@ -264,7 +264,7 @@
 
         //カーソルcss用クラス変更
         this_elm.removeClass(function (index, css) {
-						return (css.match (/\bmode_\S+/g) || []).join(' ');
+					return (css.match (/\bmode_\S+/g) || []).join(' ');
 				});
 
 				if(	this_opts.control.mode == 'erase' ||

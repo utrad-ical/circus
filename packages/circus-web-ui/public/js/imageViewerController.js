@@ -1042,9 +1042,7 @@
               tmp_insert_obj.label[j] = {};
               tmp_insert_obj.label[j].offset = container_data.offset;
               tmp_insert_obj.label[j].sizes = container_data.size;
-              if (container_data.image.indexOf('data:image') == -1) {
-                container_data.image = '';
-              }
+
               tmp_insert_obj.label[j] = container_data;
               if (tmp_insert_obj.label[j].size[0] !== 0 && tmp_insert_obj.label[j].size[0] !== 0 && tmp_insert_obj.label[j].size[0] !== 0) {
                 tmp_insert_obj.label[j].id = tmp_the_label.id;

@@ -859,7 +859,6 @@
         //書き換えが発生していたラベルにフラグを立てる
         this_elm.imageViewerController('checkUpdateLabel');
         var changed_label_num = this_elm.imageViewerController('changedLabelNum');
-				console.log(changed_label_num);
 
         if (changed_label_num == 0) {
           $('#export_err').empty();

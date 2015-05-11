@@ -787,6 +787,7 @@
         var ary_y = start_y + i * tmp_y;
         rtn_ary.push([ary_x, ary_y]);
       }
+			console.log(rtn_ary);
       return rtn_ary;
     },
 
@@ -1250,13 +1251,12 @@
             var tmp_x = (e.clientX - this_obj._tmpInfo.elementParam.start.X) / this_opts.viewer.position.zoom;
             var tmp_y = (e.clientY - this_obj._tmpInfo.elementParam.start.Y) / this_opts.viewer.position.zoom;
 
-
-					 tmp_x = tmp_x;
-					 tmp_y = tmp_y;
-
             //トリミング分の補正
             tmp_x = tmp_x + this_opts.viewer.position.sx * this_opts.viewer.position.dw / this_opts.viewer.position.ow;
             tmp_y = tmp_y + this_opts.viewer.position.sy * this_opts.viewer.position.dh / this_opts.viewer.position.oh;
+						
+						tmp_x = Math.floor(tmp_x);
+						tmp_y = Math.floor(tmp_y);
 
             var tmp_array = new Array();
             //中間点を埋める
@@ -1278,7 +1278,6 @@
 
             //ボクセル座標に変換
             tmp_array = this_obj._exchangePositionCtoV(tmp_array);
-
             this_obj._tmpInfo.label = this_obj._tmpInfo.label.concat(tmp_array);
 
             var the_active_series = this_obj.getSeriesObjectById(this_opts.viewer.draw.activeSeriesId);
@@ -1291,7 +1290,6 @@
             );
 
             this_elm.imageViewer('syncVoxel');
-
             this_obj._disableImageAlias(tmp_ctx, false);
             //本来はここで手前にあるラベルを描く
 

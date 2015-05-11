@@ -787,7 +787,6 @@
         var ary_y = start_y + i * tmp_y;
         rtn_ary.push([ary_x, ary_y]);
       }
-			console.log(rtn_ary);
       return rtn_ary;
     },
 

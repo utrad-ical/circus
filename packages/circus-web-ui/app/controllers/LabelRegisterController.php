@@ -40,7 +40,7 @@ class LabelRegisterController extends BaseController {
 								$label_obj = $this->setLabel($rec2, $storage_info->storageID);
 								$label_obj->save();
 							}
-							$save_img_result = $this->saveImage($label_obj->labelID, $rec2['image'], $storage_info->path);
+							$save_img_result = $this->saveImage($label_obj->labelID, $rec2['image'], $storage_info->path, $label_obj->w, $label_obj->h, $label_obj->d);
 							$revision[$rec['id']][] = array(
 								'id'			=>	$label_obj->labelID,
 								'attributes'	=>	array_key_exists('attribute', $rec2) ? $rec2['attribute'] : array()
@@ -138,12 +138,33 @@ class LabelRegisterController extends BaseController {
 	 * @param String $label_id ラベルID
 	 * @param Binary $image イメージデータ
 	 * @param String $path 格納先
+	 * @param Integer $width 画像幅
+	 * @param Integer $height 1枚当たりの画像高さ
+	 * @param Integer $idx 描かれている枚数
 	 * @author stani
 	 * @since 2015/03/20
 	 */
-	function saveImage($label_id, $image, $path) {
-		$decode_str = base64_decode(str_replace('data:image/png;base64,', '',$image));
-		return file_put_contents($path."/".$label_id.".png", $decode_str);
+	function saveImage($label_id, $image, $path, $width, $height, $idx) {
+		try {
+			$decode_str = base64_decode($image);
+
+			$gz_dec = zlib_decode($decode_str);
+			//ドット描画準備
+			ini_set('memory_limit', '-1');
+			$img_obj = imagecreatetruecolor($width, $height * $idx);
+			$text_color = imagecolorallocate($img_obj, 255, 255, 255);
+			$background_color = imagecolorallocate($img_obj, 0, 0, 0);
+			//ドット描画
+			for ($i = 0; $i < strlen($gz_dec); $i++) {
+				if (bin2hex($gz_dec[$i]) == '01')
+					imagesetpixel($img_obj , floor($i % $width) , floor($i / $width) , $text_color);
+			}
+			//画像出力
+			return imagepng($img_obj, $path."/".$label_id.".png");
+		} catch (Exception $e) {
+			Log::error($e);
+			return;
+		}
 	}
 
 	/**

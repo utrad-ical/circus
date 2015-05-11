@@ -222,61 +222,60 @@ voxelContainer.prototype.createSaveData = function (series_id, label_id) {
     return_obj.size[2] = max_z - min_z;
     return_obj.offset = [min_x, min_y, min_z];
 
-    //最大最小の計三個個まで
-    //imaga描画ここから
+    //最大最小の計三個まで
     var draw_w = max_x - min_x;//書き出すpngの横幅
     var draw_h = max_y - min_y;//書き出すpngのz断面グループ1枚あたりの高さ。書き出しpngの高さはこれにnumberをかけたもの
 
-    return_obj.size[0] = draw_w;
-    return_obj.size[1] = draw_h;
+    return_obj.size[0] = draw_w;	//スライス横幅 = 生成画像の幅
+    return_obj.size[1] = draw_h;	//スライス１まいごとの高さ
 
-    var png_height = draw_h * return_obj.size[2];
+    var png_height = draw_h * return_obj.size[2];		//生成画像のトータル高さ
 
-    //書き出しのための一時的キャンバス・imageオブジェクト生成
-    var dumy_canvas_elm = document.createElement('canvas');
-    dumy_canvas_elm.id = 'tmp_canvas';
-    document.getElementsByTagName("body").item(0).appendChild(dumy_canvas_elm);
+    //uintArrayを1次元に変換,初期は全マスを0で埋める
+		var tmp_img_data = new Uint8Array(draw_w*png_height);
+		for(var i=0; i<tmp_img_data.length; i++){
+			tmp_img_data[i] = 0;
+		}
 
-    dumy_canvas_elm = document.getElementById('tmp_canvas');
-    dumy_canvas_elm.style.display = 'none';
-    dumy_canvas_elm.setAttribute('width', draw_w);
-    dumy_canvas_elm.setAttribute('height', png_height);
-    var tmp_canvas_ctx = dumy_canvas_elm.getContext('2d');
-    var tmp_img_data = tmp_canvas_ctx.createImageData(draw_w, png_height);
-
-    //まずはデータを全て透明にする
-    for (var i = tmp_img_data.data.length - 1; i > 0; i--) {
-      tmp_img_data.data[i] = 0;
-    }
-
-    //uintArrayを1次元に変換
     for (var z = min_z; z < max_z; z++) {
-      var tmp_the_slice = the_label.position[z];
-      if (typeof tmp_the_slice == 'object') {
-        for (var i = tmp_the_slice.length - 1; i >= 0; i--) {
-          var y = Math.floor(i / this_series_x);
-          var x = i - this_series_x * y;
 
-          var this_x = x - min_x;
-          var this_y = y - min_y;
-          var this_z = z - min_z;
-          var the_index = 4 * (this_x + this_y * draw_w + this_z * draw_w * draw_h);
-
-          //いずれにしてもアルファ値はmax
-          tmp_img_data.data[the_index + 3] = 255;
-          if (tmp_the_slice[i] == 1) {
-            //描画されていた箇所のみ白塗り
-            tmp_img_data.data[the_index + 2] = 255;
-            tmp_img_data.data[the_index + 1] = 255;
-            tmp_img_data.data[the_index] = 255;
-          }
-        }
+      if (typeof the_label.position[z] == 'object') {
+				var tmp_the_slice = the_label.position[z];
       }
+			
+			for (var i = tmp_the_slice.length - 1; i >= 0; i--) {
+				var y = Math.floor(i / this_series_x);
+				var x = i - this_series_x * y;
+
+				var this_x = x - min_x;
+				var this_y = y - min_y;
+				var this_z = z - min_z;
+				var the_index = (this_x + this_y * draw_w + this_z * draw_w * draw_h);
+
+				if (tmp_the_slice[i] == 1) {
+				 tmp_img_data[the_index] = 1;
+				}
+			}
     }
-    tmp_canvas_ctx.putImageData(tmp_img_data, 0, 0);
-    dumy_canvas_elm.parentNode.removeChild(dumy_canvas_elm);
-    return_obj.image = dumy_canvas_elm.toDataURL();
+
+		var gzip = new Zlib.Gzip(tmp_img_data);
+    tmp_img_data =  gzip.compress();
+
+		var arrayBufferToBase64 = function( buffer ) {
+				var binary = '';
+				//var bytes = new Uint8Array( buffer );
+				var bytes =buffer;
+				var len = bytes.byteLength;
+				for (var i = 0; i < len; i++) {
+						binary += String.fromCharCode( bytes[ i ] );
+				}
+				return window.btoa( binary );
+		}
+		
+		return_obj.image = arrayBufferToBase64( tmp_img_data );
+
   }
+
   return return_obj;
 
 };

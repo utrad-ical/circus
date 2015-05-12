@@ -33,6 +33,7 @@ voxelContainer.prototype.addHistory = function (series_id, label_id, the_mode, p
       position_array[i][2]
     ];
   }
+	
   this_data.history.main.push(tmp_step_obj);
   this_data.history.redo = new Array(0); //新しい記述をした時点でredoは除去
 
@@ -468,7 +469,7 @@ voxelContainer.prototype.historyBack = function () {
 
   if (this_data.history.main.length > 0) {
     //最後の1手順分をRedo用配列に移動
-    var tmp_move_array = new Array(0);
+    var tmp_move_array = new Object();
     $.extend(true, tmp_move_array, this_data.history.main[this_data.history.main.length - 1]);
     this_data.history.redo.push(tmp_move_array);
     this_data.history.main.splice(this_data.history.main.length - 1, 1);
@@ -492,7 +493,7 @@ voxelContainer.prototype.historyBack = function () {
     }
 		
     //今現在のメインヒストリ配列の内容で再構築
-    for (var i = this_data.history.main.length - 1; i >= 0; i--) {
+    for (var i = 0; i < this_data.history.main.length; i++) {
       var this_history = this_data.history.main[i];
       this_obj.updateVoxel(
         this_history.series,
@@ -510,7 +511,7 @@ voxelContainer.prototype.historyRedo = function () {
   var this_obj = this;
   var this_data = this_obj.data;
   if (this_data.history.redo.length > 0) {
-    var tmp_move_array = new Array(0);
+    var tmp_move_array = new Object();
     $.extend(true, tmp_move_array, this_data.history.redo[this_data.history.redo.length - 1]);
     this_data.history.main.push(tmp_move_array);
     this_data.history.redo.splice(this_data.history.redo.length - 1, 1);
@@ -534,7 +535,7 @@ voxelContainer.prototype.historyRedo = function () {
     }
 
     //今現在のメインヒストリ配列の内容で再構築
-    for (var i = this_data.history.main.length - 1; i >= 0; i--) {
+    for (var i = 0; i < this_data.history.main.length; i++) {
       var this_history = this_data.history.main[i];
       this_obj.updateVoxel(
         this_history.series,

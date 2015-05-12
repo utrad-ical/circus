@@ -523,7 +523,7 @@
     },
 
 
-    eraseLabel: function (series_id, label_id, positions_array) {
+   	eraseLabel: function (series_id, label_id, positions_array) {
       //塗り機能
       //第1引数 : 対象ラベル
       //第2引数 : 塗る点の集合の配列(boxel上でのxy値)
@@ -1144,6 +1144,7 @@
 
       	//一度外に出て戻ってきた場合に再び触った場合にコンテナ書き込み
          if (this_obj._tmpInfo.label.length > 0) {
+
          //ヒストリ
            var the_active_series = this_obj.getSeriesObjectById(this_opts.viewer.draw.activeSeriesId);
            this_opts.control.container.addHistory(
@@ -1265,7 +1266,6 @@
         }
       } else if (this_opts.control.mode == 'pen' || this_opts.control.mode == 'erase') {
         if (this_obj._tmpInfo.cursor.touch_flg == 1) {
-
           if (this_obj._tmpInfo.cursor.out_flg == 0) {
 
             //ラベルを描くcanvas要素のオブジェクト
@@ -1279,8 +1279,8 @@
             tmp_x = tmp_x + this_opts.viewer.position.sx * this_opts.viewer.position.dw / this_opts.viewer.position.ow;
             tmp_y = tmp_y + this_opts.viewer.position.sy * this_opts.viewer.position.dh / this_opts.viewer.position.oh;
 
-      	tmp_x = Math.floor(tmp_x);
-      	tmp_y = Math.floor(tmp_y);
+          	tmp_x = Math.floor(tmp_x);
+          	tmp_y = Math.floor(tmp_y);
 
             var tmp_array = new Array();
             //中間点を埋める
@@ -1436,8 +1436,10 @@
         //ペンまたは消しゴムモード
         //ボクセル上での座標に変換
 
+
         //コンテナ書き込み
         if (this_obj._tmpInfo.label.length > 0) {
+
           //ヒストリ
           var the_active_series = this_obj.getSeriesObjectById(this_opts.viewer.draw.activeSeriesId);
           this_opts.control.container.addHistory(

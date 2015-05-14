@@ -249,8 +249,8 @@ class CaseDetailController extends BaseController {
 										Log::debug($label['image']);
 									} else {
 									//	$load_path = $storage_path."/".$label['id'].'.png';
-										$img_path = file_get_contents($storage_path."/".$label['id'].'.png');
-										$label['image'] = 'data:image/png;base64,'.base64_encode($img_path);
+									//	$img_path = file_get_contents($storage_path."/".$label['id'].'.png');
+									//	$label['image'] = 'data:image/png;base64,'.base64_encode($img_path);
 									}
 								} catch (Exception $e) {
 									Log::error($e);

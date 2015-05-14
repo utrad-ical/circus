@@ -146,9 +146,18 @@ class LabelRegisterController extends BaseController {
 	 */
 	function saveImage($label_id, $image, $path, $width, $height, $idx) {
 		try {
+			Log::debug('保存するデータ(base64デコード前)::');
+			Log::debug($image);
 			$decode_str = base64_decode($image);
+			Log::debug('保存するデータ(base64デコード後)::');
+			Log::debug($decode_str);
 
+/*
 			$gz_dec = zlib_decode($decode_str);
+			Log::debug('保存するデータ(zlib_decode後)::');
+			Log::debug($gz_dec);
+			*/
+			/*
 			//ドット描画準備
 			ini_set('memory_limit', '-1');
 			$img_obj = imagecreatetruecolor($width, $height * $idx);
@@ -161,6 +170,9 @@ class LabelRegisterController extends BaseController {
 			}
 			//画像出力
 			return imagepng($img_obj, $path."/".$label_id.".png");
+			*/
+			//return readgzfile($path.'/'.$label_id.'.txt.gz');
+			return file_put_contents($path.'/'.$label_id.'.txt.gz', $decode_str);
 		} catch (Exception $e) {
 			Log::error($e);
 			return;

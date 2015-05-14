@@ -12,6 +12,7 @@
 {{HTML::script('js/jquery.base64.js')}}
 {{HTML::script('js/canvastool.pngencoder.min.js')}}
 {{HTML::script('js/gzip.min.js')}}
+{{HTML::script('js/gunzip.min.js')}}
 {{HTML::script('js/voxelContainer.js')}}
 {{HTML::script('js/imageViewer.js')}}
 {{HTML::script('js/imageViewerController.js')}}

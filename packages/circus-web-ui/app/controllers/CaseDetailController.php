@@ -228,8 +228,33 @@ class CaseDetailController extends BaseController {
 								//Storage information acquisition
 								$storage_info = Storage::find($label_info->storageID);
 								$storage_path = $storage_info->path;
+/*
 								$img_path = file_get_contents($storage_path."/".$label['id'].'.png');
 								$label['image'] = 'data:image/png;base64,'.base64_encode($img_path);
+*/
+
+								try {
+
+									$tmp = '';
+								//	$fp = gzopen($storage_path."/".$label['id'].'.txt.gz', 'rb');
+								//	$tmp = stream_get_contents($fp);
+								//	gzclose($fp);
+									$load_path = $storage_path."/".$label['id'].'.txt.gz';
+									if (file_exists($load_path)) {
+										$tmp = file_get_contents($load_path);
+										Log::debug('書き出す内容(base64encode前)::');
+										Log::debug($tmp);
+										$label['image'] = base64_encode($tmp);
+										Log::debug('base64エンコード後::');
+										Log::debug($label['image']);
+									} else {
+									//	$load_path = $storage_path."/".$label['id'].'.png';
+										$img_path = file_get_contents($storage_path."/".$label['id'].'.png');
+										$label['image'] = 'data:image/png;base64,'.base64_encode($img_path);
+									}
+								} catch (Exception $e) {
+									Log::error($e);
+								}
 							}
 						}
 					}

@@ -135,7 +135,7 @@
 	  var active_series = this_elm.imageViewerController('getSeriesObjectById',[active_series_id]);
 		
 	  if(typeof active_series.activeLabelId == 'undefined' || active_series.activeLabelId == '' ){
-		  if(typeof active_series.label == 'object' || active_series.label.length > 0 ){
+		  if(typeof active_series.label == 'object' && active_series.label.length > 0 ){
 			  active_series.activeLabelId = active_series.label[0].id;
 		  }
 	  }

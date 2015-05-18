@@ -33,7 +33,7 @@ voxelContainer.prototype.addHistory = function (series_id, label_id, the_mode, p
       position_array[i][2]
     ];
   }
-	
+
   this_data.history.main.push(tmp_step_obj);
   this_data.history.redo = new Array(0); //新しい記述をした時点でredoは除去
 
@@ -57,20 +57,20 @@ voxelContainer.prototype.addLoadedData = function (series_id, label_id, the_mode
     position: new Array(0)
   }; //１筆分の描画オブジェクトの入れ物
 
-	var tmp_series = this_obj.getSeriesObjectById(series_id);
+  var tmp_series = this_obj.getSeriesObjectById(series_id);
 
   for (var i = position_array.length - 1; i >= 0; i--) {
-		if(typeof position_array[i] != 'undefined'){
-			var this_slice = position_array[i];
-			for(var j =this_slice.length-1; j>-1; j--){
-				if(this_slice[j] ==1){
-					var tmp_x = j%tmp_series.size.X;
-					var tmp_y = j/tmp_series.size.Y;
-					tmp_y = Math.floor(tmp_y);
-					tmp_step_obj.position.push([tmp_x,tmp_y,i]);
-				}
-			}
-		}
+    if(typeof position_array[i] != 'undefined'){
+      var this_slice = position_array[i];
+      for(var j =this_slice.length-1; j>-1; j--){
+        if(this_slice[j] ==1){
+          var tmp_x = j%tmp_series.size.X;
+          var tmp_y = j/tmp_series.size.Y;
+          tmp_y = Math.floor(tmp_y);
+          tmp_step_obj.position.push([tmp_x,tmp_y,i]);
+        }
+      }
+    }
   }
   this_data.history.init.push(tmp_step_obj);
 
@@ -131,28 +131,28 @@ voxelContainer.prototype.changeLabelName = function (current_label_id, series_id
   var this_obj = this;
   var this_data = this_obj.data;
 
-	//ラベルオブジェクトのidを差し替え
-	var the_label = this_obj.getLabelObjectById(current_label_id, series_id);
-	the_label.id = new_label_id;
+  //ラベルオブジェクトのidを差し替え
+  var the_label = this_obj.getLabelObjectById(current_label_id, series_id);
+  the_label.id = new_label_id;
 
-	//積まれているヒストリーの中身も調査してラベル名を変更
-	for(var i=0; i<this_data.history.init.length; i++){
-		if(this_data.history.init[i].label == current_label_id){
-			this_data.history.init[i].label = new_label_id;
-		}
-	}
-	
-	for(var i=0; i<this_data.history.main.length; i++){
-		if(this_data.history.main[i].label == current_label_id){
-			this_data.history.main[i].label = new_label_id;
-		}
-	}
-	
-	for(var i=0; i<this_data.history.redo.length; i++){
-		if(this_data.history.redo[i].label == current_label_id){
-			this_data.history.redo[i].label = new_label_id;
-		}
-	}
+  //積まれているヒストリーの中身も調査してラベル名を変更
+  for(var i=0; i<this_data.history.init.length; i++){
+    if(this_data.history.init[i].label == current_label_id){
+      this_data.history.init[i].label = new_label_id;
+    }
+  }
+
+  for(var i=0; i<this_data.history.main.length; i++){
+    if(this_data.history.main[i].label == current_label_id){
+      this_data.history.main[i].label = new_label_id;
+    }
+  }
+
+  for(var i=0; i<this_data.history.redo.length; i++){
+    if(this_data.history.redo[i].label == current_label_id){
+      this_data.history.redo[i].label = new_label_id;
+    }
+  }
 
 };
 
@@ -226,52 +226,41 @@ voxelContainer.prototype.createSaveData = function (series_id, label_id) {
     //最大最小の計三個まで
     var draw_w = max_x - min_x;//書き出すpngの横幅
     var draw_h = max_y - min_y;//書き出すpngのz断面グループ1枚あたりの高さ。書き出しpngの高さはこれにnumberをかけたもの
+    var draw_wh = draw_w * draw_h;
 
-    return_obj.size[0] = draw_w;	//スライス横幅 = 生成画像の幅
-    return_obj.size[1] = draw_h;	//スライス１まいごとの高さ
+    return_obj.size[0] = draw_w;  //スライス横幅 = 生成画像の幅
+    return_obj.size[1] = draw_h;  //スライス１まいごとの高さ
 
-    var png_height = draw_h * return_obj.size[2];		//生成画像のトータル高さ
+    var png_height = draw_h * return_obj.size[2];    //生成画像のトータル高さ
 
     //uintArrayを1次元に変換,初期は全マスを0で埋める
-		var tmp_img_data = new Uint8Array(draw_w*png_height);
-		for(var i=0; i<tmp_img_data.length; i++){
-			tmp_img_data[i] = 0;
-		}
+    var tmp_img_data = new Uint8Array(draw_w*png_height);
 
     for (var z = min_z; z < max_z; z++) {
-
-      if (typeof the_label.position[z] == 'object') {
-				var tmp_the_slice = the_label.position[z];
+     if (typeof the_label.position[z] == 'object') {
+      var tmp_the_slice = the_label.position[z];
+       for (var y = min_y; y < max_y; y++) {
+        var pre_x = this_series_x * y;
+        for (var x = min_x; x < max_x; x++) {
+          var the_index = x - min_x + (y - min_y) * draw_w + (z - min_z) * draw_wh;
+          tmp_img_data[the_index] = tmp_the_slice[x+ pre_x];
+        }
       }
-			
-			for (var i = tmp_the_slice.length - 1; i >= 0; i--) {
-				var y = Math.floor(i / this_series_x);
-				var x = i - this_series_x * y;
-
-				var this_x = x - min_x;
-				var this_y = y - min_y;
-				var this_z = z - min_z;
-				var the_index = (this_x + this_y * draw_w + this_z * draw_w * draw_h);
-
-				if (tmp_the_slice[i] == 1) {
-				 tmp_img_data[the_index] = 1;
-				}
-			}
     }
+  }
 
-		var gzip = new Zlib.Gzip(tmp_img_data);
-    tmp_img_data =  gzip.compress();
+  var gzip = new Zlib.Gzip(tmp_img_data);
+  tmp_img_data =  gzip.compress();
 
-		var arrayBufferToBase64 = function( bytes ) {
-				var binary = '';
-				var len = bytes.byteLength;
-				for (var i = 0; i < len; i++) {
-						binary += String.fromCharCode( bytes[ i ] );
-				}
-				return window.btoa( binary );
-		}
-		return_obj.image = arrayBufferToBase64( tmp_img_data );
-
+  var arrayBufferToBase64 = function( bytes ) {
+      var binary = '';
+      var len = bytes.byteLength;
+      for (var i = 0; i < len; i++) {
+        binary += String.fromCharCode( bytes[ i ] );
+      }
+      return window.btoa( binary );
+  }
+  return_obj.image = arrayBufferToBase64( tmp_img_data );
   }
 
   return return_obj;
@@ -368,7 +357,7 @@ voxelContainer.prototype.getLabelObjectById = function (label_id, series_id) {
 
 
 voxelContainer.prototype.getPositionDataFromImage = function (insertObject, series_w, series_h) {
-	
+
   //初期ロード時等、画像データからpositionデータを生成する
   var this_obj = this;
   var this_data = this_obj.data;
@@ -385,29 +374,30 @@ voxelContainer.prototype.getPositionDataFromImage = function (insertObject, seri
     the_series_h = series_h;
   }
 
-	var arrayBufferFromBase64 = function( base64string ) {
-			var binary = window.atob( base64string );
-			var return_array = [];
-			for(var i=0; i<binary.length; i++){
-				return_array.push(binary.charCodeAt(i));
-			}
-			return return_array;
-	}
-  var tmp_image_data = arrayBufferFromBase64( insertObject.image );
-	
-	var gunzip = new Zlib.Gunzip(tmp_image_data);
-	tmp_image_data = gunzip.decompress();
+  var arrayBufferFromBase64 = function( base64string ) {
+    var binary = window.atob( base64string );
+    var return_array = [];
+    for(var i=0; i<binary.length; i++){
+        return_array.push(binary.charCodeAt(i));
+        }
+    return return_array;
+  }//arrayBufferFromBase64
 
-  for (var i = 0; i < tmp_image_data.length ; i++) {
+  var tmp_img_data = arrayBufferFromBase64( insertObject.image );
+  var gunzip = new Zlib.Gunzip(tmp_img_data);
+  tmp_img_data = gunzip.decompress(); //uint8Array
+  var insertImgSlice_wh = insertObject.size[0]*insertObject.size[1];
+
+  for (var i = 0; i < tmp_img_data.length ; i++) {
     //塗られているマスだけに着目
-    if (tmp_image_data[i] == 1) {
+    if (tmp_img_data[i] == 1) {
       var the_index = i;
       //このマスが投入画像の中でどの座標に位置するか
       var the_position_y = Math.floor(the_index / insertObject.size[0]);
       var the_position_x = the_index - the_position_y * insertObject.size[0];
 
       //投入画像をaxial面でスライスして重ねたと仮定した座標
-      var slice_z = Math.floor(the_position_y / insertObject.size[1]);
+      var slice_z = Math.floor(the_index / insertImgSlice_wh);
       var slice_y = the_position_y - slice_z * insertObject.size[1];
       var slice_x = the_position_x;
 
@@ -422,7 +412,7 @@ voxelContainer.prototype.getPositionDataFromImage = function (insertObject, seri
       return_obj[true_z][the_series_w * true_y + true_x] = 1;
     }
   }
-
+  console.log(return_obj);
   return return_obj;
 };//getPositionDataFromImage
 
@@ -469,7 +459,7 @@ voxelContainer.prototype.historyBack = function () {
         this_history.position
       );
     }
-		
+
     //今現在のメインヒストリ配列の内容で再構築
     for (var i = 0; i < this_data.history.main.length; i++) {
       var this_history = this_data.history.main[i];
@@ -530,7 +520,7 @@ voxelContainer.prototype.historyRedo = function () {
 voxelContainer.prototype.insertLabelData = function (insert_obj) {
   // insert Label data directry
   // this function is call for insert loaded Label data into container
-	
+
   var this_obj = this;
   var this_data = this_obj.data;
 
@@ -613,7 +603,6 @@ voxelContainer.prototype.returnSlice = function (series_id, label_id, tmp_orient
       }
     }
   }
-
   return return_array;
 
 };//returnSlice

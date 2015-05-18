@@ -132,6 +132,14 @@
     changeActiveSeries: function (active_series_id) {
       var this_elm = this;
       controllerInfo.activeSeriesId = active_series_id;
+	  var active_series = this_elm.imageViewerController('getSeriesObjectById',[active_series_id]);
+		
+	  if(typeof active_series.activeLabelId == 'undefined' || active_series.activeLabelId == '' ){
+		  if(typeof active_series.label == 'object' || active_series.label.length > 0 ){
+			  active_series.activeLabelId = active_series.label[0].id;
+		  }
+	  }
+		
       this_elm.find('#' + active_series_id).addClass('active');
       this_elm.imageViewerController('updateLabelElements');
 
@@ -144,27 +152,28 @@
         $(elmId).trigger('changeSeries', active_series_id)
 								.trigger('sync');
       }
+		
     },
 
 
 
 
-		changedLabelNum: function() {
-			var rtn_num = 0;
-			var this_elm = this;
-			for (var i = 0; i < controllerInfo.series.length; i++) {
-				var tmp_the_controller_series = controllerInfo.series[i];
-				if (typeof tmp_the_controller_series.label == 'object') {
-					for (var j = 0; j < tmp_the_controller_series.label.length; j++) {
-						var tmp_the_label = tmp_the_controller_series.label[j];
-						if (typeof tmp_the_label.update_flg != 'undefined' && tmp_the_label.update_flg == 1) {
-							rtn_num++;
-						}
+	changedLabelNum: function() {
+		var rtn_num = 0;
+		var this_elm = this;
+		for (var i = 0; i < controllerInfo.series.length; i++) {
+			var tmp_the_controller_series = controllerInfo.series[i];
+			if (typeof tmp_the_controller_series.label == 'object') {
+				for (var j = 0; j < tmp_the_controller_series.label.length; j++) {
+					var tmp_the_label = tmp_the_controller_series.label[j];
+					if (typeof tmp_the_label.update_flg != 'undefined' && tmp_the_label.update_flg == 1) {
+						rtn_num++;
 					}
 				}
 			}
-			return rtn_num;
-		},
+		}
+		return rtn_num;
+	},
 
 
 
@@ -244,7 +253,6 @@
         $(elmId).imageViewer('changeMode', controllerInfo.mode);
       }
     },
-
 
 
 
@@ -1453,12 +1461,15 @@
         };
 
         var tmp_active_series =  this_elm.imageViewerController('getSeriesObjectById',[controllerInfo.activeSeriesId]);
+		
+		
 
         $('#' + controllerInfo.elements.label).find('.label_info_wrap').empty();
         $('#' + controllerInfo.elements.label).find('.label_attr_area').empty();
         if(typeof tmp_active_series.label =='object' && tmp_active_series.label.length>0){
             var tmp_the_label =  this_elm.imageViewerController('getLabelObjectById',tmp_active_series.activeLabelId,tmp_active_series.id);
-
+			
+			
             if(typeof tmp_the_label.attribute =='object'){
                 insert_prop.value = tmp_the_label.attribute;
             }

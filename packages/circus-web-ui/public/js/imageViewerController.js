@@ -436,7 +436,7 @@
       //ラベルオブジェクトから該当項目を削除
 
       var this_elm = this;
-      var tmp_target_series = this_elm.imageViewerController('getSeriesObjectById', [controllerInfo.activeSeriesId]);
+      var tmp_target_series = this_elm.imageViewerController('getSeriesObjectById', [series_id]);
 
       for (var j = 0; tmp_target_series.label.length; j++) {
         if (tmp_target_series.label[j].id == label_id) {

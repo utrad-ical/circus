@@ -409,6 +409,8 @@
 
         }
       }//control
+			
+			$('body').append('<div class="image_viewer_controller_loading"></div>')
 
       //set Events after creating elements
       this_elm.imageViewerController('setEvents');
@@ -850,15 +852,17 @@
       //save
       $('.btn_save').click(function () {
 
-         //書き換えが発生していたラベルにフラグを立てる
-         this_elm.imageViewerController('checkUpdateLabel');
-
-         //書き換えフラグのあるラベルのidを書き換える
-         this_elm.imageViewerController('changeUpdateLabelId');
-
-         //保存実行
-        this_elm.imageViewerController('saveData');
-
+				 $('.image_viewer_controller_loading').show(100,0,function(){
+					
+					 //書き換えが発生していたラベルにフラグを立てる
+					 this_elm.imageViewerController('checkUpdateLabel');
+	
+					 //書き換えフラグのあるラベルのidを書き換える
+					 this_elm.imageViewerController('changeUpdateLabelId');
+					 //保存実行
+					this_elm.imageViewerController('saveData');
+						
+					});
         return false;
       });
 
@@ -1013,8 +1017,8 @@
 
 			//ヒストリーを１つずつ見ていく
 			for(var i=0; i<tmp_history.length; i++){
-					var tmp_label = this_elm.imageViewerController('getLabelObjectById',tmp_history[i].label);
-					tmp_label.last_save_point = i+1
+				var tmp_label = this_elm.imageViewerController('getLabelObjectById',tmp_history[i].label);
+				tmp_label.last_save_point = i+1
 			}
 		},
 
@@ -1083,23 +1087,29 @@
               url: controllerInfo.postUrl,
               type: 'post',
               data: {
-                  data: save_data
-              }, //送信データ
+                data: save_data
+              },
               dataType: 'json',
               error: function() {
-                  alert('通信に失敗しました');
+                alert('通信に失敗しました');
               },
               success: function(response) {
                   var revisionRes = getRevisionList();
                   if (revisionRes){
 										alert(response.message);
 										this_elm.imageViewerController('resetUpdateFlg');
+										
 									}else{
 										 alert('Failed to get revision information .');
 									}
-              }
+              },
+							complete : function(){
+								$('.image_viewer_controller_loading').hide();
+							}
           });
       }
+			$('.image_viewer_controller_loading').hide();
+			
       return false;
     },//saveData
 

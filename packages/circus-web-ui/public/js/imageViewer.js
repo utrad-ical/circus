@@ -1470,7 +1470,6 @@
 
         //ペンまたは消しゴムで触れられたことを他に伝えるためにイベント発行
         if (typeof this_opts.viewer.draw.activeSeriesId != 'undefined' && typeof the_active_series != 'undefined') {
-          var the_target_label = this_obj.getLabelObjectById(the_active_series.activeLabelId, this_opts.viewer.draw.activeSeriesId);
           this_elm.trigger('onWritten', [the_active_series.activeLabelId, this_opts.viewer.draw.activeSeriesId]);
         }
 

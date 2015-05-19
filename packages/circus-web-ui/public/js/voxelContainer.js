@@ -377,44 +377,47 @@ voxelContainer.prototype.getPositionDataFromImage = function (insertObject, seri
     the_series_h = series_h;
   }
 
-  var arrayBufferFromBase64 = function( base64string ) {
-    var binary = window.atob( base64string );
-    var return_array = [];
-    for(var i=0; i<binary.length; i++){
-        return_array.push(binary.charCodeAt(i));
-        }
-    return return_array;
-  }//arrayBufferFromBase64
+	if(typeof insertObject.image != 'undefined' && insertObject.image != 'error'){
+		var arrayBufferFromBase64 = function( base64string ) {
+			var binary = window.atob( base64string );
+			var return_array = [];
+			for(var i=0; i<binary.length; i++){
+					return_array.push(binary.charCodeAt(i));
+					}
+			return return_array;
+		}//arrayBufferFromBase64
 
-  var tmp_img_data = arrayBufferFromBase64( insertObject.image );
-  var gunzip = new Zlib.Gunzip(tmp_img_data);
-  tmp_img_data = gunzip.decompress(); //uint8Array
-  var insertImgSlice_wh = insertObject.size[0]*insertObject.size[1];
+		var tmp_img_data = arrayBufferFromBase64( insertObject.image );
+		var gunzip = new Zlib.Gunzip(tmp_img_data);
+		tmp_img_data = gunzip.decompress(); //uint8Array
+		var insertImgSlice_wh = insertObject.size[0]*insertObject.size[1];
 
-  for (var i = 0; i < tmp_img_data.length ; i++) {
-    //塗られているマスだけに着目
-    if (tmp_img_data[i] == 1) {
-      var the_index = i;
-      //このマスが投入画像の中でどの座標に位置するか
-      var the_position_y = Math.floor(the_index / insertObject.size[0]);
-      var the_position_x = the_index - the_position_y * insertObject.size[0];
+		for (var i = 0; i < tmp_img_data.length ; i++) {
+			//塗られているマスだけに着目
+			if (tmp_img_data[i] == 1) {
+				var the_index = i;
+				//このマスが投入画像の中でどの座標に位置するか
+				var the_position_y = Math.floor(the_index / insertObject.size[0]);
+				var the_position_x = the_index - the_position_y * insertObject.size[0];
 
-      //投入画像をaxial面でスライスして重ねたと仮定した座標
-      var slice_z = Math.floor(the_index / insertImgSlice_wh);
-      var slice_y = the_position_y - slice_z * insertObject.size[1];
-      var slice_x = the_position_x;
+				//投入画像をaxial面でスライスして重ねたと仮定した座標
+				var slice_z = Math.floor(the_index / insertImgSlice_wh);
+				var slice_y = the_position_y - slice_z * insertObject.size[1];
+				var slice_x = the_position_x;
 
-      //uintArrayでの座標
-      var true_z = slice_z + insertObject.offset[2];
-      var true_y = slice_y + insertObject.offset[1];
-      var true_x = slice_x + insertObject.offset[0];
+				//uintArrayでの座標
+				var true_z = slice_z + insertObject.offset[2];
+				var true_y = slice_y + insertObject.offset[1];
+				var true_x = slice_x + insertObject.offset[0];
 
-      if (typeof return_obj[true_z] != 'object') {
-        return_obj[true_z] = new Uint8Array(the_series_w * the_series_h);
-      }
-      return_obj[true_z][the_series_w * true_y + true_x] = 1;
-    }
-  }
+				if (typeof return_obj[true_z] != 'object') {
+					return_obj[true_z] = new Uint8Array(the_series_w * the_series_h);
+				}
+				return_obj[true_z][the_series_w * true_y + true_x] = 1;
+			}
+		}
+	}
+
   return return_obj;
 };//getPositionDataFromImage
 

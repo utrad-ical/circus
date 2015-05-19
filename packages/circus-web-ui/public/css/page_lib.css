@@ -139,6 +139,10 @@
 .img_view_area .image_window_controller{padding:5px;}
 .img_view_area .image_window_controller_erase{width:32px; margin-left:480px; height:32px; margin-bottom:-32px; cursor:pointer; text-align:center;}
 
+.error_area{border:1px solid #c00; background:#FFF6FF;}
+.error_area li{display:inline;}
+.error_area .btn_close_error{width:100px; background:#fff; border:1px solid #ccc; margin:0 auto; cursor:pointer; text-align:center;}
+
 #ui-datepicker-div{z-index:1500 !important;}
 
 

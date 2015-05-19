@@ -529,6 +529,18 @@ id="page_case_detail"
 			@include('case.export')
 		</div>
 	</div>
+	
+	<div class="error_area mar_b_10" style="display:none;">
+		<div class="pad_20">
+			<div class="error_detail">
+				ラベル
+				<ul class="error_label_list"></ul>
+				のデータが不正です。描画に失敗しました。
+			</div>
+			<p class="btn_close_error">閉じる</p>
+		</div>
+	</div>
+	
 	<div class="control_panel mar_tb_10" id="the_panel">
 		<div class="control_panel_inner" id="the_panel_inner">
 			<div class="info_area">

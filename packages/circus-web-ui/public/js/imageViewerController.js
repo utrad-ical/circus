@@ -133,13 +133,13 @@
       var this_elm = this;
       controllerInfo.activeSeriesId = active_series_id;
 	  var active_series = this_elm.imageViewerController('getSeriesObjectById',[active_series_id]);
-		
+
 	  if(typeof active_series.activeLabelId == 'undefined' || active_series.activeLabelId == '' ){
 		  if(typeof active_series.label == 'object' && active_series.label.length > 0 ){
 			  active_series.activeLabelId = active_series.label[0].id;
 		  }
 	  }
-		
+
       this_elm.find('#' + active_series_id).addClass('active');
       this_elm.imageViewerController('updateLabelElements');
 
@@ -152,7 +152,7 @@
         $(elmId).trigger('changeSeries', active_series_id)
 								.trigger('sync');
       }
-		
+
     },
 
 
@@ -409,7 +409,7 @@
 
         }
       }//control
-			
+
 			$('body').append('<div class="image_viewer_controller_loading_wrap"><div class="image_viewer_controller_loading"></div></div>')
 
       //set Events after creating elements
@@ -521,6 +521,8 @@
         }
       }
 
+			var error_array = new Array(0);
+
       //前回描かれていたラベル情報の読み込み
       //コントローラのデフォルトのオブジェクトとマージ
       if (typeof controllerInfo.series == 'object') {
@@ -535,11 +537,30 @@
                 tmp_the_label.id = label_default.id
               }
               tmp_series.label[j] = $.extend(true, label_default, tmp_the_label);
+							if(tmp_series.label[j].image == 'error'){
+								error_array.push(tmp_series.label[j].id);
+							}
               tmp_color_index_num++;
             }
           }
         }
       }
+
+			//データエラー
+			if(error_array.length>0){
+				var error_li = '';
+				for(var i=0; i<error_array.length; i++){
+				 error_txt = '<li>'+error_txt+'</li>';
+				}
+				$('.error_label_list').append(error_txt);
+				$('.error_area').show();
+
+				$('.error_area').find('.btn_close_error').click(function(){
+					$('.error_area').slideUp();
+				});
+			}else{
+				$('.error_area').remove();
+			}
 
       //コントローラ関連の要素生成発動
       this_elm.imageViewerController('create');
@@ -854,16 +875,16 @@
 
 				$('.image_viewer_controller_loading_wrap').show();
 				var funcStart = setTimeout(function(){
-				
+
           //書き換えが発生していたラベルにフラグを立てる
           this_elm.imageViewerController('checkUpdateLabel');
-					
+
           //書き換えフラグのあるラベルのidを書き換える
           this_elm.imageViewerController('changeUpdateLabelId');
-					
+
           //保存実行
           this_elm.imageViewerController('saveData');
-					
+
 				},100);
 
         return false;
@@ -1014,7 +1035,7 @@
 					}
 				}
 			}
-			
+
 			var this_elm = this;
 			var tmp_history = controllerInfo.viewer[0].container.data.history.main;
 
@@ -1027,14 +1048,14 @@
 
 
 
-    saveData: function() {									
+    saveData: function() {
 
       //データ保存
       var this_elm = this;
       var save_data = new Object();
       save_data.caseId = controllerInfo.caseId;
       save_data.series = new Array(0);
-			
+
       if (controllerInfo.elements.revisionAttribute != '') {
         var revision_attributes = $('#' + controllerInfo.elements.revisionAttribute).propertyeditor('option').value;
         save_data.attribute = JSON.stringify(revision_attributes);
@@ -1047,7 +1068,7 @@
           tmp_insert_obj.id = tmp_the_series.id;
           tmp_insert_obj.label = new Array(0);
 
-          if (typeof tmp_the_series.label == 'object') {	
+          if (typeof tmp_the_series.label == 'object') {
 
             for (var j = 0; j < tmp_the_series.label.length; j++) {
 
@@ -1075,7 +1096,7 @@
         //console.log(e);
         return false;
       }
-			
+
 			$('.image_viewer_controller_loading_wrap').hide();
       var tmp_input_memo = window.prompt('input Memo', controllerInfo.memo);
       if (tmp_input_memo !== null) {
@@ -1105,7 +1126,7 @@
               }
           });
       }
-			
+
       return false;
     },//saveData
 
@@ -1467,15 +1488,15 @@
         };
 
         var tmp_active_series =  this_elm.imageViewerController('getSeriesObjectById',[controllerInfo.activeSeriesId]);
-		
-		
+
+
 
         $('#' + controllerInfo.elements.label).find('.label_info_wrap').empty();
         $('#' + controllerInfo.elements.label).find('.label_attr_area').empty();
         if(typeof tmp_active_series.label =='object' && tmp_active_series.label.length>0){
             var tmp_the_label =  this_elm.imageViewerController('getLabelObjectById',tmp_active_series.activeLabelId,tmp_active_series.id);
-			
-			
+
+
             if(typeof tmp_the_label.attribute =='object'){
                 insert_prop.value = tmp_the_label.attribute;
             }

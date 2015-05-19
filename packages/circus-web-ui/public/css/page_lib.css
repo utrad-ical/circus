@@ -31,7 +31,8 @@
 .ico_detail_sprite_measure{background-position: 0 -390px;}
 .ico_detail_sprite_bucket{background-position: 0 -420px;}
 
-.image_viewer_controller_loading{position:fixed; top:300px; left:50%; background:url(../img/common/loading.gif) no-repeat; width:32px; height:32px; display:none;}
+.image_viewer_controller_loading_wrap{position:fixed; top:390px; left:50%;  display:none; margin-left:-110px;border:2px solid #333; width:229px; height:27px; z-index:1000; background:#fff; border-radius:5px;}
+.image_viewer_controller_loading{background-image:url(../img/common/loading_bar.gif); background-repeat:no-repeat; background-position:center; width:229px; height:26px; display:block;}
 
 #the_panel .color_picker{width:28px; height:28px; border:none; display:block; float:left; margin-right:3px; cursor:pointer; border:1px solid #ccc; text-indent:-9999px;}
 #the_panel .visible_check_wrap{width:30px; height:30px; display:block; float:left; margin-right:3px; text-indent:-9999px; cursor:pointer; background-image:url(../img/common/ico_detail_sprite.png); background-repeat:no-repeat; background-position:0 -270px;}

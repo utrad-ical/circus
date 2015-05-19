@@ -1,13 +1,6 @@
 @charset "utf-8";
 /* CSS Document */
 
-/*
-	全ページ共通 カラースキーム
-	現在は開発上の利便性・視認性の維持のためcssは独立しておりますが
-	ある程度機能・使用がfixしてきた段階で common.css の末尾に合流して通信リクエスト数を節約します。
-
-*/
-
 body.mode_black{background:#000; color:#eee;}
 body.mode_white{background:#fff; color:#404040;}
 
@@ -25,12 +18,13 @@ body.mode_white .page_ttl{border-color:#D3CCC2;}
 
 body.mode_black .common_table{color:#404040;}
 
-
 .font_red{color:#FD3164;}
 body.mode_black #page_admin_home .cell_ttl{color:#404040;}
 body.mode_black #layer_panel{color:#404040;}
 
-
 body.mode_black .label_select_wrap{color:#404040;}
 body.mode_black .droppable_area{color:#404040;}
 
+body.mode_black .error_area{color:#404040;}
+body.mode_black .info_area{color:#404040; background:#CCC;}
+body.mode_black .label_attr_area{color:#404040;}

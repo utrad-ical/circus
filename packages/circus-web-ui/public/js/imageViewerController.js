@@ -550,7 +550,7 @@
 			if(error_array.length>0){
 				var error_li = '';
 				for(var i=0; i<error_array.length; i++){
-				 error_txt = '<li>'+error_txt+'</li>';
+				 error_txt = '<li>'+error_array[i]+'</li>';
 				}
 				$('.error_label_list').append(error_txt);
 				$('.error_area').show();

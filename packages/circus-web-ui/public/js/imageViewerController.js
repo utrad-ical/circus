@@ -410,7 +410,7 @@
         }
       }//control
 			
-			$('body').append('<div class="image_viewer_controller_loading"></div>')
+			$('body').append('<div class="image_viewer_controller_loading_wrap"><div class="image_viewer_controller_loading"></div></div>')
 
       //set Events after creating elements
       this_elm.imageViewerController('setEvents');
@@ -852,17 +852,20 @@
       //save
       $('.btn_save').click(function () {
 
-				 $('.image_viewer_controller_loading').show(100,0,function(){
+				$('.image_viewer_controller_loading_wrap').show();
+				var funcStart = setTimeout(function(){
+				
+          //書き換えが発生していたラベルにフラグを立てる
+          this_elm.imageViewerController('checkUpdateLabel');
 					
-					 //書き換えが発生していたラベルにフラグを立てる
-					 this_elm.imageViewerController('checkUpdateLabel');
-	
-					 //書き換えフラグのあるラベルのidを書き換える
-					 this_elm.imageViewerController('changeUpdateLabelId');
-					 //保存実行
-					this_elm.imageViewerController('saveData');
-						
-					});
+          //書き換えフラグのあるラベルのidを書き換える
+          this_elm.imageViewerController('changeUpdateLabelId');
+					
+          //保存実行
+          this_elm.imageViewerController('saveData');
+					
+				},100);
+
         return false;
       });
 
@@ -1073,11 +1076,9 @@
         return false;
       }
 			
-			
-			
+			$('.image_viewer_controller_loading_wrap').hide();
       var tmp_input_memo = window.prompt('input Memo', controllerInfo.memo);
       if (tmp_input_memo !== null) {
-          //save
           //console.log(save_data);
           //console.log("URL::");
           //console.log(controllerInfo.postUrl);
@@ -1094,21 +1095,16 @@
                 alert('通信に失敗しました');
               },
               success: function(response) {
-                  var revisionRes = getRevisionList();
-                  if (revisionRes){
-										alert(response.message);
-										this_elm.imageViewerController('resetUpdateFlg');
-										
-									}else{
-										 alert('Failed to get revision information .');
-									}
-              },
-							complete : function(){
-								$('.image_viewer_controller_loading').hide();
-							}
+								var revisionRes = getRevisionList();
+								if (revisionRes){
+									alert(response.message);
+									this_elm.imageViewerController('resetUpdateFlg');
+								}else{
+									 alert('Failed to get revision information .');
+								}
+              }
           });
       }
-			$('.image_viewer_controller_loading').hide();
 			
       return false;
     },//saveData

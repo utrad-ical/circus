@@ -151,28 +151,7 @@ class LabelRegisterController extends BaseController {
 			$decode_str = base64_decode($image);
 			Log::debug('保存するデータ(base64デコード後)::');
 			Log::debug($decode_str);
-
-/*
-			$gz_dec = zlib_decode($decode_str);
-			Log::debug('保存するデータ(zlib_decode後)::');
-			Log::debug($gz_dec);
-			*/
-			/*
-			//ドット描画準備
-			ini_set('memory_limit', '-1');
-			$img_obj = imagecreatetruecolor($width, $height * $idx);
-			$text_color = imagecolorallocate($img_obj, 255, 255, 255);
-			$background_color = imagecolorallocate($img_obj, 0, 0, 0);
-			//ドット描画
-			for ($i = 0; $i < strlen($gz_dec); $i++) {
-				if (bin2hex($gz_dec[$i]) == '01')
-					imagesetpixel($img_obj , floor($i % $width) , floor($i / $width) , $text_color);
-			}
-			//画像出力
-			return imagepng($img_obj, $path."/".$label_id.".png");
-			*/
-			//return readgzfile($path.'/'.$label_id.'.txt.gz');
-			return file_put_contents($path.'/'.$label_id.'.txt.gz', $decode_str);
+			return file_put_contents($path.'/'.$label_id.'.gz', $decode_str);
 		} catch (Exception $e) {
 			Log::error($e);
 			return;

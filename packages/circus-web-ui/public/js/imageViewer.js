@@ -290,6 +290,7 @@
       this_opts.viewer.draw.activeSeriesId = seriesId;
       var tmp_the_series = this_obj.getSeriesObjectById(seriesId);
 
+			//set window info
       this_opts.viewer.window = new Object();
       this_opts.viewer.window = $.extend(true,this_opts.viewer.window,tmp_the_series.window);
 
@@ -317,6 +318,13 @@
       	this_elm.find('.window_preset_wrap').removeClass('hidden');
       	this_elm.find('.image_window_preset_select').append(tmp_elm);
       }
+
+			//set active label
+			if(typeof tmp_the_series.activeLabelId == 'undefined' || tmp_the_series.activeLabelId == '' ){
+				if(typeof tmp_the_series.label == 'object' && tmp_the_series.label.length > 0 ){
+					tmp_the_series.activeLabelId = tmp_the_series.label[0].id;
+				}
+			}
 
       this_opts.viewer.voxel = $.extend(true,this_opts.viewer.voxel,tmp_the_series.voxel);
       this_obj.setCanvasSize();
@@ -1129,7 +1137,6 @@
       if(e.which!=1){
       	return
       };
-
       this_obj._tmpInfo.cursor.touch_flg = 1;
 
       //マウスの初期位置取得

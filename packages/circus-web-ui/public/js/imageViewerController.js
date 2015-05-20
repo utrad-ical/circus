@@ -132,13 +132,13 @@
     changeActiveSeries: function (active_series_id) {
       var this_elm = this;
       controllerInfo.activeSeriesId = active_series_id;
-    var active_series = this_elm.imageViewerController('getSeriesObjectById',[active_series_id]);
-
-    if(typeof active_series.activeLabelId == 'undefined' || active_series.activeLabelId == '' ){
-      if(typeof active_series.label == 'object' && active_series.label.length > 0 ){
-        active_series.activeLabelId = active_series.label[0].id;
-      }
-    }
+			var active_series = this_elm.imageViewerController('getSeriesObjectById',[active_series_id]);
+	
+			if(typeof active_series.activeLabelId == 'undefined' || active_series.activeLabelId == '' ){
+				if(typeof active_series.label == 'object' && active_series.label.length > 0 ){
+					active_series.activeLabelId = active_series.label[0].id;
+				}
+			}
 
       this_elm.find('#' + active_series_id).addClass('active');
       this_elm.imageViewerController('updateLabelElements');
@@ -535,10 +535,10 @@
                 tmp_the_label.id = label_default.id
               }
               tmp_series.label[j] = $.extend(true, label_default, tmp_the_label);
-          if(tmp_series.label[j].image == 'error'){
-            var tmp_txt = '[Series '+ i + ' label ' + j+']';
-            error_array.push(tmp_txt);
-          }
+							if(tmp_series.label[j].image == 'error'){
+								var tmp_txt = '[Series '+ i + ' label ' + j+']';
+								error_array.push(tmp_txt);
+							}
               tmp_color_index_num++;
             }
           }

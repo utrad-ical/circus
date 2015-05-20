@@ -62,20 +62,30 @@ class Exporter
 					$matrix['width'] * $matrix['height'] * $matrix['depth']);
 			}
 
-			$im = imagecreatefrompng($label['path'] . "/" . $label['labelID'] . ".png");
+			$label_file_name = $label['path'] . "/" . $label['labelID'] . ".gz";
+			$fp = fopen($label_file_name, 'rb');
+
+			if ($fp == false) {
+				throw new \Exception("Failed to load label data ($label_file_name)");
+			}
+
+			$label_data = gzdecode(stream_get_contents($fp));
+			fclose($fp);
 
 			for ($k = 0; $k < $label['d']; $k++) {
+				$offset_z = $k * $label['h'] * $label['w'];
+
 				for ($j = 0; $j < $label['h']; $j++) {
+					$offset_y = $j * $label['w'];
+
 					for ($i = 0; $i < $label['w']; $i++) {
+						$label_pos = $i + $offset_y + $offset_z;
 
-						$pos_x = $i;
-						$pos_y = $k * $label['h'] + $j;
-
-						if (imagecolorat($im, $pos_x, $pos_y) == 255) {
+						if($label_data[$label_pos] == chr(1)) {
 							$volume_pos = ($label['x'] + $i)
 								+ ($label['y'] + $j) * $matrix['width']
 								+ ($label['z'] + $k) * $matrix['width'] * $matrix['height'];
-							$data[$volume_pos] = $combined_flg ? chr($label['voxel_value']) : 1;
+							$data[$volume_pos] = $combined_flg ? chr($label['voxel_value']) : chr(1);
 						}
 					}
 				}

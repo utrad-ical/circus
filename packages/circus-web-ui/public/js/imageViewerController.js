@@ -538,7 +538,8 @@
               }
               tmp_series.label[j] = $.extend(true, label_default, tmp_the_label);
 							if(tmp_series.label[j].image == 'error'){
-								error_array.push(tmp_series.label[j].id);
+								var tmp_txt = '[Series '+ i + ' label ' + j+']';
+								error_array.push(tmp_txt);
 							}
               tmp_color_index_num++;
             }
@@ -550,7 +551,7 @@
 			if(error_array.length>0){
 				var error_li = '';
 				for(var i=0; i<error_array.length; i++){
-				 error_txt = '<li>'+error_array[i]+'</li>';
+				 error_txt = '<span>'+error_array[i]+'</span> ';
 				}
 				$('.error_label_list').append(error_txt);
 				$('.error_area').show();

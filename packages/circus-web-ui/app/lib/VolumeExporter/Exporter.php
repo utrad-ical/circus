@@ -63,25 +63,19 @@ class Exporter
 			}
 
 			$label_file_name = $label['path'] . "/" . $label['labelID'] . ".gz";
-			$fp = fopen($label_file_name, 'rb');
+			$voi_slice_size = $label['h'] * $label['w'];
 
-			if ($fp == false) {
+			if (($zp = gzopen($label_file_name, 'rb')) == false) {
 				throw new \Exception("Failed to load label data ($label_file_name)");
 			}
 
-			$label_data = gzdecode(stream_get_contents($fp));
-			fclose($fp);
-
 			for ($k = 0; $k < $label['d']; $k++) {
-				$offset_z = $k * $label['h'] * $label['w'];
-
+				$voi_slice_data = gzread ($zp , $voi_slice_size);
 				for ($j = 0; $j < $label['h']; $j++) {
-					$offset_y = $j * $label['w'];
-
+					$slice_y = $j * $label['w'];
 					for ($i = 0; $i < $label['w']; $i++) {
-						$label_pos = $i + $offset_y + $offset_z;
-
-						if($label_data[$label_pos] == chr(1)) {
+						$slice_pos = $i + $slice_y;
+						if($voi_slice_data[$slice_pos] == chr(1)) {
 							$volume_pos = ($label['x'] + $i)
 								+ ($label['y'] + $j) * $matrix['width']
 								+ ($label['z'] + $k) * $matrix['width'] * $matrix['height'];
@@ -90,6 +84,7 @@ class Exporter
 					}
 				}
 			}
+			gzclose($zp);
 
 			if (!$combined_flg) {
 				file_put_contents($raw_file_name, $data);

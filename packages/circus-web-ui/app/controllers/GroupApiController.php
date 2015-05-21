@@ -1,6 +1,6 @@
 <?php
 
-class GroupApiController extends ApiBaseController
+class GroupApiController extends ResourceApiBaseController
 {
 	protected $fields = array('groupID', 'groupName', 'privileges');
 	protected $targetClass = 'Group';

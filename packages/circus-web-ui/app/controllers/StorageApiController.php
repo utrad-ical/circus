@@ -2,7 +2,7 @@
 
 use Illuminate\Support\MessageBag;
 
-class StorageApiController extends ApiBaseController
+class StorageApiController extends ResourceApiBaseController
 {
 	protected $fields = array('storageID', 'type', 'path', 'active');
 	protected $targetClass = 'Storage';

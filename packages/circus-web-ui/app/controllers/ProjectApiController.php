@@ -1,6 +1,6 @@
 <?php
 
-class ProjectApiController extends ApiBaseController {
+class ProjectApiController extends ResourceApiBaseController {
 	protected $targetClass = 'Project';
 	protected $fields = null;
 	protected $settable = null;

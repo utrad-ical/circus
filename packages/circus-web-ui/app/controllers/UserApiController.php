@@ -1,6 +1,6 @@
 <?php
 
-class UserApiController extends ApiBaseController
+class UserApiController extends ResourceApiBaseController
 {
 	protected $targetClass = 'User';
 	protected $fields = ['userID', 'loginID', 'groups', 'description', 'loginEnabled', 'preferences'];

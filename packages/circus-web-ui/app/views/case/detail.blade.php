@@ -159,15 +159,15 @@
 
                     if(typeof response.window_width == 'number'){
                         tmp_series.window.width.current = response.window_width;
-                    };               
+                    };
 
                     //set init window settings by Series Window Priority.
                     var priority_array = ['preset','dicom','auto']; //priority default
-                    
+
                     if(typeof tmp_series.window.priority == 'string'){
                         priority_array = tmp_series.window.priority.split(',');
                     }
-                    
+
                     for(var i=0; i<priority_array.length; i++){
                         if(priority_array[i] == 'preset' && typeof tmp_series.window.preset == 'object' && tmp_series.window.preset.length>0){
                             tmp_series.window.level.current = tmp_series.window.preset[0].level;
@@ -183,30 +183,30 @@
                             break;
                         }
                     }
-                    
+
                     if(typeof tmp_series.window.preset != 'object'){
                         tmp_series.window.preset = new Array(0);
                     }
-                    
+
                     //set dicom-written-info into the last of Preset array.
                     if(typeof response.window_level_dicom == 'number' && typeof response.window_width_dicom == 'number'){
                         var tmp_preset_dicom = {
                             label: 'dicom' ,
                             level: response.window_level_dicom ,
-                            width: response.window_width_dicom                        
+                            width: response.window_width_dicom
                         }
                         tmp_series.window.preset.push(tmp_preset_dicom);
-                    };    
-                    
+                    };
+
                     //set auto-info into the last of Preset array.
                     if(typeof response.window_level == 'number' && typeof response.window_width == 'number'){
                         var tmp_preset_auto = {
                             label: 'auto' ,
                             level: response.window_level ,
-                            width: response.window_width                        
+                            width: response.window_width
                         }
                         tmp_series.window.preset.push(tmp_preset_auto);
-                    };    
+                    };
 
                     if(typeof response.window_level_max == 'number'){
                         tmp_series.window.level.maximum = response.window_level_max;
@@ -261,9 +261,9 @@
                 $('#' + initInfo[j].elements.revisionAttribute).propertyeditor(insert_prop);
             }
         }//controllerRun
-				
-				
-				
+
+
+
         $('#btnBack').click(function() {
             var this_elm = $(this);
             $('#' + initInfo[0].wrapElementId).imageViewerController('checkUpdateLabel');
@@ -291,9 +291,9 @@
             }
             return false;
         });
-				
-				
-				
+
+
+
         $('.link_case_detail').click(function(){
             changeRevision($(this).closest('td').find("input[name='revisionNo']").val(), 'detail');
         });
@@ -530,7 +530,7 @@ id="page_case_detail"
 			@include('case.export')
 		</div>
 	</div>
-	
+
 	<div class="error_area mar_b_10" style="display:none;">
 		<div class="pad_20">
 			<p class="error_detail">
@@ -539,7 +539,7 @@ id="page_case_detail"
 			<p class="btn_close_error">閉じる</p>
 		</div>
 	</div>
-	
+
 	<div class="control_panel mar_tb_10" id="the_panel">
 		<div class="control_panel_inner" id="the_panel_inner">
 			<div class="info_area">
@@ -610,7 +610,7 @@ id="page_case_detail"
 			</table>
 		</div>
 	</div>
-	<div id="unload_dialog">
+	<div id="unload_dialog" hidden>
 		There are unsaved data.
 		<br>are you sure move to other page?
 	</div>

@@ -99,7 +99,6 @@
       var this_obj = this;
       var this_opts = this.options
       var tmp_add_label_obj = {
-        color: label_obj.color,
         id: label_obj.id,
         position: new Array(0),
         rgba: label_obj.rgba,

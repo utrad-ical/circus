@@ -108,7 +108,7 @@
         active_series.label = [];
       }
       var tmp_label_obj = {};
-      var tmp_color_index_num = active_series.label.length % controllerInfo.defaultColorSet.length;
+      var tmp_color_index_num = active_series.label.length;
       
       var label_default = this_elm.imageViewerController('getLabelDefault', tmp_color_index_num);
       tmp_label_obj = $.extend(true, tmp_label_obj, label_default);
@@ -937,55 +937,55 @@
     },
 
 
+
     getLabelDefault: function (color_index) {
 
-      //ラベル新規生成
-      var this_elm = this;
-      var tmp_id = new Date();
-      var the_random = Math.random();
+			var this_elm = this;
+			var tmp_id = new Date();
+	
+			var the_month = 1 + tmp_id.getMonth();
+			the_month = this_elm.imageViewerController('zeroFormat', [the_month, 2]);
+	
+			var the_Date = tmp_id.getDate();
+			the_Date = this_elm.imageViewerController('zeroFormat', [the_Date, 2]);
+	
+			var the_Hours = tmp_id.getHours();
+			the_Hours = this_elm.imageViewerController('zeroFormat', [the_Hours, 2]);
+	
+			var the_Minutes = 1 + tmp_id.getMinutes();
+			the_Minutes = this_elm.imageViewerController('zeroFormat', [the_Minutes, 2]);
+	
+			var the_Seconds = 1 + tmp_id.getSeconds();
+			the_Seconds = this_elm.imageViewerController('zeroFormat', [the_Seconds, 2]);
+	
+			var the_Milliseconds = 1 + tmp_id.getMilliseconds();
+			the_Milliseconds = this_elm.imageViewerController('zeroFormat', [the_Milliseconds, 3]);
+	
+			var the_random = this_elm.imageViewerController('createRandomStr', [10]);
+	
+			tmp_id = tmp_id.getFullYear() + the_month + the_Date + the_Hours + the_Minutes + the_Seconds + the_Milliseconds + '_' + the_random;
+	
+			var index_number = 0;
+			if (color_index) {
+				index_number = color_index;
+			}
+			var tmp_color = controllerInfo.defaultColorSet[index_number % controllerInfo.defaultColorSet.length];
+			var tmp_rgba = this_elm.imageViewerController('getRgba', tmp_color, 100);
+	
+			var return_obj = {
+				//ラベル生成時のデフォルト
+				id: tmp_id,
+				alpha: 100,
+				attribute: '',
+				last_save_point:0,
+				rgba: tmp_rgba,
+				update_flg: 0,
+				visible: true
+			};
+			return return_obj;
+			
+    },//getLabelDefault
 
-      var the_month = 1 + tmp_id.getMonth();
-      the_month = this_elm.imageViewerController('zeroFormat', [the_month, 2]);
-
-      var the_Date = tmp_id.getDate();
-      the_Date = this_elm.imageViewerController('zeroFormat', [the_Date, 2]);
-
-      var the_Hours = tmp_id.getHours();
-      the_Hours = this_elm.imageViewerController('zeroFormat', [the_Hours, 2]);
-
-      var the_Minutes = 1 + tmp_id.getMinutes();
-      the_Minutes = this_elm.imageViewerController('zeroFormat', [the_Minutes, 2]);
-
-      var the_Seconds = 1 + tmp_id.getSeconds();
-      the_Seconds = this_elm.imageViewerController('zeroFormat', [the_Seconds, 2]);
-
-      var the_Milliseconds = 1 + tmp_id.getMilliseconds();
-      the_Milliseconds = this_elm.imageViewerController('zeroFormat', [the_Milliseconds, 3]);
-
-      var the_random = this_elm.imageViewerController('createRandomStr', [10]);
-
-      tmp_id = tmp_id.getFullYear() + the_month + the_Date + the_Hours + the_Minutes + the_Seconds + the_Milliseconds + '_' + the_random;
-
-      var index_number = 0;
-      if (color_index) {
-        index_number = color_index;
-      }
-      var tmp_color = controllerInfo.defaultColorSet[index_number];
-      var tmp_rgba = this_elm.imageViewerController('getRgba', tmp_color, 100);
-
-      var return_obj = {
-        //ラベル生成時のデフォルト
-        id: tmp_id,
-        alpha: 100,
-        attribute: '',
-        color: tmp_color, //todo初期は他のラベルで使われてない色をランダムで選ぶ
-        last_save_point:0,
-        rgba: tmp_rgba, //color/alphaを併せてcanvas適用用の値を作る
-        update_flg: 0,
-        visible: true
-      }
-      return return_obj;
-    },
 
 
     getLabelObjectById: function (label_id, series_id) {

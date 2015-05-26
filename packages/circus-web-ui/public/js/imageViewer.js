@@ -117,27 +117,40 @@
         target_series.activeLabelId = tmp_add_label_obj.id;
       }
     },
-
+		
+		
 
     _applyBoldness: function (insert_array) {
       //ペンで描いた状態の座標群と現時点での太さ指定を踏まえ,塗るべきマス目の集合に変換する
-      var this_obj = this;
-      var this_opts = this.options
-      var rtn_array = [];
-      var bold_arround = Math.floor(this_opts.viewer.draw.boldness / 2);
-      var the_boldness = this_opts.viewer.draw.boldness;
-
-      for (var i = insert_array.length - 1; i >= 0; i--) {
-        for (var k = the_boldness - 1; k >= 0; k--) {	//x軸
-          for (var l = the_boldness - 1; l >= 0; l--) {	//y軸
-            var tmp_x = insert_array[i][0] - bold_arround + k;
-            var tmp_y = insert_array[i][1] - bold_arround + l;
+      var this_obj = this,
+        this_opts = this.options,
+        rtn_array = [],
+        bold_arround = Math.floor(this_opts.viewer.draw.boldness / 2),
+        the_boldness = this_opts.viewer.draw.boldness,
+        i,
+        k,
+        l,
+        tmp_x,
+        tmp_y;
+  
+      for (i = insert_array.length - 1; i >= 0; i -= 1) {
+        for (k = the_boldness - 1; k >= 0; k -= 1) { //x軸
+          for (l = the_boldness - 1; l >= 0; l -= 1) { //y軸
+            tmp_x = insert_array[i][0] - bold_arround + k;
+            tmp_y = insert_array[i][1] - bold_arround + l;
+            if (tmp_x < 0) {
+              tmp_x = 0;
+            }
+            if (tmp_y < 0) {
+              tmp_y = 0;
+            }
             rtn_array.push([tmp_x, tmp_y]);
           }
         }
       }
       return rtn_array;
     },
+
 
 
     _changeImgSrc: function () {

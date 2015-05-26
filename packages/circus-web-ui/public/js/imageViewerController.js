@@ -96,36 +96,33 @@
   var controller_methods = {
 
     addLabelObject: function () {
-      //ラベルの新規追加
       var this_elm = this;
       var active_series = this_elm.imageViewerController('getSeriesObjectById', [controllerInfo.activeSeriesId]);
-
-      if (typeof active_series != 'object') {
+      
+      if (typeof active_series !== 'object') {
         active_series = controllerInfo.series[0];
         controllerInfo.activeSeriesId = active_series.id;
       }
-      //まだactiveSeriesにラベルオブジェクトが無い場合
-      if (typeof active_series.label != 'object') {
-        active_series.label = new Array();
-      }
-      var tmp_label_obj = new Object();
-      var tmp_color_index_num = active_series.label.length;
 
+      if (typeof active_series.label !== 'object') {
+        active_series.label = [];
+      }
+      var tmp_label_obj = {};
+      var tmp_color_index_num = active_series.label.length % controllerInfo.defaultColorSet.length;
+      
       var label_default = this_elm.imageViewerController('getLabelDefault', tmp_color_index_num);
       tmp_label_obj = $.extend(true, tmp_label_obj, label_default);
       active_series.label.push(tmp_label_obj);
-
-      //activeLabelが未定義なら今回追加したラベルを指定
-      if (typeof active_series.activeLabelId == 'undefined'|| active_series.activeLabelId == '') {
+      
+      if (typeof active_series.activeLabelId === 'undefined' || active_series.activeLabelId === '') {
         active_series.activeLabelId = active_series.label[0].id;
       }
-
-      //配下ビューアーオプション情報を書き換えて再描画を発火させる
-      for (var i = controllerInfo.viewer.length - 1; i >= 0; i--) {
+      
+      for (var i = controllerInfo.viewer.length - 1; i >= 0; i -= 1) {
         var elmId = '#' + controllerInfo.viewer[i].elementId;
         $(elmId).trigger('addLabelObject', [controllerInfo.activeSeriesId, tmp_label_obj]);
       }
-    },
+    },//addLabelObject
 
 
 

@@ -169,6 +169,7 @@ Series Search
 					{{Form::text('seriesDescription', isset($inputs['seriesDescription']) ? $inputs['seriesDescription'] : '', array('class' => 'common_input_text w_150'))}}
 				</td>
 			</tr>
+		@if(User::hasPrivilege(Group::PERSONAL_INFO_VIEW))
 			<tr>
 				<th>Patient ID</th>
 				<td>
@@ -206,6 +207,7 @@ Series Search
 					</label>
 				</td>
 			</tr>
+		@endif
 		</table>
 		<p class="al_c">
 			{{Form::button('Reset', array('class' => 'common_btn common_btn_green', 'id' => 'btn_reset'))}}
@@ -248,6 +250,7 @@ Series Search
 		<div class="w_max pad_tb_5">
 			<table class="result_table common_table">
 				<colgroup>
+				@if(User::hasPrivilege(Group::PERSONAL_INFO_VIEW))
 					<col width="10%">
 					<col width="16%">
 					<col width="5%">
@@ -257,12 +260,21 @@ Series Search
 					<col width="13%">
 					<col width="7%">
 					<col width="7%">
+				@else
+					<col width="25%">
+					<col width="25%">
+					<col width="30%">
+					<col width="10%">
+					<col width="10%">
+				@endif
 				</colgroup>
 				<tr>
+				@if(User::hasPrivilege(Group::PERSONAL_INFO_VIEW))
 					<th>patientID</th>
 					<th>patientName</th>
 					<th>age</th>
 					<th>sex</th>
+				@endif
 					<th>seriesDate</th>
 					<th>modality</th>
 					<th>seriesDescription</th>
@@ -271,10 +283,12 @@ Series Search
 				@if (count($list) > 0)
 					@foreach ($list as $rec)
 						<tr>
+						@if(User::hasPrivilege(Group::PERSONAL_INFO_VIEW))
 							<td>{{$rec->patientInfo['patientID']}}</td>
 							<td>{{$rec->patientInfo['patientName']}}</td>
 							<td>{{$rec->patientInfo['age']}}</td>
 							<td>{{CommonHelper::getSex($rec->patientInfo['sex'])}}</td>
+						@endif
 							<td>{{date('Y/m/d', $rec->seriesDate->sec)}}</td>
 							<td>{{$rec->modality}}</td>
 							<td>{{$rec->seriesDescription}}</td>

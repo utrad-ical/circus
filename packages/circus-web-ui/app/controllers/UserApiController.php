@@ -36,7 +36,7 @@ class UserApiController extends ResourceApiBaseController
 	{
 		// Restores the password field, when it's specified
 		if ($this->tmp_password) {
-			$model->password = Hash::make($this->tmp_password);
+			$model->password = (new CustomHasher())->make($this->tmp_password);
 		}
 	}
 }

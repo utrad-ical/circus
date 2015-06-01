@@ -101,6 +101,15 @@ class Series extends BaseModel {
 
 	public static function getSeriesList($search_data, $count = false)
 	{
+		//個人情報閲覧権限有
+		if (User::hasPrivilege(Group::PERSONAL_INFO_VIEW))
+			return self::getPersonalSeriesList($search_data, $count);
+
+		//個人情報閲覧権限なし
+		return self::getNonPersonalSeriesList($search_data, $count);
+	}
+
+	public static function getPersonalSeriesList($search_data, $count = false) {
 		$sql = self::where(function ($query) use ($search_data) {
 			//seriesID Series ID
 			if ($search_data['seriesUID'])
@@ -135,6 +144,49 @@ class Series extends BaseModel {
 		return $sql->orderby($search_data['sort'], $search_data['order_by'])
 			->take($search_data['disp'])
 			->skip($offset)
+			->get();
+	}
+
+	public static function getNonPersonalSeriesList($search_data, $count = false) {
+		$sql = self::where(function ($query) use ($search_data) {
+			//seriesID Series ID
+			if ($search_data['seriesUID'])
+				$query->where('seriesUID', 'like', '%' . $search_data['seriesUID'] . '%');
+
+			if ($search_data['seriesDescription'])
+				$query->where('seriesDescription', 'like', '%' . $search_data['seriesDescription'] . '%');
+		});
+
+		if ($count)
+			return $sql->count();
+
+		$offset = 0;
+		if (isset($search_data['perPage']) && $search_data['perPage'])
+			$offset = intval($search_data['disp']) * (intval($search_data['perPage']) - 1);
+
+		return $sql->orderby($search_data['sort'], $search_data['order_by'])
+			->take($search_data['disp'])
+			->skip($offset)
+			->select(
+				'studyUID',
+				'seriesUID',
+				'storageID',
+				'width',
+				'height',
+				'seriesDate',
+				'modality',
+				'seriesDescription',
+				'bodyPart',
+				'images',
+				'stationName',
+				'modelName',
+				'manufacturer',
+				'parameters',
+				'receiveMethod',
+				'domain',
+				'createTime',
+				'updateTime'
+			)
 			->get();
 	}
 }

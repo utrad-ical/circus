@@ -67,6 +67,7 @@ id="page_case_input"
 					@endif
 				</td>
 			</tr>
+		@if(User::hasPrivilege(Group::PERSONAL_INFO_VIEW))
 			<tr>
 				<th rowspan="2">Patient</th>
 				<th>ID</th>
@@ -100,6 +101,7 @@ id="page_case_input"
 					@endif
 				</td>
 			</tr>
+		@endif
 			<tr>
 				<th colspan="2">Series</th>
 				<td colspan="3">

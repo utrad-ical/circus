@@ -245,12 +245,14 @@ Case Search
 								{{Form::hidden('dummyID', isset($inputs['caseID']) ? $inputs['caseID'] : '')}}
 								{{Form::text('caseID', isset($inputs['caseID']) ? $inputs['caseID'] : '', array('class' => 'common_input_text w_200'))}}
 							</td>
+						@if(User::hasPrivilege(Group::PERSONAL_INFO_VIEW))
 							<th>Patient ID</th>
 							<td>{{Form::text('patientID', isset($inputs['patientID']) ? $inputs['patientID'] : '', array('class' => 'common_input_text w_200'))}}</td>
 						</tr>
 						<tr>
 							<th>Patient Name</th>
 							<td>{{Form::text('patientName', isset($inputs['patientName']) ? $inputs['patientName'] : '', array('class' => 'common_input_text w_200'))}}</td>
+						@endif
 							<th>Create Date</th>
 							<td>{{Form::text('createDate', isset($inputs['createDate']) ? $inputs['createDate'] : '', array('class' => 'common_input_text w_200 datepicker'))}}</td>
 						</tr>

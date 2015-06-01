@@ -17,6 +17,7 @@
 	@endif
 	<table class="result_table common_table">
 		<colgroup>
+		@if(User::hasPrivilege(Group::PERSONAL_INFO_VIEW))
 			<col width="13%">
 			<col width="10%">
 			<col width="16%">
@@ -25,13 +26,21 @@
 			<col width="13%">
 			<col width="19%">
 			<col width="9%">
+		@else
+			<col width="25%">
+			<col width="25%">
+			<col width="25%">
+			<col width="25%">
+		@endif
 		</colgroup>
 		<tr>
 			<th>projectName</th>
+		@if(User::hasPrivilege(Group::PERSONAL_INFO_VIEW))
 			<th>patientID</th>
 			<th>patientName</th>
 			<th>age</th>
 			<th>sex</th>
+		@endif
 			<th>update Date</th>
 			<th>latest Revision</th>
 			<th></th>
@@ -40,10 +49,12 @@
 			@foreach ($list as $rec)
 				<tr>
 					<td>{{$rec->project->projectName}}</td>
+				@if(User::hasPrivilege(Group::PERSONAL_INFO_VIEW))
 					<td>{{$rec->patientInfoCache['patientID']}}</td>
 					<td>{{$rec->patientInfoCache['patientName']}}</td>
 					<td>{{$rec->patientInfoCache['age']}}</td>
 					<td>{{CommonHelper::getSex($rec->patientInfoCache['sex'])}}</td>
+				@endif
 					<td>{{date('Y/m/d', strtotime($rec->updateTime))}}</td>
 					<td>
 						<a href="" class="link_detail">

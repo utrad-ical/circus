@@ -517,12 +517,14 @@ id="page_case_detail"
 		{{Form::close()}}
 	</div>
 	<div class="w_500 fl_r">
+	@if(User::hasPrivilege(Group::PERSONAL_INFO_VIEW))
 		<div class="info_area">
 			<p class="pad_10">
 				{{$case_detail->patientInfoCache['patientName']}} ({{$case_detail->patientInfoCache['patientID']}})
 				<br>{{$case_detail->patientInfoCache['birthDate']}} {{CommonHelper::getSex($case_detail->patientInfoCache['sex'])}}
 			</p>
 		</div>
+	@endif
 	</div>
 	<div class="clear">&nbsp;</div>
 	<div class="export_area" style="display:none;">

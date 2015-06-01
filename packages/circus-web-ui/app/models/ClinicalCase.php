@@ -126,15 +126,15 @@ class ClinicalCase extends BaseModel {
 							//CaseID
 	    					if ($search_data['caseID'])
 	    						$query->where('caseID', 'like', '%'.$search_data['caseID'].'%');
+							if (User::hasPrivilege(Group::PERSONAL_INFO_VIEW)) {
+		    					//PatientID
+		    					if ($search_data['patientID'])
+		    						$query->where('patientInfoCache.patientID', 'like', '%'.$search_data['patientID'].'%');
 
-	    					//PatientID
-	    					if ($search_data['patientID'])
-	    						$query->where('patientInfoCache.patientID', 'like', '%'.$search_data['patientID'].'%');
-
-	    					//PatientName
-	    					if ($search_data['patientName'])
-	    						$query->where('patientInfoCache.patientName', 'like', '%'.$search_data['patientName'].'%');
-
+		    					//PatientName
+		    					if ($search_data['patientName'])
+		    						$query->where('patientInfoCache.patientName', 'like', '%'.$search_data['patientName'].'%');
+							}
 	    					//createDate
 	    					if ($search_data['createDate']) {
 	    						$query->where(

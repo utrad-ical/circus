@@ -46,6 +46,7 @@
 			<th colspan="2">Project ID</th>
 			<td colspan="3">{{{$inputs['projectName']}}}</td>
 		</tr>
+	@if(User::hasPrivilege(Group::PERSONAL_INFO_VIEW))
 		<tr>
 			<th rowspan="2">Patient</th>
 			<th>ID</th>
@@ -59,6 +60,7 @@
 			<th>Sex</th>
 			<td>{{{CommonHelper::getSex($inputs['patientInfo']['sex'])}}}</td>
 		</tr>
+	@endif
 		<tr>
 			<th colspan="2">Series</th>
 			<td colspan="3">

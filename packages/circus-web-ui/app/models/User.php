@@ -22,6 +22,11 @@ class User extends BaseModel implements UserInterface {
 	protected $collection = self::COLLECTION;
 	protected $primaryKey = 'userID';
 
+	/**
+	 * @var Array $privilegs privilegs of User
+	 */
+	private static $privilegs;
+
 	protected $rules = array(
 		'userID' => 'required|strict_integer|min:1',
         'loginID'	=>	'required|alpha_dash|max:20',
@@ -53,6 +58,40 @@ class User extends BaseModel implements UserInterface {
 			return $validator->messages();
 		}
 		return;
+	}
+
+	/**
+	 * 該当の権限を所持しているか判定する
+	 * @param string $priv_name 権限名
+	 * @return boolean 該当の権限の所持有無
+	 */
+	public static function hasPrivilege($priv_name) {
+		if (!$priv_name)
+			return false;
+		//権限情報取得
+		self::fetchPrivilege();
+
+		return array_search($priv_name, self::$privilegs) !== false;
+	}
+
+	/**
+	 * 権限リスト取得
+	 * @return Array 権限リスト
+	 */
+	public static function fetchPrivilege() {
+		if (!self::$privilegs) {
+			$groups = Auth::user()->groups();
+
+			$result = array();
+			foreach ($groups as $group) {
+				foreach ($group->privileges as $priv) {
+					if (array_search($priv, $result) === false)
+						$result[] = $priv;
+				}
+			}
+			self::$privilegs = $result;
+		}
+		return self::$privilegs;
 	}
 
 }

@@ -71,6 +71,13 @@
             });
         });
     </script>
+    @if(!User::hasPrivilege(Group::PROJECT_CREATE))
+    <script>
+        $(function(){
+            $('#new').hide();
+        });
+    </script>
+    @endif
     <div id="template" style="display: none">
         <span class="window-preset">
             <label>

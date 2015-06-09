@@ -3,14 +3,15 @@
 /**
  * Series registration controller
  */
-class SeriesRegisterController extends BaseController {
+class SeriesRegisterController extends ApiBaseController {
 	/**
 	 * Series registration screen
 	 */
 	public function import()
 	{
 		return View::make('series.input')
-			->with('max_filesize', ini_get('upload_max_filesize'));
+			->with('max_filesize', ini_get('upload_max_filesize'))
+			->with('max_file_uploads', intval(ini_get('max_file_uploads')));
 	}
 
 	/**

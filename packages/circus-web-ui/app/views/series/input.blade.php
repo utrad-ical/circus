@@ -3,6 +3,10 @@
 @section('page_css')
 {{HTML::style('css/page.css')}}
 {{HTML::style('css/jquery-ui.css')}}
+
+<style>
+	#task-watcher { margin: 1em; }
+</style>
 @stop
 
 @section('page_js')
@@ -39,7 +43,7 @@
 
 		function busy(bool) {
 			if (bool) $('#message').hide();
-			$('#form .common_btn').prop('disabled', bool);
+			$('#form .common_btn, #form input:file').prop('disabled', bool);
 			progress.toggle(bool);
 			progressLabel.text('');
 		}
@@ -51,7 +55,8 @@
 					var percentComplete = Math.round((event.loaded * 100) / event.total);
 					progress.progressbar('value', percentComplete);
 					if (event.loaded == event.total) {
-						progressLabel.text('Processing the uploaded files...');
+						progress.hide();
+						progressLabel.hide();
 					}
 				}
 			}, false);
@@ -92,16 +97,16 @@
 				dataType: 'json',
 				xhr: myXhr,
 				success: function (data) {
-					$('#message').text('Image data was successfully imported.').show();
-					form.reset();
-					busy(false);
+					$('#task-watcher').taskWatcher(data.taskID).on('finish', function() {
+						form.reset();
+						busy(false);
+					});
 				},
 				error: function (data) {
 					alert(data.responseJSON.errorMessage);
 					busy(false);
 				}
 			});
-			console.log(xhr);
 		}
 
 	});
@@ -136,5 +141,6 @@ id="page_series_import"
 		You can also drag and drop files on this box to start uploading.
 	</div>
 	<div id="progress"><div id="progress-label"></div></div>
+	<div id="task-watcher"></div>
 	<p id="message" class="ui-state-highlight" style="display: none;"></p>
 @stop

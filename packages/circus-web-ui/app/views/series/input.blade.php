@@ -8,6 +8,8 @@
 @section('page_js')
 {{HTML::script('js/jquery-ui.min.js')}}
 <script>
+	var max_file_uploads = {{{$max_file_uploads}}};
+
 	$(function () {
 		var fileInput = document.getElementById('files');
 		var form = document.getElementById('form');
@@ -71,6 +73,11 @@
 			}
 
 			var prompt = num >= 2 ? 'these ' + num + ' files?' : 'this file?';
+			if (num > max_file_uploads) {
+				alert('Sorry, you can not upload more than ' + max_file_uploads + ' files at the same time.\n' +
+					'Use a zipped file, or consult the server administrator if they can modify the current limitation.');
+				return;
+			}
 			if (!confirm('Do you want to upload ' + prompt + ' (' + size + ' bytes)')) {
 				return;
 			}
@@ -116,7 +123,7 @@ id="page_series_import"
 @section('content')
 	{{HTML::link(asset('series/search'), 'Back to Series Search', array('class' => 'common_btn mar_b_20'))}}
 	{{Form::open(['url' => asset('series/register'), 'id' => 'form', 'method' => 'POST', 'files' => true])}}
-	<p>Choose DICOM files to upload (Maximum size: {{{$max_filesize}}}).<br>
+	<p>Choose DICOM files to upload (Maximum size: {{{$max_filesize}}}, up to {{{$max_file_uploads}}} files).<br>
 		You can select more than one file at a time.<br>
 		Zipped DICOM files are also supported.</p>
 	<p class="al_c mar_b_40">

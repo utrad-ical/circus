@@ -17,7 +17,6 @@ $(function () {
     });
   }
 
-
   // UI multiple select
   if ($('.multi_select').length > 0) {
 	  if (typeof multi_selected_item !== undefined) {
@@ -65,3 +64,50 @@ var setHiddenParams = function (parent_id, elm_name, val) {
 		$('#'+parent_id).find("input[name='"+elm_name+"']").val(val);
 	}
 };
+
+
+/* Task Watcher */
+$.fn.extend({
+	taskWatcher: function (taskID) {
+		return this.each(function () {
+			var root = $(this).empty().addClass('task-watcher').show();
+			var title = $('<div>').addClass('task-watcher-title').text('Progress');
+			var progress = $('<div>').progressbar().appendTo(root);
+			var indicator = $('<div>').addClass('task-watcher-indicator').appendTo(root);
+
+			var inquiry = function () {
+				$.ajax({
+					url: '/task/' + taskID,
+					method: 'get',
+					cache: false,
+					dataType: 'json'
+				}).then(function (data) {
+					if (data.max > 0) {
+						progress
+							.progressbar('option', 'max', data.max)
+							.progressbar('option', 'value', data.value);
+					} else {
+						progress.progressbar('option', 'value', false); // indeterminate
+					}
+					indicator.text(data.textStatus);
+					if (data.status == 'finished') {
+						progress.progressbar('option', 'max', 100).progressbar('option', 'value', 100);
+						root.addClass('task-watcher-finished');
+						$('<button>')
+							.addClass('common_btn')
+							.text('OK')
+							.appendTo(root)
+							.on('click', function() {
+								root.empty().hide();
+								root.trigger('finish');
+							});
+					} else {
+						setTimeout(inquiry, 1000);
+					}
+				});
+			};
+
+			inquiry();
+		});
+	}
+});

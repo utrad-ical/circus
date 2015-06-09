@@ -1,7 +1,9 @@
 <?php
 
 /**
- * Base model class for
+ * Base model class for other models.
+ * @property MongoDate createTime Document creation time.
+ * @property MongoDate updateTime Document update time.
  */
 class BaseModel extends Jenssegers\Mongodb\Model
 {

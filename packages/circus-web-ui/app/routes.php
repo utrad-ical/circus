@@ -77,6 +77,10 @@ Route::group(['before' => 'auth'], function() {
 	Route::resource('api/project', 'ProjectApiController');
 	Route::put('api/storage/setactive/{storageID}', 'StorageApiController@setActive');
 
+	// Task
+	Route::get('task', 'TaskController@index');
+	Route::get('task/{taskID}', 'TaskController@show');
+
 	// Preference
 	$staticView('preference');
 	Route::resource('api/preference', 'UserPreferenceApiController');

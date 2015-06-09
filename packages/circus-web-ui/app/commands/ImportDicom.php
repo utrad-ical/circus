@@ -1,10 +1,11 @@
 <?php
 
-use Illuminate\Console\Command;
+use DicomImporter\Importer;
+use DicomImporter\MongoRegisterer;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputArgument;
 
-class ImportDicom extends Command {
+class ImportDicom extends TaskCommand {
 
 	/**
 	 * The console command name.
@@ -37,8 +38,9 @@ class ImportDicom extends Command {
 	 */
 	public function fire()
 	{
-		$registerer = new \DicomImporter\MongoRegisterer();
-		$importer = new DicomImporter\Importer($registerer);
+		$registerer = new MongoRegisterer();
+		$importer = new Importer($registerer);
+		$counter = 1;
 		$path = $this->argument('path');
 		if (is_file($path)) {
 			$importer->importOne($path);
@@ -53,6 +55,8 @@ class ImportDicom extends Command {
 			$files = array();
 			foreach ($itr as $file) {
 				if ($file->isFile()) {
+					$this->updateTaskProgress($counter, 0, "Importing in progress. $counter files are processed.");
+					$counter++;
 					$filename = $file->getRealPath();
 					$this->info($filename);
 					$importer->importOne($filename);
@@ -61,6 +65,7 @@ class ImportDicom extends Command {
 		} else {
 			$this->error('Invalid path');
 		}
+		$this->markTaskAsFinished();
 	}
 
 	/**

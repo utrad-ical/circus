@@ -27,34 +27,35 @@ class SeriesRegisterController extends ApiBaseController {
 			$uploads = Input::file('files');
 			if (!is_array($uploads)) throw new Exception('Upload files not specified.');
 
-			$targets = array();
 			$auth_sess_key = Auth::getSession()->getId();
 			$tmp_dir = storage_path('uploads/' . $auth_sess_key);
+			array_map('unlink', glob("$tmp_dir/*")); // clear current contents of the upload folder
 
 			foreach ($uploads as $upload) {
+				Log::info('HELLO ' . $upload->getClientOriginalName());
 				$ext = strtolower($upload->getClientOriginalExtension());
 				$target = "$tmp_dir/" . $upload->getClientOriginalName();
 				if ($ext == 'zip') {
 					// Extract the zip file into a temp dir and import it later
 					$this->thawZip($upload, $target);
-					$targets[] = $target;
 				} else {
 					// Import a single DICOM file
 					$upload->move($tmp_dir, $upload->getClientOriginalName());
-					$targets[] = $target;
 				}
 			}
 			// invoke artisan command to import files
-			foreach ($targets as $target) {
-				Log::debug(['IMPORT', $target]);
-				Artisan::call('image:import', array('path' => $target, '--recursive' => true));
+			Log::debug(['IMPORT', $target]);
+			$escaped_tmp_dir = escapeshellarg($tmp_dir);
+			$task = Task::startNewTask("image:import --recursive $escaped_tmp_dir");
+			if (!$task) {
+				throw new Exception('Failed to invoke image importer process.');
 			}
 
 			Session::forget('edit_case_id'); // TODO: Do we really need this?
 
 			return Response::json(array(
 				'result' => true,
-				'targets' => $targets
+				'taskID' => $task->taskID
 			));
 		} catch (Exception $e) {
 			Log::info('[' . get_class($e) . ']');

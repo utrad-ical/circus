@@ -51,24 +51,25 @@
         active: true,
         value: 1
       }, //太さ変更
+      color: {
+        control: true //カラーピッカーの有無
+      },
       measure: {
         active: true, //定規機能の有効・無効
         panel: true, //定規表示パネルの有無
       },
-      color: {
-        control: true //カラーピッカーの有無
-      },
       pan: true, //手のひらツール
-      window: {
-        active: true,
-        panel: true
-      },
       pen: {
         active: true, //描画機能の有効・無効
         panel: true, //ラベル情報表示パネルの有無
       },
+      rotate: true, //そもそもコントロールパネルを置くかどうか
       show: true, //そもそもコントロールパネルを置くかどうか
-      undo: true //戻す・やり直す一括
+      undo: true, //戻す・やり直す一括
+			window: {
+        active: true,
+        panel: true
+      }
     },
     elements: {
       parent: '', //複数のビューアーを全て囲う親要素id
@@ -231,24 +232,26 @@
 
 
     changeMode: function(new_mode) {
-      //check mode
-      if (new_mode == 'bucket' || new_mode == 'erase' || new_mode == 'pan' || new_mode == 'pen' || new_mode == 'measure' || new_mode == 'window') {
-        controllerInfo.mode = new_mode;
-      } else {
-        return;
-      }
-      var tmp_panel_elm = 'body';
-      if (controllerInfo.elements.panel.length > 0) {
-        tmp_panel_elm = '#' + controllerInfo.elements.panel;
-      }
-      tmp_panel_elm = $(tmp_panel_elm);
-      var tmp_btn_class = '.ico_detail_sprite_' + controllerInfo.mode;
-      tmp_panel_elm.find(tmp_btn_class).addClass('active').siblings().removeClass('active');
-      //sync mode of the viewers
-      for (var i = 0; i < controllerInfo.viewer.length; i++) {
-        var elmId = '#' + controllerInfo.viewer[i].elementId;
-        $(elmId).imageViewer('changeMode', controllerInfo.mode);
-      }
+			//check mode
+			if (new_mode === 'bucket' || new_mode === 'erase' || new_mode === 'measure' || new_mode === 'rotate' || new_mode === 'pan' || new_mode === 'pen' || new_mode === 'window') {
+				controllerInfo.mode = new_mode;
+			} else {
+				return;
+			}
+			
+			var tmp_panel_elm = 'body';
+			if (controllerInfo.elements.panel.length > 0) {
+				tmp_panel_elm = '#' + controllerInfo.elements.panel;
+			}
+			tmp_panel_elm = $(tmp_panel_elm);
+			var tmp_btn_class = '.ico_detail_sprite_' + controllerInfo.mode;
+			tmp_panel_elm.find(tmp_btn_class).addClass('active').siblings().removeClass('active');
+			
+			//sync mode of the viewers
+			for (var i = 0; i < controllerInfo.viewer.length; i += 1) {
+				var elmId = '#' + controllerInfo.viewer[i].elementId;
+				$(elmId).imageViewer('changeMode', controllerInfo.mode);
+			}
     },
 
 
@@ -348,6 +351,15 @@
           tmp_panel_wrap.append( '<li class="toolbar_btn ico_detail_sprite ico_detail_sprite_pan"></li>');
         }
 
+        if (controllerInfo.control.measure.active == true) {
+          tmp_panel_wrap.append('<li class="toolbar_btn ico_detail_sprite ico_detail_sprite_measure"></li>');
+        }
+
+        //rotate tool
+        if (controllerInfo.control.pan == true) {
+          tmp_panel_wrap.append( '<li class="toolbar_btn ico_detail_sprite ico_detail_sprite_rotate"></li>');
+        }
+
         //buttons about drawing
         if (controllerInfo.control.pen.active == true) {
 
@@ -374,10 +386,6 @@
           tmp_panel_wrap.append(pen_elm);
           delete pen_elm;
           delete tmp_panel_wrap;
-        }
-
-        if (controllerInfo.control.measure.active == true) {
-          tmp_panel_wrap.append('<li class="toolbar_btn ico_detail_sprite ico_detail_sprite_measure"></li>');
         }
 
         if (controllerInfo.control.bucket.active == true) {
@@ -441,11 +449,17 @@
           break;
         }
       }
+			
       //ラベルが無かったら手のひらモードに切り替える
       if (tmp_target_series.label.length == 0) {
         this_elm.imageViewerController('changeMode', 'pan');
         tmp_target_series.activeLabelId = '';
-      }
+      }else{
+				//ラベルが残っていたらactiveLabel変更措置
+				if (typeof tmp_target_series.activeLabelId !== 'undefined' && tmp_target_series.activeLabelId === label_id){
+						tmp_target_series.activeLabelId = tmp_target_series.label[0].id;
+				}
+			}
 
       //要素に反映
       this_elm.imageViewerController('updateLabelElements');
@@ -857,6 +871,12 @@
         });
       }
 
+      /*回転モード*/
+      if (controllerInfo.control.measure.panel == true) {
+        $('.ico_detail_sprite_rotate').click(function () {
+          this_elm.imageViewerController('changeMode', 'rotate');
+        });
+      }
 
       /*ラベル表示領域*/
       if (controllerInfo.control.pen.panel == true) {

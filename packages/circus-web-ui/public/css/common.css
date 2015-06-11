@@ -92,6 +92,10 @@ input[type="password"]{font-family:Verdana, sans-serif; font-size:1.5em; line-he
 .ico_detail_sprite_resize_short{background-position:0 -90px;}
 .ico_detail_sprite_window{background-position:0 -120px;}
 .ico_detail_sprite_erase{background-position:0 -240px;}
+.ico_detail_sprite_measure{background-position: 0 -390px;}
+.ico_detail_sprite_bucket{background-position: 0 -420px;}
+.ico_detail_sprite_rotate{background-position: 0 -450px;}
+
 
 .draw_back{background-position:0 -150px;}
 .draw_redo{background-position:0 -180px;}

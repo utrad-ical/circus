@@ -81,6 +81,14 @@
           goal_x:0,
           goal_y:0
         },
+        guide : {
+					axial : -1,
+					axial_rotate : -1,
+					coronal : -1,
+					coronal_rotate : -1,
+					sagittal : -1,
+					sagittal_rotate : -1
+        },
         voxel: {
           x: 512,
           y: 512,
@@ -250,47 +258,57 @@
 
     changeMode: function (new_mode) {
       //モード切替処理
-      var this_obj = this;
-      var this_elm = this.element;
-      var this_opts = this.options;
-      this_elm.imageViewer('syncVoxel');
+			var this_obj = this;
+			var this_elm = this.element;
+			var this_opts = this.options;
+			this_elm.imageViewer('syncVoxel');
+			
+			if (this_opts.control.mode !== new_mode) {
+				this_opts.control.mode = new_mode;
+				this_elm.trigger('onModeChange', [this_opts.viewer.id, new_mode]);
+				//ここでは変更のあったビューアーのidと適用後のモードを生成して外から取れる状態にするだけ
+				//具体的な処理はコントローラ側
+				
+				if (this_opts.control.mode === 'rotate') {
+					
+					this_obj.guideShow();
+				}else {
+				
+					this_obj.guideShow();
+				}
 
-      if (this_opts.control.mode != new_mode) {
-        this_opts.control.mode = new_mode;
-        this_elm.trigger('onModeChange', [this_opts.viewer.id, new_mode]);
-        //ここでは変更のあったビューアーのidと適用後のモードを生成して外から取れる状態にするだけ
-        //具体的な処理はコントローラ側
-
-        var the_win_controller = this_elm.find('.image_window_controller');
-        if (this_opts.control.mode == 'window') {
-          //パネルを出す
-          the_win_controller.slideDown(200);
-          this_elm.find('.image_window_controller_wrap').find('.btn_close').show();
-          this_elm.find('.image_window_controller_wrap').find('.btn_open').hide();
-        } else {
-          //パネルを消す
-          the_win_controller.slideUp(200);
-          this_elm.find('.image_window_controller_wrap').find('.btn_close').hide();
-          this_elm.find('.image_window_controller_wrap').find('.btn_open').show();
-        }
-
-        //カーソルcss用クラス変更
-        this_elm.removeClass(function (index, css) {
-           return (css.match (/\bmode_\S+/g) || []).join(' ');
-        });
-
-        if(this_opts.control.mode == 'erase' ||
-              	this_opts.control.mode == 'window'	||
-               	this_opts.control.mode == 'pen'	||
-      	this_opts.control.mode == 'pan'	||
-      	this_opts.control.mode == 'measure' ||
-      	this_opts.control.mode == 'bucket'){
-      	var tmp_class_name = 'mode_'+this_opts.control.mode;
-      	this_elm.addClass(tmp_class_name);
-      }
-	     this_elm.find('.disp_measure').removeClass('active');
-
-      }
+			
+				var the_win_controller = this_elm.find('.image_window_controller');
+				if (this_opts.control.mode === 'window') {
+					//パネルを出す
+					the_win_controller.slideDown(200);
+					this_elm.find('.image_window_controller_wrap').find('.btn_close').show();
+					this_elm.find('.image_window_controller_wrap').find('.btn_open').hide();
+				} else {
+					//パネルを消す
+					the_win_controller.slideUp(200);
+					this_elm.find('.image_window_controller_wrap').find('.btn_close').hide();
+					this_elm.find('.image_window_controller_wrap').find('.btn_open').show();
+				}
+			
+				//カーソルcss用クラス変更
+				this_elm.removeClass(function (index, css) {
+					return (css.match(/\bmode_\S+/g) || []).join(' ');
+				});
+			
+				if (this_opts.control.mode === 'bucket' ||
+						this_opts.control.mode === 'erase' ||
+						this_opts.control.mode === 'measure' ||
+						this_opts.control.mode === 'rotate' ||
+						this_opts.control.mode === 'pen'	||
+						this_opts.control.mode === 'pan'	  ||
+						this_opts.control.mode === 'window') {
+					var tmp_class_name = 'mode_' + this_opts.control.mode;
+					this_elm.addClass(tmp_class_name);
+				}
+				this_elm.find('.disp_measure').removeClass('active');
+			
+			}
     },
 
 
@@ -479,6 +497,22 @@
       target_context.antialias = 'none';
       target_context.patternQuality = 'fast';
     },
+
+
+
+    drawGuide : function(){
+        var this_obj = this;
+        var this_elm = this.element;
+        var this_opts = this.options;
+
+				//回転や他の面のスライス位置を表示するガイドの描画
+				
+				
+				
+				
+
+    },
+
 
 
     drawLabel: function (series_id, label_id, positions_array) {
@@ -1412,6 +1446,7 @@
 
 					this_elm.trigger('sync');
 					this_elm.imageViewer('drawMeasure');
+					this_elm.imageViewer('drawGuide');
 					this_elm.find('.disp_measure').addClass('active');
 
         }

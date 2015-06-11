@@ -11,7 +11,7 @@
     baseUrl: 'http://your-website/', //画像格納ディレクトリ
     color_marker: 0,
     defaultColorSet: ['#FF0000', '#FFCC00', '#0033FF', '#0099FF', '#00CCFF', '#00FFFF', '#00FF00', '#00CC00', '#009900', '#006600', '#FF6600', '#FF3300', '#3333CC', '#CC3399', '#CC6666', '#FF9999'],
-    defaultLabelAttribute: {},
+		defaultLabelAttribute: {},
     mode: 'pan', //pan,pen,erase,window
     series: [{
         activeLabelId: '', //ウインドウレベル・幅はシリーズに紐づかせるか否かはユーザー定義
@@ -611,9 +611,24 @@
             series: new Array(0)
           }
           init_label_info.series = $.extend(true, init_label_info.series, controllerInfo.series);
+
+
+					var init_guide_info = [
+						{show : true, number:0, name : 'axial',color:'E4007F'},
+						{show : true, number:0, name : 'coronal',color:'00A0E9'},
+						{show : true, number:0, name : 'sagittal',color:'FFF100'}
+					]
+					
+					for(var j=0; j < init_guide_info.length; j++){
+						if(controllerInfo.viewer[i].orientation == init_guide_info[j].name){
+							init_guide_info[j].show = false;						
+						}
+					}
+
           $('#' + controllerInfo.viewer[i].elementId).imageViewer({
             'viewer': {
               'id': controllerInfo.viewer[i].id,
+							'guide' : init_guide_info,
               'orientation': controllerInfo.viewer[i].orientation,
               'src': controllerInfo.baseUrl,
               'window': controllerInfo.viewer[i].window,
@@ -641,11 +656,11 @@
               'container': controllerInfo.viewer[i].container
             }
 
-          });
-          /*.imageViewer()*/
+          });//imageViewer
+
         }
 
-      }/*viewerRun*/
+      }//viewerRun
       viewerRun();
 
 
@@ -1251,6 +1266,11 @@
           var tmp_this_opts = $(this).closest('.img_area').imageViewer('getOptions');
           this_elm.imageViewerController('syncWindowInfo', tmp_this_opts.viewer.window);
         });
+				
+        $(tmp_elm).bind('onNumberChange',function (e,the_orientation,the_number) {
+          var tmp_this_opts = $(this).closest('.img_area').imageViewer('option');
+          this_elm.imageViewerController('syncGuide',the_orientation,the_number);					
+        });
 
       }
 
@@ -1295,6 +1315,21 @@
         $(elmId).trigger('setOptions', [tmp_win_values]).trigger('changeImgSrc');
       }
     },//syncWindowInfo
+		
+		
+		
+		syncGuide : function(the_orientation,the_number){
+      for (var i = 0; i < controllerInfo.viewer.length; i++) {
+        var elmId = '#' + controllerInfo.viewer[i].elementId;
+				var tmp_opts = $(elmId).imageViewer('option');
+				for(var j=0; j<tmp_opts.viewer.guide.length; j++){
+					if(tmp_opts.viewer.guide[j].name == the_orientation){
+						tmp_opts.viewer.guide[j].number = the_number;
+					}
+				}
+        $(elmId).trigger('sync');
+      }
+		},
 
 
 

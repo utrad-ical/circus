@@ -81,14 +81,11 @@
           goal_x:0,
           goal_y:0
         },
-        guide : {
-					axial : -1,
-					axial_rotate : -1,
-					coronal : -1,
-					coronal_rotate : -1,
-					sagittal : -1,
-					sagittal_rotate : -1
-        },
+				guide : [
+					{show : false, number:0, name : 'axial',color:'E4007F'},
+					{show : false, number:0, name : 'coronal',color:'00A0E9'},
+					{show : false, number:0, name : 'sagittal',color:'FFF100'}
+				],
         voxel: {
           x: 512,
           y: 512,
@@ -157,6 +154,8 @@
       }
       return rtn_array;
     },
+
+
 
 
 
@@ -251,7 +250,8 @@
       this_elm.find('.image_window_controller_wrap').find('.image_window_controller').find('.image_window_level').val(this_opts.viewer.window.level.current);
       this_elm.find('.image_window_controller_wrap').find('.image_window_controller').find('.image_window_width').val(this_opts.viewer.window.width.current);
       this_elm.find('.disp_measure').removeClass('active');
-
+			
+			this_obj.drawGuide();			
     }/*_changeImgSrc*/,
 
 
@@ -268,16 +268,7 @@
 				this_elm.trigger('onModeChange', [this_opts.viewer.id, new_mode]);
 				//ここでは変更のあったビューアーのidと適用後のモードを生成して外から取れる状態にするだけ
 				//具体的な処理はコントローラ側
-				
-				if (this_opts.control.mode === 'rotate') {
-					
-					this_obj.guideShow();
-				}else {
-				
-					this_obj.guideShow();
-				}
 
-			
 				var the_win_controller = this_elm.find('.image_window_controller');
 				if (this_opts.control.mode === 'window') {
 					//パネルを出す
@@ -300,8 +291,8 @@
 						this_opts.control.mode === 'erase' ||
 						this_opts.control.mode === 'measure' ||
 						this_opts.control.mode === 'rotate' ||
-						this_opts.control.mode === 'pen'	||
-						this_opts.control.mode === 'pan'	  ||
+						this_opts.control.mode === 'pen' ||
+						this_opts.control.mode === 'pan' ||
 						this_opts.control.mode === 'window') {
 					var tmp_class_name = 'mode_' + this_opts.control.mode;
 					this_elm.addClass(tmp_class_name);
@@ -383,8 +374,8 @@
       var createCanvas = function () {
         var tmp_elm = '';
         tmp_elm = tmp_elm + '<div	class="img_wrap">'; //画像枠,入れ子を作るので開始タグのみ
-        tmp_elm = tmp_elm + '<canvas	class="canvas_elm	series_image_elm"></canvas>';//背景画像
-        tmp_elm = tmp_elm + '<canvas	class="canvas_elm	canvas_main_elm"></canvas>';//ラベルを描くキャンバス	todo:ラベルがあれば、という条件文を付けよう
+        tmp_elm = tmp_elm + '<canvas class="canvas_elm series_image_elm"></canvas>';//dicom img
+        tmp_elm = tmp_elm + '<canvas class="canvas_elm canvas_main_elm"></canvas>';//draw label
         tmp_elm = tmp_elm + '<div	class="mouse_cover"></div>';//マウス挙動キャッチ用要素
         tmp_elm = tmp_elm + '</div>';//画像枠,閉じタグ
         this_elm.append(tmp_elm);
@@ -459,6 +450,13 @@
         this_elm.find('.img_wrap').append('<p class="disp_size"><span class="current_size"></span>%</p>');
       }
 
+			//枠線の色をつける			
+			for(var i=0; i<this_opts.viewer.guide.length; i++){
+				if(this_opts.viewer.guide[i].name === this_opts.viewer.orientation){
+					this_elm.find('.img_wrap').css('borderColor','#'+this_opts.viewer.guide[i].color);
+				}
+			}
+
     },
 
 
@@ -497,21 +495,70 @@
       target_context.antialias = 'none';
       target_context.patternQuality = 'fast';
     },
+		
+		
 
-
-
-    drawGuide : function(){
-        var this_obj = this;
-        var this_elm = this.element;
-        var this_opts = this.options;
-
-				//回転や他の面のスライス位置を表示するガイドの描画
-				
-				
-				
-				
-
-    },
+		drawGuide : function(){
+			var this_obj = this;
+			var this_elm = this.element;
+			var this_opts = this.options;
+			var guide_horizontal = {};
+			var guide_vertical = {};
+			var i = 0;
+			
+			if (this_opts.viewer.orientation === 'axial') {
+				for (i = 0; i < this_opts.viewer.guide.length; i += 1) {
+					if (this_opts.viewer.guide[i].name === 'sagittal') {
+						guide_horizontal = this_opts.viewer.guide[i];
+					}
+					if (this_opts.viewer.guide[i].name === 'coronal') {
+						guide_vertical = this_opts.viewer.guide[i];
+					}
+				}
+			} else if (this_opts.viewer.orientation === 'coronal') {
+				for (i = 0; i < this_opts.viewer.guide.length; i += 1) {
+					if (this_opts.viewer.guide[i].name === 'sagittal') {
+						guide_horizontal = this_opts.viewer.guide[i];
+					}
+					if (this_opts.viewer.guide[i].name === 'axial') {
+						guide_vertical = this_opts.viewer.guide[i];
+					}
+				}
+			} else if (this_opts.viewer.orientation === 'sagittal') {
+				for (i = 0; i < this_opts.viewer.guide.length; i += 1) {
+					if (this_opts.viewer.guide[i].name === 'coronal') {
+						guide_horizontal = this_opts.viewer.guide[i];
+					}
+					if (this_opts.viewer.guide[i].name === 'axial') {
+						guide_vertical = this_opts.viewer.guide[i];
+					}
+				}
+			}
+			
+			var tmp_ctx = this_elm.find('.canvas_main_elm').get(0).getContext('2d');
+			
+			//guide_horizontal guide
+			if (guide_horizontal.show === true && guide_horizontal.number - this_opts.viewer.position.sx >= 0) {
+				var guide_start_x = (guide_horizontal.number - this_opts.viewer.position.sx) * this_opts.viewer.position.dw / this_opts.viewer.position.sw;
+				tmp_ctx.beginPath();
+				tmp_ctx.strokeStyle = '#' + guide_horizontal.color;
+				tmp_ctx.moveTo(guide_start_x, 0);
+				tmp_ctx.lineTo(guide_start_x, this_opts.viewer.position.dw);
+				tmp_ctx.closePath();
+				tmp_ctx.stroke();
+			}
+			
+			//vertical guide
+			if (guide_vertical.show === true && guide_vertical.number - this_opts.viewer.position.sy >= 0) {
+				var guide_start_y = (guide_vertical.number - this_opts.viewer.position.sy) * this_opts.viewer.position.dh / this_opts.viewer.position.sh;
+				tmp_ctx.beginPath();
+				tmp_ctx.strokeStyle = '#' + guide_vertical.color;
+				tmp_ctx.moveTo(0, guide_start_y);
+				tmp_ctx.lineTo(this_opts.viewer.position.dw, guide_start_y);
+				tmp_ctx.closePath();
+				tmp_ctx.stroke();
+			}
+		},
 
 
 
@@ -985,12 +1032,14 @@
             this_obj._changeImgSrc();
             this_elm.imageViewer('syncVoxel');
             //next/prevボタン押下時に発火させるchangeイベント
+						this_elm.trigger('onNumberChange',[this_opts.viewer.orientation,this_opts.viewer.number.current]);
           }, change: function (event, ui) {
             this_opts.viewer.number.current = ui.value;
             var tmp_disp_num = this_opts.viewer.number.current + 1;
             this_elm.find('.disp_num').text(tmp_disp_num); //画像右上の枚数表示
             this_obj._changeImgSrc();
             this_elm.imageViewer('syncVoxel');
+						this_elm.trigger('onNumberChange',[this_opts.viewer.orientation,this_opts.viewer.number.current]);
           }
         });
 
@@ -1003,6 +1052,7 @@
             var tmp_disp_num = tmp_num + 1;
             this_elm.find('.disp_num').text(tmp_disp_num); //画像右上の枚数表示
             this_obj._changeImgSrc();
+						this_elm.trigger('onNumberChange',[this_opts.viewer.orientation,this_opts.viewer.number.current]);
           }
           //レバー追従
           this_elm.find('.slider_elm').slider({
@@ -1020,6 +1070,7 @@
             var tmp_disp_num = tmp_num + 1;
             this_elm.find('.disp_num').text(tmp_disp_num); //画像右上の枚数表示
             this_obj._changeImgSrc();
+						this_elm.trigger('onNumberChange',[this_opts.viewer.orientation,this_opts.viewer.number.current]);
           }
           //レバー追従
           this_elm.find('.slider_elm').slider({
@@ -1035,8 +1086,12 @@
         this_elm.bind('changeImgSrc',function () {
 		      this_obj._changeImgSrc();
         });
-      }
 
+        this_elm.bind('drawGuide',function () {
+		      this_obj.drawGuide();
+        });
+      }
+			
       //ウインドウレベル・幅関係のイベント設置
       if (this_opts.viewer.elements.window.panel == true) {
 
@@ -1155,6 +1210,7 @@
 
       //諸々のデータ群のセットが終わったところで描画機能発火
       this_obj._changeImgSrc();
+      this_obj.drawGuide();
 
     }/*_init*/,
 
@@ -1674,6 +1730,8 @@
       var this_opts = this.options;
 
       this_obj._clearCanvas();//初期化
+      this_obj.drawGuide();//ガイド
+
       //全シリーズ・ラベルについて現在の [オリエンテーション・奥行] を渡して塗るべき座標を戻してもらう
       for (var i = this_opts.control.container.data.series.length - 1; i >= 0; i--) {
         var tmp_the_series = this_opts.control.container.data.series[i];

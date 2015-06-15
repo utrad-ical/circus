@@ -155,51 +155,24 @@
 
 
 
-	
-		changedLabelNum: function() {
-			var rtn_num = 0;
-			var this_elm = this;
-			for (var i = 0; i < controllerInfo.series.length; i++) {
-				var tmp_the_controller_series = controllerInfo.series[i];
-				if (typeof tmp_the_controller_series.label == 'object') {
-					for (var j = 0; j < tmp_the_controller_series.label.length; j++) {
-						var tmp_the_label = tmp_the_controller_series.label[j];
-						if (typeof tmp_the_label.update_flg != 'undefined' && tmp_the_label.update_flg == 1) {
-							rtn_num++;
-						}
-					}
-				}
-			}
-			return rtn_num;
-		},
-	
-	
 
-	
-	
-		changeMode: function(new_mode) {
-			//check mode
-			if (new_mode === 'bucket' || new_mode === 'erase' || new_mode === 'measure' || new_mode === 'rotate' || new_mode === 'pan' || new_mode === 'pen' || new_mode === 'window') {
-				controllerInfo.mode = new_mode;
-			} else {
-				return;
-			}
-			
-			var tmp_panel_elm = 'body';
-			if (controllerInfo.elements.panel.length > 0) {
-				tmp_panel_elm = '#' + controllerInfo.elements.panel;
-			}
-			tmp_panel_elm = $(tmp_panel_elm);
-			var tmp_btn_class = '.ico_detail_sprite_' + controllerInfo.mode;
-			tmp_panel_elm.find(tmp_btn_class).addClass('active').siblings().removeClass('active');
-			
-			//sync mode of the viewers
-			for (var i = 0; i < controllerInfo.viewer.length; i += 1) {
-				var elmId = '#' + controllerInfo.viewer[i].elementId;
-				$(elmId).imageViewer('changeMode', controllerInfo.mode);
-			}
-		},
-	
+  changedLabelNum: function() {
+    var rtn_num = 0;
+    var this_elm = this;
+    for (var i = 0; i < controllerInfo.series.length; i++) {
+      var tmp_the_controller_series = controllerInfo.series[i];
+      if (typeof tmp_the_controller_series.label == 'object') {
+        for (var j = 0; j < tmp_the_controller_series.label.length; j++) {
+          var tmp_the_label = tmp_the_controller_series.label[j];
+          if (typeof tmp_the_label.update_flg != 'undefined' && tmp_the_label.update_flg == 1) {
+            rtn_num++;
+          }
+        }
+      }
+    }
+    return rtn_num;
+  },
+
 
 
 
@@ -253,6 +226,32 @@
         var elmId = '#' + controllerInfo.viewer[i].elementId;
         $(elmId).trigger('sync');
       }
+    },
+
+
+
+
+    changeMode: function(new_mode) {
+			//check mode
+			if (new_mode === 'bucket' || new_mode === 'erase' || new_mode === 'measure' || new_mode === 'rotate' || new_mode === 'pan' || new_mode === 'pen' || new_mode === 'window') {
+				controllerInfo.mode = new_mode;
+			} else {
+				return;
+			}
+			
+			var tmp_panel_elm = 'body';
+			if (controllerInfo.elements.panel.length > 0) {
+				tmp_panel_elm = '#' + controllerInfo.elements.panel;
+			}
+			tmp_panel_elm = $(tmp_panel_elm);
+			var tmp_btn_class = '.ico_detail_sprite_' + controllerInfo.mode;
+			tmp_panel_elm.find(tmp_btn_class).addClass('active').siblings().removeClass('active');
+			
+			//sync mode of the viewers
+			for (var i = 0; i < controllerInfo.viewer.length; i += 1) {
+				var elmId = '#' + controllerInfo.viewer[i].elementId;
+				$(elmId).imageViewer('changeMode', controllerInfo.mode);
+			}
     },
 
 

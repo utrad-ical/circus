@@ -42,7 +42,7 @@ class User extends BaseModel implements UserInterface {
     );
 
 	public function groups() {
-		return $this->belongsToMany('Group', null, 'users', 'groups');
+		return $this->belongsToMany('Group', null, 'groups', 'groupID');
 	}
 
 	/**
@@ -80,11 +80,12 @@ class User extends BaseModel implements UserInterface {
 	 */
 	public static function fetchPrivilege() {
 		if (!self::$privilegs) {
-			$groups = Auth::user()->groups();
+			$groups = Auth::user()->groups;
 
 			$result = array();
 			foreach ($groups as $group) {
-				foreach ($group->privileges as $priv) {
+				$data = Group::find($group);
+				foreach ($data->privileges as $priv) {
 					if (array_search($priv, $result) === false)
 						$result[] = $priv;
 				}

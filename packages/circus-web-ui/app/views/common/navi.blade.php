@@ -47,6 +47,7 @@
 				<li>{{HTML::link(asset('administration/user'), 'User')}}</li>
 				<li>{{HTML::link(asset('administration/storage'), 'Storage')}}</li>
 				<li>{{HTML::link(asset('administration/project'), 'Project')}}</li>
+				<li>{{HTML::link(asset('administration/server_param'), 'Setting Server Params')}}</li>
 			</ul>
 		</li>
 	</ul>

@@ -10,6 +10,7 @@
  * @property array patientInfoCache Cache of Series patientInfo
  * @property array latestRevision Latest revision
  * @property array revisions List of revision
+ * @property array domains List of domain
  */
 class ClinicalCase extends BaseModel {
 	protected $connection = 'mongodb';
@@ -55,6 +56,7 @@ class ClinicalCase extends BaseModel {
 		'latestRevision.status'			=>	'strict_string',
 		'latestRevision.series'			=>	'strict_array|array_series',
 		'revisions'						=>	'strict_array|array_revision',
+		'domains'						=>  'strict_array',
 		'createTime'					=>	'mongodate',
 		'updateTime'					=>	'mongodate'
 	);

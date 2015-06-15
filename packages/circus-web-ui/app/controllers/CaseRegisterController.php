@@ -58,11 +58,20 @@ class CaseRegisterController extends BaseController {
 			$patient = $series[0]->patientInfo;
 			$result['inputs']['patientInfoCache'] = $patient;
 
+			//シリーズリストからドメインを抜き出す
+			$domains = array();
+			foreach ($series as $rec) {
+				$domains[] = $rec->domain;
+			}
+			//重複削除
+			array_unique($domains);
+
 			//The store fixed information in session
 			$case_info = array(
 				'caseID'		=>	$result['inputs']['caseID'],
 				'series_list'	=>	$series_list,
-				'patientInfo'	=>	$patient
+				'patientInfo'	=>	$patient,
+				'domains'		=>	$domains
 			);
 			Session::put('case_input', $case_info);
 		} catch (Exception $e) {
@@ -134,6 +143,8 @@ class CaseRegisterController extends BaseController {
 			$case_obj->incrementalID = 1; // This can be a dummy number only for validation
 			$case_obj->projectID = intval($case_info['projectID']);
 			$case_obj->patientInfoCache = $this->setPatientInfo($case_info['patientInfo']);
+			$case_obj->domains = $case_info['domains'];
+
 
 			//ValidateCheck
 			$case_obj->selfValidationFails($errors);
@@ -227,6 +238,7 @@ class CaseRegisterController extends BaseController {
 				$case_obj->revisions = array($series_list);
 			}
 			$case_obj->latestRevision = $series_list;
+			$case_obj->domains = $inputs['domains'];
 			$case_obj->save();
 
 			$result['msg'] = 'Registration of case information is now complete.';

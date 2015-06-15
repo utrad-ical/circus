@@ -53,7 +53,7 @@
 	#the_panel_inner{position:absolute; top:0; left:-310px;}
 	#the_panel .img_toolbar_wrap{margin:0 0 10px auto; width:60px;}
 	#the_panel .toolbar_btn{float:left; width:30px;}
-	#the_panel .toolbar_weight_wrap{text-align:center; clear:both; width:100%; padding:5px 0; border-bottom:1px solid #ccc; cursor:pointer;}
+	#the_panel .toolbar_weight_wrap{text-align:center; clear:both; width:100%; padding:5px 0; cursor:pointer;}
  .toolbar_btn{border-bottom:1px solid #ccc;}
  .label_select_wrap{float:none; margin-right:0; margin-bottom:10px;}
  .label_info_wrap{padding-top:20px; float:none; width:305px; background:#ccc;}
@@ -105,7 +105,13 @@
 .mode_pan .mouse_cover{cursor:move;}
 .mode_bucket .mouse_cover,
 .mode_erase .mouse_cover,
+.mode_measure .mouse_cover,
 .mode_pen .mouse_cover{cursor:crosshair;}
+
+.mode_rotate.slide_horizontal .mouse_cover{cursor:e-resize;}
+.mode_rotate.slide_vertical .mouse_cover{cursor:s-resize;}
+.mode_rotate.slide_horizontal.slide_vertical .mouse_cover{cursor:move;}
+
 .mode_window .mouse_cover{cursor:pointer;}
 .img_view_area.mode_image_window .mouse_cover{cursor:default;}
 .img_view_area .img_wrap.now_move:active{cursor:all-scroll;}

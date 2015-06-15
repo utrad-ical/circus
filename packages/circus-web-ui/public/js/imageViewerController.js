@@ -1013,6 +1013,7 @@
 				id: tmp_id,
 				alpha: 100,
 				attribute: '',
+				color: tmp_color,
 				last_save_point:0,
 				rgba: tmp_rgba,
 				update_flg: 0,

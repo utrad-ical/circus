@@ -81,14 +81,6 @@
           goal_x:0,
           goal_y:0
         },
-        rotate : {
-          angle : 0,	//radian
-          length : 192,
-					point_size : 3,
-					position_x : 256,
-          position_y : 256,
-          visible : false
-        },
 				guide : [
 					{show : false, number:0, name : 'axial',color:'E4007F'},
 					{show : false, number:0, name : 'coronal',color:'00A0E9'},
@@ -162,20 +154,6 @@
       }
       return rtn_array;
     },
-
-
-
-
-
-		_calculateRotatePoint: function(the_angle,the_length,the_x,the_y){
-			var return_x=0;
-			var return_y=0;
-			
-			return_x = the_x + the_length*Math.cos(the_angle);
-			return_y = the_y - the_length*Math.sin(the_angle);
-			
-			return [return_x,return_y];
-		},
 
 
 
@@ -284,7 +262,7 @@
 			var this_elm = this.element;
 			var this_opts = this.options;
 			this_elm.imageViewer('syncVoxel');
-
+			
 			if (this_opts.control.mode !== new_mode) {
 				this_opts.control.mode = new_mode;
 				this_elm.trigger('onModeChange', [this_opts.viewer.id, new_mode]);
@@ -302,13 +280,6 @@
 					the_win_controller.slideUp(200);
 					this_elm.find('.image_window_controller_wrap').find('.btn_close').hide();
 					this_elm.find('.image_window_controller_wrap').find('.btn_open').show();
-				}
-
-				if (this_opts.control.mode === 'rotate') {
-					this_opts.viewer.rotate.visible = true;
-					this_obj.drawRotate();
-				}else{
-					this_opts.viewer.rotate.visible = false;
 				}
 			
 				//カーソルcss用クラス変更
@@ -380,7 +351,6 @@
       this_obj.setCanvasSize();
       this_obj._changeImgSrc();
     },
-
 
 
     _clearCanvas: function () {
@@ -632,67 +602,26 @@
         tmp_ctx.fill();
         tmp_ctx.closePath();
       }
-    },//drawLabel
-
+    },//drawCommon	キャンバス描画ここまで
 
 
     drawMeasure : function(){
-			var this_obj = this;
-			var this_elm = this.element;
-			var this_opts = this.options;
+        var this_obj = this;
+        var this_elm = this.element;
+        var this_opts = this.options;
 
-			//ラベルを描くcanvas要素のオブジェクト
-			var tmp_ctx = this_elm.find('.canvas_main_elm').get(0).getContext('2d');
-			tmp_ctx.beginPath();
-			tmp_ctx.strokeStyle = 'rgb(155, 187, 89)';
-			tmp_ctx.fillStyle = 'rgb(155, 187, 89)';
-			tmp_ctx.moveTo(this_opts.viewer.measure.start_x,this_opts.viewer.measure.start_y);
-			tmp_ctx.lineTo(this_opts.viewer.measure.goal_x,this_opts.viewer.measure.goal_y);
-			tmp_ctx.stroke();
-			tmp_ctx.fillRect(this_opts.viewer.measure.start_x-2, this_opts.viewer.measure.start_y-2, 4, 4);
-			tmp_ctx.fillRect(this_opts.viewer.measure.goal_x-2, this_opts.viewer.measure.goal_y-2, 4, 4);
-			tmp_ctx.closePath();
+        //ラベルを描くcanvas要素のオブジェクト
+        var tmp_ctx = this_elm.find('.canvas_main_elm').get(0).getContext('2d');
+        tmp_ctx.beginPath();
+        tmp_ctx.strokeStyle = 'rgb(155, 187, 89)';
+        tmp_ctx.fillStyle = 'rgb(155, 187, 89)';
+        tmp_ctx.moveTo(this_opts.viewer.measure.start_x,this_opts.viewer.measure.start_y);
+        tmp_ctx.lineTo(this_opts.viewer.measure.goal_x,this_opts.viewer.measure.goal_y);
+        tmp_ctx.stroke();
+        tmp_ctx.fillRect(this_opts.viewer.measure.start_x-2, this_opts.viewer.measure.start_y-2, 4, 4);
+        tmp_ctx.fillRect(this_opts.viewer.measure.goal_x-2, this_opts.viewer.measure.goal_y-2, 4, 4);
+        tmp_ctx.closePath();
     },
-
-
-
-    drawRotate : function(){
-			var this_obj = this;
-			var this_elm = this.element;
-			var this_opts = this.options;
-
-			//ポッチ１座標算出
-			var rotate_params = this_opts.viewer.rotate;
-			
-			var point_01 = this_obj._calculateRotatePoint(rotate_params.angle,rotate_params.length, rotate_params.position_x, rotate_params.position_y);
-			var point_02 = this_obj._calculateRotatePoint(rotate_params.angle+Math.PI, rotate_params.length, rotate_params.position_x,rotate_params.position_y);
-
-			var tmp_ctx = this_elm.find('.canvas_main_elm').get(0).getContext('2d');
-			tmp_ctx.strokeStyle = 'rgb(155, 187, 89)';
-			tmp_ctx.fillStyle = 'rgb(155, 187, 89)';
-			
-			console.log(rotate_params);
-			//中心点
-			tmp_ctx.beginPath();
-			tmp_ctx.arc(rotate_params.position_x, rotate_params.position_y, rotate_params.point_size, 0, Math.PI*2, false);
-			tmp_ctx.fill();
-
-			//ポッチ1
-			tmp_ctx.arc(point_01[0], point_01[1], rotate_params.point_size, 0, Math.PI*2, false);
-			tmp_ctx.fill();
-			
-			//ポッチ2
-			tmp_ctx.arc(point_02[0], point_02[1], rotate_params.point_size, 0, Math.PI*2, false);
-			tmp_ctx.fill();
-			
-			//線分
-			tmp_ctx.moveTo(point_01[0],point_01[1]);
-			tmp_ctx.lineTo(point_02[0],point_02[1]);
-			tmp_ctx.stroke();
-			tmp_ctx.closePath();
-
-    },
-
 
 
    	eraseLabel: function (series_id, label_id, positions_array) {
@@ -1792,9 +1721,6 @@
         height: this_opts.viewer.position.dh  + 'px'
       });
     },//setCanvasSize
-		
-		
-		
 
 
     syncVoxel: function () {
@@ -1827,7 +1753,6 @@
           }
         }
       }
-
     }, //syncVoxel
 
 

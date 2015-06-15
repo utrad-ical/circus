@@ -75,6 +75,11 @@
             }
           ]
         },
+				guide : [
+					{show : false, number:0, name : 'axial',color:'E4007F'},
+					{show : false, number:0, name : 'coronal',color:'00A0E9'},
+					{show : false, number:0, name : 'sagittal',color:'FFF100'}
+				],
         measure : {
           start_x : 0,
           start_y : 0,
@@ -83,17 +88,13 @@
         },
         rotate : {
           angle : 0,	//radian
+          color : '#ffa500',
           length : 192,
 					point_size : 3,
 					position_x : 256,
           position_y : 256,
           visible : false
         },
-				guide : [
-					{show : false, number:0, name : 'axial',color:'E4007F'},
-					{show : false, number:0, name : 'coronal',color:'00A0E9'},
-					{show : false, number:0, name : 'sagittal',color:'FFF100'}
-				],
         voxel: {
           x: 512,
           y: 512,
@@ -306,8 +307,8 @@
 
 				if (this_opts.control.mode === 'rotate') {
 					this_opts.viewer.rotate.visible = true;
-					this_obj.drawRotate();
-				}else{
+					//this_obj.drawRotate();
+				} else {
 					this_opts.viewer.rotate.visible = false;
 				}
 			
@@ -428,7 +429,7 @@
 
         //幅
         tmp_elm = tmp_elm + '<li class="window_width_wrap"><span	class="image_window_controller_label">window	width</span>\
-      		<input	type="text"	class="image_window_width"	value="' + this_opts.viewer.window.width.current + '">\
+      		<input type="text" class="image_window_width"	value="' + this_opts.viewer.window.width.current + '">\
       		<span	class="label_width_min">' + this_opts.viewer.window.width.minimum + '</span>	-	\
       		<span	class="label_width_max">' + this_opts.viewer.window.width.maximum + '</span></li>';
 
@@ -487,20 +488,18 @@
 				}
 			}
 
-    },
+    },//_create
+		
 
 
     createSaveData: function (series_id, label_id) {
       //保存用データを作成する
-      var this_obj = this;
-      var this_opts = this.options;
-      var return_data = this_opts.control.container.createSaveData(series_id, label_id);
+      var return_data = this.options.control.container.createSaveData(series_id, label_id);
       return return_data;
-    },
+    },//createSaveData
 
 
     deleteLabelObject: function (series_id, label_id) {
-
       var this_obj = this;
       var this_opts = this.options
       var target_series = this_obj.getSeriesObjectById(series_id);
@@ -529,45 +528,15 @@
 		
 
 		drawGuide : function(){
+			
 			var this_obj = this;
 			var this_elm = this.element;
 			var this_opts = this.options;
-			var guide_horizontal = {};
-			var guide_vertical = {};
-			var i = 0;
-			
-			if (this_opts.viewer.orientation === 'axial') {
-				for (i = 0; i < this_opts.viewer.guide.length; i += 1) {
-					if (this_opts.viewer.guide[i].name === 'sagittal') {
-						guide_horizontal = this_opts.viewer.guide[i];
-					}
-					if (this_opts.viewer.guide[i].name === 'coronal') {
-						guide_vertical = this_opts.viewer.guide[i];
-					}
-				}
-			} else if (this_opts.viewer.orientation === 'coronal') {
-				for (i = 0; i < this_opts.viewer.guide.length; i += 1) {
-					if (this_opts.viewer.guide[i].name === 'sagittal') {
-						guide_horizontal = this_opts.viewer.guide[i];
-					}
-					if (this_opts.viewer.guide[i].name === 'axial') {
-						guide_vertical = this_opts.viewer.guide[i];
-					}
-				}
-			} else if (this_opts.viewer.orientation === 'sagittal') {
-				for (i = 0; i < this_opts.viewer.guide.length; i += 1) {
-					if (this_opts.viewer.guide[i].name === 'coronal') {
-						guide_horizontal = this_opts.viewer.guide[i];
-					}
-					if (this_opts.viewer.guide[i].name === 'axial') {
-						guide_vertical = this_opts.viewer.guide[i];
-					}
-				}
-			}
-			
+			var guide_horizontal = this_obj.getGuide('horizontal');
+			var guide_vertical =  this_obj.getGuide('vertical');
 			var tmp_ctx = this_elm.find('.canvas_main_elm').get(0).getContext('2d');
 			
-			//guide_horizontal guide
+			//draw horizontal
 			if (guide_horizontal.show === true && guide_horizontal.number - this_opts.viewer.position.sx >= 0) {
 				var guide_start_x = (guide_horizontal.number - this_opts.viewer.position.sx) * this_opts.viewer.position.dw / this_opts.viewer.position.sw;
 				tmp_ctx.beginPath();
@@ -578,7 +547,7 @@
 				tmp_ctx.stroke();
 			}
 			
-			//vertical guide
+			//draw vertical
 			if (guide_vertical.show === true && guide_vertical.number - this_opts.viewer.position.sy >= 0) {
 				var guide_start_y = (guide_vertical.number - this_opts.viewer.position.sy) * this_opts.viewer.position.dh / this_opts.viewer.position.sh;
 				tmp_ctx.beginPath();
@@ -588,7 +557,7 @@
 				tmp_ctx.closePath();
 				tmp_ctx.stroke();
 			}
-		},
+		},//drawGuide
 
 
 
@@ -664,14 +633,19 @@
 			//ポッチ１座標算出
 			var rotate_params = this_opts.viewer.rotate;
 			
+			if(typeof rotate_params.visible === 'undefined' || rotate_params.visible !== true){
+			
+				return;
+			
+			}
+			
 			var point_01 = this_obj._calculateRotatePoint(rotate_params.angle,rotate_params.length, rotate_params.position_x, rotate_params.position_y);
 			var point_02 = this_obj._calculateRotatePoint(rotate_params.angle+Math.PI, rotate_params.length, rotate_params.position_x,rotate_params.position_y);
 
 			var tmp_ctx = this_elm.find('.canvas_main_elm').get(0).getContext('2d');
-			tmp_ctx.strokeStyle = 'rgb(155, 187, 89)';
-			tmp_ctx.fillStyle = 'rgb(155, 187, 89)';
+			tmp_ctx.strokeStyle = rotate_params.color;
+			tmp_ctx.fillStyle = rotate_params.color;
 			
-			console.log(rotate_params);
 			//中心点
 			tmp_ctx.beginPath();
 			tmp_ctx.arc(rotate_params.position_x, rotate_params.position_y, rotate_params.point_size, 0, Math.PI*2, false);
@@ -752,29 +726,6 @@
       }
 
       return rtn_array;
-    },
-
-
-    getOptions: function () {
-      //外部からのオプション参照用メソッド
-      return this.options;
-    },
-
-
-    getLabelObjectById: function (label_id, series_id) {
-
-      //描画対象ラベルのチェック
-      var this_obj = this;
-      var this_opts = this.options;
-      var tmp_the_series = this_obj.getSeriesObjectById(series_id);
-
-      for (var i = tmp_the_series.label.length - 1; i >= 0; i--) {
-        if (tmp_the_series.label[i].id == label_id) {
-          return tmp_the_series.label[i];
-          break;
-        }
-      }
-
     },
 
 
@@ -928,6 +879,72 @@
       	$('#' + this_opts.control.container.data.member[i]).imageViewer('syncVoxel');
       }
     },
+		
+		
+		
+		getLabelObjectById: function (label_id, series_id) {
+
+      //描画対象ラベルのチェック
+      var this_obj = this;
+      var this_opts = this.options;
+      var tmp_the_series = this_obj.getSeriesObjectById(series_id);
+
+      for (var i = tmp_the_series.label.length - 1; i >= 0; i--) {
+        if (tmp_the_series.label[i].id == label_id) {
+          return tmp_the_series.label[i];
+          break;
+        }
+      }
+
+    },//getLabelObjectById
+
+
+
+    getGuide: function (target_direction) {
+      //ビューアー内での別ビューアー断面の表示用ガイドを取得する
+			
+			var this_obj = this;
+			var this_elm = this.element;
+			var this_opts = this.options;
+			var guide_horizontal = {};
+			var guide_vertical = {};
+			var i = 0;
+			
+			var return_obj = null;
+
+			for (i = this_opts.viewer.guide.length-1; i >= 0; i -= 1) {
+				if (this_opts.viewer.orientation === 'axial' && this_opts.viewer.guide[i].name === 'sagittal') {
+					guide_horizontal = this_opts.viewer.guide[i];
+				} else if (this_opts.viewer.orientation === 'axial' && this_opts.viewer.guide[i].name === 'coronal') {
+					guide_vertical = this_opts.viewer.guide[i];
+				} else if (this_opts.viewer.orientation === 'coronal' && this_opts.viewer.guide[i].name === 'sagittal') {
+					guide_horizontal = this_opts.viewer.guide[i];
+				} else if (this_opts.viewer.orientation === 'coronal' && this_opts.viewer.guide[i].name === 'axial') {
+					guide_vertical = this_opts.viewer.guide[i];
+				} else if (this_opts.viewer.orientation === 'sagittal' && this_opts.viewer.guide[i].name === 'coronal') {
+					guide_horizontal = this_opts.viewer.guide[i];
+				} else  if (this_opts.viewer.orientation === 'sagittal' && this_opts.viewer.guide[i].name === 'axial') {
+					guide_vertical = this_opts.viewer.guide[i];
+				}
+			}
+			
+			if(target_direction == 'vertical'){
+				return_obj = guide_vertical;
+			} else if (target_direction == 'horizontal'){
+				return_obj = guide_horizontal;
+			}
+			return return_obj;
+
+    },//getGuide
+
+
+
+    getOptions: function () {
+      //外部からのオプション参照用メソッド
+      return this.options;
+    },
+
+
 
     getSeriesObjectById: function (series_id) {
       //描画対象ラベルのチェック
@@ -938,6 +955,7 @@
         }
       }
     },
+
 
 
     _getStopover: function (start_x, start_y, goal_x, goal_y) {
@@ -1411,7 +1429,8 @@
       this_obj._tmpInfo.cursor.start.Y = tmp_cursor_y + this_opts.viewer.position.sy * this_opts.viewer.position.dh / this_opts.viewer.position.oh;
       }
 
-    }/*_mousedownFunc*/,
+    },//_mousedownFunc
+		
 
 
     _mousemoveFunc: function (e) {
@@ -1577,6 +1596,44 @@
 					this_elm.find('.disp_measure').addClass('active');
 
         }
+      }else if (this_opts.control.mode == 'rotate') {
+
+						//回転モード
+					//マウス位置取得(ズーム解除状態でのXY値)
+					var tmp_cursor_x = (e.clientX - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().left) / this_opts.viewer.position.zoom;
+					var tmp_cursor_y = (e.clientY - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().top) / this_opts.viewer.position.zoom;
+
+					tmp_cursor_x = tmp_cursor_x * this_opts.viewer.position.ow / this_opts.viewer.position.dw;
+					tmp_cursor_y = tmp_cursor_y * this_opts.viewer.position.oh / this_opts.viewer.position.dh;
+
+					//画像トリミング分の補正
+					this_obj._tmpInfo.cursor.current.X = tmp_cursor_x + this_opts.viewer.position.sx;
+					this_obj._tmpInfo.cursor.current.Y = tmp_cursor_y + this_opts.viewer.position.sy;
+
+					this_obj._tmpInfo.cursor.current.X = Math.ceil(this_obj._tmpInfo.cursor.current.X);
+					this_obj._tmpInfo.cursor.current.Y = Math.ceil(this_obj._tmpInfo.cursor.current.Y);
+
+					//console.log(this_obj._tmpInfo.cursor.current);
+
+					var guide_horizontal = this_obj.getGuide('horizontal');
+					var guide_vertical =  this_obj.getGuide('vertical');
+					
+					if(Math.abs(guide_horizontal.number - this_obj._tmpInfo.cursor.current.X) < 1 ){
+						this_elm.addClass('slide_horizontal');
+					}else{
+						this_elm.removeClass('slide_horizontal');
+					}
+					
+					if(Math.abs(guide_vertical.number - this_obj._tmpInfo.cursor.current.Y) < 2 ){
+						this_elm.addClass('slide_vertical');						
+					}else{
+						this_elm.removeClass('slide_vertical');
+					}
+
+					if (this_obj._tmpInfo.cursor.touch_flg == 1) {
+						
+	
+				  }
       }
     }/*_mousemoveFunc*/,
 

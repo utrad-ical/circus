@@ -77,7 +77,8 @@ class ResourceApiBaseController extends ApiBaseController
 	{
 		if (!Request::isJson()) App::abort(400);
 		$newItem = App::make($this->targetClass);
-		$newID = Seq::getIncrementSeq($this->targetClass);
+		$class = $this->targetClass;
+		$newID = Seq::getIncrementSeq($class::COLLECTION);
 		$pk = $newItem->getPrimaryKey();
 		$newItem->$pk = $newID;
 		$data = Input::all();

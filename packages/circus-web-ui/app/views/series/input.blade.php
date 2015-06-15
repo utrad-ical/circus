@@ -87,6 +87,8 @@
 				return;
 			}
 
+			fd.append('domain', $(".select_domain option:selected").val());
+
 			busy(true);
 			var xhr = $.ajax({
 				url: $('#form').attr('action'),
@@ -132,6 +134,7 @@ id="page_series_import"
 		You can select more than one file at a time.<br>
 		Zipped DICOM files are also supported.</p>
 	<p class="al_c mar_b_40">
+		domain:{{Form::select('domain', $domains, $default_domain, array('class' => 'select w_180 select_domain'))}}<br>
 		{{Form::file('', array('multiple' => 'multiple', 'id' => 'files'))}}
 		{{Form::button('Upload', array('id' => 'confirm', 'class' => 'common_btn'))}}
 		{{Form::reset('Reset', array('class' => 'common_btn'))}}

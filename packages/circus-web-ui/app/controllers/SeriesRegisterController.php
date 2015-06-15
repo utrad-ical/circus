@@ -9,9 +9,14 @@ class SeriesRegisterController extends ApiBaseController {
 	 */
 	public function import()
 	{
+		$default_domain = ServerParam::getVal('defaultDomain');
+		$domain_list = ServerParam::getDomainList();
+
 		return View::make('series.input')
 			->with('max_filesize', ini_get('upload_max_filesize'))
-			->with('max_file_uploads', intval(ini_get('max_file_uploads')));
+			->with('max_file_uploads', intval(ini_get('max_file_uploads')))
+			->with('default_domain', $default_domain)
+			->with('domains', $domain_list);
 	}
 
 	/**
@@ -26,6 +31,18 @@ class SeriesRegisterController extends ApiBaseController {
 			// Acquire information on the upload files
 			$uploads = Input::file('files');
 			if (!is_array($uploads)) throw new Exception('Upload files not specified.');
+
+			//domain unselected
+			$domain = Input::get('domain');
+			if (!$domain)
+				throw new Exception('Please select domain.');
+			//domains no regist
+			$domains = ServerParam::getVal('domains');
+			if (!$domains)
+				throw new Exception('Please set the domains from the management screen.');
+			//domain check
+			if (array_key_exists($domain, ServerParam::getDomainList()) === false)
+				throw new Exception('Domain is invalid.');
 
 			$auth_sess_key = Auth::getSession()->getId();
 			$tmp_dir = storage_path('uploads/' . $auth_sess_key);
@@ -46,6 +63,7 @@ class SeriesRegisterController extends ApiBaseController {
 			// invoke artisan command to import files
 			Log::debug(['IMPORT', $target]);
 			$escaped_tmp_dir = escapeshellarg($tmp_dir);
+			//TODO::選択されたドメインの渡し方
 			$task = Task::startNewTask("image:import --recursive $escaped_tmp_dir");
 			if (!$task) {
 				throw new Exception('Failed to invoke image importer process.');

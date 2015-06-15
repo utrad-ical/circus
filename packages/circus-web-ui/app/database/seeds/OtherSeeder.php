@@ -28,5 +28,17 @@ class OtherSeeder extends Seeder
 			$collection->index('bodyPart');
 			$collection->index('domain');
 		});
+
+		//Add Task table
+		DB::table(Task::COLLECTION)->delete();
+		Schema::create(Task::COLLECTION, function ($collection) {
+			$collection->unique('taskID');
+		});
+
+		//Add ServerParam table
+		DB::table(ServerParam::COLLECTION)->delete();
+		Schema::create(ServerParam::COLLECTION, function($collection) {
+			$collection->unique('key');
+		});
 	}
 }

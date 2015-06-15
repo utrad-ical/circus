@@ -70,11 +70,12 @@ Route::group(['before' => 'auth'], function() {
 	// Administration
 	$staticView('admin', 'admin.index');
 	Route::get('administration/{adminkind}', 'AdministrationController@index')
-		 ->where('adminkind', '^(user|group|storage|project)$');
+		 ->where('adminkind', '^(user|group|storage|project|server_param)$');
 	Route::resource('api/user', 'UserApiController');
 	Route::resource('api/group', 'GroupApiController');
 	Route::resource('api/storage', 'StorageApiController');
 	Route::resource('api/project', 'ProjectApiController');
+	Route::resource('api/serverParam', 'ServerParamApiController');
 	Route::put('api/storage/setactive/{storageID}', 'StorageApiController@setActive');
 
 	// Task

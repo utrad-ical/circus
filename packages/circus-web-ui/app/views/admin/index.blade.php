@@ -17,4 +17,6 @@ Administrator
 {{HTML::link(asset('administration/group'), 'Group List', array('class' => 'common_btn'))}}
 {{HTML::link(asset('administration/user'), 'User List', array('class' => 'common_btn'))}}
 {{HTML::link(asset('administration/storage'), 'Storage List', array('class' => 'common_btn'))}}
+{{HTML::link(asset('administration/project'), 'Project List', array('class' => 'common_btn'))}}
+{{HTML::link(asset('administration/server_param'), 'Setting Server Params', array('class' => 'common_btn'))}}
 @stop

@@ -12,7 +12,7 @@
 
                 adminEditor.run({
                     resource: 'user',
-                    primaryKey: 'userID',
+                    primaryKey: 'userEmail',
                     captionKey: 'loginID',
                     listColumns: [
                         {key: 'loginID', label: 'Login Name'},
@@ -28,6 +28,7 @@
                         }
                     ],
                     form: [
+                        {caption: 'User Email', key: 'userEmail', type: 'text'},
                         {caption: 'Login Name', key: 'loginID', type: 'text'},
                         {caption: 'Description', key: 'description', type: 'text'},
                         {caption: 'Password', key: 'password', type: 'password'},

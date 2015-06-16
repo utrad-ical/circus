@@ -29,6 +29,8 @@ Route::group(['before' => 'auth'], function() {
 
 	$staticView('home');
 
+	Route::get('case/search/{preset_id}', 'CaseSearchController@search')
+		 ->where('preset_id', '^\\d+$');
 	Route::get('case/search', 'CaseSearchController@search');
 	Route::post('case/search', 'CaseSearchController@search');
 	Route::post('case/detail', 'CaseDetailController@detail');

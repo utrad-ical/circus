@@ -10,22 +10,22 @@ class UserSeeder extends Seeder
 		// Ensure index for the users collection
 		DB::table(User::COLLECTION)->delete();
 		Schema::create(User::COLLECTION, function ($collection) {
-			$collection->unique('userID');
+			$collection->unique('userEmail');
 			$collection->unique('loginID');
 		});
 
 		Eloquent::unguard();
 
 		User::create(array(
-			'userID' => 1,
-			'loginID' => 'circus',
-			'password' => (new CustomHasher())->make('circus'),
-			'groups' => [Group::where(['groupName' => 'admin'])->firstOrFail()->groupID],
+			'userEmail'     => 'info@circus.co.jp',
+			'loginID'       => 'circus',
+			'password'      => (new CustomHasher())->make('circus'),
+			'groups'        => [Group::where(['groupName' => 'admin'])->firstOrFail()->groupID],
 			'lastLoginTime' => null,
-			'lastLoginIP' => null,
-			'description' => 'Default administrative user',
-			'loginEnabled' => true,
-			'preferences' => array('theme' => 'mode_white', 'personalInfoView' => true)
+			'lastLoginIP'   => null,
+			'description'   => 'Default administrative user',
+			'loginEnabled'  => true,
+			'preferences'   => array('theme' => 'mode_white', 'personalInfoView' => true)
 		));
 	}
 }

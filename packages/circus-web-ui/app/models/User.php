@@ -6,7 +6,7 @@ use Illuminate\Auth\UserInterface;
 /**
  * User model
  *
- * @property string userID
+ * @property string userEmail
  * @property string loginID
  * @property string password The hashed password
  * @property array groups List of groups to which this user belongs
@@ -20,7 +20,8 @@ class User extends BaseModel implements UserInterface {
 
 	const COLLECTION = 'Users';
 	protected $collection = self::COLLECTION;
-	protected $primaryKey = 'userID';
+	protected $primaryKey = 'userEmail';
+	protected $uniqueFields = ['loginID'];
 
 	/**
 	 * @var Array $privilegs privilegs of User
@@ -28,17 +29,17 @@ class User extends BaseModel implements UserInterface {
 	private static $privilegs;
 
 	protected $rules = array(
-		'userID' => 'required|strict_integer|min:1',
-        'loginID'	=>	'required|alpha_dash|max:20',
-		'password'	=>	'required',
-		'groups' => 'required|array_of_group_ids',
-		'preferences' => 'required|preferences',
-		'loginEnabled' => 'required|strict_bool',
-		'lastLoginTime' => 'mongodate',
-		'lastLoginIP' => '',
-		'description' => '',
-		'createTime'		=>	'mongodate',
-		'updateTime'		=>	'mongodate'
+		'userEmail' 	=>	'required|email',
+        'loginID'		=>	'required|alpha_dash|max:20',
+		'password'		=>	'required',
+		'groups'		=>	'required|array_of_group_ids',
+		'preferences' 	=>	'required|preferences',
+		'loginEnabled' 	=>	'required|strict_bool',
+		'lastLoginTime' =>	'mongodate',
+		'lastLoginIP' 	=>	'',
+		'description'	=>	'',
+		'createTime'	=>	'mongodate',
+		'updateTime'	=>	'mongodate'
     );
 
 	public function groups() {

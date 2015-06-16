@@ -16,14 +16,9 @@
 			<a href="{{{asset('case/search')}}}"><span class="case"></span>Case</a>
 			<ul>
 				<li>{{HTML::link(asset('case/search'), 'Case Search')}}</li>
-				@if (Session::has('case_detail_search'))
-					@foreach(Session::get('case_detail_search') as $rec_key => $rec_val)
-						<li>
-							{{HTML::link(asset('case/search'), $rec_val['save_label'], array('class' => 'link_case_detail_search'))}}
-							{{Form::open(['url' => asset('case/search'), 'method' => 'post', 'class' => 'frm_case_detail_search'])}}
-								{{Form::hidden('condition_id', $rec_key)}}
-							{{Form::close()}}
-						</li>
+				@if (isset(Auth::user()->preferences['caseSearchPresets']))
+					@foreach(Auth::user()->preferences['caseSearchPresets'] as $index => $val)
+						<li>{{HTML::link(asset('case/search/' . $index), $val['save_label'])}}</li>
 					@endforeach
 				@endif
 			</ul>

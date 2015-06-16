@@ -13,6 +13,7 @@
     defaultColorSet: ['#FF0000', '#FFCC00', '#0033FF', '#0099FF', '#00CCFF', '#00FFFF', '#00FF00', '#00CC00', '#009900', '#006600', '#FF6600', '#FF3300', '#3333CC', '#CC3399', '#CC6666', '#FF9999'],
 		defaultLabelAttribute: {},
     mode: 'pan', //pan,pen,erase,window
+    mode_array: ['bucket','erase','guide','measure','rotate','pan','pen','window'],
     series: [{
         activeLabelId: '', //ウインドウレベル・幅はシリーズに紐づかせるか否かはユーザー定義
         id: '',
@@ -54,6 +55,7 @@
       color: {
         control: true //カラーピッカーの有無
       },
+      guide: true, //ガイド移動モード
       measure: {
         active: true, //定規機能の有効・無効
         panel: true, //定規表示パネルの有無
@@ -178,13 +180,22 @@
 	
 	
 		changeMode: function(new_mode) {
-			//check mode
-			if (new_mode === 'bucket' || new_mode === 'erase' || new_mode === 'measure' || new_mode === 'rotate' || new_mode === 'pan' || new_mode === 'pen' || new_mode === 'window') {
-				controllerInfo.mode = new_mode;
-			} else {
+			var mode_num = -1;
+			if(typeof new_mode !== 'undefined'){
+				for(var i = 0; i<controllerInfo.mode_array.length; i++){
+						if(controllerInfo.mode_array[i] === new_mode){
+							mode_num = i;
+							controllerInfo.mode = new_mode;
+						}
+				}		
+				if(mode_num == -1){
+					return;
+				}
+			}else{
 				return;
 			}
 			
+
 			var tmp_panel_elm = 'body';
 			if (controllerInfo.elements.panel.length > 0) {
 				tmp_panel_elm = '#' + controllerInfo.elements.panel;
@@ -356,8 +367,13 @@
           tmp_panel_wrap.append('<li class="toolbar_btn ico_detail_sprite ico_detail_sprite_measure"></li>');
         }
 
+        //guide move tool
+        if (controllerInfo.control.guide == true) {
+          tmp_panel_wrap.append( '<li class="toolbar_btn ico_detail_sprite ico_detail_sprite_guide"></li>');
+        }
+
         //rotate tool
-        if (controllerInfo.control.pan == true) {
+        if (controllerInfo.control.rotate == true) {
           tmp_panel_wrap.append( '<li class="toolbar_btn ico_detail_sprite ico_detail_sprite_rotate"></li>');
         }
 
@@ -615,9 +631,9 @@
 
 
 					var init_guide_info = [
-						{show : true, number:0, name : 'axial',color:'E4007F'},
-						{show : true, number:0, name : 'coronal',color:'00A0E9'},
-						{show : true, number:0, name : 'sagittal',color:'FFF100'}
+						{show : true, number:0, name : 'axial',color:'0000ff'},
+						{show : true, number:0, name : 'coronal',color:'00ff00'},
+						{show : true, number:0, name : 'sagittal',color:'ff0000'}
 					]
 					
 					for(var j=0; j < init_guide_info.length; j++){
@@ -809,10 +825,10 @@
       }
 
 
-    //パン切替
-    tmp_panel_elm.find('.ico_detail_sprite_pan').click(function () {
-      this_elm.imageViewerController('changeMode', 'pan');
-    });
+			//パン切替
+			tmp_panel_elm.find('.ico_detail_sprite_pan').click(function () {
+				this_elm.imageViewerController('changeMode', 'pan');
+			});
 
       //ペンツールボタン
       if (controllerInfo.control.pen.active == true) {
@@ -884,6 +900,13 @@
       if (controllerInfo.control.measure.panel == true) {
         $('.ico_detail_sprite_measure').click(function () {
           this_elm.imageViewerController('changeMode', 'measure');
+        });
+      }
+
+      /*ガイド移動モード*/
+      if (controllerInfo.control.measure.panel == true) {
+        $('.ico_detail_sprite_guide').click(function () {
+          this_elm.imageViewerController('changeMode', 'guide');
         });
       }
 

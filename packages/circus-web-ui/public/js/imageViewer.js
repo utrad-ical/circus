@@ -11,6 +11,7 @@
         zoom: true, //虫眼鏡
         slider: true, //枚数送りレバー
         mode: 'pan', //pan,pen,erase,window,external
+		    mode_array: ['bucket','erase','guide','measure','rotate','pan','pen','window'],
         container: '' //指定必須,ラベル情報の格納用オブジェクト
       },
       viewer: { //中身の情報群
@@ -76,9 +77,9 @@
           ]
         },
 				guide : [
-					{show : false, number:0, name : 'axial',color:'E4007F'},
-					{show : false, number:0, name : 'coronal',color:'00A0E9'},
-					{show : false, number:0, name : 'sagittal',color:'FFF100'}
+					{show : false, number:0, name : 'axial',color:'0000ff'},
+					{show : false, number:0, name : 'coronal',color:'00ff00'},
+					{show : false, number:0, name : 'sagittal',color:'ff0000'}
 				],
         measure : {
           start_x : 0,
@@ -284,6 +285,31 @@
 			var this_obj = this;
 			var this_elm = this.element;
 			var this_opts = this.options;
+			
+			var mode_num = -1;
+			if(typeof new_mode !== 'undefined' ){
+				for(var i = 0; i<this_opts.control.mode_array.length; i++){
+						if(this_opts.control.mode_array[i] === new_mode){
+							mode_num = i;
+							var tmp_class_name = 'mode_' + this_opts.control.mode;
+							this_elm.addClass(tmp_class_name);
+						}
+				}		
+				if(mode_num == -1){
+					return;
+				}
+			}else{
+				return;
+			}
+			this_elm.find('.disp_measure').removeClass('active');
+			
+			
+			
+			
+			
+			
+			
+			
 			this_elm.imageViewer('syncVoxel');
 
 			if (this_opts.control.mode !== new_mode) {
@@ -317,17 +343,14 @@
 					return (css.match(/\bmode_\S+/g) || []).join(' ');
 				});
 			
-				if (this_opts.control.mode === 'bucket' ||
-						this_opts.control.mode === 'erase' ||
-						this_opts.control.mode === 'measure' ||
-						this_opts.control.mode === 'rotate' ||
-						this_opts.control.mode === 'pen' ||
-						this_opts.control.mode === 'pan' ||
-						this_opts.control.mode === 'window') {
-					var tmp_class_name = 'mode_' + this_opts.control.mode;
-					this_elm.addClass(tmp_class_name);
-				}
-				this_elm.find('.disp_measure').removeClass('active');
+			
+			
+			
+			
+			
+			
+			
+			
 			
 			}
     },

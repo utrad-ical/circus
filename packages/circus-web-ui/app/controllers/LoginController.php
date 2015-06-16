@@ -24,9 +24,14 @@ class LoginController extends BaseController
 			$param['error_msg'] = 'Please enter your ID and password.';
 			return View::make('login', $param);
 		}
-		if (!Auth::attempt($inputs)) {
-			$param['error_msg'] = 'Invalid ID or password.';
-			return View::make('login', $param);
+		//try to userEmail login
+		if (!Auth::attempt(array('userEmail' => $inputs['loginID'], 'password' => $inputs['password']))) {
+			//try to loginID login
+			if (!Auth::attempt($inputs)) {
+				//login failed
+				$param['error_msg'] = 'Invalid ID or password.';
+				return View::make('login', $param);
+			}
 		}
 
 		// login succeeded

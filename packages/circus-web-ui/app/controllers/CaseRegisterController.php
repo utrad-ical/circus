@@ -320,7 +320,7 @@ class CaseRegisterController extends BaseController {
 	function createRevision($series_list) {
 		$revision = array(
 			'date'			=>	new MongoDate(strtotime(date('Y-m-d H:i:s'))),
-			'creator'		=>	Auth::user()->userID,
+			'creator'		=>	Auth::user()->userEmail,
 			'description'	=>	'',
 			'attributes'	=>	array(),
 			'status'		=>	'draft'

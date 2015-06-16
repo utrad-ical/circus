@@ -14,7 +14,6 @@ class SeqSeeder extends Seeder
 
 		$collections = array(
 			Storage::COLLECTION => 'storageID',
-			User::COLLECTION => 'userID',
 			Group::COLLECTION => 'groupID'
 		);
 

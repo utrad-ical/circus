@@ -10,7 +10,7 @@
  * @property number w The magnitude of the width of Voume ( area occupied by the Voxel)
  * @property number h Height of the size of the Voume ( area occupied by the Voxel)
  * @property number d The magnitude of the depth of Voume ( area occupied by the Voxel)
- * @property number creator Label creator ID
+ * @property string creator Label creator Email
  */
 class Label extends BaseModel {
 	protected $connection = 'mongodb';
@@ -34,7 +34,7 @@ class Label extends BaseModel {
 		'w'				=>	'required|strict_integer',
 		'h'				=>	'required|strict_integer',
 		'd'				=>	'required|strict_integer',
-		'creator'		=>	'required|is_user',
+		'creator'		=>	'required|email',
 		'createTime'	=>	'mongodate'
 	);
 

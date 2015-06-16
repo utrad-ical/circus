@@ -107,7 +107,7 @@ class LabelRegisterController extends BaseController {
 							json_decode($inputs['attribute'], true) : array();
 		return array(
 			'date'			=>	$dt,
-			'creator'		=>	Auth::user()->userID,
+			'creator'		=>	Auth::user()->userEmail,
 			'description'	=>	isset($inputs['memo']) ? $inputs['memo'] : '',
 			'attributes'	=>	$save_attribute,
 			'status'		=>	'draft',
@@ -175,7 +175,7 @@ class LabelRegisterController extends BaseController {
 		$label_obj->w = intval($data['size'][0]);
 		$label_obj->h = intval($data['size'][1]);
 		$label_obj->d = intval($data['size'][2]);
-		$label_obj->creator = Auth::user()->userID;
+		$label_obj->creator = Auth::user()->userEmail;
 		return $label_obj;
 	}
 

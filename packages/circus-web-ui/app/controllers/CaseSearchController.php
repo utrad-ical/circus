@@ -6,7 +6,7 @@ class CaseSearchController extends BaseController {
 	/**
 	 * Case Search Results
 	 */
-	public function search() {
+	public function search($preset_id = false) {
 		//Initial setting
 		$search_flg = false;
 		$result = array();
@@ -14,6 +14,7 @@ class CaseSearchController extends BaseController {
 
 		//Input value acquisition
 		$inputs = Input::all();
+		$inputs['preset_id'] = $preset_id;
 
 		try {
 			$this->setSearchData($inputs);
@@ -66,14 +67,9 @@ class CaseSearchController extends BaseController {
 			$tmp = Session::get('case.search');
 			$tmp['perPage'] = $inputs['page'];
 			Session::put('case.search', $tmp);
-		} else if (array_key_exists('condition_id', $inputs) !== false){
-			$detail_search_session = Session::get('case_detail_search');
-			$detail_search = $detail_search_session[$inputs['condition_id']];
-			if (array_key_exists('mongo_data', $detail_search) !== false) {
-				$file_path = storage_path('saves')."/".Auth::user()->userID.'_case_'.($inputs['condition_id']+1).'.json';
-				$handle = fopen($file_path, 'r');
-				$detail_search['mongo_search_data'] = fread($handle, filesize($file_path));
-			}
+		} else if ($inputs['preset_id'] !== false) {
+			$presets = Auth::user()->preferences['caseSearchPresets'];
+			$detail_search = $presets[$inputs['preset_id']];
 			$detail_search['disp'] = Config::get('const.page_display');
 			$detail_search['sort'] = 'updateTime';
 			$detail_search['order_by'] = 'desc';
@@ -122,46 +118,20 @@ class CaseSearchController extends BaseController {
 	 * Search conditions save(Ajax)
 	 */
 	public function save_search() {
-		//Initial setting
-		$search_flg = false;
-		$result = array();
-		$error_flg = false;
-
 		//Input value acquisition
 		$inputs = Input::all();
 
-		//I want to save your search criteria in the session
-		if (Session::has('case_detail_search')) {
-			$save_case_search = Session::get('case_detail_search');
-			$before_cnt = count($save_case_search);
-			array_push($save_case_search, $inputs);
-			Session::put('case_detail_search', $save_case_search);
-		} else {
-			Session::put('case_detail_search', array($inputs));
-			$before_cnt = 0;
-		}
+		$user = Auth::user();
+		$pref = $user->preferences;
+		$presets = isset($pref['caseSearchPresets']) ? $pref['caseSearchPresets'] : array();
+		$presets[] = $inputs;
+		$pref['caseSearchPresets'] = $presets;
 
-		//Save Json file
-		$file_name = storage_path()."/saves/".Auth::user()->userID."_case_".($before_cnt+1).".json";
+		$user->preferences = $pref;
+		$user->save();
 
-		if (!file_exists($file_name)) {
-			touch($file_name);
-			$data = json_decode($inputs["mongo_search_data"]);
-			file_put_contents($file_name, $inputs["mongo_search_data"]);
-		}else {
-			$error_flg = true;
-		}
-
-		$after_cnt = count(Session::get('case_detail_search'));
-
-		if (!$error_flg && $before_cnt+1 === $after_cnt) {
-			$msg = 'Save search criteria has been completed.';
-		} else {
-			$msg = 'I failed to save the search criteria.';
-		}
-		header('Content-Type: application/json; charset=UTF-8');
-		$res = json_encode(array('result' => true, 'message' => $msg));
-		echo $res;
+		$msg = 'Saved search criteria.';
+		return Response::json(array('result' => true, 'message' => $msg));
 	}
 
 	/**

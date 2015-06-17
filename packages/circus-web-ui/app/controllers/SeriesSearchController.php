@@ -16,6 +16,12 @@ class SeriesSearchController extends BaseController {
 		$search_flg = false;
 		$result = array();
 
+		//閲覧可能なシリーズがあるかチェック
+		if (!Series::isAccessibleSeries()) {
+			$result['error_msg'] = '参照可能なシリーズはありません。';
+			return View::make('series.search', $result);
+		}
+
 		//Input value acquisition
 		$inputs = Input::all();
 		$inputs['preset_id'] = $preset_id;

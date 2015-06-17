@@ -281,6 +281,7 @@ class CaseRegisterController extends BaseController {
 		Session::forget('caseID');
 		Session::forget('case_input');
 		Session::forget('mode');
+		Session::forget('edit_case_id');
 
 		//Screen display
 		return View::make('case/complete', $result);

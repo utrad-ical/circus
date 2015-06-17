@@ -3,6 +3,7 @@
 @section('page_css')
 @stop
 
+@if(Series::isAccessibleSeries())
 @section('page_js')
 {{HTML::script('js/jquery.cookie.js')}}
 <script>
@@ -135,6 +136,7 @@
 	});
 </script>
 @stop
+@endif
 
 @section('title')
 Series Search
@@ -145,6 +147,7 @@ Series Search
 @stop
 
 @section('content')
+@if(Series::isAccessibleSeries())
 {{Form::open(['url' => asset('series/search'), 'id' => 'form_search', 'method' => 'post', 'class' => 'mar_b_20'])}}
 	<div class="al_l mar_b_10">
 		{{HTML::link(asset('series/import'), 'Series Import', array('class' => 'common_btn'))}}
@@ -313,5 +316,8 @@ Series Search
 		{{Form::hidden('seriesUID', '', array('class' => 'series_detail_seriesUID'))}}
 		{{Form::hidden('mode', 'detail')}}
 	{{Form::close()}}
+@endif
+@else
+	<span class="font_red">{{{$error_msg}}}</span>
 @endif
 @stop

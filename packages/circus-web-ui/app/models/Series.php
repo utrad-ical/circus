@@ -134,6 +134,9 @@ class Series extends BaseModel {
 				$query->where('patientInfo.sex', '=', $search_data['sex']);
 		});
 
+		//参照可能なドメイン
+		$sql->whereIn('domain', User::listAccessibleDomains());
+
 		if ($count)
 			return $sql->count();
 
@@ -156,6 +159,9 @@ class Series extends BaseModel {
 			if ($search_data['seriesDescription'])
 				$query->where('seriesDescription', 'like', '%' . $search_data['seriesDescription'] . '%');
 		});
+
+		//参照可能なドメイン
+		$sql->whereIn('domain', User::listAccessibleDomains());
 
 		if ($count)
 			return $sql->count();
@@ -188,5 +194,21 @@ class Series extends BaseModel {
 				'updateTime'
 			)
 			->get();
+	}
+
+	public static function isAccessibleSeries($series_id = null) {
+		//参照可能なドメインの一覧を取得
+		$domains = User::listAccessibleDomains();
+		if (count($domains) == 0)
+			return false;
+
+		if ($series_id !== null) {
+			//シリーズIDが指定されている場合は該当シリーズのドメインを取得する
+			$series = Series::find($series_id);
+			if (array_search($series->domain, $domains) === false)
+				return false;
+		}
+
+		return true;
 	}
 }

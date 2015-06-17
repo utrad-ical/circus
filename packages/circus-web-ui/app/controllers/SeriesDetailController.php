@@ -25,6 +25,13 @@ class SeriesDetailController extends BaseController {
 			if (!$inputs['seriesUID'])
 				throw new Exception('Please specify the series ID.');
 
+			//シリーズ自体はあるが、参照権限がない(403エラー）
+			if (!Series::isAccessibleSeries($inputs['seriesUID'])) {
+				$result['url'] = 'home';
+				$result['error_msg'] = 'Unauthorized action.';
+				return Response::view('error', $result, 403);
+			}
+
 			//Check series ID that exists
 			$series_data = Series::find($inputs['seriesUID']);
 			if (!$series_data)
@@ -33,8 +40,7 @@ class SeriesDetailController extends BaseController {
 			$result['series_detail'] = $series_data;
 			$result['series_list'] = $this->formatSeries($series_data);
 		} catch (Exception $e){
-			Log::debug($e->getMessage());
-			Log::debug($e);
+			Log::error($e);
 			$result['error_msg'] = $e->getMessage();
 		}
 		return View::make('series/detail', $result);

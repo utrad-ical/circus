@@ -28,6 +28,11 @@ class User extends BaseModel implements UserInterface {
 	 */
 	private static $privilegs;
 
+	/**
+	 * @var Array $domains accessible domains
+	 */
+	private static $domains;
+
 	protected $rules = array(
 		'userEmail' 	=>	'required|email',
         'loginID'		=>	'required|alpha_dash|max:20',
@@ -94,6 +99,23 @@ class User extends BaseModel implements UserInterface {
 			self::$privilegs = $result;
 		}
 		return self::$privilegs;
+	}
+
+	public static function listAccessibleDomains() {
+		if (!self::$domains) {
+			$groups = Auth::user()->groups;
+
+			$result = array();
+			foreach ($groups as $group) {
+				$data = Group::find($group);
+				foreach ($data->domains as $domain) {
+					if (array_search($domain, $result) === false)
+						$result[] = $domain;
+				}
+			}
+			self::$domains = $result;
+		}
+		return self::$domains;
 	}
 
 }

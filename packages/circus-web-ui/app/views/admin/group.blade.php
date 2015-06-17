@@ -28,6 +28,14 @@
                                 return $('<span>').addClass('badge').text(priv);
                             });
                         }
+                    },
+                    {
+                        label: 'Domains',
+                        data: function (item) {
+                            return item.domains.map(function(domain) {
+                                return $('<span>').addClass('badge').text(domain);
+                            });
+                        }
                     }
                 ],
                 form: [

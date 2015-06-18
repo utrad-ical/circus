@@ -12,6 +12,7 @@ var http = require('http');
 var url = require('url');
 var exec = require('child_process').exec;
 var Png = require('png').Png;
+var argv = require('minimist')(process.argv.slice(2));
 
 import log4js = require('log4js');
 var logger = prepareLogger();
@@ -23,7 +24,10 @@ logger.info('CIRCUS RS is starting up...');
 
 // include config modules
 logger.info('Loading configuration files');
-var config: any = require('./config');
+
+var configFile = typeof argv.config === 'string' ? argv.config : './config';
+var config: any = require(configFile);
+
 var resolver = require('./' + config.pathresolver);
 
 // create ImageCache

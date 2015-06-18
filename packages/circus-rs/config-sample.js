@@ -12,7 +12,7 @@ var config = {
 		module: 'CircusDbPathResolver',
 		options: {
 	 		// full path of configuration file for MongoDB connection settings
-			configPath: '<path_to_mongo_folder>'
+			configPath: '<path_to_mongo_settings_json_file>'
 		}
 	},
 	*/

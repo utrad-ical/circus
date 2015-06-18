@@ -1,101 +1,101 @@
 /**
  * ImageCache class
  */
-export module utradical.circusrs {
 
-    export class ImageCache {
+export = ImageCache;
 
-        private lru: Array<string> = [];
-        private cache: any = {};
-        private threshold: number;
+class ImageCache {
 
-        /**
-         * Constructor
-         * 
-         * threshold: upper limit of heap memory size. (in bytes)
-         *    When object added, cached object will remove to keep threshold.
-         *    So this threshold is not strictly.
-         */
-        constructor(threshold: number) {
-            this.threshold = threshold;
-        }
+	private lru: Array<string> = [];
+	private cache: any = {};
+	private threshold: number;
 
-        /**
-         * remove object from cache to keep threshold.
-         */
-        public free(): void {
-            var usage = process.memoryUsage();
-            while (usage.heapUsed < this.threshold) {
-                console.log(usage);
+	/**
+	 * Constructor
+	 *
+	 * threshold: upper limit of heap memory size. (in bytes)
+	 *    When object added, cached object will remove to keep threshold.
+	 *    So this threshold is not strictly.
+	 */
+	constructor(threshold: number) {
+		this.threshold = threshold;
+	}
 
-                if (this.lru.length > 0) {
-                    var key = this.lru.shift();
-                    delete this.cache[key];
-                } else {
-                    break;
-                }
-                usage = process.memoryUsage();
-            }
+	/**
+	 * remove object from cache to keep threshold.
+	 */
+	public free(): void {
+		var usage = process.memoryUsage();
+		while (usage.heapUsed < this.threshold) {
+			console.log(usage);
 
-            // console.log("free. lru=" + this.lru);
-        }
+			if (this.lru.length > 0) {
+				var key = this.lru.shift();
+				delete this.cache[key];
+			} else {
+				break;
+			}
+			usage = process.memoryUsage();
+		}
 
-        /**
-         * update cache entry LRU.
-         *
-         * key: key name of last used object.
-         */
-        public updateLru(key: string) : void {
-            var lruIndex = this.lru.indexOf(key);
-            if (lruIndex != -1) {
-                this.lru.splice(lruIndex, 1);
-            }
-            this.lru.push(key);
-        }
+		// console.log("free. lru=" + this.lru);
+	}
 
-        /**
-         * put data to cache.
-         *
-         * key: key name of last used object.
-         * rawData: object to be cached.
-         */
-        public put(key: string, rawData:any): void {
-            this.free();
+	/**
+	 * update cache entry LRU.
+	 *
+	 * key: key name of last used object.
+	 */
+	public updateLru(key: string): void {
+		var lruIndex = this.lru.indexOf(key);
+		if (lruIndex != -1) {
+			this.lru.splice(lruIndex, 1);
+		}
+		this.lru.push(key);
+	}
 
-            this.cache[key] = rawData;
-            this.updateLru(key);
+	/**
+	 * put data to cache.
+	 *
+	 * key: key name of last used object.
+	 * rawData: object to be cached.
+	 */
+	public put(key: string, rawData: any): void {
+		this.free();
 
-            // console.log("put [" + key + "]. lru=" + this.lru);
-        }
+		this.cache[key] = rawData;
+		this.updateLru(key);
 
-        /**
-         * remove object from cache.
-         *
-         * key: key name of object to be removed.
-         */
-        public remove(key: string): void {
-            delete this.cache[key];
-            var index = this.lru.indexOf(key);
-            if (index !== -1) {
-                this.lru.splice(index, 1);
-            }
+		// console.log("put [" + key + "]. lru=" + this.lru);
+	}
 
-            // console.log("put [" + key + "]. lru=" + this.lru);
-        }
+	/**
+	 * remove object from cache.
+	 *
+	 * key: key name of object to be removed.
+	 */
+	public remove(key: string): void {
+		delete this.cache[key];
+		var index = this.lru.indexOf(key);
+		if (index !== -1) {
+			this.lru.splice(index, 1);
+		}
 
-        /**
-         * get data from cache.
-         *
-         * key: key name of object to retrieve.
-         */
-        public get(key: string) : any {
-            if (key in this.cache) {
-                this.updateLru(key);
-                // console.log("get [" + key + "]. lru=" + this.lru);
-                return this.cache[key];
-            }
-            return null;
-        }
+		// console.log("put [" + key + "]. lru=" + this.lru);
+	}
 
-    }
+	/**
+	 * get data from cache.
+	 *
+	 * key: key name of object to retrieve.
+	 */
+	public get(key: string): any {
+		if (key in this.cache) {
+			this.updateLru(key);
+			// console.log("get [" + key + "]. lru=" + this.lru);
+			return this.cache[key];
+		}
+		return null;
+	}
+
 }

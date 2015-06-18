@@ -16,11 +16,8 @@ var Png = require('png').Png;
 import log4js = require('log4js');
 var logger = prepareLogger();
 
-import rawdata = require('./RawData');
-import RawData = rawdata.utradical.circusrs.RawData;
-
-import mpr = require('./MPR');
-import MPR = mpr.utradical.circusrs.MPR;
+import RawData = require('./RawData');
+import MPR = require('./MPR');
 
 logger.info('CIRCUS RS is starting up...');
 
@@ -30,8 +27,8 @@ var config: any = require('./config');
 var resolver = require('./' + config.pathresolver);
 
 // create ImageCache
-import imagecache = require('./ImageCache');
-var imageCache = new imagecache.utradical.circusrs.ImageCache(config.memoryThreshold);
+import ImageCache = require('./ImageCache');
+var imageCache = new ImageCache(config.memoryThreshold);
 
 // create server process
 var server = http.createServer();

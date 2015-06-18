@@ -11,5 +11,5 @@ gulp.task('typescript', function() {
 			module: 'commonjs',
 			target: 'es6'
 		}))
-		.pipe(gulp.dest('.'));
+		.pipe(gulp.dest('build'));
 });

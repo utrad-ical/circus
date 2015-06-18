@@ -25,10 +25,11 @@ logger.info('CIRCUS RS is starting up...');
 // include config modules
 logger.info('Loading configuration files');
 
-var configFile = typeof argv.config === 'string' ? argv.config : './config';
+var configFile = typeof argv.config === 'string' ? argv.config : '../config';
 var config: any = require(configFile);
 
-var resolver = require('./' + config.pathresolver);
+var resolverClass = require('./' + config.pathResolver.module);
+var resolver = new resolverClass(config.pathResolver.options);
 
 // create ImageCache
 import ImageCache = require('./ImageCache');
@@ -163,9 +164,9 @@ function readData(series, image, callback)
     imageCache.put(series, rawData);
   }
 
-  resolver.resolvPath(series, function(dcmdir) {
+  resolver.resolvePath(series, function(dcmdir) {
       if (!dcmdir) {
-         callback(null, 'cannot resolv path.');
+         callback(null, 'cannot resolve path.');
          imageCache.remove(series);
          execCounter = 0;
          return;
@@ -179,7 +180,7 @@ function readData(series, image, callback)
 
       var child = my_exec(cmd, rawData,
         function (rawData) {
-            var err = null;
+            var err: string = '';
             if (rawData == null) {
                 imageCache.remove(series);
                 err = "cannot read image.";

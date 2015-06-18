@@ -7,8 +7,8 @@ Requirements
 - gulp (for installation)
 - mongoose (for CIRCUSDB_path_resolver)
 
-Installation
-------------
+Build
+-----
 
     # npm install
     # npm install mongoose
@@ -17,24 +17,23 @@ Installation
 Configuration
 -------------
 
-[config.js]
+All configuration data will go in `config.js` file.
 
-config.pathresolver : module name for DICOM file's path resolver.
-config.dumper: path for DICOM dumper executable file.
+- `pathResolver.module`: The module name for DICOM file path resolver.
+- `pathResolver.options`: Additional data to pass to the path resolver. (See below)
+- `dumper`: path for DICOM dumper executable file.
 
 Path resolver configurations:
 
-[static_path_resolver]
-edit static_path_resolver_config.js
-change config.datadir to path for DICOM series stored.
+### StaticPathResolver
 
-[CIRCUSDB_path_resolver]
+- `pathResolver.options.dataDir`: Full physical path for the stored DICOM series.
 
-edit CIRCUSDB_path_resolver_config.js
+### CircusDbPathResolver
 
-change config.config_path to CIRCUS DB database config file's path.
+- `pathResolver.options.configPath` to CIRCUS DB database config file's path.
 
 Start server
 ------------
 
-    # node circus-rs.js
+    # node build/circus-rs.js

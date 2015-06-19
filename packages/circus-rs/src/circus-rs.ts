@@ -56,7 +56,7 @@ function my_exec(command, rawData, callback)
     var blockDataOffset = 0;
     var blockDataSize;
 
-    const HEADER_LENGTH = 8;
+    var HEADER_LENGTH = 8;
 
     var headerBuffer = new Buffer(HEADER_LENGTH);
     var headerBufferOffset = 0;

@@ -9,7 +9,7 @@ gulp.task('typescript', function() {
 		.pipe(typescript({
 			sortOutput: true,
 			module: 'commonjs',
-			target: 'es6'
+			target: 'es5'
 		}))
 		.pipe(gulp.dest('build'));
 });

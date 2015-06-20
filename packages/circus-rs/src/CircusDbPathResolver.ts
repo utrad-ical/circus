@@ -1,18 +1,22 @@
-/// <reference path='typings/es6-promise/es6-promise.d.ts' />
+/// <reference path='typings/bluebird/bluebird.d.ts' />
+/// <reference path='typings/mongoose/mongoose.d.ts' />
 
-var mongoose = require('mongoose'),
-	Schema = mongoose.Schema;
-var fs = require('fs');
-var path = require('path');
-var crypto = require('crypto');
-var Promise = require('es6-promise').Promise;
+import mongoose = require('mongoose');
+var Schema = mongoose.Schema;
+import fs = require('fs');
+import path = require('path');
+import crypto = require('crypto');
+import Promise = require('bluebird');
 
 import PathResolver = require('./PathResolver');
+
 export = CircusDbPathResolver;
 
 class CircusDbPathResolver extends PathResolver {
 	protected mongoconfig: any;
-	protected db: any = null; // DB connection
+	protected db: mongoose.Connection = null; // DB connection
+	protected seriesModel: mongoose.Model<any>;
+	protected storageModel: mongoose.Model<any>;
 
 	protected initialize() {
 		// read configuration file
@@ -21,12 +25,27 @@ class CircusDbPathResolver extends PathResolver {
 	}
 
 	public resolvePath(seriesUID: string, callback: (dir: string) => void): void {
-		this
-			.connect()
-			.then(() => this.findSeries(seriesUID))
-			.then(series => this.findStorage(series))
-			.then(dcmdir => callback && callback(dcmdir))
-			.catch((err: string) => {
+		var dcmdir: string;
+		if (!callback) return;
+
+		var hash = crypto.createHash('sha256');
+		hash.update(seriesUID);
+		var hashStr = hash.digest('hex');
+
+		this.connect()
+			.then(() => {
+				var findOne = Promise.promisify(this.seriesModel.findOne).bind(this.seriesModel);
+				return findOne({seriesUID: seriesUID}, 'storageID');
+			})
+			.then(series => {
+				var findOne = Promise.promisify(this.storageModel.findOne).bind(this.storageModel);
+				return findOne({storageID: series.storageID, type: 'dicom', active: true}, 'path');
+			})
+			.then(storage => {
+				dcmdir = path.join(storage.path, hashStr.substring(0, 2), hashStr.substring(2, 4), seriesUID);
+				callback(dcmdir);
+			})
+			.catch((err: any) => {
 				console.log('DB Error: ' + err);
 				if (this.db) {
 					this.db.close();
@@ -38,75 +57,34 @@ class CircusDbPathResolver extends PathResolver {
 
 	protected connect(): Promise<any> {
 		return new Promise((resolve, reject) => {
-			if (this.db) resolve();
+			if (this.db) {
+				resolve(null);
+				return;
+			}
 			var cfg = this.mongoconfig;
 			var constr: string =
-				'mongodb://' + cfg.username + ':' + cfg.password +
-				'@' + cfg.host + ':' + cfg.port + '/' + cfg.database;
+				`mongodb://${cfg.username}:${cfg.password}@${cfg.host}:${cfg.port}/${cfg.database}`;
 			this.db = mongoose.createConnection(constr, (err) => {
 				if (err) {
 					reject(err);
 					return;
 				}
-				resolve();
+				resolve(null);
 			});
 
 			// define and register schema
-			var SeriesSchema = new Schema({
+			var seriesSchema = new Schema({
 				studyUID: String,
 				seriesUID: String,
 				storageID: Number
 			});
-			var StorageSchema = new Schema({
+			var storageSchema = new Schema({
 				storageID: {type: Number},
 				path: {type: String},
 				active: {type: Boolean}
 			});
-			this.db.model('Series', SeriesSchema, 'Series');
-			this.db.model('Storages', StorageSchema, 'Storages');
-		});
-	}
-
-	protected findSeries(seriesUID: string): Promise<any> {
-		return new Promise((resolve, reject) => {
-			var Series = this.db.model('Series');
-			Series.findOne({seriesUID: seriesUID}, 'seriesUID storageID', (err, series) => {
-				if (err) {
-					reject(err);
-					return;
-				}
-				if (!series) {
-					reject('No series data in DB');
-					return;
-				}
-				resolve(series);
-			});
-		});
-	}
-
-	protected findStorage(series): Promise<any> {
-		return new Promise((resolve, reject) => {
-			var Storages = this.db.model('Storages');
-			Storages.findOne({storageID: series.storageID, type: 'dicom', active: true}, 'path', (err, storage) => {
-				if (err) {
-					reject(err);
-					return;
-				}
-				var hash = crypto.createHash('sha256');
-				hash.update(series.seriesUID);
-				var hashStr = hash.digest('hex');
-
-				// create path
-				var dcmdir: string = path.join(storage.path, hashStr.substring(0, 2), hashStr.substring(2, 4), series.seriesUID);
-
-				// check if the target directory exists
-				fs.exists(dcmdir, exists => {
-					if (exists)
-						resolve(dcmdir);
-					else
-						reject('not exists: ' + dcmdir);
-				});
-			});
+			this.seriesModel = this.db.model('Series', seriesSchema, 'Series');
+			this.storageModel = this.db.model('Storages', storageSchema, 'Storages');
 		});
 	}
 }

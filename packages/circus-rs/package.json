@@ -6,6 +6,7 @@
     "start": "node ./circus-rs.js"
   },
   "dependencies": {
+    "bluebird": "^2.9.30",
     "es6-promise": "^2.3.0",
     "log4js": "^0.6.22",
     "minimist": "^1.1.1",

@@ -85,8 +85,6 @@
 #the_panel .add_label:hover{color:#FD3164;}
 .toolbar_btn{text-align:center; border-bottom:none; cursor:pointer; float:left; position:relative;}
 .toolbar_btn.active{background-color:#F90;}
-.toolbar_btn .ico_visible_check_wrap{height:30px; line-height:30px;}
-.toolbar_btn .ico_visible_check_wrap input{display:block; margin:0 auto;}
 
 .img_view_area .img_area{position:relative; width:512px; margin-bottom:20px;}
 .img_view_area .img_wrap{}

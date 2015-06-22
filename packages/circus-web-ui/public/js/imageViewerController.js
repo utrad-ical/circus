@@ -11,7 +11,7 @@
     baseUrl: 'http://your-website/', //画像格納ディレクトリ
     color_marker: 0,
     defaultColorSet: ['#FF0000', '#FFCC00', '#0033FF', '#0099FF', '#00CCFF', '#00FFFF', '#00FF00', '#00CC00', '#009900', '#006600', '#FF6600', '#FF3300', '#3333CC', '#CC3399', '#CC6666', '#FF9999'],
-		defaultLabelAttribute: {},
+    defaultLabelAttribute: {},
     mode: 'pan', //pan,pen,erase,window
     mode_array: ['bucket','erase','guide','measure','rotate','pan','pen','window'],
     series: [{
@@ -68,7 +68,7 @@
       rotate: true, //そもそもコントロールパネルを置くかどうか
       show: true, //そもそもコントロールパネルを置くかどうか
       undo: true, //戻す・やり直す一括
-			window: {
+      window: {
         active: true,
         panel: true
       }
@@ -101,7 +101,7 @@
     addLabelObject: function () {
       var this_elm = this;
       var active_series = this_elm.imageViewerController('getSeriesObjectById', [controllerInfo.activeSeriesId]);
-      
+
       if (typeof active_series !== 'object') {
         active_series = controllerInfo.series[0];
         controllerInfo.activeSeriesId = active_series.id;
@@ -112,15 +112,15 @@
       }
       var tmp_label_obj = {};
       var tmp_color_index_num = active_series.label.length;
-      
+
       var label_default = this_elm.imageViewerController('getLabelDefault', tmp_color_index_num);
       tmp_label_obj = $.extend(true, tmp_label_obj, label_default);
       active_series.label.push(tmp_label_obj);
-      
+
       if (typeof active_series.activeLabelId === 'undefined' || active_series.activeLabelId === '') {
         active_series.activeLabelId = active_series.label[0].id;
       }
-      
+
       for (var i = controllerInfo.viewer.length - 1; i >= 0; i -= 1) {
         var elmId = '#' + controllerInfo.viewer[i].elementId;
         $(elmId).trigger('addLabelObject', [controllerInfo.activeSeriesId, tmp_label_obj]);
@@ -132,13 +132,13 @@
     changeActiveSeries: function (active_series_id) {
       var this_elm = this;
       controllerInfo.activeSeriesId = active_series_id;
-			var active_series = this_elm.imageViewerController('getSeriesObjectById',[active_series_id]);
-	
-			if(typeof active_series.activeLabelId == 'undefined' || active_series.activeLabelId == '' ){
-				if(typeof active_series.label == 'object' && active_series.label.length > 0 ){
-					active_series.activeLabelId = active_series.label[0].id;
-				}
-			}
+      var active_series = this_elm.imageViewerController('getSeriesObjectById',[active_series_id]);
+
+      if(typeof active_series.activeLabelId == 'undefined' || active_series.activeLabelId == '' ){
+        if(typeof active_series.label == 'object' && active_series.label.length > 0 ){
+          active_series.activeLabelId = active_series.label[0].id;
+        }
+      }
 
       this_elm.find('#' + active_series_id).addClass('active');
       this_elm.imageViewerController('updateLabelElements');
@@ -157,60 +157,60 @@
 
 
 
-	
-		changedLabelNum: function() {
-			var rtn_num = 0;
-			var this_elm = this;
-			for (var i = 0; i < controllerInfo.series.length; i++) {
-				var tmp_the_controller_series = controllerInfo.series[i];
-				if (typeof tmp_the_controller_series.label == 'object') {
-					for (var j = 0; j < tmp_the_controller_series.label.length; j++) {
-						var tmp_the_label = tmp_the_controller_series.label[j];
-						if (typeof tmp_the_label.update_flg != 'undefined' && tmp_the_label.update_flg == 1) {
-							rtn_num++;
-						}
-					}
-				}
-			}
-			return rtn_num;
-		},
-	
-	
 
-	
-	
-		changeMode: function(new_mode) {
-			var mode_num = -1;
-			if(typeof new_mode !== 'undefined'){
-				for(var i = 0; i<controllerInfo.mode_array.length; i++){
-						if(controllerInfo.mode_array[i] === new_mode){
-							mode_num = i;
-							controllerInfo.mode = new_mode;
-						}
-				}		
-				if(mode_num == -1){
-					return;
-				}
-			}else{
-				return;
-			}
-			
+    changedLabelNum: function() {
+      var rtn_num = 0;
+      var this_elm = this;
+      for (var i = 0; i < controllerInfo.series.length; i++) {
+        var tmp_the_controller_series = controllerInfo.series[i];
+        if (typeof tmp_the_controller_series.label == 'object') {
+          for (var j = 0; j < tmp_the_controller_series.label.length; j++) {
+            var tmp_the_label = tmp_the_controller_series.label[j];
+            if (typeof tmp_the_label.update_flg != 'undefined' && tmp_the_label.update_flg == 1) {
+              rtn_num++;
+            }
+          }
+        }
+      }
+      return rtn_num;
+    },
 
-			var tmp_panel_elm = 'body';
-			if (controllerInfo.elements.panel.length > 0) {
-				tmp_panel_elm = '#' + controllerInfo.elements.panel;
-			}
-			tmp_panel_elm = $(tmp_panel_elm);
-			var tmp_btn_class = '.ico_detail_sprite_' + controllerInfo.mode;
-			tmp_panel_elm.find(tmp_btn_class).addClass('active').siblings().removeClass('active');
-			
-			//sync mode of the viewers
-			for (var i = 0; i < controllerInfo.viewer.length; i += 1) {
-				var elmId = '#' + controllerInfo.viewer[i].elementId;
-				$(elmId).imageViewer('changeMode', controllerInfo.mode);
-			}
-		},
-	
+
+
+
+
+    changeMode: function(new_mode) {
+      var mode_num = -1;
+      if(typeof new_mode !== 'undefined'){
+        for(var i = 0; i<controllerInfo.mode_array.length; i++){
+            if(controllerInfo.mode_array[i] === new_mode){
+              mode_num = i;
+              controllerInfo.mode = new_mode;
+            }
+        }
+        if(mode_num == -1){
+          return;
+        }
+      }else{
+        return;
+      }
+
+
+      var tmp_panel_elm = 'body';
+      if (controllerInfo.elements.panel.length > 0) {
+        tmp_panel_elm = '#' + controllerInfo.elements.panel;
+      }
+      tmp_panel_elm = $(tmp_panel_elm);
+      var tmp_btn_class = '.ico_detail_sprite_' + controllerInfo.mode;
+      tmp_panel_elm.find(tmp_btn_class).addClass('active').siblings().removeClass('active');
+
+      //sync mode of the viewers
+      for (var i = 0; i < controllerInfo.viewer.length; i += 1) {
+        var elmId = '#' + controllerInfo.viewer[i].elementId;
+        $(elmId).imageViewer('changeMode', controllerInfo.mode);
+      }
+    },
+
 
 
 
@@ -259,12 +259,12 @@
       }
       //周辺要素に適用
       this_elm.imageViewerController('updateLabelElements');
-       //紐づくビューアーたちに伝播
+      //紐づくビューアーたちに伝播
       for (var i = 0; i < controllerInfo.viewer.length; i++) {
         var elmId = '#' + controllerInfo.viewer[i].elementId;
         $(elmId).trigger('sync');
       }
-    },
+    },//changeUpdateLabelId
 
 
 
@@ -454,6 +454,9 @@
     },
 
 
+
+
+
     deleteLabelObject: function (series_id, label_id) {
       //ラベルオブジェクトから該当項目を削除
 
@@ -466,17 +469,17 @@
           break;
         }
       }
-			
+
       //ラベルが無かったら手のひらモードに切り替える
       if (tmp_target_series.label.length == 0) {
         this_elm.imageViewerController('changeMode', 'pan');
         tmp_target_series.activeLabelId = '';
       }else{
-				//ラベルが残っていたらactiveLabel変更措置
-				if (typeof tmp_target_series.activeLabelId !== 'undefined' && tmp_target_series.activeLabelId === label_id){
-						tmp_target_series.activeLabelId = tmp_target_series.label[0].id;
-				}
-			}
+        //ラベルが残っていたらactiveLabel変更措置
+        if (typeof tmp_target_series.activeLabelId !== 'undefined' && tmp_target_series.activeLabelId === label_id){
+            tmp_target_series.activeLabelId = tmp_target_series.label[0].id;
+        }
+      }
 
       //要素に反映
       this_elm.imageViewerController('updateLabelElements');
@@ -491,7 +494,10 @@
         $(elmId).trigger('sync');
       }
 
-    },
+    },//deleteLabelObject
+
+
+
 
 
     getSeriesObjectById: function (series_id) {
@@ -502,7 +508,7 @@
           return controllerInfo.series[i];
         }
       }
-    },
+    },//getSeriesObjectById
 
 
 
@@ -563,10 +569,10 @@
                 tmp_the_label.id = label_default.id
               }
               tmp_series.label[j] = $.extend(true, label_default, tmp_the_label);
-							if(tmp_series.label[j].image == 'error'){
-								var tmp_txt = '[Series '+ i + ' label ' + j+']';
-								error_array.push(tmp_txt);
-							}
+              if(tmp_series.label[j].image == 'error'){
+                var tmp_txt = '[Series '+ i + ' label ' + j+']';
+                error_array.push(tmp_txt);
+              }
               tmp_color_index_num++;
             }
           }
@@ -630,22 +636,22 @@
           init_label_info.series = $.extend(true, init_label_info.series, controllerInfo.series);
 
 
-					var init_guide_info = [
-						{show : true, number:0, name : 'axial',color:'0000ff'},
-						{show : true, number:0, name : 'coronal',color:'00ff00'},
-						{show : true, number:0, name : 'sagittal',color:'ff0000'}
-					]
-					
-					for(var j=0; j < init_guide_info.length; j++){
-						if(controllerInfo.viewer[i].orientation == init_guide_info[j].name){
-							init_guide_info[j].show = false;						
-						}
-					}
+          var init_guide_info = [
+            {show : true, number:0, name : 'axial',color:'0000ff'},
+            {show : true, number:0, name : 'coronal',color:'00ff00'},
+            {show : true, number:0, name : 'sagittal',color:'ff0000'}
+          ]
+
+          for(var j=0; j < init_guide_info.length; j++){
+            if(controllerInfo.viewer[i].orientation == init_guide_info[j].name){
+              init_guide_info[j].show = false;
+            }
+          }
 
           $('#' + controllerInfo.viewer[i].elementId).imageViewer({
             'viewer': {
               'id': controllerInfo.viewer[i].id,
-							'guide' : init_guide_info,
+              'guide' : init_guide_info,
               'orientation': controllerInfo.viewer[i].orientation,
               'src': controllerInfo.baseUrl,
               'window': controllerInfo.viewer[i].window,
@@ -700,7 +706,7 @@
         $(elmId).trigger('sync');
       }
 
-    }/*init*/,
+    },//init
 
 
 
@@ -825,10 +831,10 @@
       }
 
 
-			//パン切替
-			tmp_panel_elm.find('.ico_detail_sprite_pan').click(function () {
-				this_elm.imageViewerController('changeMode', 'pan');
-			});
+      //パン切替
+      tmp_panel_elm.find('.ico_detail_sprite_pan').click(function () {
+        this_elm.imageViewerController('changeMode', 'pan');
+      });
 
       //ペンツールボタン
       if (controllerInfo.control.pen.active == true) {
@@ -999,51 +1005,51 @@
 
     getLabelDefault: function (color_index) {
 
-			var this_elm = this;
-			var tmp_id = new Date();
-	
-			var the_month = 1 + tmp_id.getMonth();
-			the_month = this_elm.imageViewerController('zeroFormat', [the_month, 2]);
-	
-			var the_Date = tmp_id.getDate();
-			the_Date = this_elm.imageViewerController('zeroFormat', [the_Date, 2]);
-	
-			var the_Hours = tmp_id.getHours();
-			the_Hours = this_elm.imageViewerController('zeroFormat', [the_Hours, 2]);
-	
-			var the_Minutes = 1 + tmp_id.getMinutes();
-			the_Minutes = this_elm.imageViewerController('zeroFormat', [the_Minutes, 2]);
-	
-			var the_Seconds = 1 + tmp_id.getSeconds();
-			the_Seconds = this_elm.imageViewerController('zeroFormat', [the_Seconds, 2]);
-	
-			var the_Milliseconds = 1 + tmp_id.getMilliseconds();
-			the_Milliseconds = this_elm.imageViewerController('zeroFormat', [the_Milliseconds, 3]);
-	
-			var the_random = this_elm.imageViewerController('createRandomStr', [10]);
-	
-			tmp_id = tmp_id.getFullYear() + the_month + the_Date + the_Hours + the_Minutes + the_Seconds + the_Milliseconds + '_' + the_random;
-	
-			var index_number = 0;
-			if (color_index) {
-				index_number = color_index;
-			}
-			var tmp_color = controllerInfo.defaultColorSet[index_number % controllerInfo.defaultColorSet.length];
-			var tmp_rgba = this_elm.imageViewerController('getRgba', tmp_color, 100);
-	
-			var return_obj = {
-				//ラベル生成時のデフォルト
-				id: tmp_id,
-				alpha: 100,
-				attribute: '',
-				color: tmp_color,
-				last_save_point:0,
-				rgba: tmp_rgba,
-				update_flg: 0,
-				visible: true
-			};
-			return return_obj;
-			
+      var this_elm = this;
+      var tmp_id = new Date();
+
+      var the_month = 1 + tmp_id.getMonth();
+      the_month = this_elm.imageViewerController('zeroFormat', [the_month, 2]);
+
+      var the_Date = tmp_id.getDate();
+      the_Date = this_elm.imageViewerController('zeroFormat', [the_Date, 2]);
+
+      var the_Hours = tmp_id.getHours();
+      the_Hours = this_elm.imageViewerController('zeroFormat', [the_Hours, 2]);
+
+      var the_Minutes = 1 + tmp_id.getMinutes();
+      the_Minutes = this_elm.imageViewerController('zeroFormat', [the_Minutes, 2]);
+
+      var the_Seconds = 1 + tmp_id.getSeconds();
+      the_Seconds = this_elm.imageViewerController('zeroFormat', [the_Seconds, 2]);
+
+      var the_Milliseconds = 1 + tmp_id.getMilliseconds();
+      the_Milliseconds = this_elm.imageViewerController('zeroFormat', [the_Milliseconds, 3]);
+
+      var the_random = this_elm.imageViewerController('createRandomStr', [10]);
+
+      tmp_id = tmp_id.getFullYear() + the_month + the_Date + the_Hours + the_Minutes + the_Seconds + the_Milliseconds + '_' + the_random;
+
+      var index_number = 0;
+      if (color_index) {
+        index_number = color_index;
+      }
+      var tmp_color = controllerInfo.defaultColorSet[index_number % controllerInfo.defaultColorSet.length];
+      var tmp_rgba = this_elm.imageViewerController('getRgba', tmp_color, 100);
+
+      var return_obj = {
+        //ラベル生成時のデフォルト
+        id: tmp_id,
+        alpha: 100,
+        attribute: '',
+        color: tmp_color,
+        last_save_point:0,
+        rgba: tmp_rgba,
+        update_flg: 0,
+        visible: true
+      };
+      return return_obj;
+
     },//getLabelDefault
 
 
@@ -1231,8 +1237,7 @@
             }
           }
         }
-        $(elmId).trigger('setOptions', [tmp_val])
-          .trigger('sync');
+        $(elmId).trigger('setOptions', [tmp_val]).trigger('sync');
       }
     }/*setColorToViewer*/,
 
@@ -1291,10 +1296,10 @@
           var tmp_this_opts = $(this).closest('.img_area').imageViewer('getOptions');
           this_elm.imageViewerController('syncWindowInfo', tmp_this_opts.viewer.window);
         });
-				
+
         $(tmp_elm).bind('onNumberChange',function (e,the_orientation,the_number) {
           var tmp_this_opts = $(this).closest('.img_area').imageViewer('option');
-          this_elm.imageViewerController('syncGuide',the_orientation,the_number);					
+          this_elm.imageViewerController('syncGuide',the_orientation,the_number);
         });
 
       }
@@ -1340,21 +1345,21 @@
         $(elmId).trigger('setOptions', [tmp_win_values]).trigger('changeImgSrc');
       }
     },//syncWindowInfo
-		
-		
-		
-		syncGuide : function(the_orientation,the_number){
+
+
+
+    syncGuide : function(the_orientation,the_number){
       for (var i = 0; i < controllerInfo.viewer.length; i++) {
         var elmId = '#' + controllerInfo.viewer[i].elementId;
-				var tmp_opts = $(elmId).imageViewer('option');
-				for(var j=0; j<tmp_opts.viewer.guide.length; j++){
-					if(tmp_opts.viewer.guide[j].name == the_orientation){
-						tmp_opts.viewer.guide[j].number = the_number;
-					}
-				}
+        var tmp_opts = $(elmId).imageViewer('option');
+        for(var j=0; j<tmp_opts.viewer.guide.length; j++){
+          if(tmp_opts.viewer.guide[j].name == the_orientation){
+            tmp_opts.viewer.guide[j].number = the_number;
+          }
+        }
         $(elmId).trigger('sync');
       }
-		},
+    },
 
 
 
@@ -1565,13 +1570,10 @@
 
         var tmp_active_series =  this_elm.imageViewerController('getSeriesObjectById',[controllerInfo.activeSeriesId]);
 
-
-
         $('#' + controllerInfo.elements.label).find('.label_info_wrap').empty();
         $('#' + controllerInfo.elements.label).find('.label_attr_area').empty();
         if(typeof tmp_active_series.label =='object' && tmp_active_series.label.length>0){
             var tmp_the_label =  this_elm.imageViewerController('getLabelObjectById',tmp_active_series.activeLabelId,tmp_active_series.id);
-
 
             if(typeof tmp_the_label.attribute =='object'){
                 insert_prop.value = tmp_the_label.attribute;

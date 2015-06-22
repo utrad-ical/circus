@@ -2,23 +2,23 @@
 ;
 (function ($) {
 
-  //	プラグインメイン
-  $.widget('ui.imageViewer', {	//	ビューアーごとオプション、デフォルト値
+  //  プラグインメイン
+  $.widget('ui.imageViewer', {  //  ビューアーごとオプション、デフォルト値
     options: {
-      control: {	//コントロール機能の有無
+      control: {  //コントロール機能の有無
         show: true, //そもそもコントロールパネルを置くかどうか
         measure: true, //定規
         zoom: true, //虫眼鏡
         slider: true, //枚数送りレバー
         mode: 'pan', //pan,pen,erase,window,external
-		    mode_array: ['bucket','erase','guide','measure','rotate','pan','pen','window'],
+        mode_array: ['bucket','erase','guide','measure','rotate','pan','pen','window'],
         container: '' //指定必須,ラベル情報の格納用オブジェクト
       },
       viewer: { //中身の情報群
         id: 'viewer_0',
         orientation: 'axial', //断面
         src: '', //baseURL
-        window: {	//todo	今回ははコントローラから電波
+        window: {  //todo  今回ははコントローラから電波
           level: {
             current: 0,
             maximum: 0,
@@ -29,7 +29,7 @@
             maximum: 0,
             minimum: 1
           },
-          preset: []	//sample	{label: 'your	preset	label' , level: 1000 , width : 4000}
+          preset: []  //sample  {label: 'your  preset  label' , level: 1000 , width : 4000}
         },
         number: {
           current: 0,
@@ -41,24 +41,24 @@
           maximum: 3
         },
         elements: {
-          slider: {		//枚数送りのスライダーと枚数表示
+          slider: {    //枚数送りのスライダーと枚数表示
             panel: true, //スライダーの表示有無
             display: true //枚数表示の表示有無
           },
-          zoom: {	//虫眼鏡と拡大率表示
+          zoom: {  //虫眼鏡と拡大率表示
             panel: true,
             display: true
           },
-          window: {	//windowレベル・幅の操作パネル
-            panel: true		//todo	これがtrueならパネルを表示させる
+          window: {  //windowレベル・幅の操作パネル
+            panel: true    //todo  これがtrueならパネルを表示させる
           }
         },
-        position: {	//写真の表示位置・サイズに関する情報群,512はデフォルト値
+        position: {  //写真の表示位置・サイズに関する情報群,512はデフォルト値
           ow: 512, oh: 512, //元画像の拡大・縮小なし状態でのオリジナルサイズ
-          sx: 0, sy: 0, 	//元画像のどの位置からトリミング表示するか
-          sw: 512, sh: 512, 	//元画像からのトリミング幅・高さ
-          dw: 512, dh: 512, //貼りつけサイズ(基本的にはキャンバスの領域いっぱいに表示する)	todo:シリーズ情報から参照して上書き
-          zoom: 1      	//元画像に対しての拡大率
+          sx: 0, sy: 0,   //元画像のどの位置からトリミング表示するか
+          sw: 512, sh: 512,   //元画像からのトリミング幅・高さ
+          dw: 512, dh: 512, //貼りつけサイズ(基本的にはキャンバスの領域いっぱいに表示する)  todo:シリーズ情報から参照して上書き
+          zoom: 1        //元画像に対しての拡大率
         },
         draw: {
           activeSeriesId: '',
@@ -70,17 +70,17 @@
               label: [
                 /*
                  描画情報格納用,今現在表示しているz軸で塗られているxy座標の集合を格納する。ラベルにつき１項目ずつ
-                 {	id : 'label_1', rgba : rgba(0,0,0,1),position:[] ,visible : true      	}
+                 {  id : 'label_1', rgba : rgba(0,0,0,1),position:[] ,visible : true        }
                  */
               ]
             }
           ]
         },
-				guide : [
-					{show : false, number:0, name : 'axial',color:'0000ff'},
-					{show : false, number:0, name : 'coronal',color:'00ff00'},
-					{show : false, number:0, name : 'sagittal',color:'ff0000'}
-				],
+        guide : [
+          {show : false, number:0, name : 'axial',color:'0000ff'},
+          {show : false, number:0, name : 'coronal',color:'00ff00'},
+          {show : false, number:0, name : 'sagittal',color:'ff0000'}
+        ],
         measure : {
           start_x : 0,
           start_y : 0,
@@ -88,11 +88,11 @@
           goal_y:0
         },
         rotate : {
-          angle : 0,	//radian
+          angle : 0,  //radian
           color : '#ffa500',
           length : 192,
-					point_size : 3,
-					position_x : 256,
+          point_size : 3,
+          position_x : 256,
           position_y : 256,
           visible : false
         },
@@ -131,8 +131,8 @@
         target_series.activeLabelId = tmp_add_label_obj.id;
       }
     },
-		
-		
+
+
 
     _applyBoldness: function (insert_array) {
       //ペンで描いた状態の座標群と現時点での太さ指定を踏まえ,塗るべきマス目の集合に変換する
@@ -146,7 +146,7 @@
         l,
         tmp_x,
         tmp_y;
-  
+
       for (i = insert_array.length - 1; i >= 0; i -= 1) {
         for (k = the_boldness - 1; k >= 0; k -= 1) { //x軸
           for (l = the_boldness - 1; l >= 0; l -= 1) { //y軸
@@ -169,15 +169,15 @@
 
 
 
-		_calculateRotatePoint: function(the_angle,the_length,the_x,the_y){
-			var return_x=0;
-			var return_y=0;
-			
-			return_x = the_x + the_length*Math.cos(the_angle);
-			return_y = the_y - the_length*Math.sin(the_angle);
-			
-			return [return_x,return_y];
-		},
+    _calculateRotatePoint: function(the_angle,the_length,the_x,the_y){
+      var return_x=0;
+      var return_y=0;
+
+      return_x = the_x + the_length*Math.cos(the_angle);
+      return_y = the_y - the_length*Math.sin(the_angle);
+
+      return [return_x,return_y];
+    },
 
 
 
@@ -274,85 +274,66 @@
       this_elm.find('.image_window_controller_wrap').find('.image_window_controller').find('.image_window_level').val(this_opts.viewer.window.level.current);
       this_elm.find('.image_window_controller_wrap').find('.image_window_controller').find('.image_window_width').val(this_opts.viewer.window.width.current);
       this_elm.find('.disp_measure').removeClass('active');
-			
-			this_obj.drawGuide();			
+
     }/*_changeImgSrc*/,
 
 
 
     changeMode: function (new_mode) {
       //モード切替処理
-			var this_obj = this;
-			var this_elm = this.element;
-			var this_opts = this.options;
-			
-			var mode_num = -1;
-			if(typeof new_mode !== 'undefined' ){
-				for(var i = 0; i<this_opts.control.mode_array.length; i++){
-						if(this_opts.control.mode_array[i] === new_mode){
-							mode_num = i;
-							var tmp_class_name = 'mode_' + this_opts.control.mode;
-							this_elm.addClass(tmp_class_name);
-						}
-				}		
-				if(mode_num == -1){
-					return;
-				}
-			}else{
-				return;
-			}
-			this_elm.find('.disp_measure').removeClass('active');
-			
-			
-			
-			
-			
-			
-			
-			
-			this_elm.imageViewer('syncVoxel');
+      var this_obj = this;
+      var this_elm = this.element;
+      var this_opts = this.options;
 
-			if (this_opts.control.mode !== new_mode) {
-				this_opts.control.mode = new_mode;
-				this_elm.trigger('onModeChange', [this_opts.viewer.id, new_mode]);
-				//ここでは変更のあったビューアーのidと適用後のモードを生成して外から取れる状態にするだけ
-				//具体的な処理はコントローラ側
+      var mode_num = -1;
+      if(typeof new_mode !== 'undefined' ){
+        for(var i = 0; i<this_opts.control.mode_array.length; i++){
+            if(this_opts.control.mode_array[i] === new_mode){
+              mode_num = i;
+              var tmp_class_name = 'mode_' + this_opts.control.mode;
+              this_elm.addClass(tmp_class_name);
+            }
+        }
+        if(mode_num == -1){
+          return;
+        }
+      }else{
+        return;
+      }
+      this_elm.find('.disp_measure').removeClass('active');
 
-				var the_win_controller = this_elm.find('.image_window_controller');
-				if (this_opts.control.mode === 'window') {
-					//パネルを出す
-					the_win_controller.slideDown(200);
-					this_elm.find('.image_window_controller_wrap').find('.btn_close').show();
-					this_elm.find('.image_window_controller_wrap').find('.btn_open').hide();
-				} else {
-					//パネルを消す
-					the_win_controller.slideUp(200);
-					this_elm.find('.image_window_controller_wrap').find('.btn_close').hide();
-					this_elm.find('.image_window_controller_wrap').find('.btn_open').show();
-				}
+      if (this_opts.control.mode !== new_mode) {
+        this_opts.control.mode = new_mode;
+        this_elm.trigger('onModeChange', [this_opts.viewer.id, new_mode]);
+        //ここでは変更のあったビューアーのidと適用後のモードを生成して外から取れる状態にするだけ
+        //具体的な処理はコントローラ側
 
-				if (this_opts.control.mode === 'rotate') {
-					this_opts.viewer.rotate.visible = true;
-					//this_obj.drawRotate();
-				} else {
-					this_opts.viewer.rotate.visible = false;
-				}
-			
-				//カーソルcss用クラス変更
-				this_elm.removeClass(function (index, css) {
-					return (css.match(/\bmode_\S+/g) || []).join(' ');
-				});
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			}
+        var the_win_controller = this_elm.find('.image_window_controller');
+        if (this_opts.control.mode === 'window') {
+          //パネルを出す
+          the_win_controller.slideDown(200);
+          this_elm.find('.image_window_controller_wrap').find('.btn_close').show();
+          this_elm.find('.image_window_controller_wrap').find('.btn_open').hide();
+        } else {
+          //パネルを消す
+          the_win_controller.slideUp(200);
+          this_elm.find('.image_window_controller_wrap').find('.btn_close').hide();
+          this_elm.find('.image_window_controller_wrap').find('.btn_open').show();
+        }
+
+        if (this_opts.control.mode === 'rotate') {
+          this_opts.viewer.rotate.visible = true;
+          //this_obj.drawRotate();
+        } else {
+          this_opts.viewer.rotate.visible = false;
+        }
+
+        //カーソルcss用クラス変更
+        this_elm.removeClass(function (index, css) {
+          return (css.match(/\bmode_\S+/g) || []).join(' ');
+        });
+
+      }
     },
 
 
@@ -364,7 +345,7 @@
       this_opts.viewer.draw.activeSeriesId = seriesId;
       var tmp_the_series = this_obj.getSeriesObjectById(seriesId);
 
-			//set window info
+      //set window info
       this_opts.viewer.window = new Object();
       this_opts.viewer.window = $.extend(true,this_opts.viewer.window,tmp_the_series.window);
 
@@ -379,31 +360,33 @@
       var tmp_preset_array = this_opts.viewer.window.preset;
       this_elm.find('.image_window_preset_select').empty();
       if (typeof this_opts.viewer.window.preset != 'object' || this_opts.viewer.window.preset.length == 0) {
-      	this_elm.find('.window_preset_wrap').addClass('hidden');
+        this_elm.find('.window_preset_wrap').addClass('hidden');
       } else {
-      	var tmp_elm = '<option value="blank">select setting</option>';
-      	for (var i = 0; i < tmp_preset_array.length; i++) {
-      		var isSelected = '';
-      		if(this_opts.viewer.window.level.current == tmp_preset_array[i].level && this_opts.viewer.window.width.current == tmp_preset_array[i].width){
+        var tmp_elm = '<option value="blank">select setting</option>';
+        for (var i = 0; i < tmp_preset_array.length; i++) {
+          var isSelected = '';
+          if(this_opts.viewer.window.level.current == tmp_preset_array[i].level && this_opts.viewer.window.width.current == tmp_preset_array[i].width){
             isSelected = 'selected';
-      		}
-      		tmp_elm = tmp_elm + '<option value="' + tmp_preset_array[i].level + ',' + tmp_preset_array[i].width + '" '+isSelected+'>' + tmp_preset_array[i].label + '</option>';
-      	}
-      	this_elm.find('.window_preset_wrap').removeClass('hidden');
-      	this_elm.find('.image_window_preset_select').append(tmp_elm);
+          }
+          tmp_elm = tmp_elm + '<option value="' + tmp_preset_array[i].level + ',' + tmp_preset_array[i].width + '" '+isSelected+'>' + tmp_preset_array[i].label + '</option>';
+        }
+        this_elm.find('.window_preset_wrap').removeClass('hidden');
+        this_elm.find('.image_window_preset_select').append(tmp_elm);
       }
 
-			//set active label
-			if(typeof tmp_the_series.activeLabelId == 'undefined' || tmp_the_series.activeLabelId == '' ){
-				if(typeof tmp_the_series.label == 'object' && tmp_the_series.label.length > 0 ){
-					tmp_the_series.activeLabelId = tmp_the_series.label[0].id;
-				}
-			}
+      //set active label
+      if(typeof tmp_the_series.activeLabelId == 'undefined' || tmp_the_series.activeLabelId == '' ){
+        if(typeof tmp_the_series.label == 'object' && tmp_the_series.label.length > 0 ){
+          tmp_the_series.activeLabelId = tmp_the_series.label[0].id;
+        }
+      }
 
       this_opts.viewer.voxel = $.extend(true,this_opts.viewer.voxel,tmp_the_series.voxel);
       this_obj.setCanvasSize();
       this_obj._changeImgSrc();
     },
+
+
 
 
 
@@ -416,21 +399,24 @@
     },
 
 
+
+
+
     _create: function (insert_obj) {
 
       //ウィジェット発動時に一番最初に走る
       //optionsに応じて要素生成
-      //設置した要素へのイベント発行は	_setEventsにて
+      //設置した要素へのイベント発行は  _setEventsにて
       var this_obj = this;
       var this_elm = this.element;
       var this_opts = this.options;
       //キャンバス要素群生成
       var createCanvas = function () {
         var tmp_elm = '';
-        tmp_elm = tmp_elm + '<div	class="img_wrap">'; //画像枠,入れ子を作るので開始タグのみ
+        tmp_elm = tmp_elm + '<div  class="img_wrap">'; //画像枠,入れ子を作るので開始タグのみ
         tmp_elm = tmp_elm + '<canvas class="canvas_elm series_image_elm"></canvas>';//dicom img
         tmp_elm = tmp_elm + '<canvas class="canvas_elm canvas_main_elm"></canvas>';//draw label
-        tmp_elm = tmp_elm + '<div	class="mouse_cover"></div>';//マウス挙動キャッチ用要素
+        tmp_elm = tmp_elm + '<div  class="mouse_cover"></div>';//マウス挙動キャッチ用要素
         tmp_elm = tmp_elm + '</div>';//画像枠,閉じタグ
         this_elm.append(tmp_elm);
         delete    tmp_elm;
@@ -440,24 +426,24 @@
 
       //ウインドウレベル・サイズ変更パネル
       if (this_opts.viewer.elements.window.panel == true) {
-        var tmp_elm = '<div	class="image_window_controller_wrap"><p class="btn_open">L:<span	class="win_lv_label">' + this_opts.viewer.window.level.current + '</span>\
-      		/	W:<span	class="win_width_label">' + this_opts.viewer.window.width.current + '</span></p>\
-      		<p class="btn_close"></p><ul class="image_window_controller">';
+        var tmp_elm = '<div  class="image_window_controller_wrap"><p class="btn_open">L:<span  class="win_lv_label">' + this_opts.viewer.window.level.current + '</span>\
+          /  W:<span  class="win_width_label">' + this_opts.viewer.window.width.current + '</span></p>\
+          <p class="btn_close"></p><ul class="image_window_controller">';
 
         //レベル
-        tmp_elm = tmp_elm + '<li class="window_level_wrap"><span	class="image_window_controller_label">window	level</span>\
-      		<input	type="text"	class="image_window_level"	value="' + this_opts.viewer.window.level.current + '">\
-      		<span	class="label_level_min">' + this_opts.viewer.window.level.minimum + '</span>	～	\
-      		<span	class="label_level_max">' + this_opts.viewer.window.level.maximum + '</span></li>';
+        tmp_elm = tmp_elm + '<li class="window_level_wrap"><span  class="image_window_controller_label">window  level</span>\
+          <input  type="text"  class="image_window_level"  value="' + this_opts.viewer.window.level.current + '">\
+          <span  class="label_level_min">' + this_opts.viewer.window.level.minimum + '</span>  ～  \
+          <span  class="label_level_max">' + this_opts.viewer.window.level.maximum + '</span></li>';
 
         //幅
-        tmp_elm = tmp_elm + '<li class="window_width_wrap"><span	class="image_window_controller_label">window	width</span>\
-      		<input type="text" class="image_window_width"	value="' + this_opts.viewer.window.width.current + '">\
-      		<span	class="label_width_min">' + this_opts.viewer.window.width.minimum + '</span>	-	\
-      		<span	class="label_width_max">' + this_opts.viewer.window.width.maximum + '</span></li>';
+        tmp_elm = tmp_elm + '<li class="window_width_wrap"><span  class="image_window_controller_label">window  width</span>\
+          <input type="text" class="image_window_width"  value="' + this_opts.viewer.window.width.current + '">\
+          <span  class="label_width_min">' + this_opts.viewer.window.width.minimum + '</span>  -  \
+          <span  class="label_width_max">' + this_opts.viewer.window.width.maximum + '</span></li>';
 
         //プリセット
-        tmp_elm = tmp_elm + '<li class="window_preset_wrap hidden"><select	class="image_window_preset_select"></select></li>';
+        tmp_elm = tmp_elm + '<li class="window_preset_wrap hidden"><select  class="image_window_preset_select"></select></li>';
 
         tmp_elm = tmp_elm + '</ul></div>';
         this_elm.find('.img_wrap').append(tmp_elm);
@@ -469,20 +455,20 @@
       //枚数送り関連要素
       if (this_opts.viewer.elements.slider.panel == true) {
         //スライダー
-        var tmp_elm = '<div	class="btn_prev	common_btn">Prev</div><div	class="slider_outer">\
-      	<div	class="slider_elm"></div></div><div	class="btn_next	common_btn">Next</div><div	class="clear">&nbsp;</div>';
+        var tmp_elm = '<div  class="btn_prev  common_btn">Prev</div><div  class="slider_outer">\
+        <div  class="slider_elm"></div></div><div  class="btn_next  common_btn">Next</div><div  class="clear">&nbsp;</div>';
         this_elm.prepend(tmp_elm);
         delete    tmp_elm;
       }
       if (this_opts.viewer.elements.slider.display == true) {
-        //枚数表示枠	todo枚数テキストは後で入れる形式にする
+        //枚数表示枠  todo枚数テキストは後で入れる形式にする
         var tmp_disp_num = this_opts.viewer.number.current + 1;
         var tmp_elm = '<p class="disp_num">' + this_opts.viewer.number.current + '</p>';
         this_elm.find('.img_wrap').append(tmp_elm);
         delete    tmp_elm;
       }
 
-		if (this_opts.control.measure == true) {
+    if (this_opts.control.measure == true) {
         //定規
         var tmp_elm = '<p class="disp_measure"><span class="measure_num"></span><span class="measure_label">mm</span></p>';
         this_elm.find('.img_wrap').append(tmp_elm);
@@ -491,10 +477,10 @@
 
       //ズーム機能関連要素
       if (this_opts.viewer.elements.zoom.panel == true) {
-        var tmp_elm = '<div	class="img_toolbar_wrap"><ul class="img_toolbar">\
-                  		<li class="toolbar_btn	ico_detail_sprite ico_detail_sprite_resize_large"></li>\
-                  		<li class="toolbar_btn	ico_detail_sprite ico_detail_sprite_resize_short"></li>\
-                  	</ul></div>';
+        var tmp_elm = '<div  class="img_toolbar_wrap"><ul class="img_toolbar">\
+                      <li class="toolbar_btn  ico_detail_sprite ico_detail_sprite_resize_large"></li>\
+                      <li class="toolbar_btn  ico_detail_sprite ico_detail_sprite_resize_short"></li>\
+                    </ul></div>';
         this_elm.find('.img_wrap').prepend(tmp_elm);
         delete tmp_elm;
       }
@@ -504,15 +490,15 @@
         this_elm.find('.img_wrap').append('<p class="disp_size"><span class="current_size"></span>%</p>');
       }
 
-			//枠線の色をつける			
-			for(var i=0; i<this_opts.viewer.guide.length; i++){
-				if(this_opts.viewer.guide[i].name === this_opts.viewer.orientation){
-					this_elm.find('.img_wrap').css('borderColor','#'+this_opts.viewer.guide[i].color);
-				}
-			}
+      //枠線の色をつける
+      for(var i=0; i<this_opts.viewer.guide.length; i++){
+        if(this_opts.viewer.guide[i].name === this_opts.viewer.orientation){
+          this_elm.find('.img_wrap').css('borderColor','#'+this_opts.viewer.guide[i].color);
+        }
+      }
 
     },//_create
-		
+
 
 
     createSaveData: function (series_id, label_id) {
@@ -547,47 +533,52 @@
       target_context.antialias = 'none';
       target_context.patternQuality = 'fast';
     },
-		
-		
 
-		drawGuide : function(){
-			
-			var this_obj = this;
-			var this_elm = this.element;
-			var this_opts = this.options;
-			var guide_horizontal = this_obj.getGuide('horizontal');
-			var guide_vertical =  this_obj.getGuide('vertical');
-			var tmp_ctx = this_elm.find('.canvas_main_elm').get(0).getContext('2d');
-			
-			//draw horizontal
-			if (guide_horizontal.show === true && guide_horizontal.number - this_opts.viewer.position.sx >= 0) {
-				var guide_start_x = (guide_horizontal.number - this_opts.viewer.position.sx) * this_opts.viewer.position.dw / this_opts.viewer.position.sw;
-				tmp_ctx.beginPath();
-				tmp_ctx.strokeStyle = '#' + guide_horizontal.color;
-				tmp_ctx.moveTo(guide_start_x, 0);
-				tmp_ctx.lineTo(guide_start_x, this_opts.viewer.position.dw);
-				tmp_ctx.closePath();
-				tmp_ctx.stroke();
-			}
-			
-			//draw vertical
-			if (guide_vertical.show === true && guide_vertical.number - this_opts.viewer.position.sy >= 0) {
-				var guide_start_y = (guide_vertical.number - this_opts.viewer.position.sy) * this_opts.viewer.position.dh / this_opts.viewer.position.sh;
-				tmp_ctx.beginPath();
-				tmp_ctx.strokeStyle = '#' + guide_vertical.color;
-				tmp_ctx.moveTo(0, guide_start_y);
-				tmp_ctx.lineTo(this_opts.viewer.position.dw, guide_start_y);
-				tmp_ctx.closePath();
-				tmp_ctx.stroke();
-			}
-		},//drawGuide
+
+
+    drawGuide : function(){
+
+      var this_obj = this;
+      var this_elm = this.element;
+      var this_opts = this.options;
+      var guide_horizontal = this_obj.getGuide('horizontal');
+      var guide_vertical =  this_obj.getGuide('vertical');
+      var tmp_ctx = this_elm.find('.canvas_main_elm').get(0).getContext('2d');
+
+      //draw horizontal
+      if (guide_horizontal.show === true && guide_horizontal.number - this_opts.viewer.position.sx >= 0) {
+        var guide_start_x = (guide_horizontal.number - this_opts.viewer.position.sx) * this_opts.viewer.position.dw / this_opts.viewer.position.sw;
+
+        guide_start_x = guide_start_x + 0.5* this_opts.viewer.position.zoom * this_opts.viewer.position.sw / this_opts.viewer.position.dw;
+        tmp_ctx.beginPath();
+        tmp_ctx.strokeStyle = '#' + guide_horizontal.color;
+        tmp_ctx.lineWidth = 1;
+        tmp_ctx.moveTo(guide_start_x, 0);
+        tmp_ctx.lineTo(guide_start_x, this_opts.viewer.position.dw);
+        tmp_ctx.closePath();
+        tmp_ctx.stroke();
+      }
+
+      //draw vertical
+      if (guide_vertical.show === true && guide_vertical.number - this_opts.viewer.position.sy >= 0) {
+        var guide_start_y = (guide_vertical.number - this_opts.viewer.position.sy) * this_opts.viewer.position.dh / this_opts.viewer.position.sh;
+        tmp_ctx.beginPath();
+        tmp_ctx.strokeStyle = '#' + guide_vertical.color;
+        tmp_ctx.lineWidth = 1;
+        tmp_ctx.moveTo(0, guide_start_y);
+        tmp_ctx.lineTo(this_opts.viewer.position.dw, guide_start_y);
+        tmp_ctx.closePath();
+        tmp_ctx.stroke();
+      }
+
+    },//drawGuide
 
 
 
     drawLabel: function (series_id, label_id, positions_array) {
       //塗り機能
       //第1引数 : 対象ラベル
-      //第2引数 : 塗る点の集合の配列	[x,y,z],[x2,y2,z2]...
+      //第2引数 : 塗る点の集合の配列  [x,y,z],[x2,y2,z2]...
 
       var this_obj = this;
       var this_elm = this_obj.element;
@@ -629,70 +620,68 @@
 
 
     drawMeasure : function(){
-			var this_obj = this;
-			var this_elm = this.element;
-			var this_opts = this.options;
+      var this_obj = this;
+      var this_elm = this.element;
+      var this_opts = this.options;
 
-			//ラベルを描くcanvas要素のオブジェクト
-			var tmp_ctx = this_elm.find('.canvas_main_elm').get(0).getContext('2d');
-			tmp_ctx.beginPath();
-			tmp_ctx.strokeStyle = 'rgb(155, 187, 89)';
-			tmp_ctx.fillStyle = 'rgb(155, 187, 89)';
-			tmp_ctx.moveTo(this_opts.viewer.measure.start_x,this_opts.viewer.measure.start_y);
-			tmp_ctx.lineTo(this_opts.viewer.measure.goal_x,this_opts.viewer.measure.goal_y);
-			tmp_ctx.stroke();
-			tmp_ctx.fillRect(this_opts.viewer.measure.start_x-2, this_opts.viewer.measure.start_y-2, 4, 4);
-			tmp_ctx.fillRect(this_opts.viewer.measure.goal_x-2, this_opts.viewer.measure.goal_y-2, 4, 4);
-			tmp_ctx.closePath();
+      //ラベルを描くcanvas要素のオブジェクト
+      var tmp_ctx = this_elm.find('.canvas_main_elm').get(0).getContext('2d');
+      tmp_ctx.beginPath();
+      tmp_ctx.strokeStyle = 'rgb(155, 187, 89)';
+      tmp_ctx.fillStyle = 'rgb(155, 187, 89)';
+      tmp_ctx.moveTo(this_opts.viewer.measure.start_x,this_opts.viewer.measure.start_y);
+      tmp_ctx.lineTo(this_opts.viewer.measure.goal_x,this_opts.viewer.measure.goal_y);
+      tmp_ctx.stroke();
+      tmp_ctx.fillRect(this_opts.viewer.measure.start_x-2, this_opts.viewer.measure.start_y-2, 4, 4);
+      tmp_ctx.fillRect(this_opts.viewer.measure.goal_x-2, this_opts.viewer.measure.goal_y-2, 4, 4);
+      tmp_ctx.closePath();
     },
 
 
 
     drawRotate : function(){
-			var this_obj = this;
-			var this_elm = this.element;
-			var this_opts = this.options;
+      var this_obj = this;
+      var this_elm = this.element;
+      var this_opts = this.options;
 
-			//ポッチ１座標算出
-			var rotate_params = this_opts.viewer.rotate;
-			
-			if(typeof rotate_params.visible === 'undefined' || rotate_params.visible !== true){
-			
-				return;
-			
-			}
-			
-			var point_01 = this_obj._calculateRotatePoint(rotate_params.angle,rotate_params.length, rotate_params.position_x, rotate_params.position_y);
-			var point_02 = this_obj._calculateRotatePoint(rotate_params.angle+Math.PI, rotate_params.length, rotate_params.position_x,rotate_params.position_y);
+      //ポッチ座標算出
+      var rotate_params = this_opts.viewer.rotate;
 
-			var tmp_ctx = this_elm.find('.canvas_main_elm').get(0).getContext('2d');
-			tmp_ctx.strokeStyle = rotate_params.color;
-			tmp_ctx.fillStyle = rotate_params.color;
-			
-			//中心点
-			tmp_ctx.beginPath();
-			tmp_ctx.arc(rotate_params.position_x, rotate_params.position_y, rotate_params.point_size, 0, Math.PI*2, false);
-			tmp_ctx.fill();
+      if(typeof rotate_params.visible === 'undefined' || rotate_params.visible !== true){
+        return;
+      }
 
-			//ポッチ1
-			tmp_ctx.arc(point_01[0], point_01[1], rotate_params.point_size, 0, Math.PI*2, false);
-			tmp_ctx.fill();
-			
-			//ポッチ2
-			tmp_ctx.arc(point_02[0], point_02[1], rotate_params.point_size, 0, Math.PI*2, false);
-			tmp_ctx.fill();
-			
-			//線分
-			tmp_ctx.moveTo(point_01[0],point_01[1]);
-			tmp_ctx.lineTo(point_02[0],point_02[1]);
-			tmp_ctx.stroke();
-			tmp_ctx.closePath();
+      var point_01 = this_obj._calculateRotatePoint(rotate_params.angle,rotate_params.length, rotate_params.position_x, rotate_params.position_y);
+      var point_02 = this_obj._calculateRotatePoint(rotate_params.angle+Math.PI, rotate_params.length, rotate_params.position_x,rotate_params.position_y);
+
+      var tmp_ctx = this_elm.find('.canvas_main_elm').get(0).getContext('2d');
+      tmp_ctx.strokeStyle = rotate_params.color;
+      tmp_ctx.fillStyle = rotate_params.color;
+
+      //中心点
+      tmp_ctx.beginPath();
+      tmp_ctx.arc(rotate_params.position_x, rotate_params.position_y, rotate_params.point_size, 0, Math.PI*2, false);
+      tmp_ctx.fill();
+
+      //ポッチ1
+      tmp_ctx.arc(point_01[0], point_01[1], rotate_params.point_size, 0, Math.PI*2, false);
+      tmp_ctx.fill();
+
+      //ポッチ2
+      tmp_ctx.arc(point_02[0], point_02[1], rotate_params.point_size, 0, Math.PI*2, false);
+      tmp_ctx.fill();
+
+      //線分
+      tmp_ctx.moveTo(point_01[0],point_01[1]);
+      tmp_ctx.lineTo(point_02[0],point_02[1]);
+      tmp_ctx.stroke();
+      tmp_ctx.closePath();
 
     },
 
 
 
-   	eraseLabel: function (series_id, label_id, positions_array) {
+     eraseLabel: function (series_id, label_id, positions_array) {
       //塗り機能
       //第1引数 : 対象ラベル
       //第2引数 : 塗る点の集合の配列(boxel上でのxy値)
@@ -715,12 +704,12 @@
       }
       tmp_ctx.closePath();
 
-    },//drawCommon	キャンバス描画ここまで
+    },//drawCommon  キャンバス描画ここまで
 
 
     _exchangePositionCtoV: function (insert_array) {
       //ある方向・ある面で描画された座標情報群の値をボクセル上での座標に変換
-      //第一引数: 現在の	No.	orientation	でのXY座標群
+      //第一引数: 現在の  No.  orientation  でのXY座標群
 
       var this_opts = this.options;
       var rtn_array = new Array(0);
@@ -758,16 +747,16 @@
     // 第二引数: 対象ラベルid
     // クリックされたポイントの縮尺ナシXYZ座標 [X,Y,Z]
 
-   	var this_obj = this;
+       var this_obj = this;
       var this_elm = this.element;
       var this_opts = this.options;
 
-    //今の向き・奥行ですでに描画・格納されている情報をコンテナから取得
+      //今の向き・奥行ですでに描画・格納されている情報をコンテナから取得
       var the_painted_positions_in_target_slice = this_opts.control.container.returnSlice(
-      	series_id,
-      	label_id,
-      	this_opts.viewer.orientation,
-      	this_opts.viewer.number.current
+        series_id,
+        label_id,
+        this_opts.viewer.orientation,
+        this_opts.viewer.number.current
       );
 
       var max_x = 0;
@@ -888,24 +877,18 @@
         }
       }
 
-
       this_opts.control.container.updateVoxel(series_id,label_id,'pen',target_position_array);
 
       //ヒストリに積む
       this_opts.control.container.addHistory(series_id,label_id,'pen',target_position_array);
 
       this_elm.trigger('onWritten',[label_id,series_id]);
-
-       //自分自身、同じボクセルを共用するビューアーに対してコンテナとの同期を促す
-      var tmp_this_id = this_elm.attr('id');
-      for (var i = this_opts.control.container.data.member.length - 1; i >= 0; i--) {
-      	$('#' + this_opts.control.container.data.member[i]).imageViewer('syncVoxel');
-      }
+      this_obj.syncOtherViewers();
     },
-		
-		
-		
-		getLabelObjectById: function (label_id, series_id) {
+
+
+
+    getLabelObjectById: function (label_id, series_id) {
 
       //描画対象ラベルのチェック
       var this_obj = this;
@@ -925,38 +908,38 @@
 
     getGuide: function (target_direction) {
       //ビューアー内での別ビューアー断面の表示用ガイドを取得する
-			
-			var this_obj = this;
-			var this_elm = this.element;
-			var this_opts = this.options;
-			var guide_horizontal = {};
-			var guide_vertical = {};
-			var i = 0;
-			
-			var return_obj = null;
 
-			for (i = this_opts.viewer.guide.length-1; i >= 0; i -= 1) {
-				if (this_opts.viewer.orientation === 'axial' && this_opts.viewer.guide[i].name === 'sagittal') {
-					guide_horizontal = this_opts.viewer.guide[i];
-				} else if (this_opts.viewer.orientation === 'axial' && this_opts.viewer.guide[i].name === 'coronal') {
-					guide_vertical = this_opts.viewer.guide[i];
-				} else if (this_opts.viewer.orientation === 'coronal' && this_opts.viewer.guide[i].name === 'sagittal') {
-					guide_horizontal = this_opts.viewer.guide[i];
-				} else if (this_opts.viewer.orientation === 'coronal' && this_opts.viewer.guide[i].name === 'axial') {
-					guide_vertical = this_opts.viewer.guide[i];
-				} else if (this_opts.viewer.orientation === 'sagittal' && this_opts.viewer.guide[i].name === 'coronal') {
-					guide_horizontal = this_opts.viewer.guide[i];
-				} else  if (this_opts.viewer.orientation === 'sagittal' && this_opts.viewer.guide[i].name === 'axial') {
-					guide_vertical = this_opts.viewer.guide[i];
-				}
-			}
-			
-			if(target_direction == 'vertical'){
-				return_obj = guide_vertical;
-			} else if (target_direction == 'horizontal'){
-				return_obj = guide_horizontal;
-			}
-			return return_obj;
+      var this_obj = this;
+      var this_elm = this.element;
+      var this_opts = this.options;
+      var guide_horizontal = {};
+      var guide_vertical = {};
+      var i = 0;
+
+      var return_obj = null;
+
+      for (i = this_opts.viewer.guide.length-1; i >= 0; i -= 1) {
+        if (this_opts.viewer.orientation === 'axial' && this_opts.viewer.guide[i].name === 'sagittal') {
+          guide_horizontal = this_opts.viewer.guide[i];
+        } else if (this_opts.viewer.orientation === 'axial' && this_opts.viewer.guide[i].name === 'coronal') {
+          guide_vertical = this_opts.viewer.guide[i];
+        } else if (this_opts.viewer.orientation === 'coronal' && this_opts.viewer.guide[i].name === 'sagittal') {
+          guide_horizontal = this_opts.viewer.guide[i];
+        } else if (this_opts.viewer.orientation === 'coronal' && this_opts.viewer.guide[i].name === 'axial') {
+          guide_vertical = this_opts.viewer.guide[i];
+        } else if (this_opts.viewer.orientation === 'sagittal' && this_opts.viewer.guide[i].name === 'coronal') {
+          guide_horizontal = this_opts.viewer.guide[i];
+        } else  if (this_opts.viewer.orientation === 'sagittal' && this_opts.viewer.guide[i].name === 'axial') {
+          guide_vertical = this_opts.viewer.guide[i];
+        }
+      }
+
+      if(target_direction == 'vertical'){
+        return_obj = guide_vertical;
+      } else if (target_direction == 'horizontal'){
+        return_obj = guide_horizontal;
+      }
+      return return_obj;
 
     },//getGuide
 
@@ -1012,12 +995,7 @@
 
       //コンテナ内部をひとつ手前に戻す
       this_opts.control.container.historyBack();
-
-      //自分自身、同じボクセルを共用するビューアーに対してコンテナとの同期を促す
-      var tmp_this_id = this_elm.attr('id');
-      for (var i = this_opts.control.container.data.member.length - 1; i >= 0; i--) {
-        $('#' + this_opts.control.container.data.member[i]).imageViewer('syncVoxel');
-      }
+      this_obj.syncOtherViewers();
     },
 
 
@@ -1028,16 +1006,11 @@
       var this_opts = this.options;
       //コンテナ内部の戻るを取消
       this_opts.control.container.historyRedo();
-
-      //自分自身、同じボクセルを共用するビューアーに対してコンテナとの同期を促す
-      var tmp_this_id = this_elm.attr('id');
-      for (var i = this_opts.control.container.data.member.length - 1; i >= 0; i--) {
-        $('#' + this_opts.control.container.data.member[i]).imageViewer('syncVoxel');
-      }
+      this_obj.syncOtherViewers();
     },
 
 
-    //	初期化・イベント設置
+    //  初期化・イベント設置
     _init: function (insert_object) {
 
       var this_obj = this;
@@ -1051,7 +1024,6 @@
       //連動用コンテナに自分の要素idを登録
       var this_id = this_elm.attr('id')
       this_opts.control.container.data.member.push(this_id);
-      delete this_id;
 
       //ある分だけシリーズサイズをコンテナに送り込む
       for (var i = 0; i < this_opts.viewer.draw.series.length; i++) {
@@ -1068,16 +1040,46 @@
       this_obj.setCanvasSize();
 
       //以下各種イベント群
-      this_elm.bind('', function () {
+      this_elm.bind('changeImgSrc', function () {
         this_obj._changeImgSrc();
       })
-        .bind('getOptions', function () {
-          var return_obj = this_obj.getOptions();
-          return return_obj;
-        })
-        .bind('sync', function () {
-          this_obj.syncVoxel();
-        });
+      .bind('getOptions', function () {
+        var return_obj = this_obj.getOptions();
+        return return_obj;
+      })
+      .bind('sync', function () {
+        this_obj.syncVoxel();
+      });
+
+      //表示シリーズ変更
+      this_elm.bind('changeSeries', function (e, series_id) {
+        this_obj.changeSeries(series_id);
+      });
+
+      //ラベル追加
+      this_elm.bind('addLabelObject', function (e, series_id, label_id) {
+        this_obj.addLabelObject(series_id, label_id);
+      });
+
+      //ラベル削除
+      this_elm.bind('deleteLabelObject', function (e, series_id, label_id) {
+        this_obj.deleteLabelObject(series_id, label_id);
+      });
+
+      //オプション情報の書き換え
+      this_elm.bind('setOptions', function (e, tmpSetValues) {
+        this_obj._setOptions(tmpSetValues);
+      });
+
+      this_elm.bind('drawGuide',function () {
+        this_obj.drawGuide();
+      });
+
+
+      // Disable to display context menu
+      this_elm.bind('contextmenu', function (e) {
+        return false;
+      });
 
       var mousewheelevent = 'onwheel' in document ? 'wheel' : 'onmousewheel' in    document ? 'mousewheel' : 'DOMMouseScroll';
 
@@ -1102,34 +1104,11 @@
           this_obj._mouseWheelFunc(e);
         });
 
-      //表示シリーズ変更
-      this_elm.bind('changeSeries', function (e, series_id) {
-        this_obj.changeSeries(series_id);
-      });
-
-      //ラベル追加
-      this_elm.bind('addLabelObject', function (e, series_id, label_id) {
-        this_obj.addLabelObject(series_id, label_id);
-      });
-
-      //ラベル削除
-      this_elm.bind('deleteLabelObject', function (e, series_id, label_id) {
-        this_obj.deleteLabelObject(series_id, label_id);
-      });
-
-      //オプション情報の書き換え
-      this_elm.bind('setOptions', function (e, tmpSetValues) {
-        this_obj._setOptions(tmpSetValues);
-      });
-
-      // Disable to display context menu
-      this_elm.bind('contextmenu', function (e) {
-        return false;
-      });
 
       //枚数送り関連要素
       if (this_opts.control.slider == true) {
         //スライダー
+
         this_elm.find('.slider_elm').slider({
           value: this_opts.viewer.number.current,
           orientation: 'horizontal',
@@ -1144,14 +1123,14 @@
             this_obj._changeImgSrc();
             this_elm.imageViewer('syncVoxel');
             //next/prevボタン押下時に発火させるchangeイベント
-						this_elm.trigger('onNumberChange',[this_opts.viewer.orientation,this_opts.viewer.number.current]);
+            this_elm.trigger('onNumberChange',[this_opts.viewer.orientation,this_opts.viewer.number.current]);
           }, change: function (event, ui) {
             this_opts.viewer.number.current = ui.value;
             var tmp_disp_num = this_opts.viewer.number.current + 1;
             this_elm.find('.disp_num').text(tmp_disp_num); //画像右上の枚数表示
             this_obj._changeImgSrc();
             this_elm.imageViewer('syncVoxel');
-						this_elm.trigger('onNumberChange',[this_opts.viewer.orientation,this_opts.viewer.number.current]);
+            this_elm.trigger('onNumberChange',[this_opts.viewer.orientation,this_opts.viewer.number.current]);
           }
         });
 
@@ -1159,51 +1138,38 @@
         this_elm.find('.btn_prev').click(function () {
           var tmp_num = this_opts.viewer.number.current;
           tmp_num = Number(tmp_num);
-          if (tmp_num > 0) {	//0番より手前は無い
+          if (tmp_num > 0) {  //0番より手前は無い
             tmp_num--;
             var tmp_disp_num = tmp_num + 1;
             this_elm.find('.disp_num').text(tmp_disp_num); //画像右上の枚数表示
-            this_obj._changeImgSrc();
-						this_elm.trigger('onNumberChange',[this_opts.viewer.orientation,this_opts.viewer.number.current]);
           }
           //レバー追従
           this_elm.find('.slider_elm').slider({
             value: tmp_num
           });
-          this_elm.imageViewer('syncVoxel');
         });
 
         //画像No進むボタン
         this_elm.find('.btn_next').click(function () {
           var tmp_num = this_opts.viewer.number.current;
           tmp_num = Number(tmp_num);
-          if (tmp_num < this_opts.viewer.number.maximum) {	//上限枚数の制限
+          if (tmp_num < this_opts.viewer.number.maximum) {  //上限枚数の制限
             tmp_num++;
             var tmp_disp_num = tmp_num + 1;
             this_elm.find('.disp_num').text(tmp_disp_num); //画像右上の枚数表示
-            this_obj._changeImgSrc();
-						this_elm.trigger('onNumberChange',[this_opts.viewer.orientation,this_opts.viewer.number.current]);
           }
           //レバー追従
           this_elm.find('.slider_elm').slider({
             value: tmp_num
           });
-          this_elm.imageViewer('syncVoxel');
         });
 
         this_elm.find('.btn_prev,.btn_next').mousedown(function () {
           return false;
         });
 
-        this_elm.bind('changeImgSrc',function () {
-		      this_obj._changeImgSrc();
-        });
-
-        this_elm.bind('drawGuide',function () {
-		      this_obj.drawGuide();
-        });
       }
-			
+
       //ウインドウレベル・幅関係のイベント設置
       if (this_opts.viewer.elements.window.panel == true) {
 
@@ -1275,7 +1241,7 @@
         this_elm.find('.ico_detail_sprite_resize_large,.ico_detail_sprite_resize_short').click(function () {
           if (this_opts.viewer.position.zoom <= 32 && 1 <= this_opts.viewer.position.zoom) {
 
-            var resize_value = 0.5; //todo確認	１回のプッシュでどの程度ズームインアウトするかの度合の変数はウィジェットの共通変数で持つ方が良い？
+            var resize_value = 0.5; //todo確認  １回のプッシュでどの程度ズームインアウトするかの度合の変数はウィジェットの共通変数で持つ方が良い？
             if ($(this).hasClass('ico_detail_sprite_resize_large')) {
               //拡大
               this_opts.viewer.position.zoom += resize_value;
@@ -1322,7 +1288,6 @@
 
       //諸々のデータ群のセットが終わったところで描画機能発火
       this_obj._changeImgSrc();
-      this_obj.drawGuide();
 
     }/*_init*/,
 
@@ -1349,7 +1314,7 @@
       e.preventDefault();
 
       if(e.which!=1){
-      	return
+        return
       };
       this_obj._tmpInfo.cursor.touch_flg = 1;
 
@@ -1363,7 +1328,7 @@
         this_obj._tmpInfo.elementParam.start.Y = this_opts.viewer.position.sy ;
       } else if (this_opts.control.mode == 'pen' || this_opts.control.mode == 'erase' || this_opts.control.mode == 'bucket') {
 
-      	//一度外に出て戻ってきた場合に再び触った場合にコンテナ書き込み
+        //一度外に出て戻ってきた場合に再び触った場合にコンテナ書き込み
          if (this_obj._tmpInfo.label.length > 0) {
 
          //ヒストリ
@@ -1385,7 +1350,7 @@
 
            this_obj._tmpInfo.label = new Array(0);
          }else{
-         	//通常のペン挙動
+           //通常のペン挙動
             //ラベルを描くcanvas要素のオブジェクト
             var tmp_ctx = this_elm.find('.canvas_main_elm').get(0).getContext('2d');
             //重ね合わせの表現のため一時的に現在の(orientation,奥行)ですでに描かれているラベル座標群を確保する
@@ -1408,32 +1373,32 @@
 
 
           if (this_opts.control.mode == 'pen' || this_opts.control.mode == 'erase' ){
-          	//太さを加味
-          	var tmp_array = this_obj._applyBoldness([[this_obj._tmpInfo.cursor.current.X, this_obj._tmpInfo.cursor.current.Y]]);
+            //太さを加味
+            var tmp_array = this_obj._applyBoldness([[this_obj._tmpInfo.cursor.current.X, this_obj._tmpInfo.cursor.current.Y]]);
 
-          	//ボクセル座標に変換
-          	this_obj._tmpInfo.label = this_obj._exchangePositionCtoV(tmp_array);
-          	var the_active_series = this_obj.getSeriesObjectById(this_opts.viewer.draw.activeSeriesId);
-          	this_opts.control.container.updateVoxel(
-          		this_opts.viewer.draw.activeSeriesId,
-          		the_active_series.activeLabelId,
-          		this_opts.control.mode,
-          		this_obj._tmpInfo.label
-          	);
-          	this_elm.imageViewer('syncVoxel');
-          	this_obj._disableImageAlias(tmp_ctx, false);
+            //ボクセル座標に変換
+            this_obj._tmpInfo.label = this_obj._exchangePositionCtoV(tmp_array);
+            var the_active_series = this_obj.getSeriesObjectById(this_opts.viewer.draw.activeSeriesId);
+            this_opts.control.container.updateVoxel(
+              this_opts.viewer.draw.activeSeriesId,
+              the_active_series.activeLabelId,
+              this_opts.control.mode,
+              this_obj._tmpInfo.label
+            );
+            this_elm.imageViewer('syncVoxel');
+            this_obj._disableImageAlias(tmp_ctx, false);
 
           }else{
-          	//bucket
-          	var the_active_series = this_obj.getSeriesObjectById(this_opts.viewer.draw.activeSeriesId);
-          	if(typeof the_active_series.label != 'undefined' &&  the_active_series.label.length>0){
-          		var tmp_point_position = this_obj._exchangePositionCtoV([[this_obj._tmpInfo.cursor.current.X,this_obj._tmpInfo.cursor.current.Y]]);
-          		this_obj._getBucketFillPositions(
+            //bucket
+            var the_active_series = this_obj.getSeriesObjectById(this_opts.viewer.draw.activeSeriesId);
+            if(typeof the_active_series.label != 'undefined' &&  the_active_series.label.length>0){
+              var tmp_point_position = this_obj._exchangePositionCtoV([[this_obj._tmpInfo.cursor.current.X,this_obj._tmpInfo.cursor.current.Y]]);
+              this_obj._getBucketFillPositions(
                 this_opts.viewer.draw.activeSeriesId,
                 the_active_series.activeLabelId,
                 tmp_point_position[0]
-          		);
-          	}
+              );
+            }
           }
          }
       } else if (this_opts.control.mode == 'window') {
@@ -1453,7 +1418,7 @@
       }
 
     },//_mousedownFunc
-		
+
 
 
     _mousemoveFunc: function (e) {
@@ -1471,8 +1436,8 @@
           var tmp_x = (e.clientX - this_obj._tmpInfo.cursor.start.X) / this_opts.viewer.position.zoom;
           var tmp_y = (e.clientY - this_obj._tmpInfo.cursor.start.Y) / this_opts.viewer.position.zoom;
 
-      		tmp_x = tmp_x;
-      		tmp_y = tmp_y;
+          tmp_x = tmp_x;
+          tmp_y = tmp_y;
 
           tmp_x = this_obj._tmpInfo.elementParam.start.X - tmp_x * this_opts.viewer.position.ow / this_opts.viewer.position.dw;
           tmp_y = this_obj._tmpInfo.elementParam.start.Y - tmp_y * this_opts.viewer.position.oh / this_opts.viewer.position.dh;
@@ -1497,8 +1462,8 @@
             tmp_x = this_opts.viewer.position.sx + tmp_x * this_opts.viewer.position.ow / this_opts.viewer.position.dw;
             tmp_y = this_opts.viewer.position.sy + tmp_y * this_opts.viewer.position.oh / this_opts.viewer.position.dh;
 
-          	tmp_x = Math.floor(tmp_x);
-          	tmp_y = Math.floor(tmp_y);
+            tmp_x = Math.floor(tmp_x);
+            tmp_y = Math.floor(tmp_y);
 
             var tmp_array = new Array();
             //中間点を埋める
@@ -1511,7 +1476,7 @@
               tmp_array.push([this_obj._tmpInfo.cursor.current.X, this_obj._tmpInfo.cursor.current.Y]);
             }
 
-            //次のmousemoveイベントに備えて	_tmpInfo.cursor.current	更新
+            //次のmousemoveイベントに備えて  _tmpInfo.cursor.current  更新
             this_obj._tmpInfo.cursor.current.X = tmp_x;
             this_obj._tmpInfo.cursor.current.Y = tmp_y;
 
@@ -1544,7 +1509,7 @@
             tmp_x = tmp_x + this_opts.viewer.position.sx * this_opts.viewer.position.dw / this_opts.viewer.position.ow;
             tmp_y = tmp_y + this_opts.viewer.position.sy * this_opts.viewer.position.dh / this_opts.viewer.position.oh;
 
-            //次のmousemoveイベントに備えて	{_tmpInfo.cursor.current}	更新
+            //次のmousemoveイベントに備えて  {_tmpInfo.cursor.current}  更新
             this_obj._tmpInfo.cursor.current.X = tmp_x;
             this_obj._tmpInfo.cursor.current.Y = tmp_y;
             this_obj._tmpInfo.cursor.out_flg = 0;
@@ -1573,90 +1538,89 @@
         }
       } else if (this_opts.control.mode == 'measure') {
         if (this_obj._tmpInfo.cursor.touch_flg == 1) {
-					//定規モード
-					//マウス位置取得(ズーム解除状態でのXY値)
-					var tmp_cursor_x = (e.clientX - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().left) / this_opts.viewer.position.zoom;
-					var tmp_cursor_y = (e.clientY - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().top) / this_opts.viewer.position.zoom;
+          //定規モード
+          //マウス位置取得(ズーム解除状態でのXY値)
+          var tmp_cursor_x = (e.clientX - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().left) / this_opts.viewer.position.zoom;
+          var tmp_cursor_y = (e.clientY - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().top) / this_opts.viewer.position.zoom;
 
-					//画像トリミング分の補正
-					this_obj._tmpInfo.cursor.current.X = tmp_cursor_x + this_opts.viewer.position.sx * this_opts.viewer.position.dw / this_opts.viewer.position.ow;
-					this_obj._tmpInfo.cursor.current.Y = tmp_cursor_y + this_opts.viewer.position.sy * this_opts.viewer.position.dh / this_opts.viewer.position.oh;
+          //画像トリミング分の補正
+          this_obj._tmpInfo.cursor.current.X = tmp_cursor_x + this_opts.viewer.position.sx * this_opts.viewer.position.dw / this_opts.viewer.position.ow;
+          this_obj._tmpInfo.cursor.current.Y = tmp_cursor_y + this_opts.viewer.position.sy * this_opts.viewer.position.dh / this_opts.viewer.position.oh;
 
-					//XYそれぞれの差(ズームなし状態でのピクセル)
-					var dist_w = this_obj._tmpInfo.cursor.current.X - this_obj._tmpInfo.cursor.start.X;
-					var dist_h = this_obj._tmpInfo.cursor.current.Y - this_obj._tmpInfo.cursor.start.Y;
+          //XYそれぞれの差(ズームなし状態でのピクセル)
+          var dist_w = this_obj._tmpInfo.cursor.current.X - this_obj._tmpInfo.cursor.start.X;
+          var dist_h = this_obj._tmpInfo.cursor.current.Y - this_obj._tmpInfo.cursor.start.Y;
 
-					//ボクセル縦横比調整分を除外
-					dist_w = dist_w * this_opts.viewer.position.sw / this_opts.viewer.position.dw;
-					dist_h = dist_h * this_opts.viewer.position.sh / this_opts.viewer.position.dh;
+          //ボクセル縦横比調整分を除外
+          dist_w = dist_w * this_opts.viewer.position.sw / this_opts.viewer.position.dw;
+          dist_h = dist_h * this_opts.viewer.position.sh / this_opts.viewer.position.dh;
 
-					//ミリメートル換算・voxel値を使う
-					if(this_opts.viewer.orientation == 'axial'){
-						dist_w = dist_w * this_opts.viewer.voxel.voxel_x;
-						dist_h = dist_h * this_opts.viewer.voxel.voxel_y;
-					}else if(this_opts.viewer.orientation == 'coronal'){
-						dist_w = dist_w * this_opts.viewer.voxel.voxel_x;
-						dist_h = dist_h * this_opts.viewer.voxel.voxel_z;
-					}else if(this_opts.viewer.orientation == 'sagittal'){
-						dist_w = dist_w * this_opts.viewer.voxel.voxel_y;
-						dist_h = dist_h * this_opts.viewer.voxel.voxel_z;
-					}
+          //ミリメートル換算・voxel値を使う
+          if(this_opts.viewer.orientation == 'axial'){
+            dist_w = dist_w * this_opts.viewer.voxel.voxel_x;
+            dist_h = dist_h * this_opts.viewer.voxel.voxel_y;
+          }else if(this_opts.viewer.orientation == 'coronal'){
+            dist_w = dist_w * this_opts.viewer.voxel.voxel_x;
+            dist_h = dist_h * this_opts.viewer.voxel.voxel_z;
+          }else if(this_opts.viewer.orientation == 'sagittal'){
+            dist_w = dist_w * this_opts.viewer.voxel.voxel_y;
+            dist_h = dist_h * this_opts.viewer.voxel.voxel_z;
+          }
 
-					var disp_txt = Math.sqrt( dist_w*dist_w + dist_h*dist_h );
-					disp_txt = disp_txt.toFixed(2);
-					this_elm.find('.disp_measure').find('.measure_num').text(disp_txt);
+          var disp_txt = Math.sqrt( dist_w*dist_w + dist_h*dist_h );
+          disp_txt = disp_txt.toFixed(2);
+          this_elm.find('.disp_measure').find('.measure_num').text(disp_txt);
 
-					//2点とそれを結ぶ線をキャンバス上に描く
-					this_opts.viewer.measure.start_x = (this_obj._tmpInfo.cursor.start.X - this_opts.viewer.position.sx * this_opts.viewer.position.dw / this_opts.viewer.position.ow)*this_opts.viewer.position.zoom;
-					this_opts.viewer.measure.start_y = (this_obj._tmpInfo.cursor.start.Y - this_opts.viewer.position.sy * this_opts.viewer.position.dh / this_opts.viewer.position.oh)*this_opts.viewer.position.zoom;
+          //2点とそれを結ぶ線をキャンバス上に描く
+          this_opts.viewer.measure.start_x = (this_obj._tmpInfo.cursor.start.X - this_opts.viewer.position.sx * this_opts.viewer.position.dw / this_opts.viewer.position.ow)*this_opts.viewer.position.zoom;
+          this_opts.viewer.measure.start_y = (this_obj._tmpInfo.cursor.start.Y - this_opts.viewer.position.sy * this_opts.viewer.position.dh / this_opts.viewer.position.oh)*this_opts.viewer.position.zoom;
 
-					this_opts.viewer.measure.goal_x= (this_obj._tmpInfo.cursor.current.X - this_opts.viewer.position.sx * this_opts.viewer.position.dw / this_opts.viewer.position.ow)*this_opts.viewer.position.zoom;
-					this_opts.viewer.measure.goal_y = (this_obj._tmpInfo.cursor.current.Y - this_opts.viewer.position.sy * this_opts.viewer.position.dh / this_opts.viewer.position.oh)*this_opts.viewer.position.zoom;
+          this_opts.viewer.measure.goal_x= (this_obj._tmpInfo.cursor.current.X - this_opts.viewer.position.sx * this_opts.viewer.position.dw / this_opts.viewer.position.ow)*this_opts.viewer.position.zoom;
+          this_opts.viewer.measure.goal_y = (this_obj._tmpInfo.cursor.current.Y - this_opts.viewer.position.sy * this_opts.viewer.position.dh / this_opts.viewer.position.oh)*this_opts.viewer.position.zoom;
 
-					this_elm.trigger('sync');
-					this_elm.imageViewer('drawMeasure');
-					this_elm.imageViewer('drawGuide');
-					this_elm.find('.disp_measure').addClass('active');
+          this_elm.imageViewer('syncVoxel');
+          this_elm.imageViewer('drawMeasure');
+          this_elm.find('.disp_measure').addClass('active');
 
         }
       }else if (this_opts.control.mode == 'rotate') {
 
-						//回転モード
-					//マウス位置取得(ズーム解除状態でのXY値)
-					var tmp_cursor_x = (e.clientX - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().left) / this_opts.viewer.position.zoom;
-					var tmp_cursor_y = (e.clientY - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().top) / this_opts.viewer.position.zoom;
+            //回転モード
+          //マウス位置取得(ズーム解除状態でのXY値)
+          var tmp_cursor_x = (e.clientX - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().left) / this_opts.viewer.position.zoom;
+          var tmp_cursor_y = (e.clientY - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().top) / this_opts.viewer.position.zoom;
 
-					tmp_cursor_x = tmp_cursor_x * this_opts.viewer.position.ow / this_opts.viewer.position.dw;
-					tmp_cursor_y = tmp_cursor_y * this_opts.viewer.position.oh / this_opts.viewer.position.dh;
+          tmp_cursor_x = tmp_cursor_x * this_opts.viewer.position.ow / this_opts.viewer.position.dw;
+          tmp_cursor_y = tmp_cursor_y * this_opts.viewer.position.oh / this_opts.viewer.position.dh;
 
-					//画像トリミング分の補正
-					this_obj._tmpInfo.cursor.current.X = tmp_cursor_x + this_opts.viewer.position.sx;
-					this_obj._tmpInfo.cursor.current.Y = tmp_cursor_y + this_opts.viewer.position.sy;
+          //画像トリミング分の補正
+          this_obj._tmpInfo.cursor.current.X = tmp_cursor_x + this_opts.viewer.position.sx;
+          this_obj._tmpInfo.cursor.current.Y = tmp_cursor_y + this_opts.viewer.position.sy;
 
-					this_obj._tmpInfo.cursor.current.X = Math.ceil(this_obj._tmpInfo.cursor.current.X);
-					this_obj._tmpInfo.cursor.current.Y = Math.ceil(this_obj._tmpInfo.cursor.current.Y);
+          this_obj._tmpInfo.cursor.current.X = Math.ceil(this_obj._tmpInfo.cursor.current.X);
+          this_obj._tmpInfo.cursor.current.Y = Math.ceil(this_obj._tmpInfo.cursor.current.Y);
 
-					//console.log(this_obj._tmpInfo.cursor.current);
+          //console.log(this_obj._tmpInfo.cursor.current);
 
-					var guide_horizontal = this_obj.getGuide('horizontal');
-					var guide_vertical =  this_obj.getGuide('vertical');
-					
-					if(Math.abs(guide_horizontal.number - this_obj._tmpInfo.cursor.current.X) < 1 ){
-						this_elm.addClass('slide_horizontal');
-					}else{
-						this_elm.removeClass('slide_horizontal');
-					}
-					
-					if(Math.abs(guide_vertical.number - this_obj._tmpInfo.cursor.current.Y) < 2 ){
-						this_elm.addClass('slide_vertical');						
-					}else{
-						this_elm.removeClass('slide_vertical');
-					}
+          var guide_horizontal = this_obj.getGuide('horizontal');
+          var guide_vertical =  this_obj.getGuide('vertical');
 
-					if (this_obj._tmpInfo.cursor.touch_flg == 1) {
-						
-	
-				  }
+          if(Math.abs(guide_horizontal.number - this_obj._tmpInfo.cursor.current.X) < 1 ){
+            this_elm.addClass('slide_horizontal');
+          }else{
+            this_elm.removeClass('slide_horizontal');
+          }
+
+          if(Math.abs(guide_vertical.number - this_obj._tmpInfo.cursor.current.Y) < 2 ){
+            this_elm.addClass('slide_vertical');
+          }else{
+            this_elm.removeClass('slide_vertical');
+          }
+
+          if (this_obj._tmpInfo.cursor.touch_flg == 1) {
+
+
+          }
       }
     }/*_mousemoveFunc*/,
 
@@ -1717,12 +1681,7 @@
         //メモリ解放のため配列消去
         this_obj._tmpInfo.label = new Array(0);
 
-        //同じコンテナを共用するビューアーに対して同期を促す
-        //自分自身も含む
-        var tmp_this_id = this_elm.attr('id');
-        for (var i = this_opts.control.container.data.member.length - 1; i >= 0; i--) {
-          $('#' + this_opts.control.container.data.member[i]).imageViewer('syncVoxel');
-        }
+        this_obj.syncOtherViewers();
 
         //ペンまたは消しゴムで触れられたことを他に伝えるためにイベント発行
         if (typeof this_opts.viewer.draw.activeSeriesId != 'undefined' && typeof the_active_series != 'undefined') {
@@ -1793,7 +1752,7 @@
                   if (this_opts.viewer.window.level.current === tmp_preset_array[i].level && this_opts.viewer.window.level.current === tmp_preset_array[i].level) {
                       selected_opt = tmp_preset_array[i].level + ',' + tmp_preset_array[i].width;
                   }
-                  tmp_elm = tmp_elm + '<option	value="' + tmp_preset_array[i].level + ',' + tmp_preset_array[i].width + '">' + tmp_preset_array[i].label + '</option>';
+                  tmp_elm = tmp_elm + '<option  value="' + tmp_preset_array[i].level + ',' + tmp_preset_array[i].width + '">' + tmp_preset_array[i].label + '</option>';
               }
           }
           this_elm.find('.image_window_preset_select').append(tmp_elm);
@@ -1872,12 +1831,33 @@
         height: this_opts.viewer.position.dh  + 'px'
       });
     },//setCanvasSize
-		
-		
-		
+
+
+
+
+
+    syncOtherViewers: function () {
+
+      //ボクセル情報を取得して現在のキャンバスを更新する
+      var this_obj = this;
+      var this_elm = this.element;
+      var this_opts = this.options;
+
+      //自分自身、同じボクセルを共用するビューアーに対してコンテナとの同期を促す
+      var tmp_this_id = this_elm.attr('id');
+      for (var i = this_opts.control.container.data.member.length - 1; i >= 0; i--) {
+        if(tmp_this_id !== this_opts.control.container.data.member[i]) {
+          $('#' + this_opts.control.container.data.member[i]).imageViewer('syncVoxel');
+        }
+      }
+    },//syncOtherViewers
+
+
+
 
 
     syncVoxel: function () {
+
       //ボクセル情報を取得して現在のキャンバスを更新する
       var this_obj = this;
       var this_elm = this.element;
@@ -1913,20 +1893,20 @@
 
     //temporaly datas
     _tmpInfo: {
-      cursor: {	//移動・拡大時のマウス座標格納用オブジェクト
+      cursor: {  //移動・拡大時のマウス座標格納用オブジェクト
         start: {X: 0, Y: 0},
         current: {X: 0, Y: 0},
         touch_flg: 0, //マウス押下状態を示すフラグ,1が押された状態
-        out_flg: 1	//マウスがキャンバス領域の外に居るかどうかのフラグ。１が外
+        out_flg: 1  //マウスがキャンバス領域の外に居るかどうかのフラグ。１が外
       },
 
-      elementParam: {	//マウスで何かを動かす際の初期値格納用変数
+      elementParam: {  //マウスで何かを動かす際の初期値格納用変数
         start: {X: 0, Y: 0},
         current: {X: 0, Y: 0}
       },
       imgCache: [],
       label: [], //ペンモードでマウスが一度触れてから離れるまでの描画内容の保存用
-      label_buffer: []	//今の自分のorientation,枚数で既に描かれているラベルの情報、重複防止に活用
+      label_buffer: []  //今の自分のorientation,枚数で既に描かれているラベルの情報、重複防止に活用
     }//_tmpInfo
   });
 

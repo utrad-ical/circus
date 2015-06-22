@@ -172,10 +172,8 @@
     _calculateRotatePoint: function(the_angle,the_length,the_x,the_y){
       var return_x=0;
       var return_y=0;
-
       return_x = the_x + the_length*Math.cos(the_angle);
       return_y = the_y - the_length*Math.sin(the_angle);
-
       return [return_x,return_y];
     },
 
@@ -191,7 +189,7 @@
       var this_obj = this;
       var this_elm = this.element;
       var this_opts = this.options;
-      var target_ctx = this_elm.find('.series_image_elm').get(0).getContext('2d');
+      var tmp_ctx = this_elm.find('.series_image_elm').get(0).getContext('2d');
 
       //右端の行き過ぎ防止
       if (this_opts.viewer.position.sx + this_opts.viewer.position.sw > this_opts.viewer.position.ow) {
@@ -213,8 +211,8 @@
 
       var tmp_img_obj = new Image;
       var changeMain = function () {
-        target_ctx.clearRect(0, 0, this_opts.viewer.position.dw, this_opts.viewer.position.dh);
-        target_ctx.drawImage(tmp_img_obj,
+        tmp_ctx.clearRect(0, 0, this_opts.viewer.position.dw, this_opts.viewer.position.dh);
+        tmp_ctx.drawImage(tmp_img_obj,
           this_opts.viewer.position.sx,
           this_opts.viewer.position.sy,
           this_opts.viewer.position.sw,
@@ -268,7 +266,7 @@
         changeMain();
       }
 
-      this_obj._disableImageAlias(target_ctx, false);
+      this_obj._disableImageAlias(tmp_ctx, false);
       this_elm.find('.image_window_controller_wrap').find('.win_lv_label').text(this_opts.viewer.window.level.current);
       this_elm.find('.image_window_controller_wrap').find('.win_width_label').text(this_opts.viewer.window.width.current);
       this_elm.find('.image_window_controller_wrap').find('.image_window_controller').find('.image_window_level').val(this_opts.viewer.window.level.current);
@@ -548,12 +546,12 @@
       //draw horizontal
       if (guide_horizontal.show === true && guide_horizontal.number - this_opts.viewer.position.sx >= 0) {
         var guide_start_x = (guide_horizontal.number - this_opts.viewer.position.sx) * this_opts.viewer.position.dw / this_opts.viewer.position.sw;
-
-        guide_start_x = guide_start_x + 0.5* this_opts.viewer.position.zoom * this_opts.viewer.position.sw / this_opts.viewer.position.dw;
         tmp_ctx.beginPath();
         tmp_ctx.strokeStyle = '#' + guide_horizontal.color;
         tmp_ctx.lineWidth = 1;
         tmp_ctx.moveTo(guide_start_x, 0);
+        tmp_ctx.lineTo(guide_start_x, this_opts.viewer.position.dw*0.4);
+        tmp_ctx.moveTo(guide_start_x, this_opts.viewer.position.dw*0.6);
         tmp_ctx.lineTo(guide_start_x, this_opts.viewer.position.dw);
         tmp_ctx.closePath();
         tmp_ctx.stroke();
@@ -566,6 +564,8 @@
         tmp_ctx.strokeStyle = '#' + guide_vertical.color;
         tmp_ctx.lineWidth = 1;
         tmp_ctx.moveTo(0, guide_start_y);
+        tmp_ctx.lineTo(this_opts.viewer.position.dw*0.4, guide_start_y);
+        tmp_ctx.moveTo(this_opts.viewer.position.dw*0.6, guide_start_y);
         tmp_ctx.lineTo(this_opts.viewer.position.dw, guide_start_y);
         tmp_ctx.closePath();
         tmp_ctx.stroke();

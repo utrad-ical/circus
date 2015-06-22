@@ -1298,7 +1298,6 @@
         });
 
         $(tmp_elm).bind('onNumberChange',function (e,the_orientation,the_number) {
-          var tmp_this_opts = $(this).closest('.img_area').imageViewer('option');
           this_elm.imageViewerController('syncGuide',the_orientation,the_number);
         });
 

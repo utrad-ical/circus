@@ -46,7 +46,8 @@ class SeriesRegisterController extends ApiBaseController {
 
 			$auth_sess_key = Auth::getSession()->getId();
 			$tmp_dir = storage_path('uploads/' . $auth_sess_key);
-			array_map('unlink', glob("$tmp_dir/*")); // clear current contents of the upload folder
+			// clear current contents of the upload folder
+			CommonHelper::deleteOlderTemporaryFiles(storage_path('uploads/'. $auth_sess_key), true);
 
 			foreach ($uploads as $upload) {
 				Log::info('HELLO ' . $upload->getClientOriginalName());

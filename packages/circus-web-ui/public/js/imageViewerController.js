@@ -375,7 +375,6 @@
         //guide move tool
         if (controllerInfo.control.guide == true) {
           tmp_panel_wrap.append( '<li class="toolbar_btn ico_detail_sprite ico_detail_sprite_guide"></li>');
-          tmp_panel_wrap.append( '<li class="toolbar_btn ico_visible_check_wrap"><input type="checkbox" class="guide_visible_check"></li>');
         }
 
         //buttons about drawing
@@ -386,6 +385,11 @@
 
           //eraser button
           pen_elm = pen_elm + '<li class="toolbar_btn ico_detail_sprite ico_detail_sprite_erase"></li>';
+					
+
+         if (controllerInfo.control.bucket.active == true) {
+           tmp_panel_wrap.append('<li class="toolbar_btn ico_detail_sprite ico_detail_sprite_bucket"></li>');
+         }
 
           //boldness select
           if (controllerInfo.control.boldness.active == true) {
@@ -404,10 +408,6 @@
           tmp_panel_wrap.append(pen_elm);
           delete pen_elm;
           delete tmp_panel_wrap;
-        }
-
-        if (controllerInfo.control.bucket.active == true) {
-          tmp_panel_wrap.append('<li class="toolbar_btn ico_detail_sprite ico_detail_sprite_bucket"></li>');
         }
 
         //about label
@@ -439,6 +439,7 @@
     },//create
 
 
+
     createRandomStr: function (insert_array) {
       var n = insert_array[0];  //桁数
       var b = insert_array[1] || '';
@@ -453,8 +454,6 @@
       }
       return s;
     },
-
-
 
 
 

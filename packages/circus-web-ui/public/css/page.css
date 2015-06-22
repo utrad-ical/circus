@@ -50,7 +50,6 @@ image-rendering: -webkit-optimize-speed;
 .img_view_area.mode_draw	.mouse_cover{cursor:crosshair;}
 .img_view_area.mode_image_window	.mouse_cover{cursor:default;}
 .img_view_area .img_wrap.now_move:active{cursor:all-scroll;}
-.img_view_area.mode_view .canvas_guide{display:none;}
 
 .img_view_area .btn_prev,
 .img_view_area .btn_next{width:50px; height:21px; padding:0; line-height:21px; cursor:pointer;}

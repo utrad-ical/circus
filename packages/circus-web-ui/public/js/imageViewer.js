@@ -542,30 +542,31 @@
       var guide_horizontal = this_obj.getGuide('horizontal');
       var guide_vertical =  this_obj.getGuide('vertical');
       var tmp_ctx = this_elm.find('.canvas_main_elm').get(0).getContext('2d');
+			var guide_hall_size = 0.1;
+			var guide_start_x = (guide_horizontal.number - this_opts.viewer.position.sx) * this_opts.viewer.position.dw / this_opts.viewer.position.sw || 0;
+			var guide_start_y = (guide_vertical.number - this_opts.viewer.position.sy) * this_opts.viewer.position.dh / this_opts.viewer.position.sh || 0;
 
       //draw horizontal
       if (guide_horizontal.show === true && guide_horizontal.number - this_opts.viewer.position.sx >= 0) {
-        var guide_start_x = (guide_horizontal.number - this_opts.viewer.position.sx) * this_opts.viewer.position.dw / this_opts.viewer.position.sw;
         tmp_ctx.beginPath();
         tmp_ctx.strokeStyle = '#' + guide_horizontal.color;
         tmp_ctx.lineWidth = 1;
         tmp_ctx.moveTo(guide_start_x, 0);
-        tmp_ctx.lineTo(guide_start_x, this_opts.viewer.position.dw*0.4);
-        tmp_ctx.moveTo(guide_start_x, this_opts.viewer.position.dw*0.6);
-        tmp_ctx.lineTo(guide_start_x, this_opts.viewer.position.dw);
+        tmp_ctx.lineTo(guide_start_x, guide_start_y - this_opts.viewer.position.dh*guide_hall_size);
+        tmp_ctx.moveTo(guide_start_x, guide_start_y + this_opts.viewer.position.dh*guide_hall_size);
+        tmp_ctx.lineTo(guide_start_x, this_opts.viewer.position.dh);
         tmp_ctx.closePath();
         tmp_ctx.stroke();
       }
 
       //draw vertical
       if (guide_vertical.show === true && guide_vertical.number - this_opts.viewer.position.sy >= 0) {
-        var guide_start_y = (guide_vertical.number - this_opts.viewer.position.sy) * this_opts.viewer.position.dh / this_opts.viewer.position.sh;
         tmp_ctx.beginPath();
         tmp_ctx.strokeStyle = '#' + guide_vertical.color;
         tmp_ctx.lineWidth = 1;
         tmp_ctx.moveTo(0, guide_start_y);
-        tmp_ctx.lineTo(this_opts.viewer.position.dw*0.4, guide_start_y);
-        tmp_ctx.moveTo(this_opts.viewer.position.dw*0.6, guide_start_y);
+        tmp_ctx.lineTo(guide_start_x - this_opts.viewer.position.dw*guide_hall_size, guide_start_y);
+        tmp_ctx.moveTo(guide_start_x + this_opts.viewer.position.dw*guide_hall_size, guide_start_y);
         tmp_ctx.lineTo(this_opts.viewer.position.dw, guide_start_y);
         tmp_ctx.closePath();
         tmp_ctx.stroke();

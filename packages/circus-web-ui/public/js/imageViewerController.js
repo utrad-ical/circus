@@ -367,14 +367,15 @@
           tmp_panel_wrap.append('<li class="toolbar_btn ico_detail_sprite ico_detail_sprite_measure"></li>');
         }
 
-        //guide move tool
-        if (controllerInfo.control.guide == true) {
-          tmp_panel_wrap.append( '<li class="toolbar_btn ico_detail_sprite ico_detail_sprite_guide"></li>');
-        }
-
         //rotate tool
         if (controllerInfo.control.rotate == true) {
           tmp_panel_wrap.append( '<li class="toolbar_btn ico_detail_sprite ico_detail_sprite_rotate"></li>');
+        }
+
+        //guide move tool
+        if (controllerInfo.control.guide == true) {
+          tmp_panel_wrap.append( '<li class="toolbar_btn ico_detail_sprite ico_detail_sprite_guide"></li>');
+          tmp_panel_wrap.append( '<li class="toolbar_btn ico_visible_check_wrap"><input type="checkbox" class="guide_visible_check"></li>');
         }
 
         //buttons about drawing

@@ -85,6 +85,8 @@
 #the_panel .add_label:hover{color:#FD3164;}
 .toolbar_btn{text-align:center; border-bottom:none; cursor:pointer; float:left; position:relative;}
 .toolbar_btn.active{background-color:#F90;}
+.toolbar_btn .ico_visible_check_wrap{height:30px; line-height:30px;}
+.toolbar_btn .ico_visible_check_wrap input{display:block; margin:0 auto;}
 
 .img_view_area .img_area{position:relative; width:512px; margin-bottom:20px;}
 .img_view_area .img_wrap{}
@@ -115,7 +117,6 @@
 .mode_window .mouse_cover{cursor:pointer;}
 .img_view_area.mode_image_window .mouse_cover{cursor:default;}
 .img_view_area .img_wrap.now_move:active{cursor:all-scroll;}
-.img_view_area.mode_view .canvas_guide{display:none;}
 
 .img_view_area .btn_prev,
 .img_view_area .btn_next{width:50px; height:21px; padding:0; line-height:21px; cursor:pointer;}

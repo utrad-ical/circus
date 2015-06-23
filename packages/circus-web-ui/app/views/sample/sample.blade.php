@@ -1,9 +1,6 @@
 @extends('common.layout')
 
-@section('page_css')
-@stop
-
-@section('page_js')
+@section('head')
 {{HTML::script('/js/jquery-ui.min.js')}}
 {{HTML::script('/js/jquery.flexforms.js')}}
 <script>

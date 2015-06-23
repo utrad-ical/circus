@@ -115,14 +115,14 @@
       var this_opts = this.options
       var tmp_add_label_obj = {
         id: label_obj.id,
-        position: new Array(0),
+        position: [],
         rgba: label_obj.rgba,
         visible: label_obj.visible
       };
 
       var target_series = this_obj.getSeriesObjectById(series_id);
       if (typeof target_series.label != 'object') {
-        target_series.label = new Array(0);
+        target_series.label = [];
         target_series.activeLabelId = tmp_add_label_obj.id;
       }
 
@@ -718,7 +718,7 @@
       //第一引数: 現在の  No.  orientation  でのXY座標群
 
       var this_opts = this.options;
-      var rtn_array = new Array(0);
+      var rtn_array = [];
       var tmp_orientation = this_opts.viewer.orientation;
       var tmp_number_index = this_opts.viewer.number.current;
 
@@ -1354,16 +1354,11 @@
              this_obj._tmpInfo.label
            );
 
-           this_obj._tmpInfo.label = new Array(0);
+           this_obj._tmpInfo.label = [];
          }else{
            //通常のペン挙動
             //ラベルを描くcanvas要素のオブジェクト
             var tmp_ctx = this_elm.find('.canvas_main_elm').get(0).getContext('2d');
-            //重ね合わせの表現のため一時的に現在の(orientation,奥行)ですでに描かれているラベル座標群を確保する
-            this_obj._tmpInfo.label_buffer = this_opts.control.container.getCurrentLabel(
-              this_opts.viewer.orientation,
-              this_opts.viewer.number.current
-            );
 
             //マウス位置
             this_obj._tmpInfo.elementParam.start.X = this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().left;
@@ -1959,8 +1954,7 @@
         current: {X: 0, Y: 0}
       },
       imgCache: [],
-      label: [], //ペンモードでマウスが一度触れてから離れるまでの描画内容の保存用
-      label_buffer: []  //今の自分のorientation,枚数で既に描かれているラベルの情報、重複防止に活用
+      label: [] //ペンモードでマウスが一度触れてから離れるまでの描画内容の保存用
     }//_tmpInfo
   });
 

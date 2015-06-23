@@ -1,15 +1,13 @@
 @extends('common.layout')
 
-@section('page_css')
+@section('head')
 {{HTML::style('css/page.css')}}
 {{HTML::style('css/jquery-ui.css')}}
 
 <style>
 	#task-watcher { margin: 1em; }
 </style>
-@stop
 
-@section('page_js')
 {{HTML::script('js/jquery-ui.min.js')}}
 <script>
 	var max_file_uploads = {{{$max_file_uploads}}};

@@ -1,6 +1,6 @@
 @extends('common.layout')
 
-@section('page_css')
+@section('head')
 {{HTML::style('css/jquery-ui.css')}}
 {{HTML::style('css/jquery.flexforms.css')}}
 <style>
@@ -20,9 +20,7 @@
 		width: 500px;
 	}
 </style>
-@stop
 
-@section('page_js')
 {{HTML::script('js/jquery-ui.min.js')}}
 {{HTML::script('js/jquery.flexforms.js')}}
 {{HTML::script('js/jquery.multiselect.min.js')}}

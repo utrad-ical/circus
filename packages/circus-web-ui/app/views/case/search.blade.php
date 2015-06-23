@@ -1,12 +1,10 @@
 @extends('common.layout')
 
-@section('page_css')
+@section('head')
 {{HTML::style('css/jquery-ui.css')}}
 {{HTML::style('css/jquery.flexforms.css')}}
 {{HTML::style('css/page.css')}}
-@stop
 
-@section('page_js')
 {{HTML::script('js/jquery-ui.min.js')}}
 {{HTML::script('js/jquery.multiselect.min.js')}}
 {{HTML::script('js/jquery.formserializer.js')}}

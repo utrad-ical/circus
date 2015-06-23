@@ -1,6 +1,6 @@
 @extends('common.layout')
 
-@section('page_css')
+@section('head')
     <style>
         #main_menu {
             margin: 30px;

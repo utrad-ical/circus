@@ -1,10 +1,7 @@
 @extends('common.layout')
 
-@section('page_css')
-@stop
-
 @if(Series::isAccessibleSeries())
-@section('page_js')
+@section('head')
 {{HTML::script('js/jquery.cookie.js')}}
 <script>
 	$(function() {

@@ -1,6 +1,6 @@
 @extends('common.layout')
 
-@section('page_css')
+@section('head')
 <style>
 #admin_menu li {
 	margin-bottom: 8px;

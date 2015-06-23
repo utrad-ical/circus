@@ -1,12 +1,10 @@
 @extends('common.layout')
 
-@section('page_css')
+@section('head')
 {{HTML::style('css/jquery-ui.css')}}
 {{HTML::style('css/page.css')}}
 {{HTML::style('css/page_lib.css')}}
-@stop
 
-@section('page_js')
 {{HTML::script('js/jquery-ui.min.js')}}
 <script>
 	$(function(){

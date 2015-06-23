@@ -1,12 +1,10 @@
 @extends('common.layout')
 
-@section('page_css')
+@section('head')
 {{HTML::style('css/jquery-ui.css')}}
 {{HTML::style('css/page_lib.css')}}
 {{HTML::style('css/jquery.simple-color-picker.css')}}
-@stop
 
-@section('page_js')
 {{HTML::script('js/jquery-ui.min.js')}}
 {{HTML::script('js/jquery.simple-color-picker.js')}}
 {{HTML::script('js/jquery.base64.js')}}

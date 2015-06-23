@@ -507,7 +507,7 @@ id="page_case_detail"
 		{{Form::close()}}
 	</div>
 	<div class="w_500 fl_r">
-	@if(User::hasPrivilege(Group::PERSONAL_INFO_VIEW))
+	@if(Auth::user()->hasPrivilege(Group::PERSONAL_INFO_VIEW))
 		<div class="info_area">
 			<p class="pad_10">
 				{{$case_detail->patientInfoCache['patientName']}} ({{$case_detail->patientInfoCache['patientID']}})

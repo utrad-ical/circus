@@ -17,7 +17,7 @@
 	@endif
 	<table class="result_table common_table">
 		<colgroup>
-		@if(User::hasPrivilege(Group::PERSONAL_INFO_VIEW))
+		@if(Auth::user()->hasPrivilege(Group::PERSONAL_INFO_VIEW))
 			<col width="13%">
 			<col width="10%">
 			<col width="16%">
@@ -35,7 +35,7 @@
 		</colgroup>
 		<tr>
 			<th>projectName</th>
-		@if(User::hasPrivilege(Group::PERSONAL_INFO_VIEW))
+		@if(Auth::user()->hasPrivilege(Group::PERSONAL_INFO_VIEW))
 			<th>patientID</th>
 			<th>patientName</th>
 			<th>age</th>
@@ -49,7 +49,7 @@
 			@foreach ($list as $rec)
 				<tr>
 					<td>{{$rec->project->projectName}}</td>
-				@if(User::hasPrivilege(Group::PERSONAL_INFO_VIEW))
+				@if(Auth::user()->hasPrivilege(Group::PERSONAL_INFO_VIEW))
 					<td>{{$rec->patientInfoCache['patientID']}}</td>
 					<td>{{$rec->patientInfoCache['patientName']}}</td>
 					<td>{{$rec->patientInfoCache['age']}}</td>

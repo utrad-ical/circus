@@ -90,7 +90,7 @@ class Task extends BaseModel
 
 		$task = new Task();
 		$task->taskID = $task_id;
-		$task->owner = Auth::user()->loginID; // TODO: tentative! Replace with userEmail!
+		$task->owner = Auth::user()->userEmail;
 		$task->status = self::WAITING;
 		$task->command = $command;
 		$task->textStatus = 'Starting up the process...';

@@ -25,7 +25,7 @@ voxelContainer.prototype.addHistory = function (series_id, label_id, the_mode, p
     series: series_id,
     label: label_id,
     mode: the_mode,
-    position: new Array(0)
+    position: []
   }; //１筆分の描画オブジェクトの入れ物
 
 
@@ -38,7 +38,7 @@ voxelContainer.prototype.addHistory = function (series_id, label_id, the_mode, p
   }
 
   this_data.history.main.push(tmp_step_obj);
-  this_data.history.redo = new Array(0); //新しい記述をした時点でredoは除去
+  this_data.history.redo = []; //新しい記述をした時点でredoは除去
 
 };//addHistory
 
@@ -57,7 +57,7 @@ voxelContainer.prototype.addLoadedData = function (series_id, label_id, the_mode
     series: series_id,
     label: label_id,
     mode: the_mode,
-    position: new Array(0)
+    position: []
   }; //１筆分の描画オブジェクトの入れ物
 
   var tmp_series = this_obj.getSeriesObjectById(series_id);
@@ -88,7 +88,7 @@ voxelContainer.prototype.addLabel = function (series_id, label_id, position_arra
   var this_obj = this;
   var this_data = this_obj.data;
 
-  var tmp_position_array = new Array(0);
+  var tmp_position_array = [];
   if (typeof position_array == 'object') {
     tmp_position_array = position_array;
   }
@@ -118,7 +118,7 @@ voxelContainer.prototype.addSeries = function (series_id) {
   var this_data = this_obj.data;
   var tmp_series_obj = {
     id: series_id,
-    label: new Array(0)
+    label: []
   }
   this_data.series.push(tmp_series_obj);
 };//addSeries
@@ -170,7 +170,7 @@ voxelContainer.prototype.createSaveData = function(series_id, label_id) {
   var return_obj = {
     size: [0, 0, 0],
     offset: [0, 0, 0],
-    image: new Array(0)
+    image: []
   }
 
   //描かれている者があればそれを反映する
@@ -288,9 +288,9 @@ voxelContainer.prototype.deleteLabelObject = function (series_id, label_id) {
 //実データ格納オブジェクト
 voxelContainer.prototype.data = {
   history: {
-    init: new Array(0),
-    main: new Array(0),
-    redo: new Array(0)
+    init: [],
+    main: [],
+    redo: []
   },
 
   series: [
@@ -308,7 +308,7 @@ voxelContainer.prototype.data = {
      }
      */
   ],
-  member: new Array(0) //共有しているビューアーの要素id一覧
+  member: [] //共有しているビューアーの要素id一覧
 };//data
 
 
@@ -319,7 +319,7 @@ voxelContainer.prototype.getCurrentLabel = function (tmp_orientation, tmp_curren
   //現在のorientation,奥行枚数ですでに描画されているラベルの情報を返す
   var this_obj = this;
   var this_data = this_obj.data;
-  var return_array = new Array(0);
+  var return_array = [];
   for (var j = this_obj.data.series.length - 1; j >= 0; j--) {
     var the_series = this_obj.data.series[j];
     for (var i = the_series.label.length - 1; i >= 0; i--) {
@@ -454,7 +454,7 @@ voxelContainer.prototype.historyBack = function () {
     //全てのラベルを空にする
     for (var i = this_obj.data.series.length - 1; i >= 0; i--) {
       for (var j = this_obj.data.series[i].label.length - 1; j >= 0; j--) {
-        this_obj.data.series[i].label[j].position = new Array(0);
+        this_obj.data.series[i].label[j].position = [];
       }
     }
 
@@ -498,7 +498,7 @@ voxelContainer.prototype.historyRedo = function () {
     //全てのラベルを空にする
     for (var i = this_obj.data.series.length - 1; i >= 0; i--) {
       for (var j = this_obj.data.series[i].label.length - 1; j >= 0; j--) {
-        this_obj.data.series[i].label[j].position = new Array(0);
+        this_obj.data.series[i].label[j].position = [];
       }
     }
 
@@ -563,7 +563,7 @@ voxelContainer.prototype.returnSlice = function (series_id, label_id, tmp_orient
 
   var this_obj = this;
   var this_data = this_obj.data;
-  var return_array = new Array(0);
+  var return_array = [];
   var tmp_target_series = this_obj.getSeriesObjectById(series_id);
   var voxel_x = tmp_target_series.size.X;
 
@@ -634,7 +634,7 @@ voxelContainer.prototype.setSize = function (series_id, the_x, the_y, the_z) {
   if (typeof tmp_series != 'object') {
     tmp_series = new Object();
     tmp_series.id = series_id;
-    tmp_series.label = new Array(0);
+    tmp_series.label = [];
     tmp_series.size = {
       X: the_x,
       Y: the_y,

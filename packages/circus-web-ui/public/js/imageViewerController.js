@@ -553,7 +553,7 @@
         }
       }
 
-      var error_array = new Array(0);
+      var error_array = [];
 
       //前回描かれていたラベル情報の読み込み
       //コントローラのデフォルトのオブジェクトとマージ
@@ -631,7 +631,7 @@
           //シリーズ・ラベル情報を用意
           var init_label_info = {
             activeSeriesId: controllerInfo.activeSeriesId,
-            series: new Array(0)
+            series: []
           }
           init_label_info.series = $.extend(true, init_label_info.series, controllerInfo.series);
 
@@ -1116,7 +1116,7 @@
       var this_elm = this;
       var save_data = new Object();
       save_data.caseId = controllerInfo.caseId;
-      save_data.series = new Array(0);
+      save_data.series = [];
 
       if (controllerInfo.elements.revisionAttribute != '') {
         var revision_attributes = $('#' + controllerInfo.elements.revisionAttribute).propertyeditor('option').value;
@@ -1128,7 +1128,7 @@
           var tmp_the_series = controllerInfo.series[i];
           var tmp_insert_obj = {};
           tmp_insert_obj.id = tmp_the_series.id;
-          tmp_insert_obj.label = new Array(0);
+          tmp_insert_obj.label = [];
 
           if (typeof tmp_the_series.label == 'object') {
 
@@ -1213,7 +1213,7 @@
         var tmp_series_obj = {
           activeLabelId: the_active_label_id,
           id: tmp_series.id,
-          label: new Array(0)
+          label: []
         }
 
         if (typeof tmp_series.label == 'object') {
@@ -1427,7 +1427,7 @@
 
       //ラベルオブジェクトが無いシリーズがあれば初期セットを生成
       if (typeof active_series.label != 'object') {
-        active_series.label = new Array(0);
+        active_series.label = [];
       }
 
       //現在のcontrollerInfoオブジェクトの中身に従い全シリーズ・全ラベルの要素生成

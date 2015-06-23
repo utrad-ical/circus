@@ -542,12 +542,12 @@
       var guide_horizontal = this_obj.getGuide('horizontal');
       var guide_vertical =  this_obj.getGuide('vertical');
       var tmp_ctx = this_elm.find('.canvas_main_elm').get(0).getContext('2d');
-			var guide_hall_size = 0.1;
-			var guide_start_x = (guide_horizontal.number+0.5 - this_opts.viewer.position.sx) * this_opts.viewer.position.dw / this_opts.viewer.position.sw || 0;
-			var guide_start_y = (guide_vertical.number+0.5 - this_opts.viewer.position.sy) * this_opts.viewer.position.dh / this_opts.viewer.position.sh || 0;
-			
-			guide_start_x = Math.floor(guide_start_x);
-			guide_start_y = Math.floor(guide_start_y);
+      var guide_hall_size = 0.1;
+      var guide_start_x = (guide_horizontal.number + 0.5 - this_opts.viewer.position.sx) * this_opts.viewer.position.dw / this_opts.viewer.position.sw || 0;
+      var guide_start_y = (guide_vertical.number + 0.5 - this_opts.viewer.position.sy) * this_opts.viewer.position.dh / this_opts.viewer.position.sh || 0;
+      
+      guide_start_x = Math.floor(guide_start_x);
+      guide_start_y = Math.floor(guide_start_y);
 
       //draw horizontal
       if (guide_horizontal.show === true && guide_horizontal.number - this_opts.viewer.position.sx >= 0) {
@@ -1653,20 +1653,12 @@
       var this_obj = this;
       var this_elm = this.element;
       var this_opts = this.options;
-
+      
       this_obj._tmpInfo.cursor.touch_flg = 0;
-      if (this_opts.control.mode == 'pan') {
-        //手のひらツール
-
-      } else if (this_opts.control.mode == 'pen' || this_opts.control.mode == 'erase') {
-        //ペンまたは消しゴムモード
-        //ボクセル上での座標に変換
-
-
-        //コンテナ書き込み
+      if (this_opts.control.mode === 'pen' || this_opts.control.mode === 'erase') {
+        //exchange positions data to VOXEL 3D
         if (this_obj._tmpInfo.label.length > 0) {
-
-          //ヒストリ
+          //put into history
           var the_active_series = this_obj.getSeriesObjectById(this_opts.viewer.draw.activeSeriesId);
           this_opts.control.container.addHistory(
             this_opts.viewer.draw.activeSeriesId,
@@ -1674,8 +1666,8 @@
             this_opts.control.mode,
             this_obj._tmpInfo.label
           );
-
-          //描画
+      
+          //update voxel buffer
           this_opts.control.container.updateVoxel(
             this_opts.viewer.draw.activeSeriesId,
             the_active_series.activeLabelId,
@@ -1683,17 +1675,18 @@
             this_obj._tmpInfo.label
           );
         }
-
-        //メモリ解放のため配列消去
-        this_obj._tmpInfo.label = new Array(0);
-
+      
+        //clear memory
+        this_obj._tmpInfo.label = [];
         this_obj.syncOtherViewers();
-
-        //ペンまたは消しゴムで触れられたことを他に伝えるためにイベント発行
-        if (typeof this_opts.viewer.draw.activeSeriesId != 'undefined' && typeof the_active_series != 'undefined') {
+      
+        //trigger the Event for some controllers
+        if (typeof this_opts.viewer.draw.activeSeriesId !== 'undefined' && typeof the_active_series !== 'undefined') {
           this_elm.trigger('onWritten', [the_active_series.activeLabelId, this_opts.viewer.draw.activeSeriesId]);
         }
-
+      
+      } else if (this_opts.control.mode === 'bucket') {
+        this_elm.imageViewer('syncVoxel');
       }
     },//_mouseupFunc
 

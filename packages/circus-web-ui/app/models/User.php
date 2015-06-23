@@ -6,8 +6,8 @@ use Illuminate\Auth\UserInterface;
 /**
  * User model
  *
- * @property string userEmail
- * @property string loginID
+ * @property string userEmail The user ID
+ * @property string loginID The login ID
  * @property string password The hashed password
  * @property array groups List of groups to which this user belongs
  * @property array preferences
@@ -24,14 +24,14 @@ class User extends BaseModel implements UserInterface {
 	protected $uniqueFields = ['loginID'];
 
 	/**
-	 * @var Array $privilegs privilegs of User
+	 * @var array privileges of this user
 	 */
-	private static $privilegs;
+	private $privileges;
 
 	/**
-	 * @var Array $domains accessible domains
+	 * @var array list of accessible domains
 	 */
-	private static $domains;
+	private $domains;
 
 	protected $rules = array(
 		'userEmail' 	=>	'required|email',
@@ -53,7 +53,7 @@ class User extends BaseModel implements UserInterface {
 
 	/**
 	 * Validate Check
-	 * @param $data Validate checked
+	 * @param array $data Validate checked
 	 * @return Error content
 	 * @deprecated Do not use. Use selfValidate
 	 */
@@ -67,55 +67,49 @@ class User extends BaseModel implements UserInterface {
 	}
 
 	/**
-	 * 該当の権限を所持しているか判定する
-	 * @param string $priv_name 権限名
-	 * @return boolean 該当の権限の所持有無
+	 * Checks if this user has the specified privilege
+	 * @param string $priv_name The privilege to be checked.
+	 * @return boolean True if this user has the specified privilege.
 	 */
-	public static function hasPrivilege($priv_name) {
+	public function hasPrivilege($priv_name) {
 		if (!$priv_name)
 			return false;
-		//権限情報取得
-		self::fetchPrivilege();
-
-		return array_search($priv_name, self::$privilegs) !== false;
+		$this->fetchPrivileges();
+		return array_search($priv_name, $this->privileges) !== false;
 	}
 
 	/**
-	 * 権限リスト取得
-	 * @return Array 権限リスト
+	 * Fetches the list of all privileges this user has.
+	 * @return array The list.
 	 */
-	public static function fetchPrivilege() {
-		if (!self::$privilegs) {
-			$groups = Auth::user()->groups;
-
+	public function fetchPrivileges() {
+		if (!$this->privileges) {
 			$result = array();
-			foreach ($groups as $group) {
+			foreach ($this->groups as $group) {
 				$data = Group::find($group);
 				foreach ($data->privileges as $priv) {
 					if (array_search($priv, $result) === false)
 						$result[] = $priv;
 				}
 			}
-			self::$privilegs = $result;
+			$this->privileges = array_keys($result);
 		}
-		return self::$privilegs;
+		return $this->privileges;
 	}
 
-	public static function listAccessibleDomains() {
-		if (!self::$domains) {
-			$groups = Auth::user()->groups;
-
+	public function listAccessibleDomains() {
+		if (!$this->domains) {
 			$result = array();
-			foreach ($groups as $group) {
+			foreach ($this->groups as $group) {
 				$data = Group::find($group);
 				foreach ($data->domains as $domain) {
 					if (array_search($domain, $result) === false)
 						$result[] = $domain;
 				}
 			}
-			self::$domains = $result;
+			$this->domains = $result;
 		}
-		return self::$domains;
+		return $this->domains;
 	}
 
 }

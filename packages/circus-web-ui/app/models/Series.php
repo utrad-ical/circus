@@ -102,7 +102,7 @@ class Series extends BaseModel {
 	public static function getSeriesList($search_data, $count = false)
 	{
 		//個人情報閲覧権限有
-		if (User::hasPrivilege(Group::PERSONAL_INFO_VIEW))
+		if (Auth::user()->hasPrivilege(Group::PERSONAL_INFO_VIEW))
 			return self::getPersonalSeriesList($search_data, $count);
 
 		//個人情報閲覧権限なし
@@ -135,7 +135,7 @@ class Series extends BaseModel {
 		});
 
 		//参照可能なドメイン
-		$sql->whereIn('domain', User::listAccessibleDomains());
+		$sql->whereIn('domain', Auth::user()->listAccessibleDomains());
 
 		if ($count)
 			return $sql->count();
@@ -161,7 +161,7 @@ class Series extends BaseModel {
 		});
 
 		//参照可能なドメイン
-		$sql->whereIn('domain', User::listAccessibleDomains());
+		$sql->whereIn('domain', Auth::user()->listAccessibleDomains());
 
 		if ($count)
 			return $sql->count();
@@ -196,9 +196,9 @@ class Series extends BaseModel {
 			->get();
 	}
 
-	public static function isAccessibleSeries($series_id = null) {
-		//参照可能なドメインの一覧を取得
-		$domains = User::listAccessibleDomains();
+	public static function isAccessibleSeries($series_id = null, User $user = null) {
+		if (!$user) $user = Auth::user();
+		$domains = $user->listAccessibleDomains();
 		if (count($domains) == 0)
 			return false;
 

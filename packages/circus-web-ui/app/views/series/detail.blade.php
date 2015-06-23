@@ -271,7 +271,7 @@ id="page_series_detail"
 	<div class=" img_view_area">
 		<div class="img_area fl_l mar_b_20" id="img_area_axial"></div>
 		<div class="img_area fl_r mar_b_20" id="">
-		@if(User::hasPrivilege(Group::PERSONAL_INFO_VIEW))
+		@if(Auth::user()->hasPrivilege(Group::PERSONAL_INFO_VIEW))
 			<div class="info_area">
 				<div class="pad_10">
 					<ul>

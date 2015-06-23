@@ -61,7 +61,7 @@ id="page_case_input"
 					@endif
 				</td>
 			</tr>
-		@if(User::hasPrivilege(Group::PERSONAL_INFO_VIEW))
+		@if(Auth::user()->hasPrivilege(Group::PERSONAL_INFO_VIEW))
 			<tr>
 				<th rowspan="2">Patient</th>
 				<th>ID</th>

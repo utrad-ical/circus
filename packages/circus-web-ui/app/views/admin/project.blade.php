@@ -71,7 +71,7 @@
             });
         });
     </script>
-    @if(!User::hasPrivilege(Group::PROJECT_CREATE))
+    @if(!Auth::user()->hasPrivilege(Group::PROJECT_CREATE))
     <script>
         $(function(){
             $('#new').hide();

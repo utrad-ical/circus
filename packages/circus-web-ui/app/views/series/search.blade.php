@@ -165,7 +165,7 @@ Series Search
 					{{Form::text('seriesDescription', isset($inputs['seriesDescription']) ? $inputs['seriesDescription'] : '', array('class' => 'common_input_text w_150'))}}
 				</td>
 			</tr>
-		@if(User::hasPrivilege(Group::PERSONAL_INFO_VIEW))
+		@if(Auth::user()->hasPrivilege(Group::PERSONAL_INFO_VIEW))
 			<tr>
 				<th>Patient ID</th>
 				<td>
@@ -246,7 +246,7 @@ Series Search
 		<div class="w_max pad_tb_5">
 			<table class="result_table common_table">
 				<colgroup>
-				@if(User::hasPrivilege(Group::PERSONAL_INFO_VIEW))
+				@if(Auth::user()->hasPrivilege(Group::PERSONAL_INFO_VIEW))
 					<col width="10%">
 					<col width="16%">
 					<col width="5%">
@@ -265,7 +265,7 @@ Series Search
 				@endif
 				</colgroup>
 				<tr>
-				@if(User::hasPrivilege(Group::PERSONAL_INFO_VIEW))
+				@if(Auth::user()->hasPrivilege(Group::PERSONAL_INFO_VIEW))
 					<th>patientID</th>
 					<th>patientName</th>
 					<th>age</th>
@@ -279,7 +279,7 @@ Series Search
 				@if (count($list) > 0)
 					@foreach ($list as $rec)
 						<tr>
-						@if(User::hasPrivilege(Group::PERSONAL_INFO_VIEW))
+						@if(Auth::user()->hasPrivilege(Group::PERSONAL_INFO_VIEW))
 							<td>{{$rec->patientInfo['patientID']}}</td>
 							<td>{{$rec->patientInfo['patientName']}}</td>
 							<td>{{$rec->patientInfo['age']}}</td>

@@ -76,10 +76,6 @@
 Preferences
 @stop
 
-@section('page_title')
-Preferences
-@stop
-
 @section('content')
 <div id="messages"></div>
 <div id="editor_container">

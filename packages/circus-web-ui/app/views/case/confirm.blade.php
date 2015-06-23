@@ -20,10 +20,6 @@
 {{{Session::get('mode')}}} Case Confirmation
 @stop
 
-@section('page_title')
-{{{Session::get('mode')}}} Case Confirmation
-@stop
-
 @section('content')
 {{Form::open(['url' => asset('case/complete'), 'method' => 'post'])}}
 	<table class="common_table mar_b_10">

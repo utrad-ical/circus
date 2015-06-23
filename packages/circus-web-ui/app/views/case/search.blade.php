@@ -197,11 +197,6 @@
 Case Search
 @stop
 
-@section('page_title')
-Case Search
-@stop
-
-
 @section('content')
 <div class="search_form_wrap">
 	<h2 class="con_ttl">Search Condition</h2>

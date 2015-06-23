@@ -20,10 +20,6 @@
 {{{$mode}}} Complete
 @stop
 
-@section('page_title')
-{{{$mode}}} Complete
-@stop
-
 @section('content')
 <p class="pad_tb_40 al_c">
 	@if (isset($msg))

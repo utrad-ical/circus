@@ -20,10 +20,6 @@
 {{{Session::get('mode')}}} Case
 @stop
 
-@section('page_title')
-{{{Session::get('mode')}}} Case
-@stop
-
 @section('page_id')
 id="page_case_input"
 @stop

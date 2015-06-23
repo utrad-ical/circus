@@ -239,10 +239,6 @@
 	Series Detail
 @stop
 
-@section('page_title')
-	Series Detail
-@stop
-
 @section('page_id')
 id="page_series_detail"
 @stop

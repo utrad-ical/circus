@@ -84,10 +84,6 @@
 Save Label Sample
 @stop
 
-@section('page_title')
-Save Label Sample
-@stop
-
 @section('content')
 <div class="al_l mar_b_10">
 	{{Form::open(['url' => asset('case/save_label'), 'method' => 'POST', 'files' => true, 'id' => 'frmSample'])}}

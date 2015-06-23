@@ -458,14 +458,6 @@
 @endif
 @stop
 
-@section('page_title')
-@if(isset($error_msg))
-	Case Detail
-@else
-	Case Detail (Revision {{{$revisionNo}}})
-@endif
-@stop
-
 @section('page_id')
 id="page_case_detail"
 @stop

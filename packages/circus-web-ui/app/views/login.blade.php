@@ -4,10 +4,6 @@
 Login
 @stop
 
-@section('page_title')
-Login
-@stop
-
 @section('content')
 {{Form::open(['url' => 'login', 'method' => 'POST', 'id' => 'form_login', 'class' => 'pad_t_40'])}}
 	<div class="w_500 m_auto al_c">

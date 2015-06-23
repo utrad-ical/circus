@@ -4,10 +4,6 @@
 Error
 @stop
 
-@section('page_title')
-Error
-@stop
-
 @section('content')
 <p class="pad_tb_40 al_c">
 	<span class="font_red">

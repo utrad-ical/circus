@@ -1,5 +1,8 @@
 <!DOCTYPE HTML>
 <html>
+@section('page_title')
+@yield('title')
+@stop
 <head>
 	<meta charset="utf-8">
 	<title>

@@ -129,6 +129,8 @@
 
 
 
+
+
     changeActiveSeries: function (active_series_id) {
       var this_elm = this;
       controllerInfo.activeSeriesId = active_series_id;
@@ -158,6 +160,7 @@
 
 
 
+
     changedLabelNum: function() {
       var rtn_num = 0;
       var this_elm = this;
@@ -183,10 +186,10 @@
       var mode_num = -1;
       if(typeof new_mode !== 'undefined'){
         for(var i = 0; i<controllerInfo.mode_array.length; i++){
-            if(controllerInfo.mode_array[i] === new_mode){
-              mode_num = i;
-              controllerInfo.mode = new_mode;
-            }
+					if(controllerInfo.mode_array[i] === new_mode){
+						mode_num = i;
+						controllerInfo.mode = new_mode;
+					}
         }
         if(mode_num == -1){
           return;
@@ -194,7 +197,6 @@
       }else{
         return;
       }
-
 
       var tmp_panel_elm = 'body';
       if (controllerInfo.elements.panel.length > 0) {
@@ -210,6 +212,7 @@
         $(elmId).imageViewer('changeMode', controllerInfo.mode);
       }
     },
+
 
 
 
@@ -230,8 +233,8 @@
               for (var k = 0; k < controllerInfo.viewer.length; k++) {
                 var tmp_viewer = controllerInfo.viewer[k];
                 var viewer_options = $('#' + tmp_viewer.elementId).imageViewer('option', 'viewer');
-                for (var l = 0; l < viewer_options.draw.series.length; l++) {
-                  var viewer_series = viewer_options.draw.series[l];
+                for (var l = 0; l < viewer_options.series.length; l++) {
+                  var viewer_series = viewer_options.series[l];
                   if (viewer_series.activeLabelId == tmp_current_label_id) {
                     viewer_series.activeLabelId = tmp_new_label_id;
                   }
@@ -269,23 +272,24 @@
 
 
 
-    checkUpdateLabel: function() {
-        //ラベルが前回の保存時から変更されたか調査,更新があったラベルにはフラグを立てる
-        var this_elm = this;
-        var tmp_history = controllerInfo.viewer[0].container.data.history.main;
 
-        //ヒストリーを１つずつ見ていく
-        for(var i=0; i<tmp_history.length; i++){
-            var tmp_label = this_elm.imageViewerController('getLabelObjectById',tmp_history[i].label);
-            //更新ポイント
-            if(tmp_label.last_save_point == i+1){
-              //更新なし
-              tmp_label.update_flg = 0;
-            }else{
-                //更新アリ
-                tmp_label.update_flg = 1;
-            }
-        }
+    checkUpdateLabel: function() {
+			//ラベルが前回の保存時から変更されたか調査,更新があったラベルにはフラグを立てる
+			var this_elm = this;
+			var tmp_history = controllerInfo.viewer[0].container.data.history.main;
+
+			//ヒストリーを１つずつ見ていく
+			for(var i=0; i<tmp_history.length; i++){
+				var tmp_label = this_elm.imageViewerController('getLabelObjectById',tmp_history[i].label);
+				//更新ポイント
+				if(tmp_label.last_save_point == i+1){
+					//更新なし
+					tmp_label.update_flg = 0;
+				}else{
+					//更新アリ
+					tmp_label.update_flg = 1;
+				}
+			}
     },
 
 
@@ -522,13 +526,12 @@
     init: function (insert_obj) {
 
       //コントローラ呼び出し時の初期挙動
-
       var this_elm = this;
 
       //呼び出し時に渡されたオプション情報をマージ
       $.extend(true, controllerInfo, insert_obj);
 
-    //初期表示シリーズを決める,明示的に指定が無ければ一番手前のシリーズ
+      //初期表示シリーズを決める,明示的に指定が無ければ一番手前のシリーズ
       var active_series = this_elm.imageViewerController('getSeriesObjectById', [controllerInfo.activeSeriesId]);
       if (typeof active_series != 'object') {
         active_series = controllerInfo.series[0];
@@ -629,12 +632,8 @@
           tmp_h = Math.floor(tmp_h);
 
           //シリーズ・ラベル情報を用意
-          var init_label_info = {
-            activeSeriesId: controllerInfo.activeSeriesId,
-            series: []
-          }
-          init_label_info.series = $.extend(true, init_label_info.series, controllerInfo.series);
-
+          var init_series_info = [];
+          init_series_info = $.extend(true, init_series_info, controllerInfo.series);
 
           var init_guide_info = [
             {show : true, number:0, name : 'axial',color:'0000ff'},
@@ -665,7 +664,8 @@
                 dw: tmp_w,
                 dh: tmp_h
               },
-              'draw': init_label_info,
+							activeSeriesId : controllerInfo.activeSeriesId,
+							series : init_series_info,
               'voxel': {
                 x: active_series.voxel.x,
                 y: active_series.voxel.y,
@@ -675,9 +675,7 @@
                 voxel_z: active_series.voxel.voxel_z,
               }
             },
-            'control': {
-              'container': controllerInfo.viewer[i].container
-            }
+             'container': controllerInfo.viewer[i].container
 
           });//imageViewer
 
@@ -685,7 +683,6 @@
 
       }//viewerRun
       viewerRun();
-
 
       //ビューアー発火後に生成された要素にイベント設置
       this_elm.imageViewerController('setViewerInnerEvents');
@@ -1081,32 +1078,32 @@
           }
         }
       }
-    }/*getLabelObjectById*/,
+    },//getLabelObjectById
 
 
 
 
 
-  resetUpdateFlg : function(){
-    for (var i = 0; i < controllerInfo.series.length; i++) {
-      var tmp_the_controller_series = controllerInfo.series[i];
-      if(typeof tmp_the_controller_series.label == 'object'){
-        for (var j = 0; j < tmp_the_controller_series.label.length; j++) {
-          var tmp_the_label = tmp_the_controller_series.label[j];
-          tmp_the_label.update_flg =0;
+    resetUpdateFlg : function(){
+      for (var i = 0; i < controllerInfo.series.length; i++) {
+        var tmp_the_controller_series = controllerInfo.series[i];
+        if(typeof tmp_the_controller_series.label == 'object'){
+          for (var j = 0; j < tmp_the_controller_series.label.length; j++) {
+            var tmp_the_label = tmp_the_controller_series.label[j];
+            tmp_the_label.update_flg =0;
+          }
         }
       }
-    }
 
-    var this_elm = this;
-    var tmp_history = controllerInfo.viewer[0].container.data.history.main;
+      var this_elm = this;
+      var tmp_history = controllerInfo.viewer[0].container.data.history.main;
 
-    //ヒストリーを１つずつ見ていく
-    for(var i=0; i<tmp_history.length; i++){
-      var tmp_label = this_elm.imageViewerController('getLabelObjectById',tmp_history[i].label);
-      tmp_label.last_save_point = i+1
-    }
-  },
+      //ヒストリーを１つずつ見ていく
+      for(var i=0; i<tmp_history.length; i++){
+        var tmp_label = this_elm.imageViewerController('getLabelObjectById',tmp_history[i].label);
+        tmp_label.last_save_point = i+1
+      }
+    },
 
 
 
@@ -1280,7 +1277,7 @@
 
         //更新が発生した段階でフラグを立てる
         $(tmp_elm).bind('onWritten', function (e, label_id, series_id) {
-          var the_current_point = $('#' + controllerInfo.viewer[0].elementId).imageViewer('option').control.container.data.history.main.length;
+          var the_current_point = $('#' + controllerInfo.viewer[0].elementId).imageViewer('option').container.data.history.main.length;
           var tmp_the_label = this_elm.imageViewerController('getLabelObjectById', label_id, series_id);
         });
 

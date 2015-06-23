@@ -385,7 +385,7 @@
 
           //eraser button
           pen_elm = pen_elm + '<li class="toolbar_btn ico_detail_sprite ico_detail_sprite_erase"></li>';
-					
+          
 
          if (controllerInfo.control.bucket.active == true) {
            tmp_panel_wrap.append('<li class="toolbar_btn ico_detail_sprite ico_detail_sprite_bucket"></li>');
@@ -1299,6 +1299,37 @@
 
         $(tmp_elm).bind('onNumberChange',function (e,the_orientation,the_number) {
           this_elm.imageViewerController('syncGuide',the_orientation,the_number);
+        });
+
+
+        $(tmp_elm).bind('onGuideChange',function (e,the_orientation,number_x,number_y) {
+
+          var i = 0;
+          for (i = 0; i < controllerInfo.viewer.length; i += 1) {
+            var tmp_viewer = controllerInfo.viewer[i];
+            var the_slider = $('#' + tmp_viewer.elementId).find('.slider_elm');
+          
+            if (the_orientation === 'axial') {
+              if (tmp_viewer.orientation === 'sagittal') {
+                the_slider.slider({'value': number_x});
+              } else if (tmp_viewer.orientation === 'coronal') {
+                the_slider.slider({'value': number_y});
+              }
+            } else if (the_orientation === 'coronal') {
+              if (tmp_viewer.orientation === 'sagittal') {
+                the_slider.slider({'value': number_x});
+              } else if (tmp_viewer.orientation === 'axial') {
+                the_slider.slider({'value': number_y});
+              }
+            } else if (the_orientation === 'sagittal') {
+              if (tmp_viewer.orientation === 'coronal') {
+                the_slider.slider({'value': number_x});
+              } else if (tmp_viewer.orientation === 'axial') {
+                the_slider.slider({'value': number_y});
+              }
+            }
+          }
+          
         });
 
       }

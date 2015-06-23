@@ -23,10 +23,6 @@
 Home
 @stop
 
-@section('page_title')
-Home
-@stop
-
 @section('content')
     <div>Welcome to CIRCUS DB</div>
     <nav id="main_menu">

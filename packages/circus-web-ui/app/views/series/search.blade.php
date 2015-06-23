@@ -139,10 +139,6 @@
 Series Search
 @stop
 
-@section('page_title')
-Series Search
-@stop
-
 @section('content')
 @if(Series::isAccessibleSeries())
 {{Form::open(['url' => asset('series/search'), 'id' => 'form_search', 'method' => 'post', 'class' => 'mar_b_20'])}}

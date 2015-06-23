@@ -15,10 +15,6 @@
 Administration
 @stop
 
-@section('page_title')
-Administration
-@stop
-
 @section('content')
 <ul id="admin_menu">
 	<li>{{HTML::link(asset('administration/server_param'), 'Server Configuration', array('class' => 'common_btn'))}}</li>

@@ -31,10 +31,6 @@
 {{{$title}}}
 @stop
 
-@section('page_title')
-{{{$title}}}
-@stop
-
 @section('yield')
 id="page_admin_home"
 @stop

@@ -1479,7 +1479,7 @@
             tmp_elm = tmp_elm + '<input type="text" value="' + tmp_the_label.color + '" class="color_picker color_picker_diff_color" \
             style="background-color:' + tmp_the_label.rgba + ';" readonly id="' + tmp_the_label.id + '_cp">\
             <label class="label_txt">Label ' + i + '</label><label class="alpha_label"><input type="text" value="' + tmp_the_label.alpha + '" class="alpha_change">%</label>\
-            <label class="now_draw_label"></label><label class="delete_label"></label><div class="clear">&nbsp;</div></li>';
+            <label class="ico_detail_sprite ico_now_draw"></label><label class="ico_detail_sprite ico_delete_label"></label><div class="clear">&nbsp;</div></li>';
 
           }
         }
@@ -1553,7 +1553,7 @@
 
 
       //描画対象ラベルの変更
-      tmp_wrap_elm.find('.now_draw_label').click(function () {
+      tmp_wrap_elm.find('.ico_now_draw').click(function () {
         var tmp_series_id = $(this).closest('.series_wrap').attr('id');
         controllerInfo.activeSeriesId = tmp_series_id;
 
@@ -1592,7 +1592,7 @@
       });
 
       //ラベル削除
-      tmp_wrap_elm.find('.delete_label').click(function () {
+      tmp_wrap_elm.find('.ico_delete_label').click(function () {
         var tmp_label_id = $(this).closest('.label_select_cell').attr('id');
         var tmp_series_id = $(this).closest('.series_wrap').attr('id');
         var tmp_txt = confirm('Are you sure delete this label?');

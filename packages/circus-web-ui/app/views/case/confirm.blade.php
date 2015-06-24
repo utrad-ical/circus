@@ -2,8 +2,6 @@
 
 @section('head')
 {{HTML::style('css/jquery-ui.css')}}
-{{HTML::style('css/page.css')}}
-
 {{HTML::script('js/jquery-ui.min.js')}}
 <script>
 	$(function() {

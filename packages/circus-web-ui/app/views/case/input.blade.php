@@ -2,8 +2,7 @@
 
 @section('head')
 {{HTML::style('css/jquery-ui.css')}}
-{{HTML::style('css/page.css')}}
-{{HTML::style('css/page_lib.css')}}
+{{HTML::style('css/imageViewer.css')}}
 
 {{HTML::script('js/jquery-ui.min.js')}}
 <script>

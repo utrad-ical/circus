@@ -3,7 +3,6 @@
 @section('head')
 {{HTML::style('css/jquery-ui.css')}}
 {{HTML::style('css/jquery.flexforms.css')}}
-{{HTML::style('css/page.css')}}
 
 {{HTML::script('js/jquery-ui.min.js')}}
 {{HTML::script('js/jquery.multiselect.min.js')}}

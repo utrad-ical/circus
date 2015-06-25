@@ -34,7 +34,7 @@ class User extends BaseModel implements UserInterface {
 	private $domains;
 
 	protected $rules = array(
-		'userEmail' 	=>	'required|email',
+		'userEmail' 	=>	'required|strict_string',
         'loginID'		=>	'required|alpha_dash|max:20',
 		'password'		=>	'required',
 		'groups'		=>	'required|array_of_group_ids',
@@ -74,7 +74,7 @@ class User extends BaseModel implements UserInterface {
 	public function hasPrivilege($priv_name) {
 		if (!$priv_name)
 			return false;
-		$this->fetchPrivileges();
+		$this->listPrivileges();
 		return array_search($priv_name, $this->privileges) !== false;
 	}
 
@@ -82,7 +82,7 @@ class User extends BaseModel implements UserInterface {
 	 * Fetches the list of all privileges this user has.
 	 * @return array The list.
 	 */
-	public function fetchPrivileges() {
+	public function listPrivileges() {
 		if (!$this->privileges) {
 			$result = array();
 			foreach ($this->groups as $group) {
@@ -110,6 +110,21 @@ class User extends BaseModel implements UserInterface {
 			$this->domains = $result;
 		}
 		return $this->domains;
+	}
+
+	public function listAccessibleProjects($type = Project::AUTH_TYPE_READ, $as_assoc = false)
+	{
+		$project_list = Project::whereIn($type, $this->groups)->get(array('projectID', 'projectName'));
+		$results = array();
+		if ($project_list) {
+			foreach ($project_list as $project) {
+				if ($as_assoc)
+					$results[$project->projectID] = $project->projectName;
+				else
+					$results[] = $project->projectID;
+			}
+		}
+		return $results;
 	}
 
 }

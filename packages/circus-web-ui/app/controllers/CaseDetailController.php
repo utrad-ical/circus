@@ -39,14 +39,14 @@ class CaseDetailController extends BaseController {
 
 			//Authority check
 			//Case viewing rights
-			$auth_view = Project::getProjectList(Project::AUTH_TYPE_VIEW, false);
-			if (!$auth_view || array_search($case_info->projectID, $auth_view) === false) //{
-				throw new Exception('You do not have permission to refer to the appropriate case.');
+			$user = Auth::user();
+			$auth_view = $user->listAccessibleProjects(Project::AUTH_TYPE_READ);
+			if (!$auth_view || array_search($case_info->projectID, $auth_view) === false)
+				throw new Exception('You do not have permission to refer to this case.');
 
 			//Case edit authority
-			$auth_edit = Project::getProjectList(Project::AUTH_TYPE_UPDATE, false);
-			$result['edit_flg'] = ($auth_edit && array_search($case_info->projectID, $auth_edit) !== false) ?
-						true: false;
+			$auth_edit = $user->listAccessibleProjects(Project::AUTH_TYPE_WRITE);
+			$result['edit_flg'] = $auth_edit && array_search($case_info->projectID, $auth_edit) !== false;
 
 			//The shaping Revision information for display
 			$revision_list = array();

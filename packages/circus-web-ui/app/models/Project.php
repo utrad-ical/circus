@@ -2,18 +2,24 @@
 
 /**
  * Model class for projects.
+ *
+ * Project schema:
  * @property number projectID Project ID.
  * @property string projectName Project name.
- * @property array createGroups List of groups which can create new case for this project.
- * @property array viewGroups List of groups which can view cases belonging to this project.
- * @property array updateGroups List of groups which can modify cases belonging to this project.
- * @property array reviewGroups List of groups which can set 'reviewed' status for cases belonging to this project.
- * @property array deleteGroups List of groups which can delete cases from this project.
- * @property array personalInfoViewGroups List of groups which can view personal information.
- * @property string windowPriority Order of which window data takes precedence.
- * @property array windowPresets Array of window presets.
+ * @property string description Project description.
+ * @property string origin Project origin.
+ * @property string url Project schema url.
  * @property array caseAttributesSchema List of attributes for cases.
  * @property array labelAttributesSchema List of attributes for labels.
+ * @property string windowPriority Order of which window data takes precedence.
+ * @property array windowPresets Array of window presets.
+ *
+ * Project privileges:
+ * @property array readGroups List of groups which can view cases belonging to this project.
+ * @property array addSeriesGroups List of groups which can create new case, or add a series to an existing case.
+ * @property array writeGroups List of groups which can modify cases belonging to this project.
+ * @property array moderateGroups List of groups which can delete cases, or do other administrative task of this project.
+ * @property array viewPersonalInfoGroups List of groups which can view personal information belonging to this project.
  */
 class Project extends BaseModel
 {
@@ -28,54 +34,27 @@ class Project extends BaseModel
 	/**
 	 * Case creation role
 	 */
-	const AUTH_TYPE_CREATE = 'createGroups';
+	const AUTH_TYPE_READ = 'readGroups';
 
 	/**
 	 * Case viewing role
 	 */
-	const AUTH_TYPE_VIEW = 'viewGroups';
+	const AUTH_TYPE_ADD_SERIES = 'addSeriesGroups';
 
 	/**
-	 * Case update role
+	 * Case write role
 	 */
-	const AUTH_TYPE_UPDATE = 'updateGroups';
+	const AUTH_TYPE_WRITE = 'writeGroups';
 
 	/**
 	 * Case reviewing role
 	 */
-	const AUTH_TYPE_REVIEW = 'reviewGroups';
+	const AUTH_TYPE_MODERATE = 'moderateGroups';
 
 	/**
-	 * Case deleting role
+	 * View personal info role
 	 */
-	const AUTH_TYPE_DELETE = 'deleteGroups';
-
-	/**
-	 * Case deleting role
-	 */
-	const AUTH_TYPE_PERSONAL_INFO_VIEW = 'personalInfoViewGroups';
-
-	/**
-	 * List all projects where the current user has access with the given authority type.
-	 * @return Project login user operable List
-	 * @param $auth_gp string Authority type
-	 * @param $make_combo bool Combo element generation flag
-	 */
-	public static function getProjectList($auth_gp, $make_combo = false){
-		$project_list = self::whereIn($auth_gp, Auth::user()->groups)
-							->get(array('projectID', 'projectName'));
-		$projects = array();
-		//Combo generation
-		if ($project_list) {
-			foreach ($project_list as $project) {
-				if ($make_combo)
-					$projects[$project->projectID] = $project->projectName;
-				else
-					$projects[] = $project->projectID;
-			}
-		}
-		return $projects;
-	}
+	const AUTH_TYPE_VIEW_PERSONAL_INFO = 'viewPersonalInfoGroups';
 
 	/**
 	 * Returns the project name
@@ -88,14 +67,16 @@ class Project extends BaseModel
 	}
 
 	protected $rules = array(
-		'projectID' => 'required|strict_integer',
+		'projectID' => 'required|strict_string',
 		'projectName' => 'required|strict_string',
-		self::AUTH_TYPE_CREATE => 'required|array_of_group_ids',
-		self::AUTH_TYPE_VIEW => 'required|array_of_group_ids',
-		self::AUTH_TYPE_UPDATE => 'required|array_of_group_ids',
-		self::AUTH_TYPE_REVIEW => 'required|array_of_group_ids',
-		self::AUTH_TYPE_DELETE => 'required|array_of_group_ids',
-		self::AUTH_TYPE_PERSONAL_INFO_VIEW => 'required|array_of_group_ids',
+		'description' => 'strict_string',
+		'origin' => 'strict_string',
+		'url' => 'strict_string',
+		self::AUTH_TYPE_READ => 'array_of_group_ids',
+		self::AUTH_TYPE_ADD_SERIES => 'array_of_group_ids',
+		self::AUTH_TYPE_WRITE => 'array_of_group_ids',
+		self::AUTH_TYPE_MODERATE => 'array_of_group_ids',
+		self::AUTH_TYPE_VIEW_PERSONAL_INFO => 'array_of_group_ids',
 		'windowPriority' => 'required|strict_string',
  		'windowPresets' => 'window_presets',
 		'caseAttributesSchema' => 'strict_array',

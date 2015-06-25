@@ -17,7 +17,7 @@ class UserSeeder extends Seeder
 		Eloquent::unguard();
 
 		User::create(array(
-			'userEmail'     => 'info@circus.co.jp',
+			'userEmail'     => 'circus@circus',
 			'loginID'       => 'circus',
 			'password'      => (new CustomHasher())->make('circus'),
 			'groups'        => [Group::where(['groupName' => 'admin'])->firstOrFail()->groupID],

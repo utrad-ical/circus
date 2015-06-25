@@ -15,6 +15,7 @@
                     primaryKey: 'userEmail',
                     captionKey: 'loginID',
                     listColumns: [
+                        {key: 'userEmail', label: 'user ID (E-mail)'},
                         {key: 'loginID', label: 'Login Name'},
                         {key: 'description', label: 'Description'},
                         {

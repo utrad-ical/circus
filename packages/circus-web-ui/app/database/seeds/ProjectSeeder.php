@@ -17,7 +17,7 @@ class ProjectSeeder extends Seeder
 		Eloquent::unguard();
 
 		Project::create(array(
-			'projectID' => 1,
+			'projectID' => md5(rand()),
 			'projectName' => 'Default',
 			'createGroups' => array(2),
 			'viewGroups' => array(2),

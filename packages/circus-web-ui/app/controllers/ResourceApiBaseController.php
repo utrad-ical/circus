@@ -2,6 +2,8 @@
 
 class ResourceApiBaseController extends ApiBaseController
 {
+	protected $useStringID = false;
+
 	public function index()
 	{
 		$class = $this->targetClass;
@@ -58,14 +60,18 @@ class ResourceApiBaseController extends ApiBaseController
 		return $this;
 	}
 
-	protected function validateAndSave($item)
+	protected function validateAndSave(BaseModel $item)
 	{
-		$errors = null;
-		if ($item->selfValidationFails($errors)) {
-			return $this->errorResponse($errors);
+		$item->save();
+		return $this->succeedResponse();
+	}
+
+	protected function generateNewID() {
+		$class = $this->targetClass;
+		if ($this->$useStringID) {
+			return md5(rand());
 		} else {
-			$item->save();
-			return $this->succeedResponse();
+			return Seq::getIncrementSeq($class::COLLECTION);
 		}
 	}
 
@@ -77,16 +83,28 @@ class ResourceApiBaseController extends ApiBaseController
 	{
 		if (!Request::isJson()) App::abort(400);
 		$newItem = App::make($this->targetClass);
-		$class = $this->targetClass;
-		$newID = Seq::getIncrementSeq($class::COLLECTION);
 		$pk = $newItem->getPrimaryKey();
-		$newItem->$pk = $newID;
+		$newItem->$pk = $this->generateNewID();
 		$data = Input::all();
+		$data->$pk = $this->normalizeID($data->$pk);
+
 		try {
 			return $this->bulkAssignPostedDataToModel($newItem, $data, true)
 				->validateAndSave($newItem);
 		} catch (InvalidModelException $e) {
 			return $this->errorResponse($e->getErrors());
+		}
+	}
+
+	/**
+	 * @param mixed $id The ID
+	 * @return string|int The normalized ID, either as string of as int.
+	 */
+	protected function normalizeID($id_string) {
+		if ($this->useStringID) {
+			return (string)$id_string;
+		} else {
+			return intval($id_string);
 		}
 	}
 
@@ -98,7 +116,7 @@ class ResourceApiBaseController extends ApiBaseController
 	public function show($id)
 	{
 		$class = $this->targetClass;
-		$item = $class::findOrFail(intval($id), $this->fields)->toArray();
+		$item = $class::findOrFail($this->normalizeID($id), $this->fields)->toArray();
 		$this->showFilter($item);
 		return Response::json($item);
 	}
@@ -112,7 +130,7 @@ class ResourceApiBaseController extends ApiBaseController
 	{
 		if (!Request::isJson()) App::abort(400);
 		$class = $this->targetClass;
-		$item = $class::findOrFail(intval($id));
+		$item = $class::findOrFail($this->normalizeID($id));
 		$data = Input::all();
 		try {
 			return $this->bulkAssignPostedDataToModel($item, $data, false)
@@ -136,7 +154,7 @@ class ResourceApiBaseController extends ApiBaseController
 	public function delete($id)
 	{
 		$class = $this->targetClass;
-		$item = $class::findOrFail(intval($id));
+		$item = $class::findOrFail($this->normalizeID($id));
 		$message = '';
 		if ($this->checkDeleteable($item, $message) === true) {
 			$item->delete();

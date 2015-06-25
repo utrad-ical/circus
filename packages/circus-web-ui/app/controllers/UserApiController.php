@@ -7,19 +7,7 @@ class UserApiController extends ResourceApiBaseController
 	protected $settable = ['userEmail', 'loginID', 'groups', 'description', 'loginEnabled', 'preferences'];
 
 	protected $tmp_password = null;
-
-	/**
-	 * Returns one resource item.
-	 * @param $id string ID of the view target
-	 * @return \Illuminate\Http\JsonResponse
-	 */
-	public function show($id)
-	{
-		$class = $this->targetClass;
-		$item = $class::findOrFail($id, $this->fields)->toArray();
-		$this->showFilter($item);
-		return Response::json($item);
-	}
+	protected $useStringID = true;
 
 	protected function showFilter(array &$item)
 	{
@@ -53,22 +41,4 @@ class UserApiController extends ResourceApiBaseController
 		}
 	}
 
-	/**
-	 * Updates current model.
-	 * @param $id string ID of the edit target.
-	 * @return \Illuminate\Http\JsonResponse
-	 */
-	public function update($id)
-	{
-		if (!Request::isJson()) App::abort(400);
-		$class = $this->targetClass;
-		$item = $class::findOrFail($id);
-		$data = Input::all();
-		try {
-			return $this->bulkAssignPostedDataToModel($item, $data, false)
-				->validateAndSave($item);
-		} catch (InvalidModelException $e) {
-			return $this->errorResponse($e->getErrors());
-		}
-	}
 }

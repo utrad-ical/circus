@@ -1,11 +1,9 @@
 <?php
 
-use Illuminate\Console\Command;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputArgument;
 
-class ExportVolume extends Command {
-
+class ExportVolume extends TaskCommand {
 	/**
 	 * The console command name.
 	 *
@@ -56,6 +54,7 @@ class ExportVolume extends Command {
 		} else {
 			$this->exportSeriesData();
 		}
+		$this->markTaskAsFinished();
 	}
 
 	protected function exportCaseData()
@@ -112,6 +111,7 @@ class ExportVolume extends Command {
 			return false;
 		}
 
+		$counter = 1;
 		try {
 			// Export original volume
 			$ex = new \VolumeExporter\Exporter();
@@ -120,6 +120,8 @@ class ExportVolume extends Command {
 				$series_data['images'],
 				$this->argument('output-path') . "/original.raw",
 				$this->option('without-original'));
+			$this->updateTaskProgress($counter, 0, "Exporting in progress. $counter files are processed.");
+			$counter++;
 
 			// Export case_attributes.json
 			if (array_key_exists('attributes', $revision_data)) {
@@ -129,6 +131,8 @@ class ExportVolume extends Command {
 					'revision' => $revision_index)
 					+ $revision_data['attributes'];
 				file_put_contents($file_name, json_encode($attributes));
+				$this->updateTaskProgress($counter, 0, "Exporting in progress. $counter files are processed.");
+				$counter++;
 			}
 
 			// Export label volume
@@ -154,6 +158,8 @@ class ExportVolume extends Command {
 					$this->argument('output-path'),
 					$label_info,
 					$this->option('combined'));
+				$this->updateTaskProgress($counter, 0, "Exporting in progress. $counter files are processed.");
+				$counter++;
 
 				// Export label_attributes.json
 				$file_name = $this->argument('output-path') . "/label_attributes.json";
@@ -172,6 +178,8 @@ class ExportVolume extends Command {
 					$series_index,
 					$revision_index);
 				$ex->compressFilesToZip($this->argument('output-path'), $file_name);
+				$this->updateTaskProgress($counter, 0, "Exporting in progress. $counter files are processed.");
+				$counter++;
 			}
 		} catch (Exception $e) {
 			\Log::info($e->getMessage());
@@ -191,6 +199,7 @@ class ExportVolume extends Command {
 		}
 
 		try {
+			$counter = 1;
 			// Export original volume
 			$ex = new \VolumeExporter\Exporter();
 			$ex->exportOriginalVolume(
@@ -198,6 +207,8 @@ class ExportVolume extends Command {
 				$series_data['images'],
 				$this->argument('output-path') . "/" . $series_data['seriesUID'] . ".raw",
 				$this->option('without-original'));
+				$this->updateTaskProgress($counter, 0, "Exporting in progress. $counter files are processed.");
+				$counter++;
 
 			// Compress all exported file to ZIP file
 			if ($this->option('compress')) {
@@ -205,6 +216,8 @@ class ExportVolume extends Command {
 					$this->argument('output-path'),
 					$series_data['seriesUID']);
 				$ex->compressFilesToZip($this->argument('output-path'), $file_name);
+				$this->updateTaskProgress($counter, 0, "Exporting in progress. $counter files are processed.");
+				$counter++;
 			}
 		} catch (Exception $e) {
 			\Log::info($e->getMessage());

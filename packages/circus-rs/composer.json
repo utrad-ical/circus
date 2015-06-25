@@ -12,7 +12,7 @@
     }
   ],
   "scripts": {
-    "post-install-cmd": ["gulp"],
-    "post-update-cmd": ["gulp"]
+    "post-install-cmd": ["npm install", "gulp"],
+    "post-update-cmd": ["npm install", "gulp"]
   }
 }

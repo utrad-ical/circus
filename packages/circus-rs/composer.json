@@ -1,0 +1,18 @@
+{
+  "name": "utrad-ical/circus-rs",
+  "description": "DICOM viewer",
+  "version": "0.0.2",
+  "keywords": ["DICOM"],
+  "authors": [
+    {
+      "name": "Soichiro Miki"
+    },
+    {
+      "name": "Yukihiro Nomura"
+    }
+  ],
+  "scripts": {
+    "post-install-cmd": ["gulp"],
+    "post-update-cmd": ["gulp"]
+  }
+}

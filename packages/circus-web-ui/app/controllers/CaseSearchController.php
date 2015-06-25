@@ -10,7 +10,7 @@ class CaseSearchController extends BaseController {
 		//Initial setting
 		$search_flg = false;
 		$result = array();
-		$result['project_list'] = Project::getProjectList(Project::AUTH_TYPE_VIEW, true);
+		$result['project_list'] = Auth::user()->listAccessibleProjects(Project::AUTH_TYPE_READ, true);
 
 		//Input value acquisition
 		$inputs = Input::all();

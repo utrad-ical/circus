@@ -116,7 +116,7 @@ class ClinicalCase extends BaseModel {
 								$projects[] = intval($prj);
 							}
     					} else {
-    						$projects = Project::getProjectList(Project::AUTH_TYPE_VIEW);
+    						$projects = Auth::user()->listAccessibleProjects(Project::AUTH_TYPE_READ);
     					}
     					$query->whereIn('projectID', $projects);
 

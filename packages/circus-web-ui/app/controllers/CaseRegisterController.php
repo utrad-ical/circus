@@ -10,7 +10,7 @@ class CaseRegisterController extends BaseController {
 		//Initial setting
 		$result = array();
 		$result['url'] = '/case/input';
-		$result['project_list'] = Project::getProjectList(Project::AUTH_TYPE_CREATE, true);
+		$result['project_list'] = Auth::user()->listAccessibleProjects(Project::AUTH_TYPE_CREATE, true);
 
 		$series_list = array();
 		$error_msg = '';
@@ -193,7 +193,7 @@ class CaseRegisterController extends BaseController {
 	 */
 	function errorConfirmFinish($errorMsg, $result, $mode) {
 		//Process at the time of Validate error
-		$result['project_list'] = Project::getProjectList(Project::AUTH_TYPE_CREATE, true);
+		$result['project_list'] = Auth::user()->listAccessibleProjects(Project::AUTH_TYPE_CREATE, true);
 		if (is_array($errorMsg))
 			$result['errors'] = $errorMsg;
 		else

@@ -70,8 +70,6 @@ class SeriesRegisterController extends ApiBaseController {
 				throw new Exception('Failed to invoke image importer process.');
 			}
 
-			Session::forget('edit_case_id'); // TODO: Do we really need this?
-
 			return Response::json(array(
 				'result' => true,
 				'taskID' => $task->taskID

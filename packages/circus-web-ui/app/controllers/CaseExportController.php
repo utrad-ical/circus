@@ -31,27 +31,34 @@ class CaseExportController extends BaseController {
 			$series_index = $this->getSeriesIndex($inputs['caseID'], $inputs['revisionNo'], $inputs['seriesUID']);
 
 			//command execution
+			$cmd_str = ' case '.$inputs['caseID'].' '.$tmp_dir_path;
+
 			$cmd_ary = array(
-						'mode' => 'case',
-						'output-path' => $tmp_dir_path,
-						'targetID' => $inputs['caseID'],
-						'--series_index' => $series_index,
-						'--revision' => $inputs['revisionNo'],
-						'--compress' => true
-					);
+				'--series_index' => $series_index,
+				'--revision' => $inputs['revisionNo']
+			);
+
 			//create label map
 			if (intval($inputs['data_type']) !== ClinicalCase::DATA_TYPE_ORIGINAL)
 				$cmd_ary['--map'] = $this->createMap($inputs['labels']);
 
+			foreach ($cmd_ary as $cmd_key => $cmd_val) {
+				$cmd_str .= ' '.$cmd_key.'='.$cmd_val;
+			}
+
+			$cmd_str .= ' --compress';
 			if ($data_label)
-				$cmd_ary[$data_label] = true;
+				$cmd_str .= ' '.$data_label;
 			if ($output_label)
-				$cmd_ary[$output_label] = true;
+				$cmd_str .= ' '.$output_label;
 
 			Log::debug('command params::');
-			Log::debug($cmd_ary);
+			Log::debug($cmd_str);
 
-			Artisan::call('image:export-volume',$cmd_ary);
+			$task = Task::startNewTask("image:export-volume " .$cmd_str);
+			if (!$task) {
+				throw new Exception('Failed to invoke export process.');
+			}
 
 			//download zip file
 			$zip_file_name = $inputs['caseID'].'_series'.$series_index.'_revision'.$inputs['revisionNo'].'.zip';
@@ -65,13 +72,20 @@ class CaseExportController extends BaseController {
 				'file_name' => $zip_file_name,
 				'dir_name' => $tmp_dir
 			);
-			return Response::json(["status" => "OK", "response" => $res]);
+			return Response::json(array(
+				'result' => true,
+				'taskID' => $task->taskID,
+				'response' => $res
+			));
 		} catch (Exception $e) {
 			Log::debug($e);
 
 			if (isset($tmp_dir_path))
 				File::deleteDirectory($tmp_dir_path);
-			return Response::json(["status" => "NG", "message" => $e->getMessage()]);
+			return Response::json(
+				array('result' => false, 'errorMessage' => $e->getMessage()),
+				400
+			);
 		}
 	}
 

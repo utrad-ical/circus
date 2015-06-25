@@ -28,17 +28,15 @@ class SeriesExportController extends BaseController {
 			CommonHelper::deleteOlderTemporaryFiles(storage_path('cache'), true, '-1 day');
 
 			//command execution
-			$cmd_ary = array(
-						'mode' => 'series',
-						'output-path' => $tmp_dir_path,
-						'targetID' => $inputs['seriesUID'],
-						'--compress' => true
-					);
-
+			$cmd_str = ' series '.$inputs['seriesUID']. ' '.$tmp_dir_path. ' --compress';
 			Log::debug('command params::');
-			Log::debug($cmd_ary);
+			Log::debug($cmd_str);
 
-			Artisan::call('image:export-volume',$cmd_ary);
+			//Artisan::call('image:export-volume',$cmd_ary);
+			$task = Task::startNewTask("image:export-volume " .$cmd_str);
+			if (!$task) {
+				throw new Exception('Failed to invoke export process.');
+			}
 
 			//download zip file
 			$zip_file_name = $inputs['seriesUID'].'.zip';
@@ -52,13 +50,20 @@ class SeriesExportController extends BaseController {
 				'file_name' => $zip_file_name,
 				'dir_name' => $tmp_dir
 			);
-			return Response::json(["status" => "OK", "response" => $res]);
+			return Response::json(array(
+				'result' => true,
+				'taskID' => $task->taskID,
+				'response' => $res
+			));
 		} catch (Exception $e) {
-			Log::debug($e);
+			Log::error($e);
 
 			if (isset($tmp_dir_path))
 				File::deleteDirectory($tmp_dir_path);
-			return Response::json(["status" => "NG", "message" => $e->getMessage()]);
+			return Response::json(
+				array('result' => false, 'errorMessage' => $e->getMessage()),
+				400
+			);
 		}
 	}
 

@@ -1,22 +1,22 @@
 {
     "_readme": [
         "This file locks the dependencies of your project to a known state",
-        "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "e7afdda60f5919f145e0cc348eced8a1",
+    "hash": "3a2d5dd6c06ff2dd5f82b072e5f1771f",
     "packages": [
         {
             "name": "classpreloader/classpreloader",
             "version": "1.0.2",
             "source": {
                 "type": "git",
-                "url": "https://github.com/mtdowling/ClassPreloader.git",
+                "url": "https://github.com/ClassPreloader/ClassPreloader.git",
                 "reference": "2c9f3bcbab329570c57339895bd11b5dd3b00877"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/mtdowling/ClassPreloader/zipball/2c9f3bcbab329570c57339895bd11b5dd3b00877",
+                "url": "https://api.github.com/repos/ClassPreloader/ClassPreloader/zipball/2c9f3bcbab329570c57339895bd11b5dd3b00877",
                 "reference": "2c9f3bcbab329570c57339895bd11b5dd3b00877",
                 "shasum": ""
             },
@@ -58,12 +58,12 @@
             "version": "v1.0.8",
             "source": {
                 "type": "git",
-                "url": "https://github.com/d11wtq/boris.git",
+                "url": "https://github.com/borisrepl/boris.git",
                 "reference": "125dd4e5752639af7678a22ea597115646d89c6e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/d11wtq/boris/zipball/125dd4e5752639af7678a22ea597115646d89c6e",
+                "url": "https://api.github.com/repos/borisrepl/boris/zipball/125dd4e5752639af7678a22ea597115646d89c6e",
                 "reference": "125dd4e5752639af7678a22ea597115646d89c6e",
                 "shasum": ""
             },
@@ -1691,6 +1691,40 @@
             "description": "Symfony Translation Component",
             "homepage": "http://symfony.com",
             "time": "2014-10-26 07:41:27"
+        },
+        {
+            "name": "utrad-ical/circus-rs",
+            "version": "dev-master",
+            "source": {
+                "type": "hg",
+                "url": "https://bitbucket.org/ical/circus_rs_dicom_server",
+                "reference": "920f371fd113d71fb0b1371bf7504eb6da4030e2"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://bitbucket.org/ical/circus_rs_dicom_server/get/920f371fd113d71fb0b1371bf7504eb6da4030e2.zip",
+                "reference": "920f371fd113d71fb0b1371bf7504eb6da4030e2",
+                "shasum": ""
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "CIRCUS_RS\\": "install-php/"
+                }
+            },
+            "authors": [
+                {
+                    "name": "Soichiro Miki"
+                },
+                {
+                    "name": "Yukihiro Nomura"
+                }
+            ],
+            "description": "DICOM viewer",
+            "keywords": [
+                "DICOM"
+            ],
+            "time": "2015-06-25 09:14:04"
         }
     ],
     "packages-dev": [
@@ -2653,7 +2687,9 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [],
+    "stability-flags": {
+        "utrad-ical/circus-rs": 20
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": [],

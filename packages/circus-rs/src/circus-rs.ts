@@ -14,6 +14,9 @@ var exec = require('child_process').exec;
 var Png = require('png').Png;
 var argv = require('minimist')(process.argv.slice(2));
 
+var configFile = typeof argv.config === 'string' ? argv.config : '../config';
+var config: any = require(configFile);
+
 import log4js = require('log4js');
 var logger = prepareLogger();
 
@@ -24,9 +27,6 @@ logger.info('CIRCUS RS is starting up...');
 
 // include config modules
 logger.info('Loading configuration files');
-
-var configFile = typeof argv.config === 'string' ? argv.config : '../config';
-var config: any = require(configFile);
 
 var resolverClass = require('./' + config.pathResolver.module);
 var resolver = new resolverClass(config.pathResolver.options);
@@ -193,15 +193,18 @@ function readData(series, image, callback)
 
 /////////////////////////////////////////////
 
-function prepareLogger(): log4js.Logger
-{
-    log4js.configure({
-        appenders: [
-            { type: 'console' },
-            { type: 'dateFile', filename: 'logs/debug.log', pattern: '-yyyyMMdd.log' }
-        ]
-    });
-    return log4js.getLogger();
+function prepareLogger(): log4js.Logger {
+  var logConfig: any[] = null;
+  if ('logs' in config && Array.isArray(config.logs)) {
+    logConfig = config.logs;
+  } else {
+    logConfig = [
+      {type: 'console'},
+      {type: 'dateFile', filename: 'logs/debug.log', pattern: '-yyyyMMdd.log'}
+    ];
+  }
+  log4js.configure({appenders: logConfig});
+  return log4js.getLogger();
 }
 
 function doRequest(req, res)

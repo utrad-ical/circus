@@ -17,6 +17,13 @@ var config = {
 	},
 	*/
 
+	// log configuration. See nomiddlename/log4js-node.
+	logs: [{
+		type: 'datefile',
+		filename: __dirname + 'logs/debug.log',
+		pattern: '-yyyyMMdd.log'
+	}],
+
 	// path for DICOM data dumper tool.
 	dumper: 'C:\\CIRCUS-DB\\circus_db_web_ui\\app\\bin\\dicom_voxel_dump.exe',
 

@@ -11,8 +11,7 @@
       "name": "Yukihiro Nomura"
     }
   ],
-  "scripts": {
-    "post-install-cmd": ["npm install", "gulp"],
-    "post-update-cmd": ["npm install", "gulp"]
+  "autoload": {
+    "psr-4": { "CIRCUS_RS\\": "install-php/" }
   }
 }

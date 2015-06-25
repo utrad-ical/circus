@@ -24,16 +24,17 @@
                     captionKey: 'projectName',
                     listColumns: [
                         {key: 'projectID', label: 'Project ID'},
-                        {key: 'projectName', label: 'Project Name'}
+                        {key: 'projectName', label: 'Project Name'},
+                        {key: 'description', label: 'Description'}
                     ],
                     form: [
                         {caption: 'Project Name', key: 'projectName', type: 'text'},
-                        groupProperty('viewGroups', 'View Groups'),
-                        groupProperty('createGroups', 'Create Groups'),
-                        groupProperty('updateGroups', 'Update Groups'),
-                        groupProperty('reviewGroups', 'Review Groups'),
-                        groupProperty('deleteGroups', 'Delete Groups'),
-                        groupProperty('personalInfoViewGroups', 'Personal Info View Groups'),
+                        {caption: 'Description', key: 'description', type: 'text'},
+                        groupProperty('readGroups', 'Read Groups'),
+                        groupProperty('addSeriesGroups', 'Add Series Groups'),
+                        groupProperty('writeGroups', 'Write Groups'),
+                        groupProperty('moderateGroups', 'Moderate Groups'),
+                        groupProperty('viewPersonalInfoGroups', 'View Personal Info Groups'),
                         {
                             caption: 'Window Priority',
                             key: 'windowPriority',

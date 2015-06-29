@@ -45,6 +45,28 @@ class ServerParamApiController extends ResourceApiBaseController {
 			return $this->bulkAssignPostedDataToModel($item, $data, false)
 				->validateAndSave($item);
 		} catch (InvalidModelException $e) {
+			Log::debug($e);
+			return $this->errorResponse($e->getErrors());
+		}
+	}
+
+	/**
+	 * Saves new model.
+	 * @return \Illuminate\Http\JsonResponse
+	 */
+	public function store()
+	{
+		if (!Request::isJson()) App::abort(400);
+		$newItem = App::make($this->targetClass);
+		$pk = $newItem->getPrimaryKey();
+		Log::debug($pk);
+		$data = Input::all();
+		$newItem->$pk = $this->normalizeID($data[$pk]);
+
+		try {
+			return $this->bulkAssignPostedDataToModel($newItem, $data, true)
+				->validateAndSave($newItem);
+		} catch (InvalidModelException $e) {
 			return $this->errorResponse($e->getErrors());
 		}
 	}

@@ -90,6 +90,24 @@ Route::group(['before' => 'auth'], function() {
 	// Preference
 	$staticView('preference');
 	Route::resource('api/preference', 'UserPreferenceApiController');
+
+	// Host static CIRCUS RS files in the vendor directory
+	$rsHost = function($url, $file) {
+		$ext = File::extension($file);
+		$mime_list = ['js' => 'text/javascript', 'css' => 'text/css'];
+		$mime = $mime_list[$ext];
+		Route::any($url, function() use($file, $mime) {
+			return Response::make(
+				File::get(base_path('vendor/utrad-ical/circus-rs/build/browser') . '/' . $file),
+				200,
+				['Content-Type' => $mime]
+			);
+		});
+	};
+	$rsHost('js/imageViewer.js', 'imageViewer.js');
+	$rsHost('js/voxelContainer.js', 'voxelContainer.js');
+	$rsHost('css/imageViewer.css', 'imageViewer.css');
+
 });
 
 //test用

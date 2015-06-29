@@ -79,6 +79,9 @@ Route::group(['before' => 'auth'], function() {
 	Route::resource('api/project', 'ProjectApiController');
 	Route::resource('api/serverParam', 'ServerParamApiController');
 	Route::put('api/storage/setactive/{storageID}', 'StorageApiController@setActive');
+	Route::get('api/server/status', 'ServerControllerController@status');
+
+	$staticView('administration/server', 'admin.server');
 
 	// Task
 	Route::get('task', 'TaskController@index');

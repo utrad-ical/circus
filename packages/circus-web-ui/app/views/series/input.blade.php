@@ -1,7 +1,6 @@
 @extends('common.layout')
 
 @section('head')
-{{HTML::style('css/imageViewer.css')}}
 {{HTML::style('css/jquery-ui.css')}}
 
 <style>

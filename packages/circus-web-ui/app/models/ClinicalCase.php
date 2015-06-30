@@ -50,7 +50,7 @@ class ClinicalCase extends BaseModel {
 		'patientInfoCache.weight'		=>	'strict_numeric',
 		'latestRevision'				=>	'strict_array',
 		'latestRevision.date'			=>	'mongodate',
-		'latestRevision.creator'		=>	'strict_string|email',
+		'latestRevision.creator'		=>	'strict_string',
 		'latestRevision.description'	=>	'strict_string',
 		'latestRevision.attributes'		=>	'strict_array',
 		'latestRevision.status'			=>	'strict_string',

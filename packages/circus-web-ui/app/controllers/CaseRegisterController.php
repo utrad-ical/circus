@@ -10,7 +10,7 @@ class CaseRegisterController extends BaseController {
 		//Initial setting
 		$result = array();
 		$result['url'] = '/case/input';
-		$result['project_list'] = Auth::user()->listAccessibleProjects(Project::AUTH_TYPE_CREATE, true);
+		$result['project_list'] = Auth::user()->listAccessibleProjects(Project::AUTH_TYPE_ADD_SERIES, true);
 
 		$series_list = array();
 		$error_msg = '';
@@ -119,7 +119,7 @@ class CaseRegisterController extends BaseController {
 			$case_info = Session::get('case_input');
 			$mode = Session::get('mode');
 
-			$case_info['projectID'] = intval($inputs['projectID']);
+			$case_info['projectID'] = $inputs['projectID'];
 			//Set of series
 			$case_info['seriesUID'] = $inputs['series'];
 
@@ -131,7 +131,7 @@ class CaseRegisterController extends BaseController {
 			//Save the input value to the session
 			Session::put('case_input', $case_info);
 
-			$case_info['projectName'] = Project::getProjectName($inputs['projectID']);
+			$case_info['projectName'] = Project::getProjectName($inputs['projectID']); // TODO: Fix
 
 			//Validate check for object creation
 			$case_obj = $caseID ?
@@ -141,10 +141,9 @@ class CaseRegisterController extends BaseController {
 			//Set the value for the Validate check
 			$case_obj->caseID = $case_info['caseID'];
 			$case_obj->incrementalID = 1; // This can be a dummy number only for validation
-			$case_obj->projectID = intval($case_info['projectID']);
+			$case_obj->projectID = $case_info['projectID'];
 			$case_obj->patientInfoCache = $this->setPatientInfo($case_info['patientInfo']);
 			$case_obj->domains = $case_info['domains'];
-
 
 			//ValidateCheck
 			$case_obj->selfValidationFails($errors);
@@ -193,7 +192,7 @@ class CaseRegisterController extends BaseController {
 	 */
 	function errorConfirmFinish($errorMsg, $result, $mode) {
 		//Process at the time of Validate error
-		$result['project_list'] = Auth::user()->listAccessibleProjects(Project::AUTH_TYPE_CREATE, true);
+		$result['project_list'] = Auth::user()->listAccessibleProjects(Project::AUTH_TYPE_ADD_SERIES, true);
 		if (is_array($errorMsg))
 			$result['errors'] = $errorMsg;
 		else

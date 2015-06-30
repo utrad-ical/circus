@@ -39,7 +39,7 @@ class ClinicalCase extends BaseModel {
 	protected $rules = array(
 		'caseID'						=>	'required',
 		'incrementalID'					=>	'required|strict_integer',
-		'projectID'						=>	'required|strict_integer',
+		'projectID'						=>	'required|strict_string',
 		'patientInfoCache'				=>	'strict_array',
 		'patientInfoCache.patientID'	=>	'strict_string',
 		'patientInfoCache.patientName'	=>	'strict_string',

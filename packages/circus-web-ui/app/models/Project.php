@@ -62,7 +62,7 @@ class Project extends BaseModel
 	 * @return string Project name
 	 */
 	public static function getProjectName($projectID) {
-		$project = self::where('projectID', '=', intval($projectID))->get(array('projectName'));
+		$project = self::where('projectID', '=', $projectID)->get(array('projectName'));
 		return $project ? $project[0]->projectName : '';
 	}
 

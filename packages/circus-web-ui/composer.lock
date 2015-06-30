@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "3a2d5dd6c06ff2dd5f82b072e5f1771f",
+    "hash": "f9e93762ba78165ef62fae2dc1164bfa",
     "packages": [
         {
             "name": "classpreloader/classpreloader",
@@ -1696,8 +1696,8 @@
             "name": "utrad-ical/circus-rs",
             "version": "dev-master",
             "source": {
-                "type": "hg",
-                "url": "https://bitbucket.org/ical/circus_rs_dicom_server",
+                "type": "git",
+                "url": "https://bitbucket.org/ical/circus_rs_dicom_server.git",
                 "reference": "cebad83e4f113607f334a406cbb7a78199d65152"
             },
             "dist": {

@@ -74,6 +74,8 @@ class CaseSearchController extends BaseController {
 			$detail_search['sort'] = 'updateTime';
 			$detail_search['order_by'] = 'desc';
 			Session::put('case.search', $detail_search);
+		} else if (array_key_exists('btnBack', $inputs) === false) {
+			Session::forget('case.search');
 		}
 	}
 
@@ -157,7 +159,7 @@ class CaseSearchController extends BaseController {
 	 */
 	private function getProjectCaseAttribute($projects) {
 		if (count($projects) === 1) {
-			$project = Project::find(intval($projects[0]));
+			$project = Project::find($projects[0]);
 			if ($project->caseAttributesSchema) {
 				$case_attr = $project->caseAttributesSchema;
 				foreach ($case_attr as $key => $val) {

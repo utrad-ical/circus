@@ -34,7 +34,7 @@ class Label extends BaseModel {
 		'w'				=>	'required|strict_integer',
 		'h'				=>	'required|strict_integer',
 		'd'				=>	'required|strict_integer',
-		'creator'		=>	'required|email',
+		'creator'		=>	'required|strict_string',
 		'createTime'	=>	'mongodate'
 	);
 

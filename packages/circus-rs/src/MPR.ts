@@ -1,15 +1,34 @@
 /**
  * MPR Image generator class
  */
+var url = require('url');
+
 import RawData = require('./RawData');
+import DicomReader = require('./DicomReader');
+import DicomServerModule = require('./DicomServerModule');
+import PNGWriter = require('./PNGWriter');
+
+import Logger = require('./Logger');
+var logger = Logger.prepareLogger();
 
 export = MPR;
 
-class MPR {
+class MPR extends DicomServerModule {
+
+	private pngWriter: PNGWriter;
+
+	protected initialize() {
+		super.initialize();
+
+		var pngModule = require('./' + this.config.options.pngWriter);
+		this.pngWriter = new pngModule(this.config.options.pngWriterOptions);
+	}
+
 
 	// Pixel値にWindow width/levelを適用
-	private static _applyWindowInt16(width: number, level: number, offset: number, z: number, raw: RawData): number {
-		var pixel = raw.getInt16Pixel(z, offset);
+	private _applyWindow(width: number, level: number, offset: number, z: number, raw: RawData): number {
+
+		var pixel = raw.getPixel(z, offset);
 
 		var value = Math.round((pixel - level + width / 2) * (255 / width));
 		if (value >= 255) {
@@ -20,44 +39,9 @@ class MPR {
 		return value;
 	}
 
-	private static _applyWindowUInt16(width: number, level: number, offset: number, z: number, raw: RawData): number {
-		var pixel = raw.getUInt16Pixel(z, offset);
-
-		var value = Math.round((pixel - level + width / 2) * (255 / width));
-		if (value > 255) {
-			value = 255;
-		} else if (value < 0) {
-			value = 0;
-		}
-		return value;
-	}
-
-	private static _applyWindowInt8(width: number, level: number, offset: number, z: number, raw: RawData): number {
-		var pixel = raw.getInt8Pixel(z, offset);
-		var value = Math.round((pixel - level + width / 2) * (255 / width));
-		if (value > 255) {
-			value = 255;
-		} else if (value < 0) {
-			value = 0;
-		}
-		return value;
-	}
-
-	private static _applyWindowUInt8(width: number, level: number, offset: number, z: number, raw: RawData): number {
-		var pixel = raw.getUInt8Pixel(z, offset);
-		var value = Math.round((pixel - level + width / 2) * (255 / width));
-		if (value > 255) {
-			value = 255;
-		} else if (value < 0) {
-			value = 0;
-		}
-		return value;
-	}
-
-
 	/////////////////////////////////////////////
 
-	private static _makeAxialInt16(raw: RawData, target: number, window_width: number, window_level: number): Buffer {
+	makeAxial(raw: RawData, target: number, window_width: number, window_level: number): Buffer {
 		var buffer_offset = 0;
 		var offset;
 		var value;
@@ -66,9 +50,9 @@ class MPR {
 
 		for (var y = 0; y < raw.y; y++) {
 			for (var x = 0; x < raw.x; x++) {
-				//        logger.trace('x: ' + x + ' y:' + y + ' target:' + target);
+				//		logger.trace('x: ' + x + ' y:' + y + ' target:' + target);
 				offset = y * raw.x + x;
-				value = MPR._applyWindowInt16(window_width, window_level, offset, target, raw);
+				value = this._applyWindow(window_width, window_level, offset, target, raw);
 				buffer.writeUInt8(value, buffer_offset);
 				buffer_offset++;
 			}
@@ -76,62 +60,7 @@ class MPR {
 		return buffer;
 	}
 
-	private static _makeAxialUInt16(raw: RawData, target: number, window_width: number, window_level: number): Buffer {
-		var buffer_offset = 0;
-		var offset;
-		var value;
-
-		var buffer = new Buffer(raw.x * raw.y)
-
-		for (var y = 0; y < raw.y; y++) {
-			for (var x = 0; x < raw.x; x++) {
-				offset = y * raw.x + x;
-				value = MPR._applyWindowUInt16(window_width, window_level, offset, target, raw);
-				buffer.writeUInt8(value, buffer_offset);
-				buffer_offset++;
-			}
-		}
-		return buffer;
-	}
-
-	private static _makeAxialInt8(raw: RawData, target: number, window_width: number, window_level: number): Buffer {
-		var buffer_offset = 0;
-		var offset;
-		var value;
-
-		var buffer = new Buffer(raw.x * raw.y)
-
-		for (var y = 0; y < raw.y; y++) {
-			for (var x = 0; x < raw.x; x++) {
-				offset = y * raw.x + x;
-				value = MPR._applyWindowInt8(window_width, window_level, offset, target, raw);
-				buffer.writeUInt8(value, buffer_offset);
-				buffer_offset++;
-			}
-		}
-		return buffer;
-	}
-
-	private static _makeAxialUInt8(raw: RawData, target: number, window_width: number, window_level: number): Buffer {
-		var buffer_offset = 0;
-		var offset;
-		var value;
-
-		var buffer = new Buffer(raw.x * raw.y)
-
-		for (var y = 0; y < raw.y; y++) {
-			for (var x = 0; x < raw.x; x++) {
-				offset = y * raw.x + x;
-				value = MPR._applyWindowUInt8(window_width, window_level, offset, target, raw);
-				buffer.writeUInt8(value, buffer_offset);
-				buffer_offset++;
-			}
-		}
-		return buffer;
-	}
-
-
-	private static _makeCoronalInt16(raw: RawData, target: number, window_width: number, window_level: number): Buffer {
+	makeCoronal(raw: RawData, target: number, window_width: number, window_level: number): Buffer {
 		var buffer_offset = 0;
 		var offset;
 		var value;
@@ -141,7 +70,7 @@ class MPR {
 		for (var z = 0; z < raw.z; z++) {
 			for (var x = 0; x < raw.x; x++) {
 				offset = target * raw.x + x;
-				value = MPR._applyWindowInt16(window_width, window_level, offset, z, raw);
+				value = this._applyWindow(window_width, window_level, offset, z, raw);
 				buffer.writeUInt8(value, buffer_offset);
 				buffer_offset++;
 			}
@@ -149,71 +78,17 @@ class MPR {
 		return buffer;
 	}
 
-	private static _makeCoronalUInt16(raw: RawData, target: number, window_width: number, window_level: number): Buffer {
-		var buffer_offset = 0;
-		var offset;
-		var value;
-
-		var buffer = new Buffer(raw.x * raw.z);
-
-		for (var z = 0; z < raw.z; z++) {
-			for (var x = 0; x < raw.x; x++) {
-				offset = target * raw.x + x;
-				value = MPR._applyWindowUInt16(window_width, window_level, offset, z, raw);
-				buffer.writeUInt8(value, buffer_offset);
-				buffer_offset++;
-			}
-		}
-		return buffer;
-	}
-
-	private static _makeCoronalInt8(raw: RawData, target: number, window_width: number, window_level: number): Buffer {
-		var buffer_offset = 0;
-		var offset;
-		var value;
-
-		var buffer = new Buffer(raw.x * raw.z);
-
-		for (var z = 0; z < raw.z; z++) {
-			for (var x = 0; x < raw.x; x++) {
-				offset = target * raw.x + x;
-				value = MPR._applyWindowInt8(window_width, window_level, offset, z, raw);
-				buffer.writeUInt8(value, buffer_offset);
-				buffer_offset++;
-			}
-		}
-		return buffer;
-	}
-
-	private static _makeCoronalUInt8(raw: RawData, target: number, window_width: number, window_level: number): Buffer {
-		var buffer_offset = 0;
-		var offset;
-		var value;
-
-		var buffer = new Buffer(raw.x * raw.z);
-
-		for (var z = 0; z < raw.z; z++) {
-			for (var x = 0; x < raw.x; x++) {
-				offset = target * raw.x + x;
-				value = MPR._applyWindowUInt8(window_width, window_level, offset, z, raw);
-				buffer.writeUInt8(value, buffer_offset);
-				buffer_offset++;
-			}
-		}
-		return buffer;
-	}
-
-	private static _makeSagittalInt16(raw: RawData, target: number, window_width: number, window_level: number): Buffer {
+	makeSagittal(raw: RawData, target: number, window_width: number, window_level: number): Buffer {
 		var buffer_offset = 0;
 		var offset;
 		var value;
 
 		var buffer = new Buffer(raw.y * raw.z);
 
-		for (var y = 0; y < raw.z; y++) { // 出力画像上のy座標
-			for (var x = 0; x < raw.y; x++) { // 出力画像上のx座標
+		for (var y = 0; y < raw.z; y++) {
+			for (var x = 0; x < raw.y; x++) {
 				offset = x * raw.x + target;
-				value = MPR._applyWindowInt16(window_width, window_level, offset, y, raw);
+				value = this._applyWindow(window_width, window_level, offset, y, raw);
 				buffer.writeUInt8(value, buffer_offset);
 				buffer_offset++;
 			}
@@ -221,125 +96,101 @@ class MPR {
 		return buffer;
 	}
 
-	private static _makeSagittalUInt16(raw: RawData, target: number, window_width: number, window_level: number): Buffer {
-		var buffer_offset = 0;
-		var offset;
-		var value;
+	public process(req: any, res: any, reader: DicomReader): void
+	{
+		var u = url.parse(req.url, true);
+		var query = u.query;
 
-		var buffer = new Buffer(raw.y * raw.z);
+		var window_width;
+		var window_level;
 
-		for (var y = 0; y < raw.z; y++) { // 出力画像上のy座標
-			for (var x = 0; x < raw.y; x++) { // 出力画像上のx座標
-				offset = x * raw.x + target;
-				value = MPR._applyWindowUInt16(window_width, window_level, offset, y, raw);
-				buffer.writeUInt8(value, buffer_offset);
-				buffer_offset++;
+		var target = 1;
+		var maxZ = 261;
+		var series = '';
+		var mode = 'axial';
+		var image = 'all';
+
+		if ('target' in query) {
+			target = Number(query['target']);
+		}
+		if ('ww' in query) {
+			window_width = query['ww'];
+		}
+		if ('wl' in query) {
+			window_level = query['wl'];
+		}
+		if ('series' in query) {
+			series = query['series'];
+		}
+		if ('mode' in query) {
+			mode = query['mode'];
+		}
+		if ('image' in query) {
+			image = query['image'];
+		}
+
+		if (series == '') {
+			logger.warn('no series in query');
+			res.writeHead(500);
+			res.end();
+			return;
+		}
+
+		reader.readData(series, image, function(raw: any, error: string) {
+			if (error) {
+				logger.warn(error);
+				res.writeHead(404);
+				res.end();
+				return;
 			}
-		}
-		return buffer;
-	}
 
-	private static _makeSagittalInt8(raw: RawData, target: number, window_width: number, window_level: number): Buffer {
-		var buffer_offset = 0;
-		var offset;
-		var value;
+			var buffer;
+			var out_width;
+			var out_height;
 
-		var buffer = new Buffer(raw.y * raw.z);
-
-		for (var y = 0; y < raw.z; y++) { // 出力画像上のy座標
-			for (var x = 0; x < raw.y; x++) { // 出力画像上のx座標
-				offset = x * raw.x + target;
-				value = MPR._applyWindowInt8(window_width, window_level, offset, y, raw);
-				buffer.writeUInt8(value, buffer_offset);
-				buffer_offset++;
+			if (!window_width) {
+				window_width = raw.ww;
 			}
-		}
-		return buffer;
-	}
-
-	private static _makeSagittalUInt8(raw: RawData, target: number, window_width: number, window_level: number): Buffer {
-		var buffer_offset = 0;
-		var offset;
-		var value;
-
-		var buffer = new Buffer(raw.y * raw.z);
-
-		for (var y = 0; y < raw.z; y++) { // 出力画像上のy座標
-			for (var x = 0; x < raw.y; x++) { // 出力画像上のx座標
-				offset = x * raw.x + target;
-				value = MPR._applyWindowUInt8(window_width, window_level, offset, y, raw);
-				buffer.writeUInt8(value, buffer_offset);
-				buffer_offset++;
+			if (!window_level) {
+				window_level = raw.wl;
 			}
-		}
-		return buffer;
-	}
 
+			try {
+				if (mode == 'axial') {
+					// 天頂方向描画
+					//logger.trace('axial(top)');
+					out_width = raw.x;
+					out_height = raw.y;
+					buffer = this.makeAxial(raw, target, window_width, window_level);
+				} else if (mode == 'coronal') {
+					//logger.trace('coronal');
+					// 前方向描画
+					out_width = raw.x;
+					out_height = raw.z;
+					buffer = this.makeCoronal(raw, target, window_width, window_level);
+				} else if (mode == 'sagittal') {
+					//logger.trace('sagittal');
+					// 横方向描画
+					out_width = raw.y;
+					out_height = raw.z;
+					buffer = this.makeSagittal(raw, target, window_width, window_level);
+				} else {
+					//logger.trace('unknown mode');
+					res.writeHead(404);
+					res.end();
+					return;
+				}
 
-	static makeAxial(raw: RawData, target: number, window_width: number, window_level: number): Buffer {
-		var buffer = null;
-		switch (raw.type) {
-			case 0:
-				buffer = MPR._makeAxialUInt8(raw, target, window_width, window_level);
-				break;
-			case 1:
-				buffer = MPR._makeAxialInt8(raw, target, window_width, window_level);
-				break;
-			case 2:
-				buffer = MPR._makeAxialUInt16(raw, target, window_width, window_level);
-				break;
-			case 3:
-				buffer = MPR._makeAxialInt16(raw, target, window_width, window_level);
-				break;
-			default:
-				buffer = MPR._makeAxialInt16(raw, target, window_width, window_level);
-				break;
-		}
-		return buffer;
-	}
+				this.pngWriter.write(res, buffer, out_width, out_height);
+			} catch(e) {
+				logger.warn(e);
+				res.writeHead(500);
+				res.end();
+				buffer = null;
+			}
 
-	static makeCoronal(raw: RawData, target: number, window_width: number, window_level: number): Buffer {
-		var buffer = null;
-		switch (raw.type) {
-			case 0:
-				buffer = MPR._makeCoronalUInt8(raw, target, window_width, window_level);
-				break;
-			case 1:
-				buffer = MPR._makeCoronalInt8(raw, target, window_width, window_level);
-				break;
-			case 2:
-				buffer = MPR._makeCoronalUInt16(raw, target, window_width, window_level);
-				break;
-			case 3:
-				buffer = MPR._makeCoronalInt16(raw, target, window_width, window_level);
-				break;
-			default:
-				buffer = MPR._makeCoronalInt16(raw, target, window_width, window_level);
-				break;
-		}
-		return buffer;
-	}
+		}.bind(this));
 
-	static makeSagittal(raw: RawData, target: number, window_width: number, window_level: number): Buffer {
-		var buffer = null;
-		switch (raw.type) {
-			case 0:
-				buffer = MPR._makeSagittalUInt8(raw, target, window_width, window_level);
-				break;
-			case 1:
-				buffer = MPR._makeSagittalInt8(raw, target, window_width, window_level);
-				break;
-			case 2:
-				buffer = MPR._makeSagittalUInt16(raw, target, window_width, window_level);
-				break;
-			case 3:
-				buffer = MPR._makeSagittalInt16(raw, target, window_width, window_level);
-				break;
-			default:
-				buffer = MPR._makeSagittalInt16(raw, target, window_width, window_level);
-				break;
-		}
-		return buffer;
 	}
 
 }

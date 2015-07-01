@@ -2,6 +2,9 @@
  * DICOM series image data class.
  */
 
+import Logger = require('./Logger');
+var logger = Logger.prepareLogger();
+
 export = RawData;
 
 class RawData {
@@ -26,59 +29,24 @@ class RawData {
 	 * z: series image number(0 based)
 	 * offset: pixel position (y * width + x)
 	 */
-	public getInt16Pixel(z: number, offset: number): number {
+	public getPixel(z: number, offset: number): number {
 		if (!this.dataFlag[z]) {
 			return 0;
 		}
 
-		return this.data[z].readInt16LE(offset * 2);
-	}
-
-
-	/**
-	 * get pixel value
-	 *
-	 * z: series image number(0 based)
-	 * offset: pixel position (y * width + x)
-	 */
-	public getUInt16Pixel(z: number, offset: number): number {
-		if (!this.dataFlag[z]) {
-			return 0;
+		switch (this.type) {
+			case 0:
+				return this.data[z].readUInt8(offset);
+			case 1:
+				return this.data[z].readInt8(offset);
+			case 2:
+				return this.data[z].readUInt16LE(offset * 2);
+			case 3:
+				return this.data[z].readInt16LE(offset * 2);
+			default:
+				return this.data[z].readInt16LE(offset * 2);
 		}
-
-		return this.data[z].readUInt16LE(offset * 2);
 	}
-
-
-	/**
-	 * get pixel value
-	 *
-	 * z: series image number(0 based)
-	 * offset: pixel position (y * width + x)
-	 */
-	public getInt8Pixel(z: number, offset: number): number {
-		if (!this.dataFlag[z]) {
-			return 0;
-		}
-
-		return this.data[z].readInt8(offset);
-	}
-
-
-	/**
-	 * get pixel value
-	 *
-	 * z: series image number(0 based)
-	 * offset: pixel position (y * width + x)
-	 */
-	public getUInt8Pixel(z: number, offset: number): number {
-		if (!this.dataFlag[z]) {
-			return 0;
-		}
-
-		return this.data[z].readUInt8(offset);
-	}
-
 
 	/**
 	 * set pixel dimension and allocate array.
@@ -91,11 +59,6 @@ class RawData {
 
 		this.data = new Array(this.z);
 		this.dataFlag = new Array(this.z);
-
-		console.log('x:' + this.x);
-		console.log('y:' + this.y);
-		console.log('z:' + this.z);
-		console.log('type:' + this.type);
 	}
 
 	/**
@@ -107,12 +70,6 @@ class RawData {
 		this.vz = this.header.voxelDepth;
 		this.wl = this.header.estimatedWindowLevel;
 		this.ww = this.header.estimatedWindowWidth;
-
-		console.log('vx:' + this.vx);
-		console.log('vy:' + this.vy);
-		console.log('vz:' + this.vz);
-		console.log('wl:' + this.wl);
-		console.log('ww:' + this.ww);
 	}
 
 	public containImage(image: string): boolean {
@@ -187,11 +144,11 @@ class RawData {
 
 				//console.log('image size: ' + voxelData.length);
 			} else {
-				console.log(json.errorMessage);
+				logger.warn(json.errorMessage);
 			}
 		} else {
 			// binarySize is 0. read failed.
-			console.log(json.errorMessage);
+			logger.warn(json.errorMessage);
 		}
 	}
 }

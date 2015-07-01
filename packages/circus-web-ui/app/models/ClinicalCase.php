@@ -111,14 +111,23 @@ class ClinicalCase extends BaseModel {
     					//ProjectID
     					$search_data['project'] = json_decode($search_data['project'], true);
     					if ($search_data['project']) {
-    						$projects = array();
-							foreach ($search_data['project'] as $prj){
-								$projects[] = intval($prj);
-							}
+    						$projects = array_values($search_data['project']);
     					} else {
     						$projects = Auth::user()->listAccessibleProjects(Project::AUTH_TYPE_READ);
     					}
     					$query->whereIn('projectID', $projects);
+
+    					$accessible_domains = Auth::user()->listAccessibleDomains();
+    					if ($accessible_domains) {
+    						$domain_str = '';
+    						foreach($accessible_domains as $key => $val) {
+    							$accessible_domains[$key] = '"'.$val.'"';
+    						}
+    						$domain_str = implode(',', $accessible_domains);
+
+    						$json_default_search = '{"domains":{"$not":{"$elemMatch":{"$nin":['.$domain_str.']}}}}';
+	    					$query->whereRaw(json_decode($json_default_search));
+    					}
 
 						//詳細検索
 						if ($search_data['search_mode']) {

@@ -242,6 +242,31 @@ class ClinicalCase extends BaseModel {
 		}
 		return $label_list;
 	}
+
+	public static function isAccessibleSeries($caseID) {
+		$query = self::where('caseID','=', $caseID);
+
+		//setting accesible projects
+		$projects = Auth::user()->listAccessibleProjects(Project::AUTH_TYPE_READ);
+		$query->whereIn('projectID', $projects);
+
+		//setting accesible domains
+    	$accessible_domains = Auth::user()->listAccessibleDomains();
+    	if ($accessible_domains) {
+    		$domain_str = '';
+    		foreach($accessible_domains as $key => $val) {
+    			$accessible_domains[$key] = '"'.$val.'"';
+    		}
+    		$domain_str = implode(',', $accessible_domains);
+
+    		$json_default_search = '{"domains":{"$not":{"$elemMatch":{"$nin":['.$domain_str.']}}}}';
+    		$query->whereRaw(json_decode($json_default_search));
+    	}
+
+    	$res = $query->first();
+
+		return $res ? true : false;
+	}
 }
 
 Validator::extend('is_series', function($attribute, $value, $parameters) {

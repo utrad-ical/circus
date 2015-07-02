@@ -37,6 +37,13 @@ class CaseDetailController extends BaseController {
 			if (!$case_info)
 				throw new Exception('Case ID does not exist.');
 
+			//ケース自体はあるが、参照権限がない(403エラー）
+			if (!ClinicalCase::isAccessibleSeries($inputs['caseID'])) {
+				$result['url'] = 'home';
+				$result['error_msg'] = 'Unauthorized action.';
+				return Response::view('error', $result, 403);
+			}
+
 			//Authority check
 			//Case viewing rights
 			$user = Auth::user();

@@ -52,8 +52,8 @@ class CaseDetailController extends BaseController {
 				throw new Exception('You do not have permission to refer to this case.');
 
 			//Case edit authority
-			$auth_edit = $user->listAccessibleProjects(Project::AUTH_TYPE_WRITE);
-			$result['edit_flg'] = $auth_edit && array_search($case_info->projectID, $auth_edit) !== false;
+			$result['edit_flg'] = ClinicalCase::isEdit($case_info->projectID);
+			$result['add_series_flg'] = ClinicalCase::isAddSeries($case_info->projectID);
 
 			//The shaping Revision information for display
 			$revision_list = array();

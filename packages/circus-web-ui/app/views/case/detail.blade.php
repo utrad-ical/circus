@@ -19,6 +19,46 @@
 {{HTML::script('js/export-common.js')}}
 
 @if (!isset($error_msg))
+	@if (!$edit_flg)
+		<script type="text/javascript">
+          var opt_control = {
+            boldness: {
+              active: false,
+              value: 1
+            }, //太さ変更
+            bucket: {
+              active: false,
+              value: 1
+            }, //太さ変更
+            measure: {
+              active: true,
+              panel: true
+            },
+            color: {
+              control: false
+            },
+            pan: true,
+            window: {
+              active : true,
+              panel: false
+            },
+            pen: {
+              active: false, //描画機能の有効・無効
+              panel: false, //ラベル情報表示パネルの有無
+            },
+            show: true, //そもそもコントロールパネルを置くかどうか
+            undo: false //戻す・やり直す一括
+          };
+		</script>
+    @else
+    	<script type="text/javascript">
+			var opt_control = {
+                    window : {
+                panel : false
+            }
+        };
+		</script>
+    @endif
 <script>
     //Label attributes default
     var default_label_attr_prop = {{$label_attribute_settings}};
@@ -43,11 +83,7 @@
                 attribute : {{$attribute}},
                 defaultLabelAttribute :default_label_attr_prop,
                 series : {{$series_list}},
-                control : {
-                    window : {
-                        panel : false
-                    }
-                },
+                control : opt_control,
                 elements : {
                     parent : 'page_case_detail',
                     panel : 'the_panel_inner',
@@ -95,7 +131,6 @@
                 url: '{{{$server_url["series_path"]}}}',
                 type: 'GET',
                 data: {
-                    mode : 'metadata',
                     series : tmp_series.id
                 },//Transmitted data
                 dataType: 'json',

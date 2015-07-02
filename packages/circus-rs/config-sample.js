@@ -20,7 +20,7 @@ var config = {
 
 	// log configuration. See nomiddlename/log4js-node.
 	logs: [{
-			type: 'datefile',
+			type: 'dateFile',
 			filename: __dirname + '/logs/debug.log',
 			pattern: '-yyyyMMdd.log'
 		}

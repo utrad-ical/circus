@@ -11,7 +11,8 @@
     "log4js": "^0.6.22",
     "minimist": "^1.1.1",
     "router": "^1.1.1",
-    "pngjs": "^0.4.0"
+    "pngjs": "^0.4.0",
+    "finalhandler": "^0.4.0"
   },
   "devDependencies": {
     "gulp": "^3.8.11",

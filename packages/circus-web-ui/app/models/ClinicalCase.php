@@ -267,6 +267,36 @@ class ClinicalCase extends BaseModel {
 
 		return $res ? true : false;
 	}
+
+	/**
+	 * ケース編集権限チェック
+	 * @param string $projectId プロジェクトID
+	 * @return boolean 編集権限がある場合true、ない場合false
+	 */
+	public static function isEdit($projectId) {
+		//WRITE権限チェック
+		$auth_write = Auth::user()->listAccessibleProjects(Project::AUTH_TYPE_WRITE);
+		if ($auth_write && array_search($projectId, $auth_write))
+			return true;
+
+		//MODERATE権限チェック
+		$auth_moderate = Auth::user()->listAccessibleProjects(Project::AUTH_TYPE_MODERATE);
+		if ($auth_moderate && array_search($projectId, $auth_moderate))
+			return true;
+
+		return false;
+	}
+
+	/**
+	 * シリーズ追加権限チェック
+	 * @param string $projectId プロジェクトID
+	 * @return boolean シリーズ追加権限がある場合はtrue、ない場合はfalse
+	 */
+	public static function isAddSeries($projectId) {
+		//addSeries権限チェック
+		$auth_add_series = Auth::user()->listAccessibleProjects(Project::AUTH_TYPE_ADD_SERIES);
+		return $auth_add_series && array_search($projectId, $auth_add_series) !== false;
+	}
 }
 
 Validator::extend('is_series', function($attribute, $value, $parameters) {

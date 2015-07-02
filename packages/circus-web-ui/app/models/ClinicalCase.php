@@ -276,12 +276,12 @@ class ClinicalCase extends BaseModel {
 	public static function isEdit($projectId) {
 		//WRITE権限チェック
 		$auth_write = Auth::user()->listAccessibleProjects(Project::AUTH_TYPE_WRITE);
-		if ($auth_write && array_search($projectId, $auth_write))
+		if ($auth_write && array_search($projectId, $auth_write) !== false)
 			return true;
 
 		//MODERATE権限チェック
 		$auth_moderate = Auth::user()->listAccessibleProjects(Project::AUTH_TYPE_MODERATE);
-		if ($auth_moderate && array_search($projectId, $auth_moderate))
+		if ($auth_moderate && array_search($projectId, $auth_moderate) !== false)
 			return true;
 
 		return false;

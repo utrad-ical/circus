@@ -337,11 +337,11 @@
 
 
 
-				$('.select_revision').focus(function(){
-						var this_elm = $(this);
-						var before_change_value = this_elm.val();
-						this_elm.attr('before-change-value',before_change_value)
-				});
+		$('.select_revision').focus(function(){
+				var this_elm = $(this);
+				var before_change_value = this_elm.val();
+				this_elm.attr('before-change-value',before_change_value)
+		});
 
 
 
@@ -532,10 +532,12 @@ id="page_case_detail"
 	</table>
 	<div class="w_400 fl_l">
 		{{Form::open(['url' => asset('case/detail'), 'method' => 'post'])}}
+		@if ($edit_flg)
 			<button type='button' class='common_btn btn_save' name='btnSave'>
 				<span style="background:url({{asset('/img/common/ico_save.png')}}) no-repeat; width:22px; height:22px; display:inline-block; margin-bottom:-7px; margin-right:4px;"></span>
 				Save
 			</button>
+		@endif
 			<button type="button" class="common_btn btn_export">
 				Export
 			</button>

@@ -1,6 +1,6 @@
 @extends('common.layout')
 
-@if(Series::isAccessibleSeries())
+@if(Auth::user()->isAccessibleSeries())
 @section('head')
 {{HTML::script('js/jquery.cookie.js')}}
 <script>
@@ -140,7 +140,7 @@ Series Search
 @stop
 
 @section('content')
-@if(Series::isAccessibleSeries())
+@if(Auth::user()->isAccessibleSeries())
 {{Form::open(['url' => asset('series/search'), 'id' => 'form_search', 'method' => 'post', 'class' => 'mar_b_20'])}}
 	<div class="al_l mar_b_10">
 		{{HTML::link(asset('series/import'), 'Series Import', array('class' => 'common_btn'))}}

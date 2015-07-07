@@ -40,7 +40,7 @@ class CaseDetailController extends BaseController {
 			$user = Auth::user();
 
 			//ケース自体はあるが、参照権限がない(403エラー）
-			if (!$user->isAccessibleSeries($inputs['caseID'])) {
+			if (!$user->isAccessibleCase($inputs['caseID'])) {
 				$result['url'] = 'home';
 				$result['error_msg'] = 'Unauthorized action.';
 				return Response::view('error', $result, 403);

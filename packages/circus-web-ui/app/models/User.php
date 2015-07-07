@@ -127,7 +127,12 @@ class User extends BaseModel implements UserInterface {
 		return $results;
 	}
 
-	public function isAccessibleSeries($case_id) {
+	/**
+     * ケースアクセス権限
+     * @param string $case_id ケースID
+     * @return boolean アクセス権限がある場合true、ない場合false
+	 */
+	public function isAccessibleCase($case_id) {
 		$query = ClinicalCase::where('caseID','=', $case_id);
 
 		//setting accesible projects
@@ -150,6 +155,26 @@ class User extends BaseModel implements UserInterface {
     	$res = $query->first();
 
 		return $res ? true : false;
+	}
+
+	/**
+	 * シリーズアクセス権限
+	 * @param string $series_id シリーズID
+	 * @return boolean アクセス権限がある場合はtrue、ない場合はfalse
+	 */
+	public function isAccessibleSeries($series_id = null) {
+		$domains = $this->listAccessibleDomains();
+		if (count($domains) == 0)
+			return false;
+
+		if ($series_id !== null) {
+			//シリーズIDが指定されている場合は該当シリーズのドメインを取得する
+			$series = Series::find($series_id);
+			if (array_search($series->domain, $domains) === false)
+				return false;
+		}
+
+		return true;
 	}
 
 	/**

@@ -195,20 +195,4 @@ class Series extends BaseModel {
 			)
 			->get();
 	}
-
-	public static function isAccessibleSeries($series_id = null, User $user = null) {
-		if (!$user) $user = Auth::user();
-		$domains = $user->listAccessibleDomains();
-		if (count($domains) == 0)
-			return false;
-
-		if ($series_id !== null) {
-			//シリーズIDが指定されている場合は該当シリーズのドメインを取得する
-			$series = Series::find($series_id);
-			if (array_search($series->domain, $domains) === false)
-				return false;
-		}
-
-		return true;
-	}
 }

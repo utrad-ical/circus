@@ -17,7 +17,7 @@ class SeriesSearchController extends BaseController {
 		$result = array();
 
 		//閲覧可能なシリーズがあるかチェック
-		if (!Series::isAccessibleSeries()) {
+		if (!Auth::user()->isAccessibleSeries()) {
 			$result['error_msg'] = '参照可能なシリーズはありません。';
 			return View::make('series.search', $result);
 		}

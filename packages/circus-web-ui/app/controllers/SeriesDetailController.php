@@ -26,7 +26,7 @@ class SeriesDetailController extends BaseController {
 				throw new Exception('Please specify the series ID.');
 
 			//シリーズ自体はあるが、参照権限がない(403エラー）
-			if (!Series::isAccessibleSeries($inputs['seriesUID'])) {
+			if (!Auth::user()->isAccessibleSeries($inputs['seriesUID'])) {
 				$result['url'] = 'home';
 				$result['error_msg'] = 'Unauthorized action.';
 				return Response::view('error', $result, 403);

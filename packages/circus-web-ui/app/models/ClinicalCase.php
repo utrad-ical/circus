@@ -117,17 +117,15 @@ class ClinicalCase extends BaseModel {
     					}
     					$query->whereIn('projectID', $projects);
 
+    					//accesible domain
     					$accessible_domains = Auth::user()->listAccessibleDomains();
-    					if ($accessible_domains) {
-    						$domain_str = '';
-    						foreach($accessible_domains as $key => $val) {
-    							$accessible_domains[$key] = '"'.$val.'"';
-    						}
-    						$domain_str = implode(',', $accessible_domains);
-
-    						$json_default_search = '{"domains":{"$not":{"$elemMatch":{"$nin":['.$domain_str.']}}}}';
-	    					$query->whereRaw(json_decode($json_default_search));
+    					$domain_str = '';
+    					foreach($accessible_domains as $key => $val) {
+    						$accessible_domains[$key] = '"'.$val.'"';
     					}
+    					$domain_str = implode(',', $accessible_domains);
+    					$json_default_search = '{"domains":{"$not":{"$elemMatch":{"$nin":['.$domain_str.']}}}}';
+	    				$query->whereRaw(json_decode($json_default_search));
 
 						//詳細検索
 						if ($search_data['search_mode']) {

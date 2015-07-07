@@ -127,6 +127,62 @@ class User extends BaseModel implements UserInterface {
 		return $results;
 	}
 
+	public function isAccessibleSeries($case_id) {
+		$query = ClinicalCase::where('caseID','=', $case_id);
+
+		//setting accesible projects
+		$projects = $this->listAccessibleProjects(Project::AUTH_TYPE_READ);
+		$query->whereIn('projectID', $projects);
+
+		//setting accesible domains
+    	$accessible_domains = $this->listAccessibleDomains();
+    	if ($accessible_domains) {
+    		$domain_str = '';
+    		foreach($accessible_domains as $key => $val) {
+    			$accessible_domains[$key] = '"'.$val.'"';
+    		}
+    		$domain_str = implode(',', $accessible_domains);
+
+    		$json_default_search = '{"domains":{"$not":{"$elemMatch":{"$nin":['.$domain_str.']}}}}';
+    		$query->whereRaw(json_decode($json_default_search));
+    	}
+
+    	$res = $query->first();
+
+		return $res ? true : false;
+	}
+
+	/**
+	 * ケース編集権限チェック
+	 * @param string $projectId プロジェクトID
+	 * @return boolean 編集権限がある場合true、ない場合false
+	 */
+	public function isEditCase($project_id) {
+		return ($this->hasProjectPrivileges(Project::AUTH_TYPE_WRITE, $project_id)
+				|| $this->hasProjectPrivileges(Project::AUTH_TYPE_MODERATE, $project_id));
+	}
+
+	/**
+	 * プリジェクト権限保持チェック
+	 * @param String $auth_type 権限種別
+	 * @param String $project_id プロジェクトＩＤ
+	 * @return boolean 対象のプロジェクトの該当権限を保持している場合はtrue、保持していない場合はfalse
+	 */
+	public function hasProjectPrivileges($auth_type, $project_id) {
+		$privilege = $this->listAccessibleProjects($auth_type);
+		if ($privilege && array_search($project_id, $privilege) !== false)
+			return true;
+	}
+
+	/**
+	 * シリーズ追加権限チェック
+	 * @param string $projectId プロジェクトID
+	 * @return boolean シリーズ追加権限がある場合はtrue、ない場合はfalse
+	 */
+	public function isAddSeries($project_id) {
+		return ($this->hasProjectPrivileges(Project::AUTH_TYPE_ADD_SERIES, $project_id));
+	}
+
 }
 
 Validator::extend('preferences', function ($attribute, $value, $parameters) {

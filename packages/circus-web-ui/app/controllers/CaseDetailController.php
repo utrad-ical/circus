@@ -37,8 +37,10 @@ class CaseDetailController extends BaseController {
 			if (!$case_info)
 				throw new Exception('Case ID does not exist.');
 
+			$user = Auth::user();
+
 			//ケース自体はあるが、参照権限がない(403エラー）
-			if (!ClinicalCase::isAccessibleSeries($inputs['caseID'])) {
+			if (!$user->isAccessibleSeries($inputs['caseID'])) {
 				$result['url'] = 'home';
 				$result['error_msg'] = 'Unauthorized action.';
 				return Response::view('error', $result, 403);
@@ -46,14 +48,13 @@ class CaseDetailController extends BaseController {
 
 			//Authority check
 			//Case viewing rights
-			$user = Auth::user();
 			$auth_view = $user->listAccessibleProjects(Project::AUTH_TYPE_READ);
 			if (!$auth_view || array_search($case_info->projectID, $auth_view) === false)
 				throw new Exception('You do not have permission to refer to this case.');
 
 			//Case edit authority
-			$result['edit_flg'] = ClinicalCase::isEdit($case_info->projectID);
-			$result['add_series_flg'] = ClinicalCase::isAddSeries($case_info->projectID);
+			$result['edit_flg'] = $user->isEditCase($case_info->projectID);
+			$result['add_series_flg'] = $user->isAddSeries($case_info->projectID);
 
 			//The shaping Revision information for display
 			$revision_list = array();

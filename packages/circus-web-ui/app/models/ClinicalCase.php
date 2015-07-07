@@ -224,7 +224,7 @@ class ClinicalCase extends BaseModel {
 	}
 
 	public static function getLabelList($search_data) {
-		$case_info = ClinicalCase::find($search_data['caseID']);
+		$case_info = self::find($search_data['caseID']);
 		$label_list = array();
 
 		foreach ($case_info->revisions as $idx => $revision) {
@@ -243,60 +243,6 @@ class ClinicalCase extends BaseModel {
 		return $label_list;
 	}
 
-	public static function isAccessibleSeries($caseID) {
-		$query = self::where('caseID','=', $caseID);
-
-		//setting accesible projects
-		$projects = Auth::user()->listAccessibleProjects(Project::AUTH_TYPE_READ);
-		$query->whereIn('projectID', $projects);
-
-		//setting accesible domains
-    	$accessible_domains = Auth::user()->listAccessibleDomains();
-    	if ($accessible_domains) {
-    		$domain_str = '';
-    		foreach($accessible_domains as $key => $val) {
-    			$accessible_domains[$key] = '"'.$val.'"';
-    		}
-    		$domain_str = implode(',', $accessible_domains);
-
-    		$json_default_search = '{"domains":{"$not":{"$elemMatch":{"$nin":['.$domain_str.']}}}}';
-    		$query->whereRaw(json_decode($json_default_search));
-    	}
-
-    	$res = $query->first();
-
-		return $res ? true : false;
-	}
-
-	/**
-	 * ケース編集権限チェック
-	 * @param string $projectId プロジェクトID
-	 * @return boolean 編集権限がある場合true、ない場合false
-	 */
-	public static function isEdit($projectId) {
-		//WRITE権限チェック
-		$auth_write = Auth::user()->listAccessibleProjects(Project::AUTH_TYPE_WRITE);
-		if ($auth_write && array_search($projectId, $auth_write) !== false)
-			return true;
-
-		//MODERATE権限チェック
-		$auth_moderate = Auth::user()->listAccessibleProjects(Project::AUTH_TYPE_MODERATE);
-		if ($auth_moderate && array_search($projectId, $auth_moderate) !== false)
-			return true;
-
-		return false;
-	}
-
-	/**
-	 * シリーズ追加権限チェック
-	 * @param string $projectId プロジェクトID
-	 * @return boolean シリーズ追加権限がある場合はtrue、ない場合はfalse
-	 */
-	public static function isAddSeries($projectId) {
-		//addSeries権限チェック
-		$auth_add_series = Auth::user()->listAccessibleProjects(Project::AUTH_TYPE_ADD_SERIES);
-		return $auth_add_series && array_search($projectId, $auth_add_series) !== false;
-	}
 }
 
 Validator::extend('is_series', function($attribute, $value, $parameters) {

@@ -6,6 +6,7 @@ var url = require('url');
 import RawData = require('./RawData');
 import DicomReader = require('./DicomReader');
 import DicomServerModule = require('./DicomServerModule');
+import http = require('http');
 
 import Logger = require('./Logger');
 var logger = Logger.prepareLogger();
@@ -14,7 +15,7 @@ export = Metadata;
 
 class Metadata extends DicomServerModule {
 
-	public process(req: any, res: any, reader: DicomReader): void
+	public process(req: http.ServerRequest, res: http.ServerResponse, reader: DicomReader): void
 	{
 		logger.info('Metadata::process');
 

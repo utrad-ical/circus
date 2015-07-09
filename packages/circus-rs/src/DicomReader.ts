@@ -14,18 +14,16 @@ export = DicomReader;
 class DicomReader {
 
 	private lru: Array<string> = [];
-	private cache: any = {};
+	private cache: { [seriesUID: string]: RawData } = {};
 	private threshold: number;
 	private execCounter: number = 0;
 	private resolver: PathResolver;
 	private dumper: DicomDumper;
 
-
 	private memoryThreshold: number = 1024 * 1024 * 1024; // default heap limit (1GB)
 
 	/**
 	 * Constructor
-	 *
 	 */
 	constructor(config: any) {
 		var resolverClass = require('./' + config.pathResolver.module);
@@ -77,7 +75,7 @@ class DicomReader {
 	 * key: key name of last used object.
 	 * rawData: object to be cached.
 	 */
-	public put(key: string, rawData: any): void {
+	public put(key: string, rawData: RawData): void {
 		this.cache[key] = rawData;
 		this.updateLru(key);
 

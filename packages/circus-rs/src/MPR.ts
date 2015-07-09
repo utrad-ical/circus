@@ -7,6 +7,7 @@ import RawData = require('./RawData');
 import DicomReader = require('./DicomReader');
 import DicomServerModule = require('./DicomServerModule');
 import PNGWriter = require('./PNGWriter');
+import http = require('http');
 
 import Logger = require('./Logger');
 var logger = Logger.prepareLogger();
@@ -96,7 +97,7 @@ class MPR extends DicomServerModule {
 		return buffer;
 	}
 
-	public process(req: any, res: any, reader: DicomReader): void
+	public process(req: http.ServerRequest, res: http.ServerResponse, reader: DicomReader): void
 	{
 		var u = url.parse(req.url, true);
 		var query = u.query;
@@ -157,20 +158,17 @@ class MPR extends DicomServerModule {
 
 			try {
 				if (mode == 'axial') {
-					// 天頂方向描画
 					//logger.trace('axial(top)');
 					out_width = raw.x;
 					out_height = raw.y;
 					buffer = this.makeAxial(raw, target, window_width, window_level);
 				} else if (mode == 'coronal') {
 					//logger.trace('coronal');
-					// 前方向描画
 					out_width = raw.x;
 					out_height = raw.z;
 					buffer = this.makeCoronal(raw, target, window_width, window_level);
 				} else if (mode == 'sagittal') {
 					//logger.trace('sagittal');
-					// 横方向描画
 					out_width = raw.y;
 					out_height = raw.z;
 					buffer = this.makeSagittal(raw, target, window_width, window_level);

@@ -17,6 +17,7 @@
   "devDependencies": {
     "gulp": "^3.8.11",
     "gulp-concat": "^2.5.2",
+    "gulp-less": "^3.0.3",
     "gulp-typescript": "^2.5.0",
     "typescript": "^1.4.1"
   }

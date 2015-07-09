@@ -107,9 +107,9 @@ Route::group(['before' => 'auth'], function() {
 	$rsHost('js/imageViewer.js', 'imageViewer.js');
 	$rsHost('js/voxelContainer.js', 'voxelContainer.js');
 	$rsHost('css/imageViewer.css', 'imageViewer.css');
-	$rsHost('img/common/ico_detail_sprite.png', 'tool-icon-sprite.png');
-	$rsHost('img/common/loading_bar.gif', 'loading-bar.gif');
-	$rsHost('img/common/panel_btn_sprite.png', 'panel-btn-sprite.png');
+	$rsHost('css/tool-icon-sprite.png', 'tool-icon-sprite.png');
+	$rsHost('css/loading-bar.gif', 'loading-bar.gif');
+	$rsHost('css/panel-btn-sprite.png', 'panel-btn-sprite.png');
 
 });
 

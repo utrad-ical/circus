@@ -12,7 +12,7 @@ var config = {
 	pathResolver: {
 		module: 'CircusDbPathResolver',
 		options: {
-	 		// full path of configuration file for MongoDB connection settings
+			// full path of configuration file for MongoDB connection settings
 			configPath: '<path_to_mongo_settings_json_file>'
 		}
 	},
@@ -26,15 +26,15 @@ var config = {
 		}
 	],
 
-    dumper: {
+	dumper: {
 		module: 'DicomVoxelDumperAdapter',
 		options: {
-	    	// path for DICOM data dumper tool.
+			// path for DICOM data dumper tool.
 			dumper: '<path_to_"dicom_voxel_dump"_executable_file>',
-	    	// stdout buffer size
+			// stdout buffer size
 			bufferSize: 512 * 512 * 1024
 		}
-    },
+	},
 
 	// MPR module configurations.
 	mpr: {
@@ -53,12 +53,12 @@ var config = {
 	*/
 
 	cache: {
-        /*
-    	 * threshold: upper limit of heap memory size. (in bytes)
-	     *		When object added, cached object will remove to keep threshold.
-	     *		So this threshold is not strictly.
-         */
-        memoryThreshold: 2 * 1024 * 1024 * 1024
+		/*
+		 * threshold: upper limit of heap memory size. (in bytes)
+		 *		When object added, cached object will remove to keep threshold.
+		 *		So this threshold is not strictly.
+		 */
+		memoryThreshold: 2 * 1024 * 1024 * 1024
 	},
 
 

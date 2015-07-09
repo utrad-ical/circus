@@ -1,5 +1,4 @@
 /// <reference path="typings/node/node.d.ts" />
-/// <reference path="typings/log4js/log4js.d.ts" />
 
 /*----------------------------------------------
 
@@ -8,7 +7,7 @@
 -----------------------------------------------*/
 
 // include require modules
-var http = require('http');
+import http = require('http');
 var finalhandler = require('finalhandler');
 var argv = require('minimist')(process.argv.slice(2));
 
@@ -18,6 +17,8 @@ var config: any = require(configFile);
 
 import Logger = require('./Logger');
 var logger = Logger.prepareLogger();
+
+import Counter = require('./Counter');
 
 logger.info('CIRCUS RS is starting up...');
 
@@ -37,12 +38,12 @@ var reader = new DicomReader(config);
 
 // setup routing
 var Router = require('router');
-var r = prepareRouter();
+var router = prepareRouter();
 
 // create server process
-var server = http.createServer(function(req, res) {
-	logger.info(req.url);
-	r(req, res, finalhandler(req, res, {onerror: err => {
+var server = http.createServer((req: http.ServerRequest, res: http.ServerResponse) => {
+	router(req, res, finalhandler(req, res, { onerror: err => {
+		Counter.countUp('_error');
 		logger.info(err.toString());
 	}}));
 });
@@ -57,15 +58,17 @@ function prepareRouter(): any
 	var router = Router();
 
 	router.get('/metadata', function(req, res) {
+		Counter.countUp('metadata');
 		metadataModule.process(req, res, reader);
 	});
 	router.get('/MPR', function(req, res) {
+		Counter.countUp('MPR');
 		mprModule.process(req, res, reader);
 	});
 	router.get('/status', function(req, res) {
+		Counter.countUp('status');
 		serverStatus.process(req, res, reader);
 	});
-	// TODO: append your custom module to router.
 
 	return router;
 }

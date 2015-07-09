@@ -6,6 +6,7 @@ var url = require('url');
 import DicomServerModule = require('./DicomServerModule');
 import DicomReader = require('./DicomReader');
 import http = require('http');
+import Counter = require('./Counter');
 
 import Logger = require('./Logger');
 var logger = Logger.prepareLogger();
@@ -28,7 +29,8 @@ class ServerStatus extends DicomServerModule {
 				memoryUsage: process.memoryUsage(),
 				upTime: process.uptime(),
 				upSince: startUpTime.toISOString()
-			}
+			},
+			counter: Counter.getCounts()
 		};
 		res.end(JSON.stringify(status, null, '  '));
 	}

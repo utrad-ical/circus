@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "f9e93762ba78165ef62fae2dc1164bfa",
+    "hash": "09afc979be954af6b7b7cb6d030448d6",
     "packages": [
         {
             "name": "classpreloader/classpreloader",
@@ -1698,12 +1698,12 @@
             "source": {
                 "type": "git",
                 "url": "https://bitbucket.org/ical/circus_rs_dicom_server.git",
-                "reference": "cebad83e4f113607f334a406cbb7a78199d65152"
+                "reference": "8654af1b61d8d875f2935c84bfd8be6e2c85c08c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://bitbucket.org/ical/circus_rs_dicom_server/get/cebad83e4f113607f334a406cbb7a78199d65152.zip",
-                "reference": "cebad83e4f113607f334a406cbb7a78199d65152",
+                "url": "https://bitbucket.org/ical/circus_rs_dicom_server/get/8654af1b61d8d875f2935c84bfd8be6e2c85c08c.zip",
+                "reference": "8654af1b61d8d875f2935c84bfd8be6e2c85c08c",
                 "shasum": ""
             },
             "type": "library",
@@ -1724,7 +1724,7 @@
             "keywords": [
                 "DICOM"
             ],
-            "time": "2015-06-29 19:33:52"
+            "time": "2015-07-09 06:01:57"
         }
     ],
     "packages-dev": [

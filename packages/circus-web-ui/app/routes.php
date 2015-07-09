@@ -94,7 +94,7 @@ Route::group(['before' => 'auth'], function() {
 	// Host static CIRCUS RS files in the vendor directory
 	$rsHost = function($url, $file) {
 		$ext = File::extension($file);
-		$mime_list = ['js' => 'text/javascript', 'css' => 'text/css'];
+		$mime_list = ['js' => 'text/javascript', 'css' => 'text/css', 'png' => 'image/png', 'gif' => 'image/gif'];
 		$mime = $mime_list[$ext];
 		Route::any($url, function() use($file, $mime) {
 			return Response::make(
@@ -107,6 +107,9 @@ Route::group(['before' => 'auth'], function() {
 	$rsHost('js/imageViewer.js', 'imageViewer.js');
 	$rsHost('js/voxelContainer.js', 'voxelContainer.js');
 	$rsHost('css/imageViewer.css', 'imageViewer.css');
+	$rsHost('img/common/ico_detail_sprite.png', 'tool-icon-sprite.png');
+	$rsHost('img/common/loading_bar.gif', 'loading-bar.gif');
+	$rsHost('img/common/panel_btn_sprite.png', 'panel-btn-sprite.png');
 
 });
 

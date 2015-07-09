@@ -142,14 +142,14 @@ class DicomReader {
 			logger.info('no cache found.');
 		}
 
-		this.resolver.resolvePath(series, function(dcmdir: string) {
+		this.resolver.resolvePath(series, (dcmdir: string) => {
 			if (!dcmdir) {
 				 callback(null, 'cannot resolve path.');
 				 this.execCounter = 0;
 				 return;
 			}
 
-			this.dumper.readDicom(dcmdir, params, function(rawData: RawData) {
+			this.dumper.readDicom(dcmdir, params, (rawData: RawData) => {
 				var err: string = '';
 				if (rawData == null) {
 					err = "cannot read image.";
@@ -160,8 +160,8 @@ class DicomReader {
 				}
 				callback(rawData, err);
 				this.execCounter = 0;
-			}.bind(this));
-		}.bind(this));
+			});
+		});
 	}
 
 }

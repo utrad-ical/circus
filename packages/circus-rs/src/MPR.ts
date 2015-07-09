@@ -136,7 +136,7 @@ class MPR extends DicomServerModule {
 			return;
 		}
 
-		reader.readData(series, image, function(raw: any, error: string) {
+		reader.readData(series, image, (raw: any, error: string) => {
 			if (error) {
 				logger.warn(error);
 				res.writeHead(404);
@@ -189,7 +189,7 @@ class MPR extends DicomServerModule {
 				buffer = null;
 			}
 
-		}.bind(this));
+		});
 
 	}
 

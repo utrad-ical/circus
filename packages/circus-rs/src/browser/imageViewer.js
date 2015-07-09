@@ -74,9 +74,9 @@
           }
         ],
         guide : [
-          {show : false, number: 0, name : 'axial', color: '0000ff'},
-          {show : false, number: 0, name : 'coronal', color: '00ff00'},
-          {show : false, number: 0, name : 'sagittal', color: 'ff0000'}
+          {show : false, number: 0, name : 'axial', color: 'FF7F7F'},
+          {show : false, number: 0, name : 'coronal', color: '7FFF7F'},
+          {show : false, number: 0, name : 'sagittal', color: '7F7FFF'}
         ],
         measure : {
           active : true,
@@ -87,7 +87,7 @@
         },
         rotate : {
           angle : 0, //radian
-          color : '#ffa500',
+          color : 'ffa500',
           length : 192,
           point_size : 3,
           position_x : 256,
@@ -265,18 +265,19 @@
       }
 
       this_obj._disableImageAlias(tmp_ctx, false);
+      this_elm.find('.disp_measure').removeClass('active');
+
+      //disp info
       this_elm.find('.image_window_controller_wrap').find('.win_lv_label').text(this_opts.viewer.window.level.current);
       this_elm.find('.image_window_controller_wrap').find('.win_width_label').text(this_opts.viewer.window.width.current);
       this_elm.find('.image_window_controller_wrap').find('.image_window_controller').find('.image_window_level').val(this_opts.viewer.window.level.current);
       this_elm.find('.image_window_controller_wrap').find('.image_window_controller').find('.image_window_width').val(this_opts.viewer.window.width.current);
-      this_elm.find('.disp_measure').removeClass('active');
 
     }/*_changeImgSrc*/,
 
 
 
     changeMode: function (new_mode) {
-      //モード切替処理
       var this_obj = this;
       var this_elm = this.element;
       var this_opts = this.options;
@@ -336,7 +337,7 @@
       var tmp_the_series = this_obj.getSeriesObjectById(seriesId);
 
       //set window info
-      this_opts.viewer.window = new Object();
+      this_opts.viewer.window = {};
       this_opts.viewer.window = $.extend(true,this_opts.viewer.window,tmp_the_series.window);
 
       this_elm.find('.image_window_level').val(this_opts.viewer.window.level.current);
@@ -403,10 +404,10 @@
       //キャンバス要素群生成
       var createCanvas = function () {
         var tmp_elm = '';
-        tmp_elm = tmp_elm + '<div  class="img_wrap">'; //画像枠,入れ子を作るので開始タグのみ
+        tmp_elm = tmp_elm + '<div class="img_wrap">'; //画像枠,入れ子を作るので開始タグのみ
         tmp_elm = tmp_elm + '<canvas class="canvas_elm series_image_elm"></canvas>';//dicom img
         tmp_elm = tmp_elm + '<canvas class="canvas_elm canvas_main_elm"></canvas>';//draw label
-        tmp_elm = tmp_elm + '<div  class="mouse_cover"></div>';//マウス挙動キャッチ用要素
+        tmp_elm = tmp_elm + '<div class="mouse_cover"></div>';//マウス挙動キャッチ用要素
         tmp_elm = tmp_elm + '</div>';//画像枠,閉じタグ
         this_elm.append(tmp_elm);
         delete    tmp_elm;
@@ -416,7 +417,7 @@
 
       //ウインドウレベル・サイズ変更パネル
       if (this_opts.viewer.elements.window.panel === true) {
-        var tmp_elm = '<div  class="image_window_controller_wrap"><p class="btn_open">L:<span  class="win_lv_label">' + this_opts.viewer.window.level.current + '</span>\
+        var tmp_elm = '<div class="image_window_controller_wrap"><p class="btn_open">L:<span  class="win_lv_label">' + this_opts.viewer.window.level.current + '</span>\
           /  W:<span  class="win_width_label">' + this_opts.viewer.window.width.current + '</span></p>\
           <p class="btn_close"></p><ul class="image_window_controller">';
 
@@ -445,8 +446,8 @@
       //枚数送り関連要素
       if (this_opts.viewer.elements.slider.panel === true) {
         //スライダー
-        var tmp_elm = '<div  class="btn_prev  common_btn">Prev</div><div  class="slider_outer">\
-        <div  class="slider_elm"></div></div><div  class="btn_next  common_btn">Next</div><div  class="clear">&nbsp;</div>';
+        var tmp_elm = '<div class="btn_prev  common_btn">Prev</div><div class="slider_outer">\
+        <div class="slider_elm"></div></div><div class="btn_next common_btn">Next</div><div class="clear">&nbsp;</div>';
         this_elm.prepend(tmp_elm);
         delete    tmp_elm;
       }
@@ -467,7 +468,7 @@
 
       //ズーム機能関連要素
       if (this_opts.viewer.elements.zoom.panel === true) {
-        var tmp_elm = '<div  class="img_toolbar_wrap"><ul class="img_toolbar">\
+        var tmp_elm = '<div class="img_toolbar_wrap"><ul class="img_toolbar">\
                       <li class="toolbar_btn  ico_detail_sprite ico_detail_sprite_resize_large"></li>\
                       <li class="toolbar_btn  ico_detail_sprite ico_detail_sprite_resize_short"></li>\
                     </ul></div>';
@@ -505,7 +506,7 @@
 
     deleteLabelObject: function (series_id, label_id) {
       var this_obj = this;
-      var this_opts = this.options
+      var this_opts = this.options;
       var target_series = this_obj.getSeriesObjectById(series_id);
       for (var i = 0; i < target_series.label.length; i++) {
         if (target_series.label[i].id === label_id) {
@@ -541,43 +542,61 @@
       var this_obj = this;
       var this_elm = this.element;
       var this_opts = this.options;
-      var guide_horizontal = this_obj.getGuide('horizontal');
-      var guide_vertical =  this_obj.getGuide('vertical');
       var tmp_ctx = this_elm.find('.canvas_main_elm').get(0).getContext('2d');
       var guide_hall_size = 0.1;
+
+      var guide_horizontal = this_obj.getGuide('horizontal');
+      var guide_vertical =  this_obj.getGuide('vertical');
+
       var guide_start_x = (guide_horizontal.number + 0.5 - this_opts.viewer.position.sx) * this_opts.viewer.position.dw / this_opts.viewer.position.sw || 0;
       var guide_start_y = (guide_vertical.number + 0.5 - this_opts.viewer.position.sy) * this_opts.viewer.position.dh / this_opts.viewer.position.sh || 0;
 
       guide_start_x = Math.floor(guide_start_x);
       guide_start_y = Math.floor(guide_start_y);
 
-      //draw horizontal
+      //draw horizontal position (not horizontal line)
       if (guide_horizontal.show === true && guide_horizontal.number - this_opts.viewer.position.sx >= 0) {
         tmp_ctx.beginPath();
-        tmp_ctx.strokeStyle = '#' + guide_horizontal.color;
-        tmp_ctx.lineWidth = 1;
-        tmp_ctx.moveTo(guide_start_x, 0);
-        tmp_ctx.lineTo(guide_start_x, guide_start_y - this_opts.viewer.position.dh*guide_hall_size);
-        tmp_ctx.moveTo(guide_start_x, guide_start_y + this_opts.viewer.position.dh*guide_hall_size);
-        tmp_ctx.lineTo(guide_start_x, this_opts.viewer.position.dh);
-        tmp_ctx.moveTo(guide_start_x, 0);
+        tmp_ctx.fillStyle = '#' + guide_horizontal.color;
+        tmp_ctx.rect(
+          guide_start_x,
+          0,
+          1,
+          guide_start_y - this_opts.viewer.position.dh*guide_hall_size
+        );
+
+        tmp_ctx.rect(
+          guide_start_x,
+          guide_start_y + this_opts.viewer.position.dh*guide_hall_size,
+          1,
+          this_opts.viewer.position.dh - guide_start_y + this_opts.viewer.position.dh*guide_hall_size
+        );
+        tmp_ctx.fill();
         tmp_ctx.closePath();
-        tmp_ctx.stroke();
       }
 
-      //draw vertical
+      //draw vertical position (not vertical line)
       if (guide_vertical.show === true && guide_vertical.number - this_opts.viewer.position.sy >= 0) {
         tmp_ctx.beginPath();
-        tmp_ctx.strokeStyle = '#' + guide_vertical.color;
-        tmp_ctx.lineWidth = 1;
-        tmp_ctx.moveTo(0, guide_start_y);
-        tmp_ctx.lineTo(guide_start_x - this_opts.viewer.position.dw*guide_hall_size, guide_start_y);
-        tmp_ctx.moveTo(guide_start_x + this_opts.viewer.position.dw*guide_hall_size, guide_start_y);
-        tmp_ctx.lineTo(this_opts.viewer.position.dw, guide_start_y);
-        tmp_ctx.moveTo(0, guide_start_y);
-        tmp_ctx.closePath();
-        tmp_ctx.stroke();
+        tmp_ctx.fillStyle = '#' + guide_vertical.color;
+        tmp_ctx.rect(
+           0,
+           guide_start_y,
+           guide_start_x - this_opts.viewer.position.dw*guide_hall_size,
+           1
+        );
+
+        tmp_ctx.fillStyle = '#' + guide_vertical.color;
+        tmp_ctx.rect(
+      		  guide_start_x + this_opts.viewer.position.dw*guide_hall_size,
+              guide_start_y,
+              this_opts.viewer.position.dw - guide_start_x - this_opts.viewer.position.dw*guide_hall_size,
+              1
+           );
+           tmp_ctx.fill();
+           tmp_ctx.closePath();
       }
+      this_obj._disableImageAlias(tmp_ctx, false);
 
     },//drawGuide
 
@@ -669,8 +688,8 @@
       var point_02 = this_obj._calculateRotatePoint(rotate_params.angle+Math.PI, rotate_params.length, rotate_params.position_x,rotate_params.position_y);
 
       var tmp_ctx = this_elm.find('.canvas_main_elm').get(0).getContext('2d');
-      tmp_ctx.strokeStyle = rotate_params.color;
-      tmp_ctx.fillStyle = rotate_params.color;
+      tmp_ctx.strokeStyle = '#' + rotate_params.color;
+      tmp_ctx.fillStyle = '#' + rotate_params.color;
 
       //中心点
       tmp_ctx.beginPath();

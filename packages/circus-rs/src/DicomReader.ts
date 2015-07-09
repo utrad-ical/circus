@@ -115,6 +115,15 @@ class DicomReader {
 		return null;
 	}
 
+	/**
+	 *  Returns the number of loaded volumes.
+	 */
+	public length(): number {
+		var count = 0;
+		for (var s in this.cache) count++;
+		return count;
+	}
+
 	// read header/image from DICOM data.
 	public readData(series: string, params: any, callback: any): void
 	{

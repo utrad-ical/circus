@@ -25,9 +25,11 @@ logger.info('Loading modules...');
 
 import Metadata = require('./Metadata');
 import MPR = require('./MPR');
+import ServerStatus = require('./ServerStatus');
 
 var metadataModule = new Metadata(null);
 var mprModule = new MPR(config.mpr);
+var serverStatus = new ServerStatus(null);
 
 // create DICOM Reader
 import DicomReader = require('./DicomReader');
@@ -39,7 +41,10 @@ var r = prepareRouter();
 
 // create server process
 var server = http.createServer(function(req, res) {
-    r(req, res, finalhandler(req, res));
+	logger.info(req.url);
+	r(req, res, finalhandler(req, res, {onerror: err => {
+		logger.info(err.toString());
+	}}));
 });
 server.listen(config.port);
 
@@ -57,7 +62,9 @@ function prepareRouter(): any
 	router.get('/MPR', function(req, res) {
 		mprModule.process(req, res, reader);
 	});
-
+	router.get('/status', function(req, res) {
+		serverStatus.process(req, res, reader);
+	});
 	// TODO: append your custom module to router.
 
 	return router;

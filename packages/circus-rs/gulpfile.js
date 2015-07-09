@@ -21,7 +21,7 @@ gulp.task('less', function() {
 });
 
 gulp.task('build-browser', ['less'], function() {
-	gulp.src('src/browser/*.js')
+	gulp.src('src/browser/*.{js,png,gif}')
 		.pipe(gulp.dest('build/browser'));
 });
 

@@ -12,6 +12,8 @@ var logger = Logger.prepareLogger();
 
 export = ServerStatus;
 
+var startUpTime: Date = new Date(); // The time this module was loaded
+
 class ServerStatus extends DicomServerModule {
 
 	public process(req: http.ServerRequest, res: http.ServerResponse, reader: DicomReader): void
@@ -23,10 +25,12 @@ class ServerStatus extends DicomServerModule {
 				count: reader.length()
 			},
 			process: {
-				memoryUsage: process.memoryUsage()
+				memoryUsage: process.memoryUsage(),
+				upTime: process.uptime(),
+				upSince: startUpTime.toISOString()
 			}
 		};
-		res.write(JSON.stringify(status, null, '  '));
+		res.end(JSON.stringify(status, null, '  '));
 	}
 
 }

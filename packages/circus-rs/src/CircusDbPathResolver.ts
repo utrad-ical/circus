@@ -8,6 +8,9 @@ import path = require('path');
 import crypto = require('crypto');
 import Promise = require('bluebird');
 
+import Logger = require('./Logger');
+var logger = Logger.prepareLogger();
+
 import PathResolver = require('./PathResolver');
 
 export = CircusDbPathResolver;
@@ -21,7 +24,7 @@ class CircusDbPathResolver extends PathResolver {
 	protected initialize() {
 		// read configuration file
 		this.mongoconfig = JSON.parse(fs.readFileSync(this.config.configPath, 'utf8'));
-		console.log('Loaded MongoDB Configuration.');
+		logger.info('Loaded MongoDB Configuration.');
 	}
 
 	public resolvePath(seriesUID: string, callback: (dir: string) => void): void {
@@ -46,7 +49,7 @@ class CircusDbPathResolver extends PathResolver {
 				callback(dcmdir);
 			})
 			.catch((err: any) => {
-				console.log('DB Error: ' + err);
+				logger.error('DB Error: ' + err);
 				if (this.db) {
 					this.db.close();
 					this.db = null;

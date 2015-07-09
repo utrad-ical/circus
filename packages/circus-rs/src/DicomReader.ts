@@ -15,7 +15,6 @@ class DicomReader {
 
 	private lru: Array<string> = [];
 	private cache: { [seriesUID: string]: RawData } = {};
-	private threshold: number;
 	private execCounter: number = 0;
 	private resolver: PathResolver;
 	private dumper: DicomDumper;
@@ -57,7 +56,7 @@ class DicomReader {
 	}
 
 	/**
-	 * update cache entry LRU.
+	 * update cache entry LRU
 	 *
 	 * key: key name of last used object.
 	 */
@@ -78,7 +77,6 @@ class DicomReader {
 	public put(key: string, rawData: RawData): void {
 		this.cache[key] = rawData;
 		this.updateLru(key);
-
 		this.free();
 
 		// console.log("put [" + key + "]. lru=" + this.lru);
@@ -117,9 +115,7 @@ class DicomReader {
 	 *  Returns the number of loaded volumes.
 	 */
 	public length(): number {
-		var count = 0;
-		for (var s in this.cache) count++;
-		return count;
+		return this.lru.length;
 	}
 
 	// read header/image from DICOM data.
@@ -127,7 +123,7 @@ class DicomReader {
 	{
 		if (this.execCounter > 0) {
 			//logger.trace('waiting... ');
-			setTimeout(function(){ this.readData(series, params, callback) }.bind(this), 500);
+			setTimeout(() => this.readData(series, params, callback), 500);
 			return;
 		}
 

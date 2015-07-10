@@ -3,7 +3,7 @@ import path = require('path');
 import fs = require('fs');
 import crypto = require('crypto');
 
-import Logger = require('./Logger');
+import Logger = require('../Logger');
 var logger = Logger.prepareLogger();
 
 export = StaticPathResolver;

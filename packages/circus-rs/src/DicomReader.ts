@@ -4,7 +4,7 @@
 
 import RawData = require('./RawData');
 import DicomDumper = require('./DicomDumper');
-import PathResolver = require('./PathResolver');
+import PathResolver = require('./path-resolver/PathResolver');
 
 import Logger = require('./Logger');
 var logger = Logger.prepareLogger();
@@ -25,7 +25,7 @@ class DicomReader {
 	 * Constructor
 	 */
 	constructor(config: any) {
-		var resolverClass = require('./' + config.pathResolver.module);
+		var resolverClass = require('./path-resolver/' + config.pathResolver.module);
 		this.resolver = new resolverClass(config.pathResolver.options);
 
 		var dumperClass = require('./' + config.dumper.module);

@@ -1,5 +1,5 @@
-/// <reference path='typings/bluebird/bluebird.d.ts' />
-/// <reference path='typings/mongoose/mongoose.d.ts' />
+/// <reference path='../typings/bluebird/bluebird.d.ts' />
+/// <reference path='../typings/mongoose/mongoose.d.ts' />
 
 import mongoose = require('mongoose');
 var Schema = mongoose.Schema;
@@ -8,7 +8,7 @@ import path = require('path');
 import crypto = require('crypto');
 import Promise = require('bluebird');
 
-import Logger = require('./Logger');
+import Logger = require('../Logger');
 var logger = Logger.prepareLogger();
 
 import PathResolver = require('./PathResolver');

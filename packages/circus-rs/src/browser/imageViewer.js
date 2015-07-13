@@ -387,13 +387,13 @@
 			//mousedownから呼び出し
 			//マウス位置とガイドが重なっているかを調査して
 			//重なっていたら 1 を、そうでなければ 0 を返す
-			
-			var the_return = 0;
+
+			var the_return = '';
       var this_obj = this;
       var this_elm = this.element;
       var this_opts = this.options;
 			var guide_grid_range = 2;
-			
+
       //マウス位置取得
       var tmp_cursor_x = (e.clientX - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().left) / this_opts.viewer.position.zoom;
       var tmp_cursor_y = (e.clientY - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().top) / this_opts.viewer.position.zoom;
@@ -408,13 +408,13 @@
 			if(guide_horizontal.number-guide_grid_range < this_obj._tmpInfo.cursor.start.X && this_obj._tmpInfo.cursor.start.X < guide_horizontal.number+guide_grid_range){
 				the_return = 'horizontal';
 			}
-			
+
 			if(guide_vertical.number-guide_grid_range < this_obj._tmpInfo.cursor.start.Y &&  this_obj._tmpInfo.cursor.start.Y < guide_vertical.number+guide_grid_range){
 				the_return = 'vertical';
 			}
 
 			return the_return;
-		
+
 		},//_CheckGuideOver
 
 
@@ -1164,7 +1164,7 @@
         this_obj._mousemoveFunc(e);
       })
       .bind('mouseout', function (e) {
-       
+
         this_obj._mouseoutFunc(e);
       })
       .bind('mouseover', function (e) {
@@ -1387,12 +1387,23 @@
       var this_opts = this.options;
       this_obj._tmpInfo.cursor.start.X = e.clientX;
       this_obj._tmpInfo.cursor.start.Y = e.clientY;
-			
+
 			e.preventDefault();
 			if(e.which!=1) {
 				return
 			};
 			this_obj._tmpInfo.cursor.touch_flg = 1;
+
+			//まずガイド線の上に重なっているかを調査する
+/*			var is_on_guide = this_obj._CheckGuideOver(e);
+			if(is_on_guide !== ''){
+				this_obj._tmpInfo.mode_backup = this_opts.mode;
+				this_opts.mode = 'guide_single';
+			}else{
+				this_opts.mode = this_obj._tmpInfo.mode_backup;
+				this_obj._tmpInfo.mode_backup = '';
+			}
+*/
 
 			if (this_opts.mode === 'pan') {
         this_obj._mousedownFuncPan(e);
@@ -1411,8 +1422,8 @@
       }
 
     },//_mousedownFunc
-    
-    
+
+
     _mousedownFuncPan: function (e) {
       var this_obj = this;
       var this_elm = this.element;
@@ -1422,18 +1433,18 @@
       this_obj._tmpInfo.elementParam.start.X = this_opts.viewer.position.sx ;
       this_obj._tmpInfo.elementParam.start.Y = this_opts.viewer.position.sy ;
     },
-  
-  
-  
-  
-  
-    
-    
+
+
+
+
+
+
+
     _mousedownFuncPen: function (e) {
       var this_obj = this;
       var this_elm = this.element;
       var this_opts = this.options;
-      
+
        //一度外に出て戻ってきた場合に再び触った場合にコンテナ書き込み
        if (this_obj._tmpInfo.label.length > 0) {
        //ヒストリ
@@ -1488,13 +1499,13 @@
        }
 
     },
-  
-  
-  
-  
-  
-    
-    
+
+
+
+
+
+
+
     _mousedownFuncErase: function (e) {
       var this_obj = this;
       var this_elm = this.element;
@@ -1563,24 +1574,24 @@
       var this_obj = this;
       var this_elm = this.element;
       var this_opts = this.options;
-      
+
       //通常のペン挙動
       //ラベルを描くcanvas要素のオブジェクト
       var tmp_ctx = this_elm.find('.canvas_main_elm').get(0).getContext('2d');
-      
+
       //マウス位置
       this_obj._tmpInfo.elementParam.start.X = this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().left;
       this_obj._tmpInfo.elementParam.start.Y = this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().top;
-      
+
       //canvas要素の左端を起点としたときのマウス位置(ズーム解除状態でのXY値)
       this_obj._tmpInfo.cursor.current.X = (e.clientX - this_obj._tmpInfo.elementParam.start.X) / this_opts.viewer.position.zoom;
       this_obj._tmpInfo.cursor.current.Y = (e.clientY - this_obj._tmpInfo.elementParam.start.Y) / this_opts.viewer.position.zoom;
-      
+
       //画像トリミング分の補正 , 画像原寸の位置
       this_obj._tmpInfo.cursor.current.X = this_opts.viewer.position.sx + this_obj._tmpInfo.cursor.current.X * this_opts.viewer.position.ow / this_opts.viewer.position.dw;
       this_obj._tmpInfo.cursor.current.Y = this_opts.viewer.position.sy + this_obj._tmpInfo.cursor.current.Y * this_opts.viewer.position.oh / this_opts.viewer.position.dh;
-      
-      
+
+
       var the_active_series = this_obj.getSeriesObjectById(this_opts.viewer.activeSeriesId);
       if(typeof the_active_series.label !== 'undefined' &&  the_active_series.label.length>0) {
         var tmp_point_position = this_obj._exchangePositionCtoV([[this_obj._tmpInfo.cursor.current.X,this_obj._tmpInfo.cursor.current.Y]]);
@@ -1598,7 +1609,7 @@
       var this_obj = this;
       var this_elm = this.element;
       var this_opts = this.options;
-      
+
       //ウインドウ情報の初期値
       this_obj._tmpInfo.elementParam.start.X = this_opts.viewer.window.width.current;
       this_obj._tmpInfo.elementParam.start.Y = this_opts.viewer.window.level.current;
@@ -1610,7 +1621,7 @@
       var this_obj = this;
       var this_elm = this.element;
       var this_opts = this.options;
-      
+
       //定規モード
       //マウス位置取得
       var tmp_cursor_x = (e.clientX - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().left) / this_opts.viewer.position.zoom;
@@ -1662,7 +1673,7 @@
 						this_obj._mousemoveFuncGuide(e);
 				}
 			}else{
-				
+
 				var is_on_guide = this_obj._CheckGuideOver(e);
 				if(is_on_guide !== ''){
 					this_obj._tmpInfo.mode_backup = this_opts.mode + '';
@@ -1721,7 +1732,7 @@
 
 			tmp_x = Math.floor(tmp_x);
 			tmp_y = Math.floor(tmp_y);
-			
+
 			if (this_obj._tmpInfo.cursor.out_flg === 0) {
 
 				//ラベルを描くcanvas要素のオブジェクト
@@ -1796,9 +1807,9 @@
 
 			this_obj._setOptions();
 			this_obj._changeImgSrc();
-		
+
 		},//_mousemoveFuncWindow
-		
+
 
 
     _mousemoveFuncMeasure : function (e) {
@@ -1935,11 +1946,11 @@
       if (this_opts.mode === 'pan' || this_opts.mode === 'window') {
         this_obj._tmpInfo.cursor.touch_flg = 0;
       }
-      
+
 			if(this_obj._tmpInfo.mode_backup !== ''){
 				this_opts.mode = this_obj._tmpInfo.mode_backup;
 				this_obj._tmpInfo.mode_backup = '';
-			}			
+			}
     },//_mouseoutFunc
 
 
@@ -2004,12 +2015,12 @@
 
 				this_elm.trigger('onGuideChange',[this_opts.viewer.orientation,this_obj._tmpInfo.cursor.current.X,this_obj._tmpInfo.cursor.current.Y]);
       }
-      
+
 			if(this_obj._tmpInfo.mode_backup !== ''){
 				this_opts.mode = this_obj._tmpInfo.mode_backup;
 				this_obj._tmpInfo.mode_backup = '';
-			}			
-			
+			}
+
     },//_mouseupFunc
 
 

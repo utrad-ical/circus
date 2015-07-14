@@ -81,10 +81,10 @@ class ObliqueAction extends DicomServerModule {
                 out_width = raw.x;
                 out_height = raw.y;
 
-                // �Ƃ肠����axial��1���ڂ��o��
+                // とりあえずaxialの1枚目を出力
                 buffer = MPR.makeAxial(raw, target, window_width, window_level);
 
-                // �w�b�_�͓K���B
+                // ヘッダは適当。
                 res.setHeader('X-Circus-Pixel-Size', '0.5');
                 res.setHeader('X-Circus-Pixel-Columns', '512');
                 res.setHeader('X-Circus-Pixel-Rows', '512');

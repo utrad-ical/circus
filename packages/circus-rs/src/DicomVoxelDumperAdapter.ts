@@ -4,6 +4,9 @@
 
 var exec = require('child_process').exec;
 
+import Logger = require('./Logger');
+var logger = Logger.prepareLogger();
+
 import DicomDumper = require('./DicomDumper');
 import RawData = require('./RawData');
 
@@ -28,7 +31,11 @@ class DicomVoxelDumperAdapter extends DicomDumper {
 		var headerBufferOffset = 0;
 
 		var command = this.config.dumper + ' combined --input-path="' + dcmdir + '" --stdout';
-		var proc = exec(command, {encoding: 'binary', maxBuffer: this.config.bufferSize});
+		var proc = exec(command, {encoding: 'binary', maxBuffer: this.config.bufferSize}, null);
+
+		proc.stderr.on('data', (data) => {
+			logger.error('stderr:' + data);
+		});
 
 		proc.stdout.on('data', function (chunk) {
 
@@ -98,9 +105,9 @@ class DicomVoxelDumperAdapter extends DicomDumper {
 
 		});
 
-		proc.stdout.on('end', function () {
+		proc.stdout.on('end', () => {
 			callback(rawData);
-		}.bind(this));
+		});
 
 
 	}

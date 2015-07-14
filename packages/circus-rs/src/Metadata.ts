@@ -3,10 +3,10 @@
  */
 var url = require('url');
 
+import http = require('http');
 import RawData = require('./RawData');
 import DicomReader = require('./DicomReader');
 import DicomServerModule = require('./DicomServerModule');
-import http = require('http');
 
 import Logger = require('./Logger');
 var logger = Logger.prepareLogger();
@@ -35,7 +35,7 @@ class Metadata extends DicomServerModule {
 			return;
 		}
 
-		reader.readData(series, 'all', function(raw: RawData, error: any) {
+		reader.readData(series, 'all', (raw: RawData, error: any) => {
 			if (error) {
 				logger.warn(error);
 				res.writeHead(500);

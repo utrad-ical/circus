@@ -1,7 +1,6 @@
 /**
  * DICOM Server module prototype.
  */
-
 import DicomReader = require('./DicomReader');
 import http = require('http');
 
@@ -12,7 +11,8 @@ class DicomServerModule {
 	protected config: any = null;
 
 	constructor(config: any) {
-		this.config = config;
+
+		this.config = config || {};
 		this.initialize();
 	}
 

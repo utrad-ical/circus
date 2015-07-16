@@ -36,6 +36,17 @@
 			</ul>
 		</li>
 		<li>
+			<a href="{{{asset('share/search')}}}"><span class="share"></span>Share</a>
+			<ul>
+				<li>{{HTML::link(asset('share/search'), 'Share Search')}}</li>
+				@if (isset(Auth::user()->preferences['shareSearchPresets']))
+					@foreach(Auth::user()->preferences['shareSearchPresets'] as $index => $val)
+						<li>{{HTML::link(asset('share/search/' . $index), $val['save_label'])}}</li>
+					@endforeach
+				@endif
+			</ul>
+		</li>
+		<li>
 			<a href="{{{asset('/admin')}}}"><span class="admin"></span>Admin</a>
 			<ul>
 				<li>{{HTML::link(asset('administration/group'), 'Group')}}</li>

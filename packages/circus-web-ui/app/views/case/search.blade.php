@@ -52,7 +52,7 @@
 			if (ret == null){
 				alert('Please display the save label name.');
 			} else {
-				sendAjax("{{asset('case/save_search')}}", setAjaxSearchVal("btnSave", {"name":"save_label","value":ret}));
+				sendAjax("{{asset($prefix.'/save_search')}}", setAjaxSearchVal("btnSave", {"name":"save_label","value":ret}));
 			}
 			return false;
 		});
@@ -62,7 +62,7 @@
 			var target_elm = $('#result_case_list');
 			var btnName = arguments[1] ? arguments[1] : "btnSearch";
 			var sendData = setAjaxSearchVal(btnName);
-			sendAjax("{{asset('case/search_result')}}", sendData, target_elm);
+			sendAjax("{{asset($prefix.'/search_result')}}", sendData, target_elm);
 			$('#temporaly_form').remove();
 			return false;
 		});
@@ -193,14 +193,14 @@
 @stop
 
 @section('title')
-Case Search
+{{{ucfirst($prefix)}}} Search
 @stop
 
 @section('content')
 <div class="search_form_wrap">
 	<h2 class="con_ttl">Search Condition</h2>
 	<div id="search_condition_outer">
-		{{Form::open(['url' => asset('case/search'), 'method' => 'POST', 'class' => 'common_form', 'id' => 'form_case_search'])}}
+		{{Form::open(['url' => asset('$prefix/search'), 'method' => 'POST', 'class' => 'common_form', 'id' => 'form_case_search'])}}
 			{{Form::hidden('search_mode', isset($inputs['search_mode']) ? $inputs['search_mode'] : 0, array('id' => 'search_mode'))}}
 			<table class="common_table al_l mar_b_10">
 				<colgroup>

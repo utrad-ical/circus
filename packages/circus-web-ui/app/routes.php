@@ -69,6 +69,14 @@ Route::group(['before' => 'auth'], function() {
 		return CommonHelper::downloadZip(storage_path('cache').'/'.$inputs['dir_name'], $inputs['file_name']);
 	});
 
+	//Share
+	Route::get('share/search/{preset_id}', 'ShareSearchController@search')
+		 ->where('preset_id', '^\\d+$');
+	Route::get('share/search', 'ShareSearchController@search');
+	Route::post('share/search', 'ShareSearchController@search');
+	Route::any('share/search_result', 'ShareSearchController@search_ajax');
+	Route::any('share/save_search', 'ShareSearchController@save_search');
+
 	// Administration
 	$staticView('admin', 'admin.index');
 	Route::get('administration/{adminkind}', 'AdministrationController@index')

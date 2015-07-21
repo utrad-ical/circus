@@ -246,13 +246,10 @@ class ClinicalCase extends BaseModel {
 	 * @param Array $inputs 入力値
 	 * @param integer $preset_id 保存検索番号
 	 */
-	public static function searchCase($inputs, $preset_id = false) {
+	public static function searchCase($search_data, $preset_id = false) {
 		$result = array();
 		$search_flg = false;
-		$inputs['preset_id'] = $preset_id;
 		$result['project_list'] = Auth::user()->listAccessibleProjects(Project::AUTH_TYPE_READ, true);
-		self::setSearchData($inputs);
-		$search_data = Session::get('case.search');
 
 		if ($search_data) {
 			$search_flg = true;
@@ -265,7 +262,7 @@ class ClinicalCase extends BaseModel {
 											$list_count,
 											$search_data['disp']);
 			$search_data['case_attributes'] = json_encode(
-												self::getProjectCaseAttribute(json_decode($search_data['project'], true))
+											      self::getProjectCaseAttribute(json_decode($search_data['project'], true))
 											  );
 		} else {
 			$search_data['project'] = json_encode("");
@@ -279,49 +276,11 @@ class ClinicalCase extends BaseModel {
 	}
 
 	/**
-	 * 検索条件設定
-	 * @param Array $inputs 入力値
-	 * @author stani
-	 * @since 2015/03/20
-	 */
-	private static function setSearchData($inputs) {
-		if (array_key_exists('btnReset', $inputs) !== false || !$inputs) {
-			Session::forget('case.search');
-		//Search button is pressed during
-		} else if (array_key_exists ('btnSearch', $inputs) !== false) {
-			if (array_key_exists('disp', $inputs) === false) $inputs['disp'] = Config::get('const.page_display');
-			if (array_key_exists('sort', $inputs) === false) $inputs['sort'] = 'updateTime';
-			if (array_key_exists('order_by', $inputs) === false) $inputs['order_by'] = 'desc';
-			Session::put('case.search', $inputs);
-		} else if (array_key_exists('page', $inputs) !== false) {
-			$tmp = Session::get('case.search');
-			$tmp['perPage'] = $inputs['page'];
-			Session::put('case.search', $tmp);
-		} else if ($inputs['preset_id'] !== false) {
-			$presets = Auth::user()->preferences['caseSearchPresets'];
-			$detail_search = $presets[$inputs['preset_id']];
-			$detail_search['disp'] = Config::get('const.page_display');
-			$detail_search['sort'] = 'updateTime';
-			$detail_search['order_by'] = 'desc';
-			Session::put('case.search', $detail_search);
-		} else if (array_key_exists('btnBack', $inputs) === false) {
-			Session::forget('case.search');
-		}
-	}
-
-	public static function getCaseAttribute($inputs) {
-		if (!array_key_exists('projectID', $inputs))
-			throw new Exception('Please specify the project .');
-
-		return self::getProjectCaseAttribute(array($inputs['projectID']));
-	}
-
-	/**
 	 * get the caseAttributesScheme of the project
 	 * @param Json $projects selected projects
 	 * @return Json the createAttributesSchema of the project
 	 */
-	private static function getProjectCaseAttribute($projects) {
+	public static function getProjectCaseAttribute($projects) {
 		if (count($projects) === 1) {
 			$project = Project::find($projects[0]);
 			if ($project->caseAttributesSchema) {

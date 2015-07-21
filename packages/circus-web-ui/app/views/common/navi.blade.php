@@ -39,8 +39,8 @@
 			<a href="{{{asset('share/search')}}}"><span class="share"></span>Share</a>
 			<ul>
 				<li>{{HTML::link(asset('share/search'), 'Share Search')}}</li>
-				@if (isset(Auth::user()->preferences['shareSearchPresets']))
-					@foreach(Auth::user()->preferences['shareSearchPresets'] as $index => $val)
+				@if (isset(Auth::user()->preferences['caseSearchPresets']))
+					@foreach(Auth::user()->preferences['caseSearchPresets'] as $index => $val)
 						<li>{{HTML::link(asset('share/search/' . $index), $val['save_label'])}}</li>
 					@endforeach
 				@endif

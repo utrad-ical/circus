@@ -9,6 +9,16 @@ var logger = Logger.prepareLogger();
 
 export = Oblique;
 
+interface ObliqueResult {
+	buffer: Buffer;
+	width:  number;
+	height: number;
+	pixel_size: number;
+	center_x: number;
+	center_y: number;
+}
+
+
 class Oblique  {
 
 	private static _getArrayValueWithApplyWindow(raw: RawData, pos_x: number, pos_y: number, pos_z: number,
@@ -54,7 +64,7 @@ class Oblique  {
 	/////////////////////////////////////////////
 
 	public static makeSingleOblique(raw: RawData, base_axis: string, center: [number, number, number], alpha: number,
-									window_width: number, window_level: number): [Buffer, number, number, number, number, number] {
+									window_width: number, window_level: number): ObliqueResult {
 
 		var eu_x:number = 0.0;
 		var eu_y:number = 0.0;
@@ -67,44 +77,43 @@ class Oblique  {
 		var origin_z:number = Math.floor(raw.z/2);
 		var dst_img_width:number  = 0;
 		var dst_img_height:number = 0;
-		var dst_pixel_size:number = Math.min(raw.vx, Math.min(raw.vy, raw.vz));
+		var pixel_size:number = Math.min(raw.vx, Math.min(raw.vy, raw.vz));
 		var dw:number = 0.0;
 		var offset;
-		var buffer_offset = 0;
 
 		// Set parameters
 	    if (base_axis == 'axial') {
 			var dw = Math.sqrt(Math.pow(raw.x * raw.vx, 2.0) + Math.pow(raw.y * raw.vy, 2.0));
-			dst_img_width  = 2 * Math.floor(dw / dst_pixel_size);
-			dst_img_height = 2 * Math.floor(raw.z * raw.vz / dst_pixel_size);
+			dst_img_width  = 2 * Math.floor(dw / pixel_size);
+			dst_img_height = 2 * Math.floor(raw.z * raw.vz / pixel_size);
 
-			eu_x = Math.cos(alpha) * dst_pixel_size / raw.vx;
-			eu_y = -1.0 * Math.sin(alpha) * dst_pixel_size / raw.vy;
-			ev_z = dst_pixel_size / raw.vz;
+			eu_x = Math.cos(alpha) * pixel_size / raw.vx;
+			eu_y = -1.0 * Math.sin(alpha) * pixel_size / raw.vy;
+			ev_z = pixel_size / raw.vz;
 			origin_x = center[0] - eu_x * 0.5 * dst_img_width;
 			origin_y = center[1] - eu_y * 0.5 * dst_img_width;
 			origin_z = center[2] - ev_z * 0.5 * dst_img_height;
 
 		} else if (base_axis == 'coronal') {
 			var dw = Math.sqrt(Math.pow(raw.x * raw.vx, 2.0) + Math.pow(raw.z * raw.vz, 2.0));
-			dst_img_width  = 2 * Math.floor(dw / dst_pixel_size);
-			dst_img_height = 2 * Math.floor(raw.y * raw.vy / dst_pixel_size);
+			dst_img_width  = 2 * Math.floor(dw / pixel_size);
+			dst_img_height = 2 * Math.floor(raw.y * raw.vy / pixel_size);
 
-			eu_x = Math.cos(alpha) * dst_pixel_size / raw.vx;
-			eu_z = -1.0 * Math.sin(alpha) * dst_pixel_size / raw.vz;
-			ev_y = dst_pixel_size / raw.vy;
+			eu_x = Math.cos(alpha) * pixel_size / raw.vx;
+			eu_z = -1.0 * Math.sin(alpha) * pixel_size / raw.vz;
+			ev_y = pixel_size / raw.vy;
 			origin_x = center[0] - eu_x * 0.5 * dst_img_width;
 			origin_y = center[1] - ev_y * 0.5 * dst_img_height;
 			origin_z = center[2] - eu_z * 0.5 * dst_img_width;
 
 		} else if (base_axis == 'sagittal') {
 			var dw = Math.sqrt(Math.pow(raw.y * raw.vy, 2.0) + Math.pow(raw.z * raw.vz, 2.0));
-			dst_img_width  = 2 * Math.floor(raw.x * raw.vx / dst_pixel_size);
-			dst_img_height = 2 * Math.floor(dw / dst_pixel_size);
+			dst_img_width  = 2 * Math.floor(raw.x * raw.vx / pixel_size);
+			dst_img_height = 2 * Math.floor(dw / pixel_size);
 
-			eu_x = dst_pixel_size / raw.vx;
-			ev_y = Math.cos(alpha) * dst_pixel_size / raw.vy;
-			ev_z = -1.0 * Math.sin(alpha) * dst_pixel_size / raw.vz;
+			eu_x = pixel_size / raw.vx;
+			ev_y = Math.cos(alpha) * pixel_size / raw.vy;
+			ev_z = -1.0 * Math.sin(alpha) * pixel_size / raw.vz;
 
 			origin_x = center[0] - eu_x * 0.5 * dst_img_width;
 			origin_y = center[1] - ev_y * 0.5 * dst_img_height;
@@ -124,7 +133,8 @@ class Oblique  {
 		var max_x = 0;
 		var max_y = 0;
 
-		var buffer = new Buffer(dst_img_width * dst_img_height);
+		var initial_buffer = new Buffer(dst_img_width * dst_img_height);
+		var initial_buffer_offset = 0;
 
 		for (var j = 0; j < dst_img_height; j++) {
 			var pos_x = x;
@@ -149,8 +159,8 @@ class Oblique  {
 				} else {
 					value = 0;
 				}
-				buffer.writeUInt8(value, buffer_offset);
-				buffer_offset++;
+				initial_buffer.writeUInt8(value, initial_buffer_offset);
+				initial_buffer_offset++;
 
 				pos_x += eu_x;
 				pos_y += eu_y;
@@ -162,24 +172,24 @@ class Oblique  {
 		}
 
 		// Cropping
-		var cropped_width  = max_x - min_x + 1;
-		var cropped_height = max_y - min_y + 1;
-		var dst_center_x = dst_img_width / 2 - min_x;
-		var dst_center_y = dst_img_height / 2 - min_y;
+		var width  = max_x - min_x + 1;
+		var height = max_y - min_y + 1;
+		var center_x = dst_img_width / 2 - min_x;
+		var center_y = dst_img_height / 2 - min_y;
 
-		var cropped_buffer = new Buffer(cropped_width * cropped_height);
-		var cropped_buffer_offset = 0;
-		buffer_offset = 0;
+		var buffer = new Buffer(width * height);
+		var buffer_offset = 0;
+		initial_buffer_offset = 0;
 
 		for (var j = 0; j < dst_img_height; j++) {
 			for (var i = 0; i < dst_img_width; i++) {
 				if (j >= min_y && j <= max_y && i >= min_x && i <= max_x) {
-					cropped_buffer.writeUInt8(buffer.readUInt8(buffer_offset), cropped_buffer_offset);
-					cropped_buffer_offset++;
+					buffer.writeUInt8(initial_buffer.readUInt8(initial_buffer_offset), buffer_offset);
+					buffer_offset++;
 				}
-				buffer_offset++;
+				initial_buffer_offset++;
 			}
 		}
-		return [cropped_buffer, cropped_width, cropped_height, dst_center_x, dst_center_y, dst_pixel_size];
+		return {buffer, width, height, pixel_size, center_x, center_y}
 	}
 }

@@ -49,6 +49,79 @@ class RawData {
 	}
 
 	/**
+	 * get pixel value using bilinear interpolation (from axial axis)
+	 *
+	 * z: series image number(0 based)
+	 * offset: pixel position (y * width + x)
+	 */
+	public getPixelFromAxialWithInterpolation(x: number, y: number, z: number): number {
+
+		var ix = Math.floor(x);
+		var iy = Math.floor(y);
+		var iz = Math.floor(z);
+		var x_end = this.x - 1;
+		var y_end = this.y - 1;
+
+		if (ix >= x_end) {
+			ix = x_end - 1;
+		}
+
+		if (iy >= y_end) {
+			iy = y_end - 1;
+		}
+
+		var ixp1 = ix + 1;
+		var iyp1 = iy + 1;
+
+		if (!this.dataFlag[iz]) {
+			console.log("error");
+			return 0;
+		}
+
+		var buf = this.data[iz];
+		var p0 = 0;
+		var p1 = 0;
+		var p2 = 0;
+		var p3 = 0;
+		var weight_x2 = x - ix;
+		var weight_x1 = 1.0 - weight_x2;
+		var weight_y2 = y - iy;
+		var weight_y1 = 1.0 - weight_y2;
+
+		switch (this.type) {
+			case 0:
+				p0 = buf.readUInt8(ix   + iy   * this.x);
+				p1 = buf.readUInt8(ixp1 + iy   * this.x);
+				p2 = buf.readUInt8(ix   + iyp1 * this.x);
+				p3 = buf.readUInt8(ixp1 + iyp1 * this.x);
+				break;
+			case 1:
+				p0 = buf.readInt8(ix   + iy   * this.x);
+				p1 = buf.readInt8(ixp1 + iy   * this.x);
+				p2 = buf.readInt8(ix   + iyp1 * this.x);
+				p3 = buf.readInt8(ixp1 + iyp1 * this.x);
+				break;
+			case 2:
+				p0 = buf.readUInt16LE((ix   + iy   * this.x) * 2);
+				p1 = buf.readUInt16LE((ixp1 + iy   * this.x) * 2);
+				p2 = buf.readUInt16LE((ix   + iyp1 * this.x) * 2);
+				p3 = buf.readUInt16LE((ixp1 + iyp1 * this.x) * 2);
+				break;
+			case 3:
+			default:
+				p0 = buf.readInt16LE((ix   + iy   * this.x) * 2);
+				p1 = buf.readInt16LE((ixp1 + iy   * this.x) * 2);
+				p2 = buf.readInt16LE((ix   + iyp1 * this.x) * 2);
+				p3 = buf.readInt16LE((ixp1 + iyp1 * this.x) * 2);
+				break;
+		}
+
+		var value_y1 = p0 * weight_x1 + p1 * weight_x2;
+		var value_y2 = p2 * weight_x1 + p3 * weight_x2;
+		return (value_y1 * weight_y1 + value_y2 * weight_y2);
+	}
+
+	/**
 	 * set pixel dimension and allocate array.
 	 */
 	public setDimension(): void {

@@ -114,8 +114,6 @@ class Oblique  {
 		}
 		//console.log(dst_img_width + ', ' + dst_img_height);
 
-		console.time('timerA');
-
 		// Create oblique image
 		var x = origin_x;
 		var y = origin_y;
@@ -129,9 +127,9 @@ class Oblique  {
 		var buffer = new Buffer(dst_img_width * dst_img_height);
 
 		for (var j = 0; j < dst_img_height; j++) {
-			var pos_x = origin_x;
-			var pos_y = origin_y;
-			var pos_z = origin_z;
+			var pos_x = x;
+			var pos_y = y;
+			var pos_z = z;
 
 			for (var i = 0; i < dst_img_width; i++) {
 
@@ -163,9 +161,6 @@ class Oblique  {
 			z += ev_z;
 		}
 
-		console.timeEnd('timerA');
-		console.time('timerB');
-
 		// Cropping
 		var cropped_width  = max_x - min_x + 1;
 		var cropped_height = max_y - min_y + 1;
@@ -185,10 +180,6 @@ class Oblique  {
 				buffer_offset++;
 			}
 		}
-
-		console.timeEnd('timerB');
-
-
 		return [cropped_buffer, cropped_width, cropped_height, dst_center_x, dst_center_y, dst_pixel_size];
 	}
 }

@@ -93,8 +93,9 @@ class CaseDetailController extends BaseController {
 
 			//JsonFile read
 			$result['server_url'] = Helper\ConfigHelper::getServerConfig();
+			$result['backUrl'] = Session::get('backUrl');
 		} catch (Exception $e) {
-			Log::debug($e);
+			Log::error($e);
 			$result['error_msg'] = $e->getMessage();
 		}
 		return View::make('case/detail', $result);

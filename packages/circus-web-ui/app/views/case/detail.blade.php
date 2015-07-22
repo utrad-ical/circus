@@ -302,7 +302,8 @@
             $('#' + initInfo[0].wrapElementId).imageViewerController('checkUpdateLabel');
             var tmp_changed_label_num = $('#' + initInfo[0].wrapElementId).imageViewerController('changedLabelNum');
             var runBtnBackSubmit = function() {
-                $('body').append('<form action="./search" method="POST" class="hidden" id="frm_back"></form>');
+                //$('body').append('<form action="./search" method="POST" class="hidden" id="frm_back"></form>');
+                $('body').append('<form action="{{{asset($backUrl)}}}" method="POST" class="hidden" id="frm_back"></form>');
                 $('#frm_back').append('<input type="hidden" name="btnBack" value="">').submit();
             }
             if (tmp_changed_label_num == 0) {
@@ -430,12 +431,10 @@
                 return false;
             },
             success: function (res) {
-                //console.log(res);
                 if (res.status === "OK") {
                     create_dom(res.response);
                     return true;
                 }
-                //console.log(res.message);
                 return false;
             }
         });

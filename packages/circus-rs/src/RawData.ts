@@ -63,11 +63,11 @@ class RawData {
 		var y_end = this.y - 1;
 
 		if (ix >= x_end) {
-			ix = x_end - 1;
+			ix = x_end - 1;  x = x_end;
 		}
 
 		if (iy >= y_end) {
-			iy = y_end - 1;
+			iy = y_end - 1;  y = y_end;
 		}
 
 		var ixp1 = ix + 1;

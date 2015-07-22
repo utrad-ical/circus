@@ -30,25 +30,22 @@ class Oblique  {
 		var x_end = raw.x - 1;
 		var y_end = raw.y - 1;
 		var z_end = raw.z - 1;
-		var X = pos_x;
-		var Y = pos_y;
-		var Z = pos_z;
 
-		if (X < 0.0 || Y < 0.0 || Z < 0.0 || X > x_end || Y > y_end || Z > z_end) {
-			return -1;
+		if (pos_x < 0.0 || pos_y < 0.0 || pos_z < 0.0 || pos_x > x_end || pos_y > y_end || pos_z > z_end) {
+			return 0;
 		}
 
 		if (iz >= z_end) {
-			iz = z_end - 1;  Z = z_end;
+			iz = z_end - 1;  pos_z = z_end;
 		}
 
 		// trilinear interpolation
 		var izp1 = iz + 1;
-		var weight_z2 = Z - iz;
+		var weight_z2 = pos_z - iz;
 		var weight_z1 = 1.0 - weight_z2;
 
-		var z1 = raw.getPixelFromAxialWithInterpolation(X, Y, iz);
-		var z2 = raw.getPixelFromAxialWithInterpolation(X, Y, izp1);
+		var z1 = raw.getPixelFromAxialWithInterpolation(pos_x, pos_y, iz);
+		var z2 = raw.getPixelFromAxialWithInterpolation(pos_x, pos_y, izp1);
 		var interpolated_value = z1 * weight_z1 + z2 * weight_z2;
 
 		// Apply window_level, window_width
@@ -72,95 +69,148 @@ class Oblique  {
 		var ev_x:number = 0.0;
 		var ev_y:number = 0.0;
 		var ev_z:number = 0.0;
-		var origin_x:number = Math.floor(raw.x/2);
-		var origin_y:number = Math.floor(raw.y/2);
-		var origin_z:number = Math.floor(raw.z/2);
-		var dst_img_width:number  = 0;
-		var dst_img_height:number = 0;
+		var origin_x:number = 0;
+		var origin_y:number = 0;
+		var origin_z:number = 0;
+
+		var width:number  = 0;
+		var height:number = 0;
 		var pixel_size:number = Math.min(raw.vx, Math.min(raw.vy, raw.vz));
-		var dw:number = 0.0;
-		var offset;
+		var center_x = 0;
+		var center_y = 0;
 
 		// Set parameters
 	    if (base_axis == 'axial') {
-			var dw = Math.sqrt(Math.pow(raw.x * raw.vx, 2.0) + Math.pow(raw.y * raw.vy, 2.0));
-			dst_img_width  = 2 * Math.floor(dw / pixel_size);
-			dst_img_height = 2 * Math.floor(raw.z * raw.vz / pixel_size);
-
 			eu_x = Math.cos(alpha) * pixel_size / raw.vx;
 			eu_y = -1.0 * Math.sin(alpha) * pixel_size / raw.vy;
 			ev_z = pixel_size / raw.vz;
-			origin_x = center[0] - eu_x * 0.5 * dst_img_width;
-			origin_y = center[1] - eu_y * 0.5 * dst_img_width;
-			origin_z = center[2] - ev_z * 0.5 * dst_img_height;
+
+			var px = center[0];
+			var py = center[1];
+			var minus_cnt = 0;
+			var plus_cnt = 0;
+
+			while (1) {
+				px -= eu_x;
+				py -= eu_y;
+				if(px < 0.0 || py < 0.0 || px > raw.x - 1 || py > raw.y - 1)  break;
+				minus_cnt++;
+			}
+
+			origin_x = px;
+			origin_y = py;
+			center_x = minus_cnt;
+			center_y = Math.floor(center[2] * raw.vz / pixel_size);
+			px = center[0];
+			py = center[1];
+
+			while (1) {
+				px += eu_x;
+				py += eu_y;
+				if(px < 0.0 || py < 0.0 || px > raw.x - 1 || py > raw.y - 1)  break;
+				plus_cnt++;
+			}
+
+			width  = minus_cnt + plus_cnt + 1;
+			height = Math.floor(raw.z * raw.vz / pixel_size);
 
 		} else if (base_axis == 'coronal') {
-			var dw = Math.sqrt(Math.pow(raw.x * raw.vx, 2.0) + Math.pow(raw.z * raw.vz, 2.0));
-			dst_img_width  = 2 * Math.floor(dw / pixel_size);
-			dst_img_height = 2 * Math.floor(raw.y * raw.vy / pixel_size);
-
 			eu_x = Math.cos(alpha) * pixel_size / raw.vx;
 			eu_z = -1.0 * Math.sin(alpha) * pixel_size / raw.vz;
 			ev_y = pixel_size / raw.vy;
-			origin_x = center[0] - eu_x * 0.5 * dst_img_width;
-			origin_y = center[1] - ev_y * 0.5 * dst_img_height;
-			origin_z = center[2] - eu_z * 0.5 * dst_img_width;
+
+			var px = center[0];
+			var py = center[2];
+			var minus_cnt = 0;
+			var plus_cnt = 0;
+
+			while (1) {
+				px -= eu_x;
+				py -= eu_z;
+				if(px < 0.0 || py < 0.0 || px > raw.x - 1 || py > raw.z - 1)  break;
+				minus_cnt++;
+			}
+
+			origin_x = px;
+			origin_z = py;
+			center_x = minus_cnt;
+			center_y = Math.floor(center[1] * raw.vy / pixel_size);
+			px = center[0];
+			py = center[2];
+
+			while (1) {
+				px += eu_x;
+				py += eu_z;
+				if(px < 0.0 || py < 0.0 || px > raw.x - 1 || py > raw.z - 1)  break;
+				plus_cnt++;
+			}
+
+			width  = minus_cnt + plus_cnt + 1;
+			height = Math.floor(raw.y * raw.vy / pixel_size);
 
 		} else if (base_axis == 'sagittal') {
-			var dw = Math.sqrt(Math.pow(raw.y * raw.vy, 2.0) + Math.pow(raw.z * raw.vz, 2.0));
-			dst_img_width  = 2 * Math.floor(raw.x * raw.vx / pixel_size);
-			dst_img_height = 2 * Math.floor(dw / pixel_size);
-
 			eu_x = pixel_size / raw.vx;
 			ev_y = Math.cos(alpha) * pixel_size / raw.vy;
 			ev_z = -1.0 * Math.sin(alpha) * pixel_size / raw.vz;
 
-			origin_x = center[0] - eu_x * 0.5 * dst_img_width;
-			origin_y = center[1] - ev_y * 0.5 * dst_img_height;
-			origin_z = center[2] - ev_z * 0.5 * dst_img_height;
+			var px = center[1];
+			var py = center[2];
+			var minus_cnt = 0;
+			var plus_cnt = 0;
+
+			while (1) {
+				px -= ev_y;
+				py -= ev_z;
+				if(px < 0.0 || py < 0.0 || px > raw.y - 1 || py > raw.z - 1)  break;
+				minus_cnt++;
+			}
+
+			origin_y = px;
+			origin_z = py;
+			center_x = Math.floor(center[0] * raw.vx / pixel_size);
+			center_y = minus_cnt;
+			px = center[1];
+			py = center[2];
+
+			while (1) {
+				px += ev_y;
+				py += ev_z;
+				if(px < 0.0 || py < 0.0 || px > raw.x - 1 || py > raw.z - 1)  break;
+				plus_cnt++;
+			}
+
+			width  = Math.floor(raw.x * raw.vx / pixel_size);
+			height = minus_cnt + plus_cnt + 1;
+
 		} else {
 			return null;
 		}
-		//console.log(dst_img_width + ', ' + dst_img_height);
+		//console.log(img_width + ', ' + img_height);
 
 		// Create oblique image
 		var x = origin_x;
 		var y = origin_y;
 		var z = origin_z;
 
-		var min_x = dst_img_width - 1;
-		var min_y = dst_img_height - 1;
-		var max_x = 0;
-		var max_y = 0;
+		var buffer = new Buffer(width * height);
+		var buffer_offset = 0;
 
-		var initial_buffer = new Buffer(dst_img_width * dst_img_height);
-		var initial_buffer_offset = 0;
-
-		for (var j = 0; j < dst_img_height; j++) {
+		for (var j = 0; j < height; j++) {
 			var pos_x = x;
 			var pos_y = y;
 			var pos_z = z;
 
-			for (var i = 0; i < dst_img_width; i++) {
+			for (var i = 0; i < width; i++) {
 
-				var value = -1;
+				var value = 0;
 
 				if (pos_x >= 0.0 && pos_y >= 0.0 && pos_z >= 0.0
 					&& pos_x <= raw.x - 1 && pos_y <= raw.y - 1 && pos_z <= raw.z -1) {
-					offset = j * dst_img_width + i;
 					value = this._getArrayValueWithApplyWindow(raw, pos_x, pos_y, pos_z, window_width, window_level);
 				}
 
-				if (value > 0) {
-					if (i < min_x)  min_x = i;
-					if (j < min_y)  min_y = j;
-					if (max_x < i)  max_x = i;
-					if (max_y < j)  max_y = j;
-				} else {
-					value = 0;
-				}
-				initial_buffer.writeUInt8(value, initial_buffer_offset);
-				initial_buffer_offset++;
+				buffer.writeUInt8(value, buffer_offset);
+				buffer_offset++;
 
 				pos_x += eu_x;
 				pos_y += eu_y;
@@ -171,25 +221,6 @@ class Oblique  {
 			z += ev_z;
 		}
 
-		// Cropping
-		var width  = max_x - min_x + 1;
-		var height = max_y - min_y + 1;
-		var center_x = dst_img_width / 2 - min_x;
-		var center_y = dst_img_height / 2 - min_y;
-
-		var buffer = new Buffer(width * height);
-		var buffer_offset = 0;
-		initial_buffer_offset = 0;
-
-		for (var j = 0; j < dst_img_height; j++) {
-			for (var i = 0; i < dst_img_width; i++) {
-				if (j >= min_y && j <= max_y && i >= min_x && i <= max_x) {
-					buffer.writeUInt8(initial_buffer.readUInt8(initial_buffer_offset), buffer_offset);
-					buffer_offset++;
-				}
-				initial_buffer_offset++;
-			}
-		}
 		return {buffer, width, height, pixel_size, center_x, center_y}
 	}
 }

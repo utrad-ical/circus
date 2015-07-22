@@ -17,6 +17,7 @@ class CaseSearchBaseController extends BaseController {
 
 			$result = ClinicalCase::searchCase($search_data, $preset_id);
 			$result['prefix'] = $this->_prefix;
+			Session::put('backUrl', $this->_prefix.'/search');
 		} catch (Exception $e) {
 			Log::debug($e);
 			$result['error_msg'] = $e->getMessage();
@@ -89,7 +90,6 @@ class CaseSearchBaseController extends BaseController {
 			if (array_key_exists('order_by', $inputs) === false) $inputs['order_by'] = 'desc';
 			Session::put($this->_prefix.'.search', $inputs);
 		} else if (array_key_exists('page', $inputs) !== false) {
-			//$tmp = Session::get('case.search');
 			$tmp = Session::get($this->_prefix.'.search');
 			$tmp['perPage'] = $inputs['page'];
 			Session::put('case.search', $tmp);

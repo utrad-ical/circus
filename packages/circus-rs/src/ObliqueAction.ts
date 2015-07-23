@@ -23,8 +23,8 @@ class ObliqueAction extends DicomServerModule {
     protected initialize() {
         super.initialize();
 
-        var pngModule = require('./' + this.config.options.pngWriter);
-        this.pngWriter = new pngModule(this.config.options.pngWriterOptions);
+        var pngModule = require('./' + this.config.pngWriter.module);
+        this.pngWriter = new pngModule(this.config.pngWriter.options);
     }
 
     public process(req: http.ServerRequest, res: http.ServerResponse, reader: DicomReader): void

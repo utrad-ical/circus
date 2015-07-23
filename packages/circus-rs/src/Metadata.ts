@@ -17,7 +17,7 @@ class Metadata extends DicomServerModule {
 
 	public process(req: http.ServerRequest, res: http.ServerResponse, reader: DicomReader): void
 	{
-		logger.info('Metadata::process');
+		//logger.info('Metadata::process');
 
 		var u = url.parse(req.url, true);
 		var query = u.query;

@@ -31,11 +31,13 @@ import Metadata = require('./Metadata');
 import ServerStatus = require('./ServerStatus');
 import MPR = require('./MPRAction');
 import Oblique = require('./ObliqueAction');
+import Raw = require('./RawAction');
 
 var metadataModule = new Metadata(null);
-var mprModule = new MPR(config.mpr);
+var mprModule = new MPR(config);
 var serverStatus = new ServerStatus(null);
-var obliqueModule = new Oblique(config.mpr);
+var obliqueModule = new Oblique(config);
+var rawModule = new Raw(config);
 
 // create DICOM Reader
 import DicomReader = require('./DicomReader');
@@ -79,6 +81,10 @@ function prepareRouter(): any
 	router.get('/Oblique', function(req, res) {
 		Counter.countUp('Oblique');
 		obliqueModule.process(req, res, reader);
+	});
+	router.get('/raw', function(req, res) {
+		Counter.countUp('raw');
+		rawModule.process(req, res, reader);
 	});
 
 	return router;

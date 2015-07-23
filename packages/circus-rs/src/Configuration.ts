@@ -10,18 +10,23 @@ interface Configuration {
 
 	port?: number;
 
-	bufferSize?: number;
-
 	dumper: {
 		module?: string;
 		options?: any;
 	};
 
+	rawDumper: {
+		module?: string;
+		options?: any;
+	};
+
+	pngWriter: {
+		module?: string;
+		options?: any;
+	}
+
 	mpr: {
-		options: {
-			pngWriter?: string;
-			pngWriterOptions?: any;
-		}
+		options?: any
 	};
 
 	cache?: {

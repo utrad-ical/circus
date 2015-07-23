@@ -7,7 +7,6 @@ var config = {
 			useHash: false
 		}
 	},
-
 	/* OR:
 	pathResolver: {
 		module: 'CircusDbPathResolver',
@@ -36,21 +35,30 @@ var config = {
 		}
 	},
 
-	// MPR module configurations.
-	mpr: {
+	rawDumper: {
+		module: 'DicomVoxelRawDumperAdapter',
 		options: {
-			pngWriter: 'PNGWriter_pngjs',
-			pngWriterOptions: {}
+			// path for DICOM data dumper tool.
+			dumper: '<path_to_"dicom_voxel_dump"_executable_file>',
+			// stdout buffer size
+			bufferSize: 512 * 512 * 1024
 		}
+	},
+
+	pngWriter: {
+		module: 'PNGWriter_pngjs',
+		options: {}
 	},
 	/* OR:
+	 pngWriter: {
+		 module: 'PNGWriter_nodepng',
+		 options: {}
+	 },
+	 */
+
+	// MPR module configurations.
 	mpr: {
-		options: {
-			pngWriter: 'PNGWriter_nodepng',
-			pngWriterOptions: {}
-		}
 	},
-	*/
 
 	cache: {
 		/*

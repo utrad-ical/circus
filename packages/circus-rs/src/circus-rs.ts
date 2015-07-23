@@ -41,7 +41,13 @@ var rawModule = new Raw(config);
 
 // create DICOM Reader
 import DicomReader = require('./DicomReader');
-var reader = new DicomReader(config);
+var reader = (() => {
+	var resolverClass = require('./path-resolver/' + config.pathResolver.module);
+	var resolver = new resolverClass(config.pathResolver.options);
+	var dumperClass = require('./' + config.dumper.module);
+	var dumper = new dumperClass(config.dumper.options);
+	return new DicomReader(resolver, dumper, config.cache.memoryThreshold);
+})();
 
 // setup routing
 var Router = require('router');

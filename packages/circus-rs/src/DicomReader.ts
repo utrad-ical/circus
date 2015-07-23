@@ -24,14 +24,11 @@ class DicomReader {
 	/**
 	 * Constructor
 	 */
-	constructor(config: any) {
-		var resolverClass = require('./path-resolver/' + config.pathResolver.module);
-		this.resolver = new resolverClass(config.pathResolver.options);
+	constructor(resolver: PathResolver, dumper: DicomDumper, memoryThreshold: number) {
+		this.dumper = dumper;
+		this.resolver = resolver;
 
-		var dumperClass = require('./' + config.dumper.module);
-		this.dumper = new dumperClass(config.dumper.options);
-
-		this.memoryThreshold = config.cache.memoryThreshold;
+		this.memoryThreshold = memoryThreshold;
 	}
 
 	/**

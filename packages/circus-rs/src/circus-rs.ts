@@ -14,7 +14,9 @@ var argv = require('minimist')(process.argv.slice(2));
 
 // include config modules
 var configFile = typeof argv.config === 'string' ? argv.config : '../config';
-var config: any = require(configFile);
+process.env.NODE_CONFIG_DIR = __dirname + '/../config';
+import Configuration = require('Configuration');
+var config: Configuration = require('config');
 
 import Logger = require('./Logger');
 var logger = Logger.prepareLogger();

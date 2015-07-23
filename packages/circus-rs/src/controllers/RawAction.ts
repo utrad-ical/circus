@@ -3,15 +3,13 @@
  */
 var url = require('url');
 
-import RawData = require('./RawData');
-import DicomReader = require('./DicomReader');
-import DicomRawDumper = require('./DicomRawDumper');
-import DicomServerModule = require('./controllers/DicomServerModule');
+import RawData = require('../RawData');
+import DicomRawDumper = require('../DicomRawDumper');
+import DicomServerModule = require('./DicomServerModule');
 
 import http = require('http');
 
-import Logger = require('./Logger');
-var logger = Logger.prepareLogger();
+import logger = require('../Logger');
 
 var config = require('config');
 
@@ -23,11 +21,11 @@ class RawAction extends DicomServerModule {
 
 	protected initialize() {
 		super.initialize();
-		var rawDumperModule = require('./' + config.rawDumper.module);
+		var rawDumperModule = require('../' + config.rawDumper.module);
 		this.rawDumper = new rawDumperModule(config);
 	}
 
-	public process(req: http.ServerRequest, res: http.ServerResponse, reader: DicomReader): void
+	public process(req: http.ServerRequest, res: http.ServerResponse): void
 	{
 		var u = url.parse(req.url, true);
 		var query = u.query;

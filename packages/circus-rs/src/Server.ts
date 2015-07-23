@@ -24,6 +24,7 @@ import Metadata = require('./controllers/Metadata');
 import ServerStatus = require('./controllers/ServerStatus');
 import MPR = require('./controllers/MPRAction');
 import Oblique = require('./controllers/ObliqueAction');
+import Raw = require('./controllers/RawAction');
 var Router = require('router');
 
 class Server {
@@ -72,7 +73,8 @@ class Server {
 			['metadata', Metadata],
 			['MPR', MPR],
 			['status', ServerStatus],
-			['Oblique', Oblique]
+			['Oblique', Oblique],
+			['raw', Raw]
 		];
 		routes.forEach(route => {
 			logger.info('Loading ' + route[0] + ' module...');

@@ -6,8 +6,7 @@ var exec = require('child_process').exec;
 
 import PathResolver = require('./path-resolver/PathResolver');
 import DicomRawDumper = require('./DicomRawDumper');
-import Logger = require('./Logger');
-var logger = Logger.prepareLogger();
+import logger = require('./Logger');
 
 export = DicomVoxelDumperAdapter;
 

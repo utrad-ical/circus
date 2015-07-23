@@ -3,7 +3,7 @@
   "version": "0.0.2",
   "private": true,
   "scripts": {
-    "start": "node ./build/circus-rs.js"
+    "start": "node ./circus-rs.js"
   },
   "dependencies": {
     "bluebird": "^2.9.30",

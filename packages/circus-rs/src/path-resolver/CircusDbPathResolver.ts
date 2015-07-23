@@ -9,12 +9,9 @@ import crypto = require('crypto');
 import Promise = require('bluebird');
 
 import logger from '../Logger';
-
 import PathResolver from './PathResolver';
 
-export = CircusDbPathResolver;
-
-class CircusDbPathResolver extends PathResolver {
+export default class CircusDbPathResolver extends PathResolver {
 	protected mongoconfig: any;
 	protected db: mongoose.Connection = null; // DB connection
 	protected seriesModel: mongoose.Model<any>;

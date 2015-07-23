@@ -5,9 +5,7 @@ import crypto = require('crypto');
 
 import logger from '../Logger';
 
-export = StaticPathResolver;
-
-class StaticPathResolver extends PathResolver {
+export default class StaticPathResolver extends PathResolver {
 	public resolvePath(seriesUID: string, callback: (dir: string) => void): void {
 		var dcmdir: string = null;
 		if (this.config.useHash) {

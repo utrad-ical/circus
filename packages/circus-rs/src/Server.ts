@@ -19,6 +19,7 @@ import PNGWriter from './PNGWriter';
 import DicomReader from './DicomReader';
 import DicomDumper from './DicomDumper';
 import DicomServerModule from './controllers/DicomServerModule';
+import PathResolver from './path-resolver/PathResolver';
 
 var Router = require('router');
 
@@ -44,7 +45,7 @@ class Server {
 	private createDicomReader(): DicomReader {
 		var module: string = config.pathResolver.module;
 		logger.info('Using path resolver: ' + module);
-		var resolverClass = require('./path-resolver/' + module);
+		var resolverClass: typeof PathResolver = require('./path-resolver/' + module).default;
 		var resolver = new resolverClass(config.pathResolver.options);
 		var dumperClass: typeof DicomDumper = require('./' + config.dumper.module).default;
 		var dumper = new dumperClass(config.dumper.options);

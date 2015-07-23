@@ -11,48 +11,41 @@ import VolumeBasedController from './VolumeBasedController';
 export default class Metadata extends VolumeBasedController {
 	protected processVolume(query: any, raw: RawData, res: http.ServerResponse): void {
 		try {
-			var response: any = {};
-			response.x = raw.x;
-			response.y = raw.y;
-			response.z = raw.z;
-			response.voxel_x = raw.vx;
-			response.voxel_y = raw.vy;
-			response.voxel_z = raw.vz;
-			response.window_width = raw.ww;
-			response.window_level = raw.wl;
-			if (raw.dcm_ww != null) {
+			var response: any = {
+				x: raw.x,
+				y: raw.y,
+				z: raw.z,
+				voxel_x: raw.vx,
+				voxel_y: raw.vy,
+				voxel_z: raw.vz,
+				window_width: raw.ww,
+				window_level: raw.wl
+			};
+			if (raw.dcm_ww !== null) {
 				response.window_width_dicom = raw.dcm_ww;
 			}
-			if (raw.dcm_wl != null) {
+			if (raw.dcm_wl !== null) {
 				response.window_level_dicom = raw.dcm_wl;
 			}
+			var limits: number[] = null;
 			switch (raw.type) {
 				case 0:
-					response.window_width_min = 1;
-					response.window_width_max = 256;
-					response.window_level_min = 0;
-					response.window_level_max = 255;
+					limits = [1, 256, 0, 255];
 					break;
 				case 1:
-					response.window_width_min = 1;
-					response.window_width_max = 256;
-					response.window_level_min = -128;
-					response.window_level_max = 127;
+					limits = [1, 256, -128, 127];
 					break;
 				case 2:
-					response.window_width_min = 1;
-					response.window_width_max = 65536;
-					response.window_level_min = 0;
-					response.window_level_max = 65535;
-					break;
+					limits = [1, 65536, 0, 65535];
 				case 3:
-					response.window_width_min = 1;
-					response.window_width_max = 65536;
-					response.window_level_min = -32768;
-					response.window_level_max = 32767;
+					limits = [1, 65536, -32768, 32767];
 					break;
 				default:
 					break;
+			}
+			if (limits !== null) {
+				[response.window_width_min, response.window_width_max,
+					response.window_level_min, response.window_level_max] = limits;
 			}
 
 			res.writeHead(200, {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'});

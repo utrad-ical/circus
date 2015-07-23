@@ -1,6 +1,4 @@
-export = PathResolver;
-
-class PathResolver {
+export default class PathResolver {
 	protected config: any = null;
 
 	constructor(config: any) {

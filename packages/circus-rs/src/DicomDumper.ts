@@ -2,11 +2,9 @@
  * DICOM Dumper interface
  */
 
-import RawData = require('./RawData');
+import RawData from './RawData';
 
-export = DicomDumper;
-
-class DicomDumper {
+export default class DicomDumper {
 
 	protected config: any = null;
 

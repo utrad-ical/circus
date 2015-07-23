@@ -3,17 +3,15 @@
  */
 var url = require('url');
 
-import RawData = require('../RawData');
-import DicomServerModule = require('./DicomServerModule');
-import MPR = require('../MPR');
+import RawData from '../RawData';
+import DicomServerModule from './DicomServerModule';
+import MPR from '../MPR';
 
 import http = require('http');
 
-import logger = require('../Logger');
+import logger from '../Logger';
 
-export = MPRAction;
-
-class MPRAction extends DicomServerModule {
+export default class MPRAction extends DicomServerModule {
 
 	public process(req: http.ServerRequest, res: http.ServerResponse): void
 	{

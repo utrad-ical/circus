@@ -3,13 +3,11 @@
  */
 var url = require('url');
 
-import RawData = require('./RawData');
+import RawData from './RawData';
 
-import logger = require('./Logger');
+import logger from './Logger';
 
-export = MPR;
-
-class MPR  {
+export default class MPR  {
 
 	// Pixel値にWindow width/levelを適用
 	private static _applyWindow(width: number, level: number, offset: number, z: number, raw: RawData): number {

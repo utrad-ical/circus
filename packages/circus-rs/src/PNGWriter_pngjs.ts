@@ -1,9 +1,7 @@
-import PNGWriter = require('./PNGWriter');
+import PNGWriter from './PNGWriter';
 var PNG = require('pngjs').PNG;
 
-export = PNGWriter_pngjs;
-
-class PNGWriter_pngjs extends PNGWriter{
+export default class PNGWriter_pngjs extends PNGWriter{
 
 	protected config: any = null;
 

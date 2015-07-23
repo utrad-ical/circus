@@ -2,15 +2,13 @@
  * DICOM Reader class
  */
 
-import RawData = require('./RawData');
-import DicomDumper = require('./DicomDumper');
-import PathResolver = require('./path-resolver/PathResolver');
+import RawData from './RawData';
+import DicomDumper from './DicomDumper';
+import PathResolver from './path-resolver/PathResolver';
 
-import logger = require('./Logger');
+import logger from './Logger';
 
-export = DicomReader;
-
-class DicomReader {
+export default class DicomReader {
 
 	private lru: Array<string> = [];
 	private cache: { [seriesUID: string]: RawData } = {};

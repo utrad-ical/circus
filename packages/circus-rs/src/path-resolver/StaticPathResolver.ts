@@ -1,9 +1,9 @@
-import PathResolver = require('./PathResolver');
+import PathResolver from './PathResolver';
 import path = require('path');
 import fs = require('fs');
 import crypto = require('crypto');
 
-import logger = require('../Logger');
+import logger from '../Logger';
 
 export = StaticPathResolver;
 

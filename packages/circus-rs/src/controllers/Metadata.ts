@@ -4,14 +4,12 @@
 var url = require('url');
 
 import http = require('http');
-import RawData = require('../RawData');
-import DicomServerModule = require('./DicomServerModule');
+import RawData from '../RawData';
+import DicomServerModule from './DicomServerModule';
 
-import logger = require('../Logger');
+import logger from '../Logger';
 
-export = Metadata;
-
-class Metadata extends DicomServerModule {
+export default class Metadata extends DicomServerModule {
 
 	public process(req: http.ServerRequest, res: http.ServerResponse): void
 	{

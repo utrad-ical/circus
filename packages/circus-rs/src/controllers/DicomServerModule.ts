@@ -1,13 +1,11 @@
 /**
  * DICOM Server module prototype.
  */
-import DicomReader = require('../DicomReader');
-import PNGWriter = require('../PNGWriter');
+import DicomReader from '../DicomReader';
+import PNGWriter from '../PNGWriter';
 import http = require('http');
 
-export = DicomServerModule;
-
-class DicomServerModule {
+export default class DicomServerModule {
 
 	protected reader: DicomReader;
 	protected pngWriter: PNGWriter;

@@ -4,14 +4,12 @@
 
 var exec = require('child_process').exec;
 
-import logger = require('./Logger');
+import logger from './Logger';
 
-import DicomDumper = require('./DicomDumper');
-import RawData = require('./RawData');
+import DicomDumper from './DicomDumper';
+import RawData from './RawData';
 
-export = DicomVoxelDumperAdapter;
-
-class DicomVoxelDumperAdapter extends DicomDumper {
+export default class DicomVoxelDumperAdapter extends DicomDumper {
 
 	public readDicom(dcmdir: string, config: any, callback: (rawData: RawData) => void): void
 	{

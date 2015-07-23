@@ -8,9 +8,9 @@ import path = require('path');
 import crypto = require('crypto');
 import Promise = require('bluebird');
 
-import logger = require('../Logger');
+import logger from '../Logger';
 
-import PathResolver = require('./PathResolver');
+import PathResolver from './PathResolver';
 
 export = CircusDbPathResolver;
 

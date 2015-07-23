@@ -3,18 +3,16 @@
  */
 var url = require('url');
 
-import RawData = require('../RawData');
-import DicomServerModule = require('./DicomServerModule');
-import oblique = require('../Oblique');
-import MPR = require('../MPR');
+import RawData from '../RawData';
+import DicomServerModule from './DicomServerModule';
+import Oblique from '../Oblique';
+import MPR from '../MPR';
 
 import http = require('http');
 
-import logger = require('../Logger');
+import logger from '../Logger';
 
-export = ObliqueAction;
-
-class ObliqueAction extends DicomServerModule {
+export default class ObliqueAction extends DicomServerModule {
 
     public process(req: http.ServerRequest, res: http.ServerResponse): void
     {
@@ -88,8 +86,7 @@ class ObliqueAction extends DicomServerModule {
             }
 
             try {
-                var result: oblique.ObliqueResult;
-                result = oblique.Oblique.makeSingleOblique(raw, base_axis, center, alpha, window_width, window_level);
+                var result = Oblique.makeSingleOblique(raw, base_axis, center, alpha, window_width, window_level);
 
                 res.setHeader('X-Circus-Pixel-Size', '' + result.pixel_size);
                 res.setHeader('X-Circus-Pixel-Columns', '' + result.width);

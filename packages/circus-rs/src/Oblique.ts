@@ -2,13 +2,11 @@
  * Single oblique image generator class
  */
 
-import RawData = require('./RawData');
+import RawData from './RawData';
 
-import logger = require('./Logger');
+import logger from './Logger';
 
-//export = Oblique;
-
-export interface ObliqueResult {
+interface ObliqueResult {
 	buffer: Buffer;
 	width:  number;
 	height: number;
@@ -18,7 +16,7 @@ export interface ObliqueResult {
 }
 
 
-export class Oblique  {
+export default class Oblique  {
 
 	private static _getArrayValueWithApplyWindow(raw: RawData, pos_x: number, pos_y: number, pos_z: number,
 												 window_width: number, window_level: number): number {

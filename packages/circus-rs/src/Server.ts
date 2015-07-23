@@ -12,19 +12,21 @@ var finalhandler = require('finalhandler');
 import Configuration = require('Configuration');
 var config: Configuration = require('config');
 
-import logger = require('./Logger');
+import logger from './Logger';
 logger.info('CIRCUS RS is starting up...');
 
-import Counter = require('./Counter');
-import PNGWriter = require('./Counter');
-import DicomReader = require('./DicomReader');
+import Counter from './Counter';
+import PNGWriter from './PNGWriter';
+import DicomReader from './DicomReader';
+import DicomDumper from './DicomDumper';
 
 // setup routing
-import Metadata = require('./controllers/Metadata');
-import ServerStatus = require('./controllers/ServerStatus');
-import MPR = require('./controllers/MPRAction');
-import Oblique = require('./controllers/ObliqueAction');
-import Raw = require('./controllers/RawAction');
+import Metadata from './controllers/Metadata';
+import ServerStatus from './controllers/ServerStatus';
+import MPR from './controllers/MPRAction';
+import Oblique from './controllers/ObliqueAction';
+import Raw from './controllers/RawAction';
+
 var Router = require('router');
 
 class Server {
@@ -51,7 +53,7 @@ class Server {
 		logger.info('Using path resolver: ' + module);
 		var resolverClass = require('./path-resolver/' + module);
 		var resolver = new resolverClass(config.pathResolver.options);
-		var dumperClass = require('./' + config.dumper.module);
+		var dumperClass: any = require('./' + config.dumper.module).default;
 		var dumper = new dumperClass(config.dumper.options);
 		return new DicomReader(resolver, dumper, config.cache.memoryThreshold);
 
@@ -60,7 +62,7 @@ class Server {
 	private createPngWriter(): PNGWriter {
 		var module: string = config.pngWriter.module;
 		logger.info('Using PNG writer: ' + module);
-		var pngModule = require('./' + module);
+		var pngModule: any = require('./' + module).default;
 		return new pngModule(config.pngWriter.options);
 	}
 

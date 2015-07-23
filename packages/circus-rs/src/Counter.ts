@@ -6,9 +6,7 @@ interface CounterHash {
 	[key: string]: number;
 }
 
-export = Counter;
-
-class Counter {
+export default class Counter {
 	private static counter: CounterHash = {};
 
 	public static countUp(key: string) {

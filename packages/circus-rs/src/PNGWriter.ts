@@ -1,6 +1,4 @@
-export = PNGWriter;
-
-class PNGWriter {
+export default class PNGWriter {
 
 	protected config: any = null;
 

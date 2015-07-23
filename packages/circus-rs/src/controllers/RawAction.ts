@@ -3,25 +3,23 @@
  */
 var url = require('url');
 
-import RawData = require('../RawData');
-import DicomRawDumper = require('../DicomRawDumper');
-import DicomServerModule = require('./DicomServerModule');
+import RawData from '../RawData';
+import DicomRawDumper from '../DicomRawDumper';
+import DicomServerModule from './DicomServerModule';
 
 import http = require('http');
 
-import logger = require('../Logger');
+import logger from '../Logger';
 
 var config = require('config');
 
-export = RawAction;
-
-class RawAction extends DicomServerModule {
+export default class RawAction extends DicomServerModule {
 
 	rawDumper: DicomRawDumper;
 
 	protected initialize() {
 		super.initialize();
-		var rawDumperModule = require('../' + config.rawDumper.module);
+		var rawDumperModule: any = require('../' + config.rawDumper.module).default;
 		this.rawDumper = new rawDumperModule(config);
 	}
 

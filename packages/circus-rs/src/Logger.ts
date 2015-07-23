@@ -27,4 +27,4 @@ class Logger {
 }
 
 var logger = Logger.prepareLogger();
-export = logger;
+export { logger as default };

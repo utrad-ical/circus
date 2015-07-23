@@ -2,11 +2,9 @@
  * DICOM series image data class.
  */
 
-import logger = require('./Logger');
+import logger from './Logger';
 
-export = RawData;
-
-class RawData {
+export default class RawData {
 	public x: number = 1;
 	public y: number = 1;
 	public z: number = 1;

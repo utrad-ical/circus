@@ -4,13 +4,11 @@
 
 var exec = require('child_process').exec;
 
-import PathResolver = require('./path-resolver/PathResolver');
-import DicomRawDumper = require('./DicomRawDumper');
-import logger = require('./Logger');
+import PathResolver from './path-resolver/PathResolver';
+import DicomRawDumper from './DicomRawDumper';
+import logger from './Logger';
 
-export = DicomVoxelDumperAdapter;
-
-class DicomVoxelDumperAdapter extends DicomRawDumper {
+export default class DicomVoxelDumperAdapter extends DicomRawDumper {
 
 	private resolver: PathResolver;
 

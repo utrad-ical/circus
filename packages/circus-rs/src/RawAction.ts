@@ -44,7 +44,8 @@ class RawAction extends DicomServerModule {
 		}
 
 		this.rawDumper.dump(series, {}, (data: any) : void => {
-			res.setHeader('Content-Type', 'applilcation/octet-stream');
+			res.setHeader('Content-Type', 'application/octet-stream');
+			res.setHeader('Access-Control-Allow-Origin', '*');
 			data.pipe(res);
 		});
 	}

@@ -5,11 +5,11 @@ var url = require('url');
 
 import http = require('http');
 import RawData from '../RawData';
-import DicomServerModule from './DicomServerModule';
+import Controller from './Controller';
 
 import logger from '../Logger';
 
-export default class Metadata extends DicomServerModule {
+export default class Metadata extends Controller {
 
 	public process(req: http.ServerRequest, res: http.ServerResponse): void
 	{

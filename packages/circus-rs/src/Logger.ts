@@ -6,7 +6,6 @@
  *  logger.info('foo bar');
  */
 
-import Configuration = require('./Configuration');
 import log4js = require('log4js');
 var config: Configuration = require('config');
 

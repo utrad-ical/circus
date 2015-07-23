@@ -1,5 +1,3 @@
-export = Configuration;
-
 interface Configuration {
 	pathResolver?: {
 		module?: string;

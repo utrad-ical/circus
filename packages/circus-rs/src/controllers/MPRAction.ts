@@ -4,14 +4,14 @@
 var url = require('url');
 
 import RawData from '../RawData';
-import DicomServerModule from './DicomServerModule';
+import Controller from './Controller';
 import MPR from '../MPR';
 
 import http = require('http');
 
 import logger from '../Logger';
 
-export default class MPRAction extends DicomServerModule {
+export default class MPRAction extends Controller {
 
 	public process(req: http.ServerRequest, res: http.ServerResponse): void
 	{

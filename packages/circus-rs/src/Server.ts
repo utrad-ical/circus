@@ -8,7 +8,6 @@ import http = require('http');
 var finalhandler = require('finalhandler');
 
 // Load configuration
-import Configuration = require('Configuration');
 var config: Configuration = require('config');
 
 import logger from './Logger';
@@ -18,7 +17,7 @@ import Counter from './Counter';
 import PNGWriter from './PNGWriter';
 import DicomReader from './DicomReader';
 import DicomDumper from './DicomDumper';
-import DicomServerModule from './controllers/DicomServerModule';
+import DicomServerModule from './controllers/Controller';
 import PathResolver from './path-resolver/PathResolver';
 
 var Router = require('router');

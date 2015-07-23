@@ -3,7 +3,7 @@
  */
 var url = require('url');
 
-import DicomServerModule from './DicomServerModule';
+import Controller from './Controller';
 import http = require('http');
 import Counter from '../Counter';
 
@@ -11,7 +11,7 @@ import logger from '../Logger';
 
 var startUpTime: Date = new Date(); // The time this module was loaded
 
-export default class ServerStatus extends DicomServerModule {
+export default class ServerStatus extends Controller {
 
 	public process(req: http.ServerRequest, res: http.ServerResponse): void
 	{

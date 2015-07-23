@@ -5,7 +5,7 @@ var url = require('url');
 
 import RawData from '../RawData';
 import DicomRawDumper from '../DicomRawDumper';
-import DicomServerModule from './DicomServerModule';
+import Controller from './Controller';
 
 import http = require('http');
 
@@ -13,7 +13,7 @@ import logger from '../Logger';
 
 var config = require('config');
 
-export default class RawAction extends DicomServerModule {
+export default class RawAction extends Controller {
 
 	rawDumper: DicomRawDumper;
 

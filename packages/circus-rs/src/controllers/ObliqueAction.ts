@@ -4,7 +4,7 @@
 var url = require('url');
 
 import RawData from '../RawData';
-import DicomServerModule from './DicomServerModule';
+import Controller from './Controller';
 import Oblique from '../Oblique';
 import MPR from '../MPR';
 
@@ -12,7 +12,7 @@ import http = require('http');
 
 import logger from '../Logger';
 
-export default class ObliqueAction extends DicomServerModule {
+export default class ObliqueAction extends Controller {
 
 	public process(req: http.ServerRequest, res: http.ServerResponse): void {
 		var u = url.parse(req.url, true);

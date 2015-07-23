@@ -5,7 +5,7 @@ import DicomReader from '../DicomReader';
 import PNGWriter from '../PNGWriter';
 import http = require('http');
 
-export default class DicomServerModule {
+export default class Controller {
 
 	protected reader: DicomReader;
 	protected pngWriter: PNGWriter;

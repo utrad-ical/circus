@@ -146,3 +146,19 @@ Header
 - `X-Circus-Center`: center position in output image (pixel, pixel)
 
 PNG (image/png)
+
+### raw
+
+output dicom_voxel_dump raw stream.
+
+#### request
+
+http://<hostname_of_your_server_port>/raw
+
+method: GET
+
+- `series`: DICOM_series_instance_UID (required)
+
+#### response
+
+raw dump data in 'dicom_voxel_dump combined format'. (application/octet-stream)

@@ -37,6 +37,7 @@ export default class Metadata extends VolumeBasedController {
 					break;
 				case 2:
 					limits = [1, 65536, 0, 65535];
+					break;
 				case 3:
 					limits = [1, 65536, -32768, 32767];
 					break;

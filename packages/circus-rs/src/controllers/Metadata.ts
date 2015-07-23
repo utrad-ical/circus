@@ -7,8 +7,7 @@ import http = require('http');
 import RawData = require('../RawData');
 import DicomServerModule = require('./DicomServerModule');
 
-import Logger = require('../Logger');
-var logger = Logger.prepareLogger();
+import logger = require('../Logger');
 
 export = Metadata;
 

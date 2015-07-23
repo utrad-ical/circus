@@ -8,8 +8,7 @@ import path = require('path');
 import crypto = require('crypto');
 import Promise = require('bluebird');
 
-import Logger = require('../Logger');
-var logger = Logger.prepareLogger();
+import logger = require('../Logger');
 
 import PathResolver = require('./PathResolver');
 

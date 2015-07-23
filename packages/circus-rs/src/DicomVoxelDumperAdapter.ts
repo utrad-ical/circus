@@ -4,8 +4,7 @@
 
 var exec = require('child_process').exec;
 
-import Logger = require('./Logger');
-var logger = Logger.prepareLogger();
+import logger = require('./Logger');
 
 import DicomDumper = require('./DicomDumper');
 import RawData = require('./RawData');

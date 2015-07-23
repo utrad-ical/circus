@@ -6,8 +6,7 @@ import RawData = require('./RawData');
 import DicomDumper = require('./DicomDumper');
 import PathResolver = require('./path-resolver/PathResolver');
 
-import Logger = require('./Logger');
-var logger = Logger.prepareLogger();
+import logger = require('./Logger');
 
 export = DicomReader;
 

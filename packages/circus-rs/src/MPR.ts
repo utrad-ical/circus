@@ -5,8 +5,7 @@ var url = require('url');
 
 import RawData = require('./RawData');
 
-import Logger = require('./Logger');
-var logger = Logger.prepareLogger();
+import logger = require('./Logger');
 
 export = MPR;
 

@@ -1,22 +1,14 @@
-/// <reference path="typings/log4js/log4js.d.ts" />
 /**
  * prepare log4js object according to config.js
  *
  * usage:
- *  import Logger = require('./Logger');
- *  var logger = Logger.prepareLogger();
- *
+ *  import logger = require('./Logger');
  *  logger.info('foo bar');
  */
 
-var argv = require('minimist')(process.argv.slice(2));
-
-var configFile = typeof argv.config === 'string' ? argv.config : '../config';
-var config: any = require(configFile);
-
+import Configuration = require('./Configuration');
 import log4js = require('log4js');
-
-export = Logger;
+var config: Configuration = require('config');
 
 class Logger {
 	public static prepareLogger(): log4js.Logger {
@@ -26,10 +18,13 @@ class Logger {
 		} else {
 			logConfig = [
 				{type: 'console'},
-				{type: 'dateFile', filename: 'logs/debug.log', pattern: '-yyyyMMdd.log'}
+				{type: 'dateFile', filename: __dirname + '/../logs/debug.log', pattern: '-yyyyMMdd.log'}
 			];
 		}
 		log4js.configure({appenders: logConfig});
 		return log4js.getLogger();
 	}
 }
+
+var logger = Logger.prepareLogger();
+export = logger;

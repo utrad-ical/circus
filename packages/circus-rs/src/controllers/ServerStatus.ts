@@ -7,8 +7,7 @@ import DicomServerModule = require('./DicomServerModule');
 import http = require('http');
 import Counter = require('../Counter');
 
-import Logger = require('../Logger');
-var logger = Logger.prepareLogger();
+import logger = require('../Logger');
 
 export = ServerStatus;
 

@@ -2,8 +2,7 @@
  * DICOM series image data class.
  */
 
-import Logger = require('./Logger');
-var logger = Logger.prepareLogger();
+import logger = require('./Logger');
 
 export = RawData;
 

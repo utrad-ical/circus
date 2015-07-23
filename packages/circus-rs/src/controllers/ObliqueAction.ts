@@ -10,8 +10,7 @@ import MPR = require('../MPR');
 
 import http = require('http');
 
-import Logger = require('../Logger');
-var logger = Logger.prepareLogger();
+import logger = require('../Logger');
 
 export = ObliqueAction;
 

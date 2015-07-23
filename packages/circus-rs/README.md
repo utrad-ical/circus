@@ -69,13 +69,13 @@ Start server
 Builtin modules
 ---------------
 
-### Metadata
+### metadata
 
 Get metadata of DICOM series.
 
 #### request
 
-http://<hostname_of_your_server_port>/Metadata
+http://<hostname_of_your_server_port>/metadata
 
 method: GET
 
@@ -117,5 +117,32 @@ method: GET
 - `wl`: window level of output image. (optional. default is estimated window level)
 
 #### response
+
+PNG (image/png)
+
+### Single Oblique MPR
+
+Make single oblique MPR image
+
+#### request
+
+http://<hostname_of_your_server_port>/Oblique
+
+method: GET
+
+- `series`: DICOM_series_instance_UID (required)
+- `a`: Angle counterclockwise from the X-axis of 'b' (required)
+- `b`: Reference plane 'axial' or 'coronal' or 'sagittal' (required)
+- `c`: Cursor position (3 numbers csv. required)
+- `ww`: window width of output image. (optional. default is estimated window width)
+- `wl`: window level of output image. (optional. default is estimated window level)
+
+#### response
+
+Header
+- `X-Circus-Pixel-Size`: size of pixel (mm)
+- `X-Circus-Pixel-Columns`: output image width (pixel)
+- `X-Circus-Pixel-Rows`: output image height (pixel)
+- `X-Circus-Center`: center position in output image (pixel, pixel)
 
 PNG (image/png)

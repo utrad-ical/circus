@@ -7,9 +7,9 @@ import RawData = require('./RawData');
 import Logger = require('./Logger');
 var logger = Logger.prepareLogger();
 
-export = Oblique;
+//export = Oblique;
 
-interface ObliqueResult {
+export interface ObliqueResult {
 	buffer: Buffer;
 	width:  number;
 	height: number;
@@ -19,7 +19,7 @@ interface ObliqueResult {
 }
 
 
-class Oblique  {
+export class Oblique  {
 
 	private static _getArrayValueWithApplyWindow(raw: RawData, pos_x: number, pos_y: number, pos_z: number,
 												 window_width: number, window_level: number): number {

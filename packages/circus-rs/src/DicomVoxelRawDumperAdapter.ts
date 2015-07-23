@@ -12,9 +12,6 @@ export default class DicomVoxelDumperAdapter extends DicomRawDumper {
 
 	private resolver: PathResolver;
 
-	/**
-	 * Constructor
-	 */
 	constructor(config: any) {
 		super(config);
 

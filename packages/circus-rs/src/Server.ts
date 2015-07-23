@@ -19,13 +19,7 @@ import Counter from './Counter';
 import PNGWriter from './PNGWriter';
 import DicomReader from './DicomReader';
 import DicomDumper from './DicomDumper';
-
-// setup routing
-import Metadata from './controllers/Metadata';
-import ServerStatus from './controllers/ServerStatus';
-import MPR from './controllers/MPRAction';
-import Oblique from './controllers/ObliqueAction';
-import Raw from './controllers/RawAction';
+import DicomServerModule from './controllers/DicomServerModule';
 
 var Router = require('router');
 
@@ -53,7 +47,7 @@ class Server {
 		logger.info('Using path resolver: ' + module);
 		var resolverClass = require('./path-resolver/' + module);
 		var resolver = new resolverClass(config.pathResolver.options);
-		var dumperClass: any = require('./' + config.dumper.module).default;
+		var dumperClass: typeof DicomDumper = require('./' + config.dumper.module).default;
 		var dumper = new dumperClass(config.dumper.options);
 		return new DicomReader(resolver, dumper, config.cache.memoryThreshold);
 
@@ -62,7 +56,7 @@ class Server {
 	private createPngWriter(): PNGWriter {
 		var module: string = config.pngWriter.module;
 		logger.info('Using PNG writer: ' + module);
-		var pngModule: any = require('./' + module).default;
+		var pngModule: typeof PNGWriter = require('./' + module).default;
 		return new pngModule(config.pngWriter.options);
 	}
 
@@ -72,15 +66,16 @@ class Server {
 		var reader = this.createDicomReader();
 
 		var routes: [string, any][] = [
-			['metadata', Metadata],
-			['MPR', MPR],
-			['status', ServerStatus],
-			['Oblique', Oblique],
-			['raw', Raw]
+			['metadata', 'Metadata'],
+			['MPR', 'MPRAction'],
+			['status', 'ServerStatus'],
+			['Oblique', 'ObliqueAction'],
+			['raw', 'RawAction']
 		];
 		routes.forEach(route => {
-			logger.info('Loading ' + route[0] + ' module...');
-			var controller = new route[1](reader, pngWriter);
+			logger.info('Loading ' + route[1] + ' module...');
+			var module: typeof DicomServerModule = require('./controllers/' + route[1]).default;
+			var controller = new module(reader, pngWriter);
 			router.get('/' + route[0], (req, res) => {
 				Counter.countUp(route[0]);
 				controller.process(req, res, reader);

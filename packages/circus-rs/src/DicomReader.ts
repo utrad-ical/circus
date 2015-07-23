@@ -113,7 +113,7 @@ export default class DicomReader {
 	}
 
 	// read header/image from DICOM data.
-	public readData(series: string, params: any, callback: any): void
+	public readData(series: string, params: any, callback: (RawData, any) => void): void
 	{
 		if (this.execCounter > 0) {
 			//logger.trace('waiting... ');
@@ -140,21 +140,14 @@ export default class DicomReader {
 		}
 
 		this.resolver.resolvePath(series)
-			.then((dcmdir: string) => {
-				this.dumper.readDicom(dcmdir, params, (rawData: RawData) => {
-					var err: string = '';
-					if (rawData == null) {
-						err = "cannot read image.";
-						logger.info('readDicom failed.');
-					} else {
-						logger.info('put rawdata: ' + series);
-						this.put(series, rawData);
-					}
-					callback(rawData, err);
-					this.execCounter = 0;
-				});
-			}).catch((err) => {
-				callback(null, 'cannot resolve path.');
+			.then((dcmdir: string) => this.dumper.readDicom(dcmdir, params))
+			.then((rawData: RawData) => {
+				logger.info('put rawdata: ' + series);
+				this.put(series, rawData);
+				callback(rawData, null);
+				this.execCounter = 0;
+			}).catch(err => {
+				callback(null, err.toString());
 				this.execCounter = 0;
 			});
 	}

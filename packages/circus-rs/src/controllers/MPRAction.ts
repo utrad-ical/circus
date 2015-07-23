@@ -58,8 +58,7 @@ export default class MPRAction extends VolumeBasedController {
 			out_height = raw.z;
 			buffer = MPR.makeSagittal(raw, target, window_width, window_level);
 		} else {
-			res.writeHead(400);
-			res.end();
+			this.respondBadRequest(res, 'Invalid orientation.');
 			return;
 		}
 		this.pngWriter.write(res, buffer, out_width, out_height);

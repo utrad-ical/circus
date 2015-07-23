@@ -8,11 +8,17 @@ import logger from './Logger';
 
 import DicomDumper from './DicomDumper';
 import RawData from './RawData';
+import Promise = require('bluebird');
 
 export default class DicomVoxelDumperAdapter extends DicomDumper {
 
-	public readDicom(dcmdir: string, config: any, callback: (rawData: RawData) => void): void
-	{
+	public readDicom(dcmdir: string, config: any): Promise<RawData> {
+		return new Promise<RawData>((resolve, reject) => {
+			this.readDicomDeferred(dcmdir, config, resolve, reject);
+		})
+	}
+
+	private readDicomDeferred(dcmdir: string, config: any, resolve, reject) {
 		var rawData = new RawData();
 
 		var jsonLength = 0;
@@ -34,11 +40,11 @@ export default class DicomVoxelDumperAdapter extends DicomDumper {
 			logger.error('stderr:' + data);
 		});
 
-		proc.stdout.on('data', function (chunk) {
+		proc.stdout.on('data', (chunk) => {
 
 			try {
 
-				while(chunk.length > 0) {
+				while (chunk.length > 0) {
 
 					var len;
 
@@ -95,17 +101,19 @@ export default class DicomVoxelDumperAdapter extends DicomDumper {
 					blockDataSize = 0;
 					blockDataOffset = 0;
 				}
-			} catch(e) {
-				console.log(e);
+			} catch (e) {
 				rawData = null;
+				reject(e);
 			}
-
 		});
 
 		proc.stdout.on('end', () => {
-			callback(rawData);
+			if (rawData !== null) {
+				resolve(rawData);
+			} else {
+				reject('Could not read image data');
+			}
 		});
-
 
 	}
 }

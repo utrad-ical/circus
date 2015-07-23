@@ -3,6 +3,7 @@
  */
 
 import RawData from './RawData';
+import Promise = require('bluebird');
 
 export default class DicomDumper {
 
@@ -22,11 +23,10 @@ export default class DicomDumper {
 	 *
 	 * @param dcmdir path of DICOM series data directory.
 	 * @param config request specific parameter (if needed)
-	 * @param callback callback function called when reading finished.
-	 *
 	 */
-	public readDicom(dcmdir: string, config: any, callback: (rawData: RawData) => void): void
+	public readDicom(dcmdir: string, config: any): Promise<RawData>
 	{
 		// abstract
+		return null;
 	}
 }

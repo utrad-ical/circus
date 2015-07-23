@@ -56,16 +56,12 @@ export default class ObliqueAction extends VolumeBasedController {
 			window_level = raw.wl;
 		}
 
-		try {
-			var result = Oblique.makeSingleOblique(raw, base_axis, center, alpha, window_width, window_level);
-			res.setHeader('X-Circus-Pixel-Size', '' + result.pixel_size);
-			res.setHeader('X-Circus-Pixel-Columns', '' + result.width);
-			res.setHeader('X-Circus-Pixel-Rows', '' + result.height);
-			res.setHeader('X-Circus-Center', '' + result.center_x + ',' + result.center_y);
-			this.pngWriter.write(res, result.buffer, result.width, result.center_y);
-		} catch (e) {
-			this.respondInternalServerError(res, e.toString());
-		}
+		var result = Oblique.makeSingleOblique(raw, base_axis, center, alpha, window_width, window_level);
+		res.setHeader('X-Circus-Pixel-Size', '' + result.pixel_size);
+		res.setHeader('X-Circus-Pixel-Columns', '' + result.width);
+		res.setHeader('X-Circus-Pixel-Rows', '' + result.height);
+		res.setHeader('X-Circus-Center', '' + result.center_x + ',' + result.center_y);
+		this.pngWriter.write(res, result.buffer, result.width, result.center_y);
 	}
 
 }

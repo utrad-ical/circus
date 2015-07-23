@@ -45,28 +45,24 @@ export default class MPRAction extends VolumeBasedController {
 			window_level = raw.wl;
 		}
 
-		try {
-			if (mode === 'axial') {
-				out_width = raw.x;
-				out_height = raw.y;
-				buffer = MPR.makeAxial(raw, target, window_width, window_level);
-			} else if (mode === 'coronal') {
-				out_width = raw.x;
-				out_height = raw.z;
-				buffer = MPR.makeCoronal(raw, target, window_width, window_level);
-			} else if (mode === 'sagittal') {
-				out_width = raw.y;
-				out_height = raw.z;
-				buffer = MPR.makeSagittal(raw, target, window_width, window_level);
-			} else {
-				res.writeHead(400);
-				res.end();
-				return;
-			}
-			this.pngWriter.write(res, buffer, out_width, out_height);
-		} catch(e) {
-			this.respondInternalServerError(res, e.toString());
+		if (mode === 'axial') {
+			out_width = raw.x;
+			out_height = raw.y;
+			buffer = MPR.makeAxial(raw, target, window_width, window_level);
+		} else if (mode === 'coronal') {
+			out_width = raw.x;
+			out_height = raw.z;
+			buffer = MPR.makeCoronal(raw, target, window_width, window_level);
+		} else if (mode === 'sagittal') {
+			out_width = raw.y;
+			out_height = raw.z;
+			buffer = MPR.makeSagittal(raw, target, window_width, window_level);
+		} else {
+			res.writeHead(400);
+			res.end();
+			return;
 		}
+		this.pngWriter.write(res, buffer, out_width, out_height);
 	}
 
 }

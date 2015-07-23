@@ -23,12 +23,16 @@ export default class VolumeBasedController extends Controller {
 				this.respondNotFound(res, 'Series not found');
 				return;
 			}
-			this.processVolume(query, raw, res);
+			try {
+				this.processVolume(query, raw, res);
+			} catch (e) {
+				this.respondInternalServerError(res, e.toString());
+			}
 		});
 	}
 
 	protected processVolume(query: any, raw: RawData, res: http.ServerResponse): void {
 		// Abstract.
-		// In this method, rawData is guaranteed to have valid image data.
+		// In this method, "raw" is guaranteed to have valid image data.
 	}
 }

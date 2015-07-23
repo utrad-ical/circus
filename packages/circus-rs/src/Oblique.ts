@@ -3,7 +3,6 @@
  */
 
 import RawData from './RawData';
-
 import logger from './Logger';
 
 interface ObliqueResult {
@@ -15,8 +14,7 @@ interface ObliqueResult {
 	center_y: number;
 }
 
-
-export default class Oblique  {
+export default class Oblique {
 
 	private static _getArrayValueWithApplyWindow(raw: RawData, pos_x: number, pos_y: number, pos_z: number,
 												 window_width: number, window_level: number): number {
@@ -33,7 +31,8 @@ export default class Oblique  {
 		}
 
 		if (iz >= z_end) {
-			iz = z_end - 1;  pos_z = z_end;
+			iz = z_end - 1;
+			pos_z = z_end;
 		}
 
 		// trilinear interpolation
@@ -55,29 +54,27 @@ export default class Oblique  {
 		return value;
 	}
 
-	/////////////////////////////////////////////
-
 	public static makeSingleOblique(raw: RawData, base_axis: string, center: [number, number, number], alpha: number,
 									window_width: number, window_level: number): ObliqueResult {
 
-		var eu_x:number = 0.0;
-		var eu_y:number = 0.0;
-		var eu_z:number = 0.0;
-		var ev_x:number = 0.0;
-		var ev_y:number = 0.0;
-		var ev_z:number = 0.0;
-		var origin_x:number = 0;
-		var origin_y:number = 0;
-		var origin_z:number = 0;
+		var eu_x: number = 0.0;
+		var eu_y: number = 0.0;
+		var eu_z: number = 0.0;
+		var ev_x: number = 0.0;
+		var ev_y: number = 0.0;
+		var ev_z: number = 0.0;
+		var origin_x: number = 0;
+		var origin_y: number = 0;
+		var origin_z: number = 0;
 
-		var width:number  = 0;
-		var height:number = 0;
-		var pixel_size:number = Math.min(raw.vx, Math.min(raw.vy, raw.vz));
+		var width: number = 0;
+		var height: number = 0;
+		var pixel_size: number = Math.min(raw.vx, Math.min(raw.vy, raw.vz));
 		var center_x = 0;
 		var center_y = 0;
 
 		// Set parameters
-	    if (base_axis == 'axial') {
+		if (base_axis === 'axial') {
 			eu_x = Math.cos(alpha) * pixel_size / raw.vx;
 			eu_y = -1.0 * Math.sin(alpha) * pixel_size / raw.vy;
 			ev_z = pixel_size / raw.vz;
@@ -90,7 +87,7 @@ export default class Oblique  {
 			while (1) {
 				px -= eu_x;
 				py -= eu_y;
-				if(px < 0.0 || py < 0.0 || px > raw.x - 1 || py > raw.y - 1)  break;
+				if (px < 0.0 || py < 0.0 || px > raw.x - 1 || py > raw.y - 1)  break;
 				minus_cnt++;
 			}
 
@@ -104,14 +101,14 @@ export default class Oblique  {
 			while (1) {
 				px += eu_x;
 				py += eu_y;
-				if(px < 0.0 || py < 0.0 || px > raw.x - 1 || py > raw.y - 1)  break;
+				if (px < 0.0 || py < 0.0 || px > raw.x - 1 || py > raw.y - 1)  break;
 				plus_cnt++;
 			}
 
-			width  = minus_cnt + plus_cnt + 1;
+			width = minus_cnt + plus_cnt + 1;
 			height = Math.floor(raw.z * raw.vz / pixel_size);
 
-		} else if (base_axis == 'coronal') {
+		} else if (base_axis === 'coronal') {
 			eu_x = Math.cos(alpha) * pixel_size / raw.vx;
 			eu_z = -1.0 * Math.sin(alpha) * pixel_size / raw.vz;
 			ev_y = pixel_size / raw.vy;
@@ -124,7 +121,7 @@ export default class Oblique  {
 			while (1) {
 				px -= eu_x;
 				py -= eu_z;
-				if(px < 0.0 || py < 0.0 || px > raw.x - 1 || py > raw.z - 1)  break;
+				if (px < 0.0 || py < 0.0 || px > raw.x - 1 || py > raw.z - 1)  break;
 				minus_cnt++;
 			}
 
@@ -138,14 +135,14 @@ export default class Oblique  {
 			while (1) {
 				px += eu_x;
 				py += eu_z;
-				if(px < 0.0 || py < 0.0 || px > raw.x - 1 || py > raw.z - 1)  break;
+				if (px < 0.0 || py < 0.0 || px > raw.x - 1 || py > raw.z - 1)  break;
 				plus_cnt++;
 			}
 
-			width  = minus_cnt + plus_cnt + 1;
+			width = minus_cnt + plus_cnt + 1;
 			height = Math.floor(raw.y * raw.vy / pixel_size);
 
-		} else if (base_axis == 'sagittal') {
+		} else if (base_axis === 'sagittal') {
 			eu_x = pixel_size / raw.vx;
 			ev_y = Math.cos(alpha) * pixel_size / raw.vy;
 			ev_z = -1.0 * Math.sin(alpha) * pixel_size / raw.vz;
@@ -158,7 +155,7 @@ export default class Oblique  {
 			while (1) {
 				px -= ev_y;
 				py -= ev_z;
-				if(px < 0.0 || py < 0.0 || px > raw.y - 1 || py > raw.z - 1)  break;
+				if (px < 0.0 || py < 0.0 || px > raw.y - 1 || py > raw.z - 1)  break;
 				minus_cnt++;
 			}
 
@@ -172,11 +169,11 @@ export default class Oblique  {
 			while (1) {
 				px += ev_y;
 				py += ev_z;
-				if(px < 0.0 || py < 0.0 || px > raw.x - 1 || py > raw.z - 1)  break;
+				if (px < 0.0 || py < 0.0 || px > raw.x - 1 || py > raw.z - 1)  break;
 				plus_cnt++;
 			}
 
-			width  = Math.floor(raw.x * raw.vx / pixel_size);
+			width = Math.floor(raw.x * raw.vx / pixel_size);
 			height = minus_cnt + plus_cnt + 1;
 
 		} else {
@@ -202,7 +199,7 @@ export default class Oblique  {
 				var value = 0;
 
 				if (pos_x >= 0.0 && pos_y >= 0.0 && pos_z >= 0.0
-					&& pos_x <= raw.x - 1 && pos_y <= raw.y - 1 && pos_z <= raw.z -1) {
+					&& pos_x <= raw.x - 1 && pos_y <= raw.y - 1 && pos_z <= raw.z - 1) {
 					value = this._getArrayValueWithApplyWindow(raw, pos_x, pos_y, pos_z, window_width, window_level);
 				}
 

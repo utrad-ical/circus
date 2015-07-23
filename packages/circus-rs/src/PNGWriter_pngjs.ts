@@ -1,20 +1,9 @@
 import PNGWriter from './PNGWriter';
 var PNG = require('pngjs').PNG;
 
-export default class PNGWriter_pngjs extends PNGWriter{
-
-	protected config: any = null;
-
-	constructor(config: any) {
-		super(config);
-	}
-
-	protected initialize() {
-	}
-
-	public write(res: any, data: Buffer, width: number, height: number): void
-	{
-		var png = new PNG({ width: width, height: height});
+export default class PNGWriter_pngjs extends PNGWriter {
+	public write(res: any, data: Buffer, width: number, height: number): void {
+		var png = new PNG({width: width, height: height});
 		for (var y = 0; y < png.height; y++) {
 			for (var x = 0; x < png.width; x++) {
 				var srcidx = (png.width * y + x);
@@ -28,10 +17,10 @@ export default class PNGWriter_pngjs extends PNGWriter{
 		}
 
 		res.writeHead(200,
-		{
-			'Content-Type': 'image/png',
-			'Access-Control-Allow-Origin': '*'
-		});
+			{
+				'Content-Type': 'image/png',
+				'Access-Control-Allow-Origin': '*'
+			});
 		png.pack().pipe(res);
 	}
 }

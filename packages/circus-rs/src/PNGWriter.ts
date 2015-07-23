@@ -2,8 +2,8 @@ export default class PNGWriter {
 
 	protected config: any = null;
 
-	constructor(config: any) {
-		this.config = config;
+	constructor(config?: any) {
+		this.config = config || null;
 		this.initialize();
 	}
 

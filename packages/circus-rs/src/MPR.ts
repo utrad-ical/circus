@@ -1,15 +1,15 @@
 /**
  * MPR Image generator class
  */
-var url = require('url');
 
 import RawData from './RawData';
-
 import logger from './Logger';
 
 export default class MPR  {
 
-	// Pixel値にWindow width/levelを適用
+	/**
+	 * Applies window level/width
+	 */
 	private static _applyWindow(width: number, level: number, offset: number, z: number, raw: RawData): number {
 
 		var pixel = raw.getPixel(z, offset);
@@ -22,8 +22,6 @@ export default class MPR  {
 		}
 		return value;
 	}
-
-	/////////////////////////////////////////////
 
 	public static makeAxial(raw: RawData, target: number, window_width: number, window_level: number): Buffer {
 		var buffer_offset = 0;

@@ -1,14 +1,13 @@
-/*----------------------------------------------
- DICOM server
- -----------------------------------------------*/
+/**
+ * Main server class.
+ */
 
 export = Server;
 
-// include require modules
 import http = require('http');
 var finalhandler = require('finalhandler');
 
-// include config modules
+// Load configuration
 import Configuration = require('Configuration');
 var config: Configuration = require('config');
 
@@ -65,7 +64,7 @@ class Server {
 		var pngWriter = this.createPngWriter();
 		var reader = this.createDicomReader();
 
-		var routes: [string, any][] = [
+		var routes: [string, string][] = [
 			['metadata', 'Metadata'],
 			['MPR', 'MPRAction'],
 			['status', 'ServerStatus'],

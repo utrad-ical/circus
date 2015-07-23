@@ -1,13 +1,9 @@
 /**
  * Show server status.
  */
-var url = require('url');
-
 import Controller from './Controller';
 import http = require('http');
 import Counter from '../Counter';
-
-import logger from '../Logger';
 
 var startUpTime: Date = new Date(); // The time this module was loaded
 

@@ -30,9 +30,7 @@ export default class RawAction extends Controller {
 		}
 
 		if (series == '') {
-			logger.warn('no series in query');
-			res.writeHead(500);
-			res.end();
+			this.respondBadRequest(res, 'No series in query');
 			return;
 		}
 

@@ -33,15 +33,32 @@ export default class Controller {
 		// abstract
 	}
 
+	protected respondJsonWithStatus(status: number, res: http.ServerResponse, data: any): void
+	{
+		var result: string = null;
+		try {
+			result = JSON.stringify(data, null, '  ');
+		} catch (e) {
+			this.respondInternalServerError(res, 'Error while formatting result data.');
+			return;
+		}
+		res.setHeader('Content-Type', 'application/json');
+		res.setHeader('Access-Control-Allow-Origin', '*');
+		res.writeHead(status);
+		res.write(result);
+		res.end();
+	}
+
+	protected respondJson(res: http.ServerResponse, data: any): void
+	{
+		this.respondJsonWithStatus(200, res, data);
+	}
+
 	protected respondError(status: number, res: http.ServerResponse, message: string): void
 	{
-		res.writeHead(status);
-		res.setHeader('Content-Type', 'application/octet-stream');
-		res.setHeader('Access-Control-Allow-Origin', '*');
 		logger.warn(message);
 		var err = { message: message };
-		res.write(JSON.stringify(err));
-		res.end();
+		this.respondJsonWithStatus(status, res, err);
 	}
 
 	protected respondBadRequest(res: http.ServerResponse, message: string): void

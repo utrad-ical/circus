@@ -11,8 +11,6 @@ export default class ServerStatus extends Controller {
 
 	public process(query: any, res: http.ServerResponse): void
 	{
-		res.setHeader('Access-Control-Allow-Origin', '*');
-		res.setHeader('Content-type', 'application/json');
 		var status = {
 			status: 'Running',
 			dicomReader: {
@@ -25,7 +23,7 @@ export default class ServerStatus extends Controller {
 			},
 			counter: Counter.getCounts()
 		};
-		res.end(JSON.stringify(status, null, '  '));
+		this.respondJson(res, status);
 	}
 
 }

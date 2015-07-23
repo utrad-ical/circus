@@ -48,8 +48,7 @@ export default class Metadata extends VolumeBasedController {
 					response.window_level_min, response.window_level_max] = limits;
 			}
 
-			res.writeHead(200, {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'});
-			res.end(JSON.stringify(response));
+			this.respondJson(res, response);
 		} catch (e) {
 			this.respondInternalServerError(res, e.toString());
 		}

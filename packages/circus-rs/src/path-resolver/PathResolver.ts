@@ -1,3 +1,5 @@
+import Promise = require('bluebird');
+
 export default class PathResolver {
 	protected config: any = null;
 
@@ -6,11 +8,11 @@ export default class PathResolver {
 		this.initialize();
 	}
 
-	protected initialize() {
+	protected initialize(): void {
 		// abstract
 	}
 
-	public resolvePath(seriesUID: string, callback: (dir: string) => void): void {
-		// abstract
+	public resolvePath(seriesUID: string): Promise<string> {
+		return null;
 	}
 }

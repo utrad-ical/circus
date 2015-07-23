@@ -17,41 +17,43 @@ export default class CircusDbPathResolver extends PathResolver {
 	protected seriesModel: mongoose.Model<any>;
 	protected storageModel: mongoose.Model<any>;
 
-	protected initialize() {
+	protected initialize(): void {
 		// read configuration file
 		this.mongoconfig = JSON.parse(fs.readFileSync(this.config.configPath, 'utf8'));
 		logger.info('Loaded MongoDB Configuration.');
 	}
 
-	public resolvePath(seriesUID: string, callback: (dir: string) => void): void {
+	public resolvePath(seriesUID: string): Promise<string> {
 		var dcmdir: string;
-		if (!callback) return;
 
 		var hash = crypto.createHash('sha256');
 		hash.update(seriesUID);
 		var hashStr = hash.digest('hex');
 
-		this.connect()
-			.then(() => {
-				var findOne = Promise.promisify(this.seriesModel.findOne).bind(this.seriesModel);
-				return findOne({seriesUID: seriesUID}, 'storageID');
-			})
-			.then(series => {
-				var findOne = Promise.promisify(this.storageModel.findOne).bind(this.storageModel);
-				return findOne({storageID: series.storageID, type: 'dicom', active: true}, 'path');
-			})
-			.then(storage => {
-				dcmdir = path.join(storage.path, hashStr.substring(0, 2), hashStr.substring(2, 4), seriesUID);
-				callback(dcmdir);
-			})
-			.catch((err: any) => {
-				logger.error('DB Error: ' + err);
-				if (this.db) {
-					this.db.close();
-					this.db = null;
-				}
-				callback(null);
-			});
+		return new Promise<string>((resolve: (string) => void, reject) => {
+			this.connect()
+				.then(() => {
+					var findOne = Promise.promisify(this.seriesModel.findOne).bind(this.seriesModel);
+					return findOne({seriesUID: seriesUID}, 'storageID');
+				})
+				.then(series => {
+					var findOne = Promise.promisify(this.storageModel.findOne).bind(this.storageModel);
+					return findOne({storageID: series.storageID, type: 'dicom', active: true}, 'path');
+				})
+				.then(storage => {
+					dcmdir = path.join(storage.path, hashStr.substring(0, 2), hashStr.substring(2, 4), seriesUID);
+					resolve(dcmdir);
+				})
+				.catch((err: any) => {
+					logger.error('DB Error: ' + err);
+					if (this.db) {
+						this.db.close();
+						this.db = null;
+					}
+					reject(err);
+				});
+		});
+
 	}
 
 	protected connect(): Promise<any> {

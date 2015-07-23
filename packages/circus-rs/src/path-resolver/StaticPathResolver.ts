@@ -1,12 +1,11 @@
 import PathResolver from './PathResolver';
 import path = require('path');
-import fs = require('fs');
 import crypto = require('crypto');
-
+import Promise = require('bluebird');
 import logger from '../Logger';
 
 export default class StaticPathResolver extends PathResolver {
-	public resolvePath(seriesUID: string, callback: (dir: string) => void): void {
+	public resolvePath(seriesUID: string): Promise<string> {
 		var dcmdir: string = null;
 		if (this.config.useHash) {
 			var hash = crypto.createHash('sha256');
@@ -16,13 +15,8 @@ export default class StaticPathResolver extends PathResolver {
 		} else {
 			dcmdir = path.join(this.config.dataDir, seriesUID);
 		}
-		fs.exists(dcmdir, exists => {
-			if (exists) {
-				callback(dcmdir);
-			} else {
-				logger.info('not exists:' + dcmdir);
-				callback(null);
-			}
+		return new Promise<string>((resolve: (string) => void, reject) => {
+			setTimeout(() => resolve(dcmdir), 0);
 		});
 	}
 }

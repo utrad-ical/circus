@@ -21,12 +21,7 @@ export default class DicomVoxelDumperAdapter extends DicomRawDumper {
 
 	public dump(series: string, config: any, callback: (data: any) => void): void
 	{
-		this.resolver.resolvePath(series, (dcmdir: string) => {
-			if (!dcmdir) {
-				callback(null);
-				return;
-			}
-
+		this.resolver.resolvePath(series).then((dcmdir: string) => {
 			var command = this.config.dumper.options.dumper + ' combined --input-path="' + dcmdir + '" --stdout';
 			var proc = exec(command, {encoding: 'binary', maxBuffer: this.config.bufferSize}, null);
 
@@ -35,8 +30,10 @@ export default class DicomVoxelDumperAdapter extends DicomRawDumper {
 			});
 
 			callback(proc.stdout);
+		}).catch((err) => {
+			callback(null);
+			return;
 		});
-
 
 	}
 }

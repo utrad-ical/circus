@@ -19,6 +19,7 @@ class ServerStatus extends DicomServerModule {
 
 	public process(req: http.ServerRequest, res: http.ServerResponse, reader: DicomReader): void
 	{
+		res.setHeader('Access-Control-Allow-Origin', '*');
 		res.setHeader('Content-type', 'application/json');
 		var status = {
 			status: 'Running',

@@ -1,7 +1,6 @@
 /**
  * MPR Image generator Action class
  */
-var url = require('url');
 
 import RawData from '../RawData';
 import Controller from './Controller';
@@ -13,11 +12,8 @@ import logger from '../Logger';
 
 export default class MPRAction extends Controller {
 
-	public process(req: http.ServerRequest, res: http.ServerResponse): void
+	public process(query: any, res: http.ServerResponse): void
 	{
-		var u = url.parse(req.url, true);
-		var query = u.query;
-
 		var window_width;
 		var window_level;
 
@@ -72,31 +68,23 @@ export default class MPRAction extends Controller {
 			}
 
 			try {
-				if (mode == 'axial') {
-					// 天頂方向描画
-					//logger.trace('axial(top)');
+				if (mode === 'axial') {
 					out_width = raw.x;
 					out_height = raw.y;
 					buffer = MPR.makeAxial(raw, target, window_width, window_level);
-				} else if (mode == 'coronal') {
-					//logger.trace('coronal');
-					// 前方向描画
+				} else if (mode === 'coronal') {
 					out_width = raw.x;
 					out_height = raw.z;
 					buffer = MPR.makeCoronal(raw, target, window_width, window_level);
-				} else if (mode == 'sagittal') {
-					//logger.trace('sagittal');
-					// 横方向描画
+				} else if (mode === 'sagittal') {
 					out_width = raw.y;
 					out_height = raw.z;
 					buffer = MPR.makeSagittal(raw, target, window_width, window_level);
 				} else {
-					//logger.trace('unknown mode');
-					res.writeHead(404);
+					res.writeHead(400);
 					res.end();
 					return;
 				}
-
 				this.pngWriter.write(res, buffer, out_width, out_height);
 			} catch(e) {
 				logger.warn(e);

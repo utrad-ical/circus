@@ -13,7 +13,7 @@ var startUpTime: Date = new Date(); // The time this module was loaded
 
 export default class ServerStatus extends Controller {
 
-	public process(req: http.ServerRequest, res: http.ServerResponse): void
+	public process(query: any, res: http.ServerResponse): void
 	{
 		res.setHeader('Access-Control-Allow-Origin', '*');
 		res.setHeader('Content-type', 'application/json');

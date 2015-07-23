@@ -1,7 +1,6 @@
 /**
  * MPR Image generator class
  */
-var url = require('url');
 
 import RawData from '../RawData';
 import DicomRawDumper from '../DicomRawDumper';
@@ -23,11 +22,8 @@ export default class RawAction extends Controller {
 		this.rawDumper = new rawDumperModule(config);
 	}
 
-	public process(req: http.ServerRequest, res: http.ServerResponse): void
+	public process(query: any, res: http.ServerResponse): void
 	{
-		var u = url.parse(req.url, true);
-		var query = u.query;
-
 		var series = '';
 		if ('series' in query) {
 			series = query['series'];

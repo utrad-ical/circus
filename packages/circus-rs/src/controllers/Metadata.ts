@@ -1,7 +1,6 @@
 /**
  * DICOM image metadata process class
  */
-var url = require('url');
 
 import http = require('http');
 import RawData from '../RawData';
@@ -11,13 +10,8 @@ import logger from '../Logger';
 
 export default class Metadata extends Controller {
 
-	public process(req: http.ServerRequest, res: http.ServerResponse): void
+	public process(query: any, res: http.ServerResponse): void
 	{
-		//logger.info('Metadata::process');
-
-		var u = url.parse(req.url, true);
-		var query = u.query;
-
 		var series = '';
 
 		if ('series' in query) {

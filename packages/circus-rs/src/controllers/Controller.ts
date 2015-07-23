@@ -1,6 +1,7 @@
 /**
  * DICOM Server module prototype.
  */
+var url = require('url');
 import DicomReader from '../DicomReader';
 import PNGWriter from '../PNGWriter';
 import http = require('http');
@@ -20,7 +21,13 @@ export default class Controller {
 		// abstract
 	}
 
-	public process(req: http.ServerRequest, res: http.ServerResponse, reader: DicomReader): void
+	public execute(req: http.ServerRequest, res: http.ServerResponse): void
+	{
+		var query = url.parse(req.url, true).query;
+		this.process(query, res);
+	}
+
+	protected process(query: any, res: http.ServerResponse): void
 	{
 		// abstract
 	}

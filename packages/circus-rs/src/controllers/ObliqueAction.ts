@@ -1,12 +1,10 @@
 /**
  * Oblique Image generator Action class
  */
-var url = require('url');
 
 import RawData from '../RawData';
 import Controller from './Controller';
 import Oblique from '../Oblique';
-import MPR from '../MPR';
 
 import http = require('http');
 
@@ -14,9 +12,7 @@ import logger from '../Logger';
 
 export default class ObliqueAction extends Controller {
 
-	public process(req: http.ServerRequest, res: http.ServerResponse): void {
-		var u = url.parse(req.url, true);
-		var query = u.query;
+	public process(query: any, res: http.ServerResponse): void {
 
 		var window_width: number;
 		var window_level: number;

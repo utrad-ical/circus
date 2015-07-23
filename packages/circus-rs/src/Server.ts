@@ -77,7 +77,7 @@ class Server {
 			var controller = new module(reader, pngWriter);
 			router.get('/' + route[0], (req, res) => {
 				Counter.countUp(route[0]);
-				controller.process(req, res, reader);
+				controller.execute(req, res);
 			});
 		});
 		return router;

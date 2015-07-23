@@ -3,7 +3,7 @@ export = Configuration;
 interface Configuration {
 	pathResolver?: {
 		module?: string;
-		options: any;
+		options?: any;
 	};
 
 	logs?: any[];
@@ -24,10 +24,6 @@ interface Configuration {
 		module?: string;
 		options?: any;
 	}
-
-	mpr: {
-		options?: any
-	};
 
 	cache?: {
 		memoryThreshold?: number;

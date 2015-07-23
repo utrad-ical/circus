@@ -2,17 +2,19 @@
  * DICOM Server module prototype.
  */
 import DicomReader = require('../DicomReader');
+import PNGWriter = require('../PNGWriter');
 import http = require('http');
 
 export = DicomServerModule;
 
 class DicomServerModule {
 
-	protected config: any = null;
+	protected reader: DicomReader;
+	protected pngWriter: PNGWriter;
 
-	constructor(config: any) {
-
-		this.config = config || {};
+	constructor(reader: DicomReader, pngWriter: PNGWriter) {
+		this.reader = reader;
+		this.pngWriter = pngWriter;
 		this.initialize();
 	}
 

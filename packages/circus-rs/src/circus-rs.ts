@@ -20,20 +20,31 @@ var config: Configuration = require('config');
 import Logger = require('./Logger');
 var logger = Logger.prepareLogger();
 
-import Counter = require('./Counter');
-
 logger.info('CIRCUS RS is starting up...');
+
+import Counter = require('./Counter');
+import PNGWriter = require('./Counter');
+import DicomReader = require('./DicomReader');
 
 logger.info('Loading modules...');
 
-// create DICOM Reader
-import DicomReader = require('./DicomReader');
+// set up DICOM Reader
 var reader = (() => {
-	var resolverClass = require('./path-resolver/' + config.pathResolver.module);
+	var module: string = config.pathResolver.module;
+	logger.info('Using path resolver: ' + module);
+	var resolverClass = require('./path-resolver/' + module);
 	var resolver = new resolverClass(config.pathResolver.options);
 	var dumperClass = require('./' + config.dumper.module);
 	var dumper = new dumperClass(config.dumper.options);
 	return new DicomReader(resolver, dumper, config.cache.memoryThreshold);
+})();
+
+// set up PNG writer
+var pngWriter: PNGWriter = (() => {
+	var module: string = config.pngWriter.module;
+	logger.info('Using PNG writer: ' + module);
+	var pngModule = require('./' + module);
+	return new pngModule(config.pngWriter.options);
 })();
 
 // setup routing
@@ -71,7 +82,7 @@ function prepareRouter(): any
 	];
 	routes.forEach(route => {
 		logger.info('Preparing ' + route[0] + ' module...');
-		var controller = new route[1](config.mpr);
+		var controller = new route[1](reader, pngWriter);
 		router.get('/' + route[0], (req, res) => {
 			Counter.countUp(route[0]);
 			controller.process(req, res, reader);

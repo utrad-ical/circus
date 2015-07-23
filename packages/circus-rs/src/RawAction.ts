@@ -13,6 +13,8 @@ import http = require('http');
 import Logger = require('./Logger');
 var logger = Logger.prepareLogger();
 
+var config = require('config');
+
 export = RawAction;
 
 class RawAction extends DicomServerModule {
@@ -21,9 +23,8 @@ class RawAction extends DicomServerModule {
 
 	protected initialize() {
 		super.initialize();
-
-		var rawDumperModule = require('./' + this.config.rawDumper.module);
-		this.rawDumper = new rawDumperModule(this.config);
+		var rawDumperModule = require('./' + config.rawDumper.module);
+		this.rawDumper = new rawDumperModule(config);
 	}
 
 	public process(req: http.ServerRequest, res: http.ServerResponse, reader: DicomReader): void

@@ -5,7 +5,6 @@ var url = require('url');
 
 import http = require('http');
 import RawData = require('../RawData');
-import DicomReader = require('../DicomReader');
 import DicomServerModule = require('./DicomServerModule');
 
 import Logger = require('../Logger');
@@ -15,7 +14,7 @@ export = Metadata;
 
 class Metadata extends DicomServerModule {
 
-	public process(req: http.ServerRequest, res: http.ServerResponse, reader: DicomReader): void
+	public process(req: http.ServerRequest, res: http.ServerResponse): void
 	{
 		//logger.info('Metadata::process');
 
@@ -35,7 +34,7 @@ class Metadata extends DicomServerModule {
 			return;
 		}
 
-		reader.readData(series, 'all', (raw: RawData, error: any) => {
+		this.reader.readData(series, 'all', (raw: RawData, error: any) => {
 			if (error) {
 				logger.warn(error);
 				res.writeHead(500);

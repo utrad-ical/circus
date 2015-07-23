@@ -4,10 +4,8 @@
 var url = require('url');
 
 import RawData = require('../RawData');
-import DicomReader = require('../DicomReader');
 import DicomServerModule = require('./DicomServerModule');
 import oblique = require('../Oblique');
-import PNGWriter = require('../PNGWriter');
 import MPR = require('../MPR');
 
 import http = require('http');
@@ -19,16 +17,7 @@ export = ObliqueAction;
 
 class ObliqueAction extends DicomServerModule {
 
-    private pngWriter: PNGWriter;
-
-    protected initialize() {
-        super.initialize();
-
-        var pngModule = require('../' + this.config.options.pngWriter);
-        this.pngWriter = new pngModule(this.config.options.pngWriterOptions);
-    }
-
-    public process(req: http.ServerRequest, res: http.ServerResponse, reader: DicomReader): void
+    public process(req: http.ServerRequest, res: http.ServerResponse): void
     {
         var u = url.parse(req.url, true);
         var query = u.query;
@@ -83,7 +72,8 @@ class ObliqueAction extends DicomServerModule {
             return;
         }
 
-        reader.readData(series, '', (raw: RawData, error: string) => {
+
+        this.reader.readData(series, '', (raw: RawData, error: string) => {
             if (error) {
                 logger.warn(error);
                 res.writeHead(404);

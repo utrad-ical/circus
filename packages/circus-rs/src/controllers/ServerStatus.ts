@@ -4,7 +4,6 @@
 var url = require('url');
 
 import DicomServerModule = require('./DicomServerModule');
-import DicomReader = require('../DicomReader');
 import http = require('http');
 import Counter = require('../Counter');
 
@@ -17,14 +16,14 @@ var startUpTime: Date = new Date(); // The time this module was loaded
 
 class ServerStatus extends DicomServerModule {
 
-	public process(req: http.ServerRequest, res: http.ServerResponse, reader: DicomReader): void
+	public process(req: http.ServerRequest, res: http.ServerResponse): void
 	{
 		res.setHeader('Access-Control-Allow-Origin', '*');
 		res.setHeader('Content-type', 'application/json');
 		var status = {
 			status: 'Running',
 			dicomReader: {
-				count: reader.length()
+				count: this.reader.length()
 			},
 			process: {
 				memoryUsage: process.memoryUsage(),

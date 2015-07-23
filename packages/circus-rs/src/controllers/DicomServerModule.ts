@@ -1,7 +1,7 @@
 /**
  * DICOM Server module prototype.
  */
-import DicomReader = require('./DicomReader');
+import DicomReader = require('../DicomReader');
 import http = require('http');
 
 export = DicomServerModule;

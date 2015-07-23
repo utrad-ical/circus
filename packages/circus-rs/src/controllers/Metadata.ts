@@ -4,11 +4,11 @@
 var url = require('url');
 
 import http = require('http');
-import RawData = require('./RawData');
-import DicomReader = require('./DicomReader');
+import RawData = require('../RawData');
+import DicomReader = require('../DicomReader');
 import DicomServerModule = require('./DicomServerModule');
 
-import Logger = require('./Logger');
+import Logger = require('../Logger');
 var logger = Logger.prepareLogger();
 
 export = Metadata;

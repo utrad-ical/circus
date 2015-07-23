@@ -6,7 +6,7 @@ var url = require('url');
 import RawData = require('./RawData');
 import DicomReader = require('./DicomReader');
 import DicomRawDumper = require('./DicomRawDumper');
-import DicomServerModule = require('./DicomServerModule');
+import DicomServerModule = require('./controllers/DicomServerModule');
 
 import http = require('http');
 

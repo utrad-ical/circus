@@ -4,11 +4,11 @@
 var url = require('url');
 
 import DicomServerModule = require('./DicomServerModule');
-import DicomReader = require('./DicomReader');
+import DicomReader = require('../DicomReader');
 import http = require('http');
-import Counter = require('./Counter');
+import Counter = require('../Counter');
 
-import Logger = require('./Logger');
+import Logger = require('../Logger');
 var logger = Logger.prepareLogger();
 
 export = ServerStatus;

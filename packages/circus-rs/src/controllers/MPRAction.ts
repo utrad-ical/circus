@@ -3,15 +3,15 @@
  */
 var url = require('url');
 
-import RawData = require('./RawData');
-import DicomReader = require('./DicomReader');
+import RawData = require('../RawData');
+import DicomReader = require('../DicomReader');
 import DicomServerModule = require('./DicomServerModule');
-import PNGWriter = require('./PNGWriter');
-import MPR = require('./MPR');
+import PNGWriter = require('../PNGWriter');
+import MPR = require('../MPR');
 
 import http = require('http');
 
-import Logger = require('./Logger');
+import Logger = require('../Logger');
 var logger = Logger.prepareLogger();
 
 export = MPRAction;
@@ -23,8 +23,8 @@ class MPRAction extends DicomServerModule {
 	protected initialize() {
 		super.initialize();
 
-		var pngModule = require('./' + this.config.pngWriter.module);
-		this.pngWriter = new pngModule(this.config.pngWriter.options);
+		var pngModule = require('../' + this.config.options.pngWriter);
+		this.pngWriter = new pngModule(this.config.options.pngWriterOptions);
 	}
 
 	public process(req: http.ServerRequest, res: http.ServerResponse, reader: DicomReader): void

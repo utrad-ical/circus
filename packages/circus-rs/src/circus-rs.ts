@@ -13,7 +13,6 @@ var finalhandler = require('finalhandler');
 var argv = require('minimist')(process.argv.slice(2));
 
 // include config modules
-var configFile = typeof argv.config === 'string' ? argv.config : '../config';
 process.env.NODE_CONFIG_DIR = __dirname + '/../config';
 import Configuration = require('Configuration');
 var config: Configuration = require('config');
@@ -27,18 +26,6 @@ logger.info('CIRCUS RS is starting up...');
 
 logger.info('Loading modules...');
 
-import Metadata = require('./Metadata');
-import ServerStatus = require('./ServerStatus');
-import MPR = require('./MPRAction');
-import Oblique = require('./ObliqueAction');
-import Raw = require('./RawAction');
-
-var metadataModule = new Metadata(null);
-var mprModule = new MPR(config);
-var serverStatus = new ServerStatus(null);
-var obliqueModule = new Oblique(config);
-var rawModule = new Raw(config);
-
 // create DICOM Reader
 import DicomReader = require('./DicomReader');
 var reader = (() => {
@@ -50,6 +37,11 @@ var reader = (() => {
 })();
 
 // setup routing
+import Metadata = require('./controllers/Metadata');
+import ServerStatus = require('./controllers/ServerStatus');
+import MPR = require('./controllers/MPRAction');
+import Oblique = require('./controllers/ObliqueAction');
+
 var Router = require('router');
 var router = prepareRouter();
 
@@ -71,27 +63,19 @@ logger.info('Server running on port ' + config.port);
 function prepareRouter(): any
 {
 	var router = Router();
-
-	router.get('/metadata', function(req, res) {
-		Counter.countUp('metadata');
-		metadataModule.process(req, res, reader);
+	var routes: [string, any][] = [
+		['metadata', Metadata],
+		['MPR', MPR],
+		['status', ServerStatus],
+		['Oblique', Oblique]
+	];
+	routes.forEach(route => {
+		logger.info('Preparing ' + route[0] + ' module...');
+		var controller = new route[1](config.mpr);
+		router.get('/' + route[0], (req, res) => {
+			Counter.countUp(route[0]);
+			controller.process(req, res, reader);
+		});
 	});
-	router.get('/MPR', function(req, res) {
-		Counter.countUp('MPR');
-		mprModule.process(req, res, reader);
-	});
-	router.get('/status', function(req, res) {
-		Counter.countUp('status');
-		serverStatus.process(req, res, reader);
-	});
-	router.get('/Oblique', function(req, res) {
-		Counter.countUp('Oblique');
-		obliqueModule.process(req, res, reader);
-	});
-	router.get('/raw', function(req, res) {
-		Counter.countUp('raw');
-		rawModule.process(req, res, reader);
-	});
-
 	return router;
 }

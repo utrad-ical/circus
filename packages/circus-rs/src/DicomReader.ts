@@ -139,23 +139,24 @@ export default class DicomReader {
 			logger.info('no cache found.');
 		}
 
-		this.resolver.resolvePath(series).then((dcmdir: string) => {
-			this.dumper.readDicom(dcmdir, params, (rawData: RawData) => {
-				var err: string = '';
-				if (rawData == null) {
-					err = "cannot read image.";
-					logger.info('readDicom failed.');
-				} else {
-					logger.info('put rawdata: ' + series);
-					this.put(series, rawData);
-				}
-				callback(rawData, err);
+		this.resolver.resolvePath(series)
+			.then((dcmdir: string) => {
+				this.dumper.readDicom(dcmdir, params, (rawData: RawData) => {
+					var err: string = '';
+					if (rawData == null) {
+						err = "cannot read image.";
+						logger.info('readDicom failed.');
+					} else {
+						logger.info('put rawdata: ' + series);
+						this.put(series, rawData);
+					}
+					callback(rawData, err);
+					this.execCounter = 0;
+				});
+			}).catch((err) => {
+				callback(null, 'cannot resolve path.');
 				this.execCounter = 0;
 			});
-		}).catch((err) => {
-			callback(null, 'cannot resolve path.');
-			this.execCounter = 0;
-		});
 	}
 
 }

@@ -4,52 +4,29 @@
 
 import http = require('http');
 import RawData from '../RawData';
-import Controller from './Controller';
+import VolumeBasedController from './VolumeBasedController';
 
-import logger from '../Logger';
+// import logger from '../Logger';
 
-export default class Metadata extends Controller {
-
-	public process(query: any, res: http.ServerResponse): void
-	{
-		var series = '';
-
-		if ('series' in query) {
-			series = query['series'];
-		}
-
-		if (series == '') {
-			logger.warn('no seriesUID specified.')
-			res.writeHead(404);
-			res.end();
-			return;
-		}
-
-		this.reader.readData(series, 'all', (raw: RawData, error: any) => {
-			if (error) {
-				logger.warn(error);
-				res.writeHead(500);
-				res.end();
-				return;
+export default class Metadata extends VolumeBasedController {
+	protected processVolume(query: any, raw: RawData, res: http.ServerResponse): void {
+		try {
+			var response: any = {};
+			response.x = raw.x;
+			response.y = raw.y;
+			response.z = raw.z;
+			response.voxel_x = raw.vx;
+			response.voxel_y = raw.vy;
+			response.voxel_z = raw.vz;
+			response.window_width = raw.ww;
+			response.window_level = raw.wl;
+			if (raw.dcm_ww != null) {
+				response.window_width_dicom = raw.dcm_ww;
 			}
-
-			try {
-				var response: any = {};
-				response.x = raw.x;
-				response.y = raw.y;
-				response.z = raw.z;
-				response.voxel_x = raw.vx;
-				response.voxel_y = raw.vy;
-				response.voxel_z = raw.vz;
-				response.window_width = raw.ww;
-				response.window_level = raw.wl;
-				if (raw.dcm_ww != null) {
-					response.window_width_dicom = raw.dcm_ww;
-				}
-				if (raw.dcm_wl != null) {
-					response.window_level_dicom = raw.dcm_wl;
-				}
-				switch(raw.type) {
+			if (raw.dcm_wl != null) {
+				response.window_level_dicom = raw.dcm_wl;
+			}
+			switch (raw.type) {
 				case 0:
 					response.window_width_min = 1;
 					response.window_width_max = 256;
@@ -76,16 +53,13 @@ export default class Metadata extends Controller {
 					break;
 				default:
 					break;
-				}
-
-				res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
-				res.end(JSON.stringify(response));
-			} catch(e) {
-				logger.warn(e);
-				res.writeHead(500);
-				res.end();
 			}
-		});
+
+			res.writeHead(200, {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'});
+			res.end(JSON.stringify(response));
+		} catch (e) {
+			this.respondInternalServerError(res, e.toString());
+		}
 	}
 
 }

@@ -75,7 +75,7 @@ Route::group(['before' => 'auth'], function() {
 	Route::get('share/search', 'ShareSearchController@search');
 	Route::post('share/search', 'ShareSearchController@search');
 	Route::any('share/search_result', 'ShareSearchController@search_ajax');
-	Route::any('share/save_search', 'ShareSearchController@save_search');
+	Route::any('share/export', 'ShareExportController@export');
 
 	// Administration
 	$staticView('admin', 'admin.index');

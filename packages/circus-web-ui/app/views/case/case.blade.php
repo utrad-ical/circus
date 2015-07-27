@@ -1,4 +1,191 @@
 @if ($search_flg)
+
+@if ($export_mode)
+	<script>
+		var COOKIE_NAME = "exportCookie";
+		$(document).ready(function(){
+
+			if(typeof $.cookie(COOKIE_NAME) === "undefined"){
+				var first_array = [];
+				$.cookie(COOKIE_NAME , first_array , { expires: 1 });
+			}
+			var export_array = [];
+
+			$(".all_check_parent").click(function () {
+				if($(this).prop('checked')){
+					// チェックが入れられた場合に、表示されている全てをクッキーに追加
+					var multiNums = [];
+					$(".export_case").each(function(){
+						multiNums.push($(this).val());
+						$(this).attr('checked','checked');
+					});
+					for(i = 0; i < multiNums.length; i++){
+						if($.inArray(multiNums[i] , export_array) == -1){
+							export_array.push(multiNums[i]);
+							$.cookie(COOKIE_NAME , export_array.join("_") , { expires: 1 });
+						}
+					}
+
+					$.cookie(COOKIE_NAME , export_array.join("_"));
+				} else {
+					// チェックが外された場合に、表示されている全てをクッキーから削除
+					var multiNums = [];
+					$(".export_case").each(function(){
+						multiNums.push($(this).val());
+						$(this).removeAttr('checked');
+					});
+					for(i = 0; i < multiNums.length; i++){
+						if($.inArray(multiNums[i] , export_array) != -1){
+							export_array.splice($.inArray(multiNums[i] , export_array) , 1);
+							$.cookie(COOKIE_NAME , export_array.join("_") , { expires: 1 });
+						}
+					}
+				}
+			});
+
+			$(".export_case").click(function () {
+				var target_number = $(this).val();
+				var num_idx = $.inArray(target_number , export_array);
+
+				if($(this).prop('checked')){
+					// チェックが入れられた場合に、Export対象としてクッキーに追加
+					if(num_idx == -1){
+						export_array.push(target_number);
+						$.cookie(COOKIE_NAME , export_array.join("_") , { expires: 1 });
+					}
+
+				} else {
+					// チェックが外された場合に、Export対象外としてクッキーから削除
+					if(num_idx != -1){
+						export_array.splice(num_idx , 1);
+						$.cookie(COOKIE_NAME , export_array.join("_") , { expires: 1 });
+					}
+				}
+				console.log(document.cookie);
+			});
+
+			$("#dialog").dialog({
+				autoOpen: false,
+				closeOnEscape: false,
+				closeText:"",
+				//height:80,
+				width:500,
+				maxwidth:false,
+				modal:true
+			});
+		});
+		var closeExportOptionDialog = function(error) {
+
+			$("#dialog").dialog('close');
+			$('#export_err').append(error);
+			//ボタンEnableにする
+			$('.btn_export').removeClass('disabled');
+
+		}
+
+
+		var createExportOptionDialog = function() {
+			$('#dialog').slideDown();
+			$('#progressbar').progressbar({
+				value:0
+			});
+			$('#dialog').dialog('open');
+		}
+
+		//タスク管理用
+		var progress = $('#progress').progressbar().hide();
+		var progressLabel = $('#progress-label');
+
+		var busy = function(bool) {
+			if (bool) $('#message').hide();
+			$('#form .common_btn, #form input:file').prop('disabled', bool);
+			progress.toggle(bool);
+			progressLabel.text('');
+		}
+
+		var myXhr = function() {
+			var xhr = new XMLHttpRequest();
+			xhr.upload.addEventListener('progress', function (event) {
+				if (event.lengthComputable) {
+					var percentComplete = Math.round((event.loaded * 100) / event.total);
+					progress.progressbar('value', percentComplete);
+					if (event.loaded == event.total) {
+						progress.hide();
+						progressLabel.hide();
+					}
+				}
+			}, false);
+			return xhr;
+		}
+		var validateExport = function() {
+			var COOKIE_NAME = "exportCookie";
+			console.log($.cookie(COOKIE_NAME));
+
+			var tmpCookie = $.cookie(COOKIE_NAME);
+			var len = tmpCookie.length;
+			console.log('配列長::'+len);
+			if (len == 0)
+				return false;
+
+			return true;
+		}
+		var validateOptExport = function() {
+			var error = [];
+
+			var parent_form = $('.frm_share_export');
+			//個人情報出力有無未選択
+			var personal = parent_form.find('input[name=personal]:checked').val();
+			console.log('個人情報有無::');
+			console.log(personal);
+			if (personal != 0 && personal != 1)
+				error.push('Please select the output existence of personal information .');
+			//タグ未選択
+			var tag = parent_form.find('.tags').val();
+			if (tag == "undefined")
+				error.push('Please select a tag .');
+			return error;
+		}
+
+		var isExportRun = function(validate_flag) {
+			$('.btn_export').addClass('disabled');
+
+			$('#export_err').empty();
+
+			if (validate_flag) {
+				if (!validateExport() ) {
+					closeExportOptionDialog('Please select at least one case.');
+					return false;
+				}
+				var error = validateOptExport();
+				console.log(error);
+				if (error.length > 0) {
+					closeExportOptionDialog(error.join(','));
+					return false;
+				}
+			}
+			return true;
+		}
+		$(function(){
+			$('.btn_export').click(function () {
+				$('#export_err').empty();
+				if (!validateExport()) {
+					$('#export_err').append('Export対象のケースを1つ以上選択してください');
+					return false;
+				}
+				createExportOptionDialog();
+				$('.btn_export').addClass('disabled');
+				$('.frm_share_export').append('<input type="hidden" name="export_type" value="'+$(this).attr('name')+'">');
+				return false;
+			});
+
+			$('.ui-icon-closethick').click(function() {
+				//ボタンEnableにする
+				$('.btn_export').removeClass('disabled');
+			});
+		});
+	</script>
+	@include('case.export_dialog')
+@endif
 	@if (count($list) > 0)
 		<ul class="common_pager clearfix">
 			@if (isset($list_pager))
@@ -18,22 +205,31 @@
 	<table class="result_table common_table">
 		<colgroup>
 		@if(Auth::user()->hasPrivilege(Group::PERSONAL_INFO_VIEW))
+			@if ($export_mode)
+				<col width="5%">
+			@endif
 			<col width="13%">
 			<col width="10%">
 			<col width="16%">
-			<col width="10%">
+			<col width="{{{$export_mode ? 5 : 10}}}%">
 			<col width="10%">
 			<col width="13%">
 			<col width="19%">
 			<col width="9%">
 		@else
+			@if ($export_mode)
+				<col width="5%">
+			@endif
 			<col width="25%">
 			<col width="25%">
 			<col width="25%">
-			<col width="25%">
+			<col width="{{{$export_mode ? 20 : 25}}}%">
 		@endif
 		</colgroup>
 		<tr>
+			@if ($export_mode)
+				<th>&nbsp;</th>
+			@endif
 			<th>projectName</th>
 		@if(Auth::user()->hasPrivilege(Group::PERSONAL_INFO_VIEW))
 			<th>patientID</th>
@@ -48,6 +244,9 @@
 		@if (count($list) > 0)
 			@foreach ($list as $rec)
 				<tr>
+					@if ($export_mode)
+						<td>{{Form::checkbox('export_target[]', $rec->caseID, isset($inputs['export_target']) && array_search($rec->caseID, $inputs['export_target']) !== false ? true : false, array('class' => 'export_case'))}}</td>
+					@endif
 					<td>{{$rec->project->projectName}}</td>
 				@if(Auth::user()->hasPrivilege(Group::PERSONAL_INFO_VIEW))
 					<td>{{$rec->patientInfoCache['patientID']}}</td>
@@ -72,7 +271,17 @@
 			@endforeach
 		@else
 			<tr>
-				<td colspan="8">Search results 0.</td>
+				@if ($export_mode && Auth::user()->hasPrivilege(Group::PERSONAL_INFO_VIEW))
+				<td colspan="9">
+				@elseif ($export_mode && !Auth::user()->hasPrivilege(Group::PERSONAL_INFO_VIEW))
+				<td colspan="5">
+				@elseif (!$export_mode && !Auth::user()->hasPrivilege(Group::PERSONAL_INFO_VIEW))
+				<td colspan="4">
+				@else
+				<td colspan="8">
+				@endif
+					Search results 0.
+				</td>
 			</tr>
 		@endif
 	</table>

@@ -4,6 +4,7 @@
  */
 class CaseSearchBaseController extends BaseController {
 	protected $_prefix;
+	protected $_export_mode = false;
 	/**
 	 * Case Search Results
 	 */
@@ -17,9 +18,10 @@ class CaseSearchBaseController extends BaseController {
 
 			$result = ClinicalCase::searchCase($search_data, $preset_id);
 			$result['prefix'] = $this->_prefix;
+			$result['export_mode'] = $this->_export_mode;
 			Session::put('backUrl', $this->_prefix.'/search');
 		} catch (Exception $e) {
-			Log::debug($e);
+			Log::error($e);
 			$result['error_msg'] = $e->getMessage();
 		}
 		return View::make('case/search', $result);
@@ -35,6 +37,7 @@ class CaseSearchBaseController extends BaseController {
 			$result = ClinicalCase::searchCase($search_data);
 
 			$result['prefix'] = $this->_prefix;
+			$result['export_mode'] = $this->_export_mode;
 			$tmp = View::make('case/case', $result);
 		} catch (Exception $e) {
 			Log::error($e);
@@ -83,12 +86,14 @@ class CaseSearchBaseController extends BaseController {
 	private function setSearchCondition($inputs) {
 		if (array_key_exists('btnReset', $inputs) !== false || !$inputs) {
 			Session::forget($this->_prefix.'.search');
+			$this->deleteCookie();
 		//Search button is pressed during
 		} else if (array_key_exists ('btnSearch', $inputs) !== false) {
 			if (array_key_exists('disp', $inputs) === false) $inputs['disp'] = Config::get('const.page_display');
 			if (array_key_exists('sort', $inputs) === false) $inputs['sort'] = 'updateTime';
 			if (array_key_exists('order_by', $inputs) === false) $inputs['order_by'] = 'desc';
 			Session::put($this->_prefix.'.search', $inputs);
+			$this->deleteCookie();
 		} else if (array_key_exists('page', $inputs) !== false) {
 			$tmp = Session::get($this->_prefix.'.search');
 			$tmp['perPage'] = $inputs['page'];
@@ -100,6 +105,7 @@ class CaseSearchBaseController extends BaseController {
 			$detail_search['sort'] = 'updateTime';
 			$detail_search['order_by'] = 'desc';
 			Session::put($this->_prefix.'.search', $detail_search);
+			$this->deleteCookie();
 		} else if (array_key_exists('btnBack', $inputs) === false) {
 			Session::forget($this->_prefix.'.search');
 		}
@@ -110,5 +116,13 @@ class CaseSearchBaseController extends BaseController {
 			throw new Exception('Please specify the project .');
 
 		return ClinicalCase::getProjectCaseAttribute(array($inputs['projectID']));
+	}
+
+	/**
+	 * Export対象クッキー削除
+	 */
+	private function deleteCookie() {
+		if (isset($_COOKIE["exportCookie"]))
+			setcookie("exportCookie", "", time() - 1800);
 	}
 }

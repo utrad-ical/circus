@@ -16,3 +16,4 @@ Artisan::add(new DeleteSeries);
 Artisan::add(new ExportVolume);
 Artisan::add(new GetSeries);
 Artisan::add(new TaskDummyWait);
+Artisan::add(new CaseExportVolume);

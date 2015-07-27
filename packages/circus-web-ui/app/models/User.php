@@ -92,7 +92,7 @@ class User extends BaseModel implements UserInterface {
 						$result[] = $priv;
 				}
 			}
-			$this->privileges = array_keys($result);
+			$this->privileges = $result;
 		}
 		return $this->privileges;
 	}

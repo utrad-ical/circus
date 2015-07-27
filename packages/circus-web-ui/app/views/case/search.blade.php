@@ -9,6 +9,7 @@
 {{HTML::script('js/jquery.formserializer.js')}}
 {{HTML::script('js/jquery.flexforms.js')}}
 {{HTML::script('js/more_search.js')}}
+{{HTML::script('js/jquery.cookie.js')}}
 @if (isset($inputs['mongo_search_data']))
 <script>
 	var detail_keys = {{$inputs['mongo_search_data']}};
@@ -52,7 +53,7 @@
 			if (ret == null){
 				alert('Please display the save label name.');
 			} else {
-				sendAjax("{{asset($prefix.'/save_search')}}", setAjaxSearchVal("btnSave", {"name":"save_label","value":ret}));
+				sendAjax("{{asset('case/save_search')}}", setAjaxSearchVal("btnSave", {"name":"save_label","value":ret}));
 			}
 			return false;
 		});
@@ -269,6 +270,12 @@
 			{{Form::button('Reset', array('class' => 'common_btn common_btn_green clearForm', 'type' => 'reset', 'id' => 'btn_reset', 'name' => 'btnReset'))}}
 			{{Form::button('Search', array('class' => 'common_btn common_btn_gray', 'id' => 'btn_submit', 'type' => 'button', 'name' => 'btnSubmit'))}}
 			{{Form::button('Save settings', array('class' => 'common_btn common_btn_gray', 'id' => 'save-button', 'type' => 'button', 'name' => 'btnSave'))}}
+			@if ($export_mode)
+				<p class="al_r">
+					{{Form::button('All Result Export', array('class' => 'common_btn common_btn_gray btn_export', 'name' => 'btnExportAll'))}}
+					{{Form::button('Select Export', array('class' => 'common_btn common_btn_gray btn_export', 'name' => 'btnExportSelect'))}}
+				</p>
+			@endif
 		</p>
 	</div>
 </div>

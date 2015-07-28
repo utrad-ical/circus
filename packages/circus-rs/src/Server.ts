@@ -66,9 +66,9 @@ class Server {
 
 		var routes: [string, string][] = [
 			['metadata', 'Metadata'],
-			['MPR', 'MPRAction'],
+			['mpr', 'MPRAction'],
 			['status', 'ServerStatus'],
-			['Oblique', 'ObliqueAction'],
+			['oblique', 'ObliqueAction'],
 			['raw', 'RawAction']
 		];
 		routes.forEach(route => {

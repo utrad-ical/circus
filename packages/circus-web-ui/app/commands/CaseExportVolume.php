@@ -95,63 +95,13 @@ class CaseExportVolume extends TaskCommand {
 
 					//ラベルデータ作成
 					if (array_key_exists('labels', $series)) {
-						foreach ($series['labels'] as $label) {
-							$label_data = Label::find($label['id']);
-							if (!$label_data)
-								throw new Exception('labelID ['.$label['id'].'] not found. ');
-
-							$dir = $outputPath. "/cases/".$caseId."/labels/".$label['id'];
-							if (!is_dir($dir)) {
-								mkdir($dir, 0777, true); // make directory recursively
-							}
-							//ラベルJSON
-							$file_name = $dir . '/label.json';
-							file_put_contents($file_name, json_encode($label_data));
-							$this->updateTaskProgress($counter, 0, "Exporting in progress. $counter files are processed.");
-							$counter++;
-
-							//ラベルファイル
-							$storage_info = Storage::find($label_data->storageID);
-							$storage_path = $storage_info->path;
-
-							$load_path = $storage_path."/".$label['id'].'.gz';
-
-							copy($load_path, $dir."/voxcels.gz");
-							$this->updateTaskProgress($counter, 0, "Exporting in progress. $counter files are processed.");
-							$counter++;
-						}
+						$this->createLabelData($series['labels'], $caseId, $counter);
 					}
 				}
 			}
 
 			//シリーズデータの出力
-			foreach ($series_list as $series) {
-				$series_data = Series::find($series);
-				if (!$series_data)
-					throw new Exception('seriesUID ['.$series.'] not found. ');
-
-				$dir = $outputPath."/series/".$series;
-				if (!is_dir($dir)) {
-					mkdir($dir, 0777, true); // make directory recursively
-				}
-				$path = Storage::find($series_data->storageID);
-				$dicom_path = $path->dicomStoragePath($series);
-
-				if ($dicom_dir = opendir($dicom_path)) {
-				    while (($file = readdir($dicom_dir)) !== false) {
-				        if ($file != "." && $file != "..") {
-				            copy($dicom_path."/".$file, $dir."/".$file);
-				            $this->updateTaskProgress($counter, 0, "Exporting in progress. $counter files are processed.");
-							$counter++;
-				    	}
-				    }
-			    	closedir($dicom_dir);
-				}
-
-				file_put_contents($file_name, json_encode($case_data));
-				$this->updateTaskProgress($counter, 0, "Exporting in progress. $counter files are processed.");
-				$counter++;
-			}
+			$this->createSeriesData($series_list, $counter);
 
 			//tgz圧縮
 			$phar = new PharData($outputPath.'/data.tar');
@@ -171,11 +121,68 @@ class CaseExportVolume extends TaskCommand {
 		return true;
 	}
 
+	private function createLabelData($labels, $caseId, &$counter) {
+		$outputPath = $this->argument('output-path');
+		foreach ($labels as $label) {
+			$label_data = Label::find($label['id']);
+			if (!$label_data)
+				throw new Exception('labelID ['.$label['id'].'] not found. ');
+
+			$dir = $outputPath. "/cases/".$caseId."/labels/".$label['id'];
+			if (!is_dir($dir)) {
+				mkdir($dir, 0777, true); // make directory recursively
+			}
+			//ラベルJSON
+			$file_name = $dir . '/label.json';
+			file_put_contents($file_name, json_encode($label_data));
+			$this->updateTaskProgress($counter, 0, "Exporting in progress. $counter files are processed.");
+			$counter++;
+
+			//ラベルファイル
+			$storage_info = Storage::find($label_data->storageID);
+			$storage_path = $storage_info->path;
+
+			$load_path = $storage_path."/".$label['id'].'.gz';
+
+			copy($load_path, $dir."/voxcels.gz");
+			$this->updateTaskProgress($counter, 0, "Exporting in progress. $counter files are processed.");
+			$counter++;
+		}
+	}
+
+	private function createSeriesData($series_list, &$counter) {
+		$outputPath = $this->argument('output-path');
+		//シリーズデータの出力
+		foreach ($series_list as $series) {
+			$series_data = Series::find($series);
+			if (!$series_data)
+				throw new Exception('seriesUID ['.$series.'] not found. ');
+
+			$dir = $outputPath."/series/".$series;
+			if (!is_dir($dir)) {
+				mkdir($dir, 0777, true); // make directory recursively
+			}
+			$path = Storage::find($series_data->storageID);
+			$dicom_path = $path->dicomStoragePath($series);
+
+			if ($dicom_dir = opendir($dicom_path)) {
+			    while (($file = readdir($dicom_dir)) !== false) {
+			        if ($file != "." && $file != "..") {
+			            copy($dicom_path."/".$file, $dir."/".$file);
+			            $this->updateTaskProgress($counter, 0, "Exporting in progress. $counter files are processed.");
+						$counter++;
+			    	}
+			    }
+		    	closedir($dicom_dir);
+			}
+		}
+	}
+
 	/**
 	 * テンポラリデータ削除
 	 * @param string $target_dir テンポラリフォルダパス
 	 */
-	public static function deleteTemporaryFiles($target_dir, $preserve = true)
+	private function deleteTemporaryFiles($target_dir, $preserve = true)
 	{
 		if (!File::isDirectory($target_dir)) return false;
 

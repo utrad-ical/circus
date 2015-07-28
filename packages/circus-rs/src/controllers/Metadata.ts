@@ -5,10 +5,19 @@
 import http = require('http');
 import RawData from '../RawData';
 import VolumeBasedController from './VolumeBasedController';
+import { ValidatorRules } from '../Validator';
 
 // import logger from '../Logger';
 
 export default class Metadata extends VolumeBasedController {
+
+	protected getRules(): ValidatorRules
+	{
+		return {
+			series: ['Series UID', null, 'isLength:1:200', null],
+		};
+	}
+
 	protected processVolume(query: any, raw: RawData, res: http.ServerResponse): void {
 		var response: any = {
 			x: raw.x,

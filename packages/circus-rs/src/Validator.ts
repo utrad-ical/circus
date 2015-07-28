@@ -1,14 +1,14 @@
-import v = require('validator');
+import validator = require('validator');
 
-interface ValidatorRules {
+export interface ValidatorRules {
 	// key => [description, default, validator, sanitizer(normalizer)]
-	[key: string]: [string, any, (input: any) => boolean | string, (input: any) => any | string];
+	[key: string]: [string, any, ((input: any) => boolean) | string | RegExp, ((input: any) => any) | string];
 }
 
 /**
  * Wraps node-validator and validates rules
  */
-export default class Validator {
+export class Validator {
 	private rules: ValidatorRules;
 
 	constructor(rules) {
@@ -16,11 +16,11 @@ export default class Validator {
 	}
 
 	public validate(input: any): { result: any; errors: string[] } {
-		var result = {};
-		var errors = [];
+		var result: any = {};
+		var errors: string[] = [];
 		for (var key in this.rules) {
 			var spec = this.rules[key];
-			var [/*description*/, defaults, validator, normalizer] = spec;
+			var [/*description*/, defaults, rule, normalizer] = spec;
 			var required: boolean = false;
 			var value: any;
 			if (/\!$/.test(key)) {
@@ -29,35 +29,38 @@ export default class Validator {
 			}
 			if (!(key in input)) {
 				if (required) {
-					errors.push(`{key} is empty.`);
+					errors.push(`${key} is empty.`);
 					continue;
 				} else {
-					value = defaults;
+					result[key] = defaults;
+					continue;
 				}
 			} else {
 				value = input[key];
 			}
 			var ok: boolean = false;
-			if (typeof validator === 'string') {
-				ok = !validator.split(/\s\|\s/).every(cond => {
+			if (typeof rule === 'string') {
+				ok = rule.split(/\s\|\s/).every(cond => {
 					var [funcName, ...rest] = cond.split(':');
-					return v[funcName](value, ...rest);
+					return validator[funcName](value, ...rest);
 				});
-			} else if (typeof validator === 'function') {
-				ok = validator(input[key]);
+			} else if (typeof rule === 'function') {
+				ok = rule(input[key]);
+			} else if (rule instanceof RegExp) {
+				ok = rule.test(input[key]);
 			}
 			if (ok) {
 				if (typeof normalizer === 'string') {
 					normalizer.split(/\s\|\s/).forEach(norm => {
 						var [funcName, ...rest] = norm.split(':');
-						value = v[funcName](value, ...rest);
+						value = validator[funcName](value, ...rest);
 					});
 				} else if (typeof normalizer === 'function') {
 					value = normalizer(value);
 				}
-				result[key] = normalizer(input[key]);
+				result[key] = value;
 			} else {
-				errors.push(`{key} is invalid.`);
+				errors.push(`${key} is invalid.`);
 			}
 		}
 		return { result: result, errors: errors };

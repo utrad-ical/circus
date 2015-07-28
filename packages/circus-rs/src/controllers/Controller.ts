@@ -6,6 +6,7 @@ import DicomReader from '../DicomReader';
 import PNGWriter from '../PNGWriter';
 import http = require('http');
 import logger from '../Logger';
+import { Validator, ValidatorRules } from '../Validator';
 
 export default class Controller {
 
@@ -24,13 +25,24 @@ export default class Controller {
 
 	public execute(req: http.ServerRequest, res: http.ServerResponse): void
 	{
-		var query = url.parse(req.url, true).query;
-		this.process(query, res);
+		var rawQuery = url.parse(req.url, true).query;
+		var validator = new Validator(this.getRules());
+		var {result, errors} = validator.validate(rawQuery);
+		if (errors.length) {
+			this.respondBadRequest(res, errors.join('\n'));
+		} else {
+			this.process(result, res);
+		}
 	}
 
 	protected process(query: any, res: http.ServerResponse): void
 	{
 		// abstract
+	}
+
+	protected getRules(): ValidatorRules
+	{
+		return {};
 	}
 
 	protected respondJsonWithStatus(status: number, res: http.ServerResponse, data: any): void

@@ -83,7 +83,7 @@ class CommonHelper{
 	 * @param string $tmp_dir 対象フォルダ
 	 * @param string $file_name ファイル名
 	 */
-	public static function downloadZip($tmp_dir, $file_name) {
+	public static function downloadZip($tmp_dir, $file_name, $is_delete = true) {
 		try {
 			if (!$tmp_dir || !$file_name)
 				throw new Exception('Please select download file .');
@@ -95,7 +95,7 @@ class CommonHelper{
 			);
 
 	   		return Response::stream(
-	   			function() use ($file_name, $tmp_dir){
+	   			function() use ($file_name, $tmp_dir, $is_delete){
 	   				$zip_file_path = $tmp_dir.'/'.$file_name;
 	   				$fp = fopen($zip_file_path, 'rb');
 					while(!feof($fp)) {
@@ -107,12 +107,13 @@ class CommonHelper{
 					fclose($fp);
 
 					//delete temporary folder recursively
-					File::deleteDirectory($tmp_dir);
+					if ($is_delete)
+						File::deleteDirectory($tmp_dir);
 	   			}
 				, 200
 				, $headers);
 		} catch (Exception $e) {
-			Log::debug($e);
+			Log::error($e);
 		}
 	}
 }

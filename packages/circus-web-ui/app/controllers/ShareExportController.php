@@ -24,31 +24,32 @@ class ShareExportController extends BaseController {
 			//command execution
 			$caseIds = str_replace('_', ',', $_COOKIE['exportCookie']);
 			$cmd_str = ' '.$caseIds. ' '.$tmp_dir_path;
-			if ($inputs['personal'] == 1)
+			if ($inputs['personal'] == 0)
 				$cmd_str .= ' --without-personal';
 
-			//delete trash files
-			//TODO::要保存場所の確認。キャッシュ配下だと他コマンド実行時に削除視されてしまうため
-			//CommonHelper::deleteOlderTemporaryFiles(storage_path('cache'), true, '-2 day');
+			//Export用で2日以上経過したものを削除する
+			CommonHelper::deleteOlderTemporaryFiles(storage_path('transfer'), true, '-2 day');
 
 			$task = Task::startNewTask("case:export-volume " .$cmd_str);
 			if (!$task) {
 				throw new Exception('Failed to invoke export process.');
 			}
 
-			//download zip file
-			$zip_file_name = 'data.tar.gz';
-			$zip_file_path = $tmp_dir_path.'/'.$zip_file_name;
-			Log::debug('圧縮期待ファイル名::');
-			Log::debug($zip_file_path);
+			//共有用にCache配下からstorage/transferに移動する
+			if (!is_dir(storage_path('transfer'))) {
+				mkdir(storage_path('transfer'), 0777, true); // make directory recursively
+			}
+			rename($tmp_dir_path.'/data.tgz', storage_path('transfer').'/'.$tmp_dir.'.tgz');
+			$zip_file_name = $tmp_dir.'.tgz';
+			$zip_file_path = storage_path('transfer'). '/'.$zip_file_name;
 
 			if (!file_exists($zip_file_path))
-				throw new Exception('failed create tar.gz file .');
+				throw new Exception('failed create tgz file .');
 
 			//ダウンロードに必要な情報の設定
 			$res = array(
 				'file_name' => $zip_file_name,
-				'dir_name' => $tmp_dir
+				'dir_name' => storage_path('transfer')
 			);
 
 			return Response::json(array(
@@ -58,12 +59,6 @@ class ShareExportController extends BaseController {
 			));
 		} catch (Exception $e) {
 			Log::error($e);
-
-			/*
-			TODO::圧縮成功してからこのコメントアウト解除する
-			if (isset($tmp_dir_path))
-				File::deleteDirectory($tmp_dir_path);
-				*/
 			return Response::json(
 				array('result' => false, 'errorMessage' => $e->getMessage()),
 				400
@@ -73,11 +68,24 @@ class ShareExportController extends BaseController {
 
 	private function validate($data) {
 		//Export対象のケースチェック
-		$cases = $_COOKIE['exportCookie'];
-		if (!$cases)
-			throw new Exception('ケースを1つ以上選択してください。');
+		if ($data['export_type'] !== 'btnExportSelect') {
+			$cases = $_COOKIE['exportCookie'];
+			if (!$cases)
+				throw new Exception('ケースを1つ以上選択してください。');
 
-		$caseIds = explode('_', $cases);
+			$caseIds = explode('_', $cases);
+		} else {
+			//全件
+			$search_data = Session::get('share.search');
+
+			$result = ClinicalCase::searchCase($search_data);
+			$caseIds = array();
+			if (!$result) {
+				foreach ($result as $rec) {
+					$caseIds[] = $rec->caseID;
+				}
+			}
+		}
 		foreach ($caseIds as $caseId) {
 			$case = ClinicalCase::find($caseId);
 			if (!$case)

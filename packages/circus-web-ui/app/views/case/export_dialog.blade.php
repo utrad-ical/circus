@@ -1,6 +1,7 @@
 <div id="dialog" title="Setting export options" style="display: none;">
 	<p class="mar_10">
 		{{Form::open(array('url' => asset('share/export'), 'method' => 'post', 'class' => 'frm_share_export'))}}
+			{{Form::hidden('export_type', '')}}
 			<table class="common_table">
 				<tr>
 					<th>Personal Info</th>
@@ -38,6 +39,7 @@
 {{Form::open(['url' => asset('download/volume'), 'method' => 'post', 'id' => 'frmDownload'])}}
 	{{Form::hidden('file_name', '')}}
 	{{Form::hidden('dir_name', '')}}
+	{{Form::hidden('transfer', true)}}
 {{Form::close()}}
 <span id="export_err" class="font_red"></span>
 <script>
@@ -53,7 +55,12 @@ var exportRun = function (validate_flag) {
 	if (!isExportRun(validate_flag))
 		return;
 
-	var export_data = {"cases":$.cookie(COOKIE_NAME), "personal":"","tags":""};
+	var parent_form = $('.frm_share_export');
+	var personal = parent_form.find('input[name="personal"]:checked').val();
+	var tag = parent_form.find('select[name="tag"] option:selected').val();
+	var export_type = parent_form.find('input[name="export_type"]').val();
+
+	var export_data = {"cases":$.cookie(COOKIE_NAME), "personal":personal,"tags":tag, "export_type":export_type};
 	busy(true);
 	var xhr = $.ajax({
 		url: "{{{asset('share/export')}}}",
@@ -73,7 +80,6 @@ var exportRun = function (validate_flag) {
 			closeExportOptionDialog();
 			alert(data.responseJSON.errorMessage);
 			busy(false);
-
 		}
 	});
 }

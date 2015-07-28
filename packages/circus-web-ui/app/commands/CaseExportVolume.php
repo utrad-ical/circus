@@ -37,13 +37,13 @@ class CaseExportVolume extends TaskCommand {
 	{
 		$caseIds = $this->argument('cases');
 		if (!$caseIds) {
-			$this->error('Export対象のケースを選択してください。');
+			$this->error('Please select the Export target of the case .');
 			return;
 		}
 
 		$outputPath = $this->argument('output-path');
 		if (!$outputPath) {
-			$this->error('出力先フォルダーを指定してください。');
+			$this->error('Please specify the destination folder .');
 			return;
 		}
 
@@ -59,13 +59,6 @@ class CaseExportVolume extends TaskCommand {
 		$outputPath = $this->argument('output-path');
 		$series_list = array();
 
-		Log::debug('explode前::');
-		Log::debug($this->argument('cases'));
-		Log::debug('caseID一覧::');
-		Log::debug($caseIds);
-		Log::debug('出力先');
-		Log::debug($outputPath);
-
 		try {
 			foreach ($caseIds as $caseId) {
 				$case_data = ClinicalCase::find($caseId);
@@ -74,10 +67,6 @@ class CaseExportVolume extends TaskCommand {
 					$this->error('Invalid caseID: ' . $caseId);
 					return false;
 				}
-
-				Log::debug('ケース情報::');
-				Log::debug($case_data->toArray());
-
 				//オプション:個人情報出力なし
 				if ($this->option('without-personal')) {
 					$case_data->patientInfoCache = array();
@@ -109,7 +98,7 @@ class CaseExportVolume extends TaskCommand {
 						foreach ($series['labels'] as $label) {
 							$label_data = Label::find($label['id']);
 							if (!$label_data)
-								throw new Exception('ラベルID['.$label['id'].'のラベルデータがありません。');
+								throw new Exception('labelID ['.$label['id'].'] not found. ');
 
 							$dir = $outputPath. "/cases/".$caseId."/labels/".$label['id'];
 							if (!is_dir($dir)) {
@@ -117,7 +106,7 @@ class CaseExportVolume extends TaskCommand {
 							}
 							//ラベルJSON
 							$file_name = $dir . '/label.json';
-							file_put_contents($file_name, json_encode($case_data));
+							file_put_contents($file_name, json_encode($label_data));
 							$this->updateTaskProgress($counter, 0, "Exporting in progress. $counter files are processed.");
 							$counter++;
 
@@ -128,6 +117,8 @@ class CaseExportVolume extends TaskCommand {
 							$load_path = $storage_path."/".$label['id'].'.gz';
 
 							copy($load_path, $dir."/voxcels.gz");
+							$this->updateTaskProgress($counter, 0, "Exporting in progress. $counter files are processed.");
+							$counter++;
 						}
 					}
 				}
@@ -137,7 +128,7 @@ class CaseExportVolume extends TaskCommand {
 			foreach ($series_list as $series) {
 				$series_data = Series::find($series);
 				if (!$series_data)
-					throw new Exception('シリーズID['.$series.'が存在しません。');
+					throw new Exception('seriesUID ['.$series.'] not found. ');
 
 				$dir = $outputPath."/series/".$series;
 				if (!is_dir($dir)) {
@@ -150,7 +141,9 @@ class CaseExportVolume extends TaskCommand {
 				    while (($file = readdir($dicom_dir)) !== false) {
 				        if ($file != "." && $file != "..") {
 				            copy($dicom_path."/".$file, $dir."/".$file);
-				        }
+				            $this->updateTaskProgress($counter, 0, "Exporting in progress. $counter files are processed.");
+							$counter++;
+				    	}
 				    }
 			    	closedir($dicom_dir);
 				}
@@ -160,26 +153,19 @@ class CaseExportVolume extends TaskCommand {
 				$counter++;
 			}
 
-			//TarGz圧縮
-			//TODO::あとでちゃんとしたファイル名に変える
-			exec("tar zcvfr ".$outputPath."/data.tar.gz ".$outputPath, $output, $ret);
-			Log::debug('圧縮結果::');
-			Log::debug($ret);
+			//tgz圧縮
+			$phar = new PharData($outputPath.'/data.tar');
+			$tmpAry = $phar->buildFromDirectory($outputPath);
+			$phar->compress(Phar::GZ, '.tgz');
 			$this->updateTaskProgress($counter, 0, "Exporting in progress. $counter files are processed.");
 			$counter++;
 
-			/*
-			TODO::圧縮成功してからこのコメントアウト解除する
-			unlink($outputPath."/export.tar");
-
-			//圧縮が完了したのでtar.gz以外のファイルを削除する
+			//圧縮が完了したのでtgz以外のファイルを削除する
+			File::delete($outputPath.'/data.tar');
 			$this->deleteTemporaryFiles($outputPath);
 			$this->updateTaskProgress($counter, 0, "Exporting in progress. $counter files are processed.");
-			*/
 		} catch (Exception $e) {
-			\Log::debug('エラー発生');
 			\Log::error($e);
-			\Log::info($e->getMessage());
 			return false;
 		}
 		return true;
@@ -189,7 +175,7 @@ class CaseExportVolume extends TaskCommand {
 	 * テンポラリデータ削除
 	 * @param string $target_dir テンポラリフォルダパス
 	 */
-	public static function deleteTemporaryFiles($target_dir)
+	public static function deleteTemporaryFiles($target_dir, $preserve = true)
 	{
 		if (!File::isDirectory($target_dir)) return false;
 
@@ -197,13 +183,18 @@ class CaseExportVolume extends TaskCommand {
 
 		foreach ($items as $item) {
 			if ($item->isDir()) {
-				self::deleteTemporaryFiles($item->getPathname());
+				self::deleteTemporaryFiles($item->getPathname(), false);
 			} else if ($item->getFilename() != ".gitignore") {
 				$file_name = $item->getPathname();
 				$ext = pathInfo($file_name, PATHINFO_EXTENSION);
-				if ($ext !== 'tar.gz')
+				if ($ext !== 'tgz') {
 					File::delete($file_name);
+				}
 			}
+		}
+
+		if (!$preserve) {
+			@rmdir($target_dir);
 		}
 		return true;
 	}

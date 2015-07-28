@@ -61,7 +61,6 @@
 						$.cookie(COOKIE_NAME , export_array.join("_") , { expires: 1 });
 					}
 				}
-				console.log(document.cookie);
 			});
 
 			$("#dialog").dialog({
@@ -118,12 +117,12 @@
 			return xhr;
 		}
 		var validateExport = function() {
+			var export_type = $('.frm_share_export').find('input[name="export_type"]').val();
+
 			var COOKIE_NAME = "exportCookie";
-			console.log($.cookie(COOKIE_NAME));
 
 			var tmpCookie = $.cookie(COOKIE_NAME);
 			var len = tmpCookie.length;
-			console.log('配列長::'+len);
 			if (len == 0)
 				return false;
 
@@ -135,8 +134,6 @@
 			var parent_form = $('.frm_share_export');
 			//個人情報出力有無未選択
 			var personal = parent_form.find('input[name=personal]:checked').val();
-			console.log('個人情報有無::');
-			console.log(personal);
 			if (personal != 0 && personal != 1)
 				error.push('Please select the output existence of personal information .');
 			//タグ未選択
@@ -152,12 +149,13 @@
 			$('#export_err').empty();
 
 			if (validate_flag) {
-				if (!validateExport() ) {
+				var export_type = $('.frm_share_export').find('input[name="export_type"]').val();
+
+				if (export_type != 'btnExportAll' && !validateExport() ) {
 					closeExportOptionDialog('Please select at least one case.');
 					return false;
 				}
 				var error = validateOptExport();
-				console.log(error);
 				if (error.length > 0) {
 					closeExportOptionDialog(error.join(','));
 					return false;
@@ -168,13 +166,14 @@
 		$(function(){
 			$('.btn_export').click(function () {
 				$('#export_err').empty();
-				if (!validateExport()) {
-					$('#export_err').append('Export対象のケースを1つ以上選択してください');
+				//全件出力でない場合はExport対象のケース選択Validateチェックを行う
+				if ($(this).attr('name') != 'btnExportAll' && !validateExport()) {
+					$('#export_err').append('Please the Export target of the case and select one or more .');
 					return false;
 				}
 				createExportOptionDialog();
 				$('.btn_export').addClass('disabled');
-				$('.frm_share_export').append('<input type="hidden" name="export_type" value="'+$(this).attr('name')+'">');
+				$('.frm_share_export').find('input[name="export_type"]').val($(this).attr('name'));
 				return false;
 			});
 

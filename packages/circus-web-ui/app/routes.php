@@ -66,7 +66,10 @@ Route::group(['before' => 'auth'], function() {
 	//Common download volume data
 	Route::any('download/volume', function() {
 		$inputs = Input::all();
-		return CommonHelper::downloadZip(storage_path('cache').'/'.$inputs['dir_name'], $inputs['file_name']);
+		$download_url = $inputs['dir_name'];
+		if (!Input::has('transfer'))
+			$download_url = storage_path('cache').'/'.$download_url;
+		return CommonHelper::downloadZip($download_url, $inputs['file_name'], !Input::has('transfer'));
 	});
 
 	//Share

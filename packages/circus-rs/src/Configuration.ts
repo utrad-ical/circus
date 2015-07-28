@@ -1,27 +1,20 @@
-interface Configuration {
-	pathResolver?: {
-		module?: string;
-		options?: any;
-	};
+interface ObjectDefinition {
+	module?: string;
+	options?: any;
+}
 
+interface Configuration {
 	logs?: any[];
 
 	port?: number;
 
-	dumper: {
-		module?: string;
-		options?: any;
-	};
+	pathResolver?: ObjectDefinition;
 
-	rawDumper: {
-		module?: string;
-		options?: any;
-	};
+	dumper?: ObjectDefinition;
 
-	pngWriter: {
-		module?: string;
-		options?: any;
-	};
+	rawDumper?: ObjectDefinition;
+
+	pngWriter?: ObjectDefinition;
 
 	cache?: {
 		memoryThreshold?: number;

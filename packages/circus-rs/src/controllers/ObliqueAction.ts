@@ -18,7 +18,7 @@ export default class ObliqueAction extends VolumeBasedController {
 		var window_level: number;
 		var base_axis: string;
 		var alpha: number = 0.0;
-		var center;
+		var center: [number, number, number];
 
 		if ('ww' in query) {
 			window_width = query['ww'];
@@ -30,10 +30,10 @@ export default class ObliqueAction extends VolumeBasedController {
 			base_axis = query['b'];
 		}
 		if ('a' in query) {
-			alpha = query['a'];
+			alpha = parseFloat(query['a']);
 		}
 		if ('c' in query) {
-			center = query['c'].split(',');
+			center = query['c'].split(',').map(parseFloat);
 		}
 
 		if (base_axis != 'axial' && base_axis != 'coronal' && base_axis != 'sagittal') {
@@ -61,7 +61,7 @@ export default class ObliqueAction extends VolumeBasedController {
 		res.setHeader('X-Circus-Pixel-Columns', '' + result.width);
 		res.setHeader('X-Circus-Pixel-Rows', '' + result.height);
 		res.setHeader('X-Circus-Center', '' + result.center_x + ',' + result.center_y);
-		this.pngWriter.write(res, result.buffer, result.width, result.center_y);
+		this.pngWriter.write(res, result.buffer, result.width, result.height);
 	}
 
 }

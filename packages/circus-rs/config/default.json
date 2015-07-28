@@ -57,5 +57,8 @@
  		 *		So this threshold is not strict.
  		 */
 		"memoryThreshold": 2147483648
+	},
+	"authorization": {
+		"enabled": false
 	}
 }

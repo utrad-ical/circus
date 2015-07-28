@@ -17,8 +17,12 @@ import Counter from './Counter';
 import PNGWriter from './PNGWriter';
 import DicomReader from './DicomReader';
 import DicomDumper from './DicomDumper';
+import DicomRawDumper from './DicomRawDumper';
 import DicomServerModule from './controllers/Controller';
 import PathResolver from './path-resolver/PathResolver';
+import AuthorizationCache from './AuthorizationCache';
+
+import RegisterAccessTokenAction from'./controllers/RegisterAccessTokenAction';
 
 var Router = require('router');
 
@@ -59,27 +63,57 @@ class Server {
 		return new pngModule(config.pngWriter.options);
 	}
 
+	private createRawDumper(): DicomRawDumper  {
+		var module: string = config.rawDumper.module;
+		logger.info('Using RawDumper: ' + module);
+		var rawDumperModule: typeof DicomRawDumper = require('./' + module).default;
+		return new rawDumperModule(config);
+	}
+
 	private prepareRouter(): any {
 		var router = Router();
 		var pngWriter = this.createPngWriter();
 		var reader = this.createDicomReader();
+		var rawDumper = this.createRawDumper();
+		var authorizationCache = new AuthorizationCache(config.authorization);
 
-		var routes: [string, string][] = [
-			['metadata', 'Metadata'],
-			['mpr', 'MPRAction'],
-			['status', 'ServerStatus'],
-			['oblique', 'ObliqueAction'],
-			['raw', 'RawAction']
+		// path name, process class name, need authorization
+		var routes: [string, string, boolean][] = [
+			['metadata', 'Metadata', true],
+			['mpr', 'MPRAction', true],
+			['status', 'ServerStatus', false],
+			['oblique', 'ObliqueAction', true],
+			['raw', 'RawAction', true]
 		];
 		routes.forEach(route => {
 			logger.info('Loading ' + route[1] + ' module...');
 			var module: typeof DicomServerModule = require('./controllers/' + route[1]).default;
-			var controller = new module(reader, pngWriter);
+			var controller = new module(reader, pngWriter, rawDumper);
 			router.get('/' + route[0], (req, res) => {
+				if (route[2] && config.authorization.require) {
+					if (!authorizationCache.isValid(req)) {
+						logger.info('401 error');
+						res.writeHead(401, 'access not allowed.');
+						res.end();
+						return;
+					}
+				}
+
 				Counter.countUp(route[0]);
 				controller.execute(req, res);
 			});
 		});
+
+		if (config.authorization.require) {
+			logger.info('Loading RegisterAccessTokenAction module');
+			var controller: RegisterAccessTokenAction = new RegisterAccessTokenAction(reader, pngWriter, rawDumper);
+			controller.setCache(authorizationCache);
+
+			router.get('/registerToken' , (req, res) => {
+				Counter.countUp('registerToken');
+				controller.execute(req, res);
+			});
+		}
 		return router;
 	}
 }

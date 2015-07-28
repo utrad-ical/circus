@@ -3,6 +3,7 @@
  */
 var url = require('url');
 import DicomReader from '../DicomReader';
+import DicomRawDumper from '../DicomRawDumper';
 import PNGWriter from '../PNGWriter';
 import http = require('http');
 import logger from '../Logger';
@@ -12,10 +13,12 @@ export default class Controller {
 
 	protected reader: DicomReader;
 	protected pngWriter: PNGWriter;
+	protected rawDumper: DicomRawDumper;
 
-	constructor(reader: DicomReader, pngWriter: PNGWriter) {
+	constructor(reader: DicomReader, pngWriter: PNGWriter, rawDumper: DicomRawDumper) {
 		this.reader = reader;
 		this.pngWriter = pngWriter;
+		this.rawDumper = rawDumper;
 		this.initialize();
 	}
 

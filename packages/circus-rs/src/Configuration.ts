@@ -21,9 +21,15 @@ interface Configuration {
 	pngWriter: {
 		module?: string;
 		options?: any;
-	}
+	};
 
 	cache?: {
 		memoryThreshold?: number;
 	};
+
+	authorization?: {
+		require: boolean;
+		expire?: number;
+	};
+
 }

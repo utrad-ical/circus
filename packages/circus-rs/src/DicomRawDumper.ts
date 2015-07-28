@@ -4,7 +4,7 @@
 
 import RawData from './RawData';
 
-export default class DicomDumper {
+export default class DicomRawDumper {
 
 	protected config: any = null;
 

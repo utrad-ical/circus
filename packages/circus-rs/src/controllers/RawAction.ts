@@ -14,12 +14,8 @@ var config = require('config');
 
 export default class RawAction extends Controller {
 
-	rawDumper: DicomRawDumper;
-
 	protected initialize() {
 		super.initialize();
-		var rawDumperModule: any = require('../' + config.rawDumper.module).default;
-		this.rawDumper = new rawDumperModule(config);
 	}
 
 	public process(query: any, res: http.ServerResponse): void

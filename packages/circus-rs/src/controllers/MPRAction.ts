@@ -27,10 +27,12 @@ export default class MPRAction extends VolumeBasedController {
 	protected processVolume(query: any, raw: RawData, res: http.ServerResponse): void
 	{
 		var {ww, wl, target, mode} = query;
-
 		var buffer;
 		var out_width;
 		var out_height;
+
+		if (ww === null) ww = raw.ww;
+		if (wl === null) wl = raw.wl;
 
 		if (mode === 'axial') {
 			out_width = raw.x;

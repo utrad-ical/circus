@@ -629,26 +629,30 @@
             var init_series_info = [];
             init_series_info = $.extend(true, init_series_info, controllerInfo.series);
 
-            var init_guide_info = [{
-              show: true,
-              number: 0,
-              name: 'axial',
-              color: '0000ff'
-            }, {
-              show: true,
-              number: 0,
-              name: 'coronal',
-              color: '00ff00'
-            }, {
-              show: true,
-              number: 0,
-              name: 'sagittal',
-              color: 'ff0000'
-            }]
+            var init_guide_info = {
+							lines : [{
+								show: true,
+								number: 0,
+								name: 'axial',
+								color: '0000ff'
+							}, {
+								show: true,
+								number: 0,
+								name: 'coronal',
+								color: '00ff00'
+							}, {
+								show: true,
+								number: 0,
+								name: 'sagittal',
+								color: 'ff0000'
+							}],
+							grid_range : 5,
+							hall_size : 0.1
+						}
 
-            for (var j = 0; j < init_guide_info.length; j++) {
-              if (controllerInfo.viewer[i].orientation === init_guide_info[j].name) {
-                init_guide_info[j].show = false;
+            for (var j = 0; j < init_guide_info.lines.length; j++) {
+              if (controllerInfo.viewer[i].orientation === init_guide_info.lines[j].name) {
+                init_guide_info.lines[j].show = false;
               }
             }
 
@@ -1398,9 +1402,9 @@
       for (var i = 0; i < controllerInfo.viewer.length; i++) {
         var elmId = '#' + controllerInfo.viewer[i].elementId;
         var tmp_opts = $(elmId).imageViewer('option');
-        for (var j = 0; j < tmp_opts.viewer.guide.length; j++) {
-          if (tmp_opts.viewer.guide[j].name === the_orientation) {
-            tmp_opts.viewer.guide[j].number = the_number;
+        for (var j = 0; j < tmp_opts.viewer.guide.lines.length; j++) {
+          if (tmp_opts.viewer.guide.lines[j].name === the_orientation) {
+            tmp_opts.viewer.guide.lines[j].number = the_number;
           }
         }
         $(elmId).trigger('sync');

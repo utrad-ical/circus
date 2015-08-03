@@ -69,15 +69,20 @@
               /*
                描画情報格納用,今現在表示しているz軸で塗られているxy座標の集合を格納する。ラベルにつき１項目ずつ
                {  id : 'label_1', rgba : rgba(0,0,0,1),position:[] ,visible : true        }
-               */
+              */
             ]
           }
         ],
-        guide : [
-          {show : false, number: 0, name : 'axial', color: 'FF7F7F'},
-          {show : false, number: 0, name : 'coronal', color: '7FFF7F'},
-          {show : false, number: 0, name : 'sagittal', color: '7F7FFF'}
-        ],
+        guide : {
+          lines : [
+            {show : false, number: 0, name : 'axial', color: 'FF7F7F'},
+            {show : false, number: 0, name : 'coronal', color: '7FFF7F'},
+            {show : false, number: 0, name : 'sagittal', color: '7F7FFF'}
+          ],
+          grid_range : 5,
+          hall_rate : 0.1
+        },
+          
         measure : {
           active : true,
           start_x : 0,
@@ -89,7 +94,7 @@
           angle : 0.25 * Math.PI, //radian
           color : 'ffa500',
           point_width : 8,
-					display_margin : 25,
+          display_margin : 25,
           visible : false
         },
         voxel: {
@@ -182,71 +187,69 @@
 
 
     _calculateRotatePoint: function (the_angle, center_x, center_y) {
-			//return the positions at both ends of a line segment passing through the center point
-			//the_angle: radian
-			//center_x: position X of the center point
-			//center_y: position Y of the center point
-	
-			var this_obj = this;
-			var this_elm = this.element;
-			var this_opts = this.options;
-	
-			var return_obj = [
-				[0, 0],
-				[0, 0]
-			];
-			//first array : arrow point XY
-			//second array : oppotunity point of arrow
-	
-			var max_length = this_opts.viewer.position.dw + this_opts.viewer.position.dh;
-			var tmp_distance = 0;
-	
-			//calcurate the position of main dot 
-			var the_cos = Math.cos(the_angle);
-			var the_sin = Math.sin(the_angle);
-	
-			for (tmp_distance = 0; tmp_distance < max_length; tmp_distance += 1) {
-				var tmp_x = center_x + tmp_distance * the_cos;
-				var tmp_y = center_y - tmp_distance * the_sin;
-				if (tmp_x < this_opts.viewer.rotate.display_margin) {
-					return_obj[0] = [this_opts.viewer.rotate.display_margin, tmp_y];
-					break;
-				} else if (tmp_x > this_opts.viewer.position.dw - this_opts.viewer.rotate.display_margin) {
-					return_obj[0] = [this_opts.viewer.position.dw - this_opts.viewer.rotate.display_margin, tmp_y];
-					break;
-				} else if (tmp_y < this_opts.viewer.rotate.display_margin) {
-					return_obj[0] = [tmp_x, this_opts.viewer.rotate.display_margin];
-					break;
-				} else if (tmp_y > this_opts.viewer.position.dh - this_opts.viewer.rotate.display_margin) {
-					return_obj[0] = [tmp_x, this_opts.viewer.position.dh - this_opts.viewer.rotate.display_margin];
-					break;
-				}
-			}
-	
-			//calcurate the position of opportunity point (for line)
-			the_cos = the_cos * -1;
-			the_sin = the_sin * -1;
-			for (tmp_distance = 0; tmp_distance < max_length; tmp_distance += 1) {
-				var tmp_x = center_x + tmp_distance * the_cos;
-				var tmp_y = center_y - tmp_distance * the_sin;
-	
-				if (tmp_x < 0) {
-					return_obj[1] = [0, tmp_y];
-					break;
-				} else if (tmp_x > this_opts.viewer.position.dw) {
-					return_obj[1] = [this_opts.viewer.position.dw, tmp_y];
-					break;
-				} else if (tmp_y < 0) {
-					return_obj[1] = [tmp_x, 0];
-					break;
-				} else if (tmp_y > this_opts.viewer.position.dh) {
-					return_obj[1] = [tmp_x, this_opts.viewer.position.dh];
-					break;
-				}
-			}
-	
-			return return_obj;
-		},
+      //return the positions at both ends of a line segment passing through the center point
+      //the_angle: radian
+      //center_x: position X of the center point
+      //center_y: position Y of the center point
+
+      var this_opts = this.options;
+  
+      var return_obj = [
+        [0, 0],
+        [0, 0]
+      ];
+      //first array : arrow point XY
+      //second array : oppotunity point of arrow
+  
+      var max_length = this_opts.viewer.position.dw + this_opts.viewer.position.dh;
+      var tmp_distance = 0;
+  
+      //calcurate the position of main dot 
+      var the_cos = Math.cos(the_angle);
+      var the_sin = Math.sin(the_angle);
+  
+      for (tmp_distance = 0; tmp_distance < max_length; tmp_distance += 1) {
+        var tmp_x = center_x + tmp_distance * the_cos;
+        var tmp_y = center_y - tmp_distance * the_sin;
+        if (tmp_x < this_opts.viewer.rotate.display_margin) {
+          return_obj[0] = [this_opts.viewer.rotate.display_margin, tmp_y];
+          break;
+        } else if (tmp_x > this_opts.viewer.position.dw - this_opts.viewer.rotate.display_margin) {
+          return_obj[0] = [this_opts.viewer.position.dw - this_opts.viewer.rotate.display_margin, tmp_y];
+          break;
+        } else if (tmp_y < this_opts.viewer.rotate.display_margin) {
+          return_obj[0] = [tmp_x, this_opts.viewer.rotate.display_margin];
+          break;
+        } else if (tmp_y > this_opts.viewer.position.dh - this_opts.viewer.rotate.display_margin) {
+          return_obj[0] = [tmp_x, this_opts.viewer.position.dh - this_opts.viewer.rotate.display_margin];
+          break;
+        }
+      }
+  
+      //calcurate the position of opportunity point (for line)
+      the_cos = the_cos * -1;
+      the_sin = the_sin * -1;
+      for (tmp_distance = 0; tmp_distance < max_length; tmp_distance += 1) {
+        var tmp_x = center_x + tmp_distance * the_cos;
+        var tmp_y = center_y - tmp_distance * the_sin;
+  
+        if (tmp_x < 0) {
+          return_obj[1] = [0, tmp_y];
+          break;
+        } else if (tmp_x > this_opts.viewer.position.dw) {
+          return_obj[1] = [this_opts.viewer.position.dw, tmp_y];
+          break;
+        } else if (tmp_y < 0) {
+          return_obj[1] = [tmp_x, 0];
+          break;
+        } else if (tmp_y > this_opts.viewer.position.dh) {
+          return_obj[1] = [tmp_x, this_opts.viewer.position.dh];
+          break;
+        }
+      }
+  
+      return return_obj;
+    },
 
 
 
@@ -460,37 +463,46 @@
       //mousedownから呼び出し
       //マウス位置とガイドが重なっているかを調査して
       //重なっていたら 1 を、そうでなければ 0 を返す
-
-
+  
       var the_return = '';
       var this_obj = this;
       var this_elm = this.element;
       var this_opts = this.options;
-      var guide_grid_range = 5;
-
+      var mouse_range = this_opts.viewer.guide.grid_range;
+    
+      var guide_horizontal = this_obj.getGuide('horizontal');
+      var guide_vertical =  this_obj.getGuide('vertical');
+    
+      var hall_x = this_opts.viewer.guide.hall_rate * this_opts.viewer.position.dw / this_opts.viewer.position.zoom;
+      var hall_y = this_opts.viewer.guide.hall_rate * this_opts.viewer.position.dh / this_opts.viewer.position.zoom;
+  
       if (typeof range === 'number') {
-        guide_grid_range = range;
+        mouse_range = range;
       }
-
+  
       //マウス位置取得
       var tmp_cursor_x = (e.clientX - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().left) / this_opts.viewer.position.zoom;
       var tmp_cursor_y = (e.clientY - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().top) / this_opts.viewer.position.zoom;
-
+  
       //初期位置(ズーム解除状態でのXY値)
       tmp_cursor_x = (tmp_cursor_x + this_opts.viewer.position.sx) * this_opts.viewer.position.ow / this_opts.viewer.position.dw;
       tmp_cursor_y = (tmp_cursor_y + this_opts.viewer.position.sy) * this_opts.viewer.position.oh / this_opts.viewer.position.dh;
-
-      var guide_horizontal = this_obj.getGuide('horizontal');
-      var guide_vertical =  this_obj.getGuide('vertical');
-
-      if (guide_horizontal.number - guide_grid_range < tmp_cursor_x && tmp_cursor_x < guide_horizontal.number + guide_grid_range) {
-        the_return = 'horizontal';
-      } else if (guide_vertical.number - guide_grid_range < tmp_cursor_y &&  tmp_cursor_y < guide_vertical.number + guide_grid_range) {
-        the_return = 'vertical';
+  
+  
+      if (guide_horizontal.number - mouse_range < tmp_cursor_x && guide_horizontal.number + mouse_range > tmp_cursor_x) {
+        //around cross point
+        if (guide_vertical.number - hall_x > tmp_cursor_y || guide_vertical.number + hall_x < tmp_cursor_y) {
+          the_return = 'horizontal';
+        }
+      } else if (guide_vertical.number - mouse_range < tmp_cursor_y && guide_vertical.number + mouse_range > tmp_cursor_y) {
+        //around cross point
+        if (guide_horizontal.number - hall_y > tmp_cursor_x || guide_horizontal.number + hall_y < tmp_cursor_x) {
+          the_return = 'vertical';
+        }
       }
-
-      return the_return;
-
+  
+      return the_return; // horizontal or vertical
+  
     },//_CheckGuideOver
 
 
@@ -503,7 +515,6 @@
       var this_obj = this;
       var this_elm = this.element;
       var this_opts = this.options;
-      var guide_grid_range = 5;
 
       var tmp_cursor_x = (e.clientX - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().left) / this_opts.viewer.position.zoom;
       var tmp_cursor_y = (e.clientY - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().top) / this_opts.viewer.position.zoom;
@@ -620,9 +631,9 @@
       }
 
       //枠線の色をつける
-      for(var i=0; i<this_opts.viewer.guide.length; i++) {
-        if(this_opts.viewer.guide[i].name === this_opts.viewer.orientation) {
-          this_elm.find('.img_wrap').css('borderColor', '#'+this_opts.viewer.guide[i].color);
+      for(var i=0; i<this_opts.viewer.guide.lines.length; i++) {
+        if(this_opts.viewer.guide.lines[i].name === this_opts.viewer.orientation) {
+          this_elm.find('.img_wrap').css('borderColor', '#'+this_opts.viewer.guide.lines[i].color);
         }
       }
 
@@ -681,7 +692,6 @@
       var this_elm = this.element;
       var this_opts = this.options;
       var tmp_ctx = this_elm.find('.canvas_main_elm').get(0).getContext('2d');
-      var guide_hall_size = 0.1;
 
       var guide_horizontal = this_obj.getGuide('horizontal');
       var guide_vertical =  this_obj.getGuide('vertical');
@@ -700,14 +710,14 @@
           guide_start_x,
           0,
           1,
-          guide_start_y - this_opts.viewer.position.dh*guide_hall_size
+          guide_start_y - this_opts.viewer.position.dh * this_opts.viewer.guide.hall_rate
         );
 
         tmp_ctx.rect(
           guide_start_x,
-          guide_start_y + this_opts.viewer.position.dh*guide_hall_size,
+          guide_start_y + this_opts.viewer.position.dh* this_opts.viewer.guide.hall_rate,
           1,
-          this_opts.viewer.position.dh - guide_start_y + this_opts.viewer.position.dh*guide_hall_size
+          this_opts.viewer.position.dh - guide_start_y + this_opts.viewer.position.dh* this_opts.viewer.guide.hall_rate
         );
         tmp_ctx.fill();
         tmp_ctx.closePath();
@@ -720,15 +730,15 @@
         tmp_ctx.rect(
            0,
            guide_start_y,
-           guide_start_x - this_opts.viewer.position.dw*guide_hall_size,
+           guide_start_x - this_opts.viewer.position.dw* this_opts.viewer.guide.hall_rate,
            1
         );
 
         tmp_ctx.fillStyle = '#' + guide_vertical.color;
         tmp_ctx.rect(
-            guide_start_x + this_opts.viewer.position.dw*guide_hall_size,
+            guide_start_x + this_opts.viewer.position.dw* this_opts.viewer.guide.hall_rate,
               guide_start_y,
-              this_opts.viewer.position.dw - guide_start_x - this_opts.viewer.position.dw*guide_hall_size,
+              this_opts.viewer.position.dw - guide_start_x - this_opts.viewer.position.dw* this_opts.viewer.guide.hall_rate,
               1
            );
            tmp_ctx.fill();
@@ -1102,21 +1112,26 @@
       var i = 0;
       var return_obj = null;
 
-      for (i = this_opts.viewer.guide.length-1; i >= 0; i -= 1) {
-        if (this_opts.viewer.orientation === 'axial' && this_opts.viewer.guide[i].name === 'sagittal') {
-          guide_horizontal = this_opts.viewer.guide[i];
-        } else if (this_opts.viewer.orientation === 'axial' && this_opts.viewer.guide[i].name === 'coronal') {
-          guide_vertical = this_opts.viewer.guide[i];
-        } else if (this_opts.viewer.orientation === 'coronal' && this_opts.viewer.guide[i].name === 'sagittal') {
-          guide_horizontal = this_opts.viewer.guide[i];
-        } else if (this_opts.viewer.orientation === 'coronal' && this_opts.viewer.guide[i].name === 'axial') {
-          guide_vertical = this_opts.viewer.guide[i];
-        } else if (this_opts.viewer.orientation === 'sagittal' && this_opts.viewer.guide[i].name === 'coronal') {
-          guide_horizontal = this_opts.viewer.guide[i];
-        } else  if (this_opts.viewer.orientation === 'sagittal' && this_opts.viewer.guide[i].name === 'axial') {
-          guide_vertical = this_opts.viewer.guide[i];
+      for (i = this_opts.viewer.guide.lines.length-1; i >= 0; i -= 1) {
+        if (this_opts.viewer.orientation === 'axial' && this_opts.viewer.guide.lines[i].name === 'sagittal') {
+          guide_horizontal = this_opts.viewer.guide.lines[i];
+          guide_horizontal.maximum = this_opts.viewer.voxel.x;
+
+        } else if (this_opts.viewer.orientation === 'axial' && this_opts.viewer.guide.lines[i].name === 'coronal') {
+          guide_vertical = this_opts.viewer.guide.lines[i];
+        } else if (this_opts.viewer.orientation === 'coronal' && this_opts.viewer.guide.lines[i].name === 'sagittal') {
+          guide_horizontal = this_opts.viewer.guide.lines[i];
+        } else if (this_opts.viewer.orientation === 'coronal' && this_opts.viewer.guide.lines[i].name === 'axial') {
+          guide_vertical = this_opts.viewer.guide.lines[i];
+        } else if (this_opts.viewer.orientation === 'sagittal' && this_opts.viewer.guide.lines[i].name === 'coronal') {
+          guide_horizontal = this_opts.viewer.guide.lines[i];
+        } else  if (this_opts.viewer.orientation === 'sagittal' && this_opts.viewer.guide.lines[i].name === 'axial') {
+          guide_vertical = this_opts.viewer.guide.lines[i];
         }
       }
+      
+      
+      
 
       if(target_direction === 'vertical') {
         return_obj = guide_vertical;

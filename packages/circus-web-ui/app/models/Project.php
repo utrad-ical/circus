@@ -11,6 +11,7 @@
  * @property string url Project schema url.
  * @property array caseAttributesSchema List of attributes for cases.
  * @property array labelAttributesSchema List of attributes for labels.
+ * @property array tags List of tags.
  * @property string windowPriority Order of which window data takes precedence.
  * @property array windowPresets Array of window presets.
  *
@@ -79,10 +80,11 @@ class Project extends BaseModel
 		self::AUTH_TYPE_VIEW_PERSONAL_INFO => 'array_of_group_ids',
 		'windowPriority' => 'required|strict_string',
  		'windowPresets' => 'window_presets',
+		'tags' => 'strict_array',
 		'caseAttributesSchema' => 'strict_array',
 		'labelAttributesSchema' => 'strict_array',
-		'createTime'		=>	'mongodate',
-		'updateTime'		=>	'mongodate'
+		'createTime' =>	'mongodate',
+		'updateTime' =>	'mongodate'
 	);
 
 	protected $messages = array(

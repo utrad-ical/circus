@@ -86,9 +86,10 @@
           goal_y: 0
         },
         rotate : {
-          angle : 0, //radian
+          angle : 0.25 * Math.PI, //radian
           color : 'ffa500',
-          point_width : 3,
+          point_width : 8,
+					display_margin : 25,
           visible : false
         },
         voxel: {
@@ -181,71 +182,71 @@
 
 
     _calculateRotatePoint: function (the_angle, center_x, center_y) {
-      //return the positions at both ends of a line segment passing through the center point
-      //the_angle: radian
-      //center_x: position X of the center point
-      //center_y: position Y of the center point
-
-      var this_obj = this;
-      var this_elm = this.element;
-      var this_opts = this.options;
-
-      var return_obj = [
-        [0,0],
-        [0,0]
-      ]
-      //first array : arrow point XY
-      //second array : oppotunity point of arrow
-
-      var tmp_distance = 0;
-      var max_length = this_opts.viewer.position.dw + this_opts.viewer.position.dh;
-
-      var cos_01 = Math.cos(the_angle);
-      var sin_01 = Math.sin(the_angle);
-
-      var cos_02 = Math.cos(the_angle + Math.PI);
-      var sin_02 = Math.sin(the_angle + Math.PI);
-
-      for(var tmp_distance=1; tmp_distance < max_length; tmp_distance += 1){
-        var tmp_x = center_x + tmp_distance * cos_01;
-        var tmp_y = center_y - tmp_distance * sin_01;
-        if(tmp_x <0){
-          return_obj[0] = [0,tmp_y];
-          break;
-        } else if (tmp_x > this_opts.viewer.position.dw){
-          return_obj[0] = [this_opts.viewer.position.dw,tmp_y];
-          break;
-        } else if(tmp_y <0){
-          return_obj[0] = [tmp_x,0];
-          break;
-        } else if (tmp_y > this_opts.viewer.position.dh){
-          return_obj[0] = [tmp_x,this_opts.viewer.position.dh];
-          break;
-        }
-      }
-
-      for(var tmp_distance=1; tmp_distance < max_length; tmp_distance += 1){
-        var tmp_x = center_x + tmp_distance * cos_02;
-        var tmp_y = center_y - tmp_distance * sin_02;
-
-        if(tmp_x <0){
-          return_obj[1] = [0,tmp_y];
-          break;
-        } else if (tmp_x > this_opts.viewer.position.dw){
-          return_obj[1] = [this_opts.viewer.position.dw,tmp_y];
-          break;
-        } else if(tmp_y <0){
-          return_obj[1] = [tmp_x,0];
-          break;
-        } else if (tmp_y > this_opts.viewer.position.dh){
-          return_obj[1] = [tmp_x,this_opts.viewer.position.dh];
-          break;
-        }
-
-      }
-
-      return return_obj;
-    },
+			//return the positions at both ends of a line segment passing through the center point
+			//the_angle: radian
+			//center_x: position X of the center point
+			//center_y: position Y of the center point
+	
+			var this_obj = this;
+			var this_elm = this.element;
+			var this_opts = this.options;
+	
+			var return_obj = [
+				[0, 0],
+				[0, 0]
+			];
+			//first array : arrow point XY
+			//second array : oppotunity point of arrow
+	
+			var max_length = this_opts.viewer.position.dw + this_opts.viewer.position.dh;
+			var tmp_distance = 0;
+	
+			//calcurate the position of main dot 
+			var the_cos = Math.cos(the_angle);
+			var the_sin = Math.sin(the_angle);
+	
+			for (tmp_distance = 0; tmp_distance < max_length; tmp_distance += 1) {
+				var tmp_x = center_x + tmp_distance * the_cos;
+				var tmp_y = center_y - tmp_distance * the_sin;
+				if (tmp_x < this_opts.viewer.rotate.display_margin) {
+					return_obj[0] = [this_opts.viewer.rotate.display_margin, tmp_y];
+					break;
+				} else if (tmp_x > this_opts.viewer.position.dw - this_opts.viewer.rotate.display_margin) {
+					return_obj[0] = [this_opts.viewer.position.dw - this_opts.viewer.rotate.display_margin, tmp_y];
+					break;
+				} else if (tmp_y < this_opts.viewer.rotate.display_margin) {
+					return_obj[0] = [tmp_x, this_opts.viewer.rotate.display_margin];
+					break;
+				} else if (tmp_y > this_opts.viewer.position.dh - this_opts.viewer.rotate.display_margin) {
+					return_obj[0] = [tmp_x, this_opts.viewer.position.dh - this_opts.viewer.rotate.display_margin];
+					break;
+				}
+			}
+	
+			//calcurate the position of opportunity point (for line)
+			the_cos = the_cos * -1;
+			the_sin = the_sin * -1;
+			for (tmp_distance = 0; tmp_distance < max_length; tmp_distance += 1) {
+				var tmp_x = center_x + tmp_distance * the_cos;
+				var tmp_y = center_y - tmp_distance * the_sin;
+	
+				if (tmp_x < 0) {
+					return_obj[1] = [0, tmp_y];
+					break;
+				} else if (tmp_x > this_opts.viewer.position.dw) {
+					return_obj[1] = [this_opts.viewer.position.dw, tmp_y];
+					break;
+				} else if (tmp_y < 0) {
+					return_obj[1] = [tmp_x, 0];
+					break;
+				} else if (tmp_y > this_opts.viewer.position.dh) {
+					return_obj[1] = [tmp_x, this_opts.viewer.position.dh];
+					break;
+				}
+			}
+	
+			return return_obj;
+		},
 
 
 
@@ -510,9 +511,6 @@
       //画像トリミング分の補正 , 画像原寸上の位置
       tmp_cursor_x = this_opts.viewer.position.sx + this_opts._tmpInfo.cursor.current.X * this_opts.viewer.position.ow / this_opts.viewer.position.dw;
       tmp_cursor_y = this_opts.viewer.position.sy + this_opts._tmpInfo.cursor.current.Y * this_opts.viewer.position.oh / this_opts.viewer.position.dh;
-
-
-
 
       return the_return;
 
@@ -837,12 +835,16 @@
       tmp_ctx.beginPath();
       tmp_ctx.arc(guide_horizontal.number,guide_vertical.number, rotate_params.point_width, 0, Math.PI*2, false);
       tmp_ctx.fill();
+      tmp_ctx.closePath();
 
       //ポッチ1
+      tmp_ctx.beginPath();
       tmp_ctx.arc(the_points[0][0], the_points[0][1], rotate_params.point_width, 0, Math.PI*2, false);
       tmp_ctx.fill();
+      tmp_ctx.closePath();
 
       //線分
+      tmp_ctx.beginPath();
       tmp_ctx.moveTo(the_points[0][0],the_points[0][1]);
       tmp_ctx.lineTo(the_points[1][0],the_points[1][1]);
       tmp_ctx.stroke();

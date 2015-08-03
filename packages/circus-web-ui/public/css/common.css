@@ -48,11 +48,12 @@ a:hover{text-decoration:none;}
 #gnavi li::after{content:"";  display: block; width:6px; height:6px; border-top:2px solid #333; border-right:2px solid #333; -webkit-transform: rotate(45deg); transform: rotate(45deg); position: absolute; right:8px; top:50%; margin-top:-4px;}
 #gnavi a{text-decoration:none; display:block; height: 40px; }
 
-#gnavi >li >a >span{display: inline-block; width:40px; height:40px; background-image: url('../img/common/gnavi.png'); background-size: 40px 160px; vertical-align: middle; margin-right: 10px;}
+#gnavi >li >a >span{display: inline-block; width:40px; height:40px; background-image: url('../img/common/gnavi.png'); background-size: 40px 200px; vertical-align: middle; margin-right: 10px;}
 #gnavi >li .home{background-position: 0 0;}
 #gnavi >li .case{background-position: 0 -40px;}
 #gnavi >li .series{background-position: 0 -80px;}
-#gnavi >li .admin{background-position: 0 -120px;}
+#gnavi >li .share{background-position: 0 -120px;}
+#gnavi >li .admin{background-position: 0 -160px;}
 
 #gnavi li ul{ position:absolute; top:-1px; left:150px; display: none; }
 #gnavi li li{ width:200px; text-indent:10px; }

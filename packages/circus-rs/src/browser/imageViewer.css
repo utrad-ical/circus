@@ -58,8 +58,8 @@
 .mode_measure .mouse_cover,
 .mode_pen .mouse_cover{cursor:crosshair;}
 
-.mode_rotate.slide_horizontal .mouse_cover{cursor:e-resize;}
-.mode_rotate.slide_vertical .mouse_cover{cursor:s-resize;}
+.mode_rotate.slide_horizontal .mouse_cover{cursor:col-resize;}
+.mode_rotate.slide_vertical .mouse_cover{cursor:row-resize;}
 
 .mode_guide .mouse_cover{cursor:pointer;}/*this prop should be last of mode/cursor settings*/
 

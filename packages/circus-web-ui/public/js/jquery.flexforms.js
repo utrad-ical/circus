@@ -585,9 +585,8 @@ var typedField;
                     data[this.name].push($(this).val());
                 }
             });
-            if (typeof this.spec.filter === 'function') {
+            if (typeof this.spec.filter === 'function')
                 data = this.spec.filter(data);
-            }
             return data;
         };
         Form.prototype.set = function (value) {
@@ -635,6 +634,52 @@ var typedField;
         return Form;
     })(Base);
     typedField.Form = Form;
+    var Callback = (function (_super) {
+        __extends(Callback, _super);
+        function Callback() {
+            _super.apply(this, arguments);
+            this.data = null;
+        }
+        Callback.prototype.createElement = function () {
+            var _this = this;
+            var element = $('<div>');
+            this.content = $('<div>').addClass('ui-typedfield-data');
+            element.append(this.content);
+            this.button = $('<a>').addClass('ui-typedfield-data-button ui-icon ui-icon-pencil');
+            this.button.on('click', function () {
+                if (typeof _this.spec.edit !== 'function')
+                    return;
+                _this.spec.edit(_this.data, function (data) {
+                    _this.set(data);
+                    _this.changed();
+                });
+            });
+            element.append(this.button);
+            return element;
+        };
+        Callback.prototype.get = function () {
+            return this.data;
+        };
+        Callback.prototype.set = function (value) {
+            this.data = value;
+            if (typeof this.spec.render === 'function')
+                this.spec.render(this.content, value);
+        };
+        Callback.prototype.reset = function () {
+            this.set(null);
+        };
+        Callback.prototype.enable = function () {
+            this.button.prop('disabled', false);
+        };
+        Callback.prototype.disable = function () {
+            this.button.prop('disabled', true);
+        };
+        Callback.prototype.disabled = function () {
+            return this.button.prop('disabled');
+        };
+        return Callback;
+    })(Base);
+    typedField.Callback = Callback;
 })(typedField || (typedField = {}));
 
 var filterEditor;
@@ -1121,7 +1166,8 @@ var typedFieldWidget;
         checkbox: typedField.CheckBox,
         radio: typedField.RadioGroup,
         list: typedField.ArrayList,
-        form: typedField.Form
+        form: typedField.Form,
+        callback: typedField.Callback
     };
     function registerType(type, classDefinition) {
         map[type] = classDefinition;

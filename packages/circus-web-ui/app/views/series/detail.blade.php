@@ -23,7 +23,7 @@
 
         var	initInfo	=	[
             {
-                baseUrl : "{{{Helper\ConfigHelper::getServerConfig('dicom_img_base_url')}}}",
+                baseUrl : "http://localhost:3000/mpr",
                 series : {{$series_list}},
                 control : {
                     window : {
@@ -86,7 +86,7 @@
         var initAjax= function(){
             var tmp_series = initInfo[0].series[0];
             $.ajax({
-                url: '{{{Helper\ConfigHelper::getServerConfig("series_path")}}}',
+                url: 'http://localhost:3000/metadata',
                 type: 'GET',
                 data: {
                     mode : 'metadata',

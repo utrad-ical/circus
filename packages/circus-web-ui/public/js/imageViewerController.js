@@ -1496,7 +1496,6 @@
       if (tmp_wrap_elm.find('.color_picker').length > 0) {
         $('.color_picker').simpleColorPicker({
           colors: controllerInfo.defaultColorSet,
-          onChangeEvent: true
         });
 
         //ピッカーで色変更

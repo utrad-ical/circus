@@ -83,11 +83,10 @@
                 var remove = $('<span style="display: inline-block">').addClass('ui-icon ui-icon-close').on('click', function () {
                     container.remove();
                 });
-                var color = $('<span style="display: inline-block">').addClass('ui-icon ui-icon-calculator').on('click', function() {
-                    var index = Math.floor(Math.random() * 5);
-                    var color = ['#ff0000', '#00ff00', '#ffff00', '#00ffff', '#3333ff'][index];
-                    tag.tag(color);
-                });
+                var color = $('<span style="display: inline-block">').addClass('ui-icon ui-icon-calculator')
+                    .simpleColorPicker().on('change', function(event) {
+                        tag.tag($(event.target).data('color'));
+                    });
                 return container.append(tag, remove, color);
             }
 

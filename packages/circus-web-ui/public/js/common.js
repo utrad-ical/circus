@@ -198,6 +198,7 @@ $.fn.extend({
 						element.val(selected);
 						element.blur();
 					}
+					element.data('color', selected);
 					if ($.isFunction(opts.onChangeColor)) {
 						opts.onChangeColor.call(element, selected);
 					}

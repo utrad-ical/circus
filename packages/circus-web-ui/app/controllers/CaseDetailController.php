@@ -92,7 +92,6 @@ class CaseDetailController extends BaseController {
 			$result['window_presets'] = json_encode($case_info->project->windowPresets);
 
 			//JsonFile read
-			$result['server_url'] = Helper\ConfigHelper::getServerConfig();
 			$result['backUrl'] = Session::get('backUrl');
 		} catch (Exception $e) {
 			Log::error($e);

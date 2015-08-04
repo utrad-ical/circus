@@ -74,7 +74,7 @@
 
         var	initInfo	=	[
             {
-                baseUrl : "{{{$server_url['dicom_img_base_url']}}}",
+                baseUrl : "http://localhost:3000/mpr",
                 postUrl : "{{asset('case/save_label')}}",	//Enable here if it is different from the image storage server
                 caseId : "{{Session::get('caseID')}}",
                 attribute : {{$attribute}},
@@ -125,7 +125,7 @@
         var initAjax= function(){
             var tmp_series = initInfo[0].series[ajax_cnt];
             $.ajax({
-                url: '{{{$server_url["series_path"]}}}',
+                url: 'http://localhost:3000/metadata',
                 type: 'GET',
                 data: {
                     series : tmp_series.id

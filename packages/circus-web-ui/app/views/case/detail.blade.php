@@ -3,10 +3,8 @@
 @section('head')
 {{HTML::style('css/jquery-ui.css')}}
 {{HTML::style('css/imageViewer.css')}}
-{{HTML::style('css/jquery.simple-color-picker.css')}}
 
 {{HTML::script('js/jquery-ui.min.js')}}
-{{HTML::script('js/jquery.simple-color-picker.js')}}
 {{HTML::script('js/jquery.base64.js')}}
 {{HTML::script('js/gzip.min.js')}}
 {{HTML::script('js/gunzip.min.js')}}

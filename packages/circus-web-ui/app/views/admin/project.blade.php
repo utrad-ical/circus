@@ -3,7 +3,6 @@
     <style>
         #tag-editor-list > li { margin-bottom: 2px; }
     </style>
-    <script src="/js/jquery.simple-color-picker.js"></script>
     <script>
         $(function () {
             $.getJSON('/api/group').then(function (groups) {

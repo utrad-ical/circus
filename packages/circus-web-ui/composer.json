@@ -32,12 +32,12 @@
 		"post-install-cmd": [
 			"php artisan clear-compiled",
 			"php artisan optimize",
-			"CIRCUS_RS\\Builder::build"
+			"php artisan build-rs"
 		],
 		"post-update-cmd": [
 			"php artisan clear-compiled",
 			"php artisan optimize",
-			"CIRCUS_RS\\Builder::build"
+			"php artisan build-rs"
 		],
 		"post-create-project-cmd": [
 			"php artisan key:generate"

@@ -6,37 +6,45 @@
 @section('head')
 	<script>
 		$(function() {
-			refresh();
-			$('#refresh').on('click', refresh);
-			$('#start').on('click', start);
-			$('#stop').on('click', stop);
+			$('#status, #start, #stop').on('click', clicked);
+			$('#status').click();
 
-			function refresh()
+			function clicked(event)
 			{
-				$('#status').text('Loading...');
+				var operation = $(event.target).prop('id');
+				$('#forever-list').text('Loading...');
+				$('#rs-status').text('');
 				$.ajax({
-					url: '/api/server/status',
-					method: 'GET',
-					cache: false
+					url: '/api/server/' + operation,
+					method: 'POST'
 				}).then(function(data) {
-					$('#status').text(data);
+					$('#forever-list').text(data);
+					if (/Forever processes running/i.test(data)) {
+						$.ajax({
+							url: 'http://localhost:3000/status',
+							method: 'GET',
+							dataType: 'JSON',
+							success: function(data) {
+								$('#rs-status').text(JSON.stringify(data, null, '  '));
+							},
+							error: function() {
+								$('#rs-status').text('Error');
+							}
+						});
+					}
 				});
-			}
-
-			function start()
-			{
-				//
 			}
 		});
 	</script>
+	<style>
+		#forever-list, #rs-status { background-color: #ddd; line-height: 1em; overflow-x: auto; word-wrap: normal; }
+		#panel { margin: 1em; }
+		#panel li { display: inline-block; margin-left: 10px; }
+	</style>
 @stop
 
 @section('content')
 
-	<div id="status_pane">
-		Current server status:
-		<div id="status">Pending...</div>
-	</div>
 	<div id="panel">
 		<ul>
 			<li>
@@ -46,9 +54,15 @@
 				<button class="common_btn" id="stop">Stop</button>
 			</li>
 			<li>
-				<button class="common_btn" id="refresh">Refresh</button>
+				<button class="common_btn" id="status">Refresh</button>
 			</li>
 		</ul>
+	</div>
+	<div id="status_pane">
+		<p>Current server running:</p>
+		<pre id="forever-list">Pending...</pre>
+		<p>CIRCUS RS status:</p>
+		<pre id="rs-status">Pending...</pre>
 	</div>
 
 @stop

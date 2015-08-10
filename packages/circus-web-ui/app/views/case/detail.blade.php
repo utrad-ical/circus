@@ -64,18 +64,22 @@
     var default_attr_prop = {{$case_attribute_settings}};
     var revisionNo = {{{$revisionNo}}};
     var parentLabelList = "disp_label_list";
+		
+		var metadata_url = 'http://localhost:3000/metadata';
+		var dicom_image_url = 'http://localhost:3000/mpr';
+		var oblique_url = 'http://localhost:3000/Oblique';
+		
 
     //Project-specific feature set to control the controller viewer widget
     $(function(){
         //Data group to pass when you ignite the controller immediately after page load
         //The controller 1 per group to be linked to multiple viewers
         var	voxel_container	= new voxelContainer();	//Label information storage object (three sides shared)
-        voxel_container.name = 'my_voxel';
 
         var	initInfo	=	[
             {
-                baseUrl : "http://localhost:3000/mpr",
-                obliqueUrl : "http://localhost:3000/Oblique",
+                baseUrl : dicom_image_url,
+                obliqueUrl : oblique_url,
                 postUrl : "{{asset('case/save_label')}}",	//Enable here if it is different from the image storage server
                 caseId : "{{Session::get('caseID')}}",
                 attribute : {{$attribute}},
@@ -137,7 +141,7 @@
         var initAjax= function(){
             var tmp_series = initInfo[0].series[ajax_cnt];
             $.ajax({
-                url: 'http://localhost:3000/metadata',
+                url: metadata_url,
                 type: 'GET',
                 data: {
                     series : tmp_series.id

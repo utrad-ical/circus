@@ -74,8 +74,8 @@
 
         var	initInfo	=	[
             {
-                baseUrl : "http://localhost:3000/mpr",
-                obliqueUrl : "http://localhost:3000/Oblique",
+                baseUrl : "http://160.16.56.191:3000/mpr",
+                obliqueUrl : "http://160.16.56.191:3000/Oblique",
                 postUrl : "{{asset('case/save_label')}}",	//Enable here if it is different from the image storage server
                 caseId : "{{Session::get('caseID')}}",
                 attribute : {{$attribute}},
@@ -137,7 +137,7 @@
         var initAjax= function(){
             var tmp_series = initInfo[0].series[ajax_cnt];
             $.ajax({
-                url: 'http://localhost:3000/metadata',
+                url: 'http://160.16.56.191:3000/metadata',
                 type: 'GET',
                 data: {
                     series : tmp_series.id

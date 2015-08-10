@@ -1716,12 +1716,12 @@
             "source": {
                 "type": "git",
                 "url": "https://bitbucket.org/ical/circus_rs_dicom_server.git",
-                "reference": "ed96fe3b45fddd9d15538178f7d9877cd1e8cff2"
+                "reference": "7b860d035335620cb8a12cbf88c01b8a72e419a0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://bitbucket.org/ical/circus_rs_dicom_server/get/ed96fe3b45fddd9d15538178f7d9877cd1e8cff2.zip",
-                "reference": "ed96fe3b45fddd9d15538178f7d9877cd1e8cff2",
+                "url": "https://bitbucket.org/ical/circus_rs_dicom_server/get/7b860d035335620cb8a12cbf88c01b8a72e419a0.zip",
+                "reference": "7b860d035335620cb8a12cbf88c01b8a72e419a0",
                 "shasum": ""
             },
             "type": "library",
@@ -1742,7 +1742,7 @@
             "keywords": [
                 "DICOM"
             ],
-            "time": "2015-08-10 03:36:16"
+            "time": "2015-08-10 11:00:09"
         }
     ],
     "packages-dev": [
@@ -2151,16 +2151,16 @@
         },
         {
             "name": "phpunit/phpunit",
-            "version": "4.8.2",
+            "version": "4.8.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/phpunit.git",
-                "reference": "748c6963c0a8c983fa69ee8884c885d0e98209bf"
+                "reference": "fd3050e26e3105f416d74c4d33aea659b406c59d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/748c6963c0a8c983fa69ee8884c885d0e98209bf",
-                "reference": "748c6963c0a8c983fa69ee8884c885d0e98209bf",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/fd3050e26e3105f416d74c4d33aea659b406c59d",
+                "reference": "fd3050e26e3105f416d74c4d33aea659b406c59d",
                 "shasum": ""
             },
             "require": {
@@ -2219,7 +2219,7 @@
                 "testing",
                 "xunit"
             ],
-            "time": "2015-08-07 12:56:50"
+            "time": "2015-08-10 09:16:56"
         },
         {
             "name": "phpunit/phpunit-mock-objects",

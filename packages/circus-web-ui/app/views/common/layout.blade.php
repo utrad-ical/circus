@@ -11,7 +11,6 @@
 	{{HTML::style('css/common.css')}}
 	{{HTML::style('css/page.css')}}
 	{{HTML::style('css/layout.css')}}
-	{{HTML::style('css/color.css')}}
 	{{HTML::script('js/jquery-1.11.1.min.js')}}
 	{{HTML::script('js/common.js')}}
 	@yield('head')

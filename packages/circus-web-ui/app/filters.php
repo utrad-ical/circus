@@ -72,6 +72,24 @@ Route::filter('guest', function()
 
 /*
 |--------------------------------------------------------------------------
+| Administration Filter
+|--------------------------------------------------------------------------
+|
+| The "admin" filter is the counterpart of the authentication filters as
+| it simply checks that the current user has 'manageServer' privilege.
+|
+*/
+
+
+Route::filter('admin', function($route, $request)
+{
+	if ( !Auth::user()->hasPrivilege('manageServer')) {
+		return Response::make('Unauthorized', 401);
+	}
+});
+
+/*
+|--------------------------------------------------------------------------
 | CSRF Protection Filter
 |--------------------------------------------------------------------------
 |

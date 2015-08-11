@@ -14,6 +14,7 @@
 {{HTML::script('js/imageViewerController.js')}}
 {{HTML::script('js/jquery.flexforms.js')}}
 {{HTML::script('js/export-common.js')}}
+{{HTML::script('js/jquery.multiselect.min.js')}}
 
 @if (!isset($error_msg))
 	@if (!$edit_flg)
@@ -50,7 +51,7 @@
     @else
     	<script type="text/javascript">
 			var opt_control = {
-                    window : {
+                window : {
                 panel : false
             }
         };
@@ -64,39 +65,45 @@
     var default_attr_prop = {{$case_attribute_settings}};
     var revisionNo = {{{$revisionNo}}};
     var parentLabelList = "disp_label_list";
-		
-		var metadata_url = 'http://localhost:3000/metadata';
-		var dicom_image_url = 'http://localhost:3000/mpr';
-		var oblique_url = 'http://localhost:3000/Oblique';
-		
+
+    //Tags
+    var multi_selected_item = {{$tags}};
+    var getSelectedTags = function() {
+        var tags = new Array();
+        $('.select_tags option:selected').each(function(){
+            tags.push($(this).val());
+        });
+        return tags;
+    }
+
+    var metadata_url = 'http://localhost:3000/metadata';
+    var dicom_image_url = 'http://localhost:3000/mpr';
+    var oblique_url = 'http://localhost:3000/Oblique';
+
 
     //Project-specific feature set to control the controller viewer widget
     $(function(){
         //Data group to pass when you ignite the controller immediately after page load
         //The controller 1 per group to be linked to multiple viewers
-        var	voxel_container	= new voxelContainer();	//Label information storage object (three sides shared)
+        var voxel_container = new voxelContainer(); //Label information storage object (three sides shared)
 
-        var	initInfo	=	[
+        var initInfo = [
             {
                 baseUrl : dicom_image_url,
                 obliqueUrl : oblique_url,
-                postUrl : "{{asset('case/save_label')}}",	//Enable here if it is different from the image storage server
+                postUrl : "{{asset('case/save_label')}}", //Enable here if it is different from the image storage server
                 caseId : "{{Session::get('caseID')}}",
                 attribute : {{$attribute}},
+                tags : {{$tags}},
                 defaultLabelAttribute :default_label_attr_prop,
                 series : {{$series_list}},
                 control : opt_control,
                 elements : {
-									parent : 'page_case_detail',
-									panel : 'the_panel_inner',
-									label : 'the_panel_inner',
-									labelAttribute : 'the_panel_inner',
-									revisionAttribute : 'revision_attribute_wrap',
-									parent : 'page_case_detail',
-									panel : 'the_panel_inner',
-									label : 'the_panel_inner',
-									labelAttribute : 'the_panel_inner',
-									revisionAttribute : 'revision_attribute_wrap'
+                    parent : 'page_case_detail',
+                    panel : 'the_panel_inner',
+                    label : 'the_panel_inner',
+                    labelAttribute : 'the_panel_inner',
+                    revisionAttribute : 'revision_attribute_wrap'
                 },
                 viewer : [
                     {//First sheet
@@ -107,7 +114,7 @@
                             maximum : 260, //What sheets cross section is stored
                             current : 0	//Initial display number
                         },
-												rotateControl : true
+                        rotateControl : true
                     },
                     {//2nd sheet
                         elementId : 'img_area_sagittal',
@@ -127,7 +134,7 @@
                             current : 0	//Initial display number
                         }
                     },
-                    {//4th, 
+                    {//4th,
                         elementId : 'img_area_oblique',
                         orientation : 'oblique',
                         container : voxel_container,
@@ -151,76 +158,75 @@
                     alert('I failed to communicate');
                 },
                 success: function(response){
-									//console.log(response);
-									if(typeof response.allow_mode != 'undefined'){
-											tmp_series.allow_mode = $.extend(true,tmp_series.allow_mode ,response.allow_mode);
-									}
+                    if(typeof response.allow_mode != 'undefined'){
+                        tmp_series.allow_mode = $.extend(true,tmp_series.allow_mode ,response.allow_mode);
+                    }
 
-									//set 3D length settings
-									if(typeof tmp_series.voxel != 'object'){
-											tmp_series.voxel = {};
-									}
+                    //set 3D length settings
+                    if(typeof tmp_series.voxel != 'object'){
+                        tmp_series.voxel = {};
+                    }
 
-									if(typeof response.voxel_x == 'number'){
-											tmp_series.voxel.voxel_x = response.voxel_x;
-									};
+                    if(typeof response.voxel_x == 'number'){
+                        tmp_series.voxel.voxel_x = response.voxel_x;
+                    };
 
-									if(typeof response.voxel_y == 'number'){
-											tmp_series.voxel.voxel_y = response.voxel_y;
-									};
+                    if(typeof response.voxel_y == 'number'){
+                        tmp_series.voxel.voxel_y = response.voxel_y;
+                    };
 
-									if(typeof response.voxel_z == 'number'){
-											tmp_series.voxel.voxel_z = response.voxel_z;
-									};
+                    if(typeof response.voxel_z == 'number'){
+                        tmp_series.voxel.voxel_z = response.voxel_z;
+                    };
 
-									if(typeof response.x == 'number'){
-											tmp_series.voxel.x = response.x;
-									};
+                    if(typeof response.x == 'number'){
+                        tmp_series.voxel.x = response.x;
+                    };
 
-									if(typeof response.y == 'number'){
-											tmp_series.voxel.y = response.y;
-									};
+                    if(typeof response.y == 'number'){
+                        tmp_series.voxel.y = response.y;
+                    };
 
-									if(typeof response.z == 'number'){
-											tmp_series.voxel.z = response.z;
-									};
+                    if(typeof response.z == 'number'){
+                        tmp_series.voxel.z = response.z;
+                    };
 
-									//set window settings
+                    //set window settings
 
-									if(typeof tmp_series.window != 'object'){
-											tmp_series.window = {};
-									}
+                    if(typeof tmp_series.window != 'object'){
+                        tmp_series.window = {};
+                    }
 
-									if(typeof tmp_series.window.level != 'object'){
-											tmp_series.window.level = {};
-									}
+                    if(typeof tmp_series.window.level != 'object'){
+                        tmp_series.window.level = {};
+                    }
 
-									if(typeof tmp_series.window.width != 'object'){
-											tmp_series.window.width = {};
-									}
+                    if(typeof tmp_series.window.width != 'object'){
+                        tmp_series.window.width = {};
+                    }
 
-									if(typeof response.window_level == 'number'){
-											tmp_series.window.level.current = response.window_level;
-									};
+                    if(typeof response.window_level == 'number'){
+                        tmp_series.window.level.current = response.window_level;
+                    };
 
-									if(typeof response.window_width == 'number'){
-											tmp_series.window.width.current = response.window_width;
-									};
+                    if(typeof response.window_width == 'number'){
+                        tmp_series.window.width.current = response.window_width;
+                    };
 
-									//set init window settings by Series Window Priority.
-									var priority_array = ['preset','dicom','auto']; //priority default
+                    //set init window settings by Series Window Priority.
+                    var priority_array = ['preset','dicom','auto']; //priority default
 
-									if(typeof tmp_series.window.priority == 'string'){
-											priority_array = tmp_series.window.priority.split(',');
-									}
+                    if(typeof tmp_series.window.priority == 'string'){
+                        priority_array = tmp_series.window.priority.split(',');
+                    }
 
-									for(var i=0; i<priority_array.length; i++){
-											if(priority_array[i] == 'preset' && typeof tmp_series.window.preset == 'object' && tmp_series.window.preset.length>0){
-													tmp_series.window.level.current = tmp_series.window.preset[0].level;
-													tmp_series.window.width.current = tmp_series.window.preset[0].width;
-													break;
-											}else if(priority_array[i] == 'dicom' && typeof response.window_level_dicom == 'number' && typeof response.window_width_dicom == 'number'){
-													tmp_series.window.level.current = response.window_level_dicom;
+					for(var i=0; i<priority_array.length; i++){
+						if(priority_array[i] == 'preset' && typeof tmp_series.window.preset == 'object' && tmp_series.window.preset.length>0){
+							tmp_series.window.level.current = tmp_series.window.preset[0].level;
+							tmp_series.window.width.current = tmp_series.window.preset[0].width;
+							break;
+						}else if(priority_array[i] == 'dicom' && typeof response.window_level_dicom == 'number' && typeof response.window_width_dicom == 'number'){
+							tmp_series.window.level.current = response.window_level_dicom;
 													tmp_series.window.width.current = response.window_width_dicom;
 													break;
 											}else if(priority_array[i] == 'auto' && typeof response.window_level == 'number' && typeof response.window_width == 'number'){
@@ -315,7 +321,6 @@
             $('#' + initInfo[0].wrapElementId).imageViewerController('checkUpdateLabel');
             var tmp_changed_label_num = $('#' + initInfo[0].wrapElementId).imageViewerController('changedLabelNum');
             var runBtnBackSubmit = function() {
-                //$('body').append('<form action="./search" method="POST" class="hidden" id="frm_back"></form>');
                 $('body').append('<form action="{{{asset($backUrl)}}}" method="POST" class="hidden" id="frm_back"></form>');
                 $('#frm_back').append('<input type="hidden" name="btnBack" value="">').submit();
             }
@@ -351,11 +356,11 @@
 
 
 
-		$('.select_revision').focus(function(){
-				var this_elm = $(this);
-				var before_change_value = this_elm.val();
-				this_elm.attr('before-change-value',before_change_value)
-		});
+        $('.select_revision').focus(function(){
+            var this_elm = $(this);
+            var before_change_value = this_elm.val();
+            this_elm.attr('before-change-value',before_change_value)
+        });
 
 
 
@@ -585,6 +590,10 @@ id="page_case_detail"
         <div class="control_panel_inner" id="the_panel_inner">
             <div class="info_area">
                 <div class="control_panel_inner" id="revision_attribute_wrap"></div>
+                <hr>
+                <div class="control_panel_inner" id="revision_tag_wrap">tags:
+                	{{Form::select('tags', $tag_settings, isset($tags) ? $tags : null, array('class' => 'multi_select select_tags', 'multiple' => 'multiple'))}}
+                </div>
             </div>
         </div>
     </div>

@@ -60,6 +60,8 @@ class LabelRegisterController extends BaseController {
 			//Update of case information
 			//Case information acquisition
 			$case_obj = ClinicalCase::find($inputs['caseId']);
+			$case_obj->tags = array_key_exists('tags', $inputs)
+							? json_decode($inputs['tags'], true) : array();
 
 			$tmp_revision = $this->createRevision($inputs, $series_list);
 
@@ -104,7 +106,7 @@ class LabelRegisterController extends BaseController {
 		$dt = new MongoDate(strtotime(date('Y-m-d H:i:s')));
 		//Revision information setting
 		$save_attribute = array_key_exists('attribute', $inputs) ?
-							json_decode($inputs['attribute'], true) : array();
+						  json_decode($inputs['attribute'], true) : array();
 		return array(
 			'date'			=>	$dt,
 			'creator'		=>	Auth::user()->userEmail,

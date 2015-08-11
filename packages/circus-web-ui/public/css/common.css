@@ -36,6 +36,12 @@ a:hover{text-decoration:none;}
 body.mode_white #color_switch { background-color: black!important; }
 body.mode_black #color_switch { background-color: white!important; }
 
+@media screen and	(max-width: 1000px){
+    #header nav a { display: inline-block; height: 40px; color: white; text-decoration: none; padding: 0 5px; }
+    #header nav >ul >li.icon_menu > a { max-width: 30px; overflow: hidden; }
+}
+
+
 /* Navigation bar icons */
 #header nav .case { background-position: -30px -30px; }
 #header nav .series { background-position: -60px -30px; }

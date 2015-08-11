@@ -83,7 +83,7 @@ Route::group(['before' => 'auth'], function() {
 	// Administration
 	Route::group(array('before' => 'admin'), function() use ($staticView) {
 
-		$staticView('admin', 'admin.index');
+		$staticView('administration', 'admin.index');
 		Route::get('administration/{adminkind}', 'AdministrationController@index')
 			->where('adminkind', '^(user|group|storage|project|server_param)$');
 		Route::resource('api/user', 'UserApiController');

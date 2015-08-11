@@ -1,21 +1,14 @@
 @charset "utf-8";
 /* CSS Document */
 
-/*
-	全ページ共通
-	現在は開発上の利便性・視認性の維持のためcssは独立しておりますが
-	ある程度機能・使用がfixしてきた段階で common.css の末尾に合流して通信数を節約します。
-
-*/
-
-/*display*/
+/* display */
 .hidden{ display:none;}
 .disp_b{ display:block;}
 .w_max{width:100%; display:block; padding-left:0; padding-right:0; clear:both;}
 .m_auto{ margin:0 auto;}
 .bold{font-weight:bold;}
 
-/*vertical-align*/
+/* vertical-align */
 body table .val_t{vertical-align:top;}
 body table .val_b{vertical-align:bottom;}
 body table .val_m{vertical-align:middle;}
@@ -24,11 +17,10 @@ body table .val_m{vertical-align:middle;}
 .al_r{text-align:right;}
 .al_c{text-align:center;}
 
-/*float*/
+/* float */
 .fl_l{float:left; display:block; }
 .fl_r{float:right; display:block; }
 
-/*clear要素*/
 .clear{clear:both; height:1px; overflow:hidden; width:100%; visibility:hidden; display:block;}
 
 /*------CLEAR FIX------ */

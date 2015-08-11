@@ -45,7 +45,7 @@ id="page_admin_home"
 	</div>
 	<div id="messages"></div>
 	<div id="editor_container" style="display: none">
-		<h1 id="status" class="page_ttl"></h1>
+		<h1 id="status" class="page_title"></h1>
 		<div id="editor"></div>
 		<div class="al_c">
 			<button id="cancel" class="common_btn">Cancel</button>

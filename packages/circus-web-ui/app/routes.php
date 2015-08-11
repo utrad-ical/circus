@@ -81,20 +81,23 @@ Route::group(['before' => 'auth'], function() {
 	Route::any('share/export', 'ShareExportController@export');
 
 	// Administration
-	$staticView('admin', 'admin.index');
-	Route::get('administration/{adminkind}', 'AdministrationController@index')
-		 ->where('adminkind', '^(user|group|storage|project|server_param)$');
-	Route::resource('api/user', 'UserApiController');
-	Route::resource('api/group', 'GroupApiController');
-	Route::resource('api/storage', 'StorageApiController');
-	Route::resource('api/project', 'ProjectApiController');
-	Route::resource('api/serverParam', 'ServerParamApiController');
-	Route::put('api/storage/setactive/{storageID}', 'StorageApiController@setActive');
-	Route::post('api/server/start', 'ServerControllerController@start');
-	Route::post('api/server/stop', 'ServerControllerController@stop');
-	Route::post('api/server/status', 'ServerControllerController@status');
+	Route::group(array('before' => 'admin'), function() use ($staticView) {
 
-	$staticView('administration/server', 'admin.server');
+		$staticView('admin', 'admin.index');
+		Route::get('administration/{adminkind}', 'AdministrationController@index')
+			->where('adminkind', '^(user|group|storage|project|server_param)$');
+		Route::resource('api/user', 'UserApiController');
+		Route::resource('api/group', 'GroupApiController');
+		Route::resource('api/storage', 'StorageApiController');
+		Route::resource('api/project', 'ProjectApiController');
+		Route::resource('api/serverParam', 'ServerParamApiController');
+		Route::put('api/storage/setactive/{storageID}', 'StorageApiController@setActive');
+		Route::post('api/server/start', 'ServerControllerController@start');
+		Route::post('api/server/stop', 'ServerControllerController@stop');
+		Route::post('api/server/status', 'ServerControllerController@status');
+
+		$staticView('administration/server', 'admin.server');
+	});
 
 	// Task
 	Route::get('task', 'TaskController@index');
@@ -125,6 +128,8 @@ Route::group(['before' => 'auth'], function() {
 	$rsHost('css/panel-btn-sprite.png', 'panel-btn-sprite.png');
 
 });
+
+
 
 //test用
 Route::get('case/save_label', function(){

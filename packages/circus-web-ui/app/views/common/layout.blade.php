@@ -31,7 +31,7 @@ if (Auth::check()) {
 				<ul>
 					<li>
 						<a href="{{asset('home')}}"><img src="{{asset('img/common/header-logo.png')}}" alt="CIRCUS" class="header_logo"></a></li>
-					<li>
+					<li class="icon_menu">
 						<a href="{{asset('case/search')}}"><span class="case"></span>Case</a>
 						<ul>
 							<li><a href="{{asset('case/search')}}">Case Search</a></li>
@@ -42,7 +42,7 @@ if (Auth::check()) {
 							@endif
 						</ul>
 					</li>
-					<li>
+					<li class="icon_menu">
 						<a href="{{asset('series/search')}}"><span class="series"></span>Series</a>
 						<ul>
 							<li><a href="{{asset('series/search')}}">Series Search</a></li>
@@ -54,11 +54,11 @@ if (Auth::check()) {
 							@endif
 						</ul>
 					</li>
-					<li>
+					<li class="icon_menu">
 						<a href="{{asset('share/search')}}"><span class="share"></span>Share</a>
 					</li>
 					@if (Auth::user()->hasPrivilege(Group::SERVER_MANAGE))
-					<li>
+					<li class="icon_menu">
 						<a href="{{asset('administration')}}"><span class="admin"></span>Administration</a>
 						<ul>
 							<li><a href="{{asset('administration/group')}}">Group</a></li>
@@ -75,8 +75,8 @@ if (Auth::check()) {
 				<ul>
 					<li id="user_info">{{Auth::user()->description}}</li>
 					<li id="color_select"><a id="color_switch"></a>	</li>
-					<li><a href="{{asset('preference')}}"><span class="preference"></span>Preference</a></li>
-					<li><a href="{{asset('logout')}}"><span class="logout"></span>Logout</a></li>
+					<li class="icon_menu"><a href="{{asset('preference')}}"><span class="preference"></span>Preference</a></li>
+					<li class="icon_menu"><a href="{{asset('logout')}}"><span class="logout"></span>Logout</a></li>
 				</ul>
 			</nav>
 			@else

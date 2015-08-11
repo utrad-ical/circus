@@ -9,7 +9,7 @@ img{border:none;}
 a:hover{text-decoration:none;}
 
 #wrapper{width:100%; position:relative;}
-.page_contents { width:1084px; min-height: 500px; margin:0 auto; text-align:left; position:relative; }
+.page_contents { width:1048px; min-height: 500px; margin:0 auto; text-align:left; position:relative; }
 .page_title{ border-bottom: 1px solid #d3ccc2; font-size:1.4em; margin-bottom:10px; height:40px; line-height:40px; text-align:left;}
 .con_ttl{text-align:left; margin-bottom:5px; font-size:1.2em;}
 .submit_area{padding:10px 0; text-align:center;}

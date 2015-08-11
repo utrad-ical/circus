@@ -1,66 +1,49 @@
 @charset "utf-8";
-/* CSS Document */
 
 *{margin:0; padding:0;}
-body{text-align:center; width:100%; font-family:"メイリオ","Meiryo","Osaka"; word-break:break-all;  word-wrap:break-word; font-size:0.9em; line-height:1.8em; margin:0;}
-select,input,button{ font-family:"メイリオ","Meiryo","Osaka";  word-break:keep-all;  word-wrap:normal; font-size:1em;}
+body{ width:100%; font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; word-break:break-all;  word-wrap:break-word; font-size:0.9em; line-height:1.8em; margin:0; background-color: white; }
+select,input,button{ font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; word-break:keep-all;  word-wrap:normal; font-size:1em;}
 li{list-style:none;}
 img{border:none;}
-.text_limit{	white-space:nowrap; overflow:hidden; text-overflow:ellipsis; -webkit-text-overflow:ellipsis; -o-text-overflow:ellipsis; width:100%;}
+.text_limit{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; -webkit-text-overflow:ellipsis; -o-text-overflow:ellipsis; width:100%;}
 a:hover{text-decoration:none;}
 
 #wrapper{width:100%; position:relative;}
-.page_contents{width:1084px; margin:0 auto; text-align:left; position:relative;}
-.page_area{min-height:548px; border-radius:5px;}
-.page_ttl{border-width:1px; border-bottom-style:solid; font-size:1.4em; margin-bottom:10px; height:40px; line-height:40px; text-align:left;}
+.page_contents { width:1084px; min-height: 500px; margin:0 auto; text-align:left; position:relative; }
+.page_title{border-width:1px; border-bottom-style:solid; font-size:1.4em; margin-bottom:10px; height:40px; line-height:40px; text-align:left;}
 .con_ttl{text-align:left; margin-bottom:5px; font-size:1.2em;}
 .submit_area{padding:10px 0; text-align:center;}
 .white_table{width:100%; margin:0 auto; border-collapse: collapse;}
 .search_form_wrap{padding:20px; background:rgba(255,255,255,0.5); color:#404040; border:2px solid #d0e6e4;}
 
-#header{margin:0 auto 5px; position:relative; max-width:1084px;}
-#header .header_logo{width:192px; display:block; float:left; padding-top:5px;}
-#header .header_logo img{margin-left:8px; height:40px; width:192px; display:block;}
-#header #btn_area{width:300px; float:right;}
-#header #btn_area .color_btn{width:50px; height:24px; line-height:24px; text-align:center; cursor:pointer; float:right;}
-#header #btn_area .btn_settings{width:105px; height:24px; line-height:24px; text-align:center; cursor:pointer; float:right; background:#888; border:1px solid #888; color:#fff; margin-left:5px; position:relative;}
-#header #btn_area .btn_settings a{color:#fff;}
-#header #btn_area .color_btn_white{background:#fff; color:#404040;	border:1px solid #888;}
-#header #btn_area .color_btn_black{background:#000; color:#eee;		border:1px solid #888; margin-left:5px;}
-#header #btn_area .color_btn label{display:block; width:100%; padding:5px 0;}
+/* Navigation bar */
+#header { margin:0 auto 15px; height: 40px; position: relative; background-color: #166a5d; border-bottom: 1px solid #0e372c; line-height: 40px; z-index: 2000; color: white; }
+#header img.header_logo { width: 120px; height: 30px; vertical-align: middle; margin-right: 10px; }
+#header nav { text-align: left; }
+#header #main_nav { float: left; }
+#header #sub_nav { float: right; }
+#header nav a { display: inline-block; height: 40px; color: white; text-decoration: none; padding: 0 5px; }
+#header nav >ul >li:hover >a { background-color: #168477; }
+#header nav >ul >li { float: left; position: relative; }
+#header nav >ul >li a >span { display: inline-block; height:30px; width: 30px; background-image: url('../img/common/circus-db-nav.png'); background-size: 240px 60px; vertical-align: middle; }
+#header nav >ul >li >ul { display: none; position: absolute; top: 40px; left: 0; background-color: #eee; border: 1px solid #bbb; }
+#header nav >ul >li:hover >ul { display: block; }
+#header nav >ul >li >ul >li { display: block; width: 200px; border-bottom: 1px solid #bbb; }
+#header nav >ul >li >ul >li a { display: block; color: black; height: 30px; line-height: 30px; }
+#header nav >ul >li >ul >li a:hover { background-color: #168477; color: white; }
+#header #user_info { font-weight: bold; margin-right: 10px; }
+#header a#color_switch { display: inline-block; cursor: pointer; width: 20px; height: 20px; border-radius: 3px; border: 2px solid green; vertical-align: middle; }
+body.mode_white #color_switch { background-color: black!important; }
+body.mode_black #color_switch { background-color: white!important; }
 
-#header #user_info_area{text-align:right; clear:both;}
-.btn_settings:hover #settings_main_wrap{display:block;}
-#settings_main_wrap{position:absolute; width:107px; top:24px; left:-1px; z-index:100; display:none;}
-#settings_main_wrap li a{display:block; padding:5px 0; background:#888; border-top:1px dashed #fff; z-index:100; position:relative;}
-#settings_main_wrap li a:after{content:"";  display: block; width:6px; height:6px; border-top:2px solid #333; border-right:2px solid #333; -webkit-transform: rotate(45deg);
-	transform: rotate(45deg); position: absolute; right:10px; top:50%; margin-top:-4px;}
+/* Navigation bar icons */
+#header nav .case { background-position: -30px -30px; }
+#header nav .series { background-position: -60px -30px; }
+#header nav .share { background-position: -90px -30px; }
+#header nav .admin { background-position: -120px -30px; }
+#header nav .preference { background-position: -150px -30px; }
+#header nav .logout { background-position: -180px -30px; }
 
-#footer{padding:20px 0; margin-top:20px; width:100%;}
-#footer .page_contents{ text-align:center;}
-
-#gnavi_wrap{width:40px; position:absolute; top:0; left:0; overflow:hidden; z-index:1000; line-height: 40px;}
-#gnavi_wrap:hover{overflow:visible;}
-#gnavi_wrap #gnavi_wrap_switch{text-align:left; background-color:#eee; width:40px; height:40px; line-height:40px;}
-#gnavi_wrap:hover #gnavi_wrap_switch{width:150px;}
-#gnavi li{text-align:left; width:150px; height: 40px; border-top:1px solid #bbb; position:relative; overflow:visible; background-color:#eee; }
-#gnavi li:hover {background: #ddd;}
-#gnavi li::after{content:"";  display: block; width:6px; height:6px; border-top:2px solid #333; border-right:2px solid #333; -webkit-transform: rotate(45deg); transform: rotate(45deg); position: absolute; right:8px; top:50%; margin-top:-4px;}
-#gnavi a{text-decoration:none; display:block; height: 40px; }
-
-#gnavi >li >a >span{display: inline-block; width:40px; height:40px; background-image: url('../img/common/gnavi.png'); background-size: 40px 200px; vertical-align: middle; margin-right: 10px;}
-#gnavi >li .home{background-position: 0 0;}
-#gnavi >li .case{background-position: 0 -40px;}
-#gnavi >li .series{background-position: 0 -80px;}
-#gnavi >li .share{background-position: 0 -120px;}
-#gnavi >li .admin{background-position: 0 -160px;}
-
-#gnavi li ul{ position:absolute; top:-1px; left:150px; display: none; }
-#gnavi li li{ width:200px; text-indent:10px; }
-#gnavi > li:hover ul{display:block;}
-
-.page_contents_outer{max-width:1094px; width:100%; position:relative; margin:0 auto;}
-.page_contents_inner{margin-left:50px; min-height:500px; text-align:left;}
 
 .common_pager{clear:both;}
 .pager_btn{text-align:center; display:block; margin-right:5px; float:left;}
@@ -78,13 +61,12 @@ a:hover{text-decoration:none;}
 .common_table_light{width:100%; margin:0 auto; border-collapse: collapse;}
 .common_table_light td,.common_table_light th{border-bottom:1px solid #ccc; padding:10px;}
 .common_input_text{padding:8px 0; font-size:1.2em; background:#d0e6e4; border:none; text-indent:8px;}
-input[type="password"]{font-family:Verdana, sans-serif; font-size:1.5em; line-height:0.8em;	/*パスワードのマスクの黒丸を大きくする*/}
+input[type="password"]{font-family:Verdana, sans-serif; font-size:1.5em; line-height:0.8em; }
 
 .common_btn{padding:4px; border:none; cursor:pointer; display:inline-block; text-decoration:none; text-align:center; border:none;background:#168477; color:#fff; line-height:1.5em;}
 .common_btn:hover{background:#FD3164; color:#fff;}
 .common_btn.disabled,.common_btn[disabled]{background-color:#aaa; color:#666; cursor:default;}
 .common_select{padding-top:4px; padding-bottom:4px;}
-
 
 #ui-datepicker-div {display: none;}
 

@@ -27,61 +27,68 @@ if (Auth::check()) {
 <body class="{{$class_theme}}">
 	<div id="wrapper">
 		<div id="header">
-			<div class="header_logo">
-				<a href="{{asset('home')}}">
-					<img src="{{asset('img/common/header_logo.png')}}" width="192" height="40" alt="CIRCUS">
-				</a>
-			</div>
-			{{Form::open(['url' => $_SERVER['REQUEST_URI'], 'method' => 'POST'])}}
-				<ul id="btn_area">
-					<li class="color_btn color_btn_white">
-						<label>
-							{{Form::radio('color_mode', '0', isset($class_theme) && ($class_theme == 'mode_white') ? true : false, array('class' => 'color_select', 'id' => 'color_mode_white'))}}
-						</label>
+			@if (Auth::check())
+			<nav id="main_nav">
+				<ul>
+					<li>
+						<a href="{{asset('home')}}"><img src="{{asset('img/common/header-logo.png')}}" alt="CIRCUS" class="header_logo"></a></li>
+					<li>
+						<a href="{{asset('case/search')}}"><span class="case"></span>Case</a>
+						<ul>
+							<li><a href="{{asset('case/search')}}">Case Search</a></li>
+							@if (isset(Auth::user()->preferences['caseSearchPresets']))
+							@foreach(Auth::user()->preferences['caseSearchPresets'] as $index => $val)
+								<li>{{HTML::link(asset('case/search/' . $index), $val['save_label'])}}</li>
+							@endforeach
+							@endif
+						</ul>
 					</li>
-					<li class="color_btn color_btn_black">
-						<label>
-							{{Form::radio('color_mode', '1', isset($class_theme) && ($class_theme == 'mode_black') ? true : false, array('class' => 'color_select', 'id' => 'color_mode_black'))}}
-						</label>
+					<li>
+						<a href="{{asset('series/search')}}"><span class="series"></span>Series</a>
+						<ul>
+							<li><a href="{{asset('series/search')}}">Series Search</a></li>
+							<li><a href="{{asset('series/import')}}">Series Import</a></li>
+							@if (isset(Auth::user()->preferences['seriesSearchPresets']))
+							@foreach(Auth::user()->preferences['seriesSearchPresets'] as $index => $val)
+								<li>{{HTML::link(asset('series/search/' . $index), $val['save_label'])}}</li>
+							@endforeach
+							@endif
+						</ul>
 					</li>
-					@if (Auth::check())
-						<li class="btn_settings">
-							<div id="settings_wrap">
-								<p id="setting_switch">settings</p>
-								<div id="settings_main_wrap">
-									<ul id="settings_list">
-										<li>{{HTML::link(asset('home'), 'Home')}}</li>
-										<li>{{HTML::link(asset('logout'), 'Logout')}}</li>
-										<li>{{HTML::link(asset('preference'), 'Preferences')}}</li>
-									</ul>
-								</div>
-							</div>
-						</li>
-						<li id="user_info_area">
-							<span class="font_red">
-								{{Auth::user()->description}}
-							</span>
-						</li>
+					<li>
+						<a href="{{asset('share/search')}}"><span class="share"></span>Share</a>
+					</li>
+					@if (Auth::user()->hasPrivilege(Group::SERVER_MANAGE))
+					<li>
+						<a href="{{asset('administration')}}"><span class="admin"></span>Administration</a>
+						<ul>
+							<li><a href="{{asset('administration/group')}}">Group</a></li>
+							<li><a href="{{asset('administration/user')}}">User</a></li>
+							<li><a href="{{asset('administration/storage')}}">Storage</a></li>
+							<li><a href="{{asset('administration/project')}}">Project</a></li>
+							<li><a href="{{asset('administration/server_param')}}">Setting Server Params</a></li>
+						</ul>
+					</li>
 					@endif
 				</ul>
-			{{Form::close()}}
-			<div class="clear">&nbsp;</div>
-		</div>
-		<div class="page_contents_outer">
-			<div class="page_contents_inner">
-				<div class="page_unique" @yield('page_id')>
-					<h1 class="page_ttl">
-					@yield('page_title')
-					</h1>
-					@yield('content')
-				</div>
-			</div>
-			@if (Auth::check())
-				@include('common.navi')
+			</nav>
+			<nav id="sub_nav">
+				<ul>
+					<li id="user_info">{{Auth::user()->description}}</li>
+					<li id="color_select"><a id="color_switch"></a>	</li>
+					<li><a href="{{asset('preference')}}"><span class="preference"></span>Preference</a></li>
+					<li><a href="{{asset('logout')}}"><span class="logout"></span>Logout</a></li>
+				</ul>
+			</nav>
+			@else
+			<img src="{{asset('img/common/header-logo.png')}}" alt="CIRCUS" class="header_logo">
 			@endif
-			<div class="clear">&nbsp;</div>
 		</div>
-		<div id="footer">
+		<div class="page_contents" @yield('page_id')>
+			<h1 class="page_title">
+			@yield('page_title')
+			</h1>
+			@yield('content')
 		</div>
 	</div>
 	</body>

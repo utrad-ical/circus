@@ -8,6 +8,7 @@
  * @property number incrementalID
  * @property number projectID ProjectID of projects
  * @property array patientInfoCache Cache of Series patientInfo
+ * @property array tags Tags of case
  * @property array latestRevision Latest revision
  * @property array revisions List of revision
  * @property array domains List of domain
@@ -48,6 +49,7 @@ class ClinicalCase extends BaseModel {
 		'patientInfoCache.sex'			=>	'min:1|max:1|in:F,M,O',
 		'patientInfoCache.size'			=>	'strict_numeric',
 		'patientInfoCache.weight'		=>	'strict_numeric',
+		'tags'							=>	'strict_array',
 		'latestRevision'				=>	'strict_array',
 		'latestRevision.date'			=>	'mongodate',
 		'latestRevision.creator'		=>	'strict_string',

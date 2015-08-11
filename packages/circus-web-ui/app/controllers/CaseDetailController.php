@@ -84,11 +84,13 @@ class CaseDetailController extends BaseController {
 														  $case_info->project->windowPriority,
 														  $case_info->project->windowPresets);
 			$result['attribute'] = json_encode($case_info->revisions[$select_revision]['attributes']);
+			$result['tags'] = json_encode($case_info->tags);
 			$result['inputs'] = Session::get('case.detail');
 
 			//Attribute Settings
 			$result['label_attribute_settings'] = json_encode($case_info->project->labelAttributesSchema);
 			$result['case_attribute_settings'] = json_encode($case_info->project->caseAttributesSchema);
+			$result['tag_settings'] = $this->createTagList($case_info->project->tags);
 			$result['window_presets'] = json_encode($case_info->project->windowPresets);
 
 			//JsonFile read
@@ -98,6 +100,16 @@ class CaseDetailController extends BaseController {
 			$result['error_msg'] = $e->getMessage();
 		}
 		return View::make('case/detail', $result);
+	}
+
+	function createTagList($tags) {
+		if (!$tags) return array();
+
+		$tag_list = array();
+		foreach ($tags as $tag) {
+			$tag_list[$tag['name']] = $tag['name'];
+		}
+		return $tag_list;
 	}
 
 	function getSeriesIDList($case_info, $revision_no) {

@@ -44,9 +44,8 @@
 #page_series_detail .info_area li:after {  content: "."; display: block; height: 0; clear: both; visibility: hidden;}
 #page_series_detail .info_area li { display: inline-table;}
 
-
 /*series import*/
-#page_series_import .droppable_area{background:#eee; border:1px solid #ccc; padding:40px; margin:0 100px;}
+#page_series_import .droppable_area{background:#eee; border:1px solid #ccc; padding:40px; margin:0 100px; color:#404040}
 #page_series_import .droppable_area.active{border-color: red;}
 
 

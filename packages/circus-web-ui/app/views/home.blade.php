@@ -1,35 +1,32 @@
 @extends('common.layout')
 
-@section('head')
-    <style>
-        #main_menu {
-            margin: 30px;
-        }
-
-        #main_menu li {
-            display: inline-block;
-        }
-
-        #main_menu li a {
-            color: white;
-            width: 150px;
-            height: 30px;
-            line-height: 30px;
-        }
-    </style>
-@stop
-
 @section('title')
-Home
+	Home
 @stop
 
 @section('content')
-    <div>Welcome to CIRCUS DB</div>
-    <nav id="main_menu">
-        <ul>
-            <li>{{HTML::link(asset('series/search'), 'Series Search', ['class' => 'common_btn'])}}</li>
-            <li>{{HTML::link(asset('series/import'), 'Series Import', ['class' => 'common_btn'])}}</li>
-            <li>{{HTML::link(asset('case/search'), 'Case Search', ['class' => 'common_btn'])}}</li>
-        </ul>
-    </nav>
+	<p>Welcome to CIRCUS DB!</p>
+	<ul class="column_menu">
+		<li>
+			<a href="case/search">
+				<span class="jumbo_icon case_search"></span>
+				<p>Case Search</p>
+			</a>
+			<p>Search and edit existing cases.</p>
+		</li>
+		<li>
+			<a href="series/search">
+				<span class="jumbo_icon series_search"></span>
+				<p>Series Search</p>
+			</a>
+			<p>Search uploaded series,<br/> and define new cases.</p>
+		</li>
+		<li>
+			<a href="series/import">
+				<span class="jumbo_icon series_import"></span>
+				<p>Series Import</p>
+			</a>
+			<p>Upload DICOM image files directly via the browser.</p>
+		</li>
+	</ul>
 @stop

@@ -10,7 +10,7 @@ a:hover{text-decoration:none;}
 
 #wrapper{width:100%; position:relative;}
 .page_contents { width:1084px; min-height: 500px; margin:0 auto; text-align:left; position:relative; }
-.page_title{border-width:1px; border-bottom-style:solid; font-size:1.4em; margin-bottom:10px; height:40px; line-height:40px; text-align:left;}
+.page_title{ border-bottom: 1px solid #d3ccc2; font-size:1.4em; margin-bottom:10px; height:40px; line-height:40px; text-align:left;}
 .con_ttl{text-align:left; margin-bottom:5px; font-size:1.2em;}
 .submit_area{padding:10px 0; text-align:center;}
 .white_table{width:100%; margin:0 auto; border-collapse: collapse;}
@@ -44,6 +44,29 @@ body.mode_black #color_switch { background-color: white!important; }
 #header nav .preference { background-position: -150px -30px; }
 #header nav .logout { background-position: -180px -30px; }
 
+/* Color themes */
+body.mode_black { background:#000; color:#eee; }
+body.mode_white { background:#fff; color:#404040; }
+
+body.mode_black a{ color:#168477; }
+body.mode_white a{ color:#168477; }
+
+body.mode_black a:hover{ color:#FD3164; }
+body.mode_white a:hover{ color:#FD3164; }
+
+body.mode_black .common_table{ color:#404040; }
+
+body.mode_black .label_select_wrap{ color:#404040; }
+body.mode_black .droppable_area{ color:#404040; }
+
+body.mode_black .error_area{ color:#404040; }
+body.mode_black .info_area{ color:#404040; background:#CCC; }
+body.mode_black .label_attr_area{ color:#404040; }
+
+
+/* Misc */
+
+.font_red{color:#FD3164;}
 
 .common_pager{clear:both;}
 .pager_btn{text-align:center; display:block; margin-right:5px; float:left;}
@@ -63,7 +86,7 @@ body.mode_black #color_switch { background-color: white!important; }
 .common_input_text{padding:8px 0; font-size:1.2em; background:#d0e6e4; border:none; text-indent:8px;}
 input[type="password"]{font-family:Verdana, sans-serif; font-size:1.5em; line-height:0.8em; }
 
-.common_btn{padding:4px; border:none; cursor:pointer; display:inline-block; text-decoration:none; text-align:center; border:none;background:#168477; color:#fff; line-height:1.5em;}
+.common_btn{padding:4px; border:none; cursor:pointer; display:inline-block; text-decoration:none; text-align:center; border:none;background:#168477; color:#fff!important; line-height:1.5em;}
 .common_btn:hover{background:#FD3164; color:#fff;}
 .common_btn.disabled,.common_btn[disabled]{background-color:#aaa; color:#666; cursor:default;}
 .common_select{padding-top:4px; padding-bottom:4px;}

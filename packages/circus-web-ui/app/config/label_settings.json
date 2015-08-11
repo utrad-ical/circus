@@ -1,6 +1,0 @@
-[
-	{type: 'radio', key: 'hypertension', caption: 'Hypertension', spec: {
-		options: ['true:(+)', 'false:(-)']
-	}},
-	{type: 'text', key: 'comment', caption: 'Comment'}
-]

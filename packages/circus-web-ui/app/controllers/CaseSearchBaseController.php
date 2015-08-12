@@ -19,6 +19,17 @@ class CaseSearchBaseController extends BaseController {
 			$result = ClinicalCase::searchCase($search_data, $preset_id);
 			$result['prefix'] = $this->_prefix;
 			$result['export_mode'] = $this->_export_mode;
+
+			//タグの設定
+			if ($search_data && array_key_exists('tags', $search_data)){
+				//ProjectID
+    			$search_data['project'] = json_decode($search_data['project'], true);
+    			if (count($search_data['project']) === 1) {
+    				$params = array();
+    				$params['projectID'] = $search_data['project'][0];
+    				$result['tag_list'] = $this->getTags($params);
+    			}
+			}
 			Session::put('backUrl', $this->_prefix.'/search');
 		} catch (Exception $e) {
 			Log::error($e);
@@ -80,6 +91,18 @@ class CaseSearchBaseController extends BaseController {
 	}
 
 	/**
+	 * プロジェクトに紐づくtagsを取得する(Json)
+	 */
+	public function get_project_tags() {
+		try {
+			$tags = $this->getTags(Input::all());
+			return Response::json(['status' => 'OK', 'tags' => $tags]);
+		} catch (Exception $e) {
+			return Response::json(['status' => 'NG', 'message' => $e->getMessage()]);
+		}
+	}
+
+	/**
 	 * ケース検索条件設定
 	 * @param Array $inputs 入力値
 	 */
@@ -116,6 +139,13 @@ class CaseSearchBaseController extends BaseController {
 			throw new Exception('Please specify the project .');
 
 		return ClinicalCase::getProjectCaseAttribute(array($inputs['projectID']));
+	}
+
+	public function getTags($inputs) {
+		if (!array_key_exists('projectID', $inputs))
+			throw new Exception('Please specify the project .');
+
+		return ClinicalCase::getProjectTags(array($inputs['projectID']));
 	}
 
 	/**

@@ -1698,11 +1698,9 @@
       //描画対象シリーズ変更
       $('#' + controllerInfo.elements.label).find('.series_name').click(function () {
         var this_series_id = $(this).closest('.series_wrap').attr('id');
-/*        if (controllerInfo.activeSeriesId !== this_series_id) {
+        if (controllerInfo.activeSeriesId !== this_series_id) {
           this_elm.imageViewerController('changeActiveSeries', this_series_id);
         }
-*/				
-				this_elm.imageViewerController('changeActiveSeries', this_series_id);
       });
 
       //attribute change

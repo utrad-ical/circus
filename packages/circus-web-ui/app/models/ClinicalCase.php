@@ -178,6 +178,13 @@ class ClinicalCase extends BaseModel {
 									)
 								);
 							}
+							//tags
+							if (isset($search_data['tags'])) {
+								$tags = json_decode($search_data['tags'], true);
+								if ($tags) {
+	    							$query->whereIn('tags', array_values($tags));
+								}
+							}
 						}
     				});
 
@@ -278,7 +285,7 @@ class ClinicalCase extends BaseModel {
 	}
 
 	/**
-	 * get the caseAttributesScheme of the project
+	 * get the caseAttributesSchema of the project
 	 * @param Json $projects selected projects
 	 * @return Json the createAttributesSchema of the project
 	 */
@@ -295,6 +302,27 @@ class ClinicalCase extends BaseModel {
 
 		}
 		return;
+	}
+
+	/**
+	 * get the Tags of the project
+	 * @param Json $projects selected projects
+	 * @return Json the tags of the project
+	 */
+	public static function getProjectTags($projects) {
+		if (count($projects) === 1) {
+			$project = Project::find($projects[0]);
+			if ($project->tags) {
+				$tag_list = array();
+				$tags = $project->tags;
+				foreach ($tags as $tag) {
+					$tag_list[$tag['name']] = $tag['name'];
+				}
+				return $tag_list;
+			}
+
+		}
+		return array();
 	}
 
 }

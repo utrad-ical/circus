@@ -48,6 +48,7 @@ Route::group(['before' => 'auth'], function() {
 	Route::any('case/export', 'CaseExportController@export');
 	Route::any('case/get_revision_list', 'RevisionController@get_list');
 	Route::any('get_case_attribute', 'CaseSearchController@get_case_attribute');
+	Route::any('get_project_tags', 'CaseSearchController@get_project_tags');
 
 	//Series
 	Route::get('series/search/{preset_id}', 'SeriesSearchController@search')
@@ -127,18 +128,6 @@ Route::group(['before' => 'auth'], function() {
 	$rsHost('css/loading-bar.gif', 'loading-bar.gif');
 	$rsHost('css/panel-btn-sprite.png', 'panel-btn-sprite.png');
 
-});
-
-
-
-//test用
-Route::get('case/save_label', function(){
-	$js = array();
-	$js['jquery-ui.min.js'] = 'js/jquery-ui.min.js';
-	$result['js'] = $js;
-	$result['title'] = 'Label save test';
-	$result['url'] = '/case/save_label';
-	return View::make('/sample/sample', $result);
 });
 
 //404 pages

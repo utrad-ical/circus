@@ -20,6 +20,11 @@
 <script>
 	var filter = $('#search_condition').filtereditor();
 	var multi_selected_item = {{$inputs['project']}};
+	@if (isset($inputs['tags']))
+		var multi_selected_tag = {{$inputs['tags']}};
+		multi_selected_item = multi_selected_item.concat(multi_selected_tag);
+	@endif
+
 	var getSelectedProjectIds = function() {
 		var selected_project_id;
 		var selected_cnt = 0;
@@ -30,6 +35,7 @@
 		}
 		return {'cnt':selected_cnt, 'id':selected_project_id};
 	}
+
 	$(function() {
         // Initialization parameter
         if (typeof keys != 'undefined') {
@@ -71,19 +77,45 @@
 		function setAjaxSearchVal(btnName) {
 			var form_data = $('#form_case_search').serializeArray();
 			//Condition generation of project ID
-			var project_id_ary = [];
-			for (var i = 0; i < form_data.length; i++) {
-				if (form_data[i]["name"] == "project") {
-					project_id_ary.push(form_data[i]["value"]);
-					form_data.splice(i,1);
-					break;
+			var project_id_ary = new Array();
+			$('.select_project option:selected').each(function(){
+				project_id_ary.push($(this).val());
+	        });
+
+	        //Tag
+			var tag_ary = new Array();
+			$('.select_tags option:selected').each(function(){
+				tag_ary.push($(this).val());
+	        });
+
+			var project_set_flg = false;
+			var tag_set_flg = false;
+			form_data.some(function(v, i) {
+				if(v.name=="project") {
+					form_data[i].value = JSON.stringify(project_id_ary);
+					project_set_flg = true;
 				}
+				if(v.name=="tags") {
+					form_data[i].value = JSON.stringify(tag_ary);
+					tag_set_flg = true;
+				}
+			});
+			if (!project_set_flg) {
+		        var tmp_project_ary = new Array();
+		        tmp_project_ary["name"] = "project";
+		        tmp_project_ary["value"] = JSON.stringify(project_id_ary);
+		        form_data.push(tmp_project_ary);
 			}
+			if (!tag_set_flg) {
+		        var tmp_tag_ary = new Array();
+		        tmp_tag_ary["name"] = "tags";
+		        tmp_tag_ary["value"] = JSON.stringify(tag_ary);
+		        form_data.push(tmp_tag_ary);
+			}
+
 			//Get search mode
 			var search_mode = $('#search_mode').val();
 			var tmp_ary_data = [];
-
-			var tmp_project_data = {"name":"project", "value" : JSON.stringify(project_id_ary)};
 			var tmp_action_btn_data = {"name":btnName, "value":btnName};
 			var tmp_search_mode_data = {"name":"search_mode", "value":search_mode};
 
@@ -93,15 +125,14 @@
 				var tmp_mongo_data = {"name":"mongo_data","value" : JSON.stringify(mongo_val)};
 				var mongo_search_val = filter.filtereditor('option', 'filter');
 				var tmp_mongo_search_data = {"name":"mongo_search_data","value" : JSON.stringify(mongo_search_val)};
-				tmp_ary_data= [tmp_mongo_data, tmp_project_data,tmp_action_btn_data,tmp_search_mode_data, tmp_mongo_search_data];
+				tmp_ary_data= [tmp_mongo_data, tmp_action_btn_data,tmp_search_mode_data, tmp_mongo_search_data];
 
 				$.each(form_data, function(key, val) {
-					if (val["name"] == "sort" || val["name"] == "disp")
+					if (val["name"] == "sort" || val["name"] == "disp" || val["name"] == "project")
 						tmp_ary_data.push(val);
 				});
 			} else {
-			//Simple Search
-				var tmp_data = [tmp_project_data,tmp_action_btn_data,tmp_search_mode_data];
+				var tmp_data = [tmp_action_btn_data,tmp_search_mode_data];
 				tmp_ary_data = $.extend(true,form_data, tmp_data);
 			}
 
@@ -183,11 +214,44 @@
 						}
 					}
 				});
+
+				$.ajax({
+					url: "{{{asset('get_project_tags')}}}",
+					type: 'POST',
+					data: post_data,
+					dataType: 'json',
+					error: function(){
+						alert('I failed to communicate.');
+					},
+					success: function(res){
+
+						if (res.status === "OK") {
+							$('.select_tags').empty();
+							var tags_parent = $('.select_tags');
+							$.each(res.tags, function(key, val) {
+								var tag_opt = '<option value="'+key+'">'+val+'</option>';
+								tags_parent.append(tag_opt);
+							});
+							$('.select_tags').multiselect('refresh');
+							$('.tags_message').empty();
+						} else {
+							$('.tags_message').append(res.message);
+						}
+					}
+				});
 			} else if (select_projects['cnt'] > 1) {
 				$('#search_condition').append('Detail Search selection of the project can only when one .');
+				$('.tags_message').append('Detail Search selection of the project can only when one .');
+				$('.select_tags').empty();
+				$('.select_tags').multiselect('refresh');
 			} else {
 				$('#search_condition').append('Please specify the project .');
+				$('.tags_message').append('Please specify the project .');
+				$('.select_tags').empty();
+				$('.select_tags').multiselect('refresh');
 			}
+
+
 		});
 	});
 </script>
@@ -254,6 +318,17 @@
 							<td>{{Form::text('updateDate', isset($inputs['updateDate']) ? $inputs['updateDate'] : '', array('class' => 'common_input_text w_200 datepicker'))}}</td>
 							<th>Case Date</th>
 							<td>{{Form::text('caseDate', isset($inputs['caseDate']) ? $inputs['caseDate'] : '', array('class' => 'common_input_text w_200 datepicker'))}}</td>
+						</tr>
+						<tr>
+							<th>Tags</th>
+							<td colspan="3">
+								{{Form::select('tags', isset($tag_list) ? $tag_list : array(), isset($inputs['tags']) ? $inputs['tags'] : null, array('class' => 'multi_select select_tags', 'multiple' => 'multiple'))}}
+								<span class="tags_message">
+									@if(!isset($tag_list))
+										Please specify the project .
+									@endif
+								</span>
+							</td>
 						</tr>
 					</tbody>
 				</table>

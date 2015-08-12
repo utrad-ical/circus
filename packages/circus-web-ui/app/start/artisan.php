@@ -12,6 +12,7 @@
 */
 
 Artisan::add(new ImportDicom);
+Artisan::add(new AnonymizeDicom);
 Artisan::add(new DeleteSeries);
 Artisan::add(new ExportVolume);
 Artisan::add(new GetSeries);

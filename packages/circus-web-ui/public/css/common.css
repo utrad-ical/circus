@@ -23,9 +23,9 @@ a:hover{text-decoration:none;}
 #header #main_nav { float: left; }
 #header #sub_nav { float: right; }
 #header nav a { display: inline-block; height: 40px; color: white; text-decoration: none; padding: 0 5px; }
-#header nav >ul >li:hover >a { background-color: #168477; }
+#header nav >ul >li:hover >a { background-color: #168477; color: #FD3164; }
 #header nav >ul >li { float: left; position: relative; }
-#header nav >ul >li a >span { display: inline-block; height:30px; width: 30px; background-image: url('../img/common/circus-db-nav.png'); background-size: 240px 60px; vertical-align: middle; }
+#header nav >ul >li a >span { font-size: 30px; vertical-align: middle; }
 #header nav >ul >li >ul { display: none; position: absolute; top: 40px; left: 0; background-color: #eee; border: 1px solid #bbb; }
 #header nav >ul >li:hover >ul { display: block; }
 #header nav >ul >li >ul >li { display: block; width: 200px; border-bottom: 1px solid #bbb; }
@@ -40,15 +40,6 @@ body.mode_black #color_switch { background-color: white!important; }
     #header nav a { display: inline-block; height: 40px; color: white; text-decoration: none; padding: 0 5px; }
     #header nav >ul >li.icon_menu > a { max-width: 30px; overflow: hidden; }
 }
-
-
-/* Navigation bar icons */
-#header nav .case { background-position: -30px -30px; }
-#header nav .series { background-position: -60px -30px; }
-#header nav .share { background-position: -90px -30px; }
-#header nav .admin { background-position: -120px -30px; }
-#header nav .preference { background-position: -150px -30px; }
-#header nav .logout { background-position: -180px -30px; }
 
 /* Color themes */
 body.mode_black { background:#000; color:#eee; }
@@ -72,14 +63,9 @@ body.mode_black .label_attr_area{ color:#404040; }
 /* large menu */
 ul.column_menu { margin: 20px 0; word-break: normal; }
 ul.column_menu >li { display: inline-block; text-align: center; margin-right: 30px; width: 300px; vertical-align: top; }
+ul.column_menu >li div.img { font-size: 160px; }
 ul.column_menu >li >a { display: block; border-radius: 10px; background-color: white; text-decoration: none; font-size: 24px; font-weight: bolder; padding: 16px 0; }
 ul.column_menu >li >a:hover { background-color: #d0e6e4; }
-ul.column_menu >li
-
-.jumbo_icon { display: inline-block; height:160px; width: 160px; background-image: url('../img/common/large-menu.png'); background-size: 480px 160px; vertical-align: middle; }
-.jumbo_icon.case_search { background-position: 0 0; }
-.jumbo_icon.series_search { background-position: -160px 0; }
-.jumbo_icon.series_import { background-position: -320px 0; }
 
 /* Misc */
 

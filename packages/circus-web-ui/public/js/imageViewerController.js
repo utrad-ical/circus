@@ -740,13 +740,22 @@
 				if( controllerInfo.viewer[i].orientation === 'axial' ||
 						controllerInfo.viewer[i].orientation === 'coronal' ||
 						controllerInfo.viewer[i].orientation === 'sagittal'){
-					this_elm.imageViewerController(
-						'syncGuide',
-						controllerInfo.viewer[i].orientation,
-						controllerInfo.viewer[i].number.current
-					);
+							this_elm.imageViewerController(
+							'syncGuide',
+							controllerInfo.viewer[i].orientation,
+							controllerInfo.viewer[i].number.current
+							);
 				}
       }
+			
+			//ページロード時のoblique 同期
+      for (var i = controllerInfo.viewer.length - 1; i >= 0; i--) {
+				if( controllerInfo.viewer[i].rotateControl === true){
+					var elmId = '#' + controllerInfo.viewer[i].elementId;
+					var the_angle = $(elmId).imageViewer('option').viewer.rotate.angle;
+					this_elm.imageViewerController('setObliqueOptions',controllerInfo.viewer[i].orientation, the_angle);
+	      }
+			}
 
       for (var i = controllerInfo.viewer.length - 1; i >= 0; i--) {
         var elmId = '#' + controllerInfo.viewer[i].elementId;
@@ -1367,47 +1376,51 @@
             var tmp_viewer = controllerInfo.viewer[i];
             var the_slider = $('#' + tmp_viewer.elementId).find('.slider_elm');
 
-            if (the_orientation === 'axial') {
-              if (tmp_viewer.orientation === 'sagittal') {
-                the_slider.slider({
-                  'value': number_x
-                });
-              } else if (tmp_viewer.orientation === 'coronal') {
-                the_slider.slider({
-                  'value': number_y
-                });
-              }
-            } else if (the_orientation === 'coronal') {
-              if (tmp_viewer.orientation === 'sagittal') {
-                the_slider.slider({
-                  'value': number_x
-                });
-              } else if (tmp_viewer.orientation === 'axial') {
-                the_slider.slider({
-                  'value': number_y
-                });
-              }
-            } else if (the_orientation === 'sagittal') {
-              if (tmp_viewer.orientation === 'coronal') {
-                the_slider.slider({
-                  'value': number_x
-                });
-              } else if (tmp_viewer.orientation === 'axial') {
-                the_slider.slider({
-                  'value': number_y
-                });
-              }
-            } else if (the_orientation === 'oblique') {
-             	the_angle = $('#' + tmp_viewer.elementId).imageViewer('option').viewer.cut.angle;
-            }
+						if (the_orientation === 'axial') {
+							if (tmp_viewer.orientation === 'sagittal') {
+								the_slider.slider({
+									'value': number_x
+								});
+							} else if (tmp_viewer.orientation === 'coronal') {
+								the_slider.slider({
+									'value': number_y
+								});
+							}
+						} else if (the_orientation === 'coronal') {
+							if (tmp_viewer.orientation === 'sagittal') {
+								the_slider.slider({
+									'value': number_x
+								});
+							} else if (tmp_viewer.orientation === 'axial') {
+								the_slider.slider({
+									'value': number_y
+								});
+							}
+						} else if (the_orientation === 'sagittal') {
+							if (tmp_viewer.orientation === 'coronal') {
+								the_slider.slider({
+									'value': number_x
+								});
+							} else if (tmp_viewer.orientation === 'axial') {
+								the_slider.slider({
+									'value': number_y
+								});
+							}
+						} else if (the_orientation === 'oblique') {
+							the_angle = $('#' + tmp_viewer.elementId).imageViewer('option').viewer.cut.angle;
+						}
+						
+						if(typeof tmp_viewer.rotateControl !== 'undefined' && tmp_viewer.rotateControl === true){
+							var new_rotate_opt = $('#' + tmp_viewer.elementId).imageViewer('option').viewer.rotate;
+							this_elm.imageViewerController('setObliqueOptions',tmp_viewer.orientation, new_rotate_opt.angle);
+						}	
           }
-					this_elm.imageViewerController('setObliqueOptions',the_orientation, the_angle);
 
         });
 
       }
 
-    } /*setViewerInnerEvents*/ ,
+    }, //setViewerInnerEvents
 
 
     //Synchronize the window settings of viewers

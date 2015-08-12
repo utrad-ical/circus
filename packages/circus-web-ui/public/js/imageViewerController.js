@@ -147,13 +147,22 @@
 
       //モードがペンで、対象シリーズにラベルがまだない場合
       this_elm.imageViewerController('changeMode', 'pan');
-
+			
       //紐づくビューアーたちに伝播
       for (var i = 0; i < controllerInfo.viewer.length; i++) {
         var elmId = '#' + controllerInfo.viewer[i].elementId;
-        $(elmId).trigger('changeSeries', active_series_id)
-          .trigger('sync');
+        $(elmId).trigger('changeSeries', active_series_id);
+
+				//シリーズ切替時にはそのシリーズの中央を初期表示させる
+				var tmp_opts = $(elmId).imageViewer('option');
+				tmp_opts.viewer.number.current = Math.ceil(tmp_opts.viewer.number.maximum / 2)
+				$(elmId).find('.slider_elm').slider({
+          value:tmp_opts.viewer.number.current
+				});
+
+        $(elmId).trigger('sync');
       }
+			
     },
 
 
@@ -612,16 +621,23 @@
 						tmp_h = active_series.voxel.y * active_series.voxel.voxel_y / active_series.voxel.voxel_x;
 						tmp_ow = active_series.voxel.x;
 						tmp_oh = active_series.voxel.y;
+											
+						this_viewer.number.current = Math.ceil(this_viewer.number.maximum / 2);
+						
 					} else if (this_viewer.orientation === 'sagittal') {
 						tmp_w = active_series.voxel.y * active_series.voxel.voxel_y / active_series.voxel.voxel_x;
 						tmp_h = active_series.voxel.z * active_series.voxel.voxel_z / active_series.voxel.voxel_x;
 						tmp_ow = active_series.voxel.y;
 						tmp_oh = active_series.voxel.z;
+						this_viewer.number.current = Math.ceil(this_viewer.number.maximum / 2);
+
 					} else if (this_viewer.orientation === 'coronal') {
 						tmp_w = active_series.voxel.x;
 						tmp_h = active_series.voxel.z * active_series.voxel.voxel_z / active_series.voxel.voxel_x;
 						tmp_ow = active_series.voxel.x;
 						tmp_oh = active_series.voxel.z;
+						this_viewer.number.current = Math.ceil(this_viewer.number.maximum / 2);
+
 					} else if (this_viewer.orientation === 'oblique') {
 						this_viewer.src = controllerInfo.obliqueUrl;
 						this_viewer.elements = {'slider' : {'panel' : false}};
@@ -629,11 +645,10 @@
 
 					tmp_w = Math.floor(tmp_w);
 					tmp_h = Math.floor(tmp_h);
-
+					
 					//シリーズ・ラベル情報を用意
 					var init_series_info = [];
 					init_series_info = $.extend(true, init_series_info, controllerInfo.series);
-
 
 					//set guides
 					var tmp_guide_info = {};
@@ -720,6 +735,18 @@
       //連動シリーズの1個目だけ発動でよい
       $('#' + controllerInfo.viewer[0].elementId).imageViewer('insertLabelData');
 
+			//各断面は奥行を半分まで進めた状態を初期表示にする.ガイド追従
+      for (var i = controllerInfo.viewer.length - 1; i >= 0; i--) {
+				if( controllerInfo.viewer[i].orientation === 'axial' ||
+						controllerInfo.viewer[i].orientation === 'coronal' ||
+						controllerInfo.viewer[i].orientation === 'sagittal'){
+					this_elm.imageViewerController(
+						'syncGuide',
+						controllerInfo.viewer[i].orientation,
+						controllerInfo.viewer[i].number.current
+					);
+				}
+      }
 
       for (var i = controllerInfo.viewer.length - 1; i >= 0; i--) {
         var elmId = '#' + controllerInfo.viewer[i].elementId;
@@ -1671,9 +1698,11 @@
       //描画対象シリーズ変更
       $('#' + controllerInfo.elements.label).find('.series_name').click(function () {
         var this_series_id = $(this).closest('.series_wrap').attr('id');
-        if (controllerInfo.activeSeriesId !== this_series_id) {
+/*        if (controllerInfo.activeSeriesId !== this_series_id) {
           this_elm.imageViewerController('changeActiveSeries', this_series_id);
         }
+*/				
+				this_elm.imageViewerController('changeActiveSeries', this_series_id);
       });
 
       //attribute change

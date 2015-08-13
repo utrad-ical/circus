@@ -503,11 +503,7 @@
 @stop
 
 @section('title')
-@if(isset($error_msg))
     Case Detail
-@else
-    Case Detail (Revision {{{$revisionNo}}})
-@endif
 @stop
 
 @section('page_id')

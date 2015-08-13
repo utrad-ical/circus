@@ -213,7 +213,8 @@
 			<col width="{{{$export_mode ? 5 : 10}}}%">
 			<col width="10%">
 			<col width="13%">
-			<col width="19%">
+			<col width="10%">
+			<col width="9%">
 			<col width="9%">
 		@else
 			@if ($export_mode)
@@ -221,7 +222,8 @@
 			@endif
 			<col width="25%">
 			<col width="25%">
-			<col width="25%">
+			<col width="20%">
+			<col width="5%">
 			<col width="{{{$export_mode ? 20 : 25}}}%">
 		@endif
 		</colgroup>
@@ -238,6 +240,7 @@
 		@endif
 			<th>update Date</th>
 			<th>latest Revision</th>
+			<th>tag</th>
 			<th></th>
 		</tr>
 		@if (count($list) > 0)
@@ -263,6 +266,13 @@
 							{{Form::hidden('mode', 'detail')}}
 						{{Form::close()}}
 					</td>
+					<td>
+						{{-- */$tag_list = $rec->project->tags/* --}}
+						<?php Log::debug($tag_list); ?>
+						@foreach ($rec->tags as $tag)
+							<div class="tag" style="color: rgb(255, 255, 255); background-color: {{{$tag_list[$tag]['color']}}};">{{{$tag_list[$tag]["name"]}}}</div>
+						@endforeach
+					</td>
 					<td class="al_c">
 						{{HTML::link('', 'View', array('class' => 'link_detail common_btn'))}}
 					</td>
@@ -271,13 +281,13 @@
 		@else
 			<tr>
 				@if ($export_mode && Auth::user()->hasPrivilege(Group::PERSONAL_INFO_VIEW))
-				<td colspan="9">
+				<td colspan="10">
 				@elseif ($export_mode && !Auth::user()->hasPrivilege(Group::PERSONAL_INFO_VIEW))
-				<td colspan="5">
+				<td colspan="6">
 				@elseif (!$export_mode && !Auth::user()->hasPrivilege(Group::PERSONAL_INFO_VIEW))
-				<td colspan="4">
+				<td colspan="5">
 				@else
-				<td colspan="8">
+				<td colspan="9">
 				@endif
 					Search results 0.
 				</td>

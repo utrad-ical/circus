@@ -268,7 +268,6 @@
 					</td>
 					<td>
 						{{-- */$tag_list = $rec->project->tags/* --}}
-						<?php Log::debug($tag_list); ?>
 						@foreach ($rec->tags as $tag)
 							<div class="tag" style="color: rgb(255, 255, 255); background-color: {{{$tag_list[$tag]['color']}}};">{{{$tag_list[$tag]["name"]}}}</div>
 						@endforeach

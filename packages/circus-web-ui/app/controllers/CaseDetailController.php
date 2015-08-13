@@ -106,8 +106,8 @@ class CaseDetailController extends BaseController {
 		if (!$tags) return array();
 
 		$tag_list = array();
-		foreach ($tags as $tag) {
-			$tag_list[$tag['name']] = $tag['name'];
+		foreach ($tags as $key => $tag) {
+			$tag_list[$key] = $tag['name'];
 		}
 		return $tag_list;
 	}

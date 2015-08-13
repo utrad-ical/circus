@@ -315,8 +315,8 @@ class ClinicalCase extends BaseModel {
 			if ($project->tags) {
 				$tag_list = array();
 				$tags = $project->tags;
-				foreach ($tags as $tag) {
-					$tag_list[$tag['name']] = $tag['name'];
+				foreach ($tags as $idx => $tag) {
+					$tag_list[$idx] = $tag['name'];
 				}
 				return $tag_list;
 			}

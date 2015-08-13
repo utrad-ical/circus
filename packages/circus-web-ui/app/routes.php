@@ -56,9 +56,9 @@ Route::group(['before' => 'auth'], function() {
 	Route::get('series/search', 'SeriesSearchController@search');
 	Route::post('series/search', 'SeriesSearchController@search');
 	Route::post('series/detail', 'SeriesDetailController@detail');
-	Route::get('series/import', 'SeriesRegisterController@import');
-	Route::post('series/register', 'SeriesRegisterController@register');
-	Route::get('series/complete', 'SeriesRegisterController@complete');
+	Route::get('series/import', 'SeriesImportController@import');
+	Route::post('series/register', 'SeriesImportController@register');
+	Route::get('series/complete', 'SeriesImportController@complete');
 
 	//Series (for Ajax)
 	Route::any('series/save_search', 'SeriesSearchController@save_search');

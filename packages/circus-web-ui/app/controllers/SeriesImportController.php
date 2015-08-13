@@ -3,7 +3,7 @@
 /**
  * Series registration controller
  */
-class SeriesRegisterController extends ApiBaseController {
+class SeriesImportController extends ApiBaseController {
 	/**
 	 * Series registration screen
 	 */
@@ -12,7 +12,7 @@ class SeriesRegisterController extends ApiBaseController {
 		$default_domain = ServerParam::getVal('defaultDomain');
 		$domain_list = ServerParam::getDomainList();
 
-		return View::make('series.input')
+		return View::make('series.import')
 			->with('max_filesize', ini_get('upload_max_filesize'))
 			->with('max_file_uploads', intval(ini_get('max_file_uploads')))
 			->with('default_domain', $default_domain)

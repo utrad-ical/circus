@@ -63,7 +63,7 @@ body.mode_black .label_attr_area{ color:#404040; }
 /* large menu */
 ul.column_menu { margin: 20px 0; word-break: normal; }
 ul.column_menu >li { display: inline-block; text-align: center; margin-right: 30px; width: 300px; vertical-align: top; }
-ul.column_menu >li div.img { font-size: 160px; }
+ul.column_menu >li div.img >span { font-size: 160px; vertical-align: bottom; }
 ul.column_menu >li >a { display: block; border-radius: 10px; background-color: white; text-decoration: none; font-size: 24px; font-weight: bolder; padding: 16px 0; }
 ul.column_menu >li >a:hover { background-color: #d0e6e4; }
 

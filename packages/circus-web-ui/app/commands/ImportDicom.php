@@ -38,8 +38,11 @@ class ImportDicom extends TaskCommand {
 	 */
 	public function fire()
 	{
-		$registerer = new MongoRegisterer();
-		$importer = new Importer($registerer);
+		$reg = new MongoRegisterer();
+		if (strlen($this->option('domain'))) {
+			$reg->domain = $this->option('domain');
+		}
+		$importer = new Importer($reg);
 		$counter = 1;
 		$path = $this->argument('path');
 		if (is_file($path)) {
@@ -52,7 +55,6 @@ class ImportDicom extends TaskCommand {
 			} else {
 				$itr = new DirectoryIterator($path);
 			}
-			$files = array();
 			foreach ($itr as $file) {
 				if ($file->isFile()) {
 					$this->updateTaskProgress($counter, 0, "Importing in progress. $counter files are processed.");
@@ -89,7 +91,8 @@ class ImportDicom extends TaskCommand {
 	{
 		return array(
 			array('recursive', 'r', InputOption::VALUE_NONE, 'Import recursively.', null),
-			array('anonymize', 'a', InputOption::VALUE_NONE, 'Do not register personal info.', null)
+			array('anonymize', 'a', InputOption::VALUE_NONE, 'Do not register personal info.', null),
+			array('domain', 'd', InputOption::VALUE_REQUIRED, 'Specify domain for this series.', null)
 		);
 	}
 

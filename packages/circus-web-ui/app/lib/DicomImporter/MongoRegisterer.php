@@ -20,6 +20,12 @@ class MongoRegisterer extends Registerer
 	 */
 	protected $logger;
 
+	/**
+	 * The name of domain to which the new series belongs.
+	 * @var string
+	 */
+	public $domain = null;
+
 	public function utilityPath()
 	{
 		return app_path() . '/bin/dicom_utility';
@@ -135,7 +141,7 @@ class MongoRegisterer extends Registerer
 		);
 		$sr->images = (string)$dicom_data['instanceNumber'];
 		$this->setSeriesParameters($sr, $dicom_data);
-		$sr->domain = 'default'; // TODO: Implement domain handling
+		$sr->domain = is_null($this->domain) ? 'default' : $this->domain;
 		$sr->save();
 		$this->logger->log("Inserted new series in the database. Series UID=$sr->seriesUID");
 	}

@@ -35,11 +35,11 @@ class SeriesRegisterController extends ApiBaseController {
 			//domain unselected
 			$domain = Input::get('domain');
 			if (!$domain)
-				throw new Exception('Please select domain.');
+				throw new Exception('Please select the domain.');
 			//domains no regist
 			$domains = ServerParam::getVal('domains');
 			if (!$domains)
-				throw new Exception('Please set the domains from the management screen.');
+				throw new Exception('Please set the domains in the management screen.');
 			//domain check
 			if (array_key_exists($domain, ServerParam::getDomainList()) === false)
 				throw new Exception('Domain is invalid.');
@@ -50,7 +50,6 @@ class SeriesRegisterController extends ApiBaseController {
 			CommonHelper::deleteOlderTemporaryFiles(storage_path('uploads/'. $auth_sess_key), true);
 
 			foreach ($uploads as $upload) {
-				Log::info('HELLO ' . $upload->getClientOriginalName());
 				$ext = strtolower($upload->getClientOriginalExtension());
 				$target = "$tmp_dir/" . $upload->getClientOriginalName();
 				if ($ext == 'zip') {
@@ -64,8 +63,7 @@ class SeriesRegisterController extends ApiBaseController {
 			// invoke artisan command to import files
 			Log::debug(['IMPORT', $target]);
 			$escaped_tmp_dir = escapeshellarg($tmp_dir);
-			//TODO::選択されたドメインの渡し方
-			$task = Task::startNewTask("image:import --recursive $escaped_tmp_dir");
+			$task = Task::startNewTask("image:import --recursive --domain=$domain $escaped_tmp_dir");
 			if (!$task) {
 				throw new Exception('Failed to invoke image importer process.');
 			}

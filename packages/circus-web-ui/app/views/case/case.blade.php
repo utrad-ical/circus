@@ -268,9 +268,11 @@
 					</td>
 					<td>
 						{{-- */$tag_list = $rec->project->tags/* --}}
-						@foreach ($rec->tags as $tag)
-							<div class="tag" style="color: rgb(255, 255, 255); background-color: {{{$tag_list[$tag]['color']}}};">{{{$tag_list[$tag]["name"]}}}</div>
-						@endforeach
+						@if ($tag_list && count($rec->tags) > 0)
+							@foreach ($rec->tags as $tag)
+								<div class="tag" style="color: rgb(255, 255, 255); background-color: {{{$tag_list[$tag]['color']}}};">{{{$tag_list[$tag]["name"]}}}</div>
+							@endforeach
+						@endif
 					</td>
 					<td class="al_c">
 						{{HTML::link('', 'View', array('class' => 'link_detail common_btn'))}}

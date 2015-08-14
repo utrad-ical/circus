@@ -68,9 +68,12 @@ Route::group(['before' => 'auth'], function() {
 	Route::any('download/volume', function() {
 		$inputs = Input::all();
 		$download_url = $inputs['dir_name'];
-		if (!Input::has('transfer'))
+		if (!Input::has('transfer')) {
 			$download_url = storage_path('cache').'/'.$download_url;
-		return CommonHelper::downloadZip($download_url, $inputs['file_name'], !Input::has('transfer'));
+			return CommonHelper::downloadZip($download_url, $inputs['file_name'], false);
+		} else {
+			return CommonHelper::downloadTgz($download_url);
+		}
 	});
 
 	//Share

@@ -354,7 +354,30 @@
 		</p>
 	</div>
 </div>
+{{Form::open(['url' => asset('download/volume'), 'method' => 'post', 'id' => 'frmDownload'])}}
+	{{Form::hidden('file_name', '')}}
+	{{Form::hidden('dir_name', '')}}
+	{{Form::hidden('transfer', true)}}
+{{Form::close()}}
 <div class="search_result pad_tb_5" id="result_case_list">
 @include('case.case')
+@include('case.export_dialog')
 </div>
+<script>
+$("#dialog").dialog({
+	autoOpen: false,
+	closeOnEscape: false,
+	closeText:"",
+	width:500,
+	maxwidth:false,
+	modal:true
+});
+var downloadVolume = function(data) {
+	var parent = $('#frmDownload');
+	parent.find('input[name="file_name"]').val(data.file_name);
+	parent.find('input[name="dir_name"]').val(data.dir_name);
+	parent.submit();
+}
+</script>
+
 @stop

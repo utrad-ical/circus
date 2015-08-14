@@ -11,8 +11,7 @@ class CaseExportController extends BaseController {
 
 		//POST data acquisition
 		$inputs = Input::all();
-		Log::debug('Input Values');
-		Log::debug($inputs);
+
 		try {
 			//validate check
 			$this->validate($inputs);
@@ -52,9 +51,6 @@ class CaseExportController extends BaseController {
 			if ($output_label)
 				$cmd_str .= ' '.$output_label;
 
-			Log::debug('command params::');
-			Log::debug($cmd_str);
-
 			$task = Task::startNewTask("image:export-volume " .$cmd_str);
 			if (!$task) {
 				throw new Exception('Failed to invoke export process.');
@@ -78,7 +74,7 @@ class CaseExportController extends BaseController {
 				'response' => $res
 			));
 		} catch (Exception $e) {
-			Log::debug($e);
+			Log::error($e);
 
 			if (isset($tmp_dir_path))
 				File::deleteDirectory($tmp_dir_path);

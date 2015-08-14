@@ -36,20 +36,11 @@
 	<div id="progress"><div id="progress-label"></div></div>
 	<div id="task-watcher"></div>
 </div>
-{{Form::open(['url' => asset('download/volume'), 'method' => 'post', 'id' => 'frmDownload'])}}
-	{{Form::hidden('file_name', '')}}
-	{{Form::hidden('dir_name', '')}}
-	{{Form::hidden('transfer', true)}}
-{{Form::close()}}
+
 <span id="export_err" class="font_red"></span>
 <script>
 
-var downloadVolume = function(data) {
-	var parent = $('#frmDownload');
-	parent.find('input[name="file_name"]').val(data.file_name);
-	parent.find('input[name="dir_name"]').val(data.dir_name);
-	parent.submit();
-}
+
 var exportRun = function (validate_flag) {
 	//エラーがあるのでExport処理を行わない
 	if (!isExportRun(validate_flag))
@@ -70,8 +61,8 @@ var exportRun = function (validate_flag) {
 		async:true,
 		xhr: myXhr,
 		success: function (data) {
-			downloadVolume(data.response);
 			$('#task-watcher').taskWatcher(data.taskID).on('finish', function() {
+				downloadVolume(data.response);
 				closeExportOptionDialog();
 				busy(false);
 			});

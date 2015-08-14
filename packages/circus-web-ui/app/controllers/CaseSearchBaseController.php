@@ -52,7 +52,7 @@ class CaseSearchBaseController extends BaseController {
 
 			if ($this->_export_mode) {
 				$target = array();
-				if (isset($_COOKIE["exportCookie"])) {
+				if (isset($_COOKIE["exportCookie"]) && $_COOKIE["exportCookie"]) {
 					$export_target = $_COOKIE["exportCookie"];
 					$target = explode('_', $export_target);
 				}
@@ -140,6 +140,9 @@ class CaseSearchBaseController extends BaseController {
 			$this->deleteCookie();
 		} else if (array_key_exists('btnBack', $inputs) === false) {
 			Session::forget($this->_prefix.'.search');
+			$this->deleteCookie();
+		} else {
+			$this->deleteCookie();
 		}
 	}
 

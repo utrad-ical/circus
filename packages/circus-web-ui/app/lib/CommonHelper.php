@@ -116,4 +116,43 @@ class CommonHelper{
 			Log::error($e);
 		}
 	}
+
+	/**
+	 * tgzファイルダウンロード
+	 * @param string $tmp_dir 対象フォルダ
+	 * @param string $file_name ファイル名
+	 */
+	public static function downloadTgz($file_path) {
+		try {
+			if (!$file_path)
+				throw new Exception('Please select download file .');
+
+			//共有用にtransferに移動
+			$tmp_file_name = Str::random(32);
+			$tgz_path = storage_path('transfer').'/'.$tmp_file_name.'.tgz';
+			rename($file_path, $tgz_path);
+
+			$headers = array(
+				'Content-Type' => 'application/zip',
+				'Content-Disposition' => 'attachment; filename="'.$tmp_file_name.'.tgz'.'"',
+				'Content-Length' => filesize($tgz_path)
+			);
+
+	   		return Response::stream(
+	   			function() use ($tgz_path){
+	   				$fp = fopen($tgz_path, 'rb');
+					while(!feof($fp)) {
+						$buf = fread($fp, 1048576);
+						echo $buf;
+						ob_flush();
+						flush();
+					}
+					fclose($fp);
+	   			}
+				, 200
+				, $headers);
+		} catch (Exception $e) {
+			Log::error($e);
+		}
+	}
 }

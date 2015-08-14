@@ -49,8 +49,13 @@ class CaseExportVolume extends TaskCommand {
 
 		$this->exportCaseData();
 		$this->markTaskAsFinished();
+		//return array("fileName" => $zip_file_name, "filePath" => $zip_file_path);
 	}
 
+	/**
+	 * Case Data Export main processing
+	 * @return boolean Processing result
+	 */
 	protected function exportCaseData()
 	{
 		// Get case information
@@ -67,11 +72,11 @@ class CaseExportVolume extends TaskCommand {
 					$this->error('Invalid caseID: ' . $caseId);
 					return false;
 				}
-				//オプション:個人情報出力なし
+				//Options : personal information no output
 				if ($this->option('without-personal')) {
 					$case_data->patientInfoCache = array();
 				}
-				//オプション：最新リビジョンにタグ設定
+				//Optional: tag set to the latest revision
 				if ($this->option('tag')) {
 					//TODO::最新リビジョンにタグ設定
 				}
@@ -87,30 +92,30 @@ class CaseExportVolume extends TaskCommand {
 
 				$revision = $case_data['latestRevision'];
 
-				//シリーズUIDのリストを作成する
+				//Create a list of series UID
 				foreach ($revision['series'] as $series) {
 					if (array_search($series['seriesUID'], $series_list) === false) {
 						$series_list[] = $series['seriesUID'];
 					}
 
-					//ラベルデータ作成
+					//Label data creation
 					if (array_key_exists('labels', $series)) {
 						$this->createLabelData($series['labels'], $caseId, $counter);
 					}
 				}
 			}
 
-			//シリーズデータの出力
+			//The output of the series data
 			$this->createSeriesData($series_list, $counter);
 
-			//tgz圧縮
+			//tgz compression
 			$phar = new PharData($outputPath.'/data.tar');
 			$tmpAry = $phar->buildFromDirectory($outputPath);
 			$phar->compress(Phar::GZ, '.tgz');
 			$this->updateTaskProgress($counter, 0, "Exporting in progress. $counter files are processed.");
 			$counter++;
 
-			//圧縮が完了したのでtgz以外のファイルを削除する
+			//Delete a file other than tgz
 			File::delete($outputPath.'/data.tar');
 			$this->deleteTemporaryFiles($outputPath);
 			$this->updateTaskProgress($counter, 0, "Exporting in progress. $counter files are processed.");
@@ -121,6 +126,12 @@ class CaseExportVolume extends TaskCommand {
 		return true;
 	}
 
+	/**
+	 * For creating label data Export
+	 * @param Array $labels Label array
+	 * @param string $caseId caseID
+	 * @param integer $counter Progress counter for task management
+	 */
 	private function createLabelData($labels, $caseId, &$counter) {
 		$outputPath = $this->argument('output-path');
 		foreach ($labels as $label) {
@@ -132,13 +143,13 @@ class CaseExportVolume extends TaskCommand {
 			if (!is_dir($dir)) {
 				mkdir($dir, 0777, true); // make directory recursively
 			}
-			//ラベルJSON
+			//Label JSON
 			$file_name = $dir . '/label.json';
 			file_put_contents($file_name, json_encode($label_data));
 			$this->updateTaskProgress($counter, 0, "Exporting in progress. $counter files are processed.");
 			$counter++;
 
-			//ラベルファイル
+			//Label file
 			$storage_info = Storage::find($label_data->storageID);
 			$storage_path = $storage_info->path;
 
@@ -150,9 +161,14 @@ class CaseExportVolume extends TaskCommand {
 		}
 	}
 
+	/**
+	 * For creating series data Export
+	 * @param Array $series_list Series array
+	 * @param integer $counter Progress counter for task management
+	 */
 	private function createSeriesData($series_list, &$counter) {
 		$outputPath = $this->argument('output-path');
-		//シリーズデータの出力
+		//The output of the series data
 		foreach ($series_list as $series) {
 			$series_data = Series::find($series);
 			if (!$series_data)
@@ -179,8 +195,9 @@ class CaseExportVolume extends TaskCommand {
 	}
 
 	/**
-	 * テンポラリデータ削除
-	 * @param string $target_dir テンポラリフォルダパス
+	 * Temporary data deletion
+	 * @param string $target_dir Folder path
+	 * @param boolean $preserve Whether or not leave without deleting the specified folder itself(True if the Leave, False if the Delete)
 	 */
 	private function deleteTemporaryFiles($target_dir, $preserve = true)
 	{
@@ -228,7 +245,7 @@ class CaseExportVolume extends TaskCommand {
 	{
 		return array(
 			array('without-personal', null, InputOption::VALUE_NONE, 'Without exporting pertientInfoCache.', null),
-			array('tag', null, InputOption::VALUE_NONE, '最新リビジョンにタグ付与', null),
+			array('tag', null, InputOption::VALUE_NONE, 'Tags to be applied to the latest revision', null),
 		);
 	}
 

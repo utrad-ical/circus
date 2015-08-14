@@ -6,14 +6,13 @@
 		$(document).ready(function(){
 
 			if(typeof $.cookie(COOKIE_NAME) === "undefined"){
-				var first_array = [];
+				var first_array = new Array();
 				$.cookie(COOKIE_NAME , first_array , { expires: 1 });
 			}
-			var export_array = [];
-			@if (isset($inputs['export_target']))
+			var export_array = new Array();
+			@if (isset($inputs['export_target']) && count($inputs['export_target']) > 0)
 				export_array = {{json_encode($inputs['export_target'])}};
 			@endif
-
 
 			$(".export_case").click(function () {
 				var target_number = $(this).val();
@@ -33,16 +32,6 @@
 						$.cookie(COOKIE_NAME , export_array.join("_") , { expires: 1 });
 					}
 				}
-			});
-
-			$("#dialog").dialog({
-				autoOpen: false,
-				closeOnEscape: false,
-				closeText:"",
-				//height:80,
-				width:500,
-				maxwidth:false,
-				modal:true
 			});
 		});
 		var closeExportOptionDialog = function(error) {
@@ -155,7 +144,7 @@
 			});
 		});
 	</script>
-	@include('case.export_dialog')
+
 @endif
 	@if (count($list) > 0)
 		<ul class="common_pager clearfix">

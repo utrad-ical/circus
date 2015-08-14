@@ -39,17 +39,9 @@ class ShareExportController extends BaseController {
 			if (!is_dir(storage_path('transfer'))) {
 				mkdir(storage_path('transfer'), 0777, true); // make directory recursively
 			}
-			rename($tmp_dir_path.'/data.tgz', storage_path('transfer').'/'.$tmp_dir.'.tgz');
-			$zip_file_name = $tmp_dir.'.tgz';
-			$zip_file_path = storage_path('transfer'). '/'.$zip_file_name;
-
-			if (!file_exists($zip_file_path))
-				throw new Exception('failed create tgz file .');
-
-			//ダウンロードに必要な情報の設定
 			$res = array(
-				'file_name' => $zip_file_name,
-				'dir_name' => storage_path('transfer')
+				'file_name' => 'data.tgz',
+				'dir_name'  => $tmp_dir_path.'/data.tgz'
 			);
 
 			return Response::json(array(

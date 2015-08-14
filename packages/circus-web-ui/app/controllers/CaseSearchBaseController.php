@@ -49,6 +49,15 @@ class CaseSearchBaseController extends BaseController {
 
 			$result['prefix'] = $this->_prefix;
 			$result['export_mode'] = $this->_export_mode;
+
+			if ($this->_export_mode) {
+				$target = array();
+				if (isset($_COOKIE["exportCookie"])) {
+					$export_target = $_COOKIE["exportCookie"];
+					$target = explode('_', $export_target);
+				}
+				$result['inputs']['export_target'] = $target;
+			}
 			$tmp = View::make('case/case', $result);
 		} catch (Exception $e) {
 			Log::error($e);
@@ -120,7 +129,7 @@ class CaseSearchBaseController extends BaseController {
 		} else if (array_key_exists('page', $inputs) !== false) {
 			$tmp = Session::get($this->_prefix.'.search');
 			$tmp['perPage'] = $inputs['page'];
-			Session::put('case.search', $tmp);
+			Session::put($this->_prefix.'.search', $tmp);
 		} else if ($inputs['preset_id'] !== false) {
 			$presets = Auth::user()->preferences['caseSearchPresets'];
 			$detail_search = $presets[$inputs['preset_id']];

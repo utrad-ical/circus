@@ -225,6 +225,7 @@ class CaseRegisterController extends BaseController {
 			$case_obj->projectID = $inputs['projectID'];
 			//Setting of patient information
 			$case_obj->patientInfoCache = $this->setPatientInfo($inputs['patientInfo']);
+			$case_obj->tags = array();
 
 			//Initial setting of Revision information
 			$series_list = $this->createRevision($inputs['series_list']);

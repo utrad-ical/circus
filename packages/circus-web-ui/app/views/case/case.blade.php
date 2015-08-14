@@ -10,38 +10,10 @@
 				$.cookie(COOKIE_NAME , first_array , { expires: 1 });
 			}
 			var export_array = [];
+			@if (isset($inputs['export_target']))
+				export_array = {{json_encode($inputs['export_target'])}};
+			@endif
 
-			$(".all_check_parent").click(function () {
-				if($(this).prop('checked')){
-					// チェックが入れられた場合に、表示されている全てをクッキーに追加
-					var multiNums = [];
-					$(".export_case").each(function(){
-						multiNums.push($(this).val());
-						$(this).attr('checked','checked');
-					});
-					for(i = 0; i < multiNums.length; i++){
-						if($.inArray(multiNums[i] , export_array) == -1){
-							export_array.push(multiNums[i]);
-							$.cookie(COOKIE_NAME , export_array.join("_") , { expires: 1 });
-						}
-					}
-
-					$.cookie(COOKIE_NAME , export_array.join("_"));
-				} else {
-					// チェックが外された場合に、表示されている全てをクッキーから削除
-					var multiNums = [];
-					$(".export_case").each(function(){
-						multiNums.push($(this).val());
-						$(this).removeAttr('checked');
-					});
-					for(i = 0; i < multiNums.length; i++){
-						if($.inArray(multiNums[i] , export_array) != -1){
-							export_array.splice($.inArray(multiNums[i] , export_array) , 1);
-							$.cookie(COOKIE_NAME , export_array.join("_") , { expires: 1 });
-						}
-					}
-				}
-			});
 
 			$(".export_case").click(function () {
 				var target_number = $(this).val();
@@ -247,7 +219,7 @@
 			@foreach ($list as $rec)
 				<tr>
 					@if ($export_mode)
-						<td>{{Form::checkbox('export_target[]', $rec->caseID, isset($inputs['export_target']) && array_search($rec->caseID, $inputs['export_target']) !== false ? true : false, array('class' => 'export_case'))}}</td>
+						<td>{{Form::checkbox('export_target[]', $rec->caseID, ((isset($inputs['export_target']) && array_search($rec->caseID, $inputs['export_target']) !== false) ? true : false), array('class' => 'export_case'))}}</td>
 					@endif
 					<td>{{$rec->project->projectName}}</td>
 				@if(Auth::user()->hasPrivilege(Group::PERSONAL_INFO_VIEW))

@@ -26,6 +26,11 @@ class ShareExportController extends BaseController {
 			$cmd_str = ' '.$caseIds. ' '.$tmp_dir_path;
 			if ($inputs['personal'] == 0)
 				$cmd_str .= ' --without-personal';
+			//タグの設定
+			if ($inputs['tags']) {
+				$tags = implode(',', json_decode($inputs['tags'], true));
+				$cmd_str .= ' --tag='.$tags;
+			}
 
 			//Export用で2日以上経過したものを削除する
 			CommonHelper::deleteOlderTemporaryFiles(storage_path('transfer'), true, '-2 day');
@@ -60,7 +65,7 @@ class ShareExportController extends BaseController {
 
 	private function validate($data) {
 		//Export対象のケースチェック
-		if ($data['export_type'] !== 'btnExportSelect') {
+		if ($data['export_type'] === 'btnExportSelect') {
 			$cases = $_COOKIE['exportCookie'];
 			if (!$cases)
 				throw new Exception('ケースを1つ以上選択してください。');
@@ -78,19 +83,35 @@ class ShareExportController extends BaseController {
 				}
 			}
 		}
+
+		$projectId = "";
 		foreach ($caseIds as $caseId) {
 			$case = ClinicalCase::find($caseId);
 			if (!$case)
 				throw new Exception('ケースID['.$caseId.']は存在しません。');
+			//異なるプロジェクトが混じっていないかチェックする
+
+			if (!$projectId)
+				$projectId = $case->projectID;
+
+			if ($projectId !== $case->projectID)
+				throw new Exception('Detail Search selection of the project can only when one .');
 		}
 
 		//個人情報有無
 		if ($data['personal'] != 0 && $data['personal'] != 1)
 			throw new Exception('個人情報有無を選択してください。');
 
-		//TODO::タグのValidate
+		//タグ
 		if ($data['tags']) {
-			//TODO::想定内のタグかどうかのチェック
+			$tags = json_decode($data['tags'], true);
+
+			$project = Project::find($projectId);
+			foreach ($tags as $tag) {
+				if (!isset($project->tags[intval($tag)])) {
+					throw new Exception('存在しないタグです。');
+				}
+			}
 		}
 	}
 }

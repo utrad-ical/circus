@@ -49,7 +49,6 @@ class CaseExportVolume extends TaskCommand {
 
 		$this->exportCaseData();
 		$this->markTaskAsFinished();
-		//return array("fileName" => $zip_file_name, "filePath" => $zip_file_path);
 	}
 
 	/**
@@ -78,8 +77,12 @@ class CaseExportVolume extends TaskCommand {
 				}
 				//Optional: tag set to the latest revision
 				if ($this->option('tag')) {
-					//TODO::最新リビジョンにタグ設定
+					$case_data->tags = explode(',', $this->option('tag'));
+					$case_data->save();
 				}
+
+				//Export対象からタグを除去する
+				$case_data->tags = array();
 
 				$dir = $outputPath."/cases/".$caseId;
 				if (!is_dir($dir)) {
@@ -245,7 +248,7 @@ class CaseExportVolume extends TaskCommand {
 	{
 		return array(
 			array('without-personal', null, InputOption::VALUE_NONE, 'Without exporting pertientInfoCache.', null),
-			array('tag', null, InputOption::VALUE_NONE, 'Tags to be applied to the latest revision', null),
+			array('tag', null, InputOption::VALUE_OPTIONAL, 'Tags to be applied to the latest revision', null),
 		);
 	}
 

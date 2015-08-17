@@ -78,16 +78,30 @@
 			return xhr;
 		}
 		var validateExport = function() {
+			var error = [];
+
 			var export_type = $('.frm_share_export').find('input[name="export_type"]').val();
 
-			var COOKIE_NAME = "exportCookie";
+			//押下元ボタンが全件取得でない場合は選択が1つ以上あるかチェックする
+			if (export_type !== "btnExportAll") {
+				var COOKIE_NAME = "exportCookie";
 
-			var tmpCookie = $.cookie(COOKIE_NAME);
-			var len = tmpCookie.length;
-			if (len == 0)
-				return false;
+				var tmpCookie = $.cookie(COOKIE_NAME);
+				var len = tmpCookie.length;
+				if (len == 0) {
+					error.push('Please the Export target of the case and select one or more .');
+				}
+			}
 
-			return true;
+			//プロジェクトが検索条件に設定されているかチェックする
+			var select_projects = getSelectedProjectIds();
+			if (select_projects['cnt'] > 1) {
+				error.push('Detail Search selection of the project can only when one .');
+			} else if (select_projects['cnt'] === 0) {
+				error.push('Please specify the project .');
+			}
+
+			return error;
 		}
 		var validateOptExport = function() {
 			var error = [];
@@ -118,7 +132,7 @@
 				}
 				var error = validateOptExport();
 				if (error.length > 0) {
-					closeExportOptionDialog(error.join(','));
+					closeExportOptionDialog(error.join("<br>"));
 					return false;
 				}
 			}
@@ -127,9 +141,10 @@
 		$(function(){
 			$('.btn_export').click(function () {
 				$('#export_err').empty();
+				var error = validateExport();
 				//全件出力でない場合はExport対象のケース選択Validateチェックを行う
-				if ($(this).attr('name') != 'btnExportAll' && !validateExport()) {
-					$('#export_err').append('Please the Export target of the case and select one or more .');
+				if (error.length > 0) {;
+					$('#export_err').append(error.join("<br>"));
 					return false;
 				}
 				createExportOptionDialog();

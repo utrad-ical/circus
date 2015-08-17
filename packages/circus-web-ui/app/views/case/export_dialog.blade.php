@@ -15,15 +15,7 @@
 				<tr>
 					<th>Tag</th>
 					<td>
-						<!-- TODO::ここにプロジェクトで設定されているタグコンボ -->
-						<select name="tag">
-							<option value="">---</option>
-							<option value="final">final</option>
-							<option value="draft">draft</option>
-							<option value="needsfix">needsfix</option>
-							<option value="exported_to_institute_B">exported_to_institute_B</option>
-							<option value="imported_from_institute_B">imported_from_institute_B</option>
-						</select>
+						{{Form::select('tag', isset($tag_list) ? $tag_list : array(), isset($inputs['tags']) ? $inputs['tags'] : null, array('class' => 'multi_select select_tags export_option_tag', 'multiple' => 'multiple'))}}
 					</td>
 				</tr>
 			</table>
@@ -37,7 +29,7 @@
 	<div id="task-watcher"></div>
 </div>
 
-<span id="export_err" class="font_red"></span>
+
 <script>
 
 
@@ -48,8 +40,13 @@ var exportRun = function (validate_flag) {
 
 	var parent_form = $('.frm_share_export');
 	var personal = parent_form.find('input[name="personal"]:checked').val();
-	var tag = parent_form.find('select[name="tag"] option:selected').val();
 	var export_type = parent_form.find('input[name="export_type"]').val();
+
+	var tag_ary = new Array();
+	$('.export_option_tag option:selected').each(function(){
+		tag_ary.push($(this).val());
+    });
+    var tag = JSON.stringify(tag_ary);
 
 	var export_data = {"cases":$.cookie(COOKIE_NAME), "personal":personal,"tags":tag, "export_type":export_type};
 	busy(true);
@@ -76,7 +73,6 @@ var exportRun = function (validate_flag) {
 }
 $(function(){
 	$('#btn_export_case').click(function(){
-		//ここに実行処理
 		exportRun(true);
 		return false;
 	});

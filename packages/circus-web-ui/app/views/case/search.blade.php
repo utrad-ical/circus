@@ -75,6 +75,7 @@
 		});
 		//I want to create a data for Ajax communication
 		function setAjaxSearchVal(btnName) {
+			$('#export_err').empty();
 			var form_data = $('#form_case_search').serializeArray();
 			//Condition generation of project ID
 			var project_id_ary = new Array();
@@ -359,6 +360,7 @@
 	{{Form::hidden('dir_name', '')}}
 	{{Form::hidden('transfer', true)}}
 {{Form::close()}}
+<span id="export_err" class="font_red"></span>
 <div class="search_result pad_tb_5" id="result_case_list">
 @include('case.case')
 @include('case.export_dialog')

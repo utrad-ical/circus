@@ -9,7 +9,7 @@
 	<ul class="column_menu">
 		<li>
 			<a href="case/search">
-				<div class="img"><span class="circus-icon-series-search"></span></div>
+				<div class="img"><span class="circus-icon-case-search"></span></div>
 				<p>Case Search</p>
 			</a>
 			<p>Search and edit existing cases.</p>

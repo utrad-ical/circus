@@ -60,10 +60,19 @@ You need to install node-png to use this. (see https://github.com/pkrumins/node-
 - `mpr.options.PNGWriterOptions`: currently no options.
 
 
+Authorization
+-------------
+If you want to restrict access to DICOM series image, you need to set 'true' for config.authorization.require parameter.
+Then before access to any query to circus-rs server, you must call '/requestToken' to get access token and add 'X-CircusRs-AccessToken' http header to metadata/mpr/oblique/raw access.
+
+And some optional parameter exists.
+- `authorization.expire`: life time of token (in second, optional. default 1800). each token's expire can be updated if valid metadata/mpr/oblique/raw request occured.
+- `authorizaiton.allowFrom`: ip address which can make request of requestToken. Regular expiression is ok. (optional. default '127.0.0.1')
+
 Start server
 ------------
 
-    # node build/circus-rs.js
+    # node circus-rs.js
 
 
 Builtin modules
@@ -106,7 +115,7 @@ Make MPR image and response in PNG format.
 
 #### request
 
-http://<hostname_of_your_server_port>/MPR
+http://<hostname_of_your_server_port>/mpr
 
 method: GET
 
@@ -126,7 +135,7 @@ Make single oblique MPR image
 
 #### request
 
-http://<hostname_of_your_server_port>/Oblique
+http://<hostname_of_your_server_port>/oblique
 
 method: GET
 
@@ -162,3 +171,22 @@ method: GET
 #### response
 
 raw dump data in 'dicom_voxel_dump combined format'. (application/octet-stream)
+
+### authorization
+
+generate token to access metadata/mpr/oblique...
+
+#### request
+
+http://<hostname_of_your_server_port>/requestToken
+
+method: GET
+
+- `series`: DICOM_series_instance_UID (required)
+
+#### response
+
+Response in JSON format.
+
+- `result`: 'ok' or 'ng'
+- `token`: access token if result is 'ok'.

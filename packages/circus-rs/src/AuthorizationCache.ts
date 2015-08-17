@@ -27,7 +27,7 @@ export default class AuthorizationCache {
                 }
             }
 
-        }, 10000);
+        }, 3600*1000);
 
     }
 
@@ -46,7 +46,7 @@ export default class AuthorizationCache {
     /**
      * validate query string if access is allowed.
      *
-     * @param req HTTP request. 'series' and 'token' parameter is needed.
+     * @param req HTTP request. 'series' query parameter and X-CircusRs-AccessToken http header needed.
      * @returns {boolean}
      */
     public isValid(req: http.ServerRequest) : boolean {
@@ -58,8 +58,8 @@ export default class AuthorizationCache {
             series = query['series'];
             logger.debug('series=' + series);
         }
-        if ('token' in query) {
-            token = query['token'];
+        if ('X-CircusRs-AccessToken' in req.headers) {
+            token = req.headers['X-CircusRs-AccessToken'];
             logger.debug('token=' + token);
         }
         if (series == null || token == null) {
@@ -79,6 +79,7 @@ export default class AuthorizationCache {
         }
 
         if (new Date().getTime() <= date.getTime()) {
+            this.update(series, token);
             return true;
         }
         logger.debug('token expired');

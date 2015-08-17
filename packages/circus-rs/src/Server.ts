@@ -22,7 +22,7 @@ import DicomServerModule from './controllers/Controller';
 import PathResolver from './path-resolver/PathResolver';
 import AuthorizationCache from './AuthorizationCache';
 
-import RegisterAccessTokenAction from'./controllers/RegisterAccessTokenAction';
+import RequestAccessTokenAction from'./controllers/RequestAccessTokenAction';
 
 var Router = require('router');
 
@@ -105,12 +105,18 @@ class Server {
 		});
 
 		if (config.authorization.require) {
-			logger.info('Loading RegisterAccessTokenAction module');
-			var controller: RegisterAccessTokenAction = new RegisterAccessTokenAction(reader, pngWriter, rawDumper);
+			logger.info('Loading RequestAccessTokenAction module');
+			var controller: RequestAccessTokenAction = new RequestAccessTokenAction(reader, pngWriter, rawDumper);
 			controller.setCache(authorizationCache);
 
-			router.get('/registerToken' , (req, res) => {
-				Counter.countUp('registerToken');
+			router.get('/requestToken' , (req, res) => {
+				Counter.countUp('requestToken');
+				var ip = req.ip || req.connection.remoteAddress || req.socket.remoteAddress || req.connection.socket.remoteAddress;
+				if (config.authorization.allowFrom.match(ip)) {
+					logger.info('401 error');
+					res.writeHead(401, 'access not allowed.');
+					res.end();
+				}
 				controller.execute(req, res);
 			});
 		}

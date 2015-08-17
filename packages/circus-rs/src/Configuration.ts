@@ -23,6 +23,7 @@ interface Configuration {
 	authorization?: {
 		require: boolean;
 		expire?: number;
+		allowFrom?: string;
 	};
 
 }

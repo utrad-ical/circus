@@ -59,6 +59,8 @@
 		"memoryThreshold": 2147483648
 	},
 	"authorization": {
-		"enabled": false
+		"enabled": false,
+	  	"allowFrom": "127.0.0.1",
+	  	"expire": 1800
 	}
 }

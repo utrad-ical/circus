@@ -111,6 +111,14 @@ class Server {
 				Counter.countUp(route[0]);
 				controller.execute(req, res);
 			});
+			// CrossOrigin Resource Sharing http://www.w3.org/TR/cors/
+			router.options('/' + route[0], (req, res) => {
+				res.setHeader('Access-Control-Allow-Origin', '*');
+				res.setHeader('Access-Control-Allow-Methods', 'GET');
+				res.setHeader('Access-Control-Allow-Headers', 'x-circusrs-accesstoken');
+				res.writeHead(200);
+				res.end();
+			});
 		});
 
 		if (config.authorization.require) {
@@ -121,10 +129,11 @@ class Server {
 			router.get('/requestToken' , (req, res) => {
 				Counter.countUp('requestToken');
 				var ip = req.ip || req.connection.remoteAddress || req.socket.remoteAddress || req.connection.socket.remoteAddress;
-				if (config.authorization.allowFrom.match(ip)) {
+				if (!config.authorization.allowFrom.match(ip)) {
 					logger.info('401 error');
 					res.writeHead(401, 'access not allowed.');
 					res.end();
+					return;
 				}
 				controller.execute(req, res);
 			});

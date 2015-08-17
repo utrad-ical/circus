@@ -56,14 +56,17 @@ export default class AuthorizationCache {
 
         if ('series' in query) {
             series = query['series'];
-            logger.debug('series=' + series);
+            //logger.debug('series=' + series);
         }
-        if ('X-CircusRs-AccessToken' in req.headers) {
-            token = req.headers['X-CircusRs-AccessToken'];
-            logger.debug('token=' + token);
+
+        if ('x-circusrs-accesstoken' in req.headers) {
+            token = req.headers['x-circusrs-accesstoken'];
+            //logger.debug('token=' + token);
+        } else {
+            logger.warn("no x-circusrs-accesstoken http header.");
         }
         if (series == null || token == null) {
-            logger.debug('series nor token is null');
+            logger.debug('series or token is null');
             return false;
         }
 
@@ -71,14 +74,14 @@ export default class AuthorizationCache {
         var current : Date = new Date();
         var date : Date = this.cache[key];
 
-        logger.debug('current: ' + current);
-        logger.debug('target : ' + date);
+        //logger.debug('current: ' + current);
+        //logger.debug('target : ' + date);
         if (date == null) {
             logger.debug('token not found');
             return false;
         }
 
-        if (new Date().getTime() <= date.getTime()) {
+        if (current.getTime() <= date.getTime()) {
             this.update(series, token);
             return true;
         }

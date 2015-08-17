@@ -716,10 +716,45 @@ var filterEditor;
     };
     function _create() {
         var _this = this;
-        var options = this.options;
         this.element.empty();
+        _createKeySelect.call(this);
+        this.groupSelect = $('<select class="ui-filtereditor-group-select"><option>and</option><option>or</option></select>');
+        this.toolbar = _createToolbar().appendTo(this.element);
+        this.toolbar.on('click', '.ui-filtereditor-toolbutton', $.proxy(_toolButtonClicked, this));
+        if (!$.isPlainObject(filterEditor.options.dummyCondition)) {
+            this._setOption('dummyCondition', _defaultDummyCondition.call(this));
+        }
+        if (!$.isPlainObject(filterEditor.options.filter)) {
+            filterEditor.options.filter = {
+                group: 'and',
+                members: [this.options.dummyCondition]
+            };
+        }
+        _reset.call(this);
+        this.element.on('mouseenter', '.ui-filtereditor-comparison-node', function (event) { return nodeMouseEnter.call(_this, event); });
+        this.element.on('mouseleave', '.ui-filtereditor-node', function (event) { return nodeMouseLeave.call(_this, event); });
+        this.element.on('valuechange change', $.proxy(_filterChanged, this));
+    }
+    filterEditor._create = _create;
+    function _defaultDummyCondition() {
+        var options = this.options;
+        return {
+            key: options.keys[0].key,
+            condition: '=',
+            value: ''
+        };
+    }
+    function _reset() {
+        this._setOption('dummyCondition', _defaultDummyCondition.call(this));
+        this._setOption('filter', {
+            group: 'and',
+            members: [this.options.dummyCondition]
+        });
+    }
+    function _createKeySelect() {
+        var _this = this;
         var keySelect = $('<select>').addClass('ui-filtereditor-key-select');
-        var keys = options.keys;
+        var keys = this.options.keys;
         this.keymap = {};
         $.each(keys, function (i, keydef) {
             if (!(keydef.type in _typeOpMap))
@@ -731,28 +766,7 @@ var filterEditor;
             _this.keymap[keydef.key] = keydef;
         });
         this.keySelect = keySelect;
-        this.groupSelect = $('<select class="ui-filtereditor-group-select"><option>and</option><option>or</option></select>');
-        this.toolbar = _createToolbar().appendTo(this.element);
-        this.toolbar.on('click', '.ui-filtereditor-toolbutton', $.proxy(_toolButtonClicked, this));
-        if (!$.isPlainObject(options.dummyCondition)) {
-            this._setOption('dummyCondition', {
-                key: options.keys[0].key,
-                condition: '=',
-                value: ''
-            });
-        }
-        if (!$.isPlainObject(options.filter)) {
-            options.filter = {
-                group: 'and',
-                members: [this.options.dummyCondition]
-            };
-        }
-        _commitFilter.call(this);
-        this.element.on('mouseenter', '.ui-filtereditor-comparison-node', function (event) { return nodeMouseEnter.call(_this, event); });
-        this.element.on('mouseleave', '.ui-filtereditor-node', function (event) { return nodeMouseLeave.call(_this, event); });
-        this.element.on('valuechange change', $.proxy(_filterChanged, this));
     }
-    filterEditor._create = _create;
     function nodeMouseEnter(event) {
         var node = $(event.currentTarget);
         if (node != this.hoveringNode) {
@@ -869,7 +883,9 @@ var filterEditor;
                 _commitFilter.call(this);
                 break;
             case 'keys':
-                throw 'Keys must be initialized at create time';
+                _createKeySelect.call(this);
+                _reset.call(this);
+                break;
         }
     }
     filterEditor._setOption = _setOption;

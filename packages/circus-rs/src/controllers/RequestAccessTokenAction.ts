@@ -10,6 +10,9 @@ import Controller from './Controller';
 import http = require('http');
 import AuthorizationCache from '../AuthorizationCache';
 var crypt = require('crypto');
+import logger from '../Logger';
+import { ValidatorRules } from '../Validator';
+
 
 export default class RequestAccessTokenAction extends Controller {
     private cache: AuthorizationCache;
@@ -17,6 +20,13 @@ export default class RequestAccessTokenAction extends Controller {
     public setCache(cache: AuthorizationCache) : void
     {
         this.cache = cache;
+    }
+
+    protected getRules(): ValidatorRules
+    {
+        return {
+            series: ['Series UID', null, 'isLength:1:200', null]
+        };
     }
 
     public process(query: any, res: http.ServerResponse): void

@@ -132,7 +132,7 @@ export default class DicomReader {
 					this.execCounter = 0;
 					return;
 			}*/
-			callback(rawData, null);
+			setTimeout(() => callback(rawData, null), 0);
 			this.execCounter = 0;
 			return;
 		} else {

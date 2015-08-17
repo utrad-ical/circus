@@ -6,6 +6,7 @@
 import http = require('http');
 import Controller from './Controller';
 import RawData from '../RawData';
+import logger from '../Logger';
 
 export default class VolumeBasedController extends Controller {
 	protected process(query: any, res: http.ServerResponse): void {
@@ -26,6 +27,7 @@ export default class VolumeBasedController extends Controller {
 			try {
 				this.processVolume(query, raw, res);
 			} catch (e) {
+				if ('stack' in e) logger.info(e.stack);
 				this.respondInternalServerError(res, e.toString());
 			}
 		});

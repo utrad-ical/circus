@@ -2,7 +2,9 @@
  * DICOM Dumper (using dicom_voxel_dumper)
  */
 
-var exec = require('child_process').exec;
+import child_process = require('child_process');
+var exec = child_process.exec;
+import fs = require('fs');
 
 import logger from './Logger';
 
@@ -10,25 +12,79 @@ import DicomDumper from './DicomDumper';
 import RawData from './RawData';
 import Promise = require('bluebird');
 
+const GLOBAL_HEADER = -1;
+const GLOBAL_FOOTER = -2;
+
 export default class DicomVoxelDumperAdapter extends DicomDumper {
 
-	public readDicom(dcmdir: string, config: any): Promise<RawData> {
+	public readDicom(dcmdir: string): Promise<RawData> {
 		return new Promise<RawData>((resolve, reject) => {
-			this.readDicomDeferred(dcmdir, config, resolve, reject);
+			this.readDicomDeferred(dcmdir, resolve, reject);
 		})
 	}
 
-	private readDicomDeferred(dcmdir: string, config: any, resolve, reject) {
+	protected initialize() {
+		if (!('dumper' in this.config)) {
+			throw new Error("Dumper is not specified.");
+		}
+		logger.info('Checking dumper executable: ' + this.config.dumper);
+		if (!fs.existsSync(this.config.dumper)) {
+			throw new Error("The path to the dumper is incorrect.");
+		}
+	}
+
+	/**
+	 * Buffer data: block data in dcm_voxel_dump combined format
+	 */
+	public addBlock(raw: RawData, jsonSize: number, binarySize: number, data: Buffer) {
+		var jsonData = data.toString('utf8', 0, jsonSize);
+
+		var json = JSON.parse(jsonData);
+
+		//console.log('json size=' + jsonSize);
+		//console.log('binary size=' + binarySize);
+
+		if (binarySize == GLOBAL_HEADER) {
+			raw.appendHeader(json);
+			raw.setDimension(json.width, json.height, json.depth, json.type);
+		} else if (binarySize == GLOBAL_FOOTER) {
+			raw.appendHeader(json);
+			raw.setVoxelDimension(json.voxelWidth, json.voxelHeight, json.voxelDepth);
+			raw.setEstimatedWindow(json.estimatedWindowLevel, json.estimatedWindowWidth);
+		} else if (binarySize > 0) {
+			//console.log('image block: ' + json.instanceNumber + ' size:' + binarySize + ' raw:' + data.length);
+			if (json.success) {
+				var voxelData = new Buffer(binarySize);
+				data.copy(voxelData, 0, jsonSize);
+				raw.insertSingleImage(json.instanceNumber - 1, voxelData);
+
+				if (typeof json.windowLevel != "undefined" && raw.dcm_wl == null) {
+					raw.dcm_wl = json.windowLevel;
+				}
+				if (typeof json.windowWidth != "undefined" && raw.dcm_ww == null) {
+					raw.dcm_ww = json.windowWidth;
+				}
+			} else {
+				logger.warn(json.errorMessage);
+			}
+		} else {
+			// binarySize is 0. read failed.
+			logger.warn(json.errorMessage);
+		}
+	}
+
+
+	private readDicomDeferred(dcmdir: string, resolve, reject) {
 		var rawData = new RawData();
 
 		var jsonLength = 0;
 		var binaryLength = 0;
 
-		var blockData;
-		var blockDataOffset = 0;
-		var blockDataSize;
+		var blockData: Buffer;
+		var blockDataOffset: number = 0;
+		var blockDataSize: number;
 
-		var HEADER_LENGTH = 8;
+		const HEADER_LENGTH = 8;
 
 		var headerBuffer = new Buffer(HEADER_LENGTH);
 		var headerBufferOffset = 0;
@@ -37,16 +93,16 @@ export default class DicomVoxelDumperAdapter extends DicomDumper {
 		var proc = exec(command, {encoding: 'binary', maxBuffer: this.config.bufferSize}, null);
 
 		proc.stderr.on('data', (data) => {
-			logger.error('stderr:' + data);
+			reject(data);
+			logger.error('Error: ' + data);
 		});
 
-		proc.stdout.on('data', (chunk) => {
-
+		proc.stdout.on('data', (chunk: string) => {
 			try {
 
 				while (chunk.length > 0) {
 
-					var len;
+					var len: number;
 
 					if (!blockData && jsonLength == 0 && binaryLength == 0) {
 						//console.log('no block');
@@ -90,9 +146,9 @@ export default class DicomVoxelDumperAdapter extends DicomDumper {
 
 					//console.log('block read. size=' + blockDataOffset + '/' + blockDataSize);
 
-					rawData.addBlock(jsonLength, binaryLength, blockData);
+					this.addBlock(rawData, jsonLength, binaryLength, blockData);
 
-					headerBuffer = new Buffer(HEADER_LENGTH)
+					headerBuffer = new Buffer(HEADER_LENGTH);
 					headerBufferOffset = 0;
 					jsonLength = 0;
 					binaryLength = 0;
@@ -108,7 +164,7 @@ export default class DicomVoxelDumperAdapter extends DicomDumper {
 		});
 
 		proc.stdout.on('end', () => {
-			if (rawData !== null) {
+			if (rawData !== null && rawData.x > 0 && rawData.y > 0 && rawData.z > 0) {
 				resolve(rawData);
 			} else {
 				reject('Could not read image data');

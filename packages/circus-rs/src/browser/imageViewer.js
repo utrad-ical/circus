@@ -9,7 +9,7 @@
       mode_array: ['bucket', 'erase', 'guide', 'measure', 'rotate', 'pan', 'pen', 'window'], //selectable mode
       viewer: { //中身の情報群
         id: 'viewer_0',
-        orientation: 'axial', //断面
+        orientation: '', //断面
         src: '', //baseURL
         window: {  //todo  今回ははコントローラから電波
           level: {
@@ -23,6 +23,13 @@
             minimum: 1
           },
           preset: []  //sample  {label: 'your  preset  label' , level: 1000 , width : 4000}
+        },
+        cut : {
+          angle : 0,
+          center_x : 0,
+          center_y : 0,
+          center_z : 0,
+          orientation : 'axial'
         },
         number: {
           current: 0,
@@ -49,14 +56,14 @@
           }
         },
         position: {  //写真の表示位置・サイズに関する情報群,512はデフォルト値
+          dw: 512,
+          dh: 512, //貼りつけサイズ(基本的にはキャンバスの領域いっぱいに表示する)  todo:シリーズ情報から参照して上書き
           ow: 512,
           oh: 512, //元画像の拡大・縮小なし状態でのオリジナルサイズ
           sx: 0,
           sy: 0,   //元画像のどの位置からトリミング表示するか
           sw: 512,
           sh: 512,   //元画像からのトリミング幅・高さ
-          dw: 512,
-          dh: 512, //貼りつけサイズ(基本的にはキャンバスの領域いっぱいに表示する)  todo:シリーズ情報から参照して上書き
           zoom: 1        //元画像に対しての拡大率
         },
         activeSeriesId: '',
@@ -82,7 +89,6 @@
           grid_range : 5,
           hall_rate : 0.1
         },
-          
         measure : {
           active : true,
           start_x : 0,
@@ -91,10 +97,11 @@
           goal_y: 0
         },
         rotate : {
-          angle : 0.25 * Math.PI, //radian
+          angle : 0.25 * Math.PI, //init radian
+          arrow_x : 0,
+          arrow_y : 0,
           color : 'ffa500',
           point_width : 8,
-          display_margin : 25,
           visible : false
         },
         voxel: {
@@ -113,7 +120,6 @@
           touch_flg: 0, //マウス押下状態を示すフラグ,1が押された状態
           out_flg: 1  //マウスがキャンバス領域の外に居るかどうかのフラグ。１が外
         },
-
         elementParam: {  //マウスで何かを動かす際の初期値格納用変数
           start: {X: 0, Y: 0},
           current: {X: 0, Y: 0}
@@ -193,69 +199,88 @@
       //center_y: position Y of the center point
 
       var this_opts = this.options;
-  
       var return_obj = [
+        [0, 0],
         [0, 0],
         [0, 0]
       ];
-      //first array : arrow point XY
-      //second array : oppotunity point of arrow
-  
-      var max_length = this_opts.viewer.position.dw + this_opts.viewer.position.dh;
-      var tmp_distance = 0;
-  
-      //calcurate the position of main dot 
-      var the_cos = Math.cos(the_angle);
-      var the_sin = Math.sin(the_angle);
-  
-      for (tmp_distance = 0; tmp_distance < max_length; tmp_distance += 1) {
-        var tmp_x = center_x + tmp_distance * the_cos;
-        var tmp_y = center_y - tmp_distance * the_sin;
-        if (tmp_x < this_opts.viewer.rotate.display_margin) {
-          return_obj[0] = [this_opts.viewer.rotate.display_margin, tmp_y];
-          break;
-        } else if (tmp_x > this_opts.viewer.position.dw - this_opts.viewer.rotate.display_margin) {
-          return_obj[0] = [this_opts.viewer.position.dw - this_opts.viewer.rotate.display_margin, tmp_y];
-          break;
-        } else if (tmp_y < this_opts.viewer.rotate.display_margin) {
-          return_obj[0] = [tmp_x, this_opts.viewer.rotate.display_margin];
-          break;
-        } else if (tmp_y > this_opts.viewer.position.dh - this_opts.viewer.rotate.display_margin) {
-          return_obj[0] = [tmp_x, this_opts.viewer.position.dh - this_opts.viewer.rotate.display_margin];
-          break;
+      //first array : start of the line
+      //second array : arrow point XY
+      //third array : end of line
+
+      // normalize over 360 deg
+      var tmp_pi = Math.PI;
+      if(the_angle < 0 ){
+        the_angle = the_angle + tmp_pi * 2;
+      }
+      the_angle = the_angle % (2 * tmp_pi);
+
+      //start & end point of line
+      var this_tan = Math.tan(the_angle);
+      return_obj[0] = [ 0, center_y + center_x * this_tan];
+      return_obj[2] = [ this_opts.viewer.position.dw, center_y - (this_opts.viewer.position.dw - center_x) * this_tan];
+
+      //arrow point
+      var tmp_margin = this_opts.viewer.rotate.point_width * 8;
+
+      //check the angle is which area of radian
+      if(the_angle < tmp_pi / 2 ){
+        //the first quadrant
+        var point_y = center_y - (this_opts.viewer.position.dw - center_x) * this_tan;
+        if(point_y < 0){
+          //top
+          return_obj[1][0] = center_x + (center_y - tmp_margin) / this_tan;
+          return_obj[1][1] = tmp_margin;
+        }else{
+          //right
+          return_obj[1][0] = this_opts.viewer.position.dw -tmp_margin;
+          return_obj[1][1] = center_y - (this_opts.viewer.position.dw - center_x - tmp_margin) * this_tan;
+        }
+      } else if (the_angle < tmp_pi){
+        //the second quadrant
+        var point_y = center_y + center_x * this_tan;
+        if(point_y < 0){
+          //top
+          return_obj[1][0] = center_x + (center_y - tmp_margin) / this_tan;
+          return_obj[1][1] = tmp_margin;
+        }else{
+          //left
+          return_obj[1][0] = tmp_margin;
+          return_obj[1][1] = center_y + (center_x - tmp_margin) * this_tan;
+        }
+
+      } else if (the_angle < tmp_pi * 3 / 2){
+        //the third quadrant
+        var point_y = center_y + center_x * this_tan;
+        if(point_y < this_opts.viewer.position.dh){
+          //left
+          return_obj[1][0] = tmp_margin;
+          return_obj[1][1] = center_y + (center_x - tmp_margin) * this_tan;
+        }else{
+          //bottom
+          return_obj[1][0] = center_x - (this_opts.viewer.position.dh - tmp_margin -center_y) / this_tan;
+          return_obj[1][1] = this_opts.viewer.position.dh -tmp_margin;
+        }
+      } else {
+        //the fourth quadrant
+        var point_y = center_y - (this_opts.viewer.position.dw - center_x) * this_tan;
+        if(point_y < this_opts.viewer.position.dh){
+          //right
+          return_obj[1][0] = this_opts.viewer.position.dw -tmp_margin;
+          return_obj[1][1] = center_y - (this_opts.viewer.position.dw - tmp_margin -center_x) * this_tan;
+        }else{
+          //bottom
+          return_obj[1][0] = center_x - (this_opts.viewer.position.dh - tmp_margin - center_y) / this_tan;
+          return_obj[1][1] = this_opts.viewer.position.dh -tmp_margin;
         }
       }
-  
-      //calcurate the position of opportunity point (for line)
-      the_cos = the_cos * -1;
-      the_sin = the_sin * -1;
-      for (tmp_distance = 0; tmp_distance < max_length; tmp_distance += 1) {
-        var tmp_x = center_x + tmp_distance * the_cos;
-        var tmp_y = center_y - tmp_distance * the_sin;
-  
-        if (tmp_x < 0) {
-          return_obj[1] = [0, tmp_y];
-          break;
-        } else if (tmp_x > this_opts.viewer.position.dw) {
-          return_obj[1] = [this_opts.viewer.position.dw, tmp_y];
-          break;
-        } else if (tmp_y < 0) {
-          return_obj[1] = [tmp_x, 0];
-          break;
-        } else if (tmp_y > this_opts.viewer.position.dh) {
-          return_obj[1] = [tmp_x, this_opts.viewer.position.dh];
-          break;
-        }
-      }
-  
+
       return return_obj;
     },
 
 
 
-
-
-    _changeImgSrc: function () {
+    _changeImageSrc: function () {
       //画像表示差し替え挙動(レバー・明るさ・シリーズ差し替えの際等に共通して呼び出す)
       //第一引数:捜査対象コンテキスト
       //第二引数:ソース情報(URL情報)
@@ -265,28 +290,13 @@
       var this_opts = this.options;
       var tmp_ctx = this_elm.find('.series_image_elm').get(0).getContext('2d');
 
-      //右端の行き過ぎ防止
-      if (this_opts.viewer.position.sx + this_opts.viewer.position.sw > this_opts.viewer.position.ow) {
-        this_opts.viewer.position.sx = this_opts.viewer.position.ow - this_opts.viewer.position.sw;
-      }
-
-      //下端の行き過ぎ防止
-      if (this_opts.viewer.position.sy + this_opts.viewer.position.sh > this_opts.viewer.position.oh) {
-        this_opts.viewer.position.sy = this_opts.viewer.position.oh - this_opts.viewer.position.sh;
-      }
-
-      //左端の行き過ぎ防止
-      this_opts.viewer.position.sx = Math.max(this_opts.viewer.position.sx, 0);
-      //上端の行き過ぎ防止
-      this_opts.viewer.position.sy = Math.max(this_opts.viewer.position.sy, 0);
-
-      //以下、画像src差し替え
-      var src_url = this_opts.viewer.src + '?series=' + this_opts.viewer.activeSeriesId + '&mode=' + this_opts.viewer.orientation + '&wl=' + this_opts.viewer.window.level.current + '&ww=' + this_opts.viewer.window.width.current + '&target=' + this_opts.viewer.number.current;
-
       var tmp_img_obj = new Image();
-      var changeMain = function () {
+      var src_url = this_obj._createImageSrc();
+
+			var changeMain = function () {
         tmp_ctx.clearRect(0, 0, this_opts.viewer.position.dw, this_opts.viewer.position.dh);
-        tmp_ctx.drawImage(tmp_img_obj,
+        tmp_ctx.drawImage(
+          tmp_img_obj,
           this_opts.viewer.position.sx,
           this_opts.viewer.position.sy,
           this_opts.viewer.position.sw,
@@ -295,26 +305,27 @@
           0,
           this_opts.viewer.position.dw,
           this_opts.viewer.position.dh
-          );
+        );
+        this_obj._disableImageAlias(tmp_ctx, false);
       };
 
       //すでにリクエスト済み画像であればメモリから読みだす
       var tmp_request_flg = true;
-      var cache_num = this_opts._tmpInfo.imgCache.length;
-      for (var i = cache_num - 1; i >= 0; i--) {
+
+      for (var i = this_opts._tmpInfo.imgCache.length - 1; i >= 0; i--) {
         if (this_opts._tmpInfo.imgCache[i].src === src_url) {
           tmp_img_obj = this_opts._tmpInfo.imgCache[i];
           tmp_request_flg = false;
+					break;
         }
       }
 
       //初めてリクエストを出す場合
       if (tmp_request_flg === true) {
         if (this_opts.viewer.loadQue.current < this_opts.viewer.loadQue.maximum) {
-          var tmp_img_obj = new Image();
           tmp_img_obj.src = src_url;
 
-          if (tmp_img_obj.complete === true) {
+          if (tmp_img_obj.complete === true ) {
             changeMain();
             this_opts._tmpInfo.imgCache.push(tmp_img_obj);
           } else {
@@ -324,10 +335,11 @@
           tmp_img_obj.onload = function () {
             this_opts.viewer.loadQue.current--;
             //ロード完了時点でその画像がまだ参照先として指定されたものであればキャンバスを書き換え
-            if (tmp_img_obj.src === this_opts.viewer.src + '?series=' + this_opts.viewer.activeSeriesId + '&mode=' + this_opts.orientation + '&wl=' + this_opts.viewer.window.level.current + '&ww=' + this_opts.viewer.window.width.current + '&target=' + this_opts.viewer.number.current) {
+            var tmp_current_src = this_obj._createImageSrc();
+            if (tmp_img_obj.src === tmp_current_src) {
               changeMain();
             } else {
-              this_obj._changeImgSrc();
+              this_obj._changeImageSrc();
             }
           }
 
@@ -336,20 +348,17 @@
           }
         }
       } else {
-        //すでにリクエストを出していてロードされている場合
+        //the img is already loaded
         changeMain();
       }
-
-      this_obj._disableImageAlias(tmp_ctx, false);
-      this_elm.find('.disp_measure').removeClass('active');
 
       //disp info
       this_elm.find('.image_window_controller_wrap').find('.win_lv_label').text(this_opts.viewer.window.level.current);
       this_elm.find('.image_window_controller_wrap').find('.win_width_label').text(this_opts.viewer.window.width.current);
       this_elm.find('.image_window_controller_wrap').find('.image_window_controller').find('.image_window_level').val(this_opts.viewer.window.level.current);
       this_elm.find('.image_window_controller_wrap').find('.image_window_controller').find('.image_window_width').val(this_opts.viewer.window.width.current);
-
-    }/*_changeImgSrc*/,
+      this_elm.find('.disp_measure').removeClass('active');
+    },
 
 
 
@@ -394,10 +403,7 @@
           }
 
           if (this_opts.mode === 'rotate') {
-            this_opts.viewer.rotate.visible = true;
-            this_obj.drawRotate();
-          } else {
-            this_opts.viewer.rotate.visible = false;
+            this_obj.syncVoxel();
           }
 
         }
@@ -452,10 +458,8 @@
 
       this_opts.viewer.voxel = $.extend(true,this_opts.viewer.voxel,tmp_the_series.voxel);
       this_obj.setCanvasSize();
-      this_obj._changeImgSrc();
+      this_obj._changeImageSrc();
     },
-
-
 
 
 
@@ -463,32 +467,32 @@
       //mousedownから呼び出し
       //マウス位置とガイドが重なっているかを調査して
       //重なっていたら 1 を、そうでなければ 0 を返す
-  
+
       var the_return = '';
       var this_obj = this;
       var this_elm = this.element;
       var this_opts = this.options;
       var mouse_range = this_opts.viewer.guide.grid_range;
-    
+
       var guide_horizontal = this_obj.getGuide('horizontal');
       var guide_vertical =  this_obj.getGuide('vertical');
-    
+
       var hall_x = this_opts.viewer.guide.hall_rate * this_opts.viewer.position.dw / this_opts.viewer.position.zoom;
       var hall_y = this_opts.viewer.guide.hall_rate * this_opts.viewer.position.dh / this_opts.viewer.position.zoom;
-  
+
       if (typeof range === 'number') {
         mouse_range = range;
       }
-  
+
       //マウス位置取得
       var tmp_cursor_x = (e.clientX - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().left) / this_opts.viewer.position.zoom;
       var tmp_cursor_y = (e.clientY - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().top) / this_opts.viewer.position.zoom;
-  
+
       //初期位置(ズーム解除状態でのXY値)
       tmp_cursor_x = (tmp_cursor_x + this_opts.viewer.position.sx) * this_opts.viewer.position.ow / this_opts.viewer.position.dw;
       tmp_cursor_y = (tmp_cursor_y + this_opts.viewer.position.sy) * this_opts.viewer.position.oh / this_opts.viewer.position.dh;
-  
-  
+
+
       if (guide_horizontal.number - mouse_range < tmp_cursor_x && guide_horizontal.number + mouse_range > tmp_cursor_x) {
         //around cross point
         if (guide_vertical.number - hall_x > tmp_cursor_y || guide_vertical.number + hall_x < tmp_cursor_y) {
@@ -500,33 +504,43 @@
           the_return = 'vertical';
         }
       }
-  
+
       return the_return; // horizontal or vertical
-  
+
     },//_CheckGuideOver
 
 
 
+    _CheckRotateOver : function (e,range) {
+      //check the Cursor is on Rotate handle.
 
-    _CheckRotateOver : function (e) {
-      //rotateガイドにマウスが乗っているかを調査
-
-      var the_return = '';
       var this_obj = this;
       var this_elm = this.element;
       var this_opts = this.options;
 
-      var tmp_cursor_x = (e.clientX - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().left) / this_opts.viewer.position.zoom;
-      var tmp_cursor_y = (e.clientY - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().top) / this_opts.viewer.position.zoom;
+      var the_return = 0; //return : 1 or 0
+      var rotate_params = this_opts.viewer.rotate;
 
-      //画像トリミング分の補正 , 画像原寸上の位置
-      tmp_cursor_x = this_opts.viewer.position.sx + this_opts._tmpInfo.cursor.current.X * this_opts.viewer.position.ow / this_opts.viewer.position.dw;
-      tmp_cursor_y = this_opts.viewer.position.sy + this_opts._tmpInfo.cursor.current.Y * this_opts.viewer.position.oh / this_opts.viewer.position.dh;
+			var tmp_range = rotate_params.point_width;
+			if(typeof range == 'number') {
+				tmp_range = range;
+			}
+
+      var cursor_x = e.clientX - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().left;
+      var cursor_y = e.clientY - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().top;
+
+      if(
+          rotate_params.arrow_x - tmp_range < cursor_x &&
+          rotate_params.arrow_x + tmp_range > cursor_x &&
+          rotate_params.arrow_y - tmp_range < cursor_y &&
+          rotate_params.arrow_y + tmp_range > cursor_y
+      ){
+        the_return = 1;
+      }
 
       return the_return;
 
     },//_CheckRotateOver
-
 
 
 
@@ -537,8 +551,6 @@
       //カンバスのクリア
       this_elm.find('.canvas_main_elm').get(0).getContext('2d').clearRect(0, 0, this_obj.options.viewer.position.dw, this_obj.options.viewer.position.dh);
     },
-
-
 
 
 
@@ -594,18 +606,18 @@
 
       //枚数送り関連要素
       if (this_opts.viewer.elements.slider.panel === true) {
-        //スライダー
+        //slider UI
         var tmp_elm = '<div class="btn_prev  common_btn">Prev</div><div class="slider_outer">\
         <div class="slider_elm"></div></div><div class="btn_next common_btn">Next</div><div class="clear">&nbsp;</div>';
         this_elm.prepend(tmp_elm);
-        delete    tmp_elm;
+        delete tmp_elm;
       }
       if (this_opts.viewer.elements.slider.display === true) {
-        //枚数表示枠  todo枚数テキストは後で入れる形式にする
+        //display number
         var tmp_disp_num = this_opts.viewer.number.current + 1;
         var tmp_elm = '<p class="disp_num">' + this_opts.viewer.number.current + '</p>';
         this_elm.find('.img_wrap').append(tmp_elm);
-        delete    tmp_elm;
+        delete tmp_elm;
       }
 
     if (this_opts.viewer.measure.active === true) {
@@ -638,8 +650,52 @@
       }
 
     },//_create
+		
+		
+		
+		
+		_createGuideHall : function(){
+			var this_obj = this;
+			var this_elm = this.element;
+			var this_opts = this.options;
+			var tmp_ctx = this_elm.find('.canvas_main_elm').get(0).getContext('2d');
+			
+			var position_params = this_opts.viewer.position;
+			var hall_r = position_params.dw * this_opts.viewer.guide.hall_rate;
+			
+			var guide_horizontal = this_obj.getGuide('horizontal');
+			var guide_vertical =  this_obj.getGuide('vertical');
+			
+			//fit to zoom and trim
+			var center_x = (guide_horizontal.number - position_params.sx) * position_params.dw / position_params.sw || 0;
+			var center_y = (guide_vertical.number - position_params.sy) * position_params.dh / position_params.sh || 0;
+			
+			tmp_ctx.beginPath();
+			tmp_ctx.arc(center_x, center_y, hall_r, 0, 2 * Math.PI, false);
+			tmp_ctx.save();
+			tmp_ctx.globalCompositeOperation = 'destination-out';
+			tmp_ctx.fillStyle = 'black';
+			tmp_ctx.fill();
+			tmp_ctx.restore();
+    },
 
 
+
+    _createImageSrc : function(){
+      var this_opts = this.options;
+
+      var return_url = this_opts.viewer.src + '?series=' + this_opts.viewer.activeSeriesId;
+      return_url = return_url + '&wl=' +this_opts.viewer.window.level.current;
+      return_url = return_url + '&ww=' + this_opts.viewer.window.width.current;
+      if ( this_opts.viewer.orientation === 'axial' || this_opts.viewer.orientation === 'sagittal' || this_opts.viewer.orientation === 'coronal') {
+        return_url = return_url + '&mode=' + this_opts.viewer.orientation  + '&target=' + this_opts.viewer.number.current;
+      } else {
+        return_url = return_url + '&a=' + this_opts.viewer.cut.angle;
+        return_url = return_url + '&b=' + this_opts.viewer.cut.orientation;
+        return_url = return_url + '&c=' + this_opts.viewer.cut.center_x + ','+ this_opts.viewer.cut.center_y + ','+ this_opts.viewer.cut.center_z;
+      }
+      return return_url;
+    },
 
 
 
@@ -710,14 +766,7 @@
           guide_start_x,
           0,
           1,
-          guide_start_y - this_opts.viewer.position.dh * this_opts.viewer.guide.hall_rate
-        );
-
-        tmp_ctx.rect(
-          guide_start_x,
-          guide_start_y + this_opts.viewer.position.dh* this_opts.viewer.guide.hall_rate,
-          1,
-          this_opts.viewer.position.dh - guide_start_y + this_opts.viewer.position.dh* this_opts.viewer.guide.hall_rate
+          this_opts.viewer.position.dh
         );
         tmp_ctx.fill();
         tmp_ctx.closePath();
@@ -730,19 +779,12 @@
         tmp_ctx.rect(
            0,
            guide_start_y,
-           guide_start_x - this_opts.viewer.position.dw* this_opts.viewer.guide.hall_rate,
+           this_opts.viewer.position.dw,
            1
         );
+        tmp_ctx.fill();
+        tmp_ctx.closePath();
 
-        tmp_ctx.fillStyle = '#' + guide_vertical.color;
-        tmp_ctx.rect(
-            guide_start_x + this_opts.viewer.position.dw* this_opts.viewer.guide.hall_rate,
-              guide_start_y,
-              this_opts.viewer.position.dw - guide_start_x - this_opts.viewer.position.dw* this_opts.viewer.guide.hall_rate,
-              1
-           );
-           tmp_ctx.fill();
-           tmp_ctx.closePath();
       }
       this_obj._disableImageAlias(tmp_ctx, false);
 
@@ -818,8 +860,6 @@
 
 
 
-
-
     drawRotate : function () {
       var this_obj = this;
       var this_elm = this.element;
@@ -827,6 +867,10 @@
 
       //ポッチ座標算出
       var rotate_params = this_opts.viewer.rotate;
+      var position_params = this_opts.viewer.position;
+      var tmp_ctx = this_elm.find('.canvas_main_elm').get(0).getContext('2d');
+      tmp_ctx.strokeStyle = '#' + rotate_params.color;
+      tmp_ctx.fillStyle = '#' + rotate_params.color;
 
       if(typeof rotate_params.visible === 'undefined' || rotate_params.visible !== true) {
         return;
@@ -835,34 +879,29 @@
       var guide_horizontal = this_obj.getGuide('horizontal');
       var guide_vertical =  this_obj.getGuide('vertical');
 
-      var the_points = this_obj._calculateRotatePoint(rotate_params.angle, guide_horizontal.number, guide_vertical.number);
+      //fit to zoom and trim
+      var center_x = (guide_horizontal.number - position_params.sx) * position_params.dw / position_params.sw || 0;
+      var center_y = (guide_vertical.number - position_params.sy) * position_params.dh / position_params.sh || 0;
 
-      var tmp_ctx = this_elm.find('.canvas_main_elm').get(0).getContext('2d');
-      tmp_ctx.strokeStyle = '#' + rotate_params.color;
-      tmp_ctx.fillStyle = '#' + rotate_params.color;
+      var the_points = this_obj._calculateRotatePoint(rotate_params.angle, center_x, center_y);
 
-      //中心点
-      tmp_ctx.beginPath();
-      tmp_ctx.arc(guide_horizontal.number,guide_vertical.number, rotate_params.point_width, 0, Math.PI*2, false);
-      tmp_ctx.fill();
-      tmp_ctx.closePath();
-
-      //ポッチ1
-      tmp_ctx.beginPath();
-      tmp_ctx.arc(the_points[0][0], the_points[0][1], rotate_params.point_width, 0, Math.PI*2, false);
-      tmp_ctx.fill();
-      tmp_ctx.closePath();
-
-      //線分
+      //line
       tmp_ctx.beginPath();
       tmp_ctx.moveTo(the_points[0][0],the_points[0][1]);
-      tmp_ctx.lineTo(the_points[1][0],the_points[1][1]);
+      tmp_ctx.lineTo(the_points[2][0],the_points[2][1]);
       tmp_ctx.stroke();
       tmp_ctx.closePath();
 
+      //handle arrow
+      tmp_ctx.beginPath();
+      tmp_ctx.arc(the_points[1][0], the_points[1][1], rotate_params.point_width, 0, Math.PI*2, false);
+      tmp_ctx.fill();
+      tmp_ctx.closePath();
+
+      rotate_params.arrow_x = the_points[1][0];
+      rotate_params.arrow_y = the_points[1][1];
+
     },//drawRotate
-
-
 
 
 
@@ -927,11 +966,9 @@
 
       return rtn_array;
     },
-
-
-
-
-
+		
+		
+		
     _getBucketFillPositions: function (series_id,label_id,pointed_position) {
       //バケツ発動用関数
       // 第一引数: 対象シリーズid
@@ -1116,7 +1153,6 @@
         if (this_opts.viewer.orientation === 'axial' && this_opts.viewer.guide.lines[i].name === 'sagittal') {
           guide_horizontal = this_opts.viewer.guide.lines[i];
           guide_horizontal.maximum = this_opts.viewer.voxel.x;
-
         } else if (this_opts.viewer.orientation === 'axial' && this_opts.viewer.guide.lines[i].name === 'coronal') {
           guide_vertical = this_opts.viewer.guide.lines[i];
         } else if (this_opts.viewer.orientation === 'coronal' && this_opts.viewer.guide.lines[i].name === 'sagittal') {
@@ -1129,9 +1165,6 @@
           guide_vertical = this_opts.viewer.guide.lines[i];
         }
       }
-      
-      
-      
 
       if(target_direction === 'vertical') {
         return_obj = guide_vertical;
@@ -1253,8 +1286,8 @@
       this_obj.setCanvasSize();
 
       //以下各種イベント群
-      this_elm.bind('changeImgSrc', function () {
-        this_obj._changeImgSrc();
+      this_elm.bind('changeImageSrc', function () {
+        this_obj._changeImageSrc();
       })
       .bind('getOptions', function () {
         var return_obj = this_obj.getOptions();
@@ -1317,7 +1350,7 @@
             this_opts.viewer.number.current = ui.value;
             var tmp_disp_num = this_opts.viewer.number.current + 1;
             this_elm.find('.disp_num').text(tmp_disp_num); //画像右上の枚数表示
-            this_obj._changeImgSrc();
+            this_obj._changeImageSrc();
             this_obj.syncVoxel();
             //next/prevボタン押下時に発火させるchangeイベント
             this_elm.trigger('onNumberChange',[this_opts.viewer.orientation,this_opts.viewer.number.current]);
@@ -1325,7 +1358,7 @@
             this_opts.viewer.number.current = ui.value;
             var tmp_disp_num = this_opts.viewer.number.current + 1;
             this_elm.find('.disp_num').text(tmp_disp_num); //画像右上の枚数表示
-            this_obj._changeImgSrc();
+            this_obj._changeImageSrc();
             this_obj.syncVoxel();
             this_elm.trigger('onNumberChange',[this_opts.viewer.orientation,this_opts.viewer.number.current]);
           }
@@ -1426,7 +1459,7 @@
             tmp_width = Math.max(tmp_width, this_opts.viewer.window.level.minimum);
             this_opts.viewer.window.width.current = tmp_width;
           }
-          this_obj._changeImgSrc();
+          this_obj._changeImageSrc();
         }//windowValuesChange
       }//ウインドウレベル・幅関係のイベント設置ここまで
 
@@ -1438,7 +1471,7 @@
         this_elm.find('.ico_detail_sprite_resize_large,.ico_detail_sprite_resize_short').click(function () {
           if (this_opts.viewer.position.zoom <= 32 && 1 <= this_opts.viewer.position.zoom) {
 
-            var resize_value = 0.5; //todo確認  １回のプッシュでどの程度ズームインアウトするかの度合の変数はウィジェットの共通変数で持つ方が良い？
+            var resize_value = 0.5;
             if ($(this).hasClass('ico_detail_sprite_resize_large')) {
               //拡大
               this_opts.viewer.position.zoom += resize_value;
@@ -1464,11 +1497,12 @@
             //画像右下のズーム表示
             this_elm.find('.current_size').text(100 * Number(this_opts.viewer.position.zoom)); //初期発火用
 
-            this_obj._changeImgSrc();
+						this_obj._limitImagePosition();
+						this_obj._changeImageSrc();
             this_elm.imageViewer('changeMode', 'pan');
             this_obj.syncVoxel();
 
-            //パンモードに戻すのでウインドウ情報パネルは隠す
+            //changemode to Pan mode.
             if (this_opts.viewer.elements.window.panel === true) {
               this_elm.find('.image_window_controller_wrap').find('.btn_close').trigger('click');
             }
@@ -1481,10 +1515,9 @@
       }//ズーム機能ここまで
       this_elm.find('.current_size').text(100 * Number(this_opts.viewer.position.zoom)); //初期発火用
 
-      this_obj.changeSeries(this_opts.viewer.series[0].id);
 
       //諸々のデータ群のセットが終わったところで描画機能発火
-      this_obj._changeImgSrc();
+			this_obj.changeSeries(this_opts.viewer.activeSeriesId);//表示シリーズ変更
 
     },//_init
 
@@ -1508,6 +1541,33 @@
 
 
 
+		_limitImagePosition: function(){
+		
+      var this_obj = this;
+      var this_opts = this.options;
+		
+      //right side
+      if (this_opts.viewer.position.sx + this_opts.viewer.position.sw > this_opts.viewer.position.ow) {
+        this_opts.viewer.position.sx = this_opts.viewer.position.ow - this_opts.viewer.position.sw;
+      }
+
+      //bottom
+      if (this_opts.viewer.position.sy + this_opts.viewer.position.sh > this_opts.viewer.position.oh) {
+        this_opts.viewer.position.sy = this_opts.viewer.position.oh - this_opts.viewer.position.sh;
+      }
+
+      //left side
+			if(this_opts.viewer.position.sx < 0 ){
+				this_opts.viewer.position.sx = 0;
+			}
+			
+      //top
+			if (this_opts.viewer.position.sy < 0 ){
+				this_opts.viewer.position.sy = 0;
+			}
+
+		},
+
 
 
     _mousedownFunc: function (e) {
@@ -1518,18 +1578,22 @@
       this_opts._tmpInfo.cursor.start.Y = e.clientY;
 
       e.preventDefault();
-      if(e.which!=1) {
-        return
-      };
+      if (e.which !== 1) {
+        return;
+      }
       this_opts._tmpInfo.cursor.touch_flg = 1;
 
-      //check that the cursor is on Guide-Line
+      //check the cursor is on Rotate-hadle or Guide-Line
       var target_guide_direction = this_obj._CheckGuideOver(e);
+      var is_on_rotate  = this_obj._CheckRotateOver(e);
 
-      if(target_guide_direction !== ''){
+      if (this_opts.mode === 'rotate' && is_on_rotate === 1) {
+        this_opts._tmpInfo.mode_backup = this_opts.mode;
+        this_opts.mode = 'rotate_active';
+      } else if (is_on_rotate !== 1 && target_guide_direction !== '') {
         this_opts._tmpInfo.mode_backup = this_opts.mode;
         this_opts.mode = 'guide_single';
-      }else if(this_opts._tmpInfo.mode_backup !== ''){
+      } else if (this_opts._tmpInfo.mode_backup !== '') {
         this_opts.mode = this_opts._tmpInfo.mode_backup;
         this_opts._tmpInfo.mode_backup = '';
       }
@@ -1546,9 +1610,9 @@
         this_obj._mousedownFuncPan(e);
       } else if (this_opts.mode === 'pen') {
         this_obj._mousedownFuncPen(e);
-      } else if (this_opts.mode === 'rotate') {
+      } else if (this_opts.mode === 'rotate_active') {
         this_obj._mousedownFuncRotate(e);
-      }  else if (this_opts.mode === 'window') {
+      } else if (this_opts.mode === 'window') {
         this_obj._mousedownFuncWindow(e);
       }
 
@@ -1802,6 +1866,8 @@
       var this_opts = this.options;
 
       if (this_opts._tmpInfo.cursor.touch_flg === 1) {
+        //drugging
+
         if (this_opts.mode === 'pan') {
           this_obj._mousemoveFuncPan(e);
         } else if (this_opts.mode === 'pen' || this_opts.mode === 'erase') {
@@ -1810,7 +1876,7 @@
           this_obj._mousemoveFuncWindow(e);
         } else if (this_opts.mode === 'measure') {
           this_obj._mousemoveFuncMeasure(e);
-        }else if (this_opts.mode === 'rotate') {
+        }else if (this_opts.mode === 'rotate_active') {
           this_obj._mousemoveFuncRotate(e);
         }else if (this_opts.mode === 'guide') {
           this_obj._mousemoveFuncGuide(e);
@@ -1818,7 +1884,19 @@
           var target_guide_direction = this_obj._CheckGuideOver(e,100);
           this_obj._mousemoveFuncGuideSingle(e,target_guide_direction);
         }
-      }else{
+
+      } else {
+        //before drugging, just move on canvas
+
+        if(this_opts.mode === 'rotate'){
+          if( this_obj._CheckRotateOver(e) === 1 ){
+            this_elm.addClass('mode_rotate_active');
+						return;
+          } else {
+            this_elm.removeClass('mode_rotate_active');
+          }
+          
+        }
 
         var target_guide_direction = this_obj._CheckGuideOver(e);
         if(target_guide_direction !== ''){
@@ -1826,13 +1904,16 @@
           this_elm.removeClass(function (index, css) {
             return (css.match(/\bmode_\S+/g) || []).join(' ');
           });
-          this_elm.addClass('mode_guide');
+          this_elm.addClass('mode_guide_'+target_guide_direction);
+          return;
         } else if (this_opts._tmpInfo.mode_backup !== ''){
           this_opts.mode = this_opts._tmpInfo.mode_backup;
           this_opts._tmpInfo.mode_backup = '';
           this_elm.removeClass(function (index, css) {
             return (css.match(/\bmode_\S+/g) || []).join(' ');
           });
+					this_elm.removeClass('mode_guide_horizontal');
+					this_elm.removeClass('mode_guide_vertical');
           this_elm.addClass('mode_' + this_opts.mode);
         }
       }
@@ -1856,7 +1937,8 @@
 
       this_opts.viewer.position.sx = Math.round(tmp_x);
       this_opts.viewer.position.sy = Math.round(tmp_y);
-      this_obj._changeImgSrc();
+			this_obj._limitImagePosition();
+      this_obj._changeImageSrc();
       this_obj.syncVoxel();
     },//_mousemoveFuncPan
 
@@ -1940,20 +2022,18 @@
       var tmp_x = this_opts._tmpInfo.elementParam.start.X + (e.clientX - this_opts._tmpInfo.cursor.start.X) * 10;
       var tmp_y = this_opts._tmpInfo.elementParam.start.Y - (e.clientY - this_opts._tmpInfo.cursor.start.Y) * 10;
 
-      //最大最小のハミダシ防止
-      //width
+      //fix the limit (window width)
       tmp_x = Math.max(this_opts.viewer.window.width.minimum, tmp_x);
       tmp_x = Math.min(this_opts.viewer.window.width.maximum, tmp_x);
 
-      //level
+      //fix the limit (window level)
       tmp_y = Math.max(this_opts.viewer.window.level.minimum, tmp_y);
       tmp_y = Math.min(this_opts.viewer.window.level.maximum, tmp_y);
 
       this_opts.viewer.window.width.current = Math.round(tmp_x);
       this_opts.viewer.window.level.current = Math.round(tmp_y);
 
-      this_obj._setOptions();
-      this_obj._changeImgSrc();
+      this_obj._changeImageSrc();
 
     },//_mousemoveFuncWindow
 
@@ -2054,12 +2134,12 @@
       var guide_horizontal = this_obj.getGuide('horizontal');
       var guide_vertical =  this_obj.getGuide('vertical');
 
-      if(direction == 'horizontal'){
+      if( direction == 'horizontal' ){
          var tmp_cursor_x = (e.clientX - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().left) / this_opts.viewer.position.zoom;
          tmp_cursor_x = this_opts.viewer.position.sx + tmp_cursor_x * this_opts.viewer.position.ow / this_opts.viewer.position.dw;
          tmp_cursor_x = Math.ceil(tmp_cursor_x);
          guide_horizontal.number =tmp_cursor_x;
-      }else{
+      } else {
          var tmp_cursor_y = (e.clientY - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().top) / this_opts.viewer.position.zoom;
          tmp_cursor_y = this_opts.viewer.position.sy + tmp_cursor_y * this_opts.viewer.position.oh / this_opts.viewer.position.dh;
          tmp_cursor_y = Math.ceil(tmp_cursor_y);
@@ -2080,39 +2160,30 @@
     },//_mousedownFuncRotate
 
 
+
     _mousemoveFuncRotate : function (e) {
       var this_obj = this;
       var this_elm = this.element;
       var this_opts = this.options;
 
+      var tmp_cursor_x = (e.clientX - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().left);
+      var tmp_cursor_y = (e.clientY - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().top);
 
-      var is_rotate_over =  this_obj._CheckRotateOver(e);
+      var center_x = (this_obj.getGuide('horizontal').number - this_opts.viewer.position.sx ) * this_opts.viewer.position.zoom * this_opts.viewer.position.dw / this_opts.viewer.position.ow;
+      var center_y = (this_obj.getGuide('vertical').number - this_opts.viewer.position.sy ) * this_opts.viewer.position.zoom * this_opts.viewer.position.dh / this_opts.viewer.position.oh;
 
-      var tmp_cursor_x = (e.clientX - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().left) / this_opts.viewer.position.zoom;
-      var tmp_cursor_y = (e.clientY - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().top) / this_opts.viewer.position.zoom;
-
-      //画像トリミング分の補正 , 画像原寸上の位置
-      tmp_cursor_x = this_opts.viewer.position.sx + tmp_cursor_x * this_opts.viewer.position.ow / this_opts.viewer.position.dw;
-      tmp_cursor_y = this_opts.viewer.position.sy + tmp_cursor_y * this_opts.viewer.position.oh / this_opts.viewer.position.dh;
-
-      /*var center_x = 0;
-      var center_y = 0;
-      if(this_opts.viewer.orientation == 'axial'){
-        center_x = this_opts.viewer.rotate.position_x;
-        center_y = this_opts.viewer.rotate.position_y;
-      } else if(this_opts.viewer.orientation == 'coronal'){
-        center_x = this_opts.viewer.rotate.position_x;
-        center_y = this_opts.viewer.rotate.position_z;
-      } else if(this_opts.viewer.orientation == 'sagittal'){
-        center_x = this_opts.viewer.rotate.position_y;
-        center_y = this_opts.viewer.rotate.position_z;
+      var new_angle = Math.atan( (center_y - tmp_cursor_y) / (tmp_cursor_x - center_x) );
+      if(tmp_cursor_x < center_x){
+        //the second & third quadrant
+        new_angle = new_angle + Math.PI;
       }
 
-      var the_dist = (center_x - tmp_cursor_x)*(center_x - tmp_cursor_x) + (center_y - tmp_cursor_y)*(center_y - tmp_cursor_y);
-*/
+      new_angle = Math.ceil( new_angle * 100 ) / 100;
 
+      this_opts.viewer.rotate.angle = new_angle;
+      this_obj.syncVoxel();
+      this_elm.trigger('onRotateChange', [this_opts.viewer.orientation,new_angle]);
     },//_mousemoveFuncRotate
-
 
 
 
@@ -2291,6 +2362,7 @@
        var this_obj = this;
        var this_elm = this.element;
        var this_opts = this.options;
+
        $.extend(true, this_opts, tmpSetValues);
 
        //ウインドウレベル・サイズ領域に値を入れ込む
@@ -2390,7 +2462,7 @@
       })
       .css({
         width: this_opts.viewer.position.dw + 'px',
-        height: this_opts.viewer.position.dh  + 'px'
+        height: this_opts.viewer.position.dh + 'px'
       });
     },//setCanvasSize
 
@@ -2427,6 +2499,13 @@
       this_obj._clearCanvas();//初期化
       this_obj.drawGuide();//ガイド
 
+      if( this_opts.viewer.rotate.visible === true){
+        this_obj.drawRotate();
+      }
+			
+			this_obj._createGuideHall();
+			
+			
       //全シリーズ・ラベルについて現在の [オリエンテーション・奥行] を渡して塗るべき座標を戻してもらう
       for (var i = this_opts.container.data.series.length - 1; i >= 0; i--) {
         var tmp_the_series = this_opts.container.data.series[i];
@@ -2448,12 +2527,8 @@
           }
         }
       }
-      this_obj.drawRotate();
 
     } //syncVoxel
-
-
-
   });
 
 })(jQuery);

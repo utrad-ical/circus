@@ -1,8 +1,6 @@
 /// <reference path='../typings/bluebird/bluebird.d.ts' />
 /// <reference path='../typings/mongoose/mongoose.d.ts' />
 
-import mongoose = require('mongoose');
-var Schema = mongoose.Schema;
 import fs = require('fs');
 import path = require('path');
 import crypto = require('crypto');
@@ -10,6 +8,18 @@ import Promise = require('bluebird');
 
 import logger from '../Logger';
 import PathResolver from './PathResolver';
+
+try {
+	var dummy = require.resolve('mongoose');
+} catch (e) {
+	if (e.code === 'MODULE_NOT_FOUND') {
+		logger.info('Failed loading Mongoose module. Probably it is not installed with NPM.');
+	}
+	throw e;
+}
+import mongoose = require('mongoose');
+var Schema = mongoose.Schema;
+
 
 export default class CircusDbPathResolver extends PathResolver {
 	protected mongoconfig: any;

@@ -4,21 +4,41 @@
 
 import logger from './Logger';
 
+const enum PixelFormat {
+	Unknown = -1,
+	UInt8 = 0,
+	Int8 = 1,
+	UInt16 = 2,
+	Int16 = 3
+}
+
 export default class RawData {
-	public x: number = 1;
-	public y: number = 1;
-	public z: number = 1;
-	public type: number = -1;
+	// Number of voxels
+	public x: number = 0;
+	public y: number = 0;
+	public z: number = 0;
+
+	public type: PixelFormat = PixelFormat.Unknown;
+
+	// Voxel size [mm]
 	public vx: number = 1;
 	public vy: number = 1;
 	public vz: number = 1;
+
+	// Estimated window, calculated from the actual voxel data
 	public wl: number = 1500;
 	public ww: number = 2000;
+
+	// Default window, described in DICOm file
 	public dcm_wl: number;
 	public dcm_ww: number;
-	private header: any;
-	private data: any[];
-	private dataFlag: boolean[];
+
+	// Holds DICOM header data
+	protected header: any = {};
+
+	// Actual image data
+	protected data: Buffer[];
+	protected dataFlag: boolean[];
 
 	/**
 	 * get pixel value
@@ -32,13 +52,13 @@ export default class RawData {
 		}
 
 		switch (this.type) {
-			case 0:
+			case PixelFormat.UInt8:
 				return this.data[z].readUInt8(offset);
-			case 1:
+			case PixelFormat.Int8:
 				return this.data[z].readInt8(offset);
-			case 2:
+			case PixelFormat.UInt16:
 				return this.data[z].readUInt16LE(offset * 2);
-			case 3:
+			case PixelFormat.Int16:
 				return this.data[z].readInt16LE(offset * 2);
 			default:
 				return this.data[z].readInt16LE(offset * 2);
@@ -86,25 +106,25 @@ export default class RawData {
 		var weight_y1 = 1.0 - weight_y2;
 
 		switch (this.type) {
-			case 0:
+			case PixelFormat.UInt8:
 				p0 = buf.readUInt8(ix   + iy   * this.x);
 				p1 = buf.readUInt8(ixp1 + iy   * this.x);
 				p2 = buf.readUInt8(ix   + iyp1 * this.x);
 				p3 = buf.readUInt8(ixp1 + iyp1 * this.x);
 				break;
-			case 1:
+			case PixelFormat.Int8:
 				p0 = buf.readInt8(ix   + iy   * this.x);
 				p1 = buf.readInt8(ixp1 + iy   * this.x);
 				p2 = buf.readInt8(ix   + iyp1 * this.x);
 				p3 = buf.readInt8(ixp1 + iyp1 * this.x);
 				break;
-			case 2:
+			case PixelFormat.UInt16:
 				p0 = buf.readUInt16LE((ix   + iy   * this.x) * 2);
 				p1 = buf.readUInt16LE((ixp1 + iy   * this.x) * 2);
 				p2 = buf.readUInt16LE((ix   + iyp1 * this.x) * 2);
 				p3 = buf.readUInt16LE((ixp1 + iyp1 * this.x) * 2);
 				break;
-			case 3:
+			case PixelFormat.Int16:
 			default:
 				p0 = buf.readInt16LE((ix   + iy   * this.x) * 2);
 				p1 = buf.readInt16LE((ixp1 + iy   * this.x) * 2);
@@ -118,28 +138,44 @@ export default class RawData {
 		return (value_y1 * weight_y1 + value_y2 * weight_y2);
 	}
 
-	/**
-	 * set pixel dimension and allocate array.
-	 */
-	public setDimension(): void {
-		this.x = this.header.width;
-		this.y = this.header.height;
-		this.z = this.header.depth;
-		this.type = this.header.dataType;
+	public appendHeader(header: any): void {
+		for (var key in header) {
+			this.header[key] = header[key];
+		}
+	}
 
-		this.data = new Array(this.z);
-		this.dataFlag = new Array(this.z);
+	public insertSingleImage(z: number, imageData: Buffer): void {
+		this.data[z] = imageData;
+		this.dataFlag[z] = true;
+	}
+
+	/**
+	 * Set the size of this volume and allocate an array.
+	 */
+	public setDimension(x: number, y: number, z: number, type: PixelFormat): void {
+		if (x <= 0 || y <= 0 || z <= 0) {
+			throw new Error('Invalid volume size.');
+		}
+		this.x = x;
+		this.y = y;
+		this.z = z;
+		this.type = type;
+		this.data = new Array(z);
+		this.dataFlag = new Array(z);
 	}
 
 	/**
 	 * set voxel dimension and window
 	 */
-	public setVoxelDimension(): void {
-		this.vx = this.header.voxelWidth;
-		this.vy = this.header.voxelHeight;
-		this.vz = this.header.voxelDepth;
-		this.wl = this.header.estimatedWindowLevel;
-		this.ww = this.header.estimatedWindowWidth;
+	public setVoxelDimension(width: number, height: number, depth: number): void {
+		this.vx = width;
+		this.vy = height;
+		this.vz = depth;
+	}
+
+	public setEstimatedWindow(level: number, width: number): void {
+		this.wl = level;
+		this.ww = width;
 	}
 
 	public containImage(image: string): boolean {
@@ -165,61 +201,5 @@ export default class RawData {
 		return true;
 	}
 
-
-	/**
-	 * Buffer data: block data in dcm_voxel_dump combined format
-	 */
-	public addBlock(jsonSize, binarySize, data) {
-		var jsonData = data.toString('utf8', 0, jsonSize);
-		var offset = jsonSize;
-
-		var json = JSON.parse(jsonData);
-
-		//console.log('json size=' + jsonSize);
-		//console.log('binary size=' + binarySize);
-
-		if (binarySize == -1) {
-			//console.log('global header');
-			//console.log(json);
-			// global header
-			this.header = json;
-			this.setDimension();
-
-		} else if (binarySize == -2) {
-			//console.log('global footer');
-			// global footer
-			//console.log(json);
-			if (this.header) {
-				for (var key in json) {
-					this.header[key] = json[key];
-				}
-			} else {
-				this.header = json;
-			}
-			this.setVoxelDimension();
-		} else if (binarySize > 0) {
-			//console.log('image block: ' + json.instanceNumber + ' size:' + binarySize + ' raw:' + data.length);
-			if (json.success) {
-				var voxelData = new Buffer(binarySize);
-				data.copy(voxelData, 0, jsonSize);
-				this.data[json.instanceNumber - 1] = voxelData;
-				this.dataFlag[json.instanceNumber - 1] = true;
-
-				if (typeof json.windowLevel != "undefined" && this.dcm_wl == null) {
-					this.dcm_wl = json.windowLevel;
-				}
-				if (typeof json.windowWidth != "undefined" && this.dcm_ww == null) {
-					this.dcm_ww = json.windowWidth;
-				}
-
-				//console.log('image size: ' + voxelData.length);
-			} else {
-				logger.warn(json.errorMessage);
-			}
-		} else {
-			// binarySize is 0. read failed.
-			logger.warn(json.errorMessage);
-		}
-	}
 }
 

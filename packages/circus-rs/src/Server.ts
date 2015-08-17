@@ -11,6 +11,7 @@ var finalhandler = require('finalhandler');
 var config: Configuration = require('config');
 
 import logger from './Logger';
+logger.info('================================');
 logger.info('CIRCUS RS is starting up...');
 
 import Counter from './Counter';
@@ -25,11 +26,18 @@ import AuthorizationCache from './AuthorizationCache';
 import RequestAccessTokenAction from'./controllers/RequestAccessTokenAction';
 
 var Router = require('router');
+import log4js = require('log4js');
 
 class Server {
 	public start(): void {
 		// prepare routing
-		var router = this.prepareRouter();
+		try {
+			var router = this.prepareRouter();
+		} catch (e) {
+			logger.error(e);
+			// This guarantees all the logs are flushed before actually exiting the program
+			log4js.shutdown(() => process.exit(1));
+		}
 
 		// create server process
 		var server = http.createServer((req: http.ServerRequest, res: http.ServerResponse) => {
@@ -50,10 +58,11 @@ class Server {
 		logger.info('Using path resolver: ' + module);
 		var resolverClass: typeof PathResolver = require('./path-resolver/' + module).default;
 		var resolver = new resolverClass(config.pathResolver.options);
-		var dumperClass: typeof DicomDumper = require('./' + config.dumper.module).default;
+		module = config.dumper.module;
+		logger.info('Using DICOM dumper: ' + module);
+		var dumperClass: typeof DicomDumper = require('./' + module).default;
 		var dumper = new dumperClass(config.dumper.options);
 		return new DicomReader(resolver, dumper, config.cache.memoryThreshold);
-
 	}
 
 	private createPngWriter(): PNGWriter {

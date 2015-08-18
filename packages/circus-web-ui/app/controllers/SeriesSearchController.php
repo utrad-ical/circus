@@ -54,9 +54,10 @@ class SeriesSearchController extends BaseController {
 	}
 
 	protected function setSearchData($inputs) {
-		if (array_key_exists('btnReset', $inputs) !== false || !$inputs) {
+		if (array_key_exists('btnReset', $inputs) !== false || count($inputs) === 1) {
 			// "Reset" clicked, or first-time visit to the search screen
 			Session::forget('series.search');
+			Session::forget('edit_case_id');
 		} else if (array_key_exists('btnSearch', $inputs) !== false) {
 			// "Search" button is pressed
 			if (array_key_exists('disp', $inputs) === false) $inputs['disp'] = Config::get('const.page_display');

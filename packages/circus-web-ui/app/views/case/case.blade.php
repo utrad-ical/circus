@@ -188,13 +188,13 @@
 		<colgroup>
 		@if(Auth::user()->hasPrivilege(Group::PERSONAL_INFO_VIEW))
 			@if ($export_mode)
-				<col width="5%">
+				<col width="3%">
 			@endif
 			<col width="13%">
 			<col width="10%">
 			<col width="16%">
-			<col width="{{{$export_mode ? 5 : 10}}}%">
-			<col width="13%">
+			<col width="{{{$export_mode ? 9 : 11}}}%">
+			<col width="12%">
 			<col width="10%">
 			<col width="19%">
 			<col width="9%">

@@ -87,10 +87,6 @@ class CaseExportVolume extends TaskCommand {
 					$this->error('Invalid caseID: ' . $caseId);
 					return false;
 				}
-				//Options : personal information no output
-				if ($this->option('without-personal')) {
-					$case_data->patientInfoCache = array();
-				}
 				//Optional: tag set to the latest revision
 				if ($this->option('tag')) {
 					$case_data->tags = explode(',', $this->option('tag'));
@@ -204,14 +200,20 @@ class CaseExportVolume extends TaskCommand {
 			$dicom_path = $path->dicomStoragePath($series);
 
 			if ($dicom_dir = opendir($dicom_path)) {
-			    while (($file = readdir($dicom_dir)) !== false) {
-			        if ($file != "." && $file != "..") {
-			            copy($dicom_path."/".$file, $dir."/".$file);
-			            $this->updateTaskProgress($counter, 0, "Exporting in progress. $counter files are processed.");
+				while (($file = readdir($dicom_dir)) !== false) {
+					if ($file != "." && $file != "..") {
+						if ($this->option('without-personal')) {
+							//個人情報なし
+							Process::exec($this->utilityPath() . " anonymize --out=".$dir."/".$file." ".$dicom_path."/".$file);
+						} else {
+							//個人情報有
+							copy($dicom_path."/".$file, $dir."/".$file);
+						}
+						$this->updateTaskProgress($counter, 0, "Exporting in progress. $counter files are processed.");
 						$counter++;
-			    	}
-			    }
-		    	closedir($dicom_dir);
+				    }
+				}
+			    closedir($dicom_dir);
 			}
 		}
 	}
@@ -251,6 +253,11 @@ class CaseExportVolume extends TaskCommand {
 			if (array_search($key, $export_columns) === false)
 				unset($data->$key);
 		}
+	}
+
+	private function utilityPath()
+	{
+		return app_path() . '/bin/dicom_utility';
 	}
 
 	/**

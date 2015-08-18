@@ -187,20 +187,19 @@
 			<col width="10%">
 			<col width="16%">
 			<col width="{{{$export_mode ? 5 : 10}}}%">
-			<col width="10%">
 			<col width="13%">
 			<col width="10%">
-			<col width="9%">
+			<col width="19%">
 			<col width="9%">
 		@else
 			@if ($export_mode)
 				<col width="5%">
 			@endif
 			<col width="25%">
-			<col width="25%">
+			<col width="10%">
 			<col width="20%">
-			<col width="5%">
-			<col width="{{{$export_mode ? 20 : 25}}}%">
+			<col width="35%">
+			<col width="{{{$export_mode ? 5 : 10}}}%">
 		@endif
 		</colgroup>
 		<tr>
@@ -211,8 +210,7 @@
 		@if(Auth::user()->hasPrivilege(Group::PERSONAL_INFO_VIEW))
 			<th>patientID</th>
 			<th>patientName</th>
-			<th>age</th>
-			<th>sex</th>
+			<th>age/sex</th>
 		@endif
 			<th>update Date</th>
 			<th>latest Revision</th>
@@ -229,8 +227,7 @@
 				@if(Auth::user()->hasPrivilege(Group::PERSONAL_INFO_VIEW))
 					<td>{{$rec->patientInfoCache['patientID']}}</td>
 					<td>{{$rec->patientInfoCache['patientName']}}</td>
-					<td>{{$rec->patientInfoCache['age']}}</td>
-					<td>{{CommonHelper::getSex($rec->patientInfoCache['sex'])}}</td>
+					<td>{{$rec->patientInfoCache['age']}} / {{CommonHelper::getSex($rec->patientInfoCache['sex'])}}</td>
 				@endif
 					<td>{{date('Y/m/d', strtotime($rec->updateTime))}}</td>
 					<td>
@@ -258,13 +255,13 @@
 		@else
 			<tr>
 				@if ($export_mode && Auth::user()->hasPrivilege(Group::PERSONAL_INFO_VIEW))
-				<td colspan="10">
+				<td colspan="9">
 				@elseif ($export_mode && !Auth::user()->hasPrivilege(Group::PERSONAL_INFO_VIEW))
 				<td colspan="6">
 				@elseif (!$export_mode && !Auth::user()->hasPrivilege(Group::PERSONAL_INFO_VIEW))
 				<td colspan="5">
 				@else
-				<td colspan="9">
+				<td colspan="8">
 				@endif
 					Search results 0.
 				</td>

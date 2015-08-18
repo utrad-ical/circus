@@ -13,6 +13,8 @@
 			@if (isset($inputs['export_target']) && count($inputs['export_target']) > 0)
 				export_array = {{json_encode($inputs['export_target'])}};
 			@endif
+			var tmpCookie = $.cookie(COOKIE_NAME);
+			$('.export_target_cnt').html(tmpCookie.length > 0 ? tmpCookie.split("_").length : 0);
 
 			$(".export_case").click(function () {
 				var target_number = $(this).val();
@@ -32,6 +34,8 @@
 						$.cookie(COOKIE_NAME , export_array.join("_") , { expires: 1 });
 					}
 				}
+				var tmpCookie = $.cookie(COOKIE_NAME);
+				$('.export_target_cnt').html(tmpCookie.split("_").length);
 			});
 		});
 		var closeExportOptionDialog = function(error) {
@@ -162,6 +166,9 @@
 
 @endif
 	@if (count($list) > 0)
+		@if ($export_mode)
+			<div>Export対象:<span class="export_target_cnt"></span>件</div>
+		@endif
 		<ul class="common_pager clearfix">
 			@if (isset($list_pager))
 				{{$list_pager->links()}}

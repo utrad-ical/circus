@@ -5,6 +5,7 @@
 class CaseSearchBaseController extends BaseController {
 	protected $_prefix;
 	protected $_export_mode = false;
+	private $_cookie_delete = false;
 	/**
 	 * Case Search Results
 	 */
@@ -52,7 +53,7 @@ class CaseSearchBaseController extends BaseController {
 
 			if ($this->_export_mode) {
 				$target = array();
-				if (isset($_COOKIE["exportCookie"]) && $_COOKIE["exportCookie"]) {
+				if (isset($_COOKIE["exportCookie"]) && $_COOKIE["exportCookie"] && !$this->_cookie_delete) {
 					$export_target = $_COOKIE["exportCookie"];
 					$target = explode('_', $export_target);
 				}
@@ -165,6 +166,6 @@ class CaseSearchBaseController extends BaseController {
 	 */
 	private function deleteCookie() {
 		if (isset($_COOKIE["exportCookie"]))
-			setcookie("exportCookie", "", time() - 1800);
+			$this->_cookie_delete = setcookie("exportCookie", "", time() - 3600);
 	}
 }

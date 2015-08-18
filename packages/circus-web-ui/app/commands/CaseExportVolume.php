@@ -19,6 +19,22 @@ class CaseExportVolume extends TaskCommand {
 	protected $description = 'Export case data.';
 
 	/**
+	 * @var Array $_exportColumn Export対象カラム
+	 */
+	private $_exportColumn = array(
+		'case' => array('projectID','caseID', 'revisions'),
+		'label' => array('labelID', 'x', 'y', 'z', 'w', 'h', 'd', 'creator')
+	);
+	/**
+	 * @var string EXPORT_TARGET_CASE Export対象:Case
+	 */
+	const EXPORT_TARGET_CASE = 'case';
+	/**
+	 * @var string EXPORT_TARGET_LABEL Export対象:Label
+	 */
+	const EXPORT_TARGET_LABEL = 'label';
+
+	/**
 	 * Create a new command instance.
 	 *
 	 * @return void
@@ -81,8 +97,10 @@ class CaseExportVolume extends TaskCommand {
 					$case_data->save();
 				}
 
-				//Export対象からタグを除去する
-				$case_data->tags = array();
+				$revision = $case_data['latestRevision'];
+
+				//Export対象から不要項目を削除
+				$this->excludeUnnecessaryItems($case_data, self::EXPORT_TARGET_CASE);
 
 				$dir = $outputPath."/cases/".$caseId;
 				if (!is_dir($dir)) {
@@ -92,8 +110,6 @@ class CaseExportVolume extends TaskCommand {
 				file_put_contents($file_name, json_encode($case_data));
 				$this->updateTaskProgress($counter, 0, "Exporting in progress. $counter files are processed.");
 				$counter++;
-
-				$revision = $case_data['latestRevision'];
 
 				//Create a list of series UID
 				foreach ($revision['series'] as $series) {
@@ -142,6 +158,9 @@ class CaseExportVolume extends TaskCommand {
 			if (!$label_data)
 				throw new Exception('labelID ['.$label['id'].'] not found. ');
 
+			$storage_id = $label_data->storageID;
+			$this->excludeUnnecessaryItems($label_data, self::EXPORT_TARGET_LABEL);
+
 			$dir = $outputPath. "/cases/".$caseId."/labels/".$label['id'];
 			if (!is_dir($dir)) {
 				mkdir($dir, 0777, true); // make directory recursively
@@ -153,7 +172,7 @@ class CaseExportVolume extends TaskCommand {
 			$counter++;
 
 			//Label file
-			$storage_info = Storage::find($label_data->storageID);
+			$storage_info = Storage::find($storage_id);
 			$storage_path = $storage_info->path;
 
 			$load_path = $storage_path."/".$label['id'].'.gz';
@@ -224,6 +243,14 @@ class CaseExportVolume extends TaskCommand {
 			@rmdir($target_dir);
 		}
 		return true;
+	}
+
+	private function excludeUnnecessaryItems(&$data, $mode) {
+		$export_columns = $this->_exportColumn[$mode];
+		foreach ($data->toArray() as $key => $value) {
+			if (array_search($key, $export_columns) === false)
+				unset($data->$key);
+		}
 	}
 
 	/**

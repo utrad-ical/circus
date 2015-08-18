@@ -1466,6 +1466,7 @@
 
 
     syncGuide: function (the_orientation, the_number) {
+
       for (var i = 0; i < controllerInfo.viewer.length; i++) {
         var elmId = '#' + controllerInfo.viewer[i].elementId;
         var tmp_opts = $(elmId).imageViewer('option');
@@ -1475,6 +1476,13 @@
           }
         }
         $(elmId).trigger('sync');
+				if(tmp_opts.viewer.rotate.visible === true){
+		      var this_elm = this;
+					this_elm.imageViewerController('setObliqueOptions',
+						tmp_opts.viewer.orientation,
+						tmp_opts.viewer.rotate.angle
+					);
+				};
       }			
     },
 

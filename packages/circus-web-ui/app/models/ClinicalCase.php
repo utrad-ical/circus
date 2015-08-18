@@ -5,7 +5,6 @@
  * Model class for cases.
  *
  * @property string caseID Case ID
- * @property number incrementalID
  * @property number projectID ProjectID of projects
  * @property array patientInfoCache Cache of Series patientInfo
  * @property array tags Tags of case
@@ -39,7 +38,6 @@ class ClinicalCase extends BaseModel {
 	 */
 	protected $rules = array(
 		'caseID'						=>	'required',
-		'incrementalID'					=>	'required|strict_integer',
 		'projectID'						=>	'required|strict_string',
 		'patientInfoCache'				=>	'strict_array',
 		'patientInfoCache.patientID'	=>	'strict_string',

@@ -16,7 +16,6 @@ class OtherSeeder extends Seeder
 		DB::table(ClinicalCase::COLLECTION)->delete();
 		Schema::create(ClinicalCase::COLLECTION, function ($collection) {
 			$collection->unique('caseID');
-			$collection->unique('incrementalID');
 			$collection->index('createTime');
 		});
 

@@ -140,7 +140,6 @@ class CaseRegisterController extends BaseController {
 
 			//Set the value for the Validate check
 			$case_obj->caseID = $case_info['caseID'];
-			$case_obj->incrementalID = 1; // This can be a dummy number only for validation
 			$case_obj->projectID = $case_info['projectID'];
 			$case_obj->patientInfoCache = $this->setPatientInfo($case_info['patientInfo']);
 			$case_obj->domains = $case_info['domains'];
@@ -172,14 +171,14 @@ class CaseRegisterController extends BaseController {
 	 */
 	function setPatientInfo($patient) {
 		return array(
-				'patientID'	  => $patient['patientID'],
-				'patientName' => $patient['patientName'],
-				'age'		  => $patient['age'],
-				'sex'		  => $patient['sex'],
-				'birthDate'	  => $patient['birthDate'],
-				'size'		  => $patient['size'],
-				'weight'	  => $patient['weight']
-			);
+			'patientID'	  => $patient['patientID'],
+			'patientName' => $patient['patientName'],
+			'age'		  => $patient['age'],
+			'sex'		  => $patient['sex'],
+			'birthDate'	  => $patient['birthDate'],
+			'size'		  => $patient['size'],
+			'weight'	  => $patient['weight']
+		);
 	}
 
 	/**
@@ -221,7 +220,6 @@ class CaseRegisterController extends BaseController {
 
 			//Set the value for the Validate check
 			$case_obj->caseID = $inputs['caseID'];
-			$case_obj->incrementalID = Seq::getIncrementSeq('incrementalCaseID');
 			$case_obj->projectID = $inputs['projectID'];
 			//Setting of patient information
 			$case_obj->patientInfoCache = $this->setPatientInfo($inputs['patientInfo']);

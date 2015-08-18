@@ -363,8 +363,8 @@
 			{{Form::button('Save settings', array('class' => 'common_btn common_btn_gray', 'id' => 'save-button', 'type' => 'button', 'name' => 'btnSave'))}}
 			@if ($export_mode)
 				<p class="al_r">
-					{{Form::button('All Result Export', array('class' => 'common_btn common_btn_gray btn_export', 'name' => 'btnExportAll'))}}
-					{{Form::button('Select Export', array('class' => 'common_btn common_btn_gray btn_export', 'name' => 'btnExportSelect'))}}
+					{{Form::button('Export All Results', array('class' => 'common_btn common_btn_gray btn_export', 'name' => 'btnExportAll'))}}
+					{{Form::button('Export Selected Results', array('class' => 'common_btn common_btn_gray btn_export', 'name' => 'btnExportSelect'))}}
 				</p>
 			@endif
 		</p>

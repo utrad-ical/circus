@@ -59,11 +59,16 @@ export default class AuthorizationCache {
             //logger.debug('series=' + series);
         }
 
-        if ('x-circusrs-accesstoken' in req.headers) {
-            token = req.headers['x-circusrs-accesstoken'];
+        if ('authorization' in req.headers) {
+            token = req.headers['authorization'];
             //logger.debug('token=' + token);
+            var t = token.split(' ');
+            if (t[0].toLowerCase() != 'bearer') {
+                return false;
+            }
+            token = t[1];
         } else {
-            logger.warn("no x-circusrs-accesstoken http header.");
+            logger.warn("Authorization http header.");
         }
         if (series == null || token == null) {
             logger.debug('series or token is null');

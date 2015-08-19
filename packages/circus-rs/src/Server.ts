@@ -102,6 +102,7 @@ class Server {
 				if (route[2] && config.authorization.require) {
 					if (!authorizationCache.isValid(req)) {
 						logger.info('401 error');
+						res.setHeader('WWW-Authenticate', 'Bearer realm="CircusRS"')
 						res.writeHead(401, 'access not allowed.');
 						res.end();
 						return;
@@ -115,7 +116,7 @@ class Server {
 			router.options('/' + route[0], (req, res) => {
 				res.setHeader('Access-Control-Allow-Origin', '*');
 				res.setHeader('Access-Control-Allow-Methods', 'GET');
-				res.setHeader('Access-Control-Allow-Headers', 'x-circusrs-accesstoken');
+				res.setHeader('Access-Control-Allow-Headers', 'Authorization');
 				res.writeHead(200);
 				res.end();
 			});

@@ -59,11 +59,12 @@ class RsManager
 
 	protected function exec($command, $script = '')
 	{
-		$forever_root = escapeshellarg(storage_path('forever'));
+		$forever_root = storage_path('forever');
+		putenv('FOREVER_ROOT=' . $forever_root);
 		chdir($this->rs_dir);
 		$script = $script ? " " . escapeshellarg($script) : '';
 		$d = DIRECTORY_SEPARATOR;
-		$com = ".{$d}node_modules{$d}.bin{$d}forever -p $forever_root $command --plain$script";
+		$com = ".{$d}node_modules{$d}.bin{$d}forever $command --plain$script";
 		exec($com, $out, $retvar);
 		return implode("\n", $out);
 	}

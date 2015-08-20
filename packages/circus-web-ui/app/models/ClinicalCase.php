@@ -351,6 +351,31 @@ class ClinicalCase extends BaseModel {
 		return array();
 	}
 
+	/**
+	 * Add tags if they do not exist.
+	 * @param array $tags The list of tags
+	 */
+	public function appendTags(array $tags)
+	{
+		if (!is_array($this->tags)) $this->tags = array();
+		$this->tags = array_unique(array_merge($this->tags, $tags));
+	}
+
+	/**
+	 * Remove tags if they exist.
+	 * @param array $tags The list of tags
+	 */
+	public function removeTags(array $tags)
+	{
+		$tmp = is_array($this->tags) ? $this->tags : array();
+		foreach ($tags as $tag) {
+			$index = array_search($tag, $tmp);
+			if ( $index !== false ) {
+				unset($tmp[$index]);
+			}
+		}
+		$this->tags = $tmp;
+	}
 }
 
 Validator::extend('is_series', function($attribute, $value, $parameters) {

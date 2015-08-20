@@ -67,9 +67,10 @@
   var revisionNo = {{{$revisionNo}}};
   var parentLabelList = "disp_label_list";
 
-  var metadata_url = 'http://localhost:3000/metadata';
-  var dicom_image_url = 'http://localhost:3000/mpr';
-  var oblique_url = 'http://localhost:3000/Oblique';
+  var dicomServerHost = dicomImageServerUrl();
+  var metadata_url = dicomServerHost + 'metadata';
+  var dicom_image_url = dicomServerHost + 'mpr';
+  var oblique_url = dicomServerHost + 'oblique';
 
 
 	//Project-specific feature set to control the controller viewer widget

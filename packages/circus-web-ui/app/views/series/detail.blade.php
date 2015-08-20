@@ -21,9 +21,9 @@
         var	voxel_container	= new voxelContainer();	//Label information storage object (three sides shared)
         voxel_container.name = 'my_voxel';
 
-        var	initInfo	=	[
+        var	initInfo = [
             {
-                baseUrl : "http://localhost:3000/mpr",
+                baseUrl : dicomImageServerUrl() + 'mpr',
                 series : {{$series_list}},
                 control : {
                     window : {
@@ -86,7 +86,7 @@
         var initAjax= function(){
             var tmp_series = initInfo[0].series[0];
             $.ajax({
-                url: 'http://localhost:3000/metadata',
+                url: dicomImageServerUrl() + 'metadata',
                 type: 'GET',
                 data: {
                     mode : 'metadata',

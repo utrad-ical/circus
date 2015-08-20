@@ -21,7 +21,7 @@
 					$('#forever-list').text(data);
 					if (/Forever processes running/i.test(data)) {
 						$.ajax({
-							url: 'http://localhost:3000/status',
+							url: dicomImageServerUrl() + 'status',
 							method: 'GET',
 							dataType: 'JSON',
 							success: function(data) {

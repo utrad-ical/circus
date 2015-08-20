@@ -50,6 +50,8 @@ Route::group(['before' => 'auth'], function() {
 	Route::any('get_case_attribute', 'CaseSearchController@get_case_attribute');
 	Route::any('case/save_tags', 'TagRegisterController@save_tags');
 
+	Route::get('transfer/{download_url}', 'DownloadExportDataController@download');
+
 	//Series
 	Route::get('series/search/{preset_id}', 'SeriesSearchController@search')
 		->where('preset_id', '^\\d+$');

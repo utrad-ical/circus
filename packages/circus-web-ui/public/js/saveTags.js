@@ -6,6 +6,13 @@ var getSelectedTags = function(parent_obj) {
 	});
 	return tags;
 }
+var renderTag = function(tag_name, tag_color, tag_key) {
+	var tag_label = $("<label for='"+tag_key+"'>"+tag_name+"</label>");
+	var tag_div = $('<div>').tag(tag_color);
+
+	tag_div.append(tag_label);
+	$('#'+tag_key).after(tag_div);
+}
 
 $(function() {
 	$('.select_tags').change(function() {

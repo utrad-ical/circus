@@ -263,6 +263,10 @@ class ClinicalCase extends BaseModel {
 			$result['list'] = ClinicalCase::getCaseList($search_data);
 			$list_count = ClinicalCase::getCaseList($search_data, true);
 
+			if (count($result['list']) > 0) {
+				self::filterPersonalView($result['list']);
+			}
+
 			if ($result['list'] && $search_data['disp'] !== 'all' )
 				$result['list_pager'] = Paginator::make(
 											$result['list']->toArray(),
@@ -280,6 +284,30 @@ class ClinicalCase extends BaseModel {
 		$result['search_flg'] = $search_flg;
 
 		return $result;
+	}
+
+	public static function filterPersonalView(&$cases) {
+		//プロジェクトの個人情報権限
+		$projectPersonal = Auth::user()->listAccessibleProjects(Project::AUTH_TYPE_VIEW_PERSONAL_INFO);
+		//グループの個人情報権限
+		$groupPersonal = Auth::user()->hasPrivilege(Group::PERSONAL_INFO_VIEW);
+		//ユーザの個人情報権限
+		$userPersonal = Auth::user()->preferences["personalInfoView"];
+
+		foreach ($cases as $idx => $case_obj) {
+			if (array_search($case_obj->projectID, $projectPersonal) === false || !$groupPersonal || !$userPersonal) {
+				//プロジェクトorグループorユーザの個人情報表示権限がないので個人情報系を空表示にする
+				$cases[$idx]->patientInfoCache = array(
+					'patientID'   => '',
+					'patientName' => '',
+					'age'         => '',
+					'birthDate'   => '',
+					'sex'         => '',
+					'size'        => '',
+					'weight'      => ''
+				);
+			}
+		}
 	}
 
 	/**

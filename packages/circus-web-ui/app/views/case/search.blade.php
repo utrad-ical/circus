@@ -9,6 +9,7 @@
 {{HTML::script('js/jquery.formserializer.js')}}
 {{HTML::script('js/jquery.flexforms.js')}}
 {{HTML::script('js/jquery.cookie.js')}}
+
 @if (isset($inputs['mongo_search_data']))
 <script>
 	var detail_keys = {{$inputs['mongo_search_data']}};
@@ -36,21 +37,21 @@
 	}
 
 	$(function() {
-        // Initialization parameter
-        if (typeof keys != 'undefined') {
-        	filter = $('#search_condition')
-	        .filtereditor({keys: keys})
-	        .on('filterchange', function () {
-	            var data;
-	            if (typeof detail_keys != 'undefined') {
-	                data = filter.filtereditor('option', 'filter', detail_keys);
-	            } else {
-	                data = filter.filtereditor('option', 'filter');
-	                var node = JSON.stringify(data, null, '');
-	            }
-	        });
-	        filter.trigger('filterchange');
-        }
+		// Initialization parameter
+		if (typeof keys != 'undefined') {
+			filter = $('#search_condition')
+			.filtereditor({keys: keys})
+			.on('filterchange', function () {
+				var data;
+				if (typeof detail_keys != 'undefined') {
+					data = filter.filtereditor('option', 'filter', detail_keys);
+				} else {
+					data = filter.filtereditor('option', 'filter');
+					var node = JSON.stringify(data, null, '');
+				}
+			});
+			filter.trigger('filterchange');
+		}
 
 		//Save Settings depression during treatment
 		$('#save-button').click(function(){
@@ -80,13 +81,13 @@
 			var project_id_ary = new Array();
 			$('.select_project option:selected').each(function(){
 				project_id_ary.push($(this).val());
-	        });
+			});
 
-	        //Tag
+			//Tag
 			var tag_ary = new Array();
-			$('.select_tags option:selected').each(function(){
+			$('.search_select_tags option:selected').each(function(){
 				tag_ary.push($(this).val());
-	        });
+			});
 
 			var project_set_flg = false;
 			var tag_set_flg = false;
@@ -101,16 +102,16 @@
 				}
 			});
 			if (!project_set_flg) {
-		        var tmp_project_ary = new Array();
-		        tmp_project_ary["name"] = "project";
-		        tmp_project_ary["value"] = JSON.stringify(project_id_ary);
-		        form_data.push(tmp_project_ary);
+				var tmp_project_ary = new Array();
+				tmp_project_ary["name"] = "project";
+				tmp_project_ary["value"] = JSON.stringify(project_id_ary);
+				form_data.push(tmp_project_ary);
 			}
 			if (!tag_set_flg) {
-		        var tmp_tag_ary = new Array();
-		        tmp_tag_ary["name"] = "tags";
-		        tmp_tag_ary["value"] = JSON.stringify(tag_ary);
-		        form_data.push(tmp_tag_ary);
+				var tmp_tag_ary = new Array();
+				tmp_tag_ary["name"] = "tags";
+				tmp_tag_ary["value"] = JSON.stringify(tag_ary);
+				form_data.push(tmp_tag_ary);
 			}
 
 			//Get search mode
@@ -223,13 +224,16 @@
 					},
 					success: function(res, status, xhr){
 						if (xhr.status === 200) {
-							$('.select_tags').empty();
-							var tags_parent = $('.select_tags');
+							$('.search_select_tags').empty();
+							$('.export_select_tags').empty();
+							var search_parent = $('.search_select_tags');
+							var export_parent = $('.export_select_tags');
 							$.each(res.tags, function(key, val) {
 								var tag_opt = '<option value="'+key+'">'+val["name"]+'</option>';
-								tags_parent.append(tag_opt);
+								search_parent.append(tag_opt);
+								export_parent.append(tag_opt);
 							});
-							$('.select_tags').multiselect('refresh');
+							refreshMultiTags(false);
 							$('.tags_message').empty();
 						} else {
 							$('.tags_message').append(res.message);
@@ -239,18 +243,23 @@
 			} else if (select_projects['cnt'] > 1) {
 				$('#search_condition').append('Detail Search selection of the project can only when one .');
 				$('.tags_message').append('Detail Search selection of the project can only when one .');
-				$('.select_tags').empty();
-				$('.select_tags').multiselect('refresh');
+				refreshMultiTags(true);
 			} else {
 				$('#search_condition').append('Please specify the project .');
 				$('.tags_message').append('Please specify the project .');
-				$('.select_tags').empty();
-				$('.select_tags').multiselect('refresh');
+				refreshMultiTags(true);
 			}
-
-
 		});
 	});
+
+	var refreshMultiTags = function(empty) {
+		if (empty) {
+			$('.search_select_tags').empty();
+			$('.export_select_tags').empty();
+		}
+		$('.search_select_tags').multiselect('refresh');
+		$('.export_select_tags').multiselect('refresh');
+	}
 
 	function more_search(){
 		//Various elements object available
@@ -265,7 +274,6 @@
 		$('#search_condition').toggleClass('hidden');
 		$('#easy_search').toggleClass('hidden');
 		$('#search_mode').val(s_mode);
-
 	}
 </script>
 @stop
@@ -335,7 +343,7 @@
 						<tr>
 							<th>Tags</th>
 							<td colspan="3">
-								{{Form::select('tags', isset($tag_list) ? $tag_list : array(), isset($inputs['tags']) ? $inputs['tags'] : null, array('class' => 'multi_select select_tags', 'multiple' => 'multiple'))}}
+								{{Form::select('tags', isset($tag_list) ? $tag_list : array(), isset($inputs['tags']) ? $inputs['tags'] : null, array('class' => 'multi_select search_select_tags', 'multiple' => 'multiple'))}}
 								<span class="tags_message">
 									@if(!isset($tag_list))
 										Please specify the project .

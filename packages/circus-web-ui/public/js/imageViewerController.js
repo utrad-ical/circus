@@ -1184,14 +1184,7 @@
         save_data.attribute = JSON.stringify(revision_attributes);
       }
 
-      //タグ
-      if (controllerInfo.elements.caseTags !== '') {
-          var case_tags = getSelectedTags();
-    	  save_data.tags = JSON.stringify(case_tags);
-      }
-
       try {
-
         for (var i = 0; i < controllerInfo.series.length; i++) {
           var tmp_the_series = controllerInfo.series[i];
           var tmp_insert_obj = {};

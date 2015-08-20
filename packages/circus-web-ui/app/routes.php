@@ -48,7 +48,7 @@ Route::group(['before' => 'auth'], function() {
 	Route::any('case/export', 'CaseExportController@export');
 	Route::any('case/get_revision_list', 'RevisionController@get_list');
 	Route::any('get_case_attribute', 'CaseSearchController@get_case_attribute');
-	Route::any('get_project_tags', 'CaseSearchController@get_project_tags');
+	Route::any('case/save_tags', 'TagRegisterController@save_tags');
 
 	//Series
 	Route::get('series/search/{preset_id}', 'SeriesSearchController@search')

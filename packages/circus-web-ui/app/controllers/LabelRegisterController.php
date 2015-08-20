@@ -60,9 +60,6 @@ class LabelRegisterController extends BaseController {
 			//Update of case information
 			//Case information acquisition
 			$case_obj = ClinicalCase::find($inputs['caseId']);
-			$case_obj->tags = array_key_exists('tags', $inputs)
-							? json_decode($inputs['tags'], true) : array();
-
 			$tmp_revision = $this->createRevision($inputs, $series_list);
 
 			//Error checking

@@ -1,5 +1,6 @@
-@if ($search_flg)
 
+@if ($search_flg)
+{{HTML::script('js/saveTags.js')}}
 @if ($export_mode)
 	<script>
 		var COOKIE_NAME = "exportCookie";
@@ -247,12 +248,9 @@
 						{{Form::close()}}
 					</td>
 					<td>
-						{{-- */$tag_list = $rec->project->tags/* --}}
-						@if ($tag_list && count($rec->tags) > 0)
-							@foreach ($rec->tags as $tag)
-								<div class="tag" style="color: rgb(255, 255, 255); background-color: {{{$tag_list[$tag]['color']}}};">{{{$tag_list[$tag]["name"]}}}</div>
-							@endforeach
-						@endif
+						<div class="revision_tag_wrap">
+							@include('case.tag', array('prj_tags' => $rec->project->tags, 'case_tags' => $rec->tags, 'tag_caseID' => $rec->caseID))
+						</div>
 					</td>
 					<td class="al_c">
 						{{HTML::link('', 'View', array('class' => 'link_detail common_btn'))}}

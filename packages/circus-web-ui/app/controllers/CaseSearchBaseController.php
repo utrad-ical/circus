@@ -101,23 +101,11 @@ class CaseSearchBaseController extends BaseController {
 	}
 
 	/**
-	 * プロジェクトに紐づくtagsを取得する(Json)
-	 */
-	public function get_project_tags() {
-		try {
-			$tags = $this->getTags(Input::all());
-			return Response::json(['status' => 'OK', 'tags' => $tags]);
-		} catch (Exception $e) {
-			return Response::json(['status' => 'NG', 'message' => $e->getMessage()]);
-		}
-	}
-
-	/**
 	 * ケース検索条件設定
 	 * @param Array $inputs 入力値
 	 */
 	private function setSearchCondition($inputs) {
-		if (array_key_exists('btnReset', $inputs) !== false || !$inputs) {
+		if (array_key_exists('btnReset', $inputs) !== false || count($inputs) === 1) {
 			Session::forget($this->_prefix.'.search');
 			$this->deleteCookie();
 		//Search button is pressed during

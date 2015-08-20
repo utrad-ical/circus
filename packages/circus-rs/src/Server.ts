@@ -130,7 +130,8 @@ class Server {
 			router.get('/requestToken' , (req, res) => {
 				Counter.countUp('requestToken');
 				var ip = req.ip || req.connection.remoteAddress || req.socket.remoteAddress || req.connection.socket.remoteAddress;
-				if (!config.authorization.allowFrom.match(ip)) {
+				logger.info(ip);
+				if (!ip.match(config.authorization.allowFrom)) {
 					logger.info('401 error');
 					res.writeHead(401, 'access not allowed.');
 					res.end();

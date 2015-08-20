@@ -187,7 +187,6 @@
 	@endif
 	<table class="result_table common_table">
 		<colgroup>
-		@if(Auth::user()->hasPrivilege(Group::PERSONAL_INFO_VIEW))
 			@if ($export_mode)
 				<col width="3%">
 			@endif
@@ -199,27 +198,15 @@
 			<col width="10%">
 			<col width="19%">
 			<col width="9%">
-		@else
-			@if ($export_mode)
-				<col width="5%">
-			@endif
-			<col width="25%">
-			<col width="10%">
-			<col width="20%">
-			<col width="35%">
-			<col width="{{{$export_mode ? 5 : 10}}}%">
-		@endif
 		</colgroup>
 		<tr>
 			@if ($export_mode)
 				<th>&nbsp;</th>
 			@endif
 			<th>projectName</th>
-		@if(Auth::user()->hasPrivilege(Group::PERSONAL_INFO_VIEW))
 			<th>patientID</th>
 			<th>patientName</th>
 			<th>age/sex</th>
-		@endif
 			<th>update Date</th>
 			<th>latest Revision</th>
 			<th>tag</th>
@@ -232,11 +219,15 @@
 						<td>{{Form::checkbox('export_target[]', $rec->caseID, ((isset($inputs['export_target']) && array_search($rec->caseID, $inputs['export_target']) !== false) ? true : false), array('class' => 'export_case'))}}</td>
 					@endif
 					<td>{{$rec->project->projectName}}</td>
-				@if(Auth::user()->hasPrivilege(Group::PERSONAL_INFO_VIEW))
 					<td>{{$rec->patientInfoCache['patientID']}}</td>
 					<td>{{$rec->patientInfoCache['patientName']}}</td>
-					<td>{{$rec->patientInfoCache['age']}} / {{CommonHelper::getSex($rec->patientInfoCache['sex'])}}</td>
-				@endif
+					<td>
+						{{$rec->patientInfoCache['age']}}
+						@if($rec->patientInfoCache['age'] && $rec->patientInfoCache['sex'])
+						 /
+						@endif
+						{{CommonHelper::getSex($rec->patientInfoCache['sex'])}}
+					</td>
 					<td>{{date('Y/m/d', strtotime($rec->updateTime))}}</td>
 					<td>
 						<a href="" class="link_detail">
@@ -259,15 +250,7 @@
 			@endforeach
 		@else
 			<tr>
-				@if ($export_mode && Auth::user()->hasPrivilege(Group::PERSONAL_INFO_VIEW))
-				<td colspan="9">
-				@elseif ($export_mode && !Auth::user()->hasPrivilege(Group::PERSONAL_INFO_VIEW))
-				<td colspan="6">
-				@elseif (!$export_mode && !Auth::user()->hasPrivilege(Group::PERSONAL_INFO_VIEW))
-				<td colspan="5">
-				@else
-				<td colspan="8">
-				@endif
+				<td colspan="{{{$export_mode ? 9 : 8}}}">
 					Search results 0.
 				</td>
 			</tr>
@@ -314,5 +297,6 @@
 				return false;
 			});
 		});
+
 	</script>
 @endif

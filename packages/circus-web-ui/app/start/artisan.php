@@ -19,3 +19,4 @@ Artisan::add(new GetSeries);
 Artisan::add(new TaskDummyWait);
 Artisan::add(new CaseExportVolume);
 Artisan::add(new BuildRs);
+Artisan::add(new ManageRs);

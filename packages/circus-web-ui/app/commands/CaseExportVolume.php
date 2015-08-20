@@ -19,18 +19,22 @@ class CaseExportVolume extends TaskCommand {
 	protected $description = 'Export case data.';
 
 	/**
-	 * @var Array $_exportColumn Export対象カラム
+	 * Column names to be exported.
+	 *
+	 * @var Array
 	 */
 	private $_exportColumn = array(
 		'case' => array('projectID','caseID', 'revisions'),
 		'label' => array('labelID', 'x', 'y', 'z', 'w', 'h', 'd', 'creator')
 	);
+
 	/**
-	 * @var string EXPORT_TARGET_CASE Export対象:Case
+	 * Export target key.
 	 */
 	const EXPORT_TARGET_CASE = 'case';
+
 	/**
-	 * @var string EXPORT_TARGET_LABEL Export対象:Label
+	 * Export target key.
 	 */
 	const EXPORT_TARGET_LABEL = 'label';
 
@@ -53,13 +57,13 @@ class CaseExportVolume extends TaskCommand {
 	{
 		$caseIds = $this->argument('cases');
 		if (!$caseIds) {
-			$this->error('Please select the Export target of the case .');
+			$this->error('Please select the Export target of the case.');
 			return;
 		}
 
 		$outputPath = $this->argument('output-path');
 		if (!$outputPath) {
-			$this->error('Please specify the destination folder .');
+			$this->error('Please specify the destination folder.');
 			return;
 		}
 
@@ -87,15 +91,15 @@ class CaseExportVolume extends TaskCommand {
 					$this->error('Invalid caseID: ' . $caseId);
 					return false;
 				}
-				//Optional: tag set to the latest revision
+				// Optional: tag set to the latest revision
 				if ($this->option('tag')) {
-					$case_data->tags = explode(',', $this->option('tag'));
+					$case_data->appendTags(explode(',', $this->option('tag')));
 					$case_data->save();
 				}
 
 				$revision = $case_data['latestRevision'];
 
-				//Export対象から不要項目を削除
+				// Remove unnecessary keys from the exported data.
 				$this->excludeUnnecessaryItems($case_data, self::EXPORT_TARGET_CASE);
 
 				$dir = $outputPath."/cases/".$caseId;
@@ -268,7 +272,7 @@ class CaseExportVolume extends TaskCommand {
 	protected function getArguments()
 	{
 		return array(
-			array('cases', InputArgument::REQUIRED, 'Export対象のケース.'),
+			array('cases', InputArgument::REQUIRED, 'Case IDs of the target cases'),
 			array('output-path', InputArgument::REQUIRED, 'Output path.')
 		);
 	}
@@ -281,7 +285,7 @@ class CaseExportVolume extends TaskCommand {
 	protected function getOptions()
 	{
 		return array(
-			array('without-personal', null, InputOption::VALUE_NONE, 'Without exporting pertientInfoCache.', null),
+			array('without-personal', null, InputOption::VALUE_NONE, 'Without exporting petientInfoCache.', null),
 			array('tag', null, InputOption::VALUE_OPTIONAL, 'Tags to be applied to the latest revision', null),
 		);
 	}

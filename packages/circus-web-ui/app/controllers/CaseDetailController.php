@@ -1,4 +1,10 @@
 <?php
+
+/**
+ * Used when authentication node fails.
+ */
+class AuthenticationNodeException extends \Exception {
+}
 /**
  * ケース詳細
  */
@@ -84,13 +90,11 @@ class CaseDetailController extends BaseController {
 														  $case_info->project->windowPriority,
 														  $case_info->project->windowPresets);
 			$result['attribute'] = json_encode($case_info->revisions[$select_revision]['attributes']);
-			$result['tags'] = json_encode($case_info->tags);
 			$result['inputs'] = Session::get('case.detail');
 
 			//Attribute Settings
 			$result['label_attribute_settings'] = json_encode($case_info->project->labelAttributesSchema);
 			$result['case_attribute_settings'] = json_encode($case_info->project->caseAttributesSchema);
-			$result['tag_settings'] = $this->createTagList($case_info->project->tags);
 			$result['window_presets'] = json_encode($case_info->project->windowPresets);
 
 			//JsonFile read
@@ -100,6 +104,26 @@ class CaseDetailController extends BaseController {
 			$result['error_msg'] = $e->getMessage();
 		}
 		return View::make('case/detail', $result);
+	}
+
+	function authNode($seriesUID) {
+		$request_url = "http://localhost:3000/requestToken?series=".$seriesUID;
+		$ch = curl_init();
+		curl_setopt($ch, CURLOPT_URL, $request_url);
+		curl_setopt($ch,CURLOPT_RETURNTRANSFER,true);
+		$tmp = curl_exec($ch);
+
+		if (!$tmp)
+			new AuthenticationNodeException('Node authentication error.');
+
+		$responseToken = json_decode($tmp, true);
+		curl_close($ch);
+
+		if (!$responseToken || !array_key_exists('token', $responseToken))
+			new AuthenticationNodeException($tmp);
+
+		Log::info($responseToken['token']);
+		return $responseToken['token'];
 	}
 
 	function createTagList($tags) {
@@ -223,6 +247,8 @@ class CaseDetailController extends BaseController {
 				'preset'	=>	array(),
 				'priority'	=> $priority
 			);
+
+			$series_info['token'] = $this->authNode($series['seriesUID']);
 
 			if ($presets)
 				$series_info['window']['preset'] = $presets;

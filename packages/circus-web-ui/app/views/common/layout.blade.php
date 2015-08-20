@@ -62,11 +62,12 @@ if (Auth::check()) {
 					<li class="icon_menu">
 						<a href="{{asset('administration')}}"><span class="circus-icon-administration"></span>Administration</a>
 						<ul>
-							<li><a href="{{asset('administration/group')}}">Group</a></li>
-							<li><a href="{{asset('administration/user')}}">User</a></li>
+							<li><a href="{{asset('administration/server_param')}}">Server Configuration</a></li>
+							<li><a href="{{asset('administration/server')}}">DICOM Image Server</a></li>
+							<li><a href="{{asset('administration/group')}}">Groups</a></li>
+							<li><a href="{{asset('administration/user')}}">Users</a></li>
 							<li><a href="{{asset('administration/storage')}}">Storage</a></li>
-							<li><a href="{{asset('administration/project')}}">Project</a></li>
-							<li><a href="{{asset('administration/server_param')}}">Setting Server Params</a></li>
+							<li><a href="{{asset('administration/project')}}">Projects</a></li>
 						</ul>
 					</li>
 					@endif

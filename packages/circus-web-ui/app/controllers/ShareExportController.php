@@ -1,52 +1,51 @@
 <?php
+
 /**
- * Export機能
+ * Export feature
  */
-class ShareExportController extends BaseController {
+class ShareExportController extends BaseController
+{
 	/**
 	 * Share Export
 	 */
-	public function export() {
-		$result = array();
-
-		//POST data acquisition
+	public function export()
+	{
 		$inputs = Input::all();
 		try {
-			//validate check
+			// Validation
 			$this->validate($inputs);
 
-			//create temporary folder
+			// Create temporary folder
 			$tmp_dir = Str::random(32);
-			$tmp_dir_path = storage_path('cache').'/'.$tmp_dir;
+			$tmp_dir_path = storage_path('cache') . '/' . $tmp_dir;
 			if (!mkdir($tmp_dir_path))
-				throw new Exception('Creating a temporary folder failed');
+				throw new Exception('Failed to create a temporary folder.');
 
-			//command execution
+			// Command execution
 			$caseIds = str_replace('_', ',', $_COOKIE['exportCookie']);
-			$cmd_str = ' '.$caseIds. ' '.$tmp_dir_path;
+			$cmd_str = ' ' . $caseIds . ' ' . $tmp_dir_path;
 			if ($inputs['personal'] == 0)
 				$cmd_str .= ' --without-personal';
-			//タグの設定
 			if ($inputs['tags']) {
 				$tags = implode(',', json_decode($inputs['tags'], true));
-				$cmd_str .= ' --tag='.$tags;
+				$cmd_str .= ' --tag=' . $tags;
 			}
 
-			//Export用で2日以上経過したものを削除する
+			// Delete old transfer files
 			CommonHelper::deleteOlderTemporaryFiles(storage_path('transfer'), true, '-2 day');
 
-			$task = Task::startNewTask("case:export-volume " .$cmd_str);
+			$task = Task::startNewTask("case:export-volume " . $cmd_str);
 			if (!$task) {
 				throw new Exception('Failed to invoke export process.');
 			}
 
-			//共有用にCache配下からstorage/transferに移動する
+			// TODO: Fix security
 			if (!is_dir(storage_path('transfer'))) {
-				mkdir(storage_path('transfer'), 0777, true); // make directory recursively
+				mkdir(storage_path('transfer'), 0777, true);
 			}
 			$res = array(
 				'file_name' => 'data.tgz',
-				'dir_name'  => $tmp_dir_path.'/data.tgz'
+				'dir_name' => $tmp_dir_path . '/data.tgz'
 			);
 
 			return Response::json(array(
@@ -63,18 +62,18 @@ class ShareExportController extends BaseController {
 		}
 	}
 
-	private function validate($data) {
-		//Export対象のケースチェック
+	private function validate($data)
+	{
+		// Check the target cases
 		if ($data['export_type'] === 'btnExportSelect') {
+			// export the cases which are checked
 			$cases = $_COOKIE['exportCookie'];
 			if (!$cases)
-				throw new Exception('ケースを1つ以上選択してください。');
-
+				throw new Exception('No cases are selected.');
 			$caseIds = explode('_', $cases);
 		} else {
-			//全件
+			// export all cases matching the search criteria
 			$search_data = Session::get('share.search');
-
 			$result = ClinicalCase::searchCase($search_data);
 			$caseIds = array();
 			if (!$result) {
@@ -88,28 +87,22 @@ class ShareExportController extends BaseController {
 		foreach ($caseIds as $caseId) {
 			$case = ClinicalCase::find($caseId);
 			if (!$case)
-				throw new Exception('ケースID['.$caseId.']は存在しません。');
-			//異なるプロジェクトが混じっていないかチェックする
+				throw new Exception("Invalid case ID: $caseId.");
 
-			if (!$projectId)
-				$projectId = $case->projectID;
-
+			if (!$projectId) $projectId = $case->projectID;
 			if ($projectId !== $case->projectID)
-				throw new Exception('Detail Search selection of the project can only when one .');
+				throw new Exception('The target cases belong to more than one project.');
 		}
 
-		//個人情報有無
 		if ($data['personal'] != 0 && $data['personal'] != 1)
-			throw new Exception('個人情報有無を選択してください。');
+			throw new Exception('Invalid personal data inclusion flag.');
 
-		//タグ
 		if ($data['tags']) {
 			$tags = json_decode($data['tags'], true);
-
 			$project = Project::find($projectId);
 			foreach ($tags as $tag) {
 				if (!isset($project->tags[intval($tag)])) {
-					throw new Exception('存在しないタグです。');
+					throw new Exception('Undefined tag specified.');
 				}
 			}
 		}

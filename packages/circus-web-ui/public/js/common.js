@@ -114,6 +114,11 @@ $.fn.extend({
 	}
 });
 
+function dicomImageServerUrl() {
+	var port = 3000;
+	return location.protocol + '//' + location.hostname + ':' + port + '/';
+}
+
 /* Tags */
 
 $.fn.extend({

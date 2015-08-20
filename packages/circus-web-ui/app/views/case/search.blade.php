@@ -216,20 +216,17 @@
 				});
 
 				$.ajax({
-					url: "{{{asset('get_project_tags')}}}",
-					type: 'POST',
-					data: post_data,
+					url:"{{{asset('api/project')}}}"+"/"+select_projects['id'],
 					dataType: 'json',
 					error: function(){
 						alert('I failed to communicate.');
 					},
-					success: function(res){
-
-						if (res.status === "OK") {
+					success: function(res, status, xhr){
+						if (xhr.status === 200) {
 							$('.select_tags').empty();
 							var tags_parent = $('.select_tags');
 							$.each(res.tags, function(key, val) {
-								var tag_opt = '<option value="'+key+'">'+val+'</option>';
+								var tag_opt = '<option value="'+key+'">'+val["name"]+'</option>';
 								tags_parent.append(tag_opt);
 							});
 							$('.select_tags').multiselect('refresh');

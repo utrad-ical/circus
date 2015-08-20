@@ -299,7 +299,11 @@
 					<tr>
 						<th>project ID</th>
 						<td colspan="3">
-							{{Form::select('project', $project_list, isset($inputs['project']) ? $inputs['project'] : null, array('class' => 'multi_select select_project', 'multiple' => 'multiple'))}}
+							@if ($export_mode)
+								{{Form::select('project', $project_list, isset($inputs['project']) ? $inputs['project'][0] : null, array('class' => 'select_project common_input_text w_200'))}}
+							@else
+								{{Form::select('project', $project_list, isset($inputs['project']) ? $inputs['project'] : null, array('class' => 'multi_select select_project', 'multiple' => 'multiple'))}}
+							@endif
 						</td>
 					</tr>
 				</tbody>

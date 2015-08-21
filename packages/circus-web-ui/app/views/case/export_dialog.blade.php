@@ -32,9 +32,20 @@
     </p>
     <div id="progress"><div id="progress-label"></div></div>
     <div id="task-watcher"></div>
-    <div id="download_mode"></div>
 </div>
+<div id="download_dialog" title="download options" style="display: none;">
+    <p class="mar_10">
+		<div>
+			{{Form::open(array('url' => asset('transfer'), 'class' => 'frm_share_download'))}}
+				{{Form::text('download_url', '', array('style' => 'display:none;', 'class' => 'common_input_text w_450'))}}
+				<div class="clear">&nbsp;</div>
+		    	{{HTML::link(asset('transfer'), 'Download', array('class' => 'common_btn common_btn_gray download_btn'))}}
+		    	{{Form::button('Show Download URL', array('class' => 'common_btn common_btn_gray', 'id' => 'show_share_url'))}}
 
+		    {{Form::close()}}
+	    </div>
+	</p>
+</div>
 
 <script>
 
@@ -66,9 +77,9 @@ var exportRun = function (validate_flag) {
         xhr: myXhr,
         success: function (data) {
             $('#task-watcher').taskWatcher(data.taskID).on('finish', function() {
-                downloadVolume(data.taskID);
                 closeExportOptionDialog();
                 busy(false);
+                createDownloadOptionDialog(data.taskID);
             });
         },
         error: function (data) {
@@ -78,10 +89,18 @@ var exportRun = function (validate_flag) {
         }
     });
 }
+
 $(function(){
     $('#btn_export_case').click(function(){
         exportRun(true);
         return false;
     });
+    $('#show_share_url').click(function() {
+        //dosnloadRun();
+        $('.frm_share_download').find('input[name="download_url"]').val($('.download_btn').attr('href'));
+        $('.frm_share_download').find('input[name="download_url"]').show();
+        return false;
+    });
+
 });
 </script>

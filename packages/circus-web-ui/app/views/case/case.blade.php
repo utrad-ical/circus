@@ -40,21 +40,29 @@
 			});
 		});
 		var closeExportOptionDialog = function(error) {
-
 			$("#dialog").dialog('close');
 			$('#export_err').append(error);
 			//ボタンEnableにする
-			$('.btn_export').removeClass('disabled');
-
+			//$('.btn_export').removeClass('disabled');
 		}
-
-
 		var createExportOptionDialog = function() {
 			$('#dialog').slideDown();
 			$('#progressbar').progressbar({
 				value:0
 			});
 			$('#dialog').dialog('open');
+		}
+		var closeDownloadOptionDialog = function(error) {
+			$("#download_dialog").dialog('close');
+			$('#export_err').append(error);
+			//ボタンEnableにする
+			$('.btn_export').removeClass('disabled');
+		}
+		var createDownloadOptionDialog = function(taskID) {
+			$('#download_dialog').slideDown();
+			$('.download_btn').attr('href', "{{{asset('transfer')}}}"+"/"+taskID);
+			$('.frm_share_download').find('input[name="taskID"]').val(taskID);
+			$('#download_dialog').dialog('open');
 		}
 
 		//タスク管理用
@@ -146,6 +154,7 @@
 		$(function(){
 			$('.btn_export').click(function () {
 				$('#export_err').empty();
+				$('.frm_share_export').find('input[name="export_type"]').val($(this).attr('name'));
 				var error = validateExport();
 				//全件出力でない場合はExport対象のケース選択Validateチェックを行う
 				if (error.length > 0) {;
@@ -154,7 +163,7 @@
 				}
 				createExportOptionDialog();
 				$('.btn_export').addClass('disabled');
-				$('.frm_share_export').find('input[name="export_type"]').val($(this).attr('name'));
+
 				return false;
 			});
 

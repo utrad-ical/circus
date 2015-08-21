@@ -81,18 +81,12 @@ class SeriesExportController extends BaseController {
 		if (!$series)
 			throw new Exception('The series does not exist .');
 
-
 		//series image range specification error
 		if (!isset($inputs['export_start_img']) || !isset($inputs['export_end_img']))
 			throw new Exception('Please specify a series image range .');
 
 		//out of range
-		Log::debug('分割前の範囲::');
-		Log::debug($series->images);
 		$image_range = explode(',',$series->images);
-		Log::debug('分割後の範囲::');
-		Log::debug($image_range);
-
 		$st_range_flag = false;
 		$ed_range_flag = false;
 
@@ -102,13 +96,9 @@ class SeriesExportController extends BaseController {
 			else
 				$st_range = $ed_range = $range;
 
-			Log::debug("開始番号::".$st_range."\t終了番号::".$ed_range);
-			Log::debug("指定開始番号::".$inputs['export_start_img']."\t指定終了番号::".$inputs['export_end_img']);
-
 			if (!$st_range_flag) {
 				if (intval($inputs['export_start_img']) >= intval($st_range) &&
 					intval($inputs['export_start_img']) <= intval($ed_range)) {
-					Log::debug('開始番号OK');
 					$st_range_flag = true;
 				}
 			}
@@ -116,7 +106,6 @@ class SeriesExportController extends BaseController {
 			if (!$ed_range_flag) {
 				if (intval($inputs['export_end_img']) >= intval($st_range) &&
 					intval($inputs['export_end_img']) <= intval($ed_range)) {
-					Log::debug('終了番号OK');
 					$ed_range_flag = true;
 				}
 			}

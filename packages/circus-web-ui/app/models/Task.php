@@ -99,6 +99,7 @@ class Task extends BaseModel
 		$task->logs = [];
 		$task->value = 0;
 		$task->max = 0;
+		$task->download = "";
 		$task->save();
 
 		if (!$task->executeBackgroundProcess($command, $stdin)) {

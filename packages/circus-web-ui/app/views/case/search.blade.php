@@ -30,8 +30,10 @@
 		var selected_cnt = 0;
 		var project_ids = $(".select_project option:selected");
 		for (var i = 0; i < project_ids.length; i++) {
-			selected_project_id = project_ids[i].value;
-			selected_cnt++;
+			if (project_ids[i].value !== '') {
+				selected_project_id = project_ids[i].value;
+				selected_cnt++;
+			}
 		}
 		return {'cnt':selected_cnt, 'id':selected_project_id};
 	}
@@ -80,7 +82,8 @@
 			//Condition generation of project ID
 			var project_id_ary = new Array();
 			$('.select_project option:selected').each(function(){
-				project_id_ary.push($(this).val());
+				if ($(this).val() !== '')
+					project_id_ary.push($(this).val());
 			});
 
 			//Tag
@@ -300,7 +303,7 @@
 						<th>project ID</th>
 						<td colspan="3">
 							@if ($export_mode)
-								{{Form::select('project', $project_list, isset($inputs['project']) ? $inputs['project'][0] : null, array('class' => 'select_project common_input_text w_200'))}}
+								{{Form::select('project', array_merge(array('' => '(all)'),$project_list), isset($inputs['project']) ? $inputs['project'][0] : null, array('class' => 'select_project common_input_text w_200'))}}
 							@else
 								{{Form::select('project', $project_list, isset($inputs['project']) ? $inputs['project'] : null, array('class' => 'multi_select select_project', 'multiple' => 'multiple'))}}
 							@endif
@@ -379,10 +382,7 @@
 		</p>
 	</div>
 </div>
-{{Form::open(['url' => asset('download/volume'), 'method' => 'post', 'id' => 'frmDownload'])}}
-	{{Form::hidden('file_name', '')}}
-	{{Form::hidden('dir_name', '')}}
-	{{Form::hidden('transfer', true)}}
+{{Form::open(['url' => asset('transfer'), 'method' => 'post', 'id' => 'frmDownload'])}}
 {{Form::close()}}
 <span id="export_err" class="font_red"></span>
 <div class="search_result pad_tb_5" id="result_case_list">
@@ -398,10 +398,9 @@ $("#dialog").dialog({
 	maxwidth:false,
 	modal:true
 });
-var downloadVolume = function(data) {
+var downloadVolume = function(taskID) {
 	var parent = $('#frmDownload');
-	parent.find('input[name="file_name"]').val(data.file_name);
-	parent.find('input[name="dir_name"]').val(data.dir_name);
+	parent.attr('action', "{{{asset('transfer')}}}"+"/"+taskID);
 	parent.submit();
 }
 </script>

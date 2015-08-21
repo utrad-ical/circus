@@ -18,7 +18,7 @@
     series: [{
       activeLabelId: '', //ウインドウレベル・幅はシリーズに紐づかせるか否かはユーザー定義
       id: '',
-      token: 'token_from_controller',
+      token: '',
       description: 'series name', //シリーズ名,今は特に使っていない
       number: 512, //何枚の断面が格納されているか
       window: {

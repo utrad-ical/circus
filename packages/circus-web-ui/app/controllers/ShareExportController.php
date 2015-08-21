@@ -5,6 +5,7 @@
  */
 class ShareExportController extends BaseController
 {
+	private $_caseIds = array();
 	/**
 	 * Share Export
 	 */
@@ -25,12 +26,13 @@ class ShareExportController extends BaseController
 				throw new Exception('Failed to create a temporary folder.');
 
 			// Command execution
-			$caseIds = str_replace('_', ',', $_COOKIE['exportCookie']);
+			$caseIds = implode(',', $this->_caseIds);
 			$cmd_str = ' ' . $caseIds . ' ' . $tmp_dir_path;
 			if ($inputs['personal'] == 0)
 				$cmd_str .= ' --without-personal';
-			if ($inputs['tags']) {
-				$tags = implode(',', json_decode($inputs['tags'], true));
+
+			$tags = implode(',', json_decode($inputs['tags'], true));
+			if ($tags) {
 				$cmd_str .= ' --tag=' . $tags;
 			}
 
@@ -79,13 +81,13 @@ class ShareExportController extends BaseController
 			$search_data = Session::get('share.search');
 			$result = ClinicalCase::searchCase($search_data);
 			$caseIds = array();
-			if (!$result) {
-				foreach ($result as $rec) {
+			if ($result['list']) {
+				foreach ($result['list'] as $rec) {
 					$caseIds[] = $rec->caseID;
 				}
 			}
 		}
-
+		$this->_caseIds = $caseIds;
 		$projectId = "";
 		foreach ($caseIds as $caseId) {
 			$case = ClinicalCase::find($caseId);

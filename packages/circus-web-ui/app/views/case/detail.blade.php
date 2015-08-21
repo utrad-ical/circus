@@ -141,6 +141,9 @@
 			$.ajax({
 				url: metadata_url,
 				type: 'GET',
+				headers: {
+				//	'Authorization:': 'Baerer ' + tmp_series.token
+				},
 				data: {
 					series : tmp_series.id
 				},//Transmitted data
@@ -152,7 +155,7 @@
 					if(typeof response.allow_mode != 'undefined'){
 						tmp_series.allow_mode = $.extend(true,tmp_series.allow_mode ,response.allow_mode);
 					}
-					tmp_series.token = 'token written in blade';
+
 
 					//set 3D length settings
 					if(typeof tmp_series.voxel != 'object'){

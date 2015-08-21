@@ -622,22 +622,18 @@
 						tmp_h = active_series.voxel.y * active_series.voxel.voxel_y / active_series.voxel.voxel_x;
 						tmp_ow = active_series.voxel.x;
 						tmp_oh = active_series.voxel.y;
-											
-						this_viewer.number.current = Math.ceil(this_viewer.number.maximum / 2);
 						
 					} else if (this_viewer.orientation === 'sagittal') {
 						tmp_w = active_series.voxel.y * active_series.voxel.voxel_y / active_series.voxel.voxel_x;
 						tmp_h = active_series.voxel.z * active_series.voxel.voxel_z / active_series.voxel.voxel_x;
 						tmp_ow = active_series.voxel.y;
 						tmp_oh = active_series.voxel.z;
-						this_viewer.number.current = Math.ceil(this_viewer.number.maximum / 2);
 
 					} else if (this_viewer.orientation === 'coronal') {
 						tmp_w = active_series.voxel.x;
 						tmp_h = active_series.voxel.z * active_series.voxel.voxel_z / active_series.voxel.voxel_x;
 						tmp_ow = active_series.voxel.x;
 						tmp_oh = active_series.voxel.z;
-						this_viewer.number.current = Math.ceil(this_viewer.number.maximum / 2);
 
 					} else if (this_viewer.orientation === 'oblique') {
 						this_viewer.src = controllerInfo.obliqueUrl;
@@ -681,6 +677,10 @@
 							}
 						}
 					}
+					if(typeof this_viewer.number === 'undefined'){
+						this_viewer.number = {};
+					}
+					
 					$('#' + this_viewer.elementId).imageViewer({
 						'viewer': {
 							'id': this_viewer.id,

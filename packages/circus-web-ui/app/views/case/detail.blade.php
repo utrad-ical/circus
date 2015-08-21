@@ -152,6 +152,7 @@
 					if(typeof response.allow_mode != 'undefined'){
 						tmp_series.allow_mode = $.extend(true,tmp_series.allow_mode ,response.allow_mode);
 					}
+					tmp_series.token = 'token written in blade';
 
 					//set 3D length settings
 					if(typeof tmp_series.voxel != 'object'){
@@ -271,10 +272,13 @@
 						var tmp_viewer = initInfo[0].viewer[i];
 						if(tmp_viewer.orientation == 'axial'){
 							tmp_viewer.number.maximum = response.z;
+							tmp_viewer.number.current = Math.ceil(tmp_viewer.number.maximum / 2);
 						}else if(tmp_viewer.orientation == 'coronal'){
 							tmp_viewer.number.maximum = response.y;
+							tmp_viewer.number.current = Math.ceil(tmp_viewer.number.maximum / 2);
 						}else if(tmp_viewer.orientation == 'sagittal'){
 							tmp_viewer.number.maximum = response.x;
+							tmp_viewer.number.current = Math.ceil(tmp_viewer.number.maximum / 2);
 						}
 					}
 

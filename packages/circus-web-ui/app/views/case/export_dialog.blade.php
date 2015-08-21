@@ -18,6 +18,12 @@
                         {{Form::select('tag', isset($tag_list) ? $tag_list : array(), isset($inputs['tags']) ? $inputs['tags'] : null, array('class' => 'multi_select export_select_tags export_option_tag', 'multiple' => 'multiple'))}}
                     </td>
                 </tr>
+                <tr>
+                	<th>Password</th>
+                	<td>
+                		{{Form::password('tgz_pass', array('class' => 'common_input_text'))}}
+                	</td>
+                </tr>
             </table>
             <p class="submit_area">
                 {{Form::button('Export', array('class' => 'common_btn common_btn_gray', 'id' => 'btn_export_case', 'type' => 'button', 'name' => 'btnExport'))}}
@@ -26,6 +32,7 @@
     </p>
     <div id="progress"><div id="progress-label"></div></div>
     <div id="task-watcher"></div>
+    <div id="download_mode"></div>
 </div>
 
 
@@ -40,6 +47,7 @@ var exportRun = function (validate_flag) {
     var parent_form = $('.frm_share_export');
     var personal = parent_form.find('input[name="personal"]:checked').val();
     var export_type = parent_form.find('input[name="export_type"]').val();
+    var tgz_pass = parent_form.find('input[name="tgz_pass"]').val();
 
     var tag_ary = new Array();
     $('.export_option_tag option:selected').each(function(){
@@ -47,7 +55,7 @@ var exportRun = function (validate_flag) {
     });
     var tag = JSON.stringify(tag_ary);
 
-    var export_data = {"cases":$.cookie(COOKIE_NAME), "personal":personal,"tags":tag, "export_type":export_type};
+    var export_data = {"cases":$.cookie(COOKIE_NAME), "personal":personal,"tags":tag, "export_type":export_type, "tgz_pass":tgz_pass};
     busy(true);
     var xhr = $.ajax({
         url: "{{{asset('share/export')}}}",
@@ -58,7 +66,7 @@ var exportRun = function (validate_flag) {
         xhr: myXhr,
         success: function (data) {
             $('#task-watcher').taskWatcher(data.taskID).on('finish', function() {
-                downloadVolume(data.response);
+                downloadVolume(data.taskID);
                 closeExportOptionDialog();
                 busy(false);
             });

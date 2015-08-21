@@ -50,7 +50,9 @@ Route::group(['before' => 'auth'], function() {
 	Route::any('get_case_attribute', 'CaseSearchController@get_case_attribute');
 	Route::any('case/save_tags', 'TagRegisterController@save_tags');
 
-	Route::get('transfer/{download_url}', 'DownloadExportDataController@download');
+	Route::any('transfer/{taskID}', function($taskID){
+		return CommonHelper::downloadTgz($taskID);
+	});
 
 	//Series
 	Route::get('series/search/{preset_id}', 'SeriesSearchController@search')
@@ -69,13 +71,8 @@ Route::group(['before' => 'auth'], function() {
 	//Common download volume data
 	Route::any('download/volume', function() {
 		$inputs = Input::all();
-		$download_url = $inputs['dir_name'];
-		if (!Input::has('transfer')) {
-			$download_url = storage_path('cache').'/'.$download_url;
-			return CommonHelper::downloadZip($download_url, $inputs['file_name'], false);
-		} else {
-			return CommonHelper::downloadTgz($download_url);
-		}
+		$download_url = storage_path('cache').'/'. $inputs['dir_name'];
+		return CommonHelper::downloadZip($download_url, $inputs['file_name'], false);
 	});
 
 	//Share

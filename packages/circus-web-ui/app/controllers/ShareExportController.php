@@ -10,6 +10,9 @@ class ShareExportController extends BaseController
 	 */
 	public function export()
 	{
+		$result = array();
+
+		//POST data acquisition
 		$inputs = Input::all();
 		try {
 			// Validation
@@ -31,6 +34,11 @@ class ShareExportController extends BaseController
 				$cmd_str .= ' --tag=' . $tags;
 			}
 
+			//Password option
+			if ($inputs['tgz_pass']) {
+				$cmd_str .= ' --password=' . $inputs['tgz_pass'];
+			}
+
 			// Delete old transfer files
 			CommonHelper::deleteOlderTemporaryFiles(storage_path('transfer'), true, '-2 day');
 
@@ -43,15 +51,10 @@ class ShareExportController extends BaseController
 			if (!is_dir(storage_path('transfer'))) {
 				mkdir(storage_path('transfer'), 0777, true);
 			}
-			$res = array(
-				'file_name' => 'data.tgz',
-				'dir_name' => $tmp_dir_path . '/data.tgz'
-			);
 
 			return Response::json(array(
 				'result' => true,
-				'taskID' => $task->taskID,
-				'response' => $res
+				'taskID' => $task->taskID
 			));
 		} catch (Exception $e) {
 			Log::error($e);

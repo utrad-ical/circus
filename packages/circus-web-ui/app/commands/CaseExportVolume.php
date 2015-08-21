@@ -128,7 +128,8 @@ class CaseExportVolume extends TaskCommand {
 			$this->createSeriesData($series_list, $counter);
 
 			//tgz compression
-			$phar = new PharData($outputPath.'/data.tar');
+			$tmp_file_name = Str::random(32);
+			$phar = new PharData($outputPath.'/'.$tmp_file_name.'.tar');
 			$tmpAry = $phar->buildFromDirectory($outputPath);
 			$phar->compress(Phar::GZ, '.tgz');
 			$this->updateTaskProgress($counter, 0, "Exporting in progress. $counter files are processed.");
@@ -138,6 +139,25 @@ class CaseExportVolume extends TaskCommand {
 			File::delete($outputPath.'/data.tar');
 			$this->deleteTemporaryFiles($outputPath);
 			$this->updateTaskProgress($counter, 0, "Exporting in progress. $counter files are processed.");
+
+			$transferPath = storage_path('transfer').'/'.$tmp_file_name.'.tgz';
+			$tgzPath = $outputPath.'/'.$tmp_file_name.'.tgz';
+			//AES暗号化（Passwordオプション有
+			if ($this->option('password')) {
+				$encrypt = openssl_encrypt(file_get_contents($tgzPath),'aes-256-ecb', $this->option('password'));
+				$res_bin = file_put_contents($outputPath.'/'.$tmp_file_name.'.bin', $encrypt);
+
+				unlink($tgzPath);
+				$tgzPath = $outputPath.'/'.$tmp_file_name.'.bin';
+				$transferPath = storage_path('transfer').'/'.$tmp_file_name.'.bin';
+			}
+
+			//共有用にtransferに移動
+			copy($tgzPath, $transferPath);
+
+			//ダウンロードURLをTaskに格納
+			$this->task->saveDownloadUrl($transferPath);
+
 		} catch (Exception $e) {
 			\Log::error($e);
 			return false;
@@ -287,6 +307,7 @@ class CaseExportVolume extends TaskCommand {
 		return array(
 			array('without-personal', null, InputOption::VALUE_NONE, 'Without exporting petientInfoCache.', null),
 			array('tag', null, InputOption::VALUE_OPTIONAL, 'Tags to be applied to the latest revision', null),
+			array('password', null, InputOption::VALUE_OPTIONAL, 'Add the password to the compressed file', null)
 		);
 	}
 

@@ -150,6 +150,28 @@ class Task extends BaseModel
 		$this->save();
 	}
 
+
+	public function saveDownloadUrl($url)
+	{
+		$this->download = $url;
+		$this->save();
+	}
+
+	public static function getDownloadUrl($taskID)
+	{
+		if (!$taskID)
+			throw new Exception('Please selecte taskID .');
+		$task = Task::find($taskID);
+
+
+		if (!$task)
+			throw new Exception('Invalid task');
+		if (!$task->download)
+			throw new Exception('Invalid download file .');
+
+		return $task->download;
+	}
+
 	/**
 	 * Executes command as a background process.
 	 * @param string $command The command.
@@ -174,4 +196,5 @@ class Task extends BaseModel
 		}
 		return is_resource($process);
 	}
+
 }

@@ -118,29 +118,26 @@ class CommonHelper{
 	}
 
 	/**
-	 * tgzファイルダウンロード
-	 * @param string $tmp_dir 対象フォルダ
-	 * @param string $file_name ファイル名
+	 * download tgz file
+	 * @param string $taskID taskID of task model
 	 */
-	public static function downloadTgz($file_path) {
+	public static function downloadTgz($taskID)
+	{
 		try {
-			if (!$file_path)
-				throw new Exception('Please select download file .');
+			if (!$taskID)
+				throw new Exception('Please select taskID .');
 
-			//共有用にtransferに移動
-			$tmp_file_name = Str::random(32);
-			$tgz_path = storage_path('transfer').'/'.$tmp_file_name.'.tgz';
-			rename($file_path, $tgz_path);
+			$tgz_path = Task::getDownloadUrl($taskID);
 
 			$headers = array(
 				'Content-Type' => 'application/zip',
-				'Content-Disposition' => 'attachment; filename="'.$tmp_file_name.'.tgz'.'"',
+				'Content-Disposition' => 'attachment; filename="'.basename($tgz_path).'"',
 				'Content-Length' => filesize($tgz_path)
 			);
 
-	   		return Response::stream(
-	   			function() use ($tgz_path){
-	   				$fp = fopen($tgz_path, 'rb');
+			return Response::stream(
+				function() use ($tgz_path){
+					$fp = fopen($tgz_path, 'rb');
 					while(!feof($fp)) {
 						$buf = fread($fp, 1048576);
 						echo $buf;

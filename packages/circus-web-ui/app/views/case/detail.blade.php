@@ -142,7 +142,7 @@
 				url: metadata_url,
 				type: 'GET',
 				headers: {
-				//	'Authorization:': 'Baerer ' + tmp_series.token
+					Authorization: 'Bearer ' + tmp_series.token
 				},
 				data: {
 					series : tmp_series.id

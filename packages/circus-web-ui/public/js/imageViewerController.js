@@ -382,6 +382,15 @@
         //rotate tool
         if (controllerInfo.control.rotate === true) {
           tmp_panel_wrap.append('<li class="toolbar_btn ico_detail_sprite ico_detail_sprite_rotate"></li>');
+					
+					var rotate_dir_opt = '<select class="w_100 rotate_dir_opt">';
+					for (var i = 0; i < controllerInfo.viewer.length; i++) {
+					  if(controllerInfo.viewer[i].orientation !== 'oblique'){
+						  rotate_dir_opt = rotate_dir_opt + '<option value=' + controllerInfo.viewer[i].elementId + '>' + controllerInfo.viewer[i].orientation + '</option>';
+						}
+					}
+					rotate_dir_opt = rotate_dir_opt + '</select>';
+					tmp_panel_wrap.find('.ico_detail_sprite_rotate').append(rotate_dir_opt);
         }
 
         //guide move tool
@@ -981,6 +990,22 @@
       if (controllerInfo.control.measure.panel === true) {
         $('.ico_detail_sprite_rotate').click(function () {
           this_elm.imageViewerController('changeMode', 'rotate');
+        });
+				
+				//どの断面でObliqueを制御するかの選択
+        $('.rotate_dir_opt').change(function () {
+					var this_val = $(this).val();
+					for(var i = 0; i < controllerInfo.viewer.length; i++){
+						var tmp_viewer = controllerInfo.viewer[i];
+						var the_opts = $('#' + tmp_viewer.elementId).imageViewer('option');
+						if(tmp_viewer.elementId === this_val){
+							the_opts.viewer.rotate.visible = true;
+							this_elm.imageViewerController('setObliqueOptions',the_opts.viewer.orientation, the_opts.viewer.rotate.angle);
+						} else {
+							the_opts.viewer.rotate.visible = false;
+						}
+						$('#' + tmp_viewer.elementId).imageViewer('option',the_opts).imageViewer('syncVoxel');
+					}
         });
       }
 

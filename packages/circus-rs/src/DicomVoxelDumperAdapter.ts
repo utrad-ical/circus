@@ -46,7 +46,7 @@ export default class DicomVoxelDumperAdapter extends DicomDumper {
 
 		if (binarySize == GLOBAL_HEADER) {
 			raw.appendHeader(json);
-			raw.setDimension(json.width, json.height, json.depth, json.type);
+			raw.setDimension(json.width, json.height, json.depth, json.dataType);
 		} else if (binarySize == GLOBAL_FOOTER) {
 			raw.appendHeader(json);
 			raw.setVoxelDimension(json.voxelWidth, json.voxelHeight, json.voxelDepth);

@@ -15,50 +15,47 @@ import { ValidatorRules } from '../Validator';
 
 
 export default class RequestAccessTokenAction extends Controller {
-    private cache: AuthorizationCache;
+	private cache: AuthorizationCache;
 
-    public setCache(cache: AuthorizationCache) : void
-    {
-        this.cache = cache;
-    }
+	public setCache(cache: AuthorizationCache): void {
+		this.cache = cache;
+	}
 
-    protected getRules(): ValidatorRules
-    {
-        return {
-            series: ['Series UID', null, 'isLength:1:200', null]
-        };
-    }
+	protected getRules(): ValidatorRules {
+		return {
+			series: ['Series UID', null, 'isLength:1:200', null]
+		};
+	}
 
-    public process(query: any, res: http.ServerResponse): void
-    {
-        var series: string;
+	public process(query: any, res: http.ServerResponse): void {
+		var series: string;
 
-        if ('series' in query) {
-            series = query['series'];
-        }
-        if (series == null) {
-            this.respondBadRequest(res, 'No series in query');
-            return;
-        }
+		if ('series' in query) {
+			series = query['series'];
+		}
+		if (series == null) {
+			this.respondBadRequest(res, 'No series in query');
+			return;
+		}
 
-        crypt.randomBytes(48, (ex, buf)=>{
-            var status = {};
+		crypt.randomBytes(48, (ex, buf)=> {
+			var status = {};
 
-            if (ex) {
-                status = {
-                    'result': 'ng'
-                };
-            } else {
-                var token:string = buf.toString('hex');
-                this.cache.update(series, token);
-                status = {
-                    'result': 'ok',
-                    'token': token
-                };
-            }
-            this.respondJson(res, status);
-        });
+			if (ex) {
+				status = {
+					'result': 'ng'
+				};
+			} else {
+				var token: string = buf.toString('hex');
+				this.cache.update(series, token);
+				status = {
+					'result': 'ok',
+					'token': token
+				};
+			}
+			this.respondJson(res, status);
+		});
 
-    }
+	}
 
 }

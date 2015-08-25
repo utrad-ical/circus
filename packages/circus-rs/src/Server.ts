@@ -72,7 +72,7 @@ class Server {
 		return new pngModule(config.pngWriter.options);
 	}
 
-	private createRawDumper(): DicomRawDumper  {
+	private createRawDumper(): DicomRawDumper {
 		var module: string = config.rawDumper.module;
 		logger.info('Using RawDumper: ' + module);
 		var rawDumperModule: typeof DicomRawDumper = require('./' + module).default;
@@ -102,7 +102,7 @@ class Server {
 				if (route[2] && config.authorization.require) {
 					if (!authorizationCache.isValid(req)) {
 						logger.info('401 error');
-						res.setHeader('WWW-Authenticate', 'Bearer realm="CircusRS"')
+						res.setHeader('WWW-Authenticate', 'Bearer realm="CircusRS"');
 						res.writeHead(401, 'access not allowed.');
 						res.end();
 						return;
@@ -127,7 +127,7 @@ class Server {
 			var controller: RequestAccessTokenAction = new RequestAccessTokenAction(reader, pngWriter, rawDumper);
 			controller.setCache(authorizationCache);
 
-			router.get('/requestToken' , (req, res) => {
+			router.get('/requestToken', (req, res) => {
 				Counter.countUp('requestToken');
 				var ip = req.ip || req.connection.remoteAddress || req.socket.remoteAddress || req.connection.socket.remoteAddress;
 				logger.info(ip);

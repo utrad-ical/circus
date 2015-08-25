@@ -20,8 +20,8 @@ class Anonymizer
 		$src_path = Storage::find($sr->storageID);
 
 
-		if ($src_path == $out_path) {
-			throw new \Exception("Failed to create original volume.");
+		if ($out_path == $src_path->dicomStoragePath($series_uid)) {
+			throw new \Exception("Invalid output path (same as input path).");
 		}
 
 		$mr = new MultiRange($sr['images']);

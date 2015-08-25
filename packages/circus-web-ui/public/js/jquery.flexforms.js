@@ -1068,7 +1068,12 @@ var propertyEditorWidget;
         var table = $('<table>').addClass('ui-propertyeditor-table').appendTo(this.element);
         this.fields = {};
         $.each(props, function (i, prop) {
-            if (prop.key in _this.fields) {
+            if (prop.key in _this.fields)
+                return;
+            if ('heading' in prop) {
+                var row = $('<tr>').addClass('ui-propertyeditor-heading');
+                var column = $('<th>').attr('colspan', 2).text(prop.heading).appendTo(row);
+                row.appendTo(table);
                 return;
             }
             var row = $('<tr>').addClass('ui-propertyeditor-row');
@@ -1144,6 +1149,8 @@ var propertyEditorWidget;
         this.options.value = {};
         var props = this.options.properties;
         $.each(props, function (i, prop) {
+            if ('heading' in prop)
+                return;
             var field = _this.fields[prop.key];
             _this.options.value[prop.key] = field.typedfield('valid') ? field.typedfield('getValue') : null;
         });

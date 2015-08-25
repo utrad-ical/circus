@@ -1,15 +1,15 @@
 <?php
+
 /**
  * ケースExport
  */
-class CaseExportController extends BaseController {
+class CaseExportController extends BaseController
+{
 	/**
 	 * Case Export
 	 */
-	public function export() {
-		$result = array();
-
-		//POST data acquisition
+	public function export()
+	{
 		$inputs = Input::all();
 
 		try {
@@ -18,11 +18,11 @@ class CaseExportController extends BaseController {
 
 			//create temporary folder
 			$tmp_dir = Str::random(32);
-			$tmp_dir_path = storage_path('cache').'/'.$tmp_dir;
+			$tmp_dir_path = storage_path('cache') . '/' . $tmp_dir;
 			if (!mkdir($tmp_dir_path))
-				throw new Exception('Creating a temporary folder failed');
+				throw new Exception('Failed to creating a temporary folder.');
 
-			//delete trash files
+			//delete old files
 			CommonHelper::deleteOlderTemporaryFiles(storage_path('cache'), true, '-1 day');
 
 			$data_label = $this->getDataTypeOption(intval($inputs['data_type']));
@@ -30,7 +30,7 @@ class CaseExportController extends BaseController {
 			$series_index = $this->getSeriesIndex($inputs['caseID'], $inputs['revisionNo'], $inputs['seriesUID']);
 
 			//command execution
-			$cmd_str = ' case '.$inputs['caseID'].' '.$tmp_dir_path;
+			$cmd_str = ' case ' . $inputs['caseID'] . ' ' . $tmp_dir_path;
 
 			$cmd_ary = array(
 				'--series_index' => $series_index,
@@ -42,28 +42,27 @@ class CaseExportController extends BaseController {
 				$cmd_ary['--map'] = $this->createMap($inputs['labels']);
 
 			foreach ($cmd_ary as $cmd_key => $cmd_val) {
-				$cmd_str .= ' '.$cmd_key.'='.$cmd_val;
+				$cmd_str .= ' ' . $cmd_key . '=' . $cmd_val;
 			}
 
 			$cmd_str .= ' --compress';
 			if ($data_label)
-				$cmd_str .= ' '.$data_label;
+				$cmd_str .= ' ' . $data_label;
 			if ($output_label)
-				$cmd_str .= ' '.$output_label;
+				$cmd_str .= ' ' . $output_label;
 
-			$task = Task::startNewTask("image:export-volume " .$cmd_str);
+			$task = Task::startNewTask("image:export-volume " . $cmd_str);
 			if (!$task) {
 				throw new Exception('Failed to invoke export process.');
 			}
 
 			//download zip file
-			$zip_file_name = $inputs['caseID'].'_series'.$series_index.'_revision'.$inputs['revisionNo'].'.zip';
-			$zip_file_path = $tmp_dir_path.'/'.$zip_file_name;
+			$zip_file_name = $inputs['caseID'] . '_series' . $series_index . '_revision' . $inputs['revisionNo'] . '.zip';
+			$zip_file_path = $tmp_dir_path . '/' . $zip_file_name;
 
 			if (!file_exists($zip_file_path))
 				throw new Exception('failed create zip file .');
 
-			//ダウンロードに必要な情報の設定
 			$res = array(
 				'file_name' => $zip_file_name,
 				'dir_name' => $tmp_dir
@@ -89,14 +88,16 @@ class CaseExportController extends BaseController {
 	 * validate check
 	 * @param $inputs input values
 	 */
-	function validate($inputs) {
+	function validate($inputs)
+	{
 		//no select data type
 		if (!array_key_exists('data_type', $inputs))
 			throw new Exception('Please select the data type .');
 		//data type not found
 		if ($inputs['data_type'] != ClinicalCase::DATA_TYPE_LABEL &&
 			$inputs['data_type'] != ClinicalCase::DATA_TYPE_ORIGINAL &&
-			$inputs['data_type'] != ClinicalCase::DATA_TYPE_ORIGINAL_LABEL)
+			$inputs['data_type'] != ClinicalCase::DATA_TYPE_ORIGINAL_LABEL
+		)
 			throw new Exception('The data type does not exist .');
 
 		//no select output type
@@ -104,13 +105,15 @@ class CaseExportController extends BaseController {
 			throw new Exception('Please select the output type .');
 		//output type not found
 		if ($inputs['output_type'] != ClinicalCase::OUTPUT_TYPE_COMBI &&
-			$inputs['output_type'] != ClinicalCase::OUTPUT_TYPE_SEPARATE)
+			$inputs['output_type'] != ClinicalCase::OUTPUT_TYPE_SEPARATE
+		)
 			throw new Exception('The output type does not exists .');
 
 		//include a label output and no select label
 		if (($inputs['data_type'] == ClinicalCase::DATA_TYPE_LABEL ||
 			$inputs['data_type'] == ClinicalCase::DATA_TYPE_ORIGINAL_LABEL) &&
-			!array_key_exists('labels', $inputs))
+			!array_key_exists('labels', $inputs)
+		)
 			throw new Exception('Please select at least one label.');
 
 		$case_info = ClinicalCase::find($inputs['caseID']);
@@ -124,7 +127,7 @@ class CaseExportController extends BaseController {
 
 		$revision = $case_info->revisions[$inputs['revisionNo']];
 		$series_idx = null;
-		foreach ($revision['series'] as $idx => $series){
+		foreach ($revision['series'] as $idx => $series) {
 			if ($series['seriesUID'] === $inputs['seriesUID']) {
 				$series_idx = $idx;
 				break;
@@ -136,9 +139,10 @@ class CaseExportController extends BaseController {
 
 		//include a label output and label not found
 		if ($inputs['data_type'] == ClinicalCase::DATA_TYPE_LABEL ||
-			$inputs['data_type'] == ClinicalCase::DATA_TYPE_ORIGINAL_LABEL) {
+			$inputs['data_type'] == ClinicalCase::DATA_TYPE_ORIGINAL_LABEL
+		) {
 			$series = $revision['series'][$series_idx];
-			foreach($inputs['labels'] as $idx => $label) {
+			foreach ($inputs['labels'] as $idx => $label) {
 				//label not found
 				if (!array_key_exists($idx, $series['labels']))
 					throw new Exception('The label does not exist .');
@@ -153,11 +157,12 @@ class CaseExportController extends BaseController {
 	 * @param $series_uid series id
 	 * @return $idx series index number
 	 */
-	function getSeriesIndex($case_id, $revision_no, $series_uid) {
+	function getSeriesIndex($case_id, $revision_no, $series_uid)
+	{
 		$case_info = ClinicalCase::find($case_id);
 
 		$revision = $case_info->revisions[$revision_no];
-		foreach($revision['series'] as $idx => $series) {
+		foreach ($revision['series'] as $idx => $series) {
 			if ($series['seriesUID'] === $series_uid)
 				return $idx;
 		}
@@ -167,7 +172,8 @@ class CaseExportController extends BaseController {
 	 * get data type
 	 * @param $data_type data type
 	 */
-	function getDataTypeOption($data_type) {
+	function getDataTypeOption($data_type)
+	{
 		$opt_label = '';
 		switch ($data_type) {
 			case ClinicalCase::DATA_TYPE_ORIGINAL:
@@ -184,7 +190,8 @@ class CaseExportController extends BaseController {
 	 * get output type
 	 * @param $output_type output type
 	 */
-	function getOutputTypeOption($output_type) {
+	function getOutputTypeOption($output_type)
+	{
 		return $output_type == ClinicalCase::OUTPUT_TYPE_COMBI ? '--combined' : '';
 	}
 
@@ -193,20 +200,20 @@ class CaseExportController extends BaseController {
 	 * @param $labels label list
 	 * @return map of label info
 	 */
-	function createMap($labels) {
+	function createMap($labels)
+	{
 		if (!$labels) return '';
 
 		$map_list = array();
 		foreach ($labels as $key => $value) {
-			$map_list[$value] = $key+1;
+			$map_list[$value] = $key + 1;
 		}
 		ksort($map_list);
-		//KeyとValueを連結
 		$tmp_map = array();
-		foreach($map_list as $key => $value) {
-			$tmp_map[] = $key.','.$value;
+		foreach ($map_list as $key => $value) {
+			$tmp_map[] = $key . ',' . $value;
 		}
-		return implode(':',$tmp_map);
+		return implode(':', $tmp_map);
 	}
 
 }

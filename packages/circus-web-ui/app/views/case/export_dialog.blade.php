@@ -51,7 +51,6 @@
 
 
 var exportRun = function (validate_flag) {
-    //エラーがあるのでExport処理を行わない
     if (!isExportRun(validate_flag))
         return;
 

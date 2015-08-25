@@ -198,16 +198,4 @@ class Task extends BaseModel
 		return is_resource($process);
 	}
 
-	public static function getDownloadList()
-	{
-		return Task::where('status', '=', self::FINISHED)
-				   ->where('download', '!=', '')
-				   ->where('updateTime', '=',
-						array(
-							'$gte' => new MongoDate(strtotime('-2 day')),
-						))
-				   ->orderby('updateTime', 'desc')
-				   ->get();
-	}
-
 }

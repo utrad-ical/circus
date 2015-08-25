@@ -57,7 +57,7 @@
 
 .label_select_wrap{float:left; margin-right:20px;}
 .ico_detail_sprite .ico_detail_sprite_rotate{text-indent:0;}
-.rotate_dir_opt{position:absolute; top:30px; left:0; display:none;}
+.rotate_dir_opt{position:absolute; top:0; left:30px; display:none; z-index:100;}
 .active .rotate_dir_opt{display:block;}
 .export_area .disp_label_list li{background:#eee; margin-bottom:2px; cursor:pointer;}
 .export_area .disp_label_list input.export_labels{margin-right:5px;}

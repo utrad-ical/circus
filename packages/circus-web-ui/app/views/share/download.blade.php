@@ -1,11 +1,5 @@
 @extends('common.layout')
 
-@section('head')
-{{HTML::style('css/jquery-ui.css')}}
-{{HTML::script('js/jquery-ui.min.js')}}
-{{HTML::script('js/jquery.formserializer.js')}}
-@stop
-
 @section('title')
 Download Export Data
 @stop
@@ -19,9 +13,9 @@ Download Export Data
 			<col width="15%">
 		</colgroup>
 		<tr>
-			<th>taskID</th>
-			<th>fileName</th>
-			<th>exportDatetime</th>
+			<th>Task ID</th>
+			<th>File</th>
+			<th>Export Date</th>
 		</tr>
 		@if (count($list) > 0)
 			@foreach ($list as $rec)
@@ -34,7 +28,7 @@ Download Export Data
 		@else
 			<tr>
 				<td colspan="3">
-					Download results 0.
+					No results.
 				</td>
 			</tr>
 		@endif

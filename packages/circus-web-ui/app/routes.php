@@ -16,7 +16,9 @@ Route::get('/', function() { return Redirect::to('login'); });
 Route::get('login', 'LoginController@getIndex');
 Route::post('login', 'LoginController@login');
 Route::get('logout', 'LoginController@logout');
-
+Route::any('transfer/{taskID}', function($taskID){
+	return CommonHelper::downloadTgz($taskID);
+});
 
 Route::group(['before' => 'auth'], function() {
 
@@ -50,9 +52,7 @@ Route::group(['before' => 'auth'], function() {
 	Route::any('get_case_attribute', 'CaseSearchController@get_case_attribute');
 	Route::any('case/save_tags', 'TagRegisterController@save_tags');
 
-	Route::any('transfer/{taskID}', function($taskID){
-		return CommonHelper::downloadTgz($taskID);
-	});
+
 
 	//Series
 	Route::get('series/search/{preset_id}', 'SeriesSearchController@search')
@@ -83,6 +83,8 @@ Route::group(['before' => 'auth'], function() {
 	Route::any('share/search_result', 'ShareSearchController@search_ajax');
 	Route::any('share/export', 'ShareExportController@export');
 	Route::get('share/download', 'ShareDownloadController@index');
+	Route::get('share/import/index', 'ShareImportController@index');
+	Route::any('share/import/import', 'ShareImportController@import');
 
 	// Administration
 	Route::group(array('before' => 'admin'), function() use ($staticView) {

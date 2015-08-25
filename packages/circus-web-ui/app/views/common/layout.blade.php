@@ -60,6 +60,7 @@ if (Auth::check()) {
 						<ul>
 							<li><a href="{{asset('share/search')}}">Share Search</a></li>
 							<li><a href="{{asset('share/download')}}">Download</a></li>
+							<li><a href="{{asset('share/import/index')}}">Import</a></li>
 						</ul>
 					</li>
 					@if (Auth::user()->hasPrivilege(Group::SERVER_MANAGE))

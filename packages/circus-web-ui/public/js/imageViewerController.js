@@ -676,13 +676,36 @@
 								number: 0,
 								name: 'sagittal',
 								color: 'ff0000'
-							}],
+							}, {
+								show: true,
+								number: 0,
+								name: 'oblique_x',
+								color: 'ff0000'
+							}, {
+								show: true,
+								number: 0,
+								name: 'oblique_y',
+								color: 'ff0000'
+							}
+							],
 							grid_range : 5,
 							hall_size : 0.1
 						}
 						for (var j = tmp_guide_info.lines.length - 1; j >= 0; j--) {
 							if (this_viewer.orientation === tmp_guide_info.lines[j].name) {
 								tmp_guide_info.lines.splice(j,1);
+								continue;
+							}
+							if(this_viewer.orientation !== 'oblique' && tmp_guide_info.lines[j].name === 'oblique_x'){
+								tmp_guide_info.lines.splice(j,1);
+							} else	if(this_viewer.orientation !== 'oblique' && tmp_guide_info.lines[j].name === 'oblique_y'){
+								tmp_guide_info.lines.splice(j,1);
+							}
+							
+							if(this_viewer.orientation === 'oblique'){
+								if(tmp_guide_info.lines[j].name === 'axial' || tmp_guide_info.lines[j].name === 'sagittal' || tmp_guide_info.lines[j].name === 'coronal'){
+									tmp_guide_info.lines.splice(j,1);
+								}
 							}
 						}
 					}
@@ -1495,7 +1518,7 @@
             tmp_opts.viewer.guide.lines[j].number = the_number;
           }
         }
-        $(elmId).trigger('sync');
+       
 				if(tmp_opts.viewer.rotate.visible === true){
 		      var this_elm = this;
 					this_elm.imageViewerController('setObliqueOptions',

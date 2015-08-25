@@ -19,6 +19,11 @@
 		padding-bottom: 1em;
 		width: 500px;
 	}
+
+	.ui-propertyeditor-heading > th {
+		padding-top: 1em;
+		border-bottom: 1px solid silver;
+	}
 </style>
 
 {{HTML::script('js/jquery-ui.min.js')}}

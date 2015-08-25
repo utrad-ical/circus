@@ -80,7 +80,7 @@ if (Auth::check()) {
 			<nav id="sub_nav">
 				<ul>
 					<li id="user_info">{{Auth::user()->description}}</li>
-					<li id="color_select"><a id="color_switch"></a>	</li>
+					<li id="color_select"><a id="color_switch" title="Temporary changes the color theme."></a></li>
 					<li class="icon_menu"><a href="{{asset('preference')}}"><span class="circus-icon-preference"></span>Preference</a></li>
 					<li class="icon_menu"><a href="{{asset('logout')}}"><span class="circus-icon-logout"></span>Logout</a></li>
 				</ul>

@@ -15,4 +15,21 @@ class ProjectApiController extends ResourceApiBaseController
 		array_shift($fields);
 		$this->settable = $fields;
 	}
+
+	/**
+	 * Displays project schema for sharing.
+	 * @param $projectID
+	 */
+	public function schema($projectID)
+	{
+		$class = $this->targetClass;
+		$item = $class::findOrFail($this->normalizeID($projectID), $this->fields)->toArray();
+		$item = array_only($item, array(
+			'projectID', 'projectName', 'description',
+			'caseAttributesSchema', 'labelAttributesSchema',
+			'windowPriority', 'windowPresets'
+		));
+		$item['origin'] = route('projectSchema');
+		return Response::json($item);
+	}
 }

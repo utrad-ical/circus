@@ -103,6 +103,9 @@ Route::group(['before' => 'auth'], function() {
 		$staticView('administration/server', 'admin.server');
 	});
 
+	// For project schema sharing
+	Route::get('api/projectschema/{projectID}', ['as' => 'projectSchema', 'uses' => 'ProjectApiController@schema']);
+
 	// Task
 	Route::get('task', 'TaskController@index');
 	Route::get('task/{taskID}', 'TaskController@show');

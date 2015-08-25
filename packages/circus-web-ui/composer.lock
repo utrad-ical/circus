@@ -1,7 +1,7 @@
 {
     "_readme": [
         "This file locks the dependencies of your project to a known state",
-        "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
     "hash": "98d2adc34691b333e0230db852343a53",
@@ -1716,12 +1716,12 @@
             "source": {
                 "type": "git",
                 "url": "https://bitbucket.org/ical/circus_rs_dicom_server.git",
-                "reference": "8b529c79c355757df5f55979714bb29ec067e690"
+                "reference": "1a49da5c629ecfb6455a7cf9343e71cc189c1d2e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://bitbucket.org/ical/circus_rs_dicom_server/get/8b529c79c355757df5f55979714bb29ec067e690.zip",
-                "reference": "8b529c79c355757df5f55979714bb29ec067e690",
+                "url": "https://bitbucket.org/ical/circus_rs_dicom_server/get/1a49da5c629ecfb6455a7cf9343e71cc189c1d2e.zip",
+                "reference": "1a49da5c629ecfb6455a7cf9343e71cc189c1d2e",
                 "shasum": ""
             },
             "type": "library",
@@ -1742,7 +1742,7 @@
             "keywords": [
                 "DICOM"
             ],
-            "time": "2015-08-24 05:34:15"
+            "time": "2015-08-24 09:16:50"
         }
     ],
     "packages-dev": [

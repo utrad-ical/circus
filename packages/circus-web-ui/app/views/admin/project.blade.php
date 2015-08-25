@@ -31,13 +31,9 @@
                         {key: 'description', label: 'Description'}
                     ],
                     form: [
+                        {heading: 'Project Schema (May be shared)'},
                         {caption: 'Project Name', key: 'projectName', type: 'text'},
                         {caption: 'Description', key: 'description', type: 'text'},
-                        groupProperty('readGroups', 'Read Groups'),
-                        groupProperty('addSeriesGroups', 'Add Series Groups'),
-                        groupProperty('writeGroups', 'Write Groups'),
-                        groupProperty('moderateGroups', 'Moderate Groups'),
-                        groupProperty('viewPersonalInfoGroups', 'View Personal Info Groups'),
                         {
                             caption: 'Window Priority',
                             key: 'windowPriority',
@@ -59,11 +55,18 @@
                                 }
                             }
                         }},
+                        {caption: 'Label Attributes', key: 'labelAttributesSchema', type: 'json'},
+                        {caption: 'Case Attributes', key: 'caseAttributesSchema', type: 'json'},
+
+                        {heading: 'Project Privilege (Not shared)'},
+                        groupProperty('readGroups', 'Read Groups'),
+                        groupProperty('addSeriesGroups', 'Add Series Groups'),
+                        groupProperty('writeGroups', 'Write Groups'),
+                        groupProperty('moderateGroups', 'Moderate Groups'),
+                        groupProperty('viewPersonalInfoGroups', 'View Personal Info Groups'),
                         {caption: 'Tags', key: 'tags', type: 'callback', spec: {
                             edit: editTag, render: renderTag
-                        }},
-                        {caption: 'Label Attributes', key: 'labelAttributesSchema', type: 'json'},
-                        {caption: 'Case Attributes', key: 'caseAttributesSchema', type: 'json'}
+                        }}
                     ],
                     beforeEdit: function () {
                         var select = $('select.ui-tf-select[multiple]');
@@ -73,8 +76,17 @@
                             });
                         }
                         select.multiselect('refresh');
+                    },
+                    postDrawListRow: function (row, item) {
+                        var cell = $('td:last', row);
+                        var button = $('<button>').addClass('common_btn share').text('Share').appendTo(cell);
+                        cell.append(' ').append(button);
                     }
                 });
+            });
+
+            $('#list').on('click', 'button.share', function () {
+                //
             });
 
             function newWrappedTag(tag) {

@@ -83,7 +83,6 @@
     },
     viewer: [ //展開するビューアーの情報
       {
-        id: 'viewer_', //内部的にビューアーに名前を付けておく
         elementId: '',
         orientation: '',
         window: {}, //ひな形の中身は active_series.window と共通
@@ -701,7 +700,6 @@
 							} else	if(this_viewer.orientation !== 'oblique' && tmp_guide_info.lines[j].name === 'oblique_y'){
 								tmp_guide_info.lines.splice(j,1);
 							}
-							
 							if(this_viewer.orientation === 'oblique'){
 								if(tmp_guide_info.lines[j].name === 'axial' || tmp_guide_info.lines[j].name === 'sagittal' || tmp_guide_info.lines[j].name === 'coronal'){
 									tmp_guide_info.lines.splice(j,1);
@@ -1526,6 +1524,7 @@
 						tmp_opts.viewer.rotate.angle
 					);
 				};
+				$(elmId).imageViewer('syncVoxel');
       }			
     },
 

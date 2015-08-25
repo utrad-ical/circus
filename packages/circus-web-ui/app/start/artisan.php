@@ -20,3 +20,4 @@ Artisan::add(new TaskDummyWait);
 Artisan::add(new CaseExportVolume);
 Artisan::add(new BuildRs);
 Artisan::add(new ManageRs);
+Artisan::add(new CaseImportVolume);

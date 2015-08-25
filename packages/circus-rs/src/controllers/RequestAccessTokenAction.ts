@@ -13,7 +13,6 @@ var crypt = require('crypto');
 import logger from '../Logger';
 import { ValidatorRules } from '../Validator';
 
-
 export default class RequestAccessTokenAction extends Controller {
 	private cache: AuthorizationCache;
 
@@ -28,15 +27,7 @@ export default class RequestAccessTokenAction extends Controller {
 	}
 
 	public process(query: any, res: http.ServerResponse): void {
-		var series: string;
-
-		if ('series' in query) {
-			series = query['series'];
-		}
-		if (series == null) {
-			this.respondBadRequest(res, 'No series in query');
-			return;
-		}
+		var series: string = query['series'];
 
 		crypt.randomBytes(48, (ex, buf)=> {
 			var status = {};

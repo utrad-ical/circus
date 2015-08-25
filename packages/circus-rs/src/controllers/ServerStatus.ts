@@ -5,6 +5,8 @@ import Controller from './Controller';
 import http = require('http');
 import Counter from '../Counter';
 
+var config: Configuration = require('config');
+
 var startUpTime: Date = new Date(); // The time this module was loaded
 
 export default class ServerStatus extends Controller {
@@ -21,7 +23,8 @@ export default class ServerStatus extends Controller {
 				upTime: process.uptime(),
 				upSince: startUpTime.toISOString()
 			},
-			counter: Counter.getCounts()
+			counter: Counter.getCounts(),
+			authorization: { enabled: !!config.authorization.require }
 		};
 		this.respondJson(res, status);
 	}

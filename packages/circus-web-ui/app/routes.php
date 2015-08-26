@@ -96,7 +96,8 @@ Route::group(['before' => 'auth'], function() {
 		Route::resource('api/group', 'GroupApiController');
 		Route::resource('api/storage', 'StorageApiController');
 		Route::resource('api/project', 'ProjectApiController');
-		Route::resource('api/serverParam', 'ServerParamApiController');
+		Route::get('api/server_param', 'ServerParamApiController@get');
+		Route::post('api/server_param', 'ServerParamApiController@post');
 		Route::put('api/storage/setactive/{storageID}', 'StorageApiController@setActive');
 		Route::post('api/server/start', 'ServerControllerController@start');
 		Route::post('api/server/stop', 'ServerControllerController@stop');

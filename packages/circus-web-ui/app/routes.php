@@ -83,8 +83,8 @@ Route::group(['before' => 'auth'], function() {
 	Route::any('share/search_result', 'ShareSearchController@search_ajax');
 	Route::any('share/export', 'ShareExportController@export');
 	Route::get('share/download', 'ShareDownloadController@index');
-	Route::get('share/import/index', 'ShareImportController@index');
-	Route::any('share/import/import', 'ShareImportController@import');
+	Route::get('share/import', 'ShareImportController@import');
+	Route::any('share/register', 'ShareImportController@register');
 
 	// Administration
 	Route::group(array('before' => 'admin'), function() use ($staticView) {

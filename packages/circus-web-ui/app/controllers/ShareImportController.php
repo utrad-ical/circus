@@ -17,23 +17,26 @@ class ShareImportController extends BaseController
 	/**
 	 * Share Import
 	 */
-	public function index()
+	public function import()
 	{
 		$result = array();
 
-		return Response::view('share/import', $result);
+		$default_domain = ServerParam::getVal('defaultDomain');
+		$domain_list = ServerParam::getDomainList();
+		return View::make('share.import')
+			->with('default_domain', $default_domain)
+			->with('domains', $domain_list);;
 	}
 
-	public function import()
+	/**
+	 * Import Register
+	 */
+	public function register()
 	{
-		Log::debug('Import Called');
 		$result = array();
 
 		$inputs = Input::all();
-		Log::debug($inputs);
-		Log::debug(Input::file());
 		$inputs['import_file'] = Input::file('import_file');
-		Log::debug(Input::file('import_file'));
 
 		try {
 			$this->validate($inputs);
@@ -42,7 +45,6 @@ class ShareImportController extends BaseController
 			$cmd_str = ' '.$inputs['import_type'];
 
 			//Import Path
-			Log::debug('ImportType::'.$inputs['import_type']);
 			if ($inputs['import_type'] === self::DATA_TYPE_LOCAL) {
 				$tmpDir = Str::random(32);
 				$tmpPath = storage_path('cache').'/'.$tmpDir;
@@ -57,23 +59,17 @@ class ShareImportController extends BaseController
 			if ($inputs['personal'] == 0)
 				$cmd_str .= ' --without-personal';
 
-			//Tag Option
-			/*
-			$tags = implode(',', json_decode($inputs['tags'], true));
-			if ($tags) {
-				$cmd_str .= ' --tag=' . $tags;
-			}
-			*/
+			//Domain option
+			if ($inputs['domain'])
+				$cmd_str .= ' --domain=' . $inputs['domain'];
 
 			//Password option
-			if ($inputs['tgz_pass']) {
+			if ($inputs['tgz_pass'])
 				$cmd_str .= ' --password=' . $inputs['tgz_pass'];
-			}
 
 			//delete trash files
 			CommonHelper::deleteOlderTemporaryFiles(storage_path('cache'), true, '-1 day');
 
-			Log::debug($cmd_str);
 			$task = Task::startNewTask("case:import-volume " . $cmd_str);
 			if (!$task) {
 				throw new Exception('Failed to invoke export process.');
@@ -92,27 +88,33 @@ class ShareImportController extends BaseController
 		}
 	}
 
+	public function addTag()
+	{
+
+		$inputs = Input::all();
+		//TODO::タグ付与処理
+
+		//Tag Option
+		/*
+		$tags = implode(',', json_decode($inputs['tags'], true));
+		if ($tags) {
+			$cmd_str .= ' --tag=' . $tags;
+		}
+		*/
+	}
+
 	public function validate($params)
 	{
-		Log::debug('入力値::');
-		Log::debug($params);
-		//TODO::Validateチェック
+		//Validateチェック
 		//データ形式
 		if ($params['import_type'] === self::DATA_TYPE_LOCAL) {
 			//データ形式がローカルの場合ファイル情報
-			if ($params['import_file'] === NULL) {
+			if ($params['import_file'] === NULL)
 				throw new Exception('ローカル選択時はファイル指定は必須です。');
-				/*
-			} else {
-				Log::debug('ファイル情報::');
-				Log::debug($params['import_file']);
-				*/
-			}
 		} else if ($params['import_type'] === self::DATA_TYPE_URL) {
 			//データ形式がURLの場合ファイルURL
-			if (!$params['import_url']) {
+			if (!$params['import_url'])
 				throw new Exception('Remote Server Url指定時はURLの入力は必須です。');
-			}
 		} else {
 			throw new Exception('Invalid data type .');
 		}
@@ -121,7 +123,16 @@ class ShareImportController extends BaseController
 		if ($params['personal'] != 0 && $params['personal'] != 1)
 			throw new Exception('Invalid personal data inclusion flag.');
 
-		//TODO::オプション(タグ？)
+		//オプション::ドメイン
+		if (!$params['domain'])
+			throw new Exception('Please select the domain.');
+		//domains no regist
+		$domains = ServerParam::getVal('domains');
+		if (!$domains)
+			throw new Exception('Please set the domains in the management screen.');
+		//domain check
+		if (array_key_exists($params['domain'], ServerParam::getDomainList()) === false)
+			throw new Exception('Domain is invalid.');
 	}
 
 }

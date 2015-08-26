@@ -84,10 +84,11 @@ class CaseImportVolume extends TaskCommand {
 			}
 
 			$this->importCaseData();
-			Log::debug('インポート完了');
+			Log::debug('Import Finish!!');
 			$this->markTaskAsFinished();
 		}catch (Exception $e) {
 			Log::error($e);
+			$this->markTaskAsFinished();
 			throw $e;
 		}
 	}
@@ -105,28 +106,27 @@ class CaseImportVolume extends TaskCommand {
 		$dataType = $this->argument('data-type');
 
 		$dataPath = $inputPath;
-		try {
-			//URLの場合はURLから該当データを取得する
-			if ($dataType === self::DATA_TYPE_URL) {
-				$dataPath = $this->getInputFile($inputPath);
-				$this->updateTaskProgress($counter, 0, "Importing in progress. $counter files are processed.");
-				$counter++;
-			}
-
-			//解凍処理
-			$unZipPath = $this->unZip($dataPath);
+		//URLの場合はURLから該当データを取得する
+		if ($dataType === self::DATA_TYPE_URL) {
+			$dataPath = $this->getInputFile($inputPath);
 			$this->updateTaskProgress($counter, 0, "Importing in progress. $counter files are processed.");
 			$counter++;
-
-			//インポート処理
-			$this->import($unZipPath, $counter);
-		} catch (Exception $e) {
-			Log::error($e);
-			return false;
 		}
-		return true;
+
+		//解凍処理
+		$unZipPath = $this->unZip($dataPath);
+		$this->updateTaskProgress($counter, 0, "Importing in progress. $counter files are processed.");
+		$counter++;
+
+		//インポート処理
+		$this->import($unZipPath, $counter);
 	}
 
+	/**
+	 * インポート処理
+	 * @param string $targetDir インポート対象ディレクトリパス
+	 * @param integer $counter タスク管理用進捗カウンタ
+	 */
 	private function import($targetDir, &$counter)
 	{
 		//シリーズ情報保存
@@ -154,7 +154,6 @@ class CaseImportVolume extends TaskCommand {
 			if ($caseDir = opendir($targetDir.'/cases')) {
 				while(($file = readdir($caseDir)) !== false) {
 					if ($file != "." && $file != "..") {
-						Log::debug("Case::".$file);
 						//ケース存在チェック
 						$caseObj = ClinicalCase::find($file);
 						if (!$caseObj) {
@@ -166,15 +165,7 @@ class CaseImportVolume extends TaskCommand {
 						}
 						$this->updateTaskProgress($counter, 0, "Importing in progress. $counter files are processed.");
 						$counter++;
-
-						/*
-						//ラベル情報保存
-						$labelDir = $targetDir.'/cases/'.$file.'/labels';
-						if (file_exists($labelDir)) {
-							$this->createLabelData($labelDir, $counter);
-						}
-						*/
-						Log::debug('ケース情報保存終わり');
+						Log::debug('Case Regist Finish!!');
 					}
 				}
 			}
@@ -223,6 +214,29 @@ class CaseImportVolume extends TaskCommand {
 		$labelObj->save();
 	}
 
+	/**
+	 * ファイルからJSONデータを抽出する
+	 * @param string $path ファイルパス
+	 * @return string JSONデータ
+	 */
+	private function getJsonFromFile($path)
+	{
+		if (!file_exists($path))
+			throw new Exception($path.'が存在しません。');
+
+		$lines = file($path);
+		if ($lines === false || count($lines) !== 1)
+			throw new Exception($path.'の中身が不正です。');
+
+		return json_decode($lines[0]);
+	}
+
+	/**
+	 * ケースデータValidate
+	 * @param string $path ケースディレクトリパス
+	 * @param string $caseID ケースID
+	 * @return Array Validate結果
+	 */
 	private function validateCase($path, $caseID)
 	{
 		try {
@@ -230,46 +244,39 @@ class CaseImportVolume extends TaskCommand {
 			if (!is_dir($caseDir))
 				return;
 
-			$caseFile = $caseDir.'/case.json';
-			if (!file_exists($caseFile))
-				throw new Exception($caseID.'のcase.jsonが存在しません。');
-
-			$tmpCase = file($caseFile);
-
-			$caseData = json_decode($tmpCase[0], true);
+			$caseData = $this->getJsonFromFile($caseDir.'/case.json');
 
 			//プロジェクトIDのチェック
-			if (!isset($caseData['projectID']))
+			if (!isset($caseData->projectID))
 				throw new Exception('プロジェクトIDがありません。');
-			if (!Project::find($caseData['projectID']))
-				throw new Exception('プロジェクトID['.$caseData['projectID'].']が存在しません。');
+			if (!Project::find($caseData->projectID))
+				throw new Exception('プロジェクトID['.$caseData->projectID.']が存在しません。');
 			//リビジョン情報のチェック
-			if (!isset($caseData['revisions']))
+			if (!isset($caseData->revisions))
 				throw new Exception('リビジョン情報がありません。');
 
 			$latestNo = 0;
 			$patientInfo = array();
 			$domains = array();
-			foreach ($caseData['revisions'] as $rNo => $revision) {
-				if (!isset($revision['series']))
+			foreach ($caseData->revisions as $rNo => $revision) {
+				if (!isset($revision->series))
 					throw new Exception('リビジョン['.$rNo.']内にシリーズ情報がありません。');
 				//シリーズIDのチェック
-				foreach ($revision['series'] as $series) {
-					if (!isset($series['seriesUID']))
+				foreach ($revision->series as $series) {
+					if (!isset($series->seriesUID))
 						throw new Exception('シリーズUIDがありません。');
-					if (!Series::find($series['seriesUID']))
-						throw new Exception('シリーズUID['.$series['seriesUID'].']が存在しません。');
+					if (!Series::find($series->seriesUID))
+						throw new Exception('シリーズUID['.$series->seriesUID.']が存在しません。');
 
-					$seriesObj = Series::find($series['seriesUID']);
+					$seriesObj = Series::find($series->seriesUID);
 					if (!$patientInfo)
 						$patientInfo = $seriesObj->patientInfo;
 					$domains[] = $seriesObj->domain;
 				}
 
-				if ($revision === end($caseData['revisions'])) {
+				if ($revision === end($caseData->revisions)) {
 			        $latestNo = $rNo;
 			    }
-
 			}
 			return array('result'         => true,
 						 'patientInfo'    => $patientInfo,
@@ -282,84 +289,141 @@ class CaseImportVolume extends TaskCommand {
 
 	}
 
+	/**
+	 * ケース新規登録
+	 * @param string $dirPath casesディレクトリパス
+	 * @param string $caseID ケースID
+	 */
 	private function createCase($dirPath, $caseID)
 	{
-		Log::debug('CreateCase!!');
+		Log::debug('新規登録を行うCaseID::'.$caseID);
 		$res = $this->validateCase($dirPath, $caseID);
 		if ($res['result'] === false)
 			throw new Exception($res['errorMsg']);
 
-		$caseFile = $dirPath. '/' . $caseID . '/case.json';
-		$tmpCase = file($caseFile);
-		$caseData = $json_decode($tmpCase, true);
+		$caseData = $this->getJsonFromFile($dirPath. '/' . $caseID . '/case.json');
 
 		//ケース情報登録処理
 		$caseObj = new ClinicalCase();
-		$caseObj->caseID = $caseData['caseID'];
-		$caseObj->projectID = $caseData['projectID'];
+		$caseObj = $caseData;
 		$caseObj->patientInfoCache = $res['patientInfo'];
 		$caseObj->tags = array();
-		$caseObj->latestRevision = $caseData['revisions'][$res['latestRevision']];
-		$caseObj->revisions = $caseData['revisions'];
+		$caseObj->latestRevision = $caseData->revisions[$res['latestRevision']];
 		$caseObj->domains = $res['domains'];
 		$caseObj->save();
-
-		Log::debug('createCase finish!!');
 	}
 
+	/**
+	 * ケース情報更新
+	 * @param string $dirPath casesディレクトリパス
+	 * @param string $caseID ケースID
+	 */
 	private function updateCase($dirPath, $caseID)
 	{
-		Log::debug('updateCase!!');
+		Log::debug('更新を行うCaseID::'.$caseID);
 		$res = $this->validateCase($dirPath, $caseID);
-		Log::debug('Validate結果::');
-		Log::debug($res);
+
 		if ($res['result'] === false)
 			throw new Exception($res['errorMsg']);
 
-		$caseFile = $dirPath. '/' . $caseID . '/case.json';
-		$tmpCase = file($caseFile);
-		$caseData = $json_decode($tmpCase, true);
+		$caseData = $this->getJsonFromFile($dirPath. '/' . $caseID . '/case.json');
 
 		//存在Revisionチェック
 		$caseObj = ClinicalCase::find($caseID);
-		//TODO::リビジョン入れ子
-		/*
-		$revisions = $this->createRevision($caseObj->revisions, $caseData['revisions']);
-		Log::debug('リビジョン情報::');
-		Log::debug($revisions);
 
+		//リビジョン入れ子
+		$revisions = $this->createRevision($caseObj->revisions, $caseData->revisions);
+
+		Log::debug('生成したリビジョン情報::');
+		Log::debug($revisions);
 		//ケース更新
 		end($revisions);
 		$revisionNo = key($revisions);
-		$caseObj->latestRevision = $revisions[$revisionNo];
-		$caseObj->revisions = $revisions;
-		*/
-		$caseObj->save();
 
+		Log::debug('LatestRevision::');
+		Log::debug($revisions[$revisionNo]);
+
+		//TODO::MongoDate型の確認
+		//TODO::revisions配列の確認
+	//	$caseObj->latestRevision = $revisions[$revisionNo];
+	//	$caseObj->revisions = $revisions;
+		$caseObj->save();
 	}
 
+	/**
+	 * Revisionデータ生成(入れ子対応)
+	 * @param Array $oldRevisions 既存のリビジョン情報
+	 * @param Array $addRevisions 登録予定のリビジョン情報
+	 * @return Array $revisions 入れ子対応したリビジョン情報
+	 */
 	private function createRevision($oldRevisions, $addRevisions)
 	{
 		$revisions = $oldRevisions;
-		foreach ($oldRevisions as $oldKey => $oldRevision) {
-			foreach ($addRevisions as $addKey => $addRevision) {
-				//TODO::creatorとdateを比較
-				$addRevision['date'] = new MongoDate($addRevision['date']['sec'], $addRevision['date']['usec']);
+
+		$addRevNo = 0;
+		foreach ($addRevisions as $addKey => $addRevision) {
+
+			//$addFlag = false;
+			$addPlace = 0;
+			for ($oldKey = $addRevNo; $oldKey < count($oldRevisions) - $addRevNo; $oldKey++){
+				$oldRevision = $oldRevisions[$oldKey];
+				//creatorとdateを比較
+				$addRevision->date = new MongoDate($addRevision->date->sec);
 				//作成者または作成日が不一致
-				if ($oldRevision['date'] !== $addRevision['date']
-					|| $oldRevision['creator'] !== $addRevision['creator']) {
-					if (strtotime($oldRevision['date']) < strtotime($addRevision['date'])) {
-						continue;
+				Log::debug("[Date]old::".$oldRevision['date']->sec."\tnew::".$addRevision->date->sec);
+				Log::debug("[Creator]old::".$oldRevision["creator"]."\tnew::".$addRevision->creator);
+				if ($oldRevision['date']->sec !== $addRevision->date->sec
+					|| $oldRevision['creator'] !== $addRevision->creator) {
+					if ($oldRevision['date'] > $addRevision->date) {
+						$addRevNo = $oldKey;
+						$addPlace = 1;
+						break;
+					} else if ($oldRevision['date'] < $addRevision->date) {
+						$addRevNo = $oldKey;
+						$addPlace = 2;
 					} else {
-						Log::debug('挿入前のリビジョン情報::');
-						$revisions = array_splice($revisions, $oldKey, 0, $addRevision);
+						//日付けは一致しているが作成者が違う
+						$addRevNo = $oldKey;
+						$addPlace = 3;
+						break;
 					}
+				} else {
+					$addPlace = 0;
+					$addRevNo = $oldKey;
+					break;
 				}
 			}
+
+			$tmpRevision = json_decode(json_encode($addRevision), true);
+			if ($addPlace === 2 || $addPlace === 3) {
+				if (count($oldRevisions) - 1 < $addRevNo + 1)
+					$reviisons[$addRevNo+1] = $tmpRevision;
+				else
+					array_splice($revisions, $addRevNo+1, 0, array($tmpRevision));
+			} else if($addPlace === 1) {
+				array_splice($revisions, $addRevNo, 0, array($tmpRevision));
+			}
 		}
-		return $revisions;
+
+		//TODO::MongoDate型生成見直し
+		foreach ($revisions as $key => $revision) {
+			Log::debug($revision['date']);
+			Log::debug(array_key_exists('sec', $revision['date']));
+
+			if (array_key_exists('sec', $revision['date'])) {
+				$revisions[$key]['date'] = $revision['date'];
+			} else {
+				$revisions[$key]['date'] = new MongoDate($revision['date']->sec);
+			}
+		}
+		return json_decode(json_encode($revisions),true);
 	}
 
+	/**
+	 * シリーズデータ作成
+	 * @param string $dirPath seriesディレクトリパス
+	 * @param string $seriesUID シリーズID
+	 */
 	private function createSeries($dirPath, $seriesUID)
 	{
 		$dataPath = $dirPath.'/'.$seriesUID;
@@ -375,6 +439,9 @@ class CaseImportVolume extends TaskCommand {
 					}
 					$cmd_ary = array();
 					$cmd_ary['path'] = $dataPath."/".$file;
+					if ($this->option('domain')) {
+						$cmd_ary['--domain'] = $this->option('domain');
+					}
 					Artisan::call("image:import", $cmd_ary);
 			    }
 			}
@@ -382,11 +449,19 @@ class CaseImportVolume extends TaskCommand {
 		}
 	}
 
+	/**
+	 * DICOMUtilityのパス
+	 */
 	private function utilityPath()
 	{
 		return app_path() . '/bin/dicom_utility';
 	}
 
+	/**
+	 * 圧縮ファイル解凍処理
+	 * @param string $path 圧縮ファイルパス
+	 * @return string 解凍先ディレクトリパス
+	 */
 	private function unZip($path)
 	{
 		$handle = fopen($path, "rb");
@@ -416,11 +491,14 @@ class CaseImportVolume extends TaskCommand {
 
 		$phar->extractTo($baseDir.'/temp');
 
-		Log::debug('解凍先ディレクトリ::');
-		Log::debug($baseDir.'/temp');
 		return $baseDir.'/temp';
 	}
 
+	/**
+	 * 指定されたファイルからImport対象ファイルをダウンロードする
+	 * @param string $path ImportURL
+	 * @return string ファイルパス
+	 */
 	private function getInputFile($path)
 	{
 		$ch = curl_init();
@@ -429,7 +507,6 @@ class CaseImportVolume extends TaskCommand {
 		$tempDir = storage_path('cache').'/'.$tempStr;
 		if (!is_dir($tempDir))
 			mkdir($tempDir, 0777, true); // make directory recursively
-		//$tempPath = $tempDir.'/test.tgz';
 
 		curl_setopt($ch, CURLOPT_URL,$path);
 		curl_setopt($ch, CURLOPT_HEADER, true);
@@ -442,18 +519,19 @@ class CaseImportVolume extends TaskCommand {
 			throw new Exception('指定URLからのファイルダウンロードに失敗しました。');
 
 		$fileName = $this->getFileName($result);
-		Log::debug('ダウンロードファイル名::');
-		Log::debug($fileName);
-
 		$data = explode("\n", $result);
 
 		file_put_contents($tempDir.'/'.$fileName, $data[count($data)-1]);
 		return $tempDir.'/'.$fileName;
 	}
 
+	/**
+	 * CURLレスポンスデータからダウンロードファイル名を取得する
+	 * @param string $res CURLレスポンスデータ
+	 * @return string ダウンロードファイル名
+	 */
 	private function getFileName($res)
 	{
-		Log::debug('Headerコールバック関数Called');
 		if (!$res) return;
 
 		$tmpAry = explode("\n", $res);
@@ -465,15 +543,12 @@ class CaseImportVolume extends TaskCommand {
 				$headers[$headerKey] = $headerVal;
 			}
 		}
-		if (isset($headers['Content-Disposition'])) {
-			$disposition = $headers['Content-Disposition'];
-			$idx = strpos($disposition, 'filename="');
-			Log::debug('Index::'.$idx);
-			Log::debug('全体の文字列長::'.strlen($disposition));
-			Log::debug(strlen($disposition)-($idx+12));
-			Log::debug(substr($disposition, $idx+10, strlen($disposition)-($idx+12)));
-			return substr($disposition, $idx+10, strlen($disposition)-($idx+12));
-		}
+		if (!isset($headers['Content-Disposition']))
+			throw new Exception('ファイル名が取得できません。');
+
+		$disposition = $headers['Content-Disposition'];
+		$idx = strpos($disposition, 'filename="');
+		return substr($disposition, $idx+10, strlen($disposition)-($idx+12));
 	}
 
 	/**
@@ -500,7 +575,7 @@ class CaseImportVolume extends TaskCommand {
 			array('without-personal', null, InputOption::VALUE_NONE, 'Without exporting petientInfoCache.', null),
 			array('tag', null, InputOption::VALUE_OPTIONAL, 'Tags to be applied to the case', null),
 			array('password', null, InputOption::VALUE_OPTIONAL, 'Add the password to the compressed file', null),
-			array('domains', null, InputOption::VALUE_OPTIONAL, 'Domains to be applied to the case', null)
+			array('domain', null, InputOption::VALUE_OPTIONAL, 'Domain to be applied to the case', null)
 		);
 	}
 

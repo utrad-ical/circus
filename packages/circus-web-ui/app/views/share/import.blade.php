@@ -13,7 +13,7 @@ Import Data
 @section('content')
 <div class="search_form_wrap mar_b_20">
 	<h2 class="con_ttl">Import</h2>
-	{{Form::open(array('url' => asset('share/import/import'), 'method' => 'post', 'files' => true))}}
+	{{Form::open(array('url' => asset('share/register'), 'method' => 'post', 'files' => true))}}
 		<table class="common_table">
 			<tr>
 				<th>Import Data Source</th>
@@ -44,6 +44,12 @@ Import Data
 				<th>Password</th>
 				<td>
 					{{Form::password('tgz_pass', array('class' => 'common_input_text'))}}
+				</td>
+			</tr>
+			<tr>
+				<th>Domain</th>
+				<td>
+					{{Form::select('domain', $domains, $default_domain, array('class' => 'select w_180 select_domain'))}}
 				</td>
 			</tr>
 			<tr>
@@ -111,7 +117,6 @@ $(function() {
 	            });
 	        },
             error: function (data) {
-	            console.log(data);
                 alert(data.responseJSON.errorMessage);
                 busy(false);
             }

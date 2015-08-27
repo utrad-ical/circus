@@ -514,23 +514,19 @@
         if(this_opts.viewer.position.zoom < 0.1 ) {
           this_opts.viewer.position.zoom = 0.1;
         }
-        this_opts.viewer.position.zoom = Math.floor(this_opts.viewer.position.zoom*10) / 10;
+        this_opts.viewer.position.zoom = Math.floor(this_opts.viewer.position.zoom * 10) / 10;
       }
 			
+			//trimming size before zoom-change
       var tmp_pre_w = this_opts.viewer.position.sw; //拡大処理前のトリミング幅
       var tmp_pre_h = this_opts.viewer.position.sh; //拡大処理前のトリミング高さ
 
+			//trimming size after zoom-change
       this_opts.viewer.position.sw = this_opts.viewer.position.ow / this_opts.viewer.position.zoom;
       this_opts.viewer.position.sh = this_opts.viewer.position.oh / this_opts.viewer.position.zoom;
 
-      var diff_x = (this_opts.viewer.position.sw - tmp_pre_w) / 2;
-      var diff_y = (this_opts.viewer.position.sh - tmp_pre_h) / 2;
-
-      this_opts.viewer.position.sx = this_opts.viewer.position.sx - diff_x;
-      this_opts.viewer.position.sy = this_opts.viewer.position.sy - diff_y;
-			
-			this_opts.viewer.position.sw = Math.floor(this_opts.viewer.position.sw);
-			this_opts.viewer.position.sh = Math.floor(this_opts.viewer.position.sh);
+      this_opts.viewer.position.sx = this_opts.viewer.position.sx - (this_opts.viewer.position.sw - tmp_pre_w) * 0.5;
+      this_opts.viewer.position.sy = this_opts.viewer.position.sy - (this_opts.viewer.position.sh - tmp_pre_h) * 0.5;
 
     },//changeZoom
 
@@ -877,16 +873,17 @@
       var this_obj = this;
       var this_elm = this_obj.element;
       var this_opts = this_obj.options;
-      var tmp_ctx = this_elm.find('.canvas_main_elm').get(0).getContext('2d');
-      var tmp_orientation = this_opts.viewer.orientation;
       //描画対象ラベルのチェック
       var target_label = this_obj.getLabelObjectById(label_id, series_id);
 
       if (target_label.visible === true) {
+				var tmp_ctx = this_elm.find('.canvas_main_elm').get(0).getContext('2d');
+				var tmp_orientation = this_opts.viewer.orientation;
         var tmp_sx = this_opts.viewer.position.sx;
         var tmp_sy = this_opts.viewer.position.sy;
         var bold_width = this_opts.viewer.position.zoom * this_opts.viewer.position.dw / this_opts.viewer.position.ow;
         var bold_height = this_opts.viewer.position.zoom * this_opts.viewer.position.dh / this_opts.viewer.position.oh;
+
         tmp_ctx.beginPath();
         for (var i = positions_array.length - 1; i >= 0; i--) {
           var tmp_x = 0;
@@ -920,13 +917,12 @@
       var this_elm = this.element;
       var this_opts = this.options;
 
-      //ラベルを描くcanvas要素のオブジェクト
       var tmp_ctx = this_elm.find('.canvas_main_elm').get(0).getContext('2d');
       tmp_ctx.beginPath();
       tmp_ctx.strokeStyle = 'rgb(155, 187, 89)';
       tmp_ctx.fillStyle = 'rgb(155, 187, 89)';
-      tmp_ctx.moveTo(this_opts.viewer.measure.start_x,this_opts.viewer.measure.start_y);
-      tmp_ctx.lineTo(this_opts.viewer.measure.goal_x,this_opts.viewer.measure.goal_y);
+      tmp_ctx.moveTo(this_opts.viewer.measure.start_x, this_opts.viewer.measure.start_y);
+      tmp_ctx.lineTo(this_opts.viewer.measure.goal_x, this_opts.viewer.measure.goal_y);
       tmp_ctx.stroke();
       tmp_ctx.fillRect(this_opts.viewer.measure.start_x-2, this_opts.viewer.measure.start_y-2, 4, 4);
       tmp_ctx.fillRect(this_opts.viewer.measure.goal_x-2, this_opts.viewer.measure.goal_y-2, 4, 4);
@@ -1720,17 +1716,16 @@
           //ラベルを描くcanvas要素のオブジェクト
           var tmp_ctx = this_elm.find('.canvas_main_elm').get(0).getContext('2d');
 
-          //マウス位置
-          this_opts._tmpInfo.elementParam.start.X = this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().left;
-          this_opts._tmpInfo.elementParam.start.Y = this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().top;
-
-          //canvas要素の左端を起点としたときのマウス位置(ズーム解除状態でのXY値)
-          this_opts._tmpInfo.cursor.current.X = (e.clientX - this_opts._tmpInfo.elementParam.start.X) / this_opts.viewer.position.zoom;
-          this_opts._tmpInfo.cursor.current.Y = (e.clientY - this_opts._tmpInfo.elementParam.start.Y) / this_opts.viewer.position.zoom;
+          //mouse position (on canvas , image original scale)
+          var tmp_x = (e.clientX - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().left) / this_opts.viewer.position.zoom;
+          var tmp_y = (e.clientY - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().top) / this_opts.viewer.position.zoom;
 
           //画像トリミング分の補正 , 画像原寸の位置
-          this_opts._tmpInfo.cursor.current.X = this_opts.viewer.position.sx + this_opts._tmpInfo.cursor.current.X * this_opts.viewer.position.ow / this_opts.viewer.position.dw;
-          this_opts._tmpInfo.cursor.current.Y = this_opts.viewer.position.sy + this_opts._tmpInfo.cursor.current.Y * this_opts.viewer.position.oh / this_opts.viewer.position.dh;
+          tmp_x= this_opts.viewer.position.sx + tmp_x * this_opts.viewer.position.ow / this_opts.viewer.position.dw;
+          tmp_y = this_opts.viewer.position.sy + tmp_y * this_opts.viewer.position.oh / this_opts.viewer.position.dh;
+					
+          this_opts._tmpInfo.cursor.current.X = tmp_x;
+          this_opts._tmpInfo.cursor.current.Y = tmp_y;
 
          //太さを加味
           var tmp_array = this_obj._applyBoldness([[this_opts._tmpInfo.cursor.current.X, this_opts._tmpInfo.cursor.current.Y]]);
@@ -1780,19 +1775,17 @@
        }else{
           //通常のペン挙動
           //ラベルを描くcanvas要素のオブジェクト
-          var tmp_ctx = this_elm.find('.canvas_main_elm').get(0).getContext('2d');
-
-          //マウス位置
-          this_opts._tmpInfo.elementParam.start.X = this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().left;
-          this_opts._tmpInfo.elementParam.start.Y = this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().top;
-
-          //canvas要素の左端を起点としたときのマウス位置(ズーム解除状態でのXY値)
-          this_opts._tmpInfo.cursor.current.X = (e.clientX - this_opts._tmpInfo.elementParam.start.X) / this_opts.viewer.position.zoom;
-          this_opts._tmpInfo.cursor.current.Y = (e.clientY - this_opts._tmpInfo.elementParam.start.Y) / this_opts.viewer.position.zoom;
+          //mouse position (on canvas , image original scale)
+          var tmp_x = (e.clientX - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().left) / this_opts.viewer.position.zoom;
+          var tmp_y = (e.clientY - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().top) / this_opts.viewer.position.zoom;
 
           //画像トリミング分の補正 , 画像原寸の位置
-          this_opts._tmpInfo.cursor.current.X = this_opts.viewer.position.sx + this_opts._tmpInfo.cursor.current.X * this_opts.viewer.position.ow / this_opts.viewer.position.dw;
-          this_opts._tmpInfo.cursor.current.Y = this_opts.viewer.position.sy + this_opts._tmpInfo.cursor.current.Y * this_opts.viewer.position.oh / this_opts.viewer.position.dh;
+          tmp_x= this_opts.viewer.position.sx + tmp_x * this_opts.viewer.position.ow / this_opts.viewer.position.dw;
+          tmp_y = this_opts.viewer.position.sy + tmp_y * this_opts.viewer.position.oh / this_opts.viewer.position.dh;
+					
+          this_opts._tmpInfo.cursor.current.X = tmp_x;
+          this_opts._tmpInfo.cursor.current.Y = tmp_y;
+
          //太さを加味
           var tmp_array = this_obj._applyBoldness([[this_opts._tmpInfo.cursor.current.X, this_opts._tmpInfo.cursor.current.Y]]);
 
@@ -1806,6 +1799,7 @@
             this_opts._tmpInfo.label
           );
           this_obj.syncVoxel();
+		      var tmp_ctx = this_elm.find('.canvas_main_elm').get(0).getContext('2d');
           this_obj._disableImageAlias(tmp_ctx, false);
        }
     },//_mousedownFuncErase
@@ -1848,18 +1842,13 @@
 
 
 
-    _mousedownFuncMeasure: function (e) {
+    _mousedownFuncMeasure : function (e) {
       var this_obj = this;
       var this_elm = this.element;
       var this_opts = this.options;
 
-      //get cursor position
-      var tmp_cursor_x = (e.clientX - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().left) / this_opts.viewer.position.zoom;
-      var tmp_cursor_y = (e.clientY - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().top) / this_opts.viewer.position.zoom;
-
-      //get the position (original image scale)
-      this_opts._tmpInfo.cursor.start.X = tmp_cursor_x + this_opts.viewer.position.sx * this_opts.viewer.position.dw / this_opts.viewer.position.ow;
-      this_opts._tmpInfo.cursor.start.Y = tmp_cursor_y + this_opts.viewer.position.sy * this_opts.viewer.position.dh / this_opts.viewer.position.oh;
+      this_opts.viewer.measure.start_x = e.clientX - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().left;
+      this_opts.viewer.measure.start_y = e.clientY - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().top;
 
     },//_mousedownFuncMeasure
 
@@ -1994,15 +1983,14 @@
       var this_elm = this.element;
       var this_opts = this.options;
 
-      this_opts._tmpInfo.elementParam.start.X = this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().left;
-      this_opts._tmpInfo.elementParam.start.Y = this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().top;
+			//mouse position (on canvas , image original scale)
+			var tmp_x = (e.clientX - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().left) / this_opts.viewer.position.zoom;
+			var tmp_y = (e.clientY - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().top) / this_opts.viewer.position.zoom;
 
-      var tmp_x = (e.clientX - this_opts._tmpInfo.elementParam.start.X) / this_opts.viewer.position.zoom + this_opts.viewer.position.sx;
-      var tmp_y = (e.clientY - this_opts._tmpInfo.elementParam.start.Y) / this_opts.viewer.position.zoom + this_opts.viewer.position.sy;
-
-      tmp_x = Math.floor(tmp_x * this_opts.viewer.position.ow / this_opts.viewer.position.dw);
-      tmp_y = Math.floor(tmp_y * this_opts.viewer.position.oh / this_opts.viewer.position.dh);
-
+			//画像トリミング分の補正 , 画像原寸の位置
+			tmp_x= this_opts.viewer.position.sx + tmp_x * this_opts.viewer.position.ow / this_opts.viewer.position.dw;
+			tmp_y = this_opts.viewer.position.sy + tmp_y * this_opts.viewer.position.oh / this_opts.viewer.position.dh;
+			
       if (this_opts._tmpInfo.cursor.out_flg === 0) {
 
         //ラベルを描くcanvas要素のオブジェクト
@@ -2089,24 +2077,20 @@
       var this_elm = this.element;
       var this_opts = this.options;
 
-      //定規モード
-      //マウス位置取得(ズーム解除状態でのXY値)
-      var tmp_cursor_x = (e.clientX - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().left) / this_opts.viewer.position.zoom;
-      var tmp_cursor_y = (e.clientY - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().top) / this_opts.viewer.position.zoom;
+      this_opts.viewer.measure.goal_x = e.clientX - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().left;
+      this_opts.viewer.measure.goal_y = e.clientY - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().top;
 
-      //画像トリミング分の補正
-      this_opts._tmpInfo.cursor.current.X = tmp_cursor_x + this_opts.viewer.position.sx * this_opts.viewer.position.dw / this_opts.viewer.position.ow;
-      this_opts._tmpInfo.cursor.current.Y = tmp_cursor_y + this_opts.viewer.position.sy * this_opts.viewer.position.dh / this_opts.viewer.position.oh;
+      this_obj.syncVoxel();
+      this_elm.imageViewer('drawMeasure');
 
-      //XYそれぞれの差(ズームなし状態でのピクセル)
-      var dist_w = this_opts._tmpInfo.cursor.current.X - this_opts._tmpInfo.cursor.start.X;
-      var dist_h = this_opts._tmpInfo.cursor.current.Y - this_opts._tmpInfo.cursor.start.Y;
+      //distant (canvas pixel scale)
+      var dist_w = (this_opts.viewer.measure.goal_x - this_opts.viewer.measure.start_x) * this_opts.viewer.position.dw / this_opts.viewer.position.ow;
+      var dist_h = (this_opts.viewer.measure.goal_y - this_opts.viewer.measure.start_y) * this_opts.viewer.position.dh / this_opts.viewer.position.oh;
 
-      //ボクセル縦横比調整分を除外
-      dist_w = dist_w * this_opts.viewer.position.sw / this_opts.viewer.position.dw;
-      dist_h = dist_h * this_opts.viewer.position.sh / this_opts.viewer.position.dh;
+			dist_w = dist_w / this_opts.viewer.position.zoom;
+			dist_h = dist_h / this_opts.viewer.position.zoom;
 
-      //ミリメートル換算・voxel値を使う
+      //fix to milli meter scale
       if(this_opts.viewer.orientation === 'axial') {
         dist_w = dist_w * this_opts.viewer.voxel.voxel_x;
         dist_h = dist_h * this_opts.viewer.voxel.voxel_y;
@@ -2120,18 +2104,7 @@
 
       var disp_txt = Math.sqrt( dist_w*dist_w + dist_h*dist_h );
       disp_txt = disp_txt.toFixed(2);
-      this_elm.find('.disp_measure').find('.measure_num').text(disp_txt);
-
-      //2点とそれを結ぶ線をキャンバス上に描く
-      this_opts.viewer.measure.start_x = (this_opts._tmpInfo.cursor.start.X - this_opts.viewer.position.sx * this_opts.viewer.position.dw / this_opts.viewer.position.ow)*this_opts.viewer.position.zoom;
-      this_opts.viewer.measure.start_y = (this_opts._tmpInfo.cursor.start.Y - this_opts.viewer.position.sy * this_opts.viewer.position.dh / this_opts.viewer.position.oh)*this_opts.viewer.position.zoom;
-
-      this_opts.viewer.measure.goal_x = (this_opts._tmpInfo.cursor.current.X - this_opts.viewer.position.sx * this_opts.viewer.position.dw / this_opts.viewer.position.ow)*this_opts.viewer.position.zoom;
-      this_opts.viewer.measure.goal_y = (this_opts._tmpInfo.cursor.current.Y - this_opts.viewer.position.sy * this_opts.viewer.position.dh / this_opts.viewer.position.oh)*this_opts.viewer.position.zoom;
-
-      this_obj.syncVoxel();
-      this_elm.imageViewer('drawMeasure');
-      this_elm.find('.disp_measure').addClass('active');
+      this_elm.find('.disp_measure').addClass('active').find('.measure_num').text(disp_txt);
 
     },//_mousemoveFuncMeasure
 
@@ -2496,8 +2469,8 @@
 
 
       var tmp_voxel_zoom = 512 / this_opts.viewer.voxel.x;
-      this_opts.viewer.position.dw = Math.floor(this_opts.viewer.position.dw * tmp_voxel_zoom);
-      this_opts.viewer.position.dh = Math.floor(this_opts.viewer.position.dh * tmp_voxel_zoom);
+      this_opts.viewer.position.dw =this_opts.viewer.position.dw * tmp_voxel_zoom;
+      this_opts.viewer.position.dh =this_opts.viewer.position.dh * tmp_voxel_zoom;
 
       //キャンバスのサイズ定義
       this_elm.find('.series_image_elm,.canvas_main_elm').attr({

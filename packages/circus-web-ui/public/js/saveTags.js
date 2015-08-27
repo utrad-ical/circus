@@ -24,7 +24,7 @@ $(function() {
 
 	  	var tag_data = {caseID: tag_obj[0], tags:save_tags};
 		$.ajax({
-			url: "save_tags",
+			url: location.protocol+"//"+location.host+"/case/save_tags",
 			type: 'post',
 			data: tag_data,//送信データ
 			dataType: 'json',

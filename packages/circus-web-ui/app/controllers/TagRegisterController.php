@@ -11,9 +11,13 @@ class TagRegisterController extends BaseController {
 			if (count($errors) > 0)
 				throw new Exception(implode("\n", $errors));
 
-			$case_obj = ClinicalCase::find($inputs['caseID']);
-			$case_obj->tags = json_decode($inputs['tags'], true);
-			$case_obj->save();
+			if (is_array($inputs['caseID'])) {
+				foreach ($inputs['caseID'] as $caseID) {
+					$this->saveTags($caseID, $inputs['tags']);
+				}
+			} else {
+				$this->saveTags($inputs['caseID'], $inputs['tags']);
+			}
 			return $this->outputJson(true, 'Success saved tag.');
 		} catch (InvalidModelException $e) {
 			Log::debug('InvalidModelException Error');
@@ -24,6 +28,13 @@ class TagRegisterController extends BaseController {
 			Log::error($e);
 			return $this->outputJson(false, $e->getMessage());
 		}
+	}
+
+	private function saveTags($caseID, $tags)
+	{
+		$case_obj = ClinicalCase::find($caseID);
+		$case_obj->tags = json_decode($tags, true);
+		$case_obj->save();
 	}
 
 	/**
@@ -44,23 +55,34 @@ class TagRegisterController extends BaseController {
 		$error = array();
 		//Case ID check
 		if (!$data['caseID']) {
-			$error_msg[] = 'Please set the case ID.';
-		} else if (array_key_exists('tags', $data)) {
-			$error_msg[] = 'Please set the tags. ';
+			$error[] = 'Please set the case ID.';
+		} else if (!array_key_exists('tags', $data)) {
+			$error[] = 'Please set the tags. ';
 		} else {
-			//Case presence check
-			$case_data = ClinicalCase::find($data['caseID']);
-			if (!$case_data)
-				$error_msg[] = $data['caseID'].'is the case ID that does not exist.';
-
-			$project_tags = $case_data->project->tags;
-			foreach ($data['tags'] as $tag) {
-				if (array_key_exists($tag, $project_tags) === false) {
-					$error_msg[] = 'invalid tags';
+			if (is_array($data['caseID'])) {
+				foreach ($data['caseID'] as $caseID) {
+					$this->validateCase($caseID, $data['tags'], $error);
 				}
+			} else {
+				$this->validateCase($data['caseID'], $data['tags'], $error);
 			}
 
 		}
 		return $error;
+	}
+
+	private function validateCase($caseID, $tags, &$error)
+	{
+		$tagList = json_decode($tags, true);
+		$case_data = ClinicalCase::find($caseID);
+		if (!$case_data)
+		$error[] = $caseID.'is the case ID that does not exist.';
+
+		$project_tags = $case_data->project->tags;
+		foreach ($tagList as $tag) {
+			if (array_key_exists($tag, $project_tags) === false) {
+				$error[] = 'invalid tags';
+			}
+		}
 	}
 }

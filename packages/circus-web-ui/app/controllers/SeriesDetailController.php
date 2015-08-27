@@ -85,6 +85,7 @@ class SeriesDetailController extends BaseController {
 				)
 			)
 		);
+		$series_info['token'] = Series::authNode($series->seriesUID);
 		$data[] = $series_info;
 
 		$json = json_encode($data);

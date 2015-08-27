@@ -106,26 +106,6 @@ class CaseDetailController extends BaseController {
 		return View::make('case/detail', $result);
 	}
 
-	function authNode($seriesUID) {
-		$request_url = "http://localhost:3000/requestToken?series=".$seriesUID;
-		$ch = curl_init();
-		curl_setopt($ch, CURLOPT_URL, $request_url);
-		curl_setopt($ch,CURLOPT_RETURNTRANSFER,true);
-		$tmp = curl_exec($ch);
-
-		if (!$tmp)
-			new AuthenticationNodeException('Node authentication error.');
-
-		$responseToken = json_decode($tmp, true);
-		curl_close($ch);
-
-		if (!$responseToken || !array_key_exists('token', $responseToken))
-			new AuthenticationNodeException($tmp);
-
-		Log::info($responseToken['token']);
-		return $responseToken['token'];
-	}
-
 	function createTagList($tags) {
 		if (!$tags) return array();
 
@@ -248,7 +228,8 @@ class CaseDetailController extends BaseController {
 				'priority'	=> $priority
 			);
 
-			$series_info['token'] = $this->authNode($series['seriesUID']);
+			//$series_info['token'] = $this->authNode($series['seriesUID']);
+			$series_info['token'] = Series::authNode($series['seriesUID']);
 
 			if ($presets)
 				$series_info['window']['preset'] = $presets;

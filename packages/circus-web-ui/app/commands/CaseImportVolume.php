@@ -19,16 +19,6 @@ class CaseImportVolume extends TaskCommand {
 	protected $description = 'Import case data.';
 
 	/**
-	 * Column names to be imported.
-	 *
-	 * @var Array
-	 */
-	private $_importColumn = array(
-		'case' => array('projectID','caseID', 'revisions'),
-		'label' => array('labelID', 'x', 'y', 'z', 'w', 'h', 'd', 'creator')
-	);
-
-	/**
 	 * Import target key.
 	 */
 	const IMPORT_TARGET_CASE = 'case';

@@ -4,6 +4,7 @@
 {{HTML::style('css/jquery-ui.css')}}
 {{HTML::script('js/jquery-ui.min.js')}}
 {{HTML::script('js/jquery.formserializer.js')}}
+{{HTML::script('js/jquery.multiselect.min.js')}}
 @stop
 
 @section('title')
@@ -66,6 +67,25 @@ Import Data
 <div id="progress"><div id="progress-label"></div></div>
 <div id="task-watcher"></div>
 <p id="message" class="ui-state-highlight" style="display: none;"></p>
+
+<div id="dialog" title="Setting import tag options" style="display: none;">
+    <p class="mar_10">
+        {{Form::open(array('url' => asset('share/save_tags'), 'method' => 'post', 'class' => 'frm_share_tag'))}}
+        	{{Form::hidden('taskID', '')}}
+            <table class="common_table">
+                <tr>
+                    <th>Tag</th>
+                    <td>
+                        {{Form::select('tag', isset($tag_list) ? $tag_list : array(), null, array('class' => 'multi_select import_select_tags', 'multiple' => 'multiple'))}}
+                    </td>
+                </tr>
+            </table>
+            <p class="submit_area">
+                {{Form::button('Add tags', array('class' => 'common_btn common_btn_gray', 'id' => 'btn_add_tag', 'type' => 'button', 'name' => 'btnAddTag'))}}
+            </p>
+        {{Form::close()}}
+    </p>
+</div>
 <script>
 //タスク管理用
 var progress = $('#progress').progressbar().hide();
@@ -113,6 +133,46 @@ $(function() {
 			async:true,
 	        success: function (data) {
 	            $('#task-watcher').taskWatcher(data.taskID).on('finish', function() {
+		            console.log(data.taskID);
+		            $('.frm_share_tag').find('input[name="taskID"]').val(data.taskID);
+		            $.ajax({
+						url:"{{{asset('task')}}}"+"/"+data.taskID,
+						dataType: 'json',
+						error: function(){
+							alert('I failed to communicate.');
+						},
+						success: function(res, status, xhr){
+							console.log(res);
+							if (res.logs[0]['result'] === false) {
+								alert(res.logs['errorMsg']);
+								return false;
+							}
+							console.log(res.logs);
+							var projectID = res.logs[0]['projectID'];
+							$.ajax({
+								url:"{{{asset('api/project')}}}"+"/"+projectID,
+								dataType: 'json',
+								error: function(){
+									alert('I failed to communicate.');
+								},
+								success: function(res, status, xhr){
+									if (xhr.status === 200) {
+										$('.import_select_tags').empty();
+										var import_tag_parent = $('.import_select_tags');
+										$.each(res.tags, function(key, val) {
+											var tag_opt = '<option value="'+key+'">'+val["name"]+'</option>';
+											import_tag_parent.append(tag_opt);
+										});
+										refreshMultiTags(false);
+										$('.tags_message').empty();
+									} else {
+										$('.tags_message').append(res.message);
+									}
+								}
+							});
+							createExportOptionDialog();
+						}
+					});
 	                busy(false);
 	            });
 	        },
@@ -122,6 +182,36 @@ $(function() {
             }
 	    });
 	});
+
+	$('.btn_add_tag').click(function(){
+		var form_data = $(this).closest('form').serializeArray();
+		//TODO::タグオプション通信処理
+	});
+});
+var refreshMultiTags = function(empty) {
+	if (empty) {
+		$('.import_select_tags').empty();
+	}
+	$('.import_select_tags').multiselect('refresh');
+}
+var closeExportOptionDialog = function(error) {
+	$("#dialog").dialog('close');
+	$('#export_err').append(error);
+}
+var createExportOptionDialog = function() {
+	$('#dialog').slideDown();
+	$('#progressbar').progressbar({
+		value:0
+	});
+	$('#dialog').dialog('open');
+}
+$("#dialog").dialog({
+	autoOpen: false,
+	closeOnEscape: false,
+	closeText:"",
+	width:500,
+	maxwidth:false,
+	modal:true
 });
 </script>
 @stop

@@ -54,7 +54,7 @@
           dx: 0,
           dy: 0, //display position
           dw: 512,
-          dh: 512, //display size 
+          dh: 512, //display size
           ow: 512,
           oh: 512, //original size
           sx: 0,
@@ -70,12 +70,8 @@
             activeLabelId: '', //現在の描画対象ラベル
             id: '',
             token: '',
-            label: [
-              /*
-               描画情報格納用,今現在表示しているz軸で塗られているxy座標の集合を格納する。ラベルにつき１項目ずつ
-               {  id : 'label_1', rgba : rgba(0,0,0,1),position:[] ,visible : true        }
-              */
-            ]
+            label: []
+            //sample { id : 'label_1', rgba : rgba(0,0,0,1), position:[] ,visible : true}
           }
         ],
         guide : {
@@ -190,8 +186,6 @@
 
 
 
-
-
     _calculateRotatePoint: function (the_angle, center_x, center_y) {
       //return the positions at both ends of a line segment passing through the center point
       //the_angle: radian
@@ -274,7 +268,6 @@
           return_obj[1][1] = this_opts.viewer.position.dh -tmp_margin;
         }
       }
-
       return return_obj;
     },
 
@@ -282,11 +275,11 @@
 
     _changeImageSrc: function () {
 
-      //画像表示差し替え挙動(レバー・明るさ・シリーズ差し替えの際等に共通して呼び出す)
       var this_obj = this;
       var this_elm = this.element;
       var this_opts = this.options;
-      //disp info
+
+      //disp info text
       this_elm.find('.image_window_controller_wrap').find('.win_lv_label').text(this_opts.viewer.window.level.current);
       this_elm.find('.image_window_controller_wrap').find('.win_width_label').text(this_opts.viewer.window.width.current);
       this_elm.find('.image_window_controller_wrap').find('.image_window_controller').find('.image_window_level').val(this_opts.viewer.window.level.current);
@@ -295,23 +288,23 @@
 
       var changeMain = function (image_obj) {
         var tmp_ctx = this_elm.find('.series_image_elm').get(0).getContext('2d');
-				var tmp_canvas_w = this_elm.find('.series_image_elm').width();
-				var tmp_canvas_h = this_elm.find('.series_image_elm').height();
+        var tmp_canvas_w = this_elm.find('.series_image_elm').width();
+        var tmp_canvas_h = this_elm.find('.series_image_elm').height();
         tmp_ctx.clearRect(0, 0, tmp_canvas_w, tmp_canvas_h);
-				
-				var tmp_sw = this_opts.viewer.position.sw;
-				var tmp_sh = this_opts.viewer.position.sh;
-				var tmp_dw = this_opts.viewer.position.dw;
-				var tmp_dh = this_opts.viewer.position.dh;
-				
-				if(this_opts.viewer.orientation === 'oblique'){
-					var tmp_zoom_rate = Math.max(this_opts.viewer.position.sw,this_opts.viewer.position.sh) / 512;
-					tmp_sw = this_opts.viewer.position.sw * 512 / tmp_zoom_rate;
-					tmp_sh = this_opts.viewer.position.sh * 512 / tmp_zoom_rate;
-					tmp_dw = this_opts.viewer.position.dw * 512 / tmp_zoom_rate;
-					tmp_dh = this_opts.viewer.position.dh * 512 / tmp_zoom_rate;
-				}
-				
+
+        var tmp_sw = this_opts.viewer.position.sw;
+        var tmp_sh = this_opts.viewer.position.sh;
+        var tmp_dw = this_opts.viewer.position.dw;
+        var tmp_dh = this_opts.viewer.position.dh;
+
+        if(this_opts.viewer.orientation === 'oblique'){
+        //  var tmp_zoom_rate = 20;
+//          tmp_sw = this_opts.viewer.position.sw * tmp_zoom_rate;
+//          tmp_sh = this_opts.viewer.position.sh * tmp_zoom_rate;
+//          tmp_dw = this_opts.viewer.position.dw * tmp_zoom_rate;
+//          tmp_dh = this_opts.viewer.position.dh * tmp_zoom_rate;
+        }
+
         tmp_ctx.drawImage(
           image_obj,
           this_opts.viewer.position.sx,
@@ -326,10 +319,9 @@
         this_obj._disableImageAlias(tmp_ctx, false);
       };
 
-      //すでにリクエスト済み画像であればメモリから読みだす
-
       var src_url = this_obj._createImageUrl();
 
+			//check the image is in Cache.
       for (var i = this_opts._tmpInfo.imgCache.length - 1; i >= 0; i--) {
         if (this_opts._tmpInfo.imgCache[i].url === src_url) {
           changeMain(this_opts._tmpInfo.imgCache[i].image);
@@ -357,16 +349,16 @@
               var blob = this.response;
               var tmp_img = new Image();
               tmp_img.onload = function(e) {
-								
-								if(this_opts.viewer.orientation === 'oblique'){
-									var tmp_Pixel_Columns = xhr.getResponseHeader('X-Circus-Pixel-Columns');
-									var tmp_Pixel_Rows = xhr.getResponseHeader('X-Circus-Pixel-Rows');
-									var tmp_Pixel_Size = xhr.getResponseHeader('X-Circus-Pixel-Size');
-									var tmp_Center = xhr.getResponseHeader('X-Circus-Center');
-									this_obj.setObliqueResponse(tmp_Pixel_Columns,tmp_Pixel_Rows,tmp_Pixel_Size,tmp_Center);
-									this_obj.syncVoxel();
-								}
-									
+
+                if(this_opts.viewer.orientation === 'oblique'){
+                  var tmp_Pixel_Columns = xhr.getResponseHeader('X-Circus-Pixel-Columns');
+                  var tmp_Pixel_Rows = xhr.getResponseHeader('X-Circus-Pixel-Rows');
+                  var tmp_Pixel_Size = xhr.getResponseHeader('X-Circus-Pixel-Size');
+                  var tmp_Center = xhr.getResponseHeader('X-Circus-Center');
+                  this_obj.setObliqueResponse(tmp_Pixel_Columns,tmp_Pixel_Rows,tmp_Pixel_Size,tmp_Center);
+                  this_obj.syncVoxel();
+                }
+
                 changeMain(tmp_img);
                 this_opts._tmpInfo.loadFlg = 0;
                 myWindowURL.revokeObjectURL(tmp_img.src); // Clean up after yourself.
@@ -495,47 +487,50 @@
 
 
 
-		changeZoom: function (inout) {
-			var this_obj = this;
-			var this_elm = this.element;
-			var this_opts = this.options;
-			var resize_value = 0.5;
+    changeZoom: function (inout) {
+      var this_obj = this;
+      var this_elm = this.element;
+      var this_opts = this.options;
+      var resize_value = 0.5;
 
-			if (inout === '+') {
-				if(this_opts.viewer.position.zoom < 1){
-					resize_value = 0.1;
-				}
-				this_opts.viewer.position.zoom += resize_value;
-				if(this_opts.viewer.position.zoom > 32 ) {
-					this_opts.viewer.position.zoom = 32;
-				}
-				this_opts.viewer.position.zoom = Math.ceil(this_opts.viewer.position.zoom*10) / 10;
+      if (inout === '+') {
+        if(this_opts.viewer.position.zoom < 1){
+          resize_value = 0.1;
+        }
+        this_opts.viewer.position.zoom = this_opts.viewer.position.zoom + resize_value;
+        if(this_opts.viewer.position.zoom > 32 ) {
+          this_opts.viewer.position.zoom = 32;
+        }
+        this_opts.viewer.position.zoom = Math.ceil(this_opts.viewer.position.zoom*10) / 10;
 
-			} else if ( inout === '-') {
-				if(this_opts.viewer.position.zoom <= 1){
-					resize_value = 0.1;
-				}
+      } else if ( inout === '-') {
+        if(this_opts.viewer.position.zoom <= 1){
+          resize_value = 0.1;
+        }
 
-				this_opts.viewer.position.zoom -= resize_value;
-				if(this_opts.viewer.position.zoom < 0.1 ) {
-					this_opts.viewer.position.zoom = 0.1;
-				}
-				this_opts.viewer.position.zoom = Math.floor(this_opts.viewer.position.zoom*10) / 10;
-			}
+        this_opts.viewer.position.zoom = this_opts.viewer.position.zoom - resize_value;
+        if(this_opts.viewer.position.zoom < 0.1 ) {
+          this_opts.viewer.position.zoom = 0.1;
+        }
+        this_opts.viewer.position.zoom = Math.floor(this_opts.viewer.position.zoom*10) / 10;
+      }
+			
+      var tmp_pre_w = this_opts.viewer.position.sw; //拡大処理前のトリミング幅
+      var tmp_pre_h = this_opts.viewer.position.sh; //拡大処理前のトリミング高さ
 
-			var tmp_pre_w = this_opts.viewer.position.sw; //拡大処理前のトリミング幅
-			var tmp_pre_h = this_opts.viewer.position.sh; //拡大処理前のトリミング高さ
+      this_opts.viewer.position.sw = this_opts.viewer.position.ow / this_opts.viewer.position.zoom;
+      this_opts.viewer.position.sh = this_opts.viewer.position.oh / this_opts.viewer.position.zoom;
 
-			this_opts.viewer.position.sw = this_opts.viewer.position.ow / this_opts.viewer.position.zoom;
-			this_opts.viewer.position.sh = this_opts.viewer.position.oh / this_opts.viewer.position.zoom;
+      var diff_x = (this_opts.viewer.position.sw - tmp_pre_w) / 2;
+      var diff_y = (this_opts.viewer.position.sh - tmp_pre_h) / 2;
 
-			var diff_x = (this_opts.viewer.position.sw - tmp_pre_w) / 2;
-			var diff_y = (this_opts.viewer.position.sh - tmp_pre_h) / 2;
+      this_opts.viewer.position.sx = this_opts.viewer.position.sx - diff_x;
+      this_opts.viewer.position.sy = this_opts.viewer.position.sy - diff_y;
+			
+			this_opts.viewer.position.sw = Math.floor(this_opts.viewer.position.sw);
+			this_opts.viewer.position.sh = Math.floor(this_opts.viewer.position.sh);
 
-			this_opts.viewer.position.sx = this_opts.viewer.position.sx - diff_x;
-			this_opts.viewer.position.sy = this_opts.viewer.position.sy - diff_y;
-
-		},//changeZoom
+    },//changeZoom
 
 
 
@@ -622,8 +617,8 @@
     _clearCanvas: function () {
       var this_obj = this;
       var this_elm = this.element;
-			var tmp_w = this_elm.width();
-			var tmp_h = this_elm.height();
+      var tmp_w = this_elm.width();
+      var tmp_h = this_elm.height();
       this_elm.find('.canvas_main_elm').get(0).getContext('2d').clearRect(0, 0, tmp_w, tmp_h);
     },
 
@@ -827,8 +822,8 @@
 
       var guide_horizontal = this_obj.getGuide('horizontal');
       var guide_vertical =  this_obj.getGuide('vertical');
-			
-			
+
+
 
       var guide_start_x = (guide_horizontal.number + 0.5 - this_opts.viewer.position.sx) * this_opts.viewer.position.dw / this_opts.viewer.position.sw || 0;
       var guide_start_y = (guide_vertical.number + 0.5 - this_opts.viewer.position.sy) * this_opts.viewer.position.dh / this_opts.viewer.position.sh || 0;
@@ -846,7 +841,7 @@
           1,
           this_opts.viewer.position.dh
         );
-        tmp_ctx.fill();	
+        tmp_ctx.fill();
         tmp_ctx.closePath();
       }
 
@@ -1194,11 +1189,7 @@
 
 
 
-
-
     getLabelObjectById: function (label_id, series_id) {
-
-      //描画対象ラベルのチェック
       var this_obj = this;
       var this_opts = this.options;
       var tmp_the_series = this_obj.getSeriesObjectById(series_id);
@@ -1209,10 +1200,7 @@
           break;
         }
       }
-
     },//getLabelObjectById
-
-
 
 
 
@@ -1256,16 +1244,6 @@
       return return_obj;
 
     },//getGuide
-
-
-
-
-
-    getOptions: function () {
-      //外部からのオプション参照用メソッド
-      return this.options;
-    },
-
 
 
 
@@ -1318,6 +1296,7 @@
       //コンテナ内部をひとつ手前に戻す
       this_opts.container.historyBack();
       this_obj.syncOtherViewers();
+			$(this_elm).imageViewer('syncVoxel');
     },
 
 
@@ -1332,6 +1311,7 @@
       //コンテナ内部の戻るを取消
       this_opts.container.historyRedo();
       this_obj.syncOtherViewers();
+			$(this_elm).imageViewer('syncVoxel');
     },
 
 
@@ -1370,10 +1350,6 @@
       //以下各種イベント群
       this_elm.bind('changeImageSrc', function () {
         this_obj._changeImageSrc();
-      })
-      .bind('getOptions', function () {
-        var return_obj = this_obj.getOptions();
-        return return_obj;
       })
       .bind('sync', function () {
         this_obj.syncVoxel();
@@ -1557,18 +1533,18 @@
         this_elm.find('.ico_detail_sprite_resize_large,.ico_detail_sprite_resize_short').click(function () {
           this_elm.imageViewer('changeMode', 'pan');
           if (this_opts.viewer.position.zoom <= 32 && 0.1 <= this_opts.viewer.position.zoom) {
-						
+
             if ($(this).hasClass('ico_detail_sprite_resize_large')) {
-							this_obj.changeZoom('+');
+              this_obj.changeZoom('+');
             } else if ($(this).hasClass('ico_detail_sprite_resize_short')) {
-							this_obj.changeZoom('-');
+              this_obj.changeZoom('-');
             }
 
             //display text
             this_elm.find('.current_size').text(100 * Number(this_opts.viewer.position.zoom));
 
-						//sync some lines
-						this_obj._limitImagePosition();
+            //sync some lines
+            this_obj._limitImagePosition();
             this_obj._changeImageSrc();
             this_obj.syncVoxel();
 
@@ -1614,9 +1590,9 @@
 
       var this_obj = this;
       var this_opts = this.options;
-			if(this_opts.viewer.orientation === 'oblique'){
-				return;
-			}      
+      if(this_opts.viewer.orientation === 'oblique'){
+        return;
+      }
 
       //right side
       if (this_opts.viewer.position.sx + this_opts.viewer.position.sw > this_opts.viewer.position.ow) {
@@ -1703,8 +1679,8 @@
       this_opts._tmpInfo.cursor.start.Y = e.clientY;
 
       //get init position info of the image trimming
-			this_opts._tmpInfo.elementParam.start.X = this_opts.viewer.position.sx;
-			this_opts._tmpInfo.elementParam.start.Y = this_opts.viewer.position.sy;
+      this_opts._tmpInfo.elementParam.start.X = this_opts.viewer.position.sx;
+      this_opts._tmpInfo.elementParam.start.Y = this_opts.viewer.position.sy;
 
     },//_mousedownFuncPan
 
@@ -1774,8 +1750,6 @@
 
 
 
-
-
     _mousedownFuncErase: function (e) {
       var this_obj = this;
       var this_elm = this.element;
@@ -1831,9 +1805,7 @@
           );
           this_obj.syncVoxel();
           this_obj._disableImageAlias(tmp_ctx, false);
-
        }
-
     },//_mousedownFuncErase
 
 
@@ -1870,10 +1842,7 @@
            tmp_point_position[0]
          );
        }
-
     },//_mousedownFuncBucket
-
-
 
 
 
@@ -1882,21 +1851,15 @@
       var this_elm = this.element;
       var this_opts = this.options;
 
-      //定規モード
-      //マウス位置取得
+      //get cursor position
       var tmp_cursor_x = (e.clientX - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().left) / this_opts.viewer.position.zoom;
       var tmp_cursor_y = (e.clientY - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().top) / this_opts.viewer.position.zoom;
 
-      //初期位置(ズーム解除状態でのXY値)
+      //get the position (original image scale)
       this_opts._tmpInfo.cursor.start.X = tmp_cursor_x + this_opts.viewer.position.sx * this_opts.viewer.position.dw / this_opts.viewer.position.ow;
       this_opts._tmpInfo.cursor.start.Y = tmp_cursor_y + this_opts.viewer.position.sy * this_opts.viewer.position.dh / this_opts.viewer.position.oh;
 
     },//_mousedownFuncMeasure
-
-
-
-
-    //mode rotate mousedown もとの場所
 
 
 
@@ -2001,20 +1964,20 @@
       var this_obj = this;
       var this_elm = this.element;
       var this_opts = this.options;
-			var tmp_position_params = this_opts.viewer.position;
+      var tmp_position_params = this_opts.viewer.position;
 
-			var tmp_x = (e.clientX - this_opts._tmpInfo.cursor.start.X) / tmp_position_params.zoom;
-			var tmp_y = (e.clientY - this_opts._tmpInfo.cursor.start.Y) / tmp_position_params.zoom;
+      var tmp_x = (e.clientX - this_opts._tmpInfo.cursor.start.X) / tmp_position_params.zoom;
+      var tmp_y = (e.clientY - this_opts._tmpInfo.cursor.start.Y) / tmp_position_params.zoom;
 
-			tmp_x = this_opts._tmpInfo.elementParam.start.X - tmp_x * tmp_position_params.ow / tmp_position_params.dw;
-			tmp_y = this_opts._tmpInfo.elementParam.start.Y - tmp_y * tmp_position_params.oh / tmp_position_params.dh;
+      tmp_x = this_opts._tmpInfo.elementParam.start.X - tmp_x * tmp_position_params.ow / tmp_position_params.dw;
+      tmp_y = this_opts._tmpInfo.elementParam.start.Y - tmp_y * tmp_position_params.oh / tmp_position_params.dh;
 
-			tmp_position_params.sx = Math.round(tmp_x);
-			tmp_position_params.sy = Math.round(tmp_y);
+      tmp_position_params.sx = Math.round(tmp_x);
+      tmp_position_params.sy = Math.round(tmp_y);
 
-			if(this_opts.viewer.orientation !== 'oblique'){
-				this_obj._limitImagePosition();
-			}
+      if(this_opts.viewer.orientation !== 'oblique'){
+        this_obj._limitImagePosition();
+      }
 
      this_obj._changeImageSrc();
       this_obj.syncVoxel();
@@ -2528,6 +2491,8 @@
         max: this_opts.viewer.number.maximum
       });
 
+
+
       var tmp_voxel_zoom = 512 / this_opts.viewer.voxel.x;
       this_opts.viewer.position.dw = Math.floor(this_opts.viewer.position.dw * tmp_voxel_zoom);
       this_opts.viewer.position.dh = Math.floor(this_opts.viewer.position.dh * tmp_voxel_zoom);
@@ -2545,35 +2510,38 @@
 
 
 
-
-
     setObliqueResponse: function (tmp_Pixel_Columns,tmp_Pixel_Rows,tmp_Pixel_Size,tmp_Center) {
+
+
+			//キャッシュから画像を読んだ時もこれが発動するようにしよう
 
       var this_obj = this;
       var this_elm = this.element;
       var this_opts = this.options;
 
-			this_opts.viewer.voxel.x = this_opts.viewer.position.ow = Number(tmp_Pixel_Columns);
-			this_opts.viewer.voxel.y = this_opts.viewer.position.oh = Number(tmp_Pixel_Rows);
-			
-			this_opts.viewer.voxel.voxel_x = this_opts.viewer.voxel.voxel_y = Number(tmp_Pixel_Size);
-			this_opts.viewer.position.dw = Number(tmp_Pixel_Columns) * this_opts.viewer.position.zoom;
-			this_opts.viewer.position.dh = Number(tmp_Pixel_Rows) * this_opts.viewer.position.zoom;
+      this_opts.viewer.voxel.x = this_opts.viewer.position.ow = Number(tmp_Pixel_Columns);
+      this_opts.viewer.voxel.y = this_opts.viewer.position.oh = Number(tmp_Pixel_Rows);
+      this_opts.viewer.voxel.voxel_x = this_opts.viewer.voxel.voxel_y = Number(tmp_Pixel_Size);
+ 
+      this_opts.viewer.position.dw = this_opts.viewer.position.ow * this_opts.viewer.position.zoom;
+      this_opts.viewer.position.dh = this_opts.viewer.position.oh * this_opts.viewer.position.zoom;
 
-			this_opts.viewer.position.sw = this_opts.viewer.position.ow / this_opts.viewer.position.zoom;
-			this_opts.viewer.position.sh = this_opts.viewer.position.oh / this_opts.viewer.position.zoom;
+      this_opts.viewer.position.sw = this_opts.viewer.position.ow / this_opts.viewer.position.zoom;
+      this_opts.viewer.position.sh = this_opts.viewer.position.oh / this_opts.viewer.position.zoom;
 			
-			var guide_x = tmp_Center.split(',')[0];
-			var guide_y = tmp_Center.split(',')[1];
-			
-			var guide_horizontal = this_obj.getGuide('horizontal');
+			this_opts.viewer.position.sw = Math.floor(this_opts.viewer.position.sw);
+			this_opts.viewer.position.sh = Math.floor(this_opts.viewer.position.sh);
+
+      var guide_x = tmp_Center.split(',')[0];
+      var guide_y = tmp_Center.split(',')[1];
+
+      var guide_horizontal = this_obj.getGuide('horizontal');
       var guide_vertical =  this_obj.getGuide('vertical');
 
-			guide_horizontal.number = Number(guide_x);
-			guide_vertical.number = Number(guide_y);
+      guide_horizontal.number = Number(guide_x);
+      guide_vertical.number = Number(guide_y);
 
-		},
-
+    },
 
 
 
@@ -2582,9 +2550,6 @@
       var this_obj = this;
       var this_elm = this.element;
       var this_opts = this.options;
-
-
-      //自分自身、同じボクセルを共用するビューアーに対してコンテナとの同期を促す
       var tmp_this_id = this_elm.attr('id');
       for (var i = this_opts.container.data.member.length - 1; i >= 0; i--) {
         if(tmp_this_id !== this_opts.container.data.member[i]) {
@@ -2595,26 +2560,22 @@
 
 
 
-
-
     syncVoxel: function () {
 
-      //ボクセル情報を取得して現在のキャンバスを更新する
+      //update voxel & guide
       var this_obj = this;
       var this_elm = this.element;
       var this_opts = this.options;
 
-      this_obj._clearCanvas();//初期化
-      this_obj.drawGuide();//ガイド
+      this_obj._clearCanvas();
+      this_obj.drawGuide();
 
       if( this_opts.viewer.rotate.visible === true){
         this_obj.drawRotate();
       }
-
       this_obj._createGuideHall();
 
-
-      //全シリーズ・ラベルについて現在の [オリエンテーション・奥行] を渡して塗るべき座標を戻してもらう
+      //get all position for Drawing of all Labels of all Seies.
       for (var i = this_opts.container.data.series.length - 1; i >= 0; i--) {
         var tmp_the_series = this_opts.container.data.series[i];
 
@@ -2635,7 +2596,6 @@
           }
         }
       }
-
     } //syncVoxel
   });
 

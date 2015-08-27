@@ -9,10 +9,21 @@ class ApiBaseController extends BaseController
 	protected $fields = '';
 	protected $settable = [];
 
+
 	public function __construct()
 	{
-		// Anyone who wants to access this API must be property authenticated
-		$this->beforeFilter('auth');
+		$this->registerErrorHandler();
+	}
+
+	/**
+	 * Overwrites the default exception handling defined in `start/global.php`.
+	 */
+	protected function registerErrorHandler()
+	{
+		App::error(function(Exception $exception) {
+			Log::error($exception);
+			return $this->errorResponse($exception->getMessage());
+		});
 	}
 
 	protected function errorResponse($message)

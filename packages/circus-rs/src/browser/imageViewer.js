@@ -149,6 +149,8 @@
       if (target_series.label.length === 1) {
         target_series.activeLabelId = tmp_add_label_obj.id;
       }
+			
+      this_opts.container.addLabel(series_id, label_obj.id,[]);
     },
 
 

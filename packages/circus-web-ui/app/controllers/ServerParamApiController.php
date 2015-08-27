@@ -25,7 +25,13 @@ class ServerParamApiController extends ApiBaseController
 
 	protected function validate($entries)
 	{
-		$entries = array_only($entries, ['domains']);
+		$entries = array_only($entries, ['domains', 'defaultDomain']);
+
+		if (array_search($entries['defaultDomain'], $entries['domains']) === false) {
+			throw new InvalidModelException(
+				['defaultDomain' => ['The same value should be in the domains list, too.']]
+			);
+		}
 		return $entries;
 	}
 }

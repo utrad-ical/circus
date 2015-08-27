@@ -88,12 +88,9 @@ class ResourceApiBaseController extends ApiBaseController
 		$data = Input::all();
 		$data->$pk = $this->normalizeID($data->$pk);
 
-		try {
-			return $this->bulkAssignPostedDataToModel($newItem, $data, true)
-				->validateAndSave($newItem);
-		} catch (InvalidModelException $e) {
-			return $this->errorResponse($e->getErrors());
-		}
+		// may raise InvalidModelException
+		return $this->bulkAssignPostedDataToModel($newItem, $data, true)
+			->validateAndSave($newItem);
 	}
 
 	/**

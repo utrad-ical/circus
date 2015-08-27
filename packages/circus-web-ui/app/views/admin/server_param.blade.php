@@ -24,6 +24,7 @@
 
 	<script>
 		$(function () {
+			var domainRegex = /^[_a-zA-Z][_a-zA-Z0-9\-]*$/;
 			var editor = $('#editor').propertyeditor({
 				properties: [
 					{
@@ -33,8 +34,16 @@
 						spec: {
 							elementType: 'text',
 							elementSpec: {
-								regex: /^[_a-zA-Z][_a-zA-Z0-9\-]*$/
+								regex: domainRegex
 							}
+						}
+					},
+					{
+						key: 'defaultDomain',
+						caption: 'Default Domain',
+						type: 'text',
+						spec: {
+							regex: domainRegex
 						}
 					}
 				]
@@ -64,7 +73,13 @@
 						alert('Saved.');
 						refresh();
 					},
-					error: function (err) { alert(err); },
+					error: function (res) {
+						if ($.isPlainObject(res.responseJSON)) {
+							editor.propertyeditor('complain', res.responseJSON.errors);
+						} else {
+							alert(res.responseText);
+						}
+					},
 					cached: false
 				});
 			});

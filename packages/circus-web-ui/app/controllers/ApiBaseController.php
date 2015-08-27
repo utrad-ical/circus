@@ -22,7 +22,11 @@ class ApiBaseController extends BaseController
 	{
 		App::error(function(Exception $exception) {
 			Log::error($exception);
-			return $this->errorResponse($exception->getMessage());
+			if ($exception instanceof InvalidModelException) {
+				return $this->errorResponse($exception->getErrors());
+			} else {
+				return $this->errorResponse($exception->getMessage());
+			}
 		});
 	}
 

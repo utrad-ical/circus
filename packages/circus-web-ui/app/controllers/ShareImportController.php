@@ -25,7 +25,8 @@ class ShareImportController extends BaseController
 		$domain_list = ServerParam::getDomainList();
 		return View::make('share.import')
 			->with('default_domain', $default_domain)
-			->with('domains', $domain_list);;
+			->with('domains', $domain_list)
+			->with('tag_list', array());
 	}
 
 	/**
@@ -33,8 +34,6 @@ class ShareImportController extends BaseController
 	 */
 	public function register()
 	{
-		$result = array();
-
 		$inputs = Input::all();
 		$inputs['import_file'] = Input::file('import_file');
 
@@ -74,11 +73,9 @@ class ShareImportController extends BaseController
 			if (!$task) {
 				throw new Exception('Failed to invoke export process.');
 			}
-
 			return Response::json(array(
 					'result' => true,
-					'taskID' => $task->taskID,
-					'response' => $result));
+					'taskID' => $task->taskID));
 		} catch (Exception $e) {
 			Log::error($e);
 			return Response::json(

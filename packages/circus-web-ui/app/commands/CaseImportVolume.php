@@ -54,6 +54,9 @@ class CaseImportVolume extends TaskCommand {
 		self::DATA_TYPE_URL
 	);
 
+	private $_projectID;
+	private $_caseIds = array();
+
 	/**
 	 * Create a new command instance.
 	 *
@@ -84,10 +87,11 @@ class CaseImportVolume extends TaskCommand {
 			}
 
 			$this->importCaseData();
-			Log::debug('Import Finish!!');
+			$this->addTaskLog(array("result" => true, "projectID" => $this->_projectID, "caseIds" => $this->_caseIds));
 			$this->markTaskAsFinished();
 		}catch (Exception $e) {
 			Log::error($e);
+			$this->addTaskLog(array("result" => false, "errorMsg" => $e->getMessage()));
 			$this->markTaskAsFinished();
 			throw $e;
 		}
@@ -156,6 +160,7 @@ class CaseImportVolume extends TaskCommand {
 					if ($file != "." && $file != "..") {
 						//ケース存在チェック
 						$caseObj = ClinicalCase::find($file);
+						$this->_caseIds[] = $file;
 						if (!$caseObj) {
 							//存在しないケースなのでケースデータを登録する
 							$this->createCase($targetDir.'/cases', $file);
@@ -165,13 +170,17 @@ class CaseImportVolume extends TaskCommand {
 						}
 						$this->updateTaskProgress($counter, 0, "Importing in progress. $counter files are processed.");
 						$counter++;
-						Log::debug('Case Regist Finish!!');
 					}
 				}
 			}
 		}
 	}
 
+	/**
+	 * ラベルデータ作成
+	 * @param unknown_type $labelDir
+	 * @param unknown_type $counter
+	 */
 	private function createLabelData($labelDir, &$counter)
 	{
 		if ($dir = opendir($labelDir)) {
@@ -228,7 +237,7 @@ class CaseImportVolume extends TaskCommand {
 		if ($lines === false || count($lines) !== 1)
 			throw new Exception($path.'の中身が不正です。');
 
-		return json_decode($lines[0]);
+		return json_decode($lines[0], true);
 	}
 
 	/**
@@ -245,36 +254,36 @@ class CaseImportVolume extends TaskCommand {
 				return;
 
 			$caseData = $this->getJsonFromFile($caseDir.'/case.json');
-
 			//プロジェクトIDのチェック
-			if (!isset($caseData->projectID))
+			if (!isset($caseData['projectID']))
 				throw new Exception('プロジェクトIDがありません。');
-			if (!Project::find($caseData->projectID))
-				throw new Exception('プロジェクトID['.$caseData->projectID.']が存在しません。');
+			if (!Project::find($caseData['projectID']))
+				throw new Exception('プロジェクトID['.$caseData['projectID'].']が存在しません。');
+			$this->_projectID = $caseData['projectID'];
 			//リビジョン情報のチェック
-			if (!isset($caseData->revisions))
+			if (!isset($caseData['revisions']))
 				throw new Exception('リビジョン情報がありません。');
 
 			$latestNo = 0;
 			$patientInfo = array();
 			$domains = array();
-			foreach ($caseData->revisions as $rNo => $revision) {
-				if (!isset($revision->series))
+			foreach ($caseData['revisions'] as $rNo => $revision) {
+				if (!isset($revision['series']))
 					throw new Exception('リビジョン['.$rNo.']内にシリーズ情報がありません。');
 				//シリーズIDのチェック
-				foreach ($revision->series as $series) {
-					if (!isset($series->seriesUID))
+				foreach ($revision['series'] as $series) {
+					if (!isset($series['seriesUID']))
 						throw new Exception('シリーズUIDがありません。');
-					if (!Series::find($series->seriesUID))
-						throw new Exception('シリーズUID['.$series->seriesUID.']が存在しません。');
+					if (!Series::find($series['seriesUID']))
+						throw new Exception('シリーズUID['.$series['seriesUID'].']が存在しません。');
 
-					$seriesObj = Series::find($series->seriesUID);
+					$seriesObj = Series::find($series['seriesUID']);
 					if (!$patientInfo)
-						$patientInfo = $seriesObj->patientInfo;
-					$domains[] = $seriesObj->domain;
+						$patientInfo = $seriesObj['patientInfo'];
+					$domains[] = $seriesObj['domain'];
 				}
 
-				if ($revision === end($caseData->revisions)) {
+				if ($revision === end($caseData['revisions'])) {
 			        $latestNo = $rNo;
 			    }
 			}
@@ -296,7 +305,6 @@ class CaseImportVolume extends TaskCommand {
 	 */
 	private function createCase($dirPath, $caseID)
 	{
-		Log::debug('新規登録を行うCaseID::'.$caseID);
 		$res = $this->validateCase($dirPath, $caseID);
 		if ($res['result'] === false)
 			throw new Exception($res['errorMsg']);
@@ -320,7 +328,6 @@ class CaseImportVolume extends TaskCommand {
 	 */
 	private function updateCase($dirPath, $caseID)
 	{
-		Log::debug('更新を行うCaseID::'.$caseID);
 		$res = $this->validateCase($dirPath, $caseID);
 
 		if ($res['result'] === false)
@@ -330,24 +337,35 @@ class CaseImportVolume extends TaskCommand {
 
 		//存在Revisionチェック
 		$caseObj = ClinicalCase::find($caseID);
+		$tmpCase = $caseObj->toArray();
+
+		$this->formatRevisionDate($tmpCase['revisions']);
+		$this->formatRevisionDate($caseData['revisions']);
 
 		//リビジョン入れ子
-		$revisions = $this->createRevision($caseObj->revisions, $caseData->revisions);
+		$revisions = $this->createRevision($tmpCase['revisions'], $caseData['revisions']);
 
-		Log::debug('生成したリビジョン情報::');
-		Log::debug($revisions);
 		//ケース更新
 		end($revisions);
 		$revisionNo = key($revisions);
-
-		Log::debug('LatestRevision::');
-		Log::debug($revisions[$revisionNo]);
-
-		//TODO::MongoDate型の確認
-		//TODO::revisions配列の確認
-	//	$caseObj->latestRevision = $revisions[$revisionNo];
-	//	$caseObj->revisions = $revisions;
+		$caseObj->latestRevision = $revisions[$revisionNo];
+		$caseObj->revisions = $revisions;
 		$caseObj->save();
+	}
+
+	/**
+	 * Revisionの日付を整形する
+	 * @param Array $revisions revision配列
+	 */
+	private function formatRevisionDate(&$revisions)
+	{
+		foreach ($revisions as $revKey => $revVal) {
+			if (is_array($revVal['date'])) {
+				$revisions[$revKey]['date'] = $revVal['date']['sec'];
+			} else {
+				$revisions[$revKey]['date'] = $revVal['date']->sec;
+			}
+		}
 	}
 
 	/**
@@ -358,65 +376,50 @@ class CaseImportVolume extends TaskCommand {
 	 */
 	private function createRevision($oldRevisions, $addRevisions)
 	{
-		$revisions = $oldRevisions;
 
 		$addRevNo = 0;
 		foreach ($addRevisions as $addKey => $addRevision) {
-
-			//$addFlag = false;
 			$addPlace = 0;
-			for ($oldKey = $addRevNo; $oldKey < count($oldRevisions) - $addRevNo; $oldKey++){
-				$oldRevision = $oldRevisions[$oldKey];
+			foreach ($oldRevisions as $oldKey => $oldRevision) {
+				$addRevNo = $oldKey;
 				//creatorとdateを比較
-				$addRevision->date = new MongoDate($addRevision->date->sec);
 				//作成者または作成日が不一致
-				Log::debug("[Date]old::".$oldRevision['date']->sec."\tnew::".$addRevision->date->sec);
-				Log::debug("[Creator]old::".$oldRevision["creator"]."\tnew::".$addRevision->creator);
-				if ($oldRevision['date']->sec !== $addRevision->date->sec
-					|| $oldRevision['creator'] !== $addRevision->creator) {
-					if ($oldRevision['date'] > $addRevision->date) {
-						$addRevNo = $oldKey;
+				if ($oldRevision['date'] !== $addRevision['date']
+					|| $oldRevision['creator'] !== $addRevision['creator']) {
+
+					if ($oldRevision['date'] > $addRevision['date']) {
 						$addPlace = 1;
 						break;
-					} else if ($oldRevision['date'] < $addRevision->date) {
-						$addRevNo = $oldKey;
+					} else if ($oldRevision['date'] < $addRevision['date']) {
 						$addPlace = 2;
 					} else {
 						//日付けは一致しているが作成者が違う
-						$addRevNo = $oldKey;
 						$addPlace = 3;
-						break;
 					}
 				} else {
 					$addPlace = 0;
-					$addRevNo = $oldKey;
 					break;
 				}
 			}
 
-			$tmpRevision = json_decode(json_encode($addRevision), true);
 			if ($addPlace === 2 || $addPlace === 3) {
-				if (count($oldRevisions) - 1 < $addRevNo + 1)
-					$reviisons[$addRevNo+1] = $tmpRevision;
-				else
-					array_splice($revisions, $addRevNo+1, 0, array($tmpRevision));
+				if (count($oldRevisions) - 1 < $addRevNo + 1) {
+					$oldRevisions[$addRevNo + 1] = $addRevision;
+				} else {
+					array_splice($oldRevisions, $addRevNo+1, 0, array($addRevision));
+				}
 			} else if($addPlace === 1) {
-				array_splice($revisions, $addRevNo, 0, array($tmpRevision));
+				array_splice($oldRevisions, $addRevNo, 0, array($addRevision));
+				$addRevNo++;
 			}
 		}
 
-		//TODO::MongoDate型生成見直し
-		foreach ($revisions as $key => $revision) {
-			Log::debug($revision['date']);
-			Log::debug(array_key_exists('sec', $revision['date']));
-
-			if (array_key_exists('sec', $revision['date'])) {
-				$revisions[$key]['date'] = $revision['date'];
-			} else {
-				$revisions[$key]['date'] = new MongoDate($revision['date']->sec);
-			}
+		//MongoDate型生成
+		foreach ($oldRevisions as $key => $revision) {
+			$oldRevisions[$key]['date'] = new MongoDate($revision['date']);
 		}
-		return json_decode(json_encode($revisions),true);
+		ksort($oldRevisions);
+		return $oldRevisions;
 	}
 
 	/**

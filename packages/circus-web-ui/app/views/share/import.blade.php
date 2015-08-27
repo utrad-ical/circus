@@ -70,13 +70,12 @@ Import Data
 
 <div id="dialog" title="Setting import tag options" style="display: none;">
     <p class="mar_10">
-        {{Form::open(array('url' => asset('share/save_tags'), 'method' => 'post', 'class' => 'frm_share_tag'))}}
-        	{{Form::hidden('taskID', '')}}
+        {{Form::open(array('url' => asset('case/save_tags'), 'method' => 'post', 'class' => 'frm_share_tag'))}}
             <table class="common_table">
                 <tr>
                     <th>Tag</th>
                     <td>
-                        {{Form::select('tag', isset($tag_list) ? $tag_list : array(), null, array('class' => 'multi_select import_select_tags', 'multiple' => 'multiple'))}}
+                        {{Form::select('tags', isset($tag_list) ? $tag_list : array(), null, array('class' => 'multi_select import_select_tags', 'multiple' => 'multiple'))}}
                     </td>
                 </tr>
             </table>
@@ -90,6 +89,7 @@ Import Data
 //タスク管理用
 var progress = $('#progress').progressbar().hide();
 var progressLabel = $('#progress-label');
+var taskData;
 
 var busy = function(bool) {
 	if (bool) $('#message').hide();
@@ -133,7 +133,6 @@ $(function() {
 			async:true,
 	        success: function (data) {
 	            $('#task-watcher').taskWatcher(data.taskID).on('finish', function() {
-		            console.log(data.taskID);
 		            $('.frm_share_tag').find('input[name="taskID"]').val(data.taskID);
 		            $.ajax({
 						url:"{{{asset('task')}}}"+"/"+data.taskID,
@@ -141,14 +140,13 @@ $(function() {
 						error: function(){
 							alert('I failed to communicate.');
 						},
-						success: function(res, status, xhr){
-							console.log(res);
-							if (res.logs[0]['result'] === false) {
+						success: function(res){
+							taskData = res;
+							if (taskData.logs[0]['result'] === false) {
 								alert(res.logs['errorMsg']);
 								return false;
 							}
-							console.log(res.logs);
-							var projectID = res.logs[0]['projectID'];
+							var projectID = taskData.logs[0]['projectID'];
 							$.ajax({
 								url:"{{{asset('api/project')}}}"+"/"+projectID,
 								dataType: 'json',
@@ -183,9 +181,41 @@ $(function() {
 	    });
 	});
 
-	$('.btn_add_tag').click(function(){
+	$('#btn_add_tag').click(function(){
 		var form_data = $(this).closest('form').serializeArray();
-		//TODO::タグオプション通信処理
+
+		var tag_ary = new Array();
+	    $('.import_select_tags option:selected').each(function(){
+	        tag_ary.push($(this).val());
+	    });
+
+		var tag_set_flg = false;
+		form_data.some(function(v, i) {
+			if(v.name=="tags") {
+				form_data[i].value = JSON.stringify(tag_ary);
+				tag_set_flg = true;
+			}
+		});
+
+		if (!tag_set_flg) {
+			var tmp_tag_ary = new Array();
+			tmp_tag_ary["name"] = "tags";
+			tmp_tag_ary["value"] = JSON.stringify(tag_ary);
+			form_data.push(tmp_tag_ary);
+		}
+		form_data.push({"name":"caseID", "value":taskData.logs[0].caseIds});
+		$.ajax({
+			url:  $(this).closest('form').attr('action'),
+			type: "post",
+			data: form_data,
+			dataType: 'json',
+			error: function(){
+				alert('I failed to communicate.');
+			},
+			success: function(res, status, xhr){
+				console.log(res);
+			}
+		});
 	});
 });
 var refreshMultiTags = function(empty) {

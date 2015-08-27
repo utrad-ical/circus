@@ -85,20 +85,6 @@ class ShareImportController extends BaseController
 		}
 	}
 
-	public function addTag()
-	{
-
-		$inputs = Input::all();
-		//TODO::タグ付与処理
-
-		//Tag Option
-		/*
-		$tags = implode(',', json_decode($inputs['tags'], true));
-		if ($tags) {
-			$cmd_str .= ' --tag=' . $tags;
-		}
-		*/
-	}
 
 	public function validate($params)
 	{

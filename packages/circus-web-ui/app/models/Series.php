@@ -196,12 +196,7 @@ class Series extends BaseModel {
 			->get();
 	}
 
-	/**
-	 * Get the token of node authentication
-	 * @param string $seriesUID seriesUID
-	 */
-	public static function authNode($seriesUID)
-	{
+	public static function authNode($seriesUID) {
 		$request_url = "http://localhost:3000/requestToken?series=".$seriesUID;
 		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_URL, $request_url);
@@ -217,23 +212,7 @@ class Series extends BaseModel {
 		if (!$responseToken || !array_key_exists('token', $responseToken))
 			new AuthenticationNodeException($tmp);
 
+		Log::info($responseToken['token']);
 		return $responseToken['token'];
-	}
-
-	/**
-	 * Get the domain of the series information
-	 * @param Array $seriesIds Array of the seriesUID
-	 */
-	public static function getDomains($seriesIds)
-	{
-		$domains = array();
-		$seriesList = self::getPluralSeries($seriesIds);
-		if (!$seriesList || count($seriesIds) !== count($seriesList))
-			throw new Exception('存在しないシリーズが含まれています。');
-
-		foreach ($seriesList as $series) {
-			$domains[] = $series->domain;
-		}
-		return array_unique($domains);
 	}
 }

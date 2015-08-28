@@ -114,9 +114,6 @@ var myXhr = function() {
 $(function() {
 	var tmpfile = document.getElementById('files');
 	$('.upload_btn').click(function(){
-		//Uploadボタンを押下されたら直前の情報は不要なため、初期化する
-		taskData = Array();
-
 		var form_data = $(this).closest('form').serializeArray();
 		var fd = new FormData();
 		fd.append("import_file", tmpfile.files[0]);
@@ -133,34 +130,18 @@ $(function() {
 			xhr: myXhr,
 			processData: false,
 			contentType: false,
-			cache:false,
 			async:true,
-	        success: function (res) {
-	            $('#task-watcher').taskWatcher(res.taskID).on('finish', function() {
-		            busy(false);
+	        success: function (data) {
+	            $('#task-watcher').taskWatcher(data.taskID).on('finish', function() {
+		            $('.frm_share_tag').find('input[name="taskID"]').val(data.taskID);
 		            $.ajax({
-						url:"{{{asset('task')}}}"+"/"+res.taskID,
-						method: 'get',
+						url:"{{{asset('task')}}}"+"/"+data.taskID,
 						dataType: 'json',
-						cache:false,
-						async:true,
 						error: function(){
 							alert('I failed to communicate.');
 						},
-						success: function(res2){
-							taskData = res2;
-							//ここまでくればタスク情報は不要になるので使用したtaskIDを削除する
-							$.ajax({
-								url:"{{{asset('delete/task')}}}"+"/"+taskData.taskID,
-								dataType: 'json',
-								method:'get',
-								error:function(){
-									alert('I failed to communicate.');
-								},
-								success: function(){
-									console.log('success delete task'+taskData.taskID);
-								}
-							});
+						success: function(res){
+							taskData = res;
 							if (taskData.logs[0]['result'] === false) {
 								alert(res.logs['errorMsg']);
 								return false;
@@ -169,16 +150,14 @@ $(function() {
 							$.ajax({
 								url:"{{{asset('api/project')}}}"+"/"+projectID,
 								dataType: 'json',
-								cache:false,
-								async:true,
 								error: function(){
 									alert('I failed to communicate.');
 								},
-								success: function(res3, status, xhr){
+								success: function(res, status, xhr){
 									if (xhr.status === 200) {
 										$('.import_select_tags').empty();
 										var import_tag_parent = $('.import_select_tags');
-										$.each(res3.tags, function(key, val) {
+										$.each(res.tags, function(key, val) {
 											var tag_opt = '<option value="'+key+'">'+val["name"]+'</option>';
 											import_tag_parent.append(tag_opt);
 										});
@@ -189,9 +168,10 @@ $(function() {
 									}
 								}
 							});
-							createImportOptionDialog();
+							createExportOptionDialog();
 						}
 					});
+	                busy(false);
 	            });
 	        },
             error: function (data) {
@@ -199,7 +179,6 @@ $(function() {
                 busy(false);
             }
 	    });
-	    return false;
 	});
 
 	$('#btn_add_tag').click(function(){
@@ -234,12 +213,9 @@ $(function() {
 				alert('I failed to communicate.');
 			},
 			success: function(res, status, xhr){
-				alert(res.message);
-				closeImportOptionDialog();
+				console.log(res);
 			}
 		});
-
-		return false;
 	});
 });
 var refreshMultiTags = function(empty) {
@@ -248,11 +224,11 @@ var refreshMultiTags = function(empty) {
 	}
 	$('.import_select_tags').multiselect('refresh');
 }
-var closeImportOptionDialog = function(error) {
+var closeExportOptionDialog = function(error) {
 	$("#dialog").dialog('close');
 	$('#export_err').append(error);
 }
-var createImportOptionDialog = function() {
+var createExportOptionDialog = function() {
 	$('#dialog').slideDown();
 	$('#progressbar').progressbar({
 		value:0

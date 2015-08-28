@@ -376,24 +376,6 @@ class ClinicalCase extends BaseModel {
 		}
 		$this->tags = $tmp;
 	}
-
-	/**
-	 * Save the case information
-	 * @param Array $data Registration scheduled case data
-	 * @param string $caseID caseID
-	 */
-	public static function saveCase($data, $caseID = null)
-	{
-		if (!$data)
-			throw new Exception('登録するケース情報を設定してください。');
-
-		$caseObj = $caseID ? self::find($caseID)
-						   : App::make('ClinicalCase');
-		foreach ($data as $key => $val) {
-			$caseObj->$key = $val;
-		}
-		$caseObj->save();
-	}
 }
 
 Validator::extend('is_series', function($attribute, $value, $parameters) {

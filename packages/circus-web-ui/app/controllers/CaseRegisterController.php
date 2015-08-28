@@ -58,24 +58,16 @@ class CaseRegisterController extends BaseController {
 			$patient = $series[0]->patientInfo;
 			$result['inputs']['patientInfoCache'] = $patient;
 
-			//シリーズリストからドメインを抜き出す
-			$domains = array();
-			foreach ($series as $rec) {
-				$domains[] = $rec->domain;
-			}
-			//重複削除
-			array_unique($domains);
-
 			//The store fixed information in session
 			$case_info = array(
 				'caseID'		=>	$result['inputs']['caseID'],
 				'series_list'	=>	$series_list,
 				'patientInfo'	=>	$patient,
-				'domains'		=>	$domains
+				'domains'		=>	Series::getDomains($series_ids)
 			);
 			Session::put('case_input', $case_info);
 		} catch (Exception $e) {
-			Log::debug($e);
+			Log::error($e);
 			$result['error_msg'] = $e->getMessage();
 		}
 		return View::make('case.input', $result);
@@ -208,36 +200,33 @@ class CaseRegisterController extends BaseController {
 
 		//Input value acquisition
 		$inputs = Session::get('case_input');
-		$caseID = Session::get('caseID');
+		$caseID = Session::get('caseID', null);
 		$mode = Session::get('mode');
 		$this->setBackUrl($inputs, $result);
 
 		try {
 			//Validate check for object creation
-			$case_obj = $caseID ?
-						ClinicalCase::find($caseID) :
-						App::make('ClinicalCase');
+			$revision = $this->createRevision($inputs['series_list']);
 
-			//Set the value for the Validate check
-			$case_obj->caseID = $inputs['caseID'];
-			$case_obj->projectID = $inputs['projectID'];
-			//Setting of patient information
-			$case_obj->patientInfoCache = $this->setPatientInfo($inputs['patientInfo']);
-			$case_obj->tags = array();
-
-			//Initial setting of Revision information
-			$series_list = $this->createRevision($inputs['series_list']);
+			$params = array(
+				'projectID' => $inputs['projectID'],
+				'patientInfoCache' => $this->setPatientInfo($inputs['patientInfo']),
+				'latestRevision' => $revision,
+				'domains' => $inputs['domains']
+			);
 
 			if ($caseID) {
-				$revisions = $case_obj->revisions;
-				$revisions[] = $series_list;
-				$case_obj->revisions = $revisions;
+				$caseObj = ClinicalCase::find($caseID);
+				$revisions = $caseObj->revisions;
+				$revisions[] = $revision;
+				$params['revisions'] = $revisions;
 			} else {
-				$case_obj->revisions = array($series_list);
+				$params['revisions'] = array($revision);
+				$params['tags'] = array();
+				$params['caseID'] = $inputs['caseID'];
 			}
-			$case_obj->latestRevision = $series_list;
-			$case_obj->domains = $inputs['domains'];
-			$case_obj->save();
+			ClinicalCase::saveCase($params, $caseID);
+
 
 			$result['msg'] = 'Registration of case information is now complete.';
 			$result['caseID'] = $inputs['caseID'];
@@ -247,8 +236,10 @@ class CaseRegisterController extends BaseController {
 			Session::put('complete', $result);
 			return Redirect::to('case/complete');
 		} catch (InvalidModelException $e) {
+			Log::error($e);
 			return $this->errorRedirectFinish($e->getErrors(), $result, $mode);
 		} catch (Exception $e) {
+			Log::error($e);
 			return $this->errorRedirectFinish($e->getMessage(), $result, $mode);
 		}
 	}

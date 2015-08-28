@@ -143,23 +143,27 @@ class CaseImportVolume extends TaskCommand {
 		}
 
 		//ケース情報保存
-		//TODO::外だしして既存のケース登録とまとめる
-		if (is_dir($targetDir.'/cases')) {
-			if ($caseDir = opendir($targetDir.'/cases')) {
-				while(($file = readdir($caseDir)) !== false) {
-					if ($file != "." && $file != "..") {
-						//ケース存在チェック
-						$caseObj = ClinicalCase::find($file);
-						$this->_caseIds[] = $file;
-						if (!$caseObj) {
-							//存在しないケースなのでケースデータを登録する
-							$this->createCase($targetDir.'/cases', $file);
-						} else {
-							//存在するケースなのでケースデータを更新する
-							$this->updateCase($targetDir.'/cases', $file);
-						}
-						$this->updateTaskProgress($counter, 0, "Importing in progress. $counter files are processed.");
-						$counter++;
+		if (!is_dir($targetDir.'/cases'))
+			throw new Exxception('ケースディレクトリがありません。');
+
+		if ($caseDir = opendir($targetDir.'/cases')) {
+			while(($file = readdir($caseDir)) !== false) {
+				if ($file != "." && $file != "..") {
+					//ケース存在チェック
+					$caseObj = ClinicalCase::find($file);
+					$this->_caseIds[] = $file;
+
+					$dirPath = $targetDir.'/cases';
+					$res = $this->validateCase($dirPath, $file);
+					if ($res['result'] === false)
+						throw new Exception($res['errorMsg']);
+
+					$caseData = $this->getJsonFromFile($dirPath. '/' . $file . '/case.json');
+					$this->registerCase($caseData, $res);
+					$this->updateTaskProgress($counter, 0, "Importing in progress. $counter files are processed.");
+					$counter++;
+					if (file_exists($dirPath.'/'.$file.'/labels')) {
+						$this->createLabelData($dirPath.'/'.$file.'/labels', $counter);
 					}
 				}
 			}
@@ -167,9 +171,9 @@ class CaseImportVolume extends TaskCommand {
 	}
 
 	/**
-	 * ラベルデータ作成
-	 * @param unknown_type $labelDir
-	 * @param unknown_type $counter
+	 * ラベルデータが存在しない場合はラベルデータを登録する
+	 * @param string $labelDir labelsディレクトリパス
+	 * @param integer $counter タスク進捗カウンタ
 	 */
 	private function createLabelData($labelDir, &$counter)
 	{
@@ -179,7 +183,7 @@ class CaseImportVolume extends TaskCommand {
 					$labelObj = Label::find($file);
 					if (!$labelObj) {
 						//存在しないラベルなのでラベルデータを登録する
-						$this->createLabel($labelDir, $file);
+						$this->registerLabel($labelDir, $file);
 						$this->updateTaskProgress($counter, 0, "Importing in progress. $counter files are processed.");
 						$counter++;
 					}
@@ -188,9 +192,14 @@ class CaseImportVolume extends TaskCommand {
 		}
 	}
 
-	private function createLabel($caseDir, $labelID)
+	/**
+	 * Register the label information
+	 * @param string $labelDir labelsディレクトリパス
+	 * @param string $labelID ラベルID
+	 */
+	private function registerLabel($labelDir, $labelID)
 	{
-		$path = $caseDir . '/'.$labelID;
+		$path = $labelDir . '/'.$labelID;
 		$labelFile = $path.'/label.json';
 		$tgzFile = $path.'/voxcels.gz';
 		if (!file_exists($labelFile))
@@ -198,7 +207,7 @@ class CaseImportVolume extends TaskCommand {
 		if (!file_exists($tgzFile))
 			throw new Exception('ラベル画像がありません。');
 
-		$tmpLabel = file($labelFile);
+		$labelData = $this->getJsonFromFile($labelFile);
 
 		//ラベルデータファイル保存
 		$storage = Storage::getCurrentStorage(Storage::LABEL_STORAGE);
@@ -207,8 +216,10 @@ class CaseImportVolume extends TaskCommand {
 		copy($tgzFile, $storage->path.'/'.$labelID.'.gz');
 
 		//ラベル情報保存
-		$labelObj = new Label();
-		$labelObj = $tempLabel;
+		$labelObj = App::make('Label');
+		foreach ($labelData as $key => $val) {
+			$labelObj->$key = $val;
+		}
 		$labelObj->storageID = $storage->storageID;
 		$labelObj->save();
 	}
@@ -254,9 +265,7 @@ class CaseImportVolume extends TaskCommand {
 			if (!isset($caseData['revisions']))
 				throw new Exception('リビジョン情報がありません。');
 
-			$latestNo = 0;
-			$patientInfo = array();
-			$domains = array();
+			$seriesIds = array();
 			foreach ($caseData['revisions'] as $rNo => $revision) {
 				if (!isset($revision['series']))
 					throw new Exception('リビジョン['.$rNo.']内にシリーズ情報がありません。');
@@ -264,23 +273,20 @@ class CaseImportVolume extends TaskCommand {
 				foreach ($revision['series'] as $series) {
 					if (!isset($series['seriesUID']))
 						throw new Exception('シリーズUIDがありません。');
-					if (!Series::find($series['seriesUID']))
-						throw new Exception('シリーズUID['.$series['seriesUID'].']が存在しません。');
-
-					$seriesObj = Series::find($series['seriesUID']);
-					if (!$patientInfo)
-						$patientInfo = $seriesObj['patientInfo'];
-					$domains[] = $seriesObj['domain'];
+					$seriesIds[] = $series['seriesUID'];
 				}
-
-				if ($revision === end($caseData['revisions'])) {
-			        $latestNo = $rNo;
-			    }
 			}
+			$seriesIds = array_unique($seriesIds);
+
+			//Latest Revision No.
+			end($caseData['revisions']);
+			//PatientInfo
+			$seriesObj = Series::find($seriesIds[0]);
+
 			return array('result'         => true,
-						 'patientInfo'    => $patientInfo,
-						 'latestRevision' => $latestNo,
-						 'domains'        => array_unique($domains));
+						 'patientInfo'    => $seriesObj->patientInfo,
+						 'latestRevision' => key($caseData['revisions']),
+						 'domains'        => Series::getDomains($seriesIds));
 		} catch (Exception $e) {
 			Log::error($e);
 			return array('result' => false, 'errorMsg' => $e->getMessage());
@@ -289,58 +295,43 @@ class CaseImportVolume extends TaskCommand {
 	}
 
 	/**
-	 * ケース新規登録
-	 * @param string $dirPath casesディレクトリパス
-	 * @param string $caseID ケースID
+	 * Register the case
+	 * @param Array $caseData Array of the case information
 	 */
-	private function createCase($dirPath, $caseID)
+	private function registerCase($caseData , $newCaseData)
 	{
-		$res = $this->validateCase($dirPath, $caseID);
-		if ($res['result'] === false)
-			throw new Exception($res['errorMsg']);
+		$caseObj = ClinicalCase::find($caseData['caseID']);
 
-		$caseData = $this->getJsonFromFile($dirPath. '/' . $caseID . '/case.json');
+		$params = array();
+		$caseID = null;
+		$revisions = array();
 
-		//ケース情報登録処理
-		$caseObj = new ClinicalCase();
-		$caseObj = $caseData;
-		$caseObj->patientInfoCache = $res['patientInfo'];
-		$caseObj->tags = array();
-		$caseObj->latestRevision = $caseData->revisions[$res['latestRevision']];
-		$caseObj->domains = $res['domains'];
-		$caseObj->save();
-	}
-
-	/**
-	 * ケース情報更新
-	 * @param string $dirPath casesディレクトリパス
-	 * @param string $caseID ケースID
-	 */
-	private function updateCase($dirPath, $caseID)
-	{
-		$res = $this->validateCase($dirPath, $caseID);
-
-		if ($res['result'] === false)
-			throw new Exception($res['errorMsg']);
-
-		$caseData = $this->getJsonFromFile($dirPath. '/' . $caseID . '/case.json');
-
-		//存在Revisionチェック
-		$caseObj = ClinicalCase::find($caseID);
-		$tmpCase = $caseObj->toArray();
-
-		$this->formatRevisionDate($tmpCase['revisions']);
 		$this->formatRevisionDate($caseData['revisions']);
+		if ($caseObj) {
+			//既存ケース
+			$tmpCase = $caseObj->toArray();
+			$this->formatRevisionDate($tmpCase['revisions']);
 
-		//リビジョン入れ子
-		$revisions = $this->createRevision($tmpCase['revisions'], $caseData['revisions']);
-
-		//ケース更新
+			//リビジョン入れ子
+			$revisions = $this->createRevision($tmpCase['revisions'], $caseData['revisions']);
+			$caseID = $caseObj->caseID;
+		} else {
+			//新規ケース
+			$params = $caseData;
+			$params['patientInfoCache'] = $newCaseData['patientInfo'];
+			$params['tags'] = array();
+			$params['domains'] = $newCaseData['domains'];
+			$revisions = $caseData['revisions'];
+		}
+		//最新リビジョン設定
 		end($revisions);
 		$revisionNo = key($revisions);
-		$caseObj->latestRevision = $revisions[$revisionNo];
-		$caseObj->revisions = $revisions;
-		$caseObj->save();
+
+		$this->formatUnixtimeToMongodate($revisions);
+
+		$params['latestRevision'] = $revisions[$revisionNo];
+		$params['revisions'] = $revisions;
+		ClinicalCase::saveCase($params, $caseID);
 	}
 
 	/**
@@ -404,12 +395,15 @@ class CaseImportVolume extends TaskCommand {
 			}
 		}
 
-		//MongoDate型生成
-		foreach ($oldRevisions as $key => $revision) {
-			$oldRevisions[$key]['date'] = new MongoDate($revision['date']);
-		}
 		ksort($oldRevisions);
 		return $oldRevisions;
+	}
+
+	private function formatUnixtimeToMongodate(&$revisions)
+	{
+		foreach ($revisions as $key => $revision) {
+			$revisions[$key]['date'] = new MongoDate($revision['date']);
+		}
 	}
 
 	/**

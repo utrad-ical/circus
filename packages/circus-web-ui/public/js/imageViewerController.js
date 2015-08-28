@@ -979,6 +979,12 @@
               $(elmId).imageViewer('historyBack');
             }
           }
+					
+					for (var i = 0; i < controllerInfo.viewer.length; i++) {
+            var elmId = '#' + controllerInfo.viewer[i].elementId;
+            $(elmId).imageViewer('syncVoxel');
+          }
+
         });
 
         //戻すの取消
@@ -990,6 +996,11 @@
               $(elmId).imageViewer('historyRedo');
             }
           }
+					for (var i = 0; i < controllerInfo.viewer.length; i++) {
+            var elmId = '#' + controllerInfo.viewer[i].elementId;
+            $(elmId).imageViewer('syncVoxel');
+          }
+
         });
       }
 
@@ -1382,6 +1393,10 @@
 
         //更新が発生した段階でフラグを立てる
         $(tmp_elm).bind('onWritten', function (e, label_id, series_id) {
+          for (var j = 0; j < controllerInfo.viewer.length; j++) {
+            var elmId = '#' + controllerInfo.viewer[j].elementId;
+            $(elmId).imageViewer('syncVoxel');
+          }
         });
 
         //ある面でwindow情報が変更されたらそれを他の面にも適用させる

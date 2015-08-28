@@ -274,11 +274,15 @@
 
 
 
-    _changeImageSrc: function () {
+    _changeImageSrc: function (guide_fix) {
 
       var this_obj = this;
       var this_elm = this.element;
       var this_opts = this.options;
+			var guide_fix_flg = false;
+			if(typeof guide_fix !== 'undefined' && guide_fix === true){
+				guide_fix_flg = guide_fix;
+			}
 
       //disp info text
       this_elm.find('.image_window_controller_wrap').find('.win_lv_label').text(this_opts.viewer.window.level.current);
@@ -292,30 +296,17 @@
         var tmp_canvas_w = this_elm.find('.series_image_elm').width();
         var tmp_canvas_h = this_elm.find('.series_image_elm').height();
         tmp_ctx.clearRect(0, 0, tmp_canvas_w, tmp_canvas_h);
-
-        var tmp_sw = this_opts.viewer.position.sw;
-        var tmp_sh = this_opts.viewer.position.sh;
-        var tmp_dw = this_opts.viewer.position.dw;
-        var tmp_dh = this_opts.viewer.position.dh;
-
-        if(this_opts.viewer.orientation === 'oblique'){
-        //  var tmp_zoom_rate = 20;
-        //  tmp_sw = this_opts.viewer.position.sw * tmp_zoom_rate;
-        //  tmp_sh = this_opts.viewer.position.sh * tmp_zoom_rate;
-        //  tmp_dw = this_opts.viewer.position.dw * tmp_zoom_rate;
-        //  tmp_dh = this_opts.viewer.position.dh * tmp_zoom_rate;
-        }
-
+				this_obj.syncVoxel();
         tmp_ctx.drawImage(
           image_obj,
           this_opts.viewer.position.sx,
           this_opts.viewer.position.sy,
-          tmp_sw,
-          tmp_sh,
+          this_opts.viewer.position.sw * 5,
+          this_opts.viewer.position.sh * 5,
           this_opts.viewer.position.dx,
           this_opts.viewer.position.dy,
-          tmp_dw,
-          tmp_dh
+          this_opts.viewer.position.dw * 5,
+          this_opts.viewer.position.dh * 5
         );
         this_obj._disableImageAlias(tmp_ctx, false);
       };//changeMain
@@ -324,6 +315,9 @@
 
       //check the image is in Cache.
       if(typeof this_opts._tmpInfo.imgCache[src_url] !== 'undefined'){
+				if(this_opts.viewer.orientation === 'oblique'){
+					this_obj.setObliqueResponse(this_opts._tmpInfo.imgCache[src_url].header_param,guide_fix_flg);
+				}
         changeMain(this_opts._tmpInfo.imgCache[src_url].image);
         return false;
       }
@@ -349,22 +343,22 @@
               var blob = this.response;
               var tmp_img = new Image();
               tmp_img.onload = function(e) {
-
+								var header_param = '';
                 if(this_opts.viewer.orientation === 'oblique'){
-                  var tmp_Pixel_Columns = xhr.getResponseHeader('X-Circus-Pixel-Columns');
-                  var tmp_Pixel_Rows = xhr.getResponseHeader('X-Circus-Pixel-Rows');
-                  var tmp_Pixel_Size = xhr.getResponseHeader('X-Circus-Pixel-Size');
-                  var tmp_Center = xhr.getResponseHeader('X-Circus-Center');
-                  this_obj.setObliqueResponse(tmp_Pixel_Columns,tmp_Pixel_Rows,tmp_Pixel_Size,tmp_Center);
-                  this_obj.syncVoxel();
+									header_param = {};
+                  header_param.Pixel_Columns = xhr.getResponseHeader('X-Circus-Pixel-Columns');
+                  header_param.Pixel_Rows = xhr.getResponseHeader('X-Circus-Pixel-Rows');
+                  header_param.Pixel_Size = xhr.getResponseHeader('X-Circus-Pixel-Size');
+                  header_param.Center = xhr.getResponseHeader('X-Circus-Center');
+									this_obj.setObliqueResponse(header_param,guide_fix_flg);
                 }
-
                 changeMain(tmp_img);
                 this_opts._tmpInfo.loadFlg = 0;
                 myWindowURL.revokeObjectURL(tmp_img.src); // Clean up after yourself.
 
                 this_opts._tmpInfo.imgCache[load_target_url] = {
-                  'image' : tmp_img
+                  'image' : tmp_img,
+									'header_param' : header_param
                 } // add loaded img into Cache
 
                 //if new image is required, re-start new loading.
@@ -819,8 +813,6 @@
       var guide_horizontal = this_obj.getGuide('horizontal');
       var guide_vertical =  this_obj.getGuide('vertical');
 
-
-
       var guide_start_x = (guide_horizontal.number + 0.5 - this_opts.viewer.position.sx) * this_opts.viewer.position.dw / this_opts.viewer.position.sw || 0;
       var guide_start_y = (guide_vertical.number + 0.5 - this_opts.viewer.position.sy) * this_opts.viewer.position.dh / this_opts.viewer.position.sh || 0;
 
@@ -835,7 +827,7 @@
           guide_start_x,
           0,
           1,
-          this_opts.viewer.position.dh
+          this_elm.height()
         );
         tmp_ctx.fill();
         tmp_ctx.closePath();
@@ -848,7 +840,7 @@
         tmp_ctx.rect(
            0,
            guide_start_y,
-           this_opts.viewer.position.dw,
+           this_elm.width(),
            1
         );
         tmp_ctx.fill();
@@ -1292,7 +1284,7 @@
       //コンテナ内部をひとつ手前に戻す
       this_opts.container.historyBack();
       this_obj.syncOtherViewers();
-      $(this_elm).imageViewer('syncVoxel');
+      this_obj.syncVoxel();
     },
 
 
@@ -1307,7 +1299,7 @@
       //コンテナ内部の戻るを取消
       this_opts.container.historyRedo();
       this_obj.syncOtherViewers();
-      $(this_elm).imageViewer('syncVoxel');
+      this_obj.syncVoxel();
     },
 
 
@@ -1344,8 +1336,8 @@
       this_obj.setCanvasSize();
 
       //以下各種イベント群
-      this_elm.bind('changeImageSrc', function () {
-        this_obj._changeImageSrc();
+      this_elm.bind('changeImageSrc', function (e,guide_fix) {
+        this_obj._changeImageSrc(guide_fix);
       })
       .bind('sync', function () {
         this_obj.syncVoxel();
@@ -1964,11 +1956,11 @@
       tmp_position_params.sx = Math.round(tmp_x);
       tmp_position_params.sy = Math.round(tmp_y);
 
-      if(this_opts.viewer.orientation !== 'oblique'){
+      if(this_opts.viewer.orientation !== 'obliquea'){
         this_obj._limitImagePosition();
       }
 
-     this_obj._changeImageSrc();
+      this_obj._changeImageSrc();
       this_obj.syncVoxel();
     },//_mousemoveFuncPan
 
@@ -2483,8 +2475,7 @@
 
 
 
-    setObliqueResponse: function (tmp_Pixel_Columns,tmp_Pixel_Rows,tmp_Pixel_Size,tmp_Center) {
-
+    setObliqueResponse: function (insert_Object,guide_fix_flg) {
 
       //キャッシュから画像を読んだ時もこれが発動するようにしよう
 
@@ -2492,27 +2483,37 @@
       var this_elm = this.element;
       var this_opts = this.options;
 
-      this_opts.viewer.voxel.x = this_opts.viewer.position.ow = Number(tmp_Pixel_Columns);
-      this_opts.viewer.voxel.y = this_opts.viewer.position.oh = Number(tmp_Pixel_Rows);
-      this_opts.viewer.voxel.voxel_x = this_opts.viewer.voxel.voxel_y = Number(tmp_Pixel_Size);
+      this_opts.viewer.voxel.x = this_opts.viewer.position.ow = Number(insert_Object.Pixel_Columns);
+      this_opts.viewer.voxel.y = this_opts.viewer.position.oh = Number(insert_Object.Pixel_Rows);
+      this_opts.viewer.voxel.voxel_x = this_opts.viewer.voxel.voxel_y = Number(insert_Object.Pixel_Size);
 
       this_opts.viewer.position.dw = this_opts.viewer.position.ow * this_opts.viewer.position.zoom;
       this_opts.viewer.position.dh = this_opts.viewer.position.oh * this_opts.viewer.position.zoom;
 
-      this_opts.viewer.position.sw = this_opts.viewer.position.ow / this_opts.viewer.position.zoom;
-      this_opts.viewer.position.sh = this_opts.viewer.position.oh / this_opts.viewer.position.zoom;
+      this_opts.viewer.position.sw = this_opts.viewer.position.ow;
+      this_opts.viewer.position.sh = this_opts.viewer.position.oh;
 
-      this_opts.viewer.position.sw = Math.floor(this_opts.viewer.position.sw);
-      this_opts.viewer.position.sh = Math.floor(this_opts.viewer.position.sh);
-
-      var guide_x = tmp_Center.split(',')[0];
-      var guide_y = tmp_Center.split(',')[1];
+      var guide_x = insert_Object.Center.split(',')[0];
+      var guide_y = insert_Object.Center.split(',')[1];
 
       var guide_horizontal = this_obj.getGuide('horizontal');
       var guide_vertical =  this_obj.getGuide('vertical');
 
-      guide_horizontal.number = Number(guide_x);
-      guide_vertical.number = Number(guide_y);
+      guide_x = Number(guide_x);
+      guide_y = Number(guide_y);
+			
+      guide_horizontal.number = guide_x;
+      guide_vertical.number = guide_y;
+			
+			if(typeof guide_fix_flg !== 'undefined' && guide_fix_flg === true){
+
+				var tmp_w = this_elm.width();
+				var tmp_h = this_elm.height();
+
+				this_opts.viewer.position.sx = guide_x - 0.5 * tmp_w / this_opts.viewer.position.zoom;
+				this_opts.viewer.position.sy = guide_y - 0.5 * tmp_h / this_opts.viewer.position.zoom;
+
+			}
 
     },
 
@@ -2535,7 +2536,7 @@
 
     syncVoxel: function () {
 
-      //update voxel & guide
+      //update voxel & guide & measure
       var this_obj = this;
       var this_elm = this.element;
       var this_opts = this.options;

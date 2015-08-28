@@ -34,7 +34,7 @@
 .control_panel .add_label{cursor:pointer; text-align:center; padding:10px; background:#ddd; margin:0 5px;}
 .control_panel .add_label:hover{color:#FD3164;}
 
-
+#page_series_detail{width:1048px; padding:0;}
 #page_series_detail #the_panel .img_toolbar_wrap{width:100%;}
 #page_series_detail .img_toolbar_wrap{margin:0;}
 #page_series_detail #the_panel_inner{position:relative; left:0;}
@@ -54,7 +54,7 @@
 #series_order_wrap .disp_series_list label{display:block; padding:5px;}
 
 /* case detail*/
-
+#page_case_detail{width:1048px; padding:0;}
 .label_select_wrap{float:left; margin-right:20px;}
 .ico_detail_sprite .ico_detail_sprite_rotate{text-indent:0;}
 .rotate_dir_opt{position:absolute; top:0; left:30px; display:none; z-index:100;}

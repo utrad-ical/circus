@@ -95,66 +95,6 @@ class CaseRegisterController extends BaseController {
 	}
 
 	/**
-	 * Case registration confirmation
-	 */
-	function confirm() {
-		//Initial setting
-		$result = array();
-
-		//Input value acquisition
-		$inputs = Input::all();
-		$this->setBackUrl($inputs, $result);
-
-		try {
-			//Session information acquisition
-			$caseID = Session::get('caseID');
-			$case_info = Session::get('case_input');
-			$mode = Session::get('mode');
-
-			$case_info['projectID'] = $inputs['projectID'];
-			//Set of series
-			$case_info['seriesUID'] = $inputs['series'];
-
-			//Patient ID duplication check
-			$error_msg = ClinicalCase::checkDuplicatePatientID(Series::getPluralSeries($inputs['series']), $case_info['series_list']);
-			if (!$error_msg)
-				$case_info['series_list'] = $this->sortSeriesList($case_info['series_list'], $inputs['series']);
-
-			//Save the input value to the session
-			Session::put('case_input', $case_info);
-
-			$case_info['projectName'] = Project::getProjectName($inputs['projectID']); // TODO: Fix
-
-			//Validate check for object creation
-			$case_obj = $caseID ?
-						ClinicalCase::find($caseID) :
-						App::make('ClinicalCase');
-
-			//Set the value for the Validate check
-			$case_obj->caseID = $case_info['caseID'];
-			$case_obj->projectID = $case_info['projectID'];
-			$case_obj->patientInfoCache = $this->setPatientInfo($case_info['patientInfo']);
-			$case_obj->domains = $case_info['domains'];
-
-			//ValidateCheck
-			$case_obj->selfValidationFails($errors);
-
-			$result['inputs'] = $case_info;
-			$result['series_list'] = $case_info['series_list'];
-			if ($errors)
-				return $this->errorConfirmFinish($errors, $result, $mode);
-
-			//And displays a confirmation screen because there is no error
-			return View::make('case.confirm', $result);
-
-		} catch (InvalidModelException $e) {
-			return $this->errorConfirmFinish($e->getErrors(), $result, $mode);
-		} catch (Exception $e) {
-			return $this->errorConfirmFinish($e->getMessage(), $result, $mode);
-		}
-	}
-
-	/**
 	 * 患者情報の設定
 	 * @param $patient 患者情報
 	 * @return ケーステーブル登録用に整形した患者情報
@@ -174,24 +114,6 @@ class CaseRegisterController extends BaseController {
 	}
 
 	/**
-	 * 確認画面エラーメッセージ出力
-	 * TODO::完了画面エラー出力と統合したい
-	 * @param $errorMsg エラーメッセージ
-	 * @param $result Bladeに設定するパラメータ
-	 * @param $mode 編集モード
-	 * @return View 入力画面のView
-	 */
-	function errorConfirmFinish($errorMsg, $result, $mode) {
-		//Process at the time of Validate error
-		$result['project_list'] = Auth::user()->listAccessibleProjects(Project::AUTH_TYPE_ADD_SERIES, true);
-		if (is_array($errorMsg))
-			$result['errors'] = $errorMsg;
-		else
-			$result['error_msg'] = $errorMsg;
-		return View::make('case.input', $result);
-	}
-
-	/**
 	 * Case registered
 	 */
 	function register(){
@@ -200,13 +122,17 @@ class CaseRegisterController extends BaseController {
 
 		//Input value acquisition
 		$inputs = Session::get('case_input');
+		$inputs['projectID'] = Input::get('projectID');
+		$inputs['seriesUID'] = Input::get('series');
+
 		$caseID = Session::get('caseID', null);
 		$mode = Session::get('mode');
 		$this->setBackUrl($inputs, $result);
 
 		try {
+			$series_list = $this->sortSeriesList($inputs['series_list'], $inputs['seriesUID']);
 			//Validate check for object creation
-			$revision = $this->createRevision($inputs['series_list']);
+			$revision = $this->createRevision($series_list);
 
 			$params = array(
 				'projectID' => $inputs['projectID'],

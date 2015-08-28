@@ -1519,10 +1519,7 @@
 
         if(tmp_opts.viewer.rotate.visible === true){
           var this_elm = this;
-          this_elm.imageViewerController('setObliqueOptions',
-            tmp_opts.viewer.orientation,
-            tmp_opts.viewer.rotate.angle
-          );
+          this_elm.imageViewerController('setObliqueOptions', tmp_opts.viewer.orientation, tmp_opts.viewer.rotate.angle);
         };
         $(elmId).imageViewer('syncVoxel');
       }
@@ -1531,7 +1528,6 @@
 
 
     setObliqueOptions: function (the_orientation, the_angle) {
-			
       var tmp_new_opts = {
         angle : the_angle,
         center_x : 0,
@@ -1562,7 +1558,7 @@
       if(the_oblique_elm !== ''){
         var tmp_current_opts = the_oblique_elm.imageViewer('option');
         tmp_current_opts.viewer.cut = tmp_new_opts;
-        the_oblique_elm.imageViewer('option', tmp_current_opts).trigger('changeImageSrc');
+        the_oblique_elm.imageViewer('option', tmp_current_opts).trigger('changeImageSrc',[true]);
       }
 
     },

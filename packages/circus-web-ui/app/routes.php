@@ -38,7 +38,6 @@ Route::group(['before' => 'auth'], function() {
 	Route::post('case/detail', 'CaseDetailController@detail');
 	Route::post('case/edit', 'CaseRegisterController@input');
 	Route::post('case/input', 'CaseRegisterController@input');
-	Route::post('case/confirm', 'CaseRegisterController@confirm');
 	Route::post('case/complete', 'CaseRegisterController@register');
 	Route::get('case/complete', 'CaseRegisterController@complete');
 

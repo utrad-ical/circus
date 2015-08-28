@@ -22,4 +22,10 @@ class TaskController extends ApiBaseController
 		);
 	}
 
+	public function delete($taskID)
+	{
+		$delete = Task::find($taskID)->delete();
+		return Response::json(array('result' => $delete));
+	}
+
 }

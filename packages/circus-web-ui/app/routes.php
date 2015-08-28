@@ -112,6 +112,7 @@ Route::group(['before' => 'auth'], function() {
 	// Task
 	Route::get('task', 'TaskController@index');
 	Route::get('task/{taskID}', 'TaskController@show');
+	Route::get('delete/task/{taskID}', 'TaskController@delete');
 
 	// Preference
 	$staticView('preference');
@@ -144,5 +145,3 @@ Event::listen('404', function()
 {
     return App::abort(404);
 });
-
-

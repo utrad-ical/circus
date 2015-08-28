@@ -20,7 +20,7 @@
             maximum: 0,
             minimum: 1
           },
-          preset: []  //sample  {label: 'your  preset  label' , level: 1000 , width : 4000}
+          preset: [] //sample  {label: 'your  preset  label' , level: 1000 , width : 4000}
         },
         cut : {
           angle : 0,
@@ -1187,7 +1187,6 @@
       this_opts.container.addHistory(series_id,label_id, 'pen',target_position_array);
 
       this_elm.trigger('onWritten',[label_id,series_id]);
-      this_obj.syncOtherViewers();
     },//_getBucketFillPositions
 
 
@@ -1298,8 +1297,6 @@
 
       //コンテナ内部をひとつ手前に戻す
       this_opts.container.historyBack();
-      this_obj.syncOtherViewers();
-      this_obj.syncVoxel();
     },
 
 
@@ -1313,8 +1310,6 @@
       var this_opts = this.options;
       //コンテナ内部の戻るを取消
       this_opts.container.historyRedo();
-      this_obj.syncOtherViewers();
-      this_obj.syncVoxel();
     },
 
 
@@ -1964,8 +1959,6 @@
 
 
 
-
-
     _mousemoveFuncPan : function (e) {
       var this_obj = this;
       var this_elm = this.element;
@@ -2011,28 +2004,24 @@
 
       if (this_opts._tmpInfo.cursor.out_flg === 0) {
 
-        //ラベルを描くcanvas要素のオブジェクト
         var tmp_ctx = this_elm.find('.canvas_main_elm').get(0).getContext('2d');
-
         var tmp_array = [];
-        //中間点を埋める
+
+        //filling the midpoint
         if (Math.abs(this_opts._tmpInfo.cursor.current.X - tmp_x) > 1 || Math.abs(this_opts._tmpInfo.cursor.current.Y - tmp_y) > 1) {
-          //スキマがあるとき
+          //midpoints
           tmp_array = this_obj._getStopover(this_opts._tmpInfo.cursor.current.X, this_opts._tmpInfo.cursor.current.Y, tmp_x, tmp_y);
         } else {
-          //スキマがない、中間点を埋める必要が無いとき
+          //no point
           tmp_array.push([tmp_x, tmp_y]);
           tmp_array.push([this_opts._tmpInfo.cursor.current.X, this_opts._tmpInfo.cursor.current.Y]);
         }
 
-        //次のmousemoveイベントに備えて  _tmpInfo.cursor.current  更新
+        //update _tmpInfo.cursor.current for next mid points
         this_opts._tmpInfo.cursor.current.X = tmp_x;
         this_opts._tmpInfo.cursor.current.Y = tmp_y;
 
-        //太さ加味
         tmp_array = this_obj._applyBoldness(tmp_array);
-
-        //ボクセル座標に変換
         tmp_array = this_obj._exchangePositionCtoV(tmp_array);
         this_opts._tmpInfo.label = this_opts._tmpInfo.label.concat(tmp_array);
 
@@ -2050,7 +2039,7 @@
 
       } else {
 
-        //次のmousemoveイベントに備えて  {_tmpInfo.cursor.current}  更新
+        //update _tmpInfo.cursor.current for next mid points
         this_opts._tmpInfo.cursor.current.X = tmp_x;
         this_opts._tmpInfo.cursor.current.Y = tmp_y;
         this_opts._tmpInfo.cursor.out_flg = 0;
@@ -2065,21 +2054,27 @@
       var this_elm = this.element;
       var this_opts = this.options;
 
-      //ウインドウ情報書き換えモード
       var tmp_x = this_opts._tmpInfo.elementParam.start.X + (e.clientX - this_opts._tmpInfo.cursor.start.X) * 10;
       var tmp_y = this_opts._tmpInfo.elementParam.start.Y - (e.clientY - this_opts._tmpInfo.cursor.start.Y) * 10;
 
       //fix the limit (window width)
-      tmp_x = Math.max(this_opts.viewer.window.width.minimum, tmp_x);
-      tmp_x = Math.min(this_opts.viewer.window.width.maximum, tmp_x);
+      if(this_opts.viewer.window.width.minimum > tmp_x){
+      	tmp_x = this_opts.viewer.window.width.minimum;
+      }
+      if(this_opts.viewer.window.width.maximum < tmp_x){
+      	tmp_x = this_opts.viewer.window.width.maximum;
+      }
 
       //fix the limit (window level)
-      tmp_y = Math.max(this_opts.viewer.window.level.minimum, tmp_y);
-      tmp_y = Math.min(this_opts.viewer.window.level.maximum, tmp_y);
+      if(this_opts.viewer.window.level.minimum > tmp_y){
+      	tmp_y = this_opts.viewer.window.level.minimum;
+      }
+      if(this_opts.viewer.window.level.maximum < tmp_y){
+      	tmp_y = this_opts.viewer.window.level.maximum;
+      }
 
       this_opts.viewer.window.width.current = Math.round(tmp_x);
       this_opts.viewer.window.level.current = Math.round(tmp_y);
-
       this_obj._changeImageSrc();
 
     },//_mousemoveFuncWindow
@@ -2177,9 +2172,6 @@
 
 
     _mousedownFuncRotate: function (e) {
-      var this_obj = this;
-      var this_elm = this.element;
-      var this_opts = this.options;
 
     },//_mousedownFuncRotate
 
@@ -2255,6 +2247,7 @@
       var this_obj = this;
       var this_elm = this.element;
       var this_opts = this.options;
+
       //exchange positions data to VOXEL 3D
       if (this_opts._tmpInfo.label.length > 0) {
         //put into history
@@ -2277,7 +2270,6 @@
 
       //clear memory
       this_opts._tmpInfo.label = [];
-      this_obj.syncOtherViewers();
 
       //trigger the Event for some controllers
       if (typeof this_opts.viewer.activeSeriesId !== 'undefined' && typeof the_active_series !== 'undefined') {
@@ -2501,21 +2493,6 @@
       guide_vertical.number = guide_y;
 
     },
-
-
-
-    syncOtherViewers: function () {
-
-      var this_obj = this;
-      var this_elm = this.element;
-      var this_opts = this.options;
-      var tmp_this_id = this_elm.attr('id');
-      for (var i = this_opts.container.data.member.length - 1; i >= 0; i--) {
-        if(tmp_this_id !== this_opts.container.data.member[i]) {
-          $('#' + this_opts.container.data.member[i]).imageViewer('syncVoxel');
-        }
-      }
-    },//syncOtherViewers
 
 
 

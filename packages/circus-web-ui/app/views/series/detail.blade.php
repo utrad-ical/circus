@@ -20,10 +20,14 @@
         //The controller 1 per group to be linked to multiple viewers
         var	voxel_container	= new voxelContainer();	//Label information storage object (three sides shared)
         voxel_container.name = 'my_voxel';
+				
+				var dicomServerHost = dicomImageServerUrl();
+				var metadata_url = dicomServerHost + 'metadata';
+				var dicom_image_url = dicomServerHost + 'mpr';
 
         var	initInfo = [
             {
-                baseUrl : dicomImageServerUrl() + 'mpr',
+                baseUrl :dicom_image_url,
                 series : {{$series_list}},
                 control : {
                     window : {
@@ -83,10 +87,15 @@
         ];
 
         //accept a series information from node.js by performing a number worth of ajax of series
+
         var initAjax= function(){
             var tmp_series = initInfo[0].series[0];
             $.ajax({
-                url: dicomImageServerUrl() + 'metadata',
+                url: metadata_url,
+								headers: {
+									Authorization: 'Bearer ' + tmp_series.token
+								},
+
                 type: 'GET',
                 data: {
                     mode : 'metadata',
@@ -191,6 +200,12 @@
                         if(typeof response.window_width_min == 'number'){
                             tmp_series.window.width.minimum = response.window_width_min;
                         };
+												
+												var tmp_viewer = initInfo[0].viewer[0];
+												if(tmp_viewer.orientation == 'axial'){
+													tmp_viewer.number.maximum = response.z;
+													tmp_viewer.number.current = Math.ceil(tmp_viewer.number.maximum / 2);
+												}
 
                         controllerRun();
                 }

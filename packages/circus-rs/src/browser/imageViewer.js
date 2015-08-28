@@ -523,42 +523,38 @@
 
 
     _CheckGuideOver : function (e, range) {
-      //mousedownから呼び出し
-      //マウス位置とガイドが重なっているかを調査して
-      //重なっていたら 1 を、そうでなければ 0 を返す
+			//check the cursor is on guide line
 
-      var the_return = '';
+      var the_return = ''; // horizontal or vertical
       var this_obj = this;
       var this_elm = this.element;
       var this_opts = this.options;
       var mouse_range = this_opts.viewer.guide.grid_range;
-
+      var position_params = this_opts.viewer.position;
       var guide_horizontal = this_obj.getGuide('horizontal');
       var guide_vertical =  this_obj.getGuide('vertical');
 
-      var hall_x = this_opts.viewer.guide.hall_rate * this_opts.viewer.position.dw / this_opts.viewer.position.zoom;
-      var hall_y = this_opts.viewer.guide.hall_rate * this_opts.viewer.position.dh / this_opts.viewer.position.zoom;
+      var hall_r = this_opts.viewer.guide.hall_rate * this_elm.width() / position_params.zoom;
 
       if (typeof range === 'number') {
         mouse_range = range;
       }
+			mouse_range = mouse_range / position_params.zoom;
 
-      //マウス位置取得
-      var tmp_cursor_x = (e.clientX - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().left) / this_opts.viewer.position.zoom;
-      var tmp_cursor_y = (e.clientY - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().top) / this_opts.viewer.position.zoom;
+      var tmp_cursor_x = (e.clientX - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().left) / position_params.zoom;
+      var tmp_cursor_y = (e.clientY - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().top) / position_params.zoom;
 
-      //初期位置(ズーム解除状態でのXY値)
-      tmp_cursor_x = (tmp_cursor_x + this_opts.viewer.position.sx) * this_opts.viewer.position.ow / this_opts.viewer.position.dw;
-      tmp_cursor_y = (tmp_cursor_y + this_opts.viewer.position.sy) * this_opts.viewer.position.oh / this_opts.viewer.position.dh;
+      tmp_cursor_x = (tmp_cursor_x + position_params.sx) * position_params.ow / position_params.dw;
+      tmp_cursor_y = (tmp_cursor_y + position_params.sy) * position_params.oh / position_params.dh;
 
       if (guide_horizontal.number - mouse_range < tmp_cursor_x && guide_horizontal.number + mouse_range > tmp_cursor_x) {
         //around cross point
-        if (guide_vertical.number - hall_x > tmp_cursor_y || guide_vertical.number + hall_x < tmp_cursor_y) {
+        if (guide_vertical.number - hall_r > tmp_cursor_y || guide_vertical.number + hall_r < tmp_cursor_y) {
           the_return = 'horizontal';
         }
       } else if (guide_vertical.number - mouse_range < tmp_cursor_y && guide_vertical.number + mouse_range > tmp_cursor_y) {
         //around cross point
-        if (guide_horizontal.number - hall_y > tmp_cursor_x || guide_horizontal.number + hall_y < tmp_cursor_x) {
+        if (guide_horizontal.number - hall_r > tmp_cursor_x || guide_horizontal.number + hall_r < tmp_cursor_x) {
           the_return = 'vertical';
         }
       }
@@ -741,10 +737,10 @@
 
     _createImageUrl : function(){
       var this_opts = this.options;
-
       var return_url = this_opts.viewer.src + '?series=' + this_opts.viewer.activeSeriesId;
       return_url = return_url + '&wl=' +this_opts.viewer.window.level.current;
       return_url = return_url + '&ww=' + this_opts.viewer.window.width.current;
+
       if ( this_opts.viewer.orientation === 'axial' || this_opts.viewer.orientation === 'sagittal' || this_opts.viewer.orientation === 'coronal') {
         return_url = return_url + '&mode=' + this_opts.viewer.orientation  + '&target=' + this_opts.viewer.number.current;
       } else {
@@ -785,9 +781,6 @@
 
 
     _disableImageAlias: function (target_context, state) {
-      //アンチエイリアス処理変更
-      //第1引数 : 対象とするコンテキストオブジェクト
-      //第2引数 : 適用するステータス(trueまたはfalse)
       target_context.mozImageSmoothingEnabled = state;
       target_context.oImageSmoothingEnabled = state;
       target_context.webkitImageSmoothingEnabled = state;
@@ -854,9 +847,10 @@
 
 
     drawLabel: function (series_id, label_id, positions_array) {
-      //塗り機能
-      //第1引数 : 対象ラベル
-      //第2引数 : 塗る点の集合の配列  [x,y,z],[x2,y2,z2]...
+			//drawing function
+			//series ID
+			//label ID
+			//drawing target positions [ [x,y,z],[x2,y2,z2]...]
 
       var this_obj = this;
       var this_elm = this_obj.element;
@@ -898,8 +892,6 @@
 
 
 
-
-
     drawMeasure : function () {
       var this_obj = this;
       var this_elm = this.element;
@@ -924,7 +916,6 @@
       var this_elm = this.element;
       var this_opts = this.options;
 
-      //ポッチ座標算出
       var rotate_params = this_opts.viewer.rotate;
       var position_params = this_opts.viewer.position;
       var tmp_ctx = this_elm.find('.canvas_main_elm').get(0).getContext('2d');
@@ -941,7 +932,6 @@
       //fit to zoom and trim
       var center_x = (guide_horizontal.number - position_params.sx) * position_params.dw / position_params.sw || 0;
       var center_y = (guide_vertical.number - position_params.sy) * position_params.dh / position_params.sh || 0;
-
       var the_points = this_obj._calculateRotatePoint(rotate_params.angle, center_x, center_y);
 
       //line
@@ -1003,7 +993,7 @@
       var tmp_number_index = this_opts.viewer.number.current;
 
       for (var i = insert_array.length - 1; i >= 0; i--) {
-        var tmp_obj = new Array(); //ボクセル上での座標を格納するオブジェクト
+        var tmp_obj = []; //ボクセル上での座標を格納するオブジェクト
         if (tmp_orientation === 'axial') {
           //真上から見た断面
           tmp_obj[0] = Math.floor(insert_array[i][0]);
@@ -1110,11 +1100,11 @@
         other = pointed_position[0];
       }
 
-      var point = new Array();
+      var point = [];
       point.push(position_x);
       point.push(position_y);
 
-      var position = new Array();
+      var position = [];
       position.push(point);
 
       while (position.length !== 0) {
@@ -1161,7 +1151,7 @@
           return 0;
         }
       }
-      var target_position_array = new Array();
+      var target_position_array = [];
       //2次元マップを3次元座標に変換
       for (var row = paint_map.length-1; row >= 0; row--) {
         for (var count = paint_map[row].length-1; count >= 0; count--) {
@@ -1276,7 +1266,7 @@
       var tmp_x = (goal_x - start_x) / tmp_base;
       var tmp_y = (goal_y - start_y) / tmp_base;
 
-      var rtn_ary = new Array();
+      var rtn_ary = [];
       for (var i = tmp_base - 1; i >= 0; i--) {
         var ary_x = start_x + i * tmp_x;
         var ary_y = start_y + i * tmp_y;

@@ -301,12 +301,12 @@
           image_obj,
           this_opts.viewer.position.sx,
           this_opts.viewer.position.sy,
-          this_opts.viewer.position.sw * 5,
-          this_opts.viewer.position.sh * 5,
+          this_opts.viewer.position.sw,
+          this_opts.viewer.position.sh,
           this_opts.viewer.position.dx,
           this_opts.viewer.position.dy,
-          this_opts.viewer.position.dw * 5,
-          this_opts.viewer.position.dh * 5
+          this_opts.viewer.position.dw,
+          this_opts.viewer.position.dh
         );
         this_obj._disableImageAlias(tmp_ctx, false);
       };//changeMain
@@ -721,7 +721,7 @@
       var tmp_ctx = this_elm.find('.canvas_main_elm').get(0).getContext('2d');
 
       var position_params = this_opts.viewer.position;
-      var hall_r = position_params.dw * this_opts.viewer.guide.hall_rate;
+      var hall_r = this_elm.width() * this_opts.viewer.guide.hall_rate;
 
       var guide_horizontal = this_obj.getGuide('horizontal');
       var guide_vertical =  this_obj.getGuide('vertical');
@@ -1956,7 +1956,7 @@
       tmp_position_params.sx = Math.round(tmp_x);
       tmp_position_params.sy = Math.round(tmp_y);
 
-      if(this_opts.viewer.orientation !== 'obliquea'){
+      if(this_opts.viewer.orientation !== 'oblique'){
         this_obj._limitImagePosition();
       }
 

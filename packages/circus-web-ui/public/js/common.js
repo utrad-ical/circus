@@ -1,7 +1,7 @@
 $(function () {
 
 	/* Temporarily changes the color theme */
-	$('#color_switch').click(function() {
+	$('#color_switch').click(function () {
 		var body = $('body');
 		if (body.hasClass('mode_black')) {
 			body.removeClass('mode_black').addClass('mode_white');
@@ -13,11 +13,9 @@ $(function () {
 	/* Construct jQuery UI widgets */
 
 	// datepicker
-	if ($('.datepicker').length > 0) {
-		$('.datepicker').datepicker({
-			dateFormat: "yy/mm/dd"
-		});
-	}
+	$('.datepicker').datepicker({
+		dateFormat: "yy/mm/dd"
+	});
 
 	// UI multiple select
 	if ($('.multi_select').length > 0) {
@@ -37,11 +35,9 @@ $(function () {
 	}
 
 	// UI sortable
-	if ($('.ui-sortable').length > 0) {
-		$('.ui-sortable').sortable({
-			axis: "y"
-		});
-	}
+	$('.ui-sortable').sortable({
+		axis: "y"
+	});
 
 });
 
@@ -57,16 +53,61 @@ var zeroFormat = function (input, width) {
 
 
 var setHiddenParams = function (parent_id, elm_name, val) {
-	var elm = $('#'+parent_id).find("input[name='"+elm_name+"']");
+	var elm = $('#' + parent_id).find("input[name='" + elm_name + "']");
 
 	if (!elm[0]) {
-		elm = $("<input>", {type:"hidden", name:elm_name, value:val});
-		$('#'+parent_id).append(elm);
+		elm = $("<input>", {type: "hidden", name: elm_name, value: val});
+		$('#' + parent_id).append(elm);
 	} else {
-		$('#'+parent_id).find("input[name='"+elm_name+"']").val(val);
+		$('#' + parent_id).find("input[name='" + elm_name + "']").val(val);
 	}
 };
 
+function showMessage(message, isError) {
+	var className = isError ? 'ui-state-error' : 'ui-state-highlight';
+	var div = $('<div>').addClass(className + ' mar_20').text(message);
+	if ($('#messages').length) {
+		div.appendTo($('#messages'));
+	} else {
+		div.insertAfter('h1.page_title:first');
+	}
+	setTimeout(function () {
+		div.remove();
+	}, 5000);
+}
+
+function api(command, options) {
+	var defaults = {
+		method: 'GET',
+		url: '/api/' + command,
+		dataType: 'json',
+		cached: false,
+		error: function (res) {
+			if (!res.status) {
+				showMessage('Server did not respond.', true);
+				return;
+			}
+			if (typeof params['error' + res.status] === 'function') {
+				params['error' + res.status](res);
+			} else {
+				var messages = {
+					400: 'Bad request.',
+					404: 'Not found.',
+					401: 'Authorization error. Please log-in again.'
+				};
+				var message = messages[res.status] ? messages[res.status] : res.status + ' Error';
+				showMessage(message);
+			}
+		}
+	};
+	var params = $.extend(defaults, options);
+	if (params.data) {
+		if (params.method === 'GET') params.method = 'POST';
+		params.contentType = 'application/json';
+		params.data = JSON.stringify(params.data);
+	}
+	return $.ajax(params);
+}
 
 /* Task Watcher */
 $.fn.extend({
@@ -99,7 +140,7 @@ $.fn.extend({
 							.addClass('common_btn')
 							.text('OK')
 							.appendTo(root)
-							.on('click', function() {
+							.on('click', function () {
 								root.empty().hide();
 								root.trigger('finish');
 							});
@@ -157,7 +198,7 @@ $.fn.extend({
  * Copyright (c) 2010 Rachel Carvalho <rachel.carvalho@gmail.com>
  */
 
-(function($) {
+(function ($) {
 	var defaults = {
 		colorsPerLine: 8,
 		colors: ['#000000', '#444444', '#666666', '#999999', '#cccccc', '#eeeeee', '#f3f3f3', '#ffffff',

@@ -53,34 +53,30 @@
 			refresh();
 
 			function refresh() {
-				$.ajax({
-					url: '/api/server_param',
+				api('server_param', {
 					success: function (data) {
 						editor.propertyeditor('option', 'value', data);
-					},
-					dataType: 'json',
-					cached: false
+					}
 				});
 			}
 
 			$('#save').on('click', function() {
-				$.ajax({
-					url: '/api/server_param',
-					method: 'POST',
+				if (!editor.propertyeditor('isValid')) {
+					showMessage('ERROR NAOSE');
+				}
+				api('server_param', {
 					data: editor.propertyeditor('option', 'value'),
-					dataType: 'json',
 					success: function (data) {
-						alert('Saved.');
+						showMessage('Saved.');
 						refresh();
 					},
-					error: function (res) {
+					error400: function (res) {
 						if ($.isPlainObject(res.responseJSON)) {
 							editor.propertyeditor('complain', res.responseJSON.errors);
 						} else {
-							alert(res.responseText);
+							showMessage(res.responseText, true);
 						}
-					},
-					cached: false
+					}
 				});
 			});
 

@@ -1099,6 +1099,18 @@ var propertyEditorWidget;
         this.options.disabled = true;
     }
     propertyEditorWidget.disable = disable;
+    function valid() {
+        var _this = this;
+        var props = this.options.properties;
+        var result = true;
+        $.each(props, function (i, prop) {
+            if ('heading' in prop)
+                return;
+            result = result && _this.fields[prop.key].typedfield('valid');
+        });
+        return result;
+    }
+    propertyEditorWidget.valid = valid;
     function complain(messages) {
         var _this = this;
         var key;

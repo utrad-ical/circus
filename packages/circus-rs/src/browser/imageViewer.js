@@ -479,33 +479,12 @@
 
 
 
-    changeZoom: function (inout) {
+    changeZoom: function (new_zoom) {
       var this_obj = this;
       var this_elm = this.element;
       var this_opts = this.options;
-      var resize_value = 0.5;
 
-      if (inout === '+') {
-        if(this_opts.viewer.position.zoom < 1){
-          resize_value = 0.1;
-        }
-        this_opts.viewer.position.zoom = this_opts.viewer.position.zoom + resize_value;
-        if(this_opts.viewer.position.zoom > 32 ) {
-          this_opts.viewer.position.zoom = 32;
-        }
-        this_opts.viewer.position.zoom = Math.ceil(this_opts.viewer.position.zoom*10) / 10;
-
-      } else if ( inout === '-') {
-        if(this_opts.viewer.position.zoom <= 1){
-          resize_value = 0.1;
-        }
-
-        this_opts.viewer.position.zoom = this_opts.viewer.position.zoom - resize_value;
-        if(this_opts.viewer.position.zoom < 0.1 ) {
-          this_opts.viewer.position.zoom = 0.1;
-        }
-        this_opts.viewer.position.zoom = Math.floor(this_opts.viewer.position.zoom * 10) / 10;
-      }
+			this_opts.viewer.position.zoom = new_zoom;
 
       //trimming size before zoom-change
       var tmp_pre_w = this_opts.viewer.position.sw; //拡大処理前のトリミング幅
@@ -517,6 +496,9 @@
 
       this_opts.viewer.position.sx = this_opts.viewer.position.sx - (this_opts.viewer.position.sw - tmp_pre_w) * 0.5;
       this_opts.viewer.position.sy = this_opts.viewer.position.sy - (this_opts.viewer.position.sh - tmp_pre_h) * 0.5;
+
+			//display text
+			this_elm.find('.current_size').text(100 * Number(this_opts.viewer.position.zoom));
 
     },//changeZoom
 
@@ -1528,32 +1510,48 @@
 
         this_elm.find('.ico_detail_sprite_resize_large,.ico_detail_sprite_resize_short').click(function () {
           this_elm.imageViewer('changeMode', 'pan');
-          if (this_opts.viewer.position.zoom <= 32 && 0.1 <= this_opts.viewer.position.zoom) {
-
-            if ($(this).hasClass('ico_detail_sprite_resize_large')) {
-              this_obj.changeZoom('+');
-            } else if ($(this).hasClass('ico_detail_sprite_resize_short')) {
-              this_obj.changeZoom('-');
-            }
-
-            //display text
-            this_elm.find('.current_size').text(100 * Number(this_opts.viewer.position.zoom));
-
-            //sync some lines
-            if(this_opts.viewer.orientation !== 'oblique'){
-              this_obj._limitImagePosition();
-            }
-            this_obj._changeImageSrc(event);
-            this_obj.syncVoxel();
-
-            //changemode to Pan mode.
-            if (this_opts.viewer.elements.window.panel === true) {
-              this_elm.find('.image_window_controller_wrap').find('.btn_close').trigger('click');
-            }
+          if (this_opts.viewer.position.zoom < 32 && 0.1 > this_opts.viewer.position.zoom) {
+						return false;
           }
-        });
 
-        this_elm.find('.ico_detail_sprite_resize_large,.ico_detail_sprite_resize_short').mousedown(function () {
+					var new_zoom_value = 0.5;
+					if ($(this).hasClass('ico_detail_sprite_resize_large')) {
+						//zoom in mode
+						
+						if(this_opts.viewer.position.zoom < 1){
+							new_zoom_value = 0.1;
+						}
+						new_zoom_value = this_opts.viewer.position.zoom + new_zoom_value;
+						if(new_zoom_value > 32 ) {
+							new_zoom_value = 32;
+						}
+						new_zoom_value = Math.ceil(new_zoom_value * 10) / 10;
+						
+					} else if ($(this).hasClass('ico_detail_sprite_resize_short')) {
+						//zoom out mode
+						
+						if(this_opts.viewer.position.zoom <= 1){
+							new_zoom_value = 0.1;
+						}
+		
+						new_zoom_value = this_opts.viewer.position.zoom - new_zoom_value;
+						if(new_zoom_value < 0.1 ) {
+							new_zoom_value = 0.1;
+						}
+						new_zoom_value = Math.floor(new_zoom_value * 10) / 10;
+
+					}
+					this_obj.changeZoom(new_zoom_value);
+
+					if(this_opts.viewer.orientation !== 'oblique'){
+						this_obj._limitImagePosition();
+					}
+
+					//sync some lines
+					this_obj._changeImageSrc();
+					this_obj.syncVoxel();
+
+        }).mousedown(function () {
           return false;
         });
       }//ズーム機能ここまで

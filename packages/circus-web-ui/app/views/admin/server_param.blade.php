@@ -24,7 +24,7 @@
 
 	<script>
 		$(function () {
-			var domainRegex = /^[_a-zA-Z][_a-zA-Z0-9\-]*$/;
+			var domainRegex = /^[_a-zA-Z][_a-zA-Z0-9\-.]*$/;
 			var editor = $('#editor').propertyeditor({
 				properties: [
 					{

@@ -86,6 +86,11 @@ var adminEditor = (function ($) {
 	}
 
 	function saveClicked(data) {
+		if (!editor.propertyeditor('valid')) {
+			showMessage('Fill all the fields correctly before saving.', true);
+			return;
+		}
+
 		var method = 'POST';
 		var command = opt.resource;
 		if (target !== null) {

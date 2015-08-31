@@ -61,8 +61,9 @@
 			}
 
 			$('#save').on('click', function() {
-				if (!editor.propertyeditor('isValid')) {
-					showMessage('ERROR NAOSE');
+				if (!editor.propertyeditor('valid')) {
+					showMessage('Fill all the fields correctly before saving.', true);
+					return;
 				}
 				api('server_param', {
 					data: editor.propertyeditor('option', 'value'),

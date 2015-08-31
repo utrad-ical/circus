@@ -68,8 +68,8 @@ class Project extends BaseModel
 	}
 
 	protected $rules = array(
-		'projectID' => 'required|strict_string',
-		'projectName' => 'required|strict_string',
+		'projectID' => 'required|strict_string|alpha_num',
+		'projectName' => 'required|strict_string|alpha_dash',
 		'description' => 'strict_string',
 		'origin' => 'strict_string',
 		'url' => 'strict_string',

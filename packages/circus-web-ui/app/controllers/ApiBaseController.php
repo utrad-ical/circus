@@ -25,18 +25,18 @@ class ApiBaseController extends BaseController
 			if ($exception instanceof InvalidModelException) {
 				return $this->errorResponse($exception->getErrors());
 			} else {
-				return $this->errorResponse($exception->getMessage());
+				return $this->errorResponse($exception->getMessage(), 500);
 			}
 		});
 	}
 
-	protected function errorResponse($message)
+	protected function errorResponse($message, $status = 400)
 	{
-		return Response::json(['status' => 'NG', 'errors' => $message], 400); // Bad Request
+		return Response::json(['status' => 'NG', 'errors' => $message], $status); // Bad Request
 	}
 
 	public function __call($method, $parameters)
 	{
-		return Response::json('Invalid', 404);
+		return $this->errorResponse('Invalid URL.', 404);
 	}
 }

@@ -13,9 +13,11 @@ $(function () {
 	/* Construct jQuery UI widgets */
 
 	// datepicker
-	$('.datepicker').datepicker({
-		dateFormat: "yy/mm/dd"
-	});
+	if ($('.datepicker').length > 0) {
+		$('.datepicker').datepicker({
+			dateFormat: "yy/mm/dd"
+		});
+	}
 
 	// UI multiple select
 	if ($('.multi_select').length > 0) {
@@ -35,9 +37,11 @@ $(function () {
 	}
 
 	// UI sortable
-	$('.ui-sortable').sortable({
-		axis: "y"
-	});
+	if ($('.ui-sortable').length > 0) {
+		$('.ui-sortable').sortable({
+			axis: "y"
+		});
+	}
 
 });
 

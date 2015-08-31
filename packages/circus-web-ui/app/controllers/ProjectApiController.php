@@ -9,11 +9,28 @@ class ProjectApiController extends ResourceApiBaseController
 
 	function __construct()
 	{
+		parent::__construct();
 		$project = new Project();
 		$fields = array_keys($project->getRules());
 		$this->fields = $fields;
 		array_shift($fields);
 		$this->settable = $fields;
+	}
+
+	public function store()
+	{
+		if (!Auth::user()->hasPrivilege(Group::PROJECT_CREATE)) {
+			return $this->errorResponse('You do not have the privilege to create a new project.', 403);
+		}
+		return parent::store();
+	}
+
+	public function delete($id)
+	{
+		if (!Auth::user()->hasPrivilege(Group::PROJECT_DELETE)) {
+			return $this->errorResponse('You do not have the priviledge to delete a project.', 403);
+		}
+		return parent::delete($id);
 	}
 
 	/**

@@ -68,7 +68,7 @@ class ResourceApiBaseController extends ApiBaseController
 
 	protected function generateNewID() {
 		$class = $this->targetClass;
-		if ($this->$useStringID) {
+		if ($this->useStringID) {
 			return md5(rand());
 		} else {
 			return Seq::getIncrementSeq($class::COLLECTION);
@@ -86,7 +86,7 @@ class ResourceApiBaseController extends ApiBaseController
 		$pk = $newItem->getPrimaryKey();
 		$newItem->$pk = $this->generateNewID();
 		$data = Input::all();
-		$data->$pk = $this->normalizeID($data->$pk);
+		if (isset($data->$pk)) $data->$pk = $this->normalizeID($data->$pk);
 
 		// may raise InvalidModelException
 		return $this->bulkAssignPostedDataToModel($newItem, $data, true)

@@ -147,7 +147,7 @@
 
       //モードがペンで、対象シリーズにラベルがまだない場合
       this_elm.imageViewerController('changeMode', 'pan');
-			
+
       //紐づくビューアーたちに伝播
       for (var i = 0; i < controllerInfo.viewer.length; i++) {
         var elmId = '#' + controllerInfo.viewer[i].elementId;
@@ -162,7 +162,7 @@
 
         $(elmId).trigger('sync');
       }
-			
+
     },
 
 
@@ -434,7 +434,7 @@
         if (controllerInfo.control.pen.panel === true) {
           //in this scope, only the wrap elements and add button are set.
           //each label's detail and event runs after (setEvents) function
-          $('#' + controllerInfo.elements.label).append('<div class="label_select_wrap"><div class="add_label">新規ラベル追加</div></div>');
+          $('#' + controllerInfo.elements.label).append('<div class="label_select_wrap"><div class="add_label">New Label</div></div>');
 
           if (typeof active_series.label !== 'object' || active_series.label.length === 0) {
             //create elements is runs other scope
@@ -979,7 +979,7 @@
               $(elmId).imageViewer('historyBack');
             }
           }
-					
+
 					for (var i = 0; i < controllerInfo.viewer.length; i++) {
             var elmId = '#' + controllerInfo.viewer[i].elementId;
             $(elmId).imageViewer('syncVoxel');
@@ -1569,7 +1569,7 @@
         }
 
       }
-			
+
       if(the_oblique_elm !== ''){
         var tmp_current_opts = the_oblique_elm.imageViewer('option');
         tmp_current_opts.viewer.cut = tmp_new_opts;

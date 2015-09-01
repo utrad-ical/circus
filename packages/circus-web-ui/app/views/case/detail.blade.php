@@ -528,14 +528,14 @@ id="page_case_detail"
 	<div class="clear">&nbsp;</div>
 	<table class="common_table al_l mar_b_10">
 		<colgroup>
-			<col width="20%">
-			<col width="80%">
+			<col width="10%">
+			<col width="50%">
+			<col width="15%">
+			<col width="25%">
 		</colgroup>
 		<tr>
 			<th>Case ID</th>
 			<td>{{$case_detail->caseID}}</td>
-		</tr>
-		<tr>
 			<th>Project Name</th>
 			<td>{{$case_detail->project->projectName}}</td>
 		</tr>

@@ -19,12 +19,8 @@ class LabelRegisterController extends BaseController {
 			//I want to save the label information because the error message is not
 			$revision = array();
 			$series_list = array();
-			$img_save_path = "";
 
-			//ストレージ情報取得
 			$storage_info = Storage::getCurrentStorage(Storage::LABEL_STORAGE);
-			if (!$storage_info)
-				throw new Exception("Does not exist storage for label.\nPlease register the storage from the storage management screen.");
 
 			foreach ($inputs['series'] as $rec) {
 				$revision[$rec['id']] = array();
@@ -33,14 +29,13 @@ class LabelRegisterController extends BaseController {
 					foreach ($rec['label'] as $rec2) {
 						//Register storage table and label table is not performed if there is no image
 						if ($rec2['image']) {
-							//すでにラベルが存在するかチェックする
-							//存在する場合はラベルの登録を行わない
+							// Register new label with its voxel data
 							$label_obj = Label::find($rec2['id']);
 							if (!$label_obj) {
 								$label_obj = $this->setLabel($rec2, $storage_info->storageID);
 								$label_obj->save();
 							}
-							$save_img_result = $this->saveImage($label_obj->labelID, $rec2['image'], $storage_info->path, $label_obj->w, $label_obj->h, $label_obj->d);
+							$this->saveImage($label_obj, $rec2['image']);
 							$revision[$rec['id']][] = array(
 								'id'			=>	$label_obj->labelID,
 								'attributes'	=>	array_key_exists('attribute', $rec2) ? $rec2['attribute'] : array()
@@ -133,28 +128,15 @@ class LabelRegisterController extends BaseController {
 	}
 
 	/**
-	 * ラベル画像を保存する
-	 * @param String $label_id ラベルID
-	 * @param Binary $image イメージデータ
-	 * @param String $path 格納先
-	 * @param Integer $width 画像幅
-	 * @param Integer $height 1枚当たりの画像高さ
-	 * @param Integer $idx 描かれている枚数
-	 * @author stani
-	 * @since 2015/03/20
+	 * Save the label voxel data.
+	 * @param Label $label Label instance
+	 * @param string $image Binary image data
 	 */
-	function saveImage($label_id, $image, $path, $width, $height, $idx) {
-		try {
-			Log::debug('保存するデータ(base64デコード前)::');
-			Log::debug($image);
-			$decode_str = base64_decode($image);
-			Log::debug('保存するデータ(base64デコード後)::');
-			Log::debug($decode_str);
-			return file_put_contents($path.'/'.$label_id.'.gz', $decode_str);
-		} catch (Exception $e) {
-			Log::error($e);
-			return;
-		}
+	function saveImage($label, $image) {
+		$decode_str = base64_decode($image);
+		$path = $label->labelPath();
+		if (!is_dir(dirname($path))) mkdir(dirname($path), 0777, true);
+		return file_put_contents($path, $decode_str);
 	}
 
 	/**

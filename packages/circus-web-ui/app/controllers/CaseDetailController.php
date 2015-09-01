@@ -5,9 +5,7 @@
  */
 class AuthenticationNodeException extends \Exception {
 }
-/**
- * ケース詳細
- */
+
 class CaseDetailController extends BaseController {
 	/**
 	 * Case Details screen
@@ -251,12 +249,7 @@ class CaseDetailController extends BaseController {
 								$label['size'] = array($label_info->w, $label_info->h, $label_info->d);
 								$label['offset'] = array($label_info->x, $label_info->y, $label_info->z);
 
-								//Storage information acquisition
-								$storage_info = Storage::find($label_info->storageID);
-								$storage_path = $storage_info->path;
-
-								$tmp = '';
-								$load_path = $storage_path."/".$label['id'].'.gz';
+								$load_path = $label_info->labelPath();
 								if (file_exists($load_path)) {
 									$tmp = file_get_contents($load_path);
 									$label['image'] = base64_encode($tmp);

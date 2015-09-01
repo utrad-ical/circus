@@ -56,10 +56,6 @@
           dh: 512, //display size
           ow: 512,
           oh: 512, //original size
-          sx: 0,
-          sy: 0,   //trimming poisition (original scale)
-          sw: 512,
-          sh: 512, //trimming size (original scale)
           zoom: 1
         },
         activeSeriesId: '',
@@ -153,7 +149,6 @@
 
 
     _applyBoldness: function (insert_array) {
-      //ペンで描いた状態の座標群と現時点での太さ指定を踏まえ,塗るべきマス目の集合に変換する
       var this_obj = this,
         this_opts = this.options,
         rtn_array = [],
@@ -191,7 +186,12 @@
       //center_x: position X of the center point
       //center_y: position Y of the center point
 
+      var this_obj = this;
+      var this_elm = this.element;
       var this_opts = this.options;
+			var tmp_w = this_elm.find('.series_image_elm').width();
+			var tmp_h = this_elm.find('.series_image_elm').height();
+
       var return_obj = [
         [0, 0],
         [0, 0],
@@ -199,7 +199,7 @@
       ];
       //first array : start of the line
       //second array : arrow point XY
-      //third array : end of line
+      //third array : end of the line
 
       // normalize over 360 deg
       var tmp_pi = Math.PI;
@@ -210,8 +210,8 @@
 
       //start & end point of line
       var this_tan = Math.tan(the_angle);
-      return_obj[0] = [ 0, center_y + center_x * this_tan];
-      return_obj[2] = [ this_opts.viewer.position.dw, center_y - (this_opts.viewer.position.dw - center_x) * this_tan];
+      return_obj[0] = [ 0, center_y + center_x * this_tan];	//start point
+      return_obj[2] = [ tmp_w, center_y - (tmp_w - center_x) * this_tan];	//goal point
 
       //arrow point
       var tmp_margin = this_opts.viewer.rotate.point_width * 8;
@@ -219,15 +219,15 @@
       //check the angle is which area of radian
       if(the_angle < tmp_pi / 2 ){
         //the first quadrant
-        var point_y = center_y - (this_opts.viewer.position.dw - center_x) * this_tan;
+        var point_y = center_y - (tmp_w - center_x) * this_tan;
         if(point_y < 0){
           //top
           return_obj[1][0] = center_x + (center_y - tmp_margin) / this_tan;
           return_obj[1][1] = tmp_margin;
         }else{
           //right
-          return_obj[1][0] = this_opts.viewer.position.dw -tmp_margin;
-          return_obj[1][1] = center_y - (this_opts.viewer.position.dw - center_x - tmp_margin) * this_tan;
+          return_obj[1][0] = tmp_w -tmp_margin;
+          return_obj[1][1] = center_y - (tmp_w - center_x - tmp_margin) * this_tan;
         }
       } else if (the_angle < tmp_pi){
         //the second quadrant
@@ -245,26 +245,26 @@
       } else if (the_angle < tmp_pi * 3 / 2){
         //the third quadrant
         var point_y = center_y + center_x * this_tan;
-        if(point_y < this_opts.viewer.position.dh){
+        if(point_y < tmp_h){
           //left
           return_obj[1][0] = tmp_margin;
           return_obj[1][1] = center_y + (center_x - tmp_margin) * this_tan;
         }else{
           //bottom
-          return_obj[1][0] = center_x - (this_opts.viewer.position.dh - tmp_margin -center_y) / this_tan;
-          return_obj[1][1] = this_opts.viewer.position.dh -tmp_margin;
+          return_obj[1][0] = center_x - (tmp_h - tmp_margin -center_y) / this_tan;
+          return_obj[1][1] = tmp_h -tmp_margin;
         }
       } else {
         //the fourth quadrant
-        var point_y = center_y - (this_opts.viewer.position.dw - center_x) * this_tan;
-        if(point_y < this_opts.viewer.position.dh){
+        var point_y = center_y - (tmp_w - center_x) * this_tan;
+        if(point_y < tmp_h){
           //right
-          return_obj[1][0] = this_opts.viewer.position.dw -tmp_margin;
-          return_obj[1][1] = center_y - (this_opts.viewer.position.dw - tmp_margin -center_x) * this_tan;
+          return_obj[1][0] = tmp_w -tmp_margin;
+          return_obj[1][1] = center_y - (tmp_w - tmp_margin -center_x) * this_tan;
         }else{
           //bottom
-          return_obj[1][0] = center_x - (this_opts.viewer.position.dh - tmp_margin - center_y) / this_tan;
-          return_obj[1][1] = this_opts.viewer.position.dh -tmp_margin;
+          return_obj[1][0] = center_x - (tmp_h - tmp_margin - center_y) / this_tan;
+          return_obj[1][1] = tmp_h -tmp_margin;
         }
       }
       return return_obj;
@@ -287,9 +287,9 @@
 
       var changeMain = function (image_obj) {
         var tmp_ctx = this_elm.find('.series_image_elm').get(0).getContext('2d');
-        var tmp_canvas_w = this_elm.find('.series_image_elm').width();
-        var tmp_canvas_h = this_elm.find('.series_image_elm').height();
-        tmp_ctx.clearRect(0, 0, tmp_canvas_w, tmp_canvas_h);
+				var tmp_w = this_elm.find('.series_image_elm').width();
+				var tmp_h = this_elm.find('.series_image_elm').height();
+        tmp_ctx.clearRect(0, 0, tmp_w, tmp_h);
         if(typeof fix_guide_flg !== 'undefined' && fix_guide_flg === true){
           this_obj.fixToGuide();
         }
@@ -297,14 +297,14 @@
         this_obj.syncVoxel();
         tmp_ctx.drawImage(
           image_obj,
-          this_opts.viewer.position.sx,
-          this_opts.viewer.position.sy,
-          this_opts.viewer.position.sw * 5,
-          this_opts.viewer.position.sh * 5,
+          0,
+          0,
+          this_opts.viewer.position.ow,
+          this_opts.viewer.position.oh,
           this_opts.viewer.position.dx,
           this_opts.viewer.position.dy,
-          this_opts.viewer.position.dw * 5,
-          this_opts.viewer.position.dh * 5
+          this_opts.viewer.position.dw,
+          this_opts.viewer.position.dh
         );
         this_obj._disableImageAlias(tmp_ctx, false);
       };//changeMain
@@ -484,28 +484,45 @@
       var this_elm = this.element;
       var this_opts = this.options;
 
-			this_opts.viewer.position.zoom = new_zoom;
+      this_opts.viewer.position.zoom = new_zoom;
 
       //trimming size before zoom-change
-      var tmp_pre_w = this_opts.viewer.position.sw; //拡大処理前のトリミング幅
-      var tmp_pre_h = this_opts.viewer.position.sh; //拡大処理前のトリミング高さ
+      var tmp_pre_w = this_opts.viewer.position.dw; //拡大処理前のトリミング幅
+      var tmp_pre_h = this_opts.viewer.position.dh; //拡大処理前のトリミング高さ
+
+
+      var tmp_w = 512;
+      var tmp_h = 512;
+      if (this_opts.viewer.orientation === 'axial') {
+        tmp_w = this_opts.viewer.voxel.x * this_opts.viewer.voxel.voxel_x / this_opts.viewer.voxel.voxel_x;
+        tmp_h = this_opts.viewer.voxel.y * this_opts.viewer.voxel.voxel_y / this_opts.viewer.voxel.voxel_x;
+      } else if (this_opts.viewer.orientation === 'sagittal') {
+        tmp_w = this_opts.viewer.voxel.y * this_opts.viewer.voxel.voxel_y / this_opts.viewer.voxel.voxel_x;
+        tmp_h = this_opts.viewer.voxel.z * this_opts.viewer.voxel.voxel_z / this_opts.viewer.voxel.voxel_x;
+      } else if (this_opts.viewer.orientation === 'coronal') {
+        tmp_w = this_opts.viewer.voxel.x  * this_opts.viewer.voxel.voxel_x / this_opts.viewer.voxel.voxel_x;
+        tmp_h = this_opts.viewer.voxel.z * this_opts.viewer.voxel.voxel_z / this_opts.viewer.voxel.voxel_x;
+      } else {
+        tmp_w = this_opts.viewer.voxel.x * this_opts.viewer.voxel.voxel_x / this_opts.viewer.voxel.voxel_x;
+        tmp_h = this_opts.viewer.voxel.y * this_opts.viewer.voxel.voxel_y / this_opts.viewer.voxel.voxel_x;
+      }
 
       //trimming size after zoom-change
-      this_opts.viewer.position.sw = this_opts.viewer.position.ow / this_opts.viewer.position.zoom;
-      this_opts.viewer.position.sh = this_opts.viewer.position.oh / this_opts.viewer.position.zoom;
+      this_opts.viewer.position.dw = tmp_w * this_opts.viewer.position.zoom;
+      this_opts.viewer.position.dh = tmp_h * this_opts.viewer.position.zoom;
 
-      this_opts.viewer.position.sx = this_opts.viewer.position.sx - (this_opts.viewer.position.sw - tmp_pre_w) * 0.5;
-      this_opts.viewer.position.sy = this_opts.viewer.position.sy - (this_opts.viewer.position.sh - tmp_pre_h) * 0.5;
+      this_opts.viewer.position.dx = this_opts.viewer.position.dx - (this_opts.viewer.position.dw - tmp_pre_w) * 0.5;
+      this_opts.viewer.position.dy = this_opts.viewer.position.dy - (this_opts.viewer.position.dh - tmp_pre_h) * 0.5;
 
-			//display text
-			this_elm.find('.current_size').text(100 * Number(this_opts.viewer.position.zoom));
+      //display text
+      this_elm.find('.current_size').text(100 * Number(this_opts.viewer.position.zoom));
 
     },//changeZoom
 
 
 
     _CheckGuideOver : function (e, range) {
-			//check the cursor is on guide line
+      //check the cursor is on guide line
 
       var the_return = ''; // horizontal or vertical
       var this_obj = this;
@@ -516,28 +533,28 @@
       var guide_horizontal = this_obj.getGuide('horizontal');
       var guide_vertical =  this_obj.getGuide('vertical');
 
-      var hall_r = this_opts.viewer.guide.hall_rate * this_elm.width() / position_params.zoom;
+      var hall_r = this_opts.viewer.guide.hall_rate * this_elm.find('.series_image_elm').width();
 
       if (typeof range === 'number') {
         mouse_range = range;
       }
-			mouse_range = mouse_range / position_params.zoom;
 
-      var tmp_cursor_x = (e.clientX - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().left) / position_params.zoom;
-      var tmp_cursor_y = (e.clientY - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().top) / position_params.zoom;
+      var tmp_cursor_x = e.clientX - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().left;
+      var tmp_cursor_y = e.clientY - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().top;
 
-      tmp_cursor_x = (tmp_cursor_x + position_params.sx) * position_params.ow / position_params.dw;
-      tmp_cursor_y = (tmp_cursor_y + position_params.sy) * position_params.oh / position_params.dh;
+			//guide position (canvas pixel scale)
+			var guide_pos_x = guide_horizontal.number * position_params.dw / position_params.ow + position_params.dx;
+			var guide_pos_y = guide_vertical.number * position_params.dh / position_params.oh + position_params.dy;
 
-      if (guide_horizontal.number - mouse_range < tmp_cursor_x && guide_horizontal.number + mouse_range > tmp_cursor_x) {
+      if (guide_pos_x - mouse_range < tmp_cursor_x && guide_pos_x + mouse_range > tmp_cursor_x) {
         //around cross point
         if (guide_vertical.number - hall_r > tmp_cursor_y || guide_vertical.number + hall_r < tmp_cursor_y) {
-          the_return = 'horizontal';
+          the_return = 'horizontal'; //垂直に通っている線、示すガイドはvertical
         }
-      } else if (guide_vertical.number - mouse_range < tmp_cursor_y && guide_vertical.number + mouse_range > tmp_cursor_y) {
+      } else if (guide_pos_y - mouse_range < tmp_cursor_y && guide_pos_y + mouse_range > tmp_cursor_y) {
         //around cross point
-        if (guide_horizontal.number - hall_r > tmp_cursor_x || guide_horizontal.number + hall_r < tmp_cursor_x) {
-          the_return = 'vertical';
+        if (guide_pos_x - hall_r > tmp_cursor_x || guide_pos_x + hall_r < tmp_cursor_x) {
+          the_return = 'vertical';  //水平に通っている線、示すガイドはvertical
         }
       }
 
@@ -583,8 +600,8 @@
     _clearCanvas: function () {
       var this_obj = this;
       var this_elm = this.element;
-      var tmp_w = this_elm.width();
-      var tmp_h = this_elm.height();
+      var tmp_w = this_elm.find('.series_image_elm').width();
+      var tmp_h = this_elm.find('.series_image_elm').height();
       this_elm.find('.canvas_main_elm').get(0).getContext('2d').clearRect(0, 0, tmp_w, tmp_h);
     },
 
@@ -592,27 +609,25 @@
 
     _create: function (insert_obj) {
 
-      //ウィジェット発動時に一番最初に走る
-      //optionsに応じて要素生成
-      //設置した要素へのイベント発行は  _setEventsにて
+      //run First (before _init)
       var this_obj = this;
       var this_elm = this.element;
       var this_opts = this.options;
-      //キャンバス要素群生成
+
       var createCanvas = function () {
         var tmp_elm = '';
-        tmp_elm = tmp_elm + '<div class="img_wrap">'; //画像枠,入れ子を作るので開始タグのみ
+        tmp_elm = tmp_elm + '<div class="img_wrap">'; //area div
         tmp_elm = tmp_elm + '<canvas class="canvas_elm series_image_elm"></canvas>';//dicom img
         tmp_elm = tmp_elm + '<canvas class="canvas_elm canvas_main_elm"></canvas>';//draw label
-        tmp_elm = tmp_elm + '<div class="mouse_cover"></div>';//マウス挙動キャッチ用要素
-        tmp_elm = tmp_elm + '</div>';//画像枠,閉じタグ
+        tmp_elm = tmp_elm + '<div class="mouse_cover"></div>';// element for catch event.
+        tmp_elm = tmp_elm + '</div>';//close area div
         this_elm.append(tmp_elm);
         delete tmp_elm;
       }
       createCanvas();
-      //キャンバス要素群生成ここまで
 
-      //ウインドウレベル・サイズ変更パネル
+
+      //window info elements
       if (this_opts.viewer.elements.window.panel === true) {
         var tmp_elm = '<div class="image_window_controller_wrap"><p class="btn_open">L:<span  class="win_lv_label">' + this_opts.viewer.window.level.current + '</span>\
           /  W:<span  class="win_width_label">' + this_opts.viewer.window.width.current + '</span></p>\
@@ -697,14 +712,14 @@
       var tmp_ctx = this_elm.find('.canvas_main_elm').get(0).getContext('2d');
 
       var position_params = this_opts.viewer.position;
-      var hall_r = this_elm.width() * this_opts.viewer.guide.hall_rate;
+      var hall_r = this_elm.find('.series_image_elm').width() * this_opts.viewer.guide.hall_rate;
 
       var guide_horizontal = this_obj.getGuide('horizontal');
       var guide_vertical =  this_obj.getGuide('vertical');
 
       //fit to zoom and trim
-      var center_x = (guide_horizontal.number - position_params.sx) * position_params.dw / position_params.sw || 0;
-      var center_y = (guide_vertical.number - position_params.sy) * position_params.dh / position_params.sh || 0;
+      var center_x = guide_horizontal.number * (position_params.dw / position_params.ow) + position_params.dx;
+      var center_y = guide_vertical.number * (position_params.dh / position_params.oh) + position_params.dy;
 
       tmp_ctx.beginPath();
       tmp_ctx.arc(center_x, center_y, hall_r, 0, 2 * Math.PI, false);
@@ -786,34 +801,34 @@
       var guide_horizontal = this_obj.getGuide('horizontal');
       var guide_vertical =  this_obj.getGuide('vertical');
 
-      var guide_start_x = (guide_horizontal.number + 0.5 - this_opts.viewer.position.sx) * this_opts.viewer.position.dw / this_opts.viewer.position.sw || 0;
-      var guide_start_y = (guide_vertical.number + 0.5 - this_opts.viewer.position.sy) * this_opts.viewer.position.dh / this_opts.viewer.position.sh || 0;
+      var guide_start_x = (guide_horizontal.number + 0.5) * this_opts.viewer.position.dw / this_opts.viewer.position.ow + this_opts.viewer.position.dx;
+      var guide_start_y = (guide_vertical.number + 0.5) * this_opts.viewer.position.dh / this_opts.viewer.position.oh + this_opts.viewer.position.dy; 
 
       guide_start_x = Math.floor(guide_start_x);
       guide_start_y = Math.floor(guide_start_y);
 
       //draw horizontal position (vertical line)
-      if (guide_horizontal.show === true && guide_horizontal.number - this_opts.viewer.position.sx >= 0) {
+      if (guide_horizontal.show === true) {
         tmp_ctx.beginPath();
         tmp_ctx.fillStyle = '#' + guide_horizontal.color;
         tmp_ctx.rect(
           guide_start_x,
           0,
           1,
-          this_elm.height()
+          this_elm.find('.series_image_elm').height()
         );
         tmp_ctx.fill();
         tmp_ctx.closePath();
       }
 
       //draw vertical position (horizontal line)
-      if (guide_vertical.show === true && guide_vertical.number - this_opts.viewer.position.sy >= 0) {
+      if (guide_vertical.show === true) {
         tmp_ctx.beginPath();
         tmp_ctx.fillStyle = '#' + guide_vertical.color;
         tmp_ctx.rect(
            0,
            guide_start_y,
-           this_elm.width(),
+           this_elm.find('.series_image_elm').width(),
            1
         );
         tmp_ctx.fill();
@@ -829,10 +844,10 @@
 
 
     drawLabel: function (series_id, label_id, positions_array) {
-			//drawing function
-			//series ID
-			//label ID
-			//drawing target positions [ [x,y,z],[x2,y2,z2]...]
+      //drawing function
+      //series ID
+      //label ID
+      //drawing target positions [ [x,y,z],[x2,y2,z2]...]
 
       var this_obj = this;
       var this_elm = this_obj.element;
@@ -843,10 +858,10 @@
       if (target_label.visible === true) {
         var tmp_ctx = this_elm.find('.canvas_main_elm').get(0).getContext('2d');
         var tmp_orientation = this_opts.viewer.orientation;
-        var tmp_sx = this_opts.viewer.position.sx;
-        var tmp_sy = this_opts.viewer.position.sy;
-        var bold_width = this_opts.viewer.position.zoom * this_opts.viewer.position.dw / this_opts.viewer.position.ow;
-        var bold_height = this_opts.viewer.position.zoom * this_opts.viewer.position.dh / this_opts.viewer.position.oh;
+        var tmp_zoom_x = this_opts.viewer.position.dw / this_opts.viewer.position.ow;
+        var tmp_zoom_y = this_opts.viewer.position.dh / this_opts.viewer.position.oh;
+				var tmp_dx = this_opts.viewer.position.dx;
+				var tmp_dy = this_opts.viewer.position.dy;
 
         tmp_ctx.beginPath();
         for (var i = positions_array.length - 1; i >= 0; i--) {
@@ -862,9 +877,9 @@
             tmp_x = positions_array[i][1];
             tmp_y = positions_array[i][2];
           }
-          tmp_x = (tmp_x - tmp_sx) * bold_width;
-          tmp_y = (tmp_y - tmp_sy) * bold_height;
-          tmp_ctx.rect(tmp_x, tmp_y, bold_width, bold_height);
+          tmp_x = tmp_x * tmp_zoom_x + tmp_dx;
+          tmp_y = tmp_y * tmp_zoom_y + tmp_dy;
+          tmp_ctx.rect(tmp_x, tmp_y, tmp_zoom_x, tmp_zoom_y);
         }
         tmp_ctx.fillStyle = target_label.rgba;
         tmp_ctx.fill();
@@ -902,7 +917,7 @@
       var position_params = this_opts.viewer.position;
       var tmp_ctx = this_elm.find('.canvas_main_elm').get(0).getContext('2d');
       tmp_ctx.strokeStyle = '#' + rotate_params.color;
-      tmp_ctx.fillStyle = '#' + rotate_params.color;
+      tmp_ctx.fillStyle = '#' + rotate_params.color	;
 
       if(typeof rotate_params.visible === 'undefined' || rotate_params.visible !== true) {
         return;
@@ -912,8 +927,8 @@
       var guide_vertical =  this_obj.getGuide('vertical');
 
       //fit to zoom and trim
-      var center_x = (guide_horizontal.number - position_params.sx) * position_params.dw / position_params.sw || 0;
-      var center_y = (guide_vertical.number - position_params.sy) * position_params.dh / position_params.sh || 0;
+      var center_x = guide_horizontal.number * (position_params.dw / position_params.ow) + position_params.dx;
+      var center_y = guide_vertical.number * (position_params.dh / position_params.oh) + position_params.dy;
       var the_points = this_obj._calculateRotatePoint(rotate_params.angle, center_x, center_y);
 
       //line
@@ -933,35 +948,6 @@
       rotate_params.arrow_y = the_points[1][1];
 
     },//drawRotate
-
-
-
-    eraseLabel: function (series_id, label_id, positions_array) {
-      //塗り機能
-      //第1引数 : 対象ラベル
-      //第2引数 : 塗る点の集合の配列(boxel上でのxy値)
-
-      var this_obj = this;
-      var this_elm = this.element;
-      var this_opts = this.options;
-      var tmp_ctx = this_elm.find('.canvas_main_elm').get(0).getContext('2d');
-
-      //描画対象ラベルのチェック
-      var target_label = this_obj.getLabelObjectById(label_id, series_id);
-      var array_num = positions_array.length;
-      var tmp_zoom = this_opts.viewer.position.zoom;
-
-      tmp_ctx.beginPath();
-      for (var i = array_num - 1; i >= 0; i--) {
-        var tmp_x = (positions_array[i][0] - this_opts.viewer.position.sx) * tmp_zoom;
-        var tmp_y = (positions_array[i][1] - this_opts.viewer.position.sy) * tmp_zoom;
-        tmp_ctx.clearRect(tmp_x, tmp_y, tmp_zoom, tmp_zoom);
-      }
-      tmp_ctx.closePath();
-
-    },//eraseLabel
-
-
 
 
 
@@ -1008,27 +994,24 @@
       var guide_horizontal = this_obj.getGuide('horizontal');
       var guide_vertical =  this_obj.getGuide('vertical');
 
-      var tmp_w = this_elm.width();
-      var tmp_h = this_elm.height();
+      var tmp_w = this_elm.find('.series_image_elm').width();
+      var tmp_h = this_elm.find('.series_image_elm').height();
 
-      this_opts.viewer.position.sx = guide_horizontal.number - 0.5 * tmp_w / this_opts.viewer.position.zoom;
-      this_opts.viewer.position.sy = guide_vertical.number - 0.5 * tmp_h / this_opts.viewer.position.zoom;
+      this_opts.viewer.position.dx = 0.5 * tmp_w - guide_horizontal.number * this_opts.viewer.position.zoom;
+      this_opts.viewer.position.dy = 0.5 * tmp_h - guide_vertical.number * this_opts.viewer.position.zoom;
     },
 
 
 
     _getBucketFillPositions: function (series_id,label_id,pointed_position) {
-      //バケツ発動用関数
-      // 第一引数: 対象シリーズid
-      // 第二引数: 対象ラベルid
-      // クリックされたポイントの縮尺ナシXYZ座標 [X,Y,Z]
+      // pointed positions array :  [[X1,Y1,Z1],[X2,Y2,Z2]]
 
       var this_obj = this;
       var this_elm = this.element;
       var this_opts = this.options;
 
       //今の向き・奥行ですでに描画・格納されている情報をコンテナから取得
-      var the_painted_positions_in_target_slice = this_opts.container.returnSlice(
+      var outer_points = this_opts.container.returnSlice(
         series_id,
         label_id,
         this_opts.viewer.orientation,
@@ -1038,29 +1021,27 @@
       var max_x = 0;
       var max_y = 0;
 
-      if (this_opts.viewer.orientation === 'axial') {
-        max_x = this_opts.viewer.voxel.x;
-        max_y = this_opts.viewer.voxel.y;
-      } else if (this_opts.viewer.orientation === 'coronal') {
-        max_x = this_opts.viewer.voxel.x;
-        max_y = this_opts.viewer.voxel.z;
-      } else if (this_opts.viewer.orientation === 'sagittal') {
-        max_x = this_opts.viewer.voxel.y;
-        max_y = this_opts.viewer.voxel.z;
-      }
+      max_x = Math.floor(this_opts.viewer.position.dw);
+      max_y = Math.floor(this_opts.viewer.position.dh);
 
       var paint_map = new Array(max_y);
       for (var count = paint_map.length-1; count >= 0; count--) {
         paint_map[count] = new Uint8Array(max_x);
       }
-      //3次元座標を2次元のマップに変換
-      for (var count = the_painted_positions_in_target_slice.length-1; count >= 0; count--) {
+      //exchange from 3D positions to 2D..
+      for (var count = outer_points.length-1; count >= 0; count--) {
         if (this_opts.viewer.orientation === 'axial') {
-          paint_map[the_painted_positions_in_target_slice[count][1]][the_painted_positions_in_target_slice[count][0]] = 1;
+
+          paint_map[outer_points[count][1]][outer_points[count][0]] = 1;
+
         } else if (this_opts.viewer.orientation === 'coronal') {
-          paint_map[the_painted_positions_in_target_slice[count][2]][the_painted_positions_in_target_slice[count][0]] = 1;
+
+          paint_map[outer_points[count][2]][outer_points[count][0]] = 1;
+
         } else if (this_opts.viewer.orientation === 'sagittal') {
-          paint_map[the_painted_positions_in_target_slice[count][2]][the_painted_positions_in_target_slice[count][1]] = 1;
+
+          paint_map[outer_points[count][2]][outer_points[count][1]] = 1;
+
         }
       }
 
@@ -1510,55 +1491,53 @@
 
         this_elm.find('.ico_detail_sprite_resize_large,.ico_detail_sprite_resize_short').click(function () {
           this_elm.imageViewer('changeMode', 'pan');
-          if (this_opts.viewer.position.zoom < 32 && 0.1 > this_opts.viewer.position.zoom) {
-						return false;
+          if (this_opts.viewer.position.zoom >= 32 && 0.1 >= this_opts.viewer.position.zoom) {
+            return false;
           }
 
-					var new_zoom_value = 0.5;
-					if ($(this).hasClass('ico_detail_sprite_resize_large')) {
-						//zoom in mode
-						
-						if(this_opts.viewer.position.zoom < 1){
-							new_zoom_value = 0.1;
-						}
-						new_zoom_value = this_opts.viewer.position.zoom + new_zoom_value;
-						if(new_zoom_value > 32 ) {
-							new_zoom_value = 32;
-						}
-						new_zoom_value = Math.ceil(new_zoom_value * 10) / 10;
-						
-					} else if ($(this).hasClass('ico_detail_sprite_resize_short')) {
-						//zoom out mode
-						
-						if(this_opts.viewer.position.zoom <= 1){
-							new_zoom_value = 0.1;
-						}
-		
-						new_zoom_value = this_opts.viewer.position.zoom - new_zoom_value;
-						if(new_zoom_value < 0.1 ) {
-							new_zoom_value = 0.1;
-						}
-						new_zoom_value = Math.floor(new_zoom_value * 10) / 10;
+          var new_zoom_value = 0.5;
+          if ($(this).hasClass('ico_detail_sprite_resize_large')) {
+            //zoom in mode
 
-					}
-					this_obj.changeZoom(new_zoom_value);
+            if(this_opts.viewer.position.zoom < 1){
+              new_zoom_value = 0.1;
+            }
+            new_zoom_value = this_opts.viewer.position.zoom + new_zoom_value;
+            if(new_zoom_value > 32 ) {
+              new_zoom_value = 32;
+            }
+            new_zoom_value = Math.ceil(new_zoom_value * 10) / 10;
 
-					if(this_opts.viewer.orientation !== 'oblique'){
-						this_obj._limitImagePosition();
-					}
+          } else if ($(this).hasClass('ico_detail_sprite_resize_short')) {
+            //zoom out mode
 
-					//sync some lines
-					this_obj._changeImageSrc();
-					this_obj.syncVoxel();
+            if(this_opts.viewer.position.zoom <= 1){
+              new_zoom_value = 0.1;
+            }
+
+            new_zoom_value = this_opts.viewer.position.zoom - new_zoom_value;
+            if(new_zoom_value < 0.1 ) {
+              new_zoom_value = 0.1;
+            }
+            new_zoom_value = Math.floor(new_zoom_value * 10) / 10;
+
+          }
+          this_obj.changeZoom(new_zoom_value);
+
+          if(this_opts.viewer.orientation !== 'oblique'){
+            //this_obj._limitImagePosition();
+          }
+
+          //sync some lines
+          this_obj._changeImageSrc();
+          this_obj.syncVoxel();
 
         }).mousedown(function () {
           return false;
         });
-      }//ズーム機能ここまで
-      this_elm.find('.current_size').text(100 * Number(this_opts.viewer.position.zoom)); //初期発火用
-
-      //諸々のデータ群のセットが終わったところで描画機能発火
-      this_obj.changeSeries(this_opts.viewer.activeSeriesId);//表示シリーズ変更
+      }//zoom function set
+      this_obj.changeZoom(1); // set init zoom settings
+      this_obj.changeSeries(this_opts.viewer.activeSeriesId);
 
     },//_init
 
@@ -1586,28 +1565,32 @@
 
       var this_obj = this;
       var this_opts = this.options;
+      var this_elm = this.element;
+      var tmp_w = this_elm.find('.series_image_elm').width();
+      var tmp_h = this_elm.find('.series_image_elm').height();
+
       if(this_opts.viewer.orientation === 'oblique'){
         return;
       }
 
       //right side
-      if (this_opts.viewer.position.sx + this_opts.viewer.position.sw > this_opts.viewer.position.ow) {
-        this_opts.viewer.position.sx = this_opts.viewer.position.ow - this_opts.viewer.position.sw;
+      if (tmp_w > this_opts.viewer.position.dw + this_opts.viewer.position.dx) {
+        this_opts.viewer.position.dx = tmp_w - this_opts.viewer.position.dw ;
       }
 
       //bottom
-      if (this_opts.viewer.position.sy + this_opts.viewer.position.sh > this_opts.viewer.position.oh) {
-        this_opts.viewer.position.sy = this_opts.viewer.position.oh - this_opts.viewer.position.sh;
+      if (tmp_h > this_opts.viewer.position.dh + this_opts.viewer.position.dy) {
+        this_opts.viewer.position.dy = tmp_h - this_opts.viewer.position.dh;
       }
 
       //left side
-      if(this_opts.viewer.position.sx < 0 ){
-        this_opts.viewer.position.sx = 0;
+      if(this_opts.viewer.position.dx > 0 ){
+        this_opts.viewer.position.dx = 0;
       }
 
       //top
-      if (this_opts.viewer.position.sy < 0 ){
-        this_opts.viewer.position.sy = 0;
+      if (this_opts.viewer.position.dy > 0 ){
+        this_opts.viewer.position.dy = 0;
       }
 
     },
@@ -1675,8 +1658,8 @@
       this_opts._tmpInfo.cursor.start.Y = e.clientY;
 
       //get init position info of the image trimming
-      this_opts._tmpInfo.elementParam.start.X = this_opts.viewer.position.sx;
-      this_opts._tmpInfo.elementParam.start.Y = this_opts.viewer.position.sy;
+      this_opts._tmpInfo.elementParam.start.X = this_opts.viewer.position.dx;
+      this_opts._tmpInfo.elementParam.start.Y = this_opts.viewer.position.dy;
 
     },//_mousedownFuncPan
 
@@ -1715,15 +1698,11 @@
           var tmp_ctx = this_elm.find('.canvas_main_elm').get(0).getContext('2d');
 
           //mouse position (on canvas , image original scale)
-          var tmp_x = (e.clientX - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().left) / this_opts.viewer.position.zoom;
-          var tmp_y = (e.clientY - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().top) / this_opts.viewer.position.zoom;
+					var tmp_x = (e.clientX - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().left - this_opts.viewer.position.dx) * this_opts.viewer.position.ow / this_opts.viewer.position.dw;
+					var tmp_y = (e.clientY - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().top - this_opts.viewer.position.dy) * this_opts.viewer.position.oh / this_opts.viewer.position.dh;
 
-          //画像トリミング分の補正 , 画像原寸の位置
-          tmp_x= this_opts.viewer.position.sx + tmp_x * this_opts.viewer.position.ow / this_opts.viewer.position.dw;
-          tmp_y = this_opts.viewer.position.sy + tmp_y * this_opts.viewer.position.oh / this_opts.viewer.position.dh;
-
-          this_opts._tmpInfo.cursor.current.X = tmp_x;
-          this_opts._tmpInfo.cursor.current.Y = tmp_y;
+          this_opts._tmpInfo.cursor.current.X = Math.floor(tmp_x);
+          this_opts._tmpInfo.cursor.current.Y = Math.floor(tmp_y);
 
          //太さを加味
           var tmp_array = this_obj._applyBoldness([[this_opts._tmpInfo.cursor.current.X, this_opts._tmpInfo.cursor.current.Y]]);
@@ -1749,7 +1728,7 @@
       var this_obj = this;
       var this_elm = this.element;
       var this_opts = this.options;
-       //一度外に出て戻ってきた場合に再び触った場合にコンテナ書き込み
+
        if (this_opts._tmpInfo.label.length > 0) {
 
          //history
@@ -1771,18 +1750,15 @@
 
          this_opts._tmpInfo.label = [];
        }else{
-          //通常のペン挙動
-          //ラベルを描くcanvas要素のオブジェクト
+
+          var tmp_ctx = this_elm.find('.canvas_main_elm').get(0).getContext('2d');
+
           //mouse position (on canvas , image original scale)
-          var tmp_x = (e.clientX - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().left) / this_opts.viewer.position.zoom;
-          var tmp_y = (e.clientY - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().top) / this_opts.viewer.position.zoom;
+          var tmp_x = (e.clientX - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().left - this_opts.viewer.position.dx) * this_opts.viewer.position.ow / this_opts.viewer.position.dw;
+          var tmp_y = (e.clientY - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().top - this_opts.viewer.position.dy) * this_opts.viewer.position.oh / this_opts.viewer.position.dh;
 
-          //画像トリミング分の補正 , 画像原寸の位置
-          tmp_x= this_opts.viewer.position.sx + tmp_x * this_opts.viewer.position.ow / this_opts.viewer.position.dw;
-          tmp_y = this_opts.viewer.position.sy + tmp_y * this_opts.viewer.position.oh / this_opts.viewer.position.dh;
-
-          this_opts._tmpInfo.cursor.current.X = tmp_x;
-          this_opts._tmpInfo.cursor.current.Y = tmp_y;
+          this_opts._tmpInfo.cursor.current.X = Math.floor(tmp_x);
+          this_opts._tmpInfo.cursor.current.Y = Math.floor(tmp_y);
 
          //太さを加味
           var tmp_array = this_obj._applyBoldness([[this_opts._tmpInfo.cursor.current.X, this_opts._tmpInfo.cursor.current.Y]]);
@@ -1797,7 +1773,6 @@
             this_opts._tmpInfo.label
           );
           this_obj.syncVoxel();
-          var tmp_ctx = this_elm.find('.canvas_main_elm').get(0).getContext('2d');
           this_obj._disableImageAlias(tmp_ctx, false);
        }
     },//_mousedownFuncErase
@@ -1811,26 +1786,19 @@
        var this_elm = this.element;
        var this_opts = this.options;
 
-       //通常のペン挙動
-       //ラベルを描くcanvas要素のオブジェクト
-       var tmp_ctx = this_elm.find('.canvas_main_elm').get(0).getContext('2d');
-
-       //マウス位置
-       this_opts._tmpInfo.elementParam.start.X = this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().left;
-       this_opts._tmpInfo.elementParam.start.Y = this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().top;
-
-       //canvas要素の左端を起点としたときのマウス位置(ズーム解除状態でのXY値)
-       this_opts._tmpInfo.cursor.current.X = (e.clientX - this_opts._tmpInfo.elementParam.start.X) / this_opts.viewer.position.zoom;
-       this_opts._tmpInfo.cursor.current.Y = (e.clientY - this_opts._tmpInfo.elementParam.start.Y) / this_opts.viewer.position.zoom;
-
-       //画像トリミング分の補正 , 画像原寸の位置
-       this_opts._tmpInfo.cursor.current.X = this_opts.viewer.position.sx + this_opts._tmpInfo.cursor.current.X * this_opts.viewer.position.ow / this_opts.viewer.position.dw;
-       this_opts._tmpInfo.cursor.current.Y = this_opts.viewer.position.sy + this_opts._tmpInfo.cursor.current.Y * this_opts.viewer.position.oh / this_opts.viewer.position.dh;
-
        var the_active_series = this_obj.getSeriesObjectById(this_opts.viewer.activeSeriesId);
        if (typeof the_active_series.label !== 'undefined' &&  the_active_series.label.length > 0) {
-         var tmp_point_position = this_obj._exchangePositionCtoV([[this_opts._tmpInfo.cursor.current.X, this_opts._tmpInfo.cursor.current.Y]]);
-           this_obj._getBucketFillPositions(
+
+         //cursor position (in image original scale)
+				var tmp_x = (e.clientX - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().left - this_opts.viewer.position.dx) * this_opts.viewer.position.ow / this_opts.viewer.position.dw;
+				var tmp_y = (e.clientY - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().top - this_opts.viewer.position.dy) * this_opts.viewer.position.oh / this_opts.viewer.position.dh;
+
+         tmp_x = Math.floor(tmp_x);
+         tmp_y = Math.floor(tmp_y);
+
+         var tmp_point_position = this_obj._exchangePositionCtoV([[tmp_x, tmp_y]]);
+
+         this_obj._getBucketFillPositions(
            this_opts.viewer.activeSeriesId,
            the_active_series.activeLabelId,
            tmp_point_position[0]
@@ -1852,20 +1820,12 @@
 
 
 
-    _mousedownFuncGuide: function (e) {
+    _mousedownFuncGuide : function (e) {
       var this_obj = this;
       var this_elm = this.element;
       var this_opts = this.options;
 
-      //定規モード
-      //マウス位置取得
-      var tmp_cursor_x = (e.clientX - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().left) / this_opts.viewer.position.zoom;
-      var tmp_cursor_y = (e.clientY - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().top) / this_opts.viewer.position.zoom;
-
-      //初期位置(ズーム解除状態でのXY値)
-      this_opts._tmpInfo.cursor.start.X = tmp_cursor_x + this_opts.viewer.position.sx * this_opts.viewer.position.dw / this_opts.viewer.position.ow;
-      this_opts._tmpInfo.cursor.start.Y = tmp_cursor_y + this_opts.viewer.position.sy * this_opts.viewer.position.dh / this_opts.viewer.position.oh;
-
+      this_obj._mousemoveFuncGuide(e);
     },//_mousedownFuncGuide
 
 
@@ -1953,22 +1913,14 @@
       var this_opts = this.options;
       var tmp_position_params = this_opts.viewer.position;
 
-      var tmp_x = (e.clientX - this_opts._tmpInfo.cursor.start.X) / tmp_position_params.zoom;
-      var tmp_y = (e.clientY - this_opts._tmpInfo.cursor.start.Y) / tmp_position_params.zoom;
+      tmp_x = this_opts._tmpInfo.elementParam.start.X + e.clientX - this_opts._tmpInfo.cursor.start.X;
+      tmp_y = this_opts._tmpInfo.elementParam.start.Y + e.clientY - this_opts._tmpInfo.cursor.start.Y;
+
+      tmp_position_params.dx = Math.round(tmp_x);
+      tmp_position_params.dy = Math.round(tmp_y);
 
       if(this_opts.viewer.orientation !== 'oblique'){
-        tmp_x = tmp_x * tmp_position_params.ow / tmp_position_params.dw;
-        tmp_y = tmp_y * tmp_position_params.oh / tmp_position_params.dh;
-      }
-
-      tmp_x = this_opts._tmpInfo.elementParam.start.X - tmp_x;
-      tmp_y = this_opts._tmpInfo.elementParam.start.Y - tmp_y;
-
-      tmp_position_params.sx = Math.round(tmp_x);
-      tmp_position_params.sy = Math.round(tmp_y);
-
-      if(this_opts.viewer.orientation !== 'oblique'){
-        this_obj._limitImagePosition();
+        //this_obj._limitImagePosition();
       }
 
       this_obj._changeImageSrc();
@@ -1983,12 +1935,10 @@
       var this_opts = this.options;
 
       //mouse position (on canvas , image original scale)
-      var tmp_x = (e.clientX - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().left) / this_opts.viewer.position.zoom;
-      var tmp_y = (e.clientY - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().top) / this_opts.viewer.position.zoom;
-
-      //画像トリミング分の補正 , 画像原寸の位置
-      tmp_x= this_opts.viewer.position.sx + tmp_x * this_opts.viewer.position.ow / this_opts.viewer.position.dw;
-      tmp_y = this_opts.viewer.position.sy + tmp_y * this_opts.viewer.position.oh / this_opts.viewer.position.dh;
+      var tmp_x = (e.clientX - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().left - this_opts.viewer.position.dx) * this_opts.viewer.position.ow / this_opts.viewer.position.dw;
+      var tmp_y = (e.clientY - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().top - this_opts.viewer.position.dy) * this_opts.viewer.position.oh / this_opts.viewer.position.dh;
+      tmp_x = Math.floor(tmp_x);
+      tmp_y = Math.floor(tmp_y);
 
       if (this_opts._tmpInfo.cursor.out_flg === 0) {
 
@@ -1999,6 +1949,7 @@
         if (Math.abs(this_opts._tmpInfo.cursor.current.X - tmp_x) > 1 || Math.abs(this_opts._tmpInfo.cursor.current.Y - tmp_y) > 1) {
           //midpoints
           tmp_array = this_obj._getStopover(this_opts._tmpInfo.cursor.current.X, this_opts._tmpInfo.cursor.current.Y, tmp_x, tmp_y);
+
         } else {
           //no point
           tmp_array.push([tmp_x, tmp_y]);
@@ -2047,18 +1998,18 @@
 
       //fix the limit (window width)
       if(this_opts.viewer.window.width.minimum > tmp_x){
-      	tmp_x = this_opts.viewer.window.width.minimum;
+        tmp_x = this_opts.viewer.window.width.minimum;
       }
       if(this_opts.viewer.window.width.maximum < tmp_x){
-      	tmp_x = this_opts.viewer.window.width.maximum;
+        tmp_x = this_opts.viewer.window.width.maximum;
       }
 
       //fix the limit (window level)
       if(this_opts.viewer.window.level.minimum > tmp_y){
-      	tmp_y = this_opts.viewer.window.level.minimum;
+        tmp_y = this_opts.viewer.window.level.minimum;
       }
       if(this_opts.viewer.window.level.maximum < tmp_y){
-      	tmp_y = this_opts.viewer.window.level.maximum;
+        tmp_y = this_opts.viewer.window.level.maximum;
       }
 
       this_opts.viewer.window.width.current = Math.round(tmp_x);
@@ -2074,20 +2025,19 @@
       var this_elm = this.element;
       var this_opts = this.options;
 
+			//calculate goal point
       this_opts.viewer.measure.goal_x = e.clientX - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().left;
       this_opts.viewer.measure.goal_y = e.clientY - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().top;
 
+			//drawing measure objects
       this_obj.syncVoxel();
       this_elm.imageViewer('drawMeasure');
 
       //distant (canvas pixel scale)
-      var dist_w = (this_opts.viewer.measure.goal_x - this_opts.viewer.measure.start_x) * this_opts.viewer.position.dw / this_opts.viewer.position.ow;
-      var dist_h = (this_opts.viewer.measure.goal_y - this_opts.viewer.measure.start_y) * this_opts.viewer.position.dh / this_opts.viewer.position.oh;
+      var dist_w = (this_opts.viewer.measure.goal_x - this_opts.viewer.measure.start_x) * this_opts.viewer.position.ow / this_opts.viewer.position.dw;
+      var dist_h = (this_opts.viewer.measure.goal_y - this_opts.viewer.measure.start_y) * this_opts.viewer.position.oh / this_opts.viewer.position.dh;
 
-      dist_w = dist_w / this_opts.viewer.position.zoom;
-      dist_h = dist_h / this_opts.viewer.position.zoom;
-
-      //fix to milli meter scale
+      //fix to millimeter scale
       if(this_opts.viewer.orientation === 'axial') {
         dist_w = dist_w * this_opts.viewer.voxel.voxel_x;
         dist_h = dist_h * this_opts.viewer.voxel.voxel_y;
@@ -2112,17 +2062,16 @@
       var this_elm = this.element;
       var this_opts = this.options;
 
-      var tmp_cursor_x = (e.clientX - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().left) / this_opts.viewer.position.zoom;
-      var tmp_cursor_y = (e.clientY - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().top) / this_opts.viewer.position.zoom;
+      var tmp_cursor_x = e.clientX - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().left - this_opts.viewer.position.dx;
+      var tmp_cursor_y = e.clientY - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().top - this_opts.viewer.position.dy;
 
-      tmp_cursor_x = this_opts.viewer.position.sx + tmp_cursor_x * this_opts.viewer.position.ow / this_opts.viewer.position.dw;
-      tmp_cursor_y = this_opts.viewer.position.sy + tmp_cursor_y * this_opts.viewer.position.oh / this_opts.viewer.position.dh;
-
-      tmp_cursor_x = Math.ceil(tmp_cursor_x);
-      tmp_cursor_y = Math.ceil(tmp_cursor_y);
+      tmp_cursor_x = tmp_cursor_x * this_opts.viewer.position.ow / this_opts.viewer.position.dw;
+      tmp_cursor_y = tmp_cursor_y * this_opts.viewer.position.oh / this_opts.viewer.position.dh;
 
       var guide_horizontal = this_obj.getGuide('horizontal');
       var guide_vertical =  this_obj.getGuide('vertical');
+      tmp_cursor_x =Math.floor(tmp_cursor_x);
+      tmp_cursor_y = Math.floor(tmp_cursor_y);
 
       guide_horizontal.number =tmp_cursor_x;
       guide_vertical.number = tmp_cursor_y;
@@ -2140,20 +2089,25 @@
 
       var guide_horizontal = this_obj.getGuide('horizontal');
       var guide_vertical =  this_obj.getGuide('vertical');
-
+			
       if( direction == 'horizontal' ){
-         var tmp_cursor_x = (e.clientX - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().left) / this_opts.viewer.position.zoom;
-         tmp_cursor_x = this_opts.viewer.position.sx + tmp_cursor_x * this_opts.viewer.position.ow / this_opts.viewer.position.dw;
-         tmp_cursor_x = Math.ceil(tmp_cursor_x);
-         guide_horizontal.number =tmp_cursor_x;
+				
+         var tmp_cursor_x = e.clientX - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().left - this_opts.viewer.position.dx;
+         guide_horizontal.number = Math.floor( tmp_cursor_x * this_opts.viewer.position.ow / this_opts.viewer.position.dw);
+ 
       } else {
-         var tmp_cursor_y = (e.clientY - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().top) / this_opts.viewer.position.zoom;
-         tmp_cursor_y = this_opts.viewer.position.sy + tmp_cursor_y * this_opts.viewer.position.oh / this_opts.viewer.position.dh;
-         tmp_cursor_y = Math.ceil(tmp_cursor_y);
-         guide_vertical.number = tmp_cursor_y;
-      }
+				
+         var tmp_cursor_y = e.clientY - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().top - this_opts.viewer.position.dy;
+         guide_vertical.number = Math.floor( tmp_cursor_y * this_opts.viewer.position.oh / this_opts.viewer.position.dh);
+ 
+     }
+
       this_obj.syncVoxel();
-      this_elm.trigger('onGuideChange',[this_opts.viewer.orientation,guide_horizontal.number,guide_vertical.number]);
+      this_elm.trigger('onGuideChange',[
+				this_opts.viewer.orientation,
+				guide_horizontal.number,
+				guide_vertical.number
+			]);
 
     },//_mousemoveFuncGuide
 
@@ -2169,12 +2123,16 @@
       var this_obj = this;
       var this_elm = this.element;
       var this_opts = this.options;
+      var position_params = this_opts.viewer.position;
 
-      var tmp_cursor_x = (e.clientX - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().left);
-      var tmp_cursor_y = (e.clientY - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().top);
+      var tmp_cursor_x = e.clientX - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().left;
+      var tmp_cursor_y = e.clientY - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().top;
 
-      var center_x = (this_obj.getGuide('horizontal').number - this_opts.viewer.position.sx ) * this_opts.viewer.position.zoom * this_opts.viewer.position.dw / this_opts.viewer.position.ow;
-      var center_y = (this_obj.getGuide('vertical').number - this_opts.viewer.position.sy ) * this_opts.viewer.position.zoom * this_opts.viewer.position.dh / this_opts.viewer.position.oh;
+      var guide_horizontal = this_obj.getGuide('horizontal');
+      var guide_vertical =  this_obj.getGuide('vertical');
+
+      var center_x = guide_horizontal.number * (position_params.dw / position_params.ow) + position_params.dx;
+      var center_y = guide_vertical.number * (position_params.dh / position_params.oh) + position_params.dy;
 
       var new_angle = Math.atan( (center_y - tmp_cursor_y) / (tmp_cursor_x - center_x) );
       if(tmp_cursor_x < center_x){
@@ -2183,7 +2141,6 @@
       }
 
       new_angle = Math.ceil( new_angle * 100 ) / 100;
-
       this_opts.viewer.rotate.angle = new_angle;
       this_obj.syncVoxel();
       this_elm.trigger('onRotateChange', [this_opts.viewer.orientation,new_angle]);
@@ -2195,10 +2152,8 @@
       var this_obj = this;
       var this_elm = this.element;
       var this_opts = this.options;
-
       this_opts._tmpInfo.cursor.out_flg = 1;
 
-      //手のひらツール
       if (this_opts.mode === 'pan' || this_opts.mode === 'window') {
         this_opts._tmpInfo.cursor.touch_flg = 0;
       }
@@ -2226,7 +2181,6 @@
       } else if (this_opts.mode === 'guide_single') {
         this_obj._mouseupFuncGuideSingle(e);
       }
-
     },//_mouseupFunc
 
 
@@ -2255,9 +2209,7 @@
           this_opts._tmpInfo.label
         );
       }
-
-      //clear memory
-      this_opts._tmpInfo.label = [];
+      this_opts._tmpInfo.label = []; //clear memory
 
       //trigger the Event for some controllers
       if (typeof this_opts.viewer.activeSeriesId !== 'undefined' && typeof the_active_series !== 'undefined') {
@@ -2267,32 +2219,11 @@
 
 
 
-    _mouseupFuncGuide: function (e) {
+    _mouseupFuncGuide : function (e) {
       var this_obj = this;
       var this_elm = this.element;
       var this_opts = this.options;
-
-
-      var tmp_cursor_x = (e.clientX - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().left) / this_opts.viewer.position.zoom;
-      var tmp_cursor_y = (e.clientY - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().top) / this_opts.viewer.position.zoom;
-
-      tmp_cursor_x = this_opts.viewer.position.sx + tmp_cursor_x * this_opts.viewer.position.ow / this_opts.viewer.position.dw;
-      tmp_cursor_y = this_opts.viewer.position.sy + tmp_cursor_y * this_opts.viewer.position.oh / this_opts.viewer.position.dh;
-
-      this_opts._tmpInfo.cursor.current.X = tmp_cursor_x + this_opts.viewer.position.sx;
-      this_opts._tmpInfo.cursor.current.Y = tmp_cursor_y + this_opts.viewer.position.sy;
-
-      tmp_cursor_x = Math.ceil(tmp_cursor_x);
-      tmp_cursor_y = Math.ceil(tmp_cursor_y);
-
-      var guide_horizontal = this_obj.getGuide('horizontal');
-      var guide_vertical =  this_obj.getGuide('vertical');
-
-      guide_horizontal.number =tmp_cursor_x;
-      guide_vertical.number = tmp_cursor_y;
-
-      this_elm.trigger('onGuideChange',[this_opts.viewer.orientation,guide_horizontal.number,guide_vertical.number]);
-
+      this_obj._mousemoveFuncGuide(e);
     },//_mouseupFuncGuide
 
 
@@ -2349,7 +2280,6 @@
        var this_obj = this;
        var this_elm = this.element;
        var this_opts = this.options;
-
        $.extend(true, this_opts, tmpSetValues);
 
       if (this_opts.viewer.elements.window.panel === true) {
@@ -2382,7 +2312,6 @@
 
 
     setCanvasSize: function () {
-      //シリーズ追加時・初期表示時にビューアーの大きさを再調整・コンテナにサイズ定義
       var this_obj = this;
       var this_elm = this.element;
       var this_opts = this.options;
@@ -2392,51 +2321,32 @@
       var tmp_ow = 512;
       var tmp_oh = 512;
       var tmp_num = 512;
-
-      var active_series = this_obj.getSeriesObjectById(this_opts.viewer.activeSeriesId);
-
+			
       if (this_opts.viewer.orientation === 'axial') {
-        tmp_w = active_series.voxel.x;
-        tmp_h = active_series.voxel.y * active_series.voxel.voxel_y / active_series.voxel.voxel_x;
-        tmp_ow = active_series.voxel.x;
-        tmp_oh = active_series.voxel.y;
-        tmp_num = active_series.voxel.z - 1;
+        tmp_w = this_opts.viewer.voxel.x * this_opts.viewer.voxel.voxel_x / this_opts.viewer.voxel.voxel_x;
+        tmp_h = this_opts.viewer.voxel.y * this_opts.viewer.voxel.voxel_y / this_opts.viewer.voxel.voxel_x;
+        tmp_ow = this_opts.viewer.voxel.x;
+        tmp_oh = this_opts.viewer.voxel.y;
+        tmp_num = this_opts.viewer.voxel.z - 1;
       } else if (this_opts.viewer.orientation === 'sagittal') {
-        tmp_w = active_series.voxel.y * active_series.voxel.voxel_y / active_series.voxel.voxel_x;
-        tmp_h = active_series.voxel.z * active_series.voxel.voxel_z / active_series.voxel.voxel_x;
-        tmp_ow = active_series.voxel.y;
-        tmp_oh = active_series.voxel.z;
-        tmp_num = active_series.voxel.x - 1;
+        tmp_w = this_opts.viewer.voxel.y * this_opts.viewer.voxel.voxel_y / this_opts.viewer.voxel.voxel_x;
+        tmp_h = this_opts.viewer.voxel.z * this_opts.viewer.voxel.voxel_z / this_opts.viewer.voxel.voxel_x;
+        tmp_ow = this_opts.viewer.voxel.y;
+        tmp_oh = this_opts.viewer.voxel.z;
+        tmp_num = this_opts.viewer.voxel.x - 1;
       } else if (this_opts.viewer.orientation === 'coronal') {
-        tmp_w = active_series.voxel.x;
-        tmp_h = active_series.voxel.z * active_series.voxel.voxel_z / active_series.voxel.voxel_x;
-        tmp_ow = active_series.voxel.x;
-        tmp_oh = active_series.voxel.z;
-        tmp_num = active_series.voxel.y - 1;
+        tmp_w = this_opts.viewer.voxel.x * this_opts.viewer.voxel.voxel_x / this_opts.viewer.voxel.voxel_x;
+        tmp_h = this_opts.viewer.voxel.z * this_opts.viewer.voxel.voxel_z / this_opts.viewer.voxel.voxel_x;
+        tmp_ow = this_opts.viewer.voxel.x;
+        tmp_oh = this_opts.viewer.voxel.z;
+        tmp_num = this_opts.viewer.voxel.y - 1;
       }
 
       this_opts.viewer.position.ow = tmp_ow;
       this_opts.viewer.position.oh = tmp_oh;
-      this_opts.viewer.position.sw = tmp_ow;
-      this_opts.viewer.position.sh = tmp_oh;
       this_opts.viewer.position.dw = tmp_w;
       this_opts.viewer.position.dh = tmp_h;
-
       this_opts.viewer.number.maximum = tmp_num;
-
-      if (this_opts.viewer.number.current > tmp_num) {
-        this_opts.viewer.number.current = tmp_num;
-      }
-
-      this_elm.find('.slider_elm').slider({
-        value: this_opts.viewer.number.current,
-        min: this_opts.viewer.number.minimum,
-        max: this_opts.viewer.number.maximum
-      });
-
-      var tmp_voxel_zoom = 512 / this_opts.viewer.voxel.x;
-      this_opts.viewer.position.dw =this_opts.viewer.position.dw * tmp_voxel_zoom;
-      this_opts.viewer.position.dh =this_opts.viewer.position.dh * tmp_voxel_zoom;
 
       //set canvas element size.
       this_elm.find('.series_image_elm,.canvas_main_elm').attr({
@@ -2446,6 +2356,17 @@
       .css({
         width: this_opts.viewer.position.dw + 'px',
         height: this_opts.viewer.position.dh + 'px'
+      });
+			
+			//set slider limit
+			if (this_opts.viewer.number.current > tmp_num) {
+        this_opts.viewer.number.current = tmp_num;
+      }
+
+      this_elm.find('.slider_elm').slider({
+        value: this_opts.viewer.number.current,
+        min: this_opts.viewer.number.minimum,
+        max: this_opts.viewer.number.maximum
       });
 
     },//setCanvasSize
@@ -2462,11 +2383,8 @@
       this_opts.viewer.voxel.y = this_opts.viewer.position.oh = Number(insert_Object.Pixel_Rows);
       this_opts.viewer.voxel.voxel_x = this_opts.viewer.voxel.voxel_y = Number(insert_Object.Pixel_Size);
 
-      this_opts.viewer.position.dw = this_opts.viewer.position.ow;
-      this_opts.viewer.position.dh = this_opts.viewer.position.oh;
-
-      this_opts.viewer.position.sw = this_opts.viewer.position.ow / this_opts.viewer.position.zoom;
-      this_opts.viewer.position.sh = this_opts.viewer.position.oh / this_opts.viewer.position.zoom;
+      this_opts.viewer.position.dw = this_opts.viewer.voxel.x * this_opts.viewer.position.zoom;
+      this_opts.viewer.position.dh = this_opts.viewer.voxel.y * this_opts.viewer.position.zoom;
 
       var guide_x = insert_Object.Center.split(',')[0];
       var guide_y = insert_Object.Center.split(',')[1];
@@ -2474,13 +2392,10 @@
       var guide_horizontal = this_obj.getGuide('horizontal');
       var guide_vertical =  this_obj.getGuide('vertical');
 
-      guide_x = Number(guide_x);
-      guide_y = Number(guide_y);
+      guide_horizontal.number = Number(guide_x);
+      guide_vertical.number = Number(guide_y);
 
-      guide_horizontal.number = guide_x;
-      guide_vertical.number = guide_y;
-
-    },
+    },//setObliqueResponse
 
 
 

@@ -60,9 +60,6 @@ class CaseExportController extends BaseController
 			$zip_file_name = $inputs['caseID'] . '_series' . $series_index . '_revision' . $inputs['revisionNo'] . '.zip';
 			$zip_file_path = $tmp_dir_path . '/' . $zip_file_name;
 
-			if (!file_exists($zip_file_path))
-				throw new Exception('failed create zip file .');
-
 			$res = array(
 				'file_name' => $zip_file_name,
 				'dir_name' => $tmp_dir

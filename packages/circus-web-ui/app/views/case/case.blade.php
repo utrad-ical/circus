@@ -240,7 +240,7 @@
 					<td>{{date('Y/m/d', strtotime($rec->updateTime))}}</td>
 					<td>
 						<a href="" class="link_detail">
-							{{date('Y/m/d('.CommonHelper::getWeekDay(date('w', $rec->latestRevision['date']->sec)).') H:i', $rec->latestRevision['date']->sec)}}
+							{{{date('Y/m/d H:i', $rec->latestRevision['date']->sec)}}}
 						</a>
 						{{Form::open(['url' => asset('case/detail'), 'method' => 'post', 'class' => 'form_case_detail'])}}
 							{{Form::hidden('caseID', $rec->caseID)}}

@@ -6,17 +6,6 @@
  */
 class CommonHelper{
 	/**
-	 * 曜日(表示)を取得する
-	 * @param $w 曜日を表す数値
-	 * @author stani
-	 * @since 2015/03/20
-	 */
-	public static function getWeekDay($w) {
-		$week = Config::get('const.week_day');
-		return $week[$w];
-	}
-
-	/**
 	 * 性別(表示)を取得する
 	 * @param String $sex 性別コード(O/F/M)
 	 * @return String 性別ラベル

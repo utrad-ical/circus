@@ -6,7 +6,6 @@ return array(
 	'search_display'		=>	array('' => 'display_num', 10 => 10, 50 => 50, 100 => 100, 'all' => 'all'),	//検索結果表示件数
 	'search_case_sort'		=>	array('updateTime' => 'Last Updated', 'caseID' => 'case ID'),	//ケース検索ソート
 	'search_sort'			=>	array('desc' => 'desc', 'asc' => 'asc'),	//検索昇順/降順
-	'week_day'				=>	array('日', '月', '火', '水', '木', '金', '土'),	//曜日(日本語表記)
 	'search_series_sort'	=>	array('patientInfo.patientID' => 'patient ID',
 									  'patientInfo.patientName' => 'patient name', 'patientInfo.age' => 'age',
 									  'patientInfo.sex' => 'sex', 'seriesDate' => 'series date',

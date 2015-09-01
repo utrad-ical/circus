@@ -61,11 +61,10 @@ class RevisionController extends BaseController {
 			if (array_key_exists('labels', $rec))
 				$label_cnt += count($rec['labels']);
 		}
-		$w = CommonHelper::getWeekDay(date('w', $value['date']->sec));
 
 		return array(
 			'revisionNo'	=>	$key,
-			'editDate'		=>	date('Y/m/d('.$w.')', $value['date']->sec),
+			'editDate'		=>	date('Y/m/d', $value['date']->sec),
 			'editTime'		=>	date('H:i', $value['date']->sec),
 			'seriesCount'	=>	count($value['series']),
 			'labelCount'	=>	$label_cnt,

@@ -160,7 +160,11 @@
           value:tmp_opts.viewer.number.current
         });
 
+				if(tmp_opts.viewer.orientation === 'oblique'){
+					$(elmId).trigger('changeImageSrc',[true]);
+				}
         $(elmId).trigger('sync');
+
       }
 
     },
@@ -1022,6 +1026,7 @@
       if (controllerInfo.control.measure.panel === true) {
         $('.ico_detail_sprite_rotate').click(function () {
           this_elm.imageViewerController('changeMode', 'rotate');
+					$('.rotate_dir_opt').focus().show();
         });
 
         //どの断面でObliqueを制御するかの選択
@@ -1037,8 +1042,11 @@
               the_opts.viewer.rotate.visible = false;
             }
             $('#' + tmp_viewer.elementId).imageViewer('option',the_opts).imageViewer('syncVoxel');
+						$(this).hide();
           }
-        });
+        }).blur(function(){
+				 $(this).hide();
+				});
       }
 
       /*ラベル表示領域*/
@@ -1573,7 +1581,7 @@
       if(the_oblique_elm !== ''){
         var tmp_current_opts = the_oblique_elm.imageViewer('option');
         tmp_current_opts.viewer.cut = tmp_new_opts;
-        the_oblique_elm.imageViewer('option', tmp_current_opts).trigger('changeImageSrc',[true]);
+        the_oblique_elm.imageViewer('option', tmp_current_opts).trigger('changeImageSrc');
       }
 
     },

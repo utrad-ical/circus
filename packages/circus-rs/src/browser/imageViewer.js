@@ -50,12 +50,12 @@
           }
         },
         position: {
-          dx: 0,
-          dy: 0, //display position
-          dw: 512,
-          dh: 512, //display size
-          ow: 512,
-          oh: 512, //original size
+          dx: 0,//display position
+          dy: 0,
+          dw: 512, //display size
+          dh: 512,
+          ow: 512, //image original size
+          oh: 512,
           zoom: 1
         },
         activeSeriesId: '',
@@ -189,8 +189,8 @@
       var this_obj = this;
       var this_elm = this.element;
       var this_opts = this.options;
-			var tmp_w = this_elm.find('.series_image_elm').width();
-			var tmp_h = this_elm.find('.series_image_elm').height();
+      var tmp_w = this_elm.find('.series_image_elm').width();
+      var tmp_h = this_elm.find('.series_image_elm').height();
 
       var return_obj = [
         [0, 0],
@@ -210,8 +210,8 @@
 
       //start & end point of line
       var this_tan = Math.tan(the_angle);
-      return_obj[0] = [ 0, center_y + center_x * this_tan];	//start point
-      return_obj[2] = [ tmp_w, center_y - (tmp_w - center_x) * this_tan];	//goal point
+      return_obj[0] = [ 0, center_y + center_x * this_tan];  //start point
+      return_obj[2] = [ tmp_w, center_y - (tmp_w - center_x) * this_tan];  //goal point
 
       //arrow point
       var tmp_margin = this_opts.viewer.rotate.point_width * 8;
@@ -287,8 +287,8 @@
 
       var changeMain = function (image_obj) {
         var tmp_ctx = this_elm.find('.series_image_elm').get(0).getContext('2d');
-				var tmp_w = this_elm.find('.series_image_elm').width();
-				var tmp_h = this_elm.find('.series_image_elm').height();
+        var tmp_w = this_elm.find('.series_image_elm').width();
+        var tmp_h = this_elm.find('.series_image_elm').height();
         tmp_ctx.clearRect(0, 0, tmp_w, tmp_h);
         if(typeof fix_guide_flg !== 'undefined' && fix_guide_flg === true){
           this_obj.fixToGuide();
@@ -480,37 +480,36 @@
       var this_elm = this.element;
       var this_opts = this.options;
 
-      this_opts.viewer.position.zoom = new_zoom;
-
       //trimming size before zoom-change
-      var tmp_pre_w = this_opts.viewer.position.dw; //拡大処理前のトリミング幅
-      var tmp_pre_h = this_opts.viewer.position.dh; //拡大処理前のトリミング高さ
+      var tmp_pre_w = this_opts.viewer.position.dw;
+      var tmp_pre_h = this_opts.viewer.position.dh;
 
       var tmp_w = 512;
       var tmp_h = 512;
+
       if (this_opts.viewer.orientation === 'axial') {
-        tmp_w = this_opts.viewer.voxel.x * this_opts.viewer.voxel.voxel_x / this_opts.viewer.voxel.voxel_x;
+        tmp_w = this_opts.viewer.voxel.x;
         tmp_h = this_opts.viewer.voxel.y * this_opts.viewer.voxel.voxel_y / this_opts.viewer.voxel.voxel_x;
       } else if (this_opts.viewer.orientation === 'sagittal') {
         tmp_w = this_opts.viewer.voxel.y * this_opts.viewer.voxel.voxel_y / this_opts.viewer.voxel.voxel_x;
         tmp_h = this_opts.viewer.voxel.z * this_opts.viewer.voxel.voxel_z / this_opts.viewer.voxel.voxel_x;
       } else if (this_opts.viewer.orientation === 'coronal') {
-        tmp_w = this_opts.viewer.voxel.x  * this_opts.viewer.voxel.voxel_x / this_opts.viewer.voxel.voxel_x;
+        tmp_w = this_opts.viewer.voxel.x;
         tmp_h = this_opts.viewer.voxel.z * this_opts.viewer.voxel.voxel_z / this_opts.viewer.voxel.voxel_x;
       } else {
-        tmp_w = this_opts.viewer.voxel.x * this_opts.viewer.voxel.voxel_x / this_opts.viewer.voxel.voxel_x;
+        tmp_w = this_opts.viewer.voxel.x;
         tmp_h = this_opts.viewer.voxel.y * this_opts.viewer.voxel.voxel_y / this_opts.viewer.voxel.voxel_x;
       }
 
       //trimming size after zoom-change
-      this_opts.viewer.position.dw = tmp_w * this_opts.viewer.position.zoom;
-      this_opts.viewer.position.dh = tmp_h * this_opts.viewer.position.zoom;
+      this_opts.viewer.position.dw = tmp_w * new_zoom;
+      this_opts.viewer.position.dh = tmp_h * new_zoom;
 
-      this_opts.viewer.position.dx = this_opts.viewer.position.dx - (this_opts.viewer.position.dw - tmp_pre_w) * 0.5;
-      this_opts.viewer.position.dy = this_opts.viewer.position.dy - (this_opts.viewer.position.dh - tmp_pre_h) * 0.5;
+      this_opts.viewer.position.dx = this_opts.viewer.position.dx - (new_zoom - this_opts.viewer.position.zoom) * tmp_w * 0.5;
+      this_opts.viewer.position.dy = this_opts.viewer.position.dy - (new_zoom - this_opts.viewer.position.zoom) * tmp_h * 0.5;
 
-      //display text
-      this_elm.find('.current_size').text(100 * Number(this_opts.viewer.position.zoom));
+      this_opts.viewer.position.zoom = new_zoom;
+      this_elm.find('.current_size').text(100 * Number(new_zoom));//display text
 
     },//changeZoom
 
@@ -537,9 +536,9 @@
       var tmp_cursor_x = e.clientX - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().left;
       var tmp_cursor_y = e.clientY - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().top;
 
-			//guide position (canvas pixel scale)
-			var guide_pos_x = guide_horizontal.number * position_params.dw / position_params.ow + position_params.dx;
-			var guide_pos_y = guide_vertical.number * position_params.dh / position_params.oh + position_params.dy;
+      //guide position (canvas pixel scale)
+      var guide_pos_x = guide_horizontal.number * position_params.dw / position_params.ow + position_params.dx;
+      var guide_pos_y = guide_vertical.number * position_params.dh / position_params.oh + position_params.dy;
 
       if (guide_pos_x - mouse_range < tmp_cursor_x && guide_pos_x + mouse_range > tmp_cursor_x) {
         //around cross point
@@ -851,8 +850,8 @@
         var tmp_orientation = this_opts.viewer.orientation;
         var tmp_zoom_x = this_opts.viewer.position.dw / this_opts.viewer.position.ow;
         var tmp_zoom_y = this_opts.viewer.position.dh / this_opts.viewer.position.oh;
-				var tmp_dx = this_opts.viewer.position.dx;
-				var tmp_dy = this_opts.viewer.position.dy;
+        var tmp_dx = this_opts.viewer.position.dx;
+        var tmp_dy = this_opts.viewer.position.dy;
 
         tmp_ctx.beginPath();
         for (var i = positions_array.length - 1; i >= 0; i--) {
@@ -908,7 +907,7 @@
       var position_params = this_opts.viewer.position;
       var tmp_ctx = this_elm.find('.canvas_main_elm').get(0).getContext('2d');
       tmp_ctx.strokeStyle = '#' + rotate_params.color;
-      tmp_ctx.fillStyle = '#' + rotate_params.color	;
+      tmp_ctx.fillStyle = '#' + rotate_params.color  ;
 
       if(typeof rotate_params.visible === 'undefined' || rotate_params.visible !== true) {
         return;
@@ -1412,68 +1411,64 @@
 
       }
 
-      //ウインドウレベル・幅関係のイベント設置
+      //window info
       if (this_opts.viewer.elements.window.panel === true) {
 
         var the_win_controller = this_elm.find('.image_window_controller');
-        //パネルの表示・非表示操作
+        //panel control
         the_win_controller.click(function (e) {
           e.stopPropagation();
         });
 
-        //パネルを出す
+        //show panel
         this_elm.find('.image_window_controller_wrap').find('.btn_open').click(function (e) {
           this_elm.imageViewer('changeMode', 'window');
         });
 
-        //パネルを消す
+        //hide panel
         this_elm.find('.image_window_controller_wrap').find('.btn_close').click(function (e) {
           this_elm.imageViewer('changeMode', 'pan');
         });
 
-        //ウインドウサイズ・レベル操作
         //input
         the_win_controller.find('input').change(function () {
-          windowValuesChange();
+          changeWindowInfo();
         });
 
-        //プリセット
+        //presets
         the_win_controller.find('.image_window_preset_select').change(function () {
           var tmp_value = $(this).val();
           if (tmp_value !== 'blank') {
             the_win_controller.find('.image_window_level').val(tmp_value.split(', ')[0]);
             the_win_controller.find('.image_window_width').val(tmp_value.split(', ')[1]);
-            windowValuesChange();
+            changeWindowInfo();
           }
         });
 
-        //input,selectから呼び出す共通関数
-        var windowValuesChange = function () {
+        var changeWindowInfo = function () {
 
-          //ウインドウレベル
+          //level
           var tmp_level = the_win_controller.find('.image_window_level').val();
           tmp_level = Number(tmp_level);
           if (isFinite(tmp_level) === true) {
-            //数値であれば上限値・下限値との比較をしてcontrollerを書き換える
-            //数値でないときは書き換えが走らないので操作前の値に戻る
+         	//check Max & Min
             tmp_level = Math.min(tmp_level, this_opts.viewer.window.level.maximum);
             tmp_level = Math.max(tmp_level, this_opts.viewer.window.level.minimum);
             this_opts.viewer.window.level.current = tmp_level;
           }
 
-          //ウインドウサイズ
+          //width
           var tmp_width = the_win_controller.find('.image_window_width').val();
           tmp_width = Number(tmp_width);
           if (isFinite(tmp_width) === true) {
-            //数値であれば上限値・下限値との比較
-            //数値でないときは書き換えが走らないので操作前の値に戻る
+            //check Max & Min
             tmp_width = Math.min(tmp_width, this_opts.viewer.window.level.maximum);
             tmp_width = Math.max(tmp_width, this_opts.viewer.window.level.minimum);
             this_opts.viewer.window.width.current = tmp_width;
           }
           this_obj._changeImageSrc();
-        }//windowValuesChange
-      }//ウインドウレベル・幅関係のイベント設置ここまで
+        }//changeWindowInfo
+      }//window info
 
 
       //ズーム機能
@@ -1534,10 +1529,7 @@
 
 
 
-
-
     insertLabelData: function (insert_obj) {
-
       //add label data written before page load
       var this_obj = this;
       var this_elm = this.element;
@@ -1560,13 +1552,9 @@
       var tmp_w = this_elm.find('.series_image_elm').width();
       var tmp_h = this_elm.find('.series_image_elm').height();
 
-      if(this_opts.viewer.orientation === 'oblique'){
-        return;
-      }
-
-      //right side
+      //right
       if (tmp_w > this_opts.viewer.position.dw + this_opts.viewer.position.dx) {
-        this_opts.viewer.position.dx = tmp_w - this_opts.viewer.position.dw ;
+        this_opts.viewer.position.dx = tmp_w - this_opts.viewer.position.dw;
       }
 
       //bottom
@@ -1574,7 +1562,7 @@
         this_opts.viewer.position.dy = tmp_h - this_opts.viewer.position.dh;
       }
 
-      //left side
+      //left
       if(this_opts.viewer.position.dx > 0 ){
         this_opts.viewer.position.dx = 0;
       }
@@ -1602,8 +1590,12 @@
       this_opts._tmpInfo.cursor.touch_flg = 1;
 
       //check the cursor is on Rotate-hadle or Guide-Line
-      var target_guide_direction = this_obj._CheckGuideOver(e);
       var is_on_rotate  = this_obj._CheckRotateOver(e);
+
+      var target_guide_direction = '';
+      if (this_opts.viewer.orientation !== 'oblique') {
+        target_guide_direction = this_obj._CheckGuideOver(e);
+      }
 
       if (this_opts.mode === 'rotate' && is_on_rotate === 1) {
         this_opts._tmpInfo.mode_backup = this_opts.mode;
@@ -1638,8 +1630,6 @@
 
 
 
-
-
     _mousedownFuncPan : function (e) {
       var this_obj = this;
       var this_elm = this.element;
@@ -1653,8 +1643,6 @@
       this_opts._tmpInfo.elementParam.start.Y = this_opts.viewer.position.dy;
 
     },//_mousedownFuncPan
-
-
 
 
 
@@ -1684,21 +1672,19 @@
 
          this_opts._tmpInfo.label = [];
        }else{
-         //通常のペン挙動
-          //ラベルを描くcanvas要素のオブジェクト
+          //normal pen drawing
           var tmp_ctx = this_elm.find('.canvas_main_elm').get(0).getContext('2d');
 
           //mouse position (on canvas , image original scale)
-					var tmp_x = (e.clientX - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().left - this_opts.viewer.position.dx) * this_opts.viewer.position.ow / this_opts.viewer.position.dw;
-					var tmp_y = (e.clientY - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().top - this_opts.viewer.position.dy) * this_opts.viewer.position.oh / this_opts.viewer.position.dh;
+          var tmp_x = (e.clientX - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().left - this_opts.viewer.position.dx) * this_opts.viewer.position.ow / this_opts.viewer.position.dw;
+          var tmp_y = (e.clientY - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().top - this_opts.viewer.position.dy) * this_opts.viewer.position.oh / this_opts.viewer.position.dh;
 
           this_opts._tmpInfo.cursor.current.X = Math.floor(tmp_x);
           this_opts._tmpInfo.cursor.current.Y = Math.floor(tmp_y);
 
-         //太さを加味
           var tmp_array = this_obj._applyBoldness([[this_opts._tmpInfo.cursor.current.X, this_opts._tmpInfo.cursor.current.Y]]);
 
-          //ボクセル座標に変換
+          //exchange canvas positions data to 3D data.
           this_opts._tmpInfo.label = this_obj._exchangePositionCtoV(tmp_array);
           var the_active_series = this_obj.getSeriesObjectById(this_opts.viewer.activeSeriesId);
           this_opts.container.updateVoxel(
@@ -1781,8 +1767,8 @@
        if (typeof the_active_series.label !== 'undefined' &&  the_active_series.label.length > 0) {
 
          //cursor position (in image original scale)
-				var tmp_x = (e.clientX - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().left - this_opts.viewer.position.dx) * this_opts.viewer.position.ow / this_opts.viewer.position.dw;
-				var tmp_y = (e.clientY - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().top - this_opts.viewer.position.dy) * this_opts.viewer.position.oh / this_opts.viewer.position.dh;
+        var tmp_x = (e.clientX - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().left - this_opts.viewer.position.dx) * this_opts.viewer.position.ow / this_opts.viewer.position.dw;
+        var tmp_y = (e.clientY - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().top - this_opts.viewer.position.dy) * this_opts.viewer.position.oh / this_opts.viewer.position.dh;
 
          tmp_x = Math.floor(tmp_x);
          tmp_y = Math.floor(tmp_y);
@@ -1871,10 +1857,12 @@
           } else {
             this_elm.removeClass('mode_rotate_active');
           }
-
         }
 
-        var target_guide_direction = this_obj._CheckGuideOver(e);
+        var target_guide_direction = '';
+        if (this_opts.viewer.orientation !== 'oblique') {
+          target_guide_direction = this_obj._CheckGuideOver(e);
+        }
         if(target_guide_direction !== ''){
           this_opts._tmpInfo.mode_backup = this_opts.mode + '';
           this_elm.removeClass(function (index, css) {
@@ -1904,11 +1892,8 @@
       var this_opts = this.options;
       var tmp_position_params = this_opts.viewer.position;
 
-      tmp_x = this_opts._tmpInfo.elementParam.start.X + e.clientX - this_opts._tmpInfo.cursor.start.X;
-      tmp_y = this_opts._tmpInfo.elementParam.start.Y + e.clientY - this_opts._tmpInfo.cursor.start.Y;
-
-      tmp_position_params.dx = Math.round(tmp_x);
-      tmp_position_params.dy = Math.round(tmp_y);
+      tmp_position_params.dx = Math.round(this_opts._tmpInfo.elementParam.start.X + e.clientX - this_opts._tmpInfo.cursor.start.X);
+      tmp_position_params.dy = Math.round(this_opts._tmpInfo.elementParam.start.Y + e.clientY - this_opts._tmpInfo.cursor.start.Y);
 
       if(this_opts.viewer.orientation !== 'oblique'){
         //this_obj._limitImagePosition();
@@ -2016,11 +2001,11 @@
       var this_elm = this.element;
       var this_opts = this.options;
 
-			//calculate goal point
+      //calculate goal point
       this_opts.viewer.measure.goal_x = e.clientX - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().left;
       this_opts.viewer.measure.goal_y = e.clientY - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().top;
 
-			//drawing measure objects
+      //drawing measure objects
       this_obj.syncVoxel();
       this_elm.imageViewer('drawMeasure');
 
@@ -2093,13 +2078,12 @@
 
      }
 
-      this_obj.syncVoxel();
-      this_elm.trigger('onGuideChange',[
-				this_opts.viewer.orientation,
-				guide_horizontal.number,
-				guide_vertical.number
-			]);
-
+     this_obj.syncVoxel();
+     this_elm.trigger('onGuideChange',[
+        this_opts.viewer.orientation,
+        guide_horizontal.number,
+        guide_vertical.number
+      ]);
     },//_mousemoveFuncGuide
 
 
@@ -2310,7 +2294,7 @@
       var tmp_num = 512;
 
       if (this_opts.viewer.orientation === 'axial') {
-        tmp_w = this_opts.viewer.voxel.x * this_opts.viewer.voxel.voxel_x / this_opts.viewer.voxel.voxel_x;
+        tmp_w = this_opts.viewer.voxel.x;
         tmp_h = this_opts.viewer.voxel.y * this_opts.viewer.voxel.voxel_y / this_opts.viewer.voxel.voxel_x;
         tmp_ow = this_opts.viewer.voxel.x;
         tmp_oh = this_opts.viewer.voxel.y;
@@ -2322,7 +2306,7 @@
         tmp_oh = this_opts.viewer.voxel.z;
         tmp_num = this_opts.viewer.voxel.x - 1;
       } else if (this_opts.viewer.orientation === 'coronal') {
-        tmp_w = this_opts.viewer.voxel.x * this_opts.viewer.voxel.voxel_x / this_opts.viewer.voxel.voxel_x;
+        tmp_w = this_opts.viewer.voxel.x;
         tmp_h = this_opts.viewer.voxel.z * this_opts.viewer.voxel.voxel_z / this_opts.viewer.voxel.voxel_x;
         tmp_ow = this_opts.viewer.voxel.x;
         tmp_oh = this_opts.viewer.voxel.z;
@@ -2345,8 +2329,8 @@
         height: this_opts.viewer.position.dh + 'px'
       });
 
-			//set slider limit
-			if (this_opts.viewer.number.current > tmp_num) {
+      //set slider limit
+      if (this_opts.viewer.number.current > tmp_num) {
         this_opts.viewer.number.current = tmp_num;
       }
 

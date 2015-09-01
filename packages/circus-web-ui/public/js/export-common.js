@@ -63,12 +63,11 @@ var exportRun = function (export_url, validate_flag) {
 		async:true,
 		xhr: myXhr,
 		success: function (data) {
-			downloadVolume(data.response);
 			$('#task-watcher').taskWatcher(data.taskID).on('finish', function() {
 				closeDuringExportDialog();
+				downloadVolume(data.response);
 				busy(false);
 			});
-
 		},
 		error: function (data) {
 			closeDuringExportDialog();

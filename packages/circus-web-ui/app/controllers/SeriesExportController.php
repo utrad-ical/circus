@@ -11,8 +11,6 @@ class SeriesExportController extends BaseController {
 
 		//POST data acquisition
 		$inputs = Input::all();
-		Log::debug('Input Values');
-		Log::debug($inputs);
 		try {
 			//validate check
 			$this->validate($inputs);
@@ -29,10 +27,7 @@ class SeriesExportController extends BaseController {
 
 			//command execution
 			$cmd_str = ' series '.$inputs['seriesUID']. ' '.$tmp_dir_path. ' --compress';
-			Log::debug('command params::');
-			Log::debug($cmd_str);
 
-			//Artisan::call('image:export-volume',$cmd_ary);
 			$task = Task::startNewTask("image:export-volume " .$cmd_str);
 			if (!$task) {
 				throw new Exception('Failed to invoke export process.');
@@ -41,9 +36,6 @@ class SeriesExportController extends BaseController {
 			//download zip file
 			$zip_file_name = $inputs['seriesUID'].'.zip';
 			$zip_file_path = $tmp_dir_path.'/'.$zip_file_name;
-
-			if (!file_exists($zip_file_path))
-				throw new Exception('failed create zip file .');
 
 			//ダウンロードに必要な情報の設定
 			$res = array(

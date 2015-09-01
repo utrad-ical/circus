@@ -443,11 +443,7 @@
       this_opts.viewer.window = $.extend(true,this_opts.viewer.window,tmp_the_series.window);
 
       this_elm.find('.image_window_level').val(this_opts.viewer.window.level.current);
-      this_elm.find('.label_level_min').val(this_opts.viewer.window.level.minimum);
-      this_elm.find('.label_level_max').val(this_opts.viewer.window.level.maximum);
       this_elm.find('.image_window_width').val(this_opts.viewer.window.width.current);
-      this_elm.find('.label_width_min').val(this_opts.viewer.window.width.minimum);
-      this_elm.find('.label_width_max').val(this_opts.viewer.window.width.maximum);
 
       var tmp_preset_array = this_opts.viewer.window.preset;
       this_elm.find('.image_window_preset_select').empty();
@@ -628,23 +624,19 @@
 
       //window info elements
       if (this_opts.viewer.elements.window.panel === true) {
-        var tmp_elm = '<div class="image_window_controller_wrap"><p class="btn_open">L:<span  class="win_lv_label">' + this_opts.viewer.window.level.current + '</span>\
-          /  W:<span  class="win_width_label">' + this_opts.viewer.window.width.current + '</span></p>\
+        var tmp_elm = '<div class="image_window_controller_wrap"><p class="btn_open">L:<span class="win_lv_label">' + this_opts.viewer.window.level.current + '</span>\
+          /  W:<span class="win_width_label">' + this_opts.viewer.window.width.current + '</span></p>\
           <p class="btn_close"></p><ul class="image_window_controller">';
 
-        //レベル
-        tmp_elm = tmp_elm + '<li class="window_level_wrap"><span  class="image_window_controller_label">window  level</span>\
-          <input  type="text"  class="image_window_level"  value="' + this_opts.viewer.window.level.current + '">\
-          <span  class="label_level_min">' + this_opts.viewer.window.level.minimum + '</span>  ～  \
-          <span  class="label_level_max">' + this_opts.viewer.window.level.maximum + '</span></li>';
+        //level
+        tmp_elm = tmp_elm + '<li class="window_level_wrap"><span class="image_window_controller_label">window level</span>\
+          <input type="text"  class="image_window_level" value="' + this_opts.viewer.window.level.current + '"></li>';
 
-        //幅
-        tmp_elm = tmp_elm + '<li class="window_width_wrap"><span  class="image_window_controller_label">window  width</span>\
-          <input type="text" class="image_window_width"  value="' + this_opts.viewer.window.width.current + '">\
-          <span  class="label_width_min">' + this_opts.viewer.window.width.minimum + '</span>  -  \
-          <span  class="label_width_max">' + this_opts.viewer.window.width.maximum + '</span></li>';
+        //width
+        tmp_elm = tmp_elm + '<li class="window_width_wrap"><span class="image_window_controller_label">window width</span>\
+          <input type="text" class="image_window_width" value="' + this_opts.viewer.window.width.current + '"></li>';
 
-        //プリセット
+        //presets
         tmp_elm = tmp_elm + '<li class="window_preset_wrap hidden"><select  class="image_window_preset_select"></select></li>';
 
         tmp_elm = tmp_elm + '</ul></div>';
@@ -2283,11 +2275,7 @@
 
       if (this_opts.viewer.elements.window.panel === true) {
         this_elm.find('.image_window_level').val(this_opts.viewer.window.level.current);
-        this_elm.find('.label_level_min').val(this_opts.viewer.window.level.minimum);
-        this_elm.find('.label_level_max').val(this_opts.viewer.window.level.maximum);
         this_elm.find('.image_window_width').val(this_opts.viewer.window.width.current);
-        this_elm.find('.label_width_min').val(this_opts.viewer.window.width.minimum);
-        this_elm.find('.label_width_max').val(this_opts.viewer.window.width.maximum);
         this_elm.find('.image_window_preset_select').empty();
 
         var tmp_preset_array = this_opts.viewer.window.preset;

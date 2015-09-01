@@ -40,7 +40,7 @@
 
 	$(function() {
 		// Initialization parameter
-		if (typeof keys != 'undefined') {
+		if (typeof keys !== "undefined") {
 			filter = $('#search_condition')
 			.filtereditor({keys: keys})
 			.on('filterchange', function () {
@@ -231,11 +231,13 @@
 							$('.export_select_tags').empty();
 							var search_parent = $('.search_select_tags');
 							var export_parent = $('.export_select_tags');
-							$.each(res.tags, function(key, val) {
-								var tag_opt = '<option value="'+key+'">'+val["name"]+'</option>';
-								search_parent.append(tag_opt);
-								export_parent.append(tag_opt);
-							});
+							if (res.tags) {
+								$.each(res.tags, function(key, val) {
+									var tag_opt = '<option value="'+key+'">'+val["name"]+'</option>';
+									search_parent.append(tag_opt);
+									export_parent.append(tag_opt);
+								});
+							}
 							refreshMultiTags(false);
 							$('.tags_message').empty();
 						} else {

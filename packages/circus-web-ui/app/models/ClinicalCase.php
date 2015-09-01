@@ -251,9 +251,9 @@ class ClinicalCase extends BaseModel {
 	/**
 	 * ケース検索
 	 * @param Array $inputs 入力値
-	 * @param integer $preset_id 保存検索番号
 	 */
-	public static function searchCase($search_data, $preset_id = false) {
+	public static function searchCase($search_data)
+	{
 		$result = array();
 		$search_flg = false;
 		$result['project_list'] = Auth::user()->listAccessibleProjects(Project::AUTH_TYPE_READ, true);
@@ -286,7 +286,8 @@ class ClinicalCase extends BaseModel {
 		return $result;
 	}
 
-	public static function filterPersonalView(&$cases) {
+	public static function filterPersonalView(&$cases)
+	{
 		//プロジェクトの個人情報権限
 		$projectPersonal = Auth::user()->listAccessibleProjects(Project::AUTH_TYPE_VIEW_PERSONAL_INFO);
 		//グループの個人情報権限

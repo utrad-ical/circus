@@ -62,11 +62,10 @@ class Exporter
 					$matrix['width'] * $matrix['height'] * $matrix['depth']);
 			}
 
-			$label_file_name = $label['path'] . "/" . $label['labelID'] . ".gz";
 			$voi_slice_size = $label['h'] * $label['w'];
 
-			if (($zp = gzopen($label_file_name, 'rb')) == false) {
-				throw new \Exception("Failed to load label data ($label_file_name)");
+			if (($zp = gzopen($label['path'], 'rb')) == false) {
+				throw new \Exception("Failed to load label data ($label[path])");
 			}
 
 			for ($k = 0; $k < $label['d']; $k++) {

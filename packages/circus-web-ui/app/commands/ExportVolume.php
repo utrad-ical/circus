@@ -146,9 +146,9 @@ class ExportVolume extends TaskCommand {
 				);
 
 				foreach ($map_data as $label_index => $voxel_value) {
-					$ld = Label::find($series_data['labels'][$label_index]['id'])
-						->getAttributes();
-					$ld['path'] = Storage::find($ld['storageID'])->getAttribute('path');
+					$label = Label::find($series_data['labels'][$label_index]['id']);
+					$ld = $label->getAttributes();
+					$ld['path'] =  $label->labelPath();
 					$ld['voxel_value'] = $voxel_value;
 					$label_info[] = $ld;
 					$label_attributes[$voxel_value] = $series_data['labels'][$label_index]['attributes'];

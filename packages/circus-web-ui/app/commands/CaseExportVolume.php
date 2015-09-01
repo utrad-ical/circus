@@ -178,7 +178,6 @@ class CaseExportVolume extends TaskCommand {
 			if (!$label_data)
 				throw new Exception('labelID ['.$label['id'].'] not found. ');
 
-			$storage_id = $label_data->storageID;
 			$this->excludeUnnecessaryItems($label_data, self::EXPORT_TARGET_LABEL);
 
 			$dir = $outputPath. "/cases/".$caseId."/labels/".$label['id'];
@@ -191,13 +190,8 @@ class CaseExportVolume extends TaskCommand {
 			$this->updateTaskProgress($counter, 0, "Exporting in progress. $counter files are processed.");
 			$counter++;
 
-			//Label file
-			$storage_info = Storage::find($storage_id);
-			$storage_path = $storage_info->path;
-
-			$load_path = $storage_path."/".$label['id'].'.gz';
-
-			copy($load_path, $dir."/voxcels.gz");
+			// Copy label voxel file
+			copy($label_data->labelPath(), $dir . '/voxels.gz');
 			$this->updateTaskProgress($counter, 0, "Exporting in progress. $counter files are processed.");
 			$counter++;
 		}

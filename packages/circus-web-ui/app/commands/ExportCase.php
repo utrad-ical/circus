@@ -3,13 +3,13 @@
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputArgument;
 
-class CaseExportVolume extends TaskCommand {
+class ExportCase extends TaskCommand {
 	/**
 	 * The console command name.
 	 *
 	 * @var string
 	 */
-	protected $name = 'case:export-volume';
+	protected $name = 'case:export';
 
 	/**
 	 * The console command description.
@@ -178,6 +178,8 @@ class CaseExportVolume extends TaskCommand {
 			if (!$label_data)
 				throw new Exception('labelID ['.$label['id'].'] not found. ');
 
+			$labelPath = $label_data->labelPath();
+
 			$this->excludeUnnecessaryItems($label_data, self::EXPORT_TARGET_LABEL);
 
 			$dir = $outputPath. "/cases/".$caseId."/labels/".$label['id'];
@@ -191,7 +193,7 @@ class CaseExportVolume extends TaskCommand {
 			$counter++;
 
 			// Copy label voxel file
-			copy($label_data->labelPath(), $dir . '/voxels.gz');
+			copy($labelPath, $dir . '/voxels.gz');
 			$this->updateTaskProgress($counter, 0, "Exporting in progress. $counter files are processed.");
 			$counter++;
 		}

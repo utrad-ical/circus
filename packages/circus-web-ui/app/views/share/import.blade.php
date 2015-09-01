@@ -14,7 +14,7 @@ Import Data
 @section('content')
 <div class="search_form_wrap mar_b_20">
 	<h2 class="con_ttl">Import</h2>
-	{{Form::open(array('url' => asset('share/register'), 'method' => 'post', 'files' => true))}}
+	{{Form::open(array('url' => asset('share/register'), 'method' => 'post', 'files' => true, 'id' => 'frm_import'))}}
 		<table class="common_table">
 			<tr>
 				<th>Import Data Source</th>
@@ -112,12 +112,92 @@ var myXhr = function() {
 	return xhr;
 }
 $(function() {
+	var xhr;
 	var tmpfile = document.getElementById('files');
+
+	var deleteTask = function(taskID) {
+		$.ajax({
+			url:"{{{asset('delete/task')}}}"+"/"+taskID,
+			dataType: 'json',
+			method:'get',
+			error:function(){
+				abortConnection('I failed to communicate.');
+			},
+			success: function(){
+				console.log('success delete task '+taskID);
+			}
+		});
+	}
+	var getProjectTags = function(projectID) {
+		$.ajax({
+			url:"{{{asset('api/project')}}}"+"/"+projectID,
+			dataType: 'json',
+			cache:false,
+			async:true,
+			error: function(){
+				errorConnection('I failed to communicate.');
+			},
+			success: function(res, status, xhr2){
+				if (xhr2.status !== 200) {
+					errorConnection(res.message);
+					return false;
+				}
+				if (!res || !res.tags) {
+					errorConnection('プロジェクトに紐づくタグが設定されていません。');
+					return false;
+				}
+				$('.import_select_tags').empty();
+				var import_tag_parent = $('.import_select_tags');
+				$.each(res.tags, function(key, val) {
+					var tag_opt = '<option value="'+key+'">'+val["name"]+'</option>';
+					import_tag_parent.append(tag_opt);
+				});
+				refreshMultiTags(false);
+				createImportOptionDialog();
+			}
+		});
+	}
+	var abortConnection = function() {
+		if (arguments[0])
+			alert(arguments[0]);
+		xhr.abort();
+	}
+	var errorConnection = function(message) {
+		$('.upload_btn').removeClass('disabled');
+		abortConnection(message);
+	}
 	$('.upload_btn').click(function(){
+		if($('.upload_btn').hasClass('disabled') == false){
+			importRun();
+		}
+	});
+	var setTagOption = function(taskID) {
+		xhr = $.ajax({
+			url:"{{{asset('task')}}}"+"/"+taskID,
+			method: 'get',
+			dataType: 'json',
+			cache:false,
+			async:true,
+			error: function(){
+				errorConnection('I failed to communicate.');
+			},
+			success: function(res){
+				deleteTask(res.taskID);
+				if (!res.logs || res.logs[0]['result'] === false) {
+					errorConnection('タスクログ情報の取得が失敗しました。');
+				} else {
+					getProjectTags(res.logs[0]['projectID']);
+					abortConnection();
+				}
+			}
+		});
+	}
+	var importRun = function() {
+		$('.upload_btn').addClass('disabled');
 		//Uploadボタンを押下されたら直前の情報は不要なため、初期化する
 		taskData = Array();
 
-		var form_data = $(this).closest('form').serializeArray();
+		var form_data = $('#frm_import').closest('form').serializeArray();
 		var fd = new FormData();
 		fd.append("import_file", tmpfile.files[0]);
 		for(var i = 0; i < form_data.length; i++) {
@@ -125,8 +205,8 @@ $(function() {
 		}
 
 		busy(true);
-	    var xhr = $.ajax({
-	    	url:  $(this).closest('form').attr('action'),
+	    xhr = $.ajax({
+	    	url:  $('#frm_import').closest('form').attr('action'),
 			type: "post",
 			data: fd,
 			dataType: 'json',
@@ -138,69 +218,17 @@ $(function() {
 	        success: function (res) {
 	            $('#task-watcher').taskWatcher(res.taskID).on('finish', function() {
 		            busy(false);
-		            $.ajax({
-						url:"{{{asset('task')}}}"+"/"+res.taskID,
-						method: 'get',
-						dataType: 'json',
-						cache:false,
-						async:true,
-						error: function(){
-							alert('I failed to communicate.');
-						},
-						success: function(res2){
-							taskData = res2;
-							//ここまでくればタスク情報は不要になるので使用したtaskIDを削除する
-							$.ajax({
-								url:"{{{asset('delete/task')}}}"+"/"+taskData.taskID,
-								dataType: 'json',
-								method:'get',
-								error:function(){
-									alert('I failed to communicate.');
-								},
-								success: function(){
-									console.log('success delete task'+taskData.taskID);
-								}
-							});
-							if (taskData.logs[0]['result'] === false) {
-								alert(res.logs['errorMsg']);
-								return false;
-							}
-							var projectID = taskData.logs[0]['projectID'];
-							$.ajax({
-								url:"{{{asset('api/project')}}}"+"/"+projectID,
-								dataType: 'json',
-								cache:false,
-								async:true,
-								error: function(){
-									alert('I failed to communicate.');
-								},
-								success: function(res3, status, xhr){
-									if (xhr.status === 200) {
-										$('.import_select_tags').empty();
-										var import_tag_parent = $('.import_select_tags');
-										$.each(res3.tags, function(key, val) {
-											var tag_opt = '<option value="'+key+'">'+val["name"]+'</option>';
-											import_tag_parent.append(tag_opt);
-										});
-										refreshMultiTags(false);
-										$('.tags_message').empty();
-									} else {
-										$('.tags_message').append(res.message);
-									}
-								}
-							});
-							createImportOptionDialog();
-						}
-					});
+					abortConnection();
+					setTagOption(res.taskID);
 	            });
 	        },
             error: function (data) {
-                alert(data.responseJSON.errorMessage);
+                errorConnection(data.responseJSON.errorMessage);
                 busy(false);
             }
 	    });
 	    return false;
-	});
+	}
 
 	$('#btn_add_tag').click(function(){
 		var form_data = $(this).closest('form').serializeArray();

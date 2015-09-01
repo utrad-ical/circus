@@ -69,7 +69,7 @@ class ShareImportController extends BaseController
 			//delete trash files
 			CommonHelper::deleteOlderTemporaryFiles(storage_path('cache'), true, '-1 day');
 
-			$task = Task::startNewTask("case:import-volume " . $cmd_str);
+			$task = Task::startNewTask("case:import " . $cmd_str);
 			if (!$task) {
 				throw new Exception('Failed to invoke export process.');
 			}

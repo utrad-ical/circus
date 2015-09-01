@@ -3,13 +3,13 @@
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputArgument;
 
-class CaseImportVolume extends TaskCommand {
+class ImportCase extends TaskCommand {
 	/**
 	 * The console command name.
 	 *
 	 * @var string
 	 */
-	protected $name = 'case:import-volume';
+	protected $name = 'case:import';
 
 	/**
 	 * The console command description.

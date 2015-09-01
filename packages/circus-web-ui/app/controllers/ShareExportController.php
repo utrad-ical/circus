@@ -44,7 +44,7 @@ class ShareExportController extends BaseController
 			// Delete old transfer files
 			CommonHelper::deleteOlderTemporaryFiles(storage_path('transfer'), true, '-2 day');
 
-			$task = Task::startNewTask("case:export-volume " . $cmd_str);
+			$task = Task::startNewTask("case:export " . $cmd_str);
 			if (!$task) {
 				throw new Exception('Failed to invoke export process.');
 			}

@@ -9,6 +9,10 @@ class LoginController extends BaseController
 	 */
 	public function getIndex()
 	{
+		//Redirected to the home screen if already logged in
+		if (Auth::check())
+			return Redirect::to('home');
+
 		return View::make('login');
 	}
 

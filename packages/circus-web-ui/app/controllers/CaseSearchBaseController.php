@@ -13,11 +13,10 @@ class CaseSearchBaseController extends BaseController {
 		try {
 			//検索条件の設定
 			$inputs = Input::all();
-			$inputs['preset_id'] = $preset_id;
-			$this->setSearchCondition($inputs);
+			$this->setSearchCondition($inputs, $preset_id);
 			$search_data = Session::get($this->_prefix.'.search');
 
-			$result = ClinicalCase::searchCase($search_data, $preset_id);
+			$result = ClinicalCase::searchCase($search_data);
 			$result['prefix'] = $this->_prefix;
 			$result['export_mode'] = $this->_export_mode;
 
@@ -42,15 +41,15 @@ class CaseSearchBaseController extends BaseController {
 	/**
 	 * Case Search Results(Ajax)
 	 */
-	public function search_ajax() {
+	public function search_ajax()
+	{
 		try {
-			$this->setSearchCondition(Input::all());
+			$this->setSearchCondition(Input::all(), false);
 			$search_data = Session::get($this->_prefix.'.search');
 			$result = ClinicalCase::searchCase($search_data);
 
 			$result['prefix'] = $this->_prefix;
 			$result['export_mode'] = $this->_export_mode;
-
 			if ($this->_export_mode) {
 				$target = array();
 				if (isset($_COOKIE["exportCookie"]) && $_COOKIE["exportCookie"] && !$this->_cookie_delete) {
@@ -70,7 +69,8 @@ class CaseSearchBaseController extends BaseController {
 	/**
 	 * Search conditions save(Ajax)
 	 */
-	public function save_search() {
+	public function save_search()
+	{
 		//Input value acquisition
 		$inputs = Input::all();
 
@@ -104,8 +104,9 @@ class CaseSearchBaseController extends BaseController {
 	 * ケース検索条件設定
 	 * @param Array $inputs 入力値
 	 */
-	private function setSearchCondition($inputs) {
-		if (array_key_exists('btnReset', $inputs) !== false || count($inputs) === 1) {
+	private function setSearchCondition($inputs , $preset_id)
+	{
+		if (array_key_exists('btnReset', $inputs) !== false || (!$inputs && $preset_id === false)) {
 			Session::forget($this->_prefix.'.search');
 			$this->deleteCookie();
 		//Search button is pressed during
@@ -119,9 +120,9 @@ class CaseSearchBaseController extends BaseController {
 			$tmp = Session::get($this->_prefix.'.search');
 			$tmp['perPage'] = $inputs['page'];
 			Session::put($this->_prefix.'.search', $tmp);
-		} else if ($inputs['preset_id'] !== false) {
+		} else if ($preset_id !== false) {
 			$presets = Auth::user()->preferences['caseSearchPresets'];
-			$detail_search = $presets[$inputs['preset_id']];
+			$detail_search = $presets[$preset_id];
 			$detail_search['disp'] = Config::get('const.page_display');
 			$detail_search['sort'] = 'updateTime';
 			$detail_search['order_by'] = 'desc';

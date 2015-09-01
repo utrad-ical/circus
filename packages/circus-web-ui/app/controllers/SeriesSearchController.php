@@ -24,14 +24,13 @@ class SeriesSearchController extends BaseController {
 
 		//Input value acquisition
 		$inputs = Input::all();
-		$inputs['preset_id'] = $preset_id;
 
 		// Enter 'add new series to an existing case' mode
 		if (isset($inputs['edit_case_id']))
 			Session::put('edit_case_id', $inputs['edit_case_id']);
 
 		// Parse input from HTML and save the search condition as an object
-		$this->setSearchData($inputs);
+		$this->setSearchData($inputs, $preset_id);
 		$search_data = Session::get('series.search');
 
 		//Search
@@ -53,8 +52,9 @@ class SeriesSearchController extends BaseController {
 		return View::make('series.search', $result);
 	}
 
-	protected function setSearchData($inputs) {
-		if (array_key_exists('btnReset', $inputs) !== false || count($inputs) === 1) {
+	protected function setSearchData($inputs, $preset_id)
+	{
+		if (array_key_exists('btnReset', $inputs) !== false || (!$inputs && $preset_id === false)) {
 			// "Reset" clicked, or first-time visit to the search screen
 			Session::forget('series.search');
 			Session::forget('edit_case_id');
@@ -68,9 +68,9 @@ class SeriesSearchController extends BaseController {
 			$search_data = Session::get('series.search');
 			$search_data['perPage'] = $inputs['page'];
 			Session::put('series.search', $search_data);
-		} else if ($inputs['preset_id'] !== false) {
+		} else if ($preset_id !== false) {
 			$presets = Auth::user()->preferences['seriesSearchPresets'];
-			$detail_search = $presets[$inputs['preset_id']];
+			$detail_search = $presets[$preset_id];
 			$detail_search['disp'] = Config::get('const.page_display');
 			$detail_search['sort'] = 'seriesDate';
 			$detail_search['order_by'] = 'desc';

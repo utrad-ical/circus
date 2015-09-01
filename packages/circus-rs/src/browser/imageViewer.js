@@ -490,7 +490,6 @@
       var tmp_pre_w = this_opts.viewer.position.dw; //拡大処理前のトリミング幅
       var tmp_pre_h = this_opts.viewer.position.dh; //拡大処理前のトリミング高さ
 
-
       var tmp_w = 512;
       var tmp_h = 512;
       if (this_opts.viewer.orientation === 'axial') {
@@ -802,7 +801,7 @@
       var guide_vertical =  this_obj.getGuide('vertical');
 
       var guide_start_x = (guide_horizontal.number + 0.5) * this_opts.viewer.position.dw / this_opts.viewer.position.ow + this_opts.viewer.position.dx;
-      var guide_start_y = (guide_vertical.number + 0.5) * this_opts.viewer.position.dh / this_opts.viewer.position.oh + this_opts.viewer.position.dy; 
+      var guide_start_y = (guide_vertical.number + 0.5) * this_opts.viewer.position.dh / this_opts.viewer.position.oh + this_opts.viewer.position.dy;
 
       guide_start_x = Math.floor(guide_start_x);
       guide_start_y = Math.floor(guide_start_y);
@@ -2089,17 +2088,17 @@
 
       var guide_horizontal = this_obj.getGuide('horizontal');
       var guide_vertical =  this_obj.getGuide('vertical');
-			
+
       if( direction == 'horizontal' ){
-				
+
          var tmp_cursor_x = e.clientX - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().left - this_opts.viewer.position.dx;
          guide_horizontal.number = Math.floor( tmp_cursor_x * this_opts.viewer.position.ow / this_opts.viewer.position.dw);
- 
+
       } else {
-				
+
          var tmp_cursor_y = e.clientY - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().top - this_opts.viewer.position.dy;
          guide_vertical.number = Math.floor( tmp_cursor_y * this_opts.viewer.position.oh / this_opts.viewer.position.dh);
- 
+
      }
 
       this_obj.syncVoxel();
@@ -2321,7 +2320,7 @@
       var tmp_ow = 512;
       var tmp_oh = 512;
       var tmp_num = 512;
-			
+
       if (this_opts.viewer.orientation === 'axial') {
         tmp_w = this_opts.viewer.voxel.x * this_opts.viewer.voxel.voxel_x / this_opts.viewer.voxel.voxel_x;
         tmp_h = this_opts.viewer.voxel.y * this_opts.viewer.voxel.voxel_y / this_opts.viewer.voxel.voxel_x;
@@ -2357,7 +2356,7 @@
         width: this_opts.viewer.position.dw + 'px',
         height: this_opts.viewer.position.dh + 'px'
       });
-			
+
 			//set slider limit
 			if (this_opts.viewer.number.current > tmp_num) {
         this_opts.viewer.number.current = tmp_num;

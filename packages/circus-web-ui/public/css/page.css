@@ -31,7 +31,7 @@
 .control_panel .alpha_change{width:30px; padding:0; height:26px; line-height:26px;background:rgba(0,0,0,0);}
 .control_panel .info_area{width:300px; float:left; background:#ccc; margin-right:10px;}
 
-.control_panel .add_label{cursor:pointer; text-align:center; padding:10px; background:#ddd; margin:0 5px;}
+.control_panel .add_label{cursor:pointer; text-align:center; padding:5px; background:#ddd; margin:0 5px;}
 .control_panel .add_label:hover{color:#FD3164;}
 
 #page_series_detail{width:1048px; padding:0;}

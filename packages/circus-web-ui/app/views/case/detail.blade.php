@@ -508,7 +508,7 @@ id="page_case_detail"
 @stop
 
 @section('content')
-<div class="al_l mar_b_10 w_600 fl_l">
+<div class="al_l mar_b_5 w_600 fl_l">
 	{{HTML::link(asset('case/search'), 'Back to Case Search Result', array('class' => 'common_btn', 'id' => 'btnBack'))}}
 	@if(!isset($error_msg) && $add_series_flg)
 		{{HTML::link(asset('series/search'), 'Add Series', array('class' => 'common_btn link_add_series'))}}
@@ -521,12 +521,12 @@ id="page_case_detail"
 @if (isset($error_msg))
 	<br><span class="font_red">{{$error_msg}}</span>
 @else
-	<div class="al_r mar_b_10 w_300 fl_r">
+	<div class="al_r mar_b_5 w_300 fl_r">
 		{{Form::select('revision', $revision_no_list, $revisionNo, array('class' => 'select w_180 select_revision'))}}
 		{{HTML::link(asset('case/detail#revision'), 'Revision List', array('class' => 'common_btn'))}}
 	</div>
 	<div class="clear">&nbsp;</div>
-	<table class="common_table al_l mar_b_10">
+	<table class="common_table al_l mar_b_5">
 		<colgroup>
 			<col width="10%">
 			<col width="50%">
@@ -540,37 +540,37 @@ id="page_case_detail"
 			<td>{{$case_detail->project->projectName}}</td>
 		</tr>
 	</table>
-	<div class="w_400 fl_l">
-		{{Form::open(['url' => asset('case/detail'), 'method' => 'post'])}}
-		@if ($edit_flg)
-			<button type='button' class='common_btn btn_save' name='btnSave'>
-				<span style="background:url({{asset('/img/common/ico_save.png')}}) no-repeat; width:22px; height:22px; display:inline-block; margin-bottom:-7px; margin-right:4px;"></span>
-				Save
-			</button>
-		@endif
-			<button type="button" class="common_btn btn_export">
-				Export
-			</button>
-		{{Form::close()}}
-	</div>
-	<div class="w_500 fl_r">
-	@if(Auth::user()->hasPrivilege(Group::PERSONAL_INFO_VIEW))
-		<div class="info_area">
-			<p class="pad_10">
-				{{$case_detail->patientInfoCache['patientName']}} ({{$case_detail->patientInfoCache['patientID']}})
-				<br>{{$case_detail->patientInfoCache['birthDate']}} {{CommonHelper::getSex($case_detail->patientInfoCache['sex'])}}
-			</p>
+	<div class="mar_b_5">
+		<div class="w_200 fl_l mar_r_10">
+			{{Form::open(['url' => asset('case/detail'), 'method' => 'post'])}}
+			@if ($edit_flg)
+				<button type='button' class='common_btn btn_save' name='btnSave'>
+					<span style="background:url({{asset('/img/common/ico_save.png')}}) no-repeat; width:22px; height:22px; display:inline-block; margin-bottom:-7px; margin-right:4px;"></span>
+					Save
+				</button>
+			@endif
+				<button type="button" class="common_btn btn_export">
+					Export
+				</button>
+			{{Form::close()}}
 		</div>
-	@endif
+		<div class="w_500 fl_l">
+		@if(Auth::user()->hasPrivilege(Group::PERSONAL_INFO_VIEW))
+			<p class="info_area">
+				<span class="mar_r_5">{{$case_detail->patientInfoCache['patientName']}} ({{$case_detail->patientInfoCache['patientID']}})</span>
+				<span>{{$case_detail->patientInfoCache['birthDate']}} {{CommonHelper::getSex($case_detail->patientInfoCache['sex'])}}</span>
+			</p>
+		@endif
+		</div>
+		<div class="clear">&nbsp;</div>
 	</div>
-	<div class="clear">&nbsp;</div>
 	<div class="export_area" style="display:none;">
 		<div class="pad_20">
 			@include('case.export')
 		</div>
 	</div>
 
-	<div class="error_area mar_b_10" style="display:none;">
+	<div class="error_area mar_b_5" style="display:none;">
 		<div class="pad_20">
 			<p class="error_detail">
 				Error: <br>Data of <span class="error_label_list"></span> is incorrect.
@@ -579,7 +579,7 @@ id="page_case_detail"
 		</div>
 	</div>
 
-	<div class="control_panel mar_tb_10" id="the_panel">
+	<div class="control_panel mar_tb_5" id="the_panel">
 		<div class="control_panel_inner" id="the_panel_inner">
 			<div class="info_area">
 				<div class="control_panel_inner" id="revision_attribute_wrap"></div>

@@ -305,7 +305,7 @@
         this_obj._disableImageAlias(tmp_ctx, false);
       };//changeMain
 
-      var src_url = this_obj._createImageUrl();
+      var src_url = this_obj._createImageUrl();	
 
       //check the image is in Cache.
       if(typeof this_opts._tmpInfo.imgCache[src_url] !== 'undefined'){
@@ -346,7 +346,7 @@
                   header_param.Center = xhr.getResponseHeader('X-Circus-Center');
                   this_obj.setObliqueResponse(header_param);
                 }
-                changeMain(tmp_img);
+                changeMain(tmp_img);               
                 this_opts._tmpInfo.loadFlg = 0;
                 myWindowURL.revokeObjectURL(tmp_img.src); // Clean up after yourself.
 
@@ -368,7 +368,7 @@
           xhr.responseType = 'blob';
           xhr.send(); //run the request
           this_opts._tmpInfo.loadFlg = 1;
-        }  //loadImg
+        } //loadImg
         loadImg(src_url);
       }
 
@@ -949,6 +949,7 @@
 
       var rotate_params = this_opts.viewer.rotate;
       var position_params = this_opts.viewer.position;
+      var rotate_ico_size = 32;
       var tmp_ctx = this_elm.find('.canvas_main_elm').get(0).getContext('2d');
       tmp_ctx.strokeStyle = '#' + rotate_params.color;
       tmp_ctx.fillStyle = '#' + rotate_params.color  ;
@@ -974,7 +975,22 @@
 
       //handle arrow
       tmp_ctx.beginPath();
-      tmp_ctx.arc(the_points[1][0], the_points[1][1], rotate_params.point_width, 0, Math.PI*2, false);
+      tmp_ctx.moveTo(the_points[1][0],the_points[1][1]);
+
+      tmp_ctx.lineTo(
+				the_points[1][0] + rotate_ico_size * Math.cos(rotate_params.angle),
+				the_points[1][1] - rotate_ico_size * Math.sin(rotate_params.angle)
+			);
+
+      tmp_ctx.lineTo(
+				the_points[1][0] + rotate_ico_size * 0.6 * Math.cos(Math.PI * 0.5 - rotate_params.angle),
+				the_points[1][1] + rotate_ico_size * 0.6 * Math.sin(Math.PI * 0.5 - rotate_params.angle)
+			);
+
+      tmp_ctx.lineTo(the_points[1][0],the_points[1][1]);
+			
+			
+    //  tmp_ctx.arc(the_points[1][0], the_points[1][1], rotate_params.point_width, 0, Math.PI*2, false);
       tmp_ctx.fill();
       tmp_ctx.closePath();
 

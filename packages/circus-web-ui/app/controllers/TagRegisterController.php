@@ -1,88 +1,33 @@
 <?php
+
 /**
- * タグ登録クラス
+ * Tag register class.
  */
-class TagRegisterController extends BaseController {
-	function save_tags() {
-		try {
-			$inputs = Input::all();
-			$errors = $this->validateSaveTags($inputs);
-
-			if (count($errors) > 0)
-				throw new Exception(implode("\n", $errors));
-
-			if (is_array($inputs['caseID'])) {
-				foreach ($inputs['caseID'] as $caseID) {
-					$this->saveTags($caseID, $inputs['tags']);
-				}
-			} else {
-				$this->saveTags($inputs['caseID'], $inputs['tags']);
-			}
-			return $this->outputJson(true, 'Success saved tag.');
-		} catch (InvalidModelException $e) {
-			Log::debug('InvalidModelException Error');
-			Log::error($e);
-			return $this->outputJson(false, $e->getErrors());
-		} catch (Exception $e){
-			Log::debug('Exception Error');
-			Log::error($e);
-			return $this->outputJson(false, $e->getMessage());
-		}
-	}
-
-	private function saveTags($caseID, $tags)
+class TagRegisterController extends ApiBaseController
+{
+	function save_tags()
 	{
-		$case_obj = ClinicalCase::find($caseID);
-		$case_obj->tags = json_decode($tags, true);
-		$case_obj->save();
-	}
+		$inputs = Input::all();
 
-	/**
-	 * 登録結果をJson出力する
-	 * @param Boolean $result 登録結果
-	 * @param String $msg メッセージ
-	 */
-	function outputJson($result, $msg) {
-		$data = array('result' => $result, 'message' => $msg);
-		return Response::json($data);
-	}
+		// validation
+		$accessibleProjects = Auth::user()->listAccessibleProjects(Project::AUTH_TYPE_READ, true);
+		if (!$inputs['caseID'])
+			throw new Exception('Case ID not specified.');
+		$tags = json_decode($inputs['tags'], true);
+		if (!is_array($tags))
+			throw new Exception('Invalid tag.');
 
-	/**
-	 * Tags stored data simple Validate
-	 * @param $data Tags stored data
-	 */
-	function validateSaveTags($data) {
-		$error = array();
-		//Case ID check
-		if (!$data['caseID']) {
-			$error[] = 'Please set the case ID.';
-		} else if (!array_key_exists('tags', $data)) {
-			$error[] = 'Please set the tags. ';
-		} else {
-			if (is_array($data['caseID'])) {
-				foreach ($data['caseID'] as $caseID) {
-					$this->validateCase($caseID, $data['tags'], $error);
-				}
-			} else {
-				$this->validateCase($data['caseID'], $data['tags'], $error);
+		$cases = is_array($inputs['caseID']) ? $inputs['caseID'] : [$inputs['caseID']];
+
+		foreach ($cases as $caseID) {
+			$case = ClinicalCase::findOrFail($caseID);
+			if (!isset($accessibleProjects[$case->projectID])) {
+				throw new Exception('You cannot access this project.');
 			}
-
+			$case->tags = $tags;
+			$case->save();
 		}
-		return $error;
-	}
 
-	private function validateCase($caseID, $tags, &$error)
-	{
-		$tagList = json_decode($tags, true);
-		$case_data = ClinicalCase::find($caseID);
-		if (!$case_data)
-		$error[] = $caseID.'is the case ID that does not exist.';
-
-		$project_tags = $case_data->project->tags;
-		foreach ($tagList as $tag) {
-			if (array_key_exists($tag, $project_tags) === false) {
-				$error[] = 'invalid tags';
-			}
-		}
+		return $this->succeedResponse();
 	}
 }

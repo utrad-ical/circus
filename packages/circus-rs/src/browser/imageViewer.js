@@ -527,8 +527,8 @@
       var tmp_w = 512;
       var tmp_h = 512;
 
-			var pre_w = this_opts.viewer.position.dw;
-			var pre_h = this_opts.viewer.position.dh;
+      var pre_w = this_opts.viewer.position.dw;
+      var pre_h = this_opts.viewer.position.dh;
 
       if (this_opts.viewer.orientation === 'axial') {
         tmp_w = this_opts.viewer.voxel.x;
@@ -980,14 +980,14 @@
       tmp_ctx.moveTo(the_points[1][0],the_points[1][1]);
 
       tmp_ctx.lineTo(
-				the_points[1][0] + rotate_ico_size * Math.cos(rotate_params.angle),
-				the_points[1][1] - rotate_ico_size * Math.sin(rotate_params.angle)
-			);
+        the_points[1][0] + rotate_ico_size * Math.cos(rotate_params.angle),
+        the_points[1][1] - rotate_ico_size * Math.sin(rotate_params.angle)
+      );
 
       tmp_ctx.lineTo(
-				the_points[1][0] + rotate_ico_size * 0.6 * Math.cos(Math.PI * 0.5 - rotate_params.angle),
-				the_points[1][1] + rotate_ico_size * 0.6 * Math.sin(Math.PI * 0.5 - rotate_params.angle)
-			);
+        the_points[1][0] + rotate_ico_size * 0.6 * Math.cos(Math.PI * 0.5 - rotate_params.angle),
+        the_points[1][1] + rotate_ico_size * 0.6 * Math.sin(Math.PI * 0.5 - rotate_params.angle)
+      );
 
       tmp_ctx.lineTo(the_points[1][0],the_points[1][1]);
 
@@ -1358,16 +1358,13 @@
         this_obj.syncVoxel();
       })
       .bind('changeSeries', function (e, series_id) {
-        this_obj.changeSeries(series_id);//表示シリーズ変更
+        this_obj.changeSeries(series_id);
       })
       .bind('addLabelObject', function (e, series_id, label_id) {
-        this_obj.addLabelObject(series_id, label_id);//ラベル追加
+        this_obj.addLabelObject(series_id, label_id);
       })
       .bind('deleteLabelObject', function (e, series_id, label_id) {
-        this_obj.deleteLabelObject(series_id, label_id);//ラベル削除
-      })
-      .bind('setOptions', function (e, tmpSetValues) {
-        this_obj._setOptions(tmpSetValues);//オプション情報の書き換え
+        this_obj.deleteLabelObject(series_id, label_id);
       })
       .bind('drawGuide',function () {
         this_obj.drawGuide();
@@ -1404,10 +1401,8 @@
         this_obj._mouseWheelFunc(e);
       });
 
-      //枚数送り関連要素
+      //slider UI
       if (this_opts.viewer.elements.slider.active === true) {
-        //スライダー
-
         this_elm.find('.slider_elm').slider({
           value: this_opts.viewer.number.current,
           orientation: 'horizontal',
@@ -1437,7 +1432,6 @@
           }
         });
 
-        //画像No戻るボタン
         this_elm.find('.btn_prev').click(function () {
           var tmp_num = this_opts.viewer.number.current;
           tmp_num = Number(tmp_num);
@@ -1446,13 +1440,12 @@
             var tmp_disp_num = tmp_num + 1;
             this_elm.find('.disp_num').text(tmp_disp_num); //画像右上の枚数表示
           }
-          //レバー追従
+          //slider sync
           this_elm.find('.slider_elm').slider({
             value: tmp_num
           });
         });
 
-        //画像No進むボタン
         this_elm.find('.btn_next').click(function () {
           var tmp_num = this_opts.viewer.number.current;
           tmp_num = Number(tmp_num);
@@ -1461,7 +1454,7 @@
             var tmp_disp_num = tmp_num + 1;
             this_elm.find('.disp_num').text(tmp_disp_num); //画像右上の枚数表示
           }
-          //レバー追従
+          //slider sync
           this_elm.find('.slider_elm').slider({
             value: tmp_num
           });
@@ -1533,7 +1526,6 @@
             this_obj._changeImageSrc();
           }
           this_elm.trigger('onWindowInfoChange');
-
         });
 
       }//window info
@@ -1801,12 +1793,10 @@
           this_opts._tmpInfo.cursor.current.X = Math.floor(tmp_x);
           this_opts._tmpInfo.cursor.current.Y = Math.floor(tmp_y);
 
-         //太さを加味
           var tmp_array = this_obj._applyBoldness([[this_opts._tmpInfo.cursor.current.X, this_opts._tmpInfo.cursor.current.Y]]);
-
-          //ボクセル座標に変換
           this_opts._tmpInfo.label = this_obj._exchangePositionCtoV(tmp_array);
           var the_active_series = this_obj.getSeriesObjectById(this_opts.viewer.activeSeriesId);
+
           this_opts.container.updateVoxel(
             this_opts.viewer.activeSeriesId,
             the_active_series.activeLabelId,
@@ -1817,8 +1807,6 @@
           this_obj._disableImageAlias(tmp_ctx, false);
        }
     },//_mousedownFuncErase
-
-
 
 
 
@@ -1871,8 +1859,6 @@
 
 
 
-
-
     _mousedownFuncWindow: function (e) {
       var this_obj = this;
       var this_elm = this.element;
@@ -1882,7 +1868,6 @@
       this_opts._tmpInfo.elementParam.start.X = this_opts.viewer.window.width.current;
       this_opts._tmpInfo.elementParam.start.Y = this_opts.viewer.window.level.current;
     },//_mousedownFuncWindow
-
 
 
 
@@ -2032,27 +2017,27 @@
       var tmp_width = this_opts._tmpInfo.elementParam.start.X + (e.clientX - this_opts._tmpInfo.cursor.start.X) * 10;
       var tmp_level = this_opts._tmpInfo.elementParam.start.Y - (e.clientY - this_opts._tmpInfo.cursor.start.Y) * 10;
 
-      //fix the limit (window width)
-      if(this_opts.viewer.window.width.minimum > tmp_width){
+     // fix the limit (window width)
+      if (this_opts.viewer.window.width.minimum > tmp_width) {
         tmp_width = this_opts.viewer.window.width.minimum;
       }
-      if(this_opts.viewer.window.width.maximum < tmp_width){
+      if (this_opts.viewer.window.width.maximum < tmp_width) {
         tmp_width = this_opts.viewer.window.width.maximum;
       }
 
       //fix the limit (window level)
-      if(this_opts.viewer.window.level.minimum > tmp_level){
+      if (this_opts.viewer.window.level.minimum > tmp_level) {
         tmp_level = this_opts.viewer.window.level.minimum;
       }
-      if(this_opts.viewer.window.level.maximum < tmp_level){
+      if (this_opts.viewer.window.level.maximum < tmp_level) {
         tmp_level = this_opts.viewer.window.level.maximum;
       }
 
-      this_obj.changeWindowInfo(tmp_level,tmp_width);
+      this_obj.changeWindowInfo(tmp_level, tmp_width);
       this_obj._changeImageSrc();
 
       this_elm.find('.image_window_preset_select').find('option').removeAttr('selected');
-      this_elm.find('.image_window_preset_select').val('blank')
+      this_elm.find('.image_window_preset_select').val('blank');
 
     },//_mousemoveFuncWindow
 
@@ -2310,10 +2295,13 @@
       var tmp_current = this_opts.viewer.number.current;
 
       tmp_current = tmp_current - tmp_change_ammount;
-      tmp_current = Math.min(tmp_current, this_opts.viewer.number.maximum);
-      tmp_current = Math.max(tmp_current, this_opts.viewer.number.minimum);
+      if(tmp_current > this_opts.viewer.number.maximum){
+      	tmp_current =this_opts.viewer.number.maximum;
+      }
+      if(tmp_current < this_opts.viewer.number.minimum){
+      	tmp_current =this_opts.viewer.number.minimum;
+      }
       this_opts.viewer.number.current = tmp_current;
-
       this_elm.find('.slider_elm').slider({
         value: this_opts.viewer.number.current
       });
@@ -2321,37 +2309,6 @@
       this_obj.syncVoxel();
       return false;
     },//_mouseWheelFunc
-
-
-
-    _setOptions: function (tmpSetValues) {
-       var this_obj = this;
-       var this_elm = this.element;
-       var this_opts = this.options;
-       $.extend(true, this_opts, tmpSetValues);
-
-      if (this_opts.viewer.elements.window.panel === true) {
-        this_elm.find('.image_window_level').val(this_opts.viewer.window.level.current);
-        this_elm.find('.image_window_width').val(this_opts.viewer.window.width.current);
-        this_elm.find('.image_window_preset_select').empty();
-
-        var tmp_preset_array = this_opts.viewer.window.preset;
-        var tmp_elm = '<option value="blank">select setting</option>';
-        var selected_opt = '';
-        if (typeof this_opts.viewer.window.preset === 'object' && this_opts.viewer.window.preset.length > 0) {
-          for (var i = 0; i < tmp_preset_array.length; i++) {
-            if (this_opts.viewer.window.level.current === tmp_preset_array[i].level && this_opts.viewer.window.level.current === tmp_preset_array[i].level) {
-              selected_opt = tmp_preset_array[i].level + ', ' + tmp_preset_array[i].width;
-            }
-            tmp_elm = tmp_elm + '<option  value="' + tmp_preset_array[i].level + ', ' + tmp_preset_array[i].width + '">' + tmp_preset_array[i].label + '</option>';
-          }
-       }
-       this_elm.find('.image_window_preset_select').append(tmp_elm);
-       if (selected_opt !== '') {
-         this_elm.find('.image_window_preset_select').val(selected_opt);
-       }
-      }
-    }, //_setOptions
 
 
 
@@ -2396,8 +2353,7 @@
       this_elm.find('.series_image_elm,.canvas_main_elm').attr({
         width: this_opts.viewer.position.dw,
         height: this_opts.viewer.position.dh
-      })
-      .css({
+      }).css({
         width: this_opts.viewer.position.dw + 'px',
         height: this_opts.viewer.position.dh + 'px'
       });

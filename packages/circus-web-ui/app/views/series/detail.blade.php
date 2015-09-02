@@ -52,6 +52,8 @@
                         active: true,
                         panel: true
                       },
+                      guide:false,
+                      rotate:false,
                       color: {
                         control: false
                       },
@@ -76,6 +78,14 @@
                             maximum : 260, //What sheets cross section is stored
                             current : 0	//Initial display number
                         },
+												guide : {
+													lines : [
+														{show : false, number: 0, color: 'FF7F7F', name : 'axial'},
+														{show : false, number: 0, color: '7FFF7F', name : 'coronal'},
+														{show : false, number: 0, color: '7F7FFF', name : 'sagittal'}
+													]
+												},
+
                         window: {
                             level: {current : 1000, maximum : 50000, minimum : -5000},
                             width: {current : 6000, maximum : 9000, minimum : 1},

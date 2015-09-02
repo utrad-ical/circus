@@ -694,6 +694,8 @@
               grid_range : 5,
               hall_size : 0.1
             }
+						tmp_guide_info = $.extend(true, tmp_guide_info, this_viewer.guide);
+
             for (var j = tmp_guide_info.lines.length - 1; j >= 0; j--) {
               if (this_viewer.orientation === tmp_guide_info.lines[j].name) {
                 tmp_guide_info.lines.splice(j,1);
@@ -714,6 +716,7 @@
           if(typeof this_viewer.number === 'undefined'){
             this_viewer.number = {};
           }
+
 
           $('#' + this_viewer.elementId).imageViewer({
             'viewer': {

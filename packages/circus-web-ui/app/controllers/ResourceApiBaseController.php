@@ -23,11 +23,6 @@ class ResourceApiBaseController extends ApiBaseController
 		unset($item['_id']); // We don't need Mongo's internal _id
 	}
 
-	protected function succeedResponse()
-	{
-		return Response::json(['status' => 'OK']);
-	}
-
 	/**
 	 * Called when PUT/POST method is invoked, before mass-assigning the posted data to the model.
 	 * Subclasses can override this method and tweak the posted contents.

@@ -30,6 +30,11 @@ class ApiBaseController extends BaseController
 		});
 	}
 
+	protected function succeedResponse()
+	{
+		return Response::json(['status' => 'OK']);
+	}
+
 	protected function errorResponse($message, $status = 400)
 	{
 		return Response::json(['status' => 'NG', 'errors' => $message], $status); // Bad Request

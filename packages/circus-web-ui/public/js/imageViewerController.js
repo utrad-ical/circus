@@ -898,28 +898,27 @@
 
               //配下ビューアーオプション情報を書き換えて再描画を発火させる
               //まず挿入用ウインドウ情報を用意
-              var tmp_win_values = {
-                  viewer: {
-                    window: { //todo 今回ははコントローラから伝播
-                      level: {
-                        current: active_series.window.level.current,
-                        maximum: active_series.window.level.maximum,
-                        minimum: active_series.window.level.minimum
-                      },
-                      width: {
-                        current: active_series.window.width.current,
-                        maximum: active_series.window.width.maximum,
-                        minimum: active_series.window.width.minimum
-                      },
-                      preset: active_series.window.preset
-                    }
-                  }
-                }
+              var tmp_win_values = { //todo 今回ははコントローラから伝播
+									level: {
+										current: active_series.window.level.current,
+										maximum: active_series.window.level.maximum,
+										minimum: active_series.window.level.minimum
+									},
+									width: {
+										current: active_series.window.width.current,
+										maximum: active_series.window.width.maximum,
+										minimum: active_series.window.width.minimum
+									},
+									preset: active_series.window.preset
+								}
                 //ビューアーに伝播
               for (var i = 0; i < controllerInfo.viewer.length; i++) {
                 var elmId = '#' + controllerInfo.viewer[i].elementId;
-                $(elmId).trigger('setOptions', [tmp_win_values])
-                  .trigger('changeImageSrc');
+								var tmp_opts = $(elmId).imageViewer('option');
+								tmp_opts.viewer.window = $.extend(true, tmp_opts.viewer.window, tmp_win_values);
+                $(elmId).imageViewer('option',tmp_opts)
+									.imageViewer('changeWindowInfo',tmp_win_values.level.current,tmp_win_values.width.current)
+									.trigger('changeImageSrc');
               }
             } //chgWinValCtrl
         }
@@ -970,11 +969,9 @@
           //配下ビューアーのモードをまとめて変更する
           for (var h = 0; h < controllerInfo.viewer.length; h++) {
             var elmId = '#' + controllerInfo.viewer[h].elementId;
-            $(elmId).trigger('setOptions', {
-              viewer: {
-                boldness: the_boldness
-              }
-            });
+						var tmp_opts = $(elmId).imageViewer('option');
+						tmp_opts.viewer.boldness = the_boldness;
+						$(elmId).imageViewer('option',tmp_opts);
           }
         });
 

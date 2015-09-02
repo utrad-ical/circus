@@ -279,10 +279,6 @@
       var this_opts = this.options;
 
       //disp info text
-      this_elm.find('.image_window_controller_wrap').find('.win_lv_label').text(this_opts.viewer.window.level.current);
-      this_elm.find('.image_window_controller_wrap').find('.win_width_label').text(this_opts.viewer.window.width.current);
-      this_elm.find('.image_window_controller_wrap').find('.image_window_controller').find('.image_window_level').val(this_opts.viewer.window.level.current);
-      this_elm.find('.image_window_controller_wrap').find('.image_window_controller').find('.image_window_width').val(this_opts.viewer.window.width.current);
       this_elm.find('.disp_measure').removeClass('active');
 
       var changeMain = function (image_obj) {
@@ -473,6 +469,54 @@
       this_obj.setCanvasSize();
     },
 
+
+    changeWindowInfo : function (new_level,new_width) {
+      //the type of both 2 args are "Number"
+
+      var this_obj = this;
+      var this_elm = this.element;
+      var this_opts = this.options;
+
+      //level , check Max & Min
+      if(new_level > this_opts.viewer.window.level.maximum){
+        new_level = this_opts.viewer.window.level.maximum
+      }
+
+      if(new_level < this_opts.viewer.window.level.minimum){
+        new_level = this_opts.viewer.window.level.minimum
+      }
+
+      this_opts.viewer.window.level.current = new_level;
+
+      //width ,check Max & Min
+      if(new_width > this_opts.viewer.window.level.maximum){
+        new_width = this_opts.viewer.window.level.maximum;
+      }
+
+      if(new_width < this_opts.viewer.window.level.minimum){
+        new_width = this_opts.viewer.window.level.minimum;
+      }
+
+      this_opts.viewer.window.width.current = new_width;
+      var the_win_controller = this_elm.find('.image_window_controller_wrap');
+      the_win_controller.find('.win_lv_label').text(this_opts.viewer.window.level.current);
+      the_win_controller.find('.win_width_label').text(this_opts.viewer.window.width.current);
+      the_win_controller.find('.image_window_level').val(this_opts.viewer.window.level.current);
+      the_win_controller.find('.image_window_width').val(this_opts.viewer.window.width.current);
+
+      if(typeof preset_text !== 'undefined'){
+        the_win_controller.find('.image_window_preset_select').find('option').each(function(){
+          var tmp_this = $(this);
+          if(tmp_this.html() === preset_text){
+            tmp_this.attr('selected','selected');
+          }else{
+            tmp_this.removeAttr('selected');
+          }
+        });
+
+      }
+
+    },//changeWindowInfo
 
 
     changeZoom: function (new_zoom) {
@@ -1431,43 +1475,49 @@
         });
 
         //input
-        the_win_controller.find('input').change(function () {
-          changeWindowInfo();
+        this_elm.find('input').change(function () {
+          var tmp_level = this_elm.find('.image_window_level').val();
+          var tmp_width = this_elm.find('.image_window_width').val();
+
+          tmp_level = tmp_level.replace(/[０-９]/, function(s) {
+            return String.fromCharCode(s.charCodeAt(0) - 0xFEE0);
+          });
+
+          tmp_width = tmp_width.replace(/[０-９]/, function(s) {
+            return String.fromCharCode(s.charCodeAt(0) - 0xFEE0);
+          });
+
+          tmp_level = tmp_level.replace(/\D/,'');
+          tmp_width = tmp_width.replace(/\D/,'');
+
+          if(tmp_level === ''){tmp_level = 0;}
+          if(tmp_width === ''){tmp_width = 0;}
+
+          tmp_level = Number(tmp_level);
+          tmp_width = Number(tmp_width);
+
+          this_obj.changeWindowInfo(tmp_level,tmp_width);
+          this_obj._changeImageSrc();
+          this_elm.trigger('onWindowInfoChange');
         });
 
         //presets
         the_win_controller.find('.image_window_preset_select').change(function () {
           var tmp_value = $(this).val();
           if (tmp_value !== 'blank') {
-            the_win_controller.find('.image_window_level').val(tmp_value.split(', ')[0]);
-            the_win_controller.find('.image_window_width').val(tmp_value.split(', ')[1]);
-            changeWindowInfo();
+            var tmp_level = tmp_value.split(',')[0].replace(/\D/,'');
+            var tmp_width = tmp_value.split(',')[1].replace(/\D/,'');
+
+            tmp_level = Number(tmp_level);
+            tmp_width = Number(tmp_width);
+
+            this_obj.changeWindowInfo(tmp_level,tmp_width);
+            this_obj._changeImageSrc();
           }
+          this_elm.trigger('onWindowInfoChange');
+
         });
 
-        var changeWindowInfo = function () {
-
-          //level
-          var tmp_level = the_win_controller.find('.image_window_level').val();
-          tmp_level = Number(tmp_level);
-          if (isFinite(tmp_level) === true) {
-         	//check Max & Min
-            tmp_level = Math.min(tmp_level, this_opts.viewer.window.level.maximum);
-            tmp_level = Math.max(tmp_level, this_opts.viewer.window.level.minimum);
-            this_opts.viewer.window.level.current = tmp_level;
-          }
-
-          //width
-          var tmp_width = the_win_controller.find('.image_window_width').val();
-          tmp_width = Number(tmp_width);
-          if (isFinite(tmp_width) === true) {
-            //check Max & Min
-            tmp_width = Math.min(tmp_width, this_opts.viewer.window.level.maximum);
-            tmp_width = Math.max(tmp_width, this_opts.viewer.window.level.minimum);
-            this_opts.viewer.window.width.current = tmp_width;
-          }
-          this_obj._changeImageSrc();
-        }//changeWindowInfo
       }//window info
 
 
@@ -1969,28 +2019,30 @@
       var this_elm = this.element;
       var this_opts = this.options;
 
-      var tmp_x = this_opts._tmpInfo.elementParam.start.X + (e.clientX - this_opts._tmpInfo.cursor.start.X) * 10;
-      var tmp_y = this_opts._tmpInfo.elementParam.start.Y - (e.clientY - this_opts._tmpInfo.cursor.start.Y) * 10;
+      var tmp_width = this_opts._tmpInfo.elementParam.start.X + (e.clientX - this_opts._tmpInfo.cursor.start.X) * 10;
+      var tmp_level = this_opts._tmpInfo.elementParam.start.Y - (e.clientY - this_opts._tmpInfo.cursor.start.Y) * 10;
 
       //fix the limit (window width)
-      if(this_opts.viewer.window.width.minimum > tmp_x){
-        tmp_x = this_opts.viewer.window.width.minimum;
+      if(this_opts.viewer.window.width.minimum > tmp_width){
+        tmp_width = this_opts.viewer.window.width.minimum;
       }
-      if(this_opts.viewer.window.width.maximum < tmp_x){
-        tmp_x = this_opts.viewer.window.width.maximum;
+      if(this_opts.viewer.window.width.maximum < tmp_width){
+        tmp_width = this_opts.viewer.window.width.maximum;
       }
 
       //fix the limit (window level)
-      if(this_opts.viewer.window.level.minimum > tmp_y){
-        tmp_y = this_opts.viewer.window.level.minimum;
+      if(this_opts.viewer.window.level.minimum > tmp_level){
+        tmp_level = this_opts.viewer.window.level.minimum;
       }
-      if(this_opts.viewer.window.level.maximum < tmp_y){
-        tmp_y = this_opts.viewer.window.level.maximum;
+      if(this_opts.viewer.window.level.maximum < tmp_level){
+        tmp_level = this_opts.viewer.window.level.maximum;
       }
 
-      this_opts.viewer.window.width.current = Math.round(tmp_x);
-      this_opts.viewer.window.level.current = Math.round(tmp_y);
+      this_obj.changeWindowInfo(tmp_level,tmp_width);
       this_obj._changeImageSrc();
+
+      this_elm.find('.image_window_preset_select').find('option').removeAttr('selected');
+      this_elm.find('.image_window_preset_select').val('blank')
 
     },//_mousemoveFuncWindow
 
@@ -2155,6 +2207,8 @@
         this_obj._mouseupFuncGuide(e);
       } else if (this_opts.mode === 'guide_single') {
         this_obj._mouseupFuncGuideSingle(e);
+      } else if (this_opts.mode === 'window') {
+        this_obj._mouseupFuncWindow(e);
       }
     },//_mouseupFunc
 
@@ -2221,6 +2275,15 @@
       var this_elm = this.element;
       var this_opts = this.options;
       this_opts._tmpInfo.cursor.out_flg = 0;
+    },//_mouseoverFunc
+
+
+    _mouseupFuncWindow: function (e) {
+      var this_obj = this;
+      var this_elm = this.element;
+      var this_opts = this.options;
+      this_elm.trigger('onWindowInfoChange');
+
     },//_mouseoverFunc
 
 

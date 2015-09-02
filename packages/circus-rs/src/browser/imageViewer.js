@@ -305,7 +305,7 @@
         this_obj._disableImageAlias(tmp_ctx, false);
       };//changeMain
 
-      var src_url = this_obj._createImageUrl();	
+      var src_url = this_obj._createImageUrl();
 
       //check the image is in Cache.
       if(typeof this_opts._tmpInfo.imgCache[src_url] !== 'undefined'){
@@ -346,7 +346,7 @@
                   header_param.Center = xhr.getResponseHeader('X-Circus-Center');
                   this_obj.setObliqueResponse(header_param);
                 }
-                changeMain(tmp_img);               
+                changeMain(tmp_img);
                 this_opts._tmpInfo.loadFlg = 0;
                 myWindowURL.revokeObjectURL(tmp_img.src); // Clean up after yourself.
 
@@ -524,12 +524,11 @@
       var this_elm = this.element;
       var this_opts = this.options;
 
-      //trimming size before zoom-change
-      var tmp_pre_w = this_opts.viewer.position.dw;
-      var tmp_pre_h = this_opts.viewer.position.dh;
-
       var tmp_w = 512;
       var tmp_h = 512;
+
+			var pre_w = this_opts.viewer.position.dw;
+			var pre_h = this_opts.viewer.position.dh;
 
       if (this_opts.viewer.orientation === 'axial') {
         tmp_w = this_opts.viewer.voxel.x;
@@ -545,12 +544,15 @@
         tmp_h = this_opts.viewer.voxel.y * this_opts.viewer.voxel.voxel_y / this_opts.viewer.voxel.voxel_x;
       }
 
+      var elm_w = this_elm.find('.series_image_elm').width();
+      var elm_h = this_elm.find('.series_image_elm').height();
+
       //trimming size after zoom-change
       this_opts.viewer.position.dw = tmp_w * new_zoom;
       this_opts.viewer.position.dh = tmp_h * new_zoom;
 
-      this_opts.viewer.position.dx = this_opts.viewer.position.dx - (new_zoom - this_opts.viewer.position.zoom) * tmp_w * 0.5;
-      this_opts.viewer.position.dy = this_opts.viewer.position.dy - (new_zoom - this_opts.viewer.position.zoom) * tmp_h * 0.5;
+      this_opts.viewer.position.dx = elm_w * 0.5 - (new_zoom / this_opts.viewer.position.zoom) * (elm_w * 0.5 - this_opts.viewer.position.dx);
+      this_opts.viewer.position.dy = elm_h * 0.5 - (new_zoom / this_opts.viewer.position.zoom) * (elm_h * 0.5 - this_opts.viewer.position.dy);
 
       this_opts.viewer.position.zoom = new_zoom;
       this_elm.find('.current_size').text(100 * Number(new_zoom));//display text
@@ -988,8 +990,8 @@
 			);
 
       tmp_ctx.lineTo(the_points[1][0],the_points[1][1]);
-			
-			
+
+
     //  tmp_ctx.arc(the_points[1][0], the_points[1][1], rotate_params.point_width, 0, Math.PI*2, false);
       tmp_ctx.fill();
       tmp_ctx.closePath();
@@ -1576,10 +1578,6 @@
           }
           this_obj.changeZoom(new_zoom_value);
 
-          if(this_opts.viewer.orientation !== 'oblique'){
-            //this_obj._limitImagePosition();
-          }
-
           //sync some lines
           this_obj._changeImageSrc();
           this_obj.syncVoxel();
@@ -1960,10 +1958,6 @@
 
       tmp_position_params.dx = Math.round(this_opts._tmpInfo.elementParam.start.X + e.clientX - this_opts._tmpInfo.cursor.start.X);
       tmp_position_params.dy = Math.round(this_opts._tmpInfo.elementParam.start.Y + e.clientY - this_opts._tmpInfo.cursor.start.Y);
-
-      if(this_opts.viewer.orientation !== 'oblique'){
-        //this_obj._limitImagePosition();
-      }
 
       this_obj._changeImageSrc();
       this_obj.syncVoxel();

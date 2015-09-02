@@ -144,7 +144,7 @@ class ImportCase extends TaskCommand {
 
 		//ケース情報保存
 		if (!is_dir($targetDir.'/cases'))
-			throw new Exxception('ケースディレクトリがありません。');
+			throw new Exception('ケースディレクトリがありません。');
 
 		if ($caseDir = opendir($targetDir.'/cases')) {
 			while(($file = readdir($caseDir)) !== false) {
@@ -201,7 +201,7 @@ class ImportCase extends TaskCommand {
 	{
 		$path = $labelDir . '/'.$labelID;
 		$labelFile = $path.'/label.json';
-		$tgzFile = $path.'/voxcels.gz';
+		$tgzFile = $path.'/voxels.gz';
 		if (!file_exists($labelFile))
 			throw new Exception('ラベルデータがありません。');
 		if (!file_exists($tgzFile))

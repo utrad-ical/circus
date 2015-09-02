@@ -10,14 +10,14 @@ a:hover{text-decoration:none;}
 
 #wrapper{width:100%; position:relative;}
 .page_contents {min-height: 500px; margin:0 auto; text-align:left; position:relative; padding-right:20px; padding-left:20px;}
-.page_title{ border-bottom: 1px solid #d3ccc2; font-size:1.4em; margin-bottom:10px; height:40px; line-height:40px; text-align:left;}
+.page_title{ border-bottom: 1px solid #d3ccc2; font-size:1.4em; margin-bottom:5px; text-align:left;}
 .con_ttl{text-align:left; margin-bottom:5px; font-size:1.2em;}
 .submit_area{padding:10px 0; text-align:center;}
 .white_table{width:100%; margin:0 auto; border-collapse: collapse;}
 .search_form_wrap{padding:20px; background:rgba(255,255,255,0.5); color:#404040; border:2px solid #d0e6e4;}
 
 /* Navigation bar */
-#header { margin:0 auto 15px; height: 40px; position: relative; background-color: #166a5d; border-bottom: 1px solid #0e372c; line-height: 40px; z-index: 2000; color: white; }
+#header { margin:0 auto 5px; height: 40px; position: relative; background-color: #166a5d; border-bottom: 1px solid #0e372c; line-height: 40px; z-index: 2000; color: white; }
 #header img.header_logo { width: 120px; height: 30px; vertical-align: middle; margin-right: 10px; }
 #header nav { text-align: left; }
 #header #main_nav { float: left; }
@@ -81,7 +81,7 @@ ul.column_menu >li >a:hover { background-color: #d0e6e4; }
 .common_pager .pager_sort_order{width:120px; float:right; margin-left:5px;}
 
 .common_table{width:100%; margin:0 auto; border-collapse: collapse;}
-.common_table td,.common_table th{border:1px solid #999; padding:8px;}
+.common_table td,.common_table th{border:1px solid #999; padding:5px;}
 .common_table th{background-color:#eee;}
 .common_table td{ background:#fff;}
 .common_table_light{width:100%; margin:0 auto; border-collapse: collapse;}

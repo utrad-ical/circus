@@ -858,6 +858,7 @@
 
           //select
           tmp_panel_elm.find('.image_window_preset_select').change(function () {
+						
             var tmp_value = $(this).val();
             if (tmp_value !== 'blank') {
               $(this).closest('.image_window_controller').find('.image_window_level').val(tmp_value.split(',')[0]);
@@ -1408,16 +1409,9 @@
         });
 
         //ある面でwindow情報が変更されたらそれを他の面にも適用させる
-        $(tmp_elm).find('.mouse_cover').bind('mouseup', function () {
-          if (controllerInfo.mode === 'window') {
-            var tmp_this_opts = $(this).closest('.img_area').imageViewer('option');
-            this_elm.imageViewerController('syncWindowInfo', tmp_this_opts.viewer.window);
-          }
-        });
-
-        $(tmp_elm).find('.image_window_preset_select,.image_window_level,.image_window_width').change(function () {
+        $(tmp_elm).bind('onWindowInfoChange',function () {
           var tmp_this_opts = $(this).closest('.img_area').imageViewer('option');
-          this_elm.imageViewerController('syncWindowInfo', tmp_this_opts.viewer.window);
+					this_elm.imageViewerController('syncWindowInfo', tmp_this_opts.viewer.window,$(this).closest('.img_area').attr('id'));
         });
 
         $(tmp_elm).bind('onNumberChange', function (e, the_orientation, the_number) {
@@ -1486,41 +1480,23 @@
 
 
     //Synchronize the window settings of viewers
-    syncWindowInfo: function (tmp_this_opts) {
-
-      var this_elm = this;
-      var active_series = this_elm.imageViewerController('getSeriesObjectById', [controllerInfo.activeSeriesId]);
-      if (typeof active_series !== 'object') {
-        active_series = controllerInfo.series[0];
-        controllerInfo.activeSeriesId = active_series.id;
-      }
-      var tmp_panel_elm = 'body';
-      if (controllerInfo.elements.panel.length > 0) {
-        tmp_panel_elm = '#' + controllerInfo.elements.panel;
-      }
-      tmp_panel_elm = $(tmp_panel_elm);
-      active_series.window.level.current = tmp_this_opts.level.current + 0;
-      active_series.window.width.current = tmp_this_opts.width.current + 0;
-      tmp_panel_elm.find('.image_window_level').val(active_series.window.level.current);
-      tmp_panel_elm.find('.image_window_width').val(active_series.window.width.current);
-      //配下ビューアーオプション情報を書き換えて再描画を発火させる
-      //まずは適用させる値を用意
-      var tmp_win_values = {
-          viewer: {
-            window: {
-              level: {
-                current: active_series.window.level.current,
-              },
-              width: {
-                current: active_series.window.width.current,
-              }
-            }
-          }
-        }
-        //値を渡してビュワー発火
+    syncWindowInfo: function (new_window_info,changed_element_id) {
+			var selected_preset_txt = $('#'+changed_element_id).find('.image_window_preset_select').find('option:selected').text();
       for (var i = 0; i < controllerInfo.viewer.length; i++) {
-        var elmId = '#' + controllerInfo.viewer[i].elementId;
-        $(elmId).trigger('setOptions', [tmp_win_values]).trigger('changeImageSrc');
+				if(changed_element_id !== controllerInfo.viewer[i].elementId){
+					var elmId = '#' + controllerInfo.viewer[i].elementId;
+
+					//change preset (don't fire change event)
+					$(elmId).find('.image_window_preset_select').find('option').each(function(){
+						var tmp_this = $(this);
+						if(tmp_this.text() === selected_preset_txt){
+							$(elmId).find('.image_window_preset_select').val(tmp_this.val())
+						}					
+					});
+
+					$(elmId).imageViewer('changeWindowInfo',new_window_info.level.current,new_window_info.width.current)
+									.trigger('changeImageSrc');
+				}
       }
     }, //syncWindowInfo
 

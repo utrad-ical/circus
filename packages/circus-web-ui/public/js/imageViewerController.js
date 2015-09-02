@@ -209,6 +209,11 @@
       } else {
         return;
       }
+			
+			if(new_mode !== 'rotate'){
+				$('.rotate_dir_opt').hide();
+			
+			}
 
       var tmp_panel_elm = 'body';
       if (controllerInfo.elements.panel.length > 0) {
@@ -1027,7 +1032,7 @@
       if (controllerInfo.control.measure.panel === true) {
         $('.ico_detail_sprite_rotate').click(function () {
           this_elm.imageViewerController('changeMode', 'rotate');
-					$('.rotate_dir_opt').focus().show();
+					$('.rotate_dir_opt').show().focus();
         });
 
         //どの断面でObliqueを制御するかの選択

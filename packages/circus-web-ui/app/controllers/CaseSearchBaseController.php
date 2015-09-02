@@ -21,16 +21,16 @@ class CaseSearchBaseController extends BaseController {
 			$result['export_mode'] = $this->_export_mode;
 
 			//タグの設定
-			if ($search_data && array_key_exists('tags', $search_data)){
+			if ($search_data && array_key_exists('tags', $search_data)) {
 				//ProjectID
-    			$search_data['project'] = json_decode($search_data['project'], true);
-    			if (count($search_data['project']) === 1) {
-    				$params = array();
-    				$params['projectID'] = $search_data['project'][0];
-    				$result['tag_list'] = $this->getTags($params);
-    			}
+				$search_data['project'] = json_decode($search_data['project'], true);
+				if (count($search_data['project']) === 1) {
+					$params = array();
+					$params['projectID'] = $search_data['project'][0];
+					$result['tag_list'] = $this->getTags($params);
+				}
 			}
-			Session::put('backUrl', $this->_prefix.'/search');
+			Session::put('backUrl', $this->_prefix . '/search');
 		} catch (Exception $e) {
 			Log::error($e);
 			$result['error_msg'] = $e->getMessage();

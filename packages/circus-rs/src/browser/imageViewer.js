@@ -272,7 +272,7 @@
 
 
 
-    _changeImageSrc: function (e, fix_guide_flg) {
+    _changeImageSrc: function (fix_guide_flg) {
 
       var this_obj = this;
       var this_elm = this.element;
@@ -400,10 +400,10 @@
         this_elm.find('.disp_measure').removeClass('active');
         if (this_opts.mode !== new_mode) {
           this_opts.mode = new_mode;
-					
+
           // fire the custom Event for outer scripts.
 					this_elm.trigger('onModeChange', [this_opts.viewer.id, new_mode]);
-					
+
           var the_win_controller = this_elm.find('.image_window_controller');
           if (this_opts.mode === 'window') {
             //パネルを出す
@@ -529,7 +529,7 @@
 
       var pre_w = this_opts.viewer.position.dw;
       var pre_h = this_opts.viewer.position.dh;
-			
+
 			var dpv_x = Math.min(this_opts.viewer.voxel.voxel_x / this_opts.viewer.voxel.voxel_y, 1);
 			var dpv_y = Math.min(this_opts.viewer.voxel.voxel_y / this_opts.viewer.voxel.voxel_x, 1);
 			var dpv_z = this_opts.viewer.voxel.voxel_z / Math.min(this_opts.viewer.voxel.voxel_x, this_opts.viewer.voxel.voxel_y);
@@ -1319,16 +1319,16 @@
       }
 
       this_obj.setCanvasSize();
-			      
+
       this_obj.changeSeries(this_opts.viewer.activeSeriesId);
 			this_obj.changeZoom(1); // set default zoom settings
 
 			if(this_opts.viewer.orientation === 'oblique'){
-			  this_obj._changeImageSrc(event,true);
+			  this_obj._changeImageSrc(true);
 			}else{
-				this_obj._changeImageSrc(event);
+				this_obj._changeImageSrc();
 			}
-			this_obj.setEvents();	
+			this_obj.setEvents();
 
     },//_init
 
@@ -2072,7 +2072,7 @@
       var tmp_num = 512;
 			var canvas_w = 512;
 			var canvas_y = 512;
-			
+
 			var dpv_x = Math.min(this_opts.viewer.voxel.voxel_x / this_opts.viewer.voxel.voxel_y, 1);
 			var dpv_y = Math.min(this_opts.viewer.voxel.voxel_y / this_opts.viewer.voxel.voxel_x, 1);
 			var dpv_z = this_opts.viewer.voxel.voxel_z / Math.min(this_opts.viewer.voxel.voxel_x, this_opts.viewer.voxel.voxel_y);
@@ -2102,7 +2102,7 @@
         tmp_ow = this_opts.viewer.voxel.y;
         tmp_oh = this_opts.viewer.voxel.z;
         tmp_num = this_opts.viewer.voxel.x - 1;
-      } 
+      }
       this_opts.viewer.position.ow = tmp_ow; //DICOM image original size
       this_opts.viewer.position.oh = tmp_oh;
       this_opts.viewer.position.dw = tmp_w; // initial display size (canvas pixel scale)
@@ -2141,7 +2141,7 @@
 
       //set events
       this_elm.bind('changeImageSrc', function (e,fix_guide_flg) {
-        this_obj._changeImageSrc(e,fix_guide_flg);
+        this_obj._changeImageSrc(fix_guide_flg);
       })
       .bind('sync', function () {
         this_obj.syncVoxel();

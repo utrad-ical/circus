@@ -1,4 +1,10 @@
 @extends('admin.base')
+
+@section('head')
+@parent
+{{HTML::script('js/case-tag.js')}}
+@stop
+
 @section('admin-content')
     <style>
         #tag-editor-list > li { margin-bottom: 2px; }

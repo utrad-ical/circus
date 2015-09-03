@@ -7,6 +7,7 @@
 {{HTML::script('js/jquery-ui.min.js')}}
 {{HTML::script('js/jquery.multiselect.min.js')}}
 {{HTML::script('js/jquery.formserializer.js')}}
+{{HTML::script('js/case-tag.js')}}
 {{HTML::script('js/jquery.flexforms.js')}}
 {{HTML::script('js/jquery.cookie.js')}}
 

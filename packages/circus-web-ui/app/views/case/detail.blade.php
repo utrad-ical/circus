@@ -15,6 +15,7 @@
 {{HTML::script('js/jquery.flexforms.js')}}
 {{HTML::script('js/export-common.js')}}
 {{HTML::script('js/jquery.multiselect.min.js')}}
+{{HTML::script('js/case-tag.js')}}
 {{HTML::script('js/saveTags.js')}}
 
 @if (!isset($error_msg))

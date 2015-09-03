@@ -7,6 +7,8 @@
       mode: 'pan',
       mode_array: ['bucket', 'erase', 'guide', 'measure', 'rotate', 'pan', 'pen', 'window'], //selectable mode
       viewer: {
+        activeSeriesId: '',
+        boldness: 1,
         orientation: '',
         src: '', //baseURL
         window: {
@@ -42,7 +44,6 @@
           },
           zoom: {  //zoom tool
             active: true,
-            panel: true,
             display: true
           },
           window: {  //panel element of Window level / size
@@ -58,8 +59,6 @@
           oh: 512,
           zoom: 1
         },
-        activeSeriesId: '',
-        boldness: 1,
         series: [
           {
             activeLabelId: '', //current drawing label id
@@ -143,7 +142,7 @@
         target_series.activeLabelId = tmp_add_label_obj.id;
       }
 
-      this_opts.container.addLabel(series_id, label_obj.id,[]);
+      this_opts.container.addLabel(series_id, label_obj.id, []);
     },
 
 
@@ -203,7 +202,7 @@
 
       // normalize over 360 deg
       var tmp_pi = Math.PI;
-      if(the_angle < 0 ){
+      if (the_angle < 0) {
         the_angle = the_angle + tmp_pi * 2;
       }
       the_angle = the_angle % (2 * tmp_pi);
@@ -217,54 +216,55 @@
       var tmp_margin = this_opts.viewer.rotate.point_width * 8;
 
       //check the angle is which area of radian
-      if(the_angle < tmp_pi / 2 ){
+      var point_y = 0;
+      if (the_angle < tmp_pi / 2) {
         //the first quadrant
-        var point_y = center_y - (tmp_w - center_x) * this_tan;
-        if(point_y < 0){
+        point_y = center_y - (tmp_w - center_x) * this_tan;
+        if (point_y < 0) {
           //top
           return_obj[1][0] = center_x + (center_y - tmp_margin) / this_tan;
           return_obj[1][1] = tmp_margin;
-        }else{
+        } else {
           //right
-          return_obj[1][0] = tmp_w -tmp_margin;
+          return_obj[1][0] = tmp_w - tmp_margin;
           return_obj[1][1] = center_y - (tmp_w - center_x - tmp_margin) * this_tan;
         }
-      } else if (the_angle < tmp_pi){
+      } else if (the_angle < tmp_pi) {
         //the second quadrant
-        var point_y = center_y + center_x * this_tan;
-        if(point_y < 0){
+        point_y = center_y + center_x * this_tan;
+        if (point_y < 0) {
           //top
           return_obj[1][0] = center_x + (center_y - tmp_margin) / this_tan;
           return_obj[1][1] = tmp_margin;
-        }else{
+        } else {
           //left
           return_obj[1][0] = tmp_margin;
           return_obj[1][1] = center_y + (center_x - tmp_margin) * this_tan;
         }
 
-      } else if (the_angle < tmp_pi * 3 / 2){
+      } else if (the_angle < tmp_pi * 3 / 2) {
         //the third quadrant
-        var point_y = center_y + center_x * this_tan;
-        if(point_y < tmp_h){
+        point_y = center_y + center_x * this_tan;
+        if (point_y < tmp_h) {
           //left
           return_obj[1][0] = tmp_margin;
           return_obj[1][1] = center_y + (center_x - tmp_margin) * this_tan;
-        }else{
+        } else {
           //bottom
-          return_obj[1][0] = center_x - (tmp_h - tmp_margin -center_y) / this_tan;
-          return_obj[1][1] = tmp_h -tmp_margin;
+          return_obj[1][0] = center_x - (tmp_h - tmp_margin - center_y) / this_tan;
+          return_obj[1][1] = tmp_h - tmp_margin;
         }
       } else {
         //the fourth quadrant
-        var point_y = center_y - (tmp_w - center_x) * this_tan;
-        if(point_y < tmp_h){
+        point_y = center_y - (tmp_w - center_x) * this_tan;
+        if (point_y < tmp_h) {
           //right
-          return_obj[1][0] = tmp_w -tmp_margin;
-          return_obj[1][1] = center_y - (tmp_w - tmp_margin -center_x) * this_tan;
-        }else{
+          return_obj[1][0] = tmp_w - tmp_margin;
+          return_obj[1][1] = center_y - (tmp_w - tmp_margin - center_x) * this_tan;
+        } else {
           //bottom
           return_obj[1][0] = center_x - (tmp_h - tmp_margin - center_y) / this_tan;
-          return_obj[1][1] = tmp_h -tmp_margin;
+          return_obj[1][1] = tmp_h - tmp_margin;
         }
       }
       return return_obj;
@@ -272,7 +272,7 @@
 
 
 
-    _changeImageSrc: function (e,fix_guide_flg) {
+    _changeImageSrc: function (e, fix_guide_flg) {
 
       var this_obj = this;
       var this_elm = this.element;
@@ -286,7 +286,7 @@
         var tmp_w = this_elm.find('.series_image_elm').width();
         var tmp_h = this_elm.find('.series_image_elm').height();
         tmp_ctx.clearRect(0, 0, tmp_w, tmp_h);
-        if(typeof fix_guide_flg !== 'undefined' && fix_guide_flg === true){
+        if (typeof fix_guide_flg !== 'undefined' && fix_guide_flg === true) {
           this_obj.fixToGuide();
         }
 
@@ -308,8 +308,8 @@
       var src_url = this_obj._createImageUrl();
 
       //check the image is in Cache.
-      if(typeof this_opts._tmpInfo.imgCache[src_url] !== 'undefined'){
-        if(this_opts.viewer.orientation === 'oblique'){
+      if (typeof this_opts._tmpInfo.imgCache[src_url] !== 'undefined') {
+        if (this_opts.viewer.orientation === 'oblique') {
           this_obj.setObliqueResponse(this_opts._tmpInfo.imgCache[src_url].header_param);
         }
         changeMain(this_opts._tmpInfo.imgCache[src_url].image);
@@ -323,7 +323,7 @@
       this_opts._tmpInfo.lastQue = src_url;
       if (this_opts._tmpInfo.loadFlg === 0) {
 
-        var loadImg = function(load_target_url){
+        var loadImg = function (load_target_url) {
           this_opts._tmpInfo.lastQue = null;
           this_opts._tmpInfo.loadFlg = 1;
 
@@ -332,13 +332,13 @@
 
           var myWindowURL = window.URL || window.webkitURL;  // Take care of vendor prefixes.
           var xhr = new XMLHttpRequest();
-          xhr.onload = function(e) {
-            if (this.status == 200) {
+          xhr.onload = function (e) {
+            if (this.status === 200) {
               var blob = this.response;
               var tmp_img = new Image();
-              tmp_img.onload = function(e) {
+              tmp_img.onload = function (e) {
                 var header_param = '';
-                if(this_opts.viewer.orientation === 'oblique'){
+                if (this_opts.viewer.orientation === 'oblique') {
                   header_param = {};
                   header_param.Pixel_Columns = xhr.getResponseHeader('X-Circus-Pixel-Columns');
                   header_param.Pixel_Rows = xhr.getResponseHeader('X-Circus-Pixel-Rows');
@@ -353,22 +353,22 @@
                 this_opts._tmpInfo.imgCache[load_target_url] = {
                   'image' : tmp_img,
                   'header_param' : header_param
-                } // add loaded img into Cache
+                }; // add loaded img into Cache
 
                 //if new image is required, re-start new loading.
-                if(this_opts._tmpInfo.lastQue !== null) {
+                if (this_opts._tmpInfo.lastQue !== null) {
                   loadImg(this_opts._tmpInfo.lastQue);
                 }
               };
               tmp_img.src = myWindowURL.createObjectURL(blob);
             }
           };
-          xhr.open('GET',load_target_url, true);
+          xhr.open('GET', load_target_url, true);
           xhr.setRequestHeader('Authorization', tmp_token_str);
           xhr.responseType = 'blob';
           xhr.send(); //run the request
           this_opts._tmpInfo.loadFlg = 1;
-        } //loadImg
+        }; //loadImg
         loadImg(src_url);
       }
 
@@ -449,7 +449,7 @@
         var tmp_elm = '<option value="blank">select setting</option>';
         for (var i = 0; i < tmp_preset_array.length; i++) {
           var isSelected = '';
-          if(this_opts.viewer.window.level.current === tmp_preset_array[i].level && this_opts.viewer.window.width.current === tmp_preset_array[i].width) {
+          if (this_opts.viewer.window.level.current === tmp_preset_array[i].level && this_opts.viewer.window.width.current === tmp_preset_array[i].width) {
             isSelected = 'selected';
           }
           tmp_elm = tmp_elm + '<option value="' + tmp_preset_array[i].level + ', ' + tmp_preset_array[i].width + '" '+isSelected+'>' + tmp_preset_array[i].label + '</option>';
@@ -459,8 +459,8 @@
       }
 
       //set active label
-      if(typeof tmp_the_series.activeLabelId === 'undefined' || tmp_the_series.activeLabelId === '' ) {
-        if(typeof tmp_the_series.label === 'object' && tmp_the_series.label.length > 0 ) {
+      if (typeof tmp_the_series.activeLabelId === 'undefined' || tmp_the_series.activeLabelId === '' ) {
+        if (typeof tmp_the_series.label === 'object' && tmp_the_series.label.length > 0 ) {
           tmp_the_series.activeLabelId = tmp_the_series.label[0].id;
         }
       }
@@ -478,22 +478,22 @@
       var this_opts = this.options;
 
       //level , check Max & Min
-      if(new_level > this_opts.viewer.window.level.maximum){
+      if (new_level > this_opts.viewer.window.level.maximum) {
         new_level = this_opts.viewer.window.level.maximum
       }
 
-      if(new_level < this_opts.viewer.window.level.minimum){
+      if (new_level < this_opts.viewer.window.level.minimum) {
         new_level = this_opts.viewer.window.level.minimum
       }
 
       this_opts.viewer.window.level.current = new_level;
 
       //width ,check Max & Min
-      if(new_width > this_opts.viewer.window.level.maximum){
+      if (new_width > this_opts.viewer.window.level.maximum) {
         new_width = this_opts.viewer.window.level.maximum;
       }
 
-      if(new_width < this_opts.viewer.window.level.minimum){
+      if (new_width < this_opts.viewer.window.level.minimum) {
         new_width = this_opts.viewer.window.level.minimum;
       }
 
@@ -504,12 +504,12 @@
       the_win_controller.find('.image_window_level').val(this_opts.viewer.window.level.current);
       the_win_controller.find('.image_window_width').val(this_opts.viewer.window.width.current);
 
-      if(typeof preset_text !== 'undefined'){
-        the_win_controller.find('.image_window_preset_select').find('option').each(function(){
+      if (typeof preset_text !== 'undefined') {
+        the_win_controller.find('.image_window_preset_select').find('option').each(function () {
           var tmp_this = $(this);
-          if(tmp_this.html() === preset_text){
+          if (tmp_this.html() === preset_text) {
             tmp_this.attr('selected','selected');
-          }else{
+          } else {
             tmp_this.removeAttr('selected');
           }
         });
@@ -615,19 +615,19 @@
       var rotate_params = this_opts.viewer.rotate;
 
       var tmp_range = rotate_params.point_width;
-      if(typeof range == 'number') {
+      if (typeof range == 'number') {
         tmp_range = range;
       }
 
       var cursor_x = e.clientX - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().left;
       var cursor_y = e.clientY - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().top;
 
-      if(
+      if (
           rotate_params.arrow_x - tmp_range < cursor_x &&
           rotate_params.arrow_x + tmp_range > cursor_x &&
           rotate_params.arrow_y - tmp_range < cursor_y &&
           rotate_params.arrow_y + tmp_range > cursor_y
-      ){
+      ) {
         the_return = 1;
       }
 
@@ -715,7 +715,7 @@
       }
 
       //ズーム機能関連要素
-      if (this_opts.viewer.elements.zoom.panel === true) {
+      if (this_opts.viewer.elements.zoom.display === true) {
         var tmp_elm = '<div class="img_toolbar_wrap"><ul class="img_toolbar">\
                       <li class="toolbar_btn  ico_detail_sprite ico_detail_sprite_resize_large"></li>\
                       <li class="toolbar_btn  ico_detail_sprite ico_detail_sprite_resize_short"></li>\
@@ -731,7 +731,7 @@
 
       //枠線の色をつける
       for(var i=0; i<this_opts.viewer.guide.lines.length; i++) {
-        if(this_opts.viewer.guide.lines[i].name === this_opts.viewer.orientation) {
+        if (this_opts.viewer.guide.lines[i].name === this_opts.viewer.orientation) {
           this_elm.find('.img_wrap').css('borderColor', '#'+this_opts.viewer.guide.lines[i].color);
         }
       }
@@ -741,7 +741,7 @@
 
 
 
-    _createGuideHall : function(){
+    _createGuideHall : function () {
       var this_obj = this;
       var this_elm = this.element;
       var this_opts = this.options;
@@ -768,7 +768,7 @@
 
 
 
-    _createImageUrl : function(){
+    _createImageUrl : function () {
       var this_opts = this.options;
       var return_url = this_opts.viewer.src + '?series=' + this_opts.viewer.activeSeriesId;
       return_url = return_url + '&wl=' +this_opts.viewer.window.level.current;
@@ -956,7 +956,7 @@
       tmp_ctx.strokeStyle = '#' + rotate_params.color;
       tmp_ctx.fillStyle = '#' + rotate_params.color  ;
 
-      if(typeof rotate_params.visible === 'undefined' || rotate_params.visible !== true) {
+      if (typeof rotate_params.visible === 'undefined' || rotate_params.visible !== true) {
         return;
       }
 
@@ -1038,7 +1038,7 @@
 
 
 
-    fixToGuide : function(){
+    fixToGuide : function () {
       var this_obj = this;
       var this_elm = this.element;
       var this_opts = this.options;
@@ -1243,7 +1243,7 @@
         }
       }
 
-      if(target_direction === 'vertical') {
+      if (target_direction === 'vertical') {
         return_obj = guide_vertical;
       } else if (target_direction === 'horizontal') {
         return_obj = guide_horizontal;
@@ -1419,14 +1419,14 @@
             this_obj.syncVoxel();
             this_elm.trigger('onNumberChange',[this_opts.viewer.orientation,this_opts.viewer.number.current]);
           }, change: function (event, ui) {
-            if(this_elm.hasClass('isSlide') === false){
+            if (this_elm.hasClass('isSlide') === false) {
               this_opts.viewer.number.current = ui.value;
               var tmp_disp_num = this_opts.viewer.number.current + 1;
               this_elm.find('.disp_num').text(tmp_disp_num); //画像右上の枚数表示
               this_obj._changeImageSrc();
               this_obj.syncVoxel();
               this_elm.trigger('onNumberChange',[this_opts.viewer.orientation,this_opts.viewer.number.current]);
-            }else{
+            } else {
               this_elm.removeClass('isSlide')
             }
           }
@@ -1490,19 +1490,19 @@
           var tmp_level = this_elm.find('.image_window_level').val();
           var tmp_width = this_elm.find('.image_window_width').val();
 
-          tmp_level = tmp_level.replace(/[０-９]/, function(s) {
+          tmp_level = tmp_level.replace(/[０-９]/, function (s) {
             return String.fromCharCode(s.charCodeAt(0) - 0xFEE0);
           });
 
-          tmp_width = tmp_width.replace(/[０-９]/, function(s) {
+          tmp_width = tmp_width.replace(/[０-９]/, function (s) {
             return String.fromCharCode(s.charCodeAt(0) - 0xFEE0);
           });
 
           tmp_level = tmp_level.replace(/\D/,'');
           tmp_width = tmp_width.replace(/\D/,'');
 
-          if(tmp_level === ''){tmp_level = 0;}
-          if(tmp_width === ''){tmp_width = 0;}
+          if (tmp_level === '') {tmp_level = 0;}
+          if (tmp_width === '') {tmp_width = 0;}
 
           tmp_level = Number(tmp_level);
           tmp_width = Number(tmp_width);
@@ -1545,11 +1545,11 @@
           if ($(this).hasClass('ico_detail_sprite_resize_large')) {
             //zoom in mode
 
-            if(this_opts.viewer.position.zoom < 1){
+            if (this_opts.viewer.position.zoom < 1) {
               new_zoom_value = 0.1;
             }
             new_zoom_value = this_opts.viewer.position.zoom + new_zoom_value;
-            if(new_zoom_value > 32 ) {
+            if (new_zoom_value > 32 ) {
               new_zoom_value = 32;
             }
             new_zoom_value = Math.ceil(new_zoom_value * 10) / 10;
@@ -1557,12 +1557,12 @@
           } else if ($(this).hasClass('ico_detail_sprite_resize_short')) {
             //zoom out mode
 
-            if(this_opts.viewer.position.zoom <= 1){
+            if (this_opts.viewer.position.zoom <= 1) {
               new_zoom_value = 0.1;
             }
 
             new_zoom_value = this_opts.viewer.position.zoom - new_zoom_value;
-            if(new_zoom_value < 0.1 ) {
+            if (new_zoom_value < 0.1 ) {
               new_zoom_value = 0.1;
             }
             new_zoom_value = Math.floor(new_zoom_value * 10) / 10;
@@ -1600,7 +1600,7 @@
 
 
 
-    _limitImagePosition: function(){
+    _limitImagePosition: function () {
 
       var this_obj = this;
       var this_opts = this.options;
@@ -1619,12 +1619,12 @@
       }
 
       //left
-      if(this_opts.viewer.position.dx > 0 ){
+      if (this_opts.viewer.position.dx > 0 ) {
         this_opts.viewer.position.dx = 0;
       }
 
       //top
-      if (this_opts.viewer.position.dy > 0 ){
+      if (this_opts.viewer.position.dy > 0 ) {
         this_opts.viewer.position.dy = 0;
       }
 
@@ -1727,7 +1727,7 @@
          );
 
          this_opts._tmpInfo.label = [];
-       }else{
+       } else {
           //normal pen drawing
           var tmp_ctx = this_elm.find('.canvas_main_elm').get(0).getContext('2d');
 
@@ -1782,7 +1782,7 @@
          );
 
          this_opts._tmpInfo.label = [];
-       }else{
+       } else {
 
           var tmp_ctx = this_elm.find('.canvas_main_elm').get(0).getContext('2d');
 
@@ -1899,8 +1899,8 @@
       } else {
         //before drugging, just move on canvas
 
-        if(this_opts.mode === 'rotate'){
-          if( this_obj._CheckRotateOver(e) === 1 ){
+        if (this_opts.mode === 'rotate') {
+          if ( this_obj._CheckRotateOver(e) === 1 ) {
             this_elm.addClass('mode_rotate_active');
             return;
           } else {
@@ -1912,14 +1912,14 @@
         if (this_opts.viewer.orientation !== 'oblique') {
           target_guide_direction = this_obj._CheckGuideOver(e);
         }
-        if(target_guide_direction !== ''){
+        if (target_guide_direction !== '') {
           this_opts._tmpInfo.mode_backup = this_opts.mode + '';
           this_elm.removeClass(function (index, css) {
             return (css.match(/\bmode_\S+/g) || []).join(' ');
           });
           this_elm.addClass('mode_guide_'+target_guide_direction);
           return;
-        } else if (this_opts._tmpInfo.mode_backup !== ''){
+        } else if (this_opts._tmpInfo.mode_backup !== '') {
           this_opts.mode = this_opts._tmpInfo.mode_backup;
           this_opts._tmpInfo.mode_backup = '';
           this_elm.removeClass(function (index, css) {
@@ -2061,13 +2061,13 @@
       var dist_h = (this_opts.viewer.measure.goal_y - this_opts.viewer.measure.start_y) * this_opts.viewer.position.oh / this_opts.viewer.position.dh;
 
       //fix to millimeter scale
-      if(this_opts.viewer.orientation === 'axial') {
+      if (this_opts.viewer.orientation === 'axial') {
         dist_w = dist_w * this_opts.viewer.voxel.voxel_x;
         dist_h = dist_h * this_opts.viewer.voxel.voxel_y;
-      }else if(this_opts.viewer.orientation === 'coronal') {
+      }else if (this_opts.viewer.orientation === 'coronal') {
         dist_w = dist_w * this_opts.viewer.voxel.voxel_x;
         dist_h = dist_h * this_opts.viewer.voxel.voxel_z;
-      }else if(this_opts.viewer.orientation === 'sagittal') {
+      }else if (this_opts.viewer.orientation === 'sagittal') {
         dist_w = dist_w * this_opts.viewer.voxel.voxel_y;
         dist_h = dist_h * this_opts.viewer.voxel.voxel_z;
       }
@@ -2113,7 +2113,7 @@
       var guide_horizontal = this_obj.getGuide('horizontal');
       var guide_vertical =  this_obj.getGuide('vertical');
 
-      if( direction == 'horizontal' ){
+      if ( direction == 'horizontal' ) {
 
          var tmp_cursor_x = e.clientX - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().left - this_opts.viewer.position.dx;
          guide_horizontal.number = Math.floor( tmp_cursor_x * this_opts.viewer.position.ow / this_opts.viewer.position.dw);
@@ -2157,7 +2157,7 @@
       var center_y = guide_vertical.number * (position_params.dh / position_params.oh) + position_params.dy;
 
       var new_angle = Math.atan( (center_y - tmp_cursor_y) / (tmp_cursor_x - center_x) );
-      if(tmp_cursor_x < center_x){
+      if (tmp_cursor_x < center_x) {
         //the second & third quadrant
         new_angle = new_angle + Math.PI;
       }
@@ -2180,7 +2180,7 @@
         this_opts._tmpInfo.cursor.touch_flg = 0;
       }
 
-      if(this_opts._tmpInfo.mode_backup !== ''){
+      if (this_opts._tmpInfo.mode_backup !== '') {
         this_opts.mode = this_opts._tmpInfo.mode_backup;
         this_opts._tmpInfo.mode_backup = '';
       }
@@ -2257,7 +2257,7 @@
       var this_elm = this.element;
       var this_opts = this.options;
 
-      if(this_opts._tmpInfo.mode_backup !== ''){
+      if (this_opts._tmpInfo.mode_backup !== '') {
         this_opts.mode = this_opts._tmpInfo.mode_backup;
         this_opts._tmpInfo.mode_backup = '';
       }
@@ -2295,11 +2295,11 @@
       var tmp_current = this_opts.viewer.number.current;
 
       tmp_current = tmp_current - tmp_change_ammount;
-      if(tmp_current > this_opts.viewer.number.maximum){
-      	tmp_current =this_opts.viewer.number.maximum;
+      if (tmp_current > this_opts.viewer.number.maximum) {
+        tmp_current =this_opts.viewer.number.maximum;
       }
-      if(tmp_current < this_opts.viewer.number.minimum){
-      	tmp_current =this_opts.viewer.number.minimum;
+      if (tmp_current < this_opts.viewer.number.minimum) {
+        tmp_current =this_opts.viewer.number.minimum;
       }
       this_opts.viewer.number.current = tmp_current;
       this_elm.find('.slider_elm').slider({
@@ -2409,7 +2409,7 @@
       this_obj._clearCanvas();
       this_obj.drawGuide();
 
-      if( this_opts.viewer.rotate.visible === true){
+      if ( this_opts.viewer.rotate.visible === true) {
         this_obj.drawRotate();
       }
       this_obj._createGuideHall();

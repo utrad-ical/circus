@@ -1,7 +1,7 @@
 @charset "utf-8";
 
 *{margin:0; padding:0;}
-body{ width:100%; font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; word-break:break-all;  word-wrap:break-word; font-size:0.9em; line-height:1.8em; margin:0; background-color: white; }
+body{ width:100%; font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; word-break:break-all;  word-wrap:break-word; font-size:0.9em; line-height:1.5em; margin:0; background-color: white; }
 select,input,button{ font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; word-break:keep-all;  word-wrap:normal; font-size:1em;}
 li{list-style:none;}
 img{border:none;}

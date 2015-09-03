@@ -791,11 +791,24 @@
           this_elm.imageViewerController('setObliqueOptions',controllerInfo.viewer[i].orientation, the_angle);
         }
       }
-
+			
+      //配下ビューアー表示を同期
       for (var i = controllerInfo.viewer.length - 1; i >= 0; i--) {
         var elmId = '#' + controllerInfo.viewer[i].elementId;
-        //配下ビューアー表示を同期
         $(elmId).trigger('sync');
+      }
+			
+      //各ビューアーについて画像のピクセルサイズがcanvasを超えていた場合にはズームを縮小
+      for (var i = controllerInfo.viewer.length - 1; i >= 0; i--) {
+        var elmId = '#' + controllerInfo.viewer[i].elementId;
+				var tmp_opts = $(elmId).imageViewer('option');
+				var canvas_w = $(elmId).find('series_image_elm').width();
+				
+				if(tmp_opts.viewer.position.dx > canvas_w){
+					var tmp_zoom = canvas_w / tmp_opts.viewer.position.dx;
+					tmp_zoom = Math.floor(tmp_zoom * 10) / 10;
+					$(elmId).imageViewer('changeZoom',tmp_zoom);
+				}
       }
 
     }, //init
@@ -1471,7 +1484,6 @@
           }
 
         });
-
       }
 
     }, //setViewerInnerEvents

@@ -802,12 +802,9 @@
       for (var i = controllerInfo.viewer.length - 1; i >= 0; i--) {
         var elmId = '#' + controllerInfo.viewer[i].elementId;
 				var tmp_opts = $(elmId).imageViewer('option');
-				var canvas_w = $(elmId).find('series_image_elm').width();
-
-				if(tmp_opts.viewer.position.dx > canvas_w){
-					var tmp_zoom = canvas_w / tmp_opts.viewer.position.dx;
-					tmp_zoom = Math.floor(tmp_zoom * 10) / 10;
-					$(elmId).imageViewer('changeZoom',tmp_zoom);
+				var canvas_w = $(elmId).find('.series_image_elm').width();
+				if(tmp_opts.viewer.position.dw > canvas_w){
+					$(elmId).imageViewer('fitToCanvas');
 				}
       }
 

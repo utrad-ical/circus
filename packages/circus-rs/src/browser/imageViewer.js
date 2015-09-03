@@ -402,7 +402,7 @@
           this_opts.mode = new_mode;
 
           // fire the custom Event for outer scripts.
-					this_elm.trigger('onModeChange', [this_opts.viewer.id, new_mode]);
+          this_elm.trigger('onModeChange', [this_opts.viewer.id, new_mode]);
 
           var the_win_controller = this_elm.find('.image_window_controller');
           if (this_opts.mode === 'window') {
@@ -530,15 +530,15 @@
       var pre_w = this_opts.viewer.position.dw;
       var pre_h = this_opts.viewer.position.dh;
 
-			var dpv_x = Math.min(this_opts.viewer.voxel.voxel_x / this_opts.viewer.voxel.voxel_y, 1);
-			var dpv_y = Math.min(this_opts.viewer.voxel.voxel_y / this_opts.viewer.voxel.voxel_x, 1);
-			var dpv_z = this_opts.viewer.voxel.voxel_z / Math.min(this_opts.viewer.voxel.voxel_x, this_opts.viewer.voxel.voxel_y);
+      var dpv_x = Math.min(this_opts.viewer.voxel.voxel_x / this_opts.viewer.voxel.voxel_y, 1);
+      var dpv_y = Math.min(this_opts.viewer.voxel.voxel_y / this_opts.viewer.voxel.voxel_x, 1);
+      var dpv_z = this_opts.viewer.voxel.voxel_z / Math.min(this_opts.viewer.voxel.voxel_x, this_opts.viewer.voxel.voxel_y);
 
       if (this_opts.viewer.orientation === 'axial') {
-				tmp_w = this_opts.viewer.voxel.x * dpv_x;
+        tmp_w = this_opts.viewer.voxel.x * dpv_x;
         tmp_h = this_opts.viewer.voxel.y * dpv_y;
       } else if (this_opts.viewer.orientation === 'sagittal') {
-				tmp_w = this_opts.viewer.voxel.y * dpv_y;
+        tmp_w = this_opts.viewer.voxel.y * dpv_y;
         tmp_h = this_opts.viewer.voxel.z * dpv_z;
       } else if (this_opts.viewer.orientation === 'coronal') {
         tmp_w = this_opts.viewer.voxel.y * dpv_y;
@@ -993,7 +993,7 @@
 
 
     _exchangePositionCtoV: function (insert_array) {
-			//exchange 2D position data to 3D
+      //exchange 2D position data to 3D
       var this_opts = this.options;
       var rtn_array = [];
       var tmp_orientation = this_opts.viewer.orientation;
@@ -1035,6 +1035,20 @@
 
       this_opts.viewer.position.dx = 0.5 * tmp_w - guide_horizontal.number * this_opts.viewer.position.zoom;
       this_opts.viewer.position.dy = 0.5 * tmp_h - guide_vertical.number * this_opts.viewer.position.zoom;
+    },
+
+
+
+    fitToCanvas : function () {  console.log('fitToCanvas');
+      var this_obj = this;
+      var this_elm = this.element;
+      var this_opts = this.options;
+      var canvas_w = this_elm.find('.series_image_elm').width();
+      var tmp_zoom = canvas_w / this_opts.viewer.position.dw;
+
+      tmp_zoom = Math.floor(tmp_zoom * 10) / 10;
+      this_obj.changeZoom(tmp_zoom);
+      this_obj._changeImageSrc();
     },
 
 
@@ -1248,7 +1262,7 @@
 
     _getStopover: function (start_x, start_y, goal_x, goal_y) {
       //input : start point XY & goal point XY
-			//return : the array of middle points between start & goal.
+      //return : the array of middle points between start & goal.
       var dist_x = Math.abs(goal_x - start_x);
       var dist_y = Math.abs(goal_y - start_y);
       var tmp_base = dist_x;
@@ -1321,14 +1335,14 @@
       this_obj.setCanvasSize();
 
       this_obj.changeSeries(this_opts.viewer.activeSeriesId);
-			this_obj.changeZoom(1); // set default zoom settings
+      this_obj.changeZoom(1); // set default zoom settings
 
-			if(this_opts.viewer.orientation === 'oblique'){
-			  this_obj._changeImageSrc(true);
-			}else{
-				this_obj._changeImageSrc();
-			}
-			this_obj.setEvents();
+      if(this_opts.viewer.orientation === 'oblique'){
+        this_obj._changeImageSrc(true);
+      }else{
+        this_obj._changeImageSrc();
+      }
+      this_obj.setEvents();
 
     },//_init
 
@@ -2070,12 +2084,12 @@
       var tmp_ow = 512;
       var tmp_oh = 512;
       var tmp_num = 512;
-			var canvas_w = 512;
-			var canvas_y = 512;
+      var canvas_w = 512;
+      var canvas_y = 512;
 
-			var dpv_x = Math.min(this_opts.viewer.voxel.voxel_x / this_opts.viewer.voxel.voxel_y, 1);
-			var dpv_y = Math.min(this_opts.viewer.voxel.voxel_y / this_opts.viewer.voxel.voxel_x, 1);
-			var dpv_z = this_opts.viewer.voxel.voxel_z / Math.min(this_opts.viewer.voxel.voxel_x, this_opts.viewer.voxel.voxel_y);
+      var dpv_x = Math.min(this_opts.viewer.voxel.voxel_x / this_opts.viewer.voxel.voxel_y, 1);
+      var dpv_y = Math.min(this_opts.viewer.voxel.voxel_y / this_opts.viewer.voxel.voxel_x, 1);
+      var dpv_z = this_opts.viewer.voxel.voxel_z / Math.min(this_opts.viewer.voxel.voxel_x, this_opts.viewer.voxel.voxel_y);
 
       if (this_opts.viewer.orientation === 'axial') {
         tmp_w = this_opts.viewer.voxel.x * dpv_x;
@@ -2368,7 +2382,7 @@
         });
       }//zoom function set
 
-		},//setEvents
+    },//setEvents
 
 
 

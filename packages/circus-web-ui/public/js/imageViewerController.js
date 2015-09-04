@@ -101,7 +101,7 @@
     addLabelObject: function () {
       var this_elm = this;
       var active_series = this_elm.imageViewerController('getSeriesObjectById', [controllerInfo.activeSeriesId]);
-
+			var i;
       if (typeof active_series !== 'object') {
         active_series = controllerInfo.series[0];
         controllerInfo.activeSeriesId = active_series.id;
@@ -121,7 +121,7 @@
         active_series.activeLabelId = active_series.label[0].id;
       }
 
-      for (var i = controllerInfo.viewer.length - 1; i >= 0; i -= 1) {
+      for (i = controllerInfo.viewer.length - 1; i >= 0; i -= 1) {
         var elmId = '#' + controllerInfo.viewer[i].elementId;
         $(elmId).trigger('addLabelObject', [controllerInfo.activeSeriesId, tmp_label_obj]);
       }
@@ -135,6 +135,7 @@
       var this_elm = this;
       controllerInfo.activeSeriesId = active_series_id;
       var active_series = this_elm.imageViewerController('getSeriesObjectById', [active_series_id]);
+			var i;
 
       if (typeof active_series.activeLabelId === 'undefined' || active_series.activeLabelId === '') {
         if (typeof active_series.label === 'object' && active_series.label.length > 0) {
@@ -149,25 +150,22 @@
       this_elm.imageViewerController('changeMode', 'pan');
 
       //紐づくビューアーたちに伝播
-      for (var i = 0; i < controllerInfo.viewer.length; i++) {
+      for (i = 0; i < controllerInfo.viewer.length; i += 1) {
         var elmId = '#' + controllerInfo.viewer[i].elementId;
         $(elmId).trigger('changeSeries', active_series_id);
 
         //シリーズ切替時にはそのシリーズの中央を初期表示させる
         var tmp_opts = $(elmId).imageViewer('option');
-        tmp_opts.viewer.number.current = Math.ceil(tmp_opts.viewer.number.maximum / 2)
+        tmp_opts.viewer.number.current = Math.ceil(tmp_opts.viewer.number.maximum / 2);
         $(elmId).find('.slider_elm').slider({
-          value:tmp_opts.viewer.number.current
+          value: tmp_opts.viewer.number.current
         });
-
-        if(tmp_opts.viewer.orientation === 'oblique'){
-          $(elmId).trigger('changeImageSrc',[true]);
+        if (tmp_opts.viewer.orientation === 'oblique') {
+          $(elmId).trigger('changeImageSrc', [true]);
         }
         $(elmId).trigger('sync');
-
       }
-
-    },
+    },//changeSeries
 
 
 
@@ -175,8 +173,9 @@
 
     changedLabelNum: function () {
       var rtn_num = 0;
+			var i;
       var this_elm = this;
-      for (var i = 0; i < controllerInfo.series.length; i++) {
+      for (i = 0; i < controllerInfo.series.length; i += 1) {
         var tmp_the_controller_series = controllerInfo.series[i];
         if (typeof tmp_the_controller_series.label === 'object') {
           for (var j = 0; j < tmp_the_controller_series.label.length; j++) {
@@ -210,7 +209,7 @@
         return;
       }
 
-      if(new_mode !== 'rotate'){
+      if (new_mode !== 'rotate') {
         $('.rotate_dir_opt').hide();
 
       }
@@ -393,7 +392,7 @@
 
           var rotate_dir_opt = '<select class="w_100 rotate_dir_opt">';
           for (var i = 0; i < controllerInfo.viewer.length; i++) {
-            if(controllerInfo.viewer[i].orientation !== 'oblique'){
+            if (controllerInfo.viewer[i].orientation !== 'oblique') {
               rotate_dir_opt = rotate_dir_opt + '<option value=' + controllerInfo.viewer[i].elementId + '>' + controllerInfo.viewer[i].orientation + '</option>';
             }
           }
@@ -554,7 +553,7 @@
       }
 
       //初期表示シリーズのウインドウ情報をビューアーオブジェクトに渡す
-      var tmp_viewer_param_array = new Array;
+      var tmp_viewer_param_array = [];
       for (var i = 0; i < controllerInfo.viewer.length; i++) {
         controllerInfo.viewer[i].window = {
           level: {
@@ -660,7 +659,7 @@
           //set guides
           var tmp_guide_info = {};
 
-          if(typeof this_viewer.orientation !== 'undefined'){
+          if (typeof this_viewer.orientation !== 'undefined') {
             tmp_guide_info = {
               lines : [{
                 show: true,
@@ -699,19 +698,19 @@
                 tmp_guide_info.lines.splice(j,1);
                 continue;
               }
-              if(this_viewer.orientation !== 'oblique' && tmp_guide_info.lines[j].name === 'oblique_x'){
+              if (this_viewer.orientation !== 'oblique' && tmp_guide_info.lines[j].name === 'oblique_x') {
                 tmp_guide_info.lines.splice(j,1);
-              } else  if(this_viewer.orientation !== 'oblique' && tmp_guide_info.lines[j].name === 'oblique_y'){
+              } else  if (this_viewer.orientation !== 'oblique' && tmp_guide_info.lines[j].name === 'oblique_y') {
                 tmp_guide_info.lines.splice(j,1);
               }
-              if(this_viewer.orientation === 'oblique'){
-                if(tmp_guide_info.lines[j].name === 'axial' || tmp_guide_info.lines[j].name === 'sagittal' || tmp_guide_info.lines[j].name === 'coronal'){
+              if (this_viewer.orientation === 'oblique') {
+                if (tmp_guide_info.lines[j].name === 'axial' || tmp_guide_info.lines[j].name === 'sagittal' || tmp_guide_info.lines[j].name === 'coronal') {
                   tmp_guide_info.lines.splice(j,1);
                 }
               }
             }
           }
-          if(typeof this_viewer.number === 'undefined'){
+          if (typeof this_viewer.number === 'undefined') {
             this_viewer.number = {};
           }
 
@@ -748,7 +747,7 @@
 
           }); //imageViewer
 
-          if(typeof this_viewer.rotateControl !== 'undefined' && this_viewer.rotateControl === true){
+          if (typeof this_viewer.rotateControl !== 'undefined' && this_viewer.rotateControl === true) {
             var new_rotate_opt = $('#' + this_viewer.elementId).imageViewer('option');
             new_rotate_opt.viewer.rotate.visible = true;
             $('#' + this_viewer.elementId).imageViewer('option',new_rotate_opt)
@@ -772,9 +771,9 @@
 
       //各断面は奥行を半分まで進めた状態を初期表示にする.ガイド追従
       for (var i = controllerInfo.viewer.length - 1; i >= 0; i--) {
-        if( controllerInfo.viewer[i].orientation === 'axial' ||
+        if ( controllerInfo.viewer[i].orientation === 'axial' ||
             controllerInfo.viewer[i].orientation === 'coronal' ||
-            controllerInfo.viewer[i].orientation === 'sagittal'){
+            controllerInfo.viewer[i].orientation === 'sagittal') {
               this_elm.imageViewerController(
               'syncGuide',
               controllerInfo.viewer[i].orientation,
@@ -785,7 +784,7 @@
 
       //ページロード時のoblique 同期
       for (var i = controllerInfo.viewer.length - 1; i >= 0; i--) {
-        if( controllerInfo.viewer[i].rotateControl === true){
+        if ( controllerInfo.viewer[i].rotateControl === true) {
           var elmId = '#' + controllerInfo.viewer[i].elementId;
           var the_angle = $(elmId).imageViewer('option').viewer.rotate.angle;
           this_elm.imageViewerController('setObliqueOptions',controllerInfo.viewer[i].orientation, the_angle);
@@ -803,7 +802,7 @@
         var elmId = '#' + controllerInfo.viewer[i].elementId;
 				var tmp_opts = $(elmId).imageViewer('option');
 				var canvas_w = $(elmId).find('.series_image_elm').width();
-				if(tmp_opts.viewer.position.dw > canvas_w){
+				if (tmp_opts.viewer.position.dw > canvas_w) {
 					$(elmId).imageViewer('fitToCanvas');
 				}
       }
@@ -1041,10 +1040,10 @@
         //どの断面でObliqueを制御するかの選択
         $('.rotate_dir_opt').change(function () {
           var this_val = $(this).val();
-          for(var i = 0; i < controllerInfo.viewer.length; i++){
+          for(var i = 0; i < controllerInfo.viewer.length; i++) {
             var tmp_viewer = controllerInfo.viewer[i];
             var the_opts = $('#' + tmp_viewer.elementId).imageViewer('option');
-            if(tmp_viewer.elementId === this_val){
+            if (tmp_viewer.elementId === this_val) {
               the_opts.viewer.rotate.visible = true;
               this_elm.imageViewerController('setObliqueOptions',the_opts.viewer.orientation, the_opts.viewer.rotate.angle);
             } else {
@@ -1053,7 +1052,7 @@
             $('#' + tmp_viewer.elementId).imageViewer('option',the_opts).imageViewer('syncVoxel');
             $(this).hide();
           }
-        }).blur(function(){
+        }).blur(function() {
          $(this).hide();
         });
       }
@@ -1336,8 +1335,9 @@
       //id , rgba , visible を適用させる
 
       var this_elm = this;
-      var tmp_series_array = new Array();
-      for (var i = 0; i < controllerInfo.series.length; i++) {
+      var tmp_series_array = [];
+      var i;
+      for (i = 0; i < controllerInfo.series.length; i++) {
         var tmp_series = controllerInfo.series[i];
         var the_active_label_id = '';
 
@@ -1353,7 +1353,7 @@
 
         if (typeof tmp_series.label === 'object') {
           for (var j = 0; j < tmp_series.label.length; j++) {
-            var tmp_array = new Array();
+            var tmp_array = [];
             var tmp_label = $.extend(true, tmp_array, tmp_series.label[j]);
             tmp_series_obj.label.push(tmp_label);
           }
@@ -1362,7 +1362,7 @@
       }
 
       //配下ビューアーオプション情報を書き換えて再描画を発火させる
-      for (var i = controllerInfo.viewer.length - 1; i >= 0; i--) {
+      for (i = controllerInfo.viewer.length - 1; i >= 0; i--) {
         var elmId = '#' + controllerInfo.viewer[i].elementId;
         var tmp_val = {
           viewer: {
@@ -1372,7 +1372,8 @@
         }
         $(elmId).trigger('setOptions', [tmp_val]).trigger('sync');
       }
-    } /*setColorToViewer*/ ,
+    }, //setColorToViewer
+
 
 
     setViewerInnerEvents: function () {
@@ -1434,10 +1435,10 @@
 
         $(tmp_elm).bind('onGuideChange', function (e, the_orientation, number_x, number_y) {
 
-          var i = 0;
+          var j = 0;
           var the_angle = 0;
-          for (i = 0; i < controllerInfo.viewer.length; i += 1) {
-            var tmp_viewer = controllerInfo.viewer[i];
+          for (j = 0; j < controllerInfo.viewer.length; j += 1) {
+            var tmp_viewer = controllerInfo.viewer[j];
             var the_slider = $('#' + tmp_viewer.elementId).find('.slider_elm');
 
             if (the_orientation === 'axial') {
@@ -1474,7 +1475,7 @@
               the_angle = $('#' + tmp_viewer.elementId).imageViewer('option').viewer.cut.angle;
             }
 
-            if(typeof tmp_viewer.rotateControl !== 'undefined' && tmp_viewer.rotateControl === true){
+            if (typeof tmp_viewer.rotateControl !== 'undefined' && tmp_viewer.rotateControl === true) {
               var new_rotate_opt = $('#' + tmp_viewer.elementId).imageViewer('option').viewer.rotate;
               this_elm.imageViewerController('setObliqueOptions',tmp_viewer.orientation, new_rotate_opt.angle);
             }
@@ -1490,13 +1491,13 @@
     syncWindowInfo: function (new_window_info,changed_element_id) {
       var selected_preset_txt = $('#'+changed_element_id).find('.image_window_preset_select').find('option:selected').text();
       for (var i = 0; i < controllerInfo.viewer.length; i++) {
-        if(changed_element_id !== controllerInfo.viewer[i].elementId){
+        if (changed_element_id !== controllerInfo.viewer[i].elementId) {
           var elmId = '#' + controllerInfo.viewer[i].elementId;
 
           //change preset (don't fire change event)
-          $(elmId).find('.image_window_preset_select').find('option').each(function(){
+          $(elmId).find('.image_window_preset_select').find('option').each(function() {
             var tmp_this = $(this);
-            if(tmp_this.text() === selected_preset_txt){
+            if (tmp_this.text() === selected_preset_txt) {
               $(elmId).find('.image_window_preset_select').val(tmp_this.val())
             }
           });
@@ -1522,7 +1523,7 @@
           }
         }
 
-        if(tmp_opts.viewer.rotate.visible === true){
+        if (tmp_opts.viewer.rotate.visible === true) {
           var this_elm = this;
           this_elm.imageViewerController('setObliqueOptions', tmp_opts.viewer.orientation, tmp_opts.viewer.rotate.angle);
         };
@@ -1557,7 +1558,7 @@
         }
       }
 
-      if(the_oblique_elm !== ''){
+      if (the_oblique_elm !== '') {
         var tmp_current_opts = the_oblique_elm.imageViewer('option');
         tmp_current_opts.viewer.cut = tmp_new_opts;
         the_oblique_elm.imageViewer('option', tmp_current_opts).trigger('changeImageSrc');
@@ -1680,6 +1681,7 @@
       } //coloPicker
 
 
+
       //alpha change
       tmp_wrap_elm.find('.alpha_change').change(function () {
         var the_alpha = $(this).val();
@@ -1707,6 +1709,7 @@
       //alpha_change
 
 
+
       //描画対象ラベルの変更
       tmp_wrap_elm.find('.ico_now_draw').click(function () {
         var tmp_series_id = $(this).closest('.series_wrap').attr('id');
@@ -1718,6 +1721,7 @@
         this_elm.imageViewerController('updateLabelElements');
         this_elm.imageViewerController('setColorToViewer');
       });
+
 
 
       //表示・非表示切り替え
@@ -1788,10 +1792,10 @@
             tmp_the_label.attribute = $(this).propertyeditor('option').value;
             tmp_the_label.update_flg = 1;
           });
-
       }
-
     }, //updateLabelElements
+
+
 
     zeroFormat: function (input_array) {
         // input_array = [ num , num ]
@@ -1806,6 +1810,8 @@
       } //zeroFormat
   }
 
+
+
   // プラグインメイン
   $.fn.imageViewerController = function (method) {
     // メソッド呼び出し部分
@@ -1816,6 +1822,6 @@
     } else {
       $.error('Method ' + method + ' does not exist on jQuery.tooltip');
     }
-  }
+  };
 
 })(jQuery);

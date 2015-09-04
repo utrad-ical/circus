@@ -480,11 +480,11 @@
 
       //level , check Max & Min
       if (new_level > this_opts.viewer.window.level.maximum) {
-        new_level = this_opts.viewer.window.level.maximum
+        new_level = this_opts.viewer.window.level.maximum;
       }
 
       if (new_level < this_opts.viewer.window.level.minimum) {
-        new_level = this_opts.viewer.window.level.minimum
+        new_level = this_opts.viewer.window.level.minimum;
       }
 
       this_opts.viewer.window.level.current = new_level;
@@ -663,8 +663,7 @@
         tmp_elm = tmp_elm + '<div class="mouse_cover"></div>';// element for catch event.
         tmp_elm = tmp_elm + '</div>';//close area div
         this_elm.append(tmp_elm);
-        delete tmp_elm;
-      }
+      };
       createCanvas();
 
 
@@ -682,13 +681,12 @@
         tmp_elm = tmp_elm + '<li class="window_width_wrap"><span class="image_window_controller_label">window width</span>\
           <input type="text" class="image_window_width" value="' + this_opts.viewer.window.width.current + '"></li>';
 
-        //presets
+        //preset
         tmp_elm = tmp_elm + '<li class="window_preset_wrap hidden"><select  class="image_window_preset_select"></select></li>';
 
         tmp_elm = tmp_elm + '</ul></div>';
         this_elm.find('.img_wrap').append(tmp_elm);
 
-        delete tmp_elm;
       }
 
       //number slider base (jQuery UI RUNs on them.)
@@ -697,21 +695,17 @@
         var tmp_elm = '<div class="btn_prev common_btn">Prev</div><div class="slider_outer">\
         <div class="slider_elm"></div></div><div class="btn_next common_btn">Next</div><div class="clear">&nbsp;</div>';
         this_elm.prepend(tmp_elm);
-        delete tmp_elm;
       }
       if (this_opts.viewer.orientation !== 'oblique' && this_opts.viewer.elements.slider.display === true) {
         //display number
-        var tmp_disp_num = this_opts.viewer.number.current + 1;
         var tmp_elm = '<p class="disp_num">' + this_opts.viewer.number.current + '</p>';
         this_elm.find('.img_wrap').append(tmp_elm);
-        delete tmp_elm;
       }
 
     if (this_opts.viewer.measure.active === true) {
         //measure
         var tmp_elm = '<p class="disp_measure"><span class="measure_num"></span><span class="measure_label">mm</span></p>';
         this_elm.find('.img_wrap').append(tmp_elm);
-        delete tmp_elm;
       }
 
       //zoom buttons
@@ -721,7 +715,6 @@
                       <li class="toolbar_btn  ico_detail_sprite ico_detail_sprite_resize_short"></li>\
                     </ul></div>';
         this_elm.find('.img_wrap').prepend(tmp_elm);
-        delete tmp_elm;
       }
 
       if (this_opts.viewer.elements.zoom.display === true) {
@@ -1200,7 +1193,6 @@
       for (var i = tmp_the_series.label.length - 1; i >= 0; i--) {
         if (tmp_the_series.label[i].id === label_id) {
           return tmp_the_series.label[i];
-          break;
         }
       }
     },//getLabelObjectById
@@ -2028,6 +2020,7 @@
 
 
 
+
     _mouseoverFunc: function (e) {
       var this_obj = this;
       var this_elm = this.element;
@@ -2102,7 +2095,6 @@
       } else if (this_opts.viewer.orientation === 'coronal') {
         tmp_w = this_opts.viewer.voxel.y * dpv_y;
         tmp_h = this_opts.viewer.voxel.z * dpv_z;
-
         canvas_w = Math.min(512, this_opts.viewer.voxel.x * dpv_x);
         canvas_y = this_opts.viewer.voxel.z * dpv_z;
         tmp_ow = this_opts.viewer.voxel.x;
@@ -2230,7 +2222,7 @@
               this_obj.syncVoxel();
               this_elm.trigger('onNumberChange',[this_opts.viewer.orientation,this_opts.viewer.number.current]);
             } else {
-              this_elm.removeClass('isSlide')
+              this_elm.removeClass('isSlide');
             }
           }
         });
@@ -2315,7 +2307,7 @@
           this_elm.trigger('onWindowInfoChange');
         });
 
-        //presets
+        //preset
         the_win_controller.find('.image_window_preset_select').change(function () {
           var tmp_value = $(this).val();
           if (tmp_value !== 'blank') {

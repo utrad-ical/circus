@@ -1364,13 +1364,10 @@
       //配下ビューアーオプション情報を書き換えて再描画を発火させる
       for (i = controllerInfo.viewer.length - 1; i >= 0; i--) {
         var elmId = '#' + controllerInfo.viewer[i].elementId;
-        var tmp_val = {
-          viewer: {
-            activeSeriesId: controllerInfo.activeSeriesId,
-            series: tmp_series_array
-          }
-        }
-        $(elmId).trigger('setOptions', [tmp_val]).trigger('sync');
+				var tmp_opts = $(elmId).imageViewer('option');
+				tmp_opts.viewer.activeSeriesId = controllerInfo.activeSeriesId;
+				tmp_opts.viewer.series = tmp_series_array;
+				$(elmId).imageViewer('option',tmp_opts).trigger('sync');
       }
     }, //setColorToViewer
 
@@ -1434,9 +1431,11 @@
 
 
         $(tmp_elm).bind('onGuideChange', function (e, the_orientation, number_x, number_y) {
-
-          var j = 0;
+					
+          var j;
           var the_angle = 0;
+					var touched_element_id =$(this).attr('id');
+					
           for (j = 0; j < controllerInfo.viewer.length; j += 1) {
             var tmp_viewer = controllerInfo.viewer[j];
             var the_slider = $('#' + tmp_viewer.elementId).find('.slider_elm');
@@ -1475,7 +1474,7 @@
               the_angle = $('#' + tmp_viewer.elementId).imageViewer('option').viewer.cut.angle;
             }
 
-            if (typeof tmp_viewer.rotateControl !== 'undefined' && tmp_viewer.rotateControl === true) {
+            if (typeof tmp_viewer.rotateControl !== 'undefined' && tmp_viewer.rotateControl === true && touched_element_id !== tmp_viewer.elementId) {
               var new_rotate_opt = $('#' + tmp_viewer.elementId).imageViewer('option').viewer.rotate;
               this_elm.imageViewerController('setObliqueOptions',tmp_viewer.orientation, new_rotate_opt.angle);
             }

@@ -601,7 +601,7 @@
         }
       }
       return the_return; // horizontal or vertical
-			
+
     },//_CheckGuideOver
 
 
@@ -1278,16 +1278,12 @@
 
 
 
-
-
     historyBack: function () {
       var this_obj = this;
       var this_elm = this.element;
       var this_opts = this.options;
       this_opts.container.historyBack();
     },
-
-
 
 
 
@@ -1463,24 +1459,17 @@
       var this_elm = this.element;
       var this_opts = this.options;
 
-       //一度外に出て戻ってきた場合に再び触った場合にコンテナ書き込み
+       //input temporary positions. (when the cursor drugging back from outer of canvas.)
        if (this_opts._tmpInfo.label.length > 0) {
-       //ヒストリ
-         var the_active_series = this_obj.getSeriesObjectById(this_opts.viewer.activeSeriesId);
-         this_opts.container.addHistory(
-           this_opts.viewer.activeSeriesId,
+				 var the_active_series = this_obj.getSeriesObjectById(this_opts.viewer.activeSeriesId);
+				 var tmp_data = [
+				   this_opts.viewer.activeSeriesId,
            the_active_series.activeLabelId,
            this_opts.mode,
            this_opts._tmpInfo.label
-         );
-
-         //描画
-         this_opts.container.updateVoxel(
-           this_opts.viewer.activeSeriesId,
-           the_active_series.activeLabelId,
-           this_opts.mode,
-           this_opts._tmpInfo.label
-         );
+ 				 ];
+				 this_opts.container.addHistory(tmp_data);
+         this_opts.container.updateVoxel(tmp_data);
 
          this_opts._tmpInfo.label = [];
        } else {
@@ -1499,6 +1488,7 @@
           //exchange canvas positions data to 3D data.
           this_opts._tmpInfo.label = this_obj._exchangePositionCtoV(tmp_array);
           var the_active_series = this_obj.getSeriesObjectById(this_opts.viewer.activeSeriesId);
+
           this_opts.container.updateVoxel(
             this_opts.viewer.activeSeriesId,
             the_active_series.activeLabelId,
@@ -1521,23 +1511,16 @@
        if (this_opts._tmpInfo.label.length > 0) {
 
          //history
-         var the_active_series = this_obj.getSeriesObjectById(this_opts.viewer.activeSeriesId);
-         this_opts.container.addHistory(
-           this_opts.viewer.activeSeriesId,
+				 var tmp_data = [
+				   this_opts.viewer.activeSeriesId,
            the_active_series.activeLabelId,
            this_opts.mode,
            this_opts._tmpInfo.label
-         );
-
-         //drawing buffer
-         this_opts.container.updateVoxel(
-           this_opts.viewer.activeSeriesId,
-           the_active_series.activeLabelId,
-           this_opts.mode,
-           this_opts._tmpInfo.label
-         );
-
+ 				 ];
+				 this_opts.container.addHistory(tmp_data);
+         this_opts.container.updateVoxel(tmp_data);
          this_opts._tmpInfo.label = [];
+
        } else {
 
           var tmp_ctx = this_elm.find('.canvas_main_elm').get(0).getContext('2d');
@@ -1575,8 +1558,8 @@
        if (typeof the_active_series.label !== 'undefined' &&  the_active_series.label.length > 0) {
 
          //cursor position (in image original scale)
-        var tmp_x = (e.clientX - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().left - this_opts.viewer.position.dx) * this_opts.viewer.position.ow / this_opts.viewer.position.dw;
-        var tmp_y = (e.clientY - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().top - this_opts.viewer.position.dy) * this_opts.viewer.position.oh / this_opts.viewer.position.dh;
+         var tmp_x = (e.clientX - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().left - this_opts.viewer.position.dx) * this_opts.viewer.position.ow / this_opts.viewer.position.dw;
+         var tmp_y = (e.clientY - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().top - this_opts.viewer.position.dy) * this_opts.viewer.position.oh / this_opts.viewer.position.dh;
 
          tmp_x = Math.floor(tmp_x);
          tmp_y = Math.floor(tmp_y);
@@ -2021,13 +2004,13 @@
 
 
 
-
     _mouseoverFunc: function (e) {
       var this_obj = this;
       var this_elm = this.element;
       var this_opts = this.options;
       this_opts._tmpInfo.cursor.out_flg = 0;
     },//_mouseoverFunc
+
 
 
     _mouseupFuncWindow: function (e) {

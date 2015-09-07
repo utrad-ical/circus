@@ -1368,7 +1368,7 @@
         var elmId = '#' + controllerInfo.viewer[i].elementId;
 				var tmp_opts = $(elmId).imageViewer('option');
 				tmp_opts.viewer.activeSeriesId = controllerInfo.activeSeriesId;
-				tmp_opts.viewer.series = tmp_series_array;
+				tmp_opts.viewer.series = $.extend(true, tmp_opts.viewer.series, tmp_series_array);
 				$(elmId).imageViewer('option',tmp_opts).trigger('sync');
       }
     }, //setColorToViewer

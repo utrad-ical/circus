@@ -576,7 +576,7 @@
       var guide_horizontal = this_obj.getGuide('horizontal');
       var guide_vertical =  this_obj.getGuide('vertical');
 
-      var hall_r = this_opts.viewer.guide.hall_rate * this_elm.find('.series_image_elm').width();
+      var hall_r = this_elm.find('.series_image_elm').width() * this_opts.viewer.guide.hall_rate;
 
       if (typeof range === 'number') {
         mouse_range = range;
@@ -655,6 +655,7 @@
       var this_obj = this;
       var this_elm = this.element;
       var this_opts = this.options;
+      var tmp_elm;
 
       var createCanvas = function () {
         var tmp_elm = '';
@@ -670,7 +671,7 @@
 
       //window info elements
       if (this_opts.viewer.elements.window.panel === true) {
-        var tmp_elm = '<div class="image_window_controller_wrap"><p class="btn_open">L:<span class="win_lv_label">' + this_opts.viewer.window.level.current + '</span>\
+        tmp_elm = '<div class="image_window_controller_wrap"><p class="btn_open">L:<span class="win_lv_label">' + this_opts.viewer.window.level.current + '</span>\
           /  W:<span class="win_width_label">' + this_opts.viewer.window.width.current + '</span></p>\
           <p class="btn_close"></p><ul class="image_window_controller">';
 
@@ -693,34 +694,39 @@
       //number slider base (jQuery UI RUNs on them.)
       if (this_opts.viewer.orientation !== 'oblique' && this_opts.viewer.elements.slider.panel === true) {
         //slider UI
-        var tmp_elm = '<div class="btn_prev common_btn">Prev</div><div class="slider_outer">\
-        <div class="slider_elm"></div></div><div class="btn_next common_btn">Next</div><div class="clear">&nbsp;</div>';
+        tmp_elm = '<div class="btn_prev">Prev</div>';
+        tmp_elm += '<div class="slider_outer">';
+        tmp_elm += '<div class="slider_elm"></div>';
+        tmp_elm += '</div>';
+        tmp_elm += '<div class="btn_next">Next</div>';
+        tmp_elm += '<div class="clear">&nbsp;</div>';
         this_elm.prepend(tmp_elm);
       }
+
       if (this_opts.viewer.orientation !== 'oblique' && this_opts.viewer.elements.slider.display === true) {
         //display number
-        var tmp_elm = '<p class="disp_num">' + this_opts.viewer.number.current + '</p>';
+        tmp_elm = '<p class="disp_num">' + this_opts.viewer.number.current + '</p>';
         this_elm.find('.img_wrap').append(tmp_elm);
       }
 
-    if (this_opts.viewer.measure.active === true) {
+      if (this_opts.viewer.measure.active === true) {
         //measure
-        var tmp_elm = '<p class="disp_measure"><span class="measure_num"></span><span class="measure_label">mm</span></p>';
+        tmp_elm = '<p class="disp_measure"><span class="measure_num"></span><span class="measure_label">mm</span></p>';
         this_elm.find('.img_wrap').append(tmp_elm);
       }
 
       //zoom buttons
       if (this_opts.viewer.elements.zoom.display === true) {
-        var tmp_elm = '<div class="img_toolbar_wrap"><ul class="img_toolbar">\
-                      <li class="toolbar_btn  ico_detail_sprite ico_detail_sprite_resize_large"></li>\
-                      <li class="toolbar_btn  ico_detail_sprite ico_detail_sprite_resize_short"></li>\
-                    </ul></div>';
-        this_elm.find('.img_wrap').prepend(tmp_elm);
-      }
+        tmp_elm = '<div class="img_toolbar_wrap">';
+        tmp_elm  += '<ul class="img_toolbar">';
+        tmp_elm  += '<li class="toolbar_btn ico_detail_sprite ico_detail_sprite_resize_large"></li>';
+        tmp_elm  += '<li class="toolbar_btn ico_detail_sprite ico_detail_sprite_resize_short"></li>';
+        tmp_elm  += '</ul>';
+        tmp_elm  += '</div>';
 
-      if (this_opts.viewer.elements.zoom.display === true) {
-        //element for show Zoom
-        this_elm.find('.img_wrap').append('<p class="disp_size"><span class="current_size"></span>%</p>');
+        //element for show Zoom information.
+        this_elm.find('.img_wrap').prepend(tmp_elm)
+                                    .append('<p class="disp_size"><span class="current_size"></span>%</p>');
       }
 
       //add color of border
@@ -764,15 +770,16 @@
     _createImageUrl : function () {
       var this_opts = this.options;
       var return_url = this_opts.viewer.src + '?series=' + this_opts.viewer.activeSeriesId;
-      return_url = return_url + '&wl=' +this_opts.viewer.window.level.current;
-      return_url = return_url + '&ww=' + this_opts.viewer.window.width.current;
+      return_url += '&wl=' +this_opts.viewer.window.level.current;
+      return_url += '&ww=' + this_opts.viewer.window.width.current;
 
       if ( this_opts.viewer.orientation === 'axial' || this_opts.viewer.orientation === 'sagittal' || this_opts.viewer.orientation === 'coronal') {
-        return_url = return_url + '&mode=' + this_opts.viewer.orientation  + '&target=' + this_opts.viewer.number.current;
+        return_url += '&mode=' + this_opts.viewer.orientation
+        return_url += '&target=' + this_opts.viewer.number.current;
       } else {
-        return_url = return_url + '&a=' + this_opts.viewer.cut.angle;
-        return_url = return_url + '&b=' + this_opts.viewer.cut.orientation;
-        return_url = return_url + '&c=' + this_opts.viewer.cut.center_x + ','+ this_opts.viewer.cut.center_y + ','+ this_opts.viewer.cut.center_z;
+        return_url += '&a=' + this_opts.viewer.cut.angle;
+        return_url += '&b=' + this_opts.viewer.cut.orientation;
+        return_url += '&c=' + this_opts.viewer.cut.center_x + ','+ this_opts.viewer.cut.center_y + ','+ this_opts.viewer.cut.center_z;
       }
       return return_url;
     },
@@ -783,7 +790,6 @@
       var return_data = this.options.container.createSaveData(series_id, label_id);
       return return_data;
     },//createSaveData
-
 
 
 
@@ -913,8 +919,8 @@
       var this_obj = this;
       var this_elm = this.element;
       var this_opts = this.options;
-
       var tmp_ctx = this_elm.find('.canvas_main_elm').get(0).getContext('2d');
+
       tmp_ctx.beginPath();
       tmp_ctx.strokeStyle = 'rgb(155, 187, 89)';
       tmp_ctx.fillStyle = 'rgb(155, 187, 89)';
@@ -994,7 +1000,7 @@
       var tmp_number_index = this_opts.viewer.number.current;
 
       for (var i = insert_array.length - 1; i >= 0; i--) {
-        var tmp_obj = []; //ボクセル上での座標を格納するオブジェクト
+        var tmp_obj = []; //array of the 3D positions data.
         if (tmp_orientation === 'axial') {
           tmp_obj[0] = Math.floor(insert_array[i][0]);
           tmp_obj[1] = Math.floor(insert_array[i][1]);
@@ -1033,7 +1039,7 @@
 
 
 
-    fitToCanvas : function () {  console.log('fitToCanvas');
+    fitToCanvas : function () {
       var this_obj = this;
       var this_elm = this.element;
       var this_opts = this.options;
@@ -1461,14 +1467,14 @@
 
        //input temporary positions. (when the cursor drugging back from outer of canvas.)
        if (this_opts._tmpInfo.label.length > 0) {
-				 var the_active_series = this_obj.getSeriesObjectById(this_opts.viewer.activeSeriesId);
-				 var tmp_data = [
-				   this_opts.viewer.activeSeriesId,
+         var the_active_series = this_obj.getSeriesObjectById(this_opts.viewer.activeSeriesId);
+         var tmp_data = [
+           this_opts.viewer.activeSeriesId,
            the_active_series.activeLabelId,
            this_opts.mode,
            this_opts._tmpInfo.label
- 				 ];
-				 this_opts.container.addHistory(tmp_data);
+          ];
+         this_opts.container.addHistory(tmp_data);
          this_opts.container.updateVoxel(tmp_data);
 
          this_opts._tmpInfo.label = [];
@@ -1508,43 +1514,35 @@
       var this_elm = this.element;
       var this_opts = this.options;
 
-       if (this_opts._tmpInfo.label.length > 0) {
+      var tmp_data = [
+       this_opts.viewer.activeSeriesId,
+       the_active_series.activeLabelId,
+       this_opts.mode,
+       this_opts._tmpInfo.label
+      ];
 
-         //history
-				 var tmp_data = [
-				   this_opts.viewer.activeSeriesId,
-           the_active_series.activeLabelId,
-           this_opts.mode,
-           this_opts._tmpInfo.label
- 				 ];
-				 this_opts.container.addHistory(tmp_data);
-         this_opts.container.updateVoxel(tmp_data);
-         this_opts._tmpInfo.label = [];
+      if (this_opts._tmpInfo.label.length > 0) {
+        //history
+        this_opts.container.addHistory(tmp_data);
+        this_opts.container.updateVoxel(tmp_data);
+        this_opts._tmpInfo.label = [];
+      } else {
+        var tmp_ctx = this_elm.find('.canvas_main_elm').get(0).getContext('2d');
+        //mouse position (on canvas , image original scale)
 
-       } else {
+         var tmp_x = (e.clientX - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().left - this_opts.viewer.position.dx) * this_opts.viewer.position.ow / this_opts.viewer.position.dw;
+        var tmp_y = (e.clientY - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().top - this_opts.viewer.position.dy) * this_opts.viewer.position.oh / this_opts.viewer.position.dh;
+        this_opts._tmpInfo.cursor.current.X = Math.floor(tmp_x);
+        this_opts._tmpInfo.cursor.current.Y = Math.floor(tmp_y);
 
-          var tmp_ctx = this_elm.find('.canvas_main_elm').get(0).getContext('2d');
+        var tmp_array = this_obj._applyBoldness([[this_opts._tmpInfo.cursor.current.X, this_opts._tmpInfo.cursor.current.Y]]);
+        this_opts._tmpInfo.label = this_obj._exchangePositionCtoV(tmp_array);
 
-          //mouse position (on canvas , image original scale)
-          var tmp_x = (e.clientX - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().left - this_opts.viewer.position.dx) * this_opts.viewer.position.ow / this_opts.viewer.position.dw;
-          var tmp_y = (e.clientY - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().top - this_opts.viewer.position.dy) * this_opts.viewer.position.oh / this_opts.viewer.position.dh;
-
-          this_opts._tmpInfo.cursor.current.X = Math.floor(tmp_x);
-          this_opts._tmpInfo.cursor.current.Y = Math.floor(tmp_y);
-
-          var tmp_array = this_obj._applyBoldness([[this_opts._tmpInfo.cursor.current.X, this_opts._tmpInfo.cursor.current.Y]]);
-          this_opts._tmpInfo.label = this_obj._exchangePositionCtoV(tmp_array);
-          var the_active_series = this_obj.getSeriesObjectById(this_opts.viewer.activeSeriesId);
-
-          this_opts.container.updateVoxel(
-            this_opts.viewer.activeSeriesId,
-            the_active_series.activeLabelId,
-            this_opts.mode,
-            this_opts._tmpInfo.label
-          );
-          this_obj.syncVoxel();
-          this_obj._disableImageAlias(tmp_ctx, false);
-       }
+        var the_active_series = this_obj.getSeriesObjectById(this_opts.viewer.activeSeriesId);
+        this_opts.container.updateVoxel(tmp_data);
+        this_obj.syncVoxel();
+        this_obj._disableImageAlias(tmp_ctx, false);
+      }
     },//_mousedownFuncErase
 
 
@@ -1953,6 +1951,7 @@
 
       //exchange positions data to VOXEL 3D
       if (this_opts._tmpInfo.label.length > 0) {
+
         //put into history
         var the_active_series = this_obj.getSeriesObjectById(this_opts.viewer.activeSeriesId);
         this_opts.container.addHistory(
@@ -2312,7 +2311,7 @@
       //zoom in-out button
       if (this_opts.viewer.elements.zoom.active === true) {
 
-      	this_elm.find('.ico_detail_sprite_resize_large,.ico_detail_sprite_resize_short').click(function () {
+        this_elm.find('.ico_detail_sprite_resize_large,.ico_detail_sprite_resize_short').click(function () {
           this_elm.imageViewer('changeMode', 'pan');
           if (this_opts.viewer.position.zoom >= 32 && 0.1 >= this_opts.viewer.position.zoom) {
             return false;

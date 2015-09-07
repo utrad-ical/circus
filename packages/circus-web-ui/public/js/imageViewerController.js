@@ -807,6 +807,8 @@
 				}
       }
 
+			$('.img_area').find('.btn_prev,.btn_next').addClass('common_btn');
+
     }, //init
 
 
@@ -1431,11 +1433,11 @@
 
 
         $(tmp_elm).bind('onGuideChange', function (e, the_orientation, number_x, number_y) {
-					
+
           var j;
           var the_angle = 0;
 					var touched_element_id =$(this).attr('id');
-					
+
           for (j = 0; j < controllerInfo.viewer.length; j += 1) {
             var tmp_viewer = controllerInfo.viewer[j];
             var the_slider = $('#' + tmp_viewer.elementId).find('.slider_elm');

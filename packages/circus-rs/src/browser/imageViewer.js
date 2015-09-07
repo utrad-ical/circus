@@ -1519,9 +1519,6 @@
       var this_opts = this.options;
 
       var the_active_series = this_obj.getSeriesObjectById(this_opts.viewer.activeSeriesId);
-			console.log( this_opts._tmpInfo.label);
-
-
       var tmp_data = [
        this_opts.viewer.activeSeriesId,
        the_active_series.activeLabelId,

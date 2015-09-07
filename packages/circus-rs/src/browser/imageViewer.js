@@ -121,7 +121,6 @@
 
 
     addLabelObject: function (series_id, label_obj) {
-
       var this_obj = this;
       var this_opts = this.options;
       var tmp_add_label_obj = {
@@ -138,6 +137,7 @@
       }
 
       target_series.label.push(tmp_add_label_obj);
+
       if (target_series.label.length === 1) {
         target_series.activeLabelId = tmp_add_label_obj.id;
       }
@@ -519,6 +519,7 @@
     },//changeWindowInfo
 
 
+
     changeZoom: function (new_zoom) {
       var this_obj = this;
       var this_elm = this.element;
@@ -575,7 +576,6 @@
       var position_params = this_opts.viewer.position;
       var guide_horizontal = this_obj.getGuide('horizontal');
       var guide_vertical =  this_obj.getGuide('vertical');
-
       var hall_r = this_elm.find('.series_image_elm').width() * this_opts.viewer.guide.hall_rate;
 
       if (typeof range === 'number') {
@@ -879,8 +879,8 @@
       var this_obj = this;
       var this_elm = this_obj.element;
       var this_opts = this_obj.options;
-
       var target_label = this_obj.getLabelObjectById(label_id, series_id);
+
       if (target_label.visible === true) {
         var tmp_ctx = this_elm.find('.canvas_main_elm').get(0).getContext('2d');
         var tmp_orientation = this_opts.viewer.orientation;
@@ -1468,14 +1468,18 @@
        //input temporary positions. (when the cursor drugging back from outer of canvas.)
        if (this_opts._tmpInfo.label.length > 0) {
          var the_active_series = this_obj.getSeriesObjectById(this_opts.viewer.activeSeriesId);
-         var tmp_data = [
-           this_opts.viewer.activeSeriesId,
+         this_opts.container.addHistory(
+				   this_opts.viewer.activeSeriesId,
            the_active_series.activeLabelId,
            this_opts.mode,
            this_opts._tmpInfo.label
-          ];
-         this_opts.container.addHistory(tmp_data);
-         this_opts.container.updateVoxel(tmp_data);
+				 );
+         this_opts.container.updateVoxel(
+			 	  this_opts.viewer.activeSeriesId,
+           the_active_series.activeLabelId,
+           this_opts.mode,
+           this_opts._tmpInfo.label
+				 );
 
          this_opts._tmpInfo.label = [];
        } else {
@@ -1514,6 +1518,10 @@
       var this_elm = this.element;
       var this_opts = this.options;
 
+      var the_active_series = this_obj.getSeriesObjectById(this_opts.viewer.activeSeriesId);
+			console.log( this_opts._tmpInfo.label);
+
+
       var tmp_data = [
        this_opts.viewer.activeSeriesId,
        the_active_series.activeLabelId,
@@ -1523,8 +1531,18 @@
 
       if (this_opts._tmpInfo.label.length > 0) {
         //history
-        this_opts.container.addHistory(tmp_data);
-        this_opts.container.updateVoxel(tmp_data);
+        this_opts.container.addHistory(
+			  	this_opts.viewer.activeSeriesId,
+          the_active_series.activeLabelId,
+          this_opts.mode,
+          this_opts._tmpInfo.label
+			  );
+        this_opts.container.updateVoxel(
+				  this_opts.viewer.activeSeriesId,
+          the_active_series.activeLabelId,
+          this_opts.mode,
+          this_opts._tmpInfo.label
+			  );
         this_opts._tmpInfo.label = [];
       } else {
         var tmp_ctx = this_elm.find('.canvas_main_elm').get(0).getContext('2d');
@@ -1539,7 +1557,12 @@
         this_opts._tmpInfo.label = this_obj._exchangePositionCtoV(tmp_array);
 
         var the_active_series = this_obj.getSeriesObjectById(this_opts.viewer.activeSeriesId);
-        this_opts.container.updateVoxel(tmp_data);
+        this_opts.container.updateVoxel(
+				  this_opts.viewer.activeSeriesId,
+          the_active_series.activeLabelId,
+          this_opts.mode,
+          this_opts._tmpInfo.label
+				);
         this_obj.syncVoxel();
         this_obj._disableImageAlias(tmp_ctx, false);
       }

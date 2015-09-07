@@ -591,7 +591,7 @@
 
       if (guide_pos_x - mouse_range < tmp_cursor_x && guide_pos_x + mouse_range > tmp_cursor_x) {
         //around cross point
-        if (guide_vertical.number - hall_r > tmp_cursor_y || guide_vertical.number + hall_r < tmp_cursor_y) {
+        if (guide_pos_y - hall_r > tmp_cursor_y || guide_pos_y + hall_r < tmp_cursor_y) {
           the_return = 'horizontal'; //vertical line. the number of this line means horizontal-guide.
         }
       } else if (guide_pos_y - mouse_range < tmp_cursor_y && guide_pos_y + mouse_range > tmp_cursor_y) {
@@ -601,6 +601,7 @@
         }
       }
       return the_return; // horizontal or vertical
+			
     },//_CheckGuideOver
 
 

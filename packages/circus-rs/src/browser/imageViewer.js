@@ -617,7 +617,7 @@
       var rotate_params = this_opts.viewer.rotate;
 
       var tmp_range = rotate_params.point_width;
-      if (typeof range == 'number') {
+      if (typeof range === 'number') {
         tmp_range = range;
       }
 
@@ -1260,7 +1260,7 @@
       var dist_y = Math.abs(goal_y - start_y);
       var tmp_base = dist_x;
 
-      if (dist_y > dist_x) {//縦の移動が大きければ縦を基準に中間点を作成していく
+      if (dist_y > dist_x) {//fix which is larger distance that Vertical or Horizontal.
         tmp_base = dist_y;
       }
 
@@ -1592,7 +1592,6 @@
       var this_obj = this;
       var this_elm = this.element;
       var this_opts = this.options;
-
       this_obj._mousemoveFuncGuide(e);
     },//_mousedownFuncGuide
 
@@ -1824,21 +1823,24 @@
       var this_elm = this.element;
       var this_opts = this.options;
 
-      var tmp_cursor_x = e.clientX - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().left - this_opts.viewer.position.dx;
-      var tmp_cursor_y = e.clientY - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().top - this_opts.viewer.position.dy;
-
-      tmp_cursor_x = tmp_cursor_x * this_opts.viewer.position.ow / this_opts.viewer.position.dw;
-      tmp_cursor_y = tmp_cursor_y * this_opts.viewer.position.oh / this_opts.viewer.position.dh;
-
       var guide_horizontal = this_obj.getGuide('horizontal');
       var guide_vertical =  this_obj.getGuide('vertical');
-      tmp_cursor_x =Math.floor(tmp_cursor_x);
-      tmp_cursor_y = Math.floor(tmp_cursor_y);
 
-      guide_horizontal.number =tmp_cursor_x;
-      guide_vertical.number = tmp_cursor_y;
+      var tmp_cursor_x = e.clientX - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().left;
+      var tmp_cursor_y = e.clientY - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().top;
 
-      this_elm.trigger('onGuideChange',[this_opts.viewer.orientation,guide_horizontal.number,guide_vertical.number]);
+      var guide_x = (tmp_cursor_x - this_opts.viewer.position.dx) * this_opts.viewer.position.ow / this_opts.viewer.position.dw;
+      var guide_y = (tmp_cursor_y - this_opts.viewer.position.dy) * this_opts.viewer.position.oh / this_opts.viewer.position.dh;
+
+      guide_horizontal.number = Math.floor(guide_x);
+      guide_vertical.number = Math.floor(guide_y);
+
+      this_obj.syncVoxel();
+      this_elm.trigger('onGuideChange',[
+        this_opts.viewer.orientation,
+        guide_horizontal.number,
+        guide_vertical.number
+      ]);
 
     },//_mousemoveFuncGuide
 
@@ -1852,20 +1854,16 @@
       var guide_horizontal = this_obj.getGuide('horizontal');
       var guide_vertical =  this_obj.getGuide('vertical');
 
-      if ( direction == 'horizontal' ) {
-
-         var tmp_cursor_x = e.clientX - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().left - this_opts.viewer.position.dx;
-         guide_horizontal.number = Math.floor( tmp_cursor_x * this_opts.viewer.position.ow / this_opts.viewer.position.dw);
-
+      if ( direction === 'horizontal' ) {
+        var tmp_cursor_x = e.clientX - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().left - this_opts.viewer.position.dx;
+        guide_horizontal.number = Math.floor( tmp_cursor_x * this_opts.viewer.position.ow / this_opts.viewer.position.dw);
       } else {
+        var tmp_cursor_y = e.clientY - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().top - this_opts.viewer.position.dy;
+        guide_vertical.number = Math.floor( tmp_cursor_y * this_opts.viewer.position.oh / this_opts.viewer.position.dh);
+      }
 
-         var tmp_cursor_y = e.clientY - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().top - this_opts.viewer.position.dy;
-         guide_vertical.number = Math.floor( tmp_cursor_y * this_opts.viewer.position.oh / this_opts.viewer.position.dh);
-
-     }
-
-     this_obj.syncVoxel();
-     this_elm.trigger('onGuideChange',[
+      this_obj.syncVoxel();
+      this_elm.trigger('onGuideChange',[
         this_opts.viewer.orientation,
         guide_horizontal.number,
         guide_vertical.number
@@ -2181,6 +2179,7 @@
       });
 
       //slider UI
+      //requiring jQuery UI slider.
       if (this_opts.viewer.elements.slider.active === true) {
         this_elm.find('.slider_elm').slider({
           value: this_opts.viewer.number.current,
@@ -2193,7 +2192,7 @@
             this_elm.addClass('isSlide');
             this_opts.viewer.number.current = ui.value;
             var tmp_disp_num = this_opts.viewer.number.current + 1;
-            this_elm.find('.disp_num').text(tmp_disp_num); //画像右上の枚数表示
+            this_elm.find('.disp_num').text(tmp_disp_num); //display number
             this_obj._changeImageSrc();
             this_obj.syncVoxel();
             this_elm.trigger('onNumberChange',[this_opts.viewer.orientation,this_opts.viewer.number.current]);
@@ -2201,7 +2200,7 @@
             if (this_elm.hasClass('isSlide') === false) {
               this_opts.viewer.number.current = ui.value;
               var tmp_disp_num = this_opts.viewer.number.current + 1;
-              this_elm.find('.disp_num').text(tmp_disp_num); //画像右上の枚数表示
+              this_elm.find('.disp_num').text(tmp_disp_num); //display number
               this_obj._changeImageSrc();
               this_obj.syncVoxel();
               this_elm.trigger('onNumberChange',[this_opts.viewer.orientation,this_opts.viewer.number.current]);
@@ -2214,10 +2213,10 @@
         this_elm.find('.btn_prev').click(function () {
           var tmp_num = this_opts.viewer.number.current;
           tmp_num = Number(tmp_num);
-          if (tmp_num > 0) {  //0番より手前は無い
+          if (tmp_num > 0) {  //number Zero is the min
             tmp_num--;
             var tmp_disp_num = tmp_num + 1;
-            this_elm.find('.disp_num').text(tmp_disp_num); //画像右上の枚数表示
+            this_elm.find('.disp_num').text(tmp_disp_num); //display number
           }
           //slider sync
           this_elm.find('.slider_elm').slider({
@@ -2228,10 +2227,10 @@
         this_elm.find('.btn_next').click(function () {
           var tmp_num = this_opts.viewer.number.current;
           tmp_num = Number(tmp_num);
-          if (tmp_num < this_opts.viewer.number.maximum) {  //上限枚数の制限
+          if (tmp_num < this_opts.viewer.number.maximum) {  //maximum
             tmp_num++;
             var tmp_disp_num = tmp_num + 1;
-            this_elm.find('.disp_num').text(tmp_disp_num); //画像右上の枚数表示
+            this_elm.find('.disp_num').text(tmp_disp_num); //display number
           }
           //slider sync
           this_elm.find('.slider_elm').slider({
@@ -2310,11 +2309,10 @@
       }//window info
 
 
-      //ズーム機能
+      //zoom in-out button
       if (this_opts.viewer.elements.zoom.active === true) {
-        //拡大・縮小
 
-        this_elm.find('.ico_detail_sprite_resize_large,.ico_detail_sprite_resize_short').click(function () {
+      	this_elm.find('.ico_detail_sprite_resize_large,.ico_detail_sprite_resize_short').click(function () {
           this_elm.imageViewer('changeMode', 'pan');
           if (this_opts.viewer.position.zoom >= 32 && 0.1 >= this_opts.viewer.position.zoom) {
             return false;

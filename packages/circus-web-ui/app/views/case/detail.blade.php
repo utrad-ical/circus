@@ -510,7 +510,7 @@ id="page_case_detail"
 
 @section('content')
 <div class="al_l mar_b_5 w_600 fl_l">
-	{{HTML::link(asset('case/search'), 'Back to Case Search Result', array('class' => 'common_btn', 'id' => 'btnBack'))}}
+	{{ Form::button('Back to Case Search Result', array('class' => 'common_btn', 'id' => 'btnBack'))}}
 	@if(!isset($error_msg) && $add_series_flg)
 		{{HTML::link(asset('series/search'), 'Add Series', array('class' => 'common_btn link_add_series'))}}
 		{{Form::open(['url' => asset('series/search'), 'method' => 'POST', 'class' => 'frm_add_series'])}}

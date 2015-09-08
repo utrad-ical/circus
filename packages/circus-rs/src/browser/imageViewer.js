@@ -968,13 +968,13 @@
       //handle arrow
       tmp_ctx.beginPath();
 
-			
-			var arrow_center_x = the_points[1][0] - 0.5 * rotate_ico_size * Math.cos(rotate_params.angle);
-			var arrow_center_y = the_points[1][1] + 0.5 * rotate_ico_size * Math.sin(rotate_params.angle);
-			
+
+      var arrow_center_x = the_points[1][0] - 0.5 * rotate_ico_size * Math.cos(rotate_params.angle);
+      var arrow_center_y = the_points[1][1] + 0.5 * rotate_ico_size * Math.sin(rotate_params.angle);
+
       tmp_ctx.moveTo(arrow_center_x,arrow_center_y);
 
-			//top of arrow
+      //top of arrow
       tmp_ctx.lineTo(
         arrow_center_x + rotate_ico_size * Math.cos(rotate_params.angle),
         arrow_center_y - rotate_ico_size * Math.sin(rotate_params.angle)
@@ -1482,17 +1482,17 @@
        if (this_opts._tmpInfo.label.length > 0) {
          var the_active_series = this_obj.getSeriesObjectById(this_opts.viewer.activeSeriesId);
          this_opts.container.addHistory(
-				   this_opts.viewer.activeSeriesId,
+           this_opts.viewer.activeSeriesId,
            the_active_series.activeLabelId,
            this_opts.mode,
            this_opts._tmpInfo.label
-				 );
+         );
          this_opts.container.updateVoxel(
-			 	  this_opts.viewer.activeSeriesId,
+           this_opts.viewer.activeSeriesId,
            the_active_series.activeLabelId,
            this_opts.mode,
            this_opts._tmpInfo.label
-				 );
+         );
 
          this_opts._tmpInfo.label = [];
        } else {
@@ -1542,17 +1542,17 @@
       if (this_opts._tmpInfo.label.length > 0) {
         //history
         this_opts.container.addHistory(
-			  	this_opts.viewer.activeSeriesId,
+          this_opts.viewer.activeSeriesId,
           the_active_series.activeLabelId,
           this_opts.mode,
           this_opts._tmpInfo.label
-			  );
+        );
         this_opts.container.updateVoxel(
-				  this_opts.viewer.activeSeriesId,
+          this_opts.viewer.activeSeriesId,
           the_active_series.activeLabelId,
           this_opts.mode,
           this_opts._tmpInfo.label
-			  );
+        );
         this_opts._tmpInfo.label = [];
       } else {
         var tmp_ctx = this_elm.find('.canvas_main_elm').get(0).getContext('2d');
@@ -1568,11 +1568,11 @@
 
         var the_active_series = this_obj.getSeriesObjectById(this_opts.viewer.activeSeriesId);
         this_opts.container.updateVoxel(
-				  this_opts.viewer.activeSeriesId,
+          this_opts.viewer.activeSeriesId,
           the_active_series.activeLabelId,
           this_opts.mode,
           this_opts._tmpInfo.label
-				);
+        );
         this_obj.syncVoxel();
         this_obj._disableImageAlias(tmp_ctx, false);
       }
@@ -1668,37 +1668,41 @@
       } else {
         //before drugging, just move on canvas
 
-				if (this_obj._CheckRotateOver(e) === 1 ) {
-					this_elm.addClass('mode_rotate_active');
-					return;
-				} else {
-					this_elm.removeClass('mode_rotate_active');
-				}
-					
-				var target_guide_direction = '';
-				if (this_opts.viewer.orientation !== 'oblique') {
-					target_guide_direction = this_obj._CheckGuideOver(e);
-				}
-				
-				if (target_guide_direction !== '') {
-					this_opts._tmpInfo.mode_backup = this_opts.mode + '';
-					this_elm.removeClass(function (index, css) {
-						return (css.match(/\bmode_\S+/g) || []).join(' ');
-					});
-					this_elm.addClass('mode_guide_'+target_guide_direction);
-					return;
-				} else if (this_opts._tmpInfo.mode_backup !== '') {
-					this_opts.mode = this_opts._tmpInfo.mode_backup;
-					this_opts._tmpInfo.mode_backup = '';
-					this_elm.removeClass(function (index, css) {
-						return (css.match(/\bmode_\S+/g) || []).join(' ');
-					});
-					this_elm.removeClass('mode_guide_horizontal');
-					this_elm.removeClass('mode_guide_vertical');
-					this_elm.addClass('mode_' + this_opts.mode);
+        if (this_obj._CheckRotateOver(e) === 1 ) {
+          if(this_opts.mode === 'rotate' ||this_opts.mode === 'rotate_active'){
+            this_elm.addClass('mode_rotate_active');
+            return;
+          } else {
+            this_elm.removeClass('mode_rotate_active');
+          }
+        } else {
+          this_elm.removeClass('mode_rotate_active');
+        }
 
-				}
-					
+        var target_guide_direction = '';
+        if (this_opts.viewer.orientation !== 'oblique') {
+          target_guide_direction = this_obj._CheckGuideOver(e);
+        }
+
+        if (target_guide_direction !== '') {
+          this_opts._tmpInfo.mode_backup = this_opts.mode + '';
+          this_elm.removeClass(function (index, css) {
+            return (css.match(/\bmode_\S+/g) || []).join(' ');
+          });
+          this_elm.addClass('mode_guide_'+target_guide_direction);
+          return;
+        } else if (this_opts._tmpInfo.mode_backup !== '') {
+          this_opts.mode = this_opts._tmpInfo.mode_backup;
+          this_opts._tmpInfo.mode_backup = '';
+          this_elm.removeClass(function (index, css) {
+            return (css.match(/\bmode_\S+/g) || []).join(' ');
+          });
+          this_elm.removeClass('mode_guide_horizontal');
+          this_elm.removeClass('mode_guide_vertical');
+          this_elm.addClass('mode_' + this_opts.mode);
+
+        }
+
       }
 
     },//_mousemoveFunc
@@ -1953,6 +1957,8 @@
         this_opts.mode = this_opts._tmpInfo.mode_backup;
         this_opts._tmpInfo.mode_backup = '';
       }
+
+
     },//_mouseoutFunc
 
 
@@ -2086,8 +2092,8 @@
       var this_obj = this;
       var this_elm = this.element;
       var this_opts = this.options;
-			
-			var canvas_default = 512;
+
+      var canvas_default = 512;
 
       var tmp_w = canvas_default;
       var tmp_h = canvas_default;
@@ -2132,13 +2138,13 @@
       this_opts.viewer.position.dh = tmp_h;
 
       this_opts.viewer.number.maximum = tmp_num;
-			
-			this_opts.viewer.position.dx = (canvas_default - tmp_w) / 2;
-			this_opts.viewer.position.dy = (canvas_default - tmp_h) / 2;
+
+      this_opts.viewer.position.dx = (canvas_default - tmp_w) / 2;
+      this_opts.viewer.position.dy = (canvas_default - tmp_h) / 2;
 
       //set canvas element size.
       this_elm.find('.series_image_elm,.canvas_main_elm').attr({width: canvas_default,height: canvas_default})
-			.css({width: canvas_default + 'px', height: canvas_default + 'x'});
+      .css({width: canvas_default + 'px', height: canvas_default + 'x'});
 
       //set slider limit
       if (this_opts.viewer.number.current > tmp_num) {

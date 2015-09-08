@@ -1716,12 +1716,12 @@
             "source": {
                 "type": "git",
                 "url": "https://bitbucket.org/ical/circus_rs_dicom_server.git",
-                "reference": "1ca6db413b2fd5f2c8c51027ac4f911e5b548874"
+                "reference": "1241ec268f4425b9cef9eb3b0867bf39bc3b35f6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://bitbucket.org/ical/circus_rs_dicom_server/get/1ca6db413b2fd5f2c8c51027ac4f911e5b548874.zip",
-                "reference": "1ca6db413b2fd5f2c8c51027ac4f911e5b548874",
+                "url": "https://bitbucket.org/ical/circus_rs_dicom_server/get/1241ec268f4425b9cef9eb3b0867bf39bc3b35f6.zip",
+                "reference": "1241ec268f4425b9cef9eb3b0867bf39bc3b35f6",
                 "shasum": ""
             },
             "type": "library",
@@ -1742,7 +1742,7 @@
             "keywords": [
                 "DICOM"
             ],
-            "time": "2015-09-08 07:31:45"
+            "time": "2015-09-08 08:10:40"
         }
     ],
     "packages-dev": [

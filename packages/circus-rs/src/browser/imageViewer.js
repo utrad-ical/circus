@@ -88,7 +88,7 @@
           arrow_x : 0,
           arrow_y : 0,
           color : 'ffa500',
-          point_width : 8,
+          point_width : 16,
           visible : false
         },
         voxel: {
@@ -213,7 +213,7 @@
       return_obj[2] = [ tmp_w, center_y - (tmp_w - center_x) * this_tan];  //goal point
 
       //arrow point
-      var tmp_margin = this_opts.viewer.rotate.point_width * 8;
+      var tmp_margin = this_opts.viewer.rotate.point_width * 3;
 
       //check the angle is which area of radian
       var point_y = 0;
@@ -967,21 +967,34 @@
 
       //handle arrow
       tmp_ctx.beginPath();
-      tmp_ctx.moveTo(the_points[1][0],the_points[1][1]);
 
+			
+			var arrow_center_x = the_points[1][0] - 0.5 * rotate_ico_size * Math.cos(rotate_params.angle);
+			var arrow_center_y = the_points[1][1] + 0.5 * rotate_ico_size * Math.sin(rotate_params.angle);
+			
+      tmp_ctx.moveTo(arrow_center_x,arrow_center_y);
+
+			//top of arrow
       tmp_ctx.lineTo(
-        the_points[1][0] + rotate_ico_size * Math.cos(rotate_params.angle),
-        the_points[1][1] - rotate_ico_size * Math.sin(rotate_params.angle)
+        arrow_center_x + rotate_ico_size * Math.cos(rotate_params.angle),
+        arrow_center_y - rotate_ico_size * Math.sin(rotate_params.angle)
       );
 
       tmp_ctx.lineTo(
-        the_points[1][0] + rotate_ico_size * 0.6 * Math.cos(Math.PI * 0.5 - rotate_params.angle),
-        the_points[1][1] + rotate_ico_size * 0.6 * Math.sin(Math.PI * 0.5 - rotate_params.angle)
+        arrow_center_x + rotate_ico_size * 0.3 * Math.cos(Math.PI * 0.5 - rotate_params.angle),
+        arrow_center_y + rotate_ico_size * 0.3 * Math.sin(Math.PI * 0.5 - rotate_params.angle)
       );
 
-      tmp_ctx.lineTo(the_points[1][0],the_points[1][1]);
+      tmp_ctx.lineTo(
+        arrow_center_x + rotate_ico_size * 0.3 * Math.cos(Math.PI * 0.5 + rotate_params.angle),
+        arrow_center_y - rotate_ico_size * 0.3 * Math.sin(Math.PI * 0.5 + rotate_params.angle)
+      );
+      tmp_ctx.lineTo(
+        arrow_center_x + rotate_ico_size * Math.cos(rotate_params.angle),
+        arrow_center_y - rotate_ico_size * Math.sin(rotate_params.angle)
+      );
 
-      // tmp_ctx.arc(the_points[1][0], the_points[1][1], rotate_params.point_width, 0, Math.PI*2, false);
+
       tmp_ctx.fill();
       tmp_ctx.closePath();
 
@@ -1655,36 +1668,37 @@
       } else {
         //before drugging, just move on canvas
 
-        if (this_opts.mode === 'rotate') {
-          if ( this_obj._CheckRotateOver(e) === 1 ) {
-            this_elm.addClass('mode_rotate_active');
-            return;
-          } else {
-            this_elm.removeClass('mode_rotate_active');
-          }
-        }
+				if (this_obj._CheckRotateOver(e) === 1 ) {
+					this_elm.addClass('mode_rotate_active');
+					return;
+				} else {
+					this_elm.removeClass('mode_rotate_active');
+				}
+					
+				var target_guide_direction = '';
+				if (this_opts.viewer.orientation !== 'oblique') {
+					target_guide_direction = this_obj._CheckGuideOver(e);
+				}
+				
+				if (target_guide_direction !== '') {
+					this_opts._tmpInfo.mode_backup = this_opts.mode + '';
+					this_elm.removeClass(function (index, css) {
+						return (css.match(/\bmode_\S+/g) || []).join(' ');
+					});
+					this_elm.addClass('mode_guide_'+target_guide_direction);
+					return;
+				} else if (this_opts._tmpInfo.mode_backup !== '') {
+					this_opts.mode = this_opts._tmpInfo.mode_backup;
+					this_opts._tmpInfo.mode_backup = '';
+					this_elm.removeClass(function (index, css) {
+						return (css.match(/\bmode_\S+/g) || []).join(' ');
+					});
+					this_elm.removeClass('mode_guide_horizontal');
+					this_elm.removeClass('mode_guide_vertical');
+					this_elm.addClass('mode_' + this_opts.mode);
 
-        var target_guide_direction = '';
-        if (this_opts.viewer.orientation !== 'oblique') {
-          target_guide_direction = this_obj._CheckGuideOver(e);
-        }
-        if (target_guide_direction !== '') {
-          this_opts._tmpInfo.mode_backup = this_opts.mode + '';
-          this_elm.removeClass(function (index, css) {
-            return (css.match(/\bmode_\S+/g) || []).join(' ');
-          });
-          this_elm.addClass('mode_guide_'+target_guide_direction);
-          return;
-        } else if (this_opts._tmpInfo.mode_backup !== '') {
-          this_opts.mode = this_opts._tmpInfo.mode_backup;
-          this_opts._tmpInfo.mode_backup = '';
-          this_elm.removeClass(function (index, css) {
-            return (css.match(/\bmode_\S+/g) || []).join(' ');
-          });
-          this_elm.removeClass('mode_guide_horizontal');
-          this_elm.removeClass('mode_guide_vertical');
-          this_elm.addClass('mode_' + this_opts.mode);
-        }
+				}
+					
       }
 
     },//_mousemoveFunc
@@ -2072,14 +2086,16 @@
       var this_obj = this;
       var this_elm = this.element;
       var this_opts = this.options;
+			
+			var canvas_default = 512;
 
-      var tmp_w = 512;
-      var tmp_h = 512;
-      var tmp_ow = 512;
-      var tmp_oh = 512;
-      var tmp_num = 512;
-      var canvas_w = 512;
-      var canvas_y = 512;
+      var tmp_w = canvas_default;
+      var tmp_h = canvas_default;
+      var tmp_ow = canvas_default;
+      var tmp_oh = canvas_default;
+      var tmp_num = canvas_default;
+      var canvas_w = canvas_default;
+      var canvas_y = canvas_default;
 
       var dpv_x = Math.min(this_opts.viewer.voxel.voxel_x / this_opts.viewer.voxel.voxel_y, 1);
       var dpv_y = Math.min(this_opts.viewer.voxel.voxel_y / this_opts.viewer.voxel.voxel_x, 1);
@@ -2088,15 +2104,15 @@
       if (this_opts.viewer.orientation === 'axial') {
         tmp_w = this_opts.viewer.voxel.x * dpv_x;
         tmp_h = this_opts.viewer.voxel.y * dpv_y;
-        canvas_w = Math.min(512, this_opts.viewer.voxel.x * dpv_x);
-        canvas_y = Math.min(512, this_opts.viewer.voxel.y * dpv_y);
+        canvas_w = Math.min(canvas_default, this_opts.viewer.voxel.x * dpv_x);
+        canvas_y = Math.min(canvas_default, this_opts.viewer.voxel.y * dpv_y);
         tmp_ow = this_opts.viewer.voxel.x;
         tmp_oh = this_opts.viewer.voxel.y;
         tmp_num = this_opts.viewer.voxel.z - 1;
       } else if (this_opts.viewer.orientation === 'coronal') {
         tmp_w = this_opts.viewer.voxel.y * dpv_y;
         tmp_h = this_opts.viewer.voxel.z * dpv_z;
-        canvas_w = Math.min(512, this_opts.viewer.voxel.x * dpv_x);
+        canvas_w = Math.min(canvas_default, this_opts.viewer.voxel.x * dpv_x);
         canvas_y = this_opts.viewer.voxel.z * dpv_z;
         tmp_ow = this_opts.viewer.voxel.x;
         tmp_oh = this_opts.viewer.voxel.z;
@@ -2104,7 +2120,7 @@
       } else if (this_opts.viewer.orientation === 'sagittal') {
         tmp_w = this_opts.viewer.voxel.y * dpv_y;
         tmp_h = this_opts.viewer.voxel.z * dpv_z;
-        canvas_w = Math.min(512, this_opts.viewer.voxel.y * dpv_y);
+        canvas_w = Math.min(canvas_default, this_opts.viewer.voxel.y * dpv_y);
         canvas_y = this_opts.viewer.voxel.z * dpv_z;
         tmp_ow = this_opts.viewer.voxel.y;
         tmp_oh = this_opts.viewer.voxel.z;
@@ -2114,16 +2130,15 @@
       this_opts.viewer.position.oh = tmp_oh;
       this_opts.viewer.position.dw = tmp_w; // initial display size (canvas pixel scale)
       this_opts.viewer.position.dh = tmp_h;
+
       this_opts.viewer.number.maximum = tmp_num;
+			
+			this_opts.viewer.position.dx = (canvas_default - tmp_w) / 2;
+			this_opts.viewer.position.dy = (canvas_default - tmp_h) / 2;
 
       //set canvas element size.
-      this_elm.find('.series_image_elm,.canvas_main_elm').attr({
-        width: this_opts.viewer.position.dw,
-        height: this_opts.viewer.position.dh
-      }).css({
-        width: this_opts.viewer.position.dw + 'px',
-        height: this_opts.viewer.position.dh + 'px'
-      });
+      this_elm.find('.series_image_elm,.canvas_main_elm').attr({width: canvas_default,height: canvas_default})
+			.css({width: canvas_default + 'px', height: canvas_default + 'x'});
 
       //set slider limit
       if (this_opts.viewer.number.current > tmp_num) {

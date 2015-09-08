@@ -68,6 +68,14 @@
 		});
 
 		$('#btn_submit').click(function(){
+			@if ($export_mode)
+				$('#export_err').empty();
+				var select_projects = getSelectedProjectIds();
+				if (select_projects['cnt'] !== 1) {
+					$('#export_err').append('Please specify the project ');
+					return false;
+				}
+			@endif
 			//Ajax
 			var target_elm = $('#result_case_list');
 			var btnName = arguments[1] ? arguments[1] : "btnSearch";

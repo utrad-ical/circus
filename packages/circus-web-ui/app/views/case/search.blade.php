@@ -9,7 +9,6 @@
 {{HTML::script('js/jquery.formserializer.js')}}
 {{HTML::script('js/case-tag.js')}}
 {{HTML::script('js/jquery.flexforms.js')}}
-{{HTML::script('js/jquery.cookie.js')}}
 
 @if (isset($inputs['mongo_search_data']))
 <script>
@@ -421,6 +420,7 @@ var downloadVolume = function(taskID) {
 	var parent = $('#frmDownload');
 	parent.attr('action', "{{{asset('transfer')}}}"+"/"+taskID);
 	parent.submit();
+	$('.btn_export').removeClass('disabled');
 }
 </script>
 

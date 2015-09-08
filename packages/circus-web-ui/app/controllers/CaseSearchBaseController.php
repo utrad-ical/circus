@@ -5,7 +5,7 @@
 class CaseSearchBaseController extends BaseController {
 	protected $_prefix;
 	protected $_export_mode = false;
-	private $_cookie_delete = false;
+	private $_init_storage = true;
 	/**
 	 * Case Search Results
 	 */
@@ -19,6 +19,7 @@ class CaseSearchBaseController extends BaseController {
 			$result = ClinicalCase::searchCase($search_data);
 			$result['prefix'] = $this->_prefix;
 			$result['export_mode'] = $this->_export_mode;
+			$result['init'] = $this->_init_storage;
 
 			//タグの設定
 			if ($search_data && array_key_exists('tags', $search_data)) {
@@ -50,14 +51,8 @@ class CaseSearchBaseController extends BaseController {
 
 			$result['prefix'] = $this->_prefix;
 			$result['export_mode'] = $this->_export_mode;
-			if ($this->_export_mode) {
-				$target = array();
-				if (isset($_COOKIE["exportCookie"]) && $_COOKIE["exportCookie"] && !$this->_cookie_delete) {
-					$export_target = $_COOKIE["exportCookie"];
-					$target = explode('_', $export_target);
-				}
-				$result['inputs']['export_target'] = $target;
-			}
+			$result['init'] = $this->_init_storage;
+
 			$tmp = View::make('case/case', $result);
 		} catch (Exception $e) {
 			Log::error($e);
@@ -92,7 +87,6 @@ class CaseSearchBaseController extends BaseController {
 	 */
 	public function get_case_attribute() {
 		try {
-			//$case_attr = ClinicalCase::getCaseAttribute(Input::all());
 			$case_attr = $this->getCaseAttribute(Input::all());
 			return Response::json(['status' => 'OK', 'case_attr' => $case_attr]);
 		} catch (Exception $e) {
@@ -108,18 +102,17 @@ class CaseSearchBaseController extends BaseController {
 	{
 		if (array_key_exists('btnReset', $inputs) !== false || (!$inputs && $preset_id === false)) {
 			Session::forget($this->_prefix.'.search');
-			$this->deleteCookie();
 		//Search button is pressed during
 		} else if (array_key_exists ('btnSearch', $inputs) !== false) {
 			if (array_key_exists('disp', $inputs) === false) $inputs['disp'] = Config::get('const.page_display');
 			if (array_key_exists('sort', $inputs) === false) $inputs['sort'] = 'updateTime';
 			if (array_key_exists('order_by', $inputs) === false) $inputs['order_by'] = 'desc';
 			Session::put($this->_prefix.'.search', $inputs);
-			$this->deleteCookie();
 		} else if (array_key_exists('page', $inputs) !== false) {
 			$tmp = Session::get($this->_prefix.'.search');
 			$tmp['perPage'] = $inputs['page'];
 			Session::put($this->_prefix.'.search', $tmp);
+			$this->_init_storage = false;
 		} else if ($preset_id !== false) {
 			$presets = Auth::user()->preferences['caseSearchPresets'];
 			$detail_search = $presets[$preset_id];
@@ -127,12 +120,8 @@ class CaseSearchBaseController extends BaseController {
 			$detail_search['sort'] = 'updateTime';
 			$detail_search['order_by'] = 'desc';
 			Session::put($this->_prefix.'.search', $detail_search);
-			$this->deleteCookie();
 		} else if (array_key_exists('btnBack', $inputs) === false) {
 			Session::forget($this->_prefix.'.search');
-			$this->deleteCookie();
-		} else {
-			$this->deleteCookie();
 		}
 	}
 
@@ -150,11 +139,4 @@ class CaseSearchBaseController extends BaseController {
 		return ClinicalCase::getProjectTags(array($inputs['projectID']));
 	}
 
-	/**
-	 * Export対象クッキー削除
-	 */
-	private function deleteCookie() {
-		if (isset($_COOKIE["exportCookie"]))
-			$this->_cookie_delete = setcookie("exportCookie", "", time() - 3600);
-	}
 }

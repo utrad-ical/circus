@@ -2340,23 +2340,23 @@
           var tmp_level = this_elm.find('.image_window_level').val();
           var tmp_width = this_elm.find('.image_window_width').val();
 
-          tmp_level = tmp_level.replace(/[０-９]/, function (s) {
+          tmp_level = tmp_level.replace(/[０１２３４５６７８９－]/g, function (s) {
             return String.fromCharCode(s.charCodeAt(0) - 0xFEE0);
           });
 
-          tmp_width = tmp_width.replace(/[０-９]/, function (s) {
+          tmp_width = tmp_width.replace(/[０１２３４５６７８９－]/g, function (s) {
             return String.fromCharCode(s.charCodeAt(0) - 0xFEE0);
           });
 
-          tmp_level = tmp_level.replace(/\D/,'');
-          tmp_width = tmp_width.replace(/\D/,'');
+          tmp_level = tmp_level.replace(/[^0-9\-]/g,'');
+          tmp_width = tmp_width.replace(/[^0-9\-]/g,'');
 
           if (tmp_level === '') {tmp_level = 0;}
           if (tmp_width === '') {tmp_width = 0;}
 
           tmp_level = Number(tmp_level);
           tmp_width = Number(tmp_width);
-
+					
           this_obj.changeWindowInfo(tmp_level,tmp_width);
           this_obj._changeImageSrc();
           this_elm.trigger('onWindowInfoChange');

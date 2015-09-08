@@ -1038,14 +1038,18 @@
           var this_val = $(this).val();
           for(var i = 0; i < controllerInfo.viewer.length; i++) {
             var tmp_viewer = controllerInfo.viewer[i];
-            var the_opts = $('#' + tmp_viewer.elementId).imageViewer('option');
+						var tmp_elm = $('#' + tmp_viewer.elementId);
+            var the_opts = tmp_elm.imageViewer('option');
+						
             if (tmp_viewer.elementId === this_val) {
               the_opts.viewer.rotate.visible = true;
-              this_elm.imageViewerController('setObliqueOptions',the_opts.viewer.orientation, the_opts.viewer.rotate.angle);
+              this_elm.imageViewerController('setObliqueOptions',the_opts.viewer.orientation, the_opts.viewer.rotate.angle,true);
             } else {
               the_opts.viewer.rotate.visible = false;
             }
-            $('#' + tmp_viewer.elementId).imageViewer('option',the_opts).imageViewer('syncVoxel');
+
+						tmp_elm.imageViewer('option',the_opts)
+										.imageViewer('syncVoxel');
           }
         });
       }
@@ -1525,7 +1529,7 @@
 
 
 
-    setObliqueOptions: function (the_orientation, the_angle) {
+    setObliqueOptions: function (the_orientation, the_angle,guide_fix_flg) {
       var tmp_new_opts = {
         angle : the_angle,
         center_x : 0,
@@ -1553,7 +1557,7 @@
       if (the_oblique_elm !== '') {
         var tmp_current_opts = the_oblique_elm.imageViewer('option');
         tmp_current_opts.viewer.cut = tmp_new_opts;
-        the_oblique_elm.imageViewer('option', tmp_current_opts).trigger('changeImageSrc');
+        the_oblique_elm.imageViewer('option', tmp_current_opts).trigger('changeImageSrc',guide_fix_flg);
       }
 
     },

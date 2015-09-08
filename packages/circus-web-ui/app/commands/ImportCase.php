@@ -209,19 +209,26 @@ class ImportCase extends TaskCommand {
 
 		$labelData = $this->getJsonFromFile($labelFile);
 
-		//ラベルデータファイル保存
+		// Get path for saving label data
 		$storage = Storage::getCurrentStorage(Storage::LABEL_STORAGE);
 		if (!$storage || !$storage->path)
 			throw new Exception('ラベル保存先が設定されていません。');
-		copy($tgzFile, $storage->path.'/'.$labelID.'.gz');
 
-		//ラベル情報保存
+		// Register label information into DB
 		$labelObj = App::make('Label');
 		foreach ($labelData as $key => $val) {
 			$labelObj->$key = $val;
 		}
 		$labelObj->storageID = $storage->storageID;
 		$labelObj->save();
+
+		// Copy label data (*.gz)
+		$dstTgzFile = $labelObj->labelPath();
+		$dir = dirname($dstTgzFile);
+		if (!is_dir($dir)) {
+			mkdir($dir, 0777, true);
+		}
+		copy($tgzFile, $dstTgzFile);
 	}
 
 	/**

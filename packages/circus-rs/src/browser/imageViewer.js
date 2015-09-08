@@ -88,7 +88,7 @@
           arrow_x : 0,
           arrow_y : 0,
           color : 'ffa500',
-          point_width : 16,
+          point_width : 12,
           visible : false
         },
         voxel: {
@@ -213,7 +213,7 @@
       return_obj[2] = [ tmp_w, center_y - (tmp_w - center_x) * this_tan];  //goal point
 
       //arrow point
-      var tmp_margin = this_opts.viewer.rotate.point_width * 3;
+      var tmp_margin = this_opts.viewer.rotate.point_width * 4;
 
       //check the angle is which area of radian
       var point_y = 0;
@@ -958,6 +958,9 @@
       var center_y = guide_vertical.number * (position_params.dh / position_params.oh) + position_params.dy;
       var the_points = this_obj._calculateRotatePoint(rotate_params.angle, center_x, center_y);
 
+      rotate_params.arrow_x = the_points[1][0];
+      rotate_params.arrow_y = the_points[1][1];
+
       //line
       tmp_ctx.beginPath();
       tmp_ctx.moveTo(the_points[0][0],the_points[0][1]);
@@ -968,13 +971,12 @@
       //handle arrow
       tmp_ctx.beginPath();
 
-
       var arrow_center_x = the_points[1][0] - 0.5 * rotate_ico_size * Math.cos(rotate_params.angle);
       var arrow_center_y = the_points[1][1] + 0.5 * rotate_ico_size * Math.sin(rotate_params.angle);
 
       tmp_ctx.moveTo(arrow_center_x,arrow_center_y);
 
-      //top of arrow
+      //top of handle arrow
       tmp_ctx.lineTo(
         arrow_center_x + rotate_ico_size * Math.cos(rotate_params.angle),
         arrow_center_y - rotate_ico_size * Math.sin(rotate_params.angle)
@@ -989,18 +991,49 @@
         arrow_center_x + rotate_ico_size * 0.3 * Math.cos(Math.PI * 0.5 + rotate_params.angle),
         arrow_center_y - rotate_ico_size * 0.3 * Math.sin(Math.PI * 0.5 + rotate_params.angle)
       );
+
       tmp_ctx.lineTo(
         arrow_center_x + rotate_ico_size * Math.cos(rotate_params.angle),
         arrow_center_y - rotate_ico_size * Math.sin(rotate_params.angle)
       );
 
-
       tmp_ctx.fill();
       tmp_ctx.closePath();
 
-      rotate_params.arrow_x = the_points[1][0];
-      rotate_params.arrow_y = the_points[1][1];
+      //view angle arrow
 
+
+      //direction arrow
+      tmp_ctx.beginPath();
+
+      var direction_arrow_x = the_points[1][0] + 0.5 * rotate_ico_size * Math.cos(rotate_params.angle - Math.PI * 0.5);
+      var direction_arrow_y = the_points[1][1] - 0.5 * rotate_ico_size * Math.sin(rotate_params.angle - Math.PI * 0.5);
+
+      tmp_ctx.moveTo(direction_arrow_x,direction_arrow_y);
+			//tmp_ctx. arc(direction_arrow_x,direction_arrow_y,10, 0,  Math.PI*2)
+
+     //top of direction arrow
+      tmp_ctx.lineTo(
+        direction_arrow_x + 0.5 * rotate_ico_size * Math.cos(rotate_params.angle - Math.PI * 0.25),
+        direction_arrow_y - 0.5 * rotate_ico_size * Math.sin(rotate_params.angle - Math.PI * 0.25)
+      );
+
+      tmp_ctx.lineTo(direction_arrow_x,direction_arrow_y);
+      tmp_ctx.lineTo(
+        direction_arrow_x + rotate_ico_size * Math.cos(rotate_params.angle - Math.PI * 0.5),
+        direction_arrow_y - rotate_ico_size * Math.sin(rotate_params.angle - Math.PI * 0.5)
+      );
+
+      tmp_ctx.lineTo(direction_arrow_x,direction_arrow_y);
+
+      tmp_ctx.lineTo(direction_arrow_x,direction_arrow_y);
+      tmp_ctx.lineTo(
+        direction_arrow_x + 0.5 * rotate_ico_size * Math.cos(rotate_params.angle - Math.PI * 0.75),
+        direction_arrow_y - 0.5 * rotate_ico_size * Math.sin(rotate_params.angle - Math.PI * 0.75)
+      );
+
+      tmp_ctx.stroke();
+      tmp_ctx.closePath();
     },//drawRotate
 
 
@@ -1036,9 +1069,9 @@
 
 
     fixToGuide : function () {
-			
+
 			console.log('fixtoguide');
-			
+
       var this_obj = this;
       var this_elm = this.element;
       var this_opts = this.options;
@@ -1960,7 +1993,6 @@
         this_opts.mode = this_opts._tmpInfo.mode_backup;
         this_opts._tmpInfo.mode_backup = '';
       }
-
 
     },//_mouseoutFunc
 

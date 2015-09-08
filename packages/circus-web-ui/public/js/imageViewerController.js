@@ -209,11 +209,6 @@
         return;
       }
 
-      if (new_mode !== 'rotate') {
-        $('.rotate_dir_opt').hide();
-
-      }
-
       var tmp_panel_elm = 'body';
       if (controllerInfo.elements.panel.length > 0) {
         tmp_panel_elm = '#' + controllerInfo.elements.panel;
@@ -1036,7 +1031,6 @@
       if (controllerInfo.control.measure.panel === true) {
         $('.ico_detail_sprite_rotate').click(function () {
           this_elm.imageViewerController('changeMode', 'rotate');
-          $('.rotate_dir_opt').show().focus();
         });
 
         //どの断面でObliqueを制御するかの選択
@@ -1052,10 +1046,7 @@
               the_opts.viewer.rotate.visible = false;
             }
             $('#' + tmp_viewer.elementId).imageViewer('option',the_opts).imageViewer('syncVoxel');
-            $(this).hide();
           }
-        }).blur(function() {
-         $(this).hide();
         });
       }
 

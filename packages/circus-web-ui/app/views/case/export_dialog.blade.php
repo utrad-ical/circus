@@ -65,7 +65,7 @@ var exportRun = function (validate_flag) {
     });
     var tag = JSON.stringify(tag_ary);
 
-    var export_data = {"cases":$.cookie(COOKIE_NAME), "personal":personal,"tags":tag, "export_type":export_type, "tgz_pass":tgz_pass};
+    var export_data = {"cases":sessionStorage.getItem(SESSION_STG_KEY), "personal":personal,"tags":tag, "export_type":export_type, "tgz_pass":tgz_pass};
     busy(true);
     var xhr = $.ajax({
         url: "{{{asset('share/export')}}}",
@@ -95,7 +95,6 @@ $(function(){
         return false;
     });
     $('#show_share_url').click(function() {
-        //dosnloadRun();
         $('.frm_share_download').find('input[name="download_url"]').val($('.download_btn').attr('href'));
         $('.frm_share_download').find('input[name="download_url"]').show();
         return false;

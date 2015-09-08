@@ -71,8 +71,7 @@ class ShareExportController extends BaseController
 	{
 		// Check the target cases
 		if ($data['export_type'] === 'btnExportSelect') {
-			// export the cases which are checked
-			$cases = $_COOKIE['exportCookie'];
+			$cases = $data["cases"];
 			if (!$cases)
 				throw new Exception('No cases are selected.');
 			$caseIds = explode('_', $cases);

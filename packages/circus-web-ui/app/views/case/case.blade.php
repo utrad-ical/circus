@@ -3,47 +3,60 @@
 {{HTML::script('js/saveTags.js')}}
 @if ($export_mode)
 	<script>
-		var COOKIE_NAME = "exportCookie";
+		var export_array = new Array();
+		var SESSION_STG_KEY = "exportStorage";
 		$(document).ready(function(){
-
-			if(typeof $.cookie(COOKIE_NAME) === "undefined"){
-				var first_array = new Array();
-				$.cookie(COOKIE_NAME , first_array , { expires: 1 });
-			}
-			var export_array = new Array();
-			@if (isset($inputs['export_target']) && count($inputs['export_target']) > 0)
-				export_array = {{json_encode($inputs['export_target'])}};
+			@if ($init)
+				sessionStorage.removeItem(SESSION_STG_KEY);
 			@endif
-			var tmpCookie = $.cookie(COOKIE_NAME);
-			$('.export_target_cnt').html(tmpCookie.length > 0 ? tmpCookie.split("_").length : 0);
+			var export_str = sessionStorage.getItem(SESSION_STG_KEY);
+
+			if (typeof export_str === null) {
+				var first_array = new Array();
+				sessionStorage.setItem(SESSION_STG_KEY, first_array);
+			}
+
+			var tmpStorage = sessionStorage.getItem(SESSION_STG_KEY);
+			if (tmpStorage) {
+				export_array = tmpStorage.split("_");
+			}
+
+			$(".export_case").each(function() {
+				var targetID = $(this).attr("data-target-case-id");
+				if ($.inArray(targetID, export_array) === -1) {
+					$(this).removeAttr('checked');
+				} else {
+					$(this).attr('checked','checked');
+				}
+			});
+
+			$('.export_target_cnt').html(export_array && export_array.length > 0 ? export_array.length : 0);
 
 			$(".export_case").click(function () {
 				var target_number = $(this).val();
 				var num_idx = $.inArray(target_number , export_array);
 
 				if($(this).prop('checked')){
-					// チェックが入れられた場合に、Export対象としてクッキーに追加
+					// チェックが入れられた場合に、Export対象としてセッションストレージに追加
 					if(num_idx == -1){
 						export_array.push(target_number);
-						$.cookie(COOKIE_NAME , export_array.join("_") , { expires: 1 });
+						sessionStorage.setItem(SESSION_STG_KEY, export_array.join("_"));
 					}
 
 				} else {
-					// チェックが外された場合に、Export対象外としてクッキーから削除
+					// チェックが外された場合に、Export対象外としてセッションストレージから削除
 					if(num_idx != -1){
 						export_array.splice(num_idx , 1);
-						$.cookie(COOKIE_NAME , export_array.join("_") , { expires: 1 });
+						sessionStorage.setItem(SESSION_STG_KEY , export_array.join("_"));
 					}
 				}
-				var tmpCookie = $.cookie(COOKIE_NAME);
-				$('.export_target_cnt').html(tmpCookie.split("_").length);
+				var tmpStorage = sessionStorage.getItem(SESSION_STG_KEY);
+				$('.export_target_cnt').html(tmpStorage.split("_").length);
 			});
 		});
 		var closeExportOptionDialog = function(error) {
 			$("#dialog").dialog('close');
 			$('#export_err').append(error);
-			//ボタンEnableにする
-			//$('.btn_export').removeClass('disabled');
 		}
 		var createExportOptionDialog = function() {
 			$('#dialog').slideDown();
@@ -97,10 +110,10 @@
 
 			//押下元ボタンが全件取得でない場合は選択が1つ以上あるかチェックする
 			if (export_type !== "btnExportAll") {
-				var COOKIE_NAME = "exportCookie";
+				var SESSION_STG_KEY = "exportStorage";
 
-				var tmpCookie = $.cookie(COOKIE_NAME);
-				var len = tmpCookie.length;
+				var tmpStorage = sessionStorage.getItem(SESSION_STG_KEY);
+				var len = tmpStorage.length;
 				if (len == 0) {
 					error.push('Please the Export target of the case and select one or more .');
 				}
@@ -225,7 +238,10 @@
 			@foreach ($list as $rec)
 				<tr>
 					@if ($export_mode)
-						<td>{{Form::checkbox('export_target[]', $rec->caseID, ((isset($inputs['export_target']) && array_search($rec->caseID, $inputs['export_target']) !== false) ? true : false), array('class' => 'export_case'))}}</td>
+						<td>
+							{{Form::checkbox('export_target[]', $rec->caseID, false, array('class' => 'export_case', 'data-target-case-id' => $rec->caseID))}}
+
+						</td>
 					@endif
 					<td>{{$rec->project->projectName}}</td>
 					<td>{{$rec->patientInfoCache['patientID']}}</td>

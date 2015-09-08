@@ -1036,6 +1036,9 @@
 
 
     fixToGuide : function () {
+			
+			console.log('fixtoguide');
+			
       var this_obj = this;
       var this_elm = this.element;
       var this_opts = this.options;
@@ -1046,8 +1049,8 @@
       var tmp_w = this_elm.find('.series_image_elm').width();
       var tmp_h = this_elm.find('.series_image_elm').height();
 
-      this_opts.viewer.position.dx = 0.5 * tmp_w - guide_horizontal.number * this_opts.viewer.position.zoom;
-      this_opts.viewer.position.dy = 0.5 * tmp_h - guide_vertical.number * this_opts.viewer.position.zoom;
+      this_opts.viewer.position.dx = 0.5 * tmp_w - guide_horizontal.number * this_opts.viewer.position.dw / this_opts.viewer.position.ow;
+      this_opts.viewer.position.dy = 0.5 * tmp_h - guide_vertical.number * this_opts.viewer.position.dh / this_opts.viewer.position.oh;
     },
 
 
@@ -2185,9 +2188,6 @@
       })
       .bind('drawGuide',function () {
         this_obj.drawGuide();
-      })
-      .bind('fixToGuide',function () {
-        this_obj.fixToGuide();
       });
 
       // Disable to display context menu

@@ -722,8 +722,6 @@
               'position': {
                 ow: tmp_ow,
                 oh: tmp_oh,
-                sw: tmp_ow,
-                sh: tmp_oh,
                 dw: tmp_w,
                 dh: tmp_h
               },

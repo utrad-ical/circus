@@ -120,6 +120,7 @@
     },
 
 
+
     addLabelObject: function (series_id, label_obj) {
       var this_obj = this;
       var this_opts = this.options;
@@ -147,7 +148,7 @@
 
 
 
-    _applyBoldness: function (insert_array) {
+    _applyBoldness: function (insert_array,max_x,max_y) {
       var this_obj = this,
         this_opts = this.options,
         rtn_array = [],
@@ -166,9 +167,13 @@
             tmp_y = insert_array[i][1] - bold_arround + l;
             if (tmp_x < 0) {
               tmp_x = 0;
+            } else if (tmp_x > max_x){
+              tmp_x = max_x
             }
             if (tmp_y < 0) {
               tmp_y = 0;
+            } else if (tmp_y > max_y){
+              tmp_y = max_y
             }
             rtn_array.push([tmp_x, tmp_y]);
           }
@@ -636,7 +641,6 @@
       ) {
         the_return = 1;
       }
-
       return the_return;
 
     },//_CheckRotateOver
@@ -671,7 +675,6 @@
         this_elm.append(tmp_elm);
       };
       createCanvas();
-
 
       //window info elements
       if (this_opts.viewer.elements.window.panel === true) {
@@ -1023,7 +1026,6 @@
         }
         rtn_array.push(tmp_obj);
       }
-
       return rtn_array;
     },
 
@@ -1076,30 +1078,22 @@
         this_opts.viewer.number.current
       );
 
-      var max_x = 0;
-      var max_y = 0;
-
-      max_x = Math.floor(this_opts.viewer.position.dw);
-      max_y = Math.floor(this_opts.viewer.position.dh);
+      var max_x = Math.max(this_opts.viewer.position.ow) || 0;
+      var max_y = Math.max(this_opts.viewer.position.oh) || 0;
 
       var paint_map = new Array(max_y);
-      for (var count = paint_map.length-1; count >= 0; count--) {
+      for (var count = max_y - 1; count >= 0; count--) {
         paint_map[count] = new Uint8Array(max_x);
       }
+
       //exchange from 3D positions to 2D..
-      for (var count = outer_points.length-1; count >= 0; count--) {
+      for (var count = outer_points.length - 1; count >= 0; count--) {
         if (this_opts.viewer.orientation === 'axial') {
-
           paint_map[outer_points[count][1]][outer_points[count][0]] = 1;
-
         } else if (this_opts.viewer.orientation === 'coronal') {
-
           paint_map[outer_points[count][2]][outer_points[count][0]] = 1;
-
         } else if (this_opts.viewer.orientation === 'sagittal') {
-
           paint_map[outer_points[count][2]][outer_points[count][1]] = 1;
-
         }
       }
 
@@ -1498,10 +1492,22 @@
           var tmp_x = (e.clientX - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().left - this_opts.viewer.position.dx) * this_opts.viewer.position.ow / this_opts.viewer.position.dw;
           var tmp_y = (e.clientY - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().top - this_opts.viewer.position.dy) * this_opts.viewer.position.oh / this_opts.viewer.position.dh;
 
+          if(tmp_x > this_opts.viewer.position.ow -1){
+            tmp_x = this_opts.viewer.position.ow -1;
+          }
+
+          if(tmp_y > this_opts.viewer.position.oh -1){
+            tmp_y = this_opts.viewer.position.oh -1;
+          }
+
           this_opts._tmpInfo.cursor.current.X = Math.floor(tmp_x);
           this_opts._tmpInfo.cursor.current.Y = Math.floor(tmp_y);
 
-          var tmp_array = this_obj._applyBoldness([[this_opts._tmpInfo.cursor.current.X, this_opts._tmpInfo.cursor.current.Y]]);
+          var tmp_array = this_obj._applyBoldness(
+            [[this_opts._tmpInfo.cursor.current.X, this_opts._tmpInfo.cursor.current.Y]],
+            this_opts.viewer.position.ow -1,
+            this_opts.viewer.position.oh -1
+          );
 
           //exchange canvas positions data to 3D data.
           this_opts._tmpInfo.label = this_obj._exchangePositionCtoV(tmp_array);
@@ -1553,12 +1559,25 @@
         var tmp_ctx = this_elm.find('.canvas_main_elm').get(0).getContext('2d');
         //mouse position (on canvas , image original scale)
 
-         var tmp_x = (e.clientX - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().left - this_opts.viewer.position.dx) * this_opts.viewer.position.ow / this_opts.viewer.position.dw;
+        var tmp_x = (e.clientX - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().left - this_opts.viewer.position.dx) * this_opts.viewer.position.ow / this_opts.viewer.position.dw;
         var tmp_y = (e.clientY - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().top - this_opts.viewer.position.dy) * this_opts.viewer.position.oh / this_opts.viewer.position.dh;
+
+        if(tmp_x > this_opts.viewer.position.ow -1){
+          tmp_x = this_opts.viewer.position.ow -1;
+        }
+
+        if(tmp_y > this_opts.viewer.position.oh -1){
+          tmp_y = this_opts.viewer.position.oh -1;
+        }
+
         this_opts._tmpInfo.cursor.current.X = Math.floor(tmp_x);
         this_opts._tmpInfo.cursor.current.Y = Math.floor(tmp_y);
 
-        var tmp_array = this_obj._applyBoldness([[this_opts._tmpInfo.cursor.current.X, this_opts._tmpInfo.cursor.current.Y]]);
+        var tmp_array =  this_obj._applyBoldness(
+          [[this_opts._tmpInfo.cursor.current.X, this_opts._tmpInfo.cursor.current.Y]],
+          this_opts.viewer.position.ow -1,
+          this_opts.viewer.position.oh -1
+        );
         this_opts._tmpInfo.label = this_obj._exchangePositionCtoV(tmp_array);
 
         var the_active_series = this_obj.getSeriesObjectById(this_opts.viewer.activeSeriesId);
@@ -1590,13 +1609,16 @@
          tmp_x = Math.floor(tmp_x);
          tmp_y = Math.floor(tmp_y);
 
-         var tmp_point_position = this_obj._exchangePositionCtoV([[tmp_x, tmp_y]]);
+         if(tmp_x < this_opts.viewer.position.ow -1 && tmp_y < this_opts.viewer.position.oh -1 ){
+          var tmp_point_position = this_obj._exchangePositionCtoV([[tmp_x, tmp_y]]);
 
-         this_obj._getBucketFillPositions(
-           this_opts.viewer.activeSeriesId,
-           the_active_series.activeLabelId,
-           tmp_point_position[0]
-         );
+           this_obj._getBucketFillPositions(
+             this_opts.viewer.activeSeriesId,
+             the_active_series.activeLabelId,
+             tmp_point_position[0]
+           );
+
+         }
        }
     },//_mousedownFuncBucket
 
@@ -1730,6 +1752,14 @@
       tmp_x = Math.floor(tmp_x);
       tmp_y = Math.floor(tmp_y);
 
+      if(tmp_x > this_opts.viewer.position.ow -1){
+        tmp_x = this_opts.viewer.position.ow -1;
+      }
+
+      if(tmp_y > this_opts.viewer.position.oh -1){
+        tmp_y = this_opts.viewer.position.oh -1;
+      }
+
       if (this_opts._tmpInfo.cursor.out_flg === 0) {
 
         var tmp_ctx = this_elm.find('.canvas_main_elm').get(0).getContext('2d');
@@ -1750,7 +1780,12 @@
         this_opts._tmpInfo.cursor.current.X = tmp_x;
         this_opts._tmpInfo.cursor.current.Y = tmp_y;
 
-        tmp_array = this_obj._applyBoldness(tmp_array);
+        tmp_array = this_obj._applyBoldness(
+          tmp_array,
+          this_opts.viewer.position.ow -1,
+          this_opts.viewer.position.oh -1
+        );
+
         tmp_array = this_obj._exchangePositionCtoV(tmp_array);
         this_opts._tmpInfo.label = this_opts._tmpInfo.label.concat(tmp_array);
 
@@ -2422,6 +2457,7 @@
 
 
     syncVoxel: function () {
+
 
       //update voxel & guide & measure
       var this_obj = this;

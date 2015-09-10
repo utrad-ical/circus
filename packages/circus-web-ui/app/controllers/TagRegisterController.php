@@ -17,8 +17,8 @@ class TagRegisterController extends ApiBaseController
 		if (!is_array($tags))
 			throw new Exception('Invalid tag.');
 
-		$cases = is_array($inputs['caseID']) ? $inputs['caseID'] : [$inputs['caseID']];
-
+		$cases = is_array($inputs['caseID']) ? $inputs['caseID'] :
+					strpos($inputs['caseID'], ',') !== false ? explode(',', $inputs['caseID']) : [$inputs['caseID']];
 		foreach ($cases as $caseID) {
 			$case = ClinicalCase::findOrFail($caseID);
 			if (!isset($accessibleProjects[$case->projectID])) {

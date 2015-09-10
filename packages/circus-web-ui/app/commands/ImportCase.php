@@ -114,6 +114,9 @@ class ImportCase extends TaskCommand {
 
 		//インポート処理
 		$this->import($unZipPath, $counter);
+
+		//該当ファイル削除
+		CommonHelper::deleteOlderTemporaryFiles($unZipPath);
 	}
 
 	/**
@@ -471,6 +474,10 @@ class ImportCase extends TaskCommand {
 			$tmpPath = pathinfo($path, PATHINFO_DIRNAME).'/'.pathInfo($path, PATHINFO_FILENAME);
 			$decrypt = openssl_decrypt(file_get_contents($path), 'aes-256-ecb', $this->option('password'));
 
+			//パスワードが異なる
+			if ($decrypt === false)
+				throw new Exception('failed password .');
+
 			$res_tgz = file_put_contents($tmpPath.'.tgz', $decrypt);
 			$tmpPath = $tmpPath.'.tgz';
 
@@ -479,13 +486,14 @@ class ImportCase extends TaskCommand {
 
 		//解凍処理
 		$phar = new PharData($tmpPath);
-		$baseDir = pathinfo($tmpPath, PATHINFO_DIRNAME);
-		if (!is_dir($baseDir.'/temp'))
-			mkdir($baseDir.'/temp', 0777, true); // make directory recursively
 
-		$phar->extractTo($baseDir.'/temp');
+		$tmpDir = Str::random(32);
+		$baseDir = storage_path('cache') . '/' . $tmpDir;
+		if (!is_dir($baseDir))
+			mkdir($baseDir, 0777, true); // make directory recursively
+		$phar->extractTo($baseDir);
 
-		return $baseDir.'/temp';
+		return $baseDir;
 	}
 
 	/**

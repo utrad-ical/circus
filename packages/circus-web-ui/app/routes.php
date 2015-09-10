@@ -132,6 +132,8 @@ Route::group(['before' => 'auth'], function() {
 	};
 	$rsHost('js/imageViewer.js', 'imageViewer.js');
 	$rsHost('js/voxelContainer.js', 'voxelContainer.js');
+	$rsHost('js/gunzip.min.js', 'gunzip.min.js');
+	$rsHost('js/gzip.min.js', 'gzip.min.js');
 	$rsHost('css/imageViewer.css', 'imageViewer.css');
 	$rsHost('css/tool-icon-sprite.png', 'tool-icon-sprite.png');
 	$rsHost('css/loading-bar.gif', 'loading-bar.gif');

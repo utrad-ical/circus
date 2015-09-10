@@ -183,6 +183,7 @@ $(function() {
 				errorConnection('I failed to communicate.');
 			},
 			success: function(res){
+				taskData = res;
 				deleteTask(res.taskID);
 				if (!res.logs || res.logs[0]['result'] === false) {
 					errorConnection('タスクログ情報の取得が失敗しました。');
@@ -263,7 +264,7 @@ $(function() {
 				alert('I failed to communicate.');
 			},
 			success: function(res, status, xhr){
-				alert(res.message);
+				alert('success save tags');
 				closeImportOptionDialog();
 			}
 		});
@@ -280,6 +281,7 @@ var refreshMultiTags = function(empty) {
 var closeImportOptionDialog = function(error) {
 	$("#dialog").dialog('close');
 	$('#export_err').append(error);
+	$('.upload_btn').removeClass('disabled');
 }
 var createImportOptionDialog = function() {
 	$('#dialog').slideDown();

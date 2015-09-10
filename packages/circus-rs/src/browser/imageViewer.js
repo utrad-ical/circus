@@ -974,65 +974,27 @@
 
       //handle arrow
       tmp_ctx.beginPath();
-
-      var arrow_center_x = the_points[1][0] - 0.5 * rotate_ico_size * Math.cos(rotate_params.angle);
-      var arrow_center_y = the_points[1][1] + 0.5 * rotate_ico_size * Math.sin(rotate_params.angle);
-      tmp_ctx.moveTo(arrow_center_x,arrow_center_y);
-
-      //top of handle arrow
-      tmp_ctx.lineTo(
-        arrow_center_x + rotate_ico_size * Math.cos(rotate_params.angle),
-        arrow_center_y - rotate_ico_size * Math.sin(rotate_params.angle)
-      );
-
-      tmp_ctx.lineTo(
-        arrow_center_x + rotate_ico_size * 0.3 * Math.cos(Math.PI * 0.5 - rotate_params.angle),
-        arrow_center_y + rotate_ico_size * 0.3 * Math.sin(Math.PI * 0.5 - rotate_params.angle)
-      );
-
-      tmp_ctx.lineTo(
-        arrow_center_x + rotate_ico_size * 0.3 * Math.cos(Math.PI * 0.5 + rotate_params.angle),
-        arrow_center_y - rotate_ico_size * 0.3 * Math.sin(Math.PI * 0.5 + rotate_params.angle)
-      );
-
-      tmp_ctx.lineTo(
-        arrow_center_x + rotate_ico_size * Math.cos(rotate_params.angle),
-        arrow_center_y - rotate_ico_size * Math.sin(rotate_params.angle)
-      );
-
+      tmp_ctx. arc(the_points[1][0], the_points[1][1], 0.2 * rotate_ico_size, 0, Math.PI * 2, false);
       tmp_ctx.fill();
       tmp_ctx.closePath();
 
-
       //direction arrow
       tmp_ctx.beginPath();
-
-      var direction_arrow_x = the_points[1][0] + 0.5 * rotate_ico_size * Math.cos(rotate_params.angle - Math.PI * 0.5);
-      var direction_arrow_y = the_points[1][1] - 0.5 * rotate_ico_size * Math.sin(rotate_params.angle - Math.PI * 0.5);
+      var direction_arrow_x = the_points[1][0] + 0.2 * rotate_ico_size * Math.cos(rotate_params.angle - Math.PI * 0.5);
+      var direction_arrow_y = the_points[1][1] - 0.2 * rotate_ico_size * Math.sin(rotate_params.angle - Math.PI * 0.5);
       tmp_ctx.moveTo(direction_arrow_x,direction_arrow_y);
-
-     //top of direction arrow
       tmp_ctx.lineTo(
-        direction_arrow_x + 0.5 * rotate_ico_size * Math.cos(rotate_params.angle - Math.PI * 0.25),
-        direction_arrow_y - 0.5 * rotate_ico_size * Math.sin(rotate_params.angle - Math.PI * 0.25)
+        direction_arrow_x + 0.4 * rotate_ico_size * Math.cos(rotate_params.angle - Math.PI * 0.4),
+        direction_arrow_y - 0.4 * rotate_ico_size * Math.sin(rotate_params.angle - Math.PI * 0.4)
       );
-
-      tmp_ctx.lineTo(direction_arrow_x,direction_arrow_y);
       tmp_ctx.lineTo(
-        direction_arrow_x + rotate_ico_size * Math.cos(rotate_params.angle - Math.PI * 0.5),
-        direction_arrow_y - rotate_ico_size * Math.sin(rotate_params.angle - Math.PI * 0.5)
+        direction_arrow_x + 0.4 * rotate_ico_size * Math.cos(rotate_params.angle - Math.PI * 0.6),
+        direction_arrow_y - 0.4 * rotate_ico_size * Math.sin(rotate_params.angle - Math.PI * 0.6)
       );
-
       tmp_ctx.lineTo(direction_arrow_x,direction_arrow_y);
-
-      tmp_ctx.lineTo(direction_arrow_x,direction_arrow_y);
-      tmp_ctx.lineTo(
-        direction_arrow_x + 0.5 * rotate_ico_size * Math.cos(rotate_params.angle - Math.PI * 0.75),
-        direction_arrow_y - 0.5 * rotate_ico_size * Math.sin(rotate_params.angle - Math.PI * 0.75)
-      );
-
-      tmp_ctx.stroke();
+      tmp_ctx.fill();
       tmp_ctx.closePath();
+
     },//drawRotate
 
 

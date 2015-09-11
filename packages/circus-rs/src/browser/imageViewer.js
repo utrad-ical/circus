@@ -935,14 +935,10 @@
 
       var rotate_params = this_opts.viewer.rotate;
       var position_params = this_opts.viewer.position;
-      var rotate_ico_size = 32;
+      var rotate_ico_size = 15;
       var tmp_ctx = this_elm.find('.canvas_main_elm').get(0).getContext('2d');
       tmp_ctx.strokeStyle = '#' + rotate_params.color;
-      tmp_ctx.fillStyle = '#' + rotate_params.color  ;
-
-      if (typeof rotate_params.visible === 'undefined' || rotate_params.visible !== true) {
-        return;
-      }
+      tmp_ctx.fillStyle = '#' + rotate_params.color;
 
       var guide_horizontal = this_obj.getGuide('horizontal');
       var guide_vertical =  this_obj.getGuide('vertical');
@@ -957,31 +953,31 @@
 
       //line
       tmp_ctx.beginPath();
-      tmp_ctx.moveTo(the_points[0][0],the_points[0][1]);
-      tmp_ctx.lineTo(the_points[2][0],the_points[2][1]);
+      tmp_ctx.moveTo(the_points[0][0], the_points[0][1]);
+      tmp_ctx.lineTo(the_points[2][0], the_points[2][1]);
       tmp_ctx.stroke();
       tmp_ctx.closePath();
 
       //handle arrow
       tmp_ctx.beginPath();
-      tmp_ctx. arc(the_points[1][0], the_points[1][1], 0.2 * rotate_ico_size, 0, Math.PI * 2, false);
+      tmp_ctx.arc(the_points[1][0], the_points[1][1], 0.25 * rotate_ico_size, 0, Math.PI * 2, false);
       tmp_ctx.fill();
       tmp_ctx.closePath();
 
       //direction arrow
       tmp_ctx.beginPath();
-      var direction_arrow_x = the_points[1][0] + 0.2 * rotate_ico_size * Math.cos(rotate_params.angle - Math.PI * 0.5);
-      var direction_arrow_y = the_points[1][1] - 0.2 * rotate_ico_size * Math.sin(rotate_params.angle - Math.PI * 0.5);
-      tmp_ctx.moveTo(direction_arrow_x,direction_arrow_y);
+      var direction_arrow_x = the_points[1][0] + 0.25 * rotate_ico_size * Math.cos(rotate_params.angle - Math.PI * 0.5);
+      var direction_arrow_y = the_points[1][1] - 0.25 * rotate_ico_size * Math.sin(rotate_params.angle - Math.PI * 0.5);
+      tmp_ctx.moveTo(direction_arrow_x, direction_arrow_y);
       tmp_ctx.lineTo(
-        direction_arrow_x + 0.4 * rotate_ico_size * Math.cos(rotate_params.angle - Math.PI * 0.4),
-        direction_arrow_y - 0.4 * rotate_ico_size * Math.sin(rotate_params.angle - Math.PI * 0.4)
+        direction_arrow_x + 0.75 * rotate_ico_size * Math.cos(rotate_params.angle - Math.PI * 0.375),
+        direction_arrow_y - 0.75 * rotate_ico_size * Math.sin(rotate_params.angle - Math.PI * 0.375)
      );
       tmp_ctx.lineTo(
-        direction_arrow_x + 0.4 * rotate_ico_size * Math.cos(rotate_params.angle - Math.PI * 0.6),
-        direction_arrow_y - 0.4 * rotate_ico_size * Math.sin(rotate_params.angle - Math.PI * 0.6)
+        direction_arrow_x + 0.75 * rotate_ico_size * Math.cos(rotate_params.angle - Math.PI * 0.625),
+        direction_arrow_y - 0.75 * rotate_ico_size * Math.sin(rotate_params.angle - Math.PI * 0.625)
      );
-      tmp_ctx.lineTo(direction_arrow_x,direction_arrow_y);
+      tmp_ctx.lineTo(direction_arrow_x, direction_arrow_y);
       tmp_ctx.fill();
       tmp_ctx.closePath();
 
@@ -2478,9 +2474,10 @@
       this_obj._clearCanvas();
       this_obj.drawGuide();
 
-      if (this_opts.viewer.rotate.visible === true) {
+      if (typeof this_opts.viewer.rotate.visible !== 'undefined' && this_opts.viewer.rotate.visible === true) {
         this_obj.drawRotate();
       }
+
       this_obj._createGuideHall();
 
       //get all position for Drawing of all Labels of all Seies.

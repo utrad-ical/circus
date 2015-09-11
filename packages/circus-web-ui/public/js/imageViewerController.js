@@ -101,7 +101,7 @@
     addLabelObject: function () {
       var this_elm = this;
       var active_series = this_elm.imageViewerController('getSeriesObjectById', [controllerInfo.activeSeriesId]);
-			var i;
+      var i;
       if (typeof active_series !== 'object') {
         active_series = controllerInfo.series[0];
         controllerInfo.activeSeriesId = active_series.id;
@@ -135,7 +135,7 @@
       var this_elm = this;
       controllerInfo.activeSeriesId = active_series_id;
       var active_series = this_elm.imageViewerController('getSeriesObjectById', [active_series_id]);
-			var i;
+      var i;
 
       if (typeof active_series.activeLabelId === 'undefined' || active_series.activeLabelId === '') {
         if (typeof active_series.label === 'object' && active_series.label.length > 0) {
@@ -160,10 +160,12 @@
         $(elmId).find('.slider_elm').slider({
           value: tmp_opts.viewer.number.current
         });
+
         if (tmp_opts.viewer.orientation === 'oblique') {
           $(elmId).trigger('changeImageSrc', [true]);
+        }else{
+          $(elmId).imageViewer('syncVoxel');
         }
-        $(elmId).trigger('sync');
       }
     },//changeSeries
 
@@ -173,7 +175,7 @@
 
     changedLabelNum: function () {
       var rtn_num = 0;
-			var i;
+      var i;
       var this_elm = this;
       for (i = 0; i < controllerInfo.series.length; i += 1) {
         var tmp_the_controller_series = controllerInfo.series[i];
@@ -275,7 +277,7 @@
       //紐づくビューアーたちに伝播
       for (var i = 0; i < controllerInfo.viewer.length; i++) {
         var elmId = '#' + controllerInfo.viewer[i].elementId;
-        $(elmId).trigger('sync');
+        $(elmId).imageViewer('syncVoxel');
       }
     }, //changeUpdateLabelId
 
@@ -511,7 +513,7 @@
         $(elmId).trigger('deleteLabelObject', [series_id, label_id]);
 
         //配下ビューアー表示を同期
-        $(elmId).trigger('sync');
+        $(elmId).imageViewer('syncVoxel');
       }
 
     }, //deleteLabelObject
@@ -784,23 +786,23 @@
         }
       }
 
-      //配下ビューアー表示を同期
-      for (var i = controllerInfo.viewer.length - 1; i >= 0; i--) {
-        var elmId = '#' + controllerInfo.viewer[i].elementId;
-        $(elmId).trigger('sync');
-      }
-
       //各ビューアーについて画像のピクセルサイズがcanvasを超えていた場合にはズームを縮小
+      //それ以外の場合は現状のサイズ定義でビューアー更新
       for (var i = controllerInfo.viewer.length - 1; i >= 0; i--) {
         var elmId = '#' + controllerInfo.viewer[i].elementId;
-				var tmp_opts = $(elmId).imageViewer('option');
-				var canvas_w = $(elmId).find('.series_image_elm').width();
-				if (tmp_opts.viewer.position.dw > canvas_w) {
-					$(elmId).imageViewer('fitToCanvas');
-				}
+        var tmp_opts = $(elmId).imageViewer('option');
+        var canvas_w = $(elmId).find('.series_image_elm').width();
+        var canvas_h = $(elmId).find('.series_image_elm').height();
+
+        if (tmp_opts.viewer.position.dw > canvas_w || tmp_opts.viewer.position.dh > canvas_h) {
+          $(elmId).imageViewer('fitToCanvas')
+                  .trigger('changeImageSrc');
+        } else {
+           $(elmId).imageViewer('syncVoxel');
+        }
       }
 
-			$('.img_area').find('.btn_prev,.btn_next').addClass('common_btn');
+      $('.img_area').find('.btn_prev,.btn_next').addClass('common_btn');
 
     }, //init
 
@@ -1036,9 +1038,9 @@
           var this_val = $(this).val();
           for(var i = 0; i < controllerInfo.viewer.length; i++) {
             var tmp_viewer = controllerInfo.viewer[i];
-						var tmp_elm = $('#' + tmp_viewer.elementId);
+            var tmp_elm = $('#' + tmp_viewer.elementId);
             var the_opts = tmp_elm.imageViewer('option');
-						
+
             if (tmp_viewer.elementId === this_val) {
               the_opts.viewer.rotate.visible = true;
               this_elm.imageViewerController('setObliqueOptions',the_opts.viewer.orientation, the_opts.viewer.rotate.angle,true);
@@ -1046,8 +1048,8 @@
               the_opts.viewer.rotate.visible = false;
             }
 
-						tmp_elm.imageViewer('option',the_opts)
-										.imageViewer('syncVoxel');
+            tmp_elm.imageViewer('option',the_opts)
+                    .imageViewer('syncVoxel');
           }
         });
       }
@@ -1359,10 +1361,10 @@
       //配下ビューアーオプション情報を書き換えて再描画を発火させる
       for (i = controllerInfo.viewer.length - 1; i >= 0; i--) {
         var elmId = '#' + controllerInfo.viewer[i].elementId;
-				var tmp_opts = $(elmId).imageViewer('option');
-				tmp_opts.viewer.activeSeriesId = controllerInfo.activeSeriesId;
-				tmp_opts.viewer.series = $.extend(true, tmp_opts.viewer.series, tmp_series_array);
-				$(elmId).imageViewer('option',tmp_opts).trigger('sync');
+        var tmp_opts = $(elmId).imageViewer('option');
+        tmp_opts.viewer.activeSeriesId = controllerInfo.activeSeriesId;
+        tmp_opts.viewer.series = $.extend(true, tmp_opts.viewer.series, tmp_series_array);
+        $(elmId).imageViewer('option',tmp_opts).imageViewer('syncVoxel');
       }
     }, //setColorToViewer
 
@@ -1400,19 +1402,17 @@
             tmp_panel_elm.find('.image_window_controller').show(300);
           }
         });
-
-        //更新が発生した段階でフラグを立てる
-        $(tmp_elm).bind('onWritten', function (e, label_id, series_id) {
-          for (var j = 0; j < controllerInfo.viewer.length; j++) {
-            var elmId = '#' + controllerInfo.viewer[j].elementId;
-            $(elmId).imageViewer('syncVoxel');
-          }
-        });
-
         //ある面でwindow情報が変更されたらそれを他の面にも適用させる
         $(tmp_elm).bind('onWindowInfoChange',function () {
           var tmp_this_opts = $(this).closest('.img_area').imageViewer('option');
           this_elm.imageViewerController('syncWindowInfo', tmp_this_opts.viewer.window,$(this).closest('.img_area').attr('id'));
+        });
+
+       $(tmp_elm).bind('onWritten', function (e, label_id, series_id) {
+          for (var j = 0; j < controllerInfo.viewer.length; j++) {
+            var elmId = '#' + controllerInfo.viewer[j].elementId;
+            $(elmId).imageViewer('syncVoxel');
+          }
         });
 
         $(tmp_elm).bind('onNumberChange', function (e, the_orientation, the_number) {
@@ -1429,10 +1429,14 @@
 
           var j;
           var the_angle = 0;
-					var touched_element_id =$(this).attr('id');
+          var touched_element_id =$(this).attr('id');
 
           for (j = 0; j < controllerInfo.viewer.length; j += 1) {
             var tmp_viewer = controllerInfo.viewer[j];
+            if (touched_element_id === tmp_viewer.elementId){
+              continue;
+            }
+
             var the_slider = $('#' + tmp_viewer.elementId).find('.slider_elm');
 
             if (the_orientation === 'axial') {
@@ -1469,7 +1473,7 @@
               the_angle = $('#' + tmp_viewer.elementId).imageViewer('option').viewer.cut.angle;
             }
 
-            if (typeof tmp_viewer.rotateControl !== 'undefined' && tmp_viewer.rotateControl === true && touched_element_id !== tmp_viewer.elementId) {
+            if (typeof tmp_viewer.rotateControl !== 'undefined' && tmp_viewer.rotateControl === true) {
               var new_rotate_opt = $('#' + tmp_viewer.elementId).imageViewer('option').viewer.rotate;
               this_elm.imageViewerController('setObliqueOptions',tmp_viewer.orientation, new_rotate_opt.angle);
             }

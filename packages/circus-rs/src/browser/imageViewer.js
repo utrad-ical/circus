@@ -161,8 +161,8 @@
         tmp_y;
 
       for (i = insert_array.length - 1; i >= 0; i -= 1) {
-        for (k = the_boldness - 1; k >= 0; k -= 1) { //x軸
-          for (l = the_boldness - 1; l >= 0; l -= 1) { //y軸
+        for (k = the_boldness - 1; k >= 0; k -= 1) { //x
+          for (l = the_boldness - 1; l >= 0; l -= 1) { //y
             tmp_x = insert_array[i][0] - bold_arround + k;
             tmp_y = insert_array[i][1] - bold_arround + l;
             if (tmp_x < 0) {
@@ -283,9 +283,6 @@
       var this_elm = this.element;
       var this_opts = this.options;
 
-      var pre_load_position_data = {};
-      pre_load_position_data = $.extend(true,pre_load_position_data,this_opts.viewer.position);
-
       //disp info text
       this_elm.find('.disp_measure').removeClass('active');
 
@@ -309,9 +306,8 @@
           this_opts.viewer.position.dy,
           this_opts.viewer.position.dw,
           this_opts.viewer.position.dh
-        );
+       );
         this_obj._disableImageAlias(tmp_ctx, false);
-
       };//changeMain
 
       var src_url = this_obj._createImageUrl();
@@ -379,7 +375,6 @@
         }; //loadImg
         loadImg(src_url);
       }
-
     },
 
 
@@ -400,7 +395,6 @@
       }
 
       if (change_flg === true) {
-
         this_elm.removeClass(function (index, css) {
           return (css.match(/\bmode_\S+/g) || []).join(' ');
         });
@@ -411,15 +405,14 @@
 
           // fire the custom Event for outer scripts.
           this_elm.trigger('onModeChange', [this_opts.viewer.id, new_mode]);
-
           var the_win_controller = this_elm.find('.image_window_controller');
           if (this_opts.mode === 'window') {
-            //パネルを出す
+            //show panel
             the_win_controller.slideDown(200);
             this_elm.find('.image_window_controller_wrap').find('.btn_close').show();
             this_elm.find('.image_window_controller_wrap').find('.btn_open').hide();
           } else {
-            //パネルを消す
+            //hide panel
             the_win_controller.slideUp(200);
             this_elm.find('.image_window_controller_wrap').find('.btn_close').hide();
             this_elm.find('.image_window_controller_wrap').find('.btn_open').show();
@@ -431,8 +424,7 @@
 
         }
       }
-
-    },
+    }, //changeMode
 
 
 
@@ -468,8 +460,8 @@
       }
 
       //set active label
-      if (typeof tmp_the_series.activeLabelId === 'undefined' || tmp_the_series.activeLabelId === '' ) {
-        if (typeof tmp_the_series.label === 'object' && tmp_the_series.label.length > 0 ) {
+      if (typeof tmp_the_series.activeLabelId === 'undefined' || tmp_the_series.activeLabelId === '') {
+        if (typeof tmp_the_series.label === 'object' && tmp_the_series.label.length > 0) {
           tmp_the_series.activeLabelId = tmp_the_series.label[0].id;
         }
       }
@@ -524,7 +516,6 @@
           }
         });
       }
-
     },//changeWindowInfo
 
 
@@ -638,7 +629,7 @@
           rotate_params.arrow_x + tmp_range > cursor_x &&
           rotate_params.arrow_y - tmp_range < cursor_y &&
           rotate_params.arrow_y + tmp_range > cursor_y
-      ) {
+     ) {
         the_return = 1;
       }
       return the_return;
@@ -780,7 +771,7 @@
       return_url += '&wl=' +this_opts.viewer.window.level.current;
       return_url += '&ww=' + this_opts.viewer.window.width.current;
 
-      if ( this_opts.viewer.orientation === 'axial' || this_opts.viewer.orientation === 'sagittal' || this_opts.viewer.orientation === 'coronal') {
+      if (this_opts.viewer.orientation === 'axial' || this_opts.viewer.orientation === 'sagittal' || this_opts.viewer.orientation === 'coronal') {
         return_url += '&mode=' + this_opts.viewer.orientation
         return_url += '&target=' + this_opts.viewer.number.current;
       } else {
@@ -852,7 +843,7 @@
           0,
           1,
           this_elm.find('.series_image_elm').height()
-        );
+       );
         tmp_ctx.fill();
         tmp_ctx.closePath();
       }
@@ -866,7 +857,7 @@
            guide_start_y,
            this_elm.find('.series_image_elm').width(),
            1
-        );
+       );
         tmp_ctx.fill();
         tmp_ctx.closePath();
 
@@ -877,47 +868,43 @@
 
 
 
-    drawLabel: function (series_id, label_id, positions_array) {
+    drawLabel: function (series_id, label_id, positions_array, the_color) {
       //drawing function
       //series ID
       //label ID
-      //drawing target positions [ [x,y,z],[x2,y2,z2]...]
+      //drawing target positions [ [x,y,z], [x2,y2,z2]...]
 
       var this_obj = this;
       var this_elm = this_obj.element;
       var this_opts = this_obj.options;
-      var target_label = this_obj.getLabelObjectById(label_id, series_id);
+      var tmp_ctx = this_elm.find('.canvas_main_elm').get(0).getContext('2d');
+      var tmp_orientation = this_opts.viewer.orientation;
+      var tmp_zoom_x = this_opts.viewer.position.dw / this_opts.viewer.position.ow;
+      var tmp_zoom_y = this_opts.viewer.position.dh / this_opts.viewer.position.oh;
+      var tmp_dx = this_opts.viewer.position.dx;
+      var tmp_dy = this_opts.viewer.position.dy;
 
-      if (target_label.visible === true) {
-        var tmp_ctx = this_elm.find('.canvas_main_elm').get(0).getContext('2d');
-        var tmp_orientation = this_opts.viewer.orientation;
-        var tmp_zoom_x = this_opts.viewer.position.dw / this_opts.viewer.position.ow;
-        var tmp_zoom_y = this_opts.viewer.position.dh / this_opts.viewer.position.oh;
-        var tmp_dx = this_opts.viewer.position.dx;
-        var tmp_dy = this_opts.viewer.position.dy;
-
-        tmp_ctx.beginPath();
-        for (var i = positions_array.length - 1; i >= 0; i--) {
-          var tmp_x = 0;
-          var tmp_y = 0;
-          if (tmp_orientation === 'axial') {
-            tmp_x = positions_array[i][0];
-            tmp_y = positions_array[i][1];
-          } else if (tmp_orientation === 'coronal') {
-            tmp_x = positions_array[i][0];
-            tmp_y = positions_array[i][2];
-          } else if (tmp_orientation === 'sagittal') {
-            tmp_x = positions_array[i][1];
-            tmp_y = positions_array[i][2];
-          }
-          tmp_x = tmp_x * tmp_zoom_x + tmp_dx;
-          tmp_y = tmp_y * tmp_zoom_y + tmp_dy;
-          tmp_ctx.rect(tmp_x, tmp_y, tmp_zoom_x, tmp_zoom_y);
+      tmp_ctx.beginPath();
+      tmp_ctx.fillStyle = the_color;
+      for (var i = positions_array.length - 1; i >= 0; i--) {
+        var tmp_x = 0;
+        var tmp_y = 0;
+        if (tmp_orientation === 'axial') {
+          tmp_x = positions_array[i][0];
+          tmp_y = positions_array[i][1];
+        } else if (tmp_orientation === 'coronal') {
+          tmp_x = positions_array[i][0];
+          tmp_y = positions_array[i][2];
+        } else if (tmp_orientation === 'sagittal') {
+          tmp_x = positions_array[i][1];
+          tmp_y = positions_array[i][2];
         }
-        tmp_ctx.fillStyle = target_label.rgba;
-        tmp_ctx.fill();
-        tmp_ctx.closePath();
+        tmp_x = tmp_x * tmp_zoom_x + tmp_dx;
+        tmp_y = tmp_y * tmp_zoom_y + tmp_dy;
+        tmp_ctx.rect(tmp_x, tmp_y, tmp_zoom_x, tmp_zoom_y);
       }
+      tmp_ctx.fill();
+      tmp_ctx.closePath();
     },//drawLabel
 
 
@@ -989,11 +976,11 @@
       tmp_ctx.lineTo(
         direction_arrow_x + 0.4 * rotate_ico_size * Math.cos(rotate_params.angle - Math.PI * 0.4),
         direction_arrow_y - 0.4 * rotate_ico_size * Math.sin(rotate_params.angle - Math.PI * 0.4)
-      );
+     );
       tmp_ctx.lineTo(
         direction_arrow_x + 0.4 * rotate_ico_size * Math.cos(rotate_params.angle - Math.PI * 0.6),
         direction_arrow_y - 0.4 * rotate_ico_size * Math.sin(rotate_params.angle - Math.PI * 0.6)
-      );
+     );
       tmp_ctx.lineTo(direction_arrow_x,direction_arrow_y);
       tmp_ctx.fill();
       tmp_ctx.closePath();
@@ -1040,7 +1027,6 @@
 
       tmp_zoom = Math.floor(tmp_zoom * 10) / 10;
       this_obj.changeZoom(tmp_zoom);
-      this_obj._changeImageSrc();
     },
 
 
@@ -1063,8 +1049,8 @@
 
 
 
-    _getBucketFillPositions: function (series_id,label_id,pointed_position) {
-      // pointed positions array :  [[X1,Y1,Z1],[X2,Y2,Z2]]
+    _getBucketFillPositions: function (series_id, label_id, pointed_position) {
+      // pointed positions array :  [[X1,Y1,Z1], [X2,Y2,Z2]]
 
       var this_obj = this;
       var this_elm = this.element;
@@ -1076,7 +1062,7 @@
         label_id,
         this_opts.viewer.orientation,
         this_opts.viewer.number.current
-      );
+     );
 
       var max_x = Math.max(this_opts.viewer.position.ow) || 0;
       var max_y = Math.max(this_opts.viewer.position.oh) || 0;
@@ -1185,11 +1171,8 @@
           }
         }
       }
+      return target_position_array;
 
-      this_opts.container.updateVoxel(series_id,label_id, 'pen',target_position_array);
-      this_opts.container.addHistory(series_id,label_id, 'pen',target_position_array);
-
-      this_elm.trigger('onWritten',[label_id,series_id]);
     },//_getBucketFillPositions
 
 
@@ -1281,6 +1264,7 @@
         var ary_y = start_y + i * tmp_y;
         rtn_ary.push([ary_x, ary_y]);
       }
+
       return rtn_ary;
     },
 
@@ -1326,7 +1310,7 @@
           tmp_series.voxel.x,
           tmp_series.voxel.y,
           tmp_series.voxel.z
-        );
+       );
       }
 
       this_obj.setCanvasSize();
@@ -1379,12 +1363,12 @@
       }
 
       //left
-      if (this_opts.viewer.position.dx > 0 ) {
+      if (this_opts.viewer.position.dx > 0) {
         this_opts.viewer.position.dx = 0;
       }
 
       //top
-      if (this_opts.viewer.position.dy > 0 ) {
+      if (this_opts.viewer.position.dy > 0) {
         this_opts.viewer.position.dy = 0;
       }
 
@@ -1475,13 +1459,13 @@
            the_active_series.activeLabelId,
            this_opts.mode,
            this_opts._tmpInfo.label
-         );
+        );
          this_opts.container.updateVoxel(
            this_opts.viewer.activeSeriesId,
            the_active_series.activeLabelId,
            this_opts.mode,
            this_opts._tmpInfo.label
-         );
+        );
 
          this_opts._tmpInfo.label = [];
        } else {
@@ -1509,6 +1493,10 @@
             this_opts.viewer.position.oh -1
           );
 
+                    console.log(tmp_array.length);
+          tmp_array = this_obj._reduceOverlap(tmp_array);
+                    console.log(tmp_array.length);
+
           //exchange canvas positions data to 3D data.
           this_opts._tmpInfo.label = this_obj._exchangePositionCtoV(tmp_array);
           var the_active_series = this_obj.getSeriesObjectById(this_opts.viewer.activeSeriesId);
@@ -1518,7 +1506,7 @@
             the_active_series.activeLabelId,
             this_opts.mode,
             this_opts._tmpInfo.label
-          );
+         );
           this_obj.syncVoxel();
           this_obj._disableImageAlias(tmp_ctx, false);
        }
@@ -1547,13 +1535,13 @@
           the_active_series.activeLabelId,
           this_opts.mode,
           this_opts._tmpInfo.label
-        );
+       );
         this_opts.container.updateVoxel(
           this_opts.viewer.activeSeriesId,
           the_active_series.activeLabelId,
           this_opts.mode,
           this_opts._tmpInfo.label
-        );
+       );
         this_opts._tmpInfo.label = [];
       } else {
         var tmp_ctx = this_elm.find('.canvas_main_elm').get(0).getContext('2d');
@@ -1578,6 +1566,7 @@
           this_opts.viewer.position.ow -1,
           this_opts.viewer.position.oh -1
         );
+        tmp_array = this_obj._reduceOverlap(tmp_array);
         this_opts._tmpInfo.label = this_obj._exchangePositionCtoV(tmp_array);
 
         var the_active_series = this_obj.getSeriesObjectById(this_opts.viewer.activeSeriesId);
@@ -1586,7 +1575,7 @@
           the_active_series.activeLabelId,
           this_opts.mode,
           this_opts._tmpInfo.label
-        );
+       );
         this_obj.syncVoxel();
         this_obj._disableImageAlias(tmp_ctx, false);
       }
@@ -1609,14 +1598,18 @@
          tmp_x = Math.floor(tmp_x);
          tmp_y = Math.floor(tmp_y);
 
-         if(tmp_x < this_opts.viewer.position.ow -1 && tmp_y < this_opts.viewer.position.oh -1 ){
+         if(tmp_x < this_opts.viewer.position.ow -1 && tmp_y < this_opts.viewer.position.oh -1){
           var tmp_point_position = this_obj._exchangePositionCtoV([[tmp_x, tmp_y]]);
 
-           this_obj._getBucketFillPositions(
+          var bucket_fill_positions =  this_obj._getBucketFillPositions(
              this_opts.viewer.activeSeriesId,
              the_active_series.activeLabelId,
              tmp_point_position[0]
-           );
+          );
+
+          this_opts.container.updateVoxel(this_opts.viewer.activeSeriesId,the_active_series.activeLabelId, 'pen',bucket_fill_positions);
+          this_opts.container.addHistory(this_opts.viewer.activeSeriesId,the_active_series.activeLabelId, 'pen',bucket_fill_positions);
+          this_elm.trigger('onWritten', [the_active_series.activeLabelId,this_opts.viewer.activeSeriesId]);
 
          }
        }
@@ -1685,7 +1678,7 @@
       } else {
         //before drugging, just move on canvas
 
-        if (this_obj._CheckRotateOver(e) === 1 ) {
+        if (this_obj._CheckRotateOver(e) === 1) {
           if(this_opts.mode === 'rotate' ||this_opts.mode === 'rotate_active'){
             this_elm.addClass('mode_rotate_active');
             return;
@@ -1735,8 +1728,7 @@
       tmp_position_params.dx = Math.round(this_opts._tmpInfo.elementParam.start.X + e.clientX - this_opts._tmpInfo.cursor.start.X);
       tmp_position_params.dy = Math.round(this_opts._tmpInfo.elementParam.start.Y + e.clientY - this_opts._tmpInfo.cursor.start.Y);
 
-      this_obj._changeImageSrc(false,false);
-      this_obj.syncVoxel();
+      this_obj._changeImageSrc();
     },//_mousemoveFuncPan
 
 
@@ -1786,6 +1778,7 @@
           this_opts.viewer.position.oh -1
         );
 
+        tmp_array = this_obj._reduceOverlap(tmp_array);
         tmp_array = this_obj._exchangePositionCtoV(tmp_array);
         this_opts._tmpInfo.label = this_opts._tmpInfo.label.concat(tmp_array);
 
@@ -1796,7 +1789,7 @@
           the_active_series.activeLabelId,
           this_opts.mode,
           this_opts._tmpInfo.label
-        );
+       );
 
         this_obj.syncVoxel();
         this_obj._disableImageAlias(tmp_ctx, false);
@@ -1876,7 +1869,7 @@
         dist_h = dist_h * this_opts.viewer.voxel.voxel_z;
       }
 
-      var disp_txt = Math.sqrt( dist_w*dist_w + dist_h*dist_h );
+      var disp_txt = Math.sqrt(dist_w*dist_w + dist_h*dist_h);
       disp_txt = disp_txt.toFixed(2);
       this_elm.find('.disp_measure').addClass('active').find('.measure_num').text(disp_txt);
 
@@ -1902,7 +1895,7 @@
       guide_vertical.number = Math.floor(guide_y);
 
       this_obj.syncVoxel();
-      this_elm.trigger('onGuideChange',[
+      this_elm.trigger('onGuideChange', [
         this_opts.viewer.orientation,
         guide_horizontal.number,
         guide_vertical.number
@@ -1920,16 +1913,16 @@
       var guide_horizontal = this_obj.getGuide('horizontal');
       var guide_vertical =  this_obj.getGuide('vertical');
 
-      if ( direction === 'horizontal' ) {
+      if (direction === 'horizontal') {
         var tmp_cursor_x = e.clientX - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().left - this_opts.viewer.position.dx;
-        guide_horizontal.number = Math.floor( tmp_cursor_x * this_opts.viewer.position.ow / this_opts.viewer.position.dw);
+        guide_horizontal.number = Math.floor(tmp_cursor_x * this_opts.viewer.position.ow / this_opts.viewer.position.dw);
       } else {
         var tmp_cursor_y = e.clientY - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().top - this_opts.viewer.position.dy;
-        guide_vertical.number = Math.floor( tmp_cursor_y * this_opts.viewer.position.oh / this_opts.viewer.position.dh);
+        guide_vertical.number = Math.floor(tmp_cursor_y * this_opts.viewer.position.oh / this_opts.viewer.position.dh);
       }
 
       this_obj.syncVoxel();
-      this_elm.trigger('onGuideChange',[
+      this_elm.trigger('onGuideChange', [
         this_opts.viewer.orientation,
         guide_horizontal.number,
         guide_vertical.number
@@ -1959,13 +1952,13 @@
       var center_x = guide_horizontal.number * (position_params.dw / position_params.ow) + position_params.dx;
       var center_y = guide_vertical.number * (position_params.dh / position_params.oh) + position_params.dy;
 
-      var new_angle = Math.atan( (center_y - tmp_cursor_y) / (tmp_cursor_x - center_x) );
+      var new_angle = Math.atan((center_y - tmp_cursor_y) / (tmp_cursor_x - center_x));
       if (tmp_cursor_x < center_x) {
         //the second & third quadrant
         new_angle = new_angle + Math.PI;
       }
 
-      new_angle = Math.ceil( new_angle * 100 ) / 100;
+      new_angle = Math.ceil(new_angle * 100) / 100;
       this_opts.viewer.rotate.angle = new_angle;
       this_obj.syncVoxel();
       this_elm.trigger('onRotateChange', [this_opts.viewer.orientation,new_angle]);
@@ -2028,7 +2021,7 @@
           the_active_series.activeLabelId,
           this_opts.mode,
           this_opts._tmpInfo.label
-        );
+       );
 
         //update voxel buffer
         this_opts.container.updateVoxel(
@@ -2036,7 +2029,7 @@
           the_active_series.activeLabelId,
           this_opts.mode,
           this_opts._tmpInfo.label
-        );
+       );
       }
       this_opts._tmpInfo.label = []; //clear memory
 
@@ -2111,9 +2104,34 @@
         value: this_opts.viewer.number.current
       });
 
-      this_obj.syncVoxel();
       return false;
     },//_mouseWheelFunc
+
+
+
+
+    _reduceOverlap: function (insert_array, input_dimension) {
+      var return_array = insert_array;
+      var compair_array = {};
+      var the_dimension = 2;
+      if(typeof dimension ==='number'){
+        the_dimension = input_dimension;
+      }
+
+      for(var i = return_array.length-1; i >= 0; i--){
+        var compair_str = 'id';
+        for(var j= 0; j < the_dimension; j++){
+          compair_str = compair_str + '-' + return_array[i][j];
+        }
+        if(typeof compair_array[compair_str] !== 'undefined' || compair_array[compair_str] === 1){
+          return_array.splice(i,1);
+        } else {
+          compair_array[compair_str] = 1;
+        }
+
+      }
+      return return_array;
+    },
 
 
 
@@ -2199,9 +2217,6 @@
       this_elm.bind('changeImageSrc', function (e,fit_center_flg) {
         this_obj._changeImageSrc(fit_center_flg);
       })
-      .bind('sync', function () {
-        this_obj.syncVoxel();
-      })
       .bind('changeSeries', function (e, series_id) {
         this_obj.changeSeries(series_id);
       })
@@ -2259,16 +2274,14 @@
             var tmp_disp_num = this_opts.viewer.number.current + 1;
             this_elm.find('.disp_num').text(tmp_disp_num); //display number
             this_obj._changeImageSrc();
-            this_obj.syncVoxel();
-            this_elm.trigger('onNumberChange',[this_opts.viewer.orientation,this_opts.viewer.number.current]);
+            this_elm.trigger('onNumberChange', [this_opts.viewer.orientation, this_opts.viewer.number.current]);
           }, change: function (event, ui) {
             if (this_elm.hasClass('isSlide') === false) {
               this_opts.viewer.number.current = ui.value;
               var tmp_disp_num = this_opts.viewer.number.current + 1;
               this_elm.find('.disp_num').text(tmp_disp_num); //display number
               this_obj._changeImageSrc();
-              this_obj.syncVoxel();
-              this_elm.trigger('onNumberChange',[this_opts.viewer.orientation,this_opts.viewer.number.current]);
+              this_elm.trigger('onNumberChange', [this_opts.viewer.orientation,this_opts.viewer.number.current]);
             } else {
               this_elm.removeClass('isSlide');
             }
@@ -2383,7 +2396,7 @@
               new_zoom_value = 0.1;
             }
             new_zoom_value = this_opts.viewer.position.zoom + new_zoom_value;
-            if (new_zoom_value > 32 ) {
+            if (new_zoom_value > 32) {
               new_zoom_value = 32;
             }
             new_zoom_value = Math.ceil(new_zoom_value * 10) / 10;
@@ -2396,7 +2409,7 @@
             }
 
             new_zoom_value = this_opts.viewer.position.zoom - new_zoom_value;
-            if (new_zoom_value < 0.1 ) {
+            if (new_zoom_value < 0.1) {
               new_zoom_value = 0.1;
             }
             new_zoom_value = Math.floor(new_zoom_value * 10) / 10;
@@ -2406,7 +2419,6 @@
 
           //sync some lines
           this_obj._changeImageSrc();
-          this_obj.syncVoxel();
 
         }).mousedown(function () {
           return false;
@@ -2458,7 +2470,6 @@
 
     syncVoxel: function () {
 
-
       //update voxel & guide & measure
       var this_obj = this;
       var this_elm = this.element;
@@ -2467,7 +2478,7 @@
       this_obj._clearCanvas();
       this_obj.drawGuide();
 
-      if ( this_opts.viewer.rotate.visible === true) {
+      if (this_opts.viewer.rotate.visible === true) {
         this_obj.drawRotate();
       }
       this_obj._createGuideHall();
@@ -2485,10 +2496,11 @@
               tmp_the_label.id,
               this_opts.viewer.orientation,
               this_opts.viewer.number.current
-            );
+           );
 
-            if (tmp_array.length > 0) {
-              this_obj.drawLabel(tmp_the_series.id,tmp_the_label.id,tmp_array);
+            var target_label = this_obj.getLabelObjectById(tmp_the_label.id, tmp_the_series.id);
+            if (tmp_array.length > 0 && target_label.visible === true) {
+              this_obj.drawLabel(tmp_the_series.id,tmp_the_label.id,tmp_array, target_label.color);
             }
           }
         }

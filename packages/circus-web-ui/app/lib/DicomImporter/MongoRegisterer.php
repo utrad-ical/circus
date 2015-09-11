@@ -7,6 +7,7 @@ use Monolog\Handler\RotatingFileHandler;
 use MultiRange;
 use Series;
 use Storage;
+use ServerParam;
 
 class MongoRegisterer extends Registerer
 {
@@ -141,7 +142,10 @@ class MongoRegisterer extends Registerer
 		);
 		$sr->images = (string)$dicom_data['instanceNumber'];
 		$this->setSeriesParameters($sr, $dicom_data);
-		$sr->domain = is_null($this->domain) ? 'default' : $this->domain;
+
+		$defaultDomain = ServerParam::getVal('defaultDomain');
+		$sr->domain = is_null($this->domain) ? $defaultDomain : $this->domain;
+
 		$sr->save();
 		$this->logger->log("Inserted new series in the database. Series UID=$sr->seriesUID");
 	}

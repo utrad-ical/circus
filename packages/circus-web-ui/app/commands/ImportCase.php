@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Support\Facades\File;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputArgument;
 
@@ -68,12 +69,12 @@ class ImportCase extends TaskCommand {
 			//URLまたはファイル
 			$dataType = $this->argument('data-type');
 			if (!$dataType || array_search($dataType, $this->_dataType) === false) {
-				$this->error('Please select the Import data type .');
+				$this->error('Please specify import data type (local or url).');
 			}
 
 			$filePath = $this->argument('input-path');
 			if ($filePath) {
-				$this->error('Please specify the copy source folder.');
+				$this->error('Please specify input data.');
 			}
 
 			$this->importCaseData();
@@ -94,29 +95,31 @@ class ImportCase extends TaskCommand {
 	protected function importCaseData()
 	{
 		$counter = 1;
-		//インポート元ファイル
+
+		// File name for import
 		$inputPath = $this->argument('input-path');
-		//URL or Local
+		// data type (URL or Local)
 		$dataType = $this->argument('data-type');
 
 		$dataPath = $inputPath;
-		//URLの場合はURLから該当データを取得する
+
+		// Get import data from specified URL
 		if ($dataType === self::DATA_TYPE_URL) {
 			$dataPath = $this->getInputFile($inputPath);
 			$this->updateTaskProgress($counter, 0, "Importing in progress. $counter files are processed.");
 			$counter++;
 		}
 
-		//解凍処理
+		// Extract import data
 		$unZipPath = $this->unZip($dataPath);
 		$this->updateTaskProgress($counter, 0, "Importing in progress. $counter files are processed.");
 		$counter++;
 
-		//インポート処理
+		// Main process to import case
 		$this->import($unZipPath, $counter);
 
-		//該当ファイル削除
-		CommonHelper::deleteOlderTemporaryFiles($unZipPath);
+		// Delete extracted files
+		File::deleteDirectory($unZipPath, true);
 	}
 
 	/**
@@ -145,7 +148,7 @@ class ImportCase extends TaskCommand {
 			}
 		}
 
-		//ケース情報保存
+		// ケース情報保存
 		if (!is_dir($targetDir.'/cases'))
 			throw new Exception('ケースディレクトリがありません。');
 

@@ -4,6 +4,7 @@
 var tag = {};
 (function () {
 	var projectTagList = {};
+	var pendingRequests = {};
 
 	// http://www.w3.org/TR/2008/REC-WCAG20-20081211/#relativeluminancedef
 	function lumiComp(hex) {
@@ -52,14 +53,47 @@ var tag = {};
 	 * @param callback
 	 */
 	function fetchProjectTags(projectID, callback) {
+		if (projectTagList[projectID] && callback) {
+			setTimeout(callback(projectTagList[projectID]), 0);
+			return;
+		}
+		if (projectID in pendingRequests) {
+			// HTTP request alraedy in progress
+			pendingRequests[projectID].push(callback);
+			return;
+		}
+		pendingRequests[projectID] = [callback];
 		api('project/' + projectID, {
-			success: function(data) {
+			success: function (data) {
 				var tmp = {};
 				tmp[projectID] = data.tags || [];
 				registerProjectTags(tmp);
-				callback();
+				pendingRequests[projectID].forEach(function(callback) {
+					typeof callback === 'function' && callback(projectTagList[projectID]);
+				});
+				delete pendingRequests[projectID];
 			}
 		});
+	}
+
+	function randomID() {
+		return '_' + (((1 + Math.random()) * 0x1000000) | 0).toString(16);
+	}
+
+	function popup(element, target, callback) {
+		element.on('click', function (event) {
+			event.stopPropagation();
+		});
+		element.position({my: 'top', at: 'bottom', of: target});
+
+		var body = $('body');
+		element.appendTo(body).show();
+		var handler = function () {
+			body.off('click.popup');
+			typeof callback === 'function' && callback();
+			element.remove();
+		}
+		body.on('click.popup', handler);
 	}
 
 	/**
@@ -67,48 +101,89 @@ var tag = {};
 	 * @param projectID Target project ID.
 	 * @param current string[] Currently selected tags.
 	 */
-	function tagSelector(projectID, current, callback) {
-		if (!(projectID in projectTagList)) {
-			fetchProjectTags(projectID, function() {
-				tagSelector(projectID, current, callback);
-			})
-			return;
-		}
-
-		var projectTags = projectTagList[projectID];
-		if (!$.isArray(current)) current = [];
-
-		var dialog = $('<div>')
-			.attr('title', 'Select Tags')
-			.addClass('balloon');
-		var list = $('<ul>').appendTo(dialog);
-		projectTags.forEach(function(tag) {
-			var li = $('<li>')
-				.addClass('selectable')
-				.appendTo(list);
-			$('<span>')
-				.text(tag.name)
-				.tag(tag.color)
-				.appendTo(li);
-		});
-		dialog.dialog({
-			dialogClass: 'tag-selector',
-			buttons: {
-				Cancel: function() {
-					dialog.dialog('close');
-				},
-				OK: function() {
-					dialog.dialog('close');
-					var selected = [];
-					$('input:checked', list).each(function() {
-						selected.push($(this).data('tag'));
-					})
-					callback(selected);
-				}
-			}
+	function tagSelector(projectID, target, current, callback) {
+		fetchProjectTags(projectID, function (projectTags) {
+			if (!$.isArray(current)) current = [];
+			var dialog = $('<div>')
+				.attr('title', 'Select Tags')
+				.addClass('popup tag-selector');
+			var list = $('<ul>').appendTo(dialog);
+			projectTags.forEach(function (tag) {
+				var li = $('<li>')
+					.addClass('selectable')
+					.appendTo(list);
+				var id = randomID();
+				$('<input type="checkbox">')
+					.attr('id', id)
+					.data('tag', tag.name)
+					.prop('checked', current.indexOf(tag.name) >= 0)
+					.appendTo(li);
+				$('<label>')
+					.attr('for', id)
+					.text(tag.name)
+					.tag(tag.color)
+					.appendTo(li);
+			});
+			popup(dialog, target, function () {
+				var selected = [];
+				$('input:checked', list).each(function () {
+					selected.push($(this).data('tag'));
+				});
+				typeof callback === 'function' && callback(selected);
+			});
 		});
 	}
 	tag.tagSelector = tagSelector;
 
-	$.fn.extend({tag: renderTag});
+	function tagList(tags, projectID) {
+		return this.each(function () {
+			var el = $(this);
+			tags.forEach(function (tag) {
+				var color = '#888888';
+				projectTagList[projectID].some(function(t) {
+					if (t.name === tag) {
+						color = t.color;
+						return true;
+					}
+				});
+				$('<span>').text(tag).tag(color).appendTo(el);
+			});
+		});
+	}
+
+	function tagListEditor(tags, projectID, caseID) {
+		return this.each(function () {
+			var current = tags;
+			var container = $(this);
+			var list = $('<span>').appendTo(container);
+			fetchProjectTags(projectID, function(tagList) {
+				list.tagList(tags, projectID);
+				var button = $('<button>')
+					.addClass('tag_edit_button')
+					.append($('<span class="ui-icon ui-icon-pencil">'))
+					.on('click', function (event) {
+						event.stopPropagation();
+						tagSelector(projectID, button, current, function (newTags) {
+							if (current.join('|') === newTags.join('|')) return;
+							current = newTags;
+							api('save_tags', {
+								data: {
+									caseID: caseID,
+									tags: newTags
+								}
+							}).then(function() {
+								list.empty().tagList(newTags, projectID);
+							});
+						});
+					});
+				container.append(button);
+			});
+		});
+	}
+
+	$.fn.extend({
+		tag: renderTag,
+		tagList: tagList,
+		tagListEditor: tagListEditor
+	});
 })(tag);

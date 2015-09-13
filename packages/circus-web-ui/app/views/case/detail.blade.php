@@ -16,7 +16,6 @@
 {{HTML::script('js/export-common.js')}}
 {{HTML::script('js/jquery.multiselect.min.js')}}
 {{HTML::script('js/case-tag.js')}}
-{{HTML::script('js/saveTags.js')}}
 
 @if (!isset($error_msg))
 	@if (!$edit_flg)
@@ -586,7 +585,7 @@ id="page_case_detail"
 				<div class="control_panel_inner" id="revision_attribute_wrap"></div>
 				<hr>
 				<div class="control_panel_inner revision_tag_wrap">tags:
-					@include('case.tag', array('prj_tags' => $case_detail->project->tags, 'case_tags' => $case_detail->tags, 'tag_caseID' => $case_detail->caseID))
+					@include('case.tag', array('case' => $case_detail))
 				</div>
 			</div>
 		</div>

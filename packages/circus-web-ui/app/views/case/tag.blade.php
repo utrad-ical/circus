@@ -1,6 +1,9 @@
-@if ($prj_tags)
-	@foreach ($prj_tags as $idx => $prj_tag)
-		{{Form::checkbox('tags', $idx, ($case_tags && array_search($idx, $case_tags) !== false), array('id' => $tag_caseID.'_'.$idx, 'class' => 'select_tags'))}}
-		<script>renderTag("{{$prj_tag['name']}}", "{{$prj_tag['color']}}", "{{{$tag_caseID.'_'.$idx}}}");</script>
-	@endforeach
-@endif
+<span id="{{{$case->caseID}}}_tags"/>
+<script>
+	(function() {
+		var tags = {{json_encode($case->tags)}};
+		var caseID = "{{$case->caseID}}";
+		var projectID = "{{$case->projectID}}";
+		$('#{{{$case->caseID}}}_tags').tagListEditor(tags, projectID, caseID);
+	})();
+</script>

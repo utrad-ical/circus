@@ -99,7 +99,12 @@ input[type="password"]{font-family:Verdana, sans-serif; font-size:1.5em; line-he
 .task-watcher { padding: 15px; border: 1px solid #168477; }
 .task-watcher .task-watcher-title { font-weight: bold; color: #168477; }
 
-.tag { display: inline-block; border-radius: 3px; margin-left: 1px; margin-right: 1px; padding: 0 3px; font-weight: bold; font-size: 80%; }
+/* Tags */
+.popup { position: absolute; border: 1px solid gray; background-color: white; }
+.tag { display: inline-block; text-align: center; border-radius: 3px; margin-left: 1px; margin-right: 1px; min-width: 50px; padding: 0 3px; font-weight: bold; font-size: 80%; }
+.tag-selector li { padding: 1px 3px; }
+.tag-selector li:hover { background-color: silver; }
+.tag_edit_button { border: none; }
 
 /* Color Pickers */
 div.color-picker { border: 1px solid #888; position: absolute; left: 0px; top: 0px; padding: 0px; z-index:1000;}

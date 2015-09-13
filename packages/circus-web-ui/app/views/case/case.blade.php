@@ -1,6 +1,5 @@
 
 @if ($search_flg)
-{{HTML::script('js/saveTags.js')}}
 @if ($export_mode)
 	<script>
 		var export_array = new Array();
@@ -265,7 +264,7 @@
 					</td>
 					<td>
 						<div class="revision_tag_wrap">
-							@include('case.tag', array('prj_tags' => $rec->project->tags, 'case_tags' => $rec->tags, 'tag_caseID' => $rec->caseID))
+							@include('case.tag', array('case' => $rec))
 						</div>
 					</td>
 					<td class="al_c">

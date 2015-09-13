@@ -18,12 +18,31 @@ class TagRegisterController extends ApiBaseController
 		if (!isset($inputs['tags']) || !is_array($inputs['tags']))
 			throw new Exception('Tags not properly specified.');
 
+		$mode = 'replace';
+		if (isset($inputs['mode'])) {
+			if (preg_match('/^(replace|append|remove)$/', $inputs['mode'])) {
+				$mode = $inputs['mode'];
+			} else {
+				throw new Exception('Illegal edit mode specified.');
+			}
+		}
+
 		foreach ($cases as $caseID) {
 			$case = ClinicalCase::findOrFail($caseID);
 			if (!isset($accessibleProjects[$case->projectID])) {
 				throw new Exception('You cannot access this project.');
 			}
-			$case->tags = $inputs['tags'];
+			switch ($mode) {
+				case 'replace':
+					$case->tags = $inputs['tags'];
+					break;
+				case 'append':
+					$case->appendTags($inputs['tags']);
+					break;
+				case 'remove':
+					$case->removeTags($inputs['tags']);
+					break;
+			}
 			$case->save();
 		}
 		return $this->succeedResponse();

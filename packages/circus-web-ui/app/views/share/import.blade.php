@@ -71,19 +71,17 @@ Import Data
 
 <div id="dialog" title="Setting import tag options" style="display: none;">
     <p class="mar_10">
-        {{Form::open(array('url' => asset('case/save_tags'), 'method' => 'post', 'class' => 'frm_share_tag'))}}
-            <table class="common_table">
-                <tr>
-                    <th>Tag</th>
-                    <td>
-                        {{Form::select('tags', isset($tag_list) ? $tag_list : array(), null, array('class' => 'multi_select import_select_tags', 'multiple' => 'multiple'))}}
-                    </td>
-                </tr>
-            </table>
-            <p class="submit_area">
-                {{Form::button('Add tags', array('class' => 'common_btn common_btn_gray', 'id' => 'btn_add_tag', 'type' => 'button', 'name' => 'btnAddTag'))}}
-            </p>
-        {{Form::close()}}
+        <table class="common_table">
+            <tr>
+                <th>Tag</th>
+                <td>
+                    {{Form::select('tags', isset($tag_list) ? $tag_list : array(), null, array('class' => 'multi_select import_select_tags', 'multiple' => 'multiple'))}}
+                </td>
+            </tr>
+        </table>
+        <p class="submit_area">
+            {{Form::button('Add tags', array('class' => 'common_btn common_btn_gray', 'id' => 'btn_add_tag', 'type' => 'button', 'name' => 'btnAddTag'))}}
+        </p>
     </p>
 </div>
 <script>
@@ -130,32 +128,15 @@ $(function() {
 		});
 	}
 	var getProjectTags = function(projectID) {
-		$.ajax({
-			url:"{{{asset('api/project')}}}"+"/"+projectID,
-			dataType: 'json',
-			cache:false,
-			async:true,
-			error: function(){
-				errorConnection('I failed to communicate.');
-			},
-			success: function(res, status, xhr2){
-				if (xhr2.status !== 200) {
-					errorConnection(res.message);
-					return false;
-				}
-				if (!res || !res.tags) {
-					errorConnection('プロジェクトに紐づくタグが設定されていません。');
-					return false;
-				}
-				$('.import_select_tags').empty();
-				var import_tag_parent = $('.import_select_tags');
-				$.each(res.tags, function(key, val) {
-					var tag_opt = '<option value="'+key+'">'+val["name"]+'</option>';
-					import_tag_parent.append(tag_opt);
-				});
-				refreshMultiTags(false);
-				createImportOptionDialog();
-			}
+		tag.fetchProjectTags(projectID, function(tags) {
+			$('.import_select_tags').empty();
+			var import_tag_parent = $('.import_select_tags');
+			tags.forEach(function (tag) {
+				var option = $('<option>').val(tag.name).text(tag.name);
+				import_tag_parent.append(option);
+			});
+			refreshMultiTags(false);
+			createImportOptionDialog();
 		});
 	}
 	var abortConnection = function() {
@@ -233,42 +214,16 @@ $(function() {
 	}
 
 	$('#btn_add_tag').click(function(){
-		var form_data = $(this).closest('form').serializeArray();
-
-		var tag_ary = new Array();
-	    $('.import_select_tags option:selected').each(function(){
-	        tag_ary.push($(this).val());
-	    });
-
-		var tag_set_flg = false;
-		form_data.some(function(v, i) {
-			if(v.name=="tags") {
-				form_data[i].value = JSON.stringify(tag_ary);
-				tag_set_flg = true;
+		api('save_tags', {
+			data: {
+				caseID: taskData.logs[0].caseIds,
+				mode: 'append',
+				tags: $('.import_select_tags').val() || []
 			}
+		}).then(function(res, status, xhr){
+			showMessage('Tags saved successfully.');
+			closeImportOptionDialog();
 		});
-
-		if (!tag_set_flg) {
-			var tmp_tag_ary = new Array();
-			tmp_tag_ary["name"] = "tags";
-			tmp_tag_ary["value"] = JSON.stringify(tag_ary);
-			form_data.push(tmp_tag_ary);
-		}
-		form_data.push({"name":"caseID", "value":taskData.logs[0].caseIds});
-		$.ajax({
-			url:  $(this).closest('form').attr('action'),
-			type: "post",
-			data: form_data,
-			dataType: 'json',
-			error: function(){
-				alert('I failed to communicate.');
-			},
-			success: function(res, status, xhr){
-				alert('success save tags');
-				closeImportOptionDialog();
-			}
-		});
-
 		return false;
 	});
 });

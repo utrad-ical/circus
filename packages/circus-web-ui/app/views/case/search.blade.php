@@ -227,31 +227,18 @@
 					}
 				});
 
-				$.ajax({
-					url:"{{{asset('api/project')}}}"+"/"+select_projects['id'],
-					dataType: 'json',
-					error: function(){
-						alert('I failed to communicate.');
-					},
-					success: function(res, status, xhr){
-						if (xhr.status === 200) {
-							$('.search_select_tags').empty();
-							$('.export_select_tags').empty();
-							var search_parent = $('.search_select_tags');
-							var export_parent = $('.export_select_tags');
-							if (res.tags) {
-								$.each(res.tags, function(key, val) {
-									var tag_opt = '<option value="'+key+'">'+val["name"]+'</option>';
-									search_parent.append(tag_opt);
-									export_parent.append(tag_opt);
-								});
-							}
-							refreshMultiTags(false);
-							$('.tags_message').empty();
-						} else {
-							$('.tags_message').append(res.message);
-						}
-					}
+				tag.fetchProjectTags(select_projects.id, function(tags) {
+					$('.search_select_tags').empty();
+					$('.export_select_tags').empty();
+					var search_parent = $('.search_select_tags');
+					var export_parent = $('.export_select_tags');
+					tags.forEach(function(tag) {
+						var option = $('<option>').text(tag.name).val(tag.name);
+						search_parent.append(option.clone());
+						export_parent.append(option.clone());
+					});
+					refreshMultiTags(false);
+					$('.tags_message').empty();
 				});
 			} else if (select_projects['cnt'] > 1) {
 				$('#search_condition').append('Detail Search selection of the project can only when one .');

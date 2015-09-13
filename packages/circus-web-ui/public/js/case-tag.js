@@ -135,6 +135,7 @@ var tag = {};
 	tag.tagSelector = tagSelector;
 
 	function tagList(tags, projectID) {
+		if (!Array.isArray(tags)) tags = [];
 		return this.each(function () {
 			var el = $(this);
 			tags.forEach(function (tag) {
@@ -152,7 +153,7 @@ var tag = {};
 
 	function tagListEditor(tags, projectID, caseID) {
 		return this.each(function () {
-			var current = tags;
+			var current = Array.isArray(tags) ? tags: [];
 			var container = $(this);
 			var list = $('<span>').appendTo(container);
 			fetchProjectTags(projectID, function(tagList) {

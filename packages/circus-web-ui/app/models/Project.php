@@ -80,7 +80,7 @@ class Project extends BaseModel
 		self::AUTH_TYPE_VIEW_PERSONAL_INFO => 'array_of_group_ids',
 		'windowPriority' => 'required|strict_string',
  		'windowPresets' => 'window_presets',
-		'tags' => 'strict_array',
+		'tags' => 'array_of_tags',
 		'caseAttributesSchema' => 'strict_array',
 		'labelAttributesSchema' => 'strict_array',
 		'createTime' =>	'mongodate',
@@ -100,6 +100,14 @@ Validator::extend('window_presets', function ($attribute, $value, $parameters) {
 		if (!isset($preset['label']) || !is_string($preset['label'])) return false;
 		if (!isset($preset['level']) || !is_int($preset['level'])) return false;
 		if (!isset($preset['width']) || !is_int($preset['width'])) return false;
+	}
+	return true;
+});
+
+Validator::extend('array_of_tags', function ($attribute, $value, $parameters) {
+	if (!is_array($value)) return false;
+	foreach ($value as $tag) {
+		if (!is_string($tag)) return false;
 	}
 	return true;
 });

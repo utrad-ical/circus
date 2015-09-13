@@ -75,6 +75,7 @@ var tag = {};
 			}
 		});
 	}
+	tag.fetchProjectTags = fetchProjectTags;
 
 	function randomID() {
 		return '_' + (((1 + Math.random()) * 0x1000000) | 0).toString(16);
@@ -85,15 +86,13 @@ var tag = {};
 			event.stopPropagation();
 		});
 		element.position({my: 'top', at: 'bottom', of: target});
-
-		var body = $('body');
-		element.appendTo(body).show();
+		element.appendTo('body').show();
 		var handler = function () {
-			body.off('click.popup');
+			$(document).off('click.popup');
 			typeof callback === 'function' && callback();
 			element.remove();
 		}
-		body.on('click.popup', handler);
+		$(document).on('click.popup', handler);
 	}
 
 	/**

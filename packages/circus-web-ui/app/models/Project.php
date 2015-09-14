@@ -107,7 +107,10 @@ Validator::extend('window_presets', function ($attribute, $value, $parameters) {
 Validator::extend('array_of_tags', function ($attribute, $value, $parameters) {
 	if (!is_array($value)) return false;
 	foreach ($value as $tag) {
-		if (!is_string($tag)) return false;
+		if (!is_array($tag)) return false;
+		if (!isset($tag['color']) || !preg_match('/^#[0-9a-f]{6}$/', $tag['color'])) return false;
+		Log::info('hogera');
+		if (!isset($tag['name']) || !is_string($tag['name'])) return false;
 	}
 	return true;
 });

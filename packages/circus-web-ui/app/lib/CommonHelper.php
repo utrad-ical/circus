@@ -66,40 +66,4 @@ class CommonHelper{
 
 		return true;
 	}
-
-	/**
-	 * download tgz file
-	 * @param string $taskID taskID of task model
-	 */
-	public static function downloadTgz($taskID)
-	{
-		try {
-			if (!$taskID)
-				throw new Exception('Please select taskID .');
-
-			$tgz_path = Task::getDownloadUrl($taskID);
-
-			$headers = array(
-				'Content-Type' => 'application/zip',
-				'Content-Disposition' => 'attachment; filename="'.basename($tgz_path).'"',
-				'Content-Length' => filesize($tgz_path)
-			);
-
-			return Response::stream(
-				function() use ($tgz_path){
-					$fp = fopen($tgz_path, 'rb');
-					while(!feof($fp)) {
-						$buf = fread($fp, 1048576);
-						echo $buf;
-						ob_flush();
-						flush();
-					}
-					fclose($fp);
-	   			}
-				, 200
-				, $headers);
-		} catch (Exception $e) {
-			Log::error($e);
-		}
-	}
 }

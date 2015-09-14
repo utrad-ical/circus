@@ -8,7 +8,6 @@ class TagRegisterController extends ApiBaseController
 	function save_tags()
 	{
 		$inputs = Input::all();
-		Log::info($inputs);
 
 		// validation
 		$accessibleProjects = Auth::user()->listAccessibleProjects(Project::AUTH_TYPE_READ, true);

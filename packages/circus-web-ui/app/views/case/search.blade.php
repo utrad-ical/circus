@@ -395,20 +395,6 @@ $("#dialog").dialog({
 	maxwidth:false,
 	modal:true
 });
-$("#download_dialog").dialog({
-	autoOpen: false,
-	closeOnEscape: false,
-	closeText:"",
-	width:500,
-	maxwidth:false,
-	modal:true
-});
-var downloadVolume = function(taskID) {
-	var parent = $('#frmDownload');
-	parent.attr('action', "{{{asset('transfer')}}}"+"/"+taskID);
-	parent.submit();
-	$('.btn_export').removeClass('disabled');
-}
 </script>
 
 @stop

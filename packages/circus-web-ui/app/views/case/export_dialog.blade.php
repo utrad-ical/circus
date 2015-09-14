@@ -49,7 +49,6 @@
 
 <script>
 
-
 var exportRun = function (validate_flag) {
     if (!isExportRun(validate_flag))
         return;
@@ -72,8 +71,6 @@ var exportRun = function (validate_flag) {
         type: 'post',
         data: export_data,
         dataType: 'json',
-        async:true,
-        xhr: myXhr,
         success: function (data) {
             $('#task-watcher').taskWatcher(data.taskID).on('finish', function() {
                 closeExportOptionDialog();

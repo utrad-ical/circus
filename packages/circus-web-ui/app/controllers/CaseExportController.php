@@ -1,7 +1,7 @@
 <?php
 
 /**
- * ケースExport
+ * Export case volume data, optionally with the associated label data
  */
 class CaseExportController extends BaseController
 {
@@ -56,18 +56,16 @@ class CaseExportController extends BaseController
 				throw new Exception('Failed to invoke export process.');
 			}
 
-			//download zip file
+			//determine download zip file
 			$zip_file_name = $inputs['caseID'] . '_series' . $series_index . '_revision' . $inputs['revisionNo'] . '.zip';
 			$zip_file_path = $tmp_dir_path . '/' . $zip_file_name;
 
-			$res = array(
-				'file_name' => $zip_file_name,
-				'dir_name' => $tmp_dir
-			);
+			$task->download = $zip_file_path;
+			$task->save();
+
 			return Response::json(array(
 				'result' => true,
 				'taskID' => $task->taskID,
-				'response' => $res
 			));
 		} catch (Exception $e) {
 			Log::error($e);

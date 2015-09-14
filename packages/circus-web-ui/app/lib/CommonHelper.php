@@ -68,45 +68,6 @@ class CommonHelper{
 	}
 
 	/**
-	 * Zipファイルダウンロード
-	 * @param string $tmp_dir 対象フォルダ
-	 * @param string $file_name ファイル名
-	 */
-	public static function downloadZip($tmp_dir, $file_name, $is_delete = true) {
-		try {
-			if (!$tmp_dir || !$file_name)
-				throw new Exception('Please select download file .');
-
-			$headers = array(
-				'Content-Type' => 'application/zip',
-				'Content-Disposition' => 'attachment; filename="'.$file_name.'"',
-				'Content-Length' => filesize($tmp_dir.'/'.$file_name)
-			);
-
-	   		return Response::stream(
-	   			function() use ($file_name, $tmp_dir, $is_delete){
-	   				$zip_file_path = $tmp_dir.'/'.$file_name;
-	   				$fp = fopen($zip_file_path, 'rb');
-					while(!feof($fp)) {
-						$buf = fread($fp, 1048576);
-						echo $buf;
-						ob_flush();
-						flush();
-					}
-					fclose($fp);
-
-					//delete temporary folder recursively
-					if ($is_delete)
-						File::deleteDirectory($tmp_dir);
-	   			}
-				, 200
-				, $headers);
-		} catch (Exception $e) {
-			Log::error($e);
-		}
-	}
-
-	/**
 	 * download tgz file
 	 * @param string $taskID taskID of task model
 	 */

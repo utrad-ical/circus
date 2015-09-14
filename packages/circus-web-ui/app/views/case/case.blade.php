@@ -59,49 +59,14 @@
 		}
 		var createExportOptionDialog = function() {
 			$('#dialog').slideDown();
-			$('#progressbar').progressbar({
-				value:0
-			});
 			$('#dialog').dialog('open');
 		}
-		var closeDownloadOptionDialog = function(error) {
-			$("#download_dialog").dialog('close');
-			$('#export_err').append(error);
-			//ボタンEnableにする
-			$('.btn_export').removeClass('disabled');
-		}
-		var createDownloadOptionDialog = function(taskID) {
-			$('#download_dialog').slideDown();
-			$('.download_btn').attr('href', "{{{asset('transfer')}}}"+"/"+taskID);
-			$('.frm_share_download').find('input[name="taskID"]').val(taskID);
-			$('#download_dialog').dialog('open');
-		}
-
-		//タスク管理用
-		var progress = $('#progress').progressbar().hide();
-		var progressLabel = $('#progress-label');
 
 		var busy = function(bool) {
 			if (bool) $('#message').hide();
 			$('#form .common_btn, #form input:file').prop('disabled', bool);
-			progress.toggle(bool);
-			progressLabel.text('');
 		}
 
-		var myXhr = function() {
-			var xhr = new XMLHttpRequest();
-			xhr.upload.addEventListener('progress', function (event) {
-				if (event.lengthComputable) {
-					var percentComplete = Math.round((event.loaded * 100) / event.total);
-					progress.progressbar('value', percentComplete);
-					if (event.loaded == event.total) {
-						progress.hide();
-						progressLabel.hide();
-					}
-				}
-			}, false);
-			return xhr;
-		}
 		var validateExport = function() {
 			var error = [];
 
@@ -144,7 +109,7 @@
 		}
 
 		var isExportRun = function(validate_flag) {
-			$('.btn_export').addClass('disabled');
+			$('.btn_export').prop('disabled', true);
 
 			$('#export_err').empty();
 
@@ -168,20 +133,17 @@
 				$('#export_err').empty();
 				$('.frm_share_export').find('input[name="export_type"]').val($(this).attr('name'));
 				var error = validateExport();
-				//全件出力でない場合はExport対象のケース選択Validateチェックを行う
 				if (error.length > 0) {;
 					$('#export_err').append(error.join("<br>"));
 					return false;
 				}
 				createExportOptionDialog();
-				$('.btn_export').addClass('disabled');
-
+				$('.btn_export').prop('disabled', true);
 				return false;
 			});
 
 			$('.ui-icon-closethick').click(function() {
-				//ボタンEnableにする
-				$('.btn_export').removeClass('disabled');
+				$('.btn_export').prop('disabled', false);
 			});
 		});
 	</script>
@@ -189,7 +151,7 @@
 @endif
 	@if (count($list) > 0)
 		@if ($export_mode)
-			<div>Export対象:<span class="export_target_cnt"></span>件</div>
+			<div>Export target: <span class="export_target_cnt"></span> cases</div>
 		@endif
 		<ul class="common_pager clearfix">
 			@if (isset($list_pager))

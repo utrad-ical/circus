@@ -26,27 +26,12 @@
                 </tr>
             </table>
             <p class="submit_area">
-                {{Form::button('Export', array('class' => 'common_btn common_btn_gray', 'id' => 'btn_export_case', 'type' => 'button', 'name' => 'btnExport'))}}
+                {{Form::button('Export', array('class' => 'common_btn', 'id' => 'btn_export_case'))}}
             </p>
         {{Form::close()}}
     </p>
-    <div id="progress"><div id="progress-label"></div></div>
     <div id="task-watcher"></div>
 </div>
-<div id="download_dialog" title="download options" style="display: none;">
-    <p class="mar_10">
-		<div>
-			{{Form::open(array('url' => asset('transfer'), 'class' => 'frm_share_download'))}}
-				{{Form::text('download_url', '', array('style' => 'display:none;', 'class' => 'common_input_text w_450'))}}
-				<div class="clear">&nbsp;</div>
-		    	{{HTML::link(asset('transfer'), 'Download', array('class' => 'common_btn common_btn_gray download_btn'))}}
-		    	{{Form::button('Show Download URL', array('class' => 'common_btn common_btn_gray', 'id' => 'show_share_url'))}}
-
-		    {{Form::close()}}
-	    </div>
-	</p>
-</div>
-
 <script>
 
 var exportRun = function (validate_flag) {
@@ -75,12 +60,11 @@ var exportRun = function (validate_flag) {
             $('#task-watcher').taskWatcher(data.taskID).on('finish', function() {
                 closeExportOptionDialog();
                 busy(false);
-                createDownloadOptionDialog(data.taskID);
             });
         },
         error: function (data) {
             closeExportOptionDialog();
-            alert(data.responseJSON.errorMessage);
+            showMessage(data.responseJSON.errorMessage, true);
             busy(false);
         }
     });

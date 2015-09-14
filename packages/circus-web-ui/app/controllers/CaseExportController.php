@@ -60,8 +60,7 @@ class CaseExportController extends BaseController
 			$zip_file_name = $inputs['caseID'] . '_series' . $series_index . '_revision' . $inputs['revisionNo'] . '.zip';
 			$zip_file_path = $tmp_dir_path . '/' . $zip_file_name;
 
-			$task->download = $zip_file_path;
-			$task->save();
+			$task->saveDownloadPath($zip_file_path);
 
 			return Response::json(array(
 				'result' => true,

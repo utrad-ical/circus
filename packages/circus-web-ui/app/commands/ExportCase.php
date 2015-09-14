@@ -156,7 +156,7 @@ class ExportCase extends TaskCommand {
 			copy($tgzPath, $transferPath);
 
 			//ダウンロードURLをTaskに格納
-			$this->task->saveDownloadUrl($transferPath);
+			$this->task->saveDownloadUrl($transferPath, true);
 
 		} catch (Exception $e) {
 			\Log::error($e);

@@ -20,7 +20,9 @@ class TaskController extends ApiBaseController
 			throw new Exception('You cannot access this task.');
 		}
 		$data = array_except($task->toArray(), ['_id', 'command', 'download']);
-		if (strlen($task->download)) { $data['downloadable'] = true; }
+		if (strlen($task->download) && is_file($task->download)) {
+			$data['downloadable'] = true;
+		}
 		return Response::json(
 			$data
 		);
@@ -35,10 +37,11 @@ class TaskController extends ApiBaseController
 	public function download($taskID)
 	{
 		$task = Task::findOrFail($taskID);
-		if ($task->owner !== Auth::user()->userEmail) {
-			throw new Exception('You cannot access this task.');
+		if (!$task->public) {
+			if (!Auth::user() || $task->owner !== Auth::user()->userEmail) {
+				throw new Exception('You cannot access this task.');
+			}
 		}
 		return Response::download($task->download);
 	}
-
 }

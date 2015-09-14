@@ -5,11 +5,10 @@ class TaskController extends ApiBaseController
 
 	public function index()
 	{
-		// $tasks = Task::where(['owner' => Auth::user()->loginID])->get();
-		$tasks = Task::all();
+		$tasks = Task::where(['owner' => Auth::user()->userEmail])->get();
 		$result = [];
 		foreach ($tasks as $task) {
-			$result[] = array_except($task->toArray(), ['_id', 'logs']);
+			$result[] = array_except($task->toArray(), ['_id', 'logs', 'command']);
 		}
 		return Response::json($result);
 	}
@@ -17,8 +16,11 @@ class TaskController extends ApiBaseController
 	public function show($taskID)
 	{
 		$task = Task::findOrFail($taskID);
+		if ($task->owner !== Auth::user()->userEmail) {
+			throw new Exception('You cannot access this task.');
+		}
 		return Response::json(
-			array_except($task->toArray(), ['_id'])
+			array_except($task->toArray(), ['_id', 'command'])
 		);
 	}
 

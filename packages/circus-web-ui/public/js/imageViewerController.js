@@ -485,7 +485,7 @@
       var this_elm = this;
       var tmp_target_series = this_elm.imageViewerController('getSeriesObjectById', [series_id]);
 
-      for (var j = 0; tmp_target_series.label.length; j++) {
+      for (var j = tmp_target_series.label.length -1; j >= 0; j--) {
         if (tmp_target_series.label[j].id === label_id) {
           tmp_target_series.label.splice(j, 1);
           break;
@@ -500,6 +500,7 @@
         //ラベルが残っていたらactiveLabel変更措置
         if (typeof tmp_target_series.activeLabelId !== 'undefined' && tmp_target_series.activeLabelId === label_id) {
           tmp_target_series.activeLabelId = tmp_target_series.label[0].id;
+					$('#' + tmp_target_series.label[0].id).find('.ico_now_draw').click();
         }
       }
 
@@ -1363,8 +1364,10 @@
         var elmId = '#' + controllerInfo.viewer[i].elementId;
         var tmp_opts = $(elmId).imageViewer('option');
         tmp_opts.viewer.activeSeriesId = controllerInfo.activeSeriesId;
+
         tmp_opts.viewer.series = $.extend(true, tmp_opts.viewer.series, tmp_series_array);
         $(elmId).imageViewer('option',tmp_opts).imageViewer('syncVoxel');
+
       }
     }, //setColorToViewer
 

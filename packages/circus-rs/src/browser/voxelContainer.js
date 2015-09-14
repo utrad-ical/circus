@@ -274,7 +274,7 @@ voxelContainer.prototype.deleteLabelObject = function (series_id, label_id) {
   var this_data = this_obj.data;
 
   var the_series = this_obj.getSeriesObjectById(series_id);
-  for (var j = 0; j < the_series.label.length; j++) {
+  for (var j = the_series.label.length -1 ; j >= 0; j--) {
     if (the_series.label[j].id == label_id) {
       the_series.label.splice(j, 1);
     }

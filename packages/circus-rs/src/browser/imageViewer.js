@@ -137,6 +137,13 @@
         target_series.activeLabelId = tmp_add_label_obj.id;
       }
 
+      for(var i=0; i < target_series.label.length; i++){
+        var tmp_label = target_series.label[i];
+        if(tmp_label.id === label_obj.id){
+          return;   // the label with the ID already exists. not add.
+        }
+      }
+
       target_series.label.push(tmp_add_label_obj);
 
       if (target_series.label.length === 1) {
@@ -795,7 +802,8 @@
       var this_obj = this;
       var this_opts = this.options;
       var target_series = this_obj.getSeriesObjectById(series_id);
-      for (var i = 0; i < target_series.label.length; i++) {
+
+      for (var i = target_series.label.length -1; i >= 0; i--) {
         if (target_series.label[i].id === label_id) {
           target_series.label.splice(i, 1);
           this_opts.container.deleteLabelObject(series_id, label_id);
@@ -2496,8 +2504,8 @@
            );
 
             var target_label = this_obj.getLabelObjectById(tmp_the_label.id, tmp_the_series.id);
-            if (tmp_array.length > 0 && target_label.visible === true) {
-              this_obj.drawLabel(tmp_the_series.id,tmp_the_label.id,tmp_array, target_label.color);
+            if (typeof target_label !== 'undefined' && tmp_array.length > 0 && target_label.visible === true) {
+              this_obj.drawLabel(tmp_the_series.id,tmp_the_label.id,tmp_array, target_label.rgba);
             }
           }
         }

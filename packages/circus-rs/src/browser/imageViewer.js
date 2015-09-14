@@ -1476,7 +1476,7 @@
           //normal pen drawing
           var tmp_ctx = this_elm.find('.canvas_main_elm').get(0).getContext('2d');
 
-          //mouse position (on canvas , image original scale)
+          //mouse position (on image original scale)
           var tmp_x = (e.clientX - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().left - this_opts.viewer.position.dx) * this_opts.viewer.position.ow / this_opts.viewer.position.dw;
           var tmp_y = (e.clientY - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().top - this_opts.viewer.position.dy) * this_opts.viewer.position.oh / this_opts.viewer.position.dh;
 
@@ -1497,9 +1497,7 @@
             this_opts.viewer.position.oh -1
           );
 
-                    console.log(tmp_array.length);
           tmp_array = this_obj._reduceOverlap(tmp_array);
-                    console.log(tmp_array.length);
 
           //exchange canvas positions data to 3D data.
           this_opts._tmpInfo.label = this_obj._exchangePositionCtoV(tmp_array);

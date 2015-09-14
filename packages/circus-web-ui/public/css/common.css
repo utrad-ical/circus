@@ -100,10 +100,10 @@ input[type="password"]{font-family:Verdana, sans-serif; font-size:1.5em; line-he
 .task-watcher .task-watcher-title { font-weight: bold; color: #168477; }
 
 /* Tags */
-.popup { position: absolute; border: 1px solid gray; background-color: white; }
-.tag { display: inline-block; text-align: center; border-radius: 3px; margin-left: 1px; margin-right: 1px; min-width: 50px; padding: 0 3px; font-weight: bold; font-size: 80%; }
-.tag-selector li { padding: 1px 3px; }
-.tag-selector li:hover { background-color: silver; }
+.popup { position: absolute; border: 1px solid gray; background-color: white; z-index: 1000; }
+.tag { display: inline-block; text-align: center; border-radius: 3px; margin-left: 1px; margin-right: 1px; min-width: 70px; padding: 0 3px; font-weight: bold; font-size: 90%; }
+.tag-selector li { padding: 1px 10px; }
+.tag-selector li:hover { background-color: #eeeeee; }
 .tag_edit_button { border: none; }
 
 /* Color Pickers */

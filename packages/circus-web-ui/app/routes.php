@@ -65,12 +65,8 @@ Route::group(['before' => 'auth'], function() {
 	Route::any('series/save_search', 'SeriesSearchController@save_search');
 	Route::any('series/export', 'SeriesExportController@export');
 
-	//Common download volume data
-	Route::any('download/volume', function() {
-		$inputs = Input::all();
-		$download_url = storage_path('cache').'/'. $inputs['dir_name'];
-		return CommonHelper::downloadZip($download_url, $inputs['file_name'], false);
-	});
+	// Common download
+	Route::get('download/{taskID}', 'TaskController@download');
 
 	//Share
 	Route::get('share/search/{preset_id}', 'ShareSearchController@search')

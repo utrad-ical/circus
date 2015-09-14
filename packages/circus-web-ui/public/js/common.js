@@ -150,9 +150,9 @@ $.fn.extend({
 							root.trigger('finish');
 						};
 
-						if (data.download) {
+						if (data.downloadable) {
 							// Show doownload link and 'Close anyway' button
-							addButton('Download').on('click', finish).attr('href', data.download);
+							addButton('Download').on('click', finish).attr('href', '/download/' + taskID);
 							addButton('Close').on('click', function () {
 								if (confirm('Are you sure you want to close this without downloading?')) {
 									finish();
@@ -177,7 +177,8 @@ $.extend({
 	taskWatcherDialog: function (task, options) {
 		var defaults = {
 			title: 'Task Progress',
-			detail: 'Executing the job...'
+			detail: 'Executing the job...',
+			finish: $.noop
 		};
 		var opts = $.extend({}, defaults, options);
 		var dialog = $('<div>')
@@ -198,6 +199,7 @@ $.extend({
 			.on('finish', function () {
 				dialog.dialog('close');
 				dialog.remove();
+				typeof opts.finish === 'function' && opts.finish();
 			});
 	}
 });

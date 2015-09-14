@@ -56,7 +56,6 @@
   </div>
   <span id="export_err" class="font_red"></span>
 {{Form::close()}}
-@include('common.download_volume')
 <script>
   $(function(){
     $('#btnExportCancel').click(function() {

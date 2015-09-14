@@ -1,12 +1,15 @@
 <?php
+
 /**
- * シリーズExport
+ * Export series volume data
  */
-class SeriesExportController extends BaseController {
+class SeriesExportController extends BaseController
+{
 	/**
 	 * Series Export
 	 */
-	public function export() {
+	public function export()
+	{
 		$result = array();
 
 		//POST data acquisition
@@ -17,7 +20,7 @@ class SeriesExportController extends BaseController {
 
 			//create temporary folder
 			$tmp_dir = Str::random(32);
-			$tmp_dir_path = storage_path('cache').'/'.$tmp_dir;
+			$tmp_dir_path = storage_path('cache') . '/' . $tmp_dir;
 
 			if (!mkdir($tmp_dir_path))
 				throw new Exception('Creating a temporary folder failed');
@@ -26,26 +29,22 @@ class SeriesExportController extends BaseController {
 			CommonHelper::deleteOlderTemporaryFiles(storage_path('cache'), true, '-1 day');
 
 			//command execution
-			$cmd_str = ' series '.$inputs['seriesUID']. ' '.$tmp_dir_path. ' --compress';
+			$cmd_str = ' series ' . $inputs['seriesUID'] . ' ' . $tmp_dir_path . ' --compress';
 
-			$task = Task::startNewTask("image:export-volume " .$cmd_str);
+			$task = Task::startNewTask("image:export-volume " . $cmd_str);
 			if (!$task) {
 				throw new Exception('Failed to invoke export process.');
 			}
 
-			//download zip file
-			$zip_file_name = $inputs['seriesUID'].'.zip';
-			$zip_file_path = $tmp_dir_path.'/'.$zip_file_name;
+			// determine download zip file
+			$zip_file_name = $inputs['seriesUID'] . '.zip';
+			$zip_file_path = $tmp_dir_path . '/' . $zip_file_name;
+			$task->download = $zip_file_path;
+			$task->save();
 
-			//ダウンロードに必要な情報の設定
-			$res = array(
-				'file_name' => $zip_file_name,
-				'dir_name' => $tmp_dir
-			);
 			return Response::json(array(
 				'result' => true,
-				'taskID' => $task->taskID,
-				'response' => $res
+				'taskID' => $task->taskID
 			));
 		} catch (Exception $e) {
 			Log::error($e);
@@ -63,7 +62,8 @@ class SeriesExportController extends BaseController {
 	 * validate check
 	 * @param $inputs input values
 	 */
-	function validate($inputs) {
+	function validate($inputs)
+	{
 		//seriesUID empty
 		if (!isset($inputs['seriesUID']))
 			throw new Exception('Please select the seriesUID .');
@@ -78,11 +78,11 @@ class SeriesExportController extends BaseController {
 			throw new Exception('Please specify a series image range .');
 
 		//out of range
-		$image_range = explode(',',$series->images);
+		$image_range = explode(',', $series->images);
 		$st_range_flag = false;
 		$ed_range_flag = false;
 
-		foreach($image_range as $range) {
+		foreach ($image_range as $range) {
 			if (strpos($range, '-') !== false)
 				list($st_range, $ed_range) = explode('-', $range);
 			else
@@ -90,14 +90,16 @@ class SeriesExportController extends BaseController {
 
 			if (!$st_range_flag) {
 				if (intval($inputs['export_start_img']) >= intval($st_range) &&
-					intval($inputs['export_start_img']) <= intval($ed_range)) {
+					intval($inputs['export_start_img']) <= intval($ed_range)
+				) {
 					$st_range_flag = true;
 				}
 			}
 
 			if (!$ed_range_flag) {
 				if (intval($inputs['export_end_img']) >= intval($st_range) &&
-					intval($inputs['export_end_img']) <= intval($ed_range)) {
+					intval($inputs['export_end_img']) <= intval($ed_range)
+				) {
 					$ed_range_flag = true;
 				}
 			}

@@ -10,16 +10,12 @@ class ShareDownloadController extends BaseController
 	 */
 	public function index()
 	{
-		$result = array();
-
 		$tasks = Task::where('status', '=', Task::FINISHED)
 			->where('owner', '=', Auth::user()->userEmail)
 			->where('download', '!=', '')
 			->where('updateTime', '=', array('$gte' => new MongoDate(strtotime('-2 day'))))
 			->orderby('updateTime', 'desc')
 			->get();
-
-		$result['list'] = $tasks;
-		return Response::view('share/download', $result);
+		return Response::view('share/download', ['list' => $tasks]);
 	}
 }

@@ -6,7 +6,7 @@
  * @property string owner Who started this task.
  * @property string status Task status.
  * @property string command The command.
- * @property string download Download path.
+ * @property string download Download path (do not expose this to the end user).
  * @property string textStatus Text status which is to be shown to the end user.
  * @property array logs Array of strings which hold log items.
  * @property number value

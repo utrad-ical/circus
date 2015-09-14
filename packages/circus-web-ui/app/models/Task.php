@@ -7,6 +7,7 @@
  * @property string status Task status.
  * @property string command The command.
  * @property string download Download path (do not expose this to the end user).
+ * @property bool publicDownload Whether anyone can download the generated file.
  * @property string textStatus Text status which is to be shown to the end user.
  * @property array logs Array of strings which hold log items.
  * @property number value
@@ -45,6 +46,7 @@ class Task extends BaseModel
 		'status' => 'required|strict_string',
 		'command' => 'required|strict_string',
 		'download' => 'strict_string',
+		'publicDownload' => 'strict_bool',
 		'textStatus' => 'required|strict_string',
 		'logs' => 'array',
 		'value' => 'required|strict_numeric',
@@ -100,6 +102,7 @@ class Task extends BaseModel
 		$task->value = 0;
 		$task->max = 0;
 		$task->download = "";
+		$task->publicDownload = false;
 		$task->save();
 
 		if (!$task->executeBackgroundProcess($command, $stdin)) {
@@ -152,25 +155,11 @@ class Task extends BaseModel
 	}
 
 
-	public function saveDownloadUrl($url)
+	public function saveDownloadPath($url, $public = false)
 	{
 		$this->download = $url;
+		$this->public = !!$public;
 		$this->save();
-	}
-
-	public static function getDownloadUrl($taskID)
-	{
-		if (!$taskID)
-			throw new Exception('Please selecte taskID .');
-		$task = Task::find($taskID);
-
-
-		if (!$task)
-			throw new Exception('Invalid task');
-		if (!$task->download)
-			throw new Exception('Invalid download file .');
-
-		return $task->download;
 	}
 
 	/**

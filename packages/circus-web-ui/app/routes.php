@@ -17,6 +17,9 @@ Route::get('login', 'LoginController@getIndex');
 Route::post('login', 'LoginController@login');
 Route::get('logout', 'LoginController@logout');
 
+// Common download
+Route::get('download/{taskID}', 'TaskController@download');
+
 Route::group(['before' => 'auth'], function() {
 
 	$staticView = function($uri, $view = null) {
@@ -61,9 +64,6 @@ Route::group(['before' => 'auth'], function() {
 	//Series (for Ajax)
 	Route::any('series/save_search', 'SeriesSearchController@save_search');
 	Route::any('series/export', 'SeriesExportController@export');
-
-	// Common download
-	Route::get('download/{taskID}', 'TaskController@download');
 
 	//Share
 	Route::get('share/search/{preset_id}', 'ShareSearchController@search')

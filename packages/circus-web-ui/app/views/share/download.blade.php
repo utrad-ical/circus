@@ -1,35 +1,30 @@
 @extends('common.layout')
 
 @section('title')
-Download Export Data
+Download
 @stop
 
 @section('content')
-<div class="search_result pad_tb_5" id="result_case_list">
-	<table class="result_table common_table">
-		<colgroup>
-			<col>
-			<col>
-			<col>
-		</colgroup>
+<table class="result_table common_table">
+	<tr>
+		<th>Task ID</th>
+		<th>Public</th>
+		<th>Download</th>
+		<th>Export Date</th>
+	</tr>
+	@forelse ($list as $rec)
 		<tr>
-			<th>Task ID</th>
-			<th>File</th>
-			<th>Export Date</th>
+			<td>{{$rec->taskID}}</td>
+			<td>{{$rec->publicDownload ? 'Yes' : '-'}}</td>
+			<td>{{HTML::link(asset('download/'.$rec->taskID), 'Download', ['class' => 'common_btn'])}}</td>
+			<td>{{date('Y/m/d H:i:s', strtotime($rec->updateTime))}}</td>
 		</tr>
-		@forelse ($list as $rec)
-			<tr>
-				<td>{{$rec->taskID}}</td>
-				<td>{{HTML::link(asset('download/'.$rec->taskID), 'Download')}}</td>
-				<td>{{date('Y/m/d H:i:s', strtotime($rec->updateTime))}}</td>
-			</tr>
-		@empty
-			<tr>
-				<td colspan="3">
-					No results.
-				</td>
-			</tr>
-		@endforelse
-	</table>
-</div>
+	@empty
+		<tr>
+			<td colspan="3">
+				No results.
+			</td>
+		</tr>
+	@endforelse
+</table>
 @stop

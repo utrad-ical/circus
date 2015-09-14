@@ -39,8 +39,7 @@ class SeriesExportController extends BaseController
 			// determine download zip file
 			$zip_file_name = $inputs['seriesUID'] . '.zip';
 			$zip_file_path = $tmp_dir_path . '/' . $zip_file_name;
-			$task->download = $zip_file_path;
-			$task->save();
+			$task->saveDownloadPath($zip_file_path);
 
 			return Response::json(array(
 				'result' => true,

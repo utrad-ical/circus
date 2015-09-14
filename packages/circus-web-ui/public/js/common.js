@@ -134,28 +134,71 @@ $.fn.extend({
 							.progressbar('option', 'max', data.max)
 							.progressbar('option', 'value', data.value);
 					} else {
-						progress.progressbar('option', 'value', false); // indeterminate
+						// indeterminate progress bar (stripe)
+						progress.progressbar('option', 'value', false);
 					}
 					indicator.text(data.textStatus);
 					if (data.status == 'finished') {
 						progress.progressbar('option', 'max', 100).progressbar('option', 'value', 100);
 						root.addClass('task-watcher-finished');
-						$('<button>')
-							.addClass('common_btn')
-							.text('OK')
-							.appendTo(root)
-							.on('click', function () {
-								root.empty().hide();
-								root.trigger('finish');
-							});
+						var buttons = $('<div>').addClass('task-watcher-buttons').appendTo(root);
+						var addButton = function (caption) {
+							return $('<a>').addClass('common_btn').text(caption).appendTo(buttons);
+						};
+						var finish = function () {
+							root.empty().hide();
+							root.trigger('finish');
+						};
+
+						if (data.download) {
+							// Show doownload link and 'Close anyway' button
+							addButton('Download').on('click', finish).attr('href', data.download);
+							addButton('Close').on('click', function () {
+								if (confirm('Are you sure you want to close this without downloading?')) {
+									finish();
+								}
+							})
+						} else {
+							// Just show 'OK' button to dismiss this pane
+							addButton('OK').on('click', finish);
+						}
 					} else {
 						setTimeout(inquiry, 1000);
 					}
 				});
 			};
-
 			inquiry();
 		});
+	},
+});
+
+/* Task Watcher Dialog */
+$.extend({
+	taskWatcherDialog: function (task, options) {
+		var defaults = {
+			title: 'Task Progress',
+			detail: 'Executing the job...'
+		};
+		var opts = $.extend({}, defaults, options);
+		var dialog = $('<div>')
+			.attr('title', opts.title)
+			.append($('<div>').text(opts.detail))
+			.appendTo('body')
+			.dialog({
+				modal: true,
+				dialogClass: 'task_watcher_dialog',
+				closeOnEscape: false,
+				open: function () {
+					$('.ui-dialog-titlebar-close', dialog).hide();
+				}
+			});
+		var watcher = $('<div>')
+			.appendTo(dialog)
+			.taskWatcher(task)
+			.on('finish', function () {
+				dialog.dialog('close');
+				dialog.remove();
+			});
 	}
 });
 

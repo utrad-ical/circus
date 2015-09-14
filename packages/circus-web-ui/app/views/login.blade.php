@@ -9,11 +9,11 @@ Login
 	<div class="w_500 m_auto al_c">
 		<table class="common_table al_l">
 			<colgroup>
-				<col width="30%">
-				<col width="70%">
+				<col width="35%">
+				<col width="65%">
 			</colgroup>
 			<tr>
-				<th>ID</th>
+				<th>ID or E-mail address</th>
 				<td>
 					{{Form::text('loginID', isset($loginID) ? $loginID : '', array('class' => 'common_input_text w_300', 'autofocus' => 'autofocus'))}}
 				</td>

@@ -16,9 +16,6 @@ Route::get('/', function() { return Redirect::to('login'); });
 Route::get('login', 'LoginController@getIndex');
 Route::post('login', 'LoginController@login');
 Route::get('logout', 'LoginController@logout');
-Route::any('transfer/{taskID}', function($taskID){
-	return CommonHelper::downloadTgz($taskID);
-});
 
 Route::group(['before' => 'auth'], function() {
 

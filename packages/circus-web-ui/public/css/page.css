@@ -65,6 +65,7 @@
 .export_area .disp_label_list li{background:#eee; margin-bottom:2px; cursor:pointer;}
 .export_area .disp_label_list input.export_labels{margin-right:5px;}
 .export_area .disp_label_list label{display:block; padding:5px;}
+#page_case_detail #img_area_oblique{padding-top:25px;}
 
 @media screen and	(min-width:2500px){
 	.control_panel_inner{position:absolute; top:0; left:-310px;}

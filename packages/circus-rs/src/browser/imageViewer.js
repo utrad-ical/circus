@@ -2090,11 +2090,13 @@
       var this_opts = this.options;
 
       var delta = e.originalEvent.deltaY ? -(e.originalEvent.deltaY) : e.originalEvent.wheelDelta ? e.originalEvent.wheelDelta : -(e.originalEvent.detail);
-      var tmp_change_ammount = delta * 0.01;
-      tmp_change_ammount = Math.round(tmp_change_ammount);
-      var tmp_current = this_opts.viewer.number.current;
-
-      tmp_current = tmp_current - tmp_change_ammount;
+      var tmp_change_ammount = 1;
+			if(delta < 0){
+				tmp_change_ammount = -1;
+			}
+			
+      var tmp_current = this_opts.viewer.number.current - tmp_change_ammount;
+			
       if (tmp_current > this_opts.viewer.number.maximum) {
         tmp_current =this_opts.viewer.number.maximum;
       }

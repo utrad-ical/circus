@@ -6,7 +6,7 @@
 class AuthenticationNodeException extends \Exception {
 }
 
-class CaseDetailController extends BaseController {
+class CaseDetailController extends ApiBaseController {
 	/**
 	 * Case Details screen
 	 */
@@ -86,7 +86,7 @@ class CaseDetailController extends BaseController {
 			//Shaping of the series list
 			$result['series_list'] = $this->getSeriesList($case_info->revisions[$select_revision],
 														  $case_info->project->windowPriority,
-														  $case_info->project->windowPresets);
+													  $case_info->project->windowPresets);
 			$result['attribute'] = json_encode($case_info->revisions[$select_revision]['attributes']);
 			$result['inputs'] = Session::get('case.detail');
 
@@ -102,16 +102,6 @@ class CaseDetailController extends BaseController {
 			$result['error_msg'] = $e->getMessage();
 		}
 		return View::make('case/detail', $result);
-	}
-
-	function createTagList($tags) {
-		if (!$tags) return array();
-
-		$tag_list = array();
-		foreach ($tags as $key => $tag) {
-			$tag_list[$key] = $tag['name'];
-		}
-		return $tag_list;
 	}
 
 	function getSeriesIDList($case_info, $revision_no) {
@@ -268,13 +258,5 @@ class CaseDetailController extends BaseController {
 		$json = json_encode($data);
 		$json = preg_replace('/\\\\\//', '/', $json);
 		return $json;
-	}
-	/**
-	 * Revisionの該当シリーズに紐づくラベル一覧取得(Ajax)
-	 */
-	function get_label_list() {
-		$inputs = Input::all();
-		$label_list = ClinicalCase::getLabelList($inputs);
-		return Response::json(["label_list" => $label_list]);
 	}
 }

@@ -49,7 +49,12 @@ class SeriesSearchController extends BaseController {
 
 		$result['inputs'] = $search_data;
 		$result['search_flg'] = $search_flg;
+		$result['edit_case_flg'] = $this->isEditCase();
 		return View::make('series.search', $result);
+	}
+
+	private function isEditCase() {
+		return Session::get('edit_case_id') ? true : false;
 	}
 
 	protected function setSearchData($inputs, $preset_id)
@@ -58,12 +63,14 @@ class SeriesSearchController extends BaseController {
 			// "Reset" clicked, or first-time visit to the search screen
 			Session::forget('series.search');
 			Session::forget('edit_case_id');
+			setcookie('seriesCookie', time() - 1800);
 		} else if (array_key_exists('btnSearch', $inputs) !== false) {
 			// "Search" button is pressed
 			if (array_key_exists('disp', $inputs) === false) $inputs['disp'] = Config::get('const.page_display');
 			if (array_key_exists('sort', $inputs) === false) $inputs['sort'] = 'seriesDate';
 			if (array_key_exists('order_by', $inputs) === false) $inputs['order_by'] = 'desc';
 			Session::put('series.search', $inputs);
+			setcookie('seriesCookie', time() - 1800);
 		} else if (array_key_exists('page', $inputs) !== false) {
 			$search_data = Session::get('series.search');
 			$search_data['perPage'] = $inputs['page'];
@@ -75,6 +82,7 @@ class SeriesSearchController extends BaseController {
 			$detail_search['sort'] = 'seriesDate';
 			$detail_search['order_by'] = 'desc';
 			Session::put('series.search', $detail_search);
+			setcookie('seriesCookie', time() - 1800);
 		}
 	}
 

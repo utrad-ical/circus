@@ -3,7 +3,7 @@
 /**
  * Export series volume data
  */
-class SeriesExportController extends BaseController
+class SeriesExportController extends ApiBaseController
 {
 	/**
 	 * Series Export
@@ -46,14 +46,9 @@ class SeriesExportController extends BaseController
 				'taskID' => $task->taskID
 			));
 		} catch (Exception $e) {
-			Log::error($e);
-
 			if (isset($tmp_dir_path))
 				File::deleteDirectory($tmp_dir_path);
-			return Response::json(
-				array('result' => false, 'errorMessage' => $e->getMessage()),
-				400
-			);
+			throw $e;
 		}
 	}
 
@@ -108,6 +103,6 @@ class SeriesExportController extends BaseController
 		}
 
 		if (!$st_range_flag || !$ed_range_flag)
-			throw new Exception('The image of out of  the scope  is specified .');
+			throw new Exception('The image of out of the scope is specified .');
 	}
 }

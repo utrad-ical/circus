@@ -240,7 +240,13 @@ Series Search
 				}else{
 					$('#form_edit_new_case').submit();
 				}
-			">Add New Case</button>
+			">
+			@if ($edit_case_flg)
+			Edit Case
+			@else
+			Add New Case
+			@endif
+			</button>
 		</p>
 		<div class="clear">&nbsp;</div>
 		<div class="w_max pad_tb_5">

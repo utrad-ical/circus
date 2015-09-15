@@ -290,7 +290,7 @@
       var this_elm = this.element;
       var this_opts = this.options;
 
-      var drawDicom = function (target_url) {
+      var drawDicom = function (image_object) {
         this_opts._tmpInfo.loadFlg = 0;
         var tmp_ctx = this_elm.find('.series_image_elm').get(0).getContext('2d');
         var tmp_w = this_elm.find('.series_image_elm').width();
@@ -302,7 +302,7 @@
 
         this_obj.syncVoxel();
         tmp_ctx.drawImage(
-          this_opts._tmpInfo.imgCache[target_url].image,
+          image_object,
           0,
           0,
           this_opts.viewer.position.ow,
@@ -332,7 +332,7 @@
             if (this_opts.viewer.orientation === 'oblique') {
               this_obj.setObliqueResponse(this_opts._tmpInfo.imgCache[target_url].header_param);
             }
-            drawDicom(target_url);
+            drawDicom(this_opts._tmpInfo.imgCache[target_url].image);
           }, 0);
 
         } else {
@@ -360,7 +360,7 @@
                   'image' : tmp_img,
                   'header_param' : header_param
                 }; // add loaded img into Cache
-                drawDicom(target_url);
+                drawDicom(tmp_img);
               };
               tmp_img.src = myWindowURL.createObjectURL(blob);
             }
@@ -372,7 +372,6 @@
 
         }
       }; //loadImg
-
 
       //run from here
       //disp info text

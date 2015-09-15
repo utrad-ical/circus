@@ -3,7 +3,7 @@
 /**
  * Export case volume data, optionally with the associated label data
  */
-class CaseExportController extends BaseController
+class CaseExportController extends ApiBaseController
 {
 	/**
 	 * Case Export
@@ -67,14 +67,10 @@ class CaseExportController extends BaseController
 				'taskID' => $task->taskID,
 			));
 		} catch (Exception $e) {
-			Log::error($e);
-
+		//	Log::error($e);
 			if (isset($tmp_dir_path))
 				File::deleteDirectory($tmp_dir_path);
-			return Response::json(
-				array('result' => false, 'errorMessage' => $e->getMessage()),
-				400
-			);
+			throw $e;
 		}
 	}
 

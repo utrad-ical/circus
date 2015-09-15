@@ -2,7 +2,7 @@
 /**
  * ケース検索Base
  */
-class CaseSearchBaseController extends BaseController {
+class CaseSearchBaseController extends ApiBaseController {
 	protected $_prefix;
 	protected $_export_mode = false;
 	private $_init_storage = true;
@@ -28,7 +28,10 @@ class CaseSearchBaseController extends BaseController {
 				if (count($search_data['project']) === 1) {
 					$params = array();
 					$params['projectID'] = $search_data['project'][0];
-					$result['tag_list'] = $this->getTags($params);
+					if (!array_key_exists('projectID', $inputs))
+						throw new Exception('Please specify the project .');
+
+					$result['tag_list'] = ClinicalCase::getProjectTags(array($inputs['projectID']));
 				}
 			}
 			Session::put('backUrl', $this->_prefix . '/search');
@@ -36,6 +39,7 @@ class CaseSearchBaseController extends BaseController {
 			Log::error($e);
 			$result['error_msg'] = $e->getMessage();
 		}
+
 		return View::make('case/search', $result);
 	}
 
@@ -44,20 +48,16 @@ class CaseSearchBaseController extends BaseController {
 	 */
 	public function search_ajax()
 	{
-		try {
-			$this->setSearchCondition(Input::all(), false);
-			$search_data = Session::get($this->_prefix.'.search');
-			$result = ClinicalCase::searchCase($search_data);
+		$this->setSearchCondition(Input::all(), false);
+		$search_data = Session::get($this->_prefix.'.search');
+		$result = ClinicalCase::searchCase($search_data);
 
-			$result['prefix'] = $this->_prefix;
-			$result['export_mode'] = $this->_export_mode;
-			$result['init'] = $this->_init_storage;
+		$result['prefix'] = $this->_prefix;
+		$result['export_mode'] = $this->_export_mode;
+		$result['init'] = $this->_init_storage;
 
-			$tmp = View::make('case/case', $result);
-		} catch (Exception $e) {
-			Log::error($e);
-			$tmp="";
-		}
+		$tmp = View::make('case/case', $result);
+
 		return Response::json(['result' => true, 'message' => '', 'response' => "$tmp"]);
 	}
 
@@ -78,20 +78,19 @@ class CaseSearchBaseController extends BaseController {
 		$user->preferences = $pref;
 		$user->save();
 
-		$msg = 'Saved search criteria.';
-		return Response::json(array('result' => true, 'message' => $msg));
+		return $this->succeedResponse();
 	}
 
 	/**
 	 * プロジェクトに紐づくCase Attributeを取得する(Json)
 	 */
 	public function get_case_attribute() {
-		try {
-			$case_attr = $this->getCaseAttribute(Input::all());
-			return Response::json(['status' => 'OK', 'case_attr' => $case_attr]);
-		} catch (Exception $e) {
-			return Response::json(['status' => 'NG', 'message' => $e->getMessage()]);
-		}
+		$inputs = Input::all();
+		if (!array_key_exists('projectID', $inputs))
+			return $this->errorResponse($e->getMessage());
+
+		$case_attr = ClinicalCase::getProjectCaseAttribute(array($inputs['projectID']));
+		return Response::json(['status' => 'OK', 'case_attr' => $case_attr]);
 	}
 
 	/**
@@ -123,13 +122,6 @@ class CaseSearchBaseController extends BaseController {
 		} else if (array_key_exists('btnBack', $inputs) === false) {
 			Session::forget($this->_prefix.'.search');
 		}
-	}
-
-	public function getCaseAttribute($inputs) {
-		if (!array_key_exists('projectID', $inputs))
-			throw new Exception('Please specify the project .');
-
-		return ClinicalCase::getProjectCaseAttribute(array($inputs['projectID']));
 	}
 
 	public function getTags($inputs) {

@@ -12,10 +12,10 @@
 		});
 
 		//View Series button is pressed during
-        $('.link_series_search').click(function() {
-        	$('.frmSeriesSearch').submit();
+		$('.link_series_search').click(function () {
+			$('.frmSeriesSearch').submit();
 			return false;
-        });
+		});
 	});
 </script>
 @stop

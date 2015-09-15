@@ -155,10 +155,10 @@ class Task extends BaseModel
 	}
 
 
-	public function saveDownloadPath($url, $public = false)
+	public function saveDownloadPath($path, $public = false)
 	{
-		$this->download = $url;
-		$this->public = !!$public;
+		$this->download = $path;
+		$this->publicDownload = !!$public;
 		$this->save();
 	}
 

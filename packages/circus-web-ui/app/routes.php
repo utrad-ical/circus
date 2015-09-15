@@ -78,23 +78,21 @@ Route::group(['before' => 'auth'], function() {
 
 	// Administration
 	Route::group(array('before' => 'admin'), function() use ($staticView) {
-
 		$staticView('administration', 'admin.index');
 		Route::get('administration/{adminkind}', 'AdministrationController@index')
 			->where('adminkind', '^(user|group|storage|project|server_param)$');
 		Route::resource('api/user', 'UserApiController');
 		Route::resource('api/group', 'GroupApiController');
 		Route::resource('api/storage', 'StorageApiController');
-		Route::resource('api/project', 'ProjectApiController');
 		Route::get('api/server_param', 'ServerParamApiController@get');
 		Route::post('api/server_param', 'ServerParamApiController@post');
 		Route::put('api/storage/setactive/{storageID}', 'StorageApiController@setActive');
 		Route::post('api/server/start', 'ServerControllerController@start');
 		Route::post('api/server/stop', 'ServerControllerController@stop');
 		Route::post('api/server/status', 'ServerControllerController@status');
-
 		$staticView('administration/server', 'admin.server');
 	});
+	Route::resource('api/project', 'ProjectApiController');
 
 	// For project schema sharing
 	Route::get('api/projectschema/{projectID}', ['as' => 'projectSchema', 'uses' => 'ProjectApiController@schema']);

@@ -2,7 +2,7 @@
 /**
  * ケース登録クラス
  */
-class CaseRegisterController extends BaseController {
+class CaseRegisterController extends ApiBaseController {
 	/**
 	 * Case registration input
 	 */
@@ -82,16 +82,14 @@ class CaseRegisterController extends BaseController {
 	 */
 	function getSeriesUIDList($inputs){
 		$series_exclude_ary = array();
-		$tmp_series_exclude_ary = array();
-		foreach ($inputs->revisions as $key => $value) {
-			for($i = 0; $i < count($value['series']); $i++){
-				$tmp_series_exclude_ary[] = $value['series'][$i]['seriesUID'];
-			}
+
+		for($i = 0; $i < count($inputs->latestRevision['series']); $i++){
+			$series_exclude_ary[] = $inputs->latestRevision['series'][$i]['seriesUID'];
 		}
 
 		$cookie_series = $_COOKIE['seriesCookie'];
 		$add_series = explode('_' , $cookie_series);
-		return array_merge($tmp_series_exclude_ary, $add_series);
+		return array_unique(array_merge($series_exclude_ary, $add_series));
 	}
 
 	/**

@@ -152,14 +152,14 @@ class ImportCase extends TaskCommand {
 		if (!is_dir($targetDir.'/cases'))
 			throw new Exception('ケースディレクトリがありません。');
 
-		if ($caseDir = opendir($targetDir.'/cases')) {
+		$dirPath = $targetDir.'/cases';
+
+		if ($caseDir = opendir($dirPath)) {
 			while(($file = readdir($caseDir)) !== false) {
 				if ($file != "." && $file != "..") {
-					//ケース存在チェック
-					$caseObj = ClinicalCase::find($file);
+
 					$this->_caseIds[] = $file;
 
-					$dirPath = $targetDir.'/cases';
 					$res = $this->validateCase($dirPath, $file);
 					if ($res['result'] === false)
 						throw new Exception($res['errorMsg']);

@@ -27,7 +27,7 @@ class ProjectSeeder extends Seeder
 			'personalInfoViewGroups' => array(2),
 			'windowPriority' => 'dicom,preset,auto',
 			'windowPresets' => array(),
-			'tags' => array('Draft', 'Reviewed'),
+			'tags' => array(),
 			'caseAttributesSchema' => array(),
 			'labelAttributesSchema' => array()
 		));

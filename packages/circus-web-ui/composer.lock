@@ -1716,12 +1716,12 @@
             "source": {
                 "type": "git",
                 "url": "https://bitbucket.org/ical/circus_rs_dicom_server.git",
-                "reference": "a0d8223050404c731a21cc593a864bbaa31b867f"
+                "reference": "d48bfcf011b10b5ebe41c927a2aac972f896b4a4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://bitbucket.org/ical/circus_rs_dicom_server/get/a0d8223050404c731a21cc593a864bbaa31b867f.zip",
-                "reference": "a0d8223050404c731a21cc593a864bbaa31b867f",
+                "url": "https://bitbucket.org/ical/circus_rs_dicom_server/get/d48bfcf011b10b5ebe41c927a2aac972f896b4a4.zip",
+                "reference": "d48bfcf011b10b5ebe41c927a2aac972f896b4a4",
                 "shasum": ""
             },
             "type": "library",
@@ -1742,7 +1742,7 @@
             "keywords": [
                 "DICOM"
             ],
-            "time": "2015-09-15 09:56:43"
+            "time": "2015-09-15 10:56:22"
         }
     ],
     "packages-dev": [
@@ -2102,16 +2102,16 @@
         },
         {
             "name": "phpunit/php-token-stream",
-            "version": "1.4.7",
+            "version": "1.4.8",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/php-token-stream.git",
-                "reference": "6f1447a60f068c89d345ceee32025a51dd630f1c"
+                "reference": "3144ae21711fb6cac0b1ab4cbe63b75ce3d4e8da"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/php-token-stream/zipball/6f1447a60f068c89d345ceee32025a51dd630f1c",
-                "reference": "6f1447a60f068c89d345ceee32025a51dd630f1c",
+                "url": "https://api.github.com/repos/sebastianbergmann/php-token-stream/zipball/3144ae21711fb6cac0b1ab4cbe63b75ce3d4e8da",
+                "reference": "3144ae21711fb6cac0b1ab4cbe63b75ce3d4e8da",
                 "shasum": ""
             },
             "require": {
@@ -2147,7 +2147,7 @@
             "keywords": [
                 "tokenizer"
             ],
-            "time": "2015-09-14 18:56:12"
+            "time": "2015-09-15 10:49:45"
         },
         {
             "name": "phpunit/phpunit",

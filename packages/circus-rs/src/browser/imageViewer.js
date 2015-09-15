@@ -290,10 +290,8 @@
       var this_elm = this.element;
       var this_opts = this.options;
 
-      //disp info text
-      this_elm.find('.disp_measure').removeClass('active');
-
-      var changeMain = function (image_obj) {
+      var drawDicom = function (target_url) {
+        this_opts._tmpInfo.loadFlg = 0;
         var tmp_ctx = this_elm.find('.series_image_elm').get(0).getContext('2d');
         var tmp_w = this_elm.find('.series_image_elm').width();
         var tmp_h = this_elm.find('.series_image_elm').height();
@@ -304,7 +302,7 @@
 
         this_obj.syncVoxel();
         tmp_ctx.drawImage(
-          image_obj,
+          this_opts._tmpInfo.imgCache[target_url].image,
           0,
           0,
           this_opts.viewer.position.ow,
@@ -313,34 +311,34 @@
           this_opts.viewer.position.dy,
           this_opts.viewer.position.dw,
           this_opts.viewer.position.dh
-       );
+        );
         this_obj._disableImageAlias(tmp_ctx, false);
-      };//changeMain
 
-      var src_url = this_obj._createImageUrl();
-
-      //check the image is in Cache.
-      if (typeof this_opts._tmpInfo.imgCache[src_url] !== 'undefined') {
-        if (this_opts.viewer.orientation === 'oblique') {
-          this_obj.setObliqueResponse(this_opts._tmpInfo.imgCache[src_url].header_param);
+        //if new image is required, re-start new loading.
+        if (this_opts._tmpInfo.lastQue !== null) {
+          loadImg(this_opts._tmpInfo.lastQue);
         }
-        changeMain(this_opts._tmpInfo.imgCache[src_url].image);
-        return false;
-      }
+      }; //drawDicom
 
-      //the image is not in cache
-      //if other image is loading, prevent new loading.
-      //updating only Que
-      this_opts._tmpInfo.lastQue = src_url;
-      if (this_opts._tmpInfo.loadFlg === 0) {
+      var loadImg = function (target_url) {
 
-        var loadImg = function (load_target_url) {
-          this_opts._tmpInfo.lastQue = null;
-          this_opts._tmpInfo.loadFlg = 1;
+        this_opts._tmpInfo.lastQue = null;
+        this_opts._tmpInfo.loadFlg = 1;
 
+        //check the required image is in Cache.
+        if (typeof this_opts._tmpInfo.imgCache[target_url] !== 'undefined') {
+          //from cache
+          var tmp_timer = setTimeout(function () {
+            if (this_opts.viewer.orientation === 'oblique') {
+              this_obj.setObliqueResponse(this_opts._tmpInfo.imgCache[target_url].header_param);
+            }
+            drawDicom(target_url);
+          }, 0);
+
+        } else {
+          //load new
           var the_active_series = this_obj.getSeriesObjectById(this_opts.viewer.activeSeriesId);
           var tmp_token_str = 'Bearer ' + the_active_series.token;
-
           var myWindowURL = window.URL || window.webkitURL;  // Take care of vendor prefixes.
           var xhr = new XMLHttpRequest();
           xhr.onload = function (e) {
@@ -357,29 +355,33 @@
                   header_param.Center = xhr.getResponseHeader('X-Circus-Center');
                   this_obj.setObliqueResponse(header_param);
                 }
-                changeMain(tmp_img);
-                this_opts._tmpInfo.loadFlg = 0;
                 myWindowURL.revokeObjectURL(tmp_img.src); // Clean up after yourself.
-
-                this_opts._tmpInfo.imgCache[load_target_url] = {
+                this_opts._tmpInfo.imgCache[target_url] = {
                   'image' : tmp_img,
                   'header_param' : header_param
                 }; // add loaded img into Cache
-
-                //if new image is required, re-start new loading.
-                if (this_opts._tmpInfo.lastQue !== null) {
-                  loadImg(this_opts._tmpInfo.lastQue);
-                }
+                drawDicom(target_url);
               };
               tmp_img.src = myWindowURL.createObjectURL(blob);
             }
           };
-          xhr.open('GET', load_target_url, true);
+          xhr.open('GET', target_url, true);
           xhr.setRequestHeader('Authorization', tmp_token_str);
           xhr.responseType = 'blob';
           xhr.send(); //run the request
-          this_opts._tmpInfo.loadFlg = 1;
-        }; //loadImg
+
+        }
+      }; //loadImg
+
+
+      //run from here
+      //disp info text
+      this_elm.find('.disp_measure').removeClass('active');
+
+      var src_url = this_obj._createImageUrl();
+      this_opts._tmpInfo.lastQue = src_url;
+
+      if (this_opts._tmpInfo.loadFlg === 0) {
         loadImg(src_url);
       }
     },
@@ -2091,12 +2093,12 @@
 
       var delta = e.originalEvent.deltaY ? -(e.originalEvent.deltaY) : e.originalEvent.wheelDelta ? e.originalEvent.wheelDelta : -(e.originalEvent.detail);
       var tmp_change_ammount = 1;
-			if(delta < 0){
-				tmp_change_ammount = -1;
-			}
-			
+      if(delta < 0){
+        tmp_change_ammount = -1;
+      }
+
       var tmp_current = this_opts.viewer.number.current - tmp_change_ammount;
-			
+
       if (tmp_current > this_opts.viewer.number.maximum) {
         tmp_current =this_opts.viewer.number.maximum;
       }

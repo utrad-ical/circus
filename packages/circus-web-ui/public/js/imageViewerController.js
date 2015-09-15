@@ -1312,7 +1312,7 @@
           success: function (response) {
             var revisionRes = getRevisionList();
             if (revisionRes) {
-              alert(response.message);
+              alert('Registration of label information is now complete.');
               this_elm.imageViewerController('resetUpdateFlg');
             } else {
               alert('Failed to get revision information .');

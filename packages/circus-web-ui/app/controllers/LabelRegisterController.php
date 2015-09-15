@@ -2,90 +2,67 @@
 /**
  * ラベル登録クラス
  */
-class LabelRegisterController extends BaseController {
+class LabelRegisterController extends ApiBaseController {
 	/**
 	 * Label information storage (Ajax)
 	 */
 	function save_label() {
 		//Since there is no transaction function to MongoDB,
 		//to hold to be able to delete the data of registration ID in this array
-		try {
-			$inputs = Input::get('data');
-			$errors = $this->validateSaveLabel($inputs);
+		$inputs = Input::get('data');
+		$errors = $this->validateSaveLabel($inputs);
 
-			if (count($errors) > 0)
-				throw new Exception(implode("\n", $errors));
+		if (count($errors) > 0)
+			throw new Exception(implode("\n", $errors));
 
-			//I want to save the label information because the error message is not
-			$revision = array();
-			$series_list = array();
+		//I want to save the label information because the error message is not
+		$revision = array();
+		$series_list = array();
 
-			$storage_info = Storage::getCurrentStorage(Storage::LABEL_STORAGE);
+		$storage_info = Storage::getCurrentStorage(Storage::LABEL_STORAGE);
 
-			foreach ($inputs['series'] as $rec) {
-				$revision[$rec['id']] = array();
-				//If there is a label information
-				if (array_key_exists('label', $rec) !== false) {
-					foreach ($rec['label'] as $rec2) {
-						//Register storage table and label table is not performed if there is no image
-						if ($rec2['image']) {
-							// Register new label with its voxel data
-							$label_obj = Label::find($rec2['id']);
-							if (!$label_obj) {
-								$label_obj = $this->setLabel($rec2, $storage_info->storageID);
-								$label_obj->save();
-							}
-							$this->saveImage($label_obj, $rec2['image']);
-							$revision[$rec['id']][] = array(
-								'id'			=>	$label_obj->labelID,
-								'attributes'	=>	array_key_exists('attribute', $rec2) ? $rec2['attribute'] : array()
-							);
-						} else {
-							$revision[$rec['id']][] = array(
-								'id'			=>	$rec2['id'],
-								'attributes'	=>	array_key_exists('attribute', $rec2) ? $rec2['attribute'] : array()
-							);
+		foreach ($inputs['series'] as $rec) {
+			$revision[$rec['id']] = array();
+			//If there is a label information
+			if (array_key_exists('label', $rec) !== false) {
+				foreach ($rec['label'] as $rec2) {
+					//Register storage table and label table is not performed if there is no image
+					if ($rec2['image']) {
+						// Register new label with its voxel data
+						$label_obj = Label::find($rec2['id']);
+						if (!$label_obj) {
+							$label_obj = $this->setLabel($rec2, $storage_info->storageID);
+							$label_obj->save();
 						}
+						$this->saveImage($label_obj, $rec2['image']);
+						$revision[$rec['id']][] = array(
+							'id'			=>	$label_obj->labelID,
+							'attributes'	=>	array_key_exists('attribute', $rec2) ? $rec2['attribute'] : array()
+						);
+					} else {
+						$revision[$rec['id']][] = array(
+							'id'			=>	$rec2['id'],
+							'attributes'	=>	array_key_exists('attribute', $rec2) ? $rec2['attribute'] : array()
+						);
 					}
-					$series_list[] = $this->createSeriesList($rec['id'], $revision[$rec['id']]);
-				} else {
-					$series_list[] = $this->createSeriesList($rec['id']);
 				}
+				$series_list[] = $this->createSeriesList($rec['id'], $revision[$rec['id']]);
+			} else {
+				$series_list[] = $this->createSeriesList($rec['id']);
 			}
-			//Update of case information
-			//Case information acquisition
-			$case_obj = ClinicalCase::find($inputs['caseId']);
-			$tmp_revision = $this->createRevision($inputs, $series_list);
-
-			//Error checking
-			$revisions = $case_obj->revisions;
-			$revisions[] = $tmp_revision;
-			$case_obj->revisions = $revisions;
-			$case_obj->latestRevision = $tmp_revision;
-			$case_obj->save();
-			//JSON output
-			return $this->outputJson(true, 'Registration of label information is now complete.');
-		} catch (InvalidModelException $e) {
-			Log::debug('InvalidModelException Error');
-			Log::debug($e);
-			return $this->outputJson(false, $e->getErrors());
-		} catch (Exception $e){
-			Log::debug('Exception Error');
-			Log::debug($e);
-			return $this->outputJson(false, $e->getMessage());
 		}
-	}
+		//Update of case information
+		//Case information acquisition
+		$case_obj = ClinicalCase::find($inputs['caseId']);
+		$tmp_revision = $this->createRevision($inputs, $series_list);
 
-	/**
-	 * 登録結果をJson出力する
-	 * @param Boolean $result 登録結果
-	 * @param String $msg メッセージ
-	 * @author stani
-	 * @since 2015/03/20
-	 */
-	function outputJson($result, $msg) {
-		$data = array('result' => $result, 'message' => $msg);
-		return Response::json($data);
+		//Error checking
+		$revisions = $case_obj->revisions;
+		$revisions[] = $tmp_revision;
+		$case_obj->revisions = $revisions;
+		$case_obj->latestRevision = $tmp_revision;
+		$case_obj->save();
+		return $this->succeedResponse();
 	}
 
 	/**

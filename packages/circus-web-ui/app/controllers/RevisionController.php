@@ -2,7 +2,7 @@
 /**
  * リビジョン情報取得
  */
-class RevisionController extends BaseController {
+class RevisionController extends ApiBaseController {
 	/**
 	 * revision list
 	 */
@@ -12,41 +12,35 @@ class RevisionController extends BaseController {
 		//POST data acquisition
 		$inputs = Input::all();
 
-		try {
-			//empty caseID
-			if (array_key_exists('caseID', $inputs) === false)
-				throw new Exception('Please specify a case ID.');
+		//empty caseID
+		if (array_key_exists('caseID', $inputs) === false)
+			throw new Exception('Please specify a case ID.');
 
-			$case_info = ClinicalCase::find($inputs['caseID']);
-			//case not found
-			if (!$case_info)
-				throw new Exception('Case ID does not exist.');
+		$case_info = ClinicalCase::find($inputs['caseID']);
+		//case not found
+		if (!$case_info)
+			throw new Exception('Case ID does not exist.');
 
-			//The shaping Revision information for display
-			$revision_list = array();
-			$revision_no_list = array();
-			$max_revision = 0;
-			foreach($case_info->revisions as $key => $value) {
-				//The set if Revision number is large
-				if ($max_revision < $key)
-					$max_revision = $key;
+		//The shaping Revision information for display
+		$revision_list = array();
+		$revision_no_list = array();
+		$max_revision = 0;
+		foreach($case_info->revisions as $key => $value) {
+			//The set if Revision number is large
+			if ($max_revision < $key)
+				$max_revision = $key;
 
-				$revision_list[] = $this->getRevisionInfo($key, $value);
-				$revision_no_list[] = $key;
-			}
-
-			//Revision sort order adaptation
-			$result['revision_list'] = $this->sortRevision($revision_list, 'revision.date');
-			$result['revision_no_list'] = $revision_no_list;
-
-			//Series list created
-			$result['inputs'] = Session::get('case.detail');
-			return Response::json(['status'=>'OK', 'response' => $result]);
-		} catch (Exception $e) {
-			Log::debug($e);
-			Log::debug($e->getMessage());
-			return Response::json(['status'=>'NG', 'message' => $e->getMessage()]);
+			$revision_list[] = $this->getRevisionInfo($key, $value);
+			$revision_no_list[] = $key;
 		}
+
+		//Revision sort order adaptation
+		$result['revision_list'] = $this->sortRevision($revision_list, 'revision.date');
+		$result['revision_no_list'] = $revision_no_list;
+
+		//Series list created
+		$result['inputs'] = Session::get('case.detail');
+		return Response::json(['status'=>'OK', 'response' => $result]);
 	}
 
 	/**

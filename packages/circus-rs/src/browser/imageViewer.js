@@ -1588,35 +1588,37 @@
 
 
     _mousedownFuncBucket: function (e) {
-       var this_obj = this;
-       var this_elm = this.element;
-       var this_opts = this.options;
+      var this_obj = this;
+      var this_elm = this.element;
+      var this_opts = this.options;
 
-       var the_active_series = this_obj.getSeriesObjectById(this_opts.viewer.activeSeriesId);
-       if (typeof the_active_series.label !== 'undefined' &&  the_active_series.label.length > 0) {
+      var the_active_series = this_obj.getSeriesObjectById(this_opts.viewer.activeSeriesId);
+      if (typeof the_active_series.label !== 'undefined' && the_active_series.label.length > 0) {
 
-         //cursor position (in image original scale)
-         var tmp_x = (e.clientX - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().left - this_opts.viewer.position.dx) * this_opts.viewer.position.ow / this_opts.viewer.position.dw;
-         var tmp_y = (e.clientY - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().top - this_opts.viewer.position.dy) * this_opts.viewer.position.oh / this_opts.viewer.position.dh;
+       //cursor position (in image original scale)
+        var tmp_x = (e.clientX - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().left - this_opts.viewer.position.dx) * this_opts.viewer.position.ow / this_opts.viewer.position.dw;
+        var tmp_y = (e.clientY - this_elm.find('.canvas_main_elm').get(0).getBoundingClientRect().top - this_opts.viewer.position.dy) * this_opts.viewer.position.oh / this_opts.viewer.position.dh;
 
-         tmp_x = Math.floor(tmp_x);
-         tmp_y = Math.floor(tmp_y);
+        tmp_x = Math.floor(tmp_x);
+        tmp_y = Math.floor(tmp_y);
 
-         if(tmp_x < this_opts.viewer.position.ow -1 && tmp_y < this_opts.viewer.position.oh -1){
-          var tmp_point_position = this_obj._exchangePositionCtoV([[tmp_x, tmp_y]]);
+        if (tmp_x < this_opts.viewer.position.ow - 1 && tmp_y < this_opts.viewer.position.oh - 1) {
+          var tmp_point_position = this_obj._exchangePositionCtoV([[tmp_x,  tmp_y]]);
 
-          var bucket_fill_positions =  this_obj._getBucketFillPositions(
-             this_opts.viewer.activeSeriesId,
-             the_active_series.activeLabelId,
-             tmp_point_position[0]
-          );
+          //this function runs only the cursor point is in DICOM image.
+          if (tmp_point_position[0][0] > 0 && tmp_point_position[0][1] > 0 && tmp_point_position[0][2] > 0) {
+            var bucket_fill_positions =  this_obj._getBucketFillPositions(
+                this_opts.viewer.activeSeriesId,
+                the_active_series.activeLabelId,
+                tmp_point_position[0]
+            );
 
-          this_opts.container.updateVoxel(this_opts.viewer.activeSeriesId,the_active_series.activeLabelId, 'pen',bucket_fill_positions);
-          this_opts.container.addHistory(this_opts.viewer.activeSeriesId,the_active_series.activeLabelId, 'pen',bucket_fill_positions);
-          this_elm.trigger('onWritten', [the_active_series.activeLabelId,this_opts.viewer.activeSeriesId]);
-
-         }
-       }
+            this_opts.container.updateVoxel(this_opts.viewer.activeSeriesId, the_active_series.activeLabelId,  'pen', bucket_fill_positions);
+            this_opts.container.addHistory(this_opts.viewer.activeSeriesId, the_active_series.activeLabelId,  'pen', bucket_fill_positions);
+            this_elm.trigger('onWritten',  [the_active_series.activeLabelId, this_opts.viewer.activeSeriesId]);
+          }
+        }
+      }
     },//_mousedownFuncBucket
 
 

@@ -3,7 +3,7 @@
 /**
  * Import feature
  */
-class ShareImportController extends BaseController
+class ShareImportController extends ApiBaseController
 {
 	/**
 	 * @var integer DATA_TYPE_LOCAL Import data type:local
@@ -37,52 +37,44 @@ class ShareImportController extends BaseController
 		$inputs = Input::all();
 		$inputs['import_file'] = Input::file('import_file');
 
-		try {
-			$this->validate($inputs);
+		$this->validate($inputs);
 
-			//Import Type
-			$cmd_str = ' '.$inputs['import_type'];
+		//Import Type
+		$cmd_str = ' '.$inputs['import_type'];
 
-			//Import Path
-			if ($inputs['import_type'] === self::DATA_TYPE_LOCAL) {
-				$tmpDir = Str::random(32);
-				$tmpPath = storage_path('cache').'/'.$tmpDir;
-				mkdir($tmpPath, 0777, true);
-				$inputs['import_file']->move($tmpPath, $inputs['import_file']->getClientOriginalName());
-				$cmd_str .= ' '.$tmpPath.'/'.$inputs['import_file']->getClientOriginalName();
-			} else if ($inputs['import_type'] === self::DATA_TYPE_URL) {
-				$cmd_str .= ' '.$inputs['import_url'];
-			}
-
-			//PersonalInfo Option
-			if ($inputs['personal'] == 0)
-				$cmd_str .= ' --without-personal';
-
-			//Domain option
-			if ($inputs['domain'])
-				$cmd_str .= ' --domain=' . $inputs['domain'];
-
-			//Password option
-			if ($inputs['tgz_pass'])
-				$cmd_str .= ' --password=' . $inputs['tgz_pass'];
-
-			//delete trash files
-			CommonHelper::deleteOlderTemporaryFiles(storage_path('cache'), true, '-1 day');
-
-			$task = Task::startNewTask("case:import " . $cmd_str);
-			if (!$task) {
-				throw new Exception('Failed to invoke export process.');
-			}
-			return Response::json(array(
-					'result' => true,
-					'taskID' => $task->taskID));
-		} catch (Exception $e) {
-			Log::error($e);
-			return Response::json(
-				array('result' => false, 'errorMessage' => $e->getMessage()),
-				400
-			);
+		//Import Path
+		if ($inputs['import_type'] === self::DATA_TYPE_LOCAL) {
+			$tmpDir = Str::random(32);
+			$tmpPath = storage_path('cache').'/'.$tmpDir;
+			mkdir($tmpPath, 0777, true);
+			$inputs['import_file']->move($tmpPath, $inputs['import_file']->getClientOriginalName());
+			$cmd_str .= ' '.$tmpPath.'/'.$inputs['import_file']->getClientOriginalName();
+		} else if ($inputs['import_type'] === self::DATA_TYPE_URL) {
+			$cmd_str .= ' '.$inputs['import_url'];
 		}
+
+		//PersonalInfo Option
+		if ($inputs['personal'] == 0)
+			$cmd_str .= ' --without-personal';
+
+		//Domain option
+		if ($inputs['domain'])
+			$cmd_str .= ' --domain=' . $inputs['domain'];
+
+		//Password option
+		if ($inputs['tgz_pass'])
+			$cmd_str .= ' --password=' . $inputs['tgz_pass'];
+
+		//delete trash files
+		CommonHelper::deleteOlderTemporaryFiles(storage_path('cache'), true, '-1 day');
+
+		$task = Task::startNewTask("case:import " . $cmd_str);
+		if (!$task) {
+			throw new Exception('Failed to invoke export process.');
+		}
+		return Response::json(array(
+				'result' => true,
+				'taskID' => $task->taskID));
 	}
 
 

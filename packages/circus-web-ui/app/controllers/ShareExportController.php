@@ -3,7 +3,7 @@
 /**
  * Export feature
  */
-class ShareExportController extends BaseController
+class ShareExportController extends ApiBaseController
 {
 	private $_caseIds = array();
 	/**
@@ -15,56 +15,48 @@ class ShareExportController extends BaseController
 
 		//POST data acquisition
 		$inputs = Input::all();
-		try {
-			// Validation
-			$this->validate($inputs);
+		// Validation
+		$this->validate($inputs);
 
-			// Create temporary folder
-			$tmp_dir = Str::random(32);
-			$tmp_dir_path = storage_path('cache') . '/' . $tmp_dir;
-			if (!mkdir($tmp_dir_path))
-				throw new Exception('Failed to create a temporary folder.');
+		// Create temporary folder
+		$tmp_dir = Str::random(32);
+		$tmp_dir_path = storage_path('cache') . '/' . $tmp_dir;
+		if (!mkdir($tmp_dir_path))
+			throw new Exception('Failed to create a temporary folder.');
 
-			// Command execution
-			$caseIds = implode(',', $this->_caseIds);
-			$cmd_str = ' ' . $caseIds . ' ' . $tmp_dir_path;
-			if ($inputs['personal'] == 0)
-				$cmd_str .= ' --without-personal';
+		// Command execution
+		$caseIds = implode(',', $this->_caseIds);
+		$cmd_str = ' ' . $caseIds . ' ' . $tmp_dir_path;
+		if ($inputs['personal'] == 0)
+			$cmd_str .= ' --without-personal';
 
-			$tags = implode(',', json_decode($inputs['tags'], true));
-			if ($tags) {
-				$cmd_str .= ' --tag=' . $tags;
-			}
-
-			//Password option
-			if ($inputs['tgz_pass']) {
-				$cmd_str .= ' --password=' . $inputs['tgz_pass'];
-			}
-
-			// Delete old transfer files
-			CommonHelper::deleteOlderTemporaryFiles(storage_path('transfer'), true, '-2 day');
-
-			$task = Task::startNewTask("case:export " . $cmd_str);
-			if (!$task) {
-				throw new Exception('Failed to invoke export process.');
-			}
-
-			// TODO: Fix security
-			if (!is_dir(storage_path('transfer'))) {
-				mkdir(storage_path('transfer'), 0777, true);
-			}
-
-			return Response::json(array(
-				'result' => true,
-				'taskID' => $task->taskID
-			));
-		} catch (Exception $e) {
-			Log::error($e);
-			return Response::json(
-				array('result' => false, 'errorMessage' => $e->getMessage()),
-				400
-			);
+		$tags = implode(',', json_decode($inputs['tags'], true));
+		if ($tags) {
+			$cmd_str .= ' --tag=' . $tags;
 		}
+
+		//Password option
+		if ($inputs['tgz_pass']) {
+			$cmd_str .= ' --password=' . $inputs['tgz_pass'];
+		}
+
+		// Delete old transfer files
+		CommonHelper::deleteOlderTemporaryFiles(storage_path('transfer'), true, '-2 day');
+
+		$task = Task::startNewTask("case:export " . $cmd_str);
+		if (!$task) {
+			throw new Exception('Failed to invoke export process.');
+		}
+
+		// TODO: Fix security
+		if (!is_dir(storage_path('transfer'))) {
+			mkdir(storage_path('transfer'), 0777, true);
+		}
+
+		return Response::json(array(
+			'result' => true,
+			'taskID' => $task->taskID
+		));
 	}
 
 	private function validate($data)

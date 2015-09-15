@@ -229,7 +229,7 @@ class Series extends BaseModel {
 		$domains = array();
 		$seriesList = self::getPluralSeries($seriesIds);
 		if (!$seriesList || count($seriesIds) !== count($seriesList))
-			throw new Exception('存在しないシリーズが含まれています。');
+			throw new Exception("Series don't exist includes.");
 
 		foreach ($seriesList as $series) {
 			$domains[] = $series->domain;

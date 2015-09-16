@@ -1028,7 +1028,11 @@
       var this_elm = this.element;
       var this_opts = this.options;
       var canvas_w = this_elm.find('.series_image_elm').width();
-      var tmp_zoom = canvas_w / this_opts.viewer.position.dw;
+      var canvas_h = this_elm.find('.series_image_elm').height();
+      var tmp_zoom = Math.min(
+				canvas_w / this_opts.viewer.position.dw ,
+			  canvas_h / this_opts.viewer.position.dh
+			);
 
       tmp_zoom = Math.floor(tmp_zoom * 10) / 10;
       this_obj.changeZoom(tmp_zoom);

@@ -2200,8 +2200,9 @@
       this_opts.viewer.position.dy = (canvas_default - tmp_h) / 2;
 
       //set canvas element size.
-      this_elm.find('.series_image_elm,.canvas_main_elm').attr({width: canvas_default,height: canvas_default})
-      .css({width: canvas_default + 'px', height: canvas_default + 'x'});
+      this_elm.find('.series_image_elm,.canvas_main_elm')
+        .attr({width: canvas_default,height: canvas_default})
+        .css({width: canvas_default + 'px', height: canvas_default + 'px'});
 
       //set slider limit
       if (this_opts.viewer.number.current > tmp_num) {

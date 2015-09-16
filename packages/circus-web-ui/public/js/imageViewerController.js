@@ -678,12 +678,12 @@
                 show: true,
                 number: 0,
                 name: 'oblique_x',
-                color: 'ff0000'
+                color: 'ffa500'
               }, {
                 show: true,
                 number: 0,
                 name: 'oblique_y',
-                color: 'ff0000'
+                color: 'ffa500'
               }
               ],
               grid_range : 5,

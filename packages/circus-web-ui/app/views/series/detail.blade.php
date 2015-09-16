@@ -150,8 +150,7 @@
                         if(typeof response.z == 'number'){
                             tmp_series.voxel.z = response.z;
                         };
-
-
+												
                         //set window settings
                         if(typeof tmp_series.window != 'object'){
                             tmp_series.window = new Object();
@@ -217,6 +216,16 @@
 													tmp_viewer.number.current = Math.ceil(tmp_viewer.number.maximum / 2);
 												}
 
+												for(var  k = 0; k < tmp_viewer.guide.lines.length; k++ ){
+													var tmp_guide = tmp_viewer.guide.lines[k];
+													if(tmp_guide.name === 'axial'){
+														tmp_guide.number = response.z / 2 ;
+													} else if(tmp_guide.name === 'coronal'){
+														tmp_guide.number = response.y / 2;
+													} else if(tmp_guide.name === 'sagittal'){
+														tmp_guide.number = response.x / 2;
+													}
+												}
                         controllerRun();
                 }
             });

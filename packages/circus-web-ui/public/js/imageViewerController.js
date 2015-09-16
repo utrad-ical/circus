@@ -617,38 +617,13 @@
         //ビューアーオブジェクトの数だけビューアライブラリ発火
         for (var i = 0; i < controllerInfo.viewer.length; i++) {
           var this_viewer = controllerInfo.viewer[i];
-          var tmp_w = 512;
-          var tmp_h = 512;
-          var tmp_ow = 512;
-          var tmp_oh = 512;
 
           this_viewer.src = controllerInfo.baseUrl;
           this_viewer.elements = {};
-          if (this_viewer.orientation === 'axial') {
-            tmp_w = active_series.voxel.x;
-            tmp_h = active_series.voxel.y * active_series.voxel.voxel_y / active_series.voxel.voxel_x;
-            tmp_ow = active_series.voxel.x;
-            tmp_oh = active_series.voxel.y;
-
-          } else if (this_viewer.orientation === 'sagittal') {
-            tmp_w = active_series.voxel.y * active_series.voxel.voxel_y / active_series.voxel.voxel_x;
-            tmp_h = active_series.voxel.z * active_series.voxel.voxel_z / active_series.voxel.voxel_x;
-            tmp_ow = active_series.voxel.y;
-            tmp_oh = active_series.voxel.z;
-
-          } else if (this_viewer.orientation === 'coronal') {
-            tmp_w = active_series.voxel.x;
-            tmp_h = active_series.voxel.z * active_series.voxel.voxel_z / active_series.voxel.voxel_x;
-            tmp_ow = active_series.voxel.x;
-            tmp_oh = active_series.voxel.z;
-
-          } else if (this_viewer.orientation === 'oblique') {
+          if (this_viewer.orientation === 'oblique') {
             this_viewer.src = controllerInfo.obliqueUrl;
             this_viewer.elements = {'slider' : {'panel' : false}};
           }
-
-          tmp_w = Math.floor(tmp_w);
-          tmp_h = Math.floor(tmp_h);
 
           //シリーズ・ラベル情報を用意
           var init_series_info = [];
@@ -722,12 +697,6 @@
               'window': this_viewer.window,
               'elements': this_viewer.elements,
               'number': this_viewer.number,
-              'position': {
-                ow: tmp_ow,
-                oh: tmp_oh,
-                dw: tmp_w,
-                dh: tmp_h
-              },
               activeSeriesId: controllerInfo.activeSeriesId,
               series: init_series_info,
               'voxel': {
@@ -740,9 +709,8 @@
               }
             },
             'container': this_viewer.container
-
           }); //imageViewer
-
+					
           if (typeof this_viewer.rotateControl !== 'undefined' && this_viewer.rotateControl === true) {
             var new_rotate_opt = $('#' + this_viewer.elementId).imageViewer('option');
             new_rotate_opt.viewer.rotate.visible = true;
@@ -795,9 +763,10 @@
         var canvas_w = $(elmId).find('.series_image_elm').width();
         var canvas_h = $(elmId).find('.series_image_elm').height();
 
+				$(elmId).imageViewer('fixToCenter')
+
         if (tmp_opts.viewer.position.dw > canvas_w || tmp_opts.viewer.position.dh > canvas_h) {
-          $(elmId).imageViewer('fitToCanvas')
-                  .trigger('changeImageSrc');
+          $(elmId).imageViewer('fitToCanvas').trigger('changeImageSrc');
         } else {
            $(elmId).imageViewer('syncVoxel');
         }

@@ -758,18 +758,15 @@
       //各ビューアーについて画像のピクセルサイズがcanvasを超えていた場合にはズームを縮小
       //それ以外の場合は現状のサイズ定義でビューアー更新
       for (var i = controllerInfo.viewer.length - 1; i >= 0; i--) {
-        var elmId = '#' + controllerInfo.viewer[i].elementId;
-        var tmp_opts = $(elmId).imageViewer('option');
-        var canvas_w = $(elmId).find('.series_image_elm').width();
-        var canvas_h = $(elmId).find('.series_image_elm').height();
-
-				$(elmId).imageViewer('fixToCenter')
+        var tmp_elm = $('#' + controllerInfo.viewer[i].elementId);
+        var tmp_opts = tmp_elm.imageViewer('option');
+        var canvas_w = tmp_elm.find('.series_image_elm').width();
+        var canvas_h = tmp_elm.find('.series_image_elm').height();
 
         if (tmp_opts.viewer.position.dw > canvas_w || tmp_opts.viewer.position.dh > canvas_h) {
-          $(elmId).imageViewer('fitToCanvas').trigger('changeImageSrc');
-        } else {
-           $(elmId).imageViewer('syncVoxel');
-        }
+          tmp_elm.imageViewer('fitToCanvas').trigger('changeImageSrc');
+        } 
+				tmp_elm.imageViewer('fixToCenter').imageViewer('syncVoxel');
       }
 
       $('.img_area').find('.btn_prev,.btn_next').addClass('common_btn');

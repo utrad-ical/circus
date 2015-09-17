@@ -382,6 +382,7 @@
 {{Form::open(['url' => asset('transfer'), 'method' => 'post', 'id' => 'frmDownload'])}}
 {{Form::close()}}
 <span id="export_err" class="font_red"></span>
+<div id="messages"></div>
 <div class="search_result pad_tb_5" id="result_case_list">
 @include('case.case')
 @include('case.export_dialog')

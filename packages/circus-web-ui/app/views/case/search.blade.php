@@ -178,7 +178,7 @@
 						target_elm.empty();
 						target_elm.append(res.response);
 					} else {
-						alert(res.message);
+						showMessage('Saved search criteria.');
 					}
 				}
 			});

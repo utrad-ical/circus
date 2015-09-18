@@ -58,7 +58,7 @@ export class Validator {
 				});
 			} else if (typeof rule === 'function') {
 				// The rule is checked by the given function
-				ok = rule(input[key]);
+				ok = (<Function><any>rule)(this, input[key]);
 			} else if (rule instanceof RegExp) {
 				// The rule is checked with the given regexp
 				ok = rule.test(input[key]);

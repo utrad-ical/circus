@@ -1,6 +1,7 @@
 ;// imageViewer
 (function ($) {
 
+
   $.widget('ui.imageViewer', {
     options: {
       container: '', //required. container for draw labels.

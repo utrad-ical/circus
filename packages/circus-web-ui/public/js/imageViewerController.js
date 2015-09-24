@@ -1260,31 +1260,24 @@
       $.unblockUI();
       var tmp_input_memo = window.prompt('input Memo', controllerInfo.memo);
       if (tmp_input_memo !== null) {
-        //console.log(save_data);
-        //console.log("URL::");
-        //console.log(controllerInfo.postUrl);
-        //console.log(save_data);
         save_data.memo = tmp_input_memo;
-        $.ajax({
-          url: controllerInfo.postUrl,
-          type: 'post',
-          data: {
-            data: save_data
-          },
-          dataType: 'json',
-          error: function () {
-            alert('通信に失敗しました');
-          },
-          success: function (response) {
-            var revisionRes = getRevisionList();
-            if (revisionRes) {
-              alert('Registration of label information is now complete.');
-              this_elm.imageViewerController('resetUpdateFlg');
-            } else {
-              alert('Failed to get revision information .');
+        api("", {
+            url: controllerInfo.postUrl,
+            type: 'post',
+            data: {
+              data: save_data
+            },
+            dataType: 'json',
+            success: function (response) {
+              var revisionRes = getRevisionList();
+              if (revisionRes) {
+                alert('Registration of label information is now complete.');
+                this_elm.imageViewerController('resetUpdateFlg');
+              } else {
+                alert('Failed to get revision information .');
+              }
             }
-          }
-        });
+          });
       }
 
       return false;

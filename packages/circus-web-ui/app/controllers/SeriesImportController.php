@@ -67,7 +67,6 @@ class SeriesImportController extends ApiBaseController {
 			throw new Exception('Failed to invoke image importer process.');
 		}
 
-		throw new Exception('eee');
 		return Response::json(array(
 			'result' => true,
 			'taskID' => $task->taskID

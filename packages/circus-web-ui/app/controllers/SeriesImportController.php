@@ -24,62 +24,54 @@ class SeriesImportController extends ApiBaseController {
 	 */
 	public function register()
 	{
-		try {
-			// delete old temporary files
-			CommonHelper::deleteOlderTemporaryFiles(storage_path('uploads'), true, '-1 day');
+		// delete old temporary files
+		CommonHelper::deleteOlderTemporaryFiles(storage_path('uploads'), true, '-1 day');
 
-			// Acquire information on the upload files
-			$uploads = Input::file('files');
-			if (!is_array($uploads)) throw new Exception('Upload files not specified.');
+		// Acquire information on the upload files
+		$uploads = Input::file('files');
+		if (!is_array($uploads)) throw new Exception('Upload files not specified.');
 
-			//domain unselected
-			$domain = Input::get('domain');
-			if (!$domain)
-				throw new Exception('Please select the domain.');
-			//domains no regist
-			$domains = ServerParam::getVal('domains');
-			if (!$domains)
-				throw new Exception('Please set the domains in the management screen.');
-			//domain check
-			if (array_key_exists($domain, ServerParam::getDomainList()) === false)
-				throw new Exception('Domain is invalid.');
+		//domain unselected
+		$domain = Input::get('domain');
+		if (!$domain)
+			throw new Exception('Please select the domain.');
+		//domains no regist
+		$domains = ServerParam::getVal('domains');
+		if (!$domains)
+			throw new Exception('Please set the domains in the management screen.');
+		//domain check
+		if (array_key_exists($domain, ServerParam::getDomainList()) === false)
+			throw new Exception('Domain is invalid.');
 
-			$auth_sess_key = Auth::getSession()->getId();
-			$tmp_dir = storage_path('uploads/' . $auth_sess_key);
-			// clear current contents of the upload folder
-			CommonHelper::deleteOlderTemporaryFiles(storage_path('uploads/'. $auth_sess_key), true);
+		$auth_sess_key = Auth::getSession()->getId();
+		$tmp_dir = storage_path('uploads/' . $auth_sess_key);
+		// clear current contents of the upload folder
+		CommonHelper::deleteOlderTemporaryFiles(storage_path('uploads/'. $auth_sess_key), true);
 
-			foreach ($uploads as $upload) {
-				$ext = strtolower($upload->getClientOriginalExtension());
-				$target = "$tmp_dir/" . $upload->getClientOriginalName();
-				if ($ext == 'zip') {
-					// Extract the zip file into a temp dir and import it later
-					$this->thawZip($upload, $target);
-				} else {
-					// Import a single DICOM file
-					$upload->move($tmp_dir, $upload->getClientOriginalName());
-				}
+		foreach ($uploads as $upload) {
+			$ext = strtolower($upload->getClientOriginalExtension());
+			$target = "$tmp_dir/" . $upload->getClientOriginalName();
+			if ($ext == 'zip') {
+				// Extract the zip file into a temp dir and import it later
+				$this->thawZip($upload, $target);
+			} else {
+				// Import a single DICOM file
+				$upload->move($tmp_dir, $upload->getClientOriginalName());
 			}
-			// invoke artisan command to import files
-			Log::debug(['IMPORT', $target]);
-			$escaped_tmp_dir = escapeshellarg($tmp_dir);
-			$task = Task::startNewTask("image:import --recursive --domain=$domain $escaped_tmp_dir");
-			if (!$task) {
-				throw new Exception('Failed to invoke image importer process.');
-			}
-
-			return Response::json(array(
-				'result' => true,
-				'taskID' => $task->taskID
-			));
-		} catch (Exception $e) {
-			Log::info('[' . get_class($e) . ']');
-			Log::info($e);
-			return Response::json(
-				array('result' => false, 'errorMessage' => $e->getMessage()),
-				400
-			);
 		}
+		// invoke artisan command to import files
+		Log::debug(['IMPORT', $target]);
+		$escaped_tmp_dir = escapeshellarg($tmp_dir);
+		$task = Task::startNewTask("image:import --recursive --domain=$domain $escaped_tmp_dir");
+		if (!$task) {
+			throw new Exception('Failed to invoke image importer process.');
+		}
+
+		throw new Exception('eee');
+		return Response::json(array(
+			'result' => true,
+			'taskID' => $task->taskID
+		));
 	}
 
 	/**

@@ -1679,7 +1679,10 @@
         }else if (this_opts.mode === 'guide') {
           this_obj._mousemoveFuncGuide(e);
         }else if (this_opts.mode === 'guide_single') {
-          var target_guide_direction = this_obj._CheckGuideOver(e,100);
+          var target_guide_direction = 'vertical';
+          if(this_elm.hasClass('mode_guide_horizontal')){
+            target_guide_direction = 'horizontal';
+          }
           this_obj._mousemoveFuncGuideSingle(e,target_guide_direction);
         }
 
@@ -2067,6 +2070,9 @@
         this_opts.mode = this_opts._tmpInfo.mode_backup;
         this_opts._tmpInfo.mode_backup = '';
       }
+      this_elm.removeClass('mode_guide_horizontal');
+      this_elm.removeClass('mode_guide_vertical');
+      this_elm.addClass('mode_' + this_opts.mode);
     },//_mouseupFuncGuideSingle
 
 

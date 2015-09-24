@@ -85,13 +85,15 @@
 			}
 
 			fd.append('domain', $(".select_domain option:selected").val());
-			console.log(fd);
 
 			busy(true);
+			//TODO::ajax→api
 			$.ajax({
+			//api("",{
 				url: $('#form').attr('action'),
 				type: "POST",
 				data: fd,
+			//	method:"POST",
 				processData: false,
 				contentType: false,
 				dataType: 'json',
@@ -104,15 +106,12 @@
 				},
 				complete: function (data) {
 					var res = JSON.parse(data.responseText);
-					console.log(res);
 					if (!res.taskID) {
 			            busy(false);
 		            }
 					if (res.errors) {
 		            	showMessage(res.errors, true);
 		            }
-
-
 				}
 			});
 

@@ -1307,7 +1307,7 @@
       if (insert_object) {
         this_opts = $.extend(true, this_opts, insert_object);
       }
-
+			
       //save my name in the Container. (for syncro)
       var this_id = this_elm.attr('id');
       this_opts.container.data.member.push(this_id);
@@ -2381,8 +2381,8 @@
         the_win_controller.find('.image_window_preset_select').change(function () {
           var tmp_value = $(this).val();
           if (tmp_value !== 'blank') {
-            var tmp_level = tmp_value.split(',')[0].replace(/\D/,'');
-            var tmp_width = tmp_value.split(',')[1].replace(/\D/,'');
+            var tmp_level = tmp_value.split(',')[0].replace(/[^0-9-]/g,'');
+            var tmp_width = tmp_value.split(',')[1].replace(/[^0-9-]/g,'');
 
             tmp_level = Number(tmp_level);
             tmp_width = Number(tmp_width);

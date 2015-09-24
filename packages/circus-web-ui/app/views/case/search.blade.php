@@ -165,14 +165,15 @@
 		});
 		//Ajax通信
 		function sendAjax(post_url, post_data, target_elm) {
-			$.ajax({
+			var tmp_ajax_data = {};
+			$.each(post_data, function(key, val) {
+				tmp_ajax_data[val.name] = val.value;
+			});
+
+			api("", {
 				url: post_url,
 				type: 'POST',
-				data: post_data,
-				dataType: 'json',
-				error: function(){
-					alert('I failed to communicate.');
-				},
+				data: tmp_ajax_data,
 				success: function(res){
 					if (typeof target_elm != "undefined") {
 						target_elm.empty();

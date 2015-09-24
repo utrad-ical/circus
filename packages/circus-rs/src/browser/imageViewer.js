@@ -1031,9 +1031,9 @@
       var canvas_w = this_elm.find('.series_image_elm').width();
       var canvas_h = this_elm.find('.series_image_elm').height();
       var tmp_zoom = Math.min(
-				canvas_w / this_opts.viewer.position.dw ,
-			  canvas_h / this_opts.viewer.position.dh
-			);
+        canvas_w / this_opts.viewer.position.dw ,
+        canvas_h / this_opts.viewer.position.dh
+      );
 
       tmp_zoom = Math.floor(tmp_zoom * 10) / 10;
       this_obj.changeZoom(tmp_zoom);
@@ -1315,12 +1315,10 @@
       //put series data into Container.
       for (var i = 0; i < this_opts.viewer.series.length; i++) {
         var tmp_series = this_opts.viewer.series[i];
-        this_opts.container.setSize(
-          tmp_series.id,
-          tmp_series.voxel.x,
-          tmp_series.voxel.y,
-          tmp_series.voxel.z
-       );
+        var tmp_x = Math.floor(tmp_series.voxel.x);
+        var tmp_y = Math.floor(tmp_series.voxel.y);
+        var tmp_z = Math.floor(tmp_series.voxel.z);
+        this_opts.container.setSize(tmp_series.id, tmp_x, tmp_y, tmp_z);
       }
 
       this_obj.setCanvasSize();

@@ -8,11 +8,18 @@ var exportRun = function (export_url, validate_flag) {
 		return;
 
 	var export_data = $('#frm_export').serializeArray();
+
+	var post_data = {};
+	$.each(export_data, function(key, val) {
+		post_data[val.name] = val.value;
+	});
+
 	busy(true);
-	$.ajax({
+
+	api("",{
 		url: export_url,
 		type: 'post',
-		data: export_data,
+		data: post_data,
 		dataType: 'json',
 		success: function (data) {
 			$.taskWatcherDialog(data.taskID, {
@@ -20,9 +27,12 @@ var exportRun = function (export_url, validate_flag) {
 				finish: function() { busy(false); }
 			});
 		},
-		error: function (data) {
-			showMessage(data.responseJSON.errorMessage);
-			busy(false);
+		complete:function(data) {
+			var res = JSON.parse(data.responseText);
+            if (!res.taskID) {
+            	busy(false);
+            	$('.btn_download').prop('disabled', false);
+            }
 		}
 	});
 }

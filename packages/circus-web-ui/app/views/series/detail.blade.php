@@ -100,12 +100,12 @@
 
         var initAjax= function(){
             var tmp_series = initInfo[0].series[0];
+            //TODO::ajax→api
             $.ajax({
                 url: metadata_url,
-								headers: {
-									Authorization: 'Bearer ' + tmp_series.token
-								},
-
+				headers: {
+					Authorization: 'Bearer ' + tmp_series.token
+				},
                 type: 'GET',
                 data: {
                     mode : 'metadata',

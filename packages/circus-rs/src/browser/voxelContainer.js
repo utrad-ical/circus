@@ -370,11 +370,11 @@ voxelContainer.prototype.getPositionDataFromImage = function (insertObject, seri
   var the_series_h = 512;
 
   if (typeof series_w == 'number') {
-    the_series_w = series_w;
+    the_series_w = Math.floor(series_w);
   }
 
   if (typeof series_h == 'number') {
-    the_series_h = series_h;
+    the_series_h = Math.floor(series_h);
   }
 
   if(typeof insertObject.image != 'undefined' && insertObject.image != 'error'){

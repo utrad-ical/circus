@@ -82,18 +82,6 @@ class CaseSearchBaseController extends ApiBaseController {
 	}
 
 	/**
-	 * プロジェクトに紐づくCase Attributeを取得する(Json)
-	 */
-	public function get_case_attribute() {
-		$inputs = Input::all();
-		if (!array_key_exists('projectID', $inputs))
-			return $this->errorResponse($e->getMessage());
-
-		$case_attr = ClinicalCase::getProjectCaseAttribute(array($inputs['projectID']));
-		return Response::json(['status' => 'OK', 'case_attr' => $case_attr]);
-	}
-
-	/**
 	 * ケース検索条件設定
 	 * @param Array $inputs 入力値
 	 */

@@ -91,6 +91,29 @@ class Project extends BaseModel
 		'window_presets' => 'Invalid window presets.'
 	);
 
+	/**
+	 * get the caseAttributesSchema of the project
+	 * @param Json $projects selected projects
+	 * @return Json the createAttributesSchema of the project
+	 */
+	public static function getProjectCaseAttribute($projects) {
+
+		if (count($projects) === 1) {
+			$project = Project::find($projects[0]);
+			if ($project->caseAttributesSchema) {
+				$case_attr = $project->caseAttributesSchema;
+				foreach ($case_attr as $key => $val) {
+					$case_attr[$key]['key'] = 'latestRevision.attributes.'.$val['key'];
+				}
+				return $case_attr;
+			}
+
+		}
+		return;
+
+
+	}
+
 }
 
 Validator::extend('window_presets', function ($attribute, $value, $parameters) {

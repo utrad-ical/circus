@@ -128,7 +128,7 @@
 						target_elm.empty();
 						target_elm.append(res.response);
 					} else {
-						alert(res.message);
+						showMessage('Saved search criteria.');
 					}
 				}
 			});
@@ -143,6 +143,12 @@ Series Search
 @stop
 
 @section('content')
+@if (isset($error_msg))
+<script>
+showMessage("{{{$error_msg}}}", true);
+</script>
+@endif
+
 @if(Auth::user()->isAccessibleSeries())
 {{Form::open(['url' => asset('series/search'), 'id' => 'form_search', 'method' => 'post', 'class' => 'mar_b_20'])}}
 	<div class="al_l mar_b_10">
@@ -215,7 +221,7 @@ Series Search
 		</p>
 	</div>
 {{Form::close()}}
-<span class="font_red">{{{$error_msg}}}</span>
+
 @if ($search_flg)
 	{{Form::open(['url' => asset('case/input'), 'method' => 'post', 'id' => 'form_edit_new_case'])}}
 		{{Form::hidden('back_url', 'series_search')}}

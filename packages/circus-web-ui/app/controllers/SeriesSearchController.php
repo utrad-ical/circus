@@ -108,7 +108,6 @@ class SeriesSearchController extends ApiBaseController {
 		$user->preferences = $pref;
 		$user->save();
 
-		$msg = 'Saved search criteria.';
-		return Response::json(array('result' => true, 'message' => $msg));
+		return $this->succeedResponse();
 	}
 }

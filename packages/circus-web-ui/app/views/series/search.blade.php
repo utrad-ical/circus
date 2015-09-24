@@ -112,14 +112,17 @@
 		//Ajax communication
 		function sendAjax(post_url, post_data) {
 			var target_elm = arguments[2] ? arguments[2] : "";
-			$.ajax({
+
+			var tmp_ajax_data = {};
+			$.each(post_data, function(key, val) {
+				tmp_ajax_data[val.name] = val.value;
+			});
+
+			api("", {
 				url: post_url,
 				type: 'POST',
-				data: post_data,
+				data: tmp_ajax_data,
 				dataType: 'json',
-				error: function(){
-					alert('I failed to communicate.');
-				},
 				success: function(res){
 					if (target_elm) {
 						target_elm.empty();
@@ -186,19 +189,19 @@ Series Search
 				<th>Sex</th>
 				<td>
 					<label>
-						{{Form::radio('sex', 'M', $inputs['sex'] == 'M' ? true : false)}}
+						{{Form::radio('sex', 'M', isset($inputs['sex']) && $inputs['sex'] == 'M' ? true : false)}}
 						male
 					</label>
 					<label>
-						{{Form::radio('sex', 'F', $inputs['sex'] == 'F' ? true : false)}}
+						{{Form::radio('sex', 'F', isset($inputs['sex']) && $inputs['sex'] == 'F' ? true : false)}}
 						female
 					</label>
 					<label>
-						{{Form::radio('sex', 'O', $inputs['sex'] == 'O' ? true : false)}}
+						{{Form::radio('sex', 'O', isset($inputs['sex']) && $inputs['sex'] == 'O' ? true : false)}}
 						other
 					</label>
 					<label>
-						{{Form::radio('sex', 'all', $inputs['sex'] == 'all' ? true : false)}}
+						{{Form::radio('sex', 'all', isset($inputs['sex']) && $inputs['sex'] == 'all' ? true : false)}}
 						all
 					</label>
 				</td>
@@ -212,7 +215,7 @@ Series Search
 		</p>
 	</div>
 {{Form::close()}}
-
+<span class="font_red">{{{$error_msg}}}</span>
 @if ($search_flg)
 	{{Form::open(['url' => asset('case/input'), 'method' => 'post', 'id' => 'form_edit_new_case'])}}
 		{{Form::hidden('back_url', 'series_search')}}
@@ -316,7 +319,5 @@ Series Search
 		{{Form::hidden('mode', 'detail')}}
 	{{Form::close()}}
 @endif
-@else
-	<span class="font_red">{{{$error_msg}}}</span>
 @endif
 @stop

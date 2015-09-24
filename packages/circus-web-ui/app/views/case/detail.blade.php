@@ -138,7 +138,11 @@
 		var ajax_cnt = 0;
 		var initAjax= function(){
 			var tmp_series = initInfo[0].series[ajax_cnt];
+			//TODO::ajax→api
 			$.ajax({
+			/*
+			api("", {
+				*/
 				url: metadata_url,
 				type: 'GET',
 				headers: {
@@ -399,18 +403,16 @@
 		$('#export_err').empty();
 		var export_data = {caseID: "{{{$case_detail->caseID}}}", seriesUID:active_series_ld, revisionNo:revisionNo};
 		//get label list of the revision
-		$.ajax({
-		   url: "{{{asset('case/get_label_list')}}}",
+		api("", {
+			url: "{{{asset('case/get_label_list')}}}",
 		   type: 'post',
 		   data: export_data,//送信データ
 		   dataType: 'json',
-		   error: function () {
-			 alert('I failed to communicate.');
-		   },
 		   success: function (response) {
 			 createLabelList(response.label_list, active_series_ld);
 		   }
-	   });
+		});
+
 	}
 
 
@@ -436,15 +438,11 @@
 	}
 
 	var getRevisionList = function() {
-		var result_flag = $.ajax({
+		var result_flag = api("",{
 			url: "{{{asset('case/get_revision_list')}}}",
 			type: 'post',
 			data: {caseID:"{{{$case_detail->caseID}}}"},//送信データ
 			dataType: 'json',
-			error: function () {
-				alert('Revision information acquisition failed .');
-				return false;
-			},
 			success: function (res) {
 				if (res.status === "OK") {
 					create_dom(res.response);

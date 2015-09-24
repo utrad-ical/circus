@@ -31,7 +31,7 @@ class CaseSearchBaseController extends ApiBaseController {
 					if (!array_key_exists('projectID', $inputs))
 						throw new Exception('Please specify the project .');
 
-					$result['tag_list'] = ClinicalCase::getProjectTags(array($inputs['projectID']));
+					$result['tag_list'] = Project::getProjectTags(array($inputs['projectID']));
 				}
 			}
 			Session::put('backUrl', $this->_prefix . '/search');
@@ -110,13 +110,6 @@ class CaseSearchBaseController extends ApiBaseController {
 		} else if (array_key_exists('btnBack', $inputs) === false) {
 			Session::forget($this->_prefix.'.search');
 		}
-	}
-
-	public function getTags($inputs) {
-		if (!array_key_exists('projectID', $inputs))
-			throw new Exception('Please specify the project .');
-
-		return ClinicalCase::getProjectTags(array($inputs['projectID']));
 	}
 
 }

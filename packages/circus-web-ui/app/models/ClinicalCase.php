@@ -312,27 +312,6 @@ class ClinicalCase extends BaseModel {
 	}
 
 	/**
-	 * get the Tags of the project
-	 * @param Json $projects selected projects
-	 * @return Json the tags of the project
-	 */
-	public static function getProjectTags($projects) {
-		if (count($projects) === 1) {
-			$project = Project::find($projects[0]);
-			if ($project->tags) {
-				$tag_list = array();
-				$tags = $project->tags;
-				foreach ($tags as $idx => $tag) {
-					$tag_list[$idx] = $tag['name'];
-				}
-				return $tag_list;
-			}
-
-		}
-		return array();
-	}
-
-	/**
 	 * Add tags if they do not exist.
 	 * @param array $tags The list of tags
 	 */

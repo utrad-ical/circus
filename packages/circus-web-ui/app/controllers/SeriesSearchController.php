@@ -2,7 +2,7 @@
 /**
  * Class to perform the operation of series
  */
-class SeriesSearchController extends BaseController {
+class SeriesSearchController extends ApiBaseController {
 	protected $searchableFields = [
 		'SeriesUID', 'seriesDescription', 'patientID', 'patientName',
 		'minAge', 'maxAge', 'sex'
@@ -12,44 +12,50 @@ class SeriesSearchController extends BaseController {
 	 * Series Search Result
 	 */
 	public function search($preset_id = false) {
-		//Initialization
-		$search_flg = false;
-		$result = array();
+		try {
+			//Initialization
+			$search_flg = false;
+			$result = array();
 
-		//閲覧可能なシリーズがあるかチェック
-		if (!Auth::user()->isAccessibleSeries()) {
-			$result['error_msg'] = '参照可能なシリーズはありません。';
-			return View::make('series.search', $result);
+			//閲覧可能なシリーズがあるかチェック
+			if (!Auth::user()->isAccessibleSeries()) {
+				$result['error_msg'] = '参照可能なシリーズはありません。';
+				return View::make('series.search', $result);
+			}
+
+			//Input value acquisition
+			$inputs = Input::all();
+
+			// Enter 'add new series to an existing case' mode
+			if (isset($inputs['edit_case_id']))
+				Session::put('edit_case_id', $inputs['edit_case_id']);
+
+			// Parse input from HTML and save the search condition as an object
+			$this->setSearchData($inputs, $preset_id);
+			$search_data = Session::get('series.search');
+
+			//Search
+			if ($search_data) {
+				$search_flg = true;
+				$result['list'] = Series::getSeriesList($search_data);
+
+				//Setting the pager
+				if ($result['list'] && $search_data['disp'] !== 'all' )
+					$result['list_pager'] = Paginator::make($result['list']->toArray(),
+															Series::getSeriesList($search_data, true),
+															$search_data['disp']);
+			} else {
+				$search_data['sex'] = 'all';
+			}
+
+			$result['inputs'] = $search_data;
+			$result['search_flg'] = $search_flg;
+			$result['edit_case_flg'] = $this->isEditCase();
+
+		} catch (Exception $e) {
+			Log::error($e);
+			$result['error_msg'] = $e->getMessage();
 		}
-
-		//Input value acquisition
-		$inputs = Input::all();
-
-		// Enter 'add new series to an existing case' mode
-		if (isset($inputs['edit_case_id']))
-			Session::put('edit_case_id', $inputs['edit_case_id']);
-
-		// Parse input from HTML and save the search condition as an object
-		$this->setSearchData($inputs, $preset_id);
-		$search_data = Session::get('series.search');
-
-		//Search
-		if ($search_data) {
-			$search_flg = true;
-			$result['list'] = Series::getSeriesList($search_data);
-
-			//Setting the pager
-			if ($result['list'] && $search_data['disp'] !== 'all' )
-				$result['list_pager'] = Paginator::make($result['list']->toArray(),
-														Series::getSeriesList($search_data, true),
-														$search_data['disp']);
-		} else {
-			$search_data['sex'] = 'all';
-		}
-
-		$result['inputs'] = $search_data;
-		$result['search_flg'] = $search_flg;
-		$result['edit_case_flg'] = $this->isEditCase();
 		return View::make('series.search', $result);
 	}
 

@@ -85,6 +85,7 @@
 			}
 
 			fd.append('domain', $(".select_domain option:selected").val());
+			console.log(fd);
 
 			busy(true);
 			$.ajax({
@@ -101,11 +102,20 @@
 						busy(false);
 					});
 				},
-				error: function (data) {
-					alert(data.responseJSON.errorMessage);
-					busy(false);
+				complete: function (data) {
+					var res = JSON.parse(data.responseText);
+					console.log(res);
+					if (!res.taskID) {
+			            busy(false);
+		            }
+					if (res.errors) {
+		            	showMessage(res.errors, true);
+		            }
+
+
 				}
 			});
+
 		}
 
 	});
@@ -139,4 +149,5 @@ id="page_series_import"
 	<div id="progress"><div id="progress-label"></div></div>
 	<div id="task-watcher"></div>
 	<p id="message" class="ui-state-highlight" style="display: none;"></p>
+	<p id="messages"></p>
 @stop

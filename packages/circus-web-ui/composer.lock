@@ -1,11 +1,10 @@
 {
     "_readme": [
         "This file locks the dependencies of your project to a known state",
-        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
+        "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
     "hash": "98d2adc34691b333e0230db852343a53",
-    "content-hash": "05c7ce4dd5f0e457234b88f7ab90d758",
     "packages": [
         {
             "name": "classpreloader/classpreloader",
@@ -1717,12 +1716,12 @@
             "source": {
                 "type": "git",
                 "url": "https://bitbucket.org/ical/circus_rs_dicom_server.git",
-                "reference": "eb1e437d0ad68c9d5350e568941d946cc5d88699"
+                "reference": "80d26a8eb79416bdc67abed7a25cb5f57b95d8af"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://bitbucket.org/ical/circus_rs_dicom_server/get/eb1e437d0ad68c9d5350e568941d946cc5d88699.zip",
-                "reference": "eb1e437d0ad68c9d5350e568941d946cc5d88699",
+                "url": "https://bitbucket.org/ical/circus_rs_dicom_server/get/80d26a8eb79416bdc67abed7a25cb5f57b95d8af.zip",
+                "reference": "80d26a8eb79416bdc67abed7a25cb5f57b95d8af",
                 "shasum": ""
             },
             "type": "library",
@@ -1743,7 +1742,7 @@
             "keywords": [
                 "DICOM"
             ],
-            "time": "2015-09-18 11:12:56"
+            "time": "2015-09-24 04:35:38"
         }
     ],
     "packages-dev": [
@@ -2152,16 +2151,16 @@
         },
         {
             "name": "phpunit/phpunit",
-            "version": "4.8.7",
+            "version": "4.8.9",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/phpunit.git",
-                "reference": "dab2ada9e9a503d2ec3c32fe0fb59dea9bdd9dfa"
+                "reference": "73fad41adb5b7bc3a494bb930d90648df1d5e74b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/dab2ada9e9a503d2ec3c32fe0fb59dea9bdd9dfa",
-                "reference": "dab2ada9e9a503d2ec3c32fe0fb59dea9bdd9dfa",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/73fad41adb5b7bc3a494bb930d90648df1d5e74b",
+                "reference": "73fad41adb5b7bc3a494bb930d90648df1d5e74b",
                 "shasum": ""
             },
             "require": {
@@ -2220,7 +2219,7 @@
                 "testing",
                 "xunit"
             ],
-            "time": "2015-09-14 06:57:22"
+            "time": "2015-09-20 12:56:44"
         },
         {
             "name": "phpunit/phpunit-mock-objects",

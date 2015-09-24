@@ -705,7 +705,7 @@
                 z: active_series.voxel.z,
                 voxel_x: active_series.voxel.voxel_x,
                 voxel_y: active_series.voxel.voxel_y,
-                voxel_z: active_series.voxel.voxel_z,
+                voxel_z: active_series.voxel.voxel_z
               }
             },
             'container': this_viewer.container

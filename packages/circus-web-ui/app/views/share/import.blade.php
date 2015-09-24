@@ -68,6 +68,7 @@ Import Data
 <div id="progress"><div id="progress-label"></div></div>
 <div id="task-watcher"></div>
 <p id="message" class="ui-state-highlight" style="display: none;"></p>
+<p id="messages"></p>
 
 <div id="dialog" title="Setting import tag options" style="display: none;">
     <p class="mar_10">
@@ -115,13 +116,10 @@ $(function() {
 	var tmpfile = document.getElementById('files');
 
 	var deleteTask = function(taskID) {
-		$.ajax({
+		api("", {
 			url:"{{{asset('delete/task')}}}"+"/"+taskID,
 			dataType: 'json',
 			method:'get',
-			error:function(){
-				abortConnection('I failed to communicate.');
-			},
 			success: function(){
 				console.log('success delete task '+taskID);
 			}
@@ -141,7 +139,7 @@ $(function() {
 	}
 	var abortConnection = function() {
 		if (arguments[0])
-			alert(arguments[0]);
+			showMessage(arguments[0]);
 		xhr.abort();
 	}
 	var errorConnection = function(message) {
@@ -154,20 +152,15 @@ $(function() {
 		}
 	});
 	var setTagOption = function(taskID) {
-		xhr = $.ajax({
+		xhr = api("",{
 			url:"{{{asset('task')}}}"+"/"+taskID,
 			method: 'get',
 			dataType: 'json',
-			cache:false,
-			async:true,
-			error: function(){
-				errorConnection('I failed to communicate.');
-			},
 			success: function(res){
 				taskData = res;
 				deleteTask(res.taskID);
 				if (!res.logs || res.logs[0]['result'] === false) {
-					errorConnection('タスクログ情報の取得が失敗しました。');
+					errorConnection('Failed Acquisition of the task log information.');
 				} else {
 					getProjectTags(res.logs[0]['projectID']);
 					abortConnection();
@@ -188,6 +181,8 @@ $(function() {
 		}
 
 		busy(true);
+
+		//TODO::ajax→api
 	    xhr = $.ajax({
 	    	url:  $('#frm_import').closest('form').attr('action'),
 			type: "post",
@@ -206,6 +201,7 @@ $(function() {
 	            });
 	        },
             error: function (data) {
+	            console.log(data);
                 errorConnection(data.responseJSON.errorMessage);
                 busy(false);
             }

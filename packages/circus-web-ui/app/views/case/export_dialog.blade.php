@@ -51,7 +51,7 @@ var exportRun = function (validate_flag) {
 
     var export_data = {"cases":sessionStorage.getItem(SESSION_STG_KEY), "personal":personal,"tags":tag, "export_type":export_type, "tgz_pass":tgz_pass};
     busy(true);
-    var xhr = $.ajax({
+    var xhr = api("", {
         url: "{{{asset('share/export')}}}",
         type: 'post',
         data: export_data,
@@ -59,13 +59,17 @@ var exportRun = function (validate_flag) {
         success: function (data) {
             $('#task-watcher').taskWatcher(data.taskID).on('finish', function() {
                 closeExportOptionDialog();
-                busy(false);
+                $('.btn_export').removeAttr('disabled');
+	            busy(false);
             });
         },
-        error: function (data) {
-            closeExportOptionDialog();
-            showMessage(data.responseJSON.errorMessage, true);
-            busy(false);
+        complete: function(data) {
+            var res = JSON.parse(data.responseText);
+            if (!res.taskID) {
+	            closeExportOptionDialog();
+	            $('.btn_export').removeAttr('disabled');
+	            busy(false);
+            }
         }
     });
 }

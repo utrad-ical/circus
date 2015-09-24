@@ -192,33 +192,23 @@
 
 			//選択されているプロジェクトが1つの場合のみプロジェクトに設定されているケースAttribute情報を取得する
 			if (select_projects['cnt'] === 1) {
-				var post_data = {'projectID':select_projects['id']};
-				api("",
-				{
-					url : "{{{asset('get_case_attribute')}}}",
-					type: 'POST',
-					data: post_data,
-					dataType: 'json',
-					success: function(res){
-						if (res.status === "OK") {
-							var keys = res.case_attr;
-							if (keys != "") {
-								filter_set_flag = true;
-								filter = $('#search_condition')
-								.filtereditor({keys: keys})
-								.on('filterchange', function () {
-									var data;
-									if (typeof detail_keys != 'undefined') {
-										data = filter.filtereditor('option', 'filter', detail_keys);
-									} else {
-										data = filter.filtereditor('option', 'filter');
-										var node = JSON.stringify(data, null, '');
-									}
-								});
-								filter.trigger('filterchange');
-							}
-						} else {
-							$('#search_condition').append(res.message);
+				api("project/"+select_projects.id, {
+					success: function(res) {
+						var keys = res.caseAttributesSchema;
+						if (keys != "") {
+							filter_set_flag = true;
+							filter = $('#search_condition')
+							.filtereditor({keys: keys})
+							.on('filterchange', function () {
+								var data;
+								if (typeof detail_keys != 'undefined') {
+									data = filter.filtereditor('option', 'filter', detail_keys);
+								} else {
+									data = filter.filtereditor('option', 'filter');
+									var node = JSON.stringify(data, null, '');
+								}
+							});
+							filter.trigger('filterchange');
 						}
 					}
 				});

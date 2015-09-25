@@ -500,31 +500,23 @@
       this_opts.viewer.window.level.current = new_level;
 
       //width ,check Max & Min
-      if (new_width > this_opts.viewer.window.level.maximum) {
-        new_width = this_opts.viewer.window.level.maximum;
+      if (new_width > this_opts.viewer.window.width.maximum) {
+        new_width = this_opts.viewer.window.width.maximum;
       }
-
-      if (new_width < this_opts.viewer.window.level.minimum) {
-        new_width = this_opts.viewer.window.level.minimum;
+      if (new_width < this_opts.viewer.window.width.minimum) {
+        new_width = this_opts.viewer.window.width.minimum;
       }
-
+      if (new_width < 1) {
+        new_width = 1;
+      }
       this_opts.viewer.window.width.current = new_width;
+
       var the_win_controller = this_elm.find('.image_window_controller_wrap');
       the_win_controller.find('.win_lv_label').text(this_opts.viewer.window.level.current);
       the_win_controller.find('.win_width_label').text(this_opts.viewer.window.width.current);
       the_win_controller.find('.image_window_level').val(this_opts.viewer.window.level.current);
       the_win_controller.find('.image_window_width').val(this_opts.viewer.window.width.current);
 
-      if (typeof preset_text !== 'undefined') {
-        the_win_controller.find('.image_window_preset_select').find('option').each(function () {
-          var tmp_this = $(this);
-          if (tmp_this.html() === preset_text) {
-            tmp_this.attr('selected','selected');
-          } else {
-            tmp_this.removeAttr('selected');
-          }
-        });
-      }
     },//changeWindowInfo
 
 
@@ -1822,26 +1814,26 @@
       var this_elm = this.element;
       var this_opts = this.options;
 
-      var tmp_width = this_opts._tmpInfo.elementParam.start.X + (e.clientX - this_opts._tmpInfo.cursor.start.X) * 10;
-      var tmp_level = this_opts._tmpInfo.elementParam.start.Y - (e.clientY - this_opts._tmpInfo.cursor.start.Y) * 10;
+      var new_width = this_opts._tmpInfo.elementParam.start.X + (e.clientX - this_opts._tmpInfo.cursor.start.X) * 10;
+      var new_level = this_opts._tmpInfo.elementParam.start.Y - (e.clientY - this_opts._tmpInfo.cursor.start.Y) * 10;
 
-     // fix the limit (window width)
-      if (this_opts.viewer.window.width.minimum > tmp_width) {
-        tmp_width = this_opts.viewer.window.width.minimum;
+      // fix the limit (window width)
+      if (this_opts.viewer.window.width.maximum < new_width) {
+        new_width = this_opts.viewer.window.width.maximum;
       }
-      if (this_opts.viewer.window.width.maximum < tmp_width) {
-        tmp_width = this_opts.viewer.window.width.maximum;
+      if (this_opts.viewer.window.width.minimum > new_width) {
+        new_width = this_opts.viewer.window.width.minimum;
       }
 
       //fix the limit (window level)
-      if (this_opts.viewer.window.level.minimum > tmp_level) {
-        tmp_level = this_opts.viewer.window.level.minimum;
+      if (this_opts.viewer.window.level.maximum < new_level) {
+        new_level = this_opts.viewer.window.level.maximum;
       }
-      if (this_opts.viewer.window.level.maximum < tmp_level) {
-        tmp_level = this_opts.viewer.window.level.maximum;
+      if (this_opts.viewer.window.level.minimum > new_level) {
+        new_level = this_opts.viewer.window.level.minimum;
       }
 
-      this_obj.changeWindowInfo(tmp_level, tmp_width);
+      this_obj.changeWindowInfo(new_level, new_width);
       this_obj._changeImageSrc();
 
       this_elm.find('.image_window_preset_select').find('option').removeAttr('selected');
@@ -2372,7 +2364,7 @@
           tmp_level = Number(tmp_level);
           tmp_width = Number(tmp_width);
 
-          this_obj.changeWindowInfo(tmp_level,tmp_width);
+          this_obj.changeWindowInfo(tmp_level, tmp_width);
           this_obj._changeImageSrc();
           this_elm.trigger('onWindowInfoChange');
         });

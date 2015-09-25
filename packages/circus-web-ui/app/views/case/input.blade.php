@@ -117,7 +117,7 @@ id="page_case_input"
 			{{Form::button('Confirmation', array('class' => 'common_btn btn_confirm'))}}
 		</p>
 	{{Form::close()}}
-@endif
+
 <div id="dialog" title="{{{Session::get('mode')}}} Case Confirmation" style="display: none;">
     <p class="mar_10">
         {{Form::open(['url' => asset('case/complete'), 'method' => 'post', 'class' => 'frm_confirm'])}}
@@ -171,6 +171,7 @@ id="page_case_input"
 		{{Form::close()}}
     </p>
 </div>
+@endif
 <script>
 var post_data;
 $(function(){

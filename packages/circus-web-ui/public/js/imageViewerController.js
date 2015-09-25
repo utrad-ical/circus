@@ -861,8 +861,8 @@
               if (isFinite(tmp_width) === true) {
                 //数値であれば上限値・下限値との比較をしてcontrollerを書き換える
                 //数値でないときは書き換えが走らないので操作前の値に戻る
-                tmp_width = Math.min(tmp_width, active_series.window.level.maximum);
-                tmp_width = Math.max(tmp_width, active_series.window.level.minimum);
+                tmp_width = Math.min(tmp_width, active_series.window.width.maximum);
+                tmp_width = Math.max(tmp_width, active_series.window.width.minimum);
                 active_series.window.width.current = tmp_width;
               }
               tmp_panel_elm.find('.image_window_width').val(active_series.window.width.current);

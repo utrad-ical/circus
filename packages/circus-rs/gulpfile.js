@@ -6,11 +6,9 @@ var concat = require('gulp-concat');
 gulp.task('default', ['typescript', 'less', 'build-browser']);
 
 gulp.task('typescript', function() {
+	var project = typescript.createProject('src/tsconfig.json');
 	gulp.src('src/**/*.ts')
-		.pipe(typescript({
-			module: 'commonjs',
-			target: 'es5'
-		}))
+		.pipe(typescript(project))
 		.pipe(gulp.dest('build'));
 });
 

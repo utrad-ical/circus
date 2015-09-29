@@ -56,9 +56,9 @@ export class Validator {
 					var [funcName, ...rest] = cond.split(':');
 					return validator[funcName](value, ...rest);
 				});
-			} else if (typeof rule === 'function') {
+			} else if (rule instanceof Function) {
 				// The rule is checked by the given function
-				ok = (<Function><any>rule)(input[key]);
+				ok = rule(input[key]);
 			} else if (rule instanceof RegExp) {
 				// The rule is checked with the given regexp
 				ok = rule.test(input[key]);

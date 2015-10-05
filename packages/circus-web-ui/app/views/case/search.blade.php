@@ -200,6 +200,7 @@
 		$('.select_project').change(function(){
 			filter_set_flag = false;
 			$('#search_condition').empty();
+			$('.tags_message').empty();
 			var select_projects = getSelectedProjectIds();
 
 			//選択されているプロジェクトが1つの場合のみプロジェクトに設定されているケースAttribute情報を取得する
@@ -210,7 +211,7 @@
 						if (keys != "") {
 							var search_keys = {};
 							$.each(keys,function(i, val) {
-								console.log(val);
+							//	console.log(val);
 								val.key = 'latestRevision.attributes.'+val.key;
 								search_keys[i] = val;
 							});

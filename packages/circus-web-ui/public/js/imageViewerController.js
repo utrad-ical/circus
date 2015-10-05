@@ -1271,10 +1271,10 @@
             success: function (response) {
               var revisionRes = getRevisionList();
               if (revisionRes) {
-                alert('Registration of label information is now complete.');
+            	showMessage('Registration of label information is now complete.');
                 this_elm.imageViewerController('resetUpdateFlg');
               } else {
-                alert('Failed to get revision information .');
+            	showMessage('Failed to get revision information .', true);
               }
             }
           });

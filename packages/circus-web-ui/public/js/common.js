@@ -169,7 +169,7 @@ $.fn.extend({
 			};
 			inquiry();
 		});
-	},
+	}
 });
 
 /* Task Watcher Dialog */

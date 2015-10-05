@@ -153,7 +153,7 @@
 				},//Transmitted data
 				dataType: 'json',
 				error: function(){
-					alert('I failed to communicate');
+					showMessage('Communication error.', true);
 				},
 				success: function(response){
 					if(typeof response.allow_mode != 'undefined'){

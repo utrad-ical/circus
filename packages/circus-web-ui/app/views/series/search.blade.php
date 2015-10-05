@@ -2,6 +2,7 @@
 
 @if(Auth::user()->isAccessibleSeries())
 @section('head')
+{{HTML::style('css/jquery-ui.css')}}
 {{HTML::script('js/jquery.cookie.js')}}
 <script>
 	$(function() {
@@ -82,46 +83,51 @@
 
 		//Save Settings depression during treatment
 		$('#save-button').click(function(){
-			//sendAjax("{{asset('/series/save_search')}}", setAjaxSearchVal("btnSave"));
 			var ret = prompt('Please display the save label name.', 'User set condition');
 			if (ret == null){
 				alert('Please display the save label name.');
 			} else {
-				sendAjax("{{asset('/series/save_search')}}", setAjaxSearchVal("btnSave", {"name":"save_label","value":ret}));
+				var post_data = setAjaxSearchVal({"name":"save_label","value":ret});
+
+
+				api("preference", {
+					data: {seriesSearchPresets:post_data},
+					success: function () {
+						showMessage('Saved search criteria.');
+					}
+				});
 			}
 			return false;
 		});
 
 		//I want to create a data for Ajax communication
-		function setAjaxSearchVal(btnName) {
+		function setAjaxSearchVal() {
 			var form_data = $('#form_search').serializeArray();
 			//Get search mode
 			var search_mode = $('#search_mode').val();
-			var tmp_action_btn_data = {"name":btnName, "value":btnName};
-			var tmp_ary_data = [tmp_action_btn_data];
-
 			//Option
-			if (arguments[1]) {
-				tmp_ary_data.push(arguments[1]);
+			if (arguments[0]) {
+				var tmp_ary_data = [arguments[0]];
 			}
 
 			var tmp_data = $.extend(true,form_data, tmp_ary_data);
-			return tmp_data;
+
+			var tmp_ajax_data = {};
+			$.each(tmp_data, function(key, val) {
+				if (val.name != 'btnSave')
+					tmp_ajax_data[val.name] = val.value;
+			});
+			return tmp_ajax_data;
 		}
 
 		//Ajax communication
 		function sendAjax(post_url, post_data) {
 			var target_elm = arguments[2] ? arguments[2] : "";
 
-			var tmp_ajax_data = {};
-			$.each(post_data, function(key, val) {
-				tmp_ajax_data[val.name] = val.value;
-			});
-
 			api("", {
 				url: post_url,
 				type: 'POST',
-				data: tmp_ajax_data,
+				data: post_data,
 				dataType: 'json',
 				success: function(res){
 					if (target_elm) {
@@ -221,7 +227,7 @@ showMessage("{{{$error_msg}}}", true);
 		</p>
 	</div>
 {{Form::close()}}
-
+<div id="messages"></div>
 @if ($search_flg)
 	{{Form::open(['url' => asset('case/input'), 'method' => 'post', 'id' => 'form_edit_new_case'])}}
 		{{Form::hidden('back_url', 'series_search')}}

@@ -181,6 +181,8 @@
 			$('.tags_message').empty();
 			$('.tags_message').append('Please specify the project . ');
 			$('#search_condition').empty();
+			$('.search_select_tags').empty();
+			$('.export_select_tags').empty();
 			$('.multi_select').multiselect('refresh');
 		});
 		//Ajax通信

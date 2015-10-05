@@ -178,6 +178,8 @@
 			$('#btn_submit').trigger('click', "btnReset");
 			//初期化
 			$('#form_case_search').find('select, :text').val('').end().find(':checked').prop('checked',false);
+			$('.tags_message').empty();
+			$('#search_condition').empty();
 			$('.multi_select').multiselect('refresh');
 		});
 		//Ajax通信
@@ -211,7 +213,6 @@
 						if (keys != "") {
 							var search_keys = {};
 							$.each(keys,function(i, val) {
-							//	console.log(val);
 								val.key = 'latestRevision.attributes.'+val.key;
 								search_keys[i] = val;
 							});

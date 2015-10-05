@@ -62,26 +62,6 @@ class CaseSearchBaseController extends ApiBaseController {
 	}
 
 	/**
-	 * Search conditions save(Ajax)
-	 */
-	public function save_search()
-	{
-		//Input value acquisition
-		$inputs = Input::all();
-
-		$user = Auth::user();
-		$pref = $user->preferences;
-		$presets = isset($pref['caseSearchPresets']) ? $pref['caseSearchPresets'] : array();
-		$presets[] = $inputs;
-		$pref['caseSearchPresets'] = $presets;
-
-		$user->preferences = $pref;
-		$user->save();
-
-		return $this->succeedResponse();
-	}
-
-	/**
 	 * ケース検索条件設定
 	 * @param Array $inputs 入力値
 	 */

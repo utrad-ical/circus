@@ -61,7 +61,13 @@
 			if (ret == null){
 				alert('Please display the save label name.');
 			} else {
-				sendAjax("{{asset('case/save_search')}}", setAjaxSearchVal("btnSave", {"name":"save_label","value":ret}));
+				var post_data = setAjaxSearchVal("btnSave", {"name":"save_label","value":ret});
+				api("preference", {
+					data: {caseSearchPresets:post_data},
+					success: function () {
+						showMessage('Saved search criteria.');
+					}
+				});
 			}
 			return false;
 		});
@@ -128,7 +134,8 @@
 			//Get search mode
 			var search_mode = $('#search_mode').val();
 			var tmp_ary_data = [];
-			var tmp_action_btn_data = {"name":btnName, "value":btnName};
+			if (btnName != "btnSave")
+				var tmp_action_btn_data = {"name":btnName, "value":btnName};
 			var tmp_search_mode_data = {"name":"search_mode", "value":search_mode};
 
 			//Advanced Search
@@ -137,22 +144,32 @@
 				var tmp_mongo_data = {"name":"mongo_data","value" : JSON.stringify(mongo_val)};
 				var mongo_search_val = filter.filtereditor('option', 'filter');
 				var tmp_mongo_search_data = {"name":"mongo_search_data","value" : JSON.stringify(mongo_search_val)};
-				tmp_ary_data= [tmp_mongo_data, tmp_action_btn_data,tmp_search_mode_data, tmp_mongo_search_data];
+				tmp_ary_data= [tmp_mongo_data, tmp_search_mode_data, tmp_mongo_search_data];
 
 				$.each(form_data, function(key, val) {
 					if (val["name"] == "sort" || val["name"] == "disp" || val["name"] == "project")
 						tmp_ary_data.push(val);
 				});
 			} else {
-				var tmp_data = [tmp_action_btn_data,tmp_search_mode_data];
+				var tmp_data = [tmp_search_mode_data];
 				tmp_ary_data = $.extend(true,form_data, tmp_data);
 			}
+
+			if (typeof tmp_action_btn_data != 'undefined')
+				tmp_ary_data.push(tmp_action_btn_data);
 
 			//Option
 			if (arguments[1]) {
 				tmp_ary_data.push(arguments[1]);
 			}
-			return tmp_ary_data;
+
+			var tmp_ajax_data = {};
+			$.each(tmp_ary_data, function(key, val) {
+				if (val.name != 'btnSave')
+					tmp_ajax_data[val.name] = val.value;
+			});
+
+			return tmp_ajax_data;
 		}
 
 
@@ -165,15 +182,10 @@
 		});
 		//Ajax通信
 		function sendAjax(post_url, post_data, target_elm) {
-			var tmp_ajax_data = {};
-			$.each(post_data, function(key, val) {
-				tmp_ajax_data[val.name] = val.value;
-			});
-
 			api("", {
 				url: post_url,
 				type: 'POST',
-				data: tmp_ajax_data,
+				data: post_data,
 				success: function(res){
 					if (typeof target_elm != "undefined") {
 						target_elm.empty();
@@ -196,9 +208,15 @@
 					success: function(res) {
 						var keys = res.caseAttributesSchema;
 						if (keys != "") {
+							var search_keys = {};
+							$.each(keys,function(i, val) {
+								console.log(val);
+								val.key = 'latestRevision.attributes.'+val.key;
+								search_keys[i] = val;
+							});
 							filter_set_flag = true;
 							filter = $('#search_condition')
-							.filtereditor({keys: keys})
+							.filtereditor({keys: search_keys})
 							.on('filterchange', function () {
 								var data;
 								if (typeof detail_keys != 'undefined') {

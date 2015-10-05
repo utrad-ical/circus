@@ -91,23 +91,4 @@ class SeriesSearchController extends ApiBaseController {
 			setcookie('seriesCookie', time() - 1800);
 		}
 	}
-
-	/**
-	 * Search conditions save(Ajax)
-	 */
-	public function save_search() {
-		//Input value acquisition
-		$inputs = Input::all();
-
-		$user = Auth::user();
-		$pref = $user->preferences;
-		$presets = isset($pref['seriesSearchPresets']) ? $pref['seriesSearchPresets'] : array();
-		$presets[] = $inputs;
-		$pref['seriesSearchPresets'] = $presets;
-
-		$user->preferences = $pref;
-		$user->save();
-
-		return $this->succeedResponse();
-	}
 }

@@ -43,7 +43,6 @@ Route::group(['before' => 'auth'], function() {
 
 	//Case (for Ajax)
 	Route::any('case/search_result', 'CaseSearchController@search_ajax');
-	Route::any('case/save_search', 'CaseSearchController@save_search');
 	Route::any('case/save_label', 'LabelRegisterController@save_label');
 	Route::any('case/get_label_list', 'LabelController@get_label_list');
 	Route::any('case/export', 'CaseExportController@export');
@@ -61,7 +60,6 @@ Route::group(['before' => 'auth'], function() {
 	Route::get('series/complete', 'SeriesImportController@complete');
 
 	//Series (for Ajax)
-	Route::any('series/save_search', 'SeriesSearchController@save_search');
 	Route::any('series/export', 'SeriesExportController@export');
 
 	//Share

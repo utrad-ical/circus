@@ -112,22 +112,22 @@ class Series extends BaseModel {
 	public static function getPersonalSeriesList($search_data, $count = false) {
 		$sql = self::where(function ($query) use ($search_data) {
 			//seriesID Series ID
-			if ($search_data['seriesUID'])
+			if (strlen($search_data['seriesUID']) > 0)
 				$query->where('seriesUID', 'like', '%' . $search_data['seriesUID'] . '%');
 
-			if ($search_data['seriesDescription'])
+			if (mb_strlen($search_data['seriesDescription']) > 0)
 				$query->where('seriesDescription', 'like', '%' . $search_data['seriesDescription'] . '%');
 
-			if ($search_data['patientID'])
+			if (strlen($search_data['patientID']) > 0)
 				$query->where('patientInfo.patientID', 'like', '%' . $search_data['patientID'] . '%');
 
-			if ($search_data['patientName'])
+			if (mb_strlen($search_data['patientName']) > 0)
 				$query->where('patientInfo.patientName', 'like', '%' . $search_data['patientName'] . '%');
 
-			if ($search_data['minAge'])
+			if (strlen($search_data['minAge']) > 0)
 				$query->where('patientInfo.age', '>=', intval($search_data['minAge']));
 
-			if ($search_data['maxAge'])
+			if (strlen($search_data['maxAge']) > 0)
 				$query->where('patientInfo.age', '<=', intval($search_data['maxAge']));
 
 			if ($search_data['sex'] && $search_data['sex'] !== 'all')

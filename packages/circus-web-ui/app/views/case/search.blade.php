@@ -179,6 +179,7 @@
 			//初期化
 			$('#form_case_search').find('select, :text').val('').end().find(':checked').prop('checked',false);
 			$('.tags_message').empty();
+			$('.tags_message').append('Please specify the project . ');
 			$('#search_condition').empty();
 			$('.multi_select').multiselect('refresh');
 		});

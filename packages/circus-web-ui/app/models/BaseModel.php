@@ -29,6 +29,7 @@ class BaseModel extends Jenssegers\Mongodb\Model
 
 	/**
 	 * Run self-validation for the containing data.
+	 * @param array $messages Error message
 	 * @return array Error content
 	 */
 	public function selfValidationFails(&$messages)
@@ -57,6 +58,8 @@ class BaseModel extends Jenssegers\Mongodb\Model
 
 	/**
      * Override parent's save() method and adds self-validation.
+	 * @param array $options
+	 * @return boolean Registration result
      */
     public function save(array $options = array())
     {

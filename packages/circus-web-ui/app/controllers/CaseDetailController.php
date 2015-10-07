@@ -106,6 +106,7 @@ class CaseDetailController extends ApiBaseController {
 
 	function getSeriesIDList($case_info, $revision_no) {
 		$series = array();
+		/*
 		foreach ($case_info->revisions as $key => $value) {
 			if ($key == $revision_no) {
 				for ($i = 0; $i < count($value['series']); $i++){
@@ -113,6 +114,14 @@ class CaseDetailController extends ApiBaseController {
 				}
 			}
 		}
+		*/
+		if (array_key_exists($revision_no, $case_info->revisions)) {
+			$revision = $case_info->revisions[$revision_no];
+			for ($i = 0; $i < count($revision['series']); $i++){
+				$series[] = $revision['series'][$i]['seriesUID'];
+			}
+		}
+
 		return $series;
 	}
 
@@ -155,8 +164,9 @@ class CaseDetailController extends ApiBaseController {
 
 	/**
 	 * I sort by Revision final editing time
-	 * @param $a Sort array (large value)
-	 * @param $b Sort array (small value)
+	 * @param array $a Sort array (large value)
+	 * @param array $b Sort array (small value)
+	 * @return integer Sort Result 0: equal -1: b is greater 1: a large
 	 */
 	function sortEditTime($a, $b) {
 		//Modified the new order
@@ -171,9 +181,9 @@ class CaseDetailController extends ApiBaseController {
 
 	/**
 	 * I sort by RevisionNo
-	 * @param $a Sort array (large value)
-	 * @param $b Sort array (small value)
-	 * @return Sort Result 0: equal -1: b is greater 1: a large
+	 * @param array $a Sort array (large value)
+	 * @param array$b Sort array (small value)
+	 * @return integer Sort Result 0: equal -1: b is greater 1: a large
 	 */
 	function sortRevisionNo($a, $b){
 		//Revision old order
@@ -188,7 +198,7 @@ class CaseDetailController extends ApiBaseController {
 
 	/**
 	 * Series List Json
-	 * @param $data Revision data that are selected
+	 * @param array $revision_info Revision data that are selected
 	 * @return Series list brute string to Revision
 	 */
 	function getSeriesList($revision_info, $priority, $presets = array()) {
@@ -243,7 +253,6 @@ class CaseDetailController extends ApiBaseController {
 									$tmp = file_get_contents($load_path);
 									$label['image'] = base64_encode($tmp);
 								} else {
-									//throw new Exception('ラベル情報の読み込みに失敗しました。');
 									$label['image'] = 'error';
 								}
 

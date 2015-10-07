@@ -54,7 +54,7 @@ class User extends BaseModel implements UserInterface {
 	/**
 	 * Validate Check
 	 * @param array $data Validate checked
-	 * @return Error content
+	 * @return mixed Error content
 	 * @deprecated Do not use. Use selfValidate
 	 */
 	public function validate($data) {
@@ -63,7 +63,7 @@ class User extends BaseModel implements UserInterface {
 		if ($validator->fails()) {
 			return $validator->messages();
 		}
-		return;
+		return null;
 	}
 
 	/**
@@ -141,20 +141,19 @@ class User extends BaseModel implements UserInterface {
 
 		//setting accesible domains
     	$accessible_domains = $this->listAccessibleDomains();
-    	if ($accessible_domains) {
-    		$domain_str = '';
-    		foreach($accessible_domains as $key => $val) {
-    			$accessible_domains[$key] = '"'.$val.'"';
-    		}
-    		$domain_str = implode(',', $accessible_domains);
-
-    		$json_default_search = '{"domains":{"$not":{"$elemMatch":{"$nin":['.$domain_str.']}}}}';
-    		$query->whereRaw(json_decode($json_default_search));
-    	}
+    	if ($accessible_domains) //{
+			$this->createAccessibleDomainSql($query,$accessible_domains);
+    //	}
 
     	$res = $query->first();
 
 		return $res ? true : false;
+	}
+
+	public function createAccessibleDomainSql(&$query, $domains) {
+		$domain_str = '"'.implode('","', $domains).'"';
+		$json_default_search = '{"domains":{"$not":{"$elemMatch":{"$nin":['.$domain_str.']}}}}';
+		return $query->whereRaw(json_decode($json_default_search));
 	}
 
 	/**
@@ -179,7 +178,7 @@ class User extends BaseModel implements UserInterface {
 
 	/**
 	 * ケース編集権限チェック
-	 * @param string $projectId プロジェクトID
+	 * @param string $project_id プロジェクトID
 	 * @return boolean 編集権限がある場合true、ない場合false
 	 */
 	public function isEditCase($project_id) {
@@ -197,11 +196,12 @@ class User extends BaseModel implements UserInterface {
 		$privilege = $this->listAccessibleProjects($auth_type);
 		if ($privilege && array_search($project_id, $privilege) !== false)
 			return true;
+		return false;
 	}
 
 	/**
 	 * シリーズ追加権限チェック
-	 * @param string $projectId プロジェクトID
+	 * @param string $project_id プロジェクトID
 	 * @return boolean シリーズ追加権限がある場合はtrue、ない場合はfalse
 	 */
 	public function isAddSeries($project_id) {

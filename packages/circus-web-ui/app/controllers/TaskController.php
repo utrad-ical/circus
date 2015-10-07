@@ -37,7 +37,8 @@ class TaskController extends ApiBaseController
 	public function download($taskID)
 	{
 		$task = Task::findOrFail($taskID);
-		if (!$task->public) {
+		Log::debug($task);
+		if (!$task->publicDownload) {
 			if (!Auth::user() || $task->owner !== Auth::user()->userEmail) {
 				throw new Exception('You cannot access this task.');
 			}

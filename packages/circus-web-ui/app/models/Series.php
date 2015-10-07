@@ -222,7 +222,9 @@ class Series extends BaseModel {
 
 	/**
 	 * Get the domain of the series information
-	 * @param Array $seriesIds Array of the seriesUID
+	 * @param array $seriesIds Array of the seriesUID
+	 * @return array domains of the series
+	 * @throws Exception
 	 */
 	public static function getDomains($seriesIds)
 	{

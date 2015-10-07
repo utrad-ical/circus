@@ -48,6 +48,8 @@ class CaseRegisterController extends ApiBaseController {
 				Session::put('mode', 'Add new');
 			}
 
+			if (!$series_ids)
+				throw new Exception('シリーズが選択されていません。');
 			$series = Series::getPluralSeries($series_ids);
 			//Patient ID duplication check
 			$error_msg = ClinicalCase::checkDuplicatePatientID($series, $series_list);
@@ -75,10 +77,8 @@ class CaseRegisterController extends ApiBaseController {
 
 	/**
 	 * CookieからシリーズIDリストを生成する
-	 * @param $inputs 入力値
-	 * @return シリーズIDリスト
-	 * @author stani
-	 * @since 2015/03/20
+	 * @param array $inputs 入力値
+	 * @return array シリーズIDリスト
 	 */
 	function getSeriesUIDList($inputs){
 		$series_exclude_ary = array();
@@ -94,10 +94,8 @@ class CaseRegisterController extends ApiBaseController {
 
 	/**
 	 * 患者情報の設定
-	 * @param $patient 患者情報
-	 * @return ケーステーブル登録用に整形した患者情報
-	 * @author stani
-	 * @since 2015/03/20
+	 * @param array $patient 患者情報
+	 * @return array ケーステーブル登録用に整形した患者情報
 	 */
 	function setPatientInfo($patient) {
 		return array(
@@ -141,6 +139,8 @@ class CaseRegisterController extends ApiBaseController {
 
 			if ($caseID) {
 				$caseObj = ClinicalCase::find($caseID);
+				if (!$caseObj)
+					throw new Exception('該当のケースが存在しません。');
 				$revisions = $caseObj->revisions;
 				$revisions[] = $revision;
 				$params['revisions'] = $revisions;
@@ -170,9 +170,9 @@ class CaseRegisterController extends ApiBaseController {
 
 	/**
 	 * 完了画面エラーメッセージ出力
-	 * @param $errorMsg エラーメッセージ
-	 * @param $result Bladeに設定するパラメータ
-	 * @param $mode 編集モード
+	 * @param string $errorMsg エラーメッセージ
+	 * @param array $result Bladeに設定するパラメータ
+	 * @param string $mode 編集モード
 	 */
 	function errorRedirectFinish($errorMsg, $result, $mode) {
 		$result['mode'] = $mode;
@@ -228,8 +228,9 @@ class CaseRegisterController extends ApiBaseController {
 
 	/**
 	 * To create a Revision information (New)
-	 * @param $series_list Series array
-	 * @return Revision information
+	 * @param array $series_list Series array
+	 * @return array $revision Revision information
+	 * @throws Exception
 	 */
 	function createRevision($series_list) {
 		$revision = array(
@@ -243,6 +244,8 @@ class CaseRegisterController extends ApiBaseController {
 		$series = array();
 		foreach ($series_list as $key => $val) {
 			$series_info = Series::find($key);
+			if (!$series_info)
+				throw new Exception('シリーズ['.$key.']が存在しません。');
 			$series[] = array(
 				'seriesUID'	=>	$key,
 				'images'	=>	$series_info->images,
@@ -255,19 +258,16 @@ class CaseRegisterController extends ApiBaseController {
 
 	/**
 	 * And rearranges the series listed in the specified order
-	 * @param $list Series List
-	 * @param $order Sort ordering
-	 * @return Sort the Series List
+	 * @param array $list Series List
+	 * @param array $order Sort ordering
+	 * @return array $ary Sort the Series List
 	 */
 	function sortSeriesList($list, $order) {
 		$ary = array();
 
 		for ($i = 0; $i < count($order); $i++) {
-			foreach ($list as $key => $val){
-				if ($key == $order[$i]) {
-					$ary[$key] = $val;
-				}
-			}
+			if (array_key_exists($order[$i], $list) !== false)
+				$ary[$order[$i]] = $list[$order[$i]];
 		}
 		return $ary;
 	}

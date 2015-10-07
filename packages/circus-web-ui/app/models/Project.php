@@ -93,11 +93,10 @@ class Project extends BaseModel
 
 	/**
 	 * get the caseAttributesSchema of the project
-	 * @param Json $projects selected projects
-	 * @return Json the createAttributesSchema of the project
+	 * @param array $projects selected projects
+	 * @return mixed the createAttributesSchema of the project
 	 */
 	public static function getProjectCaseAttribute($projects) {
-
 		if (count($projects) === 1) {
 			$project = Project::find($projects[0]);
 			if ($project->caseAttributesSchema) {
@@ -109,13 +108,13 @@ class Project extends BaseModel
 			}
 
 		}
-		return;
+		return null;
 	}
 
 	/**
 	 * get the Tags of the project
-	 * @param Json $projects selected projects
-	 * @return Json the tags of the project
+	 * @param array $projects selected projects
+	 * @return mixed the tags of the project
 	 */
 	public static function getProjectTags($projects) {
 		if (count($projects) === 1) {
@@ -124,13 +123,12 @@ class Project extends BaseModel
 				$tag_list = array();
 				$tags = $project->tags;
 				foreach ($tags as $idx => $tag) {
-					$tag_list[$idx] = $tag['name'];
+					$tag_list[$tag['name']] = $tag['name'];
 				}
 				return $tag_list;
 			}
-
 		}
-		return array();
+		return null;
 	}
 
 }

@@ -50,8 +50,6 @@ class ImportCase extends TaskCommand {
 
 	/**
 	 * Create a new command instance.
-	 *
-	 * @return void
 	 */
 	public function __construct()
 	{
@@ -60,13 +58,11 @@ class ImportCase extends TaskCommand {
 
 	/**
 	 * Execute the console command.
-	 *
-	 * @return mixed
 	 */
 	public function fire()
 	{
 		try {
-			//URLまたはファイル
+			//URL or File
 			$dataType = $this->argument('data-type');
 			if (!$dataType || array_search($dataType, $this->_dataType) === false) {
 				$this->error('Please specify import data type (local or url).');
@@ -101,17 +97,17 @@ class ImportCase extends TaskCommand {
 		// data type (URL or Local)
 		$dataType = $this->argument('data-type');
 
-		$dataPath = $inputPath;
+		$dataFilePath = $inputPath;
 
 		// Get import data from specified URL
 		if ($dataType === self::DATA_TYPE_URL) {
-			$dataPath = $this->getInputFile($inputPath);
+			$dataFilePath = $this->getInputFile($inputPath);
 			$this->updateTaskProgress($counter, 0, "Importing in progress. $counter files are processed.");
 			$counter++;
 		}
 
 		// Extract import data
-		$unZipPath = $this->unZip($dataPath);
+		$unZipPath = $this->unZip($dataFilePath);
 		$this->updateTaskProgress($counter, 0, "Importing in progress. $counter files are processed.");
 		$counter++;
 
@@ -123,53 +119,53 @@ class ImportCase extends TaskCommand {
 	}
 
 	/**
-	 * インポート処理
-	 * @param string $targetDir インポート対象ディレクトリパス
-	 * @param integer $counter タスク管理用進捗カウンタ
+	 * Import process
+	 * @param string $targetDir Import target directory path
+	 * @param integer $counter Task management for progress counter
+	 * @throws Exception
 	 */
 	private function import($targetDir, &$counter)
 	{
-		//シリーズ情報保存
-		if (is_dir($targetDir.'/series')) {
-			if ($dicomDir = opendir($targetDir.'/series')) {
+		//register series
+		$seriesDirPath = $targetDir.'/series';
+		if (is_dir($seriesDirPath)) {
+			if ($dicomDir = opendir($seriesDirPath)) {
 				while (($file = readdir($dicomDir)) !== false) {
 					if ($file != "." && $file != "..") {
-						//シリーズ存在チェック
+						//check series presence
 						$series = Series::find($file);
 						if (!$series) {
-							//存在しないシリーズなのでシリーズデータを登録する
-							$this->createSeries($targetDir.'/series', $file);
+							//Because unregistered series, register the new series information.
+							$this->createSeries($seriesDirPath, $file);
 							$this->updateTaskProgress($counter, 0, "Importing in progress. $counter files are processed.");
 							$counter++;
 						}
-				    }
+					}
 				}
-			    closedir($dicomDir);
+				closedir($dicomDir);
 			}
 		}
 
-		// ケース情報保存
-		if (!is_dir($targetDir.'/cases'))
-			throw new Exception('ケースディレクトリがありません。');
+		$caseDirPath = $targetDir.'/cases';
+		//register case
+		if (!is_dir($caseDirPath))
+			throw new Exception('Has not the case directory .');
 
-		$dirPath = $targetDir.'/cases';
-
-		if ($caseDir = opendir($dirPath)) {
+		if ($caseDir = opendir($caseDirPath)) {
 			while(($file = readdir($caseDir)) !== false) {
 				if ($file != "." && $file != "..") {
-
 					$this->_caseIds[] = $file;
-
-					$res = $this->validateCase($dirPath, $file);
+					$res = $this->validateCase($caseDirPath, $file);
 					if ($res['result'] === false)
 						throw new Exception($res['errorMsg']);
-
-					$caseData = $this->getJsonFromFile($dirPath. '/' . $file . '/case.json');
+					$caseData = $this->getJsonFromFile($caseDirPath. '/' . $file . '/case.json');
 					$this->registerCase($caseData, $res);
 					$this->updateTaskProgress($counter, 0, "Importing in progress. $counter files are processed.");
 					$counter++;
-					if (file_exists($dirPath.'/'.$file.'/labels')) {
-						$this->createLabelData($dirPath.'/'.$file.'/labels', $counter);
+
+					$labelDirPath = $caseDirPath.'/'.$file.'/labels';
+					if (file_exists($labelDirPath)) {
+						$this->createLabelData($labelDirPath, $counter);
 					}
 				}
 			}
@@ -177,9 +173,9 @@ class ImportCase extends TaskCommand {
 	}
 
 	/**
-	 * ラベルデータが存在しない場合はラベルデータを登録する
-	 * @param string $labelDir labelsディレクトリパス
-	 * @param integer $counter タスク進捗カウンタ
+	 * Because unregistered labels, register the new label information.
+	 * @param string $labelDir directory path of labels
+	 * @param integer $counter Task progress counter
 	 */
 	private function createLabelData($labelDir, &$counter)
 	{
@@ -188,7 +184,7 @@ class ImportCase extends TaskCommand {
 				if ($file != "." && $file != "..") {
 					$labelObj = Label::find($file);
 					if (!$labelObj) {
-						//存在しないラベルなのでラベルデータを登録する
+						//register label
 						$this->registerLabel($labelDir, $file);
 						$this->updateTaskProgress($counter, 0, "Importing in progress. $counter files are processed.");
 						$counter++;
@@ -200,8 +196,9 @@ class ImportCase extends TaskCommand {
 
 	/**
 	 * Register the label information
-	 * @param string $labelDir labelsディレクトリパス
-	 * @param string $labelID ラベルID
+	 * @param string $labelDir directory path of labels
+	 * @param string $labelID label ID
+	 * @throws Exception
 	 */
 	private function registerLabel($labelDir, $labelID)
 	{
@@ -209,16 +206,16 @@ class ImportCase extends TaskCommand {
 		$labelFile = $path.'/label.json';
 		$tgzFile = $path.'/voxels.gz';
 		if (!file_exists($labelFile))
-			throw new Exception('ラベルデータがありません。');
+			throw new Exception('Not found label data .');
 		if (!file_exists($tgzFile))
-			throw new Exception('ラベル画像がありません。');
+			throw new Exception('Not found label images .');
 
 		$labelData = $this->getJsonFromFile($labelFile);
 
 		// Get path for saving label data
 		$storage = Storage::getCurrentStorage(Storage::LABEL_STORAGE);
 		if (!$storage || !$storage->path)
-			throw new Exception('ラベル保存先が設定されていません。');
+			throw new Exception('Not set label destination .');
 
 		// Register label information into DB
 		$labelObj = App::make('Label');
@@ -232,33 +229,36 @@ class ImportCase extends TaskCommand {
 		$dstTgzFile = $labelObj->labelPath();
 		$dir = dirname($dstTgzFile);
 		if (!is_dir($dir)) {
-			mkdir($dir, 0777, true);
+			$res_md = mkdir($dir, 0777, true);
+			if (!$res_md)
+				throw new Exception('Failed create folder .');
 		}
 		copy($tgzFile, $dstTgzFile);
 	}
 
 	/**
-	 * ファイルからJSONデータを抽出する
-	 * @param string $path ファイルパス
-	 * @return string JSONデータ
+	 * Extract the JSON data from a file
+	 * @param string $path file path
+	 * @return string json data
+	 * @throws Exception
 	 */
 	private function getJsonFromFile($path)
 	{
 		if (!file_exists($path))
-			throw new Exception($path.'が存在しません。');
+			throw new Exception($path.'not found .');
 
 		$lines = file($path);
 		if ($lines === false || count($lines) !== 1)
-			throw new Exception($path.'の中身が不正です。');
+			throw new Exception($path.' contents of is invalid');
 
 		return json_decode($lines[0], true);
 	}
 
 	/**
-	 * ケースデータValidate
-	 * @param string $path ケースディレクトリパス
-	 * @param string $caseID ケースID
-	 * @return Array Validate結果
+	 * Case data validate
+	 * @param string $path path of the case directory
+	 * @param string $caseID case ID
+	 * @return Array validate results
 	 */
 	private function validateCase($path, $caseID)
 	{
@@ -268,24 +268,24 @@ class ImportCase extends TaskCommand {
 				return;
 
 			$caseData = $this->getJsonFromFile($caseDir.'/case.json');
-			//プロジェクトIDのチェック
+			//check project ID
 			if (!isset($caseData['projectID']))
-				throw new Exception('プロジェクトIDがありません。');
+				throw new Exception('project ID is not found .');
 			if (!Project::find($caseData['projectID']))
-				throw new Exception('プロジェクトID['.$caseData['projectID'].']が存在しません。');
+				throw new Exception('project ID['.$caseData['projectID'].']is not found .');
 			$this->_projectID = $caseData['projectID'];
-			//リビジョン情報のチェック
+			//check revision information
 			if (!isset($caseData['revisions']))
-				throw new Exception('リビジョン情報がありません。');
+				throw new Exception('revisions not found . ');
 
 			$seriesIds = array();
 			foreach ($caseData['revisions'] as $rNo => $revision) {
 				if (!isset($revision['series']))
-					throw new Exception('リビジョン['.$rNo.']内にシリーズ情報がありません。');
-				//シリーズIDのチェック
+					throw new Exception("The revision['.$rNo.']don't have series information .");
+				//check series ID
 				foreach ($revision['series'] as $series) {
 					if (!isset($series['seriesUID']))
-						throw new Exception('シリーズUIDがありません。');
+						throw new Exception('Series ID not found.');
 					$seriesIds[] = $series['seriesUID'];
 				}
 			}
@@ -317,11 +317,10 @@ class ImportCase extends TaskCommand {
 
 		$params = array();
 		$caseID = null;
-		$revisions = array();
 
 		$this->formatRevisionDate($caseData['revisions']);
 		if ($caseObj) {
-			//既存ケース
+			//Existing case
 			$tmpCase = $caseObj->toArray();
 			$this->formatRevisionDate($tmpCase['revisions']);
 
@@ -420,9 +419,9 @@ class ImportCase extends TaskCommand {
 	}
 
 	/**
-	 * シリーズデータ作成
-	 * @param string $dirPath seriesディレクトリパス
-	 * @param string $seriesUID シリーズID
+	 * create series data
+	 * @param string $dirPath path of the series directory
+	 * @param string $seriesUID series ID
 	 */
 	private function createSeries($dirPath, $seriesUID)
 	{
@@ -434,7 +433,7 @@ class ImportCase extends TaskCommand {
 			while(($file = readdir($dicomDir)) !== false) {
 				if ($file != "." && $file != "..") {
 					if ($this->option('without-personal')) {
-						//個人情報なし
+						//without personal information
 						Process::exec($this->utilityPath() . " anonymize ".$dicomDir."/".$file);
 					}
 					$cmd_ary = array();
@@ -461,6 +460,7 @@ class ImportCase extends TaskCommand {
 	 * 圧縮ファイル解凍処理
 	 * @param string $path 圧縮ファイルパス
 	 * @return string 解凍先ディレクトリパス
+	 * @throws Exception
 	 */
 	private function unZip($path)
 	{
@@ -469,77 +469,95 @@ class ImportCase extends TaskCommand {
 
 		$tmpPath = $path;
 		if (bin2hex(substr($binaryData, 0, 2)) !== '1f8b' && pathInfo($path, PATHINFO_EXTENSION) !== 'tgz') {
-			//パスワード付ファイル
+			//Password-protected files
 			if (!$this->option('password'))
-				throw new Exception("ご指定のファイルはパスワードが付与されています。\nパスワードを入力してください。");
+				throw new Exception("Has password .\nPlease input password .");
 
-			//拡張子以外を取得
+			//Get except extension
 			$tmpPath = pathinfo($path, PATHINFO_DIRNAME).'/'.pathInfo($path, PATHINFO_FILENAME);
 			$decrypt = openssl_decrypt(file_get_contents($path), 'aes-256-ecb', $this->option('password'));
 
-			//パスワードが異なる
+			//decrypt failed
 			if ($decrypt === false)
-				throw new Exception('failed password .');
+				throw new Exception('Failed decrypt the file .');
 
-			$res_tgz = file_put_contents($tmpPath.'.tgz', $decrypt);
 			$tmpPath = $tmpPath.'.tgz';
-
+			$res_tgz = file_put_contents($tmpPath, $decrypt);
+			if ($res_tgz === false)
+				throw new Exception('Failed decrypt the file .');
 		}
 		fclose($handle);
 
-		//解凍処理
+		//decompress
 		$phar = new PharData($tmpPath);
 
 		$tmpDir = Str::random(32);
 		$baseDir = storage_path('cache') . '/' . $tmpDir;
 		if (!is_dir($baseDir))
 			mkdir($baseDir, 0777, true); // make directory recursively
-		$phar->extractTo($baseDir);
-
+		$res_extract = $phar->extractTo($baseDir);
+		if (!$res_extract)
+			throw new Exception('Failed decompress the file .');
 		return $baseDir;
 	}
 
 	/**
-	 * 指定されたファイルからImport対象ファイルをダウンロードする
+	 * Download the import files from the specified file.
 	 * @param string $path ImportURL
-	 * @return string ファイルパス
+	 * @return string file path
+	 * @throws Exception
 	 */
 	private function getInputFile($path)
 	{
-		$ch = curl_init();
+		try {
+			$ch = curl_init();
 
-		$tempStr = Str::random(32);
-		$tempDir = storage_path('cache').'/'.$tempStr;
-		if (!is_dir($tempDir))
-			mkdir($tempDir, 0777, true); // make directory recursively
+			$tempStr = Str::random(32);
+			$tempDir = storage_path('cache') . '/' . $tempStr;
+			if (!is_dir($tempDir))
+				mkdir($tempDir, 0777, true); // make directory recursively
 
-		curl_setopt($ch, CURLOPT_URL,$path);
-		curl_setopt($ch, CURLOPT_HEADER, true);
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-		curl_setopt($ch, CURLOPT_BINARYTRANSFER, true);
-		$result = curl_exec($ch);
-		curl_close($ch);
+			curl_setopt($ch, CURLOPT_URL, $path);
+			curl_setopt($ch, CURLOPT_HEADER, true);
+			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+			curl_setopt($ch, CURLOPT_BINARYTRANSFER, true);
+			$result = curl_exec($ch);
 
-		if (!$result)
-			throw new Exception('指定URLからのファイルダウンロードに失敗しました。');
+			//get header size of the file
+			$header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
+			//get header of the file
+			$header_info = substr($result, 0, $header_size);
+			//get body of the file
+			$body_info = substr($result, $header_size);
 
-		$fileName = $this->getFileName($result);
-		$data = explode("\n", $result);
+			curl_close($ch);
+			if (!$result)
+				throw new Exception('Failed download from the specified URL .');
 
-		file_put_contents($tempDir.'/'.$fileName, $data[count($data)-1]);
-		return $tempDir.'/'.$fileName;
+			$fileName = $this->getFileName($header_info);
+
+			$filePath = $tempDir . '/' . $fileName;
+			$file_byte = file_put_contents($filePath, $body_info);
+			if ($file_byte === false)
+				throw new Exception('Failed write of the downloaded file .');
+		} catch (Exception $e) {
+			Log::error($e);
+			throw $e;
+		}
+		return $filePath;
 	}
 
 	/**
-	 * CURLレスポンスデータからダウンロードファイル名を取得する
-	 * @param string $res CURLレスポンスデータ
-	 * @return string ダウンロードファイル名
+	 * Get the download file name from the CURL response data
+	 * @param string $header_info response header information of CURL
+	 * @return string download file name
+	 * @throws Exception
 	 */
-	private function getFileName($res)
+	private function getFileName($header_info)
 	{
-		if (!$res) return;
+		if (!$header_info) return;
 
-		$tmpAry = explode("\n", $res);
+		$tmpAry = explode("\n", $header_info);
 
 		$headers = array();
 		foreach ($tmpAry as $tmpStr) {
@@ -549,7 +567,7 @@ class ImportCase extends TaskCommand {
 			}
 		}
 		if (!isset($headers['Content-Disposition']))
-			throw new Exception('ファイル名が取得できません。');
+			throw new Exception("Can't obtained Filename . ");
 
 		$disposition = $headers['Content-Disposition'];
 		$idx = strpos($disposition, 'filename="');

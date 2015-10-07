@@ -99,102 +99,90 @@ class ClinicalCase extends BaseModel {
         return $this->belongsTo('Project', 'projectID', 'projectID');
     }
 
-    /**
-     * ケース一覧取得
-     * @param Array $search_data 検索条件
-     * @return ケース一覧
-     * @author stani
-     * @since 2015/03/20
-     */
-    public static function getCaseList($search_data, $count = false) {
-    	$sql = self::where(function ($query) use ($search_data) {
-    					//ProjectID
-    					$search_data['project'] = json_decode($search_data['project'], true);
-    					if ($search_data['project']) {
-    						$projects = array_values($search_data['project']);
-    					} else {
-    						$projects = Auth::user()->listAccessibleProjects(Project::AUTH_TYPE_READ);
-    					}
-    					$query->whereIn('projectID', $projects);
+	/**
+	 * get case list.
+	 * @param Array $search_data search conditions
+	 * @return array case list
+	 */
+	public static function getCaseList($search_data, $count = false) {
+		$sql = self::where(function ($query) use ($search_data) {
+			//ProjectID
+			if ($search_data['project']) {
+				$projects = array_values($search_data['project']);
+			} else {
+				$projects = Auth::user()->listAccessibleProjects(Project::AUTH_TYPE_READ);
+			}
+			$query->whereIn('projectID', $projects);
 
-    					//accesible domain
-    					$accessible_domains = Auth::user()->listAccessibleDomains();
-    					$domain_str = '';
-    					foreach($accessible_domains as $key => $val) {
-    						$accessible_domains[$key] = '"'.$val.'"';
-    					}
-    					$domain_str = implode(',', $accessible_domains);
-    					$json_default_search = '{"domains":{"$not":{"$elemMatch":{"$nin":['.$domain_str.']}}}}';
-	    				$query->whereRaw(json_decode($json_default_search));
+			//accesible domain
+			$accessible_domains = Auth::user()->listAccessibleDomains();
+			Auth::user()->createAccessibleDomainSql($query, $accessible_domains);
 
-						//詳細検索
-						if ($search_data['search_mode']) {
-							$query->whereRaw(json_decode($search_data["mongo_data"]));
-						//簡易検索
-						} else {
-							//CaseID
-	    					if ($search_data['caseID'])
-	    						$query->where('caseID', 'like', '%'.$search_data['caseID'].'%');
-							if (Auth::user()->hasPrivilege(Group::PERSONAL_INFO_VIEW)) {
-		    					//PatientID
-		    					if ($search_data['patientID'])
-		    						$query->where('patientInfoCache.patientID', 'like', '%'.$search_data['patientID'].'%');
+			//Advanced Search
+			if ($search_data['search_mode']){
+				$query->whereRaw($search_data['mongo_data']);
+			//Simple Search
+			} else {
+				//CaseID
+				if ($search_data['caseID'])
+					$query->where('caseID', 'like', '%'.$search_data['caseID'].'%');
+				if (Auth::user()->hasPrivilege(Group::PERSONAL_INFO_VIEW)) {
+					//PatientID
+					if ($search_data['patientID'])
+						$query->where('patientInfoCache.patientID', 'like', '%'.$search_data['patientID'].'%');
 
-		    					//PatientName
-		    					if ($search_data['patientName'])
-		    						$query->where('patientInfoCache.patientName', 'like', '%'.$search_data['patientName'].'%');
-							}
-	    					//createDate
-	    					if ($search_data['createDate']) {
-	    						$query->where(
-									'createTime', '=',
-									array(
-										'$gte' => new MongoDate(strtotime($search_data['createDate'])),
-										'$lte' => new MongoDate(strtotime($search_data['createDate'].' +1 day'))
-									)
-								);
-	    					}
+					//PatientName
+					if ($search_data['patientName'])
+						$query->where('patientInfoCache.patientName', 'like', '%'.$search_data['patientName'].'%');
+				}
+				//createDate
+				if ($search_data['createDate']) {
+					$query->where(
+						'createTime', '=',
+						array(
+							'$gte' => new MongoDate(strtotime($search_data['createDate'])),
+							'$lte' => new MongoDate(strtotime($search_data['createDate'].' +1 day'))
+						)
+					);
+				}
 
-							//updateDate
-	    					if ($search_data['updateDate']) {
-	    						$query->where(
-									'updateTime', '=',
-									array(
-										'$gte' => new MongoDate(strtotime($search_data['updateDate'])),
-										'$lte' => new MongoDate(strtotime($search_data['updateDate'].' +1 day'))
-									)
-								);
-	    					}
+				//updateDate
+				if ($search_data['updateDate']) {
+					$query->where(
+						'updateTime', '=',
+						array(
+							'$gte' => new MongoDate(strtotime($search_data['updateDate'])),
+							'$lte' => new MongoDate(strtotime($search_data['updateDate'].' +1 day'))
+						)
+					);
+				}
 
-					    	//caseDate
-							if ($search_data['caseDate']) {
-								$query->where(
-									'latestRevision.date', '=',
-									array(
-										'$gte' => new MongoDate(strtotime($search_data['caseDate'])),
-										'$lte' => new MongoDate(strtotime($search_data['caseDate'].' +1 day'))
-									)
-								);
-							}
-							//tags
-							if (isset($search_data['tags'])) {
-								$tags = json_decode($search_data['tags'], true);
-								if ($tags) {
-	    							$query->whereIn('tags', array_values($tags));
-								}
-							}
-						}
-    				});
+				//caseDate
+				if ($search_data['caseDate']) {
+					$query->where(
+						'latestRevision.date', '=',
+						array(
+							'$gte' => new MongoDate(strtotime($search_data['caseDate'])),
+							'$lte' => new MongoDate(strtotime($search_data['caseDate'].' +1 day'))
+						)
+					);
+				}
+				//tags
+				if (isset($search_data['tags']) && $search_data['tags']) {
+					$query->whereIn('tags', array_values($search_data['tags']));
+				}
+			}
+		});
 
-    	//件数取得
-    	if ($count)
-    		return $sql->count();
+		//get count
+		if ($count)
+			return $sql->count();
 
-    	//リスト取得
-    	//settings offset
-    	$offset = 0;
-    	if (isset($search_data['perPage']) && $search_data['perPage'])
-    		$offset = intval($search_data['disp'])*(intval($search_data['perPage'])-1);
+		//get list
+		//settings offset
+		$offset = 0;
+		if (isset($search_data['perPage']) && $search_data['perPage'])
+			$offset = intval($search_data['disp'])*(intval($search_data['perPage'])-1);
 
 		$sql->orderby($search_data['sort'], $search_data['order_by']);
 
@@ -215,9 +203,9 @@ class ClinicalCase extends BaseModel {
 	/**
 	 * Patient ID duplication check
 	 * If there is no overlap I store the series list for display
-	 * @param $list Series List of patient ID overlapping subject
-	 * @param $series_list Destination Series List of if there is no error
-	 * @return $error_msg Error message
+	 * @param array $list Series List of patient ID overlapping subject
+	 * @param array $series_list Destination Series List of if there is no error
+	 * @return string $error_msg Error message
 	 */
 	public static function checkDuplicatePatientID($list, &$series_list = array()) {
 		$patientID = $list[0]->patientInfo['patientID'];
@@ -232,14 +220,14 @@ class ClinicalCase extends BaseModel {
 		$case_info = self::find($search_data['caseID']);
 		$label_list = array();
 
-		foreach ($case_info->revisions as $idx => $revision) {
-			if ($idx === intval($search_data['revisionNo'])) {
-				foreach($revision['series'] as $series) {
-					if ($series['seriesUID'] === $search_data['seriesUID']) {
-						if (array_key_exists('labels', $series)) {
-							foreach ($series['labels'] as $label) {
-								$label_list[] = $label['id'];
-							}
+		$revision_no =intval($search_data['revisionNo']);
+		if (array_key_exists($revision_no, $case_info->revisions)){
+			$revision = $case_info->revisions[$revision_no];
+			foreach($revision['series'] as $series) {
+				if ($series['seriesUID'] === $search_data['seriesUID']) {
+					if (array_key_exists('labels', $series)) {
+						foreach ($series['labels'] as $label) {
+							$label_list[] = $label['id'];
 						}
 					}
 				}
@@ -249,8 +237,9 @@ class ClinicalCase extends BaseModel {
 	}
 
 	/**
-	 * ケース検索
-	 * @param Array $inputs 入力値
+	 * Case Search
+	 * @param array $search_data Search condition
+	 * @return array $result
 	 */
 	public static function searchCase($search_data)
 	{
@@ -272,9 +261,7 @@ class ClinicalCase extends BaseModel {
 											$result['list']->toArray(),
 											$list_count,
 											$search_data['disp']);
-			$search_data['case_attributes'] = json_encode(
-											      Project::getProjectCaseAttribute(json_decode($search_data['project'], true))
-											  );
+			$search_data['case_attributes'] = json_encode(Project::getProjectCaseAttribute($search_data['project']));
 		} else {
 			$search_data['project'] = json_encode("");
 			$search_data['search_mode'] = 0;
@@ -288,16 +275,16 @@ class ClinicalCase extends BaseModel {
 
 	public static function filterPersonalView(&$cases)
 	{
-		//プロジェクトの個人情報権限
+		//View authority of personal information of projects
 		$projectPersonal = Auth::user()->listAccessibleProjects(Project::AUTH_TYPE_VIEW_PERSONAL_INFO);
-		//グループの個人情報権限
+		//View authority of personal information of groups
 		$groupPersonal = Auth::user()->hasPrivilege(Group::PERSONAL_INFO_VIEW);
-		//ユーザの個人情報権限
+		//View authority of personal information of user
 		$userPersonal = Auth::user()->preferences["personalInfoView"];
 
 		foreach ($cases as $idx => $case_obj) {
 			if (array_search($case_obj->projectID, $projectPersonal) === false || !$groupPersonal || !$userPersonal) {
-				//プロジェクトorグループorユーザの個人情報表示権限がないので個人情報系を空表示にする
+				//Change to empty the personal information .
 				$cases[$idx]->patientInfoCache = array(
 					'patientID'   => '',
 					'patientName' => '',
@@ -339,13 +326,14 @@ class ClinicalCase extends BaseModel {
 
 	/**
 	 * Save the case information
-	 * @param Array $data Registration scheduled case data
+	 * @param array $data Registration scheduled case data
 	 * @param string $caseID caseID
+	 * @throws Exception
 	 */
 	public static function saveCase($data, $caseID = null)
 	{
 		if (!$data)
-			throw new Exception('登録するケース情報を設定してください。');
+			throw new Exception('Please setting the case information .');
 
 		$caseObj = $caseID ? self::find($caseID)
 						   : App::make('ClinicalCase');

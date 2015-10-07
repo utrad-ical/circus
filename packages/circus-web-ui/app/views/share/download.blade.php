@@ -21,7 +21,7 @@ Download
 		</tr>
 	@empty
 		<tr>
-			<td colspan="3">
+			<td colspan="4">
 				No results.
 			</td>
 		</tr>

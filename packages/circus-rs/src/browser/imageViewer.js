@@ -1074,7 +1074,7 @@
         paint_map[count] = new Uint8Array(max_x);
       }
 
-      //exchange from 3D positions to 2D..
+      //exchange from 3D positions to 2D.
       for (var count = outer_points.length - 1; count >= 0; count--) {
         if (this_opts.viewer.orientation === 'axial') {
           paint_map[outer_points[count][1]][outer_points[count][0]] = 1;
@@ -1299,7 +1299,7 @@
       if (insert_object) {
         this_opts = $.extend(true, this_opts, insert_object);
       }
-			
+
       //save my name in the Container. (for syncro)
       var this_id = this_elm.attr('id');
       this_opts.container.data.member.push(this_id);
@@ -1600,7 +1600,7 @@
           var tmp_point_position = this_obj._exchangePositionCtoV([[tmp_x,  tmp_y]]);
 
           //this function runs only the cursor point is in DICOM image.
-          if (tmp_point_position[0][0] > 0 && tmp_point_position[0][1] > 0 && tmp_point_position[0][2] > 0) {
+          if (tmp_point_position[0][0] >= 0 && tmp_point_position[0][1] >= 0 && tmp_point_position[0][2] >= 0) {
             var bucket_fill_positions =  this_obj._getBucketFillPositions(
                 this_opts.viewer.activeSeriesId,
                 the_active_series.activeLabelId,

@@ -17,6 +17,7 @@
     "validator": "^3.41.2"
   },
   "devDependencies": {
+    "chai": "^3.3.0",
     "gulp": "^3.8.11",
     "gulp-concat": "^2.5.2",
     "gulp-less": "^3.0.3",

@@ -26,7 +26,7 @@ export class Validator {
 		// iterates over the rules object
 		for (var key in this.rules) {
 			var spec = this.rules[key];
-			var [/*description*/, defaults, rule, normalizer] = spec;
+			var [/*description*/, defaultValue, rule, normalizer] = spec;
 			var required: boolean = false;
 			var value: any;
 			if (/\!$/.test(key)) {
@@ -40,7 +40,7 @@ export class Validator {
 					errors.push(`${key} is empty.`);
 					continue;
 				} else {
-					result[key] = defaults;
+					result[key] = defaultValue;
 					continue;
 				}
 			} else {
@@ -52,7 +52,7 @@ export class Validator {
 			if (typeof rule === 'string') {
 				// The rule is a set of rules delimited by the pipe character
 				// (e.g. "isLength:2:5|isJSON")
-				ok = rule.split(/\s\|\s/).every(cond => {
+				ok = rule.split(/\s?\|\s?/).every(cond => {
 					var [funcName, ...rest] = cond.split(':');
 					return validator[funcName](value, ...rest);
 				});
@@ -62,13 +62,15 @@ export class Validator {
 			} else if (rule instanceof RegExp) {
 				// The rule is checked with the given regexp
 				ok = rule.test(input[key]);
+			} else if (rule === null) {
+				ok = true;
 			}
 
 			// Normalizes the checked value.
 			// A normalizer can be a string representing the node-validator function(s), or a function.
 			if (ok) {
 				if (typeof normalizer === 'string') {
-					normalizer.split(/\s\|\s/).forEach(norm => {
+					normalizer.split(/\s?\|\s?/).forEach(norm => {
 						var [funcName, ...rest] = norm.split(':');
 						value = validator[funcName](value, ...rest);
 					});
@@ -80,6 +82,6 @@ export class Validator {
 				errors.push(`${key} is invalid.`);
 			}
 		}
-		return { result: result, errors: errors };
+		return { result: errors.length > 0 ? null : result, errors: errors };
 	}
 }

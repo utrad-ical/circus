@@ -1,0 +1,180 @@
+var assert = require('chai').assert;
+var Promise = require('bluebird');
+var AsyncLruCache = require('../build/AsyncLruCache').default;
+
+describe('AsyncLruCache', function() {
+
+	function doubler(key) {
+		return new Promise(function(resolve, reject) {
+			setTimeout(function() {
+				resolve(key + key.toUpperCase());
+			}, 30);
+		});
+	}
+
+	function failer(key) {
+		return new Promise(function(resolve, reject) {
+			setTimeout(function() {
+				reject(new Error('It did not work'));
+			}, 30);
+		});
+	}
+
+	function bufferLoader(key) {
+		return new Promise.resolve({
+			content: Math.random(),
+			length: parseInt(key.match(/\d+/)[0])
+		});
+	}
+
+	it('must return valid length', function() {
+		var cache = new AsyncLruCache(doubler);
+		assert.property(cache, 'length');
+		assert.equal(cache.length, 0);
+	});
+
+	describe('#get', function() {
+		it('must return one item using Promise', function(done) {
+			var cache = new AsyncLruCache(doubler);
+			cache.get('foo').then(function (result) {
+				assert.equal(result, 'fooFOO');
+				assert.equal(cache.length, 1);
+				done();
+			});
+		});
+
+		it('must immediately return value if already loaded', function(done) {
+			var cache = new AsyncLruCache(doubler);
+			var time0 = (new Date()).getTime();
+			cache.get('foo').then(function () {
+				var time1 = (new Date()).getTime();
+				assert(time1 - time0 > 25);
+				return cache.get('foo').then(function() {
+					var time2 = (new Date()).getTime();
+					assert(time2 - time1 < 10);
+					done();
+				});
+			});
+		});
+
+		it('must return multiple items with pending', function(done) {
+			var cache = new AsyncLruCache(doubler);
+			var promises = [];
+			for (var i = 0; i < 10; i++) {
+				promises.push(cache.get(i % 2 ? 'foo' : 'bar'));
+			}
+			Promise.all(promises).then(function (results) {
+				results.forEach(function(result, i) {
+					assert.equal(result, i % 2 ? 'fooFOO' : 'barBAR');
+				});
+				assert.equal(cache.length, 2);
+				done();
+			});
+		});
+
+		it('must reject if loading fails', function(done) {
+			var cache = new AsyncLruCache(failer);
+			cache.get('foo').then(
+				function(result) { throw 'Unexpectedly resolved'; },
+				function(err) { done(); }
+			);
+		});
+
+		it('must bring the most recently used item to the last', function(done) {
+			var cache = new AsyncLruCache(doubler);
+			var foo;
+			cache.get('foo').then(function(result) {
+				foo = result;
+				return cache.get('bar');
+			}).then(function(bar) {
+				assert.equal(cache.getAt(0), foo);
+				assert.equal(cache.getAt(1), bar);
+				cache.touch('foo');
+				assert.equal(cache.getAt(0), bar);
+				assert.equal(cache.getAt(1), foo);
+				done();
+			});
+		});
+	});
+
+	describe('#indexOf', function() {
+		it('must return index of item', function(done) {
+			var cache = new AsyncLruCache(doubler);
+			cache.get('foo').then(function(result) {
+				assert.equal(cache.indexOf('foo'), 0);
+				assert.equal(cache.indexOf('bar'), -1);
+				done();
+			});
+		});
+	});
+
+	describe('#totalSize', function() {
+		it('must calculate total size', function(done) {
+			var cache = new AsyncLruCache(bufferLoader);
+			cache.get('item10000')
+			.then(function(item) {
+				assert.equal(cache.getTotalSize(), 10000);
+				return cache.get('item20000');
+			}).then(function(item) {
+				assert.equal(cache.getTotalSize(), 30000);
+				cache.remove('item10000');
+				assert.equal(cache.getTotalSize(), 20000);
+				done();
+			});
+		});
+	});
+
+	describe('limits', function() {
+		var cache;
+		beforeEach(function() {
+			cache = new AsyncLruCache(bufferLoader, {
+				maxCount: 10,
+				maxSize: 1000,
+				maxLife: 0.01
+			});
+		});
+
+		it('must not contain items above count limit', function(done) {
+			var promises = [];
+			for (var i = 1; i <= 20; i++) {
+				promises.push(cache.get('item' + i));
+			}
+			Promise.all(promises)
+				.then(function() {
+					// only last 10 items must remain
+					assert.equal(cache.length, 10);
+					assert.equal(cache.getTotalSize(), (11+20)*10/2);
+					done();
+				});
+		});
+
+		it('must not contain items above size limit', function(done) {
+			var promises = [];
+			for (var i = 0; i <= 5; i++) {
+				promises.push(cache.get('item' + i * 100));
+			}
+			Promise.all(promises)
+				.then(function() {
+					// only last 2 items (500, 400) must remain
+					assert.equal(cache.length, 2);
+					assert.equal(cache.getTotalSize(), 900);
+					done();
+				});
+		});
+
+		it('must not contain items after time limit', function(done) {
+			cache.get('item100')
+				.then(function(item) {
+					cache.checkTtl();
+					assert.equal(cache.touch('item100'), item);
+					setTimeout(function() {
+						cache.checkTtl();
+						assert.notEqual(cache.touch('item100'), item);
+						assert.equal(cache.length, 0);
+						done();
+					}, 20);
+				});
+		});
+	});
+
+});

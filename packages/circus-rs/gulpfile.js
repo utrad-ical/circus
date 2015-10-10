@@ -7,19 +7,19 @@ gulp.task('default', ['typescript', 'less', 'build-browser']);
 
 gulp.task('typescript', function() {
 	var project = typescript.createProject('src/tsconfig.json');
-	gulp.src('src/**/*.ts')
+	return gulp.src('src/**/*.ts')
 		.pipe(typescript(project))
 		.pipe(gulp.dest('build'));
 });
 
 gulp.task('less', function() {
-	gulp.src('src/**/*.less')
+	return gulp.src('src/**/*.less')
 		.pipe(less())
 		.pipe(gulp.dest('build'));
 });
 
 gulp.task('build-browser', ['less'], function() {
-	gulp.src('src/browser/*.{js,png,gif}')
+	return gulp.src('src/browser/*.{js,png,gif}')
 		.pipe(gulp.dest('build/browser'));
 });
 

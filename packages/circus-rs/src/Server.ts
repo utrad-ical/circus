@@ -13,6 +13,7 @@ var config: Configuration = require('config');
 import logger from './Logger';
 logger.info('================================');
 logger.info('CIRCUS RS is starting up...');
+import log4js = require('log4js');
 
 import Counter from './Counter';
 import PNGWriter from './PNGWriter';
@@ -26,31 +27,33 @@ import AuthorizationCache from './AuthorizationCache';
 import RequestAccessTokenAction from'./controllers/RequestAccessTokenAction';
 
 var Router = require('router');
-import log4js = require('log4js');
 
 class Server {
 	public start(): void {
 		// prepare routing
 		try {
 			var router = this.prepareRouter();
+			// create server process
+			var server = http.createServer((req: http.ServerRequest, res: http.ServerResponse) => {
+				router(req, res, finalhandler(req, res, {
+					onerror: err => {
+						Counter.countUp('_error');
+						logger.info(err.toString());
+					}
+				}));
+			});
+			server.on('error', err => {
+				logger.error('Server error occurred.');
+				logger.error(err);
+				log4js.shutdown(() => process.exit(1));
+			})
+			server.listen(config.port);
+			logger.info('Server running on port ' + config.port);
 		} catch (e) {
 			logger.error(e);
 			// This guarantees all the logs are flushed before actually exiting the program
 			log4js.shutdown(() => process.exit(1));
 		}
-
-		// create server process
-		var server = http.createServer((req: http.ServerRequest, res: http.ServerResponse) => {
-			router(req, res, finalhandler(req, res, {
-				onerror: err => {
-					Counter.countUp('_error');
-					logger.info(err.toString());
-				}
-			}));
-		});
-		server.listen(config.port);
-
-		logger.info('Server running on port ' + config.port);
 	}
 
 	private createDicomReader(): DicomReader {

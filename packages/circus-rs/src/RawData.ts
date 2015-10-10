@@ -2,8 +2,6 @@
  * DICOM series image data class.
  */
 
-import logger from './Logger';
-
 const enum PixelFormat {
 	Unknown = -1,
 	UInt8 = 0,
@@ -29,7 +27,7 @@ export default class RawData {
 	public wl: number = 1500;
 	public ww: number = 2000;
 
-	// Default window, described in DICOm file
+	// Default window, described in DICOM file
 	public dcm_wl: number;
 	public dcm_ww: number;
 

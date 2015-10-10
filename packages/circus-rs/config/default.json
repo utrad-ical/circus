@@ -39,11 +39,6 @@
 		}
 	},
 
-	// Raw dumper
-	"rawDumper": {
-		"module": "DicomRawDumper"
-	},
-
 	// PNG writer options
 	"pngWriter": {
 		"module": "PNGWriter_pngjs",

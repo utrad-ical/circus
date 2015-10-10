@@ -72,7 +72,7 @@ export class Validator {
 						var [funcName, ...rest] = norm.split(':');
 						value = validator[funcName](value, ...rest);
 					});
-				} else if (typeof normalizer === 'function') {
+				} else if (normalizer instanceof Function) {
 					value = normalizer(value);
 				}
 				result[key] = value;

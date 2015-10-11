@@ -12,8 +12,6 @@ interface Configuration {
 
 	dumper?: ObjectDefinition;
 
-	rawDumper?: ObjectDefinition;
-
 	imageEncoder?: ObjectDefinition;
 
 	cache?: {

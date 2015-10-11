@@ -1,18 +1,17 @@
-export default class ImageEncoder {
+import stream = require('stream');
 
+export default class ImageEncoder {
 	protected config: any = null;
 
 	constructor(config?: any) {
 		this.config = config || null;
-		this.initialize();
 	}
 
-	protected initialize() {
-		// abstract
+	public mimeType(): string {
+		return 'image/png';
 	}
 
-	public write(res: any, data: Buffer, width: number, height: number): void
-	{
+	public write(out: stream.Writable, image: Buffer, width: number, height: number): void {
 		// abstract
 	}
 }

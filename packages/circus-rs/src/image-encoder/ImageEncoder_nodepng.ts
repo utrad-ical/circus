@@ -1,17 +1,13 @@
 import ImageEncoder from './ImageEncoder';
+import stream = require('stream');
+
 var Png = require('png').Png;
 
 export default class ImageEncoder_nodepng extends ImageEncoder {
-	public write(res: any, data: Buffer, width: number, height: number): void {
-		var png = new Png(data, width, height, 'gray', 8);
-
+	public write(out: stream.Writable, image: Buffer, width: number, height: number): void {
+		var png = new Png(image, width, height, 'gray', 8);
 		png.encode(function (png_data) {
-			res.writeHead(200,
-				{
-					'Content-Type': 'image/png',
-					'Access-Control-Allow-Origin': '*'
-				});
-			res.end(png_data);
+			out.end(png_data);
 		});
 	}
 }

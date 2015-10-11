@@ -2,6 +2,7 @@
  * DICOM Server module prototype.
  */
 var url = require('url');
+import stream = require('stream');
 import ImageEncoder from '../image-encoder/ImageEncoder';
 import http = require('http');
 import logger from '../Logger';
@@ -44,6 +45,16 @@ export default class Controller {
 	protected getRules(): ValidatorRules
 	{
 		return {};
+	}
+
+	protected respondImage(res: http.ServerResponse, image: Buffer, width: number, height: number)
+	{
+		res.writeHead(200,
+			{
+				'Content-Type': this.imageEncoder.mimeType(),
+				'Access-Control-Allow-Origin': '*'
+			});
+		this.imageEncoder.write(res, image, width, height);
 	}
 
 	protected respondJsonWithStatus(status: number, res: http.ServerResponse, data: any): void

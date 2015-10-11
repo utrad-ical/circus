@@ -50,7 +50,7 @@ export default class MPRAction extends VolumeBasedController {
 			this.respondBadRequest(res, 'Invalid orientation.');
 			return;
 		}
-		this.imageEncoder.write(res, buffer, out_width, out_height);
+		this.respondImage(res, buffer, out_width, out_height);
 	}
 
 }

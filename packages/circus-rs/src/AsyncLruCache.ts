@@ -99,11 +99,13 @@ export default class AsyncLruCache<T> {
 				this.truncate();
 				var callbacks = this.pendings[key];
 				delete this.pendings[key];
+				if (!callbacks) return; // ignore cancelled pendings
 				callbacks.forEach(funcs => funcs[0](item));
 			},
 			err => {
 				var callbacks = this.pendings[key];
 				delete this.pendings[key];
+				if (!callbacks) return; // ignore cancelled pendings
 				callbacks.forEach(funcs => funcs[1](err));
 			}
 		);
@@ -126,13 +128,18 @@ export default class AsyncLruCache<T> {
 	public remove(key: string): void {
 		// If in pending, forget reject it and forget the callback
 		if (key in this.pendings) {
-			this.pendings[key].forEach(funcs => funcs[1]('Cancelled'));
+			var callbacks = this.pendings[key];
 			delete this.pendings[key];
+			if (!callbacks) return; // ignore cancelled pendings
+			var err = new Error('Cancelled');
+			callbacks.forEach(funcs => funcs[1](err));
 		}
 		// If already loaded, remove it
 		var index = this.indexOf(key);
-		var item = this.lru.splice(index, 1)[0];
-		this.totalSize -= item.size;
+		if (index >= 0) {
+			var item = this.lru.splice(index, 1)[0];
+			this.totalSize -= item.size;
+		}
 	}
 
 	public get length(): number {
@@ -166,7 +173,7 @@ export default class AsyncLruCache<T> {
 
 	public checkTtl(): void {
 		var now = (new Date()).getTime();
-		var maxLife = this.limits.maxLife;
+		var maxLife = this.limits.maxLife * 1000;
 		if (maxLife <= 0) return;
 		while (this.lru.length > 0 && now - this.lru[0].time.getTime() > maxLife) {
 			this.shift();

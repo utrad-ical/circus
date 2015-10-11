@@ -40,8 +40,8 @@
 	},
 
 	// PNG writer options
-	"pngWriter": {
-		"module": "PNGWriter_pngjs",
+	"imageEncoder": {
+		"module": "ImageEncoder_pngjs",
 		"options": {}
 	},
 

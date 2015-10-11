@@ -14,7 +14,7 @@ interface Configuration {
 
 	rawDumper?: ObjectDefinition;
 
-	pngWriter?: ObjectDefinition;
+	imageEncoder?: ObjectDefinition;
 
 	cache?: {
 		memoryThreshold?: number;

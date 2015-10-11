@@ -1,4 +1,4 @@
-export default class PNGWriter {
+export default class ImageEncoder {
 
 	protected config: any = null;
 

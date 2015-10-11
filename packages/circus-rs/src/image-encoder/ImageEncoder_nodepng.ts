@@ -1,7 +1,7 @@
-import PNGWriter from './PNGWriter';
+import ImageEncoder from './ImageEncoder';
 var Png = require('png').Png;
 
-export default class PNGWriter_nodepng extends PNGWriter {
+export default class ImageEncoder_nodepng extends ImageEncoder {
 	public write(res: any, data: Buffer, width: number, height: number): void {
 		var png = new Png(data, width, height, 'gray', 8);
 

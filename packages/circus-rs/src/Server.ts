@@ -16,7 +16,7 @@ logger.info('CIRCUS RS is starting up...');
 import log4js = require('log4js');
 
 import Counter from './Counter';
-import PNGWriter from './PNGWriter';
+import ImageEncoder from './image-encoder/ImageEncoder';
 
 import RawData from './RawData';
 import AsyncLruCache from './AsyncLruCache';
@@ -81,16 +81,16 @@ class Server {
 		)
 	}
 
-	private createPngWriter(): PNGWriter {
-		var module: string = config.pngWriter.module;
-		logger.info('Using PNG writer: ' + module);
-		var pngModule: typeof PNGWriter = require('./' + module).default;
-		return new pngModule(config.pngWriter.options);
+	private createImageEncoder(): ImageEncoder {
+		var module: string = config.imageEncoder.module;
+		logger.info('Using Image Encoder: ' + module);
+		var imageEncoder: typeof ImageEncoder = require('./image-encoder/' + module).default;
+		return new imageEncoder(config.imageEncoder.options);
 	}
 
 	private prepareRouter(): any {
 		var router = Router();
-		var pngWriter = this.createPngWriter();
+		var imageEncoder = this.createImageEncoder();
 		var reader = this.createDicomReader();
 		var authorizationCache = new AuthorizationCache(config.authorization);
 
@@ -104,7 +104,7 @@ class Server {
 		routes.forEach(route => {
 			logger.info('Loading ' + route[1] + ' module...');
 			var module: typeof DicomServerModule = require('./controllers/' + route[1]).default;
-			var controller = new module(reader, pngWriter);
+			var controller = new module(reader, imageEncoder);
 			router.get('/' + route[0], (req, res) => {
 				if (route[2] && config.authorization.require) {
 					if (!authorizationCache.isValid(req)) {
@@ -131,7 +131,7 @@ class Server {
 
 		if (config.authorization.require) {
 			logger.info('Loading RequestAccessTokenAction module');
-			var controller: RequestAccessTokenAction = new RequestAccessTokenAction(reader, pngWriter);
+			var controller: RequestAccessTokenAction = new RequestAccessTokenAction(reader, imageEncoder);
 			controller.setCache(authorizationCache);
 
 			router.get('/requestToken', (req, res) => {

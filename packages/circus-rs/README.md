@@ -6,7 +6,7 @@ Requirements
 
 - gulp (for installation)
 - mongoose (for CIRCUSDB_path_resolver, optional)
-- node-png (for PNGWriter_nodepng, optional)
+- node-png (for ImageEncoder_nodepng, optional)
 - dicom_voxel_dump (for DicomVoxelDumperAdapter)
 
 Build
@@ -37,7 +37,7 @@ All configuration data will go in `config.js` file.
 - `pathResolver.options`: Additional data to pass to the path resolver. (See below)
 - `dumper.module`: The module name for DICOM dumper module.
 - `dumper.options`: Additional data to pass to DICOM dumper. (See below)
-- `mpr.options.PNGWriter`: The module name for creating PNG image. (See below)
+- `imageEncoder`: The module name for image export. (See below)
 - `cache.memoryThreshold`:  upper limit of heap memory size in bytes.
 
 ### Path resolver configurations
@@ -59,18 +59,20 @@ You need to install mongoose to use this. (See http://mongoosejs.com/docs/index.
 - `dumper.options.dumper`: Full physical path and filename for dicom_voxel_dump.
 - `dumper.options.bufferSize`: Buffer size of stdout buffer. Don't change until needed.
 
-### PNGWriter configuraions
+### ImageEncoder configuraions
 
-#### PNGWriter_pngjs
-Default PNGWriter using 'pngjs' (written in JavaScript only).
+#### ImageEncoder_pngjs
 
-- `mpr.options.PNGWriterOptions`: currently no options.
+Default ImageEncoder using 'pngjs' (written in JavaScript only).
 
-#### PNGWriter_nodepng
-Alternative PNGWriter using 'png' (faster than PNGWriter_pngjs).
+- `imageEncoder.options`: currently no options.
+
+#### ImageEncoder_nodepng
+
+Alternative PNG writer using 'png' (needs compile, faster than ImageEncoder_pngjs).
 You need to install node-png to use this. (see https://github.com/pkrumins/node-png)
 
-- `mpr.options.PNGWriterOptions`: currently no options.
+- `imageEncoder.options`: currently no options.
 
 
 Authorization
@@ -124,7 +126,7 @@ Response in JSON format.
 
 ### MPR
 
-Make MPR image and response in PNG format.
+Make MPR image and respond image.
 
 #### request
 
@@ -140,7 +142,7 @@ method: GET
 
 #### response
 
-PNG (image/png)
+Image data defined by `imageEncoder`
 
 ### Single Oblique MPR
 
@@ -167,7 +169,7 @@ Header
 - `X-Circus-Pixel-Rows`: output image height (pixel)
 - `X-Circus-Center`: center position in output image (pixel, pixel)
 
-PNG (image/png)
+Image data defined by `imageEncoder`
 
 ### raw
 

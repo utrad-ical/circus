@@ -2,7 +2,7 @@
  * DICOM Server module prototype.
  */
 var url = require('url');
-import PNGWriter from '../PNGWriter';
+import ImageEncoder from '../image-encoder/ImageEncoder';
 import http = require('http');
 import logger from '../Logger';
 import AsyncLruCache from '../AsyncLruCache';
@@ -12,11 +12,11 @@ import { Validator, ValidatorRules } from '../Validator';
 export default class Controller {
 
 	protected reader: AsyncLruCache<RawData>;
-	protected pngWriter: PNGWriter;
+	protected imageEncoder: ImageEncoder;
 
-	constructor(reader: AsyncLruCache<RawData>, pngWriter: PNGWriter) {
+	constructor(reader: AsyncLruCache<RawData>, imageEncoder: ImageEncoder) {
 		this.reader = reader;
-		this.pngWriter = pngWriter;
+		this.imageEncoder = imageEncoder;
 		this.initialize();
 	}
 

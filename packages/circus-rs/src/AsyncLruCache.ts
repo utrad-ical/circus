@@ -7,11 +7,11 @@ interface LruEntry<T> {
 	time: Date;
 }
 
-interface Limits {
+interface Options<T> {
 	maxCount: number;
 	maxLife: number; // in seconds
 	maxSize: number; // in bytes
-	sizeKey: string;
+	sizeFunc: (T) => number;
 }
 
 type LoaderFunc<T> = (key: string) => Promise<T>;
@@ -32,25 +32,25 @@ export default class AsyncLruCache<T> {
 	private pendings: {[key: string]: [Function, Function][]} = {};
 	private memoryUsage: number;
 	private loader: LoaderFunc<T>;
-	private limits: Limits;
+	private options: Options<T>;
 	private totalSize: number = 0;
 
-	private defaultLimits: Limits = {
+	private defaultOptions: Options<T> = {
 		maxCount: 10,
 		maxLife: -1,
 		maxSize: -1,
-		sizeKey: 'length'
+		sizeFunc: item => 1
 	};
 
-	constructor (loader: LoaderFunc<T>, limits?: Limits) {
+	constructor (loader: LoaderFunc<T>, options?: Options<T>) {
 		this.loader = loader;
-		this.limits = this.defaultLimits;
-		if (typeof limits === 'object') {
-			for (var k in limits) {
-				if (k in this.limits) this.limits[k] = limits[k];
+		this.options = this.defaultOptions;
+		if (typeof options === 'object') {
+			for (var k in options) {
+				if (k in this.options) this.options[k] = options[k];
 			}
 		}
-		if (this.limits.maxLife > 0) {
+		if (this.options.maxLife > 0) {
 			setInterval(() => this.checkTtl(), 1000);
 		}
 	}
@@ -92,8 +92,7 @@ export default class AsyncLruCache<T> {
 		// If not, start loading it using the loader function
 		this.loader(key).then(
 			item => {
-				var size = (typeof item === 'object' && this.limits.sizeKey in item)
-					? parseFloat(item[this.limits.sizeKey]) : 0;
+				var size = this.options.sizeFunc(item);
 				this.lru.push({	key, item, size, time: new Date() });
 				this.totalSize += size;
 				this.truncate();
@@ -159,13 +158,13 @@ export default class AsyncLruCache<T> {
 	}
 
 	protected truncate(): void {
-		if (this.limits.maxCount > 0) {
-			while (this.lru.length > this.limits.maxCount) {
+		if (this.options.maxCount > 0) {
+			while (this.lru.length > this.options.maxCount) {
 				this.shift();
 			}
 		}
-		if (this.limits.maxSize > 0) {
-			while (this.totalSize > this.limits.maxSize) {
+		if (this.options.maxSize > 0) {
+			while (this.totalSize > this.options.maxSize) {
 				this.shift();
 			}
 		}
@@ -173,7 +172,7 @@ export default class AsyncLruCache<T> {
 
 	public checkTtl(): void {
 		var now = (new Date()).getTime();
-		var maxLife = this.limits.maxLife * 1000;
+		var maxLife = this.options.maxLife * 1000;
 		if (maxLife <= 0) return;
 		while (this.lru.length > 0 && now - this.lru[0].time.getTime() > maxLife) {
 			this.shift();

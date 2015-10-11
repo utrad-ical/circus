@@ -130,7 +130,8 @@ describe('AsyncLruCache', function() {
 
 	describe('#totalSize', function() {
 		it('must calculate total size', function(done) {
-			var cache = new AsyncLruCache(bufferLoader);
+			var opts = { sizeFunc: function(i) { return i.length; }};
+			var cache = new AsyncLruCache(bufferLoader, opts);
 			cache.get('item10000')
 			.then(function(item) {
 				try {
@@ -179,7 +180,8 @@ describe('AsyncLruCache', function() {
 			cache = new AsyncLruCache(bufferLoader, {
 				maxCount: 10,
 				maxSize: 1000,
-				maxLife: 0.01
+				maxLife: 0.01,
+				sizeFunc: function(i) { return i.length; }
 			});
 		});
 

@@ -2,6 +2,7 @@ var gulp = require('gulp');
 var typescript = require('gulp-typescript');
 var less = require('gulp-less');
 var concat = require('gulp-concat');
+var rimraf = require('rimraf');
 
 gulp.task('default', ['typescript', 'less', 'build-browser']);
 
@@ -21,6 +22,10 @@ gulp.task('less', function() {
 gulp.task('build-browser', ['less'], function() {
 	return gulp.src('src/browser/*.{js,png,gif}')
 		.pipe(gulp.dest('build/browser'));
+});
+
+gulp.task('clean', function(done) {
+	rimraf('./build/*', done);
 });
 
 gulp.task('watch', ['typescript', 'less'], function() {

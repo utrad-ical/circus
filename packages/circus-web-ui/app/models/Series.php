@@ -202,10 +202,10 @@ class Series extends BaseModel {
 	 */
 	public static function authNode($seriesUID)
 	{
-		$request_url = "http://localhost:3000/requestToken?series=".$seriesUID;
+		$request_url = "http://localhost:3000/requestToken?series=" . $seriesUID;
 		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_URL, $request_url);
-		curl_setopt($ch,CURLOPT_RETURNTRANSFER,true);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 		$tmp = curl_exec($ch);
 
 		if (!$tmp)
@@ -215,7 +215,10 @@ class Series extends BaseModel {
 		curl_close($ch);
 
 		if (!$responseToken || !array_key_exists('token', $responseToken))
-			new AuthenticationNodeException($tmp);
+			throw new AuthenticationNodeException(
+				'Failed to load DICOM image server token. ' .
+				'Is the DICOM image server up and properly configured?'
+			);
 
 		return $responseToken['token'];
 	}

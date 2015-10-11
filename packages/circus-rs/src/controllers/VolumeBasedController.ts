@@ -19,17 +19,15 @@ export default class VolumeBasedController extends Controller {
 			return;
 		}
 		// TODO: Specifying image range is temporarily disabled
-		this.reader.readData(series, 'all', (raw: RawData, error: string) => {
-			if (error || !raw) {
-				this.respondNotFound(res, 'Series not found');
-				return;
-			}
+		this.reader.get(series).then((raw: RawData) => {
 			try {
 				this.processVolume(query, raw, res);
 			} catch (e) {
 				if ('stack' in e) logger.info(e.stack);
 				this.respondInternalServerError(res, e.toString());
 			}
+		}).catch(err => {
+			this.respondNotFound(res, 'Series not found');
 		});
 	}
 

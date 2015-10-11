@@ -16,7 +16,7 @@ export default class ServerStatus extends Controller {
 		var status = {
 			status: 'Running',
 			dicomReader: {
-				count: this.reader.length()
+				count: this.reader.length
 			},
 			process: {
 				memoryUsage: process.memoryUsage(),

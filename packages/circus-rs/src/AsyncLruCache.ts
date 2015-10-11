@@ -8,10 +8,10 @@ interface LruEntry<T> {
 }
 
 interface Options<T> {
-	maxCount: number;
-	maxLife: number; // in seconds
-	maxSize: number; // in bytes
-	sizeFunc: (T) => number;
+	maxCount?: number;
+	maxLife?: number; // in seconds
+	maxSize?: number; // in bytes
+	sizeFunc?: (T) => number;
 }
 
 type LoaderFunc<T> = (key: string) => Promise<T>;

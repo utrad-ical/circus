@@ -17,7 +17,10 @@ import log4js = require('log4js');
 
 import Counter from './Counter';
 import PNGWriter from './PNGWriter';
-import DicomReader from './DicomReader';
+
+import RawData from './RawData';
+import AsyncLruCache from './AsyncLruCache';
+
 import DicomDumper from './DicomDumper';
 import DicomServerModule from './controllers/Controller';
 import PathResolver from './path-resolver/PathResolver';
@@ -55,7 +58,7 @@ class Server {
 		}
 	}
 
-	private createDicomReader(): DicomReader {
+	private createDicomReader(): AsyncLruCache<RawData> {
 		var module: string = config.pathResolver.module;
 		logger.info('Using path resolver: ' + module);
 		var resolverClass: typeof PathResolver = require('./path-resolver/' + module).default;
@@ -64,7 +67,14 @@ class Server {
 		logger.info('Using DICOM dumper: ' + module);
 		var dumperClass: typeof DicomDumper = require('./' + module).default;
 		var dumper = new dumperClass(config.dumper.options);
-		return new DicomReader(resolver, dumper, config.cache.memoryThreshold);
+		return new AsyncLruCache<RawData>(
+			seriesUID => {
+				return resolver
+					.resolvePath(seriesUID)
+					.then(dcmdir => dumper.readDicom(dcmdir, 'all'))
+			},
+			{ maxSize: config.cache.memoryThreshold }
+		)
 	}
 
 	private createPngWriter(): PNGWriter {

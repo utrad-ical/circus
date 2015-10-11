@@ -15,6 +15,19 @@ Build
     # npm install
     # gulp
 
+Test
+----
+
+Uses mocha. Tests are only partially written for now.
+
+    # npm test
+
+Alternatively, you can install mocha globally, which gives
+more options.
+
+    # npm install -g mocha
+    # mocha
+
 Configuration
 -------------
 

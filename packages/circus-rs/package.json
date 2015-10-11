@@ -3,7 +3,8 @@
   "version": "0.0.2",
   "private": true,
   "scripts": {
-    "start": "node ./circus-rs.js"
+    "start": "node ./circus-rs.js",
+    "test": "./node_modules/.bin/mocha"
   },
   "dependencies": {
     "bluebird": "^2.9.30",
@@ -22,6 +23,7 @@
     "gulp-concat": "^2.5.2",
     "gulp-less": "^3.0.3",
     "gulp-typescript": "^2.8.0",
+    "mocha": "^2.3.3",
     "typescript": "^1.5.3"
   }
 }

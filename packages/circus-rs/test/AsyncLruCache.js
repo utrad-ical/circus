@@ -4,6 +4,15 @@ var AsyncLruCache = require('../build/AsyncLruCache').default;
 
 describe('AsyncLruCache', function() {
 
+	function check(done, fn) {
+		try {
+			fn();
+			done();
+		} catch (e) {
+			done(e);
+		}
+	}
+
 	function doubler(key) {
 		return new Promise(function(resolve, reject) {
 			setTimeout(function() {
@@ -37,22 +46,30 @@ describe('AsyncLruCache', function() {
 		it('must return one item using Promise', function(done) {
 			var cache = new AsyncLruCache(doubler);
 			cache.get('foo').then(function (result) {
-				assert.equal(result, 'fooFOO');
-				assert.equal(cache.length, 1);
-				done();
+				check(done, function() {
+					assert.equal(result, 'fooFOO');
+					assert.equal(cache.length, 1);
+				})
 			});
 		});
 
 		it('must immediately return value if already loaded', function(done) {
 			var cache = new AsyncLruCache(doubler);
-			var time0 = (new Date()).getTime();
-			cache.get('foo').then(function () {
-				var time1 = (new Date()).getTime();
-				assert(time1 - time0 > 25);
-				return cache.get('foo').then(function() {
-					var time2 = (new Date()).getTime();
+			var time0 = (new Date()).getTime(), time1, time2;
+			cache.get('foo').then(function(foo) {
+				try {
+					time1 = (new Date()).getTime();
+					assert.equal(foo, 'fooFOO');
+					assert(time1 - time0 > 25);
+				} catch(e) {
+					done(e);
+				}
+				return cache.get('foo');
+			}).then(function(foo) {
+				check(done, function() {
+					time2 = (new Date()).getTime();
+					assert.equal(foo, 'fooFOO');
 					assert(time2 - time1 < 10);
-					done();
 				});
 			});
 		});
@@ -64,18 +81,19 @@ describe('AsyncLruCache', function() {
 				promises.push(cache.get(i % 2 ? 'foo' : 'bar'));
 			}
 			Promise.all(promises).then(function (results) {
-				results.forEach(function(result, i) {
-					assert.equal(result, i % 2 ? 'fooFOO' : 'barBAR');
-				});
-				assert.equal(cache.length, 2);
-				done();
+				check(done, function() {
+					results.forEach(function(result, i) {
+						assert.equal(result, i % 2 ? 'fooFOO' : 'barBAR');
+					});
+					assert.equal(cache.length, 2);
+				})
 			});
 		});
 
 		it('must reject if loading fails', function(done) {
 			var cache = new AsyncLruCache(failer);
 			cache.get('foo').then(
-				function(result) { throw 'Unexpectedly resolved'; },
+				function(result) { done(new Error('Unexpectedly resolved')); },
 				function(err) { done(); }
 			);
 		});
@@ -87,12 +105,13 @@ describe('AsyncLruCache', function() {
 				foo = result;
 				return cache.get('bar');
 			}).then(function(bar) {
-				assert.equal(cache.getAt(0), foo);
-				assert.equal(cache.getAt(1), bar);
-				cache.touch('foo');
-				assert.equal(cache.getAt(0), bar);
-				assert.equal(cache.getAt(1), foo);
-				done();
+				check(done, function() {
+					assert.equal(cache.getAt(0), foo);
+					assert.equal(cache.getAt(1), bar);
+					cache.touch('foo');
+					assert.equal(cache.getAt(0), bar);
+					assert.equal(cache.getAt(1), foo);
+				});
 			});
 		});
 	});
@@ -101,9 +120,10 @@ describe('AsyncLruCache', function() {
 		it('must return index of item', function(done) {
 			var cache = new AsyncLruCache(doubler);
 			cache.get('foo').then(function(result) {
-				assert.equal(cache.indexOf('foo'), 0);
-				assert.equal(cache.indexOf('bar'), -1);
-				done();
+				check(done, function() {
+					assert.equal(cache.indexOf('foo'), 0);
+					assert.equal(cache.indexOf('bar'), -1);
+				});
 			});
 		});
 	});
@@ -113,14 +133,43 @@ describe('AsyncLruCache', function() {
 			var cache = new AsyncLruCache(bufferLoader);
 			cache.get('item10000')
 			.then(function(item) {
-				assert.equal(cache.getTotalSize(), 10000);
+				try {
+					assert.equal(cache.getTotalSize(), 10000);
+				} catch(e) {
+					done(e);
+				}
 				return cache.get('item20000');
 			}).then(function(item) {
-				assert.equal(cache.getTotalSize(), 30000);
-				cache.remove('item10000');
-				assert.equal(cache.getTotalSize(), 20000);
-				done();
+				check(done, function() {
+					assert.equal(cache.getTotalSize(), 30000);
+					cache.remove('item10000');
+					assert.equal(cache.getTotalSize(), 20000);
+				})
 			});
+		});
+	});
+
+	describe('#remove', function() {
+		it('must remove loaded item', function(done) {
+			var cache = new AsyncLruCache(doubler);
+			cache.get('item')
+				.then(function() {
+					check(done, function() {
+						assert.equal(cache.length, 1);
+						cache.remove('item');
+						assert.equal(cache.length, 0);
+						assert.strictEqual(cache.touch('item'), undefined);
+					});
+				});
+		});
+
+		it('must reject removed pending items', function(done) {
+		 	var cache = new AsyncLruCache(doubler);
+		 	cache.get('foo').then(
+				function () { done(new Error('Unexpectedly resolved')) },
+				function (err) { done(); }
+			);
+			cache.remove('foo');
 		});
 	});
 
@@ -139,13 +188,13 @@ describe('AsyncLruCache', function() {
 			for (var i = 1; i <= 20; i++) {
 				promises.push(cache.get('item' + i));
 			}
-			Promise.all(promises)
-				.then(function() {
+			Promise.all(promises).then(function() {
+				check(done, function() {
 					// only last 10 items must remain
 					assert.equal(cache.length, 10);
 					assert.equal(cache.getTotalSize(), (11+20)*10/2);
-					done();
 				});
+			});
 		});
 
 		it('must not contain items above size limit', function(done) {
@@ -153,27 +202,31 @@ describe('AsyncLruCache', function() {
 			for (var i = 0; i <= 5; i++) {
 				promises.push(cache.get('item' + i * 100));
 			}
-			Promise.all(promises)
-				.then(function() {
+			Promise.all(promises).then(function() {
+				check(done, function() {
 					// only last 2 items (500, 400) must remain
 					assert.equal(cache.length, 2);
 					assert.equal(cache.getTotalSize(), 900);
-					done();
-				});
+				})
+			});
 		});
 
 		it('must not contain items after time limit', function(done) {
-			cache.get('item100')
-				.then(function(item) {
-					cache.checkTtl();
+			cache.get('item100').then(function(item) {
+				cache.checkTtl();
+				try {
 					assert.equal(cache.touch('item100'), item);
-					setTimeout(function() {
+				} catch (e) {
+					done(e);
+				}
+				setTimeout(function() {
+					check(done, function() {
 						cache.checkTtl();
 						assert.notEqual(cache.touch('item100'), item);
 						assert.equal(cache.length, 0);
-						done();
-					}, 20);
-				});
+					});
+				}, 20);
+			});
 		});
 	});
 

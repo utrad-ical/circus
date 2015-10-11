@@ -36,7 +36,8 @@ class Server {
 		try {
 			var router = this.prepareRouter();
 			// create server process
-			var server = http.createServer((req: http.ServerRequest, res: http.ServerResponse) => {
+			var server = http.createServer();
+			server.on('request', (req: http.ServerRequest, res: http.ServerResponse) => {
 				router(req, res, finalhandler(req, res, {
 					onerror: err => {
 						Counter.countUp('_error');
@@ -48,7 +49,7 @@ class Server {
 				logger.error('Server error occurred.');
 				logger.error(err);
 				log4js.shutdown(() => process.exit(1));
-			})
+			});
 			server.listen(config.port);
 			logger.info('Server running on port ' + config.port);
 		} catch (e) {
@@ -73,7 +74,10 @@ class Server {
 					.resolvePath(seriesUID)
 					.then(dcmdir => dumper.readDicom(dcmdir, 'all'))
 			},
-			{ maxSize: config.cache.memoryThreshold }
+			{
+				maxSize: config.cache.memoryThreshold,
+				sizeFunc: r => r.dataSize
+			}
 		)
 	}
 

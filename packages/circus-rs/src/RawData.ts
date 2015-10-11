@@ -199,5 +199,10 @@ export default class RawData {
 		return true;
 	}
 
+	public get dataSize(): number {
+		var bpp = (this.type == PixelFormat.Int8 || this.type == PixelFormat.UInt8) ? 1 : 2;
+		return this.x * this.y * this.z * bpp;
+	}
+
 }
 

@@ -11,12 +11,13 @@ var startUpTime: Date = new Date(); // The time this module was loaded
 
 export default class ServerStatus extends Controller {
 
-	public process(query: any, res: http.ServerResponse): void
+	public process(query: http.ServerRequest, res: http.ServerResponse): void
 	{
 		var status = {
 			status: 'Running',
 			dicomReader: {
-				count: this.reader.length
+				count: this.reader.length,
+				size: this.reader.getTotalSize()
 			},
 			process: {
 				memoryUsage: process.memoryUsage(),

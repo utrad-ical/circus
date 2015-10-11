@@ -22,8 +22,8 @@
     "gulp": "^3.8.11",
     "gulp-concat": "^2.5.2",
     "gulp-less": "^3.0.3",
-    "gulp-typescript": "^2.8.0",
+    "gulp-typescript": "^2.9.2",
     "mocha": "^2.3.3",
-    "typescript": "^1.5.3"
+    "typescript": "^1.6.2"
   }
 }

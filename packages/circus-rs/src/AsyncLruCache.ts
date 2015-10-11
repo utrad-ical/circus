@@ -20,11 +20,11 @@ type LoaderFunc<T> = (key: string) => Promise<T>;
  * AsyncLruCache is an asynchronous key-value container class
  * which has the following features.
  * 1) Keys are strings.
- * 2) Values are returned with a promise.
- * 3) Automatically deletes contents using three types of limits
+ * 2) Values are always returned via promises.
+ * 3) Automatically removes contents using three types of limits
  *    (number of items, total size, life)
  * To use this class you have to pass a loader function to the constructor.
- * The loader function must take a key as an argument and returns a Promise
+ * The loader function must take a key as an argument and return a Promise
  * that will resolve with the corresponding loaded item.
  */
 export default class AsyncLruCache<T> {
@@ -170,6 +170,10 @@ export default class AsyncLruCache<T> {
 		}
 	}
 
+	/**
+	 * Checks the max age. This will called automatically,
+	 * but it's possible to call this manually.
+	 */
 	public checkTtl(): void {
 		var now = (new Date()).getTime();
 		var maxLife = this.options.maxLife * 1000;

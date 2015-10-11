@@ -110,7 +110,8 @@ class Server {
 					if (!authorizationCache.isValid(req)) {
 						logger.info('401 error');
 						res.setHeader('WWW-Authenticate', 'Bearer realm="CircusRS"');
-						res.writeHead(401, 'access not allowed.');
+						res.writeHead(401, http.STATUS_CODES[401]);
+						res.write('Access denied.');
 						res.end();
 						return;
 					}

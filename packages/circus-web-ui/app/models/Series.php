@@ -202,7 +202,7 @@ class Series extends BaseModel {
 	 */
 	public static function authNode($seriesUID)
 	{
-		$request_url = "http://localhost:3000/requestToken?series=" . $seriesUID;
+		$request_url = "http://127.0.0.1:3000/requestToken?series=" . $seriesUID;
 		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_URL, $request_url);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);

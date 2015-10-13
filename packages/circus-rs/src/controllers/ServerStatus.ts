@@ -24,7 +24,7 @@ export default class ServerStatus extends Controller {
 				upTime: process.uptime(),
 				upSince: startUpTime.toISOString()
 			},
-			counter: Counter.getCounts(),
+			counter: this.server.counter.getCounts(),
 			authorization: { enabled: !!config.authorization.require }
 		};
 		this.respondJson(res, status);

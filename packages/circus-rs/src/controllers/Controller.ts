@@ -9,11 +9,13 @@ import logger from '../Logger';
 import AsyncLruCache from '../AsyncLruCache';
 import RawData from '../RawData';
 import { Validator, ValidatorRules } from '../Validator';
+import Server from '../Server';
 
 export default class Controller {
 
 	protected reader: AsyncLruCache<RawData>;
 	protected imageEncoder: ImageEncoder;
+	public server: Server;
 
 	constructor(reader: AsyncLruCache<RawData>, imageEncoder: ImageEncoder) {
 		this.reader = reader;

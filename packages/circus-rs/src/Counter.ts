@@ -7,9 +7,9 @@ interface CounterHash {
 }
 
 export default class Counter {
-	private static counter: CounterHash = {};
+	private counter: CounterHash = {};
 
-	public static countUp(key: string) {
+	public countUp(key: string) {
 		if (key in this.counter) {
 			this.counter[key]++;
 		} else {
@@ -17,7 +17,11 @@ export default class Counter {
 		}
 	}
 
-	public static getCounts(): CounterHash {
+	public getCount(key: string): number {
+		return (key in this.counter) ? this.counter[key] : 0;
+	}
+
+	public getCounts(): CounterHash {
 		return this.counter;
 	}
 }

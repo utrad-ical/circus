@@ -31,6 +31,12 @@ import RequestAccessTokenAction from'./controllers/RequestAccessTokenAction';
 var Router = require('router');
 
 class Server {
+	public counter: Counter;
+
+	constructor() {
+		this.counter = new Counter;
+	}
+
 	public start(): void {
 		// prepare routing
 		try {
@@ -40,7 +46,7 @@ class Server {
 			server.on('request', (req: http.ServerRequest, res: http.ServerResponse) => {
 				router(req, res, finalhandler(req, res, {
 					onerror: err => {
-						Counter.countUp('_error');
+						this.counter.countUp('_error');
 						logger.info(err.toString());
 					}
 				}));
@@ -105,6 +111,7 @@ class Server {
 			logger.info('Loading ' + route[1] + ' module...');
 			var module: typeof DicomServerModule = require('./controllers/' + route[1]).default;
 			var controller = new module(reader, imageEncoder);
+			controller.server = this;
 			router.get('/' + route[0], (req, res) => {
 				if (route[2] && config.authorization.require) {
 					if (!authorizationCache.isValid(req)) {
@@ -117,7 +124,7 @@ class Server {
 					}
 				}
 
-				Counter.countUp(route[0]);
+				this.counter.countUp(route[0]);
 				controller.execute(req, res);
 			});
 			// CrossOrigin Resource Sharing http://www.w3.org/TR/cors/
@@ -136,7 +143,7 @@ class Server {
 			controller.setCache(authorizationCache);
 
 			router.get('/requestToken', (req, res) => {
-				Counter.countUp('requestToken');
+				this.counter.countUp('requestToken');
 				var ip = req.ip || req.connection.remoteAddress || req.socket.remoteAddress || req.connection.socket.remoteAddress;
 				logger.info(ip);
 				if (!ip.match(config.authorization.allowFrom)) {

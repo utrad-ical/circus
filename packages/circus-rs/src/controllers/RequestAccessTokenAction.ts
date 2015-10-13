@@ -14,10 +14,11 @@ import logger from '../Logger';
 import { ValidatorRules } from '../Validator';
 
 export default class RequestAccessTokenAction extends Controller {
-	private cache: AuthorizationCache;
+	public cache: AuthorizationCache;
+	public allowFrom: string;
 
-	public setCache(cache: AuthorizationCache): void {
-		this.cache = cache;
+	protected needsTokenAuthorization(): boolean {
+		return false;
 	}
 
 	protected getRules(): ValidatorRules {
@@ -26,16 +27,29 @@ export default class RequestAccessTokenAction extends Controller {
 		};
 	}
 
-	public process(query: any, res: http.ServerResponse): void {
+	public execute(req: http.ServerRequest, res: http.ServerResponse): void {
+		var ip = req.connection.remoteAddress;
+		// logger.info(ip);
+		if (!ip.match(this.allowFrom)) {
+			logger.info('401 error');
+			res.writeHead(401, http.STATUS_CODES[401]);
+			res.write(http.STATUS_CODES[401]);
+			res.end();
+			return;
+		}
+		super.execute(req, res);
+	}
+
+	protected process(query: any, res: http.ServerResponse): void {
 		var series: string = query['series'];
 
-		crypt.randomBytes(48, (ex, buf)=> {
+		crypt.randomBytes(48, (err, buf)=> {
 			var status = {};
 
-			if (ex) {
-				status = {
-					'result': 'ng'
-				};
+			if (err) {
+				this.respondInternalServerError(
+					res, 'Internal server error while genarating token'
+				);
 			} else {
 				var token: string = buf.toString('hex');
 				this.cache.update(series, token);
@@ -43,8 +57,8 @@ export default class RequestAccessTokenAction extends Controller {
 					'result': 'ok',
 					'token': token
 				};
+				this.respondJson(res, status);
 			}
-			this.respondJson(res, status);
 		});
 
 	}

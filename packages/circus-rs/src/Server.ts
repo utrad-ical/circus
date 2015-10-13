@@ -2,8 +2,6 @@
  * Main server class.
  */
 
-export = Server;
-
 import http = require('http');
 var finalhandler = require('finalhandler');
 
@@ -22,11 +20,10 @@ import RawData from './RawData';
 import AsyncLruCache from './AsyncLruCache';
 
 import DicomDumper from './DicomDumper';
-import DicomServerModule from './controllers/Controller';
 import PathResolver from './path-resolver/PathResolver';
 import AuthorizationCache from './AuthorizationCache';
-
-import RequestAccessTokenAction from'./controllers/RequestAccessTokenAction';
+import TokenAuthenticationBridge from './controllers/TokenAuthenticationBridge';
+import Controller from './controllers/Controller';
 
 var Router = require('router');
 
@@ -100,61 +97,46 @@ class Server {
 		var reader = this.createDicomReader();
 		var authorizationCache = new AuthorizationCache(config.authorization);
 
-		// path name, process class name, need authorization
-		var routes: [string, string, boolean][] = [
-			['metadata', 'Metadata', true],
-			['mpr', 'MPRAction', true],
-			['status', 'ServerStatus', false],
-			['oblique', 'ObliqueAction', true]
+		// path name, process class name, needs token authorization, additionl depts to inject
+		var routes: [string, string, boolean, any][] = [
+			['metadata', 'Metadata', true, {}],
+			['mpr', 'MPRAction', true, {}],
+			['oblique', 'ObliqueAction', true, {}],
+			['status', 'ServerStatus', false, { counter: this.counter }],
 		];
-		routes.forEach(route => {
-			logger.info('Loading ' + route[1] + ' module...');
-			var module: typeof DicomServerModule = require('./controllers/' + route[1]).default;
-			var controller = new module(reader, imageEncoder);
-			controller.server = this;
-			router.get('/' + route[0], (req, res) => {
-				if (route[2] && config.authorization.require) {
-					if (!authorizationCache.isValid(req)) {
-						logger.info('401 error');
-						res.setHeader('WWW-Authenticate', 'Bearer realm="CircusRS"');
-						res.writeHead(401, http.STATUS_CODES[401]);
-						res.write('Access denied.');
-						res.end();
-						return;
-					}
-				}
 
-				this.counter.countUp(route[0]);
+		if (config.authorization.require) {
+			routes.push([
+				'requestToken', 'RequestAccessTokenAction', false,
+				{ cache: authorizationCache, allowFrom: config.authorization.allowFrom }
+			]);
+		}
+
+		routes.forEach(route => {
+			var [ routeName, moduleName, needsAuth, deps ] = route;
+			logger.info(`Loading ${moduleName} module...`);
+			var module: typeof Controller = require(`./controllers/${moduleName}`).default;
+			var controller = new module(reader, imageEncoder);
+			for (let k in deps) controller[k] = deps[k];
+
+			// If token authorization is required, use this middleware
+			if (config.authorization.require && needsAuth) {
+				controller = new TokenAuthenticationBridge(
+					controller, authorizationCache, reader, imageEncoder);
+			}
+
+			router.get('/' + routeName, (req, res) => {
+				this.counter.countUp(routeName);
 				controller.execute(req, res);
 			});
 			// CrossOrigin Resource Sharing http://www.w3.org/TR/cors/
-			router.options('/' + route[0], (req, res) => {
-				res.setHeader('Access-Control-Allow-Origin', '*');
-				res.setHeader('Access-Control-Allow-Methods', 'GET');
-				res.setHeader('Access-Control-Allow-Headers', 'Authorization');
-				res.writeHead(200);
-				res.end();
+			router.options('/' + routeName, (req, res) => {
+				controller.options(req, res);
 			});
 		});
 
-		if (config.authorization.require) {
-			logger.info('Loading RequestAccessTokenAction module');
-			var controller: RequestAccessTokenAction = new RequestAccessTokenAction(reader, imageEncoder);
-			controller.setCache(authorizationCache);
-
-			router.get('/requestToken', (req, res) => {
-				this.counter.countUp('requestToken');
-				var ip = req.ip || req.connection.remoteAddress || req.socket.remoteAddress || req.connection.socket.remoteAddress;
-				logger.info(ip);
-				if (!ip.match(config.authorization.allowFrom)) {
-					logger.info('401 error');
-					res.writeHead(401, 'access not allowed.');
-					res.end();
-					return;
-				}
-				controller.execute(req, res);
-			});
-		}
 		return router;
 	}
 }
+
+export = Server;

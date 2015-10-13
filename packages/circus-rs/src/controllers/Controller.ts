@@ -9,13 +9,11 @@ import logger from '../Logger';
 import AsyncLruCache from '../AsyncLruCache';
 import RawData from '../RawData';
 import { Validator, ValidatorRules } from '../Validator';
-import Server from '../Server';
 
 export default class Controller {
 
 	protected reader: AsyncLruCache<RawData>;
 	protected imageEncoder: ImageEncoder;
-	public server: Server;
 
 	constructor(reader: AsyncLruCache<RawData>, imageEncoder: ImageEncoder) {
 		this.reader = reader;
@@ -37,6 +35,15 @@ export default class Controller {
 		} else {
 			this.process(result, res);
 		}
+	}
+
+	public options(req: http.ServerRequest, res: http.ServerResponse): void
+	{
+		res.setHeader('Access-Control-Allow-Origin', '*');
+		res.setHeader('Access-Control-Allow-Methods', 'GET');
+		res.setHeader('Access-Control-Allow-Headers', 'Authorization');
+		res.writeHead(200);
+		res.end();
 	}
 
 	protected process(query: any, res: http.ServerResponse): void
@@ -83,7 +90,7 @@ export default class Controller {
 	protected respondError(status: number, res: http.ServerResponse, message: string): void
 	{
 		logger.warn(message);
-		var err = { message: message };
+		var err = { result: 'ng', message: message };
 		this.respondJsonWithStatus(status, res, err);
 	}
 

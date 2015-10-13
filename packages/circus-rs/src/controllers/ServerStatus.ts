@@ -11,6 +11,12 @@ var startUpTime: Date = new Date(); // The time this module was loaded
 
 export default class ServerStatus extends Controller {
 
+	public counter: Counter;
+
+	protected needsTokenAutorhization(): boolean {
+		return false;
+	}
+
 	public process(query: http.ServerRequest, res: http.ServerResponse): void
 	{
 		var status = {
@@ -24,7 +30,7 @@ export default class ServerStatus extends Controller {
 				upTime: process.uptime(),
 				upSince: startUpTime.toISOString()
 			},
-			counter: this.server.counter.getCounts(),
+			counter: this.counter.getCounts(),
 			authorization: { enabled: !!config.authorization.require }
 		};
 		this.respondJson(res, status);

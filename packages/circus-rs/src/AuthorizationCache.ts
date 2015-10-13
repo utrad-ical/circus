@@ -1,7 +1,3 @@
-/**
- * Created by nfujita on 2015/07/28.
- */
-
 import http = require('http');
 var url = require('url');
 import logger from './Logger';

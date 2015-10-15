@@ -22,8 +22,9 @@ export default class MockDicomDumper extends DicomDumper {
 		raw.appendHeader({
 			Dummy: 'Header'
 		});
-		raw.setDimension(512, 512, 128, PixelFormat.Int16);
-		for (var z = 0; z < 128; z++) {
+		var d = ('d' in this.config) ? this.config.d : 128;
+		raw.setDimension(512, 512, d, PixelFormat.Int16);
+		for (var z = 0; z < d; z++) {
 			var sliceData = new Buffer(512 * 512 * 2);
 			for (var x = 0; x < 512; x++) {
 				for (var y = 0; y < 512; y++) {

@@ -1,6 +1,6 @@
 import Controller from './Controller';
 import http = require('http');
-import ImageEncoder from '../image-encoder/ImageEncoder';
+import ImageEncoder from '../image-encoders/ImageEncoder';
 import AsyncLruCache from '../AsyncLruCache';
 import RawData from '../RawData';
 import AuthorizationCache from '../AuthorizationCache';

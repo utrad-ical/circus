@@ -3,7 +3,7 @@
  */
 var url = require('url');
 import stream = require('stream');
-import ImageEncoder from '../image-encoder/ImageEncoder';
+import ImageEncoder from '../image-encoders/ImageEncoder';
 import http = require('http');
 import logger from '../Logger';
 import AsyncLruCache from '../AsyncLruCache';

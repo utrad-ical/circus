@@ -6,10 +6,10 @@ import child_process = require('child_process');
 var exec = child_process.exec;
 import fs = require('fs');
 
-import logger from './Logger';
+import logger from '../Logger';
 
 import DicomDumper from './DicomDumper';
-import RawData from './RawData';
+import RawData from '../RawData';
 import Promise = require('bluebird');
 
 const GLOBAL_HEADER = -1;

@@ -2,7 +2,7 @@
  * DICOM Dumper interface
  */
 
-import RawData from './RawData';
+import RawData from '../RawData';
 import Promise = require('bluebird');
 
 export default class DicomDumper {

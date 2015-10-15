@@ -2,7 +2,7 @@
  * DICOM series image data class.
  */
 
-const enum PixelFormat {
+export const enum PixelFormat {
 	Unknown = -1,
 	UInt8 = 0,
 	Int8 = 1,

@@ -12,13 +12,13 @@ import log4js = require('log4js');
 import Promise = require('bluebird');
 
 import Counter from './Counter';
-import ImageEncoder from './image-encoder/ImageEncoder';
+import ImageEncoder from './image-encoders/ImageEncoder';
 
 import RawData from './RawData';
 import AsyncLruCache from './AsyncLruCache';
 
-import DicomDumper from './DicomDumper';
-import PathResolver from './path-resolver/PathResolver';
+import DicomDumper from './dicom-dumpers/DicomDumper';
+import PathResolver from './path-resolvers/PathResolver';
 import AuthorizationCache from './AuthorizationCache';
 import TokenAuthenticationBridge from './controllers/TokenAuthenticationBridge';
 import Controller from './controllers/Controller';
@@ -86,11 +86,11 @@ class Server {
 	private createDicomReader(): AsyncLruCache<RawData> {
 		var module: string = this.config.pathResolver.module;
 		logger.info('Using path resolver: ' + module);
-		var resolverClass: typeof PathResolver = require('./path-resolver/' + module).default;
+		var resolverClass: typeof PathResolver = require('./path-resolvers/' + module).default;
 		var resolver = new resolverClass(this.config.pathResolver.options);
 		module = this.config.dumper.module;
 		logger.info('Using DICOM dumper: ' + module);
-		var dumperClass: typeof DicomDumper = require('./' + module).default;
+		var dumperClass: typeof DicomDumper = require('./dicom-dumpers/' + module).default;
 		var dumper = new dumperClass(this.config.dumper.options);
 		return new AsyncLruCache<RawData>(
 			seriesUID => {
@@ -108,7 +108,7 @@ class Server {
 	private createImageEncoder(): ImageEncoder {
 		var module: string = this.config.imageEncoder.module;
 		logger.info('Using Image Encoder: ' + module);
-		var imageEncoder: typeof ImageEncoder = require('./image-encoder/' + module).default;
+		var imageEncoder: typeof ImageEncoder = require('./image-encoders/' + module).default;
 		return new imageEncoder(this.config.imageEncoder.options);
 	}
 

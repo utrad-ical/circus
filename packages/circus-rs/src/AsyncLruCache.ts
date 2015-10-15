@@ -28,6 +28,7 @@ type LoaderFunc<T> = (key: string) => Promise<T>;
  * that will resolve with the corresponding loaded item.
  */
 export default class AsyncLruCache<T> {
+	private timer: any = null;
 	private lru: LruEntry<T>[] = [];
 	private pendings: {[key: string]: [Function, Function][]} = {};
 	private memoryUsage: number;
@@ -51,8 +52,16 @@ export default class AsyncLruCache<T> {
 			}
 		}
 		if (this.options.maxLife > 0) {
-			setInterval(() => this.checkTtl(), 1000);
+			this.timer = setInterval(() => this.checkTtl(), 1000);
 		}
+	}
+
+	/**
+	 * Stops the internal timer.
+	 */
+	public dispose(): void
+	{
+		if (this.timer) clearInterval(this.timer);
 	}
 
 	/**

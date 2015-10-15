@@ -2,5 +2,7 @@
  * CIRCUS RS
  */
 
+var config = require('config');
+
 var Server = require('./build/Server');
-(new Server()).start();
+(new Server(config)).start();

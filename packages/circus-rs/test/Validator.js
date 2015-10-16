@@ -20,7 +20,7 @@ describe('Validator', function() {
 
 	it('must process callback rule', function() {
 		var v = new Validator({
-			fruit: ['Fruit', null, t => /a/.test(t), null]
+			fruit: ['Fruit', null, function(t) { return /a/.test(t); }, null]
 		});
 		assert.equal(v.validate({fruit: 'apple'}).result.fruit, 'apple');
 		assert.isNull(v.validate({fruit: 'melon'}).result);
@@ -35,7 +35,7 @@ describe('Validator', function() {
 
 	it('must return default value only if key is not set', function() {
 		var v = new Validator({
-			fruit: ['Fruit', 'orange', t => true, null]
+			fruit: ['Fruit', 'orange', function() { return  true; }, null]
 		});
 		assert.strictEqual(v.validate({fruit: 'apple'}).result.fruit, 'apple');
 		assert.strictEqual(v.validate({fruit: ''}).result.fruit, '');
@@ -49,7 +49,7 @@ describe('Validator', function() {
 		});
 		assert.equal(v.validate({fruit: ' 2 >= 1\t'}).result.fruit, '2 &gt;= 1');
 		var v = new Validator({
-			fruit: ['Fruit', null, null, s => s.toUpperCase()]
+			fruit: ['Fruit', null, null, function(s) { return s.toUpperCase(); }]
 		});
 		assert.equal(v.validate({fruit: 'apple'}).result.fruit, 'APPLE');
 	});

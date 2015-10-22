@@ -1,6 +1,11 @@
 /**
- * DICOM series image data class.
+ * Raw voxel container with MPR support.
  */
+
+// Make sure you don't add properties
+// that heavily depends on DICOM spec.
+
+import { MultiRange } from 'multi-integer-range';
 
 export const enum PixelFormat {
 	Unknown = -1,
@@ -10,141 +15,129 @@ export const enum PixelFormat {
 	Int16 = 3
 }
 
+export type Vector3D = [number, number, number];
+
+interface ObliqueResult {
+	buffer: Buffer;
+	outWidth:  number;
+	outHeight: number;
+	pixelSize: number;
+	centerX: number;
+	centerY: number;
+}
+
 export default class RawData {
 	// Number of voxels
-	public x: number = 0;
-	public y: number = 0;
-	public z: number = 0;
+	protected x: number = 0;
+	protected y: number = 0;
+	protected z: number = 0;
 
-	public type: PixelFormat = PixelFormat.Unknown;
+	// Pixel format
+	protected type: PixelFormat = PixelFormat.Unknown;
 
 	// Voxel size [mm]
-	public vx: number = 1;
-	public vy: number = 1;
-	public vz: number = 1;
+	protected vx: number = 1;
+	protected vy: number = 1;
+	protected vz: number = 1;
 
-	// Estimated window, calculated from the actual voxel data
-	public wl: number = 1500;
-	public ww: number = 2000;
-
-	// Default window, described in DICOM file
-	public dcm_wl: number;
-	public dcm_ww: number;
-
-	// Holds DICOM header data
-	protected header: any = {};
+	// Byte per voxel [byte/voxel]
+	protected bpp: number = 1;
 
 	// Actual image data
-	protected data: Buffer[];
-	protected dataFlag: boolean[];
+	protected data: Buffer;
+
+	// Holds which images are alrady loaded in this volume.
+	// When complete, this.loadedSlices.length() will be the same as this.z.
+	protected loadedSlices: MultiRange = new MultiRange();
+
+	// Voxel read function (maps to one of data.readIntXX functions)
+	protected read: (pos: number) => number;
 
 	/**
-	 * get pixel value
-	 *
-	 * z: series image number(0 based)
-	 * offset: pixel position (y * width + x)
+	 * Get pixel value. Each parameter must be an integer.
+	 * @param x integer x-coordinate
+	 * @param y integer y-coordinate
+	 * @param z integer z-coordinate
+	 * @returns Corresponding voxel value.
 	 */
-	public getPixel(z: number, offset: number): number {
-		if (!this.dataFlag[z]) {
-			return 0;
-		}
-
-		switch (this.type) {
-			case PixelFormat.UInt8:
-				return this.data[z].readUInt8(offset);
-			case PixelFormat.Int8:
-				return this.data[z].readInt8(offset);
-			case PixelFormat.UInt16:
-				return this.data[z].readUInt16LE(offset * 2);
-			case PixelFormat.Int16:
-				return this.data[z].readInt16LE(offset * 2);
-			default:
-				return this.data[z].readInt16LE(offset * 2);
-		}
+	public getPixelAt(x: number, y: number, z: number): number {
+		return this.read(x + y * this.x + z * this.x * this.y);
 	}
 
 	/**
-	 * get pixel value using bilinear interpolation (from axial axis)
-	 *
-	 * z: series image number(0 based)
-	 * offset: pixel position (y * width + x)
+	 * Get pixel value using bilinear interpolation.
+	 * @param x floating point x-coordinate
+	 * @param y floating point y-coordinate
+	 * @param z floating point z-coordinate
+	 * @returns Corresponding voxel value.
 	 */
-	public getPixelFromAxialWithInterpolation(x: number, y: number, z: number): number {
-
-		var ix = Math.floor(x);
-		var iy = Math.floor(y);
-		var iz = Math.floor(z);
+	public getPixelWithInterpolation(x: number, y: number, z: number): number
+	{
 		var x_end = this.x - 1;
 		var y_end = this.y - 1;
-
-		if (ix >= x_end) {
-			ix = x_end - 1;  x = x_end;
-		}
-
-		if (iy >= y_end) {
-			iy = y_end - 1;  y = y_end;
-		}
-
-		var ixp1 = ix + 1;
-		var iyp1 = iy + 1;
-
-		if (!this.dataFlag[iz]) {
-			console.log("error");
+		var z_end = this.z - 1;
+		if (x < 0.0 || y < 0.0 || z < 0.0 || x > x_end || y > y_end || z > z_end) {
 			return 0;
 		}
 
-		var buf = this.data[iz];
-		var p0 = 0;
-		var p1 = 0;
-		var p2 = 0;
-		var p3 = 0;
+		var iz = Math.floor(z);
+		if (iz >= z_end) {
+			iz = z_end - 1;
+			z = z_end;
+		}
+		var ix = Math.floor(x);
+		if (ix >= x_end) {
+			ix = x_end - 1;
+			x = x_end;
+		}
+		var iy = Math.floor(y);
+		if (iy >= y_end) {
+			iy = y_end - 1;
+			y = y_end;
+		}
+
+		var value_z1 = this.getAxialInterpolation(ix, x, iy, y, iz);
+		var value_z2 = this.getAxialInterpolation(ix, x, iy, y, iz + 1);
+		var weight_z2 = z - iz;
+		var weight_z1 = 1.0 - weight_z2;
+		return value_z1 * weight_z1 + value_z2 * weight_z2;
+	}
+
+	protected getAxialInterpolation(ix: number, x: number, iy: number, y: number, intz: number): number {
+		var ixp1 = ix + 1;
+		var iyp1 = iy + 1;
+
+		// p0 p1
+		// p2 p3
+		var offset = this.x * this.y * intz;
+		var p0 = this.read(offset + ix   + iy   * this.x);
+		var p1 = this.read(offset + ixp1 + iy   * this.x);
+		var p2 = this.read(offset + ix   + iyp1 * this.x);
+		var p3 = this.read(offset + ixp1 + iyp1 * this.x);
+
 		var weight_x2 = x - ix;
 		var weight_x1 = 1.0 - weight_x2;
 		var weight_y2 = y - iy;
 		var weight_y1 = 1.0 - weight_y2;
-
-		switch (this.type) {
-			case PixelFormat.UInt8:
-				p0 = buf.readUInt8(ix   + iy   * this.x);
-				p1 = buf.readUInt8(ixp1 + iy   * this.x);
-				p2 = buf.readUInt8(ix   + iyp1 * this.x);
-				p3 = buf.readUInt8(ixp1 + iyp1 * this.x);
-				break;
-			case PixelFormat.Int8:
-				p0 = buf.readInt8(ix   + iy   * this.x);
-				p1 = buf.readInt8(ixp1 + iy   * this.x);
-				p2 = buf.readInt8(ix   + iyp1 * this.x);
-				p3 = buf.readInt8(ixp1 + iyp1 * this.x);
-				break;
-			case PixelFormat.UInt16:
-				p0 = buf.readUInt16LE((ix   + iy   * this.x) * 2);
-				p1 = buf.readUInt16LE((ixp1 + iy   * this.x) * 2);
-				p2 = buf.readUInt16LE((ix   + iyp1 * this.x) * 2);
-				p3 = buf.readUInt16LE((ixp1 + iyp1 * this.x) * 2);
-				break;
-			case PixelFormat.Int16:
-			default:
-				p0 = buf.readInt16LE((ix   + iy   * this.x) * 2);
-				p1 = buf.readInt16LE((ixp1 + iy   * this.x) * 2);
-				p2 = buf.readInt16LE((ix   + iyp1 * this.x) * 2);
-				p3 = buf.readInt16LE((ixp1 + iyp1 * this.x) * 2);
-				break;
-		}
-
 		var value_y1 = p0 * weight_x1 + p1 * weight_x2;
 		var value_y2 = p2 * weight_x1 + p3 * weight_x2;
 		return (value_y1 * weight_y1 + value_y2 * weight_y2);
 	}
 
-	public appendHeader(header: any): void {
-		for (var key in header) {
-			this.header[key] = header[key];
-		}
-	}
-
 	public insertSingleImage(z: number, imageData: Buffer): void {
-		this.data[z] = imageData;
-		this.dataFlag[z] = true;
+		if (this.x <= 0 || this.y <= 0 || this.z <= 0) {
+			throw new Error('Dimension not set');
+		}
+		if (z < 0 || z >= this.z) {
+			throw new RangeError('z-index out of bounds');
+		}
+		if (this.x * this.y > imageData.length) {
+			throw new Error('Not enough buffer length');
+		}
+		var len = this.x * this.y * this.bpp;
+		var offset = len * z;
+		imageData.copy(this.data, offset, 0, len);
+		this.loadedSlices.append(z);
 	}
 
 	/**
@@ -154,12 +147,45 @@ export default class RawData {
 		if (x <= 0 || y <= 0 || z <= 0) {
 			throw new Error('Invalid volume size.');
 		}
+		if (this.x > 0 || this.y > 0 || this.z > 0) {
+			throw new Error('Dimension already fixed.');
+		}
+		if (x * y * z > 1024 * 1024 * 1024) {
+			throw new Error('Maximum voxel limit exceeded');
+		}
 		this.x = x;
 		this.y = y;
 		this.z = z;
 		this.type = type;
-		this.data = new Array(z);
-		this.dataFlag = new Array(z);
+		switch (type) {
+			case PixelFormat.UInt8:
+				this.bpp = 1;
+				this.read = pos => this.data.readUInt8(pos);
+				break;
+			case PixelFormat.Int8:
+				this.bpp = 1;
+				this.read = pos => this.data.readInt8(pos);
+				break;
+			case PixelFormat.UInt16:
+				this.bpp = 2;
+				this.read = pos => this.data.readUInt16LE(pos * 2);
+				break;
+			case PixelFormat.Int16:
+				this.bpp = 2;
+				this.read = pos => this.data.readInt16LE(pos * 2);
+				break;
+			default:
+				throw new RangeError('Invalid pixel format');
+		}
+		this.data = new Buffer(x * y * z * this.bpp);
+	}
+
+	public getDimension(): Vector3D {
+		return [this.x, this.y, this.z];
+	}
+
+	public getPixelFormat(): PixelFormat {
+		return this.type;
 	}
 
 	/**
@@ -171,38 +197,240 @@ export default class RawData {
 		this.vz = depth;
 	}
 
-	public setEstimatedWindow(level: number, width: number): void {
-		this.wl = level;
-		this.ww = width;
-	}
-
-	public containImage(image: string): boolean {
-		if (image == 'all') {
-			for (var index = 0; index < this.dataFlag.length; index++) {
-				if (!this.dataFlag[index]) {
-					return false;
-				}
-			}
-		} else {
-			var ar = image.split(',').map(parseInt);
-
-			var count = 0;
-			var index = ar[0];
-			while (count < ar[2]) {
-				if (!this.dataFlag[index - 1]) {
-					return false;
-				}
-				index += ar[1];
-				count++;
-			}
-		}
-		return true;
+	public getVoxelDimension(): Vector3D {
+		return [this.vx, this.vy, this.vz];
 	}
 
 	public get dataSize(): number {
-		var bpp = (this.type == PixelFormat.Int8 || this.type == PixelFormat.UInt8) ? 1 : 2;
-		return this.x * this.y * this.z * bpp;
+		return this.x * this.y * this.z * this.bpp;
 	}
 
-}
+	/**
+	 * Applies window level/width
+	 */
+	protected applyWindow(width: number, level: number, pixel: number): number {
+		var value = Math.round((pixel - level + width / 2) * (255 / width));
+		if (value > 255) {
+			value = 255;
+		} else if (value < 0) {
+			value = 0;
+		}
+		return value;
+	}
 
+	/**
+	 * Creates an orthogonal MPR image on a new buffer.
+	 */
+	public orthogonalMpr(axis: string,
+		target: number, windowWidth: number, windowLevel: number):
+			{ buffer: Buffer; outWidth: number; outHeight: number }
+	{
+		var buffer: Buffer;
+		var buffer_offset = 0;
+		var [rx, ry, rz] = [this.x, this.y, this.z];
+
+		var writeAt = (x, y, z) => {
+			buffer.writeUInt8(
+				this.applyWindow(windowWidth, windowLevel, this.getPixelAt(x, y, z)),
+				buffer_offset++
+			);
+		};
+
+		var checkZranges = () => {
+			if (this.loadedSlices.length() !== this.z)
+				throw new ReferenceError('Volume is not fully loaded to construct this MPR');
+		}
+
+		switch (axis) {
+			case 'sagittal':
+				checkZranges();
+				buffer = new Buffer(ry * rz);
+				for (let z = 0; z < rz; z++)
+					for (let y = 0; y < ry; y++)
+						writeAt(target, y, z);
+				return { buffer, outWidth: ry, outHeight: rz };
+			case 'coronal':
+				checkZranges();
+				buffer = new Buffer(rx * rz);
+				for (let z = 0; z < rz; z++)
+					for (let x = 0; x < rx; x++)
+						writeAt(x, target, z);
+				return { buffer, outWidth: rx, outHeight: rz };
+			case 'axial':
+			default:
+				buffer = new Buffer(rx * ry);
+				for (let y = 0; y < ry; y++)
+					for (let x = 0; x < rx; x++)
+						writeAt(x, y, target);
+				return { buffer, outWidth: rx, outHeight: ry };
+		}
+	}
+
+	public singleOblique(base_axis: string, center: Vector3D, alpha: number,
+			windowWidth: number, windowLevel: number): ObliqueResult
+	{
+		var eu_x: number = 0.0;
+		var eu_y: number = 0.0;
+		var eu_z: number = 0.0;
+		var ev_x: number = 0.0;
+		var ev_y: number = 0.0;
+		var ev_z: number = 0.0;
+		var [rx, ry, rz] = [this.x, this.y, this.z];
+		var origin_x: number = 0;
+		var origin_y: number = 0;
+		var origin_z: number = 0;
+
+		var outWidth: number = 0;
+		var outHeight: number = 0;
+		var pixel_size: number = Math.min(this.vx, Math.min(this.vy, this.vz));
+		var center_x = 0;
+		var center_y = 0;
+
+		// Set parameters
+		if (base_axis === 'axial') {
+			eu_x = Math.cos(alpha) * pixel_size / this.vx;
+			eu_y = -1.0 * Math.sin(alpha) * pixel_size / this.vy;
+			ev_z = pixel_size / this.vz;
+
+			var px = center[0];
+			var py = center[1];
+			var minus_cnt = 0;
+			var plus_cnt = 0;
+
+			while (1) {
+				px -= eu_x;
+				py -= eu_y;
+				if (px < 0.0 || py < 0.0 || px > rx - 1 || py > ry - 1)  break;
+				minus_cnt++;
+			}
+
+			origin_x = px;
+			origin_y = py;
+			center_x = minus_cnt;
+			center_y = Math.floor(center[2] * this.vz / pixel_size);
+			px = center[0];
+			py = center[1];
+
+			while (1) {
+				px += eu_x;
+				py += eu_y;
+				if (px < 0.0 || py < 0.0 || px > rx - 1 || py > ry - 1)  break;
+				plus_cnt++;
+			}
+
+			outWidth = minus_cnt + plus_cnt + 1;
+			outHeight = Math.floor(rz * this.vz / pixel_size);
+
+		} else if (base_axis === 'coronal') {
+			eu_x = Math.cos(alpha) * pixel_size / this.vx;
+			eu_z = -1.0 * Math.sin(alpha) * pixel_size / this.vz;
+			ev_y = pixel_size / this.vy;
+
+			var px = center[0];
+			var py = center[2];
+			var minus_cnt = 0;
+			var plus_cnt = 0;
+
+			while (1) {
+				px -= eu_x;
+				py -= eu_z;
+				if (px < 0.0 || py < 0.0 || px > rx - 1 || py > rz - 1)  break;
+				minus_cnt++;
+			}
+
+			origin_x = px;
+			origin_z = py;
+			center_x = minus_cnt;
+			center_y = Math.floor(center[1] * this.vy / pixel_size);
+			px = center[0];
+			py = center[2];
+
+			while (1) {
+				px += eu_x;
+				py += eu_z;
+				if (px < 0.0 || py < 0.0 || px > rx - 1 || py > rz - 1)  break;
+				plus_cnt++;
+			}
+
+			outWidth = minus_cnt + plus_cnt + 1;
+			outHeight = Math.floor(ry * this.vy / pixel_size);
+
+		} else if (base_axis === 'sagittal') {
+			eu_x = pixel_size / this.vx;
+			ev_y = Math.cos(alpha) * pixel_size / this.vy;
+			ev_z = -1.0 * Math.sin(alpha) * pixel_size / this.vz;
+
+			var px = center[1];
+			var py = center[2];
+			var minus_cnt = 0;
+			var plus_cnt = 0;
+
+			while (1) {
+				px -= ev_y;
+				py -= ev_z;
+				if (px < 0.0 || py < 0.0 || px > ry - 1 || py > rz - 1)  break;
+				minus_cnt++;
+			}
+
+			origin_y = px;
+			origin_z = py;
+			center_x = Math.floor(center[0] * this.vx / pixel_size);
+			center_y = minus_cnt;
+			px = center[1];
+			py = center[2];
+
+			while (1) {
+				px += ev_y;
+				py += ev_z;
+				if (px < 0.0 || py < 0.0 || px > rx - 1 || py > rz - 1)  break;
+				plus_cnt++;
+			}
+
+			outWidth = Math.floor(rx * this.vx / pixel_size);
+			outHeight = minus_cnt + plus_cnt + 1;
+
+		} else {
+			return null;
+		}
+
+		// Create oblique image
+		var x = origin_x;
+		var y = origin_y;
+		var z = origin_z;
+
+		var buffer = new Buffer(outWidth * outHeight);
+		var buffer_offset = 0;
+
+		for (var j = 0; j < outHeight; j++) {
+			let pos_x = x;
+			let pos_y = y;
+			let pos_z = z;
+
+			for (var i = 0; i < outWidth; i++) {
+
+				let value = 0;
+
+				if (pos_x >= 0.0 && pos_y >= 0.0 && pos_z >= 0.0
+					&& pos_x <= rx - 1 && pos_y <= ry - 1 && pos_z <= rz - 1) {
+					value = this.applyWindow(
+						windowWidth, windowLevel,
+						this.getPixelWithInterpolation(pos_x, pos_y, pos_z)
+					);
+				}
+
+				buffer.writeUInt8(value, buffer_offset++);
+
+				pos_x += eu_x;
+				pos_y += eu_y;
+				pos_z += eu_z;
+			}
+			x += ev_x;
+			y += ev_y;
+			z += ev_z;
+		}
+
+		return {buffer, outWidth, outHeight,
+			pixelSize: pixel_size,
+			centerX: center_x, centerY: center_y};
+	}
+}

@@ -10,6 +10,7 @@ import logger from '../Logger';
 
 import DicomDumper from './DicomDumper';
 import RawData from '../RawData';
+import DicomVolume from './../DicomVolume';
 import Promise = require('bluebird');
 
 const GLOBAL_HEADER = -1;
@@ -17,8 +18,8 @@ const GLOBAL_FOOTER = -2;
 
 export default class DicomVoxelDumperAdapter extends DicomDumper {
 
-	public readDicom(dcmdir: string): Promise<RawData> {
-		return new Promise<RawData>((resolve, reject) => {
+	public readDicom(dcmdir: string): Promise<DicomVolume> {
+		return new Promise<DicomVolume>((resolve, reject) => {
 			this.readDicomDeferred(dcmdir, resolve, reject);
 		})
 	}
@@ -36,7 +37,7 @@ export default class DicomVoxelDumperAdapter extends DicomDumper {
 	/**
 	 * Buffer data: block data in dcm_voxel_dump combined format
 	 */
-	public addBlock(raw: RawData, jsonSize: number, binarySize: number, data: Buffer) {
+	public addBlock(volume: DicomVolume, jsonSize: number, binarySize: number, data: Buffer) {
 		var jsonData = data.toString('utf8', 0, jsonSize);
 
 		var json = JSON.parse(jsonData);
@@ -45,24 +46,24 @@ export default class DicomVoxelDumperAdapter extends DicomDumper {
 		//console.log('binary size=' + binarySize);
 
 		if (binarySize == GLOBAL_HEADER) {
-			raw.appendHeader(json);
-			raw.setDimension(json.width, json.height, json.depth, json.dataType);
+			volume.appendHeader(json);
+			volume.setDimension(json.width, json.height, json.depth, json.dataType);
 		} else if (binarySize == GLOBAL_FOOTER) {
-			raw.appendHeader(json);
-			raw.setVoxelDimension(json.voxelWidth, json.voxelHeight, json.voxelDepth);
-			raw.setEstimatedWindow(json.estimatedWindowLevel, json.estimatedWindowWidth);
+			volume.appendHeader(json);
+			volume.setVoxelDimension(json.voxelWidth, json.voxelHeight, json.voxelDepth);
+			volume.setEstimatedWindow(json.estimatedWindowLevel, json.estimatedWindowWidth);
 		} else if (binarySize > 0) {
 			//console.log('image block: ' + json.instanceNumber + ' size:' + binarySize + ' raw:' + data.length);
 			if (json.success) {
 				var voxelData = new Buffer(binarySize);
 				data.copy(voxelData, 0, jsonSize);
-				raw.insertSingleImage(json.instanceNumber - 1, voxelData);
+				volume.insertSingleImage(json.instanceNumber - 1, voxelData);
 
-				if (typeof json.windowLevel != "undefined" && raw.dcm_wl == null) {
-					raw.dcm_wl = json.windowLevel;
+				if (typeof json.windowLevel != "undefined" && volume.dcm_wl == null) {
+					volume.dcm_wl = json.windowLevel;
 				}
-				if (typeof json.windowWidth != "undefined" && raw.dcm_ww == null) {
-					raw.dcm_ww = json.windowWidth;
+				if (typeof json.windowWidth != "undefined" && volume.dcm_ww == null) {
+					volume.dcm_ww = json.windowWidth;
 				}
 			} else {
 				logger.warn(json.errorMessage);
@@ -75,7 +76,7 @@ export default class DicomVoxelDumperAdapter extends DicomDumper {
 
 
 	private readDicomDeferred(dcmdir: string, resolve, reject) {
-		var rawData = new RawData();
+		var volume = new DicomVolume();
 
 		var jsonLength = 0;
 		var binaryLength = 0;
@@ -146,7 +147,7 @@ export default class DicomVoxelDumperAdapter extends DicomDumper {
 
 					//console.log('block read. size=' + blockDataOffset + '/' + blockDataSize);
 
-					this.addBlock(rawData, jsonLength, binaryLength, blockData);
+					this.addBlock(volume, jsonLength, binaryLength, blockData);
 
 					headerBuffer = new Buffer(HEADER_LENGTH);
 					headerBufferOffset = 0;
@@ -158,14 +159,14 @@ export default class DicomVoxelDumperAdapter extends DicomDumper {
 					blockDataOffset = 0;
 				}
 			} catch (e) {
-				rawData = null;
+				volume = null;
 				reject(e);
 			}
 		});
 
 		proc.stdout.on('end', () => {
-			if (rawData !== null && rawData.x > 0 && rawData.y > 0 && rawData.z > 0) {
-				resolve(rawData);
+			if (volume !== null && volume.getDimension()[2] > 0) {
+				resolve(volume);
 			} else {
 				reject('Could not read image data');
 			}

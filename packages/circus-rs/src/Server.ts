@@ -14,7 +14,7 @@ import Promise = require('bluebird');
 import Counter from './Counter';
 import ImageEncoder from './image-encoders/ImageEncoder';
 
-import RawData from './RawData';
+import DicomVolume from './DicomVolume';
 import AsyncLruCache from './AsyncLruCache';
 
 import DicomDumper from './dicom-dumpers/DicomDumper';
@@ -29,7 +29,7 @@ class Server {
 	public counter: Counter;
 	protected server: http.Server;
 	protected config: Configuration;
-	protected dicomReader: AsyncLruCache<RawData>;
+	protected dicomReader: AsyncLruCache<DicomVolume>;
 
 	constructor(config: Configuration) {
 		this.config = config;
@@ -83,7 +83,7 @@ class Server {
 		});
 	}
 
-	private createDicomReader(): AsyncLruCache<RawData> {
+	private createDicomReader(): AsyncLruCache<DicomVolume> {
 		var module: string = this.config.pathResolver.module;
 		logger.info('Using path resolver: ' + module);
 		var resolverClass: typeof PathResolver = require('./path-resolvers/' + module).default;
@@ -92,7 +92,7 @@ class Server {
 		logger.info('Using DICOM dumper: ' + module);
 		var dumperClass: typeof DicomDumper = require('./dicom-dumpers/' + module).default;
 		var dumper = new dumperClass(this.config.dumper.options);
-		return new AsyncLruCache<RawData>(
+		return new AsyncLruCache<DicomVolume>(
 			seriesUID => {
 				return resolver
 					.resolvePath(seriesUID)

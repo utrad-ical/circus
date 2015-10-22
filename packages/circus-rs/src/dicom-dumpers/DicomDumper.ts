@@ -2,7 +2,7 @@
  * DICOM Dumper interface
  */
 
-import RawData from '../RawData';
+import DicomVolume from '../DicomVolume';
 import Promise = require('bluebird');
 
 export default class DicomDumper {
@@ -24,7 +24,7 @@ export default class DicomDumper {
 	 * @param dcmdir path of DICOM series data directory.
 	 * @param config request specific parameter (if needed)
 	 */
-	public readDicom(dcmdir: string, config: any): Promise<RawData>
+	public readDicom(dcmdir: string, config: any): Promise<DicomVolume>
 	{
 		// abstract
 		return null;

@@ -2,9 +2,8 @@
  * MPR Image generator Action class
  */
 
-import RawData from '../RawData';
+import DicomVolume from '../DicomVolume';
 import VolumeBasedController from './VolumeBasedController';
-import MPR from '../MPR';
 import { ValidatorRules } from '../Validator';
 
 import http = require('http');
@@ -24,33 +23,15 @@ export default class MPRAction extends VolumeBasedController {
 		};
 	}
 
-	protected processVolume(query: any, raw: RawData, res: http.ServerResponse): void
+	protected processVolume(query: any, vol: DicomVolume, res: http.ServerResponse): void
 	{
 		var {ww, wl, target, mode} = query;
-		var buffer;
-		var out_width;
-		var out_height;
 
-		if (ww === null) ww = raw.ww;
-		if (wl === null) wl = raw.wl;
+		if (ww === null) ww = vol.ww;
+		if (wl === null) wl = vol.wl;
 
-		if (mode === 'axial') {
-			out_width = raw.x;
-			out_height = raw.y;
-			buffer = MPR.makeAxial(raw, target, ww, wl);
-		} else if (mode === 'coronal') {
-			out_width = raw.x;
-			out_height = raw.z;
-			buffer = MPR.makeCoronal(raw, target, ww, wl);
-		} else if (mode === 'sagittal') {
-			out_width = raw.y;
-			out_height = raw.z;
-			buffer = MPR.makeSagittal(raw, target, ww, wl);
-		} else {
-			this.respondBadRequest(res, 'Invalid orientation.');
-			return;
-		}
-		this.respondImage(res, buffer, out_width, out_height);
+		var { buffer, outWidth, outHeight } = vol.orthogonalMpr(mode, target, ww, wl);
+		this.respondImage(res, buffer, outWidth, outHeight);
 	}
 
 }

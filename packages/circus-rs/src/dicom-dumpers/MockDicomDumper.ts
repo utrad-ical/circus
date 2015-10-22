@@ -2,6 +2,7 @@ import logger from './../Logger';
 
 import DicomDumper from './DicomDumper';
 import { default as RawData, PixelFormat } from './../RawData';
+import DicomVolume from './../DicomVolume';
 import Promise = require('bluebird');
 
 /**
@@ -9,16 +10,16 @@ import Promise = require('bluebird');
  */
 export default class MockDicomDumper extends DicomDumper {
 
-	public readDicom(dcmdir: string): Promise<RawData> {
-		var raw = this.makeMockRaw();
-		return Promise.resolve(raw);
+	public readDicom(dcmdir: string): Promise<DicomVolume> {
+		var vol = this.makeMockVol();
+		return Promise.resolve(vol);
 	}
 
 	/**
 	 * Buffer data: block data in dcm_voxel_dump combined format
 	 */
-	public makeMockRaw(): RawData {
-		var raw = new RawData();
+	public makeMockVol(): DicomVolume {
+		var raw = new DicomVolume();
 		raw.appendHeader({
 			Dummy: 'Header'
 		});

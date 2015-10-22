@@ -3,7 +3,8 @@
  */
 
 import http = require('http');
-import RawData from '../RawData';
+import { PixelFormat } from '../RawData';
+import DicomVolume from '../DicomVolume';
 import VolumeBasedController from './VolumeBasedController';
 import { ValidatorRules } from '../Validator';
 
@@ -18,35 +19,37 @@ export default class Metadata extends VolumeBasedController {
 		};
 	}
 
-	protected processVolume(query: any, raw: RawData, res: http.ServerResponse): void {
+	protected processVolume(query: any, vol: DicomVolume, res: http.ServerResponse): void {
+		var dim = vol.getDimension();
+		var vd = vol.getVoxelDimension();
 		var response: any = {
-			x: raw.x,
-			y: raw.y,
-			z: raw.z,
-			voxel_x: raw.vx,
-			voxel_y: raw.vy,
-			voxel_z: raw.vz,
-			window_width: raw.ww,
-			window_level: raw.wl
+			x: dim[0],
+			y: dim[1],
+			z: dim[2],
+			voxel_x: vd[0],
+			voxel_y: vd[1],
+			voxel_z: vd[2],
+			window_width: vol.ww,
+			window_level: vol.wl
 		};
-		if (raw.dcm_ww !== null) {
-			response.window_width_dicom = raw.dcm_ww;
+		if (vol.dcm_ww !== null) {
+			response.window_width_dicom = vol.dcm_ww;
 		}
-		if (raw.dcm_wl !== null) {
-			response.window_level_dicom = raw.dcm_wl;
+		if (vol.dcm_wl !== null) {
+			response.window_level_dicom = vol.dcm_wl;
 		}
 		var limits: number[] = null;
-		switch (raw.type) {
-			case 0:
+		switch (vol.getPixelFormat()) {
+			case PixelFormat.UInt8:
 				limits = [1, 256, 0, 255];
 				break;
-			case 1:
+			case PixelFormat.Int8:
 				limits = [1, 256, -128, 127];
 				break;
-			case 2:
+			case PixelFormat.UInt16:
 				limits = [1, 65536, 0, 65535];
 				break;
-			case 3:
+			case PixelFormat.Int16:
 				limits = [1, 65536, -32768, 32767];
 				break;
 			default:

@@ -5,7 +5,7 @@
 
 import http = require('http');
 import Controller from './Controller';
-import RawData from '../RawData';
+import DicomVolume from '../DicomVolume';
 import logger from '../Logger';
 
 export default class VolumeBasedController extends Controller {
@@ -19,9 +19,9 @@ export default class VolumeBasedController extends Controller {
 			return;
 		}
 		// TODO: Specifying image range is temporarily disabled
-		this.reader.get(series).then((raw: RawData) => {
+		this.reader.get(series).then((vol: DicomVolume) => {
 			try {
-				this.processVolume(query, raw, res);
+				this.processVolume(query, vol, res);
 			} catch (e) {
 				if ('stack' in e) logger.info(e.stack);
 				this.respondInternalServerError(res, e.toString());
@@ -31,7 +31,7 @@ export default class VolumeBasedController extends Controller {
 		});
 	}
 
-	protected processVolume(query: any, raw: RawData, res: http.ServerResponse): void {
+	protected processVolume(query: any, vol: DicomVolume, res: http.ServerResponse): void {
 		// Abstract.
 		// In this method, "raw" is guaranteed to have valid image data.
 	}

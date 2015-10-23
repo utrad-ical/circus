@@ -159,24 +159,21 @@ export default class RawData {
 		this.type = type;
 		switch (type) {
 			case PixelFormat.UInt8:
-				this.bpp = 1;
 				this.read = pos => this.data.readUInt8(pos);
 				break;
 			case PixelFormat.Int8:
-				this.bpp = 1;
 				this.read = pos => this.data.readInt8(pos);
 				break;
 			case PixelFormat.UInt16:
-				this.bpp = 2;
 				this.read = pos => this.data.readUInt16LE(pos * 2);
 				break;
 			case PixelFormat.Int16:
-				this.bpp = 2;
 				this.read = pos => this.data.readInt16LE(pos * 2);
 				break;
 			default:
 				throw new RangeError('Invalid pixel format');
 		}
+		this.bpp = this.getPixelFormatInfo().bpp;
 		this.data = new Buffer(x * y * z * this.bpp);
 	}
 
@@ -186,6 +183,24 @@ export default class RawData {
 
 	public getPixelFormat(): PixelFormat {
 		return this.type;
+	}
+
+	public getPixelFormatInfo(type?: PixelFormat):
+		{ bpp: number; minLevel: number; maxLevel: number; minWidth: number; maxWidth: number }
+	{
+		if (typeof type === 'undefined') {
+			type = this.type;
+		}
+		switch (type) {
+			case PixelFormat.UInt8:
+				return { bpp: 1, minWidth: 1, maxWidth: 256, minLevel: 0, maxLevel: 255};
+			case PixelFormat.Int8:
+				return { bpp: 1, minWidth: 1, maxWidth: 256, minLevel: -128, maxLevel: 127};
+			case PixelFormat.UInt16:
+				return { bpp: 2, minWidth: 1, maxWidth: 65536, minLevel: 0, maxLevel: 65535};
+			case PixelFormat.Int16:
+				return { bpp: 2, minWidth: 1, maxWidth: 65536, minLevel: -32768, maxLevel: 32767};
+		}
 	}
 
 	/**

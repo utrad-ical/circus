@@ -3,7 +3,6 @@
  */
 
 import http = require('http');
-import { PixelFormat } from '../RawData';
 import DicomVolume from '../DicomVolume';
 import VolumeBasedController from './VolumeBasedController';
 import { ValidatorRules } from '../Validator';
@@ -38,27 +37,12 @@ export default class Metadata extends VolumeBasedController {
 		if (vol.dcm_wl !== null) {
 			response.window_level_dicom = vol.dcm_wl;
 		}
-		var limits: number[] = null;
-		switch (vol.getPixelFormat()) {
-			case PixelFormat.UInt8:
-				limits = [1, 256, 0, 255];
-				break;
-			case PixelFormat.Int8:
-				limits = [1, 256, -128, 127];
-				break;
-			case PixelFormat.UInt16:
-				limits = [1, 65536, 0, 65535];
-				break;
-			case PixelFormat.Int16:
-				limits = [1, 65536, -32768, 32767];
-				break;
-			default:
-				break;
-		}
-		if (limits !== null) {
-			[response.window_width_min, response.window_width_max,
-				response.window_level_min, response.window_level_max] = limits;
-		}
+		var info = vol.getPixelFormatInfo();
+		response.window_width_min = info.minWidth;
+		response.window_width_max = info.maxWidth;
+		response.window_level_min = info.minLevel;
+		response.window_level_max = info.maxLevel;
+		response.bytes_per_voxel = info.bpp;
 
 		this.respondJson(res, response);
 	}

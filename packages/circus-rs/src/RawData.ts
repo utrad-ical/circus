@@ -244,13 +244,6 @@ export default class RawData {
 		var buffer_offset = 0;
 		var [rx, ry, rz] = [this.x, this.y, this.z];
 
-		var writeAt = (x, y, z) => {
-			buffer.writeUInt8(
-				this.applyWindow(windowWidth, windowLevel, this.getPixelAt(x, y, z)),
-				buffer_offset++
-			);
-		};
-
 		var checkZranges = () => {
 			if (this.loadedSlices.length() !== this.z)
 				throw new ReferenceError('Volume is not fully loaded to construct this MPR');
@@ -262,21 +255,30 @@ export default class RawData {
 				buffer = new Buffer(ry * rz);
 				for (let z = 0; z < rz; z++)
 					for (let y = 0; y < ry; y++)
-						writeAt(target, y, z);
+						buffer.writeUInt8(
+							this.applyWindow(windowWidth, windowLevel, this.getPixelAt(target, y, z)),
+							buffer_offset++
+						);
 				return { buffer, outWidth: ry, outHeight: rz };
 			case 'coronal':
 				checkZranges();
 				buffer = new Buffer(rx * rz);
 				for (let z = 0; z < rz; z++)
 					for (let x = 0; x < rx; x++)
-						writeAt(x, target, z);
+						buffer.writeUInt8(
+							this.applyWindow(windowWidth, windowLevel, this.getPixelAt(x, target, z)),
+							buffer_offset++
+						);
 				return { buffer, outWidth: rx, outHeight: rz };
 			case 'axial':
 			default:
 				buffer = new Buffer(rx * ry);
 				for (let y = 0; y < ry; y++)
 					for (let x = 0; x < rx; x++)
-						writeAt(x, y, target);
+						buffer.writeUInt8(
+							this.applyWindow(windowWidth, windowLevel, this.getPixelAt(x, y, target)),
+							buffer_offset++
+						);
 				return { buffer, outWidth: rx, outHeight: ry };
 		}
 	}

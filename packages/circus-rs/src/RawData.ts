@@ -302,6 +302,9 @@ export default class RawData {
 		var pixel_size: number = Math.min(this.vx, Math.min(this.vy, this.vz));
 		var center_x = 0;
 		var center_y = 0;
+		var minus_cnt = 0;
+		var plus_cnt = 0;
+		let px, py;
 
 		// Set parameters
 		if (base_axis === 'axial') {
@@ -309,11 +312,8 @@ export default class RawData {
 			eu_y = -1.0 * Math.sin(alpha) * pixel_size / this.vy;
 			ev_z = pixel_size / this.vz;
 
-			var px = center[0];
-			var py = center[1];
-			var minus_cnt = 0;
-			var plus_cnt = 0;
-
+			px = center[0];
+			py = center[1];
 			while (1) {
 				px -= eu_x;
 				py -= eu_y;
@@ -325,9 +325,9 @@ export default class RawData {
 			origin_y = py;
 			center_x = minus_cnt;
 			center_y = Math.floor(center[2] * this.vz / pixel_size);
+
 			px = center[0];
 			py = center[1];
-
 			while (1) {
 				px += eu_x;
 				py += eu_y;
@@ -343,11 +343,8 @@ export default class RawData {
 			eu_z = -1.0 * Math.sin(alpha) * pixel_size / this.vz;
 			ev_y = pixel_size / this.vy;
 
-			var px = center[0];
-			var py = center[2];
-			var minus_cnt = 0;
-			var plus_cnt = 0;
-
+			px = center[0];
+			py = center[2];
 			while (1) {
 				px -= eu_x;
 				py -= eu_z;
@@ -359,9 +356,9 @@ export default class RawData {
 			origin_z = py;
 			center_x = minus_cnt;
 			center_y = Math.floor(center[1] * this.vy / pixel_size);
+
 			px = center[0];
 			py = center[2];
-
 			while (1) {
 				px += eu_x;
 				py += eu_z;
@@ -377,11 +374,8 @@ export default class RawData {
 			ev_y = Math.cos(alpha) * pixel_size / this.vy;
 			ev_z = -1.0 * Math.sin(alpha) * pixel_size / this.vz;
 
-			var px = center[1];
-			var py = center[2];
-			var minus_cnt = 0;
-			var plus_cnt = 0;
-
+			px = center[1];
+			py = center[2];
 			while (1) {
 				px -= ev_y;
 				py -= ev_z;
@@ -393,9 +387,9 @@ export default class RawData {
 			origin_z = py;
 			center_x = Math.floor(center[0] * this.vx / pixel_size);
 			center_y = minus_cnt;
+
 			px = center[1];
 			py = center[2];
-
 			while (1) {
 				px += ev_y;
 				py += ev_z;

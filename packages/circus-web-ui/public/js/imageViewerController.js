@@ -664,7 +664,7 @@
               grid_range : 5,
               hall_size : 0.1
             }
-						
+
             tmp_guide_info = $.extend(true, tmp_guide_info, this_viewer.guide);
 
             for (var j = tmp_guide_info.lines.length - 1; j >= 0; j--) {
@@ -710,7 +710,7 @@
             },
             'container': this_viewer.container
           }); //imageViewer
-					
+
           if (typeof this_viewer.rotateControl !== 'undefined' && this_viewer.rotateControl === true) {
             var new_rotate_opt = $('#' + this_viewer.elementId).imageViewer('option');
             new_rotate_opt.viewer.rotate.visible = true;
@@ -765,7 +765,7 @@
 
         if (tmp_opts.viewer.position.dw > canvas_w || tmp_opts.viewer.position.dh > canvas_h) {
           tmp_elm.imageViewer('fitToCanvas').trigger('changeImageSrc');
-        } 
+        }
 				tmp_elm.imageViewer('fixToCenter').imageViewer('syncVoxel');
       }
 
@@ -1106,29 +1106,17 @@
     getLabelDefault: function (color_index) {
 
       var this_elm = this;
-      var tmp_id = new Date();
+      var date = new Date();
 
-      var the_month = 1 + tmp_id.getMonth();
-      the_month = this_elm.imageViewerController('zeroFormat', [the_month, 2]);
-
-      var the_Date = tmp_id.getDate();
-      the_Date = this_elm.imageViewerController('zeroFormat', [the_Date, 2]);
-
-      var the_Hours = tmp_id.getHours();
-      the_Hours = this_elm.imageViewerController('zeroFormat', [the_Hours, 2]);
-
-      var the_Minutes = 1 + tmp_id.getMinutes();
-      the_Minutes = this_elm.imageViewerController('zeroFormat', [the_Minutes, 2]);
-
-      var the_Seconds = 1 + tmp_id.getSeconds();
-      the_Seconds = this_elm.imageViewerController('zeroFormat', [the_Seconds, 2]);
-
-      var the_Milliseconds = 1 + tmp_id.getMilliseconds();
-      the_Milliseconds = this_elm.imageViewerController('zeroFormat', [the_Milliseconds, 3]);
-
-      var the_random = this_elm.imageViewerController('createRandomStr', [10]);
-
-      tmp_id = tmp_id.getFullYear() + the_month + the_Date + the_Hours + the_Minutes + the_Seconds + the_Milliseconds + '_' + the_random;
+      var random_str = this_elm.imageViewerController('createRandomStr', [10]);
+      var tmp_id = date.getFullYear()
+                  + ('0'  + (date.getMonth() + 1)).slice(-2)   // month
+                  + ('0'  + date.getDate()).slice(-2)          // date
+                  + ('0'  + date.getHours()).slice(-2)         // hours
+                  + ('0'  + date.getMinutes()).slice(-2)       // minutes
+                  + ('0'  + date.getSeconds()).slice(-2)       // seconds
+                  + ('00' + date.getMilliseconds()).slice(-3)  // milliseconds
+                  + '_' + random_str;
 
       var index_number = 0;
       if (color_index) {
@@ -1753,21 +1741,7 @@
             tmp_the_label.update_flg = 1;
           });
       }
-    }, //updateLabelElements
-
-
-
-    zeroFormat: function (input_array) {
-        // input_array = [ num , num ]
-        var e = input_array[0];
-        var t = input_array[1];
-        var n = String(e).length;
-        if (t > n) {
-          return (new Array(t - n + 1)).join(0) + e
-        } else {
-          return e
-        }
-      } //zeroFormat
+    } //updateLabelElements
   }
 
 

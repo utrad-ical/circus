@@ -1089,13 +1089,13 @@
 
 
     //color,alphaの値からRGBA値を計算する
-    getRgba: function (color_num, alpha_num) {
-      var tmp_color = color_num.replace('#', '');
+    getRgba: function (color_str, alpha_num) {
+      var tmp_color = color_str.replace('#', '');
       var tmp_alpha = alpha_num * 0.01;
-      var tmp_color_r = Number('0x' + tmp_color[0]) * Number('0x' + tmp_color[0]) + Number('0x' + tmp_color[1]);
-      var tmp_color_g = Number('0x' + tmp_color[2]) * Number('0x' + tmp_color[2]) + Number('0x' + tmp_color[3]);
-      var tmp_color_b = Number('0x' + tmp_color[4]) * Number('0x' + tmp_color[4]) + Number('0x' + tmp_color[5]);
-      var return_txt = 'rgba(' + tmp_color_r + ',' + tmp_color_g + ',' + tmp_color_b + ',' + tmp_alpha + ')';
+      var tmp_r = parseInt(tmp_color.substr(0,2), 16);
+      var tmp_g = parseInt(tmp_color.substr(2,2), 16);
+      var tmp_b = parseInt(tmp_color.substr(4,2), 16);
+      var return_txt = 'rgba(' + tmp_r + ',' + tmp_g + ',' + tmp_b + ',' + tmp_alpha + ')';
       return return_txt;
     },
 

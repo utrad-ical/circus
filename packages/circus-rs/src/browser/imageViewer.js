@@ -7,6 +7,9 @@
       container: '', //required. container for draw labels.
       mode: 'pan',
       mode_array: ['bucket', 'erase', 'guide', 'measure', 'rotate', 'pan', 'pen', 'window'], //selectable mode
+      // list of modes which should not interact with guides
+      prior_modes: /^(bucket|measure|pen|erase)$/,
+
       viewer: {
         activeSeriesId: '',
         boldness: 1,
@@ -1400,7 +1403,8 @@
       if (this_opts.mode === 'rotate' && is_on_rotate === 1) {
         this_opts._tmpInfo.mode_backup = this_opts.mode;
         this_opts.mode = 'rotate_active';
-      } else if (is_on_rotate !== 1 && target_guide_direction !== '') {
+      } else if (is_on_rotate !== 1 && target_guide_direction !== '' &&
+          !this_opts.prior_modes.test(this_opts.mode)) {
         this_opts._tmpInfo.mode_backup = this_opts.mode;
         this_opts.mode = 'guide_single';
       } else if (this_opts._tmpInfo.mode_backup !== '') {
@@ -1697,7 +1701,7 @@
           target_guide_direction = this_obj._CheckGuideOver(e);
         }
 
-        if (target_guide_direction !== '') {
+        if (target_guide_direction !== '' && !this_opts.prior_modes.test(this_opts.mode)) {
           this_opts._tmpInfo.mode_backup = this_opts.mode + '';
           this_elm.removeClass(function (index, css) {
             return (css.match(/\bmode_\S+/g) || []).join(' ');

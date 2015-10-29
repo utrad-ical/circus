@@ -465,14 +465,12 @@
 
 
 
-    createRandomStr: function (insert_array) {
-      var n = insert_array[0]; //桁数
-      var b = insert_array[1] || '';
-      var a = 'abcdefghijklmnopqrstuvwxyz' + 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' + '0123456789' + b;
-      a = a.split('');
+    createRandomStr: function (length) {
+      var c  = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+      var cl = c.length;
       var s = '';
-      for (var i = 0; i < n; i++) {
-        s += a[Math.floor(Math.random() * a.length)];
+      for (var i = 0; i < length; i++) {
+        s += c[Math.floor(Math.random() * cl)];
       }
       return s;
     },
@@ -1108,7 +1106,7 @@
       var this_elm = this;
       var date = new Date();
 
-      var random_str = this_elm.imageViewerController('createRandomStr', [10]);
+      var random_str = this_elm.imageViewerController('createRandomStr', 10);
       var tmp_id = date.getFullYear()
                   + ('0'  + (date.getMonth() + 1)).slice(-2)   // month
                   + ('0'  + date.getDate()).slice(-2)          // date
@@ -1116,7 +1114,7 @@
                   + ('0'  + date.getMinutes()).slice(-2)       // minutes
                   + ('0'  + date.getSeconds()).slice(-2)       // seconds
                   + ('00' + date.getMilliseconds()).slice(-3)  // milliseconds
-                  + '_' + random_str;
+                  + '_' + random_str;                          // random string
 
       var index_number = 0;
       if (color_index) {

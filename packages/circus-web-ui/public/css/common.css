@@ -87,7 +87,6 @@ ul.column_menu >li >a:hover { background-color: #d0e6e4; }
 .common_table_light{width:100%; margin:0 auto; border-collapse: collapse;}
 .common_table_light td,.common_table_light th{border-bottom:1px solid #ccc; padding:10px;}
 .common_input_text{padding:8px 0; font-size:1.2em; background:#d0e6e4; border:none; text-indent:8px;}
-input[type="password"]{font-family:Verdana, sans-serif; font-size:1.5em; line-height:0.8em; }
 
 .common_btn{padding:4px; border:none; cursor:pointer; display:inline-block; text-decoration:none; text-align:center; border:none;background:#168477; color:#fff!important; line-height:1.5em;}
 .common_btn:hover{background:#FD3164; color:#fff;}

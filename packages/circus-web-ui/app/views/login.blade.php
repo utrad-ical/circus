@@ -4,33 +4,36 @@
 Login
 @stop
 
+@section('head')
+<style>
+table.common_table input { display: block; width: 100%; }
+</style>
+@stop
+
 @section('content')
 {{Form::open(['url' => 'login', 'method' => 'POST', 'id' => 'form_login', 'class' => 'pad_t_40'])}}
-	<div class="w_500 m_auto al_c">
+	<div class="w_300 m_auto">
 		<table class="common_table al_l">
-			<colgroup>
-				<col width="35%">
-				<col width="65%">
-			</colgroup>
 			<tr>
-				<th>ID or E-mail address</th>
 				<td>
-					{{Form::text('loginID', isset($loginID) ? $loginID : '', array('class' => 'common_input_text w_300', 'autofocus' => 'autofocus'))}}
+					{{Form::text('loginID', isset($loginID) ? $loginID : '',
+						array('class' => 'common_input_text', 'placeholder' => 'ID or E-mail',
+						'autofocus' => 'autofocus'))}}
 				</td>
 			</tr>
 			<tr>
-				<th>Password</th>
 				<td>
-					{{Form::password('password', array('class' => 'common_input_text w_300'))}}
+					{{Form::password('password',
+						array('class' => 'common_input_text', 'placeholder' => 'Password'))}}
 				</td>
 			</tr>
 		</table>
 	</div>
-	<p class="submit_area">
-		{{Form::submit('Login', array('class' => 'common_btn mar_r_5'))}}
+	<div class="submit_area">
+		{{Form::submit('Login', array('class' => 'common_btn'))}}
 		@if (isset($error_msg))
-			<br><span class="al_c font_red">{{$error_msg}}</span>
+			<div class="al_c font_red">{{$error_msg}}</div>
 		@endif
-	</p>
+	</div>
 {{Form::close()}}
 @stop

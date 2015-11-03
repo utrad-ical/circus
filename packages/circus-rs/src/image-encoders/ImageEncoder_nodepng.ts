@@ -1,5 +1,5 @@
 import ImageEncoder from './ImageEncoder';
-import stream = require('stream');
+import * as stream from 'stream';
 
 var Png = require('png').Png;
 

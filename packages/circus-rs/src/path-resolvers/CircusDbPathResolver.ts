@@ -1,10 +1,10 @@
 /// <reference path='../typings/bluebird/bluebird.d.ts' />
 /// <reference path='../typings/mongoose/mongoose.d.ts' />
 
-import fs = require('fs');
-import path = require('path');
-import crypto = require('crypto');
-import Promise = require('bluebird');
+import * as fs from 'fs';
+import * as path from 'path';
+import * as crypto from 'crypto';
+import * as Promise from 'bluebird';
 
 import logger from '../Logger';
 import PathResolver from './PathResolver';
@@ -17,9 +17,8 @@ try {
 	}
 	throw e;
 }
-import mongoose = require('mongoose');
+import * as mongoose from 'mongoose';
 var Schema = mongoose.Schema;
-
 
 export default class CircusDbPathResolver extends PathResolver {
 	protected mongoconfig: any;

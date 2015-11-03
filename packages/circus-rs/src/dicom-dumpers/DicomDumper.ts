@@ -3,7 +3,7 @@
  */
 
 import DicomVolume from '../DicomVolume';
-import Promise = require('bluebird');
+import * as Promise from 'bluebird';
 
 export default class DicomDumper {
 

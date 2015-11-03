@@ -1,5 +1,5 @@
-import http = require('http');
-var url = require('url');
+import * as http from 'http';
+import * as url from 'url';
 import logger from './Logger';
 
 interface AuthorizationInfo {

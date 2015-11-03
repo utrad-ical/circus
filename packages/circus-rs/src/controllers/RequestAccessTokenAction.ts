@@ -7,9 +7,9 @@
  * also in metadata/mpr/oblique... request.
  */
 import Controller from './Controller';
-import http = require('http');
+import * as http from 'http';
 import AuthorizationCache from '../AuthorizationCache';
-var crypt = require('crypto');
+import * as crypt from 'crypto';
 import logger from '../Logger';
 import { ValidatorRules } from '../Validator';
 

@@ -1,4 +1,4 @@
-import validator = require('validator');
+import * as validator from 'validator';
 
 /**
  * key-value pairs of validation rules.

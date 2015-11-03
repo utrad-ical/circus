@@ -2,7 +2,7 @@
  * Show server status.
  */
 import Controller from './Controller';
-import http = require('http');
+import * as http from 'http';
 import Counter from '../Counter';
 
 var config: Configuration = require('config');

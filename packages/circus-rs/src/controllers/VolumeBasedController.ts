@@ -3,7 +3,7 @@
  * which need DICOM volume (as RawData) specified by 'series' query parameter.
  */
 
-import http = require('http');
+import * as http from 'http';
 import Controller from './Controller';
 import DicomVolume from '../DicomVolume';
 import logger from '../Logger';

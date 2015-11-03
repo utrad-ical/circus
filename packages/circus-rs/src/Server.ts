@@ -2,14 +2,14 @@
  * Main server class.
  */
 
-import http = require('http');
+import * as http from 'http';
 var finalhandler = require('finalhandler');
 
 import logger from './Logger';
 logger.info('================================');
 logger.info('CIRCUS RS is starting up...');
 import log4js = require('log4js');
-import Promise = require('bluebird');
+import * as Promise from 'bluebird';
 
 import Counter from './Counter';
 import ImageEncoder from './image-encoders/ImageEncoder';

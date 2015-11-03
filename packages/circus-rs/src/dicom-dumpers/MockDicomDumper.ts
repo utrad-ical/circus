@@ -3,7 +3,7 @@ import logger from './../Logger';
 import DicomDumper from './DicomDumper';
 import { default as RawData, PixelFormat } from './../RawData';
 import DicomVolume from './../DicomVolume';
-import Promise = require('bluebird');
+import * as Promise from 'bluebird';
 
 /**
  * MockDicomDumper creates dummy voluem data.

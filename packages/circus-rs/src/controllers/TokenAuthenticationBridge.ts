@@ -1,5 +1,5 @@
 import Controller from './Controller';
-import http = require('http');
+import * as http from 'http';
 import ImageEncoder from '../image-encoders/ImageEncoder';
 import AsyncLruCache from '../AsyncLruCache';
 import RawData from '../RawData';

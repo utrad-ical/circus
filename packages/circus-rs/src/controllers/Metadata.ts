@@ -2,7 +2,7 @@
  * DICOM image metadata process class
  */
 
-import http = require('http');
+import * as http from 'http';
 import DicomVolume from '../DicomVolume';
 import VolumeBasedController from './VolumeBasedController';
 import { ValidatorRules } from '../Validator';

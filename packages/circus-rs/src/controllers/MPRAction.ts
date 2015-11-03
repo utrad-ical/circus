@@ -6,7 +6,7 @@ import DicomVolume from '../DicomVolume';
 import VolumeBasedController from './VolumeBasedController';
 import { ValidatorRules } from '../Validator';
 
-import http = require('http');
+import * as http from 'http';
 
 import logger from '../Logger';
 

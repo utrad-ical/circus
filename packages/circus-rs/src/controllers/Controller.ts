@@ -1,10 +1,10 @@
 /**
  * DICOM Server module prototype.
  */
-var url = require('url');
-import stream = require('stream');
+import * as url from 'url';
+import * as stream from 'stream';
 import ImageEncoder from '../image-encoders/ImageEncoder';
-import http = require('http');
+import * as http from 'http';
 import logger from '../Logger';
 import AsyncLruCache from '../AsyncLruCache';
 import RawData from '../RawData';

@@ -2,16 +2,16 @@
  * DICOM Dumper (using dicom_voxel_dumper)
  */
 
-import child_process = require('child_process');
+import * as child_process from 'child_process';
 var exec = child_process.exec;
-import fs = require('fs');
+import * as fs from 'fs';
 
 import logger from '../Logger';
 
 import DicomDumper from './DicomDumper';
 import RawData from '../RawData';
 import DicomVolume from './../DicomVolume';
-import Promise = require('bluebird');
+import * as Promise from 'bluebird';
 
 const GLOBAL_HEADER = -1;
 const GLOBAL_FOOTER = -2;

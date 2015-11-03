@@ -1,4 +1,4 @@
-import promise = require('bluebird');
+import * as Promise from 'bluebird';
 
 interface LruEntry<T> {
 	key: string;

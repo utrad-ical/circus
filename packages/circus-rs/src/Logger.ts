@@ -6,7 +6,7 @@
  *  logger.info('foo bar');
  */
 
-import log4js = require('log4js');
+import * as log4js from 'log4js';
 var config: Configuration = require('config');
 
 class Logger {

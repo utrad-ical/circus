@@ -1,7 +1,7 @@
 import PathResolver from './PathResolver';
-import path = require('path');
-import crypto = require('crypto');
-import Promise = require('bluebird');
+import * as path from 'path';
+import * as crypto from 'crypto';
+import * as Promise from 'bluebird';
 import logger from '../Logger';
 
 export default class StaticPathResolver extends PathResolver {

@@ -31,7 +31,6 @@ export default class AsyncLruCache<T> {
 	private timer: any = null;
 	private lru: LruEntry<T>[] = [];
 	private pendings: {[key: string]: [Function, Function][]} = {};
-	private memoryUsage: number;
 	private loader: LoaderFunc<T>;
 	private options: Options<T>;
 	private totalSize: number = 0;
@@ -40,14 +39,14 @@ export default class AsyncLruCache<T> {
 		maxCount: 10,
 		maxLife: -1,
 		maxSize: -1,
-		sizeFunc: item => 1
+		sizeFunc: (item: T): number => 1
 	};
 
-	constructor (loader: LoaderFunc<T>, options?: Options<T>) {
+	constructor(loader: LoaderFunc<T>, options?: Options<T>) {
 		this.loader = loader;
 		this.options = this.defaultOptions;
 		if (typeof options === 'object') {
-			for (var k in options) {
+			for (let k in options) {
 				if (k in this.options) this.options[k] = options[k];
 			}
 		}
@@ -59,8 +58,7 @@ export default class AsyncLruCache<T> {
 	/**
 	 * Stops the internal timer.
 	 */
-	public dispose(): void
-	{
+	public dispose(): void {
 		if (this.timer) clearInterval(this.timer);
 	}
 
@@ -68,11 +66,10 @@ export default class AsyncLruCache<T> {
 	 * Does not load anything, but synchronously returns the specified item
 	 * only if it is already loaded.
 	 */
-	public touch(key: string): T
-	{
-		for (var i = 0; i < this.lru.length; i++) {
+	public touch(key: string): T {
+		for (let i = 0; i < this.lru.length; i++) {
 			if (this.lru[i].key === key) {
-				var entry = this.lru.splice(i, 1)[0];
+				let entry = this.lru.splice(i, 1)[0];
 				entry.time = new Date(); // renew time
 				this.lru.push(entry);
 				return entry.item;
@@ -93,25 +90,25 @@ export default class AsyncLruCache<T> {
 			});
 		}
 		// If already loaded, return it via Promise
-		var item = this.touch(key);
+		let item = this.touch(key);
 		if (item !== undefined) {
 			// We should return this value asynchronously.
 			return Promise.resolve(item);
 		}
 		// If not, start loading it using the loader function
 		this.loader(key).then(
-			item => {
-				var size = this.options.sizeFunc(item);
-				this.lru.push({	key, item, size, time: new Date() });
+			(loaded: T) => {
+				let size = this.options.sizeFunc(loaded);
+				this.lru.push({key, loaded, size, time: new Date()});
 				this.totalSize += size;
 				this.truncate();
-				var callbacks = this.pendings[key];
+				let callbacks = this.pendings[key];
 				delete this.pendings[key];
 				if (!callbacks) return; // ignore cancelled pendings
-				callbacks.forEach(funcs => funcs[0](item));
+				callbacks.forEach(funcs => funcs[0](loaded));
 			},
-			err => {
-				var callbacks = this.pendings[key];
+			(err: any) => {
+				let callbacks = this.pendings[key];
 				delete this.pendings[key];
 				if (!callbacks) return; // ignore cancelled pendings
 				callbacks.forEach(funcs => funcs[1](err));
@@ -127,7 +124,7 @@ export default class AsyncLruCache<T> {
 	}
 
 	public indexOf(key: string): number {
-		for (var i = 0; i < this.lru.length; i++) {
+		for (let i = 0; i < this.lru.length; i++) {
 			if (this.lru[i].key === key) return i;
 		}
 		return -1;
@@ -136,16 +133,16 @@ export default class AsyncLruCache<T> {
 	public remove(key: string): void {
 		// If in pending, forget reject it and forget the callback
 		if (key in this.pendings) {
-			var callbacks = this.pendings[key];
+			let callbacks = this.pendings[key];
 			delete this.pendings[key];
 			if (!callbacks) return; // ignore cancelled pendings
-			var err = new Error('Cancelled');
+			let err = new Error('Cancelled');
 			callbacks.forEach(funcs => funcs[1](err));
 		}
 		// If already loaded, remove it
-		var index = this.indexOf(key);
+		let index = this.indexOf(key);
 		if (index >= 0) {
-			var item = this.lru.splice(index, 1)[0];
+			let item = this.lru.splice(index, 1)[0];
 			this.totalSize -= item.size;
 		}
 	}
@@ -160,7 +157,7 @@ export default class AsyncLruCache<T> {
 
 	protected shift(): T {
 		if (this.lru.length > 0) {
-			var shifted = this.lru[0];
+			let shifted = this.lru[0];
 			this.remove(shifted.key);
 			return shifted.item;
 		}
@@ -184,8 +181,8 @@ export default class AsyncLruCache<T> {
 	 * but it's possible to call this manually.
 	 */
 	public checkTtl(): void {
-		var now = (new Date()).getTime();
-		var maxLife = this.options.maxLife * 1000;
+		let now = (new Date()).getTime();
+		let maxLife = this.options.maxLife * 1000;
 		if (maxLife <= 0) return;
 		while (this.lru.length > 0 && now - this.lru[0].time.getTime() > maxLife) {
 			this.shift();

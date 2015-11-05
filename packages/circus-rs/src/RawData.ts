@@ -12,7 +12,8 @@ export const enum PixelFormat {
 	UInt8 = 0,
 	Int8 = 1,
 	UInt16 = 2,
-	Int16 = 3
+	Int16 = 3,
+	Binary = 4
 }
 
 export type Vector3D = [number, number, number];
@@ -131,7 +132,7 @@ export default class RawData {
 		if (z < 0 || z >= this.z) {
 			throw new RangeError('z-index out of bounds');
 		}
-		if (this.x * this.y > imageData.length) {
+		if (this.x * this.y * this.bpp > imageData.length) {
 			throw new Error('Not enough buffer length');
 		}
 		var len = this.x * this.y * this.bpp;
@@ -151,7 +152,10 @@ export default class RawData {
 			throw new Error('Dimension already fixed.');
 		}
 		if (x * y * z > 1024 * 1024 * 1024) {
-			throw new Error('Maximum voxel limit exceeded');
+			throw new Error('Maximum voxel limit exceeded.');
+		}
+		if (type === PixelFormat.Binary && (x * y) % 8 !== 0) {
+			throw new Error('Number of pixels in a slice must be a multiple of 8.');
 		}
 		this.x = x;
 		this.y = y;
@@ -169,6 +173,9 @@ export default class RawData {
 				break;
 			case PixelFormat.Int16:
 				this.read = pos => this.data.readInt16LE(pos * 2);
+				break;
+			case PixelFormat.Binary:
+				this.read = pos => (this.data.readUInt8(pos >> 3) >> (7 - pos % 8) & 1);
 				break;
 			default:
 				throw new RangeError('Invalid pixel format');
@@ -201,6 +208,8 @@ export default class RawData {
 				return { bpp: 2, minWidth: 1, maxWidth: 65536, minLevel: 0, maxLevel: 65535};
 			case PixelFormat.Int16:
 				return { bpp: 2, minWidth: 1, maxWidth: 65536, minLevel: -32768, maxLevel: 32767};
+			case PixelFormat.Binary:
+				return { bpp: 0.125, minWidth: 1, maxWidth: 1, minLevel: 0, maxLevel: 1 };
 		}
 	}
 

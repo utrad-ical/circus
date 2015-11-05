@@ -1,6 +1,30 @@
 declare var Zlib: any;
 declare var $: any;
 
+interface Series {
+	id: string;
+	label: {
+		id: string,
+		position: any
+	}[];
+	size: {
+		X: number;
+		Y: number;
+		Z: number;
+	}
+}
+
+interface VoxelContainerData {
+	history: {
+		init: any[];
+		main: any[];
+		redo: any[];
+	};
+	series: Series[];
+	member: any[];
+}
+
+
 class voxelContainer {
 	public name: string;
 
@@ -9,27 +33,13 @@ class voxelContainer {
 	}
 
 	//data object
-	public data = {
+	public data: VoxelContainerData = {
 		history: {
 			init: [],
 			main: [],
 			redo: []
 		},
-		series: [
-			/*
-			 {
-			 id : '',
-			 label : [
-			 {id:'',positions: object }
-			 ]
-			 size : {
-			 x:0,
-			 y:0,
-			 z:0
-			 }
-			 }
-			 */
-		],
+		series: [],
 		member: [] //list of id of the viewer that uses this container.
 	};
 
@@ -40,9 +50,6 @@ class voxelContainer {
 		// label_id : Label ID (String)
 		// the_mode : mode ('pen' or 'erase')
 		// position_array : array of positions of 1 stroke. ( [x1,y1,z1],[x2,y2,z2])
-
-		var this_obj = this;
-		var this_data = this_obj.data;
 
 		//one stroke positions data object.
 		var tmp_step_obj = {
@@ -60,10 +67,10 @@ class voxelContainer {
 			];
 		}
 
-		this_data.history.main.push(tmp_step_obj);
+		this.data.history.main.push(tmp_step_obj);
 
-		//remove Redo history whent the new stroke is put.
-		this_data.history.redo = [];
+		//remove Redo history when the new stroke is put.
+		this.data.history.redo = [];
 
 	};
 
@@ -71,8 +78,6 @@ class voxelContainer {
 	public addLoadedData(series_id, label_id, the_mode, position_array) {
 		//put loaded data into container
 		//this function is used to after page loading.
-		var this_obj = this;
-		var this_data = this_obj.data;
 
 		//one stroke positions data object.
 		var tmp_step_obj = {
@@ -82,7 +87,7 @@ class voxelContainer {
 			position: []
 		};
 
-		var tmp_series = this_obj.getSeriesObjectById(series_id);
+		var tmp_series = this.getSeriesObjectById(series_id);
 
 		for (var i = position_array.length - 1; i >= 0; i--) {
 			if (typeof position_array[i] != 'undefined') {
@@ -97,13 +102,10 @@ class voxelContainer {
 				}
 			}
 		}
-		this_data.history.init.push(tmp_step_obj);
+		this.data.history.init.push(tmp_step_obj);
 	}
 
 	public addLabel(series_id, label_id, position_array?) {
-		var this_obj = this;
-		var this_data = this_obj.data;
-
 		var tmp_position_array = [];
 		if (typeof position_array == 'object') {
 			tmp_position_array = position_array;
@@ -114,53 +116,47 @@ class voxelContainer {
 			position: tmp_position_array
 		};
 
-		var tmp_series = this_obj.getSeriesObjectById(series_id);
+		var tmp_series = this.getSeriesObjectById(series_id);
 
 		//if the series does not exist, create new series.
 		if (typeof tmp_series == 'undefined') {
-			this_obj.addSeries(series_id);
+			this.addSeries(series_id);
 		}
-		var the_target_series = this_obj.getSeriesObjectById(series_id);
+		var the_target_series = this.getSeriesObjectById(series_id);
 		the_target_series.label.push(tmp_label_obj);
-
 	}
 
 	public addSeries(series_id) {
-		var this_obj = this;
-		var this_data = this_obj.data;
 		var tmp_series_obj = {
 			id: series_id,
-			label: []
+			label: [],
+			size: null
 		};
-		this_data.series.push(tmp_series_obj);
+		this.data.series.push(tmp_series_obj);
 	}
 
-
 	public changeLabelName(current_label_id, series_id, new_label_id) {
-		var this_obj = this;
-		var this_data = this_obj.data;
-
 		//change the id of the Label object.
-		var the_label = this_obj.getLabelObjectById(current_label_id, series_id);
+		var the_label = this.getLabelObjectById(current_label_id, series_id);
 		the_label.id = new_label_id;
 
 		// search labels that has the ID, in history arrays.
 		// find to change.
-		for (var i = 0; i < this_data.history.init.length; i++) {
-			if (this_data.history.init[i].label == current_label_id) {
-				this_data.history.init[i].label = new_label_id;
+		for (var i = 0; i < this.data.history.init.length; i++) {
+			if (this.data.history.init[i].label == current_label_id) {
+				this.data.history.init[i].label = new_label_id;
 			}
 		}
 
-		for (var i = 0; i < this_data.history.main.length; i++) {
-			if (this_data.history.main[i].label == current_label_id) {
-				this_data.history.main[i].label = new_label_id;
+		for (var i = 0; i < this.data.history.main.length; i++) {
+			if (this.data.history.main[i].label == current_label_id) {
+				this.data.history.main[i].label = new_label_id;
 			}
 		}
 
-		for (var i = 0; i < this_data.history.redo.length; i++) {
-			if (this_data.history.redo[i].label == current_label_id) {
-				this_data.history.redo[i].label = new_label_id;
+		for (var i = 0; i < this.data.history.redo.length; i++) {
+			if (this.data.history.redo[i].label == current_label_id) {
+				this.data.history.redo[i].label = new_label_id;
 			}
 		}
 
@@ -168,10 +164,8 @@ class voxelContainer {
 
 
 	public createSaveData(series_id, label_id) {
-		var this_obj = this;
-		var this_data = this_obj.data;
-		var the_series = this_obj.getSeriesObjectById(series_id);
-		var the_label = this_obj.getLabelObjectById(label_id, series_id);
+		var the_series = this.getSeriesObjectById(series_id);
+		var the_label = this.getLabelObjectById(label_id, series_id);
 
 		// default.
 		var return_obj = {
@@ -275,10 +269,7 @@ class voxelContainer {
 
 
 	public deleteLabelObject(series_id, label_id) {
-		var this_obj = this;
-		var this_data = this_obj.data;
-
-		var the_series = this_obj.getSeriesObjectById(series_id);
+		var the_series = this.getSeriesObjectById(series_id);
 		for (var j = the_series.label.length - 1; j >= 0; j--) {
 			if (the_series.label[j].id == label_id) {
 				the_series.label.splice(j, 1);
@@ -291,13 +282,11 @@ class voxelContainer {
 		// tmp_orientation : Current orientation
 		// tmp_current_num : Current index number
 
-		var this_obj = this;
-		var this_data = this_obj.data;
 		var return_array = [];
-		for (var j = this_obj.data.series.length - 1; j >= 0; j--) {
-			var the_series = this_obj.data.series[j];
+		for (var j = this.data.series.length - 1; j >= 0; j--) {
+			var the_series = this.data.series[j];
 			for (var i = the_series.label.length - 1; i >= 0; i--) {
-				var position_array = this_obj.returnSlice(
+				var position_array = this.returnSlice(
 					the_series.id,
 					the_series.label[i].id,
 					tmp_orientation,
@@ -314,9 +303,7 @@ class voxelContainer {
 	}
 
 	public getLabelObjectById(label_id, series_id) {
-		var this_obj = this;
-		var this_data = this_obj.data;
-		var the_series = this_obj.getSeriesObjectById(series_id);
+		var the_series = this.getSeriesObjectById(series_id);
 
 		for (var i = the_series.label.length - 1; i >= 0; i--) {
 			if (the_series.label[i].id == label_id) {
@@ -331,8 +318,6 @@ class voxelContainer {
 		// create positions data from loaded data.
 		// this function is used to run after Page load.
 
-		var this_obj = this;
-		var this_data = this_obj.data;
 		var return_obj = [];
 
 		var the_series_w = 512;
@@ -392,39 +377,33 @@ class voxelContainer {
 
 
 	public getSeriesObjectById(series_id) {
-		var this_obj = this;
-		var this_data = this_obj.data;
-
-		for (var i = this_data.series.length - 1; i >= 0; i--) {
-			if (this_data.series[i].id == series_id) {
-				return this_data.series[i];
+		for (var i = this.data.series.length - 1; i >= 0; i--) {
+			if (this.data.series[i].id == series_id) {
+				return this.data.series[i];
 			}
 		}
 	};
 
 
 	public historyBack() {
-		var this_obj = this;
-		var this_data = this_obj.data;
-
-		if (this_data.history.main.length > 0) {
+		if (this.data.history.main.length > 0) {
 			//put the last one stroke to Redo history array.
 			var tmp_move_array = new Object();
-			$.extend(true, tmp_move_array, this_data.history.main[this_data.history.main.length - 1]);
-			this_data.history.redo.push(tmp_move_array);
-			this_data.history.main.splice(this_data.history.main.length - 1, 1);
+			$.extend(true, tmp_move_array, this.data.history.main[this.data.history.main.length - 1]);
+			this.data.history.redo.push(tmp_move_array);
+			this.data.history.main.splice(this.data.history.main.length - 1, 1);
 
 			//clear all labels.
-			for (var i = this_obj.data.series.length - 1; i >= 0; i--) {
-				for (var j = this_obj.data.series[i].label.length - 1; j >= 0; j--) {
-					this_obj.data.series[i].label[j].position = [];
+			for (var i = this.data.series.length - 1; i >= 0; i--) {
+				for (var j = this.data.series[i].label.length - 1; j >= 0; j--) {
+					this.data.series[i].label[j].position = [];
 				}
 			}
 
 			//draw preload drawn data.
-			for (var i = this_data.history.init.length - 1; i >= 0; i--) {
-				var this_history = this_data.history.init[i];
-				this_obj.updateVoxel(
+			for (var i = this.data.history.init.length - 1; i >= 0; i--) {
+				var this_history = this.data.history.init[i];
+				this.updateVoxel(
 					this_history.series,
 					this_history.label,
 					this_history.mode,
@@ -433,9 +412,9 @@ class voxelContainer {
 			}
 
 			//re-draw the Main history.
-			for (var i = 0; i < this_data.history.main.length; i++) {
-				var this_history = this_data.history.main[i];
-				this_obj.updateVoxel(
+			for (var i = 0; i < this.data.history.main.length; i++) {
+				var this_history = this.data.history.main[i];
+				this.updateVoxel(
 					this_history.series,
 					this_history.label,
 					this_history.mode,
@@ -490,9 +469,6 @@ class voxelContainer {
 		// insert Label data directry
 		// this function is call for insert loaded Label data into container
 
-		var this_obj = this;
-		var this_data = this_obj.data;
-
 		for (var i = 0; i < insert_obj.length; i++) {
 			var tmp_series = insert_obj[i];
 			var series_w = tmp_series.voxel.x;
@@ -501,11 +477,11 @@ class voxelContainer {
 			if (typeof tmp_series.label == 'object') {
 				for (var j = 0; j < tmp_series.label.length; j++) {
 					var tmp_label = tmp_series.label[j];
-					var position_data = this_obj.getPositionDataFromImage(tmp_label, series_w, series_h);
-					this_obj.addLabel(tmp_series.id, tmp_label.id, position_data);
+					var position_data = this.getPositionDataFromImage(tmp_label, series_w, series_h);
+					this.addLabel(tmp_series.id, tmp_label.id, position_data);
 
 					//put loaded data into History object.
-					this_obj.addLoadedData(tmp_series.id, tmp_label.id, 'pen', position_data);
+					this.addLoadedData(tmp_series.id, tmp_label.id, 'pen', position_data);
 				}
 			}
 		}
@@ -514,13 +490,11 @@ class voxelContainer {
 
 	public returnSlice(series_id, label_id, tmp_orientation, tmp_current_num) {
 
-		var this_obj = this;
-		var this_data = this_obj.data;
 		var return_array = [];
-		var tmp_target_series = this_obj.getSeriesObjectById(series_id);
+		var tmp_target_series = this.getSeriesObjectById(series_id);
 		var voxel_x = tmp_target_series.size.X;
 
-		var tmp_target_label = this_obj.getLabelObjectById(label_id, series_id);
+		var tmp_target_label = this.getLabelObjectById(label_id, series_id);
 
 		//get the array of the positions that should be drawn.(the positions are voxel XYZ unit.)
 		if (tmp_orientation == 'axial') {
@@ -575,24 +549,23 @@ class voxelContainer {
 
 
 	public setSize(series_id, the_x, the_y, the_z) {
-		var this_obj = this;
-		var this_data = this_obj.data;
-		var tmp_series = this_obj.getSeriesObjectById(series_id);
+		var tmp_series = this.getSeriesObjectById(series_id);
 
 		var tmp_x = Math.floor(the_x);
 		var tmp_y = Math.floor(the_y);
 		var tmp_z = Math.floor(the_z);
 
-		if (typeof tmp_series != 'object') {
-			tmp_series = new Object();
-			tmp_series.id = series_id;
-			tmp_series.label = [];
-			tmp_series.size = {
+		if (typeof tmp_series !== 'object') {
+			let new_series: any = {};
+			new_series.id = series_id;
+			new_series.label = [];
+			new_series.size = {
 				X: tmp_x,
 				Y: tmp_y,
 				Z: tmp_z
-			}
-			this_data.series.push(tmp_series);
+			};
+			tmp_series = new_series;
+			this.data.series.push(tmp_series);
 		} else {
 			tmp_series.size = {
 				X: tmp_x,
@@ -602,26 +575,22 @@ class voxelContainer {
 		}
 	};
 
-
 	public updateVoxel(series_id, label_id, the_mode, position_array) {
-		var this_obj = this;
-		var this_data = this_obj.data;
-
-		if (typeof this_obj.getSeriesObjectById(series_id) != 'object') {
-			this_obj.addSeries(series_id);
+		if (typeof this.getSeriesObjectById(series_id) != 'object') {
+			this.addSeries(series_id);
 		}
-		var tmp_series = this_obj.getSeriesObjectById(series_id);
+		var tmp_series = this.getSeriesObjectById(series_id);
 
-		var tmp_target_label = this_obj.getLabelObjectById(label_id, series_id);
+		var tmp_target_label = this.getLabelObjectById(label_id, series_id);
 		if (typeof tmp_target_label != 'object') {
-			this_obj.addLabel(series_id, label_id);
+			this.addLabel(series_id, label_id);
 		}
-		tmp_target_label = this_obj.getLabelObjectById(label_id, series_id);
+		tmp_target_label = this.getLabelObjectById(label_id, series_id);
 
 		var target_position_data = tmp_target_label.position;
 
 		var input_value = 1; // draw or erase.
-		if (the_mode == 'erase') {
+		if (the_mode === 'erase') {
 			input_value = 0;
 		}
 

@@ -338,14 +338,14 @@
 					//load new
 					var the_active_series = this_obj.getSeriesObjectById(this_opts.viewer.activeSeriesId);
 					var tmp_token_str = 'Bearer ' + the_active_series.token;
-					var myWindowURL = window.URL || window.webkitURL;  // Take care of vendor prefixes.
+					var myWindowURL = window.URL || (<any>window).webkitURL;  // Take care of vendor prefixes.
 					var xhr = new XMLHttpRequest();
 					xhr.onload = function (e) {
 						if (this.status === 200) {
 							var blob = this.response;
 							var tmp_img = new Image();
 							tmp_img.onload = function (e) {
-								var header_param = '';
+								var header_param: any = '';
 								if (this_opts.viewer.orientation === 'oblique') {
 									header_param = {};
 									header_param.Pixel_Columns = xhr.getResponseHeader('X-Circus-Pixel-Columns');
@@ -1028,7 +1028,7 @@
 		},
 
 
-		_getBucketFillPositions: function (series_id, label_id, pointed_position) {
+		_getBucketFillPositions: function (series_id, label_id, pointed_position): number | any[] {
 			// pointed positions array :  [[X1,Y1,Z1], [X2,Y2,Z2]]
 
 			var this_obj = this;
@@ -1089,7 +1089,7 @@
 
 			while (position.length !== 0) {
 				//get the target point
-				var point = position.shift();
+				point = position.shift();
 				//to right
 				if (point[0] + 1 < paint_map[point[1]].length) {
 					if (paint_map[point[1]][point[0] + 1] === 0) {
@@ -1173,7 +1173,7 @@
 			var this_obj = this;
 			var this_elm = this.element;
 			var this_opts = this.options;
-			var guide_horizontal = {};
+			var guide_horizontal: any = {};
 			var guide_vertical = {};
 			var i = 0;
 			var return_obj = null;
@@ -1827,8 +1827,7 @@
 				dist_h = dist_h * this_opts.viewer.voxel.voxel_z;
 			}
 
-			var disp_txt = Math.sqrt(dist_w * dist_w + dist_h * dist_h);
-			disp_txt = disp_txt.toFixed(2);
+			var disp_txt = Math.sqrt(dist_w * dist_w + dist_h * dist_h).toFixed(2);
 			this_elm.find('.disp_measure').addClass('active').find('.measure_num').text(disp_txt);
 
 		},//_mousemoveFuncMeasure
@@ -2061,21 +2060,21 @@
 
 		_reduceOverlap: function (insert_array, input_dimension) {
 			var return_array = insert_array;
-			var compair_array = {};
+			var compare_array = {};
 			var the_dimension = 2;
-			if (typeof dimension === 'number') {
-				the_dimension = input_dimension;
-			}
+			//if (typeof dimension === 'number') {
+			//	the_dimension = input_dimension;
+			//}
 
 			for (var i = return_array.length - 1; i >= 0; i--) {
 				var compair_str = 'id';
 				for (var j = 0; j < the_dimension; j++) {
 					compair_str = compair_str + '-' + return_array[i][j];
 				}
-				if (typeof compair_array[compair_str] !== 'undefined' || compair_array[compair_str] === 1) {
+				if (typeof compare_array[compair_str] !== 'undefined' || compare_array[compair_str] === 1) {
 					return_array.splice(i, 1);
 				} else {
-					compair_array[compair_str] = 1;
+					compare_array[compair_str] = 1;
 				}
 
 			}
@@ -2387,7 +2386,7 @@
 			var this_opts = this.options;
 			var position_params = this_opts.viewer.position;
 
-			var before_position = {};
+			var before_position: any = {};
 			before_position = $.extend(true, before_position, position_params);
 
 			this_opts.viewer.voxel.x = position_params.ow = Number(insert_Object.Pixel_Columns);

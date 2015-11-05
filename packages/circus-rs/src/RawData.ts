@@ -62,7 +62,7 @@ export default class RawData {
 	 * @returns Corresponding voxel value.
 	 */
 	public getPixelAt(x: number, y: number, z: number): number {
-		return this.read(x + y * this.x + z * this.x * this.y);
+		return this.read(x + (y + z * this.y) * this.x);
 	}
 
 	/**

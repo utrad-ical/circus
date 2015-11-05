@@ -7,7 +7,7 @@
 
 import { MultiRange } from 'multi-integer-range';
 
-export const enum PixelFormat {
+export enum PixelFormat {
 	Unknown = -1,
 	UInt8 = 0,
 	Int8 = 1,

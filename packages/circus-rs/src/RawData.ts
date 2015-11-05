@@ -175,6 +175,7 @@ export default class RawData {
 		}
 		this.bpp = this.getPixelFormatInfo().bpp;
 		this.data = new Buffer(x * y * z * this.bpp);
+		this.data.fill(0); // Newly created buffer needs to be zerofilled
 	}
 
 	public getDimension(): Vector3D {

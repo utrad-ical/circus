@@ -257,7 +257,7 @@ export default class RawData {
 		var checkZranges = () => {
 			if (this.loadedSlices.length() !== this.z)
 				throw new ReferenceError('Volume is not fully loaded to construct this MPR');
-		}
+		};
 
 		switch (axis) {
 			case 'sagittal':
@@ -293,6 +293,22 @@ export default class RawData {
 		}
 	}
 
+	protected walkUntilObliqueBounds(
+			sx: number, sy: number, dx: number, dy: number,
+			mx: number, my: number): { count: number, px: number, py: number}
+	{
+		let count = 0;
+		let px = sx;
+		let py = sy;
+		while (true) {
+			px += dx;
+			py += dy;
+			if (px < 0 || py < 0 || px > mx - 1 || py > my - 1) break;
+			count++;
+		}
+		return { count, px, py};
+	}
+
 	public singleOblique(base_axis: string, center: Vector3D, alpha: number,
 			windowWidth: number, windowLevel: number): ObliqueResult
 	{
@@ -314,7 +330,6 @@ export default class RawData {
 		var center_y = 0;
 		var minus_cnt = 0;
 		var plus_cnt = 0;
-		let px, py;
 
 		// Set parameters
 		if (base_axis === 'axial') {
@@ -322,28 +337,15 @@ export default class RawData {
 			eu_y = -1.0 * Math.sin(alpha) * pixel_size / this.vy;
 			ev_z = pixel_size / this.vz;
 
-			px = center[0];
-			py = center[1];
-			while (1) {
-				px -= eu_x;
-				py -= eu_y;
-				if (px < 0.0 || py < 0.0 || px > rx - 1 || py > ry - 1)  break;
-				minus_cnt++;
-			}
-
-			origin_x = px;
-			origin_y = py;
+			let edge = this.walkUntilObliqueBounds(center[0], center[1], -eu_x, -eu_y, rx, ry);
+			minus_cnt = edge.count;
+			origin_x = edge.px;
+			origin_y = edge.py;
 			center_x = minus_cnt;
 			center_y = Math.floor(center[2] * this.vz / pixel_size);
 
-			px = center[0];
-			py = center[1];
-			while (1) {
-				px += eu_x;
-				py += eu_y;
-				if (px < 0.0 || py < 0.0 || px > rx - 1 || py > ry - 1)  break;
-				plus_cnt++;
-			}
+			edge = this.walkUntilObliqueBounds(center[0], center[1], eu_x, eu_y, rx, ry);
+			plus_cnt = edge.count;
 
 			outWidth = minus_cnt + plus_cnt + 1;
 			outHeight = Math.floor(rz * this.vz / pixel_size);
@@ -353,28 +355,15 @@ export default class RawData {
 			eu_z = -1.0 * Math.sin(alpha) * pixel_size / this.vz;
 			ev_y = pixel_size / this.vy;
 
-			px = center[0];
-			py = center[2];
-			while (1) {
-				px -= eu_x;
-				py -= eu_z;
-				if (px < 0.0 || py < 0.0 || px > rx - 1 || py > rz - 1)  break;
-				minus_cnt++;
-			}
-
-			origin_x = px;
-			origin_z = py;
+			let edge = this.walkUntilObliqueBounds(center[0], center[2], -eu_x, -eu_z, rx, rz);
+			minus_cnt = edge.count;
+			origin_x = edge.px;
+			origin_z = edge.py;
 			center_x = minus_cnt;
 			center_y = Math.floor(center[1] * this.vy / pixel_size);
 
-			px = center[0];
-			py = center[2];
-			while (1) {
-				px += eu_x;
-				py += eu_z;
-				if (px < 0.0 || py < 0.0 || px > rx - 1 || py > rz - 1)  break;
-				plus_cnt++;
-			}
+			edge = this.walkUntilObliqueBounds(center[0], center[2], eu_x, eu_z, rx, rz);
+			plus_cnt = edge.count;
 
 			outWidth = minus_cnt + plus_cnt + 1;
 			outHeight = Math.floor(ry * this.vy / pixel_size);
@@ -384,28 +373,15 @@ export default class RawData {
 			ev_y = Math.cos(alpha) * pixel_size / this.vy;
 			ev_z = -1.0 * Math.sin(alpha) * pixel_size / this.vz;
 
-			px = center[1];
-			py = center[2];
-			while (1) {
-				px -= ev_y;
-				py -= ev_z;
-				if (px < 0.0 || py < 0.0 || px > ry - 1 || py > rz - 1)  break;
-				minus_cnt++;
-			}
-
-			origin_y = px;
-			origin_z = py;
+			let edge = this.walkUntilObliqueBounds(center[1], center[2], -ev_y, -ev_z, ry, rz);
+			minus_cnt = edge.count;
+			origin_y = edge.px;
+			origin_z = edge.py;
 			center_x = Math.floor(center[0] * this.vx / pixel_size);
 			center_y = minus_cnt;
 
-			px = center[1];
-			py = center[2];
-			while (1) {
-				px += ev_y;
-				py += ev_z;
-				if (px < 0.0 || py < 0.0 || px > rx - 1 || py > rz - 1)  break;
-				plus_cnt++;
-			}
+			edge = this.walkUntilObliqueBounds(center[1], center[2], ev_y, ev_z, ry, rz);
+			plus_cnt = edge.count;
 
 			outWidth = Math.floor(rx * this.vx / pixel_size);
 			outHeight = minus_cnt + plus_cnt + 1;

@@ -53,6 +53,8 @@ export default class RawData {
 
 	// Voxel read function (maps to one of data.readIntXX functions)
 	protected read: (pos: number) => number;
+	// Voxel write function (maps to one of data.writeIntXX functions)
+	protected write: (value: number, pos: number) => void;
 
 	/**
 	 * Get pixel value. Each parameter must be an integer.
@@ -63,6 +65,17 @@ export default class RawData {
 	 */
 	public getPixelAt(x: number, y: number, z: number): number {
 		return this.read(x + (y + z * this.y) * this.x);
+	}
+
+	/**
+	 * Write pixel value at the specified location.
+	 * @param value Pixel value to write.
+	 * @param x integer x-coordinate
+	 * @param y integer y-coordinate
+	 * @param z integer z-coordinate
+	 */
+	public writePixelAt(value: number, x: number, y: number, z: number): void {
+		this.write(value, x + (y + z * this.y) * this.x);
 	}
 
 	/**
@@ -164,18 +177,27 @@ export default class RawData {
 		switch (type) {
 			case PixelFormat.UInt8:
 				this.read = pos => this.data.readUInt8(pos);
+				this.write = (value, pos) => this.data.writeUInt8(value, pos);
 				break;
 			case PixelFormat.Int8:
 				this.read = pos => this.data.readInt8(pos);
+				this.write = (value, pos) => this.data.writeInt8(value, pos);
 				break;
 			case PixelFormat.UInt16:
 				this.read = pos => this.data.readUInt16LE(pos * 2);
+				this.write = (value, pos) => this.data.writeUInt16LE(value, pos * 2);
 				break;
 			case PixelFormat.Int16:
 				this.read = pos => this.data.readInt16LE(pos * 2);
+				this.write = (value, pos) => this.data.writeInt16LE(value, pos * 2);
 				break;
 			case PixelFormat.Binary:
 				this.read = pos => (this.data.readUInt8(pos >> 3) >> (7 - pos % 8) & 1);
+				this.write = (value, pos) => {
+					let cur = this.data.readUInt8(pos >> 3);
+					cur ^= (-value ^ cur) & (1 << (7 - pos % 8)); // set n-th bit to value
+					this.data.writeUInt8(cur, pos >> 3);
+				};
 				break;
 			default:
 				throw new RangeError('Invalid pixel format');

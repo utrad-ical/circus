@@ -20,9 +20,6 @@ var volume = dumper.readDicom('dummy').then(function(volume) {
 		})
 		.on('cycle', function(event) {
 			console.log(event.target.toString());
-		})
-		.on('complete', function() {
-			console.log('Finish');
 		});
 	suite.run();
 });

@@ -306,88 +306,66 @@ export default class RawData {
 			if (px < 0 || py < 0 || px > mx - 1 || py > my - 1) break;
 			count++;
 		}
-		return { count, px, py};
+		return { count, px, py };
 	}
 
 	public singleOblique(base_axis: string, center: Vector3D, alpha: number,
 			windowWidth: number, windowLevel: number): ObliqueResult
 	{
-		var eu_x: number = 0.0;
-		var eu_y: number = 0.0;
-		var eu_z: number = 0.0;
-		var ev_x: number = 0.0;
-		var ev_y: number = 0.0;
-		var ev_z: number = 0.0;
-		var [rx, ry, rz] = [this.x, this.y, this.z];
-		var origin_x: number = 0;
-		var origin_y: number = 0;
-		var origin_z: number = 0;
+		let [eu_x, eu_y, eu_z] = [0, 0, 0];
+		let [ev_x, ev_y, ev_z] = [0, 0, 0];
+		let [rx, ry, rz] = [this.x, this.y, this.z];
+		let [origin_x, origin_y, origin_z] = [0, 0, 0];
 
-		var outWidth: number = 0;
-		var outHeight: number = 0;
-		var pixel_size: number = Math.min(this.vx, Math.min(this.vy, this.vz));
-		var center_x = 0;
-		var center_y = 0;
-		var minus_cnt = 0;
-		var plus_cnt = 0;
+		let [outWidth, outHeight] = [0, 0];
+		let [centerX, centerY] = [0, 0];
+		var pixelSize = Math.min(this.vx, this.vy, this.vz);
 
-		// Set parameters
+		// Determine output size
 		if (base_axis === 'axial') {
-			eu_x = Math.cos(alpha) * pixel_size / this.vx;
-			eu_y = -1.0 * Math.sin(alpha) * pixel_size / this.vy;
-			ev_z = pixel_size / this.vz;
+			eu_x = Math.cos(alpha) * pixelSize / this.vx;
+			eu_y = -1.0 * Math.sin(alpha) * pixelSize / this.vy;
+			ev_z = pixelSize / this.vz;
 
-			let edge = this.walkUntilObliqueBounds(center[0], center[1], -eu_x, -eu_y, rx, ry);
-			minus_cnt = edge.count;
-			origin_x = edge.px;
-			origin_y = edge.py;
-			center_x = minus_cnt;
-			center_y = Math.floor(center[2] * this.vz / pixel_size);
+			let minus = this.walkUntilObliqueBounds(center[0], center[1], -eu_x, -eu_y, rx, ry);
+			let plus = this.walkUntilObliqueBounds(center[0], center[1], eu_x, eu_y, rx, ry);
 
-			edge = this.walkUntilObliqueBounds(center[0], center[1], eu_x, eu_y, rx, ry);
-			plus_cnt = edge.count;
-
-			outWidth = minus_cnt + plus_cnt + 1;
-			outHeight = Math.floor(rz * this.vz / pixel_size);
-
+			origin_x = minus.px;
+			origin_y = minus.py;
+			centerX = minus.count;
+			centerY = Math.floor(center[2] * this.vz / pixelSize);
+			outWidth = minus.count + plus.count + 1;
+			outHeight = Math.floor(rz * this.vz / pixelSize);
 		} else if (base_axis === 'coronal') {
-			eu_x = Math.cos(alpha) * pixel_size / this.vx;
-			eu_z = -1.0 * Math.sin(alpha) * pixel_size / this.vz;
-			ev_y = pixel_size / this.vy;
+			eu_x = Math.cos(alpha) * pixelSize / this.vx;
+			eu_z = -1.0 * Math.sin(alpha) * pixelSize / this.vz;
+			ev_y = pixelSize / this.vy;
 
-			let edge = this.walkUntilObliqueBounds(center[0], center[2], -eu_x, -eu_z, rx, rz);
-			minus_cnt = edge.count;
-			origin_x = edge.px;
-			origin_z = edge.py;
-			center_x = minus_cnt;
-			center_y = Math.floor(center[1] * this.vy / pixel_size);
+			let minus = this.walkUntilObliqueBounds(center[0], center[2], -eu_x, -eu_z, rx, rz);
+			let plus = this.walkUntilObliqueBounds(center[0], center[2], eu_x, eu_z, rx, rz);
 
-			edge = this.walkUntilObliqueBounds(center[0], center[2], eu_x, eu_z, rx, rz);
-			plus_cnt = edge.count;
-
-			outWidth = minus_cnt + plus_cnt + 1;
-			outHeight = Math.floor(ry * this.vy / pixel_size);
-
+			origin_x = minus.px;
+			origin_z = minus.py;
+			centerX = minus.count;
+			centerY = Math.floor(center[1] * this.vy / pixelSize);
+			outWidth = minus.count + plus.count + 1;
+			outHeight = Math.floor(ry * this.vy / pixelSize);
 		} else if (base_axis === 'sagittal') {
-			eu_x = pixel_size / this.vx;
-			ev_y = Math.cos(alpha) * pixel_size / this.vy;
-			ev_z = -1.0 * Math.sin(alpha) * pixel_size / this.vz;
+			eu_x = pixelSize / this.vx;
+			ev_y = Math.cos(alpha) * pixelSize / this.vy;
+			ev_z = -1.0 * Math.sin(alpha) * pixelSize / this.vz;
 
-			let edge = this.walkUntilObliqueBounds(center[1], center[2], -ev_y, -ev_z, ry, rz);
-			minus_cnt = edge.count;
-			origin_y = edge.px;
-			origin_z = edge.py;
-			center_x = Math.floor(center[0] * this.vx / pixel_size);
-			center_y = minus_cnt;
+			let minus = this.walkUntilObliqueBounds(center[1], center[2], -ev_y, -ev_z, ry, rz);
+			let plus = this.walkUntilObliqueBounds(center[1], center[2], ev_y, ev_z, ry, rz);
 
-			edge = this.walkUntilObliqueBounds(center[1], center[2], ev_y, ev_z, ry, rz);
-			plus_cnt = edge.count;
-
-			outWidth = Math.floor(rx * this.vx / pixel_size);
-			outHeight = minus_cnt + plus_cnt + 1;
-
+			origin_y = minus.px;
+			origin_z = minus.py;
+			centerX = Math.floor(center[0] * this.vx / pixelSize);
+			centerY = minus.count;
+			outWidth = Math.floor(rx * this.vx / pixelSize);
+			outHeight = minus.count + plus.count + 1;
 		} else {
-			return null;
+			throw new Error('Invalid axis argument.');
 		}
 
 		// Create oblique image
@@ -397,15 +375,14 @@ export default class RawData {
 
 		var buffer = new Buffer(outWidth * outHeight);
 		var buffer_offset = 0;
+		let value = 0;
 
-		for (var j = 0; j < outHeight; j++) {
+		for (let j = 0; j < outHeight; j++) {
 			let pos_x = x;
 			let pos_y = y;
 			let pos_z = z;
 
-			for (var i = 0; i < outWidth; i++) {
-
-				let value = 0;
+			for (let i = 0; i < outWidth; i++) {
 
 				if (pos_x >= 0.0 && pos_y >= 0.0 && pos_z >= 0.0
 					&& pos_x <= rx - 1 && pos_y <= ry - 1 && pos_z <= rz - 1) {
@@ -413,8 +390,7 @@ export default class RawData {
 						windowWidth, windowLevel,
 						this.getPixelWithInterpolation(pos_x, pos_y, pos_z)
 					);
-				}
-
+				} else value = 0;
 				buffer.writeUInt8(value, buffer_offset++);
 
 				pos_x += eu_x;
@@ -427,7 +403,6 @@ export default class RawData {
 		}
 
 		return {buffer, outWidth, outHeight,
-			pixelSize: pixel_size,
-			centerX: center_x, centerY: center_y};
+			pixelSize, centerX, centerY};
 	}
 }

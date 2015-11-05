@@ -13,17 +13,19 @@ export default class AuthorizationCache {
 	constructor(config: any) {
 		this.config = config || {};
 
-		setInterval(() => {
-			var date: Date = new Date();
+		setInterval(
+			() => {
+				let date: Date = new Date();
 
-			for (var x in this.cache) {
-				var limit: Date = this.cache[x];
-				if (limit.getTime() <= date.getTime()) {
-					delete this.cache[x];
+				for (let x in this.cache) {
+					let limit: Date = this.cache[x];
+					if (limit.getTime() <= date.getTime()) {
+						delete this.cache[x];
+					}
 				}
-			}
-
-		}, 3600 * 1000);
+			},
+			3600 * 1000
+		);
 
 	}
 
@@ -34,7 +36,7 @@ export default class AuthorizationCache {
 	 * @param token any strings to identify client.
 	 */
 	public update(series: string, token: string): void {
-		var currentDate: Date = new Date();
+		let currentDate: Date = new Date();
 		currentDate.setTime(currentDate.getTime() + this.config.expire * 1000);
 		this.cache[token + '_' + series] = currentDate;
 	}
@@ -46,37 +48,33 @@ export default class AuthorizationCache {
 	 * @returns {boolean}
 	 */
 	public isValid(req: http.ServerRequest): boolean {
-		var query = url.parse(req.url, true).query;
-		var token: string;
-		var series: string;
+		let query = url.parse(req.url, true).query;
+		let token: string;
+		let series: string;
 
 		if ('series' in query) {
-			series = query['series'];
-			//logger.debug('series=' + series);
+			series = query.series;
 		}
 
 		if ('authorization' in req.headers) {
-			token = req.headers['authorization'];
-			//logger.debug('token=' + token);
-			var t = token.split(' ');
-			if (t[0].toLowerCase() != 'bearer') {
+			token = req.headers.authorization;
+			let t = token.split(' ');
+			if (t[0].toLowerCase() !== 'bearer') {
 				return false;
 			}
 			token = t[1];
 		} else {
-			logger.warn("Authorization http header.");
+			logger.warn('Authorization http header.');
 		}
 		if (series == null || token == null) {
 			logger.debug('series or token is null');
 			return false;
 		}
 
-		var key: string = token + '_' + series;
-		var current: Date = new Date();
-		var date: Date = this.cache[key];
+		let key: string = token + '_' + series;
+		let current: Date = new Date();
+		let date: Date = this.cache[key];
 
-		//logger.debug('current: ' + current);
-		//logger.debug('target : ' + date);
 		if (date == null) {
 			logger.debug('token not found');
 			return false;

@@ -9,7 +9,7 @@ interface CounterHash {
 export default class Counter {
 	private counter: CounterHash = {};
 
-	public countUp(key: string) {
+	public countUp(key: string): void {
 		if (key in this.counter) {
 			this.counter[key]++;
 		} else {

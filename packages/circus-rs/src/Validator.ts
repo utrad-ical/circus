@@ -20,15 +20,15 @@ export class Validator {
 	}
 
 	public validate(input: any): { result: any; errors: string[] } {
-		var result: any = {};
-		var errors: string[] = [];
+		let result: any = {};
+		let errors: string[] = [];
 
 		// iterates over the rules object
-		for (var key in this.rules) {
-			var spec = this.rules[key];
-			var [/*description*/, defaultValue, rule, normalizer] = spec;
-			var required: boolean = false;
-			var value: any;
+		for (let key in this.rules) {
+			let spec = this.rules[key];
+			let [/*description*/, defaultValue, rule, normalizer] = spec;
+			let required: boolean = false;
+			let value: any;
 			if (/\!$/.test(key)) {
 				key = key.slice(0, -1);
 				required = true;
@@ -48,12 +48,12 @@ export class Validator {
 			}
 
 			// Checks the input value.
-			var ok: boolean = false;
+			let ok: boolean = false;
 			if (typeof rule === 'string') {
 				// The rule is a set of rules delimited by the pipe character
 				// (e.g. "isLength:2:5|isJSON")
 				ok = rule.split(/\s?\|\s?/).every(cond => {
-					var [funcName, ...rest] = cond.split(':');
+					let [funcName, ...rest] = cond.split(':');
 					return validator[funcName](value, ...rest);
 				});
 			} else if (rule instanceof Function) {
@@ -71,7 +71,7 @@ export class Validator {
 			if (ok) {
 				if (typeof normalizer === 'string') {
 					normalizer.split(/\s?\|\s?/).forEach(norm => {
-						var [funcName, ...rest] = norm.split(':');
+						let [funcName, ...rest] = norm.split(':');
 						value = validator[funcName](value, ...rest);
 					});
 				} else if (normalizer instanceof Function) {

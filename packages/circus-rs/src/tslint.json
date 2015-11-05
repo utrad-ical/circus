@@ -13,7 +13,7 @@
 			"check-space"
 		],
 		"eofline": true,
-		"forin": true,
+		"forin": false,
 		"indent": [
 			true,
 			"tabs"

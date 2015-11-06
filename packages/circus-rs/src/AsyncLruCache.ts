@@ -99,7 +99,7 @@ export default class AsyncLruCache<T> {
 		this.loader(key).then(
 			(loaded: T) => {
 				let size = this.options.sizeFunc(loaded);
-				this.lru.push({key, loaded, size, time: new Date()});
+				this.lru.push({key, item: loaded, size, time: new Date()});
 				this.totalSize += size;
 				this.truncate();
 				let callbacks = this.pendings[key];

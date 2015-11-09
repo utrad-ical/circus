@@ -93,6 +93,13 @@ export default class RawData {
 		this.write(value, x + (y + z * this.y) * this.x);
 	}
 
+	public markSliceAsLoaded(z: number): void {
+		if (z < 0 || z >= this.z) {
+			throw new RangeError('z-index out of bounds');
+		}
+		this.loadedSlices.append(z);
+	}
+
 	/**
 	 * Get pixel value using bilinear interpolation.
 	 * @param x floating point x-coordinate

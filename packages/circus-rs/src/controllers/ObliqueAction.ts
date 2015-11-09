@@ -45,7 +45,7 @@ export default class ObliqueAction extends VolumeBasedController {
 					'Access-Control-Expose-Headers',
 					'X-Circus-Pixel-Size, X-Circus-Pixel-Columns, X-Circus-Pixel-Rows, X-Circus-Center'
 				);
-				this.respondImage(res, result.buffer, result.outWidth, result.outHeight);
+				this.respondImage(res, new Buffer(result.image), result.outWidth, result.outHeight);
 			});
 	}
 

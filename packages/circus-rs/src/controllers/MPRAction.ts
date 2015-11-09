@@ -27,8 +27,8 @@ export default class MPRAction extends VolumeBasedController {
 		if (wl === null) wl = vol.wl;
 
 		vol.orthogonalMpr(mode, target, ww, wl)
-			.then(({ buffer, outWidth, outHeight }) => {
-				this.respondImage(res, buffer, outWidth, outHeight);
+			.then(({ image, outWidth, outHeight }) => {
+				this.respondImage(res, new Buffer(image), outWidth, outHeight);
 			});
 	}
 

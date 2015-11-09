@@ -21,7 +21,7 @@ export enum PixelFormat {
 export type Vector3D = [number, number, number];
 
 interface MprResult {
-	buffer: Buffer;
+	image: Uint8Array;
 	outWidth:  number;
 	outHeight: number;
 }
@@ -66,9 +66,9 @@ export default class RawData {
 	// When complete, this.loadedSlices.length() will be the same as this.z.
 	protected loadedSlices: MultiRange = new MultiRange();
 
-	// Voxel read function (maps to one of data.readIntXX functions)
+	// Voxel read function
 	protected read: (pos: number) => number;
-	// Voxel write function (maps to one of data.writeIntXX functions)
+	// Voxel write function
 	protected write: (value: number, pos: number) => void;
 
 	/**
@@ -296,7 +296,7 @@ export default class RawData {
 		target: number, windowWidth: number,
 		windowLevel: number
 	): Promise<MprResult> {
-		let buffer: Buffer;
+		let image: Uint8Array;
 		let buffer_offset = 0;
 		let [rx, ry, rz] = [this.x, this.y, this.z];
 
@@ -308,34 +308,28 @@ export default class RawData {
 		switch (axis) {
 			case 'sagittal':
 				checkZranges();
-				buffer = new Buffer(ry * rz);
+				image = new Uint8Array(ry * rz);
 				for (let z = 0; z < rz; z++)
 					for (let y = 0; y < ry; y++)
-						buffer.writeUInt8(
-							this.applyWindow(windowWidth, windowLevel, this.getPixelAt(target, y, z)),
-							buffer_offset++
-						);
-				return Promise.resolve({buffer, outWidth: ry, outHeight: rz});
+						image[buffer_offset++] =
+							this.applyWindow(windowWidth, windowLevel, this.getPixelAt(target, y, z));
+				return Promise.resolve({image, outWidth: ry, outHeight: rz});
 			case 'coronal':
 				checkZranges();
-				buffer = new Buffer(rx * rz);
+				image = new Uint8Array(rx * rz);
 				for (let z = 0; z < rz; z++)
 					for (let x = 0; x < rx; x++)
-						buffer.writeUInt8(
-							this.applyWindow(windowWidth, windowLevel, this.getPixelAt(x, target, z)),
-							buffer_offset++
-						);
-				return Promise.resolve({buffer, outWidth: rx, outHeight: rz});
+						image[buffer_offset++] =
+							this.applyWindow(windowWidth, windowLevel, this.getPixelAt(x, target, z));
+				return Promise.resolve({image, outWidth: rx, outHeight: rz});
 			default:
 			case 'axial':
-				buffer = new Buffer(rx * ry);
+				image = new Uint8Array(rx * ry);
 				for (let y = 0; y < ry; y++)
 					for (let x = 0; x < rx; x++)
-						buffer.writeUInt8(
-							this.applyWindow(windowWidth, windowLevel, this.getPixelAt(x, y, target)),
-							buffer_offset++
-						);
-				return Promise.resolve({buffer, outWidth: rx, outHeight: ry});
+						image[buffer_offset++] =
+							this.applyWindow(windowWidth, windowLevel, this.getPixelAt(x, y, target));
+				return Promise.resolve({image, outWidth: rx, outHeight: ry});
 		}
 	}
 
@@ -437,8 +431,8 @@ export default class RawData {
 		// Create oblique image
 		let [x, y, z] = origin;
 
-		let buffer = new Buffer(outWidth * outHeight);
-		let buffer_offset = 0;
+		let image = new Uint8Array(outWidth * outHeight);
+		let imageOffset = 0;
 		let value = 0;
 
 		for (let j = 0; j < outHeight; j++) {
@@ -455,7 +449,7 @@ export default class RawData {
 						this.getPixelWithInterpolation(pos_x, pos_y, pos_z)
 					);
 				} else value = 0;
-				buffer.writeUInt8(value, buffer_offset++);
+				image[imageOffset++] = value;
 
 				pos_x += eu_x;
 				pos_y += eu_y;
@@ -467,7 +461,7 @@ export default class RawData {
 		}
 
 		return Promise.resolve({
-			buffer,
+			image,
 			outWidth, outHeight,
 			pixelSize, centerX, centerY
 		});

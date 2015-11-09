@@ -27,6 +27,14 @@ interface ObliqueResult {
 	centerY: number;
 }
 
+interface PixelFormatInfo {
+	bpp: number;
+	minLevel: number;
+	maxLevel: number;
+	minWidth: number;
+	maxWidth: number;
+}
+
 export default class RawData {
 	// Number of voxels
 	protected x: number = 0;
@@ -87,56 +95,55 @@ export default class RawData {
 	 * @param z floating point z-coordinate
 	 * @returns Corresponding voxel value.
 	 */
-	public getPixelWithInterpolation(x: number, y: number, z: number): number
-	{
-		var x_end = this.x - 1;
-		var y_end = this.y - 1;
-		var z_end = this.z - 1;
+	public getPixelWithInterpolation(x: number, y: number, z: number): number {
+		let x_end = this.x - 1;
+		let y_end = this.y - 1;
+		let z_end = this.z - 1;
 		if (x < 0.0 || y < 0.0 || z < 0.0 || x > x_end || y > y_end || z > z_end) {
 			return 0;
 		}
 
-		var iz = Math.floor(z);
+		let iz = Math.floor(z);
 		if (iz >= z_end) {
 			iz = z_end - 1;
 			z = z_end;
 		}
-		var ix = Math.floor(x);
+		let ix = Math.floor(x);
 		if (ix >= x_end) {
 			ix = x_end - 1;
 			x = x_end;
 		}
-		var iy = Math.floor(y);
+		let iy = Math.floor(y);
 		if (iy >= y_end) {
 			iy = y_end - 1;
 			y = y_end;
 		}
 
-		var value_z1 = this.getAxialInterpolation(ix, x, iy, y, iz);
-		var value_z2 = this.getAxialInterpolation(ix, x, iy, y, iz + 1);
-		var weight_z2 = z - iz;
-		var weight_z1 = 1.0 - weight_z2;
+		let value_z1 = this.getAxialInterpolation(ix, x, iy, y, iz);
+		let value_z2 = this.getAxialInterpolation(ix, x, iy, y, iz + 1);
+		let weight_z2 = z - iz;
+		let weight_z1 = 1.0 - weight_z2;
 		return value_z1 * weight_z1 + value_z2 * weight_z2;
 	}
 
 	protected getAxialInterpolation(ix: number, x: number, iy: number, y: number, intz: number): number {
-		var ixp1 = ix + 1;
-		var iyp1 = iy + 1;
+		let ixp1 = ix + 1;
+		let iyp1 = iy + 1;
 
 		// p0 p1
 		// p2 p3
-		var offset = this.x * this.y * intz;
-		var p0 = this.read(offset + ix   + iy   * this.x);
-		var p1 = this.read(offset + ixp1 + iy   * this.x);
-		var p2 = this.read(offset + ix   + iyp1 * this.x);
-		var p3 = this.read(offset + ixp1 + iyp1 * this.x);
+		let offset = this.x * this.y * intz;
+		let p0 = this.read(offset + ix + iy * this.x);
+		let p1 = this.read(offset + ixp1 + iy * this.x);
+		let p2 = this.read(offset + ix + iyp1 * this.x);
+		let p3 = this.read(offset + ixp1 + iyp1 * this.x);
 
-		var weight_x2 = x - ix;
-		var weight_x1 = 1.0 - weight_x2;
-		var weight_y2 = y - iy;
-		var weight_y1 = 1.0 - weight_y2;
-		var value_y1 = p0 * weight_x1 + p1 * weight_x2;
-		var value_y2 = p2 * weight_x1 + p3 * weight_x2;
+		let weight_x2 = x - ix;
+		let weight_x1 = 1.0 - weight_x2;
+		let weight_y2 = y - iy;
+		let weight_y1 = 1.0 - weight_y2;
+		let value_y1 = p0 * weight_x1 + p1 * weight_x2;
+		let value_y2 = p2 * weight_x1 + p3 * weight_x2;
 		return (value_y1 * weight_y1 + value_y2 * weight_y2);
 	}
 
@@ -157,8 +164,8 @@ export default class RawData {
 		if (this.x * this.y * this.bpp > imageData.byteLength) {
 			throw new Error('Not enough buffer length');
 		}
-		var len = this.x * this.y * this.bpp;
-		var offset = len * z;
+		let len = this.x * this.y * this.bpp;
+		let offset = len * z;
 		let src = new Uint8Array(imageData, 0, len);
 		let dst = new Uint8Array(this.data, offset, len);
 		dst.set(src);
@@ -227,23 +234,23 @@ export default class RawData {
 		return this.type;
 	}
 
-	public getPixelFormatInfo(type?: PixelFormat):
-		{ bpp: number; minLevel: number; maxLevel: number; minWidth: number; maxWidth: number }
-	{
+	public getPixelFormatInfo(type?: PixelFormat): PixelFormatInfo {
 		if (typeof type === 'undefined') {
 			type = this.type;
 		}
 		switch (type) {
 			case PixelFormat.UInt8:
-				return { bpp: 1, minWidth: 1, maxWidth: 256, minLevel: 0, maxLevel: 255};
+				return {bpp: 1, minWidth: 1, maxWidth: 256, minLevel: 0, maxLevel: 255};
 			case PixelFormat.Int8:
-				return { bpp: 1, minWidth: 1, maxWidth: 256, minLevel: -128, maxLevel: 127};
+				return {bpp: 1, minWidth: 1, maxWidth: 256, minLevel: -128, maxLevel: 127};
 			case PixelFormat.UInt16:
-				return { bpp: 2, minWidth: 1, maxWidth: 65536, minLevel: 0, maxLevel: 65535};
+				return {bpp: 2, minWidth: 1, maxWidth: 65536, minLevel: 0, maxLevel: 65535};
 			case PixelFormat.Int16:
-				return { bpp: 2, minWidth: 1, maxWidth: 65536, minLevel: -32768, maxLevel: 32767};
+				return {bpp: 2, minWidth: 1, maxWidth: 65536, minLevel: -32768, maxLevel: 32767};
 			case PixelFormat.Binary:
-				return { bpp: 0.125, minWidth: 1, maxWidth: 1, minLevel: 0, maxLevel: 1 };
+				return {bpp: 0.125, minWidth: 1, maxWidth: 1, minLevel: 0, maxLevel: 1};
+			default:
+				throw new Error('Undefined pixel format.');
 		}
 	}
 
@@ -268,7 +275,7 @@ export default class RawData {
 	 * Applies window level/width
 	 */
 	protected applyWindow(width: number, level: number, pixel: number): number {
-		var value = Math.round((pixel - level + width / 2) * (255 / width));
+		let value = Math.round((pixel - level + width / 2) * (255 / width));
 		if (value > 255) {
 			value = 255;
 		} else if (value < 0) {
@@ -281,14 +288,14 @@ export default class RawData {
 	 * Creates an orthogonal MPR image on a new buffer.
 	 */
 	public orthogonalMpr(axis: string,
-		target: number, windowWidth: number, windowLevel: number):
-			{ buffer: Buffer; outWidth: number; outHeight: number }
-	{
-		var buffer: Buffer;
-		var buffer_offset = 0;
-		var [rx, ry, rz] = [this.x, this.y, this.z];
+		target: number, windowWidth: number,
+		windowLevel: number
+	): { buffer: Buffer; outWidth: number; outHeight: number } {
+		let buffer: Buffer;
+		let buffer_offset = 0;
+		let [rx, ry, rz] = [this.x, this.y, this.z];
 
-		var checkZranges = () => {
+		let checkZranges = () => {
 			if (this.loadedSlices.length() !== this.z)
 				throw new ReferenceError('Volume is not fully loaded to construct this MPR');
 		};
@@ -303,7 +310,7 @@ export default class RawData {
 							this.applyWindow(windowWidth, windowLevel, this.getPixelAt(target, y, z)),
 							buffer_offset++
 						);
-				return { buffer, outWidth: ry, outHeight: rz };
+				return {buffer, outWidth: ry, outHeight: rz};
 			case 'coronal':
 				checkZranges();
 				buffer = new Buffer(rx * rz);
@@ -313,9 +320,9 @@ export default class RawData {
 							this.applyWindow(windowWidth, windowLevel, this.getPixelAt(x, target, z)),
 							buffer_offset++
 						);
-				return { buffer, outWidth: rx, outHeight: rz };
-			case 'axial':
+				return {buffer, outWidth: rx, outHeight: rz};
 			default:
+			case 'axial':
 				buffer = new Buffer(rx * ry);
 				for (let y = 0; y < ry; y++)
 					for (let x = 0; x < rx; x++)
@@ -323,14 +330,13 @@ export default class RawData {
 							this.applyWindow(windowWidth, windowLevel, this.getPixelAt(x, y, target)),
 							buffer_offset++
 						);
-				return { buffer, outWidth: rx, outHeight: ry };
+				return {buffer, outWidth: rx, outHeight: ry};
 		}
 	}
 
-	protected walkUntilObliqueBounds(
-			sx: number, sy: number, dx: number, dy: number,
-			mx: number, my: number): { count: number, px: number, py: number}
-	{
+	protected walkUntilObliqueBounds(sx: number, sy: number, dx: number, dy: number,
+		mx: number, my: number
+	): { count: number, px: number, py: number} {
 		let count = 0;
 		let px = sx;
 		let py = sy;
@@ -340,12 +346,12 @@ export default class RawData {
 			if (px < 0 || py < 0 || px > mx - 1 || py > my - 1) break;
 			count++;
 		}
-		return { count, px, py };
+		return {count, px, py};
 	}
 
 	public singleOblique(base_axis: string, center: Vector3D, alpha: number,
-			windowWidth: number, windowLevel: number): ObliqueResult
-	{
+		windowWidth: number, windowLevel: number
+	): ObliqueResult {
 		let [eu_x, eu_y, eu_z] = [0, 0, 0];
 		let [ev_x, ev_y, ev_z] = [0, 0, 0];
 		let [rx, ry, rz] = [this.x, this.y, this.z];
@@ -353,7 +359,7 @@ export default class RawData {
 
 		let [outWidth, outHeight] = [0, 0];
 		let [centerX, centerY] = [0, 0];
-		var pixelSize = Math.min(this.vx, this.vy, this.vz);
+		let pixelSize = Math.min(this.vx, this.vy, this.vz);
 
 		// Determine output size
 		if (base_axis === 'axial') {
@@ -403,12 +409,12 @@ export default class RawData {
 		}
 
 		// Create oblique image
-		var x = origin_x;
-		var y = origin_y;
-		var z = origin_z;
+		let x = origin_x;
+		let y = origin_y;
+		let z = origin_z;
 
-		var buffer = new Buffer(outWidth * outHeight);
-		var buffer_offset = 0;
+		let buffer = new Buffer(outWidth * outHeight);
+		let buffer_offset = 0;
 		let value = 0;
 
 		for (let j = 0; j < outHeight; j++) {
@@ -436,7 +442,9 @@ export default class RawData {
 			z += ev_z;
 		}
 
-		return {buffer, outWidth, outHeight,
-			pixelSize, centerX, centerY};
+		return {
+			buffer, outWidth, outHeight,
+			pixelSize, centerX, centerY
+		};
 	}
 }

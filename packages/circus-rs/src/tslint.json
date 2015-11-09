@@ -2,7 +2,6 @@
 	"rules": {
 		"align": [
 			true,
-			"parameters",
 			"arguments",
 			"statements"
 		],
@@ -23,7 +22,7 @@
 		"label-undefined": true,
 		"max-line-length": [
 			true,
-			140
+			120
 		],
 		"member-access": true,
 		"member-ordering": [

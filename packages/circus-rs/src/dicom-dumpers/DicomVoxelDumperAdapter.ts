@@ -57,7 +57,7 @@ export default class DicomVoxelDumperAdapter extends DicomDumper {
 			if (json.success) {
 				var voxelData = new Buffer(binarySize);
 				data.copy(voxelData, 0, jsonSize);
-				volume.insertSingleImage(json.instanceNumber - 1, voxelData);
+				volume.insertSingleImage(json.instanceNumber - 1, new Uint8Array(voxelData));
 
 				if (typeof json.windowLevel != "undefined" && volume.dcm_wl == null) {
 					volume.dcm_wl = json.windowLevel;

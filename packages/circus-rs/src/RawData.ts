@@ -45,7 +45,9 @@ export default class RawData {
 	protected bpp: number = 1;
 
 	// Actual image data
-	protected data: Buffer;
+	protected data: ArrayBuffer;
+	// The DataView for the array buffer
+	protected view: DataView;
 
 	// Holds which images are alrady loaded in this volume.
 	// When complete, this.loadedSlices.length() will be the same as this.z.
@@ -138,19 +140,20 @@ export default class RawData {
 		return (value_y1 * weight_y1 + value_y2 * weight_y2);
 	}
 
-	public insertSingleImage(z: number, imageData: Buffer): void {
+	public insertSingleImage(z: number, imageData: Uint8Array): void {
 		if (this.x <= 0 || this.y <= 0 || this.z <= 0) {
 			throw new Error('Dimension not set');
 		}
 		if (z < 0 || z >= this.z) {
 			throw new RangeError('z-index out of bounds');
 		}
-		if (this.x * this.y * this.bpp > imageData.length) {
+		if (this.x * this.y * this.bpp > imageData.byteLength) {
 			throw new Error('Not enough buffer length');
 		}
 		var len = this.x * this.y * this.bpp;
 		var offset = len * z;
-		imageData.copy(this.data, offset, 0, len);
+		let dst = new Uint8Array(this.data, offset, len);
+		dst.set(imageData);
 		this.loadedSlices.append(z);
 	}
 
@@ -174,37 +177,40 @@ export default class RawData {
 		this.y = y;
 		this.z = z;
 		this.type = type;
+
+		this.bpp = this.getPixelFormatInfo(this.type).bpp;
+		this.data = new ArrayBuffer(x * y * z * this.bpp);
+		this.view = new DataView(this.data);
+
 		switch (type) {
 			case PixelFormat.UInt8:
-				this.read = pos => this.data.readUInt8(pos);
-				this.write = (value, pos) => this.data.writeUInt8(value, pos);
+				this.read = pos => this.view.getUint8(pos);
+				this.write = (value, pos) => this.view.setUint8(pos, value);
 				break;
 			case PixelFormat.Int8:
-				this.read = pos => this.data.readInt8(pos);
-				this.write = (value, pos) => this.data.writeInt8(value, pos);
+				this.read = pos => this.view.getInt8(pos);
+				this.write = (value, pos) => this.view.setInt8(pos, value);
 				break;
 			case PixelFormat.UInt16:
-				this.read = pos => this.data.readUInt16LE(pos * 2);
-				this.write = (value, pos) => this.data.writeUInt16LE(value, pos * 2);
+				this.read = pos => this.view.getUint16(pos * 2, true);
+				this.write = (value, pos) => this.view.setUint16(pos * 2, value, true);
 				break;
 			case PixelFormat.Int16:
-				this.read = pos => this.data.readInt16LE(pos * 2);
-				this.write = (value, pos) => this.data.writeInt16LE(value, pos * 2);
+				this.read = pos => this.view.getInt16(pos * 2, true);
+				this.write = (value, pos) => this.view.setInt16(pos * 2, value, true);
 				break;
 			case PixelFormat.Binary:
-				this.read = pos => (this.data.readUInt8(pos >> 3) >> (7 - pos % 8) & 1);
+				this.read = pos => (this.view.getUint8(pos >> 3) >> (7 - pos % 8) & 1);
 				this.write = (value, pos) => {
-					let cur = this.data.readUInt8(pos >> 3);
+					let cur = this.view.getUint8(pos >> 3);
 					cur ^= (-value ^ cur) & (1 << (7 - pos % 8)); // set n-th bit to value
-					this.data.writeUInt8(cur, pos >> 3);
+					this.view.setUint8(pos >> 3, cur);
 				};
 				break;
 			default:
 				throw new RangeError('Invalid pixel format');
 		}
 		this.bpp = this.getPixelFormatInfo().bpp;
-		this.data = new Buffer(x * y * z * this.bpp);
-		this.data.fill(0); // Newly created buffer needs to be zerofilled
 	}
 
 	public getDimension(): Vector3D {

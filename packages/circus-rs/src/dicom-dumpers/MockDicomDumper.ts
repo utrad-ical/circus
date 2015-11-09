@@ -26,13 +26,13 @@ export default class MockDicomDumper extends DicomDumper {
 		var d = ('d' in this.config) ? this.config.d : 128;
 		raw.setDimension(512, 512, d, PixelFormat.Int16);
 		for (var z = 0; z < d; z++) {
-			var sliceData = new Buffer(512 * 512 * 2);
+			var sliceData = new Uint8Array(512 * 512 * 2);
 			for (var x = 0; x < 512; x++) {
 				for (var y = 0; y < 512; y++) {
 					var val = ( Math.floor(x * 0.02)
 						+ Math.floor(y * 0.02)
 						+ Math.floor(z * 0.02) ) % 3 * 30;
-					sliceData.writeInt16LE(val, (x + y * 512) * 2);
+					sliceData[(x + y * 512) * 2] = val;
 				}
 			}
 			raw.insertSingleImage(z, sliceData);

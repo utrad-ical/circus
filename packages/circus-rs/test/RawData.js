@@ -50,5 +50,5 @@ describe('RawData', function () {
 		readWriteTest(rawdata.PixelFormat.Int16, 32, 32, 10));
 
 	it('must read/write values from/to Binary volume',
-		readWriteTest(rawdata.PixelFormat.Binary, 64, 64, 10));
+		readWriteTest(rawdata.PixelFormat.Binary, 32, 32, 10));
 });

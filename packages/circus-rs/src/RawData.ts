@@ -15,6 +15,8 @@ export enum PixelFormat {
 
 export type Vector3D = [number, number, number];
 
+export type Vector2D = [number, number];
+
 interface MprResult {
 	image: Uint8Array;
 	outWidth:  number;
@@ -259,7 +261,7 @@ export default class RawData {
 		if (!this.size) {
 			throw new Error('Dimension not set');
 		}
-		return [this.size[0], this.size[1], this.size[2]];
+		return <Vector3D>this.size.slice(0);
 	}
 
 	public getPixelFormat(): PixelFormat {
@@ -294,7 +296,7 @@ export default class RawData {
 	}
 
 	public getVoxelDimension(): Vector3D {
-		return [this.voxelSize[0], this.voxelSize[1], this.voxelSize[2]];
+		return <Vector3D>this.voxelSize.slice(0);
 	}
 
 	public get dataSize(): number {
@@ -375,6 +377,55 @@ export default class RawData {
 		return {count, px, py};
 	}
 
+	/**
+	 * Scan over the volume and make an oblique image,
+	 * starting from origin and along with the plane defined by eu/ev.
+	 * The result is written to `image`.
+	 * If windowWidth/Level is given, output image must be an Uint8Array.
+	 * Otherwise, the output image must have the same pixel format as the
+	 * source volume data.
+	 */
+	protected scanOblique(origin: Vector3D,
+		eu: Vector3D, ev: Vector3D,
+		outWidth: number, outHeight: number,
+		image: {[index: number]: number},
+		windowWidth?: number, windowLevel?: number
+	): void {
+		let [rx, ry, rz] = this.size;
+		let [x, y, z] = origin;
+		let [eu_x, eu_y, eu_z] = eu;
+		let [ev_x, ev_y, ev_z] = ev;
+
+		let imageOffset = 0;
+		let value: number;
+
+		let useWindow = (typeof windowWidth === 'number' && typeof windowLevel === 'number');
+
+		for (let j = 0; j < outHeight; j++) {
+			let [pos_x, pos_y, pos_z] = [x, y, z];
+
+			for (let i = 0; i < outWidth; i++) {
+				if (pos_x >= 0.0 && pos_y >= 0.0 && pos_z >= 0.0
+					&& pos_x <= rx - 1 && pos_y <= ry - 1 && pos_z <= rz - 1) {
+					value = this.getPixelWithInterpolation(pos_x, pos_y, pos_z);
+					if (useWindow) {
+						value = this.applyWindow(windowWidth, windowLevel, value);
+					}
+				} else {
+					value = 0;
+				}
+				image[imageOffset++] = Math.round(value);
+
+				pos_x += eu_x;
+				pos_y += eu_y;
+				pos_z += eu_z;
+			}
+			x += ev_x;
+			y += ev_y;
+			z += ev_z;
+		}
+	}
+
 	protected determineObliqueSizeAndScanOrientation(baseAxis: string, center: Vector3D, alpha: number,
 		pixelSize: number
 	): {outWidth: number, outHeight: number, centerX: number, centerY: number,
@@ -385,8 +436,8 @@ export default class RawData {
 		let [rx, ry, rz] = this.size;
 		let [vx, vy, vz] = this.voxelSize;
 		let [centerX, centerY] = [0, 0];
-		let [origin_x, origin_y, origin_z] = [0, 0, 0];
 		let [outWidth, outHeight] = [0, 0];
+		let origin: Vector3D;
 
 		// Determine output size
 		if (baseAxis === 'axial') {
@@ -397,8 +448,7 @@ export default class RawData {
 			let minus = this.walkUntilObliqueBounds(center[0], center[1], -eu_x, -eu_y, rx, ry);
 			let plus = this.walkUntilObliqueBounds(center[0], center[1], eu_x, eu_y, rx, ry);
 
-			origin_x = minus.px;
-			origin_y = minus.py;
+			origin = [minus.px, minus.py, 0];
 			centerX = minus.count;
 			centerY = Math.floor(center[2] * vz / pixelSize);
 			outWidth = minus.count + plus.count + 1;
@@ -411,8 +461,7 @@ export default class RawData {
 			let minus = this.walkUntilObliqueBounds(center[0], center[2], -eu_x, -eu_z, rx, rz);
 			let plus = this.walkUntilObliqueBounds(center[0], center[2], eu_x, eu_z, rx, rz);
 
-			origin_x = minus.px;
-			origin_z = minus.py;
+			origin = [minus.px, 0, minus.py];
 			centerX = minus.count;
 			centerY = Math.floor(center[1] * vy / pixelSize);
 			outWidth = minus.count + plus.count + 1;
@@ -425,8 +474,7 @@ export default class RawData {
 			let minus = this.walkUntilObliqueBounds(center[1], center[2], -ev_y, -ev_z, ry, rz);
 			let plus = this.walkUntilObliqueBounds(center[1], center[2], ev_y, ev_z, ry, rz);
 
-			origin_y = minus.px;
-			origin_z = minus.py;
+			origin = [0, minus.px, minus.py];
 			centerX = Math.floor(center[0] * vx / pixelSize);
 			centerY = minus.count;
 			outWidth = Math.floor(rx * vx / pixelSize);
@@ -436,13 +484,11 @@ export default class RawData {
 		}
 
 		return {
-			outWidth,
-			outHeight,
-			centerX,
-			centerY,
+			outWidth, outHeight,
+			centerX, centerY,
 			eu: [eu_x, eu_y, eu_z],
 			ev: [ev_x, ev_y, ev_z],
-			origin: [origin_x, origin_y, origin_z]
+			origin
 		};
 	}
 
@@ -453,45 +499,16 @@ export default class RawData {
 		windowWidth: number, windowLevel: number
 	): Promise<ObliqueResult> {
 		let [vx, vy, vz] = this.voxelSize;
-		let [rx, ry, rz] = this.size;
 		let pixelSize = Math.min(vx, vy, vz);
+
+		// Determine the output image bounds
 		let {outWidth, outHeight, centerX, centerY, eu, ev, origin} =
 			this.determineObliqueSizeAndScanOrientation(baseAxis, center, alpha, pixelSize);
-		let [eu_x, eu_y, eu_z] = eu;
-		let [ev_x, ev_y, ev_z] = ev;
 
-		// Create oblique image
-		let [x, y, z] = origin;
-
+		// Iterate over the output image
 		let image = new Uint8Array(outWidth * outHeight);
-		let imageOffset = 0;
-		let value = 0;
-
-		for (let j = 0; j < outHeight; j++) {
-			let pos_x = x;
-			let pos_y = y;
-			let pos_z = z;
-
-			for (let i = 0; i < outWidth; i++) {
-
-				if (pos_x >= 0.0 && pos_y >= 0.0 && pos_z >= 0.0
-					&& pos_x <= rx - 1 && pos_y <= ry - 1 && pos_z <= rz - 1) {
-					value = this.applyWindow(
-						windowWidth, windowLevel,
-						this.getPixelWithInterpolation(pos_x, pos_y, pos_z)
-					);
-				} else value = 0;
-				image[imageOffset++] = value;
-
-				pos_x += eu_x;
-				pos_y += eu_y;
-				pos_z += eu_z;
-			}
-			x += ev_x;
-			y += ev_y;
-			z += ev_z;
-		}
-
+		this.scanOblique(origin, eu, ev, outWidth, outHeight,
+			image, windowWidth, windowLevel);
 		return Promise.resolve({
 			image,
 			outWidth, outHeight,

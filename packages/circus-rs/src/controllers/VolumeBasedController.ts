@@ -27,7 +27,8 @@ export default class VolumeBasedController extends Controller {
 				this.respondInternalServerError(res, e.toString());
 			}
 		}).catch(err => {
-			this.respondNotFound(res, 'Series not found');
+			this.respondNotFound(res, 'Error while loading a series');
+			logger.error(err.toString());
 		});
 	}
 

@@ -14,7 +14,7 @@ export default class DicomDumper {
 		this.initialize();
 	}
 
-	protected initialize() {
+	protected initialize(): void {
 		// abstract
 	}
 
@@ -24,8 +24,7 @@ export default class DicomDumper {
 	 * @param dcmdir path of DICOM series data directory.
 	 * @param config request specific parameter (if needed)
 	 */
-	public readDicom(dcmdir: string, config: any): Promise<DicomVolume>
-	{
+	public readDicom(dcmdir: string, config: any): Promise<DicomVolume> {
 		// abstract
 		return null;
 	}

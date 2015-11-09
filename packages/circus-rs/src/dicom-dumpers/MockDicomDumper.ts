@@ -1,7 +1,7 @@
-import logger from './../Logger';
+// import logger from './../Logger';
 
 import DicomDumper from './DicomDumper';
-import { default as RawData, PixelFormat } from './../RawData';
+import { PixelFormat } from './../RawData';
 import DicomVolume from './../DicomVolume';
 import * as Promise from 'bluebird';
 

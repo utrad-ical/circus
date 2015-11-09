@@ -3,7 +3,7 @@
  */
 
 import * as http from 'http';
-var finalhandler = require('finalhandler');
+let finalhandler = require('finalhandler');
 
 import logger from './Logger';
 logger.info('================================');
@@ -23,7 +23,7 @@ import AuthorizationCache from './AuthorizationCache';
 import TokenAuthenticationBridge from './controllers/TokenAuthenticationBridge';
 import Controller from './controllers/Controller';
 
-var Router = require('router');
+let Router = require('router');
 
 class Server {
 	public counter: Counter;
@@ -36,20 +36,19 @@ class Server {
 		this.counter = new Counter;
 	}
 
-	public getServer(): http.Server
-	{
+	public getServer(): http.Server {
 		return this.server;
 	}
 
 	public start(): void {
 		// prepare routing
 		try {
-			var router = this.prepareRouter();
+			let router = this.prepareRouter();
 			// create server process
 			this.server = http.createServer();
 			this.server.on('request', (req: http.ServerRequest, res: http.ServerResponse) => {
 				router(req, res, finalhandler(req, res, {
-					onerror: err => {
+					onerror: (err): void => {
 						this.counter.countUp('_error');
 						logger.info(err.toString());
 					}
@@ -69,8 +68,7 @@ class Server {
 		}
 	}
 
-	public close(): Promise<void>
-	{
+	public close(): Promise<void> {
 		return new Promise<void>((resolve, reject) => {
 			this.server.close(err => {
 				if (err) {
@@ -84,61 +82,61 @@ class Server {
 	}
 
 	private createDicomReader(): AsyncLruCache<DicomVolume> {
-		var module: string = this.config.pathResolver.module;
+		let module: string = this.config.pathResolver.module;
 		logger.info('Using path resolver: ' + module);
-		var resolverClass: typeof PathResolver = require('./path-resolvers/' + module).default;
-		var resolver = new resolverClass(this.config.pathResolver.options);
+		let resolverClass: typeof PathResolver = require('./path-resolvers/' + module).default;
+		let resolver = new resolverClass(this.config.pathResolver.options);
 		module = this.config.dumper.module;
 		logger.info('Using DICOM dumper: ' + module);
-		var dumperClass: typeof DicomDumper = require('./dicom-dumpers/' + module).default;
-		var dumper = new dumperClass(this.config.dumper.options);
+		let dumperClass: typeof DicomDumper = require('./dicom-dumpers/' + module).default;
+		let dumper = new dumperClass(this.config.dumper.options);
 		return new AsyncLruCache<DicomVolume>(
 			seriesUID => {
 				return resolver
 					.resolvePath(seriesUID)
-					.then(dcmdir => dumper.readDicom(dcmdir, 'all'))
+					.then(dcmdir => dumper.readDicom(dcmdir, 'all'));
 			},
 			{
 				maxSize: this.config.cache.memoryThreshold,
-				sizeFunc: r => r.dataSize
+				sizeFunc: (r): number => r.dataSize
 			}
-		)
+		);
 	}
 
 	private createImageEncoder(): ImageEncoder {
-		var module: string = this.config.imageEncoder.module;
+		let module: string = this.config.imageEncoder.module;
 		logger.info('Using Image Encoder: ' + module);
-		var imageEncoder: typeof ImageEncoder = require('./image-encoders/' + module).default;
+		let imageEncoder: typeof ImageEncoder = require('./image-encoders/' + module).default;
 		return new imageEncoder(this.config.imageEncoder.options);
 	}
 
 	private prepareRouter(): any {
-		var config = this.config;
-		var router = Router();
-		var imageEncoder = this.createImageEncoder();
+		let config = this.config;
+		let router = Router();
+		let imageEncoder = this.createImageEncoder();
 		this.dicomReader = this.createDicomReader();
-		var authorizationCache = new AuthorizationCache(config.authorization);
+		let authorizationCache = new AuthorizationCache(config.authorization);
 
 		// path name, process class name, needs token authorization, additionl depts to inject
-		var routes: [string, string, boolean, any][] = [
+		let routes: [string, string, boolean, any][] = [
 			['metadata', 'Metadata', true, {}],
 			['mpr', 'MPRAction', true, {}],
 			['oblique', 'ObliqueAction', true, {}],
-			['status', 'ServerStatus', false, { counter: this.counter }],
+			['status', 'ServerStatus', false, {counter: this.counter}],
 		];
 
 		if (config.authorization.require) {
 			routes.push([
 				'requestToken', 'RequestAccessTokenAction', false,
-				{ cache: authorizationCache, allowFrom: config.authorization.allowFrom }
+				{cache: authorizationCache, allowFrom: config.authorization.allowFrom}
 			]);
 		}
 
 		routes.forEach(route => {
-			var [ routeName, moduleName, needsAuth, deps ] = route;
+			let [ routeName, moduleName, needsAuth, deps ] = route;
 			logger.info(`Loading ${moduleName} module...`);
-			var module: typeof Controller = require(`./controllers/${moduleName}`).default;
-			var controller = new module(this.dicomReader, imageEncoder);
+			let module: typeof Controller = require(`./controllers/${moduleName}`).default;
+			let controller = new module(this.dicomReader, imageEncoder);
 			for (let k in deps) controller[k] = deps[k];
 
 			// If token authorization is required, use this middleware

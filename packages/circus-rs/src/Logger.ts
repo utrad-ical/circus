@@ -7,11 +7,11 @@
  */
 
 import * as log4js from 'log4js';
-var config: Configuration = require('config');
+let config: Configuration = require('config');
 
 class Logger {
 	public static prepareLogger(): log4js.Logger {
-		var logConfig: any[] = null;
+		let logConfig: any[] = null;
 		if ('logs' in config && Array.isArray(config.logs)) {
 			logConfig = config.logs;
 		} else {
@@ -25,5 +25,5 @@ class Logger {
 	}
 }
 
-var logger = Logger.prepareLogger();
+let logger = Logger.prepareLogger();
 export { logger as default };

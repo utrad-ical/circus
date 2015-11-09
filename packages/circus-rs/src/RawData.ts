@@ -42,17 +42,13 @@ interface PixelFormatInfo {
 
 export default class RawData {
 	// Number of voxels
-	protected x: number = 0;
-	protected y: number = 0;
-	protected z: number = 0;
+	protected size: Vector3D = null;
 
 	// Pixel format
-	protected type: PixelFormat = PixelFormat.Unknown;
+	protected pixelFormat: PixelFormat = PixelFormat.Unknown;
 
 	// Voxel size [mm]
-	protected vx: number = 1;
-	protected vy: number = 1;
-	protected vz: number = 1;
+	protected voxelSize: Vector3D = null;
 
 	// Byte per voxel [byte/voxel]
 	protected bpp: number = 1;
@@ -79,7 +75,7 @@ export default class RawData {
 	 * @returns Corresponding voxel value.
 	 */
 	public getPixelAt(x: number, y: number, z: number): number {
-		return this.read(x + (y + z * this.y) * this.x);
+		return this.read(x + (y + z * this.size[1]) * this.size[0]);
 	}
 
 	/**
@@ -90,11 +86,11 @@ export default class RawData {
 	 * @param z integer z-coordinate
 	 */
 	public writePixelAt(value: number, x: number, y: number, z: number): void {
-		this.write(value, x + (y + z * this.y) * this.x);
+		this.write(value, x + (y + z * this.size[1]) * this.size[0]);
 	}
 
 	public markSliceAsLoaded(z: number): void {
-		if (z < 0 || z >= this.z) {
+		if (z < 0 || z >= this.size[2]) {
 			throw new RangeError('z-index out of bounds');
 		}
 		this.loadedSlices.append(z);
@@ -108,9 +104,9 @@ export default class RawData {
 	 * @returns Corresponding voxel value.
 	 */
 	public getPixelWithInterpolation(x: number, y: number, z: number): number {
-		let x_end = this.x - 1;
-		let y_end = this.y - 1;
-		let z_end = this.z - 1;
+		let x_end = this.size[0] - 1;
+		let y_end = this.size[1] - 1;
+		let z_end = this.size[2] - 1;
 		if (x < 0.0 || y < 0.0 || z < 0.0 || x > x_end || y > y_end || z > z_end) {
 			return 0;
 		}
@@ -144,11 +140,12 @@ export default class RawData {
 
 		// p0 p1
 		// p2 p3
-		let offset = this.x * this.y * intz;
-		let p0 = this.read(offset + ix + iy * this.x);
-		let p1 = this.read(offset + ixp1 + iy * this.x);
-		let p2 = this.read(offset + ix + iyp1 * this.x);
-		let p3 = this.read(offset + ixp1 + iyp1 * this.x);
+		let rx = this.size[0];
+		let offset = rx * this.size[1] * intz;
+		let p0 = this.read(offset + ix + iy * rx);
+		let p1 = this.read(offset + ixp1 + iy * rx);
+		let p2 = this.read(offset + ix + iyp1 * rx);
+		let p3 = this.read(offset + ixp1 + iyp1 * rx);
 
 		let weight_x2 = x - ix;
 		let weight_x1 = 1.0 - weight_x2;
@@ -167,16 +164,17 @@ export default class RawData {
 	 * @param imageData The inserted image data using the machine's native byte order.
 	 */
 	public insertSingleImage(z: number, imageData: ArrayBuffer): void {
-		if (this.x <= 0 || this.y <= 0 || this.z <= 0) {
+		let [rx, ry, rz] = this.size;
+		if (rx <= 0 || ry <= 0 || rz <= 0) {
 			throw new Error('Dimension not set');
 		}
-		if (z < 0 || z >= this.z) {
+		if (z < 0 || z >= rz) {
 			throw new RangeError('z-index out of bounds');
 		}
-		if (this.x * this.y * this.bpp > imageData.byteLength) {
+		if (rx * ry * this.bpp > imageData.byteLength) {
 			throw new Error('Not enough buffer length');
 		}
-		let len = this.x * this.y * this.bpp;
+		let len = rx * ry * this.bpp;
 		let offset = len * z;
 		let src = new Uint8Array(imageData, 0, len);
 		let dst = new Uint8Array(this.data, offset, len);
@@ -191,7 +189,7 @@ export default class RawData {
 		if (x <= 0 || y <= 0 || z <= 0) {
 			throw new Error('Invalid volume size.');
 		}
-		if (this.x > 0 || this.y > 0 || this.z > 0) {
+		if (this.size) {
 			throw new Error('Dimension already fixed.');
 		}
 		if (x * y * z > 1024 * 1024 * 1024) {
@@ -200,12 +198,10 @@ export default class RawData {
 		if (type === PixelFormat.Binary && (x * y) % 8 !== 0) {
 			throw new Error('Number of pixels in a slice must be a multiple of 8.');
 		}
-		this.x = x;
-		this.y = y;
-		this.z = z;
-		this.type = type;
+		this.size = [x, y, z];
+		this.pixelFormat = type;
 
-		this.bpp = this.getPixelFormatInfo(this.type).bpp;
+		this.bpp = this.getPixelFormatInfo(this.pixelFormat).bpp;
 		this.data = new ArrayBuffer(x * y * z * this.bpp);
 		this.read = pos => this.view[pos];
 		this.write = (value, pos) => this.view[pos] = value;
@@ -239,16 +235,16 @@ export default class RawData {
 	}
 
 	public getDimension(): Vector3D {
-		return [this.x, this.y, this.z];
+		return [this.size[0], this.size[1], this.size[2]];
 	}
 
 	public getPixelFormat(): PixelFormat {
-		return this.type;
+		return this.pixelFormat;
 	}
 
 	public getPixelFormatInfo(type?: PixelFormat): PixelFormatInfo {
 		if (typeof type === 'undefined') {
-			type = this.type;
+			type = this.pixelFormat;
 		}
 		switch (type) {
 			case PixelFormat.UInt8:
@@ -270,17 +266,15 @@ export default class RawData {
 	 * set voxel dimension and window
 	 */
 	public setVoxelDimension(width: number, height: number, depth: number): void {
-		this.vx = width;
-		this.vy = height;
-		this.vz = depth;
+		this.voxelSize = [width, height, depth];
 	}
 
 	public getVoxelDimension(): Vector3D {
-		return [this.vx, this.vy, this.vz];
+		return [this.voxelSize[0], this.voxelSize[1], this.voxelSize[2]];
 	}
 
 	public get dataSize(): number {
-		return this.x * this.y * this.z * this.bpp;
+		return this.size[0] * this.size[1] * this.size[2] * this.bpp;
 	}
 
 	/**
@@ -305,10 +299,10 @@ export default class RawData {
 	): Promise<MprResult> {
 		let image: Uint8Array;
 		let buffer_offset = 0;
-		let [rx, ry, rz] = [this.x, this.y, this.z];
+		let [rx, ry, rz] = this.size;
 
 		let checkZranges = () => {
-			if (this.loadedSlices.length() !== this.z)
+			if (this.loadedSlices.length() !== rz)
 				throw new ReferenceError('Volume is not fully loaded to construct this MPR');
 		};
 
@@ -362,16 +356,17 @@ export default class RawData {
 	} {
 		let [eu_x, eu_y, eu_z] = [0, 0, 0];
 		let [ev_x, ev_y, ev_z] = [0, 0, 0];
-		let [rx, ry, rz] = [this.x, this.y, this.z];
+		let [rx, ry, rz] = this.size;
+		let [vx, vy, vz] = this.voxelSize;
 		let [centerX, centerY] = [0, 0];
 		let [origin_x, origin_y, origin_z] = [0, 0, 0];
 		let [outWidth, outHeight] = [0, 0];
 
 		// Determine output size
 		if (baseAxis === 'axial') {
-			eu_x = Math.cos(alpha) * pixelSize / this.vx;
-			eu_y = -1.0 * Math.sin(alpha) * pixelSize / this.vy;
-			ev_z = pixelSize / this.vz;
+			eu_x = Math.cos(alpha) * pixelSize / vx;
+			eu_y = -1.0 * Math.sin(alpha) * pixelSize / vy;
+			ev_z = pixelSize / vz;
 
 			let minus = this.walkUntilObliqueBounds(center[0], center[1], -eu_x, -eu_y, rx, ry);
 			let plus = this.walkUntilObliqueBounds(center[0], center[1], eu_x, eu_y, rx, ry);
@@ -379,13 +374,13 @@ export default class RawData {
 			origin_x = minus.px;
 			origin_y = minus.py;
 			centerX = minus.count;
-			centerY = Math.floor(center[2] * this.vz / pixelSize);
+			centerY = Math.floor(center[2] * vz / pixelSize);
 			outWidth = minus.count + plus.count + 1;
-			outHeight = Math.floor(rz * this.vz / pixelSize);
+			outHeight = Math.floor(rz * vz / pixelSize);
 		} else if (baseAxis === 'coronal') {
-			eu_x = Math.cos(alpha) * pixelSize / this.vx;
-			eu_z = -1.0 * Math.sin(alpha) * pixelSize / this.vz;
-			ev_y = pixelSize / this.vy;
+			eu_x = Math.cos(alpha) * pixelSize / vx;
+			eu_z = -1.0 * Math.sin(alpha) * pixelSize / vz;
+			ev_y = pixelSize / vy;
 
 			let minus = this.walkUntilObliqueBounds(center[0], center[2], -eu_x, -eu_z, rx, rz);
 			let plus = this.walkUntilObliqueBounds(center[0], center[2], eu_x, eu_z, rx, rz);
@@ -393,22 +388,22 @@ export default class RawData {
 			origin_x = minus.px;
 			origin_z = minus.py;
 			centerX = minus.count;
-			centerY = Math.floor(center[1] * this.vy / pixelSize);
+			centerY = Math.floor(center[1] * vy / pixelSize);
 			outWidth = minus.count + plus.count + 1;
-			outHeight = Math.floor(ry * this.vy / pixelSize);
+			outHeight = Math.floor(ry * vy / pixelSize);
 		} else if (baseAxis === 'sagittal') {
-			eu_x = pixelSize / this.vx;
-			ev_y = Math.cos(alpha) * pixelSize / this.vy;
-			ev_z = -1.0 * Math.sin(alpha) * pixelSize / this.vz;
+			eu_x = pixelSize / vx;
+			ev_y = Math.cos(alpha) * pixelSize / vy;
+			ev_z = -1.0 * Math.sin(alpha) * pixelSize / vz;
 
 			let minus = this.walkUntilObliqueBounds(center[1], center[2], -ev_y, -ev_z, ry, rz);
 			let plus = this.walkUntilObliqueBounds(center[1], center[2], ev_y, ev_z, ry, rz);
 
 			origin_y = minus.px;
 			origin_z = minus.py;
-			centerX = Math.floor(center[0] * this.vx / pixelSize);
+			centerX = Math.floor(center[0] * vx / pixelSize);
 			centerY = minus.count;
-			outWidth = Math.floor(rx * this.vx / pixelSize);
+			outWidth = Math.floor(rx * vx / pixelSize);
 			outHeight = minus.count + plus.count + 1;
 		} else {
 			throw new Error('Invalid axis argument.');
@@ -428,8 +423,9 @@ export default class RawData {
 	public singleOblique(baseAxis: string, center: Vector3D, alpha: number,
 		windowWidth: number, windowLevel: number
 	): Promise<ObliqueResult> {
-		let [rx, ry, rz] = [this.x, this.y, this.z];
-		let pixelSize = Math.min(this.vx, this.vy, this.vz);
+		let [vx, vy, vz] = this.voxelSize;
+		let [rx, ry, rz] = this.size;
+		let pixelSize = Math.min(vx, vy, vz);
 		let {outWidth, outHeight, centerX, centerY, eu, ev, origin} =
 			this.determineObliqueSizeAndScanOrientation(baseAxis, center, alpha, pixelSize);
 		let [eu_x, eu_y, eu_z] = eu;

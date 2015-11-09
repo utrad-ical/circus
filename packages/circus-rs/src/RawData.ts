@@ -349,20 +349,20 @@ export default class RawData {
 		return {count, px, py};
 	}
 
-	public singleOblique(base_axis: string, center: Vector3D, alpha: number,
-		windowWidth: number, windowLevel: number
-	): ObliqueResult {
+	protected determineObliqueSizeAndScanOrientation(baseAxis: string, center: Vector3D, alpha: number,
+		pixelSize: number
+	): {outWidth: number, outHeight: number, centerX: number, centerY: number,
+		eu: Vector3D, ev: Vector3D, origin: Vector3D
+	} {
 		let [eu_x, eu_y, eu_z] = [0, 0, 0];
 		let [ev_x, ev_y, ev_z] = [0, 0, 0];
 		let [rx, ry, rz] = [this.x, this.y, this.z];
-		let [origin_x, origin_y, origin_z] = [0, 0, 0];
-
-		let [outWidth, outHeight] = [0, 0];
 		let [centerX, centerY] = [0, 0];
-		let pixelSize = Math.min(this.vx, this.vy, this.vz);
+		let [origin_x, origin_y, origin_z] = [0, 0, 0];
+		let [outWidth, outHeight] = [0, 0];
 
 		// Determine output size
-		if (base_axis === 'axial') {
+		if (baseAxis === 'axial') {
 			eu_x = Math.cos(alpha) * pixelSize / this.vx;
 			eu_y = -1.0 * Math.sin(alpha) * pixelSize / this.vy;
 			ev_z = pixelSize / this.vz;
@@ -376,7 +376,7 @@ export default class RawData {
 			centerY = Math.floor(center[2] * this.vz / pixelSize);
 			outWidth = minus.count + plus.count + 1;
 			outHeight = Math.floor(rz * this.vz / pixelSize);
-		} else if (base_axis === 'coronal') {
+		} else if (baseAxis === 'coronal') {
 			eu_x = Math.cos(alpha) * pixelSize / this.vx;
 			eu_z = -1.0 * Math.sin(alpha) * pixelSize / this.vz;
 			ev_y = pixelSize / this.vy;
@@ -390,7 +390,7 @@ export default class RawData {
 			centerY = Math.floor(center[1] * this.vy / pixelSize);
 			outWidth = minus.count + plus.count + 1;
 			outHeight = Math.floor(ry * this.vy / pixelSize);
-		} else if (base_axis === 'sagittal') {
+		} else if (baseAxis === 'sagittal') {
 			eu_x = pixelSize / this.vx;
 			ev_y = Math.cos(alpha) * pixelSize / this.vy;
 			ev_z = -1.0 * Math.sin(alpha) * pixelSize / this.vz;
@@ -408,10 +408,29 @@ export default class RawData {
 			throw new Error('Invalid axis argument.');
 		}
 
+		return {
+			outWidth,
+			outHeight,
+			centerX,
+			centerY,
+			eu: [eu_x, eu_y, eu_z],
+			ev: [ev_x, ev_y, ev_z],
+			origin: [origin_x, origin_y, origin_z]
+		};
+	}
+
+	public singleOblique(baseAxis: string, center: Vector3D, alpha: number,
+		windowWidth: number, windowLevel: number
+	): ObliqueResult {
+		let [rx, ry, rz] = [this.x, this.y, this.z];
+		let pixelSize = Math.min(this.vx, this.vy, this.vz);
+		let {outWidth, outHeight, centerX, centerY, eu, ev, origin} =
+			this.determineObliqueSizeAndScanOrientation(baseAxis, center, alpha, pixelSize);
+		let [eu_x, eu_y, eu_z] = eu;
+		let [ev_x, ev_y, ev_z] = ev;
+
 		// Create oblique image
-		let x = origin_x;
-		let y = origin_y;
-		let z = origin_z;
+		let [x, y, z] = origin;
 
 		let buffer = new Buffer(outWidth * outHeight);
 		let buffer_offset = 0;
@@ -443,7 +462,8 @@ export default class RawData {
 		}
 
 		return {
-			buffer, outWidth, outHeight,
+			buffer,
+			outWidth, outHeight,
 			pixelSize, centerX, centerY
 		};
 	}

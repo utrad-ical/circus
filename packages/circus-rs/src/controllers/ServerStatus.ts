@@ -5,9 +5,9 @@ import Controller from './Controller';
 import * as http from 'http';
 import Counter from '../Counter';
 
-var config: Configuration = require('config');
+let config: Configuration = require('config');
 
-var startUpTime: Date = new Date(); // The time this module was loaded
+let startUpTime: Date = new Date(); // The time this module was loaded
 
 export default class ServerStatus extends Controller {
 
@@ -17,9 +17,8 @@ export default class ServerStatus extends Controller {
 		return false;
 	}
 
-	public process(query: http.ServerRequest, res: http.ServerResponse): void
-	{
-		var status = {
+	public process(query: http.ServerRequest, res: http.ServerResponse): void {
+		let status = {
 			status: 'Running',
 			dicomReader: {
 				count: this.reader.length,
@@ -31,7 +30,7 @@ export default class ServerStatus extends Controller {
 				upSince: startUpTime.toISOString()
 			},
 			counter: this.counter.getCounts(),
-			authorization: { enabled: !!config.authorization.require }
+			authorization: {enabled: !!config.authorization.require}
 		};
 		this.respondJson(res, status);
 	}

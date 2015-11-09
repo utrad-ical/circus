@@ -13,15 +13,14 @@ export default class TokenAuthenticationBridge extends Controller {
 	private authorizationCache: AuthorizationCache;
 
 	constructor(actualController: Controller, authorizationCache: AuthorizationCache,
-				reader: AsyncLruCache<RawData>, imageEncoder: ImageEncoder)
-	{
+		reader: AsyncLruCache<RawData>, imageEncoder: ImageEncoder
+	) {
 		super(reader, imageEncoder);
 		this.authorizationCache = authorizationCache;
 		this.actualController = actualController;
 	}
 
-	public execute(req: http.ServerRequest, res: http.ServerResponse): void
-	{
+	public execute(req: http.ServerRequest, res: http.ServerResponse): void {
 		if (!this.authorizationCache.isValid(req)) {
 			res.setHeader('WWW-Authenticate', 'Bearer realm="CircusRS"');
 			res.writeHead(401, http.STATUS_CODES[401]);

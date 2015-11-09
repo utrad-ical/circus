@@ -1,3 +1,10 @@
+import Controller from './Controller';
+import * as http from 'http';
+import AuthorizationCache from '../AuthorizationCache';
+import * as crypt from 'crypto';
+import logger from '../Logger';
+import { ValidatorRules } from '../Validator';
+
 /**
  * Register access token.
  *
@@ -6,13 +13,6 @@
  *
  * also in metadata/mpr/oblique... request.
  */
-import Controller from './Controller';
-import * as http from 'http';
-import AuthorizationCache from '../AuthorizationCache';
-import * as crypt from 'crypto';
-import logger from '../Logger';
-import { ValidatorRules } from '../Validator';
-
 export default class RequestAccessTokenAction extends Controller {
 	public cache: AuthorizationCache;
 	public allowFrom: string;
@@ -28,8 +28,7 @@ export default class RequestAccessTokenAction extends Controller {
 	}
 
 	public execute(req: http.ServerRequest, res: http.ServerResponse): void {
-		var ip = req.connection.remoteAddress;
-		// logger.info(ip);
+		let ip = req.connection.remoteAddress;
 		if (!ip.match(this.allowFrom)) {
 			logger.info('401 error');
 			res.writeHead(401, http.STATUS_CODES[401]);
@@ -41,17 +40,17 @@ export default class RequestAccessTokenAction extends Controller {
 	}
 
 	protected process(query: any, res: http.ServerResponse): void {
-		var series: string = query['series'];
+		let series: string = query.series;
 
-		crypt.randomBytes(48, (err, buf)=> {
-			var status = {};
+		crypt.randomBytes(48, (err, buf) => {
+			let status = {};
 
 			if (err) {
 				this.respondInternalServerError(
 					res, 'Internal server error while genarating token'
 				);
 			} else {
-				var token: string = buf.toString('hex');
+				let token: string = buf.toString('hex');
 				this.cache.update(series, token);
 				status = {
 					'result': 'ok',

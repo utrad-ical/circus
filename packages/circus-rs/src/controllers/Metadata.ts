@@ -1,7 +1,3 @@
-/**
- * DICOM image metadata process class
- */
-
 import * as http from 'http';
 import DicomVolume from '../DicomVolume';
 import VolumeBasedController from './VolumeBasedController';
@@ -9,19 +5,21 @@ import { ValidatorRules } from '../Validator';
 
 // import logger from '../Logger';
 
+/**
+ * DICOM image metadata process class
+ */
 export default class Metadata extends VolumeBasedController {
 
-	protected getRules(): ValidatorRules
-	{
+	protected getRules(): ValidatorRules {
 		return {
 			series: ['Series UID', null, 'isLength:1:200', null],
 		};
 	}
 
 	protected processVolume(query: any, vol: DicomVolume, res: http.ServerResponse): void {
-		var dim = vol.getDimension();
-		var vd = vol.getVoxelDimension();
-		var response: any = {
+		let dim = vol.getDimension();
+		let vd = vol.getVoxelDimension();
+		let response: any = {
 			x: dim[0],
 			y: dim[1],
 			z: dim[2],
@@ -37,7 +35,7 @@ export default class Metadata extends VolumeBasedController {
 		if (vol.dcm_wl !== null) {
 			response.window_level_dicom = vol.dcm_wl;
 		}
-		var info = vol.getPixelFormatInfo();
+		let info = vol.getPixelFormatInfo();
 		response.window_width_min = info.minWidth;
 		response.window_width_max = info.maxWidth;
 		response.window_level_min = info.minLevel;

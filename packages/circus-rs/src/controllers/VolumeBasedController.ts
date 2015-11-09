@@ -10,9 +10,9 @@ import logger from '../Logger';
 
 export default class VolumeBasedController extends Controller {
 	protected process(query: any, res: http.ServerResponse): void {
-		var series: string = null;
+		let series: string = null;
 		if ('series' in query) {
-			series = query['series'];
+			series = query.series;
 		}
 		if (!series) {
 			this.respondBadRequest(res, 'No series in query');

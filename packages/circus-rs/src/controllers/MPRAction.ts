@@ -8,8 +8,6 @@ import { ValidatorRules } from '../Validator';
 
 import * as http from 'http';
 
-import logger from '../Logger';
-
 export default class MPRAction extends VolumeBasedController {
 
 	protected getRules(): ValidatorRules {
@@ -23,7 +21,7 @@ export default class MPRAction extends VolumeBasedController {
 	}
 
 	protected processVolume(query: any, vol: DicomVolume, res: http.ServerResponse): void {
-		var {ww, wl, target, mode} = query;
+		let {ww, wl, target, mode} = query;
 
 		if (ww === null) ww = vol.ww;
 		if (wl === null) wl = vol.wl;

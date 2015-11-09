@@ -8,12 +8,12 @@ import { ValidatorRules } from '../Validator';
 
 import * as http from 'http';
 
-import logger from '../Logger';
+// import logger from '../Logger';
 
 export default class ObliqueAction extends VolumeBasedController {
 
 	private checkTuple(s: string): boolean {
-		var tmp = s.split(',').map(parseFloat);
+		let tmp = s.split(',').map(parseFloat);
 		return (tmp.length === 3);
 	}
 
@@ -30,7 +30,7 @@ export default class ObliqueAction extends VolumeBasedController {
 
 	public processVolume(query: any, vol: DicomVolume, res: http.ServerResponse): void {
 
-		var { ww, wl, a, b, c } = query;
+		let { ww, wl, a, b, c } = query;
 
 		if (ww === null) ww = vol.ww;
 		if (wl === null) wl = vol.wl;

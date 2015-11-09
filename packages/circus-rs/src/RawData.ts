@@ -46,8 +46,8 @@ export default class RawData {
 
 	// Actual image data
 	protected data: ArrayBuffer;
-	// The DataView for the array buffer
-	protected view: DataView;
+	// The array view for the array buffer (eg Uint8Array)
+	protected view: {[offset: number]: number};
 
 	// Holds which images are alrady loaded in this volume.
 	// When complete, this.loadedSlices.length() will be the same as this.z.
@@ -180,31 +180,29 @@ export default class RawData {
 
 		this.bpp = this.getPixelFormatInfo(this.type).bpp;
 		this.data = new ArrayBuffer(x * y * z * this.bpp);
-		this.view = new DataView(this.data);
+		this.read = pos => this.view[pos];
+		this.write = (value, pos) => this.view[pos] = value;
 
 		switch (type) {
 			case PixelFormat.UInt8:
-				this.read = pos => this.view.getUint8(pos);
-				this.write = (value, pos) => this.view.setUint8(pos, value);
+				this.view = new Uint8Array(this.data);
 				break;
 			case PixelFormat.Int8:
-				this.read = pos => this.view.getInt8(pos);
-				this.write = (value, pos) => this.view.setInt8(pos, value);
+				this.view = new Int8Array(this.data);
 				break;
 			case PixelFormat.UInt16:
-				this.read = pos => this.view.getUint16(pos * 2, true);
-				this.write = (value, pos) => this.view.setUint16(pos * 2, value, true);
+				this.view = new Uint16Array(this.data);
 				break;
 			case PixelFormat.Int16:
-				this.read = pos => this.view.getInt16(pos * 2, true);
-				this.write = (value, pos) => this.view.setInt16(pos * 2, value, true);
+				this.view = new Int16Array(this.data);
 				break;
 			case PixelFormat.Binary:
-				this.read = pos => (this.view.getUint8(pos >> 3) >> (7 - pos % 8) & 1);
+				this.view = new Uint8Array(this.data);
+				this.read = pos => (this.view[pos >> 3] >> (7 - pos % 8)) & 1;
 				this.write = (value, pos) => {
-					let cur = this.view.getUint8(pos >> 3);
+					let cur = this.view[pos >> 3];
 					cur ^= (-value ^ cur) & (1 << (7 - pos % 8)); // set n-th bit to value
-					this.view.setUint8(pos >> 3, cur);
+					this.view[pos >> 3] = cur;
 				};
 				break;
 			default:

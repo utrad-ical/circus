@@ -1,9 +1,4 @@
-/**
- * Raw voxel container with MPR support.
- */
-
-// Make sure you don't add properties
-// that heavily depends on DICOM spec.
+// Raw voxel container class
 
 import { MultiRange } from 'multi-integer-range';
 
@@ -40,32 +35,58 @@ interface PixelFormatInfo {
 	maxWidth: number;
 }
 
+// Make sure you don't add properties
+// that heavily depends on DICOM spec!
+
+/**
+ * Raw voxel container with MPR support.
+ */
 export default class RawData {
-	// Number of voxels
+	/**
+	 * Number of voxels.
+	 */
 	protected size: Vector3D = null;
 
-	// Pixel format
+	/**
+	 * Pixel format.
+	 */
 	protected pixelFormat: PixelFormat = PixelFormat.Unknown;
 
-	// Voxel size [mm]
+	/**
+	 * Voxel size [mm]
+	 */
 	protected voxelSize: Vector3D = null;
 
-	// Byte per voxel [byte/voxel]
+	/**
+	 * Byte per voxel [byte/voxel]
+	 */
 	protected bpp: number = 1;
 
-	// Actual image data
+	/**
+	 * Actual image data.
+	 */
 	protected data: ArrayBuffer;
-	// The array view for the array buffer (eg Uint8Array)
+
+	/**
+	 * The array view used with the array buffer (eg, Uint8Array)
+	 */
 	protected view: {[offset: number]: number};
 
-	// Holds which images are alrady loaded in this volume.
-	// When complete, this.loadedSlices.length() will be the same as this.z.
-	protected loadedSlices: MultiRange = new MultiRange();
-
-	// Voxel read function
+	/**
+	 * Voxel read function
+	 */
 	protected read: (pos: number) => number;
-	// Voxel write function
+
+	/**
+	 * Voxel write function
+	 */
 	protected write: (value: number, pos: number) => void;
+
+	/**
+	 * Holds which images are already loaded in this volume.
+	 * When complete, this.loadedSlices.length() will be the same as this.z.
+	 */
+	protected loadedSlices: MultiRange = new MultiRange();
 
 	/**
 	 * Get pixel value. Each parameter must be an integer.
@@ -164,10 +185,10 @@ export default class RawData {
 	 * @param imageData The inserted image data using the machine's native byte order.
 	 */
 	public insertSingleImage(z: number, imageData: ArrayBuffer): void {
-		let [rx, ry, rz] = this.size;
-		if (rx <= 0 || ry <= 0 || rz <= 0) {
+		if (!this.size) {
 			throw new Error('Dimension not set');
 		}
+		let [rx, ry, rz] = this.size;
 		if (z < 0 || z >= rz) {
 			throw new RangeError('z-index out of bounds');
 		}
@@ -235,6 +256,9 @@ export default class RawData {
 	}
 
 	public getDimension(): Vector3D {
+		if (!this.size) {
+			throw new Error('Dimension not set');
+		}
 		return [this.size[0], this.size[1], this.size[2]];
 	}
 
@@ -274,6 +298,9 @@ export default class RawData {
 	}
 
 	public get dataSize(): number {
+		if (!this.size) {
+			throw new Error('Dimension not set');
+		}
 		return this.size[0] * this.size[1] * this.size[2] * this.bpp;
 	}
 
@@ -291,11 +318,10 @@ export default class RawData {
 	}
 
 	/**
-	 * Creates an orthogonal MPR image on a new buffer.
+	 * Creates an orthogonal MPR image on a new array buffer.
 	 */
 	public orthogonalMpr(axis: string,
-		target: number, windowWidth: number,
-		windowLevel: number
+		target: number, windowWidth: number, windowLevel: number
 	): Promise<MprResult> {
 		let image: Uint8Array;
 		let buffer_offset = 0;
@@ -420,6 +446,9 @@ export default class RawData {
 		};
 	}
 
+	/**
+	 * Creates a single oblique MPR image on a new array buffer.
+	 */
 	public singleOblique(baseAxis: string, center: Vector3D, alpha: number,
 		windowWidth: number, windowLevel: number
 	): Promise<ObliqueResult> {

@@ -12,8 +12,7 @@ import logger from '../Logger';
 
 export default class MPRAction extends VolumeBasedController {
 
-	protected getRules(): ValidatorRules
-	{
+	protected getRules(): ValidatorRules {
 		return {
 			series: ['Series UID', null, 'isLength:1:200', null],
 			target: ['Slice index', 1, 'isFloat', 'toFloat'],
@@ -23,15 +22,16 @@ export default class MPRAction extends VolumeBasedController {
 		};
 	}
 
-	protected processVolume(query: any, vol: DicomVolume, res: http.ServerResponse): void
-	{
+	protected processVolume(query: any, vol: DicomVolume, res: http.ServerResponse): void {
 		var {ww, wl, target, mode} = query;
 
 		if (ww === null) ww = vol.ww;
 		if (wl === null) wl = vol.wl;
 
-		var { buffer, outWidth, outHeight } = vol.orthogonalMpr(mode, target, ww, wl);
-		this.respondImage(res, buffer, outWidth, outHeight);
+		vol.orthogonalMpr(mode, target, ww, wl)
+			.then(({ buffer, outWidth, outHeight }) => {
+				this.respondImage(res, buffer, outWidth, outHeight);
+			});
 	}
 
 }

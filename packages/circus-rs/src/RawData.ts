@@ -7,6 +7,8 @@
 
 import { MultiRange } from 'multi-integer-range';
 
+import * as Promise from 'bluebird';
+
 export enum PixelFormat {
 	Unknown = -1,
 	UInt8 = 0,
@@ -18,10 +20,13 @@ export enum PixelFormat {
 
 export type Vector3D = [number, number, number];
 
-interface ObliqueResult {
+interface MprResult {
 	buffer: Buffer;
 	outWidth:  number;
 	outHeight: number;
+}
+
+interface ObliqueResult extends MprResult {
 	pixelSize: number;
 	centerX: number;
 	centerY: number;
@@ -290,7 +295,7 @@ export default class RawData {
 	public orthogonalMpr(axis: string,
 		target: number, windowWidth: number,
 		windowLevel: number
-	): { buffer: Buffer; outWidth: number; outHeight: number } {
+	): Promise<MprResult> {
 		let buffer: Buffer;
 		let buffer_offset = 0;
 		let [rx, ry, rz] = [this.x, this.y, this.z];
@@ -310,7 +315,7 @@ export default class RawData {
 							this.applyWindow(windowWidth, windowLevel, this.getPixelAt(target, y, z)),
 							buffer_offset++
 						);
-				return {buffer, outWidth: ry, outHeight: rz};
+				return Promise.resolve({buffer, outWidth: ry, outHeight: rz});
 			case 'coronal':
 				checkZranges();
 				buffer = new Buffer(rx * rz);
@@ -320,7 +325,7 @@ export default class RawData {
 							this.applyWindow(windowWidth, windowLevel, this.getPixelAt(x, target, z)),
 							buffer_offset++
 						);
-				return {buffer, outWidth: rx, outHeight: rz};
+				return Promise.resolve({buffer, outWidth: rx, outHeight: rz});
 			default:
 			case 'axial':
 				buffer = new Buffer(rx * ry);
@@ -330,7 +335,7 @@ export default class RawData {
 							this.applyWindow(windowWidth, windowLevel, this.getPixelAt(x, y, target)),
 							buffer_offset++
 						);
-				return {buffer, outWidth: rx, outHeight: ry};
+				return Promise.resolve({buffer, outWidth: rx, outHeight: ry});
 		}
 	}
 
@@ -421,7 +426,7 @@ export default class RawData {
 
 	public singleOblique(baseAxis: string, center: Vector3D, alpha: number,
 		windowWidth: number, windowLevel: number
-	): ObliqueResult {
+	): Promise<ObliqueResult> {
 		let [rx, ry, rz] = [this.x, this.y, this.z];
 		let pixelSize = Math.min(this.vx, this.vy, this.vz);
 		let {outWidth, outHeight, centerX, centerY, eu, ev, origin} =
@@ -461,10 +466,10 @@ export default class RawData {
 			z += ev_z;
 		}
 
-		return {
+		return Promise.resolve({
 			buffer,
 			outWidth, outHeight,
 			pixelSize, centerX, centerY
-		};
+		});
 	}
 }

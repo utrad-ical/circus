@@ -17,15 +17,14 @@ export default class ObliqueAction extends VolumeBasedController {
 		return (tmp.length === 3);
 	}
 
-	protected getRules(): ValidatorRules
-	{
+	protected getRules(): ValidatorRules {
 		return {
 			series: ['Series UID', null, 'isLength:1:200', null],
 			ww: ['Window width', null, 'isFloat', 'toFloat'],
 			wl: ['Window width', null, 'isFloat', 'toFloat'],
 			a: ['Angle', 0, 'isFloat', 'toFloat'],
 			b: ['Base axis', 'axial', /^axial|coronal|sagittal$/, (s) => s.toLowerCase()],
-			c: ['Center', [0,0,0], this.checkTuple, (s) => s.split(',').map(parseFloat)]
+			c: ['Center', [0, 0, 0], this.checkTuple, (s) => s.split(',').map(parseFloat)]
 		};
 	}
 
@@ -36,13 +35,18 @@ export default class ObliqueAction extends VolumeBasedController {
 		if (ww === null) ww = vol.ww;
 		if (wl === null) wl = vol.wl;
 
-		var result = vol.singleOblique(b, c, a, ww, wl);
-		res.setHeader('X-Circus-Pixel-Size', '' + result.pixelSize);
-		res.setHeader('X-Circus-Pixel-Columns', '' + result.outWidth);
-		res.setHeader('X-Circus-Pixel-Rows', '' + result.outHeight);
-		res.setHeader('X-Circus-Center', '' + result.centerX + ',' + result.centerY);
-		res.setHeader('Access-Control-Expose-Headers', 'X-Circus-Pixel-Size, X-Circus-Pixel-Columns, X-Circus-Pixel-Rows, X-Circus-Center');
-		this.respondImage(res, result.buffer, result.outWidth, result.outHeight);
+		vol.singleOblique(b, c, a, ww, wl)
+			.then(result => {
+				res.setHeader('X-Circus-Pixel-Size', '' + result.pixelSize);
+				res.setHeader('X-Circus-Pixel-Columns', '' + result.outWidth);
+				res.setHeader('X-Circus-Pixel-Rows', '' + result.outHeight);
+				res.setHeader('X-Circus-Center', '' + result.centerX + ',' + result.centerY);
+				res.setHeader(
+					'Access-Control-Expose-Headers',
+					'X-Circus-Pixel-Size, X-Circus-Pixel-Columns, X-Circus-Pixel-Rows, X-Circus-Center'
+				);
+				this.respondImage(res, result.buffer, result.outWidth, result.outHeight);
+			});
 	}
 
 }

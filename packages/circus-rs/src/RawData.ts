@@ -140,7 +140,14 @@ export default class RawData {
 		return (value_y1 * weight_y1 + value_y2 * weight_y2);
 	}
 
-	public insertSingleImage(z: number, imageData: Uint8Array): void {
+	/**
+	 * Appends one slice.
+	 * Note that the input data must be in the machine's native byte order
+	 * (i.e., little endian in x64 CPUs).
+	 * @param z Z coordinate of the image inserted.
+	 * @param imageData The inserted image data using the machine's native byte order.
+	 */
+	public insertSingleImage(z: number, imageData: ArrayBuffer): void {
 		if (this.x <= 0 || this.y <= 0 || this.z <= 0) {
 			throw new Error('Dimension not set');
 		}
@@ -152,8 +159,9 @@ export default class RawData {
 		}
 		var len = this.x * this.y * this.bpp;
 		var offset = len * z;
+		let src = new Uint8Array(imageData, 0, len);
 		let dst = new Uint8Array(this.data, offset, len);
-		dst.set(imageData);
+		dst.set(src);
 		this.loadedSlices.append(z);
 	}
 

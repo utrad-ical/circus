@@ -2,8 +2,7 @@
  * DICOM Dumper (using dicom_voxel_dumper)
  */
 
-import * as child_process from 'child_process';
-var exec = child_process.exec;
+import { exec } from 'child_process';
 import * as fs from 'fs';
 
 import logger from '../Logger';
@@ -24,6 +23,19 @@ export default class DicomVoxelDumperAdapter extends DicomDumper {
 		})
 	}
 
+	/**
+	 * Checks if this machine (server) is using the little endian
+	 * for 16-bit integers.
+	 */
+	protected isLittleEndian(): boolean {
+		let ab = new ArrayBuffer(2);
+		let i8 = new Int8Array(ab);
+		let i16 = new Uint16Array(ab);
+		i8[0] = 0xA1;
+		i8[1] = 0xB2;
+		return (i16[0] === 0xB2A1);
+	}
+
 	protected initialize() {
 		if (!('dumper' in this.config)) {
 			throw new Error("Dumper is not specified.");
@@ -31,6 +43,9 @@ export default class DicomVoxelDumperAdapter extends DicomDumper {
 		logger.info('Checking dumper executable: ' + this.config.dumper);
 		if (!fs.existsSync(this.config.dumper)) {
 			throw new Error("The path to the dumper is incorrect.");
+		}
+		if (!this.isLittleEndian()) {
+			throw new Error('The server machine is not using little endian.');
 		}
 	}
 
@@ -42,9 +57,6 @@ export default class DicomVoxelDumperAdapter extends DicomDumper {
 
 		var json = JSON.parse(jsonData);
 
-		//console.log('json size=' + jsonSize);
-		//console.log('binary size=' + binarySize);
-
 		if (binarySize == GLOBAL_HEADER) {
 			volume.appendHeader(json);
 			volume.setDimension(json.width, json.height, json.depth, json.dataType);
@@ -53,11 +65,13 @@ export default class DicomVoxelDumperAdapter extends DicomDumper {
 			volume.setVoxelDimension(json.voxelWidth, json.voxelHeight, json.voxelDepth);
 			volume.setEstimatedWindow(json.estimatedWindowLevel, json.estimatedWindowWidth);
 		} else if (binarySize > 0) {
-			//console.log('image block: ' + json.instanceNumber + ' size:' + binarySize + ' raw:' + data.length);
 			if (json.success) {
-				var voxelData = new Buffer(binarySize);
-				data.copy(voxelData, 0, jsonSize);
-				volume.insertSingleImage(json.instanceNumber - 1, new Uint8Array(voxelData));
+				let voxelData = new Uint8Array(binarySize);
+				let binaryOffset = jsonSize;
+				for (let i = 0; i < binarySize; i++) {
+					voxelData[i] = data.readUInt8(binaryOffset + i);
+				}
+				volume.insertSingleImage(json.instanceNumber - 1, voxelData.buffer);
 
 				if (typeof json.windowLevel != "undefined" && volume.dcm_wl == null) {
 					volume.dcm_wl = json.windowLevel;

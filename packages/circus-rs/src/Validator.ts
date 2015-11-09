@@ -23,12 +23,12 @@ export class Validator {
 		let result: any = {};
 		let errors: string[] = [];
 
+		let value: any;
 		// iterates over the rules object
 		for (let key in this.rules) {
 			let spec = this.rules[key];
 			let [/*description*/, defaultValue, rule, normalizer] = spec;
 			let required: boolean = false;
-			let value: any;
 			if (/\!$/.test(key)) {
 				key = key.slice(0, -1);
 				required = true;

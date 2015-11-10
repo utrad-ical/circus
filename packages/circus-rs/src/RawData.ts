@@ -387,14 +387,14 @@ export default class RawData {
 	 */
 	protected scanOblique(origin: Vector3D,
 		eu: Vector3D, ev: Vector3D,
-		outWidth: number, outHeight: number,
-		image: {[index: number]: number},
+		outSize: Vector2D, image: {[index: number]: number},
 		windowWidth?: number, windowLevel?: number
 	): void {
 		let [rx, ry, rz] = this.size;
 		let [x, y, z] = origin;
 		let [eu_x, eu_y, eu_z] = eu;
 		let [ev_x, ev_y, ev_z] = ev;
+		let [outWidth, outHeight] = outSize;
 
 		let imageOffset = 0;
 		let value: number;
@@ -428,8 +428,7 @@ export default class RawData {
 
 	protected determineObliqueSizeAndScanOrientation(baseAxis: string, center: Vector3D, alpha: number,
 		pixelSize: number
-	): {outWidth: number, outHeight: number, centerX: number, centerY: number,
-		eu: Vector3D, ev: Vector3D, origin: Vector3D
+	): {outSize: Vector2D, outCenter: Vector2D, eu: Vector3D, ev: Vector3D, origin: Vector3D
 	} {
 		let [eu_x, eu_y, eu_z] = [0, 0, 0];
 		let [ev_x, ev_y, ev_z] = [0, 0, 0];
@@ -484,8 +483,8 @@ export default class RawData {
 		}
 
 		return {
-			outWidth, outHeight,
-			centerX, centerY,
+			outSize: [outWidth, outHeight],
+			outCenter: [centerX, centerY],
 			eu: [eu_x, eu_y, eu_z],
 			ev: [ev_x, ev_y, ev_z],
 			origin
@@ -502,17 +501,19 @@ export default class RawData {
 		let pixelSize = Math.min(vx, vy, vz);
 
 		// Determine the output image bounds
-		let {outWidth, outHeight, centerX, centerY, eu, ev, origin} =
+		let {outSize, outCenter, eu, ev, origin} =
 			this.determineObliqueSizeAndScanOrientation(baseAxis, center, alpha, pixelSize);
 
+		// Prepare the image buffer for output
+		let image = new Uint8Array(outSize[0] * outSize[1]);
+
 		// Iterate over the output image
-		let image = new Uint8Array(outWidth * outHeight);
-		this.scanOblique(origin, eu, ev, outWidth, outHeight,
-			image, windowWidth, windowLevel);
+		this.scanOblique(origin, eu, ev, outSize, image, windowWidth, windowLevel);
 		return Promise.resolve({
 			image,
-			outWidth, outHeight,
-			pixelSize, centerX, centerY
+			outWidth: outSize[0], outHeight: outSize[1],
+			centerX: outCenter[0], centerY: outCenter[1],
+			pixelSize
 		});
 	}
 }

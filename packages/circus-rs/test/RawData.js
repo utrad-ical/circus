@@ -29,9 +29,17 @@ describe('RawData', function () {
 			for (var x = 0; x < w; x++) {
 				for (var y = 0; y < h; y++) {
 					for (var z = 0; z < d; z++) {
-						var value = Math.floor(Math.random() * (hi - lo + 1)) + lo;
+						var value = (x + y + z) % (hi - lo + 1) + lo;
 						raw.writePixelAt(value, x, y, z);
-						assert.equal(raw.getPixelAt(x, y, z), value);
+					}
+				}
+			}
+			for (var x = 0; x < w; x++) {
+				for (var y = 0; y < h; y++) {
+					for (var z = 0; z < d; z++) {
+						var value = (x + y + z) % (hi - lo + 1) + lo;
+						var px = raw.getPixelAt(x, y, z);
+						assert.equal(px, value);
 					}
 				}
 			}

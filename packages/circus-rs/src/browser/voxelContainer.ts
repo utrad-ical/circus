@@ -1,5 +1,4 @@
 declare var Zlib: any;
-declare var $: any;
 
 interface Series {
 	id: string;
@@ -620,4 +619,3 @@ class voxelContainer {
 	}
 
 }
-

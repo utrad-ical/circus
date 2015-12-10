@@ -3,7 +3,7 @@
 import DicomDumper from './DicomDumper';
 import { PixelFormat } from './../RawData';
 import DicomVolume from './../DicomVolume';
-import * as Promise from 'bluebird';
+import { Promise } from 'es6-promise';
 
 /**
  * MockDicomDumper creates dummy voluem data.

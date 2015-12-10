@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as crypto from 'crypto';
-import * as Promise from 'bluebird';
+import { Promise } from 'es6-promise';
 
 import logger from '../Logger';
 import PathResolver from './PathResolver';

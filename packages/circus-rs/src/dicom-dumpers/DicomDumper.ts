@@ -3,7 +3,7 @@
  */
 
 import DicomVolume from '../DicomVolume';
-import * as Promise from 'bluebird';
+import { Promise } from 'es6-promise';
 
 export default class DicomDumper {
 

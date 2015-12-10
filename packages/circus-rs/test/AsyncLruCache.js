@@ -1,5 +1,5 @@
 var assert = require('chai').assert;
-var Promise = require('bluebird');
+var Promise = require('es6-promise').Promise;
 var AsyncLruCache = require('../build/AsyncLruCache').default;
 
 describe('AsyncLruCache', function() {
@@ -30,7 +30,7 @@ describe('AsyncLruCache', function() {
 	}
 
 	function bufferLoader(key) {
-		return new Promise.resolve({
+		return Promise.resolve({
 			content: Math.random(),
 			length: parseInt(key.match(/\d+/)[0])
 		});

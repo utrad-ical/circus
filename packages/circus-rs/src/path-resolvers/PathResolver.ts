@@ -1,4 +1,4 @@
-import * as Promise from 'bluebird';
+import { Promise } from 'es6-promise';
 
 export default class PathResolver {
 	protected config: any = null;

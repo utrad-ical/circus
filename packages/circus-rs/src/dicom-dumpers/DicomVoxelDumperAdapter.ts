@@ -9,7 +9,7 @@ import logger from '../Logger';
 
 import DicomDumper from './DicomDumper';
 import DicomVolume from './../DicomVolume';
-import * as Promise from 'bluebird';
+import { Promise } from 'es6-promise';
 
 const GLOBAL_HEADER = -1;
 const GLOBAL_FOOTER = -2;

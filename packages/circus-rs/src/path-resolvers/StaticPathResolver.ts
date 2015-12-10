@@ -1,7 +1,7 @@
 import PathResolver from './PathResolver';
 import * as path from 'path';
 import * as crypto from 'crypto';
-import * as Promise from 'bluebird';
+import { Promise } from 'es6-promise';
 import logger from '../Logger';
 
 export default class StaticPathResolver extends PathResolver {

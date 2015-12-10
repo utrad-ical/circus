@@ -2,7 +2,7 @@
 
 import { MultiRange } from 'multi-integer-range';
 
-import * as Promise from 'bluebird';
+import { Promise } from 'es6-promise';
 
 export enum PixelFormat {
 	Unknown = -1,

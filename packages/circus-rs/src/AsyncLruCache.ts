@@ -1,4 +1,4 @@
-import * as Promise from 'bluebird';
+import { Promise } from 'es6-promise';
 
 interface LruEntry<T> {
 	key: string;

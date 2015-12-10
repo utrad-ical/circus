@@ -8,7 +8,7 @@ var defaultConfig = {
 	},
 	port: 1024,
 	logs: [],
-	dumper: {module: "MockDicomDumper", options: { d: 5 }},
+	dumper: {module: "MockDicomDumper", options: { depth: 5 }},
 	imageEncoder: {module: "ImageEncoder_pngjs", options: {}},
 	cache: {memoryThreshold: 2147483648},
 	authorization: {require: false, allowFrom: "127.0.0.1", expire: 1800}

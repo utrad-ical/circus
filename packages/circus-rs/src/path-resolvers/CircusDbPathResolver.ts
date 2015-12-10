@@ -1,6 +1,3 @@
-/// <reference path='../typings/bluebird/bluebird.d.ts' />
-/// <reference path='../typings/mongoose/mongoose.d.ts' />
-
 import * as fs from 'fs';
 import * as path from 'path';
 import * as crypto from 'crypto';
@@ -19,6 +16,24 @@ try {
 }
 import * as mongoose from 'mongoose';
 var Schema = mongoose.Schema;
+
+/**
+ * Converts "nodeback" style functions into Promise-aware functions
+ */
+function promisify(func: Function): Function {
+	return function(... args) {
+		let self = this;
+		return new Promise(function(resolve, reject) {
+			func.call(self, ...args, function(err, result) {
+				if (err) {
+					reject(err);
+				} else {
+					resolve(result);
+				}
+			});
+		});
+	};
+}
 
 export default class CircusDbPathResolver extends PathResolver {
 	protected mongoconfig: any;
@@ -42,11 +57,11 @@ export default class CircusDbPathResolver extends PathResolver {
 		return new Promise<string>((resolve: (string) => void, reject) => {
 			this.connect()
 				.then(() => {
-					var findOne = Promise.promisify(this.seriesModel.findOne).bind(this.seriesModel);
+					var findOne = promisify(this.seriesModel.findOne).bind(this.seriesModel);
 					return findOne({seriesUID: seriesUID}, 'storageID');
 				})
 				.then(series => {
-					var findOne = Promise.promisify(this.storageModel.findOne).bind(this.storageModel);
+					var findOne = promisify(this.storageModel.findOne).bind(this.storageModel);
 					return findOne({storageID: series.storageID, type: 'dicom', active: true}, 'path');
 				})
 				.then(storage => {

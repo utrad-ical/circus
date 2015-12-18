@@ -122,6 +122,7 @@ class Server {
 			['metadata', 'Metadata', true, {}],
 			['mpr', 'MPRAction', true, {}],
 			['oblique', 'ObliqueAction', true, {}],
+			['volume', 'VolumeAction', true, {}],
 			['status', 'ServerStatus', false, {counter: this.counter}],
 		];
 

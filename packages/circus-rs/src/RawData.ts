@@ -1,7 +1,6 @@
 // Raw voxel container class
 
 import { MultiRange } from 'multi-integer-range';
-
 import { Promise } from 'es6-promise';
 
 export enum PixelFormat {
@@ -203,6 +202,22 @@ export default class RawData {
 		let dst = new Uint8Array(this.data, offset, len);
 		dst.set(src);
 		this.loadedSlices.append(z);
+	}
+
+	public getSingleImage(z: number): ArrayBuffer {
+		if (!this.size) {
+			throw new Error('Dimension not set');
+		}
+		let [rx, ry, rz] = this.size;
+		if (z < 0 || z >= rz) {
+			throw new RangeError('z-index out of bounds');
+		}
+		let len = rx * ry * this.bpp;
+		let offset = len * z;
+		let src = new Uint8Array(this.data, offset, len);
+		let buffer = new ArrayBuffer(len);
+		(new Uint8Array(buffer)).set(src);
+		return buffer;
 	}
 
 	/**
@@ -516,4 +531,5 @@ export default class RawData {
 			pixelSize
 		});
 	}
+
 }

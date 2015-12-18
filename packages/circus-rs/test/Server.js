@@ -64,4 +64,12 @@ describe('Server', function () {
 			.expect('Content-Type', 'application/json')
 			.end(done);
 	});
+
+	it('must return volume', function (done) {
+		supertest(httpServer)
+			.get('/volume')
+			.query({series: 'dummy'})
+			.expect('Content-Type', 'application/octet-stream')
+			.end(done);
+	});
 });

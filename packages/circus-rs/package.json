@@ -23,6 +23,7 @@
     "chai": "^3.3.0",
     "gulp": "^3.8.11",
     "gulp-concat": "^2.5.2",
+    "gulp-iconfont": "^5.0.1",
     "gulp-less": "^3.0.3",
     "gulp-typescript": "^2.9.2",
     "mocha": "^2.3.3",

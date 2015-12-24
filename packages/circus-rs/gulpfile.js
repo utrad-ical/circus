@@ -1,6 +1,7 @@
 var gulp = require('gulp');
 var typescript = require('gulp-typescript');
 var less = require('gulp-less');
+var iconfont = require('gulp-iconfont');
 var concat = require('gulp-concat');
 var rimraf = require('rimraf');
 
@@ -19,9 +20,25 @@ gulp.task('less', function() {
 		.pipe(gulp.dest('build'));
 });
 
-gulp.task('build-browser', ['less'], function() {
+gulp.task('build-browser', ['less', 'iconfont'], function() {
 	return gulp.src('src/browser/*.{js,png,gif}')
 		.pipe(gulp.dest('build/browser'));
+});
+
+gulp.task('iconfont', function() {
+	return gulp.src('src/browser/assets/icons/*.svg')
+		.pipe(iconfont({
+			fontName: 'circus-rs-font',
+			appendUnicode: true,
+			formats: ['woff'],
+			startUnicode: 0xE600,
+			fontHeight: 512,
+			timestamp: Math.round(Date.now() / 1000) // required for consistent build
+		}))
+		.on('glyphs', function (glyphs, options) {
+			// console.log(glyphs);
+		})
+		.pipe(gulp.dest('build/browser/'));
 });
 
 gulp.task('clean', function(done) {

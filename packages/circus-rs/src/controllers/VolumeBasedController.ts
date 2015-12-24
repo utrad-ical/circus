@@ -1,13 +1,12 @@
-/**
- * VolumeBasedController is a base class of controllers
- * which need DICOM volume (as RawData) specified by 'series' query parameter.
- */
-
 import * as http from 'http';
 import Controller from './Controller';
 import DicomVolume from '../DicomVolume';
 import logger from '../Logger';
 
+/**
+ * VolumeBasedController is a base class of controllers
+ * which need DICOM volume (as RawData) specified by 'series' query parameter.
+ */
 export default class VolumeBasedController extends Controller {
 	protected process(query: any, res: http.ServerResponse): void {
 		let series: string = null;
@@ -32,8 +31,10 @@ export default class VolumeBasedController extends Controller {
 		});
 	}
 
-	protected processVolume(query: any, vol: DicomVolume, res: http.ServerResponse): void {
+	protected processVolume(
+		query: any, vol: DicomVolume, res: http.ServerResponse
+	): void {
 		// Abstract.
-		// In this method, "raw" is guaranteed to have valid image data.
+		// In this method, `vol` is guaranteed to have valid image data.
 	}
 }

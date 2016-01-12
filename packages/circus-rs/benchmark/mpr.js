@@ -1,7 +1,7 @@
 "use strict";
 
 var Benchmark = require('benchmark');
-var MockDicomDumper = require('../build/dicom-dumpers/MockDicomDumper').default;
+var MockDicomDumper = require('../build/server/dicom-dumpers/MockDicomDumper').default;
 
 var dumper = new MockDicomDumper({ depth: 512 });
 

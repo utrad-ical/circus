@@ -1,6 +1,6 @@
 "use strict";
 
-var rawdata = require('../build/RawData.js');
+var rawdata = require('../build/common/RawData.js');
 var RawData = rawdata.default;
 var PixelFormat = rawdata.PixelFormat;
 

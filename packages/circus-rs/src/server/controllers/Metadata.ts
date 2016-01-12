@@ -1,7 +1,7 @@
 import * as http from 'http';
-import DicomVolume from '../DicomVolume';
+import DicomVolume from '../../common/DicomVolume';
 import VolumeBasedController from './VolumeBasedController';
-import { ValidatorRules } from '../Validator';
+import { ValidatorRules } from '../../common/Validator';
 
 // import logger from '../Logger';
 

@@ -14,8 +14,8 @@ import { Promise } from 'es6-promise';
 import Counter from './Counter';
 import ImageEncoder from './image-encoders/ImageEncoder';
 
-import DicomVolume from './DicomVolume';
-import AsyncLruCache from './AsyncLruCache';
+import DicomVolume from '../common/DicomVolume';
+import AsyncLruCache from '../common/AsyncLruCache';
 
 import DicomDumper from './dicom-dumpers/DicomDumper';
 import PathResolver from './path-resolvers/PathResolver';

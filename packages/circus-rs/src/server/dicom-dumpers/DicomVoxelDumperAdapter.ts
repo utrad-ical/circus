@@ -8,7 +8,7 @@ import * as fs from 'fs';
 import logger from '../Logger';
 
 import DicomDumper from './DicomDumper';
-import DicomVolume from './../DicomVolume';
+import DicomVolume from '../../common/DicomVolume';
 import { Promise } from 'es6-promise';
 
 const GLOBAL_HEADER = -1;

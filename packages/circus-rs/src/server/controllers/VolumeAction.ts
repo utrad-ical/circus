@@ -1,6 +1,6 @@
-import DicomVolume from '../DicomVolume';
+import DicomVolume from '../../common/DicomVolume';
 import VolumeBasedController from './VolumeBasedController';
-import { ValidatorRules } from '../Validator';
+import { ValidatorRules } from '../../common/Validator';
 
 import * as http from 'http';
 import * as zlib from 'zlib';

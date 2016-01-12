@@ -5,9 +5,9 @@ import * as url from 'url';
 import ImageEncoder from '../image-encoders/ImageEncoder';
 import * as http from 'http';
 import logger from '../Logger';
-import AsyncLruCache from '../AsyncLruCache';
-import RawData from '../RawData';
-import { Validator, ValidatorRules } from '../Validator';
+import AsyncLruCache from '../../common/AsyncLruCache';
+import RawData from '../../common/RawData';
+import { Validator, ValidatorRules } from '../../common/Validator';
 
 export default class Controller {
 

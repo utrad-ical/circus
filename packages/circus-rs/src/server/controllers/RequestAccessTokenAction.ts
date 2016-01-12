@@ -3,7 +3,7 @@ import * as http from 'http';
 import AuthorizationCache from '../AuthorizationCache';
 import * as crypt from 'crypto';
 import logger from '../Logger';
-import { ValidatorRules } from '../Validator';
+import { ValidatorRules } from '../../common/Validator';
 
 /**
  * Register access token.

@@ -1,8 +1,8 @@
 import Controller from './Controller';
 import * as http from 'http';
 import ImageEncoder from '../image-encoders/ImageEncoder';
-import AsyncLruCache from '../AsyncLruCache';
-import RawData from '../RawData';
+import AsyncLruCache from '../../common/AsyncLruCache';
+import RawData from '../../common/RawData';
 import AuthorizationCache from '../AuthorizationCache';
 
 /**

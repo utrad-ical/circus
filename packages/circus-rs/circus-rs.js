@@ -4,5 +4,5 @@
 
 var config = require('config');
 
-var Server = require('./build/Server');
+var Server = require('./build/server/Server');
 (new Server(config)).start();

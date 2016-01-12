@@ -1,8 +1,8 @@
 // import logger from './../Logger';
 
 import DicomDumper from './DicomDumper';
-import { PixelFormat } from './../RawData';
-import DicomVolume from './../DicomVolume';
+import { PixelFormat } from '../../common/RawData';
+import DicomVolume from '../../common/DicomVolume';
 import { Promise } from 'es6-promise';
 
 /**

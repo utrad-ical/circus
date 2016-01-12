@@ -1,4 +1,4 @@
-var Validator = require('../build/Validator').Validator;
+var Validator = require('../build/common/Validator').Validator;
 var assert = require('chai').assert;
 
 describe('Validator', function() {

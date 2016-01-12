@@ -1,6 +1,6 @@
 import * as http from 'http';
 import Controller from './Controller';
-import DicomVolume from '../DicomVolume';
+import DicomVolume from '../../common/DicomVolume';
 import logger from '../Logger';
 
 /**

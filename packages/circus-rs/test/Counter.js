@@ -1,4 +1,4 @@
-var Counter = require('../build/Counter').default;
+var Counter = require('../build/server/Counter').default;
 var assert = require('chai').assert;
 
 describe('Counter', function() {

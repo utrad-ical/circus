@@ -1,4 +1,4 @@
-var Server = require('../build/Server');
+var Server = require('../build/server/Server');
 var supertest = require('supertest');
 
 var defaultConfig = {

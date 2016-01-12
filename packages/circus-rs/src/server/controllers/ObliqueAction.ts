@@ -19,7 +19,7 @@ export default class ObliqueAction extends VolumeBasedController {
 
 	protected getRules(): ValidatorRules {
 		return {
-			series: ['Series UID', null, 'isLength:1:200', null],
+			series: ['Series UID', null, this.isUID, null],
 			ww: ['Window width', null, 'isFloat', 'toFloat'],
 			wl: ['Window width', null, 'isFloat', 'toFloat'],
 			a: ['Angle', 0, 'isFloat', 'toFloat'],

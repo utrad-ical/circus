@@ -12,7 +12,7 @@ export default class Metadata extends VolumeBasedController {
 
 	protected getRules(): ValidatorRules {
 		return {
-			series: ['Series UID', null, 'isLength:1:200', null],
+			series: ['Series UID', null, this.isUID, null],
 		};
 	}
 

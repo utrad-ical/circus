@@ -51,6 +51,15 @@ export default class Controller {
 		return {};
 	}
 
+	/**
+	 * Validator function which checks the input is
+	 * a valid UID (eg, series instance UID)
+	 */
+	protected isUID(input: string): boolean {
+		return !!input.match(/^((0|[1-9]\d*)\.)*(0|[1-9]\d*)$/)
+			&& input.length <= 64;
+	}
+
 	protected respondImage(res: http.ServerResponse, image: Buffer, width: number, height: number): void {
 		res.writeHead(200, {
 			'Content-Type': this.imageEncoder.mimeType(),

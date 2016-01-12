@@ -13,7 +13,7 @@ export default class VolumeAction extends VolumeBasedController {
 
 	protected getRules(): ValidatorRules {
 		return {
-			series: ['Series UID', null, 'isLength:1:200', null]
+			series: ['Series UID', null, this.isUID, null]
 		};
 	}
 

@@ -44,7 +44,7 @@ describe('Server', function () {
 	it('must return MPR image', function (done) {
 		supertest(httpServer)
 			.get('/mpr')
-			.query({series: 'dummy'})
+			.query({series: '1.2.3.4.5'})
 			.expect('Content-Type', 'image/png')
 			.end(done);
 	});
@@ -52,7 +52,7 @@ describe('Server', function () {
 	it('must return Oblique image', function (done) {
 		supertest(httpServer)
 			.get('/oblique')
-			.query({series: 'dummy'})
+			.query({series: '1.2.3.4.5'})
 			.expect('Content-Type', 'image/png')
 			.end(done);
 	});
@@ -60,7 +60,7 @@ describe('Server', function () {
 	it('must return metadata', function (done) {
 		supertest(httpServer)
 			.get('/metadata')
-			.query({series: 'dummy'})
+			.query({series: '1.2.3.4.5'})
 			.expect('Content-Type', 'application/json')
 			.end(done);
 	});
@@ -68,7 +68,7 @@ describe('Server', function () {
 	it('must return volume', function (done) {
 		supertest(httpServer)
 			.get('/volume')
-			.query({series: 'dummy'})
+			.query({series: '1.2.3.4.5'})
 			.expect('Content-Type', 'application/octet-stream')
 			.end(done);
 	});

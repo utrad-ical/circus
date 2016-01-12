@@ -12,7 +12,7 @@ export default class MPRAction extends VolumeBasedController {
 
 	protected getRules(): ValidatorRules {
 		return {
-			series: ['Series UID', null, 'isLength:1:200', null],
+			series: ['Series UID', null, this.isUID, null],
 			target: ['Slice index', 1, 'isFloat', 'toFloat'],
 			ww: ['Window width', null, 'isFloat', 'toFloat'],
 			wl: ['Window width', null, 'isFloat', 'toFloat'],

@@ -31,7 +31,9 @@ more options.
 Configuration
 -------------
 
-All configuration data will go in `config.js` file.
+All configuration data will go in `config/local.json` file.
+Other environment-specific configuration files are supported; see
+`node-config` package for more information.
 
 - `pathResolver.module`: The module name for DICOM file path resolver.
 - `pathResolver.options`: Additional data to pass to the path resolver. (See below)
@@ -77,15 +79,18 @@ You need to install node-png to use this. (see https://github.com/pkrumins/node-
 
 Authorization
 -------------
-If you want to restrict access to DICOM series image, you need to set 'true' for config.authorization.require parameter.
-Then before access to any query to circus-rs server, you must call '/requestToken' to get access token and add 'X-CircusRs-AccessToken' http header to metadata/mpr/oblique/raw access.
 
-And some optional parameter exists.
-- `authorization.expire`: life time of token (in second, optional. default 1800). each token's expire can be updated if valid metadata/mpr/oblique/raw request occurred.
-- `authorizaiton.allowFrom`: IP address which can make request of requestToken. Regular expressions are ok. (optional. default '127.0.0.1')
+If you want to restrict access to DICOM series image, you need to set `true` for config.authorization.require parameter.
 
-Start server
-------------
+Before accessing to any resource on the CIRCUS RS server, a client must fetch the access token by calling '/requestToken'. Then the client must add `Authorization` HTTP header for accessing sensitive resources.
+
+And some optional parameters exist:
+
+- `authorization.expire`: Life time of the token (in second, optional. default 1800). Each token's expiriration date will be updated automatically if a valid metadata/mpr/oblique/raw request occurred.
+- `authorizaiton.allowFrom`: IP address from which a client can make a `requrestToken` request. Regular expressions are accepted. (optional. default '127.0.0.1')
+
+Starting Server
+---------------
 
     # node circus-rs.js
 
@@ -94,4 +99,4 @@ The use of `forever` or `nodemon` is strongly recommended.
 Server API
 ----------
 
-See [[SERVER-API.md]].
+See [Server API document](SERVER-API.md).

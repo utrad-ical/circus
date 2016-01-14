@@ -81,127 +81,17 @@ If you want to restrict access to DICOM series image, you need to set 'true' for
 Then before access to any query to circus-rs server, you must call '/requestToken' to get access token and add 'X-CircusRs-AccessToken' http header to metadata/mpr/oblique/raw access.
 
 And some optional parameter exists.
-- `authorization.expire`: life time of token (in second, optional. default 1800). each token's expire can be updated if valid metadata/mpr/oblique/raw request occured.
-- `authorizaiton.allowFrom`: ip address which can make request of requestToken. Regular expiression is ok. (optional. default '127.0.0.1')
+- `authorization.expire`: life time of token (in second, optional. default 1800). each token's expire can be updated if valid metadata/mpr/oblique/raw request occurred.
+- `authorizaiton.allowFrom`: IP address which can make request of requestToken. Regular expressions are ok. (optional. default '127.0.0.1')
 
 Start server
 ------------
 
     # node circus-rs.js
 
+The use of `forever` or `nodemon` is strongly recommended.
 
-Builtin modules
----------------
+Server API
+----------
 
-### metadata
-
-Get metadata of DICOM series.
-
-#### request
-
-http://<hostname_of_your_server_port>/metadata
-
-method: GET
-
-- `series`: DICOM_series_instance_UID (required)
-
-#### response
-
-Response in JSON format.
-
-- `x`: DICOM image width.
-- `y`: DICOM image height.
-- `z`: number of DICOM image.
-- `voxel_x`: Size of voxel for x-axis (mm)
-- `voxel_y`: Size of voxel for y-axis (mm)
-- `voxel_z`: Size of voxel for z-axis (mm)
-- `window_width`: estimated WindowWidth.
-- `window_level`: estimated WindowLevel.
-- `window_width_dicom`: WindowWidth specified in DICOM tag. (optional)
-- `window_level_dicom`: WindowLevel specified in DICOM tag. (optional)
-- `window_width_min`: Calcurated minimum WindowWidth from DICOM image's pixel format.
-- `window_width_max`: Calcurated maxmum WindowWidth from DICOM image's pixel format.
-- `window_level_min`: Calcurated minimum WindowLevel from DICOM image's pixel format.
-- `window_level_max`: Calcurated maxmum WindowLevel from DICOM image's pixel format.
-
-### MPR
-
-Make MPR image and respond image.
-
-#### request
-
-http://<hostname_of_your_server_port>/mpr
-
-method: GET
-
-- `series`: DICOM_series_instance_UID (required)
-- `mode`: axial|coronal|sagittal (required)
-- `target`: DICOM image index(0 based)
-- `ww`: window width of output image. (optional. default is estimated window width)
-- `wl`: window level of output image. (optional. default is estimated window level)
-
-#### response
-
-Image data defined by `imageEncoder`
-
-### Single Oblique MPR
-
-Make single oblique MPR image
-
-#### request
-
-http://<hostname_of_your_server_port>/oblique
-
-method: GET
-
-- `series`: DICOM_series_instance_UID (required)
-- `a`: Angle counterclockwise from the X-axis of 'b' (required)
-- `b`: Reference plane 'axial' or 'coronal' or 'sagittal' (required)
-- `c`: Cursor position (3 numbers csv. required)
-- `ww`: window width of output image. (optional. default is estimated window width)
-- `wl`: window level of output image. (optional. default is estimated window level)
-
-#### response
-
-Header
-- `X-Circus-Pixel-Size`: size of pixel (mm)
-- `X-Circus-Pixel-Columns`: output image width (pixel)
-- `X-Circus-Pixel-Rows`: output image height (pixel)
-- `X-Circus-Center`: center position in output image (pixel, pixel)
-
-Image data defined by `imageEncoder`
-
-### raw
-
-output dicom_voxel_dump raw stream.
-
-#### request
-
-http://<hostname_of_your_server_port>/raw
-
-method: GET
-
-- `series`: DICOM_series_instance_UID (required)
-
-#### response
-
-raw dump data in 'dicom_voxel_dump combined format'. (application/octet-stream)
-
-### authorization
-
-generate token to access metadata/mpr/oblique...
-
-#### request
-
-http://<hostname_of_your_server_port>/requestToken
-
-method: GET
-
-- `series`: DICOM_series_instance_UID (required)
-
-#### response
-
-Response in JSON format.
-
-- `result`: 'ok' or 'ng'
-- `token`: access token if result is 'ok'.
+See [[SERVER-API.md]].

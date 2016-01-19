@@ -3,14 +3,7 @@
 import { MultiRange } from 'multi-integer-range';
 import { Promise } from 'es6-promise';
 
-export enum PixelFormat {
-	Unknown = -1,
-	UInt8 = 0,
-	Int8 = 1,
-	UInt16 = 2,
-	Int16 = 3,
-	Binary = 4
-}
+import { PixelFormat, PixelFormatInfo, pixelFormatInfo } from './PixelFormat';
 
 export type Vector3D = [number, number, number];
 
@@ -26,14 +19,6 @@ interface ObliqueResult extends MprResult {
 	pixelSize: number;
 	centerX: number;
 	centerY: number;
-}
-
-interface PixelFormatInfo {
-	bpp: number;
-	minLevel: number;
-	maxLevel: number;
-	minWidth: number;
-	maxWidth: number;
 }
 
 // Make sure you don't add properties
@@ -287,24 +272,7 @@ export default class RawData {
 		if (typeof type === 'undefined') {
 			type = this.pixelFormat;
 		}
-		return RawData.pixelFormatInfo(type);
-	}
-
-	public static pixelFormatInfo(type: PixelFormat): PixelFormatInfo {
-		switch (type) {
-			case PixelFormat.UInt8:
-				return {bpp: 1, minWidth: 1, maxWidth: 256, minLevel: 0, maxLevel: 255};
-			case PixelFormat.Int8:
-				return {bpp: 1, minWidth: 1, maxWidth: 256, minLevel: -128, maxLevel: 127};
-			case PixelFormat.UInt16:
-				return {bpp: 2, minWidth: 1, maxWidth: 65536, minLevel: 0, maxLevel: 65535};
-			case PixelFormat.Int16:
-				return {bpp: 2, minWidth: 1, maxWidth: 65536, minLevel: -32768, maxLevel: 32767};
-			case PixelFormat.Binary:
-				return {bpp: 0.125, minWidth: 1, maxWidth: 1, minLevel: 0, maxLevel: 1};
-			default:
-				throw new Error('Undefined pixel format.');
-		}
+		return pixelFormatInfo(type);
 	}
 
 	/**

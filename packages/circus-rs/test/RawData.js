@@ -1,8 +1,9 @@
 "use strict";
 
 var rawdata = require('../build/common/RawData.js');
+var px = require('../build/common/PixelFormat.js');
 var RawData = rawdata.default;
-var PixelFormat = rawdata.PixelFormat;
+var PixelFormat = px.PixelFormat;
 
 var assert = require('chai').assert;
 
@@ -47,17 +48,17 @@ describe('RawData', function () {
 	}
 
 	it('must read/write values from/to UInt8 volume',
-		readWriteTest(rawdata.PixelFormat.UInt8, 32, 32, 10));
+		readWriteTest(PixelFormat.UInt8, 32, 32, 10));
 
 	it('must read/write values from/to Int8 volume',
-		readWriteTest(rawdata.PixelFormat.Int8, 32, 32, 10));
+		readWriteTest(PixelFormat.Int8, 32, 32, 10));
 
 	it('must read/write values from/to UInt16 volume',
-		readWriteTest(rawdata.PixelFormat.UInt16, 32, 32, 10));
+		readWriteTest(PixelFormat.UInt16, 32, 32, 10));
 
 	it('must read/write values from/to Int16 volume',
-		readWriteTest(rawdata.PixelFormat.Int16, 32, 32, 10));
+		readWriteTest(PixelFormat.Int16, 32, 32, 10));
 
 	it('must read/write values from/to Binary volume',
-		readWriteTest(rawdata.PixelFormat.Binary, 32, 32, 10));
+		readWriteTest(PixelFormat.Binary, 32, 32, 10));
 });

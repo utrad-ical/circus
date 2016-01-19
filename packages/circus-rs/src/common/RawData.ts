@@ -287,6 +287,10 @@ export default class RawData {
 		if (typeof type === 'undefined') {
 			type = this.pixelFormat;
 		}
+		return RawData.pixelFormatInfo(type);
+	}
+
+	public static pixelFormatInfo(type: PixelFormat): PixelFormatInfo {
 		switch (type) {
 			case PixelFormat.UInt8:
 				return {bpp: 1, minWidth: 1, maxWidth: 256, minLevel: 0, maxLevel: 255};

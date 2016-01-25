@@ -139,7 +139,7 @@ class Exporter
 	protected function duplicateMetaHeaderForLabel($src_file_name, $dst_file_name)
 	{
 		$buffer = file_get_contents($src_file_name);
-		$lines = explode("\r\n", $buffer);
+		$lines = explode("\n", $buffer);
 		$path_parts = pathinfo($dst_file_name);
 		$dst_data = array();
 

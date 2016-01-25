@@ -11,7 +11,15 @@ var exportRun = function (export_url, validate_flag) {
 
 	var post_data = {};
 	$.each(export_data, function(key, val) {
-		post_data[val.name] = val.value;
+		if(val.name == 'labels[]') {
+			if(post_data['labels'] == undefined) {
+				post_data['labels'] = [val.value];
+			} else {
+				post_data['labels'].push(val.value);
+			}
+		} else {
+			post_data[val.name] = val.value;
+		}
 	});
 
 	busy(true);

@@ -53,7 +53,7 @@
 		"no-internal-module": true,
 		"no-require-imports": false,
 		"no-shadowed-variable": true,
-		"no-string-literal": true,
+		"no-string-literal": false,
 		"no-switch-case-fall-through": true,
 		"no-trailing-whitespace": true,
 		"no-unreachable": true,
@@ -77,7 +77,7 @@
 		],
 		"radix": true,
 		"semicolon": true,
-		"switch-default": true,
+		"switch-default": false,
 		"trailing-comma": [
 			true,
 			{

@@ -296,10 +296,22 @@ class ImportCase extends TaskCommand {
 			//PatientInfo
 			$seriesObj = Series::find($seriesIds[0]);
 
+			// tags
+			$tags = array();
+			if ($this->option('tag')) {
+				$tag = $this->option('tag');
+				$tagList = Project::getProjectTags(array($caseData['projectID']));
+				if(array_key_exists($tag, $tagList))
+					$tags[] = $tag;
+				else
+					throw new Exception("The tag['.$tag.'] is not found.");
+			}
+
 			return array('result'         => true,
 						 'patientInfo'    => $seriesObj->patientInfo,
 						 'latestRevision' => key($caseData['revisions']),
-						 'domains'        => Series::getDomains($seriesIds));
+						 'domains'        => Series::getDomains($seriesIds),
+						 'tags'           => $tags);
 		} catch (Exception $e) {
 			Log::error($e);
 			return array('result' => false, 'errorMsg' => $e->getMessage());
@@ -331,7 +343,7 @@ class ImportCase extends TaskCommand {
 			//新規ケース
 			$params = $caseData;
 			$params['patientInfoCache'] = $newCaseData['patientInfo'];
-			$params['tags'] = array();
+			$params['tags'] = $newCaseData['tags'];
 			$params['domains'] = $newCaseData['domains'];
 			$revisions = $caseData['revisions'];
 		}

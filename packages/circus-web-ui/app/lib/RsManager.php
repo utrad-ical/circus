@@ -43,7 +43,7 @@ class RsManager
 			],
 			'dumper' => [
 				'module' =>  "DicomVoxelDumperAdapter",
-				'options' => [ 'dumper' => $dumperPath ]
+				'options' => [ 'dumper' => $dumperPath, 'bufferSize' => 805306368 ]
 			],
 			'logs' => [[
 				'type' => 'dateFile',

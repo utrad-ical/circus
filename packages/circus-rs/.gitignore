@@ -3,3 +3,4 @@ node_modules
 /build
 /config/*
 !/config/default.json
+/misc

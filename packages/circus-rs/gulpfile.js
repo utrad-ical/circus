@@ -50,6 +50,33 @@ gulp.task('clean-dist', function(done) {
 
 
 /**
+ * Create dts
+ */
+gulp.task('declaration', function() {
+	var project = typescript.createProject({
+		"module": "commonjs",
+		"target": "es5",
+		"outDir": "../build",
+		"declaration": true,
+		"noExternalResolve": true
+	});
+	return gulp.src('src/**/*.ts')
+		.pipe(typescript(project))
+		.dts
+		.pipe(gulp.dest('build/typings/circusrs'))
+});
+
+/**
+ * Source code check
+ */
+gulp.task('tslint', function() {
+ 	return gulp.src('src/browser/**/*.ts')
+		.pipe(tslint({
+			configration: 'src/tslint.json'
+		}))
+ 		.pipe(tslint.report('verbose'));
+});
+/**
  * Build demo sources
  */
 gulp.task('demo',['demo-html','demo-js']);

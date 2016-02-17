@@ -14,8 +14,12 @@ var uglify = require('gulp-uglify');
 // var runSequence = require('run-sequence');
 var tslint = require('gulp-tslint');
 
+gulp.task('default', ['typescript', 'less', 'dist-browser']);
 
-gulp.task('default', ['typescript', 'less', 'build-browser']);
+gulp.task('watch', ['typescript', 'less'], function() {
+	gulp.watch('src/**/*.ts', ['typescript']);
+	gulp.watch('src/**/*.less', ['less']);
+});
 
 gulp.task('typescript', function() {
 	var project = typescript.createProject('src/tsconfig.json');
@@ -30,12 +34,92 @@ gulp.task('less', function() {
 		.pipe(gulp.dest('build'));
 });
 
-gulp.task('build-browser', ['less', 'iconfont'], function() {
+/**
+ * Clean up
+ */
+gulp.task('clean', ['clean-build','clean-pubdocs','clean-dist']);
+gulp.task('clean-build', function(done) {
+	rimraf('build', done);
+});
+gulp.task('clean-pubdocs', function(done) {
+	rimraf('pubdocs', done);
+});
+gulp.task('clean-dist', function(done) {
+	rimraf('dist', done);
+});
+
+
+/**
+ * Build demo sources
+ */
+gulp.task('demo',['demo-html','demo-js']);
+gulp.task('demo-html',['demo-css'], function() {
+	var LOCALS = {};
+	return gulp.src('./demo/**/*.jade')
+		.pipe(jade({
+			locals: LOCALS,
+			pretty: true
+		}))
+		.pipe( gulp.dest('pubdocs') );
+});
+gulp.task('demo-css', function() {
+	return gulp.src('demo/**/*.less')
+		.pipe(less())
+		.pipe(gulp.dest('pubdocs'));
+});
+gulp.task('demo-js', ['copy-dist-browser'], function() {
+	return gulp.src('demo/**/*.js')
+		.pipe(gulp.dest('pubdocs'));
+});
+gulp.task('copy-dist-browser', ['dist-browser'], function() {
+	return gulp.src('dist/**/*')
+		.pipe(gulp.dest('pubdocs/dist'));
+});
+
+
+/**
+ * Build distribution package
+ */
+gulp.task('dist-browser', ['typescript','dist-browser-iconfont'], function() {
+	// The 'standalone' option will create `window.circusrs.Viewer`
+	// on the browser.
+	return browserify({
+			entries: ['build/browser/index.js'],
+			standalone: 'circusrs'
+		})
+		.bundle()
+		.pipe(source('circus-rs-client.js'))
+		.pipe(buffer())
+		.pipe(gulp.dest('dist'))
+		.pipe(uglify())
+		.pipe(concat('circus-rs-client.min.js'))
+		.pipe(gulp.dest('dist'));
+});
+gulp.task('dist-browser-iconfont', function() {
+	return gulp.src('src/browser/assets/icons/*.svg')
+		.pipe(iconfont({
+			fontName: 'circus-rs-font',
+			appendUnicode: true,
+			formats: ['woff'],
+			startUnicode: 0xE600,
+			fontHeight: 512,
+			timestamp: Math.round(Date.now() / 1000) // required for consistent build
+		}))
+		.on('glyphs', function (glyphs, options) {
+			// console.log(glyphs);
+		})
+		.pipe(gulp.dest('dist/css'));
+});
+
+/**
+ * Expired task
+ */
+gulp.task('expired-build-browser', ['less', 'expired-iconfont'], function() {
 	return gulp.src('src/browser/*.{js,png,gif}')
 		.pipe(gulp.dest('build/browser'));
 });
 
-gulp.task('iconfont', function() {
+gulp.task('expired-iconfont', function() {
 	return gulp.src('src/browser/assets/icons/*.svg')
 		.pipe(iconfont({
 			fontName: 'circus-rs-font',
@@ -49,54 +133,4 @@ gulp.task('iconfont', function() {
 			// console.log(glyphs);
 		})
 		.pipe(gulp.dest('build/browser/'));
-});
-
-gulp.task('clean', function(done) {
-	rimraf('./build/*', done);
-});
-
-gulp.task('watch', ['typescript', 'less'], function() {
-	gulp.watch('src/**/*.ts', ['typescript']);
-	gulp.watch('src/**/*.less', ['less']);
-});
-/**
- * Build demo sources
- */
-gulp.task('demo',['demo-html','demo-js']);
-gulp.task('demo-html',['demo-css'], function() {
-	var LOCALS = {};
-	return gulp.src('./demo/**/*.jade')
-		.pipe(jade({
-			locals: LOCALS,
-			pretty: true
-		}))
-		.pipe( gulp.dest('build/demo') );
-});
-gulp.task('demo-css', function() {
-	return gulp.src('demo/**/*.less')
-		.pipe(less())
-		.pipe(gulp.dest('build/demo'));
-});
-gulp.task('demo-js', ['dist'], function() {
-	return gulp.src('demo/**/*.js')
-		.pipe(gulp.dest('build/demo'));
-});
-
-/**
- * Build distribution package
- */
-gulp.task('dist', ['typescript'], function() {
-	// The 'standalone' option will create `window.circusrs.Viewer`
-	// on the browser.
-	return browserify({
-			entries: ['build/browser/index.js'],
-			standalone: 'circusrs'
-		})
-		.bundle()
-		.pipe(source('circus-rs.js'))
-		.pipe(buffer())
-		.pipe(gulp.dest('build'))
-		.pipe(uglify())
-		.pipe(concat('circus-rs.min.js'))
-		.pipe(gulp.dest('build'));
 });

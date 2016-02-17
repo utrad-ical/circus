@@ -1,0 +1,22 @@
+.rounded-corners (@radius: 5px) {
+  -webkit-border-radius: @radius;
+  -moz-border-radius: @radius;
+  -ms-border-radius: @radius;
+  -o-border-radius: @radius;
+  border-radius: @radius;
+}
+#rs-canvas {
+  .rounded-corners(10px);
+  border: 1px solid purple;
+}
+#view-state-canvas {
+  .rounded-corners(10px);
+  // position: absolute;
+  // left: 600px;
+  // top: 100px;
+  border: 1px solid green;
+}
+.flex{
+  display:flex;
+  width:100%
+}

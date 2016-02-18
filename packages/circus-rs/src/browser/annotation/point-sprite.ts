@@ -10,8 +10,6 @@ enum Kind{Dot = 0, Circle = 1};
 export class PointSprite extends Sprite {
 	private parent: PointAnnotation;
 	private overSize: number = 10;
-	// private hasDrawnHitTestCircle = false;
-	// private hitRect: [number,number,number,number];
 
 	constructor(parent: PointAnnotation) {
 		super();
@@ -84,6 +82,7 @@ export class PointSprite extends Sprite {
 		this.parent.setDragging(true);
 		let textObj = this.parent.getText();
 		textObj.changeAttractColor();
+		this.parent.setCenterOffset(viewerEvent);
 		viewerEvent.viewer.render();
 		return false;
 	}
@@ -96,10 +95,7 @@ export class PointSprite extends Sprite {
 		}
 		let v = viewerEvent.viewer;
 		if(this.parent.getDragMode() === 0) {//drag
-			let currentVoxel = v.getViewState().coordinatePixelToVoxel(
-				viewerEvent.canvasX,
-				viewerEvent.canvasY);
-			this.parent.setCenter(currentVoxel);
+			this.parent.dragPoint(viewerEvent);
 			v.render();
 		} else{//change circle
 			//calc radius
@@ -116,7 +112,7 @@ export class PointSprite extends Sprite {
 		return false;
 	}
 	private isNearCenter(ctx, centerCircle: [number, number], point: [number, number]): boolean{
-		let innerBorder = this.parent.getRadius() - 2;
+		let innerBorder = this.parent.getRadius() - 10;//minus length from circle arc
 		ctx.beginPath();
 		ctx.strokeStyle = "rgba(0,0,0,0)";
 		ctx.arc(centerCircle[0], centerCircle[1], innerBorder, 0, 2 * Math.PI);

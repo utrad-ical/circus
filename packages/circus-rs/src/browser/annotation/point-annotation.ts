@@ -3,6 +3,7 @@
 import { Sprite } from '../sprite';
 import { Annotation } from '../annotation';
 import { ViewState } from '../view-state';
+import { ViewerEvent } from '../viewer-event';
 import { PointText } from './point-text';
 import { PointSprite } from './point-sprite';
 
@@ -14,12 +15,12 @@ export class PointAnnotation extends Annotation {
 	private dragMode: DragMode;
 	private center: [number, number, number];//voxel coordinate
 	private radius: number = 3;// [px] default value
-	private switchBorderOfRadius = 5;
 	private color: [number, number, number, number] = [255, 255, 255, 1];//default value
 	private pointText: PointText;
 	private isFirstDraw: boolean = true;
 	private isDragging: boolean = false;
 	private sizeChanging: boolean = false;
+	private centerOffset: [number, number] = [0, 0];
 
 	public getMode(): number{
 		return this.mode;
@@ -53,7 +54,11 @@ export class PointAnnotation extends Annotation {
 		}
 	}
 	public setCenter(center: [number, number, number]): void{
-		this.center = center;
+		this.center = [
+			Math.round(center[0]),
+			Math.round(center[1]),
+			Math.round(center[2])
+		];
 	}
 	public setDragging(mode: boolean): void{
 		this.isDragging = mode;
@@ -63,6 +68,17 @@ export class PointAnnotation extends Annotation {
 	}
 	public setDragMode(mode: DragMode){
 		this.dragMode = mode;
+	}
+	public setCenterOffset(viewerEvent: ViewerEvent): void{
+		let vs = viewerEvent.viewer.getViewState();
+		let currentCenterPixel: [number, number, number] = vs.coordinateVoxelToPixel(
+			this.center[0],
+			this.center[1],
+			this.center[2]);
+		this.centerOffset = [
+			Math.round(viewerEvent.canvasX - currentCenterPixel[0]),
+			Math.round(viewerEvent.canvasY - currentCenterPixel[1])
+		];
 	}
 
 	constructor(
@@ -120,5 +136,12 @@ export class PointAnnotation extends Annotation {
 		// draw string
 		this.pointText.draw(ctx, {"x":pointCenterCoordinate[0], "y":pointCenterCoordinate[1]}, zoom);
 		return new PointSprite(this);
+	}
+	public dragPoint(viewerEvent: ViewerEvent): void{
+		let v = viewerEvent.viewer;
+		let currentVoxel = v.getViewState().coordinatePixelToVoxel(
+			viewerEvent.canvasX - this.centerOffset[0],
+			viewerEvent.canvasY - this.centerOffset[1]);
+		this.setCenter(currentVoxel);
 	}
 }

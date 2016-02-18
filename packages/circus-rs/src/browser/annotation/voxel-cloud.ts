@@ -74,4 +74,28 @@ export class VoxelCloudAnnotation extends Annotation {
 		//new implementation============
 		this.voxelArray.push([voxel[0], voxel[1], voxel[2]]);
 	}
+	public isPaintedVoxel(voxel: [number, number, number]){
+		//old implementation
+		voxel = [
+			Math.round(voxel[0]),
+			Math.round(voxel[1]),
+			Math.round(voxel[2])
+		];
+		let isPainted: boolean = false;
+		for (var i = 0; i < this.voxelArray.length; ++i) {
+			let v: [number, number, number] = this.voxelArray[i];
+			if(v[0] === voxel[0] && v[1] === voxel[1] && v[2] === voxel[2]) {
+				isPainted = true;
+				break;
+			}
+		}
+		//new implementation============
+		// if(this.voxelCube[voxel[0]][voxel[1]][voxel[2]] === 1) {
+		// 	return true;
+		// } else {
+		// 	return false;
+		// }
+		//new implementation============
+		return isPainted;
+	}
 }

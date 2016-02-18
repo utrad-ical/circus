@@ -116,7 +116,7 @@ $( function(){
 				tool = new rs.PenTool();
 				break;
 			case "bucket":
-				//do nothing
+				tool = new rs.BucketTool();
 				break;
 			case "other":
 				//do nothing

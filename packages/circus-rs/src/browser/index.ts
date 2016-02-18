@@ -22,4 +22,5 @@ export * from '../browser/annotation/arrow-text';
 export * from '../browser/viewer-event-capture-interface';
 export * from '../browser/point-tool';
 export * from '../browser/pen-tool';
+export * from '../browser/bucket-tool';
 export * from '../browser/image-source/empty-image-source';

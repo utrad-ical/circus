@@ -44,11 +44,4 @@ export class AnnotationCollection extends EventEmitter {
 			return null;
 		}
 	}
-	// public getAnnotationById(id: number): Annotation{
-	// 	if(this.collection[id]) {
-	// 		return this.collection[id];
-	// 	} else {
-	// 		return null;
-	// 	}
-	// }
 }

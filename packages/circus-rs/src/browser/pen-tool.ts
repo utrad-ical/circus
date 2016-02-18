@@ -24,11 +24,6 @@ export class PenTool extends Tool {
 	constructor( annotationCollection ) {
 		super();
 		this.previousVoxel = [0, 0, 0];
-		// this.on('focus', this.focusHandler);
-		// this.on('blur', this.blurHandler);
-		// this.on('mousedown', this.mousedownHandler);
-		// this.on('mousemove', this.mousemoveHandler);
-		// this.on('mouseup', this.mouseupHandler);
 	}
 
 	public hitTest(event: ViewerEvent){
@@ -105,7 +100,7 @@ export class PenTool extends Tool {
 		// });
 		//----------------
 		let viewer = viewerEvent.viewer;
-		let voxAno = viewer.getAnnotationCollection().getAnnotationById(viewer.getCurrentAnnotationId());
+		let voxAno = viewer.getAnnotationCollection().getCurrentAnnotation();
 		if(voxAno === null) {
 			//do nothing
 		} else {//voxAno is annotation

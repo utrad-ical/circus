@@ -149,7 +149,7 @@ $( function(){
 		}
 		if (e.target.hasAttribute("data-vox-anno-id")) {
 			var targetId = e.target.getAttribute("data-vox-anno-id");
-			rsViewer2.setCurrentAnnotationId(targetId);
+			rsViewer2.getAnnotationCollection().setCurrentAnnotationId(targetId);
 		}
 	});
 	//add annotation button event
@@ -159,8 +159,7 @@ $( function(){
 		var b=document.getElementById("b_color").value;
 		var newVoxelAnnotation = new rs.VoxelCloudAnnotation([512, 512, 128], [], [r, g, b, 1.0]);
 		var newId = rsViewer2.getAnnotationCollection().append(newVoxelAnnotation);
-		console.log(newId);
-		rsViewer2.setCurrentAnnotationId(newId);
+		rsViewer2.getAnnotationCollection().setCurrentAnnotationId(newId);
 	});
 
 	//==================================================

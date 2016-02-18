@@ -50,20 +50,6 @@ export class PointAnnotation extends Annotation {
 	public setRadius(radius: number): void{
 		if(radius >= 1) {
 			this.radius = radius;
-			// if(this.switchBorderOfRadius < radius) {//switch to dot
-			// 	if(this.isFirstDraw) {
-			// 		this.radius = radius;
-			// 	} else {
-			// 		this.mode = 0;
-			// 		this.radius = 3;
-			// 	}
-			// } else {//switch to circle
-			// 	if(radius > 5) {
-			// 		this.isFirstDraw = false;
-			// 	}
-			// 	this.mode = 1;
-			// 	this.radius = radius;
-			// }
 		}
 	}
 	public setCenter(center: [number, number, number]): void{

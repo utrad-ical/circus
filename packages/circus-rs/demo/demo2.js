@@ -53,7 +53,7 @@ $( function(){
 		[109,101,100],
 	];
 
-	var penAnnotation = new rs.VoxelCloudAnnotation([512, 512, 128], dummyPenData, [255,0,0]);
+	var penAnnotation = new rs.VoxelCloudAnnotation([512, 512, 128], dummyPenData, [0, 255, 0, 1.0]);
 
 	var dotText = new rs.PointText("サンプル");
 	var dotAnnotation = new rs.PointAnnotation(
@@ -70,21 +70,19 @@ $( function(){
 		dotText);
 	//set event before append
 	rsViewer2.getAnnotationCollection().on("append", function(annoCol){
-		console.log("append!");
-		console.dir(annoCol);
 		var liElm = document.createElement("li");
 		var frag = document.createDocumentFragment();
-		var label = "annotation";
 		for (var i = 0; i < annoCol.length; i++) {
 			var c = annoCol[i];
 			var clone = liElm.cloneNode(false);
+			var label = "annotation";
 			if(c instanceof rs.PointAnnotation) {
 				label = "point annotation";
+				clone.setAttribute("data-coordinate-x", c.getCenter()[0]);
+				clone.setAttribute("data-coordinate-y", c.getCenter()[1]);
+				clone.setAttribute("data-coordinate-z", c.getCenter()[2]);
 			}
 			clone.appendChild(document.createTextNode(label));
-			clone.setAttribute("data-coordinate-x", c.getCenter[0]);
-			clone.setAttribute("data-coordinate-y", c.getCenter[1]);
-			clone.setAttribute("data-coordinate-z", c.getCenter[2]);
 			frag.appendChild(clone);
 		}
 
@@ -111,7 +109,7 @@ $( function(){
 				tool = new rs.PointTool(1);
 				break;
 			case "pen":
-				// tool = new rs.PenTool();
+				tool = new rs.PenTool();
 				break;
 			case "bucket":
 				//do nothing
@@ -129,18 +127,22 @@ $( function(){
 	$("#point_list").on("click", function(e){
 		var vs = rsViewer2.getViewState();
 		var currentViewCenter = vs.getCenter();
-		var targetPoint = [
-			e.target.getAttribute("data-coordinate-x"),
-			e.target.getAttribute("data-coordinate-y"),
-			e.target.getAttribute("data-coordinate-z"),
-		];
-		var translateDistance = [
-			targetPoint[0] - currentViewCenter[0],
-			targetPoint[1] - currentViewCenter[1],
-			targetPoint[2] - currentViewCenter[2]
-		];
-		vs.transrate(translateDistance[0], translateDistance[1], translateDistance[2]);
-		rsViewer2.render();
+		if (e.target.hasAttribute("data-coordinate-x")
+			&& e.target.hasAttribute("data-coordinate-y")
+			&& e.target.hasAttribute("data-coordinate-z")) {
+			var targetPoint = [
+				e.target.getAttribute("data-coordinate-x"),
+				e.target.getAttribute("data-coordinate-y"),
+				e.target.getAttribute("data-coordinate-z"),
+			];
+			var translateDistance = [
+				targetPoint[0] - currentViewCenter[0],
+				targetPoint[1] - currentViewCenter[1],
+				targetPoint[2] - currentViewCenter[2]
+			];
+			vs.transrate(translateDistance[0], translateDistance[1], translateDistance[2]);
+			rsViewer2.render();
+		}
 	});
 
 	//==================================================

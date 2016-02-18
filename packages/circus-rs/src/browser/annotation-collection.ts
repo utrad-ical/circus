@@ -4,7 +4,7 @@ import { EventEmitter } from 'events';
 import { Viewer } from './viewer';
 
 export class AnnotationCollection extends EventEmitter {
-	private lastId: number = 0;
+	private lastId: number = -1;
 	private collection: Annotation[];
 
 	constructor(){
@@ -18,6 +18,7 @@ export class AnnotationCollection extends EventEmitter {
 		return this.lastId;
 	}
 	public remove(id: number): boolean{
+		this.collection[id] = null;
 		return true;
 	}
 	public forEach(f: Function): void {

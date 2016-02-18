@@ -16,9 +16,6 @@ export class PointSprite extends Sprite {
 	constructor(parent: PointAnnotation) {
 		super();
 		this.parent = parent;
-		this.on('mouseup', this.mouseupHandler);
-		this.on('mousedown', this.mousedownHandler);
-		this.on('mousemove', this.mousemoveHandler);
 	}
 	public hitTest( event:ViewerEvent ):boolean {
 		// console.dir(event);
@@ -65,7 +62,10 @@ export class PointSprite extends Sprite {
 			}
 		}
 	}
-	private mouseupHandler(viewerEvent: ViewerEvent): void {
+	public mouseupHandler(viewerEvent: ViewerEvent): boolean {
+		if(!this.hitTest(viewerEvent)){
+			return true;
+		}
 		this.parent.setDragging(false);
 		let textObj = this.parent.getText();
 		textObj.recoverColor();
@@ -75,14 +75,22 @@ export class PointSprite extends Sprite {
 			this.parent.setMode(0);//dot
 		}
 		viewerEvent.viewer.render();
+		return false;
 	}
-	private mousedownHandler(viewerEvent: ViewerEvent): void {
+	public mousedownHandler(viewerEvent: ViewerEvent): boolean {
+		if(!this.hitTest(viewerEvent)){
+			return true;
+		}
 		this.parent.setDragging(true);
 		let textObj = this.parent.getText();
 		textObj.changeAttractColor();
 		viewerEvent.viewer.render();
+		return false;
 	}
-	private mousemoveHandler(viewerEvent: ViewerEvent): void {
+	public mousemoveHandler(viewerEvent: ViewerEvent): boolean {
+		if(!this.hitTest(viewerEvent)){
+			return true;
+		}
 		if(!this.parent.getDragging()) {
 			return;
 		}
@@ -105,6 +113,7 @@ export class PointSprite extends Sprite {
 			this.parent.setRadius(radius);
 			v.render();
 		}
+		return false;
 	}
 	private isNearCenter(ctx, centerCircle: [number, number], point: [number, number]): boolean{
 		let innerBorder = this.parent.getRadius() - 2;

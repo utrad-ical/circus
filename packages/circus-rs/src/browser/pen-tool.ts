@@ -55,14 +55,15 @@ export class PenTool extends Tool {
   private blurHandler( event ){
     this.active = false;
   }
-  private mousedownHandler( event ){
+  public mousedownHandler( event ): boolean{
     this.pendown = true;
     var viewerCollection = this.getViewerFromEvent( event );
     viewerCollection.forEach( function( viewer ){
       viewer.setPrimaryCapture( this );
-    } )
+    } );
+    return true;
   }
-  private mousemoveHandler( event ){
+  public mousemoveHandler( event ): boolean{
     // add to this.voxel
 	/*
     var annotation = new VoxelCloudAnnotation( this.voxelBuffer );
@@ -71,8 +72,9 @@ export class PenTool extends Tool {
       viewer.draw( annotation.draw ); // not regist annotation
     } )
 	*/
+    return true;
   }
-  private mouseupHandler( event ){
+  public mouseupHandler( event ): boolean{
     this.pendown = false;
 	/*
     var annotation = new VoxelCloudAnnotation( this.voxelBuffer );
@@ -84,5 +86,6 @@ export class PenTool extends Tool {
     } )
 	*/
     // clear this.voxelBuffer
+    return true;
   }
 }

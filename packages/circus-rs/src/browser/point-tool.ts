@@ -14,9 +14,6 @@ export class PointTool extends Tool {
 	constructor(mode: number) {
 		super();
 		this.drawMode = mode;
-		this.on('mousedown', this.mousedownHandler);
-		this.on('mouseup', this.mouseupHandler);
-		this.on('mousemove', this.mousemoveHandler);
 	}
 	public hitTest(event: ViewerEvent): boolean{
 		// let checkedToolElm: HTMLInputElement = <HTMLInputElement>document.querySelector("[name=tool]:checked");
@@ -28,7 +25,10 @@ export class PointTool extends Tool {
 		// return isPoint;
 		return true;
 	}
-	private mousedownHandler(viewerEvent: ViewerEvent): void {
+	public mousedownHandler(viewerEvent: ViewerEvent): boolean {
+		if(!this.hitTest(viewerEvent)) {
+			return true;
+		}
 		this.isDragging = true;
 		let vs = viewerEvent.viewer.getViewState();
 		let currentVoxel = vs.coordinatePixelToVoxel(viewerEvent.canvasX, viewerEvent.canvasY);
@@ -71,14 +71,22 @@ export class PointTool extends Tool {
 		let pointListElm = document.getElementById("point_list");
 		$(pointListElm).empty();
 		pointListElm.appendChild(frag);
+		return false;
 	}
-	private mouseupHandler(viewerEvent: ViewerEvent): void {
+	public mouseupHandler(viewerEvent: ViewerEvent): boolean {
+		if(!this.hitTest(viewerEvent)) {
+			return true;
+		}
 		console.log("up");
 		this.isDragging = false;
 		viewerEvent.viewer.clearPrimaryEventCapture();
 		viewerEvent.viewer.getAnnotationCollection().append(this.pointAnnotation);
+		return false;
 	}
-	private mousemoveHandler(viewerEvent: ViewerEvent): void {
+	public mousemoveHandler(viewerEvent: ViewerEvent): boolean {
+		if(!this.hitTest(viewerEvent)) {
+			return true;
+		}
 		if(!this.isDragging) {
 			return;
 		}
@@ -109,5 +117,6 @@ export class PointTool extends Tool {
 				viewerEvent.viewer.draw( (c,v) => { return this.pointAnnotation.draw(c,v); } );
 			});
 		}
+		return false;
 	}
 }

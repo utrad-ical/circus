@@ -97,12 +97,17 @@ export class Viewer extends EventEmitter {
   }
 
   private canvasEventHandler( originalEvent ){
-	
 	if( typeof originalEvent === 'object' && originalEvent.preventDefault ) originalEvent.preventDefault();
-	
+
 	var eventType = originalEvent.type;
 	let handler;
 	switch( eventType ){
+		case 'mousemove':
+			handler = 'mousemoveHandler';
+			break;
+		case 'mouseup':
+			handler = 'mouseupHandler';
+			break;
 		case 'mousedown':
 			handler = 'mousedownHandler';
 			break;
@@ -113,17 +118,16 @@ export class Viewer extends EventEmitter {
 			handler = 'mousewheelHandler';
 			break;
 	}
-	
+
     var event = new ViewerEvent( this, eventType, originalEvent );
-	
+
     if( this.primaryEventCapture && ! this.primaryEventCapture[handler]( event ) ) return;
 
-    for( var i = this.spriteCollection.length; i > 0; i-- ){
-      if( ! (this.spriteCollection[i-1])[handler]( event ) ) return;
-    }
-
-    if( this.backgroundEventCapture && ! this.backgroundEventCapture[handler]( event ) ) return;
-  }
+	for( var i = this.spriteCollection.length; i > 0; i-- ){
+		if( ! (this.spriteCollection[i-1])[handler]( event ) ) return;
+		}
+		if(this.backgroundEventCapture && !this.backgroundEventCapture[handler]( event ) ) return;
+		}
 
 	public clear(): void {
 		this.canvasDomElement.getContext('2d').clearRect(

@@ -19,25 +19,33 @@ export class VoxelCloudSprite extends Sprite {
 		super();
 		this.isDragging = false;
 		this.previousVoxel = [0, 0, 0];
-		this.on('mouseup', this.mouseupHandler);
-		this.on('mousedown', this.mousedownHandler);
-		this.on('mousemove', this.mousemoveHandler);
 	}
 	public hitTest( event:ViewerEvent ):boolean {
 		return true;//always true
 	}
-	private mouseupHandler(viewerEvent: ViewerEvent): void {
+	public mouseupHandler(viewerEvent: ViewerEvent): boolean {
+		if(!this.hitTest(viewerEvent)){
+			return true;
+		}
 		this.isDragging = false;
+		return false;
 	}
-	private mousedownHandler(viewerEvent: ViewerEvent): void {
+	public mousedownHandler(viewerEvent: ViewerEvent): boolean {
+		if(!this.hitTest(viewerEvent)){
+			return true;
+		}
 		this.isDragging = true;
 		let vs = viewerEvent.viewer.getViewState();
 		//save start voxel
 		this.previousVoxel = vs.coordinatePixelToVoxel(viewerEvent.canvasX, viewerEvent.canvasY);
 		//set current voxel
 		this.parent.addVoxel(this.previousVoxel);
+		return false;
 	}
-	private mousemoveHandler(viewerEvent: ViewerEvent): void {
+	public mousemoveHandler(viewerEvent: ViewerEvent): boolean {
+		if(!this.hitTest(viewerEvent)){
+			return true;
+		}
 		if(this.isDragging) {
 			let vs = viewerEvent.viewer.getViewState();
 			//get current voxel coordinate
@@ -63,5 +71,6 @@ export class VoxelCloudSprite extends Sprite {
 			//re-draw
 			this.parent.draw(viewerEvent.original.target, vs);
 		}
+		return false;
 	}
 }

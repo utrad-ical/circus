@@ -46,31 +46,10 @@ export class PointTool extends Tool {
 			[255, 0, 0, 1],
 			dotText);
 		this.pointAnnotation = newAnnotation;//copy to use mousemove and mouseup
-		let annoCol = viewerEvent.viewer.getAnnotationCollection();
 
 		viewerEvent.viewer.setPrimaryEventCapture( this );
 		viewerEvent.viewer.draw( (c,v) => { return newAnnotation.draw(c,v); } );
 
-		// annoCol.append(newAnnotation);
-		// viewerEvent.viewer.render();
-
-		//---------------------------
-		let liElm = document.createElement("li");
-		let frag = document.createDocumentFragment();
-		annoCol.forEach(function(c){
-			if(c instanceof PointAnnotation) {
-				let clone = <HTMLElement>liElm.cloneNode(false);
-				clone.appendChild(document.createTextNode("point"));
-				clone.setAttribute("data-coordinate-x", c.getCenter[0]);
-				clone.setAttribute("data-coordinate-y", c.getCenter[1]);
-				clone.setAttribute("data-coordinate-z", c.getCenter[2]);
-				frag.appendChild(clone);
-			}
-		});
-
-		let pointListElm = document.getElementById("point_list");
-		$(pointListElm).empty();
-		pointListElm.appendChild(frag);
 		return false;
 	}
 	public mouseupHandler(viewerEvent: ViewerEvent): boolean {
@@ -80,7 +59,7 @@ export class PointTool extends Tool {
 		console.log("up");
 		this.isDragging = false;
 		viewerEvent.viewer.clearPrimaryEventCapture();
-		viewerEvent.viewer.getAnnotationCollection().append(this.pointAnnotation);
+		let newId = viewerEvent.viewer.getAnnotationCollection().append(this.pointAnnotation);
 		return false;
 	}
 	public mousemoveHandler(viewerEvent: ViewerEvent): boolean {

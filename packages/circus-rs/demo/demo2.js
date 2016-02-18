@@ -4,7 +4,7 @@ $( function(){
 		width: 512,
 		height: 512,
 		depth: 128,
-//		pixelFormat: PixelFormat.Int16,
+		// pixelFormat: PixelFormat.Int16,
 		vx: 0.5,
 		vy: 0.5,
 		vz: 0.5
@@ -68,11 +68,34 @@ $( function(){
 		10,
 		[0, 255, 0, 1],
 		dotText);
+	//set event before append
+	rsViewer2.getAnnotationCollection().on("append", function(annoCol){
+		console.log("append!");
+		console.dir(annoCol);
+		var liElm = document.createElement("li");
+		var frag = document.createDocumentFragment();
+		var label = "annotation";
+		for (var i = 0; i < annoCol.length; i++) {
+			var c = annoCol[i];
+			var clone = liElm.cloneNode(false);
+			if(c instanceof rs.PointAnnotation) {
+				label = "point annotation";
+			}
+			clone.appendChild(document.createTextNode(label));
+			clone.setAttribute("data-coordinate-x", c.getCenter[0]);
+			clone.setAttribute("data-coordinate-y", c.getCenter[1]);
+			clone.setAttribute("data-coordinate-z", c.getCenter[2]);
+			frag.appendChild(clone);
+		}
 
+		var pointListElm = document.getElementById("point_list");
+		$(pointListElm).empty();
+		pointListElm.appendChild(frag);
+	});
 	// rsViewer2.getAnnotationCollection().append( arrowAnnotation );
 	// rsViewer2.getAnnotationCollection().append( penAnnotation );
-	rsViewer2.getAnnotationCollection().append( dotAnnotation );
-	rsViewer2.getAnnotationCollection().append( circleAnnotation );
+	var dotId = rsViewer2.getAnnotationCollection().append( dotAnnotation );
+	var circleid = rsViewer2.getAnnotationCollection().append( circleAnnotation );
 
 	rsViewer2.render();
 	//------------------------------

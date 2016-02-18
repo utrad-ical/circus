@@ -11,8 +11,8 @@ import { ViewerEventCapture } from './viewer-event-capture-interface';
 import { EventEmitter } from 'events';
 
 interface CanvasSize {
-  width: number;
-  height: number;
+	width: number;
+	height: number;
 }
 
 export class Viewer extends EventEmitter {
@@ -29,7 +29,7 @@ export class Viewer extends EventEmitter {
 	private primaryEventCapture;
 	private backgroundEventCapture;
 
-  constructor(canvas: HTMLCanvasElement) {
+	constructor(canvas: HTMLCanvasElement) {
 	super();
 
 	let self = this;
@@ -50,10 +50,10 @@ export class Viewer extends EventEmitter {
 	canvas.addEventListener('mouseup', eventDrive);
 	canvas.addEventListener('mousemove', eventDrive);
 	canvas.addEventListener( wheelEvent, eventDrive);
-  }
-  private getViewerEvent( type, domEvent ){
-    return new ViewerEvent( this, type, domEvent );
-  }
+	}
+	private getViewerEvent( type, domEvent ){
+		return new ViewerEvent( this, type, domEvent );
+	}
 
 	public appendToComposition( composition ){
 		this.composition = composition;
@@ -65,38 +65,42 @@ export class Viewer extends EventEmitter {
 		return this.composition;
 	}
 
-  public setImageSource( imageSource: ImageSource ): void {
-    this.getComposition().setImageSource( imageSource );
-  }
-  public getImageSource(): ImageSource {
-    return this.getComposition().getImageSource();
-  }
-  public getAnnotationCollection(): AnnotationCollection {
-    return this.getComposition().getAnnotationCollection();
-  }
-  public setAnnotationCollection( annotationCollection ): void {
-    this.getComposition().setAnnotationCollection( annotationCollection );
-  }
-  public setViewState( viewState ) {
-    this.viewState = viewState;
-  }
-  public getViewState() : ViewState {
-    return this.viewState;
-  }
-  public setPrimaryEventCapture( capture: ViewerEventCapture ): void {
-    this.primaryEventCapture = capture;
-  }
-  public clearPrimaryEventCapture(): void {
-    this.primaryEventCapture = null;
-  }
-  public setBackgroundEventCapture( capture: ViewerEventCapture ): void {
-    this.backgroundEventCapture = capture;
-  }
-  public clearBackgroundEventCapture(): void {
-    this.backgroundEventCapture = null;
-  }
+	public setImageSource( imageSource: ImageSource ): void {
+		this.getComposition().setImageSource( imageSource );
+	}
+	public getImageSource(): ImageSource {
+		return this.getComposition().getImageSource();
+	}
+	public getAnnotationCollection(): AnnotationCollection {
+		return this.getComposition().getAnnotationCollection();
+	}
+	public setAnnotationCollection( annotationCollection ): void {
+		this.getComposition().setAnnotationCollection( annotationCollection );
+	}
+	public setAnnotationHandler(type: string, func: Function): void{
+		let anoCol = this.getAnnotationCollection();
+		anoCol.on(type, func);
+	}
+	public setViewState( viewState ) {
+		this.viewState = viewState;
+	}
+	public getViewState() : ViewState {
+		return this.viewState;
+	}
+	public setPrimaryEventCapture( capture: ViewerEventCapture ): void {
+		this.primaryEventCapture = capture;
+	}
+	public clearPrimaryEventCapture(): void {
+		this.primaryEventCapture = null;
+	}
+	public setBackgroundEventCapture( capture: ViewerEventCapture ): void {
+		this.backgroundEventCapture = capture;
+	}
+	public clearBackgroundEventCapture(): void {
+		this.backgroundEventCapture = null;
+	}
 
-  private canvasEventHandler( originalEvent ){
+	private canvasEventHandler( originalEvent ){
 	if( typeof originalEvent === 'object' && originalEvent.preventDefault ) originalEvent.preventDefault();
 
 	var eventType = originalEvent.type;
@@ -119,9 +123,9 @@ export class Viewer extends EventEmitter {
 			break;
 	}
 
-    var event = new ViewerEvent( this, eventType, originalEvent );
+	var event = new ViewerEvent( this, eventType, originalEvent );
 
-    if( this.primaryEventCapture && ! this.primaryEventCapture[handler]( event ) ) return;
+	if( this.primaryEventCapture && ! this.primaryEventCapture[handler]( event ) ) return;
 
 	for( var i = this.spriteCollection.length; i > 0; i-- ){
 		if( ! (this.spriteCollection[i-1])[handler]( event ) ) return;
@@ -156,7 +160,7 @@ export class Viewer extends EventEmitter {
 				if( sprite !== null ) self.spriteCollection.push( sprite );
 			});
 		}).then( ()=>{
-		    var event = new ViewerEvent( this, 'render' );
+			var event = new ViewerEvent( this, 'render' );
 			this.emit('render', event);
 		});
 	}

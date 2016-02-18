@@ -4,6 +4,7 @@
  */
 
 export * from '../browser/viewer';
+export * from '../browser/annotation';
 export * from '../browser/image-source';
 export * from '../browser/view-state';
 export * from '../browser/simple-sprite';

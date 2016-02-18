@@ -24,6 +24,7 @@ export class Viewer extends EventEmitter {
 	private viewState: ViewState;
 	private imageSource: ImageSource;
 	private annotationCollection: AnnotationCollection;
+	private currentAnnotationId: number = 0;
 	private spriteCollection: Sprite[];
 
 	private primaryEventCapture;
@@ -76,6 +77,12 @@ export class Viewer extends EventEmitter {
 	}
 	public setAnnotationCollection( annotationCollection ): void {
 		this.getComposition().setAnnotationCollection( annotationCollection );
+	}
+	public getCurrentAnnotationId(): number{
+		return this.currentAnnotationId;
+	}
+	public setCurrentAnnotationId(id: number): void{
+		this.currentAnnotationId = id;
 	}
 	public setAnnotationHandler(type: string, func: Function): void{
 		let anoCol = this.getAnnotationCollection();

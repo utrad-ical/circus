@@ -89,7 +89,7 @@ export class PenTool extends Tool {
 		if(!this.hitTest(viewerEvent)) {
 			return true;
 		}
-		this.isDragging = true;
+
 		let vs = viewerEvent.viewer.getViewState();
 		// //save start voxel
 		let currentVoxel = vs.coordinatePixelToVoxel(viewerEvent.canvasX, viewerEvent.canvasY);
@@ -105,28 +105,29 @@ export class PenTool extends Tool {
 		// });
 		//----------------
 		let viewer = viewerEvent.viewer;
-		let anoCol = viewer.getAnnotationCollection();
-		let voxAno = null;
-		anoCol.forEach(function (a) {
-			if(a instanceof VoxelCloudAnnotation) {
-				voxAno = a;//use only one annotation for now...
-				return false;
+		let voxAno = viewer.getAnnotationCollection().getAnnotationById(viewer.getCurrentAnnotationId());
+		if(voxAno === null) {
+			//do nothing
+		} else {//voxAno is annotation
+			if(voxAno instanceof VoxelCloudAnnotation) {
+				this.isDragging = true;//start drawing!
+			} else {
+				voxAno = null;
 			}
-			return true;
-		});
-		let voxelCoordinate = vs.coordinatePixelToVoxel(viewerEvent.canvasX, viewerEvent.canvasY);
-		if(voxAno !== null) {
-			this.currentVoxelCloud = voxAno;//save target voxelAnnotation
-			voxAno.addVoxel(voxelCoordinate);
-		} else {//append
-			let newVoxelCloud = new VoxelCloudAnnotation([512, 512, 128], [voxelCoordinate], [0, 255, 0, 1.0]);
-			let newId = anoCol.append(newVoxelCloud);
-			this.currentVoxelCloud = newVoxelCloud;//save target voxelAnnotation
 		}
-		//re-draw
-		this.currentVoxelCloud.draw(viewerEvent.original.target, vs);
-
-		return false;
+		if(voxAno !== null) {
+			let voxelCoordinate = vs.coordinatePixelToVoxel(viewerEvent.canvasX, viewerEvent.canvasY);
+			this.currentVoxelCloud = <VoxelCloudAnnotation>voxAno;//save target voxelAnnotation
+			this.currentVoxelCloud.addVoxel(voxelCoordinate);
+			//re-draw
+			this.currentVoxelCloud.draw(viewerEvent.original.target, vs);
+			return false;
+		} else {//do nothing...
+			// let newVoxelCloud = new VoxelCloudAnnotation([512, 512, 128], [voxelCoordinate], [0, 255, 0, 1.0]);
+			// let newId = anoCol.append(newVoxelCloud);
+			// this.currentVoxelCloud = newVoxelCloud;//save target voxelAnnotation
+			return true;
+		}
 	}
 	public mousemoveHandler( viewerEvent: ViewerEvent ): boolean{
 		if(!this.hitTest(viewerEvent)) {

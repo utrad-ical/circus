@@ -9,4 +9,7 @@ export abstract class Annotation {
 	public setId( id: number ): void {
 		this.collectionId = id;
 	}
+	public getId(): number{
+		return this.collectionId;
+	}
 }

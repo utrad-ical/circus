@@ -26,4 +26,11 @@ export class AnnotationCollection extends EventEmitter {
 			if( f(this.collection[i]) === false ) break;
 		};
 	}
+	public getAnnotationById(id: number): Annotation{
+		if(this.collection[id]) {
+			return this.collection[id];
+		} else {
+			return null;
+		}
+	}
 }

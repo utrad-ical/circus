@@ -32,12 +32,21 @@ html(lang="ja")
 		div
 			input(type="text", id="circle_text",value="default")
 			input(type="text", id="font_text",value="16pt メイリオ,Meiryo")
+			span R
+			input(type="number", id="r_color", value="0", min="0", max="255")
+			span G
+			input(type="number", id="g_color", value="255", min="0", max="255")
+			span B
+			input(type="number", id="b_color", value="0", min="0", max="255")
 		div.flex
 			div
 				div.flex
 					div
 						canvas#rs-canvas(width=512,height=512)
 					div
+						div
+							button(type="button",id="add_voxel_annotation_btn")
+								span add voxAnno
 						ul#point_list
 			div
 				canvas#view-state-canvas(width=512,height=512)

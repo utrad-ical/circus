@@ -56,13 +56,22 @@ export class VoxelCloudAnnotation extends Annotation {
 		return new VoxelCloudSprite(this);
 	}
 	public addVoxel(voxel: [number, number, number]): void{
+		//round to integer
+		voxel[0] = Math.round(voxel[0]);
+		voxel[1] = Math.round(voxel[1]);
+		voxel[2] = Math.round(voxel[2]);
 		//duplicate check
 		for (var i = 0; i < this.voxelArray.length; ++i) {
 			let data = this.voxelArray[i];
-			if(data[0] === Math.round(voxel[0]) && data[1] === Math.round(voxel[1]) && data[2] === Math.round(voxel[2]) ) {
+			if(data[0] === voxel[0] && data[1] === voxel[1] && data[2] === voxel[2] ) {
 				return;//if data is already in voxelArray, then return here.
 			}
 		}
+		//new implementation SIMPLE!============
+		// if(this.voxelCube[voxel[0]][voxel[1]][voxel[2]] === 1) {
+		// 	return;
+		// }
+		//new implementation============
 		this.voxelArray.push([voxel[0], voxel[1], voxel[2]]);
 	}
 }

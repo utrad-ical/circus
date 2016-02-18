@@ -74,16 +74,20 @@ $( function(){
 		var frag = document.createDocumentFragment();
 		for (var i = 0; i < annoCol.length; i++) {
 			var c = annoCol[i];
-			var clone = liElm.cloneNode(false);
-			var label = "annotation";
-			if(c instanceof rs.PointAnnotation) {
-				label = "point annotation";
-				clone.setAttribute("data-coordinate-x", c.getCenter()[0]);
-				clone.setAttribute("data-coordinate-y", c.getCenter()[1]);
-				clone.setAttribute("data-coordinate-z", c.getCenter()[2]);
+			if (c instanceof rs.Annotation) {//some kind of annotation
+				var clone = liElm.cloneNode(false);
+				var label = "annotation";
+				if(c instanceof rs.PointAnnotation) {
+					label = "point annotation";
+					//add extra attribute
+					clone.setAttribute("data-coordinate-x", c.getCenter()[0]);
+					clone.setAttribute("data-coordinate-y", c.getCenter()[1]);
+					clone.setAttribute("data-coordinate-z", c.getCenter()[2]);
+				}
+				clone.setAttribute("data-vox-anno-id", c.getId());
+				clone.appendChild(document.createTextNode(label));
+				frag.appendChild(clone);
 			}
-			clone.appendChild(document.createTextNode(label));
-			frag.appendChild(clone);
 		}
 
 		var pointListElm = document.getElementById("point_list");
@@ -143,6 +147,20 @@ $( function(){
 			vs.transrate(translateDistance[0], translateDistance[1], translateDistance[2]);
 			rsViewer2.render();
 		}
+		if (e.target.hasAttribute("data-vox-anno-id")) {
+			var targetId = e.target.getAttribute("data-vox-anno-id");
+			rsViewer2.setCurrentAnnotationId(targetId);
+		}
+	});
+	//add annotation button event
+	$("#add_voxel_annotation_btn").on("click", function(){
+		var r=document.getElementById("r_color").value;
+		var g=document.getElementById("g_color").value;
+		var b=document.getElementById("b_color").value;
+		var newVoxelAnnotation = new rs.VoxelCloudAnnotation([512, 512, 128], [], [r, g, b, 1.0]);
+		var newId = rsViewer2.getAnnotationCollection().append(newVoxelAnnotation);
+		console.log(newId);
+		rsViewer2.setCurrentAnnotationId(newId);
 	});
 
 	//==================================================

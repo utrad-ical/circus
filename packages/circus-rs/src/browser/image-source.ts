@@ -1,5 +1,7 @@
 'use strict';
 
-export abstract class ImageSource {
+import { EventEmitter } from 'events';
+
+export abstract class ImageSource extends EventEmitter {
 	public abstract draw( canvasDomElement, viewState ):Promise<any>;
 }

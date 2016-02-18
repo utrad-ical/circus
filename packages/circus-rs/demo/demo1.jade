@@ -9,8 +9,24 @@ html(lang="ja")
 		script(src="https://code.jquery.com/jquery-2.2.0.min.js")
 		script(src="./demo1.js")
 		title package.name
-	body
-		h1 CIRCUS-RS DEMO
-		p CIRCUS-RS DEMO
-		canvas#rs-canvas(width=512,height=512)
-		canvas#view-state-canvas(width=512,height=512)
+	body.demo1
+		h1 CIRCUS-RS DEMO ( demo1.js )
+		
+		p
+			|このサンプルでは、RawVolumeLoader を利用しています。
+			br
+			|受け取るデータは約120MBあるため、読込には時間がかかります。ブラウザ付属の開発者ツールを利用すると、伸びゆくプログレスバーを楽しむことが出来ます。
+			br
+			|読み込んでいる間は、別のイメージソース(現在はモック)を利用しています。
+			br
+			|2つのビューア(左,右)が同じ ViewState を利用しており、左のビューアについては、イメージソースを切り替え前と後で計２つ利用しています。
+		
+		canvas#rs-canvas(width=600,height=600)
+		div.right-column
+			canvas#view-state-canvas(width=300,height=300)
+			div#view-state-canvas-note
+				p 縁にある■の上でマウスホイールを行うと、表示の操作が出来ます。右上/左下/右下が、移動/回転/拡大・縮小になります。 移動は CTRL キーを押しながらスクロールすると、スピードアップします。
+				div.rect#color-x X軸移動 or X軸を中心に回転
+				div.rect#color-y Y軸移動 or Y軸を中心に回転
+				div.rect#color-z Z軸移動 or Z軸を中心に回転
+				div.rect#color-scale 表示範囲の拡大・縮小

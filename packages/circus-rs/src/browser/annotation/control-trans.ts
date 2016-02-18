@@ -74,10 +74,16 @@ export class ControlTransAnnotation extends Annotation {
 			return true;
 		}
 		if(	viewerEvent.original && viewerEvent.original.deltaY != 0 ){
+			let [dx,dy,dz] = this.dxyz;
+			if( viewerEvent.original.ctrlKey ){
+				dx *= 10;
+				dy *= 10;
+				dz *= 10;
+			}
 			if( viewerEvent.original.deltaY > 0 ){
-				viewerEvent.viewer.getViewState().transrate(-this.dxyz[0], -this.dxyz[1], -this.dxyz[2]);
+				viewerEvent.viewer.getViewState().transrate(-dx, -dy, -dz);
 			}else{
-				viewerEvent.viewer.getViewState().transrate(this.dxyz[0], this.dxyz[1], this.dxyz[2]);
+				viewerEvent.viewer.getViewState().transrate(dx, dy, dz);
 			}
 			viewerEvent.viewer.render();
 		}

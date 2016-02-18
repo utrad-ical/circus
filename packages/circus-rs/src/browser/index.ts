@@ -24,3 +24,7 @@ export * from '../browser/point-tool';
 export * from '../browser/pen-tool';
 export * from '../browser/bucket-tool';
 export * from '../browser/image-source/empty-image-source';
+export * from '../browser/image-source/raw-volume-image-source';
+
+// Is not is more better way of writing?
+exports.RawDataLoader = require('../browser/image-source/rawvolume-loader').default;

@@ -10,32 +10,39 @@ export class ViewStateImageSource extends ImageSource {
 	private width: number;
 	private height: number;
 	private depth: number;
-	private scale: number;
+	private fontSize: number = 20;
 
 	private matrix;
+	private canvasSizeCache;
 	
 	constructor( width: number, height: number, depth: number ){
 		super();
 		this.width = width;
 		this.height = height;
 		this.depth = depth;
-		this.scale = 0.5;
 	}
 	
 	public readyCoordinatesMapper(
-		viewState,
+		canvasSize,
+		cornerPoints,
 		mvTranslate: Vector3 = [-1.0, -2.0, -1.0],
 		eye: Vector3 = [1.0, 2.0, 1.0],
 		lookAt: Vector3 = [0.0, 0.0, 0.0],
 		up: Vector3 = [0.0, 0.0, -1.0]
 	){
+		if( this.canvasSizeCache
+			&& this.canvasSizeCache[0] === canvasSize[0]
+			&& this.canvasSizeCache[1] === canvasSize[1]
+		) return;
+		
+		this.canvasSizeCache = canvasSize;
+
 		let max = Math.max( this.width, this.height, this.depth );
 	
 		let preTransMat = mat4.create();
 		mat4.scale( preTransMat, preTransMat, [1/max,1/max,1/max] );
 		mat4.translate( preTransMat, preTransMat, [ this.width * -0.5, this.height * -0.5, this.depth * -0.5] );
 	
-		let canvasSize = viewState.getSize();
 		let mvMat = mat4.translate( mat4.create(), mat4.create(), mvTranslate );
 		let viewMat = mat4.lookAt( mat4.create(), eye, lookAt, up );
 		let pMat = mat4.perspective(mat4.create(), 40.0 / 180.0 * Math.PI, canvasSize[0] / canvasSize[1], 0.1, 100.0);
@@ -48,11 +55,35 @@ export class ViewStateImageSource extends ImageSource {
 		mat4.multiply( this.matrix, this.matrix, cxMat );
 		mat4.multiply( this.matrix, this.matrix, preTransMat );
 		
+
+
+
 		let center = vec3.scale( vec3.create(), [this.width, this.height, this.depth ], 0.5 );
 		let center2 = vec3.transformMat4( vec3.create(), center, this.matrix ).map( i => Math.round(i) );
-		let move = mat4.translate( mat4.create(), mat4.create(), vec3.subtract( vec3.create(), center, center2 ) );
-		mat4.multiply( this.matrix, move, this.matrix );
+		let center3 = [ canvasSize[0] / 2, canvasSize[1] / 2, 0 ];
+		let moveToCanvasOrigin = mat4.translate( mat4.create(), mat4.create(), vec3.scale( vec3.create(), center2, -1 ) );
+		mat4.multiply( this.matrix, moveToCanvasOrigin, this.matrix );
 		
+		let far = 0;
+		let farPoint = null;
+		cornerPoints.forEach( (p) => {
+			let dist = vec3.length( vec3.transformMat4( vec3.create(), p, this.matrix ).map( i => Math.round(i) ) );
+			if( dist > far ){
+				far = dist;
+				farPoint = p;
+			}
+		} );
+		if( far ){
+			let allowDist = Math.min( canvasSize[0] * 0.35, canvasSize[1] * 0.35 );
+			let scale = allowDist / far;
+			let shrink = mat4.scale( mat4.create(), mat4.create(), vec3.fromValues( scale,scale,scale ) );
+			mat4.multiply( this.matrix, shrink, this.matrix );
+		}
+		
+		let moveToCenter = mat4.translate( mat4.create(), mat4.create(), vec3.scale(vec3.create(),center3,1.1) );
+		mat4.multiply( this.matrix, moveToCenter, this.matrix );
+		
+		this.fontSize = Math.ceil( this.fontSize * Math.min( canvasSize[0] / this.width, canvasSize[1] / this.height ) );
 	}
 	
 	public getCoordinates( p ){
@@ -66,17 +97,18 @@ export class ViewStateImageSource extends ImageSource {
 		
 		let context = canvasDomElement.getContext("2d");
 		
-		this.readyCoordinatesMapper(viewState);
-		
-		
 		/**
 		 * Draw volume box
 		 */
-		let [ cA1,cA2,cA3,cA4,cB1,cB2,cB3,cB4 ] = [ 
+		
+		let cornerPoints = [ 
 			[0,0,0],[this.width, 0, 0],[this.width, this.height, 0],[0, this.height, 0],
 			[0,0, this.depth],[this.width, 0, this.depth],[this.width, this.height, this.depth],[0, this.height, this.depth ]
-		].map( p => this.getCoordinates( p ) );
+		];
+		let canvasSize = [ canvasDomElement.getAttribute('width'), canvasDomElement.getAttribute('height') ];
+		this.readyCoordinatesMapper( canvasSize, cornerPoints );
 		
+		let [ cA1,cA2,cA3,cA4,cB1,cB2,cB3,cB4 ] = cornerPoints.map( p => this.getCoordinates( p ) );
 		this.strokePolygone( context, [cA1,cA2,cA3,cA4,cA1,cB1,cB2,cA2,cA1], 1.0, 'rgb(0, 32, 128)' );
 		this.strokePolygone( context, [cB3,cB2,cB1,cB4,cB3,cA3,cA4,cB4,cB3], 1.0, 'rgb(0, 32, 128)' );
 		
@@ -138,12 +170,12 @@ export class ViewStateImageSource extends ImageSource {
 		/**
 		 * Draw status text
 		 */
-		var x = 30;
-		var y = 20;
-		var lineHeight = 24;
+		var x = this.fontSize;
+		var y = this.fontSize;
+		var lineHeight = Math.ceil( this.fontSize * 1.4 );
 		var k = 100;
 		
-		context.font = "14pt Arial";
+		context.font = this.fontSize.toString() + "px Arial";
 		context.fillStyle = 'rgba(255,0,0,1.0)';
 		// console.log( this.vecToString( viewState.getOrigin(), 100 ) );
 

@@ -118,14 +118,13 @@ export default class RawData {
 
 	/**
 	 * Get pixel value using bilinear interpolation.
-	 * Medium quality interpolation.
 	 * @param x {floating point} x-coordinate
 	 * @param y {floating point} y-coordinate
 	 * @param z {floating point} z-coordinate
 	 * @return n {number} Corresponding voxel value.
 	 */
 	public getPixelWithInterpolation(x: number, y: number, z: number): number {
-		//check value
+		// Check values
 		let x_end = this.size[0] - 1;
 		let y_end = this.size[1] - 1;
 		let z_end = this.size[2] - 1;
@@ -133,24 +132,24 @@ export default class RawData {
 			return 0;
 		}
 
-		//fix value for "EDGE" of image
-		let iz = Math.floor(z);//iz: int z
+		// Handle edge cases
+		let iz = Math.floor(z);
 		if (iz >= z_end) {
 			iz = z_end - 1;
 			z = z_end;
 		}
-		let ix = Math.floor(x);//ix: int x
+		let ix = Math.floor(x);
 		if (ix >= x_end) {
 			ix = x_end - 1;
 			x = x_end;
 		}
-		let iy = Math.floor(y);//iy: int y
+		let iy = Math.floor(y);
 		if (iy >= y_end) {
 			iy = y_end - 1;
 			y = y_end;
 		}
 
-		//calc "WEIGHT" of voxel and determine final voxel value.
+		// Calculate the weight of slices and determine the final value
 		let value_z1 = this.getAxialInterpolation(ix, x, iy, y, iz);
 		let value_z2 = this.getAxialInterpolation(ix, x, iy, y, iz + 1);
 		let weight_z2 = z - iz;
@@ -159,30 +158,28 @@ export default class RawData {
 	}
 
 	/**
-	 * get axis interpolation
+	 * Do 4-neighbor pixel interpolation within a given single axial slice.
 	 * @protected
 	 * @param ix {number}
 	 * @param x {number}
 	 * @param iy {number}
-	 * @param u {number}
+	 * @param y {number}
 	 * @param intz {number}
 	 * @return n {number}
 	 */
 	protected getAxialInterpolation(ix: number, x: number, iy: number, y: number, intz: number): number {
-		let ixp1 = ix + 1;//int x plus 1
-		let iyp1 = iy + 1;//int y plus 1
+		let ixp1 = ix + 1;
+		let iyp1 = iy + 1;
 
 		// p0 p1
 		// p2 p3
 		let rx = this.size[0];
-		let offset = rx * this.size[1] * intz;//calc "VOLUME" : x*y*z | this is used as basic offset.
-		//get 4 voxel value around offset voxel.
+		let offset = rx * this.size[1] * intz; // offset of p0 (top-left pixel)
 		let p0 = this.read(offset + ix + iy * rx);
 		let p1 = this.read(offset + ixp1 + iy * rx);
 		let p2 = this.read(offset + ix + iyp1 * rx);
 		let p3 = this.read(offset + ixp1 + iyp1 * rx);
 
-		//calc "WEIGHT" of voxel and determine final voxel value.
 		let weight_x2 = x - ix;
 		let weight_x1 = 1.0 - weight_x2;
 		let weight_y2 = y - iy;
@@ -200,28 +197,25 @@ export default class RawData {
 	 * @param imageData {ArrayBuffer} The inserted image data using the machine's native byte order.
 	 */
 	public insertSingleImage(z: number, imageData: ArrayBuffer): void {
-		//check dimension
 		if (!this.size) {
 			throw new Error('Dimension not set');
 		}
 
 		let [rx, ry, rz] = this.size;
-		//check z argument
 		if (z < 0 || z >= rz) {
 			throw new RangeError('z-index out of bounds');
 		}
 
-		//image size check
 		if (rx * ry * this.bpp > imageData.byteLength) {
 			throw new Error('Not enough buffer length');
 		}
 
-		let len = rx * ry * this.bpp;//len:byte of surface
-		let offset = len * z;//calc "VOLUME". this is used as offset
+		let byteLength = rx * ry * this.bpp; // len:byte of surface
+		let offset = byteLength * z;
 
-		let src = new Uint8Array(imageData, 0, len);//imageData can be smaller than len
-		let dst = new Uint8Array(this.data, offset, len);//determine public area with offset and len
-		dst.set(src);//overwrite
+		let src = new Uint8Array(imageData, 0, byteLength);
+		let dst = new Uint8Array(this.data, offset, byteLength);
+		dst.set(src); // This overwrites the existing slice (if any)
 		this.loadedSlices.append(z);
 	}
 
@@ -231,23 +225,20 @@ export default class RawData {
 	 * @return arraybuffer {ArrayBuffer} image data
 	 */
 	public getSingleImage(z: number): ArrayBuffer {
-		//check size
 		if (!this.size) {
 			throw new Error('Dimension not set');
 		}
 
 		let [rx, ry, rz] = this.size;
-		//validate z value
 		if (z < 0 || z >= rz) {
 			throw new RangeError('z-index out of bounds');
 		}
 
-		let len = rx * ry * this.bpp;//bpp:byte per voxel. calc surface byte
-		let offset = len * z;//calc "VOLUNE". this is used as offset
-		let src = new Uint8Array(this.data, offset, len);//data:Actual image data (full voxel data)
-			//determine public area with offset and len
-		let buffer = new ArrayBuffer(len);
-		(new Uint8Array(buffer)).set(src);//extract 2d image data
+		let byteLength = rx * ry * this.bpp;
+		let offset = byteLength * z;
+		let src = new Uint8Array(this.data, offset, byteLength);
+		let buffer = new ArrayBuffer(byteLength);
+		(new Uint8Array(buffer)).set(src);
 		return buffer;
 	}
 
@@ -259,7 +250,6 @@ export default class RawData {
 	 * @param type {PixelFormat} enum
 	 */
 	public setDimension(x: number, y: number, z: number, type: PixelFormat): void {
-		//validate section
 		if (x <= 0 || y <= 0 || z <= 0) {
 			throw new Error('Invalid volume size.');
 		}
@@ -269,47 +259,33 @@ export default class RawData {
 		if (x * y * z > 1024 * 1024 * 1024) {
 			throw new Error('Maximum voxel limit exceeded.');
 		}
-		if (type === PixelFormat.Binary && (x * y) % 8 !== 0) {//image area must be multiple of 8
+		if (type === PixelFormat.Binary && (x * y) % 8 !== 0) { // image area must be multiple of 8
 			throw new Error('Number of pixels in a slice must be a multiple of 8.');
 		}
 
-		this.size = [x, y, z];//Vector3D
+		this.size = [x, y, z];
 		this.pixelFormat = type;
+		let pxInfo = this.getPixelFormatInfo(this.pixelFormat);
+		this.data = new ArrayBuffer(this.size[0] * this.size[1] * this.size[2] * pxInfo.bpp);
+		this.setAccessor();
+	}
 
-		//getPixelFormatInfo returns PixelFormatInfo
-		this.bpp = this.getPixelFormatInfo(this.pixelFormat).bpp;//byte per voxel
-		this.data = new ArrayBuffer(x * y * z * this.bpp);//allocate data area
+	protected setAccessor(): void {
+		let pxInfo = this.getPixelFormatInfo(this.pixelFormat);
+		this.bpp = pxInfo.bpp;
+		this.view = new pxInfo.arrayClass(this.data);
 
-		//set read and write function
-		this.read = pos => this.view[pos];//view:array view.
-		this.write = (value, pos) => this.view[pos] = value;//Set "Action" to write
-
-		switch (type) {//set view by type
-			case PixelFormat.UInt8:
-				this.view = new Uint8Array(this.data);
-				break;
-			case PixelFormat.Int8:
-				this.view = new Int8Array(this.data);
-				break;
-			case PixelFormat.UInt16:
-				this.view = new Uint16Array(this.data);
-				break;
-			case PixelFormat.Int16:
-				this.view = new Int16Array(this.data);
-				break;
-			case PixelFormat.Binary:
-				this.view = new Uint8Array(this.data);
-				this.read = pos => (this.view[pos >> 3] >> (7 - pos % 8)) & 1;//Re-set function
-				this.write = (value, pos) => {//Re-set "Action"
-					let cur = this.view[pos >> 3];//???
-					cur ^= (-value ^ cur) & (1 << (7 - pos % 8)); // set n-th bit to value
-					this.view[pos >> 3] = cur;
-				};
-				break;
-			default:
-				throw new RangeError('Invalid pixel format');
+		if (this.pixelFormat !== PixelFormat.Binary) {
+			this.read = pos => this.view[pos];
+			this.write = (value, pos) => this.view[pos] = value;
+		} else {
+			this.read = pos => (this.view[pos >> 3] >> (7 - pos % 8)) & 1;
+			this.write = (value, pos) => {
+				let cur = this.view[pos >> 3];
+				cur ^= (-value ^ cur) & (1 << (7 - pos % 8)); // set n-th bit to value
+				this.view[pos >> 3] = cur;
+			};
 		}
-		this.bpp = this.getPixelFormatInfo().bpp;//byte per voxel
 	}
 
 	/**
@@ -373,7 +349,33 @@ export default class RawData {
 	}
 
 	/**
-	 * Applies window level/width. level:brightness?
+	 * Converts this raw data to new pixel format, optionally using a filter.
+	 * @param targetFormat
+	 * @param filter
+	 */
+	public convert(targetFormat: PixelFormat, filter: (number) => number): void {
+		let newRaw = new RawData();
+		let [rx, ry, rz] = this.size;
+		newRaw.setDimension(this.size[0], this.size[1], this.size[2], targetFormat);
+		for (let x = 0; x < rx; x++) {
+			for (let y = 0; y < ry; y++) {
+				for (let z = 0; z < rz; z++) {
+					let pos = x + (y + z * this.size[1]) * this.size[0];
+					let value = this.read(pos);
+					if (filter) {
+						value = filter(value);
+					}
+					newRaw.write(value, pos);
+				}
+			}
+		}
+		this.pixelFormat = targetFormat;
+		this.data = newRaw.data;
+		this.setAccessor();
+	}
+
+	/**
+	 * Applies window level/width.
 	 * @protected
 	 * @param width {number}
 	 * @param level {number}
@@ -394,7 +396,7 @@ export default class RawData {
 	 * Creates an orthogonal MPR image on a new array buffer.
 	 * not oblique.
 	 * MPR:multi-planar reconstruction
-	 * @param azeis {string}
+	 * @param axis {string}
 	 * @param target {number}
 	 * @param windowWidth {number}
 	 * @param windowLevel {number}
@@ -411,7 +413,7 @@ export default class RawData {
 		let [rx, ry, rz] = this.size;
 
 		let checkZranges = () => {
-			if (this.loadedSlices.length() !== rz)//loadedSlices:MultiRange
+			if (this.loadedSlices.length() !== rz)
 				throw new ReferenceError('Volume is not fully loaded to construct this MPR');
 		};
 
@@ -420,7 +422,7 @@ export default class RawData {
 				checkZranges();
 				image = new Uint8Array(ry * rz);
 				for (let z = 0; z < rz; z++)
-					for (let y = 0; y < ry; y++)//write data to image one by one...
+					for (let y = 0; y < ry; y++)
 						image[buffer_offset++] =
 							this.applyWindow(windowWidth, windowLevel, this.getPixelAt(target, y, z));
 				return Promise.resolve({image, outWidth: ry, outHeight: rz});
@@ -447,20 +449,20 @@ export default class RawData {
 	 * count cube of voxel from center to edge of voxel
 	 * @protected
 	 * @param centerX {number}
-	 * @param sy {number}
-	 * @param dx {number}
-	 * @param dy {number}
-	 * @param mx {number}
-	 * @param my {number}
-	 * @return object {{ count: number, px: number, py: number}}
+	 * @param centerY {number}
+	 * @param microX {number}
+	 * @param microY {number}
+	 * @param voxelX {number}
+	 * @param voxelY {number}
+	 * @return object {{count: number, px: number, py: number}}
 	 */
 	protected walkUntilObliqueBounds(
-		centerX: number,//step? center x
-		centerY: number,//center y
-		microX: number,//micro unit of x
-		microY: number,//micro unit of y
-		voxelX: number,//m??? voxel size x
-		voxelY: number//voxel size y
+		centerX: number,
+		centerY: number,
+		microX: number,
+		microY: number,
+		voxelX: number,
+		voxelY: number
 	): { count: number, px: number, py: number} {
 		let count = 0;
 		let px = centerX;
@@ -478,7 +480,7 @@ export default class RawData {
 	 * Scan over the volume and make an oblique image,
 	 * starting from origin and along with the plane defined by eu/ev.
 	 * The result is written to `image`.
-	 * If windowWidth/Level is given, output image must be an Uint8Array.
+	 * If windowWidth/Level is given, output image will be an Uint8Array.
 	 * Otherwise, the output image must have the same pixel format as the
 	 * source volume data.
 	 * @protected
@@ -486,7 +488,7 @@ export default class RawData {
 	 * @param eu {Vector3D}
 	 * @param ev {Vector3D}
 	 * @param outSize {Vector2D}
-	 * @param image {{[index: number]: number}} uint8array
+	 * @param image {{[index: number]: number}}
 	 * @param windowWidth {?number}
 	 * @param windowLevel {?number}
 	 */
@@ -536,7 +538,7 @@ export default class RawData {
 	}
 
 	/**
-	 * ???
+	 * Determine how to scan oblique image
 	 * @protected
 	 * @param baseAxis {string}
 	 * @param center {Vector3D}
@@ -553,7 +555,7 @@ export default class RawData {
 	} {
 		let [eu_x, eu_y, eu_z] = [0, 0, 0];
 		let [ev_x, ev_y, ev_z] = [0, 0, 0];
-		let [rx, ry, rz] = this.size;//Vector3D
+		let [rx, ry, rz] = this.size;
 		let [vx, vy, vz] = this.voxelSize;
 		let [centerX, centerY] = [0, 0];
 		let [outWidth, outHeight] = [0, 0];
@@ -616,7 +618,7 @@ export default class RawData {
 	 * Creates a single oblique MPR image on a new array buffer.
 	 * @param baseAxis {string}
 	 * @param center {Vector3D}
-	 * @param alpha {number} angle?
+	 * @param angle {number} angle
 	 * @param windowWidth {number}
 	 * @param windowLevel {number}
 	 * @return promise {Promise<ObliqueResult>}
@@ -629,7 +631,9 @@ export default class RawData {
 		windowLevel?: number
 	): Promise<ObliqueResult> {
 		let [vx, vy, vz] = this.voxelSize;
-		let pixelSize = Math.min(vx, vy, vz);//min of voxel
+		// Determine the output image resolution,
+		// which must be the smallest voxel size of the three axis.
+		let pixelSize = Math.min(vx, vy, vz);
 
 		// Determine the output image bounds
 		let {outSize, outCenter, eu, ev, origin} =
@@ -647,5 +651,5 @@ export default class RawData {
 			pixelSize
 		});
 	}
-	
+
 }

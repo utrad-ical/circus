@@ -1,5 +1,6 @@
 /**
  * Promisified XHR
+ * @deprecated Use 3rd-party library such as 'request'
  */
 export class XhrPromise {
 	public static send(url: string, options: any = {}): Promise<any>

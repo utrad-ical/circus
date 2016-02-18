@@ -4,9 +4,6 @@
 		"target": "es5",
 		"outDir": "../build"
 	},
-	"exclude": [
-		"browser"
-	],
 	"compileOnSave": false,
 	"buildOnSave": false
 }

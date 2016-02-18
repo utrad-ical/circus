@@ -18,6 +18,10 @@ export default class DicomVolume extends RawData {
 		}
 	}
 
+	public getHeader(key: string): any {
+		return this.header[key];
+	}
+
 	public setEstimatedWindow(level: number, width: number): void {
 		this.wl = level;
 		this.ww = width;

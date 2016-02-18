@@ -61,4 +61,12 @@ describe('RawData', function () {
 
 	it('must read/write values from/to Binary volume',
 		readWriteTest(PixelFormat.Binary, 32, 32, 10));
+
+	it('must perform pixel format converting', function() {
+		var raw = new RawData();
+		raw.setDimension(4, 4, 4, PixelFormat.Int16);
+		raw.convert(PixelFormat.Int8, function(v) { return v + 5; });
+		assert.equal(raw.getPixelFormat(), PixelFormat.Int8);
+		assert.equal(raw.getPixelAt(2, 2, 2), 5);
+	});
 });

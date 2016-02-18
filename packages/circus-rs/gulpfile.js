@@ -34,7 +34,7 @@ gulp.task('less', function() {
 		.pipe(gulp.dest('build'));
 });
 
-/**
+/*
  * Clean up
  */
 gulp.task('clean', ['clean-build','clean-pubdocs','clean-dist']);
@@ -49,7 +49,7 @@ gulp.task('clean-dist', function(done) {
 });
 
 
-/**
+/*
  * Create dts
  */
 gulp.task('declaration', function() {
@@ -66,7 +66,7 @@ gulp.task('declaration', function() {
 		.pipe(gulp.dest('build/typings/circusrs'))
 });
 
-/**
+/*
  * Source code check
  */
 gulp.task('tslint', function() {
@@ -76,11 +76,12 @@ gulp.task('tslint', function() {
 		}))
  		.pipe(tslint.report('verbose'));
 });
-/**
- * Build demo sources
+
+/*
+ * Build demo
  */
 gulp.task('demo',['demo-html','demo-js']);
-gulp.task('demo-html',['demo-css'], function() {
+gulp.task('demo-html', ['demo-css'], function() {
 	var LOCALS = {};
 	return gulp.src('./demo/**/*.jade')
 		.pipe(jade({
@@ -104,7 +105,7 @@ gulp.task('copy-dist-browser', ['dist-browser'], function() {
 });
 
 
-/**
+/*
  * Build distribution package
  */
 gulp.task('dist-browser', ['typescript','dist-browser-iconfont'], function() {
@@ -136,28 +137,4 @@ gulp.task('dist-browser-iconfont', function() {
 			// console.log(glyphs);
 		})
 		.pipe(gulp.dest('dist/css'));
-});
-
-/**
- * Expired task
- */
-gulp.task('expired-build-browser', ['less', 'expired-iconfont'], function() {
-	return gulp.src('src/browser/*.{js,png,gif}')
-		.pipe(gulp.dest('build/browser'));
-});
-
-gulp.task('expired-iconfont', function() {
-	return gulp.src('src/browser/assets/icons/*.svg')
-		.pipe(iconfont({
-			fontName: 'circus-rs-font',
-			appendUnicode: true,
-			formats: ['woff'],
-			startUnicode: 0xE600,
-			fontHeight: 512,
-			timestamp: Math.round(Date.now() / 1000) // required for consistent build
-		}))
-		.on('glyphs', function (glyphs, options) {
-			// console.log(glyphs);
-		})
-		.pipe(gulp.dest('build/browser/'));
 });

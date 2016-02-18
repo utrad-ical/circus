@@ -12,6 +12,7 @@ export default class MockDicomDumper extends DicomDumper {
 
 	public readDicom(dcmdir: string): Promise<DicomVolume> {
 		let vol = this.makeMockVol();
+		if (/404/.test(dcmdir)) return Promise.reject('Not found');
 		return Promise.resolve(vol);
 	}
 

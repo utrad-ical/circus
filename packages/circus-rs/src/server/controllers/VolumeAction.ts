@@ -18,6 +18,7 @@ export default class VolumeAction extends VolumeBasedController {
 	}
 
 	protected processVolume(query: any, vol: DicomVolume, res: http.ServerResponse): void {
+		res.setHeader('Access-Control-Allow-Origin', '*');
 		res.setHeader('Content-Type', 'application/octet-stream');
 		res.setHeader('Content-Encoding', 'gzip');
 		let gzip = zlib.createGzip();

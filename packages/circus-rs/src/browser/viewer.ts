@@ -97,32 +97,32 @@ export class Viewer extends EventEmitter {
   }
 
   private canvasEventHandler( originalEvent ){
+	
+	if( typeof originalEvent === 'object' && originalEvent.preventDefault ) originalEvent.preventDefault();
+	
 	var eventType = originalEvent.type;
+	let handler;
 	switch( eventType ){
+		case 'mousedown':
+			handler = 'mousedownHandler';
+			break;
 		case 'wheel':
 		case 'mousewheel':
 		case 'DOMMouseScroll':
 			eventType = 'mousewheel';
+			handler = 'mousewheelHandler';
+			break;
 	}
+	
     var event = new ViewerEvent( this, eventType, originalEvent );
-
-    if( this.primaryEventCapture && this.primaryEventCapture.hitTest( event ) ){
-      this.primaryEventCapture.emit( eventType, event );
-      return;
-    }
+	
+    if( this.primaryEventCapture && ! this.primaryEventCapture[handler]( event ) ) return;
 
     for( var i = this.spriteCollection.length; i > 0; i-- ){
-      let sprite = this.spriteCollection[i-1];
-      if( sprite.hitTest(event) ){
-        sprite.emit( eventType, event );
-        return;
-      }
+      if( ! (this.spriteCollection[i-1])[handler]( event ) ) return;
     }
 
-    if( this.backgroundEventCapture && this.backgroundEventCapture.hitTest( event ) ){
-      this.backgroundEventCapture.emit( eventType, event );
-      return;
-    }
+    if( this.backgroundEventCapture && ! this.backgroundEventCapture[handler]( event ) ) return;
   }
 
 	public clear(): void {

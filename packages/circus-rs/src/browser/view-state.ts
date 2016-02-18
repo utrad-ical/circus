@@ -14,6 +14,7 @@ export class ViewState {
 	private windowWidth: number;
 
 	private viewportSize: Size2; // [px]
+	private viewportOffset: Point2; // [px]
 	private zoom: number = 1.00;
 
 	private cOrigin: Point3; // [voxel index]
@@ -34,6 +35,13 @@ export class ViewState {
 		this.cY = cY || [ 0, viewportSize[1], 0 ];
 		this.windowLevel = windowLevel;
 		this.windowWidth = windowWidth;
+	}
+	
+	public setOffset( offset: Point2 ){
+		this.viewportOffset = offset;
+	}
+	public getOffset(){
+		return this.viewportOffset;
 	}
 
 	public coordinatePixelToVoxel( x, y ): Point3 {
@@ -63,7 +71,6 @@ export class ViewState {
 		let vx = vec3.dot( p1, ux );
 		let vy = vec3.dot( p1, uy );
 		let vz = vec3.dot( p1, this.getNormalVector() );
-
 		return [
 			vx * this.viewportSize[0] / vec3.length( this.cX ),
 			vy * this.viewportSize[1] / vec3.length( this.cY ),

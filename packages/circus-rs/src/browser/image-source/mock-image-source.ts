@@ -27,7 +27,6 @@ export class MockImageSource extends ImageSource {
 		
 		let self = this;
 		let context = canvasDomElement.getContext('2d');
-		let center = viewState.getCenter();
 		
 		return this.ready().then( () =>{
 		

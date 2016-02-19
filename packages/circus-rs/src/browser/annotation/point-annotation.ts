@@ -18,7 +18,7 @@ export class PointAnnotation extends Annotation {
 	private color: [number, number, number, number] = [255, 255, 255, 1];//default value
 	private pointText: PointText;
 	private isFirstDraw: boolean = true;
-	private isDragging: boolean = false;
+	public isDragging: boolean = false;
 	private sizeChanging: boolean = false;
 	private centerOffset: [number, number] = [0, 0];
 
@@ -34,9 +34,6 @@ export class PointAnnotation extends Annotation {
 	}
 	public getText(): PointText{
 		return this.pointText;
-	}
-	public getDragging(): boolean{
-		return this.isDragging;
 	}
 	public getSizeChanging(): boolean{
 		return this.sizeChanging;
@@ -59,9 +56,6 @@ export class PointAnnotation extends Annotation {
 			Math.round(center[1]),
 			Math.round(center[2])
 		];
-	}
-	public setDragging(mode: boolean): void{
-		this.isDragging = mode;
 	}
 	public setSizeChanging(mode: boolean): void{
 		this.sizeChanging = mode;
@@ -97,6 +91,8 @@ export class PointAnnotation extends Annotation {
 		for (var i = 0; i < 3; ++i) {//RGB
 			if(color[i] >= 0 && color[i] <= 255) {
 				this.color[i] = color[i];
+			} else {
+				this.color[i] = 255;
 			}
 		}
 		if(color[3] >= 0 && color[3] <= 1) {//alpha

@@ -11,8 +11,8 @@ export class BucketTool extends Tool {
 	private fillMap: number[][];
 	private voxAno: VoxelCloudAnnotation;
 	private checkBuffer: [number, number][];
-	constructor(argument) {
-		super();
+	constructor(opt) {
+		super(opt);
 	}
 	public hitTest(event: ViewerEvent): boolean{
 		return true;

@@ -21,8 +21,8 @@ export class PenTool extends Tool {
 	private currentVoxelCloud: VoxelCloudAnnotation;
 	private annotationCollection;
 
-	constructor( annotationCollection ) {
-		super();
+	constructor( opt ) {
+		super(opt);
 		this.previousVoxel = [0, 0, 0];
 	}
 

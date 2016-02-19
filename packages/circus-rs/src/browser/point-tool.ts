@@ -11,8 +11,8 @@ export class PointTool extends Tool {
 	private pointAnnotation: PointAnnotation;
 	private isDragging: boolean = false;
 	private drawMode: number;//0:dot 1:circle
-	constructor(mode: number) {
-		super();
+	constructor(opt, mode: number) {
+		super(opt);
 		this.drawMode = mode;
 	}
 	public hitTest(event: ViewerEvent): boolean{

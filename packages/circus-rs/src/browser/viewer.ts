@@ -6,6 +6,7 @@ import { ImageSource } from './image-source';
 import { AnnotationCollection } from './annotation-collection';
 import { ViewerEvent } from './viewer-event';
 import { ViewState } from './view-state';
+import { Tool } from './tool';
 import { ViewerEventCapture } from './viewer-event-capture-interface';
 
 import { EventEmitter } from 'events';
@@ -17,12 +18,13 @@ interface CanvasSize {
 
 export class Viewer extends EventEmitter {
 
-	private canvasDomElement: HTMLCanvasElement;
+	public canvasDomElement: HTMLCanvasElement;
 	private canvasDomElementSize: CanvasSize;
 	private composition: Composition;
 
 	private viewState: ViewState;
 	private imageSource: ImageSource;
+	// public tools: Tool[];
 	private annotationCollection: AnnotationCollection;
 	private spriteCollection: Sprite[];
 
@@ -64,13 +66,22 @@ export class Viewer extends EventEmitter {
 		}
 		return this.composition;
 	}
-
+	public getSpriteCollection(): Sprite[]{
+		return this.spriteCollection;
+	}
+	public appendToSpriteCollection(sprite: Sprite){
+		this.spriteCollection.push(sprite);
+	}
 	public setImageSource( imageSource: ImageSource ): void {
 		this.getComposition().setImageSource( imageSource );
 	}
 	public getImageSource(): ImageSource {
 		return this.getComposition().getImageSource();
 	}
+	// public appendTool(tool: Tool, func: Function): void{
+	// 	this.tools.push(tool);
+	// 	this.on("render", func);
+	// }
 	public getAnnotationCollection(): AnnotationCollection {
 		return this.getComposition().getAnnotationCollection();
 	}
@@ -93,45 +104,54 @@ export class Viewer extends EventEmitter {
 	public clearPrimaryEventCapture(): void {
 		this.primaryEventCapture = null;
 	}
-	public setBackgroundEventCapture( capture: ViewerEventCapture ): void {
+	public setBackgroundEventCapture( capture: ViewerEventCapture): void {
 		this.backgroundEventCapture = capture;
 	}
 	public clearBackgroundEventCapture(): void {
 		this.backgroundEventCapture = null;
+		this.canvasDomElement.style.cursor = "default";
 	}
 
 	private canvasEventHandler( originalEvent ){
-	if( typeof originalEvent === 'object' && originalEvent.preventDefault ) originalEvent.preventDefault();
+		if( typeof originalEvent === 'object' && originalEvent.preventDefault ){
+			originalEvent.preventDefault();
+		}
 
-	var eventType = originalEvent.type;
-	let handler;
-	switch( eventType ){
-		case 'mousemove':
-			handler = 'mousemoveHandler';
-			break;
-		case 'mouseup':
-			handler = 'mouseupHandler';
-			break;
-		case 'mousedown':
-			handler = 'mousedownHandler';
-			break;
-		case 'wheel':
-		case 'mousewheel':
-		case 'DOMMouseScroll':
-			eventType = 'mousewheel';
-			handler = 'mousewheelHandler';
-			break;
+		var eventType = originalEvent.type;
+		let handler;
+		switch( eventType ){
+			case 'mousemove':
+				handler = 'mousemoveHandler';
+				break;
+			case 'mouseup':
+				handler = 'mouseupHandler';
+				break;
+			case 'mousedown':
+				handler = 'mousedownHandler';
+				break;
+			case 'wheel':
+			case 'mousewheel':
+			case 'DOMMouseScroll':
+				eventType = 'mousewheel';
+				handler = 'mousewheelHandler';
+				break;
+		}
+
+		var event = new ViewerEvent( this, eventType, originalEvent );
+
+		if( this.primaryEventCapture && ! this.primaryEventCapture[handler]( event ) ){
+			return;
+		}
+
+		for( var i = this.spriteCollection.length; i > 0; i-- ){
+			if( ! (this.spriteCollection[i-1])[handler]( event ) ){
+				return;
+			}
+		}
+		if(this.backgroundEventCapture && !this.backgroundEventCapture[handler]( event ) ){
+			return;
+		}
 	}
-
-	var event = new ViewerEvent( this, eventType, originalEvent );
-
-	if( this.primaryEventCapture && ! this.primaryEventCapture[handler]( event ) ) return;
-
-	for( var i = this.spriteCollection.length; i > 0; i-- ){
-		if( ! (this.spriteCollection[i-1])[handler]( event ) ) return;
-		}
-		if(this.backgroundEventCapture && !this.backgroundEventCapture[handler]( event ) ) return;
-		}
 
 	public clear(): void {
 		this.canvasDomElement.getContext('2d').clearRect(
@@ -141,23 +161,27 @@ export class Viewer extends EventEmitter {
 	}
 
 	public draw( drawFunction: Function ): void {
-		var sprite:Sprite = drawFunction( this.canvasDomElement, this.viewState );
-		if( sprite !== null ) this.spriteCollection.push( sprite );
+		var sprite = drawFunction( this.canvasDomElement, this.viewState );
+		if( sprite !== null ){
+			this.spriteCollection.push( sprite );
+		}
 	}
 
 	public render(): Promise<any> {
 		let self = this;
 
-		self.clear();
-
 		self.spriteCollection = [];
+
+		self.clear();
 
 		return self.getImageSource().draw( self.canvasDomElement, self.viewState )
 		.then( function(){
 			var annotationCollection = self.getAnnotationCollection();
 			annotationCollection.forEach( function( annotation ){
-				var sprite:Sprite = annotation.draw( self.canvasDomElement, self.viewState );
-				if( sprite !== null ) self.spriteCollection.push( sprite );
+				var sprite = annotation.draw( self.canvasDomElement, self.viewState );
+				if( sprite !== null ){
+					self.spriteCollection.push( sprite );
+				}
 			});
 		}).then( ()=>{
 			var event = new ViewerEvent( this, 'render' );

@@ -23,7 +23,7 @@ $( function(){
 	var rsViewer2 = new rs.Viewer( canvas2 );
 	rsViewer2.setImageSource( rsDummyImageSource );
 	rsViewer2.setViewState( rsViewState );
-	var pointTool = new rs.PointTool(0);
+	var pointTool = new rs.PointTool({x:20, y:20, image:"dot.png", width:50, height:50, cursor:"default"}, 0);
 	rsViewer2.setBackgroundEventCapture(pointTool);
 	var textObj = new rs.ArrowText("サンプル");
 	// var arrowAnnotation=new rs.ArrowAnnotation([150,150,100], [50,50,50], textObj);
@@ -94,8 +94,36 @@ $( function(){
 		$(pointListElm).empty();
 		pointListElm.appendChild(frag);
 	});
-	// rsViewer2.getAnnotationCollection().append( arrowAnnotation );
-	// rsViewer2.getAnnotationCollection().append( penAnnotation );
+
+	//Add tool section
+	var hand = new rs.HandTool({x:20, y:20, image:"hand.png", width:50, height:50, cursor:"move"});
+	rsViewer2.on("render", function(){
+		this.draw( (c,vs) => hand.draw(c,vs) );
+	});
+	hand.on("ready", function(){
+		rsViewer2.draw( (c,vs) => this.draw(c,vs) );
+	});
+
+	var scale = new rs.ScaleTool({x:20, y:70, image:"scale.png", width:50, height:50, cursor:"default"}, 1.1);
+	rsViewer2.on('render', function(){
+		this.draw( (c,vs) => scale.draw(c,vs) );
+	});
+	scale.on("ready", function(){
+		rsViewer2.draw( (c,vs) => this.draw(c,vs) );
+	});
+
+	var rotate = new rs.RotateTool({x:20, y:120, image:"rotate.png", width:50, height:50, cursor:"default"}, 0,0,1);
+	rsViewer2.on("render", function(){
+		this.draw( (c,vs) => rotate.draw(c,vs) );
+	});
+	rotate.on("ready", function(){
+		rsViewer2.draw( (c,vs) => this.draw(c,vs) );
+	});
+	// rotate.on('ready', () => {
+	// 	rsViewer2.draw( (c,vs) => rotate.draw(c,vs) );
+	// });
+
+	//add annotation section
 	var dotId = rsViewer2.getAnnotationCollection().append( dotAnnotation );
 	var circleid = rsViewer2.getAnnotationCollection().append( circleAnnotation );
 
@@ -105,25 +133,38 @@ $( function(){
 	$("input[name=tool]").on("change", function(){
 		rsViewer2.clearBackgroundEventCapture();
 		var tool = null;
+		var cursor = "default";
 		switch(this.value){
 			case "dot":
-				tool = new rs.PointTool(0);
+				tool = new rs.PointTool({x:20, y:20, image:"dot.png", width:50, height:50, cursor:"default"}, 0);
+				cursor = "crosshair";
 				break;
 			case "circle":
-				tool = new rs.PointTool(1);
+				tool = new rs.PointTool({x:20, y:20, image:"circle.png", width:50, height:50, cursor:"default"}, 1);
+				cursor = "crosshair";
 				break;
 			case "pen":
-				tool = new rs.PenTool();
+				tool = new rs.PenTool({x:20, y:20, image:"pen.png", width:50, height:50, cursor:"default"});
 				break;
 			case "bucket":
-				tool = new rs.BucketTool();
+				tool = new rs.BucketTool({x:20, y:20, image:"bucket.png", width:50, height:50, cursor:"default"});
+				break;
+			case "hand":
+				tool = new rs.HandTool({x:20, y:20, image:"hand.png", width:50, height:50, cursor:"move"});
+				cursor = "move";
+				break;
+			case "scale":
+				tool = new rs.ScaleTool({x:20, y:20, image:"scale.png", width:50, height:50, cursor:"default"}, 1.1);
+				break;
+			case "rotate":
+				tool = new rs.RotateTool({x:20, y:20, image:"rotate.png", width:50, height:50, cursor:"default"}, 0,0,1);
 				break;
 			case "other":
 				//do nothing
 				break;
 		}
 		if (tool !== null) {
-			rsViewer2.setBackgroundEventCapture(tool);
+			rsViewer2.setBackgroundEventCapture(tool, cursor);
 		}
 	});
 	//annotation selection event-------------------
@@ -175,15 +216,15 @@ $( function(){
 	var rsAnnotationCollection = rsViewer.getAnnotationCollection();
 
 	rsAnnotationCollection.append( new rs.ControlTransAnnotation(
-		5, 0, 0, // xAxis
+		2, 0, 0, // xAxis
 		350, 30, 30, 'rgba(255,255,0,0.3)'
 	) );
 	rsAnnotationCollection.append( new rs.ControlTransAnnotation(
-		0, 5, 0, // yAxis
+		0, 2, 0, // yAxis
 		400, 30, 30, 'rgba(255,0,255,0.3)'
 	) );
 	rsAnnotationCollection.append( new rs.ControlTransAnnotation(
-		0, 0, 5, // zAxis
+		0, 0, 2, // zAxis
 		450, 30, 30, 'rgba(0,255,255,0.3)'
 	) );
 
@@ -205,7 +246,11 @@ $( function(){
 		450, 110, 30, 'rgba(128,128,128,0.3)'
 	) );
 	rsViewer.render();
-	rsViewer.on('render',function( e ){
-		rsViewer2.render();
+	// rsViewer.on('render',function( e ){
+	// 	rsViewer2.render();
+	// });
+	//----------
+	rsViewer2.on("render", function(){
+		rsViewer.render();
 	});
 });

@@ -36,7 +36,7 @@ export class PointSprite extends Sprite {
 		} else {//circle
 			let isAroundCircle = false;
 			let isNearCenter = false;
-			if(this.parent.getDragging()) {//dragging no check
+			if(this.parent.isDragging) {//dragging no check
 				if(this.parent.getDragMode() === 0) {//moving
 					isNearCenter = true;
 				} else {//changing
@@ -64,7 +64,7 @@ export class PointSprite extends Sprite {
 		if(!this.hitTest(viewerEvent)){
 			return true;
 		}
-		this.parent.setDragging(false);
+		this.parent.isDragging = false;
 		let textObj = this.parent.getText();
 		textObj.recoverColor();
 		let radius = this.parent.getRadius();
@@ -79,7 +79,7 @@ export class PointSprite extends Sprite {
 		if(!this.hitTest(viewerEvent)){
 			return true;
 		}
-		this.parent.setDragging(true);
+		this.parent.isDragging = true;
 		let textObj = this.parent.getText();
 		textObj.changeAttractColor();
 		this.parent.setCenterOffset(viewerEvent);
@@ -90,7 +90,7 @@ export class PointSprite extends Sprite {
 		if(!this.hitTest(viewerEvent)){
 			return true;
 		}
-		if(!this.parent.getDragging()) {
+		if(!this.parent.isDragging) {
 			return;
 		}
 		let v = viewerEvent.viewer;
@@ -113,6 +113,9 @@ export class PointSprite extends Sprite {
 	}
 	private isNearCenter(ctx, centerCircle: [number, number], point: [number, number]): boolean{
 		let innerBorder = this.parent.getRadius() - 10;//minus length from circle arc
+		if(innerBorder < 3) {
+			innerBorder = 3;
+		}
 		ctx.beginPath();
 		ctx.strokeStyle = "rgba(0,0,0,0)";
 		ctx.arc(centerCircle[0], centerCircle[1], innerBorder, 0, 2 * Math.PI);

@@ -30,26 +30,26 @@ export class Viewer extends EventEmitter {
 	private backgroundEventCapture;
 
 	constructor(canvas: HTMLCanvasElement) {
-	super();
+		super();
 
-	let self = this;
-	self.canvasDomElement = canvas;
-	self.canvasDomElementSize = {
-		width: parseInt( canvas.getAttribute('width') ),
-		height: parseInt( canvas.getAttribute('height') )
-	};
-	self.spriteCollection = [];
-	self.composition = null;
+		let self = this;
+		self.canvasDomElement = canvas;
+		self.canvasDomElementSize = {
+			width: parseInt( canvas.getAttribute('width') ),
+			height: parseInt( canvas.getAttribute('height') )
+		};
+		self.spriteCollection = [];
+		self.composition = null;
 
-	var eventDrive = ( originalEvent ) => {
-		self.canvasEventHandler( originalEvent );
-	};
-	var wheelEvent = 'onwheel' in document ? 'wheel' : 'onmousewheel' in document ? 'mousewheel' : 'DOMMouseScroll';
+		var eventDrive = ( originalEvent ) => {
+			self.canvasEventHandler( originalEvent );
+		};
+		var wheelEvent = 'onwheel' in document ? 'wheel' : 'onmousewheel' in document ? 'mousewheel' : 'DOMMouseScroll';
 
-	canvas.addEventListener('mousedown', eventDrive);
-	canvas.addEventListener('mouseup', eventDrive);
-	canvas.addEventListener('mousemove', eventDrive);
-	canvas.addEventListener( wheelEvent, eventDrive);
+		canvas.addEventListener('mousedown', eventDrive);
+		canvas.addEventListener('mouseup', eventDrive);
+		canvas.addEventListener('mousemove', eventDrive);
+		canvas.addEventListener( wheelEvent, eventDrive);
 	}
 	private getViewerEvent( type, domEvent ){
 		return new ViewerEvent( this, type, domEvent );

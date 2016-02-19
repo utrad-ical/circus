@@ -23,11 +23,11 @@ $( function(){
 	// Prepare view state
 	var viewState = new circusrs.ViewState(
 		[ canvas.getAttribute('width'), canvas.getAttribute('height')], // canvasSize,
-		[0,0, dim[2] / 2], // cOrigin
+		[0,0, 186], // cOrigin
 		[ dim[0], 0, 0 ],// cX
 		[ 0, dim[1], 0 ], // cY
-		1500, // windowLevel
-		2000 // windowWidth
+		138, // windowLevel
+		2277 // windowWidth
 	);
 	viewer.setViewState( viewState );
 	viewer.render();

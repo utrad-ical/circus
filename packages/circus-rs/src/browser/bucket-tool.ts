@@ -42,7 +42,7 @@ export class BucketTool extends Tool {
 
 		//------------------
 		let vs: ViewState = v.getViewState();
-		let currentVoxel: [number, number, number] = vs.coordinatePixelToVoxel(
+		let currentVoxel: number[] = vs.coordinatePixelToVoxel(
 			viewerEvent.canvasX,
 			viewerEvent.canvasY);
 		//paint if currentAnnotation is instance of VoxelCloudAnnotation
@@ -111,7 +111,7 @@ export class BucketTool extends Tool {
 	private checkLeft(tempX: number, tempY: number, vs: ViewState, canvas): number{
 		//inspect first line : LEFT
 		while(tempX >= 0){
-			let voxel: [number, number, number] = vs.coordinatePixelToVoxel(
+			let voxel = vs.coordinatePixelToVoxel(
 				tempX,
 				tempY);
 			if(this.voxAno.isPaintedVoxel(voxel)) {
@@ -126,7 +126,7 @@ export class BucketTool extends Tool {
 	private checkRight(tempX: number, tempY: number, vs: ViewState, canvas): number{
 		//inspect first line : RIGHT
 		while(tempX < canvas.x){
-			let voxel: [number, number, number] = vs.coordinatePixelToVoxel(
+			let voxel = vs.coordinatePixelToVoxel(
 				tempX,
 				tempY);
 			if(this.voxAno.isPaintedVoxel(voxel)) {
@@ -144,7 +144,7 @@ export class BucketTool extends Tool {
 		let emptyPixels: number[][] = [];
 		emptyPixels[0] = [];
 		while(tempX <= right[0]){//check left to right
-			let voxel: [number, number, number] = vs.coordinatePixelToVoxel(
+			let voxel = vs.coordinatePixelToVoxel(
 				tempX,
 				tempY);
 			if(this.voxAno.isPaintedVoxel(voxel)) {//already painted

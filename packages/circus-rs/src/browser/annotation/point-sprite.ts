@@ -111,7 +111,7 @@ export class PointSprite extends Sprite {
 		}
 		return false;
 	}
-	private isNearCenter(ctx, centerCircle: [number, number], point: [number, number]): boolean{
+	private isNearCenter(ctx, centerCircle: number[], point: number[]): boolean{
 		let innerBorder = this.parent.getRadius() - 10;//minus length from circle arc
 		if(innerBorder < 3) {
 			innerBorder = 3;

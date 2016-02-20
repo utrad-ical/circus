@@ -50,7 +50,7 @@ export class PointAnnotation extends Annotation {
 			this.radius = radius;
 		}
 	}
-	public setCenter(center: [number, number, number]): void{
+	public setCenter(center: number[]): void{
 		this.center = [
 			Math.round(center[0]),
 			Math.round(center[1]),
@@ -65,7 +65,7 @@ export class PointAnnotation extends Annotation {
 	}
 	public setCenterOffset(viewerEvent: ViewerEvent): void{
 		let vs = viewerEvent.viewer.getViewState();
-		let currentCenterPixel: [number, number, number] = vs.coordinateVoxelToPixel(
+		let currentCenterPixel: number[] = vs.coordinateVoxelToPixel(
 			this.center[0],
 			this.center[1],
 			this.center[2]);

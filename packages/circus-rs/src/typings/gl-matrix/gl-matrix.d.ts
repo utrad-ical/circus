@@ -3,11 +3,9 @@
 // Definitions by: chuntaro <https://github.com/chuntaro/>
 // Definitions: https://github.com/chuntaro/gl-matrix.d.ts
 
-type floats = number[];
-
 interface glMatrix {
   EPSILON: number;
-  ARRAY_TYPE: floats | Array<number>;
+  ARRAY_TYPE: Float32Array | Array<number>;
   RANDOM: () => number;
   ENABLE_SIMD: boolean;
   SIMD_AVAILABLE: boolean;
@@ -30,6 +28,8 @@ interface glMatrix {
 declare var glMatrix: glMatrix;
 
 declare module "gl-matrix" {
+    type floats = number[];
+
     interface vec2 {
       /**
        * Creates a new, empty vec2

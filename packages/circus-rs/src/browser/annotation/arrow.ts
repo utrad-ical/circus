@@ -8,9 +8,9 @@ import { ArrowStyle } from './arrow-style';
 import { ArrowText } from './arrow-text';
 
 
-type Point2 = [ number, number ];
-type Point3 = [ number, number, number ];
-type Vector3 = [ number, number, number ];
+type Point2 = number[];
+type Point3 = number[];
+type Vector3 = number[];
 type point2D = {x: number, y: number};
 
 /**

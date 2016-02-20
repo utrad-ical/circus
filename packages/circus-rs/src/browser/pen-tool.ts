@@ -14,7 +14,7 @@ import { VoxelCloudAnnotation } from './annotation/voxel-cloud'
 export class PenTool extends Tool {
 
 	private isDragging: boolean = false;
-	private previousVoxel: [number, number, number];
+	private previousVoxel: number[];
 	// private active: boolean;
 	// private pendown: boolean;
 	// private voxelBuffer;

@@ -5,14 +5,14 @@ import { Annotation } from '../annotation';
 import { ViewState } from '../view-state';
 import { VoxelCloudSprite } from './voxel-cloud-sprite';
 
-type Point3 = [ number, number, number ];
+type Point3 = number[];
 type RGBA = [number, number, number, number];
 
 export class VoxelCloudAnnotation extends Annotation {
 	private voxelArray: Point3[];
 	private voxelCube: number[][][];
 	private color: RGBA;
-	constructor(voxelSize: [number, number, number], paintData: [number, number, number][], color: RGBA) {
+	constructor(voxelSize: number[], paintData: number[][], color: RGBA) {
 		super();
 		//set data
 		this.color = color;
@@ -55,7 +55,7 @@ export class VoxelCloudAnnotation extends Annotation {
 		}
 		return new VoxelCloudSprite(this);
 	}
-	public addVoxel(voxel: [number, number, number]): void{
+	public addVoxel(voxel: number[]): void{
 		//round to integer
 		voxel[0] = Math.round(voxel[0]);
 		voxel[1] = Math.round(voxel[1]);
@@ -74,7 +74,7 @@ export class VoxelCloudAnnotation extends Annotation {
 		//new implementation============
 		this.voxelArray.push([voxel[0], voxel[1], voxel[2]]);
 	}
-	public isPaintedVoxel(voxel: [number, number, number]){
+	public isPaintedVoxel(voxel: number[]){
 		//old implementation
 		voxel = [
 			Math.round(voxel[0]),
@@ -83,7 +83,7 @@ export class VoxelCloudAnnotation extends Annotation {
 		];
 		let isPainted: boolean = false;
 		for (var i = 0; i < this.voxelArray.length; ++i) {
-			let v: [number, number, number] = this.voxelArray[i];
+			let v: number[] = this.voxelArray[i];
 			if(v[0] === voxel[0] && v[1] === voxel[1] && v[2] === voxel[2]) {
 				isPainted = true;
 				break;

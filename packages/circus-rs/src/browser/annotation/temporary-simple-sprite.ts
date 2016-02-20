@@ -1,7 +1,7 @@
 'use strict';
 
-import { ViewerEvent } from './viewer-event';
-import { Sprite } from './sprite';
+import { ViewerEvent } from '../viewer-event';
+import { Sprite } from '../sprite';
 
 // Note: Use any because generic can't have method.
 

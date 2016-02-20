@@ -3,7 +3,7 @@
 // import { EventEmitter } from 'events';
 import { ViewerEvent } from '../viewer-event';
 import { Sprite } from '../sprite';
-import { VoxelCloudAnnotation } from './voxel-cloud';
+import { VoxelCloudAnnotation } from './draft-voxel-cloud';
 
 // Note: Use any because generic can't have method.
 

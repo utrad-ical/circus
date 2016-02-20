@@ -1,10 +1,10 @@
 "use strict";
 
-import { ViewerEvent } from './viewer-event'
-import { ViewerEventCapture } from './viewer-event-capture-interface'
-import { ViewState } from './view-state'
-import { Tool } from './tool'
-import { VoxelCloudAnnotation } from './annotation/voxel-cloud'
+import { ViewerEvent } from '../viewer-event'
+import { ViewerEventCapture } from '../viewer-event-capture-interface'
+import { ViewState } from '../view-state'
+import { Tool } from './draft-tool'
+import { VoxelCloudAnnotation } from '../annotation/draft-voxel-cloud'
 
 export class BucketTool extends Tool {
 	private hoge:string = "";

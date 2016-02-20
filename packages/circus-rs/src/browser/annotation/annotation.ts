@@ -1,7 +1,7 @@
 'use strict';
 
-import { Sprite } from './sprite';
-import { ViewState } from './view-state';
+import { Sprite } from '../sprite';
+import { ViewState } from '../view-state';
 
 export abstract class Annotation {
 	private collectionId: number;

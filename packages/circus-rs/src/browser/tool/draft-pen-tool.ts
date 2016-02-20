@@ -5,11 +5,10 @@
  * stand alone を削除する
  **/
 
-import { ViewerEvent } from './viewer-event'
-import { ViewerEventCapture } from './viewer-event-capture-interface'
-// import { VoxelContainer } from './common/voxelContainer'
-import { Tool } from './tool'
-import { VoxelCloudAnnotation } from './annotation/voxel-cloud'
+import { ViewerEvent } from '../viewer-event'
+import { ViewerEventCapture } from '../viewer-event-capture-interface'
+import { Tool } from './draft-tool'
+import { VoxelCloudAnnotation } from '../annotation/draft-voxel-cloud'
 
 export class PenTool extends Tool {
 

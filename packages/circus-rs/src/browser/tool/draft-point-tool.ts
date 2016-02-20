@@ -1,10 +1,10 @@
 "use strict";
 
-import { ViewerEvent } from './viewer-event'
-import { ViewerEventCapture } from './viewer-event-capture-interface'
-import { Tool } from './tool'
-import { PointAnnotation } from './annotation/point-annotation';
-import { PointText } from './annotation/point-text';
+import { ViewerEvent } from '../viewer-event'
+import { ViewerEventCapture } from '../viewer-event-capture-interface'
+import { Tool } from './draft-tool'
+import { PointAnnotation } from '../annotation/draft-point-annotation';
+import { PointText } from '../annotation/draft-point-text';
 
 
 export class PointTool extends Tool {
@@ -48,7 +48,7 @@ export class PointTool extends Tool {
 		this.pointAnnotation = newAnnotation;//copy to use mousemove and mouseup
 
 		viewerEvent.viewer.setPrimaryEventCapture( this );
-		viewerEvent.viewer.draw( (c,v) => { return newAnnotation.draw(c,v); } );
+		viewerEvent.viewer.drawBy( newAnnotation );
 
 		return false;
 	}
@@ -84,7 +84,7 @@ export class PointTool extends Tool {
 			this.pointAnnotation.setRadius(radius);
 			//update canvas
 			viewerEvent.viewer.render().then(() => {
-				viewerEvent.viewer.draw( (c,v) => { return this.pointAnnotation.draw(c,v); } );
+				viewerEvent.viewer.drawBy( this.pointAnnotation );
 			});
 		}else{//dot
 			//get voxel coordinate
@@ -93,7 +93,7 @@ export class PointTool extends Tool {
 			this.pointAnnotation.setCenter(newVoxelCoordinate);
 			//update canvas
 			viewerEvent.viewer.render().then(() => {
-				viewerEvent.viewer.draw( (c,v) => { return this.pointAnnotation.draw(c,v); } );
+				viewerEvent.viewer.drawBy( this.pointAnnotation );
 			});
 		}
 		return false;

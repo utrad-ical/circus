@@ -1,11 +1,10 @@
 'use strict';
 
 import { Sprite } from '../sprite';
-import { Annotation } from '../annotation';
-import { EmptySprite } from '../empty-sprite';
 import { ViewState } from '../view-state';
-import { ArrowStyle } from './arrow-style';
-import { ArrowText } from './arrow-text';
+import { Annotation } from './annotation';
+import { ArrowStyle } from './draft-arrow-style';
+import { ArrowText } from './draft-arrow-text';
 
 
 type Point2 = number[];
@@ -78,7 +77,7 @@ export class ArrowAnnotation extends Annotation {
 			this.arrowText.draw(ctx, tail);
 		}
 		//---------------------------------
-		return new EmptySprite(this);
+		return null;
 	}
 	//-----------------------------------------
 	/**

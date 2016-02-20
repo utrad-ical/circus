@@ -2,7 +2,7 @@
 
 import { ViewerEvent } from '../viewer-event';
 import { Sprite } from '../sprite';
-import { Tool } from '../tool';
+import { Tool } from '../tool/draft-tool';
 
 export class ToolSprite extends Sprite {
 	private parent: Tool;

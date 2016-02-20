@@ -3,7 +3,7 @@
 import { EventEmitter } from 'events';
 import { ViewerEvent } from '../viewer-event';
 import { Sprite } from '../sprite';
-import { PointAnnotation } from './point-annotation';
+import { PointAnnotation } from './draft-point-annotation';
 
 enum Kind{Dot = 0, Circle = 1};
 

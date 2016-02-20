@@ -1,5 +1,5 @@
 'use strict';
-import { Annotation } from './annotation';
+import { Annotation } from './annotation/annotation';
 import { EventEmitter } from 'events';
 import { Viewer } from './viewer';
 

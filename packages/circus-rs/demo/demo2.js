@@ -98,26 +98,26 @@ $( function(){
 	//Add tool section
 	var hand = new rs.HandTool({x:20, y:20, image:"hand.png", width:50, height:50, cursor:"move"});
 	rsViewer2.on("render", function(){
-		this.draw( (c,vs) => hand.draw(c,vs) );
+		this.drawBy( hand );
 	});
 	hand.on("ready", function(){
-		rsViewer2.draw( (c,vs) => this.draw(c,vs) );
+		rsViewer2.drawBy( this );
 	});
 
 	var scale = new rs.ScaleTool({x:20, y:70, image:"scale.png", width:50, height:50, cursor:"default"}, 1.1);
-	rsViewer2.on('render', function(){
-		this.draw( (c,vs) => scale.draw(c,vs) );
+	rsViewer2.on("render", function(){
+		this.drawBy( scale );
 	});
 	scale.on("ready", function(){
-		rsViewer2.draw( (c,vs) => this.draw(c,vs) );
+		rsViewer2.drawBy( this );
 	});
 
 	var rotate = new rs.RotateTool({x:20, y:120, image:"rotate.png", width:50, height:50, cursor:"default"}, 0,0,1);
 	rsViewer2.on("render", function(){
-		this.draw( (c,vs) => rotate.draw(c,vs) );
+		this.drawBy( rotate );
 	});
 	rotate.on("ready", function(){
-		rsViewer2.draw( (c,vs) => this.draw(c,vs) );
+		rsViewer2.drawBy( this );
 	});
 	// rotate.on('ready', () => {
 	// 	rsViewer2.draw( (c,vs) => rotate.draw(c,vs) );

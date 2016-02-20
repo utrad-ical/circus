@@ -1,11 +1,11 @@
 'use strict';
 
 import { Sprite } from '../sprite';
-import { Annotation } from '../annotation';
+import { Annotation } from './annotation';
 import { ViewState } from '../view-state';
 import { ViewerEvent } from '../viewer-event';
-import { PointText } from './point-text';
-import { PointSprite } from './point-sprite';
+import { PointText } from './draft-point-text';
+import { PointSprite } from './draft-point-sprite';
 
 enum Mode{Dot = 0, Circle = 1};
 enum DragMode{Move = 0, Change = 1};
@@ -13,7 +13,7 @@ enum DragMode{Move = 0, Change = 1};
 export class PointAnnotation extends Annotation {
 	private mode: Mode;
 	private dragMode: DragMode;
-	private center: [number, number, number];//voxel coordinate
+	private center: [number, number, number];//draft-voxel coordinate
 	private radius: number = 3;// [px] default value
 	private color: [number, number, number, number] = [255, 255, 255, 1];//default value
 	private pointText: PointText;

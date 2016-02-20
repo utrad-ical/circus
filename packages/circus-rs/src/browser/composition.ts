@@ -1,7 +1,7 @@
 'use strict';
 
 import { AnnotationCollection } from './annotation-collection';
-import { Annotation } from './annotation';
+import { Annotation } from './annotation/annotation';
 import { ImageSource } from './image-source';
 
 export class Composition {

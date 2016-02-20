@@ -1,9 +1,9 @@
 'use strict';
 
-import { Sprite } from '../sprite';
-import { Annotation } from '../annotation';
 import { ViewState } from '../view-state';
-import { VoxelCloudSprite } from './voxel-cloud-sprite';
+import { Sprite } from '../sprite';
+import { Annotation } from './annotation';
+import { VoxelCloudSprite } from './draft-voxel-cloud-sprite';
 
 type Point3 = number[];
 type RGBA = [number, number, number, number];

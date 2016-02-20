@@ -2,8 +2,8 @@
 
 import { EventEmitter } from 'events';
 import { Sprite } from '../sprite';
-import { Annotation } from '../annotation';
-import { SimpleSprite } from '../simple-sprite';
+import { Annotation } from './annotation';
+import { SimpleSprite } from './temporary-simple-sprite';
 import { ViewState } from '../view-state';
 import { ViewerEvent } from '../viewer-event';
 

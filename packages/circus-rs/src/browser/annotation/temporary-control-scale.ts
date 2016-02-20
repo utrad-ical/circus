@@ -2,22 +2,22 @@
 
 import { EventEmitter } from 'events';
 import { Sprite } from '../sprite';
-import { Annotation } from '../annotation';
-import { SimpleSprite } from '../simple-sprite';
+import { Annotation } from './annotation';
+import { SimpleSprite } from './temporary-simple-sprite';
 import { ViewState } from '../view-state';
 import { ViewerEvent } from '../viewer-event';
 
-export class ControlTransAnnotation extends Annotation {
+export class ControlScaleAnnotation extends Annotation {
 
 	private emitter: EventEmitter;
 	private left: number;
 	private top: number;
 	private size: number;
 	private color: string;
-	private dxyz: [number, number, number];
+	private scale: number;
 
 	constructor(
-		dx: number, dy: number, dz: number,
+		scale: number,
 		left: number, top: number, size: number, color: string
 	){
 		super();
@@ -26,15 +26,15 @@ export class ControlTransAnnotation extends Annotation {
 		this.top = top;
 		this.size = size;
 		this.color = color;
-		this.dxyz = [dx, dy, dz];
+		this.scale = scale;
 
 		this.emitter = new EventEmitter();
 		this.on( 'mousewheel', ( ev )=> {
 			if(	ev.original && ev.original.deltaY != 0 ){
 				if( ev.original.deltaY > 0 ){
-					ev.viewer.getViewState().transrate(-dx, -dy, -dz);
+					ev.viewer.getViewState().scale( scale );
 				}else{
-					ev.viewer.getViewState().transrate(dx, dy, dz);
+					ev.viewer.getViewState().scale( 1.0 / scale );
 				}
 				ev.viewer.render();
 			}
@@ -74,16 +74,10 @@ export class ControlTransAnnotation extends Annotation {
 			return true;
 		}
 		if(	viewerEvent.original && viewerEvent.original.deltaY != 0 ){
-			let [dx,dy,dz] = this.dxyz;
-			if( viewerEvent.original.ctrlKey ){
-				dx *= 10;
-				dy *= 10;
-				dz *= 10;
-			}
 			if( viewerEvent.original.deltaY > 0 ){
-				viewerEvent.viewer.getViewState().transrate(-dx, -dy, -dz);
+				viewerEvent.viewer.getViewState().scale( this.scale );
 			}else{
-				viewerEvent.viewer.getViewState().transrate(dx, dy, dz);
+				viewerEvent.viewer.getViewState().scale( 1.0 / this.scale );
 			}
 			viewerEvent.viewer.render();
 		}

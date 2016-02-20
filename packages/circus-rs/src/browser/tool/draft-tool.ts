@@ -2,11 +2,11 @@
 
 import { EventEmitter } from 'events';
 
-import { Viewer } from './viewer'
-import { Sprite } from './sprite'
-import { ViewerEvent } from './viewer-event'
-import { ViewerEventCapture } from './viewer-event-capture-interface'
-import { ToolSprite } from './annotation/tool-sprite'
+import { Viewer } from '../viewer'
+import { Sprite } from '../sprite'
+import { ViewerEvent } from '../viewer-event'
+import { ViewerEventCapture } from '../viewer-event-capture-interface'
+import { ToolSprite } from '../annotation/draft-tool-sprite'
 
 type Capturing = boolean;
 

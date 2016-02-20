@@ -1,9 +1,9 @@
 "use strict";
 
-import { ViewerEvent } from './viewer-event'
-import { ViewState } from './view-state'
-import { ViewerEventCapture } from './viewer-event-capture-interface'
-import { Tool } from './tool'
+import { ViewerEvent } from '../viewer-event'
+import { ViewState } from '../view-state'
+import { ViewerEventCapture } from '../viewer-event-capture-interface'
+import { Tool } from './draft-tool'
 
 export class RotateTool extends Tool {
 	private dxyz: [number, number, number];

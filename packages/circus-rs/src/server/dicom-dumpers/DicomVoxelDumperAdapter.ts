@@ -40,7 +40,9 @@ export default class DicomVoxelDumperAdapter extends DicomDumper {
 			throw new Error('Dumper is not specified.');
 		}
 		logger.info('Checking dumper executable: ' + this.config.dumper);
-		if (!fs.existsSync(this.config.dumper)) {
+		try {
+			fs.statSync(this.config.dumper);
+		} catch (err) {
 			throw new Error('The path to the dumper is incorrect.');
 		}
 		if (!this.isLittleEndian()) {

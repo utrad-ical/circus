@@ -30,5 +30,4 @@ export * from '../browser/rotate-tool';
 export * from '../browser/image-source/empty-image-source';
 export * from '../browser/image-source/raw-volume-image-source';
 
-// Is not is more better way of writing?
-exports.RawDataLoader = require('../browser/image-source/rawvolume-loader').default;
+export { default as RawDataLoader } from '../browser/image-source/rawvolume-loader';

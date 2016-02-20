@@ -32,11 +32,8 @@
 
 	// DICOM loader
 	"dumper": {
-		"module": "DicomVoxelDumperAdapter",
-		"options": {
-			"dumper": "<path_to_\"dicom_voxel_dump\"_executable_file>",
-			"bufferSize": 268435456
-		}
+		"module": "PureJsDicomDumper",
+		"options": {}
 	},
 
 	// PNG writer options

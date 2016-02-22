@@ -6,7 +6,7 @@ import { Sprite } from './sprite';
 import { ImageSource } from './image-source';
 import { AnnotationCollection } from './annotation-collection';
 import { ViewerEvent } from './viewer-event';
-import { ViewState } from './view-state';
+import { VolumeViewState } from './volume-view-state';
 import { ViewerEventCapture } from './viewer-event-capture-interface';
 
 import { EventEmitter } from 'events';
@@ -16,7 +16,7 @@ export class Viewer extends EventEmitter {
 	private canvasDomElement: HTMLCanvasElement;
 	private composition: Composition;
 
-	private viewState: ViewState;
+	private viewState: VolumeViewState;
 	private imageSource: ImageSource;
 	private annotationCollection: AnnotationCollection;
 	private spriteCollection: Sprite[];
@@ -64,11 +64,11 @@ export class Viewer extends EventEmitter {
 	public setAnnotationCollection( annotationCollection ): void {
 		this.getComposition().setAnnotationCollection( annotationCollection );
 	}
-	public setViewState( viewState ) {
+	public setVolumeViewState( viewState ) {
 		// viewState.emit('binded',this);
 		this.viewState = viewState;
 	}
-	public getViewState() : ViewState {
+	public getVolumeViewState() : VolumeViewState {
 		return this.viewState;
 	}
 	public setPrimaryEventCapture( capture: ViewerEventCapture ): void {

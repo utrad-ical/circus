@@ -1,6 +1,6 @@
 'use strict';
 
-import { ViewState } from '../view-state';
+import { VolumeViewState } from '../volume-view-state';
 import { Sprite } from '../sprite';
 import { Annotation } from './annotation';
 import { VoxelCloudSprite } from './draft-voxel-cloud-sprite';
@@ -38,7 +38,7 @@ export class VoxelCloudAnnotation extends Annotation {
 	// public getColor(): RGBA{
 	// 	return this.color;
 	// }
-	public draw(canvasDomElement:HTMLCanvasElement, viewState:ViewState): Sprite{
+	public draw(canvasDomElement:HTMLCanvasElement, viewState:VolumeViewState): Sprite{
 		let ctx = canvasDomElement.getContext('2d');
 		let canvasSize = viewState.getSize();
 		let colorString = this.color.join(",");

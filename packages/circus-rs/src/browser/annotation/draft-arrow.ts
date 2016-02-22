@@ -1,7 +1,7 @@
 'use strict';
 
 import { Sprite } from '../sprite';
-import { ViewState } from '../view-state';
+import { VolumeViewState } from '../volume-view-state';
 import { Annotation } from './annotation';
 import { ArrowStyle } from './draft-arrow-style';
 import { ArrowText } from './draft-arrow-text';
@@ -40,10 +40,10 @@ export class ArrowAnnotation extends Annotation {
 		super();
 	}
 
-	public draw(canvasDomElement:HTMLCanvasElement, viewState:ViewState):Sprite {
+	public draw(canvasDomElement:HTMLCanvasElement, viewState:VolumeViewState):Sprite {
 		var ctx = canvasDomElement.getContext('2d');
 
-		// 3D(Point3) -> 2D(point2D) by using ViewState
+		// 3D(Point3) -> 2D(point2D) by using VolumeViewState
 		let head3D: Point3 = viewState.coordinateVoxelToPixel(
 				this.pointAt[0],
 				this.pointAt[1],

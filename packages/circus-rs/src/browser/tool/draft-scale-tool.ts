@@ -1,7 +1,7 @@
 "use strict";
 
 import { ViewerEvent } from '../viewer-event'
-import { ViewState } from '../view-state'
+import { VolumeViewState } from '../volume-view-state'
 import { ViewerEventCapture } from '../viewer-event-capture-interface'
 import { Tool } from './draft-tool'
 
@@ -36,7 +36,7 @@ export class ScaleTool extends Tool {
 		if(!this.hitTest(viewerEvent)) {
 			return true;
 		}
-		let vs = viewerEvent.viewer.getViewState();
+		let vs = viewerEvent.viewer.getVolumeViewState();
 		if(viewerEvent.original.deltaY > 0) {
 			vs.scale(this.scale);
 		} else {

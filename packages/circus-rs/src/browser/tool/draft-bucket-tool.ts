@@ -2,7 +2,7 @@
 
 import { ViewerEvent } from '../viewer-event'
 import { ViewerEventCapture } from '../viewer-event-capture-interface'
-import { ViewState } from '../view-state'
+import { VolumeViewState } from '../volume-view-state'
 import { Tool } from './draft-tool'
 import { VoxelCloudAnnotation } from '../annotation/draft-voxel-cloud'
 
@@ -41,7 +41,7 @@ export class BucketTool extends Tool {
 		}
 
 		//------------------
-		let vs: ViewState = v.getViewState();
+		let vs: VolumeViewState = v.getVolumeViewState();
 		let currentVoxel: number[] = vs.coordinatePixelToVoxel(
 			viewerEvent.canvasX,
 			viewerEvent.canvasY);
@@ -108,7 +108,7 @@ export class BucketTool extends Tool {
 		//do nothing
 		return false;
 	}
-	private checkLeft(tempX: number, tempY: number, vs: ViewState, canvas): number{
+	private checkLeft(tempX: number, tempY: number, vs: VolumeViewState, canvas): number{
 		//inspect first line : LEFT
 		while(tempX >= 0){
 			let voxel = vs.coordinatePixelToVoxel(
@@ -123,7 +123,7 @@ export class BucketTool extends Tool {
 		}
 		return tempX;
 	}
-	private checkRight(tempX: number, tempY: number, vs: ViewState, canvas): number{
+	private checkRight(tempX: number, tempY: number, vs: VolumeViewState, canvas): number{
 		//inspect first line : RIGHT
 		while(tempX < canvas.x){
 			let voxel = vs.coordinatePixelToVoxel(
@@ -138,7 +138,7 @@ export class BucketTool extends Tool {
 		}
 		return tempX;
 	}
-	private checkUpperLower(left: [number, number], right: [number, number], vs: ViewState): void{
+	private checkUpperLower(left: [number, number], right: [number, number], vs: VolumeViewState): void{
 		let tempX = left[0];
 		let tempY = left[1];
 		let emptyPixels: number[][] = [];

@@ -84,7 +84,7 @@ export class PenTool extends Tool {
 			return true;
 		}
 
-		let vs = viewerEvent.viewer.getViewState();
+		let vs = viewerEvent.viewer.getVolumeViewState();
 		// //save start voxel
 		let currentVoxel = vs.coordinatePixelToVoxel(viewerEvent.canvasX, viewerEvent.canvasY);
 		this.previousVoxel = [
@@ -139,7 +139,7 @@ export class PenTool extends Tool {
 		} )
 		*/
 		//=====================================
-		let vs = viewerEvent.viewer.getViewState();
+		let vs = viewerEvent.viewer.getVolumeViewState();
 		//get current voxel coordinate
 		let currentVoxel = vs.coordinatePixelToVoxel(viewerEvent.canvasX, viewerEvent.canvasY);
 		currentVoxel = [//round to integer

@@ -4,7 +4,7 @@ import { EventEmitter } from 'events';
 import { Sprite } from '../sprite';
 import { Annotation } from './annotation';
 import { SimpleSprite } from './temporary-simple-sprite';
-import { ViewState } from '../view-state';
+import { VolumeViewState } from '../volume-view-state';
 import { ViewerEvent } from '../viewer-event';
 
 export class ControlScaleAnnotation extends Annotation {
@@ -32,9 +32,9 @@ export class ControlScaleAnnotation extends Annotation {
 		this.on( 'mousewheel', ( ev )=> {
 			if(	ev.original && ev.original.deltaY != 0 ){
 				if( ev.original.deltaY > 0 ){
-					ev.viewer.getViewState().scale( scale );
+					ev.viewer.getVolumeViewState().scale( scale );
 				}else{
-					ev.viewer.getViewState().scale( 1.0 / scale );
+					ev.viewer.getVolumeViewState().scale( 1.0 / scale );
 				}
 				ev.viewer.render();
 			}
@@ -46,7 +46,7 @@ export class ControlScaleAnnotation extends Annotation {
 			 && this.top <= event.canvasY && event.canvasY <= (this.top + this.size);
 	}
 
-	public draw( canvasDomElement:HTMLCanvasElement, viewState:ViewState ):Sprite {
+	public draw( canvasDomElement:HTMLCanvasElement, viewState:VolumeViewState ):Sprite {
 		var context = canvasDomElement.getContext('2d');
 		context.fillStyle = this.color;
 		context.fillRect( this.left, this.top, this.size, this.size );
@@ -75,9 +75,9 @@ export class ControlScaleAnnotation extends Annotation {
 		}
 		if(	viewerEvent.original && viewerEvent.original.deltaY != 0 ){
 			if( viewerEvent.original.deltaY > 0 ){
-				viewerEvent.viewer.getViewState().scale( this.scale );
+				viewerEvent.viewer.getVolumeViewState().scale( this.scale );
 			}else{
-				viewerEvent.viewer.getViewState().scale( 1.0 / this.scale );
+				viewerEvent.viewer.getVolumeViewState().scale( 1.0 / this.scale );
 			}
 			viewerEvent.viewer.render();
 		}

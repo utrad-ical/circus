@@ -10,7 +10,7 @@ $( function(){
 		vz: 0.5
 	};
 	var rsDummyImageSource = new rs.MockImageSource(dummyConfig);
-	var rsViewState = new rs.ViewState(
+	var rsVolumeViewState = new rs.VolumeViewState(
 		[512,512], // canvasSize
 		[0,0, dummyConfig.depth / 2], // cOrigin
 		[ dummyConfig.width, 0, 0 ],// cX
@@ -22,7 +22,7 @@ $( function(){
 	var canvas2 = document.getElementById('rs-canvas');
 	var rsViewer2 = new rs.Viewer( canvas2 );
 	rsViewer2.setImageSource( rsDummyImageSource );
-	rsViewer2.setViewState( rsViewState );
+	rsViewer2.setVolumeViewState( rsVolumeViewState );
 	var pointTool = new rs.PointTool({x:20, y:20, image:"dot.png", width:50, height:50, cursor:"default"}, 0);
 	rsViewer2.setBackgroundEventCapture(pointTool);
 	var textObj = new rs.ArrowText("サンプル");
@@ -170,7 +170,7 @@ $( function(){
 	//annotation selection event-------------------
 	//move center to the selected point
 	$("#point_list").on("click", function(e){
-		var vs = rsViewer2.getViewState();
+		var vs = rsViewer2.getVolumeViewState();
 		var currentViewCenter = vs.getCenter();
 		if (e.target.hasAttribute("data-coordinate-x")
 			&& e.target.hasAttribute("data-coordinate-y")
@@ -206,12 +206,12 @@ $( function(){
 	//==================================================
 	var viewStateCanvas = document.getElementById('view-state-canvas');
 	var rsViewer = new rs.Viewer( viewStateCanvas );
-	var rsImageSource = new rs.ViewStateImageSource(
+	var rsImageSource = new rs.VolumeViewStateImageSource(
 		dummyConfig.width,
 		dummyConfig.height,
 		dummyConfig.depth );
 	rsViewer.setImageSource( rsImageSource );
-	rsViewer.setViewState( rsViewState );
+	rsViewer.setVolumeViewState( rsVolumeViewState );
 
 	var rsAnnotationCollection = rsViewer.getAnnotationCollection();
 

@@ -10,7 +10,7 @@ type Point3 = number[];
 type Vector3 = number[];
 type Size2 = number[];
 
-export class ViewState {
+export class VolumeViewState {
 
 	private windowLevel: number;
 	private windowWidth: number;

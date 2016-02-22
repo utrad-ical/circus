@@ -21,7 +21,7 @@ $( function(){
 	viewer.setImageSource( dummyImageSource );
 	
 	// Prepare view state
-	var viewState = new circusrs.ViewState(
+	var viewState = new circusrs.VolumeViewState(
 		[ canvas.getAttribute('width'), canvas.getAttribute('height')], // canvasSize,
 		[0,0, 186], // cOrigin
 		[ dim[0], 0, 0 ],// cX
@@ -29,19 +29,19 @@ $( function(){
 		138, // windowLevel
 		2277 // windowWidth
 	);
-	viewer.setViewState( viewState );
+	viewer.setVolumeViewState( viewState );
 	viewer.render();
 
 	/**
 	 * Prepare viewer to check viewport for debug
 	 */
-	var stateImageSource = new circusrs.ViewStateImageSource( dim[0], dim[1], dim[2] );
+	var stateImageSource = new circusrs.VolumeViewStateImageSource( dim[0], dim[1], dim[2] );
 	var viewStateCanvas = document.getElementById('view-state-canvas');
 	var viewStateCanvasSize = [ viewStateCanvas.getAttribute('width'), viewStateCanvas.getAttribute('height')]
 	var stateViewer = new circusrs.Viewer( viewStateCanvas );
 	stateViewer.setImageSource( stateImageSource );
 	// Attention: the same view state
-	stateViewer.setViewState( viewState );
+	stateViewer.setVolumeViewState( viewState );
 	
 	// Append some annotations to stateViewer
 	var rsAnnotationCollection = stateViewer.getAnnotationCollection();

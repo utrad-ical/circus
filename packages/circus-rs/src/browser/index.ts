@@ -5,13 +5,13 @@
 
 export * from '../browser/viewer';
 export * from '../browser/viewer-event-capture-interface';
-export * from '../browser/view-state';
+export * from '../browser/volume-view-state';
 export * from '../browser/image-source';
 export * from '../browser/image-source/mock-image-source';
 export * from '../browser/image-source/raw-volume-image-source';
 export { default as RawDataLoader } from '../browser/image-source/rawvolume-loader';
 export * from '../browser/image-source/temporary-empty-image-source';
-export * from '../browser/image-source/temporary-view-state-image-source';
+export * from '../browser/image-source/temporary-volume-view-state-image-source';
 
 export * from '../browser/annotation/annotation';
 export * from '../browser/annotation/temporary-simple-sprite';

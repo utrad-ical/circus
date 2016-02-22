@@ -30,7 +30,7 @@ export class PointTool extends Tool {
 			return true;
 		}
 		this.isDragging = true;
-		let vs = viewerEvent.viewer.getViewState();
+		let vs = viewerEvent.viewer.getVolumeViewState();
 		let currentVoxel = vs.coordinatePixelToVoxel(viewerEvent.canvasX, viewerEvent.canvasY);
 		let text = (<HTMLInputElement>document.getElementById("circle_text")).value;
 		if(text === "") {
@@ -70,7 +70,7 @@ export class PointTool extends Tool {
 			return;
 		}
 		console.log("dragging!");
-		let vs = viewerEvent.viewer.getViewState();
+		let vs = viewerEvent.viewer.getVolumeViewState();
 		if(this.drawMode === 1) {//circle
 			let voxelCenter = this.pointAnnotation.getCenter();
 			let dotCenter = vs.coordinateVoxelToPixel(voxelCenter[0], voxelCenter[1], voxelCenter[2]);

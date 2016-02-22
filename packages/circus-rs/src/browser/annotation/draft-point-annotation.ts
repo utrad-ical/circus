@@ -2,7 +2,7 @@
 
 import { Sprite } from '../sprite';
 import { Annotation } from './annotation';
-import { ViewState } from '../view-state';
+import { VolumeViewState } from '../volume-view-state';
 import { ViewerEvent } from '../viewer-event';
 import { PointText } from './draft-point-text';
 import { PointSprite } from './draft-point-sprite';
@@ -64,7 +64,7 @@ export class PointAnnotation extends Annotation {
 		this.dragMode = mode;
 	}
 	public setCenterOffset(viewerEvent: ViewerEvent): void{
-		let vs = viewerEvent.viewer.getViewState();
+		let vs = viewerEvent.viewer.getVolumeViewState();
 		let currentCenterPixel: number[] = vs.coordinateVoxelToPixel(
 			this.center[0],
 			this.center[1],
@@ -102,7 +102,7 @@ export class PointAnnotation extends Annotation {
 		}
 		this.pointText = text;
 	}
-	public draw(canvasDomElement:HTMLCanvasElement, viewState:ViewState): Sprite{
+	public draw(canvasDomElement:HTMLCanvasElement, viewState:VolumeViewState): Sprite{
 		let pointCenterCoordinate = viewState.coordinateVoxelToPixel(this.center[0], this.center[1], this.center[2]);
 		if(Math.abs(pointCenterCoordinate[2]) > 5) {//don't display annotation if center is far from view surface
 			return null;
@@ -135,7 +135,7 @@ export class PointAnnotation extends Annotation {
 	}
 	public dragPoint(viewerEvent: ViewerEvent): void{
 		let v = viewerEvent.viewer;
-		let currentVoxel = v.getViewState().coordinatePixelToVoxel(
+		let currentVoxel = v.getVolumeViewState().coordinatePixelToVoxel(
 			viewerEvent.canvasX - this.centerOffset[0],
 			viewerEvent.canvasY - this.centerOffset[1]);
 		this.setCenter(currentVoxel);

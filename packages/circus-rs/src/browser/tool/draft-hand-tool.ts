@@ -1,7 +1,7 @@
 "use strict";
 
 import { ViewerEvent } from '../viewer-event'
-import { ViewState } from '../view-state'
+import { VolumeViewState } from '../volume-view-state'
 import { ViewerEventCapture } from '../viewer-event-capture-interface'
 import { Tool } from './draft-tool'
 
@@ -27,7 +27,7 @@ export class HandTool extends Tool {
 		if(!this.isDragging) {
 			return true;
 		}
-		let vs = viewerEvent.viewer.getViewState();
+		let vs = viewerEvent.viewer.getVolumeViewState();
 		let distanceX = this.previousPoint[0] - viewerEvent.canvasX;
 		let distanceY = this.previousPoint[1] - viewerEvent.canvasY;
 		//update previous point
@@ -42,7 +42,7 @@ export class HandTool extends Tool {
 		if(this.isDragging) {//don't translate while dragging
 			return false;
 		}
-		let vs = viewerEvent.viewer.getViewState();
+		let vs = viewerEvent.viewer.getVolumeViewState();
 		if(viewerEvent.original.deltaY > 0) {
 			vs.transrate(0, 0, -1);
 		} else {

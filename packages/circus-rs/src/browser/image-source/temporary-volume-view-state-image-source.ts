@@ -5,7 +5,7 @@ import { ImageSource } from '../image-source';
 
 type Vector3 = [number,number,number];
 
-export class ViewStateImageSource extends ImageSource {
+export class VolumeViewStateImageSource extends ImageSource {
 
 	private width: number;
 	private height: number;

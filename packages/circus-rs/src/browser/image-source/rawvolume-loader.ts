@@ -21,9 +21,9 @@ export default class RawDataLoader {
 			let buffer: ArrayBuffer = res.data;
 			let volume = new DicomVolume();
 			// TODO: "bytes_per_voxel" is flawed. Fix this eventually.
-			let pixelFormat = meta.bytes_per_voxel === 2 ? PixelFormat.UInt16 : PixelFormat.UInt8;
-			let px = pixelFormatInfo(PixelFormat.UInt16);
-			volume.setDimension(meta.x, meta.y, meta.z, px.bpp);
+			let pixelFormat = meta.bytes_per_voxel === 2 ? PixelFormat.Int16 : PixelFormat.Int8;
+			let px = pixelFormatInfo(pixelFormat);
+			volume.setDimension(meta.x, meta.y, meta.z, pixelFormat);
 			volume.setVoxelDimension(meta.voxel_x, meta.voxel_y, meta.voxel_z);
 			volume.dcm_wl = meta.window_level_dicom;
 			volume.dcm_ww = meta.window_width_dicom;

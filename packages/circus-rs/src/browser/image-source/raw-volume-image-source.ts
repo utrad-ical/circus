@@ -21,7 +21,7 @@ export class RawVolumeImageSource extends ImageSource {
 		this.loader = loader;
 		this.loadPromise = Promise.resolve();
 	}
-	
+
 	public setSeries( series: string ): void {
 		if( this.series !== series ){
 			this.series = series;
@@ -29,10 +29,10 @@ export class RawVolumeImageSource extends ImageSource {
 			this.loadState = 0;
 		}
 	}
-	
+
 	public load():Promise<any> {
 		var self = this;
-	
+
 		if( self.loadState === 0 ){
 			self.loadState = 1;
 			self.loadPromise = self.loader.loadVolume( self.series ).then( ( vol )=>{
@@ -41,29 +41,29 @@ export class RawVolumeImageSource extends ImageSource {
 				self.emit( 'loaded', self.volume );
 			} );
 		}
-	
+
 		return self.loadPromise;
 	}
-	
+
 	public draw( canvasDomElement, viewState ):Promise<any> {
-		
+
 		let context = canvasDomElement.getContext('2d');
 		return this.load().then( () =>{
-		
+
 			let [ canvasWidth, canvasHeight ] = viewState.getSize();
-			
+
 			let imageBuffer = new Uint8Array( canvasWidth * canvasHeight );
-			
+
 			this.volume.scanOblique(
 				viewState.getOrigin(),
 				viewState.getUnitX(),
 				viewState.getUnitY(),
 				[ canvasWidth, canvasHeight ],
-				imageBuffer /*,
-				viewState.getWindowLevel(),
-				viewState.getWindowWidth()*/
+				imageBuffer,
+				2277, // viewState.getWindowWidth()
+				138 // viewState.getWindowLevel(),
 			);
-			
+
 			var imageData = context.createImageData( canvasWidth, canvasHeight );
 			for (var y = 0; y < canvasHeight; y++) {
 				for (var x = 0; x < canvasWidth; x++) {
@@ -78,6 +78,6 @@ export class RawVolumeImageSource extends ImageSource {
 			}
 			context.putImageData( imageData, 0, 0 );
 		} );
-		
+
 	}
 }

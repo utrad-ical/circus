@@ -1,5 +1,5 @@
 doctype html
-html(lang="ja")
+html
 	head
 		meta(charset="utf-8")
 		meta(http-equiv="X-UA-Compataible", content="IE=edge")
@@ -13,14 +13,14 @@ html(lang="ja")
 		h1 CIRCUS RS DEMO (demo1.js)
 
 		p
-			| This sample demonstrates dynamic loading of the series.
-			| While the image is loading, Mock image (checkerboard) is displayed for the time being.
+			| This sample demonstrates dynamic loading of the series.<br>
+			| While the image is loading, Mock image (checkerboard) is displayed for the time being.<br>
 			| The two viewers share the same ViewState object.
 
-		canvas#rs-canvas(width=600,height=600)
-		div.right-column
-			canvas#view-state-canvas(width=300,height=300)
-			div#view-state-canvas-note
+		canvas#rs-canvas(width=600, height=600)
+		.right-column
+			canvas#view-state-canvas(width=300, height=300)
+			#view-state-canvas-note
 				p Use mouse wheel to navigate the image orientation. (Press Ctrl key to speed up)
 				div.rect#color-x Move along/rotate around X-axis
 				div.rect#color-y Move along/rotate around Y-axis

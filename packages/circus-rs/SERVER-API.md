@@ -76,22 +76,11 @@ Example:
 
 JSON-encoded string that contains the following series information.
 
-- `x`: DICOM image width.
-- `y`: DICOM image height.
-- `z`: number of DICOM image.
-- `voxel_x`: Size of voxel for x-axis (mm)
-- `voxel_y`: Size of voxel for y-axis (mm)
-- `voxel_z`: Size of voxel for z-axis (mm)
-- `window_width`: estimated WindowWidth.
-- `window_level`: estimated WindowLevel.
-- `window_width_dicom`: WindowWidth specified in DICOM tag. (optional)
-- `window_level_dicom`: WindowLevel specified in DICOM tag. (optional)
-- `window_width_min`: Calcurated minimum WindowWidth from DICOM image's pixel format.
-- `window_width_max`: Calcurated maxmum WindowWidth from DICOM image's pixel format.
-- `window_level_min`: Calcurated minimum WindowLevel from DICOM image's pixel format.
-- `window_level_max`: Calcurated maxmum WindowLevel from DICOM image's pixel format.
-
-
+- `voxelCount`: DICOM image size.
+- `voxelSize`: Size of each voxel [mm].
+- `estimatedWindow`: Estimated window width/level.
+- `dicomWindow`: Window width/level as defined in DICOM file itself.
+- `pixelFormat`: Pixel format number as defined in PixelFomat.js.
 
 --------------------------------
 

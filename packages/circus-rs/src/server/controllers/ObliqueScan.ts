@@ -22,12 +22,25 @@ export default class ObliqueScan extends VolumeBasedController {
 		};
 	}
 
-	public processVolume(query: any, vol: DicomVolume, res: http.ServerResponse): void {
+	protected processVolume(query: any, vol: DicomVolume, res: http.ServerResponse): void {
 		let { ww, wl, origin, u, v, size, format } = query;
 
+		let useWindow = (typeof ww === 'number' && typeof wl === 'number');
+		if (format === 'png' && !useWindow) {
+			this.respondBadRequest(res, 'Window values are required for PNG output.');
+			return;
+		}
+
 		// Create the oblique image
-		let buf = new Uint8Array(size[0] * size[1]);
+		let buf: Uint8Array; // or similar
+		if (useWindow) {
+			buf = new Uint8Array(size[0] * size[1]);
+		} else {
+			buf = new (vol.getPixelFormatInfo().arrayClass)(size[0] * size[1]);
+		}
 		vol.scanOblique(origin, u, v, size, buf, ww, wl);
+
+		// Output
 		if (format === 'png') {
 			this.respondImage(res, new Buffer(buf), size[0], size[1]);
 		} else {

@@ -1,44 +1,42 @@
-.rounded-corners (@radius: 5px) {
-  -webkit-border-radius: @radius;
-  -moz-border-radius: @radius;
-  -ms-border-radius: @radius;
-  -o-border-radius: @radius;
-  border-radius: @radius;
-}
 #rs-canvas {
-  .rounded-corners(10px);
+  border-radius: 10px;
   border: 1px solid purple;
 }
 #view-state-canvas {
-  .rounded-corners(10px);
+  border-radius: 10px;
   border: 1px solid green;
 }
-.flex{
+
+.flex {
   display:flex;
   width:100%
 }
+
 body.demo1 {
 	font-size: 90%;
 	line-height: 1.35;
+    #rs-canvas { float: left; }
+    .right-column { float: left; margin: 8px; }
 }
-body.demo1 #rs-canvas { float: left; }
-body.demo1 .right-column { float: left; margin: 8px; }
 
-body.demo1 #view-state-canvas-note {
+#view-state-canvas-note {
 	margin-top: 8px;
 	width: 300px;
 	height: 284px;
-	.rounded-corners(10px);
+    border-radius: 10px;
 	border: 1px solid green;
 	padding: 20px;
 	box-sizing: border-box;
 }
 
-body.demo1 div.rect { border-left: 15px solid; padding-left: 8px; margin: 4px 4px;}
-body.demo1 div.rect#color-x { border-color: #4cff8f; }
-body.demo1 div.rect#color-y { border-color: #5293ff; }
-body.demo1 div.rect#color-z { border-color: #f88b4c; }
-body.demo1 div.rect#color-scale { border-color: #d9d9d9; }
+body.demo1 div.rect {
+    border-left: 15px solid; padding-left: 8px; margin: 4px 4px;
+    &#color-x { border-color: #4cff8f; }
+    &#color-y { border-color: #5293ff; }
+    &#color-z { border-color: #f88b4c; }
+    &#color-scale { border-color: #d9d9d9; }
+}
+
 .move_cursor{
   cursor: move;
 }

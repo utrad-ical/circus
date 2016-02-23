@@ -2,34 +2,30 @@ doctype html
 html(lang="ja")
 	head
 		meta(charset="utf-8")
-		meta(http-equiv="X-UA-Compataible",content="IE=edge")
-		meta(name="viewport",content="width=device-width, initial-scale=1")
+		meta(http-equiv="X-UA-Compataible", content="IE=edge")
+		meta(name="viewport", content="width=device-width,initial-scale=1")
 		link(rel='stylesheet', href='css/style.css')
 		script(src="dist/circus-rs-client.js")
 		script(src="https://code.jquery.com/jquery-2.2.0.min.js")
 		script(src="./demo1.js")
 		title CIRCUS RS Demo
 	body.demo1
-		h1 CIRCUS-RS DEMO ( demo1.js )
+		h1 CIRCUS RS DEMO (demo1.js)
 
 		p
-			|このサンプルでは、RawVolumeLoader を利用しています。
-			br
-			|受け取るデータは約120MBあるため、読込には時間がかかります。ブラウザ付属の開発者ツールを利用すると、伸びゆくプログレスバーを楽しむことが出来ます。
-			br
-			|読み込んでいる間は、別のイメージソース(現在はモック)を利用しています。
-			br
-			|2つのビューア(左,右)が同じ ViewState を利用しており、左のビューアについては、イメージソースを切り替え前と後で計２つ利用しています。
+			| This sample demonstrates dynamic loading of the series.
+			| While the image is loading, Mock image (checkerboard) is displayed for the time being.
+			| The two viewers share the same ViewState object.
 
 		canvas#rs-canvas(width=600,height=600)
 		div.right-column
 			canvas#view-state-canvas(width=300,height=300)
 			div#view-state-canvas-note
-				p 縁にある■の上でマウスホイールを行うと、表示の操作が出来ます。右上/左下/右下が、それぞれ移動/回転/拡大・縮小になります。 移動は CTRL キーを押しながらスクロールすると、スピードアップします。
-				div.rect#color-x X軸移動 or X軸を中心に回転
-				div.rect#color-y Y軸移動 or Y軸を中心に回転
-				div.rect#color-z Z軸移動 or Z軸を中心に回転
-				div.rect#color-scale 表示範囲の拡大・縮小
+				p Use mouse wheel to navigate the image orientation. (Press Ctrl key to speed up)
+				div.rect#color-x Move along/rotate around X-axis
+				div.rect#color-y Move along/rotate around Y-axis
+				div.rect#color-z Move along/rotate around Z-axis
+				div.rect#color-scale Zoom
 		#config
 			p
 				label API Endpoint

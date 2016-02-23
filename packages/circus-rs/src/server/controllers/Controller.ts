@@ -64,6 +64,7 @@ export default class Controller {
 
 	protected isTuple(count: number = 3): (string) => boolean {
 		return (s: string) => {
+			if (typeof s !== 'string') return false;
 			let toks = s.split(',');
 			if (toks.length !== count) return false;
 			return !toks.some(tok => isNaN(parseFloat(tok)));
@@ -71,7 +72,9 @@ export default class Controller {
 	}
 
 	protected parseTuple(count: number = 3, int: boolean = false): (string) => number[] {
-		return (s: string) => s.split(',').map(f => int ? parseInt(f, 10) : parseFloat(f)).slice(0, count);
+		return (s: string) => s.split(',')
+			.map(f => int ? parseInt(f, 10) : parseFloat(f))
+			.slice(0, count);
 	}
 
 	protected respondGzippedArrayBuffer(res: http.ServerResponse, buffer: ArrayBuffer): void {

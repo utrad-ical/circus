@@ -3,7 +3,6 @@ import VolumeBasedController from './VolumeBasedController';
 import { ValidatorRules } from '../../common/Validator';
 
 import * as http from 'http';
-import * as zlib from 'zlib';
 import * as stream from 'stream';
 
 /**
@@ -18,10 +17,6 @@ export default class VolumeAction extends VolumeBasedController {
 	}
 
 	protected processVolume(query: any, vol: DicomVolume, res: http.ServerResponse): void {
-		res.setHeader('Access-Control-Allow-Origin', '*');
-		res.setHeader('Content-Type', 'application/octet-stream');
-		res.setHeader('Content-Encoding', 'gzip');
-		let gzip = zlib.createGzip();
 		let z: number = 0;
 		let zmax: number = vol.getDimension()[2];
 		let out = new stream.Readable();
@@ -34,6 +29,6 @@ export default class VolumeAction extends VolumeBasedController {
 			this.push(new Buffer(new Uint8Array(slice)));
 			z++;
 		};
-		out.pipe(gzip).pipe(res);
+		this.respondGzippedStream(res, out);
 	}
 }

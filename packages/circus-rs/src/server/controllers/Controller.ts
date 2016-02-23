@@ -8,6 +8,8 @@ import logger from '../Logger';
 import AsyncLruCache from '../../common/AsyncLruCache';
 import RawData from '../../common/RawData';
 import { Validator, ValidatorRules } from '../../common/Validator';
+import * as zlib from 'zlib';
+import * as stream from 'stream';
 
 export default class Controller {
 
@@ -58,6 +60,37 @@ export default class Controller {
 	protected isUID(input: string): boolean {
 		return !!input.match(/^((0|[1-9]\d*)\.)*(0|[1-9]\d*)$/)
 			&& input.length <= 64;
+	}
+
+	protected isTuple(count: number = 3): (string) => boolean {
+		return (s: string) => {
+			let toks = s.split(',');
+			if (toks.length !== count) return false;
+			return !toks.some(tok => isNaN(parseFloat(tok)));
+		}
+	}
+
+	protected parseTuple(count: number = 3, int: boolean = false): (string) => number[] {
+		return (s: string) => s.split(',').map(f => int ? parseInt(f, 10) : parseFloat(f)).slice(0, count);
+	}
+
+	protected respondGzippedArrayBuffer(res: http.ServerResponse, buffer: ArrayBuffer): void {
+		let out = new stream.Readable();
+		out._read = function(size) {
+			this.push(new Buffer(new Uint8Array(buffer)));
+			this.push(null); // ends stream
+		};
+		this.respondGzippedStream(res, out);
+	}
+
+	protected respondGzippedStream(res: http.ServerResponse, stream: stream.Stream): void {
+		res.writeHead(200, {
+			'Content-Type': 'application/octet-stream',
+			'Access-Control-Allow-Origin': '*',
+			'Content-Encoding': 'gzip'
+		});
+		let gzip = zlib.createGzip();
+		stream.pipe(gzip).pipe(res);
 	}
 
 	protected respondImage(res: http.ServerResponse, image: Buffer, width: number, height: number): void {

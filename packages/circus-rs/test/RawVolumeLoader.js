@@ -3,6 +3,7 @@
 var RawDataLoader = require('../build/browser/image-source/rawvolume-loader').default;
 var Server = require('../build/server/Server');
 var assert = require('chai').assert;
+var PixelFormat = require('../build/common/PixelFormat').PixelFormat;
 
 var port = 9999;
 
@@ -13,7 +14,7 @@ var defaultConfig = {
 	},
 	port: port,
 	logs: [],
-	dumper: {module: "MockDicomDumper", options: { depth: 5 }},
+	dumper: {module: "MockDicomDumper", options: { depth: 5, vx: 0.5, vy: 0.6, vz: 0.7 }},
 	imageEncoder: {module: "ImageEncoder_pngjs", options: {}},
 	cache: {memoryThreshold: 2147483648},
 	authorization: {require: false, allowFrom: "127.0.0.1", expire: 1800}
@@ -50,6 +51,8 @@ describe('RawVolumeLoader', function() {
 		loader.loadVolume('1.2.3.4.5')
 		.then(function(volume) {
 			assert.deepEqual(volume.getDimension(), [512, 512, 5]);
+			assert.deepEqual(volume.getVoxelDimension(), [0.5, 0.6, 0.7]);
+			assert.equal(volume.getPixelFormat(), PixelFormat.Int16);
 			done();
 		})
 		.catch(function(err) {

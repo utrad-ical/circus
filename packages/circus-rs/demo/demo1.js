@@ -1,10 +1,20 @@
-var demoConfig = {
-	series: '1.2.840.113704.1.111.732.1330387449.6',
-	server: 'http://' + window.location.hostname.toString()+':51300'
-};
+$(function(){
+	$('#start').click(start);
+	var save = JSON.parse(localStorage.getItem('rs-demo1-save'));
+	if (save) {
+		$('#series').val(save.series);
+		$('#server').val(save.server);
+	}
+});
 
-$( function(){
-	
+function start() {
+	$('#start').prop('disabled', true);
+	var demoConfig = {
+		series: $('#series').val(),
+		server: $('#server').val()
+	};
+	localStorage.setItem('rs-demo1-save', JSON.stringify(demoConfig));
+
 	/**
 	 * You can use other image source while loading, if know the size.
 	 */
@@ -19,7 +29,7 @@ $( function(){
 	var canvas = document.getElementById('rs-canvas');
 	var viewer = new circusrs.Viewer( canvas );
 	viewer.setImageSource( dummyImageSource );
-	
+
 	// Prepare view state
 	var viewState = new circusrs.VolumeViewState(
 		[ canvas.getAttribute('width'), canvas.getAttribute('height')], // canvasSize,
@@ -42,7 +52,7 @@ $( function(){
 	stateViewer.setImageSource( stateImageSource );
 	// Attention: the same view state
 	stateViewer.setVolumeViewState( viewState );
-	
+
 	// Append some annotations to stateViewer
 	var rsAnnotationCollection = stateViewer.getAnnotationCollection();
 	rsAnnotationCollection.append( new circusrs.ControlTransAnnotation(
@@ -94,7 +104,7 @@ $( function(){
 		viewer.setImageSource( imageSource );
 		viewer.render();
 	});
-});
+}
 
 circusrs.MockImageSource.prototype.load = function(){};
 circusrs.MockImageSource.prototype.setSeries = function(){};

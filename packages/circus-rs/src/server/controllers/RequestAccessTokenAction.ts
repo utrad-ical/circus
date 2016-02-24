@@ -19,7 +19,7 @@ export default class RequestAccessTokenAction extends Controller {
 
 	protected getRules(): ValidatorRules {
 		return {
-			series: ['Series UID', null, 'isLength:1:200', null]
+			series: ['Series UID', null, this.isUID, null]
 		};
 	}
 

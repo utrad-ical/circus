@@ -26,4 +26,5 @@ class Logger {
 }
 
 let logger = Logger.prepareLogger();
-export { logger as default };
+let shutdown = log4js.shutdown;
+export { logger as default, shutdown };

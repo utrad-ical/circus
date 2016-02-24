@@ -81,15 +81,29 @@ class Server {
 		});
 	}
 
+	private loadModule(descriptor: any, type: string): any {
+		let module: string;
+		if (/\//.test(descriptor.module)) {
+			// Load external module if module path is explicitly set
+			module = descriptor.module;
+		} else {
+			// Load built-in modules
+			let dir = {
+				'DICOM dumper': './dicom-dumpers/',
+				'path resolver': './path-resolvers/',
+				'image encoder': './image-encoders/'
+			}[type];
+			module = dir + descriptor.module;
+		}
+		logger.info(`Using ${type}: ${module}`);
+		let theClass = require(module).default;
+		return new theClass(descriptor.options || {});
+	}
+
 	private createDicomReader(): AsyncLruCache<DicomVolume> {
-		let module: string = this.config.pathResolver.module;
-		logger.info('Using path resolver: ' + module);
-		let resolverClass: typeof PathResolver = require('./path-resolvers/' + module).default;
-		let resolver = new resolverClass(this.config.pathResolver.options);
-		module = this.config.dumper.module;
-		logger.info('Using DICOM dumper: ' + module);
-		let dumperClass: typeof DicomDumper = require('./dicom-dumpers/' + module).default;
-		let dumper = new dumperClass(this.config.dumper.options);
+		let cfg = this.config;
+		let resolver: PathResolver = this.loadModule(cfg.pathResolver, 'path resolver');
+		let dumper: DicomDumper = this.loadModule(cfg.dumper, 'DICOM dumper');
 		return new AsyncLruCache<DicomVolume>(
 			seriesUID => {
 				return resolver
@@ -103,17 +117,10 @@ class Server {
 		);
 	}
 
-	private createImageEncoder(): ImageEncoder {
-		let module: string = this.config.imageEncoder.module;
-		logger.info('Using Image Encoder: ' + module);
-		let imageEncoder: typeof ImageEncoder = require('./image-encoders/' + module).default;
-		return new imageEncoder(this.config.imageEncoder.options);
-	}
-
 	private prepareRouter(): any {
 		let config = this.config;
 		let router = Router();
-		let imageEncoder = this.createImageEncoder();
+		let imageEncoder = this.loadModule(config.imageEncoder, 'image encoder');
 		this.dicomReader = this.createDicomReader();
 		let authorizationCache = new AuthorizationCache(config.authorization);
 

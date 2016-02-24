@@ -29,6 +29,7 @@ class Server {
 	protected server: http.Server;
 	protected config: Configuration;
 	protected dicomReader: AsyncLruCache<DicomVolume>;
+	public loadeModuleNames: string[] = [];
 
 	constructor(config: Configuration) {
 		this.config = config;
@@ -96,6 +97,7 @@ class Server {
 		}
 		logger.info(`Using ${type}: ${module}`);
 		let theClass = require(module).default;
+		this.loadeModuleNames.push(theClass.name);
 		return new theClass(descriptor.options || {});
 	}
 
@@ -130,7 +132,7 @@ class Server {
 			['oblique', 'ObliqueAction', true, {}],
 			['scan', 'ObliqueScan', true, {}],
 			['volume', 'VolumeAction', true, {}],
-			['status', 'ServerStatus', false, {counter: this.counter}],
+			['status', 'ServerStatus', false, {server: this}],
 		];
 
 		if (config.authorization.require) {

@@ -3,6 +3,10 @@ import * as stream from 'stream';
 
 var PNG = require('pngjs').PNG;
 
+/**
+ * An ImageEncoder implementation which uses 'pngjs' module,
+ * a pure-JS encoding solution.
+ */
 export default class ImageEncoder_pngjs extends ImageEncoder {
 	public write(out: stream.Writable, image: Buffer, width: number, height: number): void {
 		var png = new PNG({width, height});

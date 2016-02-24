@@ -1,12 +1,12 @@
-/**
- * Oblique Image generator Action class
- */
-
 import DicomVolume from '../../common/DicomVolume';
 import VolumeBasedController from './VolumeBasedController';
 import { ValidatorRules } from '../../common/Validator';
 import * as http from 'http';
 
+/**
+ * Handles 'scan' endpoint which returns MPR image for
+ * an arbitrary orientation.
+ */
 export default class ObliqueScan extends VolumeBasedController {
 
 	protected getRules(): ValidatorRules {

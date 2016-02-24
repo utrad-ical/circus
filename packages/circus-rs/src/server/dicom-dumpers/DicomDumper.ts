@@ -1,10 +1,9 @@
-/**
- * DICOM Dumper interface
- */
-
 import DicomVolume from '../../common/DicomVolume';
 import { Promise } from 'es6-promise';
 
+/**
+ * Base DICOM Dumper class.
+ */
 export default class DicomDumper {
 
 	protected config: any = null;

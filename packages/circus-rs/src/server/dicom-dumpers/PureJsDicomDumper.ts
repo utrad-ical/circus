@@ -8,6 +8,10 @@ import fs = require('fs');
 
 import * as extractor from './DicomPixelExtractor';
 
+/**
+ * DICOM dumper implemented in pure JS.
+ * It may be slow but works anywhere against most uncompressed DICOM files.
+ */
 export default class PureJsDicomDumper extends DicomDumper {
 
 	protected readSingleDicomImageFile(path: string): Promise<extractor.DicomInfo> {

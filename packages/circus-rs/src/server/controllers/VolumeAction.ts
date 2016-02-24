@@ -6,7 +6,8 @@ import * as http from 'http';
 import * as stream from 'stream';
 
 /**
- * Controller class that dumps volume data.
+ * Handles 'volume' endpoint which dumps the whole voxel data of the
+ * specified series.
  */
 export default class VolumeAction extends VolumeBasedController {
 

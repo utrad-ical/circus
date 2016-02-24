@@ -1,5 +1,3 @@
-// import logger from './../Logger';
-
 import DicomDumper from './DicomDumper';
 import { PixelFormat } from '../../common/PixelFormat';
 import DicomVolume from '../../common/DicomVolume';

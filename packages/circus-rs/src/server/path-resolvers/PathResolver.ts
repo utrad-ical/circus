@@ -1,5 +1,10 @@
 import { Promise } from 'es6-promise';
 
+/**
+ * Base PathResolver class. A PathResolver receives a series instance UID
+ * and returns the path of the physical directory
+ * which contains the correspoinding DICOM files.
+ */
 export default class PathResolver {
 	protected config: any = null;
 

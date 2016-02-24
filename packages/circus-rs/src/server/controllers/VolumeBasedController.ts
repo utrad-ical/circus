@@ -5,7 +5,7 @@ import logger from '../Logger';
 
 /**
  * VolumeBasedController is a base class of controllers
- * which need DICOM volume (as RawData) specified by 'series' query parameter.
+ * which need DICOM volume (as DicomVolume) specified by the 'series' query parameter.
  */
 export default class VolumeBasedController extends Controller {
 	protected process(query: any, res: http.ServerResponse): void {

@@ -4,6 +4,9 @@ import * as crypto from 'crypto';
 import { Promise } from 'es6-promise';
 import logger from '../Logger';
 
+/**
+ * A basic and simple PathResolver implementation.
+ */
 export default class StaticPathResolver extends PathResolver {
 	public resolvePath(seriesUID: string): Promise<string> {
 		var dcmdir: string = null;

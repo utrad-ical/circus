@@ -16,6 +16,9 @@ try {
 }
 import * as mongoose from 'mongoose';
 
+/**
+ * A PathResolver implementation which is based on CIRCUS DB datastore.
+ */
 export default class CircusDbPathResolver extends PathResolver {
 	protected db: mongoose.Connection = null; // DB connection
 	protected seriesModel: mongoose.Model<any>;

@@ -3,10 +3,9 @@ import DicomVolume from '../../common/DicomVolume';
 import VolumeBasedController from './VolumeBasedController';
 import { ValidatorRules } from '../../common/Validator';
 
-// import logger from '../Logger';
-
 /**
- * DICOM image metadata process class
+ * Handles 'metadata' endpoint which gives general information
+ * of the specified series.
  */
 export default class Metadata extends VolumeBasedController {
 

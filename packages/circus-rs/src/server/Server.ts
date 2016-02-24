@@ -1,7 +1,3 @@
-/**
- * Main server class.
- */
-
 import * as http from 'http';
 let finalhandler = require('finalhandler');
 
@@ -24,6 +20,9 @@ import Controller from './controllers/Controller';
 
 let Router = require('router');
 
+/**
+ * Main server class.
+ */
 class Server {
 	public counter: Counter;
 	protected server: http.Server;

@@ -6,12 +6,8 @@ import logger from '../Logger';
 import { ValidatorRules } from '../../common/Validator';
 
 /**
- * Register access token.
- *
- * series: DICOM series instance UID
- * token: access token
- *
- * also in metadata/mpr/oblique... request.
+ * Handles 'requestToken' endpoint which returns an access token
+ * for each authorized series.
  */
 export default class RequestAccessTokenAction extends Controller {
 	public cache: AuthorizationCache;

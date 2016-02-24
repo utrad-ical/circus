@@ -1,7 +1,3 @@
-/**
- * DICOM Dumper (using dicom_voxel_dumper)
- */
-
 import { exec } from 'child_process';
 import * as fs from 'fs';
 
@@ -14,6 +10,9 @@ import { Promise } from 'es6-promise';
 const GLOBAL_HEADER = -1;
 const GLOBAL_FOOTER = -2;
 
+/**
+ * DICOM Dumper (using dicom_voxel_dumper)
+ */
 export default class DicomVoxelDumperAdapter extends DicomDumper {
 
 	public readDicom(dcmdir: string): Promise<DicomVolume> {

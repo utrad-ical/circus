@@ -1,15 +1,12 @@
-/**
- * Oblique Image generator Action class
- */
-
 import DicomVolume from '../../common/DicomVolume';
 import VolumeBasedController from './VolumeBasedController';
 import { ValidatorRules } from '../../common/Validator';
-
 import * as http from 'http';
 
-// import logger from '../Logger';
-
+/**
+ * Handles 'oblique' endpoint which export single oblique PNG image.
+ * @deprecated
+ */
 export default class ObliqueAction extends VolumeBasedController {
 
 	private checkTuple(s: string): boolean {

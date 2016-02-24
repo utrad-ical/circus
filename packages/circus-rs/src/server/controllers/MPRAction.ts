@@ -1,13 +1,12 @@
-/**
- * MPR Image generator Action class
- */
-
 import DicomVolume from '../../common/DicomVolume';
 import VolumeBasedController from './VolumeBasedController';
 import { ValidatorRules } from '../../common/Validator';
-
 import * as http from 'http';
 
+/**
+ * Handles 'mpr' endpoint which exports MPR image.
+ * @deprecated
+ */
 export default class MPRAction extends VolumeBasedController {
 
 	protected getRules(): ValidatorRules {

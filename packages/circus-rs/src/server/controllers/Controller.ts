@@ -1,6 +1,3 @@
-/**
- * DICOM Server module prototype.
- */
 import * as url from 'url';
 import ImageEncoder from '../image-encoders/ImageEncoder';
 import * as http from 'http';
@@ -11,7 +8,10 @@ import { Validator, ValidatorRules } from '../../common/Validator';
 import * as zlib from 'zlib';
 import * as stream from 'stream';
 
-export default class Controller {
+/**
+ * Base DICOM Server controller.
+ */
+ export default class Controller {
 
 	protected reader: AsyncLruCache<RawData>;
 	protected imageEncoder: ImageEncoder;

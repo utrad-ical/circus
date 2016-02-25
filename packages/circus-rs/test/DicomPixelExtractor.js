@@ -21,6 +21,10 @@ describe('DicomPixelExtractor', function() {
 		assert.equal(data.columns * data.rows * pxInfo.bpp, data.pixelData.byteLength);
 		var readArray = new pxInfo.arrayClass(data.pixelData);
 
+		var doRescale = data.rescale &&
+			typeof data.rescale.intercept === 'number'
+			typeof data.rescale.slope === 'number';
+
 		// write PNG image
 		var encoder = new ImageEncoder();
 		var arr = new Uint8ClampedArray(data.columns * data.rows);
@@ -29,6 +33,9 @@ describe('DicomPixelExtractor', function() {
 		for (var x = 0; x < data.columns; x++) {
 			for (var y = 0; y < data.rows; y++) {
 				var pixel = readArray[x + y * data.columns];
+				if (doRescale) {
+					pixel = pixel * data.rescale.slope + data.rescale.intercept;
+				}
 				var o = Math.round((pixel - wl + ww / 2) * (255 / ww));
 				arr[x + y * data.columns] = pixel;
 			}
@@ -59,7 +66,23 @@ describe('DicomPixelExtractor', function() {
 		{ columns: 512, rows: 512, pixelSpacing: [0.46875, 0.46875] }
 	);
 	testFile(
+		'CT-phantom-lossless',
+		{ columns: 512, rows: 512, pixelSpacing: [0.683594, 0.683594] }
+	);
+	testFile(
 		'MR-MONO2-16-head',
 		{ columns: 256, rows: 256, pixelSpacing: [0.859375, 0.859375] }
+	);
+	testFile(
+		'MR-phantom-LI',
+		{ columns: 256, rows: 256, pixelSpacing: [1.5625, 1.5625] }
+	);
+	testFile(
+		'MR-phantom-LE',
+		{ columns: 256, rows: 256, pixelSpacing: [1.5625, 1.5625] }
+	);
+	testFile(
+		'MR-phantom-lossless',
+		{ columns: 256, rows: 256, pixelSpacing: [1.5625, 1.5625] }
 	);
 });

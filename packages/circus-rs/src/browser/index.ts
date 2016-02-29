@@ -6,6 +6,7 @@
 export * from '../browser/viewer';
 export * from '../browser/viewer-event-capture-interface';
 export * from '../browser/volume-view-state';
+export * from '../browser/composition';
 export * from '../browser/image-source';
 export * from '../browser/image-source/mock-image-source';
 export * from '../browser/image-source/raw-volume-image-source';

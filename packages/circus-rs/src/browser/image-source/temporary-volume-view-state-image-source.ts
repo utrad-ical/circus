@@ -4,16 +4,20 @@ var {mat4, vec3} = require('gl-matrix');
 import { ImageSource } from '../image-source';
 
 type Vector3 = [number,number,number];
+type Point3 = [number,number,number];
 
 export class VolumeViewStateImageSource extends ImageSource {
 
 	private width: number;
 	private height: number;
 	private depth: number;
-	private fontSize: number = 20;
 
 	private matrix;
 	private canvasSizeCache;
+	
+	public eye: Point3 = [1.0, 2.0, 1.0];
+	public focus: Point3 = [0.0, 0.0, 0.0];
+	public up: Vector3 = [0.0, 0.0, -1.0];
 	
 	constructor( width: number, height: number, depth: number ){
 		super();
@@ -23,69 +27,33 @@ export class VolumeViewStateImageSource extends ImageSource {
 	}
 	
 	public readyCoordinatesMapper(
-		canvasSize,
-		cornerPoints,
-		mvTranslate: Vector3 = [-1.0, -2.0, -1.0],
-		eye: Vector3 = [1.0, 2.0, 1.0],
-		lookAt: Vector3 = [0.0, 0.0, 0.0],
-		up: Vector3 = [0.0, 0.0, -1.0]
+		canvasSize
 	){
-		if( this.canvasSizeCache
-			&& this.canvasSizeCache[0] === canvasSize[0]
-			&& this.canvasSizeCache[1] === canvasSize[1]
-		) return;
-		
-		this.canvasSizeCache = canvasSize;
 
-		let max = Math.max( this.width, this.height, this.depth );
+		let worldSize = Math.max( this.width, this.height, this.depth );
 	
-		let preTransMat = mat4.create();
-		mat4.scale( preTransMat, preTransMat, [1/max,1/max,1/max] );
-		mat4.translate( preTransMat, preTransMat, [ this.width * -0.5, this.height * -0.5, this.depth * -0.5] );
-	
-		let mvMat = mat4.translate( mat4.create(), mat4.create(), mvTranslate );
-		let viewMat = mat4.lookAt( mat4.create(), eye, lookAt, up );
-		let pMat = mat4.perspective(mat4.create(), 40.0 / 180.0 * Math.PI, canvasSize[0] / canvasSize[1], 0.1, 100.0);
-		let cxMat = mat4.multiply( mat4.create(), pMat, mat4.multiply( mat4.create(), viewMat, mvMat ) );
-		
-		let postTransMat = mat4.scale( mat4.create(), mat4.create(), [max,max,max] );
-		
-		this.matrix = mat4.create();
-		mat4.multiply( this.matrix, this.matrix, postTransMat );
-		mat4.multiply( this.matrix, this.matrix, cxMat );
-		mat4.multiply( this.matrix, this.matrix, preTransMat );
-		
+		let model = mat4.create();
+		mat4.scale( model, model, [0.8,0.8,0.8] );
+		mat4.scale( model, model, [1/worldSize,1/worldSize,1/worldSize] );
+		mat4.translate( model, model, [ this.width * -0.5, this.height * -0.5, this.depth * -0.5] );
 
-
-
-		let center = vec3.scale( vec3.create(), [this.width, this.height, this.depth ], 0.5 );
-		let center2 = vec3.transformMat4( vec3.create(), center, this.matrix ).map( i => Math.round(i) );
-		let center3 = [ canvasSize[0] / 2, canvasSize[1] / 2, 0 ];
-		let moveToCanvasOrigin = mat4.translate( mat4.create(), mat4.create(), vec3.scale( vec3.create(), center2, -1 ) );
-		mat4.multiply( this.matrix, moveToCanvasOrigin, this.matrix );
+		let view = mat4.lookAt( mat4.create(), this.eye, this.focus, this.up );
+		let projection = mat4.perspective(mat4.create(), 40.0 / 180.0 * Math.PI, canvasSize[0] / canvasSize[1], 0.1, 100.0);
+		let screen =  [
+			canvasSize[0] / 2, 0, 0, 0,
+			0, canvasSize[1] / 2, 0, 0,
+			0, 0, 1, 0,
+			canvasSize[0] / 2, canvasSize[1] / 2, 0, 1
+		];
 		
-		let far = 0;
-		let farPoint = null;
-		cornerPoints.forEach( (p) => {
-			let dist = vec3.length( vec3.transformMat4( vec3.create(), p, this.matrix ).map( i => Math.round(i) ) );
-			if( dist > far ){
-				far = dist;
-				farPoint = p;
-			}
-		} );
-		if( far ){
-			let allowDist = Math.min( canvasSize[0] * 0.35, canvasSize[1] * 0.35 );
-			let scale = allowDist / far;
-			let shrink = mat4.scale( mat4.create(), mat4.create(), vec3.fromValues( scale,scale,scale ) );
-			mat4.multiply( this.matrix, shrink, this.matrix );
-		}
-		
-		let moveToCenter = mat4.translate( mat4.create(), mat4.create(), vec3.scale(vec3.create(),center3,1.1) );
-		mat4.multiply( this.matrix, moveToCenter, this.matrix );
-		
-		this.fontSize = Math.ceil( this.fontSize * Math.min( canvasSize[0] / this.width, canvasSize[1] / this.height ) );
+		let matrix = mat4.create();
+		mat4.multiply( matrix, model, matrix );
+		mat4.multiply( matrix, view, matrix );
+		mat4.multiply( matrix, projection, matrix );
+		mat4.multiply( matrix, screen, matrix );
+		this.matrix = matrix;
 	}
-	
+
 	public getCoordinates( p ){
 		return vec3.transformMat4( vec3.create(), p, this.matrix ).map( i => Math.round(i) );
 	}
@@ -96,98 +64,75 @@ export class VolumeViewStateImageSource extends ImageSource {
 	public draw( canvasDomElement, viewState ):Promise<any> {
 		
 		let context = canvasDomElement.getContext("2d");
+		let canvasSize = [ canvasDomElement.getAttribute('width'), canvasDomElement.getAttribute('height') ];
+		this.readyCoordinatesMapper( canvasSize );
 		
 		/**
 		 * Draw volume box
 		 */
 		
-		let cornerPoints = [ 
+		let boxCorner = [ 
 			[0,0,0],[this.width, 0, 0],[this.width, this.height, 0],[0, this.height, 0],
 			[0,0, this.depth],[this.width, 0, this.depth],[this.width, this.height, this.depth],[0, this.height, this.depth ]
 		];
-		let canvasSize = [ canvasDomElement.getAttribute('width'), canvasDomElement.getAttribute('height') ];
-		this.readyCoordinatesMapper( canvasSize, cornerPoints );
 		
-		let [ cA1,cA2,cA3,cA4,cB1,cB2,cB3,cB4 ] = cornerPoints.map( p => this.getCoordinates( p ) );
+		let [ cA1,cA2,cA3,cA4,cB1,cB2,cB3,cB4 ] = boxCorner.map( p => this.getCoordinates( p ) );
 		this.strokePolygone( context, [cA1,cA2,cA3,cA4,cA1,cB1,cB2,cA2,cA1], 1.0, 'rgb(0, 32, 128)' );
 		this.strokePolygone( context, [cB3,cB2,cB1,cB4,cB3,cA3,cA4,cB4,cB3], 1.0, 'rgb(0, 32, 128)' );
-		
-		
-		/**
-		 * Draw viewport
-		 */
-		let vp = [
-			viewState.getLeftTop(),
-			viewState.getRightTop(),
-			viewState.getRightBottom(),
-			viewState.getLeftBottom()
-		].map( p => this.getCoordinates( p ) );
-		
-		this.fillPolygone( context, vp, 'rgba( 128, 128, 128, 0.2 )' );
-		
-		/**
-		 * Draw axis
-		 */
-		
-		// X axis
-		let xAxisArrow = [ viewState.getLeftTop(),viewState.getRightTop() ].map( p => this.getCoordinates( p ) );
-		this.strokePolygone( context, xAxisArrow, 3.0, 'rgba( 0, 255, 96, 1.0 )' );
+
 		// Surface in XY plane
 		this.fillPolygone( context, [cA1,cA2,cB2,cB1,cA1],'rgba( 0, 255, 96, 0.1 )' );
-		
-		// Y axis
-		let yAxisArrow = [ viewState.getLeftTop(),viewState.getLeftBottom() ].map( p => this.getCoordinates( p ) );
-		this.strokePolygone( context, yAxisArrow, 3.0, 'rgba( 0, 96, 255, 1.0 )' );
 		// Surface in YZ plane
 		this.fillPolygone( context, [cA1,cA4,cB4,cB1,cA1], 'rgba( 0, 96, 255, 0.1 )' );
 		
+		
 		/**
-		 * Draw origin
+		 * Draw cross section rectangle
 		 */
-		let origin = this.getCoordinates( viewState.getOrigin() );
-		this.strokeCircle( context, [ origin[0],origin[1] ], 3, 'rgba( 255, 96, 0, 0.7 )');
-
-		/**
-		 * Draw marker sample
-		 */
-		let p100x100x64 = [100,100,64];
-		let marker = this.getCoordinates( p100x100x64 );
-		this.strokeCircle( context, [ marker[0],marker[1] ], 5, 'rgba( 96, 0, 255, 1 )');
-		let markerGuide = [
-			p100x100x64,
-			[ p100x100x64[0],p100x100x64[1],0 ],
-			p100x100x64,
-			[ p100x100x64[0],0,p100x100x64[2] ],
-			p100x100x64,
-			[ 0, p100x100x64[1],p100x100x64[2] ],
-			p100x100x64
-		].map( p => {
-			let [x,y] = this.getCoordinates( p );
-			return [x,y];
-		} );
-		this.strokePolygone( context, markerGuide, 0.5, 'rgba( 96, 0, 255, 1 )');
+		let vertexes = [
+			vec3.clone( viewState.origin ),
+			vec3.create(),
+			vec3.create(),
+			vec3.create()
+		];
+		vec3.add( vertexes[1], vertexes[0], viewState.xAxis );
+		vec3.add( vertexes[2], vertexes[1], viewState.yAxis );
+		vec3.add( vertexes[3], vertexes[0], viewState.yAxis );
+		vertexes = vertexes.map( v => this.getCoordinates( v ) );
+		
+		// plane
+		this.fillPolygone( context, vertexes, 'rgba( 128, 128, 128, 0.2 )' );
+		
+		// X axis
+		this.strokePolygone( context, [ vertexes[0],vertexes[1] ], 3.0, 'rgba( 0, 255, 96, 1.0 )' );
+		
+		// Y axis
+		this.strokePolygone( context, [ vertexes[0],vertexes[3] ] , 3.0, 'rgba( 0, 96, 255, 1.0 )' );
+		
+		// origin
+		this.fillCircle( context, vertexes[0], 3, 'rgba( 255, 96, 0, 0.7 )');
 
 		/**
 		 * Draw status text
 		 */
-		var x = this.fontSize;
-		var y = this.fontSize;
-		var lineHeight = Math.ceil( this.fontSize * 1.4 );
+		let fontSize = Math.ceil( 20 * Math.min( canvasSize[0] / this.width, canvasSize[1] / this.height ) );
+		var x = fontSize;
+		var y = fontSize;
+		var lineHeight = Math.ceil( fontSize * 1.4 );
 		var k = 100;
 		
-		context.font = this.fontSize.toString() + "px Arial";
+		context.font = fontSize.toString() + "px Arial";
 		context.fillStyle = 'rgba(255,0,0,1.0)';
-		// console.log( this.vecToString( viewState.getOrigin(), 100 ) );
 
 		context.fillText( 'Origin: ' + this.vecToString( viewState.getOrigin(), 100 ),
 			x,y+=lineHeight);
 
-		context.fillStyle = 'rgba( 0, 255, 96, 1.0 )';
-		context.fillText( 'VectorX: '+ Math.round( vec3.length(viewState.getVectorX()) ) + ' ' + this.vecToString( viewState.getVectorX(), 100 ),
+		context.fillStyle = 'rgba( 0, 216, 96, 1.0 )';
+		context.fillText( 'VectorX: '+ Math.round( vec3.length(viewState.xAxis) ) + ' ' + this.vecToString( viewState.xAxis, 100 ),
 			x,y+=lineHeight);
 			
-		context.fillStyle = 'rgba( 0, 96, 255, 1.0 )';
-		context.fillText( 'VectorY: '+ Math.round( vec3.length(viewState.getVectorY()) ) + ' ' + this.vecToString( viewState.getVectorY(), 100 ),
+		context.fillStyle = 'rgba( 0, 96, 216, 1.0 )';
+		context.fillText( 'VectorY: '+ Math.round( vec3.length(viewState.yAxis) ) + ' ' + this.vecToString( viewState.yAxis, 100 ),
 			x,y+=lineHeight);
 
 		context.fillStyle = 'rgb(0, 0, 0)';
@@ -195,7 +140,7 @@ export class VolumeViewStateImageSource extends ImageSource {
 			x,y+=lineHeight);
 		context.fillText( 'NV: ' + this.vecToString( viewState.getNormalVector(), 100 ),
 			x,y+=lineHeight);
-		
+
 		return Promise.resolve();
 	}
 	
@@ -207,29 +152,31 @@ export class VolumeViewStateImageSource extends ImageSource {
 		return '[' + s.join(',') + ']';
 	}
 	
-	public strokeCircle( context, center: [number,number], radius: number = 10, color: string = 'rgba( 255, 0, 0, 1.0 )' ){
+	private fillPolygone( context, path, color: string = 'rgba(0,255,0,0.2)' ){
+		context.beginPath();
+		context.moveTo( path[0][0],path[0][1] );
+		for( let p = 1; p < path.length; p++ ) context.lineTo(path[p][0],path[p][1]);
+		context.lineTo(path[0][0],path[0][1]);
+		context.closePath();
+		context.fillStyle = color;
+		context.fill();
+	}
+	private strokePolygone( context, path, width: number = 1.0, color: string = 'rgba(255,0,0,0.2)' ){
+		context.beginPath();
+		context.moveTo( path[0][0],path[0][1] );
+		for( let p = 1; p < path.length; p++ ) context.lineTo(path[p][0],path[p][1]);
+		context.lineTo(path[0][0],path[0][1]);
+		context.closePath();
+		context.lineWidth = 1.0;
+		context.strokeStyle = color;
+		context.stroke();
+	}
+	private fillCircle( context, center: number[], radius: number = 10, color: string = 'rgba( 255, 0, 0, 1.0 )' ){
 		context.beginPath();
 		context.arc( center[0], center[1], radius, 0, Math.PI * 2 );
 		context.closePath();
 		context.fillStyle = color;
 		context.fill();
-	}
-	private fillPolygone( context, path, color: string = 'rgba(0,255,0,0.2)' ){
-		context.beginPath();
-		context.moveTo( path[0][0],path[0][1] );
-		path.reduce( (p,n) => { context.lineTo(n[0],n[1]); return n; }, path.shift() );
-		context.closePath();
-		context.fillStyle = color;
-		context.fill();
-	}
-	private strokePolygone( context, path, width: number = 1.0, color: string = 'rgba(0,255,0,0.2)' ){
-		context.beginPath();
-		context.moveTo( path[0][0],path[0][1] );
-		path.reduce( (p,n) => { context.lineTo(n[0],n[1]); return n; }, path.shift() );
-		context.closePath();
-		context.lineWidth = 1.0;
-		context.strokeStyle = color;
-		context.stroke();
 	}
 
 }

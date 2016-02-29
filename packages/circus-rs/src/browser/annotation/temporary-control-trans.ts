@@ -32,9 +32,9 @@ export class ControlTransAnnotation extends Annotation {
 		this.on( 'mousewheel', ( ev )=> {
 			if(	ev.original && ev.original.deltaY != 0 ){
 				if( ev.original.deltaY > 0 ){
-					ev.viewer.getVolumeViewState().transrate(-dx, -dy, -dz);
+					ev.viewer.getViewState().transrate(-dx, -dy, -dz);
 				}else{
-					ev.viewer.getVolumeViewState().transrate(dx, dy, dz);
+					ev.viewer.getViewState().transrate(dx, dy, dz);
 				}
 				ev.viewer.render();
 			}
@@ -81,9 +81,9 @@ export class ControlTransAnnotation extends Annotation {
 				dz *= 10;
 			}
 			if( viewerEvent.original.deltaY > 0 ){
-				viewerEvent.viewer.getVolumeViewState().transrate(-dx, -dy, -dz);
+				viewerEvent.viewer.getViewState().transrate(-dx, -dy, -dz);
 			}else{
-				viewerEvent.viewer.getVolumeViewState().transrate(dx, dy, dz);
+				viewerEvent.viewer.getViewState().transrate(dx, dy, dz);
 			}
 			viewerEvent.viewer.render();
 		}

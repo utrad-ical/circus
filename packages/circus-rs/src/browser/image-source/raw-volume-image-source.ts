@@ -52,19 +52,20 @@ export class RawVolumeImageSource extends ImageSource {
 
 			let [ canvasWidth, canvasHeight ] = viewState.getSize();
 
+			let origin = viewState.getOrigin().map( i=>Math.floor(i) );
 			let imageBuffer = new Uint8Array( canvasWidth * canvasHeight );
-
+			
 			this.volume.scanOblique(
-				viewState.getOrigin(),
+				origin,
 				viewState.getUnitX(),
 				viewState.getUnitY(),
 				[ canvasWidth, canvasHeight ],
 				imageBuffer,
-				2277, // viewState.getWindowWidth()
-				138 // viewState.getWindowLevel(),
+				viewState.getWindowWidth(),
+				viewState.getWindowLevel()
 			);
 
-			var imageData = context.createImageData( canvasWidth, canvasHeight );
+			let imageData = context.createImageData( canvasWidth, canvasHeight );
 			for (var y = 0; y < canvasHeight; y++) {
 				for (var x = 0; x < canvasWidth; x++) {
 					var srcidx = (canvasWidth * y + x);

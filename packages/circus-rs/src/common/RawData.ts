@@ -281,7 +281,7 @@ export default class RawData {
 		} else {
 			this.read = pos => (this.view[pos >> 3] >> (7 - pos % 8)) & 1;
 			this.write = (value, pos) => {
-				let cur = this.view[pos >> 3];
+				let cur = this.view[pos >> 3];//pos => pos/8
 				cur ^= (-value ^ cur) & (1 << (7 - pos % 8)); // set n-th bit to value
 				this.view[pos >> 3] = cur;
 			};
@@ -537,6 +537,43 @@ export default class RawData {
 		}
 	}
 
+	public scanCrossSection(
+		origin: Vector3D,
+		eu: Vector3D,
+		ev: Vector3D,
+		outSize: Vector2D,
+		image: {[index: number]: number}
+		// minimumCanvas: [number, number]
+	): void {
+		let [rx, ry, rz] = this.size;
+		let [x, y, z] = origin;
+		let [eu_x, eu_y, eu_z] = eu;
+		let [ev_x, ev_y, ev_z] = ev;
+		let [outWidth, outHeight] = outSize;
+		// let [outWidth, outHeight] = minimumCanvas;
+		let imageOffset = 0;
+		let value: number;
+		for (let j = 0; j < outHeight; j++) {
+			let [pos_x, pos_y, pos_z] = [x, y, z];
+
+			for (let i = 0; i < outWidth; i++) {
+				if (pos_x >= 0.0 && pos_y >= 0.0 && pos_z >= 0.0
+					&& pos_x <= rx - 1 && pos_y <= ry - 1 && pos_z <= rz - 1) {
+					value = this.getPixelAt(Math.floor(pos_x), Math.floor(pos_y), Math.floor(pos_z));
+				} else {
+					value = 0;
+				}
+				image[imageOffset++] = Math.round(value);
+
+				pos_x += eu_x;
+				pos_y += eu_y;
+				pos_z += eu_z;
+			}
+			x += ev_x;
+			y += ev_y;
+			z += ev_z;
+		}
+	}
 	/**
 	 * Determine how to scan oblique image
 	 * @protected

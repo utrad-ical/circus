@@ -14,8 +14,10 @@ export class ViewerEvent {
 		this.type = type || original.type;
 		if( typeof original !== 'undefined' ){
 			this.original = original;
-			this.canvasX = original.clientX - original.target.offsetLeft;
-			this.canvasY = original.clientY - original.target.offsetTop;
+			// this.canvasX = original.clientX - original.target.offsetLeft;//!!!WRONG!!!
+			this.canvasX = original.offsetX;
+			// this.canvasY = original.clientY - original.target.offsetTop;//!!!WRONG!!!
+			this.canvasY = original.offsetY;
 		}
 	}
 }

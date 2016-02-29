@@ -36,7 +36,7 @@ export class ScaleTool extends Tool {
 		if(!this.hitTest(viewerEvent)) {
 			return true;
 		}
-		let vs = viewerEvent.viewer.getVolumeViewState();
+		let vs = viewerEvent.viewer.getViewState();
 		if(viewerEvent.original.deltaY > 0) {
 			vs.scale(this.scale);
 		} else {

@@ -15,16 +15,20 @@ export class Tool extends EventEmitter implements ViewerEventCapture {
 	private y: number;
 	private width: number;
 	private height: number;
+	private positionX: number;
+	private positionY: number;
 	private imageURL: string;
 	public cursor: string;
 	private iconImage: HTMLImageElement;
 	constructor(opt){
 		super();
-		let {x = 20, y = 20, image = "", width = 50, height = 50, cursor = "default"} = opt;
+		let {x = 20, y = 20, image = "", width = 32, height = 32, positionX = 0, positionY = 0, cursor = "default"} = opt;
 		this.x = x;
 		this.y = y;
 		this.width = width;
 		this.height = width;
+		this.positionX = positionX;
+		this.positionY = positionY;
 		this.imageURL = image;
 		this.cursor = cursor;
 		let img = new Image();
@@ -39,12 +43,17 @@ export class Tool extends EventEmitter implements ViewerEventCapture {
 	public draw( canvasDomElement, viewState ){
 		if(this.iconImage) {
 			var ctx = canvasDomElement.getContext("2d");
-			ctx.drawImage(this.iconImage, this.x, this.y);
-			return new ToolSprite(this);
-		}else{
-			return null;
+			// ctx.drawImage(this.iconImage, this.x, this.y);
+			//draw background
+			ctx.fillStyle = "rgba(255,255,255,1.0)";
+			ctx.fillRect(this.x, this.y, this.width, this.height);
+			ctx.drawImage(this.iconImage, this.positionX, this.positionY, this.width, this.height, this.x, this.y, this.width, this.height);
+			// return new ToolSprite(this);
 		}
 
+	}
+	public createSprite(){
+		return new ToolSprite(this);
 	}
 	public isOnTheToolImage(x: number, y: number): boolean{
 		let isOnWidth = (this.x <= x && x <= this.x + this.width);

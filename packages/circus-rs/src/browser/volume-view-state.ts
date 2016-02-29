@@ -5,180 +5,73 @@ import * as gl from 'gl-matrix';
 let mat4 = gl.mat4;
 let vec3 = gl.vec3;
 
+import { EventEmitter } from 'events';
+
 type Point2 = number[];
 type Point3 = number[];
 type Vector3 = number[];
 type Size2 = number[];
 
-export class VolumeViewState {
-
-	private windowLevel: number;
-	private windowWidth: number;
+export class VolumeViewState extends EventEmitter {
 
 	private viewportSize: Size2; // [px]
-	private viewportOffset: Point2; // [px]
-	private zoom: number = 1.00;
 
-	private cOrigin: Point3; // [voxel index]
-	private cX: Vector3; // [voxel index]
-	private cY: Vector3; // [voxel index]
+	// cross section definition
+	public origin: Point3; // [voxel index]
+	public xAxis: Vector3; // [voxel index]
+	public yAxis: Vector3; // [voxel index]
+
+	// display option
+	public windowLevel: number;
+	public windowWidth: number;
+
+	public zoom: number = 1.00;
 
 	constructor(
 		viewportSize: Size2,
-		cOrigin: Point3 = [0, 0, 0],
-		cX?: Vector3,
-		cY?: Vector3,
+		origin: Point3 = [0, 0, 0],
+		xAxis?: Vector3,
+		yAxis?: Vector3,
 		windowLevel: number = 1500,
 		windowWidth: number = 2000
 	) {
-		this.viewportSize = viewportSize;
-		this.cOrigin = cOrigin;
-		this.cX = cX || [ viewportSize[0], 0, 0 ];
-		this.cY = cY || [ 0, viewportSize[1], 0 ];
+		super();
+		this.viewportSize = viewportSize.map( i=>Number(i) );
+		this.origin = origin;
+		this.xAxis = xAxis || [ viewportSize[0], 0, 0 ];
+		this.yAxis = yAxis || [ 0, viewportSize[1], 0 ];
 		this.windowLevel = windowLevel;
 		this.windowWidth = windowWidth;
 	}
-
-	public setOffset(offset: Point2) {
-		this.viewportOffset = offset;
-	}
-
-	public getOffset() {
-		return this.viewportOffset;
-	}
-
-	public coordinatePixelToVoxel(x, y): Point3 {
-
-		let vx = vec3.scale( vec3.create(), this.cX, x / this.viewportSize[0] );
-		let vy = vec3.scale( vec3.create(), this.cY, y / this.viewportSize[1] );
-
-		let v1 = vec3.create(), vPos = vec3.create();
-		vec3.add(v1, this.cOrigin, vx);
-		vec3.add(vPos, v1, vy);
-
-		return vPos;
-	}
-
-	/**
-	 * vz だけ ...
-	 */
-	public coordinateVoxelToPixel( x: number, y: number, z: number, depthRate: number = 1.00 ): Point3 {
-
-		let p0 = vec3.fromValues(x, y, z);
-		let p1 = vec3.create();
-		vec3.subtract(p1, p0, this.cOrigin);
-
-		let ux = vec3.normalize( vec3.create(), this.cX ),
-			uy = vec3.normalize( vec3.create(), this.cY );
-
-		let vx = vec3.dot( p1, ux );
-		let vy = vec3.dot( p1, uy );
-		let vz = vec3.dot( p1, this.getNormalVector() );
-		return [
-			vx * this.viewportSize[0] / vec3.length( this.cX ),
-			vy * this.viewportSize[1] / vec3.length( this.cY ),
-			vz * depthRate
-		];
-	}
-
-	public getZoom() {
-		return this.zoom;
-	}
-
-	public getWindowLevel() {
-		return this.windowLevel;
-	}
-
-	public getWindowWidth() {
-		return this.windowWidth;
-	}
-
-	public getSize(): Point2 {
-		return this.viewportSize;
-	}
-
-	public getVoxelSize(): Size2 {
-		return [
-			vec3.length( this.cX ),
-			vec3.length( this.cY )
-		];
-	}
-
-	public getOrigin(): Point3 {
-		return this.cOrigin;
-	}
-
-	public getVectorX(): Vector3 {
-		return this.cX;
-	}
+	
+	public getOrigin() { return this.origin; }
+	public getZoom() { return this.zoom; }
+	public getWindowLevel() { return this.windowLevel; }
+	public getWindowWidth() { return this.windowWidth; }
+	public getSize(): Point2 { return this.viewportSize; }
+	public getVectorX(): Vector3 { return this.xAxis; }
+	public getVectorY(): Vector3 { return this.yAxis; }
 
 	public getUnitX(): Vector3 {
-		return vec3.scale( vec3.create(), this.cX, 1.00 / this.viewportSize[0] );
-	}
-
-	public getVectorY(): Vector3 {
-		return this.cY;
+		return vec3.scale( vec3.create(), this.xAxis, 1.00 / this.viewportSize[0] );
 	}
 
 	public getUnitY(): Vector3 {
-		return vec3.scale( vec3.create(), this.cY, 1.00 / this.viewportSize[1] );
+		return vec3.scale( vec3.create(), this.yAxis, 1.00 / this.viewportSize[1] );
 	}
 
-	public getLeftTop(): Point3 {
-		return this.cOrigin;
-	}
-
-	public getLeftBottom(): Point3 {
-		let corner = vec3.create();
-		vec3.add( corner, this.cOrigin, this.cY );
-		return corner;
-	}
-
-	public getRightTop(): Point3 {
-		let corner = vec3.create();
-		vec3.add( corner, this.cOrigin, this.cX );
-		return corner;
-	}
-
-	public getRightBottom(): Point3 {
-		let corner = vec3.create();
-		vec3.add( corner, this.getRightTop(), this.cY );
-		return corner;
-	}
-
-	public getNormalVector( n: number = 1000 ) {
-
-		let v01 = this.cX;
-		let v02 = this.cY;
-
-		let nv0 = vec3.create();
-		let nv = vec3.create();
-		vec3.cross(nv0, v01, v02);
-		vec3.normalize(nv, nv0);
-
-		return nv.map( i => Math.round( i * n ) / n );
+	public getNormalVector() {
+		let nv = vec3.cross(vec3.create(), this.xAxis, this.yAxis);
+		return vec3.normalize(nv, nv);
 	}
 
 	public getCenter(): Point3 {
-		let vx = vec3.create(),
-			vy = vec3.create();
-		vec3.scale(vx, this.cX, 0.5);
-		vec3.scale(vy, this.cY, 0.5);
-
-		let cx = vec3.create(),
-			cxy = vec3.create();
-		vec3.add(cx, this.cOrigin, vx);
-		vec3.add(cxy, cx, vy);
-
-		return [
-			Math.round(cxy[0] * 1000) / 1000,
-			Math.round(cxy[1] * 1000) / 1000,
-			Math.round(cxy[2] * 1000) / 1000
-		];
-	}
-
-	public getBounds(): [Point3, Point3, Point3, Point3] {
-		return [this.getLeftTop(), this.getRightTop(), this.getRightBottom(), this.getLeftBottom()];
+		
+		let center = vec3.clone( this.origin );
+		vec3.add( center, center, vec3.scale(vec3.create(), this.xAxis, 0.5) );
+		vec3.add( center, center, vec3.scale(vec3.create(), this.yAxis, 0.5) );
+		
+		return center;
 	}
 
 	public isAxial(): boolean {
@@ -196,27 +89,48 @@ export class VolumeViewState {
 		return nv[2] === 0 && nv[0] === 0;
 	}
 
-	public isAxialOblique(): boolean {
-		let nv = this.getNormalVector();
-		return nv[0] === 0 && nv[1] !== 0 && nv[2] !== 0;
+	public coordinatePixelToVoxel(x, y): Point3 {
+
+		let vx = vec3.scale( vec3.create(), this.xAxis, x / vec3.length( this.xAxis ) );
+		let vy = vec3.scale( vec3.create(), this.yAxis, y / vec3.length( this.yAxis ) );
+
+		let p = vec3.clone( this.origin );
+		vec3.add(p, p, vx);
+		vec3.add(p, p, vy);
+
+		return p;
 	}
 
-	public isCoronalOblique(): boolean {
-		let nv = this.getNormalVector();
-		return nv[1] === 0 && nv[2] !== 0 && nv[0] !== 0;
-	}
+	public coordinateVoxelToPixel( x: number, y: number, z: number ): Point3 {
 
-	public isSagittalOblique(): boolean {
-		let nv = this.getNormalVector();
-		return nv[2] === 0 && nv[0] !== 0 && nv[1] !== 0;
+		let p0 = vec3.fromValues(x, y, z);
+		let p1 = vec3.subtract(vec3.create(), p0, this.origin);
+
+		let ux = vec3.normalize( vec3.create(), this.xAxis ),
+			uy = vec3.normalize( vec3.create(), this.yAxis );
+
+		let vx = vec3.dot( p1, ux );
+		let vy = vec3.dot( p1, uy );
+		let vz = vec3.dot( p1, this.getNormalVector() );
+		return [
+			vx * this.zoom,
+			vy * this.zoom,
+			vz * this.zoom
+		];
+	}
+	
+	public change(){
+		this.emit('change');
 	}
 
 	public transrate(x: number, y: number, z: number): void {
 		let transMatrix = mat4.create();
 		mat4.translate(transMatrix, mat4.create(), vec3.fromValues(x, y, z));
-		this.cOrigin = vec3.transformMat4(vec3.create(), this.cOrigin, transMatrix);
+		vec3.transformMat4(this.origin, this.origin, transMatrix);
+		
+		this.change();
 	}
-
+	
 	public scale(scale: number, centralPoint?: Point3): void {
 		this.zoom = this.zoom / scale;
 
@@ -229,17 +143,18 @@ export class VolumeViewState {
 			t => mat4.translate( mat4.create(), t, centralPoint )
 		].reverse().reduce( (p, t) => t(p), mat4.create() );
 
-		let origin = this.getOrigin();
-		let xEndPoint = vec3.add( vec3.create(), this.getVectorX(), this.getOrigin() );
-		let yEndPoint = vec3.add( vec3.create(), this.getVectorY(), this.getOrigin() );
+		let xEndPoint = vec3.add( vec3.create(), this.xAxis, this.origin );
+		let yEndPoint = vec3.add( vec3.create(), this.yAxis, this.origin );
 
-		let [ rOrigin, rXEndPoint, rYEndPoint ] = [ origin, xEndPoint, yEndPoint ].map(
+		let [ rOrigin, rXEndPoint, rYEndPoint ] = [ this.origin, xEndPoint, yEndPoint ].map(
 			p => vec3.transformMat4( vec3.create(), p, operation )
 		);
 
-		this.cOrigin = rOrigin;
-		this.cX = vec3.subtract( vec3.create(), rXEndPoint, rOrigin );
-		this.cY = vec3.subtract( vec3.create(), rYEndPoint, rOrigin );
+		this.origin = rOrigin;
+		this.xAxis = vec3.subtract( vec3.create(), rXEndPoint, rOrigin );
+		this.yAxis = vec3.subtract( vec3.create(), rYEndPoint, rOrigin );
+		
+		this.change();
 	}
 
 	/**
@@ -249,27 +164,28 @@ export class VolumeViewState {
 	 */
 	public rotate(deg: number, axis: Vector3, centralPoint?: Vector3) {
 
-		let radian = Math.PI / 180.0 * deg;
 		if (typeof centralPoint === 'undefined' || centralPoint === null)
 			centralPoint = this.getCenter();
 
-		let operation = [
-			t => mat4.translate( mat4.create(), t, vec3.scale( vec3.create(), centralPoint, -1) ),
-			t => mat4.rotate( mat4.create(), t, radian, axis ),
-			t => mat4.translate( mat4.create(), t, centralPoint )
-		].reverse().reduce((p, t) => t(p), mat4.create());
+		let radian = Math.PI / 180.0 * deg;
 
-		let origin = this.getOrigin();
-		let xEndPoint = vec3.add(vec3.create(), this.getVectorX(), this.getOrigin());
-		let yEndPoint = vec3.add(vec3.create(), this.getVectorY(), this.getOrigin());
+		let operation = mat4.create();
+		mat4.translate( operation, operation, centralPoint )
+		mat4.rotate( operation, operation, radian, axis ),
+		mat4.translate( operation, operation, vec3.scale( vec3.create(), centralPoint, -1) );
 
-		let [ rOrigin, rXEndPoint, rYEndPoint ] = [ origin, xEndPoint, yEndPoint ].map(
+		let xEndPoint = vec3.add(vec3.create(), this.xAxis, this.origin);
+		let yEndPoint = vec3.add(vec3.create(), this.yAxis, this.origin);
+
+		let [ rOrigin, rXEndPoint, rYEndPoint ] = [ this.origin, xEndPoint, yEndPoint ].map(
 			p => vec3.transformMat4(vec3.create(), p, operation)
 		);
 
-		this.cOrigin = rOrigin;
-		this.cX = vec3.subtract(vec3.create(), rXEndPoint, rOrigin);
-		this.cY = vec3.subtract(vec3.create(), rYEndPoint, rOrigin);
+		this.origin = rOrigin;
+		vec3.subtract(this.xAxis, rXEndPoint, rOrigin);
+		vec3.subtract(this.yAxis, rYEndPoint, rOrigin);
+
+		this.change();
 	}
 
 	/**

@@ -41,7 +41,7 @@ export class BucketTool extends Tool {
 		}
 
 		//------------------
-		let vs: VolumeViewState = v.getVolumeViewState();
+		let vs: VolumeViewState = v.getViewState();
 		let currentVoxel: number[] = vs.coordinatePixelToVoxel(
 			viewerEvent.canvasX,
 			viewerEvent.canvasY);
@@ -59,7 +59,7 @@ export class BucketTool extends Tool {
 			this.fillMap[i] = new Array(canvas.y);
 		}
 
-		console.log("fill");
+		console.log("bucket fill");
 		//init buffer
 		this.checkBuffer = [];
 		this.checkBuffer[this.checkBuffer.length] = [currentInspectCoordinate[0], currentInspectCoordinate[1]];

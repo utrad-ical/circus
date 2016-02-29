@@ -65,6 +65,8 @@ export class PenTool extends Tool {
 		if(!this.hitTest(event)) {
 			return true;
 		}
+		//update min and max
+		this.currentVoxelCloud.updateMinAndMax();
 		this.isDragging = false;
 		// this.pendown = false;
 		/*
@@ -84,7 +86,7 @@ export class PenTool extends Tool {
 			return true;
 		}
 
-		let vs = viewerEvent.viewer.getVolumeViewState();
+		let vs = viewerEvent.viewer.getViewState();
 		// //save start voxel
 		let currentVoxel = vs.coordinatePixelToVoxel(viewerEvent.canvasX, viewerEvent.canvasY);
 		this.previousVoxel = [
@@ -113,8 +115,10 @@ export class PenTool extends Tool {
 			let voxelCoordinate = vs.coordinatePixelToVoxel(viewerEvent.canvasX, viewerEvent.canvasY);
 			this.currentVoxelCloud = <VoxelCloudAnnotation>voxAno;//save target voxelAnnotation
 			this.currentVoxelCloud.addVoxel(voxelCoordinate);
+			this.currentVoxelCloud.drawingCoordinates[this.currentVoxelCloud.drawingCoordinates.length] = voxelCoordinate;
 			//re-draw
-			this.currentVoxelCloud.draw(viewerEvent.original.target, vs);
+			// this.currentVoxelCloud.draw(viewerEvent.original.target, vs);
+			viewerEvent.viewer.render();
 			return false;
 		} else {//do nothing...
 			// let newVoxelCloud = new VoxelCloudAnnotation([512, 512, 128], [voxelCoordinate], [0, 255, 0, 1.0]);
@@ -139,7 +143,7 @@ export class PenTool extends Tool {
 		} )
 		*/
 		//=====================================
-		let vs = viewerEvent.viewer.getVolumeViewState();
+		let vs = viewerEvent.viewer.getViewState();
 		//get current voxel coordinate
 		let currentVoxel = vs.coordinatePixelToVoxel(viewerEvent.canvasX, viewerEvent.canvasY);
 		currentVoxel = [//round to integer
@@ -161,6 +165,7 @@ export class PenTool extends Tool {
 			currentCoordinate[0] = this.previousVoxel[0] + microStepX * i;
 			currentCoordinate[1] = this.previousVoxel[1] + microStepY * i;
 			currentCoordinate[2] = this.previousVoxel[2] + microStepZ * i;
+			this.currentVoxelCloud.drawingCoordinates[this.currentVoxelCloud.drawingCoordinates.length] = currentCoordinate;
 			this.currentVoxelCloud.addVoxel(currentCoordinate);
 		}
 		this.previousVoxel = currentVoxel;//set to current voxel

@@ -32,9 +32,9 @@ export class ControlRotateAnnotation extends Annotation {
 		this.on( 'mousewheel', ( ev )=> {
 			if(	ev.original && ev.original.deltaY != 0 ){
 				if( ev.original.deltaY > 0 ){
-					ev.viewer.getVolumeViewState().rotate(5, [dx, dy, dz]);
+					ev.viewer.getViewState().rotate(5, [dx, dy, dz]);
 				}else{
-					ev.viewer.getVolumeViewState().rotate(-5, [dx, dy, dz]);
+					ev.viewer.getViewState().rotate(-5, [dx, dy, dz]);
 				}
 				ev.viewer.render();
 			}
@@ -75,9 +75,9 @@ export class ControlRotateAnnotation extends Annotation {
 		}
 		if(	viewerEvent.original && viewerEvent.original.deltaY != 0 ){
 			if( viewerEvent.original.deltaY > 0 ){
-				viewerEvent.viewer.getVolumeViewState().rotate(5, [this.dxyz[0], this.dxyz[1], this.dxyz[2]]);
+				viewerEvent.viewer.getViewState().rotate(5, [this.dxyz[0], this.dxyz[1], this.dxyz[2]]);
 			}else{
-				viewerEvent.viewer.getVolumeViewState().rotate(-5, [this.dxyz[0], this.dxyz[1], this.dxyz[2]]);
+				viewerEvent.viewer.getViewState().rotate(-5, [this.dxyz[0], this.dxyz[1], this.dxyz[2]]);
 			}
 			viewerEvent.viewer.render();
 		}

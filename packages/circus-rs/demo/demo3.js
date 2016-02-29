@@ -1,110 +1,15 @@
-$(function(){
-	var save = JSON.parse(localStorage.getItem('rs-demo1-save'));
-	if (save) {
-		$('#series').val(save.series);
-		$('#server').val(save.server);
-	}
-	
-	var r = initializeViewer();
-	var viewer = r.viewer;
-	var state = r.state;
-	var stateViewer = r.stateViewer;
-	
-	$('#window-level').change( function(){
-		state.windowLevel = parseInt( $(this).val() );
-		state.change();
-	} );
-	$('#window-width').change( function(){
-		state.windowWidth = parseInt( $(this).val() );
-		state.change();
-	} );
-	
-	$('#scale').change( function(){
-		state.scale( state.zoom * Math.pow( 1.1, $(this).val() ) );
-	} );
-	$('#origin-x').change( function(){
-		state.origin[0] = parseInt( $(this).val() );
-		state.change();
-	} );
-	$('#origin-y').change( function(){
-		state.origin[1] = parseInt( $(this).val() );
-		state.change();
-	} );
-	$('#origin-z').change( function(){
-		state.origin[2] = parseInt( $(this).val() );
-		state.change();
-	} );
-	
-	state.on('change', function(){
-		stateViewer.render();
-		viewer.render();
-		
-		$('#window-level').val( this.windowLevel );
-		$('#window-width').val( this.windowWidth );
-		
-		/*
-		var scale = -10;
-		while( this.zoom < Math.pow(1.1, scale) ){
-			scale++;
-		}
-		$('#scale').val( scale );
-		*/
-		$('#origin-x').val( this.origin[0] );
-		$('#origin-y').val( this.origin[1] );
-		$('#origin-z').val( this.origin[2] );
-	});
-	state.change();
-	
-	
-	$('#start').click( function(){
-		var self = this;
-		var config = {
-			series: $('#series').val(),
-			server: $('#server').val()
-		};
-		localStorage.setItem('rs-demo1-save', JSON.stringify(config));
-		
-		$( self ).prop('disabled', true);
-		$( self ).text('Loading ... ');
-		loadImageSource( viewer, config ).then( function(){
-			$( self ).text('Load');
-			$( self ).prop('disabled', false);
-		} );
-	});
-	
-});
-
-function loadImageSource( viewer, config ){
-	/**
-	 * Prepare the image source you want to see realy
-	 */
-	
-	return new Promise( function( resolve, reject ){
-		var loader = new circusrs.RawDataLoader( {
-			server: config.server
-		} );
-		var imageSource = new circusrs.RawVolumeImageSource( loader );
-		imageSource.setSeries( config.series );
-		imageSource.load();
-		imageSource.once('loaded', function(vol){
-			viewer.setImageSource( imageSource );
-			viewer.render();
-			resolve();
-		});
-	} );
-}
-
-function initializeViewer() {
+$( function(){
 
 	/**
 	 * You can use other image source while loading, if know the size.
 	 */
-	// Prepare image source
-	var dummyImageSource = new circusrs.MockImageSource({
+	 var imageSourceSize = {
 		width: 512,
 		height: 512,
 		depth: 419
-	});
+	};
+	// Prepare image source
+	var dummyImageSource = new circusrs.MockImageSource(imageSourceSize);
 	// Prepare viewer
 	var dim = dummyImageSource.getDimension();
 	var canvas = document.getElementById('rs-canvas');
@@ -114,13 +19,21 @@ function initializeViewer() {
 	// Prepare view state
 	var viewState = new circusrs.VolumeViewState(
 		[ canvas.getAttribute('width'), canvas.getAttribute('height')], // canvasSize,
-		[0,0, 186], // cOrigin
+		[0, 0, 0], // cOrigin
 		[ dim[0], 0, 0 ],// cX
 		[ 0, dim[1], 0 ], // cY
 		138, // windowLevel
 		2277 // windowWidth
 	);
 	viewer.setVolumeViewState( viewState );
+
+	// Prepare annotations
+	var annotationCollection = viewer.getAnnotationCollection();
+
+	var voxelCloudAnnotation = createDummyVoxelAnnotation(imageSourceSize);
+	annotationCollection.append( voxelCloudAnnotation );
+
+	// first render
 	viewer.render();
 
 	/**
@@ -131,7 +44,6 @@ function initializeViewer() {
 	var viewStateCanvasSize = [ viewStateCanvas.getAttribute('width'), viewStateCanvas.getAttribute('height')]
 	var stateViewer = new circusrs.Viewer( viewStateCanvas );
 	stateViewer.setImageSource( stateImageSource );
-	
 	// Attention: the same view state
 	stateViewer.setVolumeViewState( viewState );
 
@@ -168,11 +80,23 @@ function initializeViewer() {
 	) );
 	stateViewer.render();
 
-	return {
-		viewer: viewer,
-		stateViewer: stateViewer,
-		state: viewState
-	};
+	// Sync rendering.
+	stateViewer.on('render',function( e ){
+		viewer.render();
+	});
+
+});
+function createDummyVoxelAnnotation(size){
+
+	var volume = [];
+	for( var x = 0; x<99; x++){
+	for( var y = 0; y<99; y++){
+	for( var z = 0; z<99; z++){
+		if (Math.sqrt(x*x + y*y + z*z) > 50) {
+			volume[volume.length] = [x,y,z];
+		}
+	}}}
+	return new circusrs.VoxelCloudAnnotation(volume, [255, 0, 0, 0.5], [size.width, size.height, size.depth]);
 }
 
 circusrs.MockImageSource.prototype.load = function(){};

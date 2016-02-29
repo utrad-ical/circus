@@ -22,7 +22,7 @@ export class PointSprite extends Sprite {
 		let ctx = event.original.target.getContext('2d');
 		ctx.beginPath();
 		ctx.strokeStyle = "rgba(0,0,0,0)";
-		let centerCircle = event.viewer.getVolumeViewState().coordinateVoxelToPixel(
+		let centerCircle = event.viewer.getViewState().coordinateVoxelToPixel(
 			this.parent.getCenter()[0],
 			this.parent.getCenter()[1],
 			this.parent.getCenter()[2]);
@@ -100,7 +100,7 @@ export class PointSprite extends Sprite {
 		} else{//change circle
 			//calc radius
 			let centerVoxel = this.parent.getCenter();
-			let centerPixel = v.getVolumeViewState().coordinateVoxelToPixel(centerVoxel[0], centerVoxel[1], centerVoxel[2]);
+			let centerPixel = v.getViewState().coordinateVoxelToPixel(centerVoxel[0], centerVoxel[1], centerVoxel[2]);
 			let diffX = Math.abs(centerPixel[0] - viewerEvent.canvasX);
 			let diffY = Math.abs(centerPixel[1] - viewerEvent.canvasY);
 			let radius2 = diffX * diffX + diffY * diffY;

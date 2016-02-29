@@ -32,9 +32,9 @@ export class ControlScaleAnnotation extends Annotation {
 		this.on( 'mousewheel', ( ev )=> {
 			if(	ev.original && ev.original.deltaY != 0 ){
 				if( ev.original.deltaY > 0 ){
-					ev.viewer.getVolumeViewState().scale( scale );
+					ev.viewer.getViewState().scale( scale );
 				}else{
-					ev.viewer.getVolumeViewState().scale( 1.0 / scale );
+					ev.viewer.getViewState().scale( 1.0 / scale );
 				}
 				ev.viewer.render();
 			}
@@ -75,9 +75,9 @@ export class ControlScaleAnnotation extends Annotation {
 		}
 		if(	viewerEvent.original && viewerEvent.original.deltaY != 0 ){
 			if( viewerEvent.original.deltaY > 0 ){
-				viewerEvent.viewer.getVolumeViewState().scale( this.scale );
+				viewerEvent.viewer.getViewState().scale( this.scale );
 			}else{
-				viewerEvent.viewer.getVolumeViewState().scale( 1.0 / this.scale );
+				viewerEvent.viewer.getViewState().scale( 1.0 / this.scale );
 			}
 			viewerEvent.viewer.render();
 		}

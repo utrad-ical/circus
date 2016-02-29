@@ -23,7 +23,6 @@ export class ToolSprite extends Sprite {
 		if(!this.hitTest(viewerEvent)) {
 			return true;
 		}
-		console.log("hit");
 		//set background event capture
 		viewerEvent.viewer.clearBackgroundEventCapture();
 		viewerEvent.original.target.style.cursor = this.parent.cursor;

@@ -27,14 +27,30 @@ export class HandTool extends Tool {
 		if(!this.isDragging) {
 			return true;
 		}
-		let vs = viewerEvent.viewer.getVolumeViewState();
+		let vs = viewerEvent.viewer.getViewState();
 		let distanceX = this.previousPoint[0] - viewerEvent.canvasX;
 		let distanceY = this.previousPoint[1] - viewerEvent.canvasY;
 		//update previous point
 		this.previousPoint[0] = viewerEvent.canvasX;
 		this.previousPoint[1] = viewerEvent.canvasY;
 
-		vs.transrate(distanceX, distanceY, 0);
+		switch (true) {
+			case vs.isAxial():
+				// console.log("ax");
+				vs.transrate(distanceX, distanceY, 0);
+				break;
+			case vs.isSagittal()://not correct
+				// console.log("sg");
+				vs.transrate(distanceX, 0, distanceY);
+				break;
+			case vs.isCoronal()://not correct
+				// console.log("co");
+				vs.transrate(0, -1 * distanceX, distanceY);
+				break;
+			default:
+				// code...
+				break;
+		}
 		viewerEvent.viewer.render();
 		return false;
 	}
@@ -42,11 +58,23 @@ export class HandTool extends Tool {
 		if(this.isDragging) {//don't translate while dragging
 			return false;
 		}
-		let vs = viewerEvent.viewer.getVolumeViewState();
+		let vs = viewerEvent.viewer.getViewState();
 		if(viewerEvent.original.deltaY > 0) {
-			vs.transrate(0, 0, -1);
+			if(vs.isAxial()) {
+				vs.transrate(0, 0, -1);
+			} else if(vs.isCoronal()) {
+				vs.transrate(-1, 0, 0);//sag
+			} else {
+				vs.transrate(0, -1, 0);//sag
+			}
 		} else {
-			vs.transrate(0, 0, 1);
+			if(vs.isAxial()) {
+				vs.transrate(0, 0, 1);
+			} else if(vs.isCoronal()) {
+				vs.transrate(1, 0, 0);//sag
+			} else {
+				vs.transrate(0, 1, 0);//col
+			}
 		}
 		viewerEvent.viewer.render();
 		return false;

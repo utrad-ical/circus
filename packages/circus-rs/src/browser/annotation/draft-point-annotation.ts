@@ -64,7 +64,7 @@ export class PointAnnotation extends Annotation {
 		this.dragMode = mode;
 	}
 	public setCenterOffset(viewerEvent: ViewerEvent): void{
-		let vs = viewerEvent.viewer.getVolumeViewState();
+		let vs = viewerEvent.viewer.getViewState();
 		let currentCenterPixel: number[] = vs.coordinateVoxelToPixel(
 			this.center[0],
 			this.center[1],
@@ -135,7 +135,7 @@ export class PointAnnotation extends Annotation {
 	}
 	public dragPoint(viewerEvent: ViewerEvent): void{
 		let v = viewerEvent.viewer;
-		let currentVoxel = v.getVolumeViewState().coordinatePixelToVoxel(
+		let currentVoxel = v.getViewState().coordinatePixelToVoxel(
 			viewerEvent.canvasX - this.centerOffset[0],
 			viewerEvent.canvasY - this.centerOffset[1]);
 		this.setCenter(currentVoxel);

@@ -11,7 +11,9 @@ html(lang="ja")
 		title package.name
 	body
 		h1 CIRCUS-RS DEMO
-		ul
+		div バケツは未完。
+		div ペンツールで既存のアノテーションに追加する場合は右のアノテーションリストから cloud_volume をクリックしてから書き込めます。<br/>新たな volumeCloud を追加するには色を指定して add voxAnno ボタンを押す。
+		// ul
 			li
 				label
 					input(type="radio",name="tool",value="dot",checked="checked")
@@ -59,5 +61,17 @@ html(lang="ja")
 						ul#point_list
 			div
 				canvas#view-state-canvas(width=512,height=512)
-		div
-			img(src="./hand.png")
+		div.flex
+			div
+				div.flex
+					div
+						canvas#rs-canvas2(width=512,height=512)
+			div
+				canvas#view-state-canvas2(width=512,height=512)
+		div.flex
+			div
+				div.flex
+					div
+						canvas#rs-canvas3(width=512,height=512)
+			div
+				canvas#view-state-canvas3(width=512,height=512)

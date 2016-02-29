@@ -3,6 +3,7 @@
 import { Painter } from './painter-interface';
 import { Composition } from './composition';
 import { Sprite } from './sprite';
+import { ToolSprite } from './annotation/draft-tool-sprite';
 import { ImageSource } from './image-source';
 import { AnnotationCollection } from './annotation-collection';
 import { ViewerEvent } from './viewer-event';
@@ -20,17 +21,20 @@ export class Viewer extends EventEmitter {
 	private imageSource: ImageSource;
 	private annotationCollection: AnnotationCollection;
 	private spriteCollection: Sprite[];
+	private toolSpriteCollection: Sprite[] = [];
 
 	private primaryEventCapture;
 	private backgroundEventCapture;
 
-	constructor(canvas: HTMLCanvasElement) {
+	constructor(canvas: HTMLCanvasElement, composition?: Composition) {
 		super();
 
 		let self = this;
 		self.canvasDomElement = canvas;
 		self.spriteCollection = [];
 		self.composition = null;
+
+		this.composition = composition || new Composition();
 
 		var eventDrive = ( originalEvent ) => {
 			self.canvasEventHandler( originalEvent );
@@ -47,9 +51,6 @@ export class Viewer extends EventEmitter {
 	}
 
 	public getComposition(): Composition {
-		if( this.composition === null ){
-			this.composition = new Composition();
-		}
 		return this.composition;
 	}
 	public setImageSource( imageSource: ImageSource ): void {
@@ -68,7 +69,7 @@ export class Viewer extends EventEmitter {
 		// viewState.emit('binded',this);
 		this.viewState = viewState;
 	}
-	public getVolumeViewState() : VolumeViewState {
+	public getViewState() : VolumeViewState {
 		return this.viewState;
 	}
 	public setPrimaryEventCapture( capture: ViewerEventCapture ): void {
@@ -86,6 +87,9 @@ export class Viewer extends EventEmitter {
 	public clearBackgroundEventCapture(): void {
 		// if( this.backgroundEventCapture ) this.backgroundEventCapture.emit('some signal ?');
 		this.backgroundEventCapture = null;
+	}
+	public appendToolSprite(sprite){
+		this.toolSpriteCollection.push(sprite);
 	}
 
 	private canvasEventHandler( originalEvent ){
@@ -114,9 +118,15 @@ export class Viewer extends EventEmitter {
 		}
 
 		var event = new ViewerEvent( this, eventType, originalEvent );
-		
+
 		if( this.primaryEventCapture && ! this.primaryEventCapture[handler]( event ) )
 			return;
+
+		for (var i = 0; i < this.toolSpriteCollection.length; ++i) {
+			if(!(this.toolSpriteCollection[i])[handler](event)) {
+				return;
+			}
+		}
 
 		for( var i = this.spriteCollection.length; i > 0; i-- ){
 			if( ! (this.spriteCollection[i-1])[handler]( event ) )
@@ -135,8 +145,13 @@ export class Viewer extends EventEmitter {
 	}
 
 	public drawBy( painter: Painter ): void {
+		painter.draw( this.canvasDomElement, this.viewState );
 		var sprite = painter.draw( this.canvasDomElement, this.viewState );
-		if( sprite !== null ) this.spriteCollection.push( sprite );
+		if( sprite){
+			if(!(sprite instanceof ToolSprite)) {
+				this.spriteCollection.push( sprite );
+			}
+		}
 	}
 
 	public render(): Promise<any> {

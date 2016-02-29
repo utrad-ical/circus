@@ -23,10 +23,12 @@ export default class RawDataLoader {
 			let pixelFormat: PixelFormat = meta.pixelFormat;
 			volume.setDimension(meta.voxelCount[0], meta.voxelCount[1], meta.voxelCount[2], pixelFormat);
 			volume.setVoxelDimension(meta.voxelSize[0], meta.voxelSize[1], meta.voxelSize[2]);
-			volume.dcm_wl = meta.window_level_dicom;
-			volume.dcm_ww = meta.window_width_dicom;
-			let bytesPerSlice = meta.x * meta.y * pixelFormatInfo(pixelFormat).bpp;
-			for (let i = 0; i < meta.z; i++) {
+			volume.dcm_wl = meta.dicomWindow.level;
+			volume.dcm_ww = meta.dicomWindow.width;
+			volume.wl = meta.estimatedWindow.level;
+			volume.ww = meta.estimatedWindow.width;
+			let bytesPerSlice = meta.voxelCount[0] * meta.voxelCount[1] * pixelFormatInfo(pixelFormat).bpp;
+			for (let i = 0; i < meta.voxelCount[2]; i++) {
 				volume.insertSingleImage(i, buffer.slice(bytesPerSlice * i, bytesPerSlice * (i+1)));
 			}
 			return volume;

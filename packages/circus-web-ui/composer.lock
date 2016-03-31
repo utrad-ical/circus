@@ -4,7 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "98d2adc34691b333e0230db852343a53",
+    "hash": "cffd38a5f6df9710e97f3e0b0a83ba3c",
+    "content-hash": "dd1c04fa50d5727a397a63f3dfa9c202",
     "packages": [
         {
             "name": "classpreloader/classpreloader",
@@ -1529,12 +1530,12 @@
             "target-dir": "Symfony/Component/Routing",
             "source": {
                 "type": "git",
-                "url": "https://github.com/symfony/Routing.git",
+                "url": "https://github.com/symfony/routing.git",
                 "reference": "46142c34ea830f47429df6e15faec3a33292d618"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/Routing/zipball/46142c34ea830f47429df6e15faec3a33292d618",
+                "url": "https://api.github.com/repos/symfony/routing/zipball/46142c34ea830f47429df6e15faec3a33292d618",
                 "reference": "46142c34ea830f47429df6e15faec3a33292d618",
                 "shasum": ""
             },
@@ -1716,12 +1717,12 @@
             "source": {
                 "type": "git",
                 "url": "https://bitbucket.org/ical/circus_rs_dicom_server.git",
-                "reference": "841e224974f35bbcc328eea195dc55122292b68f"
+                "reference": "26e71b3da2a63f2f0cf4b2955db8dcadb5c92893"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://bitbucket.org/ical/circus_rs_dicom_server/get/841e224974f35bbcc328eea195dc55122292b68f.zip",
-                "reference": "841e224974f35bbcc328eea195dc55122292b68f",
+                "url": "https://bitbucket.org/ical/circus_rs_dicom_server/get/6c018e5e8c27d71f23ee46c4e08dff948ee2b60d.zip",
+                "reference": "26e71b3da2a63f2f0cf4b2955db8dcadb5c92893",
                 "shasum": ""
             },
             "type": "library",
@@ -1742,7 +1743,7 @@
             "keywords": [
                 "DICOM"
             ],
-            "time": "2015-10-29 06:50:52"
+            "time": "2016-03-31 03:20:32"
         }
     ],
     "packages-dev": [

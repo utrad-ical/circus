@@ -1,8 +1,6 @@
 @extends('common.layout')
 
 @section('head')
-{{HTML::style('css/jquery-ui.css')}}
-{{HTML::style('css/jquery.flexforms.css')}}
 <style>
 	.badge {
 		border: 1px solid silver;

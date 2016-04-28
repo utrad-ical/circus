@@ -1,9 +1,6 @@
 @extends('common.layout')
 
 @section('head')
-{{HTML::style('css/jquery-ui.css')}}
-{{HTML::style('css/jquery.flexforms.css')}}
-
 {{HTML::script('js/jquery-ui.min.js')}}
 {{HTML::script('js/jquery.multiselect.min.js')}}
 {{HTML::script('js/jquery.formserializer.js')}}
@@ -293,7 +290,7 @@
 
 @section('content')
 <div class="search_form_wrap">
-	<h2 class="con_ttl">Search Condition</h2>
+	<h2 class="subsection_title">Search Condition</h2>
 	<div id="search_condition_outer">
 		{{Form::open(['url' => asset('$prefix/search'), 'method' => 'POST', 'class' => 'common_form', 'id' => 'form_case_search'])}}
 			{{Form::hidden('search_mode', isset($inputs['search_mode']) ? $inputs['search_mode'] : 0, array('id' => 'search_mode'))}}
@@ -390,7 +387,7 @@
 </div>
 {{Form::open(['url' => asset('transfer'), 'method' => 'post', 'id' => 'frmDownload'])}}
 {{Form::close()}}
-<span id="export_err" class="font_red"></span>
+<span id="export_err" class="text_error"></span>
 <div id="messages"></div>
 <div class="search_result pad_tb_5" id="result_case_list">
 @include('case.case')

@@ -1,7 +1,6 @@
 @extends('common.layout')
 
 @section('head')
-{{HTML::style('css/jquery-ui.css')}}
 {{HTML::script('js/jquery-ui.min.js')}}
 {{HTML::script('js/jquery.formserializer.js')}}
 {{HTML::script('js/jquery.multiselect.min.js')}}
@@ -14,7 +13,7 @@ Import Data
 
 @section('content')
 <div class="search_form_wrap mar_b_20">
-	<h2 class="con_ttl">Import</h2>
+	<h2 class="subsection_title">Import</h2>
 	{{Form::open(array('url' => asset('share/register'), 'method' => 'post', 'files' => true, 'id' => 'frm_import'))}}
 		<table class="common_table">
 			<tr>

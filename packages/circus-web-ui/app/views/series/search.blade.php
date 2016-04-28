@@ -2,7 +2,6 @@
 
 @if(Auth::user()->isAccessibleSeries())
 @section('head')
-{{HTML::style('css/jquery-ui.css')}}
 {{HTML::script('js/jquery.cookie.js')}}
 <script>
 	$(function() {
@@ -161,7 +160,7 @@ showMessage("{{{$error_msg}}}", true);
 		{{HTML::link(asset('series/import'), 'Series Import', array('class' => 'common_btn'))}}
 	</div>
 	<div class="search_form_wrap">
-		<h2 class="con_ttl">Search Condition</h2>
+		<h2 class="subsection_title">Search Condition</h2>
 		<table class="common_table al_l mar_b_10">
 			<colgroup>
 				<col width="25%">

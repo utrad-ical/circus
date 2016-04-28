@@ -1,95 +1,46 @@
 'use strict';
 
 import { Painter } from './painter-interface';
-import { Composition } from './composition';
 import { Sprite } from './sprite';
-import { ToolSprite } from './annotation/draft-tool-sprite';
 import { ImageSource } from './image-source';
-import { AnnotationCollection } from './annotation-collection';
 import { ViewerEvent } from './viewer-event';
-import { VolumeViewState } from './volume-view-state';
-import { ViewerEventCapture } from './viewer-event-capture-interface';
+import { ViewerEventTarget } from './viewer-event-target';
 
 import { EventEmitter } from 'events';
 
 export class Viewer extends EventEmitter {
 
-	private canvasDomElement: HTMLCanvasElement;
-	private composition: Composition;
+	public canvasDomElement: HTMLCanvasElement;
 
-	private viewState: VolumeViewState;
-	private imageSource: ImageSource;
-	private annotationCollection: AnnotationCollection;
-	private spriteCollection: Sprite[];
-	private toolSpriteCollection: Sprite[] = [];
+	public viewState: any;
+	public imageSource: ImageSource;
+	public painters: any[];
+	public sprites: Sprite[];
 
-	private primaryEventCapture;
-	private backgroundEventCapture;
+	public primaryEventTarget;
+	public backgroundEventTarget;
+	
+	private loading: boolean;
+	private queue: RenderQueue;
 
-	constructor(canvas: HTMLCanvasElement, composition?: Composition) {
+	constructor( canvas: HTMLCanvasElement ) {
 		super();
 
-		let self = this;
-		self.canvasDomElement = canvas;
-		self.spriteCollection = [];
-		self.composition = null;
+		this.canvasDomElement = canvas;
+		this.painters = [];
+		this.sprites = [];
 
-		this.composition = composition || new Composition();
-
-		var eventDrive = ( originalEvent ) => {
-			self.canvasEventHandler( originalEvent );
+		let eventDrive = ( originalEvent ) => {
+			this.canvasEventHandler( originalEvent );
 		};
-		var wheelEvent = 'onwheel' in document ? 'wheel' : 'onmousewheel' in document ? 'mousewheel' : 'DOMMouseScroll';
-
+		
+		let wheelEvent = 'onwheel' in document ? 'wheel' : 'onmousewheel' in document ? 'mousewheel' : 'DOMMouseScroll';
 		canvas.addEventListener('mousedown', eventDrive);
 		canvas.addEventListener('mouseup', eventDrive);
 		canvas.addEventListener('mousemove', eventDrive);
 		canvas.addEventListener( wheelEvent, eventDrive);
-	}
-	private getViewerEvent( type, domEvent ){
-		return new ViewerEvent( this, type, domEvent );
-	}
-
-	public getComposition(): Composition {
-		return this.composition;
-	}
-	public setImageSource( imageSource: ImageSource ): void {
-		this.getComposition().setImageSource( imageSource );
-	}
-	public getImageSource(): ImageSource {
-		return this.getComposition().getImageSource();
-	}
-	public getAnnotationCollection(): AnnotationCollection {
-		return this.getComposition().getAnnotationCollection();
-	}
-	public setAnnotationCollection( annotationCollection ): void {
-		this.getComposition().setAnnotationCollection( annotationCollection );
-	}
-	public setVolumeViewState( viewState ) {
-		// viewState.emit('binded',this);
-		this.viewState = viewState;
-	}
-	public getViewState() : VolumeViewState {
-		return this.viewState;
-	}
-	public setPrimaryEventCapture( capture: ViewerEventCapture ): void {
-		// if( this.primaryEventCapture ) this.primaryEventCapture.emit('some signal ?');
-		this.primaryEventCapture = capture;
-	}
-	public clearPrimaryEventCapture(): void {
-		// if( this.primaryEventCapture ) this.primaryEventCapture.emit('some signal ?');
-		this.primaryEventCapture = null;
-	}
-	public setBackgroundEventCapture( capture: ViewerEventCapture): void {
-		// if( this.backgroundEventCapture ) this.backgroundEventCapture.emit('some signal ?');
-		this.backgroundEventCapture = capture;
-	}
-	public clearBackgroundEventCapture(): void {
-		// if( this.backgroundEventCapture ) this.backgroundEventCapture.emit('some signal ?');
-		this.backgroundEventCapture = null;
-	}
-	public appendToolSprite(sprite){
-		this.toolSpriteCollection.push(sprite);
+		
+		this.queue = new RenderQueue();
 	}
 
 	private canvasEventHandler( originalEvent ){
@@ -97,43 +48,25 @@ export class Viewer extends EventEmitter {
 			originalEvent.preventDefault();
 		}
 
-		var eventType = originalEvent.type;
-		let handler;
+		let eventType = originalEvent.type;
 		switch( eventType ){
 			case 'mousemove':
-				handler = 'mousemoveHandler';
-				break;
 			case 'mouseup':
-				handler = 'mouseupHandler';
-				break;
 			case 'mousedown':
-				handler = 'mousedownHandler';
 				break;
 			case 'wheel':
 			case 'mousewheel':
 			case 'DOMMouseScroll':
 				eventType = 'mousewheel';
-				handler = 'mousewheelHandler';
 				break;
 		}
 
-		var event = new ViewerEvent( this, eventType, originalEvent );
-
-		if( this.primaryEventCapture && ! this.primaryEventCapture[handler]( event ) )
-			return;
-
-		for (var i = 0; i < this.toolSpriteCollection.length; ++i) {
-			if(!(this.toolSpriteCollection[i])[handler](event)) {
-				return;
-			}
+		let event = new ViewerEvent( this, eventType, originalEvent );
+		if( this.primaryEventTarget ) event.dispatch( this.primaryEventTarget );
+		for( let i = this.sprites.length; i > 0; i-- ){
+			event.dispatch( this.sprites[i-1] );
 		}
-
-		for( var i = this.spriteCollection.length; i > 0; i-- ){
-			if( ! (this.spriteCollection[i-1])[handler]( event ) )
-				return;
-		}
-		if( this.backgroundEventCapture && !this.backgroundEventCapture[handler]( event ) )
-			return;
+		if( this.backgroundEventTarget ) event.dispatch( this.backgroundEventTarget );
 	}
 
 	public clear(): void {
@@ -145,31 +78,72 @@ export class Viewer extends EventEmitter {
 	}
 
 	public drawBy( painter: Painter ): void {
-		painter.draw( this.canvasDomElement, this.viewState );
-		var sprite = painter.draw( this.canvasDomElement, this.viewState );
-		if( sprite){
-			if(!(sprite instanceof ToolSprite)) {
-				this.spriteCollection.push( sprite );
-			}
-		}
+		let sprite = painter.draw( this.canvasDomElement, this.viewState );
+		if(sprite) this.sprites.push( sprite );
 	}
 
 	public render(): Promise<any> {
-		let self = this;
 
-		self.spriteCollection = [];
-		self.clear();
+		return this.queue.add( () => {
+			
+			this.queue.waiting = true;
+			this.sprites = [];
+			
+			let promise = this.imageSource && this.imageSource.draw
+				? this.imageSource.draw( this.canvasDomElement, this.viewState )
+				: Promise.resolve();
+			
+			promise.then( () => {
+				this.painters.forEach( ( painter ) => {
+					let sprite = painter.draw( this.canvasDomElement, this.viewState );
+					if( sprite !== null ) this.sprites.push( sprite );
+				} );
+			} ).then( () => {
+				this.queue.waiting = false;
+			} );
+			
+			return promise;
+		} );
+	}
+}
 
-		return self.getImageSource().draw( self.canvasDomElement, self.viewState )
-		.then( function(){
-			var annotationCollection = self.getAnnotationCollection();
-			annotationCollection.forEach( function( painter ){
-				var sprite = painter.draw( self.canvasDomElement, self.viewState );
-				if( sprite !== null ) self.spriteCollection.push( sprite );
-			});
-		}).then( ()=>{
-			var event = new ViewerEvent( this, 'render' );
-			this.emit('render', event );
-		});
+class RenderQueue {
+	public waiting: boolean;
+	private lastId: number;
+	private currentId: number;
+	private queue: Function[];
+	private timer;
+	
+	constructor(){
+		this.lastId = 0;
+		this.currentId = 0;
+		this.queue = [];
+	}
+	public add( f ){
+		let id = ++this.lastId;
+		let job = new Promise( ( resolve, reject )=>{
+			this.queue.push( ()=>{
+				if( id === this.currentId ){
+					return f().then( ()=>resolve() );
+				}else if( id < this.currentId ){
+					reject('Rendering skipped');
+				}
+			} );
+		} );
+		this.next();
+		return job;
+	}
+	public next(){
+		if( this.waiting ){
+			if( ! this.timer ) this.timer = setInterval( () => this.next(), 20 );
+		}else{
+			this.currentId = this.lastId;
+			this.queue.forEach( (f) => { f() } );
+			this.queue = [];
+			if( this.timer ) {
+				clearInterval( this.timer );
+				this.timer = null;
+			}
+		}
 	}
 }

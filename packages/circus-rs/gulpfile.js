@@ -108,7 +108,7 @@ gulp.task('copy-dist-browser', ['dist-browser'], function() {
 /*
  * Build distribution package
  */
-gulp.task('dist-browser', ['typescript','dist-browser-iconfont'], function() {
+gulp.task('dist-browser', ['typescript','dist-browser-css'], function() {
 	// The 'standalone' option will create `window.circusrs.Viewer`
 	// on the browser.
 	return browserify({
@@ -122,6 +122,11 @@ gulp.task('dist-browser', ['typescript','dist-browser-iconfont'], function() {
 		.pipe(uglify())
 		.pipe(concat('circus-rs-client.min.js'))
 		.pipe(gulp.dest('dist'));
+});
+gulp.task('dist-browser-css', ['dist-browser-iconfont'], function() {
+	return gulp.src('src/browser/*.less')
+		.pipe(less())
+		.pipe(gulp.dest('dist/css'));
 });
 gulp.task('dist-browser-iconfont', function() {
 	return gulp.src('src/browser/assets/icons/*.svg')

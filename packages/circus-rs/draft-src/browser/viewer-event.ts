@@ -21,7 +21,7 @@ export class ViewerEvent {
 	}
 	public dispatch( element ){
 		let handler = this.type + 'Handler';
-		if( this.propagation && element && element[handler] && typeof element[handler] === 'function' ){
+		if( this.propagation && element[handler] && typeof element[handler] === 'function' ){
 			let retval = element[handler](this);
 			if( retval === false ) this.stopPropagation();
 		}

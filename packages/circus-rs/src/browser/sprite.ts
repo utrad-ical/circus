@@ -1,22 +1,11 @@
 'use strict';
 
-import { EventEmitter } from 'events';
 import { ViewerEvent } from './viewer-event';
-import { ViewerEventCapture } from './viewer-event-capture-interface'
+import { ViewerEventTarget } from './viewer-event-target'
 
-type Capturing = boolean;
-
-export class Sprite implements ViewerEventCapture {
-	public mouseupHandler(viewerEvent: ViewerEvent): Capturing {
-		return true;
-	}
-	public mousedownHandler(viewerEvent: ViewerEvent): Capturing {
-		return true;
-	}
-	public mousemoveHandler(viewerEvent: ViewerEvent): Capturing {
-		return true;
-	}
-	public mousewheelHandler(viewerEvent: ViewerEvent): Capturing {
-		return true;
-	}
+export class Sprite implements ViewerEventTarget {
+	public mouseupHandler(viewerEvent: ViewerEvent) {}
+	public mousedownHandler(viewerEvent: ViewerEvent) {}
+	public mousemoveHandler(viewerEvent: ViewerEvent) {}
+	public mousewheelHandler(viewerEvent: ViewerEvent) {}
 }

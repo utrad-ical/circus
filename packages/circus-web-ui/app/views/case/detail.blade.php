@@ -1,7 +1,6 @@
 @extends('common.layout')
 
 @section('head')
-{{HTML::style('css/jquery-ui.css')}}
 {{HTML::style('css/imageViewer.css')}}
 
 {{HTML::script('js/jquery-ui.min.js')}}
@@ -517,7 +516,7 @@ id="page_case_detail"
 </div>
 
 @if (isset($error_msg))
-	<br><span class="font_red">{{$error_msg}}</span>
+	<br><span class="text_error">{{$error_msg}}</span>
 @else
 	<div class="al_r mar_b_5 w_300 fl_r">
 		{{Form::select('revision', $revision_no_list, $revisionNo, array('class' => 'select w_180 select_revision'))}}
@@ -601,7 +600,7 @@ id="page_case_detail"
 	</div>
 	<div class="search_result">
 		<a name="revision"></a>
-		<h2 class="con_ttl">Revision</h2>
+		<h2 class="subsection_title">Revision</h2>
 		<div class="pad_tb_10">
 			<table class="result_table common_table al_c">
 				<thead>

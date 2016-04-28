@@ -22,21 +22,24 @@ This is a quick overview. Refer to the corresponding official websites for more 
 2. Install composer (PHP's dependency management system), and type ``composer install`` at the repository root.
    All the dependencies (including Laravel framework) will be downloaded.
 
-3. Install MongoDB, create database (with an arbitrary name) and set up authentication.
+3. Type ``npm install`` at the repository root, and then type ``gulp``.
+   Asset files (CSS, fonts) will be compiled.
 
-4. Go to ``/app/config``, copy ``db_config_sample.json`` to ``db_config.json``,
+4. Install MongoDB, create database (with an arbitrary name) and set up authentication.
+
+5. Go to ``/app/config``, copy ``db_config_sample.json`` to ``db_config.json``,
    and define appropriate db connection configurations according to your environment.
 
-5. Set up initial database data (seeds). On your console, type::
+6. Set up initial database data (seeds). On your console, type::
 
      php artisan db:seed
 
    This will create initial group and user into the database.
 
-6. Set up your web server. Configure Apache and host ``public`` directory.
+7. Set up your web server. Configure Apache and host ``public`` directory.
    Alternatively, you may use PHP's built-in web server for debugging purpose.
 
-7. (UNIX user) Modify directory permissions so that web server has write access under ``app/storage`` directory.
+8. (UNIX user) Modify directory permissions so that web server has write access under ``app/storage`` directory.
 
    .. tip::
 

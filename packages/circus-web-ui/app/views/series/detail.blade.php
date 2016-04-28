@@ -1,7 +1,6 @@
 @extends('common.layout')
 
 @section('head')
-{{HTML::style('css/jquery-ui.css')}}
 {{HTML::style('css/imageViewer.css')}}
 
 {{HTML::script('js/jquery.cookie.js')}}
@@ -290,7 +289,7 @@ id="page_series_detail"
 </div>
 
 @if (isset($error_msg))
-	<p class="font_red">{{$error_msg}}</p>
+	<p class="text_error">{{$error_msg}}</p>
 @else
 	<div class="export_area" style="display:none;">
 		<div class="pad_20">

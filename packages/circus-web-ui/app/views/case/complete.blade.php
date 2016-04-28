@@ -1,7 +1,6 @@
 @extends('common.layout')
 
 @section('head')
-{{HTML::style('css/jquery-ui.css')}}
 {{HTML::script('js/jquery-ui.min.js')}}
 <script>
 	$(function() {
@@ -29,7 +28,7 @@
 	@if (isset($msg))
 		{{{$msg}}}
 	@elseif (isset($error_msg))
-		<span class="font_red">{{{$error_msg}}}</span>
+		<span class="text_error">{{{$error_msg}}}</span>
 	@endif
 </p>
 <p class="al_c">

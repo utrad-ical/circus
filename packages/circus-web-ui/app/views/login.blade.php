@@ -32,7 +32,7 @@ table.common_table input { display: block; width: 100%; }
 	<div class="submit_area">
 		{{Form::submit('Login', array('class' => 'common_btn'))}}
 		@if (isset($error_msg))
-			<div class="al_c font_red">{{$error_msg}}</div>
+			<div class="al_c text_error">{{$error_msg}}</div>
 		@endif
 	</div>
 {{Form::close()}}

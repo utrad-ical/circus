@@ -1,4 +1,4 @@
-<h2 class="con_ttl">Download Volume</h2>
+<h2 class="subsection_title">Download Volume</h2>
 {{Form::open(['url' => asset('series/export'), 'method' => 'post', 'id' => 'frm_export'])}}
 	{{Form::hidden('seriesUID', $series_detail->seriesUID)}}
 
@@ -20,7 +20,7 @@
 		{{Form::button('Download', array('class' => 'common_btn al_r btn_download'))}}
 		{{Form::button('Close', array('class' => 'common_btn al_r btn_export_cancel'))}}
 	</div>
-	<span id="export_err" class="font_red"></span>
+	<span id="export_err" class="text_error"></span>
 {{Form::close()}}
 <script>
 var createSlider = function(slider_max) {

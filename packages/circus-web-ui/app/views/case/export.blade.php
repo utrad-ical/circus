@@ -1,4 +1,4 @@
-<h2 class="con_ttl">Export volume data</h2>
+<h2 class="subsection_title">Export volume data</h2>
 <hr>
 <div>(Series: <span id="exportSeriesUID"></span>, Revision: <span id="exportRevisionNo">{{{$revisionNo}}}</span>)</div>
 {{Form::open(['url' => asset('case/export'), 'method' => 'post', 'id' => 'frm_export'])}}
@@ -54,7 +54,7 @@
     {{Form::button('Download', array('class' => 'common_btn al_r btn_download'))}}
     {{Form::button('Cancel', array('class' => 'common_btn al_r btn_export_cancel'))}}
   </div>
-  <span id="export_err" class="font_red"></span>
+  <span id="export_err" class="text_error"></span>
 {{Form::close()}}
 <script>
   $(function(){

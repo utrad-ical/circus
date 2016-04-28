@@ -1,0 +1,6 @@
+# CSS files in this directory are compiled files!
+# Original source files are found at: /app/assets/less
+
+# Ignore all compiled CSS files
+
+*.css

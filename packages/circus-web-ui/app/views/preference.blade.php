@@ -1,8 +1,6 @@
 @extends('common.layout')
 
 @section('head')
-	{{HTML::style('css/jquery-ui.css')}}
-	{{HTML::style('css/jquery.flexforms.css')}}
 	<style>
 		.ui-propertyeditor-row > td {
 			padding-bottom: 1em;

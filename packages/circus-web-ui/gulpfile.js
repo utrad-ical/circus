@@ -11,7 +11,7 @@ gulp.task('iconfont', function() {
 			appendUnicode: true,
 			formats: ['woff'],
 			startUnicode: 0xE600,
-			fontHeight: 80,
+			fontHeight: 512,
 			timestamp: Math.round(Date.now() / 1000) // required for consistent build
 		}))
 		.on('glyphs', function (glyphs, options) {

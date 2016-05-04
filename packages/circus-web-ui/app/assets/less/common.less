@@ -156,14 +156,16 @@ body.mode_white {
 ul.column_menu {
 	margin: 20px 0;
 	word-break: normal;
+	display: flex;
+	flex-flow: row wrap;
+	justify-content: space-between;
+	align-items: flex-start;
 	> li {
-		display: inline-block;
+		display: block;
 		text-align: center;
-		margin-right: 30px;
-		width: 300px;
-		vertical-align: top;
+		width: 250px;
 		div.img > span {
-			font-size: 160px;
+			font-size: 200px;
 			vertical-align: bottom;
 		}
 		> a {

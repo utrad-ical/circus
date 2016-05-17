@@ -13,4 +13,6 @@ Thumbs.db
 public/y/
 public/index.js
 public/index.js.map
+public/js-app
+public/glyphicons*
 /node_modules

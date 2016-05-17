@@ -1,10 +1,13 @@
 var webpack = require("webpack");
 
 module.exports = {
-	entry: './app/front-ui/index.js',
+	entry: {
+		index: './app/front-ui/index.js',
+		'js-app/browse': './app/front-ui/browse.jsx'
+	},
 	output: {
 		path: __dirname + '/public',
-		filename: 'index.js'
+		filename: '[name].js'
 	},
 	resolve: ['', '.js', '.jsx'],
 	module: {

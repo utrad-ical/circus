@@ -31,6 +31,10 @@ Route::group(['before' => 'auth'], function() {
 
 	$staticView('home');
 
+	// browser
+	$staticView('browse', 'browse/browse');
+
+	// Case
 	Route::get('case/search/{preset_id}', 'CaseSearchController@search')
 		 ->where('preset_id', '^\\d+$');
 	Route::get('case/search', 'CaseSearchController@search');

@@ -1,9 +1,10 @@
 @extends('common.layout')
 
 @section('title')
-	Home
+	Search
 @stop
 
 @section('content')
-	<h1>Search</h1>
+<div id="app"></div>
+<script src="/js-app/browse.js"></script>
 @stop

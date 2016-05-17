@@ -1,8 +1,8 @@
 module.exports = {
 	files: [ '../assets/icons/*.svg' ],
-	fontName: 'css/fonts/circus-db-font',
-	classPrefix: 'cicrus-icon-',
+	fontName: 'circus-db-font',
+	classPrefix: 'circus-icon-',
 	baseClass: 'circus-icon',
-	fixedWidth: true,
+	fontHeight: 512,
 	types: ['woff']
 };

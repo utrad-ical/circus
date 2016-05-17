@@ -30,7 +30,7 @@ if (Auth::check()) {
 					<li>
 						<a href="{{asset('home')}}"><img src="{{asset('img/common/header-logo.png')}}" alt="CIRCUS" class="header_logo"></a></li>
 					<li class="icon_menu">
-						<a href="{{asset('case/search')}}"><span class="circus-icon-case"></span>Case</a>
+						<a href="{{asset('case/search')}}"><span class="circus-icon circus-icon-case"></span>Case</a>
 						<ul>
 							<li><a href="{{asset('case/search')}}">Case Search</a></li>
 							@if (isset(Auth::user()->preferences['caseSearchPresets']))
@@ -41,7 +41,7 @@ if (Auth::check()) {
 						</ul>
 					</li>
 					<li class="icon_menu">
-						<a href="{{asset('series/search')}}"><span class="circus-icon-series"></span>Series</a>
+						<a href="{{asset('series/search')}}"><span class="circus-icon circus-icon-series"></span>Series</a>
 						<ul>
 							<li><a href="{{asset('series/search')}}">Series Search</a></li>
 							<li><a href="{{asset('series/import')}}">Series Import</a></li>
@@ -53,7 +53,7 @@ if (Auth::check()) {
 						</ul>
 					</li>
 					<li class="icon_menu">
-						<a href="{{asset('share/search')}}"><span class="circus-icon-share"></span>Share</a>
+						<a href="{{asset('share/search')}}"><span class="circus-icon circus-icon-share"></span>Share</a>
 						<ul>
 							<li><a href="{{asset('share/search')}}">Share Search</a></li>
 							<li><a href="{{asset('share/download')}}">Download</a></li>
@@ -62,7 +62,7 @@ if (Auth::check()) {
 					</li>
 					@if (Auth::user()->hasPrivilege(Group::SERVER_MANAGE))
 					<li class="icon_menu">
-						<a href="{{asset('administration')}}"><span class="circus-icon-administration"></span>Administration</a>
+						<a href="{{asset('administration')}}"><span class="circus-icon circus-icon-administration"></span>Administration</a>
 						<ul>
 							<li><a href="{{asset('administration/server_param')}}">Server Configuration</a></li>
 							<li><a href="{{asset('administration/server')}}">DICOM Image Server</a></li>
@@ -79,8 +79,8 @@ if (Auth::check()) {
 				<ul>
 					<li id="user_info">{{Auth::user()->description}}</li>
 					<li id="color_select"><a id="color_switch" title="Temporary changes the color theme."></a></li>
-					<li class="icon_menu"><a href="{{asset('preference')}}"><span class="circus-icon-preference"></span>Preference</a></li>
-					<li class="icon_menu"><a href="{{asset('logout')}}"><span class="circus-icon-logout"></span>Logout</a></li>
+					<li class="icon_menu"><a href="{{asset('preference')}}"><span class="circus-icon circus-icon-preference"></span>Preference</a></li>
+					<li class="icon_menu"><a href="{{asset('logout')}}"><span class="circus-icon circus-icon-logout"></span>Logout</a></li>
 				</ul>
 			</nav>
 			@else

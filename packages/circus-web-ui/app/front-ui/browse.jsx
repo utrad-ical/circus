@@ -2,23 +2,26 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { SeriesSearchCondition } from './components/search-condition-series.jsx';
 import { modalities } from './constants';
+import { api } from './utils/api';
 
 require('style!css!./bs-style/bootstrap.less');
 require('style!css!./components/components-style.less');
 
-let seriesCondition = {
-	projects: ['lung'],
-	type: 'advanced',
-	basicFilter: { modality: 'all', sex: 'all' },
-	advancedFilter: { $and: [ { age: 100 } ] }
+let store = {
+	seriesCondition: {
+		projects: ['lung'],
+		type: 'advanced',
+		basicFilter: { modality: 'all', sex: 'all' },
+		advancedFilter: { $and: [ { age: 100 } ] }
+	},
+	projectList: {}
 };
 
 const conditionChange = newCondition => {
-	seriesCondition = newCondition;
+	store.seriesCondition = newCondition;
 	render();
 };
 
-const projectList = ['a', 'b'];
 const keys = {
 	age: { caption: 'Age', type: 'number' },
 	salary: { caption: 'Salary', type: 'number' },
@@ -30,12 +33,19 @@ const keys = {
 
 function render() {
 	ReactDOM.render(
-		<SeriesSearchCondition condition={seriesCondition}
-			projects={projectList}
+		<SeriesSearchCondition condition={store.seriesCondition}
+			projects={store.projectList}
 			keys={keys}
 			onChange={conditionChange} />,
 		document.getElementById('app')
 	);
 }
+
+api('project').then(list => {
+	const projects = {};
+	list.forEach(p => projects[p.projectID] = p.projectName);
+	store.projectList = projects;
+	render();
+});
 
 render();

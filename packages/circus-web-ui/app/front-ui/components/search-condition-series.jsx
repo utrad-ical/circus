@@ -7,6 +7,9 @@ import { MultiSelect } from './multiselect.jsx';
 import { DateRangePicker } from './daterange-picker.jsx';
 import { ShrinkSelect } from './shrink-select.jsx';
 import { modalities } from '../constants';
+import { Tag } from './tag.jsx';
+
+const ProjectRenderer = props => <span>{props.projectName}</span>;
 
 export const SeriesSearchCondition = props => {
 	const activeKey = props.condition.type === 'advanced' ? 2 : 1;
@@ -18,7 +21,8 @@ export const SeriesSearchCondition = props => {
 	};
 
 	const changeProjects = projects => {
-		props.onChange({ ... props.condition, projects });
+		const newCondition = { ... props.condition, projects };
+		props.onChange(newCondition);
 	};
 
 	const changeBasicFilter = basicFilter => {
@@ -29,10 +33,34 @@ export const SeriesSearchCondition = props => {
 		props.onChange({ ... props.condition, advancedFilter });
 	}
 
+	const availableTags = (() => {
+		const tags = {};
+		props.condition.projects.forEach(pid => {
+			const project = props.projects[pid];
+			(project.tags || []).forEach(t => {
+				tags[t.name] = t;
+			});
+		});
+		return tags;
+	})();
+
+	const conditionKeys = {
+		age: { caption: 'Age', type: 'number' },
+		salary: { caption: 'Salary', type: 'number' },
+		name: { caption: 'Name', type: 'text' },
+		address: { caption: 'Address', type: 'text' },
+		sex: { caption: 'Sex', type: 'select', spec: { options: ['M', 'F', 'O'] } },
+		modality: { caption: 'Modality', type: 'select', spec: { options: modalities }},
+		tag: { caption: 'Tag', type: 'select',
+			spec: { options: Object.keys(availableTags).map(t => availableTags[t].name) }
+		}
+	};
+
 	return <Well>
 		<FormGroup>
 			<ControlLabel>Projects:</ControlLabel>&ensp;
 			<MultiSelect options={props.projects}
+				renderer={ProjectRenderer}
 				selected={props.condition.projects}
 				onChange={changeProjects} />
 		</FormGroup>
@@ -42,11 +70,12 @@ export const SeriesSearchCondition = props => {
 			<Tab eventKey={1} title="Basic">
 				<BasicConditionForm
 					value={props.condition.basicFilter}
+					availableTags={availableTags}
 					onChange={changeBasicFilter}
 				/>
 			</Tab>
 			<Tab eventKey={2} title="Advanced">
-				<ConditionEditor keys={props.keys}
+				<ConditionEditor keys={conditionKeys}
 					value={props.condition.advancedFilter}
 					onChange={changeAdvanedFilter}
 				/>
@@ -85,6 +114,8 @@ export const basicFilter2Query = filter => {
 const sexOptions = { all: 'All', M: 'male', F: 'female', O: 'other' };
 const modalityOptions = { all: 'All' };
 modalities.forEach(m => modalityOptions[m] = m);
+
+const TagRenderer = props => <Tag name={props.name} color={props.color} />;
 
 const BasicConditionForm = props => {
 	const change = (key, newValue) => {
@@ -138,6 +169,13 @@ const BasicConditionForm = props => {
 			<Label>Series Date</Label>
 			<Column>
 				<DateRangePicker value={props.value.seriesDate} onChange={r => change('seriesDate', r)} />
+			</Column>
+			<Label>Tags</Label>
+			<Column>
+				<MultiSelect renderer={TagRenderer}
+					options={props.availableTags}
+					selected={props.value.tags}
+					onChange={s => change('tags', s.length > 0 ? s : null)} />
 			</Column>
 		</Row>
 	</Form>;

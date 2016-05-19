@@ -9,12 +9,12 @@ require('style!css!./components/components-style.less');
 
 let store = {
 	seriesCondition: {
-		projects: ['lung'],
+		projects: [],
 		type: 'advanced',
 		basicFilter: { modality: 'all', sex: 'all' },
 		advancedFilter: { $and: [ { age: 100 } ] }
 	},
-	projectList: {}
+	projectList: []
 };
 
 const conditionChange = newCondition => {
@@ -22,29 +22,22 @@ const conditionChange = newCondition => {
 	render();
 };
 
-const keys = {
-	age: { caption: 'Age', type: 'number' },
-	salary: { caption: 'Salary', type: 'number' },
-	name: { caption: 'Name', type: 'text' },
-	address: { caption: 'Address', type: 'text' },
-	sex: { caption: 'Sex', type: 'select', spec: { options: ['M', 'F', 'O'] } },
-	modality: { caption: 'Modality', type: 'select', spec: { options: modalities }}
-};
-
 function render() {
 	ReactDOM.render(
-		<SeriesSearchCondition condition={store.seriesCondition}
-			projects={store.projectList}
-			keys={keys}
-			onChange={conditionChange} />,
+		<div>
+			<SeriesSearchCondition condition={store.seriesCondition}
+				projects={store.projectList}
+				onChange={conditionChange} />
+			<div>{JSON.stringify(store.seriesCondition)}</div>
+		</div>,
 		document.getElementById('app')
 	);
 }
 
 api('project').then(list => {
-	const projects = {};
-	list.forEach(p => projects[p.projectID] = p.projectName);
-	store.projectList = projects;
+	const projectList = {};
+	list.forEach(p => projectList[p.projectID] = p);
+	store.projectList = projectList;
 	render();
 });
 

@@ -2,7 +2,7 @@ import React from 'react';
 import { ShrinkSelect } from './shrink-select.jsx';
 import { FormControl, FormGroup, Button, Glyphicon } from 'react-bootstrap';
 
-export let ConditionEditor = props => {
+export const ConditionEditor = props => {
 	return <div className="condition-editor">
 		<ConditionNode keys={props.keys}
 			depth={0}
@@ -11,25 +11,26 @@ export let ConditionEditor = props => {
 	</div>;
 };
 
-let ConditionNode = props => {
+const ConditionNode = props => {
 	if (typeof props.value === 'object') {
-		let key = Object.keys(props.value)[0];
-		let value = props.value[key];
+		const key = Object.keys(props.value)[0];
+		const value = props.value[key];
 		if (key === '$and' || key === '$or') {
 			return <GroupedCondition keys={props.keys} index={props.index}
 				onChange={props.onChange} onRemove={props.onRemove}
 				depth={props.depth} groupType={key} members={value} />;
 		} else {
-			let keyOpValue = obj2binary(props.value);
+			const { keyName, op, value } = props.value;
 			return <SingleCondition keys={props.keys} index={props.index}
+				memberCount={props.memberCount}
 				onChange={props.onChange} onRemove={props.onRemove}
-				depth={props.depth} {...keyOpValue} />;
+				depth={props.depth} keyName={keyName} op={op} value={value} />;
 		}
 	}
 	return <p>Error</p>;
 };
 
-let GroupedCondition = props => {
+const GroupedCondition = props => {
 	function memberChange(index, newObj) {
 		let newMembers = props.members.slice();
 		newMembers[index] = newObj;
@@ -51,12 +52,12 @@ let GroupedCondition = props => {
 	}
 
 	function addMemberClick() {
-		let newMember = { [Object.keys(props.keys)[0]]: '' };
+		let newMember = { keyName: Object.keys(props.keys)[0], op: '==', value: '' };
 		props.onChange({ [props.groupType]: [...props.members, newMember] });
 	}
 
 	function addGroupClick() {
-		let newCondition = { [Object.keys(props.keys)[0]]: '' };
+		let newCondition = { keyName: Object.keys(props.keys)[0], op: '==', value: '' };
 		let newMember = { $or: [newCondition] };
 		props.onChange({ [props.groupType]: [...props.members, newMember] });
 	}
@@ -69,6 +70,7 @@ let GroupedCondition = props => {
 		<div className="condition-group-members">
 			{props.members.map((member, i) => (
 				<ConditionNode keys={props.keys} index={i} depth={props.depth + 1}
+					memberCount={props.members.length}
 					onChange={val => memberChange(i, val)}
 					onRemove={deleteMember}
 					key={i} value={member} />
@@ -107,13 +109,21 @@ const typeMap = {
 			'==': 'is',
 			'!=': 'is not'
 		},
-		control: props =>
-			<FormControl componentClass='select'
-			value={props.value}	onChange={ev => props.onChange(ev.target.value)}>
-				{Object.keys(props.spec.options).map(k =>
-					<option value={k} key={k}>{props.spec.options[k]}</option>
+		control: props => {
+			let options = props.spec.options;
+			if (Array.isArray(options)) {
+				const tmp = {};
+				options.forEach(item => tmp[item] = item);
+				options = tmp;
+			}
+			return <FormControl componentClass='select'
+			value={props.value} onChange={ev => props.onChange(ev.target.value)}>
+				<option value="" hidden />
+				{Object.keys(options).map(k =>
+					<option value={k} key={k}>{options[k]}</option>
 				)}
 			</FormControl>
+		}
 	}
 };
 
@@ -126,15 +136,15 @@ let SingleCondition = props => {
 	function keyChange(newId) {
 		let op = props.op;
 		if (props.keys[props.keyName].type != props.keys[newId].type) op = '==';
-		props.onChange(binary2obj(newId, op, props.value));
+		props.onChange({ keyName: newId, op, value: props.value });
 	}
 
 	function opChange(newOp) {
-		props.onChange(binary2obj(props.keyName, newOp, props.value));
+		props.onChange({ keyName: props.keyName, op: newOp, value: props.value });
 	}
 
 	function valueChange(newValue) {
-		props.onChange(binary2obj(props.keyName, props.op, newValue));
+		props.onChange({ keyName: props.keyName, op: props.op, value: newValue });
 	}
 
 	let options = {};
@@ -150,80 +160,58 @@ let SingleCondition = props => {
 		<FormGroup bsSize="sm">
 			{<Control value={props.value} onChange={valueChange} spec={valueSpec}/>}
 		</FormGroup>
-		&ensp;
-		<ToolButton icon="remove" onClick={() => props.onRemove(props.index)} />
+		{ props.memberCount > 1 ?
+			<ToolButton icon="remove" onClick={() => props.onRemove(props.index)} />
+		: null }
 	</div>;
 }
 
-let AndOr = props => {
+const AndOr = props => {
 	let options = { $and: 'AND', $or: 'OR' };
-	return <ShrinkSelect options={options} bsStyle="primary"
+	return <ShrinkSelect options={options} bsStyle="primary" size="sm"
 		value={props.value} onChange={props.onChange} />;
 };
 
-let ToolButton = props => {
+const ToolButton = props => {
 	return <Button bsSize="small" bsStyle="link" onClick={props.onClick}>
 		<Glyphicon glyph={props.icon} />
 	</Button>
-}
+};
 
-function unescapeRegExp(str) {
-	return str.replace(/\\([\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|])/g, '$1');
-}
-
-function escapeRegExp(str) {
+const escapeRegExp = str => {
 	str = str + '';
 	return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
 }
 
-function obj2binary(obj) {
-	let keyName = Object.keys(obj)[0];
-	let value = obj[keyName];
-	if (keyName === undefined) throw new Error('Invalid condition');
-	if (value.$regex) {
-		let match = value.$regex.match(/^(\^?)(.*?)(\$?)$/);
-		if (match[1] === '^') {
-			return {keyName, op: '^=', value: unescapeRegExp(match[2])};
-		} else if (match[3] === '$') {
-			return {keyName, op: '$=', value: unescapeRegExp(match[2])};
-		} else {
-			return {keyName, op: '*=', value: unescapeRegExp(match[2])};
+export const conditionToMongoQuery = condition => {
+	function binary2obj(key, op, value) {
+		switch (op) {
+			case '==':
+				return {[key]: value};
+			case '!=':
+				return {[key]: {$ne: value}};
+			case '>':
+				return {[key]: {$gt: value}};
+			case '<':
+				return {[key]: {$lt: value}};
+			case '>=':
+				return {[key]: {$ge: value}};
+			case '<=':
+				return {[key]: {$le: value}};
+			case '^=':
+				return {[key]: {$regex: '^' + escapeRegExp(value)}};
+			case '$=':
+				return {[key]: {$regex: escapeRegExp(value) + '$'}};
+			case '*=':
+				return {[key]: {$regex: escapeRegExp(value)}};
 		}
-	} else if (typeof value === 'string' || typeof value === 'number') {
-		return {keyName, value, op: '=='};
-	} else if ('$ne' in value) {
-		return {keyName, value: value.$ne, op: '!='};
-	} else if ('$gt' in value) {
-		return {keyName, value: value.$gt, op: '>'};
-	} else if ('$lt' in value) {
-		return {keyName, value: value.$lt, op: '<'};
-	} else if ('$ge' in value) {
-		return {keyName, value: value.$ge, op: '>='};
-	} else if ('$le' in value) {
-		return {keyName, value: value.$le, op: '<='};
 	}
-	throw new Error('Invalid object');
-}
 
-function binary2obj(key, op, value) {
-	switch (op) {
-		case '==':
-			return {[key]: value};
-		case '!=':
-			return {[key]: {$ne: value}};
-		case '>':
-			return {[key]: {$gt: value}};
-		case '<':
-			return {[key]: {$lt: value}};
-		case '>=':
-			return {[key]: {$ge: value}};
-		case '<=':
-			return {[key]: {$le: value}};
-		case '^=':
-			return {[key]: {$regex: '^' + escapeRegExp(value)}};
-		case '$=':
-			return {[key]: {$regex: escapeRegExp(value) + '$'}};
-		case '*=':
-			return {[key]: {$regex: escapeRegExp(value)}};
+	if (Array.isArray(condition.$and)) {
+		return { $and: condition.$and.map(m => conditionToMongoQuery(m))};
+	} else if (Array.isArray(condition.$or)) {
+		return { $or: condition.$and.map(m => conditionToMongoQuery(m))};
+	} else if ('keyName' in condition) {
+		return binary2obj(condition.keyName, condition.op, condition.value);
 	}
-}
+};

@@ -8,7 +8,7 @@ const DefaultRenderer = props => <span>{props.caption}</span>;
  */
 export const MultiSelect = props => {
 	const Renderer = props.renderer || DefaultRenderer;
-	const selected = Array.isArray(props.selected) ? props.selected : [];
+	const { showSelectedMax = 3, selected = [] } = props;
 
 	// Normalize options
 	let options = props.options;
@@ -39,6 +39,8 @@ export const MultiSelect = props => {
 	let caption = [];
 	if (selected.length === 0) {
 		caption = props.noneText ? props.noneText : '(None)';
+	} else if (selected.length > showSelectedMax) {
+		caption = `${selected.length} selected`;
 	} else {
 		selected.forEach((sel, i) => {
 			let renderItem = options[sel];

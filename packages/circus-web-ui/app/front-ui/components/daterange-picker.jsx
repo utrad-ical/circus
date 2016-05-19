@@ -1,6 +1,6 @@
 import React from 'react';
 import { DropdownButton, MenuItem } from './react-bootstrap';
-import { RelativeDatePicker } from './relative-datepicker.jsx';
+import { RelativeDatePicker, normalizeRelative } from './relative-datepicker.jsx';
 import Form from 'react-bootstrap/lib/Form';
 
 const presets = {
@@ -49,4 +49,13 @@ export const DateRangePicker = props => {
 			</DropdownButton>
 		</div>
 	</div>;
+};
+
+export const dateRangeToMongoQuery = (condition, key) => {
+	const result = { $and: [] };
+	const from = normalizeRelative(condition.from);
+	if (from) result.$and.push({ [key]: { $ge: from } });
+	const to = normalizeRelative(condition.to);
+	if (to) result.$and.push({ [key]: { $le: to } });
+	return (from || to) ? result : null;
 };

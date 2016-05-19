@@ -91,5 +91,13 @@ export class RelativeDatePicker extends React.Component {
 			<Dropdown.Menu>{editor}</Dropdown.Menu>
 		</Dropdown>;
 	}
-
 }
+
+export const normalizeRelative = dateValue => {
+	if (typeof dateValue === 'string') {
+		return moment(dateValue);
+	} else if (typeof dateValue === 'object') {
+		return moment().startOf('day').add(...dateValue);
+	}
+	return null
+};

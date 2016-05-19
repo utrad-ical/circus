@@ -91,7 +91,7 @@ const typeMap = {
 			'<=': '<='
 		},
 		control: props => <FormControl type='number' value={props.value}
-			onChange={ev => propx.onChange(ev.target.value)} />
+			onChange={ev => props.onChange(parseFloat(ev.target.value))} />
 	},
 	text: {
 		operators: {
@@ -210,7 +210,7 @@ export const conditionToMongoQuery = condition => {
 	if (Array.isArray(condition.$and)) {
 		return { $and: condition.$and.map(m => conditionToMongoQuery(m))};
 	} else if (Array.isArray(condition.$or)) {
-		return { $or: condition.$and.map(m => conditionToMongoQuery(m))};
+		return { $or: condition.$or.map(m => conditionToMongoQuery(m))};
 	} else if ('keyName' in condition) {
 		return binary2obj(condition.keyName, condition.op, condition.value);
 	}

@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 import { SeriesSearchCondition } from './components/search-condition-series.jsx';
 import { modalities } from './constants';
 import { api } from './utils/api';
+import * as modal from './components/modal.jsx';
 
 require('style!css!./bs-style/bootstrap.less');
 require('style!css!./components/components-style.less');
@@ -22,11 +23,16 @@ const conditionChange = newCondition => {
 	render();
 };
 
+const search = condition => {
+	modal.alert(JSON.stringify(condition));
+};
+
 function render() {
 	ReactDOM.render(
 		<div>
 			<SeriesSearchCondition condition={store.seriesCondition}
 				projects={store.projectList}
+				onSearch={search}
 				onChange={conditionChange} />
 			<div>{JSON.stringify(store.seriesCondition)}</div>
 		</div>,

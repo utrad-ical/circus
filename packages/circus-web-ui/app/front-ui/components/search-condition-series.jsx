@@ -1,10 +1,10 @@
 import React from 'react';
 
-import { Tabs, Tab, Form, FormGroup, FormControl,
+import { Tabs, Tab, Form, FormGroup, FormControl, Button, Glyphicon,
 	ControlLabel, Row, Col, Well } from './react-bootstrap';
-import { ConditionEditor } from './condition-editor.jsx';
+import { ConditionEditor, conditionToMongoQuery } from './condition-editor.jsx';
 import { MultiSelect } from './multiselect.jsx';
-import { DateRangePicker } from './daterange-picker.jsx';
+import { DateRangePicker, dateRangeToMongoQuery } from './daterange-picker.jsx';
 import { ShrinkSelect } from './shrink-select.jsx';
 import { modalities } from '../constants';
 import { Tag } from './tag.jsx';
@@ -58,6 +58,16 @@ export const SeriesSearchCondition = props => {
 		}
 	};
 
+	const searchClick = ev => {
+		let condition;
+		if (props.condition.type === 'basic') {
+			condition = basicFilterToMongoQuery(props.condition.basicFilter);
+		} else {
+			condition = conditionToMongoQuery(props.condition.advancedFilter);
+		}
+		props.onSearch && props.onSearch(condition);
+	};
+
 	return <Well>
 		<FormGroup>
 			<ControlLabel>Projects:</ControlLabel>&ensp;
@@ -83,6 +93,11 @@ export const SeriesSearchCondition = props => {
 				/>
 			</Tab>
 		</Tabs>
+		<div className="search-buttons">
+			<Button bsStyle="primary" onClick={searchClick}>
+				<Glyphicon glyph="search" />&ensp;Search
+			</Button>
+		</div>
 	</Well>;
 }
 
@@ -98,26 +113,34 @@ const Input = ({ type, name, value, onChange, className }) => {
 
 const Label = ({children}) => <Col md={2}><ControlLabel>{children}</ControlLabel></Col>;
 
-export const basicFilter2Query = filter => {
-	let members = [];
-	for (let k of filter) {
-		if (k === 'maxAge')
-			members.push({ age: { $le: filter[k] } });
-		else if (k === 'minAge')
-			members.push({ age: { $ge: filter[k] } });
-		else if (k === 'sex')
-			members.push({ sex: filter[k]});
-		else
-			members.push({ [k]: { $regex: filter[k] } }); // TODO: escape
-	}
-	return { $and: members };
-};
-
 const sexOptions = { all: 'All', M: 'male', F: 'female', O: 'other' };
 const modalityOptions = { all: 'All' };
 modalities.forEach(m => modalityOptions[m] = m);
 
 const TagRenderer = props => <Tag name={props.name} color={props.color} />;
+
+const basicFilterToMongoQuery = condition => {
+	const members = [];
+	Object.keys(condition).forEach(key => {
+		const val = condition[key];
+		switch (key) {
+			case 'minAge':
+				members.push({ age: { $ge: val }});
+				break;
+			case 'maxAge':
+				members.push({ age: { $le: val }});
+				break;
+			case 'seriesDate':
+				const q = dateRangeToMongoQuery(val, 'seriesDate');
+				if (q) members.push(q);
+				break;
+			default:
+				members.push({ [key]: val });
+				break;
+		}
+	});
+	return { $and: members };
+}
 
 const BasicConditionForm = props => {
 	const change = (key, newValue) => {

@@ -51,7 +51,7 @@ export const SeriesSearchCondition = props => {
 		patientID: { caption: 'patient ID', type: 'text' },
 		patientName: { caption: 'patient name', type: 'text' },
 		age: { caption: 'age', type: 'number' },
-		sex: { captin: 'sex', type: 'select', spec: { options: ['M', 'F', 'O'] } },
+		sex: { caption: 'sex', type: 'select', spec: { options: ['M', 'F', 'O'] } },
 		seriesDate: { caption: 'series date', type: 'text' },
 		tag: { caption: 'tag', type: 'select',
 			spec: { options: Object.keys(availableTags).map(t => availableTags[t].name) }

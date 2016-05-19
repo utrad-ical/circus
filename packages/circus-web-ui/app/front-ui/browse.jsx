@@ -10,9 +10,9 @@ require('style!css!./components/components-style.less');
 let store = {
 	seriesCondition: {
 		projects: [],
-		type: 'advanced',
-		basicFilter: { modality: 'all', sex: 'all' },
-		advancedFilter: { $and: [ { age: 100 } ] }
+		type: 'basic',
+		basicFilter: {},
+		advancedFilter: { $and: [] }
 	},
 	projectList: []
 };

@@ -1,7 +1,6 @@
 import React from 'react';
 
-import { FormControl, Popover, OverlayTrigger,
-	Button, ButtonGroup, Form } from 'react-bootstrap';
+import { FormControl, Dropdown, ButtonGroup, Button } from 'react-bootstrap';
 import { Calendar } from './calendar.jsx';
 import moment from 'moment';
 
@@ -20,7 +19,7 @@ function dateToString(input) {
 export class RelativeDatePicker extends React.Component {
 	constructor(props) {
 		super(props);
-		this.state = { mode: 'absolute' };
+		this.state = { mode: 'all' };
 	}
 
 	triggerChange(value) {
@@ -56,7 +55,7 @@ export class RelativeDatePicker extends React.Component {
 
 	render() {
 		const { mode } = this.state;
-		const editor = <Popover className="relative-datepicker-popover" id="relative-datepicker-popover">
+		const editor = <div className="relative-datepicker-menu" id="relative-datepicker-popover">
 			<ButtonGroup bsSize="xsmall">
 				<Button
 					bsStyle={mode === 'relative' ? 'primary' : 'default'}
@@ -73,26 +72,24 @@ export class RelativeDatePicker extends React.Component {
 			</ButtonGroup>
 			<div className="switch">
 				{mode === 'relative' ?
-					<Form inline>
+					<div className="form-inline">
 						<FormControl bsSize="sm" type="number" min={0}
 							value={Array.isArray(this.props.value) ? -this.props.value[0] : 0}
 							onChange={ev => this.relativeValueChange(ev.target.value)} />
 						&ensp;days ago
-					</Form>
+					</div>
 				: mode === 'all' ?
 					null
 				:
 					<Calendar onDateClick={date => this.dateClick(date)}/>
 				}
 			</div>
-		</Popover>;
+		</div>;
 
-		return <OverlayTrigger trigger="click" placement="bottom"
-			onEnter={() => this.adjustMode()}
-			rootClose overlay={editor}
-		>
-			<Button>{dateToString(this.props.value)}</Button>
-		</OverlayTrigger>;
+		return <Dropdown onDrop={() => this.adjustMode()}>
+			<Dropdown.Toggle>{dateToString(this.props.value)}</Dropdown.Toggle>
+			<Dropdown.Menu>{editor}</Dropdown.Menu>
+		</Dropdown>;
 	}
 
 }

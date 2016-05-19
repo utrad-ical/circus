@@ -45,13 +45,15 @@ export const SeriesSearchCondition = props => {
 	})();
 
 	const conditionKeys = {
-		age: { caption: 'Age', type: 'number' },
-		salary: { caption: 'Salary', type: 'number' },
-		name: { caption: 'Name', type: 'text' },
-		address: { caption: 'Address', type: 'text' },
-		sex: { caption: 'Sex', type: 'select', spec: { options: ['M', 'F', 'O'] } },
-		modality: { caption: 'Modality', type: 'select', spec: { options: modalities }},
-		tag: { caption: 'Tag', type: 'select',
+		modality: { caption: 'modality', type: 'select', spec: { options: modalities }},
+		seriesUID: { caption: 'series UID', type: 'text' },
+		seriesDescription: { caption: 'series description', type: 'text' },
+		patientID: { caption: 'patient ID', type: 'text' },
+		patientName: { caption: 'patient name', type: 'text' },
+		age: { caption: 'age', type: 'number' },
+		sex: { captin: 'sex', type: 'select', spec: { options: ['M', 'F', 'O'] } },
+		seriesDate: { caption: 'series date', type: 'text' },
+		tag: { caption: 'tag', type: 'select',
 			spec: { options: Object.keys(availableTags).map(t => availableTags[t].name) }
 		}
 	};
@@ -119,7 +121,10 @@ const TagRenderer = props => <Tag name={props.name} color={props.color} />;
 
 const BasicConditionForm = props => {
 	const change = (key, newValue) => {
-		if (newValue === null || typeof newValue === 'string' && newValue.length === 0) {
+		if (newValue === null ||
+			typeof newValue === 'string' && newValue.length === 0 ||
+			key.match(/modality|sex/) && newValue === 'all'
+		) {
 			let newCondition = { ...props.value };
 			delete newCondition[key];
 			props.onChange(newCondition);
@@ -132,7 +137,7 @@ const BasicConditionForm = props => {
 		<Row>
 			<Label>Modality</Label>
 			<Column>
-				<ShrinkSelect options={modalityOptions}
+				<ShrinkSelect options={modalityOptions} defaultSelect="all"
 					value={props.value.modality} onChange={v => change('modality', v)} />
 			</Column>
 		</Row>
@@ -161,7 +166,8 @@ const BasicConditionForm = props => {
 			</Column>
 			<Label>Sex</Label>
 			<Column>
-				<ShrinkSelect options={sexOptions} value={props.value.sex}
+				<ShrinkSelect options={sexOptions}
+					value={props.value.sex} defaultSelect="all"
 					onChange={v => change('sex', v)} />
 			</Column>
 		</Row>

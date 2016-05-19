@@ -178,7 +178,7 @@ const BasicConditionForm = props => {
 			</Column>
 			<Label>Tags</Label>
 			<Column>
-				<MultiSelect renderer={TagRenderer}
+				<MultiSelect renderer={TagRenderer} glue=""
 					options={props.availableTags}
 					selected={props.value.tags}
 					onChange={s => change('tags', s.length > 0 ? s : null)} />

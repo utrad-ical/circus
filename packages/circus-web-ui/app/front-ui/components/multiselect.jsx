@@ -44,7 +44,7 @@ export const MultiSelect = props => {
 	} else {
 		selected.forEach((sel, i) => {
 			let renderItem = options[sel];
-			if (i > 0) caption.push(props.glue ? props.glue : ', ');
+			if (i > 0) caption.push(props.glue !== undefined ? props.glue : ', ');
 			caption.push(<Renderer key={i} {...renderItem} />);
 		});
 	}

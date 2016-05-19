@@ -1,5 +1,5 @@
 import React from 'react';
-import { FormGroup, Button, Popover, OverlayTrigger } from 'react-bootstrap';
+import { Dropdown } from 'react-bootstrap';
 
 const DefaultRenderer = props => <span>{props.caption}</span>;
 
@@ -49,7 +49,7 @@ export const MultiSelect = props => {
 		});
 	}
 
-	const overlay = <Popover className="multiselect-popover" id="multiselect-popover"><ul>
+	const overlay = <ul>
 		{Object.keys(options).map((key, i) => {
 			const checked = selected.some(sel => sel === key);
 			const checkedClass = checked ? 'checked' : '';
@@ -59,9 +59,10 @@ export const MultiSelect = props => {
 				<Renderer {...renderItem} />
 			</li>
 		})}
-	</ul></Popover>;
+	</ul>;
 
-	return <OverlayTrigger overlay={overlay} trigger="click" placement="bottom" rootClose>
-		<Button>{caption}&ensp;<span className="caret" /></Button>
-	</OverlayTrigger>;
+	return <Dropdown className="multiselect">
+		<Dropdown.Toggle>{caption}</Dropdown.Toggle>
+		<Dropdown.Menu className="multiselect-popover">{overlay}</Dropdown.Menu>
+	</Dropdown>;
 }

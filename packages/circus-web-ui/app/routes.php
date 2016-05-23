@@ -54,6 +54,7 @@ Route::group(['before' => 'auth'], function() {
 	Route::any('api/save_tags', 'TagRegisterController@save_tags');
 
 	//Series
+	Route::post('api/series', 'SeriesListController@search');
 	Route::get('series/search/{preset_id}', 'SeriesSearchController@search')
 		->where('preset_id', '^\\d+$');
 	Route::get('series/search', 'SeriesSearchController@search');

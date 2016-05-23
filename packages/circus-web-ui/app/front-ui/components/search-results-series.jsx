@@ -14,7 +14,7 @@ const sortOptions = {
 	seriesUID: 'Series instance UID'
 };
 
-export const SearchResultsForSeries = props => {
+export const SeriesSearchResults = props => {
 	return <SearchResults
 		renderer={SeriesInfoRenderer}
 		sortOptions={sortOptions}

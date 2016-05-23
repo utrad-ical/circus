@@ -20,11 +20,6 @@ export const SeriesSearchCondition = props => {
 		props.onChange({ ... props.condition, type });
 	};
 
-	const changeProjects = projects => {
-		const newCondition = { ... props.condition, projects };
-		props.onChange(newCondition);
-	};
-
 	const changeBasicFilter = basicFilter => {
 		props.onChange({ ... props.condition, basicFilter });
 	};
@@ -32,17 +27,6 @@ export const SeriesSearchCondition = props => {
 	const changeAdvanedFilter = advancedFilter => {
 		props.onChange({ ... props.condition, advancedFilter });
 	}
-
-	const availableTags = (() => {
-		const tags = {};
-		props.condition.projects.forEach(pid => {
-			const project = props.projects[pid];
-			(project.tags || []).forEach(t => {
-				tags[t.name] = t;
-			});
-		});
-		return tags;
-	})();
 
 	const conditionKeys = {
 		modality: { caption: 'modality', type: 'select', spec: { options: modalities }},
@@ -53,9 +37,6 @@ export const SeriesSearchCondition = props => {
 		age: { caption: 'age', type: 'number' },
 		sex: { caption: 'sex', type: 'select', spec: { options: ['M', 'F', 'O'] } },
 		seriesDate: { caption: 'series date', type: 'text' },
-		tag: { caption: 'tag', type: 'select',
-			spec: { options: Object.keys(availableTags).map(t => availableTags[t].name) }
-		}
 	};
 
 	const searchClick = ev => {
@@ -69,20 +50,12 @@ export const SeriesSearchCondition = props => {
 	};
 
 	return <Well>
-		<FormGroup>
-			<ControlLabel>Projects:</ControlLabel>&ensp;
-			<MultiSelect options={props.projects}
-				renderer={ProjectRenderer}
-				selected={props.condition.projects}
-				onChange={changeProjects} />
-		</FormGroup>
 		<Tabs animation={false} id="series-search-condition"
 			activeKey={activeKey} onSelect={changeType}
 		>
 			<Tab eventKey={1} title="Basic">
 				<BasicConditionForm
 					value={props.condition.basicFilter}
-					availableTags={availableTags}
 					onChange={changeBasicFilter}
 				/>
 			</Tab>
@@ -139,7 +112,7 @@ const basicFilterToMongoQuery = condition => {
 				break;
 		}
 	});
-	return { $and: members };
+	return members.length > 0 ? { $and: members } : {};
 }
 
 const BasicConditionForm = props => {
@@ -198,13 +171,6 @@ const BasicConditionForm = props => {
 			<Label>Series Date</Label>
 			<Column>
 				<DateRangePicker value={props.value.seriesDate} onChange={r => change('seriesDate', r)} />
-			</Column>
-			<Label>Tags</Label>
-			<Column>
-				<MultiSelect renderer={TagRenderer} glue=""
-					options={props.availableTags}
-					selected={props.value.tags}
-					onChange={s => change('tags', s.length > 0 ? s : null)} />
 			</Column>
 		</Row>
 	</Form>;

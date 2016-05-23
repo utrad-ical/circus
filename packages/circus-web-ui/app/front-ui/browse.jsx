@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { SeriesSearchCondition } from './components/search-condition-series.jsx';
+import { SeriesSearchResults } from './components/search-results-series.jsx';
 import { modalities } from './constants';
 import { api } from './utils/api';
 import * as modal from './components/modal.jsx';
@@ -15,7 +16,8 @@ let store = {
 		basicFilter: {},
 		advancedFilter: { $and: [] }
 	},
-	projectList: []
+	projectList: [],
+	seriesSearchResults: null
 };
 
 const conditionChange = newCondition => {
@@ -24,7 +26,12 @@ const conditionChange = newCondition => {
 };
 
 const search = condition => {
-	modal.alert(JSON.stringify(condition));
+	const params = { data: { filter: condition } };
+	api('series', params).then(results => {
+		console.log(results);
+		store.seriesSearchResults = results;
+		render();
+	});
 };
 
 function render() {
@@ -34,7 +41,9 @@ function render() {
 				projects={store.projectList}
 				onSearch={search}
 				onChange={conditionChange} />
-			<div>{JSON.stringify(store.seriesCondition)}</div>
+			{ Array.isArray(store.seriesSearchResults) ?
+				<SeriesSearchResults items={store.seriesSearchResults} />
+			: null }
 		</div>,
 		document.getElementById('app')
 	);

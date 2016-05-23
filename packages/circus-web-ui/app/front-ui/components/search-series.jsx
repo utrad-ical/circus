@@ -7,7 +7,6 @@ export class SeriesSearch extends React.Component {
 		super(props);
 		this.state = {
 			seriesCondition: {
-				projects: [],
 				type: 'basic',
 				basicFilter: {},
 				advancedFilter: { $and: [] }
@@ -23,7 +22,6 @@ export class SeriesSearch extends React.Component {
 	search(condition) {
 		const params = { data: { filter: condition } };
 		api('series', params).then(results => {
-			console.log(results);
 			this.setState({ seriesSearchResults: results });
 		});
 	}
@@ -31,7 +29,6 @@ export class SeriesSearch extends React.Component {
 	render() {
 		return <div>
 			<SeriesSearchCondition condition={this.state.seriesCondition}
-				projects={this.state.projectList}
 				onSearch={this.search.bind(this)}
 				onChange={this.conditionChange.bind(this)} />
 			{ Array.isArray(this.state.seriesSearchResults) ?

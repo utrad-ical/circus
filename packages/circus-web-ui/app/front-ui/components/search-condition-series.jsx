@@ -1,119 +1,56 @@
 import React from 'react';
 
-import { Tabs, Tab, Form, FormGroup, FormControl, Button, Glyphicon,
-	ControlLabel, Row, Col, Well } from './react-bootstrap';
-import { ConditionEditor, conditionToMongoQuery } from './condition-editor.jsx';
-import { MultiSelect } from './multiselect.jsx';
 import { DateRangePicker, dateRangeToMongoQuery } from './daterange-picker.jsx';
 import { ShrinkSelect } from './shrink-select.jsx';
 import { modalities } from '../constants';
-import { Tag } from './tag.jsx';
+import { SearchConditionBase, FormGrid, Input } from './search-condition.jsx';
 
-const ProjectRenderer = props => <span>{props.projectName}</span>;
-
-export const SeriesSearchCondition = props => {
-	const activeKey = props.condition.type === 'advanced' ? 2 : 1;
-
-	// Switch Basic <=> Advanced
-	const changeType = key => {
-		const type = key === 1 ? 'basic' : 'advanced';
-		props.onChange({ ... props.condition, type });
-	};
-
-	const changeBasicFilter = basicFilter => {
-		props.onChange({ ... props.condition, basicFilter });
-	};
-
-	const changeAdvanedFilter = advancedFilter => {
-		props.onChange({ ... props.condition, advancedFilter });
+export class SeriesSearchCondition extends SearchConditionBase {
+	constructor(props) {
+		super(props);
+		this.conditionKeys = {
+			modality: { caption: 'modality', type: 'select', spec: { options: modalities }},
+			seriesUID: { caption: 'series UID', type: 'text' },
+			seriesDescription: { caption: 'series description', type: 'text' },
+			patientID: { caption: 'patient ID', type: 'text' },
+			patientName: { caption: 'patient name', type: 'text' },
+			age: { caption: 'age', type: 'number' },
+			sex: { caption: 'sex', type: 'select', spec: { options: ['M', 'F', 'O'] } },
+			seriesDate: { caption: 'series date', type: 'text' },
+		};
 	}
 
-	const conditionKeys = {
-		modality: { caption: 'modality', type: 'select', spec: { options: modalities }},
-		seriesUID: { caption: 'series UID', type: 'text' },
-		seriesDescription: { caption: 'series description', type: 'text' },
-		patientID: { caption: 'patient ID', type: 'text' },
-		patientName: { caption: 'patient name', type: 'text' },
-		age: { caption: 'age', type: 'number' },
-		sex: { caption: 'sex', type: 'select', spec: { options: ['M', 'F', 'O'] } },
-		seriesDate: { caption: 'series date', type: 'text' },
-	};
+	basicFilterToMongoQuery(condition) {
+		const members = [];
+		Object.keys(condition).forEach(key => {
+			const val = condition[key];
+			switch (key) {
+				case 'minAge':
+					members.push({ age: { $ge: val }});
+					break;
+				case 'maxAge':
+					members.push({ age: { $le: val }});
+					break;
+				case 'seriesDate':
+					const q = dateRangeToMongoQuery(val, 'seriesDate');
+					if (q) members.push(q);
+					break;
+				default:
+					members.push({ [key]: val });
+					break;
+			}
+		});
+		return members.length > 0 ? { $and: members } : {};
+	}
 
-	const searchClick = ev => {
-		let condition;
-		if (props.condition.type === 'basic') {
-			condition = basicFilterToMongoQuery(props.condition.basicFilter);
-		} else {
-			condition = conditionToMongoQuery(props.condition.advancedFilter);
-		}
-		props.onSearch && props.onSearch(condition);
-	};
-
-	return <Well>
-		<Tabs animation={false} id="series-search-condition"
-			activeKey={activeKey} onSelect={changeType}
-		>
-			<Tab eventKey={1} title="Basic">
-				<BasicConditionForm
-					value={props.condition.basicFilter}
-					onChange={changeBasicFilter}
-				/>
-			</Tab>
-			<Tab eventKey={2} title="Advanced">
-				<ConditionEditor keys={conditionKeys}
-					value={props.condition.advancedFilter}
-					onChange={changeAdvanedFilter}
-				/>
-			</Tab>
-		</Tabs>
-		<div className="search-buttons">
-			<Button bsStyle="primary" onClick={searchClick}>
-				<Glyphicon glyph="search" />&ensp;Search
-			</Button>
-		</div>
-	</Well>;
+	render() {
+		return this.renderUsing(BasicConditionForm);
+	}
 }
-
-const Column = props => <Col md={4}>{props.children}</Col>;
-
-const ColInput = props => <Column><Input {...props} /></Column>;
-
-const Input = ({ type, name, value, onChange, className }) => {
-	return <FormControl
-		type={type} className={className}
-		onChange={ev => onChange(name, ev.target.value)} />;
-}
-
-const Label = ({children}) => <Col md={2}><ControlLabel>{children}</ControlLabel></Col>;
 
 const sexOptions = { all: 'All', M: 'male', F: 'female', O: 'other' };
 const modalityOptions = { all: 'All' };
 modalities.forEach(m => modalityOptions[m] = m);
-
-const TagRenderer = props => <Tag name={props.name} color={props.color} />;
-
-const basicFilterToMongoQuery = condition => {
-	const members = [];
-	Object.keys(condition).forEach(key => {
-		const val = condition[key];
-		switch (key) {
-			case 'minAge':
-				members.push({ age: { $ge: val }});
-				break;
-			case 'maxAge':
-				members.push({ age: { $le: val }});
-				break;
-			case 'seriesDate':
-				const q = dateRangeToMongoQuery(val, 'seriesDate');
-				if (q) members.push(q);
-				break;
-			default:
-				members.push({ [key]: val });
-				break;
-		}
-	});
-	return members.length > 0 ? { $and: members } : {};
-}
 
 const BasicConditionForm = props => {
 	const change = (key, newValue) => {
@@ -129,49 +66,48 @@ const BasicConditionForm = props => {
 		}
 	};
 
-	return <Form horizontal>
-		<Row>
-			<Label>Modality</Label>
-			<Column>
-				<ShrinkSelect options={modalityOptions} defaultSelect="all"
-					value={props.value.modality} onChange={v => change('modality', v)} />
-			</Column>
-		</Row>
-		<Row>
-			<Label>Series UID</Label>
-			<ColInput name="seriesUID" value={props.value.seriesUID} onChange={change} />
-			<Label>Series Description</Label>
-			<ColInput name="seriesDescription" value={props.value.seriesDescription} onChange={change} />
-		</Row>
-		<Row>
-			<Label>Patient ID</Label>
-			<ColInput name="patientID" value={props.value.patientID} onChange={change} />
-			<Label>Patient Name</Label>
-			<ColInput name="patientName" value={props.value.patientName} onChange={change} />
-		</Row>
-		<Row>
-			<Label>Age</Label>
-			<Column>
-				<div className="form-inline">
-					<Input type="number" name="minAge" className="age"
-						value={props.value.minAge} onChange={change} />
-					&thinsp;&mdash;&thinsp;
-					<Input type="number" name="maxAge" className="age"
-						value={props.value.maxAge} onChange={change} />
-				</div>
-			</Column>
-			<Label>Sex</Label>
-			<Column>
-				<ShrinkSelect options={sexOptions}
-					value={props.value.sex} defaultSelect="all"
-					onChange={v => change('sex', v)} />
-			</Column>
-		</Row>
-		<Row>
-			<Label>Series Date</Label>
-			<Column>
-				<DateRangePicker value={props.value.seriesDate} onChange={r => change('seriesDate', r)} />
-			</Column>
-		</Row>
-	</Form>;
-}
+	return FormGrid([
+		[
+			'Modality',
+			<ShrinkSelect options={modalityOptions} defaultSelect="all"
+				value={props.value.modality} onChange={v => change('modality', v)} />
+		],
+		'br',
+		[
+			'Series UID',
+			<Input name="seriesUID" value={props.value.seriesUID} onChange={change} />
+		],
+		[
+			'Series Description',
+			<Input name="seriesDescription" value={props.value.seriesDescription} onChange={change} />
+		],
+		[
+			'Patient ID',
+			<Input name="patientID" value={props.value.patientID} onChange={change} />
+		],
+		[
+			'Patient Name',
+			<Input name="patientName" value={props.value.patientName} onChange={change} />
+		],
+		[
+			'Age',
+			<div className="form-inline">
+				<Input type="number" name="minAge" className="age"
+					value={props.value.minAge} onChange={change} />
+				&thinsp;&mdash;&thinsp;
+				<Input type="number" name="maxAge" className="age"
+					value={props.value.maxAge} onChange={change} />
+			</div>
+		],
+		[
+			'Sex',
+			<ShrinkSelect options={sexOptions}
+				value={props.value.sex} defaultSelect="all"
+				onChange={v => change('sex', v)} />
+		],
+		[
+			'Series Date',
+			<DateRangePicker value={props.value.seriesDate} onChange={r => change('seriesDate', r)} />
+		]
+	]);
+};

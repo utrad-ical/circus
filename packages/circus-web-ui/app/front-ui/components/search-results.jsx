@@ -7,8 +7,8 @@ export const SearchResults = props => {
 	const Renderer = props.renderer || defaultRenderer;
 	const pages = Math.ceil(props.totalItems / props.per);
 
-	return <div>
-		<div className="text-right">
+	return <div className="search-results-container">
+		<div className="search-results-header">
 			{props.totalItems + ' Result' + (props.totalItems > 1 ? 's' : '')}
 			&emsp;
 			Sort: <ShrinkSelect options={props.sortOptions}
@@ -17,7 +17,7 @@ export const SearchResults = props => {
 		<div className="search-results">
 			{props.items.map((item, i) => <Renderer {...item} key={i} />)}
 		</div>
-		<div className="text-center">
+		<div className="search-results-pager">
 			<Pagination prev next first last ellipsis
 				items={pages} maxButtons={10} activePage={props.page}
 				onSelect={props.onPageClick}

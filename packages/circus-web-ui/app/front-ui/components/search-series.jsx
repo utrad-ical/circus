@@ -8,5 +8,6 @@ export class SeriesSearch extends SearchCommon {
 		super(props);
 		this.conditionComp = SeriesSearchCondition;
 		this.resultComp = SeriesSearchResults;
+		this.setInitialCondition();
 	}
 };

@@ -46,11 +46,18 @@ const SeriesInfoRenderer = props => {
 	</div>;
 };
 
-const sortOptions = {
-	'createTime asc': 'Create time asc',
-	'createTime desc': 'Create time desc',
-	'seriesUID asc': 'Series instance UID asc'
+const sortItems = {
+	createTime: 'series import time',
+	seriesUID: 'series instance UID',
+	seriesDate: 'series date',
+	modality: 'modality'
 };
+
+const sortOptions = {};
+Object.keys(sortItems).forEach(k => {
+	sortOptions[`${k} asc`] = `${sortItems[k]} asc`;
+	sortOptions[`${k} desc`] = `${sortItems[k]} desc`;
+});
 
 export const SeriesSearchResults = props => {
 	return <SearchResults

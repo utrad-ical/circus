@@ -20,6 +20,14 @@ export class SeriesSearchCondition extends SearchConditionBase {
 		};
 	}
 
+	static nullCondition() {
+		return {
+			type: 'basic',
+			basicFilter: {},
+			advancedFilter: { $and: [] }
+		};
+	}
+
 	basicFilterToMongoQuery(condition) {
 		const members = [];
 		Object.keys(condition).forEach(key => {

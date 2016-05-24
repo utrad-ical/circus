@@ -17,6 +17,10 @@ export class SearchConditionBase extends React.Component {
 		this.props.onChange({ ... this.props.condition, advancedFilter });
 	}
 
+	resetClick() {
+		this.props.onChange(this.constructor.nullCondition());
+	}
+
 	searchClick(ev) {
 		let condition;
 		if (this.props.condition.type === 'basic') {
@@ -48,10 +52,19 @@ export class SearchConditionBase extends React.Component {
 				</Tab>
 			</Tabs>
 			<div className="search-buttons">
-				<Button bsStyle="primary" onClick={this.searchClick.bind(this)}>
+				<Button bsStyle="link"
+					onClick={this.resetClick.bind(this)}
+				>
+					Reset
+				</Button>
+				&ensp;
+				<Button bsStyle="primary"
+					onClick={this.searchClick.bind(this)}
+				>
 					<Glyphicon glyph="search" />&ensp;Search
 				</Button>
 			</div>
+			{ /* <div>{JSON.stringify(this.props.condition)}</div> */ }
 		</Well>;
 	}
 
@@ -59,7 +72,7 @@ export class SearchConditionBase extends React.Component {
 
 export const Input = ({ type, name, value, onChange, className }) => {
 	return <FormControl
-		type={type} className={className}
+		type={type} className={className} value={value}
 		onChange={ev => onChange(name, ev.target.value)} />;
 }
 

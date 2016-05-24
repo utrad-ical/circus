@@ -195,9 +195,9 @@ export const conditionToMongoQuery = condition => {
 			case '<':
 				return {[key]: {$lt: value}};
 			case '>=':
-				return {[key]: {$ge: value}};
+				return {[key]: {$gte: value}};
 			case '<=':
-				return {[key]: {$le: value}};
+				return {[key]: {$lte: value}};
 			case '^=':
 				return {[key]: {$regex: '^' + escapeRegExp(value)}};
 			case '$=':

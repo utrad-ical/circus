@@ -34,10 +34,10 @@ export class SeriesSearchCondition extends SearchConditionBase {
 			const val = condition[key];
 			switch (key) {
 				case 'minAge':
-					members.push({ age: { $ge: val }});
+					members.push({ age: { $gte: val }});
 					break;
 				case 'maxAge':
-					members.push({ age: { $le: val }});
+					members.push({ age: { $lte: val }});
 					break;
 				case 'seriesDate':
 					const q = dateRangeToMongoQuery(val, 'seriesDate');

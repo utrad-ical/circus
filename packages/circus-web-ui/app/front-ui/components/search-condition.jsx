@@ -72,8 +72,8 @@ export class SearchConditionBase extends React.Component {
 
 export const Input = ({ type, name, value, onChange, className }) => {
 	return <FormControl
-		type={type} className={className} value={value}
-		onChange={ev => onChange(name, ev.target.value)} />;
+		type={type} className={className} value={value || ''}
+		onChange={ev => onChange(name, type === 'number' ? parseFloat(ev.target.value) : ev.target.value)} />;
 }
 
 export const FormGrid = items => {

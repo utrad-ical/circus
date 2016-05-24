@@ -4,6 +4,7 @@ import { DateRangePicker, dateRangeToMongoQuery } from './daterange-picker.jsx';
 import { ShrinkSelect } from './shrink-select.jsx';
 import { modalities } from '../constants';
 import { SearchConditionBase, FormGrid, Input } from './search-condition.jsx';
+import { escapeRegExp } from '../utils/util';
 
 export class SeriesSearchCondition extends SearchConditionBase {
 	constructor(props) {
@@ -34,17 +35,20 @@ export class SeriesSearchCondition extends SearchConditionBase {
 			const val = condition[key];
 			switch (key) {
 				case 'minAge':
-					members.push({ age: { $gte: val }});
+					members.push({ 'patientInfo.age': { $gte: val }});
 					break;
 				case 'maxAge':
-					members.push({ age: { $lte: val }});
+					members.push({ 'patientInfo.age': { $lte: val }});
 					break;
 				case 'seriesDate':
 					const q = dateRangeToMongoQuery(val, 'seriesDate');
 					if (q) members.push(q);
 					break;
 				default:
-					members.push({ [key]: val });
+					if (key.match(/^(patient(.+)|sex)$/)) {
+						key = 'patientInfo.' + key;
+					}
+					members.push({ [key]: { $regex: escapeRegExp(val) } });
 					break;
 			}
 		});

@@ -54,8 +54,8 @@ export const DateRangePicker = props => {
 export const dateRangeToMongoQuery = (condition, key) => {
 	const result = { $and: [] };
 	const from = normalizeRelative(condition.from);
-	if (from) result.$and.push({ [key]: { $ge: from } });
+	if (from) result.$and.push({ [key]: { $gte: { $date: from } } });
 	const to = normalizeRelative(condition.to);
-	if (to) result.$and.push({ [key]: { $le: to } });
+	if (to) result.$and.push({ [key]: { $lte: { $date: to } } });
 	return (from || to) ? result : null;
 };

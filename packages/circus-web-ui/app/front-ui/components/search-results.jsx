@@ -9,7 +9,7 @@ export const SearchResults = props => {
 
 	return <div className="search-results-container">
 		<div className="search-results-header">
-			{props.totalItems + ' Result' + (props.totalItems > 1 ? 's' : '')}
+			{props.totalItems + ' Result' + (props.totalItems === 1 ? '' : 's')}
 			&emsp;
 			Sort: <ShrinkSelect options={props.sortOptions}
 				value={props.sort} onChange={props.onSortChange} />

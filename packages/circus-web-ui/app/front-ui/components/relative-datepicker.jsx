@@ -96,8 +96,10 @@ export class RelativeDatePicker extends React.Component {
 export const normalizeRelative = dateValue => {
 	if (typeof dateValue === 'string') {
 		return moment(dateValue);
+	} else if (dateValue === null) {
+		return null;
 	} else if (typeof dateValue === 'object') {
 		return moment().startOf('day').add(...dateValue);
 	}
-	return null
+	return null;
 };

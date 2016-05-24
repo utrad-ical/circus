@@ -1,6 +1,7 @@
 import React from 'react';
 import { ShrinkSelect } from './shrink-select.jsx';
 import { FormControl, FormGroup, Button, Glyphicon } from 'react-bootstrap';
+import { escapeRegExp } from '../utils/util';
 
 export const ConditionEditor = props => {
 	return <div className="condition-editor">
@@ -177,11 +178,6 @@ const ToolButton = props => {
 		<Glyphicon glyph={props.icon} />
 	</Button>
 };
-
-const escapeRegExp = str => {
-	str = str + '';
-	return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
-}
 
 export const conditionToMongoQuery = condition => {
 	function binary2obj(key, op, value) {

@@ -8,7 +8,7 @@ export class SearchCommon extends React.Component {
 			query: { filter: null, sort: 'createTime asc', page: 1 },
 			sort: 'createTime asc',
 			page: 1,
-			per: 2,
+			per: 15,
 			searchResults: null,
 			totalItems: null
 		};
@@ -60,6 +60,7 @@ export class SearchCommon extends React.Component {
 			<ConditionComp condition={this.state.condition}
 				onSearch={this.searchClick.bind(this)}
 				onChange={this.conditionChange.bind(this)} />
+			{ /* <pre>{JSON.stringify(this.state.query, null, '  ')}</pre> */ }
 			{ Array.isArray(this.state.searchResults) ?
 				<ResultComp
 					items={this.state.searchResults}

@@ -47,7 +47,7 @@ const Nav = props => {
 const MainMenu = props => <ul>{props.children}</ul>;
 
 const Menu = props => {
-	const className = `circus-icon icon-${props.name.toLowerCase()}`;
+	const className = `circus-icon circus-icon-${props.name.toLowerCase()}`;
 	return <li className="icon-menu">
 		<Link to={props.link}>
 			<span className={className} />

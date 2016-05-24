@@ -1,4 +1,5 @@
 import React from 'react';
+import { api } from '../utils/api';
 
 export class SearchCommon extends React.Component {
 	constructor(props) {

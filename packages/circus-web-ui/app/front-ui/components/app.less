@@ -1,0 +1,103 @@
+// Common variables
+@brand-color: #168477;
+@brand-dark: darken(@brand-color, 10%);
+@light-background: #d0e6e4;
+@highlight-color: #fd3164;
+
+// Top navigation
+header {
+	margin: 0 auto 5px;
+	height: 40px;
+	position: relative;
+	background-color: @brand-dark;
+	border-bottom: 1px solid darken(@brand-dark, 10%);
+	line-height: 40px;
+	z-index: 2000;
+	color: white;
+	text-align: left;
+
+	display: flex;
+	flex-flow: row;
+	justify-content: space-between;
+
+	.header-logo {
+		width: 120px;
+		height: 30px;
+		vertical-align: middle;
+		margin-right: 10px;
+	}
+
+	nav {
+		a {
+			display: inline-block;
+			height: 40px;
+			color: white;
+			text-decoration: none!important;
+			padding: 0 5px;
+		}
+
+		> ul { // main navigation menu
+
+			> li { // main navigation item
+				display: inline-block;
+				position: relative;
+				> a {
+					> span { // main navigation icon
+						font-size: 30px;
+						vertical-align: middle;
+					}
+				}
+				&.icon-menu:hover {
+					background-color: @brand-color;
+					> a { color: @highlight-color; }
+					> ul { // show dropdown sub menu
+						display: block;
+					}
+				}
+				> ul { // dropdown sub menu
+					display: none;
+					position: absolute;
+					top: 40px;
+					left: 0;
+					background-color: rgba(240, 240, 240, 0.9);
+					padding: 0;
+					border: 1px solid #bbb;
+					> li {
+						display: block;
+						width: 200px;
+						border-bottom: 1px solid #bbb;
+						a {
+							display: block;
+							color: black;
+							height: 30px;
+							line-height: 30px;
+							&:hover {
+								background-color: @brand-color;
+								color: white;
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	.user-info {
+		font-weight: bold;
+		margin-right: 10px;
+	}
+
+	a#color_switch {
+		display: inline-block;
+		cursor: pointer;
+		width: 20px;
+		height: 20px;
+		border-radius: 3px;
+		border: 2px solid @brand-color;
+		vertical-align: middle;
+		&:hover {
+			border-color: lighten(@brand-color, 10%);
+		}
+	}
+
+}

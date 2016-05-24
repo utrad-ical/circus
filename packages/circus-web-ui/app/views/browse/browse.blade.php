@@ -1,10 +1,11 @@
-@extends('common.layout')
-
-@section('title')
-	Search
-@stop
-
-@section('content')
-<div id="app"></div>
-<script src="/js-app/browse.js"></script>
-@stop
+<!doctype html>
+<html lang="en">
+<head>
+	<title>CIRCUS DB</title>
+	<meta charset="UTF-8">
+</head>
+<body>
+	<div id="app"></div>
+	<script src="/js-app/browse.js"></script>
+</body>
+</html>

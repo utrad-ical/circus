@@ -35,10 +35,6 @@ module.exports = {
 			{
 				test: /\.css/,
 				loader: 'style!css'
-			},
-			{
-				test: /fonts\.js/,
-				loader: 'file?name=css/fonts.css!fontgen?fileName=[fontname][ext]'
 			}
 		]
 	},

@@ -1,11 +1,24 @@
-.search-results {
-	display: table;
-	border-collapse: collapse;
-	width: 100%;
-
-	.search-result {
-		display: table-row;
-		border-top: 1px solid silver;
-		&:hover { background-color: #eee; }
+.search-results-container {
+	.search-results-header {
+		text-align: right;
+		margin-bottom: 0.3em;
 	}
+
+	.search-results {
+		display: table;
+		border-collapse: collapse;
+		width: 100%;
+
+		.search-result {
+			display: table-row;
+			border-top: 1px solid silver;
+			&:hover { background-color: #eee; }
+		}
+
+	}
+
+	.search-results-pager {
+		text-align: center;
+	}
+
 }

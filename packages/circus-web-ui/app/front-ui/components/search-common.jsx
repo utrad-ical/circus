@@ -4,11 +4,7 @@ export class SearchCommon extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			condition: {
-				type: 'basic',
-				basicFilter: {},
-				advancedFilter: { $and: [] }
-			},
+			condition: null,
 			query: { filter: null, sort: 'createTime asc', page: 1 },
 			sort: 'createTime asc',
 			page: 1,
@@ -16,6 +12,10 @@ export class SearchCommon extends React.Component {
 			searchResults: null,
 			totalItems: null
 		};
+	}
+
+	setInitialCondition() {
+		this.state.condition = this.conditionComp.nullCondition();
 	}
 
 	conditionChange(newCondition) {

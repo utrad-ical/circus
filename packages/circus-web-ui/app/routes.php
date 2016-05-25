@@ -35,6 +35,7 @@ Route::group(['before' => 'auth'], function() {
 	$staticView('browse/series', 'browse/browse');
 	$staticView('browse/case', 'browse/browse');
 	$staticView('import-series', 'browse/browse');
+	$staticView('admin/{dum}', 'browse/browse');
 
 	// Case
 	Route::get('case/search/{preset_id}', 'CaseSearchController@search')

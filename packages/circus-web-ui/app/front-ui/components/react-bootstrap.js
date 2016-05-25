@@ -4,6 +4,7 @@
 
 export { default as Button } from 'react-bootstrap/lib/Button';
 export { default as ButtonGroup } from 'react-bootstrap/lib/ButtonGroup';
+export { default as ButtonToolbar } from 'react-bootstrap/lib/ButtonToolbar';
 
 export { default as Form } from 'react-bootstrap/lib/Form';
 export { default as FormGroup } from 'react-bootstrap/lib/FormGroup';
@@ -29,5 +30,6 @@ export { default as Tabs } from 'react-bootstrap/lib/Tabs';
 export { default as Tab } from 'react-bootstrap/lib/Tab';
 
 export { default as Well } from 'react-bootstrap/lib/Well';
+export { default as Panel } from 'react-bootstrap/lib/Panel';
 
 export { default as Modal } from 'react-bootstrap/lib/Modal';

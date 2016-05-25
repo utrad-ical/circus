@@ -30,7 +30,8 @@ const Nav = props => {
 					<SubMenu name="Download" link="dummy"/>
 					<SubMenu name="Import" link="dummy"/>
 				</Menu>
-				<Menu name="Administration" link="/administration">
+				<Menu name="Administration" link="/admin">
+					<SubMenu name="DICOM Image Server" link="/admin/server"/>
 				</Menu>
 			</MainMenu>
 		</nav>

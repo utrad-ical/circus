@@ -4,6 +4,8 @@ import { DateRangePicker, dateRangeToMongoQuery } from './daterange-picker.jsx';
 import { ShrinkSelect } from './shrink-select.jsx';
 import { modalities } from '../constants';
 import { SearchConditionBase, FormGrid, Input } from './search-condition.jsx';
+import { Well, ControlLabel } from './react-bootstrap';
+import { MultiSelect } from './multiselect.jsx';
 
 export class CaseSearchCondition extends SearchConditionBase {
 	constructor(props) {
@@ -11,6 +13,15 @@ export class CaseSearchCondition extends SearchConditionBase {
 		this.conditionKeys = {
 			caseID: { caption: 'case ID', type: 'text' },
 			tag: { caption: 'Tag', type: 'select', spec: { options: [] } }
+		};
+	}
+
+	static nullCondition() {
+		return {
+			type: 'basic',
+			projects: [],
+			basicFilter: {},
+			advancedFilter: { $and: [] }
 		};
 	}
 
@@ -38,7 +49,13 @@ export class CaseSearchCondition extends SearchConditionBase {
 	}
 
 	render() {
-		return this.renderUsing(BasicConditionForm);
+		return <Well>
+			<div style={{'margin-bottom': '10px'}}>
+				<ControlLabel>Project:&ensp;</ControlLabel>
+				<MultiSelect options={['A','B','C']} />
+			</div>
+			{this.renderUsing(BasicConditionForm)}
+		</Well>
 	}
 }
 
@@ -60,10 +77,35 @@ const BasicConditionForm = props => {
 		}
 	};
 
-	return FormGrid([
+	const grid = FormGrid([
 		[
 			'Case ID',
 			<Input name="caseID" value={props.value.caseID} onChange={change} />
-		]
+		],
+		'br',
+		[
+			'Patient ID',
+			<Input name="patientID" value={props.value.caseID} onChange={change} />
+		],
+		[
+			'Patient Name',
+			<Input name="patientName" value={props.value.caseID} onChange={change} />
+		],
+		[
+			'Case Created At',
+			<DateRangePicker value={props.value.createdAt} onChange={v => change('createdAt', v)} />
+		],
+		[
+			'Case Updated At',
+			<DateRangePicker value={props.value.updatedAt} onChange={v => change('updatedAt', v)}  />
+		],
+		[
+			'Tags',
+			<Input name="caseID" value={props.value.caseID} onChange={change} />
+		],
 	]);
+
+	return <div>
+		{grid}
+	</div>;
 };

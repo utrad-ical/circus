@@ -5,6 +5,7 @@ import { ShrinkSelect } from './shrink-select.jsx';
 import { modalities } from '../constants';
 import { SearchConditionBase, FormGrid, Input } from './search-condition.jsx';
 import { escapeRegExp } from '../utils/util';
+import { Well } from './react-bootstrap';
 
 export class SeriesSearchCondition extends SearchConditionBase {
 	constructor(props) {
@@ -56,7 +57,9 @@ export class SeriesSearchCondition extends SearchConditionBase {
 	}
 
 	render() {
-		return this.renderUsing(BasicConditionForm);
+		return <Well>
+			{this.renderUsing(BasicConditionForm)}
+		</Well>
 	}
 }
 

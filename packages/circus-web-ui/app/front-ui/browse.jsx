@@ -15,8 +15,8 @@ function render() {
 	ReactDOM.render(
 		<Router history={browserHistory}>
 			<Route path='/' component={App}>
-				<Route path='/browse-series' component={SeriesSearch} />
-				<Route path='/browse-case' component={CaseSearch} />
+				<Route path='/browse/series' component={SeriesSearch} />
+				<Route path='/browse/case' component={CaseSearch} />
 			</Route>
 		</Router>,
 		document.getElementById('app')

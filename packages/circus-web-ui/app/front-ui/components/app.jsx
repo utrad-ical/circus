@@ -18,19 +18,19 @@ const Nav = props => {
 					<img src="/img/common/header-logo.png"
 						alt="CIRCUS" className="header-logo" />
 				</li>
-				<Menu name="Case" link="browse-case">
-					<SubMenu name="Case Search" link="browse-case"/>
+				<Menu name="Case" link="/browse/case">
+					<SubMenu name="Case Search" link="/browse/case"/>
 				</Menu>
-				<Menu name="Series" link="browse-series">
-					<SubMenu name="Series Search" link="browse-series"/>
-					<SubMenu name="Series Upload" link="series-upload"/>
+				<Menu name="Series" link="/browse/series">
+					<SubMenu name="Series Search" link="/browse/series"/>
+					<SubMenu name="Series Import" link="/import-series"/>
 				</Menu>
-				<Menu name="Share" link="share">
+				<Menu name="Share" link="/share">
 					<SubMenu name="Share Search" link="dummy"/>
 					<SubMenu name="Download" link="dummy"/>
 					<SubMenu name="Import" link="dummy"/>
 				</Menu>
-				<Menu name="Administration" link="administration">
+				<Menu name="Administration" link="/administration">
 				</Menu>
 			</MainMenu>
 		</nav>

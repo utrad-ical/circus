@@ -34,7 +34,7 @@ export class SearchConditionBase extends React.Component {
 	renderUsing(BasicConditionForm) {
 		const activeKey = this.props.condition.type === 'advanced' ? 2 : 1;
 
-		return <Well>
+		return <div>
 			<Tabs animation={false} id="series-search-condition"
 				activeKey={activeKey} onSelect={this.changeType.bind(this)}
 			>
@@ -65,7 +65,7 @@ export class SearchConditionBase extends React.Component {
 				</Button>
 			</div>
 			{ /* <div>{JSON.stringify(this.props.condition)}</div> */ }
-		</Well>;
+		</div>;
 	}
 
 }

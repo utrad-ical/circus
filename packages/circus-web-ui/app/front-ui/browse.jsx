@@ -6,6 +6,7 @@ import { api } from './utils/api';
 import { App } from './components/app.jsx';
 import { SeriesSearch } from './components/search-series.jsx';
 import { CaseSearch } from './components/search-case.jsx';
+import { ImportSeries } from './components/import-series.jsx';
 import * as modal from './components/modal.jsx';
 
 require('style!css!./bs-style/bootstrap.less');
@@ -17,6 +18,7 @@ function render() {
 			<Route path='/' component={App}>
 				<Route path='/browse/series' component={SeriesSearch} />
 				<Route path='/browse/case' component={CaseSearch} />
+				<Route path='/import-series' component={ImportSeries} />
 			</Route>
 		</Router>,
 		document.getElementById('app')

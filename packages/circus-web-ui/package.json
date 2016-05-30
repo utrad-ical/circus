@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "fontgen": "node app/assets/icons/fontgen.js",
-    "build": "gulp"
+    "build": "webpack"
   },
   "repository": {
     "type": "git",
@@ -29,6 +29,7 @@
     "file-loader": "^0.8.5",
     "glob": "^7.0.3",
     "gulp-typescript": "^2.4.2",
+    "less": "^2.7.1",
     "less-loader": "^2.2.3",
     "moment": "^2.13.0",
     "react": "^15.0.2",

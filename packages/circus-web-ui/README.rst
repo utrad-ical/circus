@@ -22,8 +22,17 @@ This is a quick overview. Refer to the corresponding official websites for more 
 2. Install composer (PHP's dependency management system), and type ``composer install`` at the repository root.
    All the dependencies (including Laravel framework) will be downloaded.
 
-3. Type ``npm install`` at the repository root, and then type ``gulp``.
-   Asset files (CSS, fonts) will be compiled.
+   .. tip::
+
+      With recent versions of Composer, you may be instructed to enter an OAuth2 consumer key/secret.
+      In that case, log in to Bitbucket, go to the "OAuth" page under the settings screen,
+      and create a new OAuth Consumer.
+      You need to enter a dummy URL (anything) into the "Callback URL" button for the time being.
+
+      See: https://github.com/composer/composer/issues/5166
+
+3. Type ``npm install`` at the repository root, and then type ``npm run build``.
+   Asset files (CSS, Front JS codes, etc) will be compiled from the source.
 
 4. Install MongoDB, create database (with an arbitrary name) and set up authentication.
 

@@ -11,6 +11,7 @@ import { CaseSearch } from './components/search-case.jsx';
 import { ImportSeries } from './components/import-series.jsx';
 import { AdminIndex } from './components/admin/index.jsx';
 import { DicomImageServerAdmin } from './components/admin/dicom-image-server-admin.jsx';
+import { UserAdmin } from './components/admin/user-admin.jsx';
 import * as modal from './components/modal.jsx';
 
 require('style!css!./bs-style/bootstrap.less');
@@ -26,6 +27,7 @@ function render() {
 				<Route path='admin'>
 					<IndexRoute component={AdminIndex} />
 					<Route path='server' component={DicomImageServerAdmin} />
+					<Route path='user' component={UserAdmin} />
 				</Route>
 			</Route>
 		</Router>,

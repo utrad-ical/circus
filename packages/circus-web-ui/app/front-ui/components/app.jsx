@@ -32,6 +32,7 @@ const Nav = props => {
 				</Menu>
 				<Menu name="Administration" link="/admin">
 					<SubMenu name="DICOM Image Server" link="/admin/server"/>
+					<SubMenu name="Users" link="/admin/user"/>
 				</Menu>
 			</MainMenu>
 		</nav>

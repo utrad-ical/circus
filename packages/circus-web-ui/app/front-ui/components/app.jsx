@@ -32,7 +32,10 @@ const Nav = props => {
 				</Menu>
 				<Menu name="Administration" link="/admin">
 					<SubMenu name="DICOM Image Server" link="/admin/server"/>
+					<SubMenu name="Storage" link="/admin/storage"/>
+					<SubMenu name="Groups" link="/admin/group"/>
 					<SubMenu name="Users" link="/admin/user"/>
+					<SubMenu name="Project" link="/admin/project"/>
 				</Menu>
 			</MainMenu>
 		</nav>

@@ -22,7 +22,7 @@ class UserApiController extends ResourceApiBaseController
 	{
 		// Temporarily saves the password field,
 		// which is optional and can not be mass-assigned
-		if (strlen($item['password']) > 0) {
+		if (isset($item['password']) && strlen($item['password']) > 0) {
 			$this->tmp_password = $item['password'];
 		}
 		unset($item['password']);

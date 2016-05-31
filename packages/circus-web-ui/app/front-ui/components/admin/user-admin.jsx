@@ -15,20 +15,20 @@ export class UserAdmin extends EditorPage {
 			{ caption: 'Login Name', key: 'loginID', type: 'text' },
 			{ caption: 'Description', key: 'description', type: 'text' },
 			{ caption: 'Password', key: 'password', type: 'password' },
-			// {
-			// 	caption: 'Groups',
-			// 	key: 'groups',
-			// 	type: 'multiselect',
-			// 	spec: { options: groups, valueType: 'number' }
-			// },
+			{
+				caption: 'Groups',
+				key: 'groups',
+				type: 'multiselect',
+				spec: { options: [], numericalValue: true }
+			},
 			{
 				caption: 'Theme',
 				key: 'preferences.theme',
 				type: 'select',
-				spec: { options: [ 'mode_white', 'mode_black' ] }
+				spec: { options: { mode_white: 'White', mode_black: 'Black' } }
 			},
-			// {caption: 'Show personal info', key: 'preferences.personalInfoView', type: 'checkbox'},
-			// {caption: 'Login Enabled', key: 'loginEnabled', type: 'checkbox'}
+			{ caption: 'Show personal info', key: 'preferences.personalInfoView', type: 'checkbox' },
+			{caption: 'Login Enabled', key: 'loginEnabled', type: 'checkbox'}
 		];
 		this.listColumns = [
 			{ key: 'userEmail', label: 'User ID (E-mail)' },
@@ -48,10 +48,25 @@ export class UserAdmin extends EditorPage {
 		];
 	}
 
+	makeEmptyItem() {
+		return {
+			userEmail: '',
+			loginID: '',
+			description: '',
+			password: '',
+			groups: [],
+			'preferences.theme': 'mode_white',
+			'preferences.personalInfoView': true,
+			loginEnabled: true
+		};
+	}
+
 	async componentDidMount() {
 		const groups = await api('group');
 		const groupIdMap = {};
 		groups.forEach(g => groupIdMap[g.groupID] = g.groupName);
+		console.log(groupIdMap);
+		this.editorProperties[4].spec.options = groupIdMap;
 		this.setState({ groupIdMap });
 		super.componentDidMount();
 	}

@@ -17,12 +17,13 @@ export class EditorPage extends React.Component {
 		let endPoint = this.endPoint;
 		if (this.state.target) endPoint += '/' + this.state.target;
 		const args = {
-			method: 'put',
+			method: this.state.target ? 'put' : 'post',
 			data: item
-		}
+		};
 		try {
 			await api(endPoint, args);
-			console.log('saved!');
+			this.setState({ target: null, editing: null });
+			this.loadItems();
 		} catch (err) {
 			// error400: function (res) {
 			// 	if ($.isPlainObject(res.responseJSON)) {
@@ -34,9 +35,13 @@ export class EditorPage extends React.Component {
 		}
 	}
 
-	async componentDidMount() {
+	async loadItems() {
 		const items = await api(this.endPoint);
 		this.setState({ items });
+	}
+
+	componentDidMount() {
+		this.loadItems();
 	}
 
 	editStart(item) {
@@ -50,6 +55,13 @@ export class EditorPage extends React.Component {
 		this.setState({ editing: null });
 	}
 
+	createItem() {
+		this.setState({
+			target: null,
+			editing: this.makeEmptyItem()
+		});
+	}
+
 	render() {
 		return <div>
 			<h1>
@@ -58,10 +70,11 @@ export class EditorPage extends React.Component {
 			</h1>
 			<List
 				items={this.state.items}
+				active={this.state.editing}
 				listColumns={this.listColumns}
 				onEditClick={this.editStart.bind(this)}/>
 			<p className="text-right">
-				<Button bsStyle="primary" bsSize="small">
+				<Button bsStyle="primary" bsSize="small" onClick={this.createItem.bind(this)}>
 					<Glyphicon glyph="plus"/>&ensp;
 					Create new
 				</Button>
@@ -69,6 +82,7 @@ export class EditorPage extends React.Component {
 			{ this.state.editing ?
 				<Editor
 					item={this.state.editing}
+					taret={this.state.target}
 					properties={this.editorProperties}
 					primaryKey={this.primaryKey}
 					onSaveClick={item => this.commitItem(item)}
@@ -84,7 +98,7 @@ const List = props => {
 		<th key={col.label}>{col.label}</th>
 	));
 
-	const items = props.items.map(item => {
+	const items = props.items.map((item, i) => {
 		const columns = props.listColumns.map(col => {
 			if (col.key) {
 				return <td>{item[col.key]}</td>;
@@ -92,7 +106,8 @@ const List = props => {
 				return <td>{col.data(item)}</td>;
 			}
 		});
-		return <tr>
+		const active = props.active === item;
+		return <tr key={i} className={active ? 'info' : null}>
 			{columns}
 			<td>
 				<Button bsSize="xs" bsStyle="primary"
@@ -104,7 +119,7 @@ const List = props => {
 		</tr>;
 	});
 
-	return <table className="table table-striped table-hover table-condensed">
+	return <table className="table table-hover table-condensed">
 		<thead><tr>
 			{headerColumns}
 			<th></th>
@@ -132,23 +147,23 @@ class Editor extends React.Component {
 	}
 
 	render() {
-		const header = <span>
-			Updating: <strong>{this.props.item[this.props.primaryKey]}</strong>
-		</span>;
-		return <Panel header={header} bsStyle="primary">
+		const header = this.props.target ?
+				<span>Updating: <strong>{this.props.item[this.props.primaryKey]}</strong></span>
+				: 'Creating new item';
+		const footer = <div className="text-center">
+			<Button bsStyle="link" onClick={this.props.onCancelClick}>
+				Cancel
+			</Button>
+			<Button bsStyle="primary" onClick={this.onSaveClick.bind(this)}>
+				Save
+			</Button>
+		</div>;
+		return <Panel header={header} footer={footer} bsStyle="primary">
 			<PropertyEditor
 				value={this.state.item}
 				properties={this.props.properties}
 				onChange={this.onChange.bind(this)}
 			/>
-			<p className="text-center">
-				<Button bsStyle="link" onClick={this.props.onCancelClick}>
-					Cancel
-				</Button>
-				<Button bsStyle="primary" onClick={this.onSaveClick.bind(this)}>
-					Save
-				</Button>
-			</p>
 		</Panel>;
 	}
 };

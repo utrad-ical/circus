@@ -3,10 +3,19 @@ import { Row, Col, ControlLabel, FormControl, Button, Glyphicon, Checkbox } from
 import { ColorPicker } from './color-picker.jsx';
 import { MultiSelect } from './multiselect.jsx';
 
-const Select = props => <FormControl componentClass="select" value={props.value}
-	onChange={ev => props.onChange(ev.target.value)}>
-	{props.spec.options.map(opt => <option key={opt} value={opt}>{opt}</option>)}
-</FormControl>;
+const Select = props => {
+	let options = {};
+	if (Array.isArray(props.spec.options)) {
+		props.spec.options.forEach(o => options[o] = o);
+	} else if (typeof options === 'object' && options !== null) {
+		options = props.spec.options;
+	}
+
+	return <FormControl componentClass="select" value={props.value}
+		onChange={ev => props.onChange(ev.target.value)}>
+		{Object.keys(options).map(k => <option key={k} value={k}>{options[k]}</option>)}
+	</FormControl>;
+};
 
 const FlexList = props => {
 	const items = props.value || [];
@@ -59,7 +68,8 @@ const types = {
 		onClick={ev => props.onChange(!props.value)} />,
 	constant: props => <ControlLabel>{props.value}</ControlLabel>,
 	select: Select,
-	multiselect: props => <MultiSelect options={props.spec.options} selected={props.value}
+	multiselect: props => <MultiSelect options={props.spec.options}
+		selected={props.value} numericalValue={!!props.spec.numericalValue}
 		onChange={selected => props.onChange(selected)} />,
 	color: props => <ColorPicker value={props.value} onChange={props.onChange} showColorCode={true} />,
 	list: FlexList

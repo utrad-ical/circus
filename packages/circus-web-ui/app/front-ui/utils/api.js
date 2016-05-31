@@ -6,11 +6,11 @@ export const api = (command, options = {}) => {
 		url: '/api/' + command,
 		cached: false,
 	};
-	Object.keys(options).forEach(k => {
+	for (let k in options) {
 		params[k] = options[k];
-	});
+	};
 	if (typeof params.data === 'object') {
-		params.method = 'post';
+		if (params.method === 'get') params.method = 'post';
 		params.headers = { 'Content-Type': 'application/json' };
 		params.data = JSON.stringify(params.data);
 	}

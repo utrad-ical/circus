@@ -1,4 +1,3 @@
-import Promise from 'es6-promise';
 import axios from 'axios';
 
 export const api = (command, options = {}) => {

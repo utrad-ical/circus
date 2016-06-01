@@ -32,11 +32,12 @@ Route::group(['before' => 'auth'], function() {
 	$staticView('home');
 
 	// SPA
-	$staticView('browse/series', 'browse/browse');
-	$staticView('browse/case', 'browse/browse');
-	$staticView('import-series', 'browse/browse');
-	$staticView('admin/{dum}', 'browse/browse');
-	$staticView('admin', 'browse/browse');
+	$staticView('browse/series', 'application');
+	$staticView('browse/case', 'application');
+	$staticView('import-series', 'application');
+	$staticView('admin/{dum}', 'application');
+	$staticView('admin', 'application');
+	Route::get('api/login-info', 'LoginInformationController@show');
 
 	// Case
 	Route::get('case/search/{preset_id}', 'CaseSearchController@search')

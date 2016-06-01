@@ -1,3 +1,7 @@
+// Build CSS from LESS
+require('file?name=css/style.css!../assets/less/style.less');
+
+// Babel polyfill, needed for async/await and Promise support for IE
 import 'babel-polyfill';
 
 import React from 'react';

@@ -2,8 +2,7 @@ var webpack = require("webpack");
 
 module.exports = {
 	entry: {
-		index: './app/front-ui/index.js',
-		'js-app/browse': './app/front-ui/browse.jsx'
+		application: './app/front-ui/index.jsx'
 	},
 	output: {
 		path: __dirname + '/public',

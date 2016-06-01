@@ -1,6 +1,6 @@
 import React from 'react';
 import { Panel, Button, ButtonToolbar, Glyphicon } from 'react-bootstrap';
-import { api } from '../../utils/api';
+import { api } from 'utils/api';
 import axios from 'axios';
 
 export class DicomImageServerAdmin extends React.Component {

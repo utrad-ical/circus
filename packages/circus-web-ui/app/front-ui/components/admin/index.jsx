@@ -17,7 +17,7 @@ export const AdminIndex = props => {
 	return <div>
 		<h1>Administration</h1>
 		<ButtonGroup vertical>
-			{btn('global', 'Server Configuration', 'tasks')}
+			{btn('general', 'Server Configuration', 'tasks')}
 			{btn('server', 'DICOM Image Server', 'hdd')}
 			{btn('storage', 'Storage', 'save-file')}
 			{btn('group', 'Groups', 'record')}

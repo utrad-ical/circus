@@ -1,6 +1,6 @@
 import React from 'react';
 import { Well, Button, Glyphicon } from './react-bootstrap';
-import { ShrinkSelect } from './shrink-select.jsx';
+import { ShrinkSelect } from './shrink-select';
 
 export class ImportSeries extends React.Component {
 	render() {

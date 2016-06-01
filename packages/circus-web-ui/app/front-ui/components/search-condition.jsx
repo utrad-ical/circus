@@ -1,7 +1,7 @@
 import React from 'react';
 import { Tabs, Tab, Form, FormGroup, FormControl, Button, Glyphicon,
 	ControlLabel, Row, Col, Well } from './react-bootstrap';
-import { ConditionEditor, conditionToMongoQuery } from './condition-editor.jsx';
+import { ConditionEditor, conditionToMongoQuery } from './condition-editor';
 
 export class SearchConditionBase extends React.Component {
 	changeType(key) {

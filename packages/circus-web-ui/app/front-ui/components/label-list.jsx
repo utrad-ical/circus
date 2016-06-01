@@ -1,5 +1,5 @@
 import React form 'react';
-import { ColorPicker } from './color-picker.jsx';
+import { ColorPicker } from './color-picker';
 
 export const LabelList = props => {
 	return <div className="label-list">

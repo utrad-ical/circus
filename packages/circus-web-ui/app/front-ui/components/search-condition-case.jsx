@@ -1,11 +1,11 @@
 import React from 'react';
 
-import { DateRangePicker, dateRangeToMongoQuery } from './daterange-picker.jsx';
-import { ShrinkSelect } from './shrink-select.jsx';
+import { DateRangePicker, dateRangeToMongoQuery } from './daterange-picker';
+import { ShrinkSelect } from './shrink-select';
 import { modalities } from '../constants';
-import { SearchConditionBase, FormGrid, Input } from './search-condition.jsx';
+import { SearchConditionBase, FormGrid, Input } from './search-condition';
 import { Well, ControlLabel } from './react-bootstrap';
-import { MultiSelect } from './multiselect.jsx';
+import { MultiSelect } from './multiselect';
 
 export class CaseSearchCondition extends SearchConditionBase {
 	constructor(props) {

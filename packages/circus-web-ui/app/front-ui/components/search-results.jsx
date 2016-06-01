@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShrinkSelect } from './shrink-select.jsx';
+import { ShrinkSelect } from './shrink-select';
 import { Pagination } from './react-bootstrap';
 
 export const SearchResults = props => {

@@ -1,4 +1,4 @@
-import { EditorPage } from './editor-page.jsx';
+import { EditorPage } from './editor-page';
 
 export class GroupAdmin extends EditorPage {
 	constructor(props) {

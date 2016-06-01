@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShrinkSelect } from './shrink-select.jsx';
+import { ShrinkSelect } from './shrink-select';
 import { FormControl, FormGroup, Button, Glyphicon } from 'react-bootstrap';
 import { escapeRegExp } from '../utils/util';
 

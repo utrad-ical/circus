@@ -1,6 +1,6 @@
 import React from 'react';
 import { DropdownButton, MenuItem } from './react-bootstrap';
-import { RelativeDatePicker, normalizeRelative } from './relative-datepicker.jsx';
+import { RelativeDatePicker, normalizeRelative } from './relative-datepicker';
 import Form from 'react-bootstrap/lib/Form';
 
 const presets = {

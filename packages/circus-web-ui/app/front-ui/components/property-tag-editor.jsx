@@ -1,7 +1,7 @@
 import React from 'react';
 import { FormControl } from './react-bootstrap';
-import { ColorPicker } from './color-picker.jsx';
-import { Tag } from './tag.jsx';
+import { ColorPicker } from './color-picker';
+import { Tag } from './tag';
 
 export const TagEditor = props => {
 	const change = (key, newValue) => {

@@ -1,7 +1,7 @@
 import React from 'react';
-import { CaseSearchCondition } from './search-condition-case.jsx';
-import { SeriesSearchResults } from './search-results-series.jsx';
-import { SearchCommon } from './search-common.jsx';
+import { CaseSearchCondition } from './search-condition-case';
+import { SeriesSearchResults } from './search-results-series';
+import { SearchCommon } from './search-common';
 
 export class CaseSearch extends SearchCommon {
 	constructor(props) {

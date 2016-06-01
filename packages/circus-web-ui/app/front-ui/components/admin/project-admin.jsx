@@ -1,4 +1,4 @@
-import { EditorPage } from './editor-page.jsx';
+import { EditorPage } from './editor-page';
 
 export class ProjectAdmin extends EditorPage {
 	constructor(props) {

@@ -10,8 +10,7 @@ Thumbs.db
 .buildpath
 .project
 .idea
-public/index.js
-public/index.js.map
-public/js-app
+public/application.js
+public/application.js.map
 public/glyphicons*
 /node_modules

@@ -7,6 +7,6 @@
 </head>
 <body>
 	<div id="app"></div>
-	<script src="/js-app/browse.js"></script>
+	<script src="/application.js"></script>
 </body>
 </html>

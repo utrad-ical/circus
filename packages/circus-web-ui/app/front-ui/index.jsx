@@ -1,4 +1,6 @@
-// Build CSS from LESS
+// Build CSS from LESS.
+// This CSS is not intended to be used in the SPA version;
+// we just build this for the legacy version.
 require('file?name=css/style.css!../assets/less/style.less');
 
 // Babel polyfill, needed for async/await and Promise support for IE
@@ -21,11 +23,14 @@ import { UserAdmin } from 'components/admin/user-admin';
 import { ProjectAdmin } from 'components/admin/project-admin';
 import * as modal from 'components/modal';
 
+import { store } from 'store';
+import { Provider } from 'react-redux';
+
 require('style!css!./bs-style/bootstrap.less');
 require('style!css!./components/components-style.less');
 
-function render() {
-	ReactDOM.render(
+ReactDOM.render(
+	<Provider store={store}>
 		<Router history={browserHistory}>
 			<Route path='/' component={App}>
 				<Route path='browse/series' component={SeriesSearch} />
@@ -40,9 +45,16 @@ function render() {
 					<Route path='project' component={ProjectAdmin} />
 				</Route>
 			</Route>
-		</Router>,
-		document.getElementById('app')
-	);
-}
+		</Router>
+	</Provider>,
+	document.getElementById('app')
+);
 
-render();
+async function loadUserInfo() {
+	const result = await api('login-info');
+	store.dispatch({
+		type: 'LOAD_LOGIN_INFO',
+		loginUser: result.loginUser
+	});
+}
+loadUserInfo();

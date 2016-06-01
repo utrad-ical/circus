@@ -1,5 +1,15 @@
 import React from 'react';
 import { Link } from 'react-router';
+import { connect } from 'react-redux';
+
+const UserInfoView = props => {
+	const name = props.loginUser ? props.loginUser.description : '';
+	return <span>{name}</span>;
+};
+
+const UserInfo = connect(
+	state => ({ loginUser: state.loginUser })
+)(UserInfoView);
 
 export const App = props => {
 	return <div>
@@ -41,7 +51,7 @@ const Nav = props => {
 		</nav>
 		<nav>
 			<MainMenu>
-				<li className="user-info">USER NAME</li>
+				<li className="user-info"><UserInfo /></li>
 				<Menu name="Preference" link="preference" />
 				<Menu name="Logout" link="logout" />
 			</MainMenu>

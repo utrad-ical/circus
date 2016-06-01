@@ -1,5 +1,5 @@
 import React from 'react';
-import { EditorPage } from './editor-page.jsx';
+import { EditorPage } from './editor-page';
 import { api } from '../../utils/api';
 import { Button } from '../react-bootstrap';
 

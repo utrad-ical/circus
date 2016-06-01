@@ -1,7 +1,7 @@
 import React from 'react';
-import { ShrinkSelect } from './shrink-select.jsx';
+import { ShrinkSelect } from './shrink-select';
 import { FormControl } from './react-bootstrap';
-import { StringListEditor } from './string-list-editor.jsx';
+import { StringListEditor } from './string-list-editor';
 
 export const PropertySchemaEditor = props => {
 	const types = {

@@ -8,7 +8,10 @@ module.exports = {
 		path: __dirname + '/public',
 		filename: '[name].js'
 	},
-	resolve: ['', '.js', '.jsx'],
+	resolve: {
+		root: __dirname + '/app/front-ui',
+		extensions: ['', '.js', '.jsx']
+	},
 	module: {
 		loaders: [
 			{

@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { FormControl, Dropdown, ButtonGroup, Button } from 'react-bootstrap';
-import { Calendar } from './calendar.jsx';
+import { Calendar } from './calendar';
 import moment from 'moment';
 
 function dateToString(input) {

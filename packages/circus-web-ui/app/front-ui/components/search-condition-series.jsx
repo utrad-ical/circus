@@ -2,9 +2,9 @@ import React from 'react';
 
 import { DateRangePicker, dateRangeToMongoQuery } from './daterange-picker';
 import { ShrinkSelect } from './shrink-select';
-import { modalities } from '../constants';
+import { modalities } from 'constants';
 import { SearchConditionBase, FormGrid, Input } from './search-condition';
-import { escapeRegExp } from '../utils/util';
+import { escapeRegExp } from 'utils/util';
 import { Well } from './react-bootstrap';
 
 export class SeriesSearchCondition extends SearchConditionBase {

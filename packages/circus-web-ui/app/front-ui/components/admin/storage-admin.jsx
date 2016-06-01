@@ -1,6 +1,6 @@
 import React from 'react';
 import { EditorPage } from './editor-page';
-import { api } from '../../utils/api';
+import { api } from 'utils/api';
 import { Button } from '../react-bootstrap';
 
 export class StorageAdmin extends EditorPage {

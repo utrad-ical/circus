@@ -1,7 +1,7 @@
 import React from 'react';
 import { ShrinkSelect } from './shrink-select';
 import { FormControl, FormGroup, Button, Glyphicon } from 'react-bootstrap';
-import { escapeRegExp } from '../utils/util';
+import { escapeRegExp } from 'utils/util';
 
 export const ConditionEditor = props => {
 	return <div className="condition-editor">

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button, Glyphicon, Panel } from '../react-bootstrap';
 import { PropertyEditor } from '../property-editor';
-import { api } from '../../utils/api.js';
+import { api } from 'utils/api.js';
 
 export class EditorPage extends React.Component {
 	constructor(props) {

@@ -2,7 +2,7 @@ import React from 'react';
 import { Button } from 'components/react-bootstrap';
 import { api} from 'utils/api';
 
-export class DownloadList extends React.Component {
+export class TaskList extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = { downloadList: null };
@@ -22,17 +22,18 @@ export class DownloadList extends React.Component {
 			return <div />;
 		}
 		return <div>
-			<h1>Downloads for Finished Tasks</h1>
-			<DownloadItems items={this.state.downloadList} />
+			<h1>Tasks</h1>
+			<TaskItems items={this.state.downloadList} />
 		</div>
 	}
 }
 
-const DownloadItems = props => {
+const TaskItems = props => {
 	const table = <table className="table">
 		<thead>
 			<tr>
 				<th>Task ID</th>
+				<th>Status</th>
 				<th>Public</th>
 				<th>Date</th>
 				<th>Download</th>
@@ -42,6 +43,7 @@ const DownloadItems = props => {
 			{props.items.map(item => (
 				<tr>
 					<td>{item.taskID}</td>
+					<td>{item.status}</td>
 					<td>{item.publicDownload ? 'Yes' : '-'}</td>
 					<td>{item.updateTime}</td>
 					<td>

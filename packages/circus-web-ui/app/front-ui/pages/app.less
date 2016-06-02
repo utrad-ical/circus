@@ -5,7 +5,7 @@ header {
 	position: relative;
 	background-color: @brand-dark;
 	border-bottom: 1px solid darken(@brand-dark, 10%);
-	line-height: 40px;
+	line-height: 39px;
 	z-index: 2000;
 	color: white;
 	text-align: left;
@@ -14,18 +14,14 @@ header {
 	flex-flow: row;
 	justify-content: space-between;
 
-	.header-logo {
-		width: 120px;
-		height: 30px;
-		vertical-align: middle;
-		margin-right: 10px;
+	.logo {
+		text-shadow: 1px 1px 2px black;
 	}
 
 	nav {
 		a {
 			display: inline-block;
-			height: 40px;
-			color: white;
+			color: inherit!important;
 			text-decoration: none!important;
 		}
 
@@ -35,15 +31,14 @@ header {
 				padding: 0 5px;
 				display: inline-block;
 				position: relative;
-				> a {
-					> span { // main navigation icon
-						font-size: 30px;
-						vertical-align: middle;
-					}
+				&.icon-menu span[class^='circus-icon'] { // main navigation icon
+					font-size: 25px;
+					vertical-align: middle;
+					margin-right: 3px;
 				}
-				&.icon-menu:hover {
+				&.logo:hover, &.icon-menu:hover {
+					color: @highlight-color;
 					background-color: @brand-color;
-					> a { color: @highlight-color; }
 					> ul { // show dropdown sub menu
 						display: block;
 					}
@@ -51,7 +46,7 @@ header {
 				> ul { // dropdown sub menu
 					display: none;
 					position: absolute;
-					top: 40px;
+					top: 39px;
 					left: 0;
 					background-color: rgba(240, 240, 240, 0.9);
 					padding: 0;
@@ -60,16 +55,16 @@ header {
 						display: block;
 						width: 200px;
 						border-bottom: 1px solid #bbb;
+						color: black;
+						&:hover {
+							background-color: @brand-color;
+							color: white;
+						}
 						a {
 							display: block;
-							color: black;
 							height: 30px;
 							line-height: 30px;
 							padding: 0 5px;
-							&:hover {
-								background-color: @brand-color;
-								color: white;
-							}
 						}
 					}
 				}

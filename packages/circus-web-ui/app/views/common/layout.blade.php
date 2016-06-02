@@ -33,11 +33,6 @@ if (Auth::check()) {
 						<a href="{{asset('case/search')}}"><span class="circus-icon circus-icon-case"></span>Case</a>
 						<ul>
 							<li><a href="{{asset('case/search')}}">Case Search</a></li>
-							@if (isset(Auth::user()->preferences['caseSearchPresets']))
-							@foreach(Auth::user()->preferences['caseSearchPresets'] as $index => $val)
-								<li>{{HTML::link(asset('case/search/' . $index), $val['save_label'])}}</li>
-							@endforeach
-							@endif
 						</ul>
 					</li>
 					<li class="icon_menu">
@@ -45,11 +40,6 @@ if (Auth::check()) {
 						<ul>
 							<li><a href="{{asset('series/search')}}">Series Search</a></li>
 							<li><a href="{{asset('series/import')}}">Series Import</a></li>
-							@if (isset(Auth::user()->preferences['seriesSearchPresets']))
-							@foreach(Auth::user()->preferences['seriesSearchPresets'] as $index => $val)
-								<li>{{HTML::link(asset('series/search/' . $index), $val['save_label'])}}</li>
-							@endforeach
-							@endif
 						</ul>
 					</li>
 					<li class="icon_menu">

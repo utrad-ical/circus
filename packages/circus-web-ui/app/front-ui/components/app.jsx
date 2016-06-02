@@ -2,15 +2,6 @@ import React from 'react';
 import { Link } from 'react-router';
 import { connect } from 'react-redux';
 
-const UserInfoView = props => {
-	const name = props.loginUser ? props.loginUser.description : '';
-	return <span>{name}</span>;
-};
-
-const UserInfo = connect(
-	state => ({ loginUser: state.loginUser })
-)(UserInfoView);
-
 export const App = props => {
 	return <div>
 		<Nav />
@@ -20,7 +11,7 @@ export const App = props => {
 	</div>;
 };
 
-const Nav = props => {
+const NavView = props => {
 	return <header>
 		<nav>
 			<MainMenu>
@@ -40,25 +31,34 @@ const Nav = props => {
 					<SubMenu name="Download" link="dummy"/>
 					<SubMenu name="Import" link="dummy"/>
 				</Menu>
-				<Menu name="Administration" link="/admin">
-					<SubMenu name="Server Configuration" link="/admin/general"/>
-					<SubMenu name="DICOM Image Server" link="/admin/server"/>
-					<SubMenu name="Storage" link="/admin/storage"/>
-					<SubMenu name="Groups" link="/admin/group"/>
-					<SubMenu name="Users" link="/admin/user"/>
-					<SubMenu name="Project" link="/admin/project"/>
-				</Menu>
+				{ props.isAdmin ?
+					<Menu name="Administration" link="/admin">
+						<SubMenu name="Server Configuration" link="/admin/general"/>
+						<SubMenu name="DICOM Image Server" link="/admin/server"/>
+						<SubMenu name="Storage" link="/admin/storage"/>
+						<SubMenu name="Groups" link="/admin/group"/>
+						<SubMenu name="Users" link="/admin/user"/>
+						<SubMenu name="Project" link="/admin/project"/>
+					</Menu>
+				: null }
 			</MainMenu>
 		</nav>
 		<nav>
 			<MainMenu>
-				<li className="user-info"><UserInfo /></li>
+				<li className="user-info">{props.loginUserName}</li>
 				<Menu name="Preference" link="preference" />
 				<Menu name="Logout" link="logout" />
 			</MainMenu>
 		</nav>
 	</header>
 };
+
+const Nav = connect(
+	state => ({
+		loginUserName: state.loginUser ? state.loginUser.description : '',
+		isAdmin: state.loginUser && state.loginUser.privileges.indexOf('manageServer') > -1
+	})
+)(NavView);
 
 const MainMenu = props => <ul>{props.children}</ul>;
 

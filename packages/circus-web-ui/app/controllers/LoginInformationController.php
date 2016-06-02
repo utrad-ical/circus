@@ -3,11 +3,14 @@
 class LoginInformationController extends ApiBaseController {
 	public function show()
 	{
+		$user = Auth::User();
+		$userData = array_only(
+			$user->toArray(),
+			['userEmail', 'description', 'preferences']
+		);
+		$userData['privileges'] = $user->listPrivileges();
 		$results = [
-			'loginUser' => array_only(
-				Auth::User()->toArray(),
-				['userEmail', 'description', 'preferences']
-			),
+			'loginUser' => $userData,
 			'domains' => [],
 		];
 		return Response::json($results);

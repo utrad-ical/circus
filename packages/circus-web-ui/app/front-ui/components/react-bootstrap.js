@@ -23,6 +23,8 @@ export { default as Col } from 'react-bootstrap/lib/Col';
 
 export { default as Pagination } from 'react-bootstrap/lib/Pagination';
 
+export { default as ProgressBar } from 'react-bootstrap/lib/ProgressBar';
+
 export { default as OverlayTrigger } from 'react-bootstrap/lib/OverlayTrigger';
 export { default as Popover } from 'react-bootstrap/lib/Popover';
 

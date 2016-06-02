@@ -24,7 +24,7 @@ export class DicomImageServerAdmin extends React.Component {
 
 	render() {
 		return <div>
-			<h2><Glyphicon glyph="hdd" />&ensp;DICOM Image Server</h2>
+			<h1><Glyphicon glyph="hdd" />&ensp;DICOM Image Server</h1>
 			<Panel header="Control">
 				<ButtonToolbar>
 					<Button bsStyle="success" bsSize="large" onClick={this.sendControl.bind(this, 'start')}>

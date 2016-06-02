@@ -1,9 +1,3 @@
-// Common variables
-@brand-color: #168477;
-@brand-dark: darken(@brand-color, 10%);
-@light-background: #d0e6e4;
-@highlight-color: #fd3164;
-
 // Top navigation
 header {
 	margin: 0 auto 5px;
@@ -86,18 +80,4 @@ header {
 		font-weight: bold;
 		margin-right: 10px;
 	}
-
-	a#color_switch {
-		display: inline-block;
-		cursor: pointer;
-		width: 20px;
-		height: 20px;
-		border-radius: 3px;
-		border: 2px solid @brand-color;
-		vertical-align: middle;
-		&:hover {
-			border-color: lighten(@brand-color, 10%);
-		}
-	}
-
 }

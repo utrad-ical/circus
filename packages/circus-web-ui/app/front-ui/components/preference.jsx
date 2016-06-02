@@ -50,7 +50,10 @@ export class Preference extends React.Component {
 		];
 
 		return <div>
-			<h1>Preferences</h1>
+			<h1>
+				<span className="circus-icon circus-icon-preference" />&ensp;
+				Preferences
+			</h1>
 			<PropertyEditor
 				value={this.state.settings}
 				properties={properties}

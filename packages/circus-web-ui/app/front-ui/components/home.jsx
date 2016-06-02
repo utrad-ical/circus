@@ -5,27 +5,24 @@ export const Home = props => (
 	<div>
 		<h1>Welcome to CIRCUS DB!</h1>
 		<ul className="home-menu">
-			<li>
-				<Link to="/browse/case">
-					<div className="img"><span className="circus-icon circus-icon-case-search"></span></div>
-					<p>Case Search</p>
-				</Link>
-				<p>Search and edit existing cases.</p>
-			</li>
-			<li>
-				<Link to="browse/series">
-					<div className="img"><span className="circus-icon circus-icon-series-search"></span></div>
-					<p>Series Search</p>
-				</Link>
-				<p>Search uploaded series,<br/> and define new cases.</p>
-			</li>
-			<li>
-				<Link to="/import-series">
-					<div className="img"><span className="circus-icon circus-icon-series-import"></span></div>
-					<p>Series Import</p>
-				</Link>
-				<p>Upload DICOM image files directly via the browser.</p>
-			</li>
+			<Menu link="/browse/case" icon="case-search" title="Case Search"
+				description="Search and edit existing cases." />
+			<Menu link="/browse/series" icon="series-search" title="Series Search"
+				description="Search and edit existing cases." />
+			<Menu link="/import-series" icon="series-import" title="Series Import"
+				description="Upload DICOM image files directly via the browser." />
 		</ul>
 	</div>
+);
+
+const Menu = ({ link, icon, title, description }) => (
+	<li>
+		<Link to={link}>
+			<div className="img">
+				<span className={'circus-icon circus-icon-' + icon}></span>
+			</div>
+			<p>{title}</p>
+		</Link>
+		<p>{description}</p>
+	</li>
 );

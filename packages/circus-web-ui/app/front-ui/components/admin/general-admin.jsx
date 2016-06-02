@@ -2,7 +2,7 @@ import React from 'react';
 import { PropertyEditor } from '../property-editor';
 import { api } from 'utils/api';
 import * as modal from '../modal';
-import { Button } from '../react-bootstrap';
+import { Button, Glyphicon } from '../react-bootstrap';
 
 export class GeneralAdmin extends React.Component {
 	constructor(props) {
@@ -51,7 +51,10 @@ export class GeneralAdmin extends React.Component {
 		];
 
 		return <div>
-			<h1>General Server Configuration</h1>
+			<h1>
+				<Glyphicon glyph="tasks"/>&ensp;
+				General Server Configuration
+			</h1>
 			<PropertyEditor
 				value={this.state.settings}
 				properties={properties}

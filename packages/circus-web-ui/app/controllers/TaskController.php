@@ -13,6 +13,21 @@ class TaskController extends ApiBaseController
 		return Response::json($result);
 	}
 
+	public function downloadableIndex()
+	{
+		$tasks = Task::where('status', '=', Task::FINISHED)
+			->where('owner', '=', Auth::user()->userEmail)
+			->where('download', '!=', '')
+			->where('updateTime', '=', array('$gte' => new MongoDate(strtotime('-2 day'))))
+			->orderby('updateTime', 'desc')
+			->get();
+		$result = [];
+		foreach ($tasks as $task) {
+			$result[] = array_except($task->toArray(), ['_id', 'logs', 'command', 'download']);
+		}
+		return Response::json($result);
+	}
+
 	public function show($taskID)
 	{
 		$task = Task::findOrFail($taskID);

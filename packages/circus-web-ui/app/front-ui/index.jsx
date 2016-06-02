@@ -16,6 +16,7 @@ import { Home } from 'components/home';
 import { SeriesSearch } from 'components/search-series';
 import { CaseSearch } from 'components/search-case';
 import { ImportSeries } from 'components/import-series';
+import { DownloadList } from 'components/download-list';
 import { AdminIndex } from 'components/admin/index';
 import { AdminContainer } from 'components/admin/admin-container';
 import { GeneralAdmin } from 'components/admin/general-admin';
@@ -50,6 +51,7 @@ ReactDOM.render(
 					<Route path='user' component={UserAdmin} />
 					<Route path='project' component={ProjectAdmin} />
 				</Route>
+				<Route path="download" component={DownloadList} />
 				<Route path='preference' component={Preference} />
 			</Route>
 		</Router>

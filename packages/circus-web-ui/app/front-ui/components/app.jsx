@@ -30,7 +30,7 @@ const NavView = props => {
 				</Menu>
 				<Menu name="Share" link="/share">
 					<SubMenu name="Share Search" link="dummy"/>
-					<SubMenu name="Download" link="dummy"/>
+					<SubMenu name="Download" link="/download"/>
 					<SubMenu name="Import" link="dummy"/>
 				</Menu>
 				{ props.isAdmin ?

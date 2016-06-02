@@ -58,7 +58,7 @@ export class GeneralAdmin extends React.Component {
 			<PropertyEditor
 				value={this.state.settings}
 				properties={properties}
-				onChange={this.propertyChange.bind(this)}/>;
+				onChange={this.propertyChange.bind(this)}/>
 			<p className="text-center">
 				<Button bsStyle="primary" onClick={() => this.saveClick()}>
 					Save

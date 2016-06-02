@@ -106,6 +106,7 @@ Route::group(['before' => 'auth'], function() {
 
 	// Task
 	Route::get('task', 'TaskController@index');
+	Route::get('api/task/downloadable', 'TaskController@downloadableIndex');
 	Route::get('task/{taskID}', 'TaskController@show');
 	Route::get('delete/task/{taskID}', 'TaskController@delete');
 

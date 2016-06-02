@@ -23,6 +23,7 @@ import { StorageAdmin } from 'components/admin/storage-admin';
 import { GroupAdmin } from 'components/admin/group-admin';
 import { UserAdmin } from 'components/admin/user-admin';
 import { ProjectAdmin } from 'components/admin/project-admin';
+import { Preference } from 'components/preference';
 import * as modal from 'components/modal';
 
 import { store } from 'store';
@@ -47,6 +48,7 @@ ReactDOM.render(
 					<Route path='user' component={UserAdmin} />
 					<Route path='project' component={ProjectAdmin} />
 				</Route>
+				<Route path='preference' component={Preference} />
 			</Route>
 		</Router>
 	</Provider>,

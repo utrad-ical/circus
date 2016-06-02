@@ -46,7 +46,7 @@ const NavView = props => {
 		<nav>
 			<MainMenu>
 				<li className="user-info">{props.loginUserName}</li>
-				<Menu name="Preference" link="preference" />
+				<Menu name="Preference" link="/preference" />
 				<Menu name="Logout" link="logout" />
 			</MainMenu>
 		</nav>

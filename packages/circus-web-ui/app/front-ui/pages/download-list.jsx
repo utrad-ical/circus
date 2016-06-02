@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button } from './react-bootstrap';
+import { Button } from 'components/react-bootstrap';
 import { api} from 'utils/api';
 
 export class DownloadList extends React.Component {

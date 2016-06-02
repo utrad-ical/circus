@@ -1,7 +1,7 @@
 import React from 'react';
 import { EditorPage } from './editor-page';
 import { api } from 'utils/api';
-import { Button } from '../react-bootstrap';
+import { Button } from 'components/react-bootstrap';
 
 export class UserAdmin extends EditorPage {
 	constructor(props) {

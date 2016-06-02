@@ -1,7 +1,7 @@
 import React from 'react';
 import { SearchResults } from './search-results';
-import { Button } from './react-bootstrap';
-import { modal } from './modal';
+import { Button } from 'components/react-bootstrap';
+import { modal } from 'components/modal';
 
 const createCase = seriesUID => {
 	modal.confirm('Add case for ' + seriesUID + '?').then(ans => {

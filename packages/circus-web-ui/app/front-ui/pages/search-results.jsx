@@ -1,6 +1,6 @@
 import React from 'react';
-import { ShrinkSelect } from './shrink-select';
-import { Pagination } from './react-bootstrap';
+import { ShrinkSelect } from 'components/shrink-select';
+import { Pagination } from 'components/react-bootstrap';
 
 export const SearchResults = props => {
 	const defaultRenderer = props => <div>{JSON.stringify(props.item)}</div>;

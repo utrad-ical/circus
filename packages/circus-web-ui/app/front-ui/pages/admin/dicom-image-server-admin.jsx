@@ -1,5 +1,5 @@
 import React from 'react';
-import { Panel, Button, ButtonToolbar, Glyphicon } from 'react-bootstrap';
+import { Panel, Button, ButtonToolbar, Glyphicon } from 'components/react-bootstrap';
 import { api } from 'utils/api';
 import axios from 'axios';
 

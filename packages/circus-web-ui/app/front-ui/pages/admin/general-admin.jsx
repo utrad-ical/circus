@@ -1,8 +1,8 @@
 import React from 'react';
-import { PropertyEditor } from '../property-editor';
+import { PropertyEditor } from 'components/property-editor';
 import { api } from 'utils/api';
-import * as modal from '../modal';
-import { Button, Glyphicon } from '../react-bootstrap';
+import * as modal from 'components/modal';
+import { Button, Glyphicon } from 'components/react-bootstrap';
 
 export class GeneralAdmin extends React.Component {
 	constructor(props) {

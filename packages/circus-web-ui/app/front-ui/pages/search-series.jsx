@@ -6,6 +6,8 @@ import { SearchCommon } from './search-common';
 export class SeriesSearch extends SearchCommon {
 	constructor(props) {
 		super(props);
+		this.title = 'Series Search';
+		this.glyph = 'series';
 		this.conditionComp = SeriesSearchCondition;
 		this.resultComp = SeriesSearchResults;
 		this.setInitialCondition();

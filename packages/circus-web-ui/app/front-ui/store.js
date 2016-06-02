@@ -1,5 +1,8 @@
 import { createStore, combineReducers } from 'redux';
 
+// This store should contain only information shared across pages,
+// such as the login user information.
+
 function loginUser(state = null, action) {
 	switch (action.type) {
 		case 'LOAD_LOGIN_INFO':

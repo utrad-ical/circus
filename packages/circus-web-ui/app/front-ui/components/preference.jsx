@@ -1,17 +1,17 @@
 import React from 'react';
-import { PropertyEditor } from '../property-editor';
+import { PropertyEditor } from './property-editor';
 import { api } from 'utils/api';
-import * as modal from '../modal';
-import { Button } from '../react-bootstrap';
+import * as modal from './modal';
+import { Button } from './react-bootstrap';
 
-export class GeneralAdmin extends React.Component {
+export class Preference extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = { settings: null };
 	}
 
 	async loadSettings() {
-		const settings = await api('server_param');
+		const settings = await api('preference');
 		this.setState({ settings });
 	}
 
@@ -24,7 +24,7 @@ export class GeneralAdmin extends React.Component {
 	}
 
 	async saveClick() {
-		const settings = await api('server_param', {
+		const settings = await api('preference', {
 			method: 'post', // TODO: This should be PUT?
 			data: this.state.settings
 		});
@@ -37,25 +37,24 @@ export class GeneralAdmin extends React.Component {
 
 		const properties = [
 			{
-				caption: 'Domains',
-				key: 'domains',
-				type: 'list',
-				spec: { childrenType: 'text' }
-			},
-			{
-				caption: 'Default Domain',
-				key: 'defaultDomain',
+				caption: 'Color Theme',
+				key: 'theme',
 				type: 'select',
-				spec: { options: this.state.settings.domains }
-			}
+				spec: { options: { mode_white: 'White', mode_black: 'Black' } }
+			 },
+			 {
+				 caption: 'Show Personal Info',
+				 key: 'personalInfoView',
+				 type: 'checkbox'
+			 }
 		];
 
 		return <div>
-			<h1>General Server Configuration</h1>
+			<h1>Preferences</h1>
 			<PropertyEditor
 				value={this.state.settings}
 				properties={properties}
-				onChange={this.propertyChange.bind(this)}/>;
+				onChange={this.propertyChange.bind(this)}/>
 			<p className="text-center">
 				<Button bsStyle="primary" onClick={() => this.saveClick()}>
 					Save

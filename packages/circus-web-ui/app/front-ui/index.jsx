@@ -16,6 +16,7 @@ import { SeriesSearch } from 'components/search-series';
 import { CaseSearch } from 'components/search-case';
 import { ImportSeries } from 'components/import-series';
 import { AdminIndex } from 'components/admin/index';
+import { AdminContainer } from 'components/admin/admin-container';
 import { GeneralAdmin } from 'components/admin/general-admin';
 import { DicomImageServerAdmin } from 'components/admin/dicom-image-server-admin';
 import { StorageAdmin } from 'components/admin/storage-admin';
@@ -37,7 +38,7 @@ ReactDOM.render(
 				<Route path='browse/series' component={SeriesSearch} />
 				<Route path='browse/case' component={CaseSearch} />
 				<Route path='import-series' component={ImportSeries} />
-				<Route path='admin'>
+				<Route path='admin' component={AdminContainer}>
 					<IndexRoute component={AdminIndex} />
 					<Route path='general' component={GeneralAdmin} />
 					<Route path='server' component={DicomImageServerAdmin} />

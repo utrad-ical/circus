@@ -59,7 +59,7 @@ async function loadUserInfo() {
 	const result = await api('login-info');
 	store.dispatch({
 		type: 'LOAD_LOGIN_INFO',
-		loginUser: result.loginUser
+		loginUser: result
 	});
 }
 loadUserInfo();

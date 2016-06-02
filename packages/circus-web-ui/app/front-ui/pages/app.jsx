@@ -23,15 +23,15 @@ const NavView = props => {
 				</li>
 				<Menu name="Case" link="/browse/case">
 					<SubMenu name="Case Search" link="/browse/case"/>
+					<SubMenu name="Case Import" link="/import-case"/>
 				</Menu>
 				<Menu name="Series" link="/browse/series">
 					<SubMenu name="Series Search" link="/browse/series"/>
 					<SubMenu name="Series Import" link="/import-series"/>
 				</Menu>
-				<Menu name="Share" link="/share">
-					<SubMenu name="Share Search" link="dummy"/>
-					<SubMenu name="Download" link="/download"/>
-					<SubMenu name="Import" link="dummy"/>
+				<Menu name="Tool">
+					<SubMenu name="Task List" link="/task-list"/>
+					<SubMenu name="Preference" link="/preference" />
 				</Menu>
 				{ props.isAdmin ?
 					<Menu name="Administration" link="/admin">
@@ -48,7 +48,6 @@ const NavView = props => {
 		<nav>
 			<MainMenu>
 				<li className="user-info">{props.loginUserName}</li>
-				<Menu name="Preference" link="/preference" />
 				<Menu name="Logout" link="logout" />
 			</MainMenu>
 		</nav>
@@ -66,11 +65,9 @@ const MainMenu = props => <ul>{props.children}</ul>;
 
 const Menu = props => {
 	const className = `circus-icon circus-icon-${props.name.toLowerCase()}`;
+	const caption = [<span className={className} />, props.name];
 	return <li className="icon-menu">
-		<Link to={props.link}>
-			<span className={className} />
-			{props.name}
-		</Link>
+		{props.link ? <Link to={props.link}>{caption}</Link> : caption }
 		<ul>{props.children}</ul>
 	</li>;
 };

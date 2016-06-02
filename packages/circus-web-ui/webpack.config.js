@@ -1,15 +1,16 @@
 var webpack = require("webpack");
+var path = require('path');
 
 module.exports = {
 	entry: {
 		application: './app/front-ui/index.jsx'
 	},
 	output: {
-		path: __dirname + '/public',
+		path: path.join(__dirname, 'public'),
 		filename: '[name].js'
 	},
 	resolve: {
-		root: __dirname + '/app/front-ui',
+		root: path.join(__dirname, 'app/front-ui'),
 		extensions: ['', '.js', '.jsx']
 	},
 	module: {

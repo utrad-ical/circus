@@ -16,8 +16,10 @@ const NavView = props => {
 		<nav>
 			<MainMenu>
 				<li>
-					<img src="/img/common/header-logo.png"
-						alt="CIRCUS" className="header-logo" />
+					<Link to="/home">
+						<img src="/img/common/header-logo.png"
+							alt="CIRCUS" className="header-logo" />
+					</Link>
 				</li>
 				<Menu name="Case" link="/browse/case">
 					<SubMenu name="Case Search" link="/browse/case"/>

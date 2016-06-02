@@ -12,6 +12,7 @@ import { modalities } from 'constants';
 import { Router, Route, IndexRoute, browserHistory} from 'react-router';
 import { api } from 'utils/api';
 import { App } from 'components/app';
+import { Home } from 'components/home';
 import { SeriesSearch } from 'components/search-series';
 import { CaseSearch } from 'components/search-case';
 import { ImportSeries } from 'components/import-series';
@@ -36,6 +37,7 @@ ReactDOM.render(
 	<Provider store={store}>
 		<Router history={browserHistory}>
 			<Route path='/' component={App}>
+				<Route path="home" component={Home} />
 				<Route path='browse/series' component={SeriesSearch} />
 				<Route path='browse/case' component={CaseSearch} />
 				<Route path='import-series' component={ImportSeries} />

@@ -15,10 +15,9 @@ const NavView = props => {
 	return <header>
 		<nav>
 			<MainMenu>
-				<li>
+				<li className="logo">
 					<Link to="/home">
-						<img src="/img/common/header-logo.png"
-							alt="CIRCUS" className="header-logo" />
+						<span className="circus-icon-logo" />
 					</Link>
 				</li>
 				<Menu name="Case" link="/browse/case">
@@ -64,7 +63,7 @@ const Nav = connect(
 const MainMenu = props => <ul>{props.children}</ul>;
 
 const Menu = props => {
-	const className = `circus-icon circus-icon-${props.name.toLowerCase()}`;
+	const className = `circus-icon-${props.name.toLowerCase()}`;
 	const caption = [<span className={className} />, props.name];
 	return <li className="icon-menu">
 		{props.link ? <Link to={props.link}>{caption}</Link> : caption }

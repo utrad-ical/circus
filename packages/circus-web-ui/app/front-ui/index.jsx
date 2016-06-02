@@ -8,31 +8,29 @@ import 'babel-polyfill';
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { modalities } from 'constants';
 import { Router, Route, IndexRoute, browserHistory} from 'react-router';
 import { api } from 'utils/api';
-import { App } from 'components/app';
-import { Home } from 'components/home';
-import { SeriesSearch } from 'components/search-series';
-import { CaseSearch } from 'components/search-case';
-import { ImportSeries } from 'components/import-series';
-import { DownloadList } from 'components/download-list';
-import { AdminIndex } from 'components/admin/index';
-import { AdminContainer } from 'components/admin/admin-container';
-import { GeneralAdmin } from 'components/admin/general-admin';
-import { DicomImageServerAdmin } from 'components/admin/dicom-image-server-admin';
-import { StorageAdmin } from 'components/admin/storage-admin';
-import { GroupAdmin } from 'components/admin/group-admin';
-import { UserAdmin } from 'components/admin/user-admin';
-import { ProjectAdmin } from 'components/admin/project-admin';
-import { Preference } from 'components/preference';
-import * as modal from 'components/modal';
+import { App } from 'pages/app';
+import { Home } from 'pages/home';
+import { SeriesSearch } from 'pages/search-series';
+import { CaseSearch } from 'pages/search-case';
+import { ImportSeries } from 'pages/import-series';
+import { DownloadList } from 'pages/download-list';
+import { AdminIndex } from 'pages/admin/index';
+import { AdminContainer } from 'pages/admin/admin-container';
+import { GeneralAdmin } from 'pages/admin/general-admin';
+import { DicomImageServerAdmin } from 'pages/admin/dicom-image-server-admin';
+import { StorageAdmin } from 'pages/admin/storage-admin';
+import { GroupAdmin } from 'pages/admin/group-admin';
+import { UserAdmin } from 'pages/admin/user-admin';
+import { ProjectAdmin } from 'pages/admin/project-admin';
+import { Preference } from 'pages/preference';
 
 import { store } from 'store';
 import { Provider } from 'react-redux';
 
 require('style!css!./bs-style/bootstrap.less');
-require('style!css!./components/components-style.less');
+require('style!css!./style.less');
 
 ReactDOM.render(
 	<Provider store={store}>

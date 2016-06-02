@@ -1,6 +1,6 @@
 import React from 'react';
-import { Button, Glyphicon, Panel } from '../react-bootstrap';
-import { PropertyEditor } from '../property-editor';
+import { Button, Glyphicon, Panel } from 'components/react-bootstrap';
+import { PropertyEditor } from 'components/property-editor';
 import { api } from 'utils/api.js';
 
 export class EditorPage extends React.Component {

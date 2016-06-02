@@ -1,6 +1,6 @@
 import React from 'react';
 import { browserHistory } from 'react-router';
-import { ButtonGroup, Button, Glyphicon } from '../react-bootstrap';
+import { ButtonGroup, Button, Glyphicon } from 'components/react-bootstrap';
 
 export const AdminIndex = props => {
 	const btn = (to, link, glyph) => (

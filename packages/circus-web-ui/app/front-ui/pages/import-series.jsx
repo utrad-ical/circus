@@ -1,10 +1,10 @@
 import React from 'react';
-import { Well, Button, Glyphicon } from './react-bootstrap';
-import { ShrinkSelect } from './shrink-select';
+import { Well, Button, Glyphicon } from 'components/react-bootstrap';
+import { ShrinkSelect } from 'components/shrink-select';
 import { connect } from 'react-redux';
-import * as modal from './modal';
-import { TaskProgress, TaskWatcher } from './task-watcher';
-import { FileDroppable } from './file-droppable';
+import * as modal from 'components/modal';
+import { TaskProgress, TaskWatcher } from 'components/task-watcher';
+import { FileDroppable } from 'components/file-droppable';
 
 class ImportSeriesView extends React.Component {
 	constructor(props) {

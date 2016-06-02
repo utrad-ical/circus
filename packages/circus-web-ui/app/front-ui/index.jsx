@@ -30,6 +30,9 @@ import { store } from 'store';
 import { Provider } from 'react-redux';
 
 require('style!css!./bs-style/bootstrap.less');
+require('bootstrap/fonts/glyphicons-halflings-regular.woff');
+require('bootstrap/fonts/glyphicons-halflings-regular.woff2');
+require('bootstrap/fonts/glyphicons-halflings-regular.ttf');
 require('style!css!./style.less');
 
 ReactDOM.render(

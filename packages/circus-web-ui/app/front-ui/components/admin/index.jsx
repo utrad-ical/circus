@@ -15,7 +15,10 @@ export const AdminIndex = props => {
 	);
 
 	return <div>
-		<h1>Administration</h1>
+		<h1>
+			<span className="circus-icon circus-icon-administration" />&ensp;
+			Administration
+		</h1>
 		<ButtonGroup vertical>
 			{btn('general', 'Server Configuration', 'tasks')}
 			{btn('server', 'DICOM Image Server', 'hdd')}

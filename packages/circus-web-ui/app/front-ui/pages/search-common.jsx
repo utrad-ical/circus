@@ -58,6 +58,10 @@ export class SearchCommon extends React.Component {
 		const ConditionComp = this.conditionComp;
 		const ResultComp = this.resultComp;
 		return <div>
+			<h1>
+				<span className={'circus-icon-' + this.glyph} />&ensp;
+				{this.title}
+			</h1>
 			<ConditionComp condition={this.state.condition}
 				onSearch={this.searchClick.bind(this)}
 				onChange={this.conditionChange.bind(this)} />

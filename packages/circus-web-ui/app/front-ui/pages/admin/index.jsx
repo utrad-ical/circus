@@ -4,7 +4,7 @@ import { ButtonGroup, Button, Glyphicon } from 'components/react-bootstrap';
 
 export const AdminIndex = props => {
 	const btn = (to, link, glyph) => (
-		<div className="col-md-4">
+		<div className="item">
 			<Button block bsStyle="primary" bsSize="lg"
 				onClick={() => browserHistory.push('admin/' + to)}
 			>
@@ -16,12 +16,12 @@ export const AdminIndex = props => {
 		</div>
 	);
 
-	return <div>
+	return <div className="admin-index">
 		<h1>
 			<span className="circus-icon circus-icon-administration" />&ensp;
 			Administration
 		</h1>
-		<div className="row" style={{'margin-bottom': 20}}>
+		<div className="row">
 			{btn('general', 'Server Configuration', 'tasks')}
 			{btn('server', 'DICOM Image Server', 'hdd')}
 			{btn('storage', 'Storage', 'save-file')}

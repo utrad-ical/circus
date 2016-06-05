@@ -1,11 +1,13 @@
 import React from 'react';
 import { Link } from 'react-router';
 import { connect } from 'react-redux';
+import { MessageBox } from './message-box';
 
 export const App = props => {
 	return <div>
 		<Nav />
 		<div className="container">
+			<MessageBox />
 			{props.children}
 		</div>
 	</div>;

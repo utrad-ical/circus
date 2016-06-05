@@ -2,6 +2,8 @@
 // used in our project. This should reduce the number of imort lines
 // in other comonents while keeping the size of the bundle small.
 
+export { default as Alert } from 'react-bootstrap/lib/Alert';
+
 export { default as Button } from 'react-bootstrap/lib/Button';
 export { default as ButtonGroup } from 'react-bootstrap/lib/ButtonGroup';
 export { default as ButtonToolbar } from 'react-bootstrap/lib/ButtonToolbar';

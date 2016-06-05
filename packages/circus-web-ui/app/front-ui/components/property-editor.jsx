@@ -99,6 +99,8 @@ export const PropertyEditor = props => {
 	};
 
 	const rows = props.properties.map(property => {
+		if (typeof property === 'string')
+			return <h3>{property}</h3>;
 		const Comp = typeToComponent(property.type);
 		const key = property.key;
 		const spec = property.spec || {};

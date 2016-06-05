@@ -67,10 +67,10 @@ const MainMenu = props => <ul>{props.children}</ul>;
 const Menu = props => {
 	const className = `circus-icon-${props.name.toLowerCase()}`;
 	const caption = [
-		<span className={className} />,
-		<span className="hidden-xs">{props.name}</span>
+		<span className={className} key='icon'/>,
+		<span className="hidden-xs" key='caption'>{props.name}</span>
 	];
-	return <li className="icon-menu">
+	return <li className="icon-menu" key={props.name}>
 		{props.link ? <Link to={props.link}>{caption}</Link> : caption }
 		<ul>{props.children}</ul>
 	</li>;

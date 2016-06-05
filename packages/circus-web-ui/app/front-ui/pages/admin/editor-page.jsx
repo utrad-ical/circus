@@ -98,9 +98,9 @@ const List = props => {
 	const items = props.items.map((item, i) => {
 		const columns = props.listColumns.map(col => {
 			if (col.key) {
-				return <td>{item[col.key]}</td>;
+				return <td key={col.label}>{item[col.key]}</td>;
 			} else {
-				return <td>{col.data(item)}</td>;
+				return <td key={col.label}>{col.data(item)}</td>;
 			}
 		});
 		const active = props.active === item;

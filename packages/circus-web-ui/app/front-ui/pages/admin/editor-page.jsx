@@ -9,29 +9,25 @@ export class EditorPage extends React.Component {
 		this.state = {
 			items: [],
 			target: null,
-			editing: null
+			editing: null,
+			complaints: null
 		};
 	}
 
 	async commitItem(item) {
 		let endPoint = this.endPoint;
-		if (this.state.target) endPoint += '/' + this.state.target;
+		if (this.state.target) endPoint += '/' + encodeURIComponent(this.state.target);
 		const args = {
 			method: this.state.target ? 'put' : 'post',
-			data: item
+			data: item,
+			handleErrors: [400]
 		};
 		try {
 			await api(endPoint, args);
 			this.setState({ target: null, editing: null });
 			this.loadItems();
 		} catch (err) {
-			// error400: function (res) {
-			// 	if ($.isPlainObject(res.responseJSON)) {
-			// 		editor.propertyeditor('complain', res.responseJSON.errors);
-			// 	} else {
-			// 		showMessage(res.responseText, true);
-			// 	}
-			// }
+			this.setState({ complaints: err.data.errors });
 		}
 	}
 
@@ -82,7 +78,8 @@ export class EditorPage extends React.Component {
 			{ this.state.editing ?
 				<Editor
 					item={this.state.editing}
-					taret={this.state.target}
+					complaints={this.state.complaints}
+					target={this.state.target}
 					properties={this.editorProperties}
 					primaryKey={this.primaryKey}
 					onSaveClick={item => this.commitItem(item)}
@@ -161,6 +158,7 @@ class Editor extends React.Component {
 		return <Panel header={header} footer={footer} bsStyle="primary">
 			<PropertyEditor
 				value={this.state.item}
+				complaints={this.props.complaints}
 				properties={this.props.properties}
 				onChange={this.onChange.bind(this)}
 			/>

@@ -8,12 +8,12 @@ import { Button, Glyphicon } from 'components/react-bootstrap';
 export class GeneralAdmin extends React.Component {
 	constructor(props) {
 		super(props);
-		this.state = { settings: null };
+		this.state = { settings: null, complaints: null };
 	}
 
 	async loadSettings() {
 		const settings = await api('server_param');
-		this.setState({ settings });
+		this.setState({ settings, complaints: null });
 	}
 
 	componentDidMount() {
@@ -21,20 +21,38 @@ export class GeneralAdmin extends React.Component {
 	}
 
 	propertyChange(value) {
+		if (value.domains.indexOf(value.defaultDomain) === -1) {
+			value.defaultDomain = '';
+		}
+		if (value.defaultDomain === '' && value.domains.length > 0) {
+			value.defaultDomain = value.domains[0];
+		}
 		this.setState({ settings: value });
 	}
 
 	async saveClick() {
-		const settings = await api('server_param', {
-			method: 'post', // TODO: This should be PUT?
-			data: this.state.settings
-		});
-		showMessage(
-			'Settings saved.',
-			'success',
-			{ tag: 'general-admin', short: true }
-		);
-		this.loadSettings();
+		const newSettings = {
+			...this.state.settings,
+			domains:
+				this.state.settings.domains.map(d => typeof d === 'string' ? d.trim() : '')
+				.filter(d => typeof d === 'string' && d.length > 0)
+		};
+		this.setState({ settings: newSettings });
+		try {
+			await api('server_param', {
+				method: 'post', // TODO: This should be PUT?
+				data: newSettings,
+				handleErrors: [400]
+			});
+			showMessage(
+				'Settings saved.',
+				'success',
+				{ tag: 'general-admin', short: true }
+			);
+			this.loadSettings();
+		} catch(err) {
+			this.setState({ complaints: err.data.errors });
+		}
 	}
 
 	render() {
@@ -62,6 +80,7 @@ export class GeneralAdmin extends React.Component {
 			</h1>
 			<PropertyEditor
 				value={this.state.settings}
+				complaints={this.state.complaints}
 				properties={properties}
 				onChange={this.propertyChange.bind(this)}/>
 			<p className="text-center">

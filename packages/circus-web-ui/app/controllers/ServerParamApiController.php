@@ -27,11 +27,28 @@ class ServerParamApiController extends ApiBaseController
 	{
 		$entries = array_only($entries, ['domains', 'defaultDomain']);
 
-		if (array_search($entries['defaultDomain'], $entries['domains']) === false) {
-			throw new InvalidModelException(
-				['defaultDomain' => ['The same value should be in the domains list, too.']]
-			);
+		$rules = [
+			'domains' => 'array_of_domains|required',
+			'defaultDomain' => 'required'
+		];
+		$errmes = [
+			'array_of_domains' => 'Invalid domain list.'
+		];
+
+		$validator = Validator::make($entries, $rules, $errmes);
+		if ($validator->fails()) {
+			throw new InvalidModelException($validator->messages());
 		}
 		return $entries;
 	}
 }
+
+Validator::extend('array_of_domains', function ($attribute, $value, $parameters) {
+	if (!is_array($value)) return false;
+	if (count($value) < 1) return false;
+	foreach ($value as $domain) {
+		if (!is_string($domain)) return false;
+		if (!preg_match('/^[a-zA-Z0-9\-\.]+$/', $domain)) return false;
+	}
+	return true;
+});

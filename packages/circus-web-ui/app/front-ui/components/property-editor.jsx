@@ -10,9 +10,11 @@ const Select = props => {
 	} else if (typeof options === 'object' && options !== null) {
 		options = props.spec.options;
 	}
+	const value = (props.value === null || props.value === undefined) ? '' : props.value;
 
-	return <FormControl componentClass="select" value={props.value}
+	return <FormControl componentClass="select" value={value}
 		onChange={ev => props.onChange(ev.target.value)}>
+		<option key='#NULL#' value='' hidden disabled></option>
 		{Object.keys(options).map(k => <option key={k} value={k}>{options[k]}</option>)}
 	</FormControl>;
 };
@@ -88,10 +90,10 @@ const typeToComponent = type => {
 };
 
 export const PropertyEditor = props => {
-	let values = props.value || {};
-
+	const values = props.value || {};
+	const complaints = props.complaints !== null && typeof props.complaints === 'object' ? props.complaints : {};
 	const valueChange = (key, value) => {
-		let newValues = { ... values };
+		const newValues = { ... values };
 		newValues[key] = value;
 		props.onChange && props.onChange(newValues);
 	};
@@ -100,12 +102,21 @@ export const PropertyEditor = props => {
 		const Comp = typeToComponent(property.type);
 		const key = property.key;
 		const spec = property.spec || {};
-		return <Row key={key}>
-			<Col md={3}><ControlLabel>{property.caption}</ControlLabel></Col>
-			<Col md={9}>
-				{<Comp value={values[key]} spec={spec} onChange={val => valueChange(key, val)} />}
-			</Col>
-		</Row>;
+		const complain = complaints[key];
+		const row = [
+			<Row key={key} className={complain ? 'bg-danger' : ''}>
+				<Col md={3}><ControlLabel>{property.caption}</ControlLabel></Col>
+				<Col md={9}>
+					{<Comp value={values[key]} spec={spec} onChange={val => valueChange(key, val)} />}
+				</Col>
+			</Row>
+		];
+		if (complain) {
+			row.push(<div className="text-danger complaint">
+				{complaints[key]}
+			</div>);
+		}
+		return row;
 	});
 
 	return <div className="property-editor form-horizontal">{rows}</div>;

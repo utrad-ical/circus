@@ -19,9 +19,37 @@ export async function api(command, options = {}) {
 		const res = await axios(params);
 		return res.data;
 	} catch (err) {
-		if (!params.silent) {
-			showMessage(err.toString(), 'danger');
+		// By default, all errors are displayed with a minimal message.
+		// Set 'handleErrors' option to supress error message for specific error types.
+		let handle = params.handleErrors === true;
+		if (Array.isArray(params.handleErrors) && params.handleErrors.indexOf(err.status) > -1) {
+			handle = true;
 		}
-		throw err;
+		if (handle) {
+			throw err;
+		} else {
+			showErrorMessage(err);
+		}
 	}
 };
+
+function showErrorMessage(err) {
+	let message = '';
+
+	if (typeof err.status === 'number') {
+		const messages = {
+			400: 'Bad request.',
+			404: 'Not found.',
+			401: 'Authorization error. Please log-in again.',
+			500: 'Internal server error occurred. Please consult the administrator.'
+		};
+		if (err.status in messages) {
+			message = messages[err.status];
+		} else {
+			message = `Unknown server error (${err.status}). Please consult the administrator.`;
+		}
+	} else {
+		message = 'The server did not respond.';
+	}
+	showMessage(message, 'danger');
+}

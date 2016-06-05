@@ -1,7 +1,7 @@
 import React from 'react';
 import { PropertyEditor } from 'components/property-editor';
 import { api } from 'utils/api';
-import * as modal from 'components/modal';
+import { showMessage } from 'actions';
 import { Button } from 'components/react-bootstrap';
 
 export class Preference extends React.Component {
@@ -28,7 +28,7 @@ export class Preference extends React.Component {
 			method: 'post', // TODO: This should be PUT?
 			data: this.state.settings
 		});
-		await modal.alert('Saved!');
+		showMessage('Your preference was saved.', 'success', { short: true });
 		this.loadSettings();
 	}
 

@@ -8,11 +8,34 @@ function loginUser(state = null, action) {
 		case 'LOAD_LOGIN_INFO':
 			return action.loginUser;
 	}
-	return null;
+	return state;
+}
+
+function messages(state = [], action) {
+	switch (action.type) {
+		case 'MESSAGE_ADD':
+			let boxes;
+			if (typeof action.tag === 'string') {
+				boxes = state.filter(box => box.tag !== action.tag);
+			} else {
+				boxes = [...state];
+			}
+			boxes.push({
+				id: action.id,
+				message: action.message,
+				tag: typeof action.tag === 'string' ? action.tag : null,
+				style: action.style ? action.style : 'info'
+			});
+			return boxes;
+		case 'MESSAGE_DISMISS':
+			return state.filter(box => box.id !== action.id);
+	}
+	return state;
 }
 
 const reducer = combineReducers({
-	loginUser
+	loginUser,
+	messages
 });
 
 export const store = createStore(reducer);

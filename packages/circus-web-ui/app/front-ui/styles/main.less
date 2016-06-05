@@ -12,6 +12,11 @@
 	border-bottom: 2px solid silver;
 }
 
+@keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+.alert {
+	animation: fadeIn linear 0.5s;
+}
+
 @import "../../assets/less/fonts.less";
 
 @import "../pages/app.less";

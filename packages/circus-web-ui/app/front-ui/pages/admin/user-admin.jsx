@@ -65,7 +65,6 @@ export class UserAdmin extends EditorPage {
 		const groups = await api('group');
 		const groupIdMap = {};
 		groups.forEach(g => groupIdMap[g.groupID] = g.groupName);
-		console.log(groupIdMap);
 		this.editorProperties[4].spec.options = groupIdMap;
 		this.setState({ groupIdMap });
 		super.componentDidMount();

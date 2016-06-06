@@ -1,32 +1,101 @@
 $(function(){
 	
+	// var axial = circusrs.CrossSectionUtil.getAxial();
+	// var sagittal = circusrs.CrossSectionUtil.getSagittal();
+	// var coronal = circusrs.CrossSectionUtil.getCoronal();
+	
+	// circusrs.CrossSectionUtil.getEndPointsOfCrossLine( axial, sagittal );
+	
+	// return;
+	
 	var imageSourceSelector = prepareImageSourceSelector();
 	
-	var state = {
-		section: {
-			origin: [0,0, 186],
-			xAxis: [512,0,0],
-			yAxis: [0,512,0]
-		},
-		window: {
+	imageSourceSelector.use('mock').then( function( source ){
+		setup( imageSourceSelector, source );
+	} );
+} );
+
+function setup( imageSourceSelector, defaultSource ){
+	
+	var dimension = defaultSource.getDimension();
+	var windowConfig = // defaultSource.estimateWindow() ||
+		{
 			level: 138,
-			width: 2277
-		}
-	};
+			width: 2277			
+		};
 	
-	var axialElement = document.getElementById('rs-canvas');
+	/**
+	 * axial viewer
+	 */
+	var axialViewer = (function(){
+		var state = {
+			section: {
+				origin: [0,0, dimension[2] / 2 ],
+				xAxis: [dimension[0],0,0],
+				yAxis: [0,dimension[1],0]
+			},
+			window: windowConfig
+		};
+		
+		var canvasElement = document.getElementById('rs-canvas');
+		var viewer = new circusrs.Viewer( canvasElement );
+		viewer.viewState = state;
+		imageSourceSelector.addViewer( viewer );
+		
+		return viewer;
+	})();
 	
-	var viewer = new circusrs.Viewer( axialElement );
-	viewer.viewState = state;
+	/**
+	 * sagittal viewer
+	 */
+	var sagittalViewer = (function(){
+		var state = {
+			section: {
+				origin: [dimension[0] / 2, 0, 0 ],
+				xAxis: [ 0, dimension[1], 0 ],
+				yAxis: [ 0, 0 ,dimension[2] ]
+			},
+			window: windowConfig
+		};
+		
+		var canvasElement = document.getElementById('rs-sagittal');
+		var viewer = new circusrs.Viewer( canvasElement );
+		viewer.viewState = state;
+		imageSourceSelector.addViewer( viewer );
+		
+		return viewer;
+	})();
 	
-	imageSourceSelector.addViewer( viewer );
+	/**
+	 * coronal viewer
+	 */
+	var coronalViewer = (function(){
+		var state = {
+			section: {
+				origin: [ 0, dimension[1] / 2, 0 ],
+				xAxis: [ dimension[0], 0, 0 ],
+				yAxis: [ 0, 0 ,dimension[2] ]
+			},
+			window: windowConfig
+		};
+		
+		var canvasElement = document.getElementById('rs-coronal');
+		var viewer = new circusrs.Viewer( canvasElement );
+		viewer.viewState = state;
+		imageSourceSelector.addViewer( viewer );
+		
+		return viewer;
+	})();
+	
 	imageSourceSelector.use('mock');
 	
 	/**
 	 * tool
 	 */
 	var toolDriver = new circusrs.ToolDriver();
-	viewer.backgroundEventTarget = toolDriver;
+	axialViewer.backgroundEventTarget = toolDriver;
+	sagittalViewer.backgroundEventTarget = toolDriver;
+	coronalViewer.backgroundEventTarget = toolDriver;
 	
 	var stateToolSelector = new circusrs.ToolSelector();
 	var drawToolSelector = new circusrs.ToolSelector();
@@ -99,7 +168,9 @@ $(function(){
 			iconElement.className = iconElement.className.replace( / active-tool /g, '' );
 		} );
 		
-		viewer.painters.push( tool.renderer );
+		axialViewer.painters.push( tool.renderer );
+		sagittalViewer.painters.push( tool.renderer );
+		coronalViewer.painters.push( tool.renderer );
 		
 		var $addBtn = $('[name=add-new-cloud]');
 		
@@ -115,7 +186,7 @@ $(function(){
 		var add = function(){
 			var color = colors[ colorCount++ % colors.length ];
 			var label = 'LABEL' + colorCount.toString();
-			var dim = viewer.imageSource.getDimension();
+			var dim = axialViewer.imageSource.getDimension();
 			var cloud = new circusrs.VoxelCloud();
 
 			cloud.label = label;
@@ -138,7 +209,7 @@ $(function(){
 				'value': color[3]
 			}).on('input', function(){
 				color[3] = Number( $(this).val() );
-				viewer.render();
+				axialViewer.render();
 			}).appendTo(
 				$( document.createElement('div') ).addClass('col-xs-8').appendTo($cloudControl)
 			);
@@ -174,84 +245,84 @@ $(function(){
 	*/
 
 	/**
-	 * viewer control
+	 * state tool
 	 */
-	setupViewerControl(viewer);
+	var s = new StateViewerControl( document.getElementById('state-canvas') );
+	s.observeViewer( axialViewer );
+	s.observeViewer( sagittalViewer );
+	s.observeViewer( coronalViewer );
 	
-	viewer.render()
-		// cross section check
-		.then( function(){ setupStateViewer( viewer ) } );
-});
+	Promise.all( [
+		axialViewer.render(),
+		sagittalViewer.render(),
+		coronalViewer.render(),
+	] ).then( function(){ s.render(); } );
+};
 
-function setupViewerControl( viewer ){
+
+var StateViewerControl = function( canvas ){
 	
-	var controller = new circusrs.ViewerControl( viewer, 'axial' );
+	this.canvas = canvas;
+	this.viewers = [];
+	this.xRot = 10;
+	this.yRot = -105;
 	
-	$('#window-level').change( function(){ controller.setWindowLevel( $(this).val() ); } );
-	$('#window-width').change( function(){ controller.setWindowWidth( $(this).val() ); } );
-	$('#scale').change( function(){ controller.setScale( $(this).val() ); } );
-	$('#rotate-x').change( function(){ controller.setRotateX( $(this).val() ); } );
-	$('#rotate-y').change( function(){ controller.setRotateY( $(this).val() ); } );
-	$('#rotate-z').change( function(){ controller.setRotateZ( $(this).val() ); } );
-
-	viewer.on('statechange', function(){
-		$('#window-level').val( controller.getWindowLevel() );
-		$('#window-width').val( controller.getWindowWidth() );
-		$('#scale').val( controller.getScale() );
-		$('#rotate-x').val( controller.getRotateX() );
-		$('#rotate-y').val( controller.getRotateY() );
-		$('#rotate-z').val( controller.getRotateZ() );
-	});
+	this.stateViewer = new circusrs.StateViewer( canvas );
+	this.dimension = [100, 100, 100];
 	
-}
-
-function setupStateViewer( viewer ){
-
-	var stateViewerCanvas = document.getElementById('state-canvas');
-	var xRot = 46, yRot = 34;
+	this.stateViewer.pan = 1.6;
+	this.stateViewer.setCelestialCamera( this.xRot, this.yRot );
 	
-	var stateViewer = new circusrs.StateViewer();
-	stateViewer.pan = 2.0;
-	stateViewer.setCelestialCamera( xRot, yRot );
-	
-	var stateViewerRendering = function(){
-
-		stateViewer.clearObject();
-		
-		if( viewer.imageSource ){
-			var volumeModel = new circusrs.WireAxisBoxObject( viewer.imageSource.getDimension() );
-			stateViewer.addObject( volumeModel );
-
-			var sectionModel = new circusrs.CrossSectionObject( viewer.viewState.section );
-			stateViewer.addObject( sectionModel );
-			
-			// stateViewer.setCelestialCamera( xRot+=1, yRot+=1 );
-		}
-		
-		stateViewerCanvas.getContext('2d').clearRect(0,0, stateViewerCanvas.getAttribute('width'), stateViewerCanvas.getAttribute('height') );
-		stateViewer.draw( stateViewerCanvas );
-	};
-	viewer.on('statechange', stateViewerRendering );
-	viewer.on('sourcechange', stateViewerRendering );
-
-	
+	var self = this;
 	$( 'input#pan-zoom' ).on( 'input', function () {
-		stateViewer.pan = $(this).val();
-		stateViewerRendering();
-	} ).val( stateViewer.pan );
+		self.stateViewer.pan = $(this).val();
+		self.render();
+	} ).val( this.stateViewer.pan );
 	
 	$( 'input#cam-rotate-x' ).on( 'input', function () {
-		stateViewer.setCelestialCamera( $('input#cam-rotate-x').val(), $('input#cam-rotate-y').val() );
+		self.stateViewer.setCelestialCamera( $('input#cam-rotate-x').val(), $('input#cam-rotate-y').val() );
 		$(this).next().text('(' + $('input#cam-rotate-x').val() + ')');
-		stateViewerRendering();
-	} ).val( xRot );
+		self.render();
+	} ).val( this.xRot );
 
 	$( 'input#cam-rotate-y' ).on( 'input', function () {
-		stateViewer.setCelestialCamera( $('input#cam-rotate-x').val(), $('input#cam-rotate-y').val() );
+		self.stateViewer.setCelestialCamera( $('input#cam-rotate-x').val(), $('input#cam-rotate-y').val() );
 		$(this).next().text('(' + $('input#cam-rotate-y').val() + ')');
-		stateViewerRendering();
-	} ).val( yRot );
+		self.render();
+	} ).val( this.yRot );
 	
-	stateViewerRendering();
-}
+	self.render();
+	
+};
+
+StateViewerControl.prototype.setSourceDimension = function( dim ){
+	this.dimension = dim;
+};
+StateViewerControl.prototype.render = function(){
+
+	this.stateViewer.clearObject();
+	
+	var volumeModel = new circusrs.WireAxisBoxObject( this.dimension );
+	this.stateViewer.addObject( volumeModel );
+	
+	for( var i = 0; i < this.viewers.length; i++ ){
+		this.stateViewer.addObject(
+			new circusrs.CrossSectionObject( this.viewers[i].viewState.section )
+		);
+	}
+		
+	this.canvas.getContext('2d').clearRect(0,0, this.canvas.getAttribute('width'), this.canvas.getAttribute('height') );
+	this.stateViewer.draw( this.canvas );
+};
+
+StateViewerControl.prototype.observeViewer = function( viewer ){
+	var self = this;
+	viewer.on('statechange', function(){
+		self.render();
+	} );
+	viewer.on('sourcechange', function( prevSource, newSource  ){
+		self.setSourceDimension( newSource.getDimension() );
+	} );
+	this.viewers.push( viewer );
+};
 

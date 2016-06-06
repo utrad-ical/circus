@@ -1,7 +1,7 @@
 'use strict';
 
-import { ViewerEvent } from './viewer-event';
-import { ViewerEventTarget } from './viewer-event-target'
+import { ViewerEvent }					from '../../browser/viewer/viewer-event';
+import { ViewerEventTarget }			from '../../browser/interface/viewer-event-target';
 
 export class Sprite implements ViewerEventTarget {
 	public mouseupHandler(viewerEvent: ViewerEvent) {}

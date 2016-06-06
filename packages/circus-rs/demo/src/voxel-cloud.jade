@@ -31,9 +31,12 @@ html
 				i.icon.rs-icon-bucket
 				i.icon.rs-icon-undo
 				i.icon.rs-icon-redo
+		
+		div(style="clear:both;")
+			button(type="button" name="add-new-cloud" value="1")
+				Add new cloud
 		table
 			tr
-				td(width=320): canvas#draw-canvas(width=300, height=300)
 				td(width=320): canvas#rs-canvas(width=300, height=300)
 				td
 					div.view-state-canvas-note

@@ -5,13 +5,33 @@ import { Viewer } from './viewer'
 export class ViewerEvent {
 	public type: string;
 	public original: any;
+	
+	public viewerX: number;
+	public viewerY: number;
+	public viewerWidth: number;
+	public viewerHeight: number;
+	
 	private propagation: boolean;
-
+	
 	public viewer: Viewer;
 
 	constructor( viewer:Viewer, type:string, original?: any ) {
 		this.viewer = viewer;
 		this.type = type || ( original ? original.type : null );
+		
+		if( original && original.offsetX ){
+			let canvas = viewer.canvasDomElement;
+			let viewerWidth = parseInt( canvas.getAttribute('width'), 10 );
+			let viewerHeight = parseInt( canvas.getAttribute('height'), 10 );
+			let elementWidth = canvas.clientWidth;
+			let elementHeight = canvas.clientHeight;
+			
+			this.viewerX = original.offsetX * viewerWidth / elementWidth;
+			this.viewerY = original.offsetY * viewerHeight / elementHeight;
+			this.viewerWidth = viewerWidth;
+			this.viewerHeight = viewerHeight;
+		}
+		
 		this.original = original;
 		this.propagation = true;
 	}

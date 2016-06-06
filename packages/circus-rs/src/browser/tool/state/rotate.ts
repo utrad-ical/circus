@@ -2,11 +2,12 @@
 
 var {quat, mat4, vec2, vec3} = require('gl-matrix');
 
-import { Tool } from './tool'
-import { Viewer } from '../viewer'
-import { ViewerEvent } from '../viewer-event'
-import { ViewerEventTarget } from '../viewer-event-target'
-import { CrossSection } from '../cross-section'
+import { Tool }							from '../../../browser/tool/tool';
+import { Viewer }						from '../../../browser/viewer/viewer';
+import { ViewerEvent }					from '../../../browser/viewer/viewer-event';
+import { ViewerEventTarget }			from '../../../browser/interface/viewer-event-target';
+import { CrossSection }					from '../../../browser/interface/cross-section';
+import { CrossSectionUtil }				from '../../../browser/util/cross-section-util';
 
 export class RotateTool extends Tool implements ViewerEventTarget {
 	
@@ -31,13 +32,13 @@ export class RotateTool extends Tool implements ViewerEventTarget {
 	public mousedownHandler(ev: ViewerEvent) {
 		if( ! this.drag ){
 			this.drag = true;
-			this.defaultState = JSON.parse( JSON.stringify( ev.viewer.viewState ) ); // deep clone;
+			this.defaultState = ev.viewer.getState();
 			this.vAxis = vec3.scale( vec3.create(), ev.viewer.viewState.section.xAxis, -1 );
 			this.hAxis = ev.viewer.viewState.section.yAxis;
 			this.hRotated = 0;
 			this.vRotated = 0;
-			this.ox = ev.original.offsetX;
-			this.oy = ev.original.offsetY;
+			this.ox = ev.viewerX;
+			this.oy = ev.viewerY;
 			ev.viewer.primaryEventTarget = this;
 		}
 		
@@ -45,28 +46,29 @@ export class RotateTool extends Tool implements ViewerEventTarget {
 	}
 	public mousemoveHandler(ev: ViewerEvent) {
 		if( this.drag ){
-			let canvasWidth = ev.original.target.getAttribute('width');
-			let canvasHeight = ev.original.target.getAttribute('height');
-			
-			let viewState = ev.viewer.viewState;
-			let hRotate = canvasWidth / 360 * ( this.ox - ev.original.offsetX );
-			let vRotate = canvasHeight / 360 * ( this.oy - ev.original.offsetY );
-			
-			CrossSection.rotate( viewState.section, hRotate - this.hRotated, this.hAxis );
+			ev.stopPropagation();
+			let state = ev.viewer.getState();
+
+			let hRotate = ev.viewerWidth / 360 * ( this.ox - ev.viewerX );
+			let vRotate = ev.viewerHeight / 360 * ( this.oy - ev.viewerY );
+			CrossSectionUtil.rotate( state.section, hRotate - this.hRotated, this.hAxis );
+			CrossSectionUtil.rotate( state.section, vRotate - this.vRotated, this.vAxis );
 			this.hRotated = hRotate;
-			CrossSection.rotate( viewState.section, vRotate - this.vRotated, this.vAxis );
 			this.vRotated = vRotate;
 			
+			ev.viewer.setState( state );
 			ev.viewer.render();
-			ev.stopPropagation();
 		}
 	}
 	public mouseupHandler(ev: ViewerEvent) {
 		if( this.drag ){
 			this.drag = false;
 			ev.viewer.primaryEventTarget = null;
-			if( ev.original.ctrlKey ) CrossSection.copy( ev.viewer.viewState.section, this.defaultState.section );
-			ev.viewer.render();
+
+			if( ev.original.ctrlKey ){
+				ev.viewer.setState( this.defaultState );
+				ev.viewer.render();
+			}
 		}
 		ev.stopPropagation();
 	}

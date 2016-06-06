@@ -4,10 +4,9 @@ let {mat4, vec3} = require('gl-matrix');
 
 type Vector3 = [number,number,number];
 type Point3 = [number,number,number];
-type Degree = number;
 
-export class CrossSection {
-
+export class CrossSectionUtil {
+	
 	public static copy( dst, src ) {
 		dst.origin[0] = src.origin[0];
 		dst.origin[1] = src.origin[1];
@@ -19,6 +18,7 @@ export class CrossSection {
 		dst.yAxis[1] = src.yAxis[1];
 		dst.yAxis[2] = src.yAxis[2];
 	}
+	
 	public static center( crossSection ): Point3 {
 		let center = vec3.create();
 		vec3.add( center, center, crossSection.xAxis );
@@ -51,7 +51,7 @@ export class CrossSection {
 	public static scale( crossSection, scale: number, centralPoint?: Point3) {
 
 		if (typeof centralPoint === 'undefined' || centralPoint === null)
-			centralPoint = CrossSection.center( crossSection );
+			centralPoint = CrossSectionUtil.center( crossSection );
 
 		let operation = [
 			t => mat4.translate( t, t, vec3.scale( vec3.create(), centralPoint, -1) ),
@@ -85,7 +85,7 @@ export class CrossSection {
 	public static rotate( crossSection, deg: number, axis: Vector3, centralPoint?: Point3) {
 
 		if (typeof centralPoint === 'undefined' || centralPoint === null)
-			centralPoint = CrossSection.center( crossSection );
+			centralPoint = CrossSectionUtil.center( crossSection );
 
 		let radian = Math.PI / 180.0 * deg;
 
@@ -115,9 +115,60 @@ export class CrossSection {
 		crossSection.yAxis[2] = yAxis[2];
 	}
 	
+	// public static getCelestialAngle( section1, section2 ){
+		// let nv1 = vec3.cross( vec3.create(), section1.xAxis, section1.yAxis );
+		// let nv2 = vec3.cross( vec3.create(), section2.xAxis, section2.yAxis );
+		
+		// let cosTheta = ( nv1[0] * nv2[0] + nv1[1] * nv2[1] + nv1[2] * nv2[2] )
+			// / Math.sqrt( vec3.length(nv1) )
+			// / Math.sqrt( vec3.length(nv2) );
+		
+		
+	// }
+	
+	public static getAxial( dimension: [number,number,number] = [512,512,512] ){
+		return {
+			origin: [0,0, dimension[2] / 2 ],
+			xAxis: [dimension[0],0,0],
+			yAxis: [0,dimension[1],0]
+		};
+	}
+	public static getSagittal( dimension: [number,number,number] = [512,512,512] ){
+		return {
+			origin: [dimension[0] / 2, 0, 0 ],
+			xAxis: [ 0, dimension[1], 0 ],
+			yAxis: [ 0, 0 ,dimension[2] ]
+		};
+	}
+	public static getCoronal( dimension: [number,number,number] = [512,512,512] ){
+		return {
+			origin: [ 0, dimension[1] / 2, 0 ],
+			xAxis: [ dimension[0], 0, 0 ],
+			yAxis: [ 0, 0 ,dimension[2] ]
+		};
+	}
+	
+	public static getEndPointsOfCrossLine( section1, section2 ){
+		let nv1 = vec3.cross( vec3.create(), section1.xAxis, section1.yAxis );
+		let nv2 = vec3.cross( vec3.create(), section2.xAxis, section2.yAxis );
+		let nv = vec3.cross( vec3.create(), nv1, nv2 );
+		
+		console.log(nv);
+	}
+	
+	
+	public static getZoom( section1, section2 ){
+	}
+	
+	public static getTranslate( section1, section2 ){
+	}
+	
+	
+	
+	
 	public static getVoxelMapperMatrix( section, viewport ){
 		
-		let nv = CrossSection.normalVector( section );
+		let nv = CrossSectionUtil.normalVector( section );
 		
 		let xAxisLength = vec3.length( section.xAxis );
 		
@@ -138,5 +189,25 @@ export class CrossSection {
 		
 		return matrix;
 	}
+	
+	public static getPixelToVoxelMapper( section, viewport ){
+		let matrix = CrossSectionUtil.getVoxelMapperMatrix( section, viewport );
+		return function( x: number,y: number,z: number = 0 ){
+			let p = vec3.fromValues( x, y, z );
+			vec3.transformMat4( p, p, matrix );
+			return p;
+		};
+	}
+	
+	public static getVoxelToPixelMapper( section, viewport ){
+		let matrix = CrossSectionUtil.getVoxelMapperMatrix( section, viewport );
+		let inverse = mat4.invert( mat4.create(), matrix );
+		return function(x: number,y: number,z: number){
+			let p = vec3.fromValues( x, y, z );
+			vec3.transformMat4( p, p, inverse );
+			return p;
+		};
+	}
+	
 	
 }

@@ -81,19 +81,24 @@ gulp.task('tslint', function() {
  * Build demo
  */
 gulp.task('demo',['demo-html','demo-js']);
+
 gulp.task('demo-html', ['demo-css'], function() {
-	var LOCALS = {};
-	return gulp.src('./demo/**/*.jade')
-		.pipe(jade({
-			locals: LOCALS,
-			pretty: true
-		}))
-		.pipe( gulp.dest('pubdocs') );
+	// var LOCALS = {};
+	// return gulp.src('./demo/**/*.jade')
+		// .pipe(jade({
+			// locals: LOCALS,
+			// pretty: true
+		// }))
+		// .pipe( gulp.dest('pubdocs') );
+	return gulp.src('demo/**/*.html')
+		.pipe(gulp.dest('pubdocs/'));
 });
 gulp.task('demo-css', function() {
-	return gulp.src('demo/**/*.less')
-		.pipe(less())
-		.pipe(gulp.dest('pubdocs'));
+	// return gulp.src('demo/**/*.less')
+		// .pipe(less())
+		// .pipe(gulp.dest('pubdocs'));
+	return gulp.src('demo/**/*.css')
+		.pipe(gulp.dest('pubdocs/'));
 });
 gulp.task('demo-js', ['copy-dist-browser'], function() {
 	return gulp.src('demo/**/*.js')
@@ -119,9 +124,9 @@ gulp.task('dist-browser', ['typescript','dist-browser-css'], function() {
 		.pipe(source('circus-rs-client.js'))
 		.pipe(buffer())
 		.pipe(gulp.dest('dist'))
-		.pipe(uglify())
-		.pipe(concat('circus-rs-client.min.js'))
-		.pipe(gulp.dest('dist'));
+		// .pipe(uglify())
+		// .pipe(concat('circus-rs-client.min.js'))
+		// .pipe(gulp.dest('dist'));
 });
 gulp.task('dist-browser-css', ['dist-browser-iconfont'], function() {
 	return gulp.src('src/browser/*.less')
@@ -129,17 +134,17 @@ gulp.task('dist-browser-css', ['dist-browser-iconfont'], function() {
 		.pipe(gulp.dest('dist/css'));
 });
 gulp.task('dist-browser-iconfont', function() {
-	return gulp.src('src/browser/assets/icons/*.svg')
-		.pipe(iconfont({
-			fontName: 'circus-rs-font',
-			appendUnicode: true,
-			formats: ['woff'],
-			startUnicode: 0xE600,
-			fontHeight: 512,
-			timestamp: Math.round(Date.now() / 1000) // required for consistent build
-		}))
-		.on('glyphs', function (glyphs, options) {
-			// console.log(glyphs);
-		})
-		.pipe(gulp.dest('dist/css'));
+	// return gulp.src('src/browser/assets/icons/*.svg')
+		// .pipe(iconfont({
+			// fontName: 'circus-rs-font',
+			// appendUnicode: true,
+			// formats: ['woff'],
+			// startUnicode: 0xE600,
+			// fontHeight: 512,
+			// timestamp: Math.round(Date.now() / 1000) // required for consistent build
+		// }))
+		// .on('glyphs', function (glyphs, options) {
+			// // console.log(glyphs);
+		// })
+		// .pipe(gulp.dest('dist/css'));
 });

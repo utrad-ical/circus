@@ -9,7 +9,7 @@ import { ViewerEventTarget }			from '../../../browser/interface/viewer-event-tar
 import { CrossSection }					from '../../../browser/interface/cross-section';
 import { CrossSectionUtil }				from '../../../browser/util/cross-section-util';
 
-export class RotateTool extends Tool implements ViewerEventTarget {
+export class CelestialRotateTool extends Tool implements ViewerEventTarget {
 	
 	private ox: number;
 	private oy: number;
@@ -50,11 +50,12 @@ export class RotateTool extends Tool implements ViewerEventTarget {
 			let state = ev.viewer.getState();
 
 			let hRotate = ev.viewerWidth / 360 * ( this.ox - ev.viewerX );
-			let vRotate = ev.viewerHeight / 360 * ( this.oy - ev.viewerY );
 			CrossSectionUtil.rotate( state.section, hRotate - this.hRotated, this.hAxis );
-			CrossSectionUtil.rotate( state.section, vRotate - this.vRotated, this.vAxis );
 			this.hRotated = hRotate;
-			this.vRotated = vRotate;
+
+			// let vRotate = ev.viewerHeight / 360 * ( this.oy - ev.viewerY );
+			// CrossSectionUtil.rotate( state.section, vRotate - this.vRotated, this.vAxis );
+			// this.vRotated = vRotate;
 			
 			ev.viewer.setState( state );
 			ev.viewer.render();
@@ -70,19 +71,6 @@ export class RotateTool extends Tool implements ViewerEventTarget {
 				ev.viewer.render();
 			}
 		}
-		ev.stopPropagation();
-	}
-	public mousewheelHandler(ev: ViewerEvent) {
-		
-		let viewState = ev.viewer.viewState;
-		let nv = vec3.create();
-			
-		vec3.cross( nv, viewState.section.xAxis, viewState.section.yAxis );
-		vec3.normalize( nv, nv );
-		if( ev.original.deltaY > 0 ) vec3.scale( nv, nv, -1 );
-		
-		vec3.add( viewState.section.origin, viewState.section.origin, nv );
-		ev.viewer.render();
 		ev.stopPropagation();
 	}
 }

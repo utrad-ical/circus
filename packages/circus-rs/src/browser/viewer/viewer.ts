@@ -175,21 +175,21 @@ export class Viewer extends EventEmitter {
 	 */
 	public setState( state ){
 		
-		state.section.origin = [
-			Math.floor( state.section.origin[0] ),
-			Math.floor( state.section.origin[1] ),
-			Math.floor( state.section.origin[2] ),
-		];
-		state.section.xAxis = [
-			Math.floor( state.section.xAxis[0] ),
-			Math.floor( state.section.xAxis[1] ),
-			Math.floor( state.section.xAxis[2] ),
-		];
-		state.section.yAxis = [
-			Math.floor( state.section.yAxis[0] ),
-			Math.floor( state.section.yAxis[1] ),
-			Math.floor( state.section.yAxis[2] ),
-		];
+		// state.section.origin = [
+			// Math.floor( state.section.origin[0] ),
+			// Math.floor( state.section.origin[1] ),
+			// Math.floor( state.section.origin[2] ),
+		// ];
+		// state.section.xAxis = [
+			// Math.floor( state.section.xAxis[0] ),
+			// Math.floor( state.section.xAxis[1] ),
+			// Math.floor( state.section.xAxis[2] ),
+		// ];
+		// state.section.yAxis = [
+			// Math.floor( state.section.yAxis[0] ),
+			// Math.floor( state.section.yAxis[1] ),
+			// Math.floor( state.section.yAxis[2] ),
+		// ];
 		
 		let prevState = extend( {}, this.viewState );
 		this.viewState = extend( {}, state );

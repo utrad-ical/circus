@@ -15,10 +15,11 @@ import { CrossSectionUtil }				from '../browser/util/cross-section-util';
 
 import { Tool }							from '../browser/tool/tool';
 import { HandTool }						from '../browser/tool/state/hand';
-import { RotateTool }					from '../browser/tool/state/rotate';
-import { BrushTool }					from '../browser/tool/cloud/brush';
+import { CelestialRotateTool }			from '../browser/tool/state/celestial-rotate';
 import { CloudsRenderer }				from '../browser/tool/cloud/clouds-renderer';
 import { CloudEditor }					from '../browser/tool/cloud/cloud-editor';
+import { BrushTool }					from '../browser/tool/cloud/brush';
+import { BucketTool }					from '../browser/tool/cloud/bucket';
 
 export class Composition extends EventEmitter {
 	
@@ -42,11 +43,11 @@ export class Composition extends EventEmitter {
 		// hand tool
 		this.tools['Hand'] = new HandTool();
 		
-		// rotate tool
-		this.tools['Rotate'] = new RotateTool();
+		// celestial-rotate tool
+		this.tools['CelestialRotate'] = new CelestialRotateTool();
 		
 		//
-		// Edit tool
+		// Cloud edit tools
 		//
 		this.cloudEditor = new CloudEditor();
 		
@@ -57,6 +58,14 @@ export class Composition extends EventEmitter {
 			this.renderAll();
 		});
 		this.tools['Brush'] = brush
+		
+		// bucket tool
+		let bucket = new BucketTool();
+		bucket.cloudEditor = this.cloudEditor;
+		bucket.on('filled', () => {
+			this.renderAll();
+		});
+		this.tools['Bucket'] = bucket
 		
 		/**
 		 * set up painter
@@ -84,65 +93,81 @@ export class Composition extends EventEmitter {
 		} );
 	}
 	
-	public createViewer( wrapperElement, option: { stateName?: string, width?: number, height?:number } = {
-		'stateName': 'axial',
-		'width': 300,
-		'height': 300
+	public createViewer( wrapperElement, option: { stateName?: string, width?: number, height?:number, section?:any, window?:any } = {
+		stateName: 'axial',
+		width: 300,
+		height: 300,
+		section: null,
+		window: {}
 	} ){
 
 		if( ! this.imageSource ) throw 'ImageSource is not set';
 	
-		let stateName = typeof option.stateName !== 'undefined' ? option.stateName.toString() : 'axial';
+		let stateName = typeof option.stateName !== 'undefined' ? option.stateName.toString() : null;
 		let width = typeof option.width !== 'undefined' ? option.width.toString() : '300';
 		let height = typeof option.height !== 'undefined' ? option.height.toString() : '300';
-	
+		let section = option.section || null ;
+		let ww = option.window ? option.window.width : null;
+		let wl = option.window ? option.window.level : null;
+		
+		if( !stateName && !section ) stateName = 'axial';
+		
 		let canvasElement = document.createElement('canvas');
 		canvasElement.setAttribute('width', width);
 		canvasElement.setAttribute('height', height);
 		canvasElement.style.width = '100%';
 		canvasElement.style.height = 'auto';
-		
 		wrapperElement.appendChild( canvasElement );
 	
 		let viewer = new Viewer( canvasElement );
 		
 		if( this.currentToolName ) viewer.backgroundEventTarget = this.tools[this.currentToolName];
+		viewer.painters = this.painters;
+		this.viewers.push( viewer );
 		
 		this.imageSource.ready().then( () => {
-			let section;
-			switch( stateName ){
-				case 'sagittal':
-					section = CrossSectionUtil.getSagittal( this.imageSource.getDimension() );
-					break;
-				case 'coronal':
-					section = CrossSectionUtil.getCoronal( this.imageSource.getDimension() );
-					break;
-				case 'axial':
-				default:
-					section = CrossSectionUtil.getAxial( this.imageSource.getDimension() );
-					break;
+			if( section === null ){
+				let dim = this.imageSource.getDimension();
+				switch( stateName ){
+					case 'sagittal':
+						section = CrossSectionUtil.getSagittal( dim );
+						break;
+					case 'coronal':
+						section = CrossSectionUtil.getCoronal( dim );
+						break;
+					case 'oblique':
+						section = CrossSectionUtil.getCoronal( dim );
+						CrossSectionUtil.rotate( section, 45, [0,0,1] );
+						break;
+					case 'axial':
+					default:
+						section = CrossSectionUtil.getAxial( this.imageSource.getDimension() );
+						break;
+				}
 			}
 			
-			let winConfig = ( this.imageSource as any ).esitimateWindow
-				? ( this.imageSource as any ).esitimateWindow()
-				: {
-					width: 100,
-					level: 10
-				};
-			winConfig.width = winConfig.width || 100;
-			winConfig.level = winConfig.level || 10;
+			let estimateWindow = ( this.imageSource as any ).estimateWindow
+				? ( this.imageSource as any ).estimateWindow()
+				: { width: null, level: null };
+			
+			let stateWindow = {
+				width:	ww !== null ? ww
+						: estimateWindow.width !== null ? estimateWindow.width
+						: 100,
+				level:	wl !== null ? wl
+						: estimateWindow.level !== null ? estimateWindow.level
+						: 100
+			};
 			
 			viewer.setSource( this.imageSource );
 			viewer.setState( {
 				section: section,
-				width: winConfig
+				window: stateWindow
 			} );
 			
 			Promise.resolve( viewer );
 		} );
 		
-		viewer.painters = this.painters;
-		this.viewers.push( viewer );
 		return viewer;
 	}
 	
@@ -175,8 +200,14 @@ export class Composition extends EventEmitter {
 		
 		let before = this.currentToolName;
 		this.currentToolName = toolName;
-		this.emit('toolchange', this.tools[ before ], this.tools[ toolName ] )
+		this.emit('toolchange', before, toolName );
 		
+		return this.tools[ toolName ];
+	}
+	public getTool( toolName: string ): Tool {
+		if( typeof this.tools[ toolName ] === 'undefined' )
+			throw 'Unknown tool: ' + toolName;
+			
 		return this.tools[ toolName ];
 	}
 	

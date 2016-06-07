@@ -1,7 +1,5 @@
 'use strict';
 
-import { VoxelCloud }					from '../../../common/VoxelCloud';
-import { Viewer }						from '../../../browser/viewer/viewer';
 import { ViewerEvent }					from '../../../browser/viewer/viewer-event';
 import { ViewerEventTarget }			from '../../../browser/interface/viewer-event-target';
 import { Tool }							from '../../../browser/tool/tool';
@@ -51,7 +49,6 @@ export class BrushTool extends Tool implements ViewerEventTarget {
 			ev.viewer.primaryEventTarget = null;
 			
 			this.emit( 'penup', this );
-			
 		}
 	}
 	

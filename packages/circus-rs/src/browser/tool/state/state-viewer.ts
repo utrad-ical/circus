@@ -250,9 +250,11 @@ export class WireAxisBoxObject extends StateViewerObject {
 export class CrossSectionObject extends StateViewerObject {
 
 	private crossSection;
+	private color: string;
 
-	constructor( crossSection ){
+	constructor( crossSection, color: string = 'rgba(64,64,64,0.3)' ){
 		super();
+		this.color = color;
 		this.crossSection = crossSection;
 	}
 	
@@ -266,7 +268,7 @@ export class CrossSectionObject extends StateViewerObject {
 		} );
 		
 		// draw cross section guideline
-		Vertex.fillPolygone( context, vertexes, 'rgba(64,64,64,0.3)' );
+		Vertex.fillPolygone( context, vertexes, this.color );
 		Vertex.strokePolygone( context, [ vertexes[0],vertexes[1] ], 2, 'rgba(0,0,255,1.0)' );
 		Vertex.strokePolygone( context, [ vertexes[0],vertexes[3] ], 2, 'rgba(0,255,0,1.0)' );
 		Vertex.fillCircle( context, vertexes[0], 3, 'rgba(255,0,0,1.0)' );

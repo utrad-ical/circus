@@ -1,42 +1,48 @@
 
-export function createToolbar( wrapperElement, toolNames: string[] ) {}
+export function createToolbar( wrapperElement, toolNames: string[] ) {
 	
-	// let associatedViewers = [];
+	let associatedCompositions = [];
 
-	// let selectToolHandler = tool => {
-		// associatedViewers.forEach( v => v.setTool(tool) );
-	// };
+	let selectToolHandler = toolName => {
+		associatedCompositions.forEach( c => c.setTool( toolName ) );
+	};
 	
-	// let bindViewer = ( viewer ) => {
-		// viewer.on('toolchange', ( before, after ) => {
-			// if( before !== after && typeof after === 'object' ){
-				// switch (true){
-					// case after instanceof HandTool:
-						// break;
-				// }
-			 // )
-		// } );
-		// associatedViewers.push( viewer );
-	// };
+	let ulElement = document.createElement('ul');
+	ulElement.className = 'circus-rs-toolbar';
 	
-	// let ulElement = document.createElement('ul');
-	
-	// let appendLi = ( toolName ) => {
-		// let buttonElement = document.createElement('button');
-		// buttonElement.setAttribute('type', 'button');
-		// buttonElement.appendChild( document.createTextNode( toolName ) );
-		// buttonElement.addEventListener( 'click', () => selectToolHandler( toolName ) );
+	let appendLi = ( toolName ) => {
+		let buttonElement = document.createElement('button');
+		buttonElement.setAttribute('type', 'button');
+		buttonElement.appendChild( document.createTextNode( toolName ) );
+		buttonElement.addEventListener( 'click', () => selectToolHandler( toolName ) );
 
-		// let liElement = document.createElement('li');
-		// liElement.appendChild( buttonElement );
+		let liElement = document.createElement('li');
+		liElement.className = 'circus-rs-toolbar-item ' + toolName;
+		liElement.appendChild( buttonElement );
 		
-		// ulElement.appendChild( liElement );
-	// };
+		ulElement.appendChild( liElement );
+	};
 	
-	// wrapperElement.appendChild( ulElement );
+	for( let i = 0; i < toolNames.length; i++ ){
+		appendLi( toolNames[i] );
+	}
 	
-	// return {
-		// bindViewer: bindViewer
-	// };
-// }
+	wrapperElement.appendChild( ulElement );
+	
+	let bindComposition = ( composition ) => {
+		composition.on('toolchange', ( before, after ) => {
+			
+			if( before ){
+				let re = new RegExp( ' ' + before + '-active ', 'g' );
+				ulElement.className = ulElement.className.replace( re, '' );
+			}
+			ulElement.className += ' ' + after + '-active ';
+		} );
+		associatedCompositions.push( composition );
+	};
+	
+	return {
+		bindComposition: bindComposition
+	};
+}
 

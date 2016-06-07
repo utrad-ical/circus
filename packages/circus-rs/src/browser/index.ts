@@ -18,8 +18,12 @@ export * from '../browser/tool/state/rotate';
 export * from '../browser/tool/state/state-viewer';
 
 export * from '../browser/tool/cloud/cloud-tool';
+export * from '../browser/composition';
 
 // temporary for check
 export * from '../browser/util/cross-section-util';
 // temporary for demo ?
 export * from '../common/VoxelCloud';
+
+
+export { createToolbar } from '../browser/create-toolbar';

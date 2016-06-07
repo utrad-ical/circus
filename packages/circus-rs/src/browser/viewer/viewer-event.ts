@@ -21,10 +21,8 @@ export class ViewerEvent {
 		
 		if( original && original.offsetX ){
 			let canvas = viewer.canvasDomElement;
-			let viewerWidth = parseInt( canvas.getAttribute('width'), 10 );
-			let viewerHeight = parseInt( canvas.getAttribute('height'), 10 );
-			let elementWidth = canvas.clientWidth;
-			let elementHeight = canvas.clientHeight;
+			let [ viewerWidth, viewerHeight ] = viewer.getResolution();
+			let [ elementWidth, elementHeight ] = viewer.getViewport();
 			
 			this.viewerX = original.offsetX * viewerWidth / elementWidth;
 			this.viewerY = original.offsetY * viewerHeight / elementHeight;

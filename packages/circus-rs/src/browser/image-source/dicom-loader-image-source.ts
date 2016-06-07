@@ -79,12 +79,12 @@ export abstract class DicomLoaderImageSource extends ImageSource {
 		} );
 	}
 	
-	// public estimateWindow(){
-		// return {
-			// level: this.meta.estimatedWindow.level,
-			// width: this.meta.estimatedWindow.width
-		// };
-	// }
+	public estimateWindow(){
+		return {
+			level: this.meta.estimatedWindow.level,
+			width: this.meta.estimatedWindow.width
+		};
+	}
 	// public dicomWindow(){
 		// return {
 			// level: this.meta.dicomWindow.level,
@@ -92,15 +92,16 @@ export abstract class DicomLoaderImageSource extends ImageSource {
 		// };
 	// }
 
-	// public voxelSize(): Vector3D {
-		// return this.meta.voxelSize;
-	// }
+	public voxelSize(): [ number, number ,number ] {
+		return this.meta.voxelSize;
+	}
 	
-	// public voxelCount(): Vector3D {
-		// return this.meta.voxelCount;
-	// }
+	public voxelCount(): [ number, number ,number ] {
+		return this.meta.voxelCount;
+	}
 	
 	public getDimension(): [ number, number ,number ] {
+		console.log('use voxelCount');
 		return this.meta.voxelCount;
 	}
 }

@@ -14,9 +14,7 @@ import { default as CloudEditor }		from '../../../browser/tool/cloud/cloud-edito
 
 export class CloudTool extends Tool implements ViewerEventTarget {
 	
-	public clouds: VoxelCloud[];
-	public activeCloud: VoxelCloud;
-
+	public clouds: VoxelCloud[]; // move to composition
 	public renderer: CloudsRenderer;
 	public editor: CloudEditor;
 	

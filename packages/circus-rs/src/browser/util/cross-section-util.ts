@@ -163,51 +163,25 @@ export class CrossSectionUtil {
 	public static getTranslate( section1, section2 ){
 	}
 	
-	
-	
-	
-	public static getVoxelMapperMatrix( section, viewport ){
-		
-		let nv = CrossSectionUtil.normalVector( section );
-		
-		let xAxisLength = vec3.length( section.xAxis );
-		
-		let scale = xAxisLength / viewport[1];
-		let scaleMatrix = mat4.scale( mat4.create(), mat4.create(), vec3.fromValues( scale,scale,scale ) );
-
-		let viewMatrix = mat4.create();
-		mat4.lookAt( viewMatrix, nv, [0,0,0], section.yAxis );
-		mat4.invert( viewMatrix, viewMatrix );
-		
-		let move = vec3.add( vec3.create(), section.origin, nv.map( i => i * -scale ) );
-		let transMatrix = mat4.translate( mat4.create(), mat4.create(), move );
-		
-		let matrix = mat4.create();
-		mat4.multiply( matrix, viewMatrix, matrix );
-		mat4.multiply( matrix, scaleMatrix, matrix );
-		mat4.multiply( matrix, transMatrix, matrix );
-		
-		return matrix;
-	}
-	
 	public static getPixelToVoxelMapper( section, viewport ){
-		let matrix = CrossSectionUtil.getVoxelMapperMatrix( section, viewport );
+		// function name is mismatched to real action
+		// not voxel-index, simply point of 3D
+	
+		let o = section.origin;
+		let u = vec3.scale( vec3.create(), section.xAxis, 1 / viewport[0] );
+		let v = vec3.scale( vec3.create(), section.yAxis, 1 / viewport[1] );
+		
 		return function( x: number,y: number,z: number = 0 ){
-			let p = vec3.fromValues( x, y, z );
-			vec3.transformMat4( p, p, matrix );
-			return p;
+			return [
+				o[0] + u[0] * x + v[0] * y,
+				o[1] + u[1] * x + v[1] * y,
+				o[2] + u[2] * x + v[2] * y
+			]
 		};
 	}
 	
-	public static getVoxelToPixelMapper( section, viewport ){
-		let matrix = CrossSectionUtil.getVoxelMapperMatrix( section, viewport );
-		let inverse = mat4.invert( mat4.create(), matrix );
-		return function(x: number,y: number,z: number){
-			let p = vec3.fromValues( x, y, z );
-			vec3.transformMat4( p, p, inverse );
-			return p;
-		};
-	}
+	// public static getVoxelToPixelMapper( section, viewport ){
+	// }
 	
 	
 }

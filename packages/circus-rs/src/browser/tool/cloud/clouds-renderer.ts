@@ -12,7 +12,6 @@ export class CloudsRenderer implements Painter {
 		this.clouds = [];
 	}
 	
-	
 	public draw( canvasDomElement, viewState ): Sprite {
 	
 		if( this.clouds.length === 0 ) return null;

@@ -2,6 +2,7 @@
 
 import { EventEmitter } from 'events';
 
+import { PromiseDefer }					from '../../browser/util/promise-defer';
 import { Painter }						from '../../browser/interface/painter';
 import { Sprite }						from '../../browser/viewer/sprite';
 import { ImageSource }					from '../../browser/image-source/image-source';
@@ -48,6 +49,12 @@ export class Viewer extends EventEmitter {
 		this.queue = [];
 	}
 	
+	public getResolution(){
+		return [
+			Number( this.canvasDomElement.getAttribute( 'width' ) ),
+			Number( this.canvasDomElement.getAttribute( 'height' ) )
+		];
+	}
 	public setResolution( w, h ){
 		this.canvasDomElement.setAttribute( 'width', w );
 		this.canvasDomElement.setAttribute( 'height', h );
@@ -158,8 +165,8 @@ export class Viewer extends EventEmitter {
 	
 	public getViewport(){
 		return [
-			parseInt( this.canvasDomElement.getAttribute('width') ),
-			parseInt( this.canvasDomElement.getAttribute('height') )
+			this.canvasDomElement.clientWidth,
+			this.canvasDomElement.clientHeight
 		];
 	}
 	
@@ -167,6 +174,23 @@ export class Viewer extends EventEmitter {
 	 * State handling methods
 	 */
 	public setState( state ){
+		
+		state.section.origin = [
+			Math.floor( state.section.origin[0] ),
+			Math.floor( state.section.origin[1] ),
+			Math.floor( state.section.origin[2] ),
+		];
+		state.section.xAxis = [
+			Math.floor( state.section.xAxis[0] ),
+			Math.floor( state.section.xAxis[1] ),
+			Math.floor( state.section.xAxis[2] ),
+		];
+		state.section.yAxis = [
+			Math.floor( state.section.yAxis[0] ),
+			Math.floor( state.section.yAxis[1] ),
+			Math.floor( state.section.yAxis[2] ),
+		];
+		
 		let prevState = extend( {}, this.viewState );
 		this.viewState = extend( {}, state );
 		this.emit( 'statechange', prevState, state );
@@ -191,70 +215,3 @@ export class Viewer extends EventEmitter {
 	
 }
 
-class PromiseDefer {
-	
-	private f: () => Thenable<{}>;
-	private q: any[]; // ??? { resolve: Function, reject: Function }[];
-	
-	private fire: Promise<any>;
-	private cancelState: boolean = false;
-	private cancelMessage: string;
-	
-	constructor( f ){
-		this.f = f;
-		this.q = [];
-	}
-	
-	public then( resolve: Function, reject: Function ) {
-		
-		if( this.fire ){
-			return ( this.fire as any ).then( resolve, reject );
-		}else{
-			this.q.push({
-				resolve: resolve,
-				reject: reject
-			});
-			return this;
-		}
-	}
-
-	public catch( errorHandler: Function ){
-
-		if( this.fire ){
-			return ( this.fire as any ).catch( errorHandler );
-		}else{
-			this.q.push({
-				resolve: null,
-				reject: errorHandler
-			});
-			return this;
-		}
-	}
-	
-	public execute(){
-		if( this.fire ) return this.fire;
-		
-		if( this.cancelState ){
-			this.fire = Promise.reject( this.cancelMessage );
-		}else{
-			this.fire = Promise.resolve();
-		}
-		
-		this.fire = this.fire.then( () => this.f() );
-		while( this.q.length > 0 ){
-			let c = this.q.shift();
-			this.fire = this.fire.then( c.resolve, c.reject );
-		}
-		return this.fire;
-	}
-	
-	public cancel( message: string = 'Canceled', silent: boolean = false ){
-		this.cancelState = true;
-		this.cancelMessage = message;
-		if( !silent ){
-			return this.execute();
-		}else{
-			this.fire = Promise.resolve();
-		}
-	}
-}

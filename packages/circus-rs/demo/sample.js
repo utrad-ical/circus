@@ -1,19 +1,97 @@
 $(function(){
 	
-	// var axial = circusrs.CrossSectionUtil.getAxial();
-	// var sagittal = circusrs.CrossSectionUtil.getSagittal();
-	// var coronal = circusrs.CrossSectionUtil.getCoronal();
+	var config = (function(){
+		var config = JSON.parse( localStorage.getItem('rs-demo-save') );
+		if ( config ) {
+			$('#series').val( config.series );
+			$('#server').val( config.server );
+			return config;
+		}else{
+			return null;
+		}
+		// localStorage.setItem( 'rs-demo-save', JSON.stringify( config ) );
+	})();
 	
-	// circusrs.CrossSectionUtil.getEndPointsOfCrossLine( axial, sagittal );
-	
-	// return;
-	
-	var imageSourceSelector = prepareImageSourceSelector();
-	
-	imageSourceSelector.use('mock').then( function( source ){
-		setup( imageSourceSelector, source );
-	} );
+	if( config ){
+		rs( config );
+	}
 } );
+
+function rs( config ){
+	var composition = new circusrs.Composition();
+	var imageSource = new circusrs.DynamicImageSource( config );
+	composition.setImageSource( imageSource );
+
+	var axViewer = composition.createViewer( document.querySelector('div#rs-axial'), { stateName: 'axial' } );
+	var sagViewer = composition.createViewer( document.querySelector('div#rs-sagittal'), { stateName: 'sagittal' } );
+	var corViewer = composition.createViewer( document.querySelector('div#rs-coronal'), { stateName: 'coronal' } );
+	
+	composition.setTool('Hand');
+	composition.setTool('Rotate');
+	var t = composition.setTool('Brush');
+	
+	imageSource.ready().then( function(){
+		var dim = imageSource.getDimension();
+		var vsize = imageSource.voxelSize();
+		var cloud = new circusrs.VoxelCloud();
+		cloud.label = 'TEST1';
+		cloud.color = [0xff,0,0,0xff];
+		cloud.setDimension( dim[0], dim[1], dim[2] );
+		cloud.setVoxelDimension( vsize[0], vsize[1], vsize[2] );
+		composition.clouds.push( cloud );
+		composition.editCloud( cloud );
+		
+		(function(){// draw position check
+			var ev0 = {
+				viewerX: 100,
+				viewerY: 100,
+				stopPropagation: function(){}
+			};
+			var ev1 = {
+				viewerX: 200,
+				viewerY: 200,
+				stopPropagation: function(){}
+			};
+			ev0.viewer = ev1.viewer = axViewer;
+			t.mousedownHandler(ev0);
+			t.mousemoveHandler(ev1);
+			t.mouseupHandler(ev1);
+
+			ev0.viewer = ev1.viewer = sagViewer;
+			t.mousedownHandler(ev0);
+			t.mousemoveHandler(ev1);
+			t.mouseupHandler(ev1);
+
+			ev0.viewer = ev1.viewer = corViewer;
+			t.mousedownHandler(ev0);
+			t.mousemoveHandler(ev1);
+			t.mouseupHandler(ev1);
+			
+			composition.renderAll();
+		})();
+		
+		
+		(function(){// fill check
+		
+			var viewer = axViewer;
+			var e = composition.cloudEditor;
+			e.prepare( viewer.viewState.section, viewer.getResolution() );
+			e.moveTo( 100, 100 );
+			e.lineTo( 200, 200 );
+			e.lineTo( 200, 100 );
+			e.lineTo( 100, 100 );
+			e.fill( 180, 130 );
+			
+			composition.renderAll();
+		})();
+		
+		
+	} );
+	composition.renderAll();
+	
+}
+
+
 
 function setup( imageSourceSelector, defaultSource ){
 	

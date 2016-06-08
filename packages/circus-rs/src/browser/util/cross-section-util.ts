@@ -115,17 +115,6 @@ export class CrossSectionUtil {
 		crossSection.yAxis[2] = yAxis[2];
 	}
 	
-	// public static getCelestialAngle( section1, section2 ){
-		// let nv1 = vec3.cross( vec3.create(), section1.xAxis, section1.yAxis );
-		// let nv2 = vec3.cross( vec3.create(), section2.xAxis, section2.yAxis );
-		
-		// let cosTheta = ( nv1[0] * nv2[0] + nv1[1] * nv2[1] + nv1[2] * nv2[2] )
-			// / Math.sqrt( vec3.length(nv1) )
-			// / Math.sqrt( vec3.length(nv2) );
-		
-		
-	// }
-	
 	public static getAxial( dimension: [number,number,number] = [512,512,512] ){
 		return {
 			origin: [0,0, dimension[2] / 2 ],
@@ -147,41 +136,5 @@ export class CrossSectionUtil {
 			yAxis: [ 0, 0 ,dimension[2] ]
 		};
 	}
-	
-	public static getEndPointsOfCrossLine( section1, section2 ){
-		let nv1 = vec3.cross( vec3.create(), section1.xAxis, section1.yAxis );
-		let nv2 = vec3.cross( vec3.create(), section2.xAxis, section2.yAxis );
-		let nv = vec3.cross( vec3.create(), nv1, nv2 );
-		
-		console.log(nv);
-	}
-	
-	
-	public static getZoom( section1, section2 ){
-	}
-	
-	public static getTranslate( section1, section2 ){
-	}
-	
-	public static getPixelToVoxelMapper( section, viewport ){
-		// function name is mismatched to real action
-		// not voxel-index, simply point of 3D
-	
-		let o = section.origin;
-		let u = vec3.scale( vec3.create(), section.xAxis, 1 / viewport[0] );
-		let v = vec3.scale( vec3.create(), section.yAxis, 1 / viewport[1] );
-		
-		return function( x: number,y: number,z: number = 0 ){
-			return [
-				o[0] + u[0] * x + v[0] * y,
-				o[1] + u[1] * x + v[1] * y,
-				o[2] + u[2] * x + v[2] * y
-			]
-		};
-	}
-	
-	// public static getVoxelToPixelMapper( section, viewport ){
-	// }
-	
 	
 }

@@ -49,6 +49,13 @@ export class Viewer extends EventEmitter {
 		this.queue = [];
 	}
 	
+	public getViewport(){
+		return [
+			this.canvasDomElement.clientWidth,
+			this.canvasDomElement.clientHeight
+		];
+	}
+	
 	public getResolution(){
 		return [
 			Number( this.canvasDomElement.getAttribute( 'width' ) ),
@@ -158,17 +165,6 @@ export class Viewer extends EventEmitter {
 		return defer;
 	}
 	
-	public getDimension(){
-		console.log('Using Viewer.getDimension is not recommended');
-		return this.imageSource.getDimension();
-	}
-	
-	public getViewport(){
-		return [
-			this.canvasDomElement.clientWidth,
-			this.canvasDomElement.clientHeight
-		];
-	}
 	
 	/**
 	 * State handling methods
@@ -211,6 +207,29 @@ export class Viewer extends EventEmitter {
 	}
 	public getSource(){
 		return this.imageSource;
+	}
+	
+	public dumpState(){
+
+		let getIndent = ( indent ) => {
+			let space = '';
+			while( indent-- > 0 ){
+				space += ' ';
+			}
+			return space;
+		};
+		let recursive = ( o, indent ) => {
+			if( typeof o === 'object' ){
+				let dump = "\n";
+				for( let i in o ){
+					dump += getIndent( indent ) + i + ": " + recursive( o[i], indent + 1 );
+				}
+				return dump;
+			}else{
+				return o + "\n";
+			}
+		};
+		return recursive( this.viewState, 0 );
 	}
 	
 }

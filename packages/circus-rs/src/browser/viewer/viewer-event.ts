@@ -36,6 +36,10 @@ export class ViewerEvent {
 	
 	public stopPropagation(){
 		this.propagation = false;
+		if( this.original ){
+			this.original.stopPropagation();
+			this.original.preventDefault();
+		}
 	}
 	public dispatch( element ){
 		let handler = this.type + 'Handler';

@@ -160,9 +160,9 @@ export class CloudEditor extends EventEmitter {
 
 		let eu = vec3.normalize( vec3.create(), section.xAxis );
 		let ev = vec3.normalize( vec3.create(), section.yAxis );
-		let unit = Math.min( vs[0], vs[1], vs[2] );
-		vec3.scale( eu, eu, unit );
-		vec3.scale( eu, eu, unit );
+		// let unit = Math.min( vs[0], vs[1], vs[2] );
+		// vec3.scale( eu, eu, unit );
+		// vec3.scale( eu, eu, unit );
 		
 		/**
 		 * prepare point handle functions
@@ -200,7 +200,7 @@ export class CloudEditor extends EventEmitter {
 			return p[0] < 0 || p[1] < 0 || p[2] < 0 || dim[0] <= p[0] || dim[1] <= p[1] || dim[2] <= p[2];
 		};
 		let isEdge = (p) => {
-			return !!this.cloud.getPixelAt( Math.floor(p[0]), Math.floor(p[1]), Math.floor(p[2]) );
+			return !!this.cloud.getPixelWithInterpolation( Math.floor(p[0]), Math.floor(p[1]), Math.floor(p[2]) );
 		};
 		
 		/**
@@ -208,7 +208,8 @@ export class CloudEditor extends EventEmitter {
 		 */
 		let POINT_BYTES = 3;
 		let lineBufferOffset = 0;
-		let lineBufferSize = Math.ceil( Uint16Array.BYTES_PER_ELEMENT * POINT_BYTES * Math.max( vec3.length( section.xAxis ), vec3.length( section.yAxis ) ) / unit );
+		// let lineBufferSize = Math.ceil( Uint16Array.BYTES_PER_ELEMENT * POINT_BYTES * Math.max( vec3.length( section.xAxis ), vec3.length( section.yAxis ) ) / unit );
+		let lineBufferSize = Math.ceil( Uint16Array.BYTES_PER_ELEMENT * POINT_BYTES * Math.max( vec3.length( section.xAxis ), vec3.length( section.yAxis ) ) );
 		let lineBuffer = new Uint16Array( lineBufferSize );
 		let flushedLines =  [];
 		

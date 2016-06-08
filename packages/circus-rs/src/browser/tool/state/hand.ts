@@ -3,58 +3,171 @@
 var {quat, mat4, vec2, vec3} = require('gl-matrix');
 
 import { Tool }							from '../../../browser/tool/tool';
+import { DraggableTool }				from '../../../browser/tool/draggable';
 import { Viewer }						from '../../../browser/viewer/viewer';
 import { ViewerEvent }					from '../../../browser/viewer/viewer-event';
 import { ViewerEventTarget }			from '../../../browser/interface/viewer-event-target';
+import { CrossSection }					from '../../../browser/interface/cross-section';
+import { CrossSectionUtil }				from '../../../browser/util/cross-section-util';
 
-export class HandTool extends Tool implements ViewerEventTarget {
+export class HandTool extends DraggableTool implements ViewerEventTarget {
 	
-	private ox: number;
-	private oy: number;
-	private drag: boolean;
-	private defaultState;
-
 	constructor(){
 		super();
-		this.drag = false;
 	}
 	
-	public mousedownHandler(ev: ViewerEvent) {
-		if( ! this.drag ){
-			this.drag = true;
-			this.defaultState = ev.viewer.getState();
-			this.ox = ev.viewerX;
-			this.oy = ev.viewerY;
-			ev.viewer.primaryEventTarget = this;
-		}
+	public dragstartHandler( ev: ViewerEvent ){
+		ev.viewer.primaryEventTarget = this;
 		ev.stopPropagation();
 	}
-	public mousemoveHandler(ev: ViewerEvent) {
-		if( this.drag ){
-			ev.stopPropagation();
-			let state = ev.viewer.getState();
-			
-			let dxComponent = state.section.xAxis.map( i => i / ev.viewerWidth * ( this.ox - ev.viewerX ) );
-			let dyComponent = state.section.yAxis.map( i => i / ev.viewerHeight * ( this.oy - ev.viewerY ) );
-			vec3.add( state.section.origin, state.section.origin, dxComponent );
-			vec3.add( state.section.origin, state.section.origin, dyComponent );
-			this.ox = ev.viewerX;
-			this.oy = ev.viewerY;
-			
-			ev.viewer.setState( state );
+	
+	public dragmoveHandler( ev: ViewerEvent, dragInfo ){
+		this.translateBy( ev.viewer, [ dragInfo.dx, dragInfo.dy ] );
+		ev.viewer.render();
+		ev.stopPropagation();
+	}
+	
+	public dragendHandler( ev: ViewerEvent, dragInfo ) {
+		ev.viewer.primaryEventTarget = null;
+		if( ev.original.shiftKey ){
+			this.resetTranslateState(ev.viewer);
+			this.resetZoomState(ev.viewer);
 			ev.viewer.render();
 		}
-	}
-	public mouseupHandler(ev: ViewerEvent) {
-		if( this.drag ){
-			this.drag = false;
-			ev.viewer.primaryEventTarget = null;
-
-			if( ev.original.ctrlKey ){
-				ev.viewer.setState( this.defaultState );
-				ev.viewer.render();
-			}
-		}
 		ev.stopPropagation();
+	}
+	public mousewheelHandler(ev: ViewerEvent) {
+		this.zoom( ev.viewer, ev.original.deltaY > 0 ? '+1' : '-1', [ ev.viewerX, ev.viewerY ]  );
+		ev.viewer.render();
+		ev.stopPropagation();
+	}
+	
+	/**
+	 * Translate viewport
+	 */
+	private initTranslateState( viewer: Viewer ): boolean {
+		if( typeof viewer.viewState.translate === 'undefined' ){
+			viewer.viewState.translate = { x: 0, y: 0, z: 0 };
+			return true;
+		}else{
+			return false;
+		}
+	}
+	
+	public translateBy( viewer, p: [ number, number ] ) {
+	
+		this.initTranslateState( viewer );
+	
+		let state = viewer.getState();
+		let vp = viewer.getResolution();
+		let [ eu, ev ] = this.getUnit( state.section, vp );
+		
+		let [ dx2, dy2 ] = p;
+		let [ dx, dy, dz ] = [
+			Math.round( eu[0] * -dx2 + ev[0] * -dy2 ),
+			Math.round( eu[1] * -dx2 + ev[1] * -dy2 ),
+			Math.round( eu[2] * -dx2 + ev[2] * -dy2 ) ];
+		
+		state.translate.x += dx;
+		state.translate.y += dy;
+		state.translate.z += dz;
+		
+		state.section.origin[0] += dx;
+		state.section.origin[1] += dy;
+		state.section.origin[2] += dz;
+		
+		viewer.setState( state );
+	}
+	
+	public resetTranslateState( viewer: Viewer ){
+		
+		if( typeof viewer.viewState.translate !== 'undefined' ){
+		
+			let state = viewer.getState();
+			state.section.origin[0] -= state.translate.x;
+			state.section.origin[1] -= state.translate.y;
+			state.section.origin[2] -= state.translate.z;
+			delete state.translate;
+			
+			viewer.setState( state );
+		}
+	}
+	
+	/**
+	 * pan / zoom ( with translate )
+	 */
+	
+	private initZoomState( viewer ){
+		if( typeof viewer.viewState.zoom === 'undefined' ){
+			viewer.viewState.zoom = {
+				value: 1,
+				x: 0,
+				y: 0,
+				z: 0
+			};
+			return true;
+		}else{
+			return false;
+		}
+	}
+	
+	public zoom( viewer, zoomVal: number|string, fp?: [number,number] ) {
+
+		let zoomRate = 1.05;
+	
+		this.initZoomState( viewer );
+
+		let state = viewer.getState();
+		
+		if( typeof zoomVal === 'string' ){
+			if( ( zoomVal as string ).substr(0,1) === '+' ){
+				zoomVal = state.zoom.value + Math.round( Number( ( zoomVal as string ).substr(1) ) );
+			}else if( ( zoomVal as string ).substr(0,1) === '-' ){
+				zoomVal = state.zoom.value - Math.round( Number( ( zoomVal as string ).substr(1) ) );
+			}else{
+				zoomVal = state.zoom.value;
+			}
+		}else if( typeof zoomVal === 'number' ){
+			zoomVal = Math.round( ( zoomVal as number ) );
+		}else{
+			zoomVal = state.zoom.value;
+		}
+		
+		if( zoomVal != state.zoom.value ){
+			let vp = viewer.getResolution();
+			if( !fp ) fp = [ vp[0] / 2, vp[1] / 2 ];
+			
+			let [ x0, y0, z0 ] = state.section.origin;
+			
+			let focus = this.getVolumePos( state.section, vp, fp[0], fp[1] );
+			CrossSectionUtil.scale(
+				state.section,
+				Math.pow( zoomRate, zoomVal as number ) / Math.pow( zoomRate, state.zoom.value ),
+				focus );
+			
+			state.zoom.value = zoomVal;
+			
+			let [ x1, y1, z1 ] = state.section.origin;
+			state.zoom.x += x1 - x0;
+			state.zoom.y += y1 - y0;
+			state.zoom.z += z1 - z0;
+			
+			viewer.setState( state );
+		}
+	}
+	
+	public resetZoomState( viewer ){
+		if( typeof viewer.viewState.zoom !== 'undefined' ){
+		
+			this.zoom( viewer, 0 );
+		
+			let state = viewer.getState();
+			state.section.origin[0] -= state.zoom.x;
+			state.section.origin[1] -= state.zoom.y;
+			state.section.origin[2] -= state.zoom.z;
+
+			delete state.zoom;
+			viewer.setState( state );
+		}
 	}
 }

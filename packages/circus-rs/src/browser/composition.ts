@@ -14,6 +14,7 @@ import { CrossSection }					from '../browser/interface/cross-section';
 import { CrossSectionUtil }				from '../browser/util/cross-section-util';
 
 import { Tool }							from '../browser/tool/tool';
+import { WindowTool }					from '../browser/tool/state/window';
 import { HandTool }						from '../browser/tool/state/hand';
 import { CelestialRotateTool }			from '../browser/tool/state/celestial-rotate';
 import { CloudsRenderer }				from '../browser/tool/cloud/clouds-renderer';
@@ -39,6 +40,9 @@ export class Composition extends EventEmitter {
 		/**
 		 * set up tools
 		 */
+		
+		// window tool
+		this.tools['Window'] = new WindowTool();
 		
 		// hand tool
 		this.tools['Hand'] = new HandTool();
@@ -93,25 +97,19 @@ export class Composition extends EventEmitter {
 		} );
 	}
 	
-	public createViewer( wrapperElement, option: { stateName?: string, width?: number, height?:number, section?:any, window?:any } = {
+	public createViewer( wrapperElement, option: { stateName?: string, width?: number, height?:number } = {
 		stateName: 'axial',
 		width: 300,
-		height: 300,
-		section: null,
-		window: {}
+		height: 300
 	} ){
 
 		if( ! this.imageSource ) throw 'ImageSource is not set';
 	
-		let stateName = typeof option.stateName !== 'undefined' ? option.stateName.toString() : null;
+		let stateName = typeof option.stateName !== 'undefined' ? option.stateName.toString() : 'axial';
 		let width = typeof option.width !== 'undefined' ? option.width.toString() : '300';
 		let height = typeof option.height !== 'undefined' ? option.height.toString() : '300';
-		let section = option.section || null ;
-		let ww = option.window ? option.window.width : null;
-		let wl = option.window ? option.window.level : null;
 		
-		if( !stateName && !section ) stateName = 'axial';
-		
+		// Create canvas element
 		let canvasElement = document.createElement('canvas');
 		canvasElement.setAttribute('width', width);
 		canvasElement.setAttribute('height', height);
@@ -119,53 +117,54 @@ export class Composition extends EventEmitter {
 		canvasElement.style.height = 'auto';
 		wrapperElement.appendChild( canvasElement );
 	
+		// Create viewer and entry collection.
 		let viewer = new Viewer( canvasElement );
-		
-		if( this.currentToolName ) viewer.backgroundEventTarget = this.tools[this.currentToolName];
-		viewer.painters = this.painters;
 		this.viewers.push( viewer );
 		
+		// Tool ... ?
+		if( this.currentToolName ) viewer.backgroundEventTarget = this.tools[this.currentToolName];
+		
+		// Share painter
+		viewer.painters = this.painters;
+		
 		this.imageSource.ready().then( () => {
-			if( section === null ){
-				let dim = this.imageSource.getDimension();
-				switch( stateName ){
-					case 'sagittal':
-						section = CrossSectionUtil.getSagittal( dim );
-						break;
-					case 'coronal':
-						section = CrossSectionUtil.getCoronal( dim );
-						break;
-					case 'oblique':
-						section = CrossSectionUtil.getCoronal( dim );
-						CrossSectionUtil.rotate( section, 45, [0,0,1] );
-						break;
-					case 'axial':
-					default:
-						section = CrossSectionUtil.getAxial( this.imageSource.getDimension() );
-						break;
-				}
+			
+			// Prepare default view state.
+			let state = this.imageSource.state();
+			// let dim: [ number, number, number ] = [
+				// state.voxelCount[0] * state.voxelSize[0],
+				// state.voxelCount[1] * state.voxelSize[1],
+				// state.voxelCount[2] * state.voxelSize[2]
+			// ];
+			let dim: [ number, number, number ] = state.voxelCount;
+		
+			switch( stateName ){
+				case 'sagittal':
+					state.stateName = 'sagittal';
+					state.section = CrossSectionUtil.getSagittal( dim );
+					break;
+				case 'coronal':
+					state.stateName = 'coronal';
+					state.section = CrossSectionUtil.getCoronal( dim );
+					break;
+				case 'oblique':
+					state.stateName = 'oblique';
+					state.section = CrossSectionUtil.getAxial( dim );
+					CrossSectionUtil.rotate( state.section, 45, [1,1,1] );
+					break;
+				case 'axial':
+				default:
+					state.stateName = 'axial';
+					state.section = CrossSectionUtil.getAxial( dim );
+					break;
 			}
 			
-			let estimateWindow = ( this.imageSource as any ).estimateWindow
-				? ( this.imageSource as any ).estimateWindow()
-				: { width: null, level: null };
-			
-			let stateWindow = {
-				width:	ww !== null ? ww
-						: estimateWindow.width !== null ? estimateWindow.width
-						: 100,
-				level:	wl !== null ? wl
-						: estimateWindow.level !== null ? estimateWindow.level
-						: 100
-			};
+			if( state.estimateWindow ){
+				state.window = state.estimateWindow;
+			}
 			
 			viewer.setSource( this.imageSource );
-			viewer.setState( {
-				section: section,
-				window: stateWindow
-			} );
-			
-			Promise.resolve( viewer );
+			viewer.setState( state );
 		} );
 		
 		return viewer;

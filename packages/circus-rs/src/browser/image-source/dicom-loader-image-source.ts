@@ -37,6 +37,22 @@ export abstract class DicomLoaderImageSource extends ImageSource {
 		return this.readyPromise;
 	}
 	
+	public state(){
+		let state = {
+			estimateWindow: {
+				level: this.meta.estimatedWindow.level,
+				width: this.meta.estimatedWindow.width
+			},
+			dicomWindow: {
+				level: this.meta.dicomWindow.level,
+				width: this.meta.dicomWindow.width
+			},
+			voxelSize: [ this.meta.voxelSize[0], this.meta.voxelSize[1], this.meta.voxelSize[2] ],
+			voxelCount: [ this.meta.voxelCount[0], this.meta.voxelCount[1], this.meta.voxelCount[2] ]
+		};
+		return state;
+	}
+	
 	public draw( canvasDomElement, viewState ):Promise<any> {
 	
 		let context = canvasDomElement.getContext('2d');
@@ -77,31 +93,5 @@ export abstract class DicomLoaderImageSource extends ImageSource {
 			}
 			context.putImageData( imageData, 0, 0 );
 		} );
-	}
-	
-	public estimateWindow(){
-		return {
-			level: this.meta.estimatedWindow.level,
-			width: this.meta.estimatedWindow.width
-		};
-	}
-	// public dicomWindow(){
-		// return {
-			// level: this.meta.dicomWindow.level,
-			// width: this.meta.dicomWindow.width
-		// };
-	// }
-
-	public voxelSize(): [ number, number ,number ] {
-		return this.meta.voxelSize;
-	}
-	
-	public voxelCount(): [ number, number ,number ] {
-		return this.meta.voxelCount;
-	}
-	
-	public getDimension(): [ number, number ,number ] {
-		console.log('use voxelCount');
-		return this.meta.voxelCount;
 	}
 }

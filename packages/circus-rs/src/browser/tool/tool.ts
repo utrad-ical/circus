@@ -10,19 +10,63 @@ export abstract class Tool extends EventEmitter {
 	public mousemoveHandler(ev: ViewerEvent) {}
 	public mouseupHandler(ev: ViewerEvent) {}
 	public mousewheelHandler(ev: ViewerEvent) {
-		
-		let state = ev.viewer.getState();
-		let nv = vec3.create();
-			
-		vec3.cross( nv, state.section.xAxis, state.section.yAxis );
-		vec3.normalize( nv, nv );
-		vec3.scale( nv, nv, ( ev.original.ctrlKey ? 5 : 1 ) * ( ev.original.deltaY > 0 ? -1 : 1 ) );
-		
-		vec3.add( state.section.origin, state.section.origin, nv );
-		ev.viewer.setState( state );
-		ev.viewer.render();
+	
+		let step = ( ev.original.ctrlKey ? 5 : 1 ) * ( ev.original.deltaY > 0 ? -1 : 1 );
+
+		this.slide( ev.viewer, step );
+
 		ev.stopPropagation();
 	}
+	
+	protected slide( viewer, step: number = 1 ){
 
+		let state = viewer.getState();
+		
+		let nv = vec3.create();
+		vec3.cross( nv, state.section.xAxis, state.section.yAxis );
+		vec3.normalize( nv, nv );
+		vec3.scale( nv, nv, step );
+		
+		vec3.add( state.section.origin, state.section.origin, nv );
+		viewer.setState( state );
+		viewer.render();
+	}
+
+	protected getMapper( section, viewport ){
+		
+		let [ w, h ] = viewport;
+		let [ ox, oy, oz ] = section.origin;
+		let [ ux, uy, uz ] = section.xAxis.map( i => i / w );
+		let [ vx, vy, vz ] = section.yAxis.map( i => i / h );
+		
+		return function( x: number, y: number ){
+			return [
+				ox + ux * x + vx * y,
+				oy + uy * x + vy * y,
+				oz + uz * x + vz * y
+			];
+		};
+	}
+	
+	protected getVolumePos( section, viewport, x: number, y: number ): [number, number, number]{
+		let [ w, h ] = viewport;
+		let [ ox, oy, oz ] = section.origin;
+		let [ ux, uy, uz ] = section.xAxis.map( i => i / w );
+		let [ vx, vy, vz ] = section.yAxis.map( i => i / h );
+		
+		return [
+			ox + ux * x + vx * y,
+			oy + uy * x + vy * y,
+			oz + uz * x + vz * y
+		];
+	}
+	
+	protected getUnit( section, viewport ) {
+		let [ w, h ] = viewport;
+		let [ ux, uy, uz ] = section.xAxis.map( i => i / w );
+		let [ vx, vy, vz ] = section.yAxis.map( i => i / h );
+		
+		return [ [ ux, uy, uz ], [ vx, vy, vz ] ];
+	}
 	
 }

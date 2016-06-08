@@ -34,14 +34,20 @@ function rs( config ){
 	var corViewer = composition.createViewer( document.querySelector('div#rs-coronal'), { stateName: 'coronal' } );
 	var oblViewer = composition.createViewer( document.querySelector('div#rs-oblique'), { stateName: 'oblique' } );
 	
-	var toolbar = circusrs.createToolbar( document.querySelector('div#rs-toolbar'), ['Hand','CelestialRotate','Brush','Bucket'] );
+	var toolbar = circusrs.createToolbar(
+		document.querySelector('div#rs-toolbar'),
+		[ 'Window', 'Hand', 'CelestialRotate', 'Brush', 'Bucket' ]
+	);
 	toolbar.bindComposition( composition );
+	
+	composition.renderAll();
 	
 	composition.setTool('Brush');
 	
 	imageSource.ready().then( function(){
-		var dim = imageSource.getDimension();
-		var vsize = imageSource.voxelSize();
+		var imgState = imageSource.state();
+		var dim = imgState.voxelCount;
+		var vsize = imgState.voxelSize;
 		var cloud = new circusrs.VoxelCloud();
 		cloud.label = 'TEST1';
 		cloud.color = [0xff,0,0,0xff];
@@ -76,10 +82,37 @@ function rs( config ){
 		})();
 				
 	} );
-	composition.renderAll();
 	
-	$( document.getElementById('pen-width') ).on( 'input', function(ev){
+	
+	$( '#pen-width' ).on( 'input', function(ev){
 		composition.cloudEditor.penWidth = this.value;
+	} );
+	$( '[name=reset-celestial]' ).on( 'click', function(ev){
+		var t = composition.getTool('CelestialRotate');
+		t.resetCelestialState( axViewer );
+		t.resetCelestialState( sagViewer );
+		t.resetCelestialState( corViewer );
+		t.resetCelestialState( oblViewer );
+		composition.renderAll();
+	} );
+	$( '[name=reset-hand]' ).on( 'click', function(ev){
+		var t = composition.getTool('Hand');
+		t.resetTranslateState( axViewer );
+		t.resetTranslateState( sagViewer );
+		t.resetTranslateState( corViewer );
+		t.resetTranslateState( oblViewer );
+		composition.renderAll();
+	} );
+	$( '[name=reset-zoom]' ).on( 'click', function(ev){
+		var t = composition.getTool('Hand');
+		t.resetZoomState( axViewer );
+		t.resetZoomState( sagViewer );
+		t.resetZoomState( corViewer );
+		t.resetZoomState( oblViewer );
+		composition.renderAll();
+	} );
+	$( '[name=dump-axial-viewer-state]' ).on( 'click', function(ev){
+		console.log( axViewer.dumpState() );
 	} );
 	
 	/**
@@ -156,7 +189,7 @@ StateViewerControl.prototype.observeViewer = function( viewer, color ){
 		self.render();
 	} );
 	viewer.on('sourcechange', function( prevSource, newSource  ){
-		self.setSourceDimension( newSource.getDimension() );
+		self.setSourceDimension( newSource.state().voxelCount );
 	} );
 	this.viewers.push( viewer );
 	this.colors.push( color );

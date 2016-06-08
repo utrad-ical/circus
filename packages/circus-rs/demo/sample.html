@@ -11,85 +11,7 @@
 <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.min.css">
 
 <!-- circusrs styles -->
-<link rel="stylesheet" href="dist/css/iconfont.css">
-<link rel="stylesheet" href="dist/css/browser.css">
-
-<style>
-@font-face {
-	font-family: 'circus-rs-font';
-	src: url('dist/css/circus-rs-font.woff') format('woff');
-	font-weight: normal;
-	font-style: normal;
-}
-
-ul.circus-rs-toolbar {
-	display: table;
-	width: 100%;
-	padding: 0;
-}
-ul.circus-rs-toolbar>li.circus-rs-toolbar-item {
-	display: table-row;
-}
-ul.circus-rs-toolbar>li.circus-rs-toolbar-item>button {
-	background-color: #ccc;
-	color: #000;
-	width: 100%;
-	display: table-cell;
-	font-size: 50%;
-	text-align: left;
-	padding-left: 4px;
-} ul.circus-rs-toolbar>li.circus-rs-toolbar-item>button:before {
-	font-family: 'circus-rs-font';
-	speak: none;
-	font-style: normal;
-	font-weight: normal;
-	font-variant: normal;
-	text-transform: none;
-	line-height: 1.4;
-	position: relative;
-	left: -4px;
-}
-ul.circus-rs-toolbar>li.circus-rs-toolbar-item.Hand>button:before {
-	content: '\e607';
-} ul.circus-rs-toolbar.Hand-active>li.circus-rs-toolbar-item.Hand>button {
-	background-color: #f60;
-	color: #fff;
-}
-
-ul.circus-rs-toolbar>li.circus-rs-toolbar-item.Brush>button:before {
-	content: '\e602';
-} ul.circus-rs-toolbar.Brush-active>li.circus-rs-toolbar-item.Brush>button {
-	background-color: #f60;
-	color: #fff;
-}
-
-ul.circus-rs-toolbar>li.circus-rs-toolbar-item.CelestialRotate>button:before {
-	content: '';
-} ul.circus-rs-toolbar.CelestialRotate-active>li.circus-rs-toolbar-item.CelestialRotate>button {
-	background-color: #f60;
-	color: #fff;
-}
-
-ul.circus-rs-toolbar>li.circus-rs-toolbar-item.Bucket>button:before {
-	content: '\e604';
-} ul.circus-rs-toolbar.Bucket-active>li.circus-rs-toolbar-item.Bucket>button {
-	background-color: #f60;
-	color: #fff;
-}
-
-/*
-.rs-icon(window, '\e600');
-.rs-icon(ruler, '\e601');
-.rs-icon(eraser, '\e603');
-.rs-icon(undo, '\e605');
-.rs-icon(redo, '\e606');
-.rs-icon(hand, '');
-.rs-icon(reference-rotate, '\e608');
-.rs-icon(reference-move, '\e609');
-*/
-
-</style>
-
+<link rel="stylesheet" href="dist/css/sample.css">
 </head>
 <body>
 
@@ -183,14 +105,22 @@ ul.circus-rs-toolbar>li.circus-rs-toolbar-item.Bucket>button:before {
 			<!-- toolbar -->
 			<div id="rs-toolbar"></div>
 			<div id="rs-toolbar-temp">
-				[ pen with ]
-				<input id="pen-width" type="range" min="1" max="5" step="1" value="1">
+				<div class="form-group">
+					<label class="control-label">[ pen with ]</label>
+					<input id="pen-width" type="range" min="1" max="5" step="1" value="1">
+				</div>
+				<button type="button" name="reset-hand"  class="btn btn-xs btn-block btn-default">RESET Hand</button>
+				<button type="button" name="reset-zoom"  class="btn btn-xs btn-block btn-default">RESET Zoom</button>
+				<button type="button" name="reset-celestial"  class="btn btn-xs btn-block btn-default">RESET Celestial</button>
 			</div>
 		</div>
 		<div class="col-sm-5">
 			<!-- axial-viewer -->
 			<div class="panel panel-default">
-				<div class="panel-heading">axial</div>
+				<div class="panel-heading">
+					axial
+					<button type="button" name="dump-axial-viewer-state" class="pull-right btn btn-xs btn-default">Dump State</button>
+				</div>
 				<div class="panel-body">
 					<div id="rs-axial"></div>
 				</div>

@@ -15,7 +15,9 @@ export class MockImageSource extends ImageSource {
 		super();
 		this.meta = meta;
 		this.meta.estimatedWindow = { level: 10, width: 100 };
-		this.meta.voxelSize = [ 0.5, 0.5, 0.5 ];
+		this.meta.dicomWindow = { level: 10, width: 100 };
+		this.meta.voxelSize = meta.voxelSize || [ 0.5, 0.5, 0.5 ];
+		this.meta.voxelCount = meta.voxelCount || [ 512, 512, 478 ];
 		
 		this.volume = this.createMockVolume( meta );
 	}
@@ -109,8 +111,20 @@ export class MockImageSource extends ImageSource {
 		return Promise.resolve();
 	}
 	
-	public getDimension(): [ number ,number ,number ] {
-		return this.meta.voxelCount;
+	public state(){
+		let state = {
+			estimateWindow: {
+				level: this.meta.estimatedWindow.level,
+				width: this.meta.estimatedWindow.width
+			},
+			dicomWindow: {
+				level: this.meta.dicomWindow.level,
+				width: this.meta.dicomWindow.width
+			},
+			voxelSize: [ this.meta.voxelSize[0], this.meta.voxelSize[1], this.meta.voxelSize[2] ],
+			voxelCount: [ this.meta.voxelCount[0], this.meta.voxelCount[1], this.meta.voxelCount[2] ]
+		};
+		return state;
 	}
 	
 

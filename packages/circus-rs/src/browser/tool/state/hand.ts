@@ -37,7 +37,9 @@ export class HandTool extends DraggableTool implements ViewerEventTarget {
 		ev.stopPropagation();
 	}
 	public mousewheelHandler(ev: ViewerEvent) {
-		this.zoom( ev.viewer, ev.original.deltaY > 0 ? '+1' : '-1', [ ev.viewerX, ev.viewerY ]  );
+		this.zoom( ev.viewer,
+			ev.original.ctrlKey ? ( ev.original.deltaY > 0 ? '+3' : '-3' ) : ( ev.original.deltaY > 0 ? '+1' : '-1' ) ,
+			[ ev.viewerX, ev.viewerY ]  );
 		ev.viewer.render();
 		ev.stopPropagation();
 	}

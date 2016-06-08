@@ -150,6 +150,182 @@ export class CloudEditor extends EventEmitter {
 	 * fill with Scanline Seed Fill Algorithm
 	 *  重複に関する考慮と実装がされていない。効率化の余地あり。
 	 */
+	
+	// // 3D -> 2D -> 3D パターン
+	// public fill( ex, ey ){
+		
+		// let startPos = this.mapper( ex, ey );
+		
+		// let section = this.section;
+		// let vs = this.cloud.getVoxelDimension();
+		// let dim = this.cloud.getDimension();
+		// let size = this.viewport;
+
+		// let o = section.origin;
+		// let u = vec3.scale( vec3.create(), section.xAxis, 1 / size[0] );
+		// let v = vec3.scale( vec3.create(), section.yAxis, 1 / size[1] );
+		
+		// let currentMap = new Uint8Array( size[0] * size[1] );
+		// this.cloud.scanOblique(
+			// section.origin,
+			// u,
+			// v,
+			// size,
+			// currentMap
+		// );
+		
+		// let read = ( x, y ) => currentMap[ ( y * size[0] + x ) ];
+		// let set = ( x, y ) => { currentMap[ ( y * size[0] + x ) ] = 2 };
+		
+		// /**
+		 // * prepare point handle functions
+		 // */
+		// let copy = (p) => [ p[0], p[1] ];
+		// let left = (p) => { p[0]--; return p;};
+		// let right = (p) => { p[0]++; return p;};
+		// let up = (p) => { p[1]--; return p;};
+		// let down = (p) => { p[1]++; return p;};
+		// let isBroken = (p) => {
+			// return p[0] < 0 || p[1] < 0 || size[0] <= p[0] || size[1] <= p[1];
+		// };
+		// let isEdge = (p) => {
+			// return !!currentMap[ ( p[1] * size[0] + p[0] ) ];
+		// };
+		
+		// /**
+		 // * scanned data buffer
+		 // */
+		// let POINT_BYTES = 2;
+		// let lineBufferOffset = 0;
+		// let lineBufferSize = Math.ceil( Uint16Array.BYTES_PER_ELEMENT * POINT_BYTES * Math.max( vec3.length( section.xAxis ), vec3.length( section.yAxis ) ) );
+			// // 誤り。対角線にしなくてはいけない
+		// let lineBuffer = new Uint16Array( lineBufferSize );
+		// let flushedLines =  [];
+		
+		// let save = (p) => {
+			// lineBuffer[lineBufferOffset++] = Math.floor(p[0]);
+			// lineBuffer[lineBufferOffset++] = Math.floor(p[1]);
+		// };
+		// let flush = () => {
+			// if( lineBufferOffset > 0 ){
+				// flushedLines.push( lineBuffer.slice( 0, lineBufferOffset ) );
+				// while( lineBufferOffset > 0 ){
+					// let py = lineBuffer[ --lineBufferOffset ];
+					// let px = lineBuffer[ --lineBufferOffset ];
+					// set(px,py);
+					
+					// let [ x, y, z ] = this.mapper( px, py );
+					// this.cloud.writePixelAt( 1, Math.floor(x), Math.floor(y), Math.floor(z) );
+				// }
+			// }
+		// };
+
+		// let failSafe = 1024 * 1024 * 10;
+		
+		// /**
+		 // * scan line 
+		 // */
+		// let scanLine = (pos) => {
+
+			// if( isEdge(pos) ) return true;
+				
+			// let p = copy(pos);
+			// let brokenPath = false;
+			
+			// // lineBufferを座標集合で利用するために一旦最も左に向い、その後右に走るため、動作は遅くなる。
+			// MOVE_LEFT: while( true ){
+				// if( --failSafe < 0 ) throw 'Limit over on MOVE_LEFT';
+				
+				// left(p);
+				// switch( true ){
+					// case isBroken(p): brokenPath = true; break MOVE_LEFT;
+					// case isEdge(p): break MOVE_LEFT;
+					// default: 
+				// }
+			// }
+			// if( brokenPath ) return false;
+			
+			// CORRECT_POINT_MOVING_RIGHT: while( true ){
+				// if( --failSafe < 0 ) throw 'Limit over on CORRECT_POINT_MOVING_RIGHT';
+
+				// right(p);
+				// switch( true ){
+					// case isBroken(p): brokenPath = true; break CORRECT_POINT_MOVING_RIGHT;
+					// case isEdge(p): break CORRECT_POINT_MOVING_RIGHT;
+					// default: save(p);
+				// }
+			// }
+			// if( brokenPath ) return false;
+			
+			// let o = lineBufferOffset;
+			// let upperOnEdge = true;
+			// let underOnEdge = true;
+			
+			// UPPER_UNDER_SCAN: while( o > 0 ){
+				// let py = lineBuffer[ --o ];
+				// let px = lineBuffer[ --o ];
+
+				// let upper = up( [ px, py ] );
+				// switch( true ){
+					// case isBroken(upper):
+						// brokenPath = true;
+						// break UPPER_UNDER_SCAN;
+					// case upperOnEdge && !isEdge(upper):
+						// upperOnEdge = false;
+						// buffer.push(upper);
+						// break;
+					// case !upperOnEdge && isEdge(upper):
+						// upperOnEdge = true;
+						// break;
+					// default:
+						// upperOnEdge = isEdge(upper);
+				// }
+				
+				// let under = down( [ px, py,  ] );
+				// switch( true ){
+					// case isBroken(under):
+						// brokenPath = true;
+						// break UPPER_UNDER_SCAN;
+					// case underOnEdge && !isEdge(under):
+						// underOnEdge = false;
+						// buffer.push(under);
+						// break;
+					// case !underOnEdge && isEdge(under):
+						// underOnEdge = true;
+						// break;
+					// default:
+				// }
+			// }
+			// if( brokenPath ) return false;
+
+			// flush();
+			// return true;
+		// };
+
+		// let result = true;
+		// let buffer = [ [ex,ey] ];
+		// while( result && buffer.length > 0 ){
+			// result = scanLine( buffer.shift() );
+			// if( failSafe-- < 0 ) throw 'Limit over on scanLine loop';
+		// }
+		
+		// // Broken path, revert filled points.
+		// if( !result ){
+			// let pointsBuffer;
+			// while( pointsBuffer = flushedLines.shift() ){
+				// for( let i = 0; i < pointsBuffer.length; i += POINT_BYTES ){
+					// let [ x, y, z ] = this.mapper( pointsBuffer[ i ], pointsBuffer[ i + 1 ] );
+					// this.cloud.writePixelAt( 0, Math.floor(x), Math.floor(y), Math.floor(z) );
+				// }
+			// }
+		// } 
+		
+		// return result;
+	// }
+	
+	/**
+	 * 3D直接操作パターン ... isEdge 判定に問題があるのか、 oblique でうまく動作しない場合が多い。
+	 */
 	public fill( ex, ey ){
 		
 		let startPos = this.mapper( ex, ey );
@@ -160,9 +336,6 @@ export class CloudEditor extends EventEmitter {
 
 		let eu = vec3.normalize( vec3.create(), section.xAxis );
 		let ev = vec3.normalize( vec3.create(), section.yAxis );
-		// let unit = Math.min( vs[0], vs[1], vs[2] );
-		// vec3.scale( eu, eu, unit );
-		// vec3.scale( eu, eu, unit );
 		
 		/**
 		 * prepare point handle functions

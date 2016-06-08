@@ -17,7 +17,6 @@ $(function(){
 		}else{
 			return null;
 		}
-		// 
 	})();
 	
 	if( config ) rs( config );
@@ -26,6 +25,10 @@ $(function(){
 function rs( config ){
 	var composition = new circusrs.Composition();
 	var imageSource = new circusrs.HybridImageSource( config );
+	// var imageSource = new circusrs.MockImageSource( {
+		// voxelCount: [512, 512, 478],
+		// voxelSize: [1,1,1]
+	// } );
 	
 	composition.setImageSource( imageSource );
 
@@ -36,10 +39,14 @@ function rs( config ){
 	
 	var toolbar = circusrs.createToolbar(
 		document.querySelector('div#rs-toolbar'),
-		[ 'Window', 'Hand', 'CelestialRotate', 'Brush', 'Bucket' ]
+		[ 'Window', 'Hand', 'CelestialRotate'
+		 ,'Brush', 'Eraser', 'Bucket'
+		 ,'Ruler', 'Arrow', 'Cube'
+		 ,'ReferenceRotate', 'ReferenceMove'
+		 ,'Undo', 'Redo' ]
 	);
 	toolbar.bindComposition( composition );
-	
+
 	composition.renderAll();
 	
 	composition.setTool('Brush');
@@ -50,7 +57,7 @@ function rs( config ){
 		var vsize = imgState.voxelSize;
 		var cloud = new circusrs.VoxelCloud();
 		cloud.label = 'TEST1';
-		cloud.color = [0xff,0,0,0xff];
+		cloud.color = [0xff,0,0,0x99];
 		cloud.setDimension( dim[0], dim[1], dim[2] );
 		cloud.setVoxelDimension( vsize[0], vsize[1], vsize[2] );
 		composition.clouds.push( cloud );
@@ -174,7 +181,7 @@ StateViewerControl.prototype.render = function(){
 	this.stateViewer.addObject( volumeModel );
 	
 	for( var i = 0; i < this.viewers.length; i++ ){
-		this.stateViewer.addObject(
+		if( this.viewers[i].viewState && this.viewers[i].viewState.section ) this.stateViewer.addObject(
 			new circusrs.CrossSectionObject( this.viewers[i].viewState.section , this.colors[i] )
 		);
 	}

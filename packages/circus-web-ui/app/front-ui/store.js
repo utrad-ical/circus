@@ -3,10 +3,16 @@ import { createStore, combineReducers } from 'redux';
 // This store should contain only information shared across pages,
 // such as the login user information.
 
-function loginUser(state = null, action) {
+function loginUser(state = { isFetching: false, data: null }, action) {
 	switch (action.type) {
-		case 'LOAD_LOGIN_INFO':
-			return action.loginUser;
+		case 'LOAD_FULL_LOGIN_INFO':
+			return { isFetching: false, data: action.loginUser };
+		case 'CONFIRM_LOGIN_INFO':
+			return { ...state, isFetching: false };
+		case 'REQUEST_LOGIN_INFO':
+			return { ...state, isFetching: true };
+		case 'LOGGED_OUT':
+			return { isFetching: false, data: null };
 	}
 	return state;
 }

@@ -38,6 +38,7 @@ Route::group(['before' => 'auth'], function() {
 	$staticView('admin/{dum}', 'application');
 	$staticView('admin', 'application');
 	Route::get('api/login-info', 'LoginInformationController@show');
+	Route::get('api/login-info/full', 'LoginInformationController@showFull');
 
 	// Case
 	Route::get('case/search/{preset_id}', 'CaseSearchController@search')

@@ -28,6 +28,7 @@ import { Preference } from 'pages/preference';
 
 import { store } from 'store';
 import { Provider } from 'react-redux';
+import { refreshUserInfo } from 'actions';
 
 require('style!css!./styles/main.less');
 require('bootstrap/fonts/glyphicons-halflings-regular.woff');
@@ -37,7 +38,7 @@ require('bootstrap/fonts/glyphicons-halflings-regular.ttf');
 ReactDOM.render(
 	<Provider store={store}>
 		<Router history={browserHistory}>
-			<Route path='/' component={App}>
+			<Route path='/' component={App} onChange={pageMove}>
 				<Route path="home" component={Home} />
 				<Route path='browse/series' component={SeriesSearch} />
 				<Route path='browse/case' component={CaseSearch} />
@@ -59,11 +60,9 @@ ReactDOM.render(
 	document.getElementById('app')
 );
 
-async function loadUserInfo() {
-	const result = await api('login-info');
-	store.dispatch({
-		type: 'LOAD_LOGIN_INFO',
-		loginUser: result
-	});
+// First-time login check
+refreshUserInfo(true);
+
+function pageMove() {
+	refreshUserInfo(false);
 }
-loadUserInfo();

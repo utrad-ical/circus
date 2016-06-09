@@ -15,13 +15,7 @@ class UserPreferenceApiController extends BaseController
 		$preferences = $user->preferences;
 
 		foreach($input as $key => $val) {
-			if ($key === 'caseSearchPresets' || $key === 'seriesSearchPresets') {
-				$presets = isset($preferences[$key]) ? $preferences[$key] : array();
-				$presets[] = $val;
-				$preferences[$key] = $presets;
-			} else {
-				$preferences[$key] = $val;
-			}
+			$preferences[$key] = $val;
 		}
 		$user->preferences = $preferences;
 

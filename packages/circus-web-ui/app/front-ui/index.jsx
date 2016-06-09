@@ -16,6 +16,7 @@ import { Home } from 'pages/home';
 import { SeriesSearch } from 'pages/search-series';
 import { CaseSearch } from 'pages/search-case';
 import { ImportSeries } from 'pages/import-series';
+import { SeriesDetail} from 'pages/series-detail';
 import { TaskList } from 'pages/task-list';
 import { AdminIndex } from 'pages/admin/index';
 import { AdminContainer } from 'pages/admin/admin-container';
@@ -54,6 +55,7 @@ ReactDOM.render(
 					<Route path='user' component={UserAdmin} />
 					<Route path='project' component={ProjectAdmin} />
 				</Route>
+				<Route path="series/:uid" component={SeriesDetail} />
 				<Route path="task-list" component={TaskList} />
 				<Route path='preference' component={Preference} />
 			</Route>

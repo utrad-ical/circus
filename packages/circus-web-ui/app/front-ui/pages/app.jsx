@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router';
 import { connect } from 'react-redux';
 import { MessageBox } from './message-box';
+import { logout } from 'actions';
 
 /**
  * The main application container.
@@ -13,18 +14,17 @@ const AppView = props => {
 	const notLoggedIn = !props.isUserFetching && !props.isLoggedIn;
 	return <div>
 		<Nav />
-		{ pageContentVisible ?
-			<div className="container">
-				<MessageBox />
-				{props.children}
-			</div>
-		: null }
-		{ notLoggedIn ?
-			<div className="alert alert-danger">
-				You are not logged in, or your session has been expired.<br/>
-				Please log in first.
-			</div>
-		: null }
+		<div className="container">
+			{ pageContentVisible ?
+				[<MessageBox />, props.children]
+			: null }
+			{ notLoggedIn ?
+				<div className="alert alert-danger">
+					You are not logged in, or your session has been expired.<br/>
+					Please log in first.
+				</div>
+			: null }
+		</div>
 	</div>;
 };
 
@@ -71,7 +71,7 @@ const NavView = props => {
 		<nav>
 			<MainMenu>
 				<li className="user-info">{props.loginUserName}</li>
-				<Menu name="Logout" link="logout" />
+				<Menu name="Logout" onClick={logout} />
 			</MainMenu>
 		</nav>
 	</header>
@@ -92,7 +92,7 @@ const Menu = props => {
 		<span className={className} key='icon'/>,
 		<span className="hidden-xs" key='caption'>{props.name}</span>
 	];
-	return <li className="icon-menu" key={props.name}>
+	return <li className="icon-menu" key={props.name} onClick={props.onClick}>
 		{props.link ? <Link to={props.link}>{caption}</Link> : caption }
 		<ul>{props.children}</ul>
 	</li>;

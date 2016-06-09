@@ -15,6 +15,7 @@ import { LoginScreen } from 'pages/login-screen';
 import { Home } from 'pages/home';
 import { SeriesSearch } from 'pages/search-series';
 import { CaseSearch } from 'pages/search-case';
+import { CaseDetail } from 'pages/case-detail';
 import { ImportSeries } from 'pages/import-series';
 import { SeriesDetail} from 'pages/series-detail';
 import { TaskList } from 'pages/task-list';
@@ -56,6 +57,7 @@ ReactDOM.render(
 					<Route path='project' component={ProjectAdmin} />
 				</Route>
 				<Route path="series/:uid" component={SeriesDetail} />
+				<Route path="case/:id" component={CaseDetail} />
 				<Route path="task-list" component={TaskList} />
 				<Route path='preference' component={Preference} />
 			</Route>

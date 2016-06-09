@@ -1,6 +1,7 @@
 import React from 'react';
 import { SearchResults } from './search-results';
 import { Button } from 'components/react-bootstrap';
+import { Link } from 'react-router';
 import { modal } from 'components/modal';
 
 const createCase = seriesUID => {
@@ -36,12 +37,12 @@ const SeriesInfoRenderer = props => {
 			{anon(`${props.patientInfo.age} ${props.patientInfo.sex}`)}
 		</div>
 		<div className="register">
-			<Button bsStyle="default"
-				onClick={() => createCase(props.seriesUID)}
-			>
-				<span className="circus-icon circus-icon-series" />
-				View
-			</Button>
+			<Link to={`/series/${props.seriesUID}`}>
+				<Button>
+					<span className="circus-icon circus-icon-series" />
+					View
+				</Button>
+			</Link>
 		</div>
 	</div>;
 };

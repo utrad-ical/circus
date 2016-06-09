@@ -3,15 +3,37 @@ import { Link } from 'react-router';
 import { connect } from 'react-redux';
 import { MessageBox } from './message-box';
 
-export const App = props => {
+/**
+ * The main application container.
+ * The navigation bar is always visible, but the main page content is
+ * visible only after we confirmed the user is currently logged-in with valid session.
+ */
+const AppView = props => {
+	const pageContentVisible = !props.isUserFetching && props.isLoggedIn;
+	const notLoggedIn = !props.isUserFetching && !props.isLoggedIn;
 	return <div>
 		<Nav />
-		<div className="container">
-			<MessageBox />
-			{props.children}
-		</div>
+		{ pageContentVisible ?
+			<div className="container">
+				<MessageBox />
+				{props.children}
+			</div>
+		: null }
+		{ notLoggedIn ?
+			<div className="alert alert-danger">
+				You are not logged in, or your session has been expired.<br/>
+				Please log in first.
+			</div>
+		: null }
 	</div>;
 };
+
+export const App = connect(
+	state => ({
+		isUserFetching: state.loginUser.isFetching,
+		isLoggedIn: state.loginUser.data !== null
+	})
+)(AppView);
 
 const NavView = props => {
 	return <header>
@@ -57,8 +79,8 @@ const NavView = props => {
 
 const Nav = connect(
 	state => ({
-		loginUserName: state.loginUser ? state.loginUser.description : '',
-		isAdmin: state.loginUser && state.loginUser.privileges.indexOf('manageServer') > -1
+		loginUserName: state.loginUser.data ? state.loginUser.data.description : '',
+		isAdmin: state.loginUser.data && state.loginUser.data.privileges.indexOf('manageServer') > -1
 	})
 )(NavView);
 

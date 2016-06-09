@@ -12,7 +12,7 @@ const ContainerView = props => {
 };
 
 const stateToProps = state => ({
-	isAdmin: state.loginUser && state.loginUser.privileges.indexOf('manageServer') > -1
+	isAdmin: state.loginUser.data && state.loginUser.data.privileges.indexOf('manageServer') > -1
 });
 
 export const AdminContainer = connect(stateToProps)(ContainerView);

@@ -12,13 +12,17 @@
 */
 
 // Login / logout
-Route::get('/', function() { return Redirect::to('login'); });
+// Route::get('/', function() { return Redirect::to('login'); });
 Route::get('login', 'LoginController@getIndex');
 Route::post('login', 'LoginController@login');
 Route::get('logout', 'LoginController@logout');
 
 // Common download
 Route::get('download/{taskID}', 'TaskController@download');
+
+// SPA login
+Route::get('/', function() { return View::make('application'); });
+Route::post('api/login', 'LoginApiController@login');
 
 Route::group(['before' => 'auth'], function() {
 
@@ -39,6 +43,7 @@ Route::group(['before' => 'auth'], function() {
 	$staticView('admin', 'application');
 	Route::get('api/login-info', 'LoginInformationController@show');
 	Route::get('api/login-info/full', 'LoginInformationController@showFull');
+	Route::get('api/logout', 'LoginApiController@logout');
 
 	// Case
 	Route::get('case/search/{preset_id}', 'CaseSearchController@search')

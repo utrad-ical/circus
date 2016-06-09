@@ -11,6 +11,7 @@ import ReactDOM from 'react-dom';
 import { Router, Route, IndexRoute, browserHistory} from 'react-router';
 import { api } from 'utils/api';
 import { App } from 'pages/app';
+import { LoginScreen } from 'pages/login-screen';
 import { Home } from 'pages/home';
 import { SeriesSearch } from 'pages/search-series';
 import { CaseSearch } from 'pages/search-case';
@@ -38,6 +39,7 @@ require('bootstrap/fonts/glyphicons-halflings-regular.ttf');
 ReactDOM.render(
 	<Provider store={store}>
 		<Router history={browserHistory}>
+			<Route path='/' component={LoginScreen} onLeave={() => refreshUserInfo(true)} />
 			<Route path='/' component={App} onChange={pageMove}>
 				<Route path="home" component={Home} />
 				<Route path='browse/series' component={SeriesSearch} />

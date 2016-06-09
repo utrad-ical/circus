@@ -35,7 +35,7 @@ class User extends BaseModel implements UserInterface {
 
 	protected $rules = array(
 		'userEmail' 	=>	'required|strict_string',
-        'loginID'		=>	'required|alpha_dash|max:20',
+		'loginID'		=>	'required|alpha_dash|max:20',
 		'password'		=>	'required',
 		'groups'		=>	'required|array_of_group_ids',
 		'preferences' 	=>	'required|preferences',
@@ -44,7 +44,8 @@ class User extends BaseModel implements UserInterface {
 		'lastLoginIP' 	=>	'',
 		'description'	=>	'',
 		'createTime'	=>	'mongodate',
-		'updateTime'	=>	'mongodate'
+		'updateTime'	=>	'mongodate',
+		'remember_token' => 'string'
     );
 
 	public function groups() {

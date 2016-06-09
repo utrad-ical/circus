@@ -1,5 +1,6 @@
 import { store } from 'store';
 import { api } from 'utils/api';
+import { browserHistory } from 'react-router';
 
 /*
  * Adds/hides message boxes.
@@ -52,4 +53,18 @@ export async function refreshUserInfo(full = false) {
 	} catch (err) {
 		store.dispatch({ type: 'LOGGED_OUT' });
 	}
+}
+
+export async function login(id, password) {
+	const result = await api('login', {
+		data: { id, password },
+		handleErrors: true
+	});
+	browserHistory.push('/home');
+}
+
+export async function logout() {
+	const result = await api('logout');
+	store.dispatch({ type: 'LOGGED_OUT' });
+	browserHistory.push('/');
 }

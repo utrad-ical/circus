@@ -130,44 +130,111 @@ export class Composition extends EventEmitter {
 		this.imageSource.ready().then( () => {
 			
 			// Prepare default view state.
-			let state = this.imageSource.state();
-			// let dim: [ number, number, number ] = [
-				// state.voxelCount[0] * state.voxelSize[0],
-				// state.voxelCount[1] * state.voxelSize[1],
-				// state.voxelCount[2] * state.voxelSize[2]
-			// ];
+			let state = viewer.getState();
+			
+			let isState = this.imageSource.state();
+			for( let item in isState ){
+				state[item] = isState[item];
+			}
+			
 			let dim: [ number, number, number ] = state.voxelCount;
 		
 			switch( stateName ){
 				case 'sagittal':
 					state.stateName = 'sagittal';
-					state.section = CrossSectionUtil.getSagittal( dim );
+					this.setSagittal( state );
 					break;
 				case 'coronal':
 					state.stateName = 'coronal';
-					state.section = CrossSectionUtil.getCoronal( dim );
+					this.setCoronal( state );
 					break;
 				case 'oblique':
 					state.stateName = 'oblique';
-					state.section = CrossSectionUtil.getAxial( dim );
+					this.setAxial( state );
 					CrossSectionUtil.rotate( state.section, 45, [1,1,1] );
 					break;
 				case 'axial':
 				default:
 					state.stateName = 'axial';
-					state.section = CrossSectionUtil.getAxial( dim );
+					this.setAxial( state );
 					break;
 			}
 			
 			if( state.estimateWindow ){
 				state.window = state.estimateWindow;
 			}
-			
+
 			viewer.setSource( this.imageSource );
 			viewer.setState( state );
 		} );
 		
 		return viewer;
+	}
+	
+	private setAxial( state ){
+		let mmDim = [
+			state.voxelCount[0] * state.voxelSize[0],
+			state.voxelCount[1] * state.voxelSize[1],
+			state.voxelCount[2] * state.voxelSize[2] ];
+		
+		let aspect = state.viewport[0] / state.viewport[1];
+		if( aspect >= 1.0 ){
+			state.section = {
+				origin : [ 0, -( mmDim[0] - mmDim[1] ) / 2, mmDim[2] / 2 ],
+				xAxis : [ mmDim[0], 0, 0 ],
+				yAxis : [ 0, mmDim[1] * aspect ,0 ]
+			};
+		}else{
+			state.section = {
+				origin : [ -( mmDim[1] - mmDim[0] ) / 2, 0, mmDim[2] / 2 ],
+				xAxis : [ mmDim[0] * aspect, 0, 0 ],
+				yAxis : [ 0, mmDim[1] ,0 ]
+			};
+		}
+	}
+	
+	private setSagittal( state ){
+		let mmDim = [
+			state.voxelCount[0] * state.voxelSize[0],
+			state.voxelCount[1] * state.voxelSize[1],
+			state.voxelCount[2] * state.voxelSize[2] ];
+		
+		let aspect = state.viewport[0] / state.viewport[1];
+		if( aspect >= 1.0 ){
+			state.section = {
+				origin : [ mmDim[0] / 2, 0, 0 ],
+				xAxis : [ 0, mmDim[1], 0 ],
+				yAxis : [ 0, 0 ,mmDim[2] * aspect ]
+			};
+		}else{// axial
+			state.section = {
+				origin : [ -( mmDim[1] - mmDim[0] ) / 2, 0, mmDim[2] / 2 ],
+				xAxis : [ mmDim[0] * aspect, 0, 0 ],
+				yAxis : [ 0, mmDim[1] ,0 ]
+			};
+		}
+	}
+	
+	private setCoronal( state ){
+		let mmDim = [
+			state.voxelCount[0] * state.voxelSize[0],
+			state.voxelCount[1] * state.voxelSize[1],
+			state.voxelCount[2] * state.voxelSize[2] ];
+		
+		let aspect = state.viewport[0] / state.viewport[1];
+		if( aspect >= 1.0 ){
+			state.section = {
+				origin : [ 0, mmDim[1] / 2, 0 ],
+				xAxis : [ mmDim[0], 0, 0 ],
+				yAxis : [ 0, 0 ,mmDim[2] * aspect ]
+			};
+		}else{// axial
+			state.section = {
+				origin : [ -( mmDim[1] - mmDim[0] ) / 2, 0, mmDim[2] / 2 ],
+				xAxis : [ mmDim[0] * aspect, 0, 0 ],
+				yAxis : [ 0, mmDim[1] ,0 ]
+			};
+		}
 	}
 	
 	public renderAll(){

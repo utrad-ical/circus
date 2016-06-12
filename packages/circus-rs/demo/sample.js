@@ -24,18 +24,72 @@ $(function(){
 
 function rs( config ){
 	var composition = new circusrs.Composition();
-	var imageSource = new circusrs.HybridImageSource( config );
-	// var imageSource = new circusrs.MockImageSource( {
-		// voxelCount: [512, 512, 478],
-		// voxelSize: [1,1,1]
-	// } );
+
+	var toolbar = circusrs.createToolbar(
+		document.querySelector('div#rs-toolbar'),
+		[ 'Window', 'Hand', 'CelestialRotate'
+		 ,'Brush', 'Eraser', 'Bucket'
+		 ,'Ruler', 'Arrow', 'Cube'
+		 ,'ReferenceRotate', 'ReferenceMove'
+		 ,'Undo', 'Redo' ]
+	);
+	toolbar.bindComposition( composition );
+	
+	// var imageSource = new circusrs.HybridImageSource( config );
+ 	// var imageSource = new circusrs.RawVolumeImageSourceWithMock( config );
+	
+	var imageSource = new circusrs.MockImageSource( { voxelCount: [512, 512, 419], voxelSize: [ 0.572265625, 0.572265625, 1 ] } );
 	
 	composition.setImageSource( imageSource );
 
 	var axViewer = composition.createViewer( document.querySelector('div#rs-axial'), { stateName: 'axial' } );
+	// var oblViewer = composition.createViewer( document.querySelector('div#rs-oblique'), { stateName: 'oblique' } );
+	
+	composition.setTool('Brush');
+	imageSource.ready().then( function(){
+		var imgState = imageSource.state();
+		var dim = imgState.voxelCount;
+		var vsize = imgState.voxelSize;
+		var cloud = new circusrs.VoxelCloud();
+		cloud.label = 'TEST1';
+		cloud.color = [0xff,0,0,0x99];
+		cloud.setDimension( dim[0], dim[1], dim[2] );
+		cloud.setVoxelDimension( vsize[0], vsize[1], vsize[2] );
+		composition.clouds.push( cloud );
+		composition.editCloud( cloud );
+		
+		(function(){// fill check
+		
+			var e = composition.cloudEditor;
+			var sample = function( viewer ){
+				e.prepare( viewer.getState() );
+				e.moveTo( 100, 100 );
+				e.lineTo(  50, 150 );
+				e.lineTo( 150, 150 );
+				e.lineTo( 100, 100 );
+				e.fill( 100, 125 );
+				
+				
+				e.moveTo( 200, 200 );
+				e.lineTo( 150, 250 );
+				e.lineTo( 250, 250 );
+				e.lineTo( 200, 200 );
+				e.fill( 200, 225 );
+				
+			};
+			sample( axViewer );
+			// sample( oblViewer );
+			composition.renderAll();
+		})();
+				
+	} );
+return;
+	
+	var axViewer = composition.createViewer( document.querySelector('div#rs-axial'), { stateName: 'axial' } );
 	var sagViewer = composition.createViewer( document.querySelector('div#rs-sagittal'), { stateName: 'sagittal' } );
 	var corViewer = composition.createViewer( document.querySelector('div#rs-coronal'), { stateName: 'coronal' } );
 	var oblViewer = composition.createViewer( document.querySelector('div#rs-oblique'), { stateName: 'oblique' } );
+	
 	
 	var toolbar = circusrs.createToolbar(
 		document.querySelector('div#rs-toolbar'),
@@ -67,7 +121,7 @@ function rs( config ){
 		
 			var e = composition.cloudEditor;
 			var sample = function( viewer ){
-				e.prepare( viewer.viewState.section, viewer.getResolution() );
+				e.prepare( viewer.viewState );
 				e.moveTo( 50, 50 );
 				e.lineBy( 30, -30 );
 				e.lineBy( 30, 30 );
@@ -120,6 +174,7 @@ function rs( config ){
 	} );
 	$( '[name=dump-axial-viewer-state]' ).on( 'click', function(ev){
 		console.log( axViewer.dumpState() );
+		// console.log( JSON.stringify( axViewer.viewState ) );
 	} );
 	
 	/**

@@ -4,6 +4,7 @@ import { MultiRange } from 'multi-integer-range';
 import { Promise } from 'es6-promise';
 
 import { PixelFormat, PixelFormatInfo, pixelFormatInfo } from './PixelFormat';
+import { RawDataSection } from './RawDataSection';
 
 export type Vector3D = [number, number, number];
 
@@ -537,43 +538,6 @@ export default class RawData {
 		}
 	}
 
-	public scanCrossSection(
-		origin: Vector3D,
-		eu: Vector3D,
-		ev: Vector3D,
-		outSize: Vector2D,
-		image: {[index: number]: number}
-		// minimumCanvas: [number, number]
-	): void {
-		let [rx, ry, rz] = this.size;
-		let [x, y, z] = origin;
-		let [eu_x, eu_y, eu_z] = eu;
-		let [ev_x, ev_y, ev_z] = ev;
-		let [outWidth, outHeight] = outSize;
-		// let [outWidth, outHeight] = minimumCanvas;
-		let imageOffset = 0;
-		let value: number;
-		for (let j = 0; j < outHeight; j++) {
-			let [pos_x, pos_y, pos_z] = [x, y, z];
-
-			for (let i = 0; i < outWidth; i++) {
-				if (pos_x >= 0.0 && pos_y >= 0.0 && pos_z >= 0.0
-					&& pos_x <= rx - 1 && pos_y <= ry - 1 && pos_z <= rz - 1) {
-					value = this.getPixelAt(Math.floor(pos_x), Math.floor(pos_y), Math.floor(pos_z));
-				} else {
-					value = 0;
-				}
-				image[imageOffset++] = Math.round(value);
-
-				pos_x += eu_x;
-				pos_y += eu_y;
-				pos_z += eu_z;
-			}
-			x += ev_x;
-			y += ev_y;
-			z += ev_z;
-		}
-	}
 	/**
 	 * Determine how to scan oblique image
 	 * @protected
@@ -689,4 +653,198 @@ export default class RawData {
 		});
 	}
 
+	/**
+	 * ミリメートルベース
+	 */
+	public mmGetDimension(){
+		if (!this.size) throw new Error('Dimension not set');
+		if (!this.voxelSize) throw new Error('voxel size not set');
+		
+		return [
+			this.size[0] * this.voxelSize[0],
+			this.size[1] * this.voxelSize[1],
+			this.size[2] * this.voxelSize[2],
+		];
+	}
+	public mmReadPixelAt( mm_x: number, mm_y: number, mm_z: number ): number {
+		
+		if( mm_x < 0.0 || mm_y < 0.0 || mm_z < 0.0 ) return null;
+		
+		let [ ix, iy, iz ] = [ Math.floor( mm_x / this.voxelSize[0] ), Math.floor( mm_y / this.voxelSize[1] ), Math.floor( mm_z / this.voxelSize[2] ) ];
+		if( this.size[0] <= ix || this.size[1] <= iy || this.size[2] <= iz ) return null;
+		
+		return this.read( ( iz * this.size[1] + iy ) * this.size[0] + ix );
+	}
+	// public mmReadPixelWithInterporationAt( mm_x: number, mm_y: number, mm_z: number ): number {
+	// }
+	
+	public mmIndexAt( mm_x: number, mm_y: number, mm_z: number ): Vector3D {
+		if( mm_x < 0.0 || mm_y < 0.0 || mm_z < 0.0 ) return null;
+		
+		let [ ix, iy, iz ] = [ Math.floor( mm_x / this.voxelSize[0] ), Math.floor( mm_y / this.voxelSize[1] ), Math.floor( mm_z / this.voxelSize[2] ) ];
+		if( this.size[0] <= ix || this.size[1] <= iy || this.size[2] <= iz ) return null;
+		
+		return [ ix, iy, iz ];
+	}
+	
+	public mmWritePixelAt( value: number, mm_x: number, mm_y: number, mm_z: number ): boolean {
+		if( mm_x < 0.0 || mm_y < 0.0 || mm_z < 0.0 ) return false;
+		
+		let [ ix, iy, iz ] = [ Math.floor( mm_x / this.voxelSize[0] ), Math.floor( mm_y / this.voxelSize[1] ), Math.floor( mm_z / this.voxelSize[2] ) ];
+		if( this.size[0] <= ix || this.size[1] <= iy || this.size[2] <= iz ) return false;
+		
+		this.write( value, ( iz * this.size[1] + iy ) * this.size[0] + ix );
+		
+		return true;
+	}
+	
+	public mmGetSection(
+		mm_origin: Vector3D,
+		mm_u: Vector3D,
+		mm_v: Vector3D,
+		resolution: Vector2D
+	): RawDataSection {
+
+		let [mm_o_x, mm_o_y, mm_o_z] = mm_origin;
+		let [mm_u_w, mm_u_h, mm_u_d] = mm_u;
+		let [mm_v_w, mm_v_h, mm_v_d] = mm_v;
+		
+		/**
+		 * prepare step
+		 */
+		let u_count = resolution[0];
+		let [ mm_u_step_w, mm_u_step_h, mm_u_step_d ] = [ mm_u_w / u_count, mm_u_h / u_count, mm_u_d / u_count ];
+
+		let v_count = resolution[1];
+		let [ mm_v_step_w, mm_v_step_h, mm_v_step_d ] = [ mm_v_w / v_count, mm_v_h / v_count, mm_v_d / v_count ];
+		
+		// -
+		
+		let section = new RawDataSection( u_count, v_count, this.pixelFormat );
+		let offset = 0;
+		let [ mm_v_walker_x, mm_v_walker_y, mm_v_walker_z ] = mm_origin;
+// let c = 1000;
+		for( let j = 0; j < v_count; j++ ){
+			let [ mm_u_walker_x, mm_u_walker_y, mm_u_walker_z ] = [ mm_v_walker_x, mm_v_walker_y, mm_v_walker_z ];
+			for( let i = 0; i < u_count; i++ ){
+				let value = this.mmReadPixelAt( mm_u_walker_x, mm_u_walker_y, mm_u_walker_z );
+				if( value !== null ){
+// if( c-- > 0 ) console.log('#' + offset.toString() + ' r: '+ [ mm_u_walker_x, mm_u_walker_y, mm_u_walker_z ].toString() +' => p: ' + [i,j].toString() );
+					section.write( offset, value );
+				}
+				offset++;
+				mm_u_walker_x += mm_u_step_w;
+				mm_u_walker_y += mm_u_step_h;
+				mm_u_walker_z += mm_u_step_d;
+			}
+			mm_v_walker_x += mm_v_step_w;
+			mm_v_walker_y += mm_v_step_h;
+			mm_v_walker_z += mm_v_step_d;
+		}
+		
+		return section;
+		// return section.data: ArrayBuffer; ... otherwise ... ?
+	}
+	
+	public mmGetSectionMap(
+		mm_origin: Vector3D,
+		mm_u: Vector3D,
+		mm_v: Vector3D,
+		resolution: Vector2D
+	): RawDataSectionMap {
+
+		let [mm_o_x, mm_o_y, mm_o_z] = mm_origin;
+		let [mm_u_w, mm_u_h, mm_u_d] = mm_u;
+		let [mm_v_w, mm_v_h, mm_v_d] = mm_v;
+		
+		/**
+		 * prepare step
+		 */
+		let u_count = resolution[0];
+		let [ mm_u_step_w, mm_u_step_h, mm_u_step_d ] = [ mm_u_w / u_count, mm_u_h / u_count, mm_u_d / u_count ];
+
+		let v_count = resolution[1];
+		let [ mm_v_step_w, mm_v_step_h, mm_v_step_d ] = [ mm_v_w / v_count, mm_v_h / v_count, mm_v_d / v_count ];
+		
+		// -
+		
+		let sectionMap = new RawDataSectionMap( u_count, v_count );
+		let offset = 0;
+		let [ mm_v_walker_x, mm_v_walker_y, mm_v_walker_z ] = mm_origin;
+		for( let j = 0; j < v_count; j++ ){
+			let [ mm_u_walker_x, mm_u_walker_y, mm_u_walker_z ] = [ mm_v_walker_x, mm_v_walker_y, mm_v_walker_z ];
+			for( let i = 0; i < u_count; i++ ){
+				let value = this.mmReadPixelAt( mm_u_walker_x, mm_u_walker_y, mm_u_walker_z );
+				let [ix, iy, iz] = this.mmIndexAt( mm_u_walker_x, mm_u_walker_y, mm_u_walker_z );
+				sectionMap.write( offset, value === null ? null : [ix, iy, iz] );
+				offset++;
+				mm_u_walker_x += mm_u_step_w;
+				mm_u_walker_y += mm_u_step_h;
+				mm_u_walker_z += mm_u_step_d;
+			}
+			mm_v_walker_x += mm_v_step_w;
+			mm_v_walker_y += mm_v_step_h;
+			mm_v_walker_z += mm_v_step_d;
+		}
+		
+		return sectionMap;
+	}
+}
+export class RawDataSectionMap {
+
+	public width: number;
+	public height: number;
+	private view: {[offset: number]: number};
+	
+	private v_null: number = 0;
+	private x_mask: number = 0;
+	private y_mask: number = 0;
+	private z_mask: number = 0;
+	
+	constructor( width: number, height: number ){
+		this.width = width;
+		this.height = height;
+		this.view = new Uint32Array( width * height );
+		
+		this.x_mask = parseInt('00000000000000000000011111111110', 2);
+		this.y_mask = parseInt('00000000000111111111100000000000', 2);
+		this.z_mask = parseInt('01111111111000000000000000000000', 2);
+	};
+
+	/**
+	 * フォーマット
+	 * -------------------------------------
+	 * 0		(1bit)	: not null フラグ
+	 * 1-10		(10bit)	: x座標 (最大 1023)
+	 * 11-20	(10bit)	: y座標 (最大 1023)
+	 * 21-30	(10bit)	: z座標 (最大 1023)
+	 */
+	
+	private pack( x: number, y: number, z: number ): number {
+		if( x < 0 || 1023 < x || y < 0 || 1023 < y || z < 0 || 1023 < z ) throw new Error('Out of range');
+		return 1 | ( x << 1 ) | ( y << 11 ) | ( z << 21 );
+	}
+	private unpack( value: number ){
+		if( value === this.v_null ) return null;
+		return [
+			( value & this.x_mask ) >> 1 ,
+			( value & this.y_mask ) >> 11 ,
+			( value & this.z_mask ) >> 21
+		];
+	}
+	
+	public write( offset:number, p: [ number, number, number ] ){
+		this.view[ offset ] = p === null ? this.v_null : this.pack( p[0], p[1], p[2] );
+	}
+	// public set( [x,y], [ x,y,z] );
+	public get( x: number, y: number ){
+		if( 0 <= x && x < this.width && 0 <= y && y < this.height ){
+			let offset = y * this.width + x;
+			let v = this.view[ offset ];
+			return this.unpack( v );
+		}else{
+			return null;
+		}
+	}
+	
 }

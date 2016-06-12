@@ -46,6 +46,11 @@ export class Viewer extends EventEmitter {
 		canvas.addEventListener('mousemove', eventDrive);
 		canvas.addEventListener( wheelEvent, eventDrive);
 		
+		this.viewState = {
+			resolution: this.getResolution(),
+			viewport: this.getViewport()
+		};
+		
 		this.queue = [];
 	}
 	

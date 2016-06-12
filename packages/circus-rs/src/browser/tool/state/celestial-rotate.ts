@@ -70,11 +70,28 @@ export class CelestialRotateTool extends DraggableTool implements ViewerEventTar
 		this.initCelestialState( viewer );
 	
 		let state = viewer.getState();
-		let [ vw, vh ] = viewer.getResolution();
+		let [ vw, vh ] = state.resolution;
 
-		let center = this.getVolumePos( state.section, [ vw, vh ], vw / 2, vh / 2 );
-		CrossSectionUtil.rotate( state.section, deg, viewer.viewState.section.yAxis, center );
-		state.celestial.horizontal += deg;
+		let radian = Math.PI / 180.0 * deg;
+		
+		let end0 = state.section.xAxis.concat();
+		
+		// rotate
+		let transform = mat4.rotate( mat4.create(), mat4.create(), radian, state.section.yAxis );
+		vec3.transformMat4(state.section.xAxis, state.section.xAxis, transform);
+		
+		let end1 = state.section.xAxis.concat();
+		
+		state.section.origin[0] -= ( end1[0] - end0[0] ) / 2;
+		state.section.origin[1] -= ( end1[1] - end0[1] ) / 2;
+		state.section.origin[2] -= ( end1[2] - end0[2] ) / 2;
+		
+
+		// let center = this.getVolumePos( state.section, [ vw, vh ], vw / 2, vh / 2 );
+		// CrossSectionUtil.rotate( state.section, deg, state.section.yAxis, center );
+		// state.celestial.horizontal += deg;
+		
+		
 
 		viewer.setState( state );
 	}
@@ -84,7 +101,7 @@ export class CelestialRotateTool extends DraggableTool implements ViewerEventTar
 		this.initCelestialState( viewer );
 	
 		let state = viewer.getState();
-		let [ vw, vh ] = viewer.getResolution();
+		let [ vw, vh ] = state.resolution;
 
 		let center = this.getVolumePos( state.section, [ vw, vh ], vw / 2, vh / 2 );
 		CrossSectionUtil.rotate( state.section, deg, viewer.viewState.section.xAxis, center );

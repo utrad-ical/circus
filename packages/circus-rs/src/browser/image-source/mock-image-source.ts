@@ -32,20 +32,26 @@ export class MockImageSource extends ImageSource {
 		let raw = new DicomVolume();
 		raw.setDimension(width, height, depth, pixelFormat);
 		
-		let val: number;
+		let createValue = ( x, y, z ) => {
+			let val: number;
+			
+			if (pixelFormat === PixelFormat.Binary) {
+				val = ( Math.floor(x * 0.02)
+					+ Math.floor(y * 0.02)
+					+ Math.floor(z * 0.02) ) % 2;
+			} else {
+				val = ( Math.floor(x * 0.02)
+					+ Math.floor(y * 0.02)
+					+ Math.floor(z * 0.02) ) % 3 * 30;
+			}
+			
+			return val;
+		};
+		
 		for (var z = 0; z < depth; z++) {
 			for (let y = 0; y < height; y++) {
 				for (let x = 0; x < width; x++) {
-					if (pixelFormat === PixelFormat.Binary) {
-						val = ( Math.floor(x * 0.02)
-							+ Math.floor(y * 0.02)
-							+ Math.floor(z * 0.02) ) % 2;
-					} else {
-						val = ( Math.floor(x * 0.02)
-							+ Math.floor(y * 0.02)
-							+ Math.floor(z * 0.02) ) % 3 * 30;
-					}
-					raw.writePixelAt(val, x, y, z);
+					raw.writePixelAt( createValue( x, y, z ) , x, y, z);
 				}
 			}
 			raw.markSliceAsLoaded(z);
@@ -55,7 +61,62 @@ export class MockImageSource extends ImageSource {
 		return raw;
 	}
 	
+	public ready(){
+		return Promise.resolve();
+	}
+	
+	public state(){
+		let state = {
+			estimateWindow: {
+				level: this.meta.estimatedWindow.level,
+				width: this.meta.estimatedWindow.width
+			},
+			dicomWindow: {
+				level: this.meta.dicomWindow.level,
+				width: this.meta.dicomWindow.width
+			},
+			voxelSize: [ this.meta.voxelSize[0], this.meta.voxelSize[1], this.meta.voxelSize[2] ],
+			voxelCount: [ this.meta.voxelCount[0], this.meta.voxelCount[1], this.meta.voxelCount[2] ]
+		};
+		return state;
+	}
+	
 	public draw( canvasDomElement, viewState ):Promise<any> {
+	
+		let context = canvasDomElement.getContext('2d');
+		let vpWidth = Number( canvasDomElement.getAttribute('width') );
+		let vpHeight = Number( canvasDomElement.getAttribute('height') );
+		let section = viewState.section;
+		
+		return this.ready().then( () => {
+			
+			let rawSection = this.volume.mmGetSection(
+				section.origin,
+				section.xAxis,
+				section.yAxis,
+				[ vpWidth, vpHeight ]
+			);
+			
+			let imageData = context.createImageData( vpWidth, vpHeight );
+			
+			let srcidx = 0, pixel, dstidx;
+			for (let y = 0; y < vpHeight; y++) {
+				for (let x = 0; x < vpWidth; x++) {
+					pixel = rawSection.read( srcidx );
+					dstidx = srcidx << 2; // meaning multiply 4
+					imageData.data[dstidx] = pixel;
+					imageData.data[dstidx + 1] = pixel;
+					imageData.data[dstidx + 2] = pixel;
+					imageData.data[dstidx + 3] = 0xff;
+					srcidx++;
+				}
+			}
+			context.putImageData( imageData, 0, 0 );
+		} );
+	}
+	
+	
+	public xdraw( canvasDomElement, viewState ):Promise<any> {
 	
 		let context = canvasDomElement.getContext('2d');
 		let vpWidth = Number( canvasDomElement.getAttribute('width') );
@@ -106,26 +167,5 @@ export class MockImageSource extends ImageSource {
 			context.putImageData( imageData, 0, 0 );
 		} );
 	}
-	
-	public ready(){
-		return Promise.resolve();
-	}
-	
-	public state(){
-		let state = {
-			estimateWindow: {
-				level: this.meta.estimatedWindow.level,
-				width: this.meta.estimatedWindow.width
-			},
-			dicomWindow: {
-				level: this.meta.dicomWindow.level,
-				width: this.meta.dicomWindow.width
-			},
-			voxelSize: [ this.meta.voxelSize[0], this.meta.voxelSize[1], this.meta.voxelSize[2] ],
-			voxelCount: [ this.meta.voxelCount[0], this.meta.voxelCount[1], this.meta.voxelCount[2] ]
-		};
-		return state;
-	}
-	
 
 }

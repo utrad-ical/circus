@@ -12,8 +12,48 @@ export class CloudsRenderer implements Painter {
 		this.clouds = [];
 	}
 	
-	
 	public draw( canvasDomElement, viewState ): Sprite {
+
+		let context = canvasDomElement.getContext('2d');
+		let section = viewState.section;
+		let size = viewState.resolution;
+		
+		let imageData = context.getImageData( 0, 0, size[0], size[1] );
+		let transparency = 0;
+		
+		this.clouds.forEach( (cloud) => {
+		
+			let color = cloud.color || [ 0xff, 0, 0, 0xff ];
+			
+			let rawSection = cloud.mmGetSection(
+				section.origin,
+				section.xAxis,
+				section.yAxis,
+				size
+			);
+
+			let srcidx = 0, pixel, dstidx;
+			for (var y = 0; y < size[1]; y++) {
+				for (var x = 0; x < size[0]; x++) {
+					pixel = rawSection.read( srcidx );
+					dstidx = srcidx << 2; // meaning multiply 4
+					if( pixel !== transparency ){
+						imageData.data[dstidx    ] = ( imageData.data[dstidx  ] * ( 0xff - color[3] ) + color[0] * color[3] ) / 0xff;
+						imageData.data[dstidx + 1] = ( imageData.data[dstidx+1] * ( 0xff - color[3] ) + color[1] * color[3] ) / 0xff;
+						imageData.data[dstidx + 2] = ( imageData.data[dstidx+2] * ( 0xff - color[3] ) + color[2] * color[3] ) / 0xff;
+						imageData.data[dstidx + 3] = color[3];
+					}
+					srcidx++;
+				}
+			}
+			
+		} );
+		
+		context.putImageData( imageData, 0, 0 );
+		return null;
+	}
+
+	public xdraw( canvasDomElement, viewState ): Sprite {
 	
 		let size = [ canvasDomElement.getAttribute('width'), canvasDomElement.getAttribute('height') ].map( i => Math.round(i) );
 		let context = canvasDomElement.getContext('2d');

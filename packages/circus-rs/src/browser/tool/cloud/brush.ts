@@ -15,14 +15,13 @@ export class BrushTool extends Tool implements ViewerEventTarget {
 	}
 	
 	public mousedownHandler( ev: ViewerEvent ){
-	
 		if( this.cloudEditor && !this.drawing ){
 			ev.stopPropagation();
 			
 			ev.viewer.primaryEventTarget = this;
 			this.drawing = true;
 			
-			this.cloudEditor.prepare( ev.viewer.viewState.section, ev.viewer.getResolution() );
+			this.cloudEditor.prepare( ev.viewer.viewState );
 			this.cloudEditor.moveTo( ev.viewerX, ev.viewerY );
 			this.cloudEditor.lineTo( ev.viewerX, ev.viewerY );
 			

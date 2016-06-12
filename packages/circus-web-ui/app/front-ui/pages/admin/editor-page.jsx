@@ -9,6 +9,7 @@ export class EditorPage extends React.Component {
 		this.state = {
 			items: [],
 			target: null,
+			targetID: null,
 			editing: null,
 			complaints: null
 		};
@@ -18,7 +19,9 @@ export class EditorPage extends React.Component {
 		if (!(await this.preCommitHook(this.editing, item))) return;
 
 		let endPoint = this.endPoint;
-		if (this.state.target) endPoint += '/' + encodeURIComponent(this.state.target);
+		if (this.state.target) {
+			endPoint += '/' + encodeURIComponent(this.state.editing[this.primaryKey]);
+		}
 		const args = {
 			method: this.state.target ? 'put' : 'post',
 			data: item,
@@ -77,7 +80,7 @@ export class EditorPage extends React.Component {
 	}
 
 	render() {
-		return <div>
+		return <div className="admin-editor">
 			<h1>
 				<Glyphicon glyph={this.glyph} />
 				&ensp;{this.title}

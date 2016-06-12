@@ -96,6 +96,7 @@ Route::group(['before' => 'auth'], function() {
 			->where('adminkind', '^(user|group|storage|project|server_param)$');
 		Route::resource('api/user', 'UserApiController');
 		Route::resource('api/group', 'GroupApiController');
+		Route::get('api/group-privileges', 'GroupApiController@listPrivileges');
 		Route::resource('api/storage', 'StorageApiController');
 		Route::get('api/server_param', 'ServerParamApiController@get');
 		Route::post('api/server_param', 'ServerParamApiController@post');

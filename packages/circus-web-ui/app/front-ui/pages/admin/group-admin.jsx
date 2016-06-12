@@ -17,7 +17,7 @@ export class GroupAdmin extends EditorPage {
 				key: 'privileges',
 				caption: 'Privileges',
 				type: 'multiselect',
-				spec: { options: ['a', 'b', 'c'] }
+				spec: { type: 'checkbox', options: ['a', 'b', 'c'] }
 			},
 			{
 				key: 'domains',
@@ -30,22 +30,34 @@ export class GroupAdmin extends EditorPage {
 			{ key: 'groupName', label: 'Group Name' },
 			{
 				label: 'Privileges',
-				data: item => {
-					return item.privileges.map(priv => {
-						return [<span className="label label-primary">
-							{priv}
-						</span>, ' '];
-					});
-				},
+				data: item => item.privileges.map(priv => {
+					const style = priv === 'manageServer' ? 'danger' : 'primary';
+					return <span className={`label label-${style}`}>
+						{priv}
+					</span>;
+				})
 			},
-			{ key: 'domains', label: 'Accessible Series Domains' },
+			{
+				label: 'Accessible Series Domains',
+				data: item => item.domains.map(d => (
+					<span className="label label-default">{d}</span>
+				))
+			},
 		];
+	}
+
+	targetName(item) {
+		return item.groupName;
 	}
 
 	async componentDidMount() {
 		const params = await api('server_param');
 		const domains = params.domains;
+		const privList = await api('group-privileges');
+		const privileges = {};
+		for (let p of privList) privileges[p.privilege] = p.caption;
 		this.editorProperties[2].spec.options = domains;
+		this.editorProperties[1].spec.options = privileges;
 		super.componentDidMount();
 	}
 

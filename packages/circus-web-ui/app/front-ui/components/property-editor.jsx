@@ -71,9 +71,11 @@ const types = {
 	constant: props => <ControlLabel>{props.value}</ControlLabel>,
 	select: Select,
 	multiselect: props => <MultiSelect options={props.spec.options}
+		type={props.spec.type}
 		selected={props.value} numericalValue={!!props.spec.numericalValue}
 		onChange={selected => props.onChange(selected)} />,
-	color: props => <ColorPicker value={props.value} onChange={props.onChange} showColorCode={true} />,
+	color: props => <ColorPicker value={props.value}
+		onChange={props.onChange} showColorCode={true} />,
 	list: FlexList
 };
 

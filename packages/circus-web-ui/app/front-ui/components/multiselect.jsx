@@ -7,8 +7,13 @@ const DefaultRenderer = props => <span>{props.caption}</span>;
  * Dropdown + Multiselect component.
  */
 export const MultiSelect = props => {
-	const Renderer = props.renderer || DefaultRenderer;
-	const { showSelectedMax = 3, selected = [] } = props;
+	const { renderer = DefaultRenderer,
+		showSelectedMax = 3,
+		selected = [],
+		type = 'dropdown',
+	 	glue = ', ',
+	 	noneText = '(None)'
+	} = props;
 
 	// Normalize options
 	let options = { ... props.options };
@@ -20,7 +25,7 @@ export const MultiSelect = props => {
 		if (typeof options[key] === 'string') options[key] = { caption: options[key] };
 	});
 
-	function onItemClick(event, clickedIndex, checked) {
+	function onItemChange(clickedIndex, checked) {
 		let newSelected = [];
 		Object.keys(options).forEach((key, i) => {
 			const insertingKey = props.numericalValue ? parseFloat(key) : key;
@@ -33,28 +38,50 @@ export const MultiSelect = props => {
 		typeof props.onChange === 'function' && props.onChange(newSelected);
 	}
 
+	if (type === 'dropdown') {
+		return <MultiSelectDropdown selected={selected}
+			options={options} renderer={renderer}
+			glue={glue} showSelectedMax={showSelectedMax} noneText={noneText}
+			onItemChange={onItemChange}/>;
+	} else {
+		return <MultiSelectCheckboxArray selected={selected}
+			options={options} renderer={renderer}
+			onItemChange={onItemChange}/>;
+	}
+
+}
+
+const MultiSelectDropdown = props => {
+	const Renderer = props.renderer;
+	const selected = props.selected;
+
 	let caption = [];
 	if (selected.length === 0) {
-		caption = props.noneText ? props.noneText : '(None)';
-	} else if (selected.length > showSelectedMax) {
+		caption = props.noneText;
+	} else if (selected.length > props.showSelectedMax) {
 		caption = `${selected.length} selected`;
 	} else {
 		selected.forEach((sel, i) => {
-			let renderItem = options[sel];
-			if (i > 0) caption.push(props.glue !== undefined ? props.glue : ', ');
+			let renderItem = props.options[sel];
+			if (i > 0) caption.push(props.glue);
 			caption.push(<Renderer key={i} {...renderItem} />);
 		});
 	}
 
 	const dropdown = <ul>
-		{Object.keys(options).map((key, i) => {
+		{Object.keys(props.options).map((key, i) => {
 			const checked = selected.some(sel => sel == key); // lazy equiality('==') needed
 			const checkedClass = checked ? 'checked' : '';
-			let renderItem = options[key];
-			return <li key={i} onClick={event => onItemClick(event, i, checked)} className={checkedClass}>
-				<input type="checkbox" checked={checked} readOnly />&ensp;
-				<Renderer {...renderItem} />
-			</li>
+			let renderItem = props.options[key];
+			return (
+				<li key={i}
+					onClick={() => props.onItemChange(i, checked)}
+					className={checkedClass}
+				>
+					<input type="checkbox" checked={checked} readOnly />&ensp;
+					<Renderer {...renderItem} />
+				</li>
+			);
 		})}
 	</ul>;
 
@@ -62,4 +89,27 @@ export const MultiSelect = props => {
 		<Dropdown.Toggle>{caption}</Dropdown.Toggle>
 		<Dropdown.Menu className="multiselect-popover">{dropdown}</Dropdown.Menu>
 	</Dropdown>;
+};
+
+
+const MultiSelectCheckboxArray = props => {
+	const Renderer = props.renderer;
+	const selected = props.selected;
+
+	return <ul className="list-unstyled">
+		{Object.keys(props.options).map((key, i) => {
+			const checked = selected.some(sel => sel == key); // lazy equiality('==') needed
+			const checkedClass = checked ? 'checked' : '';
+			let renderItem = props.options[key];
+			return (
+				<li key={i}
+					onClick={() => props.onItemChange(i, checked)}
+					className={checkedClass}
+				>
+					<input type="checkbox" checked={checked} readOnly />&ensp;
+					<Renderer {...renderItem} />
+				</li>
+			);
+		})}
+	</ul>;
 }

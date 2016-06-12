@@ -15,6 +15,8 @@ export class EditorPage extends React.Component {
 	}
 
 	async commitItem(item) {
+		if (!(await this.preCommitHook(this.editing, item))) return;
+
 		let endPoint = this.endPoint;
 		if (this.state.target) endPoint += '/' + encodeURIComponent(this.state.target);
 		const args = {
@@ -36,19 +38,31 @@ export class EditorPage extends React.Component {
 		this.setState({ items });
 	}
 
+	/**
+	 * Subclasses can override this method and cancel saving.
+	 */
+	async preCommitHook(before, after) {
+		return true;
+	}
+
 	componentDidMount() {
 		this.loadItems();
 	}
 
+	targetName(item) {
+		return item[this.primaryKey];
+	}
+
 	editStart(item) {
 		this.setState({
-			target: item[this.primaryKey],
-			editing: item
+			target: this.targetName(item),
+			editing: item,
+			complaints: null
 		});
 	}
 
 	cancelEditItem(item) {
-		this.setState({ editing: null });
+		this.setState({ editing: null, complaints: null });
 	}
 
 	createItem() {
@@ -56,6 +70,10 @@ export class EditorPage extends React.Component {
 			target: null,
 			editing: this.makeEmptyItem()
 		});
+	}
+
+	editorFooter() {
+		return null;
 	}
 
 	render() {
@@ -81,11 +99,11 @@ export class EditorPage extends React.Component {
 					complaints={this.state.complaints}
 					target={this.state.target}
 					properties={this.editorProperties}
-					primaryKey={this.primaryKey}
 					onSaveClick={item => this.commitItem(item)}
 					onCancelClick={() => this.cancelEditItem()}
 				/>
 			: null }
+			{this.editorFooter()}
 		</div>
 	}
 }
@@ -128,7 +146,12 @@ const List = props => {
 class Editor extends React.Component {
 	constructor(props) {
 		super(props);
-		this.state = { item: { ... props.item } };
+		const item = {};
+		for (let p of props.properties) {
+			// Remove keys not in the editor property list
+			item[p.key] = props.item[p.key];
+		}
+		this.state = { item };
 	}
 
 	componentWillReceiveProps(props) {
@@ -145,7 +168,7 @@ class Editor extends React.Component {
 
 	render() {
 		const header = this.props.target ?
-				<span>Updating: <strong>{this.props.item[this.props.primaryKey]}</strong></span>
+				<span>Updating: <strong>{this.props.target}</strong></span>
 				: 'Creating new item';
 		const footer = <div className="text-center">
 			<Button bsStyle="link" onClick={this.props.onCancelClick}>

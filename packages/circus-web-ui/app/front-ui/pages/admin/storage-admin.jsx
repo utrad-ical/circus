@@ -1,9 +1,20 @@
 import React from 'react';
 import { EditorPage } from './editor-page';
 import { api } from 'utils/api';
-import { Button } from 'components/react-bootstrap';
+import { Button, Glyphicon } from 'components/react-bootstrap';
+import { confirm } from 'components/modal';
 
 export class StorageAdmin extends EditorPage {
+	async setActiveClick(id) {
+		const args = {
+			method: 'put',
+			data: {},
+		};
+		await api('storage/setactive/' + id, args);
+		this.setState({ target: null, editing: null });
+		this.loadItems();
+	}
+
 	constructor(props) {
 		super(props);
 		this.title = 'Storage';
@@ -11,11 +22,6 @@ export class StorageAdmin extends EditorPage {
 		this.endPoint = 'storage';
 		this.primaryKey = 'storageID';
 		this.editorProperties = [
-			{
-				key: 'storageID',
-				caption: 'Storage ID',
-				type: 'constant'
-			},
 			{
 				key: 'type',
 				caption: 'Storage Type',
@@ -32,7 +38,27 @@ export class StorageAdmin extends EditorPage {
 			{ key: 'storageID', label: 'Storage ID' },
 			{ key: 'type', label: 'Type' },
 			{ key: 'path', label: 'Path' },
+			{
+				label: '',
+				data: item => {
+					if (item.active) return <span className="text-success">
+						<Glyphicon glyph='off' />
+						Active
+					</span>;
+					return (
+						<Button bsStyle="default" bsSize="xs"
+							onClick={this.setActiveClick.bind(this, item.storageID)}
+						>
+							Set this as active
+						</Button>
+					);
+				}
+			}
 		];
+	}
+
+	async preCommitHook() {
+		return await confirm('Do you really want to update the existing path/type?');
 	}
 
 	makeEmptyItem() {
@@ -41,4 +67,10 @@ export class StorageAdmin extends EditorPage {
 		};
 	}
 
+	editorFooter() {
+		return <div className="text-warning">
+			<strong>Warning:</strong> Changing the path and type
+				may cause unexpected results.
+		</div>
+	}
 }

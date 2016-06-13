@@ -43,7 +43,7 @@ export class LoginScreen extends React.Component {
 							<span className="circus-icon-logo" />
 							<span hidden>CIRCUS DB</span>
 						</h1>
-						<FormGroup bsSize="lg">
+						<FormGroup>
 							<FormControl placeholder="User ID or E-mail" autoFocus
 								value={this.state.id}
 								onChange={ev => this.change('id', ev.target.value)}

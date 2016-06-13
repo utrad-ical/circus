@@ -46,7 +46,7 @@ class User extends BaseModel implements UserInterface {
 		'createTime'	=>	'mongodate',
 		'updateTime'	=>	'mongodate',
 		'remember_token' => 'string'
-    );
+	);
 
 	public function groups() {
 		return $this->belongsToMany('Group', null, 'groups', 'groupID');
@@ -98,6 +98,10 @@ class User extends BaseModel implements UserInterface {
 		return $this->privileges;
 	}
 
+	/**
+	 * Lists the domains to which this user has access.
+	 * @return array The list of domains as an array of strings.
+	 */
 	public function listAccessibleDomains() {
 		if (!$this->domains) {
 			$result = array();
@@ -111,6 +115,39 @@ class User extends BaseModel implements UserInterface {
 			$this->domains = $result;
 		}
 		return $this->domains;
+	}
+
+	/**
+	 * List all projects to which this user has access to,
+	 * including the list of roles the user has for each project.
+	 */
+	public function listAccessibleProjectsWithRoles()
+	{
+		foreach (Project::$authTypes as $i => $role) {
+			if ($i == 0) {
+				$query = Project::whereIn($role, $this->groups);
+			} else {
+				$query = $query->orWhere(function ($query) use ($role) {
+					$query->whereIn($role, $this->groups);
+				});
+			}
+		}
+		$projects = $query->get();
+
+		$results = [];
+		foreach ($projects as $project) {
+			$roles = [];
+			foreach (Project::$authTypes as $role) {
+				if (ArrayUtil::in_array_multiple($this->groups, $project[$role])) {
+					$roles[] = $role;
+				}
+			}
+			$results[] = [
+				'project' => $project,
+				'roles' => $roles
+			];
+		}
+		return $results;
 	}
 
 	public function listAccessibleProjects($type = Project::AUTH_TYPE_READ, $as_assoc = false)
@@ -129,25 +166,23 @@ class User extends BaseModel implements UserInterface {
 	}
 
 	/**
-     * ケースアクセス権限
-     * @param string $case_id ケースID
-     * @return boolean アクセス権限がある場合true、ない場合false
+	 * Checks if this user has access to the specified case.
+	 * @param string $case_id Case ID
+	 * @return boolean True if the user has access to the specified case.
 	 */
 	public function isAccessibleCase($case_id) {
-		$query = ClinicalCase::where('caseID','=', $case_id);
+		$query = ClinicalCase::where('caseID', '=', $case_id);
 
 		//setting accesible projects
 		$projects = $this->listAccessibleProjects(Project::AUTH_TYPE_READ);
 		$query->whereIn('projectID', $projects);
 
 		//setting accesible domains
-    	$accessible_domains = $this->listAccessibleDomains();
-    	if ($accessible_domains) //{
+		$accessible_domains = $this->listAccessibleDomains();
+		if ($accessible_domains) {
 			$this->createAccessibleDomainSql($query,$accessible_domains);
-    //	}
-
-    	$res = $query->first();
-
+		}
+		$res = $query->first();
 		return $res ? true : false;
 	}
 

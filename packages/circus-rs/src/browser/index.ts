@@ -17,6 +17,5 @@ export * from '../browser/viewer/viewer';
 
 export * from '../browser/tool/state/hand';
 export * from '../browser/tool/state/celestial-rotate';
-export * from '../browser/tool/state/state-viewer';
 
 export { createToolbar } from '../browser/create-toolbar';

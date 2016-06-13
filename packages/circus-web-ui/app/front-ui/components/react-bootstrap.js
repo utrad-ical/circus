@@ -35,5 +35,7 @@ export { default as Tab } from 'react-bootstrap/lib/Tab';
 
 export { default as Well } from 'react-bootstrap/lib/Well';
 export { default as Panel } from 'react-bootstrap/lib/Panel';
+export { default as ListGroup } from 'react-bootstrap/lib/ListGroup';
+export { default as ListGroupItem } from 'react-bootstrap/lib/ListGroupItem';
 
 export { default as Modal } from 'react-bootstrap/lib/Modal';

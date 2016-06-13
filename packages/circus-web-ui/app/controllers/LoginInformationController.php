@@ -15,7 +15,7 @@ class LoginInformationController extends ApiBaseController {
 		$user = Auth::User();
 		$user_data = array_only(
 			$user->toArray(),
-			['userEmail', 'description', 'preferences',
+			['userEmail', 'loginID', 'description', 'preferences',
 				'lastLoginIP']
 		);
 

@@ -34,145 +34,27 @@ function rs( config ){
 		 ,'Undo', 'Redo' ]
 	);
 	toolbar.bindComposition( composition );
-	
-	// var imageSource = new circusrs.HybridImageSource( config );
+
+	/**
+	 * image source
+	 */
+	// var imageSource = new circusrs.MockImageSource( { voxelCount: [512, 512, 419], voxelSize: [ 0.572265625, 0.572265625, 1 ] } );
  	// var imageSource = new circusrs.RawVolumeImageSourceWithMock( config );
-	
-	var imageSource = new circusrs.MockImageSource( { voxelCount: [512, 512, 419], voxelSize: [ 0.572265625, 0.572265625, 1 ] } );
+	var imageSource = new circusrs.HybridImageSource( config );
+	// var imageSource = new circusrs.DynamicImageSource( config );
 	
 	composition.setImageSource( imageSource );
 
-	var axViewer = composition.createViewer( document.querySelector('div#rs-axial'), { stateName: 'axial' } );
-	// var oblViewer = composition.createViewer( document.querySelector('div#rs-oblique'), { stateName: 'oblique' } );
-	
-	composition.setTool('Brush');
-	
-	imageSource.ready().then( function(){
-		var imgState = imageSource.state();
-		var dim = imgState.voxelCount;
-		var vsize = imgState.voxelSize;
-		var cloud = new circusrs.VoxelCloud();
-		cloud.label = 'TEST1';
-		cloud.color = [0xff,0,0,0x99];
-		cloud.setDimension( dim[0], dim[1], dim[2] );
-		cloud.setVoxelDimension( vsize[0], vsize[1], vsize[2] );
-		composition.clouds.push( cloud );
-		composition.editCloud( cloud );
-		
-		(function(){// fill check
-		
-			var e = composition.cloudEditor;
-			var sample = function( viewer ){
-				e.prepare( viewer.getState() );
-				
-				// e.eachVoxelsOnRect( 100,100,100,100,function(p){
-					// cloud.writePixelAt( 1, Math.floor(p[0]), Math.floor(p[1]), Math.floor(p[2]) );
-				// } );
-				// return;
-				
-				var o = [ 150, 150 ];
-				var r = 100;
-				var deg = 0;
-				while( deg < 1 ){
-					var rad = deg * Math.PI / 180;
-					var p0 = [
-						o[0] - r * Math.cos( rad ),
-						o[1] - r * Math.sin( rad ) ];
-					var p1 = [
-						o[0] + r * Math.cos( rad ),
-						o[1] + r * Math.sin( rad ) ];
-					deg+=10;
-					// e.line( p0, p1 );
-					
-					e.line( [ p0[0], p0[1]+10 ], [ p1[0], p1[1]+10 ] );
-					e.line( [ p1[0], p1[1]+20 ], [ p0[0], p0[1]+20 ] );
-				}
-				
-				// 
-				// e.line2( [50,70,209], [250,75,209] );
-				/*
-				e.moveTo( 100, 100 );
-				e.lineTo(  50, 150 );
-				e.lineTo( 150, 150 );
-				e.lineTo( 100, 100 );
-				e.fill( 100, 125 );
-				
-				
-				e.moveTo( 200, 200 );
-				e.lineTo( 150, 250 );
-				e.lineTo( 250, 250 );
-				e.lineTo( 200, 200 );
-				e.fill( 200, 225 );
-				*/
-				
-			};
-			sample( axViewer );
-			// sample( oblViewer );
-			composition.renderAll();
-		})();
-				
-	} );
-return;
-	
 	var axViewer = composition.createViewer( document.querySelector('div#rs-axial'), { stateName: 'axial' } );
 	var sagViewer = composition.createViewer( document.querySelector('div#rs-sagittal'), { stateName: 'sagittal' } );
 	var corViewer = composition.createViewer( document.querySelector('div#rs-coronal'), { stateName: 'coronal' } );
 	var oblViewer = composition.createViewer( document.querySelector('div#rs-oblique'), { stateName: 'oblique' } );
 	
-	
-	var toolbar = circusrs.createToolbar(
-		document.querySelector('div#rs-toolbar'),
-		[ 'Window', 'Hand', 'CelestialRotate'
-		 ,'Brush', 'Eraser', 'Bucket'
-		 ,'Ruler', 'Arrow', 'Cube'
-		 ,'ReferenceRotate', 'ReferenceMove'
-		 ,'Undo', 'Redo' ]
-	);
-	toolbar.bindComposition( composition );
-
-	composition.renderAll();
-	
 	composition.setTool('Brush');
 	
-	imageSource.ready().then( function(){
-		var imgState = imageSource.state();
-		var dim = imgState.voxelCount;
-		var vsize = imgState.voxelSize;
-		var cloud = new circusrs.VoxelCloud();
-		cloud.label = 'TEST1';
-		cloud.color = [0xff,0,0,0x99];
-		cloud.setDimension( dim[0], dim[1], dim[2] );
-		cloud.setVoxelDimension( vsize[0], vsize[1], vsize[2] );
-		composition.clouds.push( cloud );
-		composition.editCloud( cloud );
-		
-		(function(){// fill check
-		
-			var e = composition.cloudEditor;
-			var sample = function( viewer ){
-				e.prepare( viewer.viewState );
-				e.moveTo( 50, 50 );
-				e.lineBy( 30, -30 );
-				e.lineBy( 30, 30 );
-				e.lineBy( 10, 30 );
-				e.lineBy( 50, -30 );
-				e.lineBy( 30, 30 );
-				e.lineBy( 10, 20 );
-				e.lineBy( -40, 20 );
-				e.lineBy( -30, -20 );
-				e.lineBy( -40, 60 );
-				e.lineBy( -20, 20 );
-				e.lineBy( -20, -120 );
-				e.lineTo( 50, 50 );
-				e.fill( 100, 100 );
-			};
-			sample( axViewer );
-			sample( oblViewer );
-			composition.renderAll();
-		})();
-				
-	} );
-	
+	/**
+	 * 
+	 */
 	
 	$( '#pen-width' ).on( 'input', function(ev){
 		composition.cloudEditor.penWidth = this.value;
@@ -201,88 +83,136 @@ return;
 		t.resetZoomState( oblViewer );
 		composition.renderAll();
 	} );
-	$( '[name=dump-axial-viewer-state]' ).on( 'click', function(ev){
-		console.log( axViewer.dumpState() );
-		// console.log( JSON.stringify( axViewer.viewState ) );
+	
+	imageSource.ready().then( function(){
+		var imgState = imageSource.state();
+		var dim = imgState.voxelCount;
+		var vsize = imgState.voxelSize;
+		var cloud = new circusrs.VoxelCloud();
+		cloud.label = 'TEST1';
+		cloud.color = [0xff,0,0,0x99];
+		cloud.setDimension( dim[0], dim[1], dim[2] );
+		cloud.setVoxelDimension( vsize[0], vsize[1], vsize[2] );
+		composition.clouds.push( cloud );
+		composition.editCloud( cloud );
+		
+		var drawTests = new DrawTests( composition.cloudEditor );
+		for( var i in drawTests.__proto__ ){
+			$('#draw-test').append(
+				$( document.createElement('button') ).attr({
+					type: 'button',
+					class: 'btn btn-default btn-block btn-xs'
+				}).append( i ).on('click', function(){
+					var vName = $('#draw-test select').val();
+					switch( vName ){
+						case 'axial':
+							var v = axViewer;
+							break;
+						case 'sagittal':
+							var v = sagViewer;
+							break;
+						case 'coronal':
+							var v = corViewer;
+							break;
+						case 'oblique':
+							var v = oblViewer;
+							break;
+					}
+					(drawTests[ $(this).text() ])(v);
+					composition.renderAll();
+				})
+			);
+		}
+		
+		composition.renderAll();
 	} );
-	
-	/**
-	 * state tool
-	 */
-	var s = new StateViewerControl( document.getElementById('state-canvas') );
-	s.observeViewer( axViewer, 'rgba( 0,0,255,0.2 )' );
-	s.observeViewer( sagViewer, 'rgba( 0,255,0,0.2 )' );
-	s.observeViewer( corViewer, 'rgba( 255,0,0,0.2 )' );
-	s.observeViewer( oblViewer, 'rgba( 128,128,128,0.4 )' );
-	
 }
 
-
-var StateViewerControl = function( canvas ){
+var DrawTests = ( function(){
+	var DrawTests = function( editor ){
+		this.editor = editor;
+	};
+	DrawTests.prototype.dumpState = function( viewer ){
+		console.log( viewer.dumpState() );
+	};
+	DrawTests.prototype.triangle = function( viewer ){
+		var e = this.editor; e.prepare( viewer.getState() );
+		e.moveTo( 100, 100 );
+		e.lineTo(  50, 150 );
+		e.lineTo( 150, 150 );
+		e.lineTo( 100, 100 );
+		e.fill( 100, 125 );
+	};
 	
-	this.canvas = canvas;
-	this.viewers = [];
-	this.colors = [];
-	this.xRot = 10;
-	this.yRot = -105;
-	
-	this.stateViewer = new circusrs.StateViewer( canvas );
-	this.dimension = [100, 100, 100];
-	
-	this.stateViewer.pan = 1.6;
-	this.stateViewer.setCelestialCamera( this.xRot, this.yRot );
-	
-	var self = this;
-	$( 'input#pan-zoom' ).on( 'input', function () {
-		self.stateViewer.pan = $(this).val();
-		self.render();
-	} ).val( this.stateViewer.pan );
-	
-	$( 'input#cam-rotate-x' ).on( 'input', function () {
-		self.stateViewer.setCelestialCamera( $('input#cam-rotate-x').val(), $('input#cam-rotate-y').val() );
-		$(this).next().text('(' + $('input#cam-rotate-x').val() + ')');
-		self.render();
-	} ).val( this.xRot );
-
-	$( 'input#cam-rotate-y' ).on( 'input', function () {
-		self.stateViewer.setCelestialCamera( $('input#cam-rotate-x').val(), $('input#cam-rotate-y').val() );
-		$(this).next().text('(' + $('input#cam-rotate-y').val() + ')');
-		self.render();
-	} ).val( this.yRot );
-	
-	self.render();
-	
-};
-
-StateViewerControl.prototype.setSourceDimension = function( dim ){
-	this.dimension = dim;
-};
-StateViewerControl.prototype.render = function(){
-
-	this.stateViewer.clearObject();
-	
-	var volumeModel = new circusrs.WireAxisBoxObject( this.dimension );
-	this.stateViewer.addObject( volumeModel );
-	
-	for( var i = 0; i < this.viewers.length; i++ ){
-		if( this.viewers[i].viewState && this.viewers[i].viewState.section ) this.stateViewer.addObject(
-			new circusrs.CrossSectionObject( this.viewers[i].viewState.section , this.colors[i] )
-		);
-	}
+	DrawTests.prototype.fillSection = function( viewer ){
+		var e = this.editor; e.prepare( viewer.getState() );
 		
-	this.canvas.getContext('2d').clearRect(0,0, this.canvas.getAttribute('width'), this.canvas.getAttribute('height') );
-	this.stateViewer.draw( this.canvas );
-};
+		e.eachVoxelsOnRect2( 100,100,100,100,function(p){
+			e.cloud.writePixelAt( 1, Math.floor(p[0]), Math.floor(p[1]), Math.floor(p[2]) );
+		} );
+	};
 
-StateViewerControl.prototype.observeViewer = function( viewer, color ){
-	var self = this;
-	viewer.on('statechange', function(){
-		self.render();
-	} );
-	viewer.on('sourcechange', function( prevSource, newSource  ){
-		self.setSourceDimension( newSource.state().voxelCount );
-	} );
-	this.viewers.push( viewer );
-	this.colors.push( color );
-};
-
+	DrawTests.prototype.clear = function( viewer ){
+		var state = viewer.getState();
+		var e = this.editor; e.prepare( state );
+// var limit = 500;
+		e.eachVoxelsOnRect2( 0,0,viewer.viewState.resolution[0],viewer.viewState.resolution[1],function(p){
+			
+			var pidx = [ Math.floor(p[0]), Math.floor(p[1]), Math.floor(p[2]) ];
+			
+// if( limit-- > 0 ) console.log( pidx.toString() );
+		
+			if( pidx[0] < 0 || pidx[1] < 0 || pidx[2] < 0
+				|| state.voxelCount[0] <= pidx[0]
+				|| state.voxelCount[1] <= pidx[1]
+				|| state.voxelCount[2] <= pidx[2]
+			){
+			}else{
+				e.cloud.writePixelAt( 0, pidx[0], pidx[1], pidx[2] );
+			}
+		} );
+	};
+	
+	DrawTests.prototype.fillRect = function( viewer ){
+		var e = this.editor; e.prepare( viewer.getState() );
+		e.moveTo( 100, 100 );
+		e.lineTo( 110, 100 );
+		e.lineTo( 110, 110 );
+		e.lineTo( 100, 110 );
+		e.lineTo( 100, 100 );
+		e.fill( 105, 105 );
+	};
+	
+	DrawTests.prototype.aline = function( viewer ){
+		var e = this.editor; e.prepare( viewer.getState() );
+		e.line( [50, 50], [250,200] );
+	};
+	DrawTests.prototype.lines = function( viewer ){
+		var e = this.editor; e.prepare( viewer.getState() );
+		e.line( [50, 50], [250,60] );
+		e.line( [50, 50], [250,250] );
+		e.line( [50, 50], [60,250] );
+	};
+	
+	DrawTests.prototype.radiation = function( viewer ){
+		var e = this.editor; e.prepare( viewer.getState() );
+		var o = [ 150, 150 ];
+		var r = 100;
+		var deg = 0;
+		while( deg < 90 ){
+			var rad = deg * Math.PI / 180;
+			var p0 = [
+				o[0] - r * Math.cos( rad ),
+				o[1] - r * Math.sin( rad ) ];
+			var p1 = [
+				o[0] + r * Math.cos( rad ),
+				o[1] + r * Math.sin( rad ) ];
+			deg+=10;
+			
+			e.line( [ p0[0], p0[1]-30 ], [ p1[0], p1[1]-30 ] );
+			e.line( [ p1[0], p1[1]+30 ], [ p0[0], p0[1]+30 ] );
+		}
+	};
+	
+	return DrawTests;
+} )();

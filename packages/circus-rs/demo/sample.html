@@ -11,7 +11,8 @@
 <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.min.css">
 
 <!-- circusrs styles -->
-<link rel="stylesheet" href="dist/css/sample.css">
+<link rel="stylesheet" href="../dist/css/iconfont.css">
+<link rel="stylesheet" href="./sample.css">
 </head>
 <body>
 
@@ -19,30 +20,23 @@
 
 	<!-- title -->
 	<div class="page-header">
-		<h1>CIRCUS RS DEMO <small>using-hybrid-image-source</small></h1>
+		<h1>CIRCUS RS DEMO</h1>
 	</div>
 	
 	<div class="row">
-		<div class="col-xs-6">
-			<!-- imagesource changer -->
+		<div class="col-xs-12">
 			<table class="table table-condensed table table-bordered table-striped" >
-				<thead>
+				<tbody>
 					<tr>
 						<th>
 							<label>API Endpoint</label>
 						</th>
+						<td><input id="server" type="text" name="server" value="" class="form-control input-sm" ></td>
 						<th>
 							<label>Target Series UID</label>
 						</th>
-					</tr>
-				</thead>
-				<tbody>
-					<tr>
-						<td><input id="server" type="text" name="server" value="" class="form-control input-sm" ></td>
 						<td><input id="series" type="text" name="series" value="" class="form-control input-sm" ></td>
-					</tr>
-					<tr>
-						<td colspan="2" class="text-center">
+						<td class="text-center">
 							<div class="btn-group">
 								<button id="use-button" type="button" class="btn btn-xs btn-default">OK</button>
 							</div>
@@ -50,76 +44,43 @@
 					</tr>
 				</tbody>
 			</table>
-			<div style="display: none;">
-				<div class="circus-rs-viewer">
-					<div class="btn-group btn-group-xs">
-						<button type="button" id="celestial-rotate" class="btn btn-xs btn-default">celestial-rotate</button>
-						<button disabled type="button" id="zoom" class="btn btn-default btn-xs">Zoom(+)</button>
-						<button disabled type="button" id="pan" class="btn btn-default btn-xs">Zoom(-)</button>
-						
-						<button disabled type="button" id="tool-icon-window" class="btn btn-default btn-xs"><i class="icon rs-icon-window"></i></button>
-						<button disabled type="button" id="tool-icon-ruler" class="btn btn-default btn-xs"><i class="icon rs-icon-ruler"></i></button>
-						<button type="button" id="tool-icon-hand" class="btn btn-default btn-xs"><i class="icon rs-icon-hand"></i></button>
-						<button disabled type="button" id="tool-icon-reference-rotate" class="btn btn-default btn-xs"><i class="icon rs-icon-reference-rotate"></i></button>
-						<button disabled type="button" id="tool-icon-reference-move" class="btn btn-default btn-xs"><i class="icon rs-icon-reference-move"></i></button>
-						<button disabled type="button" id="tool-icon-redo" class="btn btn-default btn-xs"><i class="icon rs-icon-redo"></i></button>
-						<button disabled type="button" id="tool-icon-undo" class="btn btn-default btn-xs"><i class="icon rs-icon-undo"></i></button>
-					</div>
-				</div>
-			</div>
 		</div>
-		<div class="col-xs-6">
-			<!-- check section -->
-			<div class="panel panel-default">
-				<div class="panel-body">
-					<div class="row">
-						<div class="col-sm-4">
-							<canvas id="state-canvas" width="300" height="300" style="width: 100%; height: auto;"></canvas>
-						</div>
-						<div class="col-sm-8">
-							<table class="table table-bordered table-striped table-condensed">
-								<tbody>
-									<tr>
-										<th>pan/zoom</th>
-										<td><input id="pan-zoom" type="range" min="0.1" max="3.0" step="0.1" value="1.0"></td>
-									</tr>
-									<tr>
-										<th>camera-x</th>
-										<td><input id="cam-rotate-x" type="range" min="-180" max="180" step="1" value="0"></td>
-									</tr>
-									<tr>
-										<th>camera-y</th>
-										<td><input id="cam-rotate-y" type="range" min="-180" max="180" step="1" value="0"></td>
-									</tr>
-								</tbody>
-							</table>
-						</div>
-					</div>
-				</div>
-			</div>
+	</div>
+	
+	<div id="toolbar-wrapper">
+		<div class="container">
+			<!-- toolbar -->
+			<div id="rs-toolbar"></div>
 		</div>
 	</div>
 	
 	<div class="row">
-		<div class="col-sm-2" style="padding-top: 10em;">
-			<!-- toolbar -->
-			<div id="rs-toolbar"></div>
-			<div id="rs-toolbar-temp">
-				<div class="form-group">
-					<label class="control-label">[ pen with ]</label>
-					<input id="pen-width" type="range" min="1" max="5" step="1" value="1">
+		<div class="col-sm-2">
+			<div class="panel panel-warning">
+				<div class="panel-heading">DEBUGGING</div>
+				<div id="draw-test" class="panel-body">
+					<select class="form-control input-xs">
+						<option value="axial">axial</option>
+						<option value="sagittal">sagittal</option>
+						<option value="coronal">coronal</option>
+						<option value="oblique">oblique</option>
+					</select>
 				</div>
-				<button type="button" name="reset-hand"  class="btn btn-xs btn-block btn-default">RESET Hand</button>
-				<button type="button" name="reset-zoom"  class="btn btn-xs btn-block btn-default">RESET Zoom</button>
-				<button type="button" name="reset-celestial"  class="btn btn-xs btn-block btn-default">RESET Celestial</button>
+				
+				<div id="rs-toolbar-temp">
+					<div class="form-group">
+						<label class="control-label">[ pen with ]</label>
+						<input id="pen-width" type="range" min="1" max="5" step="1" value="1">
+					</div>
+				</div>
 			</div>
 		</div>
 		<div class="col-sm-5">
 			<!-- axial-viewer -->
 			<div class="panel panel-default">
 				<div class="panel-heading">
-					axial
-					<button type="button" name="dump-axial-viewer-state" class="pull-right btn btn-xs btn-default">Dump State</button>
+					<span class="panel-title">axial</span>
+					<button type="button" onclick="$('#draw-test select').val( $(this).prev().text() )" class="pull-right btn btn-xs btn-default">select</button>
 				</div>
 				<div class="panel-body">
 					<div id="rs-axial"></div>
@@ -128,7 +89,10 @@
 			
 			<!-- coronal-viewer -->
 			<div class="panel panel-default">
-				<div class="panel-heading">coronal</div>
+				<div class="panel-heading">
+					<span class="panel-title">coronal</span>
+					<button type="button" onclick="$('#draw-test select').val( $(this).prev().text() )" class="pull-right btn btn-xs btn-default">select</button>
+				</div>
 				<div class="panel-body">
 					<div id="rs-coronal"></div>
 				</div>
@@ -138,45 +102,38 @@
 		<div class="col-sm-5">
 			<!-- sagittal-viewer -->
 			<div class="panel panel-default">
-				<div class="panel-heading">sagittal</div>
+				<div class="panel-heading">
+					<span class="panel-title">sagittal</span>
+					<button type="button" onclick="$('#draw-test select').val( $(this).prev().text() )" class="pull-right btn btn-xs btn-default">select</button>
+				</div>
 				<div class="panel-body">
 					<div id="rs-sagittal"></div>
 				</div>
 			</div>
 			<!-- oblique-viewer -->
 			<div class="panel panel-default">
-				<div class="panel-heading">oblique</div>
+				<div class="panel-heading">
+					<span class="panel-title">oblique</span>
+					<button type="button" onclick="$('#draw-test select').val( $(this).prev().text() )" class="pull-right btn btn-xs btn-default">select</button>
+				</div>
 				<div class="panel-body">
 					<div id="rs-oblique"></div>
 				</div>
 			</div>
 		</div>
-		<div class="col-sm-5" style="display: none;">
-			<div class="panel panel-default">
-				<style>#clouds .row { margin-bottom: 0.3em; }</style>
-				<div class="panel-heading">
-					<button type="button" id="tool-icon-brush" class="btn btn-default btn-xs"><i class="icon rs-icon-brush"></i></button>
-					<button disabled type="button" id="tool-icon-eraser" class="btn btn-default btn-xs"><i class="icon rs-icon-eraser"></i></button>
-					<button disabled type="button" id="tool-icon-bucket" class="btn btn-default btn-xs"><i class="icon rs-icon-bucket"></i></button>
-					<button type="button" name="add-new-cloud" value="1" class="btn btn-xs btn-default" >Add new cloud</button>
-				</div>
-				<div class="panel-body" id="clouds">
-				</div>
-			</div>
-		</div>
 	</div>
+	
 </div>
 
 <!-- cdn scripts -->
-<script src="https://code.jquery.com/jquery-2.2.3.min.js" integrity="sha256-a23g1Nt4dtEYOj7bR+vTu7+T8VP13humZFBJNIYoEJo=" crossorigin="anonymous"></script>
+<script src="//code.jquery.com/jquery-2.2.3.min.js" integrity="sha256-a23g1Nt4dtEYOj7bR+vTu7+T8VP13humZFBJNIYoEJo=" crossorigin="anonymous"></script>
 <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
 <script src="//cdn.jsdelivr.net/es6-promise/3.1.2/es6-promise.min.js"></script>
 
 <!-- circusrs script -->
-<script src="dist/circus-rs-client.js"></script>
+<script src="../dist/circus-rs-client.js"></script>
 
 <!-- demo script -->
-<script src="./image-source-selector.js"></script>
 <script src="./sample.js"></script>
 
 </body>

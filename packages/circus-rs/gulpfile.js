@@ -35,12 +35,9 @@ gulp.task('less', function() {
 /*
  * Clean up
  */
-gulp.task('clean', ['clean-build','clean-pubdocs','clean-dist']);
+gulp.task('clean', ['clean-build','clean-dist']);
 gulp.task('clean-build', function(done) {
 	rimraf('lib', done);
-});
-gulp.task('clean-pubdocs', function(done) {
-	rimraf('pubdocs', done);
 });
 gulp.task('clean-dist', function(done) {
 	rimraf('dist', done);
@@ -74,29 +71,6 @@ gulp.task('tslint', function() {
 		}))
  		.pipe(tslint.report('verbose'));
 });
-
-/*
- * Build demo
- */
-gulp.task('demo', ['demo-html','demo-js']);
-
-gulp.task('demo-html', ['demo-css'], function() {
-	return gulp.src('demo/**/*.html')
-		.pipe(gulp.dest('pubdocs/'));
-});
-gulp.task('demo-css', function() {
-	return gulp.src('demo/**/*.css')
-		.pipe(gulp.dest('pubdocs/'));
-});
-gulp.task('demo-js', ['copy-dist-browser'], function() {
-	return gulp.src('demo/**/*.js')
-		.pipe(gulp.dest('pubdocs'));
-});
-gulp.task('copy-dist-browser', ['dist-browser'], function() {
-	return gulp.src('dist/**/*')
-		.pipe(gulp.dest('pubdocs/dist'));
-});
-
 
 /*
  * Build distribution package

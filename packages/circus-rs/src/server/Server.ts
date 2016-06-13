@@ -4,6 +4,7 @@ let finalhandler = require('finalhandler');
 import logger, { shutdown as loggerShutdown } from './Logger';
 logger.info('================================');
 logger.info('CIRCUS RS is starting up...');
+
 import { Promise } from 'es6-promise';
 
 import Counter from './Counter';
@@ -61,6 +62,7 @@ class Server {
 			this.server.listen(this.config.port);
 			logger.info('Server running on port ' + this.config.port);
 		} catch (e) {
+			console.error(e);
 			logger.error(e);
 			// This guarantees all the logs are flushed before actually exiting the program
 			loggerShutdown(() => process.exit(1));

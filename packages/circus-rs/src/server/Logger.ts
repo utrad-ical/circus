@@ -7,7 +7,7 @@
  */
 
 import * as log4js from 'log4js';
-let config: Configuration = require('config');
+let config: Configuration = require('./Config');
 
 class Logger {
 	public static prepareLogger(): log4js.Logger {

@@ -2,8 +2,7 @@ import Controller from './Controller';
 import * as http from 'http';
 import Counter from '../Counter';
 import Server = require('../Server');
-
-let config: Configuration = require('config');
+const config = require('../Config');
 let startUpTime: Date = new Date(); // The time this module was loaded
 
 /**

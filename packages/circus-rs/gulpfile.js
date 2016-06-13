@@ -5,13 +5,11 @@ var iconfont = require('gulp-iconfont');
 var concat = require('gulp-concat');
 var rimraf = require('rimraf');
 
-// var markdown = require('gulp-markdown');
 var jade = require('gulp-jade');
 var browserify = require('browserify');
 var source = require('vinyl-source-stream');
 var buffer = require('vinyl-buffer');
 var uglify = require('gulp-uglify');
-// var runSequence = require('run-sequence');
 var tslint = require('gulp-tslint');
 
 gulp.task('default', ['typescript', 'less', 'dist-browser']);
@@ -25,13 +23,13 @@ gulp.task('typescript', function() {
 	var project = typescript.createProject('src/tsconfig.json');
 	return gulp.src('src/**/*.ts')
 		.pipe(typescript(project))
-		.pipe(gulp.dest('build'));
+		.pipe(gulp.dest('lib'));
 });
 
 gulp.task('less', function() {
 	return gulp.src('src/**/*.less')
 		.pipe(less())
-		.pipe(gulp.dest('build'));
+		.pipe(gulp.dest('lib'));
 });
 
 /*
@@ -39,7 +37,7 @@ gulp.task('less', function() {
  */
 gulp.task('clean', ['clean-build','clean-pubdocs','clean-dist']);
 gulp.task('clean-build', function(done) {
-	rimraf('build', done);
+	rimraf('lib', done);
 });
 gulp.task('clean-pubdocs', function(done) {
 	rimraf('pubdocs', done);
@@ -56,14 +54,14 @@ gulp.task('declaration', function() {
 	var project = typescript.createProject({
 		"module": "commonjs",
 		"target": "es5",
-		"outDir": "../build",
+		"outDir": "../lib",
 		"declaration": true,
 		"noExternalResolve": true
 	});
 	return gulp.src('src/**/*.ts')
 		.pipe(typescript(project))
 		.dts
-		.pipe(gulp.dest('build/typings/circusrs'))
+		.pipe(gulp.dest('lib/typings/circusrs'))
 });
 
 /*
@@ -80,23 +78,13 @@ gulp.task('tslint', function() {
 /*
  * Build demo
  */
-gulp.task('demo',['demo-html','demo-js']);
+gulp.task('demo', ['demo-html','demo-js']);
 
 gulp.task('demo-html', ['demo-css'], function() {
-	// var LOCALS = {};
-	// return gulp.src('./demo/**/*.jade')
-		// .pipe(jade({
-			// locals: LOCALS,
-			// pretty: true
-		// }))
-		// .pipe( gulp.dest('pubdocs') );
 	return gulp.src('demo/**/*.html')
 		.pipe(gulp.dest('pubdocs/'));
 });
 gulp.task('demo-css', function() {
-	// return gulp.src('demo/**/*.less')
-		// .pipe(less())
-		// .pipe(gulp.dest('pubdocs'));
 	return gulp.src('demo/**/*.css')
 		.pipe(gulp.dest('pubdocs/'));
 });
@@ -117,7 +105,7 @@ gulp.task('dist-browser', ['typescript','dist-browser-css'], function() {
 	// The 'standalone' option will create `window.circusrs.Viewer`
 	// on the browser.
 	return browserify({
-			entries: ['build/browser/index.js'],
+			entries: ['lib/browser/index.js'],
 			standalone: 'circusrs'
 		})
 		.bundle()
@@ -134,17 +122,17 @@ gulp.task('dist-browser-css', ['dist-browser-iconfont'], function() {
 		.pipe(gulp.dest('dist/css'));
 });
 gulp.task('dist-browser-iconfont', function() {
-	// return gulp.src('src/browser/assets/icons/*.svg')
-		// .pipe(iconfont({
-			// fontName: 'circus-rs-font',
-			// appendUnicode: true,
-			// formats: ['woff'],
-			// startUnicode: 0xE600,
-			// fontHeight: 512,
-			// timestamp: Math.round(Date.now() / 1000) // required for consistent build
-		// }))
-		// .on('glyphs', function (glyphs, options) {
-			// // console.log(glyphs);
-		// })
-		// .pipe(gulp.dest('dist/css'));
+	return gulp.src('src/browser/assets/icons/*.svg')
+		.pipe(iconfont({
+			fontName: 'circus-rs-font',
+			appendUnicode: true,
+			formats: ['woff'],
+			startUnicode: 0xE600,
+			fontHeight: 512,
+			timestamp: Math.round(Date.now() / 1000) // required for consistent build
+		}))
+		.on('glyphs', function (glyphs, options) {
+			// console.log(glyphs);
+		})
+		.pipe(gulp.dest('dist/css'));
 });

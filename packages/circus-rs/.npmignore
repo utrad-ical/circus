@@ -1,8 +1,9 @@
+.*
 node_modules
+config/*
+!/config/default.js
 /logs
 /build
 /lib
-/config/*
-!/config/default.js
 /dist
 /pubdocs

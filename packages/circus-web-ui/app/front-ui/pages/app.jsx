@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router';
 import { connect } from 'react-redux';
 import { MessageBox } from './message-box';
+import { Button } from 'components/react-bootstrap';
 import { logout } from 'actions';
 
 /**
@@ -15,13 +16,15 @@ const AppView = props => {
 	return <div>
 		<Nav />
 		<div className="container">
-			{ pageContentVisible ?
-				[<MessageBox />, props.children]
-			: null }
+			<MessageBox />
+			{ pageContentVisible ? props.children : null }
 			{ notLoggedIn ?
 				<div className="alert alert-danger">
 					You are not logged in, or your session has been expired.<br/>
 					Please log in first.
+					<div>
+						<Link to="/"><Button>Login</Button></Link>
+					</div>
 				</div>
 			: null }
 		</div>

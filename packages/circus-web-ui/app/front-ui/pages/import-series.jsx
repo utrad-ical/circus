@@ -1,5 +1,5 @@
 import React from 'react';
-import { Well, Button, Glyphicon } from 'components/react-bootstrap';
+import { Well, Button, Glyphicon, Alert } from 'components/react-bootstrap';
 import { ShrinkSelect } from 'components/shrink-select';
 import { connect } from 'react-redux';
 import * as modal from 'components/modal';
@@ -94,8 +94,14 @@ class ImportSeriesView extends React.Component {
 	}
 
 	render() {
-		if (!this.props.loginUser) return <div />;
 		const user = this.props.loginUser;
+
+		if (!Array.isArray(user.accessibleDomains) || user.accessibleDomains.length === 0) {
+			return <Alert bsStyle="warning">
+				You do not belong to any domain. Uploading is restricted.
+			</Alert>;
+		}
+
 		return <div>
 			<h1><span className="circus-icon-series-import" /> Series Import</h1>
 			<p>

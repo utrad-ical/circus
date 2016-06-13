@@ -42,13 +42,26 @@ const ProfileView = ({ user }) => {
 			</Panel>
 		</Col>
 		<Col md={5}>
-			<Panel bsStyle="info" header={<span><Glyphicon glyph="user"/> Profile</span>}>
-				<p>You are logged in as: <b>{user.description}</b></p>
-				<dl>
-					<dt>Login ID</dt><dd>{user.loginID}</dd>
-					<dt>Email</dt><dd>{user.userEmail}</dd>
-					<dt>Last login</dt><dd>{lastLoginTime} (from {user.lastLoginIP})</dd>
-				</dl>
+			<Panel bsStyle="info" className="home-profile"
+				header={<span><Glyphicon glyph="user"/> Profile</span>}>
+				<ListGroup fill>
+					<ListGroupItem>
+						You are logged in as: <b>{user.description}</b>
+					</ListGroupItem>
+					{ user.privileges.indexOf('manageServer') > -1 ?
+						<ListGroupItem bsStyle="danger">
+							<strong>You have administrative privilege on CIRCUS DB! </strong>
+							Use this account only when you do administrative tasks.
+						</ListGroupItem>
+					: null }
+				</ListGroup>
+				<ul className="list-unstyled">
+					<li><b>Login ID:</b> {user.loginID}</li>
+					<li><b>Email:</b> {user.userEmail}</li>
+					<li><b>Last login:</b> {lastLoginTime} (from {user.lastLoginIP})</li>
+					<li><b>Groups:</b> {user.groups.join(', ')}</li>
+					<li><b>Domains:</b> {user.accessibleDomains.join(', ')}</li>
+				</ul>
 			</Panel>
 		</Col>
 	</Row>

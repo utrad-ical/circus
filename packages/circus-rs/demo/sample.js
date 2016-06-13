@@ -46,6 +46,7 @@ function rs( config ){
 	// var oblViewer = composition.createViewer( document.querySelector('div#rs-oblique'), { stateName: 'oblique' } );
 	
 	composition.setTool('Brush');
+	
 	imageSource.ready().then( function(){
 		var imgState = imageSource.state();
 		var dim = imgState.voxelCount;
@@ -63,6 +64,33 @@ function rs( config ){
 			var e = composition.cloudEditor;
 			var sample = function( viewer ){
 				e.prepare( viewer.getState() );
+				
+				// e.eachVoxelsOnRect( 100,100,100,100,function(p){
+					// cloud.writePixelAt( 1, Math.floor(p[0]), Math.floor(p[1]), Math.floor(p[2]) );
+				// } );
+				// return;
+				
+				var o = [ 150, 150 ];
+				var r = 100;
+				var deg = 0;
+				while( deg < 1 ){
+					var rad = deg * Math.PI / 180;
+					var p0 = [
+						o[0] - r * Math.cos( rad ),
+						o[1] - r * Math.sin( rad ) ];
+					var p1 = [
+						o[0] + r * Math.cos( rad ),
+						o[1] + r * Math.sin( rad ) ];
+					deg+=10;
+					// e.line( p0, p1 );
+					
+					e.line( [ p0[0], p0[1]+10 ], [ p1[0], p1[1]+10 ] );
+					e.line( [ p1[0], p1[1]+20 ], [ p0[0], p0[1]+20 ] );
+				}
+				
+				// 
+				// e.line2( [50,70,209], [250,75,209] );
+				/*
 				e.moveTo( 100, 100 );
 				e.lineTo(  50, 150 );
 				e.lineTo( 150, 150 );
@@ -75,6 +103,7 @@ function rs( config ){
 				e.lineTo( 250, 250 );
 				e.lineTo( 200, 200 );
 				e.fill( 200, 225 );
+				*/
 				
 			};
 			sample( axViewer );

@@ -723,13 +723,11 @@ export default class RawData {
 		let section = new RawDataSection( u_count, v_count, this.pixelFormat );
 		let offset = 0;
 		let [ mm_v_walker_x, mm_v_walker_y, mm_v_walker_z ] = mm_origin;
-// let c = 1000;
 		for( let j = 0; j < v_count; j++ ){
 			let [ mm_u_walker_x, mm_u_walker_y, mm_u_walker_z ] = [ mm_v_walker_x, mm_v_walker_y, mm_v_walker_z ];
 			for( let i = 0; i < u_count; i++ ){
 				let value = this.mmReadPixelAt( mm_u_walker_x, mm_u_walker_y, mm_u_walker_z );
 				if( value !== null ){
-// if( c-- > 0 ) console.log('#' + offset.toString() + ' r: '+ [ mm_u_walker_x, mm_u_walker_y, mm_u_walker_z ].toString() +' => p: ' + [i,j].toString() );
 					section.write( offset, value );
 				}
 				offset++;

@@ -25,22 +25,16 @@ export class CloudEditor extends EventEmitter {
 		return before;
 	}
 	
-	private map;
-	
 	public prepare( state ){
 		this.section = state.section;
 		this.resolution = state.resolution;
 		this.mapper = this.getMapper();
-		
-		this.map = this.cloud.mmGetSectionMap(
-			state.section.origin,
-			state.section.xAxis,
-			state.section.yAxis,
-			state.resolution
-		);
-		
 	}
 	
+	/**
+	 * viewport 位置 ( x, y ) を voxel-index 系に変換
+	 * 端数処理はされないことに注意
+	 */
 	private getMapper(){
 		
 		let resolution = this.resolution;
@@ -49,19 +43,20 @@ export class CloudEditor extends EventEmitter {
 		let o = section.origin;
 		let u = vec3.scale( vec3.create(), section.xAxis, 1 / resolution[0] );
 		let v = vec3.scale( vec3.create(), section.yAxis, 1 / resolution[1] );
+		let voxelSize = this.cloud.getVoxelDimension();
 		
-		return function( x: number,y: number,z: number = 0 ){
+		return function( x: number,y: number ){
 			return [
-				o[0] + u[0] * x + v[0] * y,
-				o[1] + u[1] * x + v[1] * y,
-				o[2] + u[2] * x + v[2] * y
+				o[0] + u[0] / voxelSize[0] * x + v[0] / voxelSize[0] * y,
+				o[1] + u[1] / voxelSize[1] * x + v[1] / voxelSize[1] * y,
+				o[2] + u[2] / voxelSize[2] * x + v[2] / voxelSize[2] * y
 			]
 		};
 	}
 	
 	private check(p){
 		let [x,y] = [ Math.floor(p[0]), Math.floor(p[1]) ];
-		let ix = this.map.get( x, y );
+		let ix = this.mapper( x, y );
 		return '#('+ ( ix ? ix.toString() : 'null' ) + ') ' + 'vp@['+[x,y].toString()+'] ';
 	}
 	
@@ -80,61 +75,138 @@ export class CloudEditor extends EventEmitter {
 	 * 直線を通過するすべてのvoxelを塗りつぶす
 	 */
 	 
-	// index ベース
-	// oblique の場合の考慮がされていない！！！
 	private line( s: [number,number], e: [number,number] ){
-		let [ sx, sy ] = [ Math.floor(s[0]), Math.floor(s[1]) ];
-		let [ ex, ey ] = [ Math.floor(e[0]), Math.floor(e[1]) ];
-
-		this.line2( s, e );
-		this.line3( this.map.get(sx, sy), this.map.get(ex, ey) );
-
+		this.mmLine3(
+			this.mapper(s[0],s[1]),
+			this.mapper(e[0],e[1])
+		);
 	}
-	private line3( si: [number,number,number], ei: [number,number,number] ){
 
-		let [vx, vy, vz] = this.cloud.getVoxelDimension();
-		let [ dx, dy, dz ] = [ ei[0] - si[0], ei[1] - si[1], ei[2] - si[2] ];
-		let count = Math.max( Math.abs(dx / vx), Math.abs(dy / vy), Math.abs(dz / vz) );
-		let [ sx, sy, sz ] = [ dx / count, dy / count, dz / count ]; // step
+	private mmLine3(
+		p0: [number,number,number],
+		p1: [number,number,number]
+	){
+		let e = vec3.normalize( vec3.create(), [ p1[0] - p0[0], p1[1] - p0[1], p1[2] - p0[2] ] );
+		let distance = vec3.length( [ p1[0] - p0[0], p1[1] - p0[1], p1[2] - p0[2] ] );
+		let walked = 0.0;
 		
-		let [ x0, y0, z0 ] = si;
-		for( let i = 0; i <= count; i++ ){
-			let [ x1, y1, z1 ] = [ x0+sx, y0+sy, z0+sz ];
-			this.cloud.writePixelAt( 1, Math.floor(x0), Math.floor(y0), Math.floor(z0) );
-			[ x0, y0, z0 ] = [ x1, y1, z1 ];
+		let nv = vec3.cross( vec3.create(), this.section.xAxis, this.section.yAxis );
+		let vs = this.cloud.getDimension();
+		nv = [ nv[0] * vs[0], nv[1] * vs[1], nv[2] * vs[2] ];
+		let ew = vec3.normalize( nv, vec3.cross( nv, e, nv ) );
+		
+		let pi = p0.concat();
+		do{
+			this.cloud.writePixelAt( 1, Math.floor( pi[0] ), Math.floor( pi[1] ), Math.floor( pi[2] ) );
+			
+			let nib = pi.concat();
+			let nib_walk = 0;
+			let nib_distance = 10; // voxelsize補正されていない!!!
+			while( nib_walk < nib_distance ){
+				this.cloud.writePixelAt( 1, Math.floor( nib[0] ), Math.floor( nib[1] ), Math.floor( nib[2] ) );
+				let nib_step = this.getStepToNeighbor( nib, ew );
+				vec3.add( nib, nib, nib_step );
+				nib_walk += vec3.length( nib_step );
+			}
+			
+			let step = this.getStepToNeighbor( pi, e );
+			pi[0] += step[0];
+			pi[1] += step[1];
+			pi[2] += step[2];
+			walked += vec3.length( step );
+			
+		}while( walked < distance );
+
+		this.cloud.writePixelAt( 1, Math.floor( p1[0] ), Math.floor( p1[1] ), Math.floor( p1[2] ) ); // 誤差吸収
+	}
+	
+	/**
+	 * ビュー上の特定長方形を構成するボクセル座標すべてに対して処理
+	 */
+	private eachVoxelsOnRect( vx, vy, w, h, f ){
+		console.log('eachVoxelsOnRect');
+		let o = this.mapper( vx, vy );
+		let endx = this.mapper( vx + w, vy );
+		let endy = this.mapper( vx, vy + h );
+		let endxy = this.mapper( vx + w, vy + h );
+		
+		let u = [ endx[0] - o[0], endx[1] - o[1], endx[2] - o[2] ];
+		let v = [ endy[0] - o[0], endy[1] - o[1], endy[2] - o[2] ];
+		
+		let eu = vec3.normalize( vec3.create(),　u );
+		let ev = vec3.normalize( vec3.create(),　v );
+		
+		let u_distance = vec3.length( u );
+		let u_walker;
+		let v_distance = vec3.length( v );
+		let v_walker = o;
+		let v_step, u_step;
+		let u_walk;
+		
+		let safe = 0xff * 0xff;
+		let v_walk = 0.0;
+		while( v_walk < v_distance ){
+			if( safe-- < 0 ) throw 'ERROR v';
+			u_walker = v_walker.concat();
+			u_walk = 0.0;
+			while( u_walk < u_distance ){
+				if( safe-- < 0 ) throw 'ERROR u';
+				f( u_walker.concat() );
+				u_step = this.getStepToNeighbor( u_walker, eu );
+				u_walk += vec3.length( u_step );
+				vec3.add( u_walker, u_walker, u_step );
+			}
+			v_step = this.getStepToNeighbor( v_walker, ev );
+			v_walk += vec3.length( v_step );
+			vec3.add( v_walker, v_walker, v_step );
 		}
-		this.cloud.writePixelAt( 1, ei[0], ei[1], ei[2] );
-	}
-	private line2( s: [number,number], e: [number,number] ){
-		let [ sx, sy ] = [ Math.floor(s[0]), Math.floor(s[1]) ];
-		let [ ex, ey ] = [ Math.floor(e[0]), Math.floor(e[1]) ];
-		
-		let [ dx, dy ] = [ ex - sx, ey - sy ];
-		
-		let count = Math.ceil( Math.max( Math.abs( dx ), Math.abs( dy ) ) );
-		let [ step_x, step_y ] = [ dx / count, dy / count ];
-		
-		let [ px, py ] = [ sx, sy ];
-		for( let i=0; i<count; i++){
-			let [pxi, pyi] = [ Math.floor( px ), Math.floor( py ) ];
-			let [ix, iy, iz] = this.map.get( pxi, pyi );
-			this.cloud.writePixelAt( 1, ix, iy, iz );
-			px += step_x;
-			py += step_y;
-		}
-		
-		let[ eix, eiy, eiz ] = this.map.get( ex, ey );
-		
-		this.cloud.writePixelAt( 1, eix, eiy, eiz );
 		
 	}
+	
+	/**
+	 * 隣接するボクセルを取得
+	 *   e方向に最も近い次の格子点へ進むためのベクトルを返す
+	 * @param pos 
+	 * @param e unit vector of toward
+	 * @return p {number} neighbor pos.
+	 */
+	private getStepToNeighbor( pos, e ){
+		let stepLength = [ 
+			this.nextLatticeDistance( pos[0], e[0] ),
+			this.nextLatticeDistance( pos[1], e[1] ),
+			this.nextLatticeDistance( pos[2], e[2] )
+		].reduce( (prev, cur) => {
+			return cur === null ? prev : ( prev < cur ? prev : cur );
+		}, Number.POSITIVE_INFINITY );
+		
+		return [
+			e[0] * stepLength,
+			e[1] * stepLength,
+			e[2] * stepLength ];
+	}
+	/**
+	 * 次の格子点までの距離を取得
+	 * 対象1次元
+	 * @param p 現在地点
+	 * @param u 格子の方向兼幅
+	 */
+	private nextLatticeDistance( p, u ) {
+		if( u === 0 ) return null;
+		let i = Math.floor(p);
+		if( p === i ) return 1;
+		return u < 0
+			? Math.abs( p - i ) / Math.abs( u )
+			: ( 1 - Math.abs( p - i ) ) / Math.abs( u );
+	}
+	
+	
 	private createNibs( vx, vy ){
 		
 		let voxelSize = this.cloud.getVoxelDimension();
 		let section = this.section;
 		let penWidth = this.penWidth;
 
-		let o = this.map.get( Math.floor(vx), Math.floor(vy) );
+		let o = this.mapper( Math.floor(vx), Math.floor(vy) );
 		
 		let eu = vec3.normalize( vec3.create(), section.xAxis );
 		let ev = vec3.normalize( vec3.create(), section.yAxis );
@@ -185,35 +257,93 @@ console.log( '(' + logTmp.length.toString() + ') ' + logTmp.map( n => '[' + this
 	 */
 	public fill( ex, ey ){
 		
-
-		let startPos = [ Math.floor(ex), Math.floor(ey) ];
+		let startPos = this.mapper( ex, ey );
+		
+		let section = this.section;
 		
 		let vs = this.cloud.getVoxelDimension();
 		let dim = this.cloud.getDimension();
 		let bounds = [ vs[0] * dim[0], vs[1] * dim[1], vs[2] * dim[2] ];
 
-		let failSafe = 1024 * 256;
+		// だめ
+		let eu = vec3.scale( vec3.create(), section.xAxis, Math.min( vs[0], vs[1], vs[2] ) / vec3.length(section.xAxis) );
+		let ev = vec3.scale( vec3.create(), section.yAxis, Math.min( vs[0], vs[1], vs[2] ) / vec3.length(section.yAxis) );
+		let failSafe = 1024;
 		
 		/**
 		 * prepare point handle functions
 		 */
-		let copy = (p) => p.concat();
-		let left = (p) => { --p[0]; return p; };
-		let right = (p) => { ++p[0]; return p; };
-		let up = (p) => { --p[1]; return p; };
-		let down = (p) => { ++p[1]; return p; };
+		let copy = (p) => vec3.clone( p );
+		let left = (p) => {
+			vec3.subtract( p, p, eu );
+			return p;
+		};
+		let right = (p) => {
+			vec3.add( p, p, eu );
+			return p;
+		};
+		let up = (p) => {
+			vec3.subtract( p, p, ev )
+			return p;
+		};
+		let down = (p) => {
+			vec3.add( p, p, ev );
+			return p;
+		};
 		let isBroken = (p) => {
-			return p[0] < 0 || p[1] < 0 || p[2] < 0 || dim[0] <= p[0] || dim[1] <= p[1] || dim[2] <= p[2];
+			return p[0] < 0 || p[1] < 0 || p[2] < 0 || bounds[0] < p[0] || bounds[1] < p[1] || bounds[2] < p[2];
 		};
 		let isEdge = (p) => {
-			let ix = this.map.get( Math.floor(p[0]), Math.floor(p[1]) );
-			return !!this.cloud.getPixelAt( ix[0], ix[1], ix[2] );
+			return !!this.cloud.mmReadPixelAt( p[0], p[1], p[2] );
 		};
-
-console.log( 'fill ' + this.check( [ ex, ey] ) );
-
-		let flush = ( mostLeft, mostRight ) => {
-			this.line( mostLeft, mostRight );
+		
+		/**
+		 * scanned data buffer
+		 */
+		let POINT_BYTES = 3;
+		let lineBufferOffset = 0;
+		// let lineBufferSize = Math.ceil( Uint16Array.BYTES_PER_ELEMENT * POINT_BYTES * Math.max( vec3.length( section.xAxis ), vec3.length( section.yAxis ) ) / unit );
+		let lineBufferSize = Math.ceil( Uint16Array.BYTES_PER_ELEMENT * POINT_BYTES * Math.max( vec3.length( section.xAxis ), vec3.length( section.yAxis ) ) );
+		let lineBuffer = new Uint16Array( lineBufferSize );
+		let flushedLines =  [];
+		
+		let save = (p) => {
+			lineBuffer[lineBufferOffset++] = Math.floor(p[0]);
+			lineBuffer[lineBufferOffset++] = Math.floor(p[1]);
+			lineBuffer[lineBufferOffset++] = Math.floor(p[2]);
+		};
+		let flush = () => {
+			if( lineBufferOffset > 0 ){
+				
+				flushedLines.push( lineBuffer.slice( 0, lineBufferOffset ) );
+				
+				/*
+				while( lineBufferOffset > 0 ){
+					let pz = lineBuffer[ --lineBufferOffset ];
+					let py = lineBuffer[ --lineBufferOffset ];
+					let px = lineBuffer[ --lineBufferOffset ];
+					this.cloud.mmWritePixelAt( 1, px, py, pz );
+				}
+				*/
+				
+				let ez = lineBuffer[ --lineBufferOffset ];
+				let ey = lineBuffer[ --lineBufferOffset ];
+				let ex = lineBuffer[ --lineBufferOffset ];
+				if( lineBufferOffset === 0 ){
+					this.cloud.mmWritePixelAt( 1, ex, ey, ez );
+				}else{
+					let sx = lineBuffer[ 0 ];
+					let sy = lineBuffer[ 1 ];
+					let sz = lineBuffer[ 2 ];
+					
+					this.line( [sx,sy,sz], [ez,ey,ez] );
+					console.log( [sx,sy,sz].toString() );
+				}
+				lineBufferOffset = 0;
+				if( --failSafe < 0 ) throw 'Fail safe on flush';
+				
+				
+			}
 		};
 
 		
@@ -224,8 +354,7 @@ console.log( 'fill ' + this.check( [ ex, ey] ) );
 			
 			if( isEdge(pos) ) return true;
 			
-console.log('***************************** ' );
-console.log(' Scan line from ' + this.check(pos) );
+console.log('Scan line from ' + '[' + pos.toString() + ']' );
 				
 			let p = copy(pos);
 			let brokenPath = false;
@@ -237,56 +366,44 @@ console.log(' Scan line from ' + this.check(pos) );
 				left(p);
 				switch( true ){
 					case isBroken(p):
-console.log(' - move left, broken at ' + this.check(p) );
+console.log(' - move left, broken at ' + '[' + p.toString() + ']' );
 						brokenPath = true;
 						break MOVE_LEFT;
 					case isEdge(p):
-console.log(' - move left, edge at ' + this.check(p) );
-						right(p);
+console.log(' - move left, edge at ' + '[' + p.toString() + ']' );
 						break MOVE_LEFT;
 					default: 
 				}
 			}
 			if( brokenPath ) return false;
-			let mostLeft = copy(p);
-
-let dots = 0;
+			
 			CORRECT_POINT_MOVING_RIGHT: while( true ){
 				if( --failSafe < 0 ) throw 'Fail safe on CORRECT_POINT_MOVING_RIGHT';
 
 				right(p);
 				switch( true ){
-					case isBroken(p):
-console.log(' - go right, broken at ' + this.check(p) );
-						brokenPath = true;
-						break CORRECT_POINT_MOVING_RIGHT;
-					case isEdge(p):
-console.log(' - go right, edge at ' + this.check(p) );
-						left(p);
-						break CORRECT_POINT_MOVING_RIGHT;
-					default:
-						++dots;
-						// save(p);
+					case isBroken(p): brokenPath = true; break CORRECT_POINT_MOVING_RIGHT;
+					case isEdge(p): break CORRECT_POINT_MOVING_RIGHT;
+					default: save(p);
 				}
 			}
 			if( brokenPath ) return false;
-			let mostRight = copy(p);
-console.log(' - correct ' + dots.toString() + ' editor dots' );
 			
+			let o = lineBufferOffset;
 			let upperOnEdge = true;
 			let underOnEdge = true;
 			
-			UPPER_UNDER_SCAN: while( dots > 0 ){
-				dots--;
+			UPPER_UNDER_SCAN: while( o > 0 ){
+				let pz = lineBuffer[ --o ];
+				let py = lineBuffer[ --o ];
+				let px = lineBuffer[ --o ];
 
-				let upper = up( copy(p) );
+				let upper = up( [ px, py, pz ] );
 				switch( true ){
 					case isBroken(upper):
-console.log(' - upper scan broken ' + this.check(upper) );
 						brokenPath = true;
 						break UPPER_UNDER_SCAN;
 					case upperOnEdge && !isEdge(upper):
-console.log(' - upper scan add buffer ' + this.check(upper) );
 						upperOnEdge = false;
 						buffer.push(upper);
 						break;
@@ -297,14 +414,12 @@ console.log(' - upper scan add buffer ' + this.check(upper) );
 						upperOnEdge = isEdge(upper);
 				}
 				
-				let under = down( copy(p) );
+				let under = down( [ px, py, pz ] );
 				switch( true ){
 					case isBroken(under):
-console.log(' - under scan broken ' + this.check(under) );
 						brokenPath = true;
 						break UPPER_UNDER_SCAN;
 					case underOnEdge && !isEdge(under):
-console.log(' - under scan add buffer ' + this.check(under) );
 						underOnEdge = false;
 						buffer.push(under);
 						break;
@@ -313,13 +428,10 @@ console.log(' - under scan add buffer ' + this.check(under) );
 						break;
 					default:
 				}
-				left(p);
 			}
 			if( brokenPath ) return false;
 
-console.log(' - flush from ' + this.check( mostLeft ) );
-console.log(' - flush to   ' + this.check( mostRight ) );
-			flush( mostLeft, mostRight );
+			flush();
 			return true;
 		};
 
@@ -327,14 +439,9 @@ console.log(' - flush to   ' + this.check( mostRight ) );
 		let buffer = [ startPos ];
 		while( result && buffer.length > 0 ){
 			result = scanLine( buffer.shift() );
-			console.log( 'buffer: ' + buffer.length.toString() );
 			if( failSafe-- < 0 ) throw 'Fail safe on scanLine loop';
 		}
-		if( !result ){
-console.log('**** BROKEN!!! ****');
-		}
 		
-		/*
 		// Broken path, revert filled points.
 		if( !result ){
 			let pointsBuffer;
@@ -344,7 +451,6 @@ console.log('**** BROKEN!!! ****');
 				}
 			}
 		} 
-		*/
 		
 		return result;
 	}
@@ -416,202 +522,3 @@ console.log('**** BROKEN!!! ****');
 
 }
 
-	// public fill( ex, ey ){
-		
-		// let startPos = this.mapper( ex, ey );
-		
-		// let section = this.section;
-		
-		// let vs = this.cloud.getVoxelDimension();
-		// let dim = this.cloud.getDimension();
-		// let bounds = [ vs[0] * dim[0], vs[1] * dim[1], vs[2] * dim[2] ];
-
-		// // だめ
-		// let eu = vec3.scale( vec3.create(), section.xAxis, Math.min( vs[0], vs[1], vs[2] ) / vec3.length(section.xAxis) );
-		// let ev = vec3.scale( vec3.create(), section.yAxis, Math.min( vs[0], vs[1], vs[2] ) / vec3.length(section.yAxis) );
-		// let failSafe = 1024;
-		
-		// /**
-		 // * prepare point handle functions
-		 // */
-		// let copy = (p) => vec3.clone( p );
-		// let left = (p) => {
-			// vec3.subtract( p, p, eu );
-			// return p;
-		// };
-		// let right = (p) => {
-			// vec3.add( p, p, eu );
-			// return p;
-		// };
-		// let up = (p) => {
-			// vec3.subtract( p, p, ev )
-			// return p;
-		// };
-		// let down = (p) => {
-			// vec3.add( p, p, ev );
-			// return p;
-		// };
-		// let isBroken = (p) => {
-			// return p[0] < 0 || p[1] < 0 || p[2] < 0 || bounds[0] < p[0] || bounds[1] < p[1] || bounds[2] < p[2];
-		// };
-		// let isEdge = (p) => {
-			// return !!this.cloud.mmReadPixelAt( p[0], p[1], p[2] );
-		// };
-		
-		// /**
-		 // * scanned data buffer
-		 // */
-		// let POINT_BYTES = 3;
-		// let lineBufferOffset = 0;
-		// // let lineBufferSize = Math.ceil( Uint16Array.BYTES_PER_ELEMENT * POINT_BYTES * Math.max( vec3.length( section.xAxis ), vec3.length( section.yAxis ) ) / unit );
-		// let lineBufferSize = Math.ceil( Uint16Array.BYTES_PER_ELEMENT * POINT_BYTES * Math.max( vec3.length( section.xAxis ), vec3.length( section.yAxis ) ) );
-		// let lineBuffer = new Uint16Array( lineBufferSize );
-		// let flushedLines =  [];
-		
-		// let save = (p) => {
-			// lineBuffer[lineBufferOffset++] = Math.floor(p[0]);
-			// lineBuffer[lineBufferOffset++] = Math.floor(p[1]);
-			// lineBuffer[lineBufferOffset++] = Math.floor(p[2]);
-		// };
-		// let flush = () => {
-			// if( lineBufferOffset > 0 ){
-				
-				// flushedLines.push( lineBuffer.slice( 0, lineBufferOffset ) );
-				
-				// /*
-				// while( lineBufferOffset > 0 ){
-					// let pz = lineBuffer[ --lineBufferOffset ];
-					// let py = lineBuffer[ --lineBufferOffset ];
-					// let px = lineBuffer[ --lineBufferOffset ];
-					// this.cloud.mmWritePixelAt( 1, px, py, pz );
-				// }
-				// */
-				
-				// let ez = lineBuffer[ --lineBufferOffset ];
-				// let ey = lineBuffer[ --lineBufferOffset ];
-				// let ex = lineBuffer[ --lineBufferOffset ];
-				// if( lineBufferOffset === 0 ){
-					// this.cloud.mmWritePixelAt( 1, ex, ey, ez );
-				// }else{
-					// let sx = lineBuffer[ 0 ];
-					// let sy = lineBuffer[ 1 ];
-					// let sz = lineBuffer[ 2 ];
-					
-					// this.line( [sx,sy,sz], [ez,ey,ez] );
-					// console.log( [sx,sy,sz].toString() );
-				// }
-				// lineBufferOffset = 0;
-				// if( --failSafe < 0 ) throw 'Fail safe on flush';
-				
-				
-			// }
-		// };
-
-		
-		// /**
-		 // * scan line 
-		 // */
-		// let scanLine = (pos) => {
-			
-			// if( isEdge(pos) ) return true;
-			
-// console.log('Scan line from ' + '[' + pos.toString() + ']' );
-				
-			// let p = copy(pos);
-			// let brokenPath = false;
-			
-			// // lineBufferを座標集合で利用するために一旦最も左に向い、その後右に走るため、動作は遅くなる。
-			// MOVE_LEFT: while( true ){
-				// if( --failSafe < 0 ) throw 'Fail safe on MOVE_LEFT';
-				
-				// left(p);
-				// switch( true ){
-					// case isBroken(p):
-// console.log(' - move left, broken at ' + '[' + p.toString() + ']' );
-						// brokenPath = true;
-						// break MOVE_LEFT;
-					// case isEdge(p):
-// console.log(' - move left, edge at ' + '[' + p.toString() + ']' );
-						// break MOVE_LEFT;
-					// default: 
-				// }
-			// }
-			// if( brokenPath ) return false;
-			
-			// CORRECT_POINT_MOVING_RIGHT: while( true ){
-				// if( --failSafe < 0 ) throw 'Fail safe on CORRECT_POINT_MOVING_RIGHT';
-
-				// right(p);
-				// switch( true ){
-					// case isBroken(p): brokenPath = true; break CORRECT_POINT_MOVING_RIGHT;
-					// case isEdge(p): break CORRECT_POINT_MOVING_RIGHT;
-					// default: save(p);
-				// }
-			// }
-			// if( brokenPath ) return false;
-			
-			// let o = lineBufferOffset;
-			// let upperOnEdge = true;
-			// let underOnEdge = true;
-			
-			// UPPER_UNDER_SCAN: while( o > 0 ){
-				// let pz = lineBuffer[ --o ];
-				// let py = lineBuffer[ --o ];
-				// let px = lineBuffer[ --o ];
-
-				// let upper = up( [ px, py, pz ] );
-				// switch( true ){
-					// case isBroken(upper):
-						// brokenPath = true;
-						// break UPPER_UNDER_SCAN;
-					// case upperOnEdge && !isEdge(upper):
-						// upperOnEdge = false;
-						// buffer.push(upper);
-						// break;
-					// case !upperOnEdge && isEdge(upper):
-						// upperOnEdge = true;
-						// break;
-					// default:
-						// upperOnEdge = isEdge(upper);
-				// }
-				
-				// let under = down( [ px, py, pz ] );
-				// switch( true ){
-					// case isBroken(under):
-						// brokenPath = true;
-						// break UPPER_UNDER_SCAN;
-					// case underOnEdge && !isEdge(under):
-						// underOnEdge = false;
-						// buffer.push(under);
-						// break;
-					// case !underOnEdge && isEdge(under):
-						// underOnEdge = true;
-						// break;
-					// default:
-				// }
-			// }
-			// if( brokenPath ) return false;
-
-			// flush();
-			// return true;
-		// };
-
-		// let result = true;
-		// let buffer = [ startPos ];
-		// while( result && buffer.length > 0 ){
-			// result = scanLine( buffer.shift() );
-			// if( failSafe-- < 0 ) throw 'Fail safe on scanLine loop';
-		// }
-		
-		// // Broken path, revert filled points.
-		// if( !result ){
-			// let pointsBuffer;
-			// while( pointsBuffer = flushedLines.shift() ){
-				// for( let i = 0; i < pointsBuffer.length; i += POINT_BYTES ){
-					// this.cloud.writePixelAt( 0, pointsBuffer[ i ], pointsBuffer[ i+1 ], pointsBuffer[ i+2 ] );
-				// }
-			// }
-		// } 
-		
-		// return result;
-	// }

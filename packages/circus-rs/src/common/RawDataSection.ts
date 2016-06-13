@@ -30,6 +30,16 @@ export class RawDataSection {
 		this.read = ( offset ) => this.view[ offset ];
 		this.write = ( offset, value ) => this.view[ offset ] = value;
 	}
+	/**
+	 * xi {integer}
+	 * yi {integer}
+	 */
+	public getPixelAt( xi, yi ){
+		return this.read( yi * this.width + xi );
+	}
+	public writePixelAt( xi, yi, value ){
+		return this.write( yi * this.width + xi, value );
+	}
 	
 	constructor( width: number, height: number, type: PixelFormat, data?: ArrayBuffer ){
 		let pxInfo = pixelFormatInfo(type);

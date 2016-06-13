@@ -7,8 +7,6 @@ import { DraggableTool }				from '../../../browser/tool/draggable';
 import { Viewer }						from '../../../browser/viewer/viewer';
 import { ViewerEvent }					from '../../../browser/viewer/viewer-event';
 import { ViewerEventTarget }			from '../../../browser/interface/viewer-event-target';
-import { CrossSection }					from '../../../browser/interface/cross-section';
-import { CrossSectionUtil }				from '../../../browser/util/cross-section-util';
 
 export class CelestialRotateTool extends DraggableTool implements ViewerEventTarget {
 	
@@ -33,10 +31,10 @@ export class CelestialRotateTool extends DraggableTool implements ViewerEventTar
 	
 	public dragendHandler( ev: ViewerEvent, dragInfo ) {
 		ev.viewer.primaryEventTarget = null;
-		if( ev.original.shiftKey ){
-			this.resetCelestialState(ev.viewer);
-			ev.viewer.render();
-		}
+		// if( ev.original.shiftKey ){
+			// this.resetCelestialState(ev.viewer);
+			// ev.viewer.render();
+		// }
 		ev.stopPropagation();
 	}
 	
@@ -86,13 +84,6 @@ export class CelestialRotateTool extends DraggableTool implements ViewerEventTar
 		state.section.origin[1] -= ( end1[1] - end0[1] ) / 2;
 		state.section.origin[2] -= ( end1[2] - end0[2] ) / 2;
 		
-
-		// let center = this.getVolumePos( state.section, [ vw, vh ], vw / 2, vh / 2 );
-		// CrossSectionUtil.rotate( state.section, deg, state.section.yAxis, center );
-		// state.celestial.horizontal += deg;
-		
-		
-
 		viewer.setState( state );
 	}
 	
@@ -103,28 +94,38 @@ export class CelestialRotateTool extends DraggableTool implements ViewerEventTar
 		let state = viewer.getState();
 		let [ vw, vh ] = state.resolution;
 
-		let center = this.getVolumePos( state.section, [ vw, vh ], vw / 2, vh / 2 );
-		CrossSectionUtil.rotate( state.section, deg, viewer.viewState.section.xAxis, center );
-		state.celestial.vertical += deg;
-
+		let radian = Math.PI / 180.0 * deg;
+		
+		let end0 = state.section.yAxis.concat();
+		
+		// rotate
+		let transform = mat4.rotate( mat4.create(), mat4.create(), radian, state.section.xAxis );
+		vec3.transformMat4(state.section.yAxis, state.section.yAxis, transform);
+		
+		let end1 = state.section.yAxis.concat();
+		
+		state.section.origin[0] -= ( end1[0] - end0[0] ) / 2;
+		state.section.origin[1] -= ( end1[1] - end0[1] ) / 2;
+		state.section.origin[2] -= ( end1[2] - end0[2] ) / 2;
+		
 		viewer.setState( state );
 	}
 	
-	public resetCelestialState( viewer: Viewer ){
+	// public resetCelestialState( viewer: Viewer ){
 		
-		if( typeof viewer.viewState.celestial !== 'undefined' ){
+		// if( typeof viewer.viewState.celestial !== 'undefined' ){
 			
-			let state = viewer.getState();
-			let c0 = CrossSectionUtil.center( state.section );
-			vec3.scale( state.section.xAxis, state.celestial.defaultAxisX, vec3.length( state.section.xAxis ) / vec3.length( state.celestial.defaultAxisX ) );
-			vec3.scale( state.section.yAxis, state.celestial.defaultAxisY, vec3.length( state.section.yAxis ) / vec3.length( state.celestial.defaultAxisY ) );
-			let c1 = CrossSectionUtil.center( state.section );
-			state.section.origin[0] -= c1[0] - c0[0];
-			state.section.origin[1] -= c1[1] - c0[1];
-			state.section.origin[2] -= c1[2] - c0[2];
-			viewer.setState( state );
+			// let state = viewer.getState();
+			// let c0 = CrossSectionUtil.center( state.section );
+			// vec3.scale( state.section.xAxis, state.celestial.defaultAxisX, vec3.length( state.section.xAxis ) / vec3.length( state.celestial.defaultAxisX ) );
+			// vec3.scale( state.section.yAxis, state.celestial.defaultAxisY, vec3.length( state.section.yAxis ) / vec3.length( state.celestial.defaultAxisY ) );
+			// let c1 = CrossSectionUtil.center( state.section );
+			// state.section.origin[0] -= c1[0] - c0[0];
+			// state.section.origin[1] -= c1[1] - c0[1];
+			// state.section.origin[2] -= c1[2] - c0[2];
+			// viewer.setState( state );
 			
-			delete viewer.viewState.celestial;
-		}
-	}
+			// delete viewer.viewState.celestial;
+		// }
+	// }
 }

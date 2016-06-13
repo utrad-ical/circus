@@ -10,8 +10,6 @@ import { ImageSource }					from '../browser/image-source/image-source';
 import { Viewer }						from '../browser/viewer/viewer';
 import { ViewerEvent }					from '../browser/viewer/viewer-event';
 import { ViewerEventTarget }			from '../browser/interface/viewer-event-target';
-import { CrossSection }					from '../browser/interface/cross-section';
-import { CrossSectionUtil }				from '../browser/util/cross-section-util';
 
 import { Tool }							from '../browser/tool/tool';
 import { WindowTool }					from '../browser/tool/state/window';
@@ -151,7 +149,6 @@ export class Composition extends EventEmitter {
 				case 'oblique':
 					state.stateName = 'oblique';
 					this.setAxial( state );
-					CrossSectionUtil.rotate( state.section, 45, [1,1,1] );
 					break;
 				case 'axial':
 				default:
@@ -166,6 +163,12 @@ export class Composition extends EventEmitter {
 
 			viewer.setSource( this.imageSource );
 			viewer.setState( state );
+			
+			if( state.stateName === 'oblique' ){
+				console.log('OK');
+				this.tools['CelestialRotate'].horizontalRotate( viewer, 45 );
+				this.tools['CelestialRotate'].verticalRotate( viewer, 45 );
+			}
 		} );
 		
 		return viewer;

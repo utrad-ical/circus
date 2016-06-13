@@ -21,32 +21,44 @@ export abstract class Tool extends EventEmitter {
 	protected slide( viewer, step: number = 1 ){
 
 		let state = viewer.getState();
+		switch( state.stateName ){
+			case 'axial':
+				state.section.origin[2] += state.voxelSize[2] * step;
+				break;
+			case 'sagittal':
+				state.section.origin[0] += state.voxelSize[0] * step;
+				break;
+			case 'coronal':
+				state.section.origin[1] += state.voxelSize[1] * step;
+				break;
+			default:
+				let nv = vec3.create();
+				vec3.cross( nv, state.section.xAxis, state.section.yAxis );
+				vec3.normalize( nv, nv );
+				vec3.scale( nv, nv, step );
+				
+				vec3.add( state.section.origin, state.section.origin, nv );
+		}
 		
-		let nv = vec3.create();
-		vec3.cross( nv, state.section.xAxis, state.section.yAxis );
-		vec3.normalize( nv, nv );
-		vec3.scale( nv, nv, step );
-		
-		vec3.add( state.section.origin, state.section.origin, nv );
 		viewer.setState( state );
 		viewer.render();
 	}
 
-	protected getMapper( section, viewport ){
+	// protected getMapper( section, viewport ){
 		
-		let [ w, h ] = viewport;
-		let [ ox, oy, oz ] = section.origin;
-		let [ ux, uy, uz ] = section.xAxis.map( i => i / w );
-		let [ vx, vy, vz ] = section.yAxis.map( i => i / h );
+		// let [ w, h ] = viewport;
+		// let [ ox, oy, oz ] = section.origin;
+		// let [ ux, uy, uz ] = section.xAxis.map( i => i / w );
+		// let [ vx, vy, vz ] = section.yAxis.map( i => i / h );
 		
-		return function( x: number, y: number ){
-			return [
-				ox + ux * x + vx * y,
-				oy + uy * x + vy * y,
-				oz + uz * x + vz * y
-			];
-		};
-	}
+		// return function( x: number, y: number ){
+			// return [
+				// ox + ux * x + vx * y,
+				// oy + uy * x + vy * y,
+				// oz + uz * x + vz * y
+			// ];
+		// };
+	// }
 	
 	protected getVolumePos( section, viewport, x: number, y: number ): [number, number, number]{
 		let [ w, h ] = viewport;

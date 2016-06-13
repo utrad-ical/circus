@@ -7,8 +7,6 @@ import { DraggableTool }				from '../../../browser/tool/draggable';
 import { Viewer }						from '../../../browser/viewer/viewer';
 import { ViewerEvent }					from '../../../browser/viewer/viewer-event';
 import { ViewerEventTarget }			from '../../../browser/interface/viewer-event-target';
-import { CrossSection }					from '../../../browser/interface/cross-section';
-import { CrossSectionUtil }				from '../../../browser/util/cross-section-util';
 
 export class WindowTool extends DraggableTool implements ViewerEventTarget {
 	

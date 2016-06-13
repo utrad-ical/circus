@@ -7,8 +7,6 @@ import { DraggableTool }				from '../../../browser/tool/draggable';
 import { Viewer }						from '../../../browser/viewer/viewer';
 import { ViewerEvent }					from '../../../browser/viewer/viewer-event';
 import { ViewerEventTarget }			from '../../../browser/interface/viewer-event-target';
-import { CrossSection }					from '../../../browser/interface/cross-section';
-import { CrossSectionUtil }				from '../../../browser/util/cross-section-util';
 
 export class HandTool extends DraggableTool implements ViewerEventTarget {
 	
@@ -142,7 +140,7 @@ export class HandTool extends DraggableTool implements ViewerEventTarget {
 			let [ x0, y0, z0 ] = state.section.origin;
 			
 			let focus = this.getVolumePos( state.section, vp, fp[0], fp[1] );
-			CrossSectionUtil.scale(
+			this.scale(
 				state.section,
 				Math.pow( zoomRate, zoomVal as number ) / Math.pow( zoomRate, state.zoom.value ),
 				focus );
@@ -156,6 +154,26 @@ export class HandTool extends DraggableTool implements ViewerEventTarget {
 			
 			viewer.setState( state );
 		}
+	}
+	private scale( section, scale: number, centralPoint ) {
+
+		let operation = [
+			t => mat4.translate( t, t, vec3.scale( vec3.create(), centralPoint, -1) ),
+			t => mat4.scale( t, t, vec3.fromValues( scale, scale, scale ) ),
+			t => mat4.translate( t, t, centralPoint )
+		].reverse().reduce( (p, t) => t(p), mat4.create() );
+
+		let xEndPoint = vec3.add(vec3.create(), section.origin, section.xAxis );
+		let yEndPoint = vec3.add(vec3.create(), section.origin, section.yAxis );
+		let [ o, x, y ] = [ section.origin, xEndPoint, yEndPoint ].map(
+			p => vec3.transformMat4(vec3.create(), p, operation)
+		);
+		let xAxis = vec3.subtract(vec3.create(), x, o);
+		let yAxis = vec3.subtract(vec3.create(), y, o);
+		
+		vec3.copy( section.origin, o );
+		vec3.copy( section.xAxis, xAxis );
+		vec3.copy( section.yAxis, yAxis );
 	}
 	
 	public resetZoomState( viewer ){

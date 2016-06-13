@@ -20,15 +20,22 @@ export class RawVolumeImageSourceWithMock extends DicomLoaderImageSource {
 		};
 
 		return new Promise( ( resolve, reject ) => {
+			let est;
 			this.loader.metadata( this.series )
 				.then( ( meta ) => {
+					est = meta.estimatedWindow;
 					this.meta = meta;
+					this.meta.estimatedWindow = {
+						level: 255,
+						width: 760
+					};
 					this.volume = this.createMockVolume( meta );
 					resolve();
 					return this.loader.volume( this.series, this.meta );
 					// return Promise.resolve(this.volume);
 				} )
 				.then( ( volume ) => {
+					this.meta.estimatedWindow = est;
 					this.volume = volume;
 				} ).catch( ( e ) => {
 					reject(e);
@@ -37,8 +44,6 @@ export class RawVolumeImageSourceWithMock extends DicomLoaderImageSource {
 	}
 	
 	private createMockVolume( meta: DicomMetadata ): DicomVolume {
-		
-		console.log(meta);
 		
 		let [ width, height, depth ] = meta.voxelCount;
 		let [ vx, vy, vz ] = meta.voxelSize;

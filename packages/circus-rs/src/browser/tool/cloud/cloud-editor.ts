@@ -32,8 +32,7 @@ export class CloudEditor extends EventEmitter {
 	}
 	
 	/**
-	 * viewport 位置 ( x, y ) を voxel-index 系に変換
-	 * 端数処理はされないことに注意
+	 * viewport 位置 ( x, y ) を mm 系に変換
 	 */
 	private getMapper(){
 		
@@ -43,13 +42,12 @@ export class CloudEditor extends EventEmitter {
 		let o = section.origin;
 		let u = vec3.scale( vec3.create(), section.xAxis, 1 / resolution[0] );
 		let v = vec3.scale( vec3.create(), section.yAxis, 1 / resolution[1] );
-		let voxelSize = this.cloud.getVoxelDimension();
 		
 		return function( x: number,y: number ){
 			return [
-				o[0] + u[0] / voxelSize[0] * x + v[0] / voxelSize[0] * y,
-				o[1] + u[1] / voxelSize[1] * x + v[1] / voxelSize[1] * y,
-				o[2] + u[2] / voxelSize[2] * x + v[2] / voxelSize[2] * y
+				o[0] + u[0] * x + v[0] * y,
+				o[1] + u[1] * x + v[1] * y,
+				o[2] + u[2] * x + v[2] * y
 			]
 		};
 	}
@@ -63,10 +61,6 @@ export class CloudEditor extends EventEmitter {
 	public moveTo( ex, ey ){
 		this.penX = ex;
 		this.penY = ey;
-		
-		console.log( 'move to ' + this.check( [ ex, ey] ) );
-		
-		// this.nibs = this.createNibs( ex, ey );
 	}
 	
 	
@@ -83,36 +77,29 @@ export class CloudEditor extends EventEmitter {
 	}
 
 	private mmLine3(
-		p0: [number,number,number],
-		p1: [number,number,number]
+		p0_mm: [number,number,number],
+		p1_mm: [number,number,number]
 	){
+		
+		let vs = this.cloud.getDimension();
+		let p0 = this.cloud.mmIndexAt( p0_mm[0], p0_mm[1], p0_mm[2] );
+		let p1 = this.cloud.mmIndexAt( p1_mm[0], p1_mm[1], p1_mm[2] );
+		
 		let e = vec3.normalize( vec3.create(), [ p1[0] - p0[0], p1[1] - p0[1], p1[2] - p0[2] ] );
 		let distance = vec3.length( [ p1[0] - p0[0], p1[1] - p0[1], p1[2] - p0[2] ] );
 		let walked = 0.0;
 		
-		let nv = vec3.cross( vec3.create(), this.section.xAxis, this.section.yAxis );
-		let vs = this.cloud.getDimension();
-		nv = [ nv[0] * vs[0], nv[1] * vs[1], nv[2] * vs[2] ];
-		let ew = vec3.normalize( nv, vec3.cross( nv, e, nv ) );
+		// let nv = vec3.cross( vec3.create(), this.section.xAxis, this.section.yAxis );
+		// nv = [ nv[0] * vs[0], nv[1] * vs[1], nv[2] * vs[2] ];
+		// let ew = vec3.normalize( nv, vec3.cross( nv, e, nv ) );
 		
 		let pi = p0.concat();
 		do{
-			this.cloud.writePixelAt( 1, Math.floor( pi[0] ), Math.floor( pi[1] ), Math.floor( pi[2] ) );
-			
-			let nib = pi.concat();
-			let nib_walk = 0;
-			let nib_distance = 10; // voxelsize補正されていない!!!
-			while( nib_walk < nib_distance ){
-				this.cloud.writePixelAt( 1, Math.floor( nib[0] ), Math.floor( nib[1] ), Math.floor( nib[2] ) );
-				let nib_step = this.getStepToNeighbor( nib, ew );
-				vec3.add( nib, nib, nib_step );
-				nib_walk += vec3.length( nib_step );
-			}
+			this.cloud.writePixelAt( 1, Math.floor(pi[0]), Math.floor(pi[1]), Math.floor(pi[2]) );
 			
 			let step = this.getStepToNeighbor( pi, e );
-			pi[0] += step[0];
-			pi[1] += step[1];
-			pi[2] += step[2];
+			
+			vec3.add( pi, pi, step );
 			walked += vec3.length( step );
 			
 		}while( walked < distance );
@@ -123,15 +110,13 @@ export class CloudEditor extends EventEmitter {
 	/**
 	 * ビュー上の特定長方形を構成するボクセル座標すべてに対して処理
 	 */
-	private eachVoxelsOnRect( vx, vy, w, h, f ){
-		console.log('eachVoxelsOnRect');
-		let o = this.mapper( vx, vy );
-		let endx = this.mapper( vx + w, vy );
-		let endy = this.mapper( vx, vy + h );
-		let endxy = this.mapper( vx + w, vy + h );
+	private eachVoxelsOnRect3( o, u, v, f ){
 		
-		let u = [ endx[0] - o[0], endx[1] - o[1], endx[2] - o[2] ];
-		let v = [ endy[0] - o[0], endy[1] - o[1], endy[2] - o[2] ];
+		// voxel-index系に変換
+		let vs = this.cloud.getVoxelDimension();
+		o = [ o[0] / vs[0], o[1] / vs[1], o[2] / vs[2] ];
+		u = [ u[0] / vs[0], u[1] / vs[1], u[2] / vs[2] ];
+		v = [ v[0] / vs[0], v[1] / vs[1], v[2] / vs[2] ];
 		
 		let eu = vec3.normalize( vec3.create(),　u );
 		let ev = vec3.normalize( vec3.create(),　v );
@@ -143,7 +128,7 @@ export class CloudEditor extends EventEmitter {
 		let v_step, u_step;
 		let u_walk;
 		
-		let safe = 0xff * 0xff;
+		let safe = 0xff * 0xff * 10;
 		let v_walk = 0.0;
 		while( v_walk < v_distance ){
 			if( safe-- < 0 ) throw 'ERROR v';
@@ -153,6 +138,7 @@ export class CloudEditor extends EventEmitter {
 				if( safe-- < 0 ) throw 'ERROR u';
 				f( u_walker.concat() );
 				u_step = this.getStepToNeighbor( u_walker, eu );
+if( vec3.length( u_step ) === 0 ) throw "WHAT'S UP!?";
 				u_walk += vec3.length( u_step );
 				vec3.add( u_walker, u_walker, u_step );
 			}
@@ -160,14 +146,25 @@ export class CloudEditor extends EventEmitter {
 			v_walk += vec3.length( v_step );
 			vec3.add( v_walker, v_walker, v_step );
 		}
+	}
+	private eachVoxelsOnRect2( vx, vy, w, h, f ){
+// console.log('eachVoxelsOnRect (' + vx.toString() + ',' + vy.toString() + ', ' + w.toString() + 'x' + h.toString() +   ')');
+		let o = this.mapper( vx, vy );
+		let endx = this.mapper( vx + w, vy );
+		let endy = this.mapper( vx, vy + h );
+
+		let u = [ endx[0] - o[0], endx[1] - o[1], endx[2] - o[2] ];
+		let v = [ endy[0] - o[0], endy[1] - o[1], endy[2] - o[2] ];
 		
+		this.eachVoxelsOnRect3( o, u, v, f );
 	}
 	
 	/**
 	 * 隣接するボクセルを取得
-	 *   e方向に最も近い次の格子点へ進むためのベクトルを返す
+	 *   e方向に最も近い次へ進むためのベクトルを返す
 	 * @param pos 
-	 * @param e unit vector of toward
+	 * @param e toward unit vector
+	 * @param vs voxel-size
 	 * @return p {number} neighbor pos.
 	 */
 	private getStepToNeighbor( pos, e ){
@@ -194,53 +191,11 @@ export class CloudEditor extends EventEmitter {
 		if( u === 0 ) return null;
 		let i = Math.floor(p);
 		if( p === i ) return 1;
+		
+		
 		return u < 0
 			? Math.abs( p - i ) / Math.abs( u )
 			: ( 1 - Math.abs( p - i ) ) / Math.abs( u );
-	}
-	
-	
-	private createNibs( vx, vy ){
-		
-		let voxelSize = this.cloud.getVoxelDimension();
-		let section = this.section;
-		let penWidth = this.penWidth;
-
-		let o = this.mapper( Math.floor(vx), Math.floor(vy) );
-		
-		let eu = vec3.normalize( vec3.create(), section.xAxis );
-		let ev = vec3.normalize( vec3.create(), section.yAxis );
-		
-		let step_len = Math.min( voxelSize[0], voxelSize[1], voxelSize[2] );
-		let u_count = Math.floor( penWidth / step_len );
-		let u_step = vec3.scale( vec3.create(), eu, step_len );
-		let v_count = Math.floor( penWidth / step_len );
-		let v_step = vec3.scale( vec3.create(), ev, step_len );
-		
-		let nibs = [];
-		let negative = - Math.floor( penWidth / 2 );
-		let start = [
-			o[0] + ( eu[0] + ev[0] ) * negative,
-			o[1] + ( eu[1] + ev[1] ) * negative,
-			o[2] + ( eu[2] + ev[2] ) * negative ];
-		
-		let v_walker = start;
-console.log('nibs');
-		for( let j = 0; j < v_count; j++ ){
-			let u_walker = v_walker.concat();
-			
-			let logTmp = [];
-			for( let i = 0; i < u_count; i++ ){
-				logTmp.push( u_walker.concat() );
-				// ペン先を円にする場合はここに判定を追加 if( 中心からの距離が半径の内側 )
-				nibs.push( u_walker.concat() );
-				vec3.add( u_walker, u_walker, u_step );
-			}
-console.log( '(' + logTmp.length.toString() + ') ' + logTmp.map( n => '[' + this.cloud.mmIndexAt( n[0],n[1],n[2] ).toString() + ']' ).join(' , ') );
-			vec3.add( v_walker, v_walker, v_step );
-		}
-
-		return nibs;
 	}
 	
 	public lineTo( ex, ey ){
@@ -256,93 +211,48 @@ console.log( '(' + logTmp.length.toString() + ') ' + logTmp.map( n => '[' + this
 	 *  重複に関する考慮と実装がされていない。効率化の余地あり。
 	 */
 	public fill( ex, ey ){
-		
-		let startPos = this.mapper( ex, ey );
-		
-		let section = this.section;
-		
-		let vs = this.cloud.getVoxelDimension();
-		let dim = this.cloud.getDimension();
-		let bounds = [ vs[0] * dim[0], vs[1] * dim[1], vs[2] * dim[2] ];
 
-		// だめ
-		let eu = vec3.scale( vec3.create(), section.xAxis, Math.min( vs[0], vs[1], vs[2] ) / vec3.length(section.xAxis) );
-		let ev = vec3.scale( vec3.create(), section.yAxis, Math.min( vs[0], vs[1], vs[2] ) / vec3.length(section.yAxis) );
-		let failSafe = 1024;
+		let startPos = [ Math.floor(ex), Math.floor(ey) ];
+
+console.log( 'fill ' + this.check( startPos ) );
+
+		let rawSection = this.cloud.mmGetSection(
+			this.section.origin,
+			this.section.xAxis,
+			this.section.yAxis,
+			this.resolution,
+			false
+		);
+		// let eu = vec3.scale( vec3.create(),　this.section.xAxis, 1 / this.resolution[0] );
+		// let ev = vec3.scale( vec3.create(),　this.section.yAxis, 1 / this.resolution[1] );
+		let value = 1;
+
+		let failSafe = 1024 * 256;
 		
 		/**
 		 * prepare point handle functions
 		 */
-		let copy = (p) => vec3.clone( p );
-		let left = (p) => {
-			vec3.subtract( p, p, eu );
-			return p;
-		};
-		let right = (p) => {
-			vec3.add( p, p, eu );
-			return p;
-		};
-		let up = (p) => {
-			vec3.subtract( p, p, ev )
-			return p;
-		};
-		let down = (p) => {
-			vec3.add( p, p, ev );
-			return p;
-		};
+		let copy = (p) => p.concat();
+		let left = (p) => { --p[0]; return p; };
+		let right = (p) => { ++p[0]; return p; };
+		let up = (p) => { --p[1]; return p; };
+		let down = (p) => { ++p[1]; return p; };
 		let isBroken = (p) => {
-			return p[0] < 0 || p[1] < 0 || p[2] < 0 || bounds[0] < p[0] || bounds[1] < p[1] || bounds[2] < p[2];
+			return p[0] < 0 || p[1] < 0 || rawSection.width <= p[0] || rawSection.height <= p[1];
 		};
 		let isEdge = (p) => {
-			return !!this.cloud.mmReadPixelAt( p[0], p[1], p[2] );
+			return !!rawSection.getPixelAt( p[0], p[1] );
 		};
-		
-		/**
-		 * scanned data buffer
-		 */
-		let POINT_BYTES = 3;
-		let lineBufferOffset = 0;
-		// let lineBufferSize = Math.ceil( Uint16Array.BYTES_PER_ELEMENT * POINT_BYTES * Math.max( vec3.length( section.xAxis ), vec3.length( section.yAxis ) ) / unit );
-		let lineBufferSize = Math.ceil( Uint16Array.BYTES_PER_ELEMENT * POINT_BYTES * Math.max( vec3.length( section.xAxis ), vec3.length( section.yAxis ) ) );
-		let lineBuffer = new Uint16Array( lineBufferSize );
-		let flushedLines =  [];
-		
-		let save = (p) => {
-			lineBuffer[lineBufferOffset++] = Math.floor(p[0]);
-			lineBuffer[lineBufferOffset++] = Math.floor(p[1]);
-			lineBuffer[lineBufferOffset++] = Math.floor(p[2]);
-		};
-		let flush = () => {
-			if( lineBufferOffset > 0 ){
-				
-				flushedLines.push( lineBuffer.slice( 0, lineBufferOffset ) );
-				
-				/*
-				while( lineBufferOffset > 0 ){
-					let pz = lineBuffer[ --lineBufferOffset ];
-					let py = lineBuffer[ --lineBufferOffset ];
-					let px = lineBuffer[ --lineBufferOffset ];
-					this.cloud.mmWritePixelAt( 1, px, py, pz );
-				}
-				*/
-				
-				let ez = lineBuffer[ --lineBufferOffset ];
-				let ey = lineBuffer[ --lineBufferOffset ];
-				let ex = lineBuffer[ --lineBufferOffset ];
-				if( lineBufferOffset === 0 ){
-					this.cloud.mmWritePixelAt( 1, ex, ey, ez );
-				}else{
-					let sx = lineBuffer[ 0 ];
-					let sy = lineBuffer[ 1 ];
-					let sz = lineBuffer[ 2 ];
-					
-					this.line( [sx,sy,sz], [ez,ey,ez] );
-					console.log( [sx,sy,sz].toString() );
-				}
-				lineBufferOffset = 0;
-				if( --failSafe < 0 ) throw 'Fail safe on flush';
-				
-				
+
+		let fillFuncArgs = [];
+		let flush = ( mostLeft, mostRight ) => {
+			fillFuncArgs.push(
+				[ mostLeft[0]-1, mostLeft[1]-1, mostRight[0] - mostLeft[0] +1, mostRight[1] - mostLeft[1] +1 ]
+			);
+			
+			let y = mostLeft[1];
+			for( let x = mostLeft[0]; x<=mostRight[0]; x++ ){
+				rawSection.writePixelAt( x, y, value );
 			}
 		};
 
@@ -354,7 +264,8 @@ console.log( '(' + logTmp.length.toString() + ') ' + logTmp.map( n => '[' + this
 			
 			if( isEdge(pos) ) return true;
 			
-console.log('Scan line from ' + '[' + pos.toString() + ']' );
+console.log('***************************** ' );
+console.log(' Scan line from ' + this.check(pos) );
 				
 			let p = copy(pos);
 			let brokenPath = false;
@@ -366,44 +277,56 @@ console.log('Scan line from ' + '[' + pos.toString() + ']' );
 				left(p);
 				switch( true ){
 					case isBroken(p):
-console.log(' - move left, broken at ' + '[' + p.toString() + ']' );
+console.log(' - move left, broken at ' + this.check(p) );
 						brokenPath = true;
 						break MOVE_LEFT;
 					case isEdge(p):
-console.log(' - move left, edge at ' + '[' + p.toString() + ']' );
+console.log(' - move left, edge at ' + this.check(p) );
+						right(p);
 						break MOVE_LEFT;
 					default: 
 				}
 			}
 			if( brokenPath ) return false;
-			
+			let mostLeft = copy(p);
+
+let dots = 0;
 			CORRECT_POINT_MOVING_RIGHT: while( true ){
 				if( --failSafe < 0 ) throw 'Fail safe on CORRECT_POINT_MOVING_RIGHT';
 
 				right(p);
 				switch( true ){
-					case isBroken(p): brokenPath = true; break CORRECT_POINT_MOVING_RIGHT;
-					case isEdge(p): break CORRECT_POINT_MOVING_RIGHT;
-					default: save(p);
+					case isBroken(p):
+console.log(' - go right, broken at ' + this.check(p) );
+						brokenPath = true;
+						break CORRECT_POINT_MOVING_RIGHT;
+					case isEdge(p):
+console.log(' - go right, edge at ' + this.check(p) );
+						left(p);
+						break CORRECT_POINT_MOVING_RIGHT;
+					default:
+						++dots;
+						// save(p);
 				}
 			}
 			if( brokenPath ) return false;
+			let mostRight = copy(p);
+console.log(' - correct ' + dots.toString() + ' editor dots' );
 			
-			let o = lineBufferOffset;
 			let upperOnEdge = true;
 			let underOnEdge = true;
 			
-			UPPER_UNDER_SCAN: while( o > 0 ){
-				let pz = lineBuffer[ --o ];
-				let py = lineBuffer[ --o ];
-				let px = lineBuffer[ --o ];
+			UPPER_UNDER_SCAN: while( dots > 0 ){
+				dots--;
 
-				let upper = up( [ px, py, pz ] );
+				let upper = up( copy(p) );
 				switch( true ){
 					case isBroken(upper):
+console.log(' - upper scan broken ' + this.check(upper) );
 						brokenPath = true;
 						break UPPER_UNDER_SCAN;
 					case upperOnEdge && !isEdge(upper):
+console.log(' - upper scan add buffer ' + this.check(upper) );
 						upperOnEdge = false;
 						buffer.push(upper);
 						break;
@@ -414,12 +337,14 @@ console.log(' - move left, edge at ' + '[' + p.toString() + ']' );
 						upperOnEdge = isEdge(upper);
 				}
 				
-				let under = down( [ px, py, pz ] );
+				let under = down( copy(p) );
 				switch( true ){
 					case isBroken(under):
+console.log(' - under scan broken ' + this.check(under) );
 						brokenPath = true;
 						break UPPER_UNDER_SCAN;
 					case underOnEdge && !isEdge(under):
+console.log(' - under scan add buffer ' + this.check(under) );
 						underOnEdge = false;
 						buffer.push(under);
 						break;
@@ -428,10 +353,13 @@ console.log(' - move left, edge at ' + '[' + p.toString() + ']' );
 						break;
 					default:
 				}
+				left(p);
 			}
 			if( brokenPath ) return false;
 
-			flush();
+console.log(' - flush from ' + this.check( mostLeft ) );
+console.log(' - flush to   ' + this.check( mostRight ) );
+			flush( mostLeft, mostRight );
 			return true;
 		};
 
@@ -439,22 +367,21 @@ console.log(' - move left, edge at ' + '[' + p.toString() + ']' );
 		let buffer = [ startPos ];
 		while( result && buffer.length > 0 ){
 			result = scanLine( buffer.shift() );
+			console.log( 'buffer: ' + buffer.length.toString() );
 			if( failSafe-- < 0 ) throw 'Fail safe on scanLine loop';
 		}
-		
-		// Broken path, revert filled points.
-		if( !result ){
-			let pointsBuffer;
-			while( pointsBuffer = flushedLines.shift() ){
-				for( let i = 0; i < pointsBuffer.length; i += POINT_BYTES ){
-					this.cloud.writePixelAt( 0, pointsBuffer[ i ], pointsBuffer[ i+1 ], pointsBuffer[ i+2 ] );
-				}
-			}
-		} 
+		if( result ){
+			let fillFunc = ( p ) => this.cloud.writePixelAt( 1, Math.floor(p[0]), Math.floor(p[1]), Math.floor(p[2]) );
+			fillFuncArgs.forEach( 
+				a => this.eachVoxelsOnRect2( a[0], a[1], a[2], a[3], fillFunc )
+			);
+		}else{
+console.log('**** BROKEN!!! ****');
+		}
 		
 		return result;
 	}
-	
+
 	/**
 	 * imageDataからcloudへ書き戻す( 利用していないのでコメントアウト )
 	 */
@@ -520,5 +447,63 @@ console.log(' - move left, edge at ' + '[' + p.toString() + ']' );
 		// }
 	// }
 
+}
+
+export class PointsBuffer {
+
+	private length: number = 0;
+	private offset: number = 0;
+	private view: {[offset: number]: number};
+	
+	private v_null: number = 0;
+	private x_mask: number = 0;
+	private y_mask: number = 0;
+	private z_mask: number = 0;
+	
+	constructor( length ){
+		this.length = length;
+		this.offset = 0;
+		this.view = new Uint32Array( length );
+		this.x_mask = parseInt('00000000000000000000011111111110', 2);
+		this.y_mask = parseInt('00000000000111111111100000000000', 2);
+		this.z_mask = parseInt('01111111111000000000000000000000', 2);
+	};
+
+	/**
+	 * フォーマット
+	 * -------------------------------------
+	 * 0		(1bit)	: not null フラグ
+	 * 1-10		(10bit)	: x座標 (最大 1023)
+	 * 11-20	(10bit)	: y座標 (最大 1023)
+	 * 21-30	(10bit)	: z座標 (最大 1023)
+	 */
+	
+	private pack( x: number, y: number, z: number ): number {
+		if( x < 0 || 1023 < x || y < 0 || 1023 < y || z < 0 || 1023 < z ) throw new Error('Out of range');
+		return 1 | ( x << 1 ) | ( y << 11 ) | ( z << 21 );
+	}
+	private unpack( value: number ){
+		if( value === this.v_null ) return null;
+		return [
+			( value & this.x_mask ) >> 1 ,
+			( value & this.y_mask ) >> 11 ,
+			( value & this.z_mask ) >> 21
+		];
+	}
+	
+	public push( p: [ number, number, number ] ){
+		this.view[ this.offset++ ] = p === null ? this.v_null : this.pack( p[0], p[1], p[2] );
+	}
+	public shift(){
+		if( this.offset > 0 ){
+			return this.unpack( this.view[ --this.offset ] );
+		}else{
+			return null;
+		}
+	}
+	public rewind(){
+		this.offset = 0;
+	}
+	
 }
 

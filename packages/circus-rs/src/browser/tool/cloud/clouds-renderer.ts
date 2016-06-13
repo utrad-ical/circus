@@ -29,7 +29,8 @@ export class CloudsRenderer implements Painter {
 				section.origin,
 				section.xAxis,
 				section.yAxis,
-				size
+				size,
+				false
 			);
 
 			let srcidx = 0, pixel, dstidx;

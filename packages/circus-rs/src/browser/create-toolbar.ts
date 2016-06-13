@@ -31,7 +31,6 @@ export function createToolbar( wrapperElement, toolNames: string[] ) {
 	
 	let bindComposition = ( composition ) => {
 		composition.on('toolchange', ( before, after ) => {
-			
 			if( before ){
 				let re = new RegExp( ' ' + before + '-active ', 'g' );
 				ulElement.className = ulElement.className.replace( re, '' );

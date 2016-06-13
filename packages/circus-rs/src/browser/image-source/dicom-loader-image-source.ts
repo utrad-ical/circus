@@ -56,8 +56,7 @@ export abstract class DicomLoaderImageSource extends ImageSource {
 	public draw( canvasDomElement, viewState ):Promise<any> {
 	
 		let context = canvasDomElement.getContext('2d');
-		let vpWidth = Number( canvasDomElement.getAttribute('width') );
-		let vpHeight = Number( canvasDomElement.getAttribute('height') );
+		let [ vpWidth, vpHeight ] = viewState.resolution;
 		let section = viewState.section;
 		
 		return this.ready().then( () => {
@@ -65,9 +64,21 @@ export abstract class DicomLoaderImageSource extends ImageSource {
 			let win = viewState.window || this.meta.estimatedWindow;
 			
 			let scanParam = {
-				origin: section.origin as [ number, number, number ],
-				u: section.xAxis.map( i => i / vpWidth ) as [ number, number, number ],
-				v: section.yAxis.map( i => i / vpHeight ) as [ number, number, number ],
+				origin: [
+					Math.floor( section.origin[0] / viewState.voxelSize[0] ),
+					Math.floor( section.origin[1] / viewState.voxelSize[1] ),
+					Math.floor( section.origin[2] / viewState.voxelSize[2] )
+				] as [ number, number, number ],
+				u: [
+					section.xAxis[0] / viewState.voxelSize[0] / vpWidth,
+					section.xAxis[1] / viewState.voxelSize[1] / vpWidth,
+					section.xAxis[2] / viewState.voxelSize[2] / vpWidth
+				] as [ number, number, number ],
+				v: [
+					section.yAxis[0] / viewState.voxelSize[0] / vpHeight,
+					section.yAxis[1] / viewState.voxelSize[1] / vpHeight,
+					section.yAxis[2] / viewState.voxelSize[2] / vpHeight
+				] as [ number, number, number ],
 				size: [ vpWidth, vpHeight ] as [ number, number ],
 				ww: Number( win.width ),
 				wl: Number( win.level )

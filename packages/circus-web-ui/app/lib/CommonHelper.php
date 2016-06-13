@@ -1,8 +1,6 @@
 <?php
 /**
- * 共通処理クラス
- * @author stani
- * @since 2015/03/20
+ * Misc helper functions
  */
 class CommonHelper{
 	/**

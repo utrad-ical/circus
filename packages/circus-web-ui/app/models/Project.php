@@ -57,6 +57,11 @@ class Project extends BaseModel
 	 */
 	const AUTH_TYPE_VIEW_PERSONAL_INFO = 'viewPersonalInfoGroups';
 
+	public static $authTypes = [
+		self::AUTH_TYPE_READ, self::AUTH_TYPE_ADD_SERIES, self::AUTH_TYPE_WRITE,
+		self::AUTH_TYPE_MODERATE, self::AUTH_TYPE_VIEW_PERSONAL_INFO
+	];
+
 	/**
 	 * Returns the project name
 	 * @param $projectID int Project ID

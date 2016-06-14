@@ -112,12 +112,23 @@ function rs( config ){
 		composition.editCloud( cloud );
 		
 		var test = new Test( composition );
+		var funcs = [];
 		for( var i in test.__proto__ ){
+			funcs.push( i );
+		}
+		funcs.sort( function(a,b){
+			var _a = parseInt( a.substr(1,2) );
+			var _b = parseInt( b.substr(1,2) );
+			return _a === _b
+				? 0
+				: ( _a > _b ? 1 : -1);
+		} );
+		$.each( funcs, function( idx, i ){
 			$('#draw-test').append(
 				$( document.createElement('button') ).attr({
 					type: 'button',
 					class: 'btn btn-default btn-block btn-xs'
-				}).append( i ).on('click', function(){
+				}).append( i.substr(3) ).on('click', function(){
 					var vName = $('#draw-test select').val();
 					switch( vName ){
 						case 'axial':
@@ -133,11 +144,11 @@ function rs( config ){
 							var v = oblViewer;
 							break;
 					}
-					(test[ $(this).text() ])(v);
+					(test[ i ])(v);
 					composition.renderAll();
 				})
 			);
-		}
+		} );
 		
 		composition.renderAll();
 	} );
@@ -148,10 +159,94 @@ var Test = ( function(){
 		this.composition = composition;
 		this.editor = composition.cloudEditor;
 	};
-	Test.prototype.dumpState = function( viewer ){
+	Test.prototype._01dumpState = function( viewer ){
 		console.log( viewer.dumpState() );
 	};
-	Test.prototype.triangle = function( viewer ){
+
+	Test.prototype._02tranrate = function(viewer){
+		var c = this.composition;
+		var t = c.getTool('Hand');
+		
+		var step = this.tranrateFlag ? -1 : 1;
+		var count = 100;
+		var total = count;
+		
+		var start = (new Date()).getTime();
+		var moveBit = function(){
+			if( count-- > 0 ){
+				t.translateBy( viewer, [ 0, step ] );
+				setTimeout( function(){
+					moveBit();
+					viewer.render();
+				}, 1 );
+			}else{
+				var end = (new Date()).getTime();
+				var fr = ( end - start ) / total;
+				console.log( fr.toString() + '[ms] per render' );
+				this.tranrateFlag = !this.tranrateFlag;
+			}
+		};
+		moveBit();
+	}
+	
+	Test.prototype._03tranrate_a_once = function(viewer){
+		var c = this.composition;
+		var t = c.getTool('Hand');
+		t.translateBy( viewer, [ 0, this.tranrateFlag ? -100 : 100 ] );
+		this.tranrateFlag = !this.tranrateFlag;
+	}
+	
+	Test.prototype._11aline = function( viewer ){
+		var e = this.editor; e.prepare( viewer.getState() );
+		e.line( [50, 50], [250,200] );
+	};
+	
+	Test.prototype._12lines = function( viewer ){
+		var e = this.editor; e.prepare( viewer.getState() );
+		e.line( [50, 50], [250,60] );
+		e.line( [50, 50], [250,250] );
+		e.line( [50, 50], [60,250] );
+	};
+	
+	Test.prototype._13radiation = function( viewer ){
+		var e = this.editor; e.prepare( viewer.getState() );
+		var o = [ 150, 150 ];
+		var r = 100;
+		var deg = 0;
+		while( deg < 90 ){
+			var rad = deg * Math.PI / 180;
+			var p0 = [
+				o[0] - r * Math.cos( rad ),
+				o[1] - r * Math.sin( rad ) ];
+			var p1 = [
+				o[0] + r * Math.cos( rad ),
+				o[1] + r * Math.sin( rad ) ];
+			deg+=10;
+			
+			e.line( [ p0[0], p0[1]-30 ], [ p1[0], p1[1]-30 ] );
+			e.line( [ p1[0], p1[1]+30 ], [ p0[0], p0[1]+30 ] );
+		}
+	};
+	
+	Test.prototype._21fillSection = function( viewer ){
+		var e = this.editor; e.prepare( viewer.getState() );
+		
+		e.eachVoxelsOnRect2( 100,100,100,100,function(p){
+			e.cloud.writePixelAt( 1, Math.floor(p[0]), Math.floor(p[1]), Math.floor(p[2]) );
+		} );
+	};
+
+	Test.prototype._22fillRect = function( viewer ){
+		var e = this.editor; e.prepare( viewer.getState() );
+		e.moveTo( 100, 100 );
+		e.lineTo( 110, 100 );
+		e.lineTo( 110, 110 );
+		e.lineTo( 100, 110 );
+		e.lineTo( 100, 100 );
+		e.fill( 105, 105 );
+	};
+	
+	Test.prototype._23triangle = function( viewer ){
 		var e = this.editor; e.prepare( viewer.getState() );
 		e.moveTo( 100, 100 );
 		e.lineTo(  50, 150 );
@@ -160,15 +255,7 @@ var Test = ( function(){
 		e.fill( 100, 125 );
 	};
 	
-	Test.prototype.fillSection = function( viewer ){
-		var e = this.editor; e.prepare( viewer.getState() );
-		
-		e.eachVoxelsOnRect2( 100,100,100,100,function(p){
-			e.cloud.writePixelAt( 1, Math.floor(p[0]), Math.floor(p[1]), Math.floor(p[2]) );
-		} );
-	};
-
-	Test.prototype.clear = function( viewer ){
+	Test.prototype._99clear = function( viewer ){
 		var state = viewer.getState();
 		var e = this.editor; e.prepare( state );
 // var limit = 500;
@@ -189,52 +276,6 @@ var Test = ( function(){
 		} );
 	};
 	
-	Test.prototype.fillRect = function( viewer ){
-		var e = this.editor; e.prepare( viewer.getState() );
-		e.moveTo( 100, 100 );
-		e.lineTo( 110, 100 );
-		e.lineTo( 110, 110 );
-		e.lineTo( 100, 110 );
-		e.lineTo( 100, 100 );
-		e.fill( 105, 105 );
-	};
-	
-	Test.prototype.aline = function( viewer ){
-		var e = this.editor; e.prepare( viewer.getState() );
-		e.line( [50, 50], [250,200] );
-	};
-	Test.prototype.lines = function( viewer ){
-		var e = this.editor; e.prepare( viewer.getState() );
-		e.line( [50, 50], [250,60] );
-		e.line( [50, 50], [250,250] );
-		e.line( [50, 50], [60,250] );
-	};
-	
-	Test.prototype.radiation = function( viewer ){
-		var e = this.editor; e.prepare( viewer.getState() );
-		var o = [ 150, 150 ];
-		var r = 100;
-		var deg = 0;
-		while( deg < 90 ){
-			var rad = deg * Math.PI / 180;
-			var p0 = [
-				o[0] - r * Math.cos( rad ),
-				o[1] - r * Math.sin( rad ) ];
-			var p1 = [
-				o[0] + r * Math.cos( rad ),
-				o[1] + r * Math.sin( rad ) ];
-			deg+=10;
-			
-			e.line( [ p0[0], p0[1]-30 ], [ p1[0], p1[1]-30 ] );
-			e.line( [ p1[0], p1[1]+30 ], [ p0[0], p0[1]+30 ] );
-		}
-	};
-	
-	Test.prototype.tranrate = function(viewer){
-		var t = this.composition.getTool('Hand');
-		this.tranrateFlag = !this.tranrateFlag;
-		t.translateBy( viewer, [ 0, this.tranrateFlag ? 100 : -100 ] );
-	}
 	
 	return Test;
 } )();

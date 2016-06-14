@@ -146,7 +146,7 @@ function rs( config ){
 var Test = ( function(){
 	var Test = function( composition ){
 		this.composition = composition;
-		this.editor = composition.editor;
+		this.editor = composition.cloudEditor;
 	};
 	Test.prototype.dumpState = function( viewer ){
 		console.log( viewer.dumpState() );
@@ -232,8 +232,8 @@ var Test = ( function(){
 	
 	Test.prototype.tranrate = function(viewer){
 		var t = this.composition.getTool('Hand');
-		this.left = !this.left;
-		t.translateBy( viewer, [ this.left ? -150 : 150,0] );
+		this.tranrateFlag = !this.tranrateFlag;
+		t.translateBy( viewer, [ 0, this.tranrateFlag ? 100 : -100 ] );
 	}
 	
 	return Test;

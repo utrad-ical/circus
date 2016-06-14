@@ -165,7 +165,6 @@ export class Composition extends EventEmitter {
 			viewer.setState( state );
 			
 			if( state.stateName === 'oblique' ){
-				console.log('OK');
 				this.tools['CelestialRotate'].horizontalRotate( viewer, 45 );
 				this.tools['CelestialRotate'].verticalRotate( viewer, 45 );
 			}

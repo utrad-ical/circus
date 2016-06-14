@@ -3,7 +3,8 @@ $(function(){
 	$('#use-button').on('click', function(){
 		localStorage.setItem( 'rs-demo-save', JSON.stringify( {
 			server: $('#server').val(),
-			series: $('#series').val()
+			series: $('#series').val(),
+			source: $('#source').val(),
 		} ) );
 		window.location.reload();
 	});
@@ -13,13 +14,14 @@ $(function(){
 		if ( config ) {
 			$('#series').val( config.series );
 			$('#server').val( config.server );
+			$('#source').val( config.source );
 			return config;
 		}else{
 			return null;
 		}
 	})();
 	
-	if( config ) rs( config );
+	if( config && config.server && config.series && config.source ) rs( config );
 } );
 
 function rs( config ){
@@ -38,10 +40,23 @@ function rs( config ){
 	/**
 	 * image source
 	 */
-	// var imageSource = new circusrs.MockImageSource( { voxelCount: [512, 512, 419], voxelSize: [ 0.572265625, 0.572265625, 1 ] } );
- 	// var imageSource = new circusrs.RawVolumeImageSourceWithMock( config );
-	var imageSource = new circusrs.HybridImageSource( config );
-	// var imageSource = new circusrs.DynamicImageSource( config );
+	switch( config.source ){
+		case "mock":
+			var imageSource = new circusrs.MockImageSource( { voxelCount: [512, 512, 419], voxelSize: [ 0.572265625, 0.572265625, 1 ] } );
+			break;
+		case "dynamic":
+			var imageSource = new circusrs.DynamicImageSource( config );
+			break;
+		case "raw-volume":
+			var imageSource = new circusrs.RawVolumeImageSource( config );
+			break;
+		case "hybrid":
+			var imageSource = new circusrs.HybridImageSource( config );
+			break;
+		case "raw-volume-with-mock":
+			var imageSource = new circusrs.RawVolumeImageSourceWithMock( config );
+			break;
+	}
 	
 	composition.setImageSource( imageSource );
 
@@ -50,7 +65,7 @@ function rs( config ){
 	var corViewer = composition.createViewer( document.querySelector('div#rs-coronal'), { stateName: 'coronal' } );
 	var oblViewer = composition.createViewer( document.querySelector('div#rs-oblique'), { stateName: 'oblique' } );
 	
-	composition.setTool('Brush');
+	composition.setTool('Hand');
 	
 	/**
 	 * 
@@ -96,8 +111,8 @@ function rs( config ){
 		composition.clouds.push( cloud );
 		composition.editCloud( cloud );
 		
-		var drawTests = new DrawTests( composition.cloudEditor );
-		for( var i in drawTests.__proto__ ){
+		var test = new Test( composition );
+		for( var i in test.__proto__ ){
 			$('#draw-test').append(
 				$( document.createElement('button') ).attr({
 					type: 'button',
@@ -118,7 +133,7 @@ function rs( config ){
 							var v = oblViewer;
 							break;
 					}
-					(drawTests[ $(this).text() ])(v);
+					(test[ $(this).text() ])(v);
 					composition.renderAll();
 				})
 			);
@@ -128,14 +143,15 @@ function rs( config ){
 	} );
 }
 
-var DrawTests = ( function(){
-	var DrawTests = function( editor ){
-		this.editor = editor;
+var Test = ( function(){
+	var Test = function( composition ){
+		this.composition = composition;
+		this.editor = composition.editor;
 	};
-	DrawTests.prototype.dumpState = function( viewer ){
+	Test.prototype.dumpState = function( viewer ){
 		console.log( viewer.dumpState() );
 	};
-	DrawTests.prototype.triangle = function( viewer ){
+	Test.prototype.triangle = function( viewer ){
 		var e = this.editor; e.prepare( viewer.getState() );
 		e.moveTo( 100, 100 );
 		e.lineTo(  50, 150 );
@@ -144,7 +160,7 @@ var DrawTests = ( function(){
 		e.fill( 100, 125 );
 	};
 	
-	DrawTests.prototype.fillSection = function( viewer ){
+	Test.prototype.fillSection = function( viewer ){
 		var e = this.editor; e.prepare( viewer.getState() );
 		
 		e.eachVoxelsOnRect2( 100,100,100,100,function(p){
@@ -152,7 +168,7 @@ var DrawTests = ( function(){
 		} );
 	};
 
-	DrawTests.prototype.clear = function( viewer ){
+	Test.prototype.clear = function( viewer ){
 		var state = viewer.getState();
 		var e = this.editor; e.prepare( state );
 // var limit = 500;
@@ -173,7 +189,7 @@ var DrawTests = ( function(){
 		} );
 	};
 	
-	DrawTests.prototype.fillRect = function( viewer ){
+	Test.prototype.fillRect = function( viewer ){
 		var e = this.editor; e.prepare( viewer.getState() );
 		e.moveTo( 100, 100 );
 		e.lineTo( 110, 100 );
@@ -183,18 +199,18 @@ var DrawTests = ( function(){
 		e.fill( 105, 105 );
 	};
 	
-	DrawTests.prototype.aline = function( viewer ){
+	Test.prototype.aline = function( viewer ){
 		var e = this.editor; e.prepare( viewer.getState() );
 		e.line( [50, 50], [250,200] );
 	};
-	DrawTests.prototype.lines = function( viewer ){
+	Test.prototype.lines = function( viewer ){
 		var e = this.editor; e.prepare( viewer.getState() );
 		e.line( [50, 50], [250,60] );
 		e.line( [50, 50], [250,250] );
 		e.line( [50, 50], [60,250] );
 	};
 	
-	DrawTests.prototype.radiation = function( viewer ){
+	Test.prototype.radiation = function( viewer ){
 		var e = this.editor; e.prepare( viewer.getState() );
 		var o = [ 150, 150 ];
 		var r = 100;
@@ -214,5 +230,11 @@ var DrawTests = ( function(){
 		}
 	};
 	
-	return DrawTests;
+	Test.prototype.tranrate = function(viewer){
+		var t = this.composition.getTool('Hand');
+		this.left = !this.left;
+		t.translateBy( viewer, [ this.left ? -150 : 150,0] );
+	}
+	
+	return Test;
 } )();

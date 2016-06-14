@@ -36,6 +36,19 @@
 							<label>Target Series UID</label>
 						</th>
 						<td><input id="series" type="text" name="series" value="" class="form-control input-sm" ></td>
+						<th>
+							<label>Source</label>
+						</th>
+						<td>
+							<select id="source" class="form-control input-sm">
+								<option value=""></option>
+								<option value="mock">Mock</option>
+								<option value="dynamic">Dynamic</option>
+								<option value="raw-volume">RawVolume</option>
+								<option value="hybrid">Hybrid</option>
+								<option value="raw-volume-with-mock">RawVolume(mock on loading)</option>
+							</select>
+						</td>
 						<td class="text-center">
 							<div class="btn-group">
 								<button id="use-button" type="button" class="btn btn-xs btn-default">OK</button>
@@ -56,7 +69,7 @@
 	
 	<div class="row">
 		<div class="col-sm-2">
-			<div class="panel panel-warning">
+			<div class="panel panel-warning" style="position: fixed;">
 				<div class="panel-heading">DEBUGGING</div>
 				<div id="draw-test" class="panel-body">
 					<select class="form-control input-xs">

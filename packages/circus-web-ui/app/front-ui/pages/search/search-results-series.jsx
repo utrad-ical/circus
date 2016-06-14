@@ -4,66 +4,61 @@ import { Button } from 'components/react-bootstrap';
 import { Link } from 'react-router';
 import { modal } from 'components/modal';
 
-const createCase = seriesUID => {
-	modal.confirm('Add case for ' + seriesUID + '?').then(ans => {
-		if (ans === true) {
-			console.log('Add case ' + seriesUID);
-		}
-	});
+async function createCase(seriesUID) {
+	if (!(await modal.confirm('Add case for ' + seriesUID + '?'))) return;
+	console.log('Add case ' + seriesUID);
 };
 
-const SeriesInfoRenderer = props => {
-	function anon(item) {
-		if (item) {
-			return item;
-		} else {
-			return <span className="anonymized">(anonymized)</span>;
-		}
+export class SeriesSearchResults extends SearchResults {
+	constructor(props) {
+		super(props);
+		const sortItems = {
+			createTime: 'series import time',
+			seriesUID: 'series instance UID',
+			seriesDate: 'series date',
+			modality: 'modality'
+		};
+
+		const sortOptions = {};
+		Object.keys(sortItems).forEach(k => {
+			sortOptions[`${k} asc`] = `${sortItems[k]} asc`;
+			sortOptions[`${k} desc`] = `${sortItems[k]} desc`;
+		});
+		this.sortOptions = sortOptions;
 	}
 
-	// console.log(props);
-	return <div className="search-result series">
-		<div className="modality">{props.modality}</div>
-		<div className="series-date">{props.seriesDate}</div>
-		<div className="carete-time">{props.createTime}</div>
-		<div className="series-description">{props.seriesDescription}</div>
-		<div className="patient-id">
-			{anon(props.patientInfo.patientID)}
-		</div>
-		<div className="patient-name">
-			{anon(props.patientInfo.patientName)}
-		</div>
-		<div className="patient-age-sex">
-			{anon(`${props.patientInfo.age} ${props.patientInfo.sex}`)}
-		</div>
-		<div className="register">
-			<Link to={`/series/${props.seriesUID}`}>
-				<Button>
-					<span className="circus-icon circus-icon-series" />
-					View
-				</Button>
-			</Link>
-		</div>
-	</div>;
-};
+	renderItem(item) {
+		function anon(item) {
+			if (item) {
+				return item;
+			} else {
+				return <span className="anonymized">(anonymized)</span>;
+			}
+		}
 
-const sortItems = {
-	createTime: 'series import time',
-	seriesUID: 'series instance UID',
-	seriesDate: 'series date',
-	modality: 'modality'
-};
+		return <div className="search-result series">
+			<div className="modality">{item.modality}</div>
+			<div className="series-date">{item.seriesDate}</div>
+			<div className="carete-time">{item.createTime}</div>
+			<div className="series-description">{item.seriesDescription}</div>
+			<div className="patient-id">
+				{anon(item.patientInfo.patientID)}
+			</div>
+			<div className="patient-name">
+				{anon(item.patientInfo.patientName)}
+			</div>
+			<div className="patient-age-sex">
+				{anon(`${item.patientInfo.age} ${item.patientInfo.sex}`)}
+			</div>
+			<div className="register">
+				<Link to={`/series/${item.seriesUID}`}>
+					<Button>
+						<span className="circus-icon circus-icon-series" />
+						View
+					</Button>
+				</Link>
+			</div>
+		</div>;
+	}
 
-const sortOptions = {};
-Object.keys(sortItems).forEach(k => {
-	sortOptions[`${k} asc`] = `${sortItems[k]} asc`;
-	sortOptions[`${k} desc`] = `${sortItems[k]} desc`;
-});
-
-export const SeriesSearchResults = props => {
-	return <SearchResults
-		renderer={SeriesInfoRenderer}
-		sortOptions={sortOptions}
-		{...props}
-	/>;
 };

@@ -10,6 +10,6 @@ export class SeriesSearch extends SearchCommon {
 		this.glyph = 'series';
 		this.conditionComp = SeriesSearchCondition;
 		this.resultComp = SeriesSearchResults;
-		this.setInitialCondition();
+		this.state.condition = this.conditionComp.nullCondition();
 	}
 };

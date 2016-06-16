@@ -1,13 +1,13 @@
 <?php
 
-class SeriesListController extends ApiBaseController {
+class CaseListController extends ApiBaseController {
 	public function search() {
 		$data = Input::all();
 
 		$filter = $data['filter'];
 		Util::convertDate($filter);
 
-		$query = Series::whereRaw($filter);
+		$query = ClinicalCase::whereRaw($filter);
 		if (isset($data['sort'])) {
 			list($key, $asc) = explode(' ', $data['sort']);
 			$query->orderBy($key, $asc);
@@ -19,7 +19,7 @@ class SeriesListController extends ApiBaseController {
 		$results = $query->take($per)->skip(($page - 1) * $per)->get();
 
 		foreach ($results as &$result) {
-			$result['seriesDate'] = Util::mongoToISO($result['seriesDate']);
+			// $result['seriesDate'] = Util::mongoToISO($result['seriesDate']);
 		}
 
 		return Response::json([

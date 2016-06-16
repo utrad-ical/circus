@@ -1,4 +1,5 @@
 import React from 'react';
+import { startNewSearch } from 'actions';
 
 /**
  * Composes search condition box and search result pane.
@@ -8,7 +9,6 @@ export class SearchCommon extends React.Component {
 		super(props);
 		this.state = {
 			condition: null,
-			filter: null
 		};
 	}
 
@@ -17,7 +17,12 @@ export class SearchCommon extends React.Component {
 	};
 
 	searchClick(filter) {
-		this.setState({ filter });
+		startNewSearch(
+			this.searchName,
+			this.searchName,
+			filter,
+			this.defaultSort
+		);
 	}
 
 	render() {
@@ -32,7 +37,7 @@ export class SearchCommon extends React.Component {
 				onSearch={this.searchClick.bind(this)}
 				onChange={this.conditionChange.bind(this)} />
 			{ /* <pre>{JSON.stringify(this.state.filter, null, '  ')}</pre> */ }
-			<ResultComp filter={this.state.filter} />
+			<ResultComp />
 		</div>;
 	}
 };

@@ -2,11 +2,13 @@ import { store } from 'store';
 import { api } from 'utils/api';
 import { browserHistory } from 'react-router';
 
+const dispatch = store.dispatch.bind(store);
+
 /**
  * Loads the user information.
  */
 export async function refreshUserInfo(full = false) {
-	store.dispatch({ type: 'REQUEST_LOGIN_INFO' });
+	dispatch({ type: 'REQUEST_LOGIN_INFO' });
 	let result;
 	try {
 		result = await api('login-info' + (full ? '/full' : ''));
@@ -14,12 +16,12 @@ export async function refreshUserInfo(full = false) {
 			throw Error('Server did not respond with valid user data');
 		}
 	} catch (err) {
-		store.dispatch({ type: 'LOGGED_OUT' });
+		dispatch({ type: 'LOGGED_OUT' });
 	}
 	if (full) {
-		store.dispatch({ type: 'LOAD_FULL_LOGIN_INFO', loginUser: result });
+		dispatch({ type: 'LOAD_FULL_LOGIN_INFO', loginUser: result });
 	} else {
-		store.dispatch({ type: 'CONFIRM_LOGIN_INFO' });
+		dispatch({ type: 'CONFIRM_LOGIN_INFO' });
 	}
 }
 
@@ -33,6 +35,6 @@ export async function login(id, password) {
 
 export async function logout() {
 	const result = await api('logout');
-	store.dispatch({ type: 'LOGGED_OUT' });
+	dispatch({ type: 'LOGGED_OUT' });
 	browserHistory.push('/');
 }

@@ -1,8 +1,11 @@
 import { createStore, combineReducers } from 'redux';
 
-// This store should contain only information shared across pages,
+// The redux store should contain only information shared across pages,
 // such as the login user information.
 
+/**
+ * Reducer for login user.
+ */
 function loginUser(state = { isFetching: false, data: null }, action) {
 	switch (action.type) {
 		case 'LOAD_FULL_LOGIN_INFO':
@@ -17,6 +20,9 @@ function loginUser(state = { isFetching: false, data: null }, action) {
 	return state;
 }
 
+/**
+ * Reducer for message boxes.
+ */
 function messages(state = [], action) {
 	switch (action.type) {
 		case 'MESSAGE_ADD':
@@ -39,9 +45,47 @@ function messages(state = [], action) {
 	return state;
 }
 
+/**
+ * Reducer for search results and queries.
+ */
+function searches(state = {}, action) {
+	switch (action.type) {
+		case 'START_SEARCH_QUERY':
+			state = {
+				...state,
+				[action.name]: {
+					...(state[action.name] || {}),
+					isFetching: true,
+				}
+			};
+			break;
+		case 'LOAD_SEARCH_RESULTS':
+			state = {
+				...state,
+				[action.name]: {
+					isFetching: false,
+					resource: action.resource,
+					filter: action.filter,
+					sort: action.sort,
+					page: action.page,
+					per: action.per,
+					items: action.items,
+					totalItems: action.totalItems
+				}
+			};
+			break;
+		case 'DELETE_SEARCH':
+			state = { ...state };
+			delete(state[action.name]);
+			break;
+	}
+	return state;
+}
+
 const reducer = combineReducers({
 	loginUser,
-	messages
+	messages,
+	searches
 });
 
 export const store = createStore(reducer);

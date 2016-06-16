@@ -26,7 +26,7 @@ export class SeriesSearchCondition extends SearchConditionBase {
 		return {
 			type: 'basic',
 			basicFilter: {},
-			advancedFilter: { $and: [] }
+			advancedFilter: { $and: [ { keyName: 'modality', op: '==', value: 'CT' } ] }
 		};
 	}
 

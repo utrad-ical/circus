@@ -1,30 +1,24 @@
 import React from 'react';
-import { SearchResults } from './search-results';
+import { SearchResultsView } from './search-results';
 import { Button } from 'components/react-bootstrap';
 import { Link } from 'react-router';
 import { modal } from 'components/modal';
+import { connect } from 'react-redux';
 
 async function createCase(seriesUID) {
 	if (!(await modal.confirm('Add case for ' + seriesUID + '?'))) return;
 	console.log('Add case ' + seriesUID);
 };
 
-export class SeriesSearchResults extends SearchResults {
+class SeriesSearchResultsView extends SearchResultsView {
 	constructor(props) {
 		super(props);
-		const sortItems = {
+		this.makeSortOptions({
 			createTime: 'series import time',
 			seriesUID: 'series instance UID',
 			seriesDate: 'series date',
 			modality: 'modality'
-		};
-
-		const sortOptions = {};
-		Object.keys(sortItems).forEach(k => {
-			sortOptions[`${k} asc`] = `${sortItems[k]} asc`;
-			sortOptions[`${k} desc`] = `${sortItems[k]} desc`;
 		});
-		this.sortOptions = sortOptions;
 	}
 
 	renderItem(item) {
@@ -62,3 +56,11 @@ export class SeriesSearchResults extends SearchResults {
 	}
 
 };
+
+export const SeriesSearchResults = connect(
+	state => {
+		const name = 'series';
+		const search = state.searches[name] || {};
+		return { ...search, name };
+	}
+)(SeriesSearchResultsView);

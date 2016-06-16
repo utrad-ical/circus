@@ -31,7 +31,7 @@ export class SearchConditionBase extends React.Component {
 		this.props.onSearch && this.props.onSearch(condition);
 	};
 
-	renderUsing(BasicConditionForm) {
+	renderUsing(BasicConditionForm, formParams = {}) {
 		const activeKey = this.props.condition.type === 'advanced' ? 2 : 1;
 
 		return <div>
@@ -42,6 +42,7 @@ export class SearchConditionBase extends React.Component {
 					<BasicConditionForm
 						value={this.props.condition.basicFilter}
 						onChange={this.changeBasicFilter.bind(this)}
+						{...formParams}
 					/>
 				</Tab>
 				<Tab eventKey={2} title="Advanced">

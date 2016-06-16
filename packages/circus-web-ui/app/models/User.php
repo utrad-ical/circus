@@ -138,7 +138,7 @@ class User extends BaseModel implements UserInterface {
 		foreach ($projects as $project) {
 			$roles = [];
 			foreach (Project::$authTypes as $role) {
-				if (ArrayUtil::in_array_multiple($this->groups, $project[$role])) {
+				if (Util::in_array_multiple($this->groups, $project[$role])) {
 					$roles[] = $role;
 				}
 			}

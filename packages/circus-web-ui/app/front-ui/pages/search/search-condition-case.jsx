@@ -6,13 +6,26 @@ import { modalities } from 'constants';
 import { SearchConditionBase, FormGrid, Input } from './search-condition';
 import { Well, ControlLabel } from 'components/react-bootstrap';
 import { MultiSelect } from 'components/multiselect';
+import { store } from 'store';
 
 export class CaseSearchCondition extends SearchConditionBase {
 	constructor(props) {
 		super(props);
 		this.conditionKeys = {
 			caseID: { caption: 'case ID', type: 'text' },
-			tag: { caption: 'Tag', type: 'select', spec: { options: [] } }
+			tag: { caption: 'Tag', type: 'select', spec: { options: [] } },
+		};
+		const projects = store.getState().loginUser.data.accessibleProjects;
+		const projectOptions = {};
+		projects.filter(p => p.roles.indexOf('readGroups') > -1)
+			.forEach(p => {
+				projectOptions[p.project.projectID] =
+					{ caption: p.project.projectName, project: p.project }
+			});
+		this.state = {
+			selectedProjects: [],
+			projectOptions,
+			availableTags: {}
 		};
 	}
 
@@ -23,6 +36,21 @@ export class CaseSearchCondition extends SearchConditionBase {
 			basicFilter: {},
 			advancedFilter: { $and: [] }
 		};
+	}
+
+	selectedProjectsChange(projects) {
+		const availableTags = {};
+		for (let pid of projects) {
+			const p = this.state.projectOptions[pid].project;
+			p.tags.forEach(t => {
+				if (availableTags[t.name]) return;
+				availableTags[t.name] = { caption: t.name, color: t.color };
+			});
+		}
+		this.setState({
+			selectedProjects: projects,
+			availableTags
+		});
 	}
 
 	basicFilterToMongoQuery(condition) {
@@ -50,11 +78,14 @@ export class CaseSearchCondition extends SearchConditionBase {
 
 	render() {
 		return <Well>
-			<div style={{'margin-bottom': '10px'}}>
+			<div style={{marginBottom: '10px'}}>
 				<ControlLabel>Project:&ensp;</ControlLabel>
-				<MultiSelect options={['A','B','C']} />
+				<MultiSelect options={this.state.projectOptions}
+					onChange={this.selectedProjectsChange.bind(this)}
+					selected={this.state.selectedProjects}
+				/>
 			</div>
-			{this.renderUsing(BasicConditionForm)}
+			{this.renderUsing(BasicConditionForm, { availableTags: this.state.availableTags })}
 		</Well>
 	}
 }
@@ -85,11 +116,11 @@ const BasicConditionForm = props => {
 		'br',
 		[
 			'Patient ID',
-			<Input name="patientID" value={props.value.caseID} onChange={change} />
+			<Input name="patientID" value={props.value.patientID} onChange={change} />
 		],
 		[
 			'Patient Name',
-			<Input name="patientName" value={props.value.caseID} onChange={change} />
+			<Input name="patientName" value={props.value.patientName} onChange={change} />
 		],
 		[
 			'Case Created At',
@@ -101,7 +132,9 @@ const BasicConditionForm = props => {
 		],
 		[
 			'Tags',
-			<Input name="caseID" value={props.value.caseID} onChange={change} />
+			<MultiSelect options={props.availableTags} value={props.value.tags}
+				onChange={v => change('tags', v)}
+			/>
 		],
 	]);
 

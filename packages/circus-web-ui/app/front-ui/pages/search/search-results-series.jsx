@@ -33,7 +33,7 @@ class SeriesSearchResultsView extends SearchResultsView {
 		return <div className="search-result series">
 			<div className="modality">{item.modality}</div>
 			<div className="series-date">{item.seriesDate}</div>
-			<div className="carete-time">{item.createTime}</div>
+			<div className="create-time">{item.createTime}</div>
 			<div className="series-description">{item.seriesDescription}</div>
 			<div className="patient-id">
 				{anon(item.patientInfo.patientID)}

@@ -36,6 +36,7 @@ Route::group(['before' => 'auth'], function() {
 	$staticView('home');
 
 	// SPA
+	$staticView('home', 'application');
 	$staticView('browse/series', 'application');
 	$staticView('browse/case', 'application');
 	$staticView('import-series', 'application');
@@ -44,6 +45,8 @@ Route::group(['before' => 'auth'], function() {
 	Route::get('api/login-info', 'LoginInformationController@show');
 	Route::get('api/login-info/full', 'LoginInformationController@showFull');
 	Route::get('api/logout', 'LoginApiController@logout');
+	Route::post('api/series', 'SeriesListController@search');
+	Route::post('api/case', 'CaseListController@search');
 
 	// Case
 	Route::get('case/search/{preset_id}', 'CaseSearchController@search')
@@ -65,7 +68,6 @@ Route::group(['before' => 'auth'], function() {
 	Route::any('api/save_tags', 'TagRegisterController@save_tags');
 
 	//Series
-	Route::post('api/series', 'SeriesListController@search');
 	Route::get('series/search/{preset_id}', 'SeriesSearchController@search')
 		->where('preset_id', '^\\d+$');
 	Route::get('series/search', 'SeriesSearchController@search');

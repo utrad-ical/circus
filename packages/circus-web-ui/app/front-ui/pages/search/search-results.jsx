@@ -2,66 +2,27 @@ import React from 'react';
 import { ShrinkSelect } from 'components/shrink-select';
 import { Pagination } from 'components/react-bootstrap';
 import { api } from 'utils/api';
+import { changeSearchPage, changeSearchSort } from 'actions';
 
 const defaultRenderer = props => <div>{JSON.stringify(props.item)}</div>;
 
-export class SearchResults extends React.Component {
-	constructor(props) {
-		super(props);
-		this.state = {
-			filter: null,
-			items: null,
-			sort: 'createTime asc',
-			isFetching: false,
-			per: 20,
-			page: 1,
-		};
-	}
-
+export class SearchResultsView extends React.Component {
 	sortChange(sort) {
-		this.requestSearch({ sort });
+		changeSearchSort(this.props.name, sort);
 	}
 
 	pageClick(page) {
-		if (page === this.state.page) return;
-		this.requestSearch({ page });
+		if (page === this.props.page) return;
+		changeSearchPage(this.props.name, page);
 	}
 
-	async requestSearch({
-		filter = this.state.filter,
-		sort = this.state.sort,
-		page = this.state.page
-	}) {
-		if (filter === null) {
-			this.setState({
-				filter: null,
-				page: 1,
-				items: null,
-				isFetching: false
-			});
-			return;
-		}
-		this.setState({ isFetching: true });
-		const query = { filter, sort, page };
-		const results = await api('series', { data: query });
-		this.setState({
-			isFetching: false,
-			filter,
-			sort: sort,
-			page: results.page,
-			items: results.items,
-			totalItems: results.totalItems
+	makeSortOptions(sortKeys) {
+		const options = {};
+		Object.keys(sortKeys).forEach(k => {
+			options[`${k} desc`] = `${sortKeys[k]} desc`;
+			options[`${k} asc`] = `${sortKeys[k]} asc`;
 		});
-	}
-
-	componentWillReceiveProps(newProps) {
-		if (this.props.filter !== newProps.filter) {
-			this.requestSearch({ filter: newProps.filter, page: 1 });
-		}
-	}
-
-	componentWillMount() {
-		this.requestSearch({ filter: this.props.filter });
+		this.sortOptions = options;
 	}
 
 	renderItem(item) {
@@ -70,9 +31,9 @@ export class SearchResults extends React.Component {
 	}
 
 	render() {
-		if (this.state.items === null) return null;
+		if (!this.props.items) return null;
 
-		const { totalItems, per, items, page, sort } = this.state;
+		const { totalItems, per, items, page, sort } = this.props;
 		const pages = Math.ceil(totalItems / per);
 		return <div className="search-results-container">
 			<div className="search-results-header">

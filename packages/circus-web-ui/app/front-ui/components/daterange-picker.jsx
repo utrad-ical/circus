@@ -39,10 +39,16 @@ export const DateRangePicker = props => {
 
 	return <div className="daterange-picker">
 		<div className="form-inline">
-			<RelativeDatePicker value={from} onChange={fromChange}/>
+			<RelativeDatePicker id={props.id + '-from'}
+				value={from} onChange={fromChange}
+			/>
 			&thinsp;&mdash;&thinsp;
-			<RelativeDatePicker value={to} onChange={toChange}/>
-			<DropdownButton onSelect={presetSelect} bsStyle="link" title="" id="relative-daterange-preset-dropdown">
+			<RelativeDatePicker id={props.id + '-to'}
+				value={to} onChange={toChange}
+			/>
+			<DropdownButton onSelect={presetSelect} bsStyle="link" title=""
+				id="relative-daterange-preset-dropdown"
+			>
 				{Object.keys(presets).map(key => (
 					<MenuItem key={key} eventKey={key}>{presets[key].caption}</MenuItem>
 				))}

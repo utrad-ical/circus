@@ -122,7 +122,7 @@ const BasicConditionForm = props => {
 		],
 		[
 			'Series Date',
-			<DateRangePicker value={props.value.seriesDate} onChange={r => change('seriesDate', r)} />
+			<DateRangePicker value={props.value.seriesDate} onChange={r => change('seriesDate', r)} id="series-date-range"/>
 		]
 	]);
 };

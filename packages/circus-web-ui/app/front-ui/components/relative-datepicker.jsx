@@ -55,7 +55,7 @@ export class RelativeDatePicker extends React.Component {
 
 	render() {
 		const { mode } = this.state;
-		const editor = <div className="relative-datepicker-menu" id="relative-datepicker-popover">
+		const editor = <div className="relative-datepicker-menu">
 			<ButtonGroup bsSize="xsmall">
 				<Button
 					bsStyle={mode === 'relative' ? 'primary' : 'default'}
@@ -86,7 +86,7 @@ export class RelativeDatePicker extends React.Component {
 			</div>
 		</div>;
 
-		return <Dropdown onDrop={() => this.adjustMode()}>
+		return <Dropdown onDrop={() => this.adjustMode()} id={this.props.id}>
 			<Dropdown.Toggle>{dateToString(this.props.value)}</Dropdown.Toggle>
 			<Dropdown.Menu>{editor}</Dropdown.Menu>
 		</Dropdown>;

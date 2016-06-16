@@ -1,7 +1,7 @@
 import React from 'react';
 import { EditorPage } from './editor-page';
 import { api } from 'utils/api';
-import { Button } from 'components/react-bootstrap';
+import { Label } from 'components/react-bootstrap';
 
 export class UserAdmin extends EditorPage {
 	constructor(props) {
@@ -38,9 +38,9 @@ export class UserAdmin extends EditorPage {
 				data: item => {
 					return item.groups.map(groupID => {
 						if (!this.state.groupIdMap) return null;
-						return <Button bsSize="xs">
+						return <span className="label label-default" key={groupID}>
 							{this.state.groupIdMap[groupID]}
-						</Button>;
+						</span>;
 					});
 				},
 				label: 'Groups'

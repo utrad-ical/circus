@@ -91,7 +91,11 @@ class ChoiceDialog extends DialogBase {
 			<Modal.Footer>
 				{Object.keys(this.props.buttons).map(key => {
 					let b = this.props.buttons[key];
-					return <Button bsStyle={b.style} onClick={() => this.respond(b.response)}>
+					return <Button
+						bsStyle={b.style}
+						onClick={() => this.respond(b.response)}
+						key={key}
+					>
 						{key}
 					</Button>;
 				})}

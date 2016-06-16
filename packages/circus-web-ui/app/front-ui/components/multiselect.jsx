@@ -68,7 +68,7 @@ const MultiSelectDropdown = props => {
 		});
 	}
 
-	const dropdown = <ul>
+	const dropdown = <ul id="multiselect-dropdown">
 		{Object.keys(props.options).map((key, i) => {
 			const checked = selected.some(sel => sel == key); // lazy equiality('==') needed
 			const checkedClass = checked ? 'checked' : '';

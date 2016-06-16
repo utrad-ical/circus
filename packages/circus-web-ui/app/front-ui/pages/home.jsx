@@ -27,13 +27,13 @@ function role2str(role) {
 }
 
 const ProfileView = ({ user }) => {
-	const lastLoginTime = moment(user.lastLoginTime).format('YYYY-MM-DD HH:mm:ss');
+	const lastLoginTime = moment(user.lastLoginTime).format('YYYY-MM-DD HH:mm');
 	return <Row>
 		<Col md={7}>
 			<Panel bsStyle="info" header={<span><Glyphicon glyph="education"/> Your Projects</span>}>
 				<ListGroup fill>
 					{user.accessibleProjects.map(p => (
-						<ListGroupItem>
+						<ListGroupItem key={p.project.projectID}>
 							<strong>{p.project.projectName}</strong>&ensp;
 								<small>({p.roles.map(role2str).join(', ')})</small>
 						</ListGroupItem>

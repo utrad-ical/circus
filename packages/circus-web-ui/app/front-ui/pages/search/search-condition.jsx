@@ -87,13 +87,17 @@ export const FormGrid = items => {
 		if (item !== 'br') {
 			const [label, content] = item;
 			row.push(
-				<Col md={2}><ControlLabel>{label}</ControlLabel></Col>,
-				<Col md={4}>{content}</Col>
+				<Col md={2} key={label + '-l'}>
+					<ControlLabel>{label}</ControlLabel>
+				</Col>,
+				<Col md={4} key={label + '-c'}>
+					{content}
+				</Col>
 			);
 		}
 	});
 	return <Form horizontal>
-		{rows.map(r => <Row>{r}</Row>)}
+		{rows.map((r, i) => <Row key={i}>{r}</Row>)}
 	</Form>;
 };
 

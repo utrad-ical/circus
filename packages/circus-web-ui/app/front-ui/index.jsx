@@ -17,6 +17,7 @@ import { SeriesSearch } from 'pages/search/search-series';
 import { CaseSearch } from 'pages/search/search-case';
 import { CaseDetail } from 'pages/case-detail';
 import { ImportSeries } from 'pages/import-series';
+import { ImportCase} from 'pages/import-case';
 import { SeriesDetail} from 'pages/series-detail';
 import { TaskList } from 'pages/task-list';
 import { AdminIndex } from 'pages/admin/index';
@@ -47,6 +48,7 @@ ReactDOM.render(
 				<Route path='browse/series' component={SeriesSearch} />
 				<Route path='browse/case' component={CaseSearch} />
 				<Route path='import-series' component={ImportSeries} />
+				<Route path='import-case' component={ImportCase} />
 				<Route path='admin' component={AdminContainer}>
 					<IndexRoute component={AdminIndex} />
 					<Route path='general' component={GeneralAdmin} />

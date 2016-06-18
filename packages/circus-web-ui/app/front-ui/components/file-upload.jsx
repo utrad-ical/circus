@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, Glyphicon, Well } from './react-bootstrap';
+import { Button, ButtonToolbar, Glyphicon, Well } from './react-bootstrap';
 import { FileDroppable } from './file-droppable';
 import * as modal from 'components/modal';
 import axios from 'axios';
@@ -10,15 +10,22 @@ import axios from 'axios';
  * and the response can be accessed via Promise.
  */
 export class FileUpload extends React.Component {
+	constructor(props) {
+		super(props);
+		this.state = { filesSelected: [] };
+	}
+
 	dropFile(files) {
-		this.upload(files);
+		this.setState({ filesSelected: files });
 	}
 
-	uploadClick() {
-		this.upload(this.refs.fileInput.files);
+	fileSelected() {
+		console.log(this.refs.fileInput.files);
+		this.setState({ filesSelected: this.refs.fileInput.files });
 	}
 
-	async upload(files) {
+	async upload() {
+		const files = this.state.filesSelected;
 		const num = files.length;
 		if (typeof num !== 'number' || num <= 0) return;
 
@@ -80,17 +87,79 @@ export class FileUpload extends React.Component {
 
 	render() {
 		return <FileDroppable onDropFile={this.dropFile.bind(this)}>
-				<Well>
+			<Well className="file-upload">
 				{this.props.children}
-				<p><input multiple={!!this.props.multiple} type="file" ref="fileInput"/></p>
-				<p>
-					<Button bsStyle="primary" onClick={this.uploadClick.bind(this)}>
-						<Glyphicon glyph="upload" />&ensp;Upload
-					</Button>
-					<Button bsStyle="link">Reset</Button>
-				</p>
+				<div>
+					<input
+						ref="fileInput"
+						type="file"
+						multiple={!!this.props.multiple}
+						onChange={this.fileSelected.bind(this)}
+					/>
+					{ this.state.filesSelected.length == 0 ?
+						<Button bsStyle="default"
+							onClick={() => this.refs.fileInput.click()}
+						>
+							<Glyphicon glyph="plus" />&ensp;Select File
+						</Button>
+					:
+						<ButtonToolbar>
+							<Button bsStyle="primary"
+								disabled={this.state.filesSelected.length < 1}
+								onClick={this.upload.bind(this)}
+							>
+								<Glyphicon glyph="upload" />&ensp;Upload
+							</Button>
+							<Button bsStyle="link"
+								onClick={() => this.setState({ filesSelected: [] })}
+							>
+								Reset
+							</Button>
+						</ButtonToolbar>
+					}
+				</div>
+				<SummaryTable files={this.state.filesSelected} />
 				<p>You can drag and drop files to this box.</p>
 			</Well>
 		</FileDroppable>;
 	}
+}
+
+function SummaryTable(props) {
+	const files = props.files;
+	const show = 10;
+	let totalSize = 0;
+	if (files.length < 1) return null;
+	return <table className="table table-condensed">
+		<thead>
+			<tr>
+				<th>File</th>
+				<th className="text-right">Size</th>
+			</tr>
+		</thead>
+		<tbody>
+			{Array.prototype.slice.call(files).map((f, i) => {
+				totalSize += f.size;
+				if (i >= show) return null;
+				return <tr>
+					<td>{f.name}</td>
+					<td className="text-right">{f.size}</td>
+				</tr>;
+			})}
+			{ files.length > show ?
+				<tr>
+					<td><i>And {files.length - show} file(s)</i></td>
+					<td></td>
+				</tr>
+			: null }
+		</tbody>
+		{ files.length > 1 ?
+			<tfoot>
+				<tr className="info">
+					<th>Total: {files.length} files</th>
+					<th className="text-right">{totalSize}</th>
+				</tr>
+			</tfoot>
+		: null }
+	</table>;
 }

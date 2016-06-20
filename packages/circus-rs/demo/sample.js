@@ -203,9 +203,13 @@ var Test = ( function(){
 	
 	Test.prototype._12lines = function( viewer ){
 		var e = this.editor; e.prepare( viewer.getState() );
-		e.line( [50, 50], [250,60] );
-		e.line( [50, 50], [250,250] );
-		e.line( [50, 50], [60,250] );
+		e.line( [70, 50], [270,60] );
+		e.line( [70, 50], [270,250] );
+		e.line( [70, 50], [80,250] );
+
+		e.line( [240,80] ,[40, 70] );
+		e.line( [240,270] ,[40, 70] );
+		e.line( [50,270] ,[40, 70] );
 	};
 	
 	Test.prototype._13radiation = function( viewer ){

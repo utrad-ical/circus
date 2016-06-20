@@ -81,24 +81,34 @@ export class CloudEditor extends EventEmitter {
 		p1_mm: [number,number,number]
 	){
 		
-		let vs = this.cloud.getDimension();
-		let p0 = this.cloud.mmIndexAt( p0_mm[0], p0_mm[1], p0_mm[2] );
-		let p1 = this.cloud.mmIndexAt( p1_mm[0], p1_mm[1], p1_mm[2] );
+		let vs = this.cloud.getVoxelDimension();
+		// let p0 = this.cloud.mmIndexAt( p0_mm[0], p0_mm[1], p0_mm[2] );
+		// let p1 = this.cloud.mmIndexAt( p1_mm[0], p1_mm[1], p1_mm[2] );
+		let p0 = [ p0_mm[0] / vs[0], p0_mm[1] / vs[1], p0_mm[2] / vs[2] ];
+		let p1 = [ p1_mm[0] / vs[0], p1_mm[1] / vs[1], p1_mm[2] / vs[2] ];
 		
 		let e = vec3.normalize( vec3.create(), [ p1[0] - p0[0], p1[1] - p0[1], p1[2] - p0[2] ] );
 		let distance = vec3.length( [ p1[0] - p0[0], p1[1] - p0[1], p1[2] - p0[2] ] );
 		let walked = 0.0;
 		
-		// let nv = vec3.cross( vec3.create(), this.section.xAxis, this.section.yAxis );
-		// nv = [ nv[0] * vs[0], nv[1] * vs[1], nv[2] * vs[2] ];
-		// let ew = vec3.normalize( nv, vec3.cross( nv, e, nv ) );
-		
 		let pi = p0.concat();
+		
+		let trim_x = e[0] < 0
+			? (i) => i === Math.floor( i ) ? i - 1 : Math.floor(i)
+			: (i) => Math.floor(i);
+		let trim_y = e[1] < 0
+			? (i) => i === Math.floor( i ) ? i - 1 : Math.floor(i)
+			: (i) => Math.floor(i);
+		let trim_z = e[2] < 0
+			? (i) => i === Math.floor( i ) ? i - 1 : Math.floor(i)
+			: (i) => Math.floor(i);
+		
+		
 		do{
-			this.cloud.writePixelAt( 1, Math.floor(pi[0]), Math.floor(pi[1]), Math.floor(pi[2]) );
+			this.cloud.writePixelAt( 1, trim_x(pi[0]), trim_y(pi[1]), trim_z(pi[2]) );
 			
 			let step = this.getStepToNeighbor( pi, e );
-			
+// console.log('pi: '+vec3.str(pi));
 			vec3.add( pi, pi, step );
 			walked += vec3.length( step );
 			
@@ -124,7 +134,7 @@ export class CloudEditor extends EventEmitter {
 		let u_distance = vec3.length( u );
 		let u_walker;
 		let v_distance = vec3.length( v );
-		let v_walker = o;
+		let v_walker = [ o[0]+0.5, o[1]+0.5, o[2]+0.5 ];
 		let v_step, u_step;
 		let u_walk;
 		
@@ -168,13 +178,19 @@ if( vec3.length( u_step ) === 0 ) throw "WHAT'S UP!?";
 	 * @return p {number} neighbor pos.
 	 */
 	private getStepToNeighbor( pos, e ){
-		let stepLength = [ 
+		let stepLengthEntry = [ 
 			this.nextLatticeDistance( pos[0], e[0] ),
 			this.nextLatticeDistance( pos[1], e[1] ),
 			this.nextLatticeDistance( pos[2], e[2] )
-		].reduce( (prev, cur) => {
+		];
+		
+		stepLengthEntry = stepLengthEntry.filter( (i) => i !== null );
+		
+		let stepLength = stepLengthEntry.reduce( (prev, cur) => {
 			return cur === null ? prev : ( prev < cur ? prev : cur );
 		}, Number.POSITIVE_INFINITY );
+		
+console.log( stepLength.toString() + ' / ' + vec3.str( stepLengthEntry) );
 		
 		return [
 			e[0] * stepLength,
@@ -189,13 +205,10 @@ if( vec3.length( u_step ) === 0 ) throw "WHAT'S UP!?";
 	 */
 	private nextLatticeDistance( p, u ) {
 		if( u === 0 ) return null;
-		let i = Math.floor(p);
-		if( p === i ) return 1;
+		let i = u < 0 ? Math.floor(p) : Math.ceil(p);
+		if( p === i ) return Math.abs( 1 / u );
 		
-		
-		return u < 0
-			? Math.abs( p - i ) / Math.abs( u )
-			: ( 1 - Math.abs( p - i ) ) / Math.abs( u );
+		return Math.abs( ( p - i ) / u );
 	}
 	
 	public lineTo( ex, ey ){

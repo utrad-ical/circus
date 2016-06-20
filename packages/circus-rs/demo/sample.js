@@ -198,7 +198,8 @@ var Test = ( function(){
 	
 	Test.prototype._11aline = function( viewer ){
 		var e = this.editor; e.prepare( viewer.getState() );
-		e.line( [50, 50], [250,200] );
+		// e.line( [50, 50], [250,200] );
+		e.line( [50, 50], [250,50] );
 	};
 	
 	Test.prototype._12lines = function( viewer ){

@@ -80,7 +80,6 @@ export class CloudEditor extends EventEmitter {
 		p0_mm: [number,number,number],
 		p1_mm: [number,number,number]
 	){
-		
 		let vs = this.cloud.getVoxelDimension();
 		// let p0 = this.cloud.mmIndexAt( p0_mm[0], p0_mm[1], p0_mm[2] );
 		// let p1 = this.cloud.mmIndexAt( p1_mm[0], p1_mm[1], p1_mm[2] );
@@ -190,7 +189,7 @@ if( vec3.length( u_step ) === 0 ) throw "WHAT'S UP!?";
 			return cur === null ? prev : ( prev < cur ? prev : cur );
 		}, Number.POSITIVE_INFINITY );
 		
-console.log( stepLength.toString() + ' / ' + vec3.str( stepLengthEntry) );
+// console.log( stepLength.toString() + ' / ' + vec3.str( stepLengthEntry) );
 		
 		return [
 			e[0] * stepLength,
@@ -224,10 +223,196 @@ console.log( stepLength.toString() + ' / ' + vec3.str( stepLengthEntry) );
 	 *  重複に関する考慮と実装がされていない。効率化の余地あり。
 	 */
 	public fill( ex, ey ){
+		return this.fillWithScanOblique( ex, ey );
+		// return this.fillWithRawSection( ex, ey );
+	}
+	public fillWithScanOblique( ex, ey ){
 
+let verbose = true;
 		let startPos = [ Math.floor(ex), Math.floor(ey) ];
 
-console.log( 'fill ' + this.check( startPos ) );
+if( verbose ) console.log( 'fill ' + this.check( startPos ) );
+
+		let vs = this.cloud.getVoxelDimension();
+		let o = this.section.origin;
+		let size = this.resolution;
+		let u = this.section.xAxis.map( (i) => i / size[0] );
+		let v = this.section.yAxis.map( (i) => i / size[1] );
+		
+		let imageBuffer = new Uint8Array( size[0] * size[1] );
+		this.cloud.scanOblique(
+			[ o[0] / vs[0], o[1] / vs[1], o[2] / vs[2] ],
+			[ u[0] / vs[0], u[1] / vs[1], u[2] / vs[2] ],
+			[ v[0] / vs[0], v[1] / vs[1], v[2] / vs[2] ],
+			size as any,
+			imageBuffer,
+			1, 0.5
+		);
+
+		let value = 1;
+		let failSafe = 1024 * 256;
+		
+		/**
+		 * prepare point handle functions
+		 */
+		let copy = (p) => p.concat();
+		let left = (p) => { --p[0]; return p; };
+		let right = (p) => { ++p[0]; return p; };
+		let up = (p) => { --p[1]; return p; };
+		let down = (p) => { ++p[1]; return p; };
+		let isBroken = (p) => {
+			return p[0] < 0 || p[1] < 0 || size[0] <= p[0] || size[1] <= p[1];
+		};
+		let isEdge = (p) => {
+			return !! imageBuffer[ Math.floor(p[1]) * size[0] + Math.floor(p[0]) ]
+				|| !!imageBuffer[ Math.floor(p[1]) * size[0] + Math.ceil(p[0]) ]
+				|| !!imageBuffer[ Math.ceil(p[1]) * size[0] + Math.floor(p[0]) ]
+				|| !!imageBuffer[ Math.ceil(p[1]) * size[0] + Math.ceil(p[0]) ] ;
+		};
+
+		let fillFuncArgs = [];
+		let flush = ( mostLeft, mostRight ) => {
+			fillFuncArgs.push(
+				[ mostLeft[0]-1, mostLeft[1]-1, mostRight[0] - mostLeft[0] +1, mostRight[1] - mostLeft[1] +1 ]
+			);
+			
+			let y = mostLeft[1];
+			for( let x = mostLeft[0]; x<=mostRight[0]; x++ ){
+				imageBuffer[ y * size[1] + x ] = 1
+			}
+		};
+
+		/**
+		 * scan line 
+		 */
+		let scanLine = (pos) => {
+			
+			if( isEdge(pos) ) return true;
+			
+if( verbose ) console.log('***************************** ' );
+if( verbose ) console.log(' Scan line from ' + this.check(pos) );
+				
+			let p = copy(pos);
+			let brokenPath = false;
+			
+			// lineBufferを座標集合で利用するために一旦最も左に向い、その後右に走るため、動作は遅くなる。
+			MOVE_LEFT: while( true ){
+				if( --failSafe < 0 ) throw 'Fail safe on MOVE_LEFT';
+				
+				left(p);
+				switch( true ){
+					case isBroken(p):
+if( verbose ) console.log(' - move left, broken at ' + this.check(p) );
+						brokenPath = true;
+						break MOVE_LEFT;
+					case isEdge(p):
+if( verbose ) console.log(' - move left, edge at ' + this.check(p) );
+						right(p);
+						break MOVE_LEFT;
+					default: 
+				}
+			}
+			if( brokenPath ) return false;
+			let mostLeft = copy(p);
+
+let dots = 0;
+			CORRECT_POINT_MOVING_RIGHT: while( true ){
+				if( --failSafe < 0 ) throw 'Fail safe on CORRECT_POINT_MOVING_RIGHT';
+
+				right(p);
+				switch( true ){
+					case isBroken(p):
+if( verbose ) console.log(' - go right, broken at ' + this.check(p) );
+						brokenPath = true;
+						break CORRECT_POINT_MOVING_RIGHT;
+					case isEdge(p):
+if( verbose ) console.log(' - go right, edge at ' + this.check(p) );
+						left(p);
+						break CORRECT_POINT_MOVING_RIGHT;
+					default:
+						++dots;
+						// save(p);
+				}
+			}
+			if( brokenPath ) return false;
+			let mostRight = copy(p);
+if( verbose ) console.log(' - correct ' + dots.toString() + ' editor dots' );
+			
+			let upperOnEdge = true;
+			let underOnEdge = true;
+			
+			UPPER_UNDER_SCAN: while( dots > 0 ){
+				dots--;
+
+				let upper = up( copy(p) );
+				switch( true ){
+					case isBroken(upper):
+if( verbose ) console.log(' - upper scan broken ' + this.check(upper) );
+						brokenPath = true;
+						break UPPER_UNDER_SCAN;
+					case upperOnEdge && !isEdge(upper):
+if( verbose ) console.log(' - upper scan add buffer ' + this.check(upper) );
+						upperOnEdge = false;
+						buffer.push(upper);
+						break;
+					case !upperOnEdge && isEdge(upper):
+						upperOnEdge = true;
+						break;
+					default:
+						upperOnEdge = isEdge(upper);
+				}
+				
+				let under = down( copy(p) );
+				switch( true ){
+					case isBroken(under):
+if( verbose ) console.log(' - under scan broken ' + this.check(under) );
+						brokenPath = true;
+						break UPPER_UNDER_SCAN;
+					case underOnEdge && !isEdge(under):
+if( verbose ) console.log(' - under scan add buffer ' + this.check(under) );
+						underOnEdge = false;
+						buffer.push(under);
+						break;
+					case !underOnEdge && isEdge(under):
+						underOnEdge = true;
+						break;
+					default:
+				}
+				left(p);
+			}
+			if( brokenPath ) return false;
+
+if( verbose ) console.log(' - flush from ' + this.check( mostLeft ) );
+if( verbose ) console.log(' - flush to   ' + this.check( mostRight ) );
+			flush( mostLeft, mostRight );
+			return true;
+		};
+
+		let result = true;
+		let buffer = [ startPos ];
+		while( result && buffer.length > 0 ){
+			result = scanLine( buffer.shift() );
+if( verbose ) console.log( 'buffer: ' + buffer.length.toString() );
+			if( failSafe-- < 0 ) throw 'Fail safe on scanLine loop';
+		}
+		if( result ){
+			let fillFunc = ( p ) => this.cloud.writePixelAt( 1, Math.floor(p[0]), Math.floor(p[1]), Math.floor(p[2]) );
+			fillFuncArgs.forEach( 
+				a => this.eachVoxelsOnRect2( a[0], a[1], a[2], a[3], fillFunc )
+			);
+		}else{
+if( verbose ) console.log('**** BROKEN!!! ****');
+		}
+		
+		return result;
+	}
+
+
+	public fillWithRawSection( ex, ey ){
+
+		let startPos = [ Math.floor(ex), Math.floor(ey) ];
+let verbose = true;
+if( verbose ) console.log( 'fill ' + this.check( startPos ) );
 
 		let rawSection = this.cloud.mmGetSection(
 			this.section.origin,
@@ -277,8 +462,8 @@ console.log( 'fill ' + this.check( startPos ) );
 			
 			if( isEdge(pos) ) return true;
 			
-console.log('***************************** ' );
-console.log(' Scan line from ' + this.check(pos) );
+if( verbose ) console.log('***************************** ' );
+if( verbose ) console.log(' Scan line from ' + this.check(pos) );
 				
 			let p = copy(pos);
 			let brokenPath = false;
@@ -290,11 +475,11 @@ console.log(' Scan line from ' + this.check(pos) );
 				left(p);
 				switch( true ){
 					case isBroken(p):
-console.log(' - move left, broken at ' + this.check(p) );
+if( verbose ) console.log(' - move left, broken at ' + this.check(p) );
 						brokenPath = true;
 						break MOVE_LEFT;
 					case isEdge(p):
-console.log(' - move left, edge at ' + this.check(p) );
+if( verbose ) console.log(' - move left, edge at ' + this.check(p) );
 						right(p);
 						break MOVE_LEFT;
 					default: 
@@ -310,11 +495,11 @@ let dots = 0;
 				right(p);
 				switch( true ){
 					case isBroken(p):
-console.log(' - go right, broken at ' + this.check(p) );
+if( verbose ) console.log(' - go right, broken at ' + this.check(p) );
 						brokenPath = true;
 						break CORRECT_POINT_MOVING_RIGHT;
 					case isEdge(p):
-console.log(' - go right, edge at ' + this.check(p) );
+if( verbose ) console.log(' - go right, edge at ' + this.check(p) );
 						left(p);
 						break CORRECT_POINT_MOVING_RIGHT;
 					default:
@@ -324,7 +509,7 @@ console.log(' - go right, edge at ' + this.check(p) );
 			}
 			if( brokenPath ) return false;
 			let mostRight = copy(p);
-console.log(' - correct ' + dots.toString() + ' editor dots' );
+if( verbose ) console.log(' - correct ' + dots.toString() + ' editor dots' );
 			
 			let upperOnEdge = true;
 			let underOnEdge = true;
@@ -335,11 +520,11 @@ console.log(' - correct ' + dots.toString() + ' editor dots' );
 				let upper = up( copy(p) );
 				switch( true ){
 					case isBroken(upper):
-console.log(' - upper scan broken ' + this.check(upper) );
+if( verbose ) console.log(' - upper scan broken ' + this.check(upper) );
 						brokenPath = true;
 						break UPPER_UNDER_SCAN;
 					case upperOnEdge && !isEdge(upper):
-console.log(' - upper scan add buffer ' + this.check(upper) );
+if( verbose ) console.log(' - upper scan add buffer ' + this.check(upper) );
 						upperOnEdge = false;
 						buffer.push(upper);
 						break;
@@ -353,11 +538,11 @@ console.log(' - upper scan add buffer ' + this.check(upper) );
 				let under = down( copy(p) );
 				switch( true ){
 					case isBroken(under):
-console.log(' - under scan broken ' + this.check(under) );
+if( verbose ) console.log(' - under scan broken ' + this.check(under) );
 						brokenPath = true;
 						break UPPER_UNDER_SCAN;
 					case underOnEdge && !isEdge(under):
-console.log(' - under scan add buffer ' + this.check(under) );
+if( verbose ) console.log(' - under scan add buffer ' + this.check(under) );
 						underOnEdge = false;
 						buffer.push(under);
 						break;
@@ -370,8 +555,8 @@ console.log(' - under scan add buffer ' + this.check(under) );
 			}
 			if( brokenPath ) return false;
 
-console.log(' - flush from ' + this.check( mostLeft ) );
-console.log(' - flush to   ' + this.check( mostRight ) );
+if( verbose ) console.log(' - flush from ' + this.check( mostLeft ) );
+if( verbose ) console.log(' - flush to   ' + this.check( mostRight ) );
 			flush( mostLeft, mostRight );
 			return true;
 		};
@@ -380,7 +565,7 @@ console.log(' - flush to   ' + this.check( mostRight ) );
 		let buffer = [ startPos ];
 		while( result && buffer.length > 0 ){
 			result = scanLine( buffer.shift() );
-			console.log( 'buffer: ' + buffer.length.toString() );
+if( verbose ) console.log( 'buffer: ' + buffer.length.toString() );
 			if( failSafe-- < 0 ) throw 'Fail safe on scanLine loop';
 		}
 		if( result ){
@@ -389,7 +574,7 @@ console.log(' - flush to   ' + this.check( mostRight ) );
 				a => this.eachVoxelsOnRect2( a[0], a[1], a[2], a[3], fillFunc )
 			);
 		}else{
-console.log('**** BROKEN!!! ****');
+if( verbose ) console.log('**** BROKEN!!! ****');
 		}
 		
 		return result;

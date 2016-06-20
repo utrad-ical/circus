@@ -13,6 +13,10 @@ export class CloudsRenderer implements Painter {
 	}
 	
 	public draw( canvasDomElement, viewState ): Sprite {
+		// return this.drawByRawSection( canvasDomElement, viewState );
+		return this.drawByScanOblique( canvasDomElement, viewState );
+	}
+	public drawByRawSection( canvasDomElement, viewState ): Sprite {
 
 		let context = canvasDomElement.getContext('2d');
 		let section = viewState.section;
@@ -54,7 +58,7 @@ export class CloudsRenderer implements Painter {
 		return null;
 	}
 
-	public xdraw( canvasDomElement, viewState ): Sprite {
+	public drawByScanOblique( canvasDomElement, viewState ): Sprite {
 	
 		let size = [ canvasDomElement.getAttribute('width'), canvasDomElement.getAttribute('height') ].map( i => Math.round(i) );
 		let context = canvasDomElement.getContext('2d');
@@ -73,22 +77,16 @@ export class CloudsRenderer implements Painter {
 		
 			let color = cloud.color || [ 0xff, 0, 0, 0xff ];
 			let imageBuffer = new Uint8Array( size[0] * size[1] );
+			let vs = cloud.getVoxelDimension();
+			let o = viewState.section.origin;
 			
-			/*
-			cloud.scanCrossSection(
-				viewState.section.origin,
-				u,
-				v,
-				size as any,
-				imageBuffer
-			);
-			*/
 			cloud.scanOblique(
-				viewState.section.origin,
-				u,
-				v,
+				[ o[0] / vs[0], o[1] / vs[1], o[2] / vs[2] ],
+				[ u[0] / vs[0], u[1] / vs[1], u[2] / vs[2] ],
+				[ v[0] / vs[0], v[1] / vs[1], v[2] / vs[2] ],
 				size as any,
-				imageBuffer
+				imageBuffer,
+				1, 0.5
 			);
 
 			let srcidx = 0, pixel, dstidx;
@@ -100,7 +98,8 @@ export class CloudsRenderer implements Painter {
 						imageData.data[dstidx    ] = ( imageData.data[dstidx  ] * ( 0xff - color[3] ) + color[0] * color[3] ) / 0xff;
 						imageData.data[dstidx + 1] = ( imageData.data[dstidx+1] * ( 0xff - color[3] ) + color[1] * color[3] ) / 0xff;
 						imageData.data[dstidx + 2] = ( imageData.data[dstidx+2] * ( 0xff - color[3] ) + color[2] * color[3] ) / 0xff;
-						imageData.data[dstidx + 3] = color[3];
+						// imageData.data[dstidx + 3] = color[3];
+						imageData.data[dstidx + 3] = Math.round( pixel / 1.0 * 0xff );
 					}
 					srcidx++;
 				}
@@ -111,79 +110,6 @@ export class CloudsRenderer implements Painter {
 		context.putImageData( imageData, 0, 0 );
 		return null;
 	}
-	
-	// public draw( canvasDomElement, viewState ): Sprite {
-	
-		// if( this.clouds.length === 0 ) return null;
-		
-		// let drawClouds = this.clouds; // filtering clouds 
-		
-		// let dimension = this.clouds[0].getDimension();
-		
-		// let size = [ canvasDomElement.getAttribute('width'), canvasDomElement.getAttribute('height') ].map( i => Math.round(i) );
-		// let context = canvasDomElement.getContext('2d');
-
-		// let imageData = context.getImageData( 0, 0, size[0], size[1] );
-		
-		// let translateValue = 0;
-		
-		// let [rx, ry, rz] = dimension;
-		// let [x, y, z] = viewState.section.origin;
-		// let [eu_x, eu_y, eu_z] = viewState.section.xAxis.map( (i) => i / size[0] );
-		// let [ev_x, ev_y, ev_z] = viewState.section.yAxis.map( (i) => i / size[1] );
-		// let [outWidth, outHeight] = size;
-		
-		// let srcidx = 0, pixel, dstidx;
-
-		// let  pos_x, pos_y, pos_z;
-		
-		// let r,g,b,a;
-		// let layerCount;
-		
-		// for (let j = 0; j < outHeight; j++) {
-			// [pos_x, pos_y, pos_z] = [x, y, z];
-
-			// for (let i = 0; i < outWidth; i++) {
-				// if (pos_x >= 0.0 && pos_y >= 0.0 && pos_z >= 0.0 && pos_x <= rx - 1 && pos_y <= ry - 1 && pos_z <= rz - 1) {
-				
-					// dstidx = srcidx << 2; // meaning multiply 4
-					
-					// layerCount = 1;
-					// r = imageData.data[ dstidx ];
-					// g = imageData.data[ dstidx + 1 ];
-					// b = imageData.data[ dstidx + 2 ];
-					// a = imageData.data[ dstidx + 3 ];
-					
-					// drawClouds.forEach( (cloud) => {
-						// if( cloud.getPixelWithInterpolation(pos_x, pos_y, pos_z) ){
-							// r = ( r * ( 0xff - cloud.color[3] ) + cloud.color[0] * cloud.color[3] ) / 0xff;
-							// g = ( g * ( 0xff - cloud.color[3] ) + cloud.color[1] * cloud.color[3] ) / 0xff;
-							// b = ( b * ( 0xff - cloud.color[3] ) + cloud.color[2] * cloud.color[3] ) / 0xff;
-							// layerCount++;
-						// }
-					// } );
-					
-					// imageData.data[ dstidx ] = Math.round( r );
-					// imageData.data[ dstidx + 1 ] = Math.round( g );
-					// imageData.data[ dstidx + 2 ] = Math.round( b );
-					// imageData.data[ dstidx + 3 ] = 0xff;
-					
-				// }
-
-				// pos_x += eu_x;
-				// pos_y += eu_y;
-				// pos_z += eu_z;
-				
-				// srcidx++;
-			// }
-			// x += ev_x;
-			// y += ev_y;
-			// z += ev_z;
-		// }
-		
-		// context.putImageData( imageData, 0, 0 );
-		// return null;
-	// }
 	
 }
 

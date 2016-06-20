@@ -27,11 +27,6 @@ export class HandTool extends DraggableTool implements ViewerEventTarget {
 	
 	public dragendHandler( ev: ViewerEvent, dragInfo ) {
 		ev.viewer.primaryEventTarget = null;
-		if( ev.original.shiftKey ){
-			this.resetTranslateState(ev.viewer);
-			this.resetZoomState(ev.viewer);
-			ev.viewer.render();
-		}
 		ev.stopPropagation();
 	}
 	public mousewheelHandler(ev: ViewerEvent) {
@@ -60,17 +55,21 @@ export class HandTool extends DraggableTool implements ViewerEventTarget {
 	
 		let state = viewer.getState();
 		let vp = viewer.getResolution();
-		let [ eu, ev ] = this.getUnit( state.section, vp );
 		
+		let eu = [
+			state.section.xAxis[0] / vp[0],
+			state.section.xAxis[1] / vp[0],
+			state.section.xAxis[2] / vp[0] ];
+		let ev = [
+			state.section.yAxis[0] / vp[1],
+			state.section.yAxis[1] / vp[1],
+			state.section.yAxis[2] / vp[1] ];
+
 		let [ dx2, dy2 ] = p;
 		let [ dx, dy, dz ] = [
-			Math.round( eu[0] * -dx2 + ev[0] * -dy2 ),
-			Math.round( eu[1] * -dx2 + ev[1] * -dy2 ),
-			Math.round( eu[2] * -dx2 + ev[2] * -dy2 ) ];
-		
-		state.translate.x += dx;
-		state.translate.y += dy;
-		state.translate.z += dz;
+			eu[0] * -dx2 + ev[0] * -dy2,
+			eu[1] * -dx2 + ev[1] * -dy2,
+			eu[2] * -dx2 + ev[2] * -dy2 ];
 		
 		state.section.origin[0] += dx;
 		state.section.origin[1] += dy;
@@ -79,19 +78,6 @@ export class HandTool extends DraggableTool implements ViewerEventTarget {
 		viewer.setState( state );
 	}
 	
-	public resetTranslateState( viewer: Viewer ){
-		
-		if( typeof viewer.viewState.translate !== 'undefined' ){
-		
-			let state = viewer.getState();
-			state.section.origin[0] -= state.translate.x;
-			state.section.origin[1] -= state.translate.y;
-			state.section.origin[2] -= state.translate.z;
-			delete state.translate;
-			
-			viewer.setState( state );
-		}
-	}
 	
 	/**
 	 * pan / zoom ( with translate )

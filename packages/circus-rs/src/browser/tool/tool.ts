@@ -73,12 +73,4 @@ export abstract class Tool extends EventEmitter {
 		];
 	}
 	
-	protected getUnit( section, viewport ) {
-		let [ w, h ] = viewport;
-		let [ ux, uy, uz ] = section.xAxis.map( i => i / w );
-		let [ vx, vy, vz ] = section.yAxis.map( i => i / h );
-		
-		return [ [ ux, uy, uz ], [ vx, vy, vz ] ];
-	}
-	
 }

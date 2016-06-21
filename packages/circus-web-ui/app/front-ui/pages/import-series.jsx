@@ -48,6 +48,7 @@ class ImportSeriesView extends React.Component {
 			<FileUpload multiple={true} targetResource='import-series'
 				uploadFileMax={user.uploadFileMax}
 				uploadFileSizeMax={user.uploadFileSizeMax}
+				url='/test'
 				onUploaded={this.uploaded.bind(this)}
 			>
 				<p>Upload Domain:&ensp;

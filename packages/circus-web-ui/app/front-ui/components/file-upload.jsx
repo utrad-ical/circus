@@ -1,18 +1,19 @@
 import React from 'react';
-import { Button, ButtonToolbar, Glyphicon, Well } from './react-bootstrap';
+import { Button, ButtonToolbar, Glyphicon, Well, ProgressBar } from './react-bootstrap';
 import { FileDroppable } from './file-droppable';
+import { showMessage } from 'actions';
 import * as modal from 'components/modal';
-import axios from 'axios';
+import * as axios from 'axios';
 
 /**
- * Styled div where use can upload one ore more files.
+ * Styled div where a user can upload one ore more files.
  * Upload progress is displayed using a progress bar,
- * and the response can be accessed via Promise.
+ * and the response can be accessed via a Promise instance.
  */
 export class FileUpload extends React.Component {
 	constructor(props) {
 		super(props);
-		this.state = { filesSelected: [] };
+		this.state = { filesSelected: [], uploading: false, progress: 0 };
 	}
 
 	dropFile(files) {
@@ -22,6 +23,12 @@ export class FileUpload extends React.Component {
 	fileSelected() {
 		console.log(this.refs.fileInput.files);
 		this.setState({ filesSelected: this.refs.fileInput.files });
+	}
+
+	uploadProgress(event) {
+		const bytesSent = event.loaded;
+		const bytesTotal = event.total;
+		this.setState({ progress: Math.floor(bytesSent * 100 / bytesTotal) });
 	}
 
 	async upload() {
@@ -52,10 +59,29 @@ export class FileUpload extends React.Component {
 		}
 
 		// Allow the component user to access the FormData and modify it
-		if (typeof this.props.beforeUpload === 'function') {
-			this.props.beforeUpload(fd);
+		if (typeof this.props.onBeforeUpload === 'function') {
+			this.props.onBeforeUpload(fd);
 		}
-		console.log(fd);
+
+		const req = axios.post(this.props.url, {
+			data: fd,
+			progress: this.uploadProgress.bind(this)
+		});
+
+		try {
+			this.setState({ uploading: true });
+			const res = await req;
+			this.setState({ uploading: false });
+
+			if (typeof this.props.onUpload === 'function') {
+				this.props.onUpload(res);
+			}
+		} catch (err) {
+			this.setState({ uploading: false });
+			showMessage(`Upload failed (Error ${err.status})`, 'danger');
+			console.log(err);
+			throw err;
+		}
 
 		// busy(true);
 		// $.ajax({
@@ -118,6 +144,9 @@ export class FileUpload extends React.Component {
 						</ButtonToolbar>
 					}
 				</div>
+				{ this.state.uploading ?
+					<ProgressBar now={this.state.progress} label={this.state.progress + '%'} />
+				: null }
 				<SummaryTable files={this.state.filesSelected} />
 				<p>You can drag and drop files to this box.</p>
 			</Well>

@@ -25,6 +25,7 @@ Route::group(['before' => 'auth.api'], function() {
 	Route::get('api/login-info', 'LoginInformationController@show');
 	Route::get('api/login-info/full', 'LoginInformationController@showFull');
 	Route::get('api/logout', 'LoginApiController@logout');
+	Route::get('api/series/{id}', 'SeriesApiController@show');
 	Route::post('api/series', 'SeriesListController@search');
 	Route::post('api/case', 'CaseListController@search');
 
@@ -51,13 +52,12 @@ Route::group(['before' => 'auth'], function() {
 		});
 	};
 
-	// $staticView('home');
-
 	// SPA
 	$staticView('home', 'application');
 	$staticView('browse/series', 'application');
 	$staticView('browse/case', 'application');
 	$staticView('import-series', 'application');
+	$staticView('series/{uid}', 'application');
 	$staticView('admin/{dum}', 'application');
 	$staticView('admin', 'application');
 

@@ -48,6 +48,14 @@ Route::filter('auth', function()
 	}
 });
 
+Route::filter('auth.api', function() {
+	if (Auth::guest()) {
+		return Response::json(
+			['status' => 'NG', 'message' => 'unauthorized'],
+			401
+		);
+	}
+});
 
 Route::filter('auth.basic', function()
 {

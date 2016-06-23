@@ -19,6 +19,7 @@ export class LoginScreen extends React.Component {
 			if (err.status === 401) {
 				this.setState({ error: err.data.errors });
 			} else {
+				console.log(err);
 				this.setState({ error: 'Critical server error. Plese consult the administrator.'});
 			}
 		}

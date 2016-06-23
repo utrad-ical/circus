@@ -12,17 +12,35 @@
 */
 
 // Login / logout
-// Route::get('/', function() { return Redirect::to('login'); });
-Route::get('login', 'LoginController@getIndex');
-Route::post('login', 'LoginController@login');
-Route::get('logout', 'LoginController@logout');
 
 // Common download
 Route::get('download/{taskID}', 'TaskController@download');
 
-// SPA login
+// SPA login screen
 Route::get('/', function() { return View::make('application'); });
 Route::post('api/login', 'LoginApiController@login');
+
+// API Routes
+Route::group(['before' => 'auth.api'], function() {
+	Route::get('api/login-info', 'LoginInformationController@show');
+	Route::get('api/login-info/full', 'LoginInformationController@showFull');
+	Route::get('api/logout', 'LoginApiController@logout');
+	Route::post('api/series', 'SeriesListController@search');
+	Route::post('api/case', 'CaseListController@search');
+
+	Route::group(['before' => 'admin'], function() {
+		Route::resource('api/user', 'UserApiController');
+		Route::resource('api/group', 'GroupApiController');
+		Route::get('api/group-privileges', 'GroupApiController@listPrivileges');
+		Route::resource('api/storage', 'StorageApiController');
+		Route::get('api/server_param', 'ServerParamApiController@get');
+		Route::post('api/server_param', 'ServerParamApiController@post');
+		Route::put('api/storage/setactive/{storageID}', 'StorageApiController@setActive');
+		Route::post('api/server/start', 'ServerControllerController@start');
+		Route::post('api/server/stop', 'ServerControllerController@stop');
+		Route::post('api/server/status', 'ServerControllerController@status');
+	});
+});
 
 Route::group(['before' => 'auth'], function() {
 
@@ -33,7 +51,7 @@ Route::group(['before' => 'auth'], function() {
 		});
 	};
 
-	$staticView('home');
+	// $staticView('home');
 
 	// SPA
 	$staticView('home', 'application');
@@ -42,11 +60,6 @@ Route::group(['before' => 'auth'], function() {
 	$staticView('import-series', 'application');
 	$staticView('admin/{dum}', 'application');
 	$staticView('admin', 'application');
-	Route::get('api/login-info', 'LoginInformationController@show');
-	Route::get('api/login-info/full', 'LoginInformationController@showFull');
-	Route::get('api/logout', 'LoginApiController@logout');
-	Route::post('api/series', 'SeriesListController@search');
-	Route::post('api/case', 'CaseListController@search');
 
 	// Case
 	Route::get('case/search/{preset_id}', 'CaseSearchController@search')
@@ -96,16 +109,6 @@ Route::group(['before' => 'auth'], function() {
 		$staticView('administration', 'admin.index');
 		Route::get('administration/{adminkind}', 'AdministrationController@index')
 			->where('adminkind', '^(user|group|storage|project|server_param)$');
-		Route::resource('api/user', 'UserApiController');
-		Route::resource('api/group', 'GroupApiController');
-		Route::get('api/group-privileges', 'GroupApiController@listPrivileges');
-		Route::resource('api/storage', 'StorageApiController');
-		Route::get('api/server_param', 'ServerParamApiController@get');
-		Route::post('api/server_param', 'ServerParamApiController@post');
-		Route::put('api/storage/setactive/{storageID}', 'StorageApiController@setActive');
-		Route::post('api/server/start', 'ServerControllerController@start');
-		Route::post('api/server/stop', 'ServerControllerController@stop');
-		Route::post('api/server/status', 'ServerControllerController@status');
 		$staticView('administration/server', 'admin.server');
 	});
 	Route::resource('api/project', 'ProjectApiController');

@@ -73,7 +73,7 @@ const NavView = props => {
 		</nav>
 		<nav>
 			<MainMenu>
-				<li className="user-info">{props.loginUserName}</li>
+				<li className="user-info hidden-xs">{props.loginUserName}</li>
 				<Menu name="Logout" onClick={logout} />
 			</MainMenu>
 		</nav>

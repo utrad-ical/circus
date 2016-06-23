@@ -7,13 +7,13 @@
 	"repositories": [
 		{
 			"type": "vcs",
-			"url": "https://bitbucket.org/ical/circus_rs_dicom_server.git"
+			"url": "https://github.com/utrad-ical/circus-rs.git"
 		}
 	],
 	"require": {
 		"laravel/framework": "4.2.*",
 		"jenssegers/mongodb": "~2.0",
-		"utrad-ical/circus-rs": "dev-master#26e71b3da2a63f2f0cf4b2955db8dcadb5c92893"
+		"utrad-ical/circus-rs": "0.3.2"
 	},
 	"autoload": {
 		"classmap": [

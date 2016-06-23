@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "cffd38a5f6df9710e97f3e0b0a83ba3c",
-    "content-hash": "dd1c04fa50d5727a397a63f3dfa9c202",
+    "hash": "40a88b7dd560ebbe6ef13cacb83b0a6b",
+    "content-hash": "461ea7c440a26f7dd20237dbec120b62",
     "packages": [
         {
             "name": "classpreloader/classpreloader",
@@ -1713,16 +1713,16 @@
         },
         {
             "name": "utrad-ical/circus-rs",
-            "version": "dev-master",
+            "version": "v0.3.2",
             "source": {
                 "type": "git",
-                "url": "https://bitbucket.org/ical/circus_rs_dicom_server.git",
-                "reference": "26e71b3da2a63f2f0cf4b2955db8dcadb5c92893"
+                "url": "git@github.com:utrad-ical/circus-rs.git",
+                "reference": "b9556d53d7b2693a3e7fd904ea6162814d147202"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://bitbucket.org/ical/circus_rs_dicom_server/get/6c018e5e8c27d71f23ee46c4e08dff948ee2b60d.zip",
-                "reference": "26e71b3da2a63f2f0cf4b2955db8dcadb5c92893",
+                "url": "https://api.github.com/repos/utrad-ical/circus-rs/zipball/b9556d53d7b2693a3e7fd904ea6162814d147202",
+                "reference": "b9556d53d7b2693a3e7fd904ea6162814d147202",
                 "shasum": ""
             },
             "type": "library",
@@ -1743,7 +1743,11 @@
             "keywords": [
                 "DICOM"
             ],
-            "time": "2016-03-31 03:20:32"
+            "support": {
+                "source": "https://github.com/utrad-ical/circus-rs/tree/v0.3.2",
+                "issues": "https://github.com/utrad-ical/circus-rs/issues"
+            },
+            "time": "2016-06-23 13:23:51"
         }
     ],
     "packages-dev": [
@@ -2701,9 +2705,7 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "utrad-ical/circus-rs": 20
-    },
+    "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": [],

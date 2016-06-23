@@ -24,6 +24,8 @@ class ApiBaseController extends BaseController
 			Log::error($exception);
 			if ($exception instanceof InvalidModelException) {
 				return $this->errorResponse($exception->getErrors());
+			} else if ($exception instanceof ModelNotFoundException) {
+				return $this->errorResponse($exception->getMessage(), 404);
 			} else {
 				return $this->errorResponse($exception->getMessage(), 500);
 			}

@@ -11,6 +11,9 @@ module.exports = {
 	},
 	resolve: {
 		root: path.join(__dirname, 'app/front-ui'),
+		alias: {
+			'circus-rs': path.resolve(__dirname, 'vendor/utrad-ical/circus-rs/lib/browser')
+		},
 		extensions: ['', '.js', '.jsx']
 	},
 	module: {

@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "40a88b7dd560ebbe6ef13cacb83b0a6b",
-    "content-hash": "461ea7c440a26f7dd20237dbec120b62",
+    "hash": "295d3ed449a14eb951dd4103a94d3314",
+    "content-hash": "5a80b9a22a46806ff5e0b793c740ff4b",
     "packages": [
         {
             "name": "classpreloader/classpreloader",
@@ -1713,16 +1713,16 @@
         },
         {
             "name": "utrad-ical/circus-rs",
-            "version": "v0.3.2",
+            "version": "v0.3.3",
             "source": {
                 "type": "git",
                 "url": "git@github.com:utrad-ical/circus-rs.git",
-                "reference": "b9556d53d7b2693a3e7fd904ea6162814d147202"
+                "reference": "4b2c2f701d62b9dbeca6fe8a1feebe81673326ea"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/utrad-ical/circus-rs/zipball/b9556d53d7b2693a3e7fd904ea6162814d147202",
-                "reference": "b9556d53d7b2693a3e7fd904ea6162814d147202",
+                "url": "https://api.github.com/repos/utrad-ical/circus-rs/zipball/4b2c2f701d62b9dbeca6fe8a1feebe81673326ea",
+                "reference": "4b2c2f701d62b9dbeca6fe8a1feebe81673326ea",
                 "shasum": ""
             },
             "type": "library",
@@ -1744,10 +1744,10 @@
                 "DICOM"
             ],
             "support": {
-                "source": "https://github.com/utrad-ical/circus-rs/tree/v0.3.2",
+                "source": "https://github.com/utrad-ical/circus-rs/tree/dev",
                 "issues": "https://github.com/utrad-ical/circus-rs/issues"
             },
-            "time": "2016-06-23 13:23:51"
+            "time": "2016-06-23 15:25:16"
         }
     ],
     "packages-dev": [

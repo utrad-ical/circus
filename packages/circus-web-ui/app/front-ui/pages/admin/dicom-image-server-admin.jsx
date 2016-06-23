@@ -1,5 +1,6 @@
 import React from 'react';
 import { Panel, Button, ButtonToolbar, Glyphicon } from 'components/react-bootstrap';
+import { Loading } from 'components/loading';
 import { api } from 'utils/api';
 import axios from 'axios';
 import { store } from 'store';
@@ -9,8 +10,8 @@ export class DicomImageServerAdmin extends React.Component {
 		super(props);
 		this.state = {
 			isFetching: false,
-			processStatus: null,
-			rsStatus: null
+			processStatus: <Loading />,
+			rsStatus: <Loading />
 		};
 	}
 
@@ -38,9 +39,14 @@ export class DicomImageServerAdmin extends React.Component {
 	}
 
 	render() {
+		const header = <div>
+			Control
+			{ this.state.isFetching ? <span>&ensp;<Loading /></span> : null }
+		</div>;
+
 		return <div>
 			<h1><Glyphicon glyph="hdd" />&ensp;DICOM Image Server</h1>
-			<Panel header="Control">
+			<Panel header={header}>
 				<ButtonToolbar>
 					<Button bsStyle="success" bsSize="large"
 						disabled={this.state.isFetching}

@@ -22,7 +22,7 @@ export class DicomImageServerAdmin extends React.Component {
 		const data = await api('server/' + command, { method: 'post' });
 		this.setState({ processStatus: data[0] });
 		try {
-			const status = await axios.get(dicomImageServer + 'status');
+			const status = await axios.get(dicomImageServer + '/status');
 			this.setState({ rsStatus: JSON.stringify(status.data, null, '    ') });
 		} catch(err) {
 			let message = 'The server did not respond. It may not be running.';

@@ -14,6 +14,9 @@ class SeriesApiController extends ApiBaseController {
 			);
 		}
 
+		// // $series->authNode();
+		// Series::authNode($series->seriesUID);
+
 		$series = $series->toArray();
 		$series['seriesDate'] = Util::mongoToISO($series['seriesDate']);
 

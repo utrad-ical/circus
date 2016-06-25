@@ -55,7 +55,7 @@ export class SeriesDetail extends React.Component {
 			</h1>
 			<Row>
 				<Col lg={6}>
-					<ImageViewer />
+					<ImageViewer seriesUID={series.seriesUID} />
 				</Col>
 				<Col lg={6}>
 					{ typeof series.patientInfo === 'object' ?

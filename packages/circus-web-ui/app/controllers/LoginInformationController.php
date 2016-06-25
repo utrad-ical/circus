@@ -43,7 +43,7 @@ class LoginInformationController extends ApiBaseController {
 			'groups' => $groups,
 			'uploadFileSizeMax' => ini_get('upload_max_filesize'),
 			'uploadFileMax' => intval(ini_get('max_file_uploads')),
-			'dicomImageServer' => 'http://' . $_SERVER['SERVER_NAME'] . ':3000/',
+			'dicomImageServer' => 'http://' . $_SERVER['SERVER_NAME'] . ':3000',
 			'accessibleDomains' => $user->listAccessibleDomains(),
 			'accessibleProjects' => $projects,
 			'defaultDomain' => ServerParam::getVal('defaultDomain')

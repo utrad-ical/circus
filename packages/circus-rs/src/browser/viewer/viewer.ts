@@ -1,5 +1,6 @@
 'use strict';
 
+var extend = require('extend');
 import { EventEmitter } from 'events';
 
 import { PromiseDefer }					from '../../browser/util/promise-defer';
@@ -8,11 +9,6 @@ import { Sprite }						from '../../browser/viewer/sprite';
 import { ImageSource }					from '../../browser/image-source/image-source';
 import { ViewerEvent }					from '../../browser/viewer/viewer-event';
 import { ViewerEventTarget }			from '../../browser/interface/viewer-event-target';
-
-function extend(...arg:any[]) {
-	arg.unshift(true);
-	return jQuery.extend.apply( jQuery, arg );
-};
 
 export class Viewer extends EventEmitter {
 
@@ -192,13 +188,13 @@ export class Viewer extends EventEmitter {
 			// Math.floor( state.section.yAxis[2] ),
 		// ];
 		
-		let prevState = extend( {}, this.viewState );
-		this.viewState = extend( {}, state );
+		let prevState = extend( true, {}, this.viewState );
+		this.viewState = extend( true, {}, state );
 		this.emit( 'statechange', prevState, state );
 		return prevState;
 	}
 	public getState(){
-		return extend( {}, this.viewState );
+		return extend( true, {}, this.viewState );
 	}
 	
 	/**

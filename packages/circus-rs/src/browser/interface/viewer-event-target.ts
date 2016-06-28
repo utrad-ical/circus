@@ -1,6 +1,6 @@
 'use strict'
 
-import { ViewerEvent }	from '../../browser/viewer/viewer-event';
+import { ViewerEvent } from '../../browser/viewer/viewer-event';
 
 export interface ViewerEventTarget {
 	mouseupHandler: (viewerEvent: ViewerEvent) => any;

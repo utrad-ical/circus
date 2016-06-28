@@ -1,7 +1,6 @@
 {
   "name": "utrad-ical/circus-rs",
   "description": "DICOM viewer",
-  "version": "0.0.2",
   "keywords": ["DICOM"],
   "authors": [
     {

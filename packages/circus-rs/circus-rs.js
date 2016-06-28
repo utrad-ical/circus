@@ -3,8 +3,8 @@
  */
 
 // Load configuration
-var config = require('./build/server/Config');
+var config = require('./lib/server/Config');
 
 // Execute server.
-var Server = require('./build/server/Server');
+var Server = require('./lib/server/Server');
 (new Server(config)).start();

@@ -7,6 +7,10 @@ import { PixelFormat, pixelFormatInfo } from '../../common/PixelFormat';
 import DicomVolume  from '../../common/DicomVolume';
 import { DicomMetadata } from '../../browser/interface/dicom-metadata';
 
+/**
+ * Simple HTTP wrapper that connects to the CIRCUS RS server and returns the response
+ * in the appropriate format.
+ */
 export class DicomLoader {
 
 	private server: string;
@@ -15,25 +19,24 @@ export class DicomLoader {
 		this.server = server;
 	}
 
-	public metadata(series: string
-	): Promise<DicomMetadata> {
+	public metadata(series: string): Promise<DicomMetadata> {
 		let url = `${this.server}/metadata`;
 
 		return axios.get(url, {
 			params: {
 				series: series
 			}
-		}).then((res) => {
-			return res.data;
+		}).then(res => {
+			return <DicomMetadata>res.data;
 		});
 	}
 
 	public scan(series: string,
 		params: {
-			origin: [number,number,number];
-			u: [number,number,number];
-			v: [number,number,number];
-			size: [number,number];
+			origin: [number, number, number];
+			u: [number, number, number];
+			v: [number, number, number];
+			size: [number, number];
 			ww?: number;
 			wl?: number;
 		} = null

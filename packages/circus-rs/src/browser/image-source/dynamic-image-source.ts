@@ -2,7 +2,7 @@
 
 import { Promise } from 'es6-promise';
 
-import { DicomLoaderImageSource }        from '../../browser/image-source/dicom-loader-image-source';
+import { DicomLoaderImageSource } from '../../browser/image-source/dicom-loader-image-source';
 
 export class DynamicImageSource extends DicomLoaderImageSource {
 

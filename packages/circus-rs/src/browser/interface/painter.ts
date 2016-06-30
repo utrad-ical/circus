@@ -1,4 +1,4 @@
-'use strict'
+'use strict';
 
 import { Sprite } from '../../browser/viewer/sprite';
 

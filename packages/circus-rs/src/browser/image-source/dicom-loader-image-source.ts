@@ -1,12 +1,16 @@
 'use strict';
 
 import { Promise } from 'es6-promise';
-import axios = require('axios');
 
-import { DicomMetadata }                from '../../browser/interface/dicom-metadata';
-import { ImageSource }                    from '../../browser/image-source/image-source';
-import { DicomLoader }                    from '../../browser/image-source/dicom-loader';
+import { DicomMetadata } from '../../browser/interface/dicom-metadata';
+import { ImageSource } from './image-source';
+import { DicomLoader } from './dicom-loader';
 
+/**
+ * DicomLoaderImageSource is a base class of DynamicImageSource and RawVolumeImageSource.
+ * It fetches the scanned MPR data either from the RS server via HTTP or from the loaded volume,
+ * and then draws the scanned MPR image onto the specified canvas.
+ */
 export abstract class DicomLoaderImageSource extends ImageSource {
 
 	protected loader: DicomLoader;
@@ -18,9 +22,6 @@ export abstract class DicomLoaderImageSource extends ImageSource {
 
 	protected abstract prepare(): Promise<any>;
 
-	// 		this.scan = ( series, param ) => this.loader.scan( this.series, param );
-
-
 	constructor({ server = 'http://localhost:3000', series = null } = {}) {
 		super();
 
@@ -28,13 +29,13 @@ export abstract class DicomLoaderImageSource extends ImageSource {
 		this.series = series;
 
 		if (series === null) {
-			this.readyPromise = Promise.reject('parameter series is required');
+			this.readyPromise = Promise.reject('Parameter series is required');
 		} else {
 			this.readyPromise = this.prepare();
 		}
 	}
 
-	public ready() {
+	public ready(): Promise<any> {
 		return this.readyPromise;
 	}
 

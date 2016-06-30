@@ -10,6 +10,11 @@ import { ImageSource } from '../../browser/image-source/image-source';
 import { ViewerEvent } from '../../browser/viewer/viewer-event';
 import { ViewerEventTarget } from '../../browser/interface/viewer-event-target';
 
+/**
+ * Viewer is the main component of CIRCUS RS, and wraps a HTML canvas element
+ * and displays a specified image along with various annotations.
+ * Displayed object is determined by `viewState` and `imageSource`.
+ */
 export class Viewer extends EventEmitter {
 
 	public canvasDomElement: HTMLCanvasElement;
@@ -32,15 +37,13 @@ export class Viewer extends EventEmitter {
 		this.painters = [];
 		this.sprites = [];
 
-		let eventDrive = (originalEvent) => {
-			this.canvasEventHandler(originalEvent);
-		};
+		const handler = this.canvasEventHandler.bind(this);
 
-		let wheelEvent = 'onwheel' in document ? 'wheel' : 'onmousewheel' in document ? 'mousewheel' : 'DOMMouseScroll';
-		canvas.addEventListener('mousedown', eventDrive);
-		canvas.addEventListener('mouseup', eventDrive);
-		canvas.addEventListener('mousemove', eventDrive);
-		canvas.addEventListener(wheelEvent, eventDrive);
+		const wheelEvent = 'onwheel' in document ? 'wheel' : 'onmousewheel' in document ? 'mousewheel' : 'DOMMouseScroll';
+		canvas.addEventListener('mousedown', handler);
+		canvas.addEventListener('mouseup', handler);
+		canvas.addEventListener('mousemove', handler);
+		canvas.addEventListener(wheelEvent, handler);
 
 		this.viewState = {
 			resolution: this.getResolution(),
@@ -74,11 +77,10 @@ export class Viewer extends EventEmitter {
 	}
 
 	public removePainter(p: Painter) {
-		let currentCount = this.painters.length;
-		this.painters = this.painters.filter((i) => ( i !== p ));
+		const currentCount = this.painters.length;
+		this.painters = this.painters.filter(i => i !== p);
 		return this.painters.length !== currentCount;
 	}
-
 
 	private canvasEventHandler(originalEvent) {
 		if (typeof originalEvent === 'object' && originalEvent.preventDefault) {
@@ -173,23 +175,6 @@ export class Viewer extends EventEmitter {
 	 * State handling methods
 	 */
 	public setState(state) {
-
-		// state.section.origin = [
-		// Math.floor( state.section.origin[0] ),
-		// Math.floor( state.section.origin[1] ),
-		// Math.floor( state.section.origin[2] ),
-		// ];
-		// state.section.xAxis = [
-		// Math.floor( state.section.xAxis[0] ),
-		// Math.floor( state.section.xAxis[1] ),
-		// Math.floor( state.section.xAxis[2] ),
-		// ];
-		// state.section.yAxis = [
-		// Math.floor( state.section.yAxis[0] ),
-		// Math.floor( state.section.yAxis[1] ),
-		// Math.floor( state.section.yAxis[2] ),
-		// ];
-
 		let prevState = extend(true, {}, this.viewState);
 		this.viewState = extend(true, {}, state);
 		this.emit('statechange', prevState, state);
@@ -215,15 +200,14 @@ export class Viewer extends EventEmitter {
 	}
 
 	public dumpState() {
-
-		let getIndent = (indent) => {
+		const getIndent = (indent) => {
 			let space = '';
 			while (indent-- > 0) {
 				space += ' ';
 			}
 			return space;
 		};
-		let recursive = (o, indent) => {
+		const recursive = (o, indent) => {
 			if (typeof o === 'object') {
 				let dump = "\n";
 				for (let i in o) {
@@ -238,4 +222,3 @@ export class Viewer extends EventEmitter {
 	}
 
 }
-

@@ -37,8 +37,8 @@ export class RawVolumeImageSource extends DicomLoaderImageSource {
 					this.volume = volume;
 					resolve();
 				}).catch((e) => {
-				reject(e);
-			});
+					reject(e);
+				});
 		});
 	}
 

@@ -30,7 +30,7 @@ const ProfileView = ({ user }) => {
 	const lastLoginTime = moment(user.lastLoginTime).format('YYYY-MM-DD HH:mm');
 	return <Row>
 		<Col md={7}>
-			<Panel bsStyle="info" header={<span><Glyphicon glyph="education"/> Your Projects</span>}>
+			<Panel bsStyle="primary" header={<span><Glyphicon glyph="education"/> Your Projects</span>}>
 				<ListGroup fill>
 					{user.accessibleProjects.map(p => (
 						<ListGroupItem key={p.project.projectID}>
@@ -42,7 +42,7 @@ const ProfileView = ({ user }) => {
 			</Panel>
 		</Col>
 		<Col md={5}>
-			<Panel bsStyle="info" className="home-profile"
+			<Panel bsStyle="primary" className="home-profile"
 				header={<span><Glyphicon glyph="user"/> Profile</span>}>
 				<ListGroup fill>
 					<ListGroupItem>

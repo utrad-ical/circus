@@ -3,7 +3,6 @@
 var extend = require('extend');
 import { EventEmitter } from 'events';
 
-import { PromiseDefer } from '../../browser/util/promise-defer';
 import { Painter } from '../../browser/interface/painter';
 import { Sprite } from '../../browser/viewer/sprite';
 import { ImageSource } from '../../browser/image-source/image-source';
@@ -27,8 +26,18 @@ export class Viewer extends EventEmitter {
 	public primaryEventTarget;
 	public backgroundEventTarget;
 
-	private queue: PromiseDefer[];
-	private rendering: boolean = false;
+	/**
+	 * When render() is called while there is already another rendering procedure in progress,
+	 * We will keep that render Promise with a "suspended" status.
+	 * After the current rendering is finished, the last suspended one will be used.
+	 * This can prevent the imageSource's draw() method from being called too frequently.
+	 */
+	private nextRender: Promise<any> = null;
+
+	/**
+	 * Holds the current rendering promise which is actually processing ImageSource#draw().
+	 */
+	private currentRender: Promise<any> = null;
 
 	constructor(canvas: HTMLCanvasElement) {
 		super();
@@ -50,7 +59,6 @@ export class Viewer extends EventEmitter {
 			viewport: this.getViewport()
 		};
 
-		this.queue = [];
 	}
 
 	public getViewport() {
@@ -125,49 +133,35 @@ export class Viewer extends EventEmitter {
 		if (sprite) this.sprites.push(sprite);
 	}
 
-	private dequeue() {
-		if (this.queue.length > 0) {
-			this.rendering = true;
-			let lastOne = this.queue.pop();
-			while (this.queue.length > 0) {
-				this.queue.shift()
-					.cancel('Rendering skipped', true);
-			}
-			return lastOne.execute().then(() => {
-				this.rendering = false;
-				return this.dequeue();
-			});
-		} else {
-			return Promise.resolve();
-		}
-	}
-
-	private enqueue(defer) {
-		this.queue.push(defer);
-	}
-
 	public render(): Promise<any> {
+		const state = this.viewState;
+		const canvas = this.canvasDomElement;
 
-		let state = this.viewState;
-		let canvas = this.canvasDomElement;
-
-		let defer = new PromiseDefer(() => {
-			return (
-				this.imageSource && this.imageSource.draw
-					? this.imageSource.draw(canvas, state)
-					: Promise.resolve()
-			).then(() => {
-				this.painters.forEach((painter) => {
-					let sprite = painter.draw(canvas, state);
+		// Wait only if there is another render() in progress
+		const waiter = this.currentRender || Promise.resolve();
+		const p = waiter.then(() => {
+			// Now there is no rendering in progress.
+			if (p !== this.nextRender) {
+				// Another render() method was called after this, so I am expired...
+				return null;
+			}
+			// I am the most recent render() call.
+			// It's safe to call draw() now.
+			this.currentRender = p;
+			this.nextRender = null;
+			return this.imageSource.draw(canvas, state).then(res => {
+				this.painters.forEach(painter => {
+					const sprite = painter.draw(canvas, state);
 					if (sprite !== null) this.sprites.push(sprite);
 				});
+				this.currentRender = null;
+				return res;
 			});
 		});
-
-		this.enqueue(defer);
-		if (!this.rendering) this.dequeue();
-
-		return defer;
+		// Remember this render() call as the most recent one,
+		// possibly overwriting and expiring the previous nextRender
+		this.nextRender = p;
+		return p;
 	}
 
 

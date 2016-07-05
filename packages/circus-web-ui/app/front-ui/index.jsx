@@ -32,7 +32,7 @@ import { Preference } from 'pages/preference';
 
 import { store } from 'store';
 import { Provider } from 'react-redux';
-import { refreshUserInfo } from 'actions';
+import { refreshUserInfo, dismissMessageOnPageChange } from 'actions';
 
 require('style!css!./styles/main.less');
 require('bootstrap/fonts/glyphicons-halflings-regular.woff');
@@ -42,7 +42,7 @@ require('bootstrap/fonts/glyphicons-halflings-regular.ttf');
 ReactDOM.render(
 	<Provider store={store}>
 		<Router history={browserHistory}>
-			<Route path='/' component={LoginScreen} onLeave={() => refreshUserInfo(true)} />
+			<Route path='/' component={LoginScreen} onLeave={leaveLoginScreen} />
 			<Route path='/' component={App} onChange={pageMove}>
 				<Route path="home" component={Home} />
 				<Route path='browse/series' component={SeriesSearch} />
@@ -71,6 +71,14 @@ ReactDOM.render(
 // First-time login check
 refreshUserInfo(true);
 
+function leaveLoginScreen() {
+	refreshUserInfo(true);
+	dismissMessageOnPageChange();
+}
+
 function pageMove() {
+	// Hide message boxes which should not persist upon page changes
+	dismissMessageOnPageChange();
+	// Load user information again to check login status
 	refreshUserInfo(false);
 }

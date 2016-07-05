@@ -39,6 +39,8 @@ function messages(state = [], action) {
 				style: action.style ? action.style : 'info'
 			});
 			return boxes;
+		case 'MESSAGE_DISMISS_PAGE_CHANGE':
+			return state.filter(box => box.dismissOnPageChange === true);
 		case 'MESSAGE_DISMISS':
 			return state.filter(box => box.id !== action.id);
 	}

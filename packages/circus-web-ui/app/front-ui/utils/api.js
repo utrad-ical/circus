@@ -51,5 +51,5 @@ function showErrorMessage(err) {
 	} else {
 		message = 'The server did not respond.';
 	}
-	showMessage(message, 'danger');
+	showMessage(message, 'danger', { dismissOnPageChange: true });
 }

@@ -4,6 +4,9 @@ import { Promise } from 'es6-promise';
 
 import { DicomLoaderImageSource } from '../../browser/image-source/dicom-loader-image-source';
 
+/**
+ * DynamicImageSource fetches the MPR image from RS server.
+ */
 export class DynamicImageSource extends DicomLoaderImageSource {
 
 	protected prepare() {

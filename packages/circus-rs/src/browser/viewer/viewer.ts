@@ -1,8 +1,8 @@
 'use strict';
 
 var extend = require('extend');
-import { EventEmitter } from 'events';
 
+import { EventEmitter } from 'events';
 import { Painter } from '../../browser/interface/painter';
 import { Sprite } from '../../browser/viewer/sprite';
 import { ImageSource } from '../../browser/image-source/image-source';
@@ -133,6 +133,14 @@ export class Viewer extends EventEmitter {
 		if (sprite) this.sprites.push(sprite);
 	}
 
+	/**
+	 * Requests the rendering of the viewer using the current view state.
+	 * This can be called very frequently (eg, 60 times/sec),
+	 * but it may not trigger the actual rendering procedure because
+	 * you cannot have more than one rendering paths running simultaneously.
+	 * The returned promise will be rejected when this request was skipped.
+	 * @returns {Promise<*>} A promise object that resolves when an actual render happened and succeeded.
+	 */
 	public render(): Promise<any> {
 		const state = this.viewState;
 		const canvas = this.canvasDomElement;

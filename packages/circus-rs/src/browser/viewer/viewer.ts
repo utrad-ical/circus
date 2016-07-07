@@ -142,8 +142,8 @@ export class Viewer extends EventEmitter {
 		const p = waiter.then(() => {
 			// Now there is no rendering in progress.
 			if (p !== this.nextRender) {
-				// Another render() method was called after this, so I am expired...
-				return null;
+				// I am expired because another render() method was called after this
+				return Promise.reject('Frame skipped');
 			}
 			// I am the most recent render() call.
 			// It's safe to call draw() now.

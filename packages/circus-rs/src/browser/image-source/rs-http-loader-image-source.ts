@@ -17,31 +17,43 @@ export abstract class RsHttpLoaderImageSource extends ImageSource {
 	protected loader: RsHttpLoader;
 	protected series: string;
 	protected meta: DicomMetadata;
+	protected prepareLoader: Promise<any>;
 
-	protected readyPromise: Promise<any>;
-	protected scan: (string, any) => Promise<Uint8Array>;
-
-	protected abstract prepare(): Promise<any>;
+	protected abstract scan(param): Promise<Uint8Array>;
 
 	constructor({ server = 'http://localhost:3000', series = null } = {}) {
 		super();
-
 		this.loader = new RsHttpLoader(server);
 		this.series = series;
-
-		if (series === null) {
-			this.readyPromise = Promise.reject('Parameter series is required');
-		} else {
-			this.readyPromise = this.prepare();
-		}
+		this.prepareLoader = this.prepare();
 	}
 
 	public ready(): Promise<any> {
-		return this.readyPromise;
+		return this.prepareLoader;
+	}
+
+	/**
+	 * Does the actual preparation.
+	 */
+	public prepare(): Promise<any> {
+		if (!this.series) return Promise.reject('Series is required');
+		return this.loader.metadata(this.series)
+			.then(meta => {
+				this.meta = meta;
+				return this.onMetaLoaded();
+			});
+	}
+
+	/**
+	 * Subclasses can do additional initialization/loading by this.
+	 * this.meta is guaranteed to be non-null inside this.
+	 */
+	protected onMetaLoaded(): Promise<any> {
+		return Promise.resolve();
 	}
 
 	public state() {
-		let state = {
+		const state = {
 			estimateWindow: {
 				level: this.meta.estimatedWindow.level,
 				width: this.meta.estimatedWindow.width
@@ -56,56 +68,50 @@ export abstract class RsHttpLoaderImageSource extends ImageSource {
 		return state;
 	}
 
-	public draw(canvasDomElement, viewState): Promise<any> {
+	public draw(canvasDomElement, viewState): Promise<void> {
 
-		let context = canvasDomElement.getContext('2d');
-		let [ vpWidth, vpHeight ] = viewState.resolution;
-		let section = viewState.section;
+		const context = canvasDomElement.getContext('2d');
+		const [vpWidth, vpHeight] = viewState.resolution;
+		const section = viewState.section;
+		const window = viewState.window || this.meta.estimatedWindow;
 
-		return this.ready().then(() => {
+		const scanParam = {
+			origin: [
+				Math.floor(section.origin[0] / viewState.voxelSize[0]),
+				Math.floor(section.origin[1] / viewState.voxelSize[1]),
+				Math.floor(section.origin[2] / viewState.voxelSize[2])
+			] as [ number, number, number ],
+			u: [
+				section.xAxis[0] / viewState.voxelSize[0] / vpWidth,
+				section.xAxis[1] / viewState.voxelSize[1] / vpWidth,
+				section.xAxis[2] / viewState.voxelSize[2] / vpWidth
+			] as [ number, number, number ],
+			v: [
+				section.yAxis[0] / viewState.voxelSize[0] / vpHeight,
+				section.yAxis[1] / viewState.voxelSize[1] / vpHeight,
+				section.yAxis[2] / viewState.voxelSize[2] / vpHeight
+			] as [ number, number, number ],
+			size: [vpWidth, vpHeight] as [ number, number ],
+			ww: Number(window.width),
+			wl: Number(window.level)
+		};
 
-			let win = viewState.window || this.meta.estimatedWindow;
-
-			let scanParam = {
-				origin: [
-					Math.floor(section.origin[0] / viewState.voxelSize[0]),
-					Math.floor(section.origin[1] / viewState.voxelSize[1]),
-					Math.floor(section.origin[2] / viewState.voxelSize[2])
-				] as [ number, number, number ],
-				u: [
-					section.xAxis[0] / viewState.voxelSize[0] / vpWidth,
-					section.xAxis[1] / viewState.voxelSize[1] / vpWidth,
-					section.xAxis[2] / viewState.voxelSize[2] / vpWidth
-				] as [ number, number, number ],
-				v: [
-					section.yAxis[0] / viewState.voxelSize[0] / vpHeight,
-					section.yAxis[1] / viewState.voxelSize[1] / vpHeight,
-					section.yAxis[2] / viewState.voxelSize[2] / vpHeight
-				] as [ number, number, number ],
-				size: [vpWidth, vpHeight] as [ number, number ],
-				ww: Number(win.width),
-				wl: Number(win.level)
-			};
-
-			return this.scan(this.series, scanParam);
-
-		}).then((buffer: Uint8Array) => {
-
-			let imageData = context.createImageData(vpWidth, vpHeight);
-
-			let srcidx = 0, pixel, dstidx;
-			for (var y = 0; y < vpHeight; y++) {
-				for (var x = 0; x < vpWidth; x++) {
-					pixel = buffer[srcidx];
-					dstidx = srcidx << 2; // meaning multiply 4
-					imageData.data[dstidx] = pixel;
-					imageData.data[dstidx + 1] = pixel;
-					imageData.data[dstidx + 2] = pixel;
-					imageData.data[dstidx + 3] = 0xff;
-					srcidx++;
+		return this.scan(scanParam)
+			.then((buffer: Uint8Array) => {
+				let imageData = context.createImageData(vpWidth, vpHeight);
+				let srcidx = 0, pixel, dstidx;
+				for (var y = 0; y < vpHeight; y++) {
+					for (var x = 0; x < vpWidth; x++) {
+						pixel = buffer[srcidx];
+						dstidx = srcidx << 2; // meaning multiply 4
+						imageData.data[dstidx] = pixel;
+						imageData.data[dstidx + 1] = pixel;
+						imageData.data[dstidx + 2] = pixel;
+						imageData.data[dstidx + 3] = 0xff;
+						srcidx++;
+					}
 				}
-			}
-			context.putImageData(imageData, 0, 0);
-		});
+				context.putImageData(imageData, 0, 0);
+			});
 	}
 }

@@ -1,45 +1,36 @@
 'use strict';
 
-import { Promise } from 'es6-promise';
-import DicomVolume from '../../common/DicomVolume';
-import { RsHttpLoaderImageSource } from '../../browser/image-source/rs-http-loader-image-source';
+import { DicomMetadata } from '../../browser/interface/dicom-metadata';
+import { ImageSource } from './image-source';
+import { DynamicImageSource } from './dynamic-image-source';
+import { RawVolumeImageSource } from './raw-volume-image-source';
 
-export class HybridImageSource extends RsHttpLoaderImageSource {
+export class HybridImageSource extends ImageSource {
 
-	private volume: DicomVolume;
+	private dynSource: DynamicImageSource = null;
+	private volSource: RawVolumeImageSource = null;
+	private volumeReady: boolean = false;
 
-	protected prepare() {
-		this.scan = (series, param) => this.loader.scan(this.series, param);
-
-		return new Promise((resolve, reject) => {
-			this.loader.metadata(this.series)
-				.then((meta) => {
-					this.meta = meta;
-					resolve();
-
-					return this.loader.volume(this.series, this.meta).then((volume: DicomVolume) => {
-						this.volume = volume;
-						this.scan = (series, param) => {
-
-							let imageBuffer = new Uint8Array(param.size[0] * param.size[1]);
-							this.volume.scanOblique(
-								param.origin,
-								param.u,
-								param.v,
-								param.size,
-								imageBuffer,
-								param.ww,
-								param.wl
-							);
-
-							return Promise.resolve(imageBuffer);
-						};
-					});
-
-				}).catch((e) => {
-				reject(e);
-			})
+	constructor(params) {
+		super();
+		this.volSource = new RawVolumeImageSource(params);
+		this.volSource.ready().then(() => {
+			this.volumeReady = true;
 		});
+		this.dynSource = new DynamicImageSource(params);
+	}
+
+	public draw(canvasDomElement, viewState) {
+		const source = this.volumeReady ? this.volSource : this.dynSource;
+		return source.draw(canvasDomElement, viewState);
+	}
+
+	public ready() {
+		return this.dynSource.ready();
+	}
+
+	public state() {
+		return this.dynSource.state();
 	}
 
 }

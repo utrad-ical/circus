@@ -13,34 +13,23 @@ export class RawVolumeImageSourceWithMock extends RsHttpLoaderImageSource {
 
 	private volume: DicomVolume;
 
-	protected prepare() {
+	protected scan(param) {
+		return Promise.resolve(new Uint8Array(1)); // Dummy?
+	}
 
-		this.scan = (series, param) => {
-			return Promise.resolve(new Uint8Array(1));
+	protected onMetaLoaded() {
+		const meta = this.meta;
+		const est = meta.estimatedWindow;
+		this.meta.estimatedWindow = {
+			level: 255,
+			width: 760
 		};
-
-		return new Promise((resolve, reject) => {
-			let est;
-			this.loader.metadata(this.series)
-				.then((meta) => {
-					est = meta.estimatedWindow;
-					this.meta = meta;
-					this.meta.estimatedWindow = {
-						level: 255,
-						width: 760
-					};
-					this.volume = this.createMockVolume(meta);
-					resolve();
-					return this.loader.volume(this.series, this.meta);
-					// return Promise.resolve(this.volume);
-				})
-				.then((volume) => {
-					this.meta.estimatedWindow = est;
-					this.volume = volume;
-				}).catch((e) => {
-				reject(e);
+		this.volume = this.createMockVolume(meta);
+		return this.loader.volume(this.series, this.meta)
+			.then(volume => {
+				this.meta.estimatedWindow = est;
+				this.volume = volume;
 			});
-		});
 	}
 
 	private createMockVolume(meta: DicomMetadata): DicomVolume {

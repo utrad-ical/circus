@@ -14,8 +14,8 @@ export class MockImageSource extends ImageSource {
 	constructor(meta: DicomMetadata) {
 		super();
 		this.meta = meta;
-		this.meta.estimatedWindow = {level: 10, width: 100};
-		this.meta.dicomWindow = {level: 10, width: 100};
+		this.meta.estimatedWindow = { level: 10, width: 100 };
+		this.meta.dicomWindow = { level: 10, width: 100 };
 		this.meta.voxelSize = meta.voxelSize || [0.5, 0.5, 0.5];
 		this.meta.voxelCount = meta.voxelCount || [512, 512, 478];
 
@@ -59,10 +59,6 @@ export class MockImageSource extends ImageSource {
 		raw.setVoxelDimension(vx, vy, vz);
 		raw.setEstimatedWindow(wl, ww);
 		return raw;
-	}
-
-	public ready() {
-		return Promise.resolve();
 	}
 
 	public state() {

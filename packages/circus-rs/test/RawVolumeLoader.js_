@@ -1,6 +1,6 @@
 'use strict';
 
-var DicomLoader = require('../build/browser/image-source/dicom-loader').DicomLoader;
+var RsHttpLoader = require('../build/browser/image-source/rs-http-loader').RsHttpLoader;
 var Server = require('../build/server/Server');
 var assert = require('chai').assert;
 var PixelFormat = require('../build/common/PixelFormat').PixelFormat;
@@ -24,7 +24,7 @@ describe('RawVolumeLoader', function() {
 	var loader;
 	var server;
 	beforeEach(function() {
-		loader = new DicomLoader({ server: 'http://localhost:' + port });
+		loader = new RsHttpLoader({ server: 'http://localhost:' + port });
 		server = new Server(defaultConfig);
 		server.start();
 	});

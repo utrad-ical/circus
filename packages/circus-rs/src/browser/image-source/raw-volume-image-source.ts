@@ -3,13 +3,13 @@
 import { Promise }    from 'es6-promise';
 
 import DicomVolume from '../../common/DicomVolume';
-import { DicomLoaderImageSource } from '../../browser/image-source/dicom-loader-image-source';
+import { RsHttpLoaderImageSource } from '../../browser/image-source/rs-http-loader-image-source';
 
 /**
  * RawVolumeImageSource holds an entire 3D volume in memory and
  * renderes MPR image form the volume.
  */
-export class RawVolumeImageSource extends DicomLoaderImageSource {
+export class RawVolumeImageSource extends RsHttpLoaderImageSource {
 
 	private volume: DicomVolume;
 

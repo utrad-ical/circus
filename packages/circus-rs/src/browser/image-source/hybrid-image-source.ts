@@ -2,9 +2,9 @@
 
 import { Promise } from 'es6-promise';
 import DicomVolume from '../../common/DicomVolume';
-import { DicomLoaderImageSource } from '../../browser/image-source/dicom-loader-image-source';
+import { RsHttpLoaderImageSource } from '../../browser/image-source/rs-http-loader-image-source';
 
-export class HybridImageSource extends DicomLoaderImageSource {
+export class HybridImageSource extends RsHttpLoaderImageSource {
 
 	private volume: DicomVolume;
 

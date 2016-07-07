@@ -11,7 +11,7 @@ import { DicomMetadata } from '../../browser/interface/dicom-metadata';
  * Simple HTTP wrapper that connects to the CIRCUS RS server and returns the response
  * in the appropriate format.
  */
-export class DicomLoader {
+export class RsHttpLoader {
 
 	private server: string;
 

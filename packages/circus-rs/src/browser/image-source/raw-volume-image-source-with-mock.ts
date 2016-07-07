@@ -4,12 +4,12 @@ import { Promise }    from 'es6-promise';
 
 import { PixelFormat, pixelFormatInfo } from '../../common/PixelFormat';
 import DicomVolume from '../../common/DicomVolume';
-import { DicomLoaderImageSource } from '../../browser/image-source/dicom-loader-image-source';
+import { RsHttpLoaderImageSource } from '../../browser/image-source/rs-http-loader-image-source';
 import { DicomMetadata } from '../../browser/interface/dicom-metadata';
 import { ImageSource } from '../../browser/image-source/image-source';
-import { DicomLoader } from '../../browser/image-source/dicom-loader';
+import { RsHttpLoader } from '../../browser/image-source/rs-http-loader';
 
-export class RawVolumeImageSourceWithMock extends DicomLoaderImageSource {
+export class RawVolumeImageSourceWithMock extends RsHttpLoaderImageSource {
 
 	private volume: DicomVolume;
 

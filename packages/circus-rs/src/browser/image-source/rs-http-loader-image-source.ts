@@ -4,16 +4,17 @@ import { Promise } from 'es6-promise';
 
 import { DicomMetadata } from '../../browser/interface/dicom-metadata';
 import { ImageSource } from './image-source';
-import { DicomLoader } from './dicom-loader';
+import { RsHttpLoader } from './rs-http-loader';
 
 /**
- * DicomLoaderImageSource is a base class of DynamicImageSource and RawVolumeImageSource.
+ * RsHttpLoaderImageSource is a base class of ImageSource classes which
+ * need access to the CIRCUS RS server.
  * It fetches the scanned MPR data either from the RS server via HTTP or from the loaded volume,
  * and then draws the scanned MPR image onto the specified canvas.
  */
-export abstract class DicomLoaderImageSource extends ImageSource {
+export abstract class RsHttpLoaderImageSource extends ImageSource {
 
-	protected loader: DicomLoader;
+	protected loader: RsHttpLoader;
 	protected series: string;
 	protected meta: DicomMetadata;
 
@@ -25,7 +26,7 @@ export abstract class DicomLoaderImageSource extends ImageSource {
 	constructor({ server = 'http://localhost:3000', series = null } = {}) {
 		super();
 
-		this.loader = new DicomLoader(server);
+		this.loader = new RsHttpLoader(server);
 		this.series = series;
 
 		if (series === null) {

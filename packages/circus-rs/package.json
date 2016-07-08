@@ -3,8 +3,7 @@
   "version": "0.3.3",
   "scripts": {
     "start": "node ./circus-rs.js",
-    "test": "mocha",
-    "prepublish": "gulp clean && gulp"
+    "test": "mocha"
   },
   "license": "MIT",
   "dependencies": {

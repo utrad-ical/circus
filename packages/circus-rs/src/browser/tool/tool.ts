@@ -2,8 +2,12 @@
 
 let { vec3 } = require('gl-matrix');
 import { EventEmitter } from 'events';
-import { ViewerEvent }					from '../../browser/viewer/viewer-event';
+import { ViewerEvent } from '../../browser/viewer/viewer-event';
 
+/**
+ * A tool determines how a viewer interects with various UI events.
+ * An active tool will change the active view state of each viewer.
+ */
 export abstract class Tool extends EventEmitter {
 
 	public mousedownHandler(ev: ViewerEvent) {
@@ -16,11 +20,8 @@ export abstract class Tool extends EventEmitter {
 	}
 
 	public mousewheelHandler(ev: ViewerEvent) {
-
 		let step = ( ev.original.ctrlKey ? 5 : 1 ) * ( ev.original.deltaY > 0 ? -1 : 1 );
-
 		this.slide(ev.viewer, step);
-
 		ev.stopPropagation();
 	}
 

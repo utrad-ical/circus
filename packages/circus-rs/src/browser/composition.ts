@@ -2,24 +2,28 @@
 
 import { EventEmitter } from 'events';
 
-import { VoxelCloud }                        from '../common/VoxelCloud';
+import { VoxelCloud } from '../common/VoxelCloud';
 
-import { Painter }                        from '../browser/interface/painter';
-import { Sprite }                        from '../browser/viewer/sprite';
-import { ImageSource }                    from '../browser/image-source/image-source';
-import { Viewer }                        from '../browser/viewer/viewer';
-import { ViewerEvent }                    from '../browser/viewer/viewer-event';
-import { ViewerEventTarget }            from '../browser/interface/viewer-event-target';
+import { Painter } from '../browser/interface/painter';
+import { Sprite } from '../browser/viewer/sprite';
+import { ImageSource } from '../browser/image-source/image-source';
+import { Viewer } from '../browser/viewer/viewer';
+import { ViewerEvent } from '../browser/viewer/viewer-event';
+import { ViewerEventTarget } from '../browser/interface/viewer-event-target';
 
-import { Tool }                            from '../browser/tool/tool';
-import { WindowTool }                    from '../browser/tool/state/window';
-import { HandTool }                        from '../browser/tool/state/hand';
-import { CelestialRotateTool }            from '../browser/tool/state/celestial-rotate';
-import { CloudsRenderer }                from '../browser/tool/cloud/clouds-renderer';
-import { CloudEditor }                    from '../browser/tool/cloud/cloud-editor';
-import { BrushTool }                    from '../browser/tool/cloud/brush';
-import { BucketTool }                    from '../browser/tool/cloud/bucket';
+import { Tool } from '../browser/tool/tool';
+import { WindowTool } from '../browser/tool/state/window';
+import { HandTool } from '../browser/tool/state/hand';
+import { CelestialRotateTool } from '../browser/tool/state/celestial-rotate';
+import { CloudsRenderer } from '../browser/tool/cloud/clouds-renderer';
+import { CloudEditor } from '../browser/tool/cloud/cloud-editor';
+import { BrushTool } from '../browser/tool/cloud/brush';
+import { BucketTool } from '../browser/tool/cloud/bucket';
 
+/**
+ * A composition is a combination of one imageSource and
+ * an arbitrary number of annotations.
+ */
 export class Composition extends EventEmitter {
 
 	private imageSource: ImageSource;
@@ -39,7 +43,7 @@ export class Composition extends EventEmitter {
 		 * set up tools
 		 */
 
-			// window tool
+		// window tool
 		this.tools['Window'] = new WindowTool();
 
 		// hand tool

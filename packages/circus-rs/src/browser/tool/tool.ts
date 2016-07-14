@@ -1,31 +1,34 @@
 'use strict';
 
-let { vec3 } = require('gl-matrix');
+import { vec3 } from 'gl-matrix';
 import { EventEmitter } from 'events';
 import { ViewerEvent } from '../../browser/viewer/viewer-event';
 
 /**
- * A tool determines how a viewer interects with various UI events.
+ * A tool determines how a viewer intersects with various UI events.
  * An active tool will change the active view state of each viewer.
  */
 export abstract class Tool extends EventEmitter {
 
-	public mousedownHandler(ev: ViewerEvent) {
+	public mousedownHandler(ev: ViewerEvent): void {
+		// do nothing
 	}
 
-	public mousemoveHandler(ev: ViewerEvent) {
+	public mousemoveHandler(ev: ViewerEvent): void {
+		// do nothing
 	}
 
-	public mouseupHandler(ev: ViewerEvent) {
+	public mouseupHandler(ev: ViewerEvent): void {
+		// do nothing
 	}
 
-	public mousewheelHandler(ev: ViewerEvent) {
+	public mousewheelHandler(ev: ViewerEvent): void {
 		let step = ( ev.original.ctrlKey ? 5 : 1 ) * ( ev.original.deltaY > 0 ? -1 : 1 );
 		this.slide(ev.viewer, step);
 		ev.stopPropagation();
 	}
 
-	protected slide(viewer, step: number = 1) {
+	protected slide(viewer, step: number = 1): void {
 
 		let state = viewer.getState();
 		switch (state.stateName) {

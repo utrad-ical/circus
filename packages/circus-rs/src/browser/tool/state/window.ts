@@ -1,7 +1,5 @@
 'use strict';
 
-var {quat, mat4, vec2, vec3} = require('gl-matrix');
-
 import { Tool } from '../../../browser/tool/tool';
 import { DraggableTool } from '../../../browser/tool/draggable';
 import { Viewer } from '../../../browser/viewer/viewer';
@@ -9,10 +7,6 @@ import { ViewerEvent } from '../../../browser/viewer/viewer-event';
 import { ViewerEventTarget } from '../../../browser/interface/viewer-event-target';
 
 export class WindowTool extends DraggableTool implements ViewerEventTarget {
-
-	constructor() {
-		super();
-	}
 
 	public dragstartHandler(ev: ViewerEvent) {
 		ev.viewer.primaryEventTarget = this;
@@ -34,7 +28,6 @@ export class WindowTool extends DraggableTool implements ViewerEventTarget {
 	/**
 	 * window level / width
 	 */
-
 	public windowLevelBy(viewer, dl: number) {
 		let state = viewer.getState();
 		state.window.level += dl;

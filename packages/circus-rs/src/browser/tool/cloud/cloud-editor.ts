@@ -1,13 +1,12 @@
 'use strict';
 
-let { vec3 } = require('gl-matrix');
+import { vec3 } from 'gl-matrix';
 import { EventEmitter } from 'events';
-
 import { VoxelCloud } from '../../../common/VoxelCloud';
 
 export class CloudEditor extends EventEmitter {
 
-	public cloud;
+	public cloud: VoxelCloud;
 	public penWidth: number = 1;
 
 	private mapper;
@@ -18,7 +17,7 @@ export class CloudEditor extends EventEmitter {
 
 	protected nibs: [number,number,number][];
 
-	public setCloud(cloud) {
+	public setCloud(cloud: VoxelCloud) {
 		let before = cloud;
 		this.cloud = cloud;
 		this.emit('cloudchange', before, this.cloud);
@@ -48,12 +47,12 @@ export class CloudEditor extends EventEmitter {
 				o[0] + u[0] * x + v[0] * y,
 				o[1] + u[1] * x + v[1] * y,
 				o[2] + u[2] * x + v[2] * y
-			]
+			];
 		};
 	}
 
 	private check(p) {
-		let [x,y] = [Math.floor(p[0]), Math.floor(p[1])];
+		let [x, y] = [Math.floor(p[0]), Math.floor(p[1])];
 		let ix = this.mapper(x, y);
 		return '#(' + ( ix ? ix.toString() : 'null' ) + ') ' + 'vp@[' + [x, y].toString() + '] ';
 	}
@@ -67,16 +66,15 @@ export class CloudEditor extends EventEmitter {
 	/**
 	 * 直線を通過するすべてのvoxelを塗りつぶす
 	 */
-
-	private line(s: [number,number], e: [number,number]) {
+	private line(s: [number, number], e: [number, number]) {
 		this.mmLine3(
 			this.mapper(s[0], s[1]),
 			this.mapper(e[0], e[1])
 		);
 	}
 
-	private mmLine3(p0_mm: [number,number,number],
-		p1_mm: [number,number,number]
+	private mmLine3(p0_mm: [number, number, number],
+		p1_mm: [number, number, number]
 	) {
 		let vs = this.cloud.getVoxelDimension();
 		// let p0 = this.cloud.mmIndexAt( p0_mm[0], p0_mm[1], p0_mm[2] );
@@ -100,12 +98,11 @@ export class CloudEditor extends EventEmitter {
 			? (i) => i === Math.floor(i) ? i - 1 : Math.floor(i)
 			: (i) => Math.floor(i);
 
-
 		do {
 			this.cloud.writePixelAt(1, trim_x(pi[0]), trim_y(pi[1]), trim_z(pi[2]));
 
 			let step = this.getStepToNeighbor(pi, e);
-// console.log('pi: '+vec3.str(pi));
+			// console.log('pi: '+vec3.str(pi));
 			vec3.add(pi, pi, step);
 			walked += vec3.length(step);
 
@@ -188,12 +185,13 @@ export class CloudEditor extends EventEmitter {
 			return cur === null ? prev : ( prev < cur ? prev : cur );
 		}, Number.POSITIVE_INFINITY);
 
-// console.log( stepLength.toString() + ' / ' + vec3.str( stepLengthEntry) );
+		// console.log( stepLength.toString() + ' / ' + vec3.str( stepLengthEntry) );
 
 		return [
 			e[0] * stepLength,
 			e[1] * stepLength,
-			e[2] * stepLength];
+			e[2] * stepLength
+		];
 	}
 
 	/**
@@ -222,7 +220,7 @@ export class CloudEditor extends EventEmitter {
 
 	/**
 	 * fill with Scanline Seed Fill Algorithm
-	 *  重複に関する考慮と実装がされていない。効率化の余地あり。
+	 * 重複に関する考慮と実装がされていない。効率化の余地あり。
 	 */
 	public fill(ex, ey) {
 		return this.fillWithScanOblique(ex, ey);
@@ -694,14 +692,14 @@ export class PointsBuffer {
 		this.z_mask = parseInt('01111111111000000000000000000000', 2);
 	};
 
-	/**
-	 * フォーマット
-	 * -------------------------------------
-	 * 0        (1bit)    : not null フラグ
-	 * 1-10        (10bit)    : x座標 (最大 1023)
-	 * 11-20    (10bit)    : y座標 (最大 1023)
-	 * 21-30    (10bit)    : z座標 (最大 1023)
-	 */
+	//
+	// フォーマット
+	// -------------------------------------
+	// 0     (1bit)     : not null フラグ
+	// 1-10  (10bit)    : x座標 (最大 1023)
+	// 11-20 (10bit)    : y座標 (最大 1023)
+	// 21-30 (10bit)    : z座標 (最大 1023)
+	//
 
 	private pack(x: number, y: number, z: number): number {
 		if (x < 0 || 1023 < x || y < 0 || 1023 < y || z < 0 || 1023 < z) throw new Error('Out of range');
@@ -734,4 +732,3 @@ export class PointsBuffer {
 	}
 
 }
-

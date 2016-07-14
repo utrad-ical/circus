@@ -1,8 +1,6 @@
 'use strict';
 
-var {quat, mat4, vec2, vec3} = require('gl-matrix');
-
-import { Tool } from '../../../browser/tool/tool';
+import { mat4, vec3} from 'gl-matrix';
 import { DraggableTool } from '../../../browser/tool/draggable';
 import { Viewer } from '../../../browser/viewer/viewer';
 import { ViewerEvent } from '../../../browser/viewer/viewer-event';

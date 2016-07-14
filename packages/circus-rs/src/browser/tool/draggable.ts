@@ -3,12 +3,12 @@
 import { Tool } from '../../browser/tool/tool';
 import { ViewerEvent } from '../../browser/viewer/viewer-event';
 
-type DragInfo = {
+interface DragInfo {
 	dx: number;
 	dy: number;
 	ttldx: number;
 	ttldy: number;
-};
+}
 
 export abstract class DraggableTool extends Tool {
 
@@ -18,11 +18,11 @@ export abstract class DraggableTool extends Tool {
 	private starty: number;
 	private drag: boolean = false;
 
-	public abstract dragstartHandler(ev: ViewerEvent);
+	public abstract dragstartHandler(ev: ViewerEvent): void;
 
-	public abstract dragmoveHandler(ev: ViewerEvent, i: DragInfo);
+	public abstract dragmoveHandler(ev: ViewerEvent, i: DragInfo): void;
 
-	public abstract dragendHandler(ev: ViewerEvent, i: DragInfo);
+	public abstract dragendHandler(ev: ViewerEvent, i: DragInfo): void;
 
 	private info(x, y): DragInfo {
 		return {
@@ -40,7 +40,6 @@ export abstract class DraggableTool extends Tool {
 			this.prevy = ev.viewerY;
 			this.startx = ev.viewerX;
 			this.starty = ev.viewerY;
-
 			this.dragstartHandler(ev);
 		}
 	}
@@ -50,16 +49,13 @@ export abstract class DraggableTool extends Tool {
 			let info = this.info(ev.viewerX, ev.viewerY);
 			this.prevx = ev.viewerX;
 			this.prevy = ev.viewerY;
-
 			this.dragmoveHandler(ev, info);
 		}
 	}
 
 	public mouseupHandler(ev: ViewerEvent) {
 		if (this.drag) {
-
 			this.drag = false;
-
 			let info = this.info(ev.viewerX, ev.viewerY);
 			this.dragendHandler(ev, info);
 		}

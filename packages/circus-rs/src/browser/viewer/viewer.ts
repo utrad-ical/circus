@@ -197,7 +197,7 @@ export class Viewer extends EventEmitter {
 		return prevSource;
 	}
 
-	public getSource() {
+	public getSource(): ImageSource {
 		return this.imageSource;
 	}
 
@@ -211,13 +211,13 @@ export class Viewer extends EventEmitter {
 		};
 		const recursive = (o, indent) => {
 			if (typeof o === 'object') {
-				let dump = "\n";
+				let dump = '\n';
 				for (let i in o) {
-					dump += getIndent(indent) + i + ": " + recursive(o[i], indent + 1);
+					dump += getIndent(indent) + i + ': ' + recursive(o[i], indent + 1);
 				}
 				return dump;
 			} else {
-				return o + "\n";
+				return o + '\n';
 			}
 		};
 		return recursive(this.viewState, 0);

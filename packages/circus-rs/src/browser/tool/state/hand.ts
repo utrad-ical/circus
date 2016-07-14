@@ -12,23 +12,23 @@ export class HandTool extends DraggableTool implements ViewerEventTarget {
 		super();
 	}
 
-	public dragstartHandler(ev: ViewerEvent) {
+	public dragStartHandler(ev: ViewerEvent) {
 		ev.viewer.primaryEventTarget = this;
 		ev.stopPropagation();
 	}
 
-	public dragmoveHandler(ev: ViewerEvent, dragInfo) {
+	public dragMoveHandler(ev: ViewerEvent, dragInfo) {
 		this.translateBy(ev.viewer, [dragInfo.dx, dragInfo.dy]);
 		ev.viewer.render();
 		ev.stopPropagation();
 	}
 
-	public dragendHandler(ev: ViewerEvent, dragInfo) {
+	public dragEndHandler(ev: ViewerEvent, dragInfo) {
 		ev.viewer.primaryEventTarget = null;
 		ev.stopPropagation();
 	}
 
-	public mousewheelHandler(ev: ViewerEvent) {
+	public mouseWheelHandler(ev: ViewerEvent) {
 		this.zoom(ev.viewer,
 			ev.original.ctrlKey ? ( ev.original.deltaY > 0 ? '+3' : '-3' ) : ( ev.original.deltaY > 0 ? '+1' : '-1' ),
 			[ev.viewerX, ev.viewerY]);

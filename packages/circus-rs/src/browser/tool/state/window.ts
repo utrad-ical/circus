@@ -8,19 +8,19 @@ import { ViewerEventTarget } from '../../../browser/interface/viewer-event-targe
 
 export class WindowTool extends DraggableTool implements ViewerEventTarget {
 
-	public dragstartHandler(ev: ViewerEvent) {
+	public dragStartHandler(ev: ViewerEvent) {
 		ev.viewer.primaryEventTarget = this;
 		ev.stopPropagation();
 	}
 
-	public dragmoveHandler(ev: ViewerEvent, dragInfo) {
+	public dragMoveHandler(ev: ViewerEvent, dragInfo) {
 		this.windowLevelBy(ev.viewer, dragInfo.dx * ( ev.original.ctrlKey ? 2 : 1 ));
 		this.windowWidthBy(ev.viewer, dragInfo.dy * ( ev.original.ctrlKey ? 20 : 5 ));
 		ev.viewer.render();
 		ev.stopPropagation();
 	}
 
-	public dragendHandler(ev: ViewerEvent, dragInfo) {
+	public dragEndHandler(ev: ViewerEvent, dragInfo) {
 		ev.viewer.primaryEventTarget = null;
 		ev.stopPropagation();
 	}

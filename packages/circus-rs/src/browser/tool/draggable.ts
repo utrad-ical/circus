@@ -18,11 +18,11 @@ export abstract class DraggableTool extends Tool {
 	private starty: number;
 	private drag: boolean = false;
 
-	public abstract dragstartHandler(ev: ViewerEvent): void;
+	public abstract dragStartHandler(ev: ViewerEvent): void;
 
-	public abstract dragmoveHandler(ev: ViewerEvent, i: DragInfo): void;
+	public abstract dragMoveHandler(ev: ViewerEvent, i: DragInfo): void;
 
-	public abstract dragendHandler(ev: ViewerEvent, i: DragInfo): void;
+	public abstract dragEndHandler(ev: ViewerEvent, i: DragInfo): void;
 
 	private info(x, y): DragInfo {
 		return {
@@ -33,31 +33,31 @@ export abstract class DraggableTool extends Tool {
 		};
 	}
 
-	public mousedownHandler(ev: ViewerEvent) {
+	public mouseDownHandler(ev: ViewerEvent) {
 		if (!this.drag) {
 			this.drag = true;
 			this.prevx = ev.viewerX;
 			this.prevy = ev.viewerY;
 			this.startx = ev.viewerX;
 			this.starty = ev.viewerY;
-			this.dragstartHandler(ev);
+			this.dragStartHandler(ev);
 		}
 	}
 
-	public mousemoveHandler(ev: ViewerEvent) {
+	public mouseMoveHandler(ev: ViewerEvent) {
 		if (this.drag) {
 			let info = this.info(ev.viewerX, ev.viewerY);
 			this.prevx = ev.viewerX;
 			this.prevy = ev.viewerY;
-			this.dragmoveHandler(ev, info);
+			this.dragMoveHandler(ev, info);
 		}
 	}
 
-	public mouseupHandler(ev: ViewerEvent) {
+	public mouseUpHandler(ev: ViewerEvent) {
 		if (this.drag) {
 			this.drag = false;
 			let info = this.info(ev.viewerX, ev.viewerY);
-			this.dragendHandler(ev, info);
+			this.dragEndHandler(ev, info);
 		}
 	}
 }

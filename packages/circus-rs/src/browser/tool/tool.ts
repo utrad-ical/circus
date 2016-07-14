@@ -10,19 +10,19 @@ import { ViewerEvent } from '../../browser/viewer/viewer-event';
  */
 export abstract class Tool extends EventEmitter {
 
-	public mousedownHandler(ev: ViewerEvent): void {
+	public mouseDownHandler(ev: ViewerEvent): void {
 		// do nothing
 	}
 
-	public mousemoveHandler(ev: ViewerEvent): void {
+	public mouseMoveHandler(ev: ViewerEvent): void {
 		// do nothing
 	}
 
-	public mouseupHandler(ev: ViewerEvent): void {
+	public mouseUpHandler(ev: ViewerEvent): void {
 		// do nothing
 	}
 
-	public mousewheelHandler(ev: ViewerEvent): void {
+	public mouseWheelHandler(ev: ViewerEvent): void {
 		let step = ( ev.original.ctrlKey ? 5 : 1 ) * ( ev.original.deltaY > 0 ? -1 : 1 );
 		this.slide(ev.viewer, step);
 		ev.stopPropagation();

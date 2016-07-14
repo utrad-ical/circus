@@ -14,7 +14,7 @@ export class BucketTool extends Tool implements ViewerEventTarget {
 		super();
 	}
 
-	public mousedownHandler(ev: ViewerEvent) {
+	public mouseDownHandler(ev: ViewerEvent) {
 		if (this.cloudEditor) {
 			this.cloudEditor.prepare(ev.viewer.viewState);
 			this.cloudEditor.fill(ev.viewerX, ev.viewerY);

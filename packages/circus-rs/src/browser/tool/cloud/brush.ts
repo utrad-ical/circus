@@ -14,7 +14,7 @@ export class BrushTool extends Tool implements ViewerEventTarget {
 		super();
 	}
 
-	public mousedownHandler(ev: ViewerEvent) {
+	public mouseDownHandler(ev: ViewerEvent) {
 		if (this.cloudEditor && !this.drawing) {
 			ev.stopPropagation();
 
@@ -29,7 +29,7 @@ export class BrushTool extends Tool implements ViewerEventTarget {
 		}
 	}
 
-	public mousemoveHandler(ev: ViewerEvent) {
+	public mouseMoveHandler(ev: ViewerEvent) {
 
 		if (this.cloudEditor && this.drawing) {
 			ev.stopPropagation();
@@ -40,7 +40,7 @@ export class BrushTool extends Tool implements ViewerEventTarget {
 		}
 	}
 
-	public mouseupHandler(ev: ViewerEvent) {
+	public mouseUpHandler(ev: ViewerEvent) {
 
 		if (this.drawing) {
 			this.drawing = false;

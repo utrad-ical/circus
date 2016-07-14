@@ -9,12 +9,12 @@ import { ViewerEventTarget } from '../../../browser/interface/viewer-event-targe
 
 export class CelestialRotateTool extends DraggableTool implements ViewerEventTarget {
 
-	public dragstartHandler(ev: ViewerEvent): void {
+	public dragStartHandler(ev: ViewerEvent): void {
 		ev.viewer.primaryEventTarget = this;
 		ev.stopPropagation();
 	}
 
-	public dragmoveHandler(ev: ViewerEvent, dragInfo): void {
+	public dragMoveHandler(ev: ViewerEvent, dragInfo): void {
 
 		if (Math.abs(dragInfo.dx) && Math.abs(dragInfo.dx) >= Math.abs(dragInfo.dy)) {
 			let hdeg = ( dragInfo.dx < 0 ? -1 : 1  ) * ( ev.original.ctrlKey ? 2 : 1 );
@@ -24,12 +24,12 @@ export class CelestialRotateTool extends DraggableTool implements ViewerEventTar
 		}
 	}
 
-	public dragendHandler(ev: ViewerEvent, dragInfo): void {
+	public dragEndHandler(ev: ViewerEvent, dragInfo): void {
 		ev.viewer.primaryEventTarget = null;
 		ev.stopPropagation();
 	}
 
-	public mousewheelHandler(ev: ViewerEvent): void {
+	public mouseWheelHandler(ev: ViewerEvent): void {
 		let vdeg = ( ev.original.deltaY < 0 ? -1 : 1  ) * ( ev.original.ctrlKey ? 2 : 1 );
 		this.verticalRotate(ev.viewer, vdeg);
 		ev.viewer.render();

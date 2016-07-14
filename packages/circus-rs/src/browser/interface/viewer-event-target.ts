@@ -3,8 +3,8 @@
 import { ViewerEvent } from '../../browser/viewer/viewer-event';
 
 export interface ViewerEventTarget {
-	mouseupHandler: (viewerEvent: ViewerEvent) => any;
-	mousedownHandler: (viewerEvent: ViewerEvent) =>  any;
-	mousemoveHandler: (viewerEvent: ViewerEvent) =>  any;
-	mousewheelHandler: (viewerEvent: ViewerEvent) =>  any;
+	mouseUpHandler: (viewerEvent: ViewerEvent) => any;
+	mouseDownHandler: (viewerEvent: ViewerEvent) =>  any;
+	mouseMoveHandler: (viewerEvent: ViewerEvent) =>  any;
+	mouseWheelHandler: (viewerEvent: ViewerEvent) =>  any;
 }

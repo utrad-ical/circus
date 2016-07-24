@@ -36,26 +36,7 @@ export class CelestialRotateTool extends DraggableTool implements ViewerEventTar
 		ev.stopPropagation();
 	}
 
-	/**
-	 * celestial rotate
-	 */
-	private initCelestialState(viewer: Viewer): boolean {
-		if (typeof viewer.viewState.celestial === 'undefined') {
-			viewer.viewState.celestial = {
-				horizontal: 0,
-				vertical: 0,
-				defaultAxisX: vec3.clone(viewer.viewState.section.xAxis),
-				defaultAxisY: vec3.clone(viewer.viewState.section.yAxis)
-			};
-			return true;
-		} else {
-			return false;
-		}
-	}
-
 	public horizontalRotate(viewer: Viewer, deg: number) {
-
-		this.initCelestialState(viewer);
 
 		let state = viewer.getState();
 		let [ vw, vh ] = state.resolution;
@@ -78,8 +59,6 @@ export class CelestialRotateTool extends DraggableTool implements ViewerEventTar
 	}
 
 	public verticalRotate(viewer: Viewer, deg: number) {
-
-		this.initCelestialState(viewer);
 
 		let state = viewer.getState();
 		let [ vw, vh ] = state.resolution;

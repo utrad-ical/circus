@@ -12,16 +12,11 @@ $('#load').on('click', () => {
 		server: $('#server').val()
 	};
 	localStorage.setItem('rs-demo-save', JSON.stringify(config));
-	initializeViewer(config);
+	initializeViewer(config.series, config.server);
 });
 
-function initializeViewer(config) {
-	const param = {
-		series: config.series,
-		server: config.server
-	};
-
-	const src = new rs.DynamicImageSource(param);
+function initializeViewer(series, server) {
+	const src = new rs.DynamicImageSource({ series, server });
 	const comp = new rs.Composition();
 	comp.setImageSource(src);
 

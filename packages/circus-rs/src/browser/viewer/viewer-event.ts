@@ -20,9 +20,9 @@ export class ViewerEvent {
 		this.type = type || ( original ? original.type : null );
 
 		if (original && original.offsetX) {
-			let canvas = viewer.canvasDomElement;
-			let [ viewerWidth, viewerHeight ] = viewer.getResolution();
-			let [ elementWidth, elementHeight ] = viewer.getViewport();
+			const canvas = viewer.canvas;
+			const [ viewerWidth, viewerHeight ] = viewer.getResolution();
+			const [ elementWidth, elementHeight ] = viewer.getViewport();
 
 			this.viewerX = original.offsetX * viewerWidth / elementWidth;
 			this.viewerY = original.offsetY * viewerHeight / elementHeight;

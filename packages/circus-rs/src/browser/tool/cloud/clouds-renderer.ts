@@ -1,10 +1,10 @@
 'use strict';
 
 import { VoxelCloud } from '../../../common/VoxelCloud';
-import { Painter } from '../../../browser/interface/painter';
+import { Annotation } from '../../../browser/annotation/annotation';
 import { Sprite } from '../../../browser/viewer/sprite';
 
-export class CloudsRenderer implements Painter {
+export class CloudsRenderer implements Annotation {
 
 	public clouds: VoxelCloud[];
 
@@ -114,4 +114,3 @@ export class CloudsRenderer implements Painter {
 	}
 
 }
-

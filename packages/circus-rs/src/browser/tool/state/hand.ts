@@ -1,6 +1,6 @@
 'use strict';
 
-import { mat4, vec3} from 'gl-matrix';
+import { mat4, vec3 } from 'gl-matrix';
 import { DraggableTool } from '../../../browser/tool/draggable';
 import { Viewer } from '../../../browser/viewer/viewer';
 import { ViewerEvent } from '../../../browser/viewer/viewer-event';
@@ -36,21 +36,7 @@ export class HandTool extends DraggableTool implements ViewerEventTarget {
 		ev.stopPropagation();
 	}
 
-	/**
-	 * Translate viewport
-	 */
-	private initTranslateState(viewer: Viewer): boolean {
-		if (typeof viewer.viewState.translate === 'undefined') {
-			viewer.viewState.translate = {x: 0, y: 0, z: 0};
-			return true;
-		} else {
-			return false;
-		}
-	}
-
 	public translateBy(viewer, p: [ number, number ]) {
-
-		this.initTranslateState(viewer);
 
 		let state = viewer.getState();
 		let vp = viewer.getResolution();

@@ -3,7 +3,7 @@
 var extend = require('extend');
 
 import { EventEmitter } from 'events';
-import { Painter } from '../../browser/interface/painter';
+import { Annotation } from '../../browser/annotation/annotation';
 import { Sprite } from '../../browser/viewer/sprite';
 import { Composition } from '../../browser/composition';
 import { ViewerEvent } from '../../browser/viewer/viewer-event';
@@ -21,11 +21,11 @@ const DEFAULT_VIEWER_HEIGHT = 512;
 export class Viewer extends EventEmitter {
 
 	public canvas: HTMLCanvasElement;
-	public viewState: ViewState;
-	public composition: Composition;
+	private viewState: ViewState;
+	private composition: Composition;
 
-	public painters: Painter[];
-	public sprites: Sprite[];
+	// private painters: Painter[];
+	private sprites: Sprite[];
 
 	public primaryEventTarget;
 	public backgroundEventTarget;
@@ -70,7 +70,6 @@ export class Viewer extends EventEmitter {
 		div.appendChild(canvas);
 
 		this.canvas = canvas;
-		this.painters = [];
 		this.sprites = [];
 
 		const handler = this.canvasEventHandler.bind(this);
@@ -133,11 +132,6 @@ export class Viewer extends EventEmitter {
 		);
 	}
 
-	public drawBy(painter: Painter): void {
-		let sprite = painter.draw(this.canvas, this.viewState);
-		if (sprite) this.sprites.push(sprite);
-	}
-
 	/**
 	 * Requests the rendering of the viewer using the current view state.
 	 * This can be called very frequently (eg, 60 times/sec),
@@ -165,10 +159,10 @@ export class Viewer extends EventEmitter {
 			this.nextRender = null;
 			const src = this.composition.imageSource;
 			return src.draw(this, state).then(res => {
-				this.painters.forEach(painter => {
-					const sprite = painter.draw(canvas, state);
+				for (let annotation of this.composition.getAnnotations()) {
+					const sprite = annotation.draw(this, state);
 					if (sprite !== null) this.sprites.push(sprite);
-				});
+				};
 				this.currentRender = null;
 				return res;
 			});
@@ -203,9 +197,11 @@ export class Viewer extends EventEmitter {
 	public setComposition(composition: Composition) {
 		if (this.composition === composition) return;
 		if (this.composition) {
+			this.composition.unregisterViewer(this);
 			this.composition.removeListener('change', this.bindedRender);
 		}
 		this.composition = composition;
+		this.composition.registerViewer(this);
 		this.imageReady = false;
 		composition.imageSource.ready().then(() => {
 			this.imageReady = true;

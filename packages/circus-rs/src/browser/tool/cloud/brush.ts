@@ -21,7 +21,7 @@ export class BrushTool extends Tool implements ViewerEventTarget {
 			ev.viewer.primaryEventTarget = this;
 			this.drawing = true;
 
-			this.cloudEditor.prepare(ev.viewer.viewState);
+			this.cloudEditor.prepare(ev.viewer.getState());
 			this.cloudEditor.moveTo(ev.viewerX, ev.viewerY);
 			this.cloudEditor.lineTo(ev.viewerX, ev.viewerY);
 
@@ -52,4 +52,3 @@ export class BrushTool extends Tool implements ViewerEventTarget {
 	}
 
 }
-

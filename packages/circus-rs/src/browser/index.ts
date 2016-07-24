@@ -9,7 +9,6 @@ export * from '../browser/composition';
 
 export * from '../browser/image-source/mock-image-source';
 export * from '../browser/image-source/raw-volume-image-source';
-export * from '../browser/image-source/raw-volume-image-source-with-mock';
 export * from '../browser/image-source/dynamic-image-source';
 export * from '../browser/image-source/hybrid-image-source';
 

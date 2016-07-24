@@ -5,9 +5,13 @@ var extend = require('extend');
 import { EventEmitter } from 'events';
 import { Painter } from '../../browser/interface/painter';
 import { Sprite } from '../../browser/viewer/sprite';
-import { ImageSource } from '../../browser/image-source/image-source';
+import { Composition } from '../../browser/composition';
 import { ViewerEvent } from '../../browser/viewer/viewer-event';
 import { ViewerEventTarget } from '../../browser/interface/viewer-event-target';
+import { ViewState } from '../view-state';
+
+const DEFAULT_VIEWER_WIDTH = 512;
+const DEFAULT_VIEWER_HEIGHT = 512;
 
 /**
  * Viewer is the main component of CIRCUS RS, and wraps a HTML canvas element
@@ -16,15 +20,19 @@ import { ViewerEventTarget } from '../../browser/interface/viewer-event-target';
  */
 export class Viewer extends EventEmitter {
 
-	public canvasDomElement: HTMLCanvasElement;
+	public canvas: HTMLCanvasElement;
+	public viewState: ViewState;
+	public composition: Composition;
 
-	public viewState: any;
-	public imageSource: ImageSource;
 	public painters: Painter[];
 	public sprites: Sprite[];
 
 	public primaryEventTarget;
 	public backgroundEventTarget;
+
+	private bindedRender: Function;
+
+	private imageReady: boolean = false;
 
 	/**
 	 * When render() is called while there is already another rendering procedure in progress,
@@ -39,10 +47,29 @@ export class Viewer extends EventEmitter {
 	 */
 	private currentRender: Promise<any> = null;
 
-	constructor(canvas: HTMLCanvasElement) {
+	private createCanvas(width, height): HTMLCanvasElement {
+		const elm =  document.createElement('canvas');
+		elm.setAttribute('width', width);
+		elm.setAttribute('height', height);
+		return elm;
+	}
+
+	constructor(div: HTMLDivElement) {
 		super();
 
-		this.canvasDomElement = canvas;
+		if (!(div instanceof HTMLDivElement)) {
+			throw new Error('Tried to create a viewer without a container');
+		}
+
+		// Removes everything which was already in the div
+		div.innerHTML = '';
+		const canvas = this.createCanvas(
+			DEFAULT_VIEWER_WIDTH,
+			DEFAULT_VIEWER_HEIGHT
+		);
+		div.appendChild(canvas);
+
+		this.canvas = canvas;
 		this.painters = [];
 		this.sprites = [];
 
@@ -54,40 +81,20 @@ export class Viewer extends EventEmitter {
 		canvas.addEventListener('mousemove', handler);
 		canvas.addEventListener(wheelEvent, handler);
 
-		this.viewState = {
-			resolution: this.getResolution(),
-			viewport: this.getViewport()
-		};
-
+		this.bindedRender = this.render.bind(this);
 	}
 
-	public getViewport() {
-		return [
-			this.canvasDomElement.clientWidth,
-			this.canvasDomElement.clientHeight
-		];
+	public getViewport(): [number, number] {
+		return [this.canvas.clientWidth, this.canvas.clientHeight];
 	}
 
-	public getResolution() {
-		return [
-			Number(this.canvasDomElement.getAttribute('width')),
-			Number(this.canvasDomElement.getAttribute('height'))
-		];
+	public getResolution(): [number, number] {
+		return [this.canvas.width, this.canvas.height];
 	}
 
-	public setResolution(w, h) {
-		this.canvasDomElement.setAttribute('width', w);
-		this.canvasDomElement.setAttribute('height', h);
-	}
-
-	public addPainter(p: Painter) {
-		this.painters.push(p);
-	}
-
-	public removePainter(p: Painter) {
-		const currentCount = this.painters.length;
-		this.painters = this.painters.filter(i => i !== p);
-		return this.painters.length !== currentCount;
+	public setResolution(width: number, height: number): void {
+		this.canvas.width = width;
+		this.canvas.height = height;
 	}
 
 	private canvasEventHandler(originalEvent) {
@@ -120,16 +127,14 @@ export class Viewer extends EventEmitter {
 		return new ViewerEvent(this, eventType, originalEvent);
 	}
 
-	public clear(): void {
-		this.canvasDomElement.getContext('2d').clearRect(
-			0, 0,
-			Number(this.canvasDomElement.getAttribute('width')),
-			Number(this.canvasDomElement.getAttribute('height'))
+	private clear(): void {
+		this.canvas.getContext('2d').clearRect(
+			0, 0, this.canvas.width, this.canvas.height
 		);
 	}
 
 	public drawBy(painter: Painter): void {
-		let sprite = painter.draw(this.canvasDomElement, this.viewState);
+		let sprite = painter.draw(this.canvas, this.viewState);
 		if (sprite) this.sprites.push(sprite);
 	}
 
@@ -142,12 +147,13 @@ export class Viewer extends EventEmitter {
 	 * @returns {Promise<*>} A promise object that resolves when an actual render happened and succeeded.
 	 */
 	public render(): Promise<any> {
-		const state = this.viewState;
-		const canvas = this.canvasDomElement;
-
 		// Wait only if there is another render() in progress
-		const waiter = this.currentRender || Promise.resolve();
+		let waiter: any = Promise.resolve();
+		if (!this.imageReady) waiter = this.composition.imageSource.ready();
+		if (this.currentRender) waiter = waiter.then(this.currentRender);
 		const p = waiter.then(() => {
+			const canvas = this.canvas;
+			const state = this.viewState;
 			// Now there is no rendering in progress.
 			if (p !== this.nextRender) {
 				// I am expired because another render() method was called after this
@@ -157,7 +163,8 @@ export class Viewer extends EventEmitter {
 			// It's safe to call draw() now.
 			this.currentRender = p;
 			this.nextRender = null;
-			return this.imageSource.draw(canvas, state).then(res => {
+			const src = this.composition.imageSource;
+			return src.draw(this, state).then(res => {
 				this.painters.forEach(painter => {
 					const sprite = painter.draw(canvas, state);
 					if (sprite !== null) this.sprites.push(sprite);
@@ -172,17 +179,20 @@ export class Viewer extends EventEmitter {
 		return p;
 	}
 
-
 	/**
-	 * State handling methods
+	 * Sets the view state and re-renders the viewer.
 	 */
-	public setState(state) {
+	public setState(state: ViewState) {
 		let prevState = extend(true, {}, this.viewState);
 		this.viewState = extend(true, {}, state);
 		this.emit('statechange', prevState, state);
+		this.render();
 		return prevState;
 	}
 
+	/**
+	 * Returns the current view state.
+	 */
 	public getState() {
 		return extend(true, {}, this.viewState);
 	}
@@ -190,37 +200,23 @@ export class Viewer extends EventEmitter {
 	/**
 	 * ImageSource handling methods
 	 */
-	public setSource(source: ImageSource) {
-		let prevSource = this.imageSource;
-		this.imageSource = source;
-		this.emit('sourcechange', prevSource, source);
-		return prevSource;
+	public setComposition(composition: Composition) {
+		if (this.composition === composition) return;
+		if (this.composition) {
+			this.composition.removeListener('change', this.bindedRender);
+		}
+		this.composition = composition;
+		this.imageReady = false;
+		composition.imageSource.ready().then(() => {
+			this.imageReady = true;
+			this.setState(composition.imageSource.initialState(this));
+		});
+		this.composition.addListener('change', this.bindedRender);
+		this.emit('compositionChange', composition);
 	}
 
-	public getSource(): ImageSource {
-		return this.imageSource;
-	}
-
-	public dumpState() {
-		const getIndent = (indent) => {
-			let space = '';
-			while (indent-- > 0) {
-				space += ' ';
-			}
-			return space;
-		};
-		const recursive = (o, indent) => {
-			if (typeof o === 'object') {
-				let dump = '\n';
-				for (let i in o) {
-					dump += getIndent(indent) + i + ': ' + recursive(o[i], indent + 1);
-				}
-				return dump;
-			} else {
-				return o + '\n';
-			}
-		};
-		return recursive(this.viewState, 0);
+	public getComposition(): Composition {
+		return this.composition;
 	}
 
 }

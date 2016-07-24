@@ -163,7 +163,7 @@ var Test = (function() {
 		this.editor = composition.cloudEditor;
 	};
 	Test.prototype._01dumpState = function(viewer) {
-		console.log(viewer.dumpState());
+		console.log(JSON.stringify(viewer.viewState, null, '  '));
 	};
 
 	Test.prototype._02tranrate = function(viewer) {

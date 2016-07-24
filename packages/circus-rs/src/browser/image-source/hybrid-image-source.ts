@@ -4,6 +4,8 @@ import { DicomMetadata } from '../../browser/interface/dicom-metadata';
 import { ImageSource } from './image-source';
 import { DynamicImageSource } from './dynamic-image-source';
 import { RawVolumeImageSource } from './raw-volume-image-source';
+import { ViewState } from '../view-state';
+import { Viewer } from '../viewer/viewer';
 
 export class HybridImageSource extends ImageSource {
 
@@ -29,8 +31,8 @@ export class HybridImageSource extends ImageSource {
 		return this.dynSource.ready();
 	}
 
-	public state() {
-		return this.dynSource.state();
+	public initialState(viewer: Viewer): ViewState {
+		return this.dynSource.initialState(viewer);
 	}
 
 }

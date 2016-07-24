@@ -420,7 +420,9 @@ export class CloudEditor extends EventEmitter {
 		return result;
 	}
 
-
+	/**
+	 * Fills an enclosed area
+	 */
 	public fillWithRawSection(ex, ey) {
 
 		let startPos = [Math.floor(ex), Math.floor(ey)];

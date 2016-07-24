@@ -1,6 +1,8 @@
 'use strict';
 
 import { EventEmitter } from 'events';
+import { ViewState } from '../view-state';
+import { Viewer } from '../viewer/viewer';
 
 /**
  * ImageSource is an abstract class which represents a
@@ -10,7 +12,7 @@ export abstract class ImageSource extends EventEmitter {
 	/**
 	 * Draws an image according to the current view state.
 	 */
-	public abstract draw(canvasDomElement, viewState): Promise<any>;
+	public abstract draw(viewer: Viewer, viewState: ViewState): Promise<any>;
 
 	/**
 	 * Returns a Promise instance which resolves when
@@ -20,7 +22,11 @@ export abstract class ImageSource extends EventEmitter {
 		return Promise.resolve();
 	}
 
-	public state(): any {
+	/**
+	 * Creates the default view state object which will be used
+	 * when the image is firstly loaded to a viewer.
+	 */
+	public initialState(viewer: Viewer): ViewState {
 		return {};
 	}
 }

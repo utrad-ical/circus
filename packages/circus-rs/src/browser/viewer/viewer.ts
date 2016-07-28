@@ -157,20 +157,21 @@ export class Viewer extends EventEmitter {
 	 * but it may not trigger the actual rendering procedure because
 	 * you cannot have more than one rendering paths running simultaneously.
 	 * The returned promise will be rejected when this request was skipped.
-	 * @returns {Promise<*>} A promise object that resolves when an actual render happened and succeeded.
+	 * @return {Promise<boolean>} A promise object that resolves with a
+	 * boolean indicating whther actual rendering happened (true) or not (false).
 	 */
-	public render(): Promise<any> {
+	public render(): Promise<boolean> {
 		// Wait only if there is another render() in progress
 		let waiter: any = Promise.resolve();
 		if (!this.imageReady) waiter = this.composition.imageSource.ready();
 		if (this.currentRender) waiter = waiter.then(this.currentRender);
-		const p = waiter.then(() => {
+		const p: Promise<boolean> = waiter.then(() => {
 			const canvas = this.canvas;
 			const state = this.viewState;
 			// Now there is no rendering in progress.
 			if (p !== this.nextRender) {
 				// I am expired because another render() method was called after this
-				return Promise.reject('Frame skipped');
+				return Promise.resolve(false);
 			}
 			// I am the most recent render() call.
 			// It's safe to call draw() now.
@@ -183,7 +184,7 @@ export class Viewer extends EventEmitter {
 					if (sprite !== null) this.sprites.push(sprite);
 				};
 				this.currentRender = null;
-				return res;
+				return true;
 			});
 		});
 		// Remember this render() call as the most recent one,

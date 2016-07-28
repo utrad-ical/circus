@@ -1,26 +1,33 @@
 'use strict';
 
-export function createToolbar(wrapperElement, toolNames: string[]) {
+import { Viewer } from './viewer/viewer';
 
-	let associatedCompositions = [];
+interface Toolbar {
+	bindViewer: (viewer: Viewer) => void;
+}
 
-	let selectToolHandler = toolName => {
-		associatedCompositions.forEach(c => c.setTool(toolName));
+export function createToolbar(
+	wrapperElement: HTMLElement,
+	toolNames: string[]
+): Toolbar {
+	const viewers: Viewer[] = [];
+
+	const selectToolHandler = toolName => {
+		viewers.forEach(v => v.setActiveTool(toolName));
 	};
 
-	let ulElement = document.createElement('ul');
+	const ulElement = document.createElement('ul');
 	ulElement.className = 'circus-rs-toolbar';
 
-	let appendLi = (toolName) => {
-		let buttonElement = document.createElement('button');
-		buttonElement.setAttribute('type', 'button');
-		buttonElement.appendChild(document.createTextNode(toolName));
-		buttonElement.addEventListener('click', () => selectToolHandler(toolName));
+	const appendLi = toolName => {
+		const button = document.createElement('button');
+		button.setAttribute('type', 'button');
+		button.appendChild(document.createTextNode(toolName));
+		button.addEventListener('click', () => selectToolHandler(toolName));
 
-		let liElement = document.createElement('li');
+		const liElement = document.createElement('li');
 		liElement.className = 'circus-rs-toolbar-item ' + toolName;
-		liElement.appendChild(buttonElement);
-
+		liElement.appendChild(button);
 		ulElement.appendChild(liElement);
 	};
 
@@ -30,19 +37,16 @@ export function createToolbar(wrapperElement, toolNames: string[]) {
 
 	wrapperElement.appendChild(ulElement);
 
-	let bindComposition = (composition) => {
-		composition.on('toolchange', (before, after) => {
+	const bindViewer = viewer => {
+		viewer.on('toolchange', (before, after) => {
 			if (before) {
-				let re = new RegExp(' ' + before + '-active ', 'g');
+				const re = new RegExp(' ' + before + '-active ', 'g');
 				ulElement.className = ulElement.className.replace(re, '');
 			}
 			ulElement.className += ' ' + after + '-active ';
 		});
-		associatedCompositions.push(composition);
+		viewers.push(viewer);
 	};
 
-	return {
-		bindComposition: bindComposition
-	};
+	return { bindViewer };
 }
-

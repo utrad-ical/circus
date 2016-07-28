@@ -12,7 +12,9 @@ $('#load').on('click', () => {
 		server: $('#server').val()
 	};
 	localStorage.setItem('rs-demo-save', JSON.stringify(config));
-	initializeViewer(config.series, config.server);
+	const viewer = initializeViewer(config.series, config.server);
+	const toolbar = initializeToolbar();
+	toolbar.bindViewer(viewer);
 });
 
 function initializeViewer(series, server) {
@@ -23,4 +25,12 @@ function initializeViewer(series, server) {
 	const div = document.getElementById('viewer');
 	const viewer = new rs.Viewer(div);
 	viewer.setComposition(comp);
+	return viewer;
+}
+
+function initializeToolbar() {
+	return rs.createToolbar(
+		document.getElementById('toolbar'),
+		['hand', 'window', 'celestialRotate']
+	);
 }

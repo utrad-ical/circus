@@ -106,15 +106,4 @@ export class Composition extends EventEmitter {
 		return this.annotations;
 	}
 
-	public renderAll() {
-		if (!this.imageSource) throw 'ImageSource is not set';
-		return this.imageSource.ready().then(() => {
-			let p = [];
-			this.viewers.forEach((v) => {
-				p.push(v.render());
-			});
-			return Promise.all(p);
-		});
-	}
-
 }

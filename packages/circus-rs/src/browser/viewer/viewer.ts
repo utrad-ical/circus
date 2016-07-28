@@ -27,7 +27,15 @@ export class Viewer extends EventEmitter {
 	// private painters: Painter[];
 	private sprites: Sprite[];
 
+	/**
+	 * primaryEventTarget captures all UI events happened within the canvas
+	 * before other elements handle this, typically while dragging.
+	 */
 	public primaryEventTarget;
+
+	/**
+	 * backgroudnEventTarget handles all UI events after other elements.
+	 */
 	public backgroundEventTarget;
 
 	private bindedRender: Function;
@@ -114,12 +122,16 @@ export class Viewer extends EventEmitter {
 				break;
 		}
 
-		let event = new ViewerEvent(this, eventType, originalEvent);
-		if (this.primaryEventTarget) event.dispatch(this.primaryEventTarget);
-		for (let i = this.sprites.length; i > 0; i--) {
-			event.dispatch(this.sprites[i - 1]);
+		const event = new ViewerEvent(this, eventType, originalEvent);
+		if (this.primaryEventTarget) {
+			event.dispatch(this.primaryEventTarget);
 		}
-		if (this.backgroundEventTarget) event.dispatch(this.backgroundEventTarget);
+		for (let sprite of this.sprites) {
+			event.dispatch(sprite);
+		}
+		if (this.backgroundEventTarget) {
+			event.dispatch(this.backgroundEventTarget);
+		}
 	}
 
 	public createEvent(eventType, originalEvent?) {

@@ -43,9 +43,13 @@ export class ViewerEvent {
 	}
 
 	public dispatch(element) {
-		let handler = this.type + 'Handler';
-		if (this.propagation && element && element[handler] && typeof element[handler] === 'function') {
-			let retval = element[handler](this);
+		const normalizedEvent = this.type.replace(
+			/^(mouse|drag)([a-z])/,
+			(m, p1, p2) => p1 + p2.toUpperCase()
+		);
+		const handler = normalizedEvent + 'Handler';
+		if (this.propagation && element && typeof element[handler] === 'function') {
+			const retval = element[handler](this);
 			if (retval === false) this.stopPropagation();
 		}
 	}

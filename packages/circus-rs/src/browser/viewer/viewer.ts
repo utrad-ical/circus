@@ -9,6 +9,8 @@ import { Composition } from '../../browser/composition';
 import { ViewerEvent } from '../../browser/viewer/viewer-event';
 import { ViewerEventTarget } from '../../browser/interface/viewer-event-target';
 import { ViewState } from '../view-state';
+import { Tool } from '../tool/tool';
+import { toolFactory } from '../tool/tool-initializer';
 
 const DEFAULT_VIEWER_WIDTH = 512;
 const DEFAULT_VIEWER_HEIGHT = 512;
@@ -23,6 +25,9 @@ export class Viewer extends EventEmitter {
 	public canvas: HTMLCanvasElement;
 	private viewState: ViewState;
 	private composition: Composition;
+
+	private activeTool: Tool;
+	private activeToolName: string;
 
 	// private painters: Painter[];
 	private sprites: Sprite[];
@@ -89,6 +94,8 @@ export class Viewer extends EventEmitter {
 		canvas.addEventListener(wheelEvent, handler);
 
 		this.bindedRender = this.render.bind(this);
+
+		this.setActiveTool('null');
 	}
 
 	public getViewport(): [number, number] {
@@ -225,6 +232,26 @@ export class Viewer extends EventEmitter {
 
 	public getComposition(): Composition {
 		return this.composition;
+	}
+
+	public setActiveTool(toolName: string): void {
+		const before = this.activeTool;
+		const tool = toolFactory(toolName);
+		if (tool === undefined)
+			throw new TypeError('Unknown tool: ' + toolName);
+
+		this.activeTool = tool;
+
+		// set this tool as the background event target
+		// which handles UI events after other sprites
+		this.backgroundEventTarget = this.activeTool;
+
+		this.activeToolName = toolName;
+		this.emit('toolchange', before, toolName);
+	}
+
+	public getActiveTool(): string {
+		return this.activeToolName;
 	}
 
 }

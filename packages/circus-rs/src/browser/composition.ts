@@ -33,62 +33,45 @@ export class Composition extends EventEmitter {
 	 */
 	private annotations: Annotation[] = []; // TODO: Change to ES6 Set<Annotation>
 
-	private tools: any = {}; // { name: string => tool: Tool }
-	public clouds: VoxelCloud[] = [];
-
-	private currentToolName: string;
-
-	private cloudEditor: CloudEditor;
+	// public clouds: VoxelCloud[] = [];
+	// private cloudEditor: CloudEditor;
 
 	constructor() {
 		super();
 
-		/**
-		 * set up tools
-		 */
-
-		// window tool
-		this.tools['Window'] = new WindowTool();
-
-		// hand tool
-		this.tools['Hand'] = new HandTool();
-
-		// celestial-rotate tool
-		this.tools['CelestialRotate'] = new CelestialRotateTool();
-
+		// //
+		// // Cloud edit tools
+		// //
+		// this.cloudEditor = new CloudEditor();
 		//
-		// Cloud edit tools
+		// // brush tool
+		// let brush = new BrushTool();
+		// brush.cloudEditor = this.cloudEditor;
+		// brush.on('penup', () => {
+		// 	this.renderAll();
+		// });
+		// this.tools['Brush'] = brush
 		//
-		this.cloudEditor = new CloudEditor();
-
-		// brush tool
-		let brush = new BrushTool();
-		brush.cloudEditor = this.cloudEditor;
-		brush.on('penup', () => {
-			this.renderAll();
-		});
-		this.tools['Brush'] = brush
-
-		// bucket tool
-		let bucket = new BucketTool();
-		bucket.cloudEditor = this.cloudEditor;
-		bucket.on('filled', () => {
-			this.renderAll();
-		});
-		this.tools['Bucket'] = bucket
-
-		/**
-		 * set up painter
-		 */
-		let cloudsRenderer = new CloudsRenderer();
-		cloudsRenderer.clouds = this.clouds;
-		this.annotations.push(cloudsRenderer);
+		// // bucket tool
+		// let bucket = new BucketTool();
+		// bucket.cloudEditor = this.cloudEditor;
+		// bucket.on('filled', () => {
+		// 	this.renderAll();
+		// });
+		// this.tools['Bucket'] = bucket
+		//
+		// /**
+		//  * set up painter
+		//  */
+		// let cloudsRenderer = new CloudsRenderer();
+		// cloudsRenderer.clouds = this.clouds;
+		// this.annotations.push(cloudsRenderer);
 
 	}
 
-	public editCloud(cloud: VoxelCloud) {
-		this.cloudEditor.setCloud(cloud);
-	}
+	// public editCloud(cloud: VoxelCloud) {
+	// 	this.cloudEditor.setCloud(cloud);
+	// }
 
 	public setImageSource(imageSource: ImageSource) {
 		this.imageSource = imageSource;
@@ -132,36 +115,6 @@ export class Composition extends EventEmitter {
 			});
 			return Promise.all(p);
 		});
-	}
-
-	public setTool(toolName: string): Tool {
-
-		if (this.currentToolName === toolName) {
-			return this.tools[toolName];
-		}
-
-		if (typeof this.tools[toolName] === 'undefined')
-			throw 'Unknown tool: ' + toolName;
-
-		let tool = this.tools[toolName];
-
-		// bind viewers
-		this.viewers.forEach((v) => {
-			v.backgroundEventTarget = this.tools[toolName];
-		});
-
-		let before = this.currentToolName;
-		this.currentToolName = toolName;
-		this.emit('toolchange', before, toolName);
-
-		return this.tools[toolName];
-	}
-
-	public getTool(toolName: string): Tool {
-		if (typeof this.tools[toolName] === 'undefined')
-			throw 'Unknown tool: ' + toolName;
-
-		return this.tools[toolName];
 	}
 
 }

@@ -29,6 +29,10 @@ export abstract class VolumeImageSource extends ImageSource {
 		return state;
 	}
 
+	public voxelSize(): [number, number, number] {
+		return this.meta.voxelSize;
+	}
+
 	/**
 	 * Calculates the source volume size in millimeters.
 	 */

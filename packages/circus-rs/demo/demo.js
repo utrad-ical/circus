@@ -16,7 +16,7 @@ $('#load').on('click', () => {
 });
 
 function initializeViewer(series, server) {
-	const src = new rs.DynamicImageSource({ series, server });
+	const src = new rs.RawVolumeImageSource({ series, server });
 	const comp = new rs.Composition();
 	comp.setImageSource(src);
 

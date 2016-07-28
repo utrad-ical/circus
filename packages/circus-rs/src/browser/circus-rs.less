@@ -1,0 +1,33 @@
+@import 'iconfont.less';
+
+button.active-tool {
+	background: #f60 none !important;
+	color: #fff !important;
+}
+
+.circus-rs-toolbar {
+	margin: 0;
+	padding: 0;
+	li {
+		margin: 0;
+		padding: 0;
+		list-style: none;
+		display: inline-block;
+	}
+}
+
+@rs-toolbutton-size: 30px;
+
+.circus-rs-toolbutton {
+	font-size: @rs-toolbutton-size;
+	line-height: @rs-toolbutton-size;
+	height: @rs-toolbutton-size;
+	min-width: @rs-toolbutton-size;
+	border: 1px solid gray;
+	background: white;
+	color: gray;
+	&.active {
+		color: white;
+		background-color: gray;
+	}
+}

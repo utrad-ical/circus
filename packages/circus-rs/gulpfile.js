@@ -12,7 +12,7 @@ var buffer = require('vinyl-buffer');
 var uglify = require('gulp-uglify');
 var tslint = require('gulp-tslint');
 
-gulp.task('default', ['typescript', 'less', 'dist-browser']);
+gulp.task('default', ['typescript', 'dist-browser']);
 
 gulp.task('watch', ['typescript', 'less'], function() {
 	gulp.watch('src/**/*.ts', ['typescript']);
@@ -23,12 +23,6 @@ gulp.task('typescript', function() {
 	var project = typescript.createProject('src/tsconfig.json');
 	return gulp.src('src/**/*.ts')
 		.pipe(typescript(project))
-		.pipe(gulp.dest('lib'));
-});
-
-gulp.task('less', function() {
-	return gulp.src('src/**/*.less')
-		.pipe(less())
 		.pipe(gulp.dest('lib'));
 });
 
@@ -86,12 +80,9 @@ gulp.task('dist-browser', ['typescript','dist-browser-css'], function() {
 		.pipe(source('circus-rs-client.js'))
 		.pipe(buffer())
 		.pipe(gulp.dest('dist'))
-		// .pipe(uglify())
-		// .pipe(concat('circus-rs-client.min.js'))
-		// .pipe(gulp.dest('dist'));
 });
 gulp.task('dist-browser-css', ['dist-browser-iconfont'], function() {
-	return gulp.src('src/browser/*.less')
+	return gulp.src('src/browser/circus-rs.less')
 		.pipe(less())
 		.pipe(gulp.dest('dist/css'));
 });

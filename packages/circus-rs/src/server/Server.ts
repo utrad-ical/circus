@@ -5,8 +5,6 @@ import logger, { shutdown as loggerShutdown } from './Logger';
 logger.info('================================');
 logger.info('CIRCUS RS is starting up...');
 
-import { Promise } from 'es6-promise';
-
 import Counter from './Counter';
 import ImageEncoder from './image-encoders/ImageEncoder';
 

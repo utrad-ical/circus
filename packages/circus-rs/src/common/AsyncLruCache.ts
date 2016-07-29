@@ -1,5 +1,3 @@
-import { Promise } from 'es6-promise';
-
 interface LruEntry<T> {
 	key: string;
 	item: T;

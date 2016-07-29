@@ -2,7 +2,6 @@ import logger from '../Logger';
 import DicomDumper from './DicomDumper';
 import DicomVolume  from '../../common/DicomVolume';
 import { PixelFormat } from '../../common/PixelFormat';
-import { Promise } from 'es6-promise';
 
 import fs = require('fs');
 

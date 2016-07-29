@@ -1,7 +1,5 @@
 'use strict';
 
-import { Promise }    from 'es6-promise';
-
 import DicomVolume from '../../common/DicomVolume';
 import { RsHttpLoaderImageSource } from '../../browser/image-source/rs-http-loader-image-source';
 

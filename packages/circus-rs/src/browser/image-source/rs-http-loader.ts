@@ -1,6 +1,5 @@
 'use strict';
 
-import { Promise } from 'es6-promise';
 import axios = require('axios');
 
 import { PixelFormat, pixelFormatInfo } from '../../common/PixelFormat';
@@ -20,7 +19,7 @@ export class RsHttpLoader {
 	}
 
 	public metadata(series: string): Promise<DicomMetadata> {
-		let url = `${this.server}/metadata`;
+		const url = `${this.server}/metadata`;
 
 		return axios.get(url, {
 			params: {
@@ -28,7 +27,7 @@ export class RsHttpLoader {
 			}
 		}).then(res => {
 			return <DicomMetadata>res.data;
-		});
+		}) as Promise<DicomMetadata>; // TODO: Remove when axios.d.ts is updated
 	}
 
 	public scan(series: string,
@@ -56,7 +55,7 @@ export class RsHttpLoader {
 			responseType: 'arraybuffer'
 		}).then((res) => {
 			return new Uint8Array(res.data);
-		});
+		}) as Promise<Uint8Array>; // TODO: Remove when axios.d.ts is updated
 	}
 
 	public volume(series: string,

@@ -1,5 +1,4 @@
 var assert = require('chai').assert;
-var Promise = require('es6-promise').Promise;
 var AsyncLruCache = require('../build/common/AsyncLruCache').default;
 
 describe('AsyncLruCache', function() {

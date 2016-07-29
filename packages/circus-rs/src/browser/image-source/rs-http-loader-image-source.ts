@@ -1,7 +1,5 @@
 'use strict';
 
-import { Promise } from 'es6-promise';
-
 import { DicomMetadata } from '../../browser/interface/dicom-metadata';
 import { VolumeImageSource } from './volume-image-source';
 import { RsHttpLoader } from './rs-http-loader';

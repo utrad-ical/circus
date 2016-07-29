@@ -1,6 +1,5 @@
 // Raw voxel container class
 
-import { Promise } from 'es6-promise';
 import { PixelFormat, PixelFormatInfo, pixelFormatInfo } from './PixelFormat';
 
 export type Vector3D = [number, number, number];
@@ -14,7 +13,7 @@ export class RawDataSection {
 	public read: ( offset: number ) => number;
 	public write: ( offset: number, value: number ) => void;
 	private view: {[offset: number]: number};
-	
+
 	public applyWindow( width: number, level: number ){
 		let len = this.width * this.height;
 		let data = new ArrayBuffer( len );
@@ -40,14 +39,14 @@ export class RawDataSection {
 	public writePixelAt( xi, yi, value ){
 		return this.write( yi * this.width + xi, value );
 	}
-	
+
 	constructor( width: number, height: number, type: PixelFormat, data?: ArrayBuffer ){
 		let pxInfo = pixelFormatInfo(type);
 
 		this.width = width;
 		this.height = height;
 		this.data = data ? data : new ArrayBuffer( width * height * pxInfo.bpp );
-		
+
 		this.view = new pxInfo.arrayClass( this.data );
 		if( type !== PixelFormat.Binary ){
 			this.read = (offset) => this.view[offset];
@@ -61,5 +60,5 @@ export class RawDataSection {
 			};
 		}
 	}
-	
+
 }

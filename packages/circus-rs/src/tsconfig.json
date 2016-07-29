@@ -2,7 +2,8 @@
 	"compilerOptions": {
 		"module": "commonjs",
 		"target": "es5",
-		"outDir": "../build"
+		"outDir": "../build",
+		"lib": ["dom", "es5", "es2015.promise"]
 	},
 	"compileOnSave": false,
 	"buildOnSave": false

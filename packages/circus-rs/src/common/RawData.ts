@@ -1,7 +1,6 @@
 // Raw voxel container class
 
 import { MultiRange } from 'multi-integer-range';
-import { Promise } from 'es6-promise';
 
 import { PixelFormat, PixelFormatInfo, pixelFormatInfo } from './PixelFormat';
 import { RawDataSection } from './RawDataSection';
@@ -659,7 +658,7 @@ export default class RawData {
 	public mmGetDimension(){
 		if (!this.size) throw new Error('Dimension not set');
 		if (!this.voxelSize) throw new Error('voxel size not set');
-		
+
 		return [
 			this.size[0] * this.voxelSize[0],
 			this.size[1] * this.voxelSize[1],
@@ -668,13 +667,13 @@ export default class RawData {
 	}
 	public mmIndexAt( mm_x: number, mm_y: number, mm_z: number ): Vector3D {
 		if( mm_x < 0.0 || mm_y < 0.0 || mm_z < 0.0 ) return null;
-		
+
 		let [ ix, iy, iz ] = [ Math.floor( mm_x / this.voxelSize[0] ), Math.floor( mm_y / this.voxelSize[1] ), Math.floor( mm_z / this.voxelSize[2] ) ];
 		if( this.size[0] <= ix || this.size[1] <= iy || this.size[2] <= iz ) return null;
-		
+
 		return [ ix, iy, iz ];
 	}
-	
+
 	public mmGetSection(
 		origin_mm: Vector3D,
 		u_mm: Vector3D,
@@ -698,7 +697,7 @@ export default class RawData {
 			v_mm[0] / v_count,
 			v_mm[1] / v_count,
 			v_mm[2] / v_count ];
-		
+
 		let reader = interpolation
 			? (pos_x, pos_y, pos_z) => {
 				let pidx = this.mmIndexAt( pos_x, pos_y, pos_z );
@@ -708,7 +707,7 @@ export default class RawData {
 				let pidx = this.mmIndexAt( pos_x, pos_y, pos_z );
 				return pidx ? this.getPixelAt( pidx[0], pidx[1], pidx[2] ) : 0;
 			};
-		
+
 		let section = new RawDataSection( u_count, v_count, this.pixelFormat );
 		let offset = 0;
 		let [ v_walker_x, v_walker_y, v_walker_z ] = [o_x, o_y, o_z];
@@ -724,7 +723,7 @@ export default class RawData {
 			v_walker_y += v_step_h;
 			v_walker_z += v_step_d;
 		}
-		
+
 		return section;
 	}
 }

@@ -1,5 +1,4 @@
 import DicomVolume from '../../common/DicomVolume';
-import { Promise } from 'es6-promise';
 
 /**
  * Base DICOM Dumper class.

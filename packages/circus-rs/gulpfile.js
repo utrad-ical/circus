@@ -5,7 +5,6 @@ var iconfont = require('gulp-iconfont');
 var concat = require('gulp-concat');
 var rimraf = require('rimraf');
 
-var jade = require('gulp-jade');
 var browserify = require('browserify');
 var source = require('vinyl-source-stream');
 var buffer = require('vinyl-buffer');
@@ -14,9 +13,9 @@ var tslint = require('gulp-tslint');
 
 gulp.task('default', ['typescript', 'dist-browser']);
 
-gulp.task('watch', ['typescript', 'less'], function() {
+gulp.task('watch', ['typescript', 'dist-browser-css'], function() {
 	gulp.watch('src/**/*.ts', ['typescript']);
-	gulp.watch('src/**/*.less', ['less']);
+	gulp.watch('src/**/*.less', ['dist-browser-css']);
 });
 
 gulp.task('typescript', function() {
@@ -72,7 +71,9 @@ gulp.task('tslint', function() {
 /*
  * Build distribution package
  */
-gulp.task('dist-browser', ['typescript','dist-browser-css'], function() {
+gulp.task('dist-browser', ['browserify', 'dist-browser-iconfont', 'dist-browser-css']);
+
+gulp.task('browserify', ['typescript'], function() {
 	// The 'standalone' option will create `window.circusrs.Viewer`
 	// on the browser.
 	return browserify({
@@ -84,11 +85,13 @@ gulp.task('dist-browser', ['typescript','dist-browser-css'], function() {
 		.pipe(buffer())
 		.pipe(gulp.dest('dist'))
 });
-gulp.task('dist-browser-css', ['dist-browser-iconfont'], function() {
+
+gulp.task('dist-browser-css', function() {
 	return gulp.src('src/browser/circus-rs.less')
 		.pipe(less())
 		.pipe(gulp.dest('dist/css'));
 });
+
 gulp.task('dist-browser-iconfont', function() {
 	return gulp.src('src/browser/assets/icons/*.svg')
 		.pipe(iconfont({

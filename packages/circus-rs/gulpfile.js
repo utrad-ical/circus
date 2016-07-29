@@ -20,7 +20,10 @@ gulp.task('watch', ['typescript', 'less'], function() {
 });
 
 gulp.task('typescript', function() {
-	var project = typescript.createProject('src/tsconfig.json');
+	var project = typescript.createProject(
+		'src/tsconfig.json',
+		{ typescript: require('typescript') } // uses TypeScript 2.0
+	);
 	return gulp.src('src/**/*.ts')
 		.pipe(typescript(project))
 		.pipe(gulp.dest('lib'));

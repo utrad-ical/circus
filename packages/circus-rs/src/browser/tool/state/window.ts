@@ -1,8 +1,8 @@
 'use strict';
 
-import { Tool } from '../../../browser/tool/tool';
 import { DraggableTool } from '../../../browser/tool/draggable';
 import { Viewer } from '../../../browser/viewer/viewer';
+import { ViewState } from '../../view-state';
 import { ViewerEvent } from '../../../browser/viewer/viewer-event';
 import { ViewerEventTarget } from '../../../browser/interface/viewer-event-target';
 
@@ -14,9 +14,10 @@ export class WindowTool extends DraggableTool implements ViewerEventTarget {
 	}
 
 	public dragMoveHandler(ev: ViewerEvent, dragInfo) {
-		this.windowLevelBy(ev.viewer, dragInfo.dx * ( ev.original.ctrlKey ? 2 : 1 ));
-		this.windowWidthBy(ev.viewer, dragInfo.dy * ( ev.original.ctrlKey ? 20 : 5 ));
-		ev.viewer.render();
+		const viewState = ev.viewer.getState();
+		this.windowLevelBy(viewState, dragInfo.dx * ( ev.original.ctrlKey ? 2 : 1 ));
+		this.windowWidthBy(viewState, dragInfo.dy * ( ev.original.ctrlKey ? 20 : 5 ));
+		ev.viewer.setState(viewState);
 		ev.stopPropagation();
 	}
 
@@ -28,15 +29,12 @@ export class WindowTool extends DraggableTool implements ViewerEventTarget {
 	/**
 	 * window level / width
 	 */
-	public windowLevelBy(viewer, dl: number) {
-		let state = viewer.getState();
+	public windowLevelBy(state: ViewState, dl: number) {
 		state.window.level += dl;
-		viewer.setState(state);
 	}
 
-	public windowWidthBy(viewer, dw: number) {
-		let state = viewer.getState();
+	public windowWidthBy(state: ViewState, dw: number) {
 		state.window.width += dw;
-		viewer.setState(state);
+		if (state.window.width < 1) state.window.width = 1;
 	}
 }

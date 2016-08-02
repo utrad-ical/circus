@@ -5,7 +5,7 @@ import * as gl from 'gl-matrix';
  * ViewWindow determines how each pixel value is assined
  * to grayscale values on screens.
  */
-interface ViewWindow {
+export interface ViewWindow {
 	level: number;
 	width: number;
 }
@@ -13,13 +13,13 @@ interface ViewWindow {
 /**
  * Section determines the MRP section of a volume.
  */
-interface Section {
+export interface Section {
 	origin: [number, number, number];
 	xAxis: [number, number, number]; // in millimeters
 	yAxis: [number, number, number]; // in millimeters
 }
 
-interface ZoomAttributes {
+export interface ZoomAttributes {
 	x: number;
 	y: number;
 	z: number;
@@ -64,4 +64,19 @@ export function parallelToY(vec: number[]): boolean {
 export function parallelToZ(vec: number[]): boolean {
 	const a = gl.vec3.angle(vec, gl.vec3.fromValues(0, 0, 1));
 	return a < THRESHOLD || a > Math.PI - THRESHOLD;
+}
+
+export function getVolumePos(section: Section, viewport: [number, number],
+	x: number, y: number): [number, number, number]
+{
+	const [w, h] = viewport;
+	const [ox, oy, oz] = section.origin;
+	const [ux, uy, uz] = section.xAxis.map(i => i / w);
+	const [vx, vy, vz] = section.yAxis.map(i => i / h);
+
+	return [
+		ox + ux * x + vx * y,
+		oy + uy * x + vy * y,
+		oz + uz * x + vz * y
+	];
 }

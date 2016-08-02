@@ -58,17 +58,4 @@ export class Tool extends EventEmitter {
 		viewer.setState(state);
 	}
 
-	protected getVolumePos( section, viewport, x: number, y: number): [number, number, number] {
-		let [ w, h ] = viewport;
-		let [ ox, oy, oz ] = section.origin;
-		let [ ux, uy, uz ] = section.xAxis.map(i => i / w);
-		let [ vx, vy, vz ] = section.yAxis.map(i => i / h);
-
-		return [
-			ox + ux * x + vx * y,
-			oy + uy * x + vy * y,
-			oz + uz * x + vz * y
-		];
-	}
-
 }

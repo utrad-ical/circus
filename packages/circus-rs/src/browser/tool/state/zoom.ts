@@ -29,7 +29,6 @@ export class ZoomTool extends DraggableTool implements ViewerEventTarget {
 		this.zoom(ev.viewer,
 			ev.original.ctrlKey ? ( ev.original.deltaY > 0 ? '+3' : '-3' ) : ( ev.original.deltaY > 0 ? '+1' : '-1' ),
 			[ev.viewerX, ev.viewerY]);
-		// ev.viewer.render();
 		ev.stopPropagation();
 	}
 
@@ -49,7 +48,7 @@ export class ZoomTool extends DraggableTool implements ViewerEventTarget {
 		}
 	}
 
-	private zoom(viewer: Viewer, zoomVal: number|string, fp?: [number,number]) {
+	private zoom(viewer: Viewer, zoomVal: number | string, center?: [number,number]) {
 
 		const zoomRate = 1.05;
 
@@ -58,10 +57,10 @@ export class ZoomTool extends DraggableTool implements ViewerEventTarget {
 		const state: ViewState = viewer.getState();
 
 		if (typeof zoomVal === 'string') {
-			if (( zoomVal as string ).substr(0, 1) === '+') {
-				zoomVal = state.zoom.value + Math.round(Number(( zoomVal as string ).substr(1)));
+			if (zoomVal.substr(0, 1) === '+') {
+				zoomVal = state.zoom.value + Math.round(Number(zoomVal.substr(1)));
 			} else if (( zoomVal as string ).substr(0, 1) === '-') {
-				zoomVal = state.zoom.value - Math.round(Number(( zoomVal as string ).substr(1)));
+				zoomVal = state.zoom.value - Math.round(Number(zoomVal.substr(1)));
 			} else {
 				zoomVal = state.zoom.value;
 			}
@@ -72,15 +71,15 @@ export class ZoomTool extends DraggableTool implements ViewerEventTarget {
 		}
 
 		if (zoomVal != state.zoom.value) {
-			let vp = viewer.getResolution();
-			if (!fp) fp = [vp[0] / 2, vp[1] / 2];
+			const vp = viewer.getResolution();
+			if (!center) center = [vp[0] / 2, vp[1] / 2];
 
-			let [ x0, y0, z0 ] = state.section.origin;
+			const [ x0, y0, z0 ] = state.section.origin;
 
-			let focus = this.getVolumePos(state.section, vp, fp[0], fp[1]);
+			const focus = this.getVolumePos(state.section, vp, center[0], center[1]);
 			this.scale(
 				state.section,
-				Math.pow(zoomRate, zoomVal as number) / Math.pow(zoomRate, state.zoom.value),
+				Math.pow(zoomRate, zoomVal) / Math.pow(zoomRate, state.zoom.value),
 				focus);
 
 			state.zoom.value = zoomVal;
@@ -94,21 +93,21 @@ export class ZoomTool extends DraggableTool implements ViewerEventTarget {
 		}
 	}
 
-	private scale(section, scale: number, centralPoint) {
+	private scale(section, scale: number, center: [number, number, number]): void {
 
-		let operation = [
-			t => mat4.translate(t, t, vec3.scale(vec3.create(), centralPoint, -1)),
+		const operation = [
+			t => mat4.translate(t, t, vec3.scale(vec3.create(), center, -1)),
 			t => mat4.scale(t, t, vec3.fromValues(scale, scale, scale)),
-			t => mat4.translate(t, t, centralPoint)
+			t => mat4.translate(t, t, center)
 		].reverse().reduce((p, t) => t(p), mat4.create());
 
-		let xEndPoint = vec3.add(vec3.create(), section.origin, section.xAxis);
-		let yEndPoint = vec3.add(vec3.create(), section.origin, section.yAxis);
-		let [ o, x, y ] = [section.origin, xEndPoint, yEndPoint].map(
+		const xEndPoint = vec3.add(vec3.create(), section.origin, section.xAxis);
+		const yEndPoint = vec3.add(vec3.create(), section.origin, section.yAxis);
+		const [ o, x, y ] = [section.origin, xEndPoint, yEndPoint].map(
 			p => vec3.transformMat4(vec3.create(), p, operation)
 		);
-		let xAxis = vec3.subtract(vec3.create(), x, o);
-		let yAxis = vec3.subtract(vec3.create(), y, o);
+		const xAxis = vec3.subtract(vec3.create(), x, o);
+		const yAxis = vec3.subtract(vec3.create(), y, o);
 
 		vec3.copy(section.origin, o);
 		vec3.copy(section.xAxis, xAxis);

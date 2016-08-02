@@ -43,7 +43,7 @@ export class Viewer extends EventEmitter {
 	 */
 	public backgroundEventTarget;
 
-	private bindedRender: Function;
+	private boundRender: Function;
 
 	private imageReady: boolean = false;
 
@@ -93,7 +93,7 @@ export class Viewer extends EventEmitter {
 		canvas.addEventListener('mousemove', handler);
 		canvas.addEventListener(wheelEvent, handler);
 
-		this.bindedRender = this.render.bind(this);
+		this.boundRender = this.render.bind(this);
 
 		this.setActiveTool('null');
 	}
@@ -218,7 +218,7 @@ export class Viewer extends EventEmitter {
 		if (this.composition === composition) return;
 		if (this.composition) {
 			this.composition.unregisterViewer(this);
-			this.composition.removeListener('change', this.bindedRender);
+			this.composition.removeListener('change', this.boundRender);
 		}
 		this.composition = composition;
 		this.composition.registerViewer(this);
@@ -227,7 +227,7 @@ export class Viewer extends EventEmitter {
 			this.imageReady = true;
 			this.setState(composition.imageSource.initialState(this));
 		});
-		this.composition.addListener('change', this.bindedRender);
+		this.composition.addListener('change', this.boundRender);
 		this.emit('compositionChange', composition);
 	}
 

@@ -19,12 +19,20 @@ interface Section {
 	yAxis: [number, number, number]; // in millimeters
 }
 
+interface ZoomAttributes {
+	x: number;
+	y: number;
+	z: number;
+	value: number;
+}
+
 /**
  * ViewState determines how the ImageSource is viewed on each Viewer.
  */
 export interface ViewState {
 	section?: Section;
 	window?: ViewWindow;
+	zoom?: ZoomAttributes;
 };
 
 /**

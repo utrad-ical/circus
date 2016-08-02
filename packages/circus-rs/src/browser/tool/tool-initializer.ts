@@ -1,6 +1,7 @@
 import { Tool } from './tool';
 import { WindowTool } from './state/window';
 import { HandTool } from './state/hand';
+import { ZoomTool } from './state/zoom';
 import { CelestialRotateTool } from './state/celestial-rotate';
 
 const toolCollection = {};
@@ -9,6 +10,7 @@ const defaultTools = {
 	null: Tool, // Null tool that ignores all UI events only to show a static image
 	hand: HandTool,
 	window: WindowTool,
+	zoom: ZoomTool,
 	celestialRotate: CelestialRotateTool
 };
 

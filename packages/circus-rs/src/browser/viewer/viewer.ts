@@ -207,7 +207,7 @@ export class Viewer extends EventEmitter {
 	/**
 	 * Returns the current view state.
 	 */
-	public getState() {
+	public getState(): ViewState {
 		return extend(true, {}, this.viewState);
 	}
 

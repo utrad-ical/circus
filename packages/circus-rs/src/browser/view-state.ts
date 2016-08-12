@@ -80,3 +80,17 @@ export function getVolumePos(section: Section, viewport: [number, number],
 		oz + uz * x + vz * y
 	];
 }
+
+export function translateSection(section: Section, delta: number[]): Section
+{
+	const origin: [number, number, number] = [
+		section.origin[0] + delta[0],
+		section.origin[1] + delta[1],
+		section.origin[2] + delta[2]
+	];
+	return {
+		origin,
+		xAxis: section.xAxis,
+		yAxis: section.yAxis
+	};
+}

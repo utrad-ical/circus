@@ -40,4 +40,20 @@ describe('ViewState', function() {
 		assert.equal(vs.detectOrthogonalSection({ xAxis: [1, 0, 0], yAxis: [0, 0, 1] }), 'coronal');
 		assert.equal(vs.detectOrthogonalSection({ xAxis: [1, 2, 0], yAxis: [0, 1, 0] }), 'oblique');
 	});
+
+	describe('should handle section transformatinos', function() {
+		function section() {
+			return {
+				origin: [1, 3, 5],
+				xAxis: [2, 5, 9],
+				yAxis: [8, 8, 10]
+			};
+		}
+
+		it('#transform', function() {
+			var s = section();
+			var t = vs.translateSection(s, [10, 11, 12]);
+			assert.deepEqual(t.origin, [11, 14, 17]);
+		});
+	});
 });

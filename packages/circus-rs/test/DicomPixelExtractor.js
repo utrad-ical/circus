@@ -1,12 +1,12 @@
 'use strict';
 
-var extractor = require('../build/server/dicom-dumpers/DicomPixelExtractor');
+var extractor = require('../lib/server/dicom-dumpers/DicomPixelExtractor');
 var fs = require('fs');
 var zlib = require('zlib');
 var assert = require('chai').assert;
-var px = require('../build/common/PixelFormat');
+var px = require('../lib/common/PixelFormat');
 
-var ImageEncoder = require('../build/server/image-encoders/ImageEncoder_pngjs').default;
+var ImageEncoder = require('../lib/server/image-encoders/ImageEncoder_pngjs').default;
 
 var testdir = __dirname + '/test-dicom/';
 

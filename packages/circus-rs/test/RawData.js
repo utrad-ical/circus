@@ -1,7 +1,7 @@
 "use strict";
 
-var rawdata = require('../build/common/RawData.js');
-var px = require('../build/common/PixelFormat.js');
+var rawdata = require('../lib/common/RawData.js');
+var px = require('../lib/common/PixelFormat.js');
 var RawData = rawdata.default;
 var PixelFormat = px.PixelFormat;
 

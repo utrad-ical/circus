@@ -1,6 +1,6 @@
 'use strict';
 
-var Controller = require('../build/server/controllers/Controller').default;
+var Controller = require('../lib/server/controllers/Controller').default;
 var assert = require('chai').assert;
 
 describe('Controller', function() {

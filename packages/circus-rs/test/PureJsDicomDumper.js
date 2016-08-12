@@ -1,5 +1,5 @@
 var assert = require('chai').assert;
-var PureJsDicomDumper = require('../build/server/dicom-dumpers/PureJsDicomDumper').default;
+var PureJsDicomDumper = require('../lib/server/dicom-dumpers/PureJsDicomDumper').default;
 
 describe('PureJsDicomDumper', function() {
 	it.skip('must decode DICOM file from a given directory', function(done) {

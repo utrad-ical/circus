@@ -1,5 +1,5 @@
 var assert = require('chai').assert;
-var AsyncLruCache = require('../build/common/AsyncLruCache').default;
+var AsyncLruCache = require('../lib/common/AsyncLruCache').default;
 
 describe('AsyncLruCache', function() {
 

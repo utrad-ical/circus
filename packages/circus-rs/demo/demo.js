@@ -21,10 +21,13 @@ function initializeViewer(series, server) {
 	const src = new rs.RawVolumeImageSource({ series, server });
 	const comp = new rs.Composition();
 	comp.setImageSource(src);
+	const cornerText = new rs.CornerText();
+	comp.addAnnotation(cornerText);
 
 	const div = document.getElementById('viewer');
 	const viewer = new rs.Viewer(div);
 	viewer.setComposition(comp);
+
 	return viewer;
 }
 

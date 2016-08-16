@@ -7,6 +7,8 @@ export * from '../common/VoxelCloud';
 
 export * from '../browser/composition';
 
+export * from '../browser/annotation/corner-text';
+
 export * from '../browser/image-source/mock-image-source';
 export * from '../browser/image-source/raw-volume-image-source';
 export * from '../browser/image-source/dynamic-image-source';

@@ -98,7 +98,7 @@ export class Composition extends EventEmitter {
 	}
 
 	public addAnnotation(annotation: Annotation): void {
-		this.annotations.concat(annotation);
+		this.annotations.push(annotation);
 	}
 
 	public getAnnotations(): Annotation[] {

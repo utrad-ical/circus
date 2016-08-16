@@ -1,16 +1,16 @@
 'use strict';
 
-import { mat4, vec3 } from 'gl-matrix';
-import { DraggableTool } from '../../../browser/tool/draggable';
-import { Viewer } from '../../../browser/viewer/viewer';
-import { ViewerEvent } from '../../../browser/viewer/viewer-event';
-import { ViewerEventTarget } from '../../../browser/interface/viewer-event-target';
+import { DraggableTool } from '../draggable';
+import { Viewer } from '../../viewer/viewer';
+import { ViewerEvent } from '../../viewer/viewer-event';
+import { ViewerEventTarget } from '../../interface/viewer-event-target';
+import { ViewState, translateSection } from '../../view-state';
 
+/**
+ * HandTool is a tool which responds to a mouse drag and moves the
+ * VolumeImageSource parallelly to the screen.
+ */
 export class HandTool extends DraggableTool implements ViewerEventTarget {
-
-	constructor() {
-		super();
-	}
 
 	public dragStartHandler(ev: ViewerEvent) {
 		ev.viewer.primaryEventTarget = this;
@@ -18,8 +18,11 @@ export class HandTool extends DraggableTool implements ViewerEventTarget {
 	}
 
 	public dragMoveHandler(ev: ViewerEvent, dragInfo) {
-		this.translateBy(ev.viewer, [dragInfo.dx, dragInfo.dy]);
-		ev.viewer.render();
+		const viewer = ev.viewer;
+		const state = viewer.getState();
+		const vp = viewer.getResolution();
+		const newState: ViewState = this.translateBy(state, [dragInfo.dx, dragInfo.dy], vp);
+		viewer.setState(newState);
 		ev.stopPropagation();
 	}
 
@@ -28,31 +31,25 @@ export class HandTool extends DraggableTool implements ViewerEventTarget {
 		ev.stopPropagation();
 	}
 
-	public translateBy(viewer, p: [ number, number ]) {
+	public translateBy(state: ViewState, p: [number, number], vp: [number, number]): ViewState {
+		const section = state.section;
+		const eu = [
+			section.xAxis[0] / vp[0],
+			section.xAxis[1] / vp[0],
+			section.xAxis[2] / vp[0]];
+		const ev = [
+			section.yAxis[0] / vp[1],
+			section.yAxis[1] / vp[1],
+			section.yAxis[2] / vp[1]];
 
-		let state = viewer.getState();
-		let vp = viewer.getResolution();
-
-		let eu = [
-			state.section.xAxis[0] / vp[0],
-			state.section.xAxis[1] / vp[0],
-			state.section.xAxis[2] / vp[0]];
-		let ev = [
-			state.section.yAxis[0] / vp[1],
-			state.section.yAxis[1] / vp[1],
-			state.section.yAxis[2] / vp[1]];
-
-		let [ dx2, dy2 ] = p;
-		let [ dx, dy, dz ] = [
+		const [ dx2, dy2 ] = p;
+		const [ dx, dy, dz ] = [
 			eu[0] * -dx2 + ev[0] * -dy2,
 			eu[1] * -dx2 + ev[1] * -dy2,
 			eu[2] * -dx2 + ev[2] * -dy2];
 
-		state.section.origin[0] += dx;
-		state.section.origin[1] += dy;
-		state.section.origin[2] += dz;
-
-		viewer.setState(state);
+		state.section = translateSection(state.section, [dx, dy, dz]);
+		return state;
 	}
 
 }

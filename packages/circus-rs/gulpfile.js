@@ -13,8 +13,8 @@ var tslint = require('gulp-tslint');
 
 gulp.task('default', ['typescript', 'dist-browser']);
 
-gulp.task('watch', ['typescript', 'dist-browser-css'], function() {
-	gulp.watch('src/**/*.ts', ['typescript']);
+gulp.task('watch', ['browserify', 'dist-browser-css'], function() {
+	gulp.watch('src/**/*.ts', ['browserify']);
 	gulp.watch('src/**/*.less', ['dist-browser-css']);
 });
 

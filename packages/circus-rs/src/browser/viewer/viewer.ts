@@ -3,11 +3,9 @@
 var extend = require('extend');
 
 import { EventEmitter } from 'events';
-import { Annotation } from '../../browser/annotation/annotation';
-import { Sprite } from '../../browser/viewer/sprite';
-import { Composition } from '../../browser/composition';
-import { ViewerEvent } from '../../browser/viewer/viewer-event';
-import { ViewerEventTarget } from '../../browser/interface/viewer-event-target';
+import { Sprite } from './sprite';
+import { Composition } from '../composition';
+import { ViewerEvent } from './viewer-event';
 import { ViewState } from '../view-state';
 import { Tool } from '../tool/tool';
 import { toolFactory } from '../tool/tool-initializer';
@@ -145,7 +143,7 @@ export class Viewer extends EventEmitter {
 		return new ViewerEvent(this, eventType, originalEvent);
 	}
 
-	private clear(): void {
+	private clearCanvas(): void {
 		this.canvas.getContext('2d').clearRect(
 			0, 0, this.canvas.width, this.canvas.height
 		);
@@ -166,7 +164,6 @@ export class Viewer extends EventEmitter {
 		if (!this.imageReady) waiter = this.composition.imageSource.ready();
 		if (this.currentRender) waiter = waiter.then(this.currentRender);
 		const p: Promise<boolean> = waiter.then(() => {
-			const canvas = this.canvas;
 			const state = this.viewState;
 			// Now there is no rendering in progress.
 			if (p !== this.nextRender) {
@@ -178,6 +175,7 @@ export class Viewer extends EventEmitter {
 			this.currentRender = p;
 			this.nextRender = null;
 			const src = this.composition.imageSource;
+			this.clearCanvas();
 			return src.draw(this, state).then(res => {
 				for (let annotation of this.composition.getAnnotations()) {
 					const sprite = annotation.draw(this, state);

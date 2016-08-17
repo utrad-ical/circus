@@ -32,7 +32,7 @@ export interface ZoomAttributes {
 export interface ViewState {
 	section?: Section;
 	window?: ViewWindow;
-	zoom?: ZoomAttributes;
+	zoom?: ZoomAttributes; // deprecated! don't use this!
 };
 
 /**

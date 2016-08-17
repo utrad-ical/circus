@@ -15,8 +15,8 @@ export class WindowTool extends DraggableTool implements ViewerEventTarget {
 
 	public dragMoveHandler(ev: ViewerEvent, dragInfo) {
 		const viewState = ev.viewer.getState();
-		this.windowLevelBy(viewState, dragInfo.dx * ( ev.original.ctrlKey ? 2 : 1 ));
-		this.windowWidthBy(viewState, dragInfo.dy * ( ev.original.ctrlKey ? 20 : 5 ));
+		this.windowWidthBy(viewState, dragInfo.dx * ( ev.original.ctrlKey ? 20 : 5 ));
+		this.windowLevelBy(viewState, dragInfo.dy * ( ev.original.ctrlKey ? 2 : 1 ));
 		ev.viewer.setState(viewState);
 		ev.stopPropagation();
 	}

@@ -75,7 +75,7 @@ export class Composition extends EventEmitter {
 
 	public setImageSource(imageSource: ImageSource) {
 		this.imageSource = imageSource;
-		this.emit('sourceChange')
+		this.emit('sourceChange');
 	}
 
 	/**

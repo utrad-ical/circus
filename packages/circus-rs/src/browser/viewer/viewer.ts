@@ -86,14 +86,13 @@ export class Viewer extends EventEmitter {
 
 		const handler = this.canvasEventHandler.bind(this);
 
-		const wheelEvent = 'onwheel' in document ? 'wheel' : 'onmousewheel' in document ? 'mousewheel' : 'DOMMouseScroll';
 		canvas.addEventListener('mousedown', handler);
 		canvas.addEventListener('mouseup', handler);
 		canvas.addEventListener('mousemove', handler);
 		canvas.addEventListener('dragstart', handler);
 		canvas.addEventListener('drag', handler);
 		canvas.addEventListener('dragend', handler);
-		canvas.addEventListener(wheelEvent, handler);
+		canvas.addEventListener('wheel', handler);
 
 		this.boundRender = this.render.bind(this);
 
@@ -114,20 +113,9 @@ export class Viewer extends EventEmitter {
 	}
 
 	private canvasEventHandler(originalEvent: MouseEvent): void {
-		let eventType = originalEvent.type;
-		switch (eventType) {
-			case 'mousemove':
-			case 'mouseup':
-			case 'mousedown':
-				break;
-			case 'wheel':
-			case 'mousewheel':
-			case 'DOMMouseScroll':
-				eventType = 'mousewheel';
-				break;
-		}
-
+		const eventType = originalEvent.type;
 		const event = new ViewerEvent(this, eventType, originalEvent);
+
 		if (this.primaryEventTarget) {
 			event.dispatch(this.primaryEventTarget);
 		}
@@ -160,7 +148,7 @@ export class Viewer extends EventEmitter {
 	 */
 	public render(): Promise<boolean> {
 		// Wait only if there is another render() in progress
-		let waiter: any = Promise.resolve();
+		let waiter: Promise<any> = Promise.resolve();
 		if (!this.imageReady) waiter = this.composition.imageSource.ready();
 		if (this.currentRender) waiter = waiter.then(() => this.currentRender);
 		const p: Promise<boolean> = waiter.then(() => {

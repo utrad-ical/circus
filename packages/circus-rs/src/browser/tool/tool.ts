@@ -6,12 +6,13 @@ import { ViewerEvent } from '../../browser/viewer/viewer-event';
 import { detectOrthogonalSection } from '../view-state';
 import { Viewer } from '../viewer/viewer';
 import { VolumeImageSource } from '../image-source/volume-image-source';
+import { ViewerEventTarget } from '../interface/viewer-event-target';
 
 /**
  * A tool determines how a viewer intersects with various UI events.
  * An active tool will change the active view state of each viewer.
  */
-export class Tool extends EventEmitter {
+export class Tool extends EventEmitter implements ViewerEventTarget {
 
 	public mouseDownHandler(ev: ViewerEvent): void {
 		// do nothing
@@ -37,10 +38,11 @@ export class Tool extends EventEmitter {
 		// do nothing
 	}
 
-	public mouseWheelHandler(ev: ViewerEvent): void {
+	public wheelHandler(ev: ViewerEvent): void {
 		const sign = ev.original.deltaY > 0 ? -1 : 1;
 		const step = sign * (ev.original.ctrlKey ? 5 : 1);
 		this.slide(ev.viewer, step);
+		ev.original.preventDefault();
 		ev.stopPropagation();
 	}
 

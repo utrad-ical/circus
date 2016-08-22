@@ -29,7 +29,7 @@ export class CelestialRotateTool extends DraggableTool implements ViewerEventTar
 		ev.viewer.primaryEventTarget = null;
 	}
 
-	public mouseWheelHandler(ev: ViewerEvent): void {
+	public wheelHandler(ev: ViewerEvent): void {
 		const vdeg = ( ev.original.deltaY < 0 ? -1 : 1  ) * ( ev.original.ctrlKey ? 2 : 1 );
 		this.verticalRotate(ev.viewer, vdeg);
 		ev.viewer.render();

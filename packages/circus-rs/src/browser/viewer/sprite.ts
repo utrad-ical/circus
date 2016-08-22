@@ -16,7 +16,19 @@ export class Sprite implements ViewerEventTarget {
 		// do nothing by default
 	}
 
-	public mouseWheelHandler(viewerEvent: ViewerEvent): void {
+	public dragStartHandler(viewerEvent: ViewerEvent): void {
+		// do nothing by default
+	}
+
+	public dragHandler(viewerEvent: ViewerEvent): void {
+		// do nothing by default
+	}
+
+	public dragEndHandler(viewerEvent: ViewerEvent): void {
+		// do nothing by default
+	}
+
+	public wheelHandler(viewerEvent: ViewerEvent): void {
 		// do nothing by default
 	}
 }

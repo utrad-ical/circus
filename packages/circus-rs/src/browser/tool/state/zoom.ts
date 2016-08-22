@@ -26,7 +26,7 @@ export class ZoomTool extends DraggableTool implements ViewerEventTarget {
 		ev.viewer.primaryEventTarget = null;
 	}
 
-	public mouseWheelHandler(ev: ViewerEvent) {
+	public wheelHandler(ev: ViewerEvent) {
 		this.zoom(
 			ev.viewer,
 			ev.original.ctrlKey ?

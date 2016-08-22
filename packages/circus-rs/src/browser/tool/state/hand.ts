@@ -12,23 +12,29 @@ import { ViewState, translateSection } from '../../view-state';
  */
 export class HandTool extends DraggableTool implements ViewerEventTarget {
 
-	public dragStartHandler(ev: ViewerEvent) {
-		ev.viewer.primaryEventTarget = this;
-		ev.stopPropagation();
+	public dragStartHandler(ev: ViewerEvent): void {
+		super.dragStartHandler(ev);
 	}
 
-	public dragMoveHandler(ev: ViewerEvent, dragInfo) {
+	public dragHandler(ev: ViewerEvent): void {
+		super.dragHandler(ev);
+		const dragInfo = this.dragInfo;
+
+		// Drag events can be triggered continuously even though there is no mouse move,
+		// so we ignore events that does not represent actual mouse moves.
+		if (dragInfo.dx === 0 && dragInfo.dy === 0) {
+			return;
+		}
+
 		const viewer = ev.viewer;
 		const state = viewer.getState();
 		const vp = viewer.getResolution();
 		const newState: ViewState = this.translateBy(state, [dragInfo.dx, dragInfo.dy], vp);
 		viewer.setState(newState);
-		ev.stopPropagation();
 	}
 
-	public dragEndHandler(ev: ViewerEvent, dragInfo) {
-		ev.viewer.primaryEventTarget = null;
-		ev.stopPropagation();
+	public dragEndHandler(ev: ViewerEvent): void {
+		super.dragEndHandler(ev);
 	}
 
 	public translateBy(state: ViewState, p: [number, number], vp: [number, number]): ViewState {

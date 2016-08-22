@@ -25,6 +25,18 @@ export class Tool extends EventEmitter {
 		// do nothing
 	}
 
+	public dragStartHandler(ev: ViewerEvent): void {
+		// do nothing
+	}
+
+	public dragHandler(ev: ViewerEvent): void {
+		// do nothing
+	}
+
+	public dragEndHandler(ev: ViewerEvent): void {
+		// do nothing
+	}
+
 	public mouseWheelHandler(ev: ViewerEvent): void {
 		const sign = ev.original.deltaY > 0 ? -1 : 1;
 		const step = sign * (ev.original.ctrlKey ? 5 : 1);

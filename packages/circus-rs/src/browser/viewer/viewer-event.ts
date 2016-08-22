@@ -1,6 +1,6 @@
-'use strict'
+'use strict';
 
-import { Viewer } from './viewer'
+import { Viewer } from './viewer';
 
 export class ViewerEvent {
 	public type: string;
@@ -11,8 +11,6 @@ export class ViewerEvent {
 	public viewerWidth: number;
 	public viewerHeight: number;
 
-	private propagation: boolean;
-
 	public viewer: Viewer;
 
 	constructor(viewer: Viewer, type: string, original?: any) {
@@ -20,7 +18,6 @@ export class ViewerEvent {
 		this.type = type || ( original ? original.type : null );
 
 		if (original && original.offsetX) {
-			const canvas = viewer.canvas;
 			const [ viewerWidth, viewerHeight ] = viewer.getResolution();
 			const [ elementWidth, elementHeight ] = viewer.getViewport();
 
@@ -31,26 +28,21 @@ export class ViewerEvent {
 		}
 
 		this.original = original;
-		this.propagation = true;
 	}
 
-	public stopPropagation() {
-		this.propagation = false;
-		if (this.original) {
-			this.original.stopPropagation();
-			this.original.preventDefault();
-		}
+	public stopPropagation(): void {
+		this.original.stopPropagation();
 	}
 
-	public dispatch(element) {
-		const normalizedEvent = this.type.replace(
+	public dispatch(element): void {
+		const normalizedEventName = this.type.replace(
 			/^(mouse|drag)([a-z])/,
 			(m, p1, p2) => p1 + p2.toUpperCase()
 		);
-		const handler = normalizedEvent + 'Handler';
-		if (this.propagation && element && typeof element[handler] === 'function') {
-			const retval = element[handler](this);
-			if (retval === false) this.stopPropagation();
+		const handler = normalizedEventName + 'Handler';
+		if (typeof element[handler] === 'function') {
+			const retVal = element[handler](this);
+			if (retVal === false) this.original.preventDefault();
 		}
 	}
 }

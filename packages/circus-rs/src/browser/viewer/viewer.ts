@@ -58,10 +58,11 @@ export class Viewer extends EventEmitter {
 	 */
 	private currentRender: Promise<any> = null;
 
-	private createCanvas(width, height): HTMLCanvasElement {
+	private createCanvas(width: number, height: number): HTMLCanvasElement {
 		const elm =  document.createElement('canvas');
-		elm.setAttribute('width', width);
-		elm.setAttribute('height', height);
+		elm.width = width;
+		elm.height = height;
+		elm.draggable = true;
 		return elm;
 	}
 
@@ -89,6 +90,9 @@ export class Viewer extends EventEmitter {
 		canvas.addEventListener('mousedown', handler);
 		canvas.addEventListener('mouseup', handler);
 		canvas.addEventListener('mousemove', handler);
+		canvas.addEventListener('dragstart', handler);
+		canvas.addEventListener('drag', handler);
+		canvas.addEventListener('dragend', handler);
 		canvas.addEventListener(wheelEvent, handler);
 
 		this.boundRender = this.render.bind(this);
@@ -109,11 +113,7 @@ export class Viewer extends EventEmitter {
 		this.canvas.height = height;
 	}
 
-	private canvasEventHandler(originalEvent) {
-		if (typeof originalEvent === 'object' && originalEvent.preventDefault) {
-			originalEvent.preventDefault();
-		}
-
+	private canvasEventHandler(originalEvent: MouseEvent): void {
 		let eventType = originalEvent.type;
 		switch (eventType) {
 			case 'mousemove':
@@ -162,31 +162,31 @@ export class Viewer extends EventEmitter {
 		// Wait only if there is another render() in progress
 		let waiter: any = Promise.resolve();
 		if (!this.imageReady) waiter = this.composition.imageSource.ready();
-		if (this.currentRender) waiter = waiter.then(this.currentRender);
+		if (this.currentRender) waiter = waiter.then(() => this.currentRender);
 		const p: Promise<boolean> = waiter.then(() => {
 			const state = this.viewState;
 			// Now there is no rendering in progress.
 			if (p !== this.nextRender) {
 				// I am expired because another render() method was called after this
-				return Promise.resolve(false);
+				return false;
 			}
 			// I am the most recent render() call.
 			// It's safe to call draw() now.
 			this.currentRender = p;
 			this.nextRender = null;
 			const src = this.composition.imageSource;
-			this.clearCanvas();
 			return src.draw(this, state).then(res => {
 				for (let annotation of this.composition.getAnnotations()) {
 					const sprite = annotation.draw(this, state);
 					if (sprite !== null) this.sprites.push(sprite);
-				};
+				}
 				this.currentRender = null;
 				return true;
 			});
 		});
 		// Remember this render() call as the most recent one,
 		// possibly overwriting and expiring the previous nextRender
+		(p as any).tag = Math.random();
 		this.nextRender = p;
 		return p;
 	}

@@ -3,7 +3,7 @@
 import { vec3 } from 'gl-matrix';
 import { EventEmitter } from 'events';
 import { ViewerEvent } from '../../browser/viewer/viewer-event';
-import { detectOrthogonalSection } from '../view-state';
+import { detectOrthogonalSection } from '../section';
 import { Viewer } from '../viewer/viewer';
 import { VolumeImageSource } from '../image-source/volume-image-source';
 import { ViewerEventTarget } from '../interface/viewer-event-target';

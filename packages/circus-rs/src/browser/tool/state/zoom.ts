@@ -3,7 +3,8 @@
 import { mat4, vec3 } from 'gl-matrix';
 import { DraggableTool } from '../../../browser/tool/draggable';
 import { Viewer } from '../../../browser/viewer/viewer';
-import { ViewState, Section, getVolumePos } from '../../view-state';
+import { ViewState } from '../../view-state';
+import { Section, getVolumePos } from '../../section';
 import { ViewerEvent } from '../../../browser/viewer/viewer-event';
 import { VolumeImageSource } from '../../image-source/volume-image-source';
 import { ViewerEventTarget } from '../../../browser/interface/viewer-event-target';

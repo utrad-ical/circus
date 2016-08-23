@@ -35,6 +35,6 @@ function initializeViewer(series, server) {
 function initializeToolbar() {
 	return rs.createToolbar(
 		document.getElementById('toolbar'),
-		['hand', 'window', 'zoom', 'celestialRotate']
+		['hand', 'window', 'zoom', 'pager', 'celestialRotate']
 	);
 }

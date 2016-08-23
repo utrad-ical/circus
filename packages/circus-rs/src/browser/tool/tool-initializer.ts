@@ -2,6 +2,7 @@ import { Tool } from './tool';
 import { WindowTool } from './state/window';
 import { HandTool } from './state/hand';
 import { ZoomTool } from './state/zoom';
+import { PagerTool } from './state/pager';
 import { CelestialRotateTool } from './state/celestial-rotate';
 
 const toolCollection = {};
@@ -11,6 +12,7 @@ const defaultTools = {
 	hand: HandTool,
 	window: WindowTool,
 	zoom: ZoomTool,
+	pager: PagerTool,
 	celestialRotate: CelestialRotateTool
 };
 

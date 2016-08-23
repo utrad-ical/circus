@@ -114,6 +114,9 @@ export class Viewer extends EventEmitter {
 		const eventType = originalEvent.type;
 		const event = new ViewerEvent(this, eventType, originalEvent);
 
+		// Cancel default behavior by default for wheel events
+		if (eventType === 'wheel') originalEvent.preventDefault();
+
 		if (this.primaryEventTarget) {
 			event.dispatch(this.primaryEventTarget);
 		}

@@ -50,7 +50,6 @@ export class Tool extends EventEmitter implements ViewerEventTarget {
 	 * The default mouse wheel handler, which performs paging.
 	 */
 	public wheelHandler(ev: ViewerEvent): void {
-		ev.original.preventDefault();
 		const viewer = ev.viewer;
 		const state = viewer.getState();
 		const step = -this.sign(ev.original.deltaY) * (ev.original.ctrlKey ? 5 : 1);

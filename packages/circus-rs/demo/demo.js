@@ -18,8 +18,9 @@ $('#load').on('click', () => {
 });
 
 function initializeViewer(series, server) {
-	const src = new rs.RawVolumeImageSource({ series, server });
-	// const src = new rs.DynamicImageSource({ series, server });
+	const sourceClass = rs[$('#type').val()]; // ImageSource class
+
+	const src = new sourceClass({ series, server });
 	const comp = new rs.Composition();
 	comp.setImageSource(src);
 	const cornerText = new rs.CornerText();
@@ -33,8 +34,10 @@ function initializeViewer(series, server) {
 }
 
 function initializeToolbar() {
+	const container = document.getElementById('toolbar');
+	container.innerHTML = '';
 	return rs.createToolbar(
-		document.getElementById('toolbar'),
+		container,
 		['hand', 'window', 'zoom', 'pager', 'celestialRotate']
 	);
 }

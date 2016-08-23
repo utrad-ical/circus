@@ -105,11 +105,6 @@
 				"variable-declaration": "nospace"
 			}
 		],
-		"use-strict": [
-			true,
-			"check-module",
-			"check-function"
-		],
 		"variable-name": [
 			false,
 			"check-format",

@@ -21,13 +21,15 @@ button.active-tool {
 .circus-rs-toolbutton {
 	font-size: @rs-toolbutton-size;
 	line-height: @rs-toolbutton-size;
-	height: @rs-toolbutton-size;
 	min-width: @rs-toolbutton-size;
 	border: 1px solid gray;
 	background: white;
 	color: gray;
+	&:hover {
+		background-color: #ccc;
+	}
 	&.active {
 		color: white;
-		background-color: gray;
+		background-color: #333;
 	}
 }

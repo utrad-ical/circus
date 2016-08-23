@@ -38,7 +38,7 @@ export function createToolbar(
 		const button = document.createElement('button');
 		button.className = [
 			'circus-rs-toolbutton',
-			toolName,
+			'circus-rs-tool-' + toKebabCase(toolName),
 			'rs-icon-' + toKebabCase(toolName)
 		].join(' ');
 		button.setAttribute('type', 'button');

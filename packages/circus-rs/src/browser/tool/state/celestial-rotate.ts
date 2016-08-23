@@ -1,16 +1,13 @@
 import { mat4, vec3 } from 'gl-matrix';
+import { DraggableTool } from '../draggable';
+import { Viewer } from '../../viewer/viewer';
+import { ViewerEvent } from '../../viewer/viewer-event';
 
-import { DraggableTool } from '../../../browser/tool/draggable';
-import { Viewer } from '../../../browser/viewer/viewer';
-import { ViewerEvent } from '../../../browser/viewer/viewer-event';
-import { ViewerEventTarget } from '../../../browser/interface/viewer-event-target';
-
-export class CelestialRotateTool extends DraggableTool implements ViewerEventTarget {
-
-	public dragStartHandler(ev: ViewerEvent): void {
-		super.dragStartHandler(ev);
-		ev.viewer.primaryEventTarget = this;
-	}
+/**
+ * CelestialRotateTool handles mouse drags and wheel moves on the Viewer and
+ * rotates the MPR section accordingly.
+ */
+export class CelestialRotateTool extends DraggableTool {
 
 	public dragHandler(ev: ViewerEvent): void {
 		super.dragHandler(ev);
@@ -18,24 +15,16 @@ export class CelestialRotateTool extends DraggableTool implements ViewerEventTar
 		if (Math.abs(dragInfo.dx) && Math.abs(dragInfo.dx) >= Math.abs(dragInfo.dy)) {
 			const hdeg = ( dragInfo.dx < 0 ? -1 : 1  ) * ( ev.original.ctrlKey ? 2 : 1 );
 			this.horizontalRotate(ev.viewer, hdeg);
-			ev.viewer.render();
 		}
-	}
-
-	public dragEndHandler(ev: ViewerEvent): void {
-		super.dragEndHandler(ev);
-		ev.viewer.primaryEventTarget = null;
 	}
 
 	public wheelHandler(ev: ViewerEvent): void {
 		const vdeg = ( ev.original.deltaY < 0 ? -1 : 1  ) * ( ev.original.ctrlKey ? 2 : 1 );
 		this.verticalRotate(ev.viewer, vdeg);
-		ev.viewer.render();
 	}
 
 	public horizontalRotate(viewer: Viewer, deg: number) {
 		const state = viewer.getState();
-		const [vw, vh] = viewer.getResolution();
 		const radian = Math.PI / 180.0 * deg;
 		const end0 = state.section.xAxis.concat();
 
@@ -54,7 +43,6 @@ export class CelestialRotateTool extends DraggableTool implements ViewerEventTar
 
 	public verticalRotate(viewer: Viewer, deg: number) {
 		const state = viewer.getState();
-		const [vw, vh] = viewer.getResolution();
 		const radian = Math.PI / 180.0 * deg;
 		const end0 = state.section.yAxis.concat();
 

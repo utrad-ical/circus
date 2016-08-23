@@ -1,9 +1,9 @@
 'use strict';
 
-var vs = require('../lib/browser/view-state');
+var vs = require('../lib/browser/section');
 var assert = require('chai').assert;
 
-describe('ViewState', function() {
+describe('Section', function() {
 	it('#parallelToX', function() {
 		assert.isTrue(vs.parallelToX([1, 0, 0]));
 		assert.isTrue(vs.parallelToX([-1, 0, 0]));
@@ -41,7 +41,7 @@ describe('ViewState', function() {
 		assert.equal(vs.detectOrthogonalSection({ xAxis: [1, 2, 0], yAxis: [0, 1, 0] }), 'oblique');
 	});
 
-	describe('should handle section transformatinos', function() {
+	describe('should handle section transformations', function() {
 		function section() {
 			return {
 				origin: [1, 3, 5],

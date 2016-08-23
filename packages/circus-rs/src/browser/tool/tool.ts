@@ -35,13 +35,25 @@ export class Tool extends EventEmitter implements ViewerEventTarget {
 	}
 
 	/**
+	 * Utility method which works in the same way as Math.sign().
+	 * Private polyfill.
+	 * @param val Input number.
+	 * @returns {number} 1 if val is positive, -1 if negative, 0 if zero.
+	 */
+	protected sign(val: number): number {
+		val = +val; // convert to a number
+		if (val === 0 || isNaN(val)) return val;
+		return val > 0 ? 1 : -1;
+	}
+
+	/**
 	 * The default mouse wheel handler, which performs paging.
 	 */
 	public wheelHandler(ev: ViewerEvent): void {
 		ev.original.preventDefault();
 		const viewer = ev.viewer;
 		const state = viewer.getState();
-		const step = -Math.sign(ev.original.deltaY) * (ev.original.ctrlKey ? 5 : 1);
+		const step = -this.sign(ev.original.deltaY) * (ev.original.ctrlKey ? 5 : 1);
 		const src = viewer.getComposition().imageSource as VolumeImageSource;
 		if (!(src instanceof VolumeImageSource)) return;
 		const voxelSize = src.voxelSize();

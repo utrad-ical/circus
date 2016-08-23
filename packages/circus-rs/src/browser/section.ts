@@ -83,7 +83,7 @@ export function translateSection(section: Section, delta: number[]): Section
  */
 export function orientationAwareTranslation(section, voxelSize: [number, number, number], step: number = 1): Section {
 	const orientation = detectOrthogonalSection(section);
-	let delta: [number, number, number];
+	let delta: number[];
 	switch (orientation) {
 		case 'axial':
 			delta = [0, 0, voxelSize[2] * step];
@@ -111,7 +111,7 @@ export function orientationAwareTranslation(section, voxelSize: [number, number,
  */
 export function calculateScaleFactor(section: Section, viewport: [number, number]): number
 {
-	const sectionWidth = gl.vec3.length(gl.vec3.fromValues(...section.xAxis));
+	const sectionWidth = gl.vec3.length(section.xAxis);
 	const screenWidth = viewport[0];
 	return screenWidth / sectionWidth;
 }

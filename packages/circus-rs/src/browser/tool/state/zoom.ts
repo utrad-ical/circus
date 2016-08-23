@@ -33,7 +33,7 @@ export class ZoomTool extends DraggableTool {
 
 	public wheelHandler(ev: ViewerEvent): void {
 		const speed = ev.original.shiftKey ? 3 : 1;
-		const direction = Math.sign(ev.original.deltaY);
+		const direction = this.sign(ev.original.deltaY);
 		this.zoomStep(ev.viewer, speed * direction, [ev.viewerX, ev.viewerY]);
 	}
 

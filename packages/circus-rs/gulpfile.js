@@ -100,6 +100,7 @@ gulp.task('dist-browser-iconfont', function() {
 			formats: ['woff'],
 			startUnicode: 0xE600,
 			fontHeight: 512,
+			descent: 73,
 			timestamp: Math.round(Date.now() / 1000) // required for consistent build
 		}))
 		.on('glyphs', function (glyphs, options) {

@@ -4,6 +4,15 @@ interface Toolbar {
 	bindViewer: (viewer: Viewer) => void;
 }
 
+/**
+ * Converts a string to kebabcase (eg. 'someValue' => 'some-value')
+ * @param str
+ * @returns {string}
+ */
+function toKebabCase(str: string): string {
+	return str.replace(/[A-Z]/g, m => '-' + m.toLowerCase());
+}
+
 export function createToolbar(
 	wrapperElement: HTMLElement,
 	toolNames: string[]
@@ -30,7 +39,7 @@ export function createToolbar(
 		button.className = [
 			'circus-rs-toolbutton',
 			toolName,
-			'rs-icon-' + toolName
+			'rs-icon-' + toKebabCase(toolName)
 		].join(' ');
 		button.setAttribute('type', 'button');
 		// button.appendChild(document.createTextNode(toolName));

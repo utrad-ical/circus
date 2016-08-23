@@ -15,7 +15,7 @@ export class ViewerEvent {
 		this.viewer = viewer;
 		this.type = type || ( original ? original.type : null );
 
-		if (original && original.offsetX) {
+		if (original && 'offsetX' in original) {
 			const [ viewerWidth, viewerHeight ] = viewer.getResolution();
 			const [ elementWidth, elementHeight ] = viewer.getViewport();
 

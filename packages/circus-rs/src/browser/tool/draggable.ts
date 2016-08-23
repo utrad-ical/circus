@@ -44,7 +44,7 @@ export abstract class DraggableTool extends Tool {
 	private updateInfo(ev: ViewerEvent): void {
 		// Hack: For some reason, drag events can be called with zero screenX/Y values
 		// when the mouse is released. We ignore such events altogether.
-		if (ev.original.screenX === 0 && ev.original.screenY == 0) {
+		if (ev.original.screenX === 0 && ev.original.screenY === 0) {
 			this.dragInfo.dx = 0;
 			this.dragInfo.dy = 0;
 			return;

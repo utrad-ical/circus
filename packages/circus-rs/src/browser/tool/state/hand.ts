@@ -1,7 +1,5 @@
 import { DraggableTool } from '../draggable';
-import { Viewer } from '../../viewer/viewer';
 import { ViewerEvent } from '../../viewer/viewer-event';
-import { ViewerEventTarget } from '../../interface/viewer-event-target';
 import { ViewState } from '../../view-state';
 import { translateSection } from '../../section';
 
@@ -9,11 +7,7 @@ import { translateSection } from '../../section';
  * HandTool is a tool which responds to a mouse drag and moves the
  * VolumeImageSource parallelly to the screen.
  */
-export class HandTool extends DraggableTool implements ViewerEventTarget {
-
-	public dragStartHandler(ev: ViewerEvent): void {
-		super.dragStartHandler(ev);
-	}
+export class HandTool extends DraggableTool {
 
 	public dragHandler(ev: ViewerEvent): void {
 		super.dragHandler(ev);
@@ -27,13 +21,9 @@ export class HandTool extends DraggableTool implements ViewerEventTarget {
 
 		const viewer = ev.viewer;
 		const state = viewer.getState();
-		const vp = viewer.getResolution();
+		const vp = viewer.getViewport();
 		const newState: ViewState = this.translateBy(state, [dragInfo.dx, dragInfo.dy], vp);
 		viewer.setState(newState);
-	}
-
-	public dragEndHandler(ev: ViewerEvent): void {
-		super.dragEndHandler(ev);
 	}
 
 	public translateBy(state: ViewState, p: [number, number], vp: [number, number]): ViewState {
@@ -41,11 +31,13 @@ export class HandTool extends DraggableTool implements ViewerEventTarget {
 		const eu = [
 			section.xAxis[0] / vp[0],
 			section.xAxis[1] / vp[0],
-			section.xAxis[2] / vp[0]];
+			section.xAxis[2] / vp[0]
+		];
 		const ev = [
 			section.yAxis[0] / vp[1],
 			section.yAxis[1] / vp[1],
-			section.yAxis[2] / vp[1]];
+			section.yAxis[2] / vp[1]
+		];
 
 		const [ dx2, dy2 ] = p;
 		const [ dx, dy, dz ] = [

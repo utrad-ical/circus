@@ -11,50 +11,42 @@ import { VolumeImageSource } from '../../image-source/volume-image-source';
  */
 export class ZoomTool extends DraggableTool {
 
+	/**
+	 * Holds the current zoom step relative to the drag start time
+	 */
+	private currentStep: number;
+
 	public dragHandler(ev: ViewerEvent): void {
 		super.dragHandler(ev);
-		// const viewState = ev.viewer.getState()
-		// const dragInfo = this.dragInfo;
-		// ev.viewer.setState(viewState);
+		const dragInfo = this.dragInfo;
+		const step = Math.round(dragInfo.totalDy / 15);
+		if (step !== this.currentStep) {
+			this.zoomStep(ev.viewer, step - this.currentStep, [ev.viewerX, ev.viewerY]);
+			this.currentStep = step;
+		}
+	}
+
+	public dragStartHandler(ev: ViewerEvent): void {
+		super.dragStartHandler(ev);
+		this.currentStep = 0;
 	}
 
 	public wheelHandler(ev: ViewerEvent): void {
-		this.zoomStep(
-			ev.viewer,
-			ev.original.ctrlKey ?
-				( ev.original.deltaY > 0 ? 3 : -3 )
-				: ( ev.original.deltaY > 0 ? 1 : -1 ),
-			[ev.viewerX, ev.viewerY]
-		);
+		const speed = ev.original.shiftKey ? 3 : 1;
+		const direction = Math.sign(ev.original.deltaY);
+		this.zoomStep(ev.viewer, speed * direction, [ev.viewerX, ev.viewerY]);
 	}
 
 	private zoomStep(viewer: Viewer, step: number, center?: [number, number]) {
-
-		const zoomStep = 1.05;
+		const stepFactor = 1.05;
 		const state: ViewState = viewer.getState();
-
 		const vp = viewer.getResolution();
-		if (!center) center = [vp[0] / 2, vp[1] / 2];
 
+		if (!center) center = [vp[0] / 2, vp[1] / 2];
 		const focus = getVolumePos(state.section, vp, center[0], center[1]);
 
-		this.scale(
-			state.section,
-			zoomStep ** step,
-			focus
-		);
-
+		this.scale(state.section, stepFactor ** step, focus);
 		viewer.setState(state);
-	}
-
-	/**
-	 * Calculates tha magnification factor.
-	 * @return {number} The scale rate (1.0 = pixel by pixel)
-	 */
-	private calcScaleRate(src: VolumeImageSource, viewState: ViewState): number {
-		const sw = vec3.len(viewState.section.xAxis);
-		const iw = src.mmDim()[0];
-		return iw / sw;
 	}
 
 	private scale(section: Section, scale: number, center: [number, number, number]): void {
@@ -77,6 +69,13 @@ export class ZoomTool extends DraggableTool {
 		vec3.copy(section.yAxis, yAxis);
 	}
 
+	/*
+	private calcScaleRate(src: VolumeImageSource, viewState: ViewState): number {
+		const sw = vec3.len(viewState.section.xAxis);
+		const iw = src.mmDim()[0];
+		return iw / sw;
+	}
+
 	private resetZoomState(viewer: Viewer) {
 		const viewState = viewer.getState();
 		if (typeof viewState.zoom !== 'undefined') {
@@ -92,4 +91,5 @@ export class ZoomTool extends DraggableTool {
 			viewer.setState(state);
 		}
 	}
+	*/
 }

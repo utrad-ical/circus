@@ -1,5 +1,3 @@
-'use strict';
-
 import DicomVolume from '../../common/DicomVolume';
 import { RsHttpLoaderImageSource } from '../../browser/image-source/rs-http-loader-image-source';
 

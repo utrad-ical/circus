@@ -1,5 +1,3 @@
-'use strict';
-
 import { Tool } from '../../browser/tool/tool';
 import { ViewerEvent } from '../../browser/viewer/viewer-event';
 

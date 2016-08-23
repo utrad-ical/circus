@@ -1,5 +1,3 @@
-'use strict';
-
 import DicomVolume from '../../common/DicomVolume';
 import { PixelFormat, pixelFormatInfo } from '../../common/PixelFormat';
 import { DicomMetadata } from '../../browser/interface/dicom-metadata';

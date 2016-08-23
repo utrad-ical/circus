@@ -1,5 +1,3 @@
-'use strict';
-
 import { DraggableTool } from '../../../browser/tool/draggable';
 import { Viewer } from '../../../browser/viewer/viewer';
 import { ViewState } from '../../view-state';

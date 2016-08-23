@@ -1,5 +1,3 @@
-'use strict';
-
 import { ViewerEvent } from '../../browser/viewer/viewer-event';
 
 export interface ViewerEventTarget {

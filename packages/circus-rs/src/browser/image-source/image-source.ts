@@ -1,5 +1,3 @@
-'use strict';
-
 import { EventEmitter } from 'events';
 import { ViewState } from '../view-state';
 import { Viewer } from '../viewer/viewer';

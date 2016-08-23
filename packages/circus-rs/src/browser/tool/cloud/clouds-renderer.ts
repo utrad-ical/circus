@@ -1,5 +1,3 @@
-'use strict';
-
 import { VoxelCloud } from '../../../common/VoxelCloud';
 import { Annotation } from '../../../browser/annotation/annotation';
 import { Sprite } from '../../../browser/viewer/sprite';

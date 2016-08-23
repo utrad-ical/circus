@@ -1,5 +1,3 @@
-"use strict";
-
 import { mat4, vec3 } from 'gl-matrix';
 import RawData from './RawData';
 import { PixelFormat } from "./PixelFormat";

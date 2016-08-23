@@ -1,5 +1,3 @@
-'use strict';
-
 import { Viewer } from './viewer';
 
 export class ViewerEvent {

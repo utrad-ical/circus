@@ -1,5 +1,3 @@
-'use strict';
-
 import { ImageSource } from './image-source/image-source';
 import { Section } from './section';
 

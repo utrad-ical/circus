@@ -1,5 +1,3 @@
-'use strict';
-
 import { RsHttpLoaderImageSource } from '../../browser/image-source/rs-http-loader-image-source';
 
 /**

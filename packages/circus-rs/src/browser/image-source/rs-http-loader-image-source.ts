@@ -1,5 +1,3 @@
-'use strict';
-
 import { DicomMetadata } from '../../browser/interface/dicom-metadata';
 import { VolumeImageSource } from './volume-image-source';
 import { RsHttpLoader } from './rs-http-loader';

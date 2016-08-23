@@ -1,5 +1,3 @@
-'use strict';
-
 import { DraggableTool } from '../draggable';
 import { Viewer } from '../../viewer/viewer';
 import { ViewerEvent } from '../../viewer/viewer-event';

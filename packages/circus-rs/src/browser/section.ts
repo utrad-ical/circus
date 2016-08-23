@@ -1,5 +1,3 @@
-'use strict';
-
 import * as gl from 'gl-matrix';
 
 /**

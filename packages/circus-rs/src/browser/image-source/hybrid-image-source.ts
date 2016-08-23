@@ -1,5 +1,3 @@
-'use strict';
-
 import { DicomMetadata } from '../../browser/interface/dicom-metadata';
 import { ImageSource } from './image-source';
 import { DynamicImageSource } from './dynamic-image-source';

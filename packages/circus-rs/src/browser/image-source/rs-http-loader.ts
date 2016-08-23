@@ -1,5 +1,3 @@
-'use strict';
-
 import axios = require('axios');
 
 import { PixelFormat, pixelFormatInfo } from '../../common/PixelFormat';

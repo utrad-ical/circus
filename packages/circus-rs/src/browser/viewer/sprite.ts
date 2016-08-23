@@ -1,5 +1,3 @@
-'use strict';
-
 import { ViewerEvent } from '../../browser/viewer/viewer-event';
 import { ViewerEventTarget } from '../../browser/interface/viewer-event-target';
 

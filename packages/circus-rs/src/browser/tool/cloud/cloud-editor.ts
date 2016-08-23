@@ -1,5 +1,3 @@
-'use strict';
-
 import { vec3 } from 'gl-matrix';
 import { EventEmitter } from 'events';
 import { VoxelCloud } from '../../../common/VoxelCloud';

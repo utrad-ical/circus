@@ -1,5 +1,3 @@
-'use strict';
-
 export interface DicomMetadata {
 	dicomWindow?: {
 		level: number;

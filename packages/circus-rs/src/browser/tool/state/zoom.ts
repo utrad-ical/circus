@@ -18,24 +18,8 @@ export class ZoomTool extends DraggableTool {
 		// ev.viewer.setState(viewState);
 	}
 
-	/**
-	 * pan / zoom ( with translate )
-	 */
-	private initZoomState(viewer: Viewer): void {
-		const viewState = viewer.getState();
-		if (typeof viewState.zoom === 'undefined') {
-			viewState.zoom = {
-				value: 1,
-				x: 0,
-				y: 0,
-				z: 0
-			};
-			viewer.setState(viewState);
-		}
-	}
-
 	public wheelHandler(ev: ViewerEvent): void {
-		this.zoomRelativeStep(
+		this.zoomStep(
 			ev.viewer,
 			ev.original.ctrlKey ?
 				( ev.original.deltaY > 0 ? 3 : -3 )
@@ -44,41 +28,21 @@ export class ZoomTool extends DraggableTool {
 		);
 	}
 
-	private zoomRelativeStep(viewer: Viewer, relateiveStep: number, center?: [number, number]) {
-		this.initZoomState(viewer);
-		const state: ViewState = viewer.getState();
-		const zoomVal = state.zoom.value + relateiveStep;
-		this.zoomStep(viewer, zoomVal, center);
-	}
-
 	private zoomStep(viewer: Viewer, step: number, center?: [number, number]) {
 
 		const zoomStep = 1.05;
 		const state: ViewState = viewer.getState();
 
-		step = Math.round(step);
-		if (step === state.zoom.value) {
-			return;
-		}
-
 		const vp = viewer.getResolution();
 		if (!center) center = [vp[0] / 2, vp[1] / 2];
 
-		const [x0, y0, z0] = state.section.origin;
 		const focus = getVolumePos(state.section, vp, center[0], center[1]);
 
 		this.scale(
 			state.section,
-			zoomStep ** (step - state.zoom.value),
+			zoomStep ** step,
 			focus
 		);
-
-		state.zoom.value = step;
-
-		const [ x1, y1, z1 ] = state.section.origin;
-		state.zoom.x += x1 - x0;
-		state.zoom.y += y1 - y0;
-		state.zoom.z += z1 - z0;
 
 		viewer.setState(state);
 	}

@@ -10,19 +10,11 @@ export interface ViewWindow {
 	width: number;
 }
 
-export interface ZoomAttributes {
-	x: number;
-	y: number;
-	z: number;
-	value: number;
-}
-
 /**
  * ViewState determines how the ImageSource is viewed on each Viewer.
  */
 export interface ViewState {
 	section?: Section;
 	window?: ViewWindow;
-	zoom?: ZoomAttributes; // deprecated! don't use this!
 }
 

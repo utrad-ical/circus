@@ -4,6 +4,8 @@ import { ViewState } from '../view-state';
 import { convertSectionToIndex } from '../section-util';
 import { Vector2D, Section } from '../../common/geometry';
 
+import setImmediate from '../util/set-immediate';
+
 /**
  * RawVolumeImageSource holds an entire 3D volume in memory and
  * renders MPR image form the volume.
@@ -32,7 +34,7 @@ export class RawVolumeImageSource extends RsHttpLoaderImageSource {
 		// because the native Promise.resolve seems to to be called
 		// before drag events are triggered.
 		return new Promise(resolve => {
-			setTimeout(() => resolve(imageBuffer), 0);
+			setImmediate(() => resolve(imageBuffer));
 		});
 		// return Promise.resolve(imageBuffer);
 	}

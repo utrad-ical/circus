@@ -72,3 +72,14 @@ export function translateSection(section: Section, delta: number[]): Section
 		yAxis: section.yAxis
 	};
 }
+
+/**
+ * Calculates the scale factor relative to the screen pixel
+ * @returns {number} The calculated scale factor, where 1 = pixel by pixel, 2 = 200%, 0.5 = 50%
+ */
+export function calculateScaleFactor(section: Section, viewport: [number, number]): number
+{
+	const sectionWidth = gl.vec3.length(gl.vec3.fromValues(...section.xAxis));
+	const screenWidth = viewport[0];
+	return screenWidth / sectionWidth;
+}

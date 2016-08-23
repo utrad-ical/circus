@@ -5,7 +5,7 @@ import { translateSection } from '../../section';
 
 /**
  * HandTool is a tool which responds to a mouse drag and moves the
- * VolumeImageSource parallelly to the screen.
+ * VolumeImageSource in parallel with the screen.
  */
 export class HandTool extends DraggableTool {
 

@@ -5,34 +5,17 @@ import { ViewState } from '../../view-state';
 import { Section, getVolumePos } from '../../section';
 import { ViewerEvent } from '../../../browser/viewer/viewer-event';
 import { VolumeImageSource } from '../../image-source/volume-image-source';
-import { ViewerEventTarget } from '../../../browser/interface/viewer-event-target';
 
-export class ZoomTool extends DraggableTool implements ViewerEventTarget {
-
-	public dragStartHandler(ev: ViewerEvent): void {
-		super.dragStartHandler(ev);
-		ev.viewer.primaryEventTarget = this;
-	}
+/**
+ * ZoomTool
+ */
+export class ZoomTool extends DraggableTool {
 
 	public dragHandler(ev: ViewerEvent): void {
 		super.dragHandler(ev);
-		const viewState = ev.viewer.getState();
-		ev.viewer.setState(viewState);
-	}
-
-	public dragEndHandler(ev: ViewerEvent): void {
-		super.dragEndHandler(ev);
-		ev.viewer.primaryEventTarget = null;
-	}
-
-	public wheelHandler(ev: ViewerEvent) {
-		this.zoom(
-			ev.viewer,
-			ev.original.ctrlKey ?
-				( ev.original.deltaY > 0 ? '+3' : '-3' )
-				: ( ev.original.deltaY > 0 ? '+1' : '-1' ),
-			[ev.viewerX, ev.viewerY]
-		);
+		// const viewState = ev.viewer.getState()
+		// const dragInfo = this.dragInfo;
+		// ev.viewer.setState(viewState);
 	}
 
 	/**
@@ -51,55 +34,58 @@ export class ZoomTool extends DraggableTool implements ViewerEventTarget {
 		}
 	}
 
-	private zoom(viewer: Viewer, zoomVal: number | string, center?: [number,number]) {
+	public wheelHandler(ev: ViewerEvent): void {
+		this.zoomRelativeStep(
+			ev.viewer,
+			ev.original.ctrlKey ?
+				( ev.original.deltaY > 0 ? 3 : -3 )
+				: ( ev.original.deltaY > 0 ? 1 : -1 ),
+			[ev.viewerX, ev.viewerY]
+		);
+	}
 
-		const zoomRate = 1.05;
-
+	private zoomRelativeStep(viewer: Viewer, relateiveStep: number, center?: [number, number]) {
 		this.initZoomState(viewer);
+		const state: ViewState = viewer.getState();
+		const zoomVal = state.zoom.value + relateiveStep;
+		this.zoomStep(viewer, zoomVal, center);
+	}
 
+	private zoomStep(viewer: Viewer, step: number, center?: [number, number]) {
+
+		const zoomStep = 1.05;
 		const state: ViewState = viewer.getState();
 
-		if (typeof zoomVal === 'string') {
-			if (zoomVal.substr(0, 1) === '+') {
-				zoomVal = state.zoom.value + Math.round(Number(zoomVal.substr(1)));
-			} else if (zoomVal.substr(0, 1) === '-') {
-				zoomVal = state.zoom.value - Math.round(Number(zoomVal.substr(1)));
-			} else {
-				zoomVal = state.zoom.value;
-			}
-		} else if (typeof zoomVal === 'number') {
-			zoomVal = Math.round(zoomVal);
-		} else {
-			zoomVal = state.zoom.value;
+		step = Math.round(step);
+		if (step === state.zoom.value) {
+			return;
 		}
 
-		if (zoomVal != state.zoom.value) {
-			const vp = viewer.getResolution();
-			if (!center) center = [vp[0] / 2, vp[1] / 2];
+		const vp = viewer.getResolution();
+		if (!center) center = [vp[0] / 2, vp[1] / 2];
 
-			const [x0, y0, z0] = state.section.origin;
-			const focus = getVolumePos(state.section, vp, center[0], center[1]);
+		const [x0, y0, z0] = state.section.origin;
+		const focus = getVolumePos(state.section, vp, center[0], center[1]);
 
-			this.scale(
-				state.section,
-				zoomRate ** (zoomVal - state.zoom.value),
-				focus
-			);
+		this.scale(
+			state.section,
+			zoomStep ** (step - state.zoom.value),
+			focus
+		);
 
-			state.zoom.value = zoomVal;
+		state.zoom.value = step;
 
-			const [ x1, y1, z1 ] = state.section.origin;
-			state.zoom.x += x1 - x0;
-			state.zoom.y += y1 - y0;
-			state.zoom.z += z1 - z0;
+		const [ x1, y1, z1 ] = state.section.origin;
+		state.zoom.x += x1 - x0;
+		state.zoom.y += y1 - y0;
+		state.zoom.z += z1 - z0;
 
-			viewer.setState(state);
-		}
+		viewer.setState(state);
 	}
 
 	/**
-	 * Calculates tha magnifiction factor.
-	 * @return The scale rate (1.0 = pixel by pixel)
+	 * Calculates tha magnification factor.
+	 * @return {number} The scale rate (1.0 = pixel by pixel)
 	 */
 	private calcScaleRate(src: VolumeImageSource, viewState: ViewState): number {
 		const sw = vec3.len(viewState.section.xAxis);
@@ -131,7 +117,7 @@ export class ZoomTool extends DraggableTool implements ViewerEventTarget {
 		const viewState = viewer.getState();
 		if (typeof viewState.zoom !== 'undefined') {
 
-			this.zoom(viewer, 0);
+			this.zoomStep(viewer, 0);
 
 			let state = viewer.getState();
 			state.section.origin[0] -= state.zoom.x;

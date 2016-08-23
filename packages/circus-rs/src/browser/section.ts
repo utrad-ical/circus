@@ -9,12 +9,14 @@ export interface Section {
 	yAxis: [number, number, number]; // in millimeters
 }
 
+export type OrientationString = 'axial' | 'sagittal' | 'coronal' | 'oblique';
+
 /**
  * Investigates the sectin orientation and detects if the section
  * is (almost) orthogonal to one of the three axes.
  * @return One of 'axial', 'sagittal', 'coronal' or 'oblique'
  */
-export function detectOrthogonalSection(section: Section): string {
+export function detectOrthogonalSection(section: Section): OrientationString {
 	const { xAxis, yAxis } = section;
 	if (parallelToX(xAxis) && parallelToY(yAxis)) return 'axial';
 	if (parallelToY(xAxis) && parallelToZ(yAxis)) return 'sagittal';
@@ -72,6 +74,36 @@ export function translateSection(section: Section, delta: number[]): Section
 		yAxis: section.yAxis
 	};
 }
+
+/**
+ * Performs a parallel translation orthogonal to the screen (aka paging).
+ * The sliding amount is determined according to the current section orientation.
+ * When the section seems to be orthogonal to one of the axes, this performs a
+ * voxel-by-voxel sliding. Otherwise, the sliding is done by a millimeter resolution.
+ */
+export function orientationAwareTranslation(section, voxelSize: [number, number, number], step: number = 1): Section {
+	const orientation = detectOrthogonalSection(section);
+	let delta: [number, number, number];
+	switch (orientation) {
+		case 'axial':
+			delta = [0, 0, voxelSize[2] * step];
+			break;
+		case 'sagittal':
+			delta = [voxelSize[0] * step, 0, 0];
+			break;
+		case 'coronal':
+			delta = [0, voxelSize[1] * step, 0];
+			break;
+		default:
+			delta = gl.vec3.create();
+			gl.vec3.cross(delta, section.xAxis, section.yAxis);
+			gl.vec3.normalize(delta, delta);
+			gl.vec3.scale(delta, delta, step);
+	}
+	section = translateSection(section, delta);
+	return section;
+}
+
 
 /**
  * Calculates the scale factor relative to the screen pixel

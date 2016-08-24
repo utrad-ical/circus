@@ -18,5 +18,11 @@ export * from '../browser/viewer/viewer';
 
 export * from '../browser/tool/state/hand';
 export * from '../browser/tool/state/celestial-rotate';
+export * from '../browser/tool/state/window';
+export * from '../browser/tool/state/pager';
+export * from '../browser/tool/state/zoom';
 
 export { createToolbar } from '../browser/create-toolbar';
+
+export { registerTool } from '../browser/tool/tool-initializer';
+export * from '../browser/section';

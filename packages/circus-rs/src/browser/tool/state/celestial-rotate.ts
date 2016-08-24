@@ -21,7 +21,7 @@ export class CelestialRotateTool extends DraggableTool {
 			const deg = this.sign(dragInfo.dx) * speed;
 			state.section = this.rotateAroundYAxis(state.section, deg);
 		}
-		if (Math.abs(dragInfo.dx)) {
+		if (Math.abs(dragInfo.dy)) {
 			const deg = this.sign(dragInfo.dy) * speed;
 			state.section = this.rotateAroundXAxis(state.section, deg);
 		}

@@ -1,10 +1,15 @@
-import { DicomMetadata } from '../../browser/interface/dicom-metadata';
 import { ImageSource } from './image-source';
 import { DynamicImageSource } from './dynamic-image-source';
 import { RawVolumeImageSource } from './raw-volume-image-source';
 import { ViewState } from '../view-state';
 import { Viewer } from '../viewer/viewer';
+import { VolumeImageSource } from './volume-image-source';
 
+/**
+ * HybridImageSource combines DynamicImageSource and RawVolumeImageSource.
+ * It can draw MPR images as soon as DynamicImageSource is ready,
+ * and then switch to RawVolumeImageSource when it is ready.
+ */
 export class HybridImageSource extends ImageSource {
 
 	private dynSource: DynamicImageSource = null;
@@ -20,12 +25,12 @@ export class HybridImageSource extends ImageSource {
 		this.dynSource = new DynamicImageSource(params);
 	}
 
-	public draw(canvasDomElement, viewState) {
-		const source = this.volumeReady ? this.volSource : this.dynSource;
-		return source.draw(canvasDomElement, viewState);
+	public draw(viewer: Viewer, viewState: ViewState): Promise<void> {
+		const source: VolumeImageSource = this.volumeReady ? this.volSource : this.dynSource;
+		return source.draw(viewer, viewState);
 	}
 
-	public ready() {
+	public ready(): Promise<any> {
 		return this.dynSource.ready();
 	}
 

@@ -1,8 +1,5 @@
-import { DicomMetadata } from '../../browser/interface/dicom-metadata';
 import { VolumeImageSource } from './volume-image-source';
 import { RsHttpLoader } from './rs-http-loader';
-import { ViewState } from '../view-state';
-import { Viewer } from '../viewer/viewer';
 
 /**
  * RsHttpLoaderImageSource is a base class of ImageSource classes which
@@ -14,7 +11,7 @@ export abstract class RsHttpLoaderImageSource extends VolumeImageSource {
 
 	protected loader: RsHttpLoader;
 	protected series: string;
-	protected prepareLoader: Promise<any>;
+	protected prepareLoader: Promise<void>;
 
 	constructor({ server = 'http://localhost:3000', series = null } = {}) {
 		super();
@@ -23,7 +20,7 @@ export abstract class RsHttpLoaderImageSource extends VolumeImageSource {
 		this.prepareLoader = this.prepare();
 	}
 
-	public ready(): Promise<any> {
+	public ready(): Promise<void> {
 		return this.prepareLoader;
 	}
 

@@ -10,13 +10,13 @@ export abstract class ImageSource extends EventEmitter {
 	/**
 	 * Draws an image according to the current view state.
 	 */
-	public abstract draw(viewer: Viewer, viewState: ViewState): Promise<any>;
+	public abstract draw(viewer: Viewer, viewState: ViewState): Promise<void>;
 
 	/**
 	 * Returns a Promise instance which resolves when
 	 * preparation task is finished and draw() can be called.
 	 */
-	public ready(): Promise<any> {
+	public ready(): Promise<void> {
 		return Promise.resolve();
 	}
 

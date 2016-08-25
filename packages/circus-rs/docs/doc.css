@@ -11,3 +11,9 @@ article h2 {
 	margin-top: 2em;
 	border-bottom: 1px solid #ccc;
 }
+
+div.live-demo .result {
+	margin: 0.5em 0;
+	padding: 1em;
+	border: 1px solid #ecc;
+}

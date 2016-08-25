@@ -1,0 +1,7 @@
+keep_files: ['dist']
+defaults:
+    -
+        scope:
+            path: "" # empty string for all files
+        values:
+            layout: default

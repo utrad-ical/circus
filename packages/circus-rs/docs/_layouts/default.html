@@ -1,0 +1,29 @@
+<!doctype html>
+<html>
+<head>
+	<title>CIRCUS RS: {{ page.title | escape }}</title>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
+	<link rel="stylesheet" href="doc.css" />
+</head>
+<body>
+	<div class="container">
+		<div class="row">
+			<article class="col-lg-9">
+				{{ content }}
+			</article>
+			<aside class="col-lg-3 side">
+				<nav class="panel panel-default">
+					<div class="panel-heading">
+						Table of Contents
+					</div>
+					<ul class="list-group">
+						{% for p in site.pages %}
+						<li class="list-group-item"><a href="{{p.path | remove: '.md'}}.html">{{ p.title | escape }}</a></li>
+						{% endfor %}
+					</ul>
+				</nav>
+			</aside>
+		</div>
+	</div>
+</body>
+</html>

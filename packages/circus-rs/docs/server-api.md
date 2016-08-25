@@ -7,12 +7,8 @@ layout: default
 
 This article describes the API for CIRCUS RS server module. The implementation for each action is found in `src/server/controllers`.
 
-<style>
-.caution { color: red; background-color: rgba(255, 0, 0, 0.1); border: 1px solid red; padding: 1em; font-weight: bold; }
-</style>
-
-<div class="caution">
-CAUTION: CIRCUS RS is still in its early development stage. This is subject to change.
+<div class="alert alert-danger">
+<strong>CAUTION:</strong> CIRCUS RS is still in its early development stage. This is subject to change.
 </div>
 
 ## How to Call API

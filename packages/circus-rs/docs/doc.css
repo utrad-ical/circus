@@ -1,0 +1,13 @@
+aside {
+	padding-top: 1em;
+}
+
+article h1 {
+	font-weight: bolder;
+	margin: 1em 0;
+}
+
+article h2 {
+	margin-top: 2em;
+	border-bottom: 1px solid #ccc;
+}

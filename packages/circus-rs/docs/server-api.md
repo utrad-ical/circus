@@ -1,5 +1,9 @@
-Server API
-==========
+---
+title: Server API
+layout: default
+---
+
+# Server API
 
 This article describes the API for CIRCUS RS server module. The implementation for each action is found in `src/server/controllers`.
 
@@ -11,20 +15,17 @@ This article describes the API for CIRCUS RS server module. The implementation f
 CAUTION: CIRCUS RS is still in its early development stage. This is subject to change.
 </div>
 
-How to Call API
----------------
+## How to Call API
 
 CIRCUS RS server is a simple web-based API which responds to HTTP requests.
 
-Authentication
---------------
+## Authentication
 
 By default, CIRCUS RS server returns images for any requests containing valid series instance UID. When authentication mode is enabled, most requests must be authenticated by sending a access token to the server.
 
 --------------------------------
 
-`status` Action
----------------
+## `status` Action
 
 Returns the server status in JSON.
 
@@ -47,12 +48,7 @@ There are no parameters.
 
 JSON-encoded string that contains various server status.
 
-
-
---------------------------------
-
-`metadata` Action
------------------
+## `metadata` Action
 
 Returns metadata of the specified DICOM series.
 
@@ -82,10 +78,7 @@ JSON-encoded string that contains the following series information.
 - `dicomWindow`: Window width/level as defined in DICOM file itself.
 - `pixelFormat`: Pixel format number as defined in PixelFomat.js.
 
---------------------------------
-
-`mpr` Action
-------------
+## `mpr` Action
 
 Returns orthogonal MPR image.
 
@@ -114,11 +107,7 @@ Example:
 Image data encoded by `ImageEncoder`
 
 
-
---------------------------------
-
-`oblique` Action
-----------------
+## `oblique` Action
 
 Makes single oblique MPR image.
 
@@ -156,10 +145,8 @@ Image data encoded by `ImageEncoder`, with the following HTTP headers:
 
 
 
---------------------------------
+## `raw` Action
 
-`raw` Action
-------------
 
 output dicom_voxel_dump raw stream.
 
@@ -186,10 +173,8 @@ Gzipped raw dump data.
 
 
 
---------------------------------
+## `requestToken` Action
 
-`requestToken` Action
----------------------
 
 | Item | Value |
 |-|-|

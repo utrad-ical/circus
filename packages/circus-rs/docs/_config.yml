@@ -1,4 +1,5 @@
 keep_files: ['dist']
+exclude: ['live-demo.md']
 defaults:
     -
         scope:

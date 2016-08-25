@@ -2,8 +2,12 @@
 title: Working with Annotations
 ---
 
-# Annotation について
+# Working with Annotations
 
-* データの保持  
-* 描画方法の定義  
-* じつはToolより先にイベントのかっさらい
+アノテーション（注記）は ImageSource で表される画像に付随する様々な情報を表します。
+
+## アノテーションの作成
+
+## オリジナルアノテーションの作成
+
+## イベント順番

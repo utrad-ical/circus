@@ -18,11 +18,8 @@
 					<div class="panel-heading">
 						Table of Contents
 					</div>
-					<ul class="list-group">
-						{% for p in site.pages %}
-						<li class="list-group-item"><a href="{{p.path | remove: '.md'}}.html">{{ p.title | escape }}</a></li>
-						{% endfor %}
-					</ul>
+					{% capture toc %}{% include toc.md %}{% endcapture %}
+					{{ toc | markdownify }}
 				</nav>
 			</aside>
 		</div>

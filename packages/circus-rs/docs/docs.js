@@ -1,5 +1,11 @@
 $('article table').addClass('table table-hover');
 
+$('.toc').each(function() {
+	var toc = $(this).addClass('list-group');
+	toc.find('a').appendTo(toc).addClass('list-group-item');
+	toc.find('li').remove();
+});
+
 $('div.live-demo').each(function() {
 	var panel = $(this);
 	panel.addClass('panel panel-primary');

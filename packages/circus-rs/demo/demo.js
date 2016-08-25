@@ -19,6 +19,8 @@ $('#load').on('click', () => {
 	viewer = initializeViewer(config.series, config.server);
 	const toolbar = initializeToolbar();
 	toolbar.bindViewer(viewer);
+
+	putAnnotation(viewer.composition);
 });
 
 function initializeViewer(series, server) {
@@ -27,8 +29,6 @@ function initializeViewer(series, server) {
 	const src = new sourceClass({ series, server });
 	const comp = new rs.Composition();
 	comp.setImageSource(src);
-	const cornerText = new rs.CornerText();
-	comp.addAnnotation(cornerText);
 
 	const div = document.getElementById('viewer');
 	const viewer = new rs.Viewer(div);
@@ -44,4 +44,18 @@ function initializeToolbar() {
 		container,
 		['hand', 'window', 'zoom', 'pager', 'celestialRotate']
 	);
+}
+
+function putAnnotation( comp ) {
+
+	const cornerText = new rs.CornerText();
+	comp.addAnnotation(cornerText);
+	
+	// const cloud = new rs.VoxelCloud();
+	// cloud.color = '#ff0000';
+	// cloud.alpha = 0.5;
+	// cloud.volume = new rs.RawData();
+	// cloud.origin = [ 0, 0, 0 ];
+	// comp.addAnnotation(cloud);
+	
 }

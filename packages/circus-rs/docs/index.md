@@ -1,3 +1,9 @@
+---
+title: index
+layout: default
+---
+
+
 CIRCUS RS: Developer's Guide
 ==================================
 # CIRCUS RS の基本構成
@@ -92,15 +98,15 @@ javascript
 ...
 
 src.ready().then( () => {
-	
+
 	const state = viewer.getState();
-	
+
 	const [ width, height, depth ] = src.mmDim();
-	
+
 	state.section.origin = [0, height / 2, 0];
 	state.section.xAxis = [width, 0, 0];
 	state.section.yAxis = [0, 0, depth];
-				
+
 	viewer.setState( state );
 } );
 ```

@@ -73,6 +73,11 @@ export class MockImageSource extends VolumeImageSource {
 			param.ww,
 			param.wl
 		);
-		return Promise.resolve(imageBuffer);
+		// Hack:  Use setTimeout instead of Promise.resolve
+		// because the native Promise.resolve seems to to be called
+		// before drag events are triggered.
+		return new Promise(resolve => {
+			setTimeout(() => resolve(imageBuffer), 0);
+		});
 	}
 }

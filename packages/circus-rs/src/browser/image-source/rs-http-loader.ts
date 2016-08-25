@@ -16,16 +16,13 @@ export class RsHttpLoader {
 		this.server = server;
 	}
 
-	public metadata(series: string): Promise<DicomMetadata> {
-		const url = `${this.server}/metadata`;
+	public request(command: string, params: any, responseType: string = 'json'): Promise<any> {
+		const url = `${this.server}/${command}`;
+		return axios.get(url, { params, responseType }).then(res => res.data) as any as Promise<any>;
+	}
 
-		return axios.get(url, {
-			params: {
-				series: series
-			}
-		}).then(res => {
-			return <DicomMetadata>res.data;
-		}) as Promise<DicomMetadata>; // TODO: Remove when axios.d.ts is updated
+	public metadata(series: string): Promise<DicomMetadata> {
+		return this.request('metadata', { series });
 	}
 
 	public scan(series: string,
@@ -38,10 +35,9 @@ export class RsHttpLoader {
 			wl?: number;
 		} = null
 	): Promise<Uint8Array> {
-		let url = `${this.server}/scan`;
-
-		return axios.get(url, {
-			params: {
+		return this.request(
+			'scan',
+			{
 				series: series,
 				origin: params.origin.join(','),
 				u: params.u.join(','),
@@ -50,37 +46,26 @@ export class RsHttpLoader {
 				ww: params.ww,
 				wl: params.wl
 			},
-			responseType: 'arraybuffer'
-		}).then((res) => {
-			return new Uint8Array(res.data);
-		}) as Promise<Uint8Array>; // TODO: Remove when axios.d.ts is updated
+			'arraybuffer'
+		).then(res => new Uint8Array(res));
 	}
 
-	public volume(series: string,
-		meta: DicomMetadata
-	): Promise<DicomVolume> {
-		let url = `${this.server}/volume`;
-
-		return axios.get(url, {
-			params: {
-				series: series
-			},
-			responseType: 'arraybuffer'
-		}).then((res) => {
-			let buffer: ArrayBuffer = res.data;
-			let volume = new DicomVolume();
-			let pixelFormat: PixelFormat = meta.pixelFormat;
-			volume.setDimension(meta.voxelCount[0], meta.voxelCount[1], meta.voxelCount[2], pixelFormat);
-			volume.setVoxelDimension(meta.voxelSize[0], meta.voxelSize[1], meta.voxelSize[2]);
-			volume.dcm_wl = meta.dicomWindow.level;
-			volume.dcm_ww = meta.dicomWindow.width;
-			volume.wl = meta.estimatedWindow.level;
-			volume.ww = meta.estimatedWindow.width;
-			let bytesPerSlice = meta.voxelCount[0] * meta.voxelCount[1] * pixelFormatInfo(pixelFormat).bpp;
-			for (let i = 0; i < meta.voxelCount[2]; i++) {
-				volume.insertSingleImage(i, buffer.slice(bytesPerSlice * i, bytesPerSlice * (i + 1)));
-			}
-			return volume;
-		}) as any as Promise<DicomVolume>;
+	public volume(series: string, meta: DicomMetadata): Promise<DicomVolume> {
+		return this.request('volume', { series }, 'arraybuffer')
+			.then(buffer => {
+				const volume = new DicomVolume();
+				const pixelFormat: PixelFormat = meta.pixelFormat;
+				volume.setDimension(meta.voxelCount[0], meta.voxelCount[1], meta.voxelCount[2], pixelFormat);
+				volume.setVoxelDimension(meta.voxelSize[0], meta.voxelSize[1], meta.voxelSize[2]);
+				volume.dcm_wl = meta.dicomWindow.level;
+				volume.dcm_ww = meta.dicomWindow.width;
+				volume.wl = meta.estimatedWindow.level;
+				volume.ww = meta.estimatedWindow.width;
+				const bytesPerSlice = meta.voxelCount[0] * meta.voxelCount[1] * pixelFormatInfo(pixelFormat).bpp;
+				for (let i = 0; i < meta.voxelCount[2]; i++) {
+					volume.insertSingleImage(i, buffer.slice(bytesPerSlice * i, bytesPerSlice * (i + 1)));
+				}
+				return volume;
+			});
 	}
 }

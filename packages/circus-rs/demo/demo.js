@@ -1,4 +1,6 @@
-const rs = circusrs;
+'use strict';
+
+var rs = circusrs;
 
 const config = JSON.parse(localStorage.getItem('rs-demo-save'));
 if (config) {
@@ -6,13 +8,15 @@ if (config) {
 	$('#server').val(config.server);
 }
 
+var viewer = null;
+
 $('#load').on('click', () => {
 	const config = {
 		series: $('#series').val(),
 		server: $('#server').val()
 	};
 	localStorage.setItem('rs-demo-save', JSON.stringify(config));
-	const viewer = initializeViewer(config.series, config.server);
+	viewer = initializeViewer(config.series, config.server);
 	const toolbar = initializeToolbar();
 	toolbar.bindViewer(viewer);
 });

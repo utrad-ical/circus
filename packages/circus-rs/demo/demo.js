@@ -42,7 +42,7 @@ function initializeToolbar() {
 	container.innerHTML = '';
 	return rs.createToolbar(
 		container,
-		['hand', 'window', 'zoom', 'pager', 'celestialRotate']
+		['hand', 'window', 'zoom', 'pager', 'celestialRotate','brush']
 	);
 }
 

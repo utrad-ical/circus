@@ -12,10 +12,7 @@ import { Tool } from '../browser/tool/tool';
 import { WindowTool } from '../browser/tool/state/window';
 import { HandTool } from '../browser/tool/state/hand';
 import { CelestialRotateTool } from '../browser/tool/state/celestial-rotate';
-import { CloudsRenderer } from '../browser/tool/cloud/clouds-renderer';
-import { CloudEditor } from '../browser/tool/cloud/cloud-editor';
 import { BrushTool } from '../browser/tool/cloud/brush';
-import { BucketTool } from '../browser/tool/cloud/bucket';
 
 /**
  * A composition is a combination of one imageSource and

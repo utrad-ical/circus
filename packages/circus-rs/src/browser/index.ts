@@ -3,8 +3,6 @@
  * which should be visible to the consumers of CIRCUS RS.
  */
 
-export * from '../common/VoxelCloud';
-
 export * from '../browser/composition';
 
 export * from '../browser/annotation/corner-text';
@@ -21,6 +19,7 @@ export * from '../browser/tool/state/celestial-rotate';
 export * from '../browser/tool/state/window';
 export * from '../browser/tool/state/pager';
 export * from '../browser/tool/state/zoom';
+export * from '../browser/tool/cloud/brush';
 
 export { createToolbar } from '../browser/create-toolbar';
 

@@ -1,0 +1,65 @@
+---
+---
+
+@import 'highlight-colorful.css';
+
+div.container {
+	font-family: "Helvetica Neue", Helvetica, "Hiragino Kaku Gothic ProN", "メイリオ", Yu Gothis, Meiryo, sans-serif;
+}
+
+aside {
+	padding-top: 1em;
+}
+
+ul.toc li {
+	ul {
+		padding-left: 1em;
+		li {
+			list-style-type: none;
+			margin: 0.5em 0;
+		}
+	}
+}
+
+article {
+	h1 {
+		font-weight: bolder;
+		margin: 1em 0;
+		color: #444;
+		text-shadow: 1px 1px 5px #aaa;
+	}
+
+	h2 {
+		margin-top: 2em;
+		border-bottom: 1px solid #ccc;
+	}
+
+	h3 {
+		margin: 1.5em 0;
+	}
+
+	.tip {
+		font-size: 80%;
+		color: gray;
+		border-left: 2px solid gray;
+		padding-left: 10px;
+	}
+
+	.language-html pre {
+		background: #eef5ee;
+	}
+
+	dd {
+		margin-left: 30px;
+	}
+
+	code {
+		color: inherit;
+	}
+}
+
+div.live-demo .result {
+	margin: 0.5em 0;
+	padding: 1em;
+	border: 1px solid #ecc;
+}

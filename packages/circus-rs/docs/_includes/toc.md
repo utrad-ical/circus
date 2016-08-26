@@ -1,9 +1,12 @@
 - [Index](index.html)
 - [Install](install.html)
-- [Getting Started](client-tutorial.html)
-- [Core Concepts of CIRCUS RS](core-concepts.html)
-- [Working with Annotations](annotation.html)
-- [Working with Tools](tool.html)
-- [Server API](server-api.html)
-- [Hints](hint.html)
+- <h4 class="list-group-item-heading">CIRCUS RS Client</h4>
+    - [Getting Started](client-tutorial.html)
+    - [Core Concepts of CIRCUS RS](core-concepts.html)
+    - [Working with Annotations](annotation.html)
+    - [Working with Tools](tool.html)
+    - [Hints](hint.html)
+- <h4 class="list-group-item-heading">CIRCUS RS Server</h4>
+    - [Running the Server](server.html)
+    - [Server API](server-api.html)
 {:.toc}

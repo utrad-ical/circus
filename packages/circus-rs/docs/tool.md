@@ -113,7 +113,7 @@ viewer.setActiveTool('mytool');
 `viewer`プロパティ  
 : イベントの発火元となった Viewer インスタンスです。
 
-Viewer インスタンスが取得出来れば、`getState()`,`setState()`を利用して描画設定の変更をしたり、`setAnnotation()` を利用してアノテーションを加えたり、あるいは既存のアノテーションを変更したりできます。
+Viewer インスタンスが取得出来れば、`getState()`,`setState()`を利用して描画設定の変更をしたり、`addAnnotation()` を利用してアノテーションを加えたり、あるいは既存のアノテーションを変更したりできます。
 
 ```javascript
 class MyCustomTool extends circusrs.Tool {

@@ -28,11 +28,7 @@ const viewer = new circusrs.Viewer(
 viewer.setComposition(comp);
 ```
 
-<<<<<<< HEAD
-HTML
-=======
 HTML:
->>>>>>> e98e0ba... Translation
 
 ```html
 ...
@@ -52,7 +48,11 @@ ImageSource が、これから表示しようとしている画像そのもの�
 
 ひとまず断面図の描画が出来ました。
 
-Viewer の内部では、断面図の描画は、 DynamicImageSource のインスタンスに **描画設定 (ViewState)** を渡すことで実行されています。描画設定とは、 ImageSource をどのような条件で表示するのかを表すデータであり、これは単純なオブジェクト（クラスではない）です。具体的には、最初の画像がロードされて表示され終わった時点で、描画設定には以下のようなデータが含まれています。
+Viewer の内部では、断面図の描画は、 DynamicImageSource のインスタンスに **描画設定 (ViewState)** を渡すことで実行されています。  
+
+描画設定とは、 ImageSource をどのような条件で表示するのかを表すデータであり、これは単純なオブジェクトです。  
+
+具体的には、最初の画像がロードされて表示され終わった時点で、描画設定には以下のようなデータが含まれています。
 
 ```js
 var viewState = {

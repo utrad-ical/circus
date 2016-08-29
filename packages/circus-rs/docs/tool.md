@@ -128,7 +128,7 @@ class MyCustomTool extends circusrs.Tool {
 
 ## 複数のツールを登録して、切り替えて使う
 
-以下の例では、いくつかのカスタムツールを登録し、それらを切替えるための独自UIとして select DOM 要素の生成を行います。
+以下の例では、いくつかのツール(ここでは、前述のカスタムツールを含めています)を切替えるための独自UIを select DOM 要素で生成しています。
 
 JavaScript:
 

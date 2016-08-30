@@ -10,13 +10,16 @@ CIRCUS RSにおけるツールは、各種の臨床画像ビューアや画像�
 
 CIRCUS RS にはいくつかのツールクラスがあらかじめ用意されています。これらはCIRCUS RSによって自動で初期化され、デフォルトで利用できます。
 
-| class | 用途 | ツール名 |
+| ツール名 | 用途 | 実装クラス |
 |-|-|-|
-| HandTool | 手のひらツール | `hand` |
-| WindowTool | ウィンドウの設定変更 | `window` |
-| ZoomTool | 拡大・縮小 | `zoom` |
-| PagerTool | ページング | `pager` |
-| CelestialRotate | 天球回転 | `cerestialRotate` |
+| `hand` | 手のひらツール | `HandTool` |
+| `window` | ウィンドウの設定変更 | `WindowTool` |
+| `zoom` | 拡大・縮小 | `ZoomTool` |
+| `pager` | ページング | `PagerTool` |
+| `brush` | 3Dブラシ | `BrushTool` |
+| `eraser` | 3D消しゴム | `EraserTool` |
+| `bucket` | 3Dバケツツール | `BucketTool` |
+| `cerestialRotate` | 天球回転 | `CelestialRotate` |
 
 ## ツールの切り替え
 
@@ -57,7 +60,7 @@ toolbar.bindViewer(viewer);
 
 Tool は既存のツールクラスを拡張するか、基底クラスである Tool を直接継承することにより作成できます。
 
-ツールは本質的には、ビューア上のUIイベント（特にマウスイベント）に対するハンドラの集まりです。渡されるイベントには、 `viewer` プロパティをはじめ、幾つかの拡張情報が含まれています。
+ツールは本質的には、ビューア上のUIイベント（特にマウスイベント）に対するハンドラの集まりです。渡されるイベントには、イベントが発火したビューアを保持する `viewer` プロパティをはじめ、幾つかの拡張情報が含まれています。
 
 `Tool` クラスは `ViewerEventTarget` インターフェースを実装しており、デフォルトで以下のイベントに対するデフォルト動作を定義しています。現時点で、このうち実際に意味のある動作を行うのは wheelHandler のみです。
 

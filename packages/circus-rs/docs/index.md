@@ -4,10 +4,10 @@ title: Index
 
 # CIRCUS RS Developer's Guide
 
-CIRCUS RSは、HTML/JavaScriptで動作する、汎用的なDICOM画像ビューアコンポーネント＋DICOM画像サーバです。
+**CIRCUS RS** is a set of general-purpose, Web-based DICOM image server and a client-side viewer component.
 
-このドキュメントは CIRCUS RS を使って開発をする人のためのガイドです（このドキュメント内では「開発者」と呼称します）。
+This document is for developers who will develop with CIRCUS RS.
 
-## 目次
+## Index
 
 {% include toc.md %}

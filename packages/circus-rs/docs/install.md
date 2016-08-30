@@ -4,35 +4,33 @@ title: Install
 
 # Install
 
-## 動作環境
+## Running Environment
 
-### サーバ
+### Server
 
-Windows, Linux共通
+- Node.js (4.x or up)
+- You will need a good amount of free RAM (several gegabytes) because CIRCUS RS Server needs to cache 3D volume data in memory.
 
-- Node.js (4.x以上)
-- 3Dボリュームをメモリ上にキャッシュする必要があるため、RAMは十分に必要です。
+### Client (Web Browser)
 
-### クライアント（ブラウザ）
+- 64-bit versions of modern browsers which understand HTML5 canvas and Promise. These include the latest versiosn of Google Chrome, Mozilla Firefox and Microsoft Edge, but not vanilla Internet Explorer. (IE11 may work with suffient polyfills).
+- If you want to use `RawVolumeImageSource` or `HybridImageSource`, which holds 3D volume data in the RAM of client machines, you are recommend to use desktop machines with at least 8GB of RAM.
 
-- 現時点ではモダンブラウザ (Chrome, Firefox または Microsoft Edge）が必須。
-- RawVolumeImageSource または HybridImageSource を使う場合には3次元ボリュームを利用するため、かなりのメモリが使用されます。最低でもシステムのRAMが8GB以上あるデスクトップOSでの利用が推奨されます。
+## Prerequisites
 
-## 前提知識
+On developing with CIRCUS RS, you have to be able to use JavaScript and HTML. In particular, this documentation widely uses ES2015 syntax/functions such as Promises and classes.
 
-CIRCUS RS での開発にあたって JavaScript および HTML の知識が必要です。特に ES2015 の Promise や class を広汎に利用しているため、これらの利用方法について精通している必要があります。
+In this documentation, we extensively use arrow functions, shorthand object property syntax and `let/const`. You don't have to use these syntax in your own code, although it's always recommended.
 
-以下のチュートリアルでは「アロー関数構文」「短いプロパティ名」「let/const」などの ES2015 の言語機能を利用していますが、これらの利用は必須ではありません。
+You don't need to be good at HTML canvas programming and DICOM image formats unless you are going to extend internal functions/classes of CIRCUS RS.
 
-CIRCUS RS 内部の拡張をするのでない限り、 HTML Canvas の扱いや DICOM 画像フォーマットについての詳細な知識は不要です。
+CIRCUS RS is distributed on NPM, the standard module-distribution system on the JavaScript world. Therefore, you need to have Node.js and NPM installed on your development system.
 
-CIRCUR RS は JavaScript の世界での標準的なモジュールリポジトリである NPM を通じて公開されます。このため、 Node.js および NPM のインストールと、これらに関する基本的な知識が必要です。
+## Installing CIRCUS RS
 
-## CIRCUS RSのインストール
+### Developing with Webpack/Browserify (recommended)
 
-### Webpack/Browserifyを使った開発（推奨）
-
-CIRCUS RS のシステムは CommonJS 方式のモジュールを使って構造化されています。CIRCUS RS は CommonJS モジュールに対応したビルドシステムを使って開発者のアプリケーションに組み込むことができ、これが2016年時点で最も近代的な方法です。 Babel や TypeScript などのトランスパイラを組み合わせることで、いわゆる ES6 modules を使った開発も可能です。詳細はそれぞれのプロジェクトのドキュメントを参照してください。
+CIRCUS RS is structured using the CommonJS style module definition system, which is also (basically) compatible with ES2015 module system. CIRCUS RS can easily work with existing projects that make use of CommonJS ecosystem. You can use module bundlers such as Webpack and Browserify to bundle your application and CIRCUS RS (client) in one JavaScript file. Refer to the documentations of each module bundler project.
 
 ```js
 // Import using ES6 style modules
@@ -42,9 +40,9 @@ import { Viewer } from 'circus-rs/viewer/viewer';
 var Viewer = require('circus-rs/viewer/viewer').Viewer;
 ```
 
-### ビルド・結合済み `.js` ファイルのインクルード
+### Including Pre-built CIRCUS RS File
 
-HTMLファイル内でビルド済みファイルを読み込みます。
+Alternatively, you can just include pre-build CIRCUS RS Client in your HTML file.
 
 ```html
 <!-- Loading pre-bundled CIRCUS RS script -->
@@ -54,4 +52,4 @@ HTMLファイル内でビルド済みファイルを読み込みます。
 </script>
 ```
 
-これにより `circusrs` という名前空間内にすべての CIRCUS RS のクラス・APIが公開されます。（例: Viewer クラスは `circusrs.Viewer`）
+All public APIs of CIRCUS RS are exported under the `circusrs` global namespace. For example, `Viewer` class can be accessed via `circusrs.Viewer`.

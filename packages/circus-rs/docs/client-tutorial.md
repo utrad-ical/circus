@@ -4,11 +4,11 @@ title: Getting Started
 
 # Getting Started
 
-## 描画の基本
+## Fundamentals of Displaying Images
 
-この最低限のサンプルでは、 DynamicImageSource と Viewer を作成し、画面内に断面図を描画させます。
+In this minimum example, we will draw a 3D volume from a CT series.
 
-JavaScript
+JavaScript:
 
 ```js
 const series = 'your-series-id';
@@ -28,7 +28,11 @@ const viewer = new circusrs.Viewer(
 viewer.setComposition(comp);
 ```
 
+<<<<<<< HEAD
 HTML
+=======
+HTML:
+>>>>>>> e98e0ba... Translation
 
 ```html
 ...
@@ -38,7 +42,7 @@ HTML
 ...
 ```
 
-実行例：
+Example:
 
 ［画像］
 

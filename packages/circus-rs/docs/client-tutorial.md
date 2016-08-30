@@ -6,12 +6,13 @@ title: Getting Started
 
 ## Fundamentals of Displaying Images
 
-In this minimum example, we will draw a 3D volume from a CT series.
+In this minimum example, we will draw a section of a 3D volume from a CT series.
+Make sure CIRCUS RS is properly installed. (See [Install](install.html))
 
 JavaScript:
 
 ```js
-const series = 'your-series-id';
+const series = 'your-series-instance-uid';
 const server = 'https://your-rs-server/';
 
 // Create a new ImageSource
@@ -38,41 +39,71 @@ HTML:
 ...
 ```
 
-Example:
+Result:
 
 ［画像］
 
-ImageSource が、これから表示しようとしている画像そのものを表しています。作成した ImageSource と Viewer を関連付けるために Composition クラスを利用していることに注意して下さい。この例では Composition は冗長に思えるでしょうが、 Composition は ImageSource に複数の Annotation を関連づけるために使用します。
+If you do not see any image displayed, check the followings:
 
-## 描画設定の取得
+- Make sure CIRCUS RS server is running and properly set up with an appropriate image instance ID.
+  Check if the server is connectable by viewing `http://your-rs-server/status` on your browser.
+- Make sure CIRCUS RS client script is loaded in your HTML page.
+- Make sure you're using a modern browser that supports `Promise`. Internet Explorer is currently not supported.
 
-ひとまず断面図の描画が出来ました。
+An `ImageSource` instance represents the image drawn on the HTML page.
+A `DynamicImageSource` is a subclass of `ImageSource`, and we will be soon
+discussing the other types of `ImageSource`s later.
 
-Viewer の内部では、断面図の描画は、 DynamicImageSource のインスタンスに **描画設定 (ViewState)** を渡すことで実行されています。  
+A `Viewer` instance is the viewer comonent itself, which makes one HTML canvas
+element and handles everything drawn on that canvas.
 
-描画設定とは、 ImageSource をどのような条件で表示するのかを表すデータであり、これは単純なオブジェクトです。  
+To associate the viewer and the image to display, we are using a `Composition`
+instance, which is a rather simple container class.
+In this example the use of `Composition` may seem redundant,
+but a composition is used to associate multiple **annotations** to the image.
 
-具体的には、最初の画像がロードされて表示され終わった時点で、描画設定には以下のようなデータが含まれています。
+
+## Handling View States
+
+Now we know how to display a single section.
+
+The next step is to understand so-called **view state**.
+Inside of the viewer, all images are drawn to the canvas by passing
+a view state to the `ImageSource` instance.
+
+A view state is a plain object (i.e., not a class instance) that determines
+the condition under which the `ImageSource` is displayed.
+
+For example, here is how a view state looks like after a viewer was
+properly initialized and one section was properly displayed:
 
 ```js
 var viewState = {
-    "window": { // ウィンドウ設定
-        "level": 60, // ウィンドウレベル
-        "width": 400 // ウィンドウ幅
+    "window": { // display window
+        "level": 60, // window level
+        "width": 400 // window width
     },
-    "section": { // ボリュームに対するMPR断面の定義
-        "origin": [ 0, 0, 209.5 ], // 起点（断面左上の座標）
-        "xAxis": [ 293, 0, 0 ], // 断面のx軸ベクトルの定義
-        "yAxis": [ 0, 293, 0 ] // 断面のy軸方の定義
+    "section": { // 3D section
+        "origin": [ 0, 0, 209.5 ], // the top-left corner of the section
+        "xAxis": [ 293, 0, 0 ], // the orientation and size of the x-axis of the section
+        "yAxis": [ 0, 293, 0 ] // the orientation and size of the y-axis of the section
     }
 }
 ```
 
-この場合は xAxis がボリューム座標系での +x 方向、 yAxis がボリューム座標系での +y 方向を向いていることから、いわゆる axial 画像を表示していることがわかります。
+In this example, we can see the viewer is currently Displaying an axial slice
+of the original 3D volume, because `xAxis` and `yAxis` is in parallel with
+the x- and y- axis of the original volume, respectively.
 
-`DynamicImageSource` を含め、`ImageSource` は原則として非同期的に画像を描画します。また、クラスを作成した時点ですぐに描画命令を受け付けられるわけではなく、HTTPを経由した画像データのローディングなど、準備が必要です。
+A `ImageSource` instance functions *asynchronously* using JavaScript Promise.
+It also needs a preparation process, for example for loading a volume data
+over HTTP. A drawing request to a `ImageSource` when it is not yet ready
+will result in a runtime exception.
 
-準備が完了したかどうかは `ImageSource.ready()` で得られる Promise を使って判定します。これが resolve するまでは、有効な描画設定自体も存在しません。
+Whether a `ImageSource` is ready for drawing can be determined using
+`ImageSourece#ready()` method, which return a Promise instance which
+resolves when the `ImageSource` is ready.
+Before the `ImageSource` becomes ready, the view state is not available either.
 
 ```js
 src.ready().then(() => {
@@ -83,13 +114,10 @@ src.ready().then(() => {
 
 // TODO: イベントベースに書き換え
 
-## 描画設定の変更
+## Setting View States Programmatically
 
-描画設定を変更するコードを加えて別の角度からの画像を表示してみましょう。
-
-DynamicImageSource は、初期描画設定は
-
-（ボリュームに対する断面の定義の操作は `SectionUtil` を利用すると便利です）
+Let's try viewing the volume from another angle by modifying the
+view state of the viewer.
 
 JavaScript
 
@@ -111,11 +139,14 @@ src.ready().then(() => {
 } );
 ```
 
-通常、描画設定を変更するには、次の手順で行います。
+In general, here is how to modify the view state:
 
-0. Viewer#getState() で現在の描画設定を取得
-0. 取得した描画設定を加工
-0. Viewer#setState() で描画設定を更新
+0. Get the current view state via `Viewer#getState()`
+0. Modify the view state as you like
+0. Update the view state via `Viewer#setState()`
 
-`setState()` は呼ばれた瞬間にビューアの再描画を行うのではなく、次のブラウザのイベントループ終了後の時点で再描画が行われるように描画の予約を行います。必要に応じて `setState()` は複数回呼び出すことができ、それによるフレームレート低下などのパフォーマンスへの悪影響はほとんどありません。
+The actual drawing of `setState()` is delayed to the end of the
+current browser event loop. If you like, you can call `setState()`
+multiple times with very small performance impact. The actual
+rendering procedure will be occurred one in an event loop at most.
 {:.alert .alert-info}

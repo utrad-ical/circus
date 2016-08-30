@@ -67,7 +67,7 @@ but a composition is used to associate multiple **annotations** to the image.
 
 Now we know how to display a single section.
 
-The next step is to understand so-called **view state**.
+The next step is to understand so-called a **view state**.
 Inside of the viewer, all images are drawn to the canvas by passing
 a view state to the `ImageSource` instance.
 
@@ -75,7 +75,7 @@ A view state is a plain object (i.e., not a class instance) that determines
 the condition under which the `ImageSource` is displayed.
 
 For example, here is how a view state looks like after a viewer was
-properly initialized and one section was properly displayed:
+properly initialized and the first section was properly displayed:
 
 ```js
 var viewState = {

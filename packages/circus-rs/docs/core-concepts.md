@@ -2,82 +2,101 @@
 title: Core Concepts of CIRCUS RS
 ---
 
-# CIRCUS RS クライアントの基本構成
+# Core Concepts of CIRCUS RS
 
-CIRCUS RS のクライアントの動作を理解するために、以下の**クラス**の働きの理解が最低限必要です。  
-ここで言うクラスとは、 ES2015 (ES6) の `class` 構文で作られるものと等価です。
+To understand the behavior of CIRCUS RS client, we need to understand the following basic classes and their relationships.
+As described in the [Install](install.html) section, these classes can be accessed in one of the three ways below:
 
-CIRCUS RS で表示されるすべての画像およびアノテーションは高度に抽象化されています。
+1. `const Viewer = require('browser/viewer/viewer').Viewer;` if you are using plain JS with some commonJS module bundler like Webpack and Browserify.
+2. `import { Viewer } from 'browser/viewer/viewer';` if you are using a module bundler in conjunction with some transpiler like Babel and TypeScript.
+3. `circusrs.Viewer` if you are just including the the pre-bundled version of CIRCUS RS using a HTML `<script>` tag.
 
-## Viewer --- ビューアコンポーネント本体
-
-Viewer は HTML 上に描画されるビューアコンポーネント本体であり、CIRCUS RSの基本クラスです。 Viewer は1つの HTML Canvas を保持し、 ImageSource および Annotation （あれば）をウェブ画面上にレンダリングします。 ImageSource および Annottation は Composition という名前のコンテナクラス上に保管されます。
-
-Viewer に割り当てることのできる Composition は1つだけです。一方で、Composition は2つ以上の Viewer に同時に割り当てることができます。つまり、1つの画像ソースを複数のビューアに同時に割り当てて、違う描画設定で観察できます。例えば1つのボリュームをMPRで複数の方向から観察することが可能です。
-
-## ViewState --- 画像の各種描画設定
-
-ViewState は ImageSource がどのような条件で画面上に表示されるかのデータを保持するオブジェクトです（クラスではありません）。例えば、ウィンドウ幅やウィンドウレベルを変えることで画像の見た目は変化するので、これらウィンドウの設定は代表的な ViewState の属性です。
-
-ImageSource と ViewState を組み合わせることで、画面に描画されるべき1つの画像が決定されます。
-
-現時点で実装されている ViewState は3次元ボリューム画像を前提としたプロパティのみ定義されています。
+In this document, a **class** refers to a ES2015(ES6)-compatible class. Classes are actually compiled into ES5 functions using TypeScript.
 {:.alert .alert-info}
 
-## ImageSource --- 表示される画像そのもの
+## `Viewer` --- The Main Component
 
-ImageSource は表示される画像そのものを表す抽象クラスであり、 ViewState を受け取って実際のキャンバスへの画像の描画を行います。1つのImageSource は（Composition を経由して）複数の Viewer に同時に割り当てることができます。
+A **viewer** is the main component of CIRCUS RS Client, and it's the only component that directly changes the HTML DOM.
+A viewer holds one HTML canvas element, and renders an associated image source and annotations (if any) on the canvas.
+The associated image source and annotations are contained in a container class called `Composition`, which will be described later in this page.
 
-現時点で実装されているImageSourceはすべて3次元ボリューム画像を対象としています。
+You can assign only one composition to a viewer.
+On the other hand, one composition can be assigned to more than one viewer simultaneously.
+That is, you can assign one 3D volume to multiple viewers and display it from multiple angles using MPR (multiplanar reconstruction).
+
+## `ViewState` --- How the Image is Rendered
+
+A view state is a plain object (i.e., not a class instance) that determines the condition under which the `ImageSource` is displayed on a screen. For example, window level and window width are typical attributes of a view state because when these values changes, what will be displayed will also change.
+
+Each viewer has its own view state. When you assign the same composition to two viewers, but assign two difference view states to those viewers, then you will see the same image drawn under two different conditions (window, MPR section, etc.). An image drawn to a canvas is determined by one image source and one view state.
+
+For now, view state assumes the image source is a subclass of `VolumeImageSource`.
 {:.alert .alert-info}
 
-画像へのアクセス方法別に、複数の実装が存在します。
+## `ImageSource` --- The Image to Display
+
+`ImageSource` is an abstract class which represents an image (or set of images) from any origin. It typically represents a DICOM series, which is usually a set of 2D images. Each image source is responsible for receiving a viewer instance and a corresponding view state, and drawing something on a canvas asynchronously using Promise.
+
+One image source can be simultaneously assigned to two or more viewers via a composition.
+
+Currently, only 3D volume based image sources are natively implemented in CIRCUS RS. But you can extend CIRCUS RS to implement many types of image source.
+
+Here are the list of working image source implementations.
 
 `DynamicImageSource`
-: 描画の都度、サーバーからボリュームのMPR画像を取得して描画します。メモリやCPUリソースに限りがあるデバイス上での選択肢です。
+: This requests an image to CIRCUS RS Server whenever it is requested from a viewer. This does not use much memory on the client-side, but has a considerably slower paging speed. While this is a recommended choice for most applications, it may consume more bandwidth depending on the usage.
 
 `RawVolumeImageSource`
-: はじめにサーバーからボリュームデータ全体を取得した後、クライアント側でMPRデータを生成して描画します。ボリューム全体を最初にダウンロードするために初期のレスポンス時間は遅くなりますが、マシンが十分に高速であれば最もスムースな描画が期待できます。
+: This loads the entire volume from the CIRCUS RS Server, and performs MPR calculation in the client's local machine. You can achieve the best frame-per-second on a moderate desktop machine, but it may be very slow to show the first section image. Use this when smooth paging experience is very important.
 
 `HybridImageSource`
-: 基本的な動きは `RawVolumeImageSource` と同じですが、ボリュームを取得し終えるまでの間は `DynamicImageSource` としても動作します。これにより最初の画像表示までのタイムラグを抑えられる一方で、ロード完了後にはローカルマシンでのMRP計算による高速な描画が行えます。
+: This is basically the same as `RawVolumeImageSource`, but this also works as `DynamicImageSource` before the entire volume was loaded. This is the recommend class for most of the applications which are only targeted at desktop machines.
 
-## Annotation --- 画像に付随する注記データ
+## `Annotation` --- Attachment to ImageSource
 
-詳細は [Working with Annotations](annotation.html) を参照。
+See [Working with Annotations](annotation.html) for details.
 {:.tip}
 
-Annotation は、画像に付随する各種注記（アノテーション）を表現するベースクラスです。アノテーションとは、例えば以下のようなものです。
+`Annotation` is a base class which represents various attaching data to an image source. For example, these are annotations:
 
-- 病変をマークする矢印
-- 病変を計測するためのルーラー
-- 3Dボリュームラベル (VoxelCloud)
+- An arrow, circle, dot, etc., to mark a lesion
+- A ruler (caliper) to measure lesion size
+- A 3D volume label (VoxelCloud)
 
-アノテーションは Viewer に直接割り当てるのではなく、 Composition に割りあてて、 Composition を Viewer に割り当てることで使用します。
+Annotations are not directly assigned to a viewer.
+Instead, annotations are assigned to a composition, and the composition in turn is assigned to one or more viewers.
 
-1つの Composition には任意の数のアノテーションを登録することが可能です。
+A composition can have an arbitrary number of annotations.
 
-## Composition --- ImageSource と Annotation のコレクション
+## Composition --- Collection of Image Source and Annotations
 
-Viewer に表示される画像と、それに付随する Annotation とをまとめるためのコンテナクラスです。
+A composition is a container which holds one image source and attaching annotations.
 
-- 1つのComposition には1つのみの ImageSource が割り当てられます。
-- 1つのComposition には 複数の（正確には0個以上の） Annotation を割り当てることができます。
-- 1つのCompositionは複数の Viewer に同時に割り当てることができます。つまり、複数のビューアを使って1つの画像を様々な描画設定（角度・ウィンドウなど）で観察することが可能です。
+- One composition can have only one image source.
+- One composition can have an arbitrary number of annotations.
+- One composition can be simultaneously assigned to multiple viewers. That is, you can observe one image using different view states (i.e., display conditions such as display window) using multiple viewers.
 
-## Tool --- ビューア上のUIイベントを処理するツール
+## Tool --- Handles UI Events and Changes Annotations and/or Image Source
 
-詳細は [Working with Tools](tool.html) を参照。
+See [Working with Tools](tool.html) for details.
 {:.tip}
 
-Viewer 上で発生するマウス・キーボードイベントに対応して何らかの動作を行うツールの抽象基底クラスです。デフォルトでアクティブになっているツールは 「空ツール」であり、ビューア上のマウス・キーボードイベントに一切反応しません（つまり、 `<img>` タグと同様に静的に画像を表示するだけになります）。
+A **tool** is activated per viewer and responds to mouse/keyboard events happening on a viewer.
 
-CIRCUS RSには複数のツールがデフォルトで用意されており、これらは Viewer の `setTool` メソッドで切り替えることができます。自分で独自のツールを実装することも可能です。
+By default, a tool called "null tool" is active, and it does not respond to any user actions.
+This makes the viewer work much like a standard `<img>` element which shows a static image.
 
-アクティブなツールは Viewer 毎に独立して設定されます。つまり、同じ ImageSource を表示していても、ある Viewer ではページングツールが、ある Viewer ではウィンドウツールがアクティブ、という状況を意図的に作り出すことが可能です。ただし大抵の場合は共通のツールを使いたいでしょうから、UIのプログラムでそのように実装するようにしてください。
+CIRCUS RS Client is equipped with various built-in tools, which developers can use.
+An active tool can be specified using `Viewer#setTool()`. It is also possible to define your own tool for your own purpose.
 
-マウスイベント等に反応してアクティブなツールが行うことは、主に「Viewer の描画設定の変更」「Annotation の作成・編集」の2つです。前者はウィンドウの変更やページングが該当し、後者は矢印アノテーションやボリュームアノテーションの作成などが該当します。
+Active tools are determined per-viewer basis.
+This means the paging tool is active on one viewer but the window tool is active on another viewer, even though the two viewers shows the same image source.
+This can sometimes be an intended behavior.
+But if you want to use the same tool for all the viewers on the page, you have to write code according to your intention.
 
-### ツールバーについて
+Each tool will typically do either of the followings:
 
-CIRCUS RSの動作にツールバーは必須ではありませんが、簡易的なツールバーとアイコンが提供されています。詳細はツールについての説明を参照してください。
+- Changes the view state of the viewer. (e.g., paging tool and window tool)
+- Adds/edits/removes annotation of the image source (via composition) (e.g., arrow annotation tool)
+
+CIRCUS RS Client comes with a built-in tool bar with some custom icon fonts. You can use this if you with, or create your own UI to switch tools.

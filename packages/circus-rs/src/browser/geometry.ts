@@ -31,7 +31,7 @@ export function coordinate2D(section: Section,
 
 export function coordinate3D(section: Section,
 	resolution: [number, number],
-	p2: [number, number],
+	p2: [number, number]
 ): [number, number, number] {
 
 	let p3 = vec3.clone(section.origin);
@@ -92,9 +92,10 @@ export function getIntersection(section: Section, line: LineSegment): [number, n
 	} else if (dotNvA < 0 && dotNvB < 0) { // both ends of the line are under the section
 		return null;
 	} else {
-		const rate = Math.abs(dotNvA) / ( Math.abs(dotNvA) + Math.abs(dotNvB) );
+		const rate = Math.abs(dotNvA) / (Math.abs(dotNvA) + Math.abs(dotNvB));
 		const vecAX = vec3.scale(vec3.create(), line.vector, rate);
-		return vec3.add(vec3.create(), endA, vecAX); // the intersection point
+		// the intersection point
+		return vec3.add(vec3.create(), endA, vecAX) as [number, number, number];
 	}
 }
 
@@ -106,7 +107,7 @@ export function normalVector(section: Section): [number, number, number] {
 	let nv = vec3.create();
 	vec3.cross(nv, section.xAxis, section.yAxis);
 	vec3.normalize(nv, nv);
-	return nv;
+	return nv as [number, number, number];
 }
 
 
@@ -125,11 +126,11 @@ export function mmLine3(volume: RawData,
 		throw new Error('This function only supports binary format.');
 	}
 
-	const e = vec3.normalize(vec3.create(), [p1[0] - p0[0], p1[1] - p0[1], p1[2] - p0[2]]);
+	const e = vec3.normalize(vec3.create(), [p1[0] - p0[0], p1[1] - p0[1], p1[2] - p0[2]]) as [number, number, number];
 	const distance = vec3.length([p1[0] - p0[0], p1[1] - p0[1], p1[2] - p0[2]]);
 	let walked = 0.0;
 
-	let pi = p0.concat();
+	const pi = p0.concat() as [number, number, number];
 
 	const trim_x = e[0] < 0
 		? (i) => i === Math.floor(i) ? i - 1 : Math.floor(i)

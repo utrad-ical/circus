@@ -167,7 +167,7 @@ export class Viewer extends EventEmitter {
 			return src.draw(this, state).then(res => {
 				for (let annotation of this.composition.getAnnotations()) {
 					const sprite = annotation.draw(this, state);
-					if (sprite !== null) this.sprites.push(sprite);
+					if (sprite instanceof Sprite) this.sprites.push(sprite);
 				}
 				this.currentRender = null;
 				return true;

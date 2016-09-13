@@ -12,7 +12,7 @@ export interface Section {
 export type OrientationString = 'axial' | 'sagittal' | 'coronal' | 'oblique';
 
 /**
- * Investigates the sectin orientation and detects if the section
+ * Investigates the section orientation and detects if the section
  * is (almost) orthogonal to one of the three axes.
  * @return One of 'axial', 'sagittal', 'coronal' or 'oblique'
  */

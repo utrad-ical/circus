@@ -3,13 +3,13 @@ import { RsHttpLoaderImageSource } from '../../browser/image-source/rs-http-load
 
 /**
  * RawVolumeImageSource holds an entire 3D volume in memory and
- * renderes MPR image form the volume.
+ * renders MPR image form the volume.
  */
 export class RawVolumeImageSource extends RsHttpLoaderImageSource {
 
 	private volume: DicomVolume;
 
-	protected scan(param) {
+	protected scan(param): Promise<Uint8Array> {
 		const imageBuffer = new Uint8Array(param.size[0] * param.size[1]);
 		this.volume.scanOblique(
 			param.origin,
@@ -21,7 +21,7 @@ export class RawVolumeImageSource extends RsHttpLoaderImageSource {
 			param.wl
 		);
 
-		// Hack:  Use setTimeout instead of Promise.resolve
+		// Hack: Use setTimeout instead of Promise.resolve
 		// because the native Promise.resolve seems to to be called
 		// before drag events are triggered.
 		return new Promise(resolve => {
@@ -30,7 +30,7 @@ export class RawVolumeImageSource extends RsHttpLoaderImageSource {
 		// return Promise.resolve(imageBuffer);
 	}
 
-	protected onMetaLoaded() {
+	protected onMetaLoaded(): Promise<void> {
 		// Loads the entire volume, which can take many seconds
 		return this.loader.volume(this.series, this.meta)
 			.then(volume => this.volume = volume);

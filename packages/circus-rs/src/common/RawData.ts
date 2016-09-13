@@ -375,6 +375,45 @@ export default class RawData {
 	}
 
 	/**
+	 * Fills the entire volume with the specified value.
+	 * @param value
+	 */
+	public fillAll(value: number | ((x: number, y: number, z: number) => number)): void {
+		const [rx, ry, rz] = this.size;
+		this.fillCuboid(value, 0, 0, 0, rx, ry, rz);
+	}
+
+	/**
+	 * Fills the specified cuboid region with the specified value.
+	 * @param value
+	 */
+	public fillCuboid(value: number | ((x: number, y: number, z: number) => number),
+		x: number, y: number, z: number,
+		w: number, h: number, d: number
+	): void	{
+		const xmax = x + w;
+		const ymax = y + h;
+		const zmax = z + d;
+		if (typeof value === 'number') {
+			for (let xx = x; xx < xmax; xx++) {
+				for (let yy = y; yy < ymax; yy++) {
+					for (let zz = z; zz < zmax; zz++) {
+						this.writePixelAt(value, xx, yy, zz);
+					}
+				}
+			}
+		} else {
+			for (let xx = x; xx < xmax; xx++) {
+				for (let yy = y; yy < ymax; yy++) {
+					for (let zz = z; zz < zmax; zz++) {
+						this.writePixelAt(value(xx, yy, zz), xx, yy, zz);
+					}
+				}
+			}
+		}
+	}
+
+	/**
 	 * Applies window level/width.
 	 * @protected
 	 * @param width {number}

@@ -55,14 +55,8 @@ function addCloudAnnotation({
 	const cloud = new rs.VoxelCloud();
 	const volume = new rs.RawData();
 	const comp = viewer.getComposition();
-	volume.setDimension(size[0], size[1], size[2], rs.PixelFormat.Binary); // 4 = Binary
-	for (let x = 0; x < size[0]; x++) {
-		for (let y = 0; y < size[1]; y++) {
-			for (let z = 0; z < size[2]; z++) {
-				volume.writePixelAt(1, x, y, z);
-			}
-		}
-	}
+	volume.setDimension(size[0], size[1], size[2], rs.PixelFormat.Binary);
+	volume.fillAll(1);
 	const src = comp.imageSource;
 	volume.setVoxelDimension(...src.meta.voxelSize);
 	cloud.volume = volume;

@@ -49,6 +49,11 @@ export class VoxelCloud implements Annotation {
 	public active: boolean;
 
 	/**
+	 * If set to true, draws some additional marks useful for debugging.
+	 */
+	public debugPoint: boolean;
+
+	/**
 	 * Prepares a shadow canvas, which is large enough to contain
 	 * the given size. The shadow canvas can be used to
 	 * perform background image processing.
@@ -182,12 +187,10 @@ export class VoxelCloud implements Annotation {
 			rightBottom[0] = Math.max(rightBottom[0], p2[0]);
 			rightBottom[1] = Math.max(rightBottom[1], p2[1]);
 
-			// marker for debug!
-			circle(context, p2);
+			if (this.debugPoint) circle(context, p2);
 		});
 
-		// marker for debug!
-		rectangle(context, leftTop, rightBottom);
+		if (this.debugPoint) rectangle(context, leftTop, rightBottom);
 
 		// Calculates the sub-section of the current section which
 		// contains the interesection area of this voxel cloud.
@@ -268,9 +271,7 @@ export class VoxelCloud implements Annotation {
 					imageData.data[dstidx + 1] = color[1];
 					imageData.data[dstidx + 2] = color[2];
 					imageData.data[dstidx + 3] = color[3];
-				}
-				// debug!
-				else {
+				} else if (this.debugPoint) {
 					imageData.data[dstidx] = 0xff;
 					imageData.data[dstidx + 1] = 0xff;
 					imageData.data[dstidx + 2] = 0xff;
@@ -300,7 +301,7 @@ export class VoxelCloud implements Annotation {
 /**
  * For debugging
  */
-function circle(context, center: [number,number], radius: number = 2, color: string = 'rgba( 255, 0, 0, 1.0 )'): void {
+function circle(context, center: [number, number], radius: number = 2, color: string = 'rgba(255, 0, 0, 1.0)'): void {
 	context.save();
 	context.beginPath();
 	context.arc(center[0], center[1], radius, 0, Math.PI * 2);
@@ -310,7 +311,7 @@ function circle(context, center: [number,number], radius: number = 2, color: str
 	context.restore();
 }
 
-function rectangle(context, leftTop: number[], rightBottom: number[], color: string = 'rgba( 128, 128, 128, 1.0 )',
+function rectangle(context, leftTop: number[], rightBottom: number[], color: string = 'rgba(128, 128, 128, 1.0)',
 	linewidth: number = 1
 ): void {
 	context.save();

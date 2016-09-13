@@ -72,16 +72,19 @@ function addCloudAnnotation({
 	comp.addAnnotation(cloud);
 }
 
-function putAnnotation( comp ) {
+function mpr(orientation, position) {
+	const state = viewer.getState();
+	const mmDim = viewer.getComposition().imageSource.mmDim();
+	state.section = rs.createOrthogonalMprSection(
+		viewer.getResolution(),
+		mmDim,
+		orientation,
+		position
+	);
+	viewer.setState(state);
+}
 
+function putAnnotation( comp ) {
 	const cornerText = new rs.CornerText();
 	comp.addAnnotation(cornerText);
-
-	// const cloud = new rs.VoxelCloud();
-	// cloud.color = '#ff0000';
-	// cloud.alpha = 0.5;
-	// cloud.volume = new rs.RawData();
-	// cloud.origin = [ 0, 0, 0 ];
-	// comp.addAnnotation(cloud);
-
 }

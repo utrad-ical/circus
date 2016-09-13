@@ -2,6 +2,7 @@ import { ImageSource } from './image-source';
 import { DicomMetadata } from '../../browser/interface/dicom-metadata';
 import { ViewState } from '../view-state';
 import { Viewer } from '../viewer/viewer';
+import { createOrthogonalMprSection } from '../section';
 
 /**
  * VolumeImageSource is a common base class for all
@@ -23,10 +24,11 @@ export abstract class VolumeImageSource extends ImageSource {
 				width: this.meta.dicomWindow.width
 			};
 		}
-		const state: ViewState = { window };
 		// By default, images are drawn with the axial section
-		this.setAxialViewState(viewer, state);
-		return state;
+		return {
+			window,
+			section: createOrthogonalMprSection(viewer.getResolution(), this.mmDim())
+		};
 	}
 
 	public voxelSize(): [number, number, number] {
@@ -44,68 +46,6 @@ export abstract class VolumeImageSource extends ImageSource {
 			voxelCount[1] * voxelSize[1],
 			voxelCount[2] * voxelSize[2]
 		];
-	}
-
-	public setAxialViewState(viewer: Viewer, viewState: ViewState, z?: number): void {
-		const mmDim = this.mmDim();
-		const aspect = viewer.canvas.width / viewer.canvas.height;
-		if (typeof z === 'undefined') z = mmDim[2] / 2;
-
-		if (aspect >= 1.0) {
-			viewState.section = {
-				origin: [0, -( mmDim[0] - mmDim[1] ) / 2, z],
-				xAxis: [mmDim[0], 0, 0],
-				yAxis: [0, mmDim[1] * aspect, 0]
-			};
-		} else {
-			viewState.section = {
-				origin: [-( mmDim[1] - mmDim[0] ) / 2, 0, z],
-				xAxis: [mmDim[0] * aspect, 0, 0],
-				yAxis: [0, mmDim[1], 0]
-			};
-		}
-	}
-
-	private setSagittalViewState(viewer: Viewer, viewState: ViewState, x?: number): void {
-		const mmDim = this.mmDim();
-		const aspect = viewer.canvas.width / viewer.canvas.height;
-		if (typeof x === 'undefined') x = mmDim[0] / 2;
-
-		if (aspect >= 1.0) {
-			viewState.section = {
-				origin: [x, 0, 0],
-				xAxis: [0, mmDim[1], 0],
-				yAxis: [0, 0, mmDim[2] * aspect]
-			};
-		} else {
-			// TODO: seems broken
-			viewState.section = {
-				origin: [-( mmDim[1] - mmDim[0] ) / 2, 0, mmDim[2] / 2],
-				xAxis: [mmDim[0] * aspect, 0, 0],
-				yAxis: [0, mmDim[1], 0]
-			};
-		}
-	}
-
-	private setCoronalViewState(viewer: Viewer, viewState: ViewState, y?: number): void {
-		const mmDim = this.mmDim();
-		const aspect = viewer.canvas.width / viewer.canvas.height;
-		if (typeof y === 'undefined') y = mmDim[1] / 2;
-
-		if (aspect >= 1.0) {
-			viewState.section = {
-				origin: [0, y, 0],
-				xAxis: [mmDim[0], 0, 0],
-				yAxis: [0, 0, mmDim[2] * aspect]
-			};
-		} else {
-			// TODO: seems broken
-			viewState.section = {
-				origin: [-( mmDim[1] - mmDim[0] ) / 2, 0, mmDim[2] / 2],
-				xAxis: [mmDim[0] * aspect, 0, 0],
-				yAxis: [0, mmDim[1], 0]
-			};
-		}
 	}
 
 	public draw(viewer: Viewer, viewState: ViewState): Promise<void> {

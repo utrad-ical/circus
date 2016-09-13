@@ -13,7 +13,6 @@ interface LineSegment {
 	vector: number[]; // [mm]
 }
 
-
 export function coordinate2D(section: Section,
 	resolution: [number, number],
 	p3: [number, number, number]

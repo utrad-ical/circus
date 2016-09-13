@@ -115,3 +115,76 @@ export function calculateScaleFactor(section: Section, viewport: [number, number
 	const screenWidth = viewport[0];
 	return screenWidth / sectionWidth;
 }
+
+/**
+ * Calculates the "fit-to-the-viewer" initial view state section.
+ * @param resolution The target viewer size in screen pixels
+ * @param volumeSize The target volume size in millimeters
+ * @param orientation The orthogonal section
+ * @param position The position in the axis orthogonal to the screen
+ * @returns {Section}
+ */
+export function createOrthogonalMprSection(
+	resolution: [number, number],
+	volumeSize: [number, number, number],
+	orientation: OrientationString = 'axial',
+	position?: number
+): Section {
+	const aspect = resolution[0] / resolution[1];
+	let section: Section;
+	switch (orientation) {
+		case 'axial':
+			if (typeof position === 'undefined') position = volumeSize[2] / 2;
+			if (aspect >= 1.0) {
+				section = {
+					origin: [0, -( volumeSize[0] - volumeSize[1] ) / 2, position],
+					xAxis: [volumeSize[0], 0, 0],
+					yAxis: [0, volumeSize[1] * aspect, 0]
+				};
+			} else {
+				section = {
+					origin: [-( volumeSize[1] - volumeSize[0] ) / 2, 0, position],
+					xAxis: [volumeSize[0] * aspect, 0, 0],
+					yAxis: [0, volumeSize[1], 0]
+				};
+			}
+			break;
+		case 'sagittal':
+			if (typeof position === 'undefined') position = volumeSize[0] / 2;
+			if (aspect >= 1.0) {
+				section = {
+					origin: [position, 0, 0],
+					xAxis: [0, volumeSize[1], 0],
+					yAxis: [0, 0, volumeSize[2] * aspect]
+				};
+			} else {
+				section = {
+					origin: [-( volumeSize[1] - volumeSize[0] ) / 2, 0, volumeSize[2] / 2],
+					xAxis: [volumeSize[0] * aspect, 0, 0],
+					yAxis: [0, volumeSize[1], 0]
+				};
+			}
+			break;
+		case 'coronal':
+			if (typeof position === 'undefined') position = volumeSize[1] / 2;
+			if (aspect >= 1.0) {
+				section = {
+					origin: [0, position, 0],
+					xAxis: [volumeSize[0], 0, 0],
+					yAxis: [0, 0, volumeSize[2] * aspect]
+				};
+			} else {
+				section = {
+					origin: [-( volumeSize[1] - volumeSize[0] ) / 2, 0, volumeSize[2] / 2],
+					xAxis: [volumeSize[0] * aspect, 0, 0],
+					yAxis: [0, volumeSize[1], 0]
+				};
+			}
+			break;
+		default:
+			throw new TypeError('Unsupported orientation');
+	}
+	return section;
+
+}
+

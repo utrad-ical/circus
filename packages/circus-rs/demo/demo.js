@@ -50,7 +50,8 @@ function addCloudAnnotation({
 	origin = [10, 10, 10],
 	size = [64, 64, 64],
 	color = '#ff0000',
-	alpha = 0.5
+	alpha = 0.5,
+	debugPoint = false
 } = {}) {
 	const cloud = new rs.VoxelCloud();
 	const volume = new rs.RawData();
@@ -63,6 +64,7 @@ function addCloudAnnotation({
 	cloud.origin = origin;
 	cloud.color = color;
 	cloud.alpha = alpha;
+	cloud.debugPoint = debugPoint;
 	comp.addAnnotation(cloud);
 }
 

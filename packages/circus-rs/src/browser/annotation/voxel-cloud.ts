@@ -142,8 +142,8 @@ export class VoxelCloud implements Annotation {
 		// Calculates the sub-section of the current section which
 		// contains the intersection area of this voxel cloud.
 		const cloudResolution: Vector2D = [
-			rightBottom[0] - leftTop[0],
-			rightBottom[1] - leftTop[1]
+			Math.ceil(rightBottom[0] - leftTop[0]),
+			Math.ceil(rightBottom[1] - leftTop[1])
 		];
 
 		const boundingOrigin = convertScreenCoordinateToVolumeCoordinate(section, resolution, [leftTop[0], leftTop[1]]);

@@ -70,10 +70,12 @@ export function convertScreenCoordinateToVolumeCoordinate(section: Section,
 }
 
 /**
- * Calculates the intersection point of the given line segment and the section.
+ * Calculates the intersection point of the given line segment and the plane.
+ * This does not check if the intersection is within the section
+ * (i.e., section is treated as a plane that extends infinitely).
  * @return The intersection point. null if there is no intersection.
  */
-export function intersectionOfLineSegmentAndSection(section: Section, line: LineSegment): Vector3D {
+export function intersectionOfLineSegmentAndPlane(section: Section, line: LineSegment): Vector3D {
 
 	const nv = normalVector(section);
 	const P = section.origin;
@@ -114,14 +116,28 @@ export function intersectionOfLineSegmentAndSection(section: Section, line: Line
 	}
 }
 
+export function intersectionPointWithinSection(section: Section, pointOnSection: Vector2D): boolean {
+	const o = section.origin;
+	const op = [pointOnSection[0] - o[0], pointOnSection[1] - o[1], pointOnSection[2] - o[2]];
+	const xLen = vec3.len(section.xAxis);
+	const yLen = vec3.len(section.yAxis);
+	const xDot = vec3.dot(op, section.xAxis);
+	const yDot = vec3.dot(op, section.yAxis);
+	return (
+		0 <= xDot && xDot <= xLen * xLen &&
+		0 <= yDot && yDot <= yLen * yLen
+	);
+}
+
 /**
- * Calculates the intersection of the given box (cuboid) and the section.
+ * Calculates the intersection of the given box (cuboid) and the plane.
+ * The section is treated as a plane that extends infinitely.
  * @param boxOrigin
  * @param boxSize
  * @param section
  * @returns {Array} Array of intersection points. Null if there is no intersection.
  */
-export function intersectionOfBoxAndSection(
+export function intersectionOfBoxAndPlane(
 	boxOrigin: Vector3D,
 	boxSize: Vector3D,
 	section: Section
@@ -164,7 +180,7 @@ export function intersectionOfBoxAndSection(
 			origin: from,
 			vector: [to[0] - from[0], to[1] - from[1], to[2] - from[2]]
 		};
-		const intersection = intersectionOfLineSegmentAndSection(section, edge);
+		const intersection = intersectionOfLineSegmentAndPlane(section, edge);
 		if (intersection !== null)
 			intersections.push(intersection);
 	}

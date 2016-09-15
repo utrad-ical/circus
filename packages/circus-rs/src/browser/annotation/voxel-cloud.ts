@@ -2,15 +2,15 @@ import { Annotation } from './annotation';
 import { Viewer } from '../viewer/viewer';
 import { ViewState } from '../view-state';
 import { Sprite } from '../viewer/sprite';
-import RawData from '../../common/RawData';
+import RawData, { Vector3D, Vector2D } from '../../common/RawData';
 import { PixelFormat } from '../../common/PixelFormat';
 import {
 	convertScreenCoordinateToVolumeCoordinate,
 	convertVolumeCoordinateToScreenCoordinate,
-	intersectionOfBoxAndSection
+	intersectionOfBoxAndPlane,
+	intersectionPointWithinSection
 } from '../geometry';
 import { Section } from '../section';
-import { Vector3D } from '../../common/RawData';
 
 /**
  * VoxelCloud is a type of Annotation that can be registered to a Composition.
@@ -102,20 +102,25 @@ export class VoxelCloud implements Annotation {
 		const section = viewState.section;
 
 		/*
-		 * STEP 1. Checks if this cloud intersects the current section.
+		 * STEP 1. Check if this cloud intersects the current section.
 		 */
 
 		const mmOrigin = this.toMillimeter(this.origin);
 		const mmDim = this.toMillimeter(this.volume.getDimension());
-		const intersections = intersectionOfBoxAndSection(mmOrigin, mmDim, section);
+		const intersections = intersectionOfBoxAndPlane(mmOrigin, mmDim, section);
+
 		if (!intersections) {
 			// The bounding box of this voxel cloud does not intersect with the section.
 			// No need to draw anything.
 			return null;
 		}
+		if (intersections.every(p => !intersectionPointWithinSection(section, p))) {
+			// All of the intersection points are outside of sections
+			return null;
+		}
 
 		/*
-		 * STEP 2. Determines the bounding box of intersection points.
+		 * STEP 2. Determine the bounding box of intersection points.
 		 */
 		// Converts the 3D intersection points to section-based 2D coordinates
 		// and get the box that contains all the intersection points.
@@ -136,7 +141,7 @@ export class VoxelCloud implements Annotation {
 
 		// Calculates the sub-section of the current section which
 		// contains the intersection area of this voxel cloud.
-		const cloudResolution: [number, number] = [
+		const cloudResolution: Vector2D = [
 			rightBottom[0] - leftTop[0],
 			rightBottom[1] - leftTop[1]
 		];
@@ -165,7 +170,7 @@ export class VoxelCloud implements Annotation {
 
 
 		/*
-		 * STEP 2. Prepare the image data
+		 * STEP 3. Create the image data
 		 */
 		const color = [
 			parseInt(this.color.substr(1, 2), 16),

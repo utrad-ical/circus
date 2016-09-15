@@ -1,12 +1,13 @@
 import * as gl from 'gl-matrix';
+import { Vector2D, Vector3D } from '../common/RawData';
 
 /**
  * Section determines the MRP section of a volume.
  */
 export interface Section {
-	origin: [number, number, number];
-	xAxis: [number, number, number]; // in millimeters
-	yAxis: [number, number, number]; // in millimeters
+	origin: Vector3D;
+	xAxis: Vector3D; // in millimeters
+	yAxis: Vector3D; // in millimeters
 }
 
 export type OrientationString = 'axial' | 'sagittal' | 'coronal' | 'oblique';
@@ -44,8 +45,8 @@ export function parallelToZ(vec: number[]): boolean {
 
 
 export function getVolumePos(section: Section, viewport: [number, number],
-	x: number, y: number): [number, number, number]
-{
+	x: number, y: number
+): Vector3D {
 	const [w, h] = viewport;
 	const [ox, oy, oz] = section.origin;
 	const [ux, uy, uz] = section.xAxis.map(i => i / w);
@@ -81,7 +82,7 @@ export function translateSection(section: Section, delta: number[]): Section
  * When the section seems to be orthogonal to one of the axes, this performs a
  * voxel-by-voxel sliding. Otherwise, the sliding is done by a millimeter resolution.
  */
-export function orientationAwareTranslation(section, voxelSize: [number, number, number], step: number = 1): Section {
+export function orientationAwareTranslation(section, voxelSize: Vector3D, step: number = 1): Section {
 	const orientation = detectOrthogonalSection(section);
 	let delta: number[];
 	switch (orientation) {

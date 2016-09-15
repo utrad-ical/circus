@@ -1,39 +1,48 @@
 import { vec3 } from 'gl-matrix';
-import RawData from '../common/RawData';
+import RawData, { Vector2D, Vector3D } from '../common/RawData';
 import { PixelFormat } from '../common/PixelFormat';
 import { Section } from './section';
 
 /**
  * Represents one line segment.
  */
-interface LineSegment {
-	// origin: [number,number,number],// [mm]
-	// vector: [number,number,number] // [mm]
-	origin: number[]; // [mm]
-	vector: number[]; // [mm]
+export interface LineSegment {
+	origin: Vector3D;
+	vector: Vector3D;
 }
 
-export function coordinate2D(section: Section,
-	resolution: [number, number],
-	p3: [number, number, number]
-): [number, number] {
+/**
+ * Converts 3D point in volume coordinate space to 2D point in screen space using the given section.
+ * @param section
+ * @param resolution
+ * @param p3
+ * @returns {Vector2D}
+ */
+export function convertVolumeCoordinateToScreenCoordinate(
+	section: Section,
+	resolution: Vector2D,
+	p3: Vector3D
+): Vector2D {
 	const p = vec3.subtract(vec3.create(), p3, section.origin);
-
-	const p2 = [
+	return [
 		vec3.dot(vec3.normalize(vec3.create(), section.xAxis), p) * resolution[0] / vec3.length(section.xAxis),
 		vec3.dot(vec3.normalize(vec3.create(), section.yAxis), p) * resolution[1] / vec3.length(section.yAxis)
 	];
-
-	return [p2[0], p2[1]];
 }
 
+/**
+ * Converts 2D point in screen coordinate to 3D point in volume coordinate space.
+ * @param section
+ * @param resolution
+ * @param p2
+ * @returns {Vector3D}
+ */
+export function convertScreenCoordinateToVolumeCoordinate(section: Section,
+	resolution: Vector2D,
+	p2: Vector2D
+): Vector3D {
 
-export function coordinate3D(section: Section,
-	resolution: [number, number],
-	p2: [number, number]
-): [number, number, number] {
-
-	let p3 = vec3.clone(section.origin);
+	const p3 = vec3.clone(section.origin) as Vector3D;
 
 	const xComponent = [
 		p2[0] * ( section.xAxis[0] / resolution[0] ),
@@ -49,7 +58,7 @@ export function coordinate3D(section: Section,
 	vec3.add(p3, p3, xComponent);
 	vec3.add(p3, p3, yComponent);
 
-	return [p3[0], p3[1], p3[2]];
+	return p3;
 }
 
 
@@ -102,11 +111,11 @@ export function getIntersection(section: Section, line: LineSegment): [number, n
 /**
  * Calculates the normal vector of the given section.
  */
-export function normalVector(section: Section): [number, number, number] {
+export function normalVector(section: Section): Vector3D {
 	let nv = vec3.create();
 	vec3.cross(nv, section.xAxis, section.yAxis);
 	vec3.normalize(nv, nv);
-	return nv as [number, number, number];
+	return nv as Vector3D;
 }
 
 
@@ -117,19 +126,19 @@ export function normalVector(section: Section): [number, number, number] {
  * TODO: 方向別のエッジ超え判定を導入し、無駄な writePixelAt の呼び出しを低減させる
  */
 export function mmLine3(volume: RawData,
-	p0: [number, number, number], // offset (not mm!)
-	p1: [number, number, number], // offset (not mm!)
+	p0: Vector3D, // offset (not mm!)
+	p1: Vector3D, // offset (not mm!)
 	value: number = 1
 ): void {
 	if (volume.getPixelFormat() !== PixelFormat.Binary) {
 		throw new Error('This function only supports binary format.');
 	}
 
-	const e = vec3.normalize(vec3.create(), [p1[0] - p0[0], p1[1] - p0[1], p1[2] - p0[2]]) as [number, number, number];
+	const e = vec3.normalize(vec3.create(), [p1[0] - p0[0], p1[1] - p0[1], p1[2] - p0[2]]) as Vector3D;
 	const distance = vec3.length([p1[0] - p0[0], p1[1] - p0[1], p1[2] - p0[2]]);
 	let walked = 0.0;
 
-	const pi = p0.concat() as [number, number, number];
+	const pi = p0.concat() as Vector3D;
 
 	const trim_x = e[0] < 0
 		? (i) => i === Math.floor(i) ? i - 1 : Math.floor(i)
@@ -162,9 +171,7 @@ export function mmLine3(volume: RawData,
  * @return neighbor pos.
  * TODO: this function may be slow due to the use of reduce.
  */
-export function getStepToNeighbor(
-	pos: [number, number, number], e: [number, number, number]
-): [number, number, number] {
+export function getStepToNeighbor(pos: Vector3D, e: Vector3D): Vector3D {
 	let stepLengthEntry = [
 		nextLatticeDistance(pos[0], e[0]),
 		nextLatticeDistance(pos[1], e[1]),
@@ -191,7 +198,7 @@ export function getStepToNeighbor(
  * @param p starting point
  * @param u the direction
  */
-export function nextLatticeDistance(p: number, u: number): number {
+function nextLatticeDistance(p: number, u: number): number {
 	if (u === 0) return null;
 	const i = u < 0 ? Math.floor(p) : Math.ceil(p);
 	if (p === i) return Math.abs(1 / u);

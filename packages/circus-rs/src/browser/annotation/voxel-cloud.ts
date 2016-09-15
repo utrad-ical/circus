@@ -4,7 +4,7 @@ import { ViewState } from '../view-state';
 import { Sprite } from '../viewer/sprite';
 import RawData from '../../common/RawData';
 import { PixelFormat } from '../../common/PixelFormat';
-import { coordinate3D, coordinate2D, getIntersection } from '../geometry';
+import { convertScreenCoordinateToVolumeCoordinate, convertVolumeCoordinateToScreenCoordinate, getIntersection, LineSegment } from '../geometry';
 import { Section } from '../section';
 
 /**
@@ -129,7 +129,7 @@ export class VoxelCloud implements Annotation {
 		const intersections = [];
 		// T0-1, T1-2, T2-3, T3-4
 		for (let i = 0; i < 4; i++) {
-			const edge = {
+			const edge: LineSegment = {
 				origin: [topVertexes[i][0], topVertexes[i][1], topVertexes[i][2]],
 				vector: [
 					topVertexes[(i + 1) % 4][0] - topVertexes[i][0],
@@ -143,7 +143,7 @@ export class VoxelCloud implements Annotation {
 		}
 		// T0-B0, T1-B1, T2-B2, T3-B3
 		for (let i = 0; i < 4; i++) {
-			const edge = {
+			const edge: LineSegment = {
 				origin: [bottomVertexes[i][0], bottomVertexes[i][1], bottomVertexes[i][2]],
 				vector: [
 					bottomVertexes[(i + 1) % 4][0] - bottomVertexes[i][0],
@@ -157,12 +157,12 @@ export class VoxelCloud implements Annotation {
 		}
 		// B0-1, B1-2, B2-3, B3-4
 		for (let i = 0; i < 4; i++) {
-			const edge = {
+			const edge: LineSegment = {
 				origin: [topVertexes[i][0], topVertexes[i][1], topVertexes[i][2]],
 				vector: [
 					bottomVertexes[i][0] - topVertexes[i][0],
 					bottomVertexes[i][1] - topVertexes[i][1],
-					bottomVertexes[i][2] - topVertexes[i][2],
+					bottomVertexes[i][2] - topVertexes[i][2]
 				]
 			};
 			const intersection = getIntersection(section, edge);
@@ -180,7 +180,7 @@ export class VoxelCloud implements Annotation {
 		let leftTop = [Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY];
 		let rightBottom = [Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY];
 		intersections.forEach(i => {
-			const p2 = coordinate2D(section, resolution, i);
+			const p2 = convertVolumeCoordinateToScreenCoordinate(section, resolution, i);
 
 			leftTop[0] = Math.min(leftTop[0], p2[0]);
 			leftTop[1] = Math.min(leftTop[1], p2[1]);
@@ -193,15 +193,15 @@ export class VoxelCloud implements Annotation {
 		if (this.debugPoint) rectangle(context, leftTop, rightBottom);
 
 		// Calculates the sub-section of the current section which
-		// contains the interesection area of this voxel cloud.
+		// contains the intersection area of this voxel cloud.
 		const cloudResolution: [number, number] = [
 			rightBottom[0] - leftTop[0],
 			rightBottom[1] - leftTop[1]
 		];
 
-		const boundingOrigin = coordinate3D(section, resolution, [leftTop[0], leftTop[1]]);
-		const boundingXAxisEnd = coordinate3D(section, resolution, [rightBottom[0], leftTop[1]]);
-		const boundingYAxisEnd = coordinate3D(section, resolution, [leftTop[0], rightBottom[1]]);
+		const boundingOrigin = convertScreenCoordinateToVolumeCoordinate(section, resolution, [leftTop[0], leftTop[1]]);
+		const boundingXAxisEnd = convertScreenCoordinateToVolumeCoordinate(section, resolution, [rightBottom[0], leftTop[1]]);
+		const boundingYAxisEnd = convertScreenCoordinateToVolumeCoordinate(section, resolution, [leftTop[0], rightBottom[1]]);
 
 		const cloudSection: Section = {
 			origin: [
@@ -288,7 +288,8 @@ export class VoxelCloud implements Annotation {
 		shadowContext.putImageData(imageData, 0, 0);
 
 		// Transfers the image from the shadow canvas to the actual canvas
-		context.drawImage(shadow,
+		context.drawImage(
+			shadow,
 			0, 0, cloudResolution[0], cloudResolution[1], // src
 			leftTop[0], leftTop[1], rightBottom[0] - leftTop[0], rightBottom[1] - leftTop[1] // dest
 		);

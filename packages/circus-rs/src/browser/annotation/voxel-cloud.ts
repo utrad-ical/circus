@@ -82,13 +82,12 @@ export class VoxelCloud implements Annotation {
 		return canvas;
 	}
 
-	public mmDim(): Vector3D {
-		const voxelCount = this.volume.getDimension();
+	private toMillimeter(vector: Vector3D): Vector3D {
 		const voxelSize = this.volume.getVoxelDimension();
 		return [
-			voxelCount[0] * voxelSize[0],
-			voxelCount[1] * voxelSize[1],
-			voxelCount[2] * voxelSize[2]
+			vector[0] * voxelSize[0],
+			vector[1] * voxelSize[1],
+			vector[2] * voxelSize[2]
 		];
 	}
 
@@ -106,8 +105,9 @@ export class VoxelCloud implements Annotation {
 		 * STEP 1. Checks if this cloud intersects the current section.
 		 */
 
-		const mmDim = this.mmDim();
-		const intersections = intersectionOfBoxAndSection(this.origin, mmDim, section);
+		const mmOrigin = this.toMillimeter(this.origin);
+		const mmDim = this.toMillimeter(this.volume.getDimension());
+		const intersections = intersectionOfBoxAndSection(mmOrigin, mmDim, section);
 		if (!intersections) {
 			// The bounding box of this voxel cloud does not intersect with the section.
 			// No need to draw anything.
@@ -147,9 +147,9 @@ export class VoxelCloud implements Annotation {
 
 		const cloudSection: Section = {
 			origin: [
-				boundingOrigin[0] - this.origin[0],
-				boundingOrigin[1] - this.origin[1],
-				boundingOrigin[2] - this.origin[2]
+				boundingOrigin[0] - mmOrigin[0],
+				boundingOrigin[1] - mmOrigin[1],
+				boundingOrigin[2] - mmOrigin[2]
 			],
 			xAxis: [
 				boundingXAxisEnd[0] - boundingOrigin[0],

@@ -4,8 +4,10 @@ import { ViewState } from '../view-state';
 import { Sprite } from '../viewer/sprite';
 import RawData from '../../common/RawData';
 import { PixelFormat } from '../../common/PixelFormat';
-import { convertScreenCoordinateToVolumeCoordinate, convertVolumeCoordinateToScreenCoordinate, getIntersection, LineSegment } from '../geometry';
+import { convertScreenCoordinateToVolumeCoordinate, convertVolumeCoordinateToScreenCoordinate,
+	intersectionOfLineSegmentAndSection, LineSegment } from '../geometry';
 import { Section } from '../section';
+import { Vector3D } from '../../common/RawData';
 
 /**
  * VoxelCloud is a type of Annotation that can be registered to a Composition.
@@ -113,13 +115,13 @@ export class VoxelCloud implements Annotation {
 		//  B3 ------- B2
 
 		const mmDim = this.mmDim();
-		const topVertexes = [
+		const topVertexes: Vector3D[] = [
 			[ this.origin[0]           , this.origin[1]           , this.origin[2]            ], // T0
 			[ this.origin[0] + mmDim[0], this.origin[1]           , this.origin[2]            ], // T1
 			[ this.origin[0] + mmDim[0], this.origin[1] + mmDim[1], this.origin[2]            ], // T2
 			[ this.origin[0]           , this.origin[1] + mmDim[1], this.origin[2]            ]  // T3
 		];
-		const bottomVertexes = [
+		const bottomVertexes: Vector3D[] = [
 			[ this.origin[0]           , this.origin[1]           , this.origin[2] + mmDim[2] ], // B0
 			[ this.origin[0] + mmDim[0], this.origin[1]           , this.origin[2] + mmDim[2] ], // B1
 			[ this.origin[0] + mmDim[0], this.origin[1] + mmDim[1], this.origin[2] + mmDim[2] ], // B2
@@ -137,7 +139,7 @@ export class VoxelCloud implements Annotation {
 					topVertexes[(i + 1) % 4][2] - topVertexes[i][2]
 				]
 			};
-			const intersection = getIntersection(section, edge);
+			const intersection = intersectionOfLineSegmentAndSection(section, edge);
 			if (intersection !== null)
 				intersections.push(intersection);
 		}
@@ -151,7 +153,7 @@ export class VoxelCloud implements Annotation {
 					bottomVertexes[(i + 1) % 4][2] - bottomVertexes[i][2]
 				]
 			};
-			const intersection = getIntersection(section, edge);
+			const intersection = intersectionOfLineSegmentAndSection(section, edge);
 			if (intersection !== null)
 				intersections.push(intersection);
 		}
@@ -165,7 +167,7 @@ export class VoxelCloud implements Annotation {
 					bottomVertexes[i][2] - topVertexes[i][2]
 				]
 			};
-			const intersection = getIntersection(section, edge);
+			const intersection = intersectionOfLineSegmentAndSection(section, edge);
 			if (intersection !== null)
 				intersections.push(intersection);
 		}

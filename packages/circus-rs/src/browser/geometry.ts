@@ -69,12 +69,11 @@ export function convertScreenCoordinateToVolumeCoordinate(section: Section,
 	return p3;
 }
 
-
 /**
  * Calculates the intersection point of the given line segment and the section.
  * @return The intersection point. null if there is no intersection.
  */
-export function getIntersection(section: Section, line: LineSegment): [number, number, number] {
+export function intersectionOfLineSegmentAndSection(section: Section, line: LineSegment): Vector3D {
 
 	const nv = normalVector(section);
 	const P = section.origin;
@@ -111,7 +110,7 @@ export function getIntersection(section: Section, line: LineSegment): [number, n
 		const rate = Math.abs(dotNvA) / (Math.abs(dotNvA) + Math.abs(dotNvB));
 		const vecAX = vec3.scale(vec3.create(), line.vector, rate);
 		// the intersection point
-		return vec3.add(vec3.create(), endA, vecAX) as [number, number, number];
+		return vec3.add(vec3.create(), endA, vecAX) as Vector3D;
 	}
 }
 

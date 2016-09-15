@@ -27,6 +27,7 @@ function invokeAce() {
 	editor = ace.edit('example-script');
 	editor.getSession().setMode("ace/mode/javascript");
 	editor.setShowPrintMargin(false);
+	editor.setHighlightActiveLine(false);
 	editor.renderer.setShowGutter(false);
 	editor.$blockScrolling = Infinity;
 }
@@ -41,9 +42,9 @@ function loadExampleScript() {
 				/\/\*\-\-((.|\s)+?)\-\-\*\//g,
 				(m, line) => {
 					line = line.replace(
-						/^\s*\@([a-z]+)\s+(.+)$/gm,
+						/^\s*\@([a-zA-Z]+)\s+(.*)$/gm,
 						(m, tag, content) => {
-							res[tag] = content;
+							res[tag] = content === '' ? true : content;
 							return '';
 						}
 					);
@@ -70,8 +71,7 @@ $('#example-select').on('change', () => {
 	const title = $('#example-select').val();
 	const item = examples.find(i => title === i.title);
 	if (!item) return;
-	$('#example-title').text(item.title);
-	$('#example-desc').text(item.desc);
+	$('#example-desc').html(item.desc);
 	editor.setValue(item.script);
 	editor.clearSelection();
 });
@@ -82,6 +82,13 @@ $('#example-run').on('click', () => {
 		server: $('#server').val(),
 	};
 	localStorage.setItem('rs-demo-save', JSON.stringify(config));
+
+	const title = $('#example-select').val();
+	const item = examples.find(i => title === i.title);
+	if (!item.viewerNotRequired && viewer === null) {
+		alert('Please create a viewer first.');
+		return;
+	}
 
 	config.sourceClass = rs[$('#type').val()] // ImageSource class
 	window.config = config;

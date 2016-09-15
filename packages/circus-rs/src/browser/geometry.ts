@@ -82,20 +82,6 @@ export function intersectionOfLineSegmentAndPlane(section: Section, line: LineSe
 	const endA = line.origin;
 	const endB = vec3.add(vec3.create(), line.origin, line.vector);
 
-	// // for debug -----------------------------------
-	// let vertexes = [];
-	// vertexes.push( vec3.clone( section.origin ) );
-	// vertexes.push( vec3.add(vec3.create(), section.origin, section.xAxis) );
-	// vertexes.push( vec3.add(vec3.create(), section.origin, vec3.add(vec3.create(), section.yAxis, section.xAxis)) );
-	// vertexes.push( vec3.add(vec3.create(), section.origin, section.yAxis) );
-	// console.log( 'Section: ' +
-	// vec3.str(vertexes[0]).substr(4) + ' - ' +
-	// vec3.str(vertexes[1]).substr(4) + ' - ' +
-	// vec3.str(vertexes[2]).substr(4) + ' - ' +
-	// vec3.str(vertexes[3]).substr(4) );
-	// console.log( 'Line: ' + vec3.str(endA).substr(4) + ' - ' + vec3.str(endB).substr(4) );
-	// // ----------------------------------- for debug
-
 	const vecPA = vec3.subtract(vec3.create(), P, endA);
 	const vecPB = vec3.subtract(vec3.create(), P, endB);
 
@@ -119,13 +105,13 @@ export function intersectionOfLineSegmentAndPlane(section: Section, line: LineSe
 export function intersectionPointWithinSection(section: Section, pointOnSection: Vector2D): boolean {
 	const o = section.origin;
 	const op = [pointOnSection[0] - o[0], pointOnSection[1] - o[1], pointOnSection[2] - o[2]];
-	const xLen = vec3.len(section.xAxis);
-	const yLen = vec3.len(section.yAxis);
-	const xDot = vec3.dot(op, section.xAxis);
-	const yDot = vec3.dot(op, section.yAxis);
+	const lenX = vec3.len(section.xAxis);
+	const lenY = vec3.len(section.yAxis);
+	const dotX = vec3.dot(op, section.xAxis);
+	const dotY = vec3.dot(op, section.yAxis);
 	return (
-		0 <= xDot && xDot <= xLen * xLen &&
-		0 <= yDot && yDot <= yLen * yLen
+		0 <= dotX && dotX <= lenX * lenX &&
+		0 <= dotY && dotY <= lenY * lenY
 	);
 }
 
@@ -260,9 +246,12 @@ export function getStepToNeighbor(pos: Vector3D, e: Vector3D): Vector3D {
 	];
 	stepLengthEntry = stepLengthEntry.filter((i) => i !== null);
 
-	const stepLength = stepLengthEntry.reduce((prev, cur) => {
-		return cur === null ? prev : ( prev < cur ? prev : cur );
-	}, Number.POSITIVE_INFINITY);
+	const stepLength = stepLengthEntry.reduce(
+		(prev, cur) => {
+			return cur === null ? prev : ( prev < cur ? prev : cur );
+		},
+		Number.POSITIVE_INFINITY
+	);
 
 	// console.log( stepLength.toString() + ' / ' + vec3.str( stepLengthEntry) );
 

@@ -15,18 +15,26 @@ export interface LineSegment {
  * Converts 3D point in volume coordinate space to 2D point in screen space using the given section.
  * @param section
  * @param resolution
- * @param p3
+ * @param point
  * @returns {Vector2D}
  */
 export function convertVolumeCoordinateToScreenCoordinate(
 	section: Section,
 	resolution: Vector2D,
-	p3: Vector3D
+	point: Vector3D
 ): Vector2D {
-	const p = vec3.subtract(vec3.create(), p3, section.origin);
+	const projection: Vector2D = projectPointOntoSection(section, point);
 	return [
-		vec3.dot(vec3.normalize(vec3.create(), section.xAxis), p) * resolution[0] / vec3.length(section.xAxis),
-		vec3.dot(vec3.normalize(vec3.create(), section.yAxis), p) * resolution[1] / vec3.length(section.yAxis)
+		projection[0] * resolution[0] / vec3.length(section.xAxis),
+		projection[1] * resolution[1] / vec3.length(section.yAxis)
+	];
+}
+
+export function projectPointOntoSection(section: Section, point: Vector3D): Vector2D {
+	const p = vec3.subtract(vec3.create(), point, section.origin);
+	return [
+		vec3.dot(vec3.normalize(vec3.create(), section.xAxis), p),
+		vec3.dot(vec3.normalize(vec3.create(), section.yAxis), p)
 	];
 }
 

@@ -2,9 +2,10 @@ import { mat4, vec3 } from 'gl-matrix';
 import { DraggableTool } from '../../../browser/tool/draggable';
 import { Viewer } from '../../../browser/viewer/viewer';
 import { ViewState } from '../../view-state';
-import { Section, getVolumePos } from '../../section';
+import { Section } from '../../section';
 import { ViewerEvent } from '../../../browser/viewer/viewer-event';
-import { VolumeImageSource } from '../../image-source/volume-image-source';
+import { convertScreenCoordinateToVolumeCoordinate } from '../../geometry';
+import { Vector2D } from '../../../common/RawData';
 
 /**
  * ZoomTool
@@ -37,13 +38,14 @@ export class ZoomTool extends DraggableTool {
 		this.zoomStep(ev.viewer, speed * direction, [ev.viewerX, ev.viewerY]);
 	}
 
-	private zoomStep(viewer: Viewer, step: number, center?: [number, number]) {
+	private zoomStep(viewer: Viewer, step: number, center?: Vector2D): void {
 		const stepFactor = 1.05;
 		const state: ViewState = viewer.getState();
 		const vp = viewer.getResolution();
 
 		if (!center) center = [vp[0] / 2, vp[1] / 2];
-		const focus = getVolumePos(state.section, vp, center[0], center[1]);
+		// const focus = getVolumePos(state.section, vp, center[0], center[1]);
+		const focus = convertScreenCoordinateToVolumeCoordinate(state.section, vp, center);
 
 		this.scale(state.section, stepFactor ** step, focus);
 		viewer.setState(state);

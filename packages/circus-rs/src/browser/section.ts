@@ -43,22 +43,6 @@ export function parallelToZ(vec: number[]): boolean {
 	return a < THRESHOLD || a > Math.PI - THRESHOLD;
 }
 
-
-export function getVolumePos(section: Section, viewport: [number, number],
-	x: number, y: number
-): Vector3D {
-	const [w, h] = viewport;
-	const [ox, oy, oz] = section.origin;
-	const [ux, uy, uz] = section.xAxis.map(i => i / w);
-	const [vx, vy, vz] = section.yAxis.map(i => i / h);
-
-	return [
-		ox + ux * x + vx * y,
-		oy + uy * x + vy * y,
-		oz + uz * x + vz * y
-	];
-}
-
 /**
  * Performs a parallel translation on a given section.
  */

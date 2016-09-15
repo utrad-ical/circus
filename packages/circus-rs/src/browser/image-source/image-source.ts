@@ -9,8 +9,9 @@ import { Viewer } from '../viewer/viewer';
 export abstract class ImageSource extends EventEmitter {
 	/**
 	 * Draws an image according to the current view state.
+	 * @return A promise which resolves with ImageData (of canvas).
 	 */
-	public abstract draw(viewer: Viewer, viewState: ViewState): Promise<void>;
+	public abstract draw(viewer: Viewer, viewState: ViewState): Promise<ImageData>;
 
 	/**
 	 * Returns a Promise instance which resolves when

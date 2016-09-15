@@ -25,7 +25,6 @@ export class Viewer extends EventEmitter {
 	private activeTool: Tool;
 	private activeToolName: string;
 
-	// private painters: Painter[];
 	private sprites: Sprite[];
 
 	/**
@@ -132,10 +131,9 @@ export class Viewer extends EventEmitter {
 		return new ViewerEvent(this, eventType, originalEvent);
 	}
 
-	private clearCanvas(): void {
-		this.canvas.getContext('2d').clearRect(
-			0, 0, this.canvas.width, this.canvas.height
-		);
+	private renderImageDataToCanvas(image: ImageData): void {
+		const ctx = this.canvas.getContext('2d');
+		ctx.putImageData(image, 0, 0);
 	}
 
 	/**
@@ -164,7 +162,8 @@ export class Viewer extends EventEmitter {
 			this.currentRender = p;
 			this.nextRender = null;
 			const src = this.composition.imageSource;
-			return src.draw(this, state).then(res => {
+			return src.draw(this, state).then(image => {
+				this.renderImageDataToCanvas(image);
 				for (let annotation of this.composition.getAnnotations()) {
 					const sprite = annotation.draw(this, state);
 					if (sprite instanceof Sprite) this.sprites.push(sprite);

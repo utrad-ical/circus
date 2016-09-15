@@ -1,10 +1,7 @@
 import DicomVolume from '../../common/DicomVolume';
-import { PixelFormat, pixelFormatInfo } from '../../common/PixelFormat';
+import { PixelFormat } from '../../common/PixelFormat';
 import { DicomMetadata } from '../../browser/interface/dicom-metadata';
 import { VolumeImageSource } from '../../browser/image-source/volume-image-source';
-import { ViewState } from '../view-state';
-import { Viewer } from '../viewer/viewer';
-
 
 export class MockImageSource extends VolumeImageSource {
 
@@ -62,7 +59,7 @@ export class MockImageSource extends VolumeImageSource {
 		return raw;
 	}
 
-	protected scan(param) {
+	protected scan(param): Promise<Uint8Array> {
 		const imageBuffer = new Uint8Array(param.size[0] * param.size[1]);
 		this.volume.scanOblique(
 			param.origin,

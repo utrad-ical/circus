@@ -25,7 +25,7 @@ export class HybridImageSource extends ImageSource {
 		this.dynSource = new DynamicImageSource(params);
 	}
 
-	public draw(viewer: Viewer, viewState: ViewState): Promise<void> {
+	public draw(viewer: Viewer, viewState: ViewState): Promise<ImageData> {
 		const source: VolumeImageSource = this.volumeReady ? this.volSource : this.dynSource;
 		return source.draw(viewer, viewState);
 	}

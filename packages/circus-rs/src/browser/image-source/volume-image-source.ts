@@ -48,11 +48,9 @@ export abstract class VolumeImageSource extends ImageSource {
 		];
 	}
 
-	public draw(viewer: Viewer, viewState: ViewState): Promise<void> {
-		const canvas = viewer.canvas;
-		const context = canvas.getContext('2d');
-		const vpWidth = canvas.width;
-		const vpHeight = canvas.height;
+	public draw(viewer: Viewer, viewState: ViewState): Promise<ImageData> {
+		const context = viewer.canvas.getContext('2d');
+		const [vpWidth, vpHeight] = viewer.getResolution();
 		const section = viewState.section;
 		const window = viewState.window;
 		const voxelSize = this.meta.voxelSize;
@@ -80,20 +78,21 @@ export abstract class VolumeImageSource extends ImageSource {
 
 		return this.scan(scanParam)
 			.then(buffer => {
-				let imageData = context.createImageData(vpWidth, vpHeight);
-				let srcidx = 0, pixel, dstidx;
-				for (var y = 0; y < vpHeight; y++) {
-					for (var x = 0; x < vpWidth; x++) {
-						pixel = buffer[srcidx];
-						dstidx = srcidx << 2; // meaning multiply 4
-						imageData.data[dstidx] = pixel;
-						imageData.data[dstidx + 1] = pixel;
-						imageData.data[dstidx + 2] = pixel;
-						imageData.data[dstidx + 3] = 0xff;
-						srcidx++;
+				const imageData = context.createImageData(vpWidth, vpHeight);
+				const pixelData = imageData.data;
+				let srcIdx = 0, pixel, dstIdx;
+				for (let y = 0; y < vpHeight; y++) {
+					for (let x = 0; x < vpWidth; x++) {
+						pixel = buffer[srcIdx];
+						dstIdx = srcIdx << 2; // meaning multiply 4
+						pixelData[dstIdx] = pixel;
+						pixelData[dstIdx + 1] = pixel;
+						pixelData[dstIdx + 2] = pixel;
+						pixelData[dstIdx + 3] = 0xff;
+						srcIdx++;
 					}
 				}
-				context.putImageData(imageData, 0, 0);
+				return imageData;
 			});
 	}
 

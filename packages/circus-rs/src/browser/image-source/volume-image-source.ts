@@ -9,7 +9,7 @@ import { createOrthogonalMprSection } from '../section';
  * 3D volume-based image source classes which can render MPR.
  */
 export abstract class VolumeImageSource extends ImageSource {
-	protected meta: DicomMetadata;
+	public meta: DicomMetadata;
 
 	protected abstract scan(param): Promise<Uint8Array>;
 

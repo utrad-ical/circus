@@ -1,4 +1,3 @@
-import { ImageSource } from './image-source';
 import { DynamicImageSource } from './dynamic-image-source';
 import { RawVolumeImageSource } from './raw-volume-image-source';
 import { ViewState } from '../view-state';
@@ -10,11 +9,15 @@ import { VolumeImageSource } from './volume-image-source';
  * It can draw MPR images as soon as DynamicImageSource is ready,
  * and then switch to RawVolumeImageSource when it is ready.
  */
-export class HybridImageSource extends ImageSource {
+export class HybridImageSource extends VolumeImageSource {
 
 	private dynSource: DynamicImageSource = null;
 	private volSource: RawVolumeImageSource = null;
 	private volumeReady: boolean = false;
+
+	public scan(param): Promise<Uint8Array> {
+		return null; // never called
+	}
 
 	constructor(params) {
 		super();
@@ -23,6 +26,9 @@ export class HybridImageSource extends ImageSource {
 			this.volumeReady = true;
 		});
 		this.dynSource = new DynamicImageSource(params);
+		this.dynSource.ready().then(() => {
+			this.meta = this.dynSource.meta;
+		});
 	}
 
 	public draw(viewer: Viewer, viewState: ViewState): Promise<ImageData> {

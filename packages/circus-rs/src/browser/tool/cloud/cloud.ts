@@ -1,6 +1,5 @@
 import { vec3 } from 'gl-matrix';
 import { EventEmitter } from 'events';
-// import { VoxelCloud } from '../../../common/VoxelCloud';
 import { Composition } from '../../composition';
 import { Annotation } from '../../annotation/annotation';
 import { VoxelCloud } from '../../annotation/voxel-cloud';

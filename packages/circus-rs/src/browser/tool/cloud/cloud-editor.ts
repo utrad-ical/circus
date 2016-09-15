@@ -1,10 +1,12 @@
 import { vec3 } from 'gl-matrix';
 import { EventEmitter } from 'events';
-import { VoxelCloud } from '../../../common/VoxelCloud';
+import RawData from '../../../common/RawData';
+
+// DEPRECATED FILE: DO NOT IMPORT THIS FILE: WILL BE REMOVED FROM REPO SOON
 
 export class CloudEditor extends EventEmitter {
 
-	public cloud: VoxelCloud;
+	public cloud: RawData;
 	public penWidth: number = 1;
 
 	private mapper;
@@ -15,7 +17,7 @@ export class CloudEditor extends EventEmitter {
 
 	protected nibs: [number,number,number][];
 
-	public setCloud(cloud: VoxelCloud) {
+	public setCloud(cloud: RawData) {
 		let before = cloud;
 		this.cloud = cloud;
 		this.emit('cloudchange', before, this.cloud);

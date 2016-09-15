@@ -1,7 +1,5 @@
 import { EventEmitter } from 'events';
 
-import { VoxelCloud } from '../common/VoxelCloud';
-
 import { Annotation } from '../browser/annotation/annotation';
 import { ImageSource } from '../browser/image-source/image-source';
 import { Viewer } from '../browser/viewer/viewer';

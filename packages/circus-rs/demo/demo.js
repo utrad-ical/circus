@@ -1,86 +1,82 @@
 'use strict';
 
-var rs = circusrs;
+const rs = circusrs;
 
-const config = JSON.parse(localStorage.getItem('rs-demo-save'));
-if (config) {
-	$('#series').val(config.series);
-	$('#server').val(config.server);
+let viewer = null;
+let examples = [];
+
+//
+// The followings does not contain the actual usage of CIRCUS RS.
+// See example.js
+//
+
+function restoreConfig() {
+	const cfg = JSON.parse(localStorage.getItem('rs-demo-save'));
+	if (cfg) {
+		$('#series').val(cfg.series);
+		$('#server').val(cfg.server);
+	}
 }
 
-var viewer = null;
+restoreConfig();
+loadExampleScript();
 
-$('#load').on('click', () => {
-	const config = {
-		series: $('#series').val(),
-		server: $('#server').val()
-	};
-	localStorage.setItem('rs-demo-save', JSON.stringify(config));
-	viewer = initializeViewer(config.series, config.server);
-	const toolbar = initializeToolbar();
-	toolbar.bindViewer(viewer);
+function loadExampleScript() {
+	$.get({ url: 'examples.js', dataType: 'text' }).then(data => {
+		// parse
+		const items = data.split(/\s(?=\/\*\-\-)/);
+		examples = items.map(item => {
+			const res = {};
+			item = item.replace(
+				/\/\*\-\-((.|\s)+?)\-\-\*\//g,
+				(m, line) => {
+					line = line.replace(
+						/^\s*\@([a-z]+)\s+(.+)$/gm,
+						(m, tag, content) => {
+							res[tag] = content;
+							return '';
+						}
+					);
+					res.desc = line.trim();
+					return '';
+				}
+			);
+			res.script = item.trim();
+			return res;
+		});
+		buildExampleList();
+	}).fail(err => alert('Failed to load example JS file'));
+}
 
-	putAnnotation(viewer.composition);
+function buildExampleList() {
+	const sel = $('#example-select').empty();
+	examples.forEach((item, i) => {
+		$('<option>').data('index', i).text(item.title).appendTo(sel);
+	});
+	sel.trigger('change');
+}
+
+$('#example-select').on('change', () => {
+	const title = $('#example-select').val();
+	const item = examples.find(i => title === i.title);
+	if (!item) return;
+	$('#example-title').text(item.title);
+	$('#example-desc').text(item.desc);
+	$('#example-script').val(item.script);
 });
 
-function initializeViewer(series, server) {
-	const sourceClass = rs[$('#type').val()]; // ImageSource class
+$('#example-run').on('click', () => {
+	const config = {
+		series: $('#series').val(),
+		server: $('#server').val(),
+	};
+	localStorage.setItem('rs-demo-save', JSON.stringify(config));
 
-	const src = new sourceClass({ series, server });
-	const comp = new rs.Composition();
-	comp.setImageSource(src);
+	config.sourceClass = rs[$('#type').val()] // ImageSource class
+	window.config = config;
 
-	const div = document.getElementById('viewer');
-	const viewer = new rs.Viewer(div);
-	viewer.setComposition(comp);
+	const script = $('#example-script').val();
 
-	return viewer;
-}
-
-function initializeToolbar() {
-	const container = document.getElementById('toolbar');
-	container.innerHTML = '';
-	return rs.createToolbar(
-		container,
-		['hand', 'window', 'zoom', 'pager', 'celestialRotate','brush']
-	);
-}
-
-function addCloudAnnotation({
-	origin = [10, 10, 10],
-	size = [64, 64, 64],
-	color = '#ff0000',
-	alpha = 0.5,
-	debugPoint = false
-} = {}) {
-	const cloud = new rs.VoxelCloud();
-	const volume = new rs.RawData();
-	const comp = viewer.getComposition();
-	volume.setDimension(size[0], size[1], size[2], rs.PixelFormat.Binary);
-	volume.fillAll(1);
-	const src = comp.imageSource;
-	volume.setVoxelDimension(...src.meta.voxelSize);
-	cloud.volume = volume;
-	cloud.origin = origin;
-	cloud.color = color;
-	cloud.alpha = alpha;
-	cloud.debugPoint = debugPoint;
-	comp.addAnnotation(cloud);
-}
-
-function mpr(orientation, position) {
-	const state = viewer.getState();
-	const mmDim = viewer.getComposition().imageSource.mmDim();
-	state.section = rs.createOrthogonalMprSection(
-		viewer.getResolution(),
-		mmDim,
-		orientation,
-		position
-	);
-	viewer.setState(state);
-}
-
-function putAnnotation( comp ) {
-	const cornerText = new rs.CornerText();
-	comp.addAnnotation(cornerText);
-}
+	// eval the script
+	(new Function(script))();
+});

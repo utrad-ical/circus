@@ -4,8 +4,11 @@ import { ViewState } from '../view-state';
 import { Sprite } from '../viewer/sprite';
 import RawData from '../../common/RawData';
 import { PixelFormat } from '../../common/PixelFormat';
-import { convertScreenCoordinateToVolumeCoordinate, convertVolumeCoordinateToScreenCoordinate,
-	intersectionOfLineSegmentAndSection, LineSegment } from '../geometry';
+import {
+	convertScreenCoordinateToVolumeCoordinate,
+	convertVolumeCoordinateToScreenCoordinate,
+	intersectionOfBoxAndSection
+} from '../geometry';
 import { Section } from '../section';
 import { Vector3D } from '../../common/RawData';
 
@@ -60,7 +63,7 @@ export class VoxelCloud implements Annotation {
 	 * the given size. The shadow canvas can be used to
 	 * perform background image processing.
 	 */
-	private prepareShadowCanvas(resolution: [number,number]): HTMLCanvasElement {
+	private prepareShadowCanvas(resolution: [number, number]): HTMLCanvasElement {
 
 		if (!(VoxelCloud.shadowCanvas instanceof HTMLCanvasElement)) {
 			// Create new
@@ -79,7 +82,7 @@ export class VoxelCloud implements Annotation {
 		return canvas;
 	}
 
-	public mmDim(): [number, number, number] {
+	public mmDim(): Vector3D {
 		const voxelCount = this.volume.getDimension();
 		const voxelSize = this.volume.getVoxelDimension();
 		return [
@@ -103,80 +106,17 @@ export class VoxelCloud implements Annotation {
 		 * STEP 1. Checks if this cloud intersects the current section.
 		 */
 
-		// Prepare the 12 sides (line segments) of the box and
-		// checks if at least one of them intersects the current section.
-		// Top surface: t0-t1-t2-t3, Bottom surface: b0-b1-b2-b3
-		//    T0 ------- T1
-		//   / |        / |
-		//  T3 ------- T2 |
-		//  |  |       |  |
-		//  |  B0 -----|- B1
-		//  | /        | /
-		//  B3 ------- B2
-
 		const mmDim = this.mmDim();
-		const topVertexes: Vector3D[] = [
-			[ this.origin[0]           , this.origin[1]           , this.origin[2]            ], // T0
-			[ this.origin[0] + mmDim[0], this.origin[1]           , this.origin[2]            ], // T1
-			[ this.origin[0] + mmDim[0], this.origin[1] + mmDim[1], this.origin[2]            ], // T2
-			[ this.origin[0]           , this.origin[1] + mmDim[1], this.origin[2]            ]  // T3
-		];
-		const bottomVertexes: Vector3D[] = [
-			[ this.origin[0]           , this.origin[1]           , this.origin[2] + mmDim[2] ], // B0
-			[ this.origin[0] + mmDim[0], this.origin[1]           , this.origin[2] + mmDim[2] ], // B1
-			[ this.origin[0] + mmDim[0], this.origin[1] + mmDim[1], this.origin[2] + mmDim[2] ], // B2
-			[ this.origin[0]           , this.origin[1] + mmDim[1], this.origin[2] + mmDim[2] ], // B3
-		];
-
-		const intersections = [];
-		// T0-1, T1-2, T2-3, T3-4
-		for (let i = 0; i < 4; i++) {
-			const edge: LineSegment = {
-				origin: [topVertexes[i][0], topVertexes[i][1], topVertexes[i][2]],
-				vector: [
-					topVertexes[(i + 1) % 4][0] - topVertexes[i][0],
-					topVertexes[(i + 1) % 4][1] - topVertexes[i][1],
-					topVertexes[(i + 1) % 4][2] - topVertexes[i][2]
-				]
-			};
-			const intersection = intersectionOfLineSegmentAndSection(section, edge);
-			if (intersection !== null)
-				intersections.push(intersection);
-		}
-		// T0-B0, T1-B1, T2-B2, T3-B3
-		for (let i = 0; i < 4; i++) {
-			const edge: LineSegment = {
-				origin: [bottomVertexes[i][0], bottomVertexes[i][1], bottomVertexes[i][2]],
-				vector: [
-					bottomVertexes[(i + 1) % 4][0] - bottomVertexes[i][0],
-					bottomVertexes[(i + 1) % 4][1] - bottomVertexes[i][1],
-					bottomVertexes[(i + 1) % 4][2] - bottomVertexes[i][2]
-				]
-			};
-			const intersection = intersectionOfLineSegmentAndSection(section, edge);
-			if (intersection !== null)
-				intersections.push(intersection);
-		}
-		// B0-1, B1-2, B2-3, B3-4
-		for (let i = 0; i < 4; i++) {
-			const edge: LineSegment = {
-				origin: [topVertexes[i][0], topVertexes[i][1], topVertexes[i][2]],
-				vector: [
-					bottomVertexes[i][0] - topVertexes[i][0],
-					bottomVertexes[i][1] - topVertexes[i][1],
-					bottomVertexes[i][2] - topVertexes[i][2]
-				]
-			};
-			const intersection = intersectionOfLineSegmentAndSection(section, edge);
-			if (intersection !== null)
-				intersections.push(intersection);
-		}
-
-		if (intersections.length === 0) {
-			// This box does not intersect with the section. No need to draw anything.
+		const intersections = intersectionOfBoxAndSection(this.origin, mmDim, section);
+		if (!intersections) {
+			// The bounding box of this voxel cloud does not intersect with the section.
+			// No need to draw anything.
 			return null;
 		}
 
+		/*
+		 * STEP 2. Determines the bounding box of intersection points.
+		 */
 		// Converts the 3D intersection points to section-based 2D coordinates
 		// and get the box that contains all the intersection points.
 		let leftTop = [Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY];

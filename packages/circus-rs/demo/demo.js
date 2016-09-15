@@ -3,12 +3,17 @@
 const rs = circusrs;
 
 let viewer = null;
+let editor = null; // Ace editor
 let examples = [];
 
 //
 // The followings does not contain the actual usage of CIRCUS RS.
 // See example.js
 //
+
+restoreConfig();
+invokeAce();
+loadExampleScript();
 
 function restoreConfig() {
 	const cfg = JSON.parse(localStorage.getItem('rs-demo-save'));
@@ -18,8 +23,13 @@ function restoreConfig() {
 	}
 }
 
-restoreConfig();
-loadExampleScript();
+function invokeAce() {
+	editor = ace.edit('example-script');
+	editor.getSession().setMode("ace/mode/javascript");
+	editor.setShowPrintMargin(false);
+	editor.renderer.setShowGutter(false);
+	editor.$blockScrolling = Infinity;
+}
 
 function loadExampleScript() {
 	$.get({ url: 'examples.js', dataType: 'text' }).then(data => {
@@ -62,7 +72,8 @@ $('#example-select').on('change', () => {
 	if (!item) return;
 	$('#example-title').text(item.title);
 	$('#example-desc').text(item.desc);
-	$('#example-script').val(item.script);
+	editor.setValue(item.script);
+	editor.clearSelection();
 });
 
 $('#example-run').on('click', () => {
@@ -75,7 +86,7 @@ $('#example-run').on('click', () => {
 	config.sourceClass = rs[$('#type').val()] // ImageSource class
 	window.config = config;
 
-	const script = $('#example-script').val();
+	const script = editor.getValue();
 
 	// eval the script
 	(new Function(script))();

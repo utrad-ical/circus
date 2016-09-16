@@ -1,4 +1,18 @@
 /*--
+@title Default demo
+@color #ffffdd
+@viewerNotRequired
+
+The following code initializes a viewer and a toolbar for you to get started.
+Select an individual example item for details.
+--*/
+
+
+//--@include Initialize viewer
+//--@include Initialize toolbar
+
+
+/*--
 @title Initialize viewer
 @viewerNotRequired
 
@@ -17,6 +31,7 @@ const comp = new rs.Composition();
 comp.setImageSource(imageSource);
 
 // Create a viewer and associate the composition with it.
+// If there is an existing viewer in the div element, it will be cleared.
 const div = document.getElementById('viewer');
 viewer = new rs.Viewer(div);
 viewer.setComposition(comp);

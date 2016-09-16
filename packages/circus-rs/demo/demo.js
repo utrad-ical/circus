@@ -1,15 +1,20 @@
 'use strict';
 
+// Just for the sake of brevity, we make an alias for circusrs
 const rs = circusrs;
 
+// Make this variable available throught the demo
 let viewer = null;
+
+
+//
+// The followings do not contain actual usage examples of CIRCUS RS.
+// See example.js for demo scripts.
+//
+
 let editor = null; // Ace editor
 let examples = [];
 
-//
-// The followings does not contain the actual usage of CIRCUS RS.
-// See example.js
-//
 
 restoreConfig();
 invokeAce();
@@ -42,9 +47,9 @@ function loadExampleScript() {
 				/\/\*\-\-((.|\s)+?)\-\-\*\//g,
 				(m, line) => {
 					line = line.replace(
-						/^\s*\@([a-zA-Z]+)\s+(.*)$/gm,
+						/^[ \t]*\@([a-zA-Z]+)(?:[ \t]+(.*))?$/gm,
 						(m, tag, content) => {
-							res[tag] = content === '' ? true : content;
+							res[tag] = !content ? true : content;
 							return '';
 						}
 					);
@@ -61,10 +66,24 @@ function loadExampleScript() {
 
 function buildExampleList() {
 	const sel = $('#example-select').empty();
-	examples.forEach((item, i) => {
-		$('<option>').data('index', i).text(item.title).appendTo(sel);
+	examples.forEach(item => {
+		const opt = $('<option>').text(item.title);
+		if (item.color) opt.css('background-color', item.color);
+		opt.appendTo(sel);
 	});
 	sel.trigger('change');
+}
+
+function processExampleScript(script) {
+	return script.replace(
+		/^\s*\/\/\-\-\s*@include\s+(.+)$/gm,
+		(m, title) => {
+			title = title.trim();
+			const item = examples.find(i => title === i.title);
+			if (!item) return '';
+			return '\n' + processExampleScript(item.script) + '\n';
+		}
+	);
 }
 
 $('#example-select').on('change', () => {
@@ -72,7 +91,7 @@ $('#example-select').on('change', () => {
 	const item = examples.find(i => title === i.title);
 	if (!item) return;
 	$('#example-desc').html(item.desc);
-	editor.setValue(item.script);
+	editor.setValue(processExampleScript(item.script));
 	editor.clearSelection();
 });
 

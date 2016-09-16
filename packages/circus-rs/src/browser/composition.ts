@@ -19,7 +19,8 @@ import { BrushTool } from '../browser/tool/cloud/brush';
 export class Composition extends EventEmitter {
 
 	public imageSource: ImageSource;
-	private viewers: Viewer[] = [];
+
+	public viewers: Viewer[] = [];
 
 	/**
 	 * List of annotations associated with this composition.
@@ -78,11 +79,11 @@ export class Composition extends EventEmitter {
 	 */
 	public registerViewer(viewer: Viewer): void {
 		if (this.viewers.some(v => v === viewer)) return;
-		this.viewers.concat(viewer);
+		this.viewers.push(viewer);
 	}
 
 	/**
-	 * Removes a viewer to the internal list.
+	 * Removes a viewer from the internal list.
 	 * This method will be called automatically by a viewer.
 	 * End-users should not call this manually.
 	 */

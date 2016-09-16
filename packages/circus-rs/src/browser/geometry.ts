@@ -102,6 +102,9 @@ export function intersectionOfLineSegmentAndPlane(section: Section, line: LineSe
 	}
 }
 
+/**
+ * Returns true if the given point is withing the given section.
+ */
 export function intersectionPointWithinSection(section: Section, pointOnSection: Vector2D): boolean {
 	const o = section.origin;
 	const op = [pointOnSection[0] - o[0], pointOnSection[1] - o[1], pointOnSection[2] - o[2]];
@@ -114,6 +117,18 @@ export function intersectionPointWithinSection(section: Section, pointOnSection:
 		0 <= dotY && dotY <= lenY * lenY
 	);
 }
+
+
+/**
+ * Calculates the intersection point of the given line segment and the section.
+ * @return The intersection point. null if there is no intersection.
+ */
+export function intersectionOfLineSegmentAndSection(section: Section, line: LineSegment): Vector3D {
+	const intersection = intersectionOfLineSegmentAndPlane(section, line);
+	if (!intersection) return null;
+	return intersectionPointWithinSection(section, intersection) ? intersection : null;
+}
+
 
 /**
  * Calculates the intersection of the given box (cuboid) and the plane.
@@ -128,7 +143,7 @@ export function intersectionOfBoxAndPlane(
 	boxSize: Vector3D,
 	section: Section
 ): Vector3D[] {
-	const intersections = [];
+	const intersections: Vector3D[] = [];
 
 	// Prepare the 12 edges (line segments) of the box and
 	// checks if at least one of them intersects the current section.
@@ -172,6 +187,70 @@ export function intersectionOfBoxAndPlane(
 	}
 
 	return intersections.length === 0 ? null : intersections;
+}
+
+/**
+ * Calculates the intersection of two (finite) sections.
+ * @param base The base section, on which the target section is projected
+ * @param target The target section
+ * @returns The line segment which represents how the target section intersects with the base section.
+ * The resulting line segment may extend outside the boundry of base,
+ * while it does not extend outside the target.
+ */
+export function intersectionOfTwoSections(
+	base: Section, target: Section
+): LineSegment {
+	const intersections: Vector3D[] = [];
+
+	// Prepare the 4 edges (line segments) of the target section.
+	const tOrigin = target.origin;
+
+	const vertexes: Vector3D[] = [
+		tOrigin,
+		vec3.add(vec3.create(), tOrigin, target.xAxis) as Vector3D,
+		vec3.add(vec3.create(), tOrigin, target.yAxis) as Vector3D,
+		vec3.add(vec3.create(), vec3.add(vec3.create(), tOrigin, target.xAxis), target.yAxis)  as Vector3D
+	];
+
+	const edgeIndexes: Vector2D[] = [
+		[0, 1], [1, 2], [2, 3], [3, 0]
+	];
+
+	for (let i = 0; i < 4; i++) {
+		const from = vertexes[edgeIndexes[i][0]];
+		const to = vertexes[edgeIndexes[i][1]];
+		const edge: LineSegment = {
+			origin: from,
+			vector: [to[0] - from[0], to[1] - from[1], to[2] - from[2]]
+		};
+		const intersection = intersectionOfLineSegmentAndPlane(base, edge);
+		if (intersection !== null)
+			intersections.push(intersection);
+	}
+
+	if (intersections.length < 2) {
+		// two sections do not intersect at all
+		return null;
+	}
+	if (intersections.every(p => !intersectionPointWithinSection(base, p))) {
+		// the target section intersects with the plane containing the base section,
+		// but somewhere outside of the boundary of the base section
+		return null;
+	}
+
+	// Now intersections should normally contain 2 intersection points,
+	// but when there are more, find one which is different from the first
+	for (let i = 1; i < intersections.length; i++) {
+		if (vec3.distance(intersections[0], intersections[i]) > 0.0001) {
+			return {
+				origin: intersections[0],
+				vector: vec3.sub(vec3.create(), intersections[i], intersections[0]) as Vector3D
+			}
+		}
+	}
+
+	return null;
+
 }
 
 

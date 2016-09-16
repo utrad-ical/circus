@@ -3,9 +3,9 @@
 // Just for the sake of brevity, we make an alias for circusrs
 const rs = circusrs;
 
-// Make this variable available throught the demo
+// Make these variables available throught the demo
 let viewer = null;
-
+let viewer2 = null;
 
 //
 // The followings do not contain actual usage examples of CIRCUS RS.
@@ -67,6 +67,7 @@ function loadExampleScript() {
 function buildExampleList() {
 	const sel = $('#example-select').empty();
 	examples.forEach(item => {
+		if (item.hidden) return;
 		const opt = $('<option>').text(item.title);
 		if (item.color) opt.css('background-color', item.color);
 		opt.appendTo(sel);

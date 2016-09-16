@@ -13,11 +13,8 @@ Select an individual example item for details.
 
 
 /*--
-@title Initialize viewer
-@viewerNotRequired
-
-Before jumping in to other examples, you must create a viewer.
-This example shows minimum code to initialize CIRCUS RS.
+@title Initialize composition
+@hidden
 --*/
 
 // Prepare ImageSource object, using the options provided in the boxes above
@@ -30,12 +27,41 @@ const imageSource = new config.sourceClass({
 const comp = new rs.Composition();
 comp.setImageSource(imageSource);
 
+
+/*--
+@title Initialize viewer
+@viewerNotRequired
+
+Before jumping in to other examples, you must create a viewer.
+This example shows minimum code to initialize CIRCUS RS.
+--*/
+
+//--@include Initialize composition
+
 // Create a viewer and associate the composition with it.
 // If there is an existing viewer in the div element, it will be cleared.
 const div = document.getElementById('viewer');
 viewer = new rs.Viewer(div);
 viewer.setComposition(comp);
 
+
+/*--
+@title Initialize two viewers
+@viewerNotRequired
+
+Before jumping in to other examples, you must create a viewer.
+This example shows minimum code to initialize CIRCUS RS.
+--*/
+
+//--@include Initialize composition
+
+const div1 = document.getElementById('viewer');
+viewer = new rs.Viewer(div1);
+viewer.setComposition(comp);
+
+const div2 = document.getElementById('viewer2');
+viewer2 = new rs.Viewer(div2);
+viewer2.setComposition(comp);
 
 
 /*--

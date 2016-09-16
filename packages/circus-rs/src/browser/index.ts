@@ -7,6 +7,7 @@ export * from '../browser/composition';
 
 export * from '../browser/annotation/corner-text';
 export * from '../browser/annotation/voxel-cloud';
+export * from '../browser/annotation/reference-line';
 
 export { default as RawData } from '../common/RawData';
 export * from '../common/PixelFormat';

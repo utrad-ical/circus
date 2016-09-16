@@ -25,6 +25,8 @@ export class ReferenceLine implements Annotation {
 				const refLine = intersectionOfTwoSections(
 					viewState.section, sibState.section
 				);
+				if (!refLine) return; // nothing to draw
+				console.log('drawing cross reference line', refLine);
 				const from = convertVolumeCoordinateToScreenCoordinate(
 					viewState.section,
 					res,
@@ -35,8 +37,11 @@ export class ReferenceLine implements Annotation {
 					res,
 					vec3.add(vec3.create(), refLine.origin, refLine.vector) as Vector3D
 				);
+				console.log('from, to = ', from, to);
+				ctx.beginPath();
 				ctx.moveTo(from[0], from[1]);
 				ctx.lineTo(to[0], to[1]);
+				ctx.stroke();
 			});
 		} finally {
 			ctx.restore();

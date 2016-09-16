@@ -46,7 +46,7 @@ viewer.setComposition(comp);
 
 
 /*--
-@title Initialize two viewers
+@title Initialize two viewers with cross reference line
 @viewerNotRequired
 
 Before jumping in to other examples, you must create a viewer.
@@ -55,6 +55,9 @@ This example shows minimum code to initialize CIRCUS RS.
 
 //--@include Initialize composition
 
+const referenceLine = new rs.ReferenceLine();
+comp.addAnnotation(referenceLine);
+
 const div1 = document.getElementById('viewer');
 viewer = new rs.Viewer(div1);
 viewer.setComposition(comp);
@@ -62,7 +65,6 @@ viewer.setComposition(comp);
 const div2 = document.getElementById('viewer2');
 viewer2 = new rs.Viewer(div2);
 viewer2.setComposition(comp);
-
 
 /*--
 @title Initialize toolbar
@@ -77,8 +79,8 @@ const toolbar = rs.createToolbar(
 	['hand', 'window', 'zoom', 'pager', 'celestialRotate','brush']
 );
 
-toolbar.bindViewer(viewer);
-
+if (viewer) toolbar.bindViewer(viewer);
+if (viewer2) toolbar.bindViewer(viewer2);
 
 
 /*--

@@ -164,7 +164,7 @@ export class Viewer extends EventEmitter {
 			const src = this.composition.imageSource;
 			return src.draw(this, state).then(image => {
 				this.renderImageDataToCanvas(image);
-				for (let annotation of this.composition.getAnnotations()) {
+				for (let annotation of this.composition.annotations) {
 					const sprite = annotation.draw(this, state);
 					if (sprite instanceof Sprite) this.sprites.push(sprite);
 				}

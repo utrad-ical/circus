@@ -12,7 +12,7 @@ export abstract class VoxelCloudTool extends DraggableTool {
 	 * TODO: translate comment
 	 */
 	public getActiveCloud( composition: Composition ): VoxelCloud {
-		const annotations: Annotation[] = composition.getAnnotations();
+		const annotations: Annotation[] = composition.annotations;
 		let activeCloud: VoxelCloud = null;
 		annotations.forEach(
 			(anno) => {

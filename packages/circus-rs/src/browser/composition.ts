@@ -1,73 +1,33 @@
 import { EventEmitter } from 'events';
-
 import { Annotation } from '../browser/annotation/annotation';
 import { ImageSource } from '../browser/image-source/image-source';
 import { Viewer } from '../browser/viewer/viewer';
-import { ViewerEvent } from '../browser/viewer/viewer-event';
-import { ViewerEventTarget } from '../browser/interface/viewer-event-target';
-
-import { Tool } from '../browser/tool/tool';
-import { WindowTool } from '../browser/tool/state/window';
-import { HandTool } from '../browser/tool/state/hand';
-import { CelestialRotateTool } from '../browser/tool/state/celestial-rotate';
-import { BrushTool } from '../browser/tool/cloud/brush';
 
 /**
  * A composition is a combination of one imageSource and
  * an arbitrary number of annotations.
  */
 export class Composition extends EventEmitter {
-
+	/**
+	 * The image source that is associated with this composition.
+	 * Do not modify this directly: Use the acccessor methods instead.
+	 */
 	public imageSource: ImageSource;
 
-	public viewers: Viewer[] = [];
-
 	/**
-	 * List of annotations associated with this composition.
+	 * List of viewers that are associated with this composition.
+	 * Do not modify this directly: Use the acccessor methods instead.
 	 */
-	private annotations: Annotation[] = []; // TODO: Change to ES6 Set<Annotation>
-
-	// public clouds: VoxelCloud[] = [];
-	// private cloudEditor: CloudEditor;
-
-	constructor() {
-		super();
-
-		// //
-		// // Cloud edit tools
-		// //
-		// this.cloudEditor = new CloudEditor();
-		//
-		// // brush tool
-		// let brush = new BrushTool();
-		// brush.cloudEditor = this.cloudEditor;
-		// brush.on('penup', () => {
-		// 	this.renderAll();
-		// });
-		// this.tools['Brush'] = brush
-		//
-		// // bucket tool
-		// let bucket = new BucketTool();
-		// bucket.cloudEditor = this.cloudEditor;
-		// bucket.on('filled', () => {
-		// 	this.renderAll();
-		// });
-		// this.tools['Bucket'] = bucket
-		//
-		// /**
-		//  * set up painter
-		//  */
-		// let cloudsRenderer = new CloudsRenderer();
-		// cloudsRenderer.clouds = this.clouds;
-		// this.annotations.push(cloudsRenderer);
-
-	}
-
-	// public editCloud(cloud: VoxelCloud) {
-	// 	this.cloudEditor.setCloud(cloud);
-	// }
+	public viewers: Viewer[] = [];
+	
+	/**
+	 * List of annotations that are associated with this composition.
+	 * Do not modify this directly: Use the acccessor methods instead.
+	 */
+	public annotations: Annotation[] = [];
 
 	public setImageSource(imageSource: ImageSource) {
+		if (this.imageSource === imageSource) return;
 		this.imageSource = imageSource;
 		this.emit('sourceChange');
 	}
@@ -79,6 +39,7 @@ export class Composition extends EventEmitter {
 	 */
 	public registerViewer(viewer: Viewer): void {
 		if (this.viewers.some(v => v === viewer)) return;
+		this.emit('viewerChange');
 		this.viewers.push(viewer);
 	}
 
@@ -88,16 +49,27 @@ export class Composition extends EventEmitter {
 	 * End-users should not call this manually.
 	 */
 	public unregisterViewer(viewer: Viewer): void {
+		if (this.viewers.every(v => v !== viewer)) return;
 		this.viewers = this.viewers.filter(v => v !== viewer);
+		this.emit('viewerChange');
 	}
 
+	/**
+	 * Adds an annotation to this composition.
+	 */
 	public addAnnotation(annotation: Annotation): void {
+		if (this.annotations.some(a => a === annotation)) return;
 		this.annotations.push(annotation);
+		this.emit('annotationChange');
 	}
-
-	public getAnnotations(): Annotation[] {
-		// TODO: change to Iterator<Annotation>
-		return this.annotations;
+	
+	/**
+	 * Removes an annotation from this composition.
+	 */
+	public removeAnnotation(annotation: Annotation): void {
+		if (this.annotations.every(a => a !== annotation)) return;
+		this.annotations = this.annotations.filter(a => a !== annotation);
+		this.emit('annotationChange');
 	}
 
 }

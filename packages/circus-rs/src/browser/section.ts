@@ -18,18 +18,18 @@ export function detectOrthogonalSection(section: Section): OrientationString {
 
 const THRESHOLD = 0.0001;
 
-export function parallelToX(vec: number[]): boolean {
+export function parallelToX(vec: Vector3D): boolean {
 	const a = gl.vec3.angle(vec, gl.vec3.fromValues(1, 0, 0));
 	return a < THRESHOLD || a > Math.PI - THRESHOLD;
 }
 
-export function parallelToY(vec: number[]): boolean {
+export function parallelToY(vec: Vector3D): boolean {
 	const a = gl.vec3.angle(vec, gl.vec3.fromValues(0, 1, 0));
 	return a < THRESHOLD || a > Math.PI - THRESHOLD;
 
 }
 
-export function parallelToZ(vec: number[]): boolean {
+export function parallelToZ(vec: Vector3D): boolean {
 	const a = gl.vec3.angle(vec, gl.vec3.fromValues(0, 0, 1));
 	return a < THRESHOLD || a > Math.PI - THRESHOLD;
 }
@@ -37,8 +37,7 @@ export function parallelToZ(vec: number[]): boolean {
 /**
  * Performs a parallel translation on a given section.
  */
-export function translateSection(section: Section, delta: number[]): Section
-{
+export function translateSection(section: Section, delta: Vector3D): Section {
 	const origin: [number, number, number] = [
 		section.origin[0] + delta[0],
 		section.origin[1] + delta[1],
@@ -59,7 +58,7 @@ export function translateSection(section: Section, delta: number[]): Section
  */
 export function orientationAwareTranslation(section, voxelSize: Vector3D, step: number = 1): Section {
 	const orientation = detectOrthogonalSection(section);
-	let delta: number[];
+	let delta: Vector3D;
 	switch (orientation) {
 		case 'axial':
 			delta = [0, 0, voxelSize[2] * step];
@@ -71,7 +70,7 @@ export function orientationAwareTranslation(section, voxelSize: Vector3D, step: 
 			delta = [0, voxelSize[1] * step, 0];
 			break;
 		default:
-			delta = gl.vec3.create();
+			delta = gl.vec3.create() as Vector3D;
 			gl.vec3.cross(delta, section.xAxis, section.yAxis);
 			gl.vec3.normalize(delta, delta);
 			gl.vec3.scale(delta, delta, step);
@@ -101,8 +100,8 @@ export function calculateScaleFactor(section: Section, viewport: [number, number
  * @returns {Section}
  */
 export function createOrthogonalMprSection(
-	resolution: [number, number],
-	volumeSize: [number, number, number],
+	resolution: Vector2D,
+	volumeSize: Vector3D,
 	orientation: OrientationString = 'axial',
 	position?: number
 ): Section {

@@ -1,6 +1,7 @@
 import DicomVolume from '../../common/DicomVolume';
 import VolumeBasedController from './VolumeBasedController';
 import { ValidatorRules } from '../../common/Validator';
+import { Section } from '../../common/geometry/Section';
 import * as http from 'http';
 
 /**
@@ -13,8 +14,8 @@ export default class ObliqueScan extends VolumeBasedController {
 		return {
 			series: ['Series UID', null, this.isUID, null],
 			'origin!': ['Origin', null, this.isTuple(3), this.parseTuple(3)],
-			'u!': ['Scan vector X', null, this.isTuple(3), this.parseTuple(3)],
-			'v!': ['Scan vector Y', null, this.isTuple(3), this.parseTuple(3)],
+			'xAxis!': ['Scan vector X', null, this.isTuple(3), this.parseTuple(3)],
+			'yAxis!': ['Scan vector Y', null, this.isTuple(3), this.parseTuple(3)],
 			'size!': ['Output image size', null, this.isTuple(2), this.parseTuple(2, true)],
 			ww: ['Window width', undefined, 'isFloat', 'toFloat'],
 			wl: ['Window width', undefined, 'isFloat', 'toFloat'],
@@ -23,9 +24,9 @@ export default class ObliqueScan extends VolumeBasedController {
 	}
 
 	protected processVolume(query: any, vol: DicomVolume, res: http.ServerResponse): void {
-		let { ww, wl, origin, u, v, size, format } = query;
+		const { ww, wl, origin, xAxis, yAxis, size, format } = query;
 
-		let useWindow = (typeof ww === 'number' && typeof wl === 'number');
+		const useWindow = (typeof ww === 'number' && typeof wl === 'number');
 		if (format === 'png' && !useWindow) {
 			this.respondBadRequest(res, 'Window values are required for PNG output.');
 			return;
@@ -38,7 +39,8 @@ export default class ObliqueScan extends VolumeBasedController {
 		} else {
 			buf = new (vol.getPixelFormatInfo().arrayClass)(size[0] * size[1]);
 		}
-		vol.scanOblique(origin, u, v, size, buf, ww, wl);
+		const section: Section = { origin, xAxis, yAxis };
+		vol.scanObliqueSection(section, size, buf, ww, wl);
 
 		// Output
 		if (format === 'png') {

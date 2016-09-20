@@ -3,8 +3,7 @@
 import { MultiRange } from 'multi-integer-range';
 
 import { PixelFormat, PixelFormatInfo, pixelFormatInfo } from './PixelFormat';
-import { RawDataSection } from './RawDataSection';
-import { Vector2D, Vector3D, Box } from './geometry';
+import { Vector2D, Vector3D, Section, Box } from './geometry';
 
 interface MprResult {
 	image: Uint8Array;
@@ -95,7 +94,7 @@ export default class RawData {
 
 	/**
 	 * Append z to loadedSlices:MultiRange.
-	 * @param z {integer} z-coordinate
+	 * @param z z-coordinate
 	 */
 	public markSliceAsLoaded(z: number): void {
 		if (z < 0 || z >= this.size[2]) {
@@ -273,7 +272,7 @@ export default class RawData {
 		} else {
 			this.read = pos => (this.view[pos >> 3] >> (7 - pos % 8)) & 1;
 			this.write = (value, pos) => {
-				let cur = this.view[pos >> 3]; //pos => pos/8
+				let cur = this.view[pos >> 3]; // pos => pos/8
 				cur ^= (-value ^ cur) & (1 << (7 - pos % 8)); // set n-th bit to value
 				this.view[pos >> 3] = cur;
 			};
@@ -425,9 +424,7 @@ export default class RawData {
 	}
 
 	/**
-	 * Creates an orthogonal MPR image on a new array buffer.
-	 * not oblique.
-	 * MPR:multi-planar reconstruction
+	 * Creates an orthogonal MPR (multi-planar reconstruction) image on a new array buffer.
 	 * @param axis {string}
 	 * @param target {number}
 	 * @param windowWidth {number}
@@ -508,6 +505,63 @@ export default class RawData {
 		return {count, px, py};
 	}
 
+	public scanObliqueSection(
+		section: Section,
+		outSize: Vector2D,
+		outImage: { [index: number]: number},
+		windowWidth?: number,
+		windowLevel?: number
+	): void {
+		const eu: Vector3D = [
+			section.xAxis[0] / outSize[0],
+			section.xAxis[1] / outSize[0],
+			section.xAxis[2] / outSize[0]
+		];
+		const ev: Vector3D = [
+			section.yAxis[0] / outSize[1],
+			section.yAxis[1] / outSize[1],
+			section.yAxis[2] / outSize[1]
+		];
+		this.scanOblique(section.origin, eu, ev, outSize, outImage, windowWidth, windowLevel);
+	}
+
+	public scanObliqueSectionInMillimeter(
+		mmSection: Section,
+		outSize: Vector2D,
+		outImage: { [index: number]: number},
+		windowWidth?: number,
+		windowLevel?: number
+	): void {
+		const voxelSize = this.voxelSize;
+
+		// convert from mm-coordinate to index-coordinate
+		const indexSection: Section = {
+			origin: [
+				mmSection.origin[0] / voxelSize[0],
+				mmSection.origin[1] / voxelSize[1],
+				mmSection.origin[2] / voxelSize[2]
+			],
+			xAxis: [
+				mmSection.xAxis[0] / voxelSize[0],
+				mmSection.xAxis[1] / voxelSize[1],
+				mmSection.xAxis[2] / voxelSize[2]
+			],
+			yAxis: [
+				mmSection.yAxis[0] / voxelSize[0],
+				mmSection.yAxis[1] / voxelSize[1],
+				mmSection.yAxis[2] / voxelSize[2]
+			]
+		};
+
+		this.scanObliqueSection(
+			indexSection,
+			outSize,
+			outImage,
+			windowWidth,
+			windowLevel
+		);
+	}
+
 	/**
 	 * Scan over the volume and make an oblique image,
 	 * starting from origin and along with the plane defined by eu/ev.
@@ -515,7 +569,6 @@ export default class RawData {
 	 * If windowWidth/Level is given, output image will be an Uint8Array.
 	 * Otherwise, the output image must have the same pixel format as the
 	 * source volume data.
-	 * @protected
 	 * @param origin {Vector3D}
 	 * @param eu {Vector3D}
 	 * @param ev {Vector3D}
@@ -570,121 +623,6 @@ export default class RawData {
 	}
 
 	/**
-	 * Determine how to scan oblique image
-	 * @protected
-	 * @param baseAxis {string}
-	 * @param center {Vector3D}
-	 * @param angle {number}
-	 * @param minVoxelSize {number} smallest size of this.voxelSize
-	 * @return object {{outSize: Vector2D, outCenter: Vector2D, eu: Vector3D, ev: Vector3D, origin: Vector3D}}
-	 */
-	protected determineObliqueSizeAndScanOrientation(
-		baseAxis: string,
-		center: Vector3D,
-		angle: number,
-		minVoxelSize: number
-	): {outSize: Vector2D, outCenter: Vector2D, eu: Vector3D, ev: Vector3D, origin: Vector3D
-	} {
-		let [eu_x, eu_y, eu_z] = [0, 0, 0];
-		let [ev_x, ev_y, ev_z] = [0, 0, 0];
-		let [rx, ry, rz] = this.size;
-		let [vx, vy, vz] = this.voxelSize;
-		let [centerX, centerY] = [0, 0];
-		let [outWidth, outHeight] = [0, 0];
-		let origin: Vector3D;
-
-		// Determine output size
-		if (baseAxis === 'axial') {
-			eu_x = Math.cos(angle) * minVoxelSize / vx;
-			eu_y = -1.0 * Math.sin(angle) * minVoxelSize / vy;
-			ev_z = minVoxelSize / vz;
-
-			let minus = this.walkUntilObliqueBounds(center[0], center[1], -eu_x, -eu_y, rx, ry);
-			let plus = this.walkUntilObliqueBounds(center[0], center[1], eu_x, eu_y, rx, ry);
-
-			origin = [minus.px, minus.py, 0];
-			centerX = minus.count;
-			centerY = Math.floor(center[2] * vz / minVoxelSize);
-			outWidth = minus.count + plus.count + 1;
-			outHeight = Math.floor(rz * vz / minVoxelSize);
-		} else if (baseAxis === 'coronal') {
-			eu_x = Math.cos(angle) * minVoxelSize / vx;
-			eu_z = -1.0 * Math.sin(angle) * minVoxelSize / vz;
-			ev_y = minVoxelSize / vy;
-
-			let minus = this.walkUntilObliqueBounds(center[0], center[2], -eu_x, -eu_z, rx, rz);
-			let plus = this.walkUntilObliqueBounds(center[0], center[2], eu_x, eu_z, rx, rz);
-
-			origin = [minus.px, 0, minus.py];
-			centerX = minus.count;
-			centerY = Math.floor(center[1] * vy / minVoxelSize);
-			outWidth = minus.count + plus.count + 1;
-			outHeight = Math.floor(ry * vy / minVoxelSize);
-		} else if (baseAxis === 'sagittal') {
-			eu_x = minVoxelSize / vx;
-			ev_y = Math.cos(angle) * minVoxelSize / vy;
-			ev_z = -1.0 * Math.sin(angle) * minVoxelSize / vz;
-
-			let minus = this.walkUntilObliqueBounds(center[1], center[2], -ev_y, -ev_z, ry, rz);
-			let plus = this.walkUntilObliqueBounds(center[1], center[2], ev_y, ev_z, ry, rz);
-
-			origin = [0, minus.px, minus.py];
-			centerX = Math.floor(center[0] * vx / minVoxelSize);
-			centerY = minus.count;
-			outWidth = Math.floor(rx * vx / minVoxelSize);
-			outHeight = minus.count + plus.count + 1;
-		} else {
-			throw new Error('Invalid axis argument.');
-		}
-
-		return {
-			outSize: [outWidth, outHeight],
-			outCenter: [centerX, centerY],
-			eu: [eu_x, eu_y, eu_z],
-			ev: [ev_x, ev_y, ev_z],
-			origin
-		};
-	}
-
-	/**
-	 * Creates a single oblique MPR image on a new array buffer.
-	 * @param baseAxis {string}
-	 * @param center {Vector3D}
-	 * @param angle {number} angle
-	 * @param windowWidth {number}
-	 * @param windowLevel {number}
-	 * @return promise {Promise<ObliqueResult>}
-	 */
-	public singleOblique(
-		baseAxis: string,
-		center: Vector3D,
-		angle: number,
-		windowWidth?: number,
-		windowLevel?: number
-	): Promise<ObliqueResult> {
-		let [vx, vy, vz] = this.voxelSize;
-		// Determine the output image resolution,
-		// which must be the smallest voxel size of the three axis.
-		let pixelSize = Math.min(vx, vy, vz);
-
-		// Determine the output image bounds
-		let {outSize, outCenter, eu, ev, origin} =
-			this.determineObliqueSizeAndScanOrientation(baseAxis, center, angle, pixelSize);
-
-		// Prepare the image buffer for output
-		let image = new Uint8Array(outSize[0] * outSize[1]);
-
-		// Iterate over the output image
-		this.scanOblique(origin, eu, ev, outSize, image, windowWidth, windowLevel);
-		return Promise.resolve({
-			image,
-			outWidth: outSize[0], outHeight: outSize[1],
-			centerX: outCenter[0], centerY: outCenter[1],
-			pixelSize
-		});
-	}
-
-	/**
 	 * Returns the dimension of this volume measured in millimeter.
 	 */
 	public getMmDimension(): Vector3D {
@@ -698,76 +636,4 @@ export default class RawData {
 		];
 	}
 
-	/**
-	 * Returns the nearest voxel index of the given point measured in millimeters.
-	 * @param mmX
-	 * @param mmY
-	 * @param mmZ
-	 * @returns An array of integers which corresponds to the voxel position.
-	 */
-	public mmIndexAt(mmX: number, mmY: number, mmZ: number): Vector3D {
-		if (mmX < 0.0 || mmY < 0.0 || mmZ < 0.0) return null;
-
-		const [ix, iy, iz] = [
-			Math.floor(mmX / this.voxelSize[0]),
-			Math.floor(mmY / this.voxelSize[1]),
-			Math.floor(mmZ / this.voxelSize[2])
-		];
-		if (this.size[0] <= ix || this.size[1] <= iy || this.size[2] <= iz) return null;
-
-		return [ix, iy, iz];
-	}
-
-	public mmGetSection(
-		origin_mm: Vector3D,
-		u_mm: Vector3D,
-		v_mm: Vector3D,
-		resolution: Vector2D,
-		interpolation: boolean = true
-	): RawDataSection {
-
-		let [o_x, o_y, o_z] = [
-			origin_mm[0],
-			origin_mm[1],
-			origin_mm[2] ];
-		let u_count = resolution[0];
-		let [ u_step_w, u_step_h, u_step_d ] = [
-			u_mm[0] / u_count,
-			u_mm[1] / u_count,
-			u_mm[2] / u_count ];
-
-		let v_count = resolution[1];
-		let [ v_step_w, v_step_h, v_step_d ] = [
-			v_mm[0] / v_count,
-			v_mm[1] / v_count,
-			v_mm[2] / v_count ];
-
-		let reader = interpolation
-			? (pos_x, pos_y, pos_z) => {
-				let pidx = this.mmIndexAt( pos_x, pos_y, pos_z );
-				return pidx ? this.getPixelWithInterpolation( pidx[0], pidx[1], pidx[2] ) : 0;
-			}
-			: (pos_x, pos_y, pos_z) => {
-				let pidx = this.mmIndexAt( pos_x, pos_y, pos_z );
-				return pidx ? this.getPixelAt( pidx[0], pidx[1], pidx[2] ) : 0;
-			};
-
-		let section = new RawDataSection( u_count, v_count, this.pixelFormat );
-		let offset = 0;
-		let [ v_walker_x, v_walker_y, v_walker_z ] = [o_x, o_y, o_z];
-		for( let j = 0; j < v_count; j++ ){
-			let [ u_walker_x, u_walker_y, u_walker_z ] = [ v_walker_x, v_walker_y, v_walker_z ];
-			for( let i = 0; i < u_count; i++ ){
-				section.write( offset++, reader( u_walker_x, u_walker_y, u_walker_z ) );
-				u_walker_x += u_step_w;
-				u_walker_y += u_step_h;
-				u_walker_z += u_step_d;
-			}
-			v_walker_x += v_step_w;
-			v_walker_y += v_step_h;
-			v_walker_z += v_step_d;
-		}
-
-		return section;
-	}
 }

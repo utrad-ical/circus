@@ -128,10 +128,9 @@ class Server {
 		let routes: [string, string, boolean, any][] = [
 			['metadata', 'Metadata', true, {}],
 			['mpr', 'MPRAction', true, {}],
-			['oblique', 'ObliqueAction', true, {}],
 			['scan', 'ObliqueScan', true, {}],
 			['volume', 'VolumeAction', true, {}],
-			['status', 'ServerStatus', false, {server: this}],
+			['status', 'ServerStatus', false, {server: this}]
 		];
 
 		if (config.authorization.require) {

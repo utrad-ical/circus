@@ -129,6 +129,7 @@ export class VoxelCloud implements Annotation {
 		/*
 		 * STEP 2. Determine the bounding box of intersection points.
 		 */
+
 		// Converts the 3D intersection points to section-based 2D coordinates
 		// and get the box that contains all the intersection points.
 		let leftTop = [Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY];
@@ -186,39 +187,19 @@ export class VoxelCloud implements Annotation {
 			Math.round(0xff * this.alpha)
 		];
 
-		/**
-		 * scan oblique pattern ...
-		 */
-		// let o = cloudSection.origin;
-		// let u = cloudSection.xAxis.map((i) => i / cloudResolution[0]);
-		// let v = cloudSection.yAxis.map((i) => i / cloudResolution[1]);
-		// let vs = this.volume.getVoxelDimension();
-		// let imageBuffer = new Uint8Array(cloudResolution[0] * cloudResolution[1]);
-
-		// this.volume.scanOblique(
-		// [ o[0] / vs[0], o[1] / vs[1], o[2] / vs[2] ],
-		// [ u[0] / vs[0], u[1] / vs[1], u[2] / vs[2] ],
-		// [ v[0] / vs[0], v[1] / vs[1], v[2] / vs[2] ],
-		// cloudResolution,
-		// imageBuffer,
-		// 1, 0.5
-		// );
-
 		// raw section pattern ...
-		let rawSection = this.volume.mmGetSection(
-			cloudSection.origin,
-			cloudSection.xAxis,
-			cloudSection.yAxis,
+		const sectionImage = new Uint8Array(cloudResolution[0] * cloudResolution[1]);
+		this.volume.scanObliqueSectionInMillimeter(
+			cloudSection,
 			cloudResolution,
-			false
+			sectionImage
 		);
 
 		let imageData = context.createImageData(cloudResolution[0], cloudResolution[1]);
 		let srcidx = 0, pixel, dstidx;
 		for (let y = 0; y < cloudResolution[1]; y++) {
 			for (let x = 0; x < cloudResolution[0]; x++) {
-				// pixel = imageBuffer[srcidx]; // scan oblique pattern ...
-				pixel = rawSection.read(srcidx); // raw section pattern ...
+				pixel = sectionImage[srcidx];
 				dstidx = srcidx << 2; // meaning multiply 4
 				if (pixel === 1) {
 					imageData.data[dstidx] = color[0];

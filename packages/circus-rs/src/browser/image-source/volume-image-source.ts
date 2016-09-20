@@ -1,8 +1,9 @@
 import { ImageSource } from './image-source';
 import { DicomMetadata } from '../../browser/interface/dicom-metadata';
-import { ViewState } from '../view-state';
+import { ViewState, ViewWindow } from '../view-state';
 import { Viewer } from '../viewer/viewer';
 import { createOrthogonalMprSection } from '../section';
+import { Vector2D, Section } from '../../common/geometry';
 
 /**
  * VolumeImageSource is a common base class for all
@@ -11,7 +12,7 @@ import { createOrthogonalMprSection } from '../section';
 export abstract class VolumeImageSource extends ImageSource {
 	public meta: DicomMetadata;
 
-	protected abstract scan(param): Promise<Uint8Array>;
+	protected abstract scan(section: Section, window: ViewWindow, outSize: Vector2D): Promise<Uint8Array>;
 
 	public initialState(viewer: Viewer): ViewState {
 		let window = {
@@ -50,50 +51,47 @@ export abstract class VolumeImageSource extends ImageSource {
 
 	public draw(viewer: Viewer, viewState: ViewState): Promise<ImageData> {
 		const context = viewer.canvas.getContext('2d');
-		const [vpWidth, vpHeight] = viewer.getResolution();
-		const section = viewState.section;
-		const window = viewState.window;
+		const resolution = viewer.getResolution();
+		const mmSection = viewState.section;
 		const voxelSize = this.meta.voxelSize;
 
-		const scanParam = {
+		// convert from mm-coordinate to index-coordinate
+		const indexSection: Section = {
 			origin: [
-				Math.floor(section.origin[0] / voxelSize[0]),
-				Math.floor(section.origin[1] / voxelSize[1]),
-				Math.floor(section.origin[2] / voxelSize[2])
+				mmSection.origin[0] / voxelSize[0],
+				mmSection.origin[1] / voxelSize[1],
+				mmSection.origin[2] / voxelSize[2]
 			],
-			u: [
-				section.xAxis[0] / voxelSize[0] / vpWidth,
-				section.xAxis[1] / voxelSize[1] / vpWidth,
-				section.xAxis[2] / voxelSize[2] / vpWidth
+			xAxis: [
+				mmSection.xAxis[0] / voxelSize[0],
+				mmSection.xAxis[1] / voxelSize[1],
+				mmSection.xAxis[2] / voxelSize[2]
 			],
-			v: [
-				section.yAxis[0] / voxelSize[0] / vpHeight,
-				section.yAxis[1] / voxelSize[1] / vpHeight,
-				section.yAxis[2] / voxelSize[2] / vpHeight
-			],
-			size: [vpWidth, vpHeight],
-			ww: window.width,
-			wl: window.level
+			yAxis: [
+				mmSection.yAxis[0] / voxelSize[0],
+				mmSection.yAxis[1] / voxelSize[1],
+				mmSection.yAxis[2] / voxelSize[2]
+			]
 		};
 
-		return this.scan(scanParam)
-			.then(buffer => {
-				const imageData = context.createImageData(vpWidth, vpHeight);
-				const pixelData = imageData.data;
-				let srcIdx = 0, pixel, dstIdx;
-				for (let y = 0; y < vpHeight; y++) {
-					for (let x = 0; x < vpWidth; x++) {
-						pixel = buffer[srcIdx];
-						dstIdx = srcIdx << 2; // meaning multiply 4
-						pixelData[dstIdx] = pixel;
-						pixelData[dstIdx + 1] = pixel;
-						pixelData[dstIdx + 2] = pixel;
-						pixelData[dstIdx + 3] = 0xff;
-						srcIdx++;
-					}
+		return this.scan(indexSection, viewState.window, resolution)
+		.then(buffer => {
+			const imageData = context.createImageData(resolution[0], resolution[1]);
+			const pixelData = imageData.data;
+			let srcIdx = 0, pixel, dstIdx;
+			for (let y = 0; y < resolution[1]; y++) {
+				for (let x = 0; x < resolution[0]; x++) {
+					pixel = buffer[srcIdx];
+					dstIdx = srcIdx << 2; // meaning multiply 4
+					pixelData[dstIdx] = pixel;
+					pixelData[dstIdx + 1] = pixel;
+					pixelData[dstIdx + 2] = pixel;
+					pixelData[dstIdx + 3] = 0xff;
+					srcIdx++;
 				}
-				return imageData;
-			});
+			}
+			return imageData;
+		});
 	}
 
 }

@@ -3,6 +3,8 @@ import axios = require('axios');
 import { PixelFormat, pixelFormatInfo } from '../../common/PixelFormat';
 import DicomVolume  from '../../common/DicomVolume';
 import { DicomMetadata } from '../../browser/interface/dicom-metadata';
+import { Vector2D, Section } from '../../common/geometry';
+import { ViewWindow } from '../view-state';
 
 /**
  * Simple HTTP wrapper that connects to the CIRCUS RS server and returns the response
@@ -25,26 +27,22 @@ export class RsHttpLoader {
 		return this.request('metadata', { series });
 	}
 
-	public scan(series: string,
-		params: {
-			origin: [number, number, number];
-			u: [number, number, number];
-			v: [number, number, number];
-			size: [number, number];
-			ww?: number;
-			wl?: number;
-		} = null
+	public scan(
+		series: string,
+		section: Section,
+		window: ViewWindow,
+		size: Vector2D
 	): Promise<Uint8Array> {
 		return this.request(
 			'scan',
 			{
 				series: series,
-				origin: params.origin.join(','),
-				u: params.u.join(','),
-				v: params.v.join(','),
-				size: params.size.join(','),
-				ww: params.ww,
-				wl: params.wl
+				origin: section.origin.join(','),
+				xAxis: section.xAxis.join(','),
+				yAxis: section.yAxis.join(','),
+				size: size.join(','),
+				ww: window.width,
+				wl: window.level
 			},
 			'arraybuffer'
 		).then(res => new Uint8Array(res));

@@ -94,5 +94,7 @@ describe('RawData', function () {
 		assert.equal(dest.getPixelAt(0, 0, 0), 15);
 		assert.equal(dest.getPixelAt(4, 4, 4), 27);
 		assert.equal(dest.getPixelAt(5, 4, 4), 0);
+		
+		assert.throws(function() { dest.copy(dest); }, TypeError);
 	});
 });

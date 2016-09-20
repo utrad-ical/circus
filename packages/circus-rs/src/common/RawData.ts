@@ -418,7 +418,9 @@ export default class RawData {
 		srcBox?: Box,
 		offset?: Vector3D
 	): void {
+		if (src === this) throw new TypeError('Cannot copy from self');
 		if (!srcBox) srcBox = { origin: [0, 0, 0], size: src.getDimension() };
+
 		const [ox, oy, oz] = srcBox.origin;
 		if (!offset) offset = [0, 0, 0];
 		const dim = this.getDimension();

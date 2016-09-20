@@ -111,7 +111,10 @@ export class VoxelCloud implements Annotation {
 
 		const mmOrigin = this.toMillimeter(this.origin);
 		const mmDim = this.toMillimeter(this.volume.getDimension());
-		const intersections = intersectionOfBoxAndPlane(mmOrigin, mmDim, section);
+		const intersections = intersectionOfBoxAndPlane(
+			{ origin: mmOrigin, size: mmDim },
+			section
+		);
 
 		if (!intersections) {
 			// The bounding box of this voxel cloud does not intersect with the section.

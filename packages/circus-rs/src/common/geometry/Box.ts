@@ -2,21 +2,26 @@ import { Vector2D, Vector3D } from './Vector';
 import { LineSegment } from './LineSegment';
 import { Section, intersectionOfLineSegmentAndPlane } from './Section';
 
+/**
+ * Represents a bounding box.
+ */
+export interface Box {
+	origin: Vector3D;
+	size: Vector3D;
+}
+
 
 /**
  * Calculates the intersection of the given box (cuboid) and the plane.
  * The section is treated as a plane that extends infinitely.
- * @param boxOrigin
- * @param boxSize
- * @param section
+ * @param box The box
+ * @param section The section
  * @returns {Array} Array of intersection points. Null if there is no intersection.
  */
-export function intersectionOfBoxAndPlane(
-	boxOrigin: Vector3D,
-	boxSize: Vector3D,
-	section: Section
-): Vector3D[] {
+export function intersectionOfBoxAndPlane(box: Box, section: Section): Vector3D[] {
 	const intersections: Vector3D[] = [];
+	const boxOrigin = box.origin;
+	const boxSize = box.size;
 
 	// Prepare the 12 edges (line segments) of the box and
 	// checks if at least one of them intersects the current section.

@@ -4,7 +4,7 @@ import { MultiRange } from 'multi-integer-range';
 
 import { PixelFormat, PixelFormatInfo, pixelFormatInfo } from './PixelFormat';
 import { RawDataSection } from './RawDataSection';
-import { Vector2D, Vector3D } from './geometry';
+import { Vector2D, Vector3D, Box } from './geometry';
 
 interface MprResult {
 	image: Uint8Array;
@@ -27,65 +27,56 @@ interface ObliqueResult extends MprResult {
 export default class RawData {
 	/**
 	 * Number of voxels.
-	 * @protected
 	 */
 	protected size: Vector3D = null;
 
 	/**
 	 * Pixel format.
-	 * @protected
 	 */
 	protected pixelFormat: PixelFormat = PixelFormat.Unknown;
 
 	/**
-	 * Voxel size [mm]
-	 * @protected
+	 * The size of one voxel, measured in millimeter.
 	 */
 	protected voxelSize: Vector3D = null;
 
 	/**
-	 * Byte per voxel [byte/voxel]
-	 * @protected
+	 * Bytes per voxel [byte/voxel]
 	 */
 	protected bpp: number = 1;
 
 	/**
 	 * Actual image data.
-	 * @protected
 	 */
 	protected data: ArrayBuffer;
 
 	/**
 	 * The array view used with the array buffer (eg, Uint8Array)
-	 * @protected
 	 */
 	protected view: {[offset: number]: number};
 
 	/**
-	 * Voxel read function
-	 * @protected
+	 * Voxel reader function.
 	 */
 	protected read: (pos: number) => number;
 
 	/**
-	 * Voxel write function
-	 * @protected
+	 * Voxel writer function.
 	 */
 	protected write: (value: number, pos: number) => void;
 
 	/**
 	 * Holds which images are already loaded in this volume.
-	 * When complete, this.loadedSlices.length() will be the same as this.z.
-	 * @protected
+	 * When complete, this.loadedSlices.length() will be the same as this.size[2].
 	 */
 	protected loadedSlices: MultiRange = new MultiRange();
 
 	/**
-	 * Get pixel value. Each parameter must be an integer.
-	 * @param x {integer} x-coordinate
-	 * @param y {integer} y-coordinate
-	 * @param z {integer} z-coordinate
-	 * @return n {number} Corresponding voxel value.
+	 * Gets pixel value at the specified location. Each parameter must be an integer.
+	 * @param x x-coordinate
+	 * @param y y-coordinate
+	 * @param z z-coordinate
+	 * @return Corresponding voxel value.
 	 */
 	public getPixelAt(x: number, y: number, z: number): number {
 		return this.read(x + (y + z * this.size[1]) * this.size[0]);
@@ -94,9 +85,9 @@ export default class RawData {
 	/**
 	 * Write pixel value at the specified location.
 	 * @param value Pixel value to write.
-	 * @param x {integer} x-coordinate
-	 * @param y {integer} y-coordinate
-	 * @param z {integer} z-coordinate
+	 * @param x x-coordinate
+	 * @param y y-coordinate
+	 * @param z z-coordinate
 	 */
 	public writePixelAt(value: number, x: number, y: number, z: number): void {
 		this.write(value, x + (y + z * this.size[1]) * this.size[0]);
@@ -115,10 +106,10 @@ export default class RawData {
 
 	/**
 	 * Get pixel value using bilinear interpolation.
-	 * @param x {floating point} x-coordinate
-	 * @param y {floating point} y-coordinate
-	 * @param z {floating point} z-coordinate
-	 * @return n {number} Corresponding voxel value.
+	 * @param x x-coordinate (floating point)
+	 * @param y y-coordinate (floating point)
+	 * @param z z-coordinate (floating point)
+	 * @return n Interpolated corresponding voxel value.
 	 */
 	public getPixelWithInterpolation(x: number, y: number, z: number): number {
 		// Check values
@@ -190,8 +181,8 @@ export default class RawData {
 	 * Appends and overwrites one slice.
 	 * Note that the input data must be in the machine's native byte order
 	 * (i.e., little endian in x64 CPUs).
-	 * @param z {number} Z coordinate of the image inserted.
-	 * @param imageData {ArrayBuffer} The inserted image data using the machine's native byte order.
+	 * @param z Z coordinate of the image inserted.
+	 * @param imageData The inserted image data using the machine's native byte order.
 	 */
 	public insertSingleImage(z: number, imageData: ArrayBuffer): void {
 		if (!this.size) {
@@ -217,9 +208,9 @@ export default class RawData {
 	}
 
 	/**
-	 * Get single image by z.
-	 * @param z {number} z-coordinate
-	 * @return arraybuffer {ArrayBuffer} image data
+	 * Gets single image at the given z-coordinate.
+	 * @param z z-coordinate
+	 * @return The image data
 	 */
 	public getSingleImage(z: number): ArrayBuffer {
 		if (!this.size) {
@@ -267,6 +258,10 @@ export default class RawData {
 		this.setAccessor();
 	}
 
+	/**
+	 * Assigns a correct `read` and `write` methods according to the
+	 * current pixel format.
+	 */
 	protected setAccessor(): void {
 		let pxInfo = this.getPixelFormatInfo(this.pixelFormat);
 		this.bpp = pxInfo.bpp;
@@ -278,7 +273,7 @@ export default class RawData {
 		} else {
 			this.read = pos => (this.view[pos >> 3] >> (7 - pos % 8)) & 1;
 			this.write = (value, pos) => {
-				let cur = this.view[pos >> 3];//pos => pos/8
+				let cur = this.view[pos >> 3]; //pos => pos/8
 				cur ^= (-value ^ cur) & (1 << (7 - pos % 8)); // set n-th bit to value
 				this.view[pos >> 3] = cur;
 			};
@@ -286,7 +281,7 @@ export default class RawData {
 	}
 
 	/**
-	 * returns Vector3D (copy of this.size)
+	 * Returns the voxel size of this volume.
 	 * @return v3d {Vector3D}
 	 */
 	public getDimension(): Vector3D {
@@ -297,7 +292,7 @@ export default class RawData {
 	}
 
 	/**
-	 * returns pixel format
+	 * Returns the current pixel format.
 	 * @return p-format {PixelFormat}
 	 */
 	public getPixelFormat(): PixelFormat {
@@ -305,9 +300,9 @@ export default class RawData {
 	}
 
 	/**
-	 * returns PixelFormatInfo
+	 * Returns the PixelFormatInfo object if no parameter was give.
 	 * @param type ?PixelFormat
-	 * @return pinfo {PixelFormatInfo}
+	 * @return {PixelFormatInfo}
 	 */
 	public getPixelFormatInfo(type?: PixelFormat): PixelFormatInfo {
 		if (typeof type === 'undefined') {
@@ -317,7 +312,7 @@ export default class RawData {
 	}
 
 	/**
-	 * set voxel dimension and window
+	 * Sets the size of one voxel.
 	 * @param width {number}
 	 * @param height {number}
 	 * @param depth {number}
@@ -327,7 +322,7 @@ export default class RawData {
 	}
 
 	/**
-	 * get voxel size (copy of voxelSize)
+	 * Returns the size of one voxel.
 	 * @return v {Vector3D}
 	 */
 	public getVoxelDimension(): Vector3D {
@@ -335,8 +330,8 @@ export default class RawData {
 	}
 
 	/**
-	 * get full-datasize
-	 * @return bytesize {number}
+	 * Returns the volume data size in bytes
+	 * @return The byte size of the volume.
 	 */
 	public get dataSize(): number {
 		if (!this.size) {
@@ -354,9 +349,9 @@ export default class RawData {
 		let newRaw = new RawData();
 		let [rx, ry, rz] = this.size;
 		newRaw.setDimension(this.size[0], this.size[1], this.size[2], targetFormat);
-		for (let x = 0; x < rx; x++) {
+		for (let z = 0; z < rz; z++) {
 			for (let y = 0; y < ry; y++) {
-				for (let z = 0; z < rz; z++) {
+				for (let x = 0; x < rx; x++) {
 					let pos = x + (y + z * this.size[1]) * this.size[0];
 					let value = this.read(pos);
 					if (filter) {
@@ -377,32 +372,33 @@ export default class RawData {
 	 */
 	public fillAll(value: number | ((x: number, y: number, z: number) => number)): void {
 		const [rx, ry, rz] = this.size;
-		this.fillCuboid(value, 0, 0, 0, rx, ry, rz);
+		this.fillCuboid(value, { origin: [0, 0, 0], size: [rx, ry, rz] });
 	}
 
 	/**
 	 * Fills the specified cuboid region with the specified value.
 	 * @param value
 	 */
-	public fillCuboid(value: number | ((x: number, y: number, z: number) => number),
-		x: number, y: number, z: number,
-		w: number, h: number, d: number
+	public fillCuboid(
+		value: number | ((x: number, y: number, z: number) => number),
+		box: Box
 	): void	{
-		const xmax = x + w;
-		const ymax = y + h;
-		const zmax = z + d;
+		const [x, y, z] = box.origin;
+		const xmax = x + box.size[0];
+		const ymax = y + box.size[1];
+		const zmax = z + box.size[2];
 		if (typeof value === 'number') {
-			for (let xx = x; xx < xmax; xx++) {
+			for (let zz = z; zz < zmax; zz++) {
 				for (let yy = y; yy < ymax; yy++) {
-					for (let zz = z; zz < zmax; zz++) {
+					for (let xx = x; xx < xmax; xx++) {
 						this.writePixelAt(value, xx, yy, zz);
 					}
 				}
 			}
 		} else {
-			for (let xx = x; xx < xmax; xx++) {
+			for (let zz = z; zz < zmax; zz++) {
 				for (let yy = y; yy < ymax; yy++) {
-					for (let zz = z; zz < zmax; zz++) {
+					for (let xx = x; xx < xmax; xx++) {
 						this.writePixelAt(value(xx, yy, zz), xx, yy, zz);
 					}
 				}
@@ -689,25 +685,37 @@ export default class RawData {
 	}
 
 	/**
-	 * ミリメートルベース
+	 * Returns the dimension of this volume measured in millimeter.
 	 */
-	public mmGetDimension(){
+	public getMmDimension(): Vector3D {
 		if (!this.size) throw new Error('Dimension not set');
 		if (!this.voxelSize) throw new Error('voxel size not set');
 
 		return [
 			this.size[0] * this.voxelSize[0],
 			this.size[1] * this.voxelSize[1],
-			this.size[2] * this.voxelSize[2],
+			this.size[2] * this.voxelSize[2]
 		];
 	}
-	public mmIndexAt( mm_x: number, mm_y: number, mm_z: number ): Vector3D {
-		if( mm_x < 0.0 || mm_y < 0.0 || mm_z < 0.0 ) return null;
 
-		let [ ix, iy, iz ] = [ Math.floor( mm_x / this.voxelSize[0] ), Math.floor( mm_y / this.voxelSize[1] ), Math.floor( mm_z / this.voxelSize[2] ) ];
-		if( this.size[0] <= ix || this.size[1] <= iy || this.size[2] <= iz ) return null;
+	/**
+	 * Returns the nearest voxel index of the given point measured in millimeters.
+	 * @param mmX
+	 * @param mmY
+	 * @param mmZ
+	 * @returns An array of integers which corresponds to the voxel position.
+	 */
+	public mmIndexAt(mmX: number, mmY: number, mmZ: number): Vector3D {
+		if (mmX < 0.0 || mmY < 0.0 || mmZ < 0.0) return null;
 
-		return [ ix, iy, iz ];
+		const [ix, iy, iz] = [
+			Math.floor(mmX / this.voxelSize[0]),
+			Math.floor(mmY / this.voxelSize[1]),
+			Math.floor(mmZ / this.voxelSize[2])
+		];
+		if (this.size[0] <= ix || this.size[1] <= iy || this.size[2] <= iz) return null;
+
+		return [ix, iy, iz];
 	}
 
 	public mmGetSection(

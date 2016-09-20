@@ -4,10 +4,7 @@ import { MultiRange } from 'multi-integer-range';
 
 import { PixelFormat, PixelFormatInfo, pixelFormatInfo } from './PixelFormat';
 import { RawDataSection } from './RawDataSection';
-
-export type Vector3D = [number, number, number];
-
-export type Vector2D = [number, number];
+import { Vector2D, Vector3D } from './geometry';
 
 interface MprResult {
 	image: Uint8Array;

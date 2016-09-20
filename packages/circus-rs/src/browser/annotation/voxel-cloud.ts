@@ -2,15 +2,19 @@ import { Annotation } from './annotation';
 import { Viewer } from '../viewer/viewer';
 import { ViewState } from '../view-state';
 import { Sprite } from '../viewer/sprite';
-import RawData, { Vector3D, Vector2D } from '../../common/RawData';
+import RawData from '../../common/RawData';
+import {
+	Vector2D,
+	Vector3D,
+	Section,
+	intersectionOfBoxAndPlane,
+	intersectionPointWithinSection
+ } from '../../common/geometry';
 import { PixelFormat } from '../../common/PixelFormat';
 import {
 	convertScreenCoordinateToVolumeCoordinate,
 	convertVolumeCoordinateToScreenCoordinate,
-	intersectionOfBoxAndPlane,
-	intersectionPointWithinSection
 } from '../geometry';
-import { Section } from '../section';
 
 /**
  * VoxelCloud is a type of Annotation that can be registered to a Composition.

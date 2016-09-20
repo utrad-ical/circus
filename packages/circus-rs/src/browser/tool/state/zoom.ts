@@ -2,10 +2,9 @@ import { mat4, vec3 } from 'gl-matrix';
 import { DraggableTool } from '../../../browser/tool/draggable';
 import { Viewer } from '../../../browser/viewer/viewer';
 import { ViewState } from '../../view-state';
-import { Section } from '../../section';
 import { ViewerEvent } from '../../../browser/viewer/viewer-event';
 import { convertScreenCoordinateToVolumeCoordinate } from '../../geometry';
-import { Vector2D } from '../../../common/RawData';
+import { Vector2D, Section } from '../../../common/geometry';
 
 /**
  * ZoomTool

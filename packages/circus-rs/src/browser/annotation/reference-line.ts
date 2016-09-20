@@ -2,8 +2,8 @@ import { Annotation } from './annotation';
 import { Viewer } from '../viewer/viewer';
 import { ViewState } from '../view-state';
 import { Sprite } from '../viewer/sprite';
-import { intersectionOfTwoSections, convertVolumeCoordinateToScreenCoordinate } from '../geometry';
-import { Vector3D } from '../../common/RawData';
+import { convertVolumeCoordinateToScreenCoordinate } from '../geometry';
+import { Vector3D, intersectionOfTwoSections } from '../../common/geometry';
 import { vec3 } from 'gl-matrix';
 
 export class ReferenceLine implements Annotation {

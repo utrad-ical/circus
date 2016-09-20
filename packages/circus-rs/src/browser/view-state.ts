@@ -1,5 +1,5 @@
 import { ImageSource } from './image-source/image-source';
-import { Section } from './section';
+import { Section } from '../common/geometry';
 
 /**
  * ViewWindow determines how each pixel value is assined

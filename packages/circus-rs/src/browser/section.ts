@@ -1,14 +1,5 @@
 import * as gl from 'gl-matrix';
-import { Vector2D, Vector3D } from '../common/RawData';
-
-/**
- * Section determines the MRP section of a volume.
- */
-export interface Section {
-	origin: Vector3D;
-	xAxis: Vector3D; // in millimeters
-	yAxis: Vector3D; // in millimeters
-}
+import { Vector2D, Vector3D, Section } from '../common/geometry';
 
 export type OrientationString = 'axial' | 'sagittal' | 'coronal' | 'oblique';
 

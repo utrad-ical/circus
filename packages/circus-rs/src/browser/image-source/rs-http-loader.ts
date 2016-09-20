@@ -1,4 +1,4 @@
-import axios = require('axios');
+import axios from 'axios';
 
 import { PixelFormat, pixelFormatInfo } from '../../common/PixelFormat';
 import DicomVolume  from '../../common/DicomVolume';

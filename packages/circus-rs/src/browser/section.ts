@@ -82,13 +82,10 @@ export function orientationAwareTranslation(section, voxelSize: Vector3D, step: 
 
 /**
  * Calculates the scale factor relative to the screen pixel
- * @returns {number} The calculated scale factor, where 1 = pixel by pixel, 2 = 200%, 0.5 = 50%
+ * @returns The calculated scale factor, where 1 = pixel by pixel, 2 = 200%, 0.5 = 50%
  */
-export function calculateScaleFactor(section: Section, viewport: [number, number]): number
-{
-	const sectionWidth = gl.vec3.length(section.xAxis);
-	const screenWidth = viewport[0];
-	return screenWidth / sectionWidth;
+export function calculateScaleFactor(section: Section, mmDim: Vector3D): number {
+	return mmDim[0] / section.xAxis[0];
 }
 
 /**

@@ -69,4 +69,30 @@ describe('RawData', function () {
 		assert.equal(raw.getPixelFormat(), PixelFormat.Int8);
 		assert.equal(raw.getPixelAt(2, 2, 2), 5);
 	});
+
+	it('must copy data from another instance', function() {
+		var src = new RawData();
+		src.setDimension(16, 16, 16, PixelFormat.Int8);
+		src.fillAll((x, y, z) => x + y + z);
+		var dest = new RawData();
+		dest.setDimension(16, 16, 16, PixelFormat.Int8);
+		dest.copy(src);
+		assert.equal(dest.getPixelAt(3, 10, 7), 20);
+
+		dest.fillAll(0);
+		dest.copy(src, undefined, [3, 3, 3]);
+		assert.equal(dest.getPixelAt(6, 13, 10), 20);
+		assert.equal(dest.getPixelAt(15, 15, 15), 36);
+
+		dest.fillAll(0);
+		dest.copy(src, undefined, [-3, -3, -3]);
+		assert.equal(dest.getPixelAt(0, 7, 4), 20);
+		assert.equal(dest.getPixelAt(0, 0, 0), 9);
+
+		dest.fillAll(0);
+		dest.copy(src, { origin: [5, 5, 5], size: [5, 5, 5]});
+		assert.equal(dest.getPixelAt(0, 0, 0), 15);
+		assert.equal(dest.getPixelAt(4, 4, 4), 27);
+		assert.equal(dest.getPixelAt(5, 4, 4), 0);
+	});
 });

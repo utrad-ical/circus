@@ -406,6 +406,40 @@ export default class RawData {
 	}
 
 	/**
+	 * Copies the voxel data from another RawData instance.
+	 * @param src
+	 * @param srcBox
+	 * @param destOffset
+	 */
+	public copy(
+		src: RawData,
+		srcBox?: Box,
+		offset?: Vector3D
+	): void {
+		if (!srcBox) srcBox = { origin: [0, 0, 0], size: src.getDimension() };
+		const [ox, oy, oz] = srcBox.origin;
+		if (!offset) offset = [0, 0, 0];
+		const dim = this.getDimension();
+
+		const xmin = Math.max(0, -offset[0]);
+		const xmax = Math.min(dim[0] - offset[0], srcBox.size[0]);
+		const ymin = Math.max(0, -offset[1]);
+		const ymax = Math.min(dim[1] - offset[1], srcBox.size[1]);
+		const zmin = Math.max(0, -offset[2]);
+		const zmax = Math.min(dim[2] - offset[2], srcBox.size[2]);
+
+		for (let z = zmin; z < zmax; z++) {
+			for (let y = ymin; y < ymax; y++) {
+				for (let x = xmin; x < xmax; x++) {
+					// TODO: Optimize if src and this share the same pixel format
+					const val = src.getPixelAt(ox + x, oy + y, oz + z);
+					this.writePixelAt(val, offset[0] + x, offset[1] + y, offset[2] + z);
+				}
+			}
+		}
+	}
+
+	/**
 	 * Applies window level/width.
 	 * @protected
 	 * @param width {number}

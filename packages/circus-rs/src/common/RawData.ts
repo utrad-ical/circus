@@ -11,12 +11,6 @@ interface MprResult {
 	outHeight: number;
 }
 
-interface ObliqueResult extends MprResult {
-	pixelSize: number;
-	centerX: number;
-	centerY: number;
-}
-
 // Make sure you don't add properties
 // that heavily depends on DICOM spec!
 
@@ -104,7 +98,8 @@ export default class RawData {
 	}
 
 	/**
-	 * Get pixel value using bilinear interpolation.
+	 * Get pixel value from floating-point coordinate
+	 * using bilinear interpolation.
 	 * @param x x-coordinate (floating point)
 	 * @param y y-coordinate (floating point)
 	 * @param z z-coordinate (floating point)
@@ -146,7 +141,6 @@ export default class RawData {
 
 	/**
 	 * Do 4-neighbor pixel interpolation within a given single axial slice.
-	 * @protected
 	 * @param ix {number}
 	 * @param x {number}
 	 * @param iy {number}
@@ -230,11 +224,11 @@ export default class RawData {
 	}
 
 	/**
-	 * Set the size of the 'volume' and allocate an array.
-	 * @param x {number} x-coordinate
-	 * @param y {number} y-coordinate
-	 * @param z {number} z-coordinate
-	 * @param type {PixelFormat} enum
+	 * Set the size of the volume and allocate an byte array.
+	 * @param x The volume size along the x-axis ("width")
+	 * @param y The volume size along the y-axis ("height")
+	 * @param z The volume size along the z-axis ("depth")
+	 * @param type The pixel format
 	 */
 	public setDimension(x: number, y: number, z: number, type: PixelFormat): void {
 		if (x <= 0 || y <= 0 || z <= 0) {
@@ -280,8 +274,8 @@ export default class RawData {
 	}
 
 	/**
-	 * Returns the voxel size of this volume.
-	 * @return v3d {Vector3D}
+	 * Returns the voxel number of this volume along the three axes.
+	 * @return The size of this volume.
 	 */
 	public getDimension(): Vector3D {
 		if (!this.size) {
@@ -292,16 +286,18 @@ export default class RawData {
 
 	/**
 	 * Returns the current pixel format.
-	 * @return p-format {PixelFormat}
+	 * @return The current pixel format.
 	 */
 	public getPixelFormat(): PixelFormat {
 		return this.pixelFormat;
 	}
 
 	/**
-	 * Returns the PixelFormatInfo object if no parameter was give.
-	 * @param type ?PixelFormat
-	 * @return {PixelFormatInfo}
+	 * Returns the PixelFormatInfo object if no parameter is given.
+	 * Returns the corresponding PixelFormatInfo if type is set.
+	 * @param type The PixelFormat value.
+	 * @return The PixelFormatInfo object, which holds some
+	 *     helpful information about the pixel format.
 	 */
 	public getPixelFormatInfo(type?: PixelFormat): PixelFormatInfo {
 		if (typeof type === 'undefined') {
@@ -311,10 +307,10 @@ export default class RawData {
 	}
 
 	/**
-	 * Sets the size of one voxel.
-	 * @param width {number}
-	 * @param height {number}
-	 * @param depth {number}
+	 * Sets the size of one voxel in millimeter.
+	 * @param width The size of a voxel in millimeter along x-axis.
+	 * @param height The size of a voxel in millimeter along y-axis.
+	 * @param depth The size of a voxel in millimeter along z-axis.
 	 */
 	public setVoxelDimension(width: number, height: number, depth: number): void {
 		this.voxelSize = [width, height, depth];
@@ -322,14 +318,14 @@ export default class RawData {
 
 	/**
 	 * Returns the size of one voxel.
-	 * @return v {Vector3D}
+	 * @return A Vector3D object representing the size of one voxel.
 	 */
 	public getVoxelDimension(): Vector3D {
 		return <Vector3D>this.voxelSize.slice(0);
 	}
 
 	/**
-	 * Returns the volume data size in bytes
+	 * Calculates the volume data size in bytes.
 	 * @return The byte size of the volume.
 	 */
 	public get dataSize(): number {
@@ -342,9 +338,10 @@ export default class RawData {
 	/**
 	 * Converts this raw data to new pixel format, optionally using a filter.
 	 * @param targetFormat
-	 * @param filter
+	 * @param mapper Optional function which is applied to
+	 *     map the voxel values.
 	 */
-	public convert(targetFormat: PixelFormat, filter: (number) => number): void {
+	public convert(targetFormat: PixelFormat, mapper: (number) => number): void {
 		let newRaw = new RawData();
 		let [rx, ry, rz] = this.size;
 		newRaw.setDimension(this.size[0], this.size[1], this.size[2], targetFormat);
@@ -353,8 +350,8 @@ export default class RawData {
 				for (let x = 0; x < rx; x++) {
 					let pos = x + (y + z * this.size[1]) * this.size[0];
 					let value = this.read(pos);
-					if (filter) {
-						value = filter(value);
+					if (mapper) {
+						value = mapper(value);
 					}
 					newRaw.write(value, pos);
 				}
@@ -367,16 +364,18 @@ export default class RawData {
 
 	/**
 	 * Fills the entire volume with the specified value.
-	 * @param value
+	 * @param value The value to fill. Can be a function.
 	 */
-	public fillAll(value: number | ((x: number, y: number, z: number) => number)): void {
-		const [rx, ry, rz] = this.size;
-		this.fillCuboid(value, { origin: [0, 0, 0], size: [rx, ry, rz] });
+	public fillAll(
+		value: number | ((x: number, y: number, z: number) => number)
+	): void {
+		this.fillCuboid(value, { origin: [0, 0, 0], size: this.size });
 	}
 
 	/**
 	 * Fills the specified cuboid region with the specified value.
-	 * @param value
+	 * @param value The value to fill. Can be a function.
+	 * @param box The bounding box in which the volume is filled.
 	 */
 	public fillCuboid(
 		value: number | ((x: number, y: number, z: number) => number),
@@ -407,9 +406,12 @@ export default class RawData {
 
 	/**
 	 * Copies the voxel data from another RawData instance.
-	 * @param src
-	 * @param srcBox
-	 * @param destOffset
+	 * @param src The source RawData.
+	 * @param srcBox The source bounding box.
+	 *     If unspecified, copies whole volume.
+	 * @param destOffset The point of this instance where
+	 *     the source is started to be copied.
+	 *     If unspecified, origin (0, 0, 0) is used.
 	 */
 	public copy(
 		src: RawData,
@@ -441,11 +443,10 @@ export default class RawData {
 
 	/**
 	 * Applies window level/width.
-	 * @protected
-	 * @param width {number}
-	 * @param level {number}
-	 * @param pixel {number}
-	 * @return n {number} 0-255
+	 * @param width The window width.
+	 * @param level The window level.
+	 * @param pixel The input pixel value, typically a Uint16 value.
+	 * @return The windowed pixel value between 0 and 255.
 	 */
 	protected applyWindow(width: number, level: number, pixel: number): number {
 		let value = Math.round((pixel - level + width / 2) * (255 / width));
@@ -459,11 +460,11 @@ export default class RawData {
 
 	/**
 	 * Creates an orthogonal MPR (multi-planar reconstruction) image on a new array buffer.
-	 * @param axis {string}
-	 * @param target {number}
-	 * @param windowWidth {number}
-	 * @param windowLevel {number}
-	 * @return promise {Promise<MprResult>}
+	 * @param axis
+	 * @param target
+	 * @param windowWidth
+	 * @param windowLevel
+	 * @return promise
 	 */
 	public orthogonalMpr(
 		axis: string,
@@ -509,8 +510,8 @@ export default class RawData {
 	}
 
 	/**
-	 * count cube of voxel from center to edge of voxel
-	 * @protected
+	 * Count the number of voxel from the given center point
+	 * to one of the edges of the volume
 	 * @param centerX {number}
 	 * @param centerY {number}
 	 * @param microX {number}
@@ -661,7 +662,7 @@ export default class RawData {
 	 */
 	public getMmDimension(): Vector3D {
 		if (!this.size) throw new Error('Dimension not set');
-		if (!this.voxelSize) throw new Error('voxel size not set');
+		if (!this.voxelSize) throw new Error('Voxel size not set');
 
 		return [
 			this.size[0] * this.voxelSize[0],

@@ -107,9 +107,9 @@ export default class RawData {
 	 */
 	public getPixelWithInterpolation(x: number, y: number, z: number): number {
 		// Check values
-		let x_end = this.size[0] - 1;
-		let y_end = this.size[1] - 1;
-		let z_end = this.size[2] - 1;
+		const x_end = this.size[0] - 1;
+		const y_end = this.size[1] - 1;
+		const z_end = this.size[2] - 1;
 		if (x < 0.0 || y < 0.0 || z < 0.0 || x > x_end || y > y_end || z > z_end) {
 			return 0;
 		}
@@ -132,10 +132,10 @@ export default class RawData {
 		}
 
 		// Calculate the weight of slices and determine the final value
-		let value_z1 = this.getAxialInterpolation(ix, x, iy, y, iz);
-		let value_z2 = this.getAxialInterpolation(ix, x, iy, y, iz + 1);
-		let weight_z2 = z - iz;
-		let weight_z1 = 1.0 - weight_z2;
+		const value_z1 = this.getAxialInterpolation(ix, x, iy, y, iz);
+		const value_z2 = this.getAxialInterpolation(ix, x, iy, y, iz + 1);
+		const weight_z2 = z - iz;
+		const weight_z1 = 1.0 - weight_z2;
 		return value_z1 * weight_z1 + value_z2 * weight_z2;
 	}
 
@@ -149,24 +149,24 @@ export default class RawData {
 	 * @return n {number}
 	 */
 	protected getAxialInterpolation(ix: number, x: number, iy: number, y: number, intz: number): number {
-		let ixp1 = ix + 1;
-		let iyp1 = iy + 1;
+		const ixp1 = ix + 1;
+		const iyp1 = iy + 1;
 
 		// p0 p1
 		// p2 p3
-		let rx = this.size[0];
-		let offset = rx * this.size[1] * intz; // offset of p0 (top-left pixel)
-		let p0 = this.read(offset + ix + iy * rx);
-		let p1 = this.read(offset + ixp1 + iy * rx);
-		let p2 = this.read(offset + ix + iyp1 * rx);
-		let p3 = this.read(offset + ixp1 + iyp1 * rx);
+		const rx = this.size[0];
+		const offset = rx * this.size[1] * intz; // offset of p0 (top-left pixel)
+		const p0 = this.read(offset + ix + iy * rx);
+		const p1 = this.read(offset + ixp1 + iy * rx);
+		const p2 = this.read(offset + ix + iyp1 * rx);
+		const p3 = this.read(offset + ixp1 + iyp1 * rx);
 
-		let weight_x2 = x - ix;
-		let weight_x1 = 1.0 - weight_x2;
-		let weight_y2 = y - iy;
-		let weight_y1 = 1.0 - weight_y2;
-		let value_y1 = p0 * weight_x1 + p1 * weight_x2;
-		let value_y2 = p2 * weight_x1 + p3 * weight_x2;
+		const weight_x2 = x - ix;
+		const weight_x1 = 1.0 - weight_x2;
+		const weight_y2 = y - iy;
+		const weight_y1 = 1.0 - weight_y2;
+		const value_y1 = p0 * weight_x1 + p1 * weight_x2;
+		const value_y2 = p2 * weight_x1 + p3 * weight_x2;
 		return (value_y1 * weight_y1 + value_y2 * weight_y2);
 	}
 
@@ -182,7 +182,7 @@ export default class RawData {
 			throw new Error('Dimension not set');
 		}
 
-		let [rx, ry, rz] = this.size;
+		const [rx, ry, rz] = this.size;
 		if (z < 0 || z >= rz) {
 			throw new RangeError('z-index out of bounds');
 		}
@@ -191,11 +191,11 @@ export default class RawData {
 			throw new Error('Not enough buffer length');
 		}
 
-		let byteLength = rx * ry * this.bpp; // len:byte of surface
-		let offset = byteLength * z;
+		const byteLength = rx * ry * this.bpp; // len:byte of surface
+		const offset = byteLength * z;
 
-		let src = new Uint8Array(imageData, 0, byteLength);
-		let dst = new Uint8Array(this.data, offset, byteLength);
+		const src = new Uint8Array(imageData, 0, byteLength);
+		const dst = new Uint8Array(this.data, offset, byteLength);
 		dst.set(src); // This overwrites the existing slice (if any)
 		this.loadedSlices.append(z);
 	}
@@ -210,15 +210,15 @@ export default class RawData {
 			throw new Error('Dimension not set');
 		}
 
-		let [rx, ry, rz] = this.size;
+		const [rx, ry, rz] = this.size;
 		if (z < 0 || z >= rz) {
 			throw new RangeError('z-index out of bounds');
 		}
 
-		let byteLength = rx * ry * this.bpp;
-		let offset = byteLength * z;
-		let src = new Uint8Array(this.data, offset, byteLength);
-		let buffer = new ArrayBuffer(byteLength);
+		const byteLength = rx * ry * this.bpp;
+		const offset = byteLength * z;
+		const src = new Uint8Array(this.data, offset, byteLength);
+		const buffer = new ArrayBuffer(byteLength);
 		(new Uint8Array(buffer)).set(src);
 		return buffer;
 	}
@@ -246,7 +246,7 @@ export default class RawData {
 
 		this.size = [x, y, z];
 		this.pixelFormat = type;
-		let pxInfo = this.getPixelFormatInfo(this.pixelFormat);
+		const pxInfo = this.getPixelFormatInfo(this.pixelFormat);
 		this.data = new ArrayBuffer(this.size[0] * this.size[1] * this.size[2] * pxInfo.bpp);
 		this.setAccessor();
 	}
@@ -256,7 +256,7 @@ export default class RawData {
 	 * current pixel format.
 	 */
 	protected setAccessor(): void {
-		let pxInfo = this.getPixelFormatInfo(this.pixelFormat);
+		const pxInfo = this.getPixelFormatInfo(this.pixelFormat);
 		this.bpp = pxInfo.bpp;
 		this.view = new pxInfo.arrayClass(this.data);
 
@@ -342,13 +342,13 @@ export default class RawData {
 	 *     map the voxel values.
 	 */
 	public convert(targetFormat: PixelFormat, mapper: (number) => number): void {
-		let newRaw = new RawData();
-		let [rx, ry, rz] = this.size;
+		const newRaw = new RawData();
+		const [rx, ry, rz] = this.size;
 		newRaw.setDimension(this.size[0], this.size[1], this.size[2], targetFormat);
 		for (let z = 0; z < rz; z++) {
 			for (let y = 0; y < ry; y++) {
 				for (let x = 0; x < rx; x++) {
-					let pos = x + (y + z * this.size[1]) * this.size[0];
+					const pos = x + (y + z * this.size[1]) * this.size[0];
 					let value = this.read(pos);
 					if (mapper) {
 						value = mapper(value);
@@ -476,9 +476,9 @@ export default class RawData {
 	): Promise<MprResult> {
 		let image: Uint8Array;
 		let buffer_offset = 0;
-		let [rx, ry, rz] = this.size;
+		const [rx, ry, rz] = this.size;
 
-		let checkZranges = () => {
+		const checkZranges = () => {
 			if (this.loadedSlices.length() !== rz)
 				throw new ReferenceError('Volume is not fully loaded to construct this MPR');
 		};
@@ -558,16 +558,16 @@ export default class RawData {
 		windowWidth?: number,
 		windowLevel?: number
 	): void {
-		let [rx, ry, rz] = this.size;
-		let [x, y, z] = origin;
-		let [eu_x, eu_y, eu_z] = eu;
-		let [ev_x, ev_y, ev_z] = ev;
-		let [outWidth, outHeight] = outSize;
+		const [rx, ry, rz] = this.size;
+		const [eu_x, eu_y, eu_z] = eu;
+		const [ev_x, ev_y, ev_z] = ev;
+		const [outWidth, outHeight] = outSize;
 
+		let [x, y, z] = origin;
 		let imageOffset = 0;
 		let value: number;
 
-		let useWindow = (typeof windowWidth === 'number' && typeof windowLevel === 'number');
+		const useWindow = (typeof windowWidth === 'number' && typeof windowLevel === 'number');
 
 		for (let j = 0; j < outHeight; j++) {
 			let [pos_x, pos_y, pos_z] = [x, y, z];

@@ -511,6 +511,9 @@ export default class RawData {
 		}
 	}
 
+	/**
+	 * Builds a new MPR image using the given section in index-coordinate.
+	 */
 	public scanObliqueSection(
 		section: Section,
 		outSize: Vector2D,
@@ -531,6 +534,9 @@ export default class RawData {
 		this.scanOblique(section.origin, eu, ev, outSize, outImage, windowWidth, windowLevel);
 	}
 
+	/**
+	 * Builds a new MPR image using the give section in millimeters.
+	 */
 	public scanObliqueSectionInMillimeter(
 		mmSection: Section,
 		outSize: Vector2D,
@@ -569,19 +575,19 @@ export default class RawData {
 	}
 
 	/**
-	 * Scan over the volume and make an oblique image,
+	 * Scans over the volume and make an oblique image,
 	 * starting from origin and along with the plane defined by eu/ev.
 	 * The result is written to `image`.
 	 * If windowWidth/Level is given, output image will be an Uint8Array.
 	 * Otherwise, the output image must have the same pixel format as the
 	 * source volume data.
-	 * @param origin {Vector3D}
-	 * @param eu {Vector3D}
-	 * @param ev {Vector3D}
-	 * @param outSize {Vector2D}
-	 * @param image {{[index: number]: number}}
-	 * @param windowWidth {?number}
-	 * @param windowLevel {?number}
+	 * @param origin The origin point that corresponds to the top-left corner of the output image.
+	 * @param eu The scan vector which represents the horizontal one-pixel length of the output image.
+	 * @param ev The scan vector which represents the vertical one-pixel length of the output image.
+	 * @param outSize Output image size.
+	 * @param image {{[index: number]: number}} The output typed array.
+	 * @param windowWidth The window width.
+	 * @param windowLevel The window height.
 	 */
 	public scanOblique(
 		origin: Vector3D,

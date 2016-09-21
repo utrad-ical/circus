@@ -511,37 +511,6 @@ export default class RawData {
 		}
 	}
 
-	/**
-	 * Count the number of voxel from the given center point
-	 * to one of the edges of the volume
-	 * @param centerX {number}
-	 * @param centerY {number}
-	 * @param microX {number}
-	 * @param microY {number}
-	 * @param voxelX {number}
-	 * @param voxelY {number}
-	 * @return object {{count: number, px: number, py: number}}
-	 */
-	protected walkUntilObliqueBounds(
-		centerX: number,
-		centerY: number,
-		microX: number,
-		microY: number,
-		voxelX: number,
-		voxelY: number
-	): { count: number, px: number, py: number} {
-		let count = 0;
-		let px = centerX;
-		let py = centerY;
-		while (true) {
-			px += microX;
-			py += microY;
-			if (px < 0 || py < 0 || px > voxelX - 1 || py > voxelY - 1) break;
-			count++;
-		}
-		return {count, px, py};
-	}
-
 	public scanObliqueSection(
 		section: Section,
 		outSize: Vector2D,

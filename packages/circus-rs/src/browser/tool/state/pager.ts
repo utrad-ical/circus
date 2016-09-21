@@ -1,7 +1,7 @@
 import { DraggableTool } from '../../../browser/tool/draggable';
 import { ViewerEvent } from '../../../browser/viewer/viewer-event';
 import { VolumeImageSource } from '../../image-source/volume-image-source';
-import { orientationAwareTranslation } from '../../section';
+import { orientationAwareTranslation } from '../../section-util';
 
 /**
  * PagerTool handles mouse drag and performs the paging of the stacked images.

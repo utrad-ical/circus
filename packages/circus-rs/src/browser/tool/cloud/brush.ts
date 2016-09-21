@@ -3,12 +3,12 @@
 import { DraggableTool } from '../draggable';
 import { ViewerEvent } from '../../viewer/viewer-event';
 import { ViewState } from '../../view-state';
-import { translateSection } from '../../section';
 import { VoxelCloud } from '../../annotation/voxel-cloud';
 import { VolumeImageSource } from '../../image-source/volume-image-source';
 import { VoxelCloudTool } from './cloud';
 import { PixelFormat } from '../../../common/PixelFormat';
 import RawData from '../../../common/RawData';
+import { translateSection } from '../../../common/geometry';
 
 import { mmLine3 } from '../../geometry';
 
@@ -16,7 +16,7 @@ import { mmLine3 } from '../../geometry';
  * BrushTool is a tool which ...
  */
 function defaultCloud( vsize: [number,number,number], vcount?: [number,number,number] ): VoxelCloud {
-		
+
 	if( typeof vcount === 'undefined' )
 		vcount = [ 32, 32, 32 ];
 
@@ -28,7 +28,7 @@ function defaultCloud( vsize: [number,number,number], vcount?: [number,number,nu
 	cloud.color = '#00ff00';
 	cloud.alpha = 0.5;
 	cloud.origin = [100,100,200]; // sample!
-	
+
 	// fill all for debug.
 	let [ x,y,z ] = [0,0,0];
 	for( z = 0; z < vcount[2]; z++ ){
@@ -38,7 +38,7 @@ function defaultCloud( vsize: [number,number,number], vcount?: [number,number,nu
 			}
 		}
 	}
-	
+
 	return cloud;
 }
 
@@ -49,7 +49,7 @@ export class BrushTool extends VoxelCloudTool {
 		const dragInfo = this.dragInfo;
 
 	}
-	
+
 	public mouseDownHandler( ev: ViewerEvent ): void {
 		// サンプルデータの作成
 		const viewer = ev.viewer;

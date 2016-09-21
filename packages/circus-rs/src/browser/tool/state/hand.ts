@@ -1,7 +1,7 @@
 import { DraggableTool } from '../draggable';
 import { ViewerEvent } from '../../viewer/viewer-event';
 import { ViewState } from '../../view-state';
-import { translateSection } from '../../section';
+import { translateSection } from '../../../common/geometry';
 
 /**
  * HandTool is a tool which responds to a mouse drag and moves the

@@ -21,6 +21,23 @@ export function projectPointOntoSection(section: Section, point: Vector3D): Vect
 
 
 /**
+ * Performs a parallel translation on a given section.
+ */
+export function translateSection(section: Section, delta: Vector3D): Section {
+	const origin: [number, number, number] = [
+		section.origin[0] + delta[0],
+		section.origin[1] + delta[1],
+		section.origin[2] + delta[2]
+	];
+	return {
+		origin,
+		xAxis: section.xAxis,
+		yAxis: section.yAxis
+	};
+}
+
+
+/**
  * Calculates the intersection point of the given line segment and the plane.
  * This does not check if the intersection is within the section
  * (i.e., section is treated as a plane that extends infinitely).

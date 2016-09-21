@@ -2,7 +2,7 @@ import { EventEmitter } from 'events';
 import { ViewerEvent } from '../../browser/viewer/viewer-event';
 import { VolumeImageSource } from '../image-source/volume-image-source';
 import { ViewerEventTarget } from '../interface/viewer-event-target';
-import { orientationAwareTranslation } from '../section';
+import { orientationAwareTranslation } from '../section-util';
 
 /**
  * A tool determines how a viewer intersects with various UI events.

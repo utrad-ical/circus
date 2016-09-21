@@ -15,6 +15,7 @@ import {
 	convertScreenCoordinateToVolumeCoordinate,
 	convertVolumeCoordinateToScreenCoordinate,
 } from '../geometry';
+import { convertSectionToIndex } from '../section-util';
 
 /**
  * VoxelCloud is a type of Annotation that can be registered to a Composition.
@@ -175,6 +176,7 @@ export class VoxelCloud implements Annotation {
 				boundingYAxisEnd[2] - boundingOrigin[2]
 			]
 		};
+		const indexCloudSection: Section = convertSectionToIndex(cloudSection, this.volume.getVoxelDimension());
 
 
 		/*
@@ -189,8 +191,8 @@ export class VoxelCloud implements Annotation {
 
 		// raw section pattern ...
 		const sectionImage = new Uint8Array(cloudResolution[0] * cloudResolution[1]);
-		this.volume.scanObliqueSectionInMillimeter(
-			cloudSection,
+		this.volume.scanObliqueSection(
+			indexCloudSection,
 			cloudResolution,
 			sectionImage
 		);

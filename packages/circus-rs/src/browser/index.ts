@@ -11,6 +11,7 @@ export * from '../browser/annotation/reference-line';
 
 export { default as RawData } from '../common/RawData';
 export * from '../common/PixelFormat';
+export * from '../common/geometry';
 
 export * from '../browser/image-source/mock-image-source';
 export * from '../browser/image-source/raw-volume-image-source';
@@ -29,4 +30,4 @@ export * from '../browser/tool/cloud/brush';
 export { createToolbar } from '../browser/create-toolbar';
 
 export { registerTool } from '../browser/tool/tool-initializer';
-export * from '../browser/section';
+export * from '../browser/section-util';

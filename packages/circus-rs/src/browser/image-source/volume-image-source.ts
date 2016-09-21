@@ -2,7 +2,7 @@ import { ImageSource } from './image-source';
 import { DicomMetadata } from '../../browser/interface/dicom-metadata';
 import { ViewState, ViewWindow } from '../view-state';
 import { Viewer } from '../viewer/viewer';
-import { createOrthogonalMprSection } from '../section';
+import { createOrthogonalMprSection, convertSectionToIndex } from '../section-util';
 import { Vector2D, Section } from '../../common/geometry';
 
 /**
@@ -56,23 +56,7 @@ export abstract class VolumeImageSource extends ImageSource {
 		const voxelSize = this.meta.voxelSize;
 
 		// convert from mm-coordinate to index-coordinate
-		const indexSection: Section = {
-			origin: [
-				mmSection.origin[0] / voxelSize[0],
-				mmSection.origin[1] / voxelSize[1],
-				mmSection.origin[2] / voxelSize[2]
-			],
-			xAxis: [
-				mmSection.xAxis[0] / voxelSize[0],
-				mmSection.xAxis[1] / voxelSize[1],
-				mmSection.xAxis[2] / voxelSize[2]
-			],
-			yAxis: [
-				mmSection.yAxis[0] / voxelSize[0],
-				mmSection.yAxis[1] / voxelSize[1],
-				mmSection.yAxis[2] / voxelSize[2]
-			]
-		};
+		const indexSection: Section = convertSectionToIndex(mmSection, voxelSize);
 
 		return this.scan(indexSection, viewState.window, resolution)
 		.then(buffer => {

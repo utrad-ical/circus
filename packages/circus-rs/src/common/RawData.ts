@@ -535,46 +535,6 @@ export default class RawData {
 	}
 
 	/**
-	 * Builds a new MPR image using the give section in millimeters.
-	 */
-	public scanObliqueSectionInMillimeter(
-		mmSection: Section,
-		outSize: Vector2D,
-		outImage: { [index: number]: number},
-		windowWidth?: number,
-		windowLevel?: number
-	): void {
-		const voxelSize = this.voxelSize;
-
-		// convert from mm-coordinate to index-coordinate
-		const indexSection: Section = {
-			origin: [
-				mmSection.origin[0] / voxelSize[0],
-				mmSection.origin[1] / voxelSize[1],
-				mmSection.origin[2] / voxelSize[2]
-			],
-			xAxis: [
-				mmSection.xAxis[0] / voxelSize[0],
-				mmSection.xAxis[1] / voxelSize[1],
-				mmSection.xAxis[2] / voxelSize[2]
-			],
-			yAxis: [
-				mmSection.yAxis[0] / voxelSize[0],
-				mmSection.yAxis[1] / voxelSize[1],
-				mmSection.yAxis[2] / voxelSize[2]
-			]
-		};
-
-		this.scanObliqueSection(
-			indexSection,
-			outSize,
-			outImage,
-			windowWidth,
-			windowLevel
-		);
-	}
-
-	/**
 	 * Scans over the volume and make an oblique image,
 	 * starting from origin and along with the plane defined by eu/ev.
 	 * The result is written to `image`.

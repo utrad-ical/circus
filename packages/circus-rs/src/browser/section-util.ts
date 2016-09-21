@@ -1,5 +1,5 @@
 import * as gl from 'gl-matrix';
-import { Vector2D, Vector3D, Section } from '../common/geometry';
+import { Vector2D, Vector3D, Section, translateSection } from '../common/geometry';
 
 export type OrientationString = 'axial' | 'sagittal' | 'coronal' | 'oblique';
 
@@ -35,20 +35,58 @@ export function parallelToZ(vec: Vector3D): boolean {
 }
 
 /**
- * Performs a parallel translation on a given section.
+ * Converts the given section from index-coordinate to mm-coordinate.
+ * @param indexSection The section to convert.
+ * @param voxelSize Millimeter per voxel.
  */
-export function translateSection(section: Section, delta: Vector3D): Section {
-	const origin: [number, number, number] = [
-		section.origin[0] + delta[0],
-		section.origin[1] + delta[1],
-		section.origin[2] + delta[2]
-	];
-	return {
-		origin,
-		xAxis: section.xAxis,
-		yAxis: section.yAxis
+export function convertSectionToMm(indexSection: Section, voxelSize: Vector3D): Section {
+	const mmSection: Section = {
+		origin: [
+			indexSection.origin[0] * voxelSize[0],
+			indexSection.origin[1] * voxelSize[1],
+			indexSection.origin[2] * voxelSize[2]
+		],
+		xAxis: [
+			indexSection.xAxis[0] * voxelSize[0],
+			indexSection.xAxis[1] * voxelSize[1],
+			indexSection.xAxis[2] * voxelSize[2]
+		],
+		yAxis: [
+			indexSection.yAxis[0] * voxelSize[0],
+			indexSection.yAxis[1] * voxelSize[1],
+			indexSection.yAxis[2] * voxelSize[2]
+		]
 	};
+	return mmSection;
 }
+
+
+/**
+ * Converts the given section from mm-coordinate to index-coordinate
+ * @param mmSection The section to convert.
+ * @param voxelSize Millimeter per voxel.
+ */
+export function convertSectionToIndex(mmSection: Section, voxelSize: Vector3D): Section {
+	const indexSection: Section = {
+		origin: [
+			mmSection.origin[0] / voxelSize[0],
+			mmSection.origin[1] / voxelSize[1],
+			mmSection.origin[2] / voxelSize[2]
+		],
+		xAxis: [
+			mmSection.xAxis[0] / voxelSize[0],
+			mmSection.xAxis[1] / voxelSize[1],
+			mmSection.xAxis[2] / voxelSize[2]
+		],
+		yAxis: [
+			mmSection.yAxis[0] / voxelSize[0],
+			mmSection.yAxis[1] / voxelSize[1],
+			mmSection.yAxis[2] / voxelSize[2]
+		]
+	};
+	return indexSection;
+}
+
 
 /**
  * Performs a parallel translation orthogonal to the screen (aka paging).

@@ -32,6 +32,14 @@ export default class ObliqueScan extends VolumeBasedController {
 			this.respondBadRequest(res, 'Window values are required for PNG output.');
 			return;
 		}
+		if (size[0] * size[1] > 2048 * 2048) {
+			this.respondBadRequest(res, 'Requested image size is too large.');
+			return;
+		}
+		if (size[0] <= 0 || size[1] <= 0) {
+			this.respondBadRequest(res, 'Invalid image size');
+			return;
+		}
 
 		// Create the oblique image
 		let buf: Uint8Array; // or similar

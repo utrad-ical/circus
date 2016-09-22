@@ -3,6 +3,7 @@
  * which should be visible to the consumers of CIRCUS RS.
  */
 
+export * from '../browser/viewer/viewer';
 export * from '../browser/composition';
 
 export * from '../browser/annotation/corner-text';
@@ -18,7 +19,6 @@ export * from '../browser/image-source/raw-volume-image-source';
 export * from '../browser/image-source/dynamic-image-source';
 export * from '../browser/image-source/hybrid-image-source';
 
-export * from '../browser/viewer/viewer';
 
 export * from '../browser/tool/state/hand';
 export * from '../browser/tool/state/celestial-rotate';
@@ -31,3 +31,4 @@ export { createToolbar } from '../browser/create-toolbar';
 
 export { registerTool } from '../browser/tool/tool-initializer';
 export * from '../browser/section-util';
+export * from '../browser/volume-util';

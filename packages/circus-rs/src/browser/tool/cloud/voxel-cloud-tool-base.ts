@@ -1,24 +1,24 @@
-import { vec3 } from 'gl-matrix';
-import { EventEmitter } from 'events';
 import { Composition } from '../../composition';
-import { Annotation } from '../../annotation/annotation';
 import { VoxelCloud } from '../../annotation/voxel-cloud';
 import { DraggableTool } from '../draggable';
 
-export class VoxelCloudTool extends DraggableTool {
+/**
+ * VoxelCloudToolBase is a base tool that affects VoxelCloud annotation.
+ */
+export class VoxelCloudToolBase extends DraggableTool {
 
 	/**
-	 * Find the VoxelCloud in a composition
+	 * Find the active VoxelCloud annotation in a composition
+	 * @return If there is only one active VoxelCloud instance, returns it.
 	 */
 	public getActiveCloud(composition: Composition): VoxelCloud {
-		const annotations: Annotation[] = composition.annotations;
 		let activeCloud: VoxelCloud = null;
 		composition.annotations.forEach(
-			(anno) => {
-				if(anno instanceof VoxelCloud && anno.active) {
-					if( activeCloud !== null )
+			antn => {
+				if (antn instanceof VoxelCloud && antn.active) {
+					if (activeCloud !== null)
 						throw new Error('There are more than one active VoxelCloud.');
-					activeCloud = anno;
+					activeCloud = antn;
 				}
 			}
 		);

@@ -72,7 +72,7 @@ export abstract class DraggableTool extends Tool {
 			dx: ev.viewerX - this.prevX,
 			dy: ev.viewerY - this.prevY,
 			totalDx: ev.viewerX - this.startX,
-			totalDy: ev.viewerY - this.startY,
+			totalDy: ev.viewerY - this.startY
 		};
 		this.prevX = ev.viewerX;
 		this.prevY = ev.viewerY;

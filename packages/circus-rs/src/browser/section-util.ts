@@ -92,21 +92,9 @@ export function parallelToZ(vec: Vector3D): boolean {
  */
 export function convertSectionToMm(indexSection: Section, voxelSize: Vector3D): Section {
 	const mmSection: Section = {
-		origin: [
-			indexSection.origin[0] * voxelSize[0],
-			indexSection.origin[1] * voxelSize[1],
-			indexSection.origin[2] * voxelSize[2]
-		],
-		xAxis: [
-			indexSection.xAxis[0] * voxelSize[0],
-			indexSection.xAxis[1] * voxelSize[1],
-			indexSection.xAxis[2] * voxelSize[2]
-		],
-		yAxis: [
-			indexSection.yAxis[0] * voxelSize[0],
-			indexSection.yAxis[1] * voxelSize[1],
-			indexSection.yAxis[2] * voxelSize[2]
-		]
+		origin: convertPointToMm(indexSection.origin, voxelSize),
+		xAxis: convertPointToMm(indexSection.xAxis, voxelSize),
+		yAxis: convertPointToMm(indexSection.yAxis, voxelSize)
 	};
 	return mmSection;
 }
@@ -119,23 +107,27 @@ export function convertSectionToMm(indexSection: Section, voxelSize: Vector3D): 
  */
 export function convertSectionToIndex(mmSection: Section, voxelSize: Vector3D): Section {
 	const indexSection: Section = {
-		origin: [
-			mmSection.origin[0] / voxelSize[0],
-			mmSection.origin[1] / voxelSize[1],
-			mmSection.origin[2] / voxelSize[2]
-		],
-		xAxis: [
-			mmSection.xAxis[0] / voxelSize[0],
-			mmSection.xAxis[1] / voxelSize[1],
-			mmSection.xAxis[2] / voxelSize[2]
-		],
-		yAxis: [
-			mmSection.yAxis[0] / voxelSize[0],
-			mmSection.yAxis[1] / voxelSize[1],
-			mmSection.yAxis[2] / voxelSize[2]
-		]
+		origin: convertPointToIndex(mmSection.origin, voxelSize),
+		xAxis: convertPointToIndex(mmSection.xAxis, voxelSize),
+		yAxis: convertPointToIndex(mmSection.yAxis, voxelSize)
 	};
 	return indexSection;
+}
+
+export function convertPointToMm(indexPoint: Vector3D, voxelSize: Vector3D): Vector3D {
+	return [
+		indexPoint[0] * voxelSize[0],
+		indexPoint[1] * voxelSize[1],
+		indexPoint[2] * voxelSize[2]
+	] as Vector3D;
+}
+
+export function convertPointToIndex(mmPoint: Vector3D, voxelSize: Vector3D): Vector3D {
+	return [
+		mmPoint[0] / voxelSize[0],
+		mmPoint[1] / voxelSize[1],
+		mmPoint[2] / voxelSize[2]
+	] as Vector3D;
 }
 
 

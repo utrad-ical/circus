@@ -9,7 +9,7 @@ import { PixelFormat } from '../common/PixelFormat';
  * Voxels are filled when the line only "glances" them.
  * TODO: Introduce edge-overflow detection for all directions to reduce unnecessary calls to writePixelAt
  */
-export function drawLine(volume: RawData,
+export function draw3DLine(volume: RawData,
 	p0: Vector3D, // offset (not mm!)
 	p1: Vector3D, // offset (not mm!)
 	value: number = 1
@@ -22,7 +22,7 @@ export function drawLine(volume: RawData,
 	const distance = vec3.length([p1[0] - p0[0], p1[1] - p0[1], p1[2] - p0[2]]);
 	let walked = 0.0;
 
-	const pi = p0.concat() as Vector3D; // clone
+	const pi = [p0[0], p0[1], p0[2]] as Vector3D; // clone
 
 	const trim_x = e[0] < 0
 		? (i) => i === Math.floor(i) ? i - 1 : Math.floor(i)
@@ -53,7 +53,7 @@ export function drawLine(volume: RawData,
  * @return neighbor pos.
  * TODO: this function may be slow due to the use of reduce.
  */
-export function getStepToNeighbor(pos: Vector3D, e: Vector3D): Vector3D {
+function getStepToNeighbor(pos: Vector3D, e: Vector3D): Vector3D {
 	let stepLengthEntry = [
 		nextLatticeDistance(pos[0], e[0]),
 		nextLatticeDistance(pos[1], e[1]),

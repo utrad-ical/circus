@@ -155,11 +155,9 @@ viewState.window = {
 };
 viewer.setState(viewState);
 
-
-
 /*--
-@title Add cloud annotation
-Adds an cloud annotation to the viewer.
+@title AddCloudAnnotation
+@hidden
 --*/
 
 function addCloudAnnotation({
@@ -184,4 +182,31 @@ function addCloudAnnotation({
 	comp.addAnnotation(cloud);
 }
 
+/*--
+@title Add cloud annotation
+Adds an cloud annotation to the viewer.
+--*/
+
+//--@include AddCloudAnnotation
+
 addCloudAnnotation();
+
+/*--
+@title Add many cloud annotations
+This example adds many cloud annotations.
+--*/
+
+//--@include AddCloudAnnotation
+
+const comp =  viewer.getComposition();
+const [rx, ry, rz] = comp.imageSource.meta.voxelCount; // number of voxels
+
+for (let x = 0; x < 10; x++) {
+	for (let y = 0; y < 10; y++) {
+		addCloudAnnotation({
+			origin: [Math.floor(x * rx / 10), Math.floor(y * ry / 10), 0],
+			size: [Math.floor(rx * 0.08), Math.floor(rx * 0.08), rz],
+			color: (x + y) % 2 ? '#ff0000' : '#00ff00'
+		});
+	}
+}

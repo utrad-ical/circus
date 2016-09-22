@@ -1,6 +1,7 @@
 import DicomVolume from '../../common/DicomVolume';
 import { RsHttpLoaderImageSource } from '../../browser/image-source/rs-http-loader-image-source';
-import { ViewWindow } from '../view-state';
+import { ViewState } from '../view-state';
+import { convertSectionToIndex } from '../section-util';
 import { Vector2D, Section } from '../../common/geometry';
 
 /**
@@ -11,14 +12,19 @@ export class RawVolumeImageSource extends RsHttpLoaderImageSource {
 
 	private volume: DicomVolume;
 
-	protected scan(section: Section, window: ViewWindow, outSize: Vector2D): Promise<Uint8Array> {
+	protected scan(viewState: ViewState, outSize: Vector2D): Promise<Uint8Array> {
 		const imageBuffer = new Uint8Array(outSize[0] * outSize[1]);
+
+		// convert from mm-coordinate to index-coordinate
+		const mmSection = viewState.section;
+		const indexSection: Section = convertSectionToIndex(mmSection, this.voxelSize());
+
 		this.volume.scanObliqueSection(
-			section,
+			indexSection,
 			outSize,
 			imageBuffer,
-			window.width,
-			window.level
+			viewState.window.width,
+			viewState.window.level
 		);
 
 		// Hack: Use setTimeout instead of Promise.resolve

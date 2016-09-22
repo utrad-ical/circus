@@ -2,7 +2,7 @@ import { Annotation } from './annotation';
 import { Viewer } from '../viewer/viewer';
 import { ViewState } from '../view-state';
 import { Sprite } from '../viewer/sprite';
-import { convertVolumeCoordinateToScreenCoordinate } from '../geometry';
+import { convertVolumeCoordinateToScreenCoordinate } from '../section-util';
 import { Vector3D, intersectionOfTwoSections } from '../../common/geometry';
 import { vec3 } from 'gl-matrix';
 
@@ -10,16 +10,16 @@ export class ReferenceLine implements Annotation {
 	draw(viewer: Viewer, viewState: ViewState): Sprite {
 		const comp = viewer.getComposition();
 		const siblingViewers = comp.viewers.filter(v => v !== viewer);
-		
+
 		const canvas = viewer.canvas;
 		const ctx = canvas.getContext('2d');
 		const res = viewer.getResolution();
-		
+
 		try {
 			ctx.save();
 			ctx.strokeStyle = 'magenta';
 			ctx.lineWidth = 1;
-	
+
 			siblingViewers.forEach(sib => {
 				const sibState = sib.getState();
 				const refLine = intersectionOfTwoSections(

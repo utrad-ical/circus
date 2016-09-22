@@ -1,16 +1,12 @@
 'use strict';
 
-import { DraggableTool } from '../draggable';
 import { ViewerEvent } from '../../viewer/viewer-event';
-import { ViewState } from '../../view-state';
 import { VoxelCloud } from '../../annotation/voxel-cloud';
 import { VolumeImageSource } from '../../image-source/volume-image-source';
 import { VoxelCloudTool } from './cloud';
 import { PixelFormat } from '../../../common/PixelFormat';
 import RawData from '../../../common/RawData';
-import { translateSection } from '../../../common/geometry';
-
-import { mmLine3 } from '../../geometry';
+import { drawLine } from '../../volume-util';
 
 /**
  * BrushTool is a tool which ...

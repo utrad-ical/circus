@@ -3,7 +3,7 @@ import { DraggableTool } from '../../../browser/tool/draggable';
 import { Viewer } from '../../../browser/viewer/viewer';
 import { ViewState } from '../../view-state';
 import { ViewerEvent } from '../../../browser/viewer/viewer-event';
-import { convertScreenCoordinateToVolumeCoordinate } from '../../geometry';
+import { convertScreenCoordinateToVolumeCoordinate } from '../../section-util';
 import { Vector2D, Section } from '../../../common/geometry';
 
 /**
@@ -43,7 +43,6 @@ export class ZoomTool extends DraggableTool {
 		const vp = viewer.getResolution();
 
 		if (!center) center = [vp[0] / 2, vp[1] / 2];
-		// const focus = getVolumePos(state.section, vp, center[0], center[1]);
 		const focus = convertScreenCoordinateToVolumeCoordinate(state.section, vp, center);
 
 		this.scale(state.section, stepFactor ** step, focus);

@@ -13,8 +13,8 @@ import {
 import { PixelFormat } from '../../common/PixelFormat';
 import {
 	convertScreenCoordinateToVolumeCoordinate,
-	convertVolumeCoordinateToScreenCoordinate,
-} from '../geometry';
+	convertVolumeCoordinateToScreenCoordinate
+} from '../section-util';
 import { convertSectionToIndex } from '../section-util';
 
 /**

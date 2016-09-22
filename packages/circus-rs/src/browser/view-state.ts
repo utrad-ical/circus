@@ -10,11 +10,14 @@ export interface ViewWindow {
 	width: number;
 }
 
+export type InterpolationMode = 'trilinear' | 'nearestNeighbor';
+
 /**
  * ViewState determines how the ImageSource is viewed on each Viewer.
  */
 export interface ViewState {
 	section?: Section;
 	window?: ViewWindow;
+	interpolationMode?: InterpolationMode;
 }
 

@@ -10,6 +10,12 @@ export class DynamicImageSource extends RsHttpLoaderImageSource {
 	protected scan(viewState: ViewState, outSize: Vector2D): Promise<Uint8Array> {
 		// convert from mm-coordinate to index-coordinate
 		const indexSection: Section = convertSectionToIndex(viewState.section, this.voxelSize());
-		return this.loader.scan(this.series, indexSection, viewState.window, outSize);
+		return this.loader.scan(
+			this.series,
+			indexSection,
+			viewState.interpolationMode === 'trilinear',
+			viewState.window,
+			outSize
+		);
 	}
 }

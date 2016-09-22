@@ -247,6 +247,7 @@ export class CloudEditor extends EventEmitter {
 			[v[0] / vs[0], v[1] / vs[1], v[2] / vs[2]],
 			size as any,
 			imageBuffer,
+			false,
 			1, 0.5
 		);
 

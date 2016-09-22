@@ -17,6 +17,7 @@ export default class ObliqueScan extends VolumeBasedController {
 			'xAxis!': ['Scan vector X', null, this.isTuple(3), this.parseTuple(3)],
 			'yAxis!': ['Scan vector Y', null, this.isTuple(3), this.parseTuple(3)],
 			'size!': ['Output image size', null, this.isTuple(2), this.parseTuple(2, true)],
+			interpolation: ['Interpolation mode', false, null, this.parseBoolean],
 			ww: ['Window width', undefined, 'isFloat', 'toFloat'],
 			wl: ['Window width', undefined, 'isFloat', 'toFloat'],
 			format: ['Output type', 'arraybuffer', (s) => s === 'png', () => 'png']
@@ -24,7 +25,7 @@ export default class ObliqueScan extends VolumeBasedController {
 	}
 
 	protected processVolume(query: any, vol: DicomVolume, res: http.ServerResponse): void {
-		const { ww, wl, origin, xAxis, yAxis, size, format } = query;
+		const { ww, wl, origin, xAxis, yAxis, size, interpolation, format } = query;
 
 		const useWindow = (typeof ww === 'number' && typeof wl === 'number');
 		if (format === 'png' && !useWindow) {
@@ -40,7 +41,7 @@ export default class ObliqueScan extends VolumeBasedController {
 			buf = new (vol.getPixelFormatInfo().arrayClass)(size[0] * size[1]);
 		}
 		const section: Section = { origin, xAxis, yAxis };
-		vol.scanObliqueSection(section, size, buf, ww, wl);
+		vol.scanObliqueSection(section, size, buf, interpolation, ww, wl);
 
 		// Output
 		if (format === 'png') {

@@ -47,7 +47,7 @@ export class MockImageSource extends VolumeImageSource {
 			return val;
 		};
 
-		raw.setVoxelDimension(...meta.voxelSize);
+		raw.setVoxelDimension(meta.voxelSize[0], meta.voxelSize[1], meta.voxelSize[2]);
 		raw.setEstimatedWindow(wl, ww);
 		raw.fillAll(createValue);
 
@@ -69,6 +69,7 @@ export class MockImageSource extends VolumeImageSource {
 			indexSection,
 			outSize,
 			imageBuffer,
+			viewState.interpolationMode === 'trilinear',
 			viewState.window.width,
 			viewState.window.level
 		);

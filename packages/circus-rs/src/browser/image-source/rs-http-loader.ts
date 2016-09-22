@@ -30,6 +30,7 @@ export class RsHttpLoader {
 	public scan(
 		series: string,
 		section: Section,
+		useInterpolation: boolean,
 		window: ViewWindow,
 		size: Vector2D
 	): Promise<Uint8Array> {
@@ -40,6 +41,7 @@ export class RsHttpLoader {
 				origin: section.origin.join(','),
 				xAxis: section.xAxis.join(','),
 				yAxis: section.yAxis.join(','),
+				interpolation: useInterpolation ? '1' : '0',
 				size: size.join(','),
 				ww: window.width,
 				wl: window.level

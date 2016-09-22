@@ -77,6 +77,10 @@ import * as stream from 'stream';
 			.slice(0, count);
 	}
 
+	protected parseBoolean(input: string): boolean {
+		return !(/^(0|false|f|no|)$/i.test(input));
+	}
+
 	protected respondGzippedArrayBuffer(res: http.ServerResponse, buffer: ArrayBuffer): void {
 		let out = new stream.Readable();
 		out._read = function(size) {

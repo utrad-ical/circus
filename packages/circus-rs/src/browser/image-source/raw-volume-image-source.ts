@@ -23,6 +23,7 @@ export class RawVolumeImageSource extends RsHttpLoaderImageSource {
 			indexSection,
 			outSize,
 			imageBuffer,
+			viewState.interpolationMode === 'trilinear',
 			viewState.window.width,
 			viewState.window.level
 		);

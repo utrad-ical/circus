@@ -84,6 +84,21 @@ if (viewer2) toolbar.bindViewer(viewer2);
 
 
 /*--
+@title Change interpolation mode
+Set interpolationMode to 'trilinear' to enable trilinear interpolation.
+--*/
+
+function setInterpolation(mode) {
+	const viewState = viewer.getState();
+	viewState.interpolationMode = mode;
+	viewer.setState(viewState);
+}
+
+const mode = viewer.getState().interpolationMode;
+setInterpolation(mode === 'trilinear' ? 'nearestNeighbor' : 'trilinear');
+
+
+/*--
 @title Change tool
 You can change the active tool.
 Associated toolbar (if any) will be automatically updated.

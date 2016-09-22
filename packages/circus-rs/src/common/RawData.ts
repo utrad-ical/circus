@@ -64,6 +64,7 @@ export default class RawData {
 	 */
 	protected loadedSlices: MultiRange = new MultiRange();
 
+
 	/**
 	 * Gets pixel value at the specified location. Each parameter must be an integer.
 	 * @param x x-coordinate
@@ -98,12 +99,29 @@ export default class RawData {
 	}
 
 	/**
-	 * Get pixel value from floating-point coordinate
-	 * using bilinear interpolation.
+	 * Get pixel value from nearest neighbor.
 	 * @param x x-coordinate (floating point)
 	 * @param y y-coordinate (floating point)
 	 * @param z z-coordinate (floating point)
-	 * @return n Interpolated corresponding voxel value.
+	 * @return n Nearest neighbor corresponding voxel value. Returns undefined if out of bounds.
+	 */
+	public getPixelNearestNeighbor(x: number, y: number, z: number): number {
+		const x_end = this.size[0] - 1;
+		const y_end = this.size[1] - 1;
+		const z_end = this.size[2] - 1;
+		if (x < 0.0 || y < 0.0 || z < 0.0 || x > x_end || y > y_end || z > z_end) {
+			return undefined;
+		}
+		return this.getPixelAt(Math.round(x), Math.round(y), Math.round(z));
+	}
+
+	/**
+	 * Get pixel value from floating-point coordinate
+	 * using trilinear interpolation.
+	 * @param x x-coordinate (floating point)
+	 * @param y y-coordinate (floating point)
+	 * @param z z-coordinate (floating point)
+	 * @return n Interpolated corresponding voxel value. Returns undefined if out of bounds.
 	 */
 	public getPixelWithInterpolation(x: number, y: number, z: number): number {
 		// Check values
@@ -111,7 +129,7 @@ export default class RawData {
 		const y_end = this.size[1] - 1;
 		const z_end = this.size[2] - 1;
 		if (x < 0.0 || y < 0.0 || z < 0.0 || x > x_end || y > y_end || z > z_end) {
-			return 0;
+			return undefined;
 		}
 
 		// Handle edge cases
@@ -518,6 +536,7 @@ export default class RawData {
 		section: Section,
 		outSize: Vector2D,
 		outImage: { [index: number]: number},
+		interpolation: boolean = false,
 		windowWidth?: number,
 		windowLevel?: number
 	): void {
@@ -531,7 +550,7 @@ export default class RawData {
 			section.yAxis[1] / outSize[1],
 			section.yAxis[2] / outSize[1]
 		];
-		this.scanOblique(section.origin, eu, ev, outSize, outImage, windowWidth, windowLevel);
+		this.scanOblique(section.origin, eu, ev, outSize, outImage, interpolation, windowWidth, windowLevel);
 	}
 
 	/**
@@ -545,7 +564,8 @@ export default class RawData {
 	 * @param eu The scan vector which represents the horizontal one-pixel length of the output image.
 	 * @param ev The scan vector which represents the vertical one-pixel length of the output image.
 	 * @param outSize Output image size.
-	 * @param image {{[index: number]: number}} The output typed array.
+	 * @param outImage The output typed array.
+	 * @param interpolation Whether to perform trilinear interpolation.
 	 * @param windowWidth The window width.
 	 * @param windowLevel The window height.
 	 */
@@ -554,7 +574,8 @@ export default class RawData {
 		eu: Vector3D,
 		ev: Vector3D,
 		outSize: Vector2D,
-		image: {[index: number]: number},
+		outImage: {[index: number]: number},
+		interpolation: boolean = false,
 		windowWidth?: number,
 		windowLevel?: number
 	): void {
@@ -568,21 +589,20 @@ export default class RawData {
 		let value: number;
 
 		const useWindow = (typeof windowWidth === 'number' && typeof windowLevel === 'number');
+		const voxelReader = interpolation ? this.getPixelWithInterpolation : this.getPixelNearestNeighbor;
 
 		for (let j = 0; j < outHeight; j++) {
 			let [pos_x, pos_y, pos_z] = [x, y, z];
 
 			for (let i = 0; i < outWidth; i++) {
-				if (pos_x >= 0.0 && pos_y >= 0.0 && pos_z >= 0.0
-					&& pos_x <= rx - 1 && pos_y <= ry - 1 && pos_z <= rz - 1) {
-					value = this.getPixelWithInterpolation(pos_x, pos_y, pos_z);
-					if (useWindow) {
-						value = this.applyWindow(windowWidth, windowLevel, value);
-					}
-				} else {
-					value = 0;
+				value = voxelReader.call(this, pos_x, pos_y, pos_z); // may return `undefined`
+				if (value !== undefined && useWindow) {
+					value = this.applyWindow(windowWidth, windowLevel, value);
 				}
-				image[imageOffset++] = Math.round(value);
+
+				// A value of `undefined` will be silently converted to zero according to the TypedArray spec.
+				// But Math.round is important.
+				outImage[imageOffset++] = Math.round(value);
 
 				pos_x += eu_x;
 				pos_y += eu_y;

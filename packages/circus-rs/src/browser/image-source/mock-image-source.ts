@@ -2,6 +2,10 @@ import DicomVolume from '../../common/DicomVolume';
 import { PixelFormat } from '../../common/PixelFormat';
 import { DicomMetadata } from '../../browser/interface/dicom-metadata';
 import { VolumeImageSource } from '../../browser/image-source/volume-image-source';
+import { ViewState } from '../view-state';
+import { convertSectionToIndex } from '../section-util';
+import { Vector2D, Section } from '../../common/geometry';
+
 
 export class MockImageSource extends VolumeImageSource {
 
@@ -22,59 +26,60 @@ export class MockImageSource extends VolumeImageSource {
 	 */
 	private createMockVolume(meta: DicomMetadata): DicomVolume {
 
-		const [ width, height, depth ] = meta.voxelCount;
-		const [ vx, vy, vz ] = meta.voxelSize;
+		const [width, height, depth] = meta.voxelCount;
 		const pixelFormat = PixelFormat.Int16;
-		const [ wl, ww ] = [meta.estimatedWindow.level, meta.estimatedWindow.width];
+		const [wl, ww] = [meta.estimatedWindow.level, meta.estimatedWindow.width];
 
 		const raw = new DicomVolume();
 		raw.setDimension(width, height, depth, pixelFormat);
 
 		const createValue = (x, y, z) => {
-			let val: number;
-
+			const gridSize = 50;
+			let val = (
+				Math.floor(x / gridSize) +
+				Math.floor(y / gridSize) +
+				Math.floor(z / gridSize));
 			if (pixelFormat === PixelFormat.Binary) {
-				val = ( Math.floor(x * 0.02)
-					+ Math.floor(y * 0.02)
-					+ Math.floor(z * 0.02) ) % 2;
+				val %= 2;
 			} else {
-				val = ( Math.floor(x * 0.02)
-					+ Math.floor(y * 0.02)
-					+ Math.floor(z * 0.02) ) % 3 * 30;
+				val = val % 3 * 30;
 			}
-
 			return val;
 		};
 
+		raw.setVoxelDimension(...meta.voxelSize);
+		raw.setEstimatedWindow(wl, ww);
+		raw.fillAll(createValue);
+
 		for (let z = 0; z < depth; z++) {
-			for (let y = 0; y < height; y++) {
-				for (let x = 0; x < width; x++) {
-					raw.writePixelAt(createValue(x, y, z), x, y, z);
-				}
-			}
 			raw.markSliceAsLoaded(z);
 		}
-		raw.setVoxelDimension(vx, vy, vz);
-		raw.setEstimatedWindow(wl, ww);
+
 		return raw;
 	}
 
-	protected scan(param): Promise<Uint8Array> {
-		const imageBuffer = new Uint8Array(param.size[0] * param.size[1]);
-		this.volume.scanOblique(
-			param.origin,
-			param.u,
-			param.v,
-			param.size,
+	protected scan(viewState: ViewState, outSize: Vector2D): Promise<Uint8Array> {
+		const imageBuffer = new Uint8Array(outSize[0] * outSize[1]);
+
+		// convert from mm-coordinate to index-coordinate
+		const mmSection = viewState.section;
+		const indexSection: Section = convertSectionToIndex(mmSection, this.voxelSize());
+
+		this.volume.scanObliqueSection(
+			indexSection,
+			outSize,
 			imageBuffer,
-			param.ww,
-			param.wl
+			viewState.window.width,
+			viewState.window.level
 		);
-		// Hack:  Use setTimeout instead of Promise.resolve
+
+		// Hack: Use setTimeout instead of Promise.resolve
 		// because the native Promise.resolve seems to to be called
 		// before drag events are triggered.
 		return new Promise(resolve => {
 			setTimeout(() => resolve(imageBuffer), 0);
 		});
+		// return Promise.resolve(imageBuffer);
 	}
+
 }

@@ -5,6 +5,7 @@ import { ZoomTool } from './state/zoom';
 import { PagerTool } from './state/pager';
 import { CelestialRotateTool } from './state/celestial-rotate';
 import { BrushTool } from './cloud/brush';
+import { EraserTool } from './cloud/eraser';
 
 const toolCollection = {};
 
@@ -15,8 +16,9 @@ const defaultTools = {
 	zoom: ZoomTool,
 	pager: PagerTool,
 	celestialRotate: CelestialRotateTool,
-	
-	brush: BrushTool
+
+	brush: BrushTool,
+	eraser: EraserTool
 };
 
 Object.keys(defaultTools).forEach(key => {

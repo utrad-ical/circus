@@ -76,7 +76,7 @@ container.innerHTML = ''; // Clear existing tool bar
 
 const toolbar = rs.createToolbar(
 	container,
-	['hand', 'window', 'zoom', 'pager', 'celestialRotate','brush']
+	['hand', 'window', 'zoom', 'pager', 'celestialRotate', 'brush', 'eraser']
 );
 
 if (viewer) toolbar.bindViewer(viewer);
@@ -200,7 +200,6 @@ This example adds many cloud annotations.
 
 //--@include AddCloudAnnotation
 
-const comp =  viewer.getComposition();
 const [rx, ry, rz] = comp.imageSource.meta.voxelCount; // number of voxels
 
 for (let x = 0; x < 10; x++) {

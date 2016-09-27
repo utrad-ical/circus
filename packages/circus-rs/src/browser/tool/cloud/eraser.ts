@@ -2,9 +2,9 @@ import { ViewerEvent } from '../../viewer/viewer-event';
 import { VoxelCloudToolBase } from './voxel-cloud-tool-base';
 
 /**
- * BrushTool is a tool with which one can paint on an active voxel cloud.
+ * EraserTool is a tool with which one can paint on an active voxel cloud.
  */
-export class BrushTool extends VoxelCloudToolBase {
+export class EraserTool extends VoxelCloudToolBase {
 	private pX: number;
 	private pY: number;
 
@@ -18,7 +18,7 @@ export class BrushTool extends VoxelCloudToolBase {
 			ev.viewer,
 			[this.pX, this.pY],
 			[ev.viewerX, ev.viewerY],
-			1
+			0
 		);
 
 		this.pX = ev.viewerX;

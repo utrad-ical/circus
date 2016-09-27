@@ -160,6 +160,8 @@ viewer.setState(viewState);
 @hidden
 --*/
 
+const comp = viewer.getComposition();
+
 function addCloudAnnotation({
 	origin = [10, 10, 10],
 	size = [64, 64, 64],
@@ -169,7 +171,6 @@ function addCloudAnnotation({
 } = {}) {
 	const cloud = new rs.VoxelCloud();
 	const volume = new rs.RawData();
-	const comp = viewer.getComposition();
 	volume.setDimension(size[0], size[1], size[2], rs.PixelFormat.Binary);
 	volume.fillAll(1);
 	const src = comp.imageSource;
@@ -190,6 +191,7 @@ Adds an cloud annotation to the viewer.
 //--@include AddCloudAnnotation
 
 addCloudAnnotation();
+comp.annotationUpdated();
 
 /*--
 @title Add many cloud annotations
@@ -210,3 +212,6 @@ for (let x = 0; x < 10; x++) {
 		});
 	}
 }
+
+viewer.renderAnnotations();
+comp.annotationUpdated();

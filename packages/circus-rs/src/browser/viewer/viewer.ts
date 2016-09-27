@@ -19,13 +19,17 @@ const DEFAULT_VIEWER_HEIGHT = 512;
 export class Viewer extends EventEmitter {
 
 	public canvas: HTMLCanvasElement;
+
 	private viewState: ViewState;
+
 	private composition: Composition;
 
 	private activeTool: Tool;
 	private activeToolName: string;
 
 	private sprites: Sprite[];
+
+	private cachedSourceImage: ImageData;
 
 	/**
 	 * primaryEventTarget captures all UI events happened within the canvas
@@ -131,6 +135,29 @@ export class Viewer extends EventEmitter {
 		return new ViewerEvent(this, eventType, originalEvent);
 	}
 
+	/**
+	 * Synchronously draws the image fetched from the image source, along with
+	 * all the annotations associated with the composition.
+	 * This function is automatically called when ImageSource.draw() has finished,
+	 * but can be called arbitrary times when annotations are updated.
+	 * This function does nothing when ImageSource.draw() is in progress
+	 * (i.e., this.currentRender is not empty).
+	 */
+	public renderAnnotations(viewState: ViewState = null): void {
+		if (this.currentRender) {
+			// Re-drawing annotations should be done when we are not waiting
+			// for the image source to draw.
+			return;
+		}
+		if (!viewState) viewState = this.viewState;
+		if (!this.viewState) return;
+		if (this.cachedSourceImage) this.renderImageDataToCanvas(this.cachedSourceImage);
+		for (let annotation of this.composition.annotations) {
+			const sprite = annotation.draw(this, viewState);
+			if (sprite instanceof Sprite) this.sprites.push(sprite);
+		}
+	}
+
 	private renderImageDataToCanvas(image: ImageData): void {
 		const ctx = this.canvas.getContext('2d');
 		ctx.putImageData(image, 0, 0);
@@ -163,18 +190,14 @@ export class Viewer extends EventEmitter {
 			this.nextRender = null;
 			const src = this.composition.imageSource;
 			return src.draw(this, state).then(image => {
-				this.renderImageDataToCanvas(image);
-				for (let annotation of this.composition.annotations) {
-					const sprite = annotation.draw(this, state);
-					if (sprite instanceof Sprite) this.sprites.push(sprite);
-				}
+				this.cachedSourceImage = image;
 				this.currentRender = null;
+				this.renderAnnotations(state);
 				return true;
 			});
 		});
 		// Remember this render() call as the most recent one,
 		// possibly overwriting and expiring the previous nextRender
-		(p as any).tag = Math.random();
 		this.nextRender = p;
 		return p;
 	}

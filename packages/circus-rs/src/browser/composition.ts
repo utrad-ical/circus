@@ -19,7 +19,7 @@ export class Composition extends EventEmitter {
 	 * Do not modify this directly: Use the acccessor methods instead.
 	 */
 	public viewers: Viewer[] = [];
-	
+
 	/**
 	 * List of annotations that are associated with this composition.
 	 * Do not modify this directly: Use the acccessor methods instead.
@@ -62,7 +62,7 @@ export class Composition extends EventEmitter {
 		this.annotations.push(annotation);
 		this.emit('annotationChange');
 	}
-	
+
 	/**
 	 * Removes an annotation from this composition.
 	 */
@@ -70,6 +70,13 @@ export class Composition extends EventEmitter {
 		if (this.annotations.every(a => a !== annotation)) return;
 		this.annotations = this.annotations.filter(a => a !== annotation);
 		this.emit('annotationChange');
+	}
+
+	/**
+	 * Re-renders annotations in all of the associated viewers.
+	 */
+	public annotationUpdated(): void {
+		this.viewers.forEach(v => v.renderAnnotations());
 	}
 
 }

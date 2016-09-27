@@ -47,7 +47,7 @@ export class BrushTool extends VoxelCloudToolBase {
 
 		// This draws a 3D line segment over a volume
 		draw3DLine(this.activeCloud.volume, start, end);
-		ev.viewer.render(); // TODO: replace with annotation-only rendering
+		ev.viewer.renderAnnotations();
 
 		this.pX = ev.viewerX;
 		this.pY = ev.viewerY;

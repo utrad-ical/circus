@@ -113,11 +113,15 @@ export function intersectionOfTwoSections(
 	// Prepare the 4 edges (line segments) of the target section.
 	const tOrigin = target.origin;
 
+
+	// 0--1
+	// |  |
+	// 3--2
 	const vertexes: Vector3D[] = [
 		tOrigin,
 		vec3.add(vec3.create(), tOrigin, target.xAxis) as Vector3D,
-		vec3.add(vec3.create(), tOrigin, target.yAxis) as Vector3D,
-		vec3.add(vec3.create(), vec3.add(vec3.create(), tOrigin, target.xAxis), target.yAxis)  as Vector3D
+		vec3.add(vec3.create(), vec3.add(vec3.create(), tOrigin, target.xAxis), target.yAxis)  as Vector3D,
+		vec3.add(vec3.create(), tOrigin, target.yAxis) as Vector3D
 	];
 
 	const edgeIndexes: Vector2D[] = [

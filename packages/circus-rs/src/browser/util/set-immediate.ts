@@ -23,11 +23,12 @@ function receiveMessage(event): any {
 }
 
 export default function setImmediate(callback): any {
-	if ('postMesasge' in window) {
+	if ('setImmediate' in window) {
+		// use native one
 		return window.setImmediate(callback);
 	}
 
-	// use postMessage
+	// use polyfill using postMessage
 	if (!handlerInstalled) {
 		window.addEventListener('message', receiveMessage);
 		handlerInstalled = true;

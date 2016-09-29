@@ -30,9 +30,10 @@ export class RawVolumeImageSource extends RsHttpLoaderImageSource {
 			viewState.window.level
 		);
 
-		// Hack: Use setTimeout instead of Promise.resolve
-		// because the native Promise.resolve seems to to be called
-		// before drag events are triggered.
+		// If we use Promise.resolve directly, the then-calleback is called
+		// before any stacked UI events are handled.
+		// Use the polyfilled setImmediate to delay it.
+		// Cf. http://stackoverflow.com/q/27647742/1209240
 		return new Promise(resolve => {
 			setImmediate(() => resolve(imageBuffer));
 		});

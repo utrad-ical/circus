@@ -13,14 +13,18 @@ export class ViewerEvent {
 
 	constructor(viewer: Viewer, type: string, original?: any) {
 		this.viewer = viewer;
-		this.type = type || ( original ? original.type : null );
+		this.type = type || (original ? original.type : null);
 
 		if (original && 'offsetX' in original) {
-			const [ viewerWidth, viewerHeight ] = viewer.getResolution();
-			const [ elementWidth, elementHeight ] = viewer.getViewport();
+			const [viewerWidth, viewerHeight] = viewer.getResolution();
+			const [elementWidth, elementHeight] = viewer.getViewport();
 
-			this.viewerX = original.offsetX * viewerWidth / elementWidth;
-			this.viewerY = original.offsetY * viewerHeight / elementHeight;
+			const rect = viewer.canvas.getBoundingClientRect(); // in window coordinate
+			const offsetX = original.pageX - rect.left - window.scrollX;
+			const offsetY = original.pageY - rect.top - window.scrollY;
+
+			this.viewerX = offsetX * viewerWidth / elementWidth;
+			this.viewerY = offsetY * viewerHeight / elementHeight;
 			this.viewerWidth = viewerWidth;
 			this.viewerHeight = viewerHeight;
 		}

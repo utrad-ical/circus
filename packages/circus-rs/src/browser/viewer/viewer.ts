@@ -43,8 +43,11 @@ export class Viewer extends EventEmitter {
 	public backgroundEventTarget;
 
 	private boundRender: Function;
+	private boundEventHandler: EventListener;
 
 	private imageReady: boolean = false;
+
+	private isDragging: boolean = false;
 
 	/**
 	 * When render() is called while there is already another rendering procedure in progress,
@@ -63,7 +66,6 @@ export class Viewer extends EventEmitter {
 		const elm =  document.createElement('canvas');
 		elm.width = width;
 		elm.height = height;
-		elm.draggable = true;
 		return elm;
 	}
 
@@ -85,15 +87,12 @@ export class Viewer extends EventEmitter {
 		this.canvas = canvas;
 		this.sprites = [];
 
-		const handler = this.canvasEventHandler.bind(this);
+		this.boundEventHandler = this.canvasEventHandler.bind(this);
 
-		canvas.addEventListener('mousedown', handler);
-		canvas.addEventListener('mouseup', handler);
-		canvas.addEventListener('mousemove', handler);
-		canvas.addEventListener('dragstart', handler);
-		canvas.addEventListener('drag', handler);
-		canvas.addEventListener('dragend', handler);
-		canvas.addEventListener('wheel', handler);
+		canvas.addEventListener('mousedown', this.boundEventHandler);
+		canvas.addEventListener('mouseup', this.boundEventHandler);
+		canvas.addEventListener('mousemove', this.boundEventHandler);
+		canvas.addEventListener('wheel', this.boundEventHandler);
 
 		this.boundRender = this.render.bind(this);
 
@@ -114,7 +113,31 @@ export class Viewer extends EventEmitter {
 	}
 
 	private canvasEventHandler(originalEvent: MouseEvent): void {
-		const eventType = originalEvent.type;
+		let eventType = originalEvent.type;
+
+		// Emulate "drag and drop" events by swapping the event type
+		if (eventType === 'mousedown') {
+			this.isDragging = true;
+			// register additional mouse handlers to listen events outside of canvas while dragging
+			this.canvas.removeEventListener('mouseup', this.boundEventHandler);
+			this.canvas.removeEventListener('mousemove', this.boundEventHandler);
+			document.documentElement.addEventListener('mousemove', this.boundEventHandler);
+			document.documentElement.addEventListener('mouseup', this.boundEventHandler);
+			eventType = 'dragstart';
+		} else if (this.isDragging) {
+			if (eventType === 'mouseup') {
+				this.canvas.addEventListener('mouseup', this.boundEventHandler);
+				this.canvas.addEventListener('mousemove', this.boundEventHandler);
+				document.documentElement.removeEventListener('mousemove', this.boundEventHandler);
+				document.documentElement.removeEventListener('mouseup', this.boundEventHandler);
+				this.isDragging = false;
+				eventType = 'dragend';
+			} else if (eventType === 'mousemove') {
+				originalEvent.preventDefault();
+				eventType = 'drag';
+			}
+		}
+
 		const event = new ViewerEvent(this, eventType, originalEvent);
 
 		// Cancel default behavior by default for wheel events
@@ -129,10 +152,6 @@ export class Viewer extends EventEmitter {
 		if (this.backgroundEventTarget) {
 			event.dispatch(this.backgroundEventTarget);
 		}
-	}
-
-	public createEvent(eventType, originalEvent?) {
-		return new ViewerEvent(this, eventType, originalEvent);
 	}
 
 	/**

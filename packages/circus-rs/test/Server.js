@@ -49,14 +49,6 @@ describe('Server', function () {
 			.end(done);
 	});
 
-	it('must return Oblique image', function (done) {
-		supertest(httpServer)
-			.get('/oblique')
-			.query({series: '1.2.3.4.5'})
-			.expect('Content-Type', 'image/png')
-			.end(done);
-	});
-
 	it('must return metadata', function (done) {
 		supertest(httpServer)
 			.get('/metadata')

@@ -64,10 +64,10 @@ export function floodFill(grid: BinaryArrayView2D, center: Vector2D): number {
 		if (grid.get(cur) === false) {
 			let north = cur[1];
 			let south = cur[1];
+
 			do {
 				north -= 1;
 			} while (grid.get([cur[0], north]) === false && north >= 0)
-
 			do {
 				south += 1;
 			} while (grid.get([cur[0], south]) === false && south < grid.height)

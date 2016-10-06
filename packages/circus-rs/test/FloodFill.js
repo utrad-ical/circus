@@ -43,6 +43,7 @@ describe('floodFill', function() {
 
 	it('must flood-fill a ring-like cloed area', function() {
 		var pat =
+<<<<<<< ad556e051fe32603b4e1baf40dbd7de106e02419
 			'*******\n' +
 			'*     *\n' +
 			'* *** *\n' +
@@ -70,6 +71,35 @@ describe('floodFill', function() {
 		t(pat, [3, 3], inFilled, 1);
 		t(pat, [1, 1], outFilled, 16);
 		t(pat, [3, 1], outFilled, 16);
+=======
+			'********\n' +
+			'*      *\n' +
+			'* **** *\n' +
+			'* *  * *\n' +
+			'* **** *\n' +
+			'*      *\n' +
+			'********\n';
+		var outFilled =
+			'********\n' +
+			'********\n' +
+			'********\n' +
+			'***  ***\n' +
+			'********\n' +
+			'********\n' +
+			'********\n';
+		var inFilled =
+			'********\n' +
+			'*      *\n' +
+			'* **** *\n' +
+			'* **** *\n' +
+			'* **** *\n' +
+			'*      *\n' +
+			'********\n';
+
+		t(pat, [3, 3], inFilled, 2);
+		t(pat, [1, 1], outFilled, 18);
+		t(pat, [3, 1], outFilled, 18);
+>>>>>>> Add more flood-fill tests
 	});
 
 

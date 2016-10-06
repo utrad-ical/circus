@@ -4,48 +4,78 @@ var assert = require('chai').assert;
 var ff = require('../lib/browser/util/flood-fill');
 
 describe('floodFill', function() {
-	it('should fill a closed area correctly', function() {
-		var arr = new ff.BinaryArray2D(5, 5);
-		for (let i = 0; i < 5; i++) {
-			arr.set(true, [i, 0]);
-			arr.set(true, [i, 4]);
-			arr.set(true, [0, i]);
-			arr.set(true, [4, i]);
-		}
-		var filled = ff.floodFill(arr, [2, 2]);
-		assert.equal(filled, 9);
-		assert.equal(arr.toString(), '*****\n'.repeat(5));
-	});
-
-	it('should fill a complexed cloed arae', function() {
-		function t(start) {
-			var arr = new ff.BinaryArray2D(7, 7);
-			var pat =
-				'*******' +
-				'*     *' +
-				'* *** *' +
-				'* * * *' +
-				'* * * *' +
-				'* *   *' +
-				'* *****';
-			for (let i = 0; i < 49; i++) {
-				if (pat[i] === '*') arr.set(true, [i % 7, Math.floor(i / 7)]);
+	function t(pattern, start, expectedPattern, expectedFillCount) {
+		var rows = pattern.replace(/\n$/, '').split(/\n/);
+		var width = Math.max.apply(Math, rows.map(r => r.length));
+		var arr = new ff.BinaryArray2D(width, rows.length);
+		for (var y = 0; y < rows.length; y++) {
+			for (var x = 0; x < width; x++) {
+				if (rows[y][x] === '*') arr.set(true, [x, y]);
 			}
-			var filled = ff.floodFill(arr, start);
-			assert.equal(filled, 18);
-			assert.equal(arr.toString(), '*******\n'.repeat(7));
 		}
-		t([3, 3]);
-		t([1, 1]);
-		t([1, 5]);
-		t([1, 6]);
+		var filled = ff.floodFill(arr, start);
+		assert.equal(arr.toString(), expectedPattern);
+		assert.equal(filled, expectedFillCount);
+	}
+
+
+	it('must flood-fill a closed area correctly', function() {
+		var pat = '*****\n' + '*   *\n'.repeat(3) + '*****';
+		t(pat, [3, 3], '*****\n'.repeat(5), 9);
 	});
 
-	it('should fill an empty area correctly', function() {
-		var arr = new ff.BinaryArray2D(5, 5);
-		var filled = ff.floodFill(arr, [2, 2]);
-		assert.equal(filled, 25);
-		assert.equal(arr.toString(), '*****\n'.repeat(5));
+
+	it('must flood-fill a complexed cloed area', function() {
+		var pat =
+			'*******\n' +
+			'*     *\n' +
+			'* *** *\n' +
+			'* * * *\n' +
+			'* * * *\n' +
+			'* *   *\n' +
+			'* *****';
+		t(pat, [3, 3], '*******\n'.repeat(7), 18);
+		t(pat, [1, 1], '*******\n'.repeat(7), 18);
+		t(pat, [1, 5], '*******\n'.repeat(7), 18);
+		t(pat, [1, 6], '*******\n'.repeat(7), 18);
+	});
+
+
+	it('must flood-fill a ring-like cloed area', function() {
+		var pat =
+			'*******\n' +
+			'*     *\n' +
+			'* *** *\n' +
+			'* * * *\n' +
+			'* *** *\n' +
+			'*     *\n' +
+			'*******\n';
+		var outFilled =
+			'*******\n' +
+			'*******\n' +
+			'*******\n' +
+			'*** ***\n' +
+			'*******\n' +
+			'*******\n' +
+			'*******\n';
+		var inFilled =
+			'*******\n' +
+			'*     *\n' +
+			'* *** *\n' +
+			'* *** *\n' +
+			'* *** *\n' +
+			'*     *\n' +
+			'*******\n';
+
+		t(pat, [3, 3], inFilled, 1);
+		t(pat, [1, 1], outFilled, 16);
+		t(pat, [3, 1], outFilled, 16);
+	});
+
+
+	it('must flood-fill an empty area', function() {
+		var blank = '     \n'.repeat(5);
+		t(blank, [3, 3], '*****\n'.repeat(5), 25);
 	});
 
 });

@@ -214,3 +214,53 @@ for (let x = 0; x < 10; x++) {
 
 viewer.renderAnnotations();
 comp.annotationUpdated();
+
+
+/*--
+@title Benchmark of ImageSource
+This example directly invokes various types of ImageSource and sees their performance.
+--*/
+
+const dynSrc = new rs.DynamicImageSource(config);
+const volSrc = new rs.RawVolumeImageSource(config);
+
+console.log('Waiting for ready state...');
+Promise.all([dynSrc.ready(), volSrc.ready()]).then(() => {
+	return benchmark(dynSrc);
+}).then(() => {
+	return benchmark(volSrc);
+});
+
+function benchmark(src) {
+	const iteration = 100;
+	let count = 0;
+
+	const vs = {
+		window: { width: 100, level: 0 },
+		section: {
+			origin: [ 0, 0, 100 ],
+			xAxis: [ 512, 0, 0 ],
+			yAxis: [ 0, 512, 0 ]
+		}
+	};
+
+	console.log(`Measuring ${src.constructor.name}...`);
+	const start = performance.now();
+
+	function loop() {
+		return src.draw(viewer, vs).then(() => {
+			count++
+			// console.log(`iteration ${count}`);
+			if (count < iteration) return loop();
+			else {
+				return time = performance.now() - start;
+			}
+		});
+	}
+
+	return loop().then(time => {
+		const fps = 1000 / time * iteration;
+		console.log(`${src.constructor.name} took ${time} ms for ${iteration} interations (${fps} fps)`);
+	});
+
+}

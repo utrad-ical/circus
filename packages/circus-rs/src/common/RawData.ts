@@ -479,57 +479,6 @@ export default class RawData {
 	}
 
 	/**
-	 * Creates an orthogonal MPR (multi-planar reconstruction) image on a new array buffer.
-	 * @param axis
-	 * @param target
-	 * @param windowWidth
-	 * @param windowLevel
-	 * @return promise
-	 */
-	public orthogonalMpr(
-		axis: string,
-		target: number,
-		windowWidth: number,
-		windowLevel: number
-	): Promise<MprResult> {
-		let image: Uint8Array;
-		let buffer_offset = 0;
-		const [rx, ry, rz] = this.size;
-
-		const checkZranges = () => {
-			if (this.loadedSlices.length() !== rz)
-				throw new ReferenceError('Volume is not fully loaded to construct this MPR');
-		};
-
-		switch (axis) {
-			case 'sagittal':
-				checkZranges();
-				image = new Uint8Array(ry * rz);
-				for (let z = 0; z < rz; z++)
-					for (let y = 0; y < ry; y++)
-						image[buffer_offset++] =
-							this.applyWindow(windowWidth, windowLevel, this.getPixelAt(target, y, z));
-				return Promise.resolve({image, outWidth: ry, outHeight: rz});
-			case 'coronal':
-				checkZranges();
-				image = new Uint8Array(rx * rz);
-				for (let z = 0; z < rz; z++)
-					for (let x = 0; x < rx; x++)
-						image[buffer_offset++] =
-							this.applyWindow(windowWidth, windowLevel, this.getPixelAt(x, target, z));
-				return Promise.resolve({image, outWidth: rx, outHeight: rz});
-			default:
-			case 'axial':
-				image = new Uint8Array(rx * ry);
-				for (let y = 0; y < ry; y++)
-					for (let x = 0; x < rx; x++)
-						image[buffer_offset++] =
-							this.applyWindow(windowWidth, windowLevel, this.getPixelAt(x, y, target));
-				return Promise.resolve({image, outWidth: rx, outHeight: ry});
-		}
-	}
-
-	/**
 	 * Builds a new MPR image using the given section in index-coordinate.
 	 */
 	public scanObliqueSection(

@@ -462,6 +462,31 @@ export default class RawData {
 	}
 
 	/**
+	 * Changes the size of this volume by transforming the bounding box.
+	 * Used to shrink or expand the existing volume.
+	 * Added region will be filled with zero, and
+	 * value data not in the newBox will be lost.
+	 * @param newBox New bounding box
+	 * @param orig The origin of the current bounding box. Defaults to [0, 0, 0].
+	 */
+	public transformBoundingBox(newBox: Box, origin: Vector3D = [0, 0, 0]): void {
+		const newVol = new RawData();
+		newVol.setDimension(newBox.size[0], newBox.size[1], newBox.size[2], this.pixelFormat);
+		const srcBox: Box = { origin: [0, 0, 0], size: this.size };
+		const offset: Vector3D = [
+			origin[0] - newBox.origin[0],
+			origin[1] - newBox.origin[1],
+			origin[2] - newBox.origin[2]
+		];
+		newVol.copy(this, srcBox, offset);
+
+		// Replace the internal voxel data of this insntance
+		this.size = [newBox.size[0], newBox.size[1], newBox.size[2]];
+		this.data = newVol.data;
+		this.setAccessor();
+	}
+
+	/**
 	 * Applies window level/width.
 	 * @param width The window width.
 	 * @param level The window level.

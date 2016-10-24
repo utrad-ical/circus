@@ -1,7 +1,13 @@
 import { vec3 } from 'gl-matrix';
-import { Vector3D } from '../common/geometry';
+import { Vector3D, Box } from '../common/geometry';
 import RawData from '../common/RawData';
 import { PixelFormat } from '../common/PixelFormat';
+
+/**
+ * Canges the volume size by clipping or extending the original volume.
+ */
+export function extendVolume(volume: RawData, origBox: Box, newBox: Box): void {
+}
 
 /**
  * Fill all voxels with the given value when it intersects with the line segment

@@ -94,7 +94,40 @@ describe('RawData', function () {
 		assert.equal(dest.getPixelAt(0, 0, 0), 15);
 		assert.equal(dest.getPixelAt(4, 4, 4), 27);
 		assert.equal(dest.getPixelAt(5, 4, 4), 0);
-		
+
 		assert.throws(function() { dest.copy(dest); }, TypeError);
 	});
+
+	it('must transform bounding box', function() {
+
+		function newVol() {
+			var vol = new RawData();
+			vol.setDimension(16, 16, 16, PixelFormat.Int8);
+			vol.fillAll((x, y, z) => x + y + z);
+			return vol;
+		}
+
+		// shrink
+		var vol = newVol();
+		vol.transformBoundingBox({ origin: [0, 0, 0], size: [8, 8, 8] });
+		assert.deepEqual(vol.getDimension(), [8, 8, 8]);
+		assert.equal(vol.getPixelAt(5, 7, 3), 15);
+
+		// expand
+		var vol = newVol();
+		vol.transformBoundingBox({ origin: [0, 0, 0], size: [24, 24, 24] });
+		assert.deepEqual(vol.getDimension(), [24, 24, 24]);
+		assert.equal(vol.getPixelAt(5, 7, 3), 15);
+		assert.equal(vol.getPixelAt(15, 15, 15), 45);
+		assert.equal(vol.getPixelAt(20, 20, 20), 0);
+
+		// expand to left
+		var vol = newVol();
+		vol.transformBoundingBox({ origin: [0, 0, 0], size: [32, 32, 32] }, [16, 16, 16]);
+		assert.deepEqual(vol.getDimension(), [32, 32, 32]);
+		assert.equal(vol.getPixelAt(15, 15, 15), 0);
+		assert.equal(vol.getPixelAt(16 + 1, 16 + 3, 16 + 5), 9);
+
+	});
+
 });

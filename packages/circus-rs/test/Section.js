@@ -1,44 +1,45 @@
 'use strict';
 
-var vs = require('../lib/browser/section');
+var su = require('../lib/browser/section-util');
+var geo = require('../lib/common/geometry');
 var assert = require('chai').assert;
 
 describe('Section', function() {
 	it('#parallelToX', function() {
-		assert.isTrue(vs.parallelToX([1, 0, 0]));
-		assert.isTrue(vs.parallelToX([-1, 0, 0]));
-		assert.isFalse(vs.parallelToX([0, 1, 0]));
-		assert.isFalse(vs.parallelToX([0, -1, 0]));
-		assert.isFalse(vs.parallelToX([0, 0, 1]));
-		assert.isFalse(vs.parallelToX([0, 0, -1]));
-		assert.isFalse(vs.parallelToX([0.5, 0.5, 0.5]));
+		assert.isTrue(su.parallelToX([1, 0, 0]));
+		assert.isTrue(su.parallelToX([-1, 0, 0]));
+		assert.isFalse(su.parallelToX([0, 1, 0]));
+		assert.isFalse(su.parallelToX([0, -1, 0]));
+		assert.isFalse(su.parallelToX([0, 0, 1]));
+		assert.isFalse(su.parallelToX([0, 0, -1]));
+		assert.isFalse(su.parallelToX([0.5, 0.5, 0.5]));
 	});
 
 	it('#parallelToY', function() {
-		assert.isFalse(vs.parallelToY([1, 0, 0]));
-		assert.isFalse(vs.parallelToY([-1, 0, 0]));
-		assert.isTrue(vs.parallelToY([0, 1, 0]));
-		assert.isTrue(vs.parallelToY([0, -1, 0]));
-		assert.isFalse(vs.parallelToY([0, 0, 1]));
-		assert.isFalse(vs.parallelToY([0, 0, -1]));
-		assert.isFalse(vs.parallelToY([0.5, 0.5, 0.5]));
+		assert.isFalse(su.parallelToY([1, 0, 0]));
+		assert.isFalse(su.parallelToY([-1, 0, 0]));
+		assert.isTrue(su.parallelToY([0, 1, 0]));
+		assert.isTrue(su.parallelToY([0, -1, 0]));
+		assert.isFalse(su.parallelToY([0, 0, 1]));
+		assert.isFalse(su.parallelToY([0, 0, -1]));
+		assert.isFalse(su.parallelToY([0.5, 0.5, 0.5]));
 	});
 
 	it('#parallelToZ', function() {
-		assert.isFalse(vs.parallelToZ([1, 0, 0]));
-		assert.isFalse(vs.parallelToZ([-1, 0, 0]));
-		assert.isFalse(vs.parallelToZ([0, 1, 0]));
-		assert.isFalse(vs.parallelToZ([0, -1, 0]));
-		assert.isTrue(vs.parallelToZ([0, 0, 1]));
-		assert.isTrue(vs.parallelToZ([0, 0, -1]));
-		assert.isFalse(vs.parallelToZ([0.5, 0.5, 0.5]));
+		assert.isFalse(su.parallelToZ([1, 0, 0]));
+		assert.isFalse(su.parallelToZ([-1, 0, 0]));
+		assert.isFalse(su.parallelToZ([0, 1, 0]));
+		assert.isFalse(su.parallelToZ([0, -1, 0]));
+		assert.isTrue(su.parallelToZ([0, 0, 1]));
+		assert.isTrue(su.parallelToZ([0, 0, -1]));
+		assert.isFalse(su.parallelToZ([0.5, 0.5, 0.5]));
 	});
 
 	it('#detectOrthogonalSection', function() {
-		assert.equal(vs.detectOrthogonalSection({ xAxis: [1, 0, 0], yAxis: [0, 1, 0] }), 'axial');
-		assert.equal(vs.detectOrthogonalSection({ xAxis: [0, 1, 0], yAxis: [0, 0, 1] }), 'sagittal');
-		assert.equal(vs.detectOrthogonalSection({ xAxis: [1, 0, 0], yAxis: [0, 0, 1] }), 'coronal');
-		assert.equal(vs.detectOrthogonalSection({ xAxis: [1, 2, 0], yAxis: [0, 1, 0] }), 'oblique');
+		assert.equal(su.detectOrthogonalSection({ xAxis: [1, 0, 0], yAxis: [0, 1, 0] }), 'axial');
+		assert.equal(su.detectOrthogonalSection({ xAxis: [0, 1, 0], yAxis: [0, 0, 1] }), 'sagittal');
+		assert.equal(su.detectOrthogonalSection({ xAxis: [1, 0, 0], yAxis: [0, 0, 1] }), 'coronal');
+		assert.equal(su.detectOrthogonalSection({ xAxis: [1, 2, 0], yAxis: [0, 1, 0] }), 'oblique');
 	});
 
 	describe('should handle section transformations', function() {
@@ -52,7 +53,7 @@ describe('Section', function() {
 
 		it('#transform', function() {
 			var s = section();
-			var t = vs.translateSection(s, [10, 11, 12]);
+			var t = geo.translateSection(s, [10, 11, 12]);
 			assert.deepEqual(t.origin, [11, 14, 17]);
 		});
 	});

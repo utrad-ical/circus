@@ -4,10 +4,50 @@ import RawData from '../common/RawData';
 import { PixelFormat } from '../common/PixelFormat';
 
 /**
- * Canges the volume size by clipping or extending the original volume.
+ * Scans all the voxels in the given volume and
+ * determines the minimum bounding box that contains all the non-zero voxels.
+ * @param volume The volume to scan over.
+ * @param snap If this is set true and the volume is in binary format,
+ *    the x-size will be normalized to the multiple of 8.
+ * @return The bounding box measured in the given volume's coordinate.
  */
-export function extendVolume(volume: RawData, origBox: Box, newBox: Box): void {
+export function scanBoundingBox(volume: RawData, snap: boolean = true): Box {
+	// TODO: Optimization! https://en.wikipedia.org/wiki/Minimum_bounding_box_algorithms
+	const [rx, ry, rz] = volume.getDimension();
+	let minX = rx, maxX = -1;
+	let minY = ry, maxY = -1;
+	let minZ = rz, maxZ = -1;
+	let val: number;
+	for (let z = 0; z < rz; z++) {
+		for (let y = 0; y < rz; y++) {
+			for (let x = 0; x < rz; x++) {
+				val = volume.getPixelAt(x, y, z);
+				if (val !== 0) {
+					if (minX > x) minX = x;
+					if (maxX < x) maxX = x;
+					if (minY > y) minY = y;
+					if (maxY < y) maxY = y;
+					if (minZ > z) minZ = z;
+					if (maxZ < z) maxZ = z;
+				}
+			}
+		}
+	}
+
+	if (maxX === -1) return null;
+
+	const result: Box = {
+		origin: [minX, minY, minZ],
+		size: [maxX - minX + 1, maxY - minY + 1, maxZ - minZ + 1]
+	};
+
+	if (snap && volume.getPixelFormat() === PixelFormat.Binary) {
+		result.size[0] = Math.ceil(result.size[0] / 8) * 8;
+	}
+
+	return result;
 }
+
 
 /**
  * Fill all voxels with the given value when it intersects with the line segment

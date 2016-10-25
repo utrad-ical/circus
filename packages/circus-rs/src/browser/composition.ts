@@ -73,6 +73,14 @@ export class Composition extends EventEmitter {
 	}
 
 	/**
+	 * Remove all annotations.
+	 */
+	public removeAllAnnotations(): void {
+		this.annotations = [];
+		this.emit('annotationChange');
+	}
+
+	/**
 	 * Re-renders annotations in all of the associated viewers.
 	 */
 	public annotationUpdated(): void {

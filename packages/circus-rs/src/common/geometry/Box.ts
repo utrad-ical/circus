@@ -1,6 +1,7 @@
 import { Vector2D, Vector3D } from './Vector';
 import { LineSegment } from './LineSegment';
 import { Section, intersectionOfLineSegmentAndPlane } from './Section';
+import { vec3 } from 'gl-matrix';
 
 /**
  * Represents a bounding box.
@@ -10,6 +11,16 @@ export interface Box {
 	size: Vector3D;
 }
 
+export function boxEquals(box1: Box, box2: Box): boolean {
+	return (
+		box1.origin[0] === box2.origin[0] &&
+		box1.origin[1] === box2.origin[1] &&
+		box1.origin[2] === box2.origin[2] &&
+		box1.size[0] === box2.size[0] &&
+		box1.size[1] === box2.size[1] &&
+		box1.size[2] === box2.size[2]
+	);
+}
 
 /**
  * Calculates the intersection of the given box (cuboid) and the plane.

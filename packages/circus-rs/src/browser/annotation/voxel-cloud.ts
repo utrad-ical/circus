@@ -6,7 +6,9 @@ import RawData from '../../common/RawData';
 import {
 	Vector2D,
 	Vector3D,
+	Box,
 	Section,
+	boxEquals,
 	intersectionOfBoxAndPlane,
 	intersectionPointWithinSection
  } from '../../common/geometry';
@@ -15,7 +17,9 @@ import {
 	convertScreenCoordinateToVolumeCoordinate,
 	convertVolumeCoordinateToScreenCoordinate
 } from '../section-util';
+import { scanBoundingBox } from '../volume-util';
 import { convertSectionToIndex } from '../section-util';
+import { VolumeImageSource } from '../image-source/volume-image-source';
 
 /**
  * VoxelCloud is a type of Annotation that can be registered to a Composition.
@@ -94,6 +98,35 @@ export class VoxelCloud implements Annotation {
 			vector[1] * voxelSize[1],
 			vector[2] * voxelSize[2]
 		];
+	}
+
+	/**
+	 * Removes zero-area along the bounding box.
+	 */
+	public shrinkToMinimum(): void {
+		// console.time('shrink to minimum bounding box');
+		const boundingBox = scanBoundingBox(this.volume, true);
+		this.origin[0] += boundingBox.origin[0];
+		this.origin[1] += boundingBox.origin[1];
+		this.origin[2] += boundingBox.origin[2];
+		this.volume.transformBoundingBox(boundingBox);
+		// console.timeEnd('shrink to minimum bounding box');
+	}
+
+	/**
+	 * Expands this volume so that it covers the entire volume of
+	 * the parent volume image source.
+	 */
+	public expandToMaximum(source: VolumeImageSource): void {
+		const bb: Box = { origin: [0, 0, 0], size: source.meta.voxelCount };
+		if (boxEquals(bb, { origin: [0, 0, 0], size: this.volume.getDimension() })) {
+			return; // Already expanded
+		}
+
+		// console.time('expand to maximum');
+		this.volume.transformBoundingBox(bb, this.origin);
+		this.origin = [0, 0, 0];
+		// console.timeEnd('expand to maximum');
 	}
 
 	public draw(viewer: Viewer, viewState: ViewState): Sprite {

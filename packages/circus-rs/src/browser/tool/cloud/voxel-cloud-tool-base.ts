@@ -25,6 +25,9 @@ export class VoxelCloudToolBase extends DraggableTool {
 		if (!this.activeCloud) return; // no cloud to paint on
 		const activeCloud = this.activeCloud;
 
+		// Expand the target volume so that it covers the source image
+		activeCloud.expandToMaximum(src);
+
 		function convertViewerPoint(point: Vector2D): Vector3D {
 			// from screen 2D coordinate to volume coordinate in millimeter
 			const mmOfVol = su.convertScreenCoordinateToVolumeCoordinate(state.section, resolution, point);

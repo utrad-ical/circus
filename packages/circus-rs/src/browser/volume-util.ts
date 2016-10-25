@@ -12,15 +12,15 @@ import { PixelFormat } from '../common/PixelFormat';
  * @return The bounding box measured in the given volume's coordinate.
  */
 export function scanBoundingBox(volume: RawData, snap: boolean = true): Box {
-	// TODO: Optimization! https://en.wikipedia.org/wiki/Minimum_bounding_box_algorithms
+	// TODO: Optimization!
 	const [rx, ry, rz] = volume.getDimension();
 	let minX = rx, maxX = -1;
 	let minY = ry, maxY = -1;
 	let minZ = rz, maxZ = -1;
 	let val: number;
 	for (let z = 0; z < rz; z++) {
-		for (let y = 0; y < rz; y++) {
-			for (let x = 0; x < rz; x++) {
+		for (let y = 0; y < ry; y++) {
+			for (let x = 0; x < rx; x++) {
 				val = volume.getPixelAt(x, y, z);
 				if (val !== 0) {
 					if (minX > x) minX = x;

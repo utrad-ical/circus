@@ -76,7 +76,7 @@ container.innerHTML = ''; // Clear existing tool bar
 
 const toolbar = rs.createToolbar(
 	container,
-	['hand', 'window', 'zoom', 'pager', 'celestialRotate', 'brush', 'eraser']
+	['hand', 'window', 'zoom', 'pager', 'celestialRotate', 'brush', 'eraser', 'bucket']
 );
 
 if (viewer) toolbar.bindViewer(viewer);
@@ -249,8 +249,7 @@ function benchmark(src) {
 
 	function loop() {
 		return src.draw(viewer, vs).then(() => {
-			count++
-			// console.log(`iteration ${count}`);
+			count++;
 			if (count < iteration) return loop();
 			else {
 				return time = performance.now() - start;
@@ -260,7 +259,8 @@ function benchmark(src) {
 
 	return loop().then(time => {
 		const fps = 1000 / time * iteration;
-		console.log(`${src.constructor.name} took ${time} ms for ${iteration} interations (${fps} fps)`);
+		console.log(`${src.constructor.name} took ${time} ms for ${iteration} iterations (${fps} fps)`);
+		return time;
 	});
 
 }

@@ -1,29 +1,39 @@
 CIRCUS RS: DICOM Server and Viewer
 ==================================
 
+CIRCUS RS is a set of:
+
+- Canvas-based HTML widget (component) that works as a DICOM image viewer
+- Node.js web server which serves DICOM voxel data as an image or octet-stream
+
+It fully supports multiplanar reconstruction (MPR) and voxel-based annotations.
+
 Requirements
 ------------
 
-- gulp (for installation)
-- mongoose (for CIRCUSDB_path_resolver, optional)
-- node-png (for ImageEncoder_nodepng, optional)
-- dicom_voxel_dump (for DicomVoxelDumperAdapter)
+- Node.js (>= 4.0)
 
 Build
 -----
 
-    # npm install
-    # gulp
+```
+# npm install
+# gulp
+```
 
 Test
 ----
 
 Uses mocha. Tests are only partially written for now.
 
-    # npm test
+```
+npm test
+```
 
 Alternatively, you can install mocha globally, which gives
 more options.
 
-    # npm install -g mocha
-    # mocha
+```
+npm install -g mocha
+mocha
+```

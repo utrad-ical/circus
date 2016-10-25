@@ -6,6 +6,7 @@ import { PagerTool } from './state/pager';
 import { CelestialRotateTool } from './state/celestial-rotate';
 import { BrushTool } from './cloud/brush';
 import { EraserTool } from './cloud/eraser';
+import { BucketTool } from './cloud/bucket';
 
 const toolCollection = {};
 
@@ -18,7 +19,8 @@ const defaultTools = {
 	celestialRotate: CelestialRotateTool,
 
 	brush: BrushTool,
-	eraser: EraserTool
+	eraser: EraserTool,
+	bucket: BucketTool
 };
 
 Object.keys(defaultTools).forEach(key => {

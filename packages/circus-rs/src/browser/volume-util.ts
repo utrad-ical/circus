@@ -1,7 +1,9 @@
 import { vec3 } from 'gl-matrix';
-import { Vector3D, Box } from '../common/geometry';
+import { Vector2D, Vector3D, Box } from '../common/geometry';
 import RawData from '../common/RawData';
 import { PixelFormat } from '../common/PixelFormat';
+import { BinaryArrayView2D, floodFill } from './util/flood-fill';
+import { OrientationString } from './section-util';
 
 /**
  * Scans all the voxels in the given volume and
@@ -136,3 +138,50 @@ function nextLatticeDistance(p: number, u: number): number {
 
 	return Math.abs(( p - i ) / u);
 }
+
+
+/**
+ * Performs a flood-fill on a given orthogonal MPR section of the volume.
+ * @param volume The target volume to fill.
+ * @param center The starting point to start filling.
+ * @param orientation The orientation of the orthogonal MPR section.
+ * @return The number of voxels affected (filled).
+ */
+export function floodFillOnSlice(volume: RawData, center: Vector3D, orientation: OrientationString): number {
+	let view: BinaryArrayView2D;
+	let start: Vector2D;
+	const dim = volume.getDimension();
+
+	// Prepares something like a 2D DataView on the volume.
+	if (orientation === 'axial') {
+		view = {
+			width: dim[0],
+			height: dim[1],
+			get: ([x, y]) => volume.getPixelAt(x, y, center[2]) > 0,
+			set: (val, [x, y]) => volume.writePixelAt(val ? 1 : 0, x, y, center[2])
+		};
+		start = [center[0], center[1]];
+	} else if (orientation === 'sagittal') {
+		view = {
+			width: dim[1],
+			height: dim[2],
+			get: ([x, y]) => volume.getPixelAt(center[0], x, y) > 0,
+			set: (val, [x, y]) => volume.writePixelAt(val ? 1 : 0, center[0], x, y)
+		};
+		start = [center[1], center[2]];
+	} else if (orientation === 'coronal') {
+		view = {
+			width: dim[1],
+			height: dim[2],
+			get: ([x, y]) => volume.getPixelAt(x, center[1], y) > 0,
+			set: (val, [x, y]) => volume.writePixelAt(val ? 1 : 0, x, center[1], y)
+		};
+		start = [center[0], center[2]];
+	}
+	if (!view) throw new TypeError('Invalid orientation');
+
+	// Applies the generic flood-fill function on a volume
+	const filledPixels = floodFill(view, start);
+	return filledPixels;
+}
+

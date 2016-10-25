@@ -107,13 +107,20 @@ describe('RawData', function () {
 			return vol;
 		}
 
-		// shrink
+		// shrink to origin
 		var vol = newVol();
 		vol.transformBoundingBox({ origin: [0, 0, 0], size: [8, 8, 8] });
 		assert.deepEqual(vol.getDimension(), [8, 8, 8]);
 		assert.equal(vol.getPixelAt(5, 7, 3), 15);
 
-		// expand
+		// shrink to bottom-right
+		vol = newVol();
+		vol.transformBoundingBox({ origin: [8, 8, 8], size: [8, 8, 8] });
+		assert.deepEqual(vol.getDimension(), [8, 8, 8]);
+		assert.equal(vol.getPixelAt(0, 0, 0), 24);
+		assert.equal(vol.getPixelAt(7, 7, 7), 45);
+
+		// expand from origin
 		var vol = newVol();
 		vol.transformBoundingBox({ origin: [0, 0, 0], size: [24, 24, 24] });
 		assert.deepEqual(vol.getDimension(), [24, 24, 24]);
@@ -121,7 +128,7 @@ describe('RawData', function () {
 		assert.equal(vol.getPixelAt(15, 15, 15), 45);
 		assert.equal(vol.getPixelAt(20, 20, 20), 0);
 
-		// expand to left
+		// expand to top-left
 		var vol = newVol();
 		vol.transformBoundingBox({ origin: [0, 0, 0], size: [32, 32, 32] }, [16, 16, 16]);
 		assert.deepEqual(vol.getDimension(), [32, 32, 32]);

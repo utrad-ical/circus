@@ -41,14 +41,6 @@ describe('Server', function () {
 			.end(done);
 	});
 
-	it('must return MPR image', function (done) {
-		supertest(httpServer)
-			.get('/mpr')
-			.query({series: '1.2.3.4.5'})
-			.expect('Content-Type', 'image/png')
-			.end(done);
-	});
-
 	it('must return metadata', function (done) {
 		supertest(httpServer)
 			.get('/metadata')

@@ -1,6 +1,6 @@
 import DicomVolume from '../../common/DicomVolume';
-import { DicomMetadata } from '../../browser/interface/dicom-metadata';
 import { PixelFormat, pixelFormatInfo } from '../../common/PixelFormat';
+import { DicomMetadata } from './volume-image-source';
 import { RsHttpLoaderImageSource } from '../../browser/image-source/rs-http-loader-image-source';
 import { ViewState } from '../view-state';
 import { convertSectionToIndex } from '../section-util';

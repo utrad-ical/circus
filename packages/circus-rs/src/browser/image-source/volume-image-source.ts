@@ -1,9 +1,22 @@
 import { ImageSource } from './image-source';
-import { DicomMetadata } from '../../browser/interface/dicom-metadata';
-import { ViewState, ViewWindow } from '../view-state';
+import { ViewState } from '../view-state';
 import { Viewer } from '../viewer/viewer';
-import { createOrthogonalMprSection, convertSectionToIndex } from '../section-util';
-import { Vector2D, Vector3D, Section } from '../../common/geometry';
+import { createOrthogonalMprSection } from '../section-util';
+import { Vector2D, Vector3D } from '../../common/geometry';
+
+export interface DicomMetadata {
+	dicomWindow?: {
+		level: number;
+		width: number;
+	};
+	estimatedWindow?: {
+		level: number;
+		width: number;
+	};
+	voxelCount?: [ number, number, number ];
+	voxelSize: [ number, number, number ];
+	pixelFormat?: number;
+}
 
 /**
  * VolumeImageSource is a common base class for all

@@ -1,17 +1,18 @@
 import { Vector2D } from '../../common/geometry';
 
 /**
- * A very primitive 2D binary array interface
+ * A very primitive 2D binary array interface.
  */
 export interface BinaryArrayView2D {
-	get(pos: Vector2D): boolean;
-	set(val: boolean, pos: Vector2D): void;
 	width: number;
 	height: number;
+	get(pos: Vector2D): boolean;
+	set(val: boolean, pos: Vector2D): void;
 }
 
 /**
  * A very primitive 2D array implementation which consumes 1 byte per pixel.
+ * Usable, but basically for testing purposes.
  */
 export class BinaryArray2D implements BinaryArrayView2D {
 	private data: Uint8Array;
@@ -45,7 +46,7 @@ export class BinaryArray2D implements BinaryArrayView2D {
 }
 
 /**
- * Implements a basic flood-fill algorithm.
+ * Performs flood-fill on a 2D array represented by BinaryArrayView2D.
  * @return The number of pixels filled.
  */
 export function floodFill(grid: BinaryArrayView2D, center: Vector2D): number {
@@ -67,10 +68,10 @@ export function floodFill(grid: BinaryArrayView2D, center: Vector2D): number {
 
 			do {
 				north -= 1;
-			} while (grid.get([cur[0], north]) === false && north >= 0)
+			} while (grid.get([cur[0], north]) === false && north >= 0);
 			do {
 				south += 1;
-			} while (grid.get([cur[0], south]) === false && south < grid.height)
+			} while (grid.get([cur[0], south]) === false && south < grid.height);
 
 			miny = north + 1 < miny ? north + 1 : miny;
 			maxy = south - 1 > maxy ? south - 1 : maxy;
@@ -89,5 +90,4 @@ export function floodFill(grid: BinaryArrayView2D, center: Vector2D): number {
 	}
 
 	return filled;
-
 }

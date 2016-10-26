@@ -1,5 +1,5 @@
 import { VolumeImageSource } from './volume-image-source';
-import { RsHttpLoader } from './rs-http-loader';
+import { RsHttpClient } from '../http-client/rs-http-client';
 
 /**
  * RsHttpLoaderImageSource is a base class of ImageSource classes which
@@ -9,13 +9,14 @@ import { RsHttpLoader } from './rs-http-loader';
  */
 export abstract class RsHttpLoaderImageSource extends VolumeImageSource {
 
-	protected loader: RsHttpLoader;
+	protected loader: RsHttpClient;
 	protected series: string;
 	protected prepareLoader: Promise<void>;
 
-	constructor({ server = 'http://localhost:3000', series = null } = {}) {
+	constructor({ client = null, series = null } = {}) {
 		super();
-		this.loader = new RsHttpLoader(server);
+		if (!(client instanceof RsHttpClient)) throw new TypeError('RsHttpClient not set');
+		this.loader = client;
 		this.series = series;
 		this.prepareLoader = this.prepare();
 	}
@@ -30,7 +31,7 @@ export abstract class RsHttpLoaderImageSource extends VolumeImageSource {
 	 */
 	public prepare(): Promise<void> {
 		if (!this.series) return Promise.reject('Series is required');
-		return this.loader.metadata(this.series)
+		return this.loader.request('metadata', { series: this.series })
 			.then(meta => {
 				this.meta = meta;
 				return this.onMetaLoaded();

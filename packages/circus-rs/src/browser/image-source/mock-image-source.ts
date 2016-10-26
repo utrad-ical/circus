@@ -5,7 +5,7 @@ import { VolumeImageSource } from '../../browser/image-source/volume-image-sourc
 import { ViewState } from '../view-state';
 import { convertSectionToIndex } from '../section-util';
 import { Vector2D, Section } from '../../common/geometry';
-
+import setImmediate from '../util/set-immediate';
 
 export class MockImageSource extends VolumeImageSource {
 

@@ -14,11 +14,12 @@ export { default as RawData } from '../common/RawData';
 export * from '../common/PixelFormat';
 export * from '../common/geometry';
 
+export * from '../browser/http-client/rs-http-client';
+
 export * from '../browser/image-source/mock-image-source';
 export * from '../browser/image-source/raw-volume-image-source';
 export * from '../browser/image-source/dynamic-image-source';
 export * from '../browser/image-source/hybrid-image-source';
-
 
 export * from '../browser/tool/state/hand';
 export * from '../browser/tool/state/celestial-rotate';

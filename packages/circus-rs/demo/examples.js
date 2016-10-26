@@ -20,7 +20,7 @@ Select an individual example item for details.
 // Prepare ImageSource object, using the options provided in the boxes above
 const imageSource = new config.sourceClass({
 	series: config.series,
-	server: config.server
+	client: new rs.RsHttpClient(config.server)
 });
 
 // Prepare composition.
@@ -221,8 +221,10 @@ comp.annotationUpdated();
 This example directly invokes various types of ImageSource and sees their performance.
 --*/
 
-const dynSrc = new rs.DynamicImageSource(config);
-const volSrc = new rs.RawVolumeImageSource(config);
+const cfg = { series, client: new rs.RsHttpClient(config.server )};
+
+const dynSrc = new rs.DynamicImageSource(cfg);
+const volSrc = new rs.RawVolumeImageSource(cfg);
 
 console.log('Waiting for ready state...');
 Promise.all([dynSrc.ready(), volSrc.ready()]).then(() => {

@@ -15,8 +15,11 @@ JavaScript:
 const series = 'your-series-instance-uid';
 const server = 'https://your-rs-server/';
 
-// Create a new ImageSource
-const src = new circusrs.DynamicImageSource({ series, server });
+// Create a new RsHttpClient
+const client = new circusrs.RsHttpClient(server);
+
+// Create a new ImageSource using the client
+const src = new circusrs.DynamicImageSource({ series, client });
 
 // Assign your ImageSource to a new Composition
 const comp = new circusrs.Composition();
@@ -50,11 +53,16 @@ If you do not see any image displayed, check the followings:
 - Make sure CIRCUS RS client script is loaded in your HTML page.
 - Make sure you're using a modern browser that supports `Promise`. Internet Explorer is currently not supported.
 
-An `ImageSource` instance represents the image drawn on the HTML page.
+There are many classes involved, so let's take a look one by one.
+
+A `RsHttpClient` instance represents a Promise-based HTTP client which takes
+care of HTTP connections along with authentication.
+
+An `ImageSource` instance represents the image drawn on the viewer.
 A `DynamicImageSource` is a subclass of `ImageSource`, and we will be soon
 discussing the other types of `ImageSource`s later.
 
-A `Viewer` instance is the viewer comonent itself, which makes one HTML canvas
+A `Viewer` instance is the viewer component itself, which makes one HTML canvas
 element and handles everything drawn on that canvas.
 
 To associate the viewer and the image to display, we are using a `Composition`
@@ -67,8 +75,8 @@ but a composition is used to associate multiple **annotations** to the image.
 
 Now we know how to display a single section.
 
-The next step is to understand so-called a **view state**.
-Inside of the viewer, all images are drawn to the canvas by passing
+The next step is to understand **view state**.
+Inside of the viewer, all images are drawn on the canvas by passing
 a view state to the `ImageSource` instance.
 
 A view state is a plain object (i.e., not a class instance) that determines

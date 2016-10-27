@@ -12,7 +12,7 @@ import DicomVolume from '../common/DicomVolume';
 import AsyncLruCache from '../common/AsyncLruCache';
 
 import DicomDumper from './dicom-dumpers/DicomDumper';
-import PathResolver from './path-resolvers/PathResolver';
+import DicomFileRepository from './dicom-file-repository/DicomFileRepository';
 import AuthorizationCache from './AuthorizationCache';
 import TokenAuthenticationBridge from './controllers/TokenAuthenticationBridge';
 import Controller from './controllers/Controller';
@@ -89,7 +89,7 @@ class Server {
 			// Load built-in modules
 			let dir = {
 				'DICOM dumper': './dicom-dumpers/',
-				'path resolver': './path-resolvers/',
+				'DICOM file repository': './dicom-file-repository/',
 				'image encoder': './image-encoders/'
 			}[type];
 			module = dir + descriptor.module;
@@ -102,13 +102,12 @@ class Server {
 
 	private createDicomReader(): AsyncLruCache<DicomVolume> {
 		let cfg = this.config;
-		let resolver: PathResolver = this.loadModule(cfg.pathResolver, 'path resolver');
+		let repository: DicomFileRepository = this.loadModule(cfg.dicomFileRepository, 'DICOM file repository');
 		let dumper: DicomDumper = this.loadModule(cfg.dumper, 'DICOM dumper');
 		return new AsyncLruCache<DicomVolume>(
 			seriesUID => {
-				return resolver
-					.resolvePath(seriesUID)
-					.then(dcmdir => dumper.readDicom(dcmdir, 'all'));
+				return repository.getSeriesLoader(seriesUID)
+					.then(loaderInfo => dumper.readDicom(loaderInfo, 'all'));
 			},
 			{
 				maxSize: this.config.cache.memoryThreshold,

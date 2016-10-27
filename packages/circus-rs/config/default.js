@@ -11,8 +11,8 @@ var path = require('path');
 
 module.exports = {
 	// Path resolver settings.
-	"pathResolver": {
-		"module": "StaticPathResolver",
+	"dicomFileRepository": {
+		"module": "StaticDicomFileRepository",
 		"options": {
 			// Path to DICOM filter
 			"dataDir": "/var/dicom-data",

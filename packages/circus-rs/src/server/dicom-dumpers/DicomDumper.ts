@@ -1,4 +1,5 @@
 import DicomVolume from '../../common/DicomVolume';
+import { SeriesLoaderInfo } from '../dicom-file-repository/DicomFileRepository';
 
 /**
  * Base DICOM Dumper class.
@@ -19,10 +20,10 @@ export default class DicomDumper {
 	/**
 	 * read header/image from DICOM data.
 	 *
-	 * @param dcmdir path of DICOM series data directory.
+	 * @param seriesLoader series loader function
 	 * @param config request specific parameter (if needed)
 	 */
-	public readDicom(dcmdir: string, config: any): Promise<DicomVolume> {
+	public readDicom(seriesLoaderInfo: SeriesLoaderInfo, config: any): Promise<DicomVolume> {
 		// abstract
 		return null;
 	}

@@ -3,9 +3,8 @@ import DicomDumper from './DicomDumper';
 import DicomVolume  from '../../common/DicomVolume';
 import { PixelFormat } from '../../common/PixelFormat';
 
-import fs = require('fs');
-
 import * as extractor from './DicomPixelExtractor';
+import { SeriesLoaderInfo, SeriesLoader } from '../dicom-file-repository/DicomFileRepository';
 
 /**
  * DICOM dumper implemented in pure JS.
@@ -13,44 +12,15 @@ import * as extractor from './DicomPixelExtractor';
  */
 export default class PureJsDicomDumper extends DicomDumper {
 
-	protected readSingleDicomImageFile(path: string): Promise<extractor.DicomInfo> {
-		return new Promise((resolve, reject) => {
-			fs.readFile(path, (err, con) => {
-				if (err) {
-					reject(err);
-					return;
-				}
-				let ta = new Uint8Array(con);
-				let parser = new extractor.DicomPixelExtractor();
-				resolve(parser.extract(ta));
-			});
+	protected readSingleDicomImageFile(seriesLoader: SeriesLoader, image: number): Promise<extractor.DicomInfo> {
+		return seriesLoader(image).then(buffer => {
+			let ta = new Uint8Array(buffer);
+			let parser = new extractor.DicomPixelExtractor();
+			return parser.extract(ta);
 		});
 	}
 
-	private pad8(num: number): string {
-		return ('00000000' + num).slice(-8);
-	}
-
-	/**
-	 * Read the file list of the directory and count the DICOM files.
-	 */
-	protected scanDicomCount(path: string): Promise<number> {
-		return new Promise((resolve, reject) => {
-			let next = (num) => {
-				fs.stat(`${path}/${this.pad8(num)}.dcm`, (err, stats) => {
-					if (!err && stats.isFile()) {
-						num++;
-						next(num);
-					} else {
-						resolve(num - 1);
-					}
-				});
-			};
-			next(1);
-		});
-	}
-
-	public readDicom(dcmdir: string): Promise<DicomVolume> {
+	public readDicom(seriesLoaderInfo: SeriesLoaderInfo): Promise<DicomVolume> {
 		let raw = new DicomVolume();
 		let lastSliceLocation: number;
 		let pitch: number = undefined;
@@ -58,42 +28,40 @@ export default class PureJsDicomDumper extends DicomDumper {
 		let seriesMaxValue: number = null;
 		raw.setEstimatedWindow(50, 75);
 
-		return this.scanDicomCount(dcmdir).then(count => {
+		const { count, seriesLoader } = seriesLoaderInfo;
+
+		return Promise.resolve().then(() => {
 			let loader: Promise<any> = Promise.resolve(null);
 			for (let i = 1; i <= count; i++) {
-				// TODO: Remove this closure after TS1.8 release
-				// https://github.com/Microsoft/TypeScript/issues/3915
-				(i => {
-					loader = loader.then(() => {
-						// logger.debug(`reading ${i}`);
-						return this.readSingleDicomImageFile(`${dcmdir}/${this.pad8(i)}.dcm`);
-					}).then(result => {
-						// logger.debug(`inserting ${i} with ${result.pixelData.byteLength} bytes of data`);
-						if (i === 1) {
-							if ('x00180088' in result.dataset.elements) {
-								// [0018, 0088] Spacing between slices
-								pitch = result.dataset.floatString('x00180088');
-								raw.setVoxelDimension(result.pixelSpacing[0], result.pixelSpacing[1], pitch);
-							}
-							raw.appendHeader({
-								modality: result.modality,
-								rescaleSlope: result.rescale.slope,
-								rescaleIntercept: result.rescale.intercept
-							});
-							raw.dcm_wl = result.window.level;
-							raw.dcm_ww = result.window.width;
-							raw.setDimension(result.columns, result.rows, count, result.pixelFormat);
-						} else if (i > 1 && pitch === undefined) {
-							pitch = Math.abs(lastSliceLocation - result.sliceLocation);
+				loader = loader.then(() => {
+					// logger.debug(`reading ${i}`);
+					return this.readSingleDicomImageFile(seriesLoader, i);
+				}).then(result => {
+					// logger.debug(`inserting ${i} with ${result.pixelData.byteLength} bytes of data`);
+					if (i === 1) {
+						if ('x00180088' in result.dataset.elements) {
+							// [0018, 0088] Spacing between slices
+							pitch = result.dataset.floatString('x00180088');
 							raw.setVoxelDimension(result.pixelSpacing[0], result.pixelSpacing[1], pitch);
 						}
-						seriesMinValue = Math.min(seriesMinValue, result.minValue);
-						seriesMaxValue = Math.max(seriesMinValue, result.maxValue);
-						lastSliceLocation = result.sliceLocation;
-						raw.insertSingleImage(i - 1, result.pixelData);
-						return true;
-					});
-				})(i);
+						raw.appendHeader({
+							modality: result.modality,
+							rescaleSlope: result.rescale.slope,
+							rescaleIntercept: result.rescale.intercept
+						});
+						raw.dcm_wl = result.window.level;
+						raw.dcm_ww = result.window.width;
+						raw.setDimension(result.columns, result.rows, count, result.pixelFormat);
+					} else if (i > 1 && pitch === undefined) {
+						pitch = Math.abs(lastSliceLocation - result.sliceLocation);
+						raw.setVoxelDimension(result.pixelSpacing[0], result.pixelSpacing[1], pitch);
+					}
+					seriesMinValue = Math.min(seriesMinValue, result.minValue);
+					seriesMaxValue = Math.max(seriesMinValue, result.maxValue);
+					lastSliceLocation = result.sliceLocation;
+					raw.insertSingleImage(i - 1, result.pixelData);
+					return true;
+				});
 			}
 			return loader;
 		}).then(() => {

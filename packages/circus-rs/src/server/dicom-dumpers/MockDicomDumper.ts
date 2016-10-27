@@ -1,15 +1,16 @@
 import DicomDumper from './DicomDumper';
 import { PixelFormat } from '../../common/PixelFormat';
 import DicomVolume from '../../common/DicomVolume';
+import { SeriesLoaderInfo } from '../dicom-file-repository/DicomFileRepository';
 
 /**
- * MockDicomDumper creates dummy voluem data.
+ * MockDicomDumper creates dummy volume data.
  */
 export default class MockDicomDumper extends DicomDumper {
 
-	public readDicom(dcmdir: string): Promise<DicomVolume> {
+	public readDicom(seriesLoaderInfo: SeriesLoaderInfo, config: any): Promise<DicomVolume> {
 		let vol = this.makeMockVol();
-		if (/404/.test(dcmdir)) return Promise.reject('Not found');
+		// if (/404/.test(dcmdir)) return Promise.reject('Not found');
 		return Promise.resolve(vol);
 	}
 

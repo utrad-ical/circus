@@ -2,8 +2,8 @@ var Server = require('../lib/server/Server');
 var supertest = require('supertest');
 
 var defaultConfig = {
-	pathResolver: {
-		module: "StaticPathResolver",
+	dicomFileRepository: {
+		module: "StaticDicomFileRepository",
 		options: {dataDir: __dirname, useHash: false}
 	},
 	port: 1024,

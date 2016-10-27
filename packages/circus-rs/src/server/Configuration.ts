@@ -8,7 +8,7 @@ interface Configuration {
 
 	port?: number;
 
-	pathResolver?: ObjectDefinition;
+	dicomFileRepository?: ObjectDefinition;
 
 	dumper?: ObjectDefinition;
 

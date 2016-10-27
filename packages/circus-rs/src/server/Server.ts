@@ -126,7 +126,6 @@ class Server {
 		// path name, process class name, needs token authorization, additionl depts to inject
 		let routes: [string, string, boolean, any][] = [
 			['metadata', 'Metadata', true, {}],
-			['mpr', 'MPRAction', true, {}],
 			['scan', 'ObliqueScan', true, {}],
 			['volume', 'VolumeAction', true, {}],
 			['status', 'ServerStatus', false, {server: this}]

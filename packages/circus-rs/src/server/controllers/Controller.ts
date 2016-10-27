@@ -11,7 +11,7 @@ import * as stream from 'stream';
 /**
  * Base DICOM Server controller.
  */
- export default class Controller {
+export default class Controller {
 
 	protected reader: AsyncLruCache<RawData>;
 	protected imageEncoder: ImageEncoder;
@@ -82,7 +82,7 @@ import * as stream from 'stream';
 	}
 
 	protected respondGzippedArrayBuffer(res: http.ServerResponse, buffer: ArrayBuffer): void {
-		let out = new stream.Readable();
+		let out: any = new stream.Readable();
 		out._read = function(size) {
 			this.push(new Buffer(new Uint8Array(buffer)));
 			this.push(null); // ends stream

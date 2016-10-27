@@ -20,8 +20,8 @@ export default class VolumeAction extends VolumeBasedController {
 	protected processVolume(query: any, vol: DicomVolume, res: http.ServerResponse): void {
 		let z: number = 0;
 		let zmax: number = vol.getDimension()[2];
-		let out = new stream.Readable();
-		out._read = function(size) {
+		let out: any = new stream.Readable();
+		out._read = function(size): void {
 			if (z >= zmax) {
 				this.push(null); // ends stream
 				return;

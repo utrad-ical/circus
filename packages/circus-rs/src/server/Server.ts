@@ -54,7 +54,7 @@ class Server {
 			});
 			this.server.on('error', err => {
 				logger.error('Server error occurred.');
-				logger.error(err);
+				logger.error(err.message);
 				loggerShutdown(() => process.exit(1));
 			});
 			this.server.listen(this.config.port);

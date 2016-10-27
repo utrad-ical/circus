@@ -1,20 +1,14 @@
 import { ImageSource } from './image-source';
-import { ViewState } from '../view-state';
+import { ViewState, ViewWindow } from '../view-state';
 import { Viewer } from '../viewer/viewer';
 import { createOrthogonalMprSection } from '../section-util';
 import { Vector2D, Vector3D } from '../../common/geometry';
 
 export interface DicomMetadata {
-	dicomWindow?: {
-		level: number;
-		width: number;
-	};
-	estimatedWindow?: {
-		level: number;
-		width: number;
-	};
-	voxelCount?: [ number, number, number ];
-	voxelSize: [ number, number, number ];
+	dicomWindow?: ViewWindow;
+	estimatedWindow?: ViewWindow;
+	voxelCount?: Vector3D;
+	voxelSize: Vector3D;
 	pixelFormat?: number;
 }
 
@@ -62,25 +56,31 @@ export abstract class VolumeImageSource extends ImageSource {
 		];
 	}
 
+	/**
+	 * Fetches the MPR image via scan() and builds a canvas-compatible
+	 * ImageData.
+	 * @param viewer
+	 * @param viewState
+	 * @returns {Promise<ImageData>}
+	 */
 	public draw(viewer: Viewer, viewState: ViewState): Promise<ImageData> {
 		const context = viewer.canvas.getContext('2d');
 		const resolution = viewer.getResolution();
 
 		return this.scan(viewState, resolution)
 		.then(buffer => {
+			if (!buffer || buffer.byteLength !== resolution[0] * resolution[1]) {
+				throw TypeError('Scanned data is broken');
+			}
 			const imageData = context.createImageData(resolution[0], resolution[1]);
 			const pixelData = imageData.data;
-			let srcIdx = 0, pixel, dstIdx;
-			for (let y = 0; y < resolution[1]; y++) {
-				for (let x = 0; x < resolution[0]; x++) {
-					pixel = buffer[srcIdx];
-					dstIdx = srcIdx << 2; // meaning multiply 4
-					pixelData[dstIdx] = pixel;
-					pixelData[dstIdx + 1] = pixel;
-					pixelData[dstIdx + 2] = pixel;
-					pixelData[dstIdx + 3] = 0xff;
-					srcIdx++;
-				}
+			for (let srcIdx = 0; srcIdx < resolution[0] * resolution[1]; srcIdx++) {
+				const pixel = buffer[srcIdx];
+				const dstIdx = srcIdx * 4;
+				pixelData[dstIdx] = pixel;
+				pixelData[dstIdx + 1] = pixel;
+				pixelData[dstIdx + 2] = pixel;
+				pixelData[dstIdx + 3] = 0xff;
 			}
 			return imageData;
 		});

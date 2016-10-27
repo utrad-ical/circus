@@ -5,6 +5,8 @@ import { RsHttpLoaderImageSource } from '../../browser/image-source/rs-http-load
 import { ViewState } from '../view-state';
 import { convertSectionToIndex } from '../section-util';
 import { Vector2D, Section } from '../../common/geometry';
+import AsyncLruCache from '../../common/AsyncLruCache';
+import { RsHttpClient } from '../http-client/rs-http-client';
 
 import setImmediate from '../util/set-immediate';
 
@@ -14,7 +16,41 @@ import setImmediate from '../util/set-immediate';
  */
 export class RawVolumeImageSource extends RsHttpLoaderImageSource {
 
+	/**
+	 * Cache of DicomVolume, used to share large volume data across multiple instances.
+	 */
+	private static sharedCache: AsyncLruCache<DicomVolume>;
+
 	private volume: DicomVolume;
+
+	/**
+	 * Loader function passed to the AsyncLruCache.
+	 */
+	private static loadVolume(series: string, meta: DicomMetadata, loader: RsHttpClient): Promise<DicomVolume> {
+		return loader.request('volume', { series }, 'arraybuffer')
+			.then(buffer => {
+				const volume = new DicomVolume();
+				const pixelFormat: PixelFormat = meta.pixelFormat;
+				volume.setDimension(meta.voxelCount[0], meta.voxelCount[1], meta.voxelCount[2], pixelFormat);
+				volume.setVoxelDimension(meta.voxelSize[0], meta.voxelSize[1], meta.voxelSize[2]);
+				volume.dcm_wl = meta.dicomWindow.level;
+				volume.dcm_ww = meta.dicomWindow.width;
+				volume.wl = meta.estimatedWindow.level;
+				volume.ww = meta.estimatedWindow.width;
+				const bytesPerSlice = meta.voxelCount[0] * meta.voxelCount[1] * pixelFormatInfo(pixelFormat).bpp;
+				for (let i = 0; i < meta.voxelCount[2]; i++) {
+					volume.insertSingleImage(i, buffer.slice(bytesPerSlice * i, bytesPerSlice * (i + 1)));
+				}
+				return volume;
+			});
+	}
+
+	constructor({ client = null, series = null } = {}) {
+		super({ client, series });
+		if (!RawVolumeImageSource.sharedCache) {
+			RawVolumeImageSource.sharedCache = new AsyncLruCache(RawVolumeImageSource.loadVolume);
+		}
+	}
 
 	protected scan(viewState: ViewState, outSize: Vector2D): Promise<Uint8Array> {
 		const imageBuffer = new Uint8Array(outSize[0] * outSize[1]);
@@ -42,28 +78,9 @@ export class RawVolumeImageSource extends RsHttpLoaderImageSource {
 		// return Promise.resolve(imageBuffer);
 	}
 
-	private loadVolume(series: string, meta: DicomMetadata): Promise<DicomVolume> {
-		return this.loader.request('volume', { series }, 'arraybuffer')
-			.then(buffer => {
-				const volume = new DicomVolume();
-				const pixelFormat: PixelFormat = meta.pixelFormat;
-				volume.setDimension(meta.voxelCount[0], meta.voxelCount[1], meta.voxelCount[2], pixelFormat);
-				volume.setVoxelDimension(meta.voxelSize[0], meta.voxelSize[1], meta.voxelSize[2]);
-				volume.dcm_wl = meta.dicomWindow.level;
-				volume.dcm_ww = meta.dicomWindow.width;
-				volume.wl = meta.estimatedWindow.level;
-				volume.ww = meta.estimatedWindow.width;
-				const bytesPerSlice = meta.voxelCount[0] * meta.voxelCount[1] * pixelFormatInfo(pixelFormat).bpp;
-				for (let i = 0; i < meta.voxelCount[2]; i++) {
-					volume.insertSingleImage(i, buffer.slice(bytesPerSlice * i, bytesPerSlice * (i + 1)));
-				}
-				return volume;
-			});
-	}
-
 	protected onMetaLoaded(): Promise<void> {
 		// Loads the entire volume, which can take many seconds
-		return this.loadVolume(this.series, this.meta)
+		return RawVolumeImageSource.sharedCache.get(this.series, this.meta, this.loader)
 			.then(volume => this.volume = volume);
 	}
 

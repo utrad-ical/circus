@@ -5,22 +5,24 @@ interface LruEntry<T> {
 	time: Date;
 }
 
-interface Options<T> {
+export interface AsyncLruCacheOptions<T> {
 	maxCount?: number;
 	maxLife?: number; // in seconds
 	maxSize?: number; // in bytes
 	sizeFunc?: (T) => number;
 }
 
-type LoaderFunc<T> = (key: string) => Promise<T>;
+type LoaderFunc<T> = (key: string, ...context) => Promise<T>;
 
 /**
  * AsyncLruCache is an asynchronous key-value container class
  * which has the following features.
- * 1) Keys are strings.
- * 2) Values are always returned via promises.
- * 3) Automatically removes contents using three types of limits
+ *
+ * 1. Keys are strings.
+ * 2. Values are always returned via promises.
+ * 3. Automatically removes contents using three types of limits
  *    (number of items, total size, life)
+ *
  * To use this class you have to pass a loader function to the constructor.
  * The loader function must take a key as an argument and return a Promise
  * that will resolve with the corresponding loaded item.
@@ -30,17 +32,17 @@ export default class AsyncLruCache<T> {
 	private lru: LruEntry<T>[] = [];
 	private pendings: {[key: string]: [Function, Function][]} = {};
 	private loader: LoaderFunc<T>;
-	private options: Options<T>;
+	private options: AsyncLruCacheOptions<T>;
 	private totalSize: number = 0;
 
-	private defaultOptions: Options<T> = {
+	private defaultOptions: AsyncLruCacheOptions<T> = {
 		maxCount: 10,
 		maxLife: -1,
 		maxSize: -1,
 		sizeFunc: (item: T): number => 1
 	};
 
-	constructor(loader: LoaderFunc<T>, options?: Options<T>) {
+	constructor(loader: LoaderFunc<T>, options?: AsyncLruCacheOptions<T>) {
 		this.loader = loader;
 		this.options = this.defaultOptions;
 		if (typeof options === 'object') {
@@ -79,8 +81,11 @@ export default class AsyncLruCache<T> {
 	/**
 	 * Asynchronously returns the specified item using a Promise.
 	 * When a new key is passed, the loader function will be triggered.
+	 * @param key The string key of the item wanted.
+	 * @param context Optional parameters passed to the loader function.
+	 * @return The resulting item, wrapped with a Promise.
 	 */
-	public get(key: string): Promise<T> {
+	public get(key: string, ...context): Promise<T> {
 		// If already pending, just register callback
 		if (key in this.pendings) {
 			return new Promise<T>((resolve, reject) => {
@@ -94,9 +99,9 @@ export default class AsyncLruCache<T> {
 			return Promise.resolve(item);
 		}
 		// If not, start loading it using the loader function
-		this.loader(key).then(
+		this.loader(key, ...context).then(
 			(loaded: T) => {
-				let size = this.options.sizeFunc(loaded);
+				const size = this.options.sizeFunc(loaded);
 				this.lru.push({key, item: loaded, size, time: new Date()});
 				this.totalSize += size;
 				this.truncate();
@@ -131,16 +136,16 @@ export default class AsyncLruCache<T> {
 	public remove(key: string): void {
 		// If in pending, forget reject it and forget the callback
 		if (key in this.pendings) {
-			let callbacks = this.pendings[key];
+			const callbacks = this.pendings[key];
 			delete this.pendings[key];
 			if (!callbacks) return; // ignore cancelled pendings
-			let err = new Error('Cancelled');
+			const err = new Error('Cancelled');
 			callbacks.forEach(funcs => funcs[1](err));
 		}
 		// If already loaded, remove it
-		let index = this.indexOf(key);
+		const index = this.indexOf(key);
 		if (index >= 0) {
-			let item = this.lru.splice(index, 1)[0];
+			const item = this.lru.splice(index, 1)[0];
 			this.totalSize -= item.size;
 		}
 	}
@@ -155,7 +160,7 @@ export default class AsyncLruCache<T> {
 
 	protected shift(): T {
 		if (this.lru.length > 0) {
-			let shifted = this.lru[0];
+			const shifted = this.lru[0];
 			this.remove(shifted.key);
 			return shifted.item;
 		}
@@ -179,10 +184,11 @@ export default class AsyncLruCache<T> {
 	 * but it's possible to call this manually.
 	 */
 	public checkTtl(): void {
-		let now = (new Date()).getTime();
-		let maxLife = this.options.maxLife * 1000;
+		const now = (new Date()).getTime();
+		const maxLife = this.options.maxLife * 1000;
 		if (maxLife <= 0) return;
 		while (this.lru.length > 0 && now - this.lru[0].time.getTime() > maxLife) {
+			this.shift();
 			this.shift();
 		}
 	}

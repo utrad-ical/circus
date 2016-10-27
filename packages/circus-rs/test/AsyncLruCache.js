@@ -1,3 +1,5 @@
+'use strict';
+
 var assert = require('chai').assert;
 var AsyncLruCache = require('../lib/common/AsyncLruCache').default;
 
@@ -112,6 +114,19 @@ describe('AsyncLruCache', function() {
 					assert.equal(cache.getAt(1), foo);
 				});
 			});
+		});
+
+		it('must handle context', function(done) {
+			var cache = new AsyncLruCache(function(key, ctx) {
+				return Promise.resolve(key + key.toUpperCase() + ctx);
+			});
+			Promise.all([cache.get('foo', 'a'), cache.get('bar', 'b')])
+				.then(function(results) {
+					check(done, function() {
+						assert.equal(results[0], 'fooFOOa');
+						assert.equal(results[1], 'barBARb');
+					});
+				})
 		});
 	});
 

@@ -6,6 +6,7 @@
     "test": "mocha",
     "docs": "jekyll build --source=./docs --dest=./docs/_site && cp -r ./dist ./docs/_site"
   },
+  "repository": "https://github.com/utrad-ical/circus-rs",
   "license": "MIT",
   "dependencies": {
     "dicom-parser": "^1.2.0",

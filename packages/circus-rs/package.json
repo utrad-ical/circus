@@ -9,6 +9,7 @@
   "license": "MIT",
   "dependencies": {
     "dicom-parser": "^1.2.0",
+    "express": "^4.14.0",
     "finalhandler": "^0.4.0",
     "forever": "^0.14.1",
     "gl-matrix": "^2.3.1",
@@ -22,6 +23,10 @@
     "validator": "^3.41.2"
   },
   "devDependencies": {
+    "@types/express": "^4.0.33",
+    "@types/log4js": "0.0.32",
+    "@types/node": "^6.0.46",
+    "@types/validator": "^5.7.34",
     "axios": "^0.14.0",
     "benchmark": "^1.0.0",
     "browserify": "^13.0.0",
@@ -32,7 +37,7 @@
     "gulp-iconfont": "^5.0.1",
     "gulp-less": "^3.0.3",
     "gulp-tslint": "^4.3.1",
-    "gulp-typescript": "^2.13.6",
+    "gulp-typescript": "^3.1.2",
     "gulp-uglify": "^1.5.1",
     "merge": "^1.2.0",
     "mocha": "^2.3.3",
@@ -40,7 +45,7 @@
     "stream-buffers": "^2.2.0",
     "supertest": "^1.1.0",
     "tslint": "^3.3.0",
-    "typescript": "^2.0.0",
+    "typescript": "^2.0.8",
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "^1.1.0"
   }

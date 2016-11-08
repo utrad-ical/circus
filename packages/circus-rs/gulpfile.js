@@ -19,12 +19,12 @@ gulp.task('watch', ['browserify', 'dist-browser-css'], function() {
 });
 
 gulp.task('typescript', function() {
-	var project = typescript.createProject(
+	var tsproject = typescript.createProject(
 		'src/tsconfig.json',
 		{ typescript: require('typescript') } // uses TypeScript 2.0
 	);
 	return gulp.src('src/**/*.ts')
-		.pipe(typescript(project))
+		.pipe(tsproject())
 		.pipe(gulp.dest('lib'));
 });
 

@@ -1,13 +1,10 @@
-import logger, { shutdown as loggerShutdown } from './Logger';
-logger.info('================================');
-logger.info('CIRCUS RS is starting up...');
-
 import Counter from './Counter';
 import ImageEncoder from './image-encoders/ImageEncoder';
 
 import DicomVolume from '../common/DicomVolume';
 import AsyncLruCache from '../common/AsyncLruCache';
 
+import Logger from './loggers/Logger';
 import DicomDumper from './dicom-dumpers/DicomDumper';
 import DicomFileRepository from './dicom-file-repository/DicomFileRepository';
 import AuthorizationCache from './AuthorizationCache';
@@ -22,7 +19,7 @@ import { Configuration } from './Configuration';
  */
 export default class Server {
 	// injected modules
-
+	protected logger: Logger;
 	protected imageEncoder: ImageEncoder;
 	protected dicomFileRepository: DicomFileRepository;
 	protected dicomDumper: DicomDumper;
@@ -35,13 +32,16 @@ export default class Server {
 	public loadedModuleNames: string[] = [];
 
 	constructor(
+		logger: Logger,
 		imageEncoder: ImageEncoder,
 		dicomFileRepository: DicomFileRepository,
 		dicomDumper: DicomDumper,
 		config: Configuration
 	) {
+		this.logger = logger;
+		this.loadedModuleNames.push((logger.constructor as any).name); // 'name' is ES6 feature
 		this.imageEncoder = imageEncoder;
-		this.loadedModuleNames.push((imageEncoder.constructor as any).name); // 'name' is ES6 feature
+		this.loadedModuleNames.push((imageEncoder.constructor as any).name);
 		this.dicomFileRepository = dicomFileRepository;
 		this.loadedModuleNames.push((dicomFileRepository.constructor as any).name);
 		this.dicomDumper = dicomDumper;
@@ -63,13 +63,13 @@ export default class Server {
 			this.express.locals.loadedModuleNames = this.loadedModuleNames;
 			this.prepareRouter();
 			this.server = this.express.listen(this.config.port, () => {
-				logger.info('Server running on port ' + this.config.port);
+				this.logger.info('Server running on port ' + this.config.port);
 			});
 		} catch (e) {
 			console.error(e);
-			logger.error(e);
+			this.logger.error(e);
 			// This guarantees all the logs are flushed before actually exiting the program
-			loggerShutdown(() => process.exit(1));
+			this.logger.shutdown().then(() => process.exit(1));
 		}
 	}
 
@@ -119,9 +119,9 @@ export default class Server {
 
 		routes.forEach(route => {
 			const [routeName, moduleName, needsAuth] = route;
-			logger.info(`Preparing ${moduleName} controller...`);
+			this.logger.info(`Preparing ${moduleName} controller...`);
 			const module: typeof Controller = require(`./controllers/${moduleName}`).default;
-			const controller = new module(this.dicomReader, this.imageEncoder);
+			const controller = new module(this.logger, this.dicomReader, this.imageEncoder);
 
 			const execute = (req, res) => {
 				this.counter.countUp(routeName);

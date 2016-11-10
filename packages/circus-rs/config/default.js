@@ -23,14 +23,19 @@ module.exports = {
 	// server port number
 	"port": 3000,
 
-	// Log configurations. See log4js-node.
-	"logs": [
-		{
-			"type": "dateFile",
-			"filename": path.resolve(__dirname, "../logs/debug.log"),
-			"pattern": "-yyyyMMdd.log"
+	// Logger configurations
+	"logger": {
+		"module": "Log4JsLogger",
+		"options": {
+			"appenders": [
+				{
+					"type": "dateFile",
+					"filename": path.resolve(__dirname, "../logs/debug.log"),
+					"pattern": "-yyyyMMdd.log"
+				}
+			]
 		}
-	],
+	},
 
 	// DICOM loader
 	"dumper": {

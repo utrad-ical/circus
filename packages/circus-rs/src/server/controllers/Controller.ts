@@ -1,7 +1,7 @@
 import * as url from 'url';
+import Logger from '../loggers/Logger';
 import ImageEncoder from '../image-encoders/ImageEncoder';
 import * as express from 'express';
-import logger from '../Logger';
 import AsyncLruCache from '../../common/AsyncLruCache';
 import RawData from '../../common/RawData';
 import { Validator, ValidatorRules } from '../../common/Validator';
@@ -13,10 +13,12 @@ import * as stream from 'stream';
  */
 export default class Controller {
 
+	protected logger: Logger;
 	protected reader: AsyncLruCache<RawData>;
 	protected imageEncoder: ImageEncoder;
 
-	constructor(reader: AsyncLruCache<RawData>, imageEncoder: ImageEncoder) {
+	constructor(logger: Logger, reader: AsyncLruCache<RawData>, imageEncoder: ImageEncoder) {
+		this.logger = logger;
 		this.reader = reader;
 		this.imageEncoder = imageEncoder;
 		this.initialize();
@@ -128,7 +130,7 @@ export default class Controller {
 	}
 
 	protected respondError(status: number, res: express.Response, message: string): void {
-		logger.warn(message);
+		this.logger.warn(message);
 		let err = {result: 'ng', message: message};
 		this.respondJsonWithStatus(status, res, err);
 	}

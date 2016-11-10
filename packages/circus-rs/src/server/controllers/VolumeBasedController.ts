@@ -1,7 +1,6 @@
 import * as express from 'express';
 import Controller from './Controller';
 import DicomVolume from '../../common/DicomVolume';
-import logger from '../Logger';
 
 /**
  * VolumeBasedController is a base class of controllers
@@ -22,12 +21,12 @@ export default class VolumeBasedController extends Controller {
 			try {
 				this.processVolume(query, vol, res);
 			} catch (e) {
-				if ('stack' in e) logger.info(e.stack);
+				if ('stack' in e) this.logger.info(e.stack);
 				this.respondInternalServerError(res, e.toString());
 			}
 		}).catch(err => {
 			this.respondNotFound(res, 'Error while loading a series');
-			logger.error(err.toString());
+			this.logger.error(err.toString());
 		});
 	}
 

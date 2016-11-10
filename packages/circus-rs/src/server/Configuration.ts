@@ -4,9 +4,9 @@ export interface ModuleDefinition {
 }
 
 export interface Configuration {
-	logs?: any[];
-
 	port?: number;
+
+	logger?: ModuleDefinition;
 
 	dicomFileRepository?: ModuleDefinition;
 

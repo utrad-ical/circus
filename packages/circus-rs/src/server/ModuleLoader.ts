@@ -1,6 +1,7 @@
 import { ModuleDefinition } from './Configuration';
 
 export enum ModuleType {
+	Logger,
 	DicomFileRepository,
 	ImageEncoder,
 	DicomDumper
@@ -14,6 +15,7 @@ export function loadModule(moduleType: ModuleType, descriptor?: ModuleDefinition
 	} else {
 		// Load built-in modules
 		const dir = {
+			[ModuleType.Logger]: './loggers/',
 			[ModuleType.DicomFileRepository]: './dicom-file-repository/',
 			[ModuleType.ImageEncoder]: './image-encoders/',
 			[ModuleType.DicomDumper]: './dicom-dumpers/'

@@ -3,7 +3,6 @@ import * as express from 'express';
 import { STATUS_CODES } from 'http';
 import AuthorizationCache from '../AuthorizationCache';
 import * as crypt from 'crypto';
-import logger from '../Logger';
 import { ValidatorRules } from '../../common/Validator';
 
 /**
@@ -26,7 +25,7 @@ export default class RequestAccessTokenAction extends Controller {
 	public execute(req: express.Request, res: express.Response): void {
 		let ip = req.connection.remoteAddress;
 		if (!ip.match(this.allowFrom)) {
-			logger.info('401 error');
+			this.logger.info('401 error');
 			res.writeHead(401, STATUS_CODES[401]);
 			res.write(STATUS_CODES[401]);
 			res.end();

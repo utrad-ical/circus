@@ -10,7 +10,7 @@ var config = {
 		options: { dataDir: __dirname, useHash: false }
 	},
 	port: 1024,
-	logs: [],
+	logger: { module: "NullLogger" },
 	dumper: { module: "MockDicomDumper", options: { depth: 5 } },
 	imageEncoder: { module: "ImageEncoder_pngjs", options: {} },
 	cache: { memoryThreshold: 2147483648 },
@@ -32,6 +32,7 @@ describe('Server', function() {
 			beforeEach(function(done) {
 				config.authorization.require = useAuth;
 				server = new Server(
+					moduleLoader.loadModule(moduleLoader.ModuleType.Logger, config.logger),
 					moduleLoader.loadModule(moduleLoader.ModuleType.ImageEncoder, config.imageEncoder),
 					moduleLoader.loadModule(moduleLoader.ModuleType.DicomFileRepository, config.dicomFileRepository),
 					moduleLoader.loadModule(moduleLoader.ModuleType.DicomDumper, config.dumper),

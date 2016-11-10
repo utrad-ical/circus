@@ -1,6 +1,5 @@
 import * as express from 'express';
 import * as url from 'url';
-import logger from './Logger';
 
 interface AuthorizationInfo {
 	[token: string]: Date;
@@ -64,10 +63,10 @@ export default class AuthorizationCache {
 			}
 			token = t[1];
 		} else {
-			logger.warn('Authorization http header.');
+			// logger.warn('Authorization http header.');
 		}
 		if (series == null || token == null) {
-			logger.debug('series or token is null');
+			// logger.debug('series or token is null');
 			return false;
 		}
 
@@ -76,7 +75,7 @@ export default class AuthorizationCache {
 		let date: Date = this.cache[key];
 
 		if (date == null) {
-			logger.debug('token not found');
+			// logger.debug('token not found');
 			return false;
 		}
 
@@ -84,7 +83,7 @@ export default class AuthorizationCache {
 			this.update(series, token);
 			return true;
 		}
-		logger.debug('token expired');
+		// logger.debug('token expired');
 		delete this.cache[key];
 		return false;
 	}

@@ -10,12 +10,12 @@ export default class Logger {
 		// do nothing
 	}
 
-	public trace(any): void { /* do nothing */ }
-	public debug(any): void { /* do nothing */ }
-	public info(any): void { /* do nothing */ }
-	public warn(any): void { /* do nothing */ }
-	public error(any): void { /* do nothing */ }
-	public fatal(any): void { /* do nothing */ }
+	public trace(message?: any, ...optionalParams: any[]): void { /* do nothing */ }
+	public debug(message?: any, ...optionalParams: any[]): void { /* do nothing */ }
+	public info(message?: any, ...optionalParams: any[]): void { /* do nothing */ }
+	public warn(message?: any, ...optionalParams: any[]): void { /* do nothing */ }
+	public error(message?: any, ...optionalParams: any[]): void { /* do nothing */ }
+	public fatal(message?: any, ...optionalParams: any[]): void { /* do nothing */ }
 
 	public shutdown(): Promise<void> {
 		return Promise.resolve();

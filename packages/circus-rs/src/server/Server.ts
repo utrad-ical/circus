@@ -47,6 +47,9 @@ export default class Server {
 		this.dicomDumper = dicomDumper;
 		this.loadedModuleNames.push((dicomDumper.constructor as any).name);
 		this.config = config;
+
+		this.logger.info('Modules loaded: ', this.loadedModuleNames.join(', '));
+
 		this.counter = new Counter();
 	}
 
@@ -54,23 +57,29 @@ export default class Server {
 		return this.server;
 	}
 
-	public start(): void {
+	public start(): Promise<string> {
 		// prepare routing
-		try {
-			// create server process
-			this.express = express();
-			this.express.locals.counter = this.counter;
-			this.express.locals.loadedModuleNames = this.loadedModuleNames;
-			this.prepareRouter();
-			this.server = this.express.listen(this.config.port, () => {
-				this.logger.info('Server running on port ' + this.config.port);
-			});
-		} catch (e) {
-			console.error(e);
-			this.logger.error(e);
-			// This guarantees all the logs are flushed before actually exiting the program
-			this.logger.shutdown().then(() => process.exit(1));
-		}
+		return new Promise((resolve, reject) => {
+			try {
+				// create server process
+				this.express = express();
+				this.express.locals.counter = this.counter;
+				this.express.locals.loadedModuleNames = this.loadedModuleNames;
+				this.prepareRouter();
+				const port = this.config.port;
+				this.server = this.express.listen(port, () => {
+					const message = `Server running on port ${port}`;
+					this.logger.info(message);
+					resolve(message);
+				});
+			} catch (e) {
+				console.error(e);
+				this.logger.error(e);
+				// This guarantees all the logs are flushed before actually exiting the program
+				this.logger.shutdown().then(() => process.exit(1));
+				reject(e);
+			}
+		});
 	}
 
 	public close(): Promise<void> {

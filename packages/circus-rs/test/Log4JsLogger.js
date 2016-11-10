@@ -15,7 +15,12 @@ describe('Log4JsLogger', function() {
 				filename: file
 			}]
 		});
+		logger.trace('foobar');
+		logger.debug('foobar');
 		logger.info('foobar');
+		logger.warn('foobar');
+		logger.error('foobar');
+		logger.fatal('foobar');
 		logger.shutdown().then(() => {
 			try {
 				assert.isTrue(fs.existsSync(file));

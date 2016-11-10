@@ -2,6 +2,8 @@
  * CIRCUS RS
  */
 
+'use strict';
+
 console.log('CIRCUS RS is starting up...');
 
 // Load configuration
@@ -20,4 +22,9 @@ var server = new Server(
 	config
 );
 
-server.start();
+server.start().then(function(message) {
+	console.log(message);
+}).catch(function(err) {
+	console.error('Server failed to start');
+	console.error(err);
+});

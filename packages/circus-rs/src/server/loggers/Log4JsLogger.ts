@@ -15,31 +15,31 @@ export default class Log4JsLogger extends Logger {
 		this.logger = log4js.getLogger();
 	}
 
-	public trace(any): void {
+	public trace(message?: any, ...optionalParams: any[]): void {
 		this.logger.trace.apply(this.logger, arguments);
 	}
 
-	public debug(any): void {
+	public debug(message?: any, ...optionalParams: any[]): void {
 		this.logger.debug.apply(this.logger, arguments);
 	}
 
-	public info(any): void {
+	public info(message?: any, ...optionalParams: any[]): void {
 		this.logger.info.apply(this.logger, arguments);
 	}
 
-	public warn(any): void {
+	public warn(message?: any, ...optionalParams: any[]): void {
 		this.logger.warn.apply(this.logger, arguments);
 	}
 
-	public error(any): void {
+	public error(message?: any, ...optionalParams: any[]): void {
 		this.logger.error.apply(this.logger, arguments);
 	}
 
-	public fatal(any): void {
+	public fatal(message?: any, ...optionalParams: any[]): void {
 		this.logger.fatal.apply(this.logger, arguments);
 	}
 
-	public 	shutdown(): Promise<void> {
+	public shutdown(): Promise<void> {
 		return new Promise(resolve => log4js.shutdown(resolve));
 	}
 

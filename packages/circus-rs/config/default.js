@@ -31,7 +31,8 @@ module.exports = {
 				{
 					"type": "dateFile",
 					"filename": path.resolve(__dirname, "../logs/debug.log"),
-					"pattern": "-yyyyMMdd.log"
+					"pattern": "-yyyyMMdd.log",
+					"alwaysIncludePattern": true
 				}
 			]
 		}

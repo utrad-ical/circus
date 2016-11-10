@@ -11,7 +11,6 @@ import AsyncLruCache from '../common/AsyncLruCache';
 import DicomDumper from './dicom-dumpers/DicomDumper';
 import DicomFileRepository from './dicom-file-repository/DicomFileRepository';
 import AuthorizationCache from './AuthorizationCache';
-import TokenAuthenticationBridge from './controllers/TokenAuthenticationBridge';
 import Controller from './controllers/Controller';
 
 import * as http from 'http';
@@ -120,24 +119,48 @@ export default class Server {
 
 		routes.forEach(route => {
 			const [routeName, moduleName, needsAuth] = route;
-			logger.info(`Loading ${moduleName} module...`);
+			logger.info(`Preparing ${moduleName} controller...`);
 			const module: typeof Controller = require(`./controllers/${moduleName}`).default;
-			let controller = new module(this.dicomReader, this.imageEncoder);
+			const controller = new module(this.dicomReader, this.imageEncoder);
 
-			// If token authorization is required, use this middleware
-			if (config.authorization.require && needsAuth) {
-				controller = new TokenAuthenticationBridge(
-					controller, authorizationCache, this.dicomReader, this.imageEncoder);
-			}
-
-			this.express.get('/' + routeName, (req, res) => {
+			const execute = (req, res) => {
 				this.counter.countUp(routeName);
 				controller.execute(req, res);
-			});
+			};
+
+			if (needsAuth) {
+				this.express.get(`/${routeName}`, this.tokenAuthenticationMiddleware.bind(this), execute);
+			} else {
+				this.express.get(`/${routeName}`, execute);
+			}
 			// CrossOrigin Resource Sharing http://www.w3.org/TR/cors/
-			this.express.options('/' + routeName, (req, res) => {
-				controller.options(req, res);
-			});
+			this.express.options(`/${routeName}`, (req, res) => controller.options(req, res));
 		});
 	}
+
+	/**
+	 * An Express middleware function that blocks unauthorized requests
+	 */
+	private tokenAuthenticationMiddleware(
+		req: express.Request, res: express.Response, next: express.NextFunction
+	): void {
+
+		if (!this.config.authorization.require) {
+			next();
+			return;
+		}
+
+		const authorizationCache = req.app.locals.authorizationCache;
+		if (!authorizationCache.isValid(req)) {
+			res.setHeader('WWW-Authenticate', 'Bearer realm="CircusRS"');
+			res.writeHead(401, http.STATUS_CODES[401]);
+			res.write('Access denied.');
+			res.end();
+			return;
+		} else {
+			next();
+		}
+	}
+
+
 }

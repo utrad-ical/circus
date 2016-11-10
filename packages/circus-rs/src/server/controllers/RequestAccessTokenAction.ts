@@ -1,5 +1,6 @@
 import Controller from './Controller';
-import * as http from 'http';
+import * as express from 'express';
+import { STATUS_CODES } from 'http';
 import AuthorizationCache from '../AuthorizationCache';
 import * as crypt from 'crypto';
 import logger from '../Logger';
@@ -23,19 +24,19 @@ export default class RequestAccessTokenAction extends Controller {
 		};
 	}
 
-	public execute(req: http.ServerRequest, res: http.ServerResponse): void {
+	public execute(req: express.Request, res: express.Response): void {
 		let ip = req.connection.remoteAddress;
 		if (!ip.match(this.allowFrom)) {
 			logger.info('401 error');
-			res.writeHead(401, http.STATUS_CODES[401]);
-			res.write(http.STATUS_CODES[401]);
+			res.writeHead(401, STATUS_CODES[401]);
+			res.write(STATUS_CODES[401]);
 			res.end();
 			return;
 		}
 		super.execute(req, res);
 	}
 
-	protected process(query: any, res: http.ServerResponse): void {
+	protected process(query: any, req: express.Request, res: express.Response): void {
 		let series: string = query.series;
 
 		crypt.randomBytes(48, (err, buf) => {

@@ -1,4 +1,4 @@
-import * as http from 'http';
+import * as express from 'express';
 import * as url from 'url';
 import logger from './Logger';
 
@@ -47,7 +47,7 @@ export default class AuthorizationCache {
 	 * @param req HTTP request. 'series' query parameter and X-CircusRs-AccessToken http header needed.
 	 * @returns {boolean}
 	 */
-	public isValid(req: http.ServerRequest): boolean {
+	public isValid(req: express.Request): boolean {
 		let query = url.parse(req.url, true).query;
 		let token: string;
 		let series: string;
@@ -57,7 +57,7 @@ export default class AuthorizationCache {
 		}
 
 		if ('authorization' in req.headers) {
-			token = req.headers.authorization;
+			token = req.headers['authorization'];
 			let t = token.split(' ');
 			if (t[0].toLowerCase() !== 'bearer') {
 				return false;

@@ -1,4 +1,4 @@
-import * as http from 'http';
+import * as express from 'express';
 import Controller from './Controller';
 import DicomVolume from '../../common/DicomVolume';
 import logger from '../Logger';
@@ -8,7 +8,7 @@ import logger from '../Logger';
  * which need DICOM volume (as DicomVolume) specified by the 'series' query parameter.
  */
 export default class VolumeBasedController extends Controller {
-	protected process(query: any, res: http.ServerResponse): void {
+	protected process(query: any, req: express.Request, res: express.Response): void {
 		let series: string = null;
 		if ('series' in query) {
 			series = query.series;
@@ -32,7 +32,7 @@ export default class VolumeBasedController extends Controller {
 	}
 
 	protected processVolume(
-		query: any, vol: DicomVolume, res: http.ServerResponse
+		query: any, vol: DicomVolume, res: express.Response
 	): void {
 		// Abstract.
 		// In this method, `vol` is guaranteed to have valid image data.

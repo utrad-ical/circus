@@ -6,8 +6,10 @@
  *  logger.info('foo bar');
  */
 
+import { Configuration } from './configuration';
+
 import * as log4js from 'log4js';
-let config: Configuration = require('./Config');
+const config: Configuration = require('./Config') as Configuration;
 
 class Logger {
 	public static prepareLogger(): log4js.Logger {

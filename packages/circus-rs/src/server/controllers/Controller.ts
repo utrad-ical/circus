@@ -1,6 +1,6 @@
 import * as url from 'url';
 import ImageEncoder from '../image-encoders/ImageEncoder';
-import * as http from 'http';
+import * as express from 'express';
 import logger from '../Logger';
 import AsyncLruCache from '../../common/AsyncLruCache';
 import RawData from '../../common/RawData';
@@ -26,18 +26,18 @@ export default class Controller {
 		// abstract
 	}
 
-	public execute(req: http.ServerRequest, res: http.ServerResponse): void {
+	public execute(req: express.Request, res: express.Response): void {
 		let rawQuery = url.parse(req.url, true).query;
 		let validator = new Validator(this.getRules());
 		let {result, errors} = validator.validate(rawQuery);
 		if (errors.length) {
 			this.respondBadRequest(res, errors.join('\n'));
 		} else {
-			this.process(result, res);
+			this.process(result, req, res);
 		}
 	}
 
-	public options(req: http.ServerRequest, res: http.ServerResponse): void {
+	public options(req: express.Request, res: express.Response): void {
 		res.setHeader('Access-Control-Allow-Origin', '*');
 		res.setHeader('Access-Control-Allow-Methods', 'GET');
 		res.setHeader('Access-Control-Allow-Headers', 'Authorization');
@@ -45,7 +45,7 @@ export default class Controller {
 		res.end();
 	}
 
-	protected process(query: any, res: http.ServerResponse): void {
+	protected process(query: express.Request, req: express.Request, res: express.Response): void {
 		// abstract
 	}
 
@@ -81,7 +81,7 @@ export default class Controller {
 		return !(/^(0|false|f|no|)$/i.test(input));
 	}
 
-	protected respondGzippedArrayBuffer(res: http.ServerResponse, buffer: ArrayBuffer): void {
+	protected respondGzippedArrayBuffer(res: express.Response, buffer: ArrayBuffer): void {
 		let out: any = new stream.Readable();
 		out._read = function(size) {
 			this.push(new Buffer(new Uint8Array(buffer)));
@@ -90,7 +90,7 @@ export default class Controller {
 		this.respondGzippedStream(res, out);
 	}
 
-	protected respondGzippedStream(res: http.ServerResponse, stream: stream.Stream): void {
+	protected respondGzippedStream(res: express.Response, stream: stream.Stream): void {
 		res.writeHead(200, {
 			'Content-Type': 'application/octet-stream',
 			'Access-Control-Allow-Origin': '*',
@@ -100,7 +100,7 @@ export default class Controller {
 		stream.pipe(gzip).pipe(res);
 	}
 
-	protected respondImage(res: http.ServerResponse, image: Buffer, width: number, height: number): void {
+	protected respondImage(res: express.Response, image: Buffer, width: number, height: number): void {
 		res.writeHead(200, {
 			'Content-Type': this.imageEncoder.mimeType(),
 			'Access-Control-Allow-Origin': '*'
@@ -108,7 +108,7 @@ export default class Controller {
 		this.imageEncoder.write(res, image, width, height);
 	}
 
-	protected respondJsonWithStatus(status: number, res: http.ServerResponse, data: any): void {
+	protected respondJsonWithStatus(status: number, res: express.Response, data: any): void {
 		let result: string = null;
 		try {
 			result = JSON.stringify(data, null, '  ');
@@ -123,25 +123,25 @@ export default class Controller {
 		res.end();
 	}
 
-	protected respondJson(res: http.ServerResponse, data: any): void {
+	protected respondJson(res: express.Response, data: any): void {
 		this.respondJsonWithStatus(200, res, data);
 	}
 
-	protected respondError(status: number, res: http.ServerResponse, message: string): void {
+	protected respondError(status: number, res: express.Response, message: string): void {
 		logger.warn(message);
 		let err = {result: 'ng', message: message};
 		this.respondJsonWithStatus(status, res, err);
 	}
 
-	protected respondBadRequest(res: http.ServerResponse, message: string): void {
+	protected respondBadRequest(res: express.Response, message: string): void {
 		this.respondError(400, res, message);
 	}
 
-	protected respondNotFound(res: http.ServerResponse, message: string): void {
+	protected respondNotFound(res: express.Response, message: string): void {
 		this.respondError(404, res, message);
 	}
 
-	protected respondInternalServerError(res: http.ServerResponse, message: string): void {
+	protected respondInternalServerError(res: express.Response, message: string): void {
 		this.respondError(500, res, message);
 	}
 

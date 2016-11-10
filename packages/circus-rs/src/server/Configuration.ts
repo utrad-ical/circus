@@ -1,18 +1,18 @@
-interface ObjectDefinition {
+export interface ModuleDefinition {
 	module?: string;
 	options?: any;
 }
 
-interface Configuration {
+export interface Configuration {
 	logs?: any[];
 
 	port?: number;
 
-	dicomFileRepository?: ObjectDefinition;
+	dicomFileRepository?: ModuleDefinition;
 
-	dumper?: ObjectDefinition;
+	dumper?: ModuleDefinition;
 
-	imageEncoder?: ObjectDefinition;
+	imageEncoder?: ModuleDefinition;
 
 	cache?: {
 		memoryThreshold?: number;

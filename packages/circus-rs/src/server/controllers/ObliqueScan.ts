@@ -2,7 +2,7 @@ import DicomVolume from '../../common/DicomVolume';
 import VolumeBasedController from './VolumeBasedController';
 import { ValidatorRules } from '../../common/Validator';
 import { Section } from '../../common/geometry/Section';
-import * as http from 'http';
+import * as express from 'express';
 
 /**
  * Handles 'scan' endpoint which returns MPR image for
@@ -24,7 +24,7 @@ export default class ObliqueScan extends VolumeBasedController {
 		};
 	}
 
-	protected processVolume(query: any, vol: DicomVolume, res: http.ServerResponse): void {
+	protected processVolume(query: any, vol: DicomVolume, res: express.Response): void {
 		const { ww, wl, origin, xAxis, yAxis, size, interpolation, format } = query;
 
 		const useWindow = (typeof ww === 'number' && typeof wl === 'number');

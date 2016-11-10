@@ -2,7 +2,7 @@ import DicomVolume from '../../common/DicomVolume';
 import VolumeBasedController from './VolumeBasedController';
 import { ValidatorRules } from '../../common/Validator';
 
-import * as http from 'http';
+import * as express from 'express';
 import * as stream from 'stream';
 
 /**
@@ -17,7 +17,7 @@ export default class VolumeAction extends VolumeBasedController {
 		};
 	}
 
-	protected processVolume(query: any, vol: DicomVolume, res: http.ServerResponse): void {
+	protected processVolume(query: any, vol: DicomVolume, res: express.Response): void {
 		let z: number = 0;
 		let zmax: number = vol.getDimension()[2];
 		let out: any = new stream.Readable();

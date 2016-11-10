@@ -1,7 +1,5 @@
 import Controller from './Controller';
-import * as http from 'http';
-import Counter from '../Counter';
-import Server = require('../Server');
+import * as express from 'express';
 const config = require('../Config');
 let startUpTime: Date = new Date(); // The time this module was loaded
 
@@ -10,14 +8,12 @@ let startUpTime: Date = new Date(); // The time this module was loaded
  */
 export default class ServerStatus extends Controller {
 
-	public server: Server;
-
 	protected needsTokenAutorhization(): boolean {
 		return false;
 	}
 
-	public process(query: http.ServerRequest, res: http.ServerResponse): void {
-		let status = {
+	public process(query: express.Request, req: express.Request, res: express.Response): void {
+		const status = {
 			status: 'Running',
 			dicomReader: {
 				count: this.reader.length,
@@ -28,8 +24,8 @@ export default class ServerStatus extends Controller {
 				upTime: process.uptime(),
 				upSince: startUpTime.toISOString()
 			},
-			counter: this.server.counter.getCounts(),
-			loadedModules: this.server.loadeModuleNames,
+			counter: req.app.locals.counter.getCounts(),
+			loadedModules: req.app.locals.loadedModuleNames,
 			authorization: {enabled: !!config.authorization.require}
 		};
 		this.respondJson(res, status);

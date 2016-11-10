@@ -1,6 +1,3 @@
-import * as http from 'http';
-let finalhandler = require('finalhandler');
-
 import logger, { shutdown as loggerShutdown } from './Logger';
 logger.info('================================');
 logger.info('CIRCUS RS is starting up...');
@@ -17,21 +14,41 @@ import AuthorizationCache from './AuthorizationCache';
 import TokenAuthenticationBridge from './controllers/TokenAuthenticationBridge';
 import Controller from './controllers/Controller';
 
-let Router = require('router');
+import * as http from 'http';
+import * as express from 'express';
+import { Configuration } from './Configuration';
 
 /**
  * Main server class.
  */
-class Server {
+export default class Server {
+	// injected modules
+
+	protected imageEncoder: ImageEncoder;
+	protected dicomFileRepository: DicomFileRepository;
+	protected dicomDumper: DicomDumper;
+
 	public counter: Counter;
+	protected express: express.Application;
 	protected server: http.Server;
 	protected config: Configuration;
 	protected dicomReader: AsyncLruCache<DicomVolume>;
-	public loadeModuleNames: string[] = [];
+	public loadedModuleNames: string[] = [];
 
-	constructor(config: Configuration) {
+	constructor(
+		imageEncoder: ImageEncoder,
+		dicomFileRepository: DicomFileRepository,
+		dicomDumper: DicomDumper,
+		config: Configuration
+	) {
+		this.imageEncoder = imageEncoder;
+		this.loadedModuleNames.push((imageEncoder.constructor as any).name); // 'name' is ES6 feature
+		this.dicomFileRepository = dicomFileRepository;
+		this.loadedModuleNames.push((dicomFileRepository.constructor as any).name);
+		this.dicomDumper = dicomDumper;
+		this.loadedModuleNames.push((dicomDumper.constructor as any).name);
 		this.config = config;
-		this.counter = new Counter;
+		this.counter = new Counter();
 	}
 
 	public getServer(): http.Server {
@@ -41,24 +58,14 @@ class Server {
 	public start(): void {
 		// prepare routing
 		try {
-			let router = this.prepareRouter();
 			// create server process
-			this.server = http.createServer();
-			this.server.on('request', (req: http.ServerRequest, res: http.ServerResponse) => {
-				router(req, res, finalhandler(req, res, {
-					onerror: (err): void => {
-						this.counter.countUp('_error');
-						logger.info(err.toString());
-					}
-				}));
+			this.express = express();
+			this.express.locals.counter = this.counter;
+			this.express.locals.loadedModuleNames = this.loadedModuleNames;
+			this.prepareRouter();
+			this.server = this.express.listen(this.config.port, () => {
+				logger.info('Server running on port ' + this.config.port);
 			});
-			this.server.on('error', err => {
-				logger.error('Server error occurred.');
-				logger.error(err.message);
-				loggerShutdown(() => process.exit(1));
-			});
-			this.server.listen(this.config.port);
-			logger.info('Server running on port ' + this.config.port);
 		} catch (e) {
 			console.error(e);
 			logger.error(e);
@@ -80,34 +87,11 @@ class Server {
 		});
 	}
 
-	private loadModule(descriptor: any, type: string): any {
-		let module: string;
-		if (/\//.test(descriptor.module)) {
-			// Load external module if module path is explicitly set
-			module = descriptor.module;
-		} else {
-			// Load built-in modules
-			let dir = {
-				'DICOM dumper': './dicom-dumpers/',
-				'DICOM file repository': './dicom-file-repository/',
-				'image encoder': './image-encoders/'
-			}[type];
-			module = dir + descriptor.module;
-		}
-		logger.info(`Using ${type}: ${module}`);
-		let theClass = require(module).default;
-		this.loadeModuleNames.push(theClass.name);
-		return new theClass(descriptor.options || {});
-	}
-
 	private createDicomReader(): AsyncLruCache<DicomVolume> {
-		let cfg = this.config;
-		let repository: DicomFileRepository = this.loadModule(cfg.dicomFileRepository, 'DICOM file repository');
-		let dumper: DicomDumper = this.loadModule(cfg.dumper, 'DICOM dumper');
 		return new AsyncLruCache<DicomVolume>(
 			seriesUID => {
-				return repository.getSeriesLoader(seriesUID)
-					.then(loaderInfo => dumper.readDicom(loaderInfo, 'all'));
+				return this.dicomFileRepository.getSeriesLoader(seriesUID)
+					.then(loaderInfo => this.dicomDumper.readDicom(loaderInfo, 'all'));
 			},
 			{
 				maxSize: this.config.cache.memoryThreshold,
@@ -116,53 +100,44 @@ class Server {
 		);
 	}
 
-	private prepareRouter(): any {
-		let config = this.config;
-		let router = Router();
-		let imageEncoder = this.loadModule(config.imageEncoder, 'image encoder');
+	private prepareRouter(): void {
+		const config = this.config;
 		this.dicomReader = this.createDicomReader();
-		let authorizationCache = new AuthorizationCache(config.authorization);
+		const authorizationCache = new AuthorizationCache(config.authorization);
+		this.express.locals.authorizationCache = authorizationCache;
 
-		// path name, process class name, needs token authorization, additionl depts to inject
-		let routes: [string, string, boolean, any][] = [
-			['metadata', 'Metadata', true, {}],
-			['scan', 'ObliqueScan', true, {}],
-			['volume', 'VolumeAction', true, {}],
-			['status', 'ServerStatus', false, {server: this}]
+		// path name, process class name, needs token authorization
+		const routes: [string, string, boolean][] = [
+			['metadata', 'Metadata', true],
+			['scan', 'ObliqueScan', true],
+			['volume', 'VolumeAction', true],
+			['status', 'ServerStatus', false]
 		];
 
 		if (config.authorization.require) {
-			routes.push([
-				'requestToken', 'RequestAccessTokenAction', false,
-				{cache: authorizationCache, allowFrom: config.authorization.allowFrom}
-			]);
+			routes.push(['requestToken', 'RequestAccessTokenAction', false]);
 		}
 
 		routes.forEach(route => {
-			let [ routeName, moduleName, needsAuth, deps ] = route;
+			const [routeName, moduleName, needsAuth] = route;
 			logger.info(`Loading ${moduleName} module...`);
-			let module: typeof Controller = require(`./controllers/${moduleName}`).default;
-			let controller = new module(this.dicomReader, imageEncoder);
-			for (let k in deps) controller[k] = deps[k];
+			const module: typeof Controller = require(`./controllers/${moduleName}`).default;
+			let controller = new module(this.dicomReader, this.imageEncoder);
 
 			// If token authorization is required, use this middleware
 			if (config.authorization.require && needsAuth) {
 				controller = new TokenAuthenticationBridge(
-					controller, authorizationCache, this.dicomReader, imageEncoder);
+					controller, authorizationCache, this.dicomReader, this.imageEncoder);
 			}
 
-			router.get('/' + routeName, (req, res) => {
+			this.express.get('/' + routeName, (req, res) => {
 				this.counter.countUp(routeName);
 				controller.execute(req, res);
 			});
 			// CrossOrigin Resource Sharing http://www.w3.org/TR/cors/
-			router.options('/' + routeName, (req, res) => {
+			this.express.options('/' + routeName, (req, res) => {
 				controller.options(req, res);
 			});
 		});
-
-		return router;
 	}
 }
-
-export = Server;

@@ -1,5 +1,6 @@
 import Controller from './Controller';
-import * as http from 'http';
+import * as express from 'express';
+import { STATUS_CODES } from 'http';
 import ImageEncoder from '../image-encoders/ImageEncoder';
 import AsyncLruCache from '../../common/AsyncLruCache';
 import RawData from '../../common/RawData';
@@ -20,10 +21,10 @@ export default class TokenAuthenticationBridge extends Controller {
 		this.actualController = actualController;
 	}
 
-	public execute(req: http.ServerRequest, res: http.ServerResponse): void {
+	public execute(req: express.Request, res: express.Response): void {
 		if (!this.authorizationCache.isValid(req)) {
 			res.setHeader('WWW-Authenticate', 'Bearer realm="CircusRS"');
-			res.writeHead(401, http.STATUS_CODES[401]);
+			res.writeHead(401, STATUS_CODES[401]);
 			res.write('Access denied.');
 			res.end();
 			return;

@@ -1,4 +1,4 @@
-import * as http from 'http';
+import * as express from 'express';
 import DicomVolume from '../../common/DicomVolume';
 import VolumeBasedController from './VolumeBasedController';
 import { ValidatorRules } from '../../common/Validator';
@@ -15,7 +15,7 @@ export default class Metadata extends VolumeBasedController {
 		};
 	}
 
-	protected processVolume(query: any, vol: DicomVolume, res: http.ServerResponse): void {
+	protected processVolume(query: any, vol: DicomVolume, res: express.Response): void {
 		let dim = vol.getDimension();
 		let vd = vol.getVoxelDimension();
 		let response: any = {

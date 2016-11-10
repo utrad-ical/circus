@@ -1,7 +1,8 @@
-var Server = require('../lib/server/Server');
+var Server = require('../lib/server/Server').default;
 var supertest = require('supertest');
+var moduleLoader = require('../lib/server/ModuleLoader');
 
-var defaultConfig = {
+var config = {
 	dicomFileRepository: {
 		module: "StaticDicomFileRepository",
 		options: {dataDir: __dirname, useHash: false}
@@ -19,7 +20,12 @@ describe('Server', function () {
 	var httpServer;
 
 	beforeEach(function (done) {
-		server = new Server(defaultConfig);
+		server = new Server(
+			moduleLoader.loadModule(moduleLoader.ModuleType.ImageEncoder, config.imageEncoder),
+			moduleLoader.loadModule(moduleLoader.ModuleType.DicomFileRepository, config.dicomFileRepository),
+			moduleLoader.loadModule(moduleLoader.ModuleType.DicomDumper, config.dumper),
+			config
+		);
 		server.start();
 		httpServer = server.getServer();
 		httpServer.on('listening', done);

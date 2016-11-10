@@ -14,7 +14,11 @@ var config = {
 	dumper: { module: "MockDicomDumper", options: { depth: 5 } },
 	imageEncoder: { module: "ImageEncoder_pngjs", options: {} },
 	cache: { memoryThreshold: 2147483648 },
-	authorization: { require: false, allowFrom: '127.0.0.1', expire: 1800 }
+	authorization: {
+		enabled: false,
+		tokenRequestIpFilter: ['127.0.0.1', '::1', '::ffff:127.0.0.1'],
+		expire: 1800
+	}
 };
 
 describe('Server', function() {
@@ -30,7 +34,7 @@ describe('Server', function() {
 			var token;
 
 			beforeEach(function(done) {
-				config.authorization.require = useAuth;
+				config.authorization.enabled = useAuth;
 				server = new Server(
 					moduleLoader.loadModule(moduleLoader.ModuleType.Logger, config.logger),
 					moduleLoader.loadModule(moduleLoader.ModuleType.ImageEncoder, config.imageEncoder),
@@ -93,7 +97,7 @@ describe('Server', function() {
 					server.getApp().enable('trust proxy'); // Enable IP address mangling
 					supertest(httpServer)
 						.get('/token')
-						.set('X-Forwarded-For', '127.0.0.2')
+						.set('X-Forwarded-For', '127.3.4.5')
 						.expect(401)
 						.end(done);
 				});

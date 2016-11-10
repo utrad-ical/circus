@@ -23,6 +23,9 @@ module.exports = {
 	// server port number
 	"port": 3000,
 
+	// IP access control. Permits accesses from all hosts by default.
+	// "ipFilter": [["0.0.0.0", "255.255.255.255"]],
+
 	// Logger configurations
 	"logger": {
 		"module": "Log4JsLogger",
@@ -58,9 +61,12 @@ module.exports = {
  		 */
 		"memoryThreshold": 2147483648
 	},
+
+	// Enable token-based authorization.
+	// If turned off, everyone can access images when they know the series instance UID.
 	"authorization": {
-		"require": false,
-	  	"allowFrom": "127.0.0.1",
+		"enabled": false,
+	  	"tokenRequestIpFilter": ["127.0.0.1", "::1"],
 	  	"expire": 1800
 	}
 };

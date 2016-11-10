@@ -14,7 +14,7 @@ import * as http from 'http';
 import * as express from 'express';
 import { Configuration } from './Configuration';
 import { tokenAuthentication } from './auth/TokenAuthorization';
-import { ipBasedAccessControl } from './auth/IpBasedAccessControl';
+import { IpFilter as ipFilter } from 'express-ipfilter';
 
 /**
  * Main server class.
@@ -118,12 +118,16 @@ export default class Server {
 		const config = this.config;
 		this.dicomReader = this.createDicomReader();
 
-		const useAuth = !!config.authorization.require;
+		const useAuth = !!config.authorization.enabled;
 
 		const authorizationCache = new AuthorizationCache(config.authorization);
 		this.express.locals.authorizationCache = authorizationCache;
 		const tokenAuthMiddleware = useAuth ? [tokenAuthentication(authorizationCache)] : [];
-		const ipBlockerMiddleware = ipBasedAccessControl(config.authorization.allowFrom);
+
+		if (config.ipFilter) {
+			const globalIpFilter = ipFilter(config.ipFilter, { mode: 'allow', log: false });
+			this.express.use(globalIpFilter);
+		}
 
 		// path name, process class name, needs token authorization
 		const routes: [string, string, Array<express.Handler>][] = [
@@ -134,7 +138,9 @@ export default class Server {
 		];
 
 		if (useAuth) {
-			routes.push(['token', 'RequestToken', [ipBlockerMiddleware]]);
+			const filter = config.authorization.tokenRequestIpFilter;
+			const tokenRequestIpFilter = ipFilter(filter, { mode: 'allow', log: false });
+			routes.push(['token', 'RequestToken', [tokenRequestIpFilter]]);
 		}
 
 		routes.forEach(route => {

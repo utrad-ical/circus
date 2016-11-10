@@ -136,14 +136,17 @@ export default class Controller {
 	}
 
 	protected respondBadRequest(res: express.Response, message: string): void {
+		this.logger.warn(message);
 		this.respondError(400, res, message);
 	}
 
 	protected respondNotFound(res: express.Response, message: string): void {
+		this.logger.warn(message);
 		this.respondError(404, res, message);
 	}
 
 	protected respondInternalServerError(res: express.Response, message: string): void {
+		this.logger.error(message);
 		this.respondError(500, res, message);
 	}
 

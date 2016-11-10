@@ -14,7 +14,7 @@ var config = {
 	dumper: { module: "MockDicomDumper", options: { depth: 5 } },
 	imageEncoder: { module: "ImageEncoder_pngjs", options: {} },
 	cache: { memoryThreshold: 2147483648 },
-	authorization: { require: false, allowFrom: "127.0.0.1", expire: 1800 }
+	authorization: { require: false, allowFrom: '127.0.0.1', expire: 1800 }
 };
 
 describe('Server', function() {
@@ -89,6 +89,14 @@ describe('Server', function() {
 						.end(done);
 				});
 
+				it('must reject token request from invalid IP', function(done) {
+					server.getApp().enable('trust proxy'); // Enable IP address mangling
+					supertest(httpServer)
+						.get('/token')
+						.set('X-Forwarded-For', '127.0.0.2')
+						.expect(401)
+						.end(done);
+				});
 			}
 
 			it('must return metadata', function(done) {
@@ -139,6 +147,13 @@ describe('Server', function() {
 					})
 					.expect(200)
 					.expect('Content-Type', 'image/png')
+					.end(done);
+			});
+
+			it('must return 404 for nonexistent route', function(done) {
+				supertest(httpServer)
+					.get('/foobar')
+					.expect(404)
 					.end(done);
 			});
 

@@ -14,6 +14,7 @@ import * as http from 'http';
 import * as express from 'express';
 import { Configuration } from './Configuration';
 import { tokenAuthentication } from './auth/TokenAuthorization';
+import { ipBasedAccessControl } from './auth/IpBasedAccessControl';
 
 /**
  * Main server class.
@@ -56,6 +57,10 @@ export default class Server {
 
 	public getServer(): http.Server {
 		return this.server;
+	}
+
+	public getApp(): express.Application {
+		return this.express;
 	}
 
 	public start(): Promise<string> {
@@ -113,25 +118,27 @@ export default class Server {
 		const config = this.config;
 		this.dicomReader = this.createDicomReader();
 
-		// path name, process class name, needs token authorization
-		const routes: [string, string, boolean][] = [
-			['metadata', 'Metadata', true],
-			['scan', 'ObliqueScan', true],
-			['volume', 'Volume', true],
-			['status', 'ServerStatus', false]
-		];
+		const useAuth = !!config.authorization.require;
 
-		if (config.authorization.require) {
-			routes.push(['token', 'RequestToken', false]);
-		}
-
-		this.express.locals.authorization = config.authorization;
 		const authorizationCache = new AuthorizationCache(config.authorization);
 		this.express.locals.authorizationCache = authorizationCache;
-		const authMiddleware = tokenAuthentication(authorizationCache);
+		const tokenAuthMiddleware = useAuth ? [tokenAuthentication(authorizationCache)] : [];
+		const ipBlockerMiddleware = ipBasedAccessControl(config.authorization.allowFrom);
+
+		// path name, process class name, needs token authorization
+		const routes: [string, string, Array<express.Handler>][] = [
+			['metadata', 'Metadata', tokenAuthMiddleware],
+			['scan', 'ObliqueScan', tokenAuthMiddleware],
+			['volume', 'Volume', tokenAuthMiddleware],
+			['status', 'ServerStatus', []]
+		];
+
+		if (useAuth) {
+			routes.push(['token', 'RequestToken', [ipBlockerMiddleware]]);
+		}
 
 		routes.forEach(route => {
-			const [routeName, moduleName, protectedMaterial] = route;
+			const [routeName, moduleName, middleware] = route;
 			this.logger.info(`Preparing ${moduleName} controller...`);
 			const module: typeof Controller = require(`./controllers/${moduleName}`).default;
 			const controller = new module(this.logger, this.dicomReader, this.imageEncoder);
@@ -141,12 +148,8 @@ export default class Server {
 				this.counter.countUp(routeName);
 				controller.execute(req, res);
 			};
+			this.express.get(`/${routeName}`, [...middleware, execute]);
 
-			if (protectedMaterial && config.authorization.require) {
-				this.express.get(`/${routeName}`, authMiddleware, execute);
-			} else {
-				this.express.get(`/${routeName}`, execute);
-			}
 			// CrossOrigin Resource Sharing http://www.w3.org/TR/cors/
 			this.express.options(`/${routeName}`, (req, res) => controller.options(req, res));
 		});

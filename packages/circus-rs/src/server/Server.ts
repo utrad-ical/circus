@@ -73,7 +73,7 @@ export default class Server {
 				this.express.locals.loadedModuleNames = this.loadedModuleNames;
 				this.prepareRouter();
 				const port = this.config.port;
-				this.server = this.express.listen(port, () => {
+				this.server = this.express.listen(port, '127.0.0.1', () => {
 					const message = `Server running on port ${port}`;
 					this.logger.info(message);
 					resolve(message);
@@ -119,6 +119,7 @@ export default class Server {
 		this.dicomReader = this.createDicomReader();
 
 		const useAuth = !!config.authorization.enabled;
+		this.express.locals.authorizationEnabled = useAuth;
 
 		const authorizationCache = new AuthorizationCache(config.authorization);
 		this.express.locals.authorizationCache = authorizationCache;

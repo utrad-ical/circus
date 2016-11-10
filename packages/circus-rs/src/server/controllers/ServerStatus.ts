@@ -1,7 +1,7 @@
 import Controller from './Controller';
 import * as express from 'express';
-const config = require('../Config');
-let startUpTime: Date = new Date(); // The time this module was loaded
+
+const startUpTime: Date = new Date(); // The time this module was loaded
 
 /**
  * Handles 'status' endpoint which returns various server status information.
@@ -26,7 +26,7 @@ export default class ServerStatus extends Controller {
 			},
 			counter: req.app.locals.counter.getCounts(),
 			loadedModules: req.app.locals.loadedModuleNames,
-			authorization: {enabled: !!config.authorization.require}
+			authorization: { enabled: req.app.locals.authorizationEnabled }
 		};
 		this.respondJson(res, status);
 	}

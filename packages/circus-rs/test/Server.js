@@ -16,7 +16,7 @@ var config = {
 	cache: { memoryThreshold: 2147483648 },
 	authorization: {
 		enabled: false,
-		tokenRequestIpFilter: ['127.0.0.1', '::1', '::ffff:127.0.0.1'],
+		tokenRequestIpFilter: ['127.0.0.1'],
 		expire: 1800
 	}
 };

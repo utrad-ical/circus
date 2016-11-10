@@ -132,7 +132,8 @@ export default class Server {
 			const module: typeof Controller = require(`./controllers/${moduleName}`).default;
 			const controller = new module(this.logger, this.dicomReader, this.imageEncoder);
 
-			const execute = (req, res) => {
+			const execute = (req: express.Request, res: express.Response) => {
+				this.logger.info(req.url, req.hostname);
 				this.counter.countUp(routeName);
 				controller.execute(req, res);
 			};

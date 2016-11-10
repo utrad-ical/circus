@@ -1,7 +1,6 @@
 import Controller from './Controller';
 import * as express from 'express';
 import { STATUS_CODES } from 'http';
-import AuthorizationCache from '../AuthorizationCache';
 import * as crypt from 'crypto';
 import { ValidatorRules } from '../../common/Validator';
 
@@ -10,12 +9,6 @@ import { ValidatorRules } from '../../common/Validator';
  * for each authorized series.
  */
 export default class RequestAccessTokenAction extends Controller {
-	public allowFrom: string;
-
-	protected needsTokenAuthorization(): boolean {
-		return false;
-	}
-
 	protected getRules(): ValidatorRules {
 		return {
 			series: ['Series UID', null, this.isUID, null]
@@ -23,9 +16,9 @@ export default class RequestAccessTokenAction extends Controller {
 	}
 
 	public execute(req: express.Request, res: express.Response): void {
-		let ip = req.connection.remoteAddress;
-		if (!ip.match(this.allowFrom)) {
-			this.logger.info('401 error');
+		const ip = req.connection.remoteAddress;
+		if (!ip.match(req.app.locals.authorization.allowFrom)) {
+			this.logger.warn('401 error');
 			res.writeHead(401, STATUS_CODES[401]);
 			res.write(STATUS_CODES[401]);
 			res.end();
@@ -35,19 +28,17 @@ export default class RequestAccessTokenAction extends Controller {
 	}
 
 	protected process(query: any, req: express.Request, res: express.Response): void {
-		let series: string = query.series;
+		const series: string = query.series;
 
 		crypt.randomBytes(48, (err, buf) => {
-			let status = {};
-
 			if (err) {
 				this.respondInternalServerError(
 					res, 'Internal server error while generating token'
 				);
 			} else {
-				let token: string = buf.toString('hex');
+				const token: string = buf.toString('hex');
 				req.app.locals.authorizationCache.update(series, token);
-				status = {
+				const status = {
 					'result': 'ok',
 					'token': token
 				};

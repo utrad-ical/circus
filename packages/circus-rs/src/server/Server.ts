@@ -7,12 +7,13 @@ import AsyncLruCache from '../common/AsyncLruCache';
 import Logger from './loggers/Logger';
 import DicomDumper from './dicom-dumpers/DicomDumper';
 import DicomFileRepository from './dicom-file-repository/DicomFileRepository';
-import AuthorizationCache from './AuthorizationCache';
+import AuthorizationCache from './auth/AuthorizationCache';
 import Controller from './controllers/Controller';
 
 import * as http from 'http';
 import * as express from 'express';
 import { Configuration } from './Configuration';
+import { tokenAuthentication } from './auth/TokenAuthorization';
 
 /**
  * Main server class.
@@ -111,8 +112,6 @@ export default class Server {
 	private prepareRouter(): void {
 		const config = this.config;
 		this.dicomReader = this.createDicomReader();
-		const authorizationCache = new AuthorizationCache(config.authorization);
-		this.express.locals.authorizationCache = authorizationCache;
 
 		// path name, process class name, needs token authorization
 		const routes: [string, string, boolean][] = [
@@ -126,8 +125,13 @@ export default class Server {
 			routes.push(['requestToken', 'RequestAccessTokenAction', false]);
 		}
 
+		this.express.locals.authorization = config.authorization;
+		const authorizationCache = new AuthorizationCache(config.authorization);
+		this.express.locals.authorizationCache = authorizationCache;
+		const authMiddleware = tokenAuthentication(authorizationCache);
+
 		routes.forEach(route => {
-			const [routeName, moduleName, needsAuth] = route;
+			const [routeName, moduleName, protectedMaterial] = route;
 			this.logger.info(`Preparing ${moduleName} controller...`);
 			const module: typeof Controller = require(`./controllers/${moduleName}`).default;
 			const controller = new module(this.logger, this.dicomReader, this.imageEncoder);
@@ -138,8 +142,8 @@ export default class Server {
 				controller.execute(req, res);
 			};
 
-			if (needsAuth) {
-				this.express.get(`/${routeName}`, this.tokenAuthenticationMiddleware.bind(this), execute);
+			if (protectedMaterial && config.authorization.require) {
+				this.express.get(`/${routeName}`, authMiddleware, execute);
 			} else {
 				this.express.get(`/${routeName}`, execute);
 			}
@@ -147,30 +151,5 @@ export default class Server {
 			this.express.options(`/${routeName}`, (req, res) => controller.options(req, res));
 		});
 	}
-
-	/**
-	 * An Express middleware function that blocks unauthorized requests
-	 */
-	private tokenAuthenticationMiddleware(
-		req: express.Request, res: express.Response, next: express.NextFunction
-	): void {
-
-		if (!this.config.authorization.require) {
-			next();
-			return;
-		}
-
-		const authorizationCache = req.app.locals.authorizationCache;
-		if (!authorizationCache.isValid(req)) {
-			res.setHeader('WWW-Authenticate', 'Bearer realm="CircusRS"');
-			res.writeHead(401, http.STATUS_CODES[401]);
-			res.write('Access denied.');
-			res.end();
-			return;
-		} else {
-			next();
-		}
-	}
-
 
 }

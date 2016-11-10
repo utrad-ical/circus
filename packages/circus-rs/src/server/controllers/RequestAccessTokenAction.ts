@@ -11,7 +11,6 @@ import { ValidatorRules } from '../../common/Validator';
  * for each authorized series.
  */
 export default class RequestAccessTokenAction extends Controller {
-	public cache: AuthorizationCache;
 	public allowFrom: string;
 
 	protected needsTokenAuthorization(): boolean {
@@ -44,11 +43,11 @@ export default class RequestAccessTokenAction extends Controller {
 
 			if (err) {
 				this.respondInternalServerError(
-					res, 'Internal server error while genarating token'
+					res, 'Internal server error while generating token'
 				);
 			} else {
 				let token: string = buf.toString('hex');
-				this.cache.update(series, token);
+				req.app.locals.authorizationCache.update(series, token);
 				status = {
 					'result': 'ok',
 					'token': token

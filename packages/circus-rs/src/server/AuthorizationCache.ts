@@ -14,11 +14,10 @@ export default class AuthorizationCache {
 
 		setInterval(
 			() => {
-				let date: Date = new Date();
-
+				const now: Date = new Date();
 				for (let x in this.cache) {
 					let limit: Date = this.cache[x];
-					if (limit.getTime() <= date.getTime()) {
+					if (limit.getTime() <= now.getTime()) {
 						delete this.cache[x];
 					}
 				}
@@ -29,10 +28,9 @@ export default class AuthorizationCache {
 	}
 
 	/**
-	 * update token lifetime.
-	 *
-	 * @param series DICOM series instance UID
-	 * @param token any strings to identify client.
+	 * Update token lifetime.
+	 * @param series DICOM series instance UID.
+	 * @param token The token previously issued.
 	 */
 	public update(series: string, token: string): void {
 		let currentDate: Date = new Date();
@@ -41,49 +39,52 @@ export default class AuthorizationCache {
 	}
 
 	/**
-	 * validate query string if access is allowed.
-	 *
-	 * @param req HTTP request. 'series' query parameter and X-CircusRs-AccessToken http header needed.
-	 * @returns {boolean}
+	 * Removes all the previously made tokens.
+	 */
+	public reset(): void {
+		this.cache = {};
+	}
+
+	/**
+	 * Validate query string to check if access is granted.
+	 * @param req HTTP request. Must contain 'series' query parameter and Authorization http header.
+	 * @return True if the access to the series is granted.
 	 */
 	public isValid(req: express.Request): boolean {
-		let query = url.parse(req.url, true).query;
-		let token: string;
-		let series: string;
+		const query = url.parse(req.url, true).query;
 
-		if ('series' in query) {
-			series = query.series;
+		if (!('series' in query) || typeof query.series !== 'string') {
+			// logger.debug('Missing query parameter "series".');
+			return false;
 		}
+		const series: string = query.series;
 
-		if ('authorization' in req.headers) {
-			token = req.headers['authorization'];
-			let t = token.split(' ');
-			if (t[0].toLowerCase() !== 'bearer') {
-				return false;
-			}
-			token = t[1];
-		} else {
-			// logger.warn('Authorization http header.');
-		}
-		if (series == null || token == null) {
-			// logger.debug('series or token is null');
+		if (!('authorization' in req.headers)) {
+			// logger.debug('Missing authorization http header.');
 			return false;
 		}
 
-		let key: string = token + '_' + series;
-		let current: Date = new Date();
-		let date: Date = this.cache[key];
+		const [ bearer, token ] = req.headers['authorization'].split(' ');
+		if (bearer.toLowerCase() !== 'bearer') {
+			// logger.debug('Malformed authorization header.');
+			return false;
+		}
+
+		const key: string = token + '_' + series;
+		const now: Date = new Date();
+		const date: Date = this.cache[key];
 
 		if (date == null) {
 			// logger.debug('token not found');
 			return false;
 		}
 
-		if (current.getTime() <= date.getTime()) {
+		if (now.getTime() <= date.getTime()) {
 			this.update(series, token);
 			return true;
 		}
-		// logger.debug('token expired');
+
+		// logger.debug('Found token has been expired');
 		delete this.cache[key];
 		return false;
 	}

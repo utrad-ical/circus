@@ -8,7 +8,7 @@ import { ValidatorRules } from '../../common/Validator';
  * Handles 'requestToken' endpoint which returns an access token
  * for each authorized series.
  */
-export default class RequestAccessTokenAction extends Controller {
+export default class RequestToken extends Controller {
 	protected getRules(): ValidatorRules {
 		return {
 			series: ['Series UID', null, this.isUID, null]

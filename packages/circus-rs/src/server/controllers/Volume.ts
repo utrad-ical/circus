@@ -9,7 +9,7 @@ import * as stream from 'stream';
  * Handles 'volume' endpoint which dumps the whole voxel data of the
  * specified series.
  */
-export default class VolumeAction extends VolumeBasedController {
+export default class Volume extends VolumeBasedController {
 
 	protected getRules(): ValidatorRules {
 		return {

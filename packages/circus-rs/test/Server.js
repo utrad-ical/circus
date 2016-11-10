@@ -43,7 +43,7 @@ describe('Server', function() {
 				httpServer.on('listening', () => {
 					if (useAuth) {
 						supertest(httpServer)
-							.get('/requestToken')
+							.get('/token')
 							.query({ series: '1.2.3.4.5' })
 							.expect(200)
 							.expect(res => token = res.body.token) // remember token

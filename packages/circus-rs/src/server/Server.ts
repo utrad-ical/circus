@@ -117,12 +117,12 @@ export default class Server {
 		const routes: [string, string, boolean][] = [
 			['metadata', 'Metadata', true],
 			['scan', 'ObliqueScan', true],
-			['volume', 'VolumeAction', true],
+			['volume', 'Volume', true],
 			['status', 'ServerStatus', false]
 		];
 
 		if (config.authorization.require) {
-			routes.push(['requestToken', 'RequestAccessTokenAction', false]);
+			routes.push(['token', 'RequestToken', false]);
 		}
 
 		this.express.locals.authorization = config.authorization;

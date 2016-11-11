@@ -12,7 +12,7 @@ export default class ServerStatus extends Controller {
 		return false;
 	}
 
-	public process(query: express.Request, req: express.Request, res: express.Response): void {
+	public process(req: express.Request, res: express.Response): void {
 		const status = {
 			status: 'Running',
 			dicomReader: {

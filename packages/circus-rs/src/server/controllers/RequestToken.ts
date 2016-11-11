@@ -14,8 +14,8 @@ export default class RequestToken extends Controller {
 		};
 	}
 
-	protected process(query: any, req: express.Request, res: express.Response): void {
-		const series: string = query.series;
+	protected process(req: express.Request, res: express.Response): void {
+		const series: string = req.query.series;
 
 		generateAccessToken().then(token => {
 			req.app.locals.authorizationCache.update(series, token);

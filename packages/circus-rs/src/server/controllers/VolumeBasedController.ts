@@ -7,15 +7,14 @@ import DicomVolume from '../../common/DicomVolume';
  * which need DICOM volume (as DicomVolume) specified by the 'series' query parameter.
  */
 export default class VolumeBasedController extends Controller {
-	protected process(query: any, req: express.Request, res: express.Response): void {
-		let series: string = null;
-		if ('series' in query) {
-			series = query.series;
-		}
-		if (!series) {
+	protected process(req: express.Request, res: express.Response): void {
+		const query = req.query;
+		if (!('series' in query)) {
 			this.respondBadRequest(res, 'No series in query');
 			return;
 		}
+		const series = query.series;
+
 		// TODO: Specifying image range is temporarily disabled
 		this.reader.get(series).then((vol: DicomVolume) => {
 			try {

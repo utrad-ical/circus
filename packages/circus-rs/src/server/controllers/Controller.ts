@@ -29,13 +29,14 @@ export default class Controller {
 	}
 
 	public execute(req: express.Request, res: express.Response): void {
-		let rawQuery = url.parse(req.url, true).query;
+		let origQuery = req.query;
 		let validator = new Validator(this.getRules());
-		let {result, errors} = validator.validate(rawQuery);
+		let {result, errors} = validator.validate(origQuery);
 		if (errors.length) {
 			this.respondBadRequest(res, errors.join('\n'));
 		} else {
-			this.process(result, req, res);
+			req.query = result;
+			this.process(req, res);
 		}
 	}
 
@@ -47,7 +48,7 @@ export default class Controller {
 		res.end();
 	}
 
-	protected process(query: express.Request, req: express.Request, res: express.Response): void {
+	protected process(req: express.Request, res: express.Response): void {
 		// abstract
 	}
 

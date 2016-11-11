@@ -133,9 +133,9 @@ export default class Server {
 
 		// path name, process class name, needs token authorization
 		const routes: [string, string, Array<express.Handler>][] = [
-			['metadata', 'Metadata', tokenAuthMiddleware],
-			['scan', 'ObliqueScan', tokenAuthMiddleware],
-			['volume', 'Volume', tokenAuthMiddleware],
+			['series/:sid/metadata', 'Metadata', tokenAuthMiddleware],
+			['series/:sid/scan', 'ObliqueScan', tokenAuthMiddleware],
+			['series/:sid/volume', 'Volume', tokenAuthMiddleware],
 			['status', 'ServerStatus', []]
 		];
 

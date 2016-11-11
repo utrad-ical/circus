@@ -1,5 +1,4 @@
 import * as express from 'express';
-import { STATUS_CODES } from 'http';
 import AuthorizationCache from './AuthorizationCache';
 
 /**
@@ -7,14 +6,32 @@ import AuthorizationCache from './AuthorizationCache';
  */
 export function tokenAuthentication(authorizationCache: AuthorizationCache): express.Handler {
 	return function(req: express.Request, res: express.Response, next: express.NextFunction): void {
-		if (!authorizationCache.isValid(req)) {
+
+		function invalid(): void {
 			res.setHeader('WWW-Authenticate', 'Bearer realm="CircusRS"');
-			res.writeHead(401, STATUS_CODES[401]);
-			res.write('Access denied.');
+			res.status(401)
+				.json({ status: 'ng', message: 'Access denied.' });
 			res.end();
-			return;
-		} else {
-			next();
 		}
+
+		if (!('authorization' in req.headers)) {
+			invalid();
+			return;
+		}
+
+		const [ bearer, token ] = req.headers['authorization'].split(' ');
+
+		if (bearer.toLowerCase() !== 'bearer') {
+			invalid();
+			return;
+		}
+
+		if (!authorizationCache.isValid(req.params.sid, token)) {
+			invalid();
+			return;
+		}
+
+		// authorized!
+		next();
 	};
 }

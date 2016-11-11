@@ -9,13 +9,7 @@ import { ValidatorRules } from '../../common/Validator';
  */
 export default class Metadata extends VolumeBasedController {
 
-	protected getRules(): ValidatorRules {
-		return {
-			series: ['Series UID', null, this.isUID, null],
-		};
-	}
-
-	protected processVolume(query: any, vol: DicomVolume, res: express.Response): void {
+	protected processVolume(req: express.Request, vol: DicomVolume, res: express.Response): void {
 		let dim = vol.getDimension();
 		let vd = vol.getVoxelDimension();
 		let response: any = {

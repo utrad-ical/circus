@@ -12,7 +12,6 @@ export default class ObliqueScan extends VolumeBasedController {
 
 	protected getRules(): ValidatorRules {
 		return {
-			series: ['Series UID', null, this.isUID, null],
 			'origin!': ['Origin', null, this.isTuple(3), this.parseTuple(3)],
 			'xAxis!': ['Scan vector X', null, this.isTuple(3), this.parseTuple(3)],
 			'yAxis!': ['Scan vector Y', null, this.isTuple(3), this.parseTuple(3)],
@@ -24,8 +23,8 @@ export default class ObliqueScan extends VolumeBasedController {
 		};
 	}
 
-	protected processVolume(query: any, vol: DicomVolume, res: express.Response): void {
-		const { ww, wl, origin, xAxis, yAxis, size, interpolation, format } = query;
+	protected processVolume(req: express.Request, vol: DicomVolume, res: express.Response): void {
+		const { ww, wl, origin, xAxis, yAxis, size, interpolation, format } = req.query;
 
 		const useWindow = (typeof ww === 'number' && typeof wl === 'number');
 		if (format === 'png' && !useWindow) {

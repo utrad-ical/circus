@@ -1,6 +1,3 @@
-import * as express from 'express';
-import * as url from 'url';
-
 interface AuthorizationInfo {
 	[token: string]: Date;
 }
@@ -50,25 +47,7 @@ export default class AuthorizationCache {
 	 * @param req HTTP request. Must contain 'series' query parameter and Authorization http header.
 	 * @return True if the access to the series is granted.
 	 */
-	public isValid(req: express.Request): boolean {
-		const query = url.parse(req.url, true).query;
-
-		if (!('series' in query) || typeof query.series !== 'string') {
-			// logger.debug('Missing query parameter "series".');
-			return false;
-		}
-		const series: string = query.series;
-
-		if (!('authorization' in req.headers)) {
-			// logger.debug('Missing authorization http header.');
-			return false;
-		}
-
-		const [ bearer, token ] = req.headers['authorization'].split(' ');
-		if (bearer.toLowerCase() !== 'bearer') {
-			// logger.debug('Malformed authorization header.');
-			return false;
-		}
+	public isValid(series: string, token: string): boolean {
 
 		const key: string = token + '_' + series;
 		const now: Date = new Date();

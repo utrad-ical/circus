@@ -91,17 +91,15 @@ describe('Server', function() {
 			if (useAuth) {
 				it('must return authentication error if token not passed', function(done) {
 					supertest(httpServer)
-						.get('/metadata')
-						.query({ series: '1.2.3.4.5' })
+						.get('/series/1.2.3.4.5/metadata')
 						.expect(401)
 						.end(done);
 				});
 
 				it('must return authentication error if passed token is not matched', function(done) {
 					supertest(httpServer)
-						.get('/metadata')
+						.get('/series/8.8.8.8.8/metadata')
 						.set('Authorization', 'Bearer ' + token)
-						.query({ series: '8.8.8.8.8' })
 						.expect(401)
 						.end(done);
 				});
@@ -117,28 +115,25 @@ describe('Server', function() {
 			}
 
 			it('must return metadata', function(done) {
-				var test = supertest(httpServer).get('/metadata');
+				var test = supertest(httpServer).get('/series/1.2.3.4.5/metadata');
 				if (token) test.set('Authorization', 'Bearer ' + token);
-				test.query({ series: '1.2.3.4.5' })
-					.expect(200)
+				test.expect(200)
 					.expect('Content-Type', /application\/json/)
 					.end(done);
 			});
 
 			it('must return volume', function(done) {
-				var test = supertest(httpServer).get('/volume');
+				var test = supertest(httpServer).get('/series/1.2.3.4.5/volume');
 				if (token) test.set('Authorization', 'Bearer ' + token);
-				test.query({ series: '1.2.3.4.5' })
-					.expect(200)
+				test.expect(200)
 					.expect('Content-Type', 'application/octet-stream')
 					.end(done);
 			});
 
 			it('must return oblique image in binary format', function(done) {
-				var test = supertest(httpServer).get('/scan');
+				var test = supertest(httpServer).get('/series/1.2.3.4.5/scan');
 				if (token) test.set('Authorization', 'Bearer ' + token);
 				test.query({
-						series: '1.2.3.4.5',
 						origin: '200,200,50',
 						xAxis: '512,0,0',
 						yAxis: '0,512,0',
@@ -150,11 +145,10 @@ describe('Server', function() {
 			});
 
 			it('must return oblique image in PNG format', function(done) {
-				var test = supertest(httpServer).get('/scan');
+				var test = supertest(httpServer).get('/series/1.2.3.4.5/scan');
 				if (token) test.set('Authorization', 'Bearer ' + token);
 				test.query({
-						series: '1.2.3.4.5',
-						origin: '200,200,50',
+					origin: '200,200,50',
 						xAxis: '512,0,0',
 						yAxis: '0,512,0',
 						size: '50,50',

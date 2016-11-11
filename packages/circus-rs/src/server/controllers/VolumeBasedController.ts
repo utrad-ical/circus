@@ -8,17 +8,16 @@ import DicomVolume from '../../common/DicomVolume';
  */
 export default class VolumeBasedController extends Controller {
 	protected process(req: express.Request, res: express.Response): void {
-		const query = req.query;
-		if (!('series' in query)) {
-			this.respondBadRequest(res, 'No series in query');
+		if (!this.isUID(req.params.sid)) {
+			this.respondBadRequest(res, 'Invalid series UID');
 			return;
 		}
-		const series = query.series;
+		const series = req.params.sid;
 
 		// TODO: Specifying image range is temporarily disabled
 		this.reader.get(series).then((vol: DicomVolume) => {
 			try {
-				this.processVolume(query, vol, res);
+				this.processVolume(req, vol, res);
 			} catch (e) {
 				if ('stack' in e) this.logger.info(e.stack);
 				this.respondInternalServerError(res, e.toString());
@@ -30,7 +29,7 @@ export default class VolumeBasedController extends Controller {
 	}
 
 	protected processVolume(
-		query: any, vol: DicomVolume, res: express.Response
+		req: express.Request, vol: DicomVolume, res: express.Response
 	): void {
 		// Abstract.
 		// In this method, `vol` is guaranteed to have valid image data.

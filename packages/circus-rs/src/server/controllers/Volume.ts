@@ -11,13 +11,7 @@ import * as stream from 'stream';
  */
 export default class Volume extends VolumeBasedController {
 
-	protected getRules(): ValidatorRules {
-		return {
-			series: ['Series UID', null, this.isUID, null]
-		};
-	}
-
-	protected processVolume(query: any, vol: DicomVolume, res: express.Response): void {
+	protected processVolume(req: express.Request, vol: DicomVolume, res: express.Response): void {
 		let z: number = 0;
 		let zmax: number = vol.getDimension()[2];
 		let out: any = new stream.Readable();
@@ -32,4 +26,5 @@ export default class Volume extends VolumeBasedController {
 		};
 		this.respondGzippedStream(res, out);
 	}
+
 }

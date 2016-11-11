@@ -6,11 +6,8 @@ var moduleLoader = require('../lib/server/ModuleLoader');
 
 function newConfig() {
 	return {
-		dicomFileRepository: {
-			module: "StaticDicomFileRepository",
-			options: { dataDir: __dirname, useHash: false }
-		},
 		port: 1024,
+		dicomFileRepository: { module: "MockDicomFileRepository" },
 		logger: { module: "NullLogger" },
 		dumper: { module: "MockDicomDumper", options: { depth: 5 } },
 		imageEncoder: { module: "ImageEncoder_pngjs", options: {} },

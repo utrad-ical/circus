@@ -16,9 +16,8 @@ export class DynamicImageSource extends RsHttpLoaderImageSource {
 		size: Vector2D
 	): Promise<Uint8Array> {
 		return this.loader.request(
-			'scan',
+			`series/${series}/scan`,
 			{
-				series: series,
 				origin: section.origin.join(','),
 				xAxis: section.xAxis.join(','),
 				yAxis: section.yAxis.join(','),

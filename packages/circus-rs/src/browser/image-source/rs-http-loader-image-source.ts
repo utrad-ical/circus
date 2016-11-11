@@ -31,7 +31,7 @@ export abstract class RsHttpLoaderImageSource extends VolumeImageSource {
 	 */
 	public prepare(): Promise<void> {
 		if (!this.series) return Promise.reject('Series is required');
-		return this.loader.request('metadata', { series: this.series })
+		return this.loader.request(`series/${this.series}/metadata`, {})
 			.then(meta => {
 				this.meta = meta;
 				return this.onMetaLoaded();

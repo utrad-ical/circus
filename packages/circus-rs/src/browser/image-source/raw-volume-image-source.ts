@@ -27,7 +27,7 @@ export class RawVolumeImageSource extends RsHttpLoaderImageSource {
 	 * Loader function passed to the AsyncLruCache.
 	 */
 	private static loadVolume(series: string, meta: DicomMetadata, loader: RsHttpClient): Promise<DicomVolume> {
-		return loader.request('volume', { series }, 'arraybuffer')
+		return loader.request(`series/${series}/volume`, {}, 'arraybuffer')
 			.then(buffer => {
 				const volume = new DicomVolume();
 				const pixelFormat: PixelFormat = meta.pixelFormat;

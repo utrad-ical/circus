@@ -73,7 +73,7 @@ export default class Server {
 				this.express.locals.loadedModuleNames = this.loadedModuleNames;
 				this.prepareRouter();
 				const port = this.config.port;
-				this.server = this.express.listen(port, '127.0.0.1', () => {
+				this.server = this.express.listen(port, '0.0.0.0', () => {
 					const message = `Server running on port ${port}`;
 					this.logger.info(message);
 					resolve(message);

@@ -3,8 +3,6 @@ export interface ModuleDefinition {
 	options?: any;
 }
 
-export type IpFilterDefinition = Array<string | [string, string]>;
-
 export interface Configuration {
 	port?: number;
 
@@ -16,8 +14,6 @@ export interface Configuration {
 
 	imageEncoder?: ModuleDefinition;
 
-	ipFilter?: IpFilterDefinition;
-
 	cache?: {
 		memoryThreshold?: number;
 	};
@@ -25,7 +21,7 @@ export interface Configuration {
 	authorization?: {
 		enabled: boolean;
 		expire?: number;
-		tokenRequestIpFilter?: IpFilterDefinition;
+		allowFrom?: string;
 	};
 
 }

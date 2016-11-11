@@ -16,7 +16,7 @@ var config = {
 	cache: { memoryThreshold: 2147483648 },
 	authorization: {
 		enabled: false,
-		tokenRequestIpFilter: ['127.0.0.1'],
+		tokenRequestIpFilter: '^127.0.0.1$',
 		expire: 1800
 	}
 };
@@ -97,7 +97,7 @@ describe('Server', function() {
 					server.getApp().enable('trust proxy'); // Enable IP address mangling
 					supertest(httpServer)
 						.get('/token')
-						.set('X-Forwarded-For', '127.3.4.5')
+						.set('X-Forwarded-For', '127.0.0.2')
 						.expect(401)
 						.end(done);
 				});

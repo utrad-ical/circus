@@ -61,12 +61,9 @@ module.exports = {
  		 */
 		"memoryThreshold": 2147483648
 	},
-
-	// Enable token-based authorization.
-	// If turned off, everyone can access images when they know the series instance UID.
 	"authorization": {
 		"enabled": false,
-	  	"tokenRequestIpFilter": ["127.0.0.1", "::1"],
+	  	"tokenRequestIpFilter": "^127.0.0.1$",
 	  	"expire": 1800
 	}
 };

@@ -4,21 +4,24 @@ var Server = require('../lib/server/Server').default;
 var supertest = require('supertest');
 var moduleLoader = require('../lib/server/ModuleLoader');
 
-var config = {
-	dicomFileRepository: {
-		module: "StaticDicomFileRepository",
-		options: { dataDir: __dirname, useHash: false }
-	},
-	port: 1024,
-	logger: { module: "NullLogger" },
-	dumper: { module: "MockDicomDumper", options: { depth: 5 } },
-	imageEncoder: { module: "ImageEncoder_pngjs", options: {} },
-	cache: { memoryThreshold: 2147483648 },
-	authorization: {
-		enabled: false,
-		tokenRequestIpFilter: '^127.0.0.1$',
-		expire: 1800
-	}
+function newConfig() {
+	return {
+		dicomFileRepository: {
+			module: "StaticDicomFileRepository",
+			options: { dataDir: __dirname, useHash: false }
+		},
+		port: 1024,
+		logger: { module: "NullLogger" },
+		dumper: { module: "MockDicomDumper", options: { depth: 5 } },
+		imageEncoder: { module: "ImageEncoder_pngjs", options: {} },
+		globalIpFilter: '^127.0.0.1$',
+		cache: { memoryThreshold: 2147483648 },
+		authorization: {
+			enabled: false,
+			tokenRequestIpFilter: '^127.0.0.1$',
+			expire: 1800
+		}
+	};
 };
 
 describe('Server', function() {
@@ -34,6 +37,7 @@ describe('Server', function() {
 			var token;
 
 			beforeEach(function(done) {
+				const config = newConfig();
 				config.authorization.enabled = useAuth;
 				server = new Server(
 					moduleLoader.loadModule(moduleLoader.ModuleType.Logger, config.logger),
@@ -75,6 +79,15 @@ describe('Server', function() {
 					.end(done);
 			});
 
+			it('must reject invalid access using globalIpFilter', function(done) {
+				server.getApp().enable('trust proxy'); // Enable IP address mangling
+				supertest(httpServer)
+					.get('/status')
+					.set('X-Forwarded-For', '127.0.0.11') // change IP
+					.expect(401)
+					.end(done);
+			});
+
 			if (useAuth) {
 				it('must return authentication error if token not passed', function(done) {
 					supertest(httpServer)
@@ -94,7 +107,7 @@ describe('Server', function() {
 				});
 
 				it('must reject token request from invalid IP', function(done) {
-					server.getApp().enable('trust proxy'); // Enable IP address mangling
+					server.getApp().enable('trust proxy');
 					supertest(httpServer)
 						.get('/token')
 						.set('X-Forwarded-For', '127.0.0.2')

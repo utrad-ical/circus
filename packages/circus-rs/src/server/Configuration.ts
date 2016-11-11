@@ -6,6 +6,8 @@ export interface ModuleDefinition {
 export interface Configuration {
 	port?: number;
 
+	globalIpFilter?: string;
+
 	logger?: ModuleDefinition;
 
 	dicomFileRepository?: ModuleDefinition;
@@ -21,7 +23,7 @@ export interface Configuration {
 	authorization?: {
 		enabled: boolean;
 		expire?: number;
-		allowFrom?: string;
+		tokenRequestIpFilter?: string;
 	};
 
 }

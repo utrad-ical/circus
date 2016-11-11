@@ -121,6 +121,11 @@ export default class Server {
 		const useAuth = !!config.authorization.enabled;
 		this.express.locals.authorizationEnabled = useAuth;
 
+		if (typeof config.globalIpFilter === 'string') {
+			const globalBlocker = ipBasedAccessControl(config.globalIpFilter);
+			this.express.use(globalBlocker);
+		}
+
 		const authorizationCache = new AuthorizationCache(config.authorization);
 		this.express.locals.authorizationCache = authorizationCache;
 		const tokenAuthMiddleware = useAuth ? [tokenAuthentication(authorizationCache)] : [];

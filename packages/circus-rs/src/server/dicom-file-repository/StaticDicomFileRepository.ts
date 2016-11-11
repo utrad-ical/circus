@@ -47,6 +47,9 @@ export default class StaticDicomFileRepository extends DicomFileRepository {
 		}
 
 		return this.scanDicomCount(dir).then(count => {
+			if (count === 0) {
+				throw new Error('series not found');
+			}
 			const seriesLoader: SeriesLoader = (image: number) => {
 				const fileName = this.pad8(image) + '.dcm';
 				const filePath = path.join(dir, fileName);

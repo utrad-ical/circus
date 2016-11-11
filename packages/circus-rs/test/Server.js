@@ -70,7 +70,7 @@ describe('Server', function() {
 				supertest(httpServer)
 					.get('/status')
 					.expect(200)
-					.expect('Content-Type', 'application/json')
+					.expect('Content-Type', /application\/json/)
 					.expect(/Running/)
 					.end(done);
 			});
@@ -108,7 +108,7 @@ describe('Server', function() {
 				if (token) test.set('Authorization', 'Bearer ' + token);
 				test.query({ series: '1.2.3.4.5' })
 					.expect(200)
-					.expect('Content-Type', 'application/json')
+					.expect('Content-Type', /application\/json/)
 					.end(done);
 			});
 

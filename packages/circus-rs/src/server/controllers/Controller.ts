@@ -111,17 +111,8 @@ export default class Controller {
 	}
 
 	protected respondJsonWithStatus(status: number, res: express.Response, data: any): void {
-		let result: string = null;
-		try {
-			result = JSON.stringify(data, null, '  ');
-		} catch (e) {
-			this.respondInternalServerError(res, 'Error while formatting result data.');
-			return;
-		}
-		res.setHeader('Content-Type', 'application/json');
-		res.setHeader('Access-Control-Allow-Origin', '*');
-		res.writeHead(status);
-		res.write(result);
+		res.status(status);
+		res.json(data);
 		res.end();
 	}
 

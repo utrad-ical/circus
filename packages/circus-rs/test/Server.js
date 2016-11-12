@@ -2,15 +2,15 @@
 
 var Server = require('../lib/server/Server').default;
 var supertest = require('supertest');
-var moduleLoader = require('../lib/server/ModuleLoader');
+
+var NullLogger = require('../lib/server/loggers/NullLogger').default;
+var PngJsImageEncoder = require('../lib/server/image-encoders/PngJsImageEncoder').default;
+var MockDicomFileRepository = require('../lib/server/dicom-file-repository/MockDicomFileRepository').default;
+var MockDicomDumper = require('../lib/server/dicom-dumpers/MockDicomDumper').default;
 
 function newConfig() {
 	return {
 		port: 1024,
-		dicomFileRepository: { module: "MockDicomFileRepository" },
-		logger: { module: "NullLogger" },
-		dumper: { module: "MockDicomDumper", options: { depth: 5 } },
-		imageEncoder: { module: "ImageEncoder_pngjs", options: {} },
 		globalIpFilter: '^127.0.0.1$',
 		cache: { memoryThreshold: 2147483648 },
 		authorization: {
@@ -19,7 +19,7 @@ function newConfig() {
 			expire: 1800
 		}
 	};
-};
+}
 
 describe('Server', function() {
 
@@ -37,10 +37,10 @@ describe('Server', function() {
 				const config = newConfig();
 				config.authorization.enabled = useAuth;
 				server = new Server(
-					moduleLoader.loadModule(moduleLoader.ModuleType.Logger, config.logger),
-					moduleLoader.loadModule(moduleLoader.ModuleType.ImageEncoder, config.imageEncoder),
-					moduleLoader.loadModule(moduleLoader.ModuleType.DicomFileRepository, config.dicomFileRepository),
-					moduleLoader.loadModule(moduleLoader.ModuleType.DicomDumper, config.dumper),
+					new NullLogger(),
+					new PngJsImageEncoder(),
+					new MockDicomFileRepository(),
+					new MockDicomDumper({ depth: 5 }),
 					config
 				);
 				server.start();

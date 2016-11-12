@@ -121,6 +121,13 @@ export default class Server {
 		const useAuth = !!config.authorization.enabled;
 		this.express.locals.authorizationEnabled = useAuth;
 
+		// Make server return indented JSON
+		this.express.set('json spaces', 2);
+		// Turn off 'X-Powered-By: Express' header
+		this.express.set('x-powered-by', false);
+		// Enable case sensitive routing
+		this.express.set('case sensitive routing', true);
+
 		if (typeof config.globalIpFilter === 'string') {
 			const globalBlocker = ipBasedAccessControl(config.globalIpFilter);
 			this.express.use(globalBlocker);

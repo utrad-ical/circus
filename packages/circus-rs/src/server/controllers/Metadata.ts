@@ -9,10 +9,13 @@ import { ValidatorRules } from '../../common/Validator';
  */
 export default class Metadata extends VolumeBasedController {
 
-	protected processVolume(req: express.Request, vol: DicomVolume, res: express.Response): void {
-		let dim = vol.getDimension();
-		let vd = vol.getVoxelDimension();
-		let response: any = {
+	protected processVolume(
+		req: express.Request, res: express.Response, next: express.NextFunction
+	): void {
+		const vol = req.volume;
+		const dim = vol.getDimension();
+		const vd = vol.getVoxelDimension();
+		const response: any = {
 			voxelCount: dim,
 			voxelSize: vd,
 			estimatedWindow: { width: vol.ww, level: vol.wl },

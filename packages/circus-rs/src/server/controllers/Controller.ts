@@ -1,4 +1,3 @@
-import * as url from 'url';
 import Logger from '../loggers/Logger';
 import ImageEncoder from '../image-encoders/ImageEncoder';
 import * as express from 'express';
@@ -28,19 +27,23 @@ export default class Controller {
 		// abstract
 	}
 
-	public execute(req: express.Request, res: express.Response): void {
+	public execute(req: express.Request, res: express.Response, next: express.NextFunction): void {
 		let origQuery = req.query;
 		let validator = new Validator(this.getRules());
 		let {result, errors} = validator.validate(origQuery);
-		if (errors.length) {
-			this.respondBadRequest(res, errors.join('\n'));
-		} else {
-			req.query = result;
-			this.process(req, res);
+		try {
+			if (errors.length) {
+				next(this.createBadRequestError(errors.join('\n')));
+			} else {
+				req.query = result;
+				this.process(req, res, next);
+			}
+		} catch (e) {
+			next(e);
 		}
 	}
 
-	public options(req: express.Request, res: express.Response): void {
+	public options(req: express.Request, res: express.Response, next: express.NextFunction): void {
 		res.setHeader('Access-Control-Allow-Origin', '*');
 		res.setHeader('Access-Control-Allow-Methods', 'GET');
 		res.setHeader('Access-Control-Allow-Headers', 'Authorization');
@@ -48,7 +51,7 @@ export default class Controller {
 		res.end();
 	}
 
-	protected process(req: express.Request, res: express.Response): void {
+	protected process(req: express.Request, res: express.Response, next: express.NextFunction): void {
 		// abstract
 	}
 
@@ -71,7 +74,7 @@ export default class Controller {
 			let toks = s.split(',');
 			if (toks.length !== count) return false;
 			return !toks.some(tok => isNaN(parseFloat(tok)));
-		}
+		};
 	}
 
 	protected parseTuple(count: number = 3, int: boolean = false): (string) => number[] {
@@ -111,36 +114,29 @@ export default class Controller {
 		this.imageEncoder.write(res, image, width, height);
 	}
 
-	protected respondJsonWithStatus(status: number, res: express.Response, data: any): void {
-		res.status(status);
+	protected respondJson(res: express.Response, data: any): void {
+		res.status(200);
 		res.setHeader('Access-Control-Allow-Origin', '*');
 		res.json(data);
 		res.end();
 	}
 
-	protected respondJson(res: express.Response, data: any): void {
-		this.respondJsonWithStatus(200, res, data);
+	protected createError(status: number, message: string): Error {
+		const error = new Error(message);
+		(error as any).status = status;
+		return error;
 	}
 
-	protected respondError(status: number, res: express.Response, message: string): void {
-		this.logger.warn(message);
-		let err = {result: 'ng', message: message};
-		this.respondJsonWithStatus(status, res, err);
+	protected createBadRequestError(message: string): Error {
+		return this.createError(400, message);
 	}
 
-	protected respondBadRequest(res: express.Response, message: string): void {
-		this.logger.warn(message);
-		this.respondError(400, res, message);
+	protected createNotFoundError(message: string): Error {
+		return this.createError(404, message);
 	}
 
-	protected respondNotFound(res: express.Response, message: string): void {
-		this.logger.warn(message);
-		this.respondError(404, res, message);
-	}
-
-	protected respondInternalServerError(res: express.Response, message: string): void {
-		this.logger.error(message);
-		this.respondError(500, res, message);
+	protected createInternalServerError(message: string): Error {
+		return this.createError(500, message);
 	}
 
 }

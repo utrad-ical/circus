@@ -8,11 +8,7 @@ const startUpTime: Date = new Date(); // The time this module was loaded
  */
 export default class ServerStatus extends Controller {
 
-	protected needsTokenAutorhization(): boolean {
-		return false;
-	}
-
-	public process(req: express.Request, res: express.Response): void {
+	public process(req: express.Request, res: express.Response, next: express.NextFunction): void {
 		const status = {
 			status: 'Running',
 			dicomReader: {

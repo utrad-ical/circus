@@ -14,7 +14,7 @@ export default class RequestToken extends Controller {
 		};
 	}
 
-	protected process(req: express.Request, res: express.Response): void {
+	protected process(req: express.Request, res: express.Response, next: express.NextFunction): void {
 		const series: string = req.query.series;
 
 		generateAccessToken().then(token => {
@@ -22,10 +22,11 @@ export default class RequestToken extends Controller {
 			const status = { result: 'OK', token };
 			this.respondJson(res, status);
 		}).catch(() => {
-			this.respondInternalServerError(
-				res, 'Internal server error occurred while generating access token'
-			);
+			next(this.createInternalServerError(
+				'Internal server error occurred while generating access token'
+			));
 		});
+
 	}
 
 }

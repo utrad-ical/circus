@@ -149,16 +149,51 @@ export default class Server {
 			const module: typeof Controller = require(`./controllers/${moduleName}`).default;
 			const controller = new module(this.logger, this.dicomReader, this.imageEncoder);
 
-			const execute = (req: express.Request, res: express.Response) => {
+			const execute = (req: express.Request, res: express.Response, next: express.NextFunction) => {
 				this.logger.info(req.url, req.hostname);
 				this.counter.countUp(routeName);
-				controller.execute(req, res);
+				controller.execute(req, res, next);
 			};
 			this.express.get(`/${routeName}`, [...middleware, execute]);
 
 			// CrossOrigin Resource Sharing http://www.w3.org/TR/cors/
-			this.express.options(`/${routeName}`, (req, res) => controller.options(req, res));
+			this.express.options(
+				`/${routeName}`,
+				controller.options.bind(controller)
+			);
 		});
+
+		// This is default handler to catch all unknown requests of all types of verbs
+		this.express.all('*', (req, res, next) => {
+			const error = new Error('Not found');
+			(<any>error).status = 404;
+			next(error);
+		});
+
+		// Adds an error handler which outputs all errors in JSON format
+		this.express.use(errorHandler(this.logger));
+
 	}
 
+}
+
+function errorHandler(logger: Logger): express.ErrorRequestHandler {
+	return function(err: any, req: express.Request, res: express.Response, next: express.NextFunction): void {
+		logger.error(err.message);
+		if ('stack' in err) logger.trace(err.stack);
+
+		// Unexpected error, probably due to bugs
+		let status = 500;
+		let message = 'Internal server error.';
+
+		// Exceptions with status code, probably doe to invalid request, etc.
+		if (typeof err.status === 'number') {
+			status = err.status;
+			message = err.message;
+		}
+
+		res.status(status);
+		res.json({ status: 'ng', message });
+		res.end();
+	};
 }

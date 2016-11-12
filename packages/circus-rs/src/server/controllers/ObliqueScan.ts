@@ -23,20 +23,22 @@ export default class ObliqueScan extends VolumeBasedController {
 		};
 	}
 
-	protected processVolume(req: express.Request, vol: DicomVolume, res: express.Response): void {
+	protected processVolume(
+		req: express.Request, res: express.Response, next: express.NextFunction
+	): void {
 		const { ww, wl, origin, xAxis, yAxis, size, interpolation, format } = req.query;
-
+		const vol = req.volume;
 		const useWindow = (typeof ww === 'number' && typeof wl === 'number');
 		if (format === 'png' && !useWindow) {
-			this.respondBadRequest(res, 'Window values are required for PNG output.');
+			next(this.createBadRequestError('Window values are required for PNG output.'));
 			return;
 		}
 		if (size[0] * size[1] > 2048 * 2048) {
-			this.respondBadRequest(res, 'Requested image size is too large.');
+			next(this.createBadRequestError('Requested image size is too large.'));
 			return;
 		}
 		if (size[0] <= 0 || size[1] <= 0) {
-			this.respondBadRequest(res, 'Invalid image size');
+			next(this.createBadRequestError('Invalid image size'));
 			return;
 		}
 

@@ -7,31 +7,29 @@ import DicomVolume from '../../common/DicomVolume';
  * which need DICOM volume (as DicomVolume) specified by the 'series' query parameter.
  */
 export default class VolumeBasedController extends Controller {
-	protected process(req: express.Request, res: express.Response): void {
+	protected process(req: express.Request, res: express.Response, next: express.NextFunction): void {
 		if (!this.isUID(req.params.sid)) {
-			this.respondBadRequest(res, 'Invalid series UID');
-			return;
+			throw this.createBadRequestError('Invalid series UID');
 		}
 		const series = req.params.sid;
 
 		// TODO: Specifying image range is temporarily disabled
 		this.reader.get(series).then((vol: DicomVolume) => {
 			try {
-				this.processVolume(req, vol, res);
+				req.volume = vol;
+				this.processVolume(req, res, next);
 			} catch (e) {
-				if ('stack' in e) this.logger.info(e.stack);
-				this.respondInternalServerError(res, e.toString());
+				next(this.createInternalServerError(e.toString()));
 			}
 		}).catch(err => {
-			this.respondNotFound(res, 'Error while loading a series');
-			this.logger.error(err.toString());
+			next(this.createNotFoundError('Series could not be loaded'));
 		});
 	}
 
 	protected processVolume(
-		req: express.Request, vol: DicomVolume, res: express.Response
+		req: express.Request, res: express.Response, next: express.NextFunction
 	): void {
 		// Abstract.
-		// In this method, `vol` is guaranteed to have valid image data.
+		// In this method, `req.volume` is guaranteed to have valid image data.
 	}
 }

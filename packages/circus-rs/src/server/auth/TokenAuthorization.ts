@@ -9,9 +9,9 @@ export function tokenAuthentication(authorizationCache: AuthorizationCache): exp
 
 		function invalid(): void {
 			res.setHeader('WWW-Authenticate', 'Bearer realm="CircusRS"');
-			res.status(401)
-				.json({ status: 'ng', message: 'Access denied.' });
-			res.end();
+			const error: any = new Error('Access denied');
+			error.status = 401;
+			next(error);
 		}
 
 		if (!('authorization' in req.headers)) {
@@ -19,7 +19,7 @@ export function tokenAuthentication(authorizationCache: AuthorizationCache): exp
 			return;
 		}
 
-		const [ bearer, token ] = req.headers['authorization'].split(' ');
+		const [bearer, token] = req.headers['authorization'].split(' ');
 
 		if (bearer.toLowerCase() !== 'bearer') {
 			invalid();

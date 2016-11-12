@@ -11,16 +11,19 @@ import * as stream from 'stream';
  */
 export default class Volume extends VolumeBasedController {
 
-	protected processVolume(req: express.Request, vol: DicomVolume, res: express.Response): void {
+	protected processVolume(
+		req: express.Request, res: express.Response, next: express.NextFunction
+	): void {
+		const vol = req.volume;
+		const zmax: number = vol.getDimension()[2];
+		const out: any = new stream.Readable();
 		let z: number = 0;
-		let zmax: number = vol.getDimension()[2];
-		let out: any = new stream.Readable();
 		out._read = function(size): void {
 			if (z >= zmax) {
 				this.push(null); // ends stream
 				return;
 			}
-			let slice = vol.getSingleImage(z);
+			const slice = vol.getSingleImage(z);
 			this.push(new Buffer(new Uint8Array(slice)));
 			z++;
 		};

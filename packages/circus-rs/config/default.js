@@ -52,7 +52,7 @@ module.exports = {
 
 	// Image encoder is used by some request types
 	"imageEncoder": {
-		"module": "ImageEncoder_pngjs",
+		"module": "PngJsImageEncoder",
 		"options": {}
 	},
 

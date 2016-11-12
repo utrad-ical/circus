@@ -1,7 +1,6 @@
 const merge = require('merge');
 require('json5/lib/require');
 
-import * as fs from 'fs';
 import * as path from 'path';
 
 const config = require('../../config/default');

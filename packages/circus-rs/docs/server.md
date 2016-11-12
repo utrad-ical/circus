@@ -28,7 +28,7 @@ Optionally, you can use `ImageEncoder_nodepng`, which does the same job via C++ 
 On the shell:
 
 ```
-node ./circus-rs.js
+node ./server.js
 ```
 
 This will launch a http server on the default port (3000). After the server is launched, access using your favorite browser, `http://localhost:3000/status`.

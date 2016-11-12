@@ -113,6 +113,7 @@ export default class Controller {
 
 	protected respondJsonWithStatus(status: number, res: express.Response, data: any): void {
 		res.status(status);
+		res.setHeader('Access-Control-Allow-Origin', '*');
 		res.json(data);
 		res.end();
 	}

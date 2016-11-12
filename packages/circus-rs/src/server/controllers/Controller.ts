@@ -28,16 +28,17 @@ export default class Controller {
 	}
 
 	public execute(req: express.Request, res: express.Response, next: express.NextFunction): void {
-		let origQuery = req.query;
-		let validator = new Validator(this.getRules());
-		let {result, errors} = validator.validate(origQuery);
+		const origQuery = req.query;
+		const validator = new Validator(this.getRules());
+		const {result, errors} = validator.validate(origQuery);
+		if (errors.length) {
+			next(this.createBadRequestError(errors.join('\n')));
+			return;
+		}
+
 		try {
-			if (errors.length) {
-				next(this.createBadRequestError(errors.join('\n')));
-			} else {
-				req.query = result;
-				this.process(req, res, next);
-			}
+			req.query = result;
+			this.process(req, res, next);
 		} catch (e) {
 			next(e);
 		}

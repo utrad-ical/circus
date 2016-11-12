@@ -22,8 +22,6 @@ class BuildRs extends Command {
 
 	/**
 	 * Execute the console command.
-	 *
-	 * @return mixed
 	 */
 	public function fire()
 	{
@@ -32,7 +30,6 @@ class BuildRs extends Command {
 		chdir($rs_dir);
 		$this->info('Building CIRCUS RS...');
 		passthru('npm install');
-		passthru('npm install mongoose');
 		passthru('gulp');
 	}
 

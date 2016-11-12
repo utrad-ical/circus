@@ -126,6 +126,12 @@ export default class Server {
 			this.express.use(globalBlocker);
 		}
 
+		// Always append the following header
+		this.express.use((req, res: express.Response, next) => {
+			res.set('Access-Control-Allow-Origin', '*');
+			next();
+		});
+
 		const authorizationCache = new AuthorizationCache(config.authorization);
 		this.express.locals.authorizationCache = authorizationCache;
 		const tokenAuthMiddleware = useAuth ? [tokenAuthentication(authorizationCache)] : [];

@@ -44,10 +44,9 @@ export default class Controller {
 	}
 
 	public options(req: express.Request, res: express.Response, next: express.NextFunction): void {
-		res.setHeader('Access-Control-Allow-Origin', '*');
+		res.status(200);
 		res.setHeader('Access-Control-Allow-Methods', 'GET');
 		res.setHeader('Access-Control-Allow-Headers', 'Authorization');
-		res.writeHead(200);
 		res.end();
 	}
 
@@ -99,7 +98,6 @@ export default class Controller {
 	protected respondGzippedStream(res: express.Response, stream: stream.Stream): void {
 		res.writeHead(200, {
 			'Content-Type': 'application/octet-stream',
-			'Access-Control-Allow-Origin': '*',
 			'Content-Encoding': 'gzip'
 		});
 		let gzip = zlib.createGzip();
@@ -109,14 +107,11 @@ export default class Controller {
 	protected respondImage(res: express.Response, image: Buffer, width: number, height: number): void {
 		res.writeHead(200, {
 			'Content-Type': this.imageEncoder.mimeType(),
-			'Access-Control-Allow-Origin': '*'
 		});
 		this.imageEncoder.write(res, image, width, height);
 	}
 
 	protected respondJson(res: express.Response, data: any): void {
-		res.status(200);
-		res.setHeader('Access-Control-Allow-Origin', '*');
 		res.json(data);
 		res.end();
 	}

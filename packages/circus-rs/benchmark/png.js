@@ -1,7 +1,7 @@
 "use strict";
 
 var Benchmark = require('benchmark');
-var Encoder = require('../build/server/image-encoders/ImageEncoder_pngjs').default;
+var Encoder = require('../lib/server/image-encoders/PngJsImageEncoder').default;
 var streamBuffers = require('stream-buffers');
 
 var enc = new Encoder();

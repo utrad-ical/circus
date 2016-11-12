@@ -6,7 +6,7 @@ var zlib = require('zlib');
 var assert = require('chai').assert;
 var px = require('../lib/common/PixelFormat');
 
-var ImageEncoder = require('../lib/server/image-encoders/ImageEncoder_pngjs').default;
+var ImageEncoder = require('../lib/server/image-encoders/PngJsImageEncoder').default;
 
 var testdir = __dirname + '/test-dicom/';
 

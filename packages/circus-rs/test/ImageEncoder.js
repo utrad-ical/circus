@@ -1,7 +1,7 @@
 var assert = require('chai').assert;
 var streamBuffers = require('stream-buffers');
 
-var encoders = ['ImageEncoder_pngjs', 'ImageEncoder_nodepng'];
+var encoders = ['PngJsImageEncoder', 'NodePngImageEncoder'];
 
 describe('ImageEncoder', function() {
 	var originalImage;

@@ -96,7 +96,7 @@ gulp.task('dist-browser-iconfont', function() {
 	return gulp.src('src/browser/assets/icons/*.svg')
 		.pipe(iconfont({
 			fontName: 'circus-rs-font',
-			appendUnicode: true,
+			prependUnicode: true,
 			formats: ['woff'],
 			startUnicode: 0xE600,
 			fontHeight: 512,

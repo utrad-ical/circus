@@ -1,5 +1,6 @@
 import React from 'react';
 import { api } from '../utils/api';
+import { RsViewer } from '../components/rs-viewer';
 
 export class CaseDetail extends React.Component {
 	constructor(props) {
@@ -20,6 +21,9 @@ export class CaseDetail extends React.Component {
 				<span className="circus-icon-case" />
 				Case Detail: {cid}
 			</h1>
+			<div>
+				<RsViewer />
+			</div>
 			<pre>{JSON.stringify(this.state.caseData, null, 2)}</pre>
 		</div>;
 	}

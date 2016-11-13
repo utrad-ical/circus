@@ -15,7 +15,7 @@ import { LoginScreen } from 'pages/login-screen';
 import { Home } from 'pages/home';
 import { SeriesSearch } from 'pages/search/search-series';
 import { CaseSearch } from 'pages/search/search-case';
-import { CaseDetail } from 'pages/case-detail';
+import { CaseDetail } from 'pages/case-detail/case-detail';
 import { ImportSeries } from 'pages/import-series';
 import { ImportCase} from 'pages/import-case';
 import { SeriesDetail} from 'pages/series-detail';

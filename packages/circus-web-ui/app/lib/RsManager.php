@@ -64,16 +64,21 @@ class RsManager
 		return $confFileName;
 	}
 
-	protected function exec($command, $script = '')
+	protected function exec($action, $script = '')
 	{
 		$forever_root = storage_path('forever');
 		putenv('FOREVER_ROOT=' . $forever_root);
 		chdir($this->rs_dir);
-		$script = $script ? (" " . $script) : '';
+		$script = $script ? (' ' . $script) : '';
 		$d = DIRECTORY_SEPARATOR;
-		$com = ".{$d}node_modules{$d}.bin{$d}forever $command --plain$script";
+		$com = ".{$d}node_modules{$d}.bin{$d}forever $action --plain $script";
 		exec($com, $out, $retvar);
-		return implode("\n", $out);
+		$lines = implode("\n", $out);
+
+		// strip color codes (TODO: remove this when --plain option works again)
+		$lines = preg_replace('/\e\[[0-9a-f]+m/', '', $lines);
+
+		return $lines;
 	}
 
 	public function status()
@@ -90,7 +95,7 @@ class RsManager
 			return $error;
 		}
 		$confFile = $this->makeConfig();
-		$this->exec('start', 'circus-rs.js --config=' . escapeshellarg($confFile));
+		$this->exec('start', 'server.js --config=' . escapeshellarg($confFile));
 		return $this->exec('list');
 	}
 
@@ -99,7 +104,7 @@ class RsManager
 		if (($error = $this->checkForever()) !== true) {
 			return $error;
 		}
-		$this->exec('stop', 'circus-rs.js');
+		$this->exec('stop', 'server.js');
 		return $this->exec('list');
 	}
 

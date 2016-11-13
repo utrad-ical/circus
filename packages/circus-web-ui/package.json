@@ -30,7 +30,6 @@
     "css-loader": "^0.23.1",
     "file-loader": "^0.8.5",
     "glob": "^7.0.3",
-    "gulp-typescript": "^2.4.2",
     "less": "^2.7.1",
     "less-loader": "^2.2.3",
     "moment": "^2.13.0",

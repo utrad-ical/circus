@@ -28,6 +28,7 @@ Route::group(['before' => 'auth.api'], function() {
 	Route::get('api/series/{id}', 'SeriesApiController@show');
 	Route::post('api/series', 'SeriesListController@search');
 	Route::post('api/case', 'CaseListController@search');
+	Route::resource('api/case', 'CaseApiController');
 
 	Route::group(['before' => 'admin'], function() {
 		Route::resource('api/user', 'UserApiController');
@@ -60,6 +61,7 @@ Route::group(['before' => 'auth'], function() {
 	$staticView('series/{uid}', 'application');
 	$staticView('admin/{dum}', 'application');
 	$staticView('admin', 'application');
+	$staticView('case/{cid}', 'application');
 
 	// Case
 	Route::get('case/search/{preset_id}', 'CaseSearchController@search')

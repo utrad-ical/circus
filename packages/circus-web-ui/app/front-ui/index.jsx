@@ -59,7 +59,7 @@ ReactDOM.render(
 					<Route path='project' component={ProjectAdmin} />
 				</Route>
 				<Route path="series/:uid" component={SeriesDetail} />
-				<Route path="case/:id" component={CaseDetail} />
+				<Route path="case/:cid" component={CaseDetail} />
 				<Route path="task-list" component={TaskList} />
 				<Route path='preference' component={Preference} />
 			</Route>

@@ -21,12 +21,14 @@ export class ImageViewer extends React.Component {
 
 	updateComposition(seriesUID) {
 		if (seriesUID) {
-			const src = new rs.DynamicImageSource({
+			const src = new rs.HybridImageSource({
 				client: this.state.client,
 				series: seriesUID
 			});
 			this.state.composition.setImageSource(src);
 			this.state.viewer.setComposition(this.state.composition);
+			const initialTool = this.props.initialTool ? this.props.initialTool : 'pager';
+			this.state.viewer.setActiveTool(initialTool);
 		} else {
 			// this.viewer.setComposition(null);
 		}

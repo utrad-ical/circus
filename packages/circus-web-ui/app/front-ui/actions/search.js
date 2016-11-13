@@ -22,7 +22,7 @@ async function beginQuery(params) {
 		name
 	});
 	const query = { filter, sort, page };
-	const result = await api(resource, { data: query });
+	const result = await api(`${resource}/search`, { data: query });
 	dispatch({
 		type: 'LOAD_SEARCH_RESULTS',
 		name,

@@ -15,17 +15,17 @@ export const ColorPicker = props => {
 	const className = 'color-picker' + (props.showColorCode ? ' color-code' : '');
 	if (props.showColorCode) {
 		style.color = tinycolor.mostReadable(color, ['#000', '#fff']).toHexString();
-	};
+	}
 	return <OverlayTrigger trigger="click" rootClose overlay={palette} placement="bottom">
 		<div className={className} style={style}>
 			{props.showColorCode ? color.toHexString() : '' }
 		</div>
 	</OverlayTrigger>;
-}
+};
 
 ColorPicker.newItem = () => '#ffffff';
 
-const paletteColors = [
+const defaultColors = [
 	'#000000', '#444444', '#666666', '#999999', '#cccccc', '#eeeeee', '#f3f3f3', '#ffffff',
 	'#ff0000', '#ff9900', '#ffff00', '#00ff00', '#00ffff', '#0000ff', '#9900ff', '#ff00ff',
 	'#f4cccc', '#fce5cd', '#fff2cc', '#d9ead3', '#d0e0e3', '#cfe2f3', '#d9d2e9', '#ead1dc',
@@ -37,12 +37,14 @@ const paletteColors = [
 ];
 
 export const ColorPalette = props => {
+	const colors = Array.isArray(props.colors) ? props.colors : defaultColors;
 	return <div className="color-picker-palette">
-		{paletteColors.map(color => (
+		{colors.map((color, i) => (
 			<div
 				className={'color-picker-palette-color' + (color === props.color ? ' selected' : '')}
 				style={{ backgroundColor: color }}
 				onClick={props.onChange.bind(null, color)}
+				key={i}
 			/>
 		))}
 	</div>;

@@ -8,9 +8,11 @@ import * as rs from 'circus-rs';
 export class ImageViewer extends React.Component {
 	constructor(props) {
 		super(props);
+		const server = store.getState().loginUser.data.dicomImageServer;
+		const client = new rs.RsHttpClient(server);
 		this.state = {
-			client: null // RsHttpClient
-		}
+			client // RsHttpClient
+		};
 	}
 
 	componentWillReceiveProps(newProps) {
@@ -19,33 +21,18 @@ export class ImageViewer extends React.Component {
 		}
 	}
 
-	updateComposition(seriesUID) {
-		if (seriesUID) {
-			const src = new rs.HybridImageSource({
-				client: this.state.client,
-				series: seriesUID
-			});
-			this.state.composition.setImageSource(src);
-			this.state.viewer.setComposition(this.state.composition);
-			const initialTool = this.props.initialTool ? this.props.initialTool : 'pager';
-			this.state.viewer.setActiveTool(initialTool);
-		} else {
-			// this.viewer.setComposition(null);
-		}
-	}
-
 	componentDidMount() {
 		const container = this.refs.container;
 		const viewer = new rs.Viewer(container);
 		const composition = new rs.Composition();
-		const server = store.getState().loginUser.data.dicomImageServer;
-		const client = new rs.RsHttpClient(server);
-		this.setState({
-			viewer,
-			client,
-			composition
+		const src = new rs.HybridImageSource({
+			client: this.state.client,
+			series: this.props.seriesUID
 		});
-		this.updateComposition(this.props.seriesUID);
+		composition.setImageSource(src);
+		viewer.setComposition(composition);
+		const initialTool = this.props.initialTool ? this.props.initialTool : 'pager';
+		viewer.setActiveTool(initialTool);
 	}
 
 	render() {

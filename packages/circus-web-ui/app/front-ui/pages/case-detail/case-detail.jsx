@@ -1,13 +1,14 @@
 import React from 'react';
-import {api} from '../../utils/api';
-import {ImageViewer} from '../../components/image-viewer';
+import { api } from '../../utils/api';
+import { ImageViewer } from '../../components/image-viewer';
+import { Labels } from './labels';
 
 export class CaseDetail extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
 			caseData: null,
-			activeSeries: null
+			activeRevision: null
 		};
 	}
 
@@ -15,23 +16,67 @@ export class CaseDetail extends React.Component {
 		const caseID = this.props.params.cid;
 		const caseData = await api('case/' + caseID);
 		this.setState({ caseData });
-		this.setState({ activeSeries: caseData.latestRevision.series[0].seriesUID });
+		this.setState({ activeRevision: caseData.latestRevision });
 	}
 
 	render() {
 		const cid = this.props.params.cid;
-		return <div className="viewer-cluster">
+		if (!this.state.activeRevision) {
+			return null;
+		}
+		return <div>
 			<div>Case ID: {cid}</div>
+			<RevisionData revision={this.state.caseData.latestRevision} />
+		</div>;
+	}
+}
+
+export class RevisionData extends React.Component {
+
+	constructor(props) {
+		super(props);
+		this.state = { activeSeries: null };
+	}
+
+	componentDidMount() {
+		this.changeActiveSeries(this.props.revision, 0);
+	}
+
+	componentWillReceiveProps(props) {
+		if (this.props.revision !== props.revision) {
+			this.changeActiveSeries(props.revision, 0);
+		}
+	}
+
+	async changeActiveSeries(revision, index) {
+		this.setState({ activeSeries: revision.series[index] });
+	}
+
+	render () {
+		if (!this.state.activeSeries) return null;
+		const seriesUID = this.state.activeSeries.seriesUID;
+		return <div>
+			<div>Labels:</div>
+			<Labels labels={this.state.activeSeries.labels} />
+			<ViewerCluster seriesUID={seriesUID} />
+		</div>;
+	}
+}
+
+export class ViewerCluster extends React.Component {
+	render() {
+		const seriesUID = this.props.seriesUID;
+		return <div className="viewer-cluster">
 			<div className="viewer-row">
 				<div className="viewer viewer-axial">
 					<ImageViewer
-						seriesUID={this.state.activeSeries}
+						seriesUID={seriesUID}
 						orientation="axial"
 					/>
 				</div>
 				<div className="viewer viewer-sagittal">
 					<ImageViewer
-						seriesUID={this.state.activeSeries}
+						seriesUID={seriesUID}
 						orientation="sagittal"
 					/>
 				</div>
@@ -39,13 +84,13 @@ export class CaseDetail extends React.Component {
 			<div className="viewer-row">
 				<div className="viewer viewer-coronal">
 					<ImageViewer
-						seriesUID={this.state.activeSeries}
+						seriesUID={seriesUID}
 						orientation="coronal"
 					/>
 				</div>
 				<div className="viewer viewer-mpr">
 					<ImageViewer
-						seriesUID={this.state.activeSeries}
+						seriesUID={seriesUID}
 						orientation="axial"
 						initialTool="celestialRotate"
 					/>
@@ -54,4 +99,3 @@ export class CaseDetail extends React.Component {
 		</div>;
 	}
 }
-

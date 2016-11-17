@@ -1,7 +1,7 @@
 import React from 'react';
 import { api } from '../../utils/api';
 import { ImageViewer } from '../../components/image-viewer';
-import { Labels } from './labels';
+import { LabelSelector } from './labels';
 
 export class CaseDetail extends React.Component {
 	constructor(props) {
@@ -56,8 +56,10 @@ export class RevisionData extends React.Component {
 		if (!this.state.activeSeries) return null;
 		const seriesUID = this.state.activeSeries.seriesUID;
 		return <div>
-			<div>Labels:</div>
-			<Labels labels={this.state.activeSeries.labels} />
+			<LabelSelector
+				revision={this.props.revision}
+				activeSeries={this.state.activeSeries}
+			/>
 			<ViewerCluster seriesUID={seriesUID} />
 		</div>;
 	}

@@ -13,10 +13,13 @@ import { draw3DLine } from '../../volume-util';
  * VoxelCloudToolBase is a base tool that affects VoxelCloud annotations.
  */
 export class VoxelCloudToolBase extends DraggableTool {
-	protected activeCloud: VoxelCloud = null;
+	protected activeCloud: VoxelCloud | null = null;
 
 	protected convertViewerPoint(point: Vector2D, viewer: Viewer): Vector3D {
 		const state = viewer.getState();
+		const section = state.section;
+		if (!section) throw new Error('Unsupported view state.');
+
 		const comp = viewer.getComposition();
 		const resolution = viewer.getResolution();
 		const src = comp.imageSource as VolumeImageSource;

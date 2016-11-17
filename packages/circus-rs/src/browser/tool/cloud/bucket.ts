@@ -13,7 +13,11 @@ export class BucketTool extends VoxelCloudToolBase {
 		super.dragStartHandler(ev);
 		const viewer = ev.viewer;
 		const state = viewer.getState();
+		const section = state.section;
 		const comp = viewer.getComposition();
+
+		if (!section) return;
+
 		this.activeCloud = this.getActiveCloud(comp);
 		if (!this.activeCloud) return; // no cloud to paint on
 
@@ -22,7 +26,7 @@ export class BucketTool extends VoxelCloudToolBase {
 		const volumePoint = this.convertViewerPoint(viewerPoint, viewer);
 
 		// determine the orientation of section.
-		const orientation = detectOrthogonalSection(state.section);
+		const orientation = detectOrthogonalSection(section);
 		if (orientation === 'oblique') {
 			alert('You cannot use bucket tool on oblique MPR image.');
 			return;

@@ -1,7 +1,7 @@
 import DicomVolume from '../../common/DicomVolume';
 import { PixelFormat, pixelFormatInfo } from '../../common/PixelFormat';
 import { DicomMetadata } from './volume-image-source';
-import { RsHttpLoaderImageSource } from '../../browser/image-source/rs-http-loader-image-source';
+import { RsHttpLoaderImageSource, RsHttpLoaderOptions } from '../../browser/image-source/rs-http-loader-image-source';
 import { ViewState } from '../view-state';
 import { convertSectionToIndex } from '../section-util';
 import { Vector2D, Section } from '../../common/geometry';
@@ -45,7 +45,7 @@ export class RawVolumeImageSource extends RsHttpLoaderImageSource {
 			});
 	}
 
-	constructor({ client = null, series = null } = {}) {
+	constructor({ client, series }: RsHttpLoaderOptions) {
 		super({ client, series });
 		if (!RawVolumeImageSource.sharedCache) {
 			RawVolumeImageSource.sharedCache = new AsyncLruCache(RawVolumeImageSource.loadVolume);
@@ -57,6 +57,9 @@ export class RawVolumeImageSource extends RsHttpLoaderImageSource {
 
 		// convert from mm-coordinate to index-coordinate
 		const mmSection = viewState.section;
+		const viewWindow = viewState.window;
+		if (!mmSection || !viewWindow) throw new Error('Unsupported view state');
+
 		const indexSection: Section = convertSectionToIndex(mmSection, this.voxelSize());
 
 		this.volume.scanObliqueSection(
@@ -64,8 +67,8 @@ export class RawVolumeImageSource extends RsHttpLoaderImageSource {
 			outSize,
 			imageBuffer,
 			viewState.interpolationMode === 'trilinear',
-			viewState.window.width,
-			viewState.window.level
+			viewWindow.width,
+			viewWindow.level
 		);
 
 		// If we use Promise.resolve directly, the then-calleback is called

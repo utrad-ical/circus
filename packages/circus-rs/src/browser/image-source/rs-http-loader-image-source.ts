@@ -1,6 +1,11 @@
 import { VolumeImageSource } from './volume-image-source';
 import { RsHttpClient } from '../http-client/rs-http-client';
 
+export type RsHttpLoaderOptions = {
+	client: RsHttpClient,
+	series: string
+};
+
 /**
  * RsHttpLoaderImageSource is a base class of ImageSource classes which
  * need access to the CIRCUS RS server to render volume-based images.
@@ -13,9 +18,11 @@ export abstract class RsHttpLoaderImageSource extends VolumeImageSource {
 	protected series: string;
 	protected prepareLoader: Promise<void>;
 
-	constructor({ client = null, series = null } = {}) {
+	constructor(options: RsHttpLoaderOptions) {
 		super();
+		const { client, series } = options;
 		if (!(client instanceof RsHttpClient)) throw new TypeError('RsHttpClient not set');
+		if (typeof series !== 'string') throw new TypeError('Series not specified');
 		this.loader = client;
 		this.series = series;
 		this.prepareLoader = this.prepare();

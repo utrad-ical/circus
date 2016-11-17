@@ -26,8 +26,9 @@ export class HandTool extends DraggableTool {
 		viewer.setState(newState);
 	}
 
-	public translateBy(state: ViewState, p: [number, number], vp: [number, number]): ViewState {
+	private translateBy(state: ViewState, p: [number, number], vp: [number, number]): ViewState {
 		const section = state.section;
+		if (!section) return state;
 		const eu = [
 			section.xAxis[0] / vp[0],
 			section.xAxis[1] / vp[0],
@@ -45,7 +46,7 @@ export class HandTool extends DraggableTool {
 			eu[1] * -dx2 + ev[1] * -dy2,
 			eu[2] * -dx2 + ev[2] * -dy2];
 
-		state.section = translateSection(state.section, [dx, dy, dz]);
+		state.section = translateSection(section, [dx, dy, dz]);
 		return state;
 	}
 

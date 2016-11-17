@@ -43,7 +43,7 @@ export function translateSection(section: Section, delta: Vector3D): Section {
  * (i.e., section is treated as a plane that extends infinitely).
  * @return The intersection point. null if there is no intersection.
  */
-export function intersectionOfLineSegmentAndPlane(section: Section, line: LineSegment): Vector3D {
+export function intersectionOfLineSegmentAndPlane(section: Section, line: LineSegment): Vector3D | null {
 
 	const nv = normalVector(section);
 	const P = section.origin;
@@ -90,7 +90,7 @@ export function intersectionPointWithinSection(section: Section, pointOnSection:
  * Calculates the intersection point of the given line segment and the section.
  * @return The intersection point. null if there is no intersection.
  */
-export function intersectionOfLineSegmentAndSection(section: Section, line: LineSegment): Vector3D {
+export function intersectionOfLineSegmentAndSection(section: Section, line: LineSegment): Vector3D | null {
 	const intersection = intersectionOfLineSegmentAndPlane(section, line);
 	if (!intersection) return null;
 	return intersectionPointWithinSection(section, intersection) ? intersection : null;
@@ -107,7 +107,7 @@ export function intersectionOfLineSegmentAndSection(section: Section, line: Line
  */
 export function intersectionOfTwoSections(
 	base: Section, target: Section
-): LineSegment {
+): LineSegment | null {
 	const intersections: Vector3D[] = [];
 
 	// Prepare the 4 edges (line segments) of the target section.

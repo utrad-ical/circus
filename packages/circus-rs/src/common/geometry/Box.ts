@@ -29,7 +29,7 @@ export function boxEquals(box1: Box, box2: Box): boolean {
  * @param section The section
  * @returns {Array} Array of intersection points. Null if there is no intersection.
  */
-export function intersectionOfBoxAndPlane(box: Box, section: Section): Vector3D[] {
+export function intersectionOfBoxAndPlane(box: Box, section: Section): Vector3D[] | null {
 	const intersections: Vector3D[] = [];
 	const boxOrigin = box.origin;
 	const boxSize = box.size;

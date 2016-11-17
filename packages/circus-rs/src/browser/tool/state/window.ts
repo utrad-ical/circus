@@ -9,12 +9,14 @@ export class WindowTool extends DraggableTool {
 	public dragHandler(ev: ViewerEvent): void {
 		super.dragHandler(ev);
 		const dragInfo = this.dragInfo;
-		const viewState = ev.viewer.getState();
+		const state = ev.viewer.getState();
+		const viewWindow = state.window;
+		if (!viewWindow) return;
 		const speed = ev.original.ctrlKey ? 5 : 1;
-		viewState.window.level += dragInfo.dy * speed;
-		viewState.window.width += dragInfo.dx * speed;
-		if (viewState.window.width < 1) viewState.window.width = 1;
-		ev.viewer.setState(viewState);
+		viewWindow.level += dragInfo.dy * speed;
+		viewWindow.width += dragInfo.dx * speed;
+		if (viewWindow.width < 1) viewWindow.width = 1;
+		ev.viewer.setState(state);
 	}
 
 }

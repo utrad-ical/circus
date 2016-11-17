@@ -62,6 +62,9 @@ export class MockImageSource extends VolumeImageSource {
 
 		// convert from mm-coordinate to index-coordinate
 		const mmSection = viewState.section;
+		const viewWindow = viewState.window;
+		if (!mmSection || !viewWindow) throw new Error('Unsupported view state.');
+
 		const indexSection: Section = convertSectionToIndex(mmSection, this.voxelSize());
 
 		this.volume.scanObliqueSection(
@@ -69,8 +72,8 @@ export class MockImageSource extends VolumeImageSource {
 			outSize,
 			imageBuffer,
 			viewState.interpolationMode === 'trilinear',
-			viewState.window.width,
-			viewState.window.level
+			viewWindow.width,
+			viewWindow.level
 		);
 
 		// If we use Promise.resolve directly, the then-calleback is called

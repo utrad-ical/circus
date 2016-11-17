@@ -65,6 +65,7 @@ export abstract class VolumeImageSource extends ImageSource {
 	 */
 	public draw(viewer: Viewer, viewState: ViewState): Promise<ImageData> {
 		const context = viewer.canvas.getContext('2d');
+		if (!context) throw new Error('Failed to get canvas context');
 		const resolution = viewer.getResolution();
 
 		return this.scan(viewState, resolution)

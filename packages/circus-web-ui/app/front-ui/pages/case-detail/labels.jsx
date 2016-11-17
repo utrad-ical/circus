@@ -1,13 +1,24 @@
 import React from 'react';
 import { ColorPicker } from '../../components/color-picker';
-import { Popover, Button, OverlayTrigger, FormControl } from '../../components/react-bootstrap';
+import { Popover, Button, OverlayTrigger, FormControl, Panel } from '../../components/react-bootstrap';
 
-export const Labels = props => {
-	return <ul className="case-label-list">
-		{props.labels.map(label => (
-			<Label label={label} key={label.id} />
+export const LabelSelector = props => {
+	return <ul className="case-series-list">
+		{props.revision.series.map((series, index) => (
+			<Series series={series} index={index + 1} key={series.seriesUID} />
 		))}
 	</ul>;
+};
+
+const Series = props => {
+	return <li className="case-series-list-item">
+		Series #{props.index}
+		<ul className="case-label-list">
+			{props.series.labels.map((label, index) => (
+				<Label label={label} index={index + 1} key={label.id} />
+			))}
+		</ul>
+	</li>;
 };
 
 const labelColors = [
@@ -16,10 +27,13 @@ const labelColors = [
 
 export const Label = props => {
 	const label = props.label;
+	const caption = label.title ? label.title : `Label #${props.index}`;
 	return <li className="label-list-item">
-		{label.id} {label.title ? label.title : ''}
-		<OpacityEditor value={100} onChange={() => 1} />
-		<ColorPicker value="#00ff88" colors={labelColors} onChange={() => 1} />
+		{caption}
+		<div>
+			<OpacityEditor value={100} onChange={() => 1} />
+			<ColorPicker value="#00ff88" colors={labelColors} onChange={() => 1} />
+		</div>
 	</li>;
 };
 

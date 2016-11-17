@@ -8,8 +8,7 @@ import 'babel-polyfill';
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Router, Route, IndexRoute, browserHistory} from 'react-router';
-import { api } from 'utils/api';
+import { Router, Route, IndexRoute, browserHistory } from 'react-router';
 import { App } from 'pages/app';
 import { LoginScreen } from 'pages/login-screen';
 import { Home } from 'pages/home';

@@ -32,12 +32,15 @@ export class DynamicImageSource extends RsHttpLoaderImageSource {
 
 	protected scan(viewState: ViewState, outSize: Vector2D): Promise<Uint8Array> {
 		// convert from mm-coordinate to index-coordinate
-		const indexSection: Section = convertSectionToIndex(viewState.section, this.voxelSize());
+		const section = viewState.section;
+		const viewWindow = viewState.window;
+		if (!section || !viewWindow) throw new Error('Unsupported view state.');
+		const indexSection: Section = convertSectionToIndex(section, this.voxelSize());
 		return this.requestScan(
 			this.series,
 			indexSection,
 			viewState.interpolationMode === 'trilinear',
-			viewState.window,
+			viewWindow,
 			outSize
 		);
 	}

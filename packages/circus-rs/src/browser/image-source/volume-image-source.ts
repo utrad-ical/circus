@@ -5,11 +5,11 @@ import { createOrthogonalMprSection } from '../section-util';
 import { Vector2D, Vector3D } from '../../common/geometry';
 
 export interface DicomMetadata {
-	dicomWindow?: ViewWindow;
-	estimatedWindow?: ViewWindow;
-	voxelCount?: Vector3D;
+	dicomWindow: ViewWindow;
+	estimatedWindow: ViewWindow;
+	voxelCount: Vector3D;
 	voxelSize: Vector3D;
-	pixelFormat?: number;
+	pixelFormat: number;
 }
 
 /**

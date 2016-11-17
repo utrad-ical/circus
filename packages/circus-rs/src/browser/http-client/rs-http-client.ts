@@ -13,7 +13,7 @@ export class RsHttpClient {
 	/**
 	 * OAuth-compatible access token
 	 */
-	private token: string;
+	private token: string | undefined;
 
 	constructor(host: string = 'http://localhost:3000', token?: string) {
 		this.host = host;
@@ -30,7 +30,7 @@ export class RsHttpClient {
 			responseType
 		};
 
-		if (this.token) {
+		if (typeof this.token === 'string') {
 			config.headers = { Authorization: `Bearer ${this.token}` };
 		}
 		return axios(config).then(res => res.data) as any as Promise<any>;

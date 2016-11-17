@@ -118,7 +118,11 @@ export class VoxelCloud implements Annotation {
 	 * the parent volume image source.
 	 */
 	public expandToMaximum(source: VolumeImageSource): void {
-		const bb: Box = { origin: [0, 0, 0], size: source.meta.voxelCount };
+		const voxelCount = source.meta.voxelCount;
+		if (!voxelCount) throw new Error('Voxel count not set');
+		const voxelDimension = this.volume.getDimension();
+		if (!voxelDimension) throw new Error('Voxel dimension not set');
+		const bb: Box = { origin: [0, 0, 0], size: voxelCount };
 		if (boxEquals(bb, { origin: [0, 0, 0], size: this.volume.getDimension() })) {
 			return; // Already expanded
 		}
@@ -129,15 +133,19 @@ export class VoxelCloud implements Annotation {
 		// console.timeEnd('expand to maximum');
 	}
 
-	public draw(viewer: Viewer, viewState: ViewState): Sprite {
-		if (!(this.volume instanceof RawData)) return;
+	public draw(viewer: Viewer, viewState: ViewState): Sprite | null {
+		if (!(this.volume instanceof RawData)) return null;
 		if (this.volume.getPixelFormat() !== PixelFormat.Binary) {
 			throw new Error('The assigned volume must use binary data format.');
 		}
 
 		const context = viewer.canvas.getContext('2d');
+		if (!context) throw new Error('Failed to get canvas context');
+
 		const resolution = viewer.getResolution();
 		const section = viewState.section;
+
+		if (section === undefined) throw new Error('Unsupported view state.');
 
 		/*
 		 * STEP 1. Check if this cloud intersects the current section.
@@ -254,6 +262,7 @@ export class VoxelCloud implements Annotation {
 		// Put the image to the shadow canvas
 		const shadow = this.prepareShadowCanvas(cloudResolution);
 		const shadowContext = shadow.getContext('2d');
+		if (!shadowContext) throw new Error('Failed to get canvas context');
 		shadowContext.clearRect(0, 0, resolution[0], resolution[1]);
 		shadowContext.putImageData(imageData, 0, 0);
 

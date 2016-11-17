@@ -11,12 +11,12 @@ import { VolumeImageSource } from './volume-image-source';
  */
 export class HybridImageSource extends VolumeImageSource {
 
-	private dynSource: DynamicImageSource = null;
-	private volSource: RawVolumeImageSource = null;
+	private dynSource: DynamicImageSource;
+	private volSource: RawVolumeImageSource;
 	private volumeReady: boolean = false;
 
 	public scan(param): Promise<Uint8Array> {
-		return null; // never called
+		return Promise.resolve(new Uint8Array(0)); // never called
 	}
 
 	constructor(params) {

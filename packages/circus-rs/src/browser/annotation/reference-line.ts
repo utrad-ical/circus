@@ -11,12 +11,18 @@ import { vec3 } from 'gl-matrix';
  * of other viewers which share the same composition intersect with this viewer.
  */
 export class ReferenceLine implements Annotation {
-	draw(viewer: Viewer, viewState: ViewState): Sprite {
+	public draw(viewer: Viewer, viewState: ViewState): Sprite | null {
 		const comp = viewer.getComposition();
 		const siblingViewers = comp.viewers.filter(v => v !== viewer);
 
+		const mySection = viewState.section;
+		if (mySection === undefined) {
+			throw new Error('Unsupported view state.');
+		}
+
 		const canvas = viewer.canvas;
 		const ctx = canvas.getContext('2d');
+		if (!ctx) return null;
 		const res = viewer.getResolution();
 
 		try {
@@ -26,18 +32,22 @@ export class ReferenceLine implements Annotation {
 
 			siblingViewers.forEach(sib => {
 				const sibState = sib.getState();
+				const sibSection = sibState.section;
+
+				if (sibSection === undefined) return;
+
 				const refLine = intersectionOfTwoSections(
-					viewState.section, sibState.section
+					mySection, sibSection
 				);
 				if (!refLine) return; // nothing to draw
 				// console.log('drawing cross reference line', refLine);
 				const from = convertVolumeCoordinateToScreenCoordinate(
-					viewState.section,
+					mySection,
 					res,
 					refLine.origin
 				);
 				const to = convertVolumeCoordinateToScreenCoordinate(
-					viewState.section,
+					mySection,
 					res,
 					vec3.add(vec3.create(), refLine.origin, refLine.vector) as Vector3D
 				);

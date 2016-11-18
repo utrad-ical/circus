@@ -17,14 +17,18 @@ export class CelestialRotateTool extends DraggableTool {
 		if (dragInfo.dx === 0 && dragInfo.dy === 0) return;
 
 		const state = ev.viewer.getState();
+		let section = state.section;
+		if (!section) throw new Error('Unsupported view state.');
+
 		if (Math.abs(dragInfo.dx)) {
 			const deg = this.sign(dragInfo.dx) * speed;
-			state.section = this.rotateAroundYAxis(state.section, deg);
+			section = this.rotateAroundYAxis(section, deg);
 		}
 		if (Math.abs(dragInfo.dy)) {
 			const deg = this.sign(dragInfo.dy) * speed;
-			state.section = this.rotateAroundXAxis(state.section, deg);
+			section = this.rotateAroundXAxis(section, deg);
 		}
+		state.section = section;
 		ev.viewer.setState(state);
 	}
 

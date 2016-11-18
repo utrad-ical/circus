@@ -15,7 +15,7 @@ export type SeriesLoaderInfo = {
  * The returned function works as the loader to fetch the binary data
  * of the corresponding DICOM file.
  */
-export default class DicomFileRepository {
+abstract class DicomFileRepository {
 	protected config: any = null;
 
 	constructor(config: any) {
@@ -27,8 +27,7 @@ export default class DicomFileRepository {
 		// do nothing by default
 	}
 
-	public getSeriesLoader(seriesUID: string): Promise<SeriesLoaderInfo> {
-		// abstract
-		return null;
-	}
+	public abstract getSeriesLoader(seriesUID: string): Promise<SeriesLoaderInfo>;
 }
+
+export default DicomFileRepository;

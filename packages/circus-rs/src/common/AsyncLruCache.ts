@@ -6,6 +6,14 @@ interface LruEntry<T> {
 }
 
 export interface AsyncLruCacheOptions<T> {
+	maxCount: number;
+	maxLife: number; // in seconds
+	maxSize: number; // in bytes
+	sizeFunc: (T) => number;
+}
+
+// TODO: Replace this with Partial<AsyncLruCacheOptions> when TS 2.1 is out
+export interface AsyncLruCacheOptionsParameter<T> {
 	maxCount?: number;
 	maxLife?: number; // in seconds
 	maxSize?: number; // in bytes
@@ -35,16 +43,18 @@ export default class AsyncLruCache<T> {
 	private options: AsyncLruCacheOptions<T>;
 	private totalSize: number = 0;
 
-	private defaultOptions: AsyncLruCacheOptions<T> = {
-		maxCount: 10,
-		maxLife: -1,
-		maxSize: -1,
-		sizeFunc: (item: T): number => 1
-	};
+	private defaultOptions(): AsyncLruCacheOptions<T> {
+		return {
+			maxCount: 10,
+			maxLife: -1,
+			maxSize: -1,
+			sizeFunc: (item: T): number => 1
+		};
+	}
 
-	constructor(loader: LoaderFunc<T>, options?: AsyncLruCacheOptions<T>) {
+	constructor(loader: LoaderFunc<T>, options?: AsyncLruCacheOptionsParameter<T>) {
 		this.loader = loader;
-		this.options = this.defaultOptions;
+		this.options = this.defaultOptions();
 		if (typeof options === 'object') {
 			for (let k in options) {
 				if (k in this.options) this.options[k] = options[k];
@@ -66,7 +76,7 @@ export default class AsyncLruCache<T> {
 	 * Does not load anything, but synchronously returns the specified item
 	 * only if it is already loaded.
 	 */
-	public touch(key: string): T {
+	public touch(key: string): T | undefined {
 		for (let i = 0; i < this.lru.length; i++) {
 			if (this.lru[i].key === key) {
 				let entry = this.lru.splice(i, 1)[0];
@@ -158,11 +168,11 @@ export default class AsyncLruCache<T> {
 		return this.totalSize;
 	}
 
-	protected shift(): T {
+	protected shift(): T | undefined {
 		if (this.lru.length > 0) {
 			const shifted = this.lru[0];
 			this.remove(shifted.key);
-			return shifted.item;
+			return shifted ? shifted.item : undefined;
 		}
 	}
 

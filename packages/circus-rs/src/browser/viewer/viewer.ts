@@ -55,12 +55,12 @@ export class Viewer extends EventEmitter {
 	 * After the current rendering is finished, the last suspended one will be used.
 	 * This can prevent the imageSource's draw() method from being called too frequently.
 	 */
-	private nextRender: Promise<any> = null;
+	private nextRender: Promise<any> | null = null;
 
 	/**
 	 * Holds the current rendering promise which is actually processing ImageSource#draw().
 	 */
-	private currentRender: Promise<any> = null;
+	private currentRender: Promise<any> | null = null;
 
 	private createCanvas(width: number, height: number): HTMLCanvasElement {
 		const elm =  document.createElement('canvas');
@@ -162,7 +162,7 @@ export class Viewer extends EventEmitter {
 	 * This function does nothing when ImageSource.draw() is in progress
 	 * (i.e., this.currentRender is not empty).
 	 */
-	public renderAnnotations(viewState: ViewState = null): void {
+	public renderAnnotations(viewState: ViewState | null = null): void {
 		if (this.currentRender) {
 			// Re-drawing annotations should be done when we are not waiting
 			// for the image source to draw.
@@ -179,6 +179,7 @@ export class Viewer extends EventEmitter {
 
 	private renderImageDataToCanvas(image: ImageData): void {
 		const ctx = this.canvas.getContext('2d');
+		if (!ctx) throw new Error('Failed to get canvas context.');
 		ctx.putImageData(image, 0, 0);
 	}
 

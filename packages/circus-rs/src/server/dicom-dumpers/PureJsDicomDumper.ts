@@ -22,9 +22,9 @@ export default class PureJsDicomDumper extends DicomDumper {
 	public readDicom(seriesLoaderInfo: SeriesLoaderInfo): Promise<DicomVolume> {
 		let raw = new DicomVolume();
 		let lastSliceLocation: number;
-		let pitch: number = undefined;
-		let seriesMinValue: number = null;
-		let seriesMaxValue: number = null;
+		let pitch: number | undefined = undefined;
+		let seriesMinValue: number = Infinity;
+		let seriesMaxValue: number = -Infinity;
 		raw.setEstimatedWindow(50, 75);
 
 		const { count, seriesLoader } = seriesLoaderInfo;
@@ -48,8 +48,10 @@ export default class PureJsDicomDumper extends DicomDumper {
 							rescaleSlope: result.rescale.slope,
 							rescaleIntercept: result.rescale.intercept
 						});
-						raw.dcm_wl = result.window.level;
-						raw.dcm_ww = result.window.width;
+						if (result.window !== null) {
+							raw.dcm_wl = result.window.level;
+							raw.dcm_ww = result.window.width;
+						}
 						raw.setDimension(result.columns, result.rows, count, result.pixelFormat);
 					} else if (i > 1 && pitch === undefined) {
 						pitch = Math.abs(lastSliceLocation - result.sliceLocation);

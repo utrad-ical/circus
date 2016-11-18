@@ -95,7 +95,7 @@ export default class Server {
 					reject(err);
 				} else {
 					this.dicomReader.dispose();
-					resolve(null);
+					resolve();
 				}
 			});
 		});

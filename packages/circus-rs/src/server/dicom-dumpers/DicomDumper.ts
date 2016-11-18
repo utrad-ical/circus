@@ -4,7 +4,7 @@ import { SeriesLoaderInfo } from '../dicom-file-repository/DicomFileRepository';
 /**
  * Base DICOM Dumper class.
  */
-export default class DicomDumper {
+abstract class DicomDumper {
 
 	protected config: any = null;
 
@@ -23,8 +23,7 @@ export default class DicomDumper {
 	 * @param seriesLoader series loader function
 	 * @param config request specific parameter (if needed)
 	 */
-	public readDicom(seriesLoaderInfo: SeriesLoaderInfo, config: any): Promise<DicomVolume> {
-		// abstract
-		return null;
-	}
+	public abstract readDicom(seriesLoaderInfo: SeriesLoaderInfo, config: any): Promise<DicomVolume>;
 }
+
+export default DicomDumper;

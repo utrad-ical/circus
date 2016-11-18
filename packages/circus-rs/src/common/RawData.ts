@@ -105,7 +105,7 @@ export default class RawData {
 	 * @param z z-coordinate (floating point)
 	 * @return n Nearest neighbor corresponding voxel value. Returns undefined if out of bounds.
 	 */
-	public getPixelNearestNeighbor(x: number, y: number, z: number): number {
+	public getPixelNearestNeighbor(x: number, y: number, z: number): number | undefined {
 		const x_end = this.size[0] - 1;
 		const y_end = this.size[1] - 1;
 		const z_end = this.size[2] - 1;
@@ -123,7 +123,7 @@ export default class RawData {
 	 * @param z z-coordinate (floating point)
 	 * @return n Interpolated corresponding voxel value. Returns undefined if out of bounds.
 	 */
-	public getPixelWithInterpolation(x: number, y: number, z: number): number {
+	public getPixelWithInterpolation(x: number, y: number, z: number): number | undefined {
 		// Check values
 		const x_end = this.size[0] - 1;
 		const y_end = this.size[1] - 1;
@@ -571,7 +571,8 @@ export default class RawData {
 			for (let i = 0; i < outWidth; i++) {
 				value = voxelReader.call(this, pos_x, pos_y, pos_z); // may return `undefined`
 				if (value !== undefined && useWindow) {
-					value = this.applyWindow(windowWidth, windowLevel, value);
+					// skips failed controls-flow analysis
+					value = this.applyWindow(<number>windowWidth, <number>windowLevel, value);
 				}
 
 				// A value of `undefined` will be silently converted to zero according to the TypedArray spec.

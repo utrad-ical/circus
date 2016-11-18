@@ -7,7 +7,7 @@ export enum ModuleType {
 	DicomDumper
 }
 
-export function loadModule(moduleType: ModuleType, descriptor?: ModuleDefinition): any {
+export function loadModule(moduleType: ModuleType, descriptor: ModuleDefinition): any {
 	let module: string;
 	if (/\//.test(descriptor.module)) {
 		// Load external module if module path is explicitly set

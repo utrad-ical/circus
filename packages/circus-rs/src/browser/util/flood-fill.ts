@@ -58,7 +58,7 @@ export function floodFill(grid: BinaryArrayView2D, center: Vector2D): number {
 	let filled = 0;
 
 	while (stack.length > 0) {
-		const cur: Vector2D = stack.pop();
+		const cur = <Vector2D>stack.pop();
 		minx = cur[0] < minx ? cur[0] : minx;
 		maxx = cur[0] > maxx ? cur[0] : maxx;
 

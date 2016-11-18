@@ -13,7 +13,7 @@ export interface DicomInfo {
 	pixelSpacing: [number, number];
 	pixelFormat: PixelFormat;
 	rescale: RescaleParams;
-	window: WindowParams;
+	window: WindowParams | null;
 	sliceLocation: number;
 	minValue: number;
 	maxValue: number;
@@ -44,7 +44,7 @@ type DicomDataset = {
  */
 export class DicomPixelExtractor {
 
-	private determinePixelFormat(dataset: DicomDataset) {
+	private determinePixelFormat(dataset: DicomDataset): PixelFormat {
 		let pixelRepresentation = dataset.uint16('x00280103');
 		let bitsAllocated = dataset.uint16('x00280100');
 		if (pixelRepresentation === 0 && bitsAllocated === 8) {
@@ -56,6 +56,7 @@ export class DicomPixelExtractor {
 		} else if (pixelRepresentation === 1 && bitsAllocated === 16) {
 			return PixelFormat.Int16; // signed 16 bit data
 		}
+		return PixelFormat.Unknown;
 	}
 
 	private determineRescale(dataset: DicomDataset): RescaleParams {
@@ -67,13 +68,13 @@ export class DicomPixelExtractor {
 		return { intercept, slope };
 	}
 
-	protected determineWindow(dataset: DicomDataset): WindowParams {
-		let [level, width] = [undefined, undefined];
+	protected determineWindow(dataset: DicomDataset): WindowParams | null {
 		if (dataset.elements['x00281050'] && dataset.elements['x00281051']) {
-			level = dataset.floatString('x00281050');
-			width  = dataset.floatString('x00281051');
+			const level = dataset.floatString('x00281050');
+			const width  = dataset.floatString('x00281051');
+			return { level, width };
 		}
-		return { level, width };
+		return null;
 	}
 
 	protected extractUncompressedPixels(
@@ -162,6 +163,11 @@ export class DicomPixelExtractor {
 		let pixelSpacing = <[number, number]>dataset.string('x00280030').split('\\').map(x => parseFloat(x));
 		let rescale = this.determineRescale(dataset);
 		let pixelFormat = this.determinePixelFormat(dataset);
+
+		if (pixelFormat === PixelFormat.Unknown) {
+			throw new RangeError('Unsupported pixel format detected.');
+		}
+
 		let window = this.determineWindow(dataset);
 		let sliceLocation = dataset.floatString('x00201041');
 
@@ -174,7 +180,8 @@ export class DicomPixelExtractor {
 		// let invert = (photometricInterpretation === 'MONOCHROME1');
 
 		let { buffer, minValue, maxValue } = this.extractPixels(
-			dataset, transferSyntax, rows, columns, pixelFormat);
+			dataset, transferSyntax, rows, columns, pixelFormat
+		);
 
 		return {
 			modality,

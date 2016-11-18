@@ -6,7 +6,7 @@ import * as validator from 'validator';
  */
 export interface ValidatorRules {
 	// key => [description, default, validator, sanitizer(normalizer)]
-	[key: string]: [string, any, ((input: any) => boolean) | string | RegExp, ((input: any) => any) | string];
+	[key: string]: [string, any, ((input: any) => boolean) | string | RegExp | null, ((input: any) => any) | string | null];
 }
 
 /**

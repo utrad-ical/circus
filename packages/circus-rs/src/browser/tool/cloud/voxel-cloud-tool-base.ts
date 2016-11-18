@@ -24,13 +24,14 @@ export class VoxelCloudToolBase extends DraggableTool {
 		const resolution = viewer.getResolution();
 		const src = comp.imageSource as VolumeImageSource;
 		const voxelSize = src.voxelSize();
+		const activeCloud = <VoxelCloud>this.activeCloud; // guaranteed to be set
 
 		// from screen 2D coordinate to volume coordinate in millimeter
-		const mmOfVol = su.convertScreenCoordinateToVolumeCoordinate(state.section, resolution, point);
+		const mmOfVol = su.convertScreenCoordinateToVolumeCoordinate(section, resolution, point);
 		// from volume coordinate in millimeter to index coordinate
 		const indexOfVol = su.convertPointToIndex(mmOfVol, voxelSize);
 		// to local coordinate of the cloud (simple translation)
-		const indexOfCloud = vec3.subtract(indexOfVol, indexOfVol, this.activeCloud.origin) as Vector3D;
+		const indexOfCloud = vec3.subtract(indexOfVol, indexOfVol, activeCloud.origin) as Vector3D;
 		// round
 		return [Math.round(indexOfCloud[0]), Math.round(indexOfCloud[1]), Math.round(indexOfCloud[2])] as Vector3D;
 
@@ -59,8 +60,8 @@ export class VoxelCloudToolBase extends DraggableTool {
 	 * Find the active VoxelCloud annotation in a composition
 	 * @return If there is only one active VoxelCloud instance, returns it.
 	 */
-	protected getActiveCloud(composition: Composition): VoxelCloud {
-		let activeCloud: VoxelCloud = null;
+	protected getActiveCloud(composition: Composition): VoxelCloud | null {
+		let activeCloud: VoxelCloud | null = null;
 		composition.annotations.forEach(
 			antn => {
 				if (antn instanceof VoxelCloud && antn.active) {

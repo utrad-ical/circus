@@ -105,7 +105,10 @@ export class VoxelCloud implements Annotation {
 	 */
 	public shrinkToMinimum(): void {
 		// console.time('shrink to minimum bounding box');
-		const boundingBox = scanBoundingBox(this.volume, true);
+		let boundingBox = scanBoundingBox(this.volume, true);
+		if (boundingBox === null) {
+			boundingBox = { origin: [0, 0, 0], size: [1, 1, 1] }; // TODO: Fix this!
+		}
 		this.origin[0] += boundingBox.origin[0];
 		this.origin[1] += boundingBox.origin[1];
 		this.origin[2] += boundingBox.origin[2];

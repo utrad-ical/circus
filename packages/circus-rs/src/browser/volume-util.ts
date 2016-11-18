@@ -13,7 +13,7 @@ import { OrientationString } from './section-util';
  *    the x-size will be normalized to the multiple of 8.
  * @return The bounding box measured in the given volume's coordinate.
  */
-export function scanBoundingBox(volume: RawData, snap: boolean = true): Box {
+export function scanBoundingBox(volume: RawData, snap: boolean = true): Box | null {
 	// TODO: Optimization!
 	const [rx, ry, rz] = volume.getDimension();
 	let minX = rx, maxX = -1;
@@ -127,11 +127,11 @@ function getStepToNeighbor(pos: Vector3D, e: Vector3D): Vector3D {
 
 
 /**
- * Calculates the distance(?) to the next lattice point. (one dimensional)
+ * Calculates the 1/distance to the next lattice point. (one dimensional)
  * @param p starting point
  * @param u the direction
  */
-function nextLatticeDistance(p: number, u: number): number {
+function nextLatticeDistance(p: number, u: number): number | null {
 	if (u === 0) return null;
 	const i = u < 0 ? Math.floor(p) : Math.ceil(p);
 	if (p === i) return Math.abs(1 / u);
@@ -177,8 +177,9 @@ export function floodFillOnSlice(volume: RawData, center: Vector3D, orientation:
 			set: (val, [x, y]) => volume.writePixelAt(val ? 1 : 0, x, center[1], y)
 		};
 		start = [center[0], center[2]];
+	} else {
+		throw new TypeError('Invalid orientation');
 	}
-	if (!view) throw new TypeError('Invalid orientation');
 
 	// Applies the generic flood-fill function on a volume
 	const filledPixels = floodFill(view, start);

@@ -1,7 +1,4 @@
-// Raw voxel container class
-
 import { MultiRange } from 'multi-integer-range';
-
 import { PixelFormat, PixelFormatInfo, pixelFormatInfo } from './PixelFormat';
 import { Vector2D, Vector3D, Section, Box } from './geometry';
 
@@ -64,6 +61,29 @@ export default class RawData {
 	 */
 	protected loadedSlices: MultiRange = new MultiRange();
 
+	/**
+	 * Set the size of the volume and allocate an byte array.
+	 * @param size The number of voxels.
+	 * @param pixelFormat The pixel format.
+	 */
+	constructor(size: Vector3D, pixelFormat: PixelFormat) {
+		const [x, y, z] = size;
+		if (x <= 0 || y <= 0 || z <= 0) {
+			throw new RangeError('Invalid volume size.');
+		}
+		if (x * y * z > 1024 * 1024 * 1024) {
+			throw new RangeError('Maximum voxel limit exceeded.');
+		}
+		if (pixelFormat === PixelFormat.Binary && x % 8 !== 0) { // image area must be multiple of 8
+			throw new Error('Number of pixels along the x axis must be a multiple of 8.');
+		}
+
+		this.size = [x, y, z];
+		this.pixelFormat = pixelFormat;
+		const pxInfo = this.getPixelFormatInfo(this.pixelFormat);
+		this.data = new ArrayBuffer(this.size[0] * this.size[1] * this.size[2] * pxInfo.bpp);
+		this.setAccessor();
+	}
 
 	/**
 	 * Gets pixel value at the specified location. Each parameter must be an integer.
@@ -242,34 +262,6 @@ export default class RawData {
 	}
 
 	/**
-	 * Set the size of the volume and allocate an byte array.
-	 * @param x The volume size along the x-axis ("width")
-	 * @param y The volume size along the y-axis ("height")
-	 * @param z The volume size along the z-axis ("depth")
-	 * @param type The pixel format
-	 */
-	public setDimension(x: number, y: number, z: number, type: PixelFormat): void {
-		if (x <= 0 || y <= 0 || z <= 0) {
-			throw new Error('Invalid volume size.');
-		}
-		if (this.size) {
-			throw new Error('Dimension already fixed.');
-		}
-		if (x * y * z > 1024 * 1024 * 1024) {
-			throw new Error('Maximum voxel limit exceeded.');
-		}
-		if (type === PixelFormat.Binary && (x * y) % 8 !== 0) { // image area must be multiple of 8
-			throw new Error('Number of pixels in a slice must be a multiple of 8.');
-		}
-
-		this.size = [x, y, z];
-		this.pixelFormat = type;
-		const pxInfo = this.getPixelFormatInfo(this.pixelFormat);
-		this.data = new ArrayBuffer(this.size[0] * this.size[1] * this.size[2] * pxInfo.bpp);
-		this.setAccessor();
-	}
-
-	/**
 	 * Assigns a correct `read` and `write` methods according to the
 	 * current pixel format.
 	 */
@@ -326,12 +318,14 @@ export default class RawData {
 
 	/**
 	 * Sets the size of one voxel in millimeter.
-	 * @param width The size of a voxel in millimeter along x-axis.
-	 * @param height The size of a voxel in millimeter along y-axis.
-	 * @param depth The size of a voxel in millimeter along z-axis.
+	 * @param voxelSize The size of a voxel in millimeter.
 	 */
-	public setVoxelDimension(width: number, height: number, depth: number): void {
-		this.voxelSize = [width, height, depth];
+	public setVoxelSize(voxelSize: Vector3D): void {
+		const [sx, sy, sz] = voxelSize;
+		if (sx <= 0 || sy <= 0 || sz <= 0) {
+			throw new RangeError('Invalid voel size.');
+		}
+		this.voxelSize = [sx, sy, sz];
 	}
 
 	/**
@@ -360,9 +354,8 @@ export default class RawData {
 	 *     map the voxel values.
 	 */
 	public convert(targetFormat: PixelFormat, mapper: (number) => number): void {
-		const newRaw = new RawData();
 		const [rx, ry, rz] = this.size;
-		newRaw.setDimension(this.size[0], this.size[1], this.size[2], targetFormat);
+		const newRaw = new RawData(this.size, targetFormat);
 		for (let z = 0; z < rz; z++) {
 			for (let y = 0; y < ry; y++) {
 				for (let x = 0; x < rx; x++) {
@@ -470,8 +463,7 @@ export default class RawData {
 	 * @param orig The origin of the current bounding box. Defaults to [0, 0, 0].
 	 */
 	public transformBoundingBox(newBox: Box, origin: Vector3D = [0, 0, 0]): void {
-		const newVol = new RawData();
-		newVol.setDimension(newBox.size[0], newBox.size[1], newBox.size[2], this.pixelFormat);
+		const newVol = new RawData(newBox.size, this.pixelFormat);
 		const srcBox: Box = { origin: [0, 0, 0], size: this.size };
 		const offset: Vector3D = [
 			origin[0] - newBox.origin[0],

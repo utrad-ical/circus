@@ -29,10 +29,9 @@ export class RawVolumeImageSource extends RsHttpLoaderImageSource {
 	private static loadVolume(series: string, meta: DicomMetadata, loader: RsHttpClient): Promise<DicomVolume> {
 		return loader.request(`series/${series}/volume`, {}, 'arraybuffer')
 			.then(buffer => {
-				const volume = new DicomVolume();
 				const pixelFormat: PixelFormat = meta.pixelFormat;
-				volume.setDimension(meta.voxelCount[0], meta.voxelCount[1], meta.voxelCount[2], pixelFormat);
-				volume.setVoxelDimension(meta.voxelSize[0], meta.voxelSize[1], meta.voxelSize[2]);
+				const volume = new DicomVolume(meta.voxelCount, pixelFormat);
+				volume.setVoxelSize(meta.voxelSize);
 				volume.dcm_wl = meta.dicomWindow.level;
 				volume.dcm_ww = meta.dicomWindow.width;
 				volume.wl = meta.estimatedWindow.level;

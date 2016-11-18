@@ -20,12 +20,11 @@ export default class PureJsDicomDumper extends DicomDumper {
 	}
 
 	public readDicom(seriesLoaderInfo: SeriesLoaderInfo): Promise<DicomVolume> {
-		let raw = new DicomVolume();
+		let raw: DicomVolume;
 		let lastSliceLocation: number;
 		let pitch: number | undefined = undefined;
 		let seriesMinValue: number = Infinity;
 		let seriesMaxValue: number = -Infinity;
-		raw.setEstimatedWindow(50, 75);
 
 		const { count, seriesLoader } = seriesLoaderInfo;
 
@@ -41,7 +40,7 @@ export default class PureJsDicomDumper extends DicomDumper {
 						if ('x00180088' in result.dataset.elements) {
 							// [0018, 0088] Spacing between slices
 							pitch = result.dataset.floatString('x00180088');
-							raw.setVoxelDimension(result.pixelSpacing[0], result.pixelSpacing[1], pitch);
+							raw.setVoxelSize([result.pixelSpacing[0], result.pixelSpacing[1], pitch]);
 						}
 						raw.appendHeader({
 							modality: result.modality,
@@ -52,10 +51,11 @@ export default class PureJsDicomDumper extends DicomDumper {
 							raw.dcm_wl = result.window.level;
 							raw.dcm_ww = result.window.width;
 						}
-						raw.setDimension(result.columns, result.rows, count, result.pixelFormat);
+						raw = new DicomVolume([result.columns, result.rows, count], result.pixelFormat);
+						raw.setEstimatedWindow(50, 75);
 					} else if (i > 1 && pitch === undefined) {
 						pitch = Math.abs(lastSliceLocation - result.sliceLocation);
-						raw.setVoxelDimension(result.pixelSpacing[0], result.pixelSpacing[1], pitch);
+						raw.setVoxelSize([result.pixelSpacing[0], result.pixelSpacing[1], pitch]);
 					}
 					seriesMinValue = Math.min(seriesMinValue, result.minValue);
 					seriesMaxValue = Math.max(seriesMinValue, result.maxValue);

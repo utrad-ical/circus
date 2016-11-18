@@ -9,8 +9,7 @@ var assert = require('chai').assert;
 
 describe('RawData', function () {
 	it('must create binary data', function () {
-		var raw = new RawData();
-		raw.setDimension(8, 8, 8, PixelFormat.Binary);
+		var raw = new RawData([8, 8, 8], PixelFormat.Binary);
 		var array = new Uint8Array(8); // 64 bits in a slice
 		array[0] = 0xAA; // 0b10101010
 		raw.insertSingleImage(0, array.buffer);
@@ -22,8 +21,7 @@ describe('RawData', function () {
 
 	function readWriteTest(pixelFormat, w, h, d) {
 		return function () {
-			var raw = new RawData();
-			raw.setDimension(w, h, d, pixelFormat);
+			var raw = new RawData([w, h, d], pixelFormat);
 			var pi = raw.getPixelFormatInfo(pixelFormat);
 			var lo = pi.minLevel;
 			var hi = pi.maxLevel;
@@ -63,19 +61,16 @@ describe('RawData', function () {
 		readWriteTest(PixelFormat.Binary, 32, 32, 10));
 
 	it('must perform pixel format converting', function() {
-		var raw = new RawData();
-		raw.setDimension(4, 4, 4, PixelFormat.Int16);
+		var raw = new RawData([4, 4, 4], PixelFormat.Int16);
 		raw.convert(PixelFormat.Int8, function(v) { return v + 5; });
 		assert.equal(raw.getPixelFormat(), PixelFormat.Int8);
 		assert.equal(raw.getPixelAt(2, 2, 2), 5);
 	});
 
 	it('must copy data from another instance', function() {
-		var src = new RawData();
-		src.setDimension(16, 16, 16, PixelFormat.Int8);
+		var src = new RawData([16, 16, 16], PixelFormat.Int8);
 		src.fillAll((x, y, z) => x + y + z);
-		var dest = new RawData();
-		dest.setDimension(16, 16, 16, PixelFormat.Int8);
+		var dest = new RawData([16, 16, 16], PixelFormat.Int8);
 		dest.copy(src);
 		assert.equal(dest.getPixelAt(3, 10, 7), 20);
 
@@ -101,8 +96,7 @@ describe('RawData', function () {
 	it('must transform bounding box', function() {
 
 		function newVol() {
-			var vol = new RawData();
-			vol.setDimension(16, 16, 16, PixelFormat.Int8);
+			var vol = new RawData([16, 16, 16], PixelFormat.Int8);
 			vol.fillAll((x, y, z) => x + y + z);
 			return vol;
 		}

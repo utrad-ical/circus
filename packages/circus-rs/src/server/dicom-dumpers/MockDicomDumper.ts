@@ -18,12 +18,12 @@ export default class MockDicomDumper extends DicomDumper {
 	 * Buffer data: block data in dcm_voxel_dump combined format
 	 */
 	public makeMockVol(): DicomVolume {
-		let raw = new DicomVolume();
-		let {
+		const {
 			width = 512, height = 512, depth = 128,
 			pixelFormat = PixelFormat.Int16,
 			vx = 0.5, vy = 0.5, vz = 0.5 } = this.config;
-		raw.setDimension(width, height, depth, pixelFormat);
+		const raw = new DicomVolume([width, height, depth], pixelFormat);
+		raw.setVoxelSize([vx, vy, vz]);
 		let val: number;
 		for (var z = 0; z < depth; z++) {
 			for (let y = 0; y < height; y++) {
@@ -42,7 +42,6 @@ export default class MockDicomDumper extends DicomDumper {
 			}
 			raw.markSliceAsLoaded(z);
 		}
-		raw.setVoxelDimension(vx, vy, vz);
 		raw.setEstimatedWindow(10, 100);
 		return raw;
 	}

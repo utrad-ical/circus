@@ -14,15 +14,13 @@ describe('volume-util', function() {
 	describe('scanBoundingBox()', function() {
 
 		it('should return null for volume with all zeros', function() {
-			var vol = new RawData();
-			vol.setDimension(8, 8, 8, PixelFormat.Int8);
+			var vol = new RawData([8, 8, 8], PixelFormat.Int8);
 			var box = volUtil.scanBoundingBox(vol);
 			assert.equal(box, null);
 		});
 
 		it('should return correct box for volume with some non-zeros', function() {
-			var vol = new RawData();
-			vol.setDimension(8, 8, 8, PixelFormat.Int8);
+			var vol = new RawData([8 ,8, 8], PixelFormat.Int8);
 			vol.writePixelAt(1, 5, 5, 5);
 			vol.writePixelAt(1, 5, 6, 7);
 			var box = volUtil.scanBoundingBox(vol);
@@ -30,8 +28,7 @@ describe('volume-util', function() {
 		});
 
 		it('should snap x-size to the multiple of 8', function() {
-			var vol = new RawData();
-			vol.setDimension(8, 8, 8, PixelFormat.Binary);
+			var vol = new RawData([8, 8, 8], PixelFormat.Binary);
 			vol.writePixelAt(1, 5, 5, 5);
 			vol.writePixelAt(1, 5, 6, 7);
 			var box = volUtil.scanBoundingBox(vol, true); // snap
@@ -39,8 +36,7 @@ describe('volume-util', function() {
 		});
 
 		it('should return correct box for volume with all non-zeros', function() {
-			var vol = new RawData();
-			vol.setDimension(8, 8, 8, PixelFormat.Int8);
+			var vol = new RawData([8, 8, 8], PixelFormat.Int8);
 			vol.fillAll(1);
 			var box = volUtil.scanBoundingBox(vol);
 			assert.deepEqual(box, { origin: [0, 0, 0], size: [8, 8, 8] });

@@ -2,12 +2,6 @@ import { MultiRange } from 'multi-integer-range';
 import { PixelFormat, PixelFormatInfo, pixelFormatInfo } from './PixelFormat';
 import { Vector2D, Vector3D, Section, Box } from './geometry';
 
-interface MprResult {
-	image: Uint8Array;
-	outWidth:  number;
-	outHeight: number;
-}
-
 // Make sure you don't add properties
 // that heavily depends on DICOM spec!
 
@@ -24,11 +18,6 @@ export default class RawData {
 	 * Pixel format.
 	 */
 	protected pixelFormat: PixelFormat = PixelFormat.Unknown;
-
-	/**
-	 * The size of one voxel, measured in millimeter.
-	 */
-	protected voxelSize: Vector3D = null;
 
 	/**
 	 * Bytes per voxel [byte/voxel]
@@ -317,26 +306,6 @@ export default class RawData {
 	}
 
 	/**
-	 * Sets the size of one voxel in millimeter.
-	 * @param voxelSize The size of a voxel in millimeter.
-	 */
-	public setVoxelSize(voxelSize: Vector3D): void {
-		const [sx, sy, sz] = voxelSize;
-		if (sx <= 0 || sy <= 0 || sz <= 0) {
-			throw new RangeError('Invalid voel size.');
-		}
-		this.voxelSize = [sx, sy, sz];
-	}
-
-	/**
-	 * Returns the size of one voxel.
-	 * @return A Vector3D object representing the size of one voxel.
-	 */
-	public getVoxelDimension(): Vector3D {
-		return <Vector3D>this.voxelSize.slice(0);
-	}
-
-	/**
 	 * Calculates the volume data size in bytes.
 	 * @return The byte size of the volume.
 	 */
@@ -579,20 +548,6 @@ export default class RawData {
 			y += ev_y;
 			z += ev_z;
 		}
-	}
-
-	/**
-	 * Returns the dimension of this volume measured in millimeter.
-	 */
-	public getMmDimension(): Vector3D {
-		if (!this.size) throw new Error('Dimension not set');
-		if (!this.voxelSize) throw new Error('Voxel size not set');
-
-		return [
-			this.size[0] * this.voxelSize[0],
-			this.size[1] * this.voxelSize[1],
-			this.size[2] * this.voxelSize[2]
-		];
 	}
 
 }

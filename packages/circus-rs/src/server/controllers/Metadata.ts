@@ -14,7 +14,7 @@ export default class Metadata extends VolumeBasedController {
 	): void {
 		const vol = req.volume;
 		const dim = vol.getDimension();
-		const vd = vol.getVoxelDimension();
+		const vd = vol.getVoxelSize();
 		const response: any = {
 			voxelCount: dim,
 			voxelSize: vd,

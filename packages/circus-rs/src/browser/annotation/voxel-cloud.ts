@@ -2,7 +2,6 @@ import { Annotation } from './annotation';
 import { Viewer } from '../viewer/viewer';
 import { ViewState } from '../view-state';
 import { Sprite } from '../viewer/sprite';
-import RawData from '../../common/RawData';
 import {
 	Vector2D,
 	Vector3D,
@@ -20,6 +19,7 @@ import {
 import { scanBoundingBox } from '../volume-util';
 import { convertSectionToIndex } from '../section-util';
 import { VolumeImageSource } from '../image-source/volume-image-source';
+import AnisotropicRawData from "../../common/AnisotropicRawData";
 
 /**
  * VoxelCloud is a type of Annotation that can be registered to a Composition.
@@ -48,7 +48,7 @@ export class VoxelCloud implements Annotation {
 	/**
 	 * Actual volume data. The pixelFormat must be set to Binary.
 	 */
-	public volume: RawData;
+	public volume: AnisotropicRawData;
 
 	/**
 	 * The position of the origin of this volume data in the voxel coordinate of ImageSource.
@@ -92,7 +92,7 @@ export class VoxelCloud implements Annotation {
 	}
 
 	private toMillimeter(vector: Vector3D): Vector3D {
-		const voxelSize = this.volume.getVoxelDimension();
+		const voxelSize = this.volume.getVoxelSize();
 		return [
 			vector[0] * voxelSize[0],
 			vector[1] * voxelSize[1],
@@ -137,7 +137,7 @@ export class VoxelCloud implements Annotation {
 	}
 
 	public draw(viewer: Viewer, viewState: ViewState): Sprite | null {
-		if (!(this.volume instanceof RawData)) return null;
+		if (!(this.volume instanceof AnisotropicRawData)) return null;
 		if (this.volume.getPixelFormat() !== PixelFormat.Binary) {
 			throw new Error('The assigned volume must use binary data format.');
 		}
@@ -220,7 +220,7 @@ export class VoxelCloud implements Annotation {
 				boundingYAxisEnd[2] - boundingOrigin[2]
 			]
 		};
-		const indexCloudSection: Section = convertSectionToIndex(cloudSection, this.volume.getVoxelDimension());
+		const indexCloudSection: Section = convertSectionToIndex(cloudSection, this.volume.getVoxelSize());
 
 
 		/*

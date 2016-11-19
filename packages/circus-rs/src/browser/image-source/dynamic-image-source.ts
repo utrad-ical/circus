@@ -1,7 +1,8 @@
 import { RsHttpLoaderImageSource } from '../../browser/image-source/rs-http-loader-image-source';
-import { ViewState, ViewWindow } from '../view-state';
+import { ViewState } from '../view-state';
 import { convertSectionToIndex } from '../section-util';
 import { Vector2D, Section } from '../../common/geometry';
+import { ViewWindow } from '../../common/ViewWindow';
 
 /**
  * DynamicImageSource fetches the MPR image from RS server.

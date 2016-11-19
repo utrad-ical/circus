@@ -1,8 +1,9 @@
 import { ImageSource } from './image-source';
-import { ViewState, ViewWindow } from '../view-state';
+import { ViewState } from '../view-state';
 import { Viewer } from '../viewer/viewer';
 import { createOrthogonalMprSection } from '../section-util';
 import { Vector2D, Vector3D } from '../../common/geometry';
+import { ViewWindow } from '../../common/ViewWindow';
 
 export interface DicomMetadata {
 	dicomWindow: ViewWindow;

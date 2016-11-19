@@ -1,7 +1,6 @@
 import AnisotropicRawData from "./AnisotropicRawData";
 import { MultiRange } from 'multi-integer-range';
 
-
 export default class DicomVolume extends AnisotropicRawData {
 	// Estimated window, calculated from the actual voxel data
 	public wl: number = 1500;

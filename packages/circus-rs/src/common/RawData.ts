@@ -1,4 +1,3 @@
-import { MultiRange } from 'multi-integer-range';
 import { PixelFormat, PixelFormatInfo, pixelFormatInfo } from './PixelFormat';
 import { Vector2D, Vector3D, Section, Box } from './geometry';
 
@@ -45,12 +44,6 @@ export default class RawData {
 	protected write: (value: number, pos: number) => void;
 
 	/**
-	 * Holds which images are already loaded in this volume.
-	 * When complete, this.loadedSlices.length() will be the same as this.size[2].
-	 */
-	protected loadedSlices: MultiRange = new MultiRange();
-
-	/**
 	 * Set the size of the volume and allocate an byte array.
 	 * @param size The number of voxels.
 	 * @param pixelFormat The pixel format.
@@ -94,17 +87,6 @@ export default class RawData {
 	 */
 	public writePixelAt(value: number, x: number, y: number, z: number): void {
 		this.write(value, x + (y + z * this.size[1]) * this.size[0]);
-	}
-
-	/**
-	 * Append z to loadedSlices:MultiRange.
-	 * @param z z-coordinate
-	 */
-	public markSliceAsLoaded(z: number): void {
-		if (z < 0 || z >= this.size[2]) {
-			throw new RangeError('z-index out of bounds');
-		}
-		this.loadedSlices.append(z);
 	}
 
 	/**
@@ -205,10 +187,6 @@ export default class RawData {
 	 * @param imageData The inserted image data using the machine's native byte order.
 	 */
 	public insertSingleImage(z: number, imageData: ArrayBuffer): void {
-		if (!this.size) {
-			throw new Error('Dimension not set');
-		}
-
 		const [rx, ry, rz] = this.size;
 		if (z < 0 || z >= rz) {
 			throw new RangeError('z-index out of bounds');
@@ -224,7 +202,6 @@ export default class RawData {
 		const src = new Uint8Array(imageData, 0, byteLength);
 		const dst = new Uint8Array(this.data, offset, byteLength);
 		dst.set(src); // This overwrites the existing slice (if any)
-		this.loadedSlices.append(z);
 	}
 
 	/**
@@ -233,10 +210,6 @@ export default class RawData {
 	 * @return The image data
 	 */
 	public getSingleImage(z: number): ArrayBuffer {
-		if (!this.size) {
-			throw new Error('Dimension not set');
-		}
-
 		const [rx, ry, rz] = this.size;
 		if (z < 0 || z >= rz) {
 			throw new RangeError('z-index out of bounds');
@@ -277,10 +250,7 @@ export default class RawData {
 	 * @return The size of this volume.
 	 */
 	public getDimension(): Vector3D {
-		if (!this.size) {
-			throw new Error('Dimension not set');
-		}
-		return <Vector3D>this.size.slice(0);
+		return [this.size[0], this.size[1], this.size[2]];
 	}
 
 	/**
@@ -310,9 +280,6 @@ export default class RawData {
 	 * @return The byte size of the volume.
 	 */
 	public get dataSize(): number {
-		if (!this.size) {
-			throw new Error('Dimension not set');
-		}
 		return this.size[0] * this.size[1] * this.size[2] * this.bpp;
 	}
 

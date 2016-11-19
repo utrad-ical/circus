@@ -12,7 +12,7 @@ export default class RawData {
 	/**
 	 * Number of voxels.
 	 */
-	protected size: Vector3D = null;
+	protected size: Vector3D;
 
 	/**
 	 * Pixel format.
@@ -22,7 +22,7 @@ export default class RawData {
 	/**
 	 * Bytes per voxel [byte/voxel]
 	 */
-	protected bpp: number = 1;
+	protected bpp: number;
 
 	/**
 	 * Actual image data.

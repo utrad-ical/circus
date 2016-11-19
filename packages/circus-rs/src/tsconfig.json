@@ -4,7 +4,7 @@
 		"target": "es5",
 		"outDir": "../lib",
 		"lib": ["dom", "es5", "es2015.promise"],
-		"strictNullChecks": false
+		"strictNullChecks": true
 	},
 	"compileOnSave": false,
 	"buildOnSave": false

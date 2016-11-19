@@ -47,12 +47,9 @@ export default class PureJsDicomDumper extends DicomDumper {
 							rescaleSlope: result.rescale.slope,
 							rescaleIntercept: result.rescale.intercept
 						});
-						if (result.window !== null) {
-							raw.dcm_wl = result.window.level;
-							raw.dcm_ww = result.window.width;
-						}
+						raw.dicomWindow = result.window;
 						raw = new DicomVolume([result.columns, result.rows, count], result.pixelFormat);
-						raw.setEstimatedWindow(50, 75);
+						raw.estimatedWindow = { width: 50, level: 75 };
 					} else if (i > 1 && pitch === undefined) {
 						pitch = Math.abs(lastSliceLocation - result.sliceLocation);
 						raw.setVoxelSize([result.pixelSpacing[0], result.pixelSpacing[1], pitch]);
@@ -79,7 +76,7 @@ export default class PureJsDicomDumper extends DicomDumper {
 			// Specific to CIRCUS RS: Apply rescale only when the modality is CT
 			let estimatedWidth = Math.floor(seriesMaxValue - seriesMinValue + 1);
 			let estimatedLevel = Math.floor(seriesMinValue + estimatedWidth / 2);
-			raw.setEstimatedWindow(estimatedLevel, estimatedWidth);
+			raw.estimatedWindow = { level: estimatedLevel, width: estimatedWidth };
 			return raw;
 		});
 	}

@@ -1,14 +1,17 @@
 import AnisotropicRawData from "./AnisotropicRawData";
 import { MultiRange } from 'multi-integer-range';
+import { ViewWindow } from './ViewWindow';
 
 export default class DicomVolume extends AnisotropicRawData {
-	// Estimated window, calculated from the actual voxel data
-	public wl: number = 1500;
-	public ww: number = 2000;
+	/**
+	 * Estimated window, calculated from the actual voxel data
+	 */
+	public estimatedWindow: ViewWindow | null;
 
-	// Default window, described in DICOM file
-	public dcm_wl: number;
-	public dcm_ww: number;
+	/**
+	 * Default window, described in DICOM file
+	 */
+	public dicomWindow: ViewWindow | null;
 
 	/**
 	 * Holds which images are already loaded in this volume.
@@ -54,8 +57,4 @@ export default class DicomVolume extends AnisotropicRawData {
 		this.loadedSlices.append(z);
 	}
 
-	public setEstimatedWindow(level: number, width: number): void {
-		this.wl = level;
-		this.ww = width;
-	}
 }

@@ -46,7 +46,7 @@ export class MockImageSource extends VolumeImageSource {
 		};
 
 		raw.setVoxelSize(meta.voxelSize);
-		raw.setEstimatedWindow(wl, ww);
+		raw.estimatedWindow = { level: wl, width: ww };
 		raw.fillAll(createValue);
 
 		for (let z = 0; z < depth; z++) {

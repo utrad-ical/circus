@@ -13,17 +13,13 @@ export default class Metadata extends VolumeBasedController {
 		req: express.Request, res: express.Response, next: express.NextFunction
 	): void {
 		const vol = req.volume;
-		const dim = vol.getDimension();
-		const vd = vol.getVoxelSize();
 		const response: any = {
-			voxelCount: dim,
-			voxelSize: vd,
-			estimatedWindow: { width: vol.ww, level: vol.wl },
+			voxelCount: vol.getDimension(),
+			voxelSize: vol.getVoxelSize(),
+			estimatedWindow: vol.estimatedWindow,
+			dicomWindow: vol.dicomWindow,
 			pixelFormat: vol.getPixelFormat()
 		};
-		if (vol.dcm_ww !== null && vol.dcm_wl !== null) {
-			response.dicomWindow = { width: vol.dcm_ww, level: vol.dcm_wl };
-		}
 		this.respondJson(res, response);
 	}
 

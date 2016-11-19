@@ -42,7 +42,7 @@ export default class MockDicomDumper extends DicomDumper {
 			}
 			raw.markSliceAsLoaded(z);
 		}
-		raw.setEstimatedWindow(10, 100);
+		raw.estimatedWindow = { level: 10, width: 100 };
 		return raw;
 	}
 }

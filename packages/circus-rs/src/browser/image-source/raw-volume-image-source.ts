@@ -32,10 +32,8 @@ export class RawVolumeImageSource extends RsHttpLoaderImageSource {
 				const pixelFormat: PixelFormat = meta.pixelFormat;
 				const volume = new DicomVolume(meta.voxelCount, pixelFormat);
 				volume.setVoxelSize(meta.voxelSize);
-				volume.dcm_wl = meta.dicomWindow.level;
-				volume.dcm_ww = meta.dicomWindow.width;
-				volume.wl = meta.estimatedWindow.level;
-				volume.ww = meta.estimatedWindow.width;
+				volume.dicomWindow = meta.dicomWindow;
+				volume.estimatedWindow = meta.estimatedWindow;
 				const bytesPerSlice = meta.voxelCount[0] * meta.voxelCount[1] * pixelFormatInfo(pixelFormat).bpp;
 				for (let i = 0; i < meta.voxelCount[2]; i++) {
 					volume.insertSingleImage(i, buffer.slice(bytesPerSlice * i, bytesPerSlice * (i + 1)));

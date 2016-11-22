@@ -162,12 +162,13 @@ export default class Server {
 			const module: typeof Controller = require(`./controllers/${moduleName}`).default;
 			const controller = new module(this.logger, this.dicomReader, this.imageEncoder);
 
-			const execute = (req: express.Request, res: express.Response, next: express.NextFunction) => {
-				this.logger.info(req.url, req.hostname);
-				this.counter.countUp(routeName);
-				controller.execute(req, res, next);
-			};
-			this.express.get(`/${routeName}`, [...middleware, execute]);
+			const logAccess = (req, res, next) => { this.logger.info(req.url, req.hostname); next(); };
+			const countUp = (req, res, next) => { this.counter.countUp(routeName); next(); };
+
+			this.express.get(
+				`/${routeName}`,
+				[logAccess, countUp, ...middleware, ...controller.middlewares()]
+			);
 
 			// CrossOrigin Resource Sharing http://www.w3.org/TR/cors/
 			this.express.options(

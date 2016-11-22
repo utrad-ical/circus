@@ -20,28 +20,31 @@ export default class Controller {
 		this.logger = logger;
 		this.reader = reader;
 		this.imageEncoder = imageEncoder;
-		this.initialize();
 	}
 
-	protected initialize(): void {
-		// abstract
+	public middlewares(): any {
+		return [
+			this.validate(this.getRules()).bind(this),
+			this.process.bind(this)
+		];
 	}
 
-	public execute(req: express.Request, res: express.Response, next: express.NextFunction): void {
-		const origQuery = req.query;
-		const validator = new Validator(this.getRules());
-		const {result, errors} = validator.validate(origQuery);
-		if (errors.length) {
-			next(this.createBadRequestError(errors.join('\n')));
-			return;
-		}
-
-		try {
-			req.query = result;
-			this.process(req, res, next);
-		} catch (e) {
-			next(e);
-		}
+	private validate(rules: ValidatorRules): express.Handler {
+		return function(req, res, next): void {
+			const origQuery = req.query;
+			const validator = new Validator(rules);
+			const { result, errors } = validator.validate(origQuery);
+			if (errors.length) {
+				next(this.createBadRequestError(errors.join('\n')));
+				return;
+			}
+			try {
+				req.query = result;
+				next();
+			} catch (e) {
+				next(e);
+			}
+		};
 	}
 
 	public options(req: express.Request, res: express.Response, next: express.NextFunction): void {

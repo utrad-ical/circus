@@ -84,11 +84,6 @@ export default class Controller {
 		this.imageEncoder.write(res, image, width, height);
 	}
 
-	protected respondJson(res: express.Response, data: any): void {
-		res.json(data);
-		res.end();
-	}
-
 	protected createError(status: number, message: string): Error {
 		const error = new Error(message);
 		(error as any).status = status;

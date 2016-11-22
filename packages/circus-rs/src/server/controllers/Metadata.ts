@@ -20,7 +20,8 @@ export default class Metadata extends VolumeBasedController {
 			dicomWindow: vol.dicomWindow,
 			pixelFormat: vol.getPixelFormat()
 		};
-		this.respondJson(res, response);
+		res.json(response);
+		res.end();
 	}
 
 }

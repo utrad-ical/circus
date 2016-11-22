@@ -21,7 +21,8 @@ export default class RequestToken extends Controller {
 		generateAccessToken().then(token => {
 			req.app.locals.authorizationCache.update(series, token);
 			const status = { result: 'OK', token };
-			this.respondJson(res, status);
+			res.json(status);
+			res.end();
 		}).catch(() => {
 			next(this.createInternalServerError(
 				'Internal server error occurred while generating access token'

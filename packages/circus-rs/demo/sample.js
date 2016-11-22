@@ -25,7 +25,32 @@ $(function() {
 });
 
 function rs(config) {
-	var composition = new circusrs.Composition();
+	/**
+	 * image source
+	 */
+	var imageSource;
+	switch (config.source) {
+		case "mock":
+			imageSource = new circusrs.MockImageSource({
+				voxelCount: [512, 512, 419],
+				voxelSize: [0.572265625, 0.572265625, 1]
+			});
+			break;
+		case "dynamic":
+			imageSource = new circusrs.DynamicImageSource(config);
+			break;
+		case "raw-volume":
+			imageSource = new circusrs.RawVolumeImageSource(config);
+			break;
+		case "hybrid":
+			imageSource = new circusrs.HybridImageSource(config);
+			break;
+		case "raw-volume-with-mock":
+			imageSource = new circusrs.RawVolumeImageSourceWithMock(config);
+			break;
+	}
+
+	var composition = new circusrs.Composition(imageSource);
 
 	var toolbar = circusrs.createToolbar(
 		document.querySelector('div#rs-toolbar'),
@@ -36,30 +61,6 @@ function rs(config) {
 			'Undo', 'Redo']
 	);
 	toolbar.bindComposition(composition);
-
-	/**
-	 * image source
-	 */
-	switch (config.source) {
-		case "mock":
-			var imageSource = new circusrs.MockImageSource({
-				voxelCount: [512, 512, 419],
-				voxelSize: [0.572265625, 0.572265625, 1]
-			});
-			break;
-		case "dynamic":
-			var imageSource = new circusrs.DynamicImageSource(config);
-			break;
-		case "raw-volume":
-			var imageSource = new circusrs.RawVolumeImageSource(config);
-			break;
-		case "hybrid":
-			var imageSource = new circusrs.HybridImageSource(config);
-			break;
-		case "raw-volume-with-mock":
-			var imageSource = new circusrs.RawVolumeImageSourceWithMock(config);
-			break;
-	}
 
 	composition.setImageSource(imageSource);
 

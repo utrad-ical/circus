@@ -21,9 +21,8 @@ const client = new circusrs.RsHttpClient(server);
 // Create a new ImageSource using the client
 const src = new circusrs.DynamicImageSource({ series, client });
 
-// Assign your ImageSource to a new Composition
-const comp = new circusrs.Composition();
-comp.setImageSource(src);
+// Create a new Composition which represents the ImageSource
+const comp = new circusrs.Composition(src);
 
 // Assign the composition to a new Viewer
 const viewer = new circusrs.Viewer(

@@ -10,26 +10,25 @@ import { Viewer } from '../browser/viewer/viewer';
 export class Composition extends EventEmitter {
 	/**
 	 * The image source that is associated with this composition.
-	 * Do not modify this directly: Use the acccessor methods instead.
+	 * Do not modify this directly: Use the accessor methods instead.
 	 */
-	public imageSource: ImageSource;
+	public readonly imageSource: ImageSource;
 
 	/**
 	 * List of viewers that are associated with this composition.
-	 * Do not modify this directly: Use the acccessor methods instead.
+	 * Do not modify this directly: Use the accessor methods instead.
 	 */
 	public viewers: Viewer[] = [];
 
 	/**
 	 * List of annotations that are associated with this composition.
-	 * Do not modify this directly: Use the acccessor methods instead.
+	 * Do not modify this directly: Use the accessor methods instead.
 	 */
 	public annotations: Annotation[] = [];
 
-	public setImageSource(imageSource: ImageSource) {
-		if (this.imageSource === imageSource) return;
+	constructor(imageSource: ImageSource) {
+		super();
 		this.imageSource = imageSource;
-		this.emit('sourceChange');
 	}
 
 	/**

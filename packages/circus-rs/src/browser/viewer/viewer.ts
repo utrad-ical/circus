@@ -265,7 +265,6 @@ export class Viewer extends EventEmitter {
 		if (this.composition === composition) return;
 		if (this.composition) {
 			this.cancelNextRender();
-			this.composition.removeListener('sourceChange', this.boundRender);
 			this.composition.removeListener('viewerChange', this.boundRender);
 			this.composition.unregisterViewer(this);
 		}
@@ -276,7 +275,6 @@ export class Viewer extends EventEmitter {
 			this.imageReady = true;
 			this.setState(composition.imageSource.initialState(this));
 		});
-		this.composition.addListener('sourceChange', this.boundRender);
 		this.composition.addListener('viewerChange', this.boundRender);
 		this.emit('compositionChange', composition);
 	}

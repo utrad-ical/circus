@@ -20,8 +20,7 @@ document.getElementById('foobar').innerHTML = Math.random() + '';
 var viewerDiv = document.getElementById('viewer');
 var src = new circusrs.MockImageSource({});
 
-var comp = new circusrs.Composition();
-comp.setImageSource(src);
+var comp = new circusrs.Composition(src);
 
 var viewer = new circusrs.Viewer(viewerDiv);
 viewer.setComposition(comp);

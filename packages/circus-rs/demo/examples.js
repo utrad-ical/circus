@@ -24,8 +24,7 @@ const imageSource = new config.sourceClass({
 });
 
 // Prepare composition.
-const comp = new rs.Composition();
-comp.setImageSource(imageSource);
+const comp = new rs.Composition(imageSource);
 
 
 /*--

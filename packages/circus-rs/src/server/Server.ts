@@ -69,9 +69,19 @@ export default class Server {
 			try {
 				// create server process
 				this.express = express();
+
+				// Make server return indented JSON
+				this.express.set('json spaces', 2);
+				// Turn off 'X-Powered-By: Express' header
+				this.express.set('x-powered-by', false);
+				// Enable case sensitive routing
+				this.express.set('case sensitive routing', true);
+
 				this.express.locals.counter = this.counter;
 				this.express.locals.loadedModuleNames = this.loadedModuleNames;
-				this.prepareRouter();
+
+				this.buildRoutes();
+
 				const port = this.config.port;
 				this.server = this.express.listen(port, '0.0.0.0', () => {
 					const message = `Server running on port ${port}`;
@@ -114,19 +124,12 @@ export default class Server {
 		);
 	}
 
-	private prepareRouter(): void {
+	private buildRoutes(): void {
 		const config = this.config;
 		this.dicomReader = this.createDicomReader();
 
 		const useAuth = !!config.authorization.enabled;
 		this.express.locals.authorizationEnabled = useAuth;
-
-		// Make server return indented JSON
-		this.express.set('json spaces', 2);
-		// Turn off 'X-Powered-By: Express' header
-		this.express.set('x-powered-by', false);
-		// Enable case sensitive routing
-		this.express.set('case sensitive routing', true);
 
 		if (typeof config.globalIpFilter === 'string') {
 			const globalBlocker = ipBasedAccessControl(config.globalIpFilter);

@@ -1,6 +1,7 @@
 import * as express from 'express';
 import Controller from './Controller';
 import DicomVolume from '../../common/DicomVolume';
+import { isUID } from '../../common/ValidatorRules';
 
 /**
  * VolumeBasedController is a base class of controllers
@@ -8,7 +9,7 @@ import DicomVolume from '../../common/DicomVolume';
  */
 export default class VolumeBasedController extends Controller {
 	protected process(req: express.Request, res: express.Response, next: express.NextFunction): void {
-		if (!this.isUID(req.params.sid)) {
+		if (!isUID(req.params.sid)) {
 			throw this.createBadRequestError('Invalid series UID');
 		}
 		const series = req.params.sid;

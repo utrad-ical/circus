@@ -1,6 +1,7 @@
 import Controller from './Controller';
 import * as express from 'express';
 import { ValidatorRules } from '../../common/Validator';
+import { isUID } from '../../common/ValidatorRules';
 import { generateAccessToken } from '../auth/GenerateToken';
 
 /**
@@ -10,7 +11,7 @@ import { generateAccessToken } from '../auth/GenerateToken';
 export default class RequestToken extends Controller {
 	protected getRules(): ValidatorRules {
 		return {
-			series: ['Series UID', null, this.isUID, null]
+			series: ['Series UID', null, isUID, null]
 		};
 	}
 

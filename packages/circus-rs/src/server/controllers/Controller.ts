@@ -59,34 +59,6 @@ export default class Controller {
 		return {};
 	}
 
-	/**
-	 * Validator function which checks the input is
-	 * a valid UID (eg, series instance UID)
-	 */
-	protected isUID(input: string): boolean {
-		return !!input.match(/^((0|[1-9]\d*)\.)*(0|[1-9]\d*)$/)
-			&& input.length <= 64;
-	}
-
-	protected isTuple(count: number = 3): (string) => boolean {
-		return (s: string) => {
-			if (typeof s !== 'string') return false;
-			let toks = s.split(',');
-			if (toks.length !== count) return false;
-			return !toks.some(tok => isNaN(parseFloat(tok)));
-		};
-	}
-
-	protected parseTuple(count: number = 3, int: boolean = false): (string) => number[] {
-		return (s: string) => s.split(',')
-			.map(f => int ? parseInt(f, 10) : parseFloat(f))
-			.slice(0, count);
-	}
-
-	protected parseBoolean(input: string): boolean {
-		return !(/^(0|false|f|no|)$/i.test(input));
-	}
-
 	protected respondGzippedArrayBuffer(res: express.Response, buffer: ArrayBuffer): void {
 		let out: any = new stream.Readable();
 		out._read = function(size) {

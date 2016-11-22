@@ -1,6 +1,6 @@
-import DicomVolume from '../../common/DicomVolume';
 import VolumeBasedController from './VolumeBasedController';
 import { ValidatorRules } from '../../common/Validator';
+import { isTuple, parseTuple, parseBoolean } from '../../common/ValidatorRules';
 import { Section } from '../../common/geometry/Section';
 import * as express from 'express';
 
@@ -12,11 +12,11 @@ export default class ObliqueScan extends VolumeBasedController {
 
 	protected getRules(): ValidatorRules {
 		return {
-			'origin!': ['Origin', null, this.isTuple(3), this.parseTuple(3)],
-			'xAxis!': ['Scan vector X', null, this.isTuple(3), this.parseTuple(3)],
-			'yAxis!': ['Scan vector Y', null, this.isTuple(3), this.parseTuple(3)],
-			'size!': ['Output image size', null, this.isTuple(2), this.parseTuple(2, true)],
-			interpolation: ['Interpolation mode', false, null, this.parseBoolean],
+			'origin!': ['Origin', null, isTuple(3), parseTuple(3)],
+			'xAxis!': ['Scan vector X', null, isTuple(3), parseTuple(3)],
+			'yAxis!': ['Scan vector Y', null, isTuple(3), parseTuple(3)],
+			'size!': ['Output image size', null, isTuple(2), parseTuple(2, true)],
+			interpolation: ['Interpolation mode', false, null, parseBoolean],
 			ww: ['Window width', undefined, 'isFloat', 'toFloat'],
 			wl: ['Window width', undefined, 'isFloat', 'toFloat'],
 			format: ['Output type', 'arraybuffer', (s) => s === 'png', () => 'png']

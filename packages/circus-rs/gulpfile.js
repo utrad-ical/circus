@@ -63,9 +63,10 @@ gulp.task('declaration', function() {
 gulp.task('tslint', function() {
  	return gulp.src('src/browser/**/*.ts')
 		.pipe(tslint({
-			configration: 'src/tslint.json'
+			configration: 'src/tslint.json',
+			formatter: 'verbose'
 		}))
- 		.pipe(tslint.report('verbose'));
+ 		.pipe(tslint.report());
 });
 
 /*

@@ -10,7 +10,7 @@ import {
 	boxEquals,
 	intersectionOfBoxAndPlane,
 	intersectionPointWithinSection
- } from '../../common/geometry';
+} from '../../common/geometry';
 import { PixelFormat } from '../../common/PixelFormat';
 import {
 	convertScreenCoordinateToVolumeCoordinate,
@@ -19,7 +19,7 @@ import {
 import { scanBoundingBox } from '../volume-util';
 import { convertSectionToIndex } from '../section-util';
 import { VolumeImageSource } from '../image-source/volume-image-source';
-import AnisotropicRawData from "../../common/AnisotropicRawData";
+import AnisotropicRawData from '../../common/AnisotropicRawData';
 
 /**
  * VoxelCloud is a type of Annotation that can be registered to a Composition.

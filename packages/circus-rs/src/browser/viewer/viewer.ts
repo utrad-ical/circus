@@ -1,4 +1,4 @@
-var extend = require('extend');
+const extend = require('extend');
 
 import { EventEmitter } from 'events';
 import { Sprite } from './sprite';
@@ -35,12 +35,12 @@ export class Viewer extends EventEmitter {
 	 * primaryEventTarget captures all UI events happened within the canvas
 	 * before other elements handle this, typically while dragging.
 	 */
-	public primaryEventTarget;
+	public primaryEventTarget: any;
 
 	/**
-	 * backgroudnEventTarget handles all UI events after other elements.
+	 * backgroundEventTarget handles all UI events after other elements.
 	 */
-	public backgroundEventTarget;
+	public backgroundEventTarget: any;
 
 	private boundRender: Function;
 	private boundEventHandler: EventListener;

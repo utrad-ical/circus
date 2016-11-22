@@ -15,6 +15,7 @@ export class BucketTool extends VoxelCloudToolBase {
 		const state = viewer.getState();
 		const section = state.section;
 		const comp = viewer.getComposition();
+		if (!comp) throw new Error('Composition not initialized'); // should not happen
 
 		if (!section) return;
 

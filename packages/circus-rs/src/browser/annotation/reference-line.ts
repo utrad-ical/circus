@@ -13,6 +13,7 @@ import { vec3 } from 'gl-matrix';
 export class ReferenceLine implements Annotation {
 	public draw(viewer: Viewer, viewState: ViewState): Sprite | null {
 		const comp = viewer.getComposition();
+		if (!comp) throw new Error('Composition not initialized'); // should not happen
 		const siblingViewers = comp.viewers.filter(v => v !== viewer);
 
 		const mySection = viewState.section;

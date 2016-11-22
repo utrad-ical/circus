@@ -20,9 +20,9 @@ export class Viewer extends EventEmitter {
 
 	public canvas: HTMLCanvasElement;
 
-	private viewState: ViewState;
+	private viewState: ViewState = {};
 
-	private composition: Composition;
+	private composition: Composition | null;
 
 	private activeTool: Tool;
 	private activeToolName: string;
@@ -113,6 +113,9 @@ export class Viewer extends EventEmitter {
 	}
 
 	private canvasEventHandler(originalEvent: MouseEvent): void {
+		// Suppress all event when the viewer is not initialized
+		if (!this.composition || !this.viewState) return;
+
 		let eventType = originalEvent.type;
 
 		// Emulate "drag and drop" events by swapping the event type
@@ -169,9 +172,10 @@ export class Viewer extends EventEmitter {
 			return;
 		}
 		if (!viewState) viewState = this.viewState;
-		if (!this.viewState) return;
+		const comp = this.composition;
+		if (!viewState || !comp) return;
 		if (this.cachedSourceImage) this.renderImageDataToCanvas(this.cachedSourceImage);
-		for (let annotation of this.composition.annotations) {
+		for (let annotation of comp.annotations) {
 			const sprite = annotation.draw(this, viewState);
 			if (sprite instanceof Sprite) this.sprites.push(sprite);
 		}
@@ -190,15 +194,22 @@ export class Viewer extends EventEmitter {
 	 * you cannot have more than one rendering paths running simultaneously.
 	 * The returned promise will be rejected when this request was skipped.
 	 * @return {Promise<boolean>} A promise object that resolves with a
-	 * boolean indicating whther actual rendering happened (true) or not (false).
+	 * boolean indicating whether actual rendering happened (true) or not (false).
 	 */
 	public render(): Promise<boolean> {
 		// Wait only if there is another render() in progress
 		let waiter: Promise<any> = Promise.resolve();
+		if (this.composition === null) {
+			return Promise.reject(new Error('Composition not set'));
+		}
+		if (this.composition.imageSource === null) {
+			return Promise.reject(new Error('Composition not initialized'));
+		}
 		if (!this.imageReady) waiter = this.composition.imageSource.ready();
 		if (this.currentRender) waiter = waiter.then(() => this.currentRender);
 		const p: Promise<boolean> = waiter.then(() => {
 			const state = this.viewState;
+			if (state === null) throw new Error('View state not initialized');
 			// Now there is no rendering in progress.
 			if (p !== this.nextRender) {
 				// I am expired because another render() method was called after this
@@ -208,7 +219,7 @@ export class Viewer extends EventEmitter {
 			// It's safe to call draw() now.
 			this.currentRender = p;
 			this.nextRender = null;
-			const src = this.composition.imageSource;
+			const src = (<Composition>this.composition).imageSource;
 			return src.draw(this, state).then(image => {
 				this.cachedSourceImage = image;
 				this.currentRender = null;
@@ -223,9 +234,16 @@ export class Viewer extends EventEmitter {
 	}
 
 	/**
+	 * Cancels the render
+	 */
+	public cancelNextRender(): void {
+		this.nextRender = null;
+	}
+
+	/**
 	 * Sets the view state and re-renders the viewer.
 	 */
-	public setState(state: ViewState) {
+	public setState(state: ViewState): void {
 		let prevState = extend(true, {}, this.viewState);
 		this.viewState = extend(true, {}, state);
 		this.emit('statechange', prevState, state);
@@ -243,11 +261,13 @@ export class Viewer extends EventEmitter {
 	/**
 	 * ImageSource handling methods
 	 */
-	public setComposition(composition: Composition) {
+	public setComposition(composition: Composition): void {
 		if (this.composition === composition) return;
 		if (this.composition) {
+			this.cancelNextRender();
+			this.composition.removeListener('sourceChange', this.boundRender);
+			this.composition.removeListener('viewerChange', this.boundRender);
 			this.composition.unregisterViewer(this);
-			this.composition.removeListener('change', this.boundRender);
 		}
 		this.composition = composition;
 		this.composition.registerViewer(this);
@@ -256,11 +276,12 @@ export class Viewer extends EventEmitter {
 			this.imageReady = true;
 			this.setState(composition.imageSource.initialState(this));
 		});
-		this.composition.addListener('change', this.boundRender);
+		this.composition.addListener('sourceChange', this.boundRender);
+		this.composition.addListener('viewerChange', this.boundRender);
 		this.emit('compositionChange', composition);
 	}
 
-	public getComposition(): Composition {
+	public getComposition(): Composition | null {
 		return this.composition;
 	}
 

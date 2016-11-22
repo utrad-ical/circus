@@ -21,6 +21,8 @@ export class VoxelCloudToolBase extends DraggableTool {
 		if (!section) throw new Error('Unsupported view state.');
 
 		const comp = viewer.getComposition();
+		if (!comp) throw new Error('Composition not initialized'); // should not happen
+
 		const resolution = viewer.getResolution();
 		const src = comp.imageSource as VolumeImageSource;
 		const voxelSize = src.voxelSize();
@@ -39,6 +41,8 @@ export class VoxelCloudToolBase extends DraggableTool {
 
 	protected draw3DLineWithValue(viewer: Viewer, start: Vector2D, end: Vector2D, value: number): void {
 		const comp = viewer.getComposition();
+		if (!comp) throw new Error('Composition not initialized'); // should not happen
+
 		const src = comp.imageSource as VolumeImageSource;
 
 		if (!this.activeCloud) return; // no cloud to paint on

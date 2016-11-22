@@ -53,7 +53,9 @@ export class Tool extends EventEmitter implements ViewerEventTarget {
 		const viewer = ev.viewer;
 		const state = viewer.getState();
 		const step = -this.sign(ev.original.deltaY) * (ev.original.ctrlKey ? 5 : 1);
-		const src = viewer.getComposition().imageSource as VolumeImageSource;
+		const comp = viewer.getComposition();
+		if (!comp) throw new Error('Composition not initialized'); // should not happen
+		const src = comp.imageSource as VolumeImageSource;
 		if (!(src instanceof VolumeImageSource)) return;
 		const voxelSize = src.voxelSize();
 		state.section = orientationAwareTranslation(state.section, voxelSize, step);

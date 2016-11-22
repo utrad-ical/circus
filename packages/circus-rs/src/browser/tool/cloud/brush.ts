@@ -28,6 +28,7 @@ export class BrushTool extends VoxelCloudToolBase {
 	public dragStartHandler(ev: ViewerEvent): void {
 		super.dragStartHandler(ev);
 		const comp = ev.viewer.getComposition();
+		if (!comp) throw new Error('Composition not initialized'); // should not happen
 		this.activeCloud = this.getActiveCloud(comp);
 		this.pX = ev.viewerX;
 		this.pY = ev.viewerY;

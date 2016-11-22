@@ -19,7 +19,9 @@ export class PagerTool extends DraggableTool {
 		const relativeStep = step - this.currentStep;
 		if (relativeStep === 0) return;
 
-		const src = viewer.getComposition().imageSource as VolumeImageSource;
+		const comp = viewer.getComposition();
+		if (!comp) throw new Error('Composition not initialized'); // should not happen
+		const src = comp.imageSource as VolumeImageSource;
 		if (!(src instanceof VolumeImageSource)) return;
 		const voxelSize = src.voxelSize();
 

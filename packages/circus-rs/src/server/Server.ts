@@ -175,7 +175,7 @@ export default class Server {
 				[
 					countUp,
 					...middleware,
-					...controller.middlewares(this.logger, this.dicomReader, this.imageEncoder)
+					...controller.middleware(this.logger, this.dicomReader, this.imageEncoder)
 				]
 			);
 

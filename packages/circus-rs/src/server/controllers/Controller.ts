@@ -5,8 +5,6 @@ import AsyncLruCache from '../../common/AsyncLruCache';
 import RawData from '../../common/RawData';
 import { ValidatorRules } from '../../common/Validator';
 import { validate } from './Middleware';
-import * as zlib from 'zlib';
-import * as stream from 'stream';
 
 /**
  * Base DICOM Server controller.
@@ -23,7 +21,7 @@ export default class Controller {
 		this.imageEncoder = imageEncoder;
 	}
 
-	public middlewares(
+	public middleware(
 		logger: Logger, reader: AsyncLruCache<RawData>, imageEncoder: ImageEncoder
 	): express.Handler[] {
 		return [
@@ -45,31 +43,6 @@ export default class Controller {
 
 	protected getRules(): ValidatorRules {
 		return {};
-	}
-
-	protected respondGzippedArrayBuffer(res: express.Response, buffer: ArrayBuffer): void {
-		let out: any = new stream.Readable();
-		out._read = function(size) {
-			this.push(new Buffer(new Uint8Array(buffer)));
-			this.push(null); // ends stream
-		};
-		this.respondGzippedStream(res, out);
-	}
-
-	protected respondGzippedStream(res: express.Response, stream: stream.Stream): void {
-		res.writeHead(200, {
-			'Content-Type': 'application/octet-stream',
-			'Content-Encoding': 'gzip'
-		});
-		let gzip = zlib.createGzip();
-		stream.pipe(gzip).pipe(res);
-	}
-
-	protected respondImage(res: express.Response, image: Buffer, width: number, height: number): void {
-		res.writeHead(200, {
-			'Content-Type': this.imageEncoder.mimeType()
-		});
-		this.imageEncoder.write(res, image, width, height);
 	}
 
 }

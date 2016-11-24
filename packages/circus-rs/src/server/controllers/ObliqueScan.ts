@@ -4,6 +4,11 @@ import { isTuple, parseTuple, parseBoolean } from '../../common/ValidatorRules';
 import { Section } from '../../common/geometry/Section';
 import * as express from 'express';
 import { StatusError } from './Error';
+import * as compression from 'compression';
+import Logger from '../loggers/Logger';
+import AsyncLruCache from '../../common/AsyncLruCache';
+import ImageEncoder from '../image-encoders/ImageEncoder';
+import RawData from '../../common/RawData';
 
 /**
  * Handles 'scan' endpoint which returns MPR image for
@@ -22,6 +27,15 @@ export default class ObliqueScan extends VolumeBasedController {
 			wl: ['Window width', undefined, 'isFloat', 'toFloat'],
 			format: ['Output type', 'arraybuffer', (s) => s === 'png', () => 'png']
 		};
+	}
+
+	public middleware(
+		logger: Logger, reader: AsyncLruCache<RawData>, imageEncoder: ImageEncoder
+	): express.Handler[] {
+		return [
+			compression(),
+			...super.middleware(logger, reader, imageEncoder)
+		];
 	}
 
 	protected processVolume(
@@ -55,9 +69,12 @@ export default class ObliqueScan extends VolumeBasedController {
 
 		// Output
 		if (format === 'png') {
-			this.respondImage(res, new Buffer(buf), size[0], size[1]);
+			res.writeHead(200, {
+				'Content-Type': this.imageEncoder.mimeType()
+			});
+			this.imageEncoder.write(res, Buffer.from(buf.buffer), size[0], size[1]);
 		} else {
-			this.respondGzippedArrayBuffer(res, buf);
+			res.send(Buffer.from(buf));
 		}
 	}
 

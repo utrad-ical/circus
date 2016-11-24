@@ -1,8 +1,10 @@
 import * as express from 'express';
 import Logger from '../loggers/Logger';
 
-export class StatusError extends Error {
+export class StatusError {
 	public status: number;
+	public message: string;
+	public stack: string | undefined;
 
 	public static notFound(message: string): StatusError {
 		return new StatusError(404, message);
@@ -21,8 +23,9 @@ export class StatusError extends Error {
 	}
 
 	constructor(status: number, message: string) {
-		super(message);
 		this.status = status;
+		this.message = message;
+		this.stack = (new Error()).stack;
 	}
 }
 

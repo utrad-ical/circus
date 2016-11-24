@@ -1,8 +1,12 @@
 import DicomVolume from '../../common/DicomVolume';
 import VolumeBasedController from './VolumeBasedController';
-
 import * as express from 'express';
 import * as stream from 'stream';
+import * as compression from 'compression';
+import Logger from '../loggers/Logger';
+import AsyncLruCache from '../../common/AsyncLruCache';
+import RawData from '../../common/RawData';
+import ImageEncoder from '../image-encoders/ImageEncoder';
 
 /**
  * Handles 'volume' endpoint which dumps the whole voxel data of the
@@ -10,23 +14,20 @@ import * as stream from 'stream';
  */
 export default class Volume extends VolumeBasedController {
 
+	public middleware(
+		logger: Logger, reader: AsyncLruCache<RawData>, imageEncoder: ImageEncoder
+	): express.Handler[] {
+		return [
+			compression(),
+			...super.middleware(logger, reader, imageEncoder)
+		];
+	}
+
 	protected processVolume(
 		req: express.Request, res: express.Response, next: express.NextFunction
 	): void {
 		const vol = req.volume as DicomVolume;
-		const zmax: number = vol.getDimension()[2];
-		const out: any = new stream.Readable();
-		let z: number = 0;
-		out._read = function(size): void {
-			if (z >= zmax) {
-				this.push(null); // ends stream
-				return;
-			}
-			const slice = vol.getSingleImage(z);
-			this.push(new Buffer(new Uint8Array(slice)));
-			z++;
-		};
-		this.respondGzippedStream(res, out);
+		res.send(Buffer.from(vol.data));
 	}
 
 }

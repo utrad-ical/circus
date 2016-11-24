@@ -26,7 +26,7 @@ export default class RawData {
 	/**
 	 * Actual image data.
 	 */
-	protected data: ArrayBuffer;
+	public data: ArrayBuffer;
 
 	/**
 	 * The array view used with the array buffer (eg, Uint8Array)

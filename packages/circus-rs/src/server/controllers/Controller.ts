@@ -3,7 +3,8 @@ import ImageEncoder from '../image-encoders/ImageEncoder';
 import * as express from 'express';
 import AsyncLruCache from '../../common/AsyncLruCache';
 import RawData from '../../common/RawData';
-import { Validator, ValidatorRules } from '../../common/Validator';
+import { ValidatorRules } from '../../common/Validator';
+import { validate } from './Middleware';
 import * as zlib from 'zlib';
 import * as stream from 'stream';
 
@@ -22,29 +23,13 @@ export default class Controller {
 		this.imageEncoder = imageEncoder;
 	}
 
-	public middlewares(): any {
+	public middlewares(
+		logger: Logger, reader: AsyncLruCache<RawData>, imageEncoder: ImageEncoder
+	): express.Handler[] {
 		return [
-			this.validate(this.getRules()).bind(this),
+			validate(this.getRules()),
 			this.process.bind(this)
 		];
-	}
-
-	private validate(rules: ValidatorRules): express.Handler {
-		return function(req, res, next): void {
-			const origQuery = req.query;
-			const validator = new Validator(rules);
-			const { result, errors } = validator.validate(origQuery);
-			if (errors.length) {
-				next(this.createBadRequestError(errors.join('\n')));
-				return;
-			}
-			try {
-				req.query = result;
-				next();
-			} catch (e) {
-				next(e);
-			}
-		};
 	}
 
 	public options(req: express.Request, res: express.Response, next: express.NextFunction): void {
@@ -82,27 +67,9 @@ export default class Controller {
 
 	protected respondImage(res: express.Response, image: Buffer, width: number, height: number): void {
 		res.writeHead(200, {
-			'Content-Type': this.imageEncoder.mimeType(),
+			'Content-Type': this.imageEncoder.mimeType()
 		});
 		this.imageEncoder.write(res, image, width, height);
-	}
-
-	protected createError(status: number, message: string): Error {
-		const error = new Error(message);
-		(error as any).status = status;
-		return error;
-	}
-
-	protected createBadRequestError(message: string): Error {
-		return this.createError(400, message);
-	}
-
-	protected createNotFoundError(message: string): Error {
-		return this.createError(404, message);
-	}
-
-	protected createInternalServerError(message: string): Error {
-		return this.createError(500, message);
 	}
 
 }

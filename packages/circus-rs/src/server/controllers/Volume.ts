@@ -1,6 +1,5 @@
 import DicomVolume from '../../common/DicomVolume';
 import VolumeBasedController from './VolumeBasedController';
-import { ValidatorRules } from '../../common/Validator';
 
 import * as express from 'express';
 import * as stream from 'stream';
@@ -14,7 +13,7 @@ export default class Volume extends VolumeBasedController {
 	protected processVolume(
 		req: express.Request, res: express.Response, next: express.NextFunction
 	): void {
-		const vol = req.volume;
+		const vol = req.volume as DicomVolume;
 		const zmax: number = vol.getDimension()[2];
 		const out: any = new stream.Readable();
 		let z: number = 0;

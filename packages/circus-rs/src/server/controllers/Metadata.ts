@@ -21,7 +21,6 @@ export default class Metadata extends VolumeBasedController {
 			pixelFormat: vol.getPixelFormat()
 		};
 		res.json(response);
-		res.end();
 	}
 
 }

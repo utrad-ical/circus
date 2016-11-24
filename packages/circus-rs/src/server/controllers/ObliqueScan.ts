@@ -3,6 +3,7 @@ import { ValidatorRules } from '../../common/Validator';
 import { isTuple, parseTuple, parseBoolean } from '../../common/ValidatorRules';
 import { Section } from '../../common/geometry/Section';
 import * as express from 'express';
+import { StatusError } from './Error';
 
 /**
  * Handles 'scan' endpoint which returns MPR image for
@@ -30,15 +31,15 @@ export default class ObliqueScan extends VolumeBasedController {
 		const vol = req.volume;
 		const useWindow = (typeof ww === 'number' && typeof wl === 'number');
 		if (format === 'png' && !useWindow) {
-			next(this.createBadRequestError('Window values are required for PNG output.'));
+			next(StatusError.badRequest('Window values are required for PNG output.'));
 			return;
 		}
 		if (size[0] * size[1] > 2048 * 2048) {
-			next(this.createBadRequestError('Requested image size is too large.'));
+			next(StatusError.badRequest('Requested image size is too large.'));
 			return;
 		}
 		if (size[0] <= 0 || size[1] <= 0) {
-			next(this.createBadRequestError('Invalid image size'));
+			next(StatusError.badRequest('Invalid image size'));
 			return;
 		}
 

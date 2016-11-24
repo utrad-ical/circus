@@ -1,5 +1,6 @@
 import * as express from 'express';
 import AuthorizationCache from './AuthorizationCache';
+import { StatusError } from '../controllers/Error';
 
 /**
  * Returns an Express middleware function that blocks unauthorized requests
@@ -9,9 +10,7 @@ export function tokenAuthentication(authorizationCache: AuthorizationCache): exp
 
 		function invalid(): void {
 			res.setHeader('WWW-Authenticate', 'Bearer realm="CircusRS"');
-			const error: any = new Error('Access denied');
-			error.status = 401;
-			next(error);
+			next(StatusError.unauthorized('Access denied'));
 		}
 
 		if (!('authorization' in req.headers)) {

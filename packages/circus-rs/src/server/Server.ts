@@ -15,6 +15,7 @@ import * as express from 'express';
 import { Configuration } from './Configuration';
 import { tokenAuthentication } from './auth/TokenAuthorization';
 import { ipBasedAccessControl } from './auth/IpBasedAccessControl';
+import { errorHandler } from './controllers/Error';
 
 /**
  * Main server class.
@@ -136,9 +137,11 @@ export default class Server {
 			this.express.use(globalBlocker);
 		}
 
-		// Always append the following header
+		// Add global request handler
 		this.express.use((req, res: express.Response, next) => {
+			// Always append the following header
 			res.set('Access-Control-Allow-Origin', '*');
+			this.logger.info(req.url, req.hostname);
 			next();
 		});
 
@@ -165,12 +168,15 @@ export default class Server {
 			const module: typeof Controller = require(`./controllers/${moduleName}`).default;
 			const controller = new module(this.logger, this.dicomReader, this.imageEncoder);
 
-			const logAccess = (req, res, next) => { this.logger.info(req.url, req.hostname); next(); };
 			const countUp = (req, res, next) => { this.counter.countUp(routeName); next(); };
 
 			this.express.get(
 				`/${routeName}`,
-				[logAccess, countUp, ...middleware, ...controller.middlewares()]
+				[
+					countUp,
+					...middleware,
+					...controller.middlewares(this.logger, this.dicomReader, this.imageEncoder)
+				]
 			);
 
 			// CrossOrigin Resource Sharing http://www.w3.org/TR/cors/
@@ -194,23 +200,3 @@ export default class Server {
 
 }
 
-function errorHandler(logger: Logger): express.ErrorRequestHandler {
-	return function(err: any, req: express.Request, res: express.Response, next: express.NextFunction): void {
-		logger.error(err.message);
-		if ('stack' in err) logger.trace(err.stack);
-
-		// Unexpected error, probably due to bugs
-		let status = 500;
-		let message = 'Internal server error.';
-
-		// Exceptions with status code, probably doe to invalid request, etc.
-		if (typeof err.status === 'number') {
-			status = err.status;
-			message = err.message;
-		}
-
-		res.status(status);
-		res.json({ status: 'ng', message });
-		res.end();
-	};
-}

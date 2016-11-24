@@ -25,7 +25,6 @@ export default class ServerStatus extends Controller {
 			authorization: { enabled: req.app.locals.authorizationEnabled }
 		};
 		res.json(status);
-		res.end();
 	}
 
 }

@@ -3,6 +3,7 @@ import * as express from 'express';
 import { ValidatorRules } from '../../common/Validator';
 import { isUID } from '../../common/ValidatorRules';
 import { generateAccessToken } from '../auth/GenerateToken';
+import { StatusError } from './Error';
 
 /**
  * Handles 'requestToken' endpoint which returns an access token
@@ -24,9 +25,7 @@ export default class RequestToken extends Controller {
 			res.json(status);
 			res.end();
 		}).catch(() => {
-			next(this.createInternalServerError(
-				'Internal server error occurred while generating access token'
-			));
+			next(StatusError.internalServerError('Internal server error occurred while generating access token'));
 		});
 
 	}

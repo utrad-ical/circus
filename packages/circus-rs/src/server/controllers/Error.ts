@@ -1,9 +1,21 @@
 import * as express from 'express';
 import Logger from '../loggers/Logger';
 
-export class StatusError {
+// This class is needed because TypeScript currently
+// cannot properly directly extend native Error class.
+// This CustomError is a workaround found here:
+// https://github.com/Microsoft/TypeScript/issues/10166#issuecomment-244614940
+// We may remove this by targeting at ES6.
+
+class CustomError extends Error {
+	constructor(message: string) {
+		super();
+		this.message = message;
+	}
+}
+
+export class StatusError extends CustomError {
 	public status: number;
-	public message: string;
 	public stack: string | undefined;
 
 	public static notFound(message: string): StatusError {
@@ -23,9 +35,8 @@ export class StatusError {
 	}
 
 	constructor(status: number, message: string) {
+		super(message);
 		this.status = status;
-		this.message = message;
-		this.stack = (new Error()).stack;
 	}
 }
 

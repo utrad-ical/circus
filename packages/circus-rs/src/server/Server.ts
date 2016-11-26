@@ -16,6 +16,7 @@ import { Configuration } from './Configuration';
 import { tokenAuthentication } from './auth/TokenAuthorization';
 import { ipBasedAccessControl } from './auth/IpBasedAccessControl';
 import { errorHandler } from './controllers/Error';
+import { loadSeries } from './controllers/Middleware';
 
 /**
  * Main server class.
@@ -125,6 +126,16 @@ export default class Server {
 		);
 	}
 
+	private loadRouter(moduleName): express.Handler[] {
+		const module: typeof Controller = require(`./controllers/${moduleName}`).default;
+		const controller = new module(this.logger, this.dicomReader, this.imageEncoder);
+		return controller.middleware(this.logger, this.dicomReader, this.imageEncoder);
+	}
+
+	private countUp(name): express.Handler {
+		return (req, res, next) => { this.counter.countUp(name); next(); };
+	}
+
 	private buildRoutes(): void {
 		const config = this.config;
 		this.dicomReader = this.createDicomReader();
@@ -132,6 +143,7 @@ export default class Server {
 		const useAuth = !!config.authorization.enabled;
 		this.express.locals.authorizationEnabled = useAuth;
 
+		// Set up global IP filter
 		if (typeof config.globalIpFilter === 'string') {
 			const globalBlocker = ipBasedAccessControl(config.globalIpFilter);
 			this.express.use(globalBlocker);
@@ -147,44 +159,50 @@ export default class Server {
 
 		const authorizationCache = new AuthorizationCache(config.authorization);
 		this.express.locals.authorizationCache = authorizationCache;
-		const tokenAuthMiddleware = useAuth ? [tokenAuthentication(authorizationCache)] : [];
-		const ipBlockerMiddleware = ipBasedAccessControl(config.authorization.tokenRequestIpFilter);
 
-		// path name, process class name, needs token authorization
-		const routes: [string, string, Array<express.Handler>][] = [
-			['series/:sid/metadata', 'Metadata', tokenAuthMiddleware],
-			['series/:sid/scan', 'ObliqueScan', tokenAuthMiddleware],
-			['series/:sid/volume', 'Volume', tokenAuthMiddleware],
-			['status', 'ServerStatus', []]
-		];
-
+		const seriesRouter = express.Router({ mergeParams: true });
+		seriesRouter.options('*', (req, res, next) => {
+			res.status(200);
+			res.setHeader('Access-Control-Allow-Methods', 'GET');
+			res.setHeader('Access-Control-Allow-Headers', 'Authorization');
+			res.end();
+		});
 		if (useAuth) {
-			routes.push(['token', 'RequestToken', [ipBlockerMiddleware]]);
+			seriesRouter.use(tokenAuthentication(authorizationCache));
 		}
+		seriesRouter.use(loadSeries(this.logger, this.dicomReader));
 
-		routes.forEach(route => {
-			const [routeName, moduleName, middleware] = route;
-			this.logger.info(`Preparing ${moduleName} controller...`);
-			const module: typeof Controller = require(`./controllers/${moduleName}`).default;
-			const controller = new module(this.logger, this.dicomReader, this.imageEncoder);
-
-			const countUp = (req, res, next) => { this.counter.countUp(routeName); next(); };
-
-			this.express.get(
-				`/${routeName}`,
-				[
-					countUp,
-					...middleware,
-					...controller.middleware(this.logger, this.dicomReader, this.imageEncoder)
-				]
-			);
-
-			// CrossOrigin Resource Sharing http://www.w3.org/TR/cors/
-			this.express.options(
-				`/${routeName}`,
-				controller.options.bind(controller)
+		const seriesRoutes = {
+			metadata: 'Metadata',
+			scan: 'ObliqueScan',
+			volume: 'Volume'
+		};
+		Object.keys(seriesRoutes).forEach(route => {
+			seriesRouter.get(
+				`/${route}`,
+				this.countUp(route),
+				this.loadRouter(seriesRoutes[route])
 			);
 		});
+
+		this.express.use('/series/:sid', seriesRouter);
+
+		// path name, process class name, needs token authorization
+		this.express.get(
+			'/status',
+			this.countUp('status'),
+			this.loadRouter('ServerStatus')
+		);
+
+		if (useAuth) {
+			const ipBlockerMiddleware = ipBasedAccessControl(config.authorization.tokenRequestIpFilter);
+			this.express.get(
+				'/token',
+				this.countUp('token'),
+				ipBlockerMiddleware,
+				this.loadRouter('RequestToken')
+			);
+		}
 
 		// This is default handler to catch all unknown requests of all types of verbs
 		this.express.all('*', (req, res, next) => {

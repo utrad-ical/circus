@@ -15,8 +15,7 @@ import * as express from 'express';
 import { Configuration } from './Configuration';
 import { tokenAuthentication } from './auth/TokenAuthorization';
 import { ipBasedAccessControl } from './auth/IpBasedAccessControl';
-import { errorHandler } from './controllers/Error';
-import { loadSeries } from './controllers/Middleware';
+import { loadSeries, errorHandler } from './controllers/Middleware';
 
 /**
  * Main server class.

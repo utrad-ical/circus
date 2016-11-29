@@ -1,16 +1,11 @@
 import * as express from 'express';
-import DicomVolume from '../../common/DicomVolume';
-import AsyncLruCache from '../../common/AsyncLruCache';
-import Logger from '../loggers/Logger';
-import ImageEncoder from '../image-encoders/ImageEncoder';
+import { ServerHelpers } from '../ServerHelpers';
 
 /**
  * Handles 'metadata' endpoint which gives general information
  * of the specified series.
  */
-export function execute(
-	logger: Logger, reader: AsyncLruCache<DicomVolume>, imageEncoder: ImageEncoder
-): express.RequestHandler {
+export function execute(helpers: ServerHelpers): express.RequestHandler {
 	return function(req: express.Request, res: express.Response, next: express.NextFunction): void {
 		const vol = req.volume;
 		const response: any = {

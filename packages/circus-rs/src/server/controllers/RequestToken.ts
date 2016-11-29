@@ -3,18 +3,13 @@ import { isUID } from '../../common/ValidatorRules';
 import { generateAccessToken } from '../auth/GenerateToken';
 import { StatusError } from './Error';
 import { validate } from './Middleware';
-import Logger from '../loggers/Logger';
-import AsyncLruCache from '../../common/AsyncLruCache';
-import DicomVolume from '../../common/DicomVolume';
-import ImageEncoder from '../image-encoders/ImageEncoder';
+import { ServerHelpers } from '../ServerHelpers';
 
 /**
  * Handles 'requestToken' endpoint which returns an access token
  * for each authorized series.
  */
-export function execute(
-	logger: Logger, reader: AsyncLruCache<DicomVolume>, imageEncoder: ImageEncoder
-): express.RequestHandler[] {
+export function execute(helpers: ServerHelpers): express.RequestHandler[] {
 
 	const validator = validate({ series: ['Series UID', null, isUID, null] });
 

@@ -1,11 +1,9 @@
 import { ValidatorRules, Validator } from '../../common/Validator';
 import * as express from 'express';
 import { StatusError } from './Error';
-import Logger from '../loggers/Logger';
 import { isUID } from '../../common/ValidatorRules';
 import DicomVolume from '../../common/DicomVolume';
-import AsyncLruCache from '../../common/AsyncLruCache';
-import ImageEncoder from '../image-encoders/ImageEncoder';
+import { ServerHelpers } from '../ServerHelpers';
 
 export function validate(rules: ValidatorRules): express.Handler {
 	return function(req, res, next): void {
@@ -25,9 +23,8 @@ export function validate(rules: ValidatorRules): express.Handler {
 	};
 }
 
-export function loadSeries(
-	logger: Logger, reader: AsyncLruCache<DicomVolume>, imageEncoder: ImageEncoder
-): express.Handler {
+export function loadSeries(helpers: ServerHelpers): express.Handler {
+	const { seriesReader, logger } = helpers;
 	return function(req, res, next): void {
 		if (!isUID(req.params.sid)) {
 			throw StatusError.badRequest('Invalid series UID');
@@ -35,7 +32,7 @@ export function loadSeries(
 		const series = req.params.sid;
 
 		// TODO: Specifying image range is temporarily disabled
-		reader.get(series).then((vol: DicomVolume) => {
+		seriesReader.get(series).then((vol: DicomVolume) => {
 			try {
 				(req as any).volume = vol;
 				next();

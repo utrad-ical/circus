@@ -3,20 +3,17 @@ import { Section } from '../../common/geometry/Section';
 import * as express from 'express';
 import { StatusError } from './Error';
 import * as compression from 'compression';
-import Logger from '../loggers/Logger';
-import AsyncLruCache from '../../common/AsyncLruCache';
-import ImageEncoder from '../image-encoders/ImageEncoder';
 import { validate } from './Middleware';
-import DicomVolume from '../../common/DicomVolume';
 import { ValidatorRules } from '../../common/Validator';
+import { ServerHelpers } from '../ServerHelpers';
 
 /**
  * Handles 'scan' endpoint which returns MPR image for
  * an arbitrary orientation.
  */
-export function execute(
-	logger: Logger, reader: AsyncLruCache<DicomVolume>, imageEncoder: ImageEncoder
-): express.RequestHandler[] {
+export function execute(helpers: ServerHelpers): express.RequestHandler[] {
+
+	const { imageEncoder } = helpers;
 
 	const rules: ValidatorRules = {
 		'origin!': ['Origin', null, isTuple(3), parseTuple(3)],

@@ -8,6 +8,7 @@ import Logger from './loggers/Logger';
 import DicomDumper from './dicom-dumpers/DicomDumper';
 import DicomFileRepository from './dicom-file-repository/DicomFileRepository';
 import AuthorizationCache from './auth/AuthorizationCache';
+import { ServerHelpers } from './ServerHelpers';
 
 import * as http from 'http';
 import * as express from 'express';
@@ -22,10 +23,7 @@ import { loadSeries } from './controllers/Middleware';
  */
 export default class Server {
 	// injected modules
-	protected logger: Logger;
-	protected imageEncoder: ImageEncoder;
-	protected dicomFileRepository: DicomFileRepository;
-	protected dicomDumper: DicomDumper;
+	protected helpers: ServerHelpers;
 
 	public counter: Counter;
 	protected express: express.Application;
@@ -41,17 +39,20 @@ export default class Server {
 		dicomDumper: DicomDumper,
 		config: Configuration
 	) {
-		this.logger = logger;
-		this.loadedModuleNames.push((logger.constructor as any).name); // 'name' is ES6 feature
-		this.imageEncoder = imageEncoder;
-		this.loadedModuleNames.push((imageEncoder.constructor as any).name);
-		this.dicomFileRepository = dicomFileRepository;
-		this.loadedModuleNames.push((dicomFileRepository.constructor as any).name);
-		this.dicomDumper = dicomDumper;
-		this.loadedModuleNames.push((dicomDumper.constructor as any).name);
 		this.config = config;
 
-		this.logger.info('Modules loaded: ', this.loadedModuleNames.join(', '));
+		this.helpers = {
+			logger,
+			seriesReader: this.createDicomReader(dicomFileRepository, dicomDumper),
+			imageEncoder
+		};
+
+		this.loadedModuleNames.push((logger.constructor as any).name); // 'name' is ES6 feature
+		this.loadedModuleNames.push((imageEncoder.constructor as any).name);
+		this.loadedModuleNames.push((dicomFileRepository.constructor as any).name);
+		this.loadedModuleNames.push((dicomDumper.constructor as any).name);
+
+		this.helpers.logger.info('Modules loaded: ', this.loadedModuleNames.join(', '));
 
 		this.counter = new Counter();
 	}
@@ -86,14 +87,14 @@ export default class Server {
 				const port = this.config.port;
 				this.server = this.express.listen(port, '0.0.0.0', () => {
 					const message = `Server running on port ${port}`;
-					this.logger.info(message);
+					this.helpers.logger.info(message);
 					resolve(message);
 				});
 			} catch (e) {
 				console.error(e);
-				this.logger.error(e);
+				this.helpers.logger.error(e);
 				// This guarantees all the logs are flushed before actually exiting the program
-				this.logger.shutdown().then(() => process.exit(1));
+				this.helpers.logger.shutdown().then(() => process.exit(1));
 				reject(e);
 			}
 		});
@@ -105,18 +106,20 @@ export default class Server {
 				if (err) {
 					reject(err);
 				} else {
-					this.dicomReader.dispose();
+					this.helpers.seriesReader.dispose();
 					resolve();
 				}
 			});
 		});
 	}
 
-	private createDicomReader(): AsyncLruCache<DicomVolume> {
+	private createDicomReader(
+		repository: DicomFileRepository, dicomDumper: DicomDumper
+	): AsyncLruCache<DicomVolume> {
 		return new AsyncLruCache<DicomVolume>(
 			seriesUID => {
-				return this.dicomFileRepository.getSeriesLoader(seriesUID)
-					.then(loaderInfo => this.dicomDumper.readDicom(loaderInfo, 'all'));
+				return repository.getSeriesLoader(seriesUID)
+					.then(loaderInfo => dicomDumper.readDicom(loaderInfo, 'all'));
 			},
 			{
 				maxSize: this.config.cache.memoryThreshold,
@@ -126,11 +129,9 @@ export default class Server {
 	}
 
 	private loadRouter(moduleName): express.RequestHandler | express.RequestHandler[] {
-		type Processor = (
-			logger: Logger, reader: AsyncLruCache<DicomVolume>, imageEncoder: ImageEncoder
-		) => express.RequestHandler | express.RequestHandler[];
+		type Processor = (helpers: ServerHelpers) => express.RequestHandler | express.RequestHandler[];
 		const execute: Processor = require(`./controllers/${moduleName}`).execute;
-		return execute(this.logger, this.dicomReader, this.imageEncoder);
+		return execute(this.helpers);
 	}
 
 	private countUp(name): express.Handler {
@@ -139,7 +140,6 @@ export default class Server {
 
 	private buildRoutes(): void {
 		const config = this.config;
-		this.dicomReader = this.createDicomReader();
 
 		const useAuth = !!config.authorization.enabled;
 		this.express.locals.authorizationEnabled = useAuth;
@@ -154,7 +154,7 @@ export default class Server {
 		this.express.use((req, res: express.Response, next) => {
 			// Always append the following header
 			res.set('Access-Control-Allow-Origin', '*');
-			this.logger.info(req.url, req.hostname);
+			this.helpers.logger.info(req.url, req.hostname);
 			next();
 		});
 
@@ -171,7 +171,7 @@ export default class Server {
 		if (useAuth) {
 			seriesRouter.use(tokenAuthentication(authorizationCache));
 		}
-		seriesRouter.use(loadSeries(this.logger, this.dicomReader, this.imageEncoder));
+		seriesRouter.use(loadSeries(this.helpers));
 
 		const seriesRoutes = {
 			metadata: 'Metadata',
@@ -213,7 +213,7 @@ export default class Server {
 		});
 
 		// Adds an error handler which outputs all errors in JSON format
-		this.express.use(errorHandler(this.logger));
+		this.express.use(errorHandler(this.helpers.logger));
 
 	}
 

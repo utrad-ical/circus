@@ -1,20 +1,16 @@
 import * as express from 'express';
-import Logger from "../loggers/Logger";
-import AsyncLruCache from '../../common/AsyncLruCache';
-import DicomVolume from '../../common/DicomVolume';
-import ImageEncoder from '../image-encoders/ImageEncoder';
+import { ServerHelpers } from '../ServerHelpers';
 
 const startUpTime: Date = new Date(); // The time this module was loaded
 
-export function execute(
-	logger: Logger, reader: AsyncLruCache<DicomVolume>, imageEncoder: ImageEncoder
-): express.RequestHandler {
+export function execute(helpers: ServerHelpers): express.RequestHandler {
 	return (req: express.Request, res: express.Response, next: express.NextFunction): void => {
+		const { seriesReader } = helpers;
 		const status = {
 			status: 'Running',
-			dicomReader: {
-				count: reader.length,
-				size: reader.getTotalSize()
+			seriesReader: {
+				count: seriesReader.length,
+				size: seriesReader.getTotalSize()
 			},
 			process: {
 				memoryUsage: process.memoryUsage(),

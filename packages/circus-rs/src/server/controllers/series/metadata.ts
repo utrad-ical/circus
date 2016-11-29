@@ -1,5 +1,5 @@
 import * as express from 'express';
-import { ServerHelpers } from '../ServerHelpers';
+import { ServerHelpers } from '../../ServerHelpers';
 
 /**
  * Handles 'metadata' endpoint which gives general information

@@ -28,7 +28,6 @@ export default class Server {
 	protected express: express.Application;
 	protected server: http.Server;
 	protected config: Configuration;
-	protected dicomReader: AsyncLruCache<DicomVolume>;
 	public loadedModuleNames: string[] = [];
 
 	constructor(
@@ -160,6 +159,7 @@ export default class Server {
 		const authorizationCache = new AuthorizationCache(config.authorization);
 		this.express.locals.authorizationCache = authorizationCache;
 
+		// Set up series router
 		const seriesRouter = express.Router({ mergeParams: true });
 		seriesRouter.options('*', (req, res, next) => {
 			res.status(200);
@@ -172,16 +172,12 @@ export default class Server {
 		}
 		seriesRouter.use(loadSeries(this.helpers));
 
-		const seriesRoutes = {
-			metadata: 'Metadata',
-			scan: 'ObliqueScan',
-			volume: 'Volume'
-		};
-		Object.keys(seriesRoutes).forEach(route => {
+		const seriesRoutes = ['metadata', 'scan', 'volume'];
+		seriesRoutes.forEach(route => {
 			seriesRouter.get(
 				`/${route}`,
 				this.countUp(route),
-				this.loadRouter(seriesRoutes[route])
+				this.loadRouter(`series/${route}`)
 			);
 		});
 
@@ -204,7 +200,7 @@ export default class Server {
 			);
 		}
 
-		// This is default handler to catch all unknown requests of all types of verbs
+		// This is a default handler to catch all unknown requests of all types of verbs
 		this.express.all('*', (req, res, next) => {
 			const error = new Error('Not found');
 			(<any>error).status = 404;

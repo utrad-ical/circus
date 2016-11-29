@@ -1,11 +1,11 @@
-import { isTuple, parseTuple, parseBoolean } from '../../common/ValidatorRules';
-import { Section } from '../../common/geometry/Section';
 import * as express from 'express';
-import { StatusError } from './Error';
+import { isTuple, parseTuple, parseBoolean } from '../../../common/ValidatorRules';
+import { Section } from '../../../common/geometry/Section';
+import { StatusError } from '../Error';
 import * as compression from 'compression';
-import { validate } from './Middleware';
-import { ValidatorRules } from '../../common/Validator';
-import { ServerHelpers } from '../ServerHelpers';
+import { validate } from '../Middleware';
+import { ValidatorRules } from '../../../common/Validator';
+import { ServerHelpers } from '../../ServerHelpers';
 
 /**
  * Handles 'scan' endpoint which returns MPR image for

@@ -1,7 +1,7 @@
-import DicomVolume from '../../common/DicomVolume';
+import DicomVolume from '../../../common/DicomVolume';
 import * as express from 'express';
 import * as compression from 'compression';
-import { ServerHelpers } from '../ServerHelpers';
+import { ServerHelpers } from '../../ServerHelpers';
 
 /**
  * Handles 'volume' endpoint which dumps the whole voxel data of the

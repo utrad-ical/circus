@@ -8,7 +8,6 @@ import Logger from './loggers/Logger';
 import DicomDumper from './dicom-dumpers/DicomDumper';
 import DicomFileRepository from './dicom-file-repository/DicomFileRepository';
 import AuthorizationCache from './auth/AuthorizationCache';
-import Controller from './controllers/Controller';
 
 import * as http from 'http';
 import * as express from 'express';
@@ -126,10 +125,12 @@ export default class Server {
 		);
 	}
 
-	private loadRouter(moduleName): express.Handler[] {
-		const module: typeof Controller = require(`./controllers/${moduleName}`).default;
-		const controller = new module(this.logger, this.dicomReader, this.imageEncoder);
-		return controller.middleware(this.logger, this.dicomReader, this.imageEncoder);
+	private loadRouter(moduleName): express.RequestHandler | express.RequestHandler[] {
+		type Processor = (
+			logger: Logger, reader: AsyncLruCache<DicomVolume>, imageEncoder: ImageEncoder
+		) => express.RequestHandler | express.RequestHandler[];
+		const execute: Processor = require(`./controllers/${moduleName}`).execute;
+		return execute(this.logger, this.dicomReader, this.imageEncoder);
 	}
 
 	private countUp(name): express.Handler {
@@ -170,7 +171,7 @@ export default class Server {
 		if (useAuth) {
 			seriesRouter.use(tokenAuthentication(authorizationCache));
 		}
-		seriesRouter.use(loadSeries(this.logger, this.dicomReader));
+		seriesRouter.use(loadSeries(this.logger, this.dicomReader, this.imageEncoder));
 
 		const seriesRoutes = {
 			metadata: 'Metadata',

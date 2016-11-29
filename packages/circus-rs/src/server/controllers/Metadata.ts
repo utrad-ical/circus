@@ -1,17 +1,17 @@
 import * as express from 'express';
 import DicomVolume from '../../common/DicomVolume';
-import VolumeBasedController from './VolumeBasedController';
-import { ValidatorRules } from '../../common/Validator';
+import AsyncLruCache from '../../common/AsyncLruCache';
+import Logger from '../loggers/Logger';
+import ImageEncoder from '../image-encoders/ImageEncoder';
 
 /**
  * Handles 'metadata' endpoint which gives general information
  * of the specified series.
  */
-export default class Metadata extends VolumeBasedController {
-
-	protected processVolume(
-		req: express.Request, res: express.Response, next: express.NextFunction
-	): void {
+export function execute(
+	logger: Logger, reader: AsyncLruCache<DicomVolume>, imageEncoder: ImageEncoder
+): express.RequestHandler {
+	return function(req: express.Request, res: express.Response, next: express.NextFunction): void {
 		const vol = req.volume;
 		const response: any = {
 			voxelCount: vol.getDimension(),
@@ -21,6 +21,6 @@ export default class Metadata extends VolumeBasedController {
 			pixelFormat: vol.getPixelFormat()
 		};
 		res.json(response);
-	}
-
+	};
 }
+

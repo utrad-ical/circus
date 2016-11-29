@@ -1,19 +1,20 @@
-import Controller from './Controller';
 import * as express from 'express';
+import Logger from "../loggers/Logger";
+import AsyncLruCache from '../../common/AsyncLruCache';
+import DicomVolume from '../../common/DicomVolume';
+import ImageEncoder from '../image-encoders/ImageEncoder';
 
 const startUpTime: Date = new Date(); // The time this module was loaded
 
-/**
- * Handles 'status' endpoint which returns various server status information.
- */
-export default class ServerStatus extends Controller {
-
-	public process(req: express.Request, res: express.Response, next: express.NextFunction): void {
+export function execute(
+	logger: Logger, reader: AsyncLruCache<DicomVolume>, imageEncoder: ImageEncoder
+): express.RequestHandler {
+	return (req: express.Request, res: express.Response, next: express.NextFunction): void => {
 		const status = {
 			status: 'Running',
 			dicomReader: {
-				count: this.reader.length,
-				size: this.reader.getTotalSize()
+				count: reader.length,
+				size: reader.getTotalSize()
 			},
 			process: {
 				memoryUsage: process.memoryUsage(),
@@ -25,6 +26,5 @@ export default class ServerStatus extends Controller {
 			authorization: { enabled: req.app.locals.authorizationEnabled }
 		};
 		res.json(status);
-	}
-
+	};
 }

@@ -42,13 +42,13 @@ export default class PureJsDicomDumper extends DicomDumper {
 							pitch = result.dataset.floatString('x00180088');
 							raw.setVoxelSize([result.pixelSpacing[0], result.pixelSpacing[1], pitch]);
 						}
+						raw = new DicomVolume([result.columns, result.rows, count], result.pixelFormat);
 						raw.appendHeader({
 							modality: result.modality,
 							rescaleSlope: result.rescale.slope,
 							rescaleIntercept: result.rescale.intercept
 						});
 						raw.dicomWindow = result.window;
-						raw = new DicomVolume([result.columns, result.rows, count], result.pixelFormat);
 						raw.estimatedWindow = { width: 50, level: 75 };
 					} else if (i > 1 && pitch === undefined) {
 						pitch = Math.abs(lastSliceLocation - result.sliceLocation);

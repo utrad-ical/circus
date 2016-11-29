@@ -5,6 +5,7 @@ import Logger from '../loggers/Logger';
 import { isUID } from '../../common/ValidatorRules';
 import DicomVolume from '../../common/DicomVolume';
 import AsyncLruCache from '../../common/AsyncLruCache';
+import ImageEncoder from '../image-encoders/ImageEncoder';
 
 export function validate(rules: ValidatorRules): express.Handler {
 	return function(req, res, next): void {
@@ -24,7 +25,9 @@ export function validate(rules: ValidatorRules): express.Handler {
 	};
 }
 
-export function loadSeries(logger: Logger, reader: AsyncLruCache<DicomVolume>): express.Handler {
+export function loadSeries(
+	logger: Logger, reader: AsyncLruCache<DicomVolume>, imageEncoder: ImageEncoder
+): express.Handler {
 	return function(req, res, next): void {
 		if (!isUID(req.params.sid)) {
 			throw StatusError.badRequest('Invalid series UID');
@@ -35,7 +38,7 @@ export function loadSeries(logger: Logger, reader: AsyncLruCache<DicomVolume>): 
 		reader.get(series).then((vol: DicomVolume) => {
 			try {
 				(req as any).volume = vol;
-				this.processVolume(req, res, next);
+				next();
 			} catch (e) {
 				next(StatusError.internalServerError(e.toString()));
 			}

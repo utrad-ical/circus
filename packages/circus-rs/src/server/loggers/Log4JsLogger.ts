@@ -1,13 +1,12 @@
 import Logger from './Logger';
 import * as log4js from 'log4js';
-import * as path from 'path';
 
 export default class Log4JsLogger extends Logger {
 
 	private logger: log4js.Logger;
 
 	protected initialize(): void {
-		let appenders: any = [{ type: 'console' }];
+		let appenders: any[] = [{ type: 'console' }];
 		if (this.config && Array.isArray(this.config.appenders)) {
 			appenders = this.config.appenders;
 		}
@@ -40,7 +39,7 @@ export default class Log4JsLogger extends Logger {
 	}
 
 	public shutdown(): Promise<void> {
-		return new Promise(resolve => log4js.shutdown(resolve));
+		return new Promise<void>(resolve => log4js.shutdown(resolve));
 	}
 
 }

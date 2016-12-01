@@ -1,11 +1,14 @@
 import * as express from 'express';
-import AuthorizationCache from './AuthorizationCache';
-import { StatusError } from '../controllers/Error';
+import AuthorizationCache from '../../auth/AuthorizationCache';
+import { StatusError } from '../Error';
+import { ServerHelpers } from '../../ServerHelpers';
 
 /**
  * Returns an Express middleware function that blocks unauthorized requests
  */
-export function tokenAuthentication(authorizationCache: AuthorizationCache): express.Handler {
+export function tokenAuthentication(helpers: ServerHelpers, authorizationCache: AuthorizationCache): express.Handler {
+	const { logger } = helpers;
+
 	return function(req: express.Request, res: express.Response, next: express.NextFunction): void {
 
 		function invalid(): void {
@@ -14,6 +17,7 @@ export function tokenAuthentication(authorizationCache: AuthorizationCache): exp
 		}
 
 		if (!('authorization' in req.headers)) {
+			logger.warn('Tried to access data without authorization header.');
 			invalid();
 			return;
 		}
@@ -21,11 +25,13 @@ export function tokenAuthentication(authorizationCache: AuthorizationCache): exp
 		const [bearer, token] = req.headers['authorization'].split(' ');
 
 		if (bearer.toLowerCase() !== 'bearer') {
+			logger.warn('Invalid authorization header.');
 			invalid();
 			return;
 		}
 
 		if (!authorizationCache.isValid(req.params.sid, token)) {
+			logger.warn('Invalid access token.');
 			invalid();
 			return;
 		}

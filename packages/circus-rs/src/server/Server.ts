@@ -13,9 +13,10 @@ import { ServerHelpers } from './ServerHelpers';
 import * as http from 'http';
 import * as express from 'express';
 import { Configuration } from './Configuration';
-import { tokenAuthentication } from './auth/TokenAuthorization';
-import { ipBasedAccessControl } from './auth/IpBasedAccessControl';
-import { loadSeries, errorHandler } from './controllers/Middleware';
+import { tokenAuthentication } from './routes/middleware/TokenAuthorization';
+import { ipBasedAccessControl } from './routes/middleware/IpBasedAccessControl';
+import { loadSeries } from './routes/middleware/LoadSeries';
+import { errorHandler } from './routes/middleware/ErrorHandler';
 
 /**
  * Main server class.
@@ -128,7 +129,7 @@ export default class Server {
 
 	private loadRouter(moduleName): express.RequestHandler | express.RequestHandler[] {
 		type Processor = (helpers: ServerHelpers) => express.RequestHandler | express.RequestHandler[];
-		const execute: Processor = require(`./controllers/${moduleName}`).execute;
+		const execute: Processor = require(`./routes/${moduleName}`).execute;
 		return execute(this.helpers);
 	}
 
@@ -144,7 +145,7 @@ export default class Server {
 
 		// Set up global IP filter
 		if (typeof config.globalIpFilter === 'string') {
-			const globalBlocker = ipBasedAccessControl(config.globalIpFilter);
+			const globalBlocker = ipBasedAccessControl(this.helpers, config.globalIpFilter);
 			this.express.use(globalBlocker);
 		}
 
@@ -168,7 +169,7 @@ export default class Server {
 			res.end();
 		});
 		if (useAuth) {
-			seriesRouter.use(tokenAuthentication(authorizationCache));
+			seriesRouter.use(tokenAuthentication(this.helpers, authorizationCache));
 		}
 		seriesRouter.use(loadSeries(this.helpers));
 
@@ -191,7 +192,9 @@ export default class Server {
 		);
 
 		if (useAuth) {
-			const ipBlockerMiddleware = ipBasedAccessControl(config.authorization.tokenRequestIpFilter);
+			const ipBlockerMiddleware = ipBasedAccessControl(
+				this.helpers, config.authorization.tokenRequestIpFilter
+			);
 			this.express.get(
 				'/token',
 				this.countUp('token'),

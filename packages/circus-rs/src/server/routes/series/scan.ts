@@ -3,7 +3,7 @@ import { isTuple, parseTuple, parseBoolean } from '../../../common/ValidatorRule
 import { Section } from '../../../common/geometry/Section';
 import { StatusError } from '../Error';
 import * as compression from 'compression';
-import { validate } from '../Middleware';
+import { validate } from '../middleware/Validate';
 import { ValidatorRules } from '../../../common/Validator';
 import { ServerHelpers } from '../../ServerHelpers';
 

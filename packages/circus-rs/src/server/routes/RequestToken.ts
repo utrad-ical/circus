@@ -2,7 +2,7 @@ import * as express from 'express';
 import { isUID } from '../../common/ValidatorRules';
 import { generateAccessToken } from '../auth/GenerateToken';
 import { StatusError } from './Error';
-import { validate } from './Middleware';
+import { validate } from './middleware/Validate';
 import { ServerHelpers } from '../ServerHelpers';
 
 /**

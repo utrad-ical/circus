@@ -5,7 +5,7 @@ const startUpTime: Date = new Date(); // The time this module was loaded
 
 export function execute(helpers: ServerHelpers): express.RequestHandler {
 	return (req: express.Request, res: express.Response, next: express.NextFunction): void => {
-		const { seriesReader } = helpers;
+		const { seriesReader, counter } = helpers;
 		const status = {
 			status: 'Running',
 			seriesReader: {
@@ -17,7 +17,7 @@ export function execute(helpers: ServerHelpers): express.RequestHandler {
 				upTime: process.uptime(),
 				upSince: startUpTime.toISOString()
 			},
-			counter: req.app.locals.counter.getCounts(),
+			counter: counter.getCounts(),
 			loadedModules: req.app.locals.loadedModuleNames,
 			authorization: { enabled: req.app.locals.authorizationEnabled }
 		};

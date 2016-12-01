@@ -17,6 +17,7 @@ import { tokenAuthentication } from './routes/middleware/TokenAuthorization';
 import { ipBasedAccessControl } from './routes/middleware/IpBasedAccessControl';
 import { loadSeries } from './routes/middleware/LoadSeries';
 import { errorHandler } from './routes/middleware/ErrorHandler';
+import { countUp } from './routes/middleware/CountUp';
 
 /**
  * Main server class.
@@ -25,10 +26,10 @@ export default class Server {
 	// injected modules
 	protected helpers: ServerHelpers;
 
-	public counter: Counter;
+	protected config: Configuration;
+
 	protected express: express.Application;
 	protected server: http.Server;
-	protected config: Configuration;
 	public loadedModuleNames: string[] = [];
 
 	constructor(
@@ -43,7 +44,9 @@ export default class Server {
 		this.helpers = {
 			logger,
 			seriesReader: this.createDicomReader(dicomFileRepository, dicomDumper),
-			imageEncoder
+			imageEncoder,
+			authorizationCache: new AuthorizationCache(config.authorization),
+			counter: new Counter()
 		};
 
 		this.loadedModuleNames.push((logger.constructor as any).name); // 'name' is ES6 feature
@@ -52,8 +55,6 @@ export default class Server {
 		this.loadedModuleNames.push((dicomDumper.constructor as any).name);
 
 		this.helpers.logger.info('Modules loaded: ', this.loadedModuleNames.join(', '));
-
-		this.counter = new Counter();
 	}
 
 	public getServer(): http.Server {
@@ -78,7 +79,6 @@ export default class Server {
 				// Enable case sensitive routing
 				this.express.set('case sensitive routing', true);
 
-				this.express.locals.counter = this.counter;
 				this.express.locals.loadedModuleNames = this.loadedModuleNames;
 
 				this.buildRoutes();
@@ -133,10 +133,6 @@ export default class Server {
 		return execute(this.helpers);
 	}
 
-	private countUp(name): express.Handler {
-		return (req, res, next) => { this.counter.countUp(name); next(); };
-	}
-
 	private buildRoutes(): void {
 		const config = this.config;
 
@@ -157,10 +153,9 @@ export default class Server {
 			next();
 		});
 
-		const authorizationCache = new AuthorizationCache(config.authorization);
-		this.express.locals.authorizationCache = authorizationCache;
-
 		// Set up series router
+
+		// mergeParams is needed to capture ':sid' param
 		const seriesRouter = express.Router({ mergeParams: true });
 		seriesRouter.options('*', (req, res, next) => {
 			res.status(200);
@@ -169,7 +164,7 @@ export default class Server {
 			res.end();
 		});
 		if (useAuth) {
-			seriesRouter.use(tokenAuthentication(this.helpers, authorizationCache));
+			seriesRouter.use(tokenAuthentication(this.helpers));
 		}
 		seriesRouter.use(loadSeries(this.helpers));
 
@@ -177,27 +172,28 @@ export default class Server {
 		seriesRoutes.forEach(route => {
 			seriesRouter.get(
 				`/${route}`,
-				this.countUp(route),
+				countUp(this.helpers, route),
 				this.loadRouter(`series/${route}`)
 			);
 		});
 
 		this.express.use('/series/:sid', seriesRouter);
 
-		// path name, process class name, needs token authorization
+		// Set up 'status' route
 		this.express.get(
 			'/status',
-			this.countUp('status'),
+			countUp(this.helpers, 'status'),
 			this.loadRouter('ServerStatus')
 		);
 
+		// Set up 'token' route
 		if (useAuth) {
 			const ipBlockerMiddleware = ipBasedAccessControl(
 				this.helpers, config.authorization.tokenRequestIpFilter
 			);
 			this.express.get(
 				'/token',
-				this.countUp('token'),
+				countUp(this.helpers, 'token'),
 				ipBlockerMiddleware,
 				this.loadRouter('RequestToken')
 			);

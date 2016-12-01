@@ -1,13 +1,12 @@
 import * as express from 'express';
-import AuthorizationCache from '../../auth/AuthorizationCache';
 import { StatusError } from '../Error';
 import { ServerHelpers } from '../../ServerHelpers';
 
 /**
  * Returns an Express middleware function that blocks unauthorized requests
  */
-export function tokenAuthentication(helpers: ServerHelpers, authorizationCache: AuthorizationCache): express.Handler {
-	const { logger } = helpers;
+export function tokenAuthentication(helpers: ServerHelpers): express.Handler {
+	const { logger, authorizationCache } = helpers;
 
 	return function(req: express.Request, res: express.Response, next: express.NextFunction): void {
 

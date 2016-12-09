@@ -17,6 +17,7 @@ export class MockImageSource extends VolumeImageSource {
 		this.meta.dicomWindow = { level: 10, width: 100 };
 		this.meta.voxelSize = meta.voxelSize || [0.5, 0.5, 0.5];
 		this.meta.voxelCount = meta.voxelCount || [512, 512, 478];
+		this.meta.pixelFormat = meta.pixelFormat || PixelFormat.Int16;
 		this.volume = this.createMockVolume(meta);
 	}
 
@@ -26,7 +27,7 @@ export class MockImageSource extends VolumeImageSource {
 	private createMockVolume(meta: DicomMetadata): DicomVolume {
 
 		const [width, height, depth] = meta.voxelCount;
-		const pixelFormat = PixelFormat.Int16;
+		const pixelFormat = meta.pixelFormat as PixelFormat;
 		const [wl, ww] = [meta.estimatedWindow.level, meta.estimatedWindow.width];
 
 		const raw = new DicomVolume(meta.voxelSize, pixelFormat);
@@ -36,7 +37,8 @@ export class MockImageSource extends VolumeImageSource {
 			let val = (
 				Math.floor(x / gridSize) +
 				Math.floor(y / gridSize) +
-				Math.floor(z / gridSize));
+				Math.floor(z / gridSize)
+			);
 			if (pixelFormat === PixelFormat.Binary) {
 				val %= 2;
 			} else {

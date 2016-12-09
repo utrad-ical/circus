@@ -20,8 +20,9 @@ export default class MockDicomDumper extends DicomDumper {
 	public makeMockVol(): DicomVolume {
 		const {
 			width = 512, height = 512, depth = 128,
-			pixelFormat = PixelFormat.Int16,
-			vx = 0.5, vy = 0.5, vz = 0.5 } = this.config;
+			pixelFormat = (PixelFormat.Int16 as PixelFormat),
+			vx = 0.5, vy = 0.5, vz = 0.5
+		} = this.config;
 		const raw = new DicomVolume([width, height, depth], pixelFormat);
 		raw.setVoxelSize([vx, vy, vz]);
 		let val: number;

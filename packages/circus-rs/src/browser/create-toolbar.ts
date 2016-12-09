@@ -23,13 +23,18 @@ export function createToolbar(
 	ulElement.className = 'circus-rs-toolbar';
 
 	let toolChanging = false;
-	const setTool = toolName => {
+	const setTool = (toolName) => {
 		toolChanging = true;
 		Array.prototype.forEach.call(
 			ulElement.querySelectorAll('.circus-rs-toolbutton'),
-			btn => btn.classList.remove('active')
+			btn => {
+				if (btn.classList.contains('rs-icon-' + toKebabCase(toolName))) {
+					btn.classList.add('active');
+				} else {
+					btn.classList.remove('active');
+				}
+			}
 		);
-		(event.target as HTMLButtonElement).classList.add('active');
 		viewers.forEach(v => v.setActiveTool(toolName));
 		toolChanging = false;
 	};
@@ -42,7 +47,6 @@ export function createToolbar(
 			'rs-icon-' + toKebabCase(toolName)
 		].join(' ');
 		button.setAttribute('type', 'button');
-		// button.appendChild(document.createTextNode(toolName));
 
 		button.addEventListener('click', () => setTool(toolName));
 

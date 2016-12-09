@@ -40,6 +40,9 @@ export default class PureJsDicomDumper extends DicomDumper {
 						if ('x00180088' in result.dataset.elements) {
 							// [0018, 0088] Spacing between slices
 							pitch = result.dataset.floatString('x00180088');
+							if (!pitch) {
+								throw new Error('Slice pitch could not be determined');
+							}
 							raw.setVoxelSize([result.pixelSpacing[0], result.pixelSpacing[1], pitch]);
 						}
 						raw = new DicomVolume([result.columns, result.rows, count], result.pixelFormat);

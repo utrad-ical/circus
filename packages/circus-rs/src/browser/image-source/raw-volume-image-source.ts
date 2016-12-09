@@ -81,7 +81,7 @@ export class RawVolumeImageSource extends RsHttpLoaderImageSource {
 	protected onMetaLoaded(): Promise<void> {
 		// Loads the entire volume, which can take many seconds
 		return RawVolumeImageSource.sharedCache.get(this.series, this.meta, this.loader)
-			.then(volume => this.volume = volume);
+			.then(volume => { this.volume = volume; });
 	}
 
 }

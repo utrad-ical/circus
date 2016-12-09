@@ -46,7 +46,7 @@
     "stream-buffers": "^3.0.1",
     "supertest": "^2.0.1",
     "tslint": "^4.0.1",
-    "typescript": "^2.0.9",
+    "typescript": "^2.1.4",
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "^1.1.0"
   }

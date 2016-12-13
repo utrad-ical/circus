@@ -1,12 +1,14 @@
-const merge = require('merge');
-require('json5/lib/require');
-
+import * as merge from 'merge';
+import 'json5/lib/require';
+import * as minimist from 'minimist';
 import * as path from 'path';
 
 const config = require('../../config/default');
 
-const argv = require('minimist')(process.argv.slice(2));
+const argv = minimist(process.argv.slice(2));
+
 let configData = {};
+
 if (argv.config) {
 	configData = require(argv.config);
 } else {

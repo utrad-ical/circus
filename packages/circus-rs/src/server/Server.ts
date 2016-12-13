@@ -18,6 +18,7 @@ import { ipBasedAccessControl } from './routes/middleware/IpBasedAccessControl';
 import { loadSeries } from './routes/middleware/LoadSeries';
 import { errorHandler } from './routes/middleware/ErrorHandler';
 import { countUp } from './routes/middleware/CountUp';
+import { StatusError } from './routes/Error';
 
 /**
  * Main server class.
@@ -153,6 +154,8 @@ export default class Server {
 			next();
 		});
 
+		this.express.use(countUp(this.helpers));
+
 		// Set up series router
 
 		// mergeParams is needed to capture ':sid' param
@@ -172,7 +175,6 @@ export default class Server {
 		seriesRoutes.forEach(route => {
 			seriesRouter.get(
 				`/${route}`,
-				countUp(this.helpers, route),
 				this.loadRouter(`series/${route}`)
 			);
 		});
@@ -182,7 +184,6 @@ export default class Server {
 		// Set up 'status' route
 		this.express.get(
 			'/status',
-			countUp(this.helpers, 'status'),
 			this.loadRouter('ServerStatus')
 		);
 
@@ -193,7 +194,6 @@ export default class Server {
 			);
 			this.express.get(
 				'/token',
-				countUp(this.helpers, 'token'),
 				ipBlockerMiddleware,
 				this.loadRouter('RequestToken')
 			);
@@ -201,9 +201,7 @@ export default class Server {
 
 		// This is a default handler to catch all unknown requests of all types of verbs
 		this.express.all('*', (req, res, next) => {
-			const error = new Error('Not found');
-			(<any>error).status = 404;
-			next(error);
+			next(StatusError.notFound('Not found'));
 		});
 
 		// Adds an error handler which outputs all errors in JSON format

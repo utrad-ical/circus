@@ -2,7 +2,7 @@ import DicomDumper from './DicomDumper';
 import DicomVolume  from '../../common/DicomVolume';
 import { PixelFormat } from '../../common/PixelFormat';
 
-import * as extractor from './DicomPixelExtractor';
+import { DicomInfo, DicomPixelExtractor } from './DicomPixelExtractor';
 import { SeriesLoaderInfo, SeriesLoader } from '../dicom-file-repository/DicomFileRepository';
 
 /**
@@ -11,16 +11,14 @@ import { SeriesLoaderInfo, SeriesLoader } from '../dicom-file-repository/DicomFi
  */
 export default class PureJsDicomDumper extends DicomDumper {
 
-	protected readSingleDicomImageFile(seriesLoader: SeriesLoader, image: number): Promise<extractor.DicomInfo> {
-		return seriesLoader(image).then(buffer => {
-			let ta = new Uint8Array(buffer);
-			let parser = new extractor.DicomPixelExtractor();
-			return parser.extract(ta);
-		});
+	protected async readSingleDicomImageFile(seriesLoader: SeriesLoader, image: number): Promise<DicomInfo> {
+		const buffer = await seriesLoader(image);
+		const data = new Uint8Array(buffer);
+		const parser = new DicomPixelExtractor();
+		return parser.extract(data);
 	}
 
-	public readDicom(seriesLoaderInfo: SeriesLoaderInfo): Promise<DicomVolume> {
-		let raw: DicomVolume;
+	public async readDicom(seriesLoaderInfo: SeriesLoaderInfo): Promise<DicomVolume> {
 		let lastSliceLocation: number;
 		let pitch: number | undefined = undefined;
 		let seriesMinValue: number = Infinity;
@@ -28,59 +26,57 @@ export default class PureJsDicomDumper extends DicomDumper {
 
 		const { count, seriesLoader } = seriesLoaderInfo;
 
-		return Promise.resolve().then(() => {
-			let loader: Promise<any> = Promise.resolve(null);
-			for (let i = 1; i <= count; i++) {
-				loader = loader.then(() => {
-					// logger.debug(`reading ${i}`);
-					return this.readSingleDicomImageFile(seriesLoader, i);
-				}).then(result => {
-					// logger.debug(`inserting ${i} with ${result.pixelData.byteLength} bytes of data`);
-					if (i === 1) {
-						if ('x00180088' in result.dataset.elements) {
-							// [0018, 0088] Spacing between slices
-							pitch = result.dataset.floatString('x00180088');
-							if (!pitch) {
-								throw new Error('Slice pitch could not be determined');
-							}
-							raw.setVoxelSize([result.pixelSpacing[0], result.pixelSpacing[1], pitch]);
-						}
-						raw = new DicomVolume([result.columns, result.rows, count], result.pixelFormat);
-						raw.appendHeader({
-							modality: result.modality,
-							rescaleSlope: result.rescale.slope,
-							rescaleIntercept: result.rescale.intercept
-						});
-						raw.dicomWindow = result.window;
-						raw.estimatedWindow = { width: 50, level: 75 };
-					} else if (i > 1 && pitch === undefined) {
-						pitch = Math.abs(lastSliceLocation - result.sliceLocation);
-						raw.setVoxelSize([result.pixelSpacing[0], result.pixelSpacing[1], pitch]);
-					}
-					seriesMinValue = Math.min(seriesMinValue, result.minValue);
-					seriesMaxValue = Math.max(seriesMinValue, result.maxValue);
-					lastSliceLocation = result.sliceLocation;
-					raw.insertSingleImage(i - 1, result.pixelData);
-					return true;
-				});
+		// read first image
+		let dicom = await this.readSingleDicomImageFile(seriesLoader, 1);
+		const raw: DicomVolume = new DicomVolume([dicom.columns, dicom.rows, count], dicom.pixelFormat);
+		if ('x00180088' in dicom.dataset.elements) {
+			// [0018, 0088] Spacing between slices
+			pitch = dicom.dataset.floatString('x00180088');
+			if (!pitch) {
+				throw new Error('Slice pitch could not be determined');
 			}
-			return loader;
-		}).then(() => {
-			if (raw.getHeader('modality') === 'CT') {
-				let slope = raw.getHeader('rescaleSlope');
-				let intercept = raw.getHeader('rescaleIntercept');
-				// logger.debug(`Apply rescale: slope=${slope}, intercept=${intercept}`);
-				raw.convert(PixelFormat.Int16, originalValue => {
-					return originalValue * slope + intercept;
-				});
-				seriesMinValue = seriesMinValue * slope + intercept;
-				seriesMaxValue = seriesMaxValue * slope + intercept;
-			}
-			// Specific to CIRCUS RS: Apply rescale only when the modality is CT
-			let estimatedWidth = Math.floor(seriesMaxValue - seriesMinValue + 1);
-			let estimatedLevel = Math.floor(seriesMinValue + estimatedWidth / 2);
-			raw.estimatedWindow = { level: estimatedLevel, width: estimatedWidth };
-			return raw;
+			raw.setVoxelSize([dicom.pixelSpacing[0], dicom.pixelSpacing[1], pitch]);
+		}
+
+		// set headers accordingly
+		raw.appendHeader({
+			modality: dicom.modality,
+			rescaleSlope: dicom.rescale.slope,
+			rescaleIntercept: dicom.rescale.intercept
 		});
+		raw.dicomWindow = dicom.window;
+		raw.estimatedWindow = { width: 50, level: 75 };
+		lastSliceLocation = dicom.sliceLocation;
+
+		// read subsequent images
+		for (let i = 1; i <= count; i++) {
+			if (i !== 1) dicom = await this.readSingleDicomImageFile(seriesLoader, i);
+			// logger.debug(`inserting ${i} with ${result.pixelData.byteLength} bytes of data`);
+			if (i > 1 && pitch === undefined) {
+				pitch = Math.abs(lastSliceLocation - dicom.sliceLocation);
+				raw.setVoxelSize([dicom.pixelSpacing[0], dicom.pixelSpacing[1], pitch]);
+			}
+			seriesMinValue = Math.min(seriesMinValue, dicom.minValue);
+			seriesMaxValue = Math.max(seriesMinValue, dicom.maxValue);
+			lastSliceLocation = dicom.sliceLocation;
+			raw.insertSingleImage(i - 1, dicom.pixelData);
+		}
+
+		if (raw.getHeader('modality') === 'CT') {
+			const slope = raw.getHeader('rescaleSlope');
+			const intercept = raw.getHeader('rescaleIntercept');
+			// logger.debug(`Apply rescale: slope=${slope}, intercept=${intercept}`);
+			raw.convert(PixelFormat.Int16, originalValue => {
+				return originalValue * slope + intercept;
+			});
+			seriesMinValue = seriesMinValue * slope + intercept;
+			seriesMaxValue = seriesMaxValue * slope + intercept;
+		}
+
+		// Specific to CIRCUS RS: Apply rescale only when the modality is CT
+		const estimatedWidth = Math.floor(seriesMaxValue - seriesMinValue + 1);
+		const estimatedLevel = Math.floor(seriesMinValue + estimatedWidth / 2);
+		raw.estimatedWindow = { level: estimatedLevel, width: estimatedWidth };
+		return raw;
 	}
 }

@@ -1,7 +1,7 @@
 import { PixelFormat, pixelFormatInfo } from '../../common/PixelFormat';
 
-var lj = require('jpeg-lossless-decoder-js');
-var parser = require('dicom-parser');
+import * as lj from 'jpeg-lossless-decoder-js';
+import * as parser from 'dicom-parser';
 
 interface RescaleParams { slope: number; intercept: number; }
 interface WindowParams { level: number; width: number; }
@@ -32,7 +32,7 @@ type DicomDataset = {
 	string: (tag: string) => string;
 	uint16: (tag: string) => number;
 	floatString: (tag: string) => number;
-}
+};
 
 /**
  * DICOM parser and pixel data extractor.
@@ -45,8 +45,8 @@ type DicomDataset = {
 export class DicomPixelExtractor {
 
 	private determinePixelFormat(dataset: DicomDataset): PixelFormat {
-		let pixelRepresentation = dataset.uint16('x00280103');
-		let bitsAllocated = dataset.uint16('x00280100');
+		const pixelRepresentation = dataset.uint16('x00280103');
+		const bitsAllocated = dataset.uint16('x00280100');
 		if (pixelRepresentation === 0 && bitsAllocated === 8) {
 			return PixelFormat.UInt8;
 		} else if (pixelRepresentation === 1 && bitsAllocated === 8) {
@@ -81,16 +81,16 @@ export class DicomPixelExtractor {
 		dataset: DicomDataset, transferSyntax: string,
 		rows: number, columns: number, pixelFormat: PixelFormat
 	): { buffer: ArrayBuffer, minValue: number, maxValue: number } {
-		let offset = dataset.elements['x7fe00010'].dataOffset; // pixel data itself
-		let len = dataset.elements['x7fe00010'].length;
-		let pxInfo = pixelFormatInfo(pixelFormat);
-		let bpp = pxInfo.bpp;
+		const offset = dataset.elements['x7fe00010'].dataOffset; // pixel data itself
+		const len = dataset.elements['x7fe00010'].length;
+		const pxInfo = pixelFormatInfo(pixelFormat);
+		const bpp = pxInfo.bpp;
 		if (len !== bpp * rows * columns) {
 			throw new Error('Unexpected pixel data length.');
 		}
-		let pixelData = new pxInfo.arrayClass(dataset.byteArray.buffer, offset, rows * columns );
-		let buffer = new ArrayBuffer(rows * columns * bpp);
-		let resultArray = new pxInfo.arrayClass(buffer);
+		const pixelData = new pxInfo.arrayClass(dataset.byteArray.buffer, offset, rows * columns );
+		const buffer = new ArrayBuffer(rows * columns * bpp);
+		const resultArray = new pxInfo.arrayClass(buffer);
 		let minValue = pxInfo.maxLevel;
 		let maxValue = pxInfo.minLevel;
 		for (let i = 0; i < columns * rows; i++) {
@@ -106,16 +106,16 @@ export class DicomPixelExtractor {
 		dataset: DicomDataset, transferSyntax: string,
 		rows: number, columns: number, pixelFormat: PixelFormat
 	): { buffer: ArrayBuffer, minValue: number, maxValue: number } {
-		let decoder = new lj.lossless.Decoder();
+		const decoder = new lj.lossless.Decoder();
 
 		// fetch pixel data and decompress
-		let pixelDataElement = dataset.elements['x7fe00010'];
-		let frameData = parser.readEncapsulatedPixelData(dataset, pixelDataElement, 0);
+		const pixelDataElement = dataset.elements['x7fe00010'];
+		const frameData = parser.readEncapsulatedPixelData(dataset, pixelDataElement, 0);
 
-		let pxInfo = pixelFormatInfo(pixelFormat);
-		let decompressed: ArrayBuffer = decoder.decompress(frameData.buffer, frameData.byteOffset, frameData.length);
+		const pxInfo = pixelFormatInfo(pixelFormat);
+		const decompressed: ArrayBuffer = decoder.decompress(frameData.buffer, frameData.byteOffset, frameData.length);
 
-		let resultArray = new pxInfo.arrayClass(decompressed);
+		const resultArray = new pxInfo.arrayClass(decompressed);
 		let minValue = pxInfo.maxLevel;
 		let maxValue = pxInfo.minLevel;
 		for (let i = 0; i < columns * rows; i++) {
@@ -152,34 +152,34 @@ export class DicomPixelExtractor {
 	 */
 	public extract(dicomFileData: Uint8Array, frame: number = 1): DicomInfo {
 		if (frame !== 1) throw new Error('Multiframe images are not supported yet.');
-		let dataset: DicomDataset = parser.parseDicom(dicomFileData);
-		let transferSyntax = dataset.string('x00020010');
+		const dataset: DicomDataset = parser.parseDicom(dicomFileData);
+		const transferSyntax = dataset.string('x00020010');
 
-		let modality = dataset.string('x00080060'); // modality
+		const modality = dataset.string('x00080060'); // modality
 
 		// Get relevant DICOM element data (in group 0028)
-		let columns = dataset.uint16('x00280011'); // columns
-		let rows = dataset.uint16('x00280010'); // rows
-		let pixelSpacing = <[number, number]>dataset.string('x00280030').split('\\').map(x => parseFloat(x));
-		let rescale = this.determineRescale(dataset);
-		let pixelFormat = this.determinePixelFormat(dataset);
+		const columns = dataset.uint16('x00280011'); // columns
+		const rows = dataset.uint16('x00280010'); // rows
+		const pixelSpacing = <[number, number]>dataset.string('x00280030').split('\\').map(x => parseFloat(x));
+		const rescale = this.determineRescale(dataset);
+		const pixelFormat = this.determinePixelFormat(dataset);
 
 		if (pixelFormat === PixelFormat.Unknown) {
 			throw new RangeError('Unsupported pixel format detected.');
 		}
 
-		let window = this.determineWindow(dataset);
-		let sliceLocation = dataset.floatString('x00201041');
+		const window = this.determineWindow(dataset);
+		const sliceLocation = dataset.floatString('x00201041');
 
 		// PhotometricInterpretation == 'MONOCHROME1' means
 		// large pixel value means blacker instead of whiter
-		let photometricInterpretation = dataset.string('x00280004');
+		const photometricInterpretation = dataset.string('x00280004');
 		if (!(/^MONOCHROME/.test(photometricInterpretation))) {
 			throw new Error('Non-monochrome images are not supported yet.');
 		}
 		// let invert = (photometricInterpretation === 'MONOCHROME1');
 
-		let { buffer, minValue, maxValue } = this.extractPixels(
+		const { buffer, minValue, maxValue } = this.extractPixels(
 			dataset, transferSyntax, rows, columns, pixelFormat
 		);
 

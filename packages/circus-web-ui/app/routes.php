@@ -29,6 +29,8 @@ Route::group(['before' => 'auth.api'], function() {
 	Route::post('api/series/search', 'SeriesListController@search');
 	Route::get('api/case/{cid}', 'CaseApiController@show');
 	Route::post('api/case/search', 'CaseListController@search');
+	Route::put('api/blob/{id}', 'BlobController@put');
+	Route::get('api/blob/{id}', 'BlobController@get');
 
 	Route::group(['before' => 'admin'], function() {
 		Route::resource('api/user', 'UserApiController');

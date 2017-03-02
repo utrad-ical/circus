@@ -2,7 +2,7 @@
   "name": "@utrad-ical/circus-rs",
   "version": "0.6.0",
   "scripts": {
-    "start": "node ./circus-rs.js",
+    "start": "node ./server.js",
     "test": "mocha",
     "docs": "jekyll build --source=./docs --dest=./docs/_site && cp -r ./dist ./docs/_site"
   },

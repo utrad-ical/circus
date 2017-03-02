@@ -224,6 +224,7 @@ export class Viewer extends EventEmitter {
 				this.cachedSourceImage = image;
 				this.currentRender = null;
 				this.renderAnnotations(state);
+				this.emit('draw', this.viewState);
 				return true;
 			});
 		});

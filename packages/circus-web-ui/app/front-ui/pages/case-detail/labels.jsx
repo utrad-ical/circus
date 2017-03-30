@@ -1,6 +1,6 @@
 import React from 'react';
 import { ColorPicker } from '../../components/color-picker';
-import { Popover, Button, OverlayTrigger, FormControl, Panel } from '../../components/react-bootstrap';
+import { Popover, Button, OverlayTrigger, FormControl } from '../../components/react-bootstrap';
 
 export const LabelSelector = props => {
 	return <ul className="case-series-list">

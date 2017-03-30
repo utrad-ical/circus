@@ -24,12 +24,11 @@ export class ImageViewer extends React.Component {
 	componentDidMount() {
 		const container = this.refs.container;
 		const viewer = new rs.Viewer(container);
-		const composition = new rs.Composition();
 		const src = new rs.HybridImageSource({
 			client: this.state.client,
 			series: this.props.seriesUID
 		});
-		composition.setImageSource(src);
+		const composition = new rs.Composition(src);
 		viewer.setComposition(composition);
 		const initialTool = this.props.initialTool ? this.props.initialTool : 'pager';
 		viewer.setActiveTool(initialTool);

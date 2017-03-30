@@ -12,18 +12,26 @@
 	display: flex;
 }
 
-.case-series-list {
-	width: 33%;
-	margin: 0;
-	padding: 0;
-}
-
 .case-series-list-item {
 	list-style-type: none;
 	cursor: pointer;
 	&:hover {
 		background-color: #eee;
 	}
+}
+
+.case-revision-header {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	> * {
+		flex: 0 0 30%;
+	}
+}
+
+.case-label-buttons {
+	padding-left: 20px;
+	text-align: right;
 }
 
 .case-label-list {

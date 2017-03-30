@@ -1,32 +1,57 @@
 import React from 'react';
 import { api } from '../../utils/api';
 import { ImageViewer } from '../../components/image-viewer';
+import { PropertyEditor } from '../../components/property-editor';
+import { Loading } from '../../components/loading';
 import { LabelSelector } from './labels';
 
 export class CaseDetail extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
+			projectData: null,
 			caseData: null,
-			activeRevision: null
+			editingRevision: null
 		};
+		this.revisionDataChange = this.revisionDataChange.bind(this);
 	}
 
-	async componentDidMount() {
+	async loadCase() {
 		const caseID = this.props.params.cid;
 		const caseData = await api('case/' + caseID);
 		this.setState({ caseData });
-		this.setState({ activeRevision: caseData.latestRevision });
+		this.setState({ editingRevision: caseData.latestRevision });
+	}
+
+	async loadProject() {
+		const projectID = this.state.caseData.projectID;
+		const projectData = await api('project/' + projectID);
+		this.setState({ projectData });
+	}
+
+	revisionDataChange(rev) {
+		this.setState({ editingRevision: rev });
+	}
+
+	async componentDidMount() {
+		await this.loadCase();
+		await this.loadProject();
 	}
 
 	render() {
-		const cid = this.props.params.cid;
-		if (!this.state.activeRevision) {
-			return null;
+		if (!this.state.caseData || !this.state.projectData || !this.state.editingRevision) {
+			return <Loading />;
 		}
+
+		const cid = this.props.params.cid;
+
 		return <div>
-			<div>Case ID: {cid}</div>
-			<RevisionData revision={this.state.caseData.latestRevision} />
+			<div className="case-info">Case ID: {cid}</div>
+			<RevisionData
+				revision={this.state.editingRevision}
+				projectData={this.state.projectData}
+				onChange={this.revisionDataChange}
+			/>
 		</div>;
 	}
 }
@@ -35,31 +60,59 @@ export class RevisionData extends React.Component {
 
 	constructor(props) {
 		super(props);
-		this.state = { activeSeries: null };
+		this.state = {
+			activeSeriesIndex: 0,
+			activeSeries: props.revision.series[0],
+			activeLabelIndex: null
+		};
 	}
 
-	componentDidMount() {
-		this.changeActiveSeries(this.props.revision, 0);
-	}
-
-	componentWillReceiveProps(props) {
-		if (this.props.revision !== props.revision) {
-			this.changeActiveSeries(props.revision, 0);
+	componentWillReceiveProps(newProps) {
+		if (this.props.revision.series[this.state.activeSeriesIndex] !== newProps.revision.series[this.state.activeSeriesIndex]) {
+			this.changeActiveSeries(newProps.revision, 0);
 		}
 	}
 
 	async changeActiveSeries(revision, index) {
-		this.setState({ activeSeries: revision.series[index] });
+		this.setState({
+			activeSeriesIndex: index,
+			activeSeries: revision.series[index]
+		});
+	}
+
+	changeActiveLabel(label) {
+		this.setState({ activeLabel: label });
+	}
+
+	labelAttributesChange(newValue) {
+		const newLabel = {
+			...this.activeLabel,
+			attributes: newValue
+		};
+	}
+
+	caseAttributesChange(newValue) {
+		const newRevision = {
+			...this.props.revision,
+			caseAttributes: newValue
+		};
+		this.props.onChange(newRevision);
 	}
 
 	render () {
+		const { projectData } = this.props;
 		if (!this.state.activeSeries) return null;
 		const seriesUID = this.state.activeSeries.seriesUID;
 		return <div>
-			<LabelSelector
-				revision={this.props.revision}
-				activeSeries={this.state.activeSeries}
-			/>
+			<div className="case-revision-header">
+				<LabelSelector
+					revision={this.props.revision}
+					activeSeries={this.state.activeSeries}
+					activeLabel={this.state.activeLabel}
+				/>
+				<PropertyEditor properties={projectData.labelAttributesSchema} value={{}} />
+				<PropertyEditor properties={projectData.caseAttributesSchema} value={{}} />
+			</div>
 			<ViewerCluster seriesUID={seriesUID} />
 		</div>;
 	}

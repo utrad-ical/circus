@@ -22,13 +22,33 @@ export class ImageViewer extends React.Component {
 	}
 
 	componentDidMount() {
+
+		function setOrientation() {
+			const state = viewer.getState();
+			const mmDim = src.mmDim();
+			state.section = rs.createOrthogonalMprSection(
+				viewer.getResolution(),
+				mmDim,
+				orientation
+			);
+			console.log(orientation);
+			console.log(state);
+			viewer.setState(state);
+			viewer.removeListener('draw', setOrientation);
+		}
+
 		const container = this.refs.container;
 		const viewer = new rs.Viewer(container);
 		const src = new rs.HybridImageSource({
 			client: this.state.client,
 			series: this.props.seriesUID
 		});
+
+		const orientation = this.props.orientation || 'axial';
 		const composition = new rs.Composition(src);
+
+		viewer.on('draw', setOrientation);
+
 		viewer.setComposition(composition);
 		const initialTool = this.props.initialTool ? this.props.initialTool : 'pager';
 		viewer.setActiveTool(initialTool);

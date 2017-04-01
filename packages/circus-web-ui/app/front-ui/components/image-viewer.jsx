@@ -29,13 +29,14 @@ export class ImageViewer extends React.Component {
 		});
 	}
 
-	componentWillReceiveProps(newProps) {
-		if (this.seriesUID !== newProps.seriesUID) {
-			this.updateComposition(newProps.seriesUID);
+	componentWillUpdate(nextProps) {
+		if (this.props.seriesUID !== nextProps.seriesUID) {
+			this.updateComposition(nextProps.seriesUID);
 		}
-		if (this.labels !== newProps.labels) {
+		if (this.props.labels !== nextProps.labels) {
 			this.updateLabels();
 		}
+		this.viewer.setActiveTool(nextProps.tool);
 	}
 
 	componentDidMount() {

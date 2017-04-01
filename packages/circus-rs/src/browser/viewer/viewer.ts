@@ -275,6 +275,7 @@ export class Viewer extends EventEmitter {
 		composition.imageSource.ready().then(() => {
 			this.imageReady = true;
 			this.setState(composition.imageSource.initialState(this));
+			this.emit('imageReady');
 		});
 		this.composition.addListener('viewerChange', this.boundRender);
 		this.emit('compositionChange', composition);

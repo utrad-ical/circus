@@ -9,15 +9,32 @@ export class ImageViewer extends React.Component {
 	constructor(props) {
 		super(props);
 		const server = store.getState().loginUser.data.dicomImageServer;
-		const client = new rs.RsHttpClient(server);
-		this.state = {
-			client // RsHttpClient
-		};
+		this.client = new rs.RsHttpClient(server);
+		this.viewer = null;
+	}
+
+	updateLabels() {
+		const { activeLabel } = this.props;
+		const comp = this.viewer.getComposition();
+		comp.removeAllAnnotations();
+		const labels = this.props.labels;
+		labels.forEach(label => {
+			const cloud = new rs.VoxelCloud();
+			cloud.origin = label.origin;
+			cloud.volume = label.volume;
+			cloud.active = label === activeLabel;
+			cloud.color = label.color;
+			cloud.alpha = 1;
+			comp.addAnnotation(cloud);
+		});
 	}
 
 	componentWillReceiveProps(newProps) {
 		if (this.seriesUID !== newProps.seriesUID) {
 			this.updateComposition(newProps.seriesUID);
+		}
+		if (this.labels !== newProps.labels) {
+			this.updateLabels();
 		}
 	}
 
@@ -31,8 +48,6 @@ export class ImageViewer extends React.Component {
 				mmDim,
 				orientation
 			);
-			console.log(orientation);
-			console.log(state);
 			viewer.setState(state);
 			viewer.removeListener('draw', setOrientation);
 		}
@@ -40,18 +55,20 @@ export class ImageViewer extends React.Component {
 		const container = this.refs.container;
 		const viewer = new rs.Viewer(container);
 		const src = new rs.HybridImageSource({
-			client: this.state.client,
+			client: this.client,
 			series: this.props.seriesUID
 		});
 
 		const orientation = this.props.orientation || 'axial';
 		const composition = new rs.Composition(src);
 
-		viewer.on('draw', setOrientation);
+		viewer.on('imageReady', setOrientation);
 
 		viewer.setComposition(composition);
 		const initialTool = this.props.initialTool ? this.props.initialTool : 'pager';
 		viewer.setActiveTool(initialTool);
+
+		this.viewer = viewer;
 	}
 
 	render() {

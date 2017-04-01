@@ -20,7 +20,7 @@ export class CaseDetail extends React.Component {
 		const caseID = this.props.params.cid;
 		const caseData = await api('case/' + caseID);
 		this.setState({ caseData });
-		this.setState({ editingRevision: caseData.latestRevision });
+		this.setState({ editingRevision: { ... caseData.latestRevision } });
 	}
 
 	async loadProject() {
@@ -56,7 +56,7 @@ export class CaseDetail extends React.Component {
 	}
 }
 
-export class RevisionData extends React.Component {
+export class RevisionData extends React.PureComponent {
 
 	constructor(props) {
 		super(props);
@@ -65,6 +65,7 @@ export class RevisionData extends React.Component {
 			activeSeries: props.revision.series[0],
 			activeLabelIndex: null
 		};
+		this.injectedLables = [];
 	}
 
 	componentWillReceiveProps(newProps) {
@@ -100,39 +101,43 @@ export class RevisionData extends React.Component {
 	}
 
 	render () {
-		const { projectData } = this.props;
+		const { projectData, revision, onChange } = this.props;
 		if (!this.state.activeSeries) return null;
 		const seriesUID = this.state.activeSeries.seriesUID;
 		return <div>
 			<div className="case-revision-header">
 				<LabelSelector
-					revision={this.props.revision}
+					revision={revision}
+					onChange={onChange}
 					activeSeries={this.state.activeSeries}
 					activeLabel={this.state.activeLabel}
 				/>
 				<PropertyEditor properties={projectData.labelAttributesSchema} value={{}} />
 				<PropertyEditor properties={projectData.caseAttributesSchema} value={{}} />
 			</div>
-			<ViewerCluster seriesUID={seriesUID} />
+			<ViewerCluster seriesUID={seriesUID} labels={this.injectedLabels} />
 		</div>;
 	}
 }
 
-export class ViewerCluster extends React.Component {
+export class ViewerCluster extends React.PureComponent {
 	render() {
-		const seriesUID = this.props.seriesUID;
+		const { seriesUID, labels } = this.props;
+
 		return <div className="viewer-cluster">
 			<div className="viewer-row">
 				<div className="viewer viewer-axial">
 					<ImageViewer
 						seriesUID={seriesUID}
 						orientation="axial"
+						labels={labels}
 					/>
 				</div>
 				<div className="viewer viewer-sagittal">
 					<ImageViewer
 						seriesUID={seriesUID}
 						orientation="sagittal"
+						labels={labels}
 					/>
 				</div>
 			</div>
@@ -141,6 +146,7 @@ export class ViewerCluster extends React.Component {
 					<ImageViewer
 						seriesUID={seriesUID}
 						orientation="coronal"
+						labels={labels}
 					/>
 				</div>
 				<div className="viewer viewer-mpr">
@@ -148,6 +154,7 @@ export class ViewerCluster extends React.Component {
 						seriesUID={seriesUID}
 						orientation="axial"
 						initialTool="celestialRotate"
+						labels={labels}
 					/>
 				</div>
 			</div>

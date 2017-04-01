@@ -48,4 +48,4 @@ export const ColorPalette = props => {
 			/>
 		))}
 	</div>;
-}
+};

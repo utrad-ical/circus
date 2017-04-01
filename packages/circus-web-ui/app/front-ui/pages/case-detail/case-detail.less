@@ -1,6 +1,7 @@
 .viewer-cluster {
 	display: flex;
 	flex-direction: column;
+	background: #333;
 }
 
 .viewer-row {
@@ -17,6 +18,10 @@
 	display: flex;
 }
 
+.case-series-list {
+	padding-left: 0;
+}
+
 .case-series-list-item {
 	list-style-type: none;
 	cursor: pointer;
@@ -30,7 +35,10 @@
 	flex-direction: row;
 	justify-content: space-between;
 	> * {
-		flex: 0 0 30%;
+		flex: 0 0 33.3%;
+		border-left: 1px solid silver;
+		padding: 0 15px;
+		&:first-child { border-left: none; }
 	}
 }
 
@@ -41,7 +49,7 @@
 
 .case-label-list {
 	margin: 0;
-	padding-left: 20px;
+	padding-left: 0px;
 	&.active {
 		background-color: silver;
 	}
@@ -53,6 +61,7 @@
 	flex-direction: row;
 	justify-content: space-between;
 	margin: 0.2em 0;
+	padding-left: 20px;
 	&.active {
 		background-color: silver;
 	}
@@ -65,5 +74,5 @@
 }
 
 .case-detail-toolbar {
-	background-color: silver;
+	background-color: #222;
 }

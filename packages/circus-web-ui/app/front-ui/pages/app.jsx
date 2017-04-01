@@ -13,9 +13,12 @@ import { logout } from 'actions';
 const AppView = props => {
 	const pageContentVisible = !props.isUserFetching && props.isLoggedIn;
 	const notLoggedIn = !props.isUserFetching && !props.isLoggedIn;
+
+	const full = props.routes.some(r => r.component.name == 'CaseDetail');
+	const containerClass = full ? 'full-container' : 'container';
 	return <div>
 		<Nav />
-		<div className="container">
+		<div className={containerClass}>
 			<MessageBox />
 			{ pageContentVisible ? props.children : null }
 			{ notLoggedIn ?

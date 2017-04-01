@@ -2,13 +2,14 @@ import React from 'react';
 import { ColorPicker } from '../../components/color-picker';
 import { Popover, Button, OverlayTrigger, FormControl, Glyphicon } from '../../components/react-bootstrap';
 import { RawData, PixelFormat } from 'circus-rs';
+import classNames from 'classnames';
 
 const labelColors = [
 	'#ff0000', '#00ff00', '#ffff00', '#0000ff', '#ff00ff', '#00ffff'
 ];
 
 export const LabelSelector = props => {
-	const { revision, onChange } = props;
+	const { revision, onChange, onChangeActiveLabel, activeLabel, activeSeries } = props;
 
 	function changeSeries(index, newSeries) {
 		const newRev = {
@@ -20,18 +21,22 @@ export const LabelSelector = props => {
 	}
 
 	return <ul className="case-series-list">
-		{revision.series.map((series, index) => (
-			<Series series={series} index={index} key={series.seriesUID} onChange={changeSeries} />
+		{revision.series.map((series, seriesIndex) => (
+			<Series
+				series={series}
+				index={seriesIndex}
+				key={series.seriesUID}
+				onChange={changeSeries}
+				onChangeActiveLabel={onChangeActiveLabel}
+				activeSeries={activeSeries}
+				activeLabel={activeLabel}
+			/>
 		))}
 	</ul>;
 };
 
 const Series = props => {
-	const { index: seriesIndex, series, onChange } = props;
-
-	function changeActiveLabel(label) {
-
-	}
+	const { index: seriesIndex, series, activeSeries, activeLabel, onChange, onChangeActiveLabel } = props;
 
 	function changeLabel(labelIndex, label) {
 		const newSeries = {
@@ -64,16 +69,17 @@ const Series = props => {
 		onChange(seriesIndex, newSeries);
 	}
 
-	return <li className="case-series-list-item"> Series #{seriesIndex}
+	return <li className={classNames("case-series-list-item", { active: series === activeSeries })}> Series #{seriesIndex}
 		<ul className="case-label-list">
-			{series.labels.map((label, index) => (
+			{series.labels.map((label, labelIndex) => (
 				<Label
 					label={label}
-					index={index}
-					key={index}
-					onChange={() => changeLabel(label)}
-					onClick={changeActiveLabel}
-					onRemoveClick={() => removeLabel(index)}
+					activeLabel={activeLabel}
+					index={labelIndex}
+					key={labelIndex}
+					onChange={changeLabel}
+					onClick={() => onChangeActiveLabel(seriesIndex, labelIndex)}
+					onRemoveClick={() => removeLabel(labelIndex)}
 				/>
 			))}
 		</ul>
@@ -86,7 +92,7 @@ const Series = props => {
 };
 
 export const Label = props => {
-	const { label, index: labelIndex, onChange, onClick, onRemoveClick } = props;
+	const { label, index: labelIndex, activeLabel, onChange, onClick, onRemoveClick } = props;
 	const caption = label.title ? label.title : `Label #${props.index}`;
 
 	function changeLabelAlpha(alpha) {
@@ -99,9 +105,9 @@ export const Label = props => {
 		onChange(labelIndex, newLabel);
 	}
 
-	return <li className="label-list-item">
+	return <li className={classNames("label-list-item", { active: label === activeLabel })} onClick={onClick}>
 		{caption}
-		<div onClick={onClick}>
+		<div>
 			<OpacityEditor value={label.alpha} onChange={changeLabelAlpha} />
 			<ColorPicker value={label.color} colors={labelColors} onChange={changeLabelColor} />
 			<Button bsSize="xs" onClick={onRemoveClick}><Glyphicon glyph="remove" /></Button>

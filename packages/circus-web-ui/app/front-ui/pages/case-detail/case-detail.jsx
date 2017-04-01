@@ -30,8 +30,8 @@ export class CaseDetail extends React.Component {
 		this.setState({ projectData });
 	}
 
-	revisionDataChange(rev) {
-		this.setState({ editingRevision: rev });
+	revisionDataChange(revision) {
+		this.setState({ editingRevision: revision });
 	}
 
 	async componentDidMount() {
@@ -63,29 +63,33 @@ export class RevisionData extends React.PureComponent {
 		super(props);
 		this.state = {
 			activeSeriesIndex: 0,
-			activeSeries: props.revision.series[0],
 			activeLabelIndex: null,
 			tool: 'pager'
 		};
 		this.changeTool = this.changeTool.bind(this);
-		this.injectedLables = [];
+		this.changeActiveLabel = this.changeActiveLabel.bind(this);
 	}
 
 	componentWillReceiveProps(newProps) {
 		if (this.props.revision.series[this.state.activeSeriesIndex] !== newProps.revision.series[this.state.activeSeriesIndex]) {
-			this.changeActiveSeries(newProps.revision, 0);
+			this.changeActiveSeries(0);
 		}
 	}
 
-	async changeActiveSeries(revision, index) {
+	changeActiveSeries(seriesIndex) {
 		this.setState({
-			activeSeriesIndex: index,
-			activeSeries: revision.series[index]
+			activeSeriesIndex: seriesIndex,
+			activeSeries: this.props.revision.series[seriesIndex]
 		});
 	}
 
-	changeActiveLabel(label) {
-		this.setState({ activeLabel: label });
+	changeActiveLabel(seriesIndex, labelIndex) {
+		if (this.state.activeSeriesIndex !== seriesIndex) {
+			this.chanegActiveSeries(seriesIndex);
+		}
+		this.setState({
+			activeLabelIndex: labelIndex
+		});
 	}
 
 	labelAttributesChange(newValue) {
@@ -109,16 +113,19 @@ export class RevisionData extends React.PureComponent {
 
 	render () {
 		const { projectData, revision, onChange } = this.props;
-		const { tool } = this.state;
-		if (!this.state.activeSeries) return null;
-		const seriesUID = this.state.activeSeries.seriesUID;
+		const { tool, activeSeriesIndex, activeLabelIndex } = this.state;
+		const activeSeries = revision.series[activeSeriesIndex];
+		if (!activeSeries) return <span>Pinya?</span>;
+		const activeLabel = activeSeries.labels[activeLabelIndex];
+		const seriesUID = activeSeries.seriesUID;
 		return <div>
 			<div className="case-revision-header">
 				<LabelSelector
 					revision={revision}
 					onChange={onChange}
-					activeSeries={this.state.activeSeries}
-					activeLabel={this.state.activeLabel}
+					activeSeries={activeSeries}
+					activeLabel={activeLabel}
+					onChangeActiveLabel={this.changeActiveLabel}
 				/>
 				<PropertyEditor properties={projectData.labelAttributesSchema} value={{}} />
 				<PropertyEditor properties={projectData.caseAttributesSchema} value={{}} />

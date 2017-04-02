@@ -102,12 +102,11 @@ export function draw3DLine(volume: RawData,
  * TODO: this function may be slow due to the use of reduce.
  */
 function getStepToNeighbor(pos: Vector3D, e: Vector3D): Vector3D {
-	let stepLengthEntry = [
+	const stepLengthEntry: number[] = [
 		nextLatticeDistance(pos[0], e[0]),
 		nextLatticeDistance(pos[1], e[1]),
 		nextLatticeDistance(pos[2], e[2])
-	];
-	stepLengthEntry = stepLengthEntry.filter((i) => i !== null);
+	].filter(i => i !== null) as number[];
 
 	const stepLength = stepLengthEntry.reduce(
 		(prev, cur) => {

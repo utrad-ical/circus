@@ -107,6 +107,17 @@ export default class RawData {
 	}
 
 	/**
+	 * Replace the internal data buffer.
+	 * @param buffer The data to replace. Must be exactly the same size of the existing buffer.
+	 */
+	public assign(buffer: ArrayBuffer): void {
+		if (!(buffer instanceof ArrayBuffer)) throw new TypeError('Not a buffer');
+		if (buffer.byteLength !== this.dataSize) throw new TypeError('Inproper data size');
+		this.data = buffer;
+		this.setAccessor();
+	}
+
+	/**
 	 * Get pixel value from floating-point coordinate
 	 * using trilinear interpolation.
 	 * @param x x-coordinate (floating point)

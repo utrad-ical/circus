@@ -131,7 +131,12 @@ export class RevisionData extends React.PureComponent {
 				<PropertyEditor properties={projectData.caseAttributesSchema} value={{}} />
 			</div>
 			<ToolBar active={tool} changeTool={this.changeTool} />
-			<ViewerCluster seriesUID={seriesUID} labels={this.injectedLabels} tool={tool} />
+			<ViewerCluster
+				seriesUID={seriesUID}
+				labels={activeSeries.labels}
+				activeLabel={activeLabel}
+				tool={tool}
+			/>
 		</div>;
 	}
 }
@@ -147,6 +152,7 @@ class ToolBar extends React.Component {
 			<ToolButton name="window" changeTool={changeTool} active={active} />
 			<ToolButton name="brush" changeTool={changeTool} active={active} />
 			<ToolButton name="eraser" changeTool={changeTool} active={active} />
+			<ToolButton name="bucket" changeTool={changeTool} active={active} />
 		</div>;
 	}
 }
@@ -163,44 +169,34 @@ class ToolButton extends React.Component {
 
 export class ViewerCluster extends React.PureComponent {
 	render() {
-		const { seriesUID, labels, tool } = this.props;
+		const { seriesUID, labels = [], activeLabel, tool } = this.props;
+
+		function makeViewer(orientation, initialTool) {
+			return <ImageViewer
+				seriesUID={seriesUID}
+				orientation={orientation}
+				labels={labels}
+				activeLabel={activeLabel}
+				tool={tool}
+				initialTool={initialTool}
+			/>;
+		}
 
 		return <div className="viewer-cluster">
 			<div className="viewer-row">
 				<div className="viewer viewer-axial">
-					<ImageViewer
-						seriesUID={seriesUID}
-						orientation="axial"
-						labels={labels}
-						tool={tool}
-					/>
+					{makeViewer('axial')}
 				</div>
 				<div className="viewer viewer-sagittal">
-					<ImageViewer
-						seriesUID={seriesUID}
-						orientation="sagittal"
-						labels={labels}
-						tool={tool}
-					/>
+					{makeViewer('sagittal')}
 				</div>
 			</div>
 			<div className="viewer-row">
 				<div className="viewer viewer-coronal">
-					<ImageViewer
-						seriesUID={seriesUID}
-						orientation="coronal"
-						labels={labels}
-						tool={tool}
-					/>
+					{makeViewer('coronal')}
 				</div>
 				<div className="viewer viewer-mpr">
-					<ImageViewer
-						seriesUID={seriesUID}
-						orientation="axial"
-						initialTool="celestialRotate"
-						labels={labels}
-						tool={tool}
-					/>
+					{makeViewer('axial', 'celestialRotate')}
 				</div>
 			</div>
 		</div>;

@@ -13,28 +13,31 @@ export class ImageViewer extends React.Component {
 		this.viewer = null;
 	}
 
-	updateLabels() {
-		const { activeLabel } = this.props;
+	updateLabels(props) {
+		const { labels, activeLabel } = props;
 		const comp = this.viewer.getComposition();
 		comp.removeAllAnnotations();
-		const labels = this.props.labels;
 		labels.forEach(label => {
 			const cloud = new rs.VoxelCloud();
 			cloud.origin = label.origin;
-			cloud.volume = label.volume;
+			const volume = new rs.AnisotropicRawData([64, 64, 64], rs.PixelFormat.Binary);
+			volume.setVoxelSize(comp.imageSource.meta.voxelSize);
+			volume.fillAll(1);
+			cloud.volume = volume; // label.volume;
 			cloud.active = label === activeLabel;
 			cloud.color = label.color;
-			cloud.alpha = 1;
+			cloud.alpha = label.alpha;
 			comp.addAnnotation(cloud);
 		});
+		comp.annotationUpdated();
 	}
 
 	componentWillUpdate(nextProps) {
 		if (this.props.seriesUID !== nextProps.seriesUID) {
 			this.updateComposition(nextProps.seriesUID);
 		}
-		if (this.props.labels !== nextProps.labels) {
-			this.updateLabels();
+		if (this.props.labels !== nextProps.labels || this.props.activeLabel !== nextProps.activeLabel) {
+			this.updateLabels(nextProps);
 		}
 		this.viewer.setActiveTool(nextProps.tool);
 	}
@@ -64,6 +67,7 @@ export class ImageViewer extends React.Component {
 		const composition = new rs.Composition(src);
 
 		viewer.on('imageReady', setOrientation);
+		viewer.on('imageReady', () => this.updateLabels(this.props));
 
 		viewer.setComposition(composition);
 		const initialTool = this.props.initialTool ? this.props.initialTool : 'pager';

@@ -6,7 +6,7 @@ import tinycolor from 'tinycolor2';
 // Copyright (c) 2010 Rachel Carvalho <rachel.carvalho@gmail.com>
 
 export const ColorPicker = props => {
-	const palette = <Popover><ColorPalette {...props} /></Popover>;
+	const palette = <Popover id="color-picker"><ColorPalette {...props} /></Popover>;
 	const color = tinycolor(props.value || '#ffffff');
 	const style = {
 		backgroundColor: color.toHexString(),

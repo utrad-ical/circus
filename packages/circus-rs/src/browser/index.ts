@@ -11,6 +11,7 @@ export * from '../browser/annotation/voxel-cloud';
 export * from '../browser/annotation/reference-line';
 
 export { default as RawData } from '../common/RawData';
+export { default as AnisotropicRawData } from '../common/AnisotropicRawData';
 export * from '../common/PixelFormat';
 export * from '../common/geometry';
 

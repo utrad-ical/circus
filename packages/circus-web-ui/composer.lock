@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "c84a9a114959deaa9e85dd590212634f",
+    "content-hash": "f9c9f7a3495ddb3565cf8cc2bb6e8d22",
     "packages": [
         {
             "name": "classpreloader/classpreloader",
@@ -1712,16 +1712,16 @@
         },
         {
             "name": "utrad-ical/circus-rs",
-            "version": "v0.7.0",
+            "version": "v0.7.1",
             "source": {
                 "type": "git",
                 "url": "git@github.com:utrad-ical/circus-rs.git",
-                "reference": "d28d3deddbea5ffdfcb233614c7ccc68273b4588"
+                "reference": "ce031fec3e8b545157e393eac4d280df0da9c642"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/utrad-ical/circus-rs/zipball/d28d3deddbea5ffdfcb233614c7ccc68273b4588",
-                "reference": "d28d3deddbea5ffdfcb233614c7ccc68273b4588",
+                "url": "https://api.github.com/repos/utrad-ical/circus-rs/zipball/ce031fec3e8b545157e393eac4d280df0da9c642",
+                "reference": "ce031fec3e8b545157e393eac4d280df0da9c642",
                 "shasum": ""
             },
             "type": "library",
@@ -1743,10 +1743,10 @@
                 "DICOM"
             ],
             "support": {
-                "source": "https://github.com/utrad-ical/circus-rs/tree/v0.7.0",
+                "source": "https://github.com/utrad-ical/circus-rs/tree/v0.7.1",
                 "issues": "https://github.com/utrad-ical/circus-rs/issues"
             },
-            "time": "2017-04-01T15:37:24+00:00"
+            "time": "2017-04-03T09:14:32+00:00"
         }
     ],
     "packages-dev": [

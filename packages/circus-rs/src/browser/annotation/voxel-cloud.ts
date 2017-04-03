@@ -19,7 +19,7 @@ import {
 import { scanBoundingBox } from '../volume-util';
 import { convertSectionToIndex } from '../section-util';
 import { VolumeImageSource } from '../image-source/volume-image-source';
-import AnisotropicRawData from '../../common/AnisotropicRawData';
+import RawData from '../../common/RawData';
 
 /**
  * VoxelCloud is a type of Annotation that can be registered to a Composition.
@@ -48,7 +48,7 @@ export class VoxelCloud implements Annotation {
 	/**
 	 * Actual volume data. The pixelFormat must be set to Binary.
 	 */
-	public volume: AnisotropicRawData;
+	public volume: RawData;
 
 	/**
 	 * The position of the origin of this volume data in the voxel coordinate of ImageSource.
@@ -66,6 +66,8 @@ export class VoxelCloud implements Annotation {
 	 * If set to true, draws some additional marks useful for debugging.
 	 */
 	public debugPoint: boolean;
+
+	private _voxelSize: Vector3D;
 
 	/**
 	 * Prepares a shadow canvas, which is large enough to contain
@@ -92,7 +94,7 @@ export class VoxelCloud implements Annotation {
 	}
 
 	private toMillimeter(vector: Vector3D): Vector3D {
-		const voxelSize = this.volume.getVoxelSize();
+		const voxelSize = this._voxelSize;
 		return [
 			vector[0] * voxelSize[0],
 			vector[1] * voxelSize[1],
@@ -137,10 +139,14 @@ export class VoxelCloud implements Annotation {
 	}
 
 	public draw(viewer: Viewer, viewState: ViewState): Sprite | null {
-		if (!(this.volume instanceof AnisotropicRawData)) return null;
+		if (!(this.volume instanceof RawData)) return null;
 		if (this.volume.getPixelFormat() !== PixelFormat.Binary) {
 			throw new Error('The assigned volume must use binary data format.');
 		}
+
+		const composition = viewer.getComposition();
+		if (!composition) return null;
+		this._voxelSize = (<VolumeImageSource>composition.imageSource).meta.voxelSize;
 
 		const context = viewer.canvas.getContext('2d');
 		if (!context) throw new Error('Failed to get canvas context');
@@ -220,7 +226,7 @@ export class VoxelCloud implements Annotation {
 				boundingYAxisEnd[2] - boundingOrigin[2]
 			]
 		};
-		const indexCloudSection: Section = convertSectionToIndex(cloudSection, this.volume.getVoxelSize());
+		const indexCloudSection: Section = convertSectionToIndex(cloudSection, this._voxelSize);
 
 
 		/*

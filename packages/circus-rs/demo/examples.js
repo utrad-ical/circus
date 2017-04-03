@@ -169,11 +169,8 @@ function addCloudAnnotation({
 	debugPoint = false
 } = {}) {
 	const cloud = new rs.VoxelCloud();
-	const volume = new rs.RawData();
-	volume.setDimension(size[0], size[1], size[2], rs.PixelFormat.Binary);
+	const volume = new rs.RawData(size, rs.PixelFormat.Binary);
 	volume.fillAll(1);
-	const src = comp.imageSource;
-	volume.setVoxelDimension(...src.meta.voxelSize);
 	cloud.volume = volume;
 	cloud.origin = origin;
 	cloud.color = color;

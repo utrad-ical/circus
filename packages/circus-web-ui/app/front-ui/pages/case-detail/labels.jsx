@@ -49,10 +49,14 @@ const Series = props => {
 
 	function addLabel() {
 		const newLabel = {
-			color: '#ff0000',
-			origin: [Math.floor(Math.random() * 250), Math.floor(Math.random() * 250), 50],
-			alpha: 1,
-			volume: new RawData([16, 16, 16], PixelFormat.Binary)
+			type: 'voxel',
+			data: {
+				color: '#ff0000',
+				origin: [Math.floor(Math.random() * 250), Math.floor(Math.random() * 250), 50],
+				alpha: 1,
+				volume: new RawData([16, 16, 16], PixelFormat.Binary)
+			},
+			attribute: []
 		};
 		const newSeries = {
 			...series,
@@ -97,20 +101,22 @@ export const Label = props => {
 	const caption = label.title ? label.title : `Label #${props.index}`;
 
 	function changeLabelAlpha(alpha) {
-		const newLabel = { ...label, alpha };
+		const newLabel = { ...label, data: { ... label.data, alpha } };
 		onChange(labelIndex, newLabel);
 	}
 
 	function changeLabelColor(color) {
-		const newLabel = { ...label, color };
+		const newLabel = { ...label, data: { ... label.data, color } };
 		onChange(labelIndex, newLabel);
 	}
+
+	console.log('LL', label);
 
 	return <li className={classNames("label-list-item", { active: label === activeLabel })} onClick={onClick}>
 		{caption}
 		<div>
-			<OpacityEditor value={label.alpha} onChange={changeLabelAlpha} />
-			<ColorPicker value={label.color} colors={labelColors} onChange={changeLabelColor} />
+			<OpacityEditor value={label.data.alpha} onChange={changeLabelAlpha} />
+			<ColorPicker value={label.data.color} colors={labelColors} onChange={changeLabelColor} />
 			<Button bsSize="xs" onClick={onRemoveClick}><Glyphicon glyph="remove" /></Button>
 		</div>
 	</li>;

@@ -7,23 +7,113 @@ import { Button, Glyphicon } from '../../components/react-bootstrap';
 import { LabelSelector } from './labels';
 import { store } from 'store';
 import * as rs from 'circus-rs';
+import { showMessage } from '../../actions/message-box';
+import { alert, prompt } from '../../components/modal';
+import * as crypto from 'crypto';
+
+function sha1(arrayBuf) {
+	const sha = crypto.createHash('sha1');
+	sha.update(Buffer.from(arrayBuf));
+	return sha.digest('hex');
+}
 
 export class CaseDetail extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
+			busy: false,
 			projectData: null,
 			caseData: null,
-			editingRevision: null
+			editingData: null
 		};
 		this.revisionDataChange = this.revisionDataChange.bind(this);
+		this.saveRevision = this.saveRevision.bind(this);
+		this.revertRevision = this.revertRevision.bind(this);
+	}
+
+	createEditData(revision) {
+		return {
+			...revision
+		};
 	}
 
 	async loadCase() {
+		this.setState({ busy: true });
 		const caseID = this.props.params.cid;
 		const caseData = await api('case/' + caseID);
 		this.setState({ caseData });
-		this.setState({ editingRevision: { ... caseData.latestRevision } });
+
+		const data = this.createEditData(caseData.latestRevision);
+
+		// Load all label volume data in the latest revision
+		for (let series of data.series) {
+			for (let label of series.labels) {
+				if (label.type !== 'voxel') continue;
+				try {
+					const labelData = label.data;
+					if (labelData.voxels === null) {
+						labelData.origin = [0, 0, 0];
+						labelData.volume = new rs.RawData([8, 8, 8], rs.PixelFormat.Binary);
+					} else {
+						const buffer = await api(
+							'blob/' + labelData.voxels,
+							{ handleErrors: true }
+						);
+						labelData.volume = new rs.RawData(labelData.size, rs.PixelFormat.Binary);
+						labelData.volume.data = buffer;
+					}
+				} catch (err) {
+					await alert('Could not load label volume data:\n' + err.message);
+					labelData.volume = null;
+				}
+			}
+		}
+
+		this.setState({ editingData: data, busy: false });
+	}
+
+	async saveRevision() {
+		const data = this.state.editingData;
+
+		// save all label volume data
+		for (let series of data.series) {
+			for (let label of series.labels) {
+				try {
+					if (label.volume === null) continue;
+					const hash = sha1(label.volume.data);
+					await api(
+						'blob/' + hash,
+						{ method: 'put', handleError: true, data: label.volum.data }
+					);
+					label.labelID =
+					delete label.volume;
+				} catch (err) {
+					await alert('Could not save label volume data\n' + err.message);
+					return;
+				}
+			}
+		}
+
+		// prepare revision data
+		const saveData = {
+			series: data.series.map(s => {
+
+			}),
+			status: 'approved',
+			caseAttribute: []
+		};
+		const result = await api(
+			`case/${caseID}/revision`,
+			{
+				method: 'post',
+				data: saveData
+			}
+		);
+		showMessage('Saved.');
+	}
+
+	async revertRevision() {
+
 	}
 
 	async loadProject() {
@@ -33,7 +123,7 @@ export class CaseDetail extends React.Component {
 	}
 
 	revisionDataChange(revision) {
-		this.setState({ editingRevision: revision });
+		this.setState({ editingData: revision });
 	}
 
 	async componentDidMount() {
@@ -42,7 +132,7 @@ export class CaseDetail extends React.Component {
 	}
 
 	render() {
-		if (!this.state.caseData || !this.state.projectData || !this.state.editingRevision) {
+		if (!this.state.caseData || !this.state.projectData || !this.state.editingData) {
 			return <Loading />;
 		}
 
@@ -50,11 +140,28 @@ export class CaseDetail extends React.Component {
 
 		return <div>
 			<div className="case-info">Case ID: {cid}</div>
+			<MenuBar onSaveClick={this.saveRevision} onRevertClick={this.revertRevision} />
 			<RevisionData
-				revision={this.state.editingRevision}
+				revision={this.state.editingData}
 				projectData={this.state.projectData}
 				onChange={this.revisionDataChange}
 			/>
+		</div>;
+	}
+}
+
+class MenuBar extends React.Component {
+	render() {
+		const { onRevertClick, onSaveClick } = this.props;
+		return <div className="case-detail-menu">
+			<Button bsStyle="warning" onClick={onRevertClick} >
+				<Glyphicon glyph="remove-circle" />
+				Revert
+			</Button>
+			<Button bsStyle="success" onClick={onSaveClick} >
+				<Glyphicon glyph="save" />
+				Save
+			</Button>
 		</div>;
 	}
 }
@@ -103,15 +210,14 @@ export class RevisionData extends React.PureComponent {
 		const activeLabel = labels[this.state.activeLabelIndex];
 		composition.removeAllAnnotations();
 		labels.forEach(label => {
+			if (label.type !== 'voxel') return;
+			const labelData = label.data;
 			const cloud = new rs.VoxelCloud();
-			cloud.origin = label.origin;
-			const volume = new rs.AnisotropicRawData([64, 64, 64], rs.PixelFormat.Binary);
-			volume.setVoxelSize(composition.imageSource.meta.voxelSize);
-			volume.fillAll(1);
-			cloud.volume = volume; // label.volume;
+			cloud.volume = labelData.volume;
+			cloud.origin = labelData.origin;
 			cloud.active = activeLabel && (label === activeLabel);
-			cloud.color = label.color;
-			cloud.alpha = label.alpha;
+			cloud.color = labelData.color;
+			cloud.alpha = labelData.alpha;
 			composition.addAnnotation(cloud);
 		});
 		composition.annotationUpdated();

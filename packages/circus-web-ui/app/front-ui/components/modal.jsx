@@ -1,5 +1,5 @@
 // Utility modal dialogs.
-// These can be used similary to standard dialogs like alert() and prompt(),
+// These can be used similarly to standard dialogs like alert() and prompt(),
 // but are non-blocking and have Promise support.
 
 import React from 'react';

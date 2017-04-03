@@ -1,7 +1,7 @@
 import React from 'react';
 import { ColorPicker } from '../../components/color-picker';
 import { Popover, Button, OverlayTrigger, FormControl, Glyphicon } from '../../components/react-bootstrap';
-import { RawData, PixelFormat } from 'circus-rs';
+import { RawData, PixelFormat, VoxelCloud } from 'circus-rs';
 import classNames from 'classnames';
 
 const labelColors = [
@@ -48,14 +48,15 @@ const Series = props => {
 	}
 
 	function addLabel() {
+		const cloud = new VoxelCloud();
+		cloud.color = '#ff0000';
+		cloud.alpha = 1;
+		cloud.origin = [0, 0, 0];
+		cloud.volume = new RawData([16, 16, 16], PixelFormat.Binary);
 		const newLabel = {
 			type: 'voxel',
-			data: {
-				color: '#ff0000',
-				origin: [Math.floor(Math.random() * 250), Math.floor(Math.random() * 250), 50],
-				alpha: 1,
-				volume: new RawData([16, 16, 16], PixelFormat.Binary)
-			},
+			cloud,
+			data: {},
 			attribute: []
 		};
 		const newSeries = {
@@ -101,22 +102,22 @@ export const Label = props => {
 	const caption = label.title ? label.title : `Label #${props.index}`;
 
 	function changeLabelAlpha(alpha) {
-		const newLabel = { ...label, data: { ... label.data, alpha } };
-		onChange(labelIndex, newLabel);
+		label.cloud.alpha = alpha;
+		onChange(labelIndex, label);
 	}
 
 	function changeLabelColor(color) {
-		const newLabel = { ...label, data: { ... label.data, color } };
-		onChange(labelIndex, newLabel);
+		label.cloud.color = color;
+		onChange(labelIndex, label);
 	}
 
-	console.log('LL', label);
+	console.log(`Cloud #${labelIndex}`, label.cloud);
 
 	return <li className={classNames("label-list-item", { active: label === activeLabel })} onClick={onClick}>
 		{caption}
 		<div>
-			<OpacityEditor value={label.data.alpha} onChange={changeLabelAlpha} />
-			<ColorPicker value={label.data.color} colors={labelColors} onChange={changeLabelColor} />
+			<OpacityEditor value={label.cloud.alpha} onChange={changeLabelAlpha} />
+			<ColorPicker value={label.cloud.color} colors={labelColors} onChange={changeLabelColor} />
 			<Button bsSize="xs" onClick={onRemoveClick}><Glyphicon glyph="remove" /></Button>
 		</div>
 	</li>;

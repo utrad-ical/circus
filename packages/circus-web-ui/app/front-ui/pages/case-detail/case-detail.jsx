@@ -49,23 +49,29 @@ export class CaseDetail extends React.Component {
 		for (let series of data.series) {
 			for (let label of series.labels) {
 				if (label.type !== 'voxel') continue;
-				try {
-					const labelData = label.data;
-					if (labelData.voxels === null) {
-						labelData.origin = [0, 0, 0];
-						labelData.volume = new rs.RawData([8, 8, 8], rs.PixelFormat.Binary);
-					} else {
+				const cloud = new rs.VoxelCloud();
+				cloud.volume = new rs.RawData([8, 8, 8], rs.PixelFormat.Binary);
+				cloud.origin = [0, 0, 0];
+				if (label.data.voxels !== null) {
+					try {
 						const buffer = await api(
-							'blob/' + labelData.voxels,
-							{ handleErrors: true }
+							'blob/' + label.data.voxels,
+							{ handleErrors: true, responseType: 'arraybuffer' }
 						);
-						labelData.volume = new rs.RawData(labelData.size, rs.PixelFormat.Binary);
-						labelData.volume.data = buffer;
+						const volume = new rs.RawData(label.data.size, rs.PixelFormat.Binary);
+						volume.assign(buffer);
+						cloud.volume = volume;
+						cloud.origin = label.data.origin;
+					} catch (err) {
+						await alert('Could not load label volume data:\n' + err.message);
+						label.data.cloud = null;
 					}
-				} catch (err) {
-					await alert('Could not load label volume data:\n' + err.message);
-					labelData.volume = null;
 				}
+				cloud.color = label.data.color || '#ff0000';
+				cloud.alpha = parseFloat(label.data.alpha);
+				cloud.debugPoint = true;
+				label.cloud = cloud;
+				// console.log('Cloud loaded', cloud);
 			}
 		}
 
@@ -79,14 +85,33 @@ export class CaseDetail extends React.Component {
 		for (let series of data.series) {
 			for (let label of series.labels) {
 				try {
-					if (label.volume === null) continue;
-					const hash = sha1(label.volume.data);
-					await api(
-						'blob/' + hash,
-						{ method: 'put', handleError: true, data: label.volum.data }
-					);
-					label.labelID =
-					delete label.volume;
+					label.cloud.shrinkToMinimum();
+					const bb = rs.scanBoundingBox(label.cloud.volume);
+					const newLabelData = {
+						voxels: null,
+						color: label.cloud.color,
+						alpha: label.cloud.alpha
+					};
+					if (bb !== null) {
+						// save painted voxels
+						const voxels = label.cloud.volume.data;
+						console.log(voxels);
+						const hash = sha1(voxels);
+						await api(
+							'blob/' + hash,
+							{
+								method: 'put',
+								handleError: true,
+								data: voxels,
+								headers: { 'Content-Type': 'application/json' }
+							}
+						);
+						newLabelData.voxels = hash;
+						newLabelData.origin = label.cloud.origin;
+						newLabelData.size = label.cloud.volume.getDimension();
+					}
+					label.data = newLabelData;
+					delete label.cloud;
 				} catch (err) {
 					await alert('Could not save label volume data\n' + err.message);
 					return;
@@ -95,20 +120,14 @@ export class CaseDetail extends React.Component {
 		}
 
 		// prepare revision data
-		const saveData = {
-			series: data.series.map(s => {
-
-			}),
-			status: 'approved',
-			caseAttribute: []
-		};
+		data.status = 'approved';
+		const caseID = this.state.caseData.caseID;
 		const result = await api(
 			`case/${caseID}/revision`,
-			{
-				method: 'post',
-				data: saveData
-			}
+			{ method: 'post', data }
 		);
+		console.log('Saved', data);
+		console.log(result);
 		showMessage('Saved.');
 	}
 
@@ -189,6 +208,10 @@ export class RevisionData extends React.PureComponent {
 		}
 	}
 
+	componentDidMount() {
+		this.updateLabels();
+	}
+
 	componentDidUpdate() {
 		this.updateLabels();
 	}
@@ -210,17 +233,13 @@ export class RevisionData extends React.PureComponent {
 		const activeLabel = labels[this.state.activeLabelIndex];
 		composition.removeAllAnnotations();
 		labels.forEach(label => {
-			if (label.type !== 'voxel') return;
-			const labelData = label.data;
-			const cloud = new rs.VoxelCloud();
-			cloud.volume = labelData.volume;
-			cloud.origin = labelData.origin;
+			if (!label.cloud) return;
+			const cloud = label.cloud;
 			cloud.active = activeLabel && (label === activeLabel);
-			cloud.color = labelData.color;
-			cloud.alpha = labelData.alpha;
 			composition.addAnnotation(cloud);
 		});
 		composition.annotationUpdated();
+		// console.log('Annotations', composition.annotations);
 	}
 
 	changeActiveSeries(seriesIndex) {

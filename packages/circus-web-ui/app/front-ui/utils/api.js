@@ -12,8 +12,6 @@ export async function api(command, options = {}) {
 	};
 	if (typeof params.data === 'object') {
 		if (params.method === 'get') params.method = 'post';
-		params.headers = { 'Content-Type': 'application/json' };
-		params.data = JSON.stringify(params.data);
 	}
 	try {
 		const res = await axios(params);

@@ -67,7 +67,9 @@ class BlobController extends ApiBaseController
 			if ($content === false) {
 				return $this->errorResponse('Could not load the object', 500);
 			}
-			return Response::make($content)->header('Content-encoding', 'gzip');
+			return Response::make($content)
+                ->header('Content-encoding', 'gzip')
+                ->header('Content-type', 'application/octet-stream');
 		}
 
 	}

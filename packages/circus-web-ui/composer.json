@@ -13,7 +13,7 @@
 	"require": {
 		"laravel/framework": "4.2.*",
 		"jenssegers/mongodb": "~2.0",
-		"utrad-ical/circus-rs": "0.7.0"
+		"utrad-ical/circus-rs": "0.7.*"
 	},
 	"autoload": {
 		"classmap": [

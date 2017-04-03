@@ -50,6 +50,7 @@ const Series = props => {
 	function addLabel() {
 		const newLabel = {
 			color: '#ff0000',
+			origin: [Math.floor(Math.random() * 250), Math.floor(Math.random() * 250), 50],
 			alpha: 1,
 			volume: new RawData([16, 16, 16], PixelFormat.Binary)
 		};
@@ -116,7 +117,7 @@ export const Label = props => {
 };
 
 const OpacityEditor = props => {
-	const opacityEditor = <Popover><OpacityPopover {...props} /></Popover>;
+	const opacityEditor = <Popover id="opacity-editor"><OpacityPopover {...props} /></Popover>;
 	return <OverlayTrigger trigger="click" rootClose overlay={opacityEditor} placement="bottom">
 		<Button bsStyle="default" bsSize="xs">{props.value * 100}%</Button>
 	</OverlayTrigger>;

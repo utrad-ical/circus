@@ -3,11 +3,13 @@ import { Row, Col, Panel } from 'components/react-bootstrap';
 import { api } from 'utils/api';
 import { showMessage } from 'actions';
 import { ImageViewer } from 'components/image-viewer';
+import { store } from 'store';
+import * as rs from 'circus-rs';
 
 export class SeriesDetail extends React.Component {
 	constructor(props) {
 		super(props);
-		this.state = ({ fetching: false, series: null });
+		this.state = ({ fetching: false, series: null, composition: null });
 	}
 
 	async load(seriesUID) {
@@ -17,6 +19,11 @@ export class SeriesDetail extends React.Component {
 				handleErrors: [401]
 			});
 			this.setState({ fetching: false, series });
+			const server = store.getState().loginUser.data.dicomImageServer;
+			const client = new rs.RsHttpClient(server);
+			const src = new rs.HybridImageSource({ client, series: seriesUID });
+			const composition = new rs.Composition(src);
+			this.setState({ composition });
 		} catch (err) {
 			this.setState({ fetching: false, series: null });
 			if (err.status === 401) {
@@ -39,7 +46,6 @@ export class SeriesDetail extends React.Component {
 	}
 
 	render() {
-		const uid = this.props.params.uid;
 		const series = this.state.series;
 		if (!series) return null;
 		const keys = [
@@ -55,7 +61,7 @@ export class SeriesDetail extends React.Component {
 			</h1>
 			<Row>
 				<Col lg={6}>
-					<ImageViewer seriesUID={series.seriesUID} />
+					<ImageViewer composition={this.state.composition} tool="pager" initialTool="pager" />
 				</Col>
 				<Col lg={6}>
 					{ typeof series.patientInfo === 'object' ?

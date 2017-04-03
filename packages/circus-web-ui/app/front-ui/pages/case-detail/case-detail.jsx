@@ -5,6 +5,8 @@ import { PropertyEditor } from '../../components/property-editor';
 import { Loading } from '../../components/loading';
 import { Button, Glyphicon } from '../../components/react-bootstrap';
 import { LabelSelector } from './labels';
+import { store } from 'store';
+import * as rs from 'circus-rs';
 
 export class CaseDetail extends React.Component {
 	constructor(props) {
@@ -64,28 +66,84 @@ export class RevisionData extends React.PureComponent {
 		this.state = {
 			activeSeriesIndex: 0,
 			activeLabelIndex: null,
-			tool: 'pager'
+			tool: 'pager',
+			composition: null
 		};
 		this.changeTool = this.changeTool.bind(this);
 		this.changeActiveLabel = this.changeActiveLabel.bind(this);
+		this.updateLabels = this.updateLabels.bind(this);
+		const server = store.getState().loginUser.data.dicomImageServer;
+		this.client = new rs.RsHttpClient(server);
 	}
 
-	componentWillReceiveProps(newProps) {
-		if (this.props.revision.series[this.state.activeSeriesIndex] !== newProps.revision.series[this.state.activeSeriesIndex]) {
-			this.changeActiveSeries(0);
+	componentWillUpdate(newProps, newState) {
+		if (this.props.revision.series[this.state.activeSeriesIndex].seriesUID !== newProps.revision.series[this.state.activeSeriesIndex].seriesUID) {
+			this.changeActiveSeries(this.state.activeSeriesIndex);
 		}
 	}
 
+	componentDidUpdate() {
+		this.updateLabels();
+	}
+
+	componentWillMount() {
+		const { revision } = this.props;
+		this.changeActiveSeries(0);
+		const activeSeries = revision.series[this.state.activeSeriesIndex];
+		if (activeSeries.labels instanceof Array && activeSeries.labels.length > 0) {
+			this.setState({ activeLabelIndex: 0 });
+		}
+	}
+
+	updateLabels() {
+		const { revision } = this.props;
+		const { composition } = this.state;
+		const activeSeries = revision.series[this.state.activeSeriesIndex];
+		const labels = activeSeries.labels;
+		const activeLabel = labels[this.state.activeLabelIndex];
+		composition.removeAllAnnotations();
+		labels.forEach(label => {
+			const cloud = new rs.VoxelCloud();
+			cloud.origin = label.origin;
+			const volume = new rs.AnisotropicRawData([64, 64, 64], rs.PixelFormat.Binary);
+			volume.setVoxelSize(composition.imageSource.meta.voxelSize);
+			volume.fillAll(1);
+			cloud.volume = volume; // label.volume;
+			cloud.active = activeLabel && (label === activeLabel);
+			cloud.color = label.color;
+			cloud.alpha = label.alpha;
+			composition.addAnnotation(cloud);
+		});
+		composition.annotationUpdated();
+	}
+
 	changeActiveSeries(seriesIndex) {
+		const activeSeries = this.props.revision.series[this.state.activeSeriesIndex];
+
+		if (!activeSeries) {
+			this.setState({
+				activeSeriesIndex: seriesIndex,
+				composition: null
+			});
+			return;
+		}
+
+		const src = new rs.HybridImageSource({
+			client: this.client,
+			series: activeSeries.seriesUID
+		});
+		const composition = new rs.Composition(src);
+		composition.on('imageReady', this.updateLabels);
+
 		this.setState({
 			activeSeriesIndex: seriesIndex,
-			activeSeries: this.props.revision.series[seriesIndex]
+			composition
 		});
 	}
 
 	changeActiveLabel(seriesIndex, labelIndex) {
 		if (this.state.activeSeriesIndex !== seriesIndex) {
-			this.chanegActiveSeries(seriesIndex);
+			this.changeActiveSeries(seriesIndex);
 		}
 		this.setState({
 			activeLabelIndex: labelIndex
@@ -113,11 +171,10 @@ export class RevisionData extends React.PureComponent {
 
 	render () {
 		const { projectData, revision, onChange } = this.props;
-		const { tool, activeSeriesIndex, activeLabelIndex } = this.state;
+		const { tool, activeSeriesIndex, activeLabelIndex, composition } = this.state;
 		const activeSeries = revision.series[activeSeriesIndex];
 		if (!activeSeries) return <span>Pinya?</span>;
 		const activeLabel = activeSeries.labels[activeLabelIndex];
-		const seriesUID = activeSeries.seriesUID;
 		return <div>
 			<div className="case-revision-header">
 				<LabelSelector
@@ -132,7 +189,7 @@ export class RevisionData extends React.PureComponent {
 			</div>
 			<ToolBar active={tool} changeTool={this.changeTool} />
 			<ViewerCluster
-				seriesUID={seriesUID}
+				composition={composition}
 				labels={activeSeries.labels}
 				activeLabel={activeLabel}
 				tool={tool}
@@ -169,14 +226,12 @@ class ToolButton extends React.Component {
 
 export class ViewerCluster extends React.PureComponent {
 	render() {
-		const { seriesUID, labels = [], activeLabel, tool } = this.props;
+		const { composition, tool } = this.props;
 
 		function makeViewer(orientation, initialTool) {
 			return <ImageViewer
-				seriesUID={seriesUID}
 				orientation={orientation}
-				labels={labels}
-				activeLabel={activeLabel}
+				composition={composition}
 				tool={tool}
 				initialTool={initialTool}
 			/>;

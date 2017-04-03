@@ -63,7 +63,7 @@ export class CaseDetail extends React.Component {
 						cloud.volume = volume;
 						cloud.origin = label.data.origin;
 					} catch (err) {
-						await alert('Could not load label volume data:\n' + err.message);
+						await alert('Could not load label volume data: \n' + err.message);
 						label.data.cloud = null;
 					}
 				}
@@ -95,17 +95,21 @@ export class CaseDetail extends React.Component {
 					if (bb !== null) {
 						// save painted voxels
 						const voxels = label.cloud.volume.data;
-						console.log(voxels);
 						const hash = sha1(voxels);
-						await api(
-							'blob/' + hash,
-							{
-								method: 'put',
-								handleError: true,
-								data: voxels,
-								headers: { 'Content-Type': 'application/json' }
-							}
-						);
+						if (hash === label.data.voxels) {
+							// console.log('Skipping unchanged voxel data.');
+						} else {
+							// needs to save the new voxel data.
+							await api(
+								'blob/' + hash,
+								{
+									method: 'put',
+									handleErrors: true,
+									data: voxels,
+									headers: { 'Content-Type': 'application/json' }
+								}
+							);
+						}
 						newLabelData.voxels = hash;
 						newLabelData.origin = label.cloud.origin;
 						newLabelData.size = label.cloud.volume.getDimension();
@@ -113,7 +117,7 @@ export class CaseDetail extends React.Component {
 					label.data = newLabelData;
 					delete label.cloud;
 				} catch (err) {
-					await alert('Could not save label volume data\n' + err.message);
+					await alert('Could not save label volume data: \n' + err.message);
 					return;
 				}
 			}
@@ -122,13 +126,16 @@ export class CaseDetail extends React.Component {
 		// prepare revision data
 		data.status = 'approved';
 		const caseID = this.state.caseData.caseID;
-		const result = await api(
-			`case/${caseID}/revision`,
-			{ method: 'post', data }
-		);
-		console.log('Saved', data);
-		console.log(result);
-		showMessage('Saved.');
+		try {
+			const result = await api(
+				`case/${caseID}/revision`,
+				{ method: 'post', data, handleErrors: true }
+			);
+			await alert('Successfully registered a revision.');
+		} catch (err) {
+			await alert('Error: ' + err.message);
+		}
+		this.loadCase();
 	}
 
 	async revertRevision() {

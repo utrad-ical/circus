@@ -7,9 +7,9 @@ import { Button, Glyphicon } from '../../components/react-bootstrap';
 import { LabelSelector } from './labels';
 import { store } from 'store';
 import * as rs from 'circus-rs';
-import { showMessage } from '../../actions/message-box';
 import { alert, prompt } from '../../components/modal';
 import * as crypto from 'crypto';
+import merge from 'merge';
 
 function sha1(arrayBuf) {
 	const sha = crypto.createHash('sha1');
@@ -32,9 +32,7 @@ export class CaseDetail extends React.Component {
 	}
 
 	createEditData(revision) {
-		return {
-			...revision
-		};
+		return merge(true, {}, revision);
 	}
 
 	async loadCase() {
@@ -80,6 +78,10 @@ export class CaseDetail extends React.Component {
 
 	async saveRevision() {
 		const data = this.state.editingData;
+
+		const desc = await prompt('Revision message', data.description);
+		if (desc === null) return;
+		data.description = desc;
 
 		// save all label volume data
 		for (let series of data.series) {

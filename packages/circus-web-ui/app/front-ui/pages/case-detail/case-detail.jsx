@@ -11,6 +11,8 @@ import { alert, prompt, confirm } from '../../components/modal';
 import * as crypto from 'crypto';
 import { ShrinkSelect } from '../../components/shrink-select';
 import merge from 'merge';
+import classNames from 'classnames';
+
 
 function sha1(arrayBuf) {
 	const sha = crypto.createHash('sha1');
@@ -183,6 +185,7 @@ export class CaseDetail extends React.Component {
 				currentRevision={this.state.editingRevisionIndex}
 			/>
 			<RevisionData
+				busy={this.state.busy}
 				revision={this.state.editingData}
 				projectData={this.state.projectData}
 				onChange={this.revisionDataChange}
@@ -373,12 +376,12 @@ export class RevisionData extends React.Component {
 	}
 
 	render () {
-		const { projectData, revision, onChange } = this.props;
+		const { projectData, revision, onChange, busy } = this.props;
 		const { tool, activeSeriesIndex, activeLabelIndex, composition } = this.state;
 		const activeSeries = revision.series[activeSeriesIndex];
 		if (!activeSeries) return null;
 		const activeLabel = activeSeries.labels[activeLabelIndex];
-		return <div>
+		return <div className={classNames('case-revision-data', { busy })}>
 			<div className="case-revision-header">
 				<Card title="Series / Labels">
 					<LabelSelector

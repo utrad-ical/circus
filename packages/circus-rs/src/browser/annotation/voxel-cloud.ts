@@ -7,8 +7,11 @@ import {
 	Vector3D,
 	Box,
 	Section,
+	Rectangle,
 	boxEquals,
 	intersectionOfBoxAndPlane,
+	intersectionOfTwoRectangles,
+	growSubPixel
 } from '../../common/geometry';
 import { PixelFormat } from '../../common/PixelFormat';
 import {
@@ -178,8 +181,8 @@ export class VoxelCloud implements Annotation {
 
 		// Converts the 3D intersection points to section-based 2D coordinates
 		// and get the box that contains all the intersection points.
-		let leftTop = [Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY];
-		let rightBottom = [Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY];
+		let leftTop: Vector2D = [Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY];
+		let rightBottom: Vector2D = [Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY];
 		intersections.forEach(i => {
 			const p2 = convertVolumeCoordinateToScreenCoordinate(section, resolution, i);
 
@@ -196,18 +199,33 @@ export class VoxelCloud implements Annotation {
 		rightBottom[0] = Math.ceil(rightBottom[0]);
 		rightBottom[1] = Math.ceil(rightBottom[1]);
 
-		if (this.debugPoint) rectangle(context, leftTop, rightBottom);
+		const screenRect: Rectangle = { origin: [0, 0], size: resolution };
+		const sectionIntersectionsRect: Rectangle = { origin: leftTop, size: [ rightBottom[0] - leftTop[0], rightBottom[1] - leftTop[1] ] };
+
+		const screenIntersection = intersectionOfTwoRectangles(screenRect, sectionIntersectionsRect);
+		if (screenIntersection === null) {
+			// The voxel cloud will not appear withing the rectangle of the screen.
+			return null;
+		}
+
+		// The final on-screen rectangle which is inside the canvas and thus should be rendered.
+		const outRect = growSubPixel(screenIntersection);
+
+		if (this.debugPoint) rectangle(context, outRect);
 
 		// Calculates the sub-section of the current section which
 		// contains the intersection area of this voxel cloud.
-		const cloudResolution: Vector2D = [
-			rightBottom[0] - leftTop[0],
-			rightBottom[1] - leftTop[1]
-		];
+		const cloudResolution: Vector2D = outRect.size;
 
-		const boundingOrigin = convertScreenCoordinateToVolumeCoordinate(section, resolution, [leftTop[0], leftTop[1]]);
-		const boundingXAxisEnd = convertScreenCoordinateToVolumeCoordinate(section, resolution, [rightBottom[0], leftTop[1]]);
-		const boundingYAxisEnd = convertScreenCoordinateToVolumeCoordinate(section, resolution, [leftTop[0], rightBottom[1]]);
+		const boundingOrigin = convertScreenCoordinateToVolumeCoordinate(
+			section, resolution, outRect.origin
+		);
+		const boundingXAxisEnd = convertScreenCoordinateToVolumeCoordinate(
+			section, resolution, [outRect.origin[0] + outRect.size[0], outRect.origin[1]]
+		);
+		const boundingYAxisEnd = convertScreenCoordinateToVolumeCoordinate(
+			section, resolution, [outRect.origin[0], outRect.origin[1] + outRect.size[1]]
+		);
 
 		const cloudSection: Section = {
 			origin: [
@@ -227,7 +245,6 @@ export class VoxelCloud implements Annotation {
 			]
 		};
 		const indexCloudSection: Section = convertSectionToIndex(cloudSection, this._voxelSize);
-
 
 		/*
 		 * STEP 3. Create the image data
@@ -279,7 +296,7 @@ export class VoxelCloud implements Annotation {
 		context.drawImage(
 			shadow,
 			0, 0, cloudResolution[0], cloudResolution[1], // src
-			leftTop[0], leftTop[1], rightBottom[0] - leftTop[0], rightBottom[1] - leftTop[1] // dest
+			outRect.origin[0], outRect.origin[1], outRect.size[0], outRect.size[1] // dest
 		);
 
 		return null;
@@ -300,12 +317,12 @@ function circle(context, center: [number, number], radius: number = 2, color: st
 	context.restore();
 }
 
-function rectangle(context, leftTop: number[], rightBottom: number[], color: string = 'rgba(128, 128, 128, 1.0)',
+function rectangle(context, rect: Rectangle, color: string = 'rgba(128, 128, 128, 1.0)',
 	linewidth: number = 1
 ): void {
 	context.save();
 	context.beginPath();
-	context.rect(leftTop[0], leftTop[1], rightBottom[0] - leftTop[0], rightBottom[1] - leftTop[1]);
+	context.rect(rect.origin[0], rect.origin[1], rect.size[0], rect.size[1]);
 	context.closePath();
 	context.lineWidth = linewidth;
 	context.strokeStyle = color;

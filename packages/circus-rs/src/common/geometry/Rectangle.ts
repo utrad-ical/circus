@@ -41,3 +41,11 @@ export function intersectionOfTwoRectangles(rect1: Rectangle, rect2: Rectangle):
 		return null;
 	}
 }
+
+export function growSubPixel(rect: Rectangle): Rectangle {
+	const left = Math.floor(rect.origin[0]);
+	const top = Math.floor(rect.origin[1]);
+	const right = Math.ceil(rect.origin[0] + rect.size[0]);
+	const bottom = Math.ceil(rect.origin[1] + rect.size[1]);
+	return { origin: [left, top], size: [right - left, bottom - top] };
+}

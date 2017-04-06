@@ -7,7 +7,9 @@ import { confirm } from '../../components/modal';
 
 
 const labelColors = [
-	'#ff0000', '#00ff00', '#ffff00', '#0000ff', '#ff00ff', '#00ffff'
+	'#ff0000', '#00ff00', '#ffff00', '#0000ff', '#ff00ff', '#00ffff',
+	'#ff4400', '#ff0044', '#88ff00', '#afc6fc', '#ff5e6e', '#aa4433',
+	'#ff8888', '#ffff88', '#aaffaa', '#ff88ff'
 ];
 
 export const LabelSelector = props => {
@@ -116,7 +118,10 @@ export const Label = props => {
 	console.log(`Cloud #${labelIndex}`, label.cloud);
 
 	return <li className={classNames("label-list-item", { active: label === activeLabel })} onClick={onClick}>
-		{caption}
+		<div>
+			<Glyphicon glyph="chevron-right" />&ensp;
+			{caption}
+		</div>
 		<div>
 			<OpacityEditor value={label.cloud.alpha} onChange={changeLabelAlpha} />
 			<ColorPicker value={label.cloud.color} colors={labelColors} onChange={changeLabelColor} />

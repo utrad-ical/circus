@@ -380,23 +380,29 @@ export class RevisionData extends React.Component {
 		const activeLabel = activeSeries.labels[activeLabelIndex];
 		return <div>
 			<div className="case-revision-header">
-				<LabelSelector
-					revision={revision}
-					onChange={onChange}
-					activeSeries={activeSeries}
-					activeLabel={activeLabel}
-					onChangeActiveLabel={this.changeActiveLabel}
-				/>
-				<PropertyEditor
-					properties={projectData.labelAttributesSchema}
-					value={activeLabel.attributes || {}}
-					onChange={this.labelAttributesChange}
-				/>
-				<PropertyEditor
-					properties={projectData.caseAttributesSchema}
-					value={revision.attributes}
-					onChange={this.caseAttributesChange}
-				/>
+				<Card title="Series / Labels">
+					<LabelSelector
+						revision={revision}
+						onChange={onChange}
+						activeSeries={activeSeries}
+						activeLabel={activeLabel}
+						onChangeActiveLabel={this.changeActiveLabel}
+					/>
+				</Card>
+				<Card title={`Label #${activeLabelIndex} of Series #${activeSeriesIndex}`}>
+					<PropertyEditor
+						properties={projectData.labelAttributesSchema}
+						value={activeLabel.attributes || {}}
+						onChange={this.labelAttributesChange}
+					/>
+				</Card>
+				<Card title="Case Attributes">
+					<PropertyEditor
+						properties={projectData.caseAttributesSchema}
+						value={revision.attributes}
+						onChange={this.caseAttributesChange}
+					/>
+				</Card>
 			</div>
 			<ToolBar
 				active={tool}
@@ -410,6 +416,18 @@ export class RevisionData extends React.Component {
 				activeLabel={activeLabel}
 				tool={tool}
 			/>
+		</div>;
+	}
+}
+
+class Card extends React.Component {
+	render() {
+		const { title, children } = this.props;
+		return <div className="case-detail-card">
+			<div className="case-detail-card-header">{title}</div>
+			<div className="case-detail-card-body">
+				{children}
+			</div>
 		</div>;
 	}
 }

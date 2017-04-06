@@ -7,11 +7,10 @@ import { Button, Glyphicon } from '../../components/react-bootstrap';
 import { LabelSelector } from './labels';
 import { store } from 'store';
 import * as rs from 'circus-rs';
-import { alert, prompt } from '../../components/modal';
+import { alert, prompt, confirm } from '../../components/modal';
 import * as crypto from 'crypto';
 import { ShrinkSelect } from '../../components/shrink-select';
 import merge from 'merge';
-import moment from 'moment';
 
 function sha1(arrayBuf) {
 	const sha = crypto.createHash('sha1');
@@ -146,7 +145,10 @@ export class CaseDetail extends React.Component {
 	}
 
 	async revertRevision() {
-
+		if (!(await confirm('Reload the current revision?'))) {
+			return;
+		}
+		this.selectRevision(this.state.editingRevisionIndex);
 	}
 
 	async loadProject() {
@@ -249,7 +251,7 @@ class MenuBar extends React.Component {
 	}
 }
 
-export class RevisionData extends React.PureComponent {
+export class RevisionData extends React.Component {
 
 	constructor(props) {
 		super(props);
@@ -264,6 +266,8 @@ export class RevisionData extends React.PureComponent {
 		this.toggleReferenceLine = this.toggleReferenceLine.bind(this);
 		this.changeActiveLabel = this.changeActiveLabel.bind(this);
 		this.updateLabels = this.updateLabels.bind(this);
+		this.labelAttributesChange = this.labelAttributesChange.bind(this);
+		this.caseAttributesChange = this.caseAttributesChange.bind(this);
 		const server = store.getState().loginUser.data.dicomImageServer;
 		this.client = new rs.RsHttpClient(server);
 		this.referenceLineAnnotation = new rs.ReferenceLine();
@@ -344,19 +348,20 @@ export class RevisionData extends React.PureComponent {
 		});
 	}
 
-	labelAttributesChange(newValue) {
-		const newLabel = {
-			...this.activeLabel,
-			attributes: newValue
-		};
+	labelAttributesChange(value) {
+		const { revision, onChange } = this.props;
+		const { activeSeriesIndex, activeLabelIndex } = this.state;
+		const activeSeries = revision.series[activeSeriesIndex];
+		if (!activeSeries) return null;
+		const activeLabel = activeSeries.labels[activeLabelIndex];
+		activeLabel.attributes = value;
+		onChange(revision);
 	}
 
-	caseAttributesChange(newValue) {
-		const newRevision = {
-			...this.props.revision,
-			caseAttributes: newValue
-		};
-		this.props.onChange(newRevision);
+	caseAttributesChange(value) {
+		const { onChange, revision } = this.props;
+		revision.attributes = value;
+		onChange(revision);
 	}
 
 	changeTool(tool) {
@@ -371,7 +376,7 @@ export class RevisionData extends React.PureComponent {
 		const { projectData, revision, onChange } = this.props;
 		const { tool, activeSeriesIndex, activeLabelIndex, composition } = this.state;
 		const activeSeries = revision.series[activeSeriesIndex];
-		if (!activeSeries) return <span>Pinya?</span>;
+		if (!activeSeries) return null;
 		const activeLabel = activeSeries.labels[activeLabelIndex];
 		return <div>
 			<div className="case-revision-header">
@@ -382,8 +387,16 @@ export class RevisionData extends React.PureComponent {
 					activeLabel={activeLabel}
 					onChangeActiveLabel={this.changeActiveLabel}
 				/>
-				<PropertyEditor properties={projectData.labelAttributesSchema} value={{}} />
-				<PropertyEditor properties={projectData.caseAttributesSchema} value={{}} />
+				<PropertyEditor
+					properties={projectData.labelAttributesSchema}
+					value={activeLabel.attributes || {}}
+					onChange={this.labelAttributesChange}
+				/>
+				<PropertyEditor
+					properties={projectData.caseAttributesSchema}
+					value={revision.attributes}
+					onChange={this.caseAttributesChange}
+				/>
 			</div>
 			<ToolBar
 				active={tool}

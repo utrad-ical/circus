@@ -57,7 +57,7 @@ const FlexList = props => {
 		</ul>
 		<div><Button bsStyle="link" onClick={add}><Glyphicon glyph="plus" /> Add</Button></div>
 	</div>;
-}
+};
 
 const types = {
 	text: props => <FormControl value={props.value}
@@ -94,6 +94,7 @@ const typeToComponent = type => {
 export const PropertyEditor = props => {
 	const values = props.value || {};
 	const complaints = props.complaints !== null && typeof props.complaints === 'object' ? props.complaints : {};
+
 	const valueChange = (key, value) => {
 		const newValues = { ... values };
 		newValues[key] = value;

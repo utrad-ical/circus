@@ -3,6 +3,8 @@ import { ColorPicker } from '../../components/color-picker';
 import { Popover, Button, OverlayTrigger, FormControl, Glyphicon } from '../../components/react-bootstrap';
 import { RawData, PixelFormat, VoxelCloud } from 'circus-rs';
 import classNames from 'classnames';
+import { confirm } from '../../components/modal';
+
 
 const labelColors = [
 	'#ff0000', '#00ff00', '#ffff00', '#0000ff', '#ff00ff', '#00ffff'
@@ -66,8 +68,8 @@ const Series = props => {
 		onChange(seriesIndex, newSeries);
 	}
 
-	function removeLabel(labelIndex) {
-		if (!confirm('Delete?')) return;
+	async function removeLabel(labelIndex) {
+		if (!(await confirm('Delete this label?'))) return;
 		const newSeries = {
 			...series,
 			labels: series.labels.filter((l, i) => labelIndex !== i)

@@ -45,6 +45,7 @@
     "svgicons2svgfont": "^5.0.0",
     "tinycolor2": "^1.4.1",
     "ttf2woff": "^2.0.1",
+    "url-loader": "^0.5.8",
     "webpack": "^1.13.3"
   },
   "dependencies": {

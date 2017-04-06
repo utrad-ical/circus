@@ -348,10 +348,10 @@ class ToolBar extends React.Component {
 
 class ToolButton extends React.Component {
 	render() {
-		const { icon, name, active, changeTool } = this.props;
+		const { name, active, changeTool } = this.props;
 		const style = active === name ? 'primary' : 'default';
-		return <Button bsStyle={style} bsSize="sm" onClick={() => changeTool(name)}>
-			{name}
+		return <Button bsStyle={style} onClick={() => changeTool(name)}>
+			<span className={'case-detail-tool-icon rs-icon-' + name} />
 		</Button>;
 	}
 }

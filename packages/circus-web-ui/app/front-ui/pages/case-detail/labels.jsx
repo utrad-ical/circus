@@ -57,9 +57,9 @@ const Series = props => {
 		cloud.volume = new RawData([16, 16, 16], PixelFormat.Binary);
 		const newLabel = {
 			type: 'voxel',
-			cloud,
-			data: {},
-			attribute: []
+			data: {}, // will be filled just before actual save
+			attributes: [],
+			cloud // cloud is the primary data storage while editing
 		};
 		const newSeries = {
 			...series,

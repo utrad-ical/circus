@@ -172,10 +172,6 @@ export class VoxelCloud implements Annotation {
 			// No need to draw anything.
 			return null;
 		}
-		if (intersections.every(p => !intersectionPointWithinSection(section, p))) {
-			// All of the intersection points are outside of sections
-			return null;
-		}
 
 		/*
 		 * STEP 2. Determine the bounding box of intersection points.

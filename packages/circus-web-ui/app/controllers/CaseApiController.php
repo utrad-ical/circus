@@ -8,6 +8,11 @@ class CaseApiController extends ApiBaseController
 
 		$case = array_except($case, ['_id']);
 
+		$case['latestRevision']['date'] = Util::mongoToISO($case['latestRevision']['date']);
+		foreach ($case['revisions'] as &$rev) {
+			$rev['date'] = Util::mongoToISO($rev['date']);
+		}
+
 		return Response::json($case);
 	}
 

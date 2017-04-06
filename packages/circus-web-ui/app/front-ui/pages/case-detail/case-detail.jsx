@@ -9,7 +9,9 @@ import { store } from 'store';
 import * as rs from 'circus-rs';
 import { alert, prompt } from '../../components/modal';
 import * as crypto from 'crypto';
+import { ShrinkSelect } from '../../components/shrink-select';
 import merge from 'merge';
+import moment from 'moment';
 
 function sha1(arrayBuf) {
 	const sha = crypto.createHash('sha1');
@@ -24,25 +26,21 @@ export class CaseDetail extends React.Component {
 			busy: false,
 			projectData: null,
 			caseData: null,
+			editingRevisionIndex: -1,
 			editingData: null
 		};
 		this.revisionDataChange = this.revisionDataChange.bind(this);
+		this.selectRevision = this.selectRevision.bind(this);
 		this.saveRevision = this.saveRevision.bind(this);
 		this.revertRevision = this.revertRevision.bind(this);
 	}
 
-	createEditData(revision) {
-		return merge(true, {}, revision);
-	}
+	async selectRevision(index) {
+		const { revisions } = this.state.caseData;
+		const revision = revisions[index];
+		this.setState({ busy: true, editingRevisionIndex: index });
 
-	async loadCase() {
-		this.setState({ busy: true });
-		const caseID = this.props.params.cid;
-		const caseData = await api('case/' + caseID);
-		this.setState({ caseData });
-
-		const data = this.createEditData(caseData.latestRevision);
-
+		const data = merge(true, {}, revision);
 		// Load all label volume data in the latest revision
 		for (let series of data.series) {
 			for (let label of series.labels) {
@@ -66,7 +64,7 @@ export class CaseDetail extends React.Component {
 					}
 				}
 				cloud.color = label.data.color || '#ff0000';
-				cloud.alpha = parseFloat(label.data.alpha);
+				cloud.alpha = 'alpha' in label.data ? parseFloat(label.data.alpha) : 1;
 				cloud.debugPoint = true;
 				label.cloud = cloud;
 				// console.log('Cloud loaded', cloud);
@@ -74,6 +72,13 @@ export class CaseDetail extends React.Component {
 		}
 
 		this.setState({ editingData: data, busy: false });
+	}
+
+	async loadCase() {
+		const caseID = this.props.params.cid;
+		const caseData = await api('case/' + caseID);
+		this.setState({ caseData });
+		this.selectRevision(caseData.revisions.length - 1);
 	}
 
 	async saveRevision() {
@@ -168,7 +173,13 @@ export class CaseDetail extends React.Component {
 
 		return <div>
 			<div className="case-info">Case ID: {cid}</div>
-			<MenuBar onSaveClick={this.saveRevision} onRevertClick={this.revertRevision} />
+			<MenuBar
+				onSaveClick={this.saveRevision}
+				onRevertClick={this.revertRevision}
+				onRevisionSelect={this.selectRevision}
+				revisions={this.state.caseData.revisions}
+				currentRevision={this.state.editingRevisionIndex}
+			/>
 			<RevisionData
 				revision={this.state.editingData}
 				projectData={this.state.projectData}
@@ -178,18 +189,62 @@ export class CaseDetail extends React.Component {
 	}
 }
 
+class RevisionSelector extends React.Component {
+	constructor(props) {
+		super(props);
+		this.selected = this.selected.bind(this);
+	}
+
+	renderItem(revision, i) {
+		return <span className="revision-selector-item">
+			<span className="date">{revision.date}</span>
+			<span className="status label label-default">{revision.status}</span>
+			<span className="description">{revision.description}</span>
+			<span className="creator">{revision.creator}</span>
+		</span>;
+	}
+
+	selected(value) {
+		const { onSelect } = this.props;
+		const index = parseInt(/(\d+)$/.exec(value)[1]);
+		onSelect(index);
+	}
+
+	render() {
+		const { revisions = [], selected } = this.props;
+		const opts = {};
+		revisions.slice().reverse().forEach((r, i) => {
+			const originalIndex = revisions.length - i - 1;
+			opts[`rev${originalIndex}`] = this.renderItem(r, i);
+		});
+		const sel = `rev${selected}`;
+		return <ShrinkSelect options={opts} value={sel} onChange={this.selected} />;
+	}
+}
+
 class MenuBar extends React.Component {
 	render() {
-		const { onRevertClick, onSaveClick } = this.props;
+		const { onRevertClick, onSaveClick, revisions, onRevisionSelect, currentRevision } = this.props;
 		return <div className="case-detail-menu">
-			<Button bsStyle="warning" onClick={onRevertClick} >
-				<Glyphicon glyph="remove-circle" />
-				Revert
-			</Button>
-			<Button bsStyle="success" onClick={onSaveClick} >
-				<Glyphicon glyph="save" />
-				Save
-			</Button>
+			<div className="left">
+				Revision:&ensp;
+				<RevisionSelector
+					revisions={revisions}
+					selected={currentRevision}
+					onSelect={onRevisionSelect}
+				/>
+			</div>
+			<div className="right">
+				<Button bsStyle="warning" onClick={onRevertClick} >
+					<Glyphicon glyph="remove-circle" />
+					Revert
+				</Button>
+				&ensp;
+				<Button bsStyle="success" onClick={onSaveClick} >
+					<Glyphicon glyph="save" />
+					Save
+				</Button>
+			</div>
 		</div>;
 	}
 }

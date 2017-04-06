@@ -12,7 +12,8 @@ module.exports = {
 	resolve: {
 		root: path.join(__dirname, 'app/front-ui'),
 		alias: {
-			'circus-rs': path.resolve(__dirname, 'vendor/utrad-ical/circus-rs/lib/browser')
+			'circus-rs': path.resolve(__dirname, 'vendor/utrad-ical/circus-rs/lib/browser'),
+			'circus-rs-font.woff': path.resolve(__dirname, 'vendor/utrad-ical/circus-rs/dist/css/circus-rs-font.woff')
 		},
 		extensions: ['', '.js', '.jsx']
 	},
@@ -32,7 +33,17 @@ module.exports = {
 				}
 			},
 			{
-				test: /\.(woff|woff2|ttf|eot|svg)(\?v=\d+\.\d+\.\d+)?$/,
+				test: /circus-rs-font\.woff$/,
+				loader: 'url',
+				qyery: {
+					limit: 65000,
+					mimetype: 'application/font-woff',
+					name: 'circus-rs-font.woff'
+				},
+
+			},
+			{
+				test: /regular\.(woff|woff2|ttf|eot|svg)(\?v=\d+\.\d+\.\d+)?$/,
 				loader: 'file',
 				query: {
 					name: '[name].[ext]'
@@ -40,7 +51,7 @@ module.exports = {
 			},
 			{
 				test: /\.less$/,
-				loader: 'less'
+				loader: 'style!css!less'
 			},
 			{
 				test: /\.css/,

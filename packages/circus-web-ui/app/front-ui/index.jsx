@@ -33,7 +33,8 @@ import { store } from 'store';
 import { Provider } from 'react-redux';
 import { refreshUserInfo, dismissMessageOnPageChange } from 'actions';
 
-require('style!css!./styles/main.less');
+require('./styles/main.less');
+
 require('bootstrap/fonts/glyphicons-halflings-regular.woff');
 require('bootstrap/fonts/glyphicons-halflings-regular.woff2');
 require('bootstrap/fonts/glyphicons-halflings-regular.ttf');

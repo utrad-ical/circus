@@ -13,4 +13,5 @@ Thumbs.db
 public/application.js
 public/application.js.map
 public/glyphicons*
+public/*.woff
 /node_modules

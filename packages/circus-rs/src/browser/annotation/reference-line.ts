@@ -11,6 +11,12 @@ import { vec3 } from 'gl-matrix';
  * of other viewers which share the same composition intersect with this viewer.
  */
 export class ReferenceLine implements Annotation {
+
+	/**
+	 * Color of the reference line.
+	 */
+	public color: string = '#ff00ff'
+
 	public draw(viewer: Viewer, viewState: ViewState): Sprite | null {
 		const comp = viewer.getComposition();
 		if (!comp) throw new Error('Composition not initialized'); // should not happen
@@ -28,7 +34,7 @@ export class ReferenceLine implements Annotation {
 
 		try {
 			ctx.save();
-			ctx.strokeStyle = 'magenta';
+			ctx.strokeStyle = this.color;
 			ctx.lineWidth = 1;
 
 			siblingViewers.forEach(sib => {

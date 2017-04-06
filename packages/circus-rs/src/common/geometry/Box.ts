@@ -1,7 +1,6 @@
 import { Vector2D, Vector3D } from './Vector';
 import { LineSegment } from './LineSegment';
 import { Section, intersectionOfLineSegmentAndPlane } from './Section';
-import { vec3 } from 'gl-matrix';
 
 /**
  * Represents a bounding box.

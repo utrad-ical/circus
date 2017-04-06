@@ -7,6 +7,7 @@ import * as su from '../../section-util';
 import { Vector2D, Vector3D } from '../../../common/geometry';
 import { vec3 } from 'gl-matrix';
 import { draw3DLine } from '../../volume-util';
+import { ViewerEvent } from '../../viewer/viewer-event';
 
 
 /**
@@ -14,6 +15,9 @@ import { draw3DLine } from '../../volume-util';
  */
 export class VoxelCloudToolBase extends DraggableTool {
 	protected activeCloud: VoxelCloud | null = null;
+
+	protected pX: number;
+	protected pY: number;
 
 	protected convertViewerPoint(point: Vector2D, viewer: Viewer): Vector3D {
 		const state = viewer.getState();
@@ -57,7 +61,7 @@ export class VoxelCloudToolBase extends DraggableTool {
 
 		// draw a 3D line segment over a volume
 		draw3DLine(activeCloud.volume, start3D, end3D, value);
-		comp.annotationUpdated();
+		comp.annotationUpdated(viewer);
 	}
 
 	/**
@@ -76,6 +80,21 @@ export class VoxelCloudToolBase extends DraggableTool {
 			}
 		);
 		return activeCloud;
+	}
+
+	public dragStartHandler(ev: ViewerEvent): void {
+		super.dragStartHandler(ev);
+		const comp = ev.viewer.getComposition();
+		if (!comp) throw new Error('Composition not initialized'); // should not happen
+		this.activeCloud = this.getActiveCloud(comp);
+		this.pX = ev.viewerX;
+		this.pY = ev.viewerY;
+	}
+
+	public dragEndHandler(ev: ViewerEvent): void {
+		const comp = ev.viewer.getComposition();
+		if (!comp) return;
+		comp.annotationUpdated();
 	}
 
 }

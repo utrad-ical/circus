@@ -26,9 +26,12 @@ export class Composition extends EventEmitter {
 	 */
 	public annotations: Annotation[] = [];
 
+	private imageReady: boolean = false;
+
 	constructor(imageSource: ImageSource) {
 		super();
 		this.imageSource = imageSource;
+		imageSource.ready().then(() => this.imageReady = true);
 	}
 
 	/**
@@ -81,9 +84,14 @@ export class Composition extends EventEmitter {
 
 	/**
 	 * Re-renders annotations in all of the associated viewers.
+	 * @param viewer Specify the viewer to update.
 	 */
-	public annotationUpdated(): void {
-		this.viewers.forEach(v => v.renderAnnotations());
+	public annotationUpdated(viewer?: Viewer | Viewer[]): void {
+		if (!this.imageReady) return;
+		const viewers = viewer instanceof Array ? viewer
+			: viewer instanceof Viewer ? [viewer]
+			: this.viewers;
+		viewers.forEach(v => v.renderAnnotations());
 	}
 
 }

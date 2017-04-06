@@ -5,8 +5,6 @@ import { VoxelCloudToolBase } from './voxel-cloud-tool-base';
  * BrushTool is a tool with which one can paint on an active voxel cloud.
  */
 export class BrushTool extends VoxelCloudToolBase {
-	private pX: number;
-	private pY: number;
 
 	public dragHandler(ev: ViewerEvent): void {
 		super.dragHandler(ev);
@@ -21,15 +19,6 @@ export class BrushTool extends VoxelCloudToolBase {
 			1
 		);
 
-		this.pX = ev.viewerX;
-		this.pY = ev.viewerY;
-	}
-
-	public dragStartHandler(ev: ViewerEvent): void {
-		super.dragStartHandler(ev);
-		const comp = ev.viewer.getComposition();
-		if (!comp) throw new Error('Composition not initialized'); // should not happen
-		this.activeCloud = this.getActiveCloud(comp);
 		this.pX = ev.viewerX;
 		this.pY = ev.viewerY;
 	}

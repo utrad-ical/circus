@@ -200,13 +200,17 @@ export class RevisionData extends React.PureComponent {
 			activeSeriesIndex: 0,
 			activeLabelIndex: null,
 			tool: 'pager',
+			showReferenceLine: false,
 			composition: null
 		};
 		this.changeTool = this.changeTool.bind(this);
+		this.toggleReferenceLine = this.toggleReferenceLine.bind(this);
 		this.changeActiveLabel = this.changeActiveLabel.bind(this);
 		this.updateLabels = this.updateLabels.bind(this);
 		const server = store.getState().loginUser.data.dicomImageServer;
 		this.client = new rs.RsHttpClient(server);
+		this.referenceLineAnnotation = new rs.ReferenceLine();
+		this.referenceLineAnnotation.color = '#ff0000';
 	}
 
 	componentWillUpdate(newProps, newState) {
@@ -245,6 +249,7 @@ export class RevisionData extends React.PureComponent {
 			cloud.active = activeLabel && (label === activeLabel);
 			composition.addAnnotation(cloud);
 		});
+		if (this.state.showReferenceLine) { composition.addAnnotation(this.referenceLineAnnotation); }
 		composition.annotationUpdated();
 		// console.log('Annotations', composition.annotations);
 	}
@@ -301,6 +306,10 @@ export class RevisionData extends React.PureComponent {
 		this.setState({ tool });
 	}
 
+	toggleReferenceLine(show) {
+		this.setState({ showReferenceLine: show });
+	}
+
 	render () {
 		const { projectData, revision, onChange } = this.props;
 		const { tool, activeSeriesIndex, activeLabelIndex, composition } = this.state;
@@ -319,7 +328,12 @@ export class RevisionData extends React.PureComponent {
 				<PropertyEditor properties={projectData.labelAttributesSchema} value={{}} />
 				<PropertyEditor properties={projectData.caseAttributesSchema} value={{}} />
 			</div>
-			<ToolBar active={tool} changeTool={this.changeTool} />
+			<ToolBar
+				active={tool}
+				changeTool={this.changeTool}
+				showReferenceLine={this.state.showReferenceLine}
+				toggleReferenceLine={this.toggleReferenceLine}
+			/>
 			<ViewerCluster
 				composition={composition}
 				labels={activeSeries.labels}
@@ -332,7 +346,7 @@ export class RevisionData extends React.PureComponent {
 
 class ToolBar extends React.Component {
 	render() {
-		const { active, changeTool } = this.props;
+		const { active, changeTool, showReferenceLine, toggleReferenceLine } = this.props;
 
 		return <div className="case-detail-toolbar">
 			<ToolButton name="pager" changeTool={changeTool} active={active} />
@@ -342,6 +356,15 @@ class ToolBar extends React.Component {
 			<ToolButton name="brush" changeTool={changeTool} active={active} />
 			<ToolButton name="eraser" changeTool={changeTool} active={active} />
 			<ToolButton name="bucket" changeTool={changeTool} active={active} />
+			&ensp;
+			<label>
+				<input
+					type="checkbox"
+					checked={showReferenceLine}
+					onChange={ev => toggleReferenceLine(ev.target.checked)}
+				/>
+				Reference line
+			</label>
 		</div>;
 	}
 }

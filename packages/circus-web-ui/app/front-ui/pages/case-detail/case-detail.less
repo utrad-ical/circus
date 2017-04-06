@@ -1,7 +1,22 @@
 .case-detail-menu {
 	border-bottom: 1px solid silver;
-	text-align: right;
 	padding: 2px 15px;
+	display: flex;
+	flex-flow: row wrap;
+	justify-content: space-between;
+	.left {
+		padding: 2px 15px;
+	}
+	.right {
+		flex-grow: 100;
+		text-align: right;
+		padding: 2px 15px;
+	}
+}
+
+.revision-selector-item {
+	> span { margin: 0 3px; }
+	.description { font-weight: bold; }
 }
 
 .viewer-cluster {

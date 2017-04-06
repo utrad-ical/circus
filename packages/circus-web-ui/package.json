@@ -10,7 +10,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git@bitbucket.org:ical/circus_db_web_ui.git"
+    "url": "git@github.com:utrad-ical/circus-db-web-ui.git"
   },
   "keywords": [
     "CAD"
@@ -33,6 +33,7 @@
     "glob": "^7.1.1",
     "less": "^2.7.1",
     "less-loader": "^2.2.3",
+    "merge": "^1.2.0",
     "moment": "^2.16.0",
     "react": "^15.4.0",
     "react-bootstrap": "^0.30.6",

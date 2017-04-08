@@ -14,4 +14,5 @@ export const TagList = props => {
 	return <span className="tag-list">
 		{props.tags.map(tag => <Tag name={tag.name} color={tag.color} />)}
 	</span>;
-}
+};
+

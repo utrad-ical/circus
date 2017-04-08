@@ -3,6 +3,7 @@ import { api } from '../../utils/api';
 import { ImageViewer } from '../../components/image-viewer';
 import { PropertyEditor } from '../../components/property-editor';
 import { Loading } from '../../components/loading';
+import { TagList } from '../../components/tag';
 import { Button, Glyphicon } from '../../components/react-bootstrap';
 import { LabelSelector } from './labels';
 import { store } from 'store';
@@ -173,10 +174,24 @@ export class CaseDetail extends React.Component {
 			return <Loading />;
 		}
 
+		const { projectData: prj, caseData } = this.state;
+
 		const cid = this.props.params.cid;
 
+		const tags = (caseData.tags || []).map(tag => {
+			const color = (prj.tags.find(t => t.name === tag) || {}).color || '#ffffff';
+			return { name: tag, color };
+		});
+
 		return <div>
-			<div className="case-info">Case ID: {cid}</div>
+			<Card title='Case Info'>
+				<ul>
+					<li>Case ID: {cid}</li>
+					<li>Case Created At: {caseData.createTime}</li>
+					<li>Project Name: {prj.projectName}</li>
+					<li>Tags: <TagList tags={tags} /></li>
+				</ul>
+			</Card>
 			<MenuBar
 				onSaveClick={this.saveRevision}
 				onRevertClick={this.revertRevision}

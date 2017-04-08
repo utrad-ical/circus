@@ -10,6 +10,8 @@ import { orientationAwareTranslation } from '../section-util';
  */
 export class Tool extends EventEmitter implements ViewerEventTarget {
 
+	public options: object = {};
+
 	public mouseDownHandler(ev: ViewerEvent): void {
 		// do nothing
 	}
@@ -44,6 +46,10 @@ export class Tool extends EventEmitter implements ViewerEventTarget {
 		val = +val; // convert to a number
 		if (val === 0 || isNaN(val)) return val;
 		return val > 0 ? 1 : -1;
+	}
+
+	public setOptions(options: any) {
+		this.options = { ...this.options, ...options };
 	}
 
 	/**

@@ -31,6 +31,6 @@ export * from '../browser/tool/cloud/brush';
 
 export { createToolbar } from '../browser/create-toolbar';
 
-export { registerTool } from '../browser/tool/tool-initializer';
+export { registerTool, toolFactory } from '../browser/tool/tool-initializer';
 export * from '../browser/section-util';
 export * from '../browser/volume-util';

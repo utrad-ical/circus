@@ -19,6 +19,11 @@ export class VoxelCloudToolBase extends DraggableTool {
 	protected pX: number;
 	protected pY: number;
 
+	constructor() {
+		super();
+		this.options = { width: 1 };
+	}
+
 	protected convertViewerPoint(point: Vector2D, viewer: Viewer): Vector3D {
 		const state = viewer.getState();
 		const section = state.section;
@@ -113,7 +118,7 @@ export class VoxelCloudToolBase extends DraggableTool {
 			[this.pX, this.pY],
 			[ev.viewerX, ev.viewerY],
 			value,
-			width
+			(this.options as any).width || 1
 		);
 
 		this.pX = ev.viewerX;

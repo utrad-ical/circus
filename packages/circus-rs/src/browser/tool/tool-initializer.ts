@@ -30,7 +30,7 @@ Object.keys(defaultTools).forEach(key => {
 
 export function registerTool(toolName: string, toolClass: typeof Tool): void {
 	if (toolName in toolCollection) {
-		throw new Error('This tool name is already assined');
+		throw new Error('This tool name is already assigned');
 	}
 	toolCollection[toolName] = new toolClass();
 }

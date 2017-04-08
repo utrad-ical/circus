@@ -115,7 +115,7 @@ export const Label = props => {
 		onChange(labelIndex, label);
 	}
 
-	console.log(`Cloud #${labelIndex}`, label.cloud);
+	// console.log(`Cloud #${labelIndex}`, label.cloud);
 
 	return <li className={classNames("label-list-item", { active: label === activeLabel })} onClick={onClick}>
 		<div>

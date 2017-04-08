@@ -263,10 +263,12 @@ export class RevisionData extends React.Component {
 			activeLabelIndex: null,
 			tool: 'pager',
 			showReferenceLine: false,
-			composition: null
+			composition: null,
+			lineWidth: 1
 		};
 		this.changeTool = this.changeTool.bind(this);
 		this.toggleReferenceLine = this.toggleReferenceLine.bind(this);
+		this.setLineWidth = this.setLineWidth.bind(this);
 		this.changeActiveLabel = this.changeActiveLabel.bind(this);
 		this.updateLabels = this.updateLabels.bind(this);
 		this.labelAttributesChange = this.labelAttributesChange.bind(this);
@@ -375,6 +377,13 @@ export class RevisionData extends React.Component {
 		this.setState({ showReferenceLine: show });
 	}
 
+	setLineWidth(lineWidth) {
+		const w = +lineWidth;
+		this.setState({ lineWidth: w });
+		rs.toolFactory('brush').setOptions({ width: w });
+		rs.toolFactory('eraser').setOptions({ width: w });
+	}
+
 	render () {
 		const { projectData, revision, onChange, busy } = this.props;
 		const { tool, activeSeriesIndex, activeLabelIndex, composition } = this.state;
@@ -393,11 +402,13 @@ export class RevisionData extends React.Component {
 					/>
 				</Card>
 				<Card title={`Label #${activeLabelIndex} of Series #${activeSeriesIndex}`}>
-					<PropertyEditor
-						properties={projectData.labelAttributesSchema}
-						value={activeLabel.attributes || {}}
-						onChange={this.labelAttributesChange}
-					/>
+					{ activeLabel ?
+						<PropertyEditor
+							properties={projectData.labelAttributesSchema}
+							value={activeLabel.attributes || {}}
+							onChange={this.labelAttributesChange}
+						/>
+					: null }
 				</Card>
 				<Card title="Case Attributes">
 					<PropertyEditor
@@ -412,6 +423,8 @@ export class RevisionData extends React.Component {
 				changeTool={this.changeTool}
 				showReferenceLine={this.state.showReferenceLine}
 				toggleReferenceLine={this.toggleReferenceLine}
+				lineWidth={this.state.lineWidth}
+				setLineWidth={this.setLineWidth}
 			/>
 			<ViewerCluster
 				composition={composition}
@@ -458,7 +471,9 @@ class Card extends React.Component {
 
 class ToolBar extends React.Component {
 	render() {
-		const { active, changeTool, showReferenceLine, toggleReferenceLine } = this.props;
+		const { active, changeTool, showReferenceLine, toggleReferenceLine, lineWidth, setLineWidth } = this.props;
+
+		const widthOptions = [1, 3, 5, 7];
 
 		return <div className="case-detail-toolbar">
 			<ToolButton name="pager" changeTool={changeTool} active={active} />
@@ -467,6 +482,7 @@ class ToolBar extends React.Component {
 			<ToolButton name="window" changeTool={changeTool} active={active} />
 			<ToolButton name="brush" changeTool={changeTool} active={active} />
 			<ToolButton name="eraser" changeTool={changeTool} active={active} />
+			<ShrinkSelect options={widthOptions} value={''+ lineWidth} onChange={setLineWidth} />
 			<ToolButton name="bucket" changeTool={changeTool} active={active} />
 			&ensp;
 			<label>
@@ -495,11 +511,11 @@ export class ViewerCluster extends React.PureComponent {
 	render() {
 		const { composition, tool } = this.props;
 
-		function makeViewer(orientation, initialTool) {
+		function makeViewer(orientation, initialTool, fixTool) {
 			return <ImageViewer
 				orientation={orientation}
 				composition={composition}
-				tool={tool}
+				tool={fixTool ? fixTool : tool}
 				initialTool={initialTool}
 			/>;
 		}
@@ -518,7 +534,7 @@ export class ViewerCluster extends React.PureComponent {
 					{makeViewer('coronal')}
 				</div>
 				<div className="viewer viewer-mpr">
-					{makeViewer('axial', 'celestialRotate')}
+					{makeViewer('axial', 'celestialRotate', 'selectialRotate')}
 				</div>
 			</div>
 		</div>;

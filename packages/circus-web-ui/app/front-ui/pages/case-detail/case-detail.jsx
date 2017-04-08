@@ -424,13 +424,34 @@ export class RevisionData extends React.Component {
 }
 
 class Card extends React.Component {
+	constructor(props) {
+		super(props);
+		this.state = { open: true };
+		this.toggleCollapse = this.toggleCollapse.bind(this);
+	}
+
+	toggleCollapse() {
+		this.setState({ open: !this.state.open });
+	}
+
 	render() {
 		const { title, children } = this.props;
+		const { open } = this.state;
 		return <div className="case-detail-card">
-			<div className="case-detail-card-header">{title}</div>
-			<div className="case-detail-card-body">
-				{children}
-			</div>
+			<a className="case-detail-card-header" onClick={this.toggleCollapse}>
+				{title}
+				&ensp;
+				{ open ?
+					<Glyphicon glyph="triangle-bottom" />
+				:
+					<Glyphicon glyph="triangle-right" />
+				}
+			</a>
+			{ open ?
+				<div className="case-detail-card-body">
+					{children}
+				</div>
+			: null }
 		</div>;
 	}
 }

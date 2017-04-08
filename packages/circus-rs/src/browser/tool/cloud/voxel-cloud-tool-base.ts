@@ -64,6 +64,17 @@ export class VoxelCloudToolBase extends DraggableTool {
 		comp.annotationUpdated(viewer);
 	}
 
+	protected draw3DLineWithValueAndWidth(viewer: Viewer, start: Vector2D, end: Vector2D, value: number, width: number = 1): void {
+		const ds = - Math.floor((width - 1) / 2);
+		for (let x = ds; x < ds + width; x++) {
+			for (let y = ds; y < ds + width; y++) {
+				const deltaStart: Vector2D = [start[0] + x, start[1] + y];
+				const deltaEnd: Vector2D = [end[0] + x, end[1] + y];
+				this.draw3DLineWithValue(viewer, deltaStart, deltaEnd, value);
+			}
+		}
+	}
+
 	/**
 	 * Find the active VoxelCloud annotation in a composition
 	 * @return If there is only one active VoxelCloud instance, returns it.

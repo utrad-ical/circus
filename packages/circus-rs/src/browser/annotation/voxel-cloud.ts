@@ -215,8 +215,6 @@ export class VoxelCloud implements Annotation {
 
 		// Calculates the sub-section of the current section which
 		// contains the intersection area of this voxel cloud.
-		const cloudResolution: Vector2D = outRect.size;
-
 		const boundingOrigin = convertScreenCoordinateToVolumeCoordinate(
 			section, resolution, outRect.origin
 		);
@@ -257,17 +255,17 @@ export class VoxelCloud implements Annotation {
 		];
 
 		// raw section pattern ...
-		const sectionImage = new Uint8Array(cloudResolution[0] * cloudResolution[1]);
+		const sectionImage = new Uint8Array(outRect.size[0] * outRect.size[1]);
 		this.volume.scanObliqueSection(
 			indexCloudSection,
-			cloudResolution,
+			outRect.size,
 			sectionImage
 		);
 
-		let imageData = context.createImageData(cloudResolution[0], cloudResolution[1]);
+		let imageData = context.createImageData(outRect.size[0], outRect.size[1]);
 		let srcidx = 0, pixel, dstidx;
-		for (let y = 0; y < cloudResolution[1]; y++) {
-			for (let x = 0; x < cloudResolution[0]; x++) {
+		for (let y = 0; y < outRect.size[1]; y++) {
+			for (let x = 0; x < outRect.size[0]; x++) {
 				pixel = sectionImage[srcidx];
 				dstidx = srcidx << 2; // meaning multiply 4
 				if (pixel === 1) {
@@ -275,18 +273,13 @@ export class VoxelCloud implements Annotation {
 					imageData.data[dstidx + 1] = color[1];
 					imageData.data[dstidx + 2] = color[2];
 					imageData.data[dstidx + 3] = color[3];
-				} else if (this.debugPoint) {
-					imageData.data[dstidx] = 0xff;
-					imageData.data[dstidx + 1] = 0xff;
-					imageData.data[dstidx + 2] = 0xff;
-					imageData.data[dstidx + 3] = 0xff * 0.2;
 				}
 				srcidx++;
 			}
 		}
 
 		// Put the image to the shadow canvas
-		const shadow = this.prepareShadowCanvas(cloudResolution);
+		const shadow = this.prepareShadowCanvas(outRect.size);
 		const shadowContext = shadow.getContext('2d');
 		if (!shadowContext) throw new Error('Failed to get canvas context');
 		shadowContext.clearRect(0, 0, resolution[0], resolution[1]);
@@ -295,7 +288,7 @@ export class VoxelCloud implements Annotation {
 		// Transfers the image from the shadow canvas to the actual canvas
 		context.drawImage(
 			shadow,
-			0, 0, cloudResolution[0], cloudResolution[1], // src
+			0, 0, outRect.size[0], outRect.size[1], // src
 			outRect.origin[0], outRect.origin[1], outRect.size[0], outRect.size[1] // dest
 		);
 

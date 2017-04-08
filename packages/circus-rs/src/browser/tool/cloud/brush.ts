@@ -12,11 +12,12 @@ export class BrushTool extends VoxelCloudToolBase {
 		const dragInfo = this.dragInfo;
 		if (dragInfo.dx === 0 && dragInfo.dy === 0) return; // no mouse move
 
-		this.draw3DLineWithValue(
+		this.draw3DLineWithValueAndWidth(
 			ev.viewer,
 			[this.pX, this.pY],
 			[ev.viewerX, ev.viewerY],
-			1
+			1,
+			3
 		);
 
 		this.pX = ev.viewerX;

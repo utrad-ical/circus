@@ -61,7 +61,6 @@ export class VoxelCloudToolBase extends DraggableTool {
 
 		// draw a 3D line segment over a volume
 		draw3DLine(activeCloud.volume, start3D, end3D, value);
-		comp.annotationUpdated(viewer);
 	}
 
 	protected draw3DLineWithValueAndWidth(viewer: Viewer, start: Vector2D, end: Vector2D, value: number, width: number = 1): void {
@@ -100,6 +99,27 @@ export class VoxelCloudToolBase extends DraggableTool {
 		this.activeCloud = this.getActiveCloud(comp);
 		this.pX = ev.viewerX;
 		this.pY = ev.viewerY;
+	}
+
+	public dragDraw(ev: ViewerEvent, value: number, width: number): void {
+		const comp = ev.viewer.getComposition();
+		if (!comp) throw new Error('Composition not initialized'); // should not happen
+
+		const dragInfo = this.dragInfo;
+		if (dragInfo.dx === 0 && dragInfo.dy === 0) return; // no mouse move
+
+		this.draw3DLineWithValueAndWidth(
+			ev.viewer,
+			[this.pX, this.pY],
+			[ev.viewerX, ev.viewerY],
+			value,
+			width
+		);
+
+		this.pX = ev.viewerX;
+		this.pY = ev.viewerY;
+
+		comp.annotationUpdated(ev.viewer);
 	}
 
 	public dragEndHandler(ev: ViewerEvent): void {

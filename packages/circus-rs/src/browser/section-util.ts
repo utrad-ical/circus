@@ -1,5 +1,6 @@
 import { vec3 } from 'gl-matrix';
-import { Vector2D, Vector3D, Section, translateSection, projectPointOntoSection } from '../common/geometry';
+import { Vector2D, Vector3D, Section, Rectangle, translateSection, projectPointOntoSection } from '../common/geometry';
+import { fitRectangle } from '../common/geometry';
 
 export type OrientationString = 'axial' | 'sagittal' | 'coronal' | 'oblique';
 
@@ -184,55 +185,49 @@ export function createOrthogonalMprSection(
 	position?: number
 ): Section {
 	const aspect = resolution[0] / resolution[1];
-	let section: Section;
+	let section: Section, rect: Rectangle, mmpp: Vector2D;
 	switch (orientation) {
 		case 'axial':
 			if (typeof position === 'undefined') position = volumeSize[2] / 2;
-			if (aspect >= 1.0) {
-				section = {
-					origin: [0, -( volumeSize[0] - volumeSize[1] ) / 2, position],
-					xAxis: [volumeSize[0], 0, 0],
-					yAxis: [0, volumeSize[1] * aspect, 0]
-				};
-			} else {
-				section = {
-					origin: [-( volumeSize[1] - volumeSize[0] ) / 2, 0, position],
-					xAxis: [volumeSize[0] * aspect, 0, 0],
-					yAxis: [0, volumeSize[1], 0]
-				};
-			}
+			rect = fitRectangle(resolution, [volumeSize[0], volumeSize[1]]);
+			mmpp = [volumeSize[0] / rect.size[0], volumeSize[1] / rect.size[1]];
+			section = {
+				origin: [
+					- rect.origin[0] * mmpp[0],
+					- rect.origin[1] * mmpp[1],
+					position
+				],
+				xAxis: [resolution[0] * mmpp[0], 0, 0],
+				yAxis: [0, resolution[1] * mmpp[1], 0]
+			};
 			break;
 		case 'sagittal':
 			if (typeof position === 'undefined') position = volumeSize[0] / 2;
-			if (aspect >= 1.0) {
-				section = {
-					origin: [position, 0, 0],
-					xAxis: [0, volumeSize[1], 0],
-					yAxis: [0, 0, volumeSize[2] * aspect]
-				};
-			} else {
-				section = {
-					origin: [-( volumeSize[1] - volumeSize[0] ) / 2, 0, volumeSize[2] / 2],
-					xAxis: [volumeSize[0] * aspect, 0, 0],
-					yAxis: [0, volumeSize[1], 0]
-				};
-			}
+			rect = fitRectangle(resolution, [volumeSize[1], volumeSize[2]]);
+			mmpp = [volumeSize[1] / rect.size[0], volumeSize[2] / rect.size[1]];
+			section = {
+				origin: [
+					position,
+					- rect.origin[0] * mmpp[0],
+					- rect.origin[1] * mmpp[1]
+				],
+				xAxis: [0, resolution[0] * mmpp[0], 0],
+				yAxis: [0, 0, resolution[1] * mmpp[1]]
+			};
 			break;
 		case 'coronal':
 			if (typeof position === 'undefined') position = volumeSize[1] / 2;
-			if (aspect >= 1.0) {
-				section = {
-					origin: [0, position, 0],
-					xAxis: [volumeSize[0], 0, 0],
-					yAxis: [0, 0, volumeSize[2] * aspect]
-				};
-			} else {
-				section = {
-					origin: [-( volumeSize[1] - volumeSize[0] ) / 2, 0, volumeSize[2] / 2],
-					xAxis: [volumeSize[0] * aspect, 0, 0],
-					yAxis: [0, volumeSize[1], 0]
-				};
-			}
+			rect = fitRectangle(resolution, [volumeSize[0], volumeSize[2]]);
+			mmpp = [volumeSize[0] / rect.size[0], volumeSize[2] / rect.size[1]];
+			section = {
+				origin: [
+					- rect.origin[0] * mmpp[0],
+					position,
+					- rect.origin[1] * mmpp[1]
+				],
+				xAxis: [resolution[0] * mmpp[0], 0, 0],
+				yAxis: [0, 0, resolution[1] * mmpp[1]]
+			};
 			break;
 		default:
 			throw new TypeError('Unsupported orientation');

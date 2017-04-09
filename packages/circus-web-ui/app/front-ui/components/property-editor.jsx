@@ -67,7 +67,7 @@ const types = {
 	password: props => <FormControl type="password" value={props.value}
 		onChange={ev => props.onChange(ev.target.value)} />,
 	checkbox: props => <Checkbox checked={props.value}
-		onClick={ev => props.onChange(!props.value)} />,
+		onChange={ev => props.onChange(!props.value)} />,
 	constant: props => <ControlLabel>{props.value}</ControlLabel>,
 	select: Select,
 	multiselect: props => <MultiSelect options={props.spec.options}

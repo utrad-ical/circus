@@ -12,7 +12,7 @@ export const Tag = props => {
 
 export const TagList = props => {
 	return <span className="tag-list">
-		{props.tags.map(tag => <Tag name={tag.name} color={tag.color} />)}
+		{props.tags.map(tag => <Tag key={tag.name} name={tag.name} color={tag.color} />)}
 	</span>;
 };
 

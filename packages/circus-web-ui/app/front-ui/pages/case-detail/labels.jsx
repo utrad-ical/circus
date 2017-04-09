@@ -119,7 +119,7 @@ export const Label = props => {
 
 	return <li className={classNames("label-list-item", { active: label === activeLabel })} onClick={onClick}>
 		<div>
-			<Glyphicon glyph="chevron-right" />&ensp;
+			<Glyphicon glyph="tag" />&ensp;
 			{caption}
 		</div>
 		<div>

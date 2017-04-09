@@ -274,8 +274,8 @@ export class RevisionData extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			activeSeriesIndex: 0,
-			activeLabelIndex: null,
+			activeSeriesIndex: -1,
+			activeLabelIndex: -1,
 			tool: 'pager',
 			showReferenceLine: false,
 			composition: null,
@@ -300,29 +300,32 @@ export class RevisionData extends React.Component {
 		}
 	}
 
-	componentDidMount() {
-		this.updateLabels();
-	}
-
-	componentDidUpdate() {
-		this.updateLabels();
-	}
-
 	componentWillMount() {
 		const { revision } = this.props;
 		this.changeActiveSeries(0);
 		const activeSeries = revision.series[this.state.activeSeriesIndex];
-		if (activeSeries.labels instanceof Array && activeSeries.labels.length > 0) {
+		if (activeSeries && activeSeries.labels instanceof Array && activeSeries.labels.length > 0) {
 			this.setState({ activeLabelIndex: 0 });
+		} else {
+			this.setState({ activeLabelIndex: -1 });
 		}
 	}
 
-	updateLabels() {
-		const { revision } = this.props;
-		const { composition } = this.state;
-		const activeSeries = revision.series[this.state.activeSeriesIndex];
+	componentWillUpdate(nextProps, nextState) {
+		if (
+			this.state.activeSeriesIndex !== nextState.activeSeriesIndex ||
+			this.state.activeLabelIndex !== nextState.activeLabelIndex || true
+		) {
+			this.updateLabels(nextProps, nextState);
+		}
+	}
+
+	updateLabels(props, state) {
+		const { revision } = props || this.props;
+		const { composition, activeSeriesIndex, activeLabelIndex } = state || this.state;
+		const activeSeries = revision.series[activeSeriesIndex];
 		const labels = activeSeries.labels;
-		const activeLabel = labels[this.state.activeLabelIndex];
+		const activeLabel = labels[activeLabelIndex];
 		composition.removeAllAnnotations();
 		labels.forEach(label => {
 			if (!label.cloud) return;
@@ -336,23 +339,13 @@ export class RevisionData extends React.Component {
 	}
 
 	changeActiveSeries(seriesIndex) {
-		const activeSeries = this.props.revision.series[this.state.activeSeriesIndex];
-
-		if (!activeSeries) {
-			this.setState({
-				activeSeriesIndex: seriesIndex,
-				composition: null
-			});
-			return;
-		}
-
+		const activeSeries = this.props.revision.series[seriesIndex];
 		const src = new rs.HybridImageSource({
 			client: this.client,
 			series: activeSeries.seriesUID
 		});
 		const composition = new rs.Composition(src);
-		composition.on('imageReady', this.updateLabels);
-
+		src.ready().then(this.updateLabels);
 		this.setState({
 			activeSeriesIndex: seriesIndex,
 			composition
@@ -440,6 +433,7 @@ export class RevisionData extends React.Component {
 				toggleReferenceLine={this.toggleReferenceLine}
 				lineWidth={this.state.lineWidth}
 				setLineWidth={this.setLineWidth}
+				brushEnabled={!!activeLabel}
 			/>
 			<ViewerCluster
 				composition={composition}
@@ -486,7 +480,7 @@ class Card extends React.Component {
 
 class ToolBar extends React.Component {
 	render() {
-		const { active, changeTool, showReferenceLine, toggleReferenceLine, lineWidth, setLineWidth } = this.props;
+		const { active, changeTool, showReferenceLine, toggleReferenceLine, brushEnabled, lineWidth, setLineWidth } = this.props;
 
 		const widthOptions = [1, 3, 5, 7];
 
@@ -495,10 +489,10 @@ class ToolBar extends React.Component {
 			<ToolButton name="zoom" changeTool={changeTool} active={active} />
 			<ToolButton name="hand" changeTool={changeTool} active={active} />
 			<ToolButton name="window" changeTool={changeTool} active={active} />
-			<ToolButton name="brush" changeTool={changeTool} active={active} />
-			<ToolButton name="eraser" changeTool={changeTool} active={active} />
+			<ToolButton name="brush" changeTool={changeTool} active={active} disabled={!brushEnabled} />
+			<ToolButton name="eraser" changeTool={changeTool} active={active} disabled={!brushEnabled} />
 			<ShrinkSelect options={widthOptions} value={''+ lineWidth} onChange={setLineWidth} />
-			<ToolButton name="bucket" changeTool={changeTool} active={active} />
+			<ToolButton name="bucket" changeTool={changeTool} active={active} disabled={!brushEnabled} />
 			&ensp;
 			<label>
 				<input
@@ -514,9 +508,9 @@ class ToolBar extends React.Component {
 
 class ToolButton extends React.Component {
 	render() {
-		const { name, active, changeTool } = this.props;
+		const { name, active, changeTool, disabled } = this.props;
 		const style = active === name ? 'primary' : 'default';
-		return <Button bsStyle={style} onClick={() => changeTool(name)}>
+		return <Button bsStyle={style} onClick={() => !disabled && changeTool(name)} disabled={disabled} >
 			<span className={'case-detail-tool-icon rs-icon-' + name} />
 		</Button>;
 	}
@@ -549,7 +543,7 @@ export class ViewerCluster extends React.PureComponent {
 					{makeViewer('coronal')}
 				</div>
 				<div className="viewer viewer-mpr">
-					{makeViewer('axial', 'celestialRotate', 'selectialRotate')}
+					{makeViewer('axial', 'celestialRotate', 'celestialRotate')}
 				</div>
 			</div>
 		</div>;

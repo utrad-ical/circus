@@ -71,6 +71,10 @@ export class VoxelCloud implements Annotation {
 
 	private _voxelSize: Vector3D;
 
+	private _expanded: boolean = false;
+
+	get expanded(): boolean { return this._expanded; }
+
 	/**
 	 * Prepares a shadow canvas, which is large enough to contain
 	 * the given size. The shadow canvas can be used to
@@ -117,6 +121,7 @@ export class VoxelCloud implements Annotation {
 		this.origin[1] += boundingBox.origin[1];
 		this.origin[2] += boundingBox.origin[2];
 		this.volume.transformBoundingBox(boundingBox);
+		this._expanded = false;
 		// console.timeEnd('shrink to minimum bounding box');
 	}
 
@@ -137,6 +142,9 @@ export class VoxelCloud implements Annotation {
 		// console.time('expand to maximum');
 		this.volume.transformBoundingBox(bb, this.origin);
 		this.origin = [0, 0, 0];
+
+		this._expanded = true;
+
 		// console.timeEnd('expand to maximum');
 	}
 

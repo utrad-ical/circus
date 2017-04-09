@@ -79,8 +79,9 @@ export class CaseDetail extends React.Component {
 	async loadCase() {
 		const caseID = this.props.params.cid;
 		const caseData = await api('case/' + caseID);
-		this.setState({ caseData });
-		this.selectRevision(caseData.revisions.length - 1);
+		this.setState({ caseData }, () => {
+			this.selectRevision(caseData.revisions.length - 1);
+		});
 	}
 
 	async saveRevision() {
@@ -136,15 +137,16 @@ export class CaseDetail extends React.Component {
 		data.status = 'approved';
 		const caseID = this.state.caseData.caseID;
 		try {
-			const result = await api(
+			await api(
 				`case/${caseID}/revision`,
 				{ method: 'post', data, handleErrors: true }
 			);
 			await alert('Successfully registered a revision.');
+			this.setState({ caseData: null, editingData: null });
+			this.loadCase();
 		} catch (err) {
 			await alert('Error: ' + err.message);
 		}
-		this.loadCase();
 	}
 
 	async revertRevision() {

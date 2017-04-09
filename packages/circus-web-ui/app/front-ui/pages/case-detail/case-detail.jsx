@@ -332,7 +332,12 @@ export class RevisionData extends React.Component {
 		labels.forEach(label => {
 			if (!label.cloud) return;
 			const cloud = label.cloud;
-			cloud.active = activeLabel && (label === activeLabel);
+			if (activeLabel && (label === activeLabel)) {
+				cloud.active = true;
+			} else {
+				cloud.active = false;
+				if (cloud.expanded) cloud.shrinkToMinimum();
+			}
 			composition.addAnnotation(cloud);
 		});
 		if (this.state.showReferenceLine) { composition.addAnnotation(this.referenceLineAnnotation); }

@@ -4,23 +4,16 @@ import { ImageViewer } from '../../components/image-viewer';
 import { PropertyEditor } from '../../components/property-editor';
 import { Loading } from '../../components/loading';
 import { TagList } from '../../components/tag';
-import { Button, Glyphicon, DropdownButton, SplitButton, MenuItem } from '../../components/react-bootstrap';
+import { Button, Glyphicon, SplitButton, MenuItem } from '../../components/react-bootstrap';
 import { LabelSelector } from './labels';
 import { store } from 'store';
 import * as rs from 'circus-rs';
 import { alert, prompt, confirm } from '../../components/modal';
-import * as crypto from 'crypto';
 import { ShrinkSelect } from '../../components/shrink-select';
 import merge from 'merge';
 import classNames from 'classnames';
 import EventEmitter from 'events';
-
-
-function sha1(arrayBuf) {
-	const sha = crypto.createHash('sha1');
-	sha.update(Buffer.from(arrayBuf));
-	return sha.digest('hex');
-}
+import { sha1 } from '../../utils/util.js';
 
 export class CaseDetail extends React.Component {
 	constructor(props) {

@@ -4,7 +4,7 @@ import { ImageViewer } from '../../components/image-viewer';
 import { PropertyEditor } from '../../components/property-editor';
 import { Loading } from '../../components/loading';
 import { TagList } from '../../components/tag';
-import { Button, Glyphicon } from '../../components/react-bootstrap';
+import { Button, Glyphicon, DropdownButton, SplitButton, MenuItem } from '../../components/react-bootstrap';
 import { LabelSelector } from './labels';
 import { store } from 'store';
 import * as rs from 'circus-rs';
@@ -13,6 +13,7 @@ import * as crypto from 'crypto';
 import { ShrinkSelect } from '../../components/shrink-select';
 import merge from 'merge';
 import classNames from 'classnames';
+import EventEmitter from 'events';
 
 
 function sha1(arrayBuf) {
@@ -290,10 +291,14 @@ export class RevisionData extends React.Component {
 		this.updateLabels = this.updateLabels.bind(this);
 		this.labelAttributesChange = this.labelAttributesChange.bind(this);
 		this.caseAttributesChange = this.caseAttributesChange.bind(this);
+		this.selectWindowPreset = this.selectWindowPreset.bind(this);
+
 		const server = store.getState().loginUser.data.dicomImageServer;
 		this.client = new rs.RsHttpClient(server);
 		this.referenceLineAnnotation = new rs.ReferenceLine();
 		this.referenceLineAnnotation.color = '#ff0000';
+
+		this.stateChanger = new EventEmitter();
 	}
 
 	componentWillUpdate(newProps, newState) {
@@ -392,6 +397,11 @@ export class RevisionData extends React.Component {
 		this.setState({ showReferenceLine: show });
 	}
 
+	selectWindowPreset(preset) {
+		const window = { level: preset.level, width: preset.width };
+		this.stateChanger.emit('change', state => ({ ...state, window }));
+	}
+
 	setLineWidth(lineWidth) {
 		const w = +lineWidth;
 		this.setState({ lineWidth: w });
@@ -440,11 +450,14 @@ export class RevisionData extends React.Component {
 				toggleReferenceLine={this.toggleReferenceLine}
 				lineWidth={this.state.lineWidth}
 				setLineWidth={this.setLineWidth}
+				windowPresets={projectData.windowPresets}
+				selectWindowPreset={this.selectWindowPreset}
 				brushEnabled={!!activeLabel}
 			/>
 			<ViewerCluster
 				composition={composition}
 				labels={activeSeries.labels}
+				stateChanger={this.stateChanger}
 				activeLabel={activeLabel}
 				tool={tool}
 			/>
@@ -485,9 +498,10 @@ class Card extends React.Component {
 	}
 }
 
-class ToolBar extends React.Component {
+class ToolBar extends React.PureComponent {
 	render() {
-		const { active, changeTool, showReferenceLine, toggleReferenceLine, brushEnabled, lineWidth, setLineWidth } = this.props;
+		const { active, changeTool, showReferenceLine, toggleReferenceLine,
+			brushEnabled, lineWidth, setLineWidth, windowPresets = [], selectWindowPreset } = this.props;
 
 		const widthOptions = [1, 3, 5, 7];
 
@@ -495,7 +509,17 @@ class ToolBar extends React.Component {
 			<ToolButton name="pager" changeTool={changeTool} active={active} />
 			<ToolButton name="zoom" changeTool={changeTool} active={active} />
 			<ToolButton name="hand" changeTool={changeTool} active={active} />
-			<ToolButton name="window" changeTool={changeTool} active={active} />
+			<ToolButton name="window" changeTool={changeTool} active={active}>
+				{windowPresets.map((p, i) => (
+					<MenuItem
+						key={i + 1}
+						eventKey={i + 1}
+						onClick={() => selectWindowPreset(p)}
+					>
+						<b>{p.label}</b> {`(L: ${p.level} / W: ${p.width})`}
+					</MenuItem>
+				))}
+			</ToolButton>
 			<ToolButton name="brush" changeTool={changeTool} active={active} disabled={!brushEnabled} />
 			<ToolButton name="eraser" changeTool={changeTool} active={active} disabled={!brushEnabled} />
 			<ShrinkSelect options={widthOptions} value={''+ lineWidth} onChange={setLineWidth} />
@@ -513,19 +537,28 @@ class ToolBar extends React.Component {
 	}
 }
 
-class ToolButton extends React.Component {
+class ToolButton extends React.PureComponent {
 	render() {
-		const { name, active, changeTool, disabled } = this.props;
+		const { name, active, changeTool, disabled, children } = this.props;
 		const style = active === name ? 'primary' : 'default';
-		return <Button bsStyle={style} onClick={() => !disabled && changeTool(name)} disabled={disabled} >
-			<span className={'case-detail-tool-icon rs-icon-' + name} />
-		</Button>;
+		const icon = <span className={'case-detail-tool-icon rs-icon-' + name} />;
+		const onClick = () => !disabled && changeTool(name);
+		if (children) {
+			return <SplitButton title={icon} bsStyle={style} onClick={onClick} disabled={disabled} >
+				{children}
+			</SplitButton>;
+
+		} else {
+			return <Button bsStyle={style} onClick={onClick} disabled={disabled} >
+				{icon}
+			</Button>;
+		}
 	}
 }
 
 export class ViewerCluster extends React.PureComponent {
 	render() {
-		const { composition, tool } = this.props;
+		const { composition, tool, stateChanger } = this.props;
 
 		function makeViewer(orientation, initialTool, fixTool) {
 			return <ImageViewer
@@ -533,6 +566,7 @@ export class ViewerCluster extends React.PureComponent {
 				composition={composition}
 				tool={fixTool ? fixTool : tool}
 				initialTool={initialTool}
+				stateChanger={stateChanger}
 			/>;
 		}
 

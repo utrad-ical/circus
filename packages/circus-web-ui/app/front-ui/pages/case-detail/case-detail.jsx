@@ -61,7 +61,7 @@ export class CaseDetail extends React.Component {
 				}
 				cloud.color = label.data.color || '#ff0000';
 				cloud.alpha = 'alpha' in label.data ? parseFloat(label.data.alpha) : 1;
-				cloud.debugPoint = true;
+				// cloud.debugPoint = true;
 				label.cloud = cloud;
 				// console.log('Cloud loaded', cloud);
 			}

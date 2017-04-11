@@ -1,5 +1,6 @@
 import React from 'react';
 import * as rs from 'circus-rs';
+import EventEmitter from 'events';
 
 /**
  * Wraps CIRCUS RS Dicom Viewer.
@@ -8,11 +9,20 @@ export class ImageViewer extends React.Component {
 	constructor(props) {
 		super(props);
 		this.viewer = null;
+		this.changeState = this.changeState.bind(this);
+		if (this.props.stateChanger instanceof EventEmitter) {
+			this.props.stateChanger.on('change', this.changeState);
+		}
 	}
 
 	componentWillUpdate(nextProps) {
-		if (this.props.seriesUID !== nextProps.seriesUID) {
-			this.updateComposition(nextProps.seriesUID);
+		if (this.props.stateChanger !== nextProps.stateChanger) {
+			if (this.props.stateChanger instanceof EventEmitter) {
+				this.props.stateChanger.removeAllListeners('change');
+			}
+			if (nextProps.stateChanger instanceof EventEmitter) {
+				nextProps.stateChanger.on('change', this.changeState);
+			}
 		}
 		if (this.props.composition !== nextProps.composition) {
 			this.viewer.setComposition(nextProps.composition);
@@ -48,6 +58,12 @@ export class ImageViewer extends React.Component {
 		viewer.setActiveTool(initialTool);
 
 		this.viewer = viewer;
+	}
+
+	changeState(changer) {
+		const state = this.viewer.getState();
+		const newState = changer(state);
+		this.viewer.setState(newState);
 	}
 
 	render() {

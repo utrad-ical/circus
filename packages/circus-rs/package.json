@@ -32,7 +32,7 @@
     "axios": "^0.16.2",
     "benchmark": "^2.1.4",
     "browserify": "^13.3.0",
-    "chai": "^3.5.0",
+    "chai": "^4.0.2",
     "extend": "^3.0.1",
     "gulp": "3.9.1",
     "gulp-concat": "^2.6.1",

@@ -1712,16 +1712,16 @@
         },
         {
             "name": "utrad-ical/circus-rs",
-            "version": "v0.7.5",
+            "version": "v0.7.6",
             "source": {
                 "type": "git",
                 "url": "git@github.com:utrad-ical/circus-rs.git",
-                "reference": "3b1704f3390d6610af02d4fb7d921de56bdbc677"
+                "reference": "a051e7f2891fbe238efa3c0c83bc14827682e858"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/utrad-ical/circus-rs/zipball/3b1704f3390d6610af02d4fb7d921de56bdbc677",
-                "reference": "3b1704f3390d6610af02d4fb7d921de56bdbc677",
+                "url": "https://api.github.com/repos/utrad-ical/circus-rs/zipball/a051e7f2891fbe238efa3c0c83bc14827682e858",
+                "reference": "a051e7f2891fbe238efa3c0c83bc14827682e858",
                 "shasum": ""
             },
             "type": "library",
@@ -1743,10 +1743,10 @@
                 "DICOM"
             ],
             "support": {
-                "source": "https://github.com/utrad-ical/circus-rs/tree/v0.7.5",
+                "source": "https://github.com/utrad-ical/circus-rs/tree/v0.7.6",
                 "issues": "https://github.com/utrad-ical/circus-rs/issues"
             },
-            "time": "2017-04-09T10:36:09+00:00"
+            "time": "2017-06-06T14:26:08+00:00"
         }
     ],
     "packages-dev": [

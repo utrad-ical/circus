@@ -8,9 +8,6 @@ import { ViewState } from '../view-state';
 import { Tool } from '../tool/tool';
 import { toolFactory } from '../tool/tool-initializer';
 
-const DEFAULT_VIEWER_WIDTH = 512;
-const DEFAULT_VIEWER_HEIGHT = 512;
-
 /**
  * Viewer is the main component of CIRCUS RS, and wraps a HTML canvas element
  * and displays a specified image along with various annotations.
@@ -62,11 +59,19 @@ export class Viewer extends EventEmitter {
 	 */
 	private currentRender: Promise<any> | null = null;
 
-	private createCanvas(width: number, height: number): HTMLCanvasElement {
-		const elm =  document.createElement('canvas');
-		elm.width = width;
-		elm.height = height;
-		return elm;
+	private createCanvas(): HTMLCanvasElement {
+		const canvas =  document.createElement('canvas');
+		canvas.style.width = '100%';
+		canvas.style.height = '100%';
+
+		return canvas;
+	}
+
+	public resizeCanvas(): void {
+		const canvas = this.canvas;
+		if (!canvas) throw new Error('Image viewer is not initialized');
+		canvas.width = canvas.offsetWidth;
+		canvas.height = canvas.offsetHeight;
 	}
 
 	constructor(div: HTMLDivElement) {
@@ -76,15 +81,17 @@ export class Viewer extends EventEmitter {
 			throw new Error('Tried to create a viewer without a container');
 		}
 
+		if (div.clientWidth <= 0 || div.clientHeight <= 0) {
+			throw new Error('The container div has zero width or height.');
+		}
+
 		// Removes everything which was already in the div
 		div.innerHTML = '';
-		const canvas = this.createCanvas(
-			DEFAULT_VIEWER_WIDTH,
-			DEFAULT_VIEWER_HEIGHT
-		);
-		div.appendChild(canvas);
-
+		const canvas = this.createCanvas();
 		this.canvas = canvas;
+		div.appendChild(canvas);
+		this.resizeCanvas();
+
 		this.sprites = [];
 
 		this.boundEventHandler = this.canvasEventHandler.bind(this);

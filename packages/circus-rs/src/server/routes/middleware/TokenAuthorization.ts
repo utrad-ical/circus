@@ -15,15 +15,17 @@ export function tokenAuthentication(helpers: ServerHelpers): express.Handler {
 			next(StatusError.unauthorized('Access denied'));
 		}
 
-		if (!('authorization' in req.headers)) {
+		const authorization = req.headers.authorization;
+
+		if (!authorization || typeof authorization !== 'string') {
 			logger.warn('Tried to access data without authorization header.');
 			invalid();
 			return;
 		}
 
-		const [bearer, token] = req.headers['authorization'].split(' ');
+		const [bearer, token] = authorization.split(' ');
 
-		if (bearer.toLowerCase() !== 'bearer') {
+		if (typeof bearer !== 'string' || bearer.toLowerCase() !== 'bearer') {
 			logger.warn('Invalid authorization header.');
 			invalid();
 			return;

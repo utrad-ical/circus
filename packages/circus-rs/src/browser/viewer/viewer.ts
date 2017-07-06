@@ -39,7 +39,7 @@ export class Viewer extends EventEmitter {
 	 */
 	public backgroundEventTarget: any;
 
-	private boundRender: Function;
+	private boundRender: EventListener;
 	private boundEventHandler: EventListener;
 
 	private imageReady: boolean = false;

@@ -1,6 +1,7 @@
 import React from 'react';
 import * as rs from 'circus-rs';
 import EventEmitter from 'events';
+import classnames from 'classnames';
 
 /**
  * Wraps CIRCUS RS Dicom Viewer.
@@ -9,6 +10,7 @@ export class ImageViewer extends React.Component {
 	constructor(props) {
 		super(props);
 		this.viewer = null;
+		this.container = null;
 		this.changeState = this.changeState.bind(this);
 		if (this.props.stateChanger instanceof EventEmitter) {
 			this.props.stateChanger.on('change', this.changeState);
@@ -44,7 +46,7 @@ export class ImageViewer extends React.Component {
 			viewer.removeListener('draw', setOrientation);
 		};
 
-		const container = this.refs.container;
+		const container = this.container;
 		const viewer = new rs.Viewer(container);
 
 		const orientation = this.props.orientation || 'axial';
@@ -67,6 +69,10 @@ export class ImageViewer extends React.Component {
 	}
 
 	render() {
-		return <div ref="container"></div>;
+		const { className } = this.props;
+		return <div
+			className={classnames('image-viewer', className)}
+			ref={r => this.container = r}
+		/>;
 	}
 }

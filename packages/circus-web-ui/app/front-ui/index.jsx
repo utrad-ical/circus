@@ -1,7 +1,7 @@
 // Build CSS from LESS.
 // This CSS is not intended to be used in the SPA version;
 // we just build this for the legacy version.
-require('file?name=css/style.css!../assets/less/style.less');
+require('file-loader?name=css/style.css!../assets/less/style.less');
 
 // Babel polyfill, needed for async/await and Promise support for IE
 import 'babel-polyfill';

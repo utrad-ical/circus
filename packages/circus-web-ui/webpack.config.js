@@ -10,52 +10,60 @@ module.exports = {
 		filename: '[name].js'
 	},
 	resolve: {
-		root: path.join(__dirname, 'app/front-ui'),
+		modules: [
+			path.join(__dirname, 'app/front-ui'),
+			'node_modules'
+		],
 		alias: {
 			'circus-rs': path.resolve(__dirname, 'vendor/utrad-ical/circus-rs/lib/browser'),
 			'circus-rs-font.woff': path.resolve(__dirname, 'vendor/utrad-ical/circus-rs/dist/css/circus-rs-font.woff')
 		},
-		extensions: ['', '.js', '.jsx']
+		extensions: ['.js', '.jsx']
 	},
 	module: {
-		loaders: [
+		rules: [
 			{
 				test: /\.jsx?$/,
 				exclude: /node_modules/,
-				loader: 'babel',
-				query: {
-					presets: ['es2015', 'react'],
-					plugins: [
-						'transform-object-rest-spread',
-						'transform-regenerator',
-						'transform-async-functions'
-					]
-				}
+				use: [{
+					loader: 'babel-loader',
+					options: {
+						presets: ['es2015', 'react'],
+						plugins: [
+							'transform-object-rest-spread',
+							'transform-regenerator',
+							'transform-async-functions'
+						]
+					}
+				}]
 			},
 			{
 				test: /circus-rs-font\.woff$/,
-				loader: 'url',
-				qyery: {
-					limit: 65000,
-					mimetype: 'application/font-woff',
-					name: 'circus-rs-font.woff'
-				},
-
+				use: [{
+					loader: 'url-loader',
+					options: {
+						limit: 65000,
+						mimetype: 'application/font-woff',
+						name: 'circus-rs-font.woff'
+					}
+				}]
 			},
 			{
 				test: /regular\.(woff|woff2|ttf|eot|svg)(\?v=\d+\.\d+\.\d+)?$/,
-				loader: 'file',
-				query: {
-					name: '[name].[ext]'
-				}
+				use: [{
+					loader: 'file-loader',
+					options: {
+						name: '[name].[ext]'
+					}
+				}]
 			},
 			{
 				test: /\.less$/,
-				loader: 'style!css!less'
+				use: ['style-loader', 'css-loader', 'less-loader']
 			},
 			{
 				test: /\.css/,
-				loader: 'style!css'
+				use: ['style-laoder', 'css-loader']
 			}
 		]
 	},

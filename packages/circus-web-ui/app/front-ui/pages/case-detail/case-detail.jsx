@@ -555,6 +555,7 @@ export class ViewerCluster extends React.PureComponent {
 
 		function makeViewer(orientation, initialTool, fixTool) {
 			return <ImageViewer
+				className={`viewer-${orientation}`}
 				orientation={orientation}
 				composition={composition}
 				tool={fixTool ? fixTool : tool}
@@ -565,20 +566,12 @@ export class ViewerCluster extends React.PureComponent {
 
 		return <div className="viewer-cluster">
 			<div className="viewer-row">
-				<div className="viewer viewer-axial">
-					{makeViewer('axial')}
-				</div>
-				<div className="viewer viewer-sagittal">
-					{makeViewer('sagittal')}
-				</div>
+				{makeViewer('axial')}
+				{makeViewer('sagittal')}
 			</div>
 			<div className="viewer-row">
-				<div className="viewer viewer-coronal">
-					{makeViewer('coronal')}
-				</div>
-				<div className="viewer viewer-mpr">
-					{makeViewer('axial', 'celestialRotate', 'celestialRotate')}
-				</div>
+				{makeViewer('coronal')}
+				{makeViewer('axial', 'celestialRotate', 'celestialRotate')}
 			</div>
 		</div>;
 	}

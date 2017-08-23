@@ -2,7 +2,7 @@ import React from 'react';
 
 import { DateRangePicker, dateRangeToMongoQuery } from 'components/daterange-picker';
 import { ShrinkSelect } from 'components/shrink-select';
-import { modalities } from 'constants';
+import { modalities } from 'modalities';
 import { SearchConditionBase, FormGrid, Input } from './search-condition';
 import { escapeRegExp } from 'utils/util';
 import { Well } from 'components/react-bootstrap';

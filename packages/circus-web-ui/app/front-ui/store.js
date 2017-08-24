@@ -25,7 +25,7 @@ function loginUser(state = { isFetching: false, data: null }, action) {
  */
 function messages(state = [], action) {
 	switch (action.type) {
-		case 'MESSAGE_ADD':
+		case 'MESSAGE_ADD': {
 			let boxes;
 			if (typeof action.tag === 'string') {
 				boxes = state.filter(box => box.tag !== action.tag);
@@ -39,6 +39,7 @@ function messages(state = [], action) {
 				style: action.style ? action.style : 'info'
 			});
 			return boxes;
+		}
 		case 'MESSAGE_DISMISS_PAGE_CHANGE':
 			return state.filter(box => box.dismissOnPageChange === true);
 		case 'MESSAGE_DISMISS':

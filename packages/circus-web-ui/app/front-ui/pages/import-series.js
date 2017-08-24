@@ -2,8 +2,6 @@ import React from 'react';
 import { Alert } from 'components/react-bootstrap';
 import { ShrinkSelect } from 'components/shrink-select';
 import { connect } from 'react-redux';
-import * as modal from 'components/modal';
-import { TaskProgress, TaskWatcher } from 'components/task-watcher';
 import { FileUpload } from 'components/file-upload';
 
 class ImportSeriesView extends React.Component {
@@ -24,8 +22,8 @@ class ImportSeriesView extends React.Component {
 		}
 	}
 
-	uploaded(res) {
-		console.log(res);
+	uploaded() {
+		// console.log(res);
 	}
 
 	render() {

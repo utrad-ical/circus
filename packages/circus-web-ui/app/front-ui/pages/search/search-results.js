@@ -1,10 +1,7 @@
 import React from 'react';
 import { ShrinkSelect } from 'components/shrink-select';
 import { Pagination } from 'components/react-bootstrap';
-import { api } from 'utils/api';
 import { changeSearchPage, changeSearchSort } from 'actions';
-
-const defaultRenderer = props => <div>{JSON.stringify(props.item)}</div>;
 
 export class SearchResultsView extends React.Component {
 	sortChange(sort) {

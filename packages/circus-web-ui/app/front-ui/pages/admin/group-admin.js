@@ -1,6 +1,5 @@
 import { EditorPage } from './editor-page';
 import React from 'react';
-import { Button } from 'components/react-bootstrap';
 import { api } from 'utils/api';
 
 export class GroupAdmin extends EditorPage {
@@ -30,17 +29,17 @@ export class GroupAdmin extends EditorPage {
 			{ key: 'groupName', label: 'Group Name' },
 			{
 				label: 'Privileges',
-				data: item => item.privileges.map(priv => {
+				data: item => item.privileges.map((priv, i) => {
 					const style = priv === 'manageServer' ? 'danger' : 'primary';
-					return <span className={`label label-${style}`}>
+					return <span key={i} className={`label label-${style}`}>
 						{priv}
 					</span>;
 				})
 			},
 			{
 				label: 'Accessible Series Domains',
-				data: item => item.domains.map(d => (
-					<span className='label label-default'>{d}</span>
+				data: item => item.domains.map((d, i) => (
+					<span key={i} className='label label-default'>{d}</span>
 				))
 			},
 		];

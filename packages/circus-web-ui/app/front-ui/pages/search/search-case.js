@@ -1,4 +1,3 @@
-import React from 'react';
 import { CaseSearchCondition } from './search-condition-case';
 import { CaseSearchResults } from './search-results-case';
 import { SearchCommon } from './search-common';

@@ -1,7 +1,6 @@
 import React from 'react';
 
 import { DateRangePicker, dateRangeToMongoQuery } from 'components/daterange-picker';
-import { ShrinkSelect } from 'components/shrink-select';
 import { modalities } from 'modalities';
 import { SearchConditionBase, FormGrid, Input } from './search-condition';
 import { Well, ControlLabel } from 'components/react-bootstrap';
@@ -64,10 +63,11 @@ export class CaseSearchCondition extends SearchConditionBase {
 				case 'maxAge':
 					members.push({ age: { $le: val }});
 					break;
-				case 'seriesDate':
+				case 'seriesDate': {
 					const q = dateRangeToMongoQuery(val, 'seriesDate');
 					if (q) members.push(q);
 					break;
+				}
 				default:
 					members.push({ [key]: val });
 					break;
@@ -90,7 +90,6 @@ export class CaseSearchCondition extends SearchConditionBase {
 	}
 }
 
-const sexOptions = { all: 'All', M: 'male', F: 'female', O: 'other' };
 const modalityOptions = { all: 'All' };
 modalities.forEach(m => modalityOptions[m] = m);
 

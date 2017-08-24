@@ -4,7 +4,9 @@ import { ImageViewer } from '../../components/image-viewer';
 import { PropertyEditor } from '../../components/property-editor';
 import { Loading } from '../../components/loading';
 import { TagList } from '../../components/tag';
-import { Button, Glyphicon, SplitButton, MenuItem } from '../../components/react-bootstrap';
+import {
+	Button, Glyphicon, SplitButton, MenuItem
+} from '../../components/react-bootstrap';
 import { LabelSelector } from './labels';
 import { store } from 'store';
 import * as rs from 'circus-rs';
@@ -211,7 +213,7 @@ class RevisionSelector extends React.Component {
 		this.selected = this.selected.bind(this);
 	}
 
-	renderItem(revision, i) {
+	renderItem(revision) {
 		return <span className='revision-selector-item'>
 			<span className='date'>{revision.date}</span>
 			<span className='status label label-default'>{revision.status}</span>

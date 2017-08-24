@@ -24,7 +24,7 @@ export class Preference extends React.Component {
 	}
 
 	async saveClick() {
-		const settings = await api('preference', {
+		await api('preference', {
 			method: 'post', // TODO: This should be PUT?
 			data: this.state.settings
 		});
@@ -41,12 +41,12 @@ export class Preference extends React.Component {
 				key: 'theme',
 				type: 'select',
 				spec: { options: { mode_white: 'White', mode_black: 'Black' } }
-			 },
-			 {
-				 caption: 'Show Personal Info',
-				 key: 'personalInfoView',
-				 type: 'checkbox'
-			 }
+			},
+			{
+				caption: 'Show Personal Info',
+				key: 'personalInfoView',
+				type: 'checkbox'
+			}
 		];
 
 		return <div>

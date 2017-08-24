@@ -80,7 +80,7 @@ export class EditorPage extends React.Component {
 	}
 
 	render() {
-		return <div className="admin-editor">
+		return <div className='admin-editor'>
 			<h1>
 				<Glyphicon glyph={this.glyph} />
 				&ensp;{this.title}
@@ -89,10 +89,11 @@ export class EditorPage extends React.Component {
 				items={this.state.items}
 				active={this.state.editing}
 				listColumns={this.listColumns}
-				onEditClick={this.editStart.bind(this)}/>
-			<p className="text-right">
-				<Button bsStyle="primary" bsSize="small" onClick={this.createItem.bind(this)}>
-					<Glyphicon glyph="plus"/>&ensp;
+				onEditClick={this.editStart.bind(this)}
+			/>
+			<p className='text-right'>
+				<Button bsStyle='primary' bsSize='small' onClick={this.createItem.bind(this)}>
+					<Glyphicon glyph='plus'/>&ensp;
 					Create new
 				</Button>
 			</p>
@@ -105,9 +106,9 @@ export class EditorPage extends React.Component {
 					onSaveClick={item => this.commitItem(item)}
 					onCancelClick={() => this.cancelEditItem()}
 				/>
-			: null }
+				: null }
 			{this.editorFooter()}
-		</div>
+		</div>;
 	}
 }
 
@@ -128,16 +129,16 @@ const List = props => {
 		return <tr key={i} className={active ? 'info' : null}>
 			{columns}
 			<td>
-				<Button bsSize="xs" bsStyle="primary"
+				<Button bsSize='xs' bsStyle='primary'
 					onClick={props.onEditClick.bind(null, item)}
 				>
-					<Glyphicon glyph="edit"/>
+					<Glyphicon glyph='edit'/>
 				</Button>
 			</td>
 		</tr>;
 	});
 
-	return <table className="table table-hover table-condensed">
+	return <table className='table table-hover table-condensed'>
 		<thead><tr>
 			{headerColumns}
 			<th></th>
@@ -150,7 +151,7 @@ class Editor extends React.Component {
 	constructor(props) {
 		super(props);
 		const item = {};
-		for (let p of props.properties) {
+		for (const p of props.properties) {
 			// Remove keys not in the editor property list
 			item[p.key] = props.item[p.key];
 		}
@@ -171,17 +172,17 @@ class Editor extends React.Component {
 
 	render() {
 		const header = this.props.target ?
-				<span>Updating: <strong>{this.props.target}</strong></span>
-				: 'Creating new item';
-		const footer = <div className="text-center">
-			<Button bsStyle="link" onClick={this.props.onCancelClick}>
+			<span>Updating: <strong>{this.props.target}</strong></span>
+			: 'Creating new item';
+		const footer = <div className='text-center'>
+			<Button bsStyle='link' onClick={this.props.onCancelClick}>
 				Cancel
 			</Button>
-			<Button bsStyle="primary" onClick={this.onSaveClick.bind(this)}>
+			<Button bsStyle='primary' onClick={this.onSaveClick.bind(this)}>
 				Save
 			</Button>
 		</div>;
-		return <Panel header={header} footer={footer} bsStyle="primary">
+		return <Panel header={header} footer={footer} bsStyle='primary'>
 			<PropertyEditor
 				value={this.state.item}
 				complaints={this.props.complaints}
@@ -190,4 +191,4 @@ class Editor extends React.Component {
 			/>
 		</Panel>;
 	}
-};
+}

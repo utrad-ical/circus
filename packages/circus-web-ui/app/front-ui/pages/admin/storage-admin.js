@@ -41,12 +41,12 @@ export class StorageAdmin extends EditorPage {
 			{
 				label: '',
 				data: item => {
-					if (item.active) return <span className="text-success">
+					if (item.active) return <span className='text-success'>
 						<Glyphicon glyph='off' />
 						Active
 					</span>;
 					return (
-						<Button bsStyle="default" bsSize="xs"
+						<Button bsStyle='default' bsSize='xs'
 							onClick={this.setActiveClick.bind(this, item.storageID)}
 						>
 							Set this as active
@@ -68,9 +68,9 @@ export class StorageAdmin extends EditorPage {
 	}
 
 	editorFooter() {
-		return <div className="text-warning">
+		return <div className='text-warning'>
 			<strong>Warning:</strong> Changing the path and type
 				may cause unexpected results.
-		</div>
+		</div>;
 	}
 }

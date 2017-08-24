@@ -8,7 +8,7 @@ import { connect } from 'react-redux';
 async function createCase(seriesUID) {
 	if (!(await modal.confirm('Add case for ' + seriesUID + '?'))) return;
 	console.log('Add case ' + seriesUID);
-};
+}
 
 class SeriesSearchResultsView extends SearchResultsView {
 	constructor(props) {
@@ -26,28 +26,28 @@ class SeriesSearchResultsView extends SearchResultsView {
 			if (item) {
 				return item;
 			} else {
-				return <span className="anonymized">(anonymized)</span>;
+				return <span className='anonymized'>(anonymized)</span>;
 			}
 		}
 
-		return <div className="search-result series">
-			<div className="modality">{item.modality}</div>
-			<div className="series-date">{item.seriesDate}</div>
-			<div className="create-time">{item.createTime}</div>
-			<div className="series-description">{item.seriesDescription}</div>
-			<div className="patient-id">
+		return <div className='search-result series'>
+			<div className='modality'>{item.modality}</div>
+			<div className='series-date'>{item.seriesDate}</div>
+			<div className='create-time'>{item.createTime}</div>
+			<div className='series-description'>{item.seriesDescription}</div>
+			<div className='patient-id'>
 				{anon(item.patientInfo.patientID)}
 			</div>
-			<div className="patient-name">
+			<div className='patient-name'>
 				{anon(item.patientInfo.patientName)}
 			</div>
-			<div className="patient-age-sex">
+			<div className='patient-age-sex'>
 				{anon(`${item.patientInfo.age} ${item.patientInfo.sex}`)}
 			</div>
-			<div className="register">
+			<div className='register'>
 				<Link to={`/series/${item.seriesUID}`}>
 					<Button>
-						<span className="circus-icon circus-icon-series" />
+						<span className='circus-icon circus-icon-series' />
 						View
 					</Button>
 				</Link>
@@ -55,7 +55,7 @@ class SeriesSearchResultsView extends SearchResultsView {
 		</div>;
 	}
 
-};
+}
 
 export const SeriesSearchResults = connect(
 	state => {

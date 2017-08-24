@@ -35,7 +35,7 @@ export class GeneralAdmin extends React.Component {
 			...this.state.settings,
 			domains:
 				this.state.settings.domains.map(d => typeof d === 'string' ? d.trim() : '')
-				.filter(d => typeof d === 'string' && d.length > 0)
+					.filter(d => typeof d === 'string' && d.length > 0)
 		};
 		this.setState({ settings: newSettings });
 		try {
@@ -75,19 +75,20 @@ export class GeneralAdmin extends React.Component {
 
 		return <div>
 			<h1>
-				<Glyphicon glyph="tasks"/>&ensp;
+				<Glyphicon glyph='tasks'/>&ensp;
 				General Server Configuration
 			</h1>
 			<PropertyEditor
 				value={this.state.settings}
 				complaints={this.state.complaints}
 				properties={properties}
-				onChange={this.propertyChange.bind(this)}/>
-			<p className="text-center">
-				<Button bsStyle="primary" onClick={() => this.saveClick()}>
+				onChange={this.propertyChange.bind(this)}
+			/>
+			<p className='text-center'>
+				<Button bsStyle='primary' onClick={() => this.saveClick()}>
 					Save
 				</Button>
-				<Button bsStyle="link" onClick={() => this.loadSettings()}>
+				<Button bsStyle='link' onClick={() => this.loadSettings()}>
 					Cancel
 				</Button>
 			</p>

@@ -19,28 +19,28 @@ class CaseSearchResultsView extends SearchResultsView {
 			if (item) {
 				return item;
 			} else {
-				return <span className="anonymized">(anonymized)</span>;
+				return <span className='anonymized'>(anonymized)</span>;
 			}
 		}
 
-		return <div className="search-result series">
-			<div className="project-name">{item.projectID}</div>
-			<div className="carete-time">{item.createTime}</div>
-			<div className="patient-id">
+		return <div className='search-result series'>
+			<div className='project-name'>{item.projectID}</div>
+			<div className='carete-time'>{item.createTime}</div>
+			<div className='patient-id'>
 				{anon(item.patientInfoCache.patientID)}
 			</div>
-			<div className="patient-name">
+			<div className='patient-name'>
 				{anon(item.patientInfoCache.patientName)}
 			</div>
-			<div className="tags">
+			<div className='tags'>
 				{Array.isArray(item.tags) ? item.tags.map(t => (
-					<span className="label label-default">{t}</span>
+					<span className='label label-default'>{t}</span>
 				)) : null}
 			</div>
-			<div className="register">
+			<div className='register'>
 				<Link to={`/case/${item.caseID}`}>
 					<Button>
-						<span className="circus-icon circus-icon-case" />
+						<span className='circus-icon circus-icon-case' />
 						View
 					</Button>
 				</Link>
@@ -48,7 +48,7 @@ class CaseSearchResultsView extends SearchResultsView {
 		</div>;
 	}
 
-};
+}
 
 export const CaseSearchResults = connect(
 	state => {

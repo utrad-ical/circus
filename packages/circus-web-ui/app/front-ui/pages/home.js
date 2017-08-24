@@ -8,13 +8,16 @@ import moment from 'moment';
 export const Home = props => (
 	<div>
 		<h1>Welcome to CIRCUS DB!</h1>
-		<ul className="home-menu">
-			<Menu link="/browse/case" icon="case-search" title="Case Search"
-				description="Search and edit existing cases." />
-			<Menu link="/browse/series" icon="series-search" title="Series Search"
-				description="Search and edit existing cases." />
-			<Menu link="/import-series" icon="series-import" title="Series Import"
-				description="Upload DICOM image files directly via the browser." />
+		<ul className='home-menu'>
+			<Menu link='/browse/case' icon='case-search' title='Case Search'
+				description='Search and edit existing cases.'
+			/>
+			<Menu link='/browse/series' icon='series-search' title='Series Search'
+				description='Search and edit existing cases.'
+			/>
+			<Menu link='/import-series' icon='series-import' title='Series Import'
+				description='Upload DICOM image files directly via the browser.'
+			/>
 		</ul>
 		<Profile />
 	</div>
@@ -30,32 +33,33 @@ const ProfileView = ({ user }) => {
 	const lastLoginTime = moment(user.lastLoginTime).format('YYYY-MM-DD HH:mm');
 	return <Row>
 		<Col md={7}>
-			<Panel bsStyle="primary" header={<span><Glyphicon glyph="education"/> Your Projects</span>}>
+			<Panel bsStyle='primary' header={<span><Glyphicon glyph='education'/> Your Projects</span>}>
 				<ListGroup fill>
 					{user.accessibleProjects.map(p => (
 						<ListGroupItem key={p.project.projectID}>
 							<strong>{p.project.projectName}</strong>&ensp;
-								<small>({p.roles.map(role2str).join(', ')})</small>
+							<small>({p.roles.map(role2str).join(', ')})</small>
 						</ListGroupItem>
 					))}
 				</ListGroup>
 			</Panel>
 		</Col>
 		<Col md={5}>
-			<Panel bsStyle="primary" className="home-profile"
-				header={<span><Glyphicon glyph="user"/> Profile</span>}>
+			<Panel bsStyle='primary' className='home-profile'
+				header={<span><Glyphicon glyph='user'/> Profile</span>}
+			>
 				<ListGroup fill>
 					<ListGroupItem>
 						You are logged in as: <b>{user.description}</b>
 					</ListGroupItem>
 					{ user.privileges.indexOf('manageServer') > -1 ?
-						<ListGroupItem bsStyle="danger">
+						<ListGroupItem bsStyle='danger'>
 							<strong>You have administrative privilege on CIRCUS DB! </strong>
 							Use this account only when you do administrative tasks.
 						</ListGroupItem>
-					: null }
+						: null }
 				</ListGroup>
-				<ul className="list-unstyled">
+				<ul className='list-unstyled'>
 					<li><b>Login ID:</b> {user.loginID}</li>
 					<li><b>Email:</b> {user.userEmail}</li>
 					<li><b>Last login:</b> {lastLoginTime} (from {user.lastLoginIP})</li>
@@ -64,7 +68,7 @@ const ProfileView = ({ user }) => {
 				</ul>
 			</Panel>
 		</Col>
-	</Row>
+	</Row>;
 };
 
 const Profile = connect(
@@ -74,7 +78,7 @@ const Profile = connect(
 const Menu = ({ link, icon, title, description }) => (
 	<li>
 		<Link to={link}>
-			<div className="img">
+			<div className='img'>
 				<span className={'circus-icon circus-icon-' + icon}></span>
 			</div>
 			<p>{title}</p>

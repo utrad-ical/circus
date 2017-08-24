@@ -32,13 +32,13 @@ class ImportSeriesView extends React.Component {
 		const user = this.props.loginUser;
 
 		if (!Array.isArray(user.accessibleDomains) || user.accessibleDomains.length === 0) {
-			return <Alert bsStyle="warning">
+			return <Alert bsStyle='warning'>
 				You do not belong to any domain. Uploading is not allowed.
 			</Alert>;
 		}
 
 		return <div>
-			<h1><span className="circus-icon-series-import" /> Series Import</h1>
+			<h1><span className='circus-icon-series-import' /> Series Import</h1>
 			<p>
 				Choose DICOM files to upload.
 				(Maximum size: {user.uploadFileSizeMax},
@@ -54,7 +54,8 @@ class ImportSeriesView extends React.Component {
 				<p>Upload Domain:&ensp;
 					<ShrinkSelect options={user.accessibleDomains}
 						value={this.state.uploadDomain}
-						onChange={this.domainChange.bind(this)}/>
+						onChange={this.domainChange.bind(this)}
+					/>
 				</p>
 			</FileUpload>
 		</div>;

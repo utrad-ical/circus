@@ -32,7 +32,7 @@ export class DicomImageServerAdmin extends React.Component {
 			if (typeof err.state === 'number') {
 				message = `The server returned with ${err.state} error.`;
 			}
-			this.setState({ rsStatus: <em className="text-warning">{message}</em> });
+			this.setState({ rsStatus: <em className='text-warning'>{message}</em> });
 		}
 		this.setState({ isFetching: false });
 	}
@@ -48,26 +48,26 @@ export class DicomImageServerAdmin extends React.Component {
 		</div>;
 
 		return <div>
-			<h1><Glyphicon glyph="hdd" />&ensp;DICOM Image Server</h1>
+			<h1><Glyphicon glyph='hdd' />&ensp;DICOM Image Server</h1>
 			<Panel header={header}>
 				<ButtonToolbar>
-					<Button bsStyle="success" bsSize="large"
+					<Button bsStyle='success' bsSize='large'
 						disabled={this.state.isFetching}
 						onClick={this.sendControl.bind(this, 'start')}
 					>
-						<Glyphicon glyph="play" />&ensp;Start
+						<Glyphicon glyph='play' />&ensp;Start
 					</Button>
-					<Button bsStyle="danger" bsSize="large"
+					<Button bsStyle='danger' bsSize='large'
 						disabled={this.state.isFetching}
 						onClick={this.sendControl.bind(this, 'stop')}
 					>
-						<Glyphicon glyph="stop" />&ensp;Stop
+						<Glyphicon glyph='stop' />&ensp;Stop
 					</Button>
-					<Button bsStyle="default" bsSize="large"
+					<Button bsStyle='default' bsSize='large'
 						disabled={this.state.isFetching}
 						onClick={this.sendControl.bind(this, 'status')}
 					>
-						<Glyphicon glyph="refresh" />&ensp;Refresh
+						<Glyphicon glyph='refresh' />&ensp;Refresh
 					</Button>
 				</ButtonToolbar>
 			</Panel>
@@ -77,11 +77,11 @@ export class DicomImageServerAdmin extends React.Component {
 				<p>CIRCUS RS Status:</p>
 				<pre>{this.state.rsStatus}</pre>
 				{ this.state.noAuthorizationWarning ?
-					<Alert bsStyle="danger">
+					<Alert bsStyle='danger'>
 						<strong>RS Server running without authorization enabled!</strong>&ensp;
 						This can be a security risk. Use this only for debugging purposes.
 					</Alert>
-				: null }
+					: null }
 			</div>
 		</div>;
 	}

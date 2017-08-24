@@ -38,8 +38,8 @@ export class CaseDetail extends React.Component {
 
 		const data = merge(true, {}, revision);
 		// Load all label volume data in the latest revision
-		for (let series of data.series) {
-			for (let label of series.labels) {
+		for (const series of data.series) {
+			for (const label of series.labels) {
 				if (label.type !== 'voxel') continue;
 				const cloud = new rs.VoxelCloud();
 				cloud.volume = new rs.RawData([8, 8, 8], rs.PixelFormat.Binary);
@@ -86,8 +86,8 @@ export class CaseDetail extends React.Component {
 		data.description = desc;
 
 		// save all label volume data
-		for (let series of data.series) {
-			for (let label of series.labels) {
+		for (const series of data.series) {
+			for (const label of series.labels) {
 				try {
 					label.cloud.shrinkToMinimum();
 					const bb = rs.scanBoundingBox(label.cloud.volume);
@@ -212,11 +212,11 @@ class RevisionSelector extends React.Component {
 	}
 
 	renderItem(revision, i) {
-		return <span className="revision-selector-item">
-			<span className="date">{revision.date}</span>
-			<span className="status label label-default">{revision.status}</span>
-			<span className="description">{revision.description}</span>
-			<span className="creator">{revision.creator}</span>
+		return <span className='revision-selector-item'>
+			<span className='date'>{revision.date}</span>
+			<span className='status label label-default'>{revision.status}</span>
+			<span className='description'>{revision.description}</span>
+			<span className='creator'>{revision.creator}</span>
 		</span>;
 	}
 
@@ -241,8 +241,8 @@ class RevisionSelector extends React.Component {
 class MenuBar extends React.Component {
 	render() {
 		const { onRevertClick, onSaveClick, revisions, onRevisionSelect, currentRevision } = this.props;
-		return <div className="case-detail-menu">
-			<div className="left">
+		return <div className='case-detail-menu'>
+			<div className='left'>
 				Revision:&ensp;
 				<RevisionSelector
 					revisions={revisions}
@@ -250,14 +250,14 @@ class MenuBar extends React.Component {
 					onSelect={onRevisionSelect}
 				/>
 			</div>
-			<div className="right">
-				<Button bsStyle="warning" onClick={onRevertClick} >
-					<Glyphicon glyph="remove-circle" />
+			<div className='right'>
+				<Button bsStyle='warning' onClick={onRevertClick} >
+					<Glyphicon glyph='remove-circle' />
 					Revert
 				</Button>
 				&ensp;
-				<Button bsStyle="success" onClick={onSaveClick} >
-					<Glyphicon glyph="save" />
+				<Button bsStyle='success' onClick={onSaveClick} >
+					<Glyphicon glyph='save' />
 					Save
 				</Button>
 			</div>
@@ -409,8 +409,8 @@ export class RevisionData extends React.Component {
 		if (!activeSeries) return null;
 		const activeLabel = activeSeries.labels[activeLabelIndex];
 		return <div className={classNames('case-revision-data', { busy })}>
-			<div className="case-revision-header">
-				<Card title="Series / Labels">
+			<div className='case-revision-header'>
+				<Card title='Series / Labels'>
 					<LabelSelector
 						revision={revision}
 						onChange={onChange}
@@ -426,9 +426,9 @@ export class RevisionData extends React.Component {
 							value={activeLabel.attributes || {}}
 							onChange={this.labelAttributesChange}
 						/>
-					: null }
+						: null }
 				</Card>
-				<Card title="Case Attributes">
+				<Card title='Case Attributes'>
 					<PropertyEditor
 						properties={projectData.caseAttributesSchema}
 						value={revision.attributes}
@@ -472,21 +472,21 @@ class Card extends React.Component {
 	render() {
 		const { title, children } = this.props;
 		const { open } = this.state;
-		return <div className="case-detail-card">
-			<a className="case-detail-card-header" onClick={this.toggleCollapse}>
+		return <div className='case-detail-card'>
+			<a className='case-detail-card-header' onClick={this.toggleCollapse}>
 				{title}
 				&ensp;
 				{ open ?
-					<Glyphicon glyph="triangle-bottom" />
-				:
-					<Glyphicon glyph="triangle-right" />
+					<Glyphicon glyph='triangle-bottom' />
+					:
+					<Glyphicon glyph='triangle-right' />
 				}
 			</a>
 			{ open ?
-				<div className="case-detail-card-body">
+				<div className='case-detail-card-body'>
 					{children}
 				</div>
-			: null }
+				: null }
 		</div>;
 	}
 }
@@ -498,11 +498,11 @@ class ToolBar extends React.PureComponent {
 
 		const widthOptions = [1, 3, 5, 7];
 
-		return <div className="case-detail-toolbar">
-			<ToolButton name="pager" changeTool={changeTool} active={active} />
-			<ToolButton name="zoom" changeTool={changeTool} active={active} />
-			<ToolButton name="hand" changeTool={changeTool} active={active} />
-			<ToolButton name="window" changeTool={changeTool} active={active}>
+		return <div className='case-detail-toolbar'>
+			<ToolButton name='pager' changeTool={changeTool} active={active} />
+			<ToolButton name='zoom' changeTool={changeTool} active={active} />
+			<ToolButton name='hand' changeTool={changeTool} active={active} />
+			<ToolButton name='window' changeTool={changeTool} active={active}>
 				{windowPresets.map((p, i) => (
 					<MenuItem
 						key={i + 1}
@@ -513,14 +513,14 @@ class ToolBar extends React.PureComponent {
 					</MenuItem>
 				))}
 			</ToolButton>
-			<ToolButton name="brush" changeTool={changeTool} active={active} disabled={!brushEnabled} />
-			<ToolButton name="eraser" changeTool={changeTool} active={active} disabled={!brushEnabled} />
+			<ToolButton name='brush' changeTool={changeTool} active={active} disabled={!brushEnabled} />
+			<ToolButton name='eraser' changeTool={changeTool} active={active} disabled={!brushEnabled} />
 			<ShrinkSelect options={widthOptions} value={''+ lineWidth} onChange={setLineWidth} />
-			<ToolButton name="bucket" changeTool={changeTool} active={active} disabled={!brushEnabled} />
+			<ToolButton name='bucket' changeTool={changeTool} active={active} disabled={!brushEnabled} />
 			&ensp;
 			<label>
 				<input
-					type="checkbox"
+					type='checkbox'
 					checked={showReferenceLine}
 					onChange={ev => toggleReferenceLine(ev.target.checked)}
 				/>
@@ -564,12 +564,12 @@ export class ViewerCluster extends React.PureComponent {
 			/>;
 		}
 
-		return <div className="viewer-cluster">
-			<div className="viewer-row">
+		return <div className='viewer-cluster'>
+			<div className='viewer-row'>
 				{makeViewer('axial')}
 				{makeViewer('sagittal')}
 			</div>
-			<div className="viewer-row">
+			<div className='viewer-row'>
 				{makeViewer('coronal')}
 				{makeViewer('axial', 'celestialRotate', 'celestialRotate')}
 			</div>

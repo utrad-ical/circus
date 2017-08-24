@@ -7,9 +7,9 @@ export async function api(command, options = {}) {
 		url: '/api/' + command,
 		cached: false
 	};
-	for (let k in options) {
+	for (const k in options) {
 		params[k] = options[k];
-	};
+	}
 	if (typeof params.data === 'object') {
 		if (params.method === 'get') params.method = 'post';
 	}
@@ -29,7 +29,7 @@ export async function api(command, options = {}) {
 			showErrorMessage(err);
 		}
 	}
-};
+}
 
 function showErrorMessage(err) {
 	let message = '';

@@ -14,7 +14,7 @@ export class SearchCommon extends React.Component {
 
 	conditionChange(newCondition) {
 		this.setState({ condition: newCondition });
-	};
+	}
 
 	searchClick(filter) {
 		startNewSearch(
@@ -35,9 +35,10 @@ export class SearchCommon extends React.Component {
 			</h1>
 			<ConditionComp condition={this.state.condition}
 				onSearch={this.searchClick.bind(this)}
-				onChange={this.conditionChange.bind(this)} />
+				onChange={this.conditionChange.bind(this)}
+			/>
 			{ /* <pre>{JSON.stringify(this.state.filter, null, '  ')}</pre> */ }
 			<ResultComp />
 		</div>;
 	}
-};
+}

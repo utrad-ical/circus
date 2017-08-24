@@ -2,34 +2,35 @@ import React from 'react';
 import { browserHistory } from 'react-router';
 import { Button, Glyphicon } from 'components/react-bootstrap';
 
-export const AdminIndex = props => {
-	const btn = (to, link, glyph) => (
-		<div className='item'>
-			<Button block bsStyle='primary' bsSize='lg'
-				onClick={() => browserHistory.push('admin/' + to)}
-			>
-				{glyph ?
-					<span><Glyphicon glyph={glyph} />&ensp;</span>
-					: null}
-				{link}
-			</Button>
-		</div>
-	);
+const Btn = ({ to, link, glyph }) => (
+	<div className='item'>
+		<Button
+			block bsStyle='primary' bsSize='lg'
+			onClick={() => browserHistory.push('admin/' + to)}
+		>
+			{glyph &&
+				<span><Glyphicon glyph={glyph} />&ensp;</span>
+			}
+			{link}
+		</Button>
+	</div>
+);
 
+export const AdminIndex = props => {
 	return <div className='admin-index'>
 		<h1>
 			<span className='circus-icon circus-icon-administration' />&ensp;
 			Administration
 		</h1>
 		<div className='row'>
-			{btn('general', 'Server Configuration', 'tasks')}
-			{btn('server', 'DICOM Image Server', 'hdd')}
-			{btn('storage', 'Storage', 'save-file')}
+			<Btn to='general' link='Server Configuration' glyph='tasks' />
+			<Btn to='server' link='DICOM Image Server'glyph='hdd' />
+			<Btn to='storage' link='Storage'glyph='save-file' />
 		</div>
 		<div className='row'>
-			{btn('group', 'Groups', 'record')}
-			{btn('user', 'Users', 'user')}
-			{btn('project', 'Projects', 'education')}
+			<Btn to='group' link='Groups'glyph='record' />
+			<Btn to='user' link='Users'glyph='user' />
+			<Btn to='project' link='Projects'glyph='education' />
 		</div>
 	</div>;
 };

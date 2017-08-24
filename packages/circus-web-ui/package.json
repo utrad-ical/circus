@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "fontgen": "node app/assets/icons/fontgen.js",
-    "build": "webpack"
+    "build": "webpack",
+    "lint": "eslint app/front-ui"
   },
   "repository": {
     "type": "git",
@@ -31,6 +32,8 @@
     "bootstrap": "^3.3.7",
     "classnames": "^2.2.5",
     "css-loader": "^0.28.5",
+    "eslint": "^4.5.0",
+    "eslint-plugin-react": "^7.3.0",
     "file-loader": "^0.11.2",
     "glob": "^7.1.1",
     "less": "^2.7.1",

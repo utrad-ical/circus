@@ -15,6 +15,7 @@ module.exports = {
 			'node_modules'
 		],
 		alias: {
+			'rb': '@smikitky/rb-components/lib',
 			'circus-rs': path.resolve(__dirname, 'vendor/utrad-ical/circus-rs/lib/browser'),
 			'circus-rs-font.woff': path.resolve(__dirname, 'vendor/utrad-ical/circus-rs/dist/css/circus-rs-font.woff')
 		},
@@ -23,8 +24,7 @@ module.exports = {
 	module: {
 		rules: [
 			{
-				test: /\.jsx?$/,
-				exclude: /node_modules/,
+				test: t => (/\.jsx?/.test(t) && (/rb-components/.test(t) || !/node_modules/.test(t))),
 				use: [{
 					loader: 'babel-loader',
 					options: {

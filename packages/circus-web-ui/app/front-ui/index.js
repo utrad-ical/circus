@@ -44,7 +44,7 @@ ReactDOM.render(
 		<Router history={browserHistory}>
 			<Route path='/' component={LoginScreen} onLeave={leaveLoginScreen} />
 			<Route path='/' component={App} onChange={pageMove}>
-				<Route path="home" component={Home} />
+				<Route path='home' component={Home} />
 				<Route path='browse/series' component={SeriesSearch} />
 				<Route path='browse/case' component={CaseSearch} />
 				<Route path='import-series' component={ImportSeries} />
@@ -58,9 +58,9 @@ ReactDOM.render(
 					<Route path='user' component={UserAdmin} />
 					<Route path='project' component={ProjectAdmin} />
 				</Route>
-				<Route path="series/:uid" component={SeriesDetail} />
-				<Route path="case/:cid" component={CaseDetail} />
-				<Route path="task-list" component={TaskList} />
+				<Route path='series/:uid' component={SeriesDetail} />
+				<Route path='case/:cid' component={CaseDetail} />
+				<Route path='task-list' component={TaskList} />
 				<Route path='preference' component={Preference} />
 			</Route>
 		</Router>

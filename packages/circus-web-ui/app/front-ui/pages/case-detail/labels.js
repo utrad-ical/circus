@@ -24,7 +24,7 @@ export const LabelSelector = props => {
 		onChange(newRev);
 	}
 
-	return <ul className="case-series-list">
+	return <ul className='case-series-list'>
 		{revision.series.map((series, seriesIndex) => (
 			<Series
 				series={series}
@@ -79,8 +79,8 @@ const Series = props => {
 		onChange(seriesIndex, newSeries);
 	}
 
-	return <li className={classNames("case-series-list-item", { active: series === activeSeries })}> Series #{seriesIndex}
-		<ul className="case-label-list">
+	return <li className={classNames('case-series-list-item', { active: series === activeSeries })}> Series #{seriesIndex}
+		<ul className='case-label-list'>
 			{series.labels.map((label, labelIndex) => (
 				<Label
 					label={label}
@@ -93,9 +93,9 @@ const Series = props => {
 				/>
 			))}
 		</ul>
-		<div className="case-label-buttons">
-			<Button bsSize="xs" onClick={addLabel}>
-				<Glyphicon glyph="plus"/> Add Label
+		<div className='case-label-buttons'>
+			<Button bsSize='xs' onClick={addLabel}>
+				<Glyphicon glyph='plus'/> Add Label
 			</Button>
 		</div>
 	</li>;
@@ -117,44 +117,44 @@ export const Label = props => {
 
 	// console.log(`Cloud #${labelIndex}`, label.cloud);
 
-	return <li className={classNames("label-list-item", { active: label === activeLabel })} onClick={onClick}>
+	return <li className={classNames('label-list-item', { active: label === activeLabel })} onClick={onClick}>
 		<div>
-			<Glyphicon glyph="tag" />&ensp;
+			<Glyphicon glyph='tag' />&ensp;
 			{caption}
 		</div>
 		<div>
 			<OpacityEditor value={label.cloud.alpha} onChange={changeLabelAlpha} />
 			<ColorPicker value={label.cloud.color} colors={labelColors} onChange={changeLabelColor} />
-			<Button bsSize="xs" onClick={onRemoveClick}><Glyphicon glyph="remove" /></Button>
+			<Button bsSize='xs' onClick={onRemoveClick}><Glyphicon glyph='remove' /></Button>
 		</div>
 	</li>;
 };
 
 const OpacityEditor = props => {
-	const opacityEditor = <Popover id="opacity-editor"><OpacityPopover {...props} /></Popover>;
-	return <OverlayTrigger trigger="click" rootClose overlay={opacityEditor} placement="bottom">
-		<Button bsStyle="default" bsSize="xs">{props.value * 100}%</Button>
+	const opacityEditor = <Popover id='opacity-editor'><OpacityPopover {...props} /></Popover>;
+	return <OverlayTrigger trigger='click' rootClose overlay={opacityEditor} placement='bottom'>
+		<Button bsStyle='default' bsSize='xs'>{props.value * 100}%</Button>
 	</OverlayTrigger>;
 };
 
 const OpacityPopover = props => {
 	const { onChange, value } = props;
-	return <div className="label-list-opacity-dropdown">
+	return <div className='label-list-opacity-dropdown'>
 		{ value === 0 ?
-			<Button bsStyle="link" bsSize="sm" onClick={() => onChange(1)}>
-				<Glyphicon glyph="eye-close" />
+			<Button bsStyle='link' bsSize='sm' onClick={() => onChange(1)}>
+				<Glyphicon glyph='eye-close' />
 			</Button>
-		:
-			<Button bsStyle="link" bsSize="sm" onClick={() => onChange(0)}>
-				<Glyphicon glyph="eye-open" />
+			:
+			<Button bsStyle='link' bsSize='sm' onClick={() => onChange(0)}>
+				<Glyphicon glyph='eye-open' />
 			</Button>
 		}
 		<FormControl
-			type="number"
+			type='number'
 			step={10}
 			min={0}
 			max={100}
-			bsSize="sm"
+			bsSize='sm'
 			value={value * 100}
 			onChange={ev => props.onChange(ev.target.value / 100)}
 		/>

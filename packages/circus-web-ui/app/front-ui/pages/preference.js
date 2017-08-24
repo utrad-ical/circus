@@ -51,18 +51,19 @@ export class Preference extends React.Component {
 
 		return <div>
 			<h1>
-				<span className="circus-icon circus-icon-preference" />&ensp;
+				<span className='circus-icon circus-icon-preference' />&ensp;
 				Preferences
 			</h1>
 			<PropertyEditor
 				value={this.state.settings}
 				properties={properties}
-				onChange={this.propertyChange.bind(this)}/>
-			<p className="text-center">
-				<Button bsStyle="primary" onClick={() => this.saveClick()}>
+				onChange={this.propertyChange.bind(this)}
+			/>
+			<p className='text-center'>
+				<Button bsStyle='primary' onClick={() => this.saveClick()}>
 					Save
 				</Button>
-				<Button bsStyle="link" onClick={() => this.loadSettings()}>
+				<Button bsStyle='link' onClick={() => this.loadSettings()}>
 					Cancel
 				</Button>
 			</p>

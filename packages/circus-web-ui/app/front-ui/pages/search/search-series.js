@@ -14,4 +14,4 @@ export class SeriesSearch extends SearchCommon {
 		this.resultComp = SeriesSearchResults;
 		this.state.condition = this.conditionComp.nullCondition();
 	}
-};
+}

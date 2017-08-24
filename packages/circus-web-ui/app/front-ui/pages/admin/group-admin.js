@@ -40,7 +40,7 @@ export class GroupAdmin extends EditorPage {
 			{
 				label: 'Accessible Series Domains',
 				data: item => item.domains.map(d => (
-					<span className="label label-default">{d}</span>
+					<span className='label label-default'>{d}</span>
 				))
 			},
 		];
@@ -55,7 +55,7 @@ export class GroupAdmin extends EditorPage {
 		const domains = params.domains;
 		const privList = await api('group-privileges');
 		const privileges = {};
-		for (let p of privList) privileges[p.privilege] = p.caption;
+		for (const p of privList) privileges[p.privilege] = p.caption;
 		this.editorProperties[2].spec.options = domains;
 		this.editorProperties[1].spec.options = privileges;
 		super.componentDidMount();

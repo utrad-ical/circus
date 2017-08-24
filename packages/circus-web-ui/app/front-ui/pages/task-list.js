@@ -24,12 +24,12 @@ export class TaskList extends React.Component {
 		return <div>
 			<h1>Tasks</h1>
 			<TaskItems items={this.state.downloadList} />
-		</div>
+		</div>;
 	}
 }
 
 const TaskItems = props => {
-	const table = <table className="table">
+	const table = <table className='table'>
 		<thead>
 			<tr>
 				<th>Task ID</th>

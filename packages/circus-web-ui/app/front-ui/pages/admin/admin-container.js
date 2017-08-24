@@ -5,9 +5,9 @@ const ContainerView = props => {
 	if (props.isAdmin) {
 		return <div>{props.children}</div>;
 	} else {
-		return <div className="alert alert-danger">
+		return <div className='alert alert-danger'>
 			You don't have privilege to access administration page.
-		</div>
+		</div>;
 	}
 };
 

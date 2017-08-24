@@ -20,7 +20,7 @@ export class CaseSearchCondition extends SearchConditionBase {
 		projects.filter(p => p.roles.indexOf('readGroups') > -1)
 			.forEach(p => {
 				projectOptions[p.project.projectID] =
-					{ caption: p.project.projectName, project: p.project }
+					{ caption: p.project.projectName, project: p.project };
 			});
 		this.state = {
 			selectedProjects: [],
@@ -40,7 +40,7 @@ export class CaseSearchCondition extends SearchConditionBase {
 
 	selectedProjectsChange(projects) {
 		const availableTags = {};
-		for (let pid of projects) {
+		for (const pid of projects) {
 			const p = this.state.projectOptions[pid].project;
 			p.tags.forEach(t => {
 				if (availableTags[t.name]) return;
@@ -86,7 +86,7 @@ export class CaseSearchCondition extends SearchConditionBase {
 				/>
 			</div>
 			{this.renderUsing(BasicConditionForm, { availableTags: this.state.availableTags })}
-		</Well>
+		</Well>;
 	}
 }
 
@@ -100,7 +100,7 @@ const BasicConditionForm = props => {
 			typeof newValue === 'string' && newValue.length === 0 ||
 			key.match(/modality|sex/) && newValue === 'all'
 		) {
-			let newCondition = { ...props.value };
+			const newCondition = { ...props.value };
 			delete newCondition[key];
 			props.onChange(newCondition);
 		} else {
@@ -111,16 +111,16 @@ const BasicConditionForm = props => {
 	const grid = FormGrid([
 		[
 			'Case ID',
-			<Input name="caseID" value={props.value.caseID} onChange={change} />
+			<Input name='caseID' value={props.value.caseID} onChange={change} />
 		],
 		'br',
 		[
 			'Patient ID',
-			<Input name="patientID" value={props.value.patientID} onChange={change} />
+			<Input name='patientID' value={props.value.patientID} onChange={change} />
 		],
 		[
 			'Patient Name',
-			<Input name="patientName" value={props.value.patientName} onChange={change} />
+			<Input name='patientName' value={props.value.patientName} onChange={change} />
 		],
 		[
 			'Case Created At',

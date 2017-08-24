@@ -14,4 +14,4 @@ export class CaseSearch extends SearchCommon {
 		this.resultComp = CaseSearchResults;
 		this.state.condition = this.conditionComp.nullCondition();
 	}
-};
+}

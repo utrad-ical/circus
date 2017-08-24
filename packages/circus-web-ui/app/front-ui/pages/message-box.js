@@ -12,7 +12,7 @@ class MessageBoxView extends React.Component {
 	}
 
 	render() {
-		return <div className="message-boxes">
+		return <div className='message-boxes'>
 			{this.props.messages.map(m => {
 				const style = m.style ? m.style : 'success';
 				return <Alert key={m.id}
@@ -22,7 +22,7 @@ class MessageBoxView extends React.Component {
 					{m.message}
 				</Alert>;
 			})}
-		</div>
+		</div>;
 	}
 }
 

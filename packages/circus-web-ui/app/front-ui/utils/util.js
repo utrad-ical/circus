@@ -2,7 +2,7 @@ import { createHash } from 'crypto';
 
 export const escapeRegExp = str => {
 	str = str + '';
-	return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
+	return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&');
 };
 
 export const sha1 = arrayBuf => {

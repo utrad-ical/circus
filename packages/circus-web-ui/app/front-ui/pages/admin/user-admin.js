@@ -38,7 +38,7 @@ export class UserAdmin extends EditorPage {
 				data: item => {
 					return item.groups.map(groupID => {
 						if (!this.state.groupIdMap) return null;
-						return <span className="label label-default" key={groupID}>
+						return <span className='label label-default' key={groupID}>
 							{this.state.groupIdMap[groupID]}
 						</span>;
 					});

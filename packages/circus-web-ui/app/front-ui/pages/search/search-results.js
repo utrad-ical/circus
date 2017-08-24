@@ -35,18 +35,19 @@ export class SearchResultsView extends React.Component {
 
 		const { totalItems, per, items, page, sort } = this.props;
 		const pages = Math.ceil(totalItems / per);
-		return <div className="search-results-container">
-			<div className="search-results-header">
+		return <div className='search-results-container'>
+			<div className='search-results-header'>
 				{totalItems + ' Result' + (totalItems === 1 ? '' : 's')}
 				&emsp;
 				Sort: <ShrinkSelect options={this.sortOptions}
 					value={sort}
-					onChange={this.sortChange.bind(this)} />
+					onChange={this.sortChange.bind(this)}
+				/>
 			</div>
-			<div className="search-results">
+			<div className='search-results'>
 				{items.map(item => this.renderItem(item))}
 			</div>
-			<div className="search-results-pager">
+			<div className='search-results-pager'>
 				<Pagination prev next first last ellipsis
 					items={pages} maxButtons={10} activePage={page}
 					onSelect={this.pageClick.bind(this)}

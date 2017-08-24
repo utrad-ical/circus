@@ -22,14 +22,14 @@ const AppView = props => {
 			<MessageBox />
 			{ pageContentVisible ? props.children : null }
 			{ notLoggedIn ?
-				<div className="alert alert-danger">
+				<div className='alert alert-danger'>
 					You are not logged in, or your session has been expired.<br/>
 					Please log in first.
 					<div>
-						<Link to="/"><Button>Login</Button></Link>
+						<Link to='/'><Button>Login</Button></Link>
 					</div>
 				</div>
-			: null }
+				: null }
 		</div>
 	</div>;
 };
@@ -45,42 +45,42 @@ const NavView = props => {
 	return <header>
 		<nav>
 			<MainMenu>
-				<li className="logo">
-					<Link to="/home">
-						<span className="circus-icon-logo" />
+				<li className='logo'>
+					<Link to='/home'>
+						<span className='circus-icon-logo' />
 					</Link>
 				</li>
-				<Menu name="Case" link="/browse/case">
-					<SubMenu name="Case Search" link="/browse/case"/>
-					<SubMenu name="Case Import" link="/import-case"/>
+				<Menu name='Case' link='/browse/case'>
+					<SubMenu name='Case Search' link='/browse/case'/>
+					<SubMenu name='Case Import' link='/import-case'/>
 				</Menu>
-				<Menu name="Series" link="/browse/series">
-					<SubMenu name="Series Search" link="/browse/series"/>
-					<SubMenu name="Series Import" link="/import-series"/>
+				<Menu name='Series' link='/browse/series'>
+					<SubMenu name='Series Search' link='/browse/series'/>
+					<SubMenu name='Series Import' link='/import-series'/>
 				</Menu>
-				<Menu name="Tool">
-					<SubMenu name="Task List" link="/task-list"/>
-					<SubMenu name="Preference" link="/preference" />
+				<Menu name='Tool'>
+					<SubMenu name='Task List' link='/task-list'/>
+					<SubMenu name='Preference' link='/preference' />
 				</Menu>
 				{ props.isAdmin ?
-					<Menu name="Administration" link="/admin">
-						<SubMenu name="Server Configuration" link="/admin/general"/>
-						<SubMenu name="DICOM Image Server" link="/admin/server"/>
-						<SubMenu name="Storage" link="/admin/storage"/>
-						<SubMenu name="Groups" link="/admin/group"/>
-						<SubMenu name="Users" link="/admin/user"/>
-						<SubMenu name="Project" link="/admin/project"/>
+					<Menu name='Administration' link='/admin'>
+						<SubMenu name='Server Configuration' link='/admin/general'/>
+						<SubMenu name='DICOM Image Server' link='/admin/server'/>
+						<SubMenu name='Storage' link='/admin/storage'/>
+						<SubMenu name='Groups' link='/admin/group'/>
+						<SubMenu name='Users' link='/admin/user'/>
+						<SubMenu name='Project' link='/admin/project'/>
 					</Menu>
-				: null }
+					: null }
 			</MainMenu>
 		</nav>
 		<nav>
 			<MainMenu>
-				<li className="user-info hidden-xs">{props.loginUserName}</li>
-				<Menu name="Logout" onClick={logout} />
+				<li className='user-info hidden-xs'>{props.loginUserName}</li>
+				<Menu name='Logout' onClick={logout} />
 			</MainMenu>
 		</nav>
-	</header>
+	</header>;
 };
 
 const Nav = connect(
@@ -96,9 +96,9 @@ const Menu = props => {
 	const className = `circus-icon-${props.name.toLowerCase()}`;
 	const caption = [
 		<span className={className} key='icon'/>,
-		<span className="hidden-xs" key='caption'>{props.name}</span>
+		<span className='hidden-xs' key='caption'>{props.name}</span>
 	];
-	return <li className="icon-menu" key={props.name} onClick={props.onClick}>
+	return <li className='icon-menu' key={props.name} onClick={props.onClick}>
 		{props.link ? <Link to={props.link}>{caption}</Link> : caption }
 		<ul>{props.children}</ul>
 	</li>;
@@ -107,5 +107,5 @@ const Menu = props => {
 const SubMenu = props => {
 	return <li>
 		<Link to={props.link}>{props.name}</Link>
-	</li>
+	</li>;
 };

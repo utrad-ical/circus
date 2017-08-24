@@ -7,11 +7,11 @@ export class SearchConditionBase extends React.Component {
 	changeType(key) {
 		const type = key === 1 ? 'basic' : 'advanced';
 		this.props.onChange({ ... this.props.condition, type });
-	};
+	}
 
 	changeBasicFilter(basicFilter) {
 		this.props.onChange({ ... this.props.condition, basicFilter });
-	};
+	}
 
 	changeAdvanedFilter(advancedFilter) {
 		this.props.onChange({ ... this.props.condition, advancedFilter });
@@ -29,40 +29,40 @@ export class SearchConditionBase extends React.Component {
 			condition = conditionToMongoQuery(this.props.condition.advancedFilter);
 		}
 		this.props.onSearch && this.props.onSearch(condition);
-	};
+	}
 
 	renderUsing(BasicConditionForm, formParams = {}) {
 		const activeKey = this.props.condition.type === 'advanced' ? 2 : 1;
 
 		return <div>
-			<Tabs animation={false} id="series-search-condition"
+			<Tabs animation={false} id='series-search-condition'
 				activeKey={activeKey} onSelect={this.changeType.bind(this)}
 			>
-				<Tab eventKey={1} title="Basic">
+				<Tab eventKey={1} title='Basic'>
 					<BasicConditionForm
 						value={this.props.condition.basicFilter}
 						onChange={this.changeBasicFilter.bind(this)}
 						{...formParams}
 					/>
 				</Tab>
-				<Tab eventKey={2} title="Advanced">
+				<Tab eventKey={2} title='Advanced'>
 					<ConditionEditor keys={this.conditionKeys}
 						value={this.props.condition.advancedFilter}
 						onChange={this.changeAdvanedFilter.bind(this)}
 					/>
 				</Tab>
 			</Tabs>
-			<div className="search-buttons">
-				<Button bsStyle="link"
+			<div className='search-buttons'>
+				<Button bsStyle='link'
 					onClick={this.resetClick.bind(this)}
 				>
 					Reset
 				</Button>
 				&ensp;
-				<Button bsStyle="primary"
+				<Button bsStyle='primary'
 					onClick={this.searchClick.bind(this)}
 				>
-					<Glyphicon glyph="search" />&ensp;Search
+					<Glyphicon glyph='search' />&ensp;Search
 				</Button>
 			</div>
 			{ /* <div>{JSON.stringify(this.props.condition)}</div> */ }
@@ -74,8 +74,9 @@ export class SearchConditionBase extends React.Component {
 export const Input = ({ type, name, value, onChange, className }) => {
 	return <FormControl
 		type={type} className={className} value={value || ''}
-		onChange={ev => onChange(name, type === 'number' ? parseFloat(ev.target.value) : ev.target.value)} />;
-}
+		onChange={ev => onChange(name, type === 'number' ? parseFloat(ev.target.value) : ev.target.value)}
+	/>;
+};
 
 export const FormGrid = items => {
 	let row = [];

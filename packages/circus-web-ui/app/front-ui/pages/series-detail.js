@@ -56,17 +56,17 @@ export class SeriesDetail extends React.Component {
 		];
 		return <div>
 			<h1>
-				<span className="circus-icon-series" />
+				<span className='circus-icon-series' />
 				Series Detail
 			</h1>
 			<Row>
 				<Col lg={6}>
-					<ImageViewer composition={this.state.composition} tool="pager" initialTool="pager" />
+					<ImageViewer composition={this.state.composition} tool='pager' initialTool='pager' />
 				</Col>
 				<Col lg={6}>
 					{ typeof series.patientInfo === 'object' ?
 						<Table data={series.patientInfo} title='Patient Info' defaultExpanded />
-					:
+						:
 						<Panel header='Patient Info' defaultExpanded >
 							Personal information is not shown.
 						</Panel>
@@ -88,7 +88,7 @@ const Table = props => {
 	const keys = Array.isArray(props.keys) ? props.keys : Object.keys(props.data);
 	return (
 		<Panel collapsible defaultExpanded={props.defaultExpanded} header={props.title}>
-			<table fill className="table table-condensed">
+			<table fill className='table table-condensed'>
 				<tbody>
 					{keys.map(k => {
 						return <tr key={k}>
@@ -96,7 +96,7 @@ const Table = props => {
 							<td style={{wordBreak: 'break-all'}}>
 								{print(props.data[k])}
 							</td>
-						</tr>
+						</tr>;
 					})}
 				</tbody>
 			</table>

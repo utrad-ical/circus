@@ -59,7 +59,7 @@ export class SeriesSearchCondition extends SearchConditionBase {
 	render() {
 		return <Well>
 			{this.renderUsing(BasicConditionForm)}
-		</Well>
+		</Well>;
 	}
 }
 
@@ -73,7 +73,7 @@ const BasicConditionForm = props => {
 			typeof newValue === 'string' && newValue.length === 0 ||
 			key.match(/modality|sex/) && newValue === 'all'
 		) {
-			let newCondition = { ...props.value };
+			const newCondition = { ...props.value };
 			delete newCondition[key];
 			props.onChange(newCondition);
 		} else {
@@ -84,45 +84,49 @@ const BasicConditionForm = props => {
 	return FormGrid([
 		[
 			'Modality',
-			<ShrinkSelect options={modalityOptions} defaultSelect="all"
-				value={props.value.modality} onChange={v => change('modality', v)} />
+			<ShrinkSelect options={modalityOptions} defaultSelect='all'
+				value={props.value.modality} onChange={v => change('modality', v)}
+			/>
 		],
 		'br',
 		[
 			'Series UID',
-			<Input name="seriesUID" value={props.value.seriesUID} onChange={change} />
+			<Input name='seriesUID' value={props.value.seriesUID} onChange={change} />
 		],
 		[
 			'Series Description',
-			<Input name="seriesDescription" value={props.value.seriesDescription} onChange={change} />
+			<Input name='seriesDescription' value={props.value.seriesDescription} onChange={change} />
 		],
 		[
 			'Patient ID',
-			<Input name="patientID" value={props.value.patientID} onChange={change} />
+			<Input name='patientID' value={props.value.patientID} onChange={change} />
 		],
 		[
 			'Patient Name',
-			<Input name="patientName" value={props.value.patientName} onChange={change} />
+			<Input name='patientName' value={props.value.patientName} onChange={change} />
 		],
 		[
 			'Age',
-			<div className="form-inline">
-				<Input type="number" name="minAge" className="age"
-					value={props.value.minAge} onChange={change} />
+			<div className='form-inline'>
+				<Input type='number' name='minAge' className='age'
+					value={props.value.minAge} onChange={change}
+				/>
 				&thinsp;&mdash;&thinsp;
-				<Input type="number" name="maxAge" className="age"
-					value={props.value.maxAge} onChange={change} />
+				<Input type='number' name='maxAge' className='age'
+					value={props.value.maxAge} onChange={change}
+				/>
 			</div>
 		],
 		[
 			'Sex',
 			<ShrinkSelect options={sexOptions}
-				value={props.value.sex} defaultSelect="all"
-				onChange={v => change('sex', v)} />
+				value={props.value.sex} defaultSelect='all'
+				onChange={v => change('sex', v)}
+			/>
 		],
 		[
 			'Series Date',
-			<DateRangePicker value={props.value.seriesDate} onChange={r => change('seriesDate', r)} id="series-date-range"/>
+			<DateRangePicker value={props.value.seriesDate} onChange={r => change('seriesDate', r)} id='series-date-range'/>
 		]
 	]);
 };

@@ -1,7 +1,6 @@
 import React from 'react';
 import { PropertyEditor } from 'components/property-editor';
 import { api } from 'utils/api';
-import * as modal from 'components/modal';
 import { showMessage } from 'actions';
 import { Button, Glyphicon } from 'components/react-bootstrap';
 

@@ -2,7 +2,7 @@ import React from 'react';
 import { SearchResultsView } from './search-results';
 import { Button } from 'components/react-bootstrap';
 import { Link } from 'react-router';
-import { Tag } from 'components/tag';
+// import { Tag } from 'components/tag';
 import { connect } from 'react-redux';
 
 class CaseSearchResultsView extends SearchResultsView {
@@ -33,8 +33,8 @@ class CaseSearchResultsView extends SearchResultsView {
 				{anon(item.patientInfoCache.patientName)}
 			</div>
 			<div className='tags'>
-				{Array.isArray(item.tags) ? item.tags.map(t => (
-					<span className='label label-default'>{t}</span>
+				{Array.isArray(item.tags) ? item.tags.map((t, i) => (
+					<span key={i} className='label label-default'>{t}</span>
 				)) : null}
 			</div>
 			<div className='register'>

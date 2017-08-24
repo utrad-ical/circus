@@ -1,7 +1,6 @@
 import React from 'react';
 import { EditorPage } from './editor-page';
 import { api } from 'utils/api';
-import { Label } from 'components/react-bootstrap';
 
 export class UserAdmin extends EditorPage {
 	constructor(props) {

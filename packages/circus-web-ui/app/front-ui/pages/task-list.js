@@ -41,7 +41,7 @@ const TaskItems = props => {
 		</thead>
 		<tbody>
 			{props.items.map(item => (
-				<tr>
+				<tr key={item.taskID}>
 					<td>{item.taskID}</td>
 					<td>{item.status}</td>
 					<td>{item.publicDownload ? 'Yes' : '-'}</td>

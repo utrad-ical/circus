@@ -1,6 +1,8 @@
 import React from 'react';
 
-import { DateRangePicker, dateRangeToMongoQuery } from 'components/daterange-picker';
+import {
+	DateRangePicker, dateRangeToMongoQuery
+} from 'components/daterange-picker';
 import { ShrinkSelect } from 'components/shrink-select';
 import { modalities } from 'modalities';
 import { SearchConditionBase, FormGrid, Input } from './search-condition';
@@ -41,10 +43,11 @@ export class SeriesSearchCondition extends SearchConditionBase {
 				case 'maxAge':
 					members.push({ 'patientInfo.age': { $lte: val }});
 					break;
-				case 'seriesDate':
+				case 'seriesDate': {
 					const q = dateRangeToMongoQuery(val, 'seriesDate');
 					if (q) members.push(q);
 					break;
+				}
 				default:
 					if (key.match(/^(patient(.+)|sex)$/)) {
 						key = 'patientInfo.' + key;

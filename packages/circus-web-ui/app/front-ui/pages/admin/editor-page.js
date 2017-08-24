@@ -44,7 +44,7 @@ export class EditorPage extends React.Component {
 	/**
 	 * Subclasses can override this method and cancel saving.
 	 */
-	async preCommitHook(before, after) {
+	async preCommitHook(/* before, afte */) {
 		return true;
 	}
 
@@ -64,7 +64,7 @@ export class EditorPage extends React.Component {
 		});
 	}
 
-	cancelEditItem(item) {
+	cancelEditItem() {
 		this.setState({ editing: null, complaints: null });
 	}
 

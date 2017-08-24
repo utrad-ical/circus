@@ -2,13 +2,14 @@ import React from 'react';
 import { SearchResultsView } from './search-results';
 import { Button } from 'components/react-bootstrap';
 import { Link } from 'react-router';
-import { modal } from 'components/modal';
 import { connect } from 'react-redux';
 
+/*
 async function createCase(seriesUID) {
 	if (!(await modal.confirm('Add case for ' + seriesUID + '?'))) return;
-	console.log('Add case ' + seriesUID);
+	// console.log('Add case ' + seriesUID);
 }
+*/
 
 class SeriesSearchResultsView extends SearchResultsView {
 	constructor(props) {

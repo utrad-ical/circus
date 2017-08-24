@@ -1,7 +1,12 @@
 import React from 'react';
-import { Tabs, Tab, Form, FormGroup, FormControl, Button, Glyphicon,
-	ControlLabel, Row, Col, Well } from 'components/react-bootstrap';
-import { ConditionEditor, conditionToMongoQuery } from 'components/condition-editor';
+import {
+	Tabs, Tab, Form, FormControl, Button, Glyphicon,
+	ControlLabel, Row, Col
+} from 'components/react-bootstrap';
+import {
+	ConditionEditor, conditionToMongoQuery
+} from 'components/condition-editor';
+import { Tag } from 'components/tag';
 
 export class SearchConditionBase extends React.Component {
 	changeType(key) {
@@ -21,7 +26,7 @@ export class SearchConditionBase extends React.Component {
 		this.props.onChange(this.constructor.nullCondition());
 	}
 
-	searchClick(ev) {
+	searchClick() {
 		let condition;
 		if (this.props.condition.type === 'basic') {
 			condition = this.basicFilterToMongoQuery(this.props.condition.basicFilter);

@@ -6,7 +6,7 @@ const ContainerView = props => {
 		return <div>{props.children}</div>;
 	} else {
 		return <div className='alert alert-danger'>
-			You don't have privilege to access administration page.
+			You do not have privilege to access administration page.
 		</div>;
 	}
 };

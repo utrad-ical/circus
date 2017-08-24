@@ -26,7 +26,7 @@ export async function refreshUserInfo(full = false) {
 }
 
 export async function login(id, password) {
-	const result = await api('login', {
+	await api('login', {
 		data: { id, password },
 		handleErrors: true
 	});
@@ -34,7 +34,7 @@ export async function login(id, password) {
 }
 
 export async function logout() {
-	const result = await api('logout');
+	await api('logout');
 	dispatch({ type: 'LOGGED_OUT' });
 	browserHistory.push('/');
 }

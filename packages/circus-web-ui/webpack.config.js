@@ -3,7 +3,7 @@ var path = require('path');
 
 module.exports = {
 	entry: {
-		application: './app/front-ui/index.jsx'
+		application: './app/front-ui/index.js'
 	},
 	output: {
 		path: path.join(__dirname, 'public'),

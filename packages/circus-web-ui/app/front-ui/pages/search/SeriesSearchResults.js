@@ -1,5 +1,5 @@
 import React from 'react';
-import { SearchResultsView } from './search-results';
+import SearchResultsView from './SearchResultsView';
 import { Button } from 'components/react-bootstrap';
 import { Link } from 'react-router';
 import { connect } from 'react-redux';
@@ -58,7 +58,7 @@ class SeriesSearchResultsView extends SearchResultsView {
 
 }
 
-export const SeriesSearchResults = connect(
+export default SeriesSearchResults = connect(
 	state => {
 		const name = 'series';
 		const search = state.searches[name] || {};

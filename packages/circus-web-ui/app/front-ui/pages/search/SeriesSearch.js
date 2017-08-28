@@ -1,8 +1,8 @@
-import { SeriesSearchCondition } from './search-condition-series';
-import { SeriesSearchResults } from './search-results-series';
-import { SearchCommon } from './search-common';
+import SeriesSearchCondition from './SeriesSearchCondition';
+import SeriesSearchResults from './SeriesSearchResults';
+import SearchCommon from './SearchCommon';
 
-export class SeriesSearch extends SearchCommon {
+export default class SeriesSearch extends SearchCommon {
 	constructor(props) {
 		super(props);
 		this.title = 'Series Search';

@@ -3,7 +3,7 @@ import { ShrinkSelect } from 'components/shrink-select';
 import { Pagination } from 'components/react-bootstrap';
 import { changeSearchPage, changeSearchSort } from 'actions';
 
-export class SearchResultsView extends React.Component {
+export default class SearchResultsView extends React.Component {
 	sortChange(sort) {
 		changeSearchSort(this.props.name, sort);
 	}

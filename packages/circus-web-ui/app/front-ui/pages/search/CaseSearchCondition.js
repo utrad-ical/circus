@@ -2,12 +2,12 @@ import React from 'react';
 
 import { DateRangePicker, dateRangeToMongoQuery } from 'components/daterange-picker';
 import { modalities } from 'modalities';
-import { SearchConditionBase, FormGrid, Input } from './search-condition';
+import { SearchConditionBase, FormGrid, Input } from './SearchCondition';
 import { Well, ControlLabel } from 'components/react-bootstrap';
 import { MultiSelect } from 'components/multiselect';
 import { store } from 'store';
 
-export class CaseSearchCondition extends SearchConditionBase {
+export default class CaseSearchCondition extends SearchConditionBase {
 	constructor(props) {
 		super(props);
 		this.conditionKeys = {

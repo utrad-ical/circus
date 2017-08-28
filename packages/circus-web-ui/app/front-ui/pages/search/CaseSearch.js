@@ -1,8 +1,8 @@
-import { CaseSearchCondition } from './search-condition-case';
-import { CaseSearchResults } from './search-results-case';
-import { SearchCommon } from './search-common';
+import CaseSearchCondition from './CaseSearchCondition';
+import CaseSearchResults from './CaseSearchResults';
+import SearchCommon from './SearchCommon';
 
-export class CaseSearch extends SearchCommon {
+export default class CaseSearch extends SearchCommon {
 	constructor(props) {
 		super(props);
 		this.title = 'Case Search';

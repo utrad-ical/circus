@@ -1,4 +1,5 @@
-import { createStore, combineReducers } from 'redux';
+import { createStore, combineReducers, applyMiddleware } from 'redux';
+import thunk from 'redux-thunk';
 
 // The redux store should contain only information shared across pages,
 // such as the login user information.
@@ -91,4 +92,7 @@ const reducer = combineReducers({
 	searches
 });
 
-export const store = createStore(reducer);
+export const store = createStore(
+	reducer,
+	applyMiddleware(thunk)
+);

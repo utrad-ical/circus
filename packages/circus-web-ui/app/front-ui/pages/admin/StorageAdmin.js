@@ -2,7 +2,7 @@ import React from 'react';
 import { EditorPage } from './EditorPage';
 import { api } from 'utils/api';
 import { Button, Glyphicon } from 'components/react-bootstrap';
-import { confirm } from 'components/modal';
+import { confirm } from 'rb/Modal';
 
 export default class StorageAdmin extends EditorPage {
 	async setActiveClick(id) {

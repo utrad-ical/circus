@@ -10,7 +10,7 @@ import {
 import { LabelSelector } from './labels';
 import { store } from 'store';
 import * as rs from 'circus-rs';
-import { alert, prompt, confirm } from '../../components/modal';
+import { alert, prompt, confirm } from 'rb/Modal';
 import { ShrinkSelect } from '../../components/shrink-select';
 import merge from 'merge';
 import classNames from 'classnames';

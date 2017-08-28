@@ -5,11 +5,11 @@ import {
 } from 'components/daterange-picker';
 import { ShrinkSelect } from 'components/shrink-select';
 import { modalities } from 'modalities';
-import { SearchConditionBase, FormGrid, Input } from './search-condition';
+import { SearchConditionBase, FormGrid, Input } from './SearchCondition';
 import { escapeRegExp } from 'utils/util';
 import { Well } from 'components/react-bootstrap';
 
-export class SeriesSearchCondition extends SearchConditionBase {
+export default class SeriesSearchCondition extends SearchConditionBase {
 	constructor(props) {
 		super(props);
 		this.conditionKeys = {

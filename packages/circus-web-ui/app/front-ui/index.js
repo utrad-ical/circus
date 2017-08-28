@@ -12,12 +12,14 @@ import { Router, Route, IndexRoute, browserHistory } from 'react-router';
 import { App } from 'pages/app';
 import { LoginScreen } from 'pages/login-screen';
 import { Home } from 'pages/home';
-import { SeriesSearch } from 'pages/search/search-series';
-import { CaseSearch } from 'pages/search/search-case';
+
+import SeriesSearch from 'pages/search/SeriesSearch';
+import CaseSearch from 'pages/search/CaseSearch';
+
 import { CaseDetail } from 'pages/case-detail/case-detail';
 import { ImportSeries } from 'pages/import-series';
 import { ImportCase} from 'pages/import-case';
-import { SeriesDetail} from 'pages/series-detail';
+import { SeriesDetail } from 'pages/series-detail';
 import { TaskList } from 'pages/task-list';
 
 import AdminIndex from 'pages/admin/AdminIndex';

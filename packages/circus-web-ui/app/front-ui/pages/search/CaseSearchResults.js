@@ -1,5 +1,5 @@
 import React from 'react';
-import { SearchResultsView } from './search-results';
+import SearchResultsView from './SearchResultsView';
 import { Button } from 'components/react-bootstrap';
 import { Link } from 'react-router';
 // import { Tag } from 'components/tag';
@@ -50,7 +50,7 @@ class CaseSearchResultsView extends SearchResultsView {
 
 }
 
-export const CaseSearchResults = connect(
+export default CaseSearchResults = connect(
 	state => {
 		const name = 'case';
 		const search = state.searches[name] || {};

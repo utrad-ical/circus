@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router';
 import { connect } from 'react-redux';
-import { MessageBox } from './message-box';
+import MessageBox from './MessageBox';
 import { Button } from 'components/react-bootstrap';
 import { logout } from 'actions';
 
@@ -10,7 +10,7 @@ import { logout } from 'actions';
  * The navigation bar is always visible, but the main page content is
  * visible only after we confirmed the user is currently logged-in with valid session.
  */
-const AppView = props => {
+const ApplicationView = props => {
 	const pageContentVisible = !props.isUserFetching && props.isLoggedIn;
 	const notLoggedIn = !props.isUserFetching && !props.isLoggedIn;
 
@@ -34,7 +34,7 @@ const AppView = props => {
 	</div>;
 };
 
-export const App = connect(
+export default Application = connect(
 	state => ({
 		isUserFetching: state.loginUser.isFetching,
 		isLoggedIn: state.loginUser.data !== null

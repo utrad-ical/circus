@@ -9,19 +9,17 @@ import 'babel-polyfill';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Router, Route, IndexRoute, browserHistory } from 'react-router';
-import { App } from 'pages/app';
-import { LoginScreen } from 'pages/login-screen';
-import { Home } from 'pages/home';
+import Application from 'pages/Application';
+import LoginScreen from 'pages/LoginScreen';
+import HomePage from 'pages/HomePage';
 
 import SeriesSearch from 'pages/search/SeriesSearch';
 import CaseSearch from 'pages/search/CaseSearch';
-
-import { CaseDetail } from 'pages/case-detail/case-detail';
-import { ImportSeries } from 'pages/import-series';
-import { ImportCase} from 'pages/import-case';
-import { SeriesDetail } from 'pages/series-detail';
-import { TaskList } from 'pages/task-list';
-
+import CaseDetail from 'pages/case-detail/CaseDetail';
+import ImportSeries from 'pages/ImportSeries';
+import ImportCase from 'pages/ImportCase';
+import SeriesDetail from 'pages/SeriesDetail';
+import TaskList from 'pages/TaskList';
 import AdminIndex from 'pages/admin/AdminIndex';
 import AdminContainer from 'pages/admin/AdminContainer';
 import GeneralAdmin from 'pages/admin/GeneralAdmin';

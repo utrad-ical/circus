@@ -60,6 +60,6 @@ class ImportSeriesView extends React.Component {
 	}
 }
 
-export const ImportSeries = connect(
+export default ImportSeries = connect(
 	state => ({ loginUser: state.loginUser.data })
 )(ImportSeriesView);

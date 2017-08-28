@@ -2,7 +2,7 @@ import React from 'react';
 import { Button } from 'components/react-bootstrap';
 import { api} from 'utils/api';
 
-export class TaskList extends React.Component {
+export default class TaskList extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = { downloadList: null };

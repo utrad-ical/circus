@@ -6,7 +6,7 @@ import { ImageViewer } from 'components/image-viewer';
 import { store } from 'store';
 import * as rs from 'circus-rs';
 
-export class SeriesDetail extends React.Component {
+export default class SeriesDetail extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = ({ fetching: false, series: null, composition: null });

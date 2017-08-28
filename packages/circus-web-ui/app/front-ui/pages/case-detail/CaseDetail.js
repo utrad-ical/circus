@@ -17,7 +17,7 @@ import classNames from 'classnames';
 import EventEmitter from 'events';
 import { sha1 } from '../../utils/util.js';
 
-export class CaseDetail extends React.Component {
+export default class CaseDetail extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {

@@ -2,7 +2,7 @@ import React from 'react';
 import { login } from 'actions';
 import { Row, Col, Panel, FormControl, FormGroup, Button, Glyphicon } from 'components/react-bootstrap';
 
-export class LoginScreen extends React.Component {
+export default class LoginScreen extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = { id: '', password: '' };

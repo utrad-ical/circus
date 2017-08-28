@@ -76,12 +76,12 @@ export class DicomImageServerAdmin extends React.Component {
 				<pre>{this.state.processStatus}</pre>
 				<p>CIRCUS RS Status:</p>
 				<pre>{this.state.rsStatus}</pre>
-				{ this.state.noAuthorizationWarning ?
+				{ this.state.noAuthorizationWarning &&
 					<Alert bsStyle='danger'>
 						<strong>RS Server running without authorization enabled!</strong>&ensp;
 						This can be a security risk. Use this only for debugging purposes.
 					</Alert>
-					: null }
+				}
 			</div>
 		</div>;
 	}

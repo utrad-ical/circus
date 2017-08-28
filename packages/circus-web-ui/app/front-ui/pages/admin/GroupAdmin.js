@@ -1,8 +1,8 @@
-import { EditorPage } from './editor-page';
+import { EditorPage } from './EditorPage';
 import React from 'react';
 import { api } from 'utils/api';
 
-export class GroupAdmin extends EditorPage {
+export default class GroupAdmin extends EditorPage {
 	constructor(props) {
 		super(props);
 		this.state.domains = [];

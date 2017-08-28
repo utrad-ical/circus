@@ -4,7 +4,7 @@ import { api } from 'utils/api';
 import { showMessage } from 'actions';
 import { Button } from 'components/react-bootstrap';
 
-export class Preference extends React.Component {
+export default class Preferences extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = { settings: null };

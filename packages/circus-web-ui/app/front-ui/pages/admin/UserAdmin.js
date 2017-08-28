@@ -1,8 +1,8 @@
 import React from 'react';
-import { EditorPage } from './editor-page';
+import { EditorPage } from './EditorPage';
 import { api } from 'utils/api';
 
-export class UserAdmin extends EditorPage {
+export default class UserAdmin extends EditorPage {
 	constructor(props) {
 		super(props);
 		this.title = 'Users';

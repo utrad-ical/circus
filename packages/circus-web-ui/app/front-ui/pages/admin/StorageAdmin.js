@@ -1,10 +1,10 @@
 import React from 'react';
-import { EditorPage } from './editor-page';
+import { EditorPage } from './EditorPage';
 import { api } from 'utils/api';
 import { Button, Glyphicon } from 'components/react-bootstrap';
 import { confirm } from 'components/modal';
 
-export class StorageAdmin extends EditorPage {
+export default class StorageAdmin extends EditorPage {
 	async setActiveClick(id) {
 		const args = {
 			method: 'put',

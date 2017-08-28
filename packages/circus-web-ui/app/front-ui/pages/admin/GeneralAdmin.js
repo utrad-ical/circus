@@ -4,7 +4,7 @@ import { api } from 'utils/api';
 import { showMessage } from 'actions';
 import { Button, Glyphicon } from 'components/react-bootstrap';
 
-export class GeneralAdmin extends React.Component {
+export default class GeneralAdmin extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = { settings: null, complaints: null };

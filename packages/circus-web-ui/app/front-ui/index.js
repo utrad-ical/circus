@@ -19,15 +19,17 @@ import { ImportSeries } from 'pages/import-series';
 import { ImportCase} from 'pages/import-case';
 import { SeriesDetail} from 'pages/series-detail';
 import { TaskList } from 'pages/task-list';
-import { AdminIndex } from 'pages/admin/index';
-import { AdminContainer } from 'pages/admin/admin-container';
-import { GeneralAdmin } from 'pages/admin/general-admin';
-import { DicomImageServerAdmin } from 'pages/admin/dicom-image-server-admin';
-import { StorageAdmin } from 'pages/admin/storage-admin';
-import { GroupAdmin } from 'pages/admin/group-admin';
-import { UserAdmin } from 'pages/admin/user-admin';
-import { ProjectAdmin } from 'pages/admin/project-admin';
-import { Preference } from 'pages/preference';
+
+import AdminIndex from 'pages/admin/AdminIndex';
+import AdminContainer from 'pages/admin/AdminContainer';
+import GeneralAdmin from 'pages/admin/GeneralAdmin';
+import DicomImageServerAdmin from 'pages/admin/DicomImageServerAdmin';
+import StorageAdmin from 'pages/admin/StorageAdmin';
+import GroupAdmin from 'pages/admin/GroupAdmin';
+import UserAdmin from 'pages/admin/UserAdmin';
+import ProjectAdmin from 'pages/admin/ProjectAdmin';
+
+import Preferences from 'pages/Preferences';
 
 import { store } from 'store';
 import { Provider } from 'react-redux';

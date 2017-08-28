@@ -1,6 +1,6 @@
-import { EditorPage } from './editor-page';
+import { EditorPage } from './EditorPage';
 
-export class ProjectAdmin extends EditorPage {
+export default class ProjectAdmin extends EditorPage {
 	constructor(props) {
 		super(props);
 		this.title = 'Projects';

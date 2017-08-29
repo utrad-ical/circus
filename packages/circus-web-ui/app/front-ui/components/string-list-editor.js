@@ -21,22 +21,23 @@ export class StringListEditor extends React.Component {
 
 	render() {
 		const message = this.props.message ? this.props.message : 'Input string list';
-		const overlay = <Popover className="string-list-editor-popover"
-			id="string-list-editor-popover"
+		const overlay = <Popover className='string-list-editor-popover'
+			id='string-list-editor-popover'
 		>
 			<div>{message}</div>
-			<FormControl componentClass="textarea" value={this.state.text}
-				onChange={ev => this.change(ev.target.value)} />
+			<FormControl componentClass='textarea' value={this.state.text}
+				onChange={ev => this.change(ev.target.value)}
+			/>
 		</Popover>;
 
 		let caption = (this.props.value || []).join(', ');
 		if (caption === '') caption = '(None)';
 
-		return <OverlayTrigger overlay={overlay} trigger="click" placement="bottom" rootClose
+		return <OverlayTrigger overlay={overlay} trigger='click' placement='bottom' rootClose
 			onExited={this.commit.bind(this)}
 		>
 			<Button>{caption}</Button>
 		</OverlayTrigger>;
 	}
 
-};
+}

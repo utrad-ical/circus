@@ -10,13 +10,16 @@ export const WindowPresetEditor = props => {
 
 	return <span>
 		Name: <FormControl value={props.value.name}
-			onChange={ev => change('name', ev.target.value)} />
+			onChange={ev => change('name', ev.target.value)}
+		/>
 		&emsp;
-		Level: <FormControl value={props.value.level} type="number" style={{width: '100px'}}
-			onChange={ev => change('level', parseFloat(ev.target.value))} />
+		Level: <FormControl value={props.value.level} type='number' style={{width: '100px'}}
+			onChange={ev => change('level', parseFloat(ev.target.value))}
+		/>
 		&emsp;
-		Window: <FormControl value={props.value.width} type="number" style={{width: '100px'}}
-			onChange={ev => change('width', parseFloat(ev.target.value))} />
+		Window: <FormControl value={props.value.width} type='number' style={{width: '100px'}}
+			onChange={ev => change('width', parseFloat(ev.target.value))}
+		/>
 	</span>;
 };
 
@@ -26,6 +29,6 @@ WindowPresetEditor.newItem = items => {
 	while (true) {
 		if (!items.some(item => name(num) === item.name)) break;
 		num++;
-	};
+	}
 	return { name: name(num), level: 50, width: 100 };
 };

@@ -26,7 +26,7 @@ export const MultiSelect = props => {
 	});
 
 	function onItemChange(clickedIndex, checked) {
-		let newSelected = [];
+		const newSelected = [];
 		Object.keys(options).forEach((key, i) => {
 			const insertingKey = props.numericalValue ? parseFloat(key) : key;
 			if (clickedIndex !== i) {
@@ -42,14 +42,16 @@ export const MultiSelect = props => {
 		return <MultiSelectDropdown selected={selected}
 			options={options} renderer={renderer}
 			glue={glue} showSelectedMax={showSelectedMax} noneText={noneText}
-			onItemChange={onItemChange}/>;
+			onItemChange={onItemChange}
+		/>;
 	} else {
 		return <MultiSelectCheckboxArray selected={selected}
 			options={options} renderer={renderer}
-			onItemChange={onItemChange}/>;
+			onItemChange={onItemChange}
+		/>;
 	}
 
-}
+};
 
 const MultiSelectDropdown = props => {
 	const Renderer = props.renderer;
@@ -62,32 +64,32 @@ const MultiSelectDropdown = props => {
 		caption = `${selected.length} selected`;
 	} else {
 		selected.forEach((sel, i) => {
-			let renderItem = props.options[sel];
+			const renderItem = props.options[sel];
 			if (i > 0) caption.push(props.glue);
 			caption.push(<Renderer key={i} {...renderItem} />);
 		});
 	}
 
-	const dropdown = <ul id="multiselect-dropdown">
+	const dropdown = <ul id='multiselect-dropdown'>
 		{Object.keys(props.options).map((key, i) => {
 			const checked = selected.some(sel => sel == key); // lazy equiality('==') needed
 			const checkedClass = checked ? 'checked' : '';
-			let renderItem = props.options[key];
+			const renderItem = props.options[key];
 			return (
 				<li key={i}
 					onClick={() => props.onItemChange(i, checked)}
 					className={checkedClass}
 				>
-					<input type="checkbox" checked={checked} readOnly />&ensp;
+					<input type='checkbox' checked={checked} readOnly />&ensp;
 					<Renderer {...renderItem} />
 				</li>
 			);
 		})}
 	</ul>;
 
-	return <Dropdown className="multiselect">
+	return <Dropdown className='multiselect'>
 		<Dropdown.Toggle>{caption}</Dropdown.Toggle>
-		<Dropdown.Menu className="multiselect-popover">{dropdown}</Dropdown.Menu>
+		<Dropdown.Menu className='multiselect-popover'>{dropdown}</Dropdown.Menu>
 	</Dropdown>;
 };
 
@@ -96,20 +98,20 @@ const MultiSelectCheckboxArray = props => {
 	const Renderer = props.renderer;
 	const selected = props.selected;
 
-	return <ul className="list-unstyled">
+	return <ul className='list-unstyled'>
 		{Object.keys(props.options).map((key, i) => {
 			const checked = selected.some(sel => sel == key); // lazy equiality('==') needed
 			const checkedClass = checked ? 'checked' : '';
-			let renderItem = props.options[key];
+			const renderItem = props.options[key];
 			return (
 				<li key={i}
 					onClick={() => props.onItemChange(i, checked)}
 					className={checkedClass}
 				>
-					<input type="checkbox" checked={checked} readOnly />&ensp;
+					<input type='checkbox' checked={checked} readOnly />&ensp;
 					<Renderer {...renderItem} />
 				</li>
 			);
 		})}
 	</ul>;
-}
+};

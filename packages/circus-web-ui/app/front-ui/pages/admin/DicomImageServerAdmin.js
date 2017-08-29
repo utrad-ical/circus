@@ -1,6 +1,6 @@
 import React from 'react';
 import { Alert, Panel, Button, ButtonToolbar, Glyphicon } from 'components/react-bootstrap';
-import { Loading } from 'components/loading';
+import LoadingIndicator from 'rb/LoadingIndicator';
 import { api } from 'utils/api';
 import axios from 'axios';
 import { store } from 'store';
@@ -10,8 +10,8 @@ export default class DicomImageServerAdmin extends React.Component {
 		super(props);
 		this.state = {
 			isFetching: false,
-			processStatus: <Loading />,
-			rsStatus: <Loading />
+			processStatus: <LoadingIndicator />,
+			rsStatus: <LoadingIndicator />
 		};
 	}
 
@@ -44,7 +44,7 @@ export default class DicomImageServerAdmin extends React.Component {
 	render() {
 		const header = <div>
 			Control
-			{ this.state.isFetching ? <span>&ensp;<Loading /></span> : null }
+			{ this.state.isFetching ? <span>&ensp;<LoadingIndicator /></span> : null }
 		</div>;
 
 		return <div>

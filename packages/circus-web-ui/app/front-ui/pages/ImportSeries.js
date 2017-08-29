@@ -1,6 +1,6 @@
 import React from 'react';
 import { Alert } from 'components/react-bootstrap';
-import { ShrinkSelect } from 'components/shrink-select';
+import ShrinkSelect from 'rb/ShrinkSelect';
 import { connect } from 'react-redux';
 import { FileUpload } from 'components/file-upload';
 
@@ -49,12 +49,13 @@ class ImportSeriesView extends React.Component {
 				url='/test'
 				onUploaded={this.uploaded.bind(this)}
 			>
-				<p>Upload Domain:&ensp;
+				<div>Upload Domain:&ensp;
 					<ShrinkSelect options={user.accessibleDomains}
 						value={this.state.uploadDomain}
 						onChange={this.domainChange.bind(this)}
 					/>
-				</p>
+				</div>
+				<hr />
 			</FileUpload>
 		</div>;
 	}

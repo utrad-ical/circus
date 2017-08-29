@@ -58,7 +58,7 @@ class SeriesSearchResultsView extends SearchResultsView {
 
 }
 
-export default SeriesSearchResults = connect(
+export default connect(
 	state => {
 		const name = 'series';
 		const search = state.searches[name] || {};

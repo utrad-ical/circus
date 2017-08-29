@@ -1,5 +1,5 @@
 import React from 'react';
-import { EditorPage } from './EditorPage';
+import EditorPage from './EditorPage';
 import { api } from 'utils/api';
 
 export default class UserAdmin extends EditorPage {

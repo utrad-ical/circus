@@ -15,4 +15,6 @@ const stateToProps = state => ({
 	isAdmin: state.loginUser.data && state.loginUser.data.privileges.indexOf('manageServer') > -1
 });
 
-export default AdminContainer = connect(stateToProps)(ContainerView);
+const AdminContainer = connect(stateToProps)(ContainerView);
+
+export default AdminContainer;

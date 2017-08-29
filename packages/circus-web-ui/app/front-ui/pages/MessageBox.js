@@ -26,6 +26,8 @@ class MessageBoxView extends React.Component {
 	}
 }
 
-export default MessageBox = connect(
+const MessageBox = connect(
 	state => ({ messages: state.messages })
 )(MessageBoxView);
+
+export default MessageBox;

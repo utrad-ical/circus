@@ -2,7 +2,7 @@ import React from 'react';
 import { api } from '../../utils/api';
 import { ImageViewer } from '../../components/image-viewer';
 import { PropertyEditor } from '../../components/property-editor';
-import { Loading } from '../../components/loading';
+import LoadingIndicator from 'rb/LoadingIndicator';
 import { TagList } from '../../components/tag';
 import {
 	Button, Glyphicon, SplitButton, MenuItem
@@ -169,7 +169,7 @@ export default class CaseDetail extends React.Component {
 
 	render() {
 		if (!this.state.caseData || !this.state.projectData || !this.state.editingData) {
-			return <Loading />;
+			return <LoadingIndicator />;
 		}
 
 		const { projectData: prj, caseData } = this.state;

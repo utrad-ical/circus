@@ -21,8 +21,7 @@ export class FileUpload extends React.Component {
 	}
 
 	fileSelected() {
-		// console.log(this.refs.fileInput.files);
-		this.setState({ filesSelected: this.refs.fileInput.files });
+		this.setState({ filesSelected: this.fileInput.files });
 	}
 
 	uploadProgress(event) {
@@ -117,14 +116,14 @@ export class FileUpload extends React.Component {
 				{this.props.children}
 				<div>
 					<input
-						ref='fileInput'
+						ref={r => this.fileInput = r}
 						type='file'
 						multiple={!!this.props.multiple}
 						onChange={this.fileSelected.bind(this)}
 					/>
 					{ this.state.filesSelected.length == 0 ?
 						<Button bsStyle='default'
-							onClick={() => this.refs.fileInput.click()}
+							onClick={() => this.fileInput.click()}
 						>
 							<Glyphicon glyph='plus' />&ensp;Select File
 						</Button>
@@ -144,9 +143,9 @@ export class FileUpload extends React.Component {
 						</ButtonToolbar>
 					}
 				</div>
-				{ this.state.uploading ?
+				{ this.state.uploading &&
 					<ProgressBar now={this.state.progress} label={this.state.progress + '%'} />
-					: null }
+				}
 				<SummaryTable files={this.state.filesSelected} />
 				<p>You can drag and drop files to this box.</p>
 			</Well>
@@ -170,25 +169,25 @@ function SummaryTable(props) {
 			{Array.prototype.slice.call(files).map((f, i) => {
 				totalSize += f.size;
 				if (i >= show) return null;
-				return <tr>
+				return <tr key={i}>
 					<td>{f.name}</td>
 					<td className='text-right'>{f.size}</td>
 				</tr>;
 			})}
-			{ files.length > show ?
+			{ files.length > show &&
 				<tr>
 					<td><i>And {files.length - show} file(s)</i></td>
 					<td></td>
 				</tr>
-				: null }
+			}
 		</tbody>
-		{ files.length > 1 ?
+		{ files.length > 1 &&
 			<tfoot>
 				<tr className='info'>
 					<th>Total: {files.length} files</th>
 					<th className='text-right'>{totalSize}</th>
 				</tr>
 			</tfoot>
-			: null }
+		}
 	</table>;
 }

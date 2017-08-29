@@ -1,5 +1,6 @@
 import React from 'react';
-import { Alert, Panel, Button, ButtonToolbar, Glyphicon } from 'components/react-bootstrap';
+import { Alert, Panel, ButtonToolbar, Glyphicon } from 'components/react-bootstrap';
+import IconButton from 'rb/IconButton';
 import LoadingIndicator from 'rb/LoadingIndicator';
 import { api } from 'utils/api';
 import axios from 'axios';
@@ -13,6 +14,9 @@ export default class DicomImageServerAdmin extends React.Component {
 			processStatus: <LoadingIndicator />,
 			rsStatus: <LoadingIndicator />
 		};
+		this.sendStart = this.sendControl.bind(this, 'start');
+		this.sendStop = this.sendControl.bind(this, 'stop');
+		this.sendStatus = this.sendControl.bind(this, 'status');
 	}
 
 	async sendControl(command) {
@@ -38,40 +42,50 @@ export default class DicomImageServerAdmin extends React.Component {
 	}
 
 	componentDidMount() {
-		this.sendControl('status');
+		this.sendStatus();
 	}
 
 	render() {
+		const { isFetching } = this.state;
+
 		const header = <div>
 			Control
-			{ this.state.isFetching ? <span>&ensp;<LoadingIndicator /></span> : null }
+			{ isFetching ? <span>&ensp;<LoadingIndicator /></span> : null }
 		</div>;
+
+		const LargeIconButton = props => {
+			const { text, ...p } = props;
+			return <IconButton {...p}
+				bsSize='lg'
+				disabled={isFetching}
+			>{text}</IconButton>;
+		};
 
 		return <div>
 			<h1><Glyphicon glyph='hdd' />&ensp;DICOM Image Server</h1>
 			<Panel header={header}>
 				<ButtonToolbar>
-					<Button bsStyle='success' bsSize='large'
-						disabled={this.state.isFetching}
-						onClick={this.sendControl.bind(this, 'start')}
-					>
-						<Glyphicon glyph='play' />&ensp;Start
-					</Button>
-					<Button bsStyle='danger' bsSize='large'
-						disabled={this.state.isFetching}
-						onClick={this.sendControl.bind(this, 'stop')}
-					>
-						<Glyphicon glyph='stop' />&ensp;Stop
-					</Button>
-					<Button bsStyle='default' bsSize='large'
-						disabled={this.state.isFetching}
-						onClick={this.sendControl.bind(this, 'status')}
-					>
-						<Glyphicon glyph='refresh' />&ensp;Refresh
-					</Button>
+					<LargeIconButton
+						bsStyle='success'
+						icon='play'
+						text='Start'
+						onClick={this.sendStart}
+					/>
+					<LargeIconButton
+						bsStyle='danger'
+						icon='stop'
+						text='Stop'
+						onClick={this.sendStop}
+					/>
+					<LargeIconButton
+						bsStyle='default'
+						icon='refresh'
+						text='Refresh'
+						onClick={this.sendStatus}
+					/>
 				</ButtonToolbar>
 			</Panel>
-			<div className={'server-status' + (this.state.isFetching ? ' pending' : '')}>
+			<div className={'server-status' + (isFetching ? ' pending' : '')}>
 				<p>Process Status:</p>
 				<pre>{this.state.processStatus}</pre>
 				<p>CIRCUS RS Status:</p>

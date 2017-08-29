@@ -5,7 +5,7 @@ import { api } from 'utils/api';
 import axios from 'axios';
 import { store } from 'store';
 
-export class DicomImageServerAdmin extends React.Component {
+export default class DicomImageServerAdmin extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {

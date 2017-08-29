@@ -1,6 +1,6 @@
 import React from 'react';
 import { Row, Col, ControlLabel, FormControl, Button, Glyphicon, Checkbox } from './react-bootstrap';
-import { ColorPicker } from './color-picker';
+import ColorPicker from 'rb/ColorPicker';
 import { MultiSelect } from './multiselect';
 
 const Select = props => {

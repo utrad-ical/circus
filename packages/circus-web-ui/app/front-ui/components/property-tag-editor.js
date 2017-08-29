@@ -1,6 +1,6 @@
 import React from 'react';
 import { FormControl } from './react-bootstrap';
-import { ColorPicker } from './color-picker';
+import ColorPicker from 'rb/ColorPicker';
 import { Tag } from './tag';
 
 export const TagEditor = props => {

@@ -21,7 +21,7 @@ export class FileUpload extends React.Component {
 	}
 
 	fileSelected() {
-		console.log(this.refs.fileInput.files);
+		// console.log(this.refs.fileInput.files);
 		this.setState({ filesSelected: this.refs.fileInput.files });
 	}
 
@@ -79,7 +79,7 @@ export class FileUpload extends React.Component {
 		} catch (err) {
 			this.setState({ uploading: false });
 			showMessage(`Upload failed (Error ${err.status})`, 'danger');
-			console.log(err);
+			// console.log(err);
 			throw err;
 		}
 
@@ -113,30 +113,30 @@ export class FileUpload extends React.Component {
 
 	render() {
 		return <FileDroppable onDropFile={this.dropFile.bind(this)}>
-			<Well className="file-upload">
+			<Well className='file-upload'>
 				{this.props.children}
 				<div>
 					<input
-						ref="fileInput"
-						type="file"
+						ref='fileInput'
+						type='file'
 						multiple={!!this.props.multiple}
 						onChange={this.fileSelected.bind(this)}
 					/>
 					{ this.state.filesSelected.length == 0 ?
-						<Button bsStyle="default"
+						<Button bsStyle='default'
 							onClick={() => this.refs.fileInput.click()}
 						>
-							<Glyphicon glyph="plus" />&ensp;Select File
+							<Glyphicon glyph='plus' />&ensp;Select File
 						</Button>
-					:
+						:
 						<ButtonToolbar>
-							<Button bsStyle="primary"
+							<Button bsStyle='primary'
 								disabled={this.state.filesSelected.length < 1}
 								onClick={this.upload.bind(this)}
 							>
-								<Glyphicon glyph="upload" />&ensp;Upload
+								<Glyphicon glyph='upload' />&ensp;Upload
 							</Button>
-							<Button bsStyle="link"
+							<Button bsStyle='link'
 								onClick={() => this.setState({ filesSelected: [] })}
 							>
 								Reset
@@ -146,7 +146,7 @@ export class FileUpload extends React.Component {
 				</div>
 				{ this.state.uploading ?
 					<ProgressBar now={this.state.progress} label={this.state.progress + '%'} />
-				: null }
+					: null }
 				<SummaryTable files={this.state.filesSelected} />
 				<p>You can drag and drop files to this box.</p>
 			</Well>
@@ -159,11 +159,11 @@ function SummaryTable(props) {
 	const show = 10;
 	let totalSize = 0;
 	if (files.length < 1) return null;
-	return <table className="table table-condensed">
+	return <table className='table table-condensed'>
 		<thead>
 			<tr>
 				<th>File</th>
-				<th className="text-right">Size</th>
+				<th className='text-right'>Size</th>
 			</tr>
 		</thead>
 		<tbody>
@@ -172,7 +172,7 @@ function SummaryTable(props) {
 				if (i >= show) return null;
 				return <tr>
 					<td>{f.name}</td>
-					<td className="text-right">{f.size}</td>
+					<td className='text-right'>{f.size}</td>
 				</tr>;
 			})}
 			{ files.length > show ?
@@ -180,15 +180,15 @@ function SummaryTable(props) {
 					<td><i>And {files.length - show} file(s)</i></td>
 					<td></td>
 				</tr>
-			: null }
+				: null }
 		</tbody>
 		{ files.length > 1 ?
 			<tfoot>
-				<tr className="info">
+				<tr className='info'>
 					<th>Total: {files.length} files</th>
-					<th className="text-right">{totalSize}</th>
+					<th className='text-right'>{totalSize}</th>
 				</tr>
 			</tfoot>
-		: null }
+			: null }
 	</table>;
 }

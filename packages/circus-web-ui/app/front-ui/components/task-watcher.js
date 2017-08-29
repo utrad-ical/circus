@@ -15,26 +15,26 @@ export const TaskProgress = ({
 }) => {
 	let footer = null;
 	if (cancelable && !finished) {
-		footer = <div className="text-center">
+		footer = <div className='text-center'>
 			<Button onClick={onCancelClick}>
 				Cancel
 			</Button>
 		</div>;
 	}
 	if (finished) {
-		footer = <div className="text-center">
+		footer = <div className='text-center'>
 			<Button onClick={onOkClick}>
 				OK
 			</Button>
 		</div>;
 	}
-	return <Panel className="taskwatcher" bsStyle={bsStyle}
+	return <Panel className='taskwatcher' bsStyle={bsStyle}
 		header={header} footer={footer}
 	>
 		<p>{props.message}</p>
 		{indeterminate ?
 			<ProgressBar now={100} active />
-		:
+			:
 			<ProgressBar label={`${progress}%`} now={progress}/>
 		}
 	</Panel>;

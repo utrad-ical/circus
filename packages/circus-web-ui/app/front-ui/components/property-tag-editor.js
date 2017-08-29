@@ -12,10 +12,12 @@ export const TagEditor = props => {
 
 	return <span>
 		<FormControl value={props.value.name}
-			onChange={ev => change('name', ev.target.value)} />
+			onChange={ev => change('name', ev.target.value)}
+		/>
 		&emsp;
 		<ColorPicker value={props.value.color} showColorCode={true}
-			onChange={col => change('color', col)} />
+			onChange={col => change('color', col)}
+		/>
 		&emsp;
 		Sample: <Tag name={props.value.name} color={props.value.color} />
 	</span>;
@@ -27,6 +29,6 @@ TagEditor.newItem = items => {
 	while (true) {
 		if (!items.some(item => name(num) === item.name)) break;
 		num++;
-	};
+	}
 	return { name: name(num), color: '#ff8888' };
 };

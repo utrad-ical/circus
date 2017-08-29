@@ -7,6 +7,10 @@ export class FileDroppable extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = { active: false };
+		this.dragEnter = this.dragEnter.bind(this);
+		this.dragOver = this.dragOver.bind(this);
+		this.drop = this.drop.bind(this);
+		this.dragLeaveEnd = this.dragLeaveEnd.bind(this);
 	}
 
 	dragEnter(event) {
@@ -25,20 +29,20 @@ export class FileDroppable extends React.Component {
 		if (typeof this.props.onDropFile === 'function') {
 			this.props.onDropFile(files);
 		}
-	};
+	}
 
-	dragLeaveEnd(event) {
+	dragLeaveEnd() {
 		this.setState({ active: false });
 	}
 
 	render() {
 		return (
 			<div className={'file-droppable' + (this.state.active ? ' active' : '')}
-				onDragEnter={this.dragEnter.bind(this)}
-				onDragOver={this.dragOver.bind(this)}
-				onDrop={this.drop.bind(this)}
-				onDragLeave={this.dragLeaveEnd.bind(this)}
-				onDragEnd={this.dragLeaveEnd.bind(this)}
+				onDragEnter={this.dragEnter}
+				onDragOver={this.dragOver}
+				onDrop={this.drop}
+				onDragLeave={this.dragLeaveEnd}
+				onDragEnd={this.dragLeaveEnd}
 			>
 				{this.props.children}
 			</div>

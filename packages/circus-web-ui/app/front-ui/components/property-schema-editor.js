@@ -34,10 +34,12 @@ export const PropertySchemaEditor = props => {
 	};
 
 	return <span>
-		<FormControl type="text" value={props.value.key}
-			placeholder="Property name" onChange={ev => change('key', ev.target.value)} />
+		<FormControl type='text' value={props.value.key}
+			placeholder='Property name' onChange={ev => change('key', ev.target.value)}
+		/>
 		<ShrinkSelect options={types} size={null} bsStyle='primary'
-			value={props.value.type} onChange={t => change('type', t)} />
+			value={props.value.type} onChange={t => change('type', t)}
+		/>
 		{specs(props.value.type, props.value.spec || {})}
 	</span>;
 };
@@ -48,6 +50,6 @@ PropertySchemaEditor.newItem = items => {
 	while (true) {
 		if (!items.some(item => name(num) === item.key)) break;
 		num++;
-	};
+	}
 	return { key: name(num), type: 'text' };
 };

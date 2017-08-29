@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShrinkSelect } from './shrink-select';
+import ShrinkSelect from 'rb/ShrinkSelect';
 import { FormControl } from './react-bootstrap';
 import { StringListEditor } from './string-list-editor';
 

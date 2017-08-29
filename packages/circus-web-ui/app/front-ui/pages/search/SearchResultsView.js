@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShrinkSelect } from 'components/shrink-select';
+import ShrinkSelect from 'rb/ShrinkSelect';
 import { Pagination } from 'components/react-bootstrap';
 import { changeSearchPage, changeSearchSort } from 'actions';
 

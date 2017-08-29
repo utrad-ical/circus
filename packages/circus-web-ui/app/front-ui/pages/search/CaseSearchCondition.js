@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { DateRangePicker, dateRangeToMongoQuery } from 'components/daterange-picker';
+import DateRangePicker, { dateRangeToMongoQuery } from 'rb/DateRangePicker';
 import { modalities } from 'modalities';
 import { SearchConditionBase, FormGrid, Input } from './SearchCondition';
 import { Well, ControlLabel } from 'components/react-bootstrap';

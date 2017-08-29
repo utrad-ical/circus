@@ -1,8 +1,6 @@
 import React from 'react';
 
-import {
-	DateRangePicker, dateRangeToMongoQuery
-} from 'components/daterange-picker';
+import DateRangePicker, { dateRangeToMongoQuery } from 'rb/DateRangePicker';
 import { ShrinkSelect } from 'components/shrink-select';
 import { modalities } from 'modalities';
 import { SearchConditionBase, FormGrid, Input } from './SearchCondition';
@@ -129,7 +127,11 @@ const BasicConditionForm = props => {
 		],
 		[
 			'Series Date',
-			<DateRangePicker value={props.value.seriesDate} onChange={r => change('seriesDate', r)} id='series-date-range'/>
+			<DateRangePicker
+				value={props.value.seriesDate}
+				onChange={r => change('seriesDate', r)}
+				id='series-date-range'
+			/>
 		]
 	]);
 };

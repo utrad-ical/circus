@@ -1,4 +1,4 @@
-import { EditorPage } from './EditorPage';
+import EditorPage from './EditorPage';
 
 export default class ProjectAdmin extends EditorPage {
 	constructor(props) {

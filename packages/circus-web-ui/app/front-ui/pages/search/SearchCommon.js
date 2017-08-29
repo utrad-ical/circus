@@ -4,7 +4,7 @@ import { startNewSearch } from 'actions';
 /**
  * Composes search condition box and search result pane.
  */
-export class SearchCommon extends React.Component {
+export default class SearchCommon extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {

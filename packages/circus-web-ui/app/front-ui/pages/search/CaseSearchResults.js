@@ -50,7 +50,7 @@ class CaseSearchResultsView extends SearchResultsView {
 
 }
 
-export default CaseSearchResults = connect(
+export default connect(
 	state => {
 		const name = 'case';
 		const search = state.searches[name] || {};

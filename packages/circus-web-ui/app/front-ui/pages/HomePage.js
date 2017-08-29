@@ -5,7 +5,7 @@ import { Panel, Glyphicon, Row, Col, ListGroup, ListGroupItem }
 	from 'components/react-bootstrap';
 import moment from 'moment';
 
-export default HomePage = props => (
+const HomePage = props => (
 	<div>
 		<h1>Welcome to CIRCUS DB!</h1>
 		<ul className='home-menu'>
@@ -21,8 +21,8 @@ export default HomePage = props => (
 		</ul>
 		<Profile />
 	</div>
-
 );
+export default HomePage;
 
 function role2str(role) {
 	return role.replace(/Groups$/, '')

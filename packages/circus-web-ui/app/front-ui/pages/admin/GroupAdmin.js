@@ -1,4 +1,4 @@
-import { EditorPage } from './EditorPage';
+import EditorPage from './EditorPage';
 import React from 'react';
 import { api } from 'utils/api';
 

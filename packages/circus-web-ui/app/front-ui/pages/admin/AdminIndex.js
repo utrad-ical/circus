@@ -16,7 +16,7 @@ const Btn = ({ to, link, glyph }) => (
 	</div>
 );
 
-export default AdminIndex = props => {
+const AdminIndex = props => {
 	return <div className='admin-index'>
 		<h1>
 			<span className='circus-icon circus-icon-administration' />&ensp;
@@ -34,3 +34,5 @@ export default AdminIndex = props => {
 		</div>
 	</div>;
 };
+
+export default AdminIndex;

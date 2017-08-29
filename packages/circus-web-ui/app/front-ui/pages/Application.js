@@ -34,12 +34,14 @@ const ApplicationView = props => {
 	</div>;
 };
 
-export default Application = connect(
+const Application = connect(
 	state => ({
 		isUserFetching: state.loginUser.isFetching,
 		isLoggedIn: state.loginUser.data !== null
 	})
-)(AppView);
+)(ApplicationView);
+
+export default Application;
 
 const NavView = props => {
 	return <header>

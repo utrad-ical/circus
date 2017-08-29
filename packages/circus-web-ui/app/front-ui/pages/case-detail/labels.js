@@ -1,5 +1,5 @@
 import React from 'react';
-import { ColorPicker } from '../../components/color-picker';
+import ColorPicker from 'rb/ColorPicker';
 import { Popover, Button, OverlayTrigger, FormControl, Glyphicon } from '../../components/react-bootstrap';
 import { RawData, PixelFormat, VoxelCloud } from 'circus-rs';
 import classNames from 'classnames';
@@ -123,7 +123,12 @@ export const Label = props => {
 		</div>
 		<div>
 			<OpacityEditor value={label.cloud.alpha} onChange={changeLabelAlpha} />
-			<ColorPicker value={label.cloud.color} colors={labelColors} onChange={changeLabelColor} />
+			<ColorPicker
+				bsSize='xs'
+				value={label.cloud.color}
+				colors={labelColors}
+				onChange={changeLabelColor}
+			/>
 			<Button bsSize='xs' onClick={onRemoveClick}><Glyphicon glyph='remove' /></Button>
 		</div>
 	</li>;

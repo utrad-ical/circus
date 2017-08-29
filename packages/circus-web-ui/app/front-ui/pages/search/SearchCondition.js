@@ -3,9 +3,7 @@ import {
 	Tabs, Tab, Form, FormControl, Button, Glyphicon,
 	ControlLabel, Row, Col
 } from 'components/react-bootstrap';
-import {
-	ConditionEditor, conditionToMongoQuery
-} from 'components/condition-editor';
+import ConditionEditor, { conditionToMongoQuery } from 'rb/ConditionEditor';
 import { Tag } from 'components/tag';
 
 export class SearchConditionBase extends React.Component {

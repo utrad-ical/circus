@@ -1,15 +1,38 @@
 import EditorPage from './EditorPage';
 import React from 'react';
 import { api } from 'utils/api';
+import LoadingIndicator from 'rb/LoadingIndicator';
 
-export default class GroupAdmin extends EditorPage {
+const makeEmptyItem = () => {
+	return {
+		groupName: '',
+	};
+};
+
+const listColumns = [
+	{ key: 'groupName', label: 'Group Name' },
+	{
+		label: 'Privileges',
+		data: item => item.privileges.map((priv, i) => {
+			const style = priv === 'manageServer' ? 'danger' : 'primary';
+			return <span key={i} className={`label label-${style}`}>
+				{priv}
+			</span>;
+		})
+	},
+	{
+		label: 'Accessible Series Domains',
+		data: item => item.domains.map((d, i) => (
+			<span key={i} className='label label-default'>{d}</span>
+		))
+	},
+];
+
+export default class GroupAdmin extends React.Component {
 	constructor(props) {
 		super(props);
-		this.state.domains = [];
-		this.title = 'User Groups';
-		this.glyph = 'record';
-		this.endPoint = 'group';
-		this.primaryKey = 'groupID';
+		this.state = { ready: false };
+		this.domains = [];
 		this.editorProperties = [
 			{ key: 'groupName', caption: 'Group Name', type: 'text' },
 			{
@@ -22,48 +45,34 @@ export default class GroupAdmin extends EditorPage {
 				key: 'domains',
 				caption: 'Accessible Domains',
 				type: 'multiselect',
-				spec: { options: this.state.domains }
+				spec: { options: this.domains }
 			}
 		];
-		this.listColumns = [
-			{ key: 'groupName', label: 'Group Name' },
-			{
-				label: 'Privileges',
-				data: item => item.privileges.map((priv, i) => {
-					const style = priv === 'manageServer' ? 'danger' : 'primary';
-					return <span key={i} className={`label label-${style}`}>
-						{priv}
-					</span>;
-				})
-			},
-			{
-				label: 'Accessible Series Domains',
-				data: item => item.domains.map((d, i) => (
-					<span key={i} className='label label-default'>{d}</span>
-				))
-			},
-		];
-	}
-
-	targetName(item) {
-		return item.groupName;
 	}
 
 	async componentDidMount() {
 		const params = await api('server_param');
-		const domains = params.domains;
+		this.domains = params.domains;
 		const privList = await api('group-privileges');
 		const privileges = {};
 		for (const p of privList) privileges[p.privilege] = p.caption;
-		this.editorProperties[2].spec.options = domains;
 		this.editorProperties[1].spec.options = privileges;
-		super.componentDidMount();
+		this.editorProperties[2].spec.options = this.domains;
+		this.setState({ ready: true });
 	}
 
-	makeEmptyItem() {
-		return {
-			groupName: '',
-		};
+	render() {
+		if (!this.state.ready) return <LoadingIndicator />;
+		return <EditorPage
+			title='User Groups'
+			icon='record'
+			endPoint='group'
+			primaryKey='groupID'
+			editorProperties={this.editorProperties}
+			listColumns={listColumns}
+			makeEmptyItem={makeEmptyItem}
+			targetName={item => item.groupName}
+		/>;
 	}
 
 }

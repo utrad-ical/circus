@@ -17,11 +17,13 @@ export default class EditorPage extends React.Component {
 	}
 
 	async commitItem(item) {
-		if (!(await this.preCommitHook(this.editing, item))) return;
+		if (this.props.preCommitHook) {
+			if (!(await this.props.preCommitHook(this.state.target))) return;
+		}
 
-		let endPoint = this.endPoint;
+		let endPoint = this.props.endPoint;
 		if (this.state.target) {
-			endPoint += '/' + encodeURIComponent(this.state.editing[this.primaryKey]);
+			endPoint += '/' + encodeURIComponent(this.state.editing[this.props.primaryKey]);
 		}
 		const args = {
 			method: this.state.target ? 'put' : 'post',
@@ -38,15 +40,8 @@ export default class EditorPage extends React.Component {
 	}
 
 	async loadItems() {
-		const items = await api(this.endPoint);
+		const items = await api(this.props.endPoint);
 		this.setState({ items });
-	}
-
-	/**
-	 * Subclasses can override this method and cancel saving.
-	 */
-	async preCommitHook(/* before, afte */) {
-		return true;
 	}
 
 	componentDidMount() {
@@ -54,7 +49,8 @@ export default class EditorPage extends React.Component {
 	}
 
 	targetName(item) {
-		return item[this.primaryKey];
+		if (this.props.targetName) return this.props.targetName(item);
+		return item[this.props.primaryKey];
 	}
 
 	editStart(item) {
@@ -72,24 +68,22 @@ export default class EditorPage extends React.Component {
 	createItem() {
 		this.setState({
 			target: null,
-			editing: this.makeEmptyItem()
+			editing: this.props.makeEmptyItem()
 		});
 	}
 
-	editorFooter() {
-		return null;
-	}
-
 	render() {
+		const { title, icon } = this.props;
+
 		return <AdminContainer
-			title={this.title}
-			icon={this.glyph}
+			title={title}
+			icon={icon}
 			className='admin-editor'
 		>
 			<List
 				items={this.state.items}
 				active={this.state.editing}
-				listColumns={this.listColumns}
+				listColumns={this.props.listColumns}
 				onEditClick={this.editStart.bind(this)}
 			/>
 			<p className='text-right'>
@@ -103,12 +97,11 @@ export default class EditorPage extends React.Component {
 					item={this.state.editing}
 					complaints={this.state.complaints}
 					target={this.state.target}
-					properties={this.editorProperties}
+					properties={this.props.editorProperties}
 					onSaveClick={item => this.commitItem(item)}
 					onCancelClick={() => this.cancelEditItem()}
 				/>
 				: null }
-			{this.editorFooter()}
 		</AdminContainer>;
 	}
 }

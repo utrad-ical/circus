@@ -2,7 +2,7 @@ import React from 'react';
 import { PropertyEditor } from 'components/property-editor';
 import { api } from 'utils/api';
 import { showMessage } from 'actions';
-import { Button, Glyphicon } from 'components/react-bootstrap';
+import { Button } from 'components/react-bootstrap';
 import AdminContainer from './AdminContainer';
 
 export default class GeneralAdmin extends React.Component {

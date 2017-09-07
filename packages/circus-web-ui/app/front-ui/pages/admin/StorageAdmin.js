@@ -72,7 +72,6 @@ export default class StorageAdmin extends React.Component {
 		this.setState({ ready: true });
 	}
 
-
 	render() {
 		if (!this.state.ready) return <LoadingIndicator />;
 		return <div>

@@ -51,7 +51,7 @@ ReactDOM.render(
 				<Route path='browse/case' component={CaseSearch} />
 				<Route path='import-series' component={ImportSeries} />
 				<Route path='import-case' component={ImportCase} />
-				<Route path='admin' component={AdminContainer}>
+				<Route path='admin'>
 					<IndexRoute component={AdminIndex} />
 					<Route path='general' component={GeneralAdmin} />
 					<Route path='server' component={DicomImageServerAdmin} />

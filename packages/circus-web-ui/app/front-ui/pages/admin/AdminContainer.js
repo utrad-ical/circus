@@ -1,9 +1,15 @@
 import React from 'react';
 import { connect } from 'react-redux';
+import Icon from 'components/Icon';
 
 const AdminContainerView = props => {
+	const { title, icon, className } = props;
 	if (props.isAdmin) {
-		return <div>
+		return <div className={className}>
+			<h1>
+				<Icon icon={icon} />&ensp;
+				{title}
+			</h1>
 			{props.children}
 		</div>;
 	} else {

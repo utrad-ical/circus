@@ -1,10 +1,11 @@
 import React from 'react';
-import { Alert, Panel, ButtonToolbar, Glyphicon } from 'components/react-bootstrap';
+import { Alert, Panel, ButtonToolbar } from 'components/react-bootstrap';
 import IconButton from 'rb/IconButton';
 import LoadingIndicator from 'rb/LoadingIndicator';
 import { api } from 'utils/api';
 import axios from 'axios';
 import { store } from 'store';
+import AdminContainer from './AdminContainer';
 
 export default class DicomImageServerAdmin extends React.Component {
 	constructor(props) {
@@ -61,8 +62,10 @@ export default class DicomImageServerAdmin extends React.Component {
 			>{text}</IconButton>;
 		};
 
-		return <div>
-			<h1><Glyphicon glyph='hdd' />&ensp;DICOM Image Server</h1>
+		return <AdminContainer
+			icon='hdd'
+			title='DICOM Image Server'
+		>
 			<Panel header={header}>
 				<ButtonToolbar>
 					<LargeIconButton
@@ -97,6 +100,6 @@ export default class DicomImageServerAdmin extends React.Component {
 					</Alert>
 				}
 			</div>
-		</div>;
+		</AdminContainer>;
 	}
 }

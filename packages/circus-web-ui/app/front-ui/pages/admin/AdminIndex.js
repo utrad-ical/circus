@@ -1,6 +1,8 @@
 import React from 'react';
 import { browserHistory } from 'react-router';
-import { Button, Glyphicon } from 'components/react-bootstrap';
+import { Button } from 'components/react-bootstrap';
+import AdminContainer from './AdminContainer';
+import Icon from 'components/Icon';
 
 const Btn = ({ to, link, glyph }) => (
 	<div className='item'>
@@ -9,7 +11,7 @@ const Btn = ({ to, link, glyph }) => (
 			onClick={() => browserHistory.push('admin/' + to)}
 		>
 			{glyph &&
-				<span><Glyphicon glyph={glyph} />&ensp;</span>
+				<span><Icon icon={glyph} />&ensp;</span>
 			}
 			{link}
 		</Button>
@@ -17,11 +19,11 @@ const Btn = ({ to, link, glyph }) => (
 );
 
 const AdminIndex = props => {
-	return <div className='admin-index'>
-		<h1>
-			<span className='circus-icon circus-icon-administration' />&ensp;
-			Administration
-		</h1>
+	return <AdminContainer
+		title='Administration'
+		icon='circus-administration'
+		className='admin-index'
+	>
 		<div className='row'>
 			<Btn to='general' link='Server Configuration' glyph='tasks' />
 			<Btn to='server' link='DICOM Image Server'glyph='hdd' />
@@ -32,7 +34,7 @@ const AdminIndex = props => {
 			<Btn to='user' link='Users'glyph='user' />
 			<Btn to='project' link='Projects'glyph='education' />
 		</div>
-	</div>;
+	</AdminContainer>;
 };
 
 export default AdminIndex;

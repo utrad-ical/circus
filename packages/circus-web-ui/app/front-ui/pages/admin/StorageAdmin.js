@@ -3,37 +3,37 @@ import EditorPage from './EditorPage';
 import { api } from 'utils/api';
 import { Button, Glyphicon } from 'components/react-bootstrap';
 import { confirm } from 'rb/Modal';
+import LoadingIndicator from 'rb/LoadingIndicator';
 
-export default class StorageAdmin extends EditorPage {
-	async setActiveClick(id) {
-		const args = {
-			method: 'put',
-			data: {},
-		};
-		await api('storage/setactive/' + id, args);
-		this.setState({ target: null, editing: null });
-		this.loadItems();
+const makeEmptyItem = () => {
+	return {
+		groupName: '',
+	};
+};
+
+const editorProperties = [
+	{
+		key: 'type',
+		caption: 'Storage Type',
+		type: 'select',
+		spec: { options: { dicom: 'DICOM Storage', label: 'Label Data' } }
+	},
+	{
+		key: 'path',
+		caption: 'Change Path',
+		type: 'text'
 	}
+];
 
+async function preCommitHook(target) {
+	if (target === null) return true;
+	return await confirm('Do you really want to update the existing path/type?');
+}
+
+export default class StorageAdmin extends React.Component {
 	constructor(props) {
 		super(props);
-		this.title = 'Storage';
-		this.glyph = 'save-file';
-		this.endPoint = 'storage';
-		this.primaryKey = 'storageID';
-		this.editorProperties = [
-			{
-				key: 'type',
-				caption: 'Storage Type',
-				type: 'select',
-				spec: { options: { dicom: 'DICOM Storage', label: 'Label Data' } }
-			},
-			{
-				key: 'path',
-				caption: 'Change Path',
-				type: 'text'
-			}
-		];
+		this.state = { ready: true };
 		this.listColumns = [
 			{ key: 'storageID', label: 'Storage ID' },
 			{ key: 'type', label: 'Type' },
@@ -47,7 +47,7 @@ export default class StorageAdmin extends EditorPage {
 					</span>;
 					return (
 						<Button bsStyle='default' bsSize='xs'
-							onClick={this.setActiveClick.bind(this, item.storageID)}
+							onClick={() => this.handleActiveClick(item.storageID)}
 						>
 							Set this as active
 						</Button>
@@ -55,22 +55,41 @@ export default class StorageAdmin extends EditorPage {
 				}
 			}
 		];
+
 	}
 
-	async preCommitHook() {
-		return await confirm('Do you really want to update the existing path/type?');
-	}
+	async handleActiveClick(id) {
+		// unmount the editor so that it re-renders after this
+		this.setState({ ready: false });
 
-	makeEmptyItem() {
-		return {
-			groupName: '',
+		const args = {
+			method: 'put',
+			data: {},
 		};
+		await api('storage/setactive/' + id, args);
+
+		// re-mount the editor
+		this.setState({ ready: true });
 	}
 
-	editorFooter() {
-		return <div className='text-warning'>
-			<strong>Warning:</strong> Changing the path and type
-				may cause unexpected results.
+
+	render() {
+		if (!this.state.ready) return <LoadingIndicator />;
+		return <div>
+			<EditorPage
+				title='Storage'
+				icon='save-file'
+				endPoint='storage'
+				primaryKey='storageID'
+				editorProperties={editorProperties}
+				listColumns={this.listColumns}
+				makeEmptyItem={makeEmptyItem}
+				preCommitHook={preCommitHook}
+			/>
+			<div className='text-warning'>
+				<strong>Warning:</strong> Changing the path and type
+					may cause unexpected results.
+			</div>
 		</div>;
 	}
 }

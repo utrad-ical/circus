@@ -1,14 +1,44 @@
 import React from 'react';
 import EditorPage from './EditorPage';
 import { api } from 'utils/api';
+import LoadingIndicator from 'rb/LoadingIndicator';
 
-export default class UserAdmin extends EditorPage {
+const makeEmptyItem = () => {
+	return {
+		userEmail: '',
+		loginID: '',
+		description: '',
+		password: '',
+		groups: [],
+		'preferences.theme': 'mode_white',
+		'preferences.personalInfoView': true,
+		loginEnabled: true
+	};
+};
+
+export default class UserAdmin extends React.Component {
 	constructor(props) {
 		super(props);
-		this.title = 'Users';
-		this.glyph = 'user';
-		this.endPoint = 'user';
-		this.primaryKey = 'userEmail';
+
+		this.state = { ready: false };
+
+		this.listColumns = 	[
+			{ key: 'userEmail', label: 'User ID (E-mail)' },
+			{ key: 'loginID', label: 'Login Name' },
+			{ key: 'description', label: 'Description' },
+			{
+				data: item => {
+					return item.groups.map(groupID => {
+						if (!this.groupIdMap) return null;
+						return <span className='label label-default' key={groupID}>
+							{this.groupIdMap[groupID]}
+						</span>;
+					});
+				},
+				label: 'Groups'
+			}
+		];
+
 		this.editorProperties = [
 			{ caption: 'User Email', key: 'userEmail', type: 'text' },
 			{ caption: 'Login Name', key: 'loginID', type: 'text' },
@@ -29,35 +59,6 @@ export default class UserAdmin extends EditorPage {
 			{ caption: 'Show personal info', key: 'preferences.personalInfoView', type: 'checkbox' },
 			{caption: 'Login Enabled', key: 'loginEnabled', type: 'checkbox'}
 		];
-		this.listColumns = [
-			{ key: 'userEmail', label: 'User ID (E-mail)' },
-			{ key: 'loginID', label: 'Login Name' },
-			{ key: 'description', label: 'Description' },
-			{
-				data: item => {
-					return item.groups.map(groupID => {
-						if (!this.state.groupIdMap) return null;
-						return <span className='label label-default' key={groupID}>
-							{this.state.groupIdMap[groupID]}
-						</span>;
-					});
-				},
-				label: 'Groups'
-			}
-		];
-	}
-
-	makeEmptyItem() {
-		return {
-			userEmail: '',
-			loginID: '',
-			description: '',
-			password: '',
-			groups: [],
-			'preferences.theme': 'mode_white',
-			'preferences.personalInfoView': true,
-			loginEnabled: true
-		};
 	}
 
 	async componentDidMount() {
@@ -65,7 +66,21 @@ export default class UserAdmin extends EditorPage {
 		const groupIdMap = {};
 		groups.forEach(g => groupIdMap[g.groupID] = g.groupName);
 		this.editorProperties[4].spec.options = groupIdMap;
-		this.setState({ groupIdMap });
-		super.componentDidMount();
+		this.groupIdMap = groupIdMap;
+		this.setState({ ready: true });
+	}
+
+	render() {
+		if (!this.state.ready) return <LoadingIndicator />;
+		return <EditorPage
+			title='Users'
+			icon='user'
+			endPoint='user'
+			primaryKey='userEmail'
+			editorProperties={this.editorProperties}
+			listColumns={this.listColumns}
+			makeEmptyItem={makeEmptyItem}
+		/>;
 	}
 }
+

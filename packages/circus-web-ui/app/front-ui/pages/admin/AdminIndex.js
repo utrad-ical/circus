@@ -1,20 +1,18 @@
 import React from 'react';
-import { browserHistory } from 'react-router';
+import { Link } from 'react-router';
 import { Button } from 'components/react-bootstrap';
 import AdminContainer from './AdminContainer';
 import Icon from 'components/Icon';
 
 const Btn = ({ to, link, glyph }) => (
 	<div className='item'>
-		<Button
-			block bsStyle='primary' bsSize='lg'
-			onClick={() => browserHistory.push('admin/' + to)}
-		>
-			{glyph &&
-				<span><Icon icon={glyph} />&ensp;</span>
-			}
-			{link}
-		</Button>
+		<Link to={`admin/${to}`}>
+			<Button
+				block bsStyle='primary' bsSize='lg'
+			>
+				<Icon icon={glyph} />&ensp;{link}
+			</Button>
+		</Link>
 	</div>
 );
 

@@ -3,6 +3,7 @@ import { PropertyEditor } from 'components/property-editor';
 import { api } from 'utils/api';
 import { showMessage } from 'actions';
 import { Button, Glyphicon } from 'components/react-bootstrap';
+import AdminContainer from './AdminContainer';
 
 export default class GeneralAdmin extends React.Component {
 	constructor(props) {
@@ -72,11 +73,10 @@ export default class GeneralAdmin extends React.Component {
 			}
 		];
 
-		return <div>
-			<h1>
-				<Glyphicon glyph='tasks'/>&ensp;
-				General Server Configuration
-			</h1>
+		return <AdminContainer
+			title='General Server Configuration'
+			icon='tasks'
+		>
 			<PropertyEditor
 				value={this.state.settings}
 				complaints={this.state.complaints}
@@ -91,6 +91,6 @@ export default class GeneralAdmin extends React.Component {
 					Cancel
 				</Button>
 			</p>
-		</div>;
+		</AdminContainer>;
 	}
 }

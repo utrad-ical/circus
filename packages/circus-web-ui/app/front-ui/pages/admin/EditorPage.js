@@ -2,6 +2,7 @@ import React from 'react';
 import { Button, Glyphicon, Panel } from 'components/react-bootstrap';
 import { PropertyEditor } from 'components/property-editor';
 import { api } from 'utils/api.js';
+import AdminContainer from './AdminContainer';
 
 export default class EditorPage extends React.Component {
 	constructor(props) {
@@ -80,11 +81,11 @@ export default class EditorPage extends React.Component {
 	}
 
 	render() {
-		return <div className='admin-editor'>
-			<h1>
-				<Glyphicon glyph={this.glyph} />
-				&ensp;{this.title}
-			</h1>
+		return <AdminContainer
+			title={this.title}
+			icon={this.glyph}
+			className='admin-editor'
+		>
 			<List
 				items={this.state.items}
 				active={this.state.editing}
@@ -108,7 +109,7 @@ export default class EditorPage extends React.Component {
 				/>
 				: null }
 			{this.editorFooter()}
-		</div>;
+		</AdminContainer>;
 	}
 }
 

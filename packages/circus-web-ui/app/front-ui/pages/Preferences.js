@@ -1,5 +1,7 @@
 import React from 'react';
-import { PropertyEditor } from 'components/property-editor';
+import PropertyEditor from 'rb/PropertyEditor';
+import * as et from 'rb/editor-types';
+import ShrinkSelect from 'rb/ShrinkSelect';
 import { api } from 'utils/api';
 import { showMessage } from 'actions';
 import { Button } from 'components/react-bootstrap';
@@ -39,13 +41,15 @@ export default class Preferences extends React.Component {
 			{
 				caption: 'Color Theme',
 				key: 'theme',
-				type: 'select',
-				spec: { options: { mode_white: 'White', mode_black: 'Black' } }
+				editor: props => <ShrinkSelect
+					options={{ mode_white: 'White', mode_black: 'Black' }}
+					{...props}
+				/>
 			},
 			{
 				caption: 'Show Personal Info',
 				key: 'personalInfoView',
-				type: 'checkbox'
+				editor: et.checkbox({ label: 'show' })
 			}
 		];
 

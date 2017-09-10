@@ -4,6 +4,8 @@ import { api } from 'utils/api';
 import { Button, Glyphicon } from 'components/react-bootstrap';
 import { confirm } from 'rb/modal';
 import LoadingIndicator from 'rb/LoadingIndicator';
+import ShrinkSelect from 'rb/ShrinkSelect';
+import * as et from 'rb/editor-types';
 
 const makeEmptyItem = () => {
 	return {
@@ -15,13 +17,15 @@ const editorProperties = [
 	{
 		key: 'type',
 		caption: 'Storage Type',
-		type: 'select',
-		spec: { options: { dicom: 'DICOM Storage', label: 'Label Data' } }
+		editor: props => <ShrinkSelect
+			options={{ dicom: 'DICOM Storage', label: 'Label Data' }}
+			{...props}
+		/>
 	},
 	{
 		key: 'path',
 		caption: 'Change Path',
-		type: 'text'
+		editor: et.text()
 	}
 ];
 

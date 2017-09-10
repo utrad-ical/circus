@@ -1,9 +1,10 @@
 import EditorPage from './EditorPage';
 import React from 'react';
+import * as et from 'rb/editor-types';
 
 const editorProperties = [
-	{ key: 'projectName', caption: 'Project Name', type: 'text' },
-	{ key: 'description', caption: 'Description', type: 'text' },
+	{ key: 'projectName', caption: 'Project Name', editor: et.text() },
+	{ key: 'description', caption: 'Description', editor: et.text() }
 ];
 
 const listColumns = [

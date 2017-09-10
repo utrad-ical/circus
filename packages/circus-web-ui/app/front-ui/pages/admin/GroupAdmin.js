@@ -2,6 +2,8 @@ import EditorPage from './EditorPage';
 import React from 'react';
 import { api } from 'utils/api';
 import LoadingIndicator from 'rb/LoadingIndicator';
+import * as et from 'rb/editor-types';
+import MultiSelect from 'rb/MultiSelect';
 
 const makeEmptyItem = () => {
 	return {
@@ -34,19 +36,9 @@ export default class GroupAdmin extends React.Component {
 		this.state = { ready: false };
 		this.domains = [];
 		this.editorProperties = [
-			{ key: 'groupName', caption: 'Group Name', type: 'text' },
-			{
-				key: 'privileges',
-				caption: 'Privileges',
-				type: 'multiselect',
-				spec: { type: 'checkbox', options: ['a', 'b', 'c'] }
-			},
-			{
-				key: 'domains',
-				caption: 'Accessible Domains',
-				type: 'multiselect',
-				spec: { options: this.domains }
-			}
+			{ key: 'groupName', caption: 'Group Name', editor: et.text() },
+			{ key: 'privileges', caption: 'Privileges', editor: null },
+			{ key: 'domains', caption: 'Accessible Domains', editor: null }
 		];
 	}
 
@@ -56,8 +48,12 @@ export default class GroupAdmin extends React.Component {
 		const privList = await api('group-privileges');
 		const privileges = {};
 		for (const p of privList) privileges[p.privilege] = p.caption;
-		this.editorProperties[1].spec.options = privileges;
-		this.editorProperties[2].spec.options = this.domains;
+		this.editorProperties[1].editor = props => <MultiSelect
+			type='checkbox' options={privileges} {...props}
+		/>;
+		this.editorProperties[2].editor = props => <MultiSelect
+			type='checkbox' options={this.domains} {...props}
+		/>;
 		this.setState({ ready: true });
 	}
 

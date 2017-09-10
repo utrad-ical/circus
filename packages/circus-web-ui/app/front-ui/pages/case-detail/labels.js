@@ -3,7 +3,7 @@ import ColorPicker from 'rb/ColorPicker';
 import { Popover, Button, OverlayTrigger, FormControl, Glyphicon } from '../../components/react-bootstrap';
 import { RawData, PixelFormat, VoxelCloud } from 'circus-rs';
 import classNames from 'classnames';
-import { confirm } from 'rb/Modal';
+import { confirm } from 'rb/modal';
 
 const labelColors = [
 	'#ff0000', '#00ff00', '#ffff00', '#0000ff', '#ff00ff', '#00ffff',

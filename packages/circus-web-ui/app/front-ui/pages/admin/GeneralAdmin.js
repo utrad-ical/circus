@@ -1,5 +1,5 @@
 import React from 'react';
-import { PropertyEditor } from 'components/property-editor';
+import PropertyEditor from 'rb/PropertyEditor';
 import { api } from 'utils/api';
 import { showMessage } from 'actions';
 import { Button } from 'components/react-bootstrap';

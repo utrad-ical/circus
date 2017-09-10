@@ -1,5 +1,6 @@
 import React from 'react';
-import { Button, Glyphicon, Panel } from 'components/react-bootstrap';
+import { Button, Panel } from 'components/react-bootstrap';
+import IconButton from 'rb/IconButton';
 import { PropertyEditor } from 'components/property-editor';
 import { api } from 'utils/api.js';
 import AdminContainer from './AdminContainer';
@@ -14,6 +15,9 @@ export default class EditorPage extends React.Component {
 			editing: null,
 			complaints: null
 		};
+		this.createItem = this.createItem.bind(this);
+		this.editStart = this.editStart.bind(this);
+		this.cancelEditItem = this.cancelEditItem.bind(this);
 	}
 
 	async commitItem(item) {
@@ -84,24 +88,28 @@ export default class EditorPage extends React.Component {
 				items={this.state.items}
 				active={this.state.editing}
 				listColumns={this.props.listColumns}
-				onEditClick={this.editStart.bind(this)}
+				onEditClick={this.editStart}
 			/>
 			<p className='text-right'>
-				<Button bsStyle='primary' bsSize='small' onClick={this.createItem.bind(this)}>
-					<Glyphicon glyph='plus'/>&ensp;
+				<IconButton
+					icon='plus'
+					bsStyle='primary'
+					bsSize='small'
+					onClick={this.createItem}
+				>
 					Create new
-				</Button>
+				</IconButton>
 			</p>
-			{ this.state.editing ?
+			{ this.state.editing &&
 				<Editor
 					item={this.state.editing}
 					complaints={this.state.complaints}
 					target={this.state.target}
 					properties={this.props.editorProperties}
 					onSaveClick={item => this.commitItem(item)}
-					onCancelClick={() => this.cancelEditItem()}
+					onCancelClick={this.cancelEditItem}
 				/>
-				: null }
+			}
 		</AdminContainer>;
 	}
 }
@@ -123,11 +131,9 @@ const List = props => {
 		return <tr key={i} className={active ? 'info' : null}>
 			{columns}
 			<td>
-				<Button bsSize='xs' bsStyle='primary'
+				<IconButton bsSize='xs' bsStyle='primary' icon='edit'
 					onClick={props.onEditClick.bind(null, item)}
-				>
-					<Glyphicon glyph='edit'/>
-				</Button>
+				/>
 			</td>
 		</tr>;
 	});
@@ -150,6 +156,7 @@ class Editor extends React.Component {
 			item[p.key] = props.item[p.key];
 		}
 		this.state = { item };
+		this.handleSave = this.handleSave.bind(this);
 	}
 
 	componentWillReceiveProps(props) {
@@ -160,7 +167,7 @@ class Editor extends React.Component {
 		this.setState({ item });
 	}
 
-	onSaveClick() {
+	handleSave() {
 		this.props.onSaveClick && this.props.onSaveClick(this.state.item);
 	}
 
@@ -172,7 +179,7 @@ class Editor extends React.Component {
 			<Button bsStyle='link' onClick={this.props.onCancelClick}>
 				Cancel
 			</Button>
-			<Button bsStyle='primary' onClick={this.onSaveClick.bind(this)}>
+			<Button bsStyle='primary' onClick={this.handleSave}>
 				Save
 			</Button>
 		</div>;

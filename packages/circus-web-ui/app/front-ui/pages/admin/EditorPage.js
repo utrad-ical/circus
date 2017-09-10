@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button, Panel } from 'components/react-bootstrap';
 import IconButton from 'rb/IconButton';
-import { PropertyEditor } from 'components/property-editor';
+import PropertyEditor from 'rb/PropertyEditor';
 import { api } from 'utils/api.js';
 import AdminContainer from './AdminContainer';
 
@@ -13,7 +13,7 @@ export default class EditorPage extends React.Component {
 			target: null,
 			targetID: null,
 			editing: null,
-			complaints: null
+			complaints: {}
 		};
 		this.createItem = this.createItem.bind(this);
 		this.editStart = this.editStart.bind(this);
@@ -61,12 +61,12 @@ export default class EditorPage extends React.Component {
 		this.setState({
 			target: this.targetName(item),
 			editing: item,
-			complaints: null
+			complaints: {}
 		});
 	}
 
 	cancelEditItem() {
-		this.setState({ editing: null, complaints: null });
+		this.setState({ editing: null, complaints: {} });
 	}
 
 	createItem() {
@@ -150,17 +150,29 @@ const List = props => {
 class Editor extends React.Component {
 	constructor(props) {
 		super(props);
-		const item = {};
-		for (const p of props.properties) {
-			// Remove keys not in the editor property list
-			item[p.key] = props.item[p.key];
-		}
-		this.state = { item };
+		this.state = {
+			item: this.pickProperties(props.properties, props.item)
+		};
 		this.handleSave = this.handleSave.bind(this);
 	}
 
-	componentWillReceiveProps(props) {
-		this.setState({ item: { ... props.item } });
+	pickProperties(properties, item) {
+		// Remove keys not in the editor property list
+		const result = {};
+		for (const p of properties) {
+			result[p.key] = item[p.key];
+		}
+		return result;
+	}
+
+	componentWillReceiveProps(nextProps) {
+		if (nextProps.properies !== this.props.properties ||
+			nextProps.item !== this.props.item
+		) {
+			this.setState({
+				item: this.pickProperties(nextProps.properties, nextProps.item)
+			});
+		}
 	}
 
 	onChange(item) {

@@ -1,19 +1,28 @@
 import React from 'react';
-import PropertyEditor from 'rb/PropertyEditor';
 import { api } from 'utils/api';
 import { showMessage } from 'actions';
 import { Button } from 'components/react-bootstrap';
 import AdminContainer from './AdminContainer';
+import PropertyEditor from 'rb/PropertyEditor';
+import * as et from 'rb/editor-types';
+import ShrinkSelect from 'rb/ShrinkSelect';
 
 export default class GeneralAdmin extends React.Component {
 	constructor(props) {
 		super(props);
-		this.state = { settings: null, complaints: null };
+		this.state = { settings: null, complaints: {} };
+		this.arrayOfStringsEditor = et.arrayOf(
+			et.text({ style: { width: '200px', display: 'inline' } })
+		);
+		this.domainSelector = props => <ShrinkSelect
+			options={this.state.settings.domains}
+			{...props}
+		/>;
 	}
 
 	async loadSettings() {
 		const settings = await api('server_param');
-		this.setState({ settings, complaints: null });
+		this.setState({ settings, complaints: {} });
 	}
 
 	componentDidMount() {
@@ -62,14 +71,12 @@ export default class GeneralAdmin extends React.Component {
 			{
 				caption: 'Domains',
 				key: 'domains',
-				type: 'list',
-				spec: { childrenType: 'text' }
+				editor: this.arrayOfStringsEditor
 			},
 			{
 				caption: 'Default Domain',
 				key: 'defaultDomain',
-				type: 'select',
-				spec: { options: this.state.settings.domains }
+				editor: this.domainSelector
 			}
 		];
 

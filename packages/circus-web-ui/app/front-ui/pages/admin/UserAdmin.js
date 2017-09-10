@@ -2,6 +2,9 @@ import React from 'react';
 import EditorPage from './EditorPage';
 import { api } from 'utils/api';
 import LoadingIndicator from 'rb/LoadingIndicator';
+import ShrinkSelect from 'rb/ShrinkSelect';
+import MultiSelect from 'rb/MultiSelect';
+import * as et from 'rb/editor-types';
 
 const makeEmptyItem = () => {
 	return {
@@ -40,24 +43,21 @@ export default class UserAdmin extends React.Component {
 		];
 
 		this.editorProperties = [
-			{ caption: 'User Email', key: 'userEmail', type: 'text' },
-			{ caption: 'Login Name', key: 'loginID', type: 'text' },
-			{ caption: 'Description', key: 'description', type: 'text' },
-			{ caption: 'Password', key: 'password', type: 'password' },
-			{
-				caption: 'Groups',
-				key: 'groups',
-				type: 'multiselect',
-				spec: { options: [], numericalValue: true }
-			},
+			{ caption: 'User Email', key: 'userEmail', editor: et.text() },
+			{ caption: 'Login Name', key: 'loginID', editor: et.text() },
+			{ caption: 'Description', key: 'description', editor: et.text() },
+			{ caption: 'Password', key: 'password', editor: et.password() },
+			{ caption: 'Groups', key: 'groups', editor: null },
 			{
 				caption: 'Theme',
 				key: 'preferences.theme',
-				type: 'select',
-				spec: { options: { mode_white: 'White', mode_black: 'Black' } }
+				editor: props => <ShrinkSelect
+					options={{ mode_white: 'White', mode_black: 'Black' }}
+					{...props}
+				/>
 			},
-			{ caption: 'Show personal info', key: 'preferences.personalInfoView', type: 'checkbox' },
-			{caption: 'Login Enabled', key: 'loginEnabled', type: 'checkbox'}
+			{ caption: 'Show personal info', key: 'preferences.personalInfoView', editor: et.checkbox({ label: 'show' }) },
+			{caption: 'Login Enabled', key: 'loginEnabled', editor: et.checkbox({ label: 'enabled' }) }
 		];
 	}
 
@@ -65,7 +65,9 @@ export default class UserAdmin extends React.Component {
 		const groups = await api('group');
 		const groupIdMap = {};
 		groups.forEach(g => groupIdMap[g.groupID] = g.groupName);
-		this.editorProperties[4].spec.options = groupIdMap;
+		this.editorProperties[4].editor = props => <MultiSelect
+			options={groupIdMap} numericalValue {...props}
+		/>;
 		this.groupIdMap = groupIdMap;
 		this.setState({ ready: true });
 	}

@@ -2,7 +2,7 @@ import React from 'react';
 import { Button, ButtonToolbar, Glyphicon, Well, ProgressBar } from './react-bootstrap';
 import { FileDroppable } from './file-droppable';
 import { showMessage } from 'actions';
-import * as modal from 'rb/Modal';
+import * as modal from 'rb/modal';
 import * as axios from 'axios';
 
 /**

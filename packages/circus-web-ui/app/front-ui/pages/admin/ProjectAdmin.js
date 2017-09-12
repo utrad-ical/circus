@@ -6,6 +6,7 @@ import ShrinkSelect from 'rb/ShrinkSelect';
 import MultiSelect from 'rb/MultiSelect';
 import WindowPresetEditor from './WindowPresetEditor';
 import TagEditor, { newTagItem } from './TagEditor';
+import AttributeSchemaArrayEditor, { newAttributeItem } from './AttributeSchemaEditor';
 import LoadingIndicator from 'rb/LoadingIndicator';
 
 
@@ -51,6 +52,18 @@ export default class ProjectAdmin extends React.Component {
 				key: 'tags',
 				caption: 'Tags',
 				editor: et.arrayOf(TagEditor, newTagItem)
+			},
+			{
+				key: 'caseAttributesSchema',
+				caption: 'Case Attribute Schema',
+				className: 'attribute-schema-prop',
+				editor: AttributeSchemaArrayEditor
+			},
+			{
+				key: 'labelAttributesSchema',
+				caption: 'Label Attribute Schema',
+				className: 'attribute-schema-prop',
+				editor: AttributeSchemaArrayEditor
 			},
 			{ key: 'addSeriesGroups', caption: 'Add Series Groups', editor: null },
 			{ key: 'moderateGroups', caption: 'Moderate Groups', editor: null },

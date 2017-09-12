@@ -18,3 +18,33 @@
 		width: 100px;
 	}
 }
+
+.attribute-schema-prop > .col-md-9 > .array-editor {
+	> li {
+		padding: 0 2px;
+		border-bottom: 1px solid silver;
+		&:last-child { border: none; }
+	}
+}
+
+.attribute-schema-editor {
+	&.legend { font-weight: bolder; }
+	width: 95%;
+	display: inline-flex;
+	flex-directin: row;
+	.attribute-schema-key {
+		width: 25%;
+		margin-right: 3px;
+	}
+	.attribute-schema-type {
+		width: 20%;
+		margin-right: 3px;
+	}
+	.attribute-schema-spec {
+		flex-grow: 1;
+		input {
+			display: inline;
+			width: 170px;
+		}
+	}
+}

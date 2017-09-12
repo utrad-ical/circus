@@ -2,11 +2,9 @@ import EditorPage from './EditorPage';
 import React from 'react';
 import { api } from 'utils/api';
 import * as et from 'rb/editor-types';
-import ShrinkSelect from 'rb/ShrinkSelect';
-import MultiSelect from 'rb/MultiSelect';
 import WindowPresetEditor from './WindowPresetEditor';
 import TagEditor, { newTagItem } from './TagEditor';
-import AttributeSchemaArrayEditor, { newAttributeItem } from './AttributeSchemaEditor';
+import AttributeSchemaArrayEditor from './AttributeSchemaEditor';
 import LoadingIndicator from 'rb/LoadingIndicator';
 
 
@@ -44,9 +42,7 @@ export default class ProjectAdmin extends React.Component {
 			{
 				key: 'windowPriority',
 				caption: 'Window Priority',
-				editor: props => <ShrinkSelect
-					options={windowPriorityOptions} {...props}
-				/>
+				editor: et.shrinkSelect(windowPriorityOptions)
 			},
 			{
 				key: 'tags',
@@ -65,29 +61,25 @@ export default class ProjectAdmin extends React.Component {
 				className: 'attribute-schema-prop',
 				editor: AttributeSchemaArrayEditor
 			},
+			'Group Privileges',
 			{ key: 'addSeriesGroups', caption: 'Add Series Groups', editor: null },
 			{ key: 'moderateGroups', caption: 'Moderate Groups', editor: null },
 			{ key: 'viewPersonalInfoGroups', caption: 'View Personal Info Groups', editor: null },
 			{ key: 'readGroups', caption: 'Read Groups', editor: null },
 			{ key: 'writeGroups', caption: 'Write Groups', editor: null }
 		];
-
 	}
 
 	async componentDidMount() {
 		const groups = await api('group');
 		const groupIdMap = {};
 		groups.forEach(g => groupIdMap[g.groupID] = g.groupName);
-		const GroupsMultiSelect = props => <MultiSelect
-			options={groupIdMap} numericalValue {...props}
-		/>;
+		const GroupsMultiSelect = et.multiSelect(groupIdMap, { numericalValue: true });
 		this.editorProperties.forEach(property => {
 			if (/Groups$/.test(property.key)) {
 				property.editor = GroupsMultiSelect;
 			}
 		});
-
-		// this.groupIdMap = groupIdMap;
 		this.setState({ ready: true });
 	}
 

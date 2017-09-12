@@ -3,7 +3,6 @@ import React from 'react';
 import { api } from 'utils/api';
 import LoadingIndicator from 'rb/LoadingIndicator';
 import * as et from 'rb/editor-types';
-import MultiSelect from 'rb/MultiSelect';
 
 const makeEmptyItem = () => {
 	return {
@@ -48,12 +47,8 @@ export default class GroupAdmin extends React.Component {
 		const privList = await api('group-privileges');
 		const privileges = {};
 		for (const p of privList) privileges[p.privilege] = p.caption;
-		this.editorProperties[1].editor = props => <MultiSelect
-			type='checkbox' options={privileges} {...props}
-		/>;
-		this.editorProperties[2].editor = props => <MultiSelect
-			type='checkbox' options={this.domains} {...props}
-		/>;
+		this.editorProperties[1].editor = et.multiSelect(privileges, { type: 'checkbox' });
+		this.editorProperties[2].editor = et.multiSelect(this.domains, { type: 'checkbox' });
 		this.setState({ ready: true });
 	}
 

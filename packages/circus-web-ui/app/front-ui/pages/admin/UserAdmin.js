@@ -51,10 +51,7 @@ export default class UserAdmin extends React.Component {
 			{
 				caption: 'Theme',
 				key: 'preferences.theme',
-				editor: props => <ShrinkSelect
-					options={{ mode_white: 'White', mode_black: 'Black' }}
-					{...props}
-				/>
+				editor: et.shrinkSelect({ mode_white: 'White', mode_black: 'Black' })
 			},
 			{ caption: 'Show personal info', key: 'preferences.personalInfoView', editor: et.checkbox({ label: 'show' }) },
 			{caption: 'Login Enabled', key: 'loginEnabled', editor: et.checkbox({ label: 'enabled' }) }

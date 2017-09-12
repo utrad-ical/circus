@@ -5,6 +5,7 @@ import * as et from 'rb/editor-types';
 import ShrinkSelect from 'rb/ShrinkSelect';
 import MultiSelect from 'rb/MultiSelect';
 import WindowPresetEditor from './WindowPresetEditor';
+import TagEditor, { newTagItem } from './TagEditor';
 import LoadingIndicator from 'rb/LoadingIndicator';
 
 
@@ -45,6 +46,11 @@ export default class ProjectAdmin extends React.Component {
 				editor: props => <ShrinkSelect
 					options={windowPriorityOptions} {...props}
 				/>
+			},
+			{
+				key: 'tags',
+				caption: 'Tags',
+				editor: et.arrayOf(TagEditor, newTagItem)
 			},
 			{ key: 'addSeriesGroups', caption: 'Add Series Groups', editor: null },
 			{ key: 'moderateGroups', caption: 'Moderate Groups', editor: null },

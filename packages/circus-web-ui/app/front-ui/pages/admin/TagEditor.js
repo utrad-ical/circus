@@ -1,21 +1,25 @@
 import React from 'react';
-import { FormControl } from './react-bootstrap';
 import ColorPicker from 'rb/ColorPicker';
-import { Tag } from './tag';
+import { Tag } from '../../components/tag';
 
-export const TagEditor = props => {
+const TagEditor = props => {
 	const change = (key, newValue) => {
 		const newPreset = { ...props.value };
 		newPreset[key] = newValue;
 		props.onChange && props.onChange(newPreset);
 	};
 
-	return <span>
-		<FormControl value={props.value.name}
+	return <span className='form-inline'>
+		<input
+			className='form-control'
+			value={props.value.name}
+			placeholder='Name'
 			onChange={ev => change('name', ev.target.value)}
 		/>
 		&emsp;
-		<ColorPicker value={props.value.color} showColorCode={true}
+		<ColorPicker
+			value={props.value.color}
+			showColorCode={true}
 			onChange={col => change('color', col)}
 		/>
 		&emsp;
@@ -23,10 +27,12 @@ export const TagEditor = props => {
 	</span>;
 };
 
-TagEditor.newItem = items => {
+export default TagEditor;
+
+export const newTagItem = items => {
 	let num = 0;
 	const name = num => 'Untitled' + (num === 0 ? '' : num);
-	while (true) {
+	for (;;) {
 		if (!items.some(item => name(num) === item.name)) break;
 		num++;
 	}

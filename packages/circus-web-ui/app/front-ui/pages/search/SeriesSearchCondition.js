@@ -1,13 +1,12 @@
 import React from 'react';
-
 import DateRangePicker, { dateRangeToMongoQuery } from 'rb/DateRangePicker';
 import ShrinkSelect from 'rb/ShrinkSelect';
 import { modalities } from 'modalities';
-import SearchConditionBase, { FormGrid, Input } from './SearchConditionBase';
+import ConditionFrame, { FormGrid, Input } from './ConditionFrame';
 import { escapeRegExp } from 'utils/util';
 import { Well } from 'components/react-bootstrap';
 
-export default class SeriesSearchCondition extends SearchConditionBase {
+export default class SeriesSearchCondition extends React.Component {
 	constructor(props) {
 		super(props);
 		this.conditionKeys = {
@@ -59,7 +58,15 @@ export default class SeriesSearchCondition extends SearchConditionBase {
 
 	render() {
 		return <Well>
-			{this.renderUsing(BasicConditionForm)}
+			<ConditionFrame
+				condition={this.props.condition}
+				onChange={this.props.onChange}
+				onSearch={this.props.onSearch}
+				basicConditionForm={BasicConditionForm}
+				conditionKeys={this.conditionKeys}
+				basicFilterToMongoQuery={this.basicFilterToMongoQuery}
+				nullCondition={SeriesSearchCondition.nullCondition}
+			/>
 		</Well>;
 	}
 }

@@ -3,7 +3,7 @@ import React from 'react';
 import DateRangePicker, { dateRangeToMongoQuery } from 'rb/DateRangePicker';
 import ShrinkSelect from 'rb/ShrinkSelect';
 import { modalities } from 'modalities';
-import { SearchConditionBase, FormGrid, Input } from './SearchCondition';
+import SearchConditionBase, { FormGrid, Input } from './SearchConditionBase';
 import { escapeRegExp } from 'utils/util';
 import { Well } from 'components/react-bootstrap';
 

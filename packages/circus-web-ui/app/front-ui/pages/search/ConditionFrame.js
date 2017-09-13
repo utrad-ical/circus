@@ -1,71 +1,89 @@
 import React from 'react';
 import {
-	Tabs, Tab, Form, FormControl, Button, Glyphicon,
+	Tabs, Tab, Form, FormControl, Button,
 	ControlLabel, Row, Col
 } from 'components/react-bootstrap';
+import Icon from 'components/Icon';
 import ConditionEditor, { conditionToMongoQuery } from 'rb/ConditionEditor';
 import { Tag } from 'components/tag';
 
-export default class SearchConditionBase extends React.Component {
-	changeType(key) {
+export default class ConditionFrame extends React.Component {
+	constructor(props) {
+		super(props);
+		this.handleChangeType = this.handleChangeType.bind(this);
+		this.handleBasicFilterChange = this.handleBasicFilterChange.bind(this);
+		this.handleAdvancedFilterChange = this.handleAdvancedFilterChange.bind(this);
+		this.handleResetClick = this.handleResetClick.bind(this);
+		this.handleSearchClick = this.handleSearchClick.bind(this);
+	}
+
+	handleChangeType(key) {
 		const type = key === 1 ? 'basic' : 'advanced';
-		this.props.onChange({ ... this.props.condition, type });
+		this.props.onChange({ ...this.props.condition, type });
 	}
 
-	changeBasicFilter(basicFilter) {
-		this.props.onChange({ ... this.props.condition, basicFilter });
+	handleBasicFilterChange(basicFilter) {
+		this.props.onChange({ ...this.props.condition, basicFilter });
 	}
 
-	changeAdvanedFilter(advancedFilter) {
-		this.props.onChange({ ... this.props.condition, advancedFilter });
+	handleAdvancedFilterChange(advancedFilter) {
+		this.props.onChange({ ...this.props.condition, advancedFilter });
 	}
 
-	resetClick() {
-		this.props.onChange(this.constructor.nullCondition());
+	handleResetClick() {
+		this.props.onChange(this.props.nullCondition());
 	}
 
-	searchClick() {
+	handleSearchClick() {
 		let condition;
 		if (this.props.condition.type === 'basic') {
-			condition = this.basicFilterToMongoQuery(this.props.condition.basicFilter);
+			condition = this.props.basicFilterToMongoQuery(this.props.condition.basicFilter);
 		} else {
 			condition = conditionToMongoQuery(this.props.condition.advancedFilter);
 		}
 		this.props.onSearch && this.props.onSearch(condition);
 	}
 
-	renderUsing(BasicConditionForm, formParams = {}) {
+	render() {
+		const {
+			basicConditionForm: BasicConditionForm,
+			formParams = {}
+		} = this.props;
 		const activeKey = this.props.condition.type === 'advanced' ? 2 : 1;
 
 		return <div>
-			<Tabs animation={false} id='series-search-condition'
-				activeKey={activeKey} onSelect={this.changeType.bind(this)}
+			<Tabs
+				animation={false}
+				id='series-search-condition'
+				activeKey={activeKey}
+				onSelect={this.handleChangeType}
 			>
 				<Tab eventKey={1} title='Basic'>
 					<BasicConditionForm
 						value={this.props.condition.basicFilter}
-						onChange={this.changeBasicFilter.bind(this)}
+						onChange={this.handleBasicFilterChange}
 						{...formParams}
 					/>
 				</Tab>
 				<Tab eventKey={2} title='Advanced'>
-					<ConditionEditor keys={this.conditionKeys}
+					<ConditionEditor
+						keys={this.props.conditionKeys}
 						value={this.props.condition.advancedFilter}
-						onChange={this.changeAdvanedFilter.bind(this)}
+						onChange={this.handleAdvancedFilterChange}
 					/>
 				</Tab>
 			</Tabs>
 			<div className='search-buttons'>
 				<Button bsStyle='link'
-					onClick={this.resetClick.bind(this)}
+					onClick={this.handleResetClick}
 				>
 					Reset
 				</Button>
 				&ensp;
 				<Button bsStyle='primary'
-					onClick={this.searchClick.bind(this)}
+					onClick={this.handleSearchClick}
 				>
-					<Glyphicon glyph='search' />&ensp;Search
+					<Icon icon='search' />&ensp;Search
 				</Button>
 			</div>
 			{ /* <div>{JSON.stringify(this.props.condition)}</div> */ }

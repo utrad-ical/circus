@@ -7,7 +7,7 @@ export default class CaseSearch extends React.Component {
 	render() {
 		return <SearchCommon
 			title='Case Search'
-			icon='case'
+			icon='circus-case'
 			searchName='case'
 			defaultSort='createTime desc'
 			conditionComp={CaseSearchCondition}

@@ -1,13 +1,12 @@
 import React from 'react';
-
 import DateRangePicker, { dateRangeToMongoQuery } from 'rb/DateRangePicker';
 import { modalities } from 'modalities';
-import SearchConditionBase, { FormGrid, Input } from './SearchConditionBase';
+import ConditionFrame, { FormGrid, Input } from './ConditionFrame';
 import { Well, ControlLabel } from 'components/react-bootstrap';
 import { MultiSelect } from 'components/multiselect';
 import { store } from 'store';
 
-export default class CaseSearchCondition extends SearchConditionBase {
+export default class CaseSearchCondition extends React.Component {
 	constructor(props) {
 		super(props);
 		this.conditionKeys = {
@@ -85,7 +84,16 @@ export default class CaseSearchCondition extends SearchConditionBase {
 					selected={this.state.selectedProjects}
 				/>
 			</div>
-			{this.renderUsing(BasicConditionForm, { availableTags: this.state.availableTags })}
+			<ConditionFrame
+				condition={this.props.condition}
+				onChange={this.props.onChange}
+				onSearch={this.props.onSearch}
+				basicConditionForm={BasicConditionForm}
+				conditionKeys={this.conditionKeys}
+				basicFilterToMongoQuery={this.basicFilterToMongoQuery}
+				nullCondition={CaseSearchCondition.nullCondition}
+				formParams={{ availableTags: this.state.availableTags }}
+			/>
 		</Well>;
 	}
 }

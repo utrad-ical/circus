@@ -40,7 +40,8 @@ export default class SearchCommon extends React.Component {
 			<h1>
 				<Icon icon={icon} />&ensp;{title}
 			</h1>
-			<ConditionComp condition={this.state.condition}
+			<ConditionComp
+				condition={this.state.condition}
 				onSearch={this.handleSearchClick}
 				onChange={this.handleConditionChange}
 			/>

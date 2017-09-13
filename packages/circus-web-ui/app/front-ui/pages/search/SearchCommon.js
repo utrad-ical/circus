@@ -1,5 +1,6 @@
 import React from 'react';
 import { startNewSearch } from 'actions';
+import Icon from 'components/Icon';
 
 /**
  * Composes search condition box and search result pane.
@@ -8,34 +9,40 @@ export default class SearchCommon extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			condition: null,
+			condition: props.defaultCondition
 		};
+		this.handleConditionChange = this.handleConditionChange.bind(this);
+		this.handleSearchClick = this.handleSearchClick.bind(this);
 	}
 
-	conditionChange(newCondition) {
+	handleConditionChange(newCondition) {
 		this.setState({ condition: newCondition });
 	}
 
-	searchClick(filter) {
+	handleSearchClick(filter) {
+		const { searchName, defaultSort } = this.props;
 		startNewSearch(
-			this.searchName,
-			this.searchName,
+			searchName,
+			searchName,
 			filter,
-			this.defaultSort
+			defaultSort
 		);
 	}
 
 	render() {
-		const ConditionComp = this.conditionComp;
-		const ResultComp = this.resultComp;
+		const {
+			icon,
+			title,
+			conditionComp: ConditionComp,
+			resultComp: ResultComp
+		} = this.props;
 		return <div>
 			<h1>
-				<span className={'circus-icon-' + this.glyph} />&ensp;
-				{this.title}
+				<Icon icon={icon} />&ensp;{title}
 			</h1>
 			<ConditionComp condition={this.state.condition}
-				onSearch={this.searchClick.bind(this)}
-				onChange={this.conditionChange.bind(this)}
+				onSearch={this.handleSearchClick}
+				onChange={this.handleConditionChange}
 			/>
 			{ /* <pre>{JSON.stringify(this.state.filter, null, '  ')}</pre> */ }
 			<ResultComp />

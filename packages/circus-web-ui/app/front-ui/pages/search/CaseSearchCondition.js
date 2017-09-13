@@ -2,7 +2,7 @@ import React from 'react';
 
 import DateRangePicker, { dateRangeToMongoQuery } from 'rb/DateRangePicker';
 import { modalities } from 'modalities';
-import { SearchConditionBase, FormGrid, Input } from './SearchCondition';
+import SearchConditionBase, { FormGrid, Input } from './SearchConditionBase';
 import { Well, ControlLabel } from 'components/react-bootstrap';
 import { MultiSelect } from 'components/multiselect';
 import { store } from 'store';

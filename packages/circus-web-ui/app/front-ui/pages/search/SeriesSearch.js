@@ -1,16 +1,18 @@
+import React from 'react';
 import SeriesSearchCondition from './SeriesSearchCondition';
 import SeriesSearchResults from './SeriesSearchResults';
 import SearchCommon from './SearchCommon';
 
-export default class SeriesSearch extends SearchCommon {
-	constructor(props) {
-		super(props);
-		this.title = 'Series Search';
-		this.glyph = 'series';
-		this.searchName = 'series';
-		this.defaultSort = 'createTime desc';
-		this.conditionComp = SeriesSearchCondition;
-		this.resultComp = SeriesSearchResults;
-		this.state.condition = this.conditionComp.nullCondition();
+export default class SeriesSearch extends React.Component {
+	render() {
+		return <SearchCommon
+			title='Series Search'
+			icon='circus-series'
+			searchName='series'
+			defaultSort='createTime desc'
+			conditionComp={SeriesSearchCondition}
+			resultComp={SeriesSearchResults}
+			defaultCondition={SeriesSearchCondition.nullCondition()}
+		/>;
 	}
 }

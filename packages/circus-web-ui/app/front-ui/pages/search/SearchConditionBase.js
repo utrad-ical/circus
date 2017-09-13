@@ -6,7 +6,7 @@ import {
 import ConditionEditor, { conditionToMongoQuery } from 'rb/ConditionEditor';
 import { Tag } from 'components/tag';
 
-export class SearchConditionBase extends React.Component {
+export default class SearchConditionBase extends React.Component {
 	changeType(key) {
 		const type = key === 1 ? 'basic' : 'advanced';
 		this.props.onChange({ ... this.props.condition, type });

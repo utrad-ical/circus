@@ -1,0 +1,30 @@
+scope: [severAdmin]
+description: Manages the login user.
+keys:
+  - name: userEmail
+    primaryKey: true
+    type: string
+    description: >
+      User's E-mail adress. It works as a global identifier of the user.
+      Once you have created a user, `userEmail` cannot be changed.
+  - name: loginID
+    type: string
+    description: >
+      Login ID of the user. A user can use either their E-mail or the login ID
+      to log in to the system. It can be short enough (like `alice`), and
+      can be changed after the creation of the user.
+  - name: description
+    type: string
+    description: >
+      Optinal arbitrary text to identify this user.
+routes:
+  - path: /users
+    verb: get
+    handler: handleSearch
+    description: Retrieves the list of users.
+  - path: /users/:userID
+    verb: get
+    description: Retrieves the specified user.
+  - path: /users/:userID
+    verb: put
+    description: Updates the specified user.

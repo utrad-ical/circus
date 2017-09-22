@@ -1,0 +1,24 @@
+extends:
+  - eslint:recommended
+parserOptions:
+  ecmaVersion: 2017
+  sourceType: module
+  ecmaFeatures:
+    experimentalObjectRestSpread: true
+env:
+  es6: true
+  node: true
+rules:
+  indent: [2, 'tab', { SwitchCase: 1 }]
+  quotes: [2, 'single', { avoidEscape: true }]
+  padding-line-between-statements:
+    - 'error'
+    - { blankLine: 'always', prev: 'function', next: 'function' }
+    - { blankLine: 'always', prev: 'import', next: '*' }
+    - { blankLine: 'any', prev: 'import', next: 'import' }
+  no-unused-vars: [2, { argsIgnorePattern: 'props' }]
+  no-useless-escape: [0]
+  semi: [2, 'always']
+  no-var: 'error'
+  prefer-const: 'error'
+  no-console: [0]

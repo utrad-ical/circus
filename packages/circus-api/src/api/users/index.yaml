@@ -1,3 +1,4 @@
+name: users
 scope: [severAdmin]
 description: Manages the login user.
 keys:

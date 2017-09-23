@@ -6,6 +6,9 @@ routes:
     path: /users
     handler: handleSearch
     description: Retrieves the list of users.
+    responseSchema:
+      type: array
+      # items: { $ref: user }
   - verb: get
     path: /users/:userID
     description: Retrieves the specified user.

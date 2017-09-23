@@ -12,7 +12,7 @@ const glob = pify(_glob);
  * and can be used throughtout the API server.
  */
 export default async function createValidator() {
-	const ajv = new Ajv({ allErrors: true });
+	const ajv = new Ajv({ allErrors: true, useDefaults: true });
 
 	// Install all the schema YAML files under "schemas" directory
 	const schemaFiles = await glob(path.join(__dirname, '../schemas/*.yaml'));

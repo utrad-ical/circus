@@ -8,15 +8,17 @@ import _glob from 'glob';
 import Router from 'koa-router';
 import errorHandler from './errorHandler';
 import createValidator from './validation/createValidator';
+import validateInOut from './validation/validateInOut';
 import compose from 'koa-compose';
 // import validateInput from './validation/validateInput';
 
 const glob = pify(_glob);
 
-function registerApiRoute(router, dir, route) {
+function registerApiRoute(router, validator, dir, route) {
 	const handler = route.handler ? route.handler : defaultHandlerName(route.verb);
 
 	const middlewareStack = compose([
+		validateInOut(validator, route.requestSchema, route.responseSchema),
 		require(dir)[handler] // The processing function itself
 	]);
 
@@ -53,7 +55,7 @@ export default async function createApp() {
 		const data = yaml(await fs.readFile(manifestFile, 'utf8'));
 		const dir = path.dirname(manifestFile);
 		for (const route of data.routes) {
-			registerApiRoute(router, dir, route);
+			registerApiRoute(router, validator, dir, route);
 		}
 	}
 

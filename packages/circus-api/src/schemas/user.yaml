@@ -1,0 +1,26 @@
+$schema: 'http://json-schema.org/schema#'
+id: user
+title: User
+type: object
+properties:
+  userEmail:
+    type: string
+    format: email
+    description: >
+      User's E-mail address. It works as a global identifier of the user.
+      Once you have created a user, `userEmail` cannot be changed.
+  loginId:
+    type: string
+    description: >
+      Login ID of the user. A user can use either their E-mail or the login ID
+      to log in to the system. It can be short enough (like `alice`), and
+      can be changed after the creation of the user.
+  description:
+    type: string
+    description: >
+      Optinal arbitrary text to identify this user.
+  groups:
+    type: array
+    items: { type: number }
+required: ['userEmail', 'loginId', 'description', 'groups']
+additionalProperties: false

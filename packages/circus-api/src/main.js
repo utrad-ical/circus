@@ -10,6 +10,9 @@ import pify from 'pify';
 import _glob from 'glob';
 import Router from 'koa-router';
 import errorHandler from './errorHandler';
+import createValidator from './validation/createValidator';
+import compose from 'koa-compose';
+import validateInput from './validation/validateInput';
 
 const glob = pify(_glob);
 
@@ -67,6 +70,10 @@ const handlerName = verb => {
 
 const bootstrap = async () => {
 	const find = path.resolve(__dirname, 'api', '**/*.yaml');
+
+	const validator = await createValidator();
+	koa.use(async (ctx, next) => { ctx.validator = validator; next(); });
+
 	const settings = await glob(find);
 	settings.forEach(settingFile => {
 		try {
@@ -75,7 +82,9 @@ const bootstrap = async () => {
 			data.routes.forEach(route => {
 				const dir = path.dirname(settingFile);
 				const handler = route.handler ? route.handler : handlerName(route.verb);
-				const middleware = require(dir)[handler];
+				const middleware = compose([
+					require(dir)[handler]
+				]);
 				console.log(`registering ${route.verb} from ${dir}`);
 				router[route.verb](route.path, middleware);
 			});

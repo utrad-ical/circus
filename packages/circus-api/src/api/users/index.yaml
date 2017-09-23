@@ -1,36 +1,14 @@
 name: users
 scope: [severAdmin]
 description: Manages the login user.
-jsonSchema:
-  type: object
-  properties:
-    userEmail:
-      type: string
-      description: >
-        User's E-mail adress. It works as a global identifier of the user.
-        Once you have created a user, `userEmail` cannot be changed.
-    loginId:
-      type: string
-      description: >
-        Login ID of the user. A user can use either their E-mail or the login ID
-        to log in to the system. It can be short enough (like `alice`), and
-        can be changed after the creation of the user.
-    description:
-      type: string
-      description: >
-        Optinal arbitrary text to identify this user.
-    groups:
-      type: array
-      items: array
-  required: ['userEmail', 'loginId', 'description', 'gruops']
 routes:
-  - path: /users
-    verb: get
+  - verb: get
+    path: /users
     handler: handleSearch
     description: Retrieves the list of users.
-  - path: /users/:userID
-    verb: get
+  - verb: get
+    path: /users/:userID
     description: Retrieves the specified user.
-  - path: /users/:userID
-    verb: put
+  - verb: put
+    path: /users/:userID
     description: Updates the specified user.

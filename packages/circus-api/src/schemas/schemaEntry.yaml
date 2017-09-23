@@ -1,0 +1,20 @@
+$schema: 'http://json-schema.org/schema#'
+id: schemaEntry
+title: SchemaEntry
+type: object
+properties:
+  key:
+    type: string
+    description: Property key. It's expected to be (but not required to be) alphanumerical.
+  caption:
+    type: string
+    description: Caption that corresponds to the key.
+  type:
+    type: string
+    enum: ['text', 'number', 'boolean', 'select']
+    description: The type of this property.
+  spec:
+    type: object
+    description: Additional parameters for this property entry.
+required: ['key', 'type']
+additionalProperties: false

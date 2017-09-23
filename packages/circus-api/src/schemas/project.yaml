@@ -1,0 +1,52 @@
+$schema: 'http://json-schema.org/schema#'
+id: project
+title: Project
+type: object
+properties:
+  projectId:
+    type: string
+    description: >
+      :key: Randomly-generated project ID. It must be globally unique.
+  projectName:
+    type: string
+    maxLength: 64
+    description: >
+      Short name for this project.
+  description:
+    type: string
+    description: >
+      Optinal arbitrary text to explain this project.
+  tags:
+    type: array
+    items: { type: 'object' }
+  caseAttributesSchema:
+    type: array
+    items: { $ref: 'schemaEntry' }
+  labelAttributesSchema:
+    type: array
+    items: { $ref: 'schemaEntry' }
+  windowPresets:
+    type: array
+    items:
+      type: object
+      properties:
+        label: { type: 'string' }
+        level: { type: 'number' }
+        width: { type: 'number' }
+      required: ['label', 'level', 'width']
+  windowPriority:
+    type: string
+    enum: ['dicom,auto', 'auto']
+  groups:
+    type: array
+    items: { type: number }
+required:
+  - projectId
+  - projectName
+  - tags
+  - caseAttributesSchema
+  - labelAttributesSchema
+  - windowPresets
+  - windowPriority
+  - groups
+additionalProperties: false

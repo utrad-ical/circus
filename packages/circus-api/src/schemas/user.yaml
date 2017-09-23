@@ -7,7 +7,7 @@ properties:
     type: string
     format: email
     description: >
-      User's E-mail address. It works as a global identifier of the user.
+      :key: User's E-mail address. It works as a global identifier of the user.
       Once you have created a user, `userEmail` cannot be changed.
   loginId:
     type: string

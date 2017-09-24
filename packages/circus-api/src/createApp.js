@@ -3,31 +3,49 @@ import bodyParser from 'koa-bodyparser';
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import { safeLoad as yaml } from 'js-yaml';
-import pify from 'pify';
-import _glob from 'glob';
+import glob from 'glob-promise';
 import Router from 'koa-router';
-import errorHandler from './errorHandler';
+import errorHandler from './middleware/errorHandler';
 import createValidator from './validation/createValidator';
 import validateInOut from './validation/validateInOut';
 import compose from 'koa-compose';
 // import validateInput from './validation/validateInput';
 
-const glob = pify(_glob);
+function typeCheck(expectedType = 'application/json') {
+	return async function typeCheck(ctx, next) {
+		if (!/^(POST|PUT|PATCH)$/.test(ctx.request.method) || ctx.request.body.length === 0) {
+			await next();
+			return;
+		}
 
-function registerApiRoute(router, validator, dir, route) {
-	const handler = route.handler ? route.handler : defaultHandlerName(route.verb);
+		if (typeof ctx.request.type !== 'string' || ctx.request.type.length === 0) {
+			ctx.throw(401, 'Content-type is unspecified.');
+			return;
+		}
 
-	const middlewareStack = compose([
-		validateInOut(validator, route.requestSchema, route.responseSchema),
-		require(dir)[handler] // The processing function itself
-	]);
-
-	console.log(`  Register ${route.verb.toUpperCase()} on ${route.path}`);
-	router[route.verb](route.path, middlewareStack);
+		const contentType = /^([^;]*)/.exec(ctx.request.type)[1];
+		if (contentType !== expectedType) {
+			ctx.throw(415, 'This content-type is unsupported.');
+			return;
+		}
+		await next();
+	};
 }
 
-function defaultHandlerName(verb) {
-	return 'handle' + verb[0].toUpperCase() + verb.substr(1);
+function handlerName(route) {
+	if (route.handler) return route.handler;
+	return 'handle' + route.verb[0].toUpperCase() + route.verb.substr(1);
+}
+
+function registerApiRoute(router, validator, dir, route) {
+	const middlewareStack = compose([
+		typeCheck(route.expectedContentType),
+		validateInOut(validator, route.requestSchema, route.responseSchema),
+		require(dir)[handlerName(route)] // The processing function itself
+	]);
+
+	// console.log(`  Register ${route.verb.toUpperCase()} on ${route.path}`);
+	router[route.verb](route.path, middlewareStack);
 }
 
 /**
@@ -39,10 +57,18 @@ export default async function createApp() {
 	const koa = new Koa();
 
 	const validator = await createValidator();
+
+	// ***** Prepare some tiny middleware functions ***
+	// InjectValidator makes validator availabe
 	const injectValidator = async (ctx, next) => {
 		ctx.state.validator = validator;
 		await next();
 	};
+	
+	const parser = bodyParser({
+		enableTypes: ['json'],
+		onerror: (err, ctx) => ctx.throw(400, 'Invalid JSON as request body.\n' + err.message)
+	});
 
 	// Build a router.
 	// Register each API endpoints to the router according YAML manifest files.
@@ -61,7 +87,7 @@ export default async function createApp() {
 
 	// Register middleware stack to the Koa app.
 	koa.use(errorHandler()); // Formats any error into JSON
-	koa.use(bodyParser({ enableTypes: ['json'] })); // Parses JSON request body
+	koa.use(parser); // Parses JSON request body
 	koa.use(injectValidator); // Makes validator available on all subsequent middleware
 	koa.use(router.routes()); // Handles requests according to URL path
 

@@ -1,7 +1,7 @@
 import createValidator from '../src/validation/createValidator';
 import { assert } from 'chai';
 
-describe('validator', function() {
+describe('Validator', function() {
 	let validator;
 
 	before(async function() {

@@ -67,6 +67,7 @@ export default async function createApp() {
 	
 	const parser = bodyParser({
 		enableTypes: ['json'],
+		jsonLimit: '1mb',
 		onerror: (err, ctx) => ctx.throw(400, 'Invalid JSON as request body.\n' + err.message)
 	});
 

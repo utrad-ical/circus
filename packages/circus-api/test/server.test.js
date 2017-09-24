@@ -72,4 +72,20 @@ describe('Basic server behavior', function() {
 		}
 		throw new Error('Server did not raise an error.');
 	});
+	
+	it('should return 400 for huge JSON > 1mb', async function() {
+		try {
+			const bigData = { foo: 'A'.repeat(1024 * 1024) };
+			await axios.request({
+				method: 'post',
+				url: serverUrl + 'echo',
+				data: bigData
+			});
+		} catch(err) {
+			assert.exists(err.response);
+			assert.equal(err.response.status, 400);
+			return;
+		}
+		throw new Error('Server did not raise an error.');
+	});
 });

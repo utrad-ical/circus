@@ -9,7 +9,7 @@ describe('Basic server behavior', function() {
 	let server;
 
 	before(function(done) {
-		createApp().then(app => {
+		createApp({ debug: true }).then(app => {
 			server = app.listen(
 				port,
 				'localhost',

@@ -3,8 +3,10 @@ description: Shows server status
 routes:
   - verb: get
     path: /status
+    forDebug: true
     description: Shows server status.
   - verb: post
     path: /echo
+    forDebug: true
     handler: handleEcho
     description: Echoes what's in the input JSON.

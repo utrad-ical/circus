@@ -37,22 +37,13 @@ function handlerName(route) {
 	return 'handle' + route.verb[0].toUpperCase() + route.verb.substr(1);
 }
 
-function registerApiRoute(router, validator, dir, route) {
-	const middlewareStack = compose([
-		typeCheck(route.expectedContentType),
-		validateInOut(validator, route.requestSchema, route.responseSchema),
-		require(dir)[handlerName(route)] // The processing function itself
-	]);
-
-	// console.log(`  Register ${route.verb.toUpperCase()} on ${route.path}`);
-	router[route.verb](route.path, middlewareStack);
-}
-
 /**
  * Creates a new Koa app.
  * @return A new Koa application.
  */
-export default async function createApp() {
+export default async function createApp(options = {}) {
+	const { debug } = options;
+
 	// The main Koa instance.
 	const koa = new Koa();
 
@@ -82,7 +73,14 @@ export default async function createApp() {
 		const data = yaml(await fs.readFile(manifestFile, 'utf8'));
 		const dir = path.dirname(manifestFile);
 		for (const route of data.routes) {
-			registerApiRoute(router, validator, dir, route);
+			if (route.forDebug && !debug) continue;
+			const middlewareStack = compose([
+				typeCheck(route.expectedContentType),
+				validateInOut(validator, route.requestSchema, route.responseSchema),
+				require(dir)[handlerName(route)] // The processing function itself
+			]);
+			// console.log(`  Register ${route.verb.toUpperCase()} on ${route.path}`);
+			router[route.verb](route.path, middlewareStack);
 		}
 	}
 

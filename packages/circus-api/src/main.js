@@ -43,7 +43,11 @@ const { host, port } = (() => {
 	}
 })();
 
-createApp().then(koaApp => {
+const serverOptions = {
+	debug: process.env.NODE_ENV !== 'production'
+};
+
+createApp(serverOptions).then(koaApp => {
 	koaApp.listen(port, host, (err) => {
 		if (err) throw err;
 		console.log(`Server running on port ${host}:${port}`);

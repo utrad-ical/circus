@@ -88,4 +88,14 @@ describe('Basic server behavior', function() {
 		}
 		throw new Error('Server did not raise an error.');
 	});
+	
+	describe('Echo', function() {
+		it('should return input data as-is', async function() {
+			const data = { a: 10, b: 'test', c: { d: 999, e: 'TEST' } };
+			const res = await axios.post(serverUrl + 'echo', data);
+			assert.deepEqual(res.data, data);
+		});
+	});
+
+
 });

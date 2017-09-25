@@ -16,7 +16,7 @@ rules:
     - { blankLine: 'always', prev: 'function', next: 'function' }
     - { blankLine: 'always', prev: 'import', next: '*' }
     - { blankLine: 'any', prev: 'import', next: 'import' }
-  no-unused-vars: [2, { argsIgnorePattern: 'props' }]
+  no-unused-vars: [2, { argsIgnorePattern: 'next' }]
   no-useless-escape: [0]
   semi: [2, 'always']
   no-var: 'error'

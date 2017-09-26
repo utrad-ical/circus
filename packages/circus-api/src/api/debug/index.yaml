@@ -13,3 +13,8 @@ routes:
     forDebug: true
     handler: handleEcho
     description: Echoes what's in the input JSON.
+  - verb: get
+    path: /dummy-progress
+    forDebug: true
+    handler: handleDummyProgress
+    description: Returns mock progress event stream.

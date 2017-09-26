@@ -1,5 +1,5 @@
 $schema: 'http://json-schema.org/schema#'
-id: project
+$async: true
 title: Project
 type: object
 properties:

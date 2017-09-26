@@ -53,7 +53,7 @@ export default async function createApp(options = {}) {
 	// The main Koa instance.
 	const koa = new Koa();
 
-	const validator = await createValidator();
+	const validator = await createValidator(path.resolve(__dirname, 'schemas'));
 
 	// ***** Prepare some tiny middleware functions ***
 	// InjectValidator makes validator availabe

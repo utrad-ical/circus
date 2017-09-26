@@ -1,0 +1,18 @@
+id: sample
+$async: true
+description: >
+  Test schema for unit testing.
+type: object
+properties:
+  intVal:
+    type: number
+    default: 5
+  strVal:
+    type: string
+    default: 'biscuit'
+  dicomUid:
+    type: string
+    format: dicomUid
+  multiRange:
+    type: string
+    format: multiIntegerRange

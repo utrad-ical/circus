@@ -19,12 +19,18 @@ export async function handleDummyProgress(ctx, next) {
 	ctx.body = stream;
 	ctx.type = 'text/event-stream';
 
-	for (let i = 0; i <= 10; i++) {
-		await delay(500);
-		stream.write(
-			'event: progress\n' +
-			'data: ' + JSON.stringify({ progress: i * 10 }) + '\n\n'
-		);
-	}
-	stream.end();
+	Promise.resolve().then(async () => {
+		for (let i = 0; i <= 50; i++) {
+			await delay(100);
+			const data = {
+				progress: i * 2,
+				message: `${i * 2}% done.`
+			};
+			stream.write(
+				'event: progress\n' +
+				'data: ' + JSON.stringify(data) + '\n\n'
+			);
+		}
+		stream.end('event: complete\n\n');
+	});
 }

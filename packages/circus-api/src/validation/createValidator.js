@@ -5,7 +5,8 @@ import yaml from 'js-yaml';
 import * as path from 'path';
 
 /**
- * Creates the validator instance that knows all the schemas
+ * Creates the validator wrapping AJV instance.
+ * This validator knows all the schemas under the 'schemas' directory
  * and can be used throughtout the API server.
  * The resulting object has two similar methods, `validate` and `validateWithDefaults`.
  */
@@ -57,7 +58,7 @@ export default async function createValidator(schemaRoot) {
 		formats,
 		schemas
 	};
-	
+
 	// We will keep two Avj instances with different options
 	// because Ajv does not allow changing options after `new Ajv()`.
 	const ajv = new Ajv(ajvOpts);

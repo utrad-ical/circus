@@ -51,6 +51,12 @@ describe('Validator', function() {
 		const modified = await validator.validateWithDefaults('sample', testData);
 		assert.deepEqual(modified, { intVal: 5, strVal: 'biscuit' });
 	});
+	
+	it('should retrieve schema by key', async function() {
+		const schema = await validator.getSchema('sample');
+		assert.isFunction(schema);
+		assert.isObject(schema.schema);
+	});
 
 });
 

@@ -71,6 +71,9 @@ export default async function createValidator(schemaRoot) {
 		validateWithDefaults() {
 			return ajvWithDefaults.validate.apply(ajvWithDefaults, arguments);
 		},
+		getSchema() {
+			return ajv.getSchema.apply(ajv, arguments);
+		},
 		allRequired
 	};
 }

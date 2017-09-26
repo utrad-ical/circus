@@ -58,7 +58,7 @@ export default async function createApp(options = {}) {
 	// ***** Prepare some tiny middleware functions ***
 	// InjectValidator makes validator availabe
 	const injectValidator = async (ctx, next) => {
-		ctx.state.validator = validator;
+		ctx.validator = validator;
 		await next();
 	};
 

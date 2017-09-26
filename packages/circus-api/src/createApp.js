@@ -9,7 +9,7 @@ import errorHandler from './middleware/errorHandler';
 import createValidator from './validation/createValidator';
 import validateInOut from './validation/validateInOut';
 import compose from 'koa-compose';
-// import validateInput from './validation/validateInput';
+import Ajv from 'ajv';
 
 function typeCheck(expectedType = 'application/json') {
 	return async function typeCheck(ctx, next) {
@@ -35,6 +35,12 @@ function typeCheck(expectedType = 'application/json') {
 function handlerName(route) {
 	if (route.handler) return route.handler;
 	return 'handle' + route.verb[0].toUpperCase() + route.verb.substr(1);
+}
+
+function formatValidationErrors(errors) {
+	return errors.map(err => (
+		`${err.dataPath} ${err.message}`
+	)).join('\n');
 }
 
 /**
@@ -66,11 +72,21 @@ export default async function createApp(options = {}) {
 	// Register each API endpoints to the router according YAML manifest files.
 	const router = new Router();
 
-	const apiDir = path.resolve(__dirname, 'api/**/*.yaml');
+	const apiDir = path.resolve(__dirname, 'api/*/*.yaml');
 	const manifestFiles = await glob(apiDir);
+
+	const ajv = new Ajv({ allErrors: true });
+	const metaSchema = path.resolve(__dirname, 'api/schema.yaml');
+	const schemaValidator = ajv.compile(yaml(await fs.readFile(metaSchema)));
 
 	for(const manifestFile of manifestFiles) {
 		const data = yaml(await fs.readFile(manifestFile, 'utf8'));
+		if (!schemaValidator(data)) {
+			throw new TypeError(
+				`Meta schema error at ${manifestFile}.\n` +
+				formatValidationErrors(schemaValidator.errors)
+			);
+		}
 		const dir = path.dirname(manifestFile);
 		for (const route of data.routes) {
 			if (route.forDebug && !debug) continue;

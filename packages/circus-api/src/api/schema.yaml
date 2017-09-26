@@ -1,0 +1,46 @@
+title: apiSchema
+description: >
+  This is a meta-schema that explains the format of API manifest yaml files
+  under `api/*/index.yaml`.
+properties:
+  description: { type: 'string' }
+  routes:
+    type: array
+    items:
+      type: object
+      properties:
+        verb:
+          type: string
+          enum: ['get', 'put', 'post', 'patch', 'delete']
+          description: HTTP verb of this route.
+        path:
+          type: string
+          description: HTTP URL path of this route.
+        handler:
+          type: string
+          description: >
+            Handle fucntion name. If omitted, default value is determined
+            from the verb (eg. "handleGet", "handlePatch").
+        description:
+          type: string
+          description: >
+            API description. Parsed as markdown, appears as API reference.
+        requestMimeType:
+          type: string
+          default: 'application/json'
+        requestSchema:
+          type: ['object', 'string']
+          description: >
+            JSON Schema of the HTTP request JSON.
+            A string value represents the ID of the schema,
+            whereas an object value represents an actual JSON schema
+            (you can still use `$ref` to reference external schema).
+        responseSchema:
+          type: ['object', 'string']
+          description: >
+            JSON Schema of the HTTP response JSON.
+            A string value represents the ID of the schema,
+            whereas an object value represents an actual JSON schema
+            (you can still use `$ref` to reference external schema).
+      required: ['verb', 'path']
+required: ['routes']

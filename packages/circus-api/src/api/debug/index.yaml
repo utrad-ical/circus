@@ -1,0 +1,15 @@
+name: debug
+description: >
+  This is a collection of several debugging routes.
+  These endpoints are turned off if the environment variable `NODE_ENV` is
+  `production`. Enabling these endpoints on production can be a security hole.
+routes:
+  - verb: get
+    path: /status
+    forDebug: true
+    description: Shows some server status.
+  - verb: post
+    path: /echo
+    forDebug: true
+    handler: handleEcho
+    description: Echoes what's in the input JSON.

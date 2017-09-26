@@ -61,7 +61,12 @@ export default async function createApp(options = {}) {
 		ctx.state.validator = validator;
 		await next();
 	};
-	
+
+	const cors = async(ctx, next) => {
+		ctx.response.set('Access-Control-Allow-Origin', '*');
+		await next();
+	};
+
 	const parser = bodyParser({
 		enableTypes: ['json'],
 		jsonLimit: '1mb',
@@ -90,10 +95,14 @@ export default async function createApp(options = {}) {
 		const dir = path.dirname(manifestFile);
 		for (const route of data.routes) {
 			if (route.forDebug && !debug) continue;
+			const mainHandler = require(dir)[handlerName(route)];
+			if (typeof mainHandler !== 'function') {
+				throw new Error('middleware not found');
+			}
 			const middlewareStack = compose([
 				typeCheck(route.expectedContentType),
 				validateInOut(validator, route.requestSchema, route.responseSchema),
-				require(dir)[handlerName(route)] // The processing function itself
+				mainHandler // The processing function itself
 			]);
 			// console.log(`  Register ${route.verb.toUpperCase()} on ${route.path}`);
 			router[route.verb](route.path, middlewareStack);
@@ -102,6 +111,7 @@ export default async function createApp(options = {}) {
 
 	// Register middleware stack to the Koa app.
 	koa.use(errorHandler()); // Formats any error into JSON
+	koa.use(cors); // Ensures the API can be invoked from anywhere
 	koa.use(parser); // Parses JSON request body
 	koa.use(injectValidator); // Makes validator available on all subsequent middleware
 	koa.use(router.routes()); // Handles requests according to URL path

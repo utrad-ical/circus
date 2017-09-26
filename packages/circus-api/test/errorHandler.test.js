@@ -43,6 +43,10 @@ describe('errorHandler middleware', function() {
 		router.get('/server-side-error', async ctx => {
 			ctx.body = null.foo;
 		});
+		
+		router.get('/error-403', async ctx => {
+			ctx.throw(403, 'no!');
+		});
 
 		app.use(router.routes());
 		server = app.listen(
@@ -117,6 +121,20 @@ describe('errorHandler middleware', function() {
 		} catch (err) {
 			assert.equal(err.response.status, 500);
 			assert.exists(err.response.data.stack);
+			return;
+		}
+		throw new Error();
+	});
+
+	it('should return 403 for server-side run-time error', async function() {
+		try {
+			await axios.request({
+				url: serverUrl + 'error-403',
+				method: 'get'
+			});
+		} catch (err) {
+			assert.equal(err.response.status, 403);
+			assert.equal(err.response.data.error, 'no!');
 			return;
 		}
 		throw new Error();

@@ -95,7 +95,8 @@ export default async function createApp(options = {}) {
 		const dir = path.dirname(manifestFile);
 		for (const route of data.routes) {
 			if (route.forDebug && !debug) continue;
-			const mainHandler = require(dir)[handlerName(route)];
+			const module = await import(dir);
+			const mainHandler = module[handlerName(route)];
 			if (typeof mainHandler !== 'function') {
 				throw new Error('middleware not found');
 			}

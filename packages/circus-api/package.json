@@ -4,7 +4,7 @@
   "description": "CIRCUS JSON API Server using Koa",
   "main": "server.js",
   "scripts": {
-    "test": "mocha --compilers js:babel-register",
+    "test": "mocha",
     "lint": "eslint src test"
   },
   "repository": {

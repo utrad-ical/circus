@@ -38,7 +38,7 @@ export async function serverThrowsWithState(promise, status, pattern) {
 		if (pattern) {
 			assert.match(err.response.data.error, pattern);
 		}
-		return;
+		return err; // returned as a resolved value to further investigate it
 	}
-	throw new Error('Server did not throw an error');
+	throw new Error('Server did not throw any error');
 }

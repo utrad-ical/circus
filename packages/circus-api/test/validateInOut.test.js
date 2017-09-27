@@ -14,7 +14,7 @@ describe('validateInOut middleware', function() {
 		server = await setUpKoa(async app => {
 			const validator = await createValidator(path.join(__dirname, 'test-schemas'));
 			const router = new Router();
-	
+
 			router.post(
 				'/no-check',
 				validateInOut(validator),
@@ -30,24 +30,26 @@ describe('validateInOut middleware', function() {
 				validateInOut(validator, null, 'sample'),
 				async ctx => ctx.body = ctx.request.body
 			);
-			
+
 			app.use(bodyParser());
 			app.use(errorHandler(true));
 			app.use(router.routes());
 		});
 	});
-	
+
 	after(async function() {
 		await tearDownKoa(server);
 	});
-	
-	it('should perform input validation', async function() {
+
+	it('should pass input validation', async function() {
 		await axios.request({
 			url: server.url + 'in-check',
 			method: 'post',
 			data: { intVal: 5 }
 		});
+	});
 
+	it('should fail input validation', async function() {
 		await serverThrowsWithState(
 			axios.request({
 				url: server.url + 'in-check',
@@ -57,14 +59,16 @@ describe('validateInOut middleware', function() {
 			400
 		);
 	});
-	
-	it('should perform output validation', async function() {
+
+	it('should pass output validation', async function() {
 		await axios.request({
 			url: server.url + 'out-check',
 			method: 'post',
 			data: { intVal: 5 }
 		});
+	});
 
+	it('should fail output validation', async function() {
 		await serverThrowsWithState(
 			axios.request({
 				url: server.url + 'out-check',

@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "test": "mocha --compilers js:babel-register",
-    "lint": "eslint src"
+    "lint": "eslint src test"
   },
   "repository": {
     "type": "git",

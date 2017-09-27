@@ -8,6 +8,7 @@ parserOptions:
 env:
   es6: true
   node: true
+  mocha: true
 rules:
   indent: [2, 'tab', { SwitchCase: 1 }]
   quotes: [2, 'single', { avoidEscape: true }]
@@ -16,7 +17,7 @@ rules:
     - { blankLine: 'always', prev: 'function', next: 'function' }
     - { blankLine: 'always', prev: 'import', next: '*' }
     - { blankLine: 'any', prev: 'import', next: 'import' }
-  no-unused-vars: [2, { argsIgnorePattern: 'next' }]
+  no-unused-vars: [2, { argsIgnorePattern: '^(ctx|next)$' }]
   no-useless-escape: [0]
   semi: [2, 'always']
   no-var: 'error'

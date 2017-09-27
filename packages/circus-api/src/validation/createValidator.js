@@ -34,8 +34,7 @@ export default async function createValidator(schemaRoot) {
 			throw new TypeError('Unsupported JSON schema');
 		}
 		const props =
-			Object.keys(schema.properties)
-			.filter(p => except.indexOf(p) < 0);
+			Object.keys(schema.properties).filter(p => except.indexOf(p) < 0);
 		return { $async: true, allOf: [ schema, { required: props } ] };
 	};
 

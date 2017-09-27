@@ -6,7 +6,7 @@ import { serverThrowsWithState } from './koa-test';
 const port = process.env.API_TEST_PORT || 8081;
 
 describe('Basic server behavior', function() {
-	let serverUrl = `http://localhost:${port}/`;
+	const serverUrl = `http://localhost:${port}/`;
 	let server;
 
 	before(function(done) {

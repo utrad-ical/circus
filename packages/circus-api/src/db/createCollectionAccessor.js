@@ -1,15 +1,21 @@
 /**
- * Basic wrapper for Mongo collection that performs validation tasks
+ * Basic wrapper for Mongo collection that performs validation tasks.
  */
 export default function createCollectionAccessor(db, opts) {
 	const { validator, schema, collectionName, primaryKey } = opts;
 	const collection = db.collection(collectionName);
 
+	/**
+	 * Inserts a single document after validation.
+	 */
 	async function insert(data) {
 		await validator.validate(schema, data); // Any error is thrown
 		return await collection.insertOne.apply(collection, arguments);
 	}
 
+	/**
+	 * Inserts multiple documents after validation.
+	 */
 	async function insertMany(data) {
 		for (const doc of data) {
 			await validator.validate(schema, doc);
@@ -17,17 +23,26 @@ export default function createCollectionAccessor(db, opts) {
 		return await collection.insertMany.apply(collection, arguments);
 	}
 
+	/**
+	 * Fetches documents that matches the given query as an array.
+	 * The `_id` field will not be included.
+	 */
 	async function findAll() {
-		const results = await collection.find.apply(collection, arguments).toArray();
+		const results = await collection.find.apply(collection, arguments)
+			.project({ _id: 0 }).toArray();
 		for (const doc of results) {
 			await validator.validate(schema, doc);
 		}
 		return results;
 	}
 
-	async function getOne(id) {
+	/**
+	 * Fetches the single document that matches the primary key.
+	 */
+	async function findById(id) {
 		const key = primaryKey ? primaryKey : '_id';
-		const docs = await collection.find({ [key]: id }).limit(1).toArray();
+		const docs = await collection.find({ [key]: id })
+			.project({ _id: 0 }).limit(1).toArray();
 		const result = docs[0];
 		if (result !== undefined) {
 			await validator.validate(schema, result);
@@ -35,8 +50,12 @@ export default function createCollectionAccessor(db, opts) {
 		return result;
 	}
 
-	async function getOneAndFail(id) {
-		const result = await getOne(id);
+	/**
+	 * Fetches the single document by the primary key.
+	 * Throws an error with 404 status if nothing found.
+	 */
+	async function findByIdOrFail(id) {
+		const result = await findById(id);
 		if (result === undefined) {
 			const err = new Error('The requested resource was not found.');
 			err.status = 404;
@@ -46,6 +65,9 @@ export default function createCollectionAccessor(db, opts) {
 		return result;
 	}
 
+	/**
+	 * Modifies the document by the primary key.
+	 */
 	async function modifyOne(id, update) {
 		const key = primaryKey ? primaryKey : '_id';
 		const result = await collection.findOneAndUpdate(
@@ -59,15 +81,16 @@ export default function createCollectionAccessor(db, opts) {
 
 	// These methods are exposed as-is for now
 	const passthrough = ['find', 'deleteMany', 'deleteOne'];
-
-	const methods = {};
-	passthrough.forEach(method => methods[method] = collection[method].bind(collection));
+	const boundPassthrough = {};
+	passthrough.forEach(method => {
+		boundPassthrough[method] = collection[method].bind(collection);
+	});
 
 	return {
-		...methods,
+		...boundPassthrough,
 		findAll,
-		getOne,
-		getOneAndFail,
+		findById,
+		findByIdOrFail,
 		insert,
 		insertMany,
 		modifyOne

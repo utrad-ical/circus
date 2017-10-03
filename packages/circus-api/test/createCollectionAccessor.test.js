@@ -92,16 +92,17 @@ describe('createCollectionAccessor', function() {
 	});
 
 	describe('#findAll', function() {
-		it('should find an array of matched documents', async function() {
+		it('should find an array of matched documents without _id', async function() {
 			const result = await testCollection.findAll({ intVal: 4 });
 			assert.isArray(result);
 			assert(result.length == 2);
 			assert.equal(result[0].strVal, 'Uzuki');
+			assert.isUndefined(result[0]._id);
 		});
 
 		it('should return an empty array if nothing matched', async function() {
-			const result2 = await testCollection.findAll({ intVal: 13 });
-			assert.deepEqual(result2, []);
+			const result = await testCollection.findAll({ intVal: 13 });
+			assert.deepEqual(result, []);
 		});
 	});
 
@@ -113,25 +114,27 @@ describe('createCollectionAccessor', function() {
 		});
 	});
 
-	describe('#getOne', function() {
-		it('should return valid data when primary key is given', async function() {
-			const result = await testCollection.getOne(3);
+	describe('#findById', function() {
+		it('should return valid data without _id for the given primary key', async function() {
+			const result = await testCollection.findById(3);
 			assert.equal(result.strVal, 'Yayoi');
+			assert.isUndefined(result._id);
 		});
 
 		it('should raise an error when trying to load corrupted data', async function() {
-			await shouldFail(async () => await testCollection.getOneAndFail(7), ValidationError);
+			await shouldFail(async () => await testCollection.findByIdOrFail(7), ValidationError);
 		});
 	});
 
-	describe('#getOneAndFail', function() {
+	describe('#findByIdOrFail', function() {
 		it('should return valid data when primary key is given', async function() {
-			const result = await testCollection.getOne(3);
+			const result = await testCollection.findByIdOrFail(3);
 			assert.equal(result.strVal, 'Yayoi');
+			assert.isUndefined(result._id);
 		});
 
 		it('should throw when trying to load nonexistent data', async function() {
-			await shouldFail(async () => await testCollection.getOneAndFail(13));
+			await shouldFail(async () => await testCollection.findByIdOrFail(13));
 		});
 	});
 
@@ -139,8 +142,12 @@ describe('createCollectionAccessor', function() {
 		it('should perform mutation and returns the modified data', async function() {
 			const original = await testCollection.modifyOne(2, { $set: { strVal: 'Nigatsu' } });
 			assert.equal(original.strVal, 'Nigatsu');
-			const modified = await testCollection.getOne(2);
+			const modified = await testCollection.findById(2);
 			assert.equal(modified.strVal, 'Nigatsu');
+		});
+
+		it('should throw an error with invalid data', async function() {
+			shouldFail(async() => await testCollection.modifyOne(3, { strVal: 5 }), ValidationError);
 		});
 
 		it('should return null if nothing changed', async function() {

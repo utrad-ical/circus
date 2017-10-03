@@ -1,4 +1,3 @@
-id: sample
 $async: true
 description: >
   Test schema for unit testing.

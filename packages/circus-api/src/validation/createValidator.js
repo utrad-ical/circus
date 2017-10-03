@@ -44,7 +44,9 @@ export default async function createValidator(schemaRoot) {
 	for (const schemaFile of schemaFiles) {
 		const basename = path.basename(schemaFile, '.yaml');
 		const schemaData = yaml.safeLoad(await fs.readFile(schemaFile, 'utf8'));
-		schemaData.$async = true; // just to make sure
+		if (schemaData.$async !== true) {
+			throw new TypeError('All schema must be async');
+		}
 		schemas[basename] = schemaData;
 		schemas[basename + 'All'] = allRequired(schemaData);
 	}

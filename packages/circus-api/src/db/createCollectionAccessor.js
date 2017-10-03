@@ -10,6 +10,13 @@ export default function createCollectionAccessor(db, opts) {
 		return await collection.insertOne.apply(collection, arguments);
 	}
 
+	async function insertMany(data) {
+		for (const doc of data) {
+			await validator.validate(schema, doc);
+		}
+		return await collection.insertMany.apply(collection, arguments);
+	}
+
 	async function findAll() {
 		const results = await collection.find.apply(collection, arguments).toArray();
 		for (const doc of results) {
@@ -39,11 +46,30 @@ export default function createCollectionAccessor(db, opts) {
 		return result;
 	}
 
+	async function modifyOne(id, update) {
+		const key = primaryKey ? primaryKey : '_id';
+		const result = await collection.findOneAndUpdate(
+			{ [key]: id }, update, { returnOriginal: false }
+		);
+		if (result.value !== null) {
+			await validator.validate(schema, result.value);
+		}
+		return result.value;
+	}
+
 	// These methods are exposed as-is for now
 	const passthrough = ['find', 'deleteMany', 'deleteOne'];
 
 	const methods = {};
 	passthrough.forEach(method => methods[method] = collection[method].bind(collection));
 
-	return { ...methods, findAll, getOne, getOneAndFail, insert };
+	return {
+		...methods,
+		findAll,
+		getOne,
+		getOneAndFail,
+		insert,
+		insertMany,
+		modifyOne
+	};
 }

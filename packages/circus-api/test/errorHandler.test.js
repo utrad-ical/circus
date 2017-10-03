@@ -3,13 +3,13 @@ import axios from 'axios';
 import Router from 'koa-router';
 import Ajv from 'ajv';
 import { assert } from 'chai';
-import { setUpKoa, tearDownKoa, serverThrowsWithState } from './koa-test';
+import { setUpKoa, listenKoa, tearDownKoa, serverThrowsWithState } from './koa-test';
 
 describe('errorHandler middleware', function() {
 	let server;
 
 	before(async function() {
-		server = await setUpKoa(async app => {
+		const app = await setUpKoa(async app => {
 			const router = new Router();
 
 			router.get('/found', async ctx => {
@@ -44,6 +44,7 @@ describe('errorHandler middleware', function() {
 			app.use(errorHandler(true));
 			app.use(router.routes());
 		});
+		server = await listenKoa(app);
 	});
 
 	after(async function() {

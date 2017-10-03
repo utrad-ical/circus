@@ -1,21 +1,29 @@
 import Koa from 'koa';
 import { assert } from 'chai';
 
-export function setUpKoa(setUpFunc) {
-	const port = process.env.API_TEST_PORT || 8081;
+/**
+ * This is a helper module for tests using Koa server.
+ * @module
+ */
+
+export async function setUpKoa(setUpFunc) {
 	const app = new Koa();
-	return setUpFunc(app).then(() => {
-		return new Promise((resolve, reject) => {
-			const instance = app.listen(port, 'localhost', err => {
-				if (err) {
-					reject(err);
-				} else {
-					resolve({
-						url: `http://localhost:${port}/`,
-						instance
-					});
-				}
-			});
+	await setUpFunc(app);
+	return app;
+}
+
+export function listenKoa(koaApp) {
+	const port = process.env.API_TEST_PORT || 8081;
+	return new Promise((resolve, reject) => {
+		const instance = koaApp.listen(port, 'localhost', err => {
+			if (err) {
+				reject(err);
+			} else {
+				resolve({
+					url: `http://localhost:${port}/`,
+					instance
+				});
+			}
 		});
 	});
 }

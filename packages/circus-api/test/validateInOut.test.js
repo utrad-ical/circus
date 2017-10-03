@@ -5,13 +5,13 @@ import errorHandler from '../src/middleware/errorHandler';
 import axios from 'axios';
 import Router from 'koa-router';
 import * as path from 'path';
-import { setUpKoa, tearDownKoa, serverThrowsWithState } from './koa-test';
+import { setUpKoa, listenKoa, tearDownKoa, serverThrowsWithState } from './koa-test';
 
 describe('validateInOut middleware', function() {
 	let server;
 
 	before(async function() {
-		server = await setUpKoa(async app => {
+		const app = await setUpKoa(async app => {
 			const validator = await createValidator(path.join(__dirname, 'test-schemas'));
 			const router = new Router();
 
@@ -35,6 +35,7 @@ describe('validateInOut middleware', function() {
 			app.use(errorHandler(true));
 			app.use(router.routes());
 		});
+		server = await listenKoa(app);
 	});
 
 	after(async function() {

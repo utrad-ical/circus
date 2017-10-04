@@ -14,9 +14,9 @@ describe('createCollectionAccessor', function() {
 		db = await MongoClient.connect(url);
 		testCollection = await createCollectionAccessor(db, {
 			validator,
-			schema: 'sample',
+			schema: 'monthsAll',
 			collectionName: 'test',
-			primaryKey: 'intVal'
+			primaryKey: 'month'
 		});
 	});
 
@@ -25,11 +25,11 @@ describe('createCollectionAccessor', function() {
 			const col = db.collection('test');
 			await col.deleteMany({});
 			await col.insertMany([
-				{ intVal: 2, strVal: 'Kisaragi' },
-				{ intVal: 3, strVal: 'Yayoi' },
-				{ intVal: 4, strVal: 'Uzuki' },
-				{ intVal: 4, strVal: 'Uzuki' }, // dupe!
-				{ intVal: 7, strVal: true } // invalid data!
+				{ month: 2, name: 'Kisaragi' },
+				{ month: 3, name: 'Yayoi' },
+				{ month: 4, name: 'Uzuki' },
+				{ month: 4, name: 'Uzuki' }, // dupe!
+				{ month: 7, name: true } // invalid data!
 			]);
 		}
 	});
@@ -54,38 +54,38 @@ describe('createCollectionAccessor', function() {
 
 	describe('#insert', function() {
 		it('should insert a single document after successful validation', async function() {
-			await testCollection.insert({ intVal: 8, strVal: 'Hazuki' });
-			const result = await db.collection('test').find({ intVal: 8 }).toArray();
-			assert.isArray(result);
-			assert(result.length == 1);
-			assert.equal(result[0].strVal, 'Hazuki');
+			await testCollection.insert({ month: 8, name: 'Hazuki' });
+			const result = await db.collection('test').find({ month: 8 }).project({ _id: 0 }).toArray();
+			assert.deepEqual(result, [{ month: 8, name: 'Hazuki' }]);
 		});
 
 		it('should raise an error on trying to insert invalid data', async function() {
-			await shouldFail(async() => await testCollection.insert({ intVal: 'hello', strVal: 10 }));
+			await shouldFail(async() => await testCollection.insert({ month: 'hello', name: 10 }));
+			await shouldFail(async() => await testCollection.insert({ month: 5 }));
+			await shouldFail(async() => await testCollection.insert({ }));
 		});
 	});
 
 	describe('#insertMany', function() {
 		it('should insert multiple documents after successful validation', async function() {
 			await testCollection.insertMany([
-				{ intVal: 6, strVal: 'Minazuki' },
-				{ intVal: 8, strVal: 'Hazuki' }
+				{ month: 6, name: 'Minazuki' },
+				{ month: 8, name: 'Hazuki' }
 			]);
 			const result = await db.collection('test').find(
-				{ $or: [ { intVal: 6 }, { intVal: 8 } ] }
-			).project({ _id: false }).sort({ intVal: 1 }).toArray();
+				{ $or: [ { month: 6 }, { month: 8 } ] }
+			).project({ _id: false }).sort({ month: 1 }).toArray();
 			assert.deepEqual(result, [
-				{ intVal: 6, strVal: 'Minazuki' },
-				{ intVal: 8, strVal: 'Hazuki' }
+				{ month: 6, name: 'Minazuki' },
+				{ month: 8, name: 'Hazuki' }
 			]);
 		});
 
 		it('should throw when validation fails', async function() {
 			await shouldFail(async() => {
 				await testCollection.insertMany([
-					{ intVal: 6, strVal: 'Minazuki' },
-					{ intVal: 8, strVal: 17 }
+					{ month: 6, name: 'Minazuki' },
+					{ month: 8, name: 17 }
 				]);
 			});
 		});
@@ -93,23 +93,23 @@ describe('createCollectionAccessor', function() {
 
 	describe('#findAll', function() {
 		it('should find an array of matched documents without _id', async function() {
-			const result = await testCollection.findAll({ intVal: 4 });
-			assert.isArray(result);
-			assert(result.length == 2);
-			assert.equal(result[0].strVal, 'Uzuki');
-			assert.isUndefined(result[0]._id);
+			const result = await testCollection.findAll({ month: 4 });
+			assert.deepEqual(
+				result,
+				[{ month: 4, name: 'Uzuki' }, { month: 4, name: 'Uzuki' }]
+			);
 		});
 
 		it('should return an empty array if nothing matched', async function() {
-			const result = await testCollection.findAll({ intVal: 13 });
+			const result = await testCollection.findAll({ month: 13 });
 			assert.deepEqual(result, []);
 		});
 	});
 
 	describe('#deleteMany', function() {
 		it('should delete multiple documents at once', async function() {
-			await testCollection.deleteMany({ intVal: 4 });
-			const shouldBeEmpty = await testCollection.findAll({ intVal: 4 });
+			await testCollection.deleteMany({ month: 4 });
+			const shouldBeEmpty = await testCollection.findAll({ month: 4 });
 			assert.deepEqual(shouldBeEmpty, []);
 		});
 	});
@@ -117,7 +117,7 @@ describe('createCollectionAccessor', function() {
 	describe('#findById', function() {
 		it('should return valid data without _id for the given primary key', async function() {
 			const result = await testCollection.findById(3);
-			assert.equal(result.strVal, 'Yayoi');
+			assert.equal(result.name, 'Yayoi');
 			assert.isUndefined(result._id);
 		});
 
@@ -129,7 +129,7 @@ describe('createCollectionAccessor', function() {
 	describe('#findByIdOrFail', function() {
 		it('should return valid data when primary key is given', async function() {
 			const result = await testCollection.findByIdOrFail(3);
-			assert.equal(result.strVal, 'Yayoi');
+			assert.equal(result.name, 'Yayoi');
 			assert.isUndefined(result._id);
 		});
 
@@ -140,18 +140,18 @@ describe('createCollectionAccessor', function() {
 
 	describe('#modifyOne', function() {
 		it('should perform mutation and returns the modified data', async function() {
-			const original = await testCollection.modifyOne(2, { $set: { strVal: 'Nigatsu' } });
-			assert.equal(original.strVal, 'Nigatsu');
+			const original = await testCollection.modifyOne(2, { $set: { name: 'Nigatsu' } });
+			assert.equal(original.name, 'Nigatsu');
 			const modified = await testCollection.findById(2);
-			assert.equal(modified.strVal, 'Nigatsu');
+			assert.equal(modified.name, 'Nigatsu');
 		});
 
 		it('should throw an error with invalid data', async function() {
-			shouldFail(async() => await testCollection.modifyOne(3, { strVal: 5 }), ValidationError);
+			shouldFail(async() => await testCollection.modifyOne(3, { name: 5 }), ValidationError);
 		});
 
 		it('should return null if nothing changed', async function() {
-			const noSuchMonth = await testCollection.modifyOne(13, { $set: { strVal: 'Pon' } });
+			const noSuchMonth = await testCollection.modifyOne(13, { $set: { name: 'Pon' } });
 			assert.isNull(noSuchMonth);
 		});
 	});

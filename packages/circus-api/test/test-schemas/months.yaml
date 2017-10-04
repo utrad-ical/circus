@@ -1,0 +1,10 @@
+$async: true
+description: >
+  Test schema for testing collectionAccessor.
+type: object
+properties:
+  month:
+    type: number
+    minValue: 1
+  name:
+    type: string

@@ -1,8 +1,8 @@
 /**
  * Basic wrapper for Mongo collection that performs validation tasks.
  */
-export default function createCollectionAccessor(db, opts) {
-	const { validator, schema, collectionName, primaryKey } = opts;
+export default function createCollectionAccessor(db, validator, opts) {
+	const { schema, collectionName, primaryKey } = opts;
 	const collection = db.collection(collectionName);
 
 	/**

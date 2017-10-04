@@ -2,6 +2,7 @@
 
 import dashdash from 'dashdash';
 import createApp from './createApp';
+import { MongoClient } from 'mongodb';
 
 const options = [
 	{
@@ -43,16 +44,25 @@ const { host, port } = (() => {
 	}
 })();
 
-const serverOptions = {
-	debug: process.env.NODE_ENV !== 'production'
-};
+async function main() {
+	// Establish db connection (shared throughout app)
+	const db = await MongoClient.connect(process.env.MONGO_URL);
 
-createApp(serverOptions).then(koaApp => {
-	koaApp.listen(port, host, (err) => {
-		if (err) throw err;
-		console.log(`Server running on port ${host}:${port}`);
-	});
-}).catch(err => {
-	console.error('Error during the server startup.');
-	console.error(err);
-});
+	const serverOptions = {
+		debug: process.env.NODE_ENV !== 'production',
+		db
+	};
+
+	try {
+		const koaApp = await createApp(serverOptions);
+		koaApp.listen(port, host, (err) => {
+			if (err) throw err;
+			console.log(`Server running on port ${host}:${port}`);
+		});
+	} catch(err) {
+		console.error('Error during the server startup.');
+		console.error(err);
+	};
+}
+
+main();

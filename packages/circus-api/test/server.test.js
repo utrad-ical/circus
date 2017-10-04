@@ -1,13 +1,14 @@
 import createApp from '../src/createApp';
 import axios from 'axios';
 import { assert } from 'chai';
-import { listenKoa, tearDownKoa, serverThrowsWithState } from './koa-test';
+import { listenKoa, tearDownKoa, serverThrowsWithState, connectMongo } from './koa-test';
 
 describe('Basic server behavior', function() {
 	let server;
 
 	before(async function() {
-		const koaApp = await createApp({ debug: true });
+		const db = await connectMongo();
+		const koaApp = await createApp({ debug: true, db });
 		server = await listenKoa(koaApp);
 	});
 

@@ -8,6 +8,7 @@ import Router from 'koa-router';
 import errorHandler from './middleware/errorHandler';
 import createValidator from './validation/createValidator';
 import validateInOut from './validation/validateInOut';
+import createModels from './db/createModels';
 import compose from 'koa-compose';
 import Ajv from 'ajv';
 
@@ -48,17 +49,20 @@ function formatValidationErrors(errors) {
  * @return A new Koa application.
  */
 export default async function createApp(options = {}) {
-	const { debug } = options;
+	const { debug, db } = options;
 
 	// The main Koa instance.
 	const koa = new Koa();
 
 	const validator = await createValidator(path.resolve(__dirname, 'schemas'));
+	const models = createModels(db, validator);
 
 	// ***** Prepare some tiny middleware functions ***
-	// InjectValidator makes validator availabe
-	const injectValidator = async (ctx, next) => {
+	// Injector makes some dependencies semi-globally availabe
+	const injector = async (ctx, next) => {
 		ctx.validator = validator;
+		ctx.db = db;
+		ctx.models = models;
 		await next();
 	};
 
@@ -114,7 +118,7 @@ export default async function createApp(options = {}) {
 	koa.use(errorHandler()); // Formats any error into JSON
 	koa.use(cors); // Ensures the API can be invoked from anywhere
 	koa.use(parser); // Parses JSON request body
-	koa.use(injectValidator); // Makes validator available on all subsequent middleware
+	koa.use(injector); // Makes validator available on all subsequent middleware
 	koa.use(router.routes()); // Handles requests according to URL path
 
 	return koa;

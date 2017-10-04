@@ -1,5 +1,7 @@
 import Koa from 'koa';
 import { assert } from 'chai';
+import { MongoClient } from 'mongodb';
+
 
 /**
  * This is a helper module for tests using Koa server.
@@ -49,4 +51,10 @@ export async function serverThrowsWithState(promise, status, pattern) {
 		return err; // returned as a resolved value to further investigate it
 	}
 	throw new Error('Server did not throw any error');
+}
+
+export async function connectMongo() {
+	const url = process.env.MONGO_URL;
+	const db = await MongoClient.connect(url);
+	return db;
 }

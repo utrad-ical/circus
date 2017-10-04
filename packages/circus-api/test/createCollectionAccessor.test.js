@@ -1,18 +1,16 @@
 import { assert } from 'chai';
 import createValidator from '../src/validation/createValidator';
 import createCollectionAccessor from '../src/db/createCollectionAccessor';
-import { MongoClient } from 'mongodb';
 import { ValidationError } from 'ajv';
-
-const url = process.env.MONGO_URL;
+import { connectMongo } from './koa-test';
 
 describe('createCollectionAccessor', function() {
 	let db, testCollection;
 
 	before(async function() {
 		const validator = await createValidator(__dirname + '/test-schemas');
-		db = await MongoClient.connect(url);
-		testCollection = await createCollectionAccessor(db, {
+		db = await connectMongo();
+		testCollection = await createCollectionAccessor(db, validator, {
 			validator,
 			schema: 'monthsAll',
 			collectionName: 'test',

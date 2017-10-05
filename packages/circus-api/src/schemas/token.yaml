@@ -1,0 +1,9 @@
+description: Represents an OAuth2 token.
+$async: true
+properties:
+  accessToken: { type: 'string' }
+  accessTokenExpiresOn: { type: 'string' }
+  clientId: { type: 'string' }
+  refreshToken: { type: 'string' }
+  refreshTokenExpiresOn: { type: 'string' }
+  userId: { type: 'string' }

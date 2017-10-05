@@ -7,5 +7,11 @@ export default function createModels(db, validator) {
 		primaryKey: 'userEmail'
 	});
 
-	return { user };
+	const token = createCollectionAccessor(db, validator, {
+		schema: 'tokenAll',
+		collectionName: 'tokens',
+		primaryKey: 'accessToken'
+	});
+
+	return { user, token };
 }

@@ -5,7 +5,7 @@ import errorHandler from '../src/middleware/errorHandler';
 import axios from 'axios';
 import Router from 'koa-router';
 import * as path from 'path';
-import { setUpKoa, listenKoa, tearDownKoa, serverThrowsWithState } from './koa-test';
+import { setUpKoa, listenKoa, tearDownKoa, serverThrowsWithState } from './test-utils';
 
 describe('validateInOut middleware', function() {
 	let server;

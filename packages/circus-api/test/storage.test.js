@@ -1,5 +1,6 @@
 import createStorage from '../src/storage/createStorage';
 import { assert } from 'chai';
+import { asyncThrows } from './test-utils';
 import * as path from 'path';
 import * as fs from 'fs-extra';
 
@@ -7,15 +8,6 @@ describe('Storage', function() {
 	let store;
 
 	const tmpDir = path.join(__dirname, 'tmp-dir');
-
-	async function throws(func) {
-		try {
-			await func();
-		} catch (err) {
-			return;
-		}
-		throw new Error('did not throw');
-	}
 
 	before(async function() {
 		await fs.emptyDir(tmpDir);
@@ -40,9 +32,7 @@ describe('Storage', function() {
 	});
 
 	it('should throw error for nonexistent root', async function() {
-		await throws(async function() {
-			await createStorage('local', 'somewhere/over/the/rainbow');
-		});
+		await asyncThrows(createStorage('local', 'somewhere/over/the/rainbow'));
 	});
 
 	it('should execute write()', async function() {
@@ -54,9 +44,7 @@ describe('Storage', function() {
 
 	it('should execute read()', async function() {
 		assert.equal(await store.read('aabbcc'), 'coconut');
-		await throws(async function() {
-			await store.read('notafile');
-		});
+		await asyncThrows(store.read('notafile'));
 	});
 
 	it('should execute exists()', async function() {

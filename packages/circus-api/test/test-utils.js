@@ -53,14 +53,16 @@ export async function serverThrowsWithState(promise, status, pattern) {
 	throw new Error('Server did not throw any error');
 }
 
-export async function asyncThrows(func, type) {
+export async function asyncThrows(funcOrPromise, type) {
 	try {
-		await func();
+		await (funcOrPromise instanceof Promise ? funcOrPromise : funcOrPromise());
 	} catch(err) {
-		assert.instanceOf(err, type);
+		if (type) {
+			assert.instanceOf(err, type);
+		}
 		return;
 	}
-	throw new Error('Did not throw');
+	throw new Error('Function did not throw any error');
 }
 
 export async function connectMongo() {

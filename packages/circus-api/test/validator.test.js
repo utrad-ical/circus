@@ -2,7 +2,7 @@ import createValidator from '../src/validation/createValidator';
 import { assert } from 'chai';
 import * as path from 'path';
 import { ValidationError } from 'ajv';
-import { asyncThrows } from './koa-test';
+import { asyncThrows } from './test-utils';
 
 describe('Validator', function() {
 	let validator;
@@ -19,7 +19,7 @@ describe('Validator', function() {
 	it('should validate errorneous data', async function() {
 		const testData = { intVal: 10, strVal: 500 };
 		await asyncThrows(
-			() => validator.validate('sample', testData),
+			validator.validate('sample', testData),
 			ValidationError
 		);
 	});
@@ -34,11 +34,11 @@ describe('Validator', function() {
 
 		await validator.validate('sample', correctData);
 		await asyncThrows(
-			() => validator.validate('sample', wrongData1),
+			validator.validate('sample', wrongData1),
 			ValidationError
 		);
 		await asyncThrows(
-			() => validator.validate('sample', wrongData2),
+			validator.validate('sample', wrongData2),
 			ValidationError
 		);
 	});
@@ -64,7 +64,7 @@ describe('Validator', function() {
 		await validator.validate('sample', testData, validator.allRequired);
 		delete testData.intVal;
 		asyncThrows(
-			() => validator.validate('sample', testData, validator.allRequired),
+			validator.validate('sample', testData, validator.allRequired),
 			ValidationError
 		);
 	});

@@ -1,6 +1,6 @@
 import { assert } from 'chai';
 import createValidator from '../src/validation/createValidator';
-import { setUpKoa, listenKoa, tearDownKoa, connectMongo } from './koa-test';
+import { setUpKoa, listenKoa, tearDownKoa, connectMongo } from './test-utils';
 import createModels from '../src/db/createModels';
 import createOauthServer from '../src/middleware/auth/createOauthServer';
 import bodyparser from 'koa-bodyparser';

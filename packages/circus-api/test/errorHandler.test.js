@@ -3,7 +3,9 @@ import axios from 'axios';
 import Router from 'koa-router';
 import Ajv from 'ajv';
 import { assert } from 'chai';
-import { setUpKoa, listenKoa, tearDownKoa, serverThrowsWithState } from './koa-test';
+import {
+	setUpKoa, listenKoa, tearDownKoa, serverThrowsWithState
+} from './test-utils';
 
 describe('errorHandler middleware', function() {
 	let server;

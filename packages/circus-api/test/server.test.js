@@ -1,7 +1,7 @@
 import createApp from '../src/createApp';
 import axios from 'axios';
 import { assert } from 'chai';
-import { listenKoa, tearDownKoa, serverThrowsWithState, connectMongo } from './koa-test';
+import { listenKoa, tearDownKoa, serverThrowsWithState, connectMongo } from './test-utils';
 
 describe('Basic server behavior', function() {
 	let server;

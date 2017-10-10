@@ -2,7 +2,7 @@ import { assert } from 'chai';
 import createValidator from '../src/validation/createValidator';
 import createCollectionAccessor from '../src/db/createCollectionAccessor';
 import { ValidationError } from 'ajv';
-import { connectMongo } from './koa-test';
+import { asyncThrows, connectMongo } from './test-utils';
 
 describe('createCollectionAccessor', function() {
 	let db, testCollection;
@@ -40,16 +40,6 @@ describe('createCollectionAccessor', function() {
 		}
 	});
 
-	async function shouldFail(func, type) {
-		try {
-			await func();
-		} catch(err) {
-			if (type) assert(err instanceof type, 'Unexpected error type');
-			return;
-		}
-		throw new Error('Did not throw');
-	}
-
 	describe('#insert', function() {
 		it('should insert a single document after successful validation', async function() {
 			await testCollection.insert({ month: 8, name: 'Hazuki' });
@@ -58,9 +48,18 @@ describe('createCollectionAccessor', function() {
 		});
 
 		it('should raise an error on trying to insert invalid data', async function() {
-			await shouldFail(() => testCollection.insert({ month: 'hello', name: 10 }));
-			await shouldFail(() => testCollection.insert({ month: 5 }));
-			await shouldFail(() => testCollection.insert({ }));
+			await asyncThrows(
+				testCollection.insert({ month: 'hello', name: 10 }),
+				ValidationError
+			);
+			await asyncThrows(
+				testCollection.insert({ month: 5 }),
+				ValidationError
+			);
+			await asyncThrows(
+				testCollection.insert({ }),
+				ValidationError
+			);
 		});
 	});
 
@@ -80,12 +79,10 @@ describe('createCollectionAccessor', function() {
 		});
 
 		it('should throw when validation fails', async function() {
-			await shouldFail(async() => {
-				await testCollection.insertMany([
-					{ month: 6, name: 'Minazuki' },
-					{ month: 8, name: 17 }
-				]);
-			});
+			await asyncThrows(testCollection.insertMany([
+				{ month: 6, name: 'Minazuki' },
+				{ month: 8, name: 17 }
+			]), ValidationError);
 		});
 	});
 
@@ -120,7 +117,7 @@ describe('createCollectionAccessor', function() {
 		});
 
 		it('should raise an error when trying to load corrupted data', async function() {
-			await shouldFail(async () => await testCollection.findByIdOrFail(7), ValidationError);
+			await asyncThrows(testCollection.findByIdOrFail(7), ValidationError);
 		});
 	});
 
@@ -132,7 +129,7 @@ describe('createCollectionAccessor', function() {
 		});
 
 		it('should throw when trying to load nonexistent data', async function() {
-			await shouldFail(async () => await testCollection.findByIdOrFail(13));
+			await asyncThrows(testCollection.findByIdOrFail(13));
 		});
 	});
 
@@ -145,7 +142,7 @@ describe('createCollectionAccessor', function() {
 		});
 
 		it('should throw an error with invalid data', async function() {
-			shouldFail(async() => await testCollection.modifyOne(3, { name: 5 }), ValidationError);
+			asyncThrows(testCollection.modifyOne(3, { name: 5 }), ValidationError);
 		});
 
 		it('should return null if nothing changed', async function() {

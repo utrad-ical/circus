@@ -9,7 +9,13 @@ export default function createCollectionAccessor(db, validator, opts) {
 	 * Inserts a single document after validation.
 	 */
 	async function insert(data) {
-		await validator.validate(schema, data); // Any error is thrown
+		// Any error will be thrown
+		await validator.validate(
+			schema,
+			data,
+			validator.allRequired,
+			validator.withDates
+		);
 		return await collection.insertOne.apply(collection, arguments);
 	}
 
@@ -18,7 +24,12 @@ export default function createCollectionAccessor(db, validator, opts) {
 	 */
 	async function insertMany(data) {
 		for (const doc of data) {
-			await validator.validate(schema, doc);
+			await validator.validate(
+				schema,
+				doc,
+				validator.allRequired,
+				validator.withDates
+			);
 		}
 		return await collection.insertMany.apply(collection, arguments);
 	}

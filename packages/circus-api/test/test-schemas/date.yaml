@@ -1,0 +1,9 @@
+$async: true
+description: >
+  Test schema for date validation.
+type: object
+properties:
+  intVal:
+    type: number
+  dateVal:
+    date: true

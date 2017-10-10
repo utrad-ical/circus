@@ -53,6 +53,16 @@ export async function serverThrowsWithState(promise, status, pattern) {
 	throw new Error('Server did not throw any error');
 }
 
+export async function asyncThrows(func, type) {
+	try {
+		await func();
+	} catch(err) {
+		assert.instanceOf(err, type);
+		return;
+	}
+	throw new Error('Did not throw');
+}
+
 export async function connectMongo() {
 	const url = process.env.MONGO_URL;
 	const db = await MongoClient.connect(url);

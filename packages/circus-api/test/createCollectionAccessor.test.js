@@ -12,7 +12,7 @@ describe('createCollectionAccessor', function() {
 		db = await connectMongo();
 		testCollection = await createCollectionAccessor(db, validator, {
 			validator,
-			schema: 'monthsAll',
+			schema: 'months',
 			collectionName: 'test',
 			primaryKey: 'month'
 		});
@@ -58,9 +58,9 @@ describe('createCollectionAccessor', function() {
 		});
 
 		it('should raise an error on trying to insert invalid data', async function() {
-			await shouldFail(async() => await testCollection.insert({ month: 'hello', name: 10 }));
-			await shouldFail(async() => await testCollection.insert({ month: 5 }));
-			await shouldFail(async() => await testCollection.insert({ }));
+			await shouldFail(() => testCollection.insert({ month: 'hello', name: 10 }));
+			await shouldFail(() => testCollection.insert({ month: 5 }));
+			await shouldFail(() => testCollection.insert({ }));
 		});
 	});
 

@@ -48,9 +48,9 @@ export default function createOauthServer(models, debug = false) {
 	};
 
 	const oauth = oauthserver({
-	  model: oauthModel,
-	  grants: ['password'],
-	  debug
+		model: oauthModel,
+		grants: ['password'],
+		debug
 	});
 	return oauth;
 }

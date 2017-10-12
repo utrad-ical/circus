@@ -86,7 +86,7 @@ export default async function createValidator(schemaRoot) {
 	function toDate(schema, data, parentSchema, path, parentData, parentDataProperty) {
 		const isoRegex = /(\d{4})-?(\d{2})-?(\d{2})([T ](\d{2})(:?(\d{2})(:?(\d{2}(\.\d+)?))?)?(Z|([+-])(\d{2}):?(\d{2})?)?)?/;
 		if (isoRegex.test(data)) {
-	 		parentData[parentDataProperty] = new Date(data);
+			parentData[parentDataProperty] = new Date(data);
 			return true;
 		} else {
 			return false;

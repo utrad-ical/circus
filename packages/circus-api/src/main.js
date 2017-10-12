@@ -62,7 +62,7 @@ async function main() {
 	} catch(err) {
 		console.error('Error during the server startup.');
 		console.error(err);
-	};
+	}
 }
 
 main();

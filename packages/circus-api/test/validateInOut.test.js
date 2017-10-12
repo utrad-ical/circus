@@ -6,6 +6,7 @@ import axios from 'axios';
 import Router from 'koa-router';
 import * as path from 'path';
 import { setUpKoa, listenKoa, tearDownKoa, serverThrowsWithState } from './test-utils';
+import { assert } from 'chai';
 
 describe('validateInOut middleware', function() {
 	let server;
@@ -22,12 +23,17 @@ describe('validateInOut middleware', function() {
 			);
 			router.post(
 				'/in-check',
-				validateInOut(validator, 'sample'),
-				async ctx => ctx.body = { response: 'in-check done' }
+				validateInOut(validator,
+					{
+						requestSchema: 'date',
+						requestValidationOptions: { allRequired: true }
+					}
+				),
+				async ctx => ctx.body = { foo: ctx.request.body.dateVal.toISOString() }
 			);
 			router.post(
 				'/out-check',
-				validateInOut(validator, null, 'sample'),
+				validateInOut(validator, { responseSchema: 'date' }),
 				async ctx => ctx.body = ctx.request.body
 			);
 
@@ -43,11 +49,12 @@ describe('validateInOut middleware', function() {
 	});
 
 	it('should pass input validation', async function() {
-		await axios.request({
+		const res = await axios.request({
 			url: server.url + 'in-check',
 			method: 'post',
-			data: { intVal: 5 }
+			data: { intVal: 5, dateVal: '2015-05-05T00:11:22' }
 		});
+		assert.equal(res.data.foo, '2015-05-05T00:11:22.000Z');
 	});
 
 	it('should fail input validation', async function() {
@@ -55,7 +62,7 @@ describe('validateInOut middleware', function() {
 			axios.request({
 				url: server.url + 'in-check',
 				method: 'post',
-				data: { intVal: 'foo' }
+				data: { intVal: 30, dateVal: 'invalid date' }
 			}),
 			400
 		);

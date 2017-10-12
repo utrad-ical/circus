@@ -16,7 +16,7 @@ describe('Validator', function() {
 		await validator.validate('sample', testData); // shoudl not throw error
 	});
 
-	it('should validate errorneous data', async function() {
+	it('should throw with invalid data', async function() {
 		const testData = { intVal: 10, strVal: 500 };
 		await asyncThrows(
 			validator.validate('sample', testData),
@@ -43,35 +43,67 @@ describe('Validator', function() {
 		);
 	});
 
-	it('should convert to Date', async function() {
+	it('should handle toDate option', async function() {
 		const testData = { intVal: 3, dateVal: '2112-09-03T00:00:00.000Z' };
-		const result = await validator.validate('date', testData, validator.toDate);
+		const result = await validator.validate('date', testData, { toDate: true });
 		assert.instanceOf(result.dateVal, Date);
 		assert.equal(result.dateVal.toISOString(), '2112-09-03T00:00:00.000Z');
 	});
 
-	it('should convert from Date', async function() {
+	it('should handle fromDate option', async function() {
 		const iso = '2011-11-28T00:11:22.000Z';
 		const testData = { intVal: 3, dateVal: new Date(iso) };
-		const result = await validator.validate('date', testData, validator.fromDate);
+		const result = await validator.validate('date', testData, { fromDate: true });
 		assert.strictEqual(result.dateVal, iso);
 	});
 
-	it('should hanldle "all" validation', async function() {
+	it('should handle allRequired option', async function() {
 		const testData = {
 			intVal: 0, strVal: 'bar', dicomUid: '1.2.3', multiRange: '1'
 		};
-		await validator.validate('sample', testData, validator.allRequired);
+		await validator.validate('sample', testData, { allRequired: true });
 		delete testData.intVal;
 		asyncThrows(
-			validator.validate('sample', testData, validator.allRequired),
+			validator.validate('sample', testData, { allRequired: true }),
+			ValidationError
+		);
+	});
+
+	it('should handle allRequiredExcept option', async function() {
+		const testData = {
+			intVal: 0, strVal: 'bar', multiRange: '1'
+		};
+		await validator.validate('sample', testData, { allRequiredExcept: ['dicomUid'] });
+		delete testData.intVal;
+		await asyncThrows(
+			validator.validate('sample', testData, { allRequiredExcept: ['dicomUid'] }),
+			ValidationError
+		);
+	});
+
+	it('should handle dbEntry option', async function() {
+		const goodData = {
+			intVal: 0, strVal: 'bar', dicomUid: '1.2.3', multiRange: '1',
+			createdAt: new Date(), updatedAt: new Date()
+		};
+		await validator.validate('sample', goodData, { dbEntry: true });
+
+		const badData1 = { ...goodData, intVal: 'string' };
+		await asyncThrows(
+			validator.validate('sample', badData1, { dbEntry: true }),
+			ValidationError
+		);
+
+		const badData2 = { ...goodData, createdAt: '2010-01-01' };
+		await asyncThrows(
+			validator.validate('sample', badData2, { dbEntry: true }),
 			ValidationError
 		);
 	});
 
 	it('should fill defaults', async function() {
 		const testData = {};
-		const modified = await validator.validate('sample', testData, validator.fillDefaults);
+		const modified = await validator.validate('sample', testData, { fillDefaults: true });
 		assert.deepEqual(modified, { intVal: 5, strVal: 'biscuit' });
 	});
 

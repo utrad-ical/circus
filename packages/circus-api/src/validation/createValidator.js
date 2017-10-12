@@ -102,11 +102,16 @@ export default async function createValidator(schemaRoot) {
 		}
 	}
 
+	function checkDate(schema, data) {
+		return (data instanceof Date);
+	}
+
 	// We will keep several Avj instances with different options/keywords/etc
 	// because Ajv does not allow changing options after `new Ajv()`.
 
 	// The most plain validator
 	const validator = new Ajv({ ...sharedOpts, schemas });
+	validator.addKeyword('date', { validate: checkDate });
 
 	// Convers ISO date strings into Date objects
 	const toDateValidator = new Ajv({ ...sharedOpts, schemas });
@@ -119,34 +124,41 @@ export default async function createValidator(schemaRoot) {
 	// Fills defaults
 	const fillDefaultsValidator = new Ajv({ ...sharedOpts, useDefaults: true, schemas });
 
+	const validateFunctions = {
+		default() {
+			return (schema, data) => validator.validate(schema, data);
+		},
+		toDate() {
+			return (schema, data) => toDateValidator.validate(schema, data);
+		},
+		fromDate() {
+			return (schema, data) => fromDateValidator.validate(schema, data);
+		},
+		fillDefaults() {
+			return (schema, data) => fillDefaultsValidator.validate(schema, data);
+		},
+		allRequired() {
+			return (schema, data) => validator.validate(allRequiredScheama(schema), data);
+		},
+		allRequiredExcept(except) {
+			return (schema, data) => validator.validate(allRequiredScheama(schema, except), data);
+		},
+		dbEntry() {
+			return (schema, data) => validator.validate(
+				allRequiredScheama(withDatesSchema(schema)), data
+			);
+		}
+	};
+
 	// We return an object that wraps the two Ajv instances.
 	return {
-		validate: async(schema, data, ...validators) => {
-			if (!validators.length) validators = [validator.validate.bind(validator)];
-			for (const func of validators) {
+		validate: async(schema, data, options = { default: true }) => {
+			for (const key in options) {
+				const opt = options[key];
+				const func = validateFunctions[key](opt);
 				data = await func(schema, data);
 			}
 			return data;
-		},
-		toDate: (schema, data) => {
-			return toDateValidator.validate(schema, data);
-		},
-		fromDate: (schema, data) => {
-			return fromDateValidator.validate(schema, data);
-		},
-		fillDefaults: (schema, data) => {
-			return fillDefaultsValidator.validate(schema, data);
-		},
-		allRequired: (schema, data) => {
-			return validator.validate(allRequiredScheama(schema), data);
-		},
-		allRequriedExcept: except => {
-			return (schema, data) => {
-				return validator.validate(allRequiredScheama(schema, except), data);
-			};
-		},
-		withDates: (schema, data) => {
-			return validator.validate(withDatesSchema(schema), data);
 		},
 		getSchema: key => {
 			return validator.getSchema(key);

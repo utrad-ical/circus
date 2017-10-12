@@ -155,6 +155,7 @@ export default async function createValidator(schemaRoot) {
 		validate: async(schema, data, options = { default: true }) => {
 			for (const key in options) {
 				const opt = options[key];
+				if (!opt) continue;
 				const func = validateFunctions[key](opt);
 				data = await func(schema, data);
 			}

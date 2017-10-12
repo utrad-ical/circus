@@ -10,28 +10,24 @@ export default function createCollectionAccessor(db, validator, opts) {
 	 */
 	async function insert(data) {
 		// Any error will be thrown
-		await validator.validate(
-			schema,
-			data,
-			validator.allRequired,
-			validator.withDates
-		);
-		return await collection.insertOne.apply(collection, arguments);
+		const date = new Date();
+		const inserting = { ...data, createdAt: date, updatedAt: date };
+		await validator.validate(schema, inserting, { dbEntry: true });
+		return await collection.insertOne(inserting);
 	}
 
 	/**
 	 * Inserts multiple documents after validation.
 	 */
 	async function insertMany(data) {
+		const documents = [];
+		const date = new Date();
 		for (const doc of data) {
-			await validator.validate(
-				schema,
-				doc,
-				validator.allRequired,
-				validator.withDates
-			);
+			const inserting = { ...doc, createdAt: date, updatedAt: date };
+			await validator.validate(schema, inserting, { dbEntry: true });
+			documents.push(inserting);
 		}
-		return await collection.insertMany.apply(collection, arguments);
+		return await collection.insertMany(documents);
 	}
 
 	/**
@@ -42,7 +38,7 @@ export default function createCollectionAccessor(db, validator, opts) {
 		const results = await collection.find.apply(collection, arguments)
 			.project({ _id: 0 }).toArray();
 		for (const doc of results) {
-			await validator.validate(schema, doc);
+			await validator.validate(schema, doc, { dbEntry: true });
 		}
 		return results;
 	}
@@ -56,7 +52,7 @@ export default function createCollectionAccessor(db, validator, opts) {
 			.project({ _id: 0 }).limit(1).toArray();
 		const result = docs[0];
 		if (result !== undefined) {
-			await validator.validate(schema, result);
+			await validator.validate(schema, result, { dbEntry: true });
 		}
 		return result;
 	}
@@ -79,13 +75,16 @@ export default function createCollectionAccessor(db, validator, opts) {
 	/**
 	 * Modifies the document by the primary key.
 	 */
-	async function modifyOne(id, update) {
+	async function modifyOne(id, updates) {
 		const key = primaryKey ? primaryKey : '_id';
+		const date = new Date();
 		const result = await collection.findOneAndUpdate(
-			{ [key]: id }, update, { returnOriginal: false }
+			{ [key]: id },
+			{ $set: { ...updates, updatedAt: date } },
+			{ returnOriginal: false }
 		);
 		if (result.value !== null) {
-			await validator.validate(schema, result.value);
+			await validator.validate(schema, result.value, { dbEntry: true });
 		}
 		return result.value;
 	}

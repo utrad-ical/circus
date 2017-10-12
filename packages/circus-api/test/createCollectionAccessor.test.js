@@ -19,15 +19,20 @@ describe('createCollectionAccessor', function() {
 	});
 
 	beforeEach(async function() {
+		const dates = month => ({
+			createdAt: new Date(`20010${month}01T00:00:00.000Z`),
+			updatedAt: new Date(`20010${month}01T00:00:00.000Z`)
+		});
+
 		if (db) {
 			const col = db.collection('test');
 			await col.deleteMany({});
 			await col.insertMany([
-				{ month: 2, name: 'Kisaragi' },
-				{ month: 3, name: 'Yayoi' },
-				{ month: 4, name: 'Uzuki' },
-				{ month: 4, name: 'Uzuki' }, // dupe!
-				{ month: 7, name: true } // invalid data!
+				{ month: 2, name: 'Kisaragi', ...dates(2) },
+				{ month: 3, name: 'Yayoi', ...dates(3) },
+				{ month: 4, name: 'Uzuki', ...dates(4) },
+				{ month: 4, name: 'Uzuki', ...dates(4) }, // dupe!
+				{ month: 7, name: true, ...dates(7) } // invalid data!
 			]);
 		}
 	});
@@ -44,7 +49,11 @@ describe('createCollectionAccessor', function() {
 		it('should insert a single document after successful validation', async function() {
 			await testCollection.insert({ month: 8, name: 'Hazuki' });
 			const result = await db.collection('test').find({ month: 8 }).project({ _id: 0 }).toArray();
-			assert.deepEqual(result, [{ month: 8, name: 'Hazuki' }]);
+			assert.isArray(result);
+			assert.equal(result.length, 1);
+			assert.include(result[0], { month: 8, name: 'Hazuki' });
+			assert.instanceOf(result[0].createdAt, Date);
+			assert.instanceOf(result[0].updatedAt, Date);
 		});
 
 		it('should raise an error on trying to insert invalid data', async function() {
@@ -72,10 +81,8 @@ describe('createCollectionAccessor', function() {
 			const result = await db.collection('test').find(
 				{ $or: [ { month: 6 }, { month: 8 } ] }
 			).project({ _id: false }).sort({ month: 1 }).toArray();
-			assert.deepEqual(result, [
-				{ month: 6, name: 'Minazuki' },
-				{ month: 8, name: 'Hazuki' }
-			]);
+			assert.deepInclude(result[0], { month: 6, name: 'Minazuki' });
+			assert.deepInclude(result[1], { month: 8, name: 'Hazuki' });
 		});
 
 		it('should throw when validation fails', async function() {
@@ -89,10 +96,9 @@ describe('createCollectionAccessor', function() {
 	describe('#findAll', function() {
 		it('should find an array of matched documents without _id', async function() {
 			const result = await testCollection.findAll({ month: 4 });
-			assert.deepEqual(
-				result,
-				[{ month: 4, name: 'Uzuki' }, { month: 4, name: 'Uzuki' }]
-			);
+			assert.equal(result.length, 2);
+			assert.include(result[0], { month: 4, name: 'Uzuki' });
+			assert.include(result[1], { month: 4, name: 'Uzuki' });
 		});
 
 		it('should return an empty array if nothing matched', async function() {
@@ -135,7 +141,7 @@ describe('createCollectionAccessor', function() {
 
 	describe('#modifyOne', function() {
 		it('should perform mutation and returns the modified data', async function() {
-			const original = await testCollection.modifyOne(2, { $set: { name: 'Nigatsu' } });
+			const original = await testCollection.modifyOne(2, { name: 'Nigatsu' });
 			assert.equal(original.name, 'Nigatsu');
 			const modified = await testCollection.findById(2);
 			assert.equal(modified.name, 'Nigatsu');

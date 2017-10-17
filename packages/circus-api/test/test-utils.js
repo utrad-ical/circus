@@ -1,7 +1,9 @@
 import Koa from 'koa';
 import { assert } from 'chai';
 import { MongoClient } from 'mongodb';
-
+import * as fs from 'fs-extra';
+import { safeLoad as yaml } from 'js-yaml';
+import * as path from 'path';
 
 /**
  * This is a helper module for tests using Koa server.
@@ -70,4 +72,19 @@ export async function connectMongo() {
 	const url = process.env.MONGO_URL;
 	const db = await MongoClient.connect(url);
 	return db;
+}
+
+export async function setUpMongoFixture(db, collections) {
+	for (const colName of collections) {
+		const col = db.collection(colName);
+		await col.deleteMany({});
+		const data = yaml(
+			await fs.readFile(path.join(__dirname, 'fixture', colName + '.yaml'))
+		);
+		for (const row of data) {
+			row.createdAt = new Date();
+			row.updatedAt = new Date();
+		}
+		await col.insertMany(data);
+	}
 }

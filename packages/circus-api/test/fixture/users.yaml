@@ -1,0 +1,14 @@
+-
+  userEmail: alice@example.com
+  loginId: alice
+  password: aaa
+  description: Alice
+  groups: []
+  loginEnabled: true
+-
+  userEmail: bob@example.com
+  loginId: bob
+  password: bbb
+  description: Bob
+  groups: []
+  loginEnabled: true

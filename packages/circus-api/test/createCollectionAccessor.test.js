@@ -2,7 +2,7 @@ import { assert } from 'chai';
 import createValidator from '../src/validation/createValidator';
 import createCollectionAccessor from '../src/db/createCollectionAccessor';
 import { ValidationError } from 'ajv';
-import { asyncThrows, connectMongo } from './test-utils';
+import { asyncThrows, connectMongo, setUpMongoFixture } from './test-utils';
 
 describe('createCollectionAccessor', function() {
 	let db, testCollection;
@@ -13,33 +13,20 @@ describe('createCollectionAccessor', function() {
 		testCollection = await createCollectionAccessor(db, validator, {
 			validator,
 			schema: 'months',
-			collectionName: 'test',
+			collectionName: 'months',
 			primaryKey: 'month'
 		});
 	});
 
 	beforeEach(async function() {
-		const dates = month => ({
-			createdAt: new Date(`20010${month}01T00:00:00.000Z`),
-			updatedAt: new Date(`20010${month}01T00:00:00.000Z`)
-		});
-
 		if (db) {
-			const col = db.collection('test');
-			await col.deleteMany({});
-			await col.insertMany([
-				{ month: 2, name: 'Kisaragi', ...dates(2) },
-				{ month: 3, name: 'Yayoi', ...dates(3) },
-				{ month: 4, name: 'Uzuki', ...dates(4) },
-				{ month: 4, name: 'Uzuki', ...dates(4) }, // dupe!
-				{ month: 7, name: true, ...dates(7) } // invalid data!
-			]);
+			await setUpMongoFixture(db, ['months']);
 		}
 	});
 
 	after(async function() {
 		if (db) {
-			const col = db.collection('test');
+			const col = db.collection('months');
 			await col.deleteMany({});
 			await db.close();
 		}
@@ -48,7 +35,7 @@ describe('createCollectionAccessor', function() {
 	describe('#insert', function() {
 		it('should insert a single document after successful validation', async function() {
 			await testCollection.insert({ month: 8, name: 'Hazuki' });
-			const result = await db.collection('test').find({ month: 8 }).project({ _id: 0 }).toArray();
+			const result = await db.collection('months').find({ month: 8 }).project({ _id: 0 }).toArray();
 			assert.isArray(result);
 			assert.equal(result.length, 1);
 			assert.include(result[0], { month: 8, name: 'Hazuki' });
@@ -78,7 +65,7 @@ describe('createCollectionAccessor', function() {
 				{ month: 6, name: 'Minazuki' },
 				{ month: 8, name: 'Hazuki' }
 			]);
-			const result = await db.collection('test').find(
+			const result = await db.collection('months').find(
 				{ $or: [ { month: 6 }, { month: 8 } ] }
 			).project({ _id: false }).sort({ month: 1 }).toArray();
 			assert.deepInclude(result[0], { month: 6, name: 'Minazuki' });

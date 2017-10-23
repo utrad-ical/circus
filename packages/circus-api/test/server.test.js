@@ -1,7 +1,11 @@
 import createApp from '../src/createApp';
 import axios from 'axios';
 import { assert } from 'chai';
-import { listenKoa, tearDownKoa, serverThrowsWithState, connectMongo } from './test-utils';
+import {
+	listenKoa, tearDownKoa,
+	serverThrowsWithState, asyncThrows,
+	connectMongo
+} from './test-utils';
 
 describe('Basic server behavior', function() {
 	let server;
@@ -56,13 +60,12 @@ describe('Basic server behavior', function() {
 
 	it('should return 400 for huge JSON > 1mb', async function() {
 		const bigData = { foo: 'A'.repeat(1024 * 1024) };
-		await serverThrowsWithState(
+		await asyncThrows(
 			axios.request({
 				method: 'post',
 				url: server.url + 'echo',
 				data: bigData
-			}),
-			400 // Bad request
+			})
 		);
 	});
 

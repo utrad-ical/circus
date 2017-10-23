@@ -44,6 +44,7 @@ export async function serverThrowsWithState(promise, status, pattern) {
 	try {
 		await promise;
 	} catch (err) {
+		assert.exists(err.response, 'Server did not respond');
 		assert.equal(err.response.status, status);
 		if (pattern) {
 			assert.match(err.response.data.error, pattern);

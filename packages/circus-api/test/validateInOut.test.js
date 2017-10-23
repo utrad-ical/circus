@@ -52,7 +52,7 @@ describe('validateInOut middleware', function() {
 		const res = await axios.request({
 			url: server.url + 'in-check',
 			method: 'post',
-			data: { intVal: 5, dateVal: '2015-05-05T00:11:22' }
+			data: { intVal: 5, dateVal: '2015-05-05T00:11:22.000Z' }
 		});
 		assert.equal(res.data.foo, '2015-05-05T00:11:22.000Z');
 	});

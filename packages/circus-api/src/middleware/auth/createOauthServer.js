@@ -6,9 +6,17 @@ import KoaOAuth2Server from './KoaOAuth2Server';
 export default function createOauthServer(models, debug = false) {
 
 	const oauthModel = {
-		getAccessToken: function *(bearerToken) {
-			debug && console.log('getAccessToken', arguments);
-			return yield models.token.findById(bearerToken);
+		getAccessToken: async function(bearerToken) {
+			// debug && console.log('getAccessToken', arguments);
+			const entry = await models.token.findById(bearerToken);
+			if (!entry) return null;
+			const user = await models.user.findByIdOrFail(entry.userId);
+			return {
+				accessToken: entry.accessToken,
+				accessTokenExpiresAt: entry.accessTokenExpiresAt,
+				client: { id: entry.clientId },
+				user
+			};
 		},
 		getClient: async function(clientId, /* clientSecret */) {
 			// debug && console.log('getClient', arguments);

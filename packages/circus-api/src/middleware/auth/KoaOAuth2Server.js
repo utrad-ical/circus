@@ -29,11 +29,13 @@ export default class KoaOAuth2Server {
 			const request = new Request(ctx.request);
 			const response = new Response(ctx.response);
 			const token = await this.server.authenticate(request, response, options);
-			ctx.state.oauth = { token };
+			ctx.state.oauth = { token, user: token.user };
 			await next();
 		};
 	}
 
+	/*
+	// authorize is not used
 	authorize(options) {
 		return async (ctx, next) => {
 			const request = new Request(ctx.request);
@@ -43,6 +45,7 @@ export default class KoaOAuth2Server {
 			this.handleResponse(ctx, response);
 		};
 	}
+	*/
 
 	token(options) {
 		return async (ctx, next) => {

@@ -41,6 +41,7 @@ const customFormats = {
 export default async function createValidator(schemaRoot) {
 
 	const schemas = await loadSchemaFiles(schemaRoot);
+	if (!Object.keys(schemas).length) console.warn('Schema directory is empty');
 
 	/**
 	 * Takes a JSON schema and returns another JSON schema where

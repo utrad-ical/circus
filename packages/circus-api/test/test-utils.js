@@ -75,6 +75,9 @@ export async function connectMongo() {
 }
 
 export async function setUpMongoFixture(db, collections) {
+	if (!Array.isArray(collections)) {
+		throw new TypeError('collections must be an array');
+	}
 	for (const colName of collections) {
 		const col = db.collection(colName);
 		await col.deleteMany({});

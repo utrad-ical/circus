@@ -1,4 +1,4 @@
-import oauthserver from 'koa-oauth-server';
+import KoaOAuth2Server from './KoaOAuth2Server';
 
 /**
  * Creates an OAuth2 server that interacts with backend mongo.
@@ -10,8 +10,8 @@ export default function createOauthServer(models, debug = false) {
 			debug && console.log('getAccessToken', arguments);
 			return yield models.token.findById(bearerToken);
 		},
-		getClient: function *(clientId, clientSecret) {
-			console.log('getClient', arguments);
+		getClient: async function(clientId, /* clientSecret */) {
+			// debug && console.log('getClient', arguments);
 			if (clientId === 'circus-front') {
 				return {
 					clientId: 'CIRCUS Front UI',
@@ -20,34 +20,36 @@ export default function createOauthServer(models, debug = false) {
 			}
 			return null;
 		},
-		getRefreshToken: function *(refreshToken) {
-			debug && console.log('getRefreshToken', arguments);
-			const result = yield models.token.findAll({ refreshToken });
+		getRefreshToken: async function(refreshToken) {
+			// debug && console.log('getRefreshToken', arguments);
+			const result = await models.token.findAll({ refreshToken });
 			return result.length ? result[0] : null;
 		},
-		getUser: function *(username, password) {
-			debug && console.log('getting user', arguments);
-			const users = yield models.user.findAll({
+		getUser: async function(username, password) {
+			// debug && console.log('getting user', arguments);
+			const users = await models.user.findAll({
 				$or: [ { userEmail: username }, { loginId: username } ]
 			});
 			if (!users.length) return null;
 			const user = users[0];
+			return user;
 			if (user.password === password) return user; // TODO: FIX
 		},
-		saveToken: function *(token, client, user) {
-			debug && console.log('saveToken', arguments);
-			yield models.token.insertOne({
+		saveToken: async function(token, client, user) {
+			// debug && console.log('saveToken', arguments);
+			await models.token.insert({
 				accessToken: token.accessToken,
 				accessTokenExpiresAt: token.accessTokenExpiresAt,
 				refreshToken: token.refreshToken,
 				refreshTokenExpiresAt: token.refreshTokenExpiresAt,
-				client: client.id,
+				clientId: client.clientId,
 				userId: user.userEmail
 			});
+			return { ...token, client, user };
 		}
 	};
 
-	const oauth = oauthserver({
+	const oauth = new KoaOAuth2Server({
 		model: oauthModel,
 		grants: ['password'],
 		debug

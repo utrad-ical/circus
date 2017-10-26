@@ -1,17 +1,18 @@
 import createCollectionAccessor from './createCollectionAccessor';
 
 export default function createModels(db, validator) {
-	const user = createCollectionAccessor(db, validator, {
-		schema: 'user',
-		collectionName: 'users',
-		primaryKey: 'userEmail'
+	const modelDefinitions = {
+		user: { col: 'users', pk: 'userEmail' },
+		token: { col: 'tokens', pk: 'accessToken' }
+	};
+
+	const models = {};
+	Object.keys(modelDefinitions).forEach(k => {
+		const def = modelDefinitions[k];
+		models[k] = createCollectionAccessor(db, validator,
+			{ schema: k, collectionName: def.col, primaryKey: def.pk }
+		);
 	});
 
-	const token = createCollectionAccessor(db, validator, {
-		schema: 'token',
-		collectionName: 'tokens',
-		primaryKey: 'accessToken'
-	});
-
-	return { user, token };
+	return models;
 }

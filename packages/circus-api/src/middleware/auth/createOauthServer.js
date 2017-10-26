@@ -8,7 +8,7 @@ export default function createOauthServer(models, debug = false) {
 
 	const oauthModel = {
 		getAccessToken: async function(bearerToken) {
-			// debug && console.log('getAccessToken', arguments);
+			debug && console.log('getAccessToken', arguments);
 			const entry = await models.token.findById(bearerToken);
 			if (!entry) return null;
 			const user = await models.user.findByIdOrFail(entry.userId);
@@ -20,7 +20,7 @@ export default function createOauthServer(models, debug = false) {
 			};
 		},
 		getClient: async function(clientId, /* clientSecret */) {
-			// debug && console.log('getClient', arguments);
+			debug && console.log('getClient', arguments);
 			if (clientId === 'circus-front') {
 				return {
 					clientId: 'CIRCUS Front UI',
@@ -30,12 +30,12 @@ export default function createOauthServer(models, debug = false) {
 			return null;
 		},
 		getRefreshToken: async function(refreshToken) {
-			// debug && console.log('getRefreshToken', arguments);
+			debug && console.log('getRefreshToken', arguments);
 			const result = await models.token.findAll({ refreshToken });
 			return result.length ? result[0] : null;
 		},
 		getUser: async function(username, password) {
-			// debug && console.log('getting user', arguments);
+			debug && console.log('getting user', arguments);
 			const users = await models.user.findAll({
 				$or: [ { userEmail: username }, { loginId: username } ]
 			});
@@ -47,7 +47,7 @@ export default function createOauthServer(models, debug = false) {
 			return null;
 		},
 		saveToken: async function(token, client, user) {
-			// debug && console.log('saveToken', arguments);
+			debug && console.log('saveToken', arguments);
 			await models.token.insert({
 				accessToken: token.accessToken,
 				accessTokenExpiresAt: token.accessTokenExpiresAt,

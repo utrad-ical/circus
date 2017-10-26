@@ -23,7 +23,7 @@ describe('createOauthServer', function() {
 		server = await listenKoa(await setUpKoa(async app => {
 			const validator = await createValidator(path.join(__dirname, '..', 'src', 'schemas'));
 			const models = createModels(db, validator);
-			const oauth = createOauthServer(models, true);
+			const oauth = createOauthServer(models);
 
 			const router = new Router();
 			router.post('/token', oauth.token());

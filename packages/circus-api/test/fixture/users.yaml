@@ -1,14 +1,16 @@
 -
   userEmail: alice@example.com
   loginId: alice
-  password: aaa
+  # password is 'aliceSecret'
+  password: "$2y$10$CbR.aTjvI8bQdap3mbt1R.jEhHmgWTxpEd9y9AcWLCQ2B74D/ybAe"
   description: Alice
   groups: []
   loginEnabled: true
 -
   userEmail: bob@example.com
   loginId: bob
-  password: bbb
+  # password is 'bobSecret'
+  password: "$2y$10$V220aoElBuLlvx0PNdYmGueD9ke.d9ini5OgZSpxLOYO/oJtfUPOW"
   description: Bob
   groups: []
   loginEnabled: true

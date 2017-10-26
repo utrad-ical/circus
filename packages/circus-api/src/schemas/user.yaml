@@ -19,6 +19,10 @@ properties:
     type: string
     description: >
       Optinal arbitrary text to identify this user.
+  password:
+    type: string
+    description: >
+      The hashed password of this user.
   groups:
     type: array
     items: { type: number }

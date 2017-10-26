@@ -66,6 +66,34 @@ describe('createOauthServer', function() {
 		assert.deepEqual(result.data, { a: 100 });
 	});
 
+	it('should reject token request with wrong credential', async function() {
+		// wrong password
+		await serverThrowsWithState(axios.request({
+			method: 'post',
+			url: server.url + 'token',
+			data: qs.stringify({
+				client_id: 'circus-front',
+				client_secret: 'not-a-secret',
+				grant_type: 'password',
+				username: 'alice',
+				password: 'thisPasswordIsWrong'
+			})
+		}), 400);
+
+		// nonexistent user
+		await serverThrowsWithState(axios.request({
+			method: 'post',
+			url: server.url + 'token',
+			data: qs.stringify({
+				client_id: 'circus-front',
+				client_secret: 'not-a-secret',
+				grant_type: 'password',
+				username: 'charlie',
+				password: 'charlieDoesNotExist'
+			})
+		}), 400);
+	});
+
 	it('should return empty data with a request with invalid token', async function() {
 		// no token
 		await serverThrowsWithState(axios.request({

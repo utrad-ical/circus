@@ -1,0 +1,5 @@
+box: node:latest
+build:
+  steps:
+    - npm-install
+    - npm-test

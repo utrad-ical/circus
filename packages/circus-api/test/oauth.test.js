@@ -7,7 +7,6 @@ import {
 } from './test-utils';
 import createModels from '../src/db/createModels';
 import createOauthServer from '../src/middleware/auth/createOauthServer';
-import errorHandler from '../src/middleware/errorHandler';
 import bodyparser from 'koa-bodyparser';
 import Router from 'koa-router';
 import compose from 'koa-compose';
@@ -33,7 +32,6 @@ describe('createOauthServer', function() {
 			]));
 
 			app.use(bodyparser());
-			app.use(errorHandler());
 			app.use(router.routes());
 		}));
 		await setUpMongoFixture(db, ['users']);

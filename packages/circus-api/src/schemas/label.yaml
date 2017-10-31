@@ -13,16 +13,29 @@ properties:
     properties:
       voxels:
         type: string
+        description: >
+          The hash of voxel data blob, which must be stored beforehands.
       origin:
         type: array
+        items: [{ type: 'integer' }, { type: 'integer' }, { type: 'integer' }]
+        description: >
+          The origin of the voxel data.
       size:
         type: array
+        items: [{ type: 'integer', multipleOf: 8 }, { type: 'integer' }, { type: 'integer' }]
+        description: >
+          The size of the voxel data. The size along the x-axis must be a multiple of 8.
       color:
         type: string
+        pattern: '^#[0-9a-f]{6,6}$'
+        description: >
+          The hexadecimal color value of this label.
       alpha:
         type: number
         minimum: 0
         maximum: 1
+        description: >
+          The alpha value of this label, where 1 is opaque and 0 is transparent.
   attributes:
     type: object
     description: An object that represents label attributes.

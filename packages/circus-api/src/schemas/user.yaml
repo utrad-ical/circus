@@ -2,6 +2,9 @@ $schema: 'http://json-schema.org/schema#'
 $async: true
 title: User
 type: object
+description: >
+  This object contains information of one user. All users must be identified
+  using an E-mail address, similarly to Git.
 properties:
   userEmail:
     type: string
@@ -15,7 +18,8 @@ properties:
     description: >
       Login ID of the user. A user can use either their E-mail or the login ID
       to log in to the system. It can be short enough (like `alice`), and
-      can be changed after the creation of the user.
+      can be changed after the creation of the user. Unlike `userEmail`,
+      `loginId` doesn't have to be globally unique.
   password:
     type: string
     description: >
@@ -52,4 +56,3 @@ properties:
       The group ID of groups which this user belongs to.
       The set of previleges the user has is deteremined as
       the union of the privileges of the groups the user belongs to.
-additionalProperties: false

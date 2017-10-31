@@ -4,13 +4,23 @@
   # password is 'aliceSecret'
   password: "$2y$10$CbR.aTjvI8bQdap3mbt1R.jEhHmgWTxpEd9y9AcWLCQ2B74D/ybAe"
   description: Alice
-  groups: []
+  lastLoginTime: { $date: 1405266782008 }
+  lastLoginIp: '0.0.0.0'
+  preferences:
+    theme: mode_white
+    personalInfoView: false
   loginEnabled: true
+  groups: []
 -
   userEmail: bob@example.com
   loginId: bob
   # password is 'bobSecret'
   password: "$2y$10$V220aoElBuLlvx0PNdYmGueD9ke.d9ini5OgZSpxLOYO/oJtfUPOW"
   description: Bob
-  groups: []
+  lastLoginTime: { $date: 1405266782000 }
+  lastLoginIp: '0.0.0.0'
+  preferences:
+    theme: mode_white
+    personalInfoView: false
   loginEnabled: true
+  groups: []

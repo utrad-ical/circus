@@ -4,6 +4,7 @@ import { MongoClient } from 'mongodb';
 import * as fs from 'fs-extra';
 import { safeLoad as yaml } from 'js-yaml';
 import * as path from 'path';
+import EJSON from 'mongodb-extended-json';
 
 /**
  * This is a helper module for tests using Koa server.
@@ -81,12 +82,12 @@ export async function setUpMongoFixture(db, collections) {
 	for (const colName of collections) {
 		const col = db.collection(colName);
 		await col.deleteMany({});
-		const data = yaml(
+		const data = EJSON.parse(JSON.stringify(yaml(
 			await fs.readFile(path.join(__dirname, 'fixture', colName + '.yaml'))
-		);
+		)));
 		for (const row of data) {
-			row.createdAt = new Date();
-			row.updatedAt = new Date();
+			if (!row.createdAt) row.createdAt = new Date();
+			if (!row.updatedAt) row.updatedAt = new Date();
 		}
 		await col.insertMany(data);
 	}

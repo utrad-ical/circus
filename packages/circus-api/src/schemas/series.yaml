@@ -1,0 +1,72 @@
+$schema: 'http://json-schema.org/schema#'
+$async: true
+title: Series
+type: object
+description: >
+  Series represents a DICOM series, which is a collection of one or more DICOM images.
+  CIRCUS organizes all images based on DICOM series.
+  Most of the data in this data type come from imported DICOM files.
+properties:
+  seriesUid:
+    type: string
+    format: dicomUid
+    description: >
+      :key: The series instance UID, which must be globally unique according to the DICOM spec.
+  studyUID:
+    type: string
+    format: dicomUid
+    description: >
+      The study instance UID which this series belongs to. (0020,000d)
+  width:
+    type: number
+    description: >
+      The width of each image.
+  height:
+    type: number
+    description: >
+      The height of each image.
+  seriesDate:
+    date: true
+    description: >
+      The "series date", as written in the DICOM file.
+  modality:
+    type: string
+    maxLength: 10
+    description: >
+      The modality value, such as 'CT', 'MR'.
+  seriesDescription:
+    type: string
+    description: >
+      The series description, a human-readable text label of the series, such as 'T2_star axial'.
+  bodyPart:
+    type: string
+    description: >
+      The body part, such as 'HEAD', 'CHEST'.
+  stationName:
+    type: string
+    description: >
+      The station name.
+  modelName:
+    type: string
+    description: >
+      The model name.
+  manufacturer:
+    type: string
+    description: >
+      The manufacturer (company name) of the modality.
+  storageId:
+    type: number
+    description: >
+      The storage ID. **May be removed in the near future.**
+  patientInfo:
+    $ref:
+      patientInfo
+  parameters:
+    type: object
+    description: >
+      Any additional key-value pairs retrieved from the imported DICOM file.
+      The stored values will depend on the modality.
+  domain:
+    type: string
+    description: >
+      The domain to which this series belongs.

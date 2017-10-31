@@ -5,6 +5,7 @@ type: object
 properties:
   projectId:
     type: string
+    maxLength: 64
     description: >
       :key: Randomly-generated project ID. It must be globally unique.
   projectName:
@@ -14,17 +15,24 @@ properties:
       Short name for this project.
   description:
     type: string
+    maxLength: 1024
     description: >
       Optinal arbitrary text to explain this project.
   tags:
     type: array
     items: { type: 'object' }
+    description: >
+      List of tags available in this project.
   caseAttributesSchema:
     type: array
     items: { $ref: 'schemaEntry' }
+    description: >
+      The schema of case attributes.
   labelAttributesSchema:
     type: array
     items: { $ref: 'schemaEntry' }
+    description:
+      The schema of label attributes.
   windowPresets:
     type: array
     items:

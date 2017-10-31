@@ -1,0 +1,57 @@
+$schema: 'http://json-schema.org/schema#'
+$async: true
+title: Group
+type: object
+properties:
+  groupId:
+    type: number
+    description: >
+      :key: Group ID, which is an incremental number only unique per installation.
+  groupName:
+    type: string
+    description: >
+      Group name.
+  privileges:
+    type: array
+    items:
+      enum:
+        - createProject
+        - deleteProject
+        - manageServer
+        - personalInfoView
+  domains:
+    type: array
+    items:
+      type: string
+    description: >
+      The list of domains which the members of this groups will be granted access.
+  readProjects:
+    type: array
+    items:
+      type: string
+    description: >
+      The list of project IDs which the members of this group have read access.
+  writeProjects:
+    type: array
+    items:
+      type: string
+    description: >
+      The list of project IDs which the members of this group have write access.
+  addSeriesProjects:
+    type: array
+    items:
+      type: string
+    description: >
+      The list of project IDs which the members of this group can add series to existing cases.
+  viewPersonalInfoProjects:
+    type: array
+    items:
+      type: string
+    description: >
+      The list of project IDs which the members of this group can access personal information.
+  moderateProjects:
+    type: array
+    items:
+      type: string
+    description: >
+      The list of project IDs which the members of this group have the moderator privilege.

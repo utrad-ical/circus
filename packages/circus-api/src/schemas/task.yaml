@@ -1,0 +1,38 @@
+$schema: 'http://json-schema.org/schema#'
+$async: true
+title: Task
+type: object
+properties:
+  taskId:
+    type: string
+    description: The task ID.
+  owner:
+    type: string
+    format: email
+    description: The user who started this task.
+  status:
+    type: string
+    description: The task status.
+  command:
+    type: string
+    description: The command used to invoke this task.
+  download:
+    type: string
+    description: Download path relative to the download directory. Do not expose this to the end user. Can be empty if no file will be downloaded.
+  publicDownload:
+    type: boolean
+    description: Whether anyone can download the generated file.
+  textStatus:
+    type: string
+    description: The text status which will be shown to the end user.
+  logs:
+    type: array
+    items:
+      type: string
+    description: Array of strings which holds log items.
+  value:
+    type: number
+    description: The number of complete steps.
+  max:
+    type: number
+    description: The number of all steps.

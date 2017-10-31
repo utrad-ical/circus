@@ -1,0 +1,29 @@
+$schema: 'http://json-schema.org/schema#'
+$async: true
+title: Label
+type: object
+description: >
+  Label represents information stored in `ClinicalCase.revisions[n].series[m].labels`.
+  It holds information that attaches to a certain series in a case.
+properties:
+  type:
+    constant: 'voxel' # In the future other types will be introduced
+  data:
+    type: object
+    properties:
+      voxels:
+        type: string
+      origin:
+        type: array
+      size:
+        type: array
+      color:
+        type: string
+      alpha:
+        type: number
+        minimum: 0
+        maximum: 1
+  attributes:
+    type: object
+    description: An object that represents label attributes.
+

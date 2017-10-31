@@ -1,0 +1,25 @@
+$schema: 'http://json-schema.org/schema#'
+$async: true
+title: Case
+type: object
+properties:
+  caseId:
+    type: string
+    description: >
+      Randomly-generated case ID.
+  projectId:
+    type: string
+  patientInfoCache:
+    type: object
+  tags:
+    type: object
+  latestRevision:
+    $ref: revision
+  revisions:
+    type: array
+    items:
+      $ref: revision
+  domains:
+    type: array
+    items:
+      type: string

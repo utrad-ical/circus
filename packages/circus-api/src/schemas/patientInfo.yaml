@@ -1,0 +1,24 @@
+$schema: 'http://json-schema.org/schema#'
+$async: true
+title: PatientInfo
+type: object
+description: >
+  This object contains personal information that was written in corresponding
+  DICOM files.
+properties:
+  patientId:
+    type: string
+  patientName:
+    type: string
+  age:
+    type: number
+  birthDate:
+    type: string
+    regexp: ^\d\d-\d\d-\d\d$
+  sex:
+    type: string
+    enum: ['F', 'M', 'O']
+  size:
+    type: number
+  weight:
+    type: number

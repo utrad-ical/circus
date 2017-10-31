@@ -1,0 +1,46 @@
+$schema: 'http://json-schema.org/schema#'
+$async: true
+title: Revision
+type: object
+properties:
+  creator:
+    type: string
+    description: >
+      The e-mail address of the creator of this revision.
+      This usually corresponds to one of the registered users in the system,
+      but it's necessarily so. If the case is imported from some external
+      source, this property can have a value not recognized by this CIRCUS installation.
+      (In other words, this works like Git's commiter e-mail address.)
+  date:
+    date: true
+    description: When the revision was created.
+  description:
+    type: string
+    description: Optional arbitrary string to explain this revision.
+  attributes:
+    type: array
+    items:
+      type: object
+    description: An object that represents case attributes.
+  status:
+    type: string
+  series:
+    type: array
+    items:
+      type: object
+      properties:
+        seriesUid:
+          type: string
+          format: dicomUid
+        images:
+          type: string
+          format: multiIntegerRnage
+        labels:
+          type: array
+          items:
+            $ref:
+              label
+          description: >
+            The list of labels attached to this series.
+    description: >
+      The list of series entries.

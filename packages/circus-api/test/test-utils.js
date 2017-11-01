@@ -37,7 +37,7 @@ export function tearDownKoa(server) {
 	return new Promise((resolve, reject) => {
 		if (server.instance) {
 			server.instance.close(
-				err => { err ? reject() : resolve(); }
+				err => { err ? reject(err) : resolve(); }
 			);
 		} else resolve();
 	});

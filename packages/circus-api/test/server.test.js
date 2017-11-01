@@ -8,16 +8,17 @@ import {
 } from './test-utils';
 
 describe('Basic server behavior', function() {
-	let server;
+	let server, db;
 
 	before(async function() {
-		const db = await connectMongo();
+		db = await connectMongo();
 		const koaApp = await createApp({ debug: true, db });
 		server = await listenKoa(koaApp);
 	});
 
 	after(async function() {
-		await tearDownKoa(server);
+		if (server) await tearDownKoa(server);
+		if (db) await db.close();
 	});
 
 	it('should return server status', async function() {

@@ -6,6 +6,7 @@ import { safeLoad as yaml } from 'js-yaml';
 import glob from 'glob-promise';
 import Router from 'koa-router';
 import errorHandler from './middleware/errorHandler';
+import cors from './middleware/cors';
 import createValidator from './validation/createValidator';
 import validateInOut from './validation/validateInOut';
 import createModels from './db/createModels';
@@ -66,11 +67,6 @@ export default async function createApp(options = {}) {
 		await next();
 	};
 
-	const cors = async(ctx, next) => {
-		ctx.response.set('Access-Control-Allow-Origin', '*');
-		await next();
-	};
-
 	const parser = bodyParser({
 		enableTypes: ['json'],
 		jsonLimit: '1mb',
@@ -116,7 +112,7 @@ export default async function createApp(options = {}) {
 
 	// Register middleware stack to the Koa app.
 	koa.use(errorHandler()); // Formats any error into JSON
-	koa.use(cors); // Ensures the API can be invoked from anywhere
+	koa.use(cors()); // Ensures the API can be invoked from anywhere
 	koa.use(parser); // Parses JSON request body
 	koa.use(injector); // Makes validator available on all subsequent middleware
 	koa.use(router.routes()); // Handles requests according to URL path

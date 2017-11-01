@@ -10,7 +10,8 @@ export async function handleGet(ctx, next) {
 		version,
 		upSince,
 		process: {
-			arch: process.arch,
+			version: process.version,
+			upTime: process.uptime(),
 			memoryUsage: process.memoryUsage()
 		}
 	};

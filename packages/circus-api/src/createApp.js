@@ -8,32 +8,13 @@ import Router from 'koa-router';
 import errorHandler from './middleware/errorHandler';
 import cors from './middleware/cors';
 import injector from './middleware/injector';
+import typeCheck from './middleware/typeCheck';
 import createValidator from './validation/createValidator';
 import validateInOut from './validation/validateInOut';
 import createModels from './db/createModels';
 import compose from 'koa-compose';
 import Ajv from 'ajv';
 
-function typeCheck(expectedType = 'application/json') {
-	return async function typeCheck(ctx, next) {
-		if (!/^(POST|PUT|PATCH)$/.test(ctx.request.method) || ctx.request.body.length === 0) {
-			await next();
-			return;
-		}
-
-		if (typeof ctx.request.type !== 'string' || ctx.request.type.length === 0) {
-			ctx.throw(401, 'Content-type is unspecified.');
-			return;
-		}
-
-		const contentType = /^([^;]*)/.exec(ctx.request.type)[1];
-		if (contentType !== expectedType) {
-			ctx.throw(415, 'This content-type is unsupported.');
-			return;
-		}
-		await next();
-	};
-}
 
 function handlerName(route) {
 	if (route.handler) return route.handler;
@@ -58,13 +39,6 @@ export default async function createApp(options = {}) {
 
 	const validator = await createValidator(path.resolve(__dirname, 'schemas'));
 	const models = createModels(db, validator);
-
-	// ***** Prepare some tiny middleware functions ***
-	const parser = bodyParser({
-		enableTypes: ['json'],
-		jsonLimit: '1mb',
-		onerror: (err, ctx) => ctx.throw(400, 'Invalid JSON as request body.\n' + err.message)
-	});
 
 	// Build a router.
 	// Register each API endpoints to the router according YAML manifest files.
@@ -104,9 +78,13 @@ export default async function createApp(options = {}) {
 	}
 
 	// Register middleware stack to the Koa app.
-	koa.use(errorHandler()); // Formats any error into JSON
+	koa.use(errorHandler()); // Formats any errors into JSON
 	koa.use(cors()); // Ensures the API can be invoked from anywhere
-	koa.use(parser); // Parses JSON request body
+	koa.use(bodyParser({
+		enableTypes: ['json'],
+		jsonLimit: '1mb',
+		onerror: (err, ctx) => ctx.throw(400, 'Invalid JSON as request body.\n' + err.message)
+	})); // Parses JSON request body
 	koa.use(injector({ validator, db, models })); // Makes these available on all subsequent middleware
 	koa.use(router.routes()); // Handles requests according to URL path
 

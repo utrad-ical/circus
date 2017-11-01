@@ -1,17 +1,23 @@
 import { PassThrough } from 'stream';
+import { delay } from '../../utils';
+
+const version = require('../../../package.json').version;
+const upSince = new Date().toISOString();
 
 export async function handleGet(ctx, next) {
 	ctx.body = {
-		status: 'running'
+		status: 'running',
+		version,
+		upSince,
+		process: {
+			arch: process.arch,
+			memoryUsage: process.memoryUsage()
+		}
 	};
 }
 
 export async function handleEcho(ctx, next) {
 	ctx.body = ctx.request.body;
-}
-
-async function delay(ms) {
-	return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 export async function handleDummyProgress(ctx, next) {

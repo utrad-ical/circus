@@ -3,6 +3,7 @@
 import dashdash from 'dashdash';
 import createApp from './createApp';
 import { MongoClient } from 'mongodb';
+import chalk from 'chalk';
 
 const options = [
 	{
@@ -19,6 +20,13 @@ const options = [
 		default: 'localhost'
 	},
 	{
+		names: ['no-auth', 'n'],
+		env: 'CIRCUS_API_NO_AUTH',
+		type: 'bool',
+		help: 'Skip all authentication',
+		default: false
+	},
+	{
 		names: ['port', 'p'],
 		env: 'PORT',
 		type: 'number',
@@ -28,7 +36,7 @@ const options = [
 	}
 ];
 
-const { host, port } = (() => {
+const { host, port, no_auth: noAuth } = (() => {
 	try {
 		const parser = dashdash.createParser({ options });
 		const opts = parser.parse();
@@ -48,19 +56,24 @@ async function main() {
 	// Establish db connection (shared throughout app)
 	const db = await MongoClient.connect(process.env.MONGO_URL);
 
+	if (noAuth) {
+		console.warn(chalk.red('WARNING: NO AUTHENTICATION MODE!'));
+	}
+
 	const serverOptions = {
 		debug: process.env.NODE_ENV !== 'production',
-		db
+		db,
+		noAuth
 	};
 
 	try {
 		const koaApp = await createApp(serverOptions);
 		koaApp.listen(port, host, (err) => {
 			if (err) throw err;
-			console.log(`Server running on port ${host}:${port}`);
+			console.log(chalk.green(`Server running on port ${host}:${port}`));
 		});
 	} catch(err) {
-		console.error('Error during the server startup.');
+		console.error(chalk.red('Error during the server startup.'));
 		console.error(err);
 	}
 }

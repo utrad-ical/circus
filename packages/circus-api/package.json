@@ -32,6 +32,7 @@
     "koa": "^2.3.0",
     "koa-bodyparser": "^4.2.0",
     "koa-compose": "^4.0.0",
+    "koa-mount": "^3.0.0",
     "koa-router": "^7.2.1",
     "mongodb": "^2.2.31",
     "mongodb-extended-json": "^1.10.0",

@@ -5,6 +5,8 @@ import * as path from 'path';
 import { safeLoad as yaml } from 'js-yaml';
 import glob from 'glob-promise';
 import Router from 'koa-router';
+import mount from 'koa-mount';
+import createOauthServer from './middleware/auth/createOauthServer';
 import errorHandler from './middleware/errorHandler';
 import cors from './middleware/cors';
 import injector from './middleware/injector';
@@ -27,30 +29,16 @@ function formatValidationErrors(errors) {
 	)).join('\n');
 }
 
-/**
- * Creates a new Koa app.
- * @return A new Koa application.
- */
-export default async function createApp(options = {}) {
-	const { debug, db } = options;
-
-	// The main Koa instance.
-	const koa = new Koa();
-
-	const validator = await createValidator(path.resolve(__dirname, 'schemas'));
-	const models = createModels(db, validator);
-
-	// Build a router.
-	// Register each API endpoints to the router according YAML manifest files.
+async function prepareApiRouter(apiDir, validator, options) {
+	const { debug } = options;
 	const router = new Router();
 
-	const apiDir = path.resolve(__dirname, 'api/*/*.yaml');
-	const manifestFiles = await glob(apiDir);
-
+	// prepare AJV to validate API schema definition file
 	const ajv = new Ajv({ allErrors: true });
 	const metaSchema = path.resolve(__dirname, 'api/schema.yaml');
 	const schemaValidator = ajv.compile(yaml(await fs.readFile(metaSchema)));
 
+	const manifestFiles = await glob(apiDir);
 	for(const manifestFile of manifestFiles) {
 		const data = yaml(await fs.readFile(manifestFile, 'utf8'));
 		if (!schemaValidator(data)) {
@@ -77,16 +65,44 @@ export default async function createApp(options = {}) {
 		}
 	}
 
+	return router;
+}
+
+/**
+ * Creates a new Koa app.
+ * @return A new Koa application.
+ */
+export default async function createApp(options = {}) {
+	const { debug, db, noAuth } = options;
+
+	// The main Koa instance.
+	const koa = new Koa();
+
+	const validator = await createValidator(path.resolve(__dirname, 'schemas'));
+	const models = createModels(db, validator);
+
+	// Build a router.
+	// Register each API endpoints to the router according YAML manifest files.
+	const apiDir = path.resolve(__dirname, 'api/*/*.yaml');
+	const apiRouter = await prepareApiRouter(apiDir, validator, options);
+
+	const oauth = createOauthServer(models, debug);
+	const authSection = compose([
+		errorHandler(),
+		cors(),
+		bodyParser({
+			enableTypes: ['json'],
+			jsonLimit: '1mb',
+			onerror: (err, ctx) => ctx.throw(400, 'Invalid JSON as request body.\n' + err.message)
+		}),
+		injector({ validator, db, models }),
+		...( noAuth ? [] : [oauth.authenticate()]),
+		apiRouter.routes()
+	]);
+
 	// Register middleware stack to the Koa app.
-	koa.use(errorHandler()); // Formats any errors into JSON
-	koa.use(cors()); // Ensures the API can be invoked from anywhere
-	koa.use(bodyParser({
-		enableTypes: ['json'],
-		jsonLimit: '1mb',
-		onerror: (err, ctx) => ctx.throw(400, 'Invalid JSON as request body.\n' + err.message)
-	})); // Parses JSON request body
-	koa.use(injector({ validator, db, models })); // Makes these available on all subsequent middleware
-	koa.use(router.routes()); // Handles requests according to URL path
+	koa.use(mount('/api', authSection));
+	koa.use(mount('/login', oauth.token()));
 
 	return koa;
 }

@@ -12,7 +12,7 @@ describe('Basic server behavior', function() {
 
 	before(async function() {
 		db = await connectMongo();
-		const koaApp = await createApp({ debug: true, db });
+		const koaApp = await createApp({ debug: true, noAuth: true, db });
 		server = await listenKoa(koaApp);
 	});
 
@@ -22,7 +22,7 @@ describe('Basic server behavior', function() {
 	});
 
 	it('should return server status', async function() {
-		const result = await axios.get(server.url + 'status');
+		const result = await axios.get(server.url + 'api/status');
 		assert.equal(result.status, 200);
 		assert.equal(result.data.status, 'running');
 	});
@@ -38,7 +38,7 @@ describe('Basic server behavior', function() {
 		await serverThrowsWithState(
 			axios.request({
 				method: 'post',
-				url: server.url + 'echo',
+				url: server.url + 'api/echo',
 				data: {},
 				headers: { 'Content-Type': 'application/json' },
 				transformRequest: [() => '{I+am+not.a.valid-JSON}}']
@@ -51,7 +51,7 @@ describe('Basic server behavior', function() {
 		await serverThrowsWithState(
 			axios.request({
 				method: 'post',
-				url: server.url + 'echo',
+				url: server.url + 'api/echo',
 				headers: { 'Content-Type': 'text/plain', 'X-poe': 'poepoe' },
 				data: 'testdata'
 			}),
@@ -73,7 +73,7 @@ describe('Basic server behavior', function() {
 	describe('Echo', function() {
 		it('should return input data as-is', async function() {
 			const data = { a: 10, b: 'test', c: { d: 999, e: 'TEST' } };
-			const res = await axios.post(server.url + 'echo', data);
+			const res = await axios.post(server.url + 'api/echo', data);
 			assert.deepEqual(res.data, data);
 		});
 	});

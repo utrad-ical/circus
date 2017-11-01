@@ -34,8 +34,6 @@ export default class KoaOAuth2Server {
 		};
 	}
 
-	/*
-	// authorize is not used
 	authorize(options) {
 		return async (ctx, next) => {
 			const request = new Request(ctx.request);
@@ -45,7 +43,6 @@ export default class KoaOAuth2Server {
 			this.handleResponse(ctx, response);
 		};
 	}
-	*/
 
 	token(options) {
 		return async (ctx, next) => {

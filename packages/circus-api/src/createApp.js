@@ -7,6 +7,7 @@ import glob from 'glob-promise';
 import Router from 'koa-router';
 import errorHandler from './middleware/errorHandler';
 import cors from './middleware/cors';
+import injector from './middleware/injector';
 import createValidator from './validation/createValidator';
 import validateInOut from './validation/validateInOut';
 import createModels from './db/createModels';
@@ -59,14 +60,6 @@ export default async function createApp(options = {}) {
 	const models = createModels(db, validator);
 
 	// ***** Prepare some tiny middleware functions ***
-	// Injector makes some dependencies semi-globally availabe
-	const injector = async (ctx, next) => {
-		ctx.validator = validator;
-		ctx.db = db;
-		ctx.models = models;
-		await next();
-	};
-
 	const parser = bodyParser({
 		enableTypes: ['json'],
 		jsonLimit: '1mb',
@@ -114,7 +107,7 @@ export default async function createApp(options = {}) {
 	koa.use(errorHandler()); // Formats any error into JSON
 	koa.use(cors()); // Ensures the API can be invoked from anywhere
 	koa.use(parser); // Parses JSON request body
-	koa.use(injector); // Makes validator available on all subsequent middleware
+	koa.use(injector({ validator, db, models })); // Makes these available on all subsequent middleware
 	koa.use(router.routes()); // Handles requests according to URL path
 
 	return koa;

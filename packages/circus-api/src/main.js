@@ -2,7 +2,7 @@
 
 import dashdash from 'dashdash';
 import createApp from './createApp';
-import { MongoClient } from 'mongodb';
+import connectDb from './db/connectDb';
 import chalk from 'chalk';
 
 const options = [
@@ -54,7 +54,7 @@ const { host, port, no_auth: noAuth } = (() => {
 
 async function main() {
 	// Establish db connection (shared throughout app)
-	const db = await MongoClient.connect(process.env.MONGO_URL);
+	const db = await connectDb();
 
 	if (noAuth) {
 		console.warn(chalk.red('WARNING: NO AUTHENTICATION MODE!'));

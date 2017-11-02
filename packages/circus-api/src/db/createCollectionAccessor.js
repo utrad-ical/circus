@@ -99,15 +99,29 @@ export default function createCollectionAccessor(db, validator, opts) {
 	async function modifyOne(id, updates) {
 		const key = primaryKey ? primaryKey : '_id';
 		const date = new Date();
-		const result = await collection.findOneAndUpdate(
+		if (key in updates) {
+			throw new TypeError('The primary key cannot be modified.');
+		}
+		const original = await collection.findOneAndUpdate(
 			{ [key]: id },
 			{ $set: { ...updates, updatedAt: date } },
-			{ returnOriginal: false }
+			{ returnOriginal: true }
 		);
-		if (result.value !== null) {
-			await validator.validate(schema, result.value, { dbEntry: true });
+		if (original.value === null) {
+			const err = new Error('The request resource was not found.');
+			err.status = 404;
+			err.expose = true;
+			throw err;
 		}
-		return result.value;
+		const updated = { ...original.value, ...updates, updatedAt: date };
+		try {
+			await validator.validate(schema, updated, { dbEntry: true });
+		} catch (err) {
+			// validation failed, rollback
+			await collection.findOneAndUpdate({ [key]: id }, original.value);
+			throw err;
+		}
+		return updated;
 	}
 
 	// These methods are exposed as-is for now

@@ -153,9 +153,11 @@ describe('createCollectionAccessor', function() {
 			asyncThrows(testCollection.modifyOne(3, { name: 5 }), ValidationError);
 		});
 
-		it('should return null if nothing changed', async function() {
-			const noSuchMonth = await testCollection.modifyOne(13, { $set: { name: 'Pon' } });
-			assert.isNull(noSuchMonth);
+		it('should throw if not found', async function() {
+			await asyncThrows(async function() {
+				const noSuchMonth = await testCollection.modifyOne(13, { $set: { name: 'Pon' } });
+				assert.isNull(noSuchMonth);
+			}, Error);
 		});
 	});
 

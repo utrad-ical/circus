@@ -21,7 +21,7 @@ async function scanMigrationFiles() {
 		}
 	});
 	if (results.length !== files.length + 1) {
-		throw new Error('Migration files are not named sequentially.')
+		throw new Error('Migration files are not named sequentially.');
 	}
 	return results;
 }
@@ -55,7 +55,7 @@ async function migrate(db) {
 				{ upsert: true }
 			);
 		} catch (err) {
-			console.error(chalk.red('Error: ', name))
+			console.error(chalk.red('Error: ', name));
 			console.error(err.message);
 			if (err.errors) console.error(err.errors);
 			break;

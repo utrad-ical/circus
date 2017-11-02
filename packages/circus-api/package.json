@@ -39,7 +39,8 @@
     "mongodb-extended-json": "^1.10.0",
     "node-php-password": "^0.1.2",
     "oauth2-server": "^3.0.0",
-    "pify": "^3.0.0"
+    "pify": "^3.0.0",
+    "randomstring": "^1.1.5"
   },
   "devDependencies": {
     "chai": "^4.1.2",

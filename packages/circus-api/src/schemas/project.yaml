@@ -45,6 +45,3 @@ properties:
   windowPriority:
     type: string
     enum: ['dicom,auto', 'auto']
-  groups:
-    type: array
-    items: { type: number }

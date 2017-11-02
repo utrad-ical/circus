@@ -92,6 +92,21 @@ describe('createCollectionAccessor', function() {
 			const result = await testCollection.findAll({ month: 13 });
 			assert.deepEqual(result, []);
 		});
+
+		it('should perform sorting and skipping', async function() {
+			const result = await testCollection.findAll(
+				{ month: { $lte: 4 } }, { sort: { month: -1 }, skip: 1 }
+			);
+			assert.deepEqual(result[1].name, 'Yayoi');
+			assert.deepEqual(result[2].name, 'Kisaragi');
+		});
+
+		it('should perform row number limiting', async function() {
+			const result = await testCollection.findAll(
+				{ month: { $lte: 4 } }, { limit: 1 }
+			);
+			assert(result.length, 1);
+		});
 	});
 
 	describe('#deleteMany', function() {

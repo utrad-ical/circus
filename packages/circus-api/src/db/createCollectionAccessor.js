@@ -6,7 +6,7 @@ export default function createCollectionAccessor(db, validator, opts) {
 	const collection = db.collection(collectionName);
 
 	/**
-	 * Inserts a single document after validation.
+	 * Inserts a single document after validation succeeds.
 	 */
 	async function insert(data) {
 		// Any error will be thrown
@@ -17,7 +17,7 @@ export default function createCollectionAccessor(db, validator, opts) {
 	}
 
 	/**
-	 * Inserts multiple documents after validation.
+	 * Inserts multiple documents after validation succeeds for each document.
 	 */
 	async function insertMany(data) {
 		const documents = [];
@@ -34,13 +34,34 @@ export default function createCollectionAccessor(db, validator, opts) {
 	 * Fetches documents that matches the given query as an array.
 	 * The `_id` field will not be included.
 	 */
-	async function findAll() {
-		const results = await collection.find.apply(collection, arguments)
-			.project({ _id: 0 }).toArray();
-		for (const doc of results) {
-			await validator.validate(schema, doc, { dbEntry: true });
+	async function findAll(query, options = {}) {
+		const cursor = findAsCursor(query, options);
+		const array = [];
+		while (await cursor.hasNext()) {
+			array.push(await cursor.next());
 		}
-		return results;
+		return array;
+	}
+
+	/**
+	 * Executes find and returns the matched documents as a cursor-like object.
+	 * Validation is performed for each document.
+	 * The `_id` field will not be included.
+	 */
+	function findAsCursor(query, options = {}) {
+		const { sort, limit, skip } = options;
+		let cursor = collection.find(query).project({ _id: 0 });
+		if (sort) cursor = cursor.sort(sort);
+		if (skip) cursor = cursor.skip(skip);
+		if (limit) cursor = cursor.limit(limit);
+		return {
+			next: async() => {
+				const next = await cursor.next();
+				await validator.validate(schema, next, { dbEntry: true });
+				return next;
+			},
+			hasNext: () => cursor.hasNext()
+		};
 	}
 
 	/**
@@ -99,6 +120,7 @@ export default function createCollectionAccessor(db, validator, opts) {
 	return {
 		...boundPassthrough,
 		findAll,
+		findAsCursor,
 		findById,
 		findByIdOrFail,
 		insert,

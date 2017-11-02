@@ -70,7 +70,9 @@ export async function asyncThrows(funcOrPromise, type) {
 }
 
 export async function connectMongo() {
-	const url = process.env.MONGO_URL;
+	const url = process.env.CIRCUS_MONGO_TEST_URL ||
+		process.env.CIRCUS_MONGO_URL ||
+		process.env.MONGO_URL;
 	const db = await MongoClient.connect(url);
 	return db;
 }

@@ -4,7 +4,7 @@ import nodepass from 'node-php-password';
 export async function up(db, models) {
 	const projectId = generateProjectId();
 
-	await db.collection('gruops').ensureIndex({ groupId: 1 }, { unique: true });
+	await db.collection('groups').ensureIndex({ groupId: 1 }, { unique: true });
 	await models.group.insertMany([{
 		groupId: 1,
 		groupName: 'admin',
@@ -50,5 +50,5 @@ export async function up(db, models) {
 		tags: [],
 		caseAttributesSchema: [],
 		labelAttributesSchema: []
-	})
+	});
 }

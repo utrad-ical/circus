@@ -103,6 +103,7 @@ export default function createCollectionAccessor(db, validator, opts) {
 		findByIdOrFail,
 		insert,
 		insertMany,
-		modifyOne
+		modifyOne,
+		collectionName() { return collectionName; }
 	};
 }

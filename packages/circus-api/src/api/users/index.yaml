@@ -3,15 +3,15 @@ scope: [severAdmin]
 description: Manages the login user.
 routes:
   - verb: get
-    path: /users
+    path: /admin/users
     handler: handleSearch
     description: Retrieves the list of users.
     responseSchema:
       type: array
       # items: { $ref: user }
   - verb: get
-    path: /users/:userID
+    path: /admin/users/:userId
     description: Retrieves the specified user.
   - verb: put
-    path: /users/:userID
+    path: /admin/users/:userId
     description: Updates the specified user.

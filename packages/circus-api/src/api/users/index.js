@@ -3,21 +3,25 @@ const data = [
 	{ userEmail: 'example2@example.com', loginID: 'bob' }
 ];
 
+const removePassword = input => {
+	const output = { ...input };
+	delete output.password;
+	return output;
+};
+
 export const handleSearch = async (ctx, next) => {
-	ctx.body = data;
-	await next();
+	const users = (await ctx.models.user.findAll()).map(removePassword);
+	ctx.body = users;
 };
 
 export const handleGet = async (ctx, next) => {
-	const email = ctx.params.userID;
-	const user = data.find(user => user.userEmail = email);
-	if (!user) ctx.throw(404, 'Not found');
+	const user = removePassword(
+		await ctx.models.user.findByIdOrFail(ctx.params.userId)
+	);
 	ctx.body = user;
-	await next();
 };
 
 export const handlePut = async (ctx, next) => {
 	ctx.throw(400);
-	await next();
 };
 

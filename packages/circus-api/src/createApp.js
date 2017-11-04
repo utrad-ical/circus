@@ -88,7 +88,7 @@ export default async function createApp(options = {}) {
 
 	const oauth = createOauthServer(models, debug);
 	const authSection = compose([
-		errorHandler(),
+		errorHandler(debug),
 		cors(),
 		bodyParser({
 			enableTypes: ['json'],

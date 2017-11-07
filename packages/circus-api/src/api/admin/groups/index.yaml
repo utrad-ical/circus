@@ -13,8 +13,7 @@ routes:
   - verb: get
     path: /admin/groups/:groupId
     description: Retrieves the specified group.
-    responseSchema:
-      $ref: group
+    responseSchema: group
   - verb: put
     path: /admin/groups/:groupId
     description: Updates the specified group.

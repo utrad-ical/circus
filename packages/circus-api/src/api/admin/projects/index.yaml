@@ -1,0 +1,19 @@
+name: projects
+scope: [severAdmin]
+description: Manages projects.
+routes:
+  - verb: get
+    path: /admin/projects
+    handler: handleSearch
+    description: Retrieves the list of projects
+    responseSchema:
+      type: array
+      items:
+        $ref: group
+  - verb: get
+    path: /admin/projects/:projectId
+    description: Retrieves the specified project.
+    responseSchema: project
+  - verb: put
+    path: /admin/projects/:projectId
+    description: Updates the specified project.

@@ -1,6 +1,6 @@
 name: users
 scope: [severAdmin]
-description: Manages the login user.
+description: Manages login users.
 routes:
   - verb: get
     path: /admin/users

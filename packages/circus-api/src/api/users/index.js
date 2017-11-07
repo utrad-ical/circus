@@ -1,8 +1,3 @@
-const data = [
-	{ userEmail: 'example@example.com', loginID: 'alice' },
-	{ userEmail: 'example2@example.com', loginID: 'bob' }
-];
-
 const removePassword = input => {
 	const output = { ...input };
 	delete output.password;

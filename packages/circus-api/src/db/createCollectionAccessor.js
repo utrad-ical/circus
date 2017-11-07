@@ -1,3 +1,5 @@
+import status from 'http-status';
+
 /**
  * Basic wrapper for Mongo collection that performs validation tasks.
  */
@@ -109,7 +111,7 @@ export default function createCollectionAccessor(db, validator, opts) {
 		);
 		if (original.value === null) {
 			const err = new Error('The request resource was not found.');
-			err.status = 404;
+			err.status = status.NOT_FOUND;
 			err.expose = true;
 			throw err;
 		}

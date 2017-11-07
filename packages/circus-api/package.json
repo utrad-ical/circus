@@ -29,6 +29,7 @@
     "fs-extra": "^4.0.2",
     "glob": "^7.1.2",
     "glob-promise": "^3.2.0",
+    "http-status": "^1.0.1",
     "js-yaml": "^3.10.0",
     "koa": "^2.3.0",
     "koa-bodyparser": "^4.2.0",

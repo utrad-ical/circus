@@ -1,4 +1,5 @@
 import NodeOAuthServer, { Request, Response } from 'oauth2-server';
+import status from 'http-status';
 
 /**
  * Simple wrapper for node-oauth2-server.
@@ -12,7 +13,7 @@ export default class KoaOAuth2Server {
 	}
 
 	handleResponse(ctx, response) {
-		if (response.status === 302) {
+		if (response.status === status.FOUND) {
 			const location = response.headers.location;
 			delete response.headers.location;
 			ctx.set(response.headers);

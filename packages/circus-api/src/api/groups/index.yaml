@@ -1,0 +1,20 @@
+name: groups
+scope: [severAdmin]
+description: Manages user groups.
+routes:
+  - verb: get
+    path: /admin/groups
+    handler: handleSearch
+    description: Retrieves the list of groups
+    responseSchema:
+      type: array
+      items:
+        $ref: group
+  - verb: get
+    path: /admin/groups/:groupId
+    description: Retrieves the specified group.
+    responseSchema:
+      $ref: group
+  - verb: put
+    path: /admin/groups/:groupId
+    description: Updates the specified group.

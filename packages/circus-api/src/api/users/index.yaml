@@ -8,10 +8,13 @@ routes:
     description: Retrieves the list of users.
     responseSchema:
       type: array
-      # items: { $ref: user }
+      items:
+        $ref: user
   - verb: get
     path: /admin/users/:userId
     description: Retrieves the specified user.
+    responseSchema:
+      $ref: user
   - verb: put
     path: /admin/users/:userId
     description: Updates the specified user.

@@ -3,11 +3,21 @@
  */
 export default function validateInOut(validator, options = {}) {
 	const {
-		requestSchema,
 		requestValidationOptions = {},
-		responseSchema,
 		responseValidationOptions = {}
 	} = options;
+	let {
+		requestSchema,
+		responseSchema
+	} = options;
+
+	if (requestSchema && typeof requestSchema === 'object') {
+		requestSchema = { ...requestSchema, $async: true };
+	}
+	if (responseSchema && typeof responseSchema === 'object') {
+		responseSchema = { ...responseSchema, $async: true };
+	}
+
 	return async function validateInOut(ctx, next) {
 		if (requestSchema) {
 			try {

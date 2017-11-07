@@ -57,7 +57,10 @@ async function prepareApiRouter(apiDir, validator, options) {
 			}
 			const middlewareStack = compose([
 				typeCheck(route.expectedContentType),
-				validateInOut(validator, route.requestSchema, route.responseSchema),
+				validateInOut(validator, {
+					requestSchema: route.requestSchema,
+					responseSchema: route.responseSchema
+				}),
 				mainHandler // The processing function itself
 			]);
 			// console.log(`  Register ${route.verb.toUpperCase()} on ${route.path}`);

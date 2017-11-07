@@ -6,7 +6,5 @@
 		"lib": ["dom", "es5", "es2015.promise"],
 		"strictNullChecks": true,
 		"importHelpers": true
-	},
-	"compileOnSave": false,
-	"buildOnSave": false
+	}
 }

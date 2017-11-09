@@ -5,7 +5,7 @@ import * as stream from 'stream';
  * image from Buffer and writes common image file data (e.g., PNG)
  * into a given stream.
  */
-export default class ImageEncoder {
+export default abstract class ImageEncoder {
 	protected config: any = null;
 
 	constructor(config?: any) {
@@ -16,7 +16,5 @@ export default class ImageEncoder {
 		return 'image/png';
 	}
 
-	public write(out: stream.Writable, image: Buffer, width: number, height: number): void {
-		// abstract
-	}
+	public abstract write(image: Buffer, width: number, height: number): Promise<stream.Readable>;
 }

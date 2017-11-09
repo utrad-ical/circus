@@ -26,26 +26,19 @@ export default function scan(helpers: ServerHelpers): koa.Middleware {
 		wl: ['Window width', undefined, 'isFloat', 'toFloat'],
 		format: ['Output type', 'arraybuffer', (s) => s === 'png', () => 'png']
 	};
-	const validator = validate(rules);
-
-	const compressor = compress();
 
 	const main = async function scan(ctx, next) {
-		const req = ctx.request, res = ctx.response;
-		const { ww, wl, origin, xAxis, yAxis, size, interpolation, format } = req.query;
-		const vol = req.volume;
+		const { ww, wl, origin, xAxis, yAxis, size, interpolation, format } = ctx.state.query;
+		const vol = ctx.state.volume;
 		const useWindow = (typeof ww === 'number' && typeof wl === 'number');
 		if (format === 'png' && !useWindow) {
-			next(StatusError.badRequest('Window values are required for PNG output.'));
-			return;
+			throw StatusError.badRequest('Window values are required for PNG output.');
 		}
 		if (size[0] * size[1] > 2048 * 2048) {
-			next(StatusError.badRequest('Requested image size is too large.'));
-			return;
+			throw StatusError.badRequest('Requested image size is too large.');
 		}
 		if (size[0] <= 0 || size[1] <= 0) {
-			next(StatusError.badRequest('Invalid image size'));
-			return;
+			throw StatusError.badRequest('Invalid image size');
 		}
 
 		// Create the oblique image
@@ -57,18 +50,17 @@ export default function scan(helpers: ServerHelpers): koa.Middleware {
 		}
 		const section: Section = { origin, xAxis, yAxis };
 		vol.scanObliqueSection(section, size, buf, interpolation, ww, wl);
-
+		
 		// Output
 		if (format === 'png') {
-			res.writeHead(200, {
-				'Content-Type': imageEncoder.mimeType()
-			});
-			imageEncoder.write(res, Buffer.from(buf.buffer), size[0], size[1]);
+			const out = await imageEncoder.write(Buffer.from(buf.buffer), size[0], size[1]);
+			ctx.body = out;
+			ctx.type = imageEncoder.mimeType();
 		} else {
-			res.send(Buffer.from(buf));
+			ctx.body = Buffer.from(buf.buffer);
 		}
 	};
 
-	return compose([validator, compressor, main]);
+	return compose([validate(rules), compress(), main]);
 
 }

@@ -1,6 +1,6 @@
 'use strict';
 
-var v = require('../lib/common/ValidatorRules');
+var v = require('../src/common/ValidatorRules');
 var assert = require('chai').assert;
 
 describe('ValidatorRules', function() {

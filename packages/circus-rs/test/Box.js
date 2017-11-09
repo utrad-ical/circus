@@ -1,6 +1,6 @@
 'use strict';
 
-const box = require('../lib/common/geometry/Box');
+const box = require('../src/common/geometry/Box');
 const assert = require('chai').assert;
 
 describe('Box', function() {

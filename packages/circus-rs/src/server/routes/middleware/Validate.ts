@@ -1,5 +1,5 @@
 import * as koa from 'koa';
-import { StatusError } from '../Error';
+import StatusError from '../Error';
 import { Validator, ValidatorRules } from '../../../common/Validator';
 
 export default function validate(rules: ValidatorRules): koa.Middleware {
@@ -10,7 +10,7 @@ export default function validate(rules: ValidatorRules): koa.Middleware {
 		if (errors.length) {
 			throw StatusError.badRequest(errors.join('\n'));
 		}
-		ctx.request.query = result;
+		ctx.state.query = result;
 		await next();
 	};
 }

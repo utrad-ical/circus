@@ -1,5 +1,5 @@
 import * as koa from 'koa';
-import { StatusError } from '../Error';
+import StatusError from '../Error';
 import { ServerHelpers } from '../../ServerHelpers';
 
 /**
@@ -32,7 +32,7 @@ export default function tokenAuthentication(helpers: ServerHelpers): koa.Middlew
 			return;
 		}
 
-		if (!authorizationCache.isValid(req.params.sid, token)) {
+		if (!authorizationCache.isValid(ctx.params.sid, token)) {
 			logger.warn('Invalid access token.');
 			invalid();
 			return;

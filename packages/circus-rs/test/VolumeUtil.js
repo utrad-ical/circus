@@ -1,11 +1,11 @@
 'use strict';
 
-var rawdata = require('../lib/common/RawData.js');
-var px = require('../lib/common/PixelFormat.js');
+var rawdata = require('../src/common/RawData');
+var px = require('../src/common/PixelFormat');
 var RawData = rawdata.default;
 var PixelFormat = px.PixelFormat;
 
-var volUtil = require('../lib/browser/volume-util.js');
+var volUtil = require('../src/browser/volume-util');
 
 var assert = require('chai').assert;
 

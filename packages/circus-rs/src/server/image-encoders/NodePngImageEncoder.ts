@@ -8,10 +8,14 @@ import Png from 'png';
  * which is a binary (C-based) module.
  */
 export default class NodePngImageEncoder extends ImageEncoder {
-	public write(out: stream.Writable, image: Buffer, width: number, height: number): void {
+	public write(image: Buffer, width: number, height: number): Promise<stream.Readable> {
 		const png = new Png(image, width, height, 'gray', 8);
-		png.encode(function (png_data): void {
-			out.end(png_data);
+		const out = new stream.PassThrough();
+		return new Promise(resolve => {
+			png.encode(function (png_data): void {
+				out.end(png_data);
+				resolve(out);
+			});
 		});
 	}
 }

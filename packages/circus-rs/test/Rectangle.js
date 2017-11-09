@@ -1,6 +1,6 @@
 'use strict';
 
-var geo = require('../lib/common/geometry');
+var geo = require('../src/common/geometry');
 var assert = require('chai').assert;
 
 describe('Rectangle', function() {

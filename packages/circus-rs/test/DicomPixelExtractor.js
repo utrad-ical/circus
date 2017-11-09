@@ -1,12 +1,12 @@
 'use strict';
 
-var extractor = require('../lib/server/dicom-dumpers/DicomPixelExtractor');
+var extractor = require('../src/server/dicom-dumpers/DicomPixelExtractor');
 var fs = require('fs');
 var zlib = require('zlib');
 var assert = require('chai').assert;
-var px = require('../lib/common/PixelFormat');
+var px = require('../src/common/PixelFormat');
 
-var ImageEncoder = require('../lib/server/image-encoders/PngJsImageEncoder').default;
+var ImageEncoder = require('../src/server/image-encoders/PngJsImageEncoder').default;
 
 var testdir = __dirname + '/test-dicom/';
 
@@ -40,9 +40,11 @@ describe('DicomPixelExtractor', function() {
 				arr[x + y * data.columns] = pixel;
 			}
 		}
-		var stream = fs.createWriteStream(testdir + file + '.png')
-		stream.on('close', done);
-		encoder.write(stream, new Buffer(arr), data.columns, data.rows);
+		encoder.write(new Buffer(arr), data.columns, data.rows).then(out => {
+			var stream = fs.createWriteStream(testdir + file + '.png')
+			out.pipe(stream);
+			stream.on('close', done);
+		});
 	}
 
 	function testFile(file, checks) {

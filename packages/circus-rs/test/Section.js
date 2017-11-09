@@ -1,7 +1,7 @@
 'use strict';
 
-var su = require('../lib/browser/section-util');
-var geo = require('../lib/common/geometry');
+var su = require('../src/browser/section-util');
+var geo = require('../src/common/geometry');
 var assert = require('chai').assert;
 
 describe('Section', function() {

@@ -1,6 +1,6 @@
 'use strict';
 
-var Validator = require('../lib/common/Validator').Validator;
+var Validator = require('../src/common/Validator').Validator;
 var assert = require('chai').assert;
 
 describe('Validator', function() {

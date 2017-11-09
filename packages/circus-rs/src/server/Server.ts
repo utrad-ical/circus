@@ -174,8 +174,10 @@ export default class Server {
 			);
 			router.get(
 				'/token',
-				ipBlockerMiddleware,
-				this.loadRouter('RequestToken')
+				compose([
+					ipBlockerMiddleware,
+					this.loadRouter('RequestToken')
+				])
 			);
 		}
 

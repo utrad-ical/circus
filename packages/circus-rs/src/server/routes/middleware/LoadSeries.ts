@@ -1,28 +1,27 @@
-import * as express from 'express';
+import * as koa from 'koa';
 import { StatusError } from '../Error';
 import { ServerHelpers } from '../../ServerHelpers';
 import { isUID } from '../../../common/ValidatorRules';
 import DicomVolume from '../../../common/DicomVolume';
 
-export function loadSeries(helpers: ServerHelpers): express.Handler {
+export function loadSeries(helpers: ServerHelpers): koa.Middleware {
 	const { seriesReader, logger } = helpers;
-	return function(req, res, next): void {
-		if (!isUID(req.params.sid)) {
+	return async function(ctx, next) {
+		const req = ctx.request;
+		const series = ctx.params.sid;
+		if (!isUID(series)) {
 			throw StatusError.badRequest('Invalid series UID');
 		}
-		const series = req.params.sid;
 
 		// TODO: Specifying image range is temporarily disabled
-		seriesReader.get(series).then((vol: DicomVolume) => {
-			try {
-				(req as any).volume = vol;
-				next();
-			} catch (e) {
-				next(StatusError.internalServerError(e.toString()));
-			}
-		}).catch(err => {
+		let vol;
+		try {
+			vol = await seriesReader.get(series);
+		} catch (err) {
 			logger.error(err);
-			next(StatusError.notFound('Series could not be loaded'));
-		});
+			throw StatusError.notFound('Series could not be loaded');
+		}
+		ctx.state.volume = vol;
+		await next();
 	};
 }

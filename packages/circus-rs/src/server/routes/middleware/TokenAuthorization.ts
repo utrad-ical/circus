@@ -1,18 +1,19 @@
-import * as express from 'express';
+import * as koa from 'koa';
 import { StatusError } from '../Error';
 import { ServerHelpers } from '../../ServerHelpers';
 
 /**
- * Returns an Express middleware function that blocks unauthorized requests
+ * Returns a koa middleware function that blocks unauthorized requests
  */
-export function tokenAuthentication(helpers: ServerHelpers): express.Handler {
+export function tokenAuthentication(helpers: ServerHelpers): koa.Middleware {
 	const { logger, authorizationCache } = helpers;
 
-	return function(req: express.Request, res: express.Response, next: express.NextFunction): void {
+	return async function(ctx, next) {
+		const { request: req, response: res } = ctx;
 
 		function invalid(): void {
-			res.setHeader('WWW-Authenticate', 'Bearer realm="CircusRS"');
-			next(StatusError.unauthorized('Access denied'));
+			ctx.headers['WWW-Authenticate'] = 'Bearer realm="CircusRS"';
+			throw StatusError.unauthorized('Access denied');
 		}
 
 		const authorization = req.headers.authorization;
@@ -38,6 +39,6 @@ export function tokenAuthentication(helpers: ServerHelpers): express.Handler {
 		}
 
 		// authorized!
-		next();
+		await next();
 	};
 }

@@ -1,19 +1,19 @@
-import * as express from 'express';
+import * as koa from 'koa';
 import { StatusError } from '../Error';
 import { ServerHelpers } from '../../ServerHelpers';
 
 /**
- * Creates an Express middleware function that blocks unauthorized IP address
+ * Creates a koa middleware function that blocks unauthorized IP address
  */
-export function ipBasedAccessControl(helpers: ServerHelpers, allowPattern: string): express.Handler {
-	return function(req: express.Request, res: express.Response, next: express.NextFunction): void {
+export function ipBasedAccessControl(helpers: ServerHelpers, allowPattern: string): koa.Middleware {
+	return async function(ctx: koa.Context, next) {
+		const req = ctx.request;
 		const ip: string = req.ip;
 		if (!ip.match(allowPattern)) {
 			helpers.logger.warn(`Denied access from unauthorized IP: ${req.ip} for ${req.url}`);
-			next(StatusError.unauthorized('Access unauthorized'));
-			return;
+			throw StatusError.unauthorized('Access unauthorized');
 		} else {
-			next();
+			await next();
 		}
 	};
 }

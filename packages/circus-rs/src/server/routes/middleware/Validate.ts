@@ -1,21 +1,16 @@
-import * as express from 'express';
+import * as koa from 'koa';
 import { StatusError } from '../Error';
 import { Validator, ValidatorRules } from '../../../common/Validator';
 
-export function validate(rules: ValidatorRules): express.Handler {
-	return function(req, res, next): void {
-		const origQuery = req.query;
+export function validate(rules: ValidatorRules): koa.Middleware {
+	return async function(ctx, next) {
+		const origQuery = ctx.request.query;
 		const validator = new Validator(rules);
 		const { result, errors } = validator.validate(origQuery);
 		if (errors.length) {
-			next(StatusError.badRequest(errors.join('\n')));
-			return;
+			throw StatusError.badRequest(errors.join('\n'));
 		}
-		try {
-			req.query = result;
-			next();
-		} catch (e) {
-			next(e);
-		}
+		ctx.request.query = result;
+		await next();
 	};
 }

@@ -1,8 +1,9 @@
-import * as express from 'express';
+import * as koa from 'koa';
+import * as compose from 'koa-compose';
 import { isTuple, parseTuple, parseBoolean } from '../../../common/ValidatorRules';
 import { Section } from '../../../common/geometry/Section';
 import { StatusError } from '../Error';
-import * as compression from 'compression';
+import * as compress from 'koa-compress';
 import { validate } from '../middleware/Validate';
 import { ValidatorRules } from '../../../common/Validator';
 import { ServerHelpers } from '../../ServerHelpers';
@@ -11,7 +12,7 @@ import { ServerHelpers } from '../../ServerHelpers';
  * Handles 'scan' endpoint which returns MPR image for
  * an arbitrary orientation.
  */
-export function execute(helpers: ServerHelpers): express.RequestHandler[] {
+export function execute(helpers: ServerHelpers): koa.Middleware {
 
 	const { imageEncoder } = helpers;
 
@@ -27,9 +28,10 @@ export function execute(helpers: ServerHelpers): express.RequestHandler[] {
 	};
 	const validator = validate(rules);
 
-	const compressor = compression();
+	const compressor = compress();
 
-	const main = (req: express.Request, res: express.Response, next: express.NextFunction): void => {
+	const main = async(ctx, next) => {
+		const req = ctx.request, res = ctx.response;
 		const { ww, wl, origin, xAxis, yAxis, size, interpolation, format } = req.query;
 		const vol = req.volume;
 		const useWindow = (typeof ww === 'number' && typeof wl === 'number');
@@ -67,6 +69,6 @@ export function execute(helpers: ServerHelpers): express.RequestHandler[] {
 		}
 	};
 
-	return [validator, compressor, main];
+	return compose([validator, compressor, main]);
 
 }

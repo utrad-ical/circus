@@ -1,11 +1,11 @@
-import * as express from 'express';
 import { ServerHelpers } from '../../ServerHelpers';
+import * as koa from 'koa';
 
-export function countUp(helpers: ServerHelpers): express.RequestHandler {
+export function countUp(helpers: ServerHelpers): koa.Middleware {
 	const { counter } = helpers;
-	return function(req: express.Request, res: express.Response, next: express.NextFunction): void {
-		const key = req.path.split('/').slice(-1)[0];
+	return async function(ctx: koa.Context, next) {
+		const key = ctx.request.path.split('/').slice(-1)[0];
 		counter.countUp(key);
-		next();
+		await next();
 	};
 }

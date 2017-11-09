@@ -11,7 +11,10 @@ import AuthorizationCache from './auth/AuthorizationCache';
 import { ServerHelpers } from './ServerHelpers';
 
 import * as http from 'http';
-import * as express from 'express';
+import * as Koa from 'koa';
+import * as Router from 'koa-router';
+import * as compose from 'koa-compose';
+import * as koaJson from 'koa-json';
 import { Configuration } from './Configuration';
 import { tokenAuthentication } from './routes/middleware/TokenAuthorization';
 import { ipBasedAccessControl } from './routes/middleware/IpBasedAccessControl';
@@ -29,7 +32,8 @@ export default class Server {
 
 	protected config: Configuration;
 
-	protected express: express.Application;
+	protected app: Koa;
+	protected locals: any = {};
 	protected server: http.Server;
 	public loadedModuleNames: string[] = [];
 
@@ -62,8 +66,8 @@ export default class Server {
 		return this.server;
 	}
 
-	public getApp(): express.Application {
-		return this.express;
+	public getApp(): Koa {
+		return this.app;
 	}
 
 	public start(): Promise<string> {
@@ -71,21 +75,16 @@ export default class Server {
 		return new Promise((resolve, reject) => {
 			try {
 				// create server process
-				this.express = express();
+				const app = new Koa();
+				this.app = app;
+				app.context
 
-				// Make server return indented JSON
-				this.express.set('json spaces', 2);
-				// Turn off 'X-Powered-By: Express' header
-				this.express.set('x-powered-by', false);
-				// Enable case sensitive routing
-				this.express.set('case sensitive routing', true);
-
-				this.express.locals.loadedModuleNames = this.loadedModuleNames;
+				this.locals.loadedModuleNames = this.loadedModuleNames;
 
 				this.buildRoutes();
 
 				const port = this.config.port;
-				this.server = this.express.listen(port, '0.0.0.0', () => {
+				this.server = app.listen(port, '0.0.0.0', () => {
 					const message = `Server running on port ${port}`;
 					this.helpers.logger.info(message);
 					resolve(message);
@@ -128,84 +127,88 @@ export default class Server {
 		);
 	}
 
-	private loadRouter(moduleName): express.RequestHandler | express.RequestHandler[] {
-		type Processor = (helpers: ServerHelpers) => express.RequestHandler | express.RequestHandler[];
+	private loadRouter(moduleName): Koa.Middleware {
+		type Processor = (helpers: ServerHelpers) => Koa.Middleware;
 		const execute: Processor = require(`./routes/${moduleName}`).execute;
 		return execute(this.helpers);
 	}
 
 	private buildRoutes(): void {
 		const config = this.config;
+		const app = this.app;
 
 		const useAuth = !!config.authorization.enabled;
-		this.express.locals.authorizationEnabled = useAuth;
+		this.locals.authorizationEnabled = useAuth;
 
 		// Set up global IP filter
 		if (typeof config.globalIpFilter === 'string') {
-			const globalBlocker = ipBasedAccessControl(this.helpers, config.globalIpFilter);
-			this.express.use(globalBlocker);
+			app.use(ipBasedAccessControl(
+				this.helpers, config.globalIpFilter
+			));
 		}
+
+		// Pretty-pring JSON output
+		app.use(koaJson());
+
+		// Adds an error handler which outputs all errors in JSON format
+		app.use(errorHandler(this.helpers.logger));
 
 		// Add global request handler
-		this.express.use((req, res: express.Response, next) => {
+		app.use(async (ctx, next) => {
 			// Always append the following header
-			res.set('Access-Control-Allow-Origin', '*');
-			this.helpers.logger.info(req.url, req.hostname);
-			next();
+			ctx.header['Access-Control-Allow-Origin'] = '*';
+			this.helpers.logger.info(ctx.request.url, ctx.request.hostname);
+			ctx.state.locals = this.locals;
+			await next();
 		});
 
-		this.express.use(countUp(this.helpers));
+		// Counts the number of requests
+		app.use(countUp(this.helpers));
 
-		// Set up series router
-
-		// mergeParams is needed to capture ':sid' param
-		const seriesRouter = express.Router({ mergeParams: true });
-		seriesRouter.options('*', (req, res, next) => {
-			res.status(200);
-			res.setHeader('Access-Control-Allow-Methods', 'GET');
-			res.setHeader('Access-Control-Allow-Headers', 'Authorization');
-			res.end();
-		});
-		if (useAuth) {
-			seriesRouter.use(tokenAuthentication(this.helpers));
-		}
-		seriesRouter.use(loadSeries(this.helpers));
-
-		const seriesRoutes = ['metadata', 'scan', 'volume'];
-		seriesRoutes.forEach(route => {
-			seriesRouter.get(
-				`/${route}`,
-				this.loadRouter(`series/${route}`)
-			);
-		});
-
-		this.express.use('/series/:sid', seriesRouter);
-
-		// Set up 'status' route
-		this.express.get(
-			'/status',
-			this.loadRouter('ServerStatus')
-		);
+		const router = new Router();
+		router.get('/status', this.loadRouter('ServerStatus'));
 
 		// Set up 'token' route
 		if (useAuth) {
 			const ipBlockerMiddleware = ipBasedAccessControl(
 				this.helpers, config.authorization.tokenRequestIpFilter
 			);
-			this.express.get(
+			router.get(
 				'/token',
 				ipBlockerMiddleware,
 				this.loadRouter('RequestToken')
 			);
 		}
 
-		// This is a default handler to catch all unknown requests of all types of verbs
-		this.express.all('*', (req, res, next) => {
-			next(StatusError.notFound('Not found'));
+		
+		router.options('/series/*', async (ctx, next) => {
+			ctx.status = 200;
+			ctx.headers['Access-Control-Allow-Methods'] = 'GET';
+			ctx.headers['Access-Control-Allow-Headers'] = 'Authorization';
+			await next();
+		});
+		const token = useAuth ? [tokenAuthentication(this.helpers)] : [];
+		const load = loadSeries(this.helpers);
+
+		const seriesRoutes = ['metadata', 'scan', 'volume'];
+		seriesRoutes.forEach(route => {
+			router.get(
+				`/series/:sid/${route}`,
+				compose([
+					...token,
+					load,
+					this.loadRouter(`series/${route}`)
+				])
+			);
 		});
 
-		// Adds an error handler which outputs all errors in JSON format
-		this.express.use(errorHandler(this.helpers.logger));
+		// Assign the router
+		app.use(router.routes());
+
+		// This is a default handler to catch all unknown requests of all types of verbs
+		app.use(async (ctx, next) => {
+			throw StatusError.notFound('Not found');
+		});
 
 	}
 

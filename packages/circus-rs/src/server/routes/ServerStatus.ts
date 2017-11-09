@@ -1,10 +1,10 @@
-import * as express from 'express';
+import * as koa from 'koa';
 import { ServerHelpers } from '../ServerHelpers';
 
 const startUpTime: Date = new Date(); // The time this module was loaded
 
-export function execute(helpers: ServerHelpers): express.RequestHandler {
-	return (req: express.Request, res: express.Response, next: express.NextFunction): void => {
+export function execute(helpers: ServerHelpers): koa.Middleware {
+	return async function (ctx, next) {
 		const { seriesReader, counter } = helpers;
 		const status = {
 			status: 'Running',
@@ -18,9 +18,9 @@ export function execute(helpers: ServerHelpers): express.RequestHandler {
 				upSince: startUpTime.toISOString()
 			},
 			counter: counter.getCounts(),
-			loadedModules: req.app.locals.loadedModuleNames,
-			authorization: { enabled: req.app.locals.authorizationEnabled }
+			loadedModules: ctx.state.locals.loadedModuleNames,
+			authorization: { enabled: ctx.state.locals.authorizationEnabled }
 		};
-		res.json(status);
+		ctx.body = status;
 	};
 }

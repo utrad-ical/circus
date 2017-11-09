@@ -5,7 +5,8 @@
  * a valid UID (eg, series instance UID)
  */
 export function isUID(input: string): boolean {
-	return !!input.match(/^((0|[1-9]\d*)\.)*(0|[1-9]\d*)$/)
+	return typeof input === 'string'
+		&& !!input.match(/^((0|[1-9]\d*)\.)*(0|[1-9]\d*)$/)
 		&& input.length <= 64;
 }
 

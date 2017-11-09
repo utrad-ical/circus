@@ -76,7 +76,8 @@ describe('Server', function() {
 					.end(done);
 			});
 
-			it.skip('must reject invalid access using globalIpFilter', function(done) {
+			it('must reject invalid access using globalIpFilter', function(done) {
+				server.getApp().proxy = true;
 				supertest(httpServer)
 					.get('/status')
 					.set('X-Forwarded-For', '127.0.0.11') // change IP
@@ -100,7 +101,8 @@ describe('Server', function() {
 						.end(done);
 				});
 
-				it.skip('must reject token request from invalid IP', function(done) {
+				it('must reject token request from invalid IP', function(done) {
+					server.getApp().proxy = true;
 					supertest(httpServer)
 						.get('/token')
 						.set('X-Forwarded-For', '127.0.0.2')

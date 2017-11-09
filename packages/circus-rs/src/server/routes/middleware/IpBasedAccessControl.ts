@@ -5,7 +5,7 @@ import { ServerHelpers } from '../../ServerHelpers';
 /**
  * Creates a koa middleware function that blocks unauthorized IP address
  */
-export function ipBasedAccessControl(helpers: ServerHelpers, allowPattern: string): koa.Middleware {
+export default function ipBasedAccessControl(helpers: ServerHelpers, allowPattern: string): koa.Middleware {
 	return async function(ctx: koa.Context, next) {
 		const req = ctx.request;
 		const ip: string = req.ip;

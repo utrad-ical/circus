@@ -8,10 +8,10 @@ import { ServerHelpers } from '../../ServerHelpers';
  * Handles 'volume' endpoint which dumps the whole voxel data of the
  * specified series.
  */
-export function execute(helpers: ServerHelpers): koa.Middleware {
+export default function volume(helpers: ServerHelpers): koa.Middleware {
 	return compose([
 		compress(),
-		async function (ctx, next) {
+		async function volume(ctx, next) {
 			const vol = ctx.state.volume as DicomVolume;
 			ctx.body = Buffer.from(vol.data);
 		}

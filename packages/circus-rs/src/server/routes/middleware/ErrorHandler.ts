@@ -5,7 +5,7 @@ import Logger from '../../loggers/Logger';
  * Global error handler which always output errors in JSON format
  * @param logger Logger to inject
  */
-export function errorHandler(logger: Logger): koa.Middleware {
+export default function errorHandler(logger: Logger): koa.Middleware {
 	return async function(ctx: koa.Context, next) {
 		try {
 			await next();

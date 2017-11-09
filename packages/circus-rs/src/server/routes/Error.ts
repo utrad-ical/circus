@@ -10,7 +10,7 @@ class CustomError extends Error {
 	}
 }
 
-export class StatusError extends CustomError {
+export default class StatusError extends CustomError {
 	public status: number;
 	public stack: string | undefined;
 

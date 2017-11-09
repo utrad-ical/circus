@@ -3,8 +3,8 @@ import { ServerHelpers } from '../ServerHelpers';
 
 const startUpTime: Date = new Date(); // The time this module was loaded
 
-export function execute(helpers: ServerHelpers): koa.Middleware {
-	return async function (ctx, next) {
+export default function serverStatus(helpers: ServerHelpers): koa.Middleware {
+	return async function serverStatus(ctx, next) {
 		const { seriesReader, counter } = helpers;
 		const status = {
 			status: 'Running',

@@ -16,12 +16,12 @@ import * as Router from 'koa-router';
 import * as compose from 'koa-compose';
 import * as koaJson from 'koa-json';
 import { Configuration } from './Configuration';
-import { tokenAuthentication } from './routes/middleware/TokenAuthorization';
-import { ipBasedAccessControl } from './routes/middleware/IpBasedAccessControl';
-import { loadSeries } from './routes/middleware/LoadSeries';
-import { errorHandler } from './routes/middleware/ErrorHandler';
-import { countUp } from './routes/middleware/CountUp';
-import { StatusError } from './routes/Error';
+import tokenAuthentication from './routes/middleware/TokenAuthorization';
+import ipBasedAccessControl from './routes/middleware/IpBasedAccessControl';
+import loadSeries from './routes/middleware/LoadSeries';
+import errorHandler from './routes/middleware/ErrorHandler';
+import countUp from './routes/middleware/CountUp';
+import StatusError from './routes/Error';
 
 /**
  * Main server class.
@@ -128,9 +128,8 @@ export default class Server {
 	}
 
 	private loadRouter(moduleName): Koa.Middleware {
-		type Processor = (helpers: ServerHelpers) => Koa.Middleware;
-		const execute: Processor = require(`./routes/${moduleName}`).execute;
-		return execute(this.helpers);
+		const module = require(`./routes/${moduleName}`).default;
+		return module(this.helpers);
 	}
 
 	private buildRoutes(): void {

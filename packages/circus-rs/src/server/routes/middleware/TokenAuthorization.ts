@@ -5,7 +5,7 @@ import { ServerHelpers } from '../../ServerHelpers';
 /**
  * Returns a koa middleware function that blocks unauthorized requests
  */
-export function tokenAuthentication(helpers: ServerHelpers): koa.Middleware {
+export default function tokenAuthentication(helpers: ServerHelpers): koa.Middleware {
 	const { logger, authorizationCache } = helpers;
 
 	return async function(ctx, next) {

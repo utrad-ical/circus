@@ -3,18 +3,18 @@ import * as compose from 'koa-compose';
 import { isUID } from '../../common/ValidatorRules';
 import { generateAccessToken } from '../auth/GenerateToken';
 import { StatusError } from './Error';
-import { validate } from './middleware/Validate';
+import validate from './middleware/Validate';
 import { ServerHelpers } from '../ServerHelpers';
 
 /**
  * Handles 'requestToken' endpoint which returns an access token
  * for each authorized series.
  */
-export function execute(helpers: ServerHelpers): koa.Middleware {
+export default function requestToken(helpers: ServerHelpers): koa.Middleware {
 	const { authorizationCache } = helpers;
 	const validator = validate({ series: ['Series UID', null, isUID, null] });
 
-	const main = async (ctx, next) => {
+	const main = async function requestToken(ctx, next) {
 		const series: string = ctx.request.query.series;
 
 		generateAccessToken().then(token => {
@@ -26,5 +26,4 @@ export function execute(helpers: ServerHelpers): koa.Middleware {
 	};
 
 	return compose([validator, main]);
-
 }

@@ -2,7 +2,7 @@ import * as koa from 'koa';
 import { StatusError } from '../Error';
 import { Validator, ValidatorRules } from '../../../common/Validator';
 
-export function validate(rules: ValidatorRules): koa.Middleware {
+export default function validate(rules: ValidatorRules): koa.Middleware {
 	return async function(ctx, next) {
 		const origQuery = ctx.request.query;
 		const validator = new Validator(rules);

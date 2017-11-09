@@ -4,7 +4,7 @@ import { ServerHelpers } from '../../ServerHelpers';
 import { isUID } from '../../../common/ValidatorRules';
 import DicomVolume from '../../../common/DicomVolume';
 
-export function loadSeries(helpers: ServerHelpers): koa.Middleware {
+export default function loadSeries(helpers: ServerHelpers): koa.Middleware {
 	const { seriesReader, logger } = helpers;
 	return async function(ctx, next) {
 		const req = ctx.request;

@@ -2,9 +2,9 @@ import * as koa from 'koa';
 import * as compose from 'koa-compose';
 import { isTuple, parseTuple, parseBoolean } from '../../../common/ValidatorRules';
 import { Section } from '../../../common/geometry/Section';
-import { StatusError } from '../Error';
+import StatusError from '../Error';
 import * as compress from 'koa-compress';
-import { validate } from '../middleware/Validate';
+import validate from '../middleware/Validate';
 import { ValidatorRules } from '../../../common/Validator';
 import { ServerHelpers } from '../../ServerHelpers';
 
@@ -12,7 +12,7 @@ import { ServerHelpers } from '../../ServerHelpers';
  * Handles 'scan' endpoint which returns MPR image for
  * an arbitrary orientation.
  */
-export function execute(helpers: ServerHelpers): koa.Middleware {
+export default function scan(helpers: ServerHelpers): koa.Middleware {
 
 	const { imageEncoder } = helpers;
 
@@ -30,7 +30,7 @@ export function execute(helpers: ServerHelpers): koa.Middleware {
 
 	const compressor = compress();
 
-	const main = async(ctx, next) => {
+	const main = async function scan(ctx, next) {
 		const req = ctx.request, res = ctx.response;
 		const { ww, wl, origin, xAxis, yAxis, size, interpolation, format } = req.query;
 		const vol = req.volume;

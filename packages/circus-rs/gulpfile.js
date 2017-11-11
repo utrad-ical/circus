@@ -20,7 +20,7 @@ gulp.task('watch', ['browserify', 'dist-browser-css'], function() {
 
 gulp.task('typescript', function() {
 	var tsproject = typescript.createProject(
-		'src/tsconfig.json',
+		'./tsconfig.json',
 		{ typescript: require('typescript') } // uses TypeScript 2.0
 	);
 	return gulp.src('src/**/*.ts')

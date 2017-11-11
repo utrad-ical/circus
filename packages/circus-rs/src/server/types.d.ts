@@ -8,7 +8,7 @@ declare module 'koa' {
 // Augument Error class with status/expose
 declare global {
 	interface Error {
-		status: number;
-		expose: boolean;
+		status?: number;
+		expose?: boolean;
 	}
 }

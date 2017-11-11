@@ -12,7 +12,7 @@ export default function tokenAuthentication(helpers: ServerHelpers): koa.Middlew
 		const { request: req, response: res } = ctx;
 
 		function invalid(): void {
-			ctx.headers['WWW-Authenticate'] = 'Bearer realm="CircusRS"';
+			ctx.response.set('WWW-Authenticate', 'Bearer realm="CircusRS"');
 			throw StatusError.unauthorized('Access denied');
 		}
 

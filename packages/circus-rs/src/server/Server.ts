@@ -155,7 +155,7 @@ export default class Server {
 		// Add global request handler
 		app.use(async (ctx, next) => {
 			// Always append the following header
-			ctx.header['Access-Control-Allow-Origin'] = '*';
+			ctx.response.set('Access-Control-Allow-Origin', '*');
 			this.helpers.logger.info(ctx.request.url, ctx.request.hostname);
 			ctx.state.locals = this.locals;
 			await next();
@@ -184,8 +184,8 @@ export default class Server {
 		
 		router.options('/series/*', async (ctx, next) => {
 			ctx.status = 200;
-			ctx.headers['Access-Control-Allow-Methods'] = 'GET';
-			ctx.headers['Access-Control-Allow-Headers'] = 'Authorization';
+			ctx.response.set('Access-Control-Allow-Methods', 'GET');
+			ctx.response.set('Access-Control-Allow-Headers', 'Authorization');
 			await next();
 		});
 		const token = useAuth ? [tokenAuthentication(this.helpers)] : [];

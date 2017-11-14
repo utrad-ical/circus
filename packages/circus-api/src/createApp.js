@@ -12,6 +12,7 @@ import cors from './middleware/cors';
 import injector from './middleware/injector';
 import typeCheck from './middleware/typeCheck';
 import createValidator from './validation/createValidator';
+import createStorage from './storage/createStorage';
 import validateInOut from './validation/validateInOut';
 import createModels from './db/createModels';
 import compose from 'koa-compose';
@@ -78,6 +79,10 @@ export default async function createApp(options = {}) {
 
 	const validator = await createValidator(path.resolve(__dirname, 'schemas'));
 	const models = createModels(db, validator);
+	const blobStorage = await createStorage(
+		'local',
+		{ root: path.resolve(__dirname, '..', '..', 'storage') }
+	);
 
 	// Build a router.
 	// Register each API endpoints to the router according YAML manifest files.
@@ -93,7 +98,7 @@ export default async function createApp(options = {}) {
 			jsonLimit: '1mb',
 			onerror: (err, ctx) => ctx.throw(400, 'Invalid JSON as request body.\n' + err.message)
 		}),
-		injector({ validator, db, models }),
+		injector({ validator, db, models, blobStorage }),
 		...( noAuth ? [] : [oauth.authenticate()]),
 		apiRouter.routes()
 	]);

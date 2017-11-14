@@ -14,7 +14,10 @@ export default function typeCheck(expectedType = 'application/json') {
 
 		const contentType = /^([^;]*)/.exec(ctx.request.type)[1];
 		if (contentType !== expectedType) {
-			ctx.throw(status.UNSUPPORTED_MEDIA_TYPE, 'This content-type is unsupported.');
+			ctx.throw(
+				status.UNSUPPORTED_MEDIA_TYPE,
+				'This content-type is unsupported. Expected ' + expectedType
+			);
 			return;
 		}
 		await next();

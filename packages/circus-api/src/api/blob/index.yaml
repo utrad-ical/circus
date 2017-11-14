@@ -1,0 +1,11 @@
+name: debug
+description: >
+  Manages BLOB objects with a hash.
+routes:
+  - verb: get
+    path: /blob/:hash
+    description: Fetches a blog specified by the hash.
+  - verb: put
+    path: /blob/:hash
+    description: Stores a new blob.
+    expectedContentType: application/octet-stream

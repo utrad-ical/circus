@@ -55,7 +55,9 @@ async function prepareApiRouter(apiDir, validator, options) {
 				typeCheck(route.expectedContentType),
 				validateInOut(validator, {
 					requestSchema: route.requestSchema,
-					responseSchema: route.responseSchema
+					requestValidationOptions: route.requestValidationOptions,
+					responseSchema: route.responseSchema,
+					responseValidationOptions: route.responseValidationOptions
 				}),
 				mainHandler // The processing function itself
 			]);

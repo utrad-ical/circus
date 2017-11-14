@@ -1,12 +1,11 @@
 import status from 'http-status';
-// import fs from 'fs-extra';
 import rawBody from 'raw-body';
-import * as crypto from 'crypto';
+import { createHash } from 'crypto';
 
 const sha1 = buf => {
-	const shasum = crypto.createHash('sha1');
-	shasum.update(buf);
-	return shasum.digest('hex');
+	const sha1 = createHash('sha1');
+	sha1.update(buf);
+	return sha1.digest('hex');
 };
 
 export const handleGet = async (ctx, next) => {

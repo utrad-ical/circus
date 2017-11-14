@@ -1,3 +1,5 @@
+import status from 'http-status';
+
 const removePassword = input => {
 	const output = { ...input };
 	delete output.password;
@@ -17,6 +19,6 @@ export const handleGet = async (ctx, next) => {
 };
 
 export const handlePut = async (ctx, next) => {
-	ctx.throw(400);
+	ctx.throw(status.NOT_IMPLEMENTED);
 };
 

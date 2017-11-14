@@ -1,0 +1,20 @@
+name: series
+description: >
+  Operates DICOM series.
+  This handles series information stored in the database.
+  Actual image data (voxel values, window, etc.) are not contained.
+routes:
+  - verb: get
+    path: /series
+    handler: handleSearch
+    description: Retrieves the list of DICOM series.
+    responseSchema:
+      type: array
+      items:
+        $ref: series
+  - verb: post
+    path: /series
+    description: Uploads a new DICOM file or a series of DICOM files.
+  - verb: get
+    path: /series/:seriesUid
+    description: Returns information about the specified series.

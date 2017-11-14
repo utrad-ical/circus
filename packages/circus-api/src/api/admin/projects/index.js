@@ -1,5 +1,7 @@
+import status from 'http-status';
+
 export const handleSearch = async (ctx, next) => {
-	const projects = (await ctx.models.project.findAll());
+	const projects = await ctx.models.project.findAll();
 	ctx.body = projects;
 };
 
@@ -10,5 +12,5 @@ export const handleGet = async (ctx, next) => {
 };
 
 export const handlePut = async (ctx, next) => {
-	ctx.throw(400);
+	ctx.throw(status.NOT_IMPLEMENTED);
 };

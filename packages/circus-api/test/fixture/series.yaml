@@ -1,0 +1,48 @@
+-
+  seriesUid: 111.222.333.444.555
+  studyUid: 111.222.333.888.999.1000
+  width: 512
+  height: 512
+  seriesDate: { $date: '2017-10-10T00:11:22' }
+  modality: CT
+  seriesDescription: chest 2mm
+  bodyPart: Chest
+  stationName: LightSpeed
+  modelName: LightSpeed
+  manufacturer: GE
+  storageId: 0
+  patientInfo: {}
+  parameters: {}
+  domain: default
+-
+  seriesUid: 111.222.333.444.666
+  studyUid: 111.222.333.888.999.1001
+  width: 512
+  height: 512
+  seriesDate: { $date: '2017-10-11T00:15:00' }
+  modality: MR
+  seriesDescription: Brain MRA 1mm
+  bodyPart: Head
+  stationName: AAA
+  modelName: BBB
+  manufacturer: Hatsushiba
+  storageId: 0
+  patientInfo: {}
+  parameters: {}
+  domain: default
+-
+  seriesUid: 111.222.333.444.777
+  studyUid: 111.222.333.888.999.1002
+  width: 512
+  height: 512
+  seriesDate: { $date: '2017-10-12T00:11:00' }
+  modality: CT
+  seriesDescription: chest 2mm
+  bodyPart: Chest
+  stationName: LightSpeed
+  modelName: LightSpeed
+  manufacturer: GE
+  storageId: 0
+  patientInfo: {}
+  parameters: {}
+  domain: default

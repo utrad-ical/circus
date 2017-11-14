@@ -1,0 +1,30 @@
+-
+  caseId: faeb503e97f918c882453fd2d789f50f4250267740a0b3fbcc85a529f2d7715b
+  projectId: 8883fdef6f5144f50eb2a83cd34baa44
+  patientInfoCache: {}
+  latestRevision:
+    creator: alice@example.com
+    date: { $date: '2015-01-01T12:00:00Z' }
+    description: Created
+    attributes: {}
+    status: draft
+    series:
+      -
+        seriesUid: 111.222.333.444.666
+        images: 1-100
+        labels: []
+  revisions:
+    -
+      creator: alice@example.com
+      date: { $date: '2015-01-01T12:00:00Z' }
+      description: Created
+      attributes: {}
+      status: draft
+      series:
+        -
+          seriesUid: 111.222.333.444.666
+          images: 1-100
+          labels: []
+
+  tags: []
+  domains: []

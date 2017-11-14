@@ -12,7 +12,7 @@ properties:
     format: dicomUid
     description: >
       :key: The series instance UID, which must be globally unique according to the DICOM spec.
-  studyUID:
+  studyUid:
     type: string
     format: dicomUid
     description: >

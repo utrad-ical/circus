@@ -12,7 +12,9 @@ properties:
   patientInfoCache:
     type: object
   tags:
-    type: object
+    type: array
+    items:
+      type: string
   latestRevision:
     $ref: revision
   revisions:

@@ -18,9 +18,7 @@ properties:
     type: string
     description: Optional arbitrary string to explain this revision.
   attributes:
-    type: array
-    items:
-      type: object
+    type: object
     description: An object that represents case attributes.
   status:
     type: string
@@ -34,7 +32,7 @@ properties:
           format: dicomUid
         images:
           type: string
-          format: multiIntegerRnage
+          format: multiIntegerRange
         labels:
           type: array
           items:

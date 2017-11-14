@@ -1,5 +1,6 @@
-title: apiSchema
+$schema: 'http://json-schema.org/schema#'
 $async: true
+title: apiSchema
 description: >
   This is a meta-schema that explains the format of API manifest yaml files
   under `api/*/index.yaml`.

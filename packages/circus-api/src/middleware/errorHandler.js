@@ -14,7 +14,7 @@ export default function errorHandler(debugMode) {
 				ctx.status = status.NOT_FOUND; // Reassign is necessary
 			}
 		} catch (err) {
-			console.log(err);
+			// console.log(err);
 			if (err instanceof Ajv.ValidationError) {
 				// JSON validation error occurred.
 				if (err.phase === 'response') {

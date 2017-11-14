@@ -21,7 +21,12 @@ describe('errorHandler middleware', function() {
 			router.get('/invalid', async ctx => {
 				const ajv = new Ajv();
 				const schema = { $async: true, type: 'number' };
-				await ajv.validate(schema, 'hi'); // validation fails
+				try {
+					await ajv.validate(schema, 'hi'); // validation fails
+				} catch (err) {
+					err.phase = 'request';
+					throw err;
+				}
 			});
 
 			router.get('/invalid-on-response', async ctx => {

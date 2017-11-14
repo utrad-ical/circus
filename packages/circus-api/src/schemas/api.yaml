@@ -1,4 +1,5 @@
 title: apiSchema
+$async: true
 description: >
   This is a meta-schema that explains the format of API manifest yaml files
   under `api/*/index.yaml`.

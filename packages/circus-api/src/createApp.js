@@ -15,8 +15,6 @@ import createValidator from './validation/createValidator';
 import validateInOut from './validation/validateInOut';
 import createModels from './db/createModels';
 import compose from 'koa-compose';
-import Ajv from 'ajv';
-
 
 function handlerName(route) {
 	if (route.handler) return route.handler;
@@ -33,18 +31,15 @@ async function prepareApiRouter(apiDir, validator, options) {
 	const { debug } = options;
 	const router = new Router();
 
-	// prepare AJV to validate API schema definition file
-	const ajv = new Ajv({ allErrors: true });
-	const metaSchema = path.resolve(__dirname, 'api/schema.yaml');
-	const schemaValidator = ajv.compile(yaml(await fs.readFile(metaSchema)));
-
 	const manifestFiles = await glob(apiDir);
 	for(const manifestFile of manifestFiles) {
 		const data = yaml(await fs.readFile(manifestFile, 'utf8'));
-		if (!schemaValidator(data)) {
+		try {
+			validator.validate('api', data);
+		} catch (err) {
 			throw new TypeError(
 				`Meta schema error at ${manifestFile}.\n` +
-				formatValidationErrors(schemaValidator.errors)
+				formatValidationErrors(err.errors)
 			);
 		}
 		const dir = path.dirname(manifestFile);
@@ -86,7 +81,7 @@ export default async function createApp(options = {}) {
 
 	// Build a router.
 	// Register each API endpoints to the router according YAML manifest files.
-	const apiDir = path.resolve(__dirname, 'api/*/**/*.yaml');
+	const apiDir = path.resolve(__dirname, 'api/**/*.yaml');
 	const apiRouter = await prepareApiRouter(apiDir, validator, options);
 
 	const oauth = createOauthServer(models, debug);

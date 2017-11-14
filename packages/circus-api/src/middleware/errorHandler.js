@@ -14,9 +14,10 @@ export default function errorHandler(debugMode) {
 				ctx.status = status.NOT_FOUND; // Reassign is necessary
 			}
 		} catch (err) {
+			console.log(err);
 			if (err instanceof Ajv.ValidationError) {
 				// JSON validation error occurred.
-				if (err.phase == 'response') {
+				if (err.phase === 'response') {
 					// Response validation error.
 					// This means there is a bug on the server-side,
 					// or the database is corrupted.
@@ -24,7 +25,7 @@ export default function errorHandler(debugMode) {
 					ctx.body = {
 						error: 'Response schema validation error detected.'
 					};
-				} else {
+				} else if (err.phase === 'request') {
 					// Request validation error.
 					// This just means the user has sent wrong data that does
 					// not fulfill some JSON schema.
@@ -32,6 +33,11 @@ export default function errorHandler(debugMode) {
 					ctx.body = {
 						error: 'Request data is not correct.',
 						validationErrors: err.errors
+					};
+				} else {
+					ctx.status = status.INTERNAL_SERVER_ERROR;
+					ctx.body = {
+						error: 'Unexpected validation error.'
 					};
 				}
 				return;

@@ -105,7 +105,10 @@ export default async function createApp(options = {}) {
 
 	// Register middleware stack to the Koa app.
 	koa.use(mount('/api', authSection));
-	koa.use(mount('/login', oauth.token()));
+	koa.use(mount(
+		'/login',
+		compose([errorHandler(debug), bodyParser(), oauth.token()])
+	));
 
 	return koa;
 }

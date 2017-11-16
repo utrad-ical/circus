@@ -1,0 +1,10 @@
+$schema: 'http://json-schema.org/schema#'
+$async: true
+title: Preferences
+type: object
+description: >
+  The object that holds the user's preference.
+properties:
+  theme: { enum: ['mode_black', 'mode_white' ]}
+  personalInvoView: { type: boolean }
+requiredProperties: ['theme', 'personalInfoView']

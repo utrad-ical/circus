@@ -34,13 +34,7 @@ properties:
     description: >
       The IP address of the last login of this user.
   preferences:
-    type: object
-    properties:
-      theme: { enum: ['mode_black', 'mode_white' ]}
-      personalInvoView: { type: boolean }
-    requiredProperties: ['theme', 'personalInfoView']
-    description: >
-      The object that holds the user's preference.
+    $ref: preferences
   loginEnabled:
     type: boolean
     description: >

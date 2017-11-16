@@ -1,0 +1,15 @@
+name: preference
+description: >
+  Manages preferences of the log-in user.
+routes:
+  - verb: get
+    path: /preferences
+    responseSchema: preferences
+    description: >
+      Returns the preferences object of the current user.
+      Consider using login-info instead.
+  - verb: post
+    path: /preferences
+    requestSchema: preferences
+    description: >
+      Sets the preferences.

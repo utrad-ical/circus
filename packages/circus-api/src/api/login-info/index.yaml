@@ -1,0 +1,9 @@
+name: preference
+description: >
+  Returns information regarding the current user.
+routes:
+  - verb: get
+    path: /login-info
+  - verb: get
+    path: /login-info/full
+    handler: handleGetFull

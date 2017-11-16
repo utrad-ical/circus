@@ -2,7 +2,11 @@ export default async function memoryStorage() {
 	const store = {};
 
 	async function read(key) {
-		return await Buffer.from(store[key]);
+		if (key in store) {
+			return Buffer.from(store[key]);
+		} else {
+			throw new Error('not found');
+		}
 	}
 
 	async function write(key, data) {

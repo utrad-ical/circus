@@ -10,9 +10,13 @@ const sha1 = buf => {
 
 export const handleGet = async (ctx, next) => {
 	const hash = ctx.params.hash;
-	const file = await ctx.blobStorage.read(hash);
-	ctx.type = 'application/octet-stream';
-	ctx.body = file;
+	try {
+		const file = await ctx.blobStorage.read(hash);
+		ctx.type = 'application/octet-stream';
+		ctx.body = file;
+	} catch (err) {
+		ctx.throw(status.NOT_FOUND);
+	}
 };
 
 export const handlePut = async (ctx, next) => {

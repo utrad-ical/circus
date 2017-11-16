@@ -4,6 +4,7 @@ import dashdash from 'dashdash';
 import createApp from './createApp';
 import connectDb from './db/connectDb';
 import chalk from 'chalk';
+import * as path from 'path';
 
 const options = [
 	{
@@ -33,10 +34,21 @@ const options = [
 		helpArg: 'PORT',
 		help: 'port (default: 8080)',
 		default: 8080
+	},
+	{
+		names: ['debug', 'd'],
+		type: 'bool',
+		help: 'force debug mode'
+	},
+	{
+		names: ['blob-path'],
+		env: 'CIRCUS_API_BLOB_DIR',
+		type: 'string',
+		default: './store/blobs'
 	}
 ];
 
-const { host, port, no_auth: noAuth } = (() => {
+const { debug, host, port, no_auth: noAuth, blobPath } = (() => {
 	try {
 		const parser = dashdash.createParser({ options });
 		const opts = parser.parse();
@@ -45,6 +57,7 @@ const { host, port, no_auth: noAuth } = (() => {
 			console.log('Options:\n' + parser.help({ includeEnv: true }));
 			process.exit(0);
 		}
+		opts.blobPath = path.resolve(path.dirname(__dirname), opts.blob_path);
 		return opts;
 	} catch (e) {
 		console.log(e.message);
@@ -61,9 +74,10 @@ async function main() {
 	}
 
 	const serverOptions = {
-		debug: process.env.NODE_ENV !== 'production',
+		debug: debug || process.env.NODE_ENV !== 'production',
 		db,
-		noAuth
+		noAuth,
+		blobPath
 	};
 
 	try {
@@ -71,6 +85,7 @@ async function main() {
 		koaApp.listen(port, host, (err) => {
 			if (err) throw err;
 			console.log(chalk.green(`Server running on port ${host}:${port}`));
+			console.log(`  Label path: ${blobPath}`);
 		});
 	} catch(err) {
 		console.error(chalk.red('Error during the server startup.'));

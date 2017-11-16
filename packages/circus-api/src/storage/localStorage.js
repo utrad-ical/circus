@@ -8,7 +8,7 @@ export default async function localStorage(params) {
 	} = params;
 
 	if (!root || !(await fs.pathExists(root))) {
-		throw new Error('Root directory does not exist');
+		throw new Error(`Root directory "${root}" does not exist.`);
 	}
 
 	function buildPath(key) {

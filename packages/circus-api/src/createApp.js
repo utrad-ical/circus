@@ -71,20 +71,18 @@ async function prepareApiRouter(apiDir, validator, options) {
 
 /**
  * Creates a new Koa app.
- * @return A new Koa application.
  */
 export default async function createApp(options = {}) {
-	const { debug, db, noAuth } = options;
+	const { debug, db, noAuth, blobPath } = options;
 
 	// The main Koa instance.
 	const koa = new Koa();
 
 	const validator = await createValidator(path.resolve(__dirname, 'schemas'));
 	const models = createModels(db, validator);
-	const blobStorage = await createStorage(
-		'local',
-		{ root: path.resolve(__dirname, '..', '..', 'storage') }
-	);
+	const blobStorage = blobPath ?
+		await createStorage('local', { root: blobPath }) :
+		await createStorage('memory');
 
 	// Build a router.
 	// Register each API endpoints to the router according YAML manifest files.

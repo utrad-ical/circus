@@ -4,6 +4,7 @@ description: Manages user groups.
 routes:
   - verb: get
     path: /admin/groups
+    requiredGlobalPrivilege: manageServer
     handler: handleSearch
     description: Retrieves the list of groups
     responseSchema:
@@ -12,8 +13,10 @@ routes:
         $ref: group
   - verb: get
     path: /admin/groups/:groupId
+    requiredGlobalPrivilege: manageServer
     description: Retrieves the specified group.
     responseSchema: group
   - verb: put
     path: /admin/groups/:groupId
+    requiredGlobalPrivilege: manageServer
     description: Updates the specified group.

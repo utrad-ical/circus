@@ -4,6 +4,7 @@ description: Manages projects.
 routes:
   - verb: get
     path: /admin/projects
+    requiredGlobalPrivilege: manageServer
     handler: handleSearch
     description: Retrieves the list of projects
     responseSchema:
@@ -12,8 +13,10 @@ routes:
         $ref: group
   - verb: get
     path: /admin/projects/:projectId
+    requiredGlobalPrivilege: manageServer
     description: Retrieves the specified project.
     responseSchema: project
   - verb: put
     path: /admin/projects/:projectId
+    requiredGlobalPrivilege: manageServer
     description: Updates the specified project.

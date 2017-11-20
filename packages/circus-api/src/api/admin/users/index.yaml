@@ -4,6 +4,7 @@ description: Manages login users.
 routes:
   - verb: get
     path: /admin/users
+    requiredGlobalPrivilege: manageServer
     handler: handleSearch
     description: Retrieves the list of users.
     responseSchema:
@@ -12,8 +13,10 @@ routes:
         $ref: user
   - verb: get
     path: /admin/users/:userId
+    requiredGlobalPrivilege: manageServer
     description: Retrieves the specified user.
     responseSchema: user
   - verb: put
     path: /admin/users/:userId
+    requiredGlobalPrivilege: manageServer
     description: Updates the specified user.

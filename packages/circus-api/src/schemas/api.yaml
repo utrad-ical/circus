@@ -27,6 +27,14 @@ properties:
           type: string
           description: >
             API description. Parsed as markdown, appears as API reference.
+        requiredGlobalPrivilege:
+          oneOf:
+            -
+              type: string
+            -
+              type: array
+              items:
+                type: string
         requestMimeType:
           type: string
           default: 'application/json'

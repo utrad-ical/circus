@@ -10,6 +10,7 @@ import createOauthServer from './middleware/auth/createOauthServer';
 import errorHandler from './middleware/errorHandler';
 import cors from './middleware/cors';
 import injector from './middleware/injector';
+import authGlobalPriivileges from './middleware/auth/authGlobalPriivileges';
 import typeCheck from './middleware/typeCheck';
 import createValidator from './validation/createValidator';
 import createStorage from './storage/createStorage';
@@ -51,8 +52,11 @@ async function prepareApiRouter(apiDir, validator, options) {
 			if (typeof mainHandler !== 'function') {
 				throw new Error('middleware not found');
 			}
+			const globalPrivilege = route.requiredGlobalPrivilege ?
+				[authGlobalPriivileges(route.requiredGlobalPrivilege)] : [];
 			const middlewareStack = compose([
 				typeCheck(route.expectedContentType),
+				...globalPrivilege,
 				validateInOut(validator, {
 					requestSchema: route.requestSchema,
 					requestValidationOptions: route.requestValidationOptions,

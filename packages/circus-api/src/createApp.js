@@ -11,6 +11,7 @@ import errorHandler from './middleware/errorHandler';
 import cors from './middleware/cors';
 import injector from './middleware/injector';
 import checkGlobalPrivileges from './middleware/auth/checkGlobalPrivileges';
+import checkProjectPrivileges from './middleware/auth/checkProjectPrivileges';
 import typeCheck from './middleware/typeCheck';
 import createValidator from './validation/createValidator';
 import createStorage from './storage/createStorage';
@@ -30,7 +31,7 @@ function formatValidationErrors(errors) {
 }
 
 async function prepareApiRouter(apiDir, validator, options) {
-	const { debug } = options;
+	const { debug, noAuth } = options;
 	const router = new Router();
 
 	const manifestFiles = await glob(apiDir);
@@ -52,11 +53,15 @@ async function prepareApiRouter(apiDir, validator, options) {
 			if (typeof mainHandler !== 'function') {
 				throw new Error('middleware not found');
 			}
-			const globalPrivilege = route.requiredGlobalPrivilege ?
+			const globalCheck = !noAuth && route.requiredGlobalPrivilege ?
 				[checkGlobalPrivileges(route.requiredGlobalPrivilege)] : [];
+			const projectCheck = !noAuth && route.requiredProjectPrivilege ?
+				[checkProjectPrivileges(route.requiredProjectPrivilege)] : [];
+
 			const middlewareStack = compose([
 				typeCheck(route.expectedContentType),
-				...globalPrivilege,
+				...globalCheck,
+				...projectCheck,
 				validateInOut(validator, {
 					requestSchema: route.requestSchema,
 					requestValidationOptions: route.requestValidationOptions,

@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { assert } from 'chai';
 import * as test from './test-utils';
-import authGlobalPrivileges from '../src/middleware/auth/authGlobalPriivileges';
+import authGlobalPrivileges from '../src/middleware/auth/authGlobalPrivileges';
 import createValidator from '../src/validation/createValidator';
 import * as path from 'path';
 import createModels from '../src/db/createModels';

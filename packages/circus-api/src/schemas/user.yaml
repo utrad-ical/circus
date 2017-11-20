@@ -45,7 +45,8 @@ properties:
       Optinal arbitrary text to identify this user.
   groups:
     type: array
-    items: { type: number }
+    items:
+      type: number
     description: >
       The group ID of groups which this user belongs to.
       The set of previleges the user has is deteremined as

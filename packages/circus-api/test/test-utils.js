@@ -91,6 +91,11 @@ export async function setUpMongoFixture(db, collections) {
 			if (!row.createdAt) row.createdAt = new Date();
 			if (!row.updatedAt) row.updatedAt = new Date();
 		}
-		await col.insertMany(data);
+		try {
+			await col.insertMany(data);
+		} catch (err) {
+			console.log(err.errors);
+			throw err;
+		}
 	}
 }

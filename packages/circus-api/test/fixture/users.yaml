@@ -10,7 +10,7 @@
     theme: mode_white
     personalInfoView: false
   loginEnabled: true
-  groups: []
+  groups: [1] # admin
 -
   userEmail: bob@example.com
   loginId: bob
@@ -23,4 +23,4 @@
     theme: mode_white
     personalInfoView: false
   loginEnabled: true
-  groups: []
+  groups: [2] # power user

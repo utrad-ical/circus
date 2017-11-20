@@ -1,0 +1,20 @@
+-
+  groupId: 1
+  groupName: admin
+  privileges: ['manageServer', 'personalInfoView']
+  domains: []
+  readProjects: []
+  writeProjects: []
+  addSeriesProjects: []
+  viewPersonalInfoProjects: []
+  moderateProjects: []
+-
+  groupId: 2
+  groupName: powerUser
+  privileges: ['personalInfoView']
+  domains: []
+  readProjects: []
+  writeProjects: []
+  addSeriesProjects: []
+  viewPersonalInfoProjects: []
+  moderateProjects: []

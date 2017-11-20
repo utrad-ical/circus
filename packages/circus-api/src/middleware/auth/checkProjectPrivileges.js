@@ -1,5 +1,4 @@
 import status from 'http-status';
-import { access } from 'fs';
 
 /**
  * @param {string} operation
@@ -13,7 +12,7 @@ export default function checkProjectPrivileges(operation) {
 		throw new TypeError('Unknown project operation type.');
 	}
 
-	return async function(ctx, next) {
+	return async function checkProjectPrivileges(ctx, next) {
 		const user = ctx.user;
 		const caseId = ctx.params.caseId;
 		if (!caseId) {

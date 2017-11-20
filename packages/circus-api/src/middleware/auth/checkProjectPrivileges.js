@@ -1,29 +1,18 @@
 import status from 'http-status';
+import { accessibleProjectsForOperation } from '../../privilegeUtils';
 
 /**
  * @param {string} operation
  */
 export default function checkProjectPrivileges(operation) {
 
-	const operations = [
-		'read', 'write', 'addSeries', 'viewPersonalInfo', 'moderate'
-	];
-	if (typeof operation !== 'string' || operations.indexOf(operation) < 0) {
-		throw new TypeError('Unknown project operation type.');
-	}
-
 	return async function checkProjectPrivileges(ctx, next) {
 		// The user must have appropriate project privilege
 		const user = ctx.user;
-		const accessibleProjectsForOperation = {};
-		for (const groupId of user.groups) {
-			const group = await ctx.models.group.findById(groupId);
-			for (const projId of group[operation + 'Projects']) {
-				accessibleProjectsForOperation[projId] = true;
-			}
-		}
-
-		if (accessibleProjectsForOperation[ctx.case.projectId] !== true) {
+		const accessibleProjects = await accessibleProjectsForOperation(
+			ctx.models, user, operation
+		);
+		if (accessibleProjects[ctx.case.projectId] !== true) {
 			ctx.throw(
 				status.UNAUTHORIZED,
 				`You do not have "${operation}" privilege of this project.`

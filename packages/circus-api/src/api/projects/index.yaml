@@ -1,0 +1,9 @@
+name: project
+description: >
+  Fetches the project.
+routes:
+  - verb: get
+    path: /projects/:projectId
+    responseSchema: project
+    description: >
+      Returns the project data structure.

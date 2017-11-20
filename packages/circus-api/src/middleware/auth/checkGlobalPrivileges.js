@@ -1,4 +1,5 @@
 import status from 'http-status';
+import { globalPrivilegesOfUser } from '../../privilegeUtils';
 
 /**
  * Return a middleware that checks user's global privilege.
@@ -13,27 +14,15 @@ export default function checkGlobalPrivileges(privileges) {
 
 	return async function checkGlobalPrivileges(ctx, next) {
 		const user = ctx.user;
-
-		// Determines the list of privileges this user has
-		const myPrivileges = {};
-		for (const groupId of user.groups) {
-			const group = await ctx.models.group.findByIdOrFail(groupId);
-			for (const priv of group.privileges) {
-				myPrivileges[priv] = true;
-			}
-		}
-
-		// Check
+		const globalPrivileges = await globalPrivilegesOfUser(ctx.models, user);
 		for (const priv of privileges) {
-			if (!myPrivileges[priv]) {
+			if (!globalPrivileges[priv]) {
 				ctx.throw(
 					status.UNAUTHORIZED,
 					'You do not have a privilege to access this resource.'
 				);
 			}
 		}
-
-		// Passed!
 		await next();
 	};
 }

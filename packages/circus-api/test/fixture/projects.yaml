@@ -1,0 +1,12 @@
+-
+  projectId: 8883fdef6f5144f50eb2a83cd34baa44
+  projectName: Lung nodules
+  description: Collection of various lung nodules
+  windowPriority: 'dicom,auto'
+  windowPresets: []
+  tags:
+    - happy
+    - party
+    - ufo
+  caseAttributesSchema: []
+  labelAttributesSchema: []

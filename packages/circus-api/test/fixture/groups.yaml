@@ -13,8 +13,8 @@
   groupName: powerUser
   privileges: ['personalInfoView']
   domains: []
-  readProjects: []
-  writeProjects: []
+  readProjects: ['8883fdef6f5144f50eb2a83cd34baa44']
+  writeProjects: ['8883fdef6f5144f50eb2a83cd34baa44']
   addSeriesProjects: []
   viewPersonalInfoProjects: []
   moderateProjects: []

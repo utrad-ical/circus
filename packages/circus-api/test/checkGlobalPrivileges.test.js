@@ -1,12 +1,12 @@
 import axios from 'axios';
 import { assert } from 'chai';
 import * as test from './test-utils';
-import authGlobalPrivileges from '../src/middleware/auth/authGlobalPrivileges';
+import checkGlobalPrivileges from '../src/middleware/auth/checkGlobalPrivileges';
 import createValidator from '../src/validation/createValidator';
 import * as path from 'path';
 import createModels from '../src/db/createModels';
 
-describe('authGlobalPrivileges middleware', function() {
+describe('checkGlobalPrivileges middleware', function() {
 	let server, db;
 	let userEmail;
 
@@ -23,7 +23,7 @@ describe('authGlobalPrivileges middleware', function() {
 				ctx.user = await models.user.findByIdOrFail(userEmail);
 				await next();
 			});
-			app.use(authGlobalPrivileges('manageServer', 'personalInfoView'));
+			app.use(checkGlobalPrivileges('manageServer', 'personalInfoView'));
 			app.use(async (ctx, next) => {
 				ctx.body = 'Danger Zone';
 			});

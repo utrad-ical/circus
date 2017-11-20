@@ -4,14 +4,14 @@ import status from 'http-status';
  * Return a middleware that checks user's global privilege.
  * @param {string|string[]} privileges
  */
-export default function authGlobalPrivileges(privileges) {
+export default function checkGlobalPrivileges(privileges) {
 
 	if (typeof privileges === 'string') privileges = [privileges];
 	else if (!Array.isArray(privileges)) {
 		throw new TypeError('Invalid list of privileges');
 	}
 
-	return async function authGlobalPrivileges(ctx, next) {
+	return async function checkGlobalPrivileges(ctx, next) {
 		const user = ctx.user;
 
 		// Determines the list of privileges this user has

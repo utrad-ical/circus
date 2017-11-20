@@ -12,11 +12,14 @@ routes:
         $ref: clinicalCase
   - verb: post
     path: /cases
+    requiredProjectPrivilege: write
     description: Defines a new case.
   - verb: get
     path: /cases/:caseId
+    requiredProjectPrivilege: read
     description: Returns information about the specified case.
   - verb: post
     path: /cases/:caseId/revision
+    requiredProjectPrivilege: write
     handler: handlePostRevision
     description: Creates a new revision in the specified case.

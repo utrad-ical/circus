@@ -1,9 +1,7 @@
 import status from 'http-status';
 
 export const handleGet = async (ctx, next) => {
-	const caseId = ctx.params.caseId;
-	const item = await ctx.models.clinicalCase.findByIdOrFail(caseId);
-	ctx.body = item;
+	ctx.body = ctx.case;
 };
 
 export const handlePost = async (ctx, next) => {

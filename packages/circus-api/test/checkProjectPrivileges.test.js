@@ -1,7 +1,8 @@
 import axios from 'axios';
 import { assert } from 'chai';
 import * as test from './test-utils';
-import checkProjectPrivileges from '../src/middleware/auth/checkProjectPrivileges';
+import checkProjectPrivileges, { injectCaseAndProject }
+	from '../src/middleware/auth/checkProjectPrivileges';
 import createValidator from '../src/validation/createValidator';
 import * as path from 'path';
 import createModels from '../src/db/createModels';
@@ -24,6 +25,7 @@ describe('checkProjectPrivileges middleware', function() {
 				ctx.user = await models.user.findByIdOrFail(userEmail);
 				await next();
 			});
+			app.use(injectCaseAndProject());
 			app.use(checkProjectPrivileges('write'));
 			app.use(async (ctx, next) => {
 				ctx.body = 'Protected Area';

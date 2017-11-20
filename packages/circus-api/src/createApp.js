@@ -11,7 +11,7 @@ import errorHandler from './middleware/errorHandler';
 import cors from './middleware/cors';
 import injector from './middleware/injector';
 import checkGlobalPrivileges from './middleware/auth/checkGlobalPrivileges';
-import checkProjectPrivileges from './middleware/auth/checkProjectPrivileges';
+import checkProjectPrivileges, { injectCaseAndProject } from './middleware/auth/checkProjectPrivileges';
 import typeCheck from './middleware/typeCheck';
 import createValidator from './validation/createValidator';
 import createStorage from './storage/createStorage';
@@ -55,12 +55,15 @@ async function prepareApiRouter(apiDir, validator, options) {
 			}
 			const globalCheck = !noAuth && route.requiredGlobalPrivilege ?
 				[checkGlobalPrivileges(route.requiredGlobalPrivilege)] : [];
+			const inject = route.requiredProjectPrivilege ?
+				[injectCaseAndProject()] : [];
 			const projectCheck = !noAuth && route.requiredProjectPrivilege ?
 				[checkProjectPrivileges(route.requiredProjectPrivilege)] : [];
 
 			const middlewareStack = compose([
 				typeCheck(route.expectedContentType),
 				...globalCheck,
+				...inject,
 				...projectCheck,
 				validateInOut(validator, {
 					requestSchema: route.requestSchema,

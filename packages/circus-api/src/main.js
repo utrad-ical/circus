@@ -69,7 +69,7 @@ const { debug, host, port, no_auth: noAuth, blobPath } = (() => {
 async function main() {
 	// Establish db connection (shared throughout app)
 	const db = await connectDb();
-	const logger = createLogger();
+	const logger = createLogger('trace');
 
 	if (noAuth) {
 		console.warn(chalk.red('WARNING: NO AUTHENTICATION MODE!'));

@@ -18,8 +18,7 @@ export default function errorHandler(debugMode, logger) {
 		try {
 			await next();
 			if (ctx.status === status.NOT_FOUND) {
-				ctx.body = { error: 'Not found' };
-				ctx.status = status.NOT_FOUND; // Reassign is necessary
+				ctx.throw(status.NOT_FOUND, 'Not found');
 			}
 		} catch (err) {
 			// console.log(err);
@@ -66,6 +65,8 @@ export default function errorHandler(debugMode, logger) {
 					// Exception with `status` means `ctx.throw()` was
 					// manually called somewhere in our codebase.
 					// (We have successfully handled an exceptional event!)
+					logger.info('HTTP error with status ' + err.status);
+					logger.info(err);
 					ctx.status = err.status;
 					ctx.body = { error: err.message };
 				}

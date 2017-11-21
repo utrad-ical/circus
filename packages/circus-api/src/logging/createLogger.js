@@ -6,28 +6,27 @@ const logDir = path.resolve(__dirname, '../../store/logs');
 export default function createLogger(category) {
 	log4js.configure({
 		appenders: {
-			logFile: {
+			errorLog: {
 				type: 'dateFile',
-				filename: path.join(logDir, 'circus-api.log'),
+				filename: path.join(logDir, 'circus-api-error.log'),
 				keepFileExt: true,
-				level: 'debug'
 			},
+			errorFilter: { type: 'loglevelFilter', appender: 'errorLog', level: 'error' },
 			traceLog: {
 				type: 'dateFile',
 				filename: path.join(logDir, 'circus-api-trace.log'),
 				keepFileExt: true,
-				level: 'trace'
 			},
 			console: { type: 'console' },
 			off: { type: 'logLevelFilter', appender: 'console', level: 'off' }
 		},
 		categories: {
-			default: { appenders: ['logFile'], level: 'debug' },
-			trace: { appenders: ['traceLog', 'logFile'], level: 'trace' },
+			default: { appenders: ['errorLog'], level: 'error' },
+			trace: { appenders: ['traceLog', 'errorFilter'], level: 'trace' },
 			off: { appenders: ['off'], level: 'off' }
 		}
 	});
 	const logger = log4js.getLogger(category);
-	logger.level = 'debug';
+	// logger.level = 'debug';
 	return logger;
 }

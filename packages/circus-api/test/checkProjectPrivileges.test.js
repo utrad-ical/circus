@@ -3,7 +3,7 @@ import { assert } from 'chai';
 import * as test from './test-utils';
 import checkProjectPrivileges, { injectCaseAndProject }
 	from '../src/middleware/auth/checkProjectPrivileges';
-import createValidator from '../src/validation/createValidator';
+import createValidator from '../src/createValidator';
 import * as path from 'path';
 import createModels from '../src/db/createModels';
 

@@ -1,5 +1,5 @@
 import { assert } from 'chai';
-import createValidator from '../src/validation/createValidator';
+import createValidator from '../src/createValidator';
 import createCollectionAccessor from '../src/db/createCollectionAccessor';
 import { ValidationError } from 'ajv';
 import { asyncThrows, connectMongo, setUpMongoFixture } from './test-utils';

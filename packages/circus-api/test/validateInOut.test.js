@@ -1,5 +1,5 @@
-import validateInOut from '../src/validation/validateInOut';
-import createValidator from '../src/validation/createValidator';
+import validateInOut from '../src/middleware/validateInOut';
+import createValidator from '../src/createValidator';
 import bodyParser from 'koa-bodyparser';
 import errorHandler from '../src/middleware/errorHandler';
 import axios from 'axios';

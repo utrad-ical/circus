@@ -1,5 +1,5 @@
 import { assert } from 'chai';
-import createValidator from '../src/validation/createValidator';
+import createValidator from '../src/createValidator';
 import {
 	setUpKoa, listenKoa, tearDownKoa,
 	connectMongo, setUpMongoFixture,

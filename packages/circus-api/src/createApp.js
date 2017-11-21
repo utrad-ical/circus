@@ -13,10 +13,10 @@ import injector from './middleware/injector';
 import checkGlobalPrivileges from './middleware/auth/checkGlobalPrivileges';
 import checkProjectPrivileges, { injectCaseAndProject } from './middleware/auth/checkProjectPrivileges';
 import typeCheck from './middleware/typeCheck';
-import createValidator from './validation/createValidator';
+import createValidator from './createValidator';
 import createStorage from './storage/createStorage';
 import createLogger from './createLogger';
-import validateInOut from './validation/validateInOut';
+import validateInOut from './middleware/validateInOut';
 import createModels from './db/createModels';
 import compose from 'koa-compose';
 

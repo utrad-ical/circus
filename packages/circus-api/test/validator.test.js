@@ -1,4 +1,4 @@
-import createValidator from '../src/validation/createValidator';
+import createValidator from '../src/createValidator';
 import { assert } from 'chai';
 import * as path from 'path';
 import { ValidationError } from 'ajv';

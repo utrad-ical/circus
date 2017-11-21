@@ -4,7 +4,7 @@ const path = require('path');
 const chalk = require('chalk');
 
 const connectDb = require('../src/db/connectDb').default;
-const createValidator = require('../src/validation/createValidator').default;
+const createValidator = require('../src/createValidator').default;
 const createModels = require('../src/db/createModels').default;
 
 async function scanMigrationFiles() {

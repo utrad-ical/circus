@@ -6,6 +6,7 @@ import connectDb from './db/connectDb';
 import chalk from 'chalk';
 import * as path from 'path';
 import createLogger from './logging/createLogger';
+import log4js from 'log4js';
 
 const options = [
 	{
@@ -97,6 +98,15 @@ async function main() {
 		console.error(chalk.red('Error during the server startup.'));
 		console.error(err);
 	}
+
+	process.on('SIGINT', () => {
+		console.log('CIRCUS API Server terminating...');
+		logger.warn('Server terminating...');
+		log4js.shutdown(err => {
+			if (err) console.error('Logger shutdown failed', err);
+			process.exit(err ? 1 : 0);
+		});
+	});
 }
 
 main();

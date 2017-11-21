@@ -1,7 +1,7 @@
 import * as log4js from 'log4js';
 import * as path from 'path';
 
-const logDir = path.resolve(__dirname, '../../store/logs');
+const logDir = path.resolve(__dirname, '../store/logs');
 
 export default function createLogger(category) {
 	log4js.configure({

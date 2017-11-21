@@ -11,7 +11,7 @@ export default function createLogger(category) {
 				filename: path.join(logDir, 'circus-api-error.log'),
 				keepFileExt: true,
 			},
-			errorFilter: { type: 'loglevelFilter', appender: 'errorLog', level: 'error' },
+			errorFilter: { type: 'logLevelFilter', appender: 'errorLog', level: 'error' },
 			traceLog: {
 				type: 'dateFile',
 				filename: path.join(logDir, 'circus-api-trace.log'),

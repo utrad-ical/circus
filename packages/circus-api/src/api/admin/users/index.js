@@ -1,5 +1,3 @@
-import status from 'http-status';
-
 const removePassword = input => {
 	const output = { ...input };
 	delete output.password;
@@ -13,12 +11,13 @@ export const handleSearch = async (ctx, next) => {
 
 export const handleGet = async (ctx, next) => {
 	const user = removePassword(
-		await ctx.models.user.findByIdOrFail(ctx.params.userId)
+		await ctx.models.user.findByIdOrFail(ctx.params.userEmail)
 	);
 	ctx.body = user;
 };
 
 export const handlePut = async (ctx, next) => {
-	ctx.throw(status.NOT_IMPLEMENTED);
+	const userEmail = ctx.params.userEmail;
+	await ctx.models.user.modifyOne(userEmail, ctx.request.body);
+	ctx.body = null;
 };
-

@@ -102,7 +102,10 @@ export default function createCollectionAccessor(db, validator, opts) {
 		const key = primaryKey ? primaryKey : '_id';
 		const date = new Date();
 		if (key in updates) {
-			throw new TypeError('The primary key cannot be modified.');
+			const err = TypeError('The primary key cannot be modified.');
+			err.status = 400;
+			err.expose = true;
+			throw err;
 		}
 		const original = await collection.findOneAndUpdate(
 			{ [key]: id },

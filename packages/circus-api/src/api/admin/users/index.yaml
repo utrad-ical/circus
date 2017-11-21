@@ -12,11 +12,12 @@ routes:
       items:
         $ref: user
   - verb: get
-    path: /admin/users/:userId
+    path: /admin/users/:userEmail
     requiredGlobalPrivilege: manageServer
     description: Retrieves the specified user.
     responseSchema: user
   - verb: put
-    path: /admin/users/:userId
+    path: /admin/users/:userEmail
+    requestSchema: user
     requiredGlobalPrivilege: manageServer
     description: Updates the specified user.

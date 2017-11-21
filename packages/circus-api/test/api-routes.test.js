@@ -23,6 +23,10 @@ describe('API', function() {
 	});
 
 	describe('admin/groups', function() {
+		beforeEach(async function() {
+			await test.setUpMongoFixture(db, ['groups']);
+		});
+
 		it('should return list of groups', async function() {
 			const res = await axios.get(server.url + 'api/admin/groups');
 			assert.isArray(res.data);
@@ -34,6 +38,17 @@ describe('API', function() {
 			assert.equal(res.data.groupName, 'admin');
 		});
 
+		it('should return error for nonexistent group', async function() {
+			await test.serverThrowsWithState(
+				axios.get(server.url + 'api/admin/groups/7'),
+				404
+			);
+			await test.serverThrowsWithState(
+				axios.get(server.url + 'api/admin/groups/bad'),
+				404
+			);
+		});
+
 		it('should update a group', async function() {
 			await axios.request({
 				method: 'put',
@@ -43,6 +58,84 @@ describe('API', function() {
 			const res2 = await axios.get(server.url + 'api/admin/groups/1');
 			assert.equal(res2.data.groupName, 'root');
 		});
+
+		it('should return error for invalid group update', async function() {
+			await test.serverThrowsWithState(
+				axios.request({
+					method: 'put',
+					url: server.url + 'api/admin/groups/1',
+					data: { groupName: 72 }
+				}),
+				400
+			);
+			await test.serverThrowsWithState(
+				axios.request({
+					method: 'put',
+					url: server.url + 'api/admin/groups/1',
+					data: { groupId: 45 }
+				}),
+				400, /primary key/
+			);
+		});
+
+		it.skip('should reject unknown field');
+	});
+
+	describe('admin/users', function() {
+		beforeEach(async function() {
+			await test.setUpMongoFixture(db, ['users']);
+		});
+
+		it('should return list of users', async function() {
+			const res = await axios.get(server.url + 'api/admin/users');
+			assert.isArray(res.data);
+			assert.isTrue(res.data.some(u => u.loginId === 'bob'));
+			assert.isFalse(res.data.some(u => u.password), 'Result data included password field.');
+		});
+
+		it('should return a user', async function() {
+			const res = await axios.get(server.url + 'api/admin/users/alice@example.com');
+			assert.equal(res.data.loginId, 'alice');
+			assert.notExists(res.data.password);
+		});
+
+		it('should return error for nonexistent user', async function() {
+			await test.serverThrowsWithState(
+				axios.get(server.url + 'api/admin/user/john@due.com'),
+				404
+			);
+		});
+
+		it('should update a user', async function() {
+			await axios.request({
+				method: 'put',
+				url: server.url + 'api/admin/users/alice@example.com',
+				data: { loginId: 'anastasia' }
+			});
+			const res2 = await axios.get(server.url + 'api/admin/users/alice@example.com');
+			assert.equal(res2.data.loginId, 'anastasia');
+		});
+
+		it('should return error for invalid user update', async function() {
+			await test.serverThrowsWithState(
+				axios.request({
+					method: 'put',
+					url: server.url + 'api/admin/users/alice@example.com',
+					data: { groups: ['this-must-not-be', 'strings'] }
+				}),
+				400
+			);
+			await test.serverThrowsWithState(
+				axios.request({
+					method: 'put',
+					url: server.url + 'api/admin/users/alice@example.com',
+					data: { userEmail: 'alice.new.mail@example.com' }
+				}),
+				400, /primary key/
+			);
+		});
+
+		it.skip('should reject unknown field');
 	});
 
 	describe('series', function() {

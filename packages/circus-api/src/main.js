@@ -5,7 +5,7 @@ import createApp from './createApp';
 import connectDb from './db/connectDb';
 import chalk from 'chalk';
 import * as path from 'path';
-import createLogger from './logging/createLogger';
+import createLogger from './createLogger';
 import log4js from 'log4js';
 
 const options = [

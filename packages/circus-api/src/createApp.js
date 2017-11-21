@@ -15,7 +15,7 @@ import checkProjectPrivileges, { injectCaseAndProject } from './middleware/auth/
 import typeCheck from './middleware/typeCheck';
 import createValidator from './validation/createValidator';
 import createStorage from './storage/createStorage';
-import createLogger from './logging/createLogger';
+import createLogger from './createLogger';
 import validateInOut from './validation/validateInOut';
 import createModels from './db/createModels';
 import compose from 'koa-compose';

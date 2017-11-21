@@ -1,6 +1,6 @@
 import Ajv from 'ajv';
 import status from 'http-status';
-import createLogger from '../logging/createLogger';
+import createLogger from '../createLogger';
 
 /**
  * Creates an error handler middleware that always outputs JSON

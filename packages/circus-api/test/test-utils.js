@@ -47,20 +47,20 @@ export function tearDownKoa(server) {
 	});
 }
 
-export async function setUpAppForTest(logLevel = 'off') {
+export async function setUpAppForTest(logMode = 'off') {
 	const db = await connectMongo();
 	await setUpMongoFixture(
 		db,
 		['series', 'clinicalCases', 'groups', 'projects', 'users', 'tokens']
 	);
-	const logger = createLogger(logLevel);
+	const logger = createLogger(logMode);
 	const app = await createApp({ debug: true, db, logger });
 	const server = await listenKoa(app);
 	const aliceToken = '2311aee0435c36ae14c39835539a931a6344714a';
 	const aliceAxios = axios.create({ headers: { Authorization: `Bearer ${aliceToken}` } });
 	const bobToken = '8292766837c1901b0a6954f7bda49710316c57da';
 	const bobAxios = axios.create({ headers: { Authorization: `Bearer ${bobToken}` } });
-	return { db, app, aliceAxios, bobAxios, ...server };
+	return { db, app, logger, aliceAxios, bobAxios, ...server };
 }
 
 export async function tearDownAppForTest(testServer) {

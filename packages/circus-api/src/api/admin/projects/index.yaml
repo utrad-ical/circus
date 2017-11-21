@@ -6,11 +6,11 @@ routes:
     path: /admin/projects
     requiredGlobalPrivilege: manageServer
     handler: handleSearch
-    description: Retrieves the list of projects
+    description: Retrieves the list of projects.
     responseSchema:
       type: array
       items:
-        $ref: group
+        $ref: project
   - verb: get
     path: /admin/projects/:projectId
     requiredGlobalPrivilege: manageServer
@@ -19,4 +19,5 @@ routes:
   - verb: put
     path: /admin/projects/:projectId
     requiredGlobalPrivilege: manageServer
+    requestSchema: project
     description: Updates the specified project.

@@ -153,6 +153,19 @@ describe('API', function() {
 		it.skip('should reject unknown field');
 	});
 
+	describe('admin/projects', function() {
+		it('should return list of projects', async function() {
+			const res = await axios.get(server.url + 'api/admin/projects');
+			assert.isArray(res.data);
+			assert.isTrue(res.data.some(p => p.projectName === 'Lung nodules'));
+		});
+
+		it('should return a project', async function() {
+			const res = await axios.get(server.url + 'api/admin/projects/8883fdef6f5144f50eb2a83cd34baa44');
+			assert.equal(res.data.projectName, 'Lung nodules');
+		});
+	});
+
 	describe('series', function() {
 		it('should perform search', async function() {
 			const res = await axios.request({

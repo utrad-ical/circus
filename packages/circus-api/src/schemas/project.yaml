@@ -20,7 +20,14 @@ properties:
       Optinal arbitrary text to explain this project.
   tags:
     type: array
-    items: { type: 'object' }
+    items:
+      type: object
+      properties:
+        caption:
+          type: string
+        color:
+          type: string
+          pattern: ^\#[0-9a-f]{6}$
     description: >
       List of tags available in this project.
   caseAttributesSchema:

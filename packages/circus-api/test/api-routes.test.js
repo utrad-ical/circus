@@ -2,20 +2,47 @@ import axios from 'axios';
 import { assert } from 'chai';
 import * as test from './test-utils';
 import createApp from '../src/createApp';
+import createLogger from '../src/logging/createLogger';
 
 describe('API', function() {
 	let db, server;
 
 	before(async function() {
 		db = await test.connectMongo();
-		await test.setUpMongoFixture(db, ['series', 'clinicalCases']);
-		const app = await createApp({ debug: true, db, noAuth: true });
+		await test.setUpMongoFixture(
+			db,
+			['series', 'clinicalCases', 'groups', 'projects', 'users']
+		);
+		const app = await createApp({ debug: true, db, noAuth: true, logger: createLogger('trace') });
 		server = await test.listenKoa(app);
 	});
 
 	after(async function() {
 		await test.tearDownKoa(server);
 		await db.close();
+	});
+
+	describe('admin/groups', function() {
+		it('should return list of groups', async function() {
+			const res = await axios.get(server.url + 'api/admin/groups');
+			assert.isArray(res.data);
+			assert.equal(res.data[0].groupName, 'admin');
+		});
+
+		it('should return a group', async function() {
+			const res = await axios.get(server.url + 'api/admin/groups/1');
+			assert.equal(res.data.groupName, 'admin');
+		});
+
+		it('should update a group', async function() {
+			await axios.request({
+				method: 'put',
+				url: server.url + 'api/admin/groups/1',
+				data: { groupName: 'root' }
+			});
+			const res2 = await axios.get(server.url + 'api/admin/groups/1');
+			assert.equal(res2.data.groupName, 'root');
+		});
 	});
 
 	describe('series', function() {

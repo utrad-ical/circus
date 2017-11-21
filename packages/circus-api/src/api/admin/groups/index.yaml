@@ -18,5 +18,6 @@ routes:
     responseSchema: group
   - verb: put
     path: /admin/groups/:groupId
+    requestSchema: group
     requiredGlobalPrivilege: manageServer
     description: Updates the specified group.

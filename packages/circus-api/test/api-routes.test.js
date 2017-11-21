@@ -13,6 +13,30 @@ describe('API', function() {
 		await test.tearDownAppForTest(server);
 	});
 
+	describe('admin', function() {
+		it('should return unauthorized error for unauthorized user', async function() {
+			const targets = [
+				'groups', 'groups/1', 'PUT groups/1',
+				'users', 'users/alice@example.com', 'PUT users/alice@example.com',
+				'projects'
+			];
+			for (const target of targets) {
+				let [method, url] = target.split(' ');
+				if (!url) { method = 'GET'; url = target; }
+				// console.log(method, target);
+				const data = method.match(/GET|PUT/) ? { a: 10 } : undefined;
+				await test.serverThrowsWithState(
+					server.bobAxios.request({
+						url: server.url + 'api/admin/' + url,
+						method,
+						data
+					}),
+					401, /privilege/
+				);
+			}
+		});
+	});
+
 	describe('admin/groups', function() {
 		beforeEach(async function() {
 			await test.setUpMongoFixture(server.db, ['groups']);

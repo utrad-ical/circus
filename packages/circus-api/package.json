@@ -36,6 +36,7 @@
     "koa-compose": "^4.0.0",
     "koa-mount": "^3.0.0",
     "koa-router": "^7.2.1",
+    "log4js": "^2.3.12",
     "mongodb": "^2.2.31",
     "mongodb-extended-json": "^1.10.0",
     "node-php-password": "^0.1.2",

@@ -5,6 +5,7 @@ import createApp from './createApp';
 import connectDb from './db/connectDb';
 import chalk from 'chalk';
 import * as path from 'path';
+import createLogger from './logging/createLogger';
 
 const options = [
 	{
@@ -68,14 +69,17 @@ const { debug, host, port, no_auth: noAuth, blobPath } = (() => {
 async function main() {
 	// Establish db connection (shared throughout app)
 	const db = await connectDb();
+	const logger = createLogger();
 
 	if (noAuth) {
 		console.warn(chalk.red('WARNING: NO AUTHENTICATION MODE!'));
+		logger.warn('CIRCUS API will start without authentication!');
 	}
 
 	const serverOptions = {
 		debug: debug || process.env.NODE_ENV !== 'production',
 		db,
+		logger,
 		noAuth,
 		blobPath
 	};
@@ -84,6 +88,8 @@ async function main() {
 		const koaApp = await createApp(serverOptions);
 		koaApp.listen(port, host, (err) => {
 			if (err) throw err;
+			logger.info('CIRCUS API started.');
+			logger.info(`Label path: ${blobPath}`);
 			console.log(chalk.green(`Server running on port ${host}:${port}`));
 			console.log(`  Label path: ${blobPath}`);
 		});

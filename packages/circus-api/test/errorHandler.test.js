@@ -41,14 +41,14 @@ describe('errorHandler middleware', function() {
 			});
 
 			router.get('/server-side-error', async ctx => {
-				ctx.body = null.foo;
+				ctx.body = null.foo; // intentional run time error
 			});
 
 			router.get('/error-403', async ctx => {
 				ctx.throw(403, 'no!');
 			});
 
-			app.use(errorHandler(true));
+			app.use(errorHandler(true, 'off'));
 			app.use(router.routes());
 		});
 		server = await listenKoa(app);

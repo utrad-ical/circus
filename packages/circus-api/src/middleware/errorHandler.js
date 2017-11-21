@@ -1,11 +1,19 @@
 import Ajv from 'ajv';
 import status from 'http-status';
+import createLogger from '../logging/createLogger';
 
 /**
  * Creates an error handler middleware that always outputs JSON
  * as a HTTP response regardless of the cause of the error.
  */
-export default function errorHandler(debugMode) {
+export default function errorHandler(debugMode, logger) {
+
+	if (!logger) {
+		logger = createLogger('off');
+	} else if (typeof logger === 'string') {
+		logger = createLogger(logger);
+	}
+
 	return async function errorHandler(ctx, next) {
 		try {
 			await next();
@@ -15,6 +23,7 @@ export default function errorHandler(debugMode) {
 			}
 		} catch (err) {
 			// console.log(err);
+			logger.trace(err);
 			if (err instanceof Ajv.ValidationError) {
 				// JSON validation error occurred.
 				if (err.phase === 'response') {
@@ -46,6 +55,7 @@ export default function errorHandler(debugMode) {
 				if (!err.status) {
 					// Exception without `status` means some unexpected
 					// run-time error happened outside of `ctx.throw()`.
+					logger.error(err);
 					ctx.status = status.INTERNAL_SERVER_ERROR;
 					if (debugMode) {
 						ctx.body = { error: err.message, stack: err.stack };

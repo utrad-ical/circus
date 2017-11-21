@@ -15,6 +15,7 @@ import checkProjectPrivileges, { injectCaseAndProject } from './middleware/auth/
 import typeCheck from './middleware/typeCheck';
 import createValidator from './validation/createValidator';
 import createStorage from './storage/createStorage';
+import createLogger from './logging/createLogger';
 import validateInOut from './validation/validateInOut';
 import createModels from './db/createModels';
 import compose from 'koa-compose';
@@ -96,6 +97,8 @@ export default async function createApp(options = {}) {
 		await createStorage('local', { root: blobPath }) :
 		await createStorage('memory');
 
+	const logger = options.logger ? options.logger : createLogger('off');
+
 	// Build a router.
 	// Register each API endpoints to the router according YAML manifest files.
 	const apiDir = path.resolve(__dirname, 'api/**/*.yaml');
@@ -103,14 +106,14 @@ export default async function createApp(options = {}) {
 
 	const oauth = createOauthServer(models, debug);
 	const authSection = compose([
-		errorHandler(debug),
+		errorHandler(debug, logger),
 		cors(),
 		bodyParser({
 			enableTypes: ['json'],
 			jsonLimit: '1mb',
 			onerror: (err, ctx) => ctx.throw(400, 'Invalid JSON as request body.\n' + err.message)
 		}),
-		injector({ validator, db, models, blobStorage }),
+		injector({ validator, db, logger, models, blobStorage }),
 		...( noAuth ? [] : [oauth.authenticate()]),
 		apiRouter.routes()
 	]);

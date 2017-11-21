@@ -5,6 +5,10 @@ import * as fs from 'fs-extra';
 import { safeLoad as yaml } from 'js-yaml';
 import * as path from 'path';
 import EJSON from 'mongodb-extended-json';
+import createApp from '../src/createApp';
+import createLogger from '../src/logging/createLogger';
+import * as qs from 'querystring';
+import * as axios from 'axios';
 
 /**
  * This is a helper module for tests using Koa server.
@@ -41,6 +45,27 @@ export function tearDownKoa(server) {
 			);
 		} else resolve();
 	});
+}
+
+export async function setUpAppForTest(logLevel = 'off') {
+	const db = await connectMongo();
+	await setUpMongoFixture(
+		db,
+		['series', 'clinicalCases', 'groups', 'projects', 'users', 'tokens']
+	);
+	const logger = createLogger(logLevel);
+	const app = await createApp({ debug: true, db, logger });
+	const server = await listenKoa(app);
+	const aliceToken = '2311aee0435c36ae14c39835539a931a6344714a';
+	const aliceAxios = axios.create({ headers: { Authorization: `Bearer ${aliceToken}` } });
+	const bobToken = '8292766837c1901b0a6954f7bda49710316c57da';
+	const bobAxios = axios.create({ headers: { Authorization: `Bearer ${bobToken}` } });
+	return { db, app, aliceAxios, bobAxios, ...server };
+}
+
+export async function tearDownAppForTest(testServer) {
+	await tearDownKoa(testServer);
+	if (testServer.db) await testServer.db.close();
 }
 
 export async function serverThrowsWithState(promise, status, pattern) {

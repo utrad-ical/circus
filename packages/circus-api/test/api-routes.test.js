@@ -1,30 +1,21 @@
-import axios from 'axios';
 import { assert } from 'chai';
 import * as test from './test-utils';
-import createApp from '../src/createApp';
-import createLogger from '../src/logging/createLogger';
 
 describe('API', function() {
-	let db, server;
+	let server, axios;
 
 	before(async function() {
-		db = await test.connectMongo();
-		await test.setUpMongoFixture(
-			db,
-			['series', 'clinicalCases', 'groups', 'projects', 'users']
-		);
-		const app = await createApp({ debug: true, db, noAuth: true, logger: createLogger('trace') });
-		server = await test.listenKoa(app);
+		server = await test.setUpAppForTest('trace');
+		axios = server.aliceAxios; // Alraedy includes access token for alice@example.com
 	});
 
 	after(async function() {
-		await test.tearDownKoa(server);
-		await db.close();
+		await test.tearDownAppForTest(server);
 	});
 
 	describe('admin/groups', function() {
 		beforeEach(async function() {
-			await test.setUpMongoFixture(db, ['groups']);
+			await test.setUpMongoFixture(server.db, ['groups']);
 		});
 
 		it('should return list of groups', async function() {
@@ -83,7 +74,7 @@ describe('API', function() {
 
 	describe('admin/users', function() {
 		beforeEach(async function() {
-			await test.setUpMongoFixture(db, ['users']);
+			await test.setUpMongoFixture(server.db, ['users']);
 		});
 
 		it('should return list of users', async function() {
@@ -170,7 +161,7 @@ describe('API', function() {
 		});
 
 		it('should return single case information', async function() {
-			const res = await axios.request({
+			const res = await server.bobAxios.request({
 				url: server.url + 'api/cases/faeb503e97f918c882453fd2d789f50f4250267740a0b3fbcc85a529f2d7715b',
 				method: 'get'
 			});

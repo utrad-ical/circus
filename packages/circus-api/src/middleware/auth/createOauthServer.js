@@ -1,10 +1,12 @@
 import KoaOAuth2Server from './KoaOAuth2Server';
 import nodepass from 'node-php-password';
 
+const debug = false;
+
 /**
  * Creates an OAuth2 server that interacts with backend mongo.
  */
-export default function createOauthServer(models, debug = false) {
+export default function createOauthServer(models) {
 
 	const oauthModel = {
 		getAccessToken: async function(bearerToken) {

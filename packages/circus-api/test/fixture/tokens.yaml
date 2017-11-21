@@ -1,0 +1,20 @@
+# Fixed access tokens which the test users can log-in with.
+# 4102412399000 is calculatet as `new Date('2099-12-31 23:59:59').valueOf()`
+-
+  accessToken: 2311aee0435c36ae14c39835539a931a6344714a
+  accessTokenExpiresAt:
+    $date: 4102412399000
+  refreshToken: 9fdc40d3d005ae075a0b209ab36d6b1af450e56d
+  refreshTokenExpiresAt:
+    $date: 4102412399000
+  clientId: CIRCUS Front UI
+  userId: alice@example.com
+-
+  accessToken: 8292766837c1901b0a6954f7bda49710316c57da
+  accessTokenExpiresAt:
+    $date: 4102412399000
+  refreshToken: 9a7c0cd392127030b95eb4d1845f1f9ac26585c8
+  refreshTokenExpiresAt:
+    $date: 4102412399000
+  clientId: CIRCUS Front UI
+  userId: bob@example.com

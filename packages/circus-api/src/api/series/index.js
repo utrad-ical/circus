@@ -7,7 +7,10 @@ export const handleGet = async (ctx, next) => {
 };
 
 export const handlePost = async (ctx, next) => {
-	ctx.throw(status.NOT_IMPLEMENTED);
+	// koa-multer sets loaded files to ctx.req, not ctx.request
+	const files = ctx.req.files;
+	// console.log(files);
+	ctx.body = null;
 };
 
 export const handleSearch = async (ctx, next) => {

@@ -1,5 +1,6 @@
 import Koa from 'koa';
 import bodyParser from 'koa-bodyparser';
+import multer from 'koa-multer';
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import { safeLoad as yaml } from 'js-yaml';
@@ -113,6 +114,10 @@ export default async function createApp(options = {}) {
 			jsonLimit: '1mb',
 			onerror: (err, ctx) => ctx.throw(400, 'Invalid JSON as request body.\n' + err.message)
 		}),
+		multer({
+			storage: multer.memoryStorage(),
+			limits: '20mb'
+		}).array('files'),
 		injector({ validator, db, logger, models, blobStorage }),
 		...( noAuth ? [] : [oauth.authenticate()]),
 		apiRouter.routes()

@@ -16,6 +16,7 @@ export default function errorHandler(debugMode, logger) {
 
 	return async function errorHandler(ctx, next) {
 		try {
+			logger.trace('Request', ctx.request.method, ctx.request.path);
 			await next();
 			if (ctx.status === status.NOT_FOUND) {
 				ctx.throw(status.NOT_FOUND, 'Not found');

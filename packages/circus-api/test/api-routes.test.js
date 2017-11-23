@@ -1,5 +1,8 @@
 import { assert } from 'chai';
 import * as test from './test-utils';
+import FormData from 'form-data';
+import * as fs from 'fs';
+import * as path from 'path';
 
 describe('API', function() {
 	let server, axios;
@@ -184,7 +187,22 @@ describe('API', function() {
 			assert.equal(res.data.manufacturer, 'Hatsushiba');
 		});
 
-		it.skip('should upload series data');
+		describe('uploading', function() {
+			it('should upload signle DICOM file', async function() {
+				const file = path.join(__dirname, 'dicom', 'CT-MONO2-16-brain.dcm');
+				const formData = new FormData();
+				formData.append('files', fs.createReadStream(file));
+				const res = await axios.request({
+					method: 'post',
+					headers: formData.getHeaders(),
+					url: server.url + 'api/series',
+					data: formData
+				});
+				assert.equal(res.status, 204);
+			});
+
+			it.skip('should upload zipped DICOM files');
+		});
 	});
 
 	describe('cases', function() {

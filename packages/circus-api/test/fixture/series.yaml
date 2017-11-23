@@ -3,6 +3,7 @@
   studyUid: 111.222.333.888.999.1000
   width: 512
   height: 512
+  images: '1-150'
   seriesDate: { $date: '2017-10-10T00:11:22' }
   modality: CT
   seriesDescription: chest 2mm
@@ -19,6 +20,7 @@
   studyUid: 111.222.333.888.999.1001
   width: 512
   height: 512
+  images: '1-50'
   seriesDate: { $date: '2017-10-11T00:15:00' }
   modality: MR
   seriesDescription: Brain MRA 1mm
@@ -35,6 +37,7 @@
   studyUid: 111.222.333.888.999.1002
   width: 512
   height: 512
+  images: '1-236'
   seriesDate: { $date: '2017-10-12T00:11:00' }
   modality: CT
   seriesDescription: chest 2mm

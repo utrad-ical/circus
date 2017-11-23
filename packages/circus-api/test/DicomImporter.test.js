@@ -12,9 +12,7 @@ describe('DicomImporter', function() {
 
 	before(async function() {
 		db = await test.connectMongo();
-		const validator = await createValidator(
-			path.join(__dirname, '../src/schemas')
-		);
+		const validator = await createValidator();
 		models = createModels(db, validator);
 	});
 

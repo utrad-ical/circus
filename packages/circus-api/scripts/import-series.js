@@ -10,7 +10,7 @@ const createStorage = require('../src/storage/createStorage').default;
 const DicomImporter = require('../src/DicomImporter').default;
 
 async function importSeries(db) {
-	const validator = await createValidator(path.resolve(__dirname, '../src/schemas'));
+	const validator = await createValidator();
 	const models = createModels(db, validator);
 	const storage = await createStorage('local', {
 		root: process.env.CIRCUS_DICOM_DIR

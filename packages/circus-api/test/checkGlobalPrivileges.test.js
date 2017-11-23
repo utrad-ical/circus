@@ -3,7 +3,6 @@ import { assert } from 'chai';
 import * as test from './test-utils';
 import checkGlobalPrivileges from '../src/middleware/auth/checkGlobalPrivileges';
 import createValidator from '../src/createValidator';
-import * as path from 'path';
 import createModels from '../src/db/createModels';
 
 describe('checkGlobalPrivileges middleware', function() {
@@ -13,9 +12,7 @@ describe('checkGlobalPrivileges middleware', function() {
 	before(async function() {
 		db = await test.connectMongo();
 		await test.setUpMongoFixture(db, ['groups', 'users']);
-		const validator = await createValidator(
-			path.join(__dirname, '../src/schemas')
-		);
+		const validator = await createValidator();
 		const models = createModels(db, validator);
 		const app = await test.setUpKoa(async app => {
 			app.use(async (ctx, next) => {

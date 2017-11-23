@@ -12,7 +12,6 @@ import bodyparser from 'koa-bodyparser';
 import Router from 'koa-router';
 import compose from 'koa-compose';
 import axios from 'axios';
-import * as path from 'path';
 import * as qs from 'querystring';
 
 describe('createOauthServer', function() {
@@ -21,7 +20,7 @@ describe('createOauthServer', function() {
 	before(async function() {
 		db = await connectMongo();
 		server = await listenKoa(await setUpKoa(async app => {
-			const validator = await createValidator(path.join(__dirname, '..', 'src', 'schemas'));
+			const validator = await createValidator();
 			const models = createModels(db, validator);
 			const oauth = createOauthServer(models);
 

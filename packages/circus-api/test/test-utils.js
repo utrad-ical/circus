@@ -7,7 +7,6 @@ import * as path from 'path';
 import EJSON from 'mongodb-extended-json';
 import createApp from '../src/createApp';
 import createLogger from '../src/createLogger';
-import * as qs from 'querystring';
 import * as axios from 'axios';
 
 /**

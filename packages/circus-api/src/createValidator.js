@@ -31,6 +31,7 @@ const customFormats = {
 	multiIntegerRange: new RegExp(`^${intOrRange}(,${intOrRange})*$`),
 };
 
+const defaultSchemaRoot = path.join(__dirname, 'schemas');
 
 /**
  * Creates the validator wrapping AJV instance.
@@ -38,7 +39,7 @@ const customFormats = {
  * and can be used throughtout the API server.
  * The resulting object has two similar methods, `validate` and `validateWithDefaults`.
  */
-export default async function createValidator(schemaRoot) {
+export default async function createValidator(schemaRoot = defaultSchemaRoot) {
 
 	const schemas = await loadSchemaFiles(schemaRoot);
 	if (!Object.keys(schemas).length) console.warn('Schema directory is empty');

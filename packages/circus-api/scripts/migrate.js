@@ -28,7 +28,7 @@ async function scanMigrationFiles() {
 
 async function migrate(db) {
 	const migrations = await scanMigrationFiles();
-	const validator = await createValidator(path.resolve(__dirname, '../src/schemas'));
+	const validator = await createValidator();
 
 	const models = await createModels(db, validator);
 	const migrationCollection = db.collection('migration');

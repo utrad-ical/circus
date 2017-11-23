@@ -92,7 +92,7 @@ export default async function createApp(options = {}) {
 	// The main Koa instance.
 	const koa = new Koa();
 
-	const validator = await createValidator(path.resolve(__dirname, 'schemas'));
+	const validator = await createValidator();
 	const models = createModels(db, validator);
 	const blobStorage = blobPath ?
 		await createStorage('local', { root: blobPath }) :

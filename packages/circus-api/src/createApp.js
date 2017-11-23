@@ -10,7 +10,6 @@ import mount from 'koa-mount';
 import createOauthServer from './middleware/auth/createOauthServer';
 import errorHandler from './middleware/errorHandler';
 import cors from './middleware/cors';
-import injector from './middleware/injector';
 import checkGlobalPrivileges from './middleware/auth/checkGlobalPrivileges';
 import checkProjectPrivileges, { injectCaseAndProject } from './middleware/auth/checkProjectPrivileges';
 import typeCheck from './middleware/typeCheck';
@@ -32,9 +31,10 @@ function formatValidationErrors(errors) {
 	)).join('\n');
 }
 
-async function prepareApiRouter(apiDir, validator, options) {
+async function prepareApiRouter(apiDir, deps, options) {
 	const { debug, noAuth } = options;
 	const router = new Router();
+	const validator = deps.validator;
 
 	const manifestFiles = await glob(apiDir);
 	for(const manifestFile of manifestFiles) {
@@ -56,11 +56,11 @@ async function prepareApiRouter(apiDir, validator, options) {
 				throw new Error('middleware not found');
 			}
 			const globalCheck = !noAuth && route.requiredGlobalPrivilege ?
-				[checkGlobalPrivileges(route.requiredGlobalPrivilege)] : [];
+				[checkGlobalPrivileges(deps, route.requiredGlobalPrivilege)] : [];
 			const inject = route.requiredProjectPrivilege ?
-				[injectCaseAndProject()] : [];
+				[injectCaseAndProject(deps)] : [];
 			const projectCheck = !noAuth && route.requiredProjectPrivilege ?
-				[checkProjectPrivileges(route.requiredProjectPrivilege)] : [];
+				[checkProjectPrivileges(deps, route.requiredProjectPrivilege)] : [];
 
 			const middlewareStack = compose([
 				typeCheck(route.expectedContentType),
@@ -73,7 +73,7 @@ async function prepareApiRouter(apiDir, validator, options) {
 					responseSchema: route.responseSchema,
 					responseValidationOptions: route.responseValidationOptions
 				}),
-				mainHandler() // The processing function itself
+				mainHandler(deps) // The processing function itself
 			]);
 			// console.log(`  Register ${route.verb.toUpperCase()} on ${route.path}`);
 			router[route.verb](route.path, middlewareStack);
@@ -102,10 +102,13 @@ export default async function createApp(options = {}) {
 
 	// Build a router.
 	// Register each API endpoints to the router according YAML manifest files.
+	const deps = { validator, db, logger, models, blobStorage };
+
 	const apiDir = path.resolve(__dirname, 'api/**/*.yaml');
-	const apiRouter = await prepareApiRouter(apiDir, validator, options);
+	const apiRouter = await prepareApiRouter(apiDir, deps, options);
 
 	const oauth = createOauthServer(models, debug);
+
 	const authSection = compose([
 		errorHandler(debug, logger),
 		cors(),
@@ -118,7 +121,6 @@ export default async function createApp(options = {}) {
 			storage: multer.memoryStorage(),
 			limits: '20mb'
 		}).array('files'),
-		injector({ validator, db, logger, models, blobStorage }),
 		...( noAuth ? [] : [oauth.authenticate()]),
 		apiRouter.routes()
 	]);

@@ -4,13 +4,12 @@ import { accessibleProjectsForOperation } from '../../privilegeUtils';
 /**
  * @param {string} operation
  */
-export default function checkProjectPrivileges(operation) {
-
+export default function checkProjectPrivileges({ models }, operation) {
 	return async function checkProjectPrivileges(ctx, next) {
 		// The user must have appropriate project privilege
 		const user = ctx.user;
 		const accessibleProjects = await accessibleProjectsForOperation(
-			ctx.models, user, operation
+			models, user, operation
 		);
 		if (accessibleProjects[ctx.case.projectId] !== true) {
 			ctx.throw(
@@ -22,14 +21,14 @@ export default function checkProjectPrivileges(operation) {
 	};
 }
 
-export function injectCaseAndProject() {
+export function injectCaseAndProject({ models }) {
 	return async function injectCaseAndProject(ctx, next) {
 		const caseId = ctx.params.caseId;
 		if (!caseId) {
 			throw new Error('Case ID is not specified.');
 		}
-		ctx.case = await ctx.models.clinicalCase.findById(caseId);
-		ctx.project = await ctx.models.project.findById(ctx.case);
+		ctx.case = await models.clinicalCase.findById(caseId);
+		ctx.project = await models.project.findById(ctx.case);
 		await next();
 	};
 }

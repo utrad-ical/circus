@@ -18,7 +18,7 @@ export const handlePostRevision = () => {
 	};
 };
 
-export const handleSearch = () => {
+export const handleSearch = ({ models }) => {
 	return async (ctx, next) => {
 		const urlQuery = ctx.request.query;
 		const { query, sort } = (() => {
@@ -37,7 +37,7 @@ export const handleSearch = () => {
 		}
 		const page = parseInt(urlQuery.page || '1', 10);
 		const skip = limit * (page - 1);
-		const cases = await ctx.models.clinicalCase.findAll(
+		const cases = await models.clinicalCase.findAll(
 			query, { limit, skip, sort }
 		);
 		ctx.body = cases;

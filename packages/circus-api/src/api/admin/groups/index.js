@@ -1,6 +1,6 @@
-export const handleSearch = () => {
+export const handleSearch = ({ models }) => {
 	return async (ctx, next) => {
-		const groups = await ctx.models.group.findAll(
+		const groups = await models.group.findAll(
 			{},
 			{ sort: { groupId: 1 } }
 		);
@@ -8,18 +8,18 @@ export const handleSearch = () => {
 	};
 };
 
-export const handleGet = () => {
+export const handleGet = ({ models }) => {
 	return async (ctx, next) => {
 		const groupId = parseInt(ctx.params.groupId);
-		const group = await ctx.models.group.findByIdOrFail(groupId);
+		const group = await models.group.findByIdOrFail(groupId);
 		ctx.body = group;
 	};
 };
 
-export const handlePut = () => {
+export const handlePut = ({ models }) => {
 	return async (ctx, next) => {
 		const groupId = parseInt(ctx.params.groupId);
-		await ctx.models.group.modifyOne(groupId, ctx.request.body);
+		await models.group.modifyOne(groupId, ctx.request.body);
 		ctx.body = null;
 	};
 };

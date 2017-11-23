@@ -1,22 +1,22 @@
-export const handleSearch = () => {
+export const handleSearch = ({ models }) => {
 	return async (ctx, next) => {
-		const projects = await ctx.models.project.findAll();
+		const projects = await models.project.findAll();
 		ctx.body = projects;
 	};
 };
 
-export const handleGet = () => {
+export const handleGet = ({ models }) => {
 	return async (ctx, next) => {
 		const projectId = ctx.params.projectId;
-		const project = await ctx.models.project.findByIdOrFail(projectId);
+		const project = await models.project.findByIdOrFail(projectId);
 		ctx.body = project;
 	};
 };
 
-export const handlePut = () => {
+export const handlePut = ({ models }) => {
 	return async (ctx, next) => {
 		const projectId = ctx.params.projectId;
-		await ctx.models.project.modifyOne(projectId, ctx.request.body);
+		await models.project.modifyOne(projectId, ctx.request.body);
 		ctx.body = null;
 	};
 };

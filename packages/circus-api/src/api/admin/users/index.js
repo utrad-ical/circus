@@ -4,26 +4,26 @@ const removePassword = input => {
 	return output;
 };
 
-export const handleSearch = () => {
+export const handleSearch = ({ models }) => {
 	return async (ctx, next) => {
-		const users = (await ctx.models.user.findAll()).map(removePassword);
+		const users = (await models.user.findAll()).map(removePassword);
 		ctx.body = users;
 	};
 };
 
-export const handleGet = () => {
+export const handleGet = ({ models }) => {
 	return async (ctx, next) => {
 		const user = removePassword(
-			await ctx.models.user.findByIdOrFail(ctx.params.userEmail)
+			await models.user.findByIdOrFail(ctx.params.userEmail)
 		);
 		ctx.body = user;
 	};
 };
 
-export const handlePut = () => {
+export const handlePut = ({ models }) => {
 	return async (ctx, next) => {
 		const userEmail = ctx.params.userEmail;
-		await ctx.models.user.modifyOne(userEmail, ctx.request.body);
+		await models.user.modifyOne(userEmail, ctx.request.body);
 		ctx.body = null;
 	};
 };

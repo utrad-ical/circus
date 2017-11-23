@@ -8,11 +8,11 @@ const sha1 = buf => {
 	return sha1.digest('hex');
 };
 
-export const handleGet = () => {
+export const handleGet = ({ blobStorage }) => {
 	return async (ctx, next) => {
 		const hash = ctx.params.hash;
 		try {
-			const file = await ctx.blobStorage.read(hash);
+			const file = await blobStorage.read(hash);
 			ctx.type = 'application/octet-stream';
 			ctx.body = file;
 		} catch (err) {
@@ -21,7 +21,7 @@ export const handleGet = () => {
 	};
 };
 
-export const handlePut = () => {
+export const handlePut = ({ blobStorage }) => {
 	return async (ctx, next) => {
 		const file = await rawBody(ctx.req, { limit: '2mb' });
 		const hash = ctx.params.hash;
@@ -31,7 +31,7 @@ export const handlePut = () => {
 		if (sha1(file) !== hash) {
 			ctx.throw(status.BAD_REQUEST, 'Hash mismatch.');
 		}
-		await ctx.blobStorage.write(hash, file);
+		await blobStorage.write(hash, file);
 		ctx.body = null;
 		ctx.status = status.OK;
 	};

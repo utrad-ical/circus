@@ -1,7 +1,7 @@
 import { accessibleProjectsForOperation } from '../../privilegeUtils';
 import status from 'http-status';
 
-export const handleGet = () => {
+export const handleGet = ({ models }) => {
 	return async (ctx, next) => {
 		const projectId = ctx.params.projectId;
 		const prjs = accessibleProjectsForOperation(ctx, ctx.user, 'read');
@@ -11,6 +11,6 @@ export const handleGet = () => {
 				'You do not have read access to this project.'
 			);
 		}
-		ctx.body = await ctx.models.project.findByIdOrFail(projectId);
+		ctx.body = await models.project.findByIdOrFail(projectId);
 	};
 };

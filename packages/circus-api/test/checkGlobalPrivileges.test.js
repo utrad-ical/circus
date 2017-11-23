@@ -20,7 +20,7 @@ describe('checkGlobalPrivileges middleware', function() {
 				ctx.user = await models.user.findByIdOrFail(userEmail);
 				await next();
 			});
-			app.use(checkGlobalPrivileges('manageServer', 'personalInfoView'));
+			app.use(checkGlobalPrivileges({ models }, ['manageServer', 'personalInfoView']));
 			app.use(async (ctx, next) => {
 				ctx.body = 'Danger Zone';
 			});

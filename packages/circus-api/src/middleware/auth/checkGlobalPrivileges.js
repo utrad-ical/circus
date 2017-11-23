@@ -5,7 +5,7 @@ import { globalPrivilegesOfUser } from '../../privilegeUtils';
  * Return a middleware that checks user's global privilege.
  * @param {string|string[]} privileges
  */
-export default function checkGlobalPrivileges(privileges) {
+export default function checkGlobalPrivileges({ models }, privileges) {
 
 	if (typeof privileges === 'string') privileges = [privileges];
 	else if (!Array.isArray(privileges)) {
@@ -14,7 +14,7 @@ export default function checkGlobalPrivileges(privileges) {
 
 	return async function checkGlobalPrivileges(ctx, next) {
 		const user = ctx.user;
-		const globalPrivileges = await globalPrivilegesOfUser(ctx.models, user);
+		const globalPrivileges = await globalPrivilegesOfUser(models, user);
 		for (const priv of privileges) {
 			if (!globalPrivileges[priv]) {
 				ctx.throw(

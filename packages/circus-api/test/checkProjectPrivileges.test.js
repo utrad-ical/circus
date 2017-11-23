@@ -17,13 +17,12 @@ describe('checkProjectPrivileges middleware', function() {
 		const models = createModels(db, validator);
 		const app = await test.setUpKoa(async app => {
 			app.use(async (ctx, next) => {
-				ctx.models = models;
 				ctx.params = { caseId: 'faeb503e97f918c882453fd2d789f50f4250267740a0b3fbcc85a529f2d7715b' };
 				ctx.user = await models.user.findByIdOrFail(userEmail);
 				await next();
 			});
-			app.use(injectCaseAndProject());
-			app.use(checkProjectPrivileges('write'));
+			app.use(injectCaseAndProject({ models }));
+			app.use(checkProjectPrivileges({ models }, 'write'));
 			app.use(async (ctx, next) => {
 				ctx.body = 'Protected Area';
 			});

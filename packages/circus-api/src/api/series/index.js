@@ -1,9 +1,9 @@
 import status from 'http-status';
 
-export const handleGet = () => {
+export const handleGet = ({ models }) => {
 	return async (ctx, next) => {
 		const uid = ctx.params.seriesUid;
-		const series = await ctx.models.series.findByIdOrFail(uid);
+		const series = await models.series.findByIdOrFail(uid);
 		ctx.body = series;
 	};
 };
@@ -17,7 +17,7 @@ export const handlePost = () => {
 	};
 };
 
-export const handleSearch = () => {
+export const handleSearch = ({ models }) => {
 	return async (ctx, next) => {
 		const urlQuery = ctx.request.query;
 		const { query, sort } = (() => {
@@ -36,7 +36,7 @@ export const handleSearch = () => {
 		}
 		const page = parseInt(urlQuery.page || '1', 10);
 		const skip = limit * (page - 1);
-		const series = await ctx.models.series.findAll(
+		const series = await models.series.findAll(
 			query, { limit, skip, sort }
 		);
 		ctx.body = series;

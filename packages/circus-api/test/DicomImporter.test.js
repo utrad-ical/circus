@@ -7,6 +7,8 @@ import createModels from '../src/db/createModels';
 import createValidator from '../src/createValidator';
 
 describe('DicomImporter', function() {
+	// Skip this test if dicom_utility is not available
+
 	let storage, importer, models, db;
 	const file = path.join(__dirname, 'dicom', 'CT-MONO2-16-brain.dcm');
 
@@ -21,13 +23,17 @@ describe('DicomImporter', function() {
 	});
 
 	beforeEach(async function() {
-		storage = await createStorage('memory');
-		await test.setUpMongoFixture(db, ['series']);
-		importer = new DicomImporter(
-			storage,
-			models,
-			{ utility: process.env.DICOM_UTILITY }
-		);
+		if (process.env.DICOM_UTILITY) {
+			storage = await createStorage('memory');
+			await test.setUpMongoFixture(db, ['series']);
+			importer = new DicomImporter(
+				storage,
+				models,
+				{ utility: process.env.DICOM_UTILITY }
+			);
+		} else {
+			this.skip();
+		}
 	});
 
 	describe('#readDicomTagsFromFile', function() {

@@ -73,7 +73,7 @@ async function prepareApiRouter(apiDir, validator, options) {
 					responseSchema: route.responseSchema,
 					responseValidationOptions: route.responseValidationOptions
 				}),
-				mainHandler // The processing function itself
+				mainHandler() // The processing function itself
 			]);
 			// console.log(`  Register ${route.verb.toUpperCase()} on ${route.path}`);
 			router[route.verb](route.path, middlewareStack);

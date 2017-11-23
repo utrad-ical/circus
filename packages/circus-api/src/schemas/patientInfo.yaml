@@ -14,7 +14,7 @@ properties:
     type: number
   birthDate:
     type: string
-    regexp: ^\d\d-\d\d-\d\d$
+    pattern: ^\d\d\d\d-\d\d-\d\d$
   sex:
     type: string
     enum: ['F', 'M', 'O']

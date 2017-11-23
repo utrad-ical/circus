@@ -25,6 +25,12 @@ properties:
     type: number
     description: >
       The height of each image.
+  images:
+    type: string
+    format: multiIntegerRange
+    description: >
+      The list of instance numbers which this series consists of,
+      described as a string in `multi-integer-range` format.
   seriesDate:
     date: true
     description: >

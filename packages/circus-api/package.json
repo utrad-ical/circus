@@ -40,6 +40,7 @@
     "log4js": "^2.3.12",
     "mongodb": "^2.2.31",
     "mongodb-extended-json": "^1.10.0",
+    "multi-integer-range": "^4.0.3",
     "node-php-password": "^0.1.2",
     "oauth2-server": "^3.0.0",
     "pify": "^3.0.0",

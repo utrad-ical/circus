@@ -55,11 +55,20 @@ export async function setUpAppForTest(logMode = 'off') {
 	const logger = createLogger(logMode);
 	const app = await createApp({ debug: true, db, logger });
 	const server = await listenKoa(app);
-	const aliceToken = '2311aee0435c36ae14c39835539a931a6344714a';
-	const aliceAxios = axios.create({ headers: { Authorization: `Bearer ${aliceToken}` } });
-	const bobToken = '8292766837c1901b0a6954f7bda49710316c57da';
-	const bobAxios = axios.create({ headers: { Authorization: `Bearer ${bobToken}` } });
-	return { db, app, logger, aliceAxios, bobAxios, ...server };
+
+	const axiosInstances = {};
+	const users = [
+		['alice', '2311aee0435c36ae14c39835539a931a6344714a'],
+		['bob', '8292766837c1901b0a6954f7bda49710316c57da'],
+		['guest', '2c2fbaea8046df924b8b459879b799c111e9b7f1']
+	];
+	users.forEach(([user, token]) => {
+		axiosInstances[user] = axios.create({
+			headers: { Authorization: `Bearer ${token}` }
+		});
+	});
+
+	return { db, app, logger, axios: axiosInstances, ...server };
 }
 
 export async function tearDownAppForTest(testServer) {

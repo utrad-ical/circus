@@ -9,7 +9,7 @@ describe('API', function() {
 
 	before(async function() {
 		server = await test.setUpAppForTest('trace');
-		axios = server.aliceAxios; // Alraedy includes access token for alice@example.com
+		axios = server.axios.alice; // Alraedy includes access token for alice@example.com
 	});
 
 	after(async function() {
@@ -29,7 +29,7 @@ describe('API', function() {
 				// console.log(method, target);
 				const data = method.match(/GET|PUT/) ? { a: 10 } : undefined;
 				await test.serverThrowsWithState(
-					server.bobAxios.request({
+					server.axios.bob.request({
 						url: server.url + 'api/admin/' + url,
 						method,
 						data
@@ -216,7 +216,7 @@ describe('API', function() {
 		});
 
 		it('should return single case information', async function() {
-			const res = await server.bobAxios.request({
+			const res = await server.axios.bob.request({
 				url: server.url + 'api/cases/faeb503e97f918c882453fd2d789f50f4250267740a0b3fbcc85a529f2d7715b',
 				method: 'get'
 			});

@@ -24,3 +24,16 @@
     personalInfoView: false
   loginEnabled: true
   groups: [2] # power user
+-
+  userEmail: guest@example.com
+  loginId: guest
+  # password is 'guestSecret'
+  password: "$2y$10$vlacVOAjHZ9EbxLKsXSjre0Ut5NBBKhHxJt49plNna56aB6Qa/Nny"
+  description: Guest who has no privilege
+  lastLoginTime: { $date: 1405266782000 }
+  lastLoginIp: '0.0.0.0'
+  preferences:
+    theme: mode_black
+    personalInfoView: false
+  loginEnabled: true
+  groups: [3] # guests

@@ -18,3 +18,12 @@
     $date: 4102412399000
   clientId: CIRCUS Front UI
   userId: bob@example.com
+-
+  accessToken: 2c2fbaea8046df924b8b459879b799c111e9b7f1
+  accessTokenExpiresAt:
+    $date: 4102412399000
+  refreshToken: da71701f273044304e543404f032233e2cafdd3f
+  refreshTokenExpiresAt:
+    $date: 4102412399000
+  clientId: CIRCUS Front UI
+  userId: guest@example.com

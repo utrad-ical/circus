@@ -18,3 +18,13 @@
   addSeriesProjects: []
   viewPersonalInfoProjects: []
   moderateProjects: []
+-
+  groupId: 3
+  groupName: guests
+  privileges: []
+  domains: []
+  readProjects: []
+  writeProjects: []
+  addSeriesProjects: []
+  viewPersonalInfoProjects: []
+  moderateProjects: []

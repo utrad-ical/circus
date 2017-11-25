@@ -225,6 +225,12 @@ describe('API', function() {
 			assert.equal(res.data.projectId, '8883fdef6f5144f50eb2a83cd34baa44');
 		});
 
+		it('should reject revision read access from unauthorized user', async function() {
+			await test.serverThrowsWithState(server.axios.guest.get(
+				server.url + `api/cases/${cid}`
+			), 401, /read/);
+		});
+
 		it('should add a revision', async function() {
 			const res = await server.axios.bob.request({
 				url: server.url + `api/cases/${cid}/revision`,
@@ -241,6 +247,14 @@ describe('API', function() {
 				server.url + `api/cases/${cid}`
 			);
 			assert.equal(res2.data.revisions[1].creator, 'bob@example.com');
+		});
+
+		it('should reject revision addition from unauthorized user', async function() {
+			await test.serverThrowsWithState(server.axios.guest.request({
+				url: server.url + `api/cases/${cid}/revision`,
+				method: 'post',
+				data: { anything: 'can be used' }
+			}), 401, /write/);
 		});
 	});
 

@@ -8,8 +8,10 @@ routes:
     description: >
       Returns the preferences object of the current user.
       Consider using login-info instead.
-  - verb: post
+  - verb: put
     path: /preferences
     requestSchema: preferences
+    requestValidationOptions:
+      allRequired: true
     description: >
-      Sets the preferences.
+      Sets the preferences of the current user.

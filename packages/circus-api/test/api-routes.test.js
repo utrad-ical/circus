@@ -294,6 +294,28 @@ describe('API', function() {
 	});
 
 	describe('preference', function() {
+		it('should return the preference of the current user', async function() {
+			const res = await axios.get(server.url + 'api/preferences');
+			assert.equal(res.data.theme, 'mode_white');
+		});
+
+		it('should modify the preference of the current user', async function() {
+			await axios.request({
+				url: server.url + 'api/preferences',
+				method: 'put',
+				data: { theme: 'mode_black', personalInfoView: false }
+			});
+			const res2 = await axios.get(server.url + 'api/preferences');
+			assert.equal(res2.data.theme, 'mode_black');
+		});
+
+		it('should reject invalid preference update', async function() {
+			await test.serverThrowsWithState(axios.request({
+				url: server.url + 'api/preferences',
+				method: 'put',
+				data: { theme: 'mode_pink', personalInfoView: false }
+			}), 400);
+		});
 	});
 
 });

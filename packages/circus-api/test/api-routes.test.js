@@ -206,6 +206,8 @@ describe('API', function() {
 	});
 
 	describe('cases', function() {
+		const cid = 'faeb503e97f918c882453fd2d789f50f4250267740a0b3fbcc85a529f2d7715b';
+
 		it('should perform search', async function() {
 			const res = await axios.request({
 				url: server.url + 'api/cases',
@@ -217,10 +219,28 @@ describe('API', function() {
 
 		it('should return single case information', async function() {
 			const res = await server.axios.bob.request({
-				url: server.url + 'api/cases/faeb503e97f918c882453fd2d789f50f4250267740a0b3fbcc85a529f2d7715b',
+				url: server.url + `api/cases/${cid}`,
 				method: 'get'
 			});
 			assert.equal(res.data.projectId, '8883fdef6f5144f50eb2a83cd34baa44');
+		});
+
+		it('should add a revision', async function() {
+			const res = await server.axios.bob.request({
+				url: server.url + `api/cases/${cid}/revision`,
+				method: 'post',
+				data: {
+					description: 'Add something',
+					attributes: {},
+					status: 'for-review',
+					series: []
+				}
+			});
+			assert.equal(res.status, 204);
+			const res2 = await server.axios.bob.get(
+				server.url + `api/cases/${cid}`
+			);
+			assert.equal(res2.data.latestRevision.creator, 'bob@example.com');
 		});
 	});
 

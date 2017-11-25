@@ -12,9 +12,25 @@ export const handlePost = () => {
 	};
 };
 
-export const handlePostRevision = () => {
+export const handlePostRevision = ({ models }) => {
 	return async (ctx, next) => {
-		ctx.throw(status.NOT_IMPLEMENTED);
+		const aCase = ctx.case;
+		const rev = ctx.request.body;
+
+		if (rev.date) { ctx.throw(status.BAD_REQUEST, 'You cannot specify revision date.'); }
+		if (rev.creator) { ctx.throw(status.BAD_REQUEST, 'You cannot specify revision creator.'); }
+
+		rev.date = new Date();
+		rev.creator = ctx.user.userEmail;
+
+		await models.clinicalCase.modifyOne(aCase.caseId, {
+			latestRevision: rev,
+			revisions: [
+				...aCase.revisions,
+				rev
+			]
+		});
+		ctx.body = null; // No Content
 	};
 };
 

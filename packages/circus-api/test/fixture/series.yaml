@@ -20,7 +20,7 @@
   studyUid: 111.222.333.888.999.1001
   width: 512
   height: 512
-  images: '1-50'
+  images: '1-100'
   seriesDate: { $date: '2017-10-11T00:15:00' }
   modality: MR
   seriesDescription: Brain MRA 1mm

@@ -2,7 +2,9 @@ import status from 'http-status';
 
 export const handleGet = () => {
 	return async (ctx, next) => {
-		ctx.body = ctx.case;
+		const aCase = ctx.case;
+		delete aCase.latestRevision; // Remove redundant data
+		ctx.body = aCase;
 	};
 };
 

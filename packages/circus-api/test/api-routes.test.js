@@ -240,7 +240,7 @@ describe('API', function() {
 			const res2 = await server.axios.bob.get(
 				server.url + `api/cases/${cid}`
 			);
-			assert.equal(res2.data.latestRevision.creator, 'bob@example.com');
+			assert.equal(res2.data.revisions[1].creator, 'bob@example.com');
 		});
 	});
 

@@ -22,7 +22,7 @@ routes:
     path: /cases/:caseId/revision
     requiredProjectPrivilege: write
     requestSchema: revision
-    requestSchemaOptions:
+    requestValidationOptions:
       allRequiredExcept: ['date', 'creator']
     handler: handlePostRevision
     description: Creates a new revision in the specified case.

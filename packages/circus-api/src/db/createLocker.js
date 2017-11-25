@@ -16,7 +16,9 @@ import randomstring from 'randomstring';
  *   await locker.unlock(id);
  * }
  */
-export default function createLocker(db, collectionName = 'locks', timeout = 300000) {
+export default async function createLocker(db, collectionName = 'locks', timeout = 300000) {
+	db.collection(collectionName).ensureIndex({ target: 1 }, { unique: true });
+
 	async function lock(target) {
 		if (typeof target !== 'string' || !target.length) {
 			throw new TypeError('Lock target must be string');

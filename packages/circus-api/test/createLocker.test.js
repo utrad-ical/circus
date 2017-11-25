@@ -11,7 +11,7 @@ describe('createLocker', function() {
 	before(async function() {
 		db = await test.connectMongo();
 		await db.collection('locks').deleteMany({});
-		locker = createLocker(db);
+		locker = await createLocker(db);
 	});
 
 	after(async function() {
@@ -37,7 +37,7 @@ describe('createLocker', function() {
 	});
 
 	it('should not fail with a zombie lock', async function() {
-		const locker = createLocker(db, 'locker', 50);
+		const locker = await createLocker(db, 'locker', 50);
 		await locker.lock('passion');
 		await delay(100);
 		await locker.lock('passion');

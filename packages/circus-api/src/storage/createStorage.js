@@ -2,7 +2,9 @@ import localStorage from './localStorage';
 import memoryStorage from './memoryStorage';
 
 /**
- * Provides simple key-value storage
+ * Provides simple asynchronous key-value storage.
+ * @param {'local'|'memory'} type
+ * @param {object} params
  */
 export default async function createStorage(type, params) {
 	switch (type) {

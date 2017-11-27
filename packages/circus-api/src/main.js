@@ -53,7 +53,7 @@ const options = [
 const { debug, host, port, no_auth: noAuth, blobPath } = (() => {
 	try {
 		const parser = dashdash.createParser({ options });
-		const opts = parser.parse();
+		const opts = parser.parse(process.argv);
 		if (opts.help) {
 			console.log('Usage: node server.js [OPTIONS]');
 			console.log('Options:\n' + parser.help({ includeEnv: true }));

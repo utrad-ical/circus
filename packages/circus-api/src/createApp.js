@@ -107,7 +107,7 @@ export default async function createApp(options = {}) {
 	const apiDir = path.resolve(__dirname, 'api/**/*.yaml');
 	const apiRouter = await prepareApiRouter(apiDir, deps, options);
 
-	const oauth = createOauthServer(models, debug);
+	const oauth = createOauthServer(models);
 
 	const authSection = compose([
 		errorHandler(debug, logger),

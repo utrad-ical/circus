@@ -82,7 +82,7 @@ export default class DicomImporter {
 	}
 
 	/**
-	 * @param {Buffer} fileContent
+	 * @param {string} file
 	 */
 	async importFromFile(file) {
 		// Read the DICOM file

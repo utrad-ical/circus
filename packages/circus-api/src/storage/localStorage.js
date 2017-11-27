@@ -15,18 +15,31 @@ export default async function localStorage(params) {
 		return path.join(root, nameToPath(key));
 	}
 
+	/**
+	 * @param {string} key
+	 */
 	async function read(key) {
 		return await fs.readFile(buildPath(key));
 	}
 
+	/**
+	 * @param {string} key
+	 * @param {Buffer} data
+	 */
 	async function write(key, data) {
 		return await fs.outputFile(buildPath(key), data);
 	}
 
+	/**
+	 * @param {string} key
+	 */
 	async function remove(key) {
 		return await fs.unlink(buildPath(key));
 	}
 
+	/**
+	 * @param {string} key
+	 */
 	async function exists(key) {
 		// using fs-extra's extention method
 		return await fs.pathExists(buildPath(key));

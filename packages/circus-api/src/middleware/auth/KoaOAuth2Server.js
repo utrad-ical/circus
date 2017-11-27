@@ -5,7 +5,7 @@ import status from 'http-status';
  * Simple wrapper for node-oauth2-server.
  */
 export default class KoaOAuth2Server {
-	constructor(options = {}) {
+	constructor(options) {
 		if (!options.model) {
 			throw new TypeError('Missing parameter: `model`');
 		}

@@ -1,11 +1,15 @@
 require('babel-register');
-const glob = require('glob-promise');
-const path = require('path');
-const chalk = require('chalk');
+import glob from 'glob-promise';
+import * as path from 'path';
+import chalk from 'chalk';
 
-const connectDb = require('../src/db/connectDb').default;
-const createValidator = require('../src/createValidator').default;
-const createModels = require('../src/db/createModels').default;
+import connectDb from '../db/connectDb';
+import createValidator from '../createValidator';
+import createModels from '../db/createModels';
+
+export function help() {
+	console.log('Performs DB migration.');
+}
 
 async function scanMigrationFiles() {
 	const results = [];
@@ -63,7 +67,7 @@ async function migrate(db) {
 	}
 }
 
-async function exec() {
+export default async function exec() {
 	let db;
 	try {
 		db = await connectDb();
@@ -74,5 +78,3 @@ async function exec() {
 		if (db) await db.close();
 	}
 }
-
-exec();

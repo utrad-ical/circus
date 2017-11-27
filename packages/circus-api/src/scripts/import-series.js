@@ -1,15 +1,19 @@
-require('babel-register');
-const glob = require('glob-promise');
-const path = require('path');
-const chalk = require('chalk');
-const fs = require('fs-extra');
-const connectDb = require('../src/db/connectDb').default;
-const createValidator = require('../src/createValidator').default;
-const createModels = require('../src/db/createModels').default;
-const createStorage = require('../src/storage/createStorage').default;
-const DicomImporter = require('../src/DicomImporter').default;
+import * as glob from 'glob-promise';
+import * as path from 'path';
+import chalk from 'chalk';
+import * as fs from 'fs-extra';
+import connectDb from '../db/connectDb';
+import createValidator from '../createValidator';
+import createModels from '../db/createModels';
+import createStorage from '../storage/createStorage';
+import DicomImporter from '../DicomImporter';
 
-async function importSeries(db) {
+export function help() {
+	console.log('Imports DICOM series from file/directory.\n');
+	console.log('Usage: node circus.js import-series [target...]');
+}
+
+async function importSeries(db, files) {
 	const validator = await createValidator();
 	const models = createModels(db, validator);
 	const storage = await createStorage('local', {
@@ -17,7 +21,7 @@ async function importSeries(db) {
 	});
 	const importer = new DicomImporter(storage, models, { utility: process.env.DICOM_UTILITY });
 
-	const paths = process.argv.slice(2).map(p => (
+	const paths = files.map(p => (
 		path.resolve(process.cwd(), p)
 	));
 	if (!paths.length) {
@@ -53,16 +57,14 @@ async function importSeries(db) {
 	console.log(`Imported ${count} file(s).`);
 }
 
-async function exec() {
+export default async function exec(files) {
 	let db;
 	try {
 		db = await connectDb();
-		await importSeries(db);
-	} catch(err) {
+		await importSeries(db, files);
+	} catch (err) {
 		console.error(err);
 	} finally {
 		if (db) await db.close();
 	}
 }
-
-exec();

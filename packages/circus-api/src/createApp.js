@@ -40,7 +40,7 @@ async function prepareApiRouter(apiDir, deps, options) {
 	for(const manifestFile of manifestFiles) {
 		const data = yaml(await fs.readFile(manifestFile, 'utf8'));
 		try {
-			validator.validate('api', data);
+			await validator.validate('api', data);
 		} catch (err) {
 			throw new TypeError(
 				`Meta schema error at ${manifestFile}.\n` +

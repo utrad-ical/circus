@@ -1,5 +1,5 @@
 import status from 'http-status';
-import search from '../search';
+import performSearch from '../performSearch';
 
 export const handleGet = () => {
 	return async (ctx, next) => {
@@ -48,7 +48,6 @@ export const handleSearch = ({ models }) => {
 		}
 		const domainFilter = {};
 		const filter = { $and: [customFilter, domainFilter]};
-		const cases = await search(models.clinicalCase, filter, ctx);
-		ctx.body = cases;
+		await performSearch(models.clinicalCase, filter, ctx);
 	};
 };

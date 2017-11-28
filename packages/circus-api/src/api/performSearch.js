@@ -1,8 +1,8 @@
 import status from 'http-status';
 
-export default async function search(model, query, ctx, opts = {}) {
+export default async function performSearch(model, query, ctx, opts = {}) {
 	const urlQuery = ctx.request.query;
-	const { defaultSort = {} } = opts;
+	const { defaultSort = {}, transform } = opts;
 
 	const sort = urlQuery.sort ? JSON.parse(urlQuery.sort) : defaultSort;
 	if (typeof sort !== 'object') {
@@ -22,6 +22,7 @@ export default async function search(model, query, ctx, opts = {}) {
 	const page = parseInt(urlQuery.page || '1', 10);
 	const skip = limit * (page - 1);
 
-	const results = await model.findAll(query, { limit, skip, sort });
-	return results;
+	const rawResults = await model.findAll(query, { limit, skip, sort });
+	const results = transform ? rawResults.map(transform) : rawResults;
+	ctx.body = results;
 }

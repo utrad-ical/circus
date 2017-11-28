@@ -1,8 +1,8 @@
-import search from '../../search';
+import performSearch from '../../performSearch';
 
 export const handleSearch = ({ models }) => {
 	return async (ctx, next) => {
-		ctx.body = await search(models.project, {}, ctx);
+		await performSearch(models.project, {}, ctx);
 	};
 };
 

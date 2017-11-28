@@ -1,5 +1,5 @@
 import status from 'http-status';
-import search from '../search';
+import performSearch from '../performSearch';
 import * as fs from 'fs-extra';
 import * as path from 'path';
 
@@ -40,7 +40,6 @@ export const handleSearch = ({ models }) => {
 		}
 		const domainFilter = {};
 		const filter = { $and: [customFilter, domainFilter]};
-		const series = await search(models.series, filter, ctx);
-		ctx.body = series;
+		await performSearch(models.series, filter, ctx);
 	};
 };

@@ -1,4 +1,4 @@
-import search from '../../search';
+import performSearch from '../../performSearch';
 
 const removePassword = input => {
 	const output = { ...input };
@@ -8,8 +8,10 @@ const removePassword = input => {
 
 export const handleSearch = ({ models }) => {
 	return async (ctx, next) => {
-		const users = await search(models.user, {}, ctx);
-		ctx.body = users.map(removePassword);
+		await performSearch(
+			models.user, {}, ctx,
+			{ transform: removePassword }
+		);
 	};
 };
 

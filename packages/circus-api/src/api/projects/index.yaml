@@ -1,6 +1,6 @@
-name: project
+name: Projects
 description: >
-  Fetches the project.
+  Fetches the project data structure.
 routes:
   - verb: get
     path: /projects/:projectId

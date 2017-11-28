@@ -1,4 +1,4 @@
-name: groups
+name: Group Administration
 scope: [severAdmin]
 description: Manages user groups.
 routes:

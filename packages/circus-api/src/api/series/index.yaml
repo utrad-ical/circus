@@ -1,4 +1,4 @@
-name: series
+name: Series
 description: >
   Operates DICOM series.
   This handles series information stored in the database.

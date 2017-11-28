@@ -1,4 +1,4 @@
-name: preference
+name: Login Info
 description: >
   Returns information regarding the current user.
 routes:

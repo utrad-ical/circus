@@ -1,4 +1,4 @@
-name: projects
+name: Project Administration
 scope: [severAdmin]
 description: Manages projects.
 routes:

@@ -1,4 +1,4 @@
-name: debug
+name: Cases
 description: >
   Manages CIRCUS DB cases.
 routes:

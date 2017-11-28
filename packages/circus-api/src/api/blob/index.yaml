@@ -1,4 +1,4 @@
-name: debug
+name: BLOBs
 description: >
   Manages BLOB objects with a hash.
 routes:

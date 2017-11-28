@@ -1,4 +1,4 @@
-name: preference
+name: Preferences
 description: >
   Manages preferences of the log-in user.
 routes:

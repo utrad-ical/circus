@@ -1,4 +1,4 @@
-name: logout
+name: Logout
 description: >
   Forces the user to log-out by invalidating the access token.
 routes:

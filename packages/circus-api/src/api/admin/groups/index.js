@@ -1,10 +1,10 @@
+import search from '../../search';
+
 export const handleSearch = ({ models }) => {
 	return async (ctx, next) => {
-		const groups = await models.group.findAll(
-			{},
-			{ sort: { groupId: 1 } }
+		ctx.body = await search(
+			models.group, {}, ctx, { defaultSort: { groupId: 1 }}
 		);
-		ctx.body = groups;
 	};
 };
 

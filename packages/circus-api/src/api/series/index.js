@@ -1,4 +1,5 @@
 import status from 'http-status';
+import search from '../search';
 import * as fs from 'fs-extra';
 import * as path from 'path';
 
@@ -31,25 +32,15 @@ export const handlePost = ({ dicomImporter }) => {
 export const handleSearch = ({ models }) => {
 	return async (ctx, next) => {
 		const urlQuery = ctx.request.query;
-		const { query, sort } = (() => {
-			try {
-				return {
-					query: JSON.parse(urlQuery.query),
-					sort: JSON.parse(urlQuery.sort)
-				};
-			} catch (err) {
-				ctx.throw(status.BAD_REQUEST, 'Malformed query.');
-			}
-		});
-		const limit = parseInt(urlQuery.limit || '20', 10);
-		if (limit > 200) {
-			ctx.throw(status.BAD_REQUEST, 'You cannot query more than 200 items at a time.');
+		let customFilter;
+		try {
+			customFilter = urlQuery.filter ? JSON.parse(urlQuery.filter) : {};
+		} catch (err) {
+			ctx.throw(status.BAD_REQUEST, 'Bad filter.');
 		}
-		const page = parseInt(urlQuery.page || '1', 10);
-		const skip = limit * (page - 1);
-		const series = await models.series.findAll(
-			query, { limit, skip, sort }
-		);
+		const domainFilter = {};
+		const filter = { $and: [customFilter, domainFilter]};
+		const series = await search(models.series, filter, ctx);
 		ctx.body = series;
 	};
 };

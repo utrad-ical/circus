@@ -1,4 +1,4 @@
-export default async function memoryStorage(params = {}) {
+export default async function memoryStorage() {
 	const store = {};
 
 	/**

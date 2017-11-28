@@ -19,6 +19,7 @@ import createLogger from './createLogger';
 import validateInOut from './middleware/validateInOut';
 import createModels from './db/createModels';
 import compose from 'koa-compose';
+import DicomImporter from './DicomImporter';
 
 function handlerName(route) {
 	if (route.handler) return route.handler;
@@ -87,7 +88,7 @@ async function prepareApiRouter(apiDir, deps, options) {
  * Creates a new Koa app.
  */
 export default async function createApp(options = {}) {
-	const { debug, db, noAuth, blobPath } = options;
+	const { debug, db, noAuth, blobPath, dicomPath } = options;
 
 	// The main Koa instance.
 	const koa = new Koa();
@@ -98,11 +99,19 @@ export default async function createApp(options = {}) {
 		await createStorage('local', { root: blobPath }) :
 		await createStorage('memory');
 
+	const dicomStorage = dicomPath ?
+		await createStorage('local', { root: dicomPath }) :
+		await createStorage('memory');
+
 	const logger = options.logger ? options.logger : createLogger('off');
+
+	const dicomImporter = new DicomImporter(
+		dicomStorage, models, { utility: process.env.DICOM_UTILITY }
+	);
 
 	// Build a router.
 	// Register each API endpoints to the router according YAML manifest files.
-	const deps = { validator, db, logger, models, blobStorage };
+	const deps = { validator, db, logger, models, blobStorage, dicomImporter };
 
 	const apiDir = path.resolve(__dirname, 'api/**/*.yaml');
 	const apiRouter = await prepareApiRouter(apiDir, deps, options);

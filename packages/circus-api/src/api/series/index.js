@@ -1,4 +1,6 @@
 import status from 'http-status';
+import * as fs from 'fs-extra';
+import * as path from 'path';
 
 export const handleGet = ({ models }) => {
 	return async (ctx, next) => {
@@ -8,11 +10,20 @@ export const handleGet = ({ models }) => {
 	};
 };
 
-export const handlePost = () => {
+export const handlePost = ({ dicomImporter }) => {
 	return async (ctx, next) => {
 		// koa-multer sets loaded files to ctx.req, not ctx.request
 		const files = ctx.req.files;
-		// console.log(files);
+		for (const entry of files) {
+			let tmpFile;
+			try {
+				tmpFile = path.join(dicomImporter.workDir, 'import.dcm');
+				await fs.writeFile(tmpFile, entry.buffer);
+				await dicomImporter.importFromFile(tmpFile);
+			} finally {
+				await fs.unlink(tmpFile);
+			}
+		}
 		ctx.body = null;
 	};
 };

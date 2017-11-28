@@ -1,23 +1,16 @@
 import * as path from 'path';
 import randomstring from 'randomstring';
 import fs from 'fs-extra';
-import * as cp from 'child_process';
 import { multirange } from 'multi-integer-range';
-
-export function exec(command, args) {
-	return new Promise((resolve, reject) => {
-		cp.execFile(command, args, (err, stdout) => {
-			if (err) reject(err); else resolve(stdout);
-		});
-	});
-}
+import { exec } from './utils';
 
 export default class DicomImporter {
 	constructor(storage, models, opts = {}) {
-		const { utility } = opts;
+		const { utility, workDir } = opts;
 		this.models = models;
 		this.storage = storage;
 		this.utility = utility;
+		this.workDir = workDir ? workDir : path.join(__dirname, '..', 'store');
 	}
 
 	/**
@@ -34,7 +27,7 @@ export default class DicomImporter {
 	 */
 	async readDicomTags(fileContent) {
 		const tmpFile = path.join(
-			__dirname, '..', 'store',
+			this.workDir,
 			randomstring.generate({ length: 32, charset: 'hex' }) + '.dcm'
 		);
 		try {

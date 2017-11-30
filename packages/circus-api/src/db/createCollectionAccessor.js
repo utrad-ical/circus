@@ -87,7 +87,7 @@ export default function createCollectionAccessor(db, validator, opts) {
 	async function findByIdOrFail(id) {
 		const result = await findById(id);
 		if (result === undefined) {
-			const err = new Error('The requested resource was not found.');
+			const err = new Error(`The requested ${schema} was not found.`);
 			err.status = 404;
 			err.expose = true;
 			throw err;

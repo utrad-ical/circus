@@ -1,0 +1,13 @@
+$async: true
+description: >
+  Test schema for shop items
+type: object
+properties:
+  itemId:
+    type: number
+  name:
+    type: string
+  stock:
+    type: boolean
+  price:
+    type: number

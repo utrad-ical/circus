@@ -47,32 +47,32 @@ describe('performSearch', function() {
 	}
 
 	it('should perform search', async function() {
-		const items = await search({ limit: 100 });
-		assert.equal(items.length, 30);
+		const res = await search({ limit: 100 });
+		assert.equal(res.items.length, 30);
 	});
 
 	it('should take filter', async function() {
-		const items1 = await search({ query: { price: { $gt: 800 } } });
-		assert.equal(items1.length, 6);
-		const items2 = await search({ query: { color: 'blue' } });
-		assert.equal(items2.length, 3);
+		const res1 = await search({ query: { price: { $gt: 800 } } });
+		assert.equal(res1.items.length, 6);
+		const res2 = await search({ query: { color: 'blue' } });
+		assert.equal(res2.items.length, 3);
 	});
 
 	it('should take sort', async function() {
-		const items1 = await search({ sort: { price: -1 } });
-		assert.equal(items1[0].name, 'digital firewall');
-		const items2 = await search({ sort: { price: 1 } });
-		assert.equal(items2[0].name, 'bluetooth pixel');
-		const items3 = await search({ sort: { stock: 1, name: 1 } });
-		assert.deepEqual(items3.map(i => i.itemId).slice(0, 3), [28, 13, 1]);
+		const res1 = await search({ sort: { price: -1 } });
+		assert.equal(res1.items[0].name, 'digital firewall');
+		const res2 = await search({ sort: { price: 1 } });
+		assert.equal(res2.items[0].name, 'bluetooth pixel');
+		const res3 = await search({ sort: { stock: 1, name: 1 } });
+		assert.deepEqual(res3.items.map(i => i.itemId).slice(0, 3), [28, 13, 1]);
 	});
 
 	it('should take paging', async function() {
-		const items1 = await search({ page: 1, limit: 2, sort: { price: -1 } });
-		assert.deepEqual(items1.map(i => i.itemId), [12, 23]);
-		const items2 = await search({ page: 2, limit: 2, sort: { price: -1 } });
-		assert.deepEqual(items2.map(i => i.itemId), [28, 15]);
-		const items3 = await search({ page: 20, limit: 2, sort: { price: -1 } });
-		assert.deepEqual(items3, []);
+		const res1 = await search({ page: 1, limit: 2, sort: { price: -1 } });
+		assert.deepEqual(res1.items.map(i => i.itemId), [12, 23]);
+		const res2 = await search({ page: 2, limit: 2, sort: { price: -1 } });
+		assert.deepEqual(res2.items.map(i => i.itemId), [28, 15]);
+		const res3 = await search({ page: 20, limit: 2, sort: { price: -1 } });
+		assert.deepEqual(res3.items, []);
 	});
 });

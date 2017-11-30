@@ -24,5 +24,7 @@ export default async function performSearch(model, query, ctx, opts = {}) {
 
 	const rawResults = await model.findAll(query, { limit, skip, sort });
 	const results = transform ? rawResults.map(transform) : rawResults;
-	ctx.body = results;
+	ctx.body = {
+		items: results
+	};
 }

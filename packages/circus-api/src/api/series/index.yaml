@@ -9,9 +9,12 @@ routes:
     handler: handleSearch
     description: Retrieves the list of DICOM series.
     responseSchema:
-      type: array
-      items:
-        $ref: series
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: series
   - verb: post
     path: /series
     expectedContentType: multipart/form-data

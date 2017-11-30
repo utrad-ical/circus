@@ -8,9 +8,12 @@ routes:
     handler: handleSearch
     description: Retrieves the list of projects.
     responseSchema:
-      type: array
-      items:
-        $ref: project
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: project
   - verb: get
     path: /admin/projects/:projectId
     requiredGlobalPrivilege: manageServer

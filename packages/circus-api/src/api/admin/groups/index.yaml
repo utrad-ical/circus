@@ -8,9 +8,12 @@ routes:
     handler: handleSearch
     description: Retrieves the list of groups
     responseSchema:
-      type: array
-      items:
-        $ref: group
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: group
   - verb: get
     path: /admin/groups/:groupId
     requiredGlobalPrivilege: manageServer

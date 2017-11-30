@@ -7,9 +7,12 @@ routes:
     handler: handleSearch
     description: Performs search and retrieves a list of cases.
     responseSchema:
-      type: array
-      items:
-        $ref: clinicalCase
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: clinicalCase
   - verb: post
     path: /cases
     requiredProjectPrivilege: write

@@ -47,8 +47,8 @@ describe('API', function() {
 
 		it('should return list of groups', async function() {
 			const res = await axios.get(server.url + 'api/admin/groups');
-			assert.isArray(res.data);
-			assert.equal(res.data[0].groupName, 'admin');
+			assert.isArray(res.data.items);
+			assert.equal(res.data.items[0].groupName, 'admin');
 		});
 
 		it('should return a group', async function() {
@@ -106,9 +106,9 @@ describe('API', function() {
 
 		it('should return list of users', async function() {
 			const res = await axios.get(server.url + 'api/admin/users');
-			assert.isArray(res.data);
-			assert.isTrue(res.data.some(u => u.loginId === 'bob'));
-			assert.isFalse(res.data.some(u => u.password), 'Result data included password field.');
+			assert.isArray(res.data.items);
+			assert.isTrue(res.data.items.some(u => u.loginId === 'bob'));
+			assert.isFalse(res.data.items.some(u => u.password), 'Result data included password field.');
 		});
 
 		it('should return a user', async function() {
@@ -159,8 +159,8 @@ describe('API', function() {
 	describe('admin/projects', function() {
 		it('should return list of projects', async function() {
 			const res = await axios.get(server.url + 'api/admin/projects');
-			assert.isArray(res.data);
-			assert.isTrue(res.data.some(p => p.projectName === 'Lung nodules'));
+			assert.isArray(res.data.items);
+			assert.isTrue(res.data.items.some(p => p.projectName === 'Lung nodules'));
 		});
 
 		it('should return a project', async function() {
@@ -176,7 +176,7 @@ describe('API', function() {
 				method: 'get'
 			});
 			assert.equal(res.status, 200);
-			assert.equal(res.data.length, 3);
+			assert.equal(res.data.items.length, 3);
 		});
 
 		it('should return single series information', async function() {
@@ -214,7 +214,7 @@ describe('API', function() {
 				method: 'get'
 			});
 			assert.equal(res.status, 200);
-			assert.equal(res.data.length, 1);
+			assert.equal(res.data.items.length, 1);
 		});
 
 		it('should return single case information', async function() {

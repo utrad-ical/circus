@@ -2,7 +2,7 @@
   groupId: 1
   groupName: admin
   privileges: ['manageServer', 'personalInfoView']
-  domains: []
+  domains: ['sirius.org']
   readProjects: []
   writeProjects: []
   addSeriesProjects: []
@@ -12,7 +12,7 @@
   groupId: 2
   groupName: powerUser
   privileges: ['personalInfoView']
-  domains: []
+  domains: ['vega.org', 'altair.org']
   readProjects: ['8883fdef6f5144f50eb2a83cd34baa44']
   writeProjects: ['8883fdef6f5144f50eb2a83cd34baa44']
   addSeriesProjects: []

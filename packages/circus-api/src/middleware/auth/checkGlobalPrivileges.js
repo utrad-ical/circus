@@ -1,5 +1,4 @@
 import status from 'http-status';
-import { determineUserAccessInfo } from '../../privilegeUtils';
 
 /**
  * Return a middleware that checks user's global privilege.
@@ -13,8 +12,7 @@ export default function checkGlobalPrivileges({ models }, privileges) {
 	}
 
 	return async function checkGlobalPrivileges(ctx, next) {
-		const user = ctx.user;
-		const { globalPrivileges } = await determineUserAccessInfo(models, user);
+		const { globalPrivileges } = ctx.userPrivileges;
 		const okay = privileges.every(p => globalPrivileges.some(pp => pp === p));
 		if (!okay) {
 			ctx.throw(

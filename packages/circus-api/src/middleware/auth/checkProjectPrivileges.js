@@ -1,5 +1,4 @@
 import status from 'http-status';
-import { determineUserAccessInfo } from '../../privilegeUtils';
 
 /**
  * @param {string} role
@@ -7,8 +6,7 @@ import { determineUserAccessInfo } from '../../privilegeUtils';
 export default function checkProjectPrivileges({ models }, role) {
 	return async function checkProjectPrivileges(ctx, next) {
 		// The user must have appropriate project privilege
-		const user = ctx.user;
-		const { accessibleProjects } = await determineUserAccessInfo(models, user);
+		const { accessibleProjects } = ctx.userPrivileges;
 		const project = accessibleProjects.find(p => p.projectId === ctx.case.projectId);
 		if (project) {
 			const okay = project.roles.some(r => r === role);

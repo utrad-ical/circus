@@ -1,5 +1,6 @@
 import KoaOAuth2Server from './KoaOAuth2Server';
 import nodepass from 'node-php-password';
+import { determineUserAccessInfo } from '../../privilegeUtils';
 
 const debug = false;
 
@@ -14,11 +15,12 @@ export default function createOauthServer(models) {
 			const entry = await models.token.findById(bearerToken);
 			if (!entry) return null;
 			const user = await models.user.findByIdOrFail(entry.userId);
+			const privileges = await determineUserAccessInfo(models, user);
 			return {
 				accessToken: entry.accessToken,
 				accessTokenExpiresAt: entry.accessTokenExpiresAt,
 				client: { id: entry.clientId },
-				user
+				user: { user, privileges }
 			};
 		},
 		getClient: async function(clientId, /* clientSecret */) {

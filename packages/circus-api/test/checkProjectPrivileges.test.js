@@ -5,6 +5,7 @@ import checkProjectPrivileges, { injectCaseAndProject }
 	from '../src/middleware/auth/checkProjectPrivileges';
 import createValidator from '../src/createValidator';
 import createModels from '../src/db/createModels';
+import { determineUserAccessInfo } from '../src/privilegeUtils';
 
 describe('checkProjectPrivileges middleware', function() {
 	let server, db;
@@ -19,6 +20,7 @@ describe('checkProjectPrivileges middleware', function() {
 			app.use(async (ctx, next) => {
 				ctx.params = { caseId: 'faeb503e97f918c882453fd2d789f50f4250267740a0b3fbcc85a529f2d7715b' };
 				ctx.user = await models.user.findByIdOrFail(userEmail);
+				ctx.userPrivileges = await determineUserAccessInfo(models, ctx.user);
 				await next();
 			});
 			app.use(injectCaseAndProject({ models }));

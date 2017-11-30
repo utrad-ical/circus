@@ -4,6 +4,7 @@ import * as test from './test-utils';
 import checkGlobalPrivileges from '../src/middleware/auth/checkGlobalPrivileges';
 import createValidator from '../src/createValidator';
 import createModels from '../src/db/createModels';
+import { determineUserAccessInfo } from '../src/privilegeUtils';
 
 describe('checkGlobalPrivileges middleware', function() {
 	let server, db;
@@ -18,6 +19,7 @@ describe('checkGlobalPrivileges middleware', function() {
 			app.use(async (ctx, next) => {
 				ctx.models = models;
 				ctx.user = await models.user.findByIdOrFail(userEmail);
+				ctx.userPrivileges = await determineUserAccessInfo(models, ctx.user);
 				await next();
 			});
 			app.use(checkGlobalPrivileges({ models }, ['manageServer', 'personalInfoView']));

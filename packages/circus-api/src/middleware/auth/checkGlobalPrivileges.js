@@ -4,7 +4,7 @@ import status from 'http-status';
  * Return a middleware that checks user's global privilege.
  * @param {string|string[]} privileges
  */
-export default function checkGlobalPrivileges({ models }, privileges) {
+export default function checkGlobalPrivileges({}, privileges) {
 
 	if (typeof privileges === 'string') privileges = [privileges];
 	else if (!Array.isArray(privileges)) {

@@ -23,3 +23,4 @@ rules:
   no-var: 'error'
   prefer-const: 'error'
   no-console: [0]
+  no-empty-pattern: [0]

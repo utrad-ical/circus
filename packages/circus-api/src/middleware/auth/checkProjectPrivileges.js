@@ -3,7 +3,7 @@ import status from 'http-status';
 /**
  * @param {string} role
  */
-export default function checkProjectPrivileges({ models }, role) {
+export default function checkProjectPrivileges({}, role) {
 	return async function checkProjectPrivileges(ctx, next) {
 		// The user must have appropriate project privilege
 		const { accessibleProjects } = ctx.userPrivileges;

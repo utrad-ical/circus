@@ -1,20 +1,6 @@
 /**
- * Calculates the set of global privileges of the specified user.
- * A user's global privileges are the sum of global privileges
- * which are granted via the groups which the user belongs to.
+ * Calculates the set of privileges of the specified user.
  */
-export async function globalPrivilegesOfUser(models, user) {
-	// Determines the list of privileges this user has
-	const userPrivileges = {};
-	for (const groupId of user.groups) {
-		const group = await models.group.findByIdOrFail(groupId);
-		for (const priv of group.privileges) {
-			userPrivileges[priv] = true;
-		}
-	}
-	return userPrivileges;
-}
-
 export async function determineUserAccessInfo(models, user) {
 	const globalPrivileges = {};
 	const domains = {};

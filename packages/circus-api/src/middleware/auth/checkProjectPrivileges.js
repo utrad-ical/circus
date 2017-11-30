@@ -1,23 +1,24 @@
 import status from 'http-status';
-import { accessibleProjectsForOperation } from '../../privilegeUtils';
+import { determineUserAccessInfo } from '../../privilegeUtils';
 
 /**
- * @param {string} operation
+ * @param {string} role
  */
-export default function checkProjectPrivileges({ models }, operation) {
+export default function checkProjectPrivileges({ models }, role) {
 	return async function checkProjectPrivileges(ctx, next) {
 		// The user must have appropriate project privilege
 		const user = ctx.user;
-		const accessibleProjects = await accessibleProjectsForOperation(
-			models, user, operation
-		);
-		if (accessibleProjects[ctx.case.projectId] !== true) {
-			ctx.throw(
-				status.UNAUTHORIZED,
-				`You do not have "${operation}" privilege of this project.`
-			);
+		const { accessibleProjects } = await determineUserAccessInfo(models, user);
+		const project = accessibleProjects.find(p => p.projectId === ctx.case.projectId);
+		if (project) {
+			const okay = project.roles.some(r => r === role);
+			if (okay) await next();
+			return;
 		}
-		await next();
+		ctx.throw(
+			status.UNAUTHORIZED,
+			`You do not have "${role}" privilege of this project.`
+		);
 	};
 }
 

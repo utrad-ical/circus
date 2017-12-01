@@ -13,6 +13,9 @@ export const handleGet = ({ models }) => {
 
 export const handlePost = ({ dicomImporter }) => {
 	return async (ctx, next) => {
+		if (!dicomImporter) {
+			ctx.throw(status.SERVICE_UNAVAILABLE);
+		}
 		// koa-multer sets loaded files to ctx.req, not ctx.request
 		const files = ctx.req.files;
 		for (const entry of files) {

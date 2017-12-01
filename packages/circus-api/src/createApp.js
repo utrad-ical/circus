@@ -105,9 +105,9 @@ export default async function createApp(options = {}) {
 
 	const logger = options.logger ? options.logger : createLogger('off');
 
-	const dicomImporter = new DicomImporter(
+	const dicomImporter = process.env.DICOM_UTILITY ? new DicomImporter(
 		dicomStorage, models, { utility: process.env.DICOM_UTILITY }
-	);
+	) : undefined;
 
 	// Build a router.
 	// Register each API endpoints to the router according YAML manifest files.

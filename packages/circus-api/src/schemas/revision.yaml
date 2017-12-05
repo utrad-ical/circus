@@ -42,3 +42,4 @@ properties:
             The list of labels attached to this series.
     description: >
       The list of series entries.
+additionalProperties: false

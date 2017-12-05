@@ -51,3 +51,4 @@ properties:
       The group ID of groups which this user belongs to.
       The set of previleges the user has is deteremined as
       the union of the privileges of the groups the user belongs to.
+additionalProperties: false

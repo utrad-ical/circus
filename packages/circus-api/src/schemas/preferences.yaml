@@ -7,4 +7,4 @@ description: >
 properties:
   theme: { enum: ['mode_black', 'mode_white' ]}
   personalInfoView: { type: boolean }
-requiredProperties: ['theme', 'personalInfoView']
+additionalProperties: false

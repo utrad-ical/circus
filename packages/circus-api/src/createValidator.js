@@ -12,7 +12,10 @@ const loadSchemaFiles = async schemaRoot => {
 		const basename = path.basename(schemaFile, '.yaml');
 		const schemaData = yaml.safeLoad(await fs.readFile(schemaFile, 'utf8'));
 		if (schemaData.$async !== true || schemaData.$id) {
-			throw new TypeError('All schema must be async and have no $id field');
+			throw new TypeError(`Schemas "${basename}" must be async and have no $id field`);
+		}
+		if (!schemaData.properties || schemaData.additionalProperties !== false) {
+			throw new TypeError(`Schema "${basename}" must have properties.additionalProperties set to true`);
 		}
 		schemas[basename] = schemaData;
 	}

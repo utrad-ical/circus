@@ -22,3 +22,4 @@ properties:
     type: number
   weight:
     type: number
+additionalProperties: false

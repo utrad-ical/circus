@@ -55,3 +55,4 @@ properties:
       type: string
     description: >
       The list of project IDs which the members of this group have the moderator privilege.
+additionalProperties: false

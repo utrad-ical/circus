@@ -11,3 +11,4 @@ properties:
     type: boolean
   price:
     type: number
+additionalProperties: false

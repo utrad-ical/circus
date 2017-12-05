@@ -7,3 +7,4 @@ properties:
     type: number
   dateVal:
     date: true
+additionalProperties: false

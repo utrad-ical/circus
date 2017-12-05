@@ -13,3 +13,4 @@ properties:
     date: true
   userId:
     type: string
+additionalProperties: false

@@ -39,4 +39,4 @@ properties:
   attributes:
     type: object
     description: An object that represents label attributes.
-
+additionalProperties: false

@@ -6,3 +6,4 @@ properties:
   key:
     type: string
   value: {} # any valid JSON data
+additionalProperties: false

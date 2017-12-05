@@ -36,3 +36,4 @@ properties:
   max:
     type: number
     description: The number of all steps.
+additionalProperties: false

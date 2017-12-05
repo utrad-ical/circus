@@ -53,4 +53,5 @@ properties:
             whereas an object value represents an actual JSON schema
             (you can still use `$ref` to reference external schema).
       required: ['verb', 'path']
+      # additionalProperties: false
 required: ['routes']

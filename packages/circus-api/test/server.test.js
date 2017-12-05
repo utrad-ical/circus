@@ -12,7 +12,11 @@ describe('Basic server behavior', function() {
 
 	before(async function() {
 		db = await connectMongo();
-		const koaApp = await createApp({ debug: true, noAuth: true, db });
+		const koaApp = await createApp({
+			debug: true,
+			fixUser: 'alice@example.com',
+			db
+		});
 		server = await listenKoa(koaApp);
 	});
 

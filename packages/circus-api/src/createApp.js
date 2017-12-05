@@ -8,6 +8,7 @@ import glob from 'glob-promise';
 import Router from 'koa-router';
 import mount from 'koa-mount';
 import createOauthServer from './middleware/auth/createOauthServer';
+import fixUserMiddleware from './middleware/auth/fixUser';
 import errorHandler from './middleware/errorHandler';
 import cors from './middleware/cors';
 import checkPrivilege from './middleware/auth/checkPrivilege';
@@ -78,7 +79,7 @@ async function prepareApiRouter(apiDir, deps, options) {
  * Creates a new Koa app.
  */
 export default async function createApp(options = {}) {
-	const { debug, db, noAuth, blobPath, dicomPath } = options;
+	const { debug, db, fixUser, blobPath, dicomPath } = options;
 
 	// The main Koa instance.
 	const koa = new Koa();
@@ -120,7 +121,7 @@ export default async function createApp(options = {}) {
 			storage: multer.memoryStorage(),
 			limits: '20mb'
 		}).array('files'),
-		...( noAuth ? [] : [oauth.authenticate()]),
+		( fixUser ? fixUserMiddleware(deps, fixUser) : oauth.authenticate()),
 		apiRouter.routes()
 	]);
 

@@ -23,10 +23,10 @@ const options = [
 		default: 'localhost'
 	},
 	{
-		names: ['no-auth', 'n'],
-		env: 'CIRCUS_API_NO_AUTH',
-		type: 'bool',
-		help: 'Skip all authentication',
+		names: ['fix-user', 'f'],
+		env: 'CIRCUS_API_FIX_USER',
+		type: 'string',
+		help: 'Skip authentication and use this user as the current user',
 		default: false
 	},
 	{
@@ -50,7 +50,7 @@ const options = [
 	}
 ];
 
-const { debug, host, port, no_auth: noAuth, blobPath } = (() => {
+const { debug, host, port, fix_user: fixUser, blobPath } = (() => {
 	try {
 		const parser = dashdash.createParser({ options });
 		const opts = parser.parse(process.argv);
@@ -72,16 +72,17 @@ async function main() {
 	const db = await connectDb();
 	const logger = createLogger('trace');
 
-	if (noAuth) {
+	if (fixUser) {
 		console.warn(chalk.red('WARNING: NO AUTHENTICATION MODE!'));
-		logger.warn('CIRCUS API will start without authentication!');
+		console.warn(chalk.red(`CIRCUS API will start using ${fixUser} as the fixed user!`));
+		logger.warn(`CIRCUS API will start using ${fixUser} as the fixed user!`);
 	}
 
 	const serverOptions = {
 		debug: debug || process.env.NODE_ENV !== 'production',
 		db,
 		logger,
-		noAuth,
+		fixUser,
 		blobPath
 	};
 

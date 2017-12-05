@@ -10,8 +10,7 @@ import mount from 'koa-mount';
 import createOauthServer from './middleware/auth/createOauthServer';
 import errorHandler from './middleware/errorHandler';
 import cors from './middleware/cors';
-import checkGlobalPrivileges from './middleware/auth/checkGlobalPrivileges';
-import checkProjectPrivileges, { injectCaseAndProject } from './middleware/auth/checkProjectPrivileges';
+import checkPrivilege from './middleware/auth/checkPrivilege';
 import typeCheck from './middleware/typeCheck';
 import createValidator from './createValidator';
 import createStorage from './storage/createStorage';
@@ -33,7 +32,7 @@ function formatValidationErrors(errors) {
 }
 
 async function prepareApiRouter(apiDir, deps, options) {
-	const { debug, noAuth } = options;
+	const { debug } = options;
 	const router = new Router();
 	const validator = deps.validator;
 
@@ -56,18 +55,9 @@ async function prepareApiRouter(apiDir, deps, options) {
 			if (typeof mainHandler !== 'function') {
 				throw new Error('middleware not found');
 			}
-			const globalCheck = !noAuth && route.requiredGlobalPrivilege ?
-				[checkGlobalPrivileges(deps, route.requiredGlobalPrivilege)] : [];
-			const inject = route.requiredProjectPrivilege ?
-				[injectCaseAndProject(deps)] : [];
-			const projectCheck = !noAuth && route.requiredProjectPrivilege ?
-				[checkProjectPrivileges(deps, route.requiredProjectPrivilege)] : [];
-
 			const middlewareStack = compose([
 				typeCheck(route.expectedContentType),
-				...globalCheck,
-				...inject,
-				...projectCheck,
+				checkPrivilege(deps, route),
 				validateInOut(validator, {
 					requestSchema: route.requestSchema,
 					requestValidationOptions: route.requestValidationOptions,

@@ -1,11 +1,33 @@
 import axios from 'axios';
 import { showMessage } from 'actions';
+import * as qs from 'querystring';
+
+const apiServer = 'http://localhost:8080/';
+
+let token = null;
+
+export async function tryAuthenticate(id, password) {
+	const res = await axios.request({
+		method: 'post',
+		url: apiServer + 'login',
+		data: qs.stringify({
+			client_id: 'circus-front',
+			client_secret: 'not-a-secret',
+			grant_type: 'password',
+			username: id,
+			password
+		})
+	});
+	token = res.data.access_token;
+}
 
 export async function api(command, options = {}) {
 	const params = {
 		method: 'get',
-		url: '/api/' + command,
-		cached: false
+		url: apiServer + 'api/' + command,
+		cached: false,
+		withCredentials: true,
+		headers: { Authorization: `Bearer ${token}` }
 	};
 	for (const k in options) {
 		params[k] = options[k];

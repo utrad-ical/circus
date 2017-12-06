@@ -122,7 +122,8 @@ export default async function createApp(options = {}) {
 			limits: '20mb'
 		}).array('files'),
 		( fixUser ? fixUserMiddleware(deps, fixUser) : oauth.authenticate()),
-		apiRouter.routes()
+		apiRouter.routes(),
+		apiRouter.allowedMethods()
 	]);
 
 	// Register middleware stack to the Koa app.

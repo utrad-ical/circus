@@ -52,7 +52,7 @@ const ProfileView = ({ user }) => {
 					<ListGroupItem>
 						You are logged in as: <b>{user.description}</b>
 					</ListGroupItem>
-					{ user.privileges.indexOf('manageServer') > -1 ?
+					{ user.globalPrivileges.indexOf('manageServer') > -1 ?
 						<ListGroupItem bsStyle='danger'>
 							<strong>You have administrative privilege on CIRCUS DB! </strong>
 							Use this account only when you do administrative tasks.
@@ -64,7 +64,7 @@ const ProfileView = ({ user }) => {
 					<li><b>Email:</b> {user.userEmail}</li>
 					<li><b>Last login:</b> {lastLoginTime} (from {user.lastLoginIP})</li>
 					<li><b>Groups:</b> {user.groups.join(', ')}</li>
-					<li><b>Domains:</b> {user.accessibleDomains.join(', ')}</li>
+					<li><b>Domains:</b> {user.domains.join(', ')}</li>
 				</ul>
 			</Panel>
 		</Col>

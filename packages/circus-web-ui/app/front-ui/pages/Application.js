@@ -88,7 +88,7 @@ const NavView = props => {
 const Nav = connect(
 	state => ({
 		loginUserName: state.loginUser.data ? state.loginUser.data.description : '',
-		isAdmin: state.loginUser.data && state.loginUser.data.privileges.indexOf('manageServer') > -1
+		isAdmin: state.loginUser.data && state.loginUser.data.globalPrivileges.indexOf('manageServer') > -1
 	})
 )(NavView);
 

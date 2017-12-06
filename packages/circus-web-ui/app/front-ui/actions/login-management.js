@@ -1,5 +1,5 @@
 import { store } from 'store';
-import { api } from 'utils/api';
+import { api, tryAuthenticate } from 'utils/api';
 import { browserHistory } from 'react-router';
 
 const dispatch = store.dispatch.bind(store);
@@ -26,10 +26,7 @@ export async function refreshUserInfo(full = false) {
 }
 
 export async function login(id, password) {
-	await api('login', {
-		data: { id, password },
-		handleErrors: true
-	});
+	await tryAuthenticate(id, password);
 	browserHistory.push('/home');
 }
 

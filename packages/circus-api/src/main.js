@@ -38,6 +38,12 @@ const options = [
 		default: 8080
 	},
 	{
+		names: ['cors-origin', 'o'],
+		env: 'CIRCUS_API_CORS_ALLOW_ORIGIN',
+		type: 'string',
+		help: 'Accept CORS origin'
+	},
+	{
 		names: ['debug', 'd'],
 		type: 'bool',
 		help: 'force debug mode'
@@ -50,7 +56,7 @@ const options = [
 	}
 ];
 
-const { debug, host, port, fix_user: fixUser, blobPath } = (() => {
+const { debug, host, port, fix_user: fixUser, cors_origin: corsOrigin, blobPath } = (() => {
 	try {
 		const parser = dashdash.createParser({ options });
 		const opts = parser.parse(process.argv);
@@ -83,7 +89,8 @@ async function main() {
 		db,
 		logger,
 		fixUser,
-		blobPath
+		blobPath,
+		corsOrigin
 	};
 
 	try {
@@ -94,6 +101,7 @@ async function main() {
 			logger.info(`Label path: ${blobPath}`);
 			console.log(chalk.green(`Server running on port ${host}:${port}`));
 			console.log(`  Label path: ${blobPath}`);
+			console.log(`  CORS origin: ${corsOrigin}`);
 		});
 	} catch(err) {
 		console.error(chalk.red('Error during the server startup.'));

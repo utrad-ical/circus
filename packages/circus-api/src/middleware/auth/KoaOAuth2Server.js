@@ -50,7 +50,7 @@ export default class KoaOAuth2Server {
 	token(options) {
 		return async (ctx, next) => {
 			const request = new Request(ctx.request);
-			const response = new Response(ctx.response);
+			const response = new Response(ctx.res);
 			const token = await this.server.token(request, response, options);
 			ctx.state.oauth = { token };
 			this.handleResponse(ctx, response);

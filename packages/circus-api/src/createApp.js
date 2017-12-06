@@ -79,7 +79,7 @@ async function prepareApiRouter(apiDir, deps, options) {
  * Creates a new Koa app.
  */
 export default async function createApp(options = {}) {
-	const { debug, db, fixUser, blobPath, dicomPath } = options;
+	const { debug, db, fixUser, blobPath, corsOrigin, dicomPath } = options;
 
 	// The main Koa instance.
 	const koa = new Koa();
@@ -109,9 +109,16 @@ export default async function createApp(options = {}) {
 
 	const oauth = createOauthServer(models);
 
-	const authSection = compose([
-		errorHandler(debug, logger),
-		cors(),
+	// Register middleware stack to the Koa app.
+	koa.use(errorHandler(debug, logger));
+	koa.use(cors(corsOrigin));
+	koa.use(mount('/api', compose([
+		async (ctx, next) => {
+			if (ctx.method === 'OPTIONS') {
+				ctx.body = null;
+				ctx.status = 200;
+			} else await next();
+		},
 		bodyParser({
 			enableTypes: ['json'],
 			jsonLimit: '1mb',
@@ -121,17 +128,10 @@ export default async function createApp(options = {}) {
 			storage: multer.memoryStorage(),
 			limits: '20mb'
 		}).array('files'),
-		( fixUser ? fixUserMiddleware(deps, fixUser) : oauth.authenticate()),
-		apiRouter.routes(),
-		apiRouter.allowedMethods()
-	]);
-
-	// Register middleware stack to the Koa app.
-	koa.use(mount('/api', authSection));
-	koa.use(mount(
-		'/login',
-		compose([errorHandler(debug), bodyParser(), oauth.token()])
-	));
+		(fixUser ? fixUserMiddleware(deps, fixUser) : oauth.authenticate()),
+		apiRouter.routes()
+	])));
+	koa.use(mount('/login', compose([bodyParser(), oauth.token()])));
 
 	return koa;
 }

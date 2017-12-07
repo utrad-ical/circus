@@ -40,7 +40,7 @@ describe('API', function() {
 		});
 	});
 
-	describe('admin/groups', function() {
+	describe.only('admin/groups', function() {
 		beforeEach(async function() {
 			await test.setUpMongoFixture(server.db, ['groups']);
 		});
@@ -77,6 +77,23 @@ describe('API', function() {
 			assert.equal(res2.data.groupName, 'root');
 		});
 
+		const basicGroupData = {
+			groupName: 'sakura',
+			privileges: [], domains: [],
+			readProjects: [], writeProjects: [],
+			addSeriesProjects: [], viewPersonalInfoProjects: [],
+			moderateProjects: []
+		};
+
+		it('should add a new group', async function() {
+			const res = await axios.request({
+				method: 'post',
+				url: server.url + 'api/admin/groups',
+				data: basicGroupData
+			});
+			assert.equal(res.status, 200);
+		});
+
 		it('should return error for invalid group update', async function() {
 			await test.serverThrowsWithState(
 				axios.request({
@@ -93,6 +110,14 @@ describe('API', function() {
 					data: { groupId: 45 }
 				}),
 				400, /primary key/
+			);
+			await test.serverThrowsWithState(
+				axios.request({
+					method: 'post',
+					url: server.url + 'api/admin/groups',
+					data: { ...basicGroupData, groupId: 77 }
+				}),
+				400, /Group ID cannot be specified/
 			);
 		});
 

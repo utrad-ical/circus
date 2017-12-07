@@ -1,3 +1,4 @@
+import status from 'http-status';
 import performSearch from '../../performSearch';
 import { globalPrivileges } from '../../../privilegeUtils';
 
@@ -22,6 +23,18 @@ export const handlePut = ({ models }) => {
 		const groupId = parseInt(ctx.params.groupId);
 		await models.group.modifyOne(groupId, ctx.request.body);
 		ctx.body = null;
+	};
+};
+
+export const handlePost = ({ models }) => {
+	return async (ctx, next) => {
+		const groupId = await models.group.newSequentialId();
+		if ('groupId' in ctx.request.body) {
+			ctx.throw(status.BAD_REQUEST, 'Group ID cannot be specified');
+		}
+		const inserting = { ...ctx.request.body, groupId };
+		await models.group.insert(inserting);
+		ctx.body = { groupId };
 	};
 };
 

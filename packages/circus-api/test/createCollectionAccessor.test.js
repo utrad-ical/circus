@@ -59,6 +59,35 @@ describe('createCollectionAccessor', function() {
 		});
 	});
 
+	describe('#upsert', function() {
+		it('should insert a new document', async function() {
+			await testCollection.upsert(8, { name: 'Hazuki' });
+			const result = await db.collection('months').find({ month: 8 }).toArray();
+			assert.equal(result.length, 1);
+			assert.containsAllKeys(result[0], ['createdAt', 'updatedAt']);
+			assert.equal(result[0].name, 'Hazuki');
+		});
+
+		it('should update an existing document', async function() {
+			await testCollection.upsert(3, { name: 'March' });
+			const result = await db.collection('months').find({ month: 3 }).toArray();
+			assert.equal(result.length, 1);
+			assert.containsAllKeys(result[0], ['createdAt', 'updatedAt']);
+			assert.equal(result[0].name, 'March');
+		});
+
+		it('should raise an error on trying to upsert invalid data', async function() {
+			await asyncThrows(
+				testCollection.upsert(3, { name: 3 }),
+				ValidationError
+			);
+			await asyncThrows(
+				testCollection.upsert(7, { }),
+				ValidationError
+			);
+		});
+	});
+
 	describe('#insertMany', function() {
 		it('should insert multiple documents after successful validation', async function() {
 			await testCollection.insertMany([

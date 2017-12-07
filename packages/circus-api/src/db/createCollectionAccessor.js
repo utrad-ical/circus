@@ -11,11 +11,27 @@ export default function createCollectionAccessor(db, validator, opts) {
 	 * Inserts a single document after validation succeeds.
 	 */
 	async function insert(data) {
-		// Any error will be thrown
 		const date = new Date();
 		const inserting = { ...data, createdAt: date, updatedAt: date };
 		await validator.validate(schema, inserting, { dbEntry: true });
 		return await collection.insertOne(inserting);
+	}
+
+	/**
+	 * Upserts a single document after validation succeeds.
+	 * Partial update is not supported; you need to provide the whole document.
+	 * @param {string|number} id The primary key.
+	 * @param {object} data The data to upsert (excluding the id)
+	 */
+	async function upsert(id, data) {
+		const date = new Date();
+		const upserting =  { createdAt: date, updatedAt: date, ...data };
+		await validator.validate(
+			schema,
+			{ [primaryKey]: id, ...upserting },
+			{ dbEntry: true }
+		);
+		return await collection.updateOne({ [primaryKey]: id }, { $set: upserting }, { upsert: true });
 	}
 
 	/**
@@ -143,6 +159,7 @@ export default function createCollectionAccessor(db, validator, opts) {
 		findById,
 		findByIdOrFail,
 		insert,
+		upsert,
 		insertMany,
 		modifyOne,
 		collectionName() { return collectionName; }

@@ -1,0 +1,27 @@
+name: Server Parameter
+scope: [severAdmin]
+description: Manages login users.
+routes:
+  - verb: get
+    path: /admin/server-params
+    requiredGlobalPrivilege: manageServer
+    handler: handleSearch
+    description: Retrieves the list of server parameters.
+    responseSchema:
+      type: object
+  - verb: get
+    path: /admin/server-params/:key
+    requiredGlobalPrivilege: manageServer
+    description: Retrieves the specified server parameter.
+  - verb: put
+    path: /admin/server-params/:key
+    requiredGlobalPrivilege: manageServer
+    handler: handlePutOne
+    description: Updates the specified server parameter.
+  - verb: put
+    path: /admin/server-params
+    requiredGlobalPrivilege: manageServer
+    handler: handlePutAll
+    requestSchema:
+      type: object
+    description: Bulk-updates server parameters.

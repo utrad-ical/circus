@@ -1,0 +1,6 @@
+-
+  key: foo
+  value: bar
+-
+  key: color
+  value: ['green', 'black', 'blue']

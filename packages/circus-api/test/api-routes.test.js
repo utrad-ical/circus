@@ -21,7 +21,7 @@ describe('API', function() {
 			const targets = [
 				'groups', 'groups/1', 'PUT groups/1',
 				'users', 'users/alice@example.com', 'PUT users/alice@example.com',
-				'projects'
+				'projects', 'server-params'
 			];
 			for (const target of targets) {
 				let [method, url] = target.split(' ');
@@ -166,6 +166,47 @@ describe('API', function() {
 		it('should return a project', async function() {
 			const res = await axios.get(server.url + 'api/admin/projects/8883fdef6f5144f50eb2a83cd34baa44');
 			assert.equal(res.data.projectName, 'Lung nodules');
+		});
+	});
+
+	describe('admin/server-params', function() {
+		beforeEach(async function() {
+			await test.setUpMongoFixture(server.db, ['serverParams']);
+		});
+
+		it('should return parameters', async function() {
+			const res = await axios.get(server.url + 'api/admin/server-params');
+			assert.deepEqual(res.data, { foo: 'bar', color: ['green', 'black', 'blue'] });
+		});
+
+		it('should return one parameter', async function() {
+			const res = await axios.get(server.url + 'api/admin/server-params/color');
+			assert.deepEqual(res.data, ['green', 'black', 'blue']);
+		});
+
+		it('should update one parameter', async function() {
+			const res = await axios.request({
+				url: server.url + 'api/admin/server-params/color',
+				method: 'put',
+				data: ['orange']
+			});
+			assert.equal(res.status, 204);
+			const res2 = await axios.get(server.url + 'api/admin/server-params');
+			assert.deepEqual(res2.data.color, ['orange']);
+		});
+
+		it('should bulk-update parametes', async function() {
+			const res = await axios.request({
+				url: server.url + 'api/admin/server-params',
+				method: 'put',
+				data: { foo: 'buz', price: 1980 }
+			});
+			assert.equal(res.status, 204);
+			const res2 = await axios.get(server.url + 'api/admin/server-params');
+			assert.deepEqual(
+				res2.data,
+				{ foo: 'buz', color: ['green', 'black', 'blue'], price: 1980 }
+			);
 		});
 	});
 

@@ -7,6 +7,7 @@ export default function createModels(db, validator) {
 		project: { col: 'projects', pk: 'projectId' },
 		series: { col: 'series', pk: 'seriesUid' },
 		clinicalCase: { col: 'clinicalCases', pk: 'caseId' },
+		serverParam: { col: 'serverParams', pk: 'key' },
 		token: { col: 'tokens', pk: 'accessToken' }
 	};
 

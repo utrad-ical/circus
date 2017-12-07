@@ -1,4 +1,4 @@
-import { generateProjectId } from '../../src/utils';
+import { generateProjectId } from '../../utils';
 import nodepass from 'node-php-password';
 
 export async function up(db, models) {
@@ -42,7 +42,7 @@ export async function up(db, models) {
 
 	await db.collection('projects').ensureIndex({ projectId: 1 }, { unique: true });
 	await models.project.insert({
-		projectId: generateProjectId(),
+		projectId,
 		projectName: 'default',
 		description: 'The default DB project',
 		windowPriority: 'dicom,auto',
@@ -51,4 +51,10 @@ export async function up(db, models) {
 		caseAttributesSchema: [],
 		labelAttributesSchema: []
 	});
+
+	await models.serverParam.insert({
+		key: 'domains',
+		value: ['default']
+	});
+
 }

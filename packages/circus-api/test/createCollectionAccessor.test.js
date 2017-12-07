@@ -20,7 +20,7 @@ describe('createCollectionAccessor', function() {
 
 	beforeEach(async function() {
 		if (db) {
-			await setUpMongoFixture(db, ['months']);
+			await setUpMongoFixture(db, ['months', 'sequences']);
 		}
 	});
 
@@ -187,6 +187,23 @@ describe('createCollectionAccessor', function() {
 				const noSuchMonth = await testCollection.modifyOne(13, { $set: { name: 'Pon' } });
 				assert.isNull(noSuchMonth);
 			}, Error);
+		});
+	});
+
+	describe('#newSequentialId', function() {
+		it('should generate new ID', async function() {
+			const v1 = await testCollection.newSequentialId();
+			assert.equal(v1, 13);
+			const v2 = await testCollection.newSequentialId();
+			assert.equal(v2, 14);
+		});
+
+		it('should generate new sequence', async function() {
+			await db.collection('sequences').remove({});
+			const v1 = await testCollection.newSequentialId();
+			assert.equal(v1, 1);
+			const v2 = await testCollection.newSequentialId();
+			assert.equal(v2, 2);
 		});
 	});
 

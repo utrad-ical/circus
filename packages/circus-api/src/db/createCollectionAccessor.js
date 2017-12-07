@@ -145,6 +145,29 @@ export default function createCollectionAccessor(db, validator, opts) {
 		return updated;
 	}
 
+	/**
+	 * @returns {number}
+	 */
+	async function newSequentialId() {
+		const date = new Date();
+		const doc = await db.collection('sequences').findOneAndUpdate(
+			{ key: collectionName },
+			{ $inc: { value: 1 }, $set: { updatedAt: date } },
+			{ upsert: 1, projection: { _id: false, value: true }, returnOriginal: false }
+		);
+		if (doc.value !== null) {
+			return doc.value.value;
+		} else {
+			await db.collection('sequences').insertOne({
+				key: collectionName,
+				value: 1,
+				cratedAt: date,
+				updatedAt: date
+			});
+			return 1;
+		}
+	}
+
 	// These methods are exposed as-is for now
 	const passthrough = ['find', 'deleteMany', 'deleteOne'];
 	const boundPassthrough = {};
@@ -162,6 +185,7 @@ export default function createCollectionAccessor(db, validator, opts) {
 		upsert,
 		insertMany,
 		modifyOne,
+		newSequentialId,
 		collectionName() { return collectionName; }
 	};
 }

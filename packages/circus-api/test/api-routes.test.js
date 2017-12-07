@@ -96,6 +96,12 @@ describe('API', function() {
 			);
 		});
 
+		it('should return global-privileges', async function() {
+			const res = await axios(server.url + 'api/admin/global-privileges');
+			assert.isTrue(res.data.length > 1);
+			assert.isTrue(res.data.every(p => p.privilege && p.caption));
+		});
+
 		it.skip('should reject unknown field');
 	});
 

@@ -55,3 +55,12 @@ export async function accessibleProjectsForOperation(models, user, operation) {
 	}
 	return result;
 }
+
+export function globalPrivileges() {
+	return [
+		{ privilege: 'createProject', caption: 'Create Project'},
+		{ privilege: 'deleteProject', caption: 'Delete Project'},
+		{ privilege: 'manageServer', caption: 'Manage Server'},
+		{ privilege: 'personalInfoView', caption: 'View Personal Info' }
+	];
+}

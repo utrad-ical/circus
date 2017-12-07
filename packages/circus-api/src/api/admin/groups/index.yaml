@@ -1,5 +1,5 @@
 name: Group Administration
-scope: [severAdmin]
+scope: [manageServer]
 description: Manages user groups.
 routes:
   - verb: get
@@ -24,3 +24,7 @@ routes:
     requestSchema: group
     requiredGlobalPrivilege: manageServer
     description: Updates the specified group.
+  - verb: get
+    requiredGlobalPrivilege: manageServer
+    path: /admin/global-privileges
+    handler: listGlobalPrivileges

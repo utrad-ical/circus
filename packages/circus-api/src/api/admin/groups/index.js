@@ -1,4 +1,5 @@
 import performSearch from '../../performSearch';
+import { globalPrivileges } from '../../../privilegeUtils';
 
 export const handleSearch = ({ models }) => {
 	return async (ctx, next) => {
@@ -21,5 +22,11 @@ export const handlePut = ({ models }) => {
 		const groupId = parseInt(ctx.params.groupId);
 		await models.group.modifyOne(groupId, ctx.request.body);
 		ctx.body = null;
+	};
+};
+
+export const listGlobalPrivileges = () => {
+	return async (ctx, next) => {
+		ctx.body = globalPrivileges();
 	};
 };

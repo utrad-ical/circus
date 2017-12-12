@@ -11,7 +11,6 @@ export default class EditorPage extends React.Component {
 		this.state = {
 			items: [],
 			target: null,
-			targetID: null,
 			editing: null,
 			complaints: {}
 		};
@@ -29,6 +28,12 @@ export default class EditorPage extends React.Component {
 		if (this.state.target) {
 			endPoint += '/' + encodeURIComponent(this.state.editing[this.props.primaryKey]);
 		}
+
+		if (this.state.target && this.props.primaryKey in item) {
+			item = { ... item };
+			delete item[this.props.primaryKey];
+		}
+
 		const args = {
 			method: this.state.target ? 'put' : 'post',
 			data: item,
@@ -106,6 +111,7 @@ export default class EditorPage extends React.Component {
 					complaints={this.state.complaints}
 					target={this.state.target}
 					properties={this.props.editorProperties}
+					excludeProperty={this.state.target ? this.props.primaryKey : null}
 					onSaveClick={item => this.commitItem(item)}
 					onCancelClick={this.cancelEditItem}
 				/>
@@ -184,6 +190,10 @@ class Editor extends React.Component {
 	}
 
 	render() {
+		const properties = this.props.properties.filter(
+			p => !this.props.excludeProperty || this.props.excludeProperty !== p.key
+		);
+
 		const header = this.props.target ?
 			<span>Updating: <strong>{this.props.target}</strong></span>
 			: 'Creating new item';
@@ -199,7 +209,7 @@ class Editor extends React.Component {
 			<PropertyEditor
 				value={this.state.item}
 				complaints={this.props.complaints}
-				properties={this.props.properties}
+				properties={properties}
 				onChange={this.onChange.bind(this)}
 			/>
 		</Panel>;

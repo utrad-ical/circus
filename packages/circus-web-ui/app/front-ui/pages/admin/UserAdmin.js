@@ -2,8 +2,8 @@ import React from 'react';
 import EditorPage from './EditorPage';
 import { api } from 'utils/api';
 import LoadingIndicator from 'rb/LoadingIndicator';
-import ShrinkSelect from 'rb/ShrinkSelect';
 import MultiSelect from 'rb/MultiSelect';
+import ShrinkSelect from 'rb/ShrinkSelect';
 import * as et from 'rb/editor-types';
 
 const makeEmptyItem = () => {
@@ -13,10 +13,28 @@ const makeEmptyItem = () => {
 		description: '',
 		password: '',
 		groups: [],
-		'preferences.theme': 'mode_white',
-		'preferences.personalInfoView': true,
+		preferences: { theme: 'mode_white', personalInfoView: false },
 		loginEnabled: true
 	};
+};
+
+const PreferenceEditor = props => {
+	return <div>
+		<span>Theme:</span>
+		<ShrinkSelect
+			options={{ mode_white: 'White', mode_black: 'Black' }}
+			value={props.value.theme}
+			onChange={v => props.onChange({ ...props.value, theme: v})}
+		/>
+		<br />
+		<span>Show Personal Info:</span>
+		<label>
+			<input
+				type='checkbox'
+				onChange={e => props.onChange({ ...props.value, personalInfoView: e.target.checked})}
+			/>
+		</label>
+	</div>;
 };
 
 export default class UserAdmin extends React.Component {
@@ -27,14 +45,14 @@ export default class UserAdmin extends React.Component {
 
 		this.listColumns = 	[
 			{ key: 'userEmail', label: 'User ID (E-mail)' },
-			{ key: 'loginID', label: 'Login Name' },
+			{ key: 'loginId', label: 'Login Name' },
 			{ key: 'description', label: 'Description' },
 			{
 				data: item => {
-					return item.groups.map(groupID => {
+					return item.groups.map(groupId => {
 						if (!this.groupIdMap) return null;
-						return <span className='label label-default' key={groupID}>
-							{this.groupIdMap[groupID]}
+						return <span className='label label-default' key={groupId}>
+							{this.groupIdMap[groupId]}
 						</span>;
 					});
 				},
@@ -44,24 +62,19 @@ export default class UserAdmin extends React.Component {
 
 		this.editorProperties = [
 			{ caption: 'User Email', key: 'userEmail', editor: et.text() },
-			{ caption: 'Login Name', key: 'loginID', editor: et.text() },
+			{ caption: 'Login Name', key: 'loginId', editor: et.text() },
 			{ caption: 'Description', key: 'description', editor: et.text() },
 			{ caption: 'Password', key: 'password', editor: et.password() },
 			{ caption: 'Groups', key: 'groups', editor: null },
-			{
-				caption: 'Theme',
-				key: 'preferences.theme',
-				editor: et.shrinkSelect({ mode_white: 'White', mode_black: 'Black' })
-			},
-			{ caption: 'Show personal info', key: 'preferences.personalInfoView', editor: et.checkbox({ label: 'show' }) },
-			{caption: 'Login Enabled', key: 'loginEnabled', editor: et.checkbox({ label: 'enabled' }) }
+			{ caption: 'Preferences', key: 'preferences', editor: PreferenceEditor },
+			{ caption: 'Login Enabled', key: 'loginEnabled', editor: et.checkbox({ label: 'enabled' }) }
 		];
 	}
 
 	async componentDidMount() {
-		const groups = await api('group');
+		const groups = (await api('admin/groups')).items;
 		const groupIdMap = {};
-		groups.forEach(g => groupIdMap[g.groupID] = g.groupName);
+		groups.forEach(g => groupIdMap[g.groupId] = g.groupName);
 		this.editorProperties[4].editor = props => <MultiSelect
 			options={groupIdMap} numericalValue {...props}
 		/>;
@@ -74,7 +87,7 @@ export default class UserAdmin extends React.Component {
 		return <EditorPage
 			title='Users'
 			icon='user'
-			endPoint='user'
+			endPoint='admin/users'
 			primaryKey='userEmail'
 			editorProperties={this.editorProperties}
 			listColumns={this.listColumns}
@@ -82,4 +95,3 @@ export default class UserAdmin extends React.Component {
 		/>;
 	}
 }
-

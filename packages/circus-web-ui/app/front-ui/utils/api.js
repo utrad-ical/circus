@@ -2,9 +2,9 @@ import axios from 'axios';
 import { showMessage } from 'actions';
 import * as qs from 'querystring';
 
-const apiServer = 'http://localhost:8080/';
+export const apiServer = 'http://localhost:8080/';
 
-let token = null;
+export let apiCaller;
 
 export async function tryAuthenticate(id, password) {
 	const res = await axios.request({
@@ -18,25 +18,22 @@ export async function tryAuthenticate(id, password) {
 			password
 		})
 	});
-	token = res.data.access_token;
-}
-
-export async function api(command, options = {}) {
-	const params = {
-		method: 'get',
-		url: apiServer + 'api/' + command,
+	const token = res.data.access_token;
+	apiCaller = axios.create({
+		baseURL: apiServer + 'api/',
 		cached: false,
 		withCredentials: true,
 		headers: { Authorization: `Bearer ${token}` }
-	};
-	for (const k in options) {
-		params[k] = options[k];
-	}
+	});
+}
+
+export async function api(command, options = {}) {
+	const params = { method: 'get', url: command, ...options };
 	if (typeof params.data === 'object') {
 		if (params.method === 'get') params.method = 'post';
 	}
 	try {
-		const res = await axios(params);
+		const res = await apiCaller(params);
 		return res.data;
 	} catch (err) {
 		// By default, all errors are displayed with a minimal message.

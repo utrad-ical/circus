@@ -1,9 +1,8 @@
 import React from 'react';
 import { Button, ButtonToolbar, Glyphicon, Well, ProgressBar } from './react-bootstrap';
-import { FileDroppable } from './file-droppable';
+import { FileDroppable } from './FileDroppable';
 import { showMessage } from 'actions';
 import * as modal from 'rb/modal';
-import * as axios from 'axios';
 
 /**
  * Styled div where a user can upload one ore more files.
@@ -31,6 +30,8 @@ export class FileUpload extends React.Component {
 	}
 
 	async upload() {
+		const { apiCaller, url } = this.props;
+
 		const files = this.state.filesSelected;
 		const num = files.length;
 		if (typeof num !== 'number' || num <= 0) return;
@@ -39,7 +40,7 @@ export class FileUpload extends React.Component {
 		let size = 0;
 
 		for (let i = 0; i < num; i++) {
-			fd.append('files[]', files[i]);
+			fd.append('files', files[i]);
 			size += files[i].size;
 		}
 
@@ -62,7 +63,8 @@ export class FileUpload extends React.Component {
 			this.props.onBeforeUpload(fd);
 		}
 
-		const req = axios.post(this.props.url, {
+		const req = apiCaller(url, {
+			method: 'post',
 			data: fd,
 			progress: this.uploadProgress.bind(this)
 		});

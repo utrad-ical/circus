@@ -2,7 +2,8 @@ import React from 'react';
 import { Alert } from 'components/react-bootstrap';
 import ShrinkSelect from 'rb/ShrinkSelect';
 import { connect } from 'react-redux';
-import { FileUpload } from 'components/file-upload';
+import { FileUpload } from 'components/FileUpload';
+import { apiCaller } from 'utils/api';
 
 class ImportSeriesView extends React.Component {
 	constructor(props) {
@@ -10,6 +11,8 @@ class ImportSeriesView extends React.Component {
 		this.state = {
 			uploadDomain: this.props.loginUser ? this.props.loginUser.defaultDomain : '',
 		};
+		this.domainChange = this.domainChange.bind(this);
+		this.uploaded = this.uploaded.bind(this);
 	}
 
 	domainChange(domain) {
@@ -29,7 +32,7 @@ class ImportSeriesView extends React.Component {
 	render() {
 		const user = this.props.loginUser;
 
-		if (!Array.isArray(user.accessibleDomains) || user.accessibleDomains.length === 0) {
+		if (!Array.isArray(user.domains) || user.domains.length === 0) {
 			return <Alert bsStyle='warning'>
 				You do not belong to any domain. Uploading is not allowed.
 			</Alert>;
@@ -46,13 +49,15 @@ class ImportSeriesView extends React.Component {
 			<FileUpload multiple={true} targetResource='import-series'
 				uploadFileMax={user.uploadFileMax}
 				uploadFileSizeMax={user.uploadFileSizeMax}
-				url='/test'
-				onUploaded={this.uploaded.bind(this)}
+				url='series'
+				apiCaller={apiCaller}
+				onUploaded={this.uploaded}
 			>
 				<div>Upload Domain:&ensp;
-					<ShrinkSelect options={user.accessibleDomains}
+					<ShrinkSelect
+						options={user.domains}
 						value={this.state.uploadDomain}
-						onChange={this.domainChange.bind(this)}
+						onChange={this.domainChange}
 					/>
 				</div>
 				<hr />

@@ -16,8 +16,8 @@ export default class SearchResultsView extends React.Component {
 	makeSortOptions(sortKeys) {
 		const options = {};
 		Object.keys(sortKeys).forEach(k => {
-			options[`${k} desc`] = `${sortKeys[k]} desc`;
-			options[`${k} asc`] = `${sortKeys[k]} asc`;
+			options[`{"${sortKeys[k]}":-1}`] = `${k} desc`;
+			options[`{"${sortKeys[k]}":1}`] = `${k} asc`;
 		});
 		this.sortOptions = options;
 	}
@@ -41,9 +41,13 @@ export default class SearchResultsView extends React.Component {
 					onChange={this.sortChange.bind(this)}
 				/>
 			</div>
-			<div className='search-results'>
-				{items.map(item => this.renderItem(item))}
-			</div>
+			{items.length ?
+				<div className='search-results'>
+					{items.map(item => this.renderItem(item))}
+				</div>
+				:
+				<div>No results.</div>
+			}
 			<div className='search-results-pager'>
 				<Pagination prev next first last ellipsis
 					items={pages} maxButtons={10} activePage={page}

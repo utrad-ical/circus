@@ -9,7 +9,8 @@ export default class SeriesSearch extends React.Component {
 			title='Series Search'
 			icon='circus-series'
 			searchName='series'
-			defaultSort='createTime desc'
+			resource='series'
+			defaultSort='{"createTime":-1}'
 			conditionComp={SeriesSearchCondition}
 			resultComp={SeriesSearchResults}
 			defaultCondition={SeriesSearchCondition.nullCondition()}

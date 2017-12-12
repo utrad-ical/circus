@@ -1,27 +1,23 @@
 import createApp from '../src/createApp';
 import axios from 'axios';
 import { assert } from 'chai';
-import {
-	listenKoa, tearDownKoa,
-	serverThrowsWithState, asyncThrows,
-	connectMongo
-} from './test-utils';
+import * as test from './test-utils';
 
 describe('Basic server behavior', function() {
 	let server, db;
 
 	before(async function() {
-		db = await connectMongo();
+		db = await test.connectMongo();
 		const koaApp = await createApp({
 			debug: true,
 			fixUser: 'alice@example.com',
 			db
 		});
-		server = await listenKoa(koaApp);
+		server = await test.listenKoa(koaApp);
 	});
 
 	after(async function() {
-		if (server) await tearDownKoa(server);
+		if (server) await test.tearDownKoa(server);
 		if (db) await db.close();
 	});
 
@@ -61,7 +57,7 @@ describe('Basic server behavior', function() {
 
 	it('should return 400 for huge JSON > 1mb', async function() {
 		const bigData = { foo: 'A'.repeat(1024 * 1024) };
-		await asyncThrows(
+		await test.asyncThrows(
 			axios.request({
 				method: 'post',
 				url: server.url + 'echo',

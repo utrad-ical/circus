@@ -40,7 +40,7 @@ describe('API', function() {
 		});
 	});
 
-	describe.only('admin/groups', function() {
+	describe('admin/groups', function() {
 		beforeEach(async function() {
 			await test.setUpMongoFixture(server.db, ['groups']);
 		});

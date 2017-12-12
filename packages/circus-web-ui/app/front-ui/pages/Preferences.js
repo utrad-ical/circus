@@ -1,7 +1,6 @@
 import React from 'react';
 import PropertyEditor from 'rb/PropertyEditor';
 import * as et from 'rb/editor-types';
-import ShrinkSelect from 'rb/ShrinkSelect';
 import { api } from 'utils/api';
 import { showMessage } from 'actions';
 import { Button } from 'components/react-bootstrap';
@@ -9,11 +8,13 @@ import { Button } from 'components/react-bootstrap';
 export default class Preferences extends React.Component {
 	constructor(props) {
 		super(props);
+		this.saveClick = this.saveClick.bind(this);
+		this.loadSettings = this.loadSettings.bind(this);
 		this.state = { settings: null };
 	}
 
 	async loadSettings() {
-		const settings = await api('preference');
+		const settings = await api('preferences');
 		this.setState({ settings });
 	}
 
@@ -26,8 +27,8 @@ export default class Preferences extends React.Component {
 	}
 
 	async saveClick() {
-		await api('preference', {
-			method: 'post', // TODO: This should be PUT?
+		await api('preferences', {
+			method: 'put',
 			data: this.state.settings
 		});
 		showMessage('Your preference was saved.', 'success', { short: true });
@@ -41,10 +42,7 @@ export default class Preferences extends React.Component {
 			{
 				caption: 'Color Theme',
 				key: 'theme',
-				editor: props => <ShrinkSelect
-					options={{ mode_white: 'White', mode_black: 'Black' }}
-					{...props}
-				/>
+				editor: et.shrinkSelect({ mode_white: 'White', mode_black: 'Black' })
 			},
 			{
 				caption: 'Show Personal Info',
@@ -64,10 +62,10 @@ export default class Preferences extends React.Component {
 				onChange={this.propertyChange.bind(this)}
 			/>
 			<p className='text-center'>
-				<Button bsStyle='primary' onClick={() => this.saveClick()}>
+				<Button bsStyle='primary' onClick={this.saveClick}>
 					Save
 				</Button>
-				<Button bsStyle='link' onClick={() => this.loadSettings()}>
+				<Button bsStyle='link' onClick={this.loadSettings}>
 					Cancel
 				</Button>
 			</p>

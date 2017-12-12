@@ -1,6 +1,5 @@
 import EditorPage from './EditorPage';
 import React from 'react';
-import { api } from 'utils/api';
 import * as et from 'rb/editor-types';
 import WindowPresetEditor from './WindowPresetEditor';
 import TagEditor, { newTagItem } from './TagEditor';
@@ -15,14 +14,20 @@ const windowPriorityOptions = [
 ];
 
 const listColumns = [
-	{ key: 'projectID', label: 'Project ID' },
+	{ key: 'projectId', label: 'Project ID' },
 	{ key: 'projectName', label: 'Project Name' },
 	{ key: 'description', label: 'Description' },
 ];
 
 const makeEmptyItem = () => {
 	return {
-		groupName: '',
+		projectName: 'untitled project',
+		description: '',
+		windowPresets: [],
+		windowPriority: 'dicom,preset,auto',
+		tags: [],
+		caseAttributesSchema: [],
+		labelAttributesSchema: []
 	};
 };
 
@@ -61,25 +66,10 @@ export default class ProjectAdmin extends React.Component {
 				className: 'attribute-schema-prop',
 				editor: AttributeSchemaArrayEditor
 			},
-			'Group Privileges',
-			{ key: 'addSeriesGroups', caption: 'Add Series Groups', editor: null },
-			{ key: 'moderateGroups', caption: 'Moderate Groups', editor: null },
-			{ key: 'viewPersonalInfoGroups', caption: 'View Personal Info Groups', editor: null },
-			{ key: 'readGroups', caption: 'Read Groups', editor: null },
-			{ key: 'writeGroups', caption: 'Write Groups', editor: null }
 		];
 	}
 
 	async componentDidMount() {
-		const groups = await api('group');
-		const groupIdMap = {};
-		groups.forEach(g => groupIdMap[g.groupID] = g.groupName);
-		const GroupsMultiSelect = et.multiSelect(groupIdMap, { numericalValue: true });
-		this.editorProperties.forEach(property => {
-			if (/Groups$/.test(property.key)) {
-				property.editor = GroupsMultiSelect;
-			}
-		});
 		this.setState({ ready: true });
 	}
 
@@ -88,8 +78,8 @@ export default class ProjectAdmin extends React.Component {
 		return <EditorPage
 			title='Projects'
 			icon='education'
-			endPoint='project'
-			primaryKey='projectID'
+			endPoint='admin/projects'
+			primaryKey='projectId'
 			editorProperties={this.editorProperties}
 			listColumns={listColumns}
 			makeEmptyItem={makeEmptyItem}

@@ -31,8 +31,9 @@ export default class KoaOAuth2Server {
 			const response = new Response(ctx.res);
 			const token = await this.server.authenticate(request, response, options);
 			ctx.state.oauth = { token, user: token.user };
-			ctx.user = token.user.user;
-			ctx.userPrivileges = token.user.privileges;
+			for (const k in token.user) {
+				ctx[k] = token.user[k];
+			}
 			await next();
 		};
 	}

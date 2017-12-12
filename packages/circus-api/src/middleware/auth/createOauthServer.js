@@ -15,12 +15,12 @@ export default function createOauthServer(models) {
 			const entry = await models.token.findById(bearerToken);
 			if (!entry) return null;
 			const user = await models.user.findByIdOrFail(entry.userId);
-			const privileges = await determineUserAccessInfo(models, user);
+			const userPrivileges = await determineUserAccessInfo(models, user);
 			return {
 				accessToken: entry.accessToken,
 				accessTokenExpiresAt: entry.accessTokenExpiresAt,
 				client: { id: entry.clientId },
-				user: { user, privileges }
+				user: { user, userPrivileges }
 			};
 		},
 		getClient: async function(clientId, /* clientSecret */) {

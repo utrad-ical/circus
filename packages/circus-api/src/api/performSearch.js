@@ -32,8 +32,11 @@ export default async function performSearch(model, filter, ctx, opts = {}) {
 	const skip = limit * (page - 1);
 
 	const rawResults = await model.findAll(filter, { limit, skip, sort });
+	const totalItems = await model.findAsCursor(filter).count();
 	const results = transform ? rawResults.map(transform) : rawResults;
 	ctx.body = {
-		items: results
+		items: results,
+		totalItems,
+		page
 	};
 }

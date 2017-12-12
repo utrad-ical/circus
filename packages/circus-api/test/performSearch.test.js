@@ -54,8 +54,11 @@ describe('performSearch', function() {
 	it('should take filter', async function() {
 		const res1 = await search({ query: { price: { $gt: 800 } } });
 		assert.equal(res1.items.length, 6);
+		assert.equal(res1.totalItems, 6);
+		assert.equal(res1.page, 1);
 		const res2 = await search({ query: { color: 'blue' } });
 		assert.equal(res2.items.length, 3);
+		assert.equal(res2.totalItems, 3);
 	});
 
 	it('should take sort', async function() {
@@ -70,9 +73,16 @@ describe('performSearch', function() {
 	it('should take paging', async function() {
 		const res1 = await search({ page: 1, limit: 2, sort: { price: -1 } });
 		assert.deepEqual(res1.items.map(i => i.itemId), [12, 23]);
+		assert.equal(res1.totalItems, 30);
+		assert.equal(res1.page, 1);
+
 		const res2 = await search({ page: 2, limit: 2, sort: { price: -1 } });
 		assert.deepEqual(res2.items.map(i => i.itemId), [28, 15]);
+		assert.equal(res2.totalItems, 30);
+		assert.equal(res2.page, 2);
+
 		const res3 = await search({ page: 20, limit: 2, sort: { price: -1 } });
 		assert.deepEqual(res3.items, []);
+		assert.equal(res3.totalItems, 30);
 	});
 });

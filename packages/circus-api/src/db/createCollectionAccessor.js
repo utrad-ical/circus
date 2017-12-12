@@ -78,7 +78,8 @@ export default function createCollectionAccessor(db, validator, opts) {
 				await validator.validate(schema, next, { dbEntry: true });
 				return next;
 			},
-			hasNext: () => cursor.hasNext()
+			hasNext: () => cursor.hasNext(),
+			count: () => cursor.count()
 		};
 	}
 

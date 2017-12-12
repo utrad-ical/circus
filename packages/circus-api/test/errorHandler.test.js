@@ -67,57 +67,51 @@ describe('errorHandler middleware', function() {
 	});
 
 	it('should return 404 for nonexistent path', async function() {
-		await serverThrowsWithState(
-			axios.request({
-				url: server.url + 'not-found',
-				method: 'get'
-			}),
-			404,
-			/not found/i
-		);
+		const res = await axios.request({
+			url: server.url + 'not-found',
+			method: 'get',
+			validateStatus: null
+		});
+		assert.equal(res.status, 404);
 	});
 
 	it('should return 400 for request validation error', async function() {
-		await serverThrowsWithState(
-			axios.request({
-				url: server.url + 'invalid',
-				method: 'get'
-			}),
-			400,
-			/request data is not correct/i
-		);
+		const res = await axios.request({
+			url: server.url + 'invalid',
+			method: 'get',
+			validateStatus: null
+		});
+		assert.equal(res.status, 400);
+		assert.match(res.data.error, /request data is not correct/i);
 	});
 
 	it('should return 500 for server-side validation error', async function() {
-		await serverThrowsWithState(
-			axios.request({
-				url: server.url + 'invalid-on-response',
-				method: 'get'
-			}),
-			500,
-			/response schema validation error/i
-		);
+		const res = await axios.request({
+			url: server.url + 'invalid-on-response',
+			method: 'get',
+			validateStatus: null
+		});
+		assert.equal(res.status, 500);
+		assert.match(res.data.error, /response schema validation error/i);
 	});
 
 	it('should return 500 for server-side run-time error', async function() {
-		const err = await serverThrowsWithState(
-			axios.request({
-				url: server.url + 'server-side-error',
-				method: 'get'
-			}),
-			500
-		);
-		assert.exists(err.response.data.stack);
+		const res = await axios.request({
+			url: server.url + 'server-side-error',
+			method: 'get',
+			validateStatus: null
+		});
+		assert.equal(res.status, 500);
+		assert.exists(res.data.stack);
 	});
 
-	it('should return 403 for server-side run-time error', async function() {
-		await serverThrowsWithState(
-			axios.request({
-				url: server.url + 'error-403',
-				method: 'get'
-			}),
-			403,
-			/no!/i
-		);
+	it('should return 403 for server-side access error', async function() {
+		const res = await axios.request({
+			url: server.url + 'error-403',
+			method: 'get',
+			validateStatus: null
+		});
+		assert.equal(res.status, 403);
+		assert.match(res.data.error, /no!/);
 	});
 });

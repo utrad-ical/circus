@@ -58,14 +58,13 @@ describe('validateInOut middleware', function() {
 	});
 
 	it('should fail input validation', async function() {
-		await serverThrowsWithState(
-			axios.request({
-				url: server.url + 'in-check',
-				method: 'post',
-				data: { intVal: 30, dateVal: 'invalid date' }
-			}),
-			400
-		);
+		const res = await axios.request({
+			url: server.url + 'in-check',
+			method: 'post',
+			data: { intVal: 30, dateVal: 'invalid date' },
+			validateStatus: null
+		});
+		assert.equal(res.status, 400);
 	});
 
 	it('should pass output validation', async function() {
@@ -77,14 +76,13 @@ describe('validateInOut middleware', function() {
 	});
 
 	it('should fail output validation', async function() {
-		await serverThrowsWithState(
-			axios.request({
-				url: server.url + 'out-check',
-				method: 'post',
-				data: { intVal: 'foo' }
-			}),
-			500,
-			/Response schema validation error/i
-		);
+		const res = await axios.request({
+			url: server.url + 'out-check',
+			method: 'post',
+			data: { intVal: 'foo' },
+			validateStatus: null
+		});
+		assert.equal(res.status, 500);
+		assert.match(res.data.error, /Response schema validation error/i);
 	});
 });

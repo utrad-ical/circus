@@ -32,35 +32,31 @@ describe('Basic server behavior', function() {
 	});
 
 	it('should return 404 for root path', async function() {
-		await serverThrowsWithState(
-			axios.get(server.url),
-			404
-		);
+		const res = await axios.get(server.url, { validateStatus: null });
+		assert.equal(res.status, 404);
 	});
 
 	it('should return 400 for malformed JSON input', async function() {
-		await serverThrowsWithState(
-			axios.request({
-				method: 'post',
-				url: server.url + 'api/echo',
-				data: {},
-				headers: { 'Content-Type': 'application/json' },
-				transformRequest: [() => '{I+am+not.a.valid-JSON}}']
-			}),
-			400 // Bad request
-		);
+		const res = await axios.request({
+			method: 'post',
+			url: server.url + 'api/echo',
+			data: {},
+			headers: { 'Content-Type': 'application/json' },
+			transformRequest: [() => '{I+am+not.a.valid-JSON}}'],
+			validateStatus: null
+		});
+		assert.equal(res.status, 400);
 	});
 
 	it('should return 415 if content type is not set to JSON', async function() {
-		await serverThrowsWithState(
-			axios.request({
-				method: 'post',
-				url: server.url + 'api/echo',
-				headers: { 'Content-Type': 'text/plain', 'X-poe': 'poepoe' },
-				data: 'testdata'
-			}),
-			415 // Unsupported media type
-		);
+		const res = await axios.request({
+			method: 'post',
+			url: server.url + 'api/echo',
+			headers: { 'Content-Type': 'text/plain', 'X-poe': 'poepoe' },
+			data: 'testdata',
+			validateStatus: null
+		});
+		assert.equal(res.status, 415); // Unsupported media type
 	});
 
 	it('should return 400 for huge JSON > 1mb', async function() {

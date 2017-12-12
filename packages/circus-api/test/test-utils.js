@@ -64,7 +64,8 @@ export async function setUpAppForTest(logMode = 'off') {
 	];
 	users.forEach(([user, token]) => {
 		axiosInstances[user] = axios.create({
-			headers: { Authorization: `Bearer ${token}` }
+			headers: { Authorization: `Bearer ${token}` },
+			validateStatus: () => true
 		});
 	});
 
@@ -74,20 +75,6 @@ export async function setUpAppForTest(logMode = 'off') {
 export async function tearDownAppForTest(testServer) {
 	await tearDownKoa(testServer);
 	if (testServer.db) await testServer.db.close();
-}
-
-export async function serverThrowsWithState(promise, status, pattern) {
-	try {
-		await promise;
-	} catch (err) {
-		assert.exists(err.response, 'Server did not respond');
-		assert.equal(err.response.status, status);
-		if (pattern) {
-			assert.match(err.response.data.error, pattern);
-		}
-		return err; // returned as a resolved value to further investigate it
-	}
-	throw new Error('Server did not throw any error');
 }
 
 export async function asyncThrows(funcOrPromise, type) {

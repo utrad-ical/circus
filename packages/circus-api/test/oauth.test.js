@@ -67,7 +67,7 @@ describe('createOauthServer', function() {
 
 	it('should reject token request with wrong credential', async function() {
 		// wrong password
-		await serverThrowsWithState(axios.request({
+		const res1 = await axios.request({
 			method: 'post',
 			url: server.url + 'token',
 			data: qs.stringify({
@@ -76,11 +76,13 @@ describe('createOauthServer', function() {
 				grant_type: 'password',
 				username: 'alice',
 				password: 'thisPasswordIsWrong'
-			})
-		}), 400);
+			}),
+			validateStatus: null
+		});
+		assert.equal(res1.status, 400);
 
 		// nonexistent user
-		await serverThrowsWithState(axios.request({
+		const res2 = await axios.request({
 			method: 'post',
 			url: server.url + 'token',
 			data: qs.stringify({
@@ -89,23 +91,29 @@ describe('createOauthServer', function() {
 				grant_type: 'password',
 				username: 'charlie',
 				password: 'charlieDoesNotExist'
-			})
-		}), 400);
+			}),
+			validateStatus: null
+		});
+		assert.equal(res2.status, 400);
 	});
 
 	it('should return empty data with a request with invalid token', async function() {
 		// no token
-		await serverThrowsWithState(axios.request({
+		const res1 = await axios.request({
 			url: server.url + 'data',
-			method: 'get'
-		}), 401);
+			method: 'get',
+			validateStatus: null
+		});
+		assert.equal(res1.status, 401);
 
 		// wrong token
 		const wrongToken = 'PeterPiperPickedAPepper';
-		await serverThrowsWithState(axios.request({
+		const res2 = await axios.request({
 			url: server.url + 'data',
 			method: 'get',
-			headers: { Authorization: `Bearer ${wrongToken}` }
-		}), 401);
+			headers: { Authorization: `Bearer ${wrongToken}` },
+			validateStatus: false
+		});
+		assert.equal(res2.status, 401);
 	});
 });

@@ -28,14 +28,13 @@ describe('API', function() {
 				if (!url) { method = 'GET'; url = target; }
 				// console.log(method, target);
 				const data = method.match(/GET|PUT/) ? { a: 10 } : undefined;
-				await test.serverThrowsWithState(
-					server.axios.bob.request({
-						url: server.url + 'api/admin/' + url,
-						method,
-						data
-					}),
-					401, /privilege/
-				);
+				const res = await server.axios.bob.request({
+					url: server.url + 'api/admin/' + url,
+					method,
+					data
+				});
+				assert.equal(res.status, 401);
+				assert.match(res.data.error, /privilege/);
 			}
 		});
 	});
@@ -57,14 +56,10 @@ describe('API', function() {
 		});
 
 		it('should return error for nonexistent group', async function() {
-			await test.serverThrowsWithState(
-				axios.get(server.url + 'api/admin/groups/7'),
-				404
-			);
-			await test.serverThrowsWithState(
-				axios.get(server.url + 'api/admin/groups/bad'),
-				404
-			);
+			const res1 = await axios.get(server.url + 'api/admin/groups/7');
+			assert.equal(res1.status, 404);
+			const res2 = await axios.get(server.url + 'api/admin/groups/bad');
+			assert.equal(res2.status, 404);
 		});
 
 		it('should update a group', async function() {
@@ -95,30 +90,28 @@ describe('API', function() {
 		});
 
 		it('should return error for invalid group update', async function() {
-			await test.serverThrowsWithState(
-				axios.request({
-					method: 'put',
-					url: server.url + 'api/admin/groups/1',
-					data: { groupName: 72 }
-				}),
-				400
-			);
-			await test.serverThrowsWithState(
-				axios.request({
-					method: 'put',
-					url: server.url + 'api/admin/groups/1',
-					data: { groupId: 45 }
-				}),
-				400, /primary key/
-			);
-			await test.serverThrowsWithState(
-				axios.request({
-					method: 'post',
-					url: server.url + 'api/admin/groups',
-					data: { ...basicGroupData, groupId: 77 }
-				}),
-				400, /Group ID cannot be specified/
-			);
+			const res1 = await axios.request({
+				method: 'put',
+				url: server.url + 'api/admin/groups/1',
+				data: { groupName: 72 }
+			});
+			assert(res1.status, 400);
+
+			const res2 = await axios.request({
+				method: 'put',
+				url: server.url + 'api/admin/groups/1',
+				data: { groupId: 45 }
+			});
+			assert.equal(res2.status, 400);
+			assert.match(res2.data.error, /primary key/);
+
+			const res3 = await axios.request({
+				method: 'post',
+				url: server.url + 'api/admin/groups',
+				data: { ...basicGroupData, groupId: 77 }
+			});
+			assert.equal(res3.status, 400);
+			assert.match(res3.data.error, /Group ID cannot be specified/);
 		});
 
 		it('should return global-privileges', async function() {
@@ -149,10 +142,8 @@ describe('API', function() {
 		});
 
 		it('should return error for nonexistent user', async function() {
-			await test.serverThrowsWithState(
-				axios.get(server.url + 'api/admin/user/john@due.com'),
-				404
-			);
+			const res = await axios.get(server.url + 'api/admin/user/john@due.com');
+			assert(res.status, 404);
 		});
 
 		it('should update a user', async function() {
@@ -166,22 +157,20 @@ describe('API', function() {
 		});
 
 		it('should return error for invalid user update', async function() {
-			await test.serverThrowsWithState(
-				axios.request({
-					method: 'put',
-					url: server.url + 'api/admin/users/alice@example.com',
-					data: { groups: ['this-must-not-be', 'strings'] }
-				}),
-				400
-			);
-			await test.serverThrowsWithState(
-				axios.request({
-					method: 'put',
-					url: server.url + 'api/admin/users/alice@example.com',
-					data: { userEmail: 'alice.new.mail@example.com' }
-				}),
-				400, /primary key/
-			);
+			const res1 = await axios.request({
+				method: 'put',
+				url: server.url + 'api/admin/users/alice@example.com',
+				data: { groups: ['this-must-not-be', 'strings'] }
+			});
+			assert.equal(res1.status, 400);
+
+			const res2 = await axios.request({
+				method: 'put',
+				url: server.url + 'api/admin/users/alice@example.com',
+				data: { userEmail: 'alice.new.mail@example.com' }
+			});
+			assert.equal(res2.status, 400);
+			assert.match(res2.data.error, /primary key/);
 		});
 
 		it.skip('should reject unknown field');
@@ -300,9 +289,9 @@ describe('API', function() {
 		});
 
 		it('should reject revision read access from unauthorized user', async function() {
-			await test.serverThrowsWithState(server.axios.guest.get(
-				server.url + `api/cases/${cid}`
-			), 401, /read/);
+			const res = await server.axios.guest.get(server.url + `api/cases/${cid}`);
+			assert.equal(res.status, 401);
+			assert.match(res.data.error, /read/);
 		});
 
 		it('should add a revision', async function() {
@@ -324,11 +313,13 @@ describe('API', function() {
 		});
 
 		it('should reject revision addition from unauthorized user', async function() {
-			await test.serverThrowsWithState(server.axios.guest.request({
+			const res = await server.axios.guest.request({
 				url: server.url + `api/cases/${cid}/revision`,
 				method: 'post',
 				data: { anything: 'can be used' }
-			}), 401, /write/);
+			});
+			assert.equal(res.status, 401);
+			assert.match(res.data.error, /write/);
 		});
 	});
 
@@ -351,19 +342,21 @@ describe('API', function() {
 		});
 
 		it('should return 400 on hash mismatch', async function() {
-			await test.serverThrowsWithState(axios.request({
+			const res = await axios.request({
 				method: 'put',
 				url: server.url + 'api/blob/1111222233334444aaaabbbbcccc',
 				headers: { 'Content-Type': 'application/octet-stream' },
 				data: 'star'
-			}), 400);
+			});
+			assert.equal(res.status, 400);
 		});
 
 		it('should return 404 for nonexistent hash', async function() {
-			await test.serverThrowsWithState(axios.request({
+			const res = await axios.request({
 				method: 'get',
 				url: server.url + 'api/blob/aaabbbcccdddeeefff111222333'
-			}), 404);
+			});
+			assert.equal(res.status, 404);
 		});
 	});
 
@@ -384,11 +377,12 @@ describe('API', function() {
 		});
 
 		it('should reject invalid preference update', async function() {
-			await test.serverThrowsWithState(axios.request({
+			const res = await axios.request({
 				url: server.url + 'api/preferences',
 				method: 'put',
 				data: { theme: 'mode_pink', personalInfoView: false }
-			}), 400);
+			});
+			assert.equal(res.status, 400);
 		});
 	});
 

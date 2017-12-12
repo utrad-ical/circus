@@ -58,7 +58,7 @@ describe('checkPrivilege middleware', function() {
 
 		it('should fail for user with bad global privilege', async function() {
 			userEmail = 'bob@example.com';
-			await test.serverThrowsWithState(axios.get(server.url + 'g'), 401);
+			await axios.get(server.url + 'g', { validateStatus: s => s === 401 });
 		});
 	});
 
@@ -73,7 +73,7 @@ describe('checkPrivilege middleware', function() {
 		it('should fail for user without a privilege', async function() {
 			const resource = server.url + 'c/faeb503e97f918c882453fd2d789f50f4250267740a0b3fbcc85a529f2d7715b';
 			userEmail = 'alice@example.com';
-			await test.serverThrowsWithState(axios.get(resource), 401);
+			await axios.get(resource, { validateStatus: s => s === 401 });
 		});
 
 		it('should pass for user with good project privilege', async function() {
@@ -86,7 +86,7 @@ describe('checkPrivilege middleware', function() {
 		it('should fail for user without a projectprivilege', async function() {
 			const resource = server.url + 'p/8883fdef6f5144f50eb2a83cd34baa44';
 			userEmail = 'alice@example.com';
-			await test.serverThrowsWithState(axios.get(resource), 401);
+			await axios.get(resource, { validateStatus: s => s === 401 });
 		});
 	});
 });

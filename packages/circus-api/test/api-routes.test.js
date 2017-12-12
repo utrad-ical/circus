@@ -280,6 +280,29 @@ describe('API', function() {
 			assert.equal(res.data.items.length, 1);
 		});
 
+		it('should throw 400 for wrong request', async function() {
+			const res1 = await axios.get(
+				server.url + 'api/cases',
+				{ params: { filter: 'invalid-json' } }
+			);
+			assert.equal(res1.status, 400);
+			assert.match(res1.data.error, /bad filter/i);
+
+			const res2 = await axios.get(
+				server.url + 'api/cases',
+				{ params: { sort: 'invalid-json' } }
+			);
+			assert.equal(res2.status, 400);
+			assert.match(res2.data.error, /invalid json/i);
+
+			const res3 = await axios.get(
+				server.url + 'api/cases',
+				{ params: { sort: '{"field":11}' } }
+			);
+			assert.equal(res3.status, 400);
+			assert.match(res3.data.error, /key\/value pair/);
+		});
+
 		it('should return single case information', async function() {
 			const res = await server.axios.bob.request({
 				url: server.url + `api/cases/${cid}`,

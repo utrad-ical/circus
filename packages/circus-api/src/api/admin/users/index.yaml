@@ -24,3 +24,10 @@ routes:
     requestSchema: user
     requiredGlobalPrivilege: manageServer
     description: Updates the specified user.
+  - verb: post
+    path: /admin/users
+    requestSchema: user
+    requestValidationOptions:
+      allRequiredExcept: ['lastLoginTime', 'lastLoginIp']
+    requiredGlobalPrivilege: manageServer
+    description: Creates a new user.

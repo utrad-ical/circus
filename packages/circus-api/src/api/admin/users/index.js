@@ -1,4 +1,5 @@
 import performSearch from '../../performSearch';
+import nodepass from 'node-php-password';
 
 const removePassword = input => {
 	const output = { ...input };
@@ -27,7 +28,24 @@ export const handleGet = ({ models }) => {
 export const handlePut = ({ models }) => {
 	return async (ctx, next) => {
 		const userEmail = ctx.params.userEmail;
-		await models.user.modifyOne(userEmail, ctx.request.body);
+		const updating = { ...ctx.request.body };
+		if (ctx.request.body.password) {
+			updating.password = nodepass.hash(ctx.request.body.password);
+		}
+		await models.user.modifyOne(userEmail, updating);
 		ctx.body = null;
+	};
+};
+
+export const handlePost = ({ models }) => {
+	return async (ctx, next) => {
+		const inserting = {
+			...ctx.request.body,
+			password: nodepass.hash(ctx.request.body.password),
+			lastLoginTime: new Date(0),
+			lastLoginIp: ''
+		};
+		await models.user.insert(inserting);
+		ctx.body = { userEmail: ctx.request.body.userEmail };
 	};
 };

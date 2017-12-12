@@ -1,3 +1,4 @@
+import status from 'http-status';
 import performSearch from '../../performSearch';
 import nodepass from 'node-php-password';
 
@@ -29,6 +30,9 @@ export const handlePut = ({ models }) => {
 	return async (ctx, next) => {
 		const userEmail = ctx.params.userEmail;
 		const updating = { ...ctx.request.body };
+		if ('lastLoginIp' in updating || 'lastLoginTime' in updating) {
+			ctx.throw(status.BAD_REQUEST);
+		}
 		if (ctx.request.body.password) {
 			updating.password = nodepass.hash(ctx.request.body.password);
 		}
@@ -39,6 +43,9 @@ export const handlePut = ({ models }) => {
 
 export const handlePost = ({ models }) => {
 	return async (ctx, next) => {
+		if ('lastLoginIp' in ctx.request.body || 'lastLoginTime' in ctx.request.body) {
+			ctx.throw(status.BAD_REQUEST);
+		}
 		const inserting = {
 			...ctx.request.body,
 			password: nodepass.hash(ctx.request.body.password),

@@ -36,7 +36,7 @@ const ProfileView = ({ user }) => {
 			<Panel bsStyle='primary' header={<span><Glyphicon glyph='education'/> Your Projects</span>}>
 				<ListGroup fill>
 					{user.accessibleProjects.map(p => (
-						<ListGroupItem key={p.project.projectID}>
+						<ListGroupItem key={p.project.projectId}>
 							<strong>{p.project.projectName}</strong>&ensp;
 							<small>({p.roles.map(role2str).join(', ')})</small>
 						</ListGroupItem>
@@ -60,9 +60,9 @@ const ProfileView = ({ user }) => {
 						: null }
 				</ListGroup>
 				<ul className='list-unstyled'>
-					<li><b>Login ID:</b> {user.loginID}</li>
+					<li><b>Login ID:</b> {user.loginId}</li>
 					<li><b>Email:</b> {user.userEmail}</li>
-					<li><b>Last login:</b> {lastLoginTime} (from {user.lastLoginIP})</li>
+					<li><b>Last login:</b> {lastLoginTime} (from {user.lastLoginIp})</li>
 					<li><b>Groups:</b> {user.groups.join(', ')}</li>
 					<li><b>Domains:</b> {user.domains.join(', ')}</li>
 				</ul>

@@ -51,5 +51,10 @@ properties:
       required: ['label', 'level', 'width']
   windowPriority:
     type: string
-    enum: ['dicom,auto', 'auto']
+    enum:
+      - dicom,preset,auto
+      - dicom,auto
+      - preset,dicom,auto
+      - preset,auto
+      - auto
 additionalProperties: false

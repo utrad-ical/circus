@@ -30,7 +30,6 @@ routes:
     requestValidationOptions:
       allRequiredExcept: ['groupId']
     requiredGlobalPrivilege: manageServer
-    handler: handlePost
     description: Creates a new group.
   - verb: get
     requiredGlobalPrivilege: manageServer

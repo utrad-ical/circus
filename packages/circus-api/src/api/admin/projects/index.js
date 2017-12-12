@@ -1,4 +1,6 @@
+import status from 'http-status';
 import performSearch from '../../performSearch';
+import { generateProjectId } from '../../../utils';
 
 export const handleSearch = ({ models }) => {
 	return async (ctx, next) => {
@@ -19,5 +21,17 @@ export const handlePut = ({ models }) => {
 		const projectId = ctx.params.projectId;
 		await models.project.modifyOne(projectId, ctx.request.body);
 		ctx.body = null;
+	};
+};
+
+export const handlePost = ({ models }) => {
+	return async (ctx, next) => {
+		const projectId = generateProjectId();
+		if ('projectId' in ctx.request.body) {
+			ctx.throw(status.BAD_REQUEST, 'Project ID cannot be specified');
+		}
+		const inserting = { ...ctx.request.body, projectId };
+		await models.project.insert(inserting);
+		ctx.body = { projectId };
 	};
 };

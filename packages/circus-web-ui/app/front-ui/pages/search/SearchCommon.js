@@ -20,10 +20,10 @@ export default class SearchCommon extends React.Component {
 	}
 
 	handleSearchClick(filter) {
-		const { searchName, defaultSort } = this.props;
+		const { searchName, resource, defaultSort } = this.props;
 		startNewSearch(
 			searchName,
-			searchName,
+			resource,
 			filter,
 			defaultSort
 		);

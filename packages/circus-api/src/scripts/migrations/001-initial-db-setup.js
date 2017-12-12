@@ -6,7 +6,7 @@ export async function up(db, models) {
 
 	await db.collection('groups').ensureIndex({ groupId: 1 }, { unique: true });
 	await models.group.insertMany([{
-		groupId: 1,
+		groupId: await models.group.newSequentialId(),
 		groupName: 'admin',
 		privileges: ['createProject', 'deleteProject', 'manageServer', 'personalInfoView'],
 		domains: ['default'],
@@ -16,7 +16,7 @@ export async function up(db, models) {
 		viewPersonalInfoProjects: [projectId],
 		moderateProjects: [projectId]
 	}, {
-		groupId: 2,
+		groupId: await models.group.newSequentialId(),
 		groupName: 'user',
 		privileges: ['personalInfoView'],
 		domains: ['default'],

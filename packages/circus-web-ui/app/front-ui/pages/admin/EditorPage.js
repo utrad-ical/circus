@@ -44,7 +44,7 @@ export default class EditorPage extends React.Component {
 	}
 
 	async loadItems() {
-		const items = await api(this.props.endPoint);
+		const items = (await api(this.props.endPoint)).items;
 		this.setState({ items });
 	}
 

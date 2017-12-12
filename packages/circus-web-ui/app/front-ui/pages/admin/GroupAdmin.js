@@ -2,11 +2,19 @@ import EditorPage from './EditorPage';
 import React from 'react';
 import { api } from 'utils/api';
 import LoadingIndicator from 'rb/LoadingIndicator';
+import MultiSelect from 'rb/MultiSelect';
 import * as et from 'rb/editor-types';
 
 const makeEmptyItem = () => {
 	return {
-		groupName: '',
+		groupName: 'untitled group',
+		privileges: [],
+		domains: [],
+		readProjects: [],
+		writeProjects: [],
+		addSeriesProjects: [],
+		viewPersonalInfoProjects: [],
+		moderateProjects: []
 	};
 };
 
@@ -33,22 +41,34 @@ export default class GroupAdmin extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = { ready: false };
-		this.domains = [];
 		this.editorProperties = [
-			{ key: 'groupName', caption: 'Group Name', editor: et.text() },
-			{ key: 'privileges', caption: 'Privileges', editor: null },
-			{ key: 'domains', caption: 'Accessible Domains', editor: null }
+			{ key: 'groupName', caption: 'Group Name', editor: et.text() }, // 0
+			{ key: 'privileges', caption: 'Privileges', editor: null }, // 1
+			{ key: 'domains', caption: 'Accessible Domains', editor: null }, // 2
+			{ key: 'readProjects', caption: 'Readable Projects', editor: null }, // 3
+			{ key: 'writeProjects', caption: 'Writable Projects', editor: null }, // 4
+			{ key: 'addSeriesProjects', caption: 'Add Series Projects', editor: null }, // 5
+			{ key: 'viewPersonalInfoProjects', caption: 'View Personal Info Projects', editor: null }, // 6
+			{ key: 'moderateProjects', caption: 'Moderate Projects', editor: null } // 7
 		];
 	}
 
 	async componentDidMount() {
-		const params = await api('server_param');
-		this.domains = params.domains;
-		const privList = await api('group-privileges');
+		const domains = await api('admin/server-params/domains');
+		const privList = await api('admin/global-privileges');
 		const privileges = {};
 		for (const p of privList) privileges[p.privilege] = p.caption;
 		this.editorProperties[1].editor = et.multiSelect(privileges, { type: 'checkbox' });
-		this.editorProperties[2].editor = et.multiSelect(this.domains, { type: 'checkbox' });
+		this.editorProperties[2].editor = et.multiSelect(domains, { type: 'checkbox' });
+
+		const projects = (await api('admin/projects')).items;
+		const options = {};
+		projects.forEach(p => options[p.projectId] = p.projectName);
+		const projectSelect = props => <MultiSelect
+			options={options} {...props}
+		/>;
+		for (let i = 3; i <= 7; i++) this.editorProperties[i].editor = projectSelect;
+
 		this.setState({ ready: true });
 	}
 
@@ -57,8 +77,8 @@ export default class GroupAdmin extends React.Component {
 		return <EditorPage
 			title='User Groups'
 			icon='record'
-			endPoint='group'
-			primaryKey='groupID'
+			endPoint='admin/groups'
+			primaryKey='groupId'
 			editorProperties={this.editorProperties}
 			listColumns={listColumns}
 			makeEmptyItem={makeEmptyItem}

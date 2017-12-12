@@ -20,18 +20,21 @@ const makeEmptyItem = () => {
 
 const PreferenceEditor = props => {
 	return <div>
-		<span>Theme:</span>
-		<ShrinkSelect
-			options={{ mode_white: 'White', mode_black: 'Black' }}
-			value={props.value.theme}
-			onChange={v => props.onChange({ ...props.value, theme: v})}
-		/>
-		<br />
-		<span>Show Personal Info:</span>
 		<label>
+			<span>Theme:</span>
+			<ShrinkSelect
+				options={{ mode_white: 'White', mode_black: 'Black' }}
+				value={props.value.theme}
+				onChange={v => props.onChange({ ...props.value, theme: v})}
+			/>
+		</label>
+		<br />
+		<label>
+			<span>Show Personal Info:</span>&ensp;
 			<input
 				type='checkbox'
-				onChange={e => props.onChange({ ...props.value, personalInfoView: e.target.checked})}
+				checked={props.value.personalInfoView}
+				onChange={e => props.onChange({ ...props.value, personalInfoView: e.target.checked })}
 			/>
 		</label>
 	</div>;

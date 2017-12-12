@@ -3,6 +3,7 @@ import randomstring from 'randomstring';
 import fs from 'fs-extra';
 import { multirange } from 'multi-integer-range';
 import { exec } from './utils';
+import * as os from 'os';
 
 export default class DicomImporter {
 	constructor(storage, models, opts = {}) {
@@ -10,7 +11,7 @@ export default class DicomImporter {
 		this.models = models;
 		this.storage = storage;
 		this.utility = utility;
-		this.workDir = workDir ? workDir : path.join(__dirname, '..', 'store');
+		this.workDir = workDir ? workDir : os.tmpdir();
 	}
 
 	/**

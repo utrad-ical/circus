@@ -1,6 +1,7 @@
 import { store } from 'store';
 import { api, tryAuthenticate } from 'utils/api';
 import { browserHistory } from 'react-router';
+import * as Cookies from 'js-cookie';
 
 const dispatch = store.dispatch.bind(store);
 
@@ -33,5 +34,6 @@ export async function login(id, password) {
 export async function logout() {
 	await api('logout');
 	dispatch({ type: 'LOGGED_OUT' });
+	Cookies.remove('apiToken');
 	browserHistory.push('/');
 }

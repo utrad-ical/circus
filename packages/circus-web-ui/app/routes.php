@@ -11,6 +11,12 @@
 |
 */
 
+$app = function() { return View::make('application'); };
+Route::get('/', $app);
+Route::get('/{any}', $app);
+Route::get('/{any}/{thing}', $app);
+
+/*
 // Login / logout
 
 // Common download
@@ -154,6 +160,8 @@ Route::group(['before' => 'auth'], function() {
 	$rsHost('css/panel-btn-sprite.png', 'panel-btn-sprite.png');
 
 });
+
+*/
 
 //404 pages
 Event::listen('404', function()

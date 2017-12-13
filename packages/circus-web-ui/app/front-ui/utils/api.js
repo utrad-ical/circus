@@ -1,10 +1,23 @@
 import axios from 'axios';
 import { showMessage } from 'actions';
 import * as qs from 'querystring';
+import * as Cookies from 'js-cookie';
 
 export const apiServer = 'http://localhost:8080/';
 
 export let apiCaller;
+
+const token = Cookies.get('apiToken');
+if (token) createApiCaller(token);
+
+function createApiCaller(token) {
+	apiCaller = axios.create({
+		baseURL: apiServer + 'api/',
+		cached: false,
+		withCredentials: true,
+		headers: { Authorization: `Bearer ${token}` }
+	});
+}
 
 export async function tryAuthenticate(id, password) {
 	const res = await axios.request({
@@ -18,17 +31,13 @@ export async function tryAuthenticate(id, password) {
 			password
 		})
 	});
-	const token = res.data.access_token;
-	apiCaller = axios.create({
-		baseURL: apiServer + 'api/',
-		cached: false,
-		withCredentials: true,
-		headers: { Authorization: `Bearer ${token}` }
-	});
+	const newToken = res.data.access_token;
+	Cookies.set('apiToken', newToken);
+	createApiCaller(newToken);
 }
 
 export async function api(command, options = {}) {
-	const params = { method: 'get', url: command, ...options };
+	const params = { url: command, method: 'get', ...options };
 	if (typeof params.data === 'object') {
 		if (params.method === 'get') params.method = 'post';
 	}

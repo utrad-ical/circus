@@ -21,7 +21,6 @@ import ImportCase from 'pages/ImportCase';
 import SeriesDetail from 'pages/SeriesDetail';
 import TaskList from 'pages/TaskList';
 import AdminIndex from 'pages/admin/AdminIndex';
-import AdminContainer from 'pages/admin/AdminContainer';
 import GeneralAdmin from 'pages/admin/GeneralAdmin';
 import DicomImageServerAdmin from 'pages/admin/DicomImageServerAdmin';
 import StorageAdmin from 'pages/admin/StorageAdmin';

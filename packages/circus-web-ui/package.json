@@ -56,6 +56,7 @@
     "webpack": "^3.5.5"
   },
   "dependencies": {
+    "js-cookie": "^2.2.0",
     "mongoose": "^4.6.8",
     "multi-integer-range": "^4.0.2"
   }

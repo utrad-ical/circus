@@ -14,6 +14,7 @@ import LoginScreen from 'pages/LoginScreen';
 import HomePage from 'pages/HomePage';
 
 import SeriesSearch from 'pages/search/SeriesSearch';
+import CreateNewCase from 'pages/CreateNewCase';
 import CaseSearch from 'pages/search/CaseSearch';
 import CaseDetail from 'pages/case-detail/CaseDetail';
 import ImportSeries from 'pages/ImportSeries';
@@ -50,6 +51,7 @@ ReactDOM.render(
 				<Route path='browse/case' component={CaseSearch} />
 				<Route path='import-series' component={ImportSeries} />
 				<Route path='import-case' component={ImportCase} />
+				<Route path='new-case/:uid' component={CreateNewCase} />
 				<Route path='admin'>
 					<IndexRoute component={AdminIndex} />
 					<Route path='general' component={GeneralAdmin} />

@@ -43,6 +43,12 @@ const DataViewRow = props => {
 					View
 				</Button>
 			</Link>
+			<Link to={`/new-case/${item.seriesUid}`}>
+				<Button>
+					<span className='circus-icon circus-icon-case' />
+					Create Case
+				</Button>
+			</Link>
 		</div>
 	</div>;
 };

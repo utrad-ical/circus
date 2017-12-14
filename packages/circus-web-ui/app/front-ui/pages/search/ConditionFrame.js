@@ -93,38 +93,6 @@ export default class ConditionFrame extends React.Component {
 
 }
 
-export const Input = ({ type, name, value, onChange, className }) => {
-	return <FormControl
-		type={type} className={className} value={value || ''}
-		onChange={ev => onChange(name, type === 'number' ? parseFloat(ev.target.value) : ev.target.value)}
-	/>;
-};
-
-export const FormGrid = items => {
-	let row = [];
-	const rows = [row];
-	items.forEach(item => {
-		if (item === 'br' || row.length > 2) {
-			row = [];
-			rows.push(row);
-		}
-		if (item !== 'br') {
-			const [label, content] = item;
-			row.push(
-				<Col md={2} key={label + '-l'}>
-					<ControlLabel>{label}</ControlLabel>
-				</Col>,
-				<Col md={4} key={label + '-c'}>
-					{content}
-				</Col>
-			);
-		}
-	});
-	return <Form horizontal>
-		{rows.map((r, i) => <Row key={i}>{r}</Row>)}
-	</Form>;
-};
-
 export const ProjectRenderer = props => <span>{props.projectName}</span>;
 
 export const TagRenderer = props => <Tag name={props.name} color={props.color} />;

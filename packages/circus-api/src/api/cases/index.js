@@ -18,6 +18,15 @@ async function makeNewCase(models, user, userPrivileges, project, series, tags) 
 	const seriesData = [];
 	const domains = {};
 
+	// Check write access for the project.
+	const ok = userPrivileges.accessibleProjects.some(
+		p => (p.roles.indexOf('write') >= 0 && p.projectId === project.projectId)
+	);
+	if (!ok) {
+		throw new Error('You do not have write privilege for this project.');
+	}
+
+	// Check domain.
 	for (const suid of series) {
 		const item = await models.series.findById(suid);
 		if (!item) {
@@ -32,7 +41,6 @@ async function makeNewCase(models, user, userPrivileges, project, series, tags) 
 		}
 		domains[item.domain] = true;
 	}
-
 
 	const revision = {
 		creator: user.userEmail,
@@ -61,7 +69,7 @@ async function makeNewCase(models, user, userPrivileges, project, series, tags) 
 
 export const handlePost = ({ models }) => {
 	return async (ctx, next) => {
-		const project = ctx.project;
+		const project = await models.project.findByIdOrFail(ctx.request.body.projectId);
 		const caseId = await makeNewCase(
 			models,
 			ctx.user,

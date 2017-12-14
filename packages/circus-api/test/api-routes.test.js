@@ -312,9 +312,10 @@ describe('API', function() {
 
 		it('should create new case', async function() {
 			const res = await server.axios.bob.request({
-				url: server.url + `api/cases/8883fdef6f5144f50eb2a83cd34baa44`,
+				url: server.url + 'api/cases/',
 				method: 'post',
 				data: {
+					projectId: '8883fdef6f5144f50eb2a83cd34baa44',
 					series: ['111.222.333.444.777'],
 					tags: []
 				}
@@ -322,6 +323,8 @@ describe('API', function() {
 			assert.equal(res.status, 200);
 			assert.equal(res.data.caseId.length, 32);
 		});
+
+		it.skip('should throw proper error status for invalid new-case request');
 
 		it('should return single case information', async function() {
 			const res = await server.axios.bob.request({

@@ -11,9 +11,9 @@ export default class SeriesSearchCondition extends React.Component {
 		super(props);
 		this.conditionKeys = {
 			modality: { caption: 'modality', type: 'select', spec: { options: modalities }},
-			seriesUID: { caption: 'series UID', type: 'text' },
+			seriesUid: { caption: 'series UID', type: 'text' },
 			seriesDescription: { caption: 'series description', type: 'text' },
-			patientID: { caption: 'patient ID', type: 'text' },
+			patientId: { caption: 'patient ID', type: 'text' },
 			patientName: { caption: 'patient name', type: 'text' },
 			age: { caption: 'age', type: 'number' },
 			sex: { caption: 'sex', type: 'select', spec: { options: ['M', 'F', 'O'] } },

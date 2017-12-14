@@ -37,7 +37,7 @@ const DataViewRow = props => {
 			{anon(`${item.patientInfo.age} ${item.patientInfo.sex}`)}
 		</div>
 		<div className='register'>
-			<Link to={`/series/${item.seriesUID}`}>
+			<Link to={`/series/${item.seriesUid}`}>
 				<Button>
 					<span className='circus-icon circus-icon-series' />
 					View

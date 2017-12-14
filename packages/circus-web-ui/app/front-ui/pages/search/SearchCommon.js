@@ -10,7 +10,7 @@ export default class SearchCommon extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			condition: props.defaultCondition
+			condition: props.nullCondition()
 		};
 		this.handleConditionChange = this.handleConditionChange.bind(this);
 		this.handleSearchClick = this.handleSearchClick.bind(this);
@@ -34,6 +34,7 @@ export default class SearchCommon extends React.Component {
 		const {
 			icon,
 			title,
+			nullCondition,
 			conditionComp: ConditionComp,
 			resultComp: ResultComp
 		} = this.props;
@@ -43,6 +44,7 @@ export default class SearchCommon extends React.Component {
 			</h1>
 			<ConditionComp
 				condition={this.state.condition}
+				nullCondition={nullCondition}
 				onSearch={this.handleSearchClick}
 				onChange={this.handleConditionChange}
 			/>

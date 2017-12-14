@@ -1,5 +1,7 @@
 import status from 'http-status';
 import performSearch from '../performSearch';
+import { generateCaseId } from '../../utils';
+
 
 export const handleGet = () => {
 	return async (ctx, next) => {
@@ -9,9 +11,66 @@ export const handleGet = () => {
 	};
 };
 
-export const handlePost = () => {
+async function makeNewCase(models, user, userPrivileges, project, series, tags) {
+	const caseId = generateCaseId();
+
+	let patientInfoCache = null;
+	const seriesData = [];
+	const domains = {};
+
+	for (const suid of series) {
+		const item = await models.series.findById(suid);
+		if (!item) {
+			throw new Error('Nonexistent series.');
+		}
+		seriesData.push(item);
+		if (userPrivileges.domains.indexOf(item.domain) < 0) {
+			throw new Error('You cannot access this series.');
+		}
+		if (!patientInfoCache) {
+			patientInfoCache = item.patientInfo;
+		}
+		domains[item.domain] = true;
+	}
+
+
+	const revision = {
+		creator: user.userEmail,
+		date: new Date(),
+		description: 'Created new case.',
+		attributes: {},
+		status: 'draft',
+		series: seriesData.map(s => ({
+			seriesUid: s.seriesUid,
+			images: s.images,
+			labels: []
+		}))
+	};
+
+	await models.clinicalCase.insert({
+		caseId,
+		projectId: project.projectId,
+		patientInfoCache,
+		tags,
+		latestRevision: revision,
+		revisions: [revision],
+		domains: Object.keys(domains)
+	});
+	return caseId;
+}
+
+export const handlePost = ({ models }) => {
 	return async (ctx, next) => {
-		ctx.throw(status.NOT_IMPLEMENTED);
+		const project = ctx.project;
+		const caseId = await makeNewCase(
+			models,
+			ctx.user,
+			ctx.userPrivileges,
+			project,
+			ctx.request.body.series,
+			ctx.request.body.tags
+		);
+		ctx.body = { caseId };
 	};
 };
 

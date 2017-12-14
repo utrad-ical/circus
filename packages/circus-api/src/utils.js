@@ -9,6 +9,11 @@ export function generateProjectId() {
 	return randomstring.generate({ length: 32, charset: 'hex' });
 }
 
+export function generateCaseId() {
+	return randomstring.generate({ length: 32, charset: 'hex' });
+}
+
+
 /**
  * Executes a command as a child process and gets the output.
  * @param {string} command

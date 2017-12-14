@@ -14,9 +14,9 @@ routes:
           items:
             $ref: clinicalCase
   - verb: post
-    path: /cases
+    path: /cases/:projectId
     requiredProjectPrivilege: write
-    description: Defines a new case.
+    description: Creates a new case.
   - verb: get
     path: /cases/:caseId
     requiredProjectPrivilege: read

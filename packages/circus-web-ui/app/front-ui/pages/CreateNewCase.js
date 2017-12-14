@@ -2,6 +2,7 @@ import React from 'react';
 import ProjectSelector from 'components/ProjectSelector';
 import { connect } from 'react-redux';
 import IconButton from 'rb/IconButton';
+import MultiTagSelect from 'components/MultiTagSelect';
 import { Panel, ListGroup, ListGroupItem } from 'components/react-bootstrap';
 import { api } from 'utils/api';
 
@@ -12,11 +13,13 @@ class CreateNewCaseView extends React.Component {
 		if (writableProjects.length) {
 			this.state = {
 				selectedProject: writableProjects[0].projectId,
-				selectedSeries: [props.params.uid]
+				selectedSeries: [props.params.uid],
+				selectedTags: []
 			};
 		}
 		this.handleProjectSelect = this.handleProjectSelect.bind(this);
 		this.handleCreate = this.handleCreate.bind(this);
+		this.handleTagChange = this.handleTagChange.bind(this);
 	}
 
 	writableProjects(props) {
@@ -26,15 +29,28 @@ class CreateNewCaseView extends React.Component {
 	}
 
 	handleProjectSelect(projectId) {
-		this.setState({ selectedProject: projectId });
+		const { user } = this.props;
+		const prj = user.accessibleProjects.find(p => p.projectId === projectId);
+		const newTags = this.state.selectedTags.filter(
+			t => prj.project.tags.find(tt => tt.name === t)
+		);
+		this.setState({
+			selectedProject: projectId,
+			selectedTags: newTags
+		});
+	}
+
+	handleTagChange(value) {
+		this.setState({ selectedTags: value });
 	}
 
 	async handleCreate() {
-		const res = await api('cases', {
+		await api('cases', {
 			method: 'post',
 			data: {
 				project: this.state.selectedProject,
-				series: this.state.selectedSeries
+				series: this.state.selectedSeries,
+				tags: this.state.selectedTags
 			}
 		});
 		alert('Created!');
@@ -49,6 +65,9 @@ class CreateNewCaseView extends React.Component {
 				You do not belong to any writable project.
 			</div>;
 		}
+
+		const prj = writableProjects.find(p => p.projectId === this.state.selectedProject);
+		const tags = prj.project.tags;
 
 		return <div>
 			<h1><span className='circus-icon-case' />New Case</h1>
@@ -70,6 +89,13 @@ class CreateNewCaseView extends React.Component {
 					projects={writableProjects}
 					value={this.state.selectedProject}
 					onChange={this.handleProjectSelect}
+				/>
+				&ensp;
+				Tags:&ensp;
+				<MultiTagSelect
+					tags={tags}
+					value={this.state.selectedTags}
+					onChange={this.handleTagChange}
 				/>
 				&ensp;
 				<IconButton

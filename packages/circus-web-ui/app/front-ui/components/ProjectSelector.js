@@ -12,9 +12,8 @@ const ProjectSelector = props => {
 		};
 	});
 	return <ShrinkSelect
+		{...props}
 		options={options}
-		value={props.value}
-		onChange={props.onChange}
 	/>;
 };
 

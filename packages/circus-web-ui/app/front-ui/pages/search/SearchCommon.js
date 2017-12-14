@@ -1,5 +1,6 @@
 import React from 'react';
 import { startNewSearch } from 'actions';
+import { store } from 'store';
 import Icon from 'components/Icon';
 
 /**
@@ -21,12 +22,12 @@ export default class SearchCommon extends React.Component {
 
 	handleSearchClick(filter) {
 		const { searchName, resource, defaultSort } = this.props;
-		startNewSearch(
+		store.dispatch(startNewSearch(
 			searchName,
 			resource,
 			filter,
 			defaultSort
-		);
+		));
 	}
 
 	render() {

@@ -19,6 +19,7 @@ rules:
     - { blankLine: 'any', prev: 'import', next: 'import' }
   no-unused-vars: [2, { argsIgnorePattern: '^(ctx|next)$' }]
   no-useless-escape: [0]
+  no-constant-condition: [2, { checkLoops: false }]
   semi: [2, 'always']
   no-var: 'error'
   prefer-const: 'error'

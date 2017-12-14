@@ -11,8 +11,8 @@ export const MultiSelect = props => {
 		showSelectedMax = 3,
 		selected = [],
 		type = 'dropdown',
-	 	glue = ', ',
-	 	noneText = '(None)'
+		glue = ', ',
+		noneText = '(None)'
 	} = props;
 
 	// Normalize options

@@ -44,9 +44,9 @@ export default class CaseSearchCondition extends React.Component {
 		};
 		const projects = store.getState().loginUser.data.accessibleProjects;
 		const projectOptions = {};
-		projects.filter(p => p.roles.indexOf('readGroups') > -1)
+		projects.filter(p => p.roles.indexOf('read') > -1)
 			.forEach(p => {
-				projectOptions[p.project.projectID] =
+				projectOptions[p.projectId] =
 					{ caption: p.project.projectName, project: p.project };
 			});
 		this.state = {
@@ -75,7 +75,8 @@ export default class CaseSearchCondition extends React.Component {
 		return <Well>
 			<div style={{marginBottom: '10px'}}>
 				<ControlLabel>Project:&ensp;</ControlLabel>
-				<MultiSelect options={this.state.projectOptions}
+				<MultiSelect
+					options={this.state.projectOptions}
 					onChange={this.selectedProjectsChange.bind(this)}
 					selected={this.state.selectedProjects}
 				/>

@@ -249,8 +249,7 @@ describe('API', function() {
 		});
 
 		describe('uploading', function() {
-			it('should upload signle DICOM file', async function() {
-				const file = path.join(__dirname, 'dicom', 'CT-MONO2-16-brain.dcm');
+			async function uploadTest(file) {
 				const formData = new FormData();
 				formData.append('files', fs.createReadStream(file));
 				const res = await axios.request({
@@ -261,10 +260,18 @@ describe('API', function() {
 					validateStatus: null
 				});
 				if (res.status === 503) { this.skip(); return; }
-				assert.equal(res.status, 204);
+				assert.equal(res.status, 200);
+			}
+
+			it('should upload signle DICOM file', async function() {
+				const file = path.join(__dirname, 'dicom', 'CT-MONO2-16-brain.dcm');
+				await uploadTest(file);
 			});
 
-			it.skip('should upload zipped DICOM files');
+			it('should upload zipped DICOM files', async function() {
+				const file = path.join(__dirname, 'dicom', 'test.zip');
+				await uploadTest(file);
+			});
 		});
 	});
 

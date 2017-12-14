@@ -1,15 +1,16 @@
 import React from 'react';
 import { Button } from 'components/react-bootstrap';
-import { api} from 'utils/api';
+import LoadingIndicator from 'rb/LoadingIndicator';
+import { api } from 'utils/api';
 
 export default class TaskList extends React.Component {
 	constructor(props) {
 		super(props);
-		this.state = { downloadList: null };
+		this.state = { tasks: [] };
 	}
 
 	async refresh() {
-		const items = await api('task/downloadable');
+		const items = (await api('tasks')).items;
 		this.setState({ downloadList: items });
 	}
 
@@ -18,12 +19,12 @@ export default class TaskList extends React.Component {
 	}
 
 	render() {
-		if (!Array.isArray(this.state.downloadList)) {
-			return <div />;
+		if (!Array.isArray(this.state.tasks)) {
+			return <LoadingIndicator />;
 		}
 		return <div>
 			<h1>Tasks</h1>
-			<TaskItems items={this.state.downloadList} />
+			<TaskItems items={this.state.tasks} />
 		</div>;
 	}
 }
@@ -41,11 +42,11 @@ const TaskItems = props => {
 		</thead>
 		<tbody>
 			{props.items.map(item => (
-				<tr key={item.taskID}>
-					<td>{item.taskID}</td>
+				<tr key={item.taskId}>
+					<td>{item.taskId}</td>
 					<td>{item.status}</td>
 					<td>{item.publicDownload ? 'Yes' : '-'}</td>
-					<td>{item.updateTime}</td>
+					<td>{item.createdAt}</td>
 					<td>
 						<a href={'download/' + item.taskID}>
 							<Button>Download</Button>

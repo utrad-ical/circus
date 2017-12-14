@@ -416,4 +416,30 @@ describe('API', function() {
 		});
 	});
 
+	describe('tasks', function() {
+		it('should return the list of tasks of the user', async function() {
+			const res = await axios.get(server.url + 'api/tasks');
+			assert.equal(res.status, 200);
+			assert.deepEqual(res.data.items.length, 1);
+		});
+
+		it('should return the information of the specified task', async function() {
+			const res = await axios.get(server.url + 'api/tasks/aaaabbbbcccc1111');
+			assert.equal(res.status, 200);
+			assert.equal(res.data.owner, 'alice@example.com');
+		});
+
+		it('should return 404 for nonexistent task', async function() {
+			const res = await axios.get(server.url + 'api/tasks/aaaabbbbcccc0000');
+			assert.equal(res.status, 404);
+		});
+
+		it('should return unauthorized for someone else\'s task', async function() {
+			const res = await axios.get(server.url + 'api/tasks/aaaabbbbcccc2222');
+			assert.equal(res.status, 403);
+		});
+
+		it.skip('should report task progress');
+	});
+
 });

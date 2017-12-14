@@ -12,6 +12,7 @@ properties:
     description: The user who started this task.
   status:
     type: string
+    enum: ['running', 'error', 'finished']
     description: The task status.
   command:
     type: string

@@ -8,7 +8,8 @@ export default function createModels(db, validator) {
 		series: { col: 'series', pk: 'seriesUid' },
 		clinicalCase: { col: 'clinicalCases', pk: 'caseId' },
 		serverParam: { col: 'serverParams', pk: 'key' },
-		token: { col: 'tokens', pk: 'accessToken' }
+		token: { col: 'tokens', pk: 'accessToken' },
+		task: { col: 'tasks', pk: 'taskId' }
 	};
 
 	const models = {};

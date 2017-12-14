@@ -1,0 +1,22 @@
+-
+  taskId: aaaabbbbcccc1111
+  owner: alice@example.com
+  status: running
+  command: ''
+  download: ''
+  publicDownload: false
+  textStatus: Processing something.
+  logs: []
+  value: 30
+  max: 100
+-
+  taskId: aaaabbbbcccc2222
+  owner: bob@example.com
+  status: finished
+  command: ''
+  download: ''
+  publicDownload: false
+  textStatus: Import complete.
+  logs: []
+  value: 100
+  max: 100

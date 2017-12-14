@@ -50,7 +50,10 @@ export async function setUpAppForTest(logMode = 'off') {
 	const db = await connectMongo();
 	await setUpMongoFixture(
 		db,
-		['series', 'clinicalCases', 'groups', 'projects', 'users', 'serverParams', 'tokens']
+		[
+			'series', 'clinicalCases', 'groups', 'projects', 'users',
+			'serverParams', 'tokens', 'tasks'
+		]
 	);
 	const logger = createLogger(logMode);
 	const app = await createApp({ debug: true, db, logger });

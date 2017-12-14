@@ -1,0 +1,22 @@
+name: Tasks
+description: >
+  Retreive information about tasks.
+routes:
+  - verb: get
+    path: /tasks
+    handler: handleSearch
+    description: Retrieves the list of tasks of the current user.
+    responseSchema:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: task
+  - verb: get
+    path: /tasks/:taskId
+    description: Returns information about the specified task.
+  - verb: get
+    path: /tasks/:taskId/progress
+    description: Reports the progress of the specified task as an event stream.
+    handler: handleProgress

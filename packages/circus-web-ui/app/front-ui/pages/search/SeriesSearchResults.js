@@ -55,7 +55,7 @@ const DataView = props => {
 };
 
 const sortOptions = makeSortOptions({
-	createTime: 'series import time',
+	createdAt: 'series import time',
 	seriesUid: 'series instance UID',
 	seriesDate: 'series date',
 	modality: 'modality'

@@ -2,12 +2,13 @@ import React from 'react';
 import ShrinkSelect from 'rb/ShrinkSelect';
 import { Pagination } from 'components/react-bootstrap';
 import { changeSearchPage, changeSearchSort } from 'actions';
+import { store } from 'store';
 
 export const makeSortOptions = sortKeys => {
 	const options = {};
 	Object.keys(sortKeys).forEach(k => {
-		options[`{"${sortKeys[k]}":-1}`] = `${k} desc`;
-		options[`{"${sortKeys[k]}":1}`] = `${k} asc`;
+		options[`{"${k}":-1}`] = `${sortKeys[k]} desc`;
+		options[`{"${k}":1}`] = `${sortKeys[k]} asc`;
 	});
 	return options;
 };
@@ -20,12 +21,12 @@ export default class SearchResultsView extends React.Component {
 	}
 
 	handleSortChange(sort) {
-		changeSearchSort(this.props.name, sort);
+		store.dispatch(changeSearchSort(this.props.name, sort));
 	}
 
 	handlePageClick(page) {
 		if (page === this.props.page) return;
-		changeSearchPage(this.props.name, page);
+		store.dispatch(changeSearchPage(this.props.name, page));
 	}
 
 	render() {

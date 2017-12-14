@@ -3,7 +3,7 @@ import {
 	Tabs, Tab, Form, FormControl, Button,
 	ControlLabel, Row, Col
 } from 'components/react-bootstrap';
-import Icon from 'components/Icon';
+import IconButton from 'rb/IconButton';
 import ConditionEditor, { conditionToMongoQuery } from 'rb/ConditionEditor';
 import { Tag } from 'components/tag';
 
@@ -80,11 +80,12 @@ export default class ConditionFrame extends React.Component {
 					Reset
 				</Button>
 				&ensp;
-				<Button bsStyle='primary'
+				<IconButton
+					bsStyle='primary' icon='search'
 					onClick={this.handleSearchClick}
 				>
-					<Icon icon='search' />&ensp;Search
-				</Button>
+					Search
+				</IconButton>
 			</div>
 			{ /* <div>{JSON.stringify(this.props.condition)}</div> */ }
 		</div>;

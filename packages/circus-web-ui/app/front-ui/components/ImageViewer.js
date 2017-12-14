@@ -6,7 +6,7 @@ import classnames from 'classnames';
 /**
  * Wraps CIRCUS RS Dicom Viewer.
  */
-export class ImageViewer extends React.Component {
+export default class ImageViewer extends React.Component {
 	constructor(props) {
 		super(props);
 		this.viewer = null;

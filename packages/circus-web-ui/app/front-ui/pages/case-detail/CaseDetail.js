@@ -1,6 +1,6 @@
 import React from 'react';
 import { api } from '../../utils/api';
-import { ImageViewer } from '../../components/image-viewer';
+import ImageViewer from '../../components/ImageViewer';
 import { PropertyEditor } from '../../components/property-editor';
 import LoadingIndicator from 'rb/LoadingIndicator';
 import { TagList } from '../../components/tag';

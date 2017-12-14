@@ -2,7 +2,7 @@ import React from 'react';
 import { Row, Col, Panel } from 'components/react-bootstrap';
 import { api } from 'utils/api';
 import { showMessage } from 'actions';
-import { ImageViewer } from 'components/image-viewer';
+import ImageViewer from 'components/ImageViewer';
 import { store } from 'store';
 import * as rs from 'circus-rs';
 
@@ -12,22 +12,22 @@ export default class SeriesDetail extends React.Component {
 		this.state = ({ fetching: false, series: null, composition: null });
 	}
 
-	async load(seriesUID) {
+	async load(seriesUid) {
 		this.setState({ fetching: true });
 		try {
-			const series = await api('series/' + seriesUID, {
+			const series = await api('series/' + seriesUid, {
 				handleErrors: [401]
 			});
 			this.setState({ fetching: false, series });
 			const server = store.getState().loginUser.data.dicomImageServer;
 			const client = new rs.RsHttpClient(server);
-			const src = new rs.HybridImageSource({ client, series: seriesUID });
+			const src = new rs.HybridImageSource({ client, series: seriesUid });
 			const composition = new rs.Composition(src);
 			this.setState({ composition });
 		} catch (err) {
 			this.setState({ fetching: false, series: null });
 			if (err.status === 401) {
-				showMessage(`You do not have access to series ${seriesUID}.`, 'danger');
+				showMessage(`You do not have access to series ${seriesUid}.`, 'danger');
 			} else {
 				throw err;
 			}
@@ -61,7 +61,12 @@ export default class SeriesDetail extends React.Component {
 			</h1>
 			<Row>
 				<Col lg={6}>
-					<ImageViewer composition={this.state.composition} tool='pager' initialTool='pager' />
+					<ImageViewer
+						className='preview-series'
+						composition={this.state.composition}
+						tool='pager'
+						initialTool='pager'
+					/>
 				</Col>
 				<Col lg={6}>
 					{ typeof series.patientInfo === 'object' ?

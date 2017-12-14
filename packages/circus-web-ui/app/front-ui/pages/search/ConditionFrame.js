@@ -1,8 +1,5 @@
 import React from 'react';
-import {
-	Tabs, Tab, Form, FormControl, Button,
-	ControlLabel, Row, Col
-} from 'components/react-bootstrap';
+import { Tabs, Tab, Button } from 'components/react-bootstrap';
 import IconButton from 'rb/IconButton';
 import ConditionEditor, { conditionToMongoQuery } from 'rb/ConditionEditor';
 import { Tag } from 'components/tag';

@@ -3,6 +3,15 @@ import CaseSearchCondition from './CaseSearchCondition';
 import CaseSearchResults from './CaseSearchResults';
 import SearchCommon from './SearchCommon';
 
+const nullCondition = () => {
+	return {
+		type: 'basic',
+		projects: [],
+		basicFilter: {},
+		advancedFilter: { $and: [] }
+	};
+};
+
 export default class CaseSearch extends React.Component {
 	render() {
 		return <SearchCommon
@@ -13,7 +22,7 @@ export default class CaseSearch extends React.Component {
 			defaultSort='{"createTime":-1}'
 			conditionComp={CaseSearchCondition}
 			resultComp={CaseSearchResults}
-			defaultCondition={CaseSearchCondition.nullCondition()}
+			nullCondition={nullCondition}
 		/>;
 	}
 }

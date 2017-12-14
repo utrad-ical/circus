@@ -1,16 +1,45 @@
 import React from 'react';
 import DateRangePicker, { dateRangeToMongoQuery } from 'rb/DateRangePicker';
+import PropertyEditor from 'rb/PropertyEditor';
 import { modalities } from 'modalities';
-import ConditionFrame, { FormGrid, Input } from './ConditionFrame';
+import * as et from 'rb/editor-types';
+import ConditionFrame from './ConditionFrame';
+import { escapeRegExp } from 'utils/util';
 import { Well, ControlLabel } from 'components/react-bootstrap';
 import { MultiSelect } from 'components/multiselect';
 import { store } from 'store';
+
+const basicFilterToMongoQuery = (condition) => {
+	const members = [];
+	Object.keys(condition).forEach(key => {
+		const val = condition[key];
+		switch (key) {
+			case 'createdAt':
+			case 'updatedAt': {
+				const q = dateRangeToMongoQuery(val, 'seriesDate');
+				if (q) members.push(q);
+				break;
+			}
+			case 'tags':
+				break;
+			default:
+				if (key.match(/^(patient(.+))$/)) {
+					key = 'patientInfoCache.' + key;
+				}
+				if (typeof val === 'string' && !val.length) return;
+				members.push({ [key]: { $regex: escapeRegExp(val) } });
+				break;
+		}
+	});
+	return members.length > 0 ? { $and: members } : {};
+};
+
 
 export default class CaseSearchCondition extends React.Component {
 	constructor(props) {
 		super(props);
 		this.conditionKeys = {
-			caseID: { caption: 'case ID', type: 'text' },
+			caseId: { caption: 'case ID', type: 'text' },
 			tag: { caption: 'Tag', type: 'select', spec: { options: [] } },
 		};
 		const projects = store.getState().loginUser.data.accessibleProjects;
@@ -24,15 +53,6 @@ export default class CaseSearchCondition extends React.Component {
 			selectedProjects: [],
 			projectOptions,
 			availableTags: {}
-		};
-	}
-
-	static nullCondition() {
-		return {
-			type: 'basic',
-			projects: [],
-			basicFilter: {},
-			advancedFilter: { $and: [] }
 		};
 	}
 
@@ -51,30 +71,6 @@ export default class CaseSearchCondition extends React.Component {
 		});
 	}
 
-	basicFilterToMongoQuery(condition) {
-		const members = [];
-		Object.keys(condition).forEach(key => {
-			const val = condition[key];
-			switch (key) {
-				case 'minAge':
-					members.push({ age: { $ge: val }});
-					break;
-				case 'maxAge':
-					members.push({ age: { $le: val }});
-					break;
-				case 'seriesDate': {
-					const q = dateRangeToMongoQuery(val, 'seriesDate');
-					if (q) members.push(q);
-					break;
-				}
-				default:
-					members.push({ [key]: val });
-					break;
-			}
-		});
-		return members.length > 0 ? { $and: members } : {};
-	}
-
 	render() {
 		return <Well>
 			<div style={{marginBottom: '10px'}}>
@@ -90,7 +86,7 @@ export default class CaseSearchCondition extends React.Component {
 				onSearch={this.props.onSearch}
 				basicConditionForm={BasicConditionForm}
 				conditionKeys={this.conditionKeys}
-				basicFilterToMongoQuery={this.basicFilterToMongoQuery}
+				basicFilterToMongoQuery={basicFilterToMongoQuery}
 				nullCondition={CaseSearchCondition.nullCondition}
 				formParams={{ availableTags: this.state.availableTags }}
 			/>
@@ -101,51 +97,19 @@ export default class CaseSearchCondition extends React.Component {
 const modalityOptions = { all: 'All' };
 modalities.forEach(m => modalityOptions[m] = m);
 
+const properties = [
+	{ key: 'caseId', caption: 'Case ID', editor: et.text() },
+	{ key: 'patientId', caption: 'Patient ID', editor: et.text() },
+	{ key: 'patientName', caption: 'Patient Name', editor: et.text() },
+	{ key: 'createdAt', caption: 'Case Created at', editor: DateRangePicker },
+	{ key: 'updatedAt', caption: 'Case Updated at', editor: DateRangePicker },
+	{ key: 'tags', caption: 'Tags', editor: et.multiSelect({ a: '1' }) }
+];
+
 const BasicConditionForm = props => {
-	const change = (key, newValue) => {
-		if (newValue === null ||
-			typeof newValue === 'string' && newValue.length === 0 ||
-			key.match(/modality|sex/) && newValue === 'all'
-		) {
-			const newCondition = { ...props.value };
-			delete newCondition[key];
-			props.onChange(newCondition);
-		} else {
-			props.onChange({ ...props.value, [key]: newValue });
-		}
-	};
-
-	const grid = FormGrid([
-		[
-			'Case ID',
-			<Input name='caseID' value={props.value.caseID} onChange={change} />
-		],
-		'br',
-		[
-			'Patient ID',
-			<Input name='patientID' value={props.value.patientID} onChange={change} />
-		],
-		[
-			'Patient Name',
-			<Input name='patientName' value={props.value.patientName} onChange={change} />
-		],
-		[
-			'Case Created At',
-			<DateRangePicker value={props.value.createdAt} onChange={v => change('createdAt', v)} />
-		],
-		[
-			'Case Updated At',
-			<DateRangePicker value={props.value.updatedAt} onChange={v => change('updatedAt', v)}  />
-		],
-		[
-			'Tags',
-			<MultiSelect options={props.availableTags} value={props.value.tags}
-				onChange={v => change('tags', v)}
-			/>
-		],
-	]);
-
-	return <div>
-		{grid}
-	</div>;
+	return <PropertyEditor
+		properties={properties}
+		value={props.value}
+		onChange={props.onChange}
+	/>;
 };

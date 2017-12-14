@@ -1,144 +1,85 @@
 import React from 'react';
-import DateRangePicker, { dateRangeToMongoQuery } from 'rb/DateRangePicker';
-import ShrinkSelect from 'rb/ShrinkSelect';
 import { modalities } from 'modalities';
-import ConditionFrame, { FormGrid, Input } from './ConditionFrame';
+import ConditionFrame from './ConditionFrame';
 import { escapeRegExp } from 'utils/util';
+import * as et from 'rb/editor-types';
+import DateRangePicker, { dateRangeToMongoQuery } from 'rb/DateRangePicker';
+import PropertyEditor from 'rb/PropertyEditor';
 import { Well } from 'components/react-bootstrap';
+import AgeMinMax from 'components/AgeMinMax';
 
-export default class SeriesSearchCondition extends React.Component {
-	constructor(props) {
-		super(props);
-		this.conditionKeys = {
-			modality: { caption: 'modality', type: 'select', spec: { options: modalities }},
-			seriesUid: { caption: 'series UID', type: 'text' },
-			seriesDescription: { caption: 'series description', type: 'text' },
-			patientId: { caption: 'patient ID', type: 'text' },
-			patientName: { caption: 'patient name', type: 'text' },
-			age: { caption: 'age', type: 'number' },
-			sex: { caption: 'sex', type: 'select', spec: { options: ['M', 'F', 'O'] } },
-			seriesDate: { caption: 'series date', type: 'text' },
-		};
-	}
-
-	static nullCondition() {
-		return {
-			type: 'basic',
-			basicFilter: {},
-			advancedFilter: { $and: [ { keyName: 'modality', op: '==', value: 'CT' } ] }
-		};
-	}
-
-	basicFilterToMongoQuery(condition) {
-		const members = [];
-		Object.keys(condition).forEach(key => {
-			const val = condition[key];
-			switch (key) {
-				case 'minAge':
-					members.push({ 'patientInfo.age': { $gte: val }});
-					break;
-				case 'maxAge':
-					members.push({ 'patientInfo.age': { $lte: val }});
-					break;
-				case 'seriesDate': {
-					const q = dateRangeToMongoQuery(val, 'seriesDate');
-					if (q) members.push(q);
-					break;
-				}
-				default:
-					if (key.match(/^(patient(.+)|sex)$/)) {
-						key = 'patientInfo.' + key;
-					}
-					members.push({ [key]: { $regex: escapeRegExp(val) } });
-					break;
-			}
-		});
-		return members.length > 0 ? { $and: members } : {};
-	}
-
-	render() {
-		return <Well>
-			<ConditionFrame
-				condition={this.props.condition}
-				onChange={this.props.onChange}
-				onSearch={this.props.onSearch}
-				basicConditionForm={BasicConditionForm}
-				conditionKeys={this.conditionKeys}
-				basicFilterToMongoQuery={this.basicFilterToMongoQuery}
-				nullCondition={SeriesSearchCondition.nullCondition}
-			/>
-		</Well>;
-	}
-}
+const conditionKeys = {
+	modality: { caption: 'modality', type: 'select', spec: { options: modalities }},
+	seriesUid: { caption: 'series UID', type: 'text' },
+	seriesDescription: { caption: 'series description', type: 'text' },
+	patientId: { caption: 'patient ID', type: 'text' },
+	patientName: { caption: 'patient name', type: 'text' },
+	age: { caption: 'age', type: 'number' },
+	sex: { caption: 'sex', type: 'select', spec: { options: ['M', 'F', 'O'] } },
+	seriesDate: { caption: 'series date', type: 'text' },
+};
 
 const sexOptions = { all: 'All', M: 'male', F: 'female', O: 'other' };
 const modalityOptions = { all: 'All' };
 modalities.forEach(m => modalityOptions[m] = m);
 
-const BasicConditionForm = props => {
-	const change = (key, newValue) => {
-		if (newValue === null ||
-			typeof newValue === 'string' && newValue.length === 0 ||
-			key.match(/modality|sex/) && newValue === 'all'
-		) {
-			const newCondition = { ...props.value };
-			delete newCondition[key];
-			props.onChange(newCondition);
-		} else {
-			props.onChange({ ...props.value, [key]: newValue });
-		}
-	};
+const properties = [
+	{ key: 'modality', caption: 'Modality', editor: et.shrinkSelect(modalityOptions) },
+	{ key: 'seriesUid', caption: 'Series UID', editor: et.text() },
+	{ key: 'seriesDescription', caption: 'Series Description', editor: et.text() },
+	{ key: 'patientId', caption: 'Patient ID', editor: et.text() },
+	{ key: 'patientName', caption: 'Patient Name', editor: et.text() },
+	{ key: 'age', caption: 'Age', editor: AgeMinMax },
+	{ key: 'sex', caption: 'Sex', editor: et.shrinkSelect(sexOptions) },
+	{ key: 'seriesDate', caption: 'Series Date', editor: DateRangePicker }
+];
 
-	return FormGrid([
-		[
-			'Modality',
-			<ShrinkSelect options={modalityOptions} defaultSelect='all'
-				value={props.value.modality} onChange={v => change('modality', v)}
-			/>
-		],
-		'br',
-		[
-			'Series UID',
-			<Input name='seriesUID' value={props.value.seriesUID} onChange={change} />
-		],
-		[
-			'Series Description',
-			<Input name='seriesDescription' value={props.value.seriesDescription} onChange={change} />
-		],
-		[
-			'Patient ID',
-			<Input name='patientID' value={props.value.patientID} onChange={change} />
-		],
-		[
-			'Patient Name',
-			<Input name='patientName' value={props.value.patientName} onChange={change} />
-		],
-		[
-			'Age',
-			<div className='form-inline'>
-				<Input type='number' name='minAge' className='age'
-					value={props.value.minAge} onChange={change}
-				/>
-				&thinsp;&mdash;&thinsp;
-				<Input type='number' name='maxAge' className='age'
-					value={props.value.maxAge} onChange={change}
-				/>
-			</div>
-		],
-		[
-			'Sex',
-			<ShrinkSelect options={sexOptions}
-				value={props.value.sex} defaultSelect='all'
-				onChange={v => change('sex', v)}
-			/>
-		],
-		[
-			'Series Date',
-			<DateRangePicker
-				value={props.value.seriesDate}
-				onChange={r => change('seriesDate', r)}
-				id='series-date-range'
-			/>
-		]
-	]);
+const BasicConditionForm = props => {
+	return <PropertyEditor
+		properties={properties}
+		value={props.value}
+		onChange={props.onChange}
+	/>;
 };
+
+const basicFilterToMongoQuery = condition => {
+	const members = [];
+	Object.keys(condition).forEach(key => {
+		const val = condition[key];
+		switch (key) {
+			case 'age':
+				if (typeof val.min === 'number') members.push({ 'patientInfo.age': { $gte: val.min }});
+				if (typeof val.max === 'number') members.push({ 'patientInfo.age': { $lte: val.max }});
+				break;
+			case 'seriesDate': {
+				const q = dateRangeToMongoQuery(val, 'seriesDate');
+				if (q) members.push(q);
+				break;
+			}
+			default:
+				if (key.match(/modality|sex/) && val === 'all') return;
+				if (key.match(/^(patient(.+)|sex)$/)) {
+					key = 'patientInfo.' + key;
+				}
+				if (typeof val === 'string' && !val.length) return;
+				members.push({ [key]: { $regex: escapeRegExp(val) } });
+				break;
+		}
+	});
+	return members.length > 0 ? { $and: members } : {};
+};
+
+export default function SeriesSearchCondition(props) {
+	const { condition, onChange, onSearch, nullCondition } = props;
+	return <Well>
+		<ConditionFrame
+			condition={condition}
+			onChange={onChange}
+			onSearch={onSearch}
+			basicConditionForm={BasicConditionForm}
+			conditionKeys={conditionKeys}
+			basicFilterToMongoQuery={basicFilterToMongoQuery}
+			nullCondition={nullCondition}
+		/>
+	</Well>;
+}

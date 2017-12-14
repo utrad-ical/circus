@@ -265,12 +265,12 @@ describe('API', function() {
 
 			it('should upload signle DICOM file', async function() {
 				const file = path.join(__dirname, 'dicom', 'CT-MONO2-16-brain.dcm');
-				await uploadTest(file);
+				await uploadTest.call(this, file);
 			});
 
 			it('should upload zipped DICOM files', async function() {
 				const file = path.join(__dirname, 'dicom', 'test.zip');
-				await uploadTest(file);
+				await uploadTest.call(this, file);
 			});
 		});
 	});

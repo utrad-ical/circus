@@ -54,7 +54,7 @@ export default class ConditionFrame extends React.Component {
 		return <div>
 			<Tabs
 				animation={false}
-				id='series-search-condition'
+				id='search-condition-tabs'
 				activeKey={activeKey}
 				onSelect={this.handleChangeType}
 			>

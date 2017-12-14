@@ -21,7 +21,7 @@ export default class GeneralAdmin extends React.Component {
 	}
 
 	async loadSettings() {
-		const settings = await api('server_param');
+		const settings = await api('admin/server-params');
 		this.setState({ settings, complaints: {} });
 	}
 
@@ -48,8 +48,8 @@ export default class GeneralAdmin extends React.Component {
 		};
 		this.setState({ settings: newSettings });
 		try {
-			await api('server_param', {
-				method: 'post', // TODO: This should be PUT?
+			await api('admin/server-params', {
+				method: 'put',
 				data: newSettings,
 				handleErrors: [400]
 			});

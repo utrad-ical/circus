@@ -62,18 +62,14 @@ export default class Server {
 		this.helpers.logger.info('Modules loaded: ', this.loadedModuleNames.join(', '));
 	}
 
-	public getApp(): Koa {
-		return this.app;
-	}
-
-	public prepare(): this {
+	public createServer(): Koa {
 		// create server process
 		const app = new Koa();
 		this.app = app;
 		this.locals.loadedModuleNames = this.loadedModuleNames;
 
 		this.buildRoutes();
-		return this;
+		return app;
 	}
 
 	private createDicomReader(

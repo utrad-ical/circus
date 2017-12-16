@@ -19,13 +19,11 @@ async function main() {
 	const server = new Server(
 		logger,
 		imageEncoder,
-		
 		loadModule(ModuleType.DicomFileRepository, config.dicomFileRepository),
 		loadModule(ModuleType.DicomDumper, config.dumper),
 		config
 	);
-	server.prepare();
-	const app = server.getApp();
+	const app = server.createServer();
 
 	const port = config.port;
 	try {

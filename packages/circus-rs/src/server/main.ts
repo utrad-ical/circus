@@ -14,10 +14,12 @@ async function main() {
 	console.log('CIRCUS RS is starting up...');
 
 	const logger = loadModule(ModuleType.Logger, config.logger);
+	const imageEncoder = loadModule(ModuleType.ImageEncoder, config.imageEncoder);
 
 	const server = new Server(
 		logger,
-		loadModule(ModuleType.ImageEncoder, config.imageEncoder),
+		imageEncoder,
+		
 		loadModule(ModuleType.DicomFileRepository, config.dicomFileRepository),
 		loadModule(ModuleType.DicomDumper, config.dumper),
 		config

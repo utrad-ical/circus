@@ -35,7 +35,6 @@ export default class Server {
 
 	protected app: Koa;
 	protected locals: any = {};
-	protected server: http.Server;
 	public loadedModuleNames: string[] = [];
 
 	constructor(
@@ -63,10 +62,6 @@ export default class Server {
 		this.helpers.logger.info('Modules loaded: ', this.loadedModuleNames.join(', '));
 	}
 
-	public getServer(): http.Server {
-		return this.server;
-	}
-
 	public getApp(): Koa {
 		return this.app;
 	}
@@ -76,21 +71,9 @@ export default class Server {
 		const app = new Koa();
 		this.app = app;
 		this.locals.loadedModuleNames = this.loadedModuleNames;
+
 		this.buildRoutes();
 		return this;
-	}
-
-	public close(): Promise<void> {
-		return new Promise<void>((resolve, reject) => {
-			this.server.close(err => {
-				if (err) {
-					reject(err);
-				} else {
-					this.helpers.seriesReader.dispose();
-					resolve();
-				}
-			});
-		});
 	}
 
 	private createDicomReader(

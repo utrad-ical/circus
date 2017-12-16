@@ -43,8 +43,7 @@ describe('Server', function() {
 					new MockDicomDumper({ depth: 5 }),
 					config
 				);
-				server.start();
-				httpServer = server.getServer();
+				httpServer = server.prepare().getApp().listen(config.port, '0.0.0.0');
 				httpServer.on('listening', () => {
 					if (useAuth) {
 						supertest(httpServer)
@@ -64,7 +63,7 @@ describe('Server', function() {
 			});
 
 			afterEach(function(done) {
-				server.close().then(done);
+				httpServer.close(done);
 			});
 
 			it('must return JSON for status', function(done) {

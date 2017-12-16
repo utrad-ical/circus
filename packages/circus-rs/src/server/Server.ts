@@ -13,6 +13,7 @@ import { ServerHelpers } from './ServerHelpers';
 import * as http from 'http';
 import * as Koa from 'koa';
 import * as Router from 'koa-router';
+import * as mount from 'koa-mount';
 import * as compose from 'koa-compose';
 import * as koaJson from 'koa-json';
 import { Configuration } from './Configuration';
@@ -132,6 +133,18 @@ export default class Server {
 		return module(this.helpers);
 	}
 
+	private createSeriesRouter(): Router {
+		const router = new Router();
+		const seriesRoutes = ['metadata', 'scan', 'volume'];
+		seriesRoutes.forEach(route => {
+			router.get(
+				`/${route}`,
+				this.loadRouter(`series/${route}`)
+			);
+		});
+		return router;
+	}
+
 	private buildRoutes(): void {
 		const config = this.config;
 		const app = this.app;
@@ -181,7 +194,6 @@ export default class Server {
 			);
 		}
 
-		
 		router.options('/series/*', async (ctx, next) => {
 			ctx.status = 200;
 			ctx.response.set('Access-Control-Allow-Methods', 'GET');
@@ -191,17 +203,10 @@ export default class Server {
 		const token = useAuth ? [tokenAuthentication(this.helpers)] : [];
 		const load = loadSeries(this.helpers);
 
-		const seriesRoutes = ['metadata', 'scan', 'volume'];
-		seriesRoutes.forEach(route => {
-			router.get(
-				`/series/:sid/${route}`,
-				compose([
-					...token,
-					load,
-					this.loadRouter(`series/${route}`)
-				])
-			);
-		});
+		const seriesRouter = this.createSeriesRouter();
+
+		router.use('/series/:sid', compose([...token, load]));
+		router.use('/series/:sid', seriesRouter.routes());
 
 		// Assign the router
 		app.use(router.routes());

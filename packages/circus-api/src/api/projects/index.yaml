@@ -4,6 +4,7 @@ description: >
 routes:
   - verb: get
     path: /projects/:projectId
+    requiredProjectPrivilege: read
     responseSchema: project
     description: >
       Returns the project data structure.

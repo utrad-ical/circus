@@ -74,7 +74,7 @@ export default class CaseDetail extends React.Component {
 
 	async loadCase() {
 		const caseID = this.props.params.cid;
-		const caseData = await api('case/' + caseID);
+		const caseData = await api('cases/' + caseID);
 		this.setState({ caseData }, () => {
 			this.selectRevision(caseData.revisions.length - 1);
 		});
@@ -153,8 +153,8 @@ export default class CaseDetail extends React.Component {
 	}
 
 	async loadProject() {
-		const projectID = this.state.caseData.projectID;
-		const projectData = await api('project/' + projectID);
+		const projectId = this.state.caseData.projectId;
+		const projectData = await api('projects/' + projectId);
 		this.setState({ projectData });
 	}
 
@@ -180,12 +180,11 @@ export default class CaseDetail extends React.Component {
 			const color = (prj.tags.find(t => t.name === tag) || {}).color || '#ffffff';
 			return { name: tag, color };
 		});
-
 		return <div>
 			<Card title='Case Info'>
 				<ul>
 					<li>Case ID: {cid}</li>
-					<li>Case Created At: {caseData.createTime}</li>
+					<li>Case Created At: {caseData.createdAt}</li>
 					<li>Project Name: {prj.projectName}</li>
 					<li>Tags: <TagList tags={tags} /></li>
 				</ul>
@@ -233,7 +232,7 @@ class RevisionSelector extends React.Component {
 		const opts = {};
 		revisions.slice().reverse().forEach((r, i) => {
 			const originalIndex = revisions.length - i - 1;
-			opts[`rev${originalIndex}`] = this.renderItem(r, i);
+			opts[`rev${originalIndex}`] = { caption: this.renderItem(r) };
 		});
 		const sel = `rev${selected}`;
 		return <ShrinkSelect options={opts} value={sel} onChange={this.selected} />;
@@ -296,9 +295,16 @@ export class RevisionData extends React.Component {
 		this.stateChanger = new EventEmitter();
 	}
 
-	componentWillUpdate(newProps, newState) {
-		if (this.props.revision.series[this.state.activeSeriesIndex].seriesUID !== newProps.revision.series[this.state.activeSeriesIndex].seriesUID) {
+	componentWillUpdate(nextProps, nextState) {
+		if (this.props.revision.series[this.state.activeSeriesIndex].seriesUid !== nextProps.revision.series[this.state.activeSeriesIndex].seriesUid) {
 			this.changeActiveSeries(this.state.activeSeriesIndex);
+		}
+
+		if (
+			this.state.activeSeriesIndex !== nextState.activeSeriesIndex ||
+			this.state.activeLabelIndex !== nextState.activeLabelIndex
+		) {
+			this.updateLabels(nextProps, nextState);
 		}
 	}
 
@@ -310,15 +316,6 @@ export class RevisionData extends React.Component {
 			this.setState({ activeLabelIndex: 0 });
 		} else {
 			this.setState({ activeLabelIndex: -1 });
-		}
-	}
-
-	componentWillUpdate(nextProps, nextState) {
-		if (
-			this.state.activeSeriesIndex !== nextState.activeSeriesIndex ||
-			this.state.activeLabelIndex !== nextState.activeLabelIndex || true
-		) {
-			this.updateLabels(nextProps, nextState);
 		}
 	}
 
@@ -349,7 +346,7 @@ export class RevisionData extends React.Component {
 		const activeSeries = this.props.revision.series[seriesIndex];
 		const src = new rs.HybridImageSource({
 			client: this.client,
-			series: activeSeries.seriesUID
+			series: activeSeries.seriesUid
 		});
 		const composition = new rs.Composition(src);
 		src.ready().then(this.updateLabels);

@@ -30,7 +30,7 @@ const DataViewRow = props => {
 			)) : null}
 		</div>
 		<div className='register'>
-			<Link to={`/case/${item.caseID}`}>
+			<Link to={`/case/${item.caseId}`}>
 				<Button>
 					<span className='circus-icon circus-icon-case' />
 					View

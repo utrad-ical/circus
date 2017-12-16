@@ -71,33 +71,13 @@ export default class Server {
 		return this.app;
 	}
 
-	public start(): Promise<string> {
-		// prepare routing
-		return new Promise((resolve, reject) => {
-			try {
-				// create server process
-				const app = new Koa();
-				this.app = app;
-				app.context
-
-				this.locals.loadedModuleNames = this.loadedModuleNames;
-
-				this.buildRoutes();
-
-				const port = this.config.port;
-				this.server = app.listen(port, '0.0.0.0', () => {
-					const message = `Server running on port ${port}`;
-					this.helpers.logger.info(message);
-					resolve(message);
-				});
-			} catch (e) {
-				console.error(e);
-				this.helpers.logger.error(e);
-				// This guarantees all the logs are flushed before actually exiting the program
-				this.helpers.logger.shutdown().then(() => process.exit(1));
-				reject(e);
-			}
-		});
+	public prepare(): this {
+		// create server process
+		const app = new Koa();
+		this.app = app;
+		this.locals.loadedModuleNames = this.loadedModuleNames;
+		this.buildRoutes();
+		return this;
 	}
 
 	public close(): Promise<void> {

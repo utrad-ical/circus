@@ -22,4 +22,4 @@ if (argv.config) {
 }
 merge.recursive(config, configData);
 
-module.exports = config;
+export default config;

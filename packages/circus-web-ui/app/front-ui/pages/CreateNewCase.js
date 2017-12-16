@@ -3,7 +3,8 @@ import ProjectSelector from 'components/ProjectSelector';
 import { connect } from 'react-redux';
 import IconButton from 'rb/IconButton';
 import MultiTagSelect from 'components/MultiTagSelect';
-import { Panel, ListGroup, ListGroupItem } from 'components/react-bootstrap';
+import { Panel } from 'components/react-bootstrap';
+import DataGrid from 'components/DataGrid';
 import { api } from 'utils/api';
 
 class CreateNewCaseView extends React.Component {
@@ -48,12 +49,11 @@ class CreateNewCaseView extends React.Component {
 		await api('cases', {
 			method: 'post',
 			data: {
-				project: this.state.selectedProject,
+				projectId: this.state.selectedProject,
 				series: this.state.selectedSeries,
 				tags: this.state.selectedTags
 			}
 		});
-		alert('Created!');
 	}
 
 	render() {
@@ -68,20 +68,22 @@ class CreateNewCaseView extends React.Component {
 
 		const prj = writableProjects.find(p => p.projectId === this.state.selectedProject);
 		const tags = prj.project.tags;
-
+		const columns = [
+			{ key: 'volumeId', caption: '#' },
+			{ key: 'seriesUid', caption: 'Series' },
+			{ key: 'range', caption: 'Range' }
+		];
+		const seriesData = this.state.selectedSeries.map((s, i) => ({
+			volumeId: i,
+			seriesUid: s,
+			range: '-'
+		}));
+		
 		return <div>
 			<h1><span className='circus-icon-case' />New Case</h1>
 			<Panel collapsible defaultExpanded header='Series'>
-				<ListGroup fill>
-					{this.state.selectedSeries.map((s, i) => (
-						<ListGroupItem key={s}>
-							<b>Volume {i}</b>: {s}
-						</ListGroupItem>
-					))}
-					<ListGroupItem>
-						<IconButton icon='plus' bsSize='sm'>Add Another Series</IconButton>
-					</ListGroupItem>
-				</ListGroup>
+				<DataGrid columns={columns} value={seriesData} />
+				<IconButton icon='plus' bsSize='sm'>Add Another Series</IconButton>
 			</Panel>
 			<div>
 				Project:&ensp;

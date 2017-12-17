@@ -3,5 +3,5 @@ node_modules
 /lib
 /config/*
 !/config/default.js
-/dist
+/dist/circus-rs-client.js
 /docs/_site

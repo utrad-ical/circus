@@ -45,7 +45,7 @@ export default class DicomImporter {
 		return undefined;
 	}
 
-	buildNewDocument(tags) {
+	buildNewDocument(tags, domain) {
 		const doc = {
 			seriesUid: tags.seriesInstanceUID,
 			studyUid: tags.studyInstanceUID,
@@ -70,7 +70,7 @@ export default class DicomImporter {
 				weight: parseFloat(tags.weight)
 			},
 			parameters: {},
-			domain: 'default'
+			domain
 		};
 		return doc;
 	}
@@ -78,7 +78,7 @@ export default class DicomImporter {
 	/**
 	 * @param {string} file
 	 */
-	async importFromFile(file) {
+	async importFromFile(file, domain) {
 		// Read the DICOM file
 		const tags = await this.readDicomTagsFromFile(file);
 		const fileContent = await fs.readFile(file);
@@ -97,7 +97,7 @@ export default class DicomImporter {
 			);
 		} else {
 			// Insert as a new series
-			const doc = this.buildNewDocument(tags);
+			const doc = this.buildNewDocument(tags, domain);
 			await this.models.series.insert(doc);
 		}
 

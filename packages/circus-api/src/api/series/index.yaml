@@ -16,7 +16,7 @@ routes:
           items:
             $ref: series
   - verb: post
-    path: /series
+    path: /series/domain/:domain
     expectedContentType: multipart/form-data
     description: Uploads a new DICOM file or a series of DICOM files.
   - verb: get

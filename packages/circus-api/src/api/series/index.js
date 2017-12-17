@@ -17,7 +17,7 @@ export const handleGet = ({ models }) => {
 
 export const handlePost = ({ dicomImporter }) => {
 
-	async function importFromBuffer(buffer) {
+	async function importFromBuffer(buffer, domain) {
 		const signature = buffer.readUInt32BE(0x80, true);
 		if (signature !== 0x4449434D) {
 			return; // Non-DICOM file
@@ -26,7 +26,7 @@ export const handlePost = ({ dicomImporter }) => {
 		try {
 			tmpFile = path.join(dicomImporter.workDir, 'import.dcm');
 			await fs.writeFile(tmpFile, buffer);
-			await dicomImporter.importFromFile(tmpFile);
+			await dicomImporter.importFromFile(tmpFile, domain);
 		} finally {
 			await fs.unlink(tmpFile);
 		}
@@ -35,6 +35,11 @@ export const handlePost = ({ dicomImporter }) => {
 	return async (ctx, next) => {
 		if (!dicomImporter) {
 			ctx.throw(status.SERVICE_UNAVAILABLE);
+		}
+
+		const domain = ctx.params.domain;
+		if (!ctx.userPrivileges.domains.some(d => d === domain)) {
+			ctx.throw(status.FORBIDDEN, 'You cannot upload to this domain.');
 		}
 
 		// koa-multer sets loaded files to ctx.req, not ctx.request
@@ -49,11 +54,11 @@ export const handlePost = ({ dicomImporter }) => {
 				archive.forEach((r, f) => filesInArchive.push(f));
 				for (const file of filesInArchive) {
 					const buf = await file.async('nodebuffer');
-					await importFromBuffer(buf);
+					await importFromBuffer(buf, domain);
 					count++;
 				}
 			} else {
-				await importFromBuffer(entry.buffer);
+				await importFromBuffer(entry.buffer, domain);
 				count++;
 			}
 		}

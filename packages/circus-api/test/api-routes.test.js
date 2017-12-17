@@ -258,28 +258,37 @@ describe('API', function() {
 		});
 
 		describe('uploading', function() {
-			async function uploadTest(file) {
+			async function uploadTest(file, loginName = 'alice', domain = 'sirius.org') {
 				const formData = new FormData();
 				formData.append('files', fs.createReadStream(file));
-				const res = await axios.request({
+				const res = await server.axios[loginName].request({
 					method: 'post',
 					headers: formData.getHeaders(),
-					url: server.url + 'api/series',
+					url: server.url + `api/series/domain/${domain}`,
 					data: formData,
 					validateStatus: null
 				});
 				if (res.status === 503) { this.skip(); return; }
-				assert.equal(res.status, 200);
+				return res;
 			}
 
 			it('should upload signle DICOM file', async function() {
 				const file = path.join(__dirname, 'dicom', 'CT-MONO2-16-brain.dcm');
-				await uploadTest.call(this, file);
+				const res = await uploadTest.call(this, file);
+				assert.equal(res.status, 200);
 			});
 
 			it('should upload zipped DICOM files', async function() {
 				const file = path.join(__dirname, 'dicom', 'test.zip');
-				await uploadTest.call(this, file);
+				const res = await uploadTest.call(this, file);
+				assert.equal(res.status, 200);
+			});
+
+			it('should reject series upload into innaccessible domain', async function() {
+				const file = path.join(__dirname, 'dicom', 'CT-MONO2-16-brain.dcm');
+				const res = await uploadTest.call(this, file, 'bob');
+				assert.equal(res.status, 403);
+				assert.match(res.data.error, /You cannot upload to this domain/);
 			});
 		});
 	});

@@ -46,7 +46,7 @@ describe('DicomImporter', function() {
 
 	describe('#importFromFile', function() {
 		it('should import a DICOM file', async function() {
-			await importer.importFromFile(file);
+			await importer.importFromFile(file, 'someDomain');
 			const key = '2.16.840.1.113662.2.1.2519.21582.2990505.2105152.2381633.20/8';
 			assert.isTrue(await storage.exists(key));
 		});

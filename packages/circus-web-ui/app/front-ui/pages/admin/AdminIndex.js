@@ -24,13 +24,13 @@ const AdminIndex = props => {
 	>
 		<div className='row'>
 			<Btn to='general' link='Server Configuration' glyph='tasks' />
-			<Btn to='server' link='DICOM Image Server'glyph='hdd' />
-			<Btn to='storage' link='Storage'glyph='save-file' />
 		</div>
 		<div className='row'>
-			<Btn to='group' link='Groups'glyph='record' />
-			<Btn to='user' link='Users'glyph='user' />
-			<Btn to='project' link='Projects'glyph='education' />
+			<Btn to='project' link='Projects' glyph='education' />
+		</div>
+		<div className='row'>
+			<Btn to='group' link='Groups' glyph='record' />
+			<Btn to='user' link='Users' glyph='user' />
 		</div>
 	</AdminContainer>;
 };

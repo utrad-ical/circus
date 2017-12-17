@@ -64,16 +64,14 @@ const NavView = props => {
 					<SubMenu name='Task List' link='/task-list'/>
 					<SubMenu name='Preference' link='/preference' />
 				</Menu>
-				{ props.isAdmin ?
+				{ props.isAdmin &&
 					<Menu name='Administration' link='/admin'>
 						<SubMenu name='Server Configuration' link='/admin/general'/>
-						<SubMenu name='DICOM Image Server' link='/admin/server'/>
-						<SubMenu name='Storage' link='/admin/storage'/>
+						<SubMenu name='Project' link='/admin/project'/>
 						<SubMenu name='Groups' link='/admin/group'/>
 						<SubMenu name='Users' link='/admin/user'/>
-						<SubMenu name='Project' link='/admin/project'/>
 					</Menu>
-					: null }
+				}
 			</MainMenu>
 		</nav>
 		<nav>

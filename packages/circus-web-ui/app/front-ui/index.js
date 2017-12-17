@@ -23,8 +23,6 @@ import SeriesDetail from 'pages/SeriesDetail';
 import TaskList from 'pages/TaskList';
 import AdminIndex from 'pages/admin/AdminIndex';
 import GeneralAdmin from 'pages/admin/GeneralAdmin';
-import DicomImageServerAdmin from 'pages/admin/DicomImageServerAdmin';
-import StorageAdmin from 'pages/admin/StorageAdmin';
 import GroupAdmin from 'pages/admin/GroupAdmin';
 import UserAdmin from 'pages/admin/UserAdmin';
 import ProjectAdmin from 'pages/admin/ProjectAdmin';
@@ -55,8 +53,6 @@ ReactDOM.render(
 				<Route path='admin'>
 					<IndexRoute component={AdminIndex} />
 					<Route path='general' component={GeneralAdmin} />
-					<Route path='server' component={DicomImageServerAdmin} />
-					<Route path='storage' component={StorageAdmin} />
 					<Route path='group' component={GroupAdmin} />
 					<Route path='user' component={UserAdmin} />
 					<Route path='project' component={ProjectAdmin} />

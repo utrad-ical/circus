@@ -47,8 +47,8 @@ export default function circusRs({ models, logger }, dicomStorage) {
 	const volumeLoader = loadSeries(helpers);
 
 	const router = new Router();
-	router.use('/:sid', volumeLoader);
-	router.use('/:sid', createSeriesRouter(helpers).routes());
+	router.use('/series/:sid', volumeLoader);
+	router.use('/series/:sid', createSeriesRouter(helpers).routes());
 
 	return router;
 }

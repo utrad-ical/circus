@@ -103,7 +103,11 @@ export default async function createApp(options = {}) {
 
 	// Build a router.
 	// Register each API endpoints to the router according YAML manifest files.
-	const deps = { validator, db, logger, models, blobStorage, dicomImporter };
+	const deps = {
+		validator, db, logger, models, blobStorage, dicomImporter,
+		uploadFileSizeMax: '200mb',
+		dicomImageServerUrl: 'http://localhost:8080/rs'
+	};
 
 	const apiDir = path.resolve(__dirname, 'api/**/*.yaml');
 	const apiRouter = await prepareApiRouter(apiDir, deps, options);
@@ -127,7 +131,7 @@ export default async function createApp(options = {}) {
 		}),
 		multer({
 			storage: multer.memoryStorage(),
-			limits: '20mb'
+			limits: deps.uploadFileSizeMax
 		}).array('files'),
 		(fixUser ? fixUserMiddleware(deps, fixUser) : oauth.authenticate()),
 		apiRouter.routes()

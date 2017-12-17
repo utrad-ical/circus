@@ -10,16 +10,16 @@ export const handleGet = () => {
 	};
 };
 
-export const handleGetFull = () => {
+export const handleGetFull = ({ dicomImageServerUrl, uploadFileSizeMax }) => {
 	return async (ctx, next) => {
 		const user = { ...ctx.user };
 		delete user.password;
 		ctx.body = {
 			...user,
 			...ctx.userPrivileges,
-			dicomImageServer: 'http://localhost:3000',
+			dicomImageServer: dicomImageServerUrl,
 			uploadFileMax: 30,
-			uploadFileSizeMax: '1g'
+			uploadFileSizeMax: uploadFileSizeMax.toUpperCase()
 		};
 	};
 };

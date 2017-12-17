@@ -1,0 +1,48 @@
+// Import Bootstrap as our primary CSS framework
+@import "bootstrap.less";
+
+// Common variables
+@brand-dark: darken(@brand-primary, 10%);
+@highlight-color: #fd3164;
+
+.container h1 {
+	margin: 10px 0 20px;
+	font-size: 24px;
+	font-weight: bold;
+	border-bottom: 2px solid silver;
+}
+
+@keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+.alert {
+	animation: fadeIn linear 0.5s;
+}
+
+@import "fonts.less";
+
+@import "../pages/Application.less";
+@import "../pages/LoginScreen.less";
+@import "../pages/search/search.less";
+@import "../pages/search/SeriesSearchResults.less";
+@import "../pages/search/SearchResultsView.less";
+@import "../pages/HomePage.less";
+@import "../pages/admin/admin.less";
+@import "../pages/case-detail/CaseDetail.less";
+@import "../pages/SeriesDetail.less";
+
+@import "~rb/ArrayEditor.less";
+@import "~rb/BlockSelect.less";
+@import "~rb/Calendar.less";
+@import "~rb/RelativeDatePicker.less";
+@import "~rb/PropertyEditor.less";
+@import "~rb/ColorPicker.less";
+@import "~rb/ConditionEditor.less";
+@import "~rb/Icon.less";
+@import "~rb/MultiSelect.less";
+
+@import "../components/FileDroppable.less";
+@import "../components/FileUpload.less";
+@import "../components/multiselect.less";
+@import "../components/property-editor.less";
+@import "../components/string-list-editor.less";
+@import "../components/tag.less";
+@import "../components/task-watcher.less";

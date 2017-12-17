@@ -44,6 +44,7 @@ const Application = connect(
 export default Application;
 
 const NavView = props => {
+	const { onLogout } = props;
 	return <header>
 		<nav>
 			<MainMenu>
@@ -77,7 +78,7 @@ const NavView = props => {
 		<nav>
 			<MainMenu>
 				<li className='user-info hidden-xs'>{props.loginUserName}</li>
-				<Menu name='Logout' onClick={logout} />
+				<Menu name='Logout' onClick={onLogout} />
 			</MainMenu>
 		</nav>
 	</header>;
@@ -87,6 +88,9 @@ const Nav = connect(
 	state => ({
 		loginUserName: state.loginUser.data ? state.loginUser.data.description : '',
 		isAdmin: state.loginUser.data && state.loginUser.data.globalPrivileges.indexOf('manageServer') > -1
+	}),
+	dispatch => ({
+		onLogout: () => dispatch(logout())
 	})
 )(NavView);
 

@@ -52,7 +52,7 @@ export default class SeriesDetail extends React.Component {
 			'modality', 'bodyPart', 'width', 'height', 'images',
 			'manufacturer', 'modelName',
 			'seriesDate', 'updateTime',
-			'domain', 'seriesUID', 'studyUID'
+			'domain', 'seriesUid', 'studyUid'
 		];
 		return <div>
 			<h1>

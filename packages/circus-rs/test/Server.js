@@ -1,25 +1,13 @@
 'use strict';
 
-var Server = require('../src/server/Server').default;
+var createServer = require('../src/server/Server').default;
 var supertest = require('supertest');
 
 var NullLogger = require('../src/server/loggers/NullLogger').default;
 var PngJsImageEncoder = require('../src/server/image-encoders/PngJsImageEncoder').default;
 var MockDicomFileRepository = require('../src/server/dicom-file-repository/MockDicomFileRepository').default;
 var MockDicomDumper = require('../src/server/dicom-dumpers/MockDicomDumper').default;
-
-function newConfig() {
-	return {
-		port: 1024,
-		globalIpFilter: '^127.0.0.1$',
-		cache: { memoryThreshold: 2147483648 },
-		authorization: {
-			enabled: false,
-			tokenRequestIpFilter: '^127.0.0.1$',
-			expire: 1800
-		}
-	};
-}
+var createDicomReader = require('../src/server/createDicomReader').default;
 
 describe('Server', function() {
 
@@ -29,21 +17,30 @@ describe('Server', function() {
 	function runServerTests(contextText, useAuth) {
 		context(contextText, function() {
 
-			var server;
+			var app;
 			var httpServer;
 			var token;
 
 			beforeEach(function(done) {
-				const config = newConfig();
-				config.authorization.enabled = useAuth;
-				server = new Server(
-					new NullLogger(),
-					new PngJsImageEncoder(),
+				const seriesReader = createDicomReader(
 					new MockDicomFileRepository(),
 					new MockDicomDumper({ depth: 5 }),
-					config
+					100000000
 				);
-				httpServer = server.prepare().getApp().listen(config.port, '0.0.0.0');
+				app = createServer({
+					logger: new NullLogger(),
+					imageEncoder: new PngJsImageEncoder(),
+					seriesReader,
+					loadedModuleNames: [],
+					authorization: {
+						enabled: useAuth,
+						tokenRequestIpFilter: '^127.0.0.1$',
+						expire: 1800
+					},
+					globalIpFilter: '^127.0.0.1$'
+				});
+
+				httpServer = app.listen(1024, '0.0.0.0');
 				httpServer.on('listening', () => {
 					if (useAuth) {
 						supertest(httpServer)
@@ -76,7 +73,7 @@ describe('Server', function() {
 			});
 
 			it('must reject invalid access using globalIpFilter', function(done) {
-				server.getApp().proxy = true;
+				app.proxy = true;
 				supertest(httpServer)
 					.get('/status')
 					.set('X-Forwarded-For', '127.0.0.11') // change IP
@@ -101,7 +98,7 @@ describe('Server', function() {
 				});
 
 				it('must reject token request from invalid IP', function(done) {
-					server.getApp().proxy = true;
+					app.proxy = true;
 					supertest(httpServer)
 						.get('/token')
 						.set('X-Forwarded-For', '127.0.0.2')

@@ -17,6 +17,7 @@ function listen(app, ...args): Promise<http.Server> {
 }
 
 
+
 async function main(): Promise<void> {
 	console.log('CIRCUS RS is starting up...');
 

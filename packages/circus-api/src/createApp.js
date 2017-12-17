@@ -20,6 +20,7 @@ import validateInOut from './middleware/validateInOut';
 import createModels from './db/createModels';
 import compose from 'koa-compose';
 import DicomImporter from './DicomImporter';
+import circusRs from './circusRs';
 
 function handlerName(route) {
 	if (route.handler) return route.handler;
@@ -132,6 +133,8 @@ export default async function createApp(options = {}) {
 		apiRouter.routes()
 	])));
 	koa.use(mount('/login', compose([bodyParser(), oauth.token()])));
+
+	koa.use(mount('/rs', circusRs({ models, logger }, dicomStorage).routes()));
 
 	return koa;
 }

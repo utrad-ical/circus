@@ -53,10 +53,16 @@ const options = [
 		env: 'CIRCUS_API_BLOB_DIR',
 		type: 'string',
 		default: './store/blobs'
+	},
+	{
+		names: ['dicom-path'],
+		env: 'CIRCUS_API_DICOM_DIR',
+		type: 'string',
+		default: './store/dicom'
 	}
 ];
 
-const { debug, host, port, fix_user: fixUser, cors_origin: corsOrigin, blobPath } = (() => {
+const { debug, host, port, fix_user: fixUser, cors_origin: corsOrigin, blobPath, dicomPath } = (() => {
 	try {
 		const parser = dashdash.createParser({ options });
 		const opts = parser.parse(process.argv);
@@ -66,6 +72,7 @@ const { debug, host, port, fix_user: fixUser, cors_origin: corsOrigin, blobPath 
 			process.exit(0);
 		}
 		opts.blobPath = path.resolve(path.dirname(__dirname), opts.blob_path);
+		opts.dicomPath = path.resolve(path.dirname(__dirname), opts.dicom_path);
 		return opts;
 	} catch (e) {
 		console.log(e.message);
@@ -90,6 +97,7 @@ async function main() {
 		logger,
 		fixUser,
 		blobPath,
+		dicomPath,
 		corsOrigin
 	};
 
@@ -101,6 +109,7 @@ async function main() {
 			logger.info(`Label path: ${blobPath}`);
 			console.log(chalk.green(`Server running on port ${host}:${port}`));
 			console.log(`  Label path: ${blobPath}`);
+			console.log(`  DICOM path: ${dicomPath}`)
 			console.log(`  CORS origin: ${corsOrigin}`);
 		});
 	} catch(err) {

@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/utrad-ical/circus-api#readme",
   "dependencies": {
+    "@utrad-ical/circus-rs": "git+https://github.com/utrad-ical/circus-rs.git",
     "ajv": "^5.2.2",
     "axios": "^0.16.2",
     "babel-plugin-dynamic-import-node": "^1.1.0",
@@ -46,15 +47,17 @@
     "oauth2-server": "^3.0.0",
     "pify": "^3.0.0",
     "randomstring": "^1.1.5",
-    "raw-body": "^2.3.2"
+    "raw-body": "^2.3.2",
+    "ts-node": "^4.0.2",
+    "typescript": "^2.6.2"
   },
   "devDependencies": {
     "chai": "^4.1.2",
     "eslint": "^4.7.1",
     "form-data": "^2.3.1",
     "mocha": "^3.5.3"
-	},
-	"nodemonConfig": {
-		"ext": "js,mjs,json,yaml"
-	}
+  },
+  "nodemonConfig": {
+    "ext": "js,mjs,json,yaml"
+  }
 }

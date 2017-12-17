@@ -4,6 +4,8 @@ import IconButton from 'rb/IconButton';
 import PropertyEditor from 'rb/PropertyEditor';
 import { api } from 'utils/api.js';
 import AdminContainer from './AdminContainer';
+import { refreshUserInfo } from 'actions';
+import { store } from 'store';
 
 export default class EditorPage extends React.Component {
 	constructor(props) {
@@ -42,7 +44,8 @@ export default class EditorPage extends React.Component {
 		try {
 			await api(endPoint, args);
 			this.setState({ target: null, editing: null });
-			this.loadItems();
+			await this.loadItems();
+			dispatch(refreshUserInfo(true)); // Full user data refresh
 		} catch (err) {
 			this.setState({ complaints: err.data.errors });
 		}

@@ -63,10 +63,10 @@ ReactDOM.render(
 );
 
 // First-time login check
-refreshUserInfo(true);
+store.dispatch(refreshUserInfo(true));
 
 function leaveLoginScreen() {
-	refreshUserInfo(true);
+	store.dispatch(refreshUserInfo(true));
 	dismissMessageOnPageChange();
 }
 
@@ -74,5 +74,5 @@ function pageMove() {
 	// Hide message boxes which should not persist upon page changes
 	dismissMessageOnPageChange();
 	// Load user information again to check login status
-	refreshUserInfo(false);
+	store.dispatch(refreshUserInfo(false));
 }

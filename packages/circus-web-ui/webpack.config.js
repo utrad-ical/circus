@@ -3,7 +3,7 @@ const path = require('path');
 
 module.exports = {
 	entry: {
-		application: './app/front-ui/index.js'
+		application: './src/index.js'
 	},
 	output: {
 		path: path.join(__dirname, 'public'),
@@ -11,15 +11,14 @@ module.exports = {
 	},
 	resolve: {
 		modules: [
-			path.join(__dirname, 'app/front-ui'),
+			path.join(__dirname, 'src'),
 			'node_modules'
 		],
 		alias: {
 			'rb': '@smikitky/rb-components/lib',
-			'circus-rs': path.resolve(__dirname, 'vendor/utrad-ical/circus-rs/lib/browser'),
-			'circus-rs-font.woff': path.resolve(__dirname, 'vendor/utrad-ical/circus-rs/dist/css/circus-rs-font.woff')
+			'circus-rs': path.resolve(__dirname, 'node_modules/@utrad-ical/circus-rs/src/browser')
 		},
-		extensions: ['.js', '.jsx']
+		extensions: ['.js', '.jsx', '.ts']
 	},
 	module: {
 		rules: [
@@ -38,23 +37,14 @@ module.exports = {
 				}]
 			},
 			{
-				test: /circus-rs-font\.woff$/,
-				use: [{
-					loader: 'url-loader',
-					options: {
-						limit: 65000,
-						mimetype: 'application/font-woff',
-						name: 'circus-rs-font.woff'
-					}
-				}]
+				test: /\.ts$/,
+				use: ['ts-loader']
 			},
 			{
-				test: /regular\.(woff|woff2|ttf|eot|svg)(\?v=\d+\.\d+\.\d+)?$/,
+				test: /\.(woff|woff2|ttf|eot|svg)(\?v=\d+\.\d+\.\d+)?$/,
 				use: [{
-					loader: 'file-loader',
-					options: {
-						name: '[name].[ext]'
-					}
+					loader: 'url-loader',
+					options: { limit: 1000000 }
 				}]
 			},
 			{

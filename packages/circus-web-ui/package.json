@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "fontgen": "node app/assets/icons/fontgen.js",
+    "fontgen": "node assets/icons/fontgen.js",
     "build": "webpack",
     "lint": "eslint app/front-ui"
   },
@@ -56,8 +56,12 @@
     "webpack": "^3.5.5"
   },
   "dependencies": {
+    "@utrad-ical/circus-rs": "github:utrad-ical/circus-rs",
+    "glob-promise": "^3.3.0",
     "js-cookie": "^2.2.0",
     "mongoose": "^4.6.8",
-    "multi-integer-range": "^4.0.2"
+    "multi-integer-range": "^4.0.2",
+    "ts-loader": "^3.2.0",
+    "typescript": "^2.6.2"
   }
 }

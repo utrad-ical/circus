@@ -4,6 +4,7 @@ import { api } from 'utils/api';
 import LoadingIndicator from 'rb/LoadingIndicator';
 import MultiSelect from 'rb/MultiSelect';
 import ShrinkSelect from 'rb/ShrinkSelect';
+import classnames from 'classnames';
 import * as et from 'rb/editor-types';
 
 const makeEmptyItem = () => {
@@ -53,9 +54,11 @@ export default class UserAdmin extends React.Component {
 			{
 				data: item => {
 					return item.groups.map(groupId => {
-						if (!this.groupIdMap) return null;
-						return <span className='label label-default' key={groupId}>
-							{this.groupIdMap[groupId]}
+						if (!this.groups) return null;
+						const group = this.groups.find(g => g.groupId === groupId);
+						const style = group.privileges.indexOf('manageServer') >= 0 ? 'label-danger' : 'label-default';
+						return <span className={(classnames('label', style))} key={groupId}>
+							{group.groupName}
 						</span>;
 					});
 				},
@@ -75,13 +78,12 @@ export default class UserAdmin extends React.Component {
 	}
 
 	async componentDidMount() {
-		const groups = (await api('admin/groups')).items;
+		this.groups = (await api('admin/groups')).items;
 		const groupIdMap = {};
-		groups.forEach(g => groupIdMap[g.groupId] = g.groupName);
+		this.groups.forEach(g => groupIdMap[g.groupId] = g.groupName);
 		this.editorProperties[4].editor = props => <MultiSelect
 			options={groupIdMap} numericalValue {...props}
 		/>;
-		this.groupIdMap = groupIdMap;
 		this.setState({ ready: true });
 	}
 

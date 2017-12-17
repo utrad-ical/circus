@@ -9,7 +9,7 @@ class ImportSeriesView extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			uploadDomain: this.props.loginUser ? this.props.loginUser.defaultDomain : '',
+			uploadDomain: props.loginUser ? props.loginUser.domains[0] : null
 		};
 		this.domainChange = this.domainChange.bind(this);
 		this.uploaded = this.uploaded.bind(this);
@@ -31,6 +31,7 @@ class ImportSeriesView extends React.Component {
 
 	render() {
 		const user = this.props.loginUser;
+		const { uploadDomain } = this.state;
 
 		if (!Array.isArray(user.domains) || user.domains.length === 0) {
 			return <Alert bsStyle='warning'>
@@ -49,7 +50,7 @@ class ImportSeriesView extends React.Component {
 			<FileUpload multiple={true} targetResource='import-series'
 				uploadFileMax={user.uploadFileMax}
 				uploadFileSizeMax={user.uploadFileSizeMax}
-				url='series'
+				url={`series/domain/${encodeURIComponent(uploadDomain)}`}
 				apiCaller={apiCaller}
 				onUploaded={this.uploaded}
 			>

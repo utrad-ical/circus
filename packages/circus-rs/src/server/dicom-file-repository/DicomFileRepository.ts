@@ -7,7 +7,7 @@ export type SeriesLoader = (image: number) => Promise<ArrayBuffer>;
 export type SeriesLoaderInfo = {
 	seriesLoader: SeriesLoader;
 	count: number;
-}
+};
 
 /**
  * Base DicomFileRepository class. An DicomFileRepository receives a series instance UID

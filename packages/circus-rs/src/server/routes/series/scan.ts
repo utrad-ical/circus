@@ -50,7 +50,7 @@ export default function scan(helpers: ServerHelpers): koa.Middleware {
 		}
 		const section: Section = { origin, xAxis, yAxis };
 		vol.scanObliqueSection(section, size, buf, interpolation, ww, wl);
-		
+
 		// Output
 		if (format === 'png') {
 			const out = await imageEncoder.write(Buffer.from(buf.buffer), size[0], size[1]);

@@ -245,7 +245,16 @@ describe('API', function() {
 				url: server.url + 'api/series/111.222.333.444.666',
 				method: 'get'
 			});
+			assert.equal(res.status, 200);
 			assert.equal(res.data.manufacturer, 'Hatsushiba');
+		});
+
+		it('should reject 403 for unauthorized series', async function() {
+			const res = await axios.request({
+				url: server.url + 'api/series/111.222.333.444.777',
+				method: 'get'
+			});
+			assert.equal(res.status, 403);
 		});
 
 		describe('uploading', function() {

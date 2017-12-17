@@ -8,6 +8,9 @@ export const handleGet = ({ models }) => {
 	return async (ctx, next) => {
 		const uid = ctx.params.seriesUid;
 		const series = await models.series.findByIdOrFail(uid);
+		if (ctx.userPrivileges.domains.indexOf(series.domain) < 0) {
+			ctx.throw(status.FORBIDDEN, 'You do not have privilege to access this series.');
+		}
 		ctx.body = series;
 	};
 };
@@ -67,7 +70,9 @@ export const handleSearch = ({ models }) => {
 		} catch (err) {
 			ctx.throw(status.BAD_REQUEST, 'Bad filter.');
 		}
-		const domainFilter = {};
+		const domainFilter = {
+			domain: { $in: ctx.userPrivileges.domains }
+		};
 		const filter = { $and: [customFilter, domainFilter]};
 		await performSearch(models.series, filter, ctx);
 	};

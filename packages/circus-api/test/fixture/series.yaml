@@ -1,4 +1,21 @@
 -
+  seriesUid: 111.222.333.444.444
+  studyUid: 111.222.333.888.999.999
+  width: 1024
+  height: 1024
+  images: '1'
+  seriesDate: { $date: '2017-10-10T00:11:11' }
+  modality: CR
+  seriesDescription: chest PA
+  bodyPart: Chest
+  stationName: Radiko123
+  modelName: Radiko Ace
+  manufacturer: RadikoSystems
+  storageId: 0
+  patientInfo: {}
+  parameters: {}
+  domain: sirius.org
+-
   seriesUid: 111.222.333.444.555
   studyUid: 111.222.333.888.999.1000
   width: 512
@@ -14,7 +31,7 @@
   storageId: 0
   patientInfo: {}
   parameters: {}
-  domain: default
+  domain: sirius.org
 -
   seriesUid: 111.222.333.444.666
   studyUid: 111.222.333.888.999.1001
@@ -31,7 +48,7 @@
   storageId: 0
   patientInfo: {}
   parameters: {}
-  domain: default
+  domain: sirius.org
 -
   seriesUid: 111.222.333.444.777
   studyUid: 111.222.333.888.999.1002

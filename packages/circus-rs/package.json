@@ -1,6 +1,6 @@
 {
   "name": "@utrad-ical/circus-rs",
-  "version": "0.9.0",
+  "version": "0.9.1",
   "scripts": {
     "start": "node ./server.js",
     "test": "mocha",

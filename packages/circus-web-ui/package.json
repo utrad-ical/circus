@@ -19,7 +19,7 @@
   "author": "UTRAD ICAL Team",
   "license": "UNLICENSED",
   "devDependencies": {
-    "@smikitky/rb-components": "^2.1.0",
+    "@smikitky/rb-components": "^2.3.0",
     "axios": "^0.15.2",
     "babel-core": "^6.25.0",
     "babel-loader": "^7.1.2",

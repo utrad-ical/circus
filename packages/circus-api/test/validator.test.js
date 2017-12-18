@@ -24,23 +24,53 @@ describe('Validator', function() {
 		);
 	});
 
-	it('should validate special formats', async function() {
-		const correctData = {
-			dicomUid: '1.2.840.10008.2000.11111.222.33333',
-			multiRange: '1-5,7-103,1000,1050'
-		};
-		const wrongData1 = { dicomUid: '11..22' };
-		const wrongData2 = { multiRange: '11--33' };
+	describe('special formats', async function() {
+		async function testFormat(format, valid, invalid) {
+			for (const s of valid) {
+				await validator.validate(
+					{ type: 'string', format, $async: true },
+					s
+				);
+			}
+			for (const s of invalid) {
+				await asyncThrows(validator.validate(
+					{ type: 'string', format, $async: true },
+					s
+				), ValidationError);
+			}
+		}
 
-		await validator.validate('sample', correctData);
-		await asyncThrows(
-			validator.validate('sample', wrongData1),
-			ValidationError
-		);
-		await asyncThrows(
-			validator.validate('sample', wrongData2),
-			ValidationError
-		);
+		it('dicomUid', async function() {
+			await testFormat(
+				'dicomUid',
+				['1.2.840.10008.2000.11111.222.33333'],
+				['11..22']
+			);
+		});
+
+		it('multiIntegerRange', async function() {
+			await testFormat(
+				'multiIntegerRange',
+				['1-5,7-103,1000,1050'],
+				['11--33']
+			);
+		});
+
+		it('color', async function() {
+			await testFormat(
+				'color',
+				['#ffffff', '#000000', '#fab845'],
+				['#', 'red', '#FFFFFF', ' #ffff00', '#00ff00 ']
+			);
+		});
+
+		it('kebabId', async function() {
+			await testFormat(
+				'kebab',
+				['a-b', 'class-name', 'blue-yellow-red'],
+				['a--b', ' class-name', 'not*correct*']
+			);
+		});
 	});
 
 	it('should handle toDate option', async function() {

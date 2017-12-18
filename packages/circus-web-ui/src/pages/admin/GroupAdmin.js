@@ -4,6 +4,7 @@ import { api } from 'utils/api';
 import LoadingIndicator from 'rb/LoadingIndicator';
 import MultiSelect from 'rb/MultiSelect';
 import * as et from 'rb/editor-types';
+import ProjectSelectorMultiple from 'components/ProjectSelectorMultiple';
 
 const makeEmptyItem = () => {
 	return {
@@ -62,11 +63,11 @@ export default class GroupAdmin extends React.Component {
 		this.editorProperties[2].editor = et.multiSelect(domains, { type: 'checkbox' });
 
 		const projects = (await api('admin/projects')).items;
-		const options = {};
-		projects.forEach(p => options[p.projectId] = p.projectName);
-		const projectSelect = props => <MultiSelect
-			options={options} {...props}
+		const projectOptions = projects.map(project => ({ projectId: project.projectId, project }));
+		const projectSelect = props => <ProjectSelectorMultiple
+			projects={projectOptions} {...props}
 		/>;
+
 		for (let i = 3; i <= 7; i++) this.editorProperties[i].editor = projectSelect;
 
 		this.setState({ ready: true });

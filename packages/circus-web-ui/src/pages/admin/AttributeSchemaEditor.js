@@ -19,13 +19,18 @@ const NullSpecEditor = props => null;
 const AttributeSchemaEditor = props => {
 	const { value: { key, type, spec = {} }, onChange } = props;
 
-	const typeOptions = ['text', 'number', 'select', 'checkbox'];
+	const typeOptions = {
+		text: 'Text',
+		number: 'Number',
+		select: 'Select',
+		boolean: 'Checkbox'
+	};
 
 	const SpecEditor = {
 		text: NullSpecEditor,
 		number: NullSpecEditor,
 		select: SelectSpecEditor,
-		checkbox: NullSpecEditor
+		boolean: NullSpecEditor
 	}[type];
 
 	const handleKeyChange = ev => {

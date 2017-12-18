@@ -13,6 +13,19 @@ properties:
     maxLength: 64
     description: >
       Short name for this project.
+  icon:
+    type: object
+    properties:
+      glyph:
+        type: string
+        format: kebab
+      color:
+        type: string
+        format: color
+      backgroundColor:
+        type: string
+        format: color
+    requiredProperties: ['glyph', 'color', 'backgroundColor']
   description:
     type: string
     maxLength: 1024

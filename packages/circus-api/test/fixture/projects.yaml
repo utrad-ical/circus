@@ -1,6 +1,10 @@
 -
   projectId: 8883fdef6f5144f50eb2a83cd34baa44
   projectName: Lung nodules
+  icon:
+    glyph: lung
+    color: '#ffff00'
+    backgroundColor: '#00ffff'
   description: Collection of various lung nodules
   windowPriority: 'dicom,auto'
   windowPresets: []

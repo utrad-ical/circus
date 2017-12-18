@@ -4,47 +4,57 @@ import { Button } from 'components/react-bootstrap';
 import { Link } from 'react-router';
 // import { Tag } from 'components/tag';
 import { connect } from 'react-redux';
+import DataGrid from 'components/DataGrid';
+import PatientInfoBox from 'pages/search/PatientInfoBox';
+import ProjectDisplay from 'components/ProjectDisplay';
 
-const DataViewRow = props => {
-	const { item } = props;
-	function anon(item) {
-		if (item) {
-			return item;
-		} else {
-			return <span className='anonymized'>(anonymized)</span>;
-		}
-	}
+const Tags = props => {
+	const item = props.value;
+	return JSON.stringify(item.tags);
+};
 
-	return <div className='search-result series'>
-		<div className='project-name'>{item.projectID}</div>
-		<div className='carete-time'>{item.createTime}</div>
-		<div className='patient-id'>
-			{anon(item.patientInfoCache.patientID)}
-		</div>
-		<div className='patient-name'>
-			{anon(item.patientInfoCache.patientName)}
-		</div>
-		<div className='tags'>
-			{Array.isArray(item.tags) ? item.tags.map((t, i) => (
-				<span key={i} className='label label-default'>{t}</span>
-			)) : null}
-		</div>
+const Operation = props => {
+	const item = props.value;
+	return (
 		<div className='register'>
 			<Link to={`/case/${item.caseId}`}>
-				<Button>
+				<Button bsSize='sm' bsStyle='primary'>
 					<span className='circus-icon circus-icon-case' />
 					View
 				</Button>
 			</Link>
 		</div>
-	</div>;
+	);
 };
+
+const Project = props => {
+	const item = props.value;
+	return <ProjectDisplay projectId={item.projectId} withName />;
+};
+
+const columns = [
+	{ caption: 'Project', className: 'project', renderer: Project },
+	{
+		caption: 'Patient',
+		className: 'patient',
+		renderer: ({ value: { patientInfoCache }}) => {
+			return <PatientInfoBox value={{patientInfo: patientInfoCache}} />;
+		}
+	},
+	{ caption: 'Create Time', key: 'createdAt' },
+	{ caption: 'Tags', className: 'tags', renderer: Tags },
+	{ caption: '', className: 'operation', renderer: Operation }
+];
 
 const DataView = props => {
 	const { items } = props;
-	return <div className='search-results'>{items.map(
-		item => <DataViewRow key={item.caseId} item={item} />
-	)}</div>;
+	return (
+		<DataGrid
+			className='series-search-result'
+			columns={columns}
+			value={items}
+		/>
+	);
 };
 
 const sortOptions = makeSortOptions({
@@ -53,11 +63,13 @@ const sortOptions = makeSortOptions({
 });
 
 const CaseSearchResultsView = props => {
-	return <SearchResultsView
-		sortOptions={sortOptions}
-		dataView={DataView}
-		{...props}
-	/>;
+	return (
+		<SearchResultsView
+			sortOptions={sortOptions}
+			dataView={DataView}
+			{...props}
+		/>
+	);
 };
 
 export default connect(

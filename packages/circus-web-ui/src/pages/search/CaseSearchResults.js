@@ -2,7 +2,6 @@ import React, { Fragment } from 'react';
 import SearchResultsView, { makeSortOptions } from './SearchResultsView';
 import { Button } from 'components/react-bootstrap';
 import { Link } from 'react-router';
-// import { Tag } from 'components/tag';
 import { connect } from 'react-redux';
 import DataGrid from 'components/DataGrid';
 import PatientInfoBox from 'pages/search/PatientInfoBox';

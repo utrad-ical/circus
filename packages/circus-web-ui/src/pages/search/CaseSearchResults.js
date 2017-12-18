@@ -7,10 +7,17 @@ import { connect } from 'react-redux';
 import DataGrid from 'components/DataGrid';
 import PatientInfoBox from 'pages/search/PatientInfoBox';
 import ProjectDisplay from 'components/ProjectDisplay';
+import ProjectTag from 'components/ProjectTag';
 
 const Tags = props => {
 	const item = props.value;
-	return JSON.stringify(item.tags);
+	return (
+		<span>
+			{item.tags.map(t => (
+				<ProjectTag key={t} projectId={item.projectId} tag={t} />
+			))}
+		</span>
+	);
 };
 
 const Operation = props => {
@@ -43,8 +50,8 @@ const columns = [
 	{
 		caption: 'Patient',
 		className: 'patient',
-		renderer: ({ value: { patientInfoCache }}) => {
-			return <PatientInfoBox value={{patientInfo: patientInfoCache}} />;
+		renderer: ({ value: { patientInfoCache } }) => {
+			return <PatientInfoBox value={{ patientInfo: patientInfoCache }} />;
 		}
 	},
 	{ caption: 'Create Time', key: 'createdAt' },
@@ -78,9 +85,7 @@ const CaseSearchResultsView = props => {
 	);
 };
 
-export default connect(
-	state => {
-		const search = state.searches.case || {};
-		return { ...search, name: 'case' };
-	}
-)(CaseSearchResultsView);
+export default connect(state => {
+	const search = state.searches.case || {};
+	return { ...search, name: 'case' };
+})(CaseSearchResultsView);

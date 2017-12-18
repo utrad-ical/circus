@@ -7,7 +7,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "fontgen": "node assets/icons/fontgen.js",
     "build": "webpack",
-    "lint": "eslint app/front-ui"
+    "lint": "eslint src",
+    "lint-fix": "eslint src --fix"
   },
   "repository": {
     "type": "git",

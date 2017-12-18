@@ -45,7 +45,7 @@ export default class EditorPage extends React.Component {
 			await api(endPoint, args);
 			this.setState({ target: null, editing: null });
 			await this.loadItems();
-			dispatch(refreshUserInfo(true)); // Full user data refresh
+			store.dispatch(refreshUserInfo(true)); // Full user data refresh
 		} catch (err) {
 			this.setState({ complaints: err.data.errors });
 		}

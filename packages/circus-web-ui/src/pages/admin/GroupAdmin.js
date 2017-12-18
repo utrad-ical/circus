@@ -2,7 +2,6 @@ import EditorPage from './EditorPage';
 import React from 'react';
 import { api } from 'utils/api';
 import LoadingIndicator from 'rb/LoadingIndicator';
-import MultiSelect from 'rb/MultiSelect';
 import * as et from 'rb/editor-types';
 import ProjectSelectorMultiple from 'components/ProjectSelectorMultiple';
 

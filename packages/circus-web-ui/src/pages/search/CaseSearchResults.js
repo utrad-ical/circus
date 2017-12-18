@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Fragment } from 'react';
 import SearchResultsView, { makeSortOptions } from './SearchResultsView';
 import { Button } from 'components/react-bootstrap';
 import { Link } from 'react-router';
@@ -29,11 +29,17 @@ const Operation = props => {
 
 const Project = props => {
 	const item = props.value;
-	return <ProjectDisplay projectId={item.projectId} withName />;
+	return <ProjectDisplay projectId={item.projectId} size='xl' withName />;
+};
+
+const CaseId = props => {
+	const item = props.value;
+	return <Fragment>{item.caseId.substr(0, 8)}</Fragment>;
 };
 
 const columns = [
 	{ caption: 'Project', className: 'project', renderer: Project },
+	{ caption: 'Case ID', className: 'caseId', renderer: CaseId },
 	{
 		caption: 'Patient',
 		className: 'patient',

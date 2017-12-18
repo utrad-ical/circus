@@ -14,18 +14,24 @@ const PatientInfoBox = props => {
 			</div>
 			<div className='sub'>
 				<span className='patient-id'>{pt.patientId}</span>
-				<span className='patient-birthdate'>{pt.birthDate}</span>
+				{pt.birthDate && (
+					<Fragment>
+						&ensp;<span className='patient-birthdate'>
+							DOB: {pt.birthDate}
+						</span>
+					</Fragment>
+				)}
 				{pt.size > 0 && (
 					<Fragment>
 						&ensp;<span className='patient-size'>
-							&ensp;Ht: {pt.size}
+							Ht: {pt.size}
 						</span>
 					</Fragment>
 				)}
 				{pt.weight > 0 && (
 					<Fragment>
 						&ensp;<span className='patient-weight'>
-							&ensp;Wt: {pt.weight}
+							Wt: {pt.weight}
 						</span>
 					</Fragment>
 				)}

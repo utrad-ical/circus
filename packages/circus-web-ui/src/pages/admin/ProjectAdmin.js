@@ -34,6 +34,7 @@ const makeEmptyItem = () => {
 	return {
 		projectName: 'untitled project',
 		description: '',
+		icon: { glyph: 'cpu', color: '#38761d', backgroundColor: '#ffffff' },
 		windowPresets: [],
 		windowPriority: 'dicom,preset,auto',
 		tags: [],

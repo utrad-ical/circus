@@ -1,63 +1,88 @@
-import React from 'react';
+import React, { Fragment } from 'react';
 import SearchResultsView, { makeSortOptions } from './SearchResultsView';
 import { Button } from 'components/react-bootstrap';
 import { Link } from 'react-router';
 import { connect } from 'react-redux';
+import DataGrid from 'components/DataGrid';
 
-/*
-async function createCase(seriesUID) {
-	if (!(await modal.confirm('Add case for ' + seriesUID + '?'))) return;
-	// console.log('Add case ' + seriesUID);
-}
-*/
+const Modality = props => {
+	const series = props.value;
+	return <span className='label label-default'>{series.modality}</span>;
+};
 
-const DataViewRow = props => {
-	function anon(item) {
-		if (item) {
-			return item;
-		} else {
-			return <span className='anonymized'>(anonymized)</span>;
-		}
+const Patient = props => {
+	const { patientInfo: pt } = props.value;
+	if (!pt) {
+		return <span className='patient-info-masked'>(masked)</span>;
 	}
+	return (
+		<div className='patient-info-box'>
+			<div>
+				<span className='patient-name'>{pt.patientName}</span>&ensp;
+				<span className='patient-age'>{pt.age}</span>
+				<span className='patient-sex'>{pt.sex}</span>
+			</div>
+			<div className='sub'>
+				<span className='patient-id'>{pt.patientId}</span>
+				<span className='patient-birthdate'>{pt.birthDate}</span>
+				{pt.size > 0 && (
+					<Fragment>
+						&ensp;<span className='patient-size'>
+							&ensp;Ht: {pt.size}
+						</span>
+					</Fragment>
+				)}
+				{pt.weight > 0 && (
+					<Fragment>
+						&ensp;<span className='patient-weight'>
+							&ensp;Wt: {pt.weight}
+						</span>
+					</Fragment>
+				)}
+			</div>
+		</div>
+	);
+};
 
-	const { item } = props;
-
-	return <div className='search-result series'>
-		<div className='modality'>{item.modality}</div>
-		<div className='series-date'>{item.seriesDate}</div>
-		<div className='create-time'>{item.createTime}</div>
-		<div className='series-description'>{item.seriesDescription}</div>
-		<div className='patient-id'>
-			{anon(item.patientInfo.patientID)}
-		</div>
-		<div className='patient-name'>
-			{anon(item.patientInfo.patientName)}
-		</div>
-		<div className='patient-age-sex'>
-			{anon(`${item.patientInfo.age} ${item.patientInfo.sex}`)}
-		</div>
-		<div className='register'>
-			<Link to={`/series/${item.seriesUid}`}>
-				<Button>
+const Operation = props => {
+	const { value: series } = props;
+	return (
+		<Fragment>
+			<Link to={`/series/${series.seriesUid}`}>
+				<Button bsSize='sm'>
 					<span className='circus-icon circus-icon-series' />
 					View
 				</Button>
 			</Link>
-			<Link to={`/new-case/${item.seriesUid}`}>
-				<Button>
+			&thinsp;
+			<Link to={`/new-case/${series.seriesUid}`}>
+				<Button bsStyle='primary' bsSize='sm'>
 					<span className='circus-icon circus-icon-case' />
-					Create Case
+					New
 				</Button>
 			</Link>
-		</div>
-	</div>;
+		</Fragment>
+	);
 };
+
+const columns = [
+	{ caption: '', className: 'modality', renderer: Modality },
+	{ caption: 'Patient', className: 'patient', renderer: Patient },
+	{ caption: 'Series Desc', key: 'seriesDescription' },
+	{ caption: 'Series Date', key: 'seriesDate' },
+	{ caption: 'Import date', key: 'createdAt' },
+	{ caption: '', className: 'operation', renderer: Operation }
+];
 
 const DataView = props => {
 	const { items } = props;
-	return <div className='search-results'>{items.map(
-		item => <DataViewRow key={item.seriesUid} item={item} />
-	)}</div>;
+	return (
+		<DataGrid
+			className='series-search-result'
+			columns={columns}
+			value={items}
+		/>
+	);
 };
 
 const sortOptions = makeSortOptions({
@@ -68,16 +93,16 @@ const sortOptions = makeSortOptions({
 });
 
 const SeriesSearchResultsView = props => {
-	return <SearchResultsView
-		sortOptions={sortOptions}
-		dataView={DataView}
-		{...props}
-	/>;
+	return (
+		<SearchResultsView
+			sortOptions={sortOptions}
+			dataView={DataView}
+			{...props}
+		/>
+	);
 };
 
-export default connect(
-	state => {
-		const search = state.searches.series || {};
-		return { ...search, name: 'series' };
-	}
-)(SeriesSearchResultsView);
+export default connect(state => {
+	const search = state.searches.series || {};
+	return { ...search, name: 'series' };
+})(SeriesSearchResultsView);

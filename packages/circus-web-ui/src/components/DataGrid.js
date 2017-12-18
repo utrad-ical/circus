@@ -16,7 +16,7 @@ const DataGrid = props => {
 	const { value, className } = props;
 	const columns = props.columns.map(normalizeColumn);
 	return (
-		<table className={classnames('table', className)}>
+		<table className={classnames('table', 'data-grid', className)}>
 			<thead>
 				<tr>
 					{columns.map(c => (

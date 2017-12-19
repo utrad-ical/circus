@@ -16,7 +16,7 @@ const ProjectDisplayView = props => {
 	</Tooltip>;
 	return (
 		<OverlayTrigger overlay={toolTip} placement='top'>
-			<div>
+			<span>
 				<ProjectIcon icon={project.project.icon} size={size} />
 				{withName && (
 					<span>
@@ -28,7 +28,7 @@ const ProjectDisplayView = props => {
 						&ensp;<small>{project.project.description}</small>
 					</span>
 				)}
-			</div>
+			</span>
 		</OverlayTrigger>
 	);
 };

@@ -1,6 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import ProjectIcon from 'components/ProjectIcon';
+import { OverlayTrigger, Tooltip } from 'components/react-bootstrap';
 
 const ProjectDisplayView = props => {
 	const { projectId, size, withName, withDescription } = props;
@@ -10,20 +11,25 @@ const ProjectDisplayView = props => {
 	if (!project) {
 		throw new Error('Tried to render icon for an inaccessible project');
 	}
+	const toolTip = <Tooltip placelemnt='top'>
+		{project.project.description}
+	</Tooltip>;
 	return (
-		<span>
-			<ProjectIcon icon={project.project.icon} size={size} />
-			{withName && (
-				<span>
-					&ensp;<b>{project.project.projectName}</b>
-				</span>
-			)}
-			{withDescription && (
-				<span>
-					&ensp;<small>{project.project.description}</small>
-				</span>
-			)}
-		</span>
+		<OverlayTrigger overlay={toolTip} placement='top'>
+			<div>
+				<ProjectIcon icon={project.project.icon} size={size} />
+				{withName && (
+					<span>
+						&ensp;<b>{project.project.projectName}</b>
+					</span>
+				)}
+				{withDescription && (
+					<span>
+						&ensp;<small>{project.project.description}</small>
+					</span>
+				)}
+			</div>
+		</OverlayTrigger>
 	);
 };
 

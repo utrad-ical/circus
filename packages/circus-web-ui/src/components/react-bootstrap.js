@@ -29,6 +29,7 @@ export { default as Pagination } from 'react-bootstrap/lib/Pagination';
 export { default as ProgressBar } from 'react-bootstrap/lib/ProgressBar';
 
 export { default as OverlayTrigger } from 'react-bootstrap/lib/OverlayTrigger';
+export { default as Tooltip } from 'react-bootstrap/lib/Tooltip';
 export { default as Popover } from 'react-bootstrap/lib/Popover';
 
 export { default as Tabs } from 'react-bootstrap/lib/Tabs';

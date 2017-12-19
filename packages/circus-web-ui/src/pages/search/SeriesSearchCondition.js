@@ -8,17 +8,6 @@ import { Well } from 'components/react-bootstrap';
 import AgeMinMax from 'components/AgeMinMax';
 import { conditionToMongoQuery } from 'rb/ConditionEditor';
 
-const advancedConditionKeys = {
-	modality: { caption: 'modality', type: 'select', spec: { options: modalities }},
-	seriesUid: { caption: 'series UID', type: 'text' },
-	seriesDescription: { caption: 'series description', type: 'text' },
-	patientId: { caption: 'patient ID', type: 'text' },
-	patientName: { caption: 'patient name', type: 'text' },
-	age: { caption: 'age', type: 'number' },
-	sex: { caption: 'sex', type: 'select', spec: { options: ['M', 'F', 'O'] } },
-	seriesDate: { caption: 'series date', type: 'text' },
-};
-
 const sexOptions = { all: 'All', M: 'male', F: 'female', O: 'other' };
 const modalityOptions = { all: 'All' };
 modalities.forEach(m => modalityOptions[m] = m);
@@ -59,6 +48,17 @@ const basicFilterToMongoQuery = condition => {
 		}
 	});
 	return members.length > 0 ? { $and: members } : {};
+};
+
+const advancedConditionKeys = {
+	modality: { caption: 'modality', type: 'select', spec: { options: modalities }},
+	seriesUid: { caption: 'series UID', type: 'text' },
+	seriesDescription: { caption: 'series description', type: 'text' },
+	patientId: { caption: 'patient ID', type: 'text' },
+	patientName: { caption: 'patient name', type: 'text' },
+	age: { caption: 'age', type: 'number' },
+	sex: { caption: 'sex', type: 'select', spec: { options: ['M', 'F', 'O'] } },
+	seriesDate: { caption: 'series date', type: 'text' },
 };
 
 const conditionToFilter = condition => {

@@ -4,7 +4,6 @@ import ConditionFrame from './ConditionFrame';
 import { escapeRegExp } from 'utils/util';
 import * as et from 'rb/editor-types';
 import DateRangePicker, { dateRangeToMongoQuery } from 'rb/DateRangePicker';
-import PropertyEditor from 'rb/PropertyEditor';
 import { Well } from 'components/react-bootstrap';
 import AgeMinMax from 'components/AgeMinMax';
 
@@ -23,7 +22,7 @@ const sexOptions = { all: 'All', M: 'male', F: 'female', O: 'other' };
 const modalityOptions = { all: 'All' };
 modalities.forEach(m => modalityOptions[m] = m);
 
-const properties = [
+const basicConditionProperties = [
 	{ key: 'modality', caption: 'Modality', editor: et.shrinkSelect(modalityOptions) },
 	{ key: 'seriesUid', caption: 'Series UID', editor: et.text() },
 	{ key: 'seriesDescription', caption: 'Series Description', editor: et.text() },
@@ -33,15 +32,6 @@ const properties = [
 	{ key: 'sex', caption: 'Sex', editor: et.shrinkSelect(sexOptions) },
 	{ key: 'seriesDate', caption: 'Series Date', editor: DateRangePicker }
 ];
-
-const BasicConditionForm = props => {
-	return <PropertyEditor
-		className='condition-basic-filter'
-		properties={properties}
-		value={props.value}
-		onChange={props.onChange}
-	/>;
-};
 
 const basicFilterToMongoQuery = condition => {
 	const members = [];
@@ -78,7 +68,7 @@ export default function SeriesSearchCondition(props) {
 			onChange={onChange}
 			onSearch={onSearch}
 			onResetClick={onResetClick}
-			basicConditionForm={BasicConditionForm}
+			basicConditionProperties={basicConditionProperties}
 			conditionKeys={conditionKeys}
 			basicFilterToMongoQuery={basicFilterToMongoQuery}
 		/>

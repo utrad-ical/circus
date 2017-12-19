@@ -1,6 +1,5 @@
 import React from 'react';
 import DateRangePicker, { dateRangeToMongoQuery } from 'rb/DateRangePicker';
-import PropertyEditor from 'rb/PropertyEditor';
 import { modalities } from 'modalities';
 import * as et from 'rb/editor-types';
 import ConditionFrame from './ConditionFrame';
@@ -80,7 +79,7 @@ class CaseSearchConditionView extends React.Component {
 				onChange={this.props.onChange}
 				onSearch={this.props.onSearch}
 				onResetClick={this.props.onResetClick}
-				basicConditionForm={BasicConditionForm}
+				basicConditionProperties={basicConditionProperties}
 				conditionKeys={this.conditionKeys}
 				basicFilterToMongoQuery={basicFilterToMongoQuery}
 				formParams={{ availableTags: this.state.availableTags }}
@@ -98,7 +97,7 @@ export default CaseSearchCondition;
 const modalityOptions = { all: 'All' };
 modalities.forEach(m => modalityOptions[m] = m);
 
-const properties = [
+const basicConditionProperties = [
 	{ key: 'caseId', caption: 'Case ID', editor: et.text() },
 	{ key: 'patientId', caption: 'Patient ID', editor: et.text() },
 	{ key: 'patientName', caption: 'Patient Name', editor: et.text() },
@@ -106,12 +105,3 @@ const properties = [
 	{ key: 'updatedAt', caption: 'Case Updated at', editor: DateRangePicker },
 	{ key: 'tags', caption: 'Tags', editor: et.multiSelect({ a: '1' }) }
 ];
-
-const BasicConditionForm = props => {
-	return <PropertyEditor
-		className='condition-basic-filter'
-		properties={properties}
-		value={props.value}
-		onChange={props.onChange}
-	/>;
-};

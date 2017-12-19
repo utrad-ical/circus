@@ -2,6 +2,7 @@ import React from 'react';
 import { Tabs, Tab, Button } from 'components/react-bootstrap';
 import IconButton from 'rb/IconButton';
 import ConditionEditor, { conditionToMongoQuery } from 'rb/ConditionEditor';
+import PropertyEditor from 'rb/PropertyEditor';
 import { Tag } from 'components/tag';
 
 const ConditionFrame = props => {
@@ -33,7 +34,7 @@ const ConditionFrame = props => {
 	}
 
 	const {
-		basicConditionForm: BasicConditionForm,
+		basicConditionProperties,
 		formParams = {}
 	} = props;
 	const activeKey = props.condition.type === 'advanced' ? 2 : 1;
@@ -47,7 +48,9 @@ const ConditionFrame = props => {
 				onSelect={handleChangeType}
 			>
 				<Tab eventKey={1} title='Basic'>
-					<BasicConditionForm
+					<PropertyEditor
+						className='condition-basic-filter'
+						properties={basicConditionProperties}
 						value={props.condition.basicFilter}
 						onChange={handleBasicFilterChange}
 						{...formParams}

@@ -5,6 +5,7 @@ import { Link } from 'react-router';
 import { connect } from 'react-redux';
 import DataGrid from 'components/DataGrid';
 import PatientInfoBox from 'pages/search/PatientInfoBox';
+import TimeDisplay from 'components/TimeDisplay';
 
 const Modality = props => {
 	const series = props.value;
@@ -40,8 +41,16 @@ const columns = [
 	{ caption: '', className: 'modality', renderer: Modality },
 	{ caption: 'Patient', className: 'patient', renderer: PatientInfoBox },
 	{ caption: 'Series Desc', key: 'seriesDescription' },
-	{ caption: 'Series Date', key: 'seriesDate' },
-	{ caption: 'Import date', key: 'createdAt' },
+	{
+		caption: 'Series Date',
+		className: 'series-date',
+		renderer: props => <TimeDisplay value={props.value.seriesDate} />
+	},
+	{
+		caption: 'Import date',
+		className: 'created-at',
+		renderer: props => <TimeDisplay value={props.value.createdAt} />
+	},
 	{ caption: '', className: 'operation', renderer: Operation }
 ];
 

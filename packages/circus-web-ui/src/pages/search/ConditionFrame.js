@@ -20,7 +20,10 @@ const ConditionFrame = props => {
 
 	const {
 		basicConditionProperties,
-		advancedConditionKeys
+		advancedConditionKeys,
+		condition,
+		onSearchClick,
+		onResetClick
 	} = props;
 	const activeKey = props.condition.type === 'advanced' ? 2 : 1;
 
@@ -36,27 +39,27 @@ const ConditionFrame = props => {
 					<PropertyEditor
 						className='condition-basic-filter'
 						properties={basicConditionProperties}
-						value={props.condition.basicFilter}
+						value={condition.basicFilter}
 						onChange={handleBasicFilterChange}
 					/>
 				</Tab>
 				<Tab eventKey={2} title='Advanced'>
 					<ConditionEditor
 						keys={advancedConditionKeys}
-						value={props.condition.advancedFilter}
+						value={condition.advancedFilter}
 						onChange={handleAdvancedFilterChange}
 					/>
 				</Tab>
 			</Tabs>
 			<div className='search-buttons'>
-				<Button bsStyle='link' onClick={props.onResetClick}>
+				<Button bsStyle='link' onClick={onResetClick}>
 					Reset
 				</Button>
 				&ensp;
 				<IconButton
 					bsStyle='primary'
 					icon='search'
-					onClick={props.onSearchClick}
+					onClick={onSearchClick}
 				>
 					Search
 				</IconButton>

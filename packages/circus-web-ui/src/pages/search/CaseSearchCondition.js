@@ -9,6 +9,18 @@ import { connect } from 'react-redux';
 import ProjectSelectorMultiple from 'components/ProjectSelectorMultiple';
 import { conditionToMongoQuery } from 'rb/ConditionEditor';
 
+const modalityOptions = { all: 'All' };
+modalities.forEach(m => modalityOptions[m] = m);
+
+const basicConditionProperties = [
+	{ key: 'caseId', caption: 'Case ID', editor: et.text() },
+	{ key: 'patientId', caption: 'Patient ID', editor: et.text() },
+	{ key: 'patientName', caption: 'Patient Name', editor: et.text() },
+	{ key: 'createdAt', caption: 'Case Created at', editor: DateRangePicker },
+	{ key: 'updatedAt', caption: 'Case Updated at', editor: DateRangePicker },
+	{ key: 'tags', caption: 'Tags', editor: et.multiSelect({ a: '1' }) }
+];
+
 const basicFilterToMongoQuery = (condition) => {
 	const members = [];
 	Object.keys(condition).forEach(key => {
@@ -109,15 +121,3 @@ const CaseSearchCondition = connect(
 )(CaseSearchConditionView);
 
 export default CaseSearchCondition;
-
-const modalityOptions = { all: 'All' };
-modalities.forEach(m => modalityOptions[m] = m);
-
-const basicConditionProperties = [
-	{ key: 'caseId', caption: 'Case ID', editor: et.text() },
-	{ key: 'patientId', caption: 'Patient ID', editor: et.text() },
-	{ key: 'patientName', caption: 'Patient Name', editor: et.text() },
-	{ key: 'createdAt', caption: 'Case Created at', editor: DateRangePicker },
-	{ key: 'updatedAt', caption: 'Case Updated at', editor: DateRangePicker },
-	{ key: 'tags', caption: 'Tags', editor: et.multiSelect({ a: '1' }) }
-];

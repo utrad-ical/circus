@@ -14,6 +14,7 @@ export default class SearchCommon extends React.Component {
 		};
 		this.handleConditionChange = this.handleConditionChange.bind(this);
 		this.handleSearchClick = this.handleSearchClick.bind(this);
+		this.handleResetClick = this.handleResetClick.bind(this);
 	}
 
 	handleConditionChange(newCondition) {
@@ -28,6 +29,11 @@ export default class SearchCommon extends React.Component {
 			filter,
 			defaultSort
 		));
+	}
+
+	handleResetClick() {
+		const { nullCondition } = this.props;
+		this.setState({ condition: nullCondition() });
 	}
 
 	render() {
@@ -47,6 +53,7 @@ export default class SearchCommon extends React.Component {
 				nullCondition={nullCondition}
 				onSearch={this.handleSearchClick}
 				onChange={this.handleConditionChange}
+				onResetClick={this.handleResetClick}
 			/>
 			{ /* <pre>{JSON.stringify(this.state.filter, null, '  ')}</pre> */ }
 			<ResultComp />

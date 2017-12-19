@@ -70,6 +70,7 @@ function searches(state = {}, action) {
 					isFetching: false,
 					resource: action.resource,
 					filter: action.filter,
+					condition: action.condition,
 					sort: action.sort,
 					page: action.page,
 					per: action.per,

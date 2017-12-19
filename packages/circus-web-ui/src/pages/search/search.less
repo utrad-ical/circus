@@ -7,16 +7,29 @@
 	input.form-control { width: 80px; }
 }
 
-.table.data-grid {
-	tbody tr td { vertical-align: middle; }
-	border-bottom: 2px solid #ddd;
-}
+.search-results-container {
+	.search-results-header {
+		text-align: right;
+		margin-bottom: 0.3em;
+	}
 
-.data-grid .patient {
-	.patient-info-masked { color: silver; }
-	.patient-info-box {
-		.sub { font-size: 80%; color: gray; }
-		.patient-id { font-style: italic; }
-		.patient-name { font-weight: bold; }
+	.search-results-pager {
+		text-align: center;
+	}
+
+	.table.data-grid {
+		tbody tr td { vertical-align: middle; }
+		border-bottom: 2px solid #ddd;
+
+		.modality-marker { font-size: 120%; }
+
+		.patient {
+			.patient-info-masked { color: silver; }
+			.patient-info-box {
+				.sub { font-size: 80%; color: gray; }
+				.patient-id { font-style: italic; }
+				.patient-name { font-weight: bold; }
+			}
+		}
 	}
 }

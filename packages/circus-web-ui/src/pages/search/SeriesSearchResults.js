@@ -8,7 +8,11 @@ import PatientInfoBox from 'pages/search/PatientInfoBox';
 
 const Modality = props => {
 	const series = props.value;
-	return <span className='label label-default'>{series.modality}</span>;
+	return (
+		<span className='modality-marker label label-default'>
+			{series.modality}
+		</span>
+	);
 };
 
 const Operation = props => {

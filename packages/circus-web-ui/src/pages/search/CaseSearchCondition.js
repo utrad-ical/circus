@@ -7,6 +7,7 @@ import { escapeRegExp } from 'utils/util';
 import { Well, ControlLabel } from 'components/react-bootstrap';
 import { connect } from 'react-redux';
 import ProjectSelectorMultiple from 'components/ProjectSelectorMultiple';
+import { conditionToMongoQuery } from 'rb/ConditionEditor';
 
 const basicFilterToMongoQuery = (condition) => {
 	const members = [];
@@ -33,6 +34,15 @@ const basicFilterToMongoQuery = (condition) => {
 	return members.length > 0 ? { $and: members } : {};
 };
 
+const conditionToFilter = condition => {
+	switch (condition.type) {
+		case 'basic':
+			return basicFilterToMongoQuery(condition.basicFilter);
+		case 'advanced':
+			return conditionToMongoQuery(condition.advancedFilter);
+	}
+	throw new Error('Unkonwn condition type');
+};
 
 class CaseSearchConditionView extends React.Component {
 	constructor(props) {
@@ -46,6 +56,7 @@ class CaseSearchConditionView extends React.Component {
 			availableTags: {}
 		};
 		this.selectedProjectsChange = this.selectedProjectsChange.bind(this);
+		this.handleSearchClick = this.handleSearchClick.bind(this);
 	}
 
 	selectedProjectsChange(projects) {
@@ -63,6 +74,12 @@ class CaseSearchConditionView extends React.Component {
 		});
 	}
 
+	handleSearchClick() {
+		const { condition } = this.props;
+		const filter = conditionToFilter(condition);
+		this.props.onSearch({ condition, filter });
+	}
+
 	render() {
 		const { accessibleProjects } = this.props;
 		return <Well>
@@ -77,7 +94,7 @@ class CaseSearchConditionView extends React.Component {
 			<ConditionFrame
 				condition={this.props.condition}
 				onChange={this.props.onChange}
-				onSearch={this.props.onSearch}
+				onSearchClick={this.handleSearchClick}
 				onResetClick={this.props.onResetClick}
 				basicConditionProperties={basicConditionProperties}
 				advancedConditionKeys={this.advancedConditionKeys}

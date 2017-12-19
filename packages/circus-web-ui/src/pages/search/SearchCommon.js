@@ -13,7 +13,7 @@ export default class SearchCommon extends React.Component {
 			condition: props.nullCondition()
 		};
 		this.handleConditionChange = this.handleConditionChange.bind(this);
-		this.handleSearchClick = this.handleSearchClick.bind(this);
+		this.handleSearch = this.handleSearch.bind(this);
 		this.handleResetClick = this.handleResetClick.bind(this);
 	}
 
@@ -21,7 +21,7 @@ export default class SearchCommon extends React.Component {
 		this.setState({ condition: newCondition });
 	}
 
-	handleSearchClick(filter) {
+	handleSearch({ filter }) {
 		const { searchName, resource, defaultSort } = this.props;
 		store.dispatch(startNewSearch(
 			searchName,
@@ -51,7 +51,7 @@ export default class SearchCommon extends React.Component {
 			<ConditionComp
 				condition={this.state.condition}
 				nullCondition={nullCondition}
-				onSearch={this.handleSearchClick}
+				onSearch={this.handleSearch}
 				onChange={this.handleConditionChange}
 				onResetClick={this.handleResetClick}
 			/>

@@ -64,9 +64,17 @@ export default function createOauthServer(models) {
 		}
 	};
 
+	async function onTokenIssue(ctx, token) {
+		await models.user.modifyOne(token.user.userEmail, {
+			lastLoginTime: new Date(),
+			lastLoginIp: ctx.request.ip
+		});
+	}
+
 	const oauth = new KoaOAuth2Server({
 		model: oauthModel,
 		grants: ['password'],
+		onTokenIssue,
 		debug
 	});
 	return oauth;

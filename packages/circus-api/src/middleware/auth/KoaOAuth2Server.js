@@ -10,6 +10,7 @@ export default class KoaOAuth2Server {
 			throw new TypeError('Missing parameter: `model`');
 		}
 		this.server = new NodeOAuthServer(options);
+		this.options = options;
 	}
 
 	handleResponse(ctx, response) {
@@ -54,6 +55,9 @@ export default class KoaOAuth2Server {
 			const response = new Response(ctx.res);
 			const token = await this.server.token(request, response, options);
 			ctx.state.oauth = { token };
+			if (typeof this.options.onTokenIssue === 'function') {
+				await this.options.onTokenIssue.call(null, ctx, token);
+			}
 			this.handleResponse(ctx, response);
 		};
 	}

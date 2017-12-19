@@ -19,7 +19,7 @@ export default class CaseSearch extends React.Component {
 			icon='circus-case'
 			searchName='case'
 			resource='cases'
-			defaultSort='{"createTime":-1}'
+			defaultSort='{"createdAt":-1}'
 			conditionComp={CaseSearchCondition}
 			resultComp={CaseSearchResults}
 			nullCondition={nullCondition}

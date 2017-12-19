@@ -75,8 +75,9 @@ const DataView = props => {
 };
 
 const sortOptions = makeSortOptions({
-	createTime: 'series import time',
-	projectID: 'project'
+	createdAt: 'case create time',
+	updatedAt: 'case updated time',
+	projectId: 'project'
 });
 
 const CaseSearchResultsView = props => {

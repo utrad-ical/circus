@@ -16,6 +16,7 @@ import merge from 'merge';
 import classNames from 'classnames';
 import EventEmitter from 'events';
 import { sha1 } from '../../utils/util.js';
+import ProjectDisplay from 'components/ProjectDisplay';
 
 export default class CaseDetail extends React.Component {
 	constructor(props) {
@@ -182,12 +183,8 @@ export default class CaseDetail extends React.Component {
 		});
 		return <div>
 			<Card title='Case Info'>
-				<ul>
-					<li>Case ID: {cid}</li>
-					<li>Case Created At: {caseData.createdAt}</li>
-					<li>Project Name: {prj.projectName}</li>
-					<li>Tags: <TagList tags={tags} /></li>
-				</ul>
+				<ProjectDisplay projectId={prj.projectId} withName size='xl' />
+				Case: {cid} (created at: {caseData.createdAt})
 			</Card>
 			<MenuBar
 				onSaveClick={this.saveRevision}

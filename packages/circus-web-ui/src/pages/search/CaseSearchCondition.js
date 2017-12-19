@@ -85,10 +85,10 @@ export default class CaseSearchCondition extends React.Component {
 				condition={this.props.condition}
 				onChange={this.props.onChange}
 				onSearch={this.props.onSearch}
+				onResetClick={this.props.onResetClick}
 				basicConditionForm={BasicConditionForm}
 				conditionKeys={this.conditionKeys}
 				basicFilterToMongoQuery={basicFilterToMongoQuery}
-				nullCondition={CaseSearchCondition.nullCondition}
 				formParams={{ availableTags: this.state.availableTags }}
 			/>
 		</Well>;

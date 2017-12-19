@@ -71,16 +71,16 @@ const basicFilterToMongoQuery = condition => {
 };
 
 export default function SeriesSearchCondition(props) {
-	const { condition, onChange, onSearch, nullCondition } = props;
+	const { condition, onChange, onSearch, onResetClick } = props;
 	return <Well>
 		<ConditionFrame
 			condition={condition}
 			onChange={onChange}
 			onSearch={onSearch}
+			onResetClick={onResetClick}
 			basicConditionForm={BasicConditionForm}
 			conditionKeys={conditionKeys}
 			basicFilterToMongoQuery={basicFilterToMongoQuery}
-			nullCondition={nullCondition}
 		/>
 	</Well>;
 }

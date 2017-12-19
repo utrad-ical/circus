@@ -18,10 +18,6 @@ const ConditionFrame = props => {
 		props.onChange({ ...props.condition, advancedFilter });
 	}
 
-	function handleResetClick() {
-		props.onChange(props.nullCondition());
-	}
-
 	function handleSearchClick() {
 		let condition;
 		if (props.condition.type === 'basic') {
@@ -66,7 +62,7 @@ const ConditionFrame = props => {
 				</Tab>
 			</Tabs>
 			<div className='search-buttons'>
-				<Button bsStyle='link' onClick={handleResetClick}>
+				<Button bsStyle='link' onClick={props.onResetClick}>
 					Reset
 				</Button>
 				&ensp;

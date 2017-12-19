@@ -4,18 +4,26 @@ import ConditionFrame from './ConditionFrame';
 import { escapeRegExp } from 'utils/util';
 import * as et from 'rb/editor-types';
 import DateRangePicker, { dateRangeToMongoQuery } from 'rb/DateRangePicker';
-import { Well } from 'components/react-bootstrap';
 import AgeMinMax from 'components/AgeMinMax';
 import { conditionToMongoQuery } from 'rb/ConditionEditor';
+import SearchPanel from 'pages/search/SearchPanel';
 
 const sexOptions = { all: 'All', M: 'male', F: 'female', O: 'other' };
 const modalityOptions = { all: 'All' };
-modalities.forEach(m => modalityOptions[m] = m);
+modalities.forEach(m => (modalityOptions[m] = m));
 
 const basicConditionProperties = [
-	{ key: 'modality', caption: 'Modality', editor: et.shrinkSelect(modalityOptions) },
+	{
+		key: 'modality',
+		caption: 'Modality',
+		editor: et.shrinkSelect(modalityOptions)
+	},
 	{ key: 'seriesUid', caption: 'Series UID', editor: et.text() },
-	{ key: 'seriesDescription', caption: 'Series Description', editor: et.text() },
+	{
+		key: 'seriesDescription',
+		caption: 'Series Description',
+		editor: et.text()
+	},
 	{ key: 'patientId', caption: 'Patient ID', editor: et.text() },
 	{ key: 'patientName', caption: 'Patient Name', editor: et.text() },
 	{ key: 'age', caption: 'Age', editor: AgeMinMax },
@@ -29,8 +37,10 @@ const basicFilterToMongoQuery = condition => {
 		const val = condition[key];
 		switch (key) {
 			case 'age':
-				if (typeof val.min === 'number') members.push({ 'patientInfo.age': { $gte: val.min }});
-				if (typeof val.max === 'number') members.push({ 'patientInfo.age': { $lte: val.max }});
+				if (typeof val.min === 'number')
+					members.push({ 'patientInfo.age': { $gte: val.min } });
+				if (typeof val.max === 'number')
+					members.push({ 'patientInfo.age': { $lte: val.max } });
 				break;
 			case 'seriesDate': {
 				const q = dateRangeToMongoQuery(val, 'seriesDate');
@@ -51,14 +61,18 @@ const basicFilterToMongoQuery = condition => {
 };
 
 const advancedConditionKeys = {
-	modality: { caption: 'modality', type: 'select', spec: { options: modalities }},
+	modality: {
+		caption: 'modality',
+		type: 'select',
+		spec: { options: modalities }
+	},
 	seriesUid: { caption: 'series UID', type: 'text' },
 	seriesDescription: { caption: 'series description', type: 'text' },
 	patientId: { caption: 'patient ID', type: 'text' },
 	patientName: { caption: 'patient name', type: 'text' },
 	age: { caption: 'age', type: 'number' },
 	sex: { caption: 'sex', type: 'select', spec: { options: ['M', 'F', 'O'] } },
-	seriesDate: { caption: 'series date', type: 'text' },
+	seriesDate: { caption: 'series date', type: 'text' }
 };
 
 const conditionToFilter = condition => {
@@ -79,15 +93,18 @@ export default function SeriesSearchCondition(props) {
 		onSearch({ condition, filter });
 	}
 
-	return <Well>
-		<ConditionFrame
-			condition={condition}
-			onChange={onChange}
+	return (
+		<SearchPanel
 			onSearchClick={handleSearchClick}
 			onResetClick={onResetClick}
-			basicConditionProperties={basicConditionProperties}
-			advancedConditionKeys={advancedConditionKeys}
-			basicFilterToMongoQuery={basicFilterToMongoQuery}
-		/>
-	</Well>;
+		>
+			<ConditionFrame
+				condition={condition}
+				onChange={onChange}
+				basicConditionProperties={basicConditionProperties}
+				advancedConditionKeys={advancedConditionKeys}
+				basicFilterToMongoQuery={basicFilterToMongoQuery}
+			/>
+		</SearchPanel>
+	);
 }

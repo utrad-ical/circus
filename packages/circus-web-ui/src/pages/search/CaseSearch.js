@@ -7,7 +7,7 @@ const nullCondition = () => {
 	return {
 		type: 'basic',
 		projects: [],
-		basicFilter: {},
+		basicFilter: { tags: [] },
 		advancedFilter: { $and: [] }
 	};
 };

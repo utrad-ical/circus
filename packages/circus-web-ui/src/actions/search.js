@@ -11,6 +11,7 @@ function beginQuery(params) {
 	
 		const resource = params.resource || search.resource;
 		const filter = params.filter || search.filter;
+		const condition = params.condition || search.condition;
 		const page = params.page || search.page;
 		const sort = params.sort || search.sort;
 		const per = params.per || search.per;
@@ -26,6 +27,7 @@ function beginQuery(params) {
 			name,
 			resource,
 			filter,
+			condition,
 			sort,
 			per,
 			page: result.page,
@@ -35,8 +37,11 @@ function beginQuery(params) {
 	};
 }
 
-export function startNewSearch(name, resource, filter, sort) {
-	return beginQuery({ name, resource, filter, page: 1, per: 20, sort });
+export function startNewSearch(name, resource, filter, condition, sort) {
+	// 'filter' is a query object sent to the server.
+	// 'conditon' represents a state of a search condition panel,
+	// from which `filter` is constructed.
+	return beginQuery({ name, resource, filter, condition, page: 1, per: 20, sort });
 }
 
 export function changeSearchPage(name, page) {

@@ -7,7 +7,7 @@ import DateRangePicker, { dateRangeToMongoQuery } from 'rb/DateRangePicker';
 import { Well } from 'components/react-bootstrap';
 import AgeMinMax from 'components/AgeMinMax';
 
-const conditionKeys = {
+const advancedConditionKeys = {
 	modality: { caption: 'modality', type: 'select', spec: { options: modalities }},
 	seriesUid: { caption: 'series UID', type: 'text' },
 	seriesDescription: { caption: 'series description', type: 'text' },
@@ -69,7 +69,7 @@ export default function SeriesSearchCondition(props) {
 			onSearch={onSearch}
 			onResetClick={onResetClick}
 			basicConditionProperties={basicConditionProperties}
-			conditionKeys={conditionKeys}
+			advancedConditionKeys={advancedConditionKeys}
 			basicFilterToMongoQuery={basicFilterToMongoQuery}
 		/>
 	</Well>;

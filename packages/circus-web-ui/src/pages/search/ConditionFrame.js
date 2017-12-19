@@ -35,6 +35,7 @@ const ConditionFrame = props => {
 
 	const {
 		basicConditionProperties,
+		advancedConditionKeys,
 		formParams = {}
 	} = props;
 	const activeKey = props.condition.type === 'advanced' ? 2 : 1;
@@ -58,7 +59,7 @@ const ConditionFrame = props => {
 				</Tab>
 				<Tab eventKey={2} title='Advanced'>
 					<ConditionEditor
-						keys={props.conditionKeys}
+						keys={advancedConditionKeys}
 						value={props.condition.advancedFilter}
 						onChange={handleAdvancedFilterChange}
 					/>

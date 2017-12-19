@@ -6,8 +6,8 @@ import * as et from 'rb/editor-types';
 import ConditionFrame from './ConditionFrame';
 import { escapeRegExp } from 'utils/util';
 import { Well, ControlLabel } from 'components/react-bootstrap';
-import { MultiSelect } from 'components/multiselect';
-import { store } from 'store';
+import { connect } from 'react-redux';
+import ProjectSelectorMultiple from 'components/ProjectSelectorMultiple';
 
 const basicFilterToMongoQuery = (condition) => {
 	const members = [];
@@ -35,31 +35,24 @@ const basicFilterToMongoQuery = (condition) => {
 };
 
 
-export default class CaseSearchCondition extends React.Component {
+class CaseSearchConditionView extends React.Component {
 	constructor(props) {
 		super(props);
 		this.conditionKeys = {
 			caseId: { caption: 'case ID', type: 'text' },
 			tag: { caption: 'Tag', type: 'select', spec: { options: [] } },
 		};
-		const projects = store.getState().loginUser.data.accessibleProjects;
-		const projectOptions = {};
-		projects.filter(p => p.roles.indexOf('read') > -1)
-			.forEach(p => {
-				projectOptions[p.projectId] =
-					{ caption: p.project.projectName, project: p.project };
-			});
 		this.state = {
 			selectedProjects: [],
-			projectOptions,
 			availableTags: {}
 		};
+		this.selectedProjectsChange = this.selectedProjectsChange.bind(this);
 	}
 
 	selectedProjectsChange(projects) {
 		const availableTags = {};
 		for (const pid of projects) {
-			const p = this.state.projectOptions[pid].project;
+			const p = this.props.accessibleProjects.find(p => p.projectId === pid).project;
 			p.tags.forEach(t => {
 				if (availableTags[t.name]) return;
 				availableTags[t.name] = { caption: t.name, color: t.color };
@@ -72,13 +65,14 @@ export default class CaseSearchCondition extends React.Component {
 	}
 
 	render() {
+		const { accessibleProjects } = this.props;
 		return <Well>
 			<div style={{marginBottom: '10px'}}>
 				<ControlLabel>Project:&ensp;</ControlLabel>
-				<MultiSelect
-					options={this.state.projectOptions}
-					onChange={this.selectedProjectsChange.bind(this)}
-					selected={this.state.selectedProjects}
+				<ProjectSelectorMultiple
+					projects={accessibleProjects}
+					value={this.state.selectedProjects}
+					onChange={this.selectedProjectsChange}
 				/>
 			</div>
 			<ConditionFrame
@@ -94,6 +88,12 @@ export default class CaseSearchCondition extends React.Component {
 		</Well>;
 	}
 }
+
+const CaseSearchCondition = connect(
+	state => ({ accessibleProjects: state.loginUser.data.accessibleProjects })
+)(CaseSearchConditionView);
+
+export default CaseSearchCondition;
 
 const modalityOptions = { all: 'All' };
 modalities.forEach(m => modalityOptions[m] = m);

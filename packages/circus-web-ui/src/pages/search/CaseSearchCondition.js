@@ -13,14 +13,16 @@ import SearchPanel from 'pages/search/SearchPanel';
 const modalityOptions = { all: 'All' };
 modalities.forEach(m => (modalityOptions[m] = m));
 
-const basicConditionProperties = [
-	{ key: 'caseId', caption: 'Case ID', editor: et.text() },
-	{ key: 'patientId', caption: 'Patient ID', editor: et.text() },
-	{ key: 'patientName', caption: 'Patient Name', editor: et.text() },
-	{ key: 'createdAt', caption: 'Case Created at', editor: DateRangePicker },
-	{ key: 'updatedAt', caption: 'Case Updated at', editor: DateRangePicker },
-	{ key: 'tags', caption: 'Tags', editor: et.multiSelect({ a: '1' }) }
-];
+const basicConditionPropertiesTemplate = () => {
+	return [
+		{ key: 'caseId', caption: 'Case ID', editor: et.text() },
+		{ key: 'patientId', caption: 'Patient ID', editor: et.text() },
+		{ key: 'patientName', caption: 'Patient Name', editor: et.text() },
+		{ key: 'createdAt', caption: 'Case Created at', editor: DateRangePicker },
+		{ key: 'updatedAt', caption: 'Case Updated at', editor: DateRangePicker },
+		{ key: 'tags', caption: 'Tags', editor: et.multiSelect({}) }
+	];
+};
 
 const basicFilterToMongoQuery = condition => {
 	const members = [];
@@ -34,6 +36,7 @@ const basicFilterToMongoQuery = condition => {
 				break;
 			}
 			case 'tags':
+				if (val.length) members.push({ tags: { $in: val }});
 				break;
 			default:
 				if (key.match(/^(patient(.+))$/)) {
@@ -64,28 +67,37 @@ class CaseSearchConditionView extends React.Component {
 			caseId: { caption: 'case ID', type: 'text' },
 			tag: { caption: 'Tag', type: 'select', spec: { options: [] } }
 		};
+
 		this.state = {
-			selectedProjects: [],
-			availableTags: {}
+			basicConditionProperties: basicConditionPropertiesTemplate()
 		};
+
 		this.selectedProjectsChange = this.selectedProjectsChange.bind(this);
 		this.handleSearchClick = this.handleSearchClick.bind(this);
 	}
 
 	selectedProjectsChange(projects) {
+		const { accessibleProjects, condition } = this.props;
 		const availableTags = {};
 		for (const pid of projects) {
-			const p = this.props.accessibleProjects.find(
-				p => p.projectId === pid
-			).project;
-			p.tags.forEach(t => {
+			const p = accessibleProjects.find(p => p.projectId === pid);
+			p.project.tags.forEach(t => {
 				if (availableTags[t.name]) return;
 				availableTags[t.name] = { caption: t.name, color: t.color };
 			});
 		}
-		this.setState({
-			selectedProjects: projects,
-			availableTags
+		const basicConditionProperties = basicConditionPropertiesTemplate();
+		basicConditionProperties[5].editor = et.multiSelect(availableTags);
+		const newTags = condition.basicFilter.tags.filter(t => availableTags[t]);
+
+		this.setState({ basicConditionProperties });
+		this.props.onChange({
+			...condition,
+			basicFilter: {
+				...condition.basic,
+				tags: newTags
+			},
+			projects
 		});
 	}
 
@@ -96,7 +108,8 @@ class CaseSearchConditionView extends React.Component {
 	}
 
 	render() {
-		const { accessibleProjects } = this.props;
+		const { accessibleProjects, condition } = this.props;
+
 		return (
 			<SearchPanel
 				onSearchClick={this.handleSearchClick}
@@ -106,14 +119,14 @@ class CaseSearchConditionView extends React.Component {
 					<ControlLabel>Project:&ensp;</ControlLabel>
 					<ProjectSelectorMultiple
 						projects={accessibleProjects}
-						value={this.state.selectedProjects}
+						value={condition.projects}
 						onChange={this.selectedProjectsChange}
 					/>
 				</div>
 				<ConditionFrame
-					condition={this.props.condition}
+					condition={condition}
 					onChange={this.props.onChange}
-					basicConditionProperties={basicConditionProperties}
+					basicConditionProperties={this.state.basicConditionProperties}
 					advancedConditionKeys={this.advancedConditionKeys}
 					basicFilterToMongoQuery={basicFilterToMongoQuery}
 				/>

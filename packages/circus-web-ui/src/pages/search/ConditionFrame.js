@@ -1,6 +1,5 @@
 import React from 'react';
-import { Tabs, Tab, Button } from 'components/react-bootstrap';
-import IconButton from 'rb/IconButton';
+import { Tabs, Tab } from 'components/react-bootstrap';
 import ConditionEditor from 'rb/ConditionEditor';
 import PropertyEditor from 'rb/PropertyEditor';
 
@@ -21,9 +20,7 @@ const ConditionFrame = props => {
 	const {
 		basicConditionProperties,
 		advancedConditionKeys,
-		condition,
-		onSearchClick,
-		onResetClick
+		condition
 	} = props;
 	const activeKey = props.condition.type === 'advanced' ? 2 : 1;
 
@@ -51,19 +48,6 @@ const ConditionFrame = props => {
 					/>
 				</Tab>
 			</Tabs>
-			<div className='search-buttons'>
-				<Button bsStyle='link' onClick={onResetClick}>
-					Reset
-				</Button>
-				&ensp;
-				<IconButton
-					bsStyle='primary'
-					icon='search'
-					onClick={onSearchClick}
-				>
-					Search
-				</IconButton>
-			</div>
 		</div>
 	);
 };

@@ -4,13 +4,14 @@ import { modalities } from 'modalities';
 import * as et from 'rb/editor-types';
 import ConditionFrame from './ConditionFrame';
 import { escapeRegExp } from 'utils/util';
-import { Well, ControlLabel } from 'components/react-bootstrap';
+import { ControlLabel } from 'components/react-bootstrap';
 import { connect } from 'react-redux';
 import ProjectSelectorMultiple from 'components/ProjectSelectorMultiple';
 import { conditionToMongoQuery } from 'rb/ConditionEditor';
+import SearchPanel from 'pages/search/SearchPanel';
 
 const modalityOptions = { all: 'All' };
-modalities.forEach(m => modalityOptions[m] = m);
+modalities.forEach(m => (modalityOptions[m] = m));
 
 const basicConditionProperties = [
 	{ key: 'caseId', caption: 'Case ID', editor: et.text() },
@@ -21,7 +22,7 @@ const basicConditionProperties = [
 	{ key: 'tags', caption: 'Tags', editor: et.multiSelect({ a: '1' }) }
 ];
 
-const basicFilterToMongoQuery = (condition) => {
+const basicFilterToMongoQuery = condition => {
 	const members = [];
 	Object.keys(condition).forEach(key => {
 		const val = condition[key];
@@ -61,7 +62,7 @@ class CaseSearchConditionView extends React.Component {
 		super(props);
 		this.advancedConditionKeys = {
 			caseId: { caption: 'case ID', type: 'text' },
-			tag: { caption: 'Tag', type: 'select', spec: { options: [] } },
+			tag: { caption: 'Tag', type: 'select', spec: { options: [] } }
 		};
 		this.state = {
 			selectedProjects: [],
@@ -74,7 +75,9 @@ class CaseSearchConditionView extends React.Component {
 	selectedProjectsChange(projects) {
 		const availableTags = {};
 		for (const pid of projects) {
-			const p = this.props.accessibleProjects.find(p => p.projectId === pid).project;
+			const p = this.props.accessibleProjects.find(
+				p => p.projectId === pid
+			).project;
 			p.tags.forEach(t => {
 				if (availableTags[t.name]) return;
 				availableTags[t.name] = { caption: t.name, color: t.color };
@@ -94,30 +97,33 @@ class CaseSearchConditionView extends React.Component {
 
 	render() {
 		const { accessibleProjects } = this.props;
-		return <Well>
-			<div style={{marginBottom: '10px'}}>
-				<ControlLabel>Project:&ensp;</ControlLabel>
-				<ProjectSelectorMultiple
-					projects={accessibleProjects}
-					value={this.state.selectedProjects}
-					onChange={this.selectedProjectsChange}
-				/>
-			</div>
-			<ConditionFrame
-				condition={this.props.condition}
-				onChange={this.props.onChange}
+		return (
+			<SearchPanel
 				onSearchClick={this.handleSearchClick}
 				onResetClick={this.props.onResetClick}
-				basicConditionProperties={basicConditionProperties}
-				advancedConditionKeys={this.advancedConditionKeys}
-				basicFilterToMongoQuery={basicFilterToMongoQuery}
-			/>
-		</Well>;
+			>
+				<div style={{ marginBottom: '10px' }}>
+					<ControlLabel>Project:&ensp;</ControlLabel>
+					<ProjectSelectorMultiple
+						projects={accessibleProjects}
+						value={this.state.selectedProjects}
+						onChange={this.selectedProjectsChange}
+					/>
+				</div>
+				<ConditionFrame
+					condition={this.props.condition}
+					onChange={this.props.onChange}
+					basicConditionProperties={basicConditionProperties}
+					advancedConditionKeys={this.advancedConditionKeys}
+					basicFilterToMongoQuery={basicFilterToMongoQuery}
+				/>
+			</SearchPanel>
+		);
 	}
 }
 
-const CaseSearchCondition = connect(
-	state => ({ accessibleProjects: state.loginUser.data.accessibleProjects })
-)(CaseSearchConditionView);
+const CaseSearchCondition = connect(state => ({
+	accessibleProjects: state.loginUser.data.accessibleProjects
+}))(CaseSearchConditionView);
 
 export default CaseSearchCondition;

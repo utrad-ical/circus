@@ -72,7 +72,8 @@ const advancedConditionKeys = {
 	patientName: { caption: 'patient name', type: 'text' },
 	age: { caption: 'age', type: 'number' },
 	sex: { caption: 'sex', type: 'select', spec: { options: ['M', 'F', 'O'] } },
-	seriesDate: { caption: 'series date', type: 'text' }
+	seriesDate: { caption: 'series date', type: 'date' },
+	updatedAt: { caption: 'import date', type: 'date' }
 };
 
 const conditionToFilter = condition => {

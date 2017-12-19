@@ -60,6 +60,7 @@ const basicFilterToMongoQuery = condition => {
 
 const conditionToFilter = condition => {
 	let tabFilter;
+	console.log('c', condition);
 	switch (condition.type) {
 		case 'basic':
 			tabFilter = basicFilterToMongoQuery(
@@ -70,10 +71,20 @@ const conditionToFilter = condition => {
 		case 'advanced':
 			tabFilter = conditionToMongoQuery(condition.advancedFilter);
 			break;
+		default:
+			throw new Error('Unknown conditoin type.');
 	}
 	return condition.projects.length > 0
 		? { $and: [tabFilter, { projectId: { $in: condition.projects } }] }
 		: tabFilter;
+};
+
+const advancedConditionKeysTemplate = () => {
+	return {
+		caseId: { caption: 'case ID', type: 'text' },
+		createdAt: { caption: 'case created at', type: 'date' },
+		updatedAt: { caption: 'case updated at', type: 'date' }
+	};
 };
 
 class CaseSearchConditionView extends React.Component {
@@ -108,14 +119,22 @@ class CaseSearchConditionView extends React.Component {
 			t => availableTags[t]
 		);
 
-		this.setState({ basicConditionProperties });
+		const advancedConditionKeys = advancedConditionKeysTemplate();
+		advancedConditionKeys.tags = {
+			caption: 'tag',
+			type: 'select',
+			spec: { options: Object.keys(availableTags) }
+		};
+
+		this.setState({ basicConditionProperties, advancedConditionKeys });
 		this.props.onChange({
 			...condition,
+			projects,
 			basicFilter: {
-				...condition.basic,
+				...condition.basicFilter,
 				tags: newTags
 			},
-			projects
+			advancedFilter: { $and: [] }
 		});
 	}
 
@@ -127,6 +146,7 @@ class CaseSearchConditionView extends React.Component {
 
 	render() {
 		const { accessibleProjects, condition } = this.props;
+		const { basicConditionProperties, advancedConditionKeys } = this.state;
 
 		return (
 			<SearchPanel
@@ -145,10 +165,8 @@ class CaseSearchConditionView extends React.Component {
 				<ConditionFrame
 					condition={condition}
 					onChange={this.props.onChange}
-					basicConditionProperties={
-						this.state.basicConditionProperties
-					}
-					advancedConditionKeys={this.advancedConditionKeys}
+					basicConditionProperties={basicConditionProperties}
+					advancedConditionKeys={advancedConditionKeys}
 					basicFilterToMongoQuery={basicFilterToMongoQuery}
 				/>
 			</SearchPanel>

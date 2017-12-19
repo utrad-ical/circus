@@ -2,10 +2,6 @@
  * Creates a Koa middleware that checks request and response with schema.
  */
 export default function validateInOut(validator, options = {}) {
-	const {
-		requestValidationOptions = {},
-		responseValidationOptions = {}
-	} = options;
 	let {
 		requestSchema,
 		responseSchema
@@ -24,7 +20,7 @@ export default function validateInOut(validator, options = {}) {
 				ctx.request.body = await validator.validate(
 					requestSchema,
 					ctx.request.body,
-					{ toDate: true, ...requestValidationOptions }
+					'toDate'
 				);
 			} catch(err) {
 				err.phase = 'request';
@@ -37,7 +33,7 @@ export default function validateInOut(validator, options = {}) {
 				ctx.body = await validator.validate(
 					responseSchema,
 					ctx.body,
-					{ fromDate: true, ...responseValidationOptions }
+					'fromDate'
 				);
 			} catch(err) {
 				err.phase = 'response';

@@ -26,8 +26,6 @@ routes:
     description: Updates the specified project.
   - verb: post
     path: /admin/projects
-    requestSchema: project
-    requestValidationOptions:
-      allRequiredExcept: ['projectId']
+    requestSchema: project|allRequiredExcept projectId
     requiredGlobalPrivilege: manageServer
     description: Creates a new project.

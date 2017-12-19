@@ -6,13 +6,7 @@ routes:
     path: /cases
     handler: handleSearch
     description: Performs search and retrieves a list of cases.
-    responseSchema:
-      type: object
-      properties:
-        items:
-          type: array
-          items:
-            $ref: clinicalCase
+    responseSchema: clinicalCase|searchResult
   - verb: post
     path: /cases
     # requiredProjectPrivilege: write
@@ -24,8 +18,6 @@ routes:
   - verb: post
     path: /cases/:caseId/revision
     requiredProjectPrivilege: write
-    requestSchema: revision
-    requestValidationOptions:
-      allRequiredExcept: ['date', 'creator']
+    requestSchema: revision|allRequiredExcept date,creator
     handler: handlePostRevision
     description: Creates a new revision in the specified case.

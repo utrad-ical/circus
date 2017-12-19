@@ -6,13 +6,7 @@ routes:
     path: /tasks
     handler: handleSearch
     description: Retrieves the list of tasks of the current user.
-    responseSchema:
-      type: object
-      properties:
-        items:
-          type: array
-          items:
-            $ref: task
+    responseSchema: task|searchResult
   - verb: get
     path: /tasks/:taskId
     description: Returns information about the specified task.

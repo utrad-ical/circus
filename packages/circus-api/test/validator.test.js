@@ -73,17 +73,17 @@ describe('Validator', function() {
 		});
 	});
 
-	it('should handle toDate option', async function() {
+	it('should work with toDate mode', async function() {
 		const testData = { intVal: 3, dateVal: '2112-09-03T00:00:00.000Z' };
-		const result = await validator.validate('date', testData, { toDate: true });
+		const result = await validator.validate('date', testData, 'toDate');
 		assert.instanceOf(result.dateVal, Date);
 		assert.equal(result.dateVal.toISOString(), '2112-09-03T00:00:00.000Z');
 	});
 
-	it('should handle fromDate option', async function() {
+	it('should work with fromDate mode', async function() {
 		const iso = '2011-11-28T00:11:22.000Z';
 		const testData = { intVal: 3, dateVal: new Date(iso) };
-		const result = await validator.validate('date', testData, { fromDate: true });
+		const result = await validator.validate('date', testData, 'fromDate');
 		assert.strictEqual(result.dateVal, iso);
 	});
 
@@ -91,24 +91,23 @@ describe('Validator', function() {
 		const testData = {
 			intVal: 0, strVal: 'bar', dicomUid: '1.2.3', multiRange: '1'
 		};
-		await validator.validate('sample', testData, { allRequired: true });
+		await validator.validate('sample|allRequired', testData);
 		delete testData.intVal;
 		asyncThrows(
-			validator.validate('sample', testData, { allRequired: true }),
+			validator.validate('sample|allRequired', testData),
 			ValidationError
 		);
 	});
 
 	it('should handle allRequiredExcept option', async function() {
-		const testData = {
-			intVal: 0, strVal: 'bar', multiRange: '1'
-		};
-		await validator.validate('sample', testData, { allRequiredExcept: ['dicomUid'] });
+		const testData = { intVal: 0, strVal: 'bar', multiRange: '1' };
+		await validator.validate('sample|allRequiredExcept dicomUid', testData);
 		delete testData.intVal;
 		await asyncThrows(
-			validator.validate('sample', testData, { allRequiredExcept: ['dicomUid'] }),
+			validator.validate('sample|allRequiredExcept dicomUid', testData),
 			ValidationError
 		);
+		await validator.validate('sample|allRequiredExcept dicomUid,intVal', testData);
 	});
 
 	it('should handle dbEntry option', async function() {
@@ -116,17 +115,17 @@ describe('Validator', function() {
 			intVal: 0, strVal: 'bar', dicomUid: '1.2.3', multiRange: '1',
 			createdAt: new Date(), updatedAt: new Date()
 		};
-		await validator.validate('sample', goodData, { dbEntry: true });
+		await validator.validate('sample|dbEntry', goodData);
 
 		const badData1 = { ...goodData, intVal: 'string' };
 		await asyncThrows(
-			validator.validate('sample', badData1, { dbEntry: true }),
+			validator.validate('sample|dbEntry', badData1),
 			ValidationError
 		);
 
 		const badData2 = { ...goodData, createdAt: '2010-01-01' };
 		await asyncThrows(
-			validator.validate('sample', badData2, { dbEntry: true }),
+			validator.validate('sample|dbEntry', badData2),
 			ValidationError
 		);
 	});
@@ -139,24 +138,24 @@ describe('Validator', function() {
 			updatedAt: new Date()
 		};
 		const goodData = { items: [goodItem, goodItem], totalItems: 2, page:1 };
-		await validator.validate('sample', goodData, { searchResult: true });
+		await validator.validate('sample|searchResult', goodData);
 
 		const badData1 = { items: [goodItem, goodItem], totalItems: 2 };
 		await asyncThrows(
-			validator.validate('sample', badData1, { searchResult: true }),
+			validator.validate('sample|searchResult', badData1),
 			ValidationError
 		);
 
 		const badData2 = { items: [goodItem, 'foo'], totalItems: 2, page: 1 };
 		await asyncThrows(
-			validator.validate('sample', badData2, { searchResult: true }),
+			validator.validate('sample|searchResult', badData2),
 			ValidationError
 		);
 	});
 
 	it('should fill defaults', async function() {
 		const testData = {};
-		const modified = await validator.validate('sample', testData, { fillDefaults: true });
+		const modified = await validator.validate('sample', testData, 'fillDefaults');
 		assert.deepEqual(modified, { intVal: 5, strVal: 'biscuit' });
 	});
 

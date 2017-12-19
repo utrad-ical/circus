@@ -7,13 +7,15 @@ export default function createCollectionAccessor(db, validator, opts) {
 	const { schema, collectionName, primaryKey } = opts;
 	const collection = db.collection(collectionName);
 
+	const dbEntrySchema = schema + '|dbEntry';
+
 	/**
 	 * Inserts a single document after validation succeeds.
 	 */
 	async function insert(data) {
 		const date = new Date();
 		const inserting = { ...data, createdAt: date, updatedAt: date };
-		await validator.validate(schema, inserting, { dbEntry: true });
+		await validator.validate(dbEntrySchema, inserting);
 		return await collection.insertOne(inserting);
 	}
 
@@ -27,9 +29,8 @@ export default function createCollectionAccessor(db, validator, opts) {
 		const date = new Date();
 		const upserting =  { createdAt: date, updatedAt: date, ...data };
 		await validator.validate(
-			schema,
-			{ [primaryKey]: id, ...upserting },
-			{ dbEntry: true }
+			dbEntrySchema,
+			{ [primaryKey]: id, ...upserting }
 		);
 		return await collection.updateOne({ [primaryKey]: id }, { $set: upserting }, { upsert: true });
 	}
@@ -42,7 +43,7 @@ export default function createCollectionAccessor(db, validator, opts) {
 		const date = new Date();
 		for (const doc of data) {
 			const inserting = { ...doc, createdAt: date, updatedAt: date };
-			await validator.validate(schema, inserting, { dbEntry: true });
+			await validator.validate(dbEntrySchema, inserting);
 			documents.push(inserting);
 		}
 		return await collection.insertMany(documents);
@@ -75,7 +76,7 @@ export default function createCollectionAccessor(db, validator, opts) {
 		return {
 			next: async() => {
 				const next = await cursor.next();
-				await validator.validate(schema, next, { dbEntry: true });
+				await validator.validate(dbEntrySchema, next);
 				return next;
 			},
 			hasNext: () => cursor.hasNext(),
@@ -92,7 +93,7 @@ export default function createCollectionAccessor(db, validator, opts) {
 			.project({ _id: 0 }).limit(1).toArray();
 		const result = docs[0];
 		if (result !== undefined) {
-			await validator.validate(schema, result, { dbEntry: true });
+			await validator.validate(dbEntrySchema, result);
 		}
 		return result;
 	}
@@ -137,7 +138,7 @@ export default function createCollectionAccessor(db, validator, opts) {
 		}
 		const updated = { ...original.value, ...updates, updatedAt: date };
 		try {
-			await validator.validate(schema, updated, { dbEntry: true });
+			await validator.validate(dbEntrySchema, updated);
 		} catch (err) {
 			// validation failed, rollback
 			await collection.findOneAndUpdate({ [key]: id }, original.value);

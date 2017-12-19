@@ -7,13 +7,7 @@ routes:
     requiredGlobalPrivilege: manageServer
     handler: handleSearch
     description: Retrieves the list of groups
-    responseSchema:
-      type: object
-      properties:
-        items:
-          type: array
-          items:
-            $ref: group
+    responseSchema: group|searchResult
   - verb: get
     path: /admin/groups/:groupId
     requiredGlobalPrivilege: manageServer

@@ -10,8 +10,6 @@ routes:
       Consider using login-info instead.
   - verb: put
     path: /preferences
-    requestSchema: preferences
-    requestValidationOptions:
-      allRequired: true
+    requestSchema: preferences|allRequired
     description: >
       Sets the preferences of the current user.

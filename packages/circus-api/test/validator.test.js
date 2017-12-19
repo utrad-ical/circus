@@ -64,7 +64,7 @@ describe('Validator', function() {
 			);
 		});
 
-		it('kebabId', async function() {
+		it('kebab', async function() {
 			await testFormat(
 				'kebab',
 				['a-b', 'class-name', 'blue-yellow-red'],
@@ -127,6 +127,29 @@ describe('Validator', function() {
 		const badData2 = { ...goodData, createdAt: '2010-01-01' };
 		await asyncThrows(
 			validator.validate('sample', badData2, { dbEntry: true }),
+			ValidationError
+		);
+	});
+
+	it('should handle searchResult option', async function() {
+		const goodItem = {
+			intVal: 0,
+			strVal: 'bar',
+			createdAt: new Date(),
+			updatedAt: new Date()
+		};
+		const goodData = { items: [goodItem, goodItem], totalItems: 2, page:1 };
+		await validator.validate('sample', goodData, { searchResult: true });
+
+		const badData1 = { items: [goodItem, goodItem], totalItems: 2 };
+		await asyncThrows(
+			validator.validate('sample', badData1, { searchResult: true }),
+			ValidationError
+		);
+
+		const badData2 = { items: [goodItem, 'foo'], totalItems: 2, page: 1 };
+		await asyncThrows(
+			validator.validate('sample', badData2, { searchResult: true }),
 			ValidationError
 		);
 	});

@@ -15,7 +15,7 @@ const loadSchemaFiles = async schemaRoot => {
 			throw new TypeError(`Schemas "${basename}" must be async and have no $id field`);
 		}
 		if (!schemaData.properties || schemaData.additionalProperties !== false) {
-			throw new TypeError(`Schema "${basename}" must have properties.additionalProperties set to true`);
+			throw new TypeError(`Schema "${basename}" must have properties.additionalProperties set to false`);
 		}
 		schemas[basename] = schemaData;
 	}
@@ -78,7 +78,24 @@ export default async function createValidator(schemaRoot = defaultSchemaRoot) {
 				...schema.properties,
 				createdAt: { date: true },
 				updatedAt: { date: true }
-			}
+			},
+			required: [...(schema.required || []), 'createdAt', 'updatedAt']
+		};
+	};
+
+	const searchResultSchema = (input) => {
+		return {
+			$async: true,
+			type: 'object',
+			properties: {
+				items: {
+					type: 'array',
+					items: withDatesSchema(input)
+				},
+				totalItems: { type: 'number' },
+				page: { type: 'number' }
+			},
+			required: ['items', 'totalItems', 'page']
 		};
 	};
 
@@ -149,6 +166,9 @@ export default async function createValidator(schemaRoot = defaultSchemaRoot) {
 		},
 		allRequiredExcept(except) {
 			return (schema, data) => validator.validate(allRequiredScheama(schema, except), data);
+		},
+		searchResult() {
+			return (schema, data) => validator.validate(searchResultSchema(schema), data);
 		},
 		dbEntry() {
 			return (schema, data) => validator.validate(

@@ -9,9 +9,9 @@ import {
 	ListGroup,
 	ListGroupItem
 } from 'components/react-bootstrap';
-import moment from 'moment';
 import ProjectDisplay from 'components/ProjectDisplay';
 import Icon from 'components/Icon';
+import TimeDisplay from 'components/TimeDisplay';
 
 const HomePage = props => (
 	<div>
@@ -77,7 +77,6 @@ const MyProjects = ({ user }) => {
 };
 
 const MyProfile = ({ user }) => {
-	const lastLoginTime = moment(user.lastLoginTime).format('YYYY-MM-DD HH:mm');
 	return (
 		<Panel
 			bsStyle='primary'
@@ -98,8 +97,8 @@ const MyProfile = ({ user }) => {
 						<strong>
 							You have administrative privilege on CIRCUS DB!
 						</strong>
-						&ensp;
-						Use this account only when you do administrative tasks.
+						&ensp; Use this account only when you do administrative
+						tasks.
 					</ListGroupItem>
 				) : null}
 			</ListGroup>
@@ -111,7 +110,9 @@ const MyProfile = ({ user }) => {
 					<b>Email:</b> {user.userEmail}
 				</li>
 				<li>
-					<b>Last login:</b> {lastLoginTime} (from {user.lastLoginIp})
+					<b>Last login:</b>{' '}
+					<TimeDisplay value={user.lastLoginTime} /> (from{' '}
+					{user.lastLoginIp})
 				</li>
 				<li>
 					<b>Groups:</b> {user.groups.join(', ')}

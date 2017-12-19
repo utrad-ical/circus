@@ -7,6 +7,7 @@ import DataGrid from 'components/DataGrid';
 import PatientInfoBox from 'pages/search/PatientInfoBox';
 import ProjectDisplay from 'components/ProjectDisplay';
 import ProjectTag from 'components/ProjectTag';
+import TimeDisplay from 'components/TimeDisplay';
 
 const Tags = props => {
 	const item = props.value;
@@ -53,7 +54,11 @@ const columns = [
 			return <PatientInfoBox value={{ patientInfo: patientInfoCache }} />;
 		}
 	},
-	{ caption: 'Create Time', key: 'createdAt' },
+	{
+		caption: 'Create Time',
+		className: 'created-at',
+		renderer: props => <TimeDisplay value={props.value.createdAt} />
+	},
 	{ caption: 'Tags', className: 'tags', renderer: Tags },
 	{ caption: '', className: 'operation', renderer: Operation }
 ];

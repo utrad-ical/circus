@@ -36,7 +36,6 @@ const ConditionFrame = props => {
 	const {
 		basicConditionProperties,
 		advancedConditionKeys,
-		formParams = {}
 	} = props;
 	const activeKey = props.condition.type === 'advanced' ? 2 : 1;
 
@@ -54,7 +53,6 @@ const ConditionFrame = props => {
 						properties={basicConditionProperties}
 						value={props.condition.basicFilter}
 						onChange={handleBasicFilterChange}
-						{...formParams}
 					/>
 				</Tab>
 				<Tab eventKey={2} title='Advanced'>
@@ -83,9 +81,3 @@ const ConditionFrame = props => {
 };
 
 export default ConditionFrame;
-
-export const ProjectRenderer = props => <span>{props.projectName}</span>;
-
-export const TagRenderer = props => (
-	<Tag name={props.name} color={props.color} />
-);

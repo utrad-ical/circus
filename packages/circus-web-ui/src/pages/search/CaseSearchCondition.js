@@ -82,7 +82,6 @@ class CaseSearchConditionView extends React.Component {
 				basicConditionProperties={basicConditionProperties}
 				advancedConditionKeys={this.advancedConditionKeys}
 				basicFilterToMongoQuery={basicFilterToMongoQuery}
-				formParams={{ availableTags: this.state.availableTags }}
 			/>
 		</Well>;
 	}

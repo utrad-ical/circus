@@ -79,9 +79,9 @@ const advancedConditionKeys = {
 const conditionToFilter = condition => {
 	switch (condition.type) {
 		case 'basic':
-			return basicFilterToMongoQuery(condition.basicFilter);
+			return basicFilterToMongoQuery(condition.basic);
 		case 'advanced':
-			return conditionToMongoQuery(condition.advancedFilter);
+			return conditionToMongoQuery(condition.advanced);
 	}
 	throw new Error('Unkonwn condition type');
 };
@@ -104,7 +104,6 @@ export default function SeriesSearchCondition(props) {
 				onChange={onChange}
 				basicConditionProperties={basicConditionProperties}
 				advancedConditionKeys={advancedConditionKeys}
-				basicFilterToMongoQuery={basicFilterToMongoQuery}
 			/>
 		</SearchPanel>
 	);

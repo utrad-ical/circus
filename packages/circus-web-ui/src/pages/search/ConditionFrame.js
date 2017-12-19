@@ -1,9 +1,8 @@
 import React from 'react';
 import { Tabs, Tab, Button } from 'components/react-bootstrap';
 import IconButton from 'rb/IconButton';
-import ConditionEditor, { conditionToMongoQuery } from 'rb/ConditionEditor';
+import ConditionEditor from 'rb/ConditionEditor';
 import PropertyEditor from 'rb/PropertyEditor';
-import { Tag } from 'components/tag';
 
 const ConditionFrame = props => {
 	function handleChangeType(key) {
@@ -19,23 +18,9 @@ const ConditionFrame = props => {
 		props.onChange({ ...props.condition, advancedFilter });
 	}
 
-	function handleSearchClick() {
-		let condition;
-		if (props.condition.type === 'basic') {
-			condition = props.basicFilterToMongoQuery(
-				props.condition.basicFilter
-			);
-		} else {
-			condition = conditionToMongoQuery(
-				props.condition.advancedFilter
-			);
-		}
-		props.onSearch && props.onSearch(condition);
-	}
-
 	const {
 		basicConditionProperties,
-		advancedConditionKeys,
+		advancedConditionKeys
 	} = props;
 	const activeKey = props.condition.type === 'advanced' ? 2 : 1;
 
@@ -71,7 +56,7 @@ const ConditionFrame = props => {
 				<IconButton
 					bsStyle='primary'
 					icon='search'
-					onClick={handleSearchClick}
+					onClick={props.onSearchClick}
 				>
 					Search
 				</IconButton>

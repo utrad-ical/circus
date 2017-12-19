@@ -6,6 +6,7 @@ import * as et from 'rb/editor-types';
 import DateRangePicker, { dateRangeToMongoQuery } from 'rb/DateRangePicker';
 import { Well } from 'components/react-bootstrap';
 import AgeMinMax from 'components/AgeMinMax';
+import { conditionToMongoQuery } from 'rb/ConditionEditor';
 
 const advancedConditionKeys = {
 	modality: { caption: 'modality', type: 'select', spec: { options: modalities }},
@@ -60,13 +61,29 @@ const basicFilterToMongoQuery = condition => {
 	return members.length > 0 ? { $and: members } : {};
 };
 
+const conditionToFilter = condition => {
+	switch (condition.type) {
+		case 'basic':
+			return basicFilterToMongoQuery(condition.basicFilter);
+		case 'advanced':
+			return conditionToMongoQuery(condition.advancedFilter);
+	}
+	throw new Error('Unkonwn condition type');
+};
+
 export default function SeriesSearchCondition(props) {
 	const { condition, onChange, onSearch, onResetClick } = props;
+
+	function handleSearchClick() {
+		const filter = conditionToFilter(condition);
+		onSearch({ condition, filter });
+	}
+
 	return <Well>
 		<ConditionFrame
 			condition={condition}
 			onChange={onChange}
-			onSearch={onSearch}
+			onSearchClick={handleSearchClick}
 			onResetClick={onResetClick}
 			basicConditionProperties={basicConditionProperties}
 			advancedConditionKeys={advancedConditionKeys}

@@ -20,9 +20,7 @@ routes:
     description: Updates the specified group.
   - verb: post
     path: /admin/groups
-    requestSchema: group
-    requestValidationOptions:
-      allRequiredExcept: ['groupId']
+    requestSchema: group|allRequiredExcept groupId
     requiredGlobalPrivilege: manageServer
     description: Creates a new group.
   - verb: get

@@ -62,9 +62,7 @@ async function prepareApiRouter(apiDir, deps, options) {
 				checkPrivilege(deps, route),
 				validateInOut(validator, {
 					requestSchema: route.requestSchema,
-					requestValidationOptions: route.requestValidationOptions,
-					responseSchema: route.responseSchema,
-					responseValidationOptions: route.responseValidationOptions
+					responseSchema: route.responseSchema
 				}),
 				mainHandler(deps) // The processing function itself
 			]);

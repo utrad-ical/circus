@@ -53,8 +53,6 @@ properties:
             A string value represents the ID of the schema,
             whereas an object value represents an actual JSON schema
             (you can still use `$ref` to reference external schema).
-        requestValidationOptions:
-          type: object
         responseSchema:
           type: ['object', 'string']
           description: >
@@ -62,8 +60,6 @@ properties:
             A string value represents the ID of the schema,
             whereas an object value represents an actual JSON schema
             (you can still use `$ref` to reference external schema).
-        responseValidationOptions:
-          type: object
       required: ['verb', 'path']
       additionalProperties: false
 additionalProperties: false

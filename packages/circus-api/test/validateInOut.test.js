@@ -25,8 +25,7 @@ describe('validateInOut middleware', function() {
 				'/in-check',
 				validateInOut(validator,
 					{
-						requestSchema: 'date',
-						requestValidationOptions: { allRequired: true }
+						requestSchema: 'date|allRequired'
 					}
 				),
 				async ctx => ctx.body = { foo: ctx.request.body.dateVal.toISOString() }

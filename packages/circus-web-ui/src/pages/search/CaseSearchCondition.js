@@ -37,7 +37,7 @@ const basicFilterToMongoQuery = (condition) => {
 class CaseSearchConditionView extends React.Component {
 	constructor(props) {
 		super(props);
-		this.conditionKeys = {
+		this.advancedConditionKeys = {
 			caseId: { caption: 'case ID', type: 'text' },
 			tag: { caption: 'Tag', type: 'select', spec: { options: [] } },
 		};
@@ -80,7 +80,7 @@ class CaseSearchConditionView extends React.Component {
 				onSearch={this.props.onSearch}
 				onResetClick={this.props.onResetClick}
 				basicConditionProperties={basicConditionProperties}
-				conditionKeys={this.conditionKeys}
+				advancedConditionKeys={this.advancedConditionKeys}
 				basicFilterToMongoQuery={basicFilterToMongoQuery}
 				formParams={{ availableTags: this.state.availableTags }}
 			/>

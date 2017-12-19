@@ -115,6 +115,11 @@ export const handleSearch = ({ models }) => {
 		}
 		const domainFilter = {};
 		const filter = { $and: [customFilter, domainFilter]};
-		await performSearch(models.clinicalCase, filter, ctx);
+		const transform = caseData => {
+			delete caseData.revisions;
+			return caseData;
+		};
+
+		await performSearch(models.clinicalCase, filter, ctx, { transform });
 	};
 };

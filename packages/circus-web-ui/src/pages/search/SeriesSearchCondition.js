@@ -36,6 +36,7 @@ const properties = [
 
 const BasicConditionForm = props => {
 	return <PropertyEditor
+		className='condition-basic-filter'
 		properties={properties}
 		value={props.value}
 		onChange={props.onChange}

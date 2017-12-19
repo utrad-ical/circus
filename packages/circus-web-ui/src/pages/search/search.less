@@ -7,6 +7,18 @@
 	input.form-control { width: 80px; }
 }
 
+.condition-basic-filter {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: space-between;
+	> .row {
+		flex: 0 0 50%;
+		@media screen and (max-width: 768px) {
+			& { flex: 0 0 100%; }
+		}
+	}
+}
+
 .search-results-container {
 	.search-results-header {
 		text-align: right;

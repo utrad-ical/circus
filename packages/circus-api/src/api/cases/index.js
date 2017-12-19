@@ -2,16 +2,38 @@ import status from 'http-status';
 import performSearch from '../performSearch';
 import { generateCaseId } from '../../utils';
 
+const maskPatientInfo = ctx => {
+	return caseData => {
+		const wantToView = ctx.user.preferences.personalInfoView;
+		const accessibleProjects = ctx.userPrivileges.accessibleProjects;
+		const project = accessibleProjects.find(
+			p => caseData.projectId === p.projectId
+		);
+		const viewable = project.roles.some(r => r === 'viewPersonalInfo');
+		const view = viewable && wantToView;
+		if (!view) {
+			delete caseData.patientInfoCache;
+		}
+		return caseData;
+	};
+};
 
 export const handleGet = () => {
 	return async (ctx, next) => {
 		const aCase = ctx.case;
 		delete aCase.latestRevision; // Remove redundant data
-		ctx.body = aCase;
+		ctx.body = maskPatientInfo(ctx)(aCase);
 	};
 };
 
-async function makeNewCase(models, user, userPrivileges, project, series, tags) {
+async function makeNewCase(
+	models,
+	user,
+	userPrivileges,
+	project,
+	series,
+	tags
+) {
 	const caseId = generateCaseId();
 
 	let patientInfoCache = null;
@@ -20,7 +42,7 @@ async function makeNewCase(models, user, userPrivileges, project, series, tags) 
 
 	// Check write access for the project.
 	const ok = userPrivileges.accessibleProjects.some(
-		p => (p.roles.indexOf('write') >= 0 && p.projectId === project.projectId)
+		p => p.roles.indexOf('write') >= 0 && p.projectId === project.projectId
 	);
 	if (!ok) {
 		throw new Error('You do not have write privilege for this project.');
@@ -69,7 +91,9 @@ async function makeNewCase(models, user, userPrivileges, project, series, tags) 
 
 export const handlePost = ({ models }) => {
 	return async (ctx, next) => {
-		const project = await models.project.findByIdOrFail(ctx.request.body.projectId);
+		const project = await models.project.findByIdOrFail(
+			ctx.request.body.projectId
+		);
 		const caseId = await makeNewCase(
 			models,
 			ctx.user,
@@ -87,18 +111,19 @@ export const handlePostRevision = ({ models }) => {
 		const aCase = ctx.case;
 		const rev = ctx.request.body;
 
-		if (rev.date) { ctx.throw(status.BAD_REQUEST, 'You cannot specify revision date.'); }
-		if (rev.creator) { ctx.throw(status.BAD_REQUEST, 'You cannot specify revision creator.'); }
+		if (rev.date) {
+			ctx.throw(status.BAD_REQUEST, 'You cannot specify revision date.');
+		}
+		if (rev.creator) {
+			ctx.throw(status.BAD_REQUEST, 'You cannot specify revision creator.');
+		}
 
 		rev.date = new Date();
 		rev.creator = ctx.user.userEmail;
 
 		await models.clinicalCase.modifyOne(aCase.caseId, {
 			latestRevision: rev,
-			revisions: [
-				...aCase.revisions,
-				rev
-			]
+			revisions: [...aCase.revisions, rev]
 		});
 		ctx.body = null; // No Content
 	};
@@ -114,10 +139,12 @@ export const handleSearch = ({ models }) => {
 			ctx.throw(status.BAD_REQUEST, 'Bad filter.');
 		}
 		const domainFilter = {};
-		const filter = { $and: [customFilter, domainFilter]};
+		const filter = { $and: [customFilter, domainFilter] };
+
+		const mask = maskPatientInfo(ctx);
 		const transform = caseData => {
 			delete caseData.revisions;
-			return caseData;
+			return mask(caseData);
 		};
 
 		await performSearch(models.clinicalCase, filter, ctx, { transform });

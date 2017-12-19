@@ -4,6 +4,15 @@ import * as fs from 'fs-extra';
 import * as path from 'path';
 import * as JSZip from 'jszip';
 
+const maskPatientInfo = ctx => {
+	return series => {
+		if (!ctx.user.preferences.personalInfoView) {
+			delete series.patientInfo;
+		}
+		return series;
+	};
+};
+
 export const handleGet = ({ models }) => {
 	return async (ctx, next) => {
 		const uid = ctx.params.seriesUid;
@@ -79,6 +88,10 @@ export const handleSearch = ({ models }) => {
 			domain: { $in: ctx.userPrivileges.domains }
 		};
 		const filter = { $and: [customFilter, domainFilter]};
-		await performSearch(models.series, filter, ctx);
+
+		// Removes patient info according to the preference
+		const transform = maskPatientInfo(ctx);
+
+		await performSearch(models.series, filter, ctx, { transform });
 	};
 };

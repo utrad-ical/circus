@@ -6,8 +6,8 @@ import SearchCommon from './SearchCommon';
 const nullCondition = () => {
 	return {
 		type: 'basic',
-		basicFilter: { modality: 'all', sex: 'all' },
-		advancedFilter: { $and: [ { keyName: 'modality', op: '==', value: 'CT' } ] }
+		basic: { modality: 'all', sex: 'all' },
+		advanced: { $and: [ { keyName: 'modality', op: '==', value: 'CT' } ] }
 	};
 };
 

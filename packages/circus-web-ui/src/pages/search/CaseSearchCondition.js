@@ -60,16 +60,15 @@ const basicFilterToMongoQuery = condition => {
 
 const conditionToFilter = condition => {
 	let tabFilter;
-	console.log('c', condition);
 	switch (condition.type) {
 		case 'basic':
 			tabFilter = basicFilterToMongoQuery(
-				condition.basicFilter,
+				condition.basic,
 				condition.projects
 			);
 			break;
 		case 'advanced':
-			tabFilter = conditionToMongoQuery(condition.advancedFilter);
+			tabFilter = conditionToMongoQuery(condition.advanced);
 			break;
 		default:
 			throw new Error('Unknown conditoin type.');
@@ -96,7 +95,8 @@ class CaseSearchConditionView extends React.Component {
 		};
 
 		this.state = {
-			basicConditionProperties: basicConditionPropertiesTemplate()
+			basicConditionProperties: basicConditionPropertiesTemplate(),
+			advancedConditionKeys: advancedConditionKeysTemplate()
 		};
 
 		this.selectedProjectsChange = this.selectedProjectsChange.bind(this);
@@ -115,26 +115,28 @@ class CaseSearchConditionView extends React.Component {
 		}
 		const basicConditionProperties = basicConditionPropertiesTemplate();
 		basicConditionProperties[5].editor = et.multiSelect(availableTags);
-		const newTags = condition.basicFilter.tags.filter(
+		const newTags = condition.basic.tags.filter(
 			t => availableTags[t]
 		);
 
 		const advancedConditionKeys = advancedConditionKeysTemplate();
-		advancedConditionKeys.tags = {
-			caption: 'tag',
-			type: 'select',
-			spec: { options: Object.keys(availableTags) }
-		};
+		if (Object.keys(availableTags).length) {
+			advancedConditionKeys.tags = {
+				caption: 'tag',
+				type: 'select',
+				spec: { options: Object.keys(availableTags) }
+			};
+		}
 
 		this.setState({ basicConditionProperties, advancedConditionKeys });
 		this.props.onChange({
 			...condition,
 			projects,
-			basicFilter: {
-				...condition.basicFilter,
+			basic: {
+				...condition.basic,
 				tags: newTags
 			},
-			advancedFilter: { $and: [] }
+			advanced: { $and: [] }
 		});
 	}
 
@@ -167,7 +169,6 @@ class CaseSearchConditionView extends React.Component {
 					onChange={this.props.onChange}
 					basicConditionProperties={basicConditionProperties}
 					advancedConditionKeys={advancedConditionKeys}
-					basicFilterToMongoQuery={basicFilterToMongoQuery}
 				/>
 			</SearchPanel>
 		);

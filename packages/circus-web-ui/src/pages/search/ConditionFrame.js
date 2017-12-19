@@ -9,12 +9,12 @@ const ConditionFrame = props => {
 		props.onChange({ ...props.condition, type });
 	}
 
-	function handleBasicFilterChange(basicFilter) {
-		props.onChange({ ...props.condition, basicFilter });
+	function handleBasicFilterChange(basicCondition) {
+		props.onChange({ ...props.condition, basic: basicCondition });
 	}
 
-	function handleAdvancedFilterChange(advancedFilter) {
-		props.onChange({ ...props.condition, advancedFilter });
+	function handleAdvancedFilterChange(advancedCondition) {
+		props.onChange({ ...props.condition, advanced: advancedCondition });
 	}
 
 	const {
@@ -36,14 +36,14 @@ const ConditionFrame = props => {
 					<PropertyEditor
 						className='condition-basic-filter'
 						properties={basicConditionProperties}
-						value={condition.basicFilter}
+						value={condition.basic}
 						onChange={handleBasicFilterChange}
 					/>
 				</Tab>
 				<Tab eventKey={2} title='Advanced'>
 					<ConditionEditor
 						keys={advancedConditionKeys}
-						value={condition.advancedFilter}
+						value={condition.advanced}
 						onChange={handleAdvancedFilterChange}
 					/>
 				</Tab>

@@ -18,8 +18,16 @@ const basicConditionPropertiesTemplate = () => {
 		{ key: 'caseId', caption: 'Case ID', editor: et.text() },
 		{ key: 'patientId', caption: 'Patient ID', editor: et.text() },
 		{ key: 'patientName', caption: 'Patient Name', editor: et.text() },
-		{ key: 'createdAt', caption: 'Case Created at', editor: DateRangePicker },
-		{ key: 'updatedAt', caption: 'Case Updated at', editor: DateRangePicker },
+		{
+			key: 'createdAt',
+			caption: 'Case Created at',
+			editor: DateRangePicker
+		},
+		{
+			key: 'updatedAt',
+			caption: 'Case Updated at',
+			editor: DateRangePicker
+		},
 		{ key: 'tags', caption: 'Tags', editor: et.multiSelect({}) }
 	];
 };
@@ -36,7 +44,7 @@ const basicFilterToMongoQuery = condition => {
 				break;
 			}
 			case 'tags':
-				if (val.length) members.push({ tags: { $in: val }});
+				if (val.length) members.push({ tags: { $in: val } });
 				break;
 			default:
 				if (key.match(/^(patient(.+))$/)) {
@@ -51,13 +59,21 @@ const basicFilterToMongoQuery = condition => {
 };
 
 const conditionToFilter = condition => {
+	let tabFilter;
 	switch (condition.type) {
 		case 'basic':
-			return basicFilterToMongoQuery(condition.basicFilter);
+			tabFilter = basicFilterToMongoQuery(
+				condition.basicFilter,
+				condition.projects
+			);
+			break;
 		case 'advanced':
-			return conditionToMongoQuery(condition.advancedFilter);
+			tabFilter = conditionToMongoQuery(condition.advancedFilter);
+			break;
 	}
-	throw new Error('Unkonwn condition type');
+	return condition.projects.length > 0
+		? { $and: [tabFilter, { projectId: { $in: condition.projects } }] }
+		: tabFilter;
 };
 
 class CaseSearchConditionView extends React.Component {
@@ -88,7 +104,9 @@ class CaseSearchConditionView extends React.Component {
 		}
 		const basicConditionProperties = basicConditionPropertiesTemplate();
 		basicConditionProperties[5].editor = et.multiSelect(availableTags);
-		const newTags = condition.basicFilter.tags.filter(t => availableTags[t]);
+		const newTags = condition.basicFilter.tags.filter(
+			t => availableTags[t]
+		);
 
 		this.setState({ basicConditionProperties });
 		this.props.onChange({
@@ -119,6 +137,7 @@ class CaseSearchConditionView extends React.Component {
 					<ControlLabel>Project:&ensp;</ControlLabel>
 					<ProjectSelectorMultiple
 						projects={accessibleProjects}
+						noneText='(All projects)'
 						value={condition.projects}
 						onChange={this.selectedProjectsChange}
 					/>
@@ -126,7 +145,9 @@ class CaseSearchConditionView extends React.Component {
 				<ConditionFrame
 					condition={condition}
 					onChange={this.props.onChange}
-					basicConditionProperties={this.state.basicConditionProperties}
+					basicConditionProperties={
+						this.state.basicConditionProperties
+					}
 					advancedConditionKeys={this.advancedConditionKeys}
 					basicFilterToMongoQuery={basicFilterToMongoQuery}
 				/>

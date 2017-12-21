@@ -23,7 +23,7 @@ const ApplicationView = props => {
       <Nav />
       <div className={containerClass}>
         <MessageBox />
-        {pageContentVisible ? props.children : null}
+        {pageContentVisible && props.children}
         {notLoggedIn ? (
           <div className="alert alert-danger">
             You are not logged in, or your session has been expired.<br />

@@ -93,10 +93,9 @@ export default async function createApp(options = {}) {
 
   const logger = options.logger ? options.logger : createLogger('off');
 
-  const dicomImporter = process.env.DICOM_UTILITY
-    ? new DicomImporter(dicomStorage, models, {
-        utility: process.env.DICOM_UTILITY
-      })
+  const utilityEnv = process.env.DICOM_UTILITY;
+  const dicomImporter = utilityEnv
+    ? new DicomImporter(dicomStorage, models, { utility: utilityEnv })
     : undefined;
 
   // Build a router.

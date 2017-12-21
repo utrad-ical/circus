@@ -9,7 +9,8 @@
     "fontgen": "node assets/icons/fontgen.js",
     "build": "webpack",
     "lint": "eslint src",
-    "lint-fix": "eslint src --fix"
+    "lint-fix": "eslint src --fix",
+    "prettier": "prettier src/**/*.js --write"
   },
   "repository": {
     "type": "git",
@@ -42,6 +43,7 @@
     "less-loader": "^4.0.5",
     "merge": "^1.2.0",
     "moment": "^2.16.0",
+    "prettier": "^1.9.2",
     "react": "^16.2.0",
     "react-bootstrap": "^0.31.5",
     "react-dom": "^16.2.0",
@@ -66,5 +68,8 @@
     "multi-integer-range": "^4.0.2",
     "ts-loader": "^3.2.0",
     "typescript": "^2.6.2"
+  },
+  "prettier": {
+    "singleQuote": true
   }
 }

@@ -12,7 +12,7 @@ import TimeDisplay from 'components/TimeDisplay';
 const Tags = props => {
 	const item = props.value;
 	return (
-		<span>
+		<span className='tag-list'>
 			{item.tags.map(t => (
 				<ProjectTag key={t} projectId={item.projectId} tag={t} />
 			))}

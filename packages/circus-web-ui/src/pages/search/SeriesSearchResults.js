@@ -2,7 +2,6 @@ import React, { Fragment } from 'react';
 import SearchResultsView, { makeSortOptions } from './SearchResultsView';
 import { Button } from 'components/react-bootstrap';
 import { Link } from 'react-router';
-import { connect } from 'react-redux';
 import DataGrid from 'components/DataGrid';
 import PatientInfoBox from 'pages/search/PatientInfoBox';
 import TimeDisplay from 'components/TimeDisplay';
@@ -55,12 +54,12 @@ const columns = [
 ];
 
 const DataView = props => {
-  const { items } = props;
+  const { value } = props;
   return (
     <DataGrid
       className="series-search-result"
       columns={columns}
-      value={items}
+      value={value}
     />
   );
 };
@@ -72,17 +71,14 @@ const sortOptions = makeSortOptions({
   modality: 'modality'
 });
 
-const SeriesSearchResultsView = props => {
+const SeriesSearchResults = props => {
   return (
     <SearchResultsView
       sortOptions={sortOptions}
       dataView={DataView}
-      {...props}
+      name="series"
     />
   );
 };
 
-export default connect(state => {
-  const search = state.searches.series || {};
-  return { ...search, name: 'series' };
-})(SeriesSearchResultsView);
+export default SeriesSearchResults;

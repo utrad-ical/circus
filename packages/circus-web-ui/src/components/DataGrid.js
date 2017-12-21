@@ -4,7 +4,7 @@ import classnames from 'classnames';
 const normalizeColumn = c => {
 	const ret = typeof c === 'string' ? { key: c, caption: c } : { ...c };
 	const key = ret.key;
-	if (!('className' in ret)) ret.className = kebabCase(key);
+	if (!('className' in ret)) ret.className = key ? kebabCase(key) : undefined;
 	return ret;
 };
 

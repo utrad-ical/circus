@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Fragment } from 'react';
 import ShrinkSelect from 'rb/ShrinkSelect';
 import { Pagination } from 'components/react-bootstrap';
 import { changeSearchPage, changeSearchSort } from 'actions';
@@ -39,12 +39,16 @@ const SearchResultsView = props => {
     <div className="search-results-container">
       <div className="search-results-header">
         {totalItems + ' Result' + (totalItems > 1 ? 's' : '')}
-        &emsp;Sort:&ensp;
-        <ShrinkSelect
-          options={sortOptions}
-          value={sort}
-          onChange={handleSortChange}
-        />
+        {sortOptions && (
+          <Fragment>
+            &emsp;Sort:&ensp;
+            <ShrinkSelect
+              options={sortOptions}
+              value={sort}
+              onChange={handleSortChange}
+            />
+          </Fragment>
+        )}
       </div>
       {<DataView value={items} />}
       <div className="search-results-pager">

@@ -329,7 +329,7 @@ describe('API', function() {
       'faeb503e97f918c882453fd2d789f50f4250267740a0b3fbcc85a529f2d7715b';
 
     it('should perform search', async function() {
-      const res = await axios.request({
+      const res = await server.axios.bob.request({
         url: server.url + 'api/cases',
         method: 'get'
       });

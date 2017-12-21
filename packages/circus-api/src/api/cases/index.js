@@ -9,6 +9,13 @@ const maskPatientInfo = ctx => {
     const project = accessibleProjects.find(
       p => caseData.projectId === p.projectId
     );
+    if (!project) {
+      throw new Error(
+        `Project ${caseData.projectId} is not accessbible by ${
+          ctx.user.userEmail
+        }.`
+      );
+    }
     const viewable = project.roles.some(r => r === 'viewPersonalInfo');
     const view = viewable && wantToView;
     if (!view) {
@@ -138,8 +145,16 @@ export const handleSearch = ({ models }) => {
     } catch (err) {
       ctx.throw(status.BAD_REQUEST, 'Bad filter.');
     }
-    const domainFilter = {};
-    const filter = { $and: [customFilter, domainFilter] };
+    // const domainFilter = {};
+    const accessibleProjectIds = ctx.userPrivileges.accessibleProjects.map(
+      p => p.projectId
+    );
+    const accessibleProjectFilter = {
+      projectId: { $in: accessibleProjectIds }
+    };
+    const filter = {
+      $and: [customFilter, accessibleProjectFilter /* domainFilter */]
+    };
 
     const mask = maskPatientInfo(ctx);
     const transform = caseData => {

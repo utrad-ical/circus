@@ -1,7 +1,7 @@
 import React from 'react';
 import { api } from '../../utils/api';
 import ImageViewer from '../../components/ImageViewer';
-import { PropertyEditor } from '../../components/property-editor';
+import PropertyEditor from 'rb/PropertyEditor';
 import LoadingIndicator from 'rb/LoadingIndicator';
 import { TagList } from '../../components/tag';
 import {
@@ -17,6 +17,7 @@ import classNames from 'classnames';
 import EventEmitter from 'events';
 import { sha1 } from '../../utils/util.js';
 import ProjectDisplay from 'components/ProjectDisplay';
+import attributeSchemaToProperties from 'pages/case-detail/attributeSchemaToProperties';
 
 export default class CaseDetail extends React.Component {
 	constructor(props) {
@@ -273,8 +274,15 @@ export class RevisionData extends React.Component {
 			tool: 'pager',
 			showReferenceLine: false,
 			composition: null,
-			lineWidth: 1
+			lineWidth: 1,
+			caseAttributesProperties: attributeSchemaToProperties(
+				props.projectData.caseAttributesSchema
+			),
+			labelAttributesProperties: attributeSchemaToProperties(
+				props.projectData.labelAttributesSchema
+			),
 		};
+
 		this.changeTool = this.changeTool.bind(this);
 		this.toggleReferenceLine = this.toggleReferenceLine.bind(this);
 		this.setLineWidth = this.setLineWidth.bind(this);
@@ -418,7 +426,7 @@ export class RevisionData extends React.Component {
 				<Card title={`Label #${activeLabelIndex} of Series #${activeSeriesIndex}`}>
 					{ activeLabel ?
 						<PropertyEditor
-							properties={projectData.labelAttributesSchema}
+							properties={this.state.labelAttributesProperties}
 							value={activeLabel.attributes || {}}
 							onChange={this.labelAttributesChange}
 						/>
@@ -426,7 +434,7 @@ export class RevisionData extends React.Component {
 				</Card>
 				<Card title='Case Attributes'>
 					<PropertyEditor
-						properties={projectData.caseAttributesSchema}
+						properties={this.state.caseAttributesProperties}
 						value={revision.attributes}
 						onChange={this.caseAttributesChange}
 					/>

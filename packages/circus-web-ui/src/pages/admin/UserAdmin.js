@@ -55,11 +55,11 @@ export default class UserAdmin extends React.Component {
     this.state = { ready: false };
 
     this.listColumns = [
-      { key: 'userEmail', label: 'User ID (E-mail)' },
-      { key: 'loginId', label: 'Login Name' },
-      { key: 'description', label: 'Description' },
+      { key: 'userEmail', caption: 'User ID (E-mail)' },
+      { key: 'loginId', caption: 'Login Name' },
+      { key: 'description', caption: 'Description' },
       {
-        data: item => {
+        renderer: ({ value: item }) => {
           return item.groups.map(groupId => {
             if (!this.groups) return null;
             const group = this.groups.find(g => g.groupId === groupId);
@@ -74,7 +74,7 @@ export default class UserAdmin extends React.Component {
             );
           });
         },
-        label: 'Groups'
+        caption: 'Groups'
       }
     ];
 

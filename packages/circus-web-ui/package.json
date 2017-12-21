@@ -10,7 +10,7 @@
     "build": "webpack",
     "lint": "eslint src",
     "lint-fix": "eslint src --fix",
-    "prettier": "prettier src/**/*.js --write"
+    "prettier": "prettier src/**/*.{js,less} --write"
   },
   "repository": {
     "type": "git",

@@ -1,53 +1,64 @@
 .admin-index .item {
-	.make-md-column(4);
-	margin-bottom: 20px;
-	a { text-decoration: none; }
+  .make-md-column(4);
+  margin-bottom: 20px;
+  a {
+    text-decoration: none;
+  }
 }
 
 .server-status.pending {
-	opacity: 0.3;
-	transition: opacity 0.5s;
+  opacity: 0.3;
+  transition: opacity 0.5s;
 }
 
 .admin-editor {
-	.label { margin-left: 2px; margin-right: 2px; }
+  .label {
+    margin-left: 2px;
+    margin-right: 2px;
+  }
 
-	.table {
-		td { vertical-align: middle; }
-	}
+  .table {
+    td {
+      vertical-align: middle;
+    }
+  }
 }
 
 .window-preset-editor {
-	input[type=number] {
-		width: 100px;
-	}
+  input[type='number'] {
+    width: 100px;
+  }
 }
 
 .attribute-schema-prop > .col-md-9 > .array-editor {
-	> li {
-		padding: 0 2px;
-		border-bottom: 1px solid silver;
-		&:last-child { border: none; }
-	}
+  > li {
+    padding: 0 2px;
+    border-bottom: 1px solid silver;
+    &:last-child {
+      border: none;
+    }
+  }
 }
 
 .attribute-schema-editor {
-	&.legend { font-weight: bolder; }
-	width: 95%;
-	display: inline-flex;
-	flex-direction: row;
-	.attribute-schema-key {
-		width: 25%;
-		margin-right: 3px;
-	}
-	.attribute-schema-type {
-		width: 20%;
-		margin-right: 3px;
-	}
-	.attribute-schema-spec {
-		flex-grow: 1;
-		input {
-			display: inline;
-		}
-	}
+  &.legend {
+    font-weight: bolder;
+  }
+  width: 95%;
+  display: inline-flex;
+  flex-direction: row;
+  .attribute-schema-key {
+    width: 25%;
+    margin-right: 3px;
+  }
+  .attribute-schema-type {
+    width: 20%;
+    margin-right: 3px;
+  }
+  .attribute-schema-spec {
+    flex-grow: 1;
+    input {
+      display: inline;
+    }
+  }
 }

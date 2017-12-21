@@ -55,9 +55,15 @@ const columns = [
 		}
 	},
 	{
-		caption: 'Create Time',
+		caption: 'Create/Update',
 		className: 'created-at',
-		renderer: props => <TimeDisplay value={props.value.createdAt} />
+		renderer: props => (
+			<Fragment>
+				<TimeDisplay value={props.value.createdAt} />
+				<br />
+				<TimeDisplay value={props.value.updatedAt} />
+			</Fragment>
+		)
 	},
 	{ caption: 'Tags', className: 'tags', renderer: Tags },
 	{ caption: '', className: 'operation', renderer: Operation }

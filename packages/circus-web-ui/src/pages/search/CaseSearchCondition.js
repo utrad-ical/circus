@@ -20,12 +20,12 @@ const basicConditionPropertiesTemplate = () => {
 		{ key: 'patientName', caption: 'Patient Name', editor: et.text() },
 		{
 			key: 'createdAt',
-			caption: 'Case Created at',
+			caption: 'Create Time',
 			editor: DateRangePicker
 		},
 		{
 			key: 'updatedAt',
-			caption: 'Case Updated at',
+			caption: 'Update Time',
 			editor: DateRangePicker
 		},
 		{ key: 'tags', caption: 'Tags', editor: et.multiSelect({}) }

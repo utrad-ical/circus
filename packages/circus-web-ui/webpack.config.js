@@ -62,6 +62,9 @@ module.exports = {
 			'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV)
 		})
 	],
+	devServer: {
+		contentBase: path.join(__dirname, 'public')
+	},
 	devtool: '#sourcemap'
 };
 

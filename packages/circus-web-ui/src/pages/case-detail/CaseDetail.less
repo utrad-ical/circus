@@ -1,136 +1,146 @@
 .case-detail-menu {
-	border-bottom: 1px solid silver;
-	border-top: 1px solid silver;
-	padding: 2px 15px;
-	display: flex;
-	flex-flow: row wrap;
-	justify-content: space-between;
-	.left {
-		padding: 2px 15px;
-	}
-	.right {
-		flex-grow: 100;
-		text-align: right;
-		padding: 2px 15px;
-	}
+  border-bottom: 1px solid silver;
+  border-top: 1px solid silver;
+  padding: 2px 15px;
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: space-between;
+  .left {
+    padding: 2px 15px;
+  }
+  .right {
+    flex-grow: 100;
+    text-align: right;
+    padding: 2px 15px;
+  }
 }
 
 .revision-selector-item {
-	> span { margin: 0 3px; }
-	.description { font-weight: bold; }
+  > span {
+    margin: 0 3px;
+  }
+  .description {
+    font-weight: bold;
+  }
 }
 
 .viewer-cluster {
-	display: flex;
-	flex-direction: column;
-	background: #333;
+  display: flex;
+  flex-direction: column;
+  background: #333;
 }
 
 .viewer-row {
-	display: flex;
-	height: 512px;
-	flex-direction: row;
-	justify-content: space-around;
-	margin-bottom: 3px;
-	.image-viewer {
-		height: 512px;
-		width: 512px;
-		// flex: 0 0 50%;
-	}
+  display: flex;
+  height: 512px;
+  flex-direction: row;
+  justify-content: space-around;
+  margin-bottom: 3px;
+  .image-viewer {
+    height: 512px;
+    width: 512px;
+    // flex: 0 0 50%;
+  }
 }
 
 .case-info {
-	border-bottom: 1px solid silver;
+  border-bottom: 1px solid silver;
 }
 
 .case-detail-header {
-	display: flex;
+  display: flex;
 }
 
 .case-series-list {
-	padding-left: 0;
+  padding-left: 0;
 }
 
 .case-series-list-item {
-	list-style-type: none;
-	cursor: pointer;
+  list-style-type: none;
+  cursor: pointer;
 }
 
 .case-detail-card {
-	.case-detail-card-header {
-		display: block;
-		text-decoration: none;
-		color: white;
-		padding: 2px 5px;
-		background-color: #333333;
-		font-weight: bold;
-		cursor: pointer;
-	}
-	.case-detail-card-body {
-		.property-editor {
-			margin: 0 15px;
-		}
-	}
+  .case-detail-card-header {
+    display: block;
+    text-decoration: none;
+    color: white;
+    padding: 2px 5px;
+    background-color: #333333;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  .case-detail-card-body {
+    .property-editor {
+      margin: 0 15px;
+    }
+  }
 }
 
 .case-revision-data {
-	&.busy { opacity: 0.5; }
+  &.busy {
+    opacity: 0.5;
+  }
 }
 
 .case-revision-header {
-	display: flex;
-	flex-direction: row;
-	justify-content: space-between;
-	> * {
-		flex: 0 0 33.3%;
-		border-left: 1px solid silver;
-		padding: 0;
-		&:first-child { border-left: none; }
-	}
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  > * {
+    flex: 0 0 33.3%;
+    border-left: 1px solid silver;
+    padding: 0;
+    &:first-child {
+      border-left: none;
+    }
+  }
 }
 
 .case-label-buttons {
-	padding-left: 20px;
-	text-align: right;
+  padding-left: 20px;
+  text-align: right;
 }
 
 .case-label-list {
-	margin: 0;
-	padding-left: 0;
-	&.active {
-		background-color: silver;
-	}
+  margin: 0;
+  padding-left: 0;
+  &.active {
+    background-color: silver;
+  }
 }
 
 .label-list-item {
-	list-style-type: none;
-	display: flex;
-	flex-direction: row;
-	justify-content: space-between;
-	padding: 0.2em 10px;
-	border-bottom: 1px solid silver;
-	&:hover {
-		background-color: #eeeeee;
-	}
-	&.active {
-		background-color: silver;
-		font-weight: bold;
-	}
+  list-style-type: none;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  padding: 0.2em 10px;
+  border-bottom: 1px solid silver;
+  &:hover {
+    background-color: #eeeeee;
+  }
+  &.active {
+    background-color: silver;
+    font-weight: bold;
+  }
 }
 
 .label-list-opacity-dropdown {
-	width: 110px;
-	display: flex;
-	flex-direction: row;
+  width: 110px;
+  display: flex;
+  flex-direction: row;
 }
 
 .case-detail-toolbar {
-	background-color: #222;
-	color: white;
-	button {
-		height: 40px;
-		padding: 0 10px;
-		font-size: 170%;
-		&.dropdown-toggle { font-size: 100%; }
-	}
+  background-color: #222;
+  color: white;
+  button {
+    height: 40px;
+    padding: 0 10px;
+    font-size: 170%;
+    &.dropdown-toggle {
+      font-size: 100%;
+    }
+  }
 }

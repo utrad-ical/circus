@@ -1,47 +1,64 @@
 .search-buttons {
-	text-align: center;
-	margin-top: 1em;
+  text-align: center;
+  margin-top: 1em;
 }
 
 .age-minmax.form-inline {
-	input.form-control { width: 80px; }
+  input.form-control {
+    width: 80px;
+  }
 }
 
 .condition-basic-filter {
-	display: flex;
-	flex-wrap: wrap;
-	justify-content: space-between;
-	> .row {
-		flex: 0 0 50%;
-		@media screen and (max-width: 768px) {
-			& { flex: 0 0 100%; }
-		}
-	}
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  > .row {
+    flex: 0 0 50%;
+    @media screen and (max-width: 768px) {
+      & {
+        flex: 0 0 100%;
+      }
+    }
+  }
 }
 
 .search-results-container {
-	.search-results-header {
-		text-align: right;
-		margin-bottom: 0.3em;
-	}
+  .search-results-header {
+    text-align: right;
+    margin-bottom: 0.3em;
+  }
 
-	.search-results-pager {
-		text-align: center;
-	}
+  .search-results-pager {
+    text-align: center;
+  }
 
-	.table.data-grid {
-		tbody tr td { vertical-align: middle; }
-		border-bottom: 2px solid #ddd;
+  .table.data-grid {
+    tbody tr td {
+      vertical-align: middle;
+    }
+    border-bottom: 2px solid #ddd;
 
-		.modality-marker { font-size: 120%; }
+    .modality-marker {
+      font-size: 120%;
+    }
 
-		.patient {
-			.patient-info-masked { color: silver; }
-			.patient-info-box {
-				.sub { font-size: 80%; color: gray; }
-				.patient-id { font-style: italic; }
-				.patient-name { font-weight: bold; }
-			}
-		}
-	}
+    .patient {
+      .patient-info-masked {
+        color: silver;
+      }
+      .patient-info-box {
+        .sub {
+          font-size: 80%;
+          color: gray;
+        }
+        .patient-id {
+          font-style: italic;
+        }
+        .patient-name {
+          font-weight: bold;
+        }
+      }
+    }
+  }
 }

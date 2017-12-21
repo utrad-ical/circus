@@ -18,7 +18,7 @@
   },
   "homepage": "https://github.com/utrad-ical/circus-api#readme",
   "dependencies": {
-    "@utrad-ical/circus-rs": "git+https://github.com/utrad-ical/circus-rs.git",
+    "@utrad-ical/circus-rs": "github:utrad-ical/circus-rs",
     "ajv": "^5.2.2",
     "axios": "^0.16.2",
     "babel-plugin-dynamic-import-node": "^1.1.0",

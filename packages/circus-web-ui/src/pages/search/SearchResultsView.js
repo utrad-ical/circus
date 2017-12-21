@@ -36,18 +36,19 @@ const SearchResultsView = props => {
 	}
 
 	const pages = Math.ceil(totalItems / per);
+	if (!Array.isArray(items)) return null;
 	return (
 		<div className='search-results-container'>
 			<div className='search-results-header'>
-				{totalItems + ' Result' + (totalItems === 1 ? '' : 's')}
-				&emsp; Sort:{' '}
+				{totalItems + ' Result' + (totalItems > 1 ? 's' : '')}
+				&emsp;Sort:&ensp;
 				<ShrinkSelect
 					options={sortOptions}
 					value={sort}
 					onChange={handleSortChange}
 				/>
 			</div>
-			{items && items.length && <DataView items={items} />}
+			{<DataView items={items} />}
 			<div className='search-results-pager'>
 				<Pagination
 					prev

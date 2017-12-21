@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "webpack-dev-server",
     "fontgen": "node assets/icons/fontgen.js",
     "build": "webpack",
     "lint": "eslint src",
@@ -54,7 +55,8 @@
     "tinycolor2": "^1.4.1",
     "ttf2woff": "^2.0.1",
     "url-loader": "^0.5.8",
-    "webpack": "^3.5.5"
+    "webpack": "^3.5.5",
+    "webpack-dev-server": "^2.9.7"
   },
   "dependencies": {
     "@utrad-ical/circus-rs": "github:utrad-ical/circus-rs",

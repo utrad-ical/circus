@@ -6,8 +6,8 @@
 // files directly from Node.js
 var tsOptions = require('./tsconfig').compilerOptions;
 require('ts-node').register({
-	compilerOptions: tsOptions,
-	disableWarnings: true
+  compilerOptions: tsOptions,
+  disableWarnings: true
 });
 
 require('./src/server/main');

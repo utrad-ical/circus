@@ -31,8 +31,14 @@ describe('DicomPixelExtractor', function() {
     // write PNG image
     var encoder = new ImageEncoder();
     var arr = new Uint8ClampedArray(data.columns * data.rows);
-    var ww = data.window.width;
-    var wl = data.window.level;
+    var useWindow = data.window
+      ? data.window
+      : {
+          level: (data.maxValue + data.maxValue) / 2,
+          width: data.maxValue - data.minValue
+        };
+    var ww = useWindow.width;
+    var wl = useWindow.level;
     for (var x = 0; x < data.columns; x++) {
       for (var y = 0; y < data.rows; y++) {
         var pixel = readArray[x + y * data.columns];

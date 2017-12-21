@@ -20,17 +20,18 @@ const windowPriorityOptions = [
 
 const listColumns = [
   {
-    label: 'Project Name',
-    data: p => (
+    caption: 'Project Name',
+    className: 'project-name',
+    renderer: ({ value: project }) => (
       <span>
-        <ProjectIcon icon={p.icon} size="lg" />
+        <ProjectIcon icon={project.icon} size="lg" />
         &ensp;
-        {p.projectName}
+        {project.projectName}
       </span>
     )
   },
-  { key: 'description', label: 'Description' },
-  { key: 'projectId', label: 'Project ID' }
+  { key: 'description', caption: 'Description' },
+  { key: 'projectId', caption: 'Project ID' }
 ];
 
 const makeEmptyItem = () => {

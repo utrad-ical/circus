@@ -19,22 +19,25 @@ const makeEmptyItem = () => {
 };
 
 const listColumns = [
-  { key: 'groupName', label: 'Group Name' },
+  { key: 'groupName', caption: 'Group Name' },
   {
-    label: 'Privileges',
-    data: item =>
-      item.privileges.map((priv, i) => {
+    caption: 'Privileges',
+    className: 'privileges',
+    renderer: ({ value: item }) => {
+      return item.privileges.map((priv, i) => {
         const style = priv === 'manageServer' ? 'danger' : 'primary';
         return (
           <span key={i} className={`label label-${style}`}>
             {priv}
           </span>
         );
-      })
+      });
+    }
   },
   {
-    label: 'Accessible Series Domains',
-    data: item =>
+    caption: 'Accessible Series Domains',
+    className: 'domains',
+    renderer: ({ value: item }) =>
       item.domains.map((d, i) => (
         <span key={i} className="label label-default">
           {d}

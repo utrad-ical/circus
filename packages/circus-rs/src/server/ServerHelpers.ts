@@ -9,9 +9,9 @@ import Counter from './Counter';
  * This is a simple facade interface that aggregates helper classes
  */
 export interface ServerHelpers {
-	readonly logger: Logger;
-	readonly seriesReader: AsyncLruCache<DicomVolume>;
-	readonly imageEncoder: ImageEncoder;
-	readonly authorizationCache: AuthorizationCache;
-	readonly counter: Counter;
+  readonly logger: Logger;
+  readonly seriesReader: AsyncLruCache<DicomVolume>;
+  readonly imageEncoder: ImageEncoder;
+  readonly authorizationCache: AuthorizationCache;
+  readonly counter: Counter;
 }

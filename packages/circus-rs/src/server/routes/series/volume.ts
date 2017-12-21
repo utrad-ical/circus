@@ -9,11 +9,11 @@ import { ServerHelpers } from '../../ServerHelpers';
  * specified series.
  */
 export default function volume(helpers: ServerHelpers): koa.Middleware {
-	return compose([
-		compress(),
-		async function volume(ctx, next) {
-			const vol = ctx.state.volume as DicomVolume;
-			ctx.body = Buffer.from(vol.data);
-		}
-	]);
+  return compose([
+    compress(),
+    async function volume(ctx, next) {
+      const vol = ctx.state.volume as DicomVolume;
+      ctx.body = Buffer.from(vol.data);
+    }
+  ]);
 }

@@ -7,33 +7,36 @@ import { orientationAwareTranslation } from '../../section-util';
  * PagerTool handles mouse drag and performs the paging of the stacked images.
  */
 export class PagerTool extends DraggableTool {
-	private currentStep: number;
+  private currentStep: number;
 
-	public dragHandler(ev: ViewerEvent): void {
-		super.dragEndHandler(ev);
-		const dragInfo = this.dragInfo;
-		const viewer = ev.viewer;
-		const state = viewer.getState();
+  public dragHandler(ev: ViewerEvent): void {
+    super.dragEndHandler(ev);
+    const dragInfo = this.dragInfo;
+    const viewer = ev.viewer;
+    const state = viewer.getState();
 
-		const step = Math.floor(dragInfo.totalDy / 10);
-		const relativeStep = step - this.currentStep;
-		if (relativeStep === 0) return;
+    const step = Math.floor(dragInfo.totalDy / 10);
+    const relativeStep = step - this.currentStep;
+    if (relativeStep === 0) return;
 
-		const comp = viewer.getComposition();
-		if (!comp) throw new Error('Composition not initialized'); // should not happen
-		const src = comp.imageSource as VolumeImageSource;
-		if (!(src instanceof VolumeImageSource)) return;
-		const voxelSize = src.voxelSize();
+    const comp = viewer.getComposition();
+    if (!comp) throw new Error('Composition not initialized'); // should not happen
+    const src = comp.imageSource as VolumeImageSource;
+    if (!(src instanceof VolumeImageSource)) return;
+    const voxelSize = src.voxelSize();
 
-		state.section = orientationAwareTranslation(state.section, voxelSize, relativeStep);
-		viewer.setState(state);
+    state.section = orientationAwareTranslation(
+      state.section,
+      voxelSize,
+      relativeStep
+    );
+    viewer.setState(state);
 
-		this.currentStep = step;
-	}
+    this.currentStep = step;
+  }
 
-	public dragStartHandler(ev: ViewerEvent): void {
-		super.dragStartHandler(ev);
-		this.currentStep = 0;
-	}
-
+  public dragStartHandler(ev: ViewerEvent): void {
+    super.dragStartHandler(ev);
+    this.currentStep = 0;
+  }
 }

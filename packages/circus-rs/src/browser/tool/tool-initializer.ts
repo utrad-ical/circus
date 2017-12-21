@@ -11,30 +11,30 @@ import { BucketTool } from './cloud/bucket';
 const toolCollection = {};
 
 const defaultTools = {
-	null: Tool, // Null tool that ignores all UI events only to show a static image
-	hand: HandTool,
-	window: WindowTool,
-	zoom: ZoomTool,
-	pager: PagerTool,
-	celestialRotate: CelestialRotateTool,
+  null: Tool, // Null tool that ignores all UI events only to show a static image
+  hand: HandTool,
+  window: WindowTool,
+  zoom: ZoomTool,
+  pager: PagerTool,
+  celestialRotate: CelestialRotateTool,
 
-	brush: BrushTool,
-	eraser: EraserTool,
-	bucket: BucketTool
+  brush: BrushTool,
+  eraser: EraserTool,
+  bucket: BucketTool
 };
 
 Object.keys(defaultTools).forEach(key => {
-	const toolClass = defaultTools[key];
-	toolCollection[key] = new toolClass();
+  const toolClass = defaultTools[key];
+  toolCollection[key] = new toolClass();
 });
 
 export function registerTool(toolName: string, toolClass: typeof Tool): void {
-	if (toolName in toolCollection) {
-		throw new Error('This tool name is already assigned');
-	}
-	toolCollection[toolName] = new toolClass();
+  if (toolName in toolCollection) {
+    throw new Error('This tool name is already assigned');
+  }
+  toolCollection[toolName] = new toolClass();
 }
 
 export function toolFactory(key: string): Tool {
-	return toolCollection[key];
+  return toolCollection[key];
 }

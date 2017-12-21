@@ -1,29 +1,28 @@
 export interface ModuleDefinition {
-	module: string;
-	options: any;
+  module: string;
+  options: any;
 }
 
 export interface Configuration {
-	port: number;
+  port: number;
 
-	globalIpFilter: string;
+  globalIpFilter: string;
 
-	logger: ModuleDefinition;
+  logger: ModuleDefinition;
 
-	dicomFileRepository: ModuleDefinition;
+  dicomFileRepository: ModuleDefinition;
 
-	dumper: ModuleDefinition;
+  dumper: ModuleDefinition;
 
-	imageEncoder: ModuleDefinition;
+  imageEncoder: ModuleDefinition;
 
-	cache: {
-		memoryThreshold: number;
-	};
+  cache: {
+    memoryThreshold: number;
+  };
 
-	authorization: {
-		enabled: boolean;
-		expire: number;
-		tokenRequestIpFilter: string;
-	};
-
+  authorization: {
+    enabled: boolean;
+    expire: number;
+    tokenRequestIpFilter: string;
+  };
 }

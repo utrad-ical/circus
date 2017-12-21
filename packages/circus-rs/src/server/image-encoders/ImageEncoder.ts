@@ -6,15 +6,19 @@ import * as stream from 'stream';
  * into a given stream.
  */
 export default abstract class ImageEncoder {
-	protected config: any = null;
+  protected config: any = null;
 
-	constructor(config?: any) {
-		this.config = config || null;
-	}
+  constructor(config?: any) {
+    this.config = config || null;
+  }
 
-	public mimeType(): string {
-		return 'image/png';
-	}
+  public mimeType(): string {
+    return 'image/png';
+  }
 
-	public abstract write(image: Buffer, width: number, height: number): Promise<stream.Readable>;
+  public abstract write(
+    image: Buffer,
+    width: number,
+    height: number
+  ): Promise<stream.Readable>;
 }

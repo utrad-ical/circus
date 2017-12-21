@@ -15,26 +15,26 @@ const handlers: { [index: number]: Function } = {};
 let handlerInstalled = false;
 
 function receiveMessage(event): any {
-	const handle = event.data.slice(prefix.length);
-	if (handlers[handle]) {
-		handlers[handle]();
-		delete handlers[handle];
-	}
+  const handle = event.data.slice(prefix.length);
+  if (handlers[handle]) {
+    handlers[handle]();
+    delete handlers[handle];
+  }
 }
 
 export default function setImmediate(callback): any {
-	if ('setImmediate' in window) {
-		// use native one
-		return window.setImmediate(callback);
-	}
+  if ('setImmediate' in window) {
+    // use native one
+    return window.setImmediate(callback);
+  }
 
-	// use polyfill using postMessage
-	if (!handlerInstalled) {
-		window.addEventListener('message', receiveMessage);
-		handlerInstalled = true;
-	}
+  // use polyfill using postMessage
+  if (!handlerInstalled) {
+    window.addEventListener('message', receiveMessage);
+    handlerInstalled = true;
+  }
 
-	handlers[handlerIndex] = callback;
-	window.postMessage(prefix + handlerIndex, '*');
-	return handlerIndex++;
+  handlers[handlerIndex] = callback;
+  window.postMessage(prefix + handlerIndex, '*');
+  return handlerIndex++;
 }

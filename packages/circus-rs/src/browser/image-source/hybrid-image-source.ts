@@ -10,38 +10,38 @@ import { VolumeImageSource } from './volume-image-source';
  * and then switch to RawVolumeImageSource when it is ready.
  */
 export class HybridImageSource extends VolumeImageSource {
+  private dynSource: DynamicImageSource;
+  private volSource: RawVolumeImageSource;
+  private volumeReady: boolean = false;
 
-	private dynSource: DynamicImageSource;
-	private volSource: RawVolumeImageSource;
-	private volumeReady: boolean = false;
+  public scan(param): Promise<Uint8Array> {
+    return Promise.resolve(new Uint8Array(0)); // never called
+  }
 
-	public scan(param): Promise<Uint8Array> {
-		return Promise.resolve(new Uint8Array(0)); // never called
-	}
+  constructor(params) {
+    super();
+    this.volSource = new RawVolumeImageSource(params);
+    this.volSource.ready().then(() => {
+      this.volumeReady = true;
+    });
+    this.dynSource = new DynamicImageSource(params);
+    this.dynSource.ready().then(() => {
+      this.meta = this.dynSource.meta;
+    });
+  }
 
-	constructor(params) {
-		super();
-		this.volSource = new RawVolumeImageSource(params);
-		this.volSource.ready().then(() => {
-			this.volumeReady = true;
-		});
-		this.dynSource = new DynamicImageSource(params);
-		this.dynSource.ready().then(() => {
-			this.meta = this.dynSource.meta;
-		});
-	}
+  public draw(viewer: Viewer, viewState: ViewState): Promise<ImageData> {
+    const source: VolumeImageSource = this.volumeReady
+      ? this.volSource
+      : this.dynSource;
+    return source.draw(viewer, viewState);
+  }
 
-	public draw(viewer: Viewer, viewState: ViewState): Promise<ImageData> {
-		const source: VolumeImageSource = this.volumeReady ? this.volSource : this.dynSource;
-		return source.draw(viewer, viewState);
-	}
+  public ready(): Promise<any> {
+    return this.dynSource.ready();
+  }
 
-	public ready(): Promise<any> {
-		return this.dynSource.ready();
-	}
-
-	public initialState(viewer: Viewer): ViewState {
-		return this.dynSource.initialState(viewer);
-	}
-
+  public initialState(viewer: Viewer): ViewState {
+    return this.dynSource.initialState(viewer);
+  }
 }

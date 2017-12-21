@@ -1,24 +1,25 @@
 @font-face {
-	font-family: 'circus-rs-font';
-	src: url('circus-rs-font.woff') format('woff');
-	font-weight: normal;
-	font-style: normal;
+  font-family: 'circus-rs-font';
+  src: url('circus-rs-font.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
 }
 
-[class^="rs-icon-"], [class*=" rs-icon-"] {
-	font-family: 'circus-rs-font';
-	speak: none;
-	font-style: normal;
-	font-weight: normal;
-	font-variant: normal;
-	text-transform: none;
-	line-height: 1;
+[class^='rs-icon-'],
+[class*=' rs-icon-'] {
+  font-family: 'circus-rs-font';
+  speak: none;
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
 }
 
 .rs-icon(@name, @code) {
-	.rs-icon-@{name}:before {
-		content: @code;
-	}
+  .rs-icon-@{name}:before {
+    content: @code;
+  }
 }
 
 .rs-icon(window, '\e600');

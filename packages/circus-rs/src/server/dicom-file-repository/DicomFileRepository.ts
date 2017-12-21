@@ -5,8 +5,8 @@
 export type SeriesLoader = (image: number) => Promise<ArrayBuffer>;
 
 export type SeriesLoaderInfo = {
-	seriesLoader: SeriesLoader;
-	count: number;
+  seriesLoader: SeriesLoader;
+  count: number;
 };
 
 /**
@@ -16,18 +16,18 @@ export type SeriesLoaderInfo = {
  * of the corresponding DICOM file.
  */
 abstract class DicomFileRepository {
-	protected config: any = null;
+  protected config: any = null;
 
-	constructor(config: any) {
-		this.config = config;
-		this.initialize();
-	}
+  constructor(config: any) {
+    this.config = config;
+    this.initialize();
+  }
 
-	protected initialize(): void {
-		// do nothing by default
-	}
+  protected initialize(): void {
+    // do nothing by default
+  }
 
-	public abstract getSeriesLoader(seriesUID: string): Promise<SeriesLoaderInfo>;
+  public abstract getSeriesLoader(seriesUID: string): Promise<SeriesLoaderInfo>;
 }
 
 export default DicomFileRepository;

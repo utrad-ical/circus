@@ -8,8 +8,7 @@ export type InterpolationMode = 'trilinear' | 'nearestNeighbor';
  * ViewState determines how the ImageSource is viewed on each Viewer.
  */
 export interface ViewState {
-	section?: Section;
-	window?: ViewWindow;
-	interpolationMode?: InterpolationMode;
+  section?: Section;
+  window?: ViewWindow;
+  interpolationMode?: InterpolationMode;
 }
-

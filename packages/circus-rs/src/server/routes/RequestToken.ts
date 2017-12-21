@@ -11,20 +11,22 @@ import { ServerHelpers } from '../ServerHelpers';
  * for each authorized series.
  */
 export default function requestToken(helpers: ServerHelpers): koa.Middleware {
-	const { authorizationCache } = helpers;
-	const validator = validate({ series: ['Series UID', null, isUID, null] });
+  const { authorizationCache } = helpers;
+  const validator = validate({ series: ['Series UID', null, isUID, null] });
 
-	const main = async function requestToken(ctx, next) {
-		const series: string = ctx.request.query.series;
+  const main = async function requestToken(ctx, next) {
+    const series: string = ctx.request.query.series;
 
-		try {
-			const token = await generateAccessToken();
-			authorizationCache.update(series, token);
-			ctx.body = { result: 'OK', token };
-		} catch(err) {
-			throw StatusError.internalServerError('Internal server error occurred while generating access token');
-		}
-	};
+    try {
+      const token = await generateAccessToken();
+      authorizationCache.update(series, token);
+      ctx.body = { result: 'OK', token };
+    } catch (err) {
+      throw StatusError.internalServerError(
+        'Internal server error occurred while generating access token'
+      );
+    }
+  };
 
-	return compose([validator, main]);
+  return compose([validator, main]);
 }

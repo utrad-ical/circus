@@ -1,14 +1,13 @@
- import * as koa from 'koa';
+import * as koa from 'koa';
 
 declare module 'koa' {
-	interface Context {
-	}
+  interface Context {}
 }
 
 // Augument Error class with status/expose
 declare global {
-	interface Error {
-		status?: number;
-		expose?: boolean;
-	}
+  interface Error {
+    status?: number;
+    expose?: boolean;
+  }
 }

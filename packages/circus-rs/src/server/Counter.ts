@@ -3,25 +3,25 @@
  */
 
 interface CounterHash {
-	[key: string]: number;
+  [key: string]: number;
 }
 
 export default class Counter {
-	private counter: CounterHash = {};
+  private counter: CounterHash = {};
 
-	public countUp(key: string): void {
-		if (key in this.counter) {
-			this.counter[key]++;
-		} else {
-			this.counter[key] = 1;
-		}
-	}
+  public countUp(key: string): void {
+    if (key in this.counter) {
+      this.counter[key]++;
+    } else {
+      this.counter[key] = 1;
+    }
+  }
 
-	public getCount(key: string): number {
-		return (key in this.counter) ? this.counter[key] : 0;
-	}
+  public getCount(key: string): number {
+    return key in this.counter ? this.counter[key] : 0;
+  }
 
-	public getCounts(): CounterHash {
-		return this.counter;
-	}
+  public getCounts(): CounterHash {
+    return this.counter;
+  }
 }

@@ -54,12 +54,12 @@ function messages(state = [], action) {
  */
 function searches(state = {}, action) {
 	switch (action.type) {
-		case 'START_SEARCH_QUERY':
+		case 'SET_SEARCH_QUERY_BUSY':
 			state = {
 				...state,
 				[action.name]: {
 					...(state[action.name] || {}),
-					isFetching: true,
+					isFetching: action.isFetching,
 				}
 			};
 			break;

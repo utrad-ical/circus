@@ -15,25 +15,34 @@ function beginQuery(params) {
 		const page = params.page || search.page;
 		const sort = params.sort || search.sort;
 		const per = params.per || search.per;
-	
-		dispatch({
-			type: 'START_SEARCH_QUERY',
-			name
-		});
-		const query = { filter, sort, page };
-		const result = await api(resource, { params: query });
-		dispatch({
-			type: 'LOAD_SEARCH_RESULTS',
-			name,
-			resource,
-			filter,
-			condition,
-			sort,
-			per,
-			page: result.page,
-			items: result.items,
-			totalItems: result.totalItems
-		});
+
+		try {
+			dispatch({
+				type: 'SET_SEARCH_QUERY_BUSY',
+				name,
+				isFetching: true
+			});
+			const query = { filter, sort, page };
+			const result = await api(resource, { params: query });
+			dispatch({
+				type: 'LOAD_SEARCH_RESULTS',
+				name,
+				resource,
+				filter,
+				condition,
+				sort,
+				per,
+				page: result.page,
+				items: result.items,
+				totalItems: result.totalItems
+			});
+		} finally {
+			dispatch({
+				type: 'SET_SEARCH_QUERY_BUSY',
+				name,
+				isFetching: false
+			});
+		}
 	};
 }
 

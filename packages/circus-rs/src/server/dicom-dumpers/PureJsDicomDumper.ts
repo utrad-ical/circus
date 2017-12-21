@@ -72,6 +72,11 @@ export default class PureJsDicomDumper extends DicomDumper {
       raw.insertSingleImage(i - 1, dicom.pixelData);
     }
 
+    if (pitch === undefined && count === 1) {
+      pitch = 1;
+      raw.setVoxelSize([dicom.pixelSpacing[0], dicom.pixelSpacing[1], pitch]);
+    }
+
     if (raw.getHeader('modality') === 'CT') {
       const slope = raw.getHeader('rescaleSlope');
       const intercept = raw.getHeader('rescaleIntercept');

@@ -11,7 +11,7 @@ const ProjectDisplayView = props => {
 	if (!project) {
 		throw new Error('Tried to render icon for an inaccessible project');
 	}
-	const toolTip = <Tooltip placelemnt='top'>
+	const toolTip = <Tooltip placelemnt='top' id='project-display-tooltip'>
 		{project.project.description}
 	</Tooltip>;
 	return (

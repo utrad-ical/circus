@@ -37,12 +37,20 @@ export default async function performSearch(model, filter, ctx, opts = {}) {
   const page = parseInt(urlQuery.page || '1', 10);
   const skip = limit * (page - 1);
 
-  const rawResults = await model.findAll(filter, { limit, skip, sort });
-  const totalItems = await model.findAsCursor(filter).count();
-  const results = transform ? rawResults.map(transform) : rawResults;
-  ctx.body = {
-    items: results,
-    totalItems,
-    page
-  };
+  try {
+    const rawResults = await model.findAll(filter, { limit, skip, sort });
+    const totalItems = await model.findAsCursor(filter).count();
+    const results = transform ? rawResults.map(transform) : rawResults;
+    ctx.body = {
+      items: results,
+      totalItems,
+      page
+    };
+  } catch (err) {
+    if (err.code === 2) {
+      ctx.throw(status.BAD_REQUEST, 'Invalid query');
+    } else {
+      throw err;
+    }
+  }
 }

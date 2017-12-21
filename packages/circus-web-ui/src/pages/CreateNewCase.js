@@ -6,6 +6,7 @@ import MultiTagSelect from 'components/MultiTagSelect';
 import { Panel } from 'components/react-bootstrap';
 import DataGrid from 'components/DataGrid';
 import { api } from 'utils/api';
+import { browserHistory } from 'react-router';
 
 class CreateNewCaseView extends React.Component {
 	constructor(props) {
@@ -46,7 +47,7 @@ class CreateNewCaseView extends React.Component {
 	}
 
 	async handleCreate() {
-		await api('cases', {
+		const res = await api('cases', {
 			method: 'post',
 			data: {
 				projectId: this.state.selectedProject,
@@ -54,6 +55,10 @@ class CreateNewCaseView extends React.Component {
 				tags: this.state.selectedTags
 			}
 		});
+		if (res.caseId) {
+			const newCaseId = res.caseId;
+			browserHistory.push(`/case/${newCaseId}`);
+		}
 	}
 
 	render() {
@@ -78,7 +83,7 @@ class CreateNewCaseView extends React.Component {
 			seriesUid: s,
 			range: '-'
 		}));
-		
+
 		return <div>
 			<h1><span className='circus-icon-case' />New Case</h1>
 			<Panel collapsible defaultExpanded header='Series'>

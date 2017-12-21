@@ -23,120 +23,131 @@ import DicomImporter from './DicomImporter';
 import circusRs from './circusRs';
 
 function handlerName(route) {
-	if (route.handler) return route.handler;
-	return 'handle' + route.verb[0].toUpperCase() + route.verb.substr(1);
+  if (route.handler) return route.handler;
+  return 'handle' + route.verb[0].toUpperCase() + route.verb.substr(1);
 }
 
 function formatValidationErrors(errors) {
-	return errors.map(err => (
-		`${err.dataPath} ${err.message}`
-	)).join('\n');
+  return errors.map(err => `${err.dataPath} ${err.message}`).join('\n');
 }
 
 async function prepareApiRouter(apiDir, deps, options) {
-	const { debug } = options;
-	const router = new Router();
-	const validator = deps.validator;
+  const { debug } = options;
+  const router = new Router();
+  const validator = deps.validator;
 
-	const manifestFiles = await glob(apiDir);
-	for(const manifestFile of manifestFiles) {
-		const data = yaml(await fs.readFile(manifestFile, 'utf8'));
-		try {
-			await validator.validate('api', data);
-		} catch (err) {
-			throw new TypeError(
-				`Meta schema error at ${manifestFile}.\n` +
-				formatValidationErrors(err.errors)
-			);
-		}
-		const dir = path.dirname(manifestFile);
-		for (const route of data.routes) {
-			if (route.forDebug && !debug) continue;
-			const module = require(dir);
-			const mainHandler = module[handlerName(route)];
-			if (typeof mainHandler !== 'function') {
-				throw new Error('middleware not found');
-			}
-			const middlewareStack = compose([
-				typeCheck(route.expectedContentType),
-				checkPrivilege(deps, route),
-				validateInOut(validator, {
-					requestSchema: route.requestSchema,
-					responseSchema: route.responseSchema
-				}),
-				mainHandler(deps) // The processing function itself
-			]);
-			// console.log(`  Register ${route.verb.toUpperCase()} on ${route.path}`);
-			router[route.verb](route.path, middlewareStack);
-		}
-	}
+  const manifestFiles = await glob(apiDir);
+  for (const manifestFile of manifestFiles) {
+    const data = yaml(await fs.readFile(manifestFile, 'utf8'));
+    try {
+      await validator.validate('api', data);
+    } catch (err) {
+      throw new TypeError(
+        `Meta schema error at ${manifestFile}.\n` +
+          formatValidationErrors(err.errors)
+      );
+    }
+    const dir = path.dirname(manifestFile);
+    for (const route of data.routes) {
+      if (route.forDebug && !debug) continue;
+      const module = require(dir);
+      const mainHandler = module[handlerName(route)];
+      if (typeof mainHandler !== 'function') {
+        throw new Error('middleware not found');
+      }
+      const middlewareStack = compose([
+        typeCheck(route.expectedContentType),
+        checkPrivilege(deps, route),
+        validateInOut(validator, {
+          requestSchema: route.requestSchema,
+          responseSchema: route.responseSchema
+        }),
+        mainHandler(deps) // The processing function itself
+      ]);
+      // console.log(`  Register ${route.verb.toUpperCase()} on ${route.path}`);
+      router[route.verb](route.path, middlewareStack);
+    }
+  }
 
-	return router;
+  return router;
 }
 
 /**
  * Creates a new Koa app.
  */
 export default async function createApp(options = {}) {
-	const { debug, db, fixUser, blobPath, corsOrigin, dicomPath } = options;
+  const { debug, db, fixUser, blobPath, corsOrigin, dicomPath } = options;
 
-	// The main Koa instance.
-	const koa = new Koa();
+  // The main Koa instance.
+  const koa = new Koa();
 
-	const validator = await createValidator();
-	const models = createModels(db, validator);
-	const blobStorage = blobPath ?
-		await createStorage('local', { root: blobPath }) :
-		await createStorage('memory');
+  const validator = await createValidator();
+  const models = createModels(db, validator);
+  const blobStorage = blobPath
+    ? await createStorage('local', { root: blobPath })
+    : await createStorage('memory');
 
-	const dicomStorage = dicomPath ?
-		await createStorage('local', { root: dicomPath }) :
-		await createStorage('memory');
+  const dicomStorage = dicomPath
+    ? await createStorage('local', { root: dicomPath })
+    : await createStorage('memory');
 
-	const logger = options.logger ? options.logger : createLogger('off');
+  const logger = options.logger ? options.logger : createLogger('off');
 
-	const dicomImporter = process.env.DICOM_UTILITY ? new DicomImporter(
-		dicomStorage, models, { utility: process.env.DICOM_UTILITY }
-	) : undefined;
+  const dicomImporter = process.env.DICOM_UTILITY
+    ? new DicomImporter(dicomStorage, models, {
+        utility: process.env.DICOM_UTILITY
+      })
+    : undefined;
 
-	// Build a router.
-	// Register each API endpoints to the router according YAML manifest files.
-	const deps = {
-		validator, db, logger, models, blobStorage, dicomImporter,
-		uploadFileSizeMax: '200mb',
-		dicomImageServerUrl: 'http://localhost:8080/rs'
-	};
+  // Build a router.
+  // Register each API endpoints to the router according YAML manifest files.
+  const deps = {
+    validator,
+    db,
+    logger,
+    models,
+    blobStorage,
+    dicomImporter,
+    uploadFileSizeMax: '200mb',
+    dicomImageServerUrl: 'http://localhost:8080/rs'
+  };
 
-	const apiDir = path.resolve(__dirname, 'api/**/*.yaml');
-	const apiRouter = await prepareApiRouter(apiDir, deps, options);
+  const apiDir = path.resolve(__dirname, 'api/**/*.yaml');
+  const apiRouter = await prepareApiRouter(apiDir, deps, options);
 
-	const oauth = createOauthServer(models);
+  const oauth = createOauthServer(models);
 
-	// Register middleware stack to the Koa app.
-	koa.use(errorHandler(debug, logger));
-	koa.use(cors(corsOrigin));
-	koa.use(mount('/api', compose([
-		async (ctx, next) => {
-			if (ctx.method === 'OPTIONS') {
-				ctx.body = null;
-				ctx.status = 200;
-			} else await next();
-		},
-		bodyParser({
-			enableTypes: ['json'],
-			jsonLimit: '1mb',
-			onerror: (err, ctx) => ctx.throw(400, 'Invalid JSON as request body.\n' + err.message)
-		}),
-		multer({
-			storage: multer.memoryStorage(),
-			limits: deps.uploadFileSizeMax
-		}).array('files'),
-		(fixUser ? fixUserMiddleware(deps, fixUser) : oauth.authenticate()),
-		apiRouter.routes()
-	])));
-	koa.use(mount('/login', compose([bodyParser(), oauth.token()])));
+  // Register middleware stack to the Koa app.
+  koa.use(errorHandler(debug, logger));
+  koa.use(cors(corsOrigin));
+  koa.use(
+    mount(
+      '/api',
+      compose([
+        async (ctx, next) => {
+          if (ctx.method === 'OPTIONS') {
+            ctx.body = null;
+            ctx.status = 200;
+          } else await next();
+        },
+        bodyParser({
+          enableTypes: ['json'],
+          jsonLimit: '1mb',
+          onerror: (err, ctx) =>
+            ctx.throw(400, 'Invalid JSON as request body.\n' + err.message)
+        }),
+        multer({
+          storage: multer.memoryStorage(),
+          limits: deps.uploadFileSizeMax
+        }).array('files'),
+        fixUser ? fixUserMiddleware(deps, fixUser) : oauth.authenticate(),
+        apiRouter.routes()
+      ])
+    )
+  );
+  koa.use(mount('/login', compose([bodyParser(), oauth.token()])));
 
-	koa.use(mount('/rs', circusRs({ models, logger }, dicomStorage).routes()));
+  koa.use(mount('/rs', circusRs({ models, logger }, dicomStorage).routes()));
 
-	return koa;
+  return koa;
 }

@@ -5,7 +5,8 @@
   "main": "server.js",
   "scripts": {
     "test": "mocha",
-    "lint": "eslint src test"
+    "lint": "eslint src test",
+    "prettier": "prettier --write src/**/*.js test/*.js"
   },
   "repository": {
     "type": "git",
@@ -55,9 +56,13 @@
     "chai": "^4.1.2",
     "eslint": "^4.7.1",
     "form-data": "^2.3.1",
-    "mocha": "^3.5.3"
+    "mocha": "^3.5.3",
+    "prettier": "^1.9.2"
   },
   "nodemonConfig": {
     "ext": "js,mjs,json,yaml"
+  },
+  "prettier": {
+    "singleQuote": true
   }
 }

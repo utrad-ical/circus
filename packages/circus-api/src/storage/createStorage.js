@@ -7,11 +7,11 @@ import memoryStorage from './memoryStorage';
  * @param {object} params
  */
 export default async function createStorage(type, params = {}) {
-	switch (type) {
-		case 'local':
-			return await localStorage(params);
-		case 'memory':
-			return await memoryStorage();
-	}
-	throw Error('This storage type is not supported');
+  switch (type) {
+    case 'local':
+      return await localStorage(params);
+    case 'memory':
+      return await memoryStorage();
+  }
+  throw Error('This storage type is not supported');
 }

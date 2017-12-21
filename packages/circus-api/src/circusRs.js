@@ -10,45 +10,44 @@ import Router from 'koa-router';
  * Creates a series router.
  */
 export default function circusRs({ models, logger }, dicomStorage) {
+  const dicomFileRepository = {
+    getSeriesLoader: async seriesUid => {
+      const series = await models.series.findByIdOrFail(seriesUid);
+      const images = multirange(series.images);
+      if (images.min() !== 1 || images.segmentLength() !== 1) {
+        throw new Error('Incontinuous series not supported');
+      }
+      return {
+        seriesLoader: async image => {
+          const key = `${seriesUid}/${image}`;
+          const file = await dicomStorage.read(key);
+          return file;
+        },
+        count: images.length()
+      };
+    }
+  };
 
-	const dicomFileRepository = {
-		getSeriesLoader: async (seriesUid) => {
-			const series = await models.series.findByIdOrFail(seriesUid);
-			const images = multirange(series.images);
-			if (images.min() !== 1 || images.segmentLength() !== 1) {
-				throw new Error('Incontinuous series not supported');
-			}
-			return {
-				seriesLoader: async image => {
-					const key = `${seriesUid}/${image}`;
-					const file = await dicomStorage.read(key);
-					return file;
-				},
-				count: images.length()
-			};
-		}
-	};
+  const dicomDumper = new PureJsDicomDumper();
+  const seriesReader = new createDicomReader(
+    dicomFileRepository,
+    dicomDumper,
+    2 * 1024 * 1024 * 1024
+  );
 
-	const dicomDumper = new PureJsDicomDumper();
-	const seriesReader = new createDicomReader(
-		dicomFileRepository,
-		dicomDumper,
-		2 * 1024 * 1024 * 1024
-	);
+  const imageEncoder = new PngJsImageEncoder();
 
-	const imageEncoder = new PngJsImageEncoder();
+  const helpers = {
+    logger,
+    seriesReader,
+    imageEncoder
+  };
 
-	const helpers = {
-		logger,
-		seriesReader,
-		imageEncoder,
-	};
+  const volumeLoader = loadSeries(helpers);
 
-	const volumeLoader = loadSeries(helpers);
+  const router = new Router();
+  router.use('/series/:sid', volumeLoader);
+  router.use('/series/:sid', createSeriesRouter(helpers).routes());
 
-	const router = new Router();
-	router.use('/series/:sid', volumeLoader);
-	router.use('/series/:sid', createSeriesRouter(helpers).routes());
-
-	return router;
+  return router;
 }

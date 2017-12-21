@@ -46,7 +46,7 @@ describe('DicomPixelExtractor', function() {
           pixel = pixel * data.rescale.slope + data.rescale.intercept;
         }
         var o = Math.round((pixel - wl + ww / 2) * (255 / ww));
-        arr[x + y * data.columns] = pixel;
+        arr[x + y * data.columns] = o;
       }
     }
     encoder.write(new Buffer(arr), data.columns, data.rows).then(out => {
@@ -86,6 +86,11 @@ describe('DicomPixelExtractor', function() {
     columns: 256,
     rows: 256,
     pixelSpacing: [0.859375, 0.859375]
+  });
+  testFile('DX-MONO2-16-chest', {
+    columns: 2022,
+    rows: 2022,
+    window: { level: 8192, width: 16383 }
   });
   testFile('MR-phantom-LI', {
     columns: 256,

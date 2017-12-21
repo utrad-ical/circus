@@ -16,9 +16,9 @@ globals:
 plugins:
   - react
 rules:
-  indent: [2, 'tab', { SwitchCase: 1 }]
+  indent: [2, 2, { SwitchCase: 1 }]
   quotes: [2, 'single', { avoidEscape: true }]
-  jsx-quotes: [2, 'prefer-single']
+  jsx-quotes: [2, 'prefer-double']
   padding-line-between-statements:
     - 'error'
     - { blankLine: 'always', prev: 'function', next: 'function' }

@@ -2,6 +2,8 @@ import React from 'react';
 import ShrinkSelect from 'rb/ShrinkSelect';
 import { Pagination } from 'components/react-bootstrap';
 import { changeSearchPage, changeSearchSort } from 'actions';
+import LoadingIndicator from 'rb/LoadingIndicator';
+import { connect } from 'react-redux';
 
 export const makeSortOptions = sortKeys => {
   const options = {};
@@ -13,17 +15,14 @@ export const makeSortOptions = sortKeys => {
 };
 
 const SearchResultsView = props => {
-  const {
-    dispatch,
-    name,
-    totalItems,
-    per,
-    items,
-    page,
-    sort,
-    sortOptions,
-    dataView: DataView
-  } = props;
+  const { dispatch, search, name, sortOptions, dataView: DataView } = props;
+  if (!search) return null;
+  const { isFetching, totalItems, per, items, page, sort } = search;
+
+  if (isFetching && !Array.isArray(items))
+    return <LoadingIndicator delay={1000} />;
+
+  if (!Array.isArray(items)) return null; // This should not happen
 
   function handleSortChange(newSort) {
     if (newSort === sort) return;
@@ -36,7 +35,6 @@ const SearchResultsView = props => {
   }
 
   const pages = Math.ceil(totalItems / per);
-  if (!Array.isArray(items)) return null;
   return (
     <div className="search-results-container">
       <div className="search-results-header">
@@ -48,7 +46,7 @@ const SearchResultsView = props => {
           onChange={handleSortChange}
         />
       </div>
-      {<DataView items={items} />}
+      {<DataView value={items} />}
       <div className="search-results-pager">
         <Pagination
           prev
@@ -66,4 +64,6 @@ const SearchResultsView = props => {
   );
 };
 
-export default SearchResultsView;
+export default connect((state, ownProps) => ({
+  search: state.searches[ownProps.name]
+}))(SearchResultsView);

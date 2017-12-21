@@ -1,5 +1,7 @@
 box: node:latest
 build:
   steps:
+    - add-ssh-key:
+        keyname: GITHUB
     - npm-install
     - npm-test

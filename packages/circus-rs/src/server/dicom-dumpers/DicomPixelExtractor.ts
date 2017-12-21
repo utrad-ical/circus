@@ -195,10 +195,10 @@ export class DicomPixelExtractor {
     // Get relevant DICOM element data (in group 0028)
     const columns = dataset.uint16('x00280011'); // columns
     const rows = dataset.uint16('x00280010'); // rows
-    const pixelSpacing = <[number, number]>dataset
-      .string('x00280030')
-      .split('\\')
-      .map(x => parseFloat(x));
+    const pixelSpacingRaw = dataset.string('x00280030');
+    const pixelSpacing = <[number, number]>(pixelSpacingRaw
+      ? pixelSpacingRaw.split('\\').map(x => parseFloat(x))
+      : [1, 1]);
     const rescale = this.determineRescale(dataset);
     const pixelFormat = this.determinePixelFormat(dataset);
 

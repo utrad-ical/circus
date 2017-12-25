@@ -9,6 +9,7 @@ import { connect } from 'react-redux';
 import ProjectSelectorMultiple from 'components/ProjectSelectorMultiple';
 import { conditionToMongoQuery } from 'rb/ConditionEditor';
 import SearchPanel from 'pages/search/SearchPanel';
+import sendSearchCondition from 'pages/search/sendSearchCondition';
 
 const modalityOptions = { all: 'All' };
 modalities.forEach(m => (modalityOptions[m] = m));
@@ -136,9 +137,9 @@ class CaseSearchConditionView extends React.Component {
   }
 
   handleSearchClick() {
-    const { condition } = this.props;
+    const { condition, onSearchClick } = this.props;
     const filter = conditionToFilter(condition);
-    this.props.onSearch({ condition, filter });
+    onSearchClick(filter);
   }
 
   render() {
@@ -170,8 +171,22 @@ class CaseSearchConditionView extends React.Component {
   }
 }
 
+const nullCondition = () => {
+  return {
+    type: 'basic',
+    projects: [],
+    basic: { tags: [] },
+    advanced: { $and: [] }
+  };
+};
+
 const CaseSearchCondition = connect(state => ({
   accessibleProjects: state.loginUser.data.accessibleProjects
 }))(CaseSearchConditionView);
 
-export default CaseSearchCondition;
+export default sendSearchCondition({
+  searchName: 'case',
+  resource: 'cases',
+  defaultSort: '{"createdAt":-1}',
+  nullCondition
+})(CaseSearchCondition);

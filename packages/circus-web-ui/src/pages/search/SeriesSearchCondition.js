@@ -7,6 +7,7 @@ import DateRangePicker, { dateRangeToMongoQuery } from 'rb/DateRangePicker';
 import AgeMinMax from 'components/AgeMinMax';
 import { conditionToMongoQuery } from 'rb/ConditionEditor';
 import SearchPanel from 'pages/search/SearchPanel';
+import sendSearchCondition from 'pages/search/sendSearchCondition';
 
 const sexOptions = { all: 'All', M: 'male', F: 'female', O: 'other' };
 const modalityOptions = { all: 'All' };
@@ -86,12 +87,12 @@ const conditionToFilter = condition => {
   throw new Error('Unkonwn condition type');
 };
 
-export default function SeriesSearchCondition(props) {
-  const { condition, onChange, onSearch, onResetClick } = props;
+const SeriesSearchCondition = props => {
+  const { condition, onChange, onSearchClick, onResetClick } = props;
 
   function handleSearchClick() {
     const filter = conditionToFilter(condition);
-    onSearch({ condition, filter });
+    onSearchClick(filter);
   }
 
   return (
@@ -104,4 +105,19 @@ export default function SeriesSearchCondition(props) {
       />
     </SearchPanel>
   );
-}
+};
+
+const nullCondition = () => {
+  return {
+    type: 'basic',
+    basic: { modality: 'all', sex: 'all' },
+    advanced: { $and: [{ keyName: 'modality', op: '==', value: 'CT' }] }
+  };
+};
+
+export default sendSearchCondition({
+  searchName: 'series',
+  resource: 'series',
+  defaultSort: '{"createdAt":-1}',
+  nullCondition
+})(SeriesSearchCondition);

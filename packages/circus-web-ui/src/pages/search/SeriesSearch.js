@@ -1,29 +1,18 @@
 import React from 'react';
 import SeriesSearchCondition from './SeriesSearchCondition';
 import SeriesSearchResults from './SeriesSearchResults';
-import SearchCommon from './SearchCommon';
-
-const nullCondition = () => {
-  return {
-    type: 'basic',
-    basic: { modality: 'all', sex: 'all' },
-    advanced: { $and: [{ keyName: 'modality', op: '==', value: 'CT' }] }
-  };
-};
+import Icon from 'components/Icon';
 
 export default class SeriesSearch extends React.Component {
   render() {
     return (
-      <SearchCommon
-        title="Series Search"
-        icon="circus-series"
-        searchName="series"
-        resource="series"
-        defaultSort="{&quot;createdAt&quot;:-1}"
-        conditionComp={SeriesSearchCondition}
-        resultComp={SeriesSearchResults}
-        nullCondition={nullCondition}
-      />
+      <div>
+        <h1>
+          <Icon icon="circus-series" /> Series Search
+        </h1>
+        <SeriesSearchCondition />
+        <SeriesSearchResults />
+      </div>
     );
   }
 }

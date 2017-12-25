@@ -1,30 +1,18 @@
 import React from 'react';
-import CaseSearchCondition from './CaseSearchCondition';
-import CaseSearchResults from './CaseSearchResults';
-import SearchCommon from './SearchCommon';
-
-const nullCondition = () => {
-  return {
-    type: 'basic',
-    projects: [],
-    basic: { tags: [] },
-    advanced: { $and: [] }
-  };
-};
+import CaseSearchResults from 'pages/search/CaseSearchResults';
+import CaseSearchCondition from 'pages/search/CaseSearchCondition';
+import Icon from 'components/Icon';
 
 export default class CaseSearch extends React.Component {
   render() {
     return (
-      <SearchCommon
-        title="Case Search"
-        icon="circus-case"
-        searchName="case"
-        resource="cases"
-        defaultSort="{&quot;createdAt&quot;:-1}"
-        conditionComp={CaseSearchCondition}
-        resultComp={CaseSearchResults}
-        nullCondition={nullCondition}
-      />
+      <div>
+        <h1>
+          <Icon icon="circus-case" /> Case Search
+        </h1>
+        <CaseSearchCondition />
+        <CaseSearchResults />
+      </div>
     );
   }
 }

@@ -24,7 +24,7 @@ rules:
     - { blankLine: 'always', prev: 'function', next: 'function' }
     - { blankLine: 'always', prev: 'import', next: '*' }
     - { blankLine: 'any', prev: 'import', next: 'import' }
-  no-unused-vars: [2, { argsIgnorePattern: 'props' }]
+  no-unused-vars: [2, { argsIgnorePattern: 'props', ignoreRestSiblings: true }]
   "react/prop-types": [0]
   "react/display-name": [0]
   "react/jsx-closing-bracket-location": [2, 'line-aligned']

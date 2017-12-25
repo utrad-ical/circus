@@ -13,18 +13,18 @@ const kebabCase = str => {
 };
 
 const DataGrid = props => {
-  const { value, className, onRowClick, active } = props;
+  const { value, className, onItemClick, active } = props;
   const columns = props.columns.map(normalizeColumn);
 
-  const handleRowClick = index => {
-    onRowClick && onRowClick(index, value[index]);
+  const handleItemClick = index => {
+    onItemClick && onItemClick(index, value[index]);
   };
 
   return (
     <table
       className={classnames(
         'table table-hover table-condensed data-grid',
-        { 'data-grid-row-clickable': onRowClick },
+        { 'data-grid-row-clickable': onItemClick },
         className
       )}
     >
@@ -42,7 +42,7 @@ const DataGrid = props => {
           <tr
             key={i}
             className={classnames({ info: active === item })}
-            onClick={() => handleRowClick(i)}
+            onClick={() => handleItemClick(i)}
           >
             {columns.map((c, i) => {
               const Renderer = c.renderer;

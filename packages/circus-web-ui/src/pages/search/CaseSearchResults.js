@@ -1,6 +1,7 @@
 import React, { Fragment } from 'react';
-import SearchResultsView, { makeSortOptions } from './SearchResultsView';
-import { Button } from 'components/react-bootstrap';
+import SearchResultsView, {
+  makeSortOptions
+} from 'components/SearchResultsView';
 import { Link } from 'react-router';
 import DataGrid from 'components/DataGrid';
 import PatientInfoBox from 'components/PatientInfoBox';

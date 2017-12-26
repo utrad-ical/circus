@@ -6,7 +6,7 @@ import { api } from 'utils/api.js';
 import AdminContainer from './AdminContainer';
 import { refreshUserInfo, startNewSearch } from 'actions';
 import DataGrid from 'components/DataGrid';
-import SearchResultsView from 'pages/search/SearchResultsView';
+import SearchResultsView from 'components/SearchResultsView';
 import { connect } from 'react-redux';
 
 class EditorPage extends React.Component {

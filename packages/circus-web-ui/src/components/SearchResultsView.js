@@ -4,6 +4,7 @@ import { Pagination } from 'components/react-bootstrap';
 import { changeSearchPage, changeSearchSort } from 'actions';
 import LoadingIndicator from 'rb/LoadingIndicator';
 import { connect } from 'react-redux';
+import Icon from 'components/Icon';
 
 export const makeSortOptions = sortKeys => {
   const options = {};
@@ -14,6 +15,10 @@ export const makeSortOptions = sortKeys => {
   return options;
 };
 
+/**
+ * SearchResultsView is connected to `search` redux state and
+ * displays the search results along with pager and sort changer.
+ */
 const SearchResultsView = props => {
   const {
     dispatch,
@@ -48,7 +53,8 @@ const SearchResultsView = props => {
         {totalItems + ' Result' + (totalItems > 1 ? 's' : '')}
         {sortOptions && (
           <Fragment>
-            &emsp;Sort:&ensp;
+            &emsp;
+            <Icon icon="sort" />&ensp;
             <ShrinkSelect
               options={sortOptions}
               value={sort}

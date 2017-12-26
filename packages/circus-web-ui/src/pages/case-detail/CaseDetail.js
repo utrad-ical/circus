@@ -48,6 +48,9 @@ export default class CaseDetail extends React.Component {
     this.setState({ busy: true, editingRevisionIndex: index });
 
     const data = merge(true, {}, revision);
+    delete data.date;
+    delete data.creator;
+
     // Load all label volume data in the latest revision
     for (const series of data.series) {
       for (const label of series.labels) {
@@ -122,7 +125,7 @@ export default class CaseDetail extends React.Component {
                 method: 'put',
                 handleErrors: true,
                 data: voxels,
-                headers: { 'Content-Type': 'application/json' }
+                headers: { 'Content-Type': 'application/octet-stream' }
               });
             }
             newLabelData.voxels = hash;
@@ -132,6 +135,7 @@ export default class CaseDetail extends React.Component {
           label.data = newLabelData;
           delete label.cloud;
         } catch (err) {
+          console.error(err);
           await alert('Could not save label volume data: \n' + err.message);
           return;
         }
@@ -140,9 +144,9 @@ export default class CaseDetail extends React.Component {
 
     // prepare revision data
     data.status = 'approved';
-    const caseID = this.state.caseData.caseID;
+    const caseId = this.state.caseData.caseId;
     try {
-      await api(`case/${caseID}/revision`, {
+      await api(`cases/${caseId}/revision`, {
         method: 'post',
         data,
         handleErrors: true
@@ -151,6 +155,7 @@ export default class CaseDetail extends React.Component {
       this.setState({ caseData: null, editingData: null });
       this.loadCase();
     } catch (err) {
+      console.error(err);
       await alert('Error: ' + err.message);
     }
   }

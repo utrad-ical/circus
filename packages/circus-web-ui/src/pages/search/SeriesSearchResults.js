@@ -3,7 +3,7 @@ import SearchResultsView, { makeSortOptions } from './SearchResultsView';
 import { Button } from 'components/react-bootstrap';
 import { Link } from 'react-router';
 import DataGrid from 'components/DataGrid';
-import PatientInfoBox from 'pages/search/PatientInfoBox';
+import PatientInfoBox from 'components/PatientInfoBox';
 import TimeDisplay from 'components/TimeDisplay';
 
 const Modality = props => {

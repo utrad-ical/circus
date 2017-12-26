@@ -22,6 +22,8 @@ import { sha1 } from '../../utils/util.js';
 import ProjectDisplay from 'components/ProjectDisplay';
 import attributeSchemaToProperties from './attributeSchemaToProperties';
 import classnames from 'classnames';
+import PatientInfoBox from 'components/PatientInfoBox';
+import TimeDisplay from 'components/TimeDisplay';
 
 export default class CaseDetail extends React.Component {
   constructor(props) {
@@ -195,11 +197,12 @@ export default class CaseDetail extends React.Component {
     return (
       <div>
         <Card title="Case Info" className="case-info">
+          <PatientInfoBox value={caseData.patientInfoCache} />
+          <ProjectDisplay projectId={prj.projectId} withName size="xl" />
           <div>
-            <ProjectDisplay projectId={prj.projectId} withName size="xl" />
-          </div>
-          <div>
-            Case: {cid} (created at: {caseData.createdAt})
+            Case: {cid}
+            <br />
+            (Create: <TimeDisplay value={caseData.createdAt} />)
           </div>
         </Card>
         <MenuBar

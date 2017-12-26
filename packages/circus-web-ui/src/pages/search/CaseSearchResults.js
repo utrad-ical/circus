@@ -7,6 +7,7 @@ import PatientInfoBox from 'components/PatientInfoBox';
 import ProjectDisplay from 'components/ProjectDisplay';
 import ProjectTag from 'components/ProjectTag';
 import TimeDisplay from 'components/TimeDisplay';
+import IconButton from 'components/IconButton';
 
 const Tags = props => {
   const item = props.value;
@@ -24,10 +25,9 @@ const Operation = props => {
   return (
     <div className="register">
       <Link to={`/case/${item.caseId}`}>
-        <Button bsSize="sm" bsStyle="primary">
-          <span className="circus-icon circus-icon-case" />
+        <IconButton icon="circus-case" bsSize="sm" bsStyle="primary">
           View
-        </Button>
+        </IconButton>
       </Link>
     </div>
   );

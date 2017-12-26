@@ -1,13 +1,13 @@
 import React from 'react';
 import MultiSelect from 'rb/MultiSelect';
-import { Tag } from './tag';
+import PhysicalTag from './PhysicalTag';
 
 const MultiTagSelect = props => {
   const { tags } = props;
 
   const options = {};
   tags.forEach(tag => {
-    options[tag.name] = { caption: <Tag {...tag} /> };
+    options[tag.name] = { caption: <PhysicalTag {...tag} /> };
   });
 
   return <MultiSelect {...props} options={options} />;

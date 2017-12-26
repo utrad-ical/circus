@@ -1,6 +1,6 @@
 import React from 'react';
 import ColorPicker from 'rb/ColorPicker';
-import { Tag } from '../../components/tag';
+import PhysicalTag from 'components/PhysicalTag';
 
 const TagEditor = props => {
   const change = (key, newValue) => {
@@ -23,7 +23,8 @@ const TagEditor = props => {
         showColorCode={true}
         onChange={col => change('color', col)}
       />
-      &emsp; Sample: <Tag name={props.value.name} color={props.value.color} />
+      &emsp; Sample:{' '}
+      <PhysicalTag name={props.value.name} color={props.value.color} />
     </span>
   );
 };

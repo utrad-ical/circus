@@ -1,7 +1,7 @@
 import React, { Fragment } from 'react';
 import ShrinkSelect from 'rb/ShrinkSelect';
 import { Pagination } from 'components/react-bootstrap';
-import { changeSearchPage, changeSearchSort } from 'actions';
+import { changeSearchPage, changeSearchSort, changeSearchLimit } from 'actions';
 import LoadingIndicator from 'rb/LoadingIndicator';
 import { connect } from 'react-redux';
 import Icon from 'components/Icon';
@@ -14,6 +14,8 @@ export const makeSortOptions = sortKeys => {
   });
   return options;
 };
+
+const limitOptions = [10, 20, 50, 100, 200];
 
 /**
  * SearchResultsView is connected to `search` redux state and
@@ -29,7 +31,7 @@ const SearchResultsView = props => {
     active
   } = props;
   if (!search) return null;
-  const { isFetching, totalItems, per, items, page, sort } = search;
+  const { isFetching, totalItems, limit, items, page, sort } = search;
 
   if (isFetching && !Array.isArray(items))
     return <LoadingIndicator delay={1000} />;
@@ -46,11 +48,24 @@ const SearchResultsView = props => {
     dispatch(changeSearchPage(name, newPage));
   }
 
-  const pages = Math.ceil(totalItems / per);
+  function handleLimitChange(newLimit) {
+    newLimit = parseInt(newLimit, 10);
+    if (newLimit === limit) return;
+    dispatch(changeSearchLimit(name, newLimit));
+  }
+
+  const pages = Math.ceil(totalItems / limit);
   return (
     <div className="search-results-container">
       <div className="search-results-header">
         {totalItems + ' Result' + (totalItems > 1 ? 's' : '')}
+        &emsp;
+        <ShrinkSelect
+          options={limitOptions}
+          value={limit + ''}
+          onChange={handleLimitChange}
+        />
+        &ensp;items
         {sortOptions && (
           <Fragment>
             &emsp;

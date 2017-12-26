@@ -6,7 +6,7 @@ function beginQuery(params) {
     const name = params.name;
     const search = state.searches[name];
     if (search && search.isFetching) {
-      throw new Error('Previous search not finished');
+      throw new Error('Previous search has not finished.');
     }
 
     const resource = params.resource || search.resource;
@@ -14,7 +14,7 @@ function beginQuery(params) {
     const condition = params.condition || search.condition;
     const page = params.page || search.page;
     const sort = params.sort || search.sort;
-    const per = params.per || search.per;
+    const limit = params.limit || search.limit;
 
     try {
       dispatch({
@@ -22,7 +22,7 @@ function beginQuery(params) {
         name,
         isFetching: true
       });
-      const query = { filter, sort, page };
+      const query = { filter, sort, page, limit };
       const result = await api(resource, { params: query });
       dispatch({
         type: 'LOAD_SEARCH_RESULTS',
@@ -31,7 +31,7 @@ function beginQuery(params) {
         filter,
         condition,
         sort,
-        per,
+        limit,
         page: result.page,
         items: result.items,
         totalItems: result.totalItems
@@ -56,7 +56,7 @@ export function startNewSearch(name, resource, filter, condition, sort) {
     filter,
     condition,
     page: 1,
-    per: 20,
+    limit: 20,
     sort
   });
 }
@@ -67,4 +67,8 @@ export function changeSearchPage(name, page) {
 
 export function changeSearchSort(name, sort) {
   return beginQuery({ name, sort });
+}
+
+export function changeSearchLimit(name, limit) {
+  return beginQuery({ name, limit });
 }

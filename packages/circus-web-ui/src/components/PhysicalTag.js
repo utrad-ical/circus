@@ -1,7 +1,7 @@
 import React from 'react';
 import tinycolor from 'tinycolor2';
 
-export const Tag = props => {
+const PhysicalTag = props => {
   const tagColor = props.color || '#f00';
   const backgroundColor = tinycolor(tagColor).toHexString();
   const color = tinycolor
@@ -18,11 +18,13 @@ export const Tag = props => {
   );
 };
 
+export default PhysicalTag;
+
 export const TagList = props => {
   return (
     <span className="tag-list">
       {props.tags.map(tag => (
-        <Tag key={tag.name} name={tag.name} color={tag.color} />
+        <PhysicalTag key={tag.name} name={tag.name} color={tag.color} />
       ))}
     </span>
   );

@@ -103,6 +103,7 @@ export default class GroupAdmin extends React.Component {
       <EditorPage
         title="User Groups"
         icon="record"
+        searchName="admin-group"
         endPoint="admin/groups"
         primaryKey="groupId"
         editorProperties={this.editorProperties}

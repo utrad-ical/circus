@@ -15,7 +15,14 @@ export const makeSortOptions = sortKeys => {
 };
 
 const SearchResultsView = props => {
-  const { dispatch, search, name, sortOptions, dataView: DataView } = props;
+  const {
+    dispatch,
+    search,
+    name,
+    sortOptions,
+    dataView: DataView,
+    active
+  } = props;
   if (!search) return null;
   const { isFetching, totalItems, per, items, page, sort } = search;
 
@@ -50,7 +57,7 @@ const SearchResultsView = props => {
           </Fragment>
         )}
       </div>
-      {<DataView value={items} />}
+      <DataView value={items} active={active} />
       <div className="search-results-pager">
         <Pagination
           prev

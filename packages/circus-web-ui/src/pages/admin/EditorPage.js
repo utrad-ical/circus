@@ -4,38 +4,52 @@ import IconButton from 'rb/IconButton';
 import PropertyEditor from 'rb/PropertyEditor';
 import { api } from 'utils/api.js';
 import AdminContainer from './AdminContainer';
-import { refreshUserInfo } from 'actions';
-import { store } from 'store';
+import { refreshUserInfo, startNewSearch } from 'actions';
 import DataGrid from 'components/DataGrid';
+import SearchResultsView from 'pages/search/SearchResultsView';
+import { connect } from 'react-redux';
 
-export default class EditorPage extends React.Component {
+class EditorPage extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      items: [],
       target: null,
       editing: null,
       complaints: {}
     };
+    this.commitItem = this.commitItem.bind(this);
     this.createItem = this.createItem.bind(this);
     this.editStart = this.editStart.bind(this);
     this.cancelEditItem = this.cancelEditItem.bind(this);
+    this.prepareGrid();
+  }
+
+  prepareGrid() {
+    this.grid = props => (
+      <DataGrid
+        value={props.value}
+        columns={this.props.listColumns}
+        onItemClick={this.editStart}
+        active={props.active}
+      />
+    );
   }
 
   async commitItem(item) {
-    if (this.props.preCommitHook) {
-      if (!await this.props.preCommitHook(this.state.target)) return;
+    const { dispatch, preCommitHook, primaryKey } = this.props;
+
+    if (preCommitHook) {
+      if (!await preCommitHook(this.state.target)) return;
     }
 
     let endPoint = this.props.endPoint;
     if (this.state.target) {
-      endPoint +=
-        '/' + encodeURIComponent(this.state.editing[this.props.primaryKey]);
+      endPoint += '/' + encodeURIComponent(this.state.editing[primaryKey]);
     }
 
-    if (this.state.target && this.props.primaryKey in item) {
+    if (this.state.target && primaryKey in item) {
       item = { ...item };
-      delete item[this.props.primaryKey];
+      delete item[primaryKey];
     }
 
     const args = {
@@ -47,15 +61,15 @@ export default class EditorPage extends React.Component {
       await api(endPoint, args);
       this.setState({ target: null, editing: null });
       await this.loadItems();
-      store.dispatch(refreshUserInfo(true)); // Full user data refresh
+      dispatch(refreshUserInfo(true)); // Full user data refresh
     } catch (err) {
       this.setState({ complaints: err.data.errors });
     }
   }
 
   async loadItems() {
-    const items = (await api(this.props.endPoint)).items;
-    this.setState({ items });
+    const { searchName, endPoint, dispatch } = this.props;
+    dispatch(startNewSearch(searchName, endPoint, {}, {}, {}));
   }
 
   componentDidMount() {
@@ -87,15 +101,15 @@ export default class EditorPage extends React.Component {
   }
 
   render() {
-    const { title, icon } = this.props;
+    const { title, icon, searchName } = this.props;
 
     return (
       <AdminContainer title={title} icon={icon} className="admin-editor">
-        <DataGrid
-          value={this.state.items}
+        <SearchResultsView
+          name={searchName}
+          dataView={this.grid}
           active={this.state.editing}
-          columns={this.props.listColumns}
-          onRowClick={this.editStart}
+          onItemClick={this.editStart}
         />
         <p className="text-right">
           <IconButton
@@ -122,6 +136,8 @@ export default class EditorPage extends React.Component {
     );
   }
 }
+
+export default connect()(EditorPage);
 
 class Editor extends React.Component {
   constructor(props) {

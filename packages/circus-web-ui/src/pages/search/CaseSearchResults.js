@@ -6,7 +6,7 @@ import { Link } from 'react-router';
 import DataGrid from 'components/DataGrid';
 import PatientInfoBox from 'components/PatientInfoBox';
 import ProjectDisplay from 'components/ProjectDisplay';
-import ProjectTag from 'components/ProjectTag';
+import Tag from 'components/Tag';
 import TimeDisplay from 'components/TimeDisplay';
 import IconButton from 'components/IconButton';
 
@@ -14,9 +14,7 @@ const Tags = props => {
   const item = props.value;
   return (
     <span className="tag-list">
-      {item.tags.map(t => (
-        <ProjectTag key={t} projectId={item.projectId} tag={t} />
-      ))}
+      {item.tags.map(t => <Tag key={t} projectId={item.projectId} tag={t} />)}
     </span>
   );
 };

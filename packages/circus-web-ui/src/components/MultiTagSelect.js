@@ -1,6 +1,6 @@
 import React from 'react';
 import MultiSelect from 'rb/MultiSelect';
-import PhysicalTag from './PhysicalTag';
+import { PhysicalTag } from './Tag';
 
 const MultiTagSelect = props => {
   const { tags } = props;

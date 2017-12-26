@@ -152,7 +152,7 @@ export default class ProjectAdmin extends React.Component {
         title="Projects"
         icon="education"
         searchName="admin-project"
-        endPoint="admin/projects"
+        resrouce="admin/projects"
         primaryKey="projectId"
         editorProperties={this.editorProperties}
         listColumns={listColumns}

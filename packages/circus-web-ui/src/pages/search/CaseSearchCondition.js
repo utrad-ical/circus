@@ -33,14 +33,14 @@ const basicConditionPropertiesTemplate = () => {
   ];
 };
 
-const basicFilterToMongoQuery = condition => {
+const basicConditionToMongoQuery = condition => {
   const members = [];
   Object.keys(condition).forEach(key => {
     const val = condition[key];
     switch (key) {
       case 'createdAt':
       case 'updatedAt': {
-        const q = dateRangeToMongoQuery(val, 'seriesDate');
+        const q = dateRangeToMongoQuery(val, key);
         if (q) members.push(q);
         break;
       }
@@ -56,14 +56,19 @@ const basicFilterToMongoQuery = condition => {
         break;
     }
   });
-  return members.length > 0 ? { $and: members } : {};
+  return members.length > 1
+    ? { $and: members }
+    : members.length === 1 ? members[0] : {};
 };
 
 const conditionToFilter = condition => {
   let tabFilter;
   switch (condition.type) {
     case 'basic':
-      tabFilter = basicFilterToMongoQuery(condition.basic, condition.projects);
+      tabFilter = basicConditionToMongoQuery(
+        condition.basic,
+        condition.projects
+      );
       break;
     case 'advanced':
       tabFilter = conditionToMongoQuery(condition.advanced);
@@ -71,9 +76,14 @@ const conditionToFilter = condition => {
     default:
       throw new Error('Unknown conditoin type.');
   }
-  return condition.projects.length > 0
-    ? { $and: [tabFilter, { projectId: { $in: condition.projects } }] }
-    : tabFilter;
+  if (condition.projects.length === 0) return tabFilter;
+  if (tabFilter.$and) {
+    return {
+      $and: [...tabFilter.$and, { projectId: { $in: condition.projects } }]
+    };
+  } else {
+    return { $and: [tabFilter, { projectId: { $in: condition.projects } }] };
+  }
 };
 
 const advancedConditionKeysTemplate = () => {

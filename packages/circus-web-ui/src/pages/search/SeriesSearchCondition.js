@@ -32,7 +32,7 @@ const basicConditionProperties = [
   { key: 'seriesDate', caption: 'Series Date', editor: DateRangePicker }
 ];
 
-const basicFilterToMongoQuery = condition => {
+const basicConditionToMongoQuery = condition => {
   const members = [];
   Object.keys(condition).forEach(key => {
     const val = condition[key];
@@ -58,7 +58,9 @@ const basicFilterToMongoQuery = condition => {
         break;
     }
   });
-  return members.length > 0 ? { $and: members } : {};
+  return members.length > 1
+    ? { $and: members }
+    : members.length === 1 ? members[0] : {};
 };
 
 const advancedConditionKeys = {
@@ -80,7 +82,7 @@ const advancedConditionKeys = {
 const conditionToFilter = condition => {
   switch (condition.type) {
     case 'basic':
-      return basicFilterToMongoQuery(condition.basic);
+      return basicConditionToMongoQuery(condition.basic);
     case 'advanced':
       return conditionToMongoQuery(condition.advanced);
   }

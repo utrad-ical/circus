@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button, Well } from 'components/react-bootstrap';
-import IconButton from 'rb/IconButton';
+import IconButton from 'components/IconButton';
 
 const SearchPanel = props => {
   const { onResetClick, onSearchClick, children } = props;

@@ -5,6 +5,7 @@ import { Link } from 'react-router';
 import DataGrid from 'components/DataGrid';
 import PatientInfoBox from 'components/PatientInfoBox';
 import TimeDisplay from 'components/TimeDisplay';
+import IconButton from 'components/IconButton';
 
 const Modality = props => {
   const series = props.value;
@@ -20,17 +21,15 @@ const Operation = props => {
   return (
     <Fragment>
       <Link to={`/series/${series.seriesUid}`}>
-        <Button bsSize="sm">
-          <span className="circus-icon circus-icon-series" />
+        <IconButton icon="circus-series" bsSize="sm">
           View
-        </Button>
+        </IconButton>
       </Link>
       &thinsp;
       <Link to={`/new-case/${series.seriesUid}`}>
-        <Button bsStyle="primary" bsSize="sm">
-          <span className="circus-icon circus-icon-case" />
+        <IconButton icon="circus-case" bsStyle="primary" bsSize="sm">
           New
-        </Button>
+        </IconButton>
       </Link>
     </Fragment>
   );

@@ -50,7 +50,7 @@ const columns = [
     caption: 'Patient',
     className: 'patient',
     renderer: ({ value: { patientInfoCache } }) => {
-      return <PatientInfoBox value={{ patientInfo: patientInfoCache }} />;
+      return <PatientInfoBox value={patientInfoCache} />;
     }
   },
   {

@@ -1,7 +1,7 @@
 import React, { Fragment } from 'react';
 
 const PatientInfoBox = props => {
-  const { patientInfo: pt } = props.value;
+  const pt = props.value;
   if (!pt) {
     return <span className="patient-info-masked">(masked)</span>;
   }

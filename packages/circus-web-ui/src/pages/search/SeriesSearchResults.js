@@ -38,7 +38,13 @@ const Operation = props => {
 
 const columns = [
   { caption: '', className: 'modality', renderer: Modality },
-  { caption: 'Patient', className: 'patient', renderer: PatientInfoBox },
+  {
+    caption: 'Patient',
+    className: 'patient',
+    renderer: ({ value: { patientInfo } }) => {
+      return <PatientInfoBox value={patientInfo} />;
+    }
+  },
   { caption: 'Series Desc', key: 'seriesDescription' },
   {
     caption: 'Series Date',

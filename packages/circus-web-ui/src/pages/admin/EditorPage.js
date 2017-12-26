@@ -42,9 +42,9 @@ class EditorPage extends React.Component {
       if (!await preCommitHook(this.state.target)) return;
     }
 
-    let endPoint = this.props.endPoint;
+    let resource = this.props.resource;
     if (this.state.target) {
-      endPoint += '/' + encodeURIComponent(this.state.editing[primaryKey]);
+      resource += '/' + encodeURIComponent(this.state.editing[primaryKey]);
     }
 
     if (this.state.target && primaryKey in item) {
@@ -58,7 +58,7 @@ class EditorPage extends React.Component {
       handleErrors: [400]
     };
     try {
-      await api(endPoint, args);
+      await api(resource, args);
       this.setState({ target: null, editing: null });
       await this.loadItems();
       dispatch(refreshUserInfo(true)); // Full user data refresh
@@ -68,8 +68,8 @@ class EditorPage extends React.Component {
   }
 
   async loadItems() {
-    const { searchName, endPoint, dispatch } = this.props;
-    dispatch(startNewSearch(searchName, endPoint, {}, {}, {}));
+    const { searchName, resource, dispatch } = this.props;
+    dispatch(startNewSearch(searchName, resource, {}, {}, {}));
   }
 
   componentDidMount() {

@@ -110,7 +110,7 @@ export default class UserAdmin extends React.Component {
         title="Users"
         icon="user"
         searchName="admin-user"
-        endPoint="admin/users"
+        resource="admin/users"
         primaryKey="userEmail"
         editorProperties={this.editorProperties}
         listColumns={this.listColumns}

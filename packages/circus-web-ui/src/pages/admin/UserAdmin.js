@@ -109,6 +109,7 @@ export default class UserAdmin extends React.Component {
       <EditorPage
         title="Users"
         icon="user"
+        searchName="admin-user"
         endPoint="admin/users"
         primaryKey="userEmail"
         editorProperties={this.editorProperties}

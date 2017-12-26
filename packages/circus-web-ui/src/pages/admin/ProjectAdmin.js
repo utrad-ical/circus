@@ -151,6 +151,7 @@ export default class ProjectAdmin extends React.Component {
       <EditorPage
         title="Projects"
         icon="education"
+        searchName="admin-project"
         endPoint="admin/projects"
         primaryKey="projectId"
         editorProperties={this.editorProperties}

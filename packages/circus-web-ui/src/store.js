@@ -73,7 +73,7 @@ function searches(state = {}, action) {
           condition: action.condition,
           sort: action.sort,
           page: action.page,
-          per: action.per,
+          limit: action.limit,
           items: action.items,
           totalItems: action.totalItems
         }

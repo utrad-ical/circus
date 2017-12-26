@@ -17,6 +17,10 @@ export const makeSortOptions = sortKeys => {
 
 const limitOptions = [10, 20, 50, 100, 200];
 
+const ItemsPerPageOptionRenderer = props => (
+  <Fragment>{props.caption} items</Fragment>
+);
+
 /**
  * SearchResultsView is connected to `search` redux state and
  * displays the search results along with pager and sort changer.
@@ -49,7 +53,6 @@ const SearchResultsView = props => {
   }
 
   function handleLimitChange(newLimit) {
-    newLimit = parseInt(newLimit, 10);
     if (newLimit === limit) return;
     dispatch(changeSearchLimit(name, newLimit));
   }
@@ -65,8 +68,9 @@ const SearchResultsView = props => {
           value={limit + ''}
           onChange={handleLimitChange}
           disabled={isFetching}
+          renderer={ItemsPerPageOptionRenderer}
+          numericalValue
         />
-        &ensp;items
         {sortOptions && (
           <Fragment>
             &emsp;

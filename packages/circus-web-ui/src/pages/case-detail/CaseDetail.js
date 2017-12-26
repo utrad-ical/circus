@@ -3,7 +3,6 @@ import { api } from '../../utils/api';
 import ImageViewer from '../../components/ImageViewer';
 import PropertyEditor from 'rb/PropertyEditor';
 import LoadingIndicator from 'rb/LoadingIndicator';
-import { TagList } from '../../components/tag';
 import {
   Button,
   Glyphicon,
@@ -24,6 +23,7 @@ import attributeSchemaToProperties from './attributeSchemaToProperties';
 import classnames from 'classnames';
 import PatientInfoBox from 'components/PatientInfoBox';
 import TimeDisplay from 'components/TimeDisplay';
+import ProjectTag from 'components/ProjectTag';
 
 export default class CaseDetail extends React.Component {
   constructor(props) {
@@ -189,16 +189,16 @@ export default class CaseDetail extends React.Component {
 
     const cid = this.props.params.cid;
 
-    const tags = (caseData.tags || []).map(tag => {
-      const color =
-        (prj.tags.find(t => t.name === tag) || {}).color || '#ffffff';
-      return { name: tag, color };
-    });
     return (
       <div>
         <Card title="Case Info" className="case-info">
-          <PatientInfoBox value={caseData.patientInfoCache} />
           <ProjectDisplay projectId={prj.projectId} withName size="xl" />
+          <PatientInfoBox value={caseData.patientInfoCache} />
+          <div className="tag-list">
+            {caseData.tags.map(t => (
+              <ProjectTag projectId={prj.projectId} tag={t} key={t} />
+            ))}
+          </div>
           <div>
             Case: {cid}
             <br />

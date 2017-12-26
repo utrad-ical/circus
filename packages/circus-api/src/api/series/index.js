@@ -3,6 +3,7 @@ import performSearch from '../performSearch';
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import * as JSZip from 'jszip';
+import * as EJSON from 'mongodb-extended-json';
 
 const maskPatientInfo = ctx => {
   return series => {
@@ -82,7 +83,7 @@ export const handleSearch = ({ models }) => {
     const urlQuery = ctx.request.query;
     let customFilter;
     try {
-      customFilter = urlQuery.filter ? JSON.parse(urlQuery.filter) : {};
+      customFilter = urlQuery.filter ? EJSON.parse(urlQuery.filter) : {};
     } catch (err) {
       ctx.throw(status.BAD_REQUEST, 'Bad filter.');
     }

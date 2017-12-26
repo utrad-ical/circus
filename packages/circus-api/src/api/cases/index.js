@@ -1,6 +1,7 @@
 import status from 'http-status';
 import performSearch from '../performSearch';
 import { generateCaseId } from '../../utils';
+import * as EJSON from 'mongodb-extended-json';
 
 const maskPatientInfo = ctx => {
   return caseData => {
@@ -141,7 +142,7 @@ export const handleSearch = ({ models }) => {
     const urlQuery = ctx.request.query;
     let customFilter;
     try {
-      customFilter = urlQuery.filter ? JSON.parse(urlQuery.filter) : {};
+      customFilter = urlQuery.filter ? EJSON.parse(urlQuery.filter) : {};
     } catch (err) {
       ctx.throw(status.BAD_REQUEST, 'Bad filter.');
     }

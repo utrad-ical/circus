@@ -1,6 +1,6 @@
 import React from 'react';
 import ColorPicker from 'rb/ColorPicker';
-import PhysicalTag from 'components/PhysicalTag';
+import { PhysicalTag } from 'components/Tag';
 
 const TagEditor = props => {
   const change = (key, newValue) => {

@@ -23,7 +23,7 @@ import attributeSchemaToProperties from './attributeSchemaToProperties';
 import classnames from 'classnames';
 import PatientInfoBox from 'components/PatientInfoBox';
 import TimeDisplay from 'components/TimeDisplay';
-import ProjectTag from 'components/ProjectTag';
+import Tag from 'components/Tag';
 
 export default class CaseDetail extends React.Component {
   constructor(props) {
@@ -196,7 +196,7 @@ export default class CaseDetail extends React.Component {
           <PatientInfoBox value={caseData.patientInfoCache} />
           <div className="tag-list">
             {caseData.tags.map(t => (
-              <ProjectTag projectId={prj.projectId} tag={t} key={t} />
+              <Tag projectId={prj.projectId} tag={t} key={t} />
             ))}
           </div>
           <div>

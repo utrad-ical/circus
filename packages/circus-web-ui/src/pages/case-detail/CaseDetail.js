@@ -19,8 +19,9 @@ import classNames from 'classnames';
 import EventEmitter from 'events';
 import { sha1 } from '../../utils/util.js';
 import ProjectDisplay from 'components/ProjectDisplay';
+import Card from './Card';
+import RevisionSelector from './RevisionSelector';
 import attributeSchemaToProperties from './attributeSchemaToProperties';
-import classnames from 'classnames';
 import PatientInfoBox from 'components/PatientInfoBox';
 import TimeDisplay from 'components/TimeDisplay';
 import Tag from 'components/Tag';
@@ -220,44 +221,6 @@ export default class CaseDetail extends React.Component {
         />
       </div>
     );
-  }
-}
-
-class RevisionSelector extends React.Component {
-  constructor(props) {
-    super(props);
-    this.selected = this.selected.bind(this);
-  }
-
-  renderItem(revision) {
-    return (
-      <span className="revision-selector-item">
-        <span className="date">{revision.date}</span>
-        <span className="status label label-default">{revision.status}</span>
-        <span className="description">{revision.description}</span>
-        <span className="creator">{revision.creator}</span>
-      </span>
-    );
-  }
-
-  selected(value) {
-    const { onSelect } = this.props;
-    const index = parseInt(/(\d+)$/.exec(value)[1]);
-    onSelect(index);
-  }
-
-  render() {
-    const { revisions = [], selected } = this.props;
-    const opts = {};
-    revisions
-      .slice()
-      .reverse()
-      .forEach((r, i) => {
-        const originalIndex = revisions.length - i - 1;
-        opts[`rev${originalIndex}`] = { caption: this.renderItem(r) };
-      });
-    const sel = `rev${selected}`;
-    return <ShrinkSelect options={opts} value={sel} onChange={this.selected} />;
   }
 }
 
@@ -507,37 +470,6 @@ export class RevisionData extends React.Component {
           activeLabel={activeLabel}
           tool={tool}
         />
-      </div>
-    );
-  }
-}
-
-class Card extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = { open: true };
-    this.toggleCollapse = this.toggleCollapse.bind(this);
-  }
-
-  toggleCollapse() {
-    this.setState({ open: !this.state.open });
-  }
-
-  render() {
-    const { title, children, className } = this.props;
-    const { open } = this.state;
-    return (
-      <div className={classnames('case-detail-card', className)}>
-        <a className="case-detail-card-header" onClick={this.toggleCollapse}>
-          {title}
-          &ensp;
-          {open ? (
-            <Glyphicon glyph="triangle-bottom" />
-          ) : (
-            <Glyphicon glyph="triangle-right" />
-          )}
-        </a>
-        {open && <div className="case-detail-card-body">{children}</div>}
       </div>
     );
   }

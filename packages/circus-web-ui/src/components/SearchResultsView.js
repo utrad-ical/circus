@@ -64,6 +64,7 @@ const SearchResultsView = props => {
           options={limitOptions}
           value={limit + ''}
           onChange={handleLimitChange}
+          disabled={isFetching}
         />
         &ensp;items
         {sortOptions && (
@@ -74,6 +75,7 @@ const SearchResultsView = props => {
               options={sortOptions}
               value={sort}
               onChange={handleSortChange}
+              disabled={isFetching}
             />
           </Fragment>
         )}
@@ -90,6 +92,7 @@ const SearchResultsView = props => {
           maxButtons={10}
           activePage={page}
           onSelect={handlePageClick}
+          disabled={isFetching}
         />
       </div>
     </div>

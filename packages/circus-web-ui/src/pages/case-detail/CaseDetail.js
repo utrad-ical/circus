@@ -21,6 +21,7 @@ import EventEmitter from 'events';
 import { sha1 } from '../../utils/util.js';
 import ProjectDisplay from 'components/ProjectDisplay';
 import attributeSchemaToProperties from './attributeSchemaToProperties';
+import classnames from 'classnames';
 
 export default class CaseDetail extends React.Component {
   constructor(props) {
@@ -193,9 +194,13 @@ export default class CaseDetail extends React.Component {
     });
     return (
       <div>
-        <Card title="Case Info">
-          <ProjectDisplay projectId={prj.projectId} withName size="xl" />
-          Case: {cid} (created at: {caseData.createdAt})
+        <Card title="Case Info" className="case-info">
+          <div>
+            <ProjectDisplay projectId={prj.projectId} withName size="xl" />
+          </div>
+          <div>
+            Case: {cid} (created at: {caseData.createdAt})
+          </div>
         </Card>
         <MenuBar
           onSaveClick={this.saveRevision}
@@ -516,10 +521,10 @@ class Card extends React.Component {
   }
 
   render() {
-    const { title, children } = this.props;
+    const { title, children, className } = this.props;
     const { open } = this.state;
     return (
-      <div className="case-detail-card">
+      <div className={classnames('case-detail-card', className)}>
         <a className="case-detail-card-header" onClick={this.toggleCollapse}>
           {title}
           &ensp;
@@ -529,7 +534,7 @@ class Card extends React.Component {
             <Glyphicon glyph="triangle-right" />
           )}
         </a>
-        {open ? <div className="case-detail-card-body">{children}</div> : null}
+        {open && <div className="case-detail-card-body">{children}</div>}
       </div>
     );
   }

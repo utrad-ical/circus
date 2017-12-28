@@ -19,9 +19,6 @@ class CreateNewCaseView extends React.Component {
         selectedTags: []
       };
     }
-    this.handleProjectSelect = this.handleProjectSelect.bind(this);
-    this.handleCreate = this.handleCreate.bind(this);
-    this.handleTagChange = this.handleTagChange.bind(this);
   }
 
   writableProjects(props) {
@@ -30,7 +27,7 @@ class CreateNewCaseView extends React.Component {
     );
   }
 
-  handleProjectSelect(projectId) {
+  handleProjectSelect = projectId => {
     const { user } = this.props;
     const prj = user.accessibleProjects.find(p => p.projectId === projectId);
     const newTags = this.state.selectedTags.filter(t =>
@@ -40,13 +37,13 @@ class CreateNewCaseView extends React.Component {
       selectedProject: projectId,
       selectedTags: newTags
     });
-  }
+  };
 
-  handleTagChange(value) {
+  handleTagChange = value => {
     this.setState({ selectedTags: value });
-  }
+  };
 
-  async handleCreate() {
+  handleCreate = async () => {
     const res = await api('cases', {
       method: 'post',
       data: {
@@ -59,7 +56,7 @@ class CreateNewCaseView extends React.Component {
       const newCaseId = res.caseId;
       browserHistory.push(`/case/${newCaseId}`);
     }
-  }
+  };
 
   render() {
     // const { user } = this.props;

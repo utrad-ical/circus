@@ -17,10 +17,6 @@ class EditorPage extends React.Component {
       editing: null,
       complaints: {}
     };
-    this.commitItem = this.commitItem.bind(this);
-    this.createItem = this.createItem.bind(this);
-    this.editStart = this.editStart.bind(this);
-    this.cancelEditItem = this.cancelEditItem.bind(this);
     this.prepareGrid();
   }
 
@@ -35,7 +31,7 @@ class EditorPage extends React.Component {
     );
   }
 
-  async commitItem(item) {
+  commitItem = async item => {
     const { dispatch, preCommitHook, primaryKey } = this.props;
 
     if (preCommitHook) {
@@ -65,7 +61,7 @@ class EditorPage extends React.Component {
     } catch (err) {
       this.setState({ complaints: err.data.errors });
     }
-  }
+  };
 
   async loadItems() {
     const { searchName, resource, dispatch } = this.props;
@@ -81,24 +77,24 @@ class EditorPage extends React.Component {
     return item[this.props.primaryKey];
   }
 
-  editStart(index, item) {
+  editStart = (index, item) => {
     this.setState({
       target: this.targetName(item),
       editing: item,
       complaints: {}
     });
-  }
+  };
 
-  cancelEditItem() {
+  cancelEditItem = () => {
     this.setState({ editing: null, complaints: {} });
-  }
+  };
 
-  createItem() {
+  createItem = () => {
     this.setState({
       target: null,
       editing: this.props.makeEmptyItem()
     });
-  }
+  };
 
   render() {
     const { title, icon, searchName } = this.props;
@@ -145,7 +141,6 @@ class Editor extends React.Component {
     this.state = {
       item: this.pickProperties(props.properties, props.item)
     };
-    this.handleSave = this.handleSave.bind(this);
   }
 
   pickProperties(properties, item) {
@@ -172,9 +167,9 @@ class Editor extends React.Component {
     this.setState({ item });
   }
 
-  handleSave() {
+  handleSave = () => {
     this.props.onSaveClick && this.props.onSaveClick(this.state.item);
-  }
+  };
 
   render() {
     const properties = this.props.properties.filter(

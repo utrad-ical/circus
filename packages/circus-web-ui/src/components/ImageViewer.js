@@ -11,7 +11,6 @@ export default class ImageViewer extends React.Component {
     super(props);
     this.viewer = null;
     this.container = null;
-    this.changeState = this.changeState.bind(this);
     if (this.props.stateChanger instanceof EventEmitter) {
       this.props.stateChanger.on('change', this.changeState);
     }
@@ -64,11 +63,11 @@ export default class ImageViewer extends React.Component {
     this.viewer = viewer;
   }
 
-  changeState(changer) {
+  changeState = changer => {
     const state = this.viewer.getState();
     const newState = changer(state);
     this.viewer.setState(newState);
-  }
+  };
 
   render() {
     const { className } = this.props;

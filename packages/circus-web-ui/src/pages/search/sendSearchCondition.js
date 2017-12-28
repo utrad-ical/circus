@@ -18,26 +18,23 @@ const sendSearchCondition = opts => {
             ? props.reloadCondition
             : nullCondition()
         };
-        this.handleChange = this.handleChange.bind(this);
-        this.handleSearchClick = this.handleSearchClick.bind(this);
-        this.handleResetClick = this.handleResetClick.bind(this);
       }
 
-      handleChange(newCondition) {
+      handleChange = newCondition => {
         this.setState({ condition: newCondition });
-      }
+      };
 
-      handleSearchClick(filter) {
+      handleSearchClick = filter => {
         const { dispatch } = this.props;
         const { condition } = this.state;
         dispatch(
           startNewSearch(searchName, resource, filter, condition, defaultSort)
         );
-      }
+      };
 
-      handleResetClick() {
+      handleResetClick = () => {
         this.setState({ condition: nullCondition() });
-      }
+      };
 
       render() {
         const { onChange, onSearchClick, onResetClick, ...props } = this.props;

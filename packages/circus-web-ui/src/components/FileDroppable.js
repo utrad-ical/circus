@@ -7,33 +7,29 @@ export class FileDroppable extends React.Component {
   constructor(props) {
     super(props);
     this.state = { active: false };
-    this.dragEnter = this.dragEnter.bind(this);
-    this.dragOver = this.dragOver.bind(this);
-    this.drop = this.drop.bind(this);
-    this.dragLeaveEnd = this.dragLeaveEnd.bind(this);
   }
 
-  dragEnter(event) {
+  dragEnter = event => {
     event.preventDefault();
-  }
+  };
 
-  dragOver(event) {
+  dragOver = event => {
     event.preventDefault(); // accepts file drop
     this.setState({ active: true });
-  }
+  };
 
-  drop(event) {
+  drop = event => {
     this.setState({ active: false });
     event.preventDefault();
     const files = event.dataTransfer.files;
     if (typeof this.props.onDropFile === 'function') {
       this.props.onDropFile(files);
     }
-  }
+  };
 
-  dragLeaveEnd() {
+  dragLeaveEnd = () => {
     this.setState({ active: false });
-  }
+  };
 
   render() {
     return (

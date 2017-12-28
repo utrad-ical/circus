@@ -69,7 +69,7 @@ export class TaskWatcher extends React.Component {
   }
 
   componentDidMount() {
-    query();
+    this.query();
   }
 
   render() {

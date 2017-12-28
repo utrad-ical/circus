@@ -131,7 +131,6 @@ export default class CaseDetail extends React.Component {
           label.data = newLabelData;
           delete label.cloud;
         } catch (err) {
-          console.error(err);
           await alert('Could not save label volume data: \n' + err.message);
           return;
         }
@@ -151,7 +150,6 @@ export default class CaseDetail extends React.Component {
       this.setState({ caseData: null, editingData: null });
       this.loadCase();
     } catch (err) {
-      console.error(err);
       await alert('Error: ' + err.message);
     }
   };

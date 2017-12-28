@@ -8,15 +8,13 @@ import { Button } from 'components/react-bootstrap';
 export default class Preferences extends React.Component {
   constructor(props) {
     super(props);
-    this.saveClick = this.saveClick.bind(this);
-    this.loadSettings = this.loadSettings.bind(this);
     this.state = { settings: null };
   }
 
-  async loadSettings() {
+  loadSettings = async () => {
     const settings = await api('preferences');
     this.setState({ settings });
-  }
+  };
 
   componentDidMount() {
     this.loadSettings();
@@ -26,14 +24,14 @@ export default class Preferences extends React.Component {
     this.setState({ settings: value });
   }
 
-  async saveClick() {
+  saveClick = async () => {
     await api('preferences', {
       method: 'put',
       data: this.state.settings
     });
     showMessage('Your preference was saved.', 'success', { short: true });
     this.loadSettings();
-  }
+  };
 
   render() {
     if (this.state.settings === null) return <div />;

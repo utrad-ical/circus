@@ -3,6 +3,7 @@
   "plugins": [
     "transform-object-rest-spread",
     "transform-regenerator",
-    "transform-async-functions"
+    "transform-async-functions",
+    "transform-class-properties"
   ]
 }

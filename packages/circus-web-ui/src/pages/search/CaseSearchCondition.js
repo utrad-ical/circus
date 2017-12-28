@@ -106,12 +106,9 @@ class CaseSearchConditionView extends React.Component {
       basicConditionProperties: basicConditionPropertiesTemplate(),
       advancedConditionKeys: advancedConditionKeysTemplate()
     };
-
-    this.selectedProjectsChange = this.selectedProjectsChange.bind(this);
-    this.handleSearchClick = this.handleSearchClick.bind(this);
   }
 
-  selectedProjectsChange(projects) {
+  selectedProjectsChange = projects => {
     const { accessibleProjects, condition } = this.props;
     const availableTags = {};
     for (const pid of projects) {
@@ -144,13 +141,13 @@ class CaseSearchConditionView extends React.Component {
       },
       advanced: { $and: [] }
     });
-  }
+  };
 
-  handleSearchClick() {
+  handleSearchClick = () => {
     const { condition, onSearchClick } = this.props;
     const filter = conditionToFilter(condition);
     onSearchClick(filter);
-  }
+  };
 
   render() {
     const { accessibleProjects, condition } = this.props;

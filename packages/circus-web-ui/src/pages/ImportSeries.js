@@ -11,13 +11,11 @@ class ImportSeriesView extends React.Component {
     this.state = {
       uploadDomain: props.loginUser ? props.loginUser.domains[0] : null
     };
-    this.domainChange = this.domainChange.bind(this);
-    this.uploaded = this.uploaded.bind(this);
   }
 
-  domainChange(domain) {
+  domainChange = domain => {
     this.setState({ uploadDomain: domain });
-  }
+  };
 
   componentWillReceiveProps(props) {
     if (this.state.uploadDomain === '' && props.loginUser) {
@@ -25,9 +23,9 @@ class ImportSeriesView extends React.Component {
     }
   }
 
-  uploaded() {
+  uploaded = () => {
     // console.log(res);
-  }
+  };
 
   render() {
     const user = this.props.loginUser;

@@ -3,11 +3,6 @@ import ShrinkSelect from 'rb/ShrinkSelect';
 import TimeDisplay from 'components/TimeDisplay';
 
 export default class RevisionSelector extends React.PureComponent {
-  constructor(props) {
-    super(props);
-    this.selected = this.selected.bind(this);
-  }
-
   renderItem(revision) {
     return (
       <span className="revision-selector-item">
@@ -21,11 +16,11 @@ export default class RevisionSelector extends React.PureComponent {
     );
   }
 
-  selected(value) {
+  selected = value => {
     const { onSelect } = this.props;
     const index = parseInt(/(\d+)$/.exec(value)[1]);
     onSelect(index);
-  }
+  };
 
   render() {
     const { revisions = [], selected } = this.props;

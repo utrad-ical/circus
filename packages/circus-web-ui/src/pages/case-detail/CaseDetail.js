@@ -36,13 +36,9 @@ export default class CaseDetail extends React.Component {
       editingRevisionIndex: -1,
       editingData: null
     };
-    this.revisionDataChange = this.revisionDataChange.bind(this);
-    this.selectRevision = this.selectRevision.bind(this);
-    this.saveRevision = this.saveRevision.bind(this);
-    this.revertRevision = this.revertRevision.bind(this);
   }
 
-  async selectRevision(index) {
+  selectRevision = async index => {
     const { revisions } = this.state.caseData;
     const revision = revisions[index];
     this.setState({ busy: true, editingRevisionIndex: index });
@@ -85,7 +81,7 @@ export default class CaseDetail extends React.Component {
     }
 
     this.setState({ editingData: data, busy: false });
-  }
+  };
 
   async loadCase() {
     const caseID = this.props.params.cid;
@@ -95,7 +91,7 @@ export default class CaseDetail extends React.Component {
     });
   }
 
-  async saveRevision() {
+  saveRevision = async () => {
     const data = this.state.editingData;
 
     const desc = await prompt('Revision message', data.description);
@@ -158,14 +154,14 @@ export default class CaseDetail extends React.Component {
       console.error(err);
       await alert('Error: ' + err.message);
     }
-  }
+  };
 
-  async revertRevision() {
+  revertRevision = async () => {
     if (!await confirm('Reload the current revision?')) {
       return;
     }
     this.selectRevision(this.state.editingRevisionIndex);
-  }
+  };
 
   async loadProject() {
     const projectId = this.state.caseData.projectId;
@@ -173,9 +169,9 @@ export default class CaseDetail extends React.Component {
     this.setState({ projectData });
   }
 
-  revisionDataChange(revision) {
+  revisionDataChange = revision => {
     this.setState({ editingData: revision });
-  }
+  };
 
   async componentDidMount() {
     await this.loadCase();
@@ -282,15 +278,6 @@ export class RevisionData extends React.Component {
       )
     };
 
-    this.changeTool = this.changeTool.bind(this);
-    this.toggleReferenceLine = this.toggleReferenceLine.bind(this);
-    this.setLineWidth = this.setLineWidth.bind(this);
-    this.changeActiveLabel = this.changeActiveLabel.bind(this);
-    this.updateLabels = this.updateLabels.bind(this);
-    this.labelAttributesChange = this.labelAttributesChange.bind(this);
-    this.caseAttributesChange = this.caseAttributesChange.bind(this);
-    this.selectWindowPreset = this.selectWindowPreset.bind(this);
-
     const server = store.getState().loginUser.data.dicomImageServer;
     this.client = new rs.RsHttpClient(server);
     this.referenceLineAnnotation = new rs.ReferenceLine();
@@ -330,7 +317,7 @@ export class RevisionData extends React.Component {
     }
   }
 
-  updateLabels(props, state) {
+  updateLabels = (props, state) => {
     const { revision } = props || this.props;
     const { composition, activeSeriesIndex, activeLabelIndex } =
       state || this.state;
@@ -354,7 +341,7 @@ export class RevisionData extends React.Component {
     }
     composition.annotationUpdated();
     // console.log('Annotations', composition.annotations);
-  }
+  };
 
   changeActiveSeries(seriesIndex) {
     const activeSeries = this.props.revision.series[seriesIndex];
@@ -370,16 +357,16 @@ export class RevisionData extends React.Component {
     });
   }
 
-  changeActiveLabel(seriesIndex, labelIndex) {
+  changeActiveLabel = (seriesIndex, labelIndex) => {
     if (this.state.activeSeriesIndex !== seriesIndex) {
       this.changeActiveSeries(seriesIndex);
     }
     this.setState({
       activeLabelIndex: labelIndex
     });
-  }
+  };
 
-  labelAttributesChange(value) {
+  labelAttributesChange = value => {
     const { revision, onChange } = this.props;
     const { activeSeriesIndex, activeLabelIndex } = this.state;
     const activeSeries = revision.series[activeSeriesIndex];
@@ -387,33 +374,33 @@ export class RevisionData extends React.Component {
     const activeLabel = activeSeries.labels[activeLabelIndex];
     activeLabel.attributes = value;
     onChange(revision);
-  }
+  };
 
-  caseAttributesChange(value) {
+  caseAttributesChange = value => {
     const { onChange, revision } = this.props;
     revision.attributes = value;
     onChange(revision);
-  }
+  };
 
-  changeTool(tool) {
+  changeTool = tool => {
     this.setState({ tool });
-  }
+  };
 
-  toggleReferenceLine(show) {
+  toggleReferenceLine = show => {
     this.setState({ showReferenceLine: show });
-  }
+  };
 
-  selectWindowPreset(preset) {
+  selectWindowPreset = preset => {
     const window = { level: preset.level, width: preset.width };
     this.stateChanger.emit('change', state => ({ ...state, window }));
-  }
+  };
 
-  setLineWidth(lineWidth) {
+  setLineWidth = lineWidth => {
     const w = +lineWidth;
     this.setState({ lineWidth: w });
     rs.toolFactory('brush').setOptions({ width: w });
     rs.toolFactory('eraser').setOptions({ width: w });
-  }
+  };
 
   render() {
     const { projectData, revision, onChange, busy } = this.props;

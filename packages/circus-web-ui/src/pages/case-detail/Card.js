@@ -6,12 +6,11 @@ export default class Card extends React.Component {
   constructor(props) {
     super(props);
     this.state = { open: true };
-    this.toggleCollapse = this.toggleCollapse.bind(this);
   }
 
-  toggleCollapse() {
+  toggleCollapse = () => {
     this.setState({ open: !this.state.open });
-  }
+  };
 
   render() {
     const { title, children, className } = this.props;

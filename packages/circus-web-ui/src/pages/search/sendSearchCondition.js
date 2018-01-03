@@ -20,11 +20,7 @@ const sendSearchCondition = opts => {
     class Enhanced extends React.Component {
       constructor(props) {
         super(props);
-        this.state = {
-          condition: props.reloadCondition
-            ? props.reloadCondition
-            : nullCondition()
-        };
+        this.state = { condition: props.initialCondition };
       }
 
       handleChange = newCondition => {
@@ -44,6 +40,10 @@ const sendSearchCondition = opts => {
           )
         );
       };
+
+      componentDidMount() {
+        this.handleSearchClick();
+      }
 
       handleSavePresetClick = async () => {
         const { dispatch } = this.props;
@@ -79,10 +79,10 @@ const sendSearchCondition = opts => {
       const matched = presets.find(
         preset => preset.name === ownProps.presetName
       );
-      if (matched) return { reloadCondition: JSON.parse(matched.condition) };
+      if (matched) return { initialCondition: JSON.parse(matched.condition) };
       if (state.searches[searchName])
-        return { reloadCondition: state.searches[searchName].condition };
-      return { reloadCondition: null };
+        return { initialCondition: state.searches[searchName].condition };
+      return { initialCondition: nullCondition() };
     };
 
     return connect(mapStateToProps)(Enhanced);

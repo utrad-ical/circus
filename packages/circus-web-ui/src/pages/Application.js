@@ -81,7 +81,7 @@ const NavView = props => {
                 sub
                 icon="chevron-right"
                 name={preset.name}
-                link={`/browse/series/encodeURIComponent(${preset.name})`}
+                link={`/browse/series/${encodeURIComponent(preset.name)}`}
               />
             ))}
             <SubMenu

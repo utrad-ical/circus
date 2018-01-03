@@ -8,7 +8,7 @@ const SeriesSearch = props => (
     <h1>
       <Icon icon="circus-series" /> Series Search
     </h1>
-    <SeriesSearchCondition />
+    <SeriesSearchCondition presetName={props.params.presetName} />
     <SeriesSearchResults />
   </div>
 );

@@ -2,10 +2,45 @@ import React from 'react';
 import PropertyEditor from 'rb/PropertyEditor';
 import * as et from 'rb/editor-types';
 import { api } from 'utils/api';
-import { showMessage } from 'actions';
+import { showMessage, refreshUserInfo } from 'actions';
 import { Button } from 'components/react-bootstrap';
+import IconButton from 'components/IconButton';
+import { connect } from 'react-redux';
 
-export default class Preferences extends React.Component {
+const PresetDeleteEditor = props => {
+  const { value, onChange } = props;
+
+  const handleDeleteClick = presetName => {
+    const newValue = value.filter(preset => preset.name !== presetName);
+    onChange(newValue);
+  };
+
+  if (!Array.isArray(value) || !value.length) {
+    return <div className="form-control-static text-muted">(no presets)</div>;
+  }
+
+  return (
+    <ul className="list-unstyled">
+      {value.map(preset => {
+        return (
+          <li key={preset.name} className="form-control-static">
+            {preset.name}{' '}
+            <IconButton
+              bsSize="xs"
+              bsStyle="primary"
+              icon="remove"
+              onClick={() => handleDeleteClick(preset.name)}
+            >
+              Delete
+            </IconButton>
+          </li>
+        );
+      })}
+    </ul>
+  );
+};
+
+class PreferencesView extends React.Component {
   constructor(props) {
     super(props);
     this.state = { settings: null };
@@ -25,11 +60,13 @@ export default class Preferences extends React.Component {
   }
 
   saveClick = async () => {
+    const { dispatch } = this.props;
     await api('preferences', {
       method: 'patch',
       data: this.state.settings
     });
     showMessage('Your preference was saved.', 'success', { short: true });
+    dispatch(refreshUserInfo(true));
     this.loadSettings();
   };
 
@@ -46,6 +83,16 @@ export default class Preferences extends React.Component {
         caption: 'Show Personal Info',
         key: 'personalInfoView',
         editor: et.checkbox({ label: 'show' })
+      },
+      {
+        caption: 'Case Search Presets',
+        key: 'caseSearchPresets',
+        editor: PresetDeleteEditor
+      },
+      {
+        caption: 'Series Search Presets',
+        key: 'seriesSearchPresets',
+        editor: PresetDeleteEditor
       }
     ];
 
@@ -72,3 +119,7 @@ export default class Preferences extends React.Component {
     );
   }
 }
+
+const Preferences = connect()(PreferencesView);
+
+export default Preferences;

@@ -90,7 +90,13 @@ const conditionToFilter = condition => {
 };
 
 const SeriesSearchCondition = props => {
-  const { condition, onChange, onSearchClick, onResetClick } = props;
+  const {
+    condition,
+    onChange,
+    onSearchClick,
+    onResetClick,
+    onSavePresetClick
+  } = props;
 
   function handleSearchClick() {
     const filter = conditionToFilter(condition);
@@ -98,7 +104,11 @@ const SeriesSearchCondition = props => {
   }
 
   return (
-    <SearchPanel onSearchClick={handleSearchClick} onResetClick={onResetClick}>
+    <SearchPanel
+      onSearchClick={handleSearchClick}
+      onResetClick={onResetClick}
+      onSavePresetClick={onSavePresetClick}
+    >
       <ConditionFrame
         condition={condition}
         onChange={onChange}

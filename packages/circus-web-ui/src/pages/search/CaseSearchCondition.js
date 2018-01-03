@@ -157,6 +157,7 @@ class CaseSearchConditionView extends React.Component {
       <SearchPanel
         onSearchClick={this.handleSearchClick}
         onResetClick={this.props.onResetClick}
+        onSavePresetClick={this.props.onSavePresetClick}
       >
         <div style={{ marginBottom: '10px' }}>
           <ControlLabel>Project:&ensp;</ControlLabel>

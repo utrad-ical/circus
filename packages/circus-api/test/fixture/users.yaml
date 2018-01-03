@@ -9,6 +9,8 @@
   preferences:
     theme: mode_white
     personalInfoView: false
+    seriesSearchPresets: []
+    caseSearchPresets: []
   loginEnabled: true
   groups: [1] # admin
 -
@@ -22,6 +24,8 @@
   preferences:
     theme: mode_white
     personalInfoView: false
+    seriesSearchPresets: []
+    caseSearchPresets: []
   loginEnabled: true
   groups: [2] # power user
 -
@@ -35,5 +39,7 @@
   preferences:
     theme: mode_black
     personalInfoView: false
+    seriesSearchPresets: []
+    caseSearchPresets: []
   loginEnabled: true
   groups: [3] # guests

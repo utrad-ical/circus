@@ -4,7 +4,7 @@ description: >
 routes:
   - verb: get
     path: /preferences
-    responseSchema: preferences
+    responseSchema: preferences|allRequired
     description: >
       Returns the preferences object of the current user.
       Consider using login-info instead.
@@ -13,3 +13,8 @@ routes:
     requestSchema: preferences|allRequired
     description: >
       Sets the preferences of the current user.
+  - verb: patch
+    path: /preferences
+    requestSchema: preferences
+    description: >
+      Patches the preferences of the current user.

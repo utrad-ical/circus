@@ -5,6 +5,16 @@ type: object
 description: >
   The object that holds the user's preference.
 properties:
-  theme: { enum: ['mode_black', 'mode_white' ]}
-  personalInfoView: { type: boolean }
+  theme:
+    enum: ['mode_black', 'mode_white' ]
+  personalInfoView:
+    type: boolean
+  seriesSearchPresets:
+    type: array
+    items:
+      type: object
+  caseSearchPresets:
+    type: array
+    items:
+      type: object
 additionalProperties: false

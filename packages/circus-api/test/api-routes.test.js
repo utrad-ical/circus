@@ -457,12 +457,31 @@ describe('API', function() {
       assert.equal(res.data.theme, 'mode_white');
     });
 
-    it('should modify the preference of the current user', async function() {
-      await axios.request({
+    it('should modify the preference of the current user using PUT', async function() {
+      const res1 = await axios.request({
         url: server.url + 'api/preferences',
         method: 'put',
-        data: { theme: 'mode_black', personalInfoView: false }
+        data: {
+          theme: 'mode_black',
+          personalInfoView: false,
+          seriesSearchPresets: [],
+          caseSearchPresets: []
+        }
       });
+      assert.equal(res1.status, 204);
+      const res2 = await axios.get(server.url + 'api/preferences');
+      assert.equal(res2.data.theme, 'mode_black');
+    });
+
+    it('should modify the preference of the current user using PATCH', async function() {
+      const res1 = await axios.request({
+        url: server.url + 'api/preferences',
+        method: 'patch',
+        data: {
+          theme: 'mode_black'
+        }
+      });
+      assert.equal(res1.status, 204);
       const res2 = await axios.get(server.url + 'api/preferences');
       assert.equal(res2.data.theme, 'mode_black');
     });

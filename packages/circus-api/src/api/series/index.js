@@ -7,7 +7,10 @@ import * as EJSON from 'mongodb-extended-json';
 
 const maskPatientInfo = ctx => {
   return series => {
-    if (!ctx.user.preferences.personalInfoView) {
+    const show =
+      ctx.userPrivileges.globalPrivileges.some(p => p === 'personalInfoView') &&
+      ctx.user.preferences.personalInfoView;
+    if (!show) {
       delete series.patientInfo;
     }
     return series;

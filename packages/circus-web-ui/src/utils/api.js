@@ -3,7 +3,7 @@ import { showMessage } from 'actions';
 import * as qs from 'querystring';
 import * as Cookies from 'js-cookie';
 
-export const apiServer = 'http://localhost:8080/';
+export const apiServer = '/';
 
 export let apiCaller;
 

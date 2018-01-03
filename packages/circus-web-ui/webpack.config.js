@@ -58,7 +58,12 @@ module.exports = {
   ],
   devServer: {
     contentBase: path.join(__dirname, 'public'),
-    historyApiFallback: true
+    historyApiFallback: true,
+    proxy: {
+      '/api': 'http://localhost:8080',
+      '/login': 'http://localhost:8080',
+      '/series': 'http://localhost:8080'
+    }
   },
   devtool: '#sourcemap'
 };

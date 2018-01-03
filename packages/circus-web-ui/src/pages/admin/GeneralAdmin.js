@@ -79,7 +79,7 @@ export default class GeneralAdmin extends React.Component {
     ];
 
     return (
-      <AdminContainer title="General Server Configuration" icon="tasks">
+      <AdminContainer title="General Server Configuration" icon="th-large">
         <PropertyEditor
           value={this.state.settings}
           complaints={this.state.complaints}

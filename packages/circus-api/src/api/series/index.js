@@ -27,7 +27,7 @@ export const handleGet = ({ models }) => {
         'You do not have privilege to access this series.'
       );
     }
-    ctx.body = series;
+    ctx.body = maskPatientInfo(ctx)(series);
   };
 };
 

@@ -66,6 +66,7 @@ const NavView = props => {
               <SubMenu
                 key={preset.name}
                 sub
+                icon="chevron-right"
                 name={preset.name}
                 link={`/browse/case/${encodeURIComponent(preset.name)}`}
               />
@@ -78,6 +79,7 @@ const NavView = props => {
               <SubMenu
                 key={preset.name}
                 sub
+                icon="chevron-right"
                 name={preset.name}
                 link={`/browse/series/encodeURIComponent(${preset.name})`}
               />

@@ -1,5 +1,6 @@
 import { api } from 'utils/api';
 import { refreshUserInfo } from './login-management';
+import { prompt, confirm } from 'rb/modal';
 
 function beginQuery(params) {
   return async (dispatch, getState) => {
@@ -74,11 +75,22 @@ export function changeSearchLimit(name, limit) {
   return beginQuery({ name, limit });
 }
 
-export function savePreset(name, presetName, condition) {
+export function savePreset(name, condition) {
   return async (dispatch, getState) => {
     const state = getState();
     const user = state.loginUser.data;
-    const key = name === 'series' ? 'seriesSearchPresets' : 'caseSearchPresets';
+    const key = name + 'SearchPresets';
+    const presets = user.preferences[key];
+
+    const presetName = await prompt('Preset name');
+    if (!presetName || !presetName.length) return;
+
+    if (presets.some(preset => preset.name === presetName)) {
+      if (!await confirm(`Overwrite the existing preset "${presetName}"?`)) {
+        return;
+      }
+    }
+
     dispatch({
       type: 'SET_SEARCH_QUERY_BUSY',
       name,

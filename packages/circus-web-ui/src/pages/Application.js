@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { Fragment } from 'react';
 import { Link } from 'react-router';
 import { connect } from 'react-redux';
 import MessageBox from './MessageBox';
 import { Button } from 'components/react-bootstrap';
 import { logout } from 'actions';
+import Icon from 'components/Icon';
 
 /**
  * The main application container.
@@ -48,7 +49,7 @@ const Application = connect(state => ({
 export default Application;
 
 const NavView = props => {
-  const { onLogout } = props;
+  const { onLogout, caseSearchPresets, seriesSearchPresets } = props;
   return (
     <header>
       <nav>
@@ -60,10 +61,26 @@ const NavView = props => {
           </li>
           <Menu name="Case" link="/browse/case">
             <SubMenu name="Case Search" link="/browse/case" />
+            {caseSearchPresets.map(preset => (
+              <SubMenu
+                key={preset.name}
+                icon="search"
+                name={preset.name}
+                link={`/browse/case/${preset.name}`}
+              />
+            ))}
             <SubMenu name="Case Import" link="/import-case" />
           </Menu>
           <Menu name="Series" link="/browse/series">
             <SubMenu name="Series Search" link="/browse/series" />
+            {seriesSearchPresets.map(preset => (
+              <SubMenu
+                key={preset.name}
+                icon="search"
+                name={preset.name}
+                link={`/browse/series/${preset.name}`}
+              />
+            ))}
             <SubMenu name="Series Import" link="/import-series" />
           </Menu>
           <Menu name="Tool">
@@ -95,7 +112,13 @@ const Nav = connect(
     loginUserName: state.loginUser.data ? state.loginUser.data.description : '',
     isAdmin:
       state.loginUser.data &&
-      state.loginUser.data.globalPrivileges.indexOf('manageServer') > -1
+      state.loginUser.data.globalPrivileges.indexOf('manageServer') > -1,
+    caseSearchPresets: state.loginUser.data
+      ? state.loginUser.data.preferences.caseSearchPresets
+      : [],
+    seriesSearchPresets: state.loginUser.data
+      ? state.loginUser.data.preferences.seriesSearchPresets
+      : []
   }),
   dispatch => ({
     onLogout: () => dispatch(logout())
@@ -123,7 +146,14 @@ const Menu = props => {
 const SubMenu = props => {
   return (
     <li>
-      <Link to={props.link}>{props.name}</Link>
+      <Link to={props.link}>
+        {props.icon && (
+          <Fragment>
+            <Icon icon={props.icon} />&ensp;
+          </Fragment>
+        )}
+        {props.name}
+      </Link>
     </li>
   );
 };

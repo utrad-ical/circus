@@ -3,16 +3,14 @@ import SeriesSearchCondition from './SeriesSearchCondition';
 import SeriesSearchResults from './SeriesSearchResults';
 import Icon from 'components/Icon';
 
-export default class SeriesSearch extends React.Component {
-  render() {
-    return (
-      <div>
-        <h1>
-          <Icon icon="circus-series" /> Series Search
-        </h1>
-        <SeriesSearchCondition />
-        <SeriesSearchResults />
-      </div>
-    );
-  }
-}
+const SeriesSearch = props => (
+  <div>
+    <h1>
+      <Icon icon="circus-series" /> Series Search
+    </h1>
+    <SeriesSearchCondition />
+    <SeriesSearchResults />
+  </div>
+);
+
+export default SeriesSearch;

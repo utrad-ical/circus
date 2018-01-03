@@ -60,11 +60,20 @@ const sendSearchCondition = opts => {
     }
 
     Enhanced.displayName = `searchPanel(${searchName})`;
-    return connect(state => ({
-      reloadCondition: state.searches[searchName]
-        ? state.searches[searchName].condition
-        : null
-    }))(Enhanced);
+
+    const mapStateToProps = (state, ownProps) => {
+      const presetKey = searchName + 'SearchPresets';
+      const presets = state.loginUser.data.preferences[presetKey];
+      const matched = presets.find(
+        preset => preset.name === ownProps.presetName
+      );
+      if (matched) return { reloadCondition: JSON.parse(matched.condition) };
+      if (state.searches[searchName])
+        return { reloadCondition: state.searches[searchName].condition };
+      return { reloadCondition: null };
+    };
+
+    return connect(mapStateToProps)(Enhanced);
   };
 };
 

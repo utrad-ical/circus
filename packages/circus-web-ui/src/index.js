@@ -40,8 +40,8 @@ ReactDOM.render(
       <Route path="/" component={LoginScreen} onLeave={leaveLoginScreen} />
       <Route path="/" component={Application} onChange={pageMove}>
         <Route path="home" component={HomePage} />
-        <Route path="browse/series" component={SeriesSearch} />
-        <Route path="browse/case" component={CaseSearch} />
+        <Route path="browse/series(/:presetName)" component={SeriesSearch} />
+        <Route path="browse/case(/:presetName)" component={CaseSearch} />
         <Route path="import-series" component={ImportSeries} />
         <Route path="import-case" component={ImportCase} />
         <Route path="new-case/:uid" component={CreateNewCase} />

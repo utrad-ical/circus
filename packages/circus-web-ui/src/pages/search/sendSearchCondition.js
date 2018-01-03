@@ -1,6 +1,7 @@
 import React from 'react';
-import { startNewSearch } from 'actions';
+import { startNewSearch, savePreset } from 'actions';
 import { connect } from 'react-redux';
+import { prompt } from 'rb/modal';
 
 /**
  * Creates a HOC that remembers the current editing condition and
@@ -32,6 +33,13 @@ const sendSearchCondition = opts => {
         );
       };
 
+      handleSavePresetClick = async () => {
+        const { dispatch } = this.props;
+        const presetName = await prompt('Preset name');
+        if (!presetName || !presetName.length) return;
+        dispatch(savePreset(searchName, presetName, this.state.condition));
+      };
+
       handleResetClick = () => {
         this.setState({ condition: nullCondition() });
       };
@@ -43,6 +51,7 @@ const sendSearchCondition = opts => {
             onChange={this.handleChange}
             onSearchClick={this.handleSearchClick}
             onResetClick={this.handleResetClick}
+            onSavePresetClick={this.handleSavePresetClick}
             condition={this.state.condition}
             {...props}
           />

@@ -1,4 +1,5 @@
 import { api } from 'utils/api';
+import { refreshUserInfo } from './login-management';
 
 function beginQuery(params) {
   return async (dispatch, getState) => {
@@ -71,4 +72,31 @@ export function changeSearchSort(name, sort) {
 
 export function changeSearchLimit(name, limit) {
   return beginQuery({ name, limit });
+}
+
+export function savePreset(name, presetName, condition) {
+  return async (dispatch, getState) => {
+    const state = getState();
+    const user = state.loginUser.data;
+    const key = name === 'series' ? 'seriesSearchPresets' : 'caseSearchPresets';
+    dispatch({
+      type: 'SET_SEARCH_QUERY_BUSY',
+      name,
+      isFetching: true
+    });
+    const newPresets = [
+      { name: presetName, condition: JSON.stringify(condition) },
+      ...user.preferences[key].filter(preset => preset.name !== presetName)
+    ];
+    await api('preferences', {
+      method: 'patch',
+      data: { [key]: newPresets }
+    });
+    dispatch(refreshUserInfo(true));
+    dispatch({
+      type: 'SET_SEARCH_QUERY_BUSY',
+      name,
+      isFetching: false
+    });
+  };
 }

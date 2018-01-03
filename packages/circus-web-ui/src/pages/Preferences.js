@@ -26,7 +26,7 @@ export default class Preferences extends React.Component {
 
   saveClick = async () => {
     await api('preferences', {
-      method: 'put',
+      method: 'patch',
       data: this.state.settings
     });
     showMessage('Your preference was saved.', 'success', { short: true });

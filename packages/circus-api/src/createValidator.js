@@ -36,7 +36,15 @@ const customFormats = {
     /^(0|[1-9][0-9]*)(\.(0|[1-9][0-9]*))+$/.test(s),
   multiIntegerRange: new RegExp(`^${intOrRange}(,${intOrRange})*$`),
   color: /^\#[0-9a-f]{6}$/,
-  kebab: /^([a-z0-9]+\-)*[a-z0-9]+$/
+  kebab: /^([a-z0-9]+\-)*[a-z0-9]+$/,
+  jsonString: s => {
+    try {
+      JSON.parse(s);
+      return true;
+    } catch (err) {
+      return false;
+    }
+  }
 };
 
 const defaultSchemaRoot = path.join(__dirname, 'schemas');

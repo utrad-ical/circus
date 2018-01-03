@@ -65,6 +65,14 @@ describe('Validator', function() {
         ['a--b', ' class-name', 'not*correct*']
       );
     });
+
+    it('jsonString', async function() {
+      await testFormat(
+        'jsonString',
+        ['"a"', '[1,5]', '{"a":50,"b":["c"]}'],
+        ['{', 'a', '"']
+      );
+    });
   });
 
   it('should work with toDate mode', async function() {

@@ -5,7 +5,7 @@ export async function up(db, models) {
   const projectId = generateProjectId();
 
   await db.collection('groups').ensureIndex({ groupId: 1 }, { unique: true });
-  await models.group.insertMany([
+  await db.collection('groups').insertMany([
     {
       groupId: await models.group.newSequentialId(),
       groupName: 'admin',
@@ -20,7 +20,9 @@ export async function up(db, models) {
       writeProjects: [projectId],
       addSeriesProjects: [projectId],
       viewPersonalInfoProjects: [projectId],
-      moderateProjects: [projectId]
+      moderateProjects: [projectId],
+      createdAt: new Date(),
+      updatedAt: new Date()
     },
     {
       groupId: await models.group.newSequentialId(),
@@ -31,12 +33,14 @@ export async function up(db, models) {
       writeProjects: [projectId],
       addSeriesProjects: [projectId],
       viewPersonalInfoProjects: [projectId],
-      moderateProjects: []
+      moderateProjects: [],
+      createdAt: new Date(),
+      updatedAt: new Date()
     }
   ]);
 
   await db.collection('users').ensureIndex({ userEmail: 1 }, { unique: true });
-  await models.user.insert({
+  await db.collection('users').insert({
     userEmail: 'circus@circus.example.com',
     loginId: 'circus',
     password: nodepass.hash('circus'),
@@ -45,13 +49,15 @@ export async function up(db, models) {
     lastLoginIp: '',
     description: 'Default administrative user',
     loginEnabled: true,
-    preferences: { theme: 'mode_white', personalInfoView: true }
+    preferences: { theme: 'mode_white', personalInfoView: true },
+    createdAt: new Date(),
+    updatedAt: new Date()
   });
 
   await db
     .collection('projects')
     .ensureIndex({ projectId: 1 }, { unique: true });
-  await models.project.insert({
+  await db.collection('projects').insert({
     projectId,
     projectName: 'default',
     description: 'The default DB project',
@@ -59,10 +65,12 @@ export async function up(db, models) {
     windowPresets: [],
     tags: [],
     caseAttributesSchema: [],
-    labelAttributesSchema: []
+    labelAttributesSchema: [],
+    createdAt: new Date(),
+    updatedAt: new Date()
   });
 
-  await models.serverParam.insert({
+  await db.collection('serverParams').insert({
     key: 'domains',
     value: ['default']
   });

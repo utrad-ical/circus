@@ -62,10 +62,6 @@ header {
             width: 200px;
             border-bottom: 1px solid #bbb;
             color: black;
-            &.sub {
-              // sub-sub menu indent
-              padding-left: 30px;
-            }
             &:hover {
               background-color: @brand-primary;
               color: white;
@@ -74,7 +70,15 @@ header {
               display: block;
               height: 40px;
               line-height: 40px;
-              padding: 0 5px;
+              padding: 0 8px;
+            }
+            &.sub {
+              // sub-sub menu indent
+              a {
+                padding-left: 20px;
+                height: 30px;
+                line-height: 30px;
+              }
             }
           }
         }

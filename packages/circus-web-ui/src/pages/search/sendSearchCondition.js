@@ -8,7 +8,13 @@ import { prompt } from 'rb/modal';
  * starts a new search.
  */
 const sendSearchCondition = opts => {
-  const { nullCondition, searchName, resource, defaultSort } = opts;
+  const {
+    nullCondition,
+    conditionToFilter,
+    searchName,
+    resource,
+    defaultSort
+  } = opts;
 
   return function(BaseComponent) {
     class Enhanced extends React.Component {
@@ -25,11 +31,17 @@ const sendSearchCondition = opts => {
         this.setState({ condition: newCondition });
       };
 
-      handleSearchClick = filter => {
+      handleSearchClick = () => {
         const { dispatch } = this.props;
         const { condition } = this.state;
         dispatch(
-          startNewSearch(searchName, resource, filter, condition, defaultSort)
+          startNewSearch(
+            searchName,
+            resource,
+            conditionToFilter(condition),
+            condition,
+            defaultSort
+          )
         );
       };
 

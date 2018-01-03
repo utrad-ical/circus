@@ -143,22 +143,12 @@ class CaseSearchConditionView extends React.Component {
     });
   };
 
-  handleSearchClick = () => {
-    const { condition, onSearchClick } = this.props;
-    const filter = conditionToFilter(condition);
-    onSearchClick(filter);
-  };
-
   render() {
     const { accessibleProjects, condition } = this.props;
     const { basicConditionProperties, advancedConditionKeys } = this.state;
 
     return (
-      <SearchPanel
-        onSearchClick={this.handleSearchClick}
-        onResetClick={this.props.onResetClick}
-        onSavePresetClick={this.props.onSavePresetClick}
-      >
+      <SearchPanel {...this.props}>
         <div style={{ marginBottom: '10px' }}>
           <ControlLabel>Project:&ensp;</ControlLabel>
           <ProjectSelectorMultiple
@@ -196,5 +186,6 @@ export default sendSearchCondition({
   searchName: 'case',
   resource: 'cases',
   defaultSort: '{"createdAt":-1}',
-  nullCondition
+  nullCondition,
+  conditionToFilter
 })(CaseSearchCondition);

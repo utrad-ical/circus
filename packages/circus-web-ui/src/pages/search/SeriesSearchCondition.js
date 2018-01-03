@@ -90,25 +90,10 @@ const conditionToFilter = condition => {
 };
 
 const SeriesSearchCondition = props => {
-  const {
-    condition,
-    onChange,
-    onSearchClick,
-    onResetClick,
-    onSavePresetClick
-  } = props;
-
-  function handleSearchClick() {
-    const filter = conditionToFilter(condition);
-    onSearchClick(filter);
-  }
+  const { condition, onChange } = props;
 
   return (
-    <SearchPanel
-      onSearchClick={handleSearchClick}
-      onResetClick={onResetClick}
-      onSavePresetClick={onSavePresetClick}
-    >
+    <SearchPanel {...props}>
       <ConditionFrame
         condition={condition}
         onChange={onChange}
@@ -131,5 +116,6 @@ export default sendSearchCondition({
   searchName: 'series',
   resource: 'series',
   defaultSort: '{"createdAt":-1}',
-  nullCondition
+  nullCondition,
+  conditionToFilter
 })(SeriesSearchCondition);

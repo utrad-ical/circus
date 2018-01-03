@@ -49,7 +49,7 @@ class PreferencesView extends React.Component {
 
   loadSettings = async () => {
     const settings = await api('preferences');
-    this.setState({ settings });
+    if (!this.unmounted) this.setState({ settings });
   };
 
   componentDidMount() {
@@ -60,6 +60,10 @@ class PreferencesView extends React.Component {
     this.setState({ settings: value });
   }
 
+  componentWillUnmount() {
+    this.unmounted = true;
+  }
+
   saveClick = async () => {
     const { dispatch } = this.props;
     await api('preferences', {
@@ -67,8 +71,8 @@ class PreferencesView extends React.Component {
       data: this.state.settings
     });
     showMessage('Your preference was saved.', 'success', { short: true });
-    dispatch(refreshUserInfo(true));
     this.loadSettings();
+    dispatch(refreshUserInfo(true));
   };
 
   render() {

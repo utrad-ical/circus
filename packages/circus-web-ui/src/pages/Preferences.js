@@ -6,6 +6,7 @@ import { showMessage, refreshUserInfo } from 'actions';
 import { Button } from 'components/react-bootstrap';
 import IconButton from 'components/IconButton';
 import { connect } from 'react-redux';
+import Icon from 'components/Icon';
 
 const PresetDeleteEditor = props => {
   const { value, onChange } = props;
@@ -99,8 +100,7 @@ class PreferencesView extends React.Component {
     return (
       <div>
         <h1>
-          <span className="circus-icon circus-icon-preference" />&ensp;
-          Preferences
+          <Icon icon="circus-preference" /> Preferences
         </h1>
         <PropertyEditor
           value={this.state.settings}

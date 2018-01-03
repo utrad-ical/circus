@@ -5,6 +5,7 @@ import MessageBox from './MessageBox';
 import { Button } from 'components/react-bootstrap';
 import { logout } from 'actions';
 import Icon from 'components/Icon';
+import classnames from 'classnames';
 
 /**
  * The main application container.
@@ -60,39 +61,51 @@ const NavView = props => {
             </Link>
           </li>
           <Menu name="Case" link="/browse/case">
-            <SubMenu name="Case Search" link="/browse/case" />
+            <SubMenu icon="search" name="Case Search" link="/browse/case" />
             {caseSearchPresets.map(preset => (
               <SubMenu
                 key={preset.name}
-                icon="search"
+                sub
                 name={preset.name}
                 link={`/browse/case/${preset.name}`}
               />
             ))}
-            <SubMenu name="Case Import" link="/import-case" />
+            <SubMenu icon="open" name="Case Import" link="/import-case" />
           </Menu>
           <Menu name="Series" link="/browse/series">
-            <SubMenu name="Series Search" link="/browse/series" />
+            <SubMenu icon="search" name="Series Search" link="/browse/series" />
             {seriesSearchPresets.map(preset => (
               <SubMenu
                 key={preset.name}
-                icon="search"
+                sub
                 name={preset.name}
                 link={`/browse/series/${preset.name}`}
               />
             ))}
-            <SubMenu name="Series Import" link="/import-series" />
+            <SubMenu
+              icon="circus-series-import"
+              name="Series Import"
+              link="/import-series"
+            />
           </Menu>
           <Menu name="Tool">
-            <SubMenu name="Task List" link="/task-list" />
-            <SubMenu name="Preference" link="/preference" />
+            <SubMenu icon="tasks" name="Task List" link="/task-list" />
+            <SubMenu
+              icon="circus-preference"
+              name="Preference"
+              link="/preference"
+            />
           </Menu>
           {props.isAdmin && (
             <Menu name="Administration" link="/admin">
-              <SubMenu name="Server Configuration" link="/admin/general" />
-              <SubMenu name="Project" link="/admin/project" />
-              <SubMenu name="Groups" link="/admin/group" />
-              <SubMenu name="Users" link="/admin/user" />
+              <SubMenu
+                icon="th-large"
+                name="Server Configuration"
+                link="/admin/general"
+              />
+              <SubMenu icon="education" name="Project" link="/admin/project" />
+              <SubMenu icon="record" name="Groups" link="/admin/group" />
+              <SubMenu icon="user" name="Users" link="/admin/user" />
             </Menu>
           )}
         </MainMenu>
@@ -145,7 +158,7 @@ const Menu = props => {
 
 const SubMenu = props => {
   return (
-    <li>
+    <li className={classnames({ sub: props.sub })}>
       <Link to={props.link}>
         {props.icon && (
           <Fragment>

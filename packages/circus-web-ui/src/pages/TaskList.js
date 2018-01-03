@@ -2,6 +2,7 @@ import React from 'react';
 import { Button } from 'components/react-bootstrap';
 import LoadingIndicator from 'rb/LoadingIndicator';
 import { api } from 'utils/api';
+import Icon from 'components/Icon';
 
 export default class TaskList extends React.Component {
   constructor(props) {
@@ -24,7 +25,9 @@ export default class TaskList extends React.Component {
     }
     return (
       <div>
-        <h1>Tasks</h1>
+        <h1>
+          <Icon icon="tasks" /> Tasks
+        </h1>
         <TaskItems items={this.state.tasks} />
       </div>
     );

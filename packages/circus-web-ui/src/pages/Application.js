@@ -17,7 +17,10 @@ const ApplicationView = props => {
   const notLoggedIn = !props.isUserFetching && !props.isLoggedIn;
 
   const full = props.routes.some(
-    r => r.component && r.component.name == 'CaseDetail'
+    r =>
+      r.component &&
+      r.component.displayName &&
+      r.component.displayName.match(/CaseDetail/)
   );
   const containerClass = full ? 'full-container' : 'container';
   return (

@@ -25,8 +25,9 @@ import attributeSchemaToProperties from './attributeSchemaToProperties';
 import PatientInfoBox from 'components/PatientInfoBox';
 import TimeDisplay from 'components/TimeDisplay';
 import Tag from 'components/Tag';
+import { connect } from 'react-redux';
 
-export default class CaseDetail extends React.Component {
+class CaseDetailView extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -84,9 +85,12 @@ export default class CaseDetail extends React.Component {
   };
 
   async loadCase() {
-    const caseId = this.props.params.cid;
+    const caseId = this.props.params.caseId;
     const caseData = await api('cases/' + caseId);
-    this.setState({ caseData }, () => {
+    const project = this.props.accessibleProjects.find(
+      p => p.projectId === caseData.projectId
+    );
+    this.setState({ caseData, projectData: project.project }, () => {
       this.selectRevision(caseData.revisions.length - 1);
     });
   }
@@ -161,19 +165,12 @@ export default class CaseDetail extends React.Component {
     this.selectRevision(this.state.editingRevisionIndex);
   };
 
-  async loadProject() {
-    const projectId = this.state.caseData.projectId;
-    const projectData = await api('projects/' + projectId);
-    this.setState({ projectData });
-  }
-
   revisionDataChange = revision => {
     this.setState({ editingData: revision });
   };
 
   async componentDidMount() {
     await this.loadCase();
-    await this.loadProject();
   }
 
   render() {
@@ -187,7 +184,7 @@ export default class CaseDetail extends React.Component {
 
     const { projectData: prj, caseData } = this.state;
 
-    const cid = this.props.params.cid;
+    const caseId = this.props.params.caseId;
 
     return (
       <div>
@@ -200,7 +197,7 @@ export default class CaseDetail extends React.Component {
             ))}
           </div>
           <div>
-            Case: {cid}
+            Case: {caseId}
             <br />
             (Create: <TimeDisplay value={caseData.createdAt} />)
           </div>
@@ -222,6 +219,11 @@ export default class CaseDetail extends React.Component {
     );
   }
 }
+
+const CaseDetail = connect(state => ({
+  accessibleProjects: state.loginUser.data.accessibleProjects
+}))(CaseDetailView);
+export default CaseDetail;
 
 const MenuBar = props => {
   const {

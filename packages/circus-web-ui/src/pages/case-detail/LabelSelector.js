@@ -3,14 +3,14 @@ import ColorPicker from 'rb/ColorPicker';
 import {
   Popover,
   Button,
-  OverlayTrigger,
-  FormControl
+  OverlayTrigger
 } from '../../components/react-bootstrap';
 import { RawData, PixelFormat, VoxelCloud } from 'circus-rs';
 import classNames from 'classnames';
 import { confirm } from 'rb/modal';
 import IconButton from 'components/IconButton';
 import Icon from 'components/Icon';
+import Slider from 'rb/Slider';
 
 const labelColors = [
   '#ff0000',
@@ -230,14 +230,13 @@ const OpacityPopover = props => {
           onClick={() => onChange(0)}
         />
       )}
-      <FormControl
-        type="number"
-        step={10}
+      <Slider
+        className="opacity-slider"
         min={0}
         max={100}
-        bsSize="sm"
+        step={10}
         value={value * 100}
-        onChange={ev => props.onChange(ev.target.value / 100)}
+        onChange={v => props.onChange(v / 100)}
       />
     </div>
   );

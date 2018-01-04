@@ -84,8 +84,8 @@ export default class CaseDetail extends React.Component {
   };
 
   async loadCase() {
-    const caseID = this.props.params.cid;
-    const caseData = await api('cases/' + caseID);
+    const caseId = this.props.params.cid;
+    const caseData = await api('cases/' + caseId);
     this.setState({ caseData }, () => {
       this.selectRevision(caseData.revisions.length - 1);
     });
@@ -539,6 +539,7 @@ const ToolButton = props => {
   if (children) {
     return (
       <SplitButton
+        id={`toolbutton-${name}`}
         title={icon}
         bsStyle={style}
         onClick={onClick}

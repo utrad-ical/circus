@@ -59,6 +59,7 @@ export default class UserAdmin extends React.Component {
       { key: 'loginId', caption: 'Login Name' },
       { key: 'description', caption: 'Description' },
       {
+        key: 'groups',
         renderer: ({ value: item }) => {
           return item.groups.map(groupId => {
             if (!this.groups) return null;

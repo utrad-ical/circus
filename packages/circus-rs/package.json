@@ -5,6 +5,8 @@
     "start": "node ./server.js",
     "devserver": "webpack-dev-server",
     "test": "mocha",
+    "build": "webpack",
+    "clean": "rimraf dist",
     "docs": "jekyll build --source=./docs --dest=./docs/_site && cp -r ./dist ./docs/_site",
     "lint": "tslint src/{browser,common,server}/**/*.ts",
     "prettier": "prettier src/**/*.{ts,js,less} test/**/*.{ts,js} --write"
@@ -62,7 +64,7 @@
     "merge": "^1.2.0",
     "mocha": "^4.0.1",
     "prettier": "^1.9.2",
-    "rimraf": "^2.6.1",
+    "rimraf": "^2.6.2",
     "stream-buffers": "^3.0.1",
     "supertest": "^3.0.0",
     "svg2ttf": "^4.1.0",

@@ -3,6 +3,7 @@
   "version": "0.9.2",
   "scripts": {
     "start": "node ./server.js",
+    "devserver": "webpack-dev-server",
     "test": "mocha",
     "docs": "jekyll build --source=./docs --dest=./docs/_site && cp -r ./dist ./docs/_site",
     "prettier": "prettier src/**/*.{ts,js,less} test/**/*.{ts,js} --write"
@@ -69,7 +70,8 @@
     "ttf2woff": "^2.0.1",
     "typescript": "^2.6.1",
     "vinyl-buffer": "^1.0.0",
-    "vinyl-source-stream": "^1.1.0"
+    "vinyl-source-stream": "^1.1.0",
+    "webpack-dev-server": "^2.9.7"
   },
   "nodemonConfig": {
     "ext": "ts,js,json"

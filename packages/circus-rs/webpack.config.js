@@ -7,6 +7,7 @@ module.exports = {
   },
   output: {
     path: path.join(__dirname, 'dist'),
+    library: 'circusrs',
     filename: '[name].js'
   },
   resolve: {
@@ -26,6 +27,10 @@ module.exports = {
       {
         test: /\.css/,
         use: ['style-laoder', 'css-loader']
+      },
+      {
+        test: /\.woff/,
+        use: ['url-loader']
       }
     ]
   },
@@ -34,6 +39,9 @@ module.exports = {
       'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV)
     })
   ],
+  devServer: {
+    contentBase: path.join(__dirname, 'demo')
+  },
   devtool: '#sourcemap'
 };
 

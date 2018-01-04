@@ -2,6 +2,8 @@
  * This module re-exports "public" classes and functions
  * which should be visible to the consumers of CIRCUS RS.
  */
+import './circus-rs.less';
+import './assets/icons/circus-rs-font-glyphs.less';
 
 export * from '../browser/viewer/viewer';
 export * from '../browser/composition';

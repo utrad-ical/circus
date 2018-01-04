@@ -30,7 +30,7 @@ const labelColors = [
   '#ff88ff'
 ];
 
-export const LabelSelector = props => {
+const LabelSelector = props => {
   const {
     revision,
     onChange,
@@ -64,6 +64,8 @@ export const LabelSelector = props => {
     </ul>
   );
 };
+
+export default LabelSelector;
 
 const Series = props => {
   const {

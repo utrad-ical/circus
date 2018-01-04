@@ -1,6 +1,6 @@
 {
   "name": "@utrad-ical/circus-rs",
-  "version": "0.9.2",
+  "version": "0.10.0",
   "scripts": {
     "start": "node ./server.js",
     "devserver": "webpack-dev-server",

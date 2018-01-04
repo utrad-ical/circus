@@ -57,6 +57,7 @@ async function main(): Promise<void> {
     const httpServer = await listen(app, port, '0.0.0.0');
     const message = `Server running on port ${port}`;
     logger.info(message);
+    console.log(message);
   } catch (e) {
     console.error('Server failed to start');
     console.error(e);

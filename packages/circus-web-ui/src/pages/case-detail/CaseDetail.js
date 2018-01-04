@@ -412,7 +412,7 @@ export class RevisionData extends React.Component {
     return (
       <div className={classNames('case-revision-data', { busy })}>
         <div className="case-revision-header">
-          <Card title="Series / Labels">
+          <Card title="Series / Labels" className="labels">
             <LabelSelector
               revision={revision}
               onChange={onChange}
@@ -420,19 +420,20 @@ export class RevisionData extends React.Component {
               activeLabel={activeLabel}
               onChangeActiveLabel={this.changeActiveLabel}
             />
+            <div>
+              <div>
+                Label #{activeLabelIndex} of Series #{activeSeriesIndex}
+              </div>
+              {activeLabel && (
+                <PropertyEditor
+                  properties={this.state.labelAttributesProperties}
+                  value={activeLabel.attributes || {}}
+                  onChange={this.labelAttributesChange}
+                />
+              )}
+            </div>
           </Card>
-          <Card
-            title={`Label #${activeLabelIndex} of Series #${activeSeriesIndex}`}
-          >
-            {activeLabel ? (
-              <PropertyEditor
-                properties={this.state.labelAttributesProperties}
-                value={activeLabel.attributes || {}}
-                onChange={this.labelAttributesChange}
-              />
-            ) : null}
-          </Card>
-          <Card title="Case Attributes">
+          <Card title="Case Attributes" className="case-attributes">
             <PropertyEditor
               properties={this.state.caseAttributesProperties}
               value={revision.attributes}

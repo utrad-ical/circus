@@ -11,14 +11,14 @@ It fully supports multiplanar reconstruction (MPR) and voxel-based annotations.
 Requirements
 ------------
 
-- Node.js (>= 4.0)
+- Node.js (>= 8.9)
 
 Build
 -----
 
 ```
 # npm install
-# gulp
+# npm run build
 ```
 
 Test

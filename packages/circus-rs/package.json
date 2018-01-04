@@ -43,6 +43,7 @@
     "browserify": "^14.4.0",
     "chai": "^4.0.2",
     "extend": "^3.0.1",
+    "glob-promise": "^3.3.0",
     "gulp": "3.9.1",
     "gulp-concat": "^2.6.1",
     "gulp-iconfont": "^8.0.1",
@@ -56,7 +57,10 @@
     "rimraf": "^2.6.1",
     "stream-buffers": "^3.0.1",
     "supertest": "^3.0.0",
+    "svg2ttf": "^4.1.0",
+    "svgicons2svgfont": "^5.0.2",
     "tslint": "^5.4.2",
+    "ttf2woff": "^2.0.1",
     "typescript": "^2.6.1",
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "^1.1.0"

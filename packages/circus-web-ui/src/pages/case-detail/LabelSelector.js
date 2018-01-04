@@ -55,7 +55,7 @@ const LabelSelector = props => {
         <Series
           series={series}
           index={seriesIndex}
-          key={series.seriesUID}
+          key={series.seriesUid}
           onChange={changeSeries}
           onChangeActiveLabel={onChangeActiveLabel}
           activeSeries={activeSeries}

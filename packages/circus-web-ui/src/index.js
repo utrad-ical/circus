@@ -21,7 +21,6 @@ import GeneralAdmin from 'pages/admin/GeneralAdmin';
 import GroupAdmin from 'pages/admin/GroupAdmin';
 import UserAdmin from 'pages/admin/UserAdmin';
 import ProjectAdmin from 'pages/admin/ProjectAdmin';
-
 import Preferences from 'pages/Preferences';
 
 import { store } from 'store';
@@ -53,7 +52,7 @@ ReactDOM.render(
           <Route path="project" component={ProjectAdmin} />
         </Route>
         <Route path="series/:uid" component={SeriesDetail} />
-        <Route path="case/:cid" component={CaseDetail} />
+        <Route path="case/:caseId" component={CaseDetail} />
         <Route path="task-list" component={TaskList} />
         <Route path="preference" component={Preferences} />
       </Route>

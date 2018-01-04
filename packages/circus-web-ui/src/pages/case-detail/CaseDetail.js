@@ -9,7 +9,7 @@ import {
   SplitButton,
   MenuItem
 } from '../../components/react-bootstrap';
-import { LabelSelector } from './labels';
+import LabelSelector from './LabelSelector';
 import { store } from 'store';
 import * as rs from 'circus-rs';
 import { alert, prompt, confirm } from 'rb/modal';

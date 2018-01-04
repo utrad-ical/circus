@@ -18,6 +18,7 @@
     "@types/log4js": "0.0.32",
     "@types/node": "^8.0.51",
     "@types/validator": "^6.2.0",
+    "css-loader": "^0.28.7",
     "dicom-parser": "^1.7.5",
     "forever": "^0.15.3",
     "gl-matrix": "^2.3.2",
@@ -29,13 +30,18 @@
     "koa-json": "^2.0.2",
     "koa-mount": "^3.0.0",
     "koa-router": "^7.2.1",
+    "less-loader": "^4.0.5",
     "log4js": "^1.1.1",
     "minimist": "^1.2.0",
     "multi-integer-range": "^4.0.3",
     "pngjs": "^3.2.0",
+    "style-loader": "^0.19.1",
+    "ts-loader": "^3.2.0",
     "ts-node": "^3.3.0",
     "tslib": "^1.7.1",
-    "validator": "^7.0.0"
+    "url-loader": "^0.6.2",
+    "validator": "^7.0.0",
+    "webpack": "^3.10.0"
   },
   "devDependencies": {
     "axios": "^0.16.2",

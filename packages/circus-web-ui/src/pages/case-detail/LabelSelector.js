@@ -4,12 +4,13 @@ import {
   Popover,
   Button,
   OverlayTrigger,
-  FormControl,
-  Glyphicon
+  FormControl
 } from '../../components/react-bootstrap';
 import { RawData, PixelFormat, VoxelCloud } from 'circus-rs';
 import classNames from 'classnames';
 import { confirm } from 'rb/modal';
+import IconButton from 'components/IconButton';
+import Icon from 'components/Icon';
 
 const labelColors = [
   '#ff0000',
@@ -120,8 +121,7 @@ const Series = props => {
         active: series === activeSeries
       })}
     >
-      {' '}
-      Series #{seriesIndex}
+      <Icon icon="circus-series" /> Series #{seriesIndex}
       <ul className="case-label-list">
         {series.labels.map((label, labelIndex) => (
           <Label
@@ -136,9 +136,9 @@ const Series = props => {
         ))}
       </ul>
       <div className="case-label-buttons">
-        <Button bsSize="xs" onClick={addLabel}>
-          <Glyphicon glyph="plus" /> Add Label
-        </Button>
+        <IconButton icon="plus" bsSize="xs" onClick={addLabel}>
+          Add Label
+        </IconButton>
       </div>
     </li>
   );
@@ -175,8 +175,7 @@ export const Label = props => {
       onClick={onClick}
     >
       <div>
-        <Glyphicon glyph="tag" />&ensp;
-        {caption}
+        <Icon icon="tag" /> {caption}
       </div>
       <div>
         <OpacityEditor value={label.cloud.alpha} onChange={changeLabelAlpha} />
@@ -186,9 +185,7 @@ export const Label = props => {
           colors={labelColors}
           onChange={changeLabelColor}
         />
-        <Button bsSize="xs" onClick={onRemoveClick}>
-          <Glyphicon glyph="remove" />
-        </Button>
+        <IconButton icon="remove" bsSize="xs" onClick={onRemoveClick} />
       </div>
     </li>
   );
@@ -219,13 +216,19 @@ const OpacityPopover = props => {
   return (
     <div className="label-list-opacity-dropdown">
       {value === 0 ? (
-        <Button bsStyle="link" bsSize="sm" onClick={() => onChange(1)}>
-          <Glyphicon glyph="eye-close" />
-        </Button>
+        <IconButton
+          icon="eye-close"
+          bsStyle="link"
+          bsSize="sm"
+          onClick={() => onChange(1)}
+        />
       ) : (
-        <Button bsStyle="link" bsSize="sm" onClick={() => onChange(0)}>
-          <Glyphicon glyph="eye-open" />
-        </Button>
+        <IconButton
+          icon="eye-open"
+          bsStyle="link"
+          bsSize="sm"
+          onClick={() => onChange(0)}
+        />
       )}
       <FormControl
         type="number"

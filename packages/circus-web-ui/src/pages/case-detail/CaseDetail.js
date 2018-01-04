@@ -420,7 +420,7 @@ export class RevisionData extends React.Component {
               activeLabel={activeLabel}
               onChangeActiveLabel={this.changeActiveLabel}
             />
-            <div>
+            <div className="label-attributes">
               <div>
                 Label #{activeLabelIndex} of Series #{activeSeriesIndex}
               </div>

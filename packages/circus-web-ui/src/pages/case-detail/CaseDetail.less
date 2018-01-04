@@ -91,19 +91,22 @@
 
 .case-revision-header {
   display: flex;
-  flex-direction: row;
+  flex-flow: row;
   justify-content: space-between;
   > .labels {
-    flex: 60%;
+    flex: 65%;
     .case-detail-card-body {
       display: flex;
       > * {
         flex: 50%;
       }
+      .label-attributes {
+        padding: 0.3em;
+      }
     }
   }
   > .case-attributes {
-    flex: 40%;
+    flex: 35%;
   }
   > * {
     border-left: 1px solid silver;

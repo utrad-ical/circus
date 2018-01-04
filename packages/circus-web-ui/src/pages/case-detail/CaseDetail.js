@@ -223,40 +223,38 @@ export default class CaseDetail extends React.Component {
   }
 }
 
-class MenuBar extends React.Component {
-  render() {
-    const {
-      onRevertClick,
-      onSaveClick,
-      revisions,
-      onRevisionSelect,
-      currentRevision
-    } = this.props;
-    return (
-      <div className="case-detail-menu">
-        <div className="left">
-          Revision:&ensp;
-          <RevisionSelector
-            revisions={revisions}
-            selected={currentRevision}
-            onSelect={onRevisionSelect}
-          />
-        </div>
-        <div className="right">
-          <Button bsStyle="warning" onClick={onRevertClick}>
-            <Glyphicon glyph="remove-circle" />
-            Revert
-          </Button>
-          &ensp;
-          <Button bsStyle="success" onClick={onSaveClick}>
-            <Glyphicon glyph="save" />
-            Save
-          </Button>
-        </div>
+const MenuBar = props => {
+  const {
+    onRevertClick,
+    onSaveClick,
+    revisions,
+    onRevisionSelect,
+    currentRevision
+  } = props;
+  return (
+    <div className="case-detail-menu">
+      <div className="left">
+        Revision:&ensp;
+        <RevisionSelector
+          revisions={revisions}
+          selected={currentRevision}
+          onSelect={onRevisionSelect}
+        />
       </div>
-    );
-  }
-}
+      <div className="right">
+        <Button bsStyle="warning" onClick={onRevertClick}>
+          <Glyphicon glyph="remove-circle" />
+          Revert
+        </Button>
+        &ensp;
+        <Button bsStyle="success" onClick={onSaveClick}>
+          <Glyphicon glyph="save" />
+          Save
+        </Button>
+      </div>
+    </div>
+  );
+};
 
 export class RevisionData extends React.Component {
   constructor(props) {
@@ -465,130 +463,124 @@ export class RevisionData extends React.Component {
   }
 }
 
-class ToolBar extends React.PureComponent {
-  render() {
-    const {
-      active,
-      changeTool,
-      showReferenceLine,
-      toggleReferenceLine,
-      brushEnabled,
-      lineWidth,
-      setLineWidth,
-      windowPresets = [],
-      selectWindowPreset
-    } = this.props;
+const ToolBar = props => {
+  const {
+    active,
+    changeTool,
+    showReferenceLine,
+    toggleReferenceLine,
+    brushEnabled,
+    lineWidth,
+    setLineWidth,
+    windowPresets = [],
+    selectWindowPreset
+  } = props;
 
-    const widthOptions = [1, 3, 5, 7];
+  const widthOptions = [1, 3, 5, 7];
 
+  return (
+    <div className="case-detail-toolbar">
+      <ToolButton name="pager" changeTool={changeTool} active={active} />
+      <ToolButton name="zoom" changeTool={changeTool} active={active} />
+      <ToolButton name="hand" changeTool={changeTool} active={active} />
+      <ToolButton name="window" changeTool={changeTool} active={active}>
+        {windowPresets.map((p, i) => (
+          <MenuItem
+            key={i + 1}
+            eventKey={i + 1}
+            onClick={() => selectWindowPreset(p)}
+          >
+            <b>{p.label}</b> {`(L: ${p.level} / W: ${p.width})`}
+          </MenuItem>
+        ))}
+      </ToolButton>
+      <ToolButton
+        name="brush"
+        changeTool={changeTool}
+        active={active}
+        disabled={!brushEnabled}
+      />
+      <ToolButton
+        name="eraser"
+        changeTool={changeTool}
+        active={active}
+        disabled={!brushEnabled}
+      />
+      <ShrinkSelect
+        options={widthOptions}
+        value={'' + lineWidth}
+        onChange={setLineWidth}
+      />
+      <ToolButton
+        name="bucket"
+        changeTool={changeTool}
+        active={active}
+        disabled={!brushEnabled}
+      />
+      &ensp;
+      <label>
+        <input
+          type="checkbox"
+          checked={showReferenceLine}
+          onChange={ev => toggleReferenceLine(ev.target.checked)}
+        />
+        Reference line
+      </label>
+    </div>
+  );
+};
+
+const ToolButton = props => {
+  const { name, active, changeTool, disabled, children } = props;
+  const style = active === name ? 'primary' : 'default';
+  const icon = <span className={'case-detail-tool-icon rs-icon-' + name} />;
+  const onClick = () => !disabled && changeTool(name);
+  if (children) {
     return (
-      <div className="case-detail-toolbar">
-        <ToolButton name="pager" changeTool={changeTool} active={active} />
-        <ToolButton name="zoom" changeTool={changeTool} active={active} />
-        <ToolButton name="hand" changeTool={changeTool} active={active} />
-        <ToolButton name="window" changeTool={changeTool} active={active}>
-          {windowPresets.map((p, i) => (
-            <MenuItem
-              key={i + 1}
-              eventKey={i + 1}
-              onClick={() => selectWindowPreset(p)}
-            >
-              <b>{p.label}</b> {`(L: ${p.level} / W: ${p.width})`}
-            </MenuItem>
-          ))}
-        </ToolButton>
-        <ToolButton
-          name="brush"
-          changeTool={changeTool}
-          active={active}
-          disabled={!brushEnabled}
-        />
-        <ToolButton
-          name="eraser"
-          changeTool={changeTool}
-          active={active}
-          disabled={!brushEnabled}
-        />
-        <ShrinkSelect
-          options={widthOptions}
-          value={'' + lineWidth}
-          onChange={setLineWidth}
-        />
-        <ToolButton
-          name="bucket"
-          changeTool={changeTool}
-          active={active}
-          disabled={!brushEnabled}
-        />
-        &ensp;
-        <label>
-          <input
-            type="checkbox"
-            checked={showReferenceLine}
-            onChange={ev => toggleReferenceLine(ev.target.checked)}
-          />
-          Reference line
-        </label>
-      </div>
+      <SplitButton
+        title={icon}
+        bsStyle={style}
+        onClick={onClick}
+        disabled={disabled}
+      >
+        {children}
+      </SplitButton>
+    );
+  } else {
+    return (
+      <Button bsStyle={style} onClick={onClick} disabled={disabled}>
+        {icon}
+      </Button>
     );
   }
-}
+};
 
-class ToolButton extends React.PureComponent {
-  render() {
-    const { name, active, changeTool, disabled, children } = this.props;
-    const style = active === name ? 'primary' : 'default';
-    const icon = <span className={'case-detail-tool-icon rs-icon-' + name} />;
-    const onClick = () => !disabled && changeTool(name);
-    if (children) {
-      return (
-        <SplitButton
-          title={icon}
-          bsStyle={style}
-          onClick={onClick}
-          disabled={disabled}
-        >
-          {children}
-        </SplitButton>
-      );
-    } else {
-      return (
-        <Button bsStyle={style} onClick={onClick} disabled={disabled}>
-          {icon}
-        </Button>
-      );
-    }
-  }
-}
+const ViewerCluster = props => {
+  const { composition, tool, stateChanger } = props;
 
-export class ViewerCluster extends React.PureComponent {
-  render() {
-    const { composition, tool, stateChanger } = this.props;
-
-    function makeViewer(orientation, initialTool, fixTool) {
-      return (
-        <ImageViewer
-          className={`viewer-${orientation}`}
-          orientation={orientation}
-          composition={composition}
-          tool={fixTool ? fixTool : tool}
-          initialTool={initialTool}
-          stateChanger={stateChanger}
-        />
-      );
-    }
-
+  function makeViewer(orientation, initialTool, fixTool) {
     return (
-      <div className="viewer-cluster">
-        <div className="viewer-row">
-          {makeViewer('axial')}
-          {makeViewer('sagittal')}
-        </div>
-        <div className="viewer-row">
-          {makeViewer('coronal')}
-          {makeViewer('axial', 'celestialRotate', 'celestialRotate')}
-        </div>
-      </div>
+      <ImageViewer
+        className={`viewer-${orientation}`}
+        orientation={orientation}
+        composition={composition}
+        tool={fixTool ? fixTool : tool}
+        initialTool={initialTool}
+        stateChanger={stateChanger}
+      />
     );
   }
-}
+
+  return (
+    <div className="viewer-cluster">
+      <div className="viewer-row">
+        {makeViewer('axial')}
+        {makeViewer('sagittal')}
+      </div>
+      <div className="viewer-row">
+        {makeViewer('coronal')}
+        {makeViewer('axial', 'celestialRotate', 'celestialRotate')}
+      </div>
+    </div>
+  );
+};

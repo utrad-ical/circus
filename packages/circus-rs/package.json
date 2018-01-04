@@ -6,6 +6,7 @@
     "devserver": "webpack-dev-server",
     "test": "mocha",
     "docs": "jekyll build --source=./docs --dest=./docs/_site && cp -r ./dist ./docs/_site",
+    "lint": "tslint src/{browser,common,server}/**/*.ts",
     "prettier": "prettier src/**/*.{ts,js,less} test/**/*.{ts,js} --write"
   },
   "repository": "https://github.com/utrad-ical/circus-rs",
@@ -66,7 +67,7 @@
     "supertest": "^3.0.0",
     "svg2ttf": "^4.1.0",
     "svgicons2svgfont": "^5.0.2",
-    "tslint": "^5.4.2",
+    "tslint": "^5.8.0",
     "ttf2woff": "^2.0.1",
     "typescript": "^2.6.1",
     "vinyl-buffer": "^1.0.0",

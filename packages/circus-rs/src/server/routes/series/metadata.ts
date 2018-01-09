@@ -6,7 +6,7 @@ import { ServerHelpers } from '../../ServerHelpers';
  * of the specified series.
  */
 export default function metadata(helpers: ServerHelpers): koa.Middleware {
-  return async function metadata(ctx, next) {
+  return async function metadata(ctx, next): Promise<void> {
     const vol = ctx.state.volume;
     const response: any = {
       voxelCount: vol.getDimension(),

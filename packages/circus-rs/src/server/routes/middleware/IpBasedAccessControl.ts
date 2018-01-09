@@ -9,7 +9,7 @@ export default function ipBasedAccessControl(
   helpers: ServerHelpers,
   allowPattern: string
 ): koa.Middleware {
-  return async function(ctx, next) {
+  return async function(ctx, next): Promise<void> {
     const req = ctx.request;
     const ip: string = req.ip;
     if (!ip.match(allowPattern)) {

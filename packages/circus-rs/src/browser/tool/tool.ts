@@ -47,7 +47,7 @@ export class Tool extends EventEmitter implements ViewerEventTarget {
     return val > 0 ? 1 : -1;
   }
 
-  public setOptions(options: any) {
+  public setOptions(options: any): void {
     this.options = { ...this.options, ...options };
   }
 

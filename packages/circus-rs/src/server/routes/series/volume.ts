@@ -11,7 +11,7 @@ import { ServerHelpers } from '../../ServerHelpers';
 export default function volume(helpers: ServerHelpers): koa.Middleware {
   return compose([
     compress(),
-    async function volume(ctx, next) {
+    async function volume(ctx, next): Promise<void> {
       const vol = ctx.state.volume as DicomVolume;
       ctx.body = Buffer.from(vol.data);
     }

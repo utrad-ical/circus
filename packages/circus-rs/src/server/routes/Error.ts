@@ -1,4 +1,4 @@
-function newError(status: number) {
+function newError(status: number): (string) => Error {
   return function(message: string): Error {
     const err = new Error(message);
     err.status = status;

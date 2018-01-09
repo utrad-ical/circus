@@ -14,7 +14,7 @@ export default function requestToken(helpers: ServerHelpers): koa.Middleware {
   const { authorizationCache } = helpers;
   const validator = validate({ series: ['Series UID', null, isUID, null] });
 
-  const main = async function requestToken(ctx, next) {
+  const main = async function requestToken(ctx, next): Promise<void> {
     const series: string = ctx.request.query.series;
 
     try {

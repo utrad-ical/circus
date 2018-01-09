@@ -10,7 +10,7 @@ export default function tokenAuthentication(
 ): koa.Middleware {
   const { logger, authorizationCache } = helpers;
 
-  return async function(ctx, next) {
+  return async function(ctx, next): Promise<void> {
     const { request: req, response: res } = ctx;
 
     function invalid(): void {

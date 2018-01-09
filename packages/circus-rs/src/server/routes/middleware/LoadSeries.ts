@@ -6,7 +6,7 @@ import DicomVolume from '../../../common/DicomVolume';
 
 export default function loadSeries(helpers: ServerHelpers): koa.Middleware {
   const { seriesReader, logger } = helpers;
-  return async function(ctx, next) {
+  return async function(ctx, next): Promise<void> {
     const req = ctx.request;
     const series = ctx.params.sid;
     if (!isUID(series)) {

@@ -32,7 +32,7 @@ export default class MockDicomDumper extends DicomDumper {
     const raw = new DicomVolume([width, height, depth], pixelFormat);
     raw.setVoxelSize([vx, vy, vz]);
     let val: number;
-    for (var z = 0; z < depth; z++) {
+    for (let z = 0; z < depth; z++) {
       for (let y = 0; y < height; y++) {
         for (let x = 0; x < width; x++) {
           if (pixelFormat === PixelFormat.Binary) {

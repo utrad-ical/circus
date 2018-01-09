@@ -3,7 +3,7 @@ import StatusError from '../Error';
 import { Validator, ValidatorRules } from '../../../common/Validator';
 
 export default function validate(rules: ValidatorRules): koa.Middleware {
-  return async function(ctx, next) {
+  return async function(ctx, next): Promise<void> {
     const origQuery = ctx.request.query;
     const validator = new Validator(rules);
     const { result, errors } = validator.validate(origQuery);

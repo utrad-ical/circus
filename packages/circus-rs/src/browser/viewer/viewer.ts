@@ -1,5 +1,4 @@
-const extend = require('extend');
-
+import * as extend from 'extend';
 import { EventEmitter } from 'events';
 import { Sprite } from './sprite';
 import { Composition } from '../composition';

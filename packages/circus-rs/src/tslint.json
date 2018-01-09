@@ -1,6 +1,6 @@
 {
   "rules": {
-    "align": [true, "arguments", "statements"],
+    "align": [true, "statements"],
     "ban": false,
     "class-name": true,
     "comment-format": [true, "check-space"],
@@ -27,7 +27,6 @@
     "no-switch-case-fall-through": true,
     "no-trailing-whitespace": true,
     "no-unused-expression": true,
-    // "no-use-before-declare": true,
     "no-var-keyword": true,
     "no-var-requires": true,
     "object-literal-sort-keys": false,

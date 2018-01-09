@@ -25,7 +25,7 @@ export default class DicomVolume extends AnisotropicRawData {
   protected header: { [key: string]: any } = {};
 
   public appendHeader(header: { [key: string]: any }): void {
-    for (var key in header) {
+    for (const key in header) {
       this.header[key] = header[key];
     }
   }

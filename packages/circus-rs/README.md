@@ -38,34 +38,43 @@ npm install -g mocha
 mocha
 ```
 
-Developper's start up guide
----------------------------
-1. Create your config file and save as `config/local.json5`
-  - This file is to overwrite content of `config/default.json`.
-  - Don't remove `config/default.json`. It functions as a default if not written on your custom config file.
-  - In many cases, you need to change `dicomFileRepository.options.dataDir`.
+Developer's start up guide
+--------------------------
 
-2. Check your node version.
-  - Required node < 5.3.0
+1. Create your config file and save it as `config/local.json5`
 
-3. Upgrade your node and anythings related.
+  - This file overwrites the content of `config/default.json`.
+  - Don't remove `config/default.json`. It functions as a default.
+  - The most important setting you have to change in most cases is `dicomFileRepository.options.dataDir`.
 
-4. Install webpack if not installing it.
-  - Sometimes use global option `-g`.
+2. Check your Node.js version. 8.9 or later is required.
 
-5. Prepare dicom images on your `dicomFileRepository.options.dataDir` direcoty.
+3. (optional) Install webpack globally if you want to just type `webpack` and build.
 
-6. Start webpack-dev-server
-  - `$ npm run devserver` or `$ npx webpack-dev-server --host 0.0.0.0` or somthing like that.
+   ```
+   $ npm install -g webpack
+   ```
 
-7. Start CIRCUS-RS server.
-  - `$ npm start`
+4. Prepare dicom images on your `dicomFileRepository.options.dataDir` direcoty.
 
-8. Access to http://webpack-dev-server:PORT/
-  - The `PORT` is your webpack-dev-server's port, not circus-rs server's.
-  - The default port is 8080.
+5. Start webpack-dev-server. To run with the default settings:
 
-9. Fill some fields and push the run-button on the page.
+   ```
+   $ npm run devserver
+   ```
+  
+   If you want to specify command-line options:
 
-10. Did you see your image ?
+   ```
+   $ npx webpack-dev-server --host 0.0.0.0
+   ```
 
+6. Start CIRCUS-RS server.
+
+   ```
+   $ npm start
+   ```
+
+7. Access to http://webpack-dev-server:PORT/. The `PORT` is the port used by webpack-dev-server, not that of CIRCUS RS server. By default, an available port will be searched from 8080.
+
+8. Fill the fields and push the run button on the page. See if the image has loaded correctly.

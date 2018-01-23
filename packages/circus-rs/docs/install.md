@@ -8,12 +8,12 @@ title: Install
 
 ### Server
 
-- Node.js (4.x or up)
+- Node.js (8.9 or up)
 - You will need a good amount of free RAM (several gegabytes) because CIRCUS RS Server needs to cache 3D volume data in memory.
 
 ### Client (Web Browser)
 
-- 64-bit versions of modern browsers which understand HTML5 canvas and Promise. These include the latest versiosn of Google Chrome, Mozilla Firefox and Microsoft Edge, but not vanilla Internet Explorer. (IE11 may work with suffient polyfills).
+- 64-bit versions of modern browsers which understand HTML5 canvas and Promise. These include the latest versios of Google Chrome, Mozilla Firefox and Microsoft Edge, but not vanilla Internet Explorer. (IE11 may work with suffient polyfills).
 - If you want to use `RawVolumeImageSource` or `HybridImageSource`, which holds 3D volume data in the RAM of client machines, you are recommend to use desktop machines with at least 8GB of RAM.
 
 ## Prerequisites
@@ -42,7 +42,7 @@ var Viewer = require('circus-rs/viewer/viewer').Viewer;
 
 ### Including Pre-built CIRCUS RS File
 
-Alternatively, you can just include pre-build CIRCUS RS Client in your HTML file.
+Alternatively, you can just include pre-built CIRCUS RS Client in your HTML file.
 
 ```html
 <!-- Loading pre-bundled CIRCUS RS script -->

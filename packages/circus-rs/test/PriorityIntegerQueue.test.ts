@@ -1,11 +1,10 @@
-var assert = require('chai').assert;
-var PriorityIntegerQueue = require('../src/common/PriorityIntegerQueue')
-  .default;
+import { assert } from 'chai';
+import PriorityIntegerQueue from '../src/common/PriorityIntegerQueue';
 
 describe('PriorityIntegerQueue', function() {
   function extract(queue) {
-    var result = [];
-    var i;
+    const result: number[] = [];
+    let i;
     while ((i = queue.pop()) !== undefined) {
       result.push(i);
     }

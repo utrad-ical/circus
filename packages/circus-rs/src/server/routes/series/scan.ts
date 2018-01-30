@@ -68,14 +68,14 @@ export default function scan(helpers: ServerHelpers): koa.Middleware {
     // Output
     if (format === 'png') {
       const out = await imageEncoder.write(
-        Buffer.from(buf.buffer),
+        Buffer.from(buf.buffer as ArrayBuffer),
         size[0],
         size[1]
       );
       ctx.body = out;
       ctx.type = imageEncoder.mimeType();
     } else {
-      ctx.body = Buffer.from(buf.buffer);
+      ctx.body = Buffer.from(buf.buffer as ArrayBuffer);
     }
   };
 

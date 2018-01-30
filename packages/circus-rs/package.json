@@ -21,7 +21,7 @@
     "@types/koa-json": "^2.0.17",
     "@types/koa-router": "^7.0.23",
     "@types/log4js": "0.0.32",
-    "@types/node": "^8.0.51",
+    "@types/node": "^8.5.9",
     "@types/validator": "^6.2.0",
     "css-loader": "^0.28.7",
     "dicom-parser": "^1.7.5",

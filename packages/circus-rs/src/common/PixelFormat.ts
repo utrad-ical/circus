@@ -14,7 +14,7 @@ export interface PixelFormatInfo {
   minWidth: number;
   maxWidth: number;
   // This works because other typed arrays have compatible interface
-  arrayClass: typeof Uint8Array;
+  arrayClass: any;
 }
 
 export function pixelFormatInfo(type: PixelFormat): PixelFormatInfo {

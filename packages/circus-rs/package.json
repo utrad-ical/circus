@@ -68,7 +68,8 @@
     "typescript": "^2.6.1",
     "url-loader": "^0.6.2",
     "webpack": "^3.10.0",
-    "webpack-dev-server": "^2.9.7"
+    "webpack-dev-server": "^2.9.7",
+    "webpack-glsl-loader": "^1.0.1"
   },
   "nodemonConfig": {
     "ext": "ts,js,json"

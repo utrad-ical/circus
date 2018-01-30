@@ -25,12 +25,16 @@ module.exports = {
         use: ['style-loader', 'css-loader', 'less-loader']
       },
       {
-        test: /\.css/,
+        test: /\.css$/,
         use: ['style-laoder', 'css-loader']
       },
       {
-        test: /\.woff/,
+        test: /\.woff$/,
         use: ['url-loader']
+      },
+      {
+        test: /\.frag|\.vert$/,
+        use: ['webpack-glsl-loader']
       }
     ]
   },

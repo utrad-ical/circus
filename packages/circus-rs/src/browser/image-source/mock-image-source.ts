@@ -31,7 +31,7 @@ export class MockImageSource extends VolumeImageSource {
     const pixelFormat = meta.pixelFormat as PixelFormat;
     const [wl, ww] = [meta.estimatedWindow.level, meta.estimatedWindow.width];
 
-    const raw = new DicomVolume(meta.voxelSize, pixelFormat);
+    const raw = new DicomVolume(meta.voxelCount, pixelFormat);
 
     const createValue = (x, y, z) => {
       const gridSize = 50;

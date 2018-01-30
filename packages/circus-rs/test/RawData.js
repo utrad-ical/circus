@@ -1,16 +1,16 @@
 'use strict';
 
-var rawdata = require('../src/common/RawData');
-var px = require('../src/common/PixelFormat');
-var RawData = rawdata.default;
-var PixelFormat = px.PixelFormat;
+const rawdata = require('../src/common/RawData');
+const px = require('../src/common/PixelFormat');
+const RawData = rawdata.default;
+const PixelFormat = px.PixelFormat;
 
-var assert = require('chai').assert;
+const assert = require('chai').assert;
 
 describe('RawData', function() {
   it('must create binary data', function() {
-    var raw = new RawData([8, 8, 8], PixelFormat.Binary);
-    var array = new Uint8Array(8); // 64 bits in a slice
+    const raw = new RawData([8, 8, 8], PixelFormat.Binary);
+    const array = new Uint8Array(8); // 64 bits in a slice
     array[0] = 0xaa; // 0b10101010
     raw.insertSingleImage(0, array.buffer);
     assert.equal(raw.getPixelAt(0, 0, 0), 1);
@@ -21,23 +21,23 @@ describe('RawData', function() {
 
   function readWriteTest(pixelFormat, w, h, d) {
     return function() {
-      var raw = new RawData([w, h, d], pixelFormat);
-      var pi = raw.getPixelFormatInfo(pixelFormat);
-      var lo = pi.minLevel;
-      var hi = pi.maxLevel;
-      for (var x = 0; x < w; x++) {
-        for (var y = 0; y < h; y++) {
-          for (var z = 0; z < d; z++) {
-            var value = (x + y + z) % (hi - lo + 1) + lo;
+      const raw = new RawData([w, h, d], pixelFormat);
+      const pi = raw.getPixelFormatInfo(pixelFormat);
+      const lo = pi.minLevel;
+      const hi = pi.maxLevel;
+      for (let x = 0; x < w; x++) {
+        for (let y = 0; y < h; y++) {
+          for (let z = 0; z < d; z++) {
+            const value = (x + y + z) % (hi - lo + 1) + lo;
             raw.writePixelAt(value, x, y, z);
           }
         }
       }
-      for (var x = 0; x < w; x++) {
-        for (var y = 0; y < h; y++) {
-          for (var z = 0; z < d; z++) {
-            var value = (x + y + z) % (hi - lo + 1) + lo;
-            var px = raw.getPixelAt(x, y, z);
+      for (let x = 0; x < w; x++) {
+        for (let y = 0; y < h; y++) {
+          for (let z = 0; z < d; z++) {
+            const value = (x + y + z) % (hi - lo + 1) + lo;
+            const px = raw.getPixelAt(x, y, z);
             assert.equal(px, value);
           }
         }
@@ -71,7 +71,7 @@ describe('RawData', function() {
   );
 
   it('must perform pixel format converting', function() {
-    var raw = new RawData([4, 4, 4], PixelFormat.Int16);
+    const raw = new RawData([4, 4, 4], PixelFormat.Int16);
     raw.convert(PixelFormat.Int8, function(v) {
       return v + 5;
     });
@@ -80,9 +80,9 @@ describe('RawData', function() {
   });
 
   it('must copy data from another instance', function() {
-    var src = new RawData([16, 16, 16], PixelFormat.Int8);
+    const src = new RawData([16, 16, 16], PixelFormat.Int8);
     src.fillAll((x, y, z) => x + y + z);
-    var dest = new RawData([16, 16, 16], PixelFormat.Int8);
+    const dest = new RawData([16, 16, 16], PixelFormat.Int8);
     dest.copy(src);
     assert.equal(dest.getPixelAt(3, 10, 7), 20);
 
@@ -109,41 +109,49 @@ describe('RawData', function() {
 
   it('must transform bounding box', function() {
     function newVol() {
-      var vol = new RawData([16, 16, 16], PixelFormat.Int8);
+      const vol = new RawData([16, 16, 16], PixelFormat.Int8);
       vol.fillAll((x, y, z) => x + y + z);
       return vol;
     }
 
     // shrink to origin
-    var vol = newVol();
-    vol.transformBoundingBox({ origin: [0, 0, 0], size: [8, 8, 8] });
-    assert.deepEqual(vol.getDimension(), [8, 8, 8]);
-    assert.equal(vol.getPixelAt(5, 7, 3), 15);
+    {
+      const vol = newVol();
+      vol.transformBoundingBox({ origin: [0, 0, 0], size: [8, 8, 8] });
+      assert.deepEqual(vol.getDimension(), [8, 8, 8]);
+      assert.equal(vol.getPixelAt(5, 7, 3), 15);
+    }
 
     // shrink to bottom-right
-    vol = newVol();
-    vol.transformBoundingBox({ origin: [8, 8, 8], size: [8, 8, 8] });
-    assert.deepEqual(vol.getDimension(), [8, 8, 8]);
-    assert.equal(vol.getPixelAt(0, 0, 0), 24);
-    assert.equal(vol.getPixelAt(7, 7, 7), 45);
+    {
+      const vol = newVol();
+      vol.transformBoundingBox({ origin: [8, 8, 8], size: [8, 8, 8] });
+      assert.deepEqual(vol.getDimension(), [8, 8, 8]);
+      assert.equal(vol.getPixelAt(0, 0, 0), 24);
+      assert.equal(vol.getPixelAt(7, 7, 7), 45);
+    }
 
     // expand from origin
-    var vol = newVol();
-    vol.transformBoundingBox({ origin: [0, 0, 0], size: [24, 24, 24] });
-    assert.deepEqual(vol.getDimension(), [24, 24, 24]);
-    assert.equal(vol.getPixelAt(5, 7, 3), 15);
-    assert.equal(vol.getPixelAt(15, 15, 15), 45);
-    assert.equal(vol.getPixelAt(20, 20, 20), 0);
+    {
+      const vol = newVol();
+      vol.transformBoundingBox({ origin: [0, 0, 0], size: [24, 24, 24] });
+      assert.deepEqual(vol.getDimension(), [24, 24, 24]);
+      assert.equal(vol.getPixelAt(5, 7, 3), 15);
+      assert.equal(vol.getPixelAt(15, 15, 15), 45);
+      assert.equal(vol.getPixelAt(20, 20, 20), 0);
+    }
 
     // expand to top-left
-    var vol = newVol();
-    vol.transformBoundingBox({ origin: [0, 0, 0], size: [32, 32, 32] }, [
-      16,
-      16,
-      16
-    ]);
-    assert.deepEqual(vol.getDimension(), [32, 32, 32]);
-    assert.equal(vol.getPixelAt(15, 15, 15), 0);
-    assert.equal(vol.getPixelAt(16 + 1, 16 + 3, 16 + 5), 9);
+    {
+      const vol = newVol();
+      vol.transformBoundingBox({ origin: [0, 0, 0], size: [32, 32, 32] }, [
+        16,
+        16,
+        16
+      ]);
+      assert.deepEqual(vol.getDimension(), [32, 32, 32]);
+      assert.equal(vol.getPixelAt(15, 15, 15), 0);
+      assert.equal(vol.getPixelAt(16 + 1, 16 + 3, 16 + 5), 9);
+    }
   });
 });

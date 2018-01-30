@@ -1,56 +1,56 @@
 'use strict';
 
-var extractor = require('../src/server/dicom-dumpers/DicomPixelExtractor');
-var fs = require('fs');
-var zlib = require('zlib');
-var assert = require('chai').assert;
-var px = require('../src/common/PixelFormat');
+const extractor = require('../src/server/dicom-dumpers/DicomPixelExtractor');
+const fs = require('fs');
+const zlib = require('zlib');
+const assert = require('chai').assert;
+const px = require('../src/common/PixelFormat');
 
-var ImageEncoder = require('../src/server/image-encoders/PngJsImageEncoder')
+const ImageEncoder = require('../src/server/image-encoders/PngJsImageEncoder')
   .default;
 
-var testdir = __dirname + '/test-dicom/';
+const testdir = __dirname + '/test-dicom/';
 
 describe('DicomPixelExtractor', function() {
   function test(done, file, content, checks) {
-    var ex = new extractor.DicomPixelExtractor();
-    var data = ex.extract(new Uint8Array(content.buffer));
-    for (var key in checks) {
+    const ex = new extractor.DicomPixelExtractor();
+    const data = ex.extract(new Uint8Array(content.buffer));
+    for (const key in checks) {
       assert.deepEqual(checks[key], data[key]);
     }
-    var pxInfo = px.pixelFormatInfo(data.pixelFormat);
+    const pxInfo = px.pixelFormatInfo(data.pixelFormat);
     assert.equal(
       data.columns * data.rows * pxInfo.bpp,
       data.pixelData.byteLength
     );
-    var readArray = new pxInfo.arrayClass(data.pixelData);
+    const readArray = new pxInfo.arrayClass(data.pixelData);
 
-    var doRescale = data.rescale && typeof data.rescale.intercept === 'number';
+    const doRescale = data.rescale && typeof data.rescale.intercept === 'number';
     typeof data.rescale.slope === 'number';
 
     // write PNG image
-    var encoder = new ImageEncoder();
-    var arr = new Uint8ClampedArray(data.columns * data.rows);
-    var useWindow = data.window
+    const encoder = new ImageEncoder();
+    const arr = new Uint8ClampedArray(data.columns * data.rows);
+    const useWindow = data.window
       ? data.window
       : {
           level: (data.maxValue + data.maxValue) / 2,
           width: data.maxValue - data.minValue
         };
-    var ww = useWindow.width;
-    var wl = useWindow.level;
-    for (var x = 0; x < data.columns; x++) {
-      for (var y = 0; y < data.rows; y++) {
-        var pixel = readArray[x + y * data.columns];
+    const ww = useWindow.width;
+    const wl = useWindow.level;
+    for (let x = 0; x < data.columns; x++) {
+      for (let y = 0; y < data.rows; y++) {
+        let pixel = readArray[x + y * data.columns];
         if (doRescale) {
           pixel = pixel * data.rescale.slope + data.rescale.intercept;
         }
-        var o = Math.round((pixel - wl + ww / 2) * (255 / ww));
+        const o = Math.round((pixel - wl + ww / 2) * (255 / ww));
         arr[x + y * data.columns] = o;
       }
     }
     encoder.write(new Buffer(arr), data.columns, data.rows).then(out => {
-      var stream = fs.createWriteStream(testdir + file + '.png');
+      const stream = fs.createWriteStream(testdir + file + '.png');
       out.pipe(stream);
       stream.on('close', done);
     });
@@ -60,13 +60,13 @@ describe('DicomPixelExtractor', function() {
     it('must parse ' + file, function(done) {
       // Test file can be either a raw DICOM file or a gzipped one
       try {
-        var zippedFileContent = fs.readFileSync(testdir + file + '.gz');
+        const zippedFileContent = fs.readFileSync(testdir + file + '.gz');
         zlib.unzip(zippedFileContent, function(err, fileContent) {
           if (err) throw err;
           test(done, file, fileContent, checks);
         });
       } catch (err) {
-        var fileContent = fs.readFileSync(testdir + file);
+        const fileContent = fs.readFileSync(testdir + file);
         test(done, file, fileContent, checks);
       }
     });

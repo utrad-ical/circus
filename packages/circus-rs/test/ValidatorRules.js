@@ -1,7 +1,7 @@
 'use strict';
 
-var v = require('../src/common/ValidatorRules');
-var assert = require('chai').assert;
+const v = require('../src/common/ValidatorRules');
+const assert = require('chai').assert;
 
 describe('ValidatorRules', function() {
   it('#isUID', function() {
@@ -12,13 +12,13 @@ describe('ValidatorRules', function() {
     assert.isFalse(v.isUID('.1.2'));
     assert.isFalse(v.isUID('1.5.'));
     assert.isFalse(v.isUID('1111.222.333..4.5.6'));
-    var uid64 = '1.'.repeat(31) + '2';
+    const uid64 = '1.'.repeat(31) + '2';
     assert.isTrue(v.isUID(uid64));
     assert.isFalse(v.isUID(uid64 + '.3333'));
   });
 
   it('#isTuple', function() {
-    var t3 = v.isTuple(3);
+    const t3 = v.isTuple(3);
     assert.isTrue(t3('1,2,3'));
     assert.isTrue(t3('1.1,2.5,-3.8'));
     assert.isFalse(t3('1,2'));
@@ -28,7 +28,7 @@ describe('ValidatorRules', function() {
   });
 
   it('#parseTuple', function() {
-    var p3 = v.parseTuple(3, true);
+    let p3 = v.parseTuple(3, true);
     assert.deepEqual(p3('1,3,5'), [1, 3, 5]);
     assert.deepEqual(p3('1,-3,5.7'), [1, -3, 5]);
     p3 = v.parseTuple(3, false);
@@ -37,7 +37,7 @@ describe('ValidatorRules', function() {
   });
 
   it('#parseBoolean', function() {
-    var b = v.parseBoolean;
+    const b = v.parseBoolean;
     assert.isTrue(b('yes'));
     assert.isTrue(b('1'));
     assert.isTrue(b('true'));

@@ -1,9 +1,9 @@
-var Counter = require('../src/server/Counter').default;
-var assert = require('chai').assert;
+const Counter = require('../src/server/Counter').default;
+const assert = require('chai').assert;
 
 describe('Counter', function() {
   it('must count up', function() {
-    var counter = new Counter();
+    const counter = new Counter();
     assert.strictEqual(counter.getCount('foo'), 0);
     assert.strictEqual(counter.getCount('bar'), 0);
     counter.countUp('foo');
@@ -12,7 +12,7 @@ describe('Counter', function() {
   });
 
   it('must return set of counters', function() {
-    var counter = new Counter();
+    const counter = new Counter();
     counter.countUp('foo');
     counter.countUp('bar');
     counter.countUp('bar');

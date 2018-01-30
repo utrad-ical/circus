@@ -1,7 +1,7 @@
 'use strict';
 
-var assert = require('chai').assert;
-var AsyncLruCache = require('../src/common/AsyncLruCache').default;
+const assert = require('chai').assert;
+const AsyncLruCache = require('../src/common/AsyncLruCache').default;
 
 describe('AsyncLruCache', function() {
   function check(done, fn) {
@@ -14,14 +14,14 @@ describe('AsyncLruCache', function() {
   }
 
   function doubler(key) {
-    return new Promise(function(resolve, reject) {
+    return new Promise(function(resolve) {
       setTimeout(function() {
         resolve(key + key.toUpperCase());
       }, 30);
     });
   }
 
-  function failer(key) {
+  function failer() {
     return new Promise(function(resolve, reject) {
       setTimeout(function() {
         reject(new Error('It did not work'));
@@ -37,14 +37,14 @@ describe('AsyncLruCache', function() {
   }
 
   it('must return valid length', function() {
-    var cache = new AsyncLruCache(doubler);
+    const cache = new AsyncLruCache(doubler);
     assert.property(cache, 'length');
     assert.equal(cache.length, 0);
   });
 
   describe('#get', function() {
     it('must return one item using Promise', function(done) {
-      var cache = new AsyncLruCache(doubler);
+      const cache = new AsyncLruCache(doubler);
       cache.get('foo').then(function(result) {
         check(done, function() {
           assert.equal(result, 'fooFOO');
@@ -54,10 +54,9 @@ describe('AsyncLruCache', function() {
     });
 
     it('must immediately return value if already loaded', function(done) {
-      var cache = new AsyncLruCache(doubler);
-      var time0 = new Date().getTime(),
-        time1,
-        time2;
+      const cache = new AsyncLruCache(doubler);
+      const time0 = new Date().getTime();
+      let time1, time2;
       cache
         .get('foo')
         .then(function(foo) {
@@ -80,9 +79,9 @@ describe('AsyncLruCache', function() {
     });
 
     it('must return multiple items with pending', function(done) {
-      var cache = new AsyncLruCache(doubler);
-      var promises = [];
-      for (var i = 0; i < 10; i++) {
+      const cache = new AsyncLruCache(doubler);
+      const promises = [];
+      for (let i = 0; i < 10; i++) {
         promises.push(cache.get(i % 2 ? 'foo' : 'bar'));
       }
       Promise.all(promises).then(function(results) {
@@ -96,20 +95,20 @@ describe('AsyncLruCache', function() {
     });
 
     it('must reject if loading fails', function(done) {
-      var cache = new AsyncLruCache(failer);
+      const cache = new AsyncLruCache(failer);
       cache.get('foo').then(
-        function(result) {
+        function() {
           done(new Error('Unexpectedly resolved'));
         },
-        function(err) {
+        function() {
           done();
         }
       );
     });
 
     it('must bring the most recently used item to the last', function(done) {
-      var cache = new AsyncLruCache(doubler);
-      var foo;
+      const cache = new AsyncLruCache(doubler);
+      let foo;
       cache
         .get('foo')
         .then(function(result) {
@@ -128,7 +127,7 @@ describe('AsyncLruCache', function() {
     });
 
     it('must handle context', function(done) {
-      var cache = new AsyncLruCache(function(key, ctx) {
+      const cache = new AsyncLruCache(function(key, ctx) {
         return Promise.resolve(key + key.toUpperCase() + ctx);
       });
       Promise.all([cache.get('foo', 'a'), cache.get('bar', 'b')]).then(function(
@@ -144,8 +143,8 @@ describe('AsyncLruCache', function() {
 
   describe('#indexOf', function() {
     it('must return index of item', function(done) {
-      var cache = new AsyncLruCache(doubler);
-      cache.get('foo').then(function(result) {
+      const cache = new AsyncLruCache(doubler);
+      cache.get('foo').then(function() {
         check(done, function() {
           assert.equal(cache.indexOf('foo'), 0);
           assert.equal(cache.indexOf('bar'), -1);
@@ -156,15 +155,15 @@ describe('AsyncLruCache', function() {
 
   describe('#totalSize', function() {
     it('must calculate total size', function(done) {
-      var opts = {
+      const opts = {
         sizeFunc: function(i) {
           return i.length;
         }
       };
-      var cache = new AsyncLruCache(bufferLoader, opts);
+      const cache = new AsyncLruCache(bufferLoader, opts);
       cache
         .get('item10000')
-        .then(function(item) {
+        .then(function() {
           try {
             assert.equal(cache.getTotalSize(), 10000);
           } catch (e) {
@@ -172,7 +171,7 @@ describe('AsyncLruCache', function() {
           }
           return cache.get('item20000');
         })
-        .then(function(item) {
+        .then(function() {
           check(done, function() {
             assert.equal(cache.getTotalSize(), 30000);
             cache.remove('item10000');
@@ -184,7 +183,7 @@ describe('AsyncLruCache', function() {
 
   describe('#remove', function() {
     it('must remove loaded item', function(done) {
-      var cache = new AsyncLruCache(doubler);
+      const cache = new AsyncLruCache(doubler);
       cache.get('item').then(function() {
         check(done, function() {
           assert.equal(cache.length, 1);
@@ -196,12 +195,12 @@ describe('AsyncLruCache', function() {
     });
 
     it('must reject removed pending items', function(done) {
-      var cache = new AsyncLruCache(doubler);
+      const cache = new AsyncLruCache(doubler);
       cache.get('foo').then(
         function() {
           done(new Error('Unexpectedly resolved'));
         },
-        function(err) {
+        function() {
           done();
         }
       );
@@ -210,7 +209,7 @@ describe('AsyncLruCache', function() {
   });
 
   describe('limits', function() {
-    var cache;
+    let cache;
     beforeEach(function() {
       cache = new AsyncLruCache(bufferLoader, {
         maxCount: 10,
@@ -223,8 +222,8 @@ describe('AsyncLruCache', function() {
     });
 
     it('must not contain items above count limit', function(done) {
-      var promises = [];
-      for (var i = 1; i <= 20; i++) {
+      const promises = [];
+      for (let i = 1; i <= 20; i++) {
         promises.push(cache.get('item' + i));
       }
       Promise.all(promises).then(function() {
@@ -237,8 +236,8 @@ describe('AsyncLruCache', function() {
     });
 
     it('must not contain items above size limit', function(done) {
-      var promises = [];
-      for (var i = 0; i <= 5; i++) {
+      const promises = [];
+      for (let i = 0; i <= 5; i++) {
         promises.push(cache.get('item' + i * 100));
       }
       Promise.all(promises).then(function() {

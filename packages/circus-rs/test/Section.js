@@ -1,8 +1,8 @@
 'use strict';
 
-var su = require('../src/browser/section-util');
-var geo = require('../src/common/geometry');
-var assert = require('chai').assert;
+const su = require('../src/browser/section-util');
+const geo = require('../src/common/geometry');
+const assert = require('chai').assert;
 
 describe('Section', function() {
   it('#parallelToX', function() {
@@ -64,8 +64,8 @@ describe('Section', function() {
     }
 
     it('#transform', function() {
-      var s = section();
-      var t = geo.translateSection(s, [10, 11, 12]);
+      const s = section();
+      const t = geo.translateSection(s, [10, 11, 12]);
       assert.deepEqual(t.origin, [11, 14, 17]);
     });
   });

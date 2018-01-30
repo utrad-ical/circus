@@ -1,15 +1,15 @@
 'use strict';
 
-var Log4JsLogger = require('../src/server/loggers/Log4JsLogger').default;
-var assert = require('chai').assert;
-var path = require('path');
-var fs = require('fs');
+const Log4JsLogger = require('../src/server/loggers/Log4JsLogger').default;
+const assert = require('chai').assert;
+const path = require('path');
+const fs = require('fs');
 
 describe('Log4JsLogger', function() {
-  var file = path.resolve(__dirname, 'test-log.log');
+  const file = path.resolve(__dirname, 'test-log.log');
 
   it('should write log file', function(done) {
-    var logger = new Log4JsLogger({
+    const logger = new Log4JsLogger({
       appenders: [
         {
           type: 'file',
@@ -34,10 +34,10 @@ describe('Log4JsLogger', function() {
   });
 
   beforeEach(function(done) {
-    fs.unlink(file, err => done());
+    fs.unlink(file, () => done());
   });
 
   afterEach(function(done) {
-    fs.unlink(file, err => done());
+    fs.unlink(file, () => done());
   });
 });

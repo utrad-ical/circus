@@ -1,16 +1,16 @@
 'use strict';
 
-var createServer = require('../src/server/Server').default;
-var supertest = require('supertest');
+const createServer = require('../src/server/Server').default;
+const supertest = require('supertest');
 
-var NullLogger = require('../src/server/loggers/NullLogger').default;
-var PngJsImageEncoder = require('../src/server/image-encoders/PngJsImageEncoder')
+const NullLogger = require('../src/server/loggers/NullLogger').default;
+const PngJsImageEncoder = require('../src/server/image-encoders/PngJsImageEncoder')
   .default;
-var MockDicomFileRepository = require('../src/server/dicom-file-repository/MockDicomFileRepository')
+const MockDicomFileRepository = require('../src/server/dicom-file-repository/MockDicomFileRepository')
   .default;
-var MockDicomDumper = require('../src/server/dicom-dumpers/MockDicomDumper')
+const MockDicomDumper = require('../src/server/dicom-dumpers/MockDicomDumper')
   .default;
-var createDicomReader = require('../src/server/createDicomReader').default;
+const createDicomReader = require('../src/server/createDicomReader').default;
 
 describe('Server', function() {
   runServerTests('without authentication', false);
@@ -18,9 +18,9 @@ describe('Server', function() {
 
   function runServerTests(contextText, useAuth) {
     context(contextText, function() {
-      var app;
-      var httpServer;
-      var token;
+      let app;
+      let httpServer;
+      let token;
 
       beforeEach(function(done) {
         const seriesReader = createDicomReader(
@@ -109,7 +109,7 @@ describe('Server', function() {
       }
 
       it('must return metadata', function(done) {
-        var test = supertest(httpServer).get('/series/1.2.3.4.5/metadata');
+        const test = supertest(httpServer).get('/series/1.2.3.4.5/metadata');
         if (token) test.set('Authorization', 'Bearer ' + token);
         test
           .expect(200)
@@ -118,7 +118,7 @@ describe('Server', function() {
       });
 
       it('must return volume', function(done) {
-        var test = supertest(httpServer).get('/series/1.2.3.4.5/volume');
+        const test = supertest(httpServer).get('/series/1.2.3.4.5/volume');
         if (token) test.set('Authorization', 'Bearer ' + token);
         test
           .expect(200)
@@ -127,7 +127,7 @@ describe('Server', function() {
       });
 
       it('must return oblique image in binary format', function(done) {
-        var test = supertest(httpServer).get('/series/1.2.3.4.5/scan');
+        const test = supertest(httpServer).get('/series/1.2.3.4.5/scan');
         if (token) test.set('Authorization', 'Bearer ' + token);
         test
           .query({
@@ -142,7 +142,7 @@ describe('Server', function() {
       });
 
       it('must return oblique image in PNG format', function(done) {
-        var test = supertest(httpServer).get('/series/1.2.3.4.5/scan');
+        const test = supertest(httpServer).get('/series/1.2.3.4.5/scan');
         if (token) test.set('Authorization', 'Bearer ' + token);
         test
           .query({

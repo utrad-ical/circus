@@ -1,30 +1,30 @@
 'use strict';
 
-var assert = require('chai').assert;
-var ff = require('../src/browser/util/flood-fill');
+const assert = require('chai').assert;
+const ff = require('../src/browser/util/flood-fill');
 
 describe('floodFill', function() {
   function t(pattern, start, expectedPattern, expectedFillCount) {
-    var rows = pattern.replace(/\n$/, '').split(/\n/);
-    var width = Math.max.apply(Math, rows.map(r => r.length));
-    var arr = new ff.BinaryArray2D(width, rows.length);
-    for (var y = 0; y < rows.length; y++) {
-      for (var x = 0; x < width; x++) {
+    const rows = pattern.replace(/\n$/, '').split(/\n/);
+    const width = Math.max.apply(Math, rows.map(r => r.length));
+    const arr = new ff.BinaryArray2D(width, rows.length);
+    for (let y = 0; y < rows.length; y++) {
+      for (let x = 0; x < width; x++) {
         if (rows[y][x] === '*') arr.set(true, [x, y]);
       }
     }
-    var filled = ff.floodFill(arr, start);
+    const filled = ff.floodFill(arr, start);
     assert.equal(arr.toString(), expectedPattern);
     assert.equal(filled, expectedFillCount);
   }
 
   it('must flood-fill a closed area correctly', function() {
-    var pat = '*****\n' + '*   *\n'.repeat(3) + '*****';
+    const pat = '*****\n' + '*   *\n'.repeat(3) + '*****';
     t(pat, [3, 3], '*****\n'.repeat(5), 9);
   });
 
   it('must flood-fill a complexed cloed area', function() {
-    var pat =
+    const pat =
       '*******\n' +
       '*     *\n' +
       '* *** *\n' +
@@ -39,7 +39,7 @@ describe('floodFill', function() {
   });
 
   it('must flood-fill a ring-like closed area', function() {
-    var pat =
+    const pat =
       '********\n' +
       '*      *\n' +
       '* **** *\n' +
@@ -47,7 +47,7 @@ describe('floodFill', function() {
       '* **** *\n' +
       '*      *\n' +
       '********\n';
-    var outFilled =
+    const outFilled =
       '********\n' +
       '********\n' +
       '********\n' +
@@ -55,7 +55,7 @@ describe('floodFill', function() {
       '********\n' +
       '********\n' +
       '********\n';
-    var inFilled =
+    const inFilled =
       '********\n' +
       '*      *\n' +
       '* **** *\n' +
@@ -70,7 +70,7 @@ describe('floodFill', function() {
   });
 
   it('must flood-fill an empty area', function() {
-    var blank = '     \n'.repeat(5);
+    const blank = '     \n'.repeat(5);
     t(blank, [3, 3], '*****\n'.repeat(5), 25);
   });
 });

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Fragment } from 'react';
 import ProjectSelector from 'components/ProjectSelector';
 import { connect } from 'react-redux';
 import IconButton from 'rb/IconButton';
@@ -7,6 +7,9 @@ import { Panel } from 'components/react-bootstrap';
 import DataGrid from 'components/DataGrid';
 import { api } from 'utils/api';
 import { browserHistory } from 'react-router';
+import { alert, prompt } from 'rb/modal';
+import MultiRange from 'multi-integer-range';
+import classnames from 'classnames';
 
 class CreateNewCaseView extends React.Component {
   constructor(props) {
@@ -15,10 +18,74 @@ class CreateNewCaseView extends React.Component {
     if (writableProjects.length) {
       this.state = {
         selectedProject: writableProjects[0].projectId,
-        selectedSeries: [props.params.uid],
+        selectedSeries: [],
         selectedTags: []
       };
     }
+  }
+
+  ImagesRenderer = props => {
+    const { value } = props;
+
+    // uploaded images
+    const imageRange = new MultiRange(value.images);
+
+    const handleEditClick = async () => {
+      const ans = await prompt(
+        <span>
+          Specify a <strong>continuous</strong> image range within{' '}
+          <b>{value.images}</b>.
+        </span>,
+        value.range
+      );
+      if (!ans) return;
+      try {
+        new MultiRange(ans);
+      } catch (e) {
+        await alert('Syntax error.');
+        return;
+      }
+      const mr = new MultiRange(ans);
+      if (mr.segmentLength() !== 1) {
+        await alert('Please specify a continuous range.');
+        return;
+      }
+      if (!imageRange.has(mr)) {
+        await alert(
+          'Specified range is not included in the original image range.'
+        );
+        return;
+      }
+      const selectedSeries = [...this.state.selectedSeries];
+      selectedSeries[value.volumeId] = {
+        ...selectedSeries[value.volumeId],
+        range: mr.toString()
+      };
+      this.setState({ selectedSeries });
+    };
+
+    const classes = classnames({
+      'text-danger': !imageRange.equals(value.range)
+    });
+
+    return (
+      <Fragment>
+        <span className={classes}>{value.range}</span>{' '}
+        <IconButton
+          onClick={handleEditClick}
+          bsStyle="default"
+          bsSize="xs"
+          icon="edit"
+        />
+      </Fragment>
+    );
+  };
+
+  async componentDidMount() {
+    const series = await api('series/' + this.props.params.uid);
+    this.setState({
+      selectedSeries: [{ ...series, range: series.images }]
+    });
   }
 
   writableProjects(props) {
@@ -44,17 +111,21 @@ class CreateNewCaseView extends React.Component {
   };
 
   handleCreate = async () => {
+    // TODO: Check if a similar case exists
+
     const res = await api('cases', {
       method: 'post',
       data: {
         projectId: this.state.selectedProject,
-        series: this.state.selectedSeries,
+        series: this.state.selectedSeries.map(s => ({
+          seriesUid: s.seriesUid,
+          range: s.range
+        })),
         tags: this.state.selectedTags
       }
     });
     if (res.caseId) {
-      const newCaseId = res.caseId;
-      browserHistory.push(`/case/${newCaseId}`);
+      browserHistory.push(`/case/${res.caseId}`);
     }
   };
 
@@ -76,13 +147,14 @@ class CreateNewCaseView extends React.Component {
     const tags = prj.project.tags;
     const columns = [
       { key: 'volumeId', caption: '#' },
+      { key: 'modality', caption: 'Modality' },
       { key: 'seriesUid', caption: 'Series' },
-      { key: 'range', caption: 'Range' }
+      { key: 'seriesDescription', caption: 'Series desc' },
+      { key: 'images', caption: 'Range', renderer: this.ImagesRenderer }
     ];
     const seriesData = this.state.selectedSeries.map((s, i) => ({
       volumeId: i,
-      seriesUid: s,
-      range: '-'
+      ...s
     }));
 
     return (

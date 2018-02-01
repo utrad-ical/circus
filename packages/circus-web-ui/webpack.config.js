@@ -58,7 +58,7 @@ module.exports = {
   ],
   devServer: {
     contentBase: path.join(__dirname, 'public'),
-    historyApiFallback: true,
+    historyApiFallback: { disableDotRule: true },
     proxy: {
       '/api': 'http://localhost:8080',
       '/login': 'http://localhost:8080',

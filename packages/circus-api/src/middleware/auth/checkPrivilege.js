@@ -28,6 +28,8 @@ export default function checkPrivilege({ models }, route) {
 
     if (requiredProjectPrivilege) {
       let projectId;
+
+      // Check project privilege either via caseId or directly via projectId
       if (ctx.params.caseId) {
         const caseId = ctx.params.caseId;
         ctx.case = await models.clinicalCase.findById(caseId);
@@ -35,7 +37,10 @@ export default function checkPrivilege({ models }, route) {
       } else if (ctx.params.projectId) {
         projectId = ctx.params.projectId;
       } else {
-        ctx.throw(status.INTERNAL_SERVER_ERROR, 'pinya');
+        ctx.throw(
+          status.BAD_REQUEST,
+          'No project or case specified to check project privilege.'
+        );
       }
       ctx.project = await models.project.findById(projectId);
 

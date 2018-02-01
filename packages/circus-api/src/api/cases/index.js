@@ -2,6 +2,7 @@ import status from 'http-status';
 import performSearch from '../performSearch';
 import { generateCaseId } from '../../utils';
 import * as EJSON from 'mongodb-extended-json';
+import MultiRange from 'multi-integer-range';
 
 const maskPatientInfo = ctx => {
   return caseData => {
@@ -56,12 +57,18 @@ async function makeNewCase(
     throw new Error('You do not have write privilege for this project.');
   }
 
-  // Check domain.
-  for (const suid of series) {
-    const item = await models.series.findById(suid);
+  // Check domain and image range for each series.
+  for (const seriesEntry of series) {
+    const seriesUid = seriesEntry.seriesUid;
+    const item = await models.series.findById(seriesUid);
     if (!item) {
       throw new Error('Nonexistent series.');
     }
+    if (!new MultiRange(item.images).has(seriesEntry.range)) {
+      throw new Error('Specified range is invalid.');
+    }
+
+    item.range = seriesEntry.range;
     seriesData.push(item);
     if (userPrivileges.domains.indexOf(item.domain) < 0) {
       throw new Error('You cannot access this series.');
@@ -80,7 +87,7 @@ async function makeNewCase(
     status: 'draft',
     series: seriesData.map(s => ({
       seriesUid: s.seriesUid,
-      images: s.images,
+      images: s.range,
       labels: []
     }))
   };

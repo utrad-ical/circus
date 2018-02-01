@@ -9,6 +9,7 @@ routes:
     responseSchema: clinicalCase|searchResult
   - verb: post
     path: /cases
+    # TODO: Security: Determine how to detect target project
     # requiredProjectPrivilege: write
     description: Creates a new case.
   - verb: get

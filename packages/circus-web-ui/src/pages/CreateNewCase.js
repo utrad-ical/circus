@@ -7,9 +7,46 @@ import { Panel } from 'components/react-bootstrap';
 import DataGrid from 'components/DataGrid';
 import { api } from 'utils/api';
 import { browserHistory } from 'react-router';
-import { alert, prompt } from 'rb/modal';
+import { prompt } from 'rb/modal';
 import MultiRange from 'multi-integer-range';
 import classnames from 'classnames';
+import SearchResultsView from 'components/SearchResultsView';
+import { startNewSearch } from 'actions';
+
+const RelevantSeriesDataView = props => {
+  const { onSeriesRegister } = props;
+  const columns = [
+    { key: 'seriesUid', caption: 'Series UID' },
+    {
+      key: 'action',
+      caption: '',
+      renderer: ({ value }) => (
+        <IconButton
+          icon="chevron-up"
+          bsSize="xs"
+          onClick={() => onSeriesRegister(value.seriesUid)}
+        >
+          Add
+        </IconButton>
+      )
+    }
+  ];
+  return <DataGrid value={props.value} columns={columns} />;
+};
+
+const RelevantSeries = props => {
+  const { onSeriesRegister } = props;
+  return (
+    <div>
+      <h4>Series from the same study</h4>
+      <SearchResultsView
+        name="relevantSeries"
+        dataView={RelevantSeriesDataView}
+        onSeriesRegister={onSeriesRegister}
+      />
+    </div>
+  );
+};
 
 class CreateNewCaseView extends React.Component {
   constructor(props) {
@@ -19,9 +56,12 @@ class CreateNewCaseView extends React.Component {
       this.state = {
         selectedProject: writableProjects[0].projectId,
         selectedSeries: [],
-        selectedTags: []
+        selectedTags: [],
+        showRelevantSeries: false,
+        busy: false
       };
     }
+    this.registerSeries = this.registerSeries.bind(this);
   }
 
   ImagesRenderer = props => {
@@ -31,31 +71,33 @@ class CreateNewCaseView extends React.Component {
     const imageRange = new MultiRange(value.images);
 
     const handleEditClick = async () => {
+      const validator = str => {
+        let mr;
+        const errorMessage =
+          'Please specify an inter range in the form like `3` or `1-3`.';
+        try {
+          mr = new MultiRange(str);
+        } catch (e) {
+          return errorMessage;
+        }
+        if (!str.length) return 'input something';
+        if (mr.segmentLength() !== 1) return errorMessage;
+        if (!imageRange.has(mr))
+          return 'Specified range is not included in the original image range.';
+        return null;
+      };
+
       const ans = await prompt(
         <span>
           Specify a <strong>continuous</strong> image range within{' '}
           <b>{value.images}</b>.
         </span>,
-        value.range
+        value.range,
+        { validator }
       );
+
       if (!ans) return;
-      try {
-        new MultiRange(ans);
-      } catch (e) {
-        await alert('Syntax error.');
-        return;
-      }
       const mr = new MultiRange(ans);
-      if (mr.segmentLength() !== 1) {
-        await alert('Please specify a continuous range.');
-        return;
-      }
-      if (!imageRange.has(mr)) {
-        await alert(
-          'Specified range is not included in the original image range.'
-        );
-        return;
-      }
       const selectedSeries = [...this.state.selectedSeries];
       selectedSeries[value.volumeId] = {
         ...selectedSeries[value.volumeId],
@@ -81,11 +123,32 @@ class CreateNewCaseView extends React.Component {
     );
   };
 
-  async componentDidMount() {
-    const series = await api('series/' + this.props.params.uid);
+  RemoveSeriesButtonRenderer = props => {
+    const handleClick = () => {
+      this.setState({
+        selectedSeries: this.state.selectedSeries.filter(
+          (dummy, i) => i !== props.value.volumeId
+        )
+      });
+    };
+    return <IconButton bsSize="xs" icon="remove" onClick={handleClick} />;
+  };
+
+  async registerSeries(seriesUid) {
+    const { selectedSeries } = this.state;
+    if (this.state.busy) return;
+    if (selectedSeries.some(s => s.seriesUid === seriesUid)) return;
+    this.setState({ busy: true });
+    const series = await api('series/' + seriesUid);
+    const newEntry = { ...series, range: series.images };
     this.setState({
-      selectedSeries: [{ ...series, range: series.images }]
+      selectedSeries: [...selectedSeries, newEntry],
+      busy: false
     });
+  }
+
+  async componentDidMount() {
+    this.registerSeries(this.props.params.uid);
   }
 
   writableProjects(props) {
@@ -110,6 +173,19 @@ class CreateNewCaseView extends React.Component {
     this.setState({ selectedTags: value });
   };
 
+  handleAddSeriesClick = () => {
+    const { dispatch } = this.props;
+    if (!this.state.showRelevantSeries) {
+      const filter = {
+        // studyUid: this.state.selectedSeries.map(s => s.studyUid)
+      };
+      dispatch(startNewSearch('relevantSeries', 'series', filter, {}, {}));
+      this.setState({ showRelevantSeries: true });
+    } else {
+      this.setState({ showRelevantSeries: false });
+    }
+  };
+
   handleCreate = async () => {
     // TODO: Check if a similar case exists
 
@@ -131,7 +207,9 @@ class CreateNewCaseView extends React.Component {
 
   render() {
     // const { user } = this.props;
+    const { showRelevantSeries, busy, selectedSeries } = this.state;
     const writableProjects = this.writableProjects(this.props);
+    const canCreate = !busy && selectedSeries.length;
 
     if (!writableProjects.length) {
       return (
@@ -150,7 +228,8 @@ class CreateNewCaseView extends React.Component {
       { key: 'modality', caption: 'Modality' },
       { key: 'seriesUid', caption: 'Series' },
       { key: 'seriesDescription', caption: 'Series desc' },
-      { key: 'images', caption: 'Range', renderer: this.ImagesRenderer }
+      { key: 'images', caption: 'Range', renderer: this.ImagesRenderer },
+      { className: 'delete', renderer: this.RemoveSeriesButtonRenderer }
     ];
     const seriesData = this.state.selectedSeries.map((s, i) => ({
       volumeId: i,
@@ -164,9 +243,17 @@ class CreateNewCaseView extends React.Component {
         </h1>
         <Panel collapsible defaultExpanded header="Series">
           <DataGrid columns={columns} value={seriesData} />
-          <IconButton icon="plus" bsSize="sm">
+          <IconButton
+            icon="plus"
+            bsSize="sm"
+            onClick={this.handleAddSeriesClick}
+            active={showRelevantSeries}
+          >
             Add Another Series
           </IconButton>
+          {showRelevantSeries && (
+            <RelevantSeries onSeriesRegister={this.registerSeries} />
+          )}
         </Panel>
         <div>
           Project:&ensp;
@@ -182,7 +269,12 @@ class CreateNewCaseView extends React.Component {
             onChange={this.handleTagChange}
           />
           &ensp;
-          <IconButton icon="star" bsStyle="primary" onClick={this.handleCreate}>
+          <IconButton
+            disabled={!canCreate}
+            icon="star"
+            bsStyle="primary"
+            onClick={this.handleCreate}
+          >
             Create
           </IconButton>
         </div>
@@ -191,8 +283,7 @@ class CreateNewCaseView extends React.Component {
   }
 }
 
-const CreateNewCase = connect(state => {
-  return { user: state.loginUser.data };
-})(CreateNewCaseView);
+const stateToProps = state => ({ user: state.loginUser.data });
+const CreateNewCase = connect(stateToProps)(CreateNewCaseView);
 
 export default CreateNewCase;

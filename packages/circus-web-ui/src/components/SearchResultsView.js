@@ -32,7 +32,8 @@ const SearchResultsView = props => {
     name,
     sortOptions,
     dataView: DataView,
-    active
+    active,
+    ...rest
   } = props;
   if (!search) return null;
   const { isFetching, totalItems, limit, items, page, sort } = search;
@@ -84,7 +85,7 @@ const SearchResultsView = props => {
           </Fragment>
         )}
       </div>
-      <DataView value={items} active={active} />
+      <DataView value={items} active={active} {...rest} />
       <div className="search-results-pager">
         <Pagination
           prev

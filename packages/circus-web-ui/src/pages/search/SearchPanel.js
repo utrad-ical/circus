@@ -1,11 +1,12 @@
 import React from 'react';
-import { Button, Well } from 'components/react-bootstrap';
+import { Button } from 'components/react-bootstrap';
 import IconButton from 'components/IconButton';
+import Collapser from 'components/Collapser';
 
 const SearchPanel = props => {
   const { onResetClick, onSearchClick, onSavePresetClick, children } = props;
   return (
-    <Well>
+    <Collapser title="Search Condition" framed>
       {children}
       <div className="search-buttons">
         <IconButton bsStyle="link" icon="save" onClick={onSavePresetClick}>
@@ -20,7 +21,7 @@ const SearchPanel = props => {
           Search
         </IconButton>
       </div>
-    </Well>
+    </Collapser>
   );
 };
 

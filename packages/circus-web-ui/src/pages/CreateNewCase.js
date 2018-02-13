@@ -1,7 +1,7 @@
 import React, { Fragment } from 'react';
 import ProjectSelector from 'components/ProjectSelector';
 import { connect } from 'react-redux';
-import IconButton from 'rb/IconButton';
+import IconButton from '../components/IconButton';
 import MultiTagSelect from 'components/MultiTagSelect';
 import { Panel } from 'components/react-bootstrap';
 import DataGrid from 'components/DataGrid';
@@ -268,10 +268,11 @@ class CreateNewCaseView extends React.Component {
             value={this.state.selectedTags}
             onChange={this.handleTagChange}
           />
-          &ensp;
+        </div>
+        <div className="text-right">
           <IconButton
             disabled={!canCreate}
-            icon="star"
+            icon="circus-case"
             bsStyle="primary"
             onClick={this.handleCreate}
           >

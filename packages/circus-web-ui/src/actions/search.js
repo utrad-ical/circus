@@ -75,6 +75,10 @@ export function changeSearchLimit(name, limit) {
   return beginQuery({ name, limit });
 }
 
+export function refreshSearch(name) {
+  return beginQuery({ name });
+}
+
 export function savePreset(name, condition) {
   return async (dispatch, getState) => {
     const state = getState();

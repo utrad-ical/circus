@@ -1,9 +1,15 @@
 import React, { Fragment } from 'react';
 import ShrinkSelect from 'rb/ShrinkSelect';
 import { Pagination } from 'components/react-bootstrap';
-import { changeSearchPage, changeSearchSort, changeSearchLimit } from 'actions';
+import {
+  changeSearchPage,
+  changeSearchSort,
+  changeSearchLimit,
+  refreshSearch
+} from 'actions';
 import LoadingIndicator from 'rb/LoadingIndicator';
 import { connect } from 'react-redux';
+import AutoReloadSwitch from './AutoReloadSwitch';
 import Icon from 'components/Icon';
 
 export const makeSortOptions = sortKeys => {
@@ -33,6 +39,7 @@ const SearchResultsView = props => {
     sortOptions,
     dataView: DataView,
     active,
+    refreshable,
     ...rest
   } = props;
   if (!search) return null;
@@ -58,6 +65,11 @@ const SearchResultsView = props => {
     dispatch(changeSearchLimit(name, newLimit));
   }
 
+  function handleRefresh() {
+    if (isFetching) return;
+    dispatch(refreshSearch(name));
+  }
+
   const pages = Math.ceil(totalItems / limit);
   return (
     <div className="search-results-container">
@@ -73,6 +85,16 @@ const SearchResultsView = props => {
           renderer={ItemsPerPageOptionRenderer}
           numericalValue
         />
+        {refreshable && (
+          <Fragment>
+            &emsp;
+            <AutoReloadSwitch
+              bsSize="sm"
+              onRefresh={handleRefresh}
+              disabled={isFetching}
+            />
+          </Fragment>
+        )}
         {sortOptions && (
           <Fragment>
             &emsp;

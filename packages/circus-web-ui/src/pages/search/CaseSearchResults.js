@@ -89,6 +89,7 @@ const CaseSearchResultsView = props => {
     <SearchResultsView
       sortOptions={sortOptions}
       dataView={DataView}
+      refreshable
       name="case"
     />
   );

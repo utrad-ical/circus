@@ -82,6 +82,7 @@ const SeriesSearchResults = props => {
     <SearchResultsView
       sortOptions={sortOptions}
       dataView={DataView}
+      refreshable
       name="series"
     />
   );

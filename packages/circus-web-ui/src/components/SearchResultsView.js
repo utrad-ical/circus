@@ -65,6 +65,7 @@ const SearchResultsView = props => {
         {totalItems + ' Result' + (totalItems > 1 ? 's' : '')}
         &emsp;
         <ShrinkSelect
+          bsSize="sm"
           options={limitOptions}
           value={limit + ''}
           onChange={handleLimitChange}
@@ -77,6 +78,7 @@ const SearchResultsView = props => {
             &emsp;
             <Icon icon="sort" />&ensp;
             <ShrinkSelect
+              bsSize="sm"
               options={sortOptions}
               value={sort}
               onChange={handleSortChange}

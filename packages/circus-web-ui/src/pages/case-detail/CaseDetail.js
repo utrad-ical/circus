@@ -19,7 +19,7 @@ import classNames from 'classnames';
 import EventEmitter from 'events';
 import { sha1 } from '../../utils/util.js';
 import ProjectDisplay from 'components/ProjectDisplay';
-import Card from './Card';
+import Collapser from '../../components/Collapser';
 import RevisionSelector from './RevisionSelector';
 import attributeSchemaToProperties from './attributeSchemaToProperties';
 import PatientInfoBox from 'components/PatientInfoBox';
@@ -188,7 +188,7 @@ class CaseDetailView extends React.Component {
 
     return (
       <div>
-        <Card title="Case Info" className="case-info">
+        <Collapser title="Case Info" className="case-info">
           <ProjectDisplay projectId={prj.projectId} withName size="xl" />
           <PatientInfoBox value={caseData.patientInfoCache} />
           <div className="tag-list">
@@ -201,7 +201,7 @@ class CaseDetailView extends React.Component {
             <br />
             (Create: <TimeDisplay value={caseData.createdAt} />)
           </div>
-        </Card>
+        </Collapser>
         <MenuBar
           onSaveClick={this.saveRevision}
           onRevertClick={this.revertRevision}
@@ -414,7 +414,7 @@ export class RevisionData extends React.Component {
     return (
       <div className={classNames('case-revision-data', { busy })}>
         <div className="case-revision-header">
-          <Card title="Series / Labels" className="labels">
+          <Collapser title="Series / Labels" className="labels">
             <LabelSelector
               revision={revision}
               onChange={onChange}
@@ -434,14 +434,14 @@ export class RevisionData extends React.Component {
                 />
               )}
             </div>
-          </Card>
-          <Card title="Case Attributes" className="case-attributes">
+          </Collapser>
+          <Collapser title="Case Attributes" className="case-attributes">
             <PropertyEditor
               properties={this.state.caseAttributesProperties}
               value={revision.attributes}
               onChange={this.caseAttributesChange}
             />
-          </Card>
+          </Collapser>
         </div>
         <ToolBar
           active={tool}

@@ -43,7 +43,7 @@
 }
 
 .case-info {
-  .case-detail-card-body {
+  .collapser-body {
     padding: 3px;
     display: flex;
     flex-flow: row wrap;
@@ -65,24 +65,6 @@
   cursor: pointer;
 }
 
-.case-detail-card {
-  .case-detail-card-header {
-    display: block;
-    text-decoration: none;
-    user-select: none;
-    color: white;
-    padding: 2px 5px;
-    background-color: #333333;
-    font-weight: bold;
-    cursor: pointer;
-  }
-  .case-detail-card-body {
-    .property-editor {
-      margin: 0 15px;
-    }
-  }
-}
-
 .case-revision-data {
   &.busy {
     opacity: 0.5;
@@ -95,7 +77,7 @@
   justify-content: space-between;
   > .labels {
     flex: 65%;
-    .case-detail-card-body {
+    .collapser-body {
       display: flex;
       > * {
         flex: 50%;

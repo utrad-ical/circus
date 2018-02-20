@@ -58,7 +58,7 @@ export default class StaticDicomFileRepository extends DicomFileRepository {
         return new Promise<ArrayBuffer>((resolve, reject) => {
           fs.readFile(filePath, (err, data: Buffer) => {
             if (err) reject(err);
-            resolve(data.buffer);
+            resolve(data.buffer as ArrayBuffer);
           });
         });
       };

@@ -11,7 +11,7 @@ export class CelestialRotateTool extends DraggableTool {
   public dragHandler(ev: ViewerEvent): void {
     super.dragHandler(ev);
     const dragInfo = this.dragInfo;
-    const speed = ev.original.ctrlKey ? 0.3 : 0.1;
+    const speed = ev.original.ctrlKey ? 2.5 : 0.6;
 
     if (dragInfo.dx === 0 && dragInfo.dy === 0) return;
 

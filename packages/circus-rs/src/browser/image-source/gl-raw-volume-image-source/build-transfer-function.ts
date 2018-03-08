@@ -1,21 +1,37 @@
-const tinycolor = require('tinycolor2');
+import * as tinycolor from 'tinycolor2';
+import { TransferFunctionEntry } from '../../view-state';
 
-const mix = function(color1, color2, p) {
-  var rgb1 = color1;
-  var rgb2 = color2;
+interface RgbaColor {
+  r: number;
+  g: number;
+  b: number;
+  a: number;
+}
 
-  var rgba = {
-    r: Math.round((rgb2.r - rgb1.r) * p + rgb1.r),
-    g: Math.round((rgb2.g - rgb1.g) * p + rgb1.g),
-    b: Math.round((rgb2.b - rgb1.b) * p + rgb1.b),
-    a: (rgb2.a - rgb1.a) * p + rgb1.a
+const mix = function(
+  color1: RgbaColor,
+  color2: RgbaColor,
+  p: number
+): RgbaColor {
+  return {
+    r: Math.round((color2.r - color1.r) * p + color1.r),
+    g: Math.round((color2.g - color1.g) * p + color1.g),
+    b: Math.round((color2.b - color1.b) * p + color1.b),
+    a: (color2.a - color1.a) * p + color1.a
   };
-
-  return rgba;
 };
 
-export function buildTransferFunction(gradation, steps = 256) {
-  if (!Array.isArray(gradation) || gradation.length == 0)
+/**
+ * Build a gradition as a list of colors.
+ * @param gradation The gradient definition
+ * @param steps Number of steps to split
+ * @return The list of RGBA colors
+ */
+export function buildTransferFunctionMap(
+  gradation: TransferFunctionEntry[],
+  steps = 256
+): Uint8Array {
+  if (!Array.isArray(gradation) || gradation.length === 0)
     throw new TypeError('Invalid gradation object.');
 
   const numSteps = gradation.length;

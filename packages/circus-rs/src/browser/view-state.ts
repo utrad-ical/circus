@@ -2,7 +2,15 @@ import { ImageSource } from './image-source/image-source';
 import { Section } from '../common/geometry';
 import { ViewWindow } from '../common/ViewWindow';
 
-export type InterpolationMode = 'trilinear' | 'nearestNeighbor' | 'vr-mask-custom';
+export type InterpolationMode =
+  | 'trilinear'
+  | 'nearestNeighbor'
+  | 'vr-mask-custom';
+
+export interface TransferFunctionEntry {
+  color: string;
+  position: number;
+}
 
 /**
  * ViewState determines how the ImageSource is viewed on each Viewer.
@@ -42,7 +50,7 @@ export interface ViewState {
     dimension: [number, number, number];
   };
 
-  transferFunction?: any[];
+  transferFunction?: TransferFunctionEntry[];
 
   /**
    * If omitted, the default is the center of the (sub)volume,

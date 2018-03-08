@@ -16,7 +16,7 @@ import * as mat4 from 'gl-matrix/src/gl-matrix/mat4.js';
 
 import GLContextHandler from './gl-raw-volume-image-source/gl-context-handler';
 
-import { buildTransferFunction } from './gl-raw-volume-image-source/build-transfer-function';
+import { buildTransferFunctionMap } from './gl-raw-volume-image-source/build-transfer-function';
 
 /**
  * Container for a WebGL texture.
@@ -99,7 +99,7 @@ export class GLRawVolumeImageSource extends ImageSource {
         { position: 65536.0 / 65536.0, color: '#ffffffff' }
       ],
       quality: 1.0,
-	  interpolationMode: 'trilinear'
+      interpolationMode: 'trilinear'
     };
 
     /**
@@ -129,8 +129,8 @@ export class GLRawVolumeImageSource extends ImageSource {
   public draw(viewer: Viewer, viewState: ViewState): Promise<ImageData> {
     const [viewportWidth, viewportHeight] = viewer.getResolution();
     const [vw, vh, vd] = this.volume.getVoxelSize();
-	
-	console.log(JSON.stringify(viewState, null, 2));
+
+    console.log(JSON.stringify(viewState, null, 2));
 
     // ビューアの幅と高さがわからないと、裏キャンバスが作れない？
     // 特殊な方法で回避できそうだが取り急ぎ draw 時にセットアップ(どっちみち、コンテキスト消失への対応は必要)
@@ -183,25 +183,25 @@ export class GLRawVolumeImageSource extends ImageSource {
       this.subVolume = subVolume;
     }
 
-	// background setup
+    // background setup
     const [r, g, b, a] = viewState.background as number[];
     gl.clearColor(r, g, b, a);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-	gl.uniform4fv(glh.uniformIndex['uBackground'], [r,b,g,a]);
-	
-	// interpolation mode
-	switch( viewState.interpolationMode ) {
-		case 'trilinear':
-			gl.uniform1i(glh.uniformIndex['uInterpolationMode'], 1);
-			break;
-		case 'vr-mask-custom':
-			gl.uniform1i(glh.uniformIndex['uInterpolationMode'], 2);
-			break;
-		case 'nearestNeighbor':
-		default:
-			gl.uniform1i(glh.uniformIndex['uInterpolationMode'], 0);
-			break;
-	}
+    gl.uniform4fv(glh.uniformIndex['uBackground'], [r, b, g, a]);
+
+    // interpolation mode
+    switch (viewState.interpolationMode) {
+      case 'trilinear':
+        gl.uniform1i(glh.uniformIndex['uInterpolationMode'], 1);
+        break;
+      case 'vr-mask-custom':
+        gl.uniform1i(glh.uniformIndex['uInterpolationMode'], 2);
+        break;
+      case 'nearestNeighbor':
+      default:
+        gl.uniform1i(glh.uniformIndex['uInterpolationMode'], 0);
+        break;
+    }
 
     /* Prepare camera */
     const camera = this.createCamera(viewState);
@@ -430,7 +430,7 @@ export class GLRawVolumeImageSource extends ImageSource {
 
     gl.bindTexture(gl.TEXTURE_2D, this.transferFunctionTexture);
 
-    const buffer = buildTransferFunction(transferFunction, 65536);
+    const buffer = buildTransferFunctionMap(transferFunction, 65536);
     gl.texImage2D(
       gl.TEXTURE_2D,
       0,
@@ -570,7 +570,7 @@ export class GLRawVolumeImageSource extends ImageSource {
     glh.registerUniform('uRayStepLength');
     glh.registerUniform('uRayIntensityCoef');
     glh.registerUniform('uMaxSteps');
-	
+
     glh.registerUniform('uBackground');
     glh.registerUniform('uInterpolationMode');
 

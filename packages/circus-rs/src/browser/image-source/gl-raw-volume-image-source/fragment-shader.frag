@@ -97,7 +97,7 @@ float getPixelWithInterpolation(vec3 mmCoord)
 
   float z2y1 = mix(z2p0, z2p1, fract(x));
   float z2y2 = mix(z2p2, z2p3, fract(x));
-  float z2 = mix z2y1, z2y2, fract(y));
+  float z2 = mix(z2y1, z2y2, fract(y));
 
   return mix(z1, z2, fract(z));
 }
@@ -157,7 +157,7 @@ vec2 getValueAndMaskAt(float x, float y, float z)
   float s = x / uTextureSize[0] + sliceColNo / uSliceGridSize[0];
   float t = y / uTextureSize[1] + sliceRowNo / uSliceGridSize[1];
 
-  vec4 pixelLuminanceAlphaValue = texture2D uVolumeTextureSampler, vec2(s,t));
+  vec4 pixelLuminanceAlphaValue = texture2D(uVolumeTextureSampler, vec2(s,t));
   float pixelValue = (pixelLuminanceAlphaValue.a * 256.0 + pixelLuminanceAlphaValue.r) * 256.0;
 
   if (pixelValue > 32767.0) {

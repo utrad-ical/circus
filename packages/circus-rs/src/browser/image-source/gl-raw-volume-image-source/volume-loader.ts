@@ -298,7 +298,7 @@ export class RsVolumeLoader implements DicomVolumeLoader {
  * For Debug
  */
 export class CacheIndexedDB implements VolumeCache {
-  private connection: IDBDatabase;
+  private connection: IDBDatabase | null;
   private queue: Promise<void>;
 
   private dbName: string;
@@ -358,6 +358,7 @@ export class CacheIndexedDB implements VolumeCache {
 
   public put(key: string, content: any): Promise<void> {
     const putFunc = () => {
+      if (!this.connection) throw new Error('IndexedDB not initialized');
       const store = this.connection
         .transaction(this.storeName, 'readwrite')
         .objectStore(this.storeName);
@@ -372,6 +373,7 @@ export class CacheIndexedDB implements VolumeCache {
 
   public delete(key: string): Promise<void> {
     const deleteFunc = () => {
+      if (!this.connection) throw new Error('IndexedDB not initialized');
       const store = this.connection
         .transaction(this.storeName, 'readwrite')
         .objectStore(this.storeName);
@@ -385,6 +387,7 @@ export class CacheIndexedDB implements VolumeCache {
   public get(key: string): Promise<DicomVolume | DicomMetadata | any> {
     return new Promise((resolve, reject) => {
       this.queue.then(() => {
+        if (!this.connection) throw new Error('IndexedDB not initialized');
         const store = this.connection
           .transaction(this.storeName, 'readwrite')
           .objectStore(this.storeName);
@@ -414,7 +417,9 @@ export class CacheIndexedDB implements VolumeCache {
       request.onerror = () => {
         console.log('Drop failed');
       };
-      request.onsuccess = ev => {};
+      request.onsuccess = ev => {
+        /* noop */
+      };
     });
   }
 }

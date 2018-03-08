@@ -14,7 +14,7 @@ import * as vec3 from 'gl-matrix/src/gl-matrix/vec3.js';
 import * as vec4 from 'gl-matrix/src/gl-matrix/vec4.js';
 import * as mat4 from 'gl-matrix/src/gl-matrix/mat4.js';
 
-import GLContextHandler from './gl-raw-volume-image-source/gl-context-handler';
+import GLContextManager from './gl-raw-volume-image-source/gl-context-manager';
 
 import { buildTransferFunctionMap } from './gl-raw-volume-image-source/build-transfer-function';
 
@@ -36,7 +36,7 @@ export class GLRawVolumeImageSource extends ImageSource {
   private meta: DicomMetadata;
   private volume: DicomVolume;
 
-  private glHandler: GLContextHandler;
+  private glHandler: GLContextManager;
   private volumeTexture: VolumeTexture;
   private gradationTexture;
 
@@ -135,7 +135,7 @@ export class GLRawVolumeImageSource extends ImageSource {
     // ビューアの幅と高さがわからないと、裏キャンバスが作れない？
     // 特殊な方法で回避できそうだが取り急ぎ draw 時にセットアップ(どっちみち、コンテキスト消失への対応は必要)
     if (!this.glHandler) {
-      this.glHandler = new GLContextHandler({
+      this.glHandler = new GLContextManager({
         width: viewportWidth,
         height: viewportHeight
       });

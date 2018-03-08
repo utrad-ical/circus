@@ -1,24 +1,33 @@
-type GLContextHandlerOptions = {
+interface GLContextManagerOptions {
   width: number;
   height: number;
-};
+}
 
 /**
  * Generic utility wrapper to handle WebGL context
  * and various associated resources.
  */
-export default class GLContextHandler {
+export default class GLContextManager {
   public gl: WebGLRenderingContext;
-  public buffers: any = {};
-  public attrIndex: any = {};
-  public uniformIndex: any = {};
+
+  public buffers: {
+    [key: string]: {
+      target: number;
+      buffer: WebGLBuffer;
+      type: number;
+      itemSize: number;
+      numItems: number | null;
+    };
+  } = {};
+  public attrIndex: { [key: string]: number } = {};
+  public uniformIndex: { [key: string]: WebGLUniformLocation } = {};
 
   private vertexShaderSource: string;
   private fragmentShaderSource: string;
   private attrNames: string[] = [];
   private uniformNames: string[] = [];
 
-  constructor({ width, height }: GLContextHandlerOptions) {
+  constructor({ width, height }: GLContextManagerOptions) {
     const backCanvas: HTMLCanvasElement = document.createElement('canvas');
     backCanvas.width = width;
     backCanvas.height = height;
@@ -44,7 +53,7 @@ export default class GLContextHandler {
     const gl =
       backCanvas.getContext('webgl') ||
       backCanvas.getContext('experimental-webgl');
-    if (!gl) throw new Error('Failed to get webgl context');
+    if (!gl) throw new Error('Failed to get WegGL context');
 
     gl.viewport(0, 0, width, height);
 
@@ -70,7 +79,7 @@ export default class GLContextHandler {
   public registerBuffer(
     name: string,
     target,
-    type,
+    type: number,
     itemSize: number = 1
   ): void {
     const gl = this.gl;
@@ -79,10 +88,10 @@ export default class GLContextHandler {
     if (!buffer) throw new Error('Cannot create buffer');
 
     this.buffers[name] = {
-      target: target,
-      buffer: buffer,
-      type: type,
-      itemSize: itemSize,
+      target,
+      buffer,
+      type,
+      itemSize,
       numItems: null
     };
   }
@@ -149,9 +158,11 @@ export default class GLContextHandler {
     const gl = this.gl;
 
     if (!this.buffers[bufferName])
-      throw Error('Not registered buffer: ' + bufferName);
+      throw new Error('Not registered buffer: ' + bufferName);
 
     const { buffer, target, type, numItems } = this.buffers[bufferName];
+    if (numItems === null) throw new Error();
+
     gl.bindBuffer(target, buffer);
 
     if (target === gl.ELEMENT_ARRAY_BUFFER) {
@@ -214,7 +225,7 @@ export default class GLContextHandler {
     // Collect attributes, uniform location indices
 
     // attributes
-    const attrIndex: any = {};
+    const attrIndex: { [key: string]: number } = {};
     this.attrNames.forEach(name => {
       const index = gl.getAttribLocation(shaderProgram, name);
 
@@ -227,7 +238,7 @@ export default class GLContextHandler {
     this.attrIndex = attrIndex;
 
     // uniforms
-    const uniformIndex: any = {};
+    const uniformIndex: { [key: string]: WebGLUniformLocation } = {};
     this.uniformNames.forEach(name => {
       const index = gl.getUniformLocation(shaderProgram, name);
 

@@ -51,23 +51,28 @@ export default class GLContextHandler {
     this.gl = gl;
   }
 
-  public registerVertexShader(source: string) {
+  public registerVertexShader(source: string): void {
     this.vertexShaderSource = source;
   }
 
-  public registerFragmentShader(source: string) {
+  public registerFragmentShader(source: string): void {
     this.fragmentShaderSource = source;
   }
 
-  public registerAttr(name: string) {
+  public registerAttr(name: string): void {
     this.attrNames.push(name);
   }
 
-  public registerUniform(name: string) {
+  public registerUniform(name: string): void {
     this.uniformNames.push(name);
   }
 
-  public registerBuffer(name: string, target, type, itemSize: number = 1) {
+  public registerBuffer(
+    name: string,
+    target,
+    type,
+    itemSize: number = 1
+  ): void {
     const gl = this.gl;
 
     const buffer = gl.createBuffer();
@@ -82,7 +87,7 @@ export default class GLContextHandler {
     };
   }
 
-  public bufferData(name, srcData: ArrayBufferView, usage) {
+  public bufferData(name, srcData: ArrayBufferView, usage): void {
     const gl = this.gl;
 
     if (!this.buffers[name]) throw Error('Not registered buffer: ' + name);
@@ -115,7 +120,7 @@ export default class GLContextHandler {
     normalized: boolean = false,
     stride: number = 0,
     offset: number = 0
-  ) {
+  ): void {
     const gl = this.gl;
 
     if (this.attrIndex[attrName] === undefined)
@@ -140,7 +145,7 @@ export default class GLContextHandler {
     );
   }
 
-  public drawBuffer(bufferName: string, mode, offset: number = 0) {
+  public drawBuffer(bufferName: string, mode, offset: number = 0): void {
     const gl = this.gl;
 
     if (!this.buffers[bufferName])
@@ -156,7 +161,7 @@ export default class GLContextHandler {
     }
   }
 
-  public setupShaders() {
+  public setupShaders(): void {
     const gl = this.gl;
 
     // Compile shader sources
@@ -235,11 +240,13 @@ export default class GLContextHandler {
     this.uniformIndex = uniformIndex;
   }
 
-  private glHandleContextLost(ev: Event) {
+  private glHandleContextLost(ev: Event): void {
     ev.preventDefault();
     // cancelRequestAnimFrame(requestId);
     // suspend loading texture status
   }
 
-  private glHandleContextRestored(ev: Event) {}
+  private glHandleContextRestored(ev: Event): void {
+    //
+  }
 }

@@ -172,14 +172,14 @@ export class VesselSampleLoader implements DicomVolumeLoader {
   private cache: VolumeCache;
 
   private coef: number;
-  
+
   constructor({ host, path, coef }: any) {
     this.client = new RsHttpClient(host);
     this.path = path;
-	this.coef = coef || 1;
+    this.coef = coef || 1;
   }
 
-  public useCache(cache: VolumeCache) {
+  public useCache(cache: VolumeCache): void {
     this.cache = cache;
   }
 
@@ -212,7 +212,8 @@ export class VesselSampleLoader implements DicomVolumeLoader {
 
         for (let offset = 0; offset < bufferSize; offset++) {
           // destUint16BufferArray[offset] = srcUint8BufferArray[offset];
-          destUint16BufferArray[offset] = srcUint8BufferArray[offset] * this.coef;
+          destUint16BufferArray[offset] =
+            srcUint8BufferArray[offset] * this.coef;
         }
 
         volume.assign((destUint16BufferArray as any).buffer);
@@ -236,7 +237,7 @@ export class RsVolumeLoader implements DicomVolumeLoader {
     this.series = series;
   }
 
-  public useCache(cache: VolumeCache) {
+  public useCache(cache: VolumeCache): void {
     this.cache = cache;
   }
 
@@ -297,26 +298,21 @@ export class RsVolumeLoader implements DicomVolumeLoader {
  * For Debug
  */
 export class CacheIndexedDB implements VolumeCache {
-  private connection;
+  private connection: IDBDatabase;
   private queue: Promise<void>;
 
-  private dbName;
-  private storeName = 'cache';
+  private dbName: string;
+  private storeName: string = 'cache';
 
-  static detected: any;
+  private static detected: IDBFactory;
 
-  static detect() {
+  public static detect(): IDBFactory {
     if (!CacheIndexedDB.detected) {
       const w = window as any;
-
       const indexedDB =
         w.indexedDB || w.mozIndexedDB || w.webkitIndexedDB || w.msIndexedDB;
-      // const IDBTransaction = w.IDBTransaction || w.webkitIDBTransaction || w.msIDBTransaction || {READ_WRITE: "readwrite"};
-      // const IDBKeyRange = w.IDBKeyRange || w.webkitIDBKeyRange || w.msIDBKeyRange;
-
       if (!indexedDB)
         throw Error('IndexedDB is not supported on this browser.');
-
       CacheIndexedDB.detected = indexedDB;
     }
     return CacheIndexedDB.detected;
@@ -339,12 +335,12 @@ export class CacheIndexedDB implements VolumeCache {
           console.log(ev);
         };
         openRequest.onsuccess = ev => {
-          this.connection = ev.target.result;
+          this.connection = (ev.target as any).result as IDBDatabase;
           // console.log('OPEND');
           resolve();
         };
         openRequest.onupgradeneeded = ev => {
-          this.connection = ev.target.result;
+          this.connection = (ev.target as any).result as IDBDatabase;
 
           const store = this.connection.createObjectStore(this.storeName, {
             keyPath: 'key'
@@ -369,11 +365,8 @@ export class CacheIndexedDB implements VolumeCache {
         key: key,
         content: content
       });
-      // console.log('PUT');
     };
-
     this.queue = this.queue.then(putFunc);
-
     return this.queue;
   }
 
@@ -409,7 +402,7 @@ export class CacheIndexedDB implements VolumeCache {
     });
   }
 
-  public drop() {
+  public drop(): void {
     this.queue = this.queue.then(() => {
       if (this.connection) this.connection.close();
 

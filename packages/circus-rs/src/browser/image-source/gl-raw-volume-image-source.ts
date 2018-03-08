@@ -2,7 +2,7 @@ import DicomVolume from '../../common/DicomVolume';
 import { DicomMetadata } from './volume-image-source';
 import { ImageSource } from './image-source';
 import { Viewer } from '../viewer/viewer';
-import { ViewState } from '../view-state';
+import { ViewState, TransferFunctionEntry } from '../view-state';
 
 import { DicomVolumeLoader } from './gl-raw-volume-image-source/volume-loader';
 
@@ -17,6 +17,13 @@ import * as mat4 from 'gl-matrix/src/gl-matrix/mat4.js';
 import GLContextManager from './gl-raw-volume-image-source/gl-context-manager';
 
 import { buildTransferFunctionMap } from './gl-raw-volume-image-source/build-transfer-function';
+
+interface Camera {
+  position: number[];
+  target: number[];
+  up: number[];
+  zoom: number;
+}
 
 /**
  * Container for a WebGL texture.
@@ -38,15 +45,14 @@ export class GLRawVolumeImageSource extends ImageSource {
 
   private glHandler: GLContextManager;
   private volumeTexture: VolumeTexture;
-  private gradationTexture;
 
   private readyState: Promise<void>;
 
   // viewState cache for checking update something on WegGL
-  private transferFunction;
-  private subVolume;
+  private transferFunction: TransferFunctionEntry[];
+  private subVolume: any;
 
-  private transferFunctionTexture;
+  private transferFunctionTexture: WebGLTexture;
 
   private baseScale: number;
 
@@ -241,14 +247,16 @@ export class GLRawVolumeImageSource extends ImageSource {
     /* Prepare texture */
 
     // transfer function texture
-    if (viewState.transferFunction !== this.transferFunction) {
+    if (
+      viewState.transferFunction !== this.transferFunction &&
+      viewState.transferFunction
+    ) {
       this.updateTransferFunction(viewState.transferFunction);
       this.transferFunction = viewState.transferFunction;
     }
 
     gl.uniform1i(glh.uniformIndex['uTransferFunctionSampler'], 0);
     gl.activeTexture(gl.TEXTURE0);
-    // gl.bindTexture(gl.TEXTURE_2D, this.gradationTexture);
     gl.bindTexture(gl.TEXTURE_2D, this.transferFunctionTexture);
 
     // volume texture
@@ -316,14 +324,14 @@ export class GLRawVolumeImageSource extends ImageSource {
    * viewState.rotate
    */
   // private debugCount: number = 0;
-  private createCamera(viewState) {
+  private createCamera(viewState): Camera {
     const [
       mmVolumeWidth,
       mmVolumeHeight,
       mmVolumeDepth
     ] = this.volume.getMmDimension();
 
-    const camera = {
+    const camera: Camera = {
       // 同次座標系
       position: [
         mmVolumeWidth * 0.5,
@@ -394,7 +402,7 @@ export class GLRawVolumeImageSource extends ImageSource {
     return camera;
   }
 
-  private baseMatrix(m?) {
+  private baseMatrix(m?: mat4): mat4 {
     m = m || mat4.create();
 
     // 2. scale to world coords
@@ -421,12 +429,16 @@ export class GLRawVolumeImageSource extends ImageSource {
    * each intensity value in the original image represented as a Uint16 value.
    * The texture size is 256 x 256 x 4bpp (fixed) or 240KiB.
    */
-  protected updateTransferFunction(transferFunction) {
+  protected updateTransferFunction(transferFunction): void {
     const glh = this.glHandler;
     const gl = glh.gl;
 
-    if (!this.transferFunctionTexture)
-      this.transferFunctionTexture = gl.createTexture();
+    if (!this.transferFunctionTexture) {
+      const texture = gl.createTexture();
+      if (!texture)
+        throw new Error('Failed to craete transfer function texture');
+      this.transferFunctionTexture = texture;
+    }
 
     gl.bindTexture(gl.TEXTURE_2D, this.transferFunctionTexture);
 
@@ -469,7 +481,7 @@ export class GLRawVolumeImageSource extends ImageSource {
     // Returns ceil(log2(n)).
     const getMinPower2 = n => {
       let m = 0;
-      while (1 << ++m < n) {}
+      while (1 << ++m < n);
       return m;
     };
 
@@ -544,7 +556,7 @@ export class GLRawVolumeImageSource extends ImageSource {
     return { textureSize, sliceGridSize, sliceSize, texture };
   }
 
-  private glSetup() {
+  private glSetup(): void {
     const glh = this.glHandler;
     const gl = glh.gl;
 
@@ -584,7 +596,7 @@ export class GLRawVolumeImageSource extends ImageSource {
     gl.enable(gl.DEPTH_TEST);
   }
 
-  private updateVolumeBoxBuffer({ dimension, offset }) {
+  private updateVolumeBoxBuffer({ dimension, offset }): void {
     // calculated in world-coords
 
     const glh = this.glHandler;
@@ -691,7 +703,7 @@ export class GLRawVolumeImageSource extends ImageSource {
     );
   }
 
-  private glDrawVolumeBox(camera: any, viewState: ViewState) {
+  private glDrawVolumeBox(camera: Camera, viewState: ViewState): void {
     const glh = this.glHandler;
     const gl = glh.gl;
 
@@ -765,7 +777,7 @@ function bufferVolumeTextureDebugger(
   ox = 0,
   oy = 0,
   sliceSize = [512, 512]
-) {
+): void {
   const backCanvas: HTMLCanvasElement = document.createElement('canvas');
   [backCanvas.width, backCanvas.height] = sliceSize;
   backCanvas.style.border = '3px solid #f00';

@@ -8,6 +8,8 @@ import { BrushTool } from './cloud/brush';
 import { EraserTool } from './cloud/eraser';
 import { BucketTool } from './cloud/bucket';
 
+import { VRRotateZoomTool } from './state/vr-rotate-zoom';
+
 const toolCollection = {};
 
 const defaultTools = {
@@ -20,7 +22,9 @@ const defaultTools = {
 
   brush: BrushTool,
   eraser: EraserTool,
-  bucket: BucketTool
+  bucket: BucketTool,
+
+  'vr-rotate-zoom': VRRotateZoomTool
 };
 
 Object.keys(defaultTools).forEach(key => {

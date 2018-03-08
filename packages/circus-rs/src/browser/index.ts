@@ -23,6 +23,8 @@ export * from '../browser/image-source/mock-image-source';
 export * from '../browser/image-source/raw-volume-image-source';
 export * from '../browser/image-source/dynamic-image-source';
 export * from '../browser/image-source/hybrid-image-source';
+export * from '../browser/image-source/gl-raw-volume-image-source';
+export * from '../browser/image-source/gl-raw-volume-image-source/volume-loader';
 
 export * from '../browser/tool/state/hand';
 export * from '../browser/tool/state/celestial-rotate';

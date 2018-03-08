@@ -118,3 +118,9 @@ $('#example-run').on('click', () => {
 	// eval the script
 	(new Function(script))();
 });
+
+// document.addEventListener('DOMContentLoaded', () => {
+	// setTimeout( () => {
+		// $('#example-run').click();
+	// }, 200 );
+// });

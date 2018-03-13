@@ -12,15 +12,16 @@ export interface TransferFunctionEntry {
   position: number;
 }
 
-/**
- * ViewState determines how the ImageSource is viewed on each Viewer.
- */
-export interface ViewState {
+export type TransferFunction = Array<TransferFunctionEntry>;
+
+export interface SectionViewState {
   section?: Section;
   window?: ViewWindow;
   interpolationMode?: InterpolationMode;
+}
 
-  // For volume rendering
+export interface VrViewState {
+  interpolationMode?: InterpolationMode;
 
   /**
    * Affects global alpha of each voxel.
@@ -50,7 +51,7 @@ export interface ViewState {
     dimension: [number, number, number];
   };
 
-  transferFunction?: TransferFunctionEntry[];
+  transferFunction?: TransferFunction;
 
   /**
    * If omitted, the default is the center of the (sub)volume,
@@ -69,3 +70,8 @@ export interface ViewState {
    */
   quality?: number;
 }
+
+/**
+ * ViewState determines how the ImageSource is viewed on each Viewer.
+ */
+export interface ViewState extends SectionViewState, VrViewState {}

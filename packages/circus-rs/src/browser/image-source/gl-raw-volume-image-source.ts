@@ -132,7 +132,7 @@ export class GLRawVolumeImageSource extends ImageSource {
    * @param viewState
    * @returns {Promise<ImageData>}
    */
-  public draw(viewer: Viewer, viewState: ViewState): Promise<ImageData> {
+  public async draw(viewer: Viewer, viewState: ViewState): Promise<ImageData> {
     const [viewportWidth, viewportHeight] = viewer.getResolution();
     const [vw, vh, vd] = this.volume.getVoxelSize();
 
@@ -316,7 +316,7 @@ export class GLRawVolumeImageSource extends ImageSource {
     // }
     // }
 
-    return Promise.resolve(imageData);
+    return imageData;
   }
 
   /**

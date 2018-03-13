@@ -46,11 +46,11 @@ export class MockLoader implements DicomVolumeLoader {
     this.meta = meta;
   }
 
-  public loadMeta(): Promise<DicomMetadata> {
-    return Promise.resolve(this.meta);
+  public async loadMeta(): Promise<DicomMetadata> {
+    return this.meta;
   }
 
-  public loadVolume(): Promise<DicomVolume> {
+  public async loadVolume(): Promise<DicomVolume> {
     const option = this.option;
 
     const meta = this.meta;
@@ -81,7 +81,7 @@ export class MockLoader implements DicomVolumeLoader {
       volume.markSliceAsLoaded(z);
     }
 
-    return Promise.resolve(volume);
+    return volume;
   }
 }
 
@@ -95,47 +95,45 @@ export class MixLoaderSample implements DicomVolumeLoader {
     this.maskLoader = maskLoader;
   }
 
-  public loadMeta(): Promise<DicomMetadata> {
-    return this.volumeLoader.loadMeta().then(meta => {
-      this.meta = meta;
-      return meta;
-    });
+  public async loadMeta(): Promise<DicomMetadata> {
+    const meta = await this.volumeLoader.loadMeta();
+    this.meta = meta;
+    return meta;
   }
 
-  public loadVolume(): Promise<DicomVolume> {
-    return Promise.all([
+  public async loadVolume(): Promise<DicomVolume> {
+    const [baseVolume, maskVolume] = await Promise.all([
       this.volumeLoader.loadVolume(),
       this.maskLoader.loadVolume()
-    ]).then(([baseVolume, maskVolume]) => {
-      const meta = this.meta;
-      const [width, height, depth] = meta.voxelCount;
-      const pixelFormat = meta.pixelFormat as PixelFormat;
+    ]);
+    const meta = this.meta;
+    const [width, height, depth] = meta.voxelCount;
+    const pixelFormat = meta.pixelFormat as PixelFormat;
 
-      const volume = new DicomVolume([width, height, depth], pixelFormat);
-      volume.setVoxelSize(meta.voxelSize);
-      if (meta.estimatedWindow)
-        volume.estimatedWindow = { ...meta.estimatedWindow };
+    const volume = new DicomVolume([width, height, depth], pixelFormat);
+    volume.setVoxelSize(meta.voxelSize);
+    if (meta.estimatedWindow)
+      volume.estimatedWindow = { ...meta.estimatedWindow };
 
-      volume.fillAll((x, y, z) => {
-        const val = baseVolume.getPixelAt(x, y, z);
-        const mask = maskVolume.getPixelAt(x, y, z);
-        // const val = mask ? 658 : 0;
+    volume.fillAll((x, y, z) => {
+      const val = baseVolume.getPixelAt(x, y, z);
+      const mask = maskVolume.getPixelAt(x, y, z);
+      // const val = mask ? 658 : 0;
 
-        switch (mask) {
-          case 1:
-            return Math.min(val, 32767);
-          case 2:
-            return Math.min(val, 32767) + 32768;
-          default:
-            return 0;
-        }
-      });
-      for (let z = 0; z < depth; z++) {
-        volume.markSliceAsLoaded(z);
+      switch (mask) {
+        case 1:
+          return Math.min(val, 32767);
+        case 2:
+          return Math.min(val, 32767) + 32768;
+        default:
+          return 0;
       }
-
-      return volume;
     });
+    for (let z = 0; z < depth; z++) {
+      volume.markSliceAsLoaded(z);
+    }
+
+    return volume;
   }
 }
 
@@ -241,56 +239,50 @@ export class RsVolumeLoader implements DicomVolumeLoader {
     this.cache = cache;
   }
 
-  public loadMeta(): Promise<DicomMetadata> {
-    if (!this.series) return Promise.reject('Series is required');
+  public async loadMeta(): Promise<DicomMetadata> {
+    if (!this.series) throw new Error('Series is required');
 
-    return (this.cache
-      ? this.cache.get(this.series + '.meta')
-      : Promise.resolve()
-    )
-      .then((meta?: DicomMetadata | null) => {
-        return meta
-          ? meta
-          : this.client.request(`series/${this.series}/metadata`, {});
-      })
-      .then(meta => {
-        this.meta = meta;
-
-        if (this.cache) this.cache.put(this.series + '.meta', meta);
-
-        return meta;
-      });
+    let meta: DicomMetadata | undefined;
+    if (this.cache) {
+      const cache = this.cache.get(this.series + '.meta');
+      if (cache) meta = await cache;
+    }
+    if (!meta) {
+      meta = (await this.client.request(
+        `series/${this.series}/metadata`,
+        {}
+      )) as DicomMetadata;
+    }
+    this.meta = meta;
+    if (this.cache) this.cache.put(this.series + '.meta', meta);
+    return meta;
   }
 
-  public loadVolume(): Promise<DicomVolume> {
-    if (!this.series) return Promise.reject('Series is required');
+  public async loadVolume(): Promise<DicomVolume> {
+    if (!this.series) throw new Error('Series is required');
 
-    return (this.cache
-      ? this.cache.get(this.series + '.buffer')
-      : Promise.resolve()
-    )
-      .then((volume?: DicomVolume | null) => {
-        return volume
-          ? volume
-          : this.client.request(
-              `series/${this.series}/volume`,
-              {},
-              'arraybuffer'
-            );
-      })
-      .then(buffer => {
-        const meta = this.meta;
-        const volume = new DicomVolume(meta.voxelCount, meta.pixelFormat);
-        volume.setVoxelSize(meta.voxelSize);
-        if (meta.dicomWindow) volume.dicomWindow = meta.dicomWindow;
-        if (meta.estimatedWindow) volume.estimatedWindow = meta.estimatedWindow;
+    let buffer: ArrayBuffer | undefined;
+    if (this.cache) {
+      const cache = this.cache.get(this.series + '.buffer');
+      if (cache) buffer = await buffer;
+    }
+    if (!buffer) {
+      buffer = await this.client.request(
+        `series/${this.series}/volume`,
+        {},
+        'arraybuffer'
+      );
+    }
 
-        volume.assign(buffer);
+    const meta = this.meta;
+    const volume = new DicomVolume(meta.voxelCount, meta.pixelFormat);
+    volume.setVoxelSize(meta.voxelSize);
+    if (meta.dicomWindow) volume.dicomWindow = meta.dicomWindow;
+    if (meta.estimatedWindow) volume.estimatedWindow = meta.estimatedWindow;
+    volume.assign(buffer as ArrayBuffer);
 
-        if (this.cache) this.cache.put(this.series + '.buffer', buffer);
-
-        return volume;
-      });
+    if (this.cache) this.cache.put(this.series + '.buffer', buffer);
+    return volume;
   }
 }
 
@@ -384,7 +376,7 @@ export class CacheIndexedDB implements VolumeCache {
     return Promise.resolve();
   }
 
-  public get(key: string): Promise<DicomVolume | DicomMetadata | any> {
+  public get(key: string): Promise<any> {
     return new Promise((resolve, reject) => {
       this.queue.then(() => {
         if (!this.connection) throw new Error('IndexedDB not initialized');

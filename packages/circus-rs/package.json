@@ -48,6 +48,7 @@
     "validator": "^7.0.0"
   },
   "devDependencies": {
+    "@types/tinycolor2": "^1.4.0",
     "ajv": "^5.5.2",
     "axios": "^0.16.2",
     "benchmark": "^2.1.4",

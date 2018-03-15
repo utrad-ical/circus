@@ -1,6 +1,7 @@
 import DicomVolume from '../../../common/DicomVolume';
 import { PixelFormat, pixelFormatInfo } from '../../../common/PixelFormat';
 import { RsHttpClient } from '../../http-client/rs-http-client';
+import IndexedDbCache from '../../util/IndexedDbCache';
 
 export interface DicomVolumeLoader {
   loadMeta(): Promise<DicomMetadata>;
@@ -19,11 +20,6 @@ interface DicomMetadata {
   voxelCount: [number, number, number];
   voxelSize: [number, number, number];
   pixelFormat: number;
-}
-
-interface VolumeCache {
-  put(key: string, content: any): Promise<void>;
-  get(key: string): Promise<DicomVolume | DicomMetadata | any>;
 }
 
 export class MockLoader implements DicomVolumeLoader {
@@ -167,7 +163,7 @@ export class VesselSampleLoader implements DicomVolumeLoader {
     estimatedWindow: { level: 200, width: 600 }
   };
 
-  private cache: VolumeCache;
+  private cache: IndexedDbCache<any>;
 
   private coef: number;
 
@@ -177,7 +173,7 @@ export class VesselSampleLoader implements DicomVolumeLoader {
     this.coef = coef || 1;
   }
 
-  public useCache(cache: VolumeCache): void {
+  public useCache(cache: IndexedDbCache<any>): void {
     this.cache = cache;
   }
 
@@ -228,14 +224,14 @@ export class RsVolumeLoader implements DicomVolumeLoader {
   private series: string;
   private meta: DicomMetadata;
 
-  private cache: VolumeCache;
+  private cache: IndexedDbCache<ArrayBuffer | DicomMetadata>;
 
   constructor({ host, token, series }: any) {
     this.client = new RsHttpClient(host, token);
     this.series = series;
   }
 
-  public useCache(cache: VolumeCache): void {
+  public useCache(cache: IndexedDbCache<ArrayBuffer | DicomMetadata>): void {
     this.cache = cache;
   }
 
@@ -244,7 +240,9 @@ export class RsVolumeLoader implements DicomVolumeLoader {
 
     let meta: DicomMetadata | undefined;
     if (this.cache) {
-      const cache = this.cache.get(this.series + '.meta');
+      const cache = <Promise<DicomMetadata>>this.cache.get(
+        this.series + '.meta'
+      );
       if (cache) meta = await cache;
     }
     if (!meta) {
@@ -281,137 +279,7 @@ export class RsVolumeLoader implements DicomVolumeLoader {
     if (meta.estimatedWindow) volume.estimatedWindow = meta.estimatedWindow;
     volume.assign(buffer as ArrayBuffer);
 
-    if (this.cache) this.cache.put(this.series + '.buffer', buffer);
+    if (this.cache && buffer) this.cache.put(this.series + '.buffer', buffer);
     return volume;
-  }
-}
-
-/**
- * For Debug
- */
-export class CacheIndexedDB implements VolumeCache {
-  private connection: IDBDatabase | null;
-  private queue: Promise<void>;
-
-  private dbName: string;
-  private storeName: string = 'cache';
-
-  private static detected: IDBFactory;
-
-  public static detect(): IDBFactory {
-    if (!CacheIndexedDB.detected) {
-      const w = window as any;
-      const indexedDB =
-        w.indexedDB || w.mozIndexedDB || w.webkitIndexedDB || w.msIndexedDB;
-      if (!indexedDB)
-        throw Error('IndexedDB is not supported on this browser.');
-      CacheIndexedDB.detected = indexedDB;
-    }
-    return CacheIndexedDB.detected;
-  }
-
-  constructor(dbName: string = 'circus-rs-cache') {
-    this.dbName = dbName;
-    this.queue = Promise.resolve();
-    this.open();
-  }
-
-  public open(): void {
-    const openFunc = (): Promise<void> => {
-      return new Promise((resolve, reject) => {
-        const db = CacheIndexedDB.detect();
-        const openRequest = db.open(this.dbName);
-
-        openRequest.onerror = ev => {
-          console.log('Error on open database');
-          console.log(ev);
-        };
-        openRequest.onsuccess = ev => {
-          this.connection = (ev.target as any).result as IDBDatabase;
-          // console.log('OPEND');
-          resolve();
-        };
-        openRequest.onupgradeneeded = ev => {
-          this.connection = (ev.target as any).result as IDBDatabase;
-
-          const store = this.connection.createObjectStore(this.storeName, {
-            keyPath: 'key'
-          });
-          store.transaction.oncomplete = tranev => {
-            // console.log('CREATED');
-            resolve();
-          };
-        };
-      });
-    };
-
-    this.queue = this.queue.then(openFunc);
-  }
-
-  public put(key: string, content: any): Promise<void> {
-    const putFunc = () => {
-      if (!this.connection) throw new Error('IndexedDB not initialized');
-      const store = this.connection
-        .transaction(this.storeName, 'readwrite')
-        .objectStore(this.storeName);
-      store.put({
-        key: key,
-        content: content
-      });
-    };
-    this.queue = this.queue.then(putFunc);
-    return this.queue;
-  }
-
-  public delete(key: string): Promise<void> {
-    const deleteFunc = () => {
-      if (!this.connection) throw new Error('IndexedDB not initialized');
-      const store = this.connection
-        .transaction(this.storeName, 'readwrite')
-        .objectStore(this.storeName);
-      store.delete(key);
-    };
-    this.queue = this.queue.then(deleteFunc);
-
-    return Promise.resolve();
-  }
-
-  public get(key: string): Promise<any> {
-    return new Promise((resolve, reject) => {
-      this.queue.then(() => {
-        if (!this.connection) throw new Error('IndexedDB not initialized');
-        const store = this.connection
-          .transaction(this.storeName, 'readwrite')
-          .objectStore(this.storeName);
-
-        const request = store.get(key);
-        request.onerror = ev => {
-          resolve(undefined);
-        };
-        request.onsuccess = ev => {
-          // console.log("GET: "+key);
-          // console.log(request.result);
-          resolve(request.result ? request.result.content : undefined);
-        };
-      });
-    });
-  }
-
-  public drop(): void {
-    this.queue = this.queue.then(() => {
-      if (this.connection) this.connection.close();
-
-      this.connection = null;
-
-      const db = CacheIndexedDB.detect();
-
-      const request = db.deleteDatabase(this.dbName);
-      request.onerror = () => {
-        console.log('Drop failed');
-      };
-      request.onsuccess = ev => {
-        /* noop */
-      };
-    });
   }
 }

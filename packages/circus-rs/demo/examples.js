@@ -17,7 +17,7 @@ const transferFunctionSample = {
     { position: 658.0 / 65536.0, color: '#ff0000ff' },
     { position: 32767.9 / 65536.0, color: '#000000ff' },
     // under range [32768;65536] is hilited pixels
-	// But if interpolationMode is "vr-mask-custom", not used.
+    // But if interpolationMode is "vr-mask-custom", not used.
     { position: (0.0 + 32768.0) / 65536.0, color: '#00000000' },
     { position: (336.0 + 32768.0) / 65536.0, color: '#00000000' },
     { position: (336.1 + 32768.0) / 65536.0, color: '#666600ff' },
@@ -116,7 +116,7 @@ if (viewer) {
 Change interpolation mode を使用して、表示の変化を確認して下さい。
 --*/
 
-const cache = new rs.CacheIndexedDB();
+const cache = new rs.IndexedDbCache();
 
 // prepare volume loader
 const volumeLoader = new rs.RsVolumeLoader({
@@ -174,7 +174,7 @@ const loader = new rs.RsVolumeLoader({
   host: config.server
 });
 
-loader.useCache(new rs.CacheIndexedDB());
+loader.useCache(new rs.IndexedDbCache());
 
 //--@include Volume rendering common
 
@@ -182,7 +182,7 @@ imageSource.ready().then(() => {
   const state0 = viewer.getState();
   state0.transferFunction = transferFunctionSample.masked;
   // state0.interpolationMode = 'trilinear';
-  
+
   state0.subVolume = {
     offset: [0, 0, 0],
     dimension: [512, 512, 132]
@@ -236,7 +236,6 @@ imageSource.ready().then(() => {
     { position: 65536.0 / 65536.0, color: '#88ff00ff' }
   ];
   viewer.setState(state0);
-
 });
 
 /*--

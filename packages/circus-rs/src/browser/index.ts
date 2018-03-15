@@ -26,6 +26,8 @@ export * from '../browser/image-source/hybrid-image-source';
 export * from '../browser/image-source/gl-raw-volume-image-source';
 export * from '../browser/image-source/gl-raw-volume-image-source/volume-loader';
 
+export { default as IndexedDbCache } from '../browser/util/IndexedDbCache';
+
 export * from '../browser/tool/state/hand';
 export * from '../browser/tool/state/celestial-rotate';
 export * from '../browser/tool/state/window';

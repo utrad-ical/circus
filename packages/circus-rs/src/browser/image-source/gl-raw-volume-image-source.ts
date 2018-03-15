@@ -3,8 +3,7 @@ import { DicomMetadata } from './volume-image-source';
 import { ImageSource } from './image-source';
 import { Viewer } from '../viewer/viewer';
 import { ViewState, TransferFunctionEntry } from '../view-state';
-
-import { DicomVolumeLoader } from './gl-raw-volume-image-source/volume-loader';
+import { DicomVolumeLoader } from './DicomVolumeLoader';
 
 // WebGL shader source (GLSL)
 const vertexShaderSource = require('./gl-raw-volume-image-source/vertex-shader.vert');

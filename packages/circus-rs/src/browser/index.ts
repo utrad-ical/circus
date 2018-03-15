@@ -24,7 +24,7 @@ export * from '../browser/image-source/raw-volume-image-source';
 export * from '../browser/image-source/dynamic-image-source';
 export * from '../browser/image-source/hybrid-image-source';
 export * from '../browser/image-source/gl-raw-volume-image-source';
-export * from '../browser/image-source/gl-raw-volume-image-source/volume-loader';
+export * from '../browser/image-source/DicomVolumeLoader';
 
 export { default as IndexedDbCache } from '../browser/util/IndexedDbCache';
 

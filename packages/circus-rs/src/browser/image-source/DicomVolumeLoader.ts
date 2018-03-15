@@ -1,7 +1,7 @@
-import DicomVolume from '../../../common/DicomVolume';
-import { PixelFormat, pixelFormatInfo } from '../../../common/PixelFormat';
-import { RsHttpClient } from '../../http-client/rs-http-client';
-import IndexedDbCache from '../../util/IndexedDbCache';
+import DicomVolume from '../../common/DicomVolume';
+import { PixelFormat, pixelFormatInfo } from '../../common/PixelFormat';
+import { RsHttpClient } from '../http-client/rs-http-client';
+import IndexedDbCache from '../util/IndexedDbCache';
 
 export interface DicomVolumeLoader {
   loadMeta(): Promise<DicomMetadata>;

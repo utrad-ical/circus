@@ -143,7 +143,7 @@ const maskLoader = new rs.VesselSampleLoader({
 maskLoader.useCache(cache);
 
 // wrap loaders
-const loader = new rs.MixLoaderSample({
+const loader = new rs.MixVolumeLoader({
   volumeLoader: volumeLoader,
   maskLoader: maskLoader
 });
@@ -246,7 +246,7 @@ imageSource.ready().then(() => {
 モック
 --*/
 
-const loader = new rs.MockLoader();
+const loader = new rs.MockVolumeLoader();
 
 //--@include Volume rendering common
 

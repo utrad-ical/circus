@@ -5,26 +5,42 @@
 import './circus-rs.less';
 import './assets/icons/circus-rs-font-glyphs.less';
 
-export * from '../browser/viewer/viewer';
-export * from '../browser/composition';
+export * from './viewer/viewer';
+export * from './composition';
 
-export * from '../browser/annotation/corner-text';
-export * from '../browser/annotation/voxel-cloud';
-export * from '../browser/annotation/reference-line';
+export * from './annotation/corner-text';
+export * from './annotation/voxel-cloud';
+export * from './annotation/reference-line';
 
 export { default as RawData } from '../common/RawData';
 export { default as AnisotropicRawData } from '../common/AnisotropicRawData';
 export * from '../common/PixelFormat';
 export * from '../common/geometry';
 
-export * from '../browser/http-client/rs-http-client';
+export * from './http-client/rs-http-client';
 
-export * from '../browser/image-source/mock-image-source';
-export * from '../browser/image-source/raw-volume-image-source';
-export * from '../browser/image-source/dynamic-image-source';
-export * from '../browser/image-source/hybrid-image-source';
-export * from '../browser/image-source/gl-raw-volume-image-source';
-export * from '../browser/image-source/DicomVolumeLoader';
+export * from './image-source/mock-image-source';
+export * from './image-source/raw-volume-image-source';
+export * from './image-source/dynamic-image-source';
+export * from './image-source/hybrid-image-source';
+export * from './image-source/gl-raw-volume-image-source';
+
+export {
+  default as DicomVolumeLoader,
+  DicomMetadata
+} from '../browser/image-source/volume-loader/DicomVolumeLoader';
+export {
+  default as MockVolumeLoader
+} from './image-source/volume-loader/MockVolumeLoader';
+export {
+  default as MixVolumeLoader
+} from './image-source/volume-loader/MixVolumeLoader';
+export {
+  default as RsVolumeLoader
+} from './image-source/volume-loader/RsVolumeLoader';
+export {
+  default as VesselSampleLoader
+} from './image-source/volume-loader/VesselSampleLoader';
 
 export { default as IndexedDbCache } from '../browser/util/IndexedDbCache';
 

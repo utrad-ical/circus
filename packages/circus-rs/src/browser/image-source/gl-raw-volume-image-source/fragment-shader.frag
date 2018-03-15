@@ -1,13 +1,16 @@
 precision mediump float;
 
 uniform vec3 uVoxelSizeInverse;
-uniform vec3 uVolumeDimension; // draw volume size (sub volume size), on voxel coords system.
-uniform vec3 uVolumeOffset; // draw volume offset (sub volume offset), on voxel coords system.
+
+// draw volume size (sub volume size), on voxel coords system.
+uniform vec3 uVolumeDimension;
+
+// draw volume offset (sub volume offset), on voxel coords system.
+uniform vec3 uVolumeOffset;
 
 uniform sampler2D uVolumeTextureSampler;
 uniform vec2 uTextureSize;
 uniform vec2 uSliceGridSize;
-// uniform vec2 uSliceSize;
 
 uniform sampler2D uTransferFunctionSampler;
 
@@ -145,10 +148,9 @@ vec4 getColorFromPixelValue(float pixelValue)
   return texture2D(uTransferFunctionSampler, vec2(t / 256.0, s / 256.0));
 }
 
-/** *************************************************************************************************
-* If using masked value and trilinear filtering, the marking color becomes too weak.
-* Parse pixel value as if the first bit is mask.
-* ****************************************************************************************************/
+// If using masked value and trilinear filtering,
+// the marking color appears too weak.
+// Parse pixel values as if the first bit is mask.
 vec2 getValueAndMaskAt(float x, float y, float z)
 {
   float sliceColNo = mod(z, uSliceGridSize[0]);
@@ -158,7 +160,9 @@ vec2 getValueAndMaskAt(float x, float y, float z)
   float t = y / uTextureSize[1] + sliceRowNo / uSliceGridSize[1];
 
   vec4 pixelLuminanceAlphaValue = texture2D(uVolumeTextureSampler, vec2(s,t));
-  float pixelValue = (pixelLuminanceAlphaValue.a * 256.0 + pixelLuminanceAlphaValue.r) * 256.0;
+  float pixelValue = (
+    pixelLuminanceAlphaValue.a * 256.0 + pixelLuminanceAlphaValue.r
+  ) * 256.0;
 
   if (pixelValue > 32767.0) {
       return vec2(pixelValue - 32767.0, 1.0);

@@ -1,5 +1,5 @@
 import * as tinycolor from 'tinycolor2';
-import { TransferFunctionEntry } from '../../view-state';
+import { TransferFunction } from '../../view-state';
 
 interface RgbaColor {
   r: number;
@@ -27,8 +27,8 @@ const mix = function(
  * @param steps Number of steps to split
  * @return The list of RGBA colors
  */
-export function buildTransferFunctionMap(
-  gradation: TransferFunctionEntry[],
+export default function buildTransferFunctionMap(
+  gradation: TransferFunction,
   steps = 256
 ): Uint8Array {
   if (!Array.isArray(gradation) || gradation.length === 0)

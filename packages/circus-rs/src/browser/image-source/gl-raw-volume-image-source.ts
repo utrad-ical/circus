@@ -15,7 +15,7 @@ import * as mat4 from 'gl-matrix/src/gl-matrix/mat4.js';
 
 import GLContextManager from './gl-raw-volume-image-source/gl-context-manager';
 
-import { buildTransferFunctionMap } from './gl-raw-volume-image-source/build-transfer-function';
+import buildTransferFunctionMap from './gl-raw-volume-image-source/buildTransferFunctionMap';
 
 interface Camera {
   position: number[];

@@ -8,28 +8,27 @@ import { ViewWindow } from '../../common/ViewWindow';
  * DynamicImageSource fetches the MPR image from RS server.
  */
 export class DynamicImageSource extends RsHttpLoaderImageSource {
-  private requestScan(
+  private async requestScan(
     series: string,
     section: Section,
     useInterpolation: boolean,
     window: ViewWindow,
     size: Vector2D
   ): Promise<Uint8Array> {
-    return this.loader
-      .request(
-        `series/${series}/scan`,
-        {
-          origin: section.origin.join(','),
-          xAxis: section.xAxis.join(','),
-          yAxis: section.yAxis.join(','),
-          interpolation: useInterpolation ? '1' : '0',
-          size: size.join(','),
-          ww: window.width,
-          wl: window.level
-        },
-        'arraybuffer'
-      )
-      .then(res => new Uint8Array(res));
+    const res = await this.loader.request(
+      `series/${series}/scan`,
+      {
+        origin: section.origin.join(','),
+        xAxis: section.xAxis.join(','),
+        yAxis: section.yAxis.join(','),
+        interpolation: useInterpolation ? '1' : '0',
+        size: size.join(','),
+        ww: window.width,
+        wl: window.level
+      },
+      'arraybuffer'
+    );
+    return new Uint8Array(res);
   }
 
   protected scan(viewState: ViewState, outSize: Vector2D): Promise<Uint8Array> {

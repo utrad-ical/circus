@@ -14,8 +14,8 @@ export class HybridImageSource extends VolumeImageSource {
   private volSource: RawVolumeImageSource;
   private volumeReady: boolean = false;
 
-  public scan(param): Promise<Uint8Array> {
-    return Promise.resolve(new Uint8Array(0)); // never called
+  public async scan(param): Promise<Uint8Array> {
+    return new Uint8Array(0); // never called
   }
 
   constructor(params) {

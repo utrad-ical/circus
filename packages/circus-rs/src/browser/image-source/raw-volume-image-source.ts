@@ -28,31 +28,32 @@ export class RawVolumeImageSource extends RsHttpLoaderImageSource {
   /**
    * Loader function passed to the AsyncLruCache.
    */
-  private static loadVolume(
+  private static async loadVolume(
     series: string,
     meta: DicomMetadata,
     loader: RsHttpClient
   ): Promise<DicomVolume> {
-    return loader
-      .request(`series/${series}/volume`, {}, 'arraybuffer')
-      .then(buffer => {
-        const pixelFormat: PixelFormat = meta.pixelFormat;
-        const volume = new DicomVolume(meta.voxelCount, pixelFormat);
-        volume.setVoxelSize(meta.voxelSize);
-        volume.dicomWindow = meta.dicomWindow;
-        volume.estimatedWindow = meta.estimatedWindow;
-        const bytesPerSlice =
-          meta.voxelCount[0] *
-          meta.voxelCount[1] *
-          pixelFormatInfo(pixelFormat).bpp;
-        for (let i = 0; i < meta.voxelCount[2]; i++) {
-          volume.insertSingleImage(
-            i,
-            buffer.slice(bytesPerSlice * i, bytesPerSlice * (i + 1))
-          );
-        }
-        return volume;
-      });
+    const buffer = await loader.request(
+      `series/${series}/volume`,
+      {},
+      'arraybuffer'
+    );
+    const pixelFormat: PixelFormat = meta.pixelFormat;
+    const volume = new DicomVolume(meta.voxelCount, pixelFormat);
+    volume.setVoxelSize(meta.voxelSize);
+    volume.dicomWindow = meta.dicomWindow;
+    volume.estimatedWindow = meta.estimatedWindow;
+    const bytesPerSlice =
+      meta.voxelCount[0] *
+      meta.voxelCount[1] *
+      pixelFormatInfo(pixelFormat).bpp;
+    for (let i = 0; i < meta.voxelCount[2]; i++) {
+      volume.insertSingleImage(
+        i,
+        buffer.slice(bytesPerSlice * i, bytesPerSlice * (i + 1))
+      );
+    }
+    return volume;
   }
 
   constructor({ client, series }: RsHttpLoaderOptions) {
@@ -96,12 +97,13 @@ export class RawVolumeImageSource extends RsHttpLoaderImageSource {
     // return Promise.resolve(imageBuffer);
   }
 
-  protected onMetaLoaded(): Promise<void> {
+  protected async onMetaLoaded(): Promise<void> {
     // Loads the entire volume, which can take many seconds
-    return RawVolumeImageSource.sharedCache
-      .get(this.series, this.meta, this.loader)
-      .then(volume => {
-        this.volume = volume;
-      });
+    const volume = await RawVolumeImageSource.sharedCache.get(
+      this.series,
+      this.meta,
+      this.loader
+    );
+    this.volume = volume;
   }
 }

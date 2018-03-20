@@ -5,7 +5,7 @@ import Viewer from '../../viewer/Viewer';
 import MprImageSource from '../../image-source/MprImageSource';
 import * as su from '../../section-util';
 import { Vector2D, Vector3D } from '../../../common/geometry';
-import { vec3 } from 'gl-matrix';
+import { vec2, vec3 } from 'gl-matrix';
 import { draw3DLine } from '../../volume-util';
 import ViewerEvent from '../../viewer/ViewerEvent';
 
@@ -43,7 +43,7 @@ export default class VoxelCloudToolBase extends DraggableTool {
       point
     );
     // from volume coordinate in millimeter to index coordinate
-    const indexOfVol = su.convertPointToIndex(mmOfVol, voxelSize);
+    const indexOfVol = su.convertPointToIndex(mmOfVol, voxelSize).toArray();
     // to local coordinate of the cloud (simple translation)
     const indexOfCloud = vec3.subtract(
       indexOfVol,

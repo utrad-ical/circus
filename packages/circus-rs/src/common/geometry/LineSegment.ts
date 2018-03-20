@@ -1,9 +1,9 @@
-import { Vector3D } from './Vector';
+import { Vector3 } from 'three';
 
 /**
  * Represents one line segment.
  */
 export interface LineSegment {
-  origin: Vector3D;
-  vector: Vector3D;
+  origin: Vector3;
+  vector: Vector3;
 }

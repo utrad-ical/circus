@@ -1,4 +1,5 @@
 import { Vector2D, Vector3D } from './Vector';
+import { Vector3 } from 'three';
 import { LineSegment } from './LineSegment';
 import { Section, intersectionOfLineSegmentAndPlane } from './Section';
 
@@ -79,14 +80,15 @@ export function intersectionOfBoxAndPlane(
   ];
 
   for (let i = 0; i < 12; i++) {
-    const from = vertexes[edgeIndexes[i][0]];
-    const to = vertexes[edgeIndexes[i][1]];
+    const from = new Vector3().fromArray(vertexes[edgeIndexes[i][0]]);
+    const to = new Vector3().fromArray(vertexes[edgeIndexes[i][1]]);
     const edge: LineSegment = {
       origin: from,
-      vector: [to[0] - from[0], to[1] - from[1], to[2] - from[2]]
+      vector: new Vector3().subVectors(to, from)
     };
     const intersection = intersectionOfLineSegmentAndPlane(section, edge);
-    if (intersection !== null) intersections.push(intersection);
+    if (intersection !== null)
+      intersections.push(intersection.toArray() as Vector3D);
   }
 
   return intersections.length === 0 ? null : intersections;

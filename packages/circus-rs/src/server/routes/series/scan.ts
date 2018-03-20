@@ -11,6 +11,7 @@ import * as compress from 'koa-compress';
 import validate from '../middleware/Validate';
 import { ValidatorRules } from '../../../common/Validator';
 import { ServerHelpers } from '../../ServerHelpers';
+import { Vector3 } from 'three';
 
 /**
  * Handles 'scan' endpoint which returns MPR image for
@@ -62,7 +63,11 @@ export default function scan(helpers: ServerHelpers): koa.Middleware {
     } else {
       buf = new (vol.getPixelFormatInfo()).arrayClass(size[0] * size[1]);
     }
-    const section: Section = { origin, xAxis, yAxis };
+    const section: Section = {
+      origin: new Vector3().fromArray(origin),
+      xAxis: new Vector3().fromArray(xAxis),
+      yAxis: new Vector3().fromArray(yAxis)
+    };
     vol.scanObliqueSection(section, size, buf, interpolation, ww, wl);
 
     // Output

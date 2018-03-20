@@ -2,6 +2,7 @@ import DraggableTool from '../DraggableTool';
 import ViewerEvent from '../../viewer/ViewerEvent';
 import { MprViewState } from '../../ViewState';
 import { translateSection } from '../../../common/geometry';
+import { Vector3 } from 'three';
 
 /**
  * HandTool is a tool which responds to a mouse drag and moves the
@@ -41,16 +42,12 @@ export default class HandTool extends DraggableTool {
   ): MprViewState {
     const section = state.section;
     if (!section) return state;
-    const eu = [
-      section.xAxis[0] / vp[0],
-      section.xAxis[1] / vp[0],
-      section.xAxis[2] / vp[0]
-    ];
-    const ev = [
-      section.yAxis[0] / vp[1],
-      section.yAxis[1] / vp[1],
-      section.yAxis[2] / vp[1]
-    ];
+
+    const xAxis = section.xAxis.toArray();
+    const yAxis = section.yAxis.toArray();
+
+    const eu = [xAxis[0] / vp[0], xAxis[1] / vp[0], xAxis[2] / vp[0]];
+    const ev = [yAxis[0] / vp[1], yAxis[1] / vp[1], yAxis[2] / vp[1]];
 
     const [dx2, dy2] = p;
     const [dx, dy, dz] = [
@@ -61,7 +58,7 @@ export default class HandTool extends DraggableTool {
 
     const result: MprViewState = {
       ...state,
-      section: translateSection(section, [dx, dy, dz])
+      section: translateSection(section, new Vector3(dx, dy, dz))
     };
     return result;
   }

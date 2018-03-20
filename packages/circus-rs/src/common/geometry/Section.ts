@@ -1,38 +1,32 @@
-import { vec3 } from 'gl-matrix';
-import { Vector2D, Vector3D } from './Vector';
+import { Vector2, Vector3 } from 'three';
 import { LineSegment } from './LineSegment';
 
 /**
  * Section determines the MRP section of a volume.
  */
 export interface Section {
-  origin: Vector3D;
-  xAxis: Vector3D; // in millimeters
-  yAxis: Vector3D; // in millimeters
+  origin: Vector3;
+  xAxis: Vector3; // in millimeters
+  yAxis: Vector3; // in millimeters
 }
 
 export function projectPointOntoSection(
   section: Section,
-  point: Vector3D
-): Vector2D {
-  const p = vec3.subtract(vec3.create(), point, section.origin);
-  return [
-    vec3.dot(vec3.normalize(vec3.create(), section.xAxis), p),
-    vec3.dot(vec3.normalize(vec3.create(), section.yAxis), p)
-  ];
+  point: Vector3
+): Vector2 {
+  const p = new Vector3().subVectors(point, section.origin);
+  return new Vector2(
+    section.xAxis.normalize().dot(p),
+    section.yAxis.normalize().dot(p)
+  );
 }
 
 /**
  * Performs a parallel translation on a given section.
  */
-export function translateSection(section: Section, delta: Vector3D): Section {
-  const origin: [number, number, number] = [
-    section.origin[0] + delta[0],
-    section.origin[1] + delta[1],
-    section.origin[2] + delta[2]
-  ];
+export function translateSection(section: Section, delta: Vector3): Section {
   return {
-    origin,
+    origin: section.origin.clone().add(delta),
     xAxis: section.xAxis,
     yAxis: section.yAxis
   };
@@ -47,17 +41,17 @@ export function translateSection(section: Section, delta: Vector3D): Section {
 export function intersectionOfLineSegmentAndPlane(
   section: Section,
   line: LineSegment
-): Vector3D | null {
+): Vector3 | null {
   const nv = normalVector(section);
   const P = section.origin;
   const endA = line.origin;
-  const endB = vec3.add(vec3.create(), line.origin, line.vector);
+  const endB = new Vector3().addVectors(line.origin, line.vector);
 
-  const vecPA = vec3.subtract(vec3.create(), P, endA);
-  const vecPB = vec3.subtract(vec3.create(), P, endB);
+  const vecPA = new Vector3().subVectors(P, endA);
+  const vecPB = new Vector3().subVectors(P, endB);
 
-  const dotNvA = vec3.dot(vecPA, nv);
-  const dotNvB = vec3.dot(vecPB, nv);
+  const dotNvA = vecPA.dot(nv);
+  const dotNvB = vecPB.dot(nv);
 
   if (dotNvA === 0 && dotNvB === 0) {
     // the line is parallel to the section
@@ -70,29 +64,25 @@ export function intersectionOfLineSegmentAndPlane(
     return null;
   } else {
     const rate = Math.abs(dotNvA) / (Math.abs(dotNvA) + Math.abs(dotNvB));
-    const vecAX = vec3.scale(vec3.create(), line.vector, rate);
+    const vecAX = line.vector.clone().multiplyScalar(rate);
     // the intersection point
-    return vec3.add(vec3.create(), endA, vecAX) as Vector3D;
+    return new Vector3().addVectors(endA, vecAX);
   }
 }
 
 /**
- * Returns true if the given point is withing the given section.
+ * Returns true if the given point is within the given section.
  */
 export function intersectionPointWithinSection(
   section: Section,
-  pointOnSection: Vector2D
+  pointOnSection: Vector3
 ): boolean {
   const o = section.origin;
-  const op = [
-    pointOnSection[0] - o[0],
-    pointOnSection[1] - o[1],
-    pointOnSection[2] - o[2]
-  ];
-  const lenX = vec3.len(section.xAxis);
-  const lenY = vec3.len(section.yAxis);
-  const dotX = vec3.dot(op, section.xAxis);
-  const dotY = vec3.dot(op, section.yAxis);
+  const op = new Vector3().subVectors(pointOnSection, o);
+  const lenX = section.xAxis.length();
+  const lenY = section.yAxis.length();
+  const dotX = section.xAxis.dot(op);
+  const dotY = section.yAxis.dot(op);
   return 0 <= dotX && dotX <= lenX * lenX && 0 <= dotY && dotY <= lenY * lenY;
 }
 
@@ -103,7 +93,7 @@ export function intersectionPointWithinSection(
 export function intersectionOfLineSegmentAndSection(
   section: Section,
   line: LineSegment
-): Vector3D | null {
+): Vector3 | null {
   const intersection = intersectionOfLineSegmentAndPlane(section, line);
   if (!intersection) return null;
   return intersectionPointWithinSection(section, intersection)
@@ -123,7 +113,7 @@ export function intersectionOfTwoSections(
   base: Section,
   target: Section
 ): LineSegment | null {
-  const intersections: Vector3D[] = [];
+  const intersections: Vector3[] = [];
 
   // Prepare the 4 edges (line segments) of the target section.
   const tOrigin = target.origin;
@@ -131,25 +121,23 @@ export function intersectionOfTwoSections(
   // 0--1
   // |  |
   // 3--2
-  const vertexes: Vector3D[] = [
+  //
+  // prettier-ignore
+  const vertexes: Vector3[] = [
     tOrigin,
-    vec3.add(vec3.create(), tOrigin, target.xAxis) as Vector3D,
-    vec3.add(
-      vec3.create(),
-      vec3.add(vec3.create(), tOrigin, target.xAxis),
-      target.yAxis
-    ) as Vector3D,
-    vec3.add(vec3.create(), tOrigin, target.yAxis) as Vector3D
+    tOrigin.clone().add(target.xAxis),
+    tOrigin.clone().add(target.xAxis).add(target.yAxis),
+    tOrigin.clone().add(target.yAxis)
   ];
 
-  const edgeIndexes: Vector2D[] = [[0, 1], [1, 2], [2, 3], [3, 0]];
+  const edgeIndexes: number[][] = [[0, 1], [1, 2], [2, 3], [3, 0]];
 
   for (let i = 0; i < 4; i++) {
     const from = vertexes[edgeIndexes[i][0]];
     const to = vertexes[edgeIndexes[i][1]];
     const edge: LineSegment = {
       origin: from,
-      vector: [to[0] - from[0], to[1] - from[1], to[2] - from[2]]
+      vector: new Vector3().subVectors(to, from)
     };
     const intersection = intersectionOfLineSegmentAndPlane(base, edge);
     if (intersection !== null) intersections.push(intersection);
@@ -168,14 +156,10 @@ export function intersectionOfTwoSections(
   // Now intersections should normally contain 2 intersection points,
   // but when there are more, find one which is different from the first
   for (let i = 1; i < intersections.length; i++) {
-    if (vec3.distance(intersections[0], intersections[i]) > 0.0001) {
+    if (intersections[0].distanceTo(intersections[i]) > 0.0001) {
       return {
         origin: intersections[0],
-        vector: vec3.sub(
-          vec3.create(),
-          intersections[i],
-          intersections[0]
-        ) as Vector3D
+        vector: new Vector3().subVectors(intersections[i], intersections[0])
       };
     }
   }
@@ -186,9 +170,6 @@ export function intersectionOfTwoSections(
 /**
  * Calculates the normal vector of the given section.
  */
-export function normalVector(section: Section): Vector3D {
-  let nv = vec3.create();
-  vec3.cross(nv, section.xAxis, section.yAxis);
-  vec3.normalize(nv, nv);
-  return nv as Vector3D;
+export function normalVector(section: Section): Vector3 {
+  return section.xAxis.cross(section.yAxis).normalize();
 }

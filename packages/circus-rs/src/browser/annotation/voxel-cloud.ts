@@ -22,6 +22,7 @@ import { scanBoundingBox } from '../volume-util';
 import { convertSectionToIndex } from '../section-util';
 import MprImageSource from '../image-source/MprImageSource';
 import RawData from '../../common/RawData';
+import { Vector3 } from 'three';
 
 /**
  * VoxelCloud is a type of Annotation that can be registered to a Composition.
@@ -257,21 +258,21 @@ export class VoxelCloud implements Annotation {
     );
 
     const cloudSection: Section = {
-      origin: [
+      origin: new Vector3(
         boundingOrigin[0] - mmOrigin[0],
         boundingOrigin[1] - mmOrigin[1],
         boundingOrigin[2] - mmOrigin[2]
-      ],
-      xAxis: [
+      ),
+      xAxis: new Vector3(
         boundingXAxisEnd[0] - boundingOrigin[0],
         boundingXAxisEnd[1] - boundingOrigin[1],
         boundingXAxisEnd[2] - boundingOrigin[2]
-      ],
-      yAxis: [
+      ),
+      yAxis: new Vector3(
         boundingYAxisEnd[0] - boundingOrigin[0],
         boundingYAxisEnd[1] - boundingOrigin[1],
         boundingYAxisEnd[2] - boundingOrigin[2]
-      ]
+      )
     };
     const indexCloudSection: Section = convertSectionToIndex(
       cloudSection,

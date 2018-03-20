@@ -1,4 +1,4 @@
-import { mat4, vec3 } from 'gl-matrix';
+import { Vector2, Vector3 } from 'three';
 import DraggableTool from '../DraggableTool';
 import Viewer from '../../viewer/Viewer';
 import ViewState from '../../ViewState';
@@ -52,62 +52,34 @@ export default class ZoomTool extends DraggableTool {
           vp,
           center
         );
-        this.scale(section, stepFactor ** step, focus);
-        viewer.setState(state);
+        const newState = {
+          ...state,
+          section: this.scaleSection(
+            section,
+            stepFactor ** step,
+            new Vector3().fromArray(focus)
+          )
+        };
+        viewer.setState(newState);
         break;
       case 'vr':
         break;
     }
   }
 
-  private scale(
+  private scaleSection(
     section: Section,
     scale: number,
-    center: [number, number, number]
-  ): void {
-    const operation = [
-      (t: number[]) =>
-        mat4.translate(t, t, vec3.scale(vec3.create(), center, -1)),
-      (t: number[]) => mat4.scale(t, t, vec3.fromValues(scale, scale, scale)),
-      (t: number[]) => mat4.translate(t, t, center)
-    ]
-      .reverse()
-      .reduce((p, t) => t(p), mat4.create());
-
-    const xEndPoint = vec3.add(vec3.create(), section.origin, section.xAxis);
-    const yEndPoint = vec3.add(vec3.create(), section.origin, section.yAxis);
-    const [o, x, y] = [section.origin, xEndPoint, yEndPoint].map(p =>
-      vec3.transformMat4(vec3.create(), p, operation)
-    );
-    const xAxis = vec3.subtract(vec3.create(), x, o);
-    const yAxis = vec3.subtract(vec3.create(), y, o);
-
-    vec3.copy(section.origin, o);
-    vec3.copy(section.xAxis, xAxis);
-    vec3.copy(section.yAxis, yAxis);
+    center: Vector3
+  ): Section {
+    return {
+      origin: section.origin
+        .clone()
+        .sub(center)
+        .multiplyScalar(scale)
+        .add(center),
+      xAxis: section.xAxis.clone().multiplyScalar(scale),
+      yAxis: section.yAxis.clone().multiplyScalar(scale)
+    };
   }
-
-  /*
-	private calcScaleRate(src: VolumeImageSource, viewState: ViewState): number {
-		const sw = vec3.len(viewState.section.xAxis);
-		const iw = src.mmDim()[0];
-		return iw / sw;
-	}
-
-	private resetZoomState(viewer: Viewer) {
-		const viewState = viewer.getState();
-		if (typeof viewState.zoom !== 'undefined') {
-
-			this.zoomStep(viewer, 0);
-
-			let state = viewer.getState();
-			state.section.origin[0] -= state.zoom.x;
-			state.section.origin[1] -= state.zoom.y;
-			state.section.origin[2] -= state.zoom.z;
-
-			delete state.zoom;
-			viewer.setState(state);
-		}
-	}
-	*/
 }

@@ -1,4 +1,5 @@
 import { mat4, vec3 } from 'gl-matrix';
+import { Vector3 } from 'three';
 import DraggableTool from '../DraggableTool';
 import ViewerEvent from '../../viewer/ViewerEvent';
 import { Section } from '../../../common/geometry';
@@ -38,44 +39,53 @@ export default class CelestialRotateTool extends DraggableTool {
 
   private rotateAroundYAxis(section: Section, deg: number): Section {
     const radian = Math.PI / 180.0 * deg;
-    const end0 = section.xAxis.concat();
+    const end0 = section.xAxis.clone();
 
     // rotate
     const transform = mat4.rotate(
       mat4.create(),
       mat4.create(),
       radian,
-      section.yAxis
+      section.yAxis.toArray()
     );
-    vec3.transformMat4(section.xAxis, section.xAxis, transform);
+    const newXAxis = vec3.transformMat4(
+      vec3.create(),
+      section.xAxis.toArray(),
+      transform
+    );
+    section.xAxis = new Vector3().fromArray(newXAxis);
 
-    const end1 = section.xAxis.concat();
+    const end1 = section.xAxis.clone();
 
-    section.origin[0] -= (end1[0] - end0[0]) / 2;
-    section.origin[1] -= (end1[1] - end0[1]) / 2;
-    section.origin[2] -= (end1[2] - end0[2]) / 2;
-
+    section.origin.sub(
+      new Vector3().subVectors(end1, end0).multiplyScalar(0.5)
+    );
     return section;
   }
 
   private rotateAroundXAxis(section: Section, deg: number): Section {
     const radian = Math.PI / 180.0 * deg;
-    const end0 = section.yAxis.concat();
+    const end0 = section.yAxis.clone();
 
     // rotate
     const transform = mat4.rotate(
       mat4.create(),
       mat4.create(),
       radian,
-      section.xAxis
+      section.xAxis.toArray()
     );
-    vec3.transformMat4(section.yAxis, section.yAxis, transform);
+    const newYAxis = vec3.transformMat4(
+      vec3.create(),
+      section.yAxis.toArray(),
+      transform
+    );
+    section.yAxis = new Vector3().fromArray(newYAxis);
 
-    const end1 = section.yAxis.concat();
+    const end1 = section.yAxis.clone();
 
-    section.origin[0] -= (end1[0] - end0[0]) / 2;
-    section.origin[1] -= (end1[1] - end0[1]) / 2;
-    section.origin[2] -= (end1[2] - end0[2]) / 2;
+    section.origin.sub(
+      new Vector3().subVectors(end1, end0).multiplyScalar(0.5)
+    );
 
     return section;
   }

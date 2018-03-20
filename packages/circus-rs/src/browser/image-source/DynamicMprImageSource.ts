@@ -43,9 +43,9 @@ export default class DynamicMprImageSource extends MprImageSource {
     const res = await this.rsClient.request(
       `series/${series}/scan`,
       {
-        origin: section.origin.join(','),
-        xAxis: section.xAxis.join(','),
-        yAxis: section.yAxis.join(','),
+        origin: section.origin.toArray().join(','),
+        xAxis: section.xAxis.toArray().join(','),
+        yAxis: section.yAxis.toArray().join(','),
         interpolation: useInterpolation ? '1' : '0',
         size: size.join(','),
         ww: window.width,

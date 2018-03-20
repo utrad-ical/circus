@@ -2,7 +2,11 @@ import DicomVolume from '../../common/DicomVolume';
 import { DicomVolumeMetadata } from './volume-loader/DicomVolumeLoader';
 import ImageSource from './ImageSource';
 import Viewer from '../viewer/Viewer';
-import ViewState, { VrViewState, TransferFunctionEntry } from '../ViewState';
+import ViewState, {
+  VrViewState,
+  TransferFunctionEntry,
+  TransferFunction
+} from '../ViewState';
 import DicomVolumeLoader from './volume-loader/DicomVolumeLoader';
 
 // WebGL shader source (GLSL)
@@ -299,7 +303,7 @@ export default class VolumeRenderingImageSource extends ImageSource {
    * viewState.rotate
    */
   // private debugCount: number = 0;
-  private createCamera(viewState): Camera {
+  private createCamera(viewState: VrViewState): Camera {
     const [
       mmVolumeWidth,
       mmVolumeHeight,
@@ -377,7 +381,7 @@ export default class VolumeRenderingImageSource extends ImageSource {
     return camera;
   }
 
-  private baseMatrix(m?: mat4): mat4 {
+  private baseMatrix(m?: any): any {
     m = m || mat4.create();
 
     // 2. scale to world coords
@@ -404,7 +408,7 @@ export default class VolumeRenderingImageSource extends ImageSource {
    * each intensity value in the original image represented as a Uint16 value.
    * The texture size is 256 x 256 x 4bpp (fixed) or 240KiB.
    */
-  protected updateTransferFunction(transferFunction): void {
+  protected updateTransferFunction(transferFunction: TransferFunction): void {
     const glh = this.glHandler;
     const gl = glh.gl;
 
@@ -447,14 +451,17 @@ export default class VolumeRenderingImageSource extends ImageSource {
    * As a workaround, we use gl.LUMINANCE_ALPHA format
    * which is 16bit per texel. (We absolutely need to disable interpolation!)
    */
-  public bufferVolumeTexture(gl, volume): VolumeTexture {
+  public bufferVolumeTexture(
+    gl: WebGLRenderingContext,
+    volume: DicomVolume
+  ): VolumeTexture {
     const [width, height, depth] = volume.getDimension();
 
     // Calculates the number of tile rows and columns required to store the
     // entire volume.
 
     // Returns ceil(log2(n)).
-    const getMinPower2 = n => {
+    const getMinPower2 = (n: number) => {
       let m = 0;
       while (1 << ++m < n);
       return m;
@@ -484,6 +491,8 @@ export default class VolumeRenderingImageSource extends ImageSource {
     ];
 
     const texture = gl.createTexture();
+    if (!texture) throw new Error('Failed to create volume texture');
+
     gl.bindTexture(gl.TEXTURE_2D, texture);
 
     const texBuffer = new Uint8Array((textureSize[0] * textureSize[1]) << 1);
@@ -571,7 +580,13 @@ export default class VolumeRenderingImageSource extends ImageSource {
     gl.enable(gl.DEPTH_TEST);
   }
 
-  private updateVolumeBoxBuffer({ dimension, offset }): void {
+  private updateVolumeBoxBuffer({
+    dimension,
+    offset
+  }: {
+    dimension: number[];
+    offset: number[];
+  }): void {
     // calculated in world-coords
 
     const glh = this.glHandler;

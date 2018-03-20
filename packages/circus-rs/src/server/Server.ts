@@ -25,7 +25,7 @@ import metadata from './routes/series/metadata';
 import scan from './routes/series/scan';
 import volume from './routes/series/volume';
 
-export function createSeriesRouter(helpers): Router {
+export function createSeriesRouter(helpers: ServerHelpers): Router {
   const router = new Router();
   router.get('/metadata', metadata(helpers));
   router.get('/scan', scan(helpers));
@@ -33,7 +33,7 @@ export function createSeriesRouter(helpers): Router {
   return router;
 }
 
-function loadRoute(moduleName, helpers): Koa.Middleware {
+function loadRoute(moduleName: string, helpers: ServerHelpers): Koa.Middleware {
   const middleware = require(`./routes/${moduleName}`).default;
   return middleware(helpers);
 }

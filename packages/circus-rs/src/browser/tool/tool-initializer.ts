@@ -9,9 +9,9 @@ import EraserTool from './cloud/EraserTool';
 import BucketTool from './cloud/BrushTool';
 import VrRotateZoomTool from './state/VrRotateZoomTool';
 
-const toolCollection = {};
+const toolCollection: { [toolName: string]: Tool } = {};
 
-const defaultTools = {
+const defaultTools: { [toolName: string]: typeof Tool } = {
   null: Tool, // Null tool that ignores all UI events only to show a static image
   hand: HandTool,
   window: WindowTool,

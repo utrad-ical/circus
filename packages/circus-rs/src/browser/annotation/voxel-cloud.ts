@@ -342,7 +342,7 @@ export class VoxelCloud implements Annotation {
  * For debugging
  */
 function circle(
-  context,
+  context: CanvasRenderingContext2D,
   center: [number, number],
   radius: number = 2,
   color: string = 'rgba(255, 0, 0, 1.0)'
@@ -357,7 +357,7 @@ function circle(
 }
 
 function rectangle(
-  context,
+  context: CanvasRenderingContext2D,
   rect: Rectangle,
   color: string = 'rgba(128, 128, 128, 1.0)',
   linewidth: number = 1

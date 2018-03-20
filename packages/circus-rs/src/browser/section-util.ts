@@ -154,7 +154,7 @@ export function convertPointToIndex(
  * voxel-by-voxel sliding. Otherwise, the sliding is done by a millimeter resolution.
  */
 export function orientationAwareTranslation(
-  section,
+  section: Section,
   voxelSize: Vector3D,
   step: number = 1
 ): Section {

@@ -4,11 +4,12 @@ import loadModule, { ModuleType } from './ModuleLoader';
 import DicomDumper from './dicom-dumpers/DicomDumper';
 import DicomFileRepository from './dicom-file-repository/DicomFileRepository';
 import * as http from 'http';
+import * as Koa from 'koa';
 import createDicomReader from './createDicomReader';
 
-function listen(app, ...args): Promise<http.Server> {
+function listen(app: Koa, ...args: any[]): Promise<http.Server> {
   return new Promise((resolve, reject) => {
-    const httpServer = app.listen.call(app, ...args, err => {
+    const httpServer = app.listen.call(app, ...args, (err: Error) => {
       if (err) reject(err);
       else resolve(httpServer);
     });

@@ -12,15 +12,9 @@ export interface AsyncLruCacheOptions<T> {
   sizeFunc: (item: T) => number;
 }
 
-// TODO: Replace this with Partial<AsyncLruCacheOptions> when TS 2.1 is out
-export interface AsyncLruCacheOptionsParameter<T> {
-  maxCount?: number;
-  maxLife?: number; // in seconds
-  maxSize?: number; // in bytes
-  sizeFunc?: (item: T) => number;
-}
+type AsyncLruCacheOptionsParameter<T> = Partial<AsyncLruCacheOptions<T>>;
 
-type LoaderFunc<T> = (key: string, ...context) => Promise<T>;
+type LoaderFunc<T> = (key: string, ...context: any[]) => Promise<T>;
 
 /**
  * AsyncLruCache is an asynchronous key-value container class
@@ -54,15 +48,10 @@ export default class AsyncLruCache<T> {
 
   constructor(
     loader: LoaderFunc<T>,
-    options?: AsyncLruCacheOptionsParameter<T>
+    options: AsyncLruCacheOptionsParameter<T> = {}
   ) {
     this.loader = loader;
-    this.options = this.defaultOptions();
-    if (typeof options === 'object') {
-      for (let k in options) {
-        if (k in this.options) this.options[k] = options[k];
-      }
-    }
+    this.options = { ...this.defaultOptions(), ...options };
     if (this.options.maxLife > 0) {
       this.timer = setInterval(() => this.checkTtl(), 1000);
     }
@@ -98,7 +87,7 @@ export default class AsyncLruCache<T> {
    * @param context Optional parameters passed to the loader function.
    * @return The resulting item, wrapped with a Promise.
    */
-  public get(key: string, ...context): Promise<T> {
+  public get(key: string, ...context: any[]): Promise<T> {
     // If already pending, just register callback
     if (key in this.pendings) {
       return new Promise<T>((resolve, reject) => {

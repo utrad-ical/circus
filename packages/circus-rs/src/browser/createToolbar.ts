@@ -23,11 +23,11 @@ export default function createToolbar(
   ulElement.className = 'circus-rs-toolbar';
 
   let toolChanging = false;
-  const setTool = toolName => {
+  const setTool = (toolName: string) => {
     toolChanging = true;
     Array.prototype.forEach.call(
       ulElement.querySelectorAll('.circus-rs-toolbutton'),
-      btn => {
+      (btn: HTMLElement) => {
         if (btn.classList.contains('rs-icon-' + toKebabCase(toolName))) {
           btn.classList.add('active');
         } else {
@@ -39,7 +39,7 @@ export default function createToolbar(
     toolChanging = false;
   };
 
-  const appendButton = toolName => {
+  const appendButton = (toolName: string) => {
     const button = document.createElement('button');
     button.className = [
       'circus-rs-toolbutton',
@@ -62,8 +62,8 @@ export default function createToolbar(
 
   wrapperElement.appendChild(ulElement);
 
-  const bindViewer = viewer => {
-    viewer.on('toolchange', (before, after) => {
+  const bindViewer = (viewer: Viewer) => {
+    viewer.on('toolchange', (before: string, after: string) => {
       if (!toolChanging) setTool(after);
     });
     viewers.push(viewer);

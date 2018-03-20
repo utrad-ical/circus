@@ -78,7 +78,7 @@ export default class WebGlContextManager {
 
   public registerBuffer(
     name: string,
-    target,
+    target: number,
     type: number,
     itemSize: number = 1
   ): void {
@@ -96,7 +96,11 @@ export default class WebGlContextManager {
     };
   }
 
-  public bufferData(name, srcData: ArrayBufferView, usage): void {
+  public bufferData(
+    name: string,
+    srcData: ArrayBufferView,
+    usage: number
+  ): void {
     const gl = this.gl;
 
     if (!this.buffers[name]) throw Error('Not registered buffer: ' + name);
@@ -154,7 +158,11 @@ export default class WebGlContextManager {
     );
   }
 
-  public drawBuffer(bufferName: string, mode, offset: number = 0): void {
+  public drawBuffer(
+    bufferName: string,
+    mode: number,
+    offset: number = 0
+  ): void {
     const gl = this.gl;
 
     if (!this.buffers[bufferName])

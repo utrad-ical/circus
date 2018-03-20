@@ -82,15 +82,16 @@ export function draw3DLine(
 
   const pi = [p0[0], p0[1], p0[2]] as Vector3D; // clone
 
-  const trim_x =
+  type Trimmer = (i: number) => number;
+  const trim_x: Trimmer =
     e[0] < 0
       ? i => (i === Math.floor(i) ? i - 1 : Math.floor(i))
       : i => Math.floor(i);
-  const trim_y =
+  const trim_y: Trimmer =
     e[1] < 0
       ? i => (i === Math.floor(i) ? i - 1 : Math.floor(i))
       : i => Math.floor(i);
-  const trim_z =
+  const trim_z: Trimmer =
     e[2] < 0
       ? i => (i === Math.floor(i) ? i - 1 : Math.floor(i))
       : i => Math.floor(i);

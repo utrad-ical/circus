@@ -20,7 +20,7 @@ export interface ValidatorRules {
 export class Validator {
   private rules: ValidatorRules;
 
-  constructor(rules) {
+  constructor(rules: ValidatorRules) {
     this.rules = rules;
   }
 
@@ -59,7 +59,7 @@ export class Validator {
         // (e.g. "isLength:2:5|isJSON")
         ok = rule.split(/\s?\|\s?/).every(cond => {
           let [funcName, ...rest] = cond.split(':');
-          return validator[funcName](value, ...rest);
+          return (validator as any)[funcName](value, ...rest);
         });
       } else if (rule instanceof Function) {
         // The rule is checked by the given function
@@ -77,7 +77,7 @@ export class Validator {
         if (typeof normalizer === 'string') {
           normalizer.split(/\s?\|\s?/).forEach(norm => {
             let [funcName, ...rest] = norm.split(':');
-            value = validator[funcName](value, ...rest);
+            value = (validator as any)[funcName](value, ...rest);
           });
         } else if (normalizer instanceof Function) {
           value = normalizer(value);

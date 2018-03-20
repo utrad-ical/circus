@@ -36,7 +36,7 @@ export default class ViewerEvent {
     this.original.stopPropagation();
   }
 
-  public dispatch(element): void {
+  public dispatch(element: any): void {
     const normalizedEventName = this.type.replace(
       /^(mouse|drag)([a-z])/,
       (m, p1, p2) => p1 + p2.toUpperCase()

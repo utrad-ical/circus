@@ -16,7 +16,7 @@ export default class NodePngImageEncoder extends ImageEncoder {
     const png = new Png(image, width, height, 'gray', 8);
     const out = new stream.PassThrough();
     return new Promise(resolve => {
-      png.encode(function(png_data): void {
+      png.encode(function(png_data: any): void {
         out.end(png_data);
         resolve(out);
       });

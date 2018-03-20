@@ -10,7 +10,7 @@ export function parseMhdHeader(text: string): Map<string, string> {
   const lines = text.split(/\r\n?/);
   lines.forEach(line => {
     const [key, value] = line.split(/\s*=\s*/, 2);
-    result[key] = value;
+    result.set(key, value);
   });
   return result;
 }

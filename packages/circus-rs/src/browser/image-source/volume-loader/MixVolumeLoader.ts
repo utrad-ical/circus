@@ -12,7 +12,13 @@ export default class MixVolumeLoader implements DicomVolumeLoader {
   private maskLoader: DicomVolumeLoader;
   private meta: DicomVolumeMetadata;
 
-  constructor({ volumeLoader, maskLoader }) {
+  constructor({
+    volumeLoader,
+    maskLoader
+  }: {
+    volumeLoader: DicomVolumeLoader;
+    maskLoader: DicomVolumeLoader;
+  }) {
     this.volumeLoader = volumeLoader;
     this.maskLoader = maskLoader;
   }

@@ -30,7 +30,7 @@ export default function scan(helpers: ServerHelpers): koa.Middleware {
     format: ['Output type', 'arraybuffer', s => s === 'png', () => 'png']
   };
 
-  const main = async function scan(ctx, next): Promise<void> {
+  const main: koa.Middleware = async function scan(ctx, next): Promise<void> {
     const {
       ww,
       wl,

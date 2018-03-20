@@ -2,6 +2,14 @@
 
 declare module 'pngjs';
 declare module 'png';
+declare module 'jpeg-lossless-decoder-js';
+declare module 'dicom-parser';
+declare module 'merge';
+declare module 'extend';
+
+declare module 'gl-matrix/src/gl-matrix/vec3.js';
+declare module 'gl-matrix/src/gl-matrix/vec4.js';
+declare module 'gl-matrix/src/gl-matrix/mat4.js';
 
 // Consumed by mocha tests
 declare var describe: any;

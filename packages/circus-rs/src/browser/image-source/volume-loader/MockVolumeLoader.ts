@@ -47,7 +47,7 @@ export default class MockLoader implements DicomVolumeLoader {
     if (meta.estimatedWindow)
       volume.estimatedWindow = { ...meta.estimatedWindow };
 
-    const createValue = (x, y, z) => {
+    const createValue = (x: number, y: number, z: number) => {
       let val =
         Math.floor(x / gridSize) +
         Math.floor(y / gridSize) +

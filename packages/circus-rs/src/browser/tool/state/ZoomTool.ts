@@ -66,9 +66,10 @@ export default class ZoomTool extends DraggableTool {
     center: [number, number, number]
   ): void {
     const operation = [
-      t => mat4.translate(t, t, vec3.scale(vec3.create(), center, -1)),
-      t => mat4.scale(t, t, vec3.fromValues(scale, scale, scale)),
-      t => mat4.translate(t, t, center)
+      (t: number[]) =>
+        mat4.translate(t, t, vec3.scale(vec3.create(), center, -1)),
+      (t: number[]) => mat4.scale(t, t, vec3.fromValues(scale, scale, scale)),
+      (t: number[]) => mat4.translate(t, t, center)
     ]
       .reverse()
       .reduce((p, t) => t(p), mat4.create());

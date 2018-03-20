@@ -17,7 +17,7 @@ export default class StaticDicomFileRepository extends DicomFileRepository {
    */
   protected scanDicomCount(path: string): Promise<number> {
     return new Promise((resolve, reject) => {
-      let next = num => {
+      let next = (num: number) => {
         fs.stat(`${path}/${this.pad8(num)}.dcm`, (err, stats) => {
           if (!err && stats.isFile()) {
             num++;

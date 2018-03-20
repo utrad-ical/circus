@@ -18,7 +18,7 @@ export function isUID(input: string): boolean {
  * @param count
  * @returns {(s:string)=>(boolean|boolean)}
  */
-export function isTuple(count: number = 3): (string) => boolean {
+export function isTuple(count: number = 3): (input: string) => boolean {
   return (s: string) => {
     if (typeof s !== 'string') return false;
     let toks = s.split(',');
@@ -37,7 +37,7 @@ export function isTuple(count: number = 3): (string) => boolean {
 export function parseTuple(
   count: number = 3,
   int: boolean = false
-): (string) => number[] {
+): (input: string) => number[] {
   return (s: string) =>
     s
       .split(',')

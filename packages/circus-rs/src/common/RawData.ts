@@ -320,7 +320,10 @@ export default class RawData {
    * @param mapper Optional function which is applied to
    *     map the voxel values.
    */
-  public convert(targetFormat: PixelFormat, mapper: (number) => number): void {
+  public convert(
+    targetFormat: PixelFormat,
+    mapper: (input: number) => number
+  ): void {
     const [rx, ry, rz] = this.size;
     const newRaw = new RawData(this.size, targetFormat);
     for (let z = 0; z < rz; z++) {

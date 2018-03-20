@@ -14,7 +14,7 @@ let handlerIndex = 1;
 const handlers: { [index: number]: Function } = {};
 let handlerInstalled = false;
 
-function receiveMessage(event): any {
+function receiveMessage(event: MessageEvent): any {
   const handle = event.data.slice(prefix.length);
   if (handlers[handle]) {
     handlers[handle]();
@@ -22,7 +22,7 @@ function receiveMessage(event): any {
   }
 }
 
-export default function setImmediate(callback): any {
+export default function setImmediate(callback: Function): any {
   if ('setImmediate' in window) {
     // use native one
     return window.setImmediate(callback);

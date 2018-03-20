@@ -36,8 +36,10 @@ export default function buildTransferFunctionMap(
 
   const numSteps = gradation.length;
 
+  type Step = { c: RgbaColor; p: number } | undefined;
+
   let gi = -1;
-  let left, right;
+  let left: Step, right: Step;
   const nextStep = () => {
     ++gi;
     const leftStep = gradation[gi];
@@ -52,6 +54,7 @@ export default function buildTransferFunctionMap(
     };
   };
   nextStep();
+  if (!left || !right) throw new TypeError();
 
   const buffer = new Uint8Array(steps * 4);
   for (let i = 0; i < steps; i++) {

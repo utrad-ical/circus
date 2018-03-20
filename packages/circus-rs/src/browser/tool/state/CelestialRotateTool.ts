@@ -1,4 +1,3 @@
-import { mat4, vec3 } from 'gl-matrix';
 import { Vector3 } from 'three';
 import DraggableTool from '../DraggableTool';
 import ViewerEvent from '../../viewer/ViewerEvent';
@@ -37,56 +36,37 @@ export default class CelestialRotateTool extends DraggableTool {
     }
   }
 
-  private rotateAroundYAxis(section: Section, deg: number): Section {
-    const radian = Math.PI / 180.0 * deg;
-    const end0 = section.xAxis.clone();
-
-    // rotate
-    const transform = mat4.rotate(
-      mat4.create(),
-      mat4.create(),
-      radian,
-      section.yAxis.toArray()
-    );
-    const newXAxis = vec3.transformMat4(
-      vec3.create(),
-      section.xAxis.toArray(),
-      transform
-    );
-    section.xAxis = new Vector3().fromArray(newXAxis);
-
-    const end1 = section.xAxis.clone();
-
-    section.origin.sub(
-      new Vector3().subVectors(end1, end0).multiplyScalar(0.5)
-    );
-    return section;
+  private rotate(
+    section: Section,
+    rotAxis: Vector3,
+    rotCenter: Vector3,
+    angle: number
+  ): Section {
+    const radian = Math.PI / 180.0 * angle;
+    return {
+      origin: section.origin
+        .clone()
+        .sub(rotCenter)
+        .applyAxisAngle(rotAxis, radian)
+        .add(rotCenter),
+      xAxis: section.xAxis.clone().applyAxisAngle(rotAxis, radian),
+      yAxis: section.yAxis.clone().applyAxisAngle(rotAxis, radian)
+    };
   }
 
-  private rotateAroundXAxis(section: Section, deg: number): Section {
-    const radian = Math.PI / 180.0 * deg;
-    const end0 = section.yAxis.clone();
+  private rotateAroundYAxis(section: Section, angle: number): Section {
+    const rotCenter = section.origin
+      .clone()
+      .add(section.xAxis.clone().divideScalar(2));
+    const rotAxis = section.yAxis.clone().normalize();
+    return this.rotate(section, rotAxis, rotCenter, angle);
+  }
 
-    // rotate
-    const transform = mat4.rotate(
-      mat4.create(),
-      mat4.create(),
-      radian,
-      section.xAxis.toArray()
-    );
-    const newYAxis = vec3.transformMat4(
-      vec3.create(),
-      section.yAxis.toArray(),
-      transform
-    );
-    section.yAxis = new Vector3().fromArray(newYAxis);
-
-    const end1 = section.yAxis.clone();
-
-    section.origin.sub(
-      new Vector3().subVectors(end1, end0).multiplyScalar(0.5)
-    );
-
-    return section;
+  private rotateAroundXAxis(section: Section, angle: number): Section {
+    const rotCenter = section.origin
+      .clone()
+      .add(section.yAxis.clone().divideScalar(2));
+    const rotAxis = section.xAxis.clone().normalize();
+    return this.rotate(section, rotAxis, rotCenter, angle);
   }
 }

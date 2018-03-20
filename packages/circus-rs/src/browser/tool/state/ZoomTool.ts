@@ -20,10 +20,11 @@ export default class ZoomTool extends DraggableTool {
     const dragInfo = this.dragInfo;
     const step = Math.round(dragInfo.totalDy / 15);
     if (step !== this.currentStep) {
-      this.zoomStep(ev.viewer, step - this.currentStep, [
-        ev.viewerX,
-        ev.viewerY
-      ]);
+      this.zoomStep(
+        ev.viewer,
+        step - this.currentStep,
+        new Vector2(ev.viewerX, ev.viewerY)
+      );
       this.currentStep = step;
     }
   }
@@ -36,21 +37,25 @@ export default class ZoomTool extends DraggableTool {
   public wheelHandler(ev: ViewerEvent): void {
     const speed = ev.original.shiftKey ? 3 : 1;
     const direction = this.sign(ev.original.deltaY);
-    this.zoomStep(ev.viewer, speed * direction, [ev.viewerX, ev.viewerY]);
+    this.zoomStep(
+      ev.viewer,
+      speed * direction,
+      new Vector2(ev.viewerX, ev.viewerY)
+    );
   }
 
-  private zoomStep(viewer: Viewer, step: number, center?: Vector2D): void {
+  private zoomStep(viewer: Viewer, step: number, center?: Vector2): void {
     const stepFactor = 1.05;
     const state: ViewState = viewer.getState();
     switch (state.type) {
       case 'mpr':
         const section = state.section;
         const vp = viewer.getResolution();
-        if (!center) center = [vp[0] / 2, vp[1] / 2];
+        if (!center) center = new Vector2(vp[0] / 2, vp[1] / 2);
         const focus = convertScreenCoordinateToVolumeCoordinate(
           section,
           vp,
-          center
+          center.toArray() as Vector2D
         );
         const newState = {
           ...state,

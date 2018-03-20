@@ -1,5 +1,5 @@
 import { Vector2D, Vector3D } from '../common/geometry';
-import { Vector3 } from 'three';
+import { Vector3, Vector2 } from 'three';
 import { vec3 } from 'gl-matrix';
 import {
   Section,
@@ -15,56 +15,33 @@ export type OrientationString = 'axial' | 'sagittal' | 'coronal' | 'oblique';
  * Converts 3D point in volume coordinate space to 2D point in screen space using the given section.
  * @param section
  * @param resolution
- * @param point
+ * @param volumePoint
  * @returns {Vector2D}
  */
 export function convertVolumeCoordinateToScreenCoordinate(
   section: Section,
-  resolution: Vector2D,
-  point: Vector3D
-): Vector2D {
-  const projection: Vector2D = projectPointOntoSection(
-    section,
-    new Vector3().fromArray(point)
-  ).toArray() as Vector2D;
-  return [
-    projection[0] * resolution[0] / vec3.length(section.xAxis.toArray()),
-    projection[1] * resolution[1] / vec3.length(section.yAxis.toArray())
-  ];
+  resolution: Vector2,
+  volumePoint: Vector3
+): Vector2 {
+  const projection = projectPointOntoSection(section, volumePoint);
+  return new Vector2(
+    projection.x * resolution.x / section.xAxis.length(),
+    projection.y * resolution.y / section.yAxis.length()
+  );
 }
 
 /**
  * Converts 2D point in screen coordinate to 3D point in volume coordinate space.
- * @param section
- * @param resolution
- * @param p2
- * @returns {Vector3D}
  */
 export function convertScreenCoordinateToVolumeCoordinate(
   section: Section,
-  resolution: Vector2D,
-  p2: Vector2D
-): Vector3D {
-  const p3 = section.origin.toArray();
-
-  const xAxis = section.xAxis.toArray();
-  const yAxis = section.yAxis.toArray();
-
-  const xComponent = [
-    p2[0] * (xAxis[0] / resolution[0]),
-    p2[0] * (xAxis[1] / resolution[0]),
-    p2[0] * (xAxis[2] / resolution[0])
-  ];
-  const yComponent = [
-    p2[1] * (yAxis[0] / resolution[1]),
-    p2[1] * (yAxis[1] / resolution[1]),
-    p2[1] * (yAxis[2] / resolution[1])
-  ];
-
-  vec3.add(p3, p3, xComponent);
-  vec3.add(p3, p3, yComponent);
-
-  return p3 as Vector3D;
+  resolution: Vector2,
+  screenPoint: Vector2
+): Vector3 {
+  return section.origin
+    .clone()
+    .add(section.xAxis.clone().multiplyScalar(screenPoint.x / resolution.x))
+    .add(section.yAxis.clone().multiplyScalar(screenPoint.y / resolution.y));
 }
 
 /**
@@ -105,18 +82,12 @@ export function parallelToZ(vec: Vector3D): boolean {
  */
 export function convertSectionToMm(
   indexSection: Section,
-  voxelSize: Vector3D
+  voxelSize: Vector3
 ): Section {
   const mmSection: Section = {
-    origin: convertPointToMm(
-      indexSection.origin.toArray() as Vector3D,
-      voxelSize
-    ),
-    xAxis: convertPointToMm(
-      indexSection.xAxis.toArray() as Vector3D,
-      voxelSize
-    ),
-    yAxis: convertPointToMm(indexSection.yAxis.toArray() as Vector3D, voxelSize)
+    origin: convertPointToMm(indexSection.origin, voxelSize),
+    xAxis: convertPointToMm(indexSection.xAxis, voxelSize),
+    yAxis: convertPointToMm(indexSection.yAxis, voxelSize)
   };
   return mmSection;
 }
@@ -128,42 +99,28 @@ export function convertSectionToMm(
  */
 export function convertSectionToIndex(
   mmSection: Section,
-  voxelSize: Vector3D
+  voxelSize: Vector3
 ): Section {
   const indexSection: Section = {
-    origin: convertPointToIndex(
-      mmSection.origin.toArray() as Vector3D,
-      voxelSize
-    ),
-    xAxis: convertPointToIndex(
-      mmSection.xAxis.toArray() as Vector3D,
-      voxelSize
-    ),
-    yAxis: convertPointToIndex(mmSection.yAxis.toArray() as Vector3D, voxelSize)
+    origin: convertPointToIndex(mmSection.origin, voxelSize),
+    xAxis: convertPointToIndex(mmSection.xAxis, voxelSize),
+    yAxis: convertPointToIndex(mmSection.yAxis, voxelSize)
   };
   return indexSection;
 }
 
 export function convertPointToMm(
-  indexPoint: Vector3D,
-  voxelSize: Vector3D
+  indexPoint: Vector3,
+  voxelSize: Vector3
 ): Vector3 {
-  return new Vector3(
-    indexPoint[0] * voxelSize[0],
-    indexPoint[1] * voxelSize[1],
-    indexPoint[2] * voxelSize[2]
-  );
+  return indexPoint.clone().multiply(voxelSize);
 }
 
 export function convertPointToIndex(
-  mmPoint: Vector3D,
-  voxelSize: Vector3D
+  mmPoint: Vector3,
+  voxelSize: Vector3
 ): Vector3 {
-  return new Vector3(
-    mmPoint[0] / voxelSize[0],
-    mmPoint[1] / voxelSize[1],
-    mmPoint[2] / voxelSize[2]
-  );
+  return mmPoint.clone().divide(voxelSize);
 }
 
 /**

@@ -3,8 +3,8 @@ import Viewer from '../viewer/Viewer';
 import ViewState from '../ViewState';
 import Sprite from '../viewer/Sprite';
 import { convertVolumeCoordinateToScreenCoordinate } from '../section-util';
-import { Vector3D, intersectionOfTwoSections } from '../../common/geometry';
-import { vec3 } from 'gl-matrix';
+import { intersectionOfTwoSections } from '../../common/geometry';
+import { Vector2 } from 'three';
 
 /**
  * ReferenceLine is a type of annotation which draws how the sections
@@ -27,7 +27,7 @@ export class ReferenceLine implements Annotation {
     const canvas = viewer.canvas;
     const ctx = canvas.getContext('2d');
     if (!ctx) return null;
-    const res = viewer.getResolution();
+    const res = new Vector2().fromArray(viewer.getResolution());
 
     try {
       ctx.save();
@@ -46,21 +46,17 @@ export class ReferenceLine implements Annotation {
         const from = convertVolumeCoordinateToScreenCoordinate(
           mySection,
           res,
-          refLine.origin.toArray() as Vector3D
+          refLine.origin
         );
         const to = convertVolumeCoordinateToScreenCoordinate(
           mySection,
           res,
-          vec3.add(
-            vec3.create(),
-            refLine.origin.toArray(),
-            refLine.vector.toArray()
-          ) as Vector3D
+          refLine.origin.clone().add(refLine.vector)
         );
         // console.log('from, to = ', from, to);
         ctx.beginPath();
-        ctx.moveTo(from[0], from[1]);
-        ctx.lineTo(to[0], to[1]);
+        ctx.moveTo(from.x, from.y);
+        ctx.lineTo(to.x, to.y);
         ctx.stroke();
       });
     } finally {

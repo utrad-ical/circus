@@ -5,9 +5,10 @@ import Viewer from '../../viewer/Viewer';
 import MprImageSource from '../../image-source/MprImageSource';
 import * as su from '../../section-util';
 import { Vector2D, Vector3D } from '../../../common/geometry';
-import { vec2, vec3 } from 'gl-matrix';
+// import { vec2, vec3 } from 'gl-matrix';
 import { draw3DLine } from '../../volume-util';
 import ViewerEvent from '../../viewer/ViewerEvent';
+import { Vector2, Vector3 } from 'three';
 
 /**
  * VoxelCloudToolBase is a base tool that affects VoxelCloud annotations.
@@ -33,28 +34,26 @@ export default class VoxelCloudToolBase extends DraggableTool {
 
     const resolution = viewer.getResolution();
     const src = comp.imageSource as MprImageSource;
-    const voxelSize = src.metadata.voxelSize;
+    const voxelSize = new Vector3().fromArray(src.metadata.voxelSize);
     const activeCloud = <VoxelCloud>this.activeCloud; // guaranteed to be set
 
     // from screen 2D coordinate to volume coordinate in millimeter
     const mmOfVol = su.convertScreenCoordinateToVolumeCoordinate(
       section,
-      resolution,
-      point
+      new Vector2().fromArray(resolution),
+      new Vector2().fromArray(point)
     );
     // from volume coordinate in millimeter to index coordinate
-    const indexOfVol = su.convertPointToIndex(mmOfVol, voxelSize).toArray();
+    const indexOfVol = su.convertPointToIndex(mmOfVol, voxelSize);
     // to local coordinate of the cloud (simple translation)
-    const indexOfCloud = vec3.subtract(
-      indexOfVol,
-      indexOfVol,
-      activeCloud.origin
-    ) as Vector3D;
+    const indexOfCloud = indexOfVol.sub(
+      new Vector3().fromArray(activeCloud.origin)
+    );
     // round
     return [
-      Math.round(indexOfCloud[0]),
-      Math.round(indexOfCloud[1]),
-      Math.round(indexOfCloud[2])
+      Math.round(indexOfCloud.x),
+      Math.round(indexOfCloud.y),
+      Math.round(indexOfCloud.z)
     ] as Vector3D;
   }
 

@@ -8,6 +8,7 @@ import setImmediate from '../util/setImmediate';
 import Viewer from '../viewer/Viewer';
 import drawToImageData from './drawToImageData';
 import MprImageSource from './MprImageSource';
+import { Vector3 } from 'three';
 
 /**
  * RawVolumeMprImageSource holds an entire 3D volume in memory and
@@ -37,7 +38,7 @@ export default class RawVolumeMprImageSource extends MprImageSource {
 
     const indexSection: Section = convertSectionToIndex(
       mmSection,
-      this.metadata.voxelSize
+      new Vector3().fromArray(this.metadata.voxelSize)
     );
 
     this.volume.scanObliqueSection(

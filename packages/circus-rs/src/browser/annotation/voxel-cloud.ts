@@ -22,7 +22,7 @@ import { scanBoundingBox } from '../volume-util';
 import { convertSectionToIndex } from '../section-util';
 import MprImageSource from '../image-source/MprImageSource';
 import RawData from '../../common/RawData';
-import { Vector3 } from 'three';
+import { Vector2, Vector3 } from 'three';
 
 /**
  * VoxelCloud is a type of Annotation that can be registered to a Composition.
@@ -166,7 +166,7 @@ export class VoxelCloud implements Annotation {
     const context = viewer.canvas.getContext('2d');
     if (!context) throw new Error('Failed to get canvas context');
 
-    const resolution = viewer.getResolution();
+    const resolution = new Vector2().fromArray(viewer.getResolution());
     const section = viewState.section;
 
     /*
@@ -203,13 +203,13 @@ export class VoxelCloud implements Annotation {
       const p2 = convertVolumeCoordinateToScreenCoordinate(
         section,
         resolution,
-        i
+        new Vector3().fromArray(i)
       );
 
-      leftTop[0] = Math.min(leftTop[0], p2[0]);
-      leftTop[1] = Math.min(leftTop[1], p2[1]);
-      rightBottom[0] = Math.max(rightBottom[0], p2[0]);
-      rightBottom[1] = Math.max(rightBottom[1], p2[1]);
+      leftTop[0] = Math.min(leftTop[0], p2.x);
+      leftTop[1] = Math.min(leftTop[1], p2.y);
+      rightBottom[0] = Math.max(rightBottom[0], p2.x);
+      rightBottom[1] = Math.max(rightBottom[1], p2.y);
 
       if (this.debugPoint) circle(context, p2);
     });
@@ -219,7 +219,10 @@ export class VoxelCloud implements Annotation {
     rightBottom[0] = Math.ceil(rightBottom[0]);
     rightBottom[1] = Math.ceil(rightBottom[1]);
 
-    const screenRect: Rectangle = { origin: [0, 0], size: resolution };
+    const screenRect: Rectangle = {
+      origin: [0, 0],
+      size: resolution.toArray() as Vector2D
+    };
     const sectionIntersectionsRect: Rectangle = {
       origin: leftTop,
       size: [rightBottom[0] - leftTop[0], rightBottom[1] - leftTop[1]]
@@ -244,39 +247,27 @@ export class VoxelCloud implements Annotation {
     const boundingOrigin = convertScreenCoordinateToVolumeCoordinate(
       section,
       resolution,
-      outRect.origin
+      new Vector2(outRect.origin[0], outRect.origin[1])
     );
     const boundingXAxisEnd = convertScreenCoordinateToVolumeCoordinate(
       section,
       resolution,
-      [outRect.origin[0] + outRect.size[0], outRect.origin[1]]
+      new Vector2(outRect.origin[0] + outRect.size[0], outRect.origin[1])
     );
     const boundingYAxisEnd = convertScreenCoordinateToVolumeCoordinate(
       section,
       resolution,
-      [outRect.origin[0], outRect.origin[1] + outRect.size[1]]
+      new Vector2(outRect.origin[0], outRect.origin[1] + outRect.size[1])
     );
 
     const cloudSection: Section = {
-      origin: new Vector3(
-        boundingOrigin[0] - mmOrigin[0],
-        boundingOrigin[1] - mmOrigin[1],
-        boundingOrigin[2] - mmOrigin[2]
-      ),
-      xAxis: new Vector3(
-        boundingXAxisEnd[0] - boundingOrigin[0],
-        boundingXAxisEnd[1] - boundingOrigin[1],
-        boundingXAxisEnd[2] - boundingOrigin[2]
-      ),
-      yAxis: new Vector3(
-        boundingYAxisEnd[0] - boundingOrigin[0],
-        boundingYAxisEnd[1] - boundingOrigin[1],
-        boundingYAxisEnd[2] - boundingOrigin[2]
-      )
+      origin: boundingOrigin.clone().sub(new Vector3().fromArray(mmOrigin)),
+      xAxis: boundingXAxisEnd.clone().sub(boundingOrigin),
+      yAxis: boundingYAxisEnd.clone().sub(boundingOrigin)
     };
     const indexCloudSection: Section = convertSectionToIndex(
       cloudSection,
-      this._voxelSize
+      new Vector3().fromArray(this._voxelSize)
     );
 
     /*
@@ -319,7 +310,7 @@ export class VoxelCloud implements Annotation {
     const shadow = this.prepareShadowCanvas(outRect.size);
     const shadowContext = shadow.getContext('2d');
     if (!shadowContext) throw new Error('Failed to get canvas context');
-    shadowContext.clearRect(0, 0, resolution[0], resolution[1]);
+    shadowContext.clearRect(0, 0, resolution.x, resolution.y);
     shadowContext.putImageData(imageData, 0, 0);
 
     // Transfers the image from the shadow canvas to the actual canvas
@@ -344,13 +335,13 @@ export class VoxelCloud implements Annotation {
  */
 function circle(
   context: CanvasRenderingContext2D,
-  center: [number, number],
+  center: Vector2,
   radius: number = 2,
   color: string = 'rgba(255, 0, 0, 1.0)'
 ): void {
   context.save();
   context.beginPath();
-  context.arc(center[0], center[1], radius, 0, Math.PI * 2);
+  context.arc(center.x, center.y, radius, 0, Math.PI * 2);
   context.closePath();
   context.fillStyle = color;
   context.fill();

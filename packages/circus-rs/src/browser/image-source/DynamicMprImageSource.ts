@@ -7,6 +7,7 @@ import Viewer from '../viewer/Viewer';
 import drawToImageData from './drawToImageData';
 import MprImageSource from './MprImageSource';
 import { DicomVolumeMetadata } from './volume-loader/DicomVolumeLoader';
+import { Vector3 } from 'three';
 
 /**
  * DynamicImageSource fetches the MPR image from RS server.
@@ -64,7 +65,7 @@ export default class DynamicMprImageSource extends MprImageSource {
     const outSize = viewer.getResolution();
     const indexSection: Section = convertSectionToIndex(
       section,
-      this.metadata.voxelSize
+      new Vector3().fromArray(this.metadata.voxelSize)
     );
     const buffer = await this.requestScan(
       this.series,

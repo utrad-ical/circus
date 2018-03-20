@@ -44,26 +44,22 @@ export default class ZoomTool extends DraggableTool {
     );
   }
 
-  private zoomStep(viewer: Viewer, step: number, center?: Vector2): void {
+  private zoomStep(viewer: Viewer, step: number, screenCenter?: Vector2): void {
     const stepFactor = 1.05;
     const state: ViewState = viewer.getState();
     switch (state.type) {
       case 'mpr':
         const section = state.section;
         const vp = viewer.getResolution();
-        if (!center) center = new Vector2(vp[0] / 2, vp[1] / 2);
-        const focus = convertScreenCoordinateToVolumeCoordinate(
+        if (!screenCenter) screenCenter = new Vector2(vp[0] / 2, vp[1] / 2);
+        const volumeCenter = convertScreenCoordinateToVolumeCoordinate(
           section,
-          vp,
-          center.toArray() as Vector2D
+          new Vector2(vp[0], vp[1]),
+          screenCenter
         );
         const newState = {
           ...state,
-          section: this.scaleSection(
-            section,
-            stepFactor ** step,
-            new Vector3().fromArray(focus)
-          )
+          section: this.scaleSection(section, stepFactor ** step, volumeCenter)
         };
         viewer.setState(newState);
         break;
@@ -75,14 +71,14 @@ export default class ZoomTool extends DraggableTool {
   private scaleSection(
     section: Section,
     scale: number,
-    center: Vector3
+    volumeCenter: Vector3
   ): Section {
     return {
       origin: section.origin
         .clone()
-        .sub(center)
+        .sub(volumeCenter)
         .multiplyScalar(scale)
-        .add(center),
+        .add(volumeCenter),
       xAxis: section.xAxis.clone().multiplyScalar(scale),
       yAxis: section.yAxis.clone().multiplyScalar(scale)
     };

@@ -2,7 +2,7 @@ import DraggableTool from '../DraggableTool';
 import ViewerEvent from '../../viewer/ViewerEvent';
 import { MprViewState } from '../../ViewState';
 import { translateSection } from '../../../common/geometry';
-import { Vector3 } from 'three';
+import { Vector2, Vector3 } from 'three';
 
 /**
  * HandTool is a tool which responds to a mouse drag and moves the
@@ -21,12 +21,16 @@ export default class HandTool extends DraggableTool {
 
     const viewer = ev.viewer;
     const state = viewer.getState();
+    const vp = viewer.getViewport();
 
     switch (state.type) {
       case 'mpr':
-        const vp = viewer.getViewport();
         viewer.setState(
-          this.translateBy(state, [dragInfo.dx, dragInfo.dy], vp)
+          this.translateBy(
+            state,
+            new Vector2(dragInfo.dx, dragInfo.dy),
+            new Vector2().fromArray(vp)
+          )
         );
         break;
       case 'vr':
@@ -37,29 +41,18 @@ export default class HandTool extends DraggableTool {
 
   private translateBy(
     state: MprViewState,
-    p: [number, number],
-    vp: [number, number]
+    move: Vector2,
+    vp: Vector2
   ): MprViewState {
     const section = state.section;
-    if (!section) return state;
-
-    const xAxis = section.xAxis.toArray();
-    const yAxis = section.yAxis.toArray();
-
-    const eu = [xAxis[0] / vp[0], xAxis[1] / vp[0], xAxis[2] / vp[0]];
-    const ev = [yAxis[0] / vp[1], yAxis[1] / vp[1], yAxis[2] / vp[1]];
-
-    const [dx2, dy2] = p;
-    const [dx, dy, dz] = [
-      eu[0] * -dx2 + ev[0] * -dy2,
-      eu[1] * -dx2 + ev[1] * -dy2,
-      eu[2] * -dx2 + ev[2] * -dy2
-    ];
-
-    const result: MprViewState = {
-      ...state,
-      section: translateSection(section, new Vector3(dx, dy, dz))
-    };
-    return result;
+    const moveScale = move.clone().divide(vp);
+    const newSection = translateSection(
+      section,
+      new Vector3().addVectors(
+        section.xAxis.clone().multiplyScalar(-moveScale.x),
+        section.yAxis.clone().multiplyScalar(-moveScale.y)
+      )
+    );
+    return { ...state, section: newSection };
   }
 }

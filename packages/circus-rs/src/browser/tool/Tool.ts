@@ -1,7 +1,7 @@
 import { EventEmitter } from 'events';
-import { ViewerEvent } from '../../browser/viewer/viewer-event';
+import ViewerEvent from '../../browser/viewer/ViewerEvent';
 import MprImageSource from '../image-source/MprImageSource';
-import { ViewerEventTarget } from '../interface/viewer-event-target';
+import ViewerEventTarget from '../interface/ViewerEventTarget';
 import { orientationAwareTranslation } from '../section-util';
 
 /**

@@ -34,10 +34,10 @@ CIRCUS RS is structured using the CommonJS style module definition system, which
 
 ```js
 // Import using ES6 style modules
-import { Viewer } from 'circus-rs/viewer/viewer';
+import Viewer from 'circus-rs/viewer/Viewer';
 
 // Or using traditional commonJS style
-var Viewer = require('circus-rs/viewer/viewer').Viewer;
+var Viewer = require('circus-rs/viewer/Viewer').default;
 ```
 
 ### Including Pre-built CIRCUS RS File

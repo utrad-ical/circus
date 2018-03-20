@@ -1,4 +1,4 @@
-import { Viewer } from './viewer/viewer';
+import Viewer from './viewer/Viewer';
 
 interface Toolbar {
   bindViewer: (viewer: Viewer) => void;

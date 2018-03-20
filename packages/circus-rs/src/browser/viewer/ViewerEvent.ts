@@ -1,6 +1,6 @@
-import { Viewer } from './viewer';
+import Viewer from './Viewer';
 
-export class ViewerEvent {
+export default class ViewerEvent {
   public type: string;
   public original: any;
 

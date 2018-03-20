@@ -1,6 +1,6 @@
 import { mat4, vec3 } from 'gl-matrix';
 import DraggableTool from '../DraggableTool';
-import { ViewerEvent } from '../../viewer/viewer-event';
+import ViewerEvent from '../../viewer/ViewerEvent';
 import { Section } from '../../../common/geometry';
 import { MprViewState } from '../../ViewState';
 

@@ -1,5 +1,5 @@
 import DraggableTool from '../DraggableTool';
-import { ViewerEvent } from '../../../browser/viewer/viewer-event';
+import ViewerEvent from '../../viewer/ViewerEvent';
 
 /**
  * WindowTool handles mouse drag and modifies the window level/width accordingly.

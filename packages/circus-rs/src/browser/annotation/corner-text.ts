@@ -1,7 +1,7 @@
 import { Annotation } from './annotation';
-import { Viewer } from '../viewer/viewer';
+import Viewer from '../viewer/Viewer';
 import ViewState from '../ViewState';
-import { Sprite } from '../viewer/sprite';
+import Sprite from '../viewer/Sprite';
 
 const PADDING = 10;
 

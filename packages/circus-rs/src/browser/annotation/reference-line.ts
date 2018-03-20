@@ -1,7 +1,7 @@
 import { Annotation } from './annotation';
-import { Viewer } from '../viewer/viewer';
+import Viewer from '../viewer/Viewer';
 import ViewState from '../ViewState';
-import { Sprite } from '../viewer/sprite';
+import Sprite from '../viewer/Sprite';
 import { convertVolumeCoordinateToScreenCoordinate } from '../section-util';
 import { Vector3D, intersectionOfTwoSections } from '../../common/geometry';
 import { vec3 } from 'gl-matrix';

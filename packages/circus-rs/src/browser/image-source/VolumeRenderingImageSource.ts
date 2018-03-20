@@ -1,7 +1,7 @@
 import DicomVolume from '../../common/DicomVolume';
 import { DicomVolumeMetadata } from './volume-loader/DicomVolumeLoader';
 import ImageSource from './ImageSource';
-import { Viewer } from '../viewer/viewer';
+import Viewer from '../viewer/Viewer';
 import ViewState, { VrViewState, TransferFunctionEntry } from '../ViewState';
 import DicomVolumeLoader from './volume-loader/DicomVolumeLoader';
 

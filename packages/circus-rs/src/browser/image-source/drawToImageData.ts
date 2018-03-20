@@ -1,4 +1,4 @@
-import { Viewer } from '../viewer/viewer';
+import Viewer from '../viewer/Viewer';
 
 /**
  * Builds RGBA canvas imagedata from a grayscale image.

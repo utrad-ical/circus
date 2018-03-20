@@ -1,5 +1,5 @@
 import DraggableTool from '../DraggableTool';
-import { ViewerEvent } from '../../../browser/viewer/viewer-event';
+import ViewerEvent from '../../viewer/ViewerEvent';
 import MprImageSource from '../../image-source/MprImageSource';
 import { orientationAwareTranslation } from '../../section-util';
 import { MprViewState } from '../../ViewState';

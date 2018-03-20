@@ -1,4 +1,4 @@
-import { ViewerEvent } from '../../viewer/viewer-event';
+import ViewerEvent from '../../viewer/ViewerEvent';
 import VoxelCloudToolBase from './VoxelCloudToolBase';
 
 /**

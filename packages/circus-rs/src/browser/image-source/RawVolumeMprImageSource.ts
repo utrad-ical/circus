@@ -5,7 +5,7 @@ import { convertSectionToIndex } from '../section-util';
 import { Vector2D, Section } from '../../common/geometry';
 // import AsyncLruCache from '../../common/AsyncLruCache';
 import setImmediate from '../util/setImmediate';
-import { Viewer } from '../viewer/viewer';
+import Viewer from '../viewer/Viewer';
 import drawToImageData from './drawToImageData';
 import MprImageSource from './MprImageSource';
 

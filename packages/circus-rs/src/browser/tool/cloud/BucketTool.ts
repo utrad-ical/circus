@@ -1,4 +1,4 @@
-import { ViewerEvent } from '../../../browser/viewer/viewer-event';
+import ViewerEvent from '../../viewer/ViewerEvent';
 import VoxelCloudToolBase from './VoxelCloudToolBase';
 import { Vector2D } from '../../../common/geometry';
 import { floodFillOnSlice } from '../../volume-util';

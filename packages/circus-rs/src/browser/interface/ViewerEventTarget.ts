@@ -1,6 +1,6 @@
-import { ViewerEvent } from '../../browser/viewer/viewer-event';
+import ViewerEvent from '../../browser/viewer/ViewerEvent';
 
-export interface ViewerEventTarget {
+export default interface ViewerEventTarget {
   mouseUpHandler: (viewerEvent: ViewerEvent) => any;
   mouseDownHandler: (viewerEvent: ViewerEvent) => any;
   mouseMoveHandler: (viewerEvent: ViewerEvent) => any;

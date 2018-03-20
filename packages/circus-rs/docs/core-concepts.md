@@ -7,8 +7,8 @@ title: Core Concepts of CIRCUS RS
 To understand the behavior of CIRCUS RS client, we need to understand the following basic classes and their relationships.
 As described in the [Install](install.html) section, these classes can be accessed in one of the three ways below:
 
-1. `const Viewer = require('browser/viewer/viewer').Viewer;` if you are using plain JS with some commonJS module bundler like Webpack and Browserify.
-2. `import { Viewer } from 'browser/viewer/viewer';` if you are using a module bundler in conjunction with some transpiler like Babel and TypeScript.
+1. `const Viewer = require('browser/viewer/Viewer').default;` if you are using plain JS with some commonJS module bundler like Webpack and Browserify.
+2. `import Viewer from 'browser/viewer/Viewer';` if you are using a module bundler in conjunction with some transpiler like Babel and TypeScript.
 3. `circusrs.Viewer` if you are just including the the pre-bundled version of CIRCUS RS using a HTML `<script>` tag.
 
 In this document, a **class** refers to a ES2015(ES6)-compatible class. Classes are actually compiled into ES5 functions using TypeScript.

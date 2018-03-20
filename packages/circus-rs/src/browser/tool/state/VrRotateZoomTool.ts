@@ -1,8 +1,8 @@
 import { mat4, vec3 } from 'gl-matrix';
 import DraggableTool from '../DraggableTool';
-import { Viewer } from '../../../browser/viewer/viewer';
+import Viewer from '../../viewer/Viewer';
 import ViewState from '../../ViewState';
-import { ViewerEvent } from '../../../browser/viewer/viewer-event';
+import ViewerEvent from '../../../browser/viewer/ViewerEvent';
 
 /**
  * VrRotateZoomTool

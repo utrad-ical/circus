@@ -5,7 +5,7 @@
 import './circus-rs.less';
 import './assets/icons/circus-rs-font-glyphs.less';
 
-export * from './viewer/viewer';
+export { default as Viewer } from './viewer/Viewer';
 export { default as Composition } from './Composition';
 
 export * from './annotation/corner-text';

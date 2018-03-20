@@ -1,7 +1,7 @@
-import { ViewerEvent } from '../../browser/viewer/viewer-event';
-import { ViewerEventTarget } from '../../browser/interface/viewer-event-target';
+import ViewerEvent from './ViewerEvent';
+import ViewerEventTarget from '../../browser/interface/ViewerEventTarget';
 
-export class Sprite implements ViewerEventTarget {
+export default class Sprite implements ViewerEventTarget {
   public mouseUpHandler(viewerEvent: ViewerEvent): void {
     // do nothing by default
   }

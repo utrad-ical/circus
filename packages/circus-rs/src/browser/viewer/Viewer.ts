@@ -1,8 +1,8 @@
 import * as extend from 'extend';
 import { EventEmitter } from 'events';
-import { Sprite } from './sprite';
+import Sprite from './Sprite';
 import Composition from '../Composition';
-import { ViewerEvent } from './viewer-event';
+import ViewerEvent from './ViewerEvent';
 import ViewState from '../ViewState';
 import Tool from '../tool/Tool';
 import { toolFactory } from '../tool/tool-initializer';
@@ -12,7 +12,7 @@ import { toolFactory } from '../tool/tool-initializer';
  * and displays a specified image along with various annotations.
  * Displayed object is determined by `viewState` and `imageSource`.
  */
-export class Viewer extends EventEmitter {
+export default class Viewer extends EventEmitter {
   public canvas: HTMLCanvasElement;
 
   private viewState: ViewState;

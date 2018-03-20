@@ -1,5 +1,5 @@
 import Tool from '../../browser/tool/Tool';
-import { ViewerEvent } from '../../browser/viewer/viewer-event';
+import ViewerEvent from '../../browser/viewer/ViewerEvent';
 
 /**
  * DragInfo holds convenient data while dragging.

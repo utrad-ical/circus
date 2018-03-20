@@ -1,13 +1,13 @@
 import Composition from '../../Composition';
 import { VoxelCloud } from '../../annotation/voxel-cloud';
 import DraggableTool from '../DraggableTool';
-import { Viewer } from '../../viewer/viewer';
+import Viewer from '../../viewer/Viewer';
 import MprImageSource from '../../image-source/MprImageSource';
 import * as su from '../../section-util';
 import { Vector2D, Vector3D } from '../../../common/geometry';
 import { vec3 } from 'gl-matrix';
 import { draw3DLine } from '../../volume-util';
-import { ViewerEvent } from '../../viewer/viewer-event';
+import ViewerEvent from '../../viewer/ViewerEvent';
 
 /**
  * VoxelCloudToolBase is a base tool that affects VoxelCloud annotations.

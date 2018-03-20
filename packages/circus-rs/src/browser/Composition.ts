@@ -1,7 +1,7 @@
 import { EventEmitter } from 'events';
 import { Annotation } from '../browser/annotation/annotation';
 import ImageSource from '../browser/image-source/ImageSource';
-import { Viewer } from '../browser/viewer/viewer';
+import Viewer from './viewer/Viewer';
 
 /**
  * A composition is a combination of one imageSource and

@@ -4,7 +4,7 @@ import { Vector2D, Section } from '../../common/geometry';
 import { ViewWindow } from '../../common/ViewWindow';
 import ImageSource from './ImageSource';
 import { RsHttpClient } from '../http-client/rs-http-client';
-import { Viewer } from '../viewer/viewer';
+import Viewer from '../viewer/Viewer';
 import drawToImageData from './drawToImageData';
 import MprImageSource from './MprImageSource';
 import { DicomVolumeMetadata } from './volume-loader/DicomVolumeLoader';

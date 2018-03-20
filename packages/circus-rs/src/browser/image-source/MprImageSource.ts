@@ -1,6 +1,6 @@
 import ImageSource from './ImageSource';
 import ViewState from '../ViewState';
-import { Viewer } from '../viewer/viewer';
+import Viewer from '../viewer/Viewer';
 import { createOrthogonalMprSection } from '../section-util';
 import { Vector2D, Vector3D } from '../../common/geometry';
 import { ViewWindow } from '../../common/ViewWindow';

@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events';
 import ViewState from '../ViewState';
-import { Viewer } from '../viewer/viewer';
+import Viewer from '../viewer/Viewer';
 
 /**
  * ImageSource is an abstract class which represents a

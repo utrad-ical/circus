@@ -6,7 +6,7 @@ import './circus-rs.less';
 import './assets/icons/circus-rs-font-glyphs.less';
 
 export * from './viewer/viewer';
-export * from './composition';
+export { default as Composition } from './Composition';
 
 export * from './annotation/corner-text';
 export * from './annotation/voxel-cloud';

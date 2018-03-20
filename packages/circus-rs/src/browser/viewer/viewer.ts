@@ -1,7 +1,7 @@
 import * as extend from 'extend';
 import { EventEmitter } from 'events';
 import { Sprite } from './sprite';
-import { Composition } from '../composition';
+import Composition from '../Composition';
 import { ViewerEvent } from './viewer-event';
 import ViewState from '../ViewState';
 import Tool from '../tool/Tool';

@@ -7,7 +7,7 @@ import { Viewer } from '../browser/viewer/viewer';
  * A composition is a combination of one imageSource and
  * an arbitrary number of annotations.
  */
-export class Composition extends EventEmitter {
+export default class Composition extends EventEmitter {
   /**
    * The image source that is associated with this composition.
    * Do not modify this directly: Use the accessor methods instead.

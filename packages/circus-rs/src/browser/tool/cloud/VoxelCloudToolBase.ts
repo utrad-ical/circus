@@ -1,4 +1,4 @@
-import { Composition } from '../../composition';
+import Composition from '../../Composition';
 import { VoxelCloud } from '../../annotation/voxel-cloud';
 import DraggableTool from '../DraggableTool';
 import { Viewer } from '../../viewer/viewer';

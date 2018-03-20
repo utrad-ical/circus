@@ -2,7 +2,7 @@ import { mat4, vec3 } from 'gl-matrix';
 import DraggableTool from '../DraggableTool';
 import { ViewerEvent } from '../../viewer/viewer-event';
 import { Section } from '../../../common/geometry';
-import { MprViewState } from '../../view-state';
+import { MprViewState } from '../../ViewState';
 
 /**
  * CelestialRotateTool handles mouse drags and wheel moves on the Viewer and

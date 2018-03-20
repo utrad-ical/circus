@@ -1,6 +1,6 @@
 import DynamicMprImageSource from './DynamicMprImageSource';
 import RawVolumeMprImageSource from './RawVolumeMprImageSource';
-import { ViewState } from '../view-state';
+import ViewState from '../ViewState';
 import { Viewer } from '../viewer/viewer';
 import DicomVolumeLoader from './volume-loader/DicomVolumeLoader';
 import { RsHttpClient } from '../http-client/rs-http-client';

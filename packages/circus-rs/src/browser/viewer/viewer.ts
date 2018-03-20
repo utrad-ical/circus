@@ -3,8 +3,8 @@ import { EventEmitter } from 'events';
 import { Sprite } from './sprite';
 import { Composition } from '../composition';
 import { ViewerEvent } from './viewer-event';
-import { ViewState } from '../view-state';
-import { Tool } from '../tool/tool';
+import ViewState from '../ViewState';
+import Tool from '../tool/Tool';
 import { toolFactory } from '../tool/tool-initializer';
 
 /**

@@ -1,6 +1,6 @@
 import DraggableTool from '../DraggableTool';
 import { ViewerEvent } from '../../viewer/viewer-event';
-import { MprViewState } from '../../view-state';
+import { MprViewState } from '../../ViewState';
 import { translateSection } from '../../../common/geometry';
 
 /**

@@ -75,6 +75,8 @@ export interface VrViewState {
 }
 
 /**
- * ViewState determines how the ImageSource is viewed on each Viewer.
+ * ViewState determines how an ImageSource is displayed on each Viewer.
  */
-export type ViewState = MprViewState | VrViewState;
+type ViewState = MprViewState | VrViewState;
+
+export default ViewState;

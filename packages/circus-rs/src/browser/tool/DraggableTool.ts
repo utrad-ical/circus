@@ -1,4 +1,4 @@
-import { Tool } from '../../browser/tool/tool';
+import Tool from '../../browser/tool/Tool';
 import { ViewerEvent } from '../../browser/viewer/viewer-event';
 
 /**

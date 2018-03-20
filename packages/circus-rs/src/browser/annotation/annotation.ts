@@ -1,5 +1,5 @@
 import { Sprite } from '../../browser/viewer/sprite';
-import { ViewState } from '../view-state';
+import ViewState from '../ViewState';
 import { Viewer } from '../viewer/viewer';
 
 export interface Annotation {

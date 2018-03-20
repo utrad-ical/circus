@@ -2,7 +2,7 @@ import DraggableTool from '../DraggableTool';
 import { ViewerEvent } from '../../../browser/viewer/viewer-event';
 import MprImageSource from '../../image-source/MprImageSource';
 import { orientationAwareTranslation } from '../../section-util';
-import { MprViewState } from '../../view-state';
+import { MprViewState } from '../../ViewState';
 
 /**
  * PagerTool handles mouse drag and performs the paging of the stacked images.

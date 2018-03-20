@@ -1,6 +1,6 @@
 import { Annotation } from './annotation';
 import { Viewer } from '../viewer/viewer';
-import { ViewState } from '../view-state';
+import ViewState from '../ViewState';
 import { Sprite } from '../viewer/sprite';
 import {
   Vector2D,

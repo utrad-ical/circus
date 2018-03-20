@@ -1,4 +1,4 @@
-import { Tool } from './tool';
+import Tool from './Tool';
 import WindowTool from './state/WindowTool';
 import HandTool from './state/HandTool';
 import ZoomTool from './state/ZoomTool';

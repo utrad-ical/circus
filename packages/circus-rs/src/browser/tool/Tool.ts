@@ -8,7 +8,7 @@ import { orientationAwareTranslation } from '../section-util';
  * A tool determines how a viewer intersects with various UI events.
  * An active tool will change the active view state of each viewer.
  */
-export class Tool extends EventEmitter implements ViewerEventTarget {
+export default class Tool extends EventEmitter implements ViewerEventTarget {
   public options: object = {};
 
   public mouseDownHandler(ev: ViewerEvent): void {

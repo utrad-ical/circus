@@ -33,7 +33,7 @@ export class VoxelCloudToolBase extends DraggableTool {
 
     const resolution = viewer.getResolution();
     const src = comp.imageSource as VolumeImageSource;
-    const voxelSize = src.voxelSize();
+    const voxelSize = src.metadata.voxelSize;
     const activeCloud = <VoxelCloud>this.activeCloud; // guaranteed to be set
 
     // from screen 2D coordinate to volume coordinate in millimeter

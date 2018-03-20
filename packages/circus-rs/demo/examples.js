@@ -278,9 +278,16 @@ Select an individual example item for details.
 --*/
 
 // Prepare ImageSource object, using the options provided in the boxes above
+const volumeLoader = new rs.RsVolumeLoader({
+  host: config.server,
+  token: null,
+  series: config.series
+});
+const rsHttpClient = new rs.RsHttpClient(config.server);
 const imageSource = new config.sourceClass({
-  series: config.series,
-  client: new rs.RsHttpClient(config.server)
+  volumeLoader,
+  rsHttpClient,
+  series: config.series
 });
 
 // Prepare composition.

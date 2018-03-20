@@ -1,72 +1,34 @@
 import DicomVolume from '../../common/DicomVolume';
-import { PixelFormat, pixelFormatInfo } from '../../common/PixelFormat';
-import { DicomMetadata } from './volume-image-source';
-import {
-  RsHttpLoaderImageSource,
-  RsHttpLoaderOptions
-} from '../../browser/image-source/rs-http-loader-image-source';
+import DicomVolumeLoader from './volume-loader/DicomVolumeLoader';
 import { ViewState } from '../view-state';
 import { convertSectionToIndex } from '../section-util';
 import { Vector2D, Section } from '../../common/geometry';
-import AsyncLruCache from '../../common/AsyncLruCache';
-import { RsHttpClient } from '../http-client/rs-http-client';
-
+// import AsyncLruCache from '../../common/AsyncLruCache';
 import setImmediate from '../util/set-immediate';
+import { Viewer } from '../viewer/viewer';
+import drawToImageData from './drawToImageData';
+import { VolumeImageSource } from './volume-image-source';
 
 /**
  * RawVolumeImageSource holds an entire 3D volume in memory and
  * renders MPR image form the volume.
  */
-export class RawVolumeImageSource extends RsHttpLoaderImageSource {
-  /**
-   * Cache of DicomVolume, used to share large volume data across multiple instances.
-   */
-  private static sharedCache: AsyncLruCache<DicomVolume>;
-
+export class RawVolumeImageSource extends VolumeImageSource {
+  private volumeLoader: DicomVolumeLoader;
   private volume: DicomVolume;
 
-  /**
-   * Loader function passed to the AsyncLruCache.
-   */
-  private static async loadVolume(
-    series: string,
-    meta: DicomMetadata,
-    loader: RsHttpClient
-  ): Promise<DicomVolume> {
-    const buffer = await loader.request(
-      `series/${series}/volume`,
-      {},
-      'arraybuffer'
-    );
-    const pixelFormat: PixelFormat = meta.pixelFormat;
-    const volume = new DicomVolume(meta.voxelCount, pixelFormat);
-    volume.setVoxelSize(meta.voxelSize);
-    volume.dicomWindow = meta.dicomWindow;
-    volume.estimatedWindow = meta.estimatedWindow;
-    const bytesPerSlice =
-      meta.voxelCount[0] *
-      meta.voxelCount[1] *
-      pixelFormatInfo(pixelFormat).bpp;
-    for (let i = 0; i < meta.voxelCount[2]; i++) {
-      volume.insertSingleImage(
-        i,
-        buffer.slice(bytesPerSlice * i, bytesPerSlice * (i + 1))
-      );
-    }
-    return volume;
+  constructor({ volumeLoader }: { volumeLoader: DicomVolumeLoader }) {
+    super();
+    this.volumeLoader = volumeLoader;
+    this.loadSequence = (async () => {
+      this.metadata = await this.volumeLoader.loadMeta();
+      this.volume = await this.volumeLoader.loadVolume();
+    })();
   }
 
-  constructor({ client, series }: RsHttpLoaderOptions) {
-    super({ client, series });
-    if (!RawVolumeImageSource.sharedCache) {
-      RawVolumeImageSource.sharedCache = new AsyncLruCache(
-        RawVolumeImageSource.loadVolume
-      );
-    }
-  }
-
-  protected scan(viewState: ViewState, outSize: Vector2D): Promise<Uint8Array> {
-    const imageBuffer = new Uint8Array(outSize[0] * outSize[1]);
+  public draw(viewer: Viewer, viewState: ViewState): Promise<ImageData> {
+    const outSize = viewer.getResolution();
+    const mprOutput = new Uint8Array(outSize[0] * outSize[1]);
 
     // convert from mm-coordinate to index-coordinate
     const mmSection = viewState.section;
@@ -75,35 +37,26 @@ export class RawVolumeImageSource extends RsHttpLoaderImageSource {
 
     const indexSection: Section = convertSectionToIndex(
       mmSection,
-      this.voxelSize()
+      this.metadata.voxelSize
     );
 
     this.volume.scanObliqueSection(
       indexSection,
       outSize,
-      imageBuffer,
+      mprOutput,
       viewState.interpolationMode === 'trilinear',
       viewWindow.width,
       viewWindow.level
     );
+    const imageData = drawToImageData(viewer, mprOutput);
 
     // If we use Promise.resolve directly, the then-calleback is called
     // before any stacked UI events are handled.
     // Use the polyfilled setImmediate to delay it.
     // Cf. http://stackoverflow.com/q/27647742/1209240
     return new Promise(resolve => {
-      setImmediate(() => resolve(imageBuffer));
+      setImmediate(() => resolve(imageData));
     });
-    // return Promise.resolve(imageBuffer);
-  }
-
-  protected async onMetaLoaded(): Promise<void> {
-    // Loads the entire volume, which can take many seconds
-    const volume = await RawVolumeImageSource.sharedCache.get(
-      this.series,
-      this.meta,
-      this.loader
-    );
-    this.volume = volume;
+    // return Promise.resolve(imageData);
   }
 }

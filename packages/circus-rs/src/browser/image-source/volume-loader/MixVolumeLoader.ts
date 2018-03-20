@@ -1,6 +1,7 @@
-import DicomVolumeLoader, { DicomMetadata } from './DicomVolumeLoader';
+import DicomVolumeLoader from './DicomVolumeLoader';
 import DicomVolume from '../../../common/DicomVolume';
 import { PixelFormat } from '../../../common/PixelFormat';
+import { DicomMetadata } from '../volume-image-source';
 
 /**
  * MixVolumeLoader takes two volume loaders and asynchronouslly produces

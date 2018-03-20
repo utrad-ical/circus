@@ -131,7 +131,7 @@ export class VoxelCloud implements Annotation {
    * the parent volume image source.
    */
   public expandToMaximum(source: VolumeImageSource): void {
-    const voxelCount = source.meta.voxelCount;
+    const voxelCount = source.metadata.voxelCount;
     if (!voxelCount) throw new Error('Voxel count not set');
     const voxelDimension = this.volume.getDimension();
     if (!voxelDimension) throw new Error('Voxel dimension not set');
@@ -159,7 +159,7 @@ export class VoxelCloud implements Annotation {
 
     const composition = viewer.getComposition();
     if (!composition) return null;
-    this._voxelSize = (<VolumeImageSource>composition.imageSource).meta.voxelSize;
+    this._voxelSize = (<VolumeImageSource>composition.imageSource).metadata.voxelSize;
 
     const context = viewer.canvas.getContext('2d');
     if (!context) throw new Error('Failed to get canvas context');

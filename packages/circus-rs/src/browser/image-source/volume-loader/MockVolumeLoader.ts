@@ -1,6 +1,7 @@
-import DicomVolumeLoader, { DicomMetadata } from './DicomVolumeLoader';
+import DicomVolumeLoader from './DicomVolumeLoader';
 import { PixelFormat } from '../..';
 import DicomVolume from '../../../common/DicomVolume';
+import { DicomMetadata } from '../volume-image-source';
 
 interface MockVolumeLoaderOptions {
   meta?: DicomMetadata;

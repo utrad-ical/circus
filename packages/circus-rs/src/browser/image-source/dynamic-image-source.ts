@@ -1,13 +1,38 @@
-import { RsHttpLoaderImageSource } from '../../browser/image-source/rs-http-loader-image-source';
 import { ViewState } from '../view-state';
 import { convertSectionToIndex } from '../section-util';
 import { Vector2D, Section } from '../../common/geometry';
 import { ViewWindow } from '../../common/ViewWindow';
+import { ImageSource } from './image-source';
+import { RsHttpClient } from '../http-client/rs-http-client';
+import { Viewer } from '../viewer/viewer';
+import drawToImageData from './drawToImageData';
+import { VolumeImageSource, DicomMetadata } from './volume-image-source';
 
 /**
  * DynamicImageSource fetches the MPR image from RS server.
  */
-export class DynamicImageSource extends RsHttpLoaderImageSource {
+export class DynamicImageSource extends VolumeImageSource {
+  private rsClient: RsHttpClient;
+  private series: string;
+
+  constructor({
+    rsHttpClient,
+    series
+  }: {
+    rsHttpClient: RsHttpClient;
+    series: string;
+  }) {
+    super();
+    this.rsClient = rsHttpClient;
+    this.series = series;
+    this.loadSequence = (async () => {
+      this.metadata = (await rsHttpClient.request(
+        `series/${series}/metadata`,
+        {}
+      )) as DicomMetadata;
+    })();
+  }
+
   private async requestScan(
     series: string,
     section: Section,
@@ -15,7 +40,7 @@ export class DynamicImageSource extends RsHttpLoaderImageSource {
     window: ViewWindow,
     size: Vector2D
   ): Promise<Uint8Array> {
-    const res = await this.loader.request(
+    const res = await this.rsClient.request(
       `series/${series}/scan`,
       {
         origin: section.origin.join(','),
@@ -31,21 +56,23 @@ export class DynamicImageSource extends RsHttpLoaderImageSource {
     return new Uint8Array(res);
   }
 
-  protected scan(viewState: ViewState, outSize: Vector2D): Promise<Uint8Array> {
+  public async draw(viewer: Viewer, viewState: ViewState): Promise<ImageData> {
     // convert from mm-coordinate to index-coordinate
     const section = viewState.section;
     const viewWindow = viewState.window;
+    const outSize = viewer.getResolution();
     if (!section || !viewWindow) throw new Error('Unsupported view state.');
     const indexSection: Section = convertSectionToIndex(
       section,
-      this.voxelSize()
+      this.metadata.voxelSize
     );
-    return this.requestScan(
+    const buffer = await this.requestScan(
       this.series,
       indexSection,
       viewState.interpolationMode === 'trilinear',
       viewWindow,
       outSize
     );
+    return drawToImageData(viewer, buffer);
   }
 }

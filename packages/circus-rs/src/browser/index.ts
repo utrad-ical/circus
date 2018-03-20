@@ -19,15 +19,13 @@ export * from '../common/geometry';
 
 export * from './http-client/rs-http-client';
 
-export * from './image-source/mock-image-source';
 export * from './image-source/raw-volume-image-source';
 export * from './image-source/dynamic-image-source';
 export * from './image-source/hybrid-image-source';
 export * from './image-source/gl-raw-volume-image-source';
 
 export {
-  default as DicomVolumeLoader,
-  DicomMetadata
+  default as DicomVolumeLoader
 } from '../browser/image-source/volume-loader/DicomVolumeLoader';
 export {
   default as MockVolumeLoader

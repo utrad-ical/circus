@@ -1,8 +1,9 @@
 import { RsHttpClient } from '../../http-client/rs-http-client';
-import DicomVolumeLoader, { DicomMetadata } from './DicomVolumeLoader';
+import DicomVolumeLoader from './DicomVolumeLoader';
 import IndexedDbCache from '../../util/IndexedDbCache';
 import DicomVolume from '../../../common/DicomVolume';
 import { PixelFormat } from '../../../common/PixelFormat';
+import { DicomMetadata } from '../volume-image-source';
 
 export default class VesselSampleLoader implements DicomVolumeLoader {
   // [Note]

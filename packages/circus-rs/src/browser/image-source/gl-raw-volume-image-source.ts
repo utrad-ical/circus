@@ -113,8 +113,8 @@ export class GLRawVolumeImageSource extends ImageSource {
     const createOrthogonalMprSection = require('../section-util')
       .createOrthogonalMprSection;
     state.window = {
-      level: this.meta.estimatedWindow.level,
-      width: this.meta.estimatedWindow.width
+      level: this.meta.estimatedWindow ? this.meta.estimatedWindow.level : 50,
+      width: this.meta.estimatedWindow ? this.meta.estimatedWindow.width : 50
     };
 
     state.section = createOrthogonalMprSection(

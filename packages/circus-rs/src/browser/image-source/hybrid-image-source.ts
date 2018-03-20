@@ -2,7 +2,15 @@ import { DynamicImageSource } from './dynamic-image-source';
 import { RawVolumeImageSource } from './raw-volume-image-source';
 import { ViewState } from '../view-state';
 import { Viewer } from '../viewer/viewer';
-import { VolumeImageSource } from './volume-image-source';
+import DicomVolumeLoader from './volume-loader/DicomVolumeLoader';
+import { RsHttpClient } from '../http-client/rs-http-client';
+import { VolumeImageSource, DicomMetadata } from './volume-image-source';
+
+interface HybridImageSourceParams {
+  volumeLoader: DicomVolumeLoader;
+  rsHttpClient: RsHttpClient;
+  series: string;
+}
 
 /**
  * HybridImageSource combines DynamicImageSource and RawVolumeImageSource.
@@ -14,11 +22,7 @@ export class HybridImageSource extends VolumeImageSource {
   private volSource: RawVolumeImageSource;
   private volumeReady: boolean = false;
 
-  public async scan(param): Promise<Uint8Array> {
-    return new Uint8Array(0); // never called
-  }
-
-  constructor(params) {
+  constructor(params: HybridImageSourceParams) {
     super();
     this.volSource = new RawVolumeImageSource(params);
     this.volSource.ready().then(() => {
@@ -26,7 +30,7 @@ export class HybridImageSource extends VolumeImageSource {
     });
     this.dynSource = new DynamicImageSource(params);
     this.dynSource.ready().then(() => {
-      this.meta = this.dynSource.meta;
+      this.metadata = this.dynSource.metadata;
     });
   }
 

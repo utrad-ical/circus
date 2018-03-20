@@ -23,7 +23,7 @@ export class PagerTool extends DraggableTool {
     if (!comp) throw new Error('Composition not initialized'); // should not happen
     const src = comp.imageSource as VolumeImageSource;
     if (!(src instanceof VolumeImageSource)) return;
-    const voxelSize = src.voxelSize();
+    const voxelSize = src.metadata.voxelSize;
 
     state.section = orientationAwareTranslation(
       state.section,

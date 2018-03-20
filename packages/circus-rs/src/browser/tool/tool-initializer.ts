@@ -1,14 +1,13 @@
 import { Tool } from './tool';
-import { WindowTool } from './state/window';
-import { HandTool } from './state/hand';
-import { ZoomTool } from './state/zoom';
-import { PagerTool } from './state/pager';
-import { CelestialRotateTool } from './state/celestial-rotate';
-import { BrushTool } from './cloud/brush';
-import { EraserTool } from './cloud/eraser';
-import { BucketTool } from './cloud/bucket';
-
-import { VRRotateZoomTool } from './state/vr-rotate-zoom';
+import WindowTool from './state/WindowTool';
+import HandTool from './state/HandTool';
+import ZoomTool from './state/ZoomTool';
+import PagerTool from './state/PagerTool';
+import CelestialRotateTool from './state/CelestialRotateTool';
+import BrushTool from './cloud/BrushTool';
+import EraserTool from './cloud/EraserTool';
+import BucketTool from './cloud/BrushTool';
+import VrRotateZoomTool from './state/VrRotateZoomTool';
 
 const toolCollection = {};
 
@@ -24,7 +23,7 @@ const defaultTools = {
   eraser: EraserTool,
   bucket: BucketTool,
 
-  'vr-rotate-zoom': VRRotateZoomTool
+  'vr-rotate-zoom': VrRotateZoomTool
 };
 
 Object.keys(defaultTools).forEach(key => {

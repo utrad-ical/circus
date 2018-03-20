@@ -1,15 +1,15 @@
 import { mat4, vec3 } from 'gl-matrix';
-import { DraggableTool } from '../../../browser/tool/draggable';
+import DraggableTool from '../DraggableTool';
 import { Viewer } from '../../../browser/viewer/viewer';
 import { ViewState } from '../../view-state';
 import { ViewerEvent } from '../../../browser/viewer/viewer-event';
 
 /**
- * VRZoomTool
+ * VrRotateZoomTool
  *
  *  Edit viewState.vrScale
  */
-export class VRRotateZoomTool extends DraggableTool {
+export default class VrRotateZoomTool extends DraggableTool {
   public dragHandler(ev: ViewerEvent): void {
     const viewer = ev.viewer;
     const state: ViewState = viewer.getState();

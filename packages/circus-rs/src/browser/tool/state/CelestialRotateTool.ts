@@ -1,5 +1,5 @@
 import { mat4, vec3 } from 'gl-matrix';
-import { DraggableTool } from '../draggable';
+import DraggableTool from '../DraggableTool';
 import { ViewerEvent } from '../../viewer/viewer-event';
 import { Section } from '../../../common/geometry';
 import { MprViewState } from '../../view-state';
@@ -8,7 +8,7 @@ import { MprViewState } from '../../view-state';
  * CelestialRotateTool handles mouse drags and wheel moves on the Viewer and
  * rotates the MPR section accordingly.
  */
-export class CelestialRotateTool extends DraggableTool {
+export default class CelestialRotateTool extends DraggableTool {
   public dragHandler(ev: ViewerEvent): void {
     super.dragHandler(ev);
     const dragInfo = this.dragInfo;

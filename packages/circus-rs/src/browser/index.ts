@@ -51,12 +51,14 @@ export {
 
 export { default as IndexedDbCache } from '../browser/util/IndexedDbCache';
 
-export * from '../browser/tool/state/hand';
-export * from '../browser/tool/state/celestial-rotate';
-export * from '../browser/tool/state/window';
-export * from '../browser/tool/state/pager';
-export * from '../browser/tool/state/zoom';
-export * from '../browser/tool/cloud/brush';
+export { default as HandTool } from '../browser/tool/state/HandTool';
+export {
+  default as CelestialRotateTool
+} from '../browser/tool/state/CelestialRotateTool';
+export { default as WindowTool } from '../browser/tool/state/WindowTool';
+export { default as PagerTool } from '../browser/tool/state/PagerTool';
+export { default as ZoomTool } from '../browser/tool/state/ZoomTool';
+export { default as BrushTool } from '../browser/tool/cloud/BrushTool';
 
 export { createToolbar } from '../browser/create-toolbar';
 

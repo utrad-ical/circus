@@ -1,10 +1,10 @@
-import { DraggableTool } from '../../../browser/tool/draggable';
+import DraggableTool from '../DraggableTool';
 import { ViewerEvent } from '../../../browser/viewer/viewer-event';
 
 /**
  * WindowTool handles mouse drag and modifies the window level/width accordingly.
  */
-export class WindowTool extends DraggableTool {
+export default class WindowTool extends DraggableTool {
   public dragHandler(ev: ViewerEvent): void {
     super.dragHandler(ev);
     const dragInfo = this.dragInfo;

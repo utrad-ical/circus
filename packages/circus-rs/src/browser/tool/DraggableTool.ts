@@ -31,7 +31,7 @@ export interface DragInfo {
  * This class manages a protected member "dragInfo", which holds handy values
  * such as the total mouse move distance from the drag start point.
  */
-export abstract class DraggableTool extends Tool {
+export default abstract class DraggableTool extends Tool {
   /**
    * Holds some useful drag-related variables.
    */

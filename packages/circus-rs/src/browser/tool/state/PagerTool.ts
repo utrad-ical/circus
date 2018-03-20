@@ -1,4 +1,4 @@
-import { DraggableTool } from '../../../browser/tool/draggable';
+import DraggableTool from '../DraggableTool';
 import { ViewerEvent } from '../../../browser/viewer/viewer-event';
 import MprImageSource from '../../image-source/MprImageSource';
 import { orientationAwareTranslation } from '../../section-util';
@@ -7,7 +7,7 @@ import { MprViewState } from '../../view-state';
 /**
  * PagerTool handles mouse drag and performs the paging of the stacked images.
  */
-export class PagerTool extends DraggableTool {
+export default class PagerTool extends DraggableTool {
   private currentStep: number;
 
   public dragHandler(ev: ViewerEvent): void {

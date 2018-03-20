@@ -1,4 +1,4 @@
-import { DraggableTool } from '../draggable';
+import DraggableTool from '../DraggableTool';
 import { ViewerEvent } from '../../viewer/viewer-event';
 import { MprViewState } from '../../view-state';
 import { translateSection } from '../../../common/geometry';
@@ -7,7 +7,7 @@ import { translateSection } from '../../../common/geometry';
  * HandTool is a tool which responds to a mouse drag and moves the
  * MprImageSource in parallel with the screen.
  */
-export class HandTool extends DraggableTool {
+export default class HandTool extends DraggableTool {
   public dragHandler(ev: ViewerEvent): void {
     super.dragHandler(ev);
     const dragInfo = this.dragInfo;

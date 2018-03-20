@@ -1,6 +1,6 @@
 import { Composition } from '../../composition';
 import { VoxelCloud } from '../../annotation/voxel-cloud';
-import { DraggableTool } from '../draggable';
+import DraggableTool from '../DraggableTool';
 import { Viewer } from '../../viewer/viewer';
 import MprImageSource from '../../image-source/MprImageSource';
 import * as su from '../../section-util';
@@ -12,7 +12,7 @@ import { ViewerEvent } from '../../viewer/viewer-event';
 /**
  * VoxelCloudToolBase is a base tool that affects VoxelCloud annotations.
  */
-export class VoxelCloudToolBase extends DraggableTool {
+export default class VoxelCloudToolBase extends DraggableTool {
   protected activeCloud: VoxelCloud | null = null;
 
   protected pX: number;

@@ -1,5 +1,5 @@
 import { mat4, vec3 } from 'gl-matrix';
-import { DraggableTool } from '../../../browser/tool/draggable';
+import DraggableTool from '../DraggableTool';
 import { Viewer } from '../../../browser/viewer/viewer';
 import { ViewState } from '../../view-state';
 import { ViewerEvent } from '../../../browser/viewer/viewer-event';
@@ -9,7 +9,7 @@ import { Vector2D, Section } from '../../../common/geometry';
 /**
  * ZoomTool
  */
-export class ZoomTool extends DraggableTool {
+export default class ZoomTool extends DraggableTool {
   /**
    * Holds the current zoom step relative to the drag start time
    */

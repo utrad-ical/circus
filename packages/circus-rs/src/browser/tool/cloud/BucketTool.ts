@@ -1,5 +1,5 @@
 import { ViewerEvent } from '../../../browser/viewer/viewer-event';
-import { VoxelCloudToolBase } from './voxel-cloud-tool-base';
+import VoxelCloudToolBase from './VoxelCloudToolBase';
 import { Vector2D } from '../../../common/geometry';
 import { floodFillOnSlice } from '../../volume-util';
 import { detectOrthogonalSection } from '../../section-util';
@@ -7,7 +7,7 @@ import { detectOrthogonalSection } from '../../section-util';
 /**
  * Bucket tool performs the flood-fill operation along an orthogonal MPR plane.
  */
-export class BucketTool extends VoxelCloudToolBase {
+export default class BucketTool extends VoxelCloudToolBase {
   public dragStartHandler(ev: ViewerEvent): void {
     super.dragStartHandler(ev);
     const viewer = ev.viewer;

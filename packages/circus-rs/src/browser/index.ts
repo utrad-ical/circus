@@ -19,10 +19,19 @@ export * from '../common/geometry';
 
 export * from './http-client/rs-http-client';
 
-export * from './image-source/raw-volume-image-source';
-export * from './image-source/dynamic-image-source';
-export * from './image-source/hybrid-image-source';
-export * from './image-source/gl-raw-volume-image-source';
+export { default as MprImageSource } from './image-source/MprImageSource';
+export {
+  default as DynamicMprImageSource
+} from './image-source/DynamicMprImageSource';
+export {
+  default as RawVolumeMprImageSource
+} from './image-source/RawVolumeMprImageSource';
+export {
+  default as HybridMprImageSource
+} from './image-source/HybridImageSource';
+export {
+  default as VolumeRenderingImageSource
+} from './image-source/VolumeRenderingImageSource';
 
 export {
   default as DicomVolumeLoader

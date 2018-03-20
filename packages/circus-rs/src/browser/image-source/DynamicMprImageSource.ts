@@ -2,16 +2,17 @@ import { ViewState } from '../view-state';
 import { convertSectionToIndex } from '../section-util';
 import { Vector2D, Section } from '../../common/geometry';
 import { ViewWindow } from '../../common/ViewWindow';
-import { ImageSource } from './image-source';
+import ImageSource from './ImageSource';
 import { RsHttpClient } from '../http-client/rs-http-client';
 import { Viewer } from '../viewer/viewer';
 import drawToImageData from './drawToImageData';
-import { VolumeImageSource, DicomMetadata } from './volume-image-source';
+import MprImageSource from './MprImageSource';
+import { DicomVolumeMetadata } from './volume-loader/DicomVolumeLoader';
 
 /**
  * DynamicImageSource fetches the MPR image from RS server.
  */
-export class DynamicImageSource extends VolumeImageSource {
+export default class DynamicMprImageSource extends MprImageSource {
   private rsClient: RsHttpClient;
   private series: string;
 
@@ -29,7 +30,7 @@ export class DynamicImageSource extends VolumeImageSource {
       this.metadata = (await rsHttpClient.request(
         `series/${series}/metadata`,
         {}
-      )) as DicomMetadata;
+      )) as DicomVolumeMetadata;
     })();
   }
 

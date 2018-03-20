@@ -2,7 +2,7 @@ import { Composition } from '../../composition';
 import { VoxelCloud } from '../../annotation/voxel-cloud';
 import { DraggableTool } from '../draggable';
 import { Viewer } from '../../viewer/viewer';
-import { VolumeImageSource } from '../../image-source/volume-image-source';
+import MprImageSource from '../../image-source/MprImageSource';
 import * as su from '../../section-util';
 import { Vector2D, Vector3D } from '../../../common/geometry';
 import { vec3 } from 'gl-matrix';
@@ -32,7 +32,7 @@ export class VoxelCloudToolBase extends DraggableTool {
     if (!comp) throw new Error('Composition not initialized'); // should not happen
 
     const resolution = viewer.getResolution();
-    const src = comp.imageSource as VolumeImageSource;
+    const src = comp.imageSource as MprImageSource;
     const voxelSize = src.metadata.voxelSize;
     const activeCloud = <VoxelCloud>this.activeCloud; // guaranteed to be set
 
@@ -67,7 +67,7 @@ export class VoxelCloudToolBase extends DraggableTool {
     const comp = viewer.getComposition();
     if (!comp) throw new Error('Composition not initialized'); // should not happen
 
-    const src = comp.imageSource as VolumeImageSource;
+    const src = comp.imageSource as MprImageSource;
 
     if (!this.activeCloud) return; // no cloud to paint on
     const activeCloud = this.activeCloud;

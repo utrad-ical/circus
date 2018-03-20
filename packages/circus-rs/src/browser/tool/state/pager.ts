@@ -1,6 +1,6 @@
 import { DraggableTool } from '../../../browser/tool/draggable';
 import { ViewerEvent } from '../../../browser/viewer/viewer-event';
-import { VolumeImageSource } from '../../image-source/volume-image-source';
+import MprImageSource from '../../image-source/MprImageSource';
 import { orientationAwareTranslation } from '../../section-util';
 
 /**
@@ -21,8 +21,8 @@ export class PagerTool extends DraggableTool {
 
     const comp = viewer.getComposition();
     if (!comp) throw new Error('Composition not initialized'); // should not happen
-    const src = comp.imageSource as VolumeImageSource;
-    if (!(src instanceof VolumeImageSource)) return;
+    const src = comp.imageSource as MprImageSource;
+    if (!(src instanceof MprImageSource)) return;
     const voxelSize = src.metadata.voxelSize;
 
     state.section = orientationAwareTranslation(

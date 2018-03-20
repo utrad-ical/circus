@@ -5,7 +5,7 @@ import { translateSection } from '../../../common/geometry';
 
 /**
  * HandTool is a tool which responds to a mouse drag and moves the
- * VolumeImageSource in parallel with the screen.
+ * MprImageSource in parallel with the screen.
  */
 export class HandTool extends DraggableTool {
   public dragHandler(ev: ViewerEvent): void {

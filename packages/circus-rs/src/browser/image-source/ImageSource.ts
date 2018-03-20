@@ -6,7 +6,7 @@ import { Viewer } from '../viewer/viewer';
  * ImageSource is an abstract class which represents a
  * 2D or 3D image from any source and draws it onto a given canvas.
  */
-export abstract class ImageSource extends EventEmitter {
+export default abstract class ImageSource extends EventEmitter {
   /**
    * Draws an image according to the current view state.
    * @return A promise which resolves with ImageData (of canvas).

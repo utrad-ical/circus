@@ -80,7 +80,7 @@ function viewStateAnimation(viewer, state0, state1, totalTime) {
   if (totalTime > 0) animate();
 }
 
-const imageSource = new rs.GLRawVolumeImageSource({
+const imageSource = new rs.VolumeRenderingImageSource({
   loader: loader
 });
 

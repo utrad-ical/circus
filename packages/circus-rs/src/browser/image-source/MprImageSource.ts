@@ -1,25 +1,18 @@
-import { ImageSource } from './image-source';
+import ImageSource from './ImageSource';
 import { ViewState } from '../view-state';
 import { Viewer } from '../viewer/viewer';
 import { createOrthogonalMprSection } from '../section-util';
 import { Vector2D, Vector3D } from '../../common/geometry';
 import { ViewWindow } from '../../common/ViewWindow';
 import { PixelFormat } from '../../common/PixelFormat';
-
-export interface DicomMetadata {
-  dicomWindow?: ViewWindow;
-  estimatedWindow?: ViewWindow;
-  voxelCount: [number, number, number];
-  voxelSize: [number, number, number];
-  pixelFormat: PixelFormat;
-}
+import { DicomVolumeMetadata } from './volume-loader/DicomVolumeLoader';
 
 /**
- * VolumeImageSource is a common base class for all
+ * MprImageSource is a common base class for all
  * 3D volume-based image source classes which can render MPR.
  */
-export abstract class VolumeImageSource extends ImageSource {
-  public metadata: DicomMetadata;
+export default abstract class MprImageSource extends ImageSource {
+  public metadata: DicomVolumeMetadata;
   protected loadSequence: Promise<void>;
 
   public initialState(viewer: Viewer): ViewState {

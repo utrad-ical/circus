@@ -1,6 +1,6 @@
 import DicomVolume from '../../common/DicomVolume';
-import { DicomMetadata } from './volume-image-source';
-import { ImageSource } from './image-source';
+import { DicomVolumeMetadata } from './volume-loader/DicomVolumeLoader';
+import ImageSource from './ImageSource';
 import { Viewer } from '../viewer/viewer';
 import { ViewState, TransferFunctionEntry } from '../view-state';
 import DicomVolumeLoader from './volume-loader/DicomVolumeLoader';
@@ -38,8 +38,8 @@ type GLRawVolumeImageSourceOption = {
   loader: DicomVolumeLoader;
 };
 
-export class GLRawVolumeImageSource extends ImageSource {
-  private meta: DicomMetadata;
+export default class VolumeRenderingImageSource extends ImageSource {
+  private meta: DicomVolumeMetadata;
   private volume: DicomVolume;
 
   private glHandler: GLContextManager;

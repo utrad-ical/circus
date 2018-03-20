@@ -20,7 +20,7 @@ import {
 } from '../section-util';
 import { scanBoundingBox } from '../volume-util';
 import { convertSectionToIndex } from '../section-util';
-import { VolumeImageSource } from '../image-source/volume-image-source';
+import MprImageSource from '../image-source/MprImageSource';
 import RawData from '../../common/RawData';
 
 /**
@@ -130,7 +130,7 @@ export class VoxelCloud implements Annotation {
    * Expands this volume so that it covers the entire volume of
    * the parent volume image source.
    */
-  public expandToMaximum(source: VolumeImageSource): void {
+  public expandToMaximum(source: MprImageSource): void {
     const voxelCount = source.metadata.voxelCount;
     if (!voxelCount) throw new Error('Voxel count not set');
     const voxelDimension = this.volume.getDimension();
@@ -159,7 +159,7 @@ export class VoxelCloud implements Annotation {
 
     const composition = viewer.getComposition();
     if (!composition) return null;
-    this._voxelSize = (<VolumeImageSource>composition.imageSource).metadata.voxelSize;
+    this._voxelSize = (<MprImageSource>composition.imageSource).metadata.voxelSize;
 
     const context = viewer.canvas.getContext('2d');
     if (!context) throw new Error('Failed to get canvas context');

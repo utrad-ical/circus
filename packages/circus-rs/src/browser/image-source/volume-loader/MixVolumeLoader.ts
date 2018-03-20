@@ -1,7 +1,7 @@
 import DicomVolumeLoader from './DicomVolumeLoader';
 import DicomVolume from '../../../common/DicomVolume';
 import { PixelFormat } from '../../../common/PixelFormat';
-import { DicomMetadata } from '../volume-image-source';
+import { DicomVolumeMetadata } from './DicomVolumeLoader';
 
 /**
  * MixVolumeLoader takes two volume loaders and asynchronouslly produces
@@ -10,14 +10,14 @@ import { DicomMetadata } from '../volume-image-source';
 export default class MixVolumeLoader implements DicomVolumeLoader {
   private volumeLoader: DicomVolumeLoader;
   private maskLoader: DicomVolumeLoader;
-  private meta: DicomMetadata;
+  private meta: DicomVolumeMetadata;
 
   constructor({ volumeLoader, maskLoader }) {
     this.volumeLoader = volumeLoader;
     this.maskLoader = maskLoader;
   }
 
-  public async loadMeta(): Promise<DicomMetadata> {
+  public async loadMeta(): Promise<DicomVolumeMetadata> {
     const meta = await this.volumeLoader.loadMeta();
     this.meta = meta;
     return meta;

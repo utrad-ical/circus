@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events';
 import { ViewerEvent } from '../../browser/viewer/viewer-event';
-import { VolumeImageSource } from '../image-source/volume-image-source';
+import MprImageSource from '../image-source/MprImageSource';
 import { ViewerEventTarget } from '../interface/viewer-event-target';
 import { orientationAwareTranslation } from '../section-util';
 
@@ -60,8 +60,8 @@ export class Tool extends EventEmitter implements ViewerEventTarget {
     const step = -this.sign(ev.original.deltaY) * (ev.original.ctrlKey ? 5 : 1);
     const comp = viewer.getComposition();
     if (!comp) throw new Error('Composition not initialized'); // should not happen
-    const src = comp.imageSource as VolumeImageSource;
-    if (!(src instanceof VolumeImageSource)) return;
+    const src = comp.imageSource as MprImageSource;
+    if (!(src instanceof MprImageSource)) return;
     const voxelSize = src.metadata.voxelSize;
     state.section = orientationAwareTranslation(state.section, voxelSize, step);
     viewer.setState(state);

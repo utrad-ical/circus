@@ -3,7 +3,7 @@ import DicomVolumeLoader from './DicomVolumeLoader';
 import IndexedDbCache from '../../util/IndexedDbCache';
 import DicomVolume from '../../../common/DicomVolume';
 import { PixelFormat } from '../../../common/PixelFormat';
-import { DicomMetadata } from '../volume-image-source';
+import { DicomVolumeMetadata } from './DicomVolumeLoader';
 
 export default class VesselSampleLoader implements DicomVolumeLoader {
   // [Note]
@@ -27,7 +27,7 @@ export default class VesselSampleLoader implements DicomVolumeLoader {
 
   private client: RsHttpClient;
   private path: string;
-  private meta: DicomMetadata = {
+  private meta: DicomVolumeMetadata = {
     voxelSize: [0.4688, 0.4688, 0.6],
     voxelCount: [512, 512, 132],
     pixelFormat: PixelFormat.UInt16,
@@ -49,7 +49,7 @@ export default class VesselSampleLoader implements DicomVolumeLoader {
     this.cache = cache;
   }
 
-  public loadMeta(): Promise<DicomMetadata> {
+  public loadMeta(): Promise<DicomVolumeMetadata> {
     return Promise.resolve(this.meta);
   }
 

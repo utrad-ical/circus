@@ -7,13 +7,13 @@ import { Vector2D, Section } from '../../common/geometry';
 import setImmediate from '../util/set-immediate';
 import { Viewer } from '../viewer/viewer';
 import drawToImageData from './drawToImageData';
-import { VolumeImageSource } from './volume-image-source';
+import MprImageSource from './MprImageSource';
 
 /**
- * RawVolumeImageSource holds an entire 3D volume in memory and
+ * RawVolumeMprImageSource holds an entire 3D volume in memory and
  * renders MPR image form the volume.
  */
-export class RawVolumeImageSource extends VolumeImageSource {
+export default class RawVolumeMprImageSource extends MprImageSource {
   private volumeLoader: DicomVolumeLoader;
   private volume: DicomVolume;
 

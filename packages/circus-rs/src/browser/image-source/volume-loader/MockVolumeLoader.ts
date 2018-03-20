@@ -1,10 +1,10 @@
 import DicomVolumeLoader from './DicomVolumeLoader';
 import { PixelFormat } from '../..';
 import DicomVolume from '../../../common/DicomVolume';
-import { DicomMetadata } from '../volume-image-source';
+import { DicomVolumeMetadata } from './DicomVolumeLoader';
 
 interface MockVolumeLoaderOptions {
-  meta?: DicomMetadata;
+  meta?: DicomVolumeMetadata;
   gridSize?: number;
 }
 
@@ -13,12 +13,12 @@ interface MockVolumeLoaderOptions {
  */
 export default class MockLoader implements DicomVolumeLoader {
   private option: MockVolumeLoaderOptions;
-  private meta: DicomMetadata;
+  private meta: DicomVolumeMetadata;
 
   constructor(option: MockVolumeLoaderOptions = {}) {
     this.option = option;
 
-    const meta: DicomMetadata = option.meta || {
+    const meta: DicomVolumeMetadata = option.meta || {
       voxelSize: [0.4688, 0.4688, 0.6],
       voxelCount: [512, 512, 132],
       estimatedWindow: { level: 200, width: 600 },
@@ -29,7 +29,7 @@ export default class MockLoader implements DicomVolumeLoader {
     this.meta = meta;
   }
 
-  public async loadMeta(): Promise<DicomMetadata> {
+  public async loadMeta(): Promise<DicomVolumeMetadata> {
     return this.meta;
   }
 

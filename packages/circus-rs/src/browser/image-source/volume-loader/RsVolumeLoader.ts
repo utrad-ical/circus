@@ -2,30 +2,32 @@ import { RsHttpClient } from '../../http-client/rs-http-client';
 import DicomVolumeLoader from './DicomVolumeLoader';
 import IndexedDbCache from '../../util/IndexedDbCache';
 import DicomVolume from '../../../common/DicomVolume';
-import { DicomMetadata } from '../volume-image-source';
+import { DicomVolumeMetadata } from './DicomVolumeLoader';
 
 export default class RsVolumeLoader implements DicomVolumeLoader {
   private client: RsHttpClient;
   private series: string;
-  private meta: DicomMetadata;
+  private meta: DicomVolumeMetadata;
 
-  private cache: IndexedDbCache<ArrayBuffer | DicomMetadata>;
+  private cache: IndexedDbCache<ArrayBuffer | DicomVolumeMetadata>;
 
   constructor({ host, token, series }: any) {
     this.client = new RsHttpClient(host, token);
     this.series = series;
   }
 
-  public useCache(cache: IndexedDbCache<ArrayBuffer | DicomMetadata>): void {
+  public useCache(
+    cache: IndexedDbCache<ArrayBuffer | DicomVolumeMetadata>
+  ): void {
     this.cache = cache;
   }
 
-  public async loadMeta(): Promise<DicomMetadata> {
+  public async loadMeta(): Promise<DicomVolumeMetadata> {
     if (!this.series) throw new Error('Series is required');
 
-    let meta: DicomMetadata | undefined;
+    let meta: DicomVolumeMetadata | undefined;
     if (this.cache) {
-      const cache = <Promise<DicomMetadata>>this.cache.get(
+      const cache = <Promise<DicomVolumeMetadata>>this.cache.get(
         this.series + '.meta'
       );
       if (cache) meta = await cache;
@@ -34,7 +36,7 @@ export default class RsVolumeLoader implements DicomVolumeLoader {
       meta = (await this.client.request(
         `series/${this.series}/metadata`,
         {}
-      )) as DicomMetadata;
+      )) as DicomVolumeMetadata;
     }
     this.meta = meta;
     if (this.cache) this.cache.put(this.series + '.meta', meta);

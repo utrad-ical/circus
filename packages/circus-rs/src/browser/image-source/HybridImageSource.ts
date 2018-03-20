@@ -1,10 +1,10 @@
-import { DynamicImageSource } from './dynamic-image-source';
-import { RawVolumeImageSource } from './raw-volume-image-source';
+import DynamicMprImageSource from './DynamicMprImageSource';
+import RawVolumeMprImageSource from './RawVolumeMprImageSource';
 import { ViewState } from '../view-state';
 import { Viewer } from '../viewer/viewer';
 import DicomVolumeLoader from './volume-loader/DicomVolumeLoader';
 import { RsHttpClient } from '../http-client/rs-http-client';
-import { VolumeImageSource, DicomMetadata } from './volume-image-source';
+import MprImageSource from './MprImageSource';
 
 interface HybridImageSourceParams {
   volumeLoader: DicomVolumeLoader;
@@ -13,29 +13,29 @@ interface HybridImageSourceParams {
 }
 
 /**
- * HybridImageSource combines DynamicImageSource and RawVolumeImageSource.
- * It can draw MPR images as soon as DynamicImageSource is ready,
- * and then switch to RawVolumeImageSource when it is ready.
+ * HybridImageSource combines DynamicMprImageSource and RawVolumeMprImageSource.
+ * It can draw MPR images as soon as the former gets ready,
+ * and then switch to RawVolumeMprImageSource when it is ready.
  */
-export class HybridImageSource extends VolumeImageSource {
-  private dynSource: DynamicImageSource;
-  private volSource: RawVolumeImageSource;
+export default class HybridMprImageSource extends MprImageSource {
+  private dynSource: DynamicMprImageSource;
+  private volSource: RawVolumeMprImageSource;
   private volumeReady: boolean = false;
 
   constructor(params: HybridImageSourceParams) {
     super();
-    this.volSource = new RawVolumeImageSource(params);
+    this.volSource = new RawVolumeMprImageSource(params);
     this.volSource.ready().then(() => {
       this.volumeReady = true;
     });
-    this.dynSource = new DynamicImageSource(params);
+    this.dynSource = new DynamicMprImageSource(params);
     this.dynSource.ready().then(() => {
       this.metadata = this.dynSource.metadata;
     });
   }
 
   public draw(viewer: Viewer, viewState: ViewState): Promise<ImageData> {
-    const source: VolumeImageSource = this.volumeReady
+    const source: MprImageSource = this.volumeReady
       ? this.volSource
       : this.dynSource;
     return source.draw(viewer, viewState);

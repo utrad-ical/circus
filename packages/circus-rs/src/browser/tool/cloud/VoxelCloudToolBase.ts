@@ -5,7 +5,6 @@ import Viewer from '../../viewer/Viewer';
 import MprImageSource from '../../image-source/MprImageSource';
 import * as su from '../../section-util';
 import { Vector2D, Vector3D } from '../../../common/geometry';
-// import { vec2, vec3 } from 'gl-matrix';
 import { draw3DLine } from '../../volume-util';
 import ViewerEvent from '../../viewer/ViewerEvent';
 import { Vector2, Vector3 } from 'three';
@@ -24,7 +23,7 @@ export default class VoxelCloudToolBase extends DraggableTool {
     this.options = { width: 1 };
   }
 
-  protected convertViewerPoint(point: Vector2D, viewer: Viewer): Vector3D {
+  protected convertViewerPoint(point: Vector2D, viewer: Viewer): Vector3 {
     const state = viewer.getState();
     if (state.type !== 'mpr') throw new Error('Unsupported view state.');
     const section = state.section;
@@ -50,11 +49,11 @@ export default class VoxelCloudToolBase extends DraggableTool {
       new Vector3().fromArray(activeCloud.origin)
     );
     // round
-    return [
+    return new Vector3(
       Math.round(indexOfCloud.x),
       Math.round(indexOfCloud.y),
       Math.round(indexOfCloud.z)
-    ] as Vector3D;
+    );
   }
 
   protected draw3DLineWithValue(

@@ -1,6 +1,5 @@
 import { Vector2D, Vector3D } from '../common/geometry';
 import { Vector3, Vector2 } from 'three';
-import { vec3 } from 'gl-matrix';
 import {
   Section,
   Rectangle,
@@ -16,7 +15,7 @@ export type OrientationString = 'axial' | 'sagittal' | 'coronal' | 'oblique';
  * @param section
  * @param resolution
  * @param volumePoint
- * @returns {Vector2D}
+ * @returns {Vector2}
  */
 export function convertVolumeCoordinateToScreenCoordinate(
   section: Section,
@@ -50,8 +49,8 @@ export function convertScreenCoordinateToVolumeCoordinate(
  * @return One of 'axial', 'sagittal', 'coronal' or 'oblique'
  */
 export function detectOrthogonalSection(section: Section): OrientationString {
-  const xAxis = section.xAxis.toArray() as Vector3D;
-  const yAxis = section.yAxis.toArray() as Vector3D;
+  const xAxis = section.xAxis;
+  const yAxis = section.yAxis;
   if (parallelToX(xAxis) && parallelToY(yAxis)) return 'axial';
   if (parallelToY(xAxis) && parallelToZ(yAxis)) return 'sagittal';
   if (parallelToX(xAxis) && parallelToZ(yAxis)) return 'coronal';
@@ -60,18 +59,18 @@ export function detectOrthogonalSection(section: Section): OrientationString {
 
 const THRESHOLD = 0.0001;
 
-export function parallelToX(vec: Vector3D): boolean {
-  const a = vec3.angle(vec, vec3.fromValues(1, 0, 0));
+export function parallelToX(vec: Vector3): boolean {
+  const a = vec.angleTo(new Vector3(1, 0, 0));
   return a < THRESHOLD || a > Math.PI - THRESHOLD;
 }
 
-export function parallelToY(vec: Vector3D): boolean {
-  const a = vec3.angle(vec, vec3.fromValues(0, 1, 0));
+export function parallelToY(vec: Vector3): boolean {
+  const a = vec.angleTo(new Vector3(0, 1, 0));
   return a < THRESHOLD || a > Math.PI - THRESHOLD;
 }
 
-export function parallelToZ(vec: Vector3D): boolean {
-  const a = vec3.angle(vec, vec3.fromValues(0, 0, 1));
+export function parallelToZ(vec: Vector3): boolean {
+  const a = vec.angleTo(new Vector3(0, 0, 1));
   return a < THRESHOLD || a > Math.PI - THRESHOLD;
 }
 
@@ -135,24 +134,26 @@ export function orientationAwareTranslation(
   step: number = 1
 ): Section {
   const orientation = detectOrthogonalSection(section);
-  let delta: Vector3D;
+  let delta: Vector3;
   switch (orientation) {
     case 'axial':
-      delta = [0, 0, voxelSize[2] * step];
+      delta = new Vector3(0, 0, voxelSize[2] * step);
       break;
     case 'sagittal':
-      delta = [voxelSize[0] * step, 0, 0];
+      delta = new Vector3(voxelSize[0] * step, 0, 0);
       break;
     case 'coronal':
-      delta = [0, voxelSize[1] * step, 0];
+      delta = new Vector3(0, voxelSize[1] * step, 0);
       break;
     default:
-      delta = vec3.create() as Vector3D;
-      vec3.cross(delta, section.xAxis.toArray(), section.yAxis.toArray());
-      vec3.normalize(delta, delta);
-      vec3.scale(delta, delta, step);
+      delta = section.xAxis
+        .clone()
+        .cross(section.yAxis)
+        .normalize()
+        .multiplyScalar(step);
+      break;
   }
-  section = translateSection(section, new Vector3().fromArray(delta));
+  section = translateSection(section, delta);
   return section;
 }
 

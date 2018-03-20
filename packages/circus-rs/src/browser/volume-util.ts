@@ -1,9 +1,9 @@
-import { vec3 } from 'gl-matrix';
-import { Vector2D, Vector3D, Box } from '../common/geometry';
+import { Box } from '../common/geometry';
 import RawData from '../common/RawData';
 import { PixelFormat } from '../common/PixelFormat';
 import floodFill, { BinaryArrayView2D } from './util/floodFill';
 import { OrientationString } from './section-util';
+import { Vector3 } from 'three';
 
 /**
  * Scans all the voxels in the given volume and
@@ -64,51 +64,48 @@ export function scanBoundingBox(
  */
 export function draw3DLine(
   volume: RawData,
-  p0: Vector3D, // offset (not mm!)
-  p1: Vector3D, // offset (not mm!)
+  p0: Vector3, // offset (not mm!)
+  p1: Vector3, // offset (not mm!)
   value: number = 1
 ): void {
   if (volume.getPixelFormat() !== PixelFormat.Binary) {
     throw new Error('This function only supports binary format.');
   }
 
-  const e = vec3.normalize(vec3.create(), [
-    p1[0] - p0[0],
-    p1[1] - p0[1],
-    p1[2] - p0[2]
-  ]) as Vector3D;
-  const distance = vec3.length([p1[0] - p0[0], p1[1] - p0[1], p1[2] - p0[2]]);
+  const diff = new Vector3().subVectors(p1, p0);
+  const distance = diff.length();
+  const e = diff.normalize();
   let walked = 0.0;
 
-  const pi = [p0[0], p0[1], p0[2]] as Vector3D; // clone
+  const pi = p0.clone(); // clone
 
   type Trimmer = (i: number) => number;
   const trim_x: Trimmer =
-    e[0] < 0
+    e.x < 0
       ? i => (i === Math.floor(i) ? i - 1 : Math.floor(i))
       : i => Math.floor(i);
   const trim_y: Trimmer =
-    e[1] < 0
+    e.y < 0
       ? i => (i === Math.floor(i) ? i - 1 : Math.floor(i))
       : i => Math.floor(i);
   const trim_z: Trimmer =
-    e[2] < 0
+    e.z < 0
       ? i => (i === Math.floor(i) ? i - 1 : Math.floor(i))
       : i => Math.floor(i);
 
   do {
-    volume.writePixelAt(value, trim_x(pi[0]), trim_y(pi[1]), trim_z(pi[2]));
+    volume.writePixelAt(value, trim_x(pi.z), trim_y(pi.y), trim_z(pi.z));
     const step = getStepToNeighbor(pi, e);
-    vec3.add(pi, pi, step);
-    walked += vec3.length(step);
+    pi.add(step);
+    walked += step.length();
   } while (walked < distance);
 
   volume.writePixelAt(
     value,
-    Math.floor(p1[0]),
-    Math.floor(p1[1]),
-    Math.floor(p1[2])
-  ); // 誤差吸収
+    Math.floor(p1.x),
+    Math.floor(p1.y),
+    Math.floor(p1.z)
+  );
 }
 
 /**
@@ -118,11 +115,11 @@ export function draw3DLine(
  * @return neighbor pos.
  * TODO: this function may be slow due to the use of reduce.
  */
-function getStepToNeighbor(pos: Vector3D, e: Vector3D): Vector3D {
+function getStepToNeighbor(pos: Vector3, e: Vector3): Vector3 {
   const stepLengthEntry: number[] = [
-    nextLatticeDistance(pos[0], e[0]),
-    nextLatticeDistance(pos[1], e[1]),
-    nextLatticeDistance(pos[2], e[2])
+    nextLatticeDistance(pos.x, e.x),
+    nextLatticeDistance(pos.y, e.y),
+    nextLatticeDistance(pos.z, e.z)
   ].filter(i => i !== null) as number[];
 
   const stepLength = stepLengthEntry.reduce((prev, cur) => {
@@ -130,8 +127,7 @@ function getStepToNeighbor(pos: Vector3D, e: Vector3D): Vector3D {
   }, Number.POSITIVE_INFINITY);
 
   // console.log( stepLength.toString() + ' / ' + vec3.str( stepLengthEntry) );
-
-  return [e[0] * stepLength, e[1] * stepLength, e[2] * stepLength];
+  return new Vector3(e.x * stepLength, e.y * stepLength, e.z * stepLength);
 }
 
 /**
@@ -156,11 +152,11 @@ function nextLatticeDistance(p: number, u: number): number | null {
  */
 export function floodFillOnSlice(
   volume: RawData,
-  center: Vector3D,
+  center: Vector3,
   orientation: OrientationString
 ): number {
   let view: BinaryArrayView2D;
-  let start: Vector2D;
+  let start: [number, number];
   const dim = volume.getDimension();
 
   // Prepares something like a 2D DataView on the volume.
@@ -168,26 +164,26 @@ export function floodFillOnSlice(
     view = {
       width: dim[0],
       height: dim[1],
-      get: ([x, y]) => volume.getPixelAt(x, y, center[2]) > 0,
-      set: (val, [x, y]) => volume.writePixelAt(val ? 1 : 0, x, y, center[2])
+      get: ([x, y]) => volume.getPixelAt(x, y, center.z) > 0,
+      set: (val, [x, y]) => volume.writePixelAt(val ? 1 : 0, x, y, center.z)
     };
-    start = [center[0], center[1]];
+    start = [center.x, center.y];
   } else if (orientation === 'sagittal') {
     view = {
       width: dim[1],
       height: dim[2],
-      get: ([x, y]) => volume.getPixelAt(center[0], x, y) > 0,
-      set: (val, [x, y]) => volume.writePixelAt(val ? 1 : 0, center[0], x, y)
+      get: ([x, y]) => volume.getPixelAt(center.x, x, y) > 0,
+      set: (val, [x, y]) => volume.writePixelAt(val ? 1 : 0, center.x, x, y)
     };
-    start = [center[1], center[2]];
+    start = [center.y, center.z];
   } else if (orientation === 'coronal') {
     view = {
       width: dim[1],
       height: dim[2],
-      get: ([x, y]) => volume.getPixelAt(x, center[1], y) > 0,
-      set: (val, [x, y]) => volume.writePixelAt(val ? 1 : 0, x, center[1], y)
+      get: ([x, y]) => volume.getPixelAt(x, center.y, y) > 0,
+      set: (val, [x, y]) => volume.writePixelAt(val ? 1 : 0, x, center.y, y)
     };
-    start = [center[0], center[2]];
+    start = [center.x, center.z];
   } else {
     throw new TypeError('Invalid orientation');
   }

@@ -6,16 +6,16 @@ import ViewState, { VrViewState, TransferFunctionEntry } from '../ViewState';
 import DicomVolumeLoader from './volume-loader/DicomVolumeLoader';
 
 // WebGL shader source (GLSL)
-const vertexShaderSource = require('./gl-raw-volume-image-source/vertex-shader.vert');
-const fragmentShaderSource = require('./gl-raw-volume-image-source/fragment-shader.frag');
+const vertexShaderSource = require('./volume-rendering-image-source/vertex-shader.vert');
+const fragmentShaderSource = require('./volume-rendering-image-source/fragment-shader.frag');
 
 import * as vec3 from 'gl-matrix/src/gl-matrix/vec3.js';
 import * as vec4 from 'gl-matrix/src/gl-matrix/vec4.js';
 import * as mat4 from 'gl-matrix/src/gl-matrix/mat4.js';
 
-import GLContextManager from './gl-raw-volume-image-source/gl-context-manager';
+import WebGlContextManager from './volume-rendering-image-source/WebGlContextManager';
 
-import buildTransferFunctionMap from './gl-raw-volume-image-source/buildTransferFunctionMap';
+import buildTransferFunctionMap from './volume-rendering-image-source/buildTransferFunctionMap';
 
 interface Camera {
   position: number[];
@@ -42,7 +42,7 @@ export default class VolumeRenderingImageSource extends ImageSource {
   private meta: DicomVolumeMetadata;
   private volume: DicomVolume;
 
-  private glHandler: GLContextManager;
+  private glHandler: WebGlContextManager;
   private volumeTexture: VolumeTexture;
 
   private readyState: Promise<void>;
@@ -121,7 +121,7 @@ export default class VolumeRenderingImageSource extends ImageSource {
     // ビューアの幅と高さがわからないと、裏キャンバスが作れない？
     // 特殊な方法で回避できそうだが取り急ぎ draw 時にセットアップ(どっちみち、コンテキスト消失への対応は必要)
     if (!this.glHandler) {
-      this.glHandler = new GLContextManager({
+      this.glHandler = new WebGlContextManager({
         width: viewportWidth,
         height: viewportHeight
       });

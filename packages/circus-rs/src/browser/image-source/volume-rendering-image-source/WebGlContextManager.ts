@@ -1,4 +1,4 @@
-interface GLContextManagerOptions {
+interface WebGlContextManagerOptions {
   width: number;
   height: number;
 }
@@ -7,7 +7,7 @@ interface GLContextManagerOptions {
  * Generic utility wrapper to handle WebGL context
  * and various associated resources.
  */
-export default class GLContextManager {
+export default class WebGlContextManager {
   public gl: WebGLRenderingContext;
 
   public buffers: {
@@ -27,7 +27,7 @@ export default class GLContextManager {
   private attrNames: string[] = [];
   private uniformNames: string[] = [];
 
-  constructor({ width, height }: GLContextManagerOptions) {
+  constructor({ width, height }: WebGlContextManagerOptions) {
     const backCanvas: HTMLCanvasElement = document.createElement('canvas');
     backCanvas.width = width;
     backCanvas.height = height;

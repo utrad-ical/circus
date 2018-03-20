@@ -13,7 +13,7 @@ function toKebabCase(str: string): string {
   return str.replace(/[A-Z]/g, m => '-' + m.toLowerCase());
 }
 
-export function createToolbar(
+export default function createToolbar(
   wrapperElement: HTMLElement,
   toolNames: string[]
 ): Toolbar {

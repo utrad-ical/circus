@@ -30,11 +30,11 @@ export default function setImmediate(callback): any {
 
   // use polyfill using postMessage
   if (!handlerInstalled) {
-    window.addEventListener('message', receiveMessage);
+    (window as any).addEventListener('message', receiveMessage);
     handlerInstalled = true;
   }
 
   handlers[handlerIndex] = callback;
-  window.postMessage(prefix + handlerIndex, '*');
+  (window as any).postMessage(prefix + handlerIndex, '*');
   return handlerIndex++;
 }

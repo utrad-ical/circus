@@ -60,7 +60,7 @@ export { default as PagerTool } from '../browser/tool/state/PagerTool';
 export { default as ZoomTool } from '../browser/tool/state/ZoomTool';
 export { default as BrushTool } from '../browser/tool/cloud/BrushTool';
 
-export { createToolbar } from '../browser/create-toolbar';
+export { default as createToolbar } from '../browser/createToolbar';
 
 export { registerTool, toolFactory } from '../browser/tool/tool-initializer';
 export * from '../browser/section-util';

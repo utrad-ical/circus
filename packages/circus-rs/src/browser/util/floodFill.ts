@@ -49,7 +49,10 @@ export class BinaryArray2D implements BinaryArrayView2D {
  * Performs flood-fill on a 2D array represented by BinaryArrayView2D.
  * @return The number of pixels filled.
  */
-export function floodFill(grid: BinaryArrayView2D, center: Vector2D): number {
+export default function floodFill(
+  grid: BinaryArrayView2D,
+  center: Vector2D
+): number {
   // https://en.wikipedia.org/wiki/Flood_fill
   const stack: Vector2D[] = [center];
 

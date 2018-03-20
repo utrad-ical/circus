@@ -1,7 +1,7 @@
 'use strict';
 
 const assert = require('chai').assert;
-const ff = require('../src/browser/util/flood-fill');
+const ff = require('../src/browser/util/floodFill');
 
 describe('floodFill', function() {
   function t(pattern, start, expectedPattern, expectedFillCount) {

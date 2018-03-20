@@ -2,7 +2,7 @@ import { vec3 } from 'gl-matrix';
 import { Vector2D, Vector3D, Box } from '../common/geometry';
 import RawData from '../common/RawData';
 import { PixelFormat } from '../common/PixelFormat';
-import { BinaryArrayView2D, floodFill } from './util/flood-fill';
+import floodFill, { BinaryArrayView2D } from './util/floodFill';
 import { OrientationString } from './section-util';
 
 /**

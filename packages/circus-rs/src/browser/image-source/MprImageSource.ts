@@ -2,9 +2,7 @@ import ImageSource from './ImageSource';
 import ViewState from '../ViewState';
 import Viewer from '../viewer/Viewer';
 import { createOrthogonalMprSection } from '../section-util';
-import { Vector2D, Vector3D } from '../../common/geometry';
-import { ViewWindow } from '../../common/ViewWindow';
-import { PixelFormat } from '../../common/PixelFormat';
+import { Vector3D } from '../../common/geometry';
 import { DicomVolumeMetadata } from './volume-loader/DicomVolumeLoader';
 
 /**

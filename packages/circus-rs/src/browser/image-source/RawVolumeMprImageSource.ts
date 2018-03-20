@@ -2,7 +2,7 @@ import DicomVolume from '../../common/DicomVolume';
 import DicomVolumeLoader from './volume-loader/DicomVolumeLoader';
 import ViewState from '../ViewState';
 import { convertSectionToIndex } from '../section-util';
-import { Vector2D, Section } from '../../common/geometry';
+import { Section } from '../../common/geometry';
 // import AsyncLruCache from '../../common/AsyncLruCache';
 import setImmediate from '../util/setImmediate';
 import Viewer from '../viewer/Viewer';

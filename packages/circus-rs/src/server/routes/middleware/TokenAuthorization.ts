@@ -11,7 +11,7 @@ export default function tokenAuthentication(
   const { logger, authorizationCache } = helpers;
 
   return async function(ctx, next): Promise<void> {
-    const { request: req, response: res } = ctx;
+    const { request: req } = ctx;
 
     function invalid(): void {
       ctx.response.set('WWW-Authenticate', 'Bearer realm="CircusRS"');

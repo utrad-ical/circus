@@ -9,7 +9,7 @@ export interface AsyncLruCacheOptions<T> {
   maxCount: number;
   maxLife: number; // in seconds
   maxSize: number; // in bytes
-  sizeFunc: (T) => number;
+  sizeFunc: (item: T) => number;
 }
 
 // TODO: Replace this with Partial<AsyncLruCacheOptions> when TS 2.1 is out
@@ -17,7 +17,7 @@ export interface AsyncLruCacheOptionsParameter<T> {
   maxCount?: number;
   maxLife?: number; // in seconds
   maxSize?: number; // in bytes
-  sizeFunc?: (T) => number;
+  sizeFunc?: (item: T) => number;
 }
 
 type LoaderFunc<T> = (key: string, ...context) => Promise<T>;

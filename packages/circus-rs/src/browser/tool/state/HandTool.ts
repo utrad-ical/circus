@@ -63,6 +63,6 @@ export default class HandTool extends DraggableTool {
       ...state,
       section: translateSection(section, [dx, dy, dz])
     };
-    return state;
+    return result;
   }
 }

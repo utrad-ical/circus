@@ -5,8 +5,6 @@ import DicomVolume from '../common/DicomVolume';
 import AsyncLruCache from '../common/AsyncLruCache';
 
 import Logger from './loggers/Logger';
-import DicomDumper from './dicom-dumpers/DicomDumper';
-import DicomFileRepository from './dicom-file-repository/DicomFileRepository';
 import AuthorizationCache from './auth/AuthorizationCache';
 import { ServerHelpers } from './ServerHelpers';
 
@@ -14,7 +12,6 @@ import * as Koa from 'koa';
 import * as Router from 'koa-router';
 import * as compose from 'koa-compose';
 import * as koaJson from 'koa-json';
-import { Configuration } from './Configuration';
 import tokenAuthentication from './routes/middleware/TokenAuthorization';
 import ipBasedAccessControl from './routes/middleware/IpBasedAccessControl';
 import loadSeries from './routes/middleware/LoadSeries';

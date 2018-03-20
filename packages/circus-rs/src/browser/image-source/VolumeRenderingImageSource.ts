@@ -62,11 +62,7 @@ export default class VolumeRenderingImageSource extends ImageSource {
       .then((meta: any) => {
         this.meta = meta;
 
-        const [
-          mmVolumeWidth,
-          mmVolumeHeight,
-          mmVolumeDepth
-        ] = this.meta.voxelCount;
+        const [mmVolumeWidth, mmVolumeHeight] = this.meta.voxelCount;
         this.baseScale = 2.0 / Math.max(mmVolumeWidth, mmVolumeHeight);
 
         return loader.loadVolume();
@@ -83,7 +79,6 @@ export default class VolumeRenderingImageSource extends ImageSource {
 
   public initialState(viewer: Viewer): ViewState {
     const meta = this.meta;
-    const [vw, vh, vd] = meta.voxelSize;
     const [dx, dy, dz] = meta.voxelCount;
 
     const state: VrViewState = {
@@ -245,12 +240,7 @@ export default class VolumeRenderingImageSource extends ImageSource {
     gl.bindTexture(gl.TEXTURE_2D, this.transferFunctionTexture);
 
     // volume texture
-    const {
-      textureSize,
-      sliceGridSize,
-      sliceSize,
-      texture
-    } = this.volumeTexture;
+    const { textureSize, sliceGridSize, texture } = this.volumeTexture;
     gl.uniform1i(glh.uniformIndex['uVolumeTextureSampler'], 1);
     gl.activeTexture(gl.TEXTURE1);
     gl.uniform2fv(glh.uniformIndex['uTextureSize'], textureSize);
@@ -756,6 +746,7 @@ export default class VolumeRenderingImageSource extends ImageSource {
   }
 }
 
+/*
 function bufferVolumeTextureDebugger(
   textureSize,
   texBuffer,
@@ -800,3 +791,4 @@ function bufferVolumeTextureDebugger(
   const ctx = backCanvas.getContext('2d');
   if (ctx && slice) ctx.putImageData(slice, 0, 0);
 }
+*/

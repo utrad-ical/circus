@@ -2,7 +2,6 @@ import ViewState from '../ViewState';
 import { convertSectionToIndex } from '../section-util';
 import { Vector2D, Section } from '../../common/geometry';
 import { ViewWindow } from '../../common/ViewWindow';
-import ImageSource from './ImageSource';
 import { RsHttpClient } from '../http-client/rs-http-client';
 import Viewer from '../viewer/Viewer';
 import drawToImageData from './drawToImageData';

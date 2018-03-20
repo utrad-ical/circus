@@ -1,4 +1,4 @@
-import { Vector2D, Vector3D } from './Vector';
+import { Vector2D } from './Vector';
 
 /**
  * Represents a bounding box.

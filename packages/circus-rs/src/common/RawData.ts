@@ -517,7 +517,6 @@ export default class RawData {
     windowWidth?: number,
     windowLevel?: number
   ): void {
-    const [rx, ry, rz] = this.size;
     const [eu_x, eu_y, eu_z] = eu;
     const [ev_x, ev_y, ev_z] = ev;
     const [outWidth, outHeight] = outSize;

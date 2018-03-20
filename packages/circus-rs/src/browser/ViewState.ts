@@ -1,4 +1,3 @@
-import ImageSource from './image-source/ImageSource';
 import { Section } from '../common/geometry';
 import { ViewWindow } from '../common/ViewWindow';
 

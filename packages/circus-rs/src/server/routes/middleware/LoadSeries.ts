@@ -2,12 +2,10 @@ import * as koa from 'koa';
 import StatusError from '../Error';
 import { ServerHelpers } from '../../ServerHelpers';
 import { isUID } from '../../../common/ValidatorRules';
-import DicomVolume from '../../../common/DicomVolume';
 
 export default function loadSeries(helpers: ServerHelpers): koa.Middleware {
   const { seriesReader, logger } = helpers;
   return async function(ctx, next): Promise<void> {
-    const req = ctx.request;
     const series = ctx.params.sid;
     if (!isUID(series)) {
       throw StatusError.badRequest('Invalid series UID');

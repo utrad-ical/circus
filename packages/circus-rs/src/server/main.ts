@@ -1,10 +1,8 @@
 import config from './Config';
-import createServer, { DicomReader } from './Server';
+import createServer from './Server';
 import loadModule, { ModuleType } from './ModuleLoader';
 import DicomDumper from './dicom-dumpers/DicomDumper';
 import DicomFileRepository from './dicom-file-repository/DicomFileRepository';
-import AsyncLruCache from '../common/AsyncLruCache';
-import DicomVolume from '../common/DicomVolume';
 import * as http from 'http';
 import createDicomReader from './createDicomReader';
 
@@ -54,7 +52,7 @@ async function main(): Promise<void> {
 
   const port = config.port;
   try {
-    const httpServer = await listen(app, port, '0.0.0.0');
+    await listen(app, port, '0.0.0.0');
     const message = `Server running on port ${port}`;
     logger.info(message);
     console.log(message);

@@ -205,7 +205,7 @@ export function createOrthogonalMprSection(
   orientation: OrientationString = 'axial',
   position?: number
 ): Section {
-  const aspect = resolution[0] / resolution[1];
+  // const aspect = resolution[0] / resolution[1];
   let section: Section, rect: Rectangle, mmpp: Vector2D;
   switch (orientation) {
     case 'axial':

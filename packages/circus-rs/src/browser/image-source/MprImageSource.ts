@@ -24,6 +24,7 @@ export default abstract class MprImageSource extends ImageSource {
         : { level: 50, width: 100 };
     // By default, images are drawn with the axial section
     return {
+      type: 'mpr',
       window,
       interpolationMode: 'trilinear',
       section: createOrthogonalMprSection(viewer.getResolution(), this.mmDim())

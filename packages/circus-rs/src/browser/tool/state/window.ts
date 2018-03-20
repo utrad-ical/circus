@@ -9,6 +9,8 @@ export class WindowTool extends DraggableTool {
     super.dragHandler(ev);
     const dragInfo = this.dragInfo;
     const state = ev.viewer.getState();
+    if (state.type !== 'mpr') throw new Error('Unsupported view state');
+
     const viewWindow = state.window;
     if (!viewWindow) return;
     const speed = ev.original.ctrlKey ? 5 : 1;

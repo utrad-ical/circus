@@ -2,6 +2,7 @@ import { mat4, vec3 } from 'gl-matrix';
 import { DraggableTool } from '../draggable';
 import { ViewerEvent } from '../../viewer/viewer-event';
 import { Section } from '../../../common/geometry';
+import { MprViewState } from '../../view-state';
 
 /**
  * CelestialRotateTool handles mouse drags and wheel moves on the Viewer and
@@ -16,19 +17,23 @@ export class CelestialRotateTool extends DraggableTool {
     if (dragInfo.dx === 0 && dragInfo.dy === 0) return;
 
     const state = ev.viewer.getState();
-    let section = state.section;
-    if (!section) throw new Error('Unsupported view state.');
-
-    if (Math.abs(dragInfo.dx)) {
-      const deg = this.sign(dragInfo.dx) * speed;
-      section = this.rotateAroundYAxis(section, deg);
+    switch (state.type) {
+      case 'mpr':
+        let section = state.section;
+        if (Math.abs(dragInfo.dx)) {
+          const deg = this.sign(dragInfo.dx) * speed;
+          section = this.rotateAroundYAxis(section, deg);
+        }
+        if (Math.abs(dragInfo.dy)) {
+          const deg = this.sign(dragInfo.dy) * speed;
+          section = this.rotateAroundXAxis(section, deg);
+        }
+        const newState: MprViewState = { ...state, section };
+        ev.viewer.setState(newState);
+        break;
+      case 'vr':
+        break;
     }
-    if (Math.abs(dragInfo.dy)) {
-      const deg = this.sign(dragInfo.dy) * speed;
-      section = this.rotateAroundXAxis(section, deg);
-    }
-    state.section = section;
-    ev.viewer.setState(state);
   }
 
   private rotateAroundYAxis(section: Section, deg: number): Section {

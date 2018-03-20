@@ -25,8 +25,8 @@ export class VoxelCloudToolBase extends DraggableTool {
 
   protected convertViewerPoint(point: Vector2D, viewer: Viewer): Vector3D {
     const state = viewer.getState();
+    if (state.type !== 'mpr') throw new Error('Unsupported view state.');
     const section = state.section;
-    if (!section) throw new Error('Unsupported view state.');
 
     const comp = viewer.getComposition();
     if (!comp) throw new Error('Composition not initialized'); // should not happen

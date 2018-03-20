@@ -1,6 +1,6 @@
 import { DraggableTool } from '../draggable';
 import { ViewerEvent } from '../../viewer/viewer-event';
-import { ViewState } from '../../view-state';
+import { MprViewState } from '../../view-state';
 import { translateSection } from '../../../common/geometry';
 
 /**
@@ -20,20 +20,25 @@ export class HandTool extends DraggableTool {
 
     const viewer = ev.viewer;
     const state = viewer.getState();
-    const vp = viewer.getViewport();
-    const newState: ViewState = this.translateBy(
-      state,
-      [dragInfo.dx, dragInfo.dy],
-      vp
-    );
-    viewer.setState(newState);
+
+    switch (state.type) {
+      case 'mpr':
+        const vp = viewer.getViewport();
+        viewer.setState(
+          this.translateBy(state, [dragInfo.dx, dragInfo.dy], vp)
+        );
+        break;
+      case 'vr':
+        // TODO: Implement hand tool
+        break;
+    }
   }
 
   private translateBy(
-    state: ViewState,
+    state: MprViewState,
     p: [number, number],
     vp: [number, number]
-  ): ViewState {
+  ): MprViewState {
     const section = state.section;
     if (!section) return state;
     const eu = [
@@ -54,7 +59,10 @@ export class HandTool extends DraggableTool {
       eu[2] * -dx2 + ev[2] * -dy2
     ];
 
-    state.section = translateSection(section, [dx, dy, dz]);
+    const result: MprViewState = {
+      ...state,
+      section: translateSection(section, [dx, dy, dz])
+    };
     return state;
   }
 }

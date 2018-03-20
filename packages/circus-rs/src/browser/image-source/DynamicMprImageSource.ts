@@ -59,10 +59,10 @@ export default class DynamicMprImageSource extends MprImageSource {
 
   public async draw(viewer: Viewer, viewState: ViewState): Promise<ImageData> {
     // convert from mm-coordinate to index-coordinate
+    if (viewState.type !== 'mpr') throw new Error('Unsupported view state.');
     const section = viewState.section;
     const viewWindow = viewState.window;
     const outSize = viewer.getResolution();
-    if (!section || !viewWindow) throw new Error('Unsupported view state.');
     const indexSection: Section = convertSectionToIndex(
       section,
       this.metadata.voxelSize

@@ -2,7 +2,7 @@ import DicomVolume from '../../common/DicomVolume';
 import { DicomVolumeMetadata } from './volume-loader/DicomVolumeLoader';
 import ImageSource from './ImageSource';
 import { Viewer } from '../viewer/viewer';
-import { ViewState, TransferFunctionEntry } from '../view-state';
+import { ViewState, VrViewState, TransferFunctionEntry } from '../view-state';
 import DicomVolumeLoader from './volume-loader/DicomVolumeLoader';
 
 // WebGL shader source (GLSL)
@@ -86,7 +86,8 @@ export default class VolumeRenderingImageSource extends ImageSource {
     const [vw, vh, vd] = meta.voxelSize;
     const [dx, dy, dz] = meta.voxelCount;
 
-    const state: ViewState = {
+    const state: VrViewState = {
+      type: 'vr',
       background: [0.0, 0.0, 0.0, 1.0],
       zoom: 2.0,
       horizontal: 0,
@@ -107,21 +108,6 @@ export default class VolumeRenderingImageSource extends ImageSource {
       interpolationMode: 'trilinear'
     };
 
-    /**
-     * Tool をごまかして使用するために section など(本来不要な？項目を)設定
-     */
-    const createOrthogonalMprSection = require('../section-util')
-      .createOrthogonalMprSection;
-    state.window = {
-      level: this.meta.estimatedWindow ? this.meta.estimatedWindow.level : 50,
-      width: this.meta.estimatedWindow ? this.meta.estimatedWindow.width : 50
-    };
-
-    state.section = createOrthogonalMprSection(
-      viewer.getResolution(),
-      this.meta.voxelCount
-    );
-
     return state;
   }
 
@@ -135,7 +121,7 @@ export default class VolumeRenderingImageSource extends ImageSource {
     const [viewportWidth, viewportHeight] = viewer.getResolution();
     const [vw, vh, vd] = this.volume.getVoxelSize();
 
-    console.log(JSON.stringify(viewState, null, 2));
+    if (viewState.type !== 'vr') throw new Error('Unsupported view state.');
 
     // ビューアの幅と高さがわからないと、裏キャンバスが作れない？
     // 特殊な方法で回避できそうだが取り急ぎ draw 時にセットアップ(どっちみち、コンテキスト消失への対応は必要)
@@ -702,7 +688,7 @@ export default class VolumeRenderingImageSource extends ImageSource {
     );
   }
 
-  private glDrawVolumeBox(camera: Camera, viewState: ViewState): void {
+  private glDrawVolumeBox(camera: Camera, viewState: VrViewState): void {
     const glh = this.glHandler;
     const gl = glh.gl;
 

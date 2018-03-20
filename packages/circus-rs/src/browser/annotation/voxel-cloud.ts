@@ -156,6 +156,7 @@ export class VoxelCloud implements Annotation {
     if (this.volume.getPixelFormat() !== PixelFormat.Binary) {
       throw new Error('The assigned volume must use binary data format.');
     }
+    if (viewState.type !== 'mpr') throw new Error('Unsupported view state.');
 
     const composition = viewer.getComposition();
     if (!composition) return null;
@@ -167,12 +168,9 @@ export class VoxelCloud implements Annotation {
     const resolution = viewer.getResolution();
     const section = viewState.section;
 
-    if (section === undefined) throw new Error('Unsupported view state.');
-
     /*
 		 * STEP 1. Check if this cloud intersects the current section.
 		 */
-
     const mmOrigin = this.toMillimeter(this.origin);
     const mmDim = this.toMillimeter(this.volume.getDimension());
     const intersections = intersectionOfBoxAndPlane(

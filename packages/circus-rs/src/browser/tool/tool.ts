@@ -57,13 +57,24 @@ export class Tool extends EventEmitter implements ViewerEventTarget {
   public wheelHandler(ev: ViewerEvent): void {
     const viewer = ev.viewer;
     const state = viewer.getState();
-    const step = -this.sign(ev.original.deltaY) * (ev.original.ctrlKey ? 5 : 1);
-    const comp = viewer.getComposition();
-    if (!comp) throw new Error('Composition not initialized'); // should not happen
-    const src = comp.imageSource as MprImageSource;
-    if (!(src instanceof MprImageSource)) return;
-    const voxelSize = src.metadata.voxelSize;
-    state.section = orientationAwareTranslation(state.section, voxelSize, step);
-    viewer.setState(state);
+
+    switch (state.type) {
+      case 'mpr':
+        const step =
+          -this.sign(ev.original.deltaY) * (ev.original.ctrlKey ? 5 : 1);
+        const comp = viewer.getComposition();
+        if (!comp) throw new Error('Composition not initialized'); // should not happen
+        const src = comp.imageSource as MprImageSource;
+        const voxelSize = src.metadata.voxelSize;
+        state.section = orientationAwareTranslation(
+          state.section,
+          voxelSize,
+          step
+        );
+        viewer.setState(state);
+        break;
+      case 'vr':
+        break;
+    }
   }
 }

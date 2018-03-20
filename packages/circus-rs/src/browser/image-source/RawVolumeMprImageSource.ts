@@ -31,9 +31,9 @@ export default class RawVolumeMprImageSource extends MprImageSource {
     const mprOutput = new Uint8Array(outSize[0] * outSize[1]);
 
     // convert from mm-coordinate to index-coordinate
+    if (viewState.type !== 'mpr') throw new Error('Unsupported view state');
     const mmSection = viewState.section;
     const viewWindow = viewState.window;
-    if (!mmSection || !viewWindow) throw new Error('Unsupported view state');
 
     const indexSection: Section = convertSectionToIndex(
       mmSection,

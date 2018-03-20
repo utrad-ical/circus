@@ -13,6 +13,7 @@ export class VRRotateZoomTool extends DraggableTool {
   public dragHandler(ev: ViewerEvent): void {
     const viewer = ev.viewer;
     const state: ViewState = viewer.getState();
+    if (state.type !== 'vr') throw new Error('Unsupported view state');
 
     // console.log(state);
 
@@ -38,6 +39,7 @@ export class VRRotateZoomTool extends DraggableTool {
   public wheelHandler(ev: ViewerEvent): void {
     const viewer = ev.viewer;
     const state: ViewState = viewer.getState();
+    if (state.type !== 'vr') throw new Error('Unsupported view state.');
 
     const speed = ev.original.shiftKey ? 0.005 : 0.002;
     const zoom =

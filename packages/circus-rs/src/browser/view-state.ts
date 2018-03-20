@@ -14,13 +14,15 @@ export interface TransferFunctionEntry {
 
 export type TransferFunction = Array<TransferFunctionEntry>;
 
-export interface SectionViewState {
-  section?: Section;
-  window?: ViewWindow;
+export interface MprViewState {
+  type: 'mpr';
+  section: Section;
+  window: ViewWindow;
   interpolationMode?: InterpolationMode;
 }
 
 export interface VrViewState {
+  type: 'vr';
   interpolationMode?: InterpolationMode;
 
   /**
@@ -31,17 +33,17 @@ export interface VrViewState {
   /**
    * Zoom value.
    */
-  zoom?: number;
+  zoom: number;
 
   /**
    * Horizontal rotation of the camera measured in degree.
    */
-  horizontal?: number;
+  horizontal: number;
 
   /**
    * Vertical rotation of the camera measured in degree.
    */
-  vertical?: number;
+  vertical: number;
 
   /**
    * Sub-volume
@@ -51,9 +53,10 @@ export interface VrViewState {
     dimension: [number, number, number];
   };
 
-  transferFunction?: TransferFunction;
+  transferFunction: TransferFunction;
 
   /**
+   * Where for the camera to look at.
    * If omitted, the default is the center of the (sub)volume,
    * which is the required behavior in almost all cases.
    */
@@ -62,7 +65,7 @@ export interface VrViewState {
   /**
    * Background fill color for outside of the volume boundary.
    */
-  background?: [number, number, number, number];
+  background: [number, number, number, number];
 
   /**
    * Controls the rendering quality. Higher is better and slower.
@@ -74,4 +77,4 @@ export interface VrViewState {
 /**
  * ViewState determines how the ImageSource is viewed on each Viewer.
  */
-export interface ViewState extends SectionViewState, VrViewState {}
+export type ViewState = MprViewState | VrViewState;

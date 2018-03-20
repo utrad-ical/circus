@@ -12,6 +12,7 @@ export class BucketTool extends VoxelCloudToolBase {
     super.dragStartHandler(ev);
     const viewer = ev.viewer;
     const state = viewer.getState();
+    if (state.type !== 'mpr') throw new Error('Unsupported view state');
     const section = state.section;
     const comp = viewer.getComposition();
     if (!comp) throw new Error('Composition not initialized'); // should not happen

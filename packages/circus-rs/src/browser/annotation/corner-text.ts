@@ -15,7 +15,11 @@ export class CornerText implements Annotation {
     if (!ctx) return null;
 
     const state = viewer.getState();
-    const lines = [JSON.stringify(state.window), JSON.stringify(state.section)];
+
+    const lines =
+      state.type === 'mpr'
+        ? [JSON.stringify(state.window), JSON.stringify(state.section)]
+        : JSON.stringify(state);
     const vp = viewer.getViewport();
 
     try {

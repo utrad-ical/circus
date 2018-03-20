@@ -28,7 +28,5 @@ export default abstract class ImageSource extends EventEmitter {
    * Creates the default view state object which will be used
    * when the image is firstly loaded to a viewer.
    */
-  public initialState(viewer: Viewer): ViewState {
-    return {};
-  }
+  public abstract initialState(viewer: Viewer): ViewState;
 }

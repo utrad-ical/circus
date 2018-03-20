@@ -42,21 +42,22 @@ export class ZoomTool extends DraggableTool {
   private zoomStep(viewer: Viewer, step: number, center?: Vector2D): void {
     const stepFactor = 1.05;
     const state: ViewState = viewer.getState();
-    const section = state.section;
-
-    if (!section) throw new Error('Unsupported view state.');
-
-    const vp = viewer.getResolution();
-
-    if (!center) center = [vp[0] / 2, vp[1] / 2];
-    const focus = convertScreenCoordinateToVolumeCoordinate(
-      section,
-      vp,
-      center
-    );
-
-    this.scale(section, stepFactor ** step, focus);
-    viewer.setState(state);
+    switch (state.type) {
+      case 'mpr':
+        const section = state.section;
+        const vp = viewer.getResolution();
+        if (!center) center = [vp[0] / 2, vp[1] / 2];
+        const focus = convertScreenCoordinateToVolumeCoordinate(
+          section,
+          vp,
+          center
+        );
+        this.scale(section, stepFactor ** step, focus);
+        viewer.setState(state);
+        break;
+      case 'vr':
+        break;
+    }
   }
 
   private scale(

@@ -21,10 +21,8 @@ export class ReferenceLine implements Annotation {
     if (!comp) throw new Error('Composition not initialized'); // should not happen
     const siblingViewers = comp.viewers.filter(v => v !== viewer);
 
+    if (viewState.type !== 'mpr') throw new Error('Unsupported view state.');
     const mySection = viewState.section;
-    if (mySection === undefined) {
-      throw new Error('Unsupported view state.');
-    }
 
     const canvas = viewer.canvas;
     const ctx = canvas.getContext('2d');
@@ -38,8 +36,8 @@ export class ReferenceLine implements Annotation {
 
       siblingViewers.forEach(sib => {
         const sibState = sib.getState();
+        if (sibState.type !== 'mpr') return;
         const sibSection = sibState.section;
-
         if (sibSection === undefined) return;
 
         const refLine = intersectionOfTwoSections(mySection, sibSection);

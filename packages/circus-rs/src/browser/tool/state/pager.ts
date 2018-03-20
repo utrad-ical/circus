@@ -2,6 +2,7 @@ import { DraggableTool } from '../../../browser/tool/draggable';
 import { ViewerEvent } from '../../../browser/viewer/viewer-event';
 import MprImageSource from '../../image-source/MprImageSource';
 import { orientationAwareTranslation } from '../../section-util';
+import { MprViewState } from '../../view-state';
 
 /**
  * PagerTool handles mouse drag and performs the paging of the stacked images.
@@ -15,24 +16,32 @@ export class PagerTool extends DraggableTool {
     const viewer = ev.viewer;
     const state = viewer.getState();
 
-    const step = Math.floor(dragInfo.totalDy / 10);
-    const relativeStep = step - this.currentStep;
-    if (relativeStep === 0) return;
+    switch (state.type) {
+      case 'mpr':
+        const step = Math.floor(dragInfo.totalDy / 10);
+        const relativeStep = step - this.currentStep;
+        if (relativeStep === 0) return;
 
-    const comp = viewer.getComposition();
-    if (!comp) throw new Error('Composition not initialized'); // should not happen
-    const src = comp.imageSource as MprImageSource;
-    if (!(src instanceof MprImageSource)) return;
-    const voxelSize = src.metadata.voxelSize;
+        const comp = viewer.getComposition();
+        if (!comp) throw new Error('Composition not initialized'); // should not happen
+        const src = comp.imageSource as MprImageSource;
+        if (!(src instanceof MprImageSource)) return;
+        const voxelSize = src.metadata.voxelSize;
 
-    state.section = orientationAwareTranslation(
-      state.section,
-      voxelSize,
-      relativeStep
-    );
-    viewer.setState(state);
-
-    this.currentStep = step;
+        const newState: MprViewState = {
+          ...state,
+          section: orientationAwareTranslation(
+            state.section,
+            voxelSize,
+            relativeStep
+          )
+        };
+        this.currentStep = step;
+        viewer.setState(newState);
+        break;
+      case 'vr':
+        break;
+    }
   }
 
   public dragStartHandler(ev: ViewerEvent): void {

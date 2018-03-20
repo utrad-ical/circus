@@ -15,7 +15,7 @@ import { toolFactory } from '../tool/tool-initializer';
 export class Viewer extends EventEmitter {
   public canvas: HTMLCanvasElement;
 
-  private viewState: ViewState = {};
+  private viewState: ViewState;
 
   private composition: Composition | null;
 

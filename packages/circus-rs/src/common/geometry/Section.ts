@@ -171,5 +171,8 @@ export function intersectionOfTwoSections(
  * Calculates the normal vector of the given section.
  */
 export function normalVector(section: Section): Vector3 {
-  return section.xAxis.cross(section.yAxis).normalize();
+  return section.xAxis
+    .clone()
+    .cross(section.yAxis)
+    .normalize();
 }

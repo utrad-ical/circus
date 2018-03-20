@@ -4,7 +4,7 @@ import Viewer from '../../viewer/Viewer';
 import ViewState from '../../ViewState';
 import ViewerEvent from '../../viewer/ViewerEvent';
 import { convertScreenCoordinateToVolumeCoordinate } from '../../section-util';
-import { Vector2D, Section } from '../../../common/geometry';
+import { Section } from '../../../common/geometry';
 
 /**
  * ZoomTool

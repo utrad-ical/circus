@@ -3,7 +3,7 @@ import RawData from '../common/RawData';
 import { PixelFormat } from '../common/PixelFormat';
 import floodFill, { BinaryArrayView2D } from './util/floodFill';
 import { OrientationString } from './section-util';
-import { Vector3 } from 'three';
+import { Vector3, Vector2 } from 'three';
 
 /**
  * Scans all the voxels in the given volume and
@@ -156,7 +156,7 @@ export function floodFillOnSlice(
   orientation: OrientationString
 ): number {
   let view: BinaryArrayView2D;
-  let start: [number, number];
+  let start: Vector2;
   const dim = volume.getDimension();
 
   // Prepares something like a 2D DataView on the volume.
@@ -164,26 +164,29 @@ export function floodFillOnSlice(
     view = {
       width: dim[0],
       height: dim[1],
-      get: ([x, y]) => volume.getPixelAt(x, y, center.z) > 0,
-      set: (val, [x, y]) => volume.writePixelAt(val ? 1 : 0, x, y, center.z)
+      get: pos => volume.getPixelAt(pos.x, pos.y, center.z) > 0,
+      set: (val, pos) =>
+        volume.writePixelAt(val ? 1 : 0, pos.x, pos.y, center.z)
     };
-    start = [center.x, center.y];
+    start = new Vector2(center.x, center.y);
   } else if (orientation === 'sagittal') {
     view = {
       width: dim[1],
       height: dim[2],
-      get: ([x, y]) => volume.getPixelAt(center.x, x, y) > 0,
-      set: (val, [x, y]) => volume.writePixelAt(val ? 1 : 0, center.x, x, y)
+      get: pos => volume.getPixelAt(center.x, pos.x, pos.y) > 0,
+      set: (val, pos) =>
+        volume.writePixelAt(val ? 1 : 0, center.x, pos.x, pos.y)
     };
-    start = [center.y, center.z];
+    start = new Vector2(center.y, center.z);
   } else if (orientation === 'coronal') {
     view = {
       width: dim[1],
       height: dim[2],
-      get: ([x, y]) => volume.getPixelAt(x, center.y, y) > 0,
-      set: (val, [x, y]) => volume.writePixelAt(val ? 1 : 0, x, center.y, y)
+      get: pos => volume.getPixelAt(pos.x, center.y, pos.y) > 0,
+      set: (val, pos) =>
+        volume.writePixelAt(val ? 1 : 0, pos.x, center.y, pos.y)
     };
-    start = [center.x, center.z];
+    start = new Vector2(center.x, center.z);
   } else {
     throw new TypeError('Invalid orientation');
   }

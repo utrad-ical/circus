@@ -1,19 +1,23 @@
 'use strict';
 
 const assert = require('chai').assert;
-const ff = require('../src/browser/util/floodFill');
+const {
+  default: floodFill,
+  BinaryArray2D
+} = require('../src/browser/util/floodFill');
+const { Vector2 } = require('three');
 
 describe('floodFill', function() {
   function t(pattern, start, expectedPattern, expectedFillCount) {
     const rows = pattern.replace(/\n$/, '').split(/\n/);
     const width = Math.max.apply(Math, rows.map(r => r.length));
-    const arr = new ff.BinaryArray2D(width, rows.length);
+    const arr = new BinaryArray2D(width, rows.length);
     for (let y = 0; y < rows.length; y++) {
       for (let x = 0; x < width; x++) {
-        if (rows[y][x] === '*') arr.set(true, [x, y]);
+        if (rows[y][x] === '*') arr.set(true, new Vector2(x, y));
       }
     }
-    const filled = ff.floodFill(arr, start);
+    const filled = floodFill(arr, new Vector2().fromArray(start));
     assert.equal(arr.toString(), expectedPattern);
     assert.equal(filled, expectedFillCount);
   }

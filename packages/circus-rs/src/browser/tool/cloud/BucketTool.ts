@@ -1,8 +1,8 @@
 import ViewerEvent from '../../viewer/ViewerEvent';
 import VoxelCloudToolBase from './VoxelCloudToolBase';
-import { Vector2D } from '../../../common/geometry';
 import { floodFillOnSlice } from '../../volume-util';
 import { detectOrthogonalSection } from '../../section-util';
+import { Vector2 } from 'three';
 
 /**
  * Bucket tool performs the flood-fill operation along an orthogonal MPR plane.
@@ -23,7 +23,7 @@ export default class BucketTool extends VoxelCloudToolBase {
     if (!this.activeCloud) return; // no cloud to paint on
 
     // convert mouse cursor location to cloud's local coordinate
-    const viewerPoint: Vector2D = [ev.viewerX, ev.viewerY];
+    const viewerPoint = new Vector2(ev.viewerX, ev.viewerY);
     const volumePoint = this.convertViewerPoint(viewerPoint, viewer);
 
     // determine the orientation of section.

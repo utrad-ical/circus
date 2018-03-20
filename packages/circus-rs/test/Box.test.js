@@ -1,5 +1,6 @@
 'use strict';
 
+const { Vector3 } = require('three');
 const box = require('../src/common/geometry/Box');
 const assert = require('chai').assert;
 
@@ -13,9 +14,9 @@ describe('Box', function() {
     it('must return 4 points with box and axial section', function() {
       function test(z, points) {
         const intersections = box.intersectionOfBoxAndPlane(cube, {
-          origin: [0, 0, z],
-          xAxis: [2, 0, 0],
-          yAxis: [0, 2, 0]
+          origin: new Vector3(0, 0, z),
+          xAxis: new Vector3(2, 0, 0),
+          yAxis: new Vector3(0, 2, 0)
         });
         assert.strictEqual((intersections || []).length, points.length);
         points.forEach(p => {

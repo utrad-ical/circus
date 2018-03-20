@@ -4,7 +4,6 @@ import DraggableTool from '../DraggableTool';
 import Viewer from '../../viewer/Viewer';
 import MprImageSource from '../../image-source/MprImageSource';
 import * as su from '../../section-util';
-import { Vector2D, Vector3D } from '../../../common/geometry';
 import { draw3DLine } from '../../volume-util';
 import ViewerEvent from '../../viewer/ViewerEvent';
 import { Vector2, Vector3 } from 'three';
@@ -23,7 +22,7 @@ export default class VoxelCloudToolBase extends DraggableTool {
     this.options = { width: 1 };
   }
 
-  protected convertViewerPoint(point: Vector2D, viewer: Viewer): Vector3 {
+  protected convertViewerPoint(point: Vector2, viewer: Viewer): Vector3 {
     const state = viewer.getState();
     if (state.type !== 'mpr') throw new Error('Unsupported view state.');
     const section = state.section;
@@ -39,8 +38,8 @@ export default class VoxelCloudToolBase extends DraggableTool {
     // from screen 2D coordinate to volume coordinate in millimeter
     const mmOfVol = su.convertScreenCoordinateToVolumeCoordinate(
       section,
-      new Vector2().fromArray(resolution),
-      new Vector2().fromArray(point)
+      new Vector2(resolution[0], resolution[1]),
+      point
     );
     // from volume coordinate in millimeter to index coordinate
     const indexOfVol = su.convertPointToIndex(mmOfVol, voxelSize);
@@ -58,8 +57,8 @@ export default class VoxelCloudToolBase extends DraggableTool {
 
   protected draw3DLineWithValue(
     viewer: Viewer,
-    start: Vector2D,
-    end: Vector2D,
+    start: Vector2,
+    end: Vector2,
     value: number
   ): void {
     const comp = viewer.getComposition();
@@ -83,16 +82,16 @@ export default class VoxelCloudToolBase extends DraggableTool {
 
   protected draw3DLineWithValueAndWidth(
     viewer: Viewer,
-    start: Vector2D,
-    end: Vector2D,
+    start: Vector2,
+    end: Vector2,
     value: number,
     width: number = 1
   ): void {
     const ds = -Math.floor((width - 1) / 2);
     for (let x = ds; x < ds + width; x++) {
       for (let y = ds; y < ds + width; y++) {
-        const deltaStart: Vector2D = [start[0] + x, start[1] + y];
-        const deltaEnd: Vector2D = [end[0] + x, end[1] + y];
+        const deltaStart = new Vector2(start.x + x, start.y + y);
+        const deltaEnd = new Vector2(end.x + x, end.y + y);
         this.draw3DLineWithValue(viewer, deltaStart, deltaEnd, value);
       }
     }
@@ -132,8 +131,8 @@ export default class VoxelCloudToolBase extends DraggableTool {
 
     this.draw3DLineWithValueAndWidth(
       ev.viewer,
-      [this.pX, this.pY],
-      [ev.viewerX, ev.viewerY],
+      new Vector2(this.pX, this.pY),
+      new Vector2(ev.viewerX, ev.viewerY),
       value,
       (this.options as any).width || 1
     );

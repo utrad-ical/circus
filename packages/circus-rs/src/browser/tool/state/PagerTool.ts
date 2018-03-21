@@ -8,7 +8,7 @@ import { MprViewState } from '../../ViewState';
  * PagerTool handles mouse drag and performs the paging of the stacked images.
  */
 export default class PagerTool extends DraggableTool {
-  private currentStep: number;
+  private currentStep: number | undefined;
 
   public dragHandler(ev: ViewerEvent): void {
     super.dragEndHandler(ev);
@@ -19,14 +19,14 @@ export default class PagerTool extends DraggableTool {
     switch (state.type) {
       case 'mpr':
         const step = Math.floor(dragInfo.totalDy / 10);
-        const relativeStep = step - this.currentStep;
+        const relativeStep = step - this.currentStep!;
         if (relativeStep === 0) return;
 
         const comp = viewer.getComposition();
         if (!comp) throw new Error('Composition not initialized'); // should not happen
         const src = comp.imageSource as MprImageSource;
         if (!(src instanceof MprImageSource)) return;
-        const voxelSize = src.metadata.voxelSize;
+        const voxelSize = src.metadata!.voxelSize;
 
         const newState: MprViewState = {
           ...state,

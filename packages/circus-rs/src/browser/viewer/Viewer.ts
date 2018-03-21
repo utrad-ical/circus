@@ -15,16 +15,16 @@ import { toolFactory } from '../tool/tool-initializer';
 export default class Viewer extends EventEmitter {
   public canvas: HTMLCanvasElement;
 
-  private viewState: ViewState;
+  private viewState: ViewState | undefined;
 
-  private composition: Composition | null;
+  private composition: Composition | undefined;
 
-  private activeTool: Tool;
-  private activeToolName: string;
+  private activeTool: Tool | undefined;
+  private activeToolName: string | undefined;
 
   private sprites: Sprite[];
 
-  private cachedSourceImage: ImageData;
+  private cachedSourceImage: ImageData | undefined;
 
   /**
    * primaryEventTarget captures all UI events happened within the canvas
@@ -188,7 +188,7 @@ export default class Viewer extends EventEmitter {
       // for the image source to draw.
       return;
     }
-    if (!viewState) viewState = this.viewState;
+    if (!viewState) viewState = this.viewState || null;
     const comp = this.composition;
     if (!viewState || !comp) return;
     if (this.cachedSourceImage)
@@ -217,7 +217,7 @@ export default class Viewer extends EventEmitter {
   public render(): Promise<boolean> {
     // Wait only if there is another render() in progress
     let waiter: Promise<any> = Promise.resolve();
-    if (this.composition === null) {
+    if (!this.composition) {
       return Promise.reject(new Error('Composition not set'));
     }
     if (this.composition.imageSource === null) {
@@ -227,7 +227,7 @@ export default class Viewer extends EventEmitter {
     if (this.currentRender) waiter = waiter.then(() => this.currentRender);
     const p: Promise<boolean> = waiter.then(() => {
       const state = this.viewState;
-      if (state === null) throw new Error('View state not initialized');
+      if (!state) throw new Error('View state not initialized');
       // Now there is no rendering in progress.
       if (p !== this.nextRender) {
         // I am expired because another render() method was called after this
@@ -299,7 +299,7 @@ export default class Viewer extends EventEmitter {
     this.emit('compositionChange', composition);
   }
 
-  public getComposition(): Composition | null {
+  public getComposition(): Composition | undefined {
     return this.composition;
   }
 
@@ -318,7 +318,7 @@ export default class Viewer extends EventEmitter {
     this.emit('toolchange', before, toolName);
   }
 
-  public getActiveTool(): string {
+  public getActiveTool(): string | undefined {
     return this.activeToolName;
   }
 }

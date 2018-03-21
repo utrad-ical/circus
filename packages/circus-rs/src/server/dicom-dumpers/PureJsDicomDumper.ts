@@ -54,7 +54,7 @@ export default class PureJsDicomDumper extends DicomDumper {
       rescaleSlope: dicom.rescale.slope,
       rescaleIntercept: dicom.rescale.intercept
     });
-    raw.dicomWindow = dicom.window;
+    raw.dicomWindow = dicom.window || undefined;
     raw.estimatedWindow = { width: 50, level: 75 };
     lastSliceLocation = dicom.sliceLocation;
 

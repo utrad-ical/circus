@@ -6,12 +6,12 @@ export default class DicomVolume extends AnisotropicRawData {
   /**
    * Estimated window, calculated from the actual voxel data
    */
-  public estimatedWindow: ViewWindow | null;
+  public estimatedWindow?: ViewWindow;
 
   /**
    * Default window, described in DICOM file
    */
-  public dicomWindow: ViewWindow | null;
+  public dicomWindow?: ViewWindow;
 
   /**
    * Holds which images are already loaded in this volume.

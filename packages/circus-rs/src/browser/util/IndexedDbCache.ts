@@ -1,5 +1,5 @@
 export default class IndexedDbCache<T> {
-  private connection: IDBDatabase | null;
+  private connection: IDBDatabase | undefined;
   private queue: Promise<void>;
 
   private dbName: string;
@@ -109,7 +109,7 @@ export default class IndexedDbCache<T> {
     this.queue = this.queue.then(() => {
       if (this.connection) this.connection.close();
 
-      this.connection = null;
+      this.connection = undefined;
 
       const db = IndexedDbCache.detect();
 

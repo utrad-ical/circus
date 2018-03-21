@@ -14,8 +14,8 @@ import { Vector2, Vector3 } from 'three';
 export default class VoxelCloudToolBase extends DraggableTool {
   protected activeCloud: VoxelCloud | null = null;
 
-  protected pX: number;
-  protected pY: number;
+  protected pX: number | undefined;
+  protected pY: number | undefined;
 
   constructor() {
     super();
@@ -32,7 +32,7 @@ export default class VoxelCloudToolBase extends DraggableTool {
 
     const resolution = viewer.getResolution();
     const src = comp.imageSource as MprImageSource;
-    const voxelSize = new Vector3().fromArray(src.metadata.voxelSize);
+    const voxelSize = new Vector3().fromArray(src.metadata!.voxelSize);
     const activeCloud = <VoxelCloud>this.activeCloud; // guaranteed to be set
 
     // from screen 2D coordinate to volume coordinate in millimeter
@@ -45,7 +45,7 @@ export default class VoxelCloudToolBase extends DraggableTool {
     const indexOfVol = su.convertPointToIndex(mmOfVol, voxelSize);
     // to local coordinate of the cloud (simple translation)
     const indexOfCloud = indexOfVol.sub(
-      new Vector3().fromArray(activeCloud.origin)
+      new Vector3().fromArray(activeCloud.origin!)
     );
     // round
     return new Vector3(
@@ -77,7 +77,7 @@ export default class VoxelCloudToolBase extends DraggableTool {
     const end3D = this.convertViewerPoint(end, viewer);
 
     // draw a 3D line segment over a volume
-    draw3DLine(activeCloud.volume, start3D, end3D, value);
+    draw3DLine(activeCloud.volume!, start3D, end3D, value);
   }
 
   protected draw3DLineWithValueAndWidth(

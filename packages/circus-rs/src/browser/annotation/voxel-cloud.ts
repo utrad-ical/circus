@@ -41,36 +41,36 @@ export class VoxelCloud implements Annotation {
   /**
    * Displayed color of the cloud, in the form of '#ff00ff'
    */
-  public color: string;
+  public color?: string;
 
   /**
    * Alpha value of the cloud, must be between 0.0 and 1.0
    */
-  public alpha: number;
+  public alpha?: number;
 
   /**
    * Actual volume data. The pixelFormat must be set to Binary.
    */
-  public volume: RawData;
+  public volume?: RawData;
 
   /**
    * The position of the origin of this volume data in the voxel coordinate of ImageSource.
    * Should be in voxel coordinate (not in mm)!
    */
-  public origin: [number, number, number];
+  public origin?: [number, number, number];
 
   /**
    * Determines whether this VoxelCloud is the target of the
    * cloud manipulation tools (e.g., BrushTool, EraserTool).
    */
-  public active: boolean;
+  public active: boolean = true;
 
   /**
    * If set to true, draws some additional marks useful for debugging.
    */
-  public debugPoint: boolean;
+  public debugPoint: boolean = false;
 
-  private _voxelSize: Vector3D;
+  private _voxelSize?: Vector3D;
 
   private _expanded: boolean = false;
 
@@ -102,7 +102,7 @@ export class VoxelCloud implements Annotation {
   }
 
   private toMillimeter(vector: Vector3D): Vector3D {
-    const voxelSize = this._voxelSize;
+    const voxelSize = this._voxelSize!;
     return [
       vector[0] * voxelSize[0],
       vector[1] * voxelSize[1],
@@ -114,6 +114,7 @@ export class VoxelCloud implements Annotation {
    * Removes zero-area along the bounding box.
    */
   public shrinkToMinimum(): void {
+    if (!this.volume || !this.origin) throw new Error();
     // console.time('shrink to minimum bounding box');
     let boundingBox = scanBoundingBox(this.volume, true);
     if (boundingBox === null) {
@@ -132,6 +133,7 @@ export class VoxelCloud implements Annotation {
    * the parent volume image source.
    */
   public expandToMaximum(source: MprImageSource): void {
+    if (!this.volume || !source.metadata) throw new Error();
     const voxelCount = source.metadata.voxelCount;
     if (!voxelCount) throw new Error('Voxel count not set');
     const voxelDimension = this.volume.getDimension();
@@ -153,7 +155,13 @@ export class VoxelCloud implements Annotation {
   }
 
   public draw(viewer: Viewer, viewState: ViewState): Sprite | null {
-    if (!(this.volume instanceof RawData)) return null;
+    if (
+      !(this.volume instanceof RawData) ||
+      !this.origin ||
+      !this.color ||
+      !this.alpha
+    )
+      return null;
     if (this.volume.getPixelFormat() !== PixelFormat.Binary) {
       throw new Error('The assigned volume must use binary data format.');
     }
@@ -161,7 +169,8 @@ export class VoxelCloud implements Annotation {
 
     const composition = viewer.getComposition();
     if (!composition) return null;
-    this._voxelSize = (<MprImageSource>composition.imageSource).metadata.voxelSize;
+    const imageSource = composition.imageSource as MprImageSource;
+    this._voxelSize = imageSource.metadata!.voxelSize;
 
     const context = viewer.canvas.getContext('2d');
     if (!context) throw new Error('Failed to get canvas context');

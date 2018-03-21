@@ -4,10 +4,10 @@ export default class ViewerEvent {
   public type: string;
   public original: any;
 
-  public viewerX: number;
-  public viewerY: number;
-  public viewerWidth: number;
-  public viewerHeight: number;
+  public viewerX?: number;
+  public viewerY?: number;
+  public viewerWidth?: number;
+  public viewerHeight?: number;
 
   public viewer: Viewer;
 

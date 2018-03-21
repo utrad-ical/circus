@@ -9,7 +9,7 @@ export default class AnisotropicRawData extends RawData {
   /**
    * The size of one voxel, measured in millimeter.
    */
-  protected voxelSize: Vector3D;
+  protected voxelSize: Vector3D | undefined;
 
   /**
    * Sets the size of one voxel in millimeter.

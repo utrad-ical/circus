@@ -27,7 +27,8 @@ export interface DragInfo {
 }
 
 /**
- * DraggableTool is a base class for tools that handles mouse dragging over the Viewer.
+ * DraggableTool is a base class for tools that handles mouse dragging
+ * over the Viewer.
  * This class manages a protected member "dragInfo", which holds handy values
  * such as the total mouse move distance from the drag start point.
  */
@@ -35,14 +36,20 @@ export default abstract class DraggableTool extends Tool {
   /**
    * Holds some useful drag-related variables.
    */
-  protected dragInfo: DragInfo;
+  protected dragInfo!: DragInfo;
 
-  private prevX: number;
-  private prevY: number;
-  private startX: number;
-  private startY: number;
+  private prevX!: number;
+  private prevY!: number;
+  private startX!: number;
+  private startY!: number;
 
   public dragStartHandler(ev: ViewerEvent): void {
+    if (
+      typeof ev.viewerX === 'undefined' ||
+      typeof ev.viewerY === 'undefined'
+    ) {
+      return;
+    }
     this.prevX = ev.viewerX;
     this.prevY = ev.viewerY;
     this.startX = ev.viewerX;
@@ -66,6 +73,8 @@ export default abstract class DraggableTool extends Tool {
       this.dragInfo.dy = 0;
       return;
     }
+    if (typeof ev.viewerX === 'undefined' || typeof ev.viewerY === 'undefined')
+      return;
 
     this.dragInfo = {
       dx: ev.viewerX - this.prevX,

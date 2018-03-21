@@ -13,7 +13,7 @@ export default class ZoomTool extends DraggableTool {
   /**
    * Holds the current zoom step relative to the drag start time
    */
-  private currentStep: number;
+  private currentStep: number | undefined;
 
   public dragHandler(ev: ViewerEvent): void {
     super.dragHandler(ev);
@@ -22,7 +22,7 @@ export default class ZoomTool extends DraggableTool {
     if (step !== this.currentStep) {
       this.zoomStep(
         ev.viewer,
-        step - this.currentStep,
+        step - this.currentStep!,
         new Vector2(ev.viewerX, ev.viewerY)
       );
       this.currentStep = step;

@@ -65,6 +65,7 @@ export default class Tool extends EventEmitter implements ViewerEventTarget {
         const comp = viewer.getComposition();
         if (!comp) throw new Error('Composition not initialized'); // should not happen
         const src = comp.imageSource as MprImageSource;
+        if (!src.metadata) return;
         const voxelSize = src.metadata.voxelSize;
         state.section = orientationAwareTranslation(
           state.section,

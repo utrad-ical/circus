@@ -21,7 +21,7 @@ export default class RawData {
   /**
    * Bytes per voxel [byte/voxel]
    */
-  protected bpp: number;
+  protected bpp!: number;
 
   /**
    * Actual image data.
@@ -31,17 +31,17 @@ export default class RawData {
   /**
    * The array view used with the array buffer (eg, Uint8Array)
    */
-  protected view: { [offset: number]: number };
+  protected view!: { [offset: number]: number };
 
   /**
    * Voxel reader function.
    */
-  protected read: (pos: number) => number;
+  protected read!: (pos: number) => number;
 
   /**
    * Voxel writer function.
    */
-  protected write: (value: number, pos: number) => void;
+  protected write!: (value: number, pos: number) => void;
 
   /**
    * Set the size of the volume and allocate an byte array.

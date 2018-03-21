@@ -34,7 +34,7 @@ export default class BucketTool extends VoxelCloudToolBase {
     }
 
     // perform flood-fill on the active cloud
-    floodFillOnSlice(this.activeCloud.volume, volumePoint, orientation);
+    floodFillOnSlice(this.activeCloud.volume!, volumePoint, orientation);
 
     // draw a 3D line segment over a volume
     comp.annotationUpdated();

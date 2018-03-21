@@ -2,7 +2,7 @@ import Logger from './Logger';
 import * as log4js from 'log4js';
 
 export default class Log4JsLogger extends Logger {
-  private logger: log4js.Logger;
+  private logger!: log4js.Logger;
 
   protected initialize(): void {
     let appenders: any[] = [{ type: 'console' }];

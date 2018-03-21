@@ -16,20 +16,22 @@ import { Vector3 } from 'three';
  */
 export default class RawVolumeMprImageSource extends MprImageSource {
   private volumeLoader: DicomVolumeLoader;
-  private volume: DicomVolume;
+  private volume: DicomVolume | undefined;
 
   constructor({ volumeLoader }: { volumeLoader: DicomVolumeLoader }) {
     super();
     this.volumeLoader = volumeLoader;
     this.loadSequence = (async () => {
-      this.metadata = await this.volumeLoader.loadMeta();
-      this.volume = await this.volumeLoader.loadVolume();
+      this.metadata = await volumeLoader.loadMeta();
+      this.volume = await volumeLoader.loadVolume();
     })();
   }
 
   public draw(viewer: Viewer, viewState: ViewState): Promise<ImageData> {
     const outSize = viewer.getResolution();
     const mprOutput = new Uint8Array(outSize[0] * outSize[1]);
+    const metadata = this.metadata!;
+    const volume = this.volume!;
 
     // convert from mm-coordinate to index-coordinate
     if (viewState.type !== 'mpr') throw new Error('Unsupported view state');
@@ -38,10 +40,10 @@ export default class RawVolumeMprImageSource extends MprImageSource {
 
     const indexSection: Section = convertSectionToIndex(
       mmSection,
-      new Vector3().fromArray(this.metadata.voxelSize)
+      new Vector3().fromArray(metadata.voxelSize)
     );
 
-    this.volume.scanObliqueSection(
+    volume.scanObliqueSection(
       indexSection,
       outSize,
       mprOutput,

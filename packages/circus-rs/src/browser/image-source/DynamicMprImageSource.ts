@@ -9,6 +9,11 @@ import MprImageSource from './MprImageSource';
 import { DicomVolumeMetadata } from './volume-loader/DicomVolumeLoader';
 import { Vector3 } from 'three';
 
+interface DynamicMprImageSourceOptions {
+  rsHttpClient: RsHttpClient;
+  series: string;
+}
+
 /**
  * DynamicImageSource fetches the MPR image from RS server.
  */
@@ -16,13 +21,7 @@ export default class DynamicMprImageSource extends MprImageSource {
   private rsClient: RsHttpClient;
   private series: string;
 
-  constructor({
-    rsHttpClient,
-    series
-  }: {
-    rsHttpClient: RsHttpClient;
-    series: string;
-  }) {
+  constructor({ rsHttpClient, series }: DynamicMprImageSourceOptions) {
     super();
     this.rsClient = rsHttpClient;
     this.series = series;
@@ -63,9 +62,10 @@ export default class DynamicMprImageSource extends MprImageSource {
     const section = viewState.section;
     const viewWindow = viewState.window;
     const outSize = viewer.getResolution();
+    const metadata = this.metadata!;
     const indexSection: Section = convertSectionToIndex(
       section,
-      new Vector3().fromArray(this.metadata.voxelSize)
+      new Vector3().fromArray(metadata!.voxelSize)
     );
     const buffer = await this.requestScan(
       this.series,

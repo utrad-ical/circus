@@ -38,35 +38,35 @@ interface VolumeTexture {
   texture: WebGLTexture;
 }
 
-type GLRawVolumeImageSourceOption = {
+type VolumeRenderingImageSourceOption = {
   loader: DicomVolumeLoader;
 };
 
 export default class VolumeRenderingImageSource extends ImageSource {
-  private meta: DicomVolumeMetadata;
-  private volume: DicomVolume;
+  private meta: DicomVolumeMetadata | undefined;
+  private volume: DicomVolume | undefined;
 
-  private glHandler: WebGlContextManager;
-  private volumeTexture: VolumeTexture;
+  private glHandler: WebGlContextManager | undefined;
+  private volumeTexture: VolumeTexture | undefined;
 
   private readyState: Promise<void>;
 
   // viewState cache for checking update something on WegGL
-  private transferFunction: TransferFunctionEntry[];
+  private transferFunction: TransferFunction | undefined;
   private subVolume: any;
 
-  private transferFunctionTexture: WebGLTexture;
+  private transferFunctionTexture: WebGLTexture | undefined;
 
-  private baseScale: number;
+  private baseScale: number | undefined;
 
-  constructor({ loader }: GLRawVolumeImageSourceOption) {
+  constructor({ loader }: VolumeRenderingImageSourceOption) {
     super();
     this.readyState = loader
       .loadMeta()
       .then((meta: any) => {
         this.meta = meta;
 
-        const [mmVolumeWidth, mmVolumeHeight] = this.meta.voxelCount;
+        const [mmVolumeWidth, mmVolumeHeight] = this.meta!.voxelCount;
         this.baseScale = 2.0 / Math.max(mmVolumeWidth, mmVolumeHeight);
 
         return loader.loadVolume();
@@ -82,7 +82,7 @@ export default class VolumeRenderingImageSource extends ImageSource {
   }
 
   public initialState(viewer: Viewer): ViewState {
-    const meta = this.meta;
+    const meta = this.meta!;
     const [dx, dy, dz] = meta.voxelCount;
 
     const state: VrViewState = {
@@ -118,7 +118,8 @@ export default class VolumeRenderingImageSource extends ImageSource {
    */
   public async draw(viewer: Viewer, viewState: ViewState): Promise<ImageData> {
     const [viewportWidth, viewportHeight] = viewer.getResolution();
-    const [vw, vh, vd] = this.volume.getVoxelSize();
+    const volume = this.volume!;
+    const [vw, vh, vd] = volume.getVoxelSize();
 
     if (viewState.type !== 'vr') throw new Error('Unsupported view state.');
 
@@ -158,7 +159,7 @@ export default class VolumeRenderingImageSource extends ImageSource {
 
       const subVolume = viewState.subVolume || {
         offset: [0, 0, 0],
-        dimension: this.volume.getDimension()
+        dimension: volume.getDimension()
       };
       this.updateVolumeBoxBuffer(subVolume);
 
@@ -241,10 +242,10 @@ export default class VolumeRenderingImageSource extends ImageSource {
 
     gl.uniform1i(glh.uniformIndex['uTransferFunctionSampler'], 0);
     gl.activeTexture(gl.TEXTURE0);
-    gl.bindTexture(gl.TEXTURE_2D, this.transferFunctionTexture);
+    gl.bindTexture(gl.TEXTURE_2D, this.transferFunctionTexture!);
 
     // volume texture
-    const { textureSize, sliceGridSize, texture } = this.volumeTexture;
+    const { textureSize, sliceGridSize, texture } = this.volumeTexture!;
     gl.uniform1i(glh.uniformIndex['uVolumeTextureSampler'], 1);
     gl.activeTexture(gl.TEXTURE1);
     gl.uniform2fv(glh.uniformIndex['uTextureSize'], textureSize);
@@ -304,11 +305,8 @@ export default class VolumeRenderingImageSource extends ImageSource {
    */
   // private debugCount: number = 0;
   private createCamera(viewState: VrViewState): Camera {
-    const [
-      mmVolumeWidth,
-      mmVolumeHeight,
-      mmVolumeDepth
-    ] = this.volume.getMmDimension();
+    const [mmVolumeWidth, mmVolumeHeight, mmVolumeDepth] = this
+      .volume!.getMmDimension();
 
     const camera: Camera = {
       // 同次座標系
@@ -388,11 +386,8 @@ export default class VolumeRenderingImageSource extends ImageSource {
     mat4.scale(m, m, [this.baseScale, this.baseScale, this.baseScale]);
 
     // 1. move to center(0,0,0) @ model coords system
-    const [
-      mmVolumeWidth,
-      mmVolumeHeight,
-      mmVolumeDepth
-    ] = this.volume.getMmDimension();
+    const [mmVolumeWidth, mmVolumeHeight, mmVolumeDepth] = this
+      .volume!.getMmDimension();
     mat4.translate(m, m, [
       -mmVolumeWidth / 2,
       -mmVolumeHeight / 2,
@@ -409,7 +404,7 @@ export default class VolumeRenderingImageSource extends ImageSource {
    * The texture size is 256 x 256 x 4bpp (fixed) or 240KiB.
    */
   protected updateTransferFunction(transferFunction: TransferFunction): void {
-    const glh = this.glHandler;
+    const glh = this.glHandler!;
     const gl = glh.gl;
 
     if (!this.transferFunctionTexture) {
@@ -541,8 +536,9 @@ export default class VolumeRenderingImageSource extends ImageSource {
   }
 
   private glSetup(): void {
-    const glh = this.glHandler;
+    const glh = this.glHandler!;
     const gl = glh.gl;
+    const volume = this.volume!;
 
     glh.registerVertexShader(vertexShaderSource);
     glh.registerFragmentShader(fragmentShaderSource);
@@ -572,10 +568,7 @@ export default class VolumeRenderingImageSource extends ImageSource {
 
     glh.setupShaders();
 
-    this.volumeTexture = this.bufferVolumeTexture(
-      this.glHandler.gl,
-      this.volume
-    );
+    this.volumeTexture = this.bufferVolumeTexture(glh.gl, volume);
 
     gl.enable(gl.DEPTH_TEST);
   }
@@ -589,10 +582,10 @@ export default class VolumeRenderingImageSource extends ImageSource {
   }): void {
     // calculated in world-coords
 
-    const glh = this.glHandler;
+    const glh = this.glHandler!;
     const gl = glh.gl;
 
-    const [vw, vh, vd] = this.volume.getVoxelSize();
+    const [vw, vh, vd] = this.volume!.getVoxelSize();
     const [ox, oy, oz] = [offset[0] * vw, offset[1] * vh, offset[2] * vd];
     const [w, h, d] = [dimension[0] * vw, dimension[1] * vh, dimension[2] * vd];
 
@@ -694,21 +687,23 @@ export default class VolumeRenderingImageSource extends ImageSource {
   }
 
   private glDrawVolumeBox(camera: Camera, viewState: VrViewState): void {
-    const glh = this.glHandler;
+    const glh = this.glHandler!;
     const gl = glh.gl;
+    const volume = this.volume!;
+    const baseScale = this.baseScale!;
 
     const [
       mmVolumeWidth,
       mmVolumeHeight,
       mmVolumeDepth
-    ] = this.volume.getMmDimension();
+    ] = volume.getMmDimension();
 
     // Prepare model matrix
     const modelMatrix = mat4.create();
     mat4.scale(modelMatrix, modelMatrix, [
-      this.baseScale * camera.zoom,
-      this.baseScale * camera.zoom,
-      this.baseScale * camera.zoom
+      baseScale * camera.zoom,
+      baseScale * camera.zoom,
+      baseScale * camera.zoom
     ]);
 
     // Place the box representing the (sub)volume at the target
@@ -716,7 +711,7 @@ export default class VolumeRenderingImageSource extends ImageSource {
     if (viewState.target) {
       target.set([...viewState.target]);
     } else if (viewState.subVolume) {
-      const [w, h, d] = this.volume.getVoxelSize();
+      const [w, h, d] = volume.getVoxelSize();
       target.set([
         (viewState.subVolume.offset[0] +
           viewState.subVolume.dimension[0] * 0.5) *

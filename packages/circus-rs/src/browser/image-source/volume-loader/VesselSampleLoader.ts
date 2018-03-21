@@ -35,7 +35,7 @@ export default class VesselSampleLoader implements DicomVolumeLoader {
     estimatedWindow: { level: 200, width: 600 }
   };
 
-  private cache: IndexedDbCache<any>;
+  private cache: IndexedDbCache<any> | undefined;
 
   private coef: number;
 

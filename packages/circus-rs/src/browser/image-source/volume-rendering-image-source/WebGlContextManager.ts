@@ -22,8 +22,8 @@ export default class WebGlContextManager {
   public attrIndex: { [key: string]: number } = {};
   public uniformIndex: { [key: string]: WebGLUniformLocation } = {};
 
-  private vertexShaderSource: string;
-  private fragmentShaderSource: string;
+  private vertexShaderSource: string | undefined;
+  private fragmentShaderSource: string | undefined;
   private attrNames: string[] = [];
   private uniformNames: string[] = [];
 

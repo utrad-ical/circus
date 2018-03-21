@@ -10,7 +10,7 @@ import { DicomVolumeMetadata } from './DicomVolumeLoader';
 export default class MixVolumeLoader implements DicomVolumeLoader {
   private volumeLoader: DicomVolumeLoader;
   private maskLoader: DicomVolumeLoader;
-  private meta: DicomVolumeMetadata;
+  private meta: DicomVolumeMetadata | undefined;
 
   constructor({
     volumeLoader,
@@ -30,6 +30,8 @@ export default class MixVolumeLoader implements DicomVolumeLoader {
   }
 
   public async loadVolume(): Promise<DicomVolume> {
+    if (!this.meta) throw new Error('Medatada not loaded yet');
+
     const [baseVolume, maskVolume] = await Promise.all([
       this.volumeLoader.loadVolume(),
       this.maskLoader.loadVolume()

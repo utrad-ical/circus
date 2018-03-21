@@ -10,10 +10,11 @@ import { DicomVolumeMetadata } from './volume-loader/DicomVolumeLoader';
  * 3D volume-based image source classes which can render MPR.
  */
 export default abstract class MprImageSource extends ImageSource {
-  public metadata: DicomVolumeMetadata;
-  protected loadSequence: Promise<void>;
+  public metadata: DicomVolumeMetadata | undefined;
+  protected loadSequence: Promise<void> | undefined;
 
   public initialState(viewer: Viewer): ViewState {
+    if (!this.metadata) throw new Error('Metadata now loaded');
     const metadata = this.metadata;
     const window = metadata.dicomWindow
       ? { ...metadata.dicomWindow }
@@ -37,6 +38,7 @@ export default abstract class MprImageSource extends ImageSource {
    * Calculates the source volume size in millimeters.
    */
   public mmDim(): Vector3D {
+    if (!this.metadata) throw new Error('Metadata now loaded');
     const voxelCount = this.metadata.voxelCount;
     const voxelSize = this.metadata.voxelSize;
     return [

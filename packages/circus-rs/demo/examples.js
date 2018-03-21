@@ -118,11 +118,11 @@ const cache = new rs.IndexedDbCache();
 
 // prepare volume loader
 const rsHttpClient = new rs.RsHttpClient(config.server);
-const mainLoader = new rs.RsVolumeLoader({
+const mainVolumeLoader = new rs.RsVolumeLoader({
   series: config.series,
   rsHttpClient
 });
-mainLoader.useCache(cache);
+mainVolumeLoader.useCache(cache);
 
 // prepare mask loader
 const maskHost =
@@ -136,8 +136,8 @@ const maskHost =
 const maskLoadPath = 'sampledata/combined2.raw';
 
 const maskLoader = new rs.VesselSampleLoader({
-  host: maskHost,
-  path: maskLoadPath
+  path: maskLoadPath,
+  rsHttpClient
 });
 maskLoader.useCache(cache);
 

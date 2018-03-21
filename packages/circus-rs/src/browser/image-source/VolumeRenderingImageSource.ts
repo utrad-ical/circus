@@ -13,9 +13,7 @@ import DicomVolumeLoader from './volume-loader/DicomVolumeLoader';
 const vertexShaderSource = require('./volume-rendering-image-source/vertex-shader.vert');
 const fragmentShaderSource = require('./volume-rendering-image-source/fragment-shader.frag');
 
-import * as vec3 from 'gl-matrix/src/gl-matrix/vec3.js';
-import * as vec4 from 'gl-matrix/src/gl-matrix/vec4.js';
-import * as mat4 from 'gl-matrix/src/gl-matrix/mat4.js';
+import { vec3, vec4, mat4 } from 'gl-matrix';
 
 import WebGlContextManager from './volume-rendering-image-source/WebGlContextManager';
 
@@ -43,7 +41,7 @@ type VolumeRenderingImageSourceOption = {
 };
 
 export default class VolumeRenderingImageSource extends ImageSource {
-  private meta: DicomVolumeMetadata | undefined;
+  private metadata: DicomVolumeMetadata | undefined;
   private volume: DicomVolume | undefined;
 
   private glHandler: WebGlContextManager | undefined;
@@ -57,14 +55,14 @@ export default class VolumeRenderingImageSource extends ImageSource {
 
   private transferFunctionTexture: WebGLTexture | undefined;
 
-  private baseScale: number | undefined;
+  private baseScale: number = 1;
 
   constructor({ volumeLoader }: VolumeRenderingImageSourceOption) {
     super();
     this.loadSequence = (async () => {
-      const meta = await volumeLoader.loadMeta();
-      this.meta = meta;
-      const [mmVolumeWidth, mmVolumeHeight] = this.meta.voxelCount;
+      const metadata = await volumeLoader.loadMeta();
+      this.metadata = metadata;
+      const [mmVolumeWidth, mmVolumeHeight] = this.metadata.voxelCount;
       this.baseScale = 2.0 / Math.max(mmVolumeWidth, mmVolumeHeight);
       const volume = await volumeLoader.loadVolume();
       this.volume = volume;
@@ -76,7 +74,7 @@ export default class VolumeRenderingImageSource extends ImageSource {
   }
 
   public initialState(viewer: Viewer): ViewState {
-    const meta = this.meta!;
+    const meta = this.metadata!;
     const [dx, dy, dz] = meta.voxelCount;
 
     const state: VrViewState = {
@@ -707,7 +705,7 @@ export default class VolumeRenderingImageSource extends ImageSource {
     ]);
 
     // Place the box representing the (sub)volume at the target
-    let target = vec3.create();
+    let target = vec3.create() as any;
     if (viewState.target) {
       target.set([...viewState.target]);
     } else if (viewState.subVolume) {

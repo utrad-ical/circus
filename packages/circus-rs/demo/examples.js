@@ -119,9 +119,10 @@ Change interpolation mode を使用して、表示の変化を確認して下さ
 const cache = new rs.IndexedDbCache();
 
 // prepare volume loader
+const rsHttpClient = new rs.RsHttpClient(config.server);
 const volumeLoader = new rs.RsVolumeLoader({
   series: config.series,
-  host: config.server
+  rsHttpClient
 });
 volumeLoader.useCache(cache);
 
@@ -169,9 +170,10 @@ imageSource.ready().then(() => {
 MRAを直接使用しています。
 --*/
 
+const rsHttpClient = new rs.RsHttpClient(config.server);
 const loader = new rs.RsVolumeLoader({
   series: config.series,
-  host: config.server
+  rsHttpClient
 });
 
 loader.useCache(new rs.IndexedDbCache());
@@ -278,12 +280,11 @@ Select an individual example item for details.
 --*/
 
 // Prepare ImageSource object, using the options provided in the boxes above
-const volumeLoader = new rs.RsVolumeLoader({
-  host: config.server,
-  token: null,
-  series: config.series
-});
 const rsHttpClient = new rs.RsHttpClient(config.server);
+const volumeLoader = new rs.RsVolumeLoader({
+  series: config.series,
+  rsHttpClient
+});
 const imageSource = new config.sourceClass({
   volumeLoader,
   rsHttpClient,

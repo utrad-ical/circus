@@ -1,4 +1,4 @@
-import { RsHttpClient } from '../../http-client/rs-http-client';
+import RsHttpClient from '../../http-client/RsHttpClient';
 import DicomVolumeLoader from './DicomVolumeLoader';
 import IndexedDbCache from '../../util/IndexedDbCache';
 import DicomVolume from '../../../common/DicomVolume';

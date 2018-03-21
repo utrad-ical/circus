@@ -18,7 +18,7 @@ export { default as AnisotropicRawData } from '../common/AnisotropicRawData';
 export * from '../common/PixelFormat';
 export * from '../common/geometry';
 
-export * from './http-client/rs-http-client';
+export { default as RsHttpClient } from './http-client/RsHttpClient';
 
 export { default as MprImageSource } from './image-source/MprImageSource';
 export {

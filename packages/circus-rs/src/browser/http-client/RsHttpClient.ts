@@ -4,7 +4,7 @@ import axios, { AxiosRequestConfig } from 'axios';
  * Simple HTTP wrapper that connects to the CIRCUS RS server and returns the response
  * in the appropriate format.
  */
-export class RsHttpClient {
+export default class RsHttpClient {
   /**
    * Host name, optionally with port in `host:port` format
    */

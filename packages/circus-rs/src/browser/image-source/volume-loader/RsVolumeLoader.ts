@@ -1,18 +1,23 @@
-import { RsHttpClient } from '../../http-client/rs-http-client';
+import RsHttpClient from '../../http-client/RsHttpClient';
 import DicomVolumeLoader from './DicomVolumeLoader';
 import IndexedDbCache from '../../util/IndexedDbCache';
 import DicomVolume from '../../../common/DicomVolume';
 import { DicomVolumeMetadata } from './DicomVolumeLoader';
 
+interface RsVolumeLoaderOptions {
+  rsHttpClient: RsHttpClient;
+  series: string;
+}
+
 export default class RsVolumeLoader implements DicomVolumeLoader {
   private client: RsHttpClient;
   private series: string;
-  private meta: DicomVolumeMetadata;
+  private meta: DicomVolumeMetadata | undefined;
 
-  private cache: IndexedDbCache<ArrayBuffer | DicomVolumeMetadata>;
+  private cache: IndexedDbCache<ArrayBuffer | DicomVolumeMetadata> | undefined;
 
-  constructor({ host, token, series }: any) {
-    this.client = new RsHttpClient(host, token);
+  constructor({ rsHttpClient, series }: RsVolumeLoaderOptions) {
+    this.client = rsHttpClient;
     this.series = series;
   }
 
@@ -45,6 +50,7 @@ export default class RsVolumeLoader implements DicomVolumeLoader {
 
   public async loadVolume(): Promise<DicomVolume> {
     if (!this.series) throw new Error('Series is required');
+    if (!this.meta) throw new Error('Medatadata not loaded yet');
 
     let buffer: ArrayBuffer | undefined;
     if (this.cache) {

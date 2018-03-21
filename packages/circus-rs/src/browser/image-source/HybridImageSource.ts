@@ -3,7 +3,7 @@ import RawVolumeMprImageSource from './RawVolumeMprImageSource';
 import ViewState from '../ViewState';
 import Viewer from '../viewer/Viewer';
 import DicomVolumeLoader from './volume-loader/DicomVolumeLoader';
-import { RsHttpClient } from '../http-client/rs-http-client';
+import RsHttpClient from '../http-client/RsHttpClient';
 import MprImageSource from './MprImageSource';
 
 interface HybridImageSourceParams {

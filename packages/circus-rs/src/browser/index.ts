@@ -4,6 +4,7 @@
  */
 import './circus-rs.less';
 import './assets/icons/circus-rs-font-glyphs.less';
+import 'tslib';
 
 export { default as Viewer } from './viewer/Viewer';
 export { default as Composition } from './Composition';

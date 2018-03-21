@@ -27,8 +27,8 @@ import { Vector2, Vector3 } from 'three';
 /**
  * VoxelCloud is a type of Annotation that can be registered to a Composition.
  * This represents one voxel cloud annotation (aka voxel label).
- * An instance of VoxelCloud can be updated manually by the consumer of CIRCUS RS,
- * or automatically by various cloud manipulation tools.
+ * An instance of VoxelCloud can be updated manually by the consumer
+ * of CIRCUS RS, or automatically by various cloud manipulation tools.
  */
 export default class VoxelCloud implements Annotation {
   /**
@@ -54,7 +54,8 @@ export default class VoxelCloud implements Annotation {
   public volume?: RawData;
 
   /**
-   * The position of the origin of this volume data in the voxel coordinate of ImageSource.
+   * The position of the origin of this volume data
+   * in the voxel coordinate of ImageSource.
    * Should be in voxel coordinate (not in mm)!
    */
   public origin?: [number, number, number];
@@ -189,7 +190,8 @@ export default class VoxelCloud implements Annotation {
     );
 
     if (!intersections) {
-      // The bounding box of this voxel cloud does not intersect with the section.
+      // The bounding box of this voxel cloud does not intersect
+      // with the section.
       // No need to draw anything.
       return null;
     }
@@ -246,7 +248,7 @@ export default class VoxelCloud implements Annotation {
       return null;
     }
 
-    // The final on-screen rectangle which is inside the canvas and thus should be rendered.
+    // The final on-screen rectangle inside the canvas and thus should be rendered.
     const outRect = growSubPixel(screenIntersection);
 
     if (this.debugPoint) rectangle(context, outRect);

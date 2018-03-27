@@ -11,7 +11,8 @@ import { fitRectangle } from '../common/geometry';
 export type OrientationString = 'axial' | 'sagittal' | 'coronal' | 'oblique';
 
 /**
- * Converts 3D point in volume coordinate space to 2D point in screen space using the given section.
+ * Converts 3D point in volume coordinate space to 2D point in screen space
+ * using the given section.
  * @param section
  * @param resolution
  * @param volumePoint

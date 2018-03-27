@@ -180,8 +180,8 @@ export default class VoxelCloud implements Annotation {
     const section = viewState.section;
 
     /*
-		 * STEP 1. Check if this cloud intersects the current section.
-		 */
+     * STEP 1. Check if this cloud intersects the current section.
+     */
     const mmOrigin = this.toMillimeter(this.origin);
     const mmDim = this.toMillimeter(this.volume.getDimension());
     const intersections = intersectionOfBoxAndPlane(
@@ -197,8 +197,8 @@ export default class VoxelCloud implements Annotation {
     }
 
     /*
-		 * STEP 2. Determine the bounding box of intersection points.
-		 */
+     * STEP 2. Determine the bounding box of intersection points.
+     */
 
     // Converts the 3D intersection points to section-based 2D coordinates
     // and get the box that contains all the intersection points.

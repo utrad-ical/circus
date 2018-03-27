@@ -2,7 +2,7 @@ import { Vector3 } from 'three';
 import DraggableTool from '../DraggableTool';
 import ViewerEvent from '../../viewer/ViewerEvent';
 import { Section } from '../../../common/geometry';
-import { MprViewState } from '../../ViewState';
+import { MprViewState, VrViewState } from '../../ViewState';
 
 /**
  * CelestialRotateTool handles mouse drags and wheel moves on the Viewer and
@@ -11,28 +11,44 @@ import { MprViewState } from '../../ViewState';
 export default class CelestialRotateTool extends DraggableTool {
   public dragHandler(ev: ViewerEvent): void {
     super.dragHandler(ev);
+    const viewer = ev.viewer;
     const dragInfo = this.dragInfo;
-    const speed = ev.original.ctrlKey ? 2.5 : 0.6;
-
     if (dragInfo.dx === 0 && dragInfo.dy === 0) return;
 
-    const state = ev.viewer.getState();
+    const state = viewer.getState();
     switch (state.type) {
-      case 'mpr':
+      case 'mpr': {
+        const speed = ev.original.ctrlKey ? 2.5 : 0.6;
         let section = state.section;
         if (Math.abs(dragInfo.dx)) {
-          const deg = this.sign(dragInfo.dx) * speed;
-          section = this.rotateAroundYAxis(section, deg);
+          section = this.rotateAroundYAxis(
+            section,
+            this.sign(dragInfo.dx) * speed
+          );
         }
         if (Math.abs(dragInfo.dy)) {
-          const deg = this.sign(dragInfo.dy) * speed;
-          section = this.rotateAroundXAxis(section, deg);
+          section = this.rotateAroundXAxis(
+            section,
+            this.sign(dragInfo.dy) * speed
+          );
         }
         const newState: MprViewState = { ...state, section };
-        ev.viewer.setState(newState);
+        viewer.setState(newState);
         break;
-      case 'vr':
-        break;
+      }
+      case 'vr': {
+        const speed = ev.original.shiftKey ? 0.5 : 0.2;
+        const horizontal =
+          typeof state.horizontal !== 'undefined'
+            ? state.horizontal + dragInfo.dx * speed
+            : 0;
+        const vertical =
+          typeof state.vertical !== 'undefined'
+            ? state.vertical - dragInfo.dy * speed
+            : 0;
+        const newState: VrViewState = { ...state, horizontal, vertical };
+        viewer.setState(newState);
+      }
     }
   }
 

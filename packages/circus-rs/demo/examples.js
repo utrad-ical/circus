@@ -94,15 +94,11 @@ viewer.setComposition(comp);
 const container = document.getElementById('toolbar');
 container.innerHTML = ''; // Clear existing tool bar
 
-const toolbar = rs.createToolbar(
-  container,
-  // ['hand', 'window', 'zoom', 'pager', 'celestialRotate', 'brush', 'eraser', 'bucket']
-  ['vr-rotate-zoom']
-);
+const toolbar = rs.createToolbar(container, ['hand', 'celestialRotate']);
 
 if (viewer) {
   toolbar.bindViewer(viewer);
-  viewer.setActiveTool('vr-rotate-zoom');
+  viewer.setActiveTool('celestialRotate');
 }
 
 /*--

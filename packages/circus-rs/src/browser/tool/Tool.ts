@@ -75,6 +75,12 @@ export default class Tool extends EventEmitter implements ViewerEventTarget {
         viewer.setState(state);
         break;
       case 'vr':
+        const speed = ev.original.shiftKey ? 0.005 : 0.002;
+        const zoom =
+          typeof state.zoom !== 'undefined'
+            ? state.zoom + ev.original.deltaY * speed * -1
+            : 1.0;
+        viewer.setState({ ...state, zoom });
         break;
     }
   }

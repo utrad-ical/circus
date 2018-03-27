@@ -7,7 +7,6 @@ import CelestialRotateTool from './state/CelestialRotateTool';
 import BrushTool from './cloud/BrushTool';
 import EraserTool from './cloud/EraserTool';
 import BucketTool from './cloud/BrushTool';
-import VrRotateZoomTool from './state/VrRotateZoomTool';
 
 const toolCollection: { [toolName: string]: Tool } = {};
 
@@ -21,9 +20,7 @@ const defaultTools: { [toolName: string]: typeof Tool } = {
 
   brush: BrushTool,
   eraser: EraserTool,
-  bucket: BucketTool,
-
-  'vr-rotate-zoom': VrRotateZoomTool
+  bucket: BucketTool
 };
 
 Object.keys(defaultTools).forEach(key => {

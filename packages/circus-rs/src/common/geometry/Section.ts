@@ -16,8 +16,14 @@ export function projectPointOntoSection(
 ): Vector2 {
   const p = new Vector3().subVectors(point, section.origin);
   return new Vector2(
-    section.xAxis.normalize().dot(p),
-    section.yAxis.normalize().dot(p)
+    section.xAxis
+      .clone()
+      .normalize()
+      .dot(p),
+    section.yAxis
+      .clone()
+      .normalize()
+      .dot(p)
   );
 }
 

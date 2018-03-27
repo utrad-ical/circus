@@ -80,9 +80,7 @@ function viewStateAnimation(viewer, state0, state1, totalTime) {
   if (totalTime > 0) animate();
 }
 
-const imageSource = new rs.VolumeRenderingImageSource({
-  loader: loader
-});
+const imageSource = new rs.VolumeRenderingImageSource({ volumeLoader });
 
 // Prepare composition.
 const comp = new rs.Composition(imageSource);
@@ -120,11 +118,11 @@ const cache = new rs.IndexedDbCache();
 
 // prepare volume loader
 const rsHttpClient = new rs.RsHttpClient(config.server);
-const volumeLoader = new rs.RsVolumeLoader({
+const mainLoader = new rs.RsVolumeLoader({
   series: config.series,
   rsHttpClient
 });
-volumeLoader.useCache(cache);
+mainLoader.useCache(cache);
 
 // prepare mask loader
 const maskHost =
@@ -144,10 +142,7 @@ const maskLoader = new rs.VesselSampleLoader({
 maskLoader.useCache(cache);
 
 // wrap loaders
-const loader = new rs.MixVolumeLoader({
-  volumeLoader: volumeLoader,
-  maskLoader: maskLoader
-});
+const volumeLoader = new rs.MixVolumeLoader({ mainLoader, maskLoader });
 
 //--@include Volume rendering common
 
@@ -171,12 +166,12 @@ MRAを直接使用しています。
 --*/
 
 const rsHttpClient = new rs.RsHttpClient(config.server);
-const loader = new rs.RsVolumeLoader({
+const volumeLoader = new rs.RsVolumeLoader({
   series: config.series,
   rsHttpClient
 });
 
-loader.useCache(new rs.IndexedDbCache());
+volumeLoader.useCache(new rs.IndexedDbCache());
 
 //--@include Volume rendering common
 
@@ -222,7 +217,7 @@ const sampleHost =
     : '');
 const samplePath = 'sampledata/vessel_mask.raw';
 
-const loader = new rs.VesselSampleLoader({
+const volumeLoader = new rs.VesselSampleLoader({
   host: sampleHost,
   path: samplePath,
   coef: 65536 * 0.5
@@ -248,7 +243,7 @@ imageSource.ready().then(() => {
 モック
 --*/
 
-const loader = new rs.MockVolumeLoader();
+const volumeLoader = new rs.MockVolumeLoader();
 
 //--@include Volume rendering common
 

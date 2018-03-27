@@ -3,28 +3,27 @@ import DicomVolume from '../../../common/DicomVolume';
 import { PixelFormat } from '../../../common/PixelFormat';
 import { DicomVolumeMetadata } from './DicomVolumeLoader';
 
+interface MixVolumeLoaderOptions {
+  mainLoader: DicomVolumeLoader;
+  maskLoader: DicomVolumeLoader;
+}
+
 /**
  * MixVolumeLoader takes two volume loaders and asynchronouslly produces
  * one duplex volume.
  */
 export default class MixVolumeLoader implements DicomVolumeLoader {
-  private volumeLoader: DicomVolumeLoader;
+  private mainLoader: DicomVolumeLoader;
   private maskLoader: DicomVolumeLoader;
   private meta: DicomVolumeMetadata | undefined;
 
-  constructor({
-    volumeLoader,
-    maskLoader
-  }: {
-    volumeLoader: DicomVolumeLoader;
-    maskLoader: DicomVolumeLoader;
-  }) {
-    this.volumeLoader = volumeLoader;
+  constructor({ mainLoader, maskLoader }: MixVolumeLoaderOptions) {
+    this.mainLoader = mainLoader;
     this.maskLoader = maskLoader;
   }
 
   public async loadMeta(): Promise<DicomVolumeMetadata> {
-    const meta = await this.volumeLoader.loadMeta();
+    const meta = await this.mainLoader.loadMeta();
     this.meta = meta;
     return meta;
   }
@@ -33,7 +32,7 @@ export default class MixVolumeLoader implements DicomVolumeLoader {
     if (!this.meta) throw new Error('Medatada not loaded yet');
 
     const [baseVolume, maskVolume] = await Promise.all([
-      this.volumeLoader.loadVolume(),
+      this.mainLoader.loadVolume(),
       this.maskLoader.loadVolume()
     ]);
     const meta = this.meta;

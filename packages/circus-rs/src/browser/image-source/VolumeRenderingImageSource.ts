@@ -39,7 +39,7 @@ interface VolumeTexture {
 }
 
 type VolumeRenderingImageSourceOption = {
-  loader: DicomVolumeLoader;
+  volumeLoader: DicomVolumeLoader;
 };
 
 export default class VolumeRenderingImageSource extends ImageSource {
@@ -49,7 +49,7 @@ export default class VolumeRenderingImageSource extends ImageSource {
   private glHandler: WebGlContextManager | undefined;
   private volumeTexture: VolumeTexture | undefined;
 
-  private readyState: Promise<void>;
+  private loadSequence: Promise<void>;
 
   // viewState cache for checking update something on WegGL
   private transferFunction: TransferFunction | undefined;
@@ -59,26 +59,20 @@ export default class VolumeRenderingImageSource extends ImageSource {
 
   private baseScale: number | undefined;
 
-  constructor({ loader }: VolumeRenderingImageSourceOption) {
+  constructor({ volumeLoader }: VolumeRenderingImageSourceOption) {
     super();
-    this.readyState = loader
-      .loadMeta()
-      .then((meta: any) => {
-        this.meta = meta;
-
-        const [mmVolumeWidth, mmVolumeHeight] = this.meta!.voxelCount;
-        this.baseScale = 2.0 / Math.max(mmVolumeWidth, mmVolumeHeight);
-
-        return loader.loadVolume();
-      })
-      .then((volume: DicomVolume) => {
-        this.volume = volume;
-        return Promise.resolve();
-      });
+    this.loadSequence = (async () => {
+      const meta = await volumeLoader.loadMeta();
+      this.meta = meta;
+      const [mmVolumeWidth, mmVolumeHeight] = this.meta.voxelCount;
+      this.baseScale = 2.0 / Math.max(mmVolumeWidth, mmVolumeHeight);
+      const volume = await volumeLoader.loadVolume();
+      this.volume = volume;
+    })();
   }
 
   public ready(): Promise<void> {
-    return this.readyState;
+    return this.loadSequence;
   }
 
   public initialState(viewer: Viewer): ViewState {
@@ -305,8 +299,11 @@ export default class VolumeRenderingImageSource extends ImageSource {
    */
   // private debugCount: number = 0;
   private createCamera(viewState: VrViewState): Camera {
-    const [mmVolumeWidth, mmVolumeHeight, mmVolumeDepth] = this
-      .volume!.getMmDimension();
+    const [
+      mmVolumeWidth,
+      mmVolumeHeight,
+      mmVolumeDepth
+    ] = this.volume!.getMmDimension();
 
     const camera: Camera = {
       // 同次座標系
@@ -386,8 +383,11 @@ export default class VolumeRenderingImageSource extends ImageSource {
     mat4.scale(m, m, [this.baseScale, this.baseScale, this.baseScale]);
 
     // 1. move to center(0,0,0) @ model coords system
-    const [mmVolumeWidth, mmVolumeHeight, mmVolumeDepth] = this
-      .volume!.getMmDimension();
+    const [
+      mmVolumeWidth,
+      mmVolumeHeight,
+      mmVolumeDepth
+    ] = this.volume!.getMmDimension();
     mat4.translate(m, m, [
       -mmVolumeWidth / 2,
       -mmVolumeHeight / 2,

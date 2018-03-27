@@ -9,9 +9,9 @@ import 'tslib';
 export { default as Viewer } from './viewer/Viewer';
 export { default as Composition } from './Composition';
 
-export * from './annotation/corner-text';
-export * from './annotation/voxel-cloud';
-export * from './annotation/reference-line';
+export * from './annotation/CornerText';
+export * from './annotation/VoxelCloud';
+export * from './annotation/ReferenceLine';
 
 export { default as RawData } from '../common/RawData';
 export { default as AnisotropicRawData } from '../common/AnisotropicRawData';

@@ -1,4 +1,4 @@
-import { Annotation } from './annotation';
+import Annotation from './Annotation';
 import Viewer from '../viewer/Viewer';
 import ViewState from '../ViewState';
 import Sprite from '../viewer/Sprite';
@@ -30,7 +30,7 @@ import { Vector2, Vector3 } from 'three';
  * An instance of VoxelCloud can be updated manually by the consumer of CIRCUS RS,
  * or automatically by various cloud manipulation tools.
  */
-export class VoxelCloud implements Annotation {
+export default class VoxelCloud implements Annotation {
   /**
    * ShadowCanvas is a background canvas used to perform
    * various pixel-based composite operations.

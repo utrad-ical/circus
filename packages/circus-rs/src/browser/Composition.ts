@@ -1,5 +1,5 @@
 import { EventEmitter } from 'events';
-import { Annotation } from '../browser/annotation/annotation';
+import Annotation from '../browser/annotation/annotation';
 import ImageSource from '../browser/image-source/ImageSource';
 import Viewer from './viewer/Viewer';
 

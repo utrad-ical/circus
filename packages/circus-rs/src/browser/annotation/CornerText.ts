@@ -1,11 +1,11 @@
-import { Annotation } from './annotation';
+import Annotation from './Annotation';
 import Viewer from '../viewer/Viewer';
 import ViewState from '../ViewState';
 import Sprite from '../viewer/Sprite';
 
 const PADDING = 10;
 
-export class CornerText implements Annotation {
+export default class CornerText implements Annotation {
   public draw(viewer: Viewer, viewState: ViewState): Sprite | null {
     if (!viewer || !viewState) return null;
     const canvas = viewer.canvas;

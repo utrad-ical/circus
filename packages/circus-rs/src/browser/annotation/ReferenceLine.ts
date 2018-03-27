@@ -1,4 +1,4 @@
-import { Annotation } from './annotation';
+import Annotation from './Annotation';
 import Viewer from '../viewer/Viewer';
 import ViewState from '../ViewState';
 import Sprite from '../viewer/Sprite';
@@ -10,7 +10,7 @@ import { Vector2 } from 'three';
  * ReferenceLine is a type of annotation which draws how the sections
  * of other viewers which share the same composition intersect with this viewer.
  */
-export class ReferenceLine implements Annotation {
+export default class ReferenceLine implements Annotation {
   /**
    * Color of the reference line.
    */

@@ -1,5 +1,5 @@
 import Composition from '../../Composition';
-import { VoxelCloud } from '../../annotation/voxel-cloud';
+import VoxelCloud from '../../annotation/VoxelCloud';
 import DraggableTool from '../DraggableTool';
 import Viewer from '../../viewer/Viewer';
 import MprImageSource from '../../image-source/MprImageSource';

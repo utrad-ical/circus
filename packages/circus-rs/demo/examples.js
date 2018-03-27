@@ -459,7 +459,7 @@ This example adds many cloud annotations.
 
 //--@include AddCloudAnnotation
 
-const [rx, ry, rz] = comp.imageSource.meta.voxelCount; // number of voxels
+const [rx, ry, rz] = comp.imageSource.metadata.voxelCount; // number of voxels
 
 for (let x = 0; x < 10; x++) {
   for (let y = 0; y < 10; y++) {

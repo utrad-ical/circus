@@ -3,8 +3,6 @@ import Viewer from '../viewer/Viewer';
 import ViewState from '../ViewState';
 import Sprite from '../viewer/Sprite';
 import {
-  Vector2D,
-  Vector3D,
   Box,
   Section,
   Rectangle,
@@ -34,7 +32,6 @@ export default class VoxelCloud implements Annotation {
   /**
    * ShadowCanvas is a background canvas used to perform
    * various pixel-based composite operations.
-   * @type {HTMLCanvasElement}
    */
   private static shadowCanvas: HTMLCanvasElement;
 
@@ -71,7 +68,7 @@ export default class VoxelCloud implements Annotation {
    */
   public debugPoint: boolean = false;
 
-  private _voxelSize?: Vector3D;
+  private _voxelSize?: Vector3;
 
   private _expanded: boolean = false;
 
@@ -84,12 +81,12 @@ export default class VoxelCloud implements Annotation {
    * the given size. The shadow canvas can be used to
    * perform background image processing.
    */
-  private prepareShadowCanvas(resolution: [number, number]): HTMLCanvasElement {
+  private prepareShadowCanvas(resolution: Vector2): HTMLCanvasElement {
     if (!(VoxelCloud.shadowCanvas instanceof HTMLCanvasElement)) {
       // Create new
       const canvas = document.createElement('canvas');
-      canvas.width = resolution[0];
-      canvas.height = resolution[1];
+      canvas.width = resolution.x;
+      canvas.height = resolution.y;
       VoxelCloud.shadowCanvas = canvas;
       return canvas;
     }
@@ -97,18 +94,13 @@ export default class VoxelCloud implements Annotation {
     // Use the existing one
     const canvas = VoxelCloud.shadowCanvas;
     // Setting the width/height of a canvas makes the canvas cleared
-    if (canvas.width < resolution[0]) canvas.width = resolution[0];
-    if (canvas.height < resolution[1]) canvas.height = resolution[1];
+    if (canvas.width < resolution.x) canvas.width = resolution.x;
+    if (canvas.height < resolution.y) canvas.height = resolution.y;
     return canvas;
   }
 
-  private toMillimeter(vector: Vector3D): Vector3D {
-    const voxelSize = this._voxelSize!;
-    return [
-      vector[0] * voxelSize[0],
-      vector[1] * voxelSize[1],
-      vector[2] * voxelSize[2]
-    ];
+  private toMillimeter(vector: Vector3): Vector3 {
+    return new Vector3().multiplyVectors(vector, this._voxelSize!);
   }
 
   /**
@@ -171,7 +163,7 @@ export default class VoxelCloud implements Annotation {
     const composition = viewer.getComposition();
     if (!composition) return null;
     const imageSource = composition.imageSource as MprImageSource;
-    this._voxelSize = imageSource.metadata!.voxelSize;
+    this._voxelSize = new Vector3().fromArray(imageSource.metadata!.voxelSize);
 
     const context = viewer.canvas.getContext('2d');
     if (!context) throw new Error('Failed to get canvas context');
@@ -182,10 +174,15 @@ export default class VoxelCloud implements Annotation {
     /*
      * STEP 1. Check if this cloud intersects the current section.
      */
-    const mmOrigin = this.toMillimeter(this.origin);
-    const mmDim = this.toMillimeter(this.volume.getDimension());
+    const mmOrigin = this.toMillimeter(new Vector3().fromArray(this.origin));
+    const mmDim = this.toMillimeter(
+      new Vector3().fromArray(this.volume.getDimension())
+    );
     const intersections = intersectionOfBoxAndPlane(
-      { origin: mmOrigin, size: mmDim },
+      {
+        origin: mmOrigin.toArray() as [number, number, number],
+        size: mmDim.toArray() as [number, number, number]
+      },
       section
     );
 
@@ -202,14 +199,14 @@ export default class VoxelCloud implements Annotation {
 
     // Converts the 3D intersection points to section-based 2D coordinates
     // and get the box that contains all the intersection points.
-    let leftTop: Vector2D = [
+    let leftTop = new Vector2(
       Number.POSITIVE_INFINITY,
       Number.POSITIVE_INFINITY
-    ];
-    let rightBottom: Vector2D = [
+    );
+    let rightBottom = new Vector2(
       Number.NEGATIVE_INFINITY,
       Number.NEGATIVE_INFINITY
-    ];
+    );
     intersections.forEach(i => {
       const p2 = convertVolumeCoordinateToScreenCoordinate(
         section,
@@ -217,26 +214,26 @@ export default class VoxelCloud implements Annotation {
         new Vector3().fromArray(i)
       );
 
-      leftTop[0] = Math.min(leftTop[0], p2.x);
-      leftTop[1] = Math.min(leftTop[1], p2.y);
-      rightBottom[0] = Math.max(rightBottom[0], p2.x);
-      rightBottom[1] = Math.max(rightBottom[1], p2.y);
+      leftTop.x = Math.min(leftTop.x, p2.x);
+      leftTop.y = Math.min(leftTop.y, p2.y);
+      rightBottom.x = Math.max(rightBottom.x, p2.x);
+      rightBottom.y = Math.max(rightBottom.y, p2.y);
 
       if (this.debugPoint) circle(context, p2);
     });
 
-    leftTop[0] = Math.floor(leftTop[0]);
-    leftTop[1] = Math.floor(leftTop[1]);
-    rightBottom[0] = Math.ceil(rightBottom[0]);
-    rightBottom[1] = Math.ceil(rightBottom[1]);
+    leftTop.x = Math.floor(leftTop.x);
+    leftTop.y = Math.floor(leftTop.y);
+    rightBottom.x = Math.ceil(rightBottom.x);
+    rightBottom.y = Math.ceil(rightBottom.y);
 
     const screenRect: Rectangle = {
       origin: [0, 0],
-      size: resolution.toArray() as Vector2D
+      size: resolution.toArray() as [number, number]
     };
     const sectionIntersectionsRect: Rectangle = {
-      origin: leftTop,
-      size: [rightBottom[0] - leftTop[0], rightBottom[1] - leftTop[1]]
+      origin: leftTop.toArray() as [number, number],
+      size: [rightBottom.x - leftTop.x, rightBottom.y - leftTop.y]
     };
 
     const screenIntersection = intersectionOfTwoRectangles(
@@ -272,18 +269,18 @@ export default class VoxelCloud implements Annotation {
     );
 
     const cloudSection: Section = {
-      origin: boundingOrigin.clone().sub(new Vector3().fromArray(mmOrigin)),
+      origin: boundingOrigin.clone().sub(mmOrigin),
       xAxis: boundingXAxisEnd.clone().sub(boundingOrigin),
       yAxis: boundingYAxisEnd.clone().sub(boundingOrigin)
     };
     const indexCloudSection: Section = convertSectionToIndex(
       cloudSection,
-      new Vector3().fromArray(this._voxelSize)
+      this._voxelSize
     );
 
     /*
-		 * STEP 3. Create the image data
-		 */
+     * STEP 3. Create the image data
+     */
     const color = [
       parseInt(this.color.substr(1, 2), 16),
       parseInt(this.color.substr(3, 2), 16),
@@ -318,7 +315,9 @@ export default class VoxelCloud implements Annotation {
     }
 
     // Put the image to the shadow canvas
-    const shadow = this.prepareShadowCanvas(outRect.size);
+    const shadow = this.prepareShadowCanvas(
+      new Vector2().fromArray(outRect.size)
+    );
     const shadowContext = shadow.getContext('2d');
     if (!shadowContext) throw new Error('Failed to get canvas context');
     shadowContext.clearRect(0, 0, resolution.x, resolution.y);

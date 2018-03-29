@@ -5,10 +5,8 @@ import Sprite from '../viewer/Sprite';
 import {
   Box,
   Section,
-  Rectangle,
   boxEquals,
   intersectionOfBoxAndPlane,
-  intersectionOfTwoRectangles,
   box2GrowSubpixel,
   growSubPixel
 } from '../../common/geometry';
@@ -21,7 +19,7 @@ import { scanBoundingBox } from '../volume-util';
 import { convertSectionToIndex } from '../section-util';
 import MprImageSource from '../image-source/MprImageSource';
 import RawData from '../../common/RawData';
-import { Box2, Vector2, Vector3 } from 'three';
+import { Box2, Box3, Vector2, Vector3 } from 'three';
 
 /**
  * VoxelCloud is a type of Annotation that can be registered to a Composition.
@@ -180,10 +178,7 @@ export default class VoxelCloud implements Annotation {
       new Vector3().fromArray(this.volume.getDimension())
     );
     const intersections = intersectionOfBoxAndPlane(
-      {
-        origin: mmOrigin.toArray() as [number, number, number],
-        size: mmDim.toArray() as [number, number, number]
-      },
+      new Box3(mmOrigin, new Vector3().addVectors(mmOrigin, mmDim)),
       section
     );
 

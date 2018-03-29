@@ -9,6 +9,7 @@ import {
   boxEquals,
   intersectionOfBoxAndPlane,
   intersectionOfTwoRectangles,
+  box2GrowSubpixel,
   growSubPixel
 } from '../../common/geometry';
 import { PixelFormat } from '../../common/PixelFormat';
@@ -20,7 +21,7 @@ import { scanBoundingBox } from '../volume-util';
 import { convertSectionToIndex } from '../section-util';
 import MprImageSource from '../image-source/MprImageSource';
 import RawData from '../../common/RawData';
-import { Vector2, Vector3 } from 'three';
+import { Box2, Vector2, Vector3 } from 'three';
 
 /**
  * VoxelCloud is a type of Annotation that can be registered to a Composition.
@@ -199,54 +200,29 @@ export default class VoxelCloud implements Annotation {
 
     // Converts the 3D intersection points to section-based 2D coordinates
     // and get the box that contains all the intersection points.
-    let leftTop = new Vector2(
-      Number.POSITIVE_INFINITY,
-      Number.POSITIVE_INFINITY
-    );
-    let rightBottom = new Vector2(
-      Number.NEGATIVE_INFINITY,
-      Number.NEGATIVE_INFINITY
-    );
+    const containingBox = new Box2().makeEmpty();
     intersections.forEach(i => {
       const p2 = convertVolumeCoordinateToScreenCoordinate(
         section,
         resolution,
-        new Vector3().fromArray(i)
+        i
       );
-
-      leftTop.x = Math.min(leftTop.x, p2.x);
-      leftTop.y = Math.min(leftTop.y, p2.y);
-      rightBottom.x = Math.max(rightBottom.x, p2.x);
-      rightBottom.y = Math.max(rightBottom.y, p2.y);
-
+      containingBox.expandByPoint(p2);
       if (this.debugPoint) circle(context, p2);
     });
 
-    leftTop.x = Math.floor(leftTop.x);
-    leftTop.y = Math.floor(leftTop.y);
-    rightBottom.x = Math.ceil(rightBottom.x);
-    rightBottom.y = Math.ceil(rightBottom.y);
+    box2GrowSubpixel(containingBox);
 
-    const screenRect: Rectangle = {
-      origin: [0, 0],
-      size: resolution.toArray() as [number, number]
-    };
-    const sectionIntersectionsRect: Rectangle = {
-      origin: leftTop.toArray() as [number, number],
-      size: [rightBottom.x - leftTop.x, rightBottom.y - leftTop.y]
-    };
-
-    const screenIntersection = intersectionOfTwoRectangles(
-      screenRect,
-      sectionIntersectionsRect
-    );
-    if (screenIntersection === null) {
+    const screenRect: Box2 = new Box2(new Vector2(0, 0), resolution.clone());
+    const screenIntersection = screenRect.intersect(containingBox);
+    if (screenIntersection.isEmpty()) {
       // The voxel cloud will not appear withing the rectangle of the screen.
       return null;
     }
 
     // The final on-screen rectangle inside the canvas and thus should be rendered.
-    const outRect = growSubPixel(screenIntersection);
+    const outRect = box2GrowSubpixel(screenIntersection);
+    const outRectSize = outRect.getSize();
 
     if (this.debugPoint) rectangle(context, outRect);
 
@@ -255,17 +231,17 @@ export default class VoxelCloud implements Annotation {
     const boundingOrigin = convertScreenCoordinateToVolumeCoordinate(
       section,
       resolution,
-      new Vector2(outRect.origin[0], outRect.origin[1])
+      new Vector2(outRect.min.x, outRect.min.y)
     );
     const boundingXAxisEnd = convertScreenCoordinateToVolumeCoordinate(
       section,
       resolution,
-      new Vector2(outRect.origin[0] + outRect.size[0], outRect.origin[1])
+      new Vector2(outRect.max.x, outRect.min.y)
     );
     const boundingYAxisEnd = convertScreenCoordinateToVolumeCoordinate(
       section,
       resolution,
-      new Vector2(outRect.origin[0], outRect.origin[1] + outRect.size[1])
+      new Vector2(outRect.min.x, outRect.max.y)
     );
 
     const cloudSection: Section = {
@@ -289,19 +265,19 @@ export default class VoxelCloud implements Annotation {
     ];
 
     // raw section pattern ...
-    const sectionImage = new Uint8Array(outRect.size[0] * outRect.size[1]);
+    const sectionImage = new Uint8Array(outRectSize.x * outRectSize.y);
     this.volume.scanObliqueSection(
       indexCloudSection,
-      outRect.size,
+      outRectSize.toArray() as [number, number],
       sectionImage
     );
 
-    let imageData = context.createImageData(outRect.size[0], outRect.size[1]);
+    let imageData = context.createImageData(outRectSize.x, outRectSize.y);
     let srcidx = 0,
       pixel,
       dstidx;
-    for (let y = 0; y < outRect.size[1]; y++) {
-      for (let x = 0; x < outRect.size[0]; x++) {
+    for (let y = 0; y < outRectSize.y; y++) {
+      for (let x = 0; x < outRectSize.x; x++) {
         pixel = sectionImage[srcidx];
         dstidx = srcidx << 2; // meaning multiply 4
         if (pixel === 1) {
@@ -315,9 +291,7 @@ export default class VoxelCloud implements Annotation {
     }
 
     // Put the image to the shadow canvas
-    const shadow = this.prepareShadowCanvas(
-      new Vector2().fromArray(outRect.size)
-    );
+    const shadow = this.prepareShadowCanvas(outRectSize);
     const shadowContext = shadow.getContext('2d');
     if (!shadowContext) throw new Error('Failed to get canvas context');
     shadowContext.clearRect(0, 0, resolution.x, resolution.y);
@@ -328,12 +302,12 @@ export default class VoxelCloud implements Annotation {
       shadow,
       0,
       0,
-      outRect.size[0],
-      outRect.size[1], // src
-      outRect.origin[0],
-      outRect.origin[1],
-      outRect.size[0],
-      outRect.size[1] // dest
+      outRectSize.x,
+      outRectSize.y, // src
+      outRect.min.x,
+      outRect.min.y,
+      outRectSize.x,
+      outRectSize.y // dest
     );
 
     return null;
@@ -360,13 +334,14 @@ function circle(
 
 function rectangle(
   context: CanvasRenderingContext2D,
-  rect: Rectangle,
+  rect: Box2,
   color: string = 'rgba(128, 128, 128, 1.0)',
   linewidth: number = 1
 ): void {
   context.save();
   context.beginPath();
-  context.rect(rect.origin[0], rect.origin[1], rect.size[0], rect.size[1]);
+  const size = rect.getSize();
+  context.rect(rect.min.x, rect.min.y, size.x, size.y);
   context.closePath();
   context.lineWidth = linewidth;
   context.strokeStyle = color;

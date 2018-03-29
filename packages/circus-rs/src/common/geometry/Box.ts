@@ -1,5 +1,5 @@
 import { Vector2D, Vector3D } from './Vector';
-import { Vector3 } from 'three';
+import { Box2, Vector3 } from 'three';
 import { LineSegment } from './LineSegment';
 import { Section, intersectionOfLineSegmentAndPlane } from './Section';
 
@@ -9,6 +9,14 @@ import { Section, intersectionOfLineSegmentAndPlane } from './Section';
 export interface Box {
   origin: Vector3D;
   size: Vector3D;
+}
+
+export function box2GrowSubpixel(box: Box2): Box2 {
+  box.min.x = Math.floor(box.min.x);
+  box.min.y = Math.floor(box.min.y);
+  box.max.x = Math.ceil(box.max.x);
+  box.max.y = Math.ceil(box.max.y);
+  return box;
 }
 
 export function boxEquals(box1: Box, box2: Box): boolean {
@@ -32,10 +40,10 @@ export function boxEquals(box1: Box, box2: Box): boolean {
 export function intersectionOfBoxAndPlane(
   box: Box,
   section: Section
-): Vector3D[] | null {
-  const intersections: Vector3D[] = [];
-  const boxOrigin = box.origin;
-  const boxSize = box.size;
+): Vector3[] | null {
+  const intersections: Vector3[] = [];
+  const bo = box.origin;
+  const bs = box.size;
 
   // Prepare the 12 edges (line segments) of the box and
   // checks if at least one of them intersects the current section.
@@ -48,23 +56,19 @@ export function intersectionOfBoxAndPlane(
   //  | /        | /
   //  B3 ------- B2
 
-  const vertexes: Vector3D[] = [
-    [boxOrigin[0], boxOrigin[1], boxOrigin[2]], // T0
-    [boxOrigin[0] + boxSize[0], boxOrigin[1], boxOrigin[2]], // T1
-    [boxOrigin[0] + boxSize[0], boxOrigin[1] + boxSize[1], boxOrigin[2]], // T2
-    [boxOrigin[0], boxOrigin[1] + boxSize[1], boxOrigin[2]], // T3
-    [boxOrigin[0], boxOrigin[1], boxOrigin[2] + boxSize[2]], // B0
-    [boxOrigin[0] + boxSize[0], boxOrigin[1], boxOrigin[2] + boxSize[2]], // B1
-    [
-      boxOrigin[0] + boxSize[0],
-      boxOrigin[1] + boxSize[1],
-      boxOrigin[2] + boxSize[2]
-    ], // B2
-    [boxOrigin[0], boxOrigin[1] + boxSize[1], boxOrigin[2] + boxSize[2]] // B3
+  const vertexes: Vector3[] = [
+    new Vector3(bo[0], bo[1], bo[2]), // T0
+    new Vector3(bo[0] + bs[0], bo[1], bo[2]), // T1
+    new Vector3(bo[0] + bs[0], bo[1] + bs[1], bo[2]), // T2
+    new Vector3(bo[0], bo[1] + bs[1], bo[2]), // T3
+    new Vector3(bo[0], bo[1], bo[2] + bs[2]), // B0
+    new Vector3(bo[0] + bs[0], bo[1], bo[2] + bs[2]), // B1
+    new Vector3(bo[0] + bs[0], bo[1] + bs[1], bo[2] + bs[2]), // B2
+    new Vector3(bo[0], bo[1] + bs[1], bo[2] + bs[2]) // B3
   ];
 
   // 12 sides of the cuboid
-  const edgeIndexes: Vector2D[] = [
+  const edgeIndexes = [
     [0, 1],
     [1, 2],
     [2, 3],
@@ -80,15 +84,14 @@ export function intersectionOfBoxAndPlane(
   ];
 
   for (let i = 0; i < 12; i++) {
-    const from = new Vector3().fromArray(vertexes[edgeIndexes[i][0]]);
-    const to = new Vector3().fromArray(vertexes[edgeIndexes[i][1]]);
+    const from = vertexes[edgeIndexes[i][0]];
+    const to = vertexes[edgeIndexes[i][1]];
     const edge: LineSegment = {
       origin: from,
       vector: new Vector3().subVectors(to, from)
     };
     const intersection = intersectionOfLineSegmentAndPlane(section, edge);
-    if (intersection !== null)
-      intersections.push(intersection.toArray() as Vector3D);
+    if (intersection !== null) intersections.push(intersection);
   }
 
   return intersections.length === 0 ? null : intersections;

@@ -9,25 +9,16 @@ export interface Rectangle {
   size: Vector2D;
 }
 
+/**
+ * Slightly expands this rect so that it contains the original and all the vertexes are integers.
+ * @param box The input Box2.
+ */
 export function box2GrowSubpixel(box: Box2): Box2 {
   box.min.x = Math.floor(box.min.x);
   box.min.y = Math.floor(box.min.y);
   box.max.x = Math.ceil(box.max.x);
   box.max.y = Math.ceil(box.max.y);
   return box;
-}
-
-/**
- * Slightly expands this rect so that it contains the original and all the vertexes are integers.
- * @param rect
- * @returns {{origin: [number,number], size: [number,number]}}
- */
-export function growSubPixel(rect: Rectangle): Rectangle {
-  const left = Math.floor(rect.origin[0]);
-  const top = Math.floor(rect.origin[1]);
-  const right = Math.ceil(rect.origin[0] + rect.size[0]);
-  const bottom = Math.ceil(rect.origin[1] + rect.size[1]);
-  return { origin: [left, top], size: [right - left, bottom - top] };
 }
 
 /**

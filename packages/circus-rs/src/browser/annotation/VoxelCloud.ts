@@ -5,10 +5,8 @@ import Sprite from '../viewer/Sprite';
 import {
   Box,
   Section,
-  boxEquals,
   intersectionOfBoxAndPlane,
-  box2GrowSubpixel,
-  growSubPixel
+  box2GrowSubpixel
 } from '../../common/geometry';
 import { PixelFormat } from '../../common/PixelFormat';
 import {
@@ -130,15 +128,29 @@ export default class VoxelCloud implements Annotation {
     if (!voxelCount) throw new Error('Voxel count not set');
     const voxelDimension = this.volume.getDimension();
     if (!voxelDimension) throw new Error('Voxel dimension not set');
-    const bb: Box = { origin: [0, 0, 0], size: voxelCount };
+    const bb: Box3 = new Box3(
+      new Vector3(0, 0, 0),
+      new Vector3().fromArray(voxelCount)
+    );
     if (
-      boxEquals(bb, { origin: [0, 0, 0], size: this.volume.getDimension() })
+      bb.equals(
+        new Box3(
+          new Vector3(0, 0, 0),
+          new Vector3().fromArray(this.volume.getDimension())
+        )
+      )
     ) {
       return; // Already expanded
     }
 
     // console.time('expand to maximum');
-    this.volume.transformBoundingBox(bb, this.origin);
+    this.volume.transformBoundingBox(
+      {
+        origin: bb.min.toArray() as [number, number, number],
+        size: bb.getSize().toArray() as [number, number, number]
+      },
+      this.origin
+    );
     this.origin = [0, 0, 0];
 
     this._expanded = true;

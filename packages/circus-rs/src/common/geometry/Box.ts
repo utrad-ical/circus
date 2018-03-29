@@ -1,5 +1,5 @@
-import { Vector2D, Vector3D } from './Vector';
-import { Box2, Box3, Vector3 } from 'three';
+import { Vector3D } from './Vector';
+import { Box3, Vector3 } from 'three';
 import { LineSegment } from './LineSegment';
 import { Section, intersectionOfLineSegmentAndPlane } from './Section';
 
@@ -9,17 +9,6 @@ import { Section, intersectionOfLineSegmentAndPlane } from './Section';
 export interface Box {
   origin: Vector3D;
   size: Vector3D;
-}
-
-export function boxEquals(box1: Box, box2: Box): boolean {
-  return (
-    box1.origin[0] === box2.origin[0] &&
-    box1.origin[1] === box2.origin[1] &&
-    box1.origin[2] === box2.origin[2] &&
-    box1.size[0] === box2.size[0] &&
-    box1.size[1] === box2.size[1] &&
-    box1.size[2] === box2.size[2]
-  );
 }
 
 /**

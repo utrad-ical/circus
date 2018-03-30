@@ -1,13 +1,5 @@
 import { Vector2D } from './Vector';
-import { Box2 } from 'three';
-
-/**
- * Represents a bounding box.
- */
-export interface Rectangle {
-  origin: Vector2D;
-  size: Vector2D;
-}
+import { Box2, Vector2 } from 'three';
 
 /**
  * Slightly expands this rect so that it contains the original and all the vertexes are integers.
@@ -22,28 +14,29 @@ export function box2GrowSubpixel(box: Box2): Box2 {
 }
 
 /**
- * Scales the inner box as large as possible inside the outer rectangle, maintaining the aspect ratio.
- * @param outer The out case to which the inner rectangle is being fit.
- * @param inner
+ * Scales the inner box as large as possible inside the outer rectangle,
+ * maintaining the aspect ratio. The inner box will be placed at the center.
+ * @param outer The outer box to which the inner rectangle is being fit.
+ * @param inner The inner box.
  */
-export function fitRectangle(outer: Vector2D, inner: Vector2D): Rectangle {
-  if (outer[0] <= 0 || outer[1] <= 0 || inner[0] <= 0 || inner[1] <= 0) {
+export function fitRectangle(outer: Vector2, inner: Vector2): Box2 {
+  if (outer.x <= 0 || outer.y <= 0 || inner.x <= 0 || inner.y <= 0) {
     throw new RangeError('Invalid frame size.');
   }
 
-  const outerAspect = outer[0] / outer[1];
-  const innerAspect = inner[0] / inner[1];
+  const outerAspect = outer.x / outer.y;
+  const innerAspect = inner.x / inner.y;
   if (outerAspect > innerAspect) {
     // The outer rect is "wider" than the inner rect
-    return {
-      origin: [(outer[0] - outer[1] * innerAspect) / 2, 0],
-      size: [outer[1] * innerAspect, outer[1]]
-    };
+    return new Box2(
+      new Vector2((outer.x - outer.y * innerAspect) / 2, 0),
+      new Vector2((outer.x + outer.y * innerAspect) / 2, outer.y)
+    );
   } else {
     // The outer rect is "taller" than the inner rect
-    return {
-      origin: [0, (outer[1] - outer[0] / innerAspect) / 2],
-      size: [outer[0], outer[0] / innerAspect]
-    };
+    return new Box2(
+      new Vector2(0, (outer.y - outer.x / innerAspect) / 2),
+      new Vector2(outer.x, (outer.y + outer.x / innerAspect) / 2)
+    );
   }
 }

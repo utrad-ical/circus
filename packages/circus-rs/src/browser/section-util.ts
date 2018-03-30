@@ -1,12 +1,11 @@
 import { Vector2D, Vector3D } from '../common/geometry';
-import { Vector3, Vector2 } from 'three';
+import { Box2, Vector3, Vector2 } from 'three';
 import {
   Section,
-  Rectangle,
   translateSection,
-  projectPointOntoSection
+  projectPointOntoSection,
+  fitRectangle
 } from '../common/geometry';
-import { fitRectangle } from '../common/geometry';
 
 export type OrientationString = 'axial' | 'sagittal' | 'coronal' | 'oblique';
 
@@ -162,11 +161,8 @@ export function orientationAwareTranslation(
  * Calculates the scale factor relative to the screen pixel
  * @returns The calculated scale factor, where 1 = pixel by pixel, 2 = 200%, 0.5 = 50%
  */
-export function calculateScaleFactor(
-  section: Section,
-  mmDim: Vector3D
-): number {
-  return mmDim[0] / section.xAxis.getComponent(0);
+export function calculateScaleFactor(section: Section, mmDim: Vector3): number {
+  return mmDim.x / section.xAxis.getComponent(0);
 }
 
 /**
@@ -184,50 +180,58 @@ export function createOrthogonalMprSection(
   position?: number
 ): Section {
   // const aspect = resolution[0] / resolution[1];
-  let section: Section, rect: Rectangle, mmpp: Vector2D;
+  const res = new Vector2().fromArray(resolution);
+  const vs = new Vector3().fromArray(volumeSize);
+  let section: Section;
   switch (orientation) {
-    case 'axial':
-      if (typeof position === 'undefined') position = volumeSize[2] / 2;
-      rect = fitRectangle(resolution, [volumeSize[0], volumeSize[1]]);
-      mmpp = [volumeSize[0] / rect.size[0], volumeSize[1] / rect.size[1]];
+    case 'axial': {
+      if (typeof position === 'undefined') position = vs.z / 2;
+      const rect = fitRectangle(res, new Vector2(vs.x, vs.y));
+      const size = rect.getSize();
+      const mmpp = [vs.x / size.x, vs.y / size.y];
       section = {
         origin: new Vector3(
-          -rect.origin[0] * mmpp[0],
-          -rect.origin[1] * mmpp[1],
+          -rect.min.x * mmpp[0],
+          -rect.min.y * mmpp[1],
           position
         ),
-        xAxis: new Vector3(resolution[0] * mmpp[0], 0, 0),
-        yAxis: new Vector3(0, resolution[1] * mmpp[1], 0)
+        xAxis: new Vector3(res.x * mmpp[0], 0, 0),
+        yAxis: new Vector3(0, res.y * mmpp[1], 0)
       };
       break;
-    case 'sagittal':
-      if (typeof position === 'undefined') position = volumeSize[0] / 2;
-      rect = fitRectangle(resolution, [volumeSize[1], volumeSize[2]]);
-      mmpp = [volumeSize[1] / rect.size[0], volumeSize[2] / rect.size[1]];
+    }
+    case 'sagittal': {
+      if (typeof position === 'undefined') position = vs.x / 2;
+      const rect = fitRectangle(res, new Vector2(vs.y, vs.z));
+      const size = rect.getSize();
+      const mmpp = [vs.y / size.x, vs.z / size.y];
       section = {
         origin: new Vector3(
           position,
-          -rect.origin[0] * mmpp[0],
-          -rect.origin[1] * mmpp[1]
+          -rect.min.x * mmpp[0],
+          -rect.min.y * mmpp[1]
         ),
-        xAxis: new Vector3(0, resolution[0] * mmpp[0], 0),
-        yAxis: new Vector3(0, 0, resolution[1] * mmpp[1])
+        xAxis: new Vector3(0, res.x * mmpp[0], 0),
+        yAxis: new Vector3(0, 0, res.y * mmpp[1])
       };
       break;
-    case 'coronal':
-      if (typeof position === 'undefined') position = volumeSize[1] / 2;
-      rect = fitRectangle(resolution, [volumeSize[0], volumeSize[2]]);
-      mmpp = [volumeSize[0] / rect.size[0], volumeSize[2] / rect.size[1]];
+    }
+    case 'coronal': {
+      if (typeof position === 'undefined') position = vs.y / 2;
+      const rect = fitRectangle(res, new Vector2(vs.x, vs.z));
+      const size = rect.getSize();
+      const mmpp = [vs.x / size.x, vs.z / size.y];
       section = {
         origin: new Vector3(
-          -rect.origin[0] * mmpp[0],
+          -rect.min.x * mmpp[0],
           position,
-          -rect.origin[1] * mmpp[1]
+          -rect.min.y * mmpp[1]
         ),
-        xAxis: new Vector3(resolution[0] * mmpp[0], 0, 0),
-        yAxis: new Vector3(0, 0, resolution[1] * mmpp[1])
+        xAxis: new Vector3(res.x * mmpp[0], 0, 0),
+        yAxis: new Vector3(0, 0, res.y * mmpp[1])
       };
       break;
+    }
     default:
       throw new TypeError('Unsupported orientation');
   }

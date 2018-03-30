@@ -1,7 +1,6 @@
 import { Vector3D } from './Vector';
-import { Box3, Vector3 } from 'three';
-import { LineSegment } from './LineSegment';
-import { Section, intersectionOfLineSegmentAndPlane } from './Section';
+import { Box3, Line3, Vector3 } from 'three';
+import { Section, intersectionOfLineAndPlane } from './Section';
 
 /**
  * Represents a bounding box.
@@ -59,11 +58,10 @@ export function intersectionOfBoxAndPlane(
   for (let i = 0; i < 12; i++) {
     const from = vertexes[edgeIndexes[i][0]];
     const to = vertexes[edgeIndexes[i][1]];
-    const edge: LineSegment = {
-      origin: from,
-      vector: new Vector3().subVectors(to, from)
-    };
-    const intersection = intersectionOfLineSegmentAndPlane(section, edge);
+    const intersection = intersectionOfLineAndPlane(
+      section,
+      new Line3(from, to)
+    );
     if (intersection !== null) intersections.push(intersection);
   }
 

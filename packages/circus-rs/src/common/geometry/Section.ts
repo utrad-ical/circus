@@ -1,5 +1,4 @@
-import { Vector2, Vector3 } from 'three';
-import { LineSegment } from './LineSegment';
+import { Vector2, Vector3, Line3 } from 'three';
 
 /**
  * Section determines the MRP section of a volume.
@@ -44,17 +43,17 @@ export function translateSection(section: Section, delta: Vector3): Section {
  * (i.e., section is treated as a plane that extends infinitely).
  * @return The intersection point. null if there is no intersection.
  */
-export function intersectionOfLineSegmentAndPlane(
+export function intersectionOfLineAndPlane(
   section: Section,
-  line: LineSegment
+  line: Line3
 ): Vector3 | null {
   const nv = normalVector(section);
-  const P = section.origin;
-  const endA = line.origin;
-  const endB = new Vector3().addVectors(line.origin, line.vector);
+  const origin = section.origin;
+  const endA = line.start;
+  const endB = line.end;
 
-  const vecPA = new Vector3().subVectors(P, endA);
-  const vecPB = new Vector3().subVectors(P, endB);
+  const vecPA = new Vector3().subVectors(origin, line.start);
+  const vecPB = new Vector3().subVectors(origin, line.end);
 
   const dotNvA = vecPA.dot(nv);
   const dotNvB = vecPB.dot(nv);
@@ -70,9 +69,7 @@ export function intersectionOfLineSegmentAndPlane(
     return null;
   } else {
     const rate = Math.abs(dotNvA) / (Math.abs(dotNvA) + Math.abs(dotNvB));
-    const vecAX = line.vector.clone().multiplyScalar(rate);
-    // the intersection point
-    return new Vector3().addVectors(endA, vecAX);
+    return line.at(rate, new Vector3());
   }
 }
 
@@ -96,11 +93,11 @@ export function intersectionPointWithinSection(
  * Calculates the intersection point of the given line segment and the section.
  * @return The intersection point. null if there is no intersection.
  */
-export function intersectionOfLineSegmentAndSection(
+export function intersectionOfLineAndSection(
   section: Section,
-  line: LineSegment
+  line: Line3
 ): Vector3 | null {
-  const intersection = intersectionOfLineSegmentAndPlane(section, line);
+  const intersection = intersectionOfLineAndPlane(section, line);
   if (!intersection) return null;
   return intersectionPointWithinSection(section, intersection)
     ? intersection
@@ -118,7 +115,7 @@ export function intersectionOfLineSegmentAndSection(
 export function intersectionOfTwoSections(
   base: Section,
   target: Section
-): LineSegment | null {
+): Line3 | null {
   const intersections: Vector3[] = [];
 
   // Prepare the 4 edges (line segments) of the target section.
@@ -141,11 +138,8 @@ export function intersectionOfTwoSections(
   for (let i = 0; i < 4; i++) {
     const from = vertexes[edgeIndexes[i][0]];
     const to = vertexes[edgeIndexes[i][1]];
-    const edge: LineSegment = {
-      origin: from,
-      vector: new Vector3().subVectors(to, from)
-    };
-    const intersection = intersectionOfLineSegmentAndPlane(base, edge);
+    const edge = new Line3(from, to);
+    const intersection = intersectionOfLineAndPlane(base, edge);
     if (intersection !== null) intersections.push(intersection);
   }
 
@@ -163,10 +157,7 @@ export function intersectionOfTwoSections(
   // but when there are more, find one which is different from the first
   for (let i = 1; i < intersections.length; i++) {
     if (intersections[0].distanceTo(intersections[i]) > 0.0001) {
-      return {
-        origin: intersections[0],
-        vector: new Vector3().subVectors(intersections[i], intersections[0])
-      };
+      return new Line3(intersections[0], intersections[i]);
     }
   }
 

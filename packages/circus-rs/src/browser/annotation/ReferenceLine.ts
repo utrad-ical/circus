@@ -46,12 +46,12 @@ export default class ReferenceLine implements Annotation {
         const from = convertVolumeCoordinateToScreenCoordinate(
           mySection,
           res,
-          refLine.origin
+          refLine.start
         );
         const to = convertVolumeCoordinateToScreenCoordinate(
           mySection,
           res,
-          refLine.origin.clone().add(refLine.vector)
+          refLine.end
         );
         // console.log('from, to = ', from, to);
         ctx.beginPath();

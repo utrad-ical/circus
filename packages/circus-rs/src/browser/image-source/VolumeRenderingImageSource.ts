@@ -83,17 +83,15 @@ export default class VolumeRenderingImageSource extends ImageSource {
       zoom: 2.0,
       horizontal: 0,
       vertical: 0,
-      // Target will be used only in special cases
+      // Target is optional and is used only in special cases
       // target: [dx * 0.5 * vw, dy * 0.5 * vh, dz * 0.5 * vd],
       subVolume: {
         offset: [0, 0, 0],
         dimension: [dx, dy, dz]
       },
       transferFunction: [
-        /* [texture check] */
-        { position: 0.0 / 65536.0, color: '#000000ff' },
-        { position: 658.0 / 65536.0, color: '#ffffffff' },
-        { position: 65536.0 / 65536.0, color: '#ffffffff' }
+        { position: 0, color: '#000000ff' },
+        { position: 1, color: '#ffffffff' }
       ],
       quality: 1.0,
       interpolationMode: 'trilinear'
@@ -115,8 +113,6 @@ export default class VolumeRenderingImageSource extends ImageSource {
 
     if (viewState.type !== 'vr') throw new Error('Unsupported view state.');
 
-    // ビューアの幅と高さがわからないと、裏キャンバスが作れない？
-    // 特殊な方法で回避できそうだが取り急ぎ draw 時にセットアップ(どっちみち、コンテキスト消失への対応は必要)
     if (!this.glHandler) {
       this.glHandler = new WebGlContextManager({
         width: viewportWidth,
@@ -264,38 +260,15 @@ export default class VolumeRenderingImageSource extends ImageSource {
       pixels
     );
 
-    // v これだと上下反転で取得されてしまう
     const imageData = new ImageData(
       Uint8ClampedArray.from(pixels),
       gl.drawingBufferWidth,
       gl.drawingBufferHeight
     );
 
-    // v 上下反転しつつimageDataを作成
-    // const imageData = new ImageData( gl.drawingBufferWidth, gl.drawingBufferHeight );
-    // const pixelData = imageData.data;
-
-    // for( let i = 0; i < gl.drawingBufferHeight; i++ ) {
-    // const srcOffset = (gl.drawingBufferWidth-1 - i) * gl.drawingBufferWidth * 4;
-    // const destOffset = i * gl.drawingBufferWidth * 4;
-
-    // // Which is better, (A) or (B) ?
-    // /* (A) */ // pixelData.set( pixels.slice(srcOffset, srcOffset + gl.drawingBufferWidth * 4 ), destOffset );
-    // /* (B) */
-    // const w = 4 * gl.drawingBufferWidth;
-    // for( let j = 0; j < w; j++ ) {
-    // pixelData[ destOffset + j ] = pixels[ srcOffset + j ];
-    // }
-    // }
-
     return imageData;
   }
 
-  /**
-   * viewState のカメラ定義から、レンダリングに使用する定義に調整
-   * viewState.rotate
-   */
-  // private debugCount: number = 0;
   private createCamera(viewState: VrViewState): Camera {
     const [
       mmVolumeWidth,
@@ -304,12 +277,14 @@ export default class VolumeRenderingImageSource extends ImageSource {
     ] = this.volume!.getMmDimension();
 
     const camera: Camera = {
-      // 同次座標系
+      // These are using homogenous coordinates (Vector4);
+      // the fourth elements are important
       position: [
         mmVolumeWidth * 0.5,
         mmVolumeHeight * 0.5,
+        // Make this far enough
         mmVolumeDepth * 0.5 +
-          Math.max(mmVolumeWidth, mmVolumeHeight, mmVolumeDepth) * 100, // 十分遠ければ良い。ズームの最大を意識する
+          Math.max(mmVolumeWidth, mmVolumeHeight, mmVolumeDepth) * 100,
         1
       ],
       target: [

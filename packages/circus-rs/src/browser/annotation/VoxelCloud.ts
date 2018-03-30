@@ -219,17 +219,15 @@ export default class VoxelCloud implements Annotation {
     });
 
     box2GrowSubpixel(containingBox);
-
     const screenRect: Box2 = new Box2(new Vector2(0, 0), resolution.clone());
-    const screenIntersection = screenRect.intersect(containingBox);
-    if (screenIntersection.isEmpty()) {
-      // The voxel cloud will not appear withing the rectangle of the screen.
+
+    // The final on-screen rectangle inside the canvas
+    const outRect = screenRect.intersect(containingBox);
+    const outRectSize = outRect.getSize();
+    if (outRect.isEmpty() || outRectSize.x === 0 || outRectSize.y === 0) {
+      // The voxel cloud will not appear within the rectangle of the screen
       return null;
     }
-
-    // The final on-screen rectangle inside the canvas and thus should be rendered.
-    const outRect = box2GrowSubpixel(screenIntersection);
-    const outRectSize = outRect.getSize();
 
     if (this.debugPoint) rectangle(context, outRect);
 

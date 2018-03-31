@@ -4,7 +4,7 @@ import Viewer from '../../viewer/Viewer';
 import ViewState from '../../ViewState';
 import ViewerEvent from '../../viewer/ViewerEvent';
 import { convertScreenCoordinateToVolumeCoordinate } from '../../section-util';
-import { Section } from '../../../common/geometry';
+import { Section, vectorizeSection } from '../../../common/geometry';
 
 /**
  * ZoomTool
@@ -73,14 +73,15 @@ export default class ZoomTool extends DraggableTool {
     scale: number,
     volumeCenter: Vector3
   ): Section {
+    const vSection = vectorizeSection(section);
     return {
-      origin: section.origin
-        .clone()
+      origin: vSection.origin
         .sub(volumeCenter)
         .multiplyScalar(scale)
-        .add(volumeCenter),
-      xAxis: section.xAxis.clone().multiplyScalar(scale),
-      yAxis: section.yAxis.clone().multiplyScalar(scale)
+        .add(volumeCenter)
+        .toArray(),
+      xAxis: vSection.xAxis.multiplyScalar(scale).toArray(),
+      yAxis: vSection.yAxis.multiplyScalar(scale).toArray()
     };
   }
 }

@@ -472,20 +472,20 @@ export default class RawData {
     windowWidth?: number,
     windowLevel?: number
   ): void {
-    const xAxis = section.xAxis.toArray();
+    const xAxis = section.xAxis;
     const eu: Vector3D = [
       xAxis[0] / outSize[0],
       xAxis[1] / outSize[0],
       xAxis[2] / outSize[0]
     ];
-    const yAxis = section.yAxis.toArray();
+    const yAxis = section.yAxis;
     const ev: Vector3D = [
       yAxis[0] / outSize[1],
       yAxis[1] / outSize[1],
       yAxis[2] / outSize[1]
     ];
     this.scanOblique(
-      section.origin.toArray() as Vector3D,
+      section.origin as Vector3D,
       eu,
       ev,
       outSize,

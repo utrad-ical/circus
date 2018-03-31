@@ -4,25 +4,39 @@ import { Vector2, Vector3, Line3 } from 'three';
  * Section determines the MRP section of a volume.
  */
 export interface Section {
+  origin: number[];
+  xAxis: number[]; // in millimeters
+  yAxis: number[]; // in millimeters
+}
+
+interface SectionVector {
   origin: Vector3;
-  xAxis: Vector3; // in millimeters
-  yAxis: Vector3; // in millimeters
+  xAxis: Vector3;
+  yAxis: Vector3;
+}
+
+/**
+ * Converts the members of Section into Vector3 for easier calculation.
+ * It is safe to modify the returned object because all the members are cloned.
+ * @param section The input Section object.
+ */
+export function vectorizeSection(section: Section): SectionVector {
+  return {
+    origin: new Vector3().fromArray(section.origin),
+    xAxis: new Vector3().fromArray(section.xAxis),
+    yAxis: new Vector3().fromArray(section.yAxis)
+  };
 }
 
 export function projectPointOntoSection(
   section: Section,
   point: Vector3
 ): Vector2 {
-  const p = new Vector3().subVectors(point, section.origin);
+  const vSection = vectorizeSection(section);
+  const p = new Vector3().subVectors(point, vSection.origin);
   return new Vector2(
-    section.xAxis
-      .clone()
-      .normalize()
-      .dot(p),
-    section.yAxis
-      .clone()
-      .normalize()
-      .dot(p)
+    vSection.xAxis.normalize().dot(p),
+    vSection.yAxis.normalize().dot(p)
   );
 }
 
@@ -30,10 +44,11 @@ export function projectPointOntoSection(
  * Performs a parallel translation on a given section.
  */
 export function translateSection(section: Section, delta: Vector3): Section {
+  const vSection = vectorizeSection(section);
   return {
-    origin: section.origin.clone().add(delta),
-    xAxis: section.xAxis,
-    yAxis: section.yAxis
+    origin: vSection.origin.add(delta).toArray(),
+    xAxis: vSection.xAxis.toArray(),
+    yAxis: vSection.yAxis.toArray()
   };
 }
 
@@ -48,7 +63,7 @@ export function intersectionOfLineAndPlane(
   line: Line3
 ): Vector3 | null {
   const nv = normalVector(section);
-  const origin = section.origin;
+  const origin = new Vector3().fromArray(section.origin);
   const endA = line.start;
   const endB = line.end;
 
@@ -80,12 +95,13 @@ export function intersectionPointWithinSection(
   section: Section,
   pointOnSection: Vector3
 ): boolean {
-  const o = section.origin;
-  const op = new Vector3().subVectors(pointOnSection, o);
-  const lenX = section.xAxis.length();
-  const lenY = section.yAxis.length();
-  const dotX = section.xAxis.dot(op);
-  const dotY = section.yAxis.dot(op);
+  const vSection = vectorizeSection(section);
+  const origin = vSection.origin;
+  const op = new Vector3().subVectors(pointOnSection, origin);
+  const lenX = vSection.xAxis.length();
+  const lenY = vSection.yAxis.length();
+  const dotX = vSection.xAxis.dot(op);
+  const dotY = vSection.yAxis.dot(op);
   return 0 <= dotX && dotX <= lenX * lenX && 0 <= dotY && dotY <= lenY * lenY;
 }
 
@@ -119,7 +135,8 @@ export function intersectionOfTwoSections(
   const intersections: Vector3[] = [];
 
   // Prepare the 4 edges (line segments) of the target section.
-  const tOrigin = target.origin;
+  const vTarget = vectorizeSection(target);
+  const tOrigin = vTarget.origin;
 
   // 0--1
   // |  |
@@ -128,9 +145,9 @@ export function intersectionOfTwoSections(
   // prettier-ignore
   const vertexes: Vector3[] = [
     tOrigin,
-    tOrigin.clone().add(target.xAxis),
-    tOrigin.clone().add(target.xAxis).add(target.yAxis),
-    tOrigin.clone().add(target.yAxis)
+    tOrigin.clone().add(vTarget.xAxis),
+    tOrigin.clone().add(vTarget.xAxis).add(vTarget.yAxis),
+    tOrigin.clone().add(vTarget.yAxis)
   ];
 
   const edgeIndexes: number[][] = [[0, 1], [1, 2], [2, 3], [3, 0]];
@@ -168,8 +185,8 @@ export function intersectionOfTwoSections(
  * Calculates the normal vector of the given section.
  */
 export function normalVector(section: Section): Vector3 {
-  return section.xAxis
-    .clone()
-    .cross(section.yAxis)
+  return new Vector3()
+    .fromArray(section.xAxis)
+    .cross(new Vector3().fromArray(section.yAxis))
     .normalize();
 }

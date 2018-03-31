@@ -49,8 +49,8 @@ export default class HandTool extends DraggableTool {
     const newSection = translateSection(
       section,
       new Vector3().addVectors(
-        section.xAxis.clone().multiplyScalar(-moveScale.x),
-        section.yAxis.clone().multiplyScalar(-moveScale.y)
+        new Vector3().fromArray(section.xAxis).multiplyScalar(-moveScale.x),
+        new Vector3().fromArray(section.yAxis).multiplyScalar(-moveScale.y)
       )
     );
     return { ...state, section: newSection };

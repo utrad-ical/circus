@@ -1,7 +1,7 @@
 import { Vector3 } from 'three';
 import DraggableTool from '../DraggableTool';
 import ViewerEvent from '../../viewer/ViewerEvent';
-import { Section } from '../../../common/geometry';
+import { Section, vectorizeSection } from '../../../common/geometry';
 import { MprViewState, VrViewState } from '../../ViewState';
 
 /**
@@ -59,30 +59,29 @@ export default class CelestialRotateTool extends DraggableTool {
     angle: number
   ): Section {
     const radian = Math.PI / 180.0 * angle;
+    const vSection = vectorizeSection(section);
     return {
-      origin: section.origin
-        .clone()
+      origin: vSection.origin
         .sub(rotCenter)
         .applyAxisAngle(rotAxis, radian)
-        .add(rotCenter),
-      xAxis: section.xAxis.clone().applyAxisAngle(rotAxis, radian),
-      yAxis: section.yAxis.clone().applyAxisAngle(rotAxis, radian)
+        .add(rotCenter)
+        .toArray(),
+      xAxis: vSection.xAxis.applyAxisAngle(rotAxis, radian).toArray(),
+      yAxis: vSection.yAxis.applyAxisAngle(rotAxis, radian).toArray()
     };
   }
 
   private rotateAroundYAxis(section: Section, angle: number): Section {
-    const rotCenter = section.origin
-      .clone()
-      .add(section.xAxis.clone().divideScalar(2));
-    const rotAxis = section.yAxis.clone().normalize();
+    const vSection = vectorizeSection(section);
+    const rotCenter = vSection.origin.add(vSection.xAxis.divideScalar(2));
+    const rotAxis = vSection.yAxis.normalize();
     return this.rotate(section, rotAxis, rotCenter, angle);
   }
 
   private rotateAroundXAxis(section: Section, angle: number): Section {
-    const rotCenter = section.origin
-      .clone()
-      .add(section.yAxis.clone().divideScalar(2));
-    const rotAxis = section.xAxis.clone().normalize();
+    const vSection = vectorizeSection(section);
+    const rotCenter = vSection.origin.add(vSection.yAxis.divideScalar(2));
+    const rotAxis = vSection.xAxis.normalize();
     return this.rotate(section, rotAxis, rotCenter, angle);
   }
 }

@@ -1,4 +1,4 @@
-import { Vector2D, Vector3D } from '../common/geometry';
+import { Vector2D, Vector3D, vectorizeSection } from '../common/geometry';
 import { Box2, Vector3, Vector2 } from 'three';
 import {
   Section,
@@ -22,10 +22,11 @@ export function convertVolumeCoordinateToScreenCoordinate(
   resolution: Vector2,
   volumePoint: Vector3
 ): Vector2 {
+  const vSection = vectorizeSection(section);
   const projection = projectPointOntoSection(section, volumePoint);
   return new Vector2(
-    projection.x * resolution.x / section.xAxis.length(),
-    projection.y * resolution.y / section.yAxis.length()
+    projection.x * resolution.x / vSection.xAxis.length(),
+    projection.y * resolution.y / vSection.yAxis.length()
   );
 }
 
@@ -37,10 +38,10 @@ export function convertScreenCoordinateToVolumeCoordinate(
   resolution: Vector2,
   screenPoint: Vector2
 ): Vector3 {
-  return section.origin
-    .clone()
-    .add(section.xAxis.clone().multiplyScalar(screenPoint.x / resolution.x))
-    .add(section.yAxis.clone().multiplyScalar(screenPoint.y / resolution.y));
+  const vSection = vectorizeSection(section);
+  return vSection.origin
+    .add(vSection.xAxis.multiplyScalar(screenPoint.x / resolution.x))
+    .add(vSection.yAxis.multiplyScalar(screenPoint.y / resolution.y));
 }
 
 /**
@@ -49,8 +50,8 @@ export function convertScreenCoordinateToVolumeCoordinate(
  * @return One of 'axial', 'sagittal', 'coronal' or 'oblique'
  */
 export function detectOrthogonalSection(section: Section): OrientationString {
-  const xAxis = section.xAxis;
-  const yAxis = section.yAxis;
+  const xAxis = new Vector3().fromArray(section.xAxis);
+  const yAxis = new Vector3().fromArray(section.yAxis);
   if (parallelToX(xAxis) && parallelToY(yAxis)) return 'axial';
   if (parallelToY(xAxis) && parallelToZ(yAxis)) return 'sagittal';
   if (parallelToX(xAxis) && parallelToZ(yAxis)) return 'coronal';
@@ -83,10 +84,11 @@ export function convertSectionToMm(
   indexSection: Section,
   voxelSize: Vector3
 ): Section {
+  const vSection = vectorizeSection(indexSection);
   const mmSection: Section = {
-    origin: convertPointToMm(indexSection.origin, voxelSize),
-    xAxis: convertPointToMm(indexSection.xAxis, voxelSize),
-    yAxis: convertPointToMm(indexSection.yAxis, voxelSize)
+    origin: convertPointToMm(vSection.origin, voxelSize).toArray(),
+    xAxis: convertPointToMm(vSection.xAxis, voxelSize).toArray(),
+    yAxis: convertPointToMm(vSection.yAxis, voxelSize).toArray()
   };
   return mmSection;
 }
@@ -100,10 +102,11 @@ export function convertSectionToIndex(
   mmSection: Section,
   voxelSize: Vector3
 ): Section {
+  const vSection = vectorizeSection(mmSection);
   const indexSection: Section = {
-    origin: convertPointToIndex(mmSection.origin, voxelSize),
-    xAxis: convertPointToIndex(mmSection.xAxis, voxelSize),
-    yAxis: convertPointToIndex(mmSection.yAxis, voxelSize)
+    origin: convertPointToIndex(vSection.origin, voxelSize).toArray(),
+    xAxis: convertPointToIndex(vSection.xAxis, voxelSize).toArray(),
+    yAxis: convertPointToIndex(vSection.yAxis, voxelSize).toArray()
   };
   return indexSection;
 }
@@ -146,9 +149,9 @@ export function orientationAwareTranslation(
       delta = new Vector3(0, voxelSize[1] * step, 0);
       break;
     default:
-      delta = section.xAxis
-        .clone()
-        .cross(section.yAxis)
+      delta = new Vector3()
+        .fromArray(section.xAxis)
+        .cross(new Vector3().fromArray(section.yAxis))
         .normalize()
         .multiplyScalar(step);
       break;
@@ -162,7 +165,7 @@ export function orientationAwareTranslation(
  * @returns The calculated scale factor, where 1 = pixel by pixel, 2 = 200%, 0.5 = 50%
  */
 export function calculateScaleFactor(section: Section, mmDim: Vector3): number {
-  return mmDim.x / section.xAxis.getComponent(0);
+  return mmDim.x / section.xAxis[0];
 }
 
 /**
@@ -190,13 +193,9 @@ export function createOrthogonalMprSection(
       const size = rect.getSize();
       const mmpp = [vs.x / size.x, vs.y / size.y];
       section = {
-        origin: new Vector3(
-          -rect.min.x * mmpp[0],
-          -rect.min.y * mmpp[1],
-          position
-        ),
-        xAxis: new Vector3(res.x * mmpp[0], 0, 0),
-        yAxis: new Vector3(0, res.y * mmpp[1], 0)
+        origin: [-rect.min.x * mmpp[0], -rect.min.y * mmpp[1], position],
+        xAxis: [res.x * mmpp[0], 0, 0],
+        yAxis: [0, res.y * mmpp[1], 0]
       };
       break;
     }
@@ -206,13 +205,9 @@ export function createOrthogonalMprSection(
       const size = rect.getSize();
       const mmpp = [vs.y / size.x, vs.z / size.y];
       section = {
-        origin: new Vector3(
-          position,
-          -rect.min.x * mmpp[0],
-          -rect.min.y * mmpp[1]
-        ),
-        xAxis: new Vector3(0, res.x * mmpp[0], 0),
-        yAxis: new Vector3(0, 0, res.y * mmpp[1])
+        origin: [position, -rect.min.x * mmpp[0], -rect.min.y * mmpp[1]],
+        xAxis: [0, res.x * mmpp[0], 0],
+        yAxis: [0, 0, res.y * mmpp[1]]
       };
       break;
     }
@@ -222,13 +217,9 @@ export function createOrthogonalMprSection(
       const size = rect.getSize();
       const mmpp = [vs.x / size.x, vs.z / size.y];
       section = {
-        origin: new Vector3(
-          -rect.min.x * mmpp[0],
-          position,
-          -rect.min.y * mmpp[1]
-        ),
-        xAxis: new Vector3(res.x * mmpp[0], 0, 0),
-        yAxis: new Vector3(0, 0, res.y * mmpp[1])
+        origin: [-rect.min.x * mmpp[0], position, -rect.min.y * mmpp[1]],
+        xAxis: [res.x * mmpp[0], 0, 0],
+        yAxis: [0, 0, res.y * mmpp[1]]
       };
       break;
     }

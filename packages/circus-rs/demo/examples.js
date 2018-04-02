@@ -471,6 +471,22 @@ viewer.renderAnnotations();
 comp.annotationUpdated();
 
 /*--
+@title Add PlaneFigure Annotation
+--*/
+
+const fig = new rs.PlaneFigure();
+fig.color = '#ff0000';
+fig.type = 'circle';
+fig.width = 3;
+fig.min = [10, 10];
+fig.max = [100, 100];
+
+const comp = viewer.getComposition();
+comp.addAnnotation(fig);
+viewer.renderAnnotations();
+comp.annotationUpdated();
+
+/*--
 @title Benchmark of ImageSource
 This example directly invokes various types of ImageSource and sees their performance.
 --*/

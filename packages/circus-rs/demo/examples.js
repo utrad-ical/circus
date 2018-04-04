@@ -338,7 +338,9 @@ const toolbar = rs.createToolbar(container, [
   'celestialRotate',
   'brush',
   'eraser',
-  'bucket'
+  'bucket',
+  'circle',
+  'rectangle'
 ]);
 
 if (viewer) toolbar.bindViewer(viewer);

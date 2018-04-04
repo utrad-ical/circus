@@ -7,6 +7,8 @@ import CelestialRotateTool from './state/CelestialRotateTool';
 import BrushTool from './cloud/BrushTool';
 import EraserTool from './cloud/EraserTool';
 import BucketTool from './cloud/BrushTool';
+import CircleTool from './annotation/CircleTool';
+import RectangleTool from './annotation/RectangleTool';
 
 const toolCollection: { [toolName: string]: Tool } = {};
 
@@ -17,6 +19,9 @@ const defaultTools: { [toolName: string]: typeof Tool } = {
   zoom: ZoomTool,
   pager: PagerTool,
   celestialRotate: CelestialRotateTool,
+
+  circle: CircleTool,
+  rectangle: RectangleTool,
 
   brush: BrushTool,
   eraser: EraserTool,

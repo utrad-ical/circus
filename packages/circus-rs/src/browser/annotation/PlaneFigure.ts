@@ -3,7 +3,7 @@ import Viewer from '../viewer/Viewer';
 import ViewState from '../ViewState';
 import Sprite from '../viewer/Sprite';
 
-type FigureType = 'rectangle' | 'circle';
+export type FigureType = 'rectangle' | 'circle';
 
 export default class PlaneFigure implements Annotation {
   public color: string = '#ffffff';

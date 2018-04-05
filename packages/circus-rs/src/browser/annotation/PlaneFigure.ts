@@ -14,7 +14,7 @@ export default class PlaneFigure implements Annotation {
   /**
    * Color of the outline.
    */
-  public color: string = '#ffffff';
+  public color: string = '#ff88ff';
 
   /**
    * Width of the outline.
@@ -41,7 +41,7 @@ export default class PlaneFigure implements Annotation {
    */
   public zThreshold: number = 0.1;
 
-  public dimmedColor: string = '#ffffff55';
+  public dimmedColor: string = '#ff88ff55';
   public zDimmedThreshold: number = 3;
 
   public type: FigureType = 'circle';

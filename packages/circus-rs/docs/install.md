@@ -13,14 +13,12 @@ title: Install
 
 ### Client (Web Browser)
 
-- 64-bit versions of modern browsers which understand HTML5 canvas and Promise. These include the latest versios of Google Chrome, Mozilla Firefox and Microsoft Edge, but not vanilla Internet Explorer. (IE11 may work with suffient polyfills).
-- If you want to use `RawVolumeImageSource` or `HybridImageSource`, which holds 3D volume data in the RAM of client machines, you are recommend to use desktop machines with at least 8GB of RAM.
+- 64-bit versions of modern browsers which understand HTML5 canvas and Promise. These include the latest versions of Google Chrome, Mozilla Firefox and Microsoft Edge, but not vanilla Internet Explorer. (IE11 may work with suffient polyfills).
+- If you want to use `RawVolumeMprImageSource` or `HybridMprImageSource`, which holds 3D volume data in the RAM of client machines, you are recommend to use desktop machines with at least 8GB of RAM.
 
 ## Prerequisites
 
-On developing with CIRCUS RS, you have to be able to use JavaScript and HTML. In particular, this documentation widely uses ES2015 syntax/functions such as Promises and classes.
-
-In this documentation, we extensively use arrow functions, shorthand object property syntax and `let/const`. You don't have to use these syntax in your own code, although it's always recommended.
+To developing with CIRCUS RS, you have to be able to use JavaScript and HTML. In particular, this documentation widely uses ES2015 syntax/functions such as Promises and classes.
 
 You don't need to be good at HTML canvas programming and DICOM image formats unless you are going to extend internal functions/classes of CIRCUS RS.
 

@@ -357,21 +357,45 @@ describe('API', function() {
       assert.match(res3.data.error, /key\/value pair/);
     });
 
-    it('should create new case', async function() {
-      const res = await server.axios.bob.request({
-        url: server.url + 'api/cases/',
-        method: 'post',
-        data: {
-          projectId: '8883fdef6f5144f50eb2a83cd34baa44',
-          series: ['111.222.333.444.777'],
-          tags: []
-        }
+    describe('create', function() {
+      it('should create new case', async function() {
+        const res = await server.axios.bob.request({
+          url: server.url + 'api/cases/',
+          method: 'post',
+          data: {
+            projectId: '8883fdef6f5144f50eb2a83cd34baa44',
+            series: [{
+              seriesUid: '111.222.333.444.777',
+              range: '1-200'
+            }],
+            tags: []
+          }
+        });
+        assert.equal(res.status, 200);
+        assert.equal(res.data.caseId.length, 32);
       });
-      assert.equal(res.status, 200);
-      assert.equal(res.data.caseId.length, 32);
+
+      it('should throw for invalid series image range', async function() {
+        const res = await server.axios.bob.request({
+          url: server.url + 'api/cases/',
+          method: 'post',
+          data: {
+            projectId: '8883fdef6f5144f50eb2a83cd34baa44',
+            series: [{
+              seriesUid: '111.222.333.444.777',
+              range: '1-500' // This is out of bounds!
+            }],
+            tags: []
+          }
+        });
+        assert.equal(res.status, 500);
+        assert.match(res.data.error, /range/);
+      });
+
+      // TODO: more checks regarding security
+
     });
 
-    it.skip('should throw proper error status for invalid new-case request');
 
     it('should return single case information', async function() {
       const res = await server.axios.bob.request({

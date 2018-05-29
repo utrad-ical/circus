@@ -53,7 +53,7 @@ async function prepareApiRouter(apiDir, deps, options) {
       const module = require(dir);
       const mainHandler = module[handlerName(route)];
       if (typeof mainHandler !== 'function') {
-        throw new Error('middleware not found');
+        throw new Error(`middleware ${handlerName(route)} for ${manifestFile} not found`);
       }
       const middlewareStack = compose([
         typeCheck(route.expectedContentType),

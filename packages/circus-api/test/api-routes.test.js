@@ -3,6 +3,7 @@ import * as test from './test-utils';
 import FormData from 'form-data';
 import * as fs from 'fs';
 import * as path from 'path';
+import * as pluginJobManager from '../src/api/mockJobManager';
 
 describe('API', function() {
   let server, axios;
@@ -477,7 +478,7 @@ describe('API', function() {
     });
   });
 
-  describe.only('plubin-jobs', function() {
+  describe('plubin-jobs', function() {
     it('should register a new plug-in job', async function() {
       const res = await axios.request({
         method: 'post',
@@ -509,6 +510,46 @@ describe('API', function() {
       assert.equal(res.data.jobId, jobId);
       assert.equal(res.data.status, 'finished');
       assert.equal(res.status, 200);
+    });
+  });
+
+  describe('plugin-job-manager', function() {
+    let url;
+
+    before(function() {
+      url = server.url + 'api/plugin-job-manager';
+    });
+
+    it('should return the current state of a server', async function() {
+      const res = await axios.get(url);
+      const status = await pluginJobManager.status();
+      assert.equal(res.status, 200);
+      assert.equal(res.data.status, status);
+    });
+
+    it('should set the state of a server', async function() {
+      const res = await axios.request({
+        method: 'patch',
+        url,
+        data: { status: 'running' }
+      });
+      assert.equal(res.status, 200);
+      assert.deepEqual(res.data, { status: 'running' });
+      const res2 = await axios.request({
+        method: 'patch',
+        url,
+        data: { status: 'stopped' }
+      });
+      assert.deepEqual(res2.data, { status: 'stopped' });
+    });
+
+    it('should throw for invalid status change request', async function() {
+      const res = await axios.request({
+        method: 'patch',
+        url,
+        data: { status: 'going' } // invalid status
+      });
+      assert.equal(res.status, 400);
     });
   });
 

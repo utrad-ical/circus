@@ -1,0 +1,10 @@
+name: PluginJobManager
+description: >
+  Manages CIRCUS CS Plug-in Job Manager.
+routes:
+  - verb: get
+    path: /plugin-job-manager
+    description: Gets the status of the job manager.
+  - verb: patch
+    path: /plugin-job-manager
+    description: Sets the status of the job manager.

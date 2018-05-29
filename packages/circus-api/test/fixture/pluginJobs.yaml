@@ -9,6 +9,7 @@
       startImgNum: 1
       endImgNum: 236
       imageDelta: 1
+  feedbacks: []
   startedAt: { $date: 1405266782000 }
   finishedAt: { $date: 1405266800000 }
   result: []

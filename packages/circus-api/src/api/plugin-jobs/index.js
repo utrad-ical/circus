@@ -15,6 +15,7 @@ export const handlePost = ({ models }) => {
       errorMessage: null,
       result: null,
       startedAt: null,
+      feedbacks: [],
       finishedAt: null,
       ...request
     });
@@ -22,7 +23,7 @@ export const handlePost = ({ models }) => {
   };
 };
 
-export const deletePost = ({ models }) => {
+export const handlePatch = ({ models }) => {
   return async (ctx, next) => {
     const jobId = ctx.params.jobId;
     await jobManager.cancelJob(jobId);

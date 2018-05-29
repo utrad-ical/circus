@@ -6,6 +6,10 @@ routes:
     path: /plugin-jobs
     description: >
       Creates a new plug-in job.
+  - verb: patch
+    path: /plugin-jobs/:jobId
+    description: >
+      Cancels an existing plug-in job.
   - verb: get
     path: /plugin-jobs
     description: >

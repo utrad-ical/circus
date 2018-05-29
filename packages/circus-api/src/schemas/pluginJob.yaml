@@ -38,6 +38,11 @@ properties:
     items:
       $ref:
         pluginJobSeries
+  feedbacks:
+    type: array
+    items:
+      $ref:
+        pluginJobFeedback
   startedAt:
     description: >
       Job start time.

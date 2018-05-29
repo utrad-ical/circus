@@ -1,0 +1,14 @@
+$schema: 'http://json-schema.org/schema#'
+$async: true
+title: PluginJobManager
+type: object
+description: >
+  Represents a CIRCUS CS plug-in job manager.
+  Used to turn on/off manager status.
+properties:
+  status:
+    type: string
+    enum:
+      - running
+      - stopped
+additionalProperties: false

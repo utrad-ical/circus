@@ -1,0 +1,27 @@
+$schema: 'http://json-schema.org/schema#'
+$async: true
+title: PluginJobFeedback
+type: object
+description: >
+  Represents a CIRCUS CS feedback entry.
+properties:
+  feedbackId:
+    type: string
+  isConsensual:
+    type: boolean
+  jobId:
+    type: string
+  userEmail:
+    type: string
+  data: {} # type: any
+  actionLog:
+    type: array
+    items:
+      type: object
+      properties:
+        date:
+          date: true
+        action:
+          type: string
+      required: ['date', 'action']
+additionalProperties: false

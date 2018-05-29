@@ -3,11 +3,11 @@
 let queue = [];
 let serverStatus = 'stopped';
 
-export async function registerJob(jobId, request, priority) {
+export async function registerJob(jobId, request, priority = 0) {
   if (queue.some(item => item.jobId === jobId)) {
     throw new Error('Duplicated job ID.');
   }
-  queue.push({ jobId, request, priority });
+  queue.push({ jobId, priority, request });
   return;
 }
 

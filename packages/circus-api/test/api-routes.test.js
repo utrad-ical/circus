@@ -479,6 +479,8 @@ describe('API', function() {
   });
 
   describe('plugin-jobs', function() {
+    const jobId = 'd4412ed0fcf1e0ab747c725f794c672a';
+
     it('should register a new plug-in job', async function() {
       const res = await axios.request({
         method: 'post',
@@ -501,13 +503,34 @@ describe('API', function() {
     });
 
     it('should return a finished plug-in job', async function() {
-      const jobId = 'd4412ed0fcf1e0ab747c725f794c672a';
       const res = await axios.request({
         url: server.url + `api/plugin-jobs/${jobId}`
       });
       assert.equal(res.data.jobId, jobId);
       assert.equal(res.data.status, 'finished');
       assert.equal(res.status, 200);
+    });
+
+    it('should register a new feedback entry', async function() {
+      const res = await axios.request({
+        url: server.url + `api/plugin-jobs/${jobId}/feedback`,
+        method: 'post',
+        data: {
+          isConsensual: false,
+          data: { a: 100 },
+          actionLog: []
+        }
+      });
+      assert.equal(res.status, 200);
+    });
+
+    it('should return a list of feedback entries', async function() {
+      const res = await axios.request({
+        url: server.url + `api/plugin-jobs/${jobId}/feedback`,
+        method: 'get'
+      });
+      assert.equal(res.status, 200);
+      assert.equal(res.data.length, 1);
     });
   });
 

@@ -9,8 +9,6 @@ properties:
     type: string
   isConsensual:
     type: boolean
-  jobId:
-    type: string
   userEmail:
     type: string
   data: {} # type: any
@@ -24,4 +22,6 @@ properties:
         action:
           type: string
       required: ['date', 'action']
+  createdAt:
+    date: true
 additionalProperties: false

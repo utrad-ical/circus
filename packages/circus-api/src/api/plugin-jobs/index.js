@@ -1,6 +1,6 @@
 import status from 'http-status';
 import performSearch from '../performSearch';
-import { generateJobId } from '../../utils';
+import { generateJobId, generateFeedbackId } from '../../utils';
 import * as jobManager from '../mockJobManager';
 
 export const handlePost = ({ models }) => {
@@ -66,12 +66,26 @@ export const handleGet = ({ models }) => {
 
 export const handlePostFeedback = ({ models }) => {
   return async (ctx, next) => {
-    ctx.throw(status.NOT_IMPLEMENTED);
+    const jobId = ctx.params.jobId;
+    const job = await models.pluginJob.findByIdOrFail(jobId);
+    const feedbackId = generateFeedbackId();
+    const item = {
+      feedbackId,
+      userEmail: ctx.user.userEmail,
+      createdAt: new Date(),
+      ...ctx.request.body
+    };
+    await models.pluginJob.modifyOne(jobId, {
+      feedbacks: [...job.feedbacks, item]
+    });
+    ctx.body = { feedbackId };
   };
 };
 
 export const handleGetFeedback = ({ models }) => {
   return async (ctx, next) => {
-    ctx.throw(status.NOT_IMPLEMENTED);
+    const jobId = ctx.params.jobId;
+    const job = await models.pluginJob.findByIdOrFail(jobId);
+    ctx.body = job.feedbacks;
   };
 };

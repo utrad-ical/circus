@@ -1,0 +1,16 @@
+name: PluginJobs
+description: >
+  Creates and manages CIRCUS CS Plug-in jobs.
+routes:
+  - verb: post
+    path: /plugin-jobs
+    description: >
+      Creates a new plug-in job.
+  - verb: get
+    path: /plugin-jobs
+    description: >
+      Performs search for the plug-in job.
+  - verb: get
+    path: /plugin-jobs/:jobId
+    description: >
+      Returns the detail of the specified plug-in job.

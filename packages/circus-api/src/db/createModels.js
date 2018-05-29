@@ -9,7 +9,8 @@ export default function createModels(db, validator) {
     clinicalCase: { col: 'clinicalCases', pk: 'caseId' },
     serverParam: { col: 'serverParams', pk: 'key' },
     token: { col: 'tokens', pk: 'accessToken' },
-    task: { col: 'tasks', pk: 'taskId' }
+    task: { col: 'tasks', pk: 'taskId' },
+    pluginJob: { col: 'pluginJobs', pk: 'jobId' }
   };
 
   const models = {};

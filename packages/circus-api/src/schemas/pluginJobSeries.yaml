@@ -1,0 +1,25 @@
+$schema: 'http://json-schema.org/schema#'
+$async: true
+title: PluginJobSeries
+type: object
+description: >
+  Represents series information used to build
+  raw volume consumed by CAD plug-ins.
+properties:
+  seriesUid:
+    type: string
+    format: dicomUid
+  startImgNum:
+    type: number
+  endImgNum:
+    type: number
+  imageDelta:
+    type: number
+  requiredPrivateTags:
+    type: string
+additionalProperties: false
+required:
+  - seriesUid
+  - startImgNum
+  - endImgNum
+  - imageDelta

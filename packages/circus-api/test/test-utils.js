@@ -56,7 +56,8 @@ export async function setUpAppForTest(logMode = 'off') {
     'users',
     'serverParams',
     'tokens',
-    'tasks'
+    'tasks',
+    'pluginJobs'
   ]);
   const logger = createLogger(logMode);
   const app = await createApp({ debug: true, db, logger });

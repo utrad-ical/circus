@@ -364,10 +364,12 @@ describe('API', function() {
           method: 'post',
           data: {
             projectId: '8883fdef6f5144f50eb2a83cd34baa44',
-            series: [{
-              seriesUid: '111.222.333.444.777',
-              range: '1-200'
-            }],
+            series: [
+              {
+                seriesUid: '111.222.333.444.777',
+                range: '1-200'
+              }
+            ],
             tags: []
           }
         });
@@ -381,10 +383,12 @@ describe('API', function() {
           method: 'post',
           data: {
             projectId: '8883fdef6f5144f50eb2a83cd34baa44',
-            series: [{
-              seriesUid: '111.222.333.444.777',
-              range: '1-500' // This is out of bounds!
-            }],
+            series: [
+              {
+                seriesUid: '111.222.333.444.777',
+                range: '1-500' // This is out of bounds!
+              }
+            ],
             tags: []
           }
         });
@@ -393,9 +397,7 @@ describe('API', function() {
       });
 
       // TODO: more checks regarding security
-
     });
-
 
     it('should return single case information', async function() {
       const res = await server.axios.bob.request({
@@ -472,6 +474,41 @@ describe('API', function() {
         url: server.url + 'api/blob/aaabbbcccdddeeefff111222333'
       });
       assert.equal(res.status, 404);
+    });
+  });
+
+  describe.only('plubin-jobs', function() {
+    it('should register a new plug-in job', async function() {
+      const res = await axios.request({
+        method: 'post',
+        url: server.url + 'api/plugin-jobs',
+        data: {
+          priority: 1,
+          request: {
+            pluginName: 'MRA-CAD',
+            pluginVersion: '1.5',
+            series: [
+              {
+                seriesUid: '11.22.333',
+                startImgNum: 0,
+                endImgNum: 100,
+                imageDelta: 1
+              }
+            ]
+          }
+        }
+      });
+      assert.equal(res.status, 200);
+    });
+
+    it('should return a finished plug-in job', async function() {
+      const jobId = 'd4412ed0fcf1e0ab747c725f794c672a';
+      const res = await axios.request({
+        url: server.url + `api/plugin-jobs/${jobId}`
+      });
+      assert.equal(res.data.jobId, jobId);
+      assert.equal(res.data.status, 'finished');
+      assert.equal(res.status, 200);
     });
   });
 

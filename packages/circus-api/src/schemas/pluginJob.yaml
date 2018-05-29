@@ -1,0 +1,56 @@
+$schema: 'http://json-schema.org/schema#'
+$async: true
+title: PluginJob
+type: object
+description: >
+  Represents a CIRCUS CS plug-in job.
+properties:
+  jobId:
+    type: string
+    description: >
+      :key: The unique ID of the job.
+  pluginName:
+    type: string
+  pluginVersion:
+    type: string
+  # environment:
+  #  type: string
+  status:
+    type: string
+    description: >
+      The current status of this job.
+    enum:
+      - in_queue
+      - processing
+      - finished
+      - cancelled
+      - failed
+      - invalidated
+  errorMessage:
+    oneOf:
+      - type: string
+      - type: 'null'
+    description: >
+      Contains an error message if the status is 'failed'.
+  series:
+    type: array
+    minItems: 1
+    items:
+      $ref:
+        pluginJobSeries
+  startedAt:
+    description: >
+      Job start time.
+    oneOf:
+      - date: true
+      - type: 'null'
+  finishedAt:
+    description: >
+      Job finish time.
+    oneOf:
+      - date: true
+      - type: 'null'
+  result:
+    description:
+      The result data of this plug-in job.
+additionalProperties: false

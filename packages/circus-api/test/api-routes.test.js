@@ -478,25 +478,23 @@ describe('API', function() {
     });
   });
 
-  describe('plubin-jobs', function() {
+  describe('plugin-jobs', function() {
     it('should register a new plug-in job', async function() {
       const res = await axios.request({
         method: 'post',
         url: server.url + 'api/plugin-jobs',
         data: {
           priority: 1,
-          request: {
-            pluginName: 'MRA-CAD',
-            pluginVersion: '1.5',
-            series: [
-              {
-                seriesUid: '11.22.333',
-                startImgNum: 0,
-                endImgNum: 100,
-                imageDelta: 1
-              }
-            ]
-          }
+          pluginName: 'MRA-CAD',
+          pluginVersion: '1.5',
+          series: [
+            {
+              seriesUid: '11.22.333',
+              startImgNum: 0,
+              endImgNum: 100,
+              imageDelta: 1
+            }
+          ]
         }
       });
       assert.equal(res.status, 200);

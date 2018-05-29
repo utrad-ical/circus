@@ -6,6 +6,7 @@ routes:
     path: /plugin-jobs
     description: >
       Creates a new plug-in job.
+    requestSchema: pluginJob
   - verb: patch
     path: /plugin-jobs/:jobId
     description: >
@@ -14,7 +15,20 @@ routes:
     path: /plugin-jobs
     description: >
       Performs search for the plug-in job.
+    responseSchema:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: pluginJob
   - verb: get
     path: /plugin-jobs/:jobId
     description: >
       Returns the detail of the specified plug-in job.
+    responseSchema: pluginJob
+  - verb: post
+    path: /plugin-jobs/:jobId/feedbacks
+    description: >
+      Creataes a new feedback entry for the specified plug-in job.
+    handler: handlePostFeedback

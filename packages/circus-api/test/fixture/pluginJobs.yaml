@@ -2,6 +2,7 @@
   jobId: d4412ed0fcf1e0ab747c725f794c672a
   pluginName: Lung-CAD
   pluginVersion: '1.4'
+  userEmail: alice@example.com
   status: finished
   errorMessage: null
   series:

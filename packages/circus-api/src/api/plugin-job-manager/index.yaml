@@ -5,6 +5,9 @@ routes:
   - verb: get
     path: /plugin-job-manager
     description: Gets the status of the job manager.
+    responseSchema: pluginJobManager
   - verb: patch
     path: /plugin-job-manager
     description: Sets the status of the job manager.
+    requestSchema: pluginJobManager
+    responseSchema: pluginJobManager

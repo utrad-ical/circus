@@ -1,0 +1,33 @@
+{
+  "name": "circus-cs-core",
+  "version": "1.0.0",
+  "description": "CIRCUS CS Core: Plugin manager queue system =================================================",
+  "main": "core.js",
+  "dependencies": {
+    "@types/dockerode": "^2.5.4",
+    "@types/js-yaml": "^3.11.1",
+    "@types/node": "^10.3.1",
+    "@types/rimraf": "^2.0.2",
+    "dockerode": "^2.5.5",
+    "js-yaml": "^3.12.0",
+    "memory-streams": "^0.1.3",
+    "rimraf": "^2.6.2",
+    "ts-node": "^6.1.0",
+    "tslib": "^1.9.2",
+    "typescript": "^2.9.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/utrad-ical/circus-cs-core.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/utrad-ical/circus-cs-core/issues"
+  },
+  "homepage": "https://github.com/utrad-ical/circus-cs-core#readme"
+}

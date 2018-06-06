@@ -1,5 +1,4 @@
 import * as fs from 'fs';
-import * as path from 'path';
 import * as rimraf from 'rimraf';
 
 export function isDir(dir: string): Promise<boolean>

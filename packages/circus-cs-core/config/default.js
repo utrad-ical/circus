@@ -11,6 +11,15 @@
 var path = require('path');
 
 module.exports = {
+	"temporaryDirBase": "/tmp/circus",
+	"pluginConfigPath": path.join(__dirname, "plugins.yml"),
+	
+	"mongoURL": "mongodb://localhost:51081/cs_core",
+	
+	// "webUI": {
+		// "mongoURL": "mongodb://localhost:51081/cs_web_ui"
+	// },
+	
 	// DICOM file repository is a loader that fetches the content of a DICOM file
 	// specified by a series instance UID and an image number.
 	"dicomFileRepository": {
@@ -20,30 +29,30 @@ module.exports = {
 			"useHash": false
 		}
 	},
-
-	// Logger configurations. By default, we make use of log4js library,
-	// so see the documentation for that project.
-	"logger": {
-		"module": "Log4JsLogger",
-		"options": {
-			"appenders": [
-				{
-					"type": "dateFile",
-					"filename": path.resolve(__dirname, "../logs/debug.log"),
-					"pattern": "-yyyyMMdd.log",
-					"alwaysIncludePattern": true
-				}
-			]
-		}
-	},
 	
 	"docker": {
 		"socketPath": "/var/run/docker.sock"
 	},
-
+	
 	"dicomDumpOptions": {
-		"image": "circus/dicom_voxel_dump:1.0",
-		"volume_in": "/data/in",
-		"volume_out": "/data/out"
+		"dockerImage": "circus/dicom_voxel_dump:1.0",
+		"volumeIn": "/data/in",
+		"volumeOut": "/data/out"
 	}
+
+	// // Logger configurations. By default, we make use of log4js library,
+	// // so see the documentation for that project.
+	// "logger": {
+		// "module": "Log4JsLogger",
+		// "options": {
+			// "appenders": [
+				// {
+					// "type": "dateFile",
+					// "filename": path.resolve(__dirname, "../logs/debug.log"),
+					// "pattern": "-yyyyMMdd.log",
+					// "alwaysIncludePattern": true
+				// }
+			// ]
+		// }
+	// },
 };

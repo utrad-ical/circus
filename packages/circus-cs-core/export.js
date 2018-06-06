@@ -6,4 +6,4 @@ require('ts-node').register({
   compilerOptions: tsOptions,
   disableWarnings: true
 });
-require('./src/draft-note');
+module.exports = require('./src/index');

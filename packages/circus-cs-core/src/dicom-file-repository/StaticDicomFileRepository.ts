@@ -1,15 +1,15 @@
 import DicomFileRepository, {
   SeriesLoader,
   SeriesLoaderInfo
-} from './DicomFileRepository';
-import * as path from 'path';
-import * as fs from 'fs';
-import * as crypto from 'crypto';
+} from "./DicomFileRepository";
+import * as path from "path";
+import * as fs from "fs";
+import * as crypto from "crypto";
 // import logger from '../Logger';
 
 export default class StaticDicomFileRepository extends DicomFileRepository {
   private pad8(num: number): string {
-    return ('00000000' + num).slice(-8);
+    return ("00000000" + num).slice(-8);
   }
 
   /**
@@ -34,9 +34,9 @@ export default class StaticDicomFileRepository extends DicomFileRepository {
   public getSeriesLoader(seriesUID: string): Promise<SeriesLoaderInfo> {
     let dir: string;
     if (this.config.useHash) {
-      const hash = crypto.createHash('sha256');
+      const hash = crypto.createHash("sha256");
       hash.update(seriesUID);
-      const hashStr = hash.digest('hex');
+      const hashStr = hash.digest("hex");
       dir = path.join(
         this.config.dataDir,
         hashStr.substring(0, 2),
@@ -49,10 +49,10 @@ export default class StaticDicomFileRepository extends DicomFileRepository {
 
     return this.scanDicomCount(dir).then(count => {
       if (count === 0) {
-        throw new Error('series not found');
+        throw new Error("series not found");
       }
       const seriesLoader: SeriesLoader = (image: number) => {
-        const fileName = this.pad8(image) + '.dcm';
+        const fileName = this.pad8(image) + ".dcm";
         const filePath = path.join(dir, fileName);
 
         return new Promise<ArrayBuffer>((resolve, reject) => {

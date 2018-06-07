@@ -4,4 +4,4 @@ require('ts-node').register({
   disableWarnings: true
 });
 
-require('./src/cui/');
+require('./src/daemon');

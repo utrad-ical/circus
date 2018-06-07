@@ -39,13 +39,13 @@ circus/dicom_voxel_dump:1.0
 ### Prepare Mongo Db
 - Create a db for cs-core in your mongoDb.
 - Edit `config/default.js`
-	- mongoURL
-- `$ node cui up` for creating collection of core queue system automatically.
+	- queue
+- `$ node cui up_queue_mongodb` for creating collection of core queue system automatically.
 
 ### Sample execution
 
 ```
-$ node cui check
+$ node cui check_env
 OK
 $ node cui register --pluginId=Lung-CAD --seriesUid=[seriesUID]
 $ node cui next

@@ -14,11 +14,15 @@ module.exports = {
 	"temporaryDirBase": "/tmp/circus",
 	"pluginConfigPath": path.join(__dirname, "plugins.yml"),
 	
-	"mongoURL": "mongodb://localhost:51081/cs_core",
+	"queue": {
+		"mongoURL": "mongodb://localhost:51081/cs_core",
+		"collectionTitle": "pluginJobQueue"
+	},
 	
-	// "webUI": {
-		// "mongoURL": "mongodb://localhost:51081/cs_web_ui"
-	// },
+	"WebUI": {
+		"mongoURL": "mongodb://localhost:51081/cs_web_ui",
+		"collectionTitle": "pluginJobs"
+	},
 	
 	// DICOM file repository is a loader that fetches the content of a DICOM file
 	// specified by a series instance UID and an image number.
@@ -38,6 +42,26 @@ module.exports = {
 		"dockerImage": "circus/dicom_voxel_dump:1.0",
 		"volumeIn": "/data/in",
 		"volumeOut": "/data/out"
+	},
+	
+	/**
+	 * Dequeue daemon settings (based on pm2)
+	 */
+	"daemon": {
+		// (pm2)
+		"script": "daemon.js",
+		
+		// (pm2) See interface StartOptions ( https://github.com/Unitech/pm2/blob/master/types/index.d.ts )
+		"startOptions": {
+			"name": "dequeue-daemon",
+			"cwd": path.join(__dirname, ".."),
+			"output": path.join(__dirname, "..", "logs", "pm2", "stdout"),
+			"error": path.join(__dirname, "..", "logs", "pm2", "stderr")
+			// env:
+		},
+		
+		"tick": 1000,
+		"waitOnFail": 60 * 1000
 	}
 
 	// // Logger configurations. By default, we make use of log4js library,

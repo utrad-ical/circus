@@ -1,20 +1,35 @@
 import * as fs from "fs";
 import * as path from "path";
 import { createHash } from "crypto";
-import { PluginJobRequest } from "./interface";
-import { isDir, mkDir, rmDir } from "./directory";
-import DicomFileRepository from "./dicom-file-repository/DicomFileRepository";
-import * as QueueSystem from "./queue";
-import { default as DockerRunner, DockerRunnerTimeout } from "./docker-runner";
-import { default as config, detectDicomeFileRepository } from "./config";
+import { PluginJobRequest } from "../interface";
+import { isDir, mkDir, rmDir } from "../util/directory";
+import DicomFileRepository from "../dicom-file-repository/DicomFileRepository";
+import detectDicomeFileRepository from "../dicom-file-repository/detect";
+import * as QueueSystem from "../queue";
+import {
+  default as DockerRunner,
+  DockerRunnerTimeout
+} from "../util/docker-runner";
+import config from "../config";
 
-const hook = require("./web-ui-hook");
+const hook = require("../web-ui-hooks");
+
+const logging = (
+  content: string,
+  queueItem: QueueSystem.Item<PluginJobRequest> | null = null
+) => {
+  console.log(content + "   : " + (queueItem ? queueItem._id : ""));
+};
 
 export default async function processNextJob(): Promise<boolean> {
   //  Get next item from queue.
   const queueItem: QueueSystem.Item<
     PluginJobRequest
   > | null = await QueueSystem.dequeue();
+
+  logging(
+    "Get next item from queue: " + (queueItem ? queueItem._id : "(none)")
+  );
   if (queueItem === null) return false;
 
   return processJob(queueItem);
@@ -24,13 +39,16 @@ export async function processJob(
   queueItem: QueueSystem.Item<PluginJobRequest>
 ): Promise<boolean> {
   try {
-    // 1. Mark "processing".
+    // 1. Mark queue item as "processing".
+    logging('Mark queue item as "processing".', queueItem);
     await QueueSystem.processing(queueItem);
 
-    // 2. Notice to webUI system, "processing".
+    // 2. Notice status "processing" to webUI system via hook.
+    logging('Notice status "processing" to webUI system via hook.', queueItem);
     if (hook.proccessing) await hook.proccessing(queueItem.jobId);
 
     // 3. Create some temporary directories.
+    logging("Create some temporary directories.", queueItem);
     var {
       tmpBaseDir,
       tmpDicomDir,
@@ -38,23 +56,36 @@ export async function processJob(
       tmpPluginOutputDir
     } = await createTemporaryDirectories(queueItem.jobId);
   } catch (e) {
+    logging("Error: " + e.message, queueItem);
+    // E. Mark queue item as "error".
     await QueueSystem.error(queueItem);
     return false;
   }
 
   try {
     //  4. Fetch DICOM data from repository into local temporary area.
-    // Todo: supports multiple serieses.
+    logging(
+      "Fetch DICOM data from repository into local temporary area.",
+      queueItem
+    );
     const payload: PluginJobRequest = queueItem.payload;
     const { series } = payload;
-    const [head] = series;
-    await fetchDICOMData(head.seriesUid, tmpDicomDir);
+    const fetches: Promise<any>[] = [];
+    for (let i = 0; i < series.length; i++) {
+      fetches.push(fetchDICOMData(series[i].seriesUid, tmpDicomDir, i));
+    }
+    await Promise.all(fetches);
 
     //  5. Parse the DICOM data to raw volume file and a few meta files.
+    logging(
+      "Parse the DICOM data to raw volume file and a few meta files.",
+      queueItem
+    );
     await parseDICOMData(tmpDicomDir, tmpPluginInputDir);
 
-    //  7. Execute plugin process.
+    //  6. Execute plugin process.
     //  And observing to handle timeout, other unexpected errors.
+    logging("Execute plugin process.", queueItem);
     try {
       var pluginStdout = await executePlugin(
         payload.pluginId,
@@ -77,7 +108,8 @@ export async function processJob(
       throw e;
     }
 
-    // 10. Validate the result.
+    // 7. Validate the result.
+    logging("Validate the result.", queueItem);
     try {
       validatePluginExecutionResult(
         queueItem.jobId,
@@ -97,7 +129,8 @@ export async function processJob(
       throw e;
     }
 
-    // 11. Process the result.
+    // 8. Process the result.
+    logging("Process the result.", queueItem);
     // Notice status "finished" to webUI system and register some result at the same time.
     // Other results (like output files) put to ... ?
     if (hook.finished)
@@ -108,14 +141,18 @@ export async function processJob(
         tmpPluginOutputDir
       );
 
-    // 13. Update queue state to "done"
+    // 9. Mark queue item as "done".
+    logging('Mark queue item as "done".', queueItem);
     await QueueSystem.done(queueItem);
     return true;
   } catch (e) {
+    logging("Error: " + e.message, queueItem);
+    // E. Mark queue item as "error".
     await QueueSystem.error(queueItem);
     return false;
   } finally {
-    // 12. Clean up temporary directories.
+    // 10. Clean up temporary directories.
+    logging("Clean up temporary directories.", queueItem);
     await rmDir(tmpBaseDir);
   }
 }
@@ -158,9 +195,15 @@ export async function createTemporaryDirectories(
 
 export async function fetchDICOMData(
   seriesUid: string,
-  storeDir: string
+  storeDir: string,
+  index: number
 ): Promise<void> {
-  const repository: DicomFileRepository = detectDicomeFileRepository();
+  // Todo: supports multiple serieses.
+  if (index !== 0) return Promise.resolve();
+
+  const repository: DicomFileRepository = detectDicomeFileRepository(
+    config.dicomFileRepository
+  );
 
   if (!await isDir(storeDir))
     throw new Error(`Dicrectory: ${storeDir} is not exists.`);

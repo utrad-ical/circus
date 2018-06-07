@@ -7,30 +7,41 @@ let exec: boolean = true;
 
 process.on("SIGINT", function() {
   console.log("signal SIGINT");
-  console.log(new Date().toISOString() + " Dequeue daemon will be stopped on next dequeue.");
+  console.log(
+    new Date().toISOString() +
+      " Dequeue daemon will be stopped on next dequeue."
+  );
   exec = false;
 });
 
 export async function main(): Promise<void> {
-  console.log(new Date().toISOString() + " Dequeue daemon started.");
-  
-  while (exec) {
-    console.log(new Date().toISOString() + " " + "Next");
+  console.log(
+    new Date().toISOString() + " Dequeue daemon started. pid:" + process.pid
+  );
 
+  let lastIsEmpty = false;
+  do {
     try {
       const result = await processNextJob();
-      console.log(new Date().toISOString() + " " + (result ? "OK" : "FAILED"));
+      if (result === null) {
+        if (!lastIsEmpty)
+          console.log(new Date().toISOString() + " Queue empty");
+        lastIsEmpty = true;
+      } else {
+        lastIsEmpty = false;
+        console.log(
+          new Date().toISOString() + (result ? " Succeeded" : " Failed")
+        );
 
-      if (!result && waitOnFail && exec) {
-        console.log(new Date().toISOString() + " Sleep result: false");
-        await (() => new Promise((a, b) => setTimeout(a, waitOnFail)))();
+        if (!result && waitOnFail && exec)
+          await (() => new Promise((a, b) => setTimeout(a, waitOnFail)))();
       }
     } catch (e) {
-      console.error(new Date().toISOString() + " ERROR " + e.message);
+      console.error(new Date().toISOString() + " Fatal " + e.message);
     }
 
     await (() => new Promise((a, b) => setTimeout(a, tick)))();
-  }
+  } while (exec);
 
   console.log(new Date().toISOString() + " Dequeue daemon stopped.");
 
@@ -38,20 +49,3 @@ export async function main(): Promise<void> {
 }
 
 main();
-
-/*
-// start
-var http = require('http');
-var app = http.createServer(function(req, res) {
-  res.writeHead(200);
-  res.end('hey');
-})
-var listener = app.listen(0, function() {
-  console.log('Listening on port ' + listener.address().port);
-  // Here we send the ready signal to PM2
-  process.send('ready');
-});
-
-
-// stop
-*/

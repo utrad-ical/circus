@@ -4,7 +4,7 @@ import config from "./config";
 import * as path from "path";
 import * as fs from "fs-extra";
 
-const { mongoURL, collectionTitle } = config.WebUI;
+const { mongoURL, collectionTitle, resultDir } = config.WebUI;
 
 export async function inQueue(jobId: string): Promise<void> {
   console.log("Notice inQueue");
@@ -43,7 +43,7 @@ export async function finished(
   tmpPluginInputDir: string,
   tmpPluginOutputDir: string
 ): Promise<void> {
-  const baseDir = "/tmp/circus/results/" + jobId;
+  const baseDir = path.join(resultDir, jobId);
   console.log("Notice finished #" + jobId);
   console.log("  >> result: " + baseDir);
 

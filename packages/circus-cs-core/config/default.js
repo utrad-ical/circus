@@ -11,7 +11,7 @@
 var path = require('path');
 
 module.exports = {
-	"temporaryDirBase": "/tmp/circus",
+	"temporaryDirBase": path.join(__dirname, "..", "tmp", "proc"),
 	"pluginConfigPath": path.join(__dirname, "plugins.yml"),
 	
 	"queue": {
@@ -21,7 +21,8 @@ module.exports = {
 	
 	"WebUI": {
 		"mongoURL": "mongodb://localhost:51081/cs_web_ui",
-		"collectionTitle": "pluginJobs"
+		"collectionTitle": "pluginJobs",
+		"resultDir": path.join(__dirname, "..", "tmp", "result")
 	},
 	
 	// DICOM file repository is a loader that fetches the content of a DICOM file
@@ -55,8 +56,8 @@ module.exports = {
 		"startOptions": {
 			"name": "dequeue-daemon",
 			"cwd": path.join(__dirname, ".."),
-			"output": path.join(__dirname, "..", "logs", "pm2", "stdout"),
-			"error": path.join(__dirname, "..", "logs", "pm2", "stderr")
+			"output": path.join(__dirname, "..", "logs", "daemon-pm2-output.log"),
+			"error": path.join(__dirname, "..", "logs", "daemon-pm2-error.log")
 			// env:
 		},
 		

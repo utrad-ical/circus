@@ -18,19 +18,17 @@ const logging = (
   content: string,
   queueItem: QueueSystem.Item<PluginJobRequest> | null = null
 ) => {
-  console.log(content + "   : " + (queueItem ? queueItem._id : ""));
+  console.log("    - " + (queueItem ? queueItem._id : "") + ": " + content);
 };
 
-export default async function processNextJob(): Promise<boolean> {
+export default async function processNextJob(): Promise<boolean | null> {
   //  Get next item from queue.
   const queueItem: QueueSystem.Item<
     PluginJobRequest
   > | null = await QueueSystem.dequeue();
 
-  logging(
-    "Get next item from queue: " + (queueItem ? queueItem._id : "(none)")
-  );
-  if (queueItem === null) return false;
+  if (queueItem === null) return null;
+  logging("Dequeued", queueItem);
 
   return processJob(queueItem);
 }

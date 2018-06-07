@@ -1,3 +1,4 @@
 /node_modules/
 /docker_images/
 /logs/
+/tmp/

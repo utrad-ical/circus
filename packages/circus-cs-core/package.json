@@ -25,7 +25,9 @@
     "tslib": "^1.9.2",
     "typescript": "^2.9.1"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "prettier": "^1.13.5"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -38,5 +40,8 @@
   "bugs": {
     "url": "https://github.com/utrad-ical/circus-cs-core/issues"
   },
-  "homepage": "https://github.com/utrad-ical/circus-cs-core#readme"
+  "homepage": "https://github.com/utrad-ical/circus-cs-core#readme",
+  "prettier": {
+    "singleQuote": true
+  }
 }

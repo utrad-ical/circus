@@ -1,8 +1,8 @@
-import * as aapm2 from "../util/aapm2";
-import config from "../config";
+import * as aapm2 from '../util/aapm2';
+import config from '../config';
 
 const { script, startOptions = {} } = config.daemon;
-startOptions.name = startOptions.name || "cs-core-dequeue-daemon";
+startOptions.name = startOptions.name || 'cs-core-dequeue-daemon';
 
 export async function start(): Promise<void> {
   // Connect to pm2
@@ -15,7 +15,7 @@ export async function start(): Promise<void> {
   try {
     // Check already running.
     const processList = await aapm2.describe(startOptions.name);
-    if (0 < processList.length) throw Error("Already running");
+    if (0 < processList.length) throw Error('Already running');
 
     // Start daemon
     await aapm2.start(script, startOptions);
@@ -37,7 +37,7 @@ export async function stop(): Promise<void> {
   try {
     // Check running.
     const processList = await aapm2.describe(startOptions.name);
-    if (0 === processList.length) throw Error("Not running");
+    if (0 === processList.length) throw Error('Not running');
 
     // Stop and remove
     await aapm2.delete(startOptions.name);
@@ -48,7 +48,7 @@ export async function stop(): Promise<void> {
   }
 }
 
-export async function status(): Promise<"running" | "stopped"> {
+export async function status(): Promise<'running' | 'stopped'> {
   // Connect to pm2
   try {
     await aapm2.connect();
@@ -60,7 +60,7 @@ export async function status(): Promise<"running" | "stopped"> {
     // Check running.
     const processList = await aapm2.describe(startOptions.name);
 
-    return 0 < processList.length ? "running" : "stopped";
+    return 0 < processList.length ? 'running' : 'stopped';
   } catch (e) {
     throw e;
   } finally {

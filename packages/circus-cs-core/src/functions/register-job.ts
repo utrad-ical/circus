@@ -1,5 +1,5 @@
-import { PluginJobRequest as Payload } from "../interface";
-import * as QueueSystem from "../queue";
+import { PluginJobRequest as Payload } from '../interface';
+import * as QueueSystem from '../queue';
 
 // Todo: check if plugin exists?
 // Todo: check if series exists?

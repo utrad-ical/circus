@@ -1,10 +1,10 @@
-import * as minimist from "minimist";
-import register from "./register";
-import next from "./next";
-import list_queue from "./list_queue";
-import up_queue_mongodb from "./up_queue_mongodb";
-import check_env from "./check_env";
-import { start, stop, status, pm2list, pm2killall } from "./daemon";
+import * as minimist from 'minimist';
+import register from './register';
+import next from './next';
+import list_queue from './list_queue';
+import up_queue_mongodb from './up_queue_mongodb';
+import check_env from './check_env';
+import { start, stop, status, pm2list, pm2killall } from './daemon';
 
 const functionCollection: any = {
   register,
@@ -34,8 +34,8 @@ async function main() {
   } else if (command) {
     console.error('"' + command + '" is not supported.');
   } else {
-    console.error("Which function you want to execute?");
-    Object.keys(functionCollection).forEach(i => console.log(" - " + i));
+    console.error('Which function you want to execute?');
+    Object.keys(functionCollection).forEach(i => console.log(' - ' + i));
   }
 }
 

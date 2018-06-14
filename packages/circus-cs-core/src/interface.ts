@@ -13,9 +13,9 @@ export type JobSeries = {
 };
 
 export type JobState =
-  | "in_queue"
-  | "processing"
-  | "finished"
-  | "failed"
-  | "invalidated"
-  | "cancelled";
+  | 'in_queue'
+  | 'processing'
+  | 'finished'
+  | 'failed'
+  | 'invalidated'
+  | 'cancelled';

@@ -10,9 +10,9 @@
  *     - timeouted
  *     - (statechange may be supportted ...?)
  */
-import { EventEmitter } from "events";
-import * as Dockerode from "dockerode";
-import * as memory from "memory-streams";
+import { EventEmitter } from 'events';
+import * as Dockerode from 'dockerode';
+import * as memory from 'memory-streams';
 
 export default class DockerRunner extends EventEmitter {
   private dockerOptions: Dockerode.DockerOptions;
@@ -37,7 +37,7 @@ export default class DockerRunner extends EventEmitter {
     const docker = new Dockerode(this.dockerOptions);
 
     const container = await docker.createContainer(createOptions);
-    this.emit("container", container);
+    this.emit('container', container);
 
     const stdoutInContainer = await container.attach({
       stream: true,
@@ -46,10 +46,10 @@ export default class DockerRunner extends EventEmitter {
     });
     const stream = new memory.WritableStream();
     stdoutInContainer.pipe(stream);
-    this.emit("attached", stdoutInContainer);
+    this.emit('attached', stdoutInContainer);
 
     /* not async */ container.start().then(() => {
-      this.emit("started", container);
+      this.emit('started', container);
     });
 
     const startTime: number = Number(new Date().getTime());
@@ -57,18 +57,18 @@ export default class DockerRunner extends EventEmitter {
       let state;
       try {
         state = (await container.inspect()).State;
-        this.emit("inspected", state);
+        this.emit('inspected', state);
 
-        if (state.Status === "exited") {
-          this.emit("exited", state);
+        if (state.Status === 'exited') {
+          this.emit('exited', state);
 
           await container.remove();
-          this.emit("removed", container);
+          this.emit('removed', container);
 
           break;
         }
       } catch (e) {
-        this.emit("disappeared", container);
+        this.emit('disappeared', container);
         break;
       }
 
@@ -77,7 +77,7 @@ export default class DockerRunner extends EventEmitter {
         this.timeout !== null &&
         new Date().getTime() > startTime + this.timeout
       ) {
-        this.emit("timeouted", state);
+        this.emit('timeouted', state);
 
         try {
           await container.stop();
@@ -97,7 +97,7 @@ export default class DockerRunner extends EventEmitter {
   }
 
   sleep(millSeconds?: number) {
-    if (typeof millSeconds === "undefined") millSeconds = this.tick;
+    if (typeof millSeconds === 'undefined') millSeconds = this.tick;
 
     return new Promise((resolve, reject) =>
       setTimeout(() => {
@@ -112,7 +112,7 @@ export class DockerRunnerTimeout /* extends Exception? Error? Throwable? ...or s
   public message: string;
   public previous: any;
 
-  constructor(message: string, code: string = "", previous?: any) {
+  constructor(message: string, code: string = '', previous?: any) {
     this.message = message;
     this.code = code;
     this.previous = previous;

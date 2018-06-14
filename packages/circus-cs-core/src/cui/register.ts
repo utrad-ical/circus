@@ -1,33 +1,33 @@
-import * as ajv from "ajv";
-import registerJob from "../functions/register-job";
+import * as ajv from 'ajv';
+import registerJob from '../functions/register-job';
 
 const argumentsSchema = {
-  type: "object",
+  type: 'object',
   properties: {
     jobId: {
-      type: "string"
+      type: 'string'
     },
     pluginId: {
-      type: "string"
+      type: 'string'
     },
     seriesUid: {
-      type: "string"
+      type: 'string'
     },
     environment: {
-      type: "string"
+      type: 'string'
     },
     priority: {
-      type: "number"
+      type: 'number'
     }
   },
-  required: ["pluginId", "seriesUid"]
+  required: ['pluginId', 'seriesUid']
 };
 
 export default async function register(argv: any) {
   const argCheck = new ajv().compile(argumentsSchema)(argv);
 
   if (!argCheck) {
-    console.error("Argument is something wrong.");
+    console.error('Argument is something wrong.');
     process.exit(1);
   }
 

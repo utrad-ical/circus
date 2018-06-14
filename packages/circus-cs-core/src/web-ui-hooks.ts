@@ -1,21 +1,21 @@
-import { MongoClient } from "mongodb";
+import { MongoClient } from 'mongodb';
 
-import config from "./config";
-import * as path from "path";
-import * as fs from "fs-extra";
+import config from './config';
+import * as path from 'path';
+import * as fs from 'fs-extra';
 
 const { mongoURL, collectionTitle, resultDir } = config.WebUI;
 
 export async function inQueue(jobId: string): Promise<void> {
-  console.log("Notice inQueue");
+  console.log('Notice inQueue');
 }
 
 export async function proccessing(jobId: string): Promise<void> {
-  console.log("Notice proccessing");
+  console.log('Notice proccessing');
 }
 
 export async function timeout(jobId: string): Promise<void> {
-  console.log("Notice timeout");
+  console.log('Notice timeout');
 }
 
 export async function failed(
@@ -24,7 +24,7 @@ export async function failed(
   tmpPluginInputDir: string,
   tmpPluginOutputDir: string
 ): Promise<void> {
-  console.log("Notice failed");
+  console.log('Notice failed');
 }
 
 export async function invalidated(
@@ -34,7 +34,7 @@ export async function invalidated(
   tmpPluginOutputDir: string,
   e: any
 ): Promise<void> {
-  console.log("Notice invalidated");
+  console.log('Notice invalidated');
 }
 
 export async function finished(
@@ -44,20 +44,20 @@ export async function finished(
   tmpPluginOutputDir: string
 ): Promise<void> {
   const baseDir = path.join(resultDir, jobId);
-  console.log("Notice finished #" + jobId);
-  console.log("  >> result: " + baseDir);
+  console.log('Notice finished #' + jobId);
+  console.log('  >> result: ' + baseDir);
 
   try {
     await fs.mkdirs(baseDir);
-    await fs.copy(path.join(tmpPluginOutputDir, ".."), baseDir);
-    await fs.writeFile(path.join(baseDir, "stdout.txt"), result);
+    await fs.copy(path.join(tmpPluginOutputDir, '..'), baseDir);
+    await fs.writeFile(path.join(baseDir, 'stdout.txt'), result);
   } catch (e) {
-    console.error("  >> error: " + e.message);
+    console.error('  >> error: ' + e.message);
   }
 }
 
 export async function cancelled(jobId: string): Promise<void> {
-  console.log("Notice cancelled");
+  console.log('Notice cancelled');
 }
 
 /**
@@ -72,7 +72,7 @@ async function update(jobId: string, $set: any): Promise<void> {
       .collection(collectionTitle)
       .findOneAndUpdate({ jobId }, { $set });
 
-    if (value === null) throw new Error("Corresponded document is not exists.");
+    if (value === null) throw new Error('Corresponded document is not exists.');
 
     return value; // before update value.
   } catch (e) {

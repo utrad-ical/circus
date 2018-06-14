@@ -1,24 +1,24 @@
-import * as fs from "fs";
-import * as path from "path";
-import { createHash } from "crypto";
-import { PluginJobRequest } from "../interface";
-import { isDir, mkDir, rmDir } from "../util/directory";
-import DicomFileRepository from "../dicom-file-repository/DicomFileRepository";
-import detectDicomeFileRepository from "../dicom-file-repository/detect";
-import * as QueueSystem from "../queue";
+import * as fs from 'fs';
+import * as path from 'path';
+import { createHash } from 'crypto';
+import { PluginJobRequest } from '../interface';
+import { isDir, mkDir, rmDir } from '../util/directory';
+import DicomFileRepository from '../dicom-file-repository/DicomFileRepository';
+import detectDicomeFileRepository from '../dicom-file-repository/detect';
+import * as QueueSystem from '../queue';
 import {
   default as DockerRunner,
   DockerRunnerTimeout
-} from "../util/docker-runner";
-import config from "../config";
+} from '../util/docker-runner';
+import config from '../config';
 
-const hook = require("../web-ui-hooks");
+const hook = require('../web-ui-hooks');
 
 const logging = (
   content: string,
   queueItem: QueueSystem.Item<PluginJobRequest> | null = null
 ) => {
-  console.log("    - " + (queueItem ? queueItem._id : "") + ": " + content);
+  console.log('    - ' + (queueItem ? queueItem._id : '') + ': ' + content);
 };
 
 export default async function processNextJob(): Promise<boolean | null> {
@@ -28,7 +28,7 @@ export default async function processNextJob(): Promise<boolean | null> {
   > | null = await QueueSystem.dequeue();
 
   if (queueItem === null) return null;
-  logging("Dequeued", queueItem);
+  logging('Dequeued', queueItem);
 
   return processJob(queueItem);
 }
@@ -46,7 +46,7 @@ export async function processJob(
     if (hook.proccessing) await hook.proccessing(queueItem.jobId);
 
     // 3. Create some temporary directories.
-    logging("Create some temporary directories.", queueItem);
+    logging('Create some temporary directories.', queueItem);
     var {
       tmpBaseDir,
       tmpDicomDir,
@@ -54,7 +54,7 @@ export async function processJob(
       tmpPluginOutputDir
     } = await createTemporaryDirectories(queueItem.jobId);
   } catch (e) {
-    logging("Error: " + e.message, queueItem);
+    logging('Error: ' + e.message, queueItem);
     // E. Mark queue item as "error".
     await QueueSystem.error(queueItem);
     return false;
@@ -63,7 +63,7 @@ export async function processJob(
   try {
     //  4. Fetch DICOM data from repository into local temporary area.
     logging(
-      "Fetch DICOM data from repository into local temporary area.",
+      'Fetch DICOM data from repository into local temporary area.',
       queueItem
     );
     const payload: PluginJobRequest = queueItem.payload;
@@ -76,14 +76,14 @@ export async function processJob(
 
     //  5. Parse the DICOM data to raw volume file and a few meta files.
     logging(
-      "Parse the DICOM data to raw volume file and a few meta files.",
+      'Parse the DICOM data to raw volume file and a few meta files.',
       queueItem
     );
     await parseDICOMData(tmpDicomDir, tmpPluginInputDir);
 
     //  6. Execute plugin process.
     //  And observing to handle timeout, other unexpected errors.
-    logging("Execute plugin process.", queueItem);
+    logging('Execute plugin process.', queueItem);
     try {
       var pluginStdout = await executePlugin(
         payload.pluginId,
@@ -107,7 +107,7 @@ export async function processJob(
     }
 
     // 7. Validate the result.
-    logging("Validate the result.", queueItem);
+    logging('Validate the result.', queueItem);
     try {
       validatePluginExecutionResult(
         queueItem.jobId,
@@ -128,7 +128,7 @@ export async function processJob(
     }
 
     // 8. Process the result.
-    logging("Process the result.", queueItem);
+    logging('Process the result.', queueItem);
     // Notice status "finished" to webUI system and register some result at the same time.
     // Other results (like output files) put to ... ?
     if (hook.finished)
@@ -144,13 +144,13 @@ export async function processJob(
     await QueueSystem.done(queueItem);
     return true;
   } catch (e) {
-    logging("Error: " + e.message, queueItem);
+    logging('Error: ' + e.message, queueItem);
     // E. Mark queue item as "error".
     await QueueSystem.error(queueItem);
     return false;
   } finally {
     // 10. Clean up temporary directories.
-    logging("Clean up temporary directories.", queueItem);
+    logging('Clean up temporary directories.', queueItem);
     await rmDir(tmpBaseDir);
   }
 }
@@ -164,21 +164,21 @@ export async function createTemporaryDirectories(
   tmpPluginOutputDir: string;
 }> {
   const directoryName = (_ => {
-    return createHash("md5")
+    return createHash('md5')
       .update(_)
-      .digest("hex");
+      .digest('hex');
   })(jobId);
   const tmpBaseDir = path.join(config.temporaryDirBase, directoryName);
-  const tmpDicomDir = path.join(config.temporaryDirBase, directoryName, "dcm");
+  const tmpDicomDir = path.join(config.temporaryDirBase, directoryName, 'dcm');
   const tmpPluginInputDir = path.join(
     config.temporaryDirBase,
     directoryName,
-    "in"
+    'in'
   );
   const tmpPluginOutputDir = path.join(
     config.temporaryDirBase,
     directoryName,
-    "out"
+    'out'
   );
 
   await mkDir(tmpBaseDir);
@@ -203,13 +203,13 @@ export async function fetchDICOMData(
     config.dicomFileRepository
   );
 
-  if (!await isDir(storeDir))
+  if (!(await isDir(storeDir)))
     throw new Error(`Dicrectory: ${storeDir} is not exists.`);
 
   const { seriesLoader, count } = await repository.getSeriesLoader(seriesUid);
 
   const save = (num: number) => {
-    const filename = ("00000000" + num.toString()).slice(-8);
+    const filename = ('00000000' + num.toString()).slice(-8);
     return new Promise((resolve, reject) => {
       seriesLoader(num).then((buffer: ArrayBuffer) =>
         fs.writeFile(`${storeDir}/${filename}.dcm`, new Buffer(buffer), err => {
@@ -232,10 +232,10 @@ export async function parseDICOMData(
 ): Promise<[number, number, number]> {
   const { socketPath } = config.docker;
 
-  if (!await isDir(srcDir))
+  if (!(await isDir(srcDir)))
     throw new Error(`Dicrectory: ${srcDir} is not exists.`);
 
-  if (!await isDir(destDir))
+  if (!(await isDir(destDir)))
     throw new Error(`Dicrectory: ${destDir} is not exists.`);
 
   const { dockerImage, volumeIn, volumeOut } = config.dicomDumpOptions;
@@ -270,17 +270,17 @@ export async function executePlugin(
   if (!(pluginId in pluginConfig))
     throw new Error(`Plugin: ${pluginId} is not defined.`);
 
-  if (!await isDir(srcDir))
+  if (!(await isDir(srcDir)))
     throw new Error(`Dicrectory: ${srcDir} is not exists.`);
 
-  if (!await isDir(destDir))
+  if (!(await isDir(destDir)))
     throw new Error(`Dicrectory: ${destDir} is not exists.`);
 
   const {
     dockerImage,
     binds = {
-      in: "/circus/in",
-      out: "/circus/out"
+      in: '/circus/in',
+      out: '/circus/out'
     },
     maxExecutionSeconds = 360
   } = pluginConfig[pluginId];

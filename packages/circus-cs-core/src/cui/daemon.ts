@@ -1,13 +1,13 @@
-import * as daemon from "../functions/daemon-ctl";
+import * as daemon from '../functions/daemon-ctl';
 
 export async function start(argv: any) {
   await wrap(daemon.start);
-  console.log("Started");
+  console.log('Started');
 }
 
 export async function stop(argv: any) {
   await wrap(daemon.stop);
-  console.log("Stopped");
+  console.log('Stopped');
 }
 
 export async function status(argv: any) {
@@ -20,7 +20,7 @@ export async function pm2list(argv: any) {
 
 export async function pm2killall(argv: any) {
   await wrap(daemon.pm2killall);
-  console.log("OK");
+  console.log('OK');
 }
 
 async function wrap(func: Function) {

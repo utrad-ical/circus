@@ -1,29 +1,29 @@
-import * as ajv from "ajv";
-import listQueue from "../functions/list-queue";
-import { QueueState } from "../queue";
+import * as ajv from 'ajv';
+import listQueue from '../functions/list-queue';
+import { QueueState } from '../queue';
 
 const argumentsSchema = {
-  type: "object",
+  type: 'object',
   properties: {
     w: {
       // wait (default)
-      type: "boolean"
+      type: 'boolean'
     },
     p: {
       // processing
-      type: "boolean"
+      type: 'boolean'
     },
     e: {
       // error
-      type: "boolean"
+      type: 'boolean'
     },
     d: {
       // done
-      type: "boolean"
+      type: 'boolean'
     },
     a: {
       // all
-      type: "boolean"
+      type: 'boolean'
     }
   }
 };
@@ -32,27 +32,27 @@ export default async function list_queue(argv: any) {
   const argCheck = new ajv().compile(argumentsSchema)(argv);
 
   if (!argCheck) {
-    console.error("Argument is something wrong.");
+    console.error('Argument is something wrong.');
     process.exit(1);
   }
 
-  let state: QueueState | "all";
+  let state: QueueState | 'all';
   switch (true) {
     case argv.a:
-      state = "all";
+      state = 'all';
       break;
     case argv.p:
-      state = "processing";
+      state = 'processing';
       break;
     case argv.d:
-      state = "done";
+      state = 'done';
       break;
     case argv.e:
-      state = "error";
+      state = 'error';
       break;
     case argv.w:
     default:
-      state = "wait";
+      state = 'wait';
       break;
   }
 

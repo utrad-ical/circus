@@ -1,15 +1,15 @@
-import * as ajv from "ajv";
-import processNextJob from "../functions/process-next-job";
+import * as ajv from 'ajv';
+import processNextJob from '../functions/process-next-job';
 
 const argumentsSchema = {
-  type: "object"
+  type: 'object'
 };
 
 export default async function next(argv: any) {
   const argCheck = new ajv().compile(argumentsSchema)(argv);
 
   if (!argCheck) {
-    console.error("Argument is something wrong.");
+    console.error('Argument is something wrong.');
     process.exit(1);
   }
 

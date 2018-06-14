@@ -6,7 +6,7 @@ export default function detect(descriptor: { module: string; options: any }) {
     loadPath = descriptor.module;
   } else {
     // Load built-in modules
-    loadPath = __dirname + "/" + descriptor.module;
+    loadPath = __dirname + '/' + descriptor.module;
   }
   let repositoryClass = require(loadPath).default;
   return new repositoryClass(descriptor.options || {});

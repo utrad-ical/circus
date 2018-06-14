@@ -1,5 +1,5 @@
-import * as fs from "fs";
-import * as rimraf from "rimraf";
+import * as fs from 'fs';
+import * as rimraf from 'rimraf';
 
 export function isDir(dir: string): Promise<boolean> {
   return new Promise((resolve, reject) => {

@@ -1,4 +1,4 @@
-import * as pm2 from "pm2";
+import * as pm2 from 'pm2';
 
 export interface ProcessDescription extends pm2.ProcessDescription {}
 export interface StartOptions extends pm2.StartOptions {}

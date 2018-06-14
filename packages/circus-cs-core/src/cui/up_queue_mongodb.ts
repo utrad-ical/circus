@@ -1,8 +1,8 @@
-import * as ajv from "ajv";
-import { MongoClient } from "mongodb";
-import config from "../config";
+import * as ajv from 'ajv';
+import { MongoClient } from 'mongodb';
+import config from '../config';
 const argumentsSchema = {
-  type: "object"
+  type: 'object'
 };
 
 const { mongoURL, collectionTitle } = config.queue;
@@ -11,7 +11,7 @@ export default async function up_queue_mongodb(argv: any) {
   const argCheck = new ajv().compile(argumentsSchema)(argv);
 
   if (!argCheck) {
-    console.error("Argument is something wrong.");
+    console.error('Argument is something wrong.');
     process.exit(1);
   }
 
@@ -22,7 +22,7 @@ export default async function up_queue_mongodb(argv: any) {
     process.exit(1);
   }
 
-  console.log("Collection created: " + collectionTitle);
+  console.log('Collection created: ' + collectionTitle);
 }
 
 async function setup(): Promise<void> {

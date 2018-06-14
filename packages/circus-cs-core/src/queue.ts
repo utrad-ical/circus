@@ -1,10 +1,10 @@
-import { MongoClient } from "mongodb";
-import { PluginJobRequest as Payload } from "./interface";
-import config from "./config";
+import { MongoClient } from 'mongodb';
+import { PluginJobRequest as Payload } from './interface';
+import config from './config';
 
 const { mongoURL, collectionTitle } = config.queue;
 
-export type QueueState = "wait" | "processing" | "done" | "error";
+export type QueueState = 'wait' | 'processing' | 'done' | 'error';
 
 export type Item<Payload> = {
   _id?: string;
@@ -29,7 +29,7 @@ export /* but no meaning... */ async function createItem(
     jobId,
     payload,
     priority,
-    state: "wait"
+    state: 'wait'
   };
   return queueItem;
 }
@@ -38,7 +38,7 @@ export /* but no meaning... */ async function createItem(
  * Create queue item from payload object
  */
 export async function list(
-  state: QueueState | "all" = "wait"
+  state: QueueState | 'all' = 'wait'
 ): Promise<Item<Payload>[]> {
   const connection: MongoClient | null = await MongoClient.connect(mongoURL);
 
@@ -48,7 +48,7 @@ export async function list(
       documentset = await connection
         .db()
         .collection(collectionTitle)
-        .find<Item<Payload>>(state === "all" ? {} : { state }, {
+        .find<Item<Payload>>(state === 'all' ? {} : { state }, {
           sort: { priority: -1, _id: 1 }
         })
         .toArray();
@@ -93,7 +93,7 @@ export async function dequeue(): Promise<Item<Payload> | null> {
         .db()
         .collection(collectionTitle)
         .findOne<Item<Payload>>(
-          { state: "wait" },
+          { state: 'wait' },
           { sort: { priority: -1, _id: 1 }, limit: 1 }
         );
     } catch (e) {
@@ -119,17 +119,17 @@ export async function processing(queueItem: Item<Payload>): Promise<void> {
       .findOneAndUpdate(
         {
           _id: queueItem._id,
-          state: "wait"
+          state: 'wait'
         },
         {
           $set: {
-            state: "processing",
+            state: 'processing',
             beginAt: new Date().toISOString()
           }
         }
       );
 
-    if (value === null) throw new Error("Queue item status error.");
+    if (value === null) throw new Error('Queue item status error.');
   } catch (e) {
     throw e;
   } finally {
@@ -147,17 +147,17 @@ export async function done(queueItem: Item<Payload>): Promise<void> {
       .findOneAndUpdate(
         {
           _id: queueItem._id,
-          state: "processing"
+          state: 'processing'
         },
         {
           $set: {
-            state: "done",
+            state: 'done',
             finishedAt: new Date().toISOString()
           }
         }
       );
 
-    if (value === null) throw new Error("Queue item status error.");
+    if (value === null) throw new Error('Queue item status error.');
   } catch (e) {
     throw e;
   } finally {
@@ -178,13 +178,13 @@ export async function error(queueItem: Item<Payload>): Promise<void> {
         },
         {
           $set: {
-            state: "error",
+            state: 'error',
             finishedAt: new Date().toISOString()
           }
         }
       );
 
-    if (value === null) throw new Error("Queue item status error.");
+    if (value === null) throw new Error('Queue item status error.');
   } catch (e) {
     throw e;
   } finally {

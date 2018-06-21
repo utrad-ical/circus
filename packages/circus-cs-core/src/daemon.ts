@@ -1,3 +1,9 @@
+/**
+ * This is a main job manager which contains the main loop.
+ * This program is not to meant to be invoked directly.
+ * @module
+ */
+
 import processNextJob from './functions/process-next-job';
 import config from './config';
 

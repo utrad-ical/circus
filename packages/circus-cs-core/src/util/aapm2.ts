@@ -1,3 +1,8 @@
+/**
+ * Exports the promisified versions of pm2 functions.
+ * @module
+ */
+
 import * as pm2 from 'pm2';
 
 export interface ProcessDescription extends pm2.ProcessDescription {}
@@ -24,7 +29,7 @@ export function disconnect(): Promise<void> {
   });
 }
 
-// pm2.start ( script, options, errback: ErrCallback )
+// pm2.start (script, options, errback: ErrCallback)
 // >>> Raise error if already started.
 export function start(script: string, options: StartOptions): Promise<void> {
   return new Promise((resolve, reject) => {

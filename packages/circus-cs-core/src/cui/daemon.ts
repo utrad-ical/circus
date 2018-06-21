@@ -1,29 +1,29 @@
 import * as daemon from '../functions/daemon-ctl';
 
 export async function start(argv: any) {
-  await wrap(daemon.start);
+  await callAndCatch(daemon.start);
   console.log('Started');
 }
 
 export async function stop(argv: any) {
-  await wrap(daemon.stop);
+  await callAndCatch(daemon.stop);
   console.log('Stopped');
 }
 
 export async function status(argv: any) {
-  await wrap(daemon.status);
+  await callAndCatch(daemon.status);
 }
 
 export async function pm2list(argv: any) {
-  await wrap(daemon.pm2list);
+  await callAndCatch(daemon.pm2list);
 }
 
 export async function pm2killall(argv: any) {
-  await wrap(daemon.pm2killall);
+  await callAndCatch(daemon.pm2killall);
   console.log('OK');
 }
 
-async function wrap(func: Function) {
+async function callAndCatch(func: Function) {
   try {
     const result = await func();
     if (result) console.log(result);

@@ -13,7 +13,7 @@ export type Item<T> = {
   payload: T;
   state: QueueState;
   queuedAt?: string;
-  beginAt?: string;
+  startedAt?: string;
   finishedAt?: string;
 };
 
@@ -122,7 +122,7 @@ export async function processing(queueItem: Item<Payload>): Promise<void> {
         {
           $set: {
             state: 'processing',
-            beginAt: new Date().toISOString()
+            startedAt: new Date().toISOString()
           }
         }
       );

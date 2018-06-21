@@ -1,16 +1,16 @@
 import { MongoClient } from 'mongodb';
-import { PluginJobRequest as Payload } from './interface';
-import config from './config';
+import { PluginJobRequest as Payload } from '../interface';
+import config from '../config';
 
 const { mongoURL, collectionTitle } = config.queue;
 
 export type QueueState = 'wait' | 'processing' | 'done' | 'error';
 
-export type Item<Payload> = {
+export type Item<T> = {
   _id?: string;
   jobId: string;
   priority: number;
-  payload: Payload;
+  payload: T;
   state: QueueState;
   queuedAt?: string;
   beginAt?: string;
@@ -64,7 +64,6 @@ export async function list(
 /**
  * Basic queue functions
  */
-
 export async function enqueue(queueItem: Item<Payload>): Promise<string> {
   queueItem.queuedAt = new Date().toISOString();
 

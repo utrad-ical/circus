@@ -1,6 +1,6 @@
 import * as ajv from 'ajv';
 import listQueue from '../functions/list-queue';
-import { QueueState } from '../queue';
+import { QueueState } from '../queue/queue';
 
 const argumentsSchema = {
   type: 'object',

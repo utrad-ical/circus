@@ -5,7 +5,7 @@ import { PluginJobRequest } from '../interface';
 import { isDir, mkDir, rmDir } from '../util/directory';
 import DicomFileRepository from '../dicom-file-repository/DicomFileRepository';
 import detectDicomeFileRepository from '../dicom-file-repository/detect';
-import * as QueueSystem from '../queue';
+import * as QueueSystem from '../queue/queue';
 import {
   default as DockerRunner,
   DockerRunnerTimeout

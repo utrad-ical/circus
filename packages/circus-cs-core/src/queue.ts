@@ -108,7 +108,6 @@ export async function dequeue(): Promise<Item<Payload> | null> {
 /**
  * Change state functions
  */
-
 export async function processing(queueItem: Item<Payload>): Promise<void> {
   const connection: MongoClient | null = await MongoClient.connect(mongoURL);
 

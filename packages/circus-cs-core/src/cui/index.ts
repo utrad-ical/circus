@@ -6,12 +6,10 @@ import up_queue_mongodb from './up_queue_mongodb';
 import check_env from './check_env';
 import { start, stop, status, pm2list, pm2killall } from './daemon';
 
-const functionCollection: any = {
+const commands: { [key: string]: (argv: any) => Promise<void> } = {
   register,
   next,
-
   list_queue,
-
   up_queue_mongodb,
   check_env,
   start,
@@ -27,15 +25,15 @@ async function main() {
 
   const args = minimist(argv);
 
-  const callFunc = command ? functionCollection[command] : undefined;
+  const callFunc = command ? commands[command] : undefined;
 
   if (callFunc) {
     await callFunc(args);
   } else if (command) {
-    console.error('"' + command + '" is not supported.');
+    console.error(`"${command}" is not supported.`);
   } else {
-    console.error('Which function you want to execute?');
-    Object.keys(functionCollection).forEach(i => console.log(' - ' + i));
+    console.error('Available commands:');
+    Object.keys(commands).forEach(i => console.log(' - ' + i));
   }
 }
 

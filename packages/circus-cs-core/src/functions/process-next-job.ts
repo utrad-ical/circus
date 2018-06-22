@@ -1,8 +1,8 @@
-import * as fs from 'fs';
+import * as fs from 'fs-extra';
 import * as path from 'path';
 import { createHash } from 'crypto';
 import { PluginJobRequest } from '../interface';
-import { isDir, mkDir, rmDir } from '../util/directory';
+import { isDir } from '../util/directory';
 import DicomFileRepository from '../dicom-file-repository/DicomFileRepository';
 import detectDicomeFileRepository from '../dicom-file-repository/detect';
 import * as QueueSystem from '../queue/queue';
@@ -151,7 +151,7 @@ export async function processJob(
   } finally {
     // 10. Clean up temporary directories.
     logging('Clean up temporary directories.', queueItem);
-    await rmDir(tmpBaseDir);
+    await fs.remove(tmpBaseDir);
   }
 }
 
@@ -181,11 +181,11 @@ export async function createTemporaryDirectories(
     'out'
   );
 
-  await mkDir(tmpBaseDir);
+  await fs.mkdir(tmpBaseDir);
   await Promise.all([
-    mkDir(tmpDicomDir),
-    mkDir(tmpPluginInputDir),
-    mkDir(tmpPluginOutputDir)
+    fs.mkdir(tmpDicomDir),
+    fs.mkdir(tmpPluginInputDir),
+    fs.mkdir(tmpPluginOutputDir)
   ]);
 
   return { tmpBaseDir, tmpDicomDir, tmpPluginInputDir, tmpPluginOutputDir };

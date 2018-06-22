@@ -1,7 +1,7 @@
 import * as ajv from 'ajv';
-import * as fs from 'fs';
+import * as fs from 'fs-extra';
 import { MongoClient } from 'mongodb';
-import { isDir, mkDir, rmDir } from '../util/directory';
+import { isDir } from '../util/directory';
 import config from '../config';
 const argumentsSchema = {
   type: 'object'
@@ -38,8 +38,8 @@ async function checkTemporaryDirBase() {
         `config.temporaryDirBase: ${temporaryDirBase} is not exists.`
       );
 
-    await mkDir(`${temporaryDirBase}/test`);
-    await rmDir(`${temporaryDirBase}/test`);
+    await fs.mkdir(`${temporaryDirBase}/test`);
+    await fs.remove(`${temporaryDirBase}/test`);
   } catch (e) {
     throw new Error(
       `config.temporaryDirBase: ${temporaryDirBase} is something wrong.  (ex) not exists, no permission to write, ...etc`

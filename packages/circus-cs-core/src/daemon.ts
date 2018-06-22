@@ -11,46 +11,40 @@ const { tick, waitOnFail } = config.daemon;
 
 let exec: boolean = true;
 
+const printLog = (message: string, isError: boolean = false) => {
+  console[isError ? 'error' : 'log'](new Date().toISOString() + ' ' + message);
+};
+
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
 process.on('SIGINT', function() {
-  console.log('signal SIGINT');
-  console.log(
-    new Date().toISOString() +
-      ' Dequeue daemon will be stopped on next dequeue.'
-  );
+  printLog('Signal SIGINT');
+  printLog('Dequeue daemon will be stopped on next dequeue.');
   exec = false;
 });
 
-export async function main(): Promise<void> {
-  console.log(
-    new Date().toISOString() + ' Dequeue daemon started. pid:' + process.pid
-  );
+export async function main() {
+  printLog(`Dequeue daemon started. pid: ${process.pid}`);
 
-  let lastIsEmpty = false;
+  let lastIsEmpty = false; // Flag to avoid printing too many 'Queue empty'
   do {
     try {
       const result = await processNextJob();
       if (result === null) {
-        if (!lastIsEmpty)
-          console.log(new Date().toISOString() + ' Queue empty');
+        if (!lastIsEmpty) printLog('Queue empty');
         lastIsEmpty = true;
       } else {
         lastIsEmpty = false;
-        console.log(
-          new Date().toISOString() + (result ? ' Succeeded' : ' Failed')
-        );
-
-        if (!result && waitOnFail && exec)
-          await (() => new Promise((a, b) => setTimeout(a, waitOnFail)))();
+        printLog(result ? 'Succeeded' : 'Failed');
+        if (!result && waitOnFail && exec) await delay(waitOnFail);
       }
     } catch (e) {
-      console.error(new Date().toISOString() + ' Fatal ' + e.message);
+      printLog('Fatal ' + e.message, true);
     }
-
-    await (() => new Promise((a, b) => setTimeout(a, tick)))();
+    await delay(tick);
   } while (exec);
 
-  console.log(new Date().toISOString() + ' Dequeue daemon stopped.');
-
+  printLog('Dequeue daemon stopped.');
   process.exit(0);
 }
 

@@ -23,9 +23,7 @@ const logging = (
 
 export default async function processNextJob(): Promise<boolean | null> {
   //  Get next item from queue.
-  const queueItem: QueueSystem.Item<
-    PluginJobRequest
-  > | null = await QueueSystem.dequeue();
+  const queueItem = await QueueSystem.dequeue();
 
   if (queueItem === null) return null;
   logging('Dequeued', queueItem);

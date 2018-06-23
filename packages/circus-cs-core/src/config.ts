@@ -1,7 +1,14 @@
 import * as yaml from 'js-yaml';
 import * as fs from 'fs';
+import * as merge from 'merge';
 
 const config = require('../config/default');
+
+let env = {};
+try {
+  env = require('../config/env');
+  merge.recursive(config, env);
+} catch (e) {}
 
 function parsePluginConfig(pluginConfigPath: string) {
   const pluginConfigContent = yaml.safeLoad(

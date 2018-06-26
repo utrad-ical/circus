@@ -11,7 +11,7 @@ export default async function check_env(argv: any) {
   const argCheck = new ajv().compile(argumentsSchema)(argv);
 
   if (!argCheck) {
-    console.error('Argument is something wrong.');
+    console.error('Invalid argument.');
     process.exit(1);
   }
 
@@ -42,7 +42,7 @@ async function checkTemporaryDirBase() {
     await fs.remove(`${temporaryDirBase}/test`);
   } catch (e) {
     throw new Error(
-      `config.temporaryDirBase: ${temporaryDirBase} is something wrong.  (ex) not exists, no permission to write, ...etc`
+      `config.temporaryDirBase: ${temporaryDirBase} does not exist or is not writable.`
     );
   }
 }
@@ -53,7 +53,7 @@ async function checkDocker() {
     docker.socketPath || process.env.DOCKER_SOCKET || '/var/run/docker.sock';
 
   if (!fs.statSync(dockerSocketPath).isSocket())
-    throw new Error('Are you sure the docker is running?');
+    throw new Error('Are you sure Docker is running?');
 
   config.docker = docker;
 }
@@ -69,6 +69,6 @@ async function checkMongo(title: string, url: string) {
       throw new Error('Cannot connect to mongodb');
     }
   } catch (e) {
-    throw new Error(`${title} is something wrong.`);
+    throw new Error(`Error regarding ${title}`);
   }
 }

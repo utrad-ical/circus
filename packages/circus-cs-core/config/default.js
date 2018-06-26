@@ -57,16 +57,12 @@ module.exports = {
    * Dequeue daemon settings (based on pm2)
    */
   daemon: {
-    // (pm2)
-    script: 'daemon.js',
-
     // (pm2) See interface StartOptions ( https://github.com/Unitech/pm2/blob/master/types/index.d.ts )
     startOptions: {
       name: 'dequeue-daemon',
       cwd: path.join(__dirname, '..'),
       output: path.join(__dirname, '..', 'logs', 'daemon-pm2-output.log'),
       error: path.join(__dirname, '..', 'logs', 'daemon-pm2-error.log')
-      // env:
     },
 
     tick: 1000,

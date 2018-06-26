@@ -11,7 +11,7 @@ import {
   DockerRunnerTimeout
 } from '../util/docker-runner';
 import config from '../config';
-import { bootstrapQueueSystem } from '../bootstrapQueueSystem';
+import bootstrapQueueSystem from '../bootstrapQueueSystem';
 
 const hook = require('../web-ui-hooks');
 

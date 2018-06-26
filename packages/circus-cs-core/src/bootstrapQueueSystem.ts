@@ -5,7 +5,7 @@ import { PluginJobRequest } from './interface';
 /**
  * Creates a MonboDB-based queue system based on the configuration.
  */
-export async function bootstrapQueueSystem(): Promise<
+export default async function bootstrapQueueSystem(): Promise<
   QueueSystem<PluginJobRequest>
 > {
   const options = {

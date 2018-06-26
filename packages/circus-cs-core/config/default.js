@@ -59,7 +59,7 @@ module.exports = {
   daemon: {
     // (pm2) See interface StartOptions ( https://github.com/Unitech/pm2/blob/master/types/index.d.ts )
     startOptions: {
-      name: 'dequeue-daemon',
+      name: 'circus-cs-job-manager',
       cwd: path.join(__dirname, '..'),
       output: path.join(__dirname, '..', 'logs', 'daemon-pm2-output.log'),
       error: path.join(__dirname, '..', 'logs', 'daemon-pm2-error.log')

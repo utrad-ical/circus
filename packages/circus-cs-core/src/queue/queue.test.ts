@@ -3,7 +3,7 @@ import * as mongo from 'mongodb';
 
 describe('Queue system: Mongo', () => {
   let client: mongo.MongoClient;
-  let db: mongo.Db;
+  let collection: mongo.Collection;
   let queue: q.QueueSystem<any>;
 
   const mongoUrl =
@@ -13,14 +13,13 @@ describe('Queue system: Mongo', () => {
 
   beforeAll(async () => {
     client = await mongo.MongoClient.connect(mongoUrl);
-    db = client.db();
-    await db.collection(collectionName).remove({});
-    queue = await q.craeteMongoQueue({ mongoUrl, collectionName });
+    collection = client.db().collection(collectionName);
+    await collection.remove({});
+    queue = await q.craeteMongoQueue({ collection });
   });
 
   afterAll(async () => {
-    await queue.dispose();
-    await client.close();
+    await client.close(true);
   });
 
   test('insert a job and list it', async () => {

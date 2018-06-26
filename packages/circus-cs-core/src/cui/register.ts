@@ -32,7 +32,7 @@ export default async function register(argv: any) {
     process.exit(1);
   }
 
-  const queue = await bootstrapQueueSystem();
+  const { queue, dispose } = await bootstrapQueueSystem();
   try {
     const newJobId = () => new Date().getTime().toString();
     const { jobId, pluginId, seriesUid, environment, priority } = argv;
@@ -47,6 +47,6 @@ export default async function register(argv: any) {
     );
     await queue.enqueue(item);
   } finally {
-    queue.dispose();
+    await dispose();
   }
 }

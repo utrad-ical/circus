@@ -56,11 +56,11 @@ export default async function list_queue(argv: any) {
       break;
   }
 
-  const queue = await bootstrapQueueSystem();
+  const { queue, dispose } = await bootstrapQueueSystem();
   try {
     const items = await queue.list(state);
     console.log(items);
   } finally {
-    queue.dispose();
+    await dispose();
   }
 }

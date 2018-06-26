@@ -7,5 +7,5 @@ import * as QueueSystem from '../queue/queue';
 export default async function listQueue(
   state: QueueSystem.QueueState | 'all' = 'wait'
 ): Promise<QueueSystem.Item<Payload>[]> {
-  return await QueueSystem.list<Payload>(state);
+  return await QueueSystem.list(state);
 }

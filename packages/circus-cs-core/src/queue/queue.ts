@@ -1,5 +1,4 @@
 import { MongoClient, Collection } from 'mongodb';
-import { PluginJobRequest as Payload } from '../interface';
 import config from '../config';
 
 export type QueueState = 'wait' | 'processing' | 'done' | 'error';
@@ -20,12 +19,12 @@ export type Item<T> = {
  */
 // TODO: Do we really have to export this?
 // TODO: Why is this async?
-export async function createItem(
+export async function createItem<T>(
   jobId: string,
-  payload: Payload,
+  payload: T,
   priority: number = 0
-): Promise<Item<Payload>> {
-  const queueItem: Item<Payload> = {
+): Promise<Item<T>> {
+  const queueItem: Item<T> = {
     jobId,
     payload,
     priority,
@@ -34,14 +33,14 @@ export async function createItem(
   return queueItem;
 }
 
-interface QueueSystem {
-  list: (state?: QueueState | 'all') => Promise<Item<Payload>[]>;
-  enqueue: (queueItem: Item<Payload>) => Promise<string>;
-  dequeue: () => Promise<Item<Payload> | null>;
+export interface QueueSystem<T> {
+  list: (state?: QueueState | 'all') => Promise<Item<T>[]>;
+  enqueue: (queueItem: Item<T>) => Promise<string>;
+  dequeue: () => Promise<Item<T> | null>;
   dispose: () => Promise<void>;
-  processing: (queueItem: Item<Payload>) => Promise<void>;
-  done: (queueItem: Item<Payload>) => Promise<void>;
-  error: (queueItem: Item<Payload>) => Promise<void>;
+  processing: (queueItem: Item<T>) => Promise<void>;
+  done: (queueItem: Item<T>) => Promise<void>;
+  error: (queueItem: Item<T>) => Promise<void>;
 }
 
 interface QueueOptions {
@@ -49,9 +48,9 @@ interface QueueOptions {
   collectionName: string;
 }
 
-export async function craeteMongoQueue(
+export async function craeteMongoQueue<T>(
   options: QueueOptions
-): Promise<QueueSystem> {
+): Promise<QueueSystem<T>> {
   const { mongoUrl, collectionName } = options;
 
   let connection: MongoClient | undefined;
@@ -68,11 +67,11 @@ export async function craeteMongoQueue(
     const collection = await getCollection();
     const statusFilter = state === 'all' ? {} : { state };
     return await collection
-      .find<Item<Payload>>(statusFilter, { sort: { priority: -1, _id: 1 } })
+      .find<Item<T>>(statusFilter, { sort: { priority: -1, _id: 1 } })
       .toArray();
   };
 
-  const enqueue = async (queueItem: Item<Payload>) => {
+  const enqueue = async (queueItem: Item<T>) => {
     const collection = await getCollection();
     queueItem.queuedAt = new Date().toISOString();
     const { insertedId } = await collection.insertOne(queueItem);
@@ -81,13 +80,13 @@ export async function craeteMongoQueue(
 
   const dequeue = async () => {
     const collection = await getCollection();
-    return await collection.findOne<Item<Payload>>(
+    return await collection.findOne<Item<T>>(
       { state: 'wait' },
       { sort: { priority: -1, _id: 1 }, limit: 1 }
     );
   };
 
-  const processing = async (queueItem: Item<Payload>) => {
+  const processing = async (queueItem: Item<T>) => {
     const collection = await getCollection();
     const { value } = await collection.findOneAndUpdate(
       { _id: queueItem._id, state: 'wait' },
@@ -96,7 +95,7 @@ export async function craeteMongoQueue(
     if (value === null) throw new Error('Queue item status error.');
   };
 
-  const done = async (queueItem: Item<Payload>) => {
+  const done = async (queueItem: Item<T>) => {
     const collection = await getCollection();
     const { value, lastErrorObject, ok } = await collection.findOneAndUpdate(
       { _id: queueItem._id, state: 'processing' },
@@ -105,7 +104,7 @@ export async function craeteMongoQueue(
     if (value === null) throw new Error('Queue item status error.');
   };
 
-  const error = async (queueItem: Item<Payload>) => {
+  const error = async (queueItem: Item<T>) => {
     const collection = await getCollection();
     const { value, lastErrorObject, ok } = await collection.findOneAndUpdate(
       { _id: queueItem._id },
@@ -122,8 +121,9 @@ export async function craeteMongoQueue(
   return { list, enqueue, dequeue, processing, done, error, dispose };
 }
 
-// TODO: We will remove this as soon as possible
-const tentativeSingletonQueue = craeteMongoQueue({
+// TODO: We will remove the following as soon as possible
+import { PluginJobRequest as Payload } from '../interface';
+const tentativeSingletonQueue = craeteMongoQueue<Payload>({
   mongoUrl: config.queue.mongoURL,
   collectionName: config.queue.collectionTitle
 });

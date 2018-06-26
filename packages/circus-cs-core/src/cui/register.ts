@@ -1,5 +1,6 @@
 import * as ajv from 'ajv';
-import registerJob from '../functions/register-job';
+import { bootstrapQueueSystem } from '../bootstrapQueueSystem';
+import { createItem } from '../queue/queue';
 
 const argumentsSchema = {
   type: 'object',
@@ -27,22 +28,26 @@ export default async function register(argv: any) {
   const argCheck = new ajv().compile(argumentsSchema)(argv);
 
   if (!argCheck) {
-    console.error('Argument is something wrong.');
+    console.error('Invalid arguments.');
     process.exit(1);
   }
 
   try {
+    const queue = await bootstrapQueueSystem();
+    const newJobId = () => new Date().getTime().toString();
+
     const { jobId, pluginId, seriesUid, environment, priority } = argv;
-    const createNextJobId = () => new Date().getTime().toString();
-    await registerJob(
-      jobId || createNextJobId(),
+    const item = createItem(
+      jobId || newJobId(),
       {
         pluginId,
         series: [{ seriesUid }],
         environment
       },
-      priority || 0
+      priority
     );
+    await queue.enqueue(item);
+    queue.dispose();
   } catch (e) {
     console.error(e.message);
     process.exit(1);

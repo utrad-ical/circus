@@ -1,5 +1,4 @@
 import { MongoClient, Collection } from 'mongodb';
-import config from '../config';
 
 export type QueueState = 'wait' | 'processing' | 'done' | 'error';
 
@@ -119,35 +118,4 @@ export async function craeteMongoQueue<T>(
   };
 
   return { list, enqueue, dequeue, processing, done, error, dispose };
-}
-
-// TODO: We will remove the following as soon as possible
-import { PluginJobRequest as Payload } from '../interface';
-const tentativeSingletonQueue = craeteMongoQueue<Payload>({
-  mongoUrl: config.queue.mongoURL,
-  collectionName: config.queue.collectionTitle
-});
-
-export async function list(state: QueueState | 'all' = 'wait') {
-  return (await tentativeSingletonQueue).list(state);
-}
-
-export async function enqueue(queueItem: Item<Payload>) {
-  return (await tentativeSingletonQueue).enqueue(queueItem);
-}
-
-export async function dequeue() {
-  return (await tentativeSingletonQueue).dequeue();
-}
-
-export async function processing(queueItem: Item<Payload>) {
-  return (await tentativeSingletonQueue).processing(queueItem);
-}
-
-export async function done(queueItem: Item<Payload>) {
-  return (await tentativeSingletonQueue).done(queueItem);
-}
-
-export async function error(queueItem: Item<Payload>) {
-  return (await tentativeSingletonQueue).error(queueItem);
 }

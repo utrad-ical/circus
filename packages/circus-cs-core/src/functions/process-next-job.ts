@@ -11,6 +11,7 @@ import {
   DockerRunnerTimeout
 } from '../util/docker-runner';
 import config from '../config';
+import { bootstrapQueueSystem } from '../bootstrapQueueSystem';
 
 const hook = require('../web-ui-hooks');
 
@@ -23,21 +24,23 @@ const logging = (
 
 export default async function processNextJob(): Promise<boolean | null> {
   //  Get next item from queue.
-  const queueItem = await QueueSystem.dequeue();
+  const queueSystem = await bootstrapQueueSystem();
+  const queueItem = await queueSystem.dequeue();
 
   if (queueItem === null) return null;
   logging('Dequeued', queueItem);
 
-  return processJob(queueItem);
+  return processJob(queueSystem, queueItem);
 }
 
 export async function processJob(
+  queueSystem: QueueSystem.QueueSystem<PluginJobRequest>,
   queueItem: QueueSystem.Item<PluginJobRequest>
 ): Promise<boolean> {
   try {
     // 1. Mark queue item as "processing".
     logging('Mark queue item as "processing".', queueItem);
-    await QueueSystem.processing(queueItem);
+    await queueSystem.processing(queueItem);
 
     // 2. Notice status "processing" to webUI system via hook.
     logging('Notice status "processing" to webUI system via hook.', queueItem);
@@ -54,7 +57,7 @@ export async function processJob(
   } catch (e) {
     logging('Error: ' + e.message, queueItem);
     // E. Mark queue item as "error".
-    await QueueSystem.error(queueItem);
+    await queueSystem.error(queueItem);
     return false;
   }
 
@@ -139,12 +142,12 @@ export async function processJob(
 
     // 9. Mark queue item as "done".
     logging('Mark queue item as "done".', queueItem);
-    await QueueSystem.done(queueItem);
+    await queueSystem.done(queueItem);
     return true;
   } catch (e) {
     logging('Error: ' + e.message, queueItem);
     // E. Mark queue item as "error".
-    await QueueSystem.error(queueItem);
+    await queueSystem.error(queueItem);
     return false;
   } finally {
     // 10. Clean up temporary directories.

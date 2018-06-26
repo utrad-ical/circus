@@ -1,5 +1,5 @@
 import * as ajv from 'ajv';
-import listQueue from '../functions/list-queue';
+import { bootstrapQueueSystem } from '../bootstrapQueueSystem';
 import { QueueState } from '../queue/queue';
 
 const argumentsSchema = {
@@ -32,7 +32,7 @@ export default async function list_queue(argv: any) {
   const argCheck = new ajv().compile(argumentsSchema)(argv);
 
   if (!argCheck) {
-    console.error('Argument is something wrong.');
+    console.error('Invalid arguments.');
     process.exit(1);
   }
 
@@ -57,8 +57,10 @@ export default async function list_queue(argv: any) {
   }
 
   try {
-    const queues = await listQueue(state);
-    console.log(queues);
+    const queue = await bootstrapQueueSystem();
+    const items = await queue.list(state);
+    console.log(items);
+    queue.dispose();
   } catch (e) {
     console.error(e.message);
     process.exit(1);

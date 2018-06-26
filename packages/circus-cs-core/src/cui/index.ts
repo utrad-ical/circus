@@ -20,18 +20,24 @@ const commands: { [key: string]: (argv: any) => Promise<void> } = {
 async function main() {
   const argv = process.argv.slice(2);
   const command = argv.shift();
-
   const args = minimist(argv);
-
   const callFunc = command ? commands[command] : undefined;
 
-  if (callFunc) {
+  if (!callFunc) {
+    if (command) {
+      console.error(`"${command}" is not supported.`);
+    } else {
+      console.log('Available commands:');
+      Object.keys(commands).forEach(i => console.log(' - ' + i));
+    }
+    return;
+  }
+
+  try {
     await callFunc(args);
-  } else if (command) {
-    console.error(`"${command}" is not supported.`);
-  } else {
-    console.error('Available commands:');
-    Object.keys(commands).forEach(i => console.log(' - ' + i));
+  } catch (e) {
+    console.error(e);
+    process.exit(1);
   }
 }
 

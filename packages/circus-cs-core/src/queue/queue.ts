@@ -3,36 +3,6 @@ import config from '../config';
 
 export type QueueState = 'wait' | 'processing' | 'done' | 'error';
 
-export type Item<T> = {
-  _id?: string;
-  jobId: string;
-  priority: number;
-  payload: T;
-  state: QueueState;
-  queuedAt?: string;
-  startedAt?: string;
-  finishedAt?: string;
-};
-
-/**
- * Create queue item from payload object
- */
-// TODO: Do we really have to export this?
-// TODO: Why is this async?
-export async function createItem<T>(
-  jobId: string,
-  payload: T,
-  priority: number = 0
-): Promise<Item<T>> {
-  const queueItem: Item<T> = {
-    jobId,
-    payload,
-    priority,
-    state: 'wait'
-  };
-  return queueItem;
-}
-
 export interface QueueSystem<T> {
   list: (state?: QueueState | 'all') => Promise<Item<T>[]>;
   enqueue: (queueItem: Item<T>) => Promise<string>;
@@ -41,6 +11,36 @@ export interface QueueSystem<T> {
   processing: (queueItem: Item<T>) => Promise<void>;
   done: (queueItem: Item<T>) => Promise<void>;
   error: (queueItem: Item<T>) => Promise<void>;
+}
+
+export interface Item<T> {
+  _id?: string;
+  jobId: string;
+  priority: number;
+  payload: T;
+  state: QueueState;
+  queuedAt?: string;
+  startedAt?: string;
+  finishedAt?: string;
+}
+
+/**
+ * Create queue item from payload object
+ */
+// TODO: Do we really have to export this?
+// TODO: Why is this async?
+export function createItem<T>(
+  jobId: string,
+  payload: T,
+  priority: number = 0
+): Item<T> {
+  const queueItem: Item<T> = {
+    jobId,
+    payload,
+    priority,
+    state: 'wait'
+  };
+  return queueItem;
 }
 
 interface QueueOptions {

@@ -24,7 +24,7 @@ describe('Queue system: Mongo', () => {
   });
 
   it('should insert a job and list it', async () => {
-    const item = await q.createItem('abcde', { a: 5 }, 0);
+    const item = q.createItem('abcde', { a: 5 }, 0);
     await queue.enqueue(item);
     const next = await queue.dequeue();
     expect(next).toMatchObject({ payload: { a: 5 } });

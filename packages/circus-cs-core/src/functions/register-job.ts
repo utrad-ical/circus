@@ -9,7 +9,7 @@ export default async function registerJob(
   payload: Payload,
   priority: number = 0
 ): Promise<void> {
-  const queueItem: QueueSystem.Item<Payload> = await QueueSystem.createItem(
+  const queueItem: QueueSystem.Item<Payload> = QueueSystem.createItem(
     jobId,
     payload,
     priority

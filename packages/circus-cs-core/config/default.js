@@ -35,9 +35,9 @@ module.exports = {
     }
   },
 
-  docker: {
-    socketPath: '/var/run/docker.sock'
-  },
+  // Parameters for Dockerode to connect to Docker API.
+  // e.g., { host: 'http://localhost', port: 2375 }
+  docker: {},
 
   dicomDumpOptions: {
     dockerImage: 'circus/dicom_voxel_dump:1.0',

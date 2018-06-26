@@ -1,29 +1,31 @@
-/**
- * Wrapper of Dockerode
- *   To support the following events:
- *     - container
- *     - attached
- *     - started
- *     - inspected
- *     - disappeared
- *     - exited
- *     - timeouted
- *     - (statechange may be supportted ...?)
- */
 import { EventEmitter } from 'events';
 import * as Dockerode from 'dockerode';
 import * as memory from 'memory-streams';
+import sleep from '../util/sleep';
 
+// Supported events:
+//   - container
+//   - attached
+//   - started
+//   - inspected
+//   - disappeared
+//   - exited
+//   - timeouted
+//   - (statechange may be supported ...?)
+
+/**
+ * Dockerode wrapper.
+ */
 export default class DockerRunner extends EventEmitter {
   private dockerOptions: Dockerode.DockerOptions;
 
-  private tick: number;
+  private watchInterval: number;
   private timeout: number | null;
 
   constructor(options: Dockerode.DockerOptions = {}) {
     super();
     this.dockerOptions = options;
-    this.tick = 500;
+    this.watchInterval = 500;
     this.timeout = null;
   }
 
@@ -48,7 +50,7 @@ export default class DockerRunner extends EventEmitter {
     stdoutInContainer.pipe(stream);
     this.emit('attached', stdoutInContainer);
 
-    /* not async */ container.start().then(() => {
+    container.start().then(() => {
       this.emit('started', container);
     });
 
@@ -87,7 +89,7 @@ export default class DockerRunner extends EventEmitter {
           await container.remove();
         } catch (e) {}
 
-        throw new DockerRunnerTimeout(stream.toString());
+        throw new DockerTimeoutError(stream.toString());
       }
 
       await this.sleep();
@@ -96,23 +98,17 @@ export default class DockerRunner extends EventEmitter {
     return stream.toString();
   }
 
-  sleep(millSeconds?: number) {
-    if (typeof millSeconds === 'undefined') millSeconds = this.tick;
-
-    return new Promise((resolve, reject) =>
-      setTimeout(() => {
-        resolve();
-      }, millSeconds)
-    );
+  sleep(millSeconds: number = this.watchInterval) {
+    return sleep(millSeconds);
   }
 }
 
-export class DockerRunnerTimeout /* extends Exception? Error? Throwable? ...or something? */ {
+export class DockerTimeoutError extends Error {
   public code: string;
-  public message: string;
   public previous: any;
 
   constructor(message: string, code: string = '', previous?: any) {
+    super(message);
     this.message = message;
     this.code = code;
     this.previous = previous;

@@ -6,10 +6,7 @@ import { isDir } from '../util/directory';
 import DicomFileRepository from '../dicom-file-repository/DicomFileRepository';
 import detectDicomeFileRepository from '../dicom-file-repository/detect';
 import * as QueueSystem from '../queue/queue';
-import {
-  default as DockerRunner,
-  DockerRunnerTimeout
-} from '../util/docker-runner';
+import DockerRunner, { DockerTimeoutError } from '../util/DockerRunner';
 import config from '../config';
 import bootstrapQueueSystem from '../bootstrapQueueSystem';
 
@@ -93,7 +90,7 @@ export async function processJob(
       );
     } catch (e) {
       //  Handle timeout, other unexpected errors.
-      if (e instanceof DockerRunnerTimeout) {
+      if (e instanceof DockerTimeoutError) {
         if (hook.timeout) await hook.timeout(queueItem.jobId);
       } else {
         if (hook.failed)
@@ -231,7 +228,7 @@ export async function parseDICOMData(
   srcDir: string,
   destDir: string
 ): Promise<[number, number, number]> {
-  const { socketPath } = config.docker;
+  const dockerConfig = config.docker;
 
   if (!(await isDir(srcDir)))
     throw new Error(`Dicrectory: ${srcDir} is not exists.`);
@@ -242,7 +239,7 @@ export async function parseDICOMData(
   const { dockerImage, volumeIn, volumeOut } = config.dicomDumpOptions;
 
   const runner = new DockerRunner({
-    socketPath,
+    ...dockerConfig,
     timeout: 3600 * 1000 // Force timeout?
   });
 
@@ -265,7 +262,7 @@ export async function executePlugin(
   srcDir: string,
   destDir: string
 ): Promise<string> {
-  const { socketPath } = config.docker;
+  const dockerConfig = config.docker;
   const pluginConfig = config.plugins;
 
   if (!(pluginId in pluginConfig))
@@ -287,7 +284,7 @@ export async function executePlugin(
   } = pluginConfig[pluginId];
 
   const runner = new DockerRunner({
-    socketPath,
+    ...dockerConfig,
     timeout: 3 * 60 * 60 * 1000
   });
 

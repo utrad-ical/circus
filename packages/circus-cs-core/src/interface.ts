@@ -1,16 +1,16 @@
-export type PluginJobRequest = {
+export interface PluginJobRequest {
   pluginId: string;
   series: JobSeries[];
   environment?: string; // deprecated
-};
+}
 
-export type JobSeries = {
+export interface JobSeries {
   seriesUid: string;
   startImgNum?: number;
   endImgNum?: number;
   imageDelta?: number;
   requiredPrivateTags?: string[];
-};
+}
 
 export type JobState =
   | 'in_queue'

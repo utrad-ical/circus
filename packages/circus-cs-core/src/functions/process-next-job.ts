@@ -202,7 +202,7 @@ export async function fetchDICOMData(
   );
 
   if (!(await isDirectory(storeDir)))
-    throw new Error(`Dicrectory: ${storeDir} is not exists.`);
+    throw new Error(`Dicrectory: ${storeDir} does not exist.`);
 
   const { seriesLoader, count } = await repository.getSeriesLoader(seriesUid);
 
@@ -231,10 +231,10 @@ export async function parseDICOMData(
   const dockerConfig = config.docker;
 
   if (!(await isDirectory(srcDir)))
-    throw new Error(`Dicrectory: ${srcDir} is not exists.`);
+    throw new Error(`Dicrectory: ${srcDir} does not exist.`);
 
   if (!(await isDirectory(destDir)))
-    throw new Error(`Dicrectory: ${destDir} is not exists.`);
+    throw new Error(`Dicrectory: ${destDir} does not exist.`);
 
   const { dockerImage, volumeIn, volumeOut } = config.dicomDumpOptions;
 
@@ -269,10 +269,10 @@ export async function executePlugin(
     throw new Error(`Plugin: ${pluginId} is not defined.`);
 
   if (!(await isDirectory(srcDir)))
-    throw new Error(`Dicrectory: ${srcDir} is not exists.`);
+    throw new Error(`Dicrectory: ${srcDir} does not exist.`);
 
   if (!(await isDirectory(destDir)))
-    throw new Error(`Dicrectory: ${destDir} is not exists.`);
+    throw new Error(`Dicrectory: ${destDir} does not exist.`);
 
   const {
     dockerImage,

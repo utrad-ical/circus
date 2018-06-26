@@ -72,7 +72,8 @@ async function update(jobId: string, $set: any): Promise<void> {
       .collection(collectionTitle)
       .findOneAndUpdate({ jobId }, { $set });
 
-    if (value === null) throw new Error('Corresponded document is not exists.');
+    if (value === null)
+      throw new Error('Corresponded document does not exist.');
 
     return value; // before update value.
   } catch (e) {

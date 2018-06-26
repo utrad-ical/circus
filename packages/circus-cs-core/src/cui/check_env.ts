@@ -35,7 +35,7 @@ async function checkTemporaryDirBase() {
     // Create directory
     if (!(await isDirectory(temporaryDirBase)))
       throw new Error(
-        `config.temporaryDirBase: ${temporaryDirBase} is not exists.`
+        `config.temporaryDirBase: ${temporaryDirBase} does not exist.`
       );
 
     await fs.mkdir(`${temporaryDirBase}/test`);

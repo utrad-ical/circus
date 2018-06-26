@@ -23,7 +23,7 @@ describe('Queue system: Mongo', () => {
     await client.close();
   });
 
-  it('should insert a job and list it', async () => {
+  test('insert a job and list it', async () => {
     const item = q.createItem('abcde', { a: 5 }, 0);
     await queue.enqueue(item);
     const next = await queue.dequeue();

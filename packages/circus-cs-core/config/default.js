@@ -15,12 +15,12 @@ module.exports = {
   pluginConfigPath: path.join(__dirname, 'plugins.yml'),
 
   queue: {
-    mongoURL: 'mongodb://localhost:27018/circus-cs-core',
+    mongoURL: 'mongodb://localhost:27017/circus-cs-core',
     collectionTitle: 'pluginJobQueue'
   },
 
   WebUI: {
-    mongoURL: 'mongodb://localhost:27018/circus-api',
+    mongoURL: 'mongodb://localhost:27017/circus-api',
     collectionTitle: 'pluginJobs',
     resultDir: path.join(__dirname, '..', 'tmp', 'result')
   },

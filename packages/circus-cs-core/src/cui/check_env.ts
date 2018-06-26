@@ -1,7 +1,7 @@
 import * as ajv from 'ajv';
 import * as fs from 'fs-extra';
 import { MongoClient } from 'mongodb';
-import { isDir } from '../util/directory';
+import isDirectory from '../util/isDirectory';
 import config from '../config';
 const argumentsSchema = {
   type: 'object'
@@ -33,7 +33,7 @@ async function checkTemporaryDirBase() {
 
   try {
     // Create directory
-    if (!(await isDir(temporaryDirBase)))
+    if (!(await isDirectory(temporaryDirBase)))
       throw new Error(
         `config.temporaryDirBase: ${temporaryDirBase} is not exists.`
       );

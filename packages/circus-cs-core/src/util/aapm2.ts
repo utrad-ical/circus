@@ -2,7 +2,6 @@
  * Exports the promisified versions of pm2 functions.
  * @module
  */
-
 import * as pm2 from 'pm2';
 
 export interface ProcessDescription extends pm2.ProcessDescription {}
@@ -37,18 +36,6 @@ export function start(script: string, options: StartOptions): Promise<void> {
     pm2.start(script, options, errCallBack(resolve, reject));
   });
 }
-
-// pm2.start ( options = { script: script, ...options }, errback: ErrCallback )
-// >>> Restart with no error maybe.
-// export function start(options: StartOptions): Promise<void>
-// {
-// return new Promise(
-// (resolve, reject) => {
-// // pm2.disconnect has invalid type in d.ts
-// pm2.start(options, errCallBack(resolve, reject));
-// }
-// );
-// }
 
 export function describe(
   process: string | number

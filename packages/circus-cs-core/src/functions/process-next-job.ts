@@ -2,7 +2,7 @@ import * as fs from 'fs-extra';
 import * as path from 'path';
 import { createHash } from 'crypto';
 import { PluginJobRequest } from '../interface';
-import { isDir } from '../util/directory';
+import isDirectory from '../util/isDirectory';
 import DicomFileRepository from '../dicom-file-repository/DicomFileRepository';
 import detectDicomeFileRepository from '../dicom-file-repository/detect';
 import * as QueueSystem from '../queue/queue';
@@ -201,7 +201,7 @@ export async function fetchDICOMData(
     config.dicomFileRepository
   );
 
-  if (!(await isDir(storeDir)))
+  if (!(await isDirectory(storeDir)))
     throw new Error(`Dicrectory: ${storeDir} is not exists.`);
 
   const { seriesLoader, count } = await repository.getSeriesLoader(seriesUid);
@@ -230,10 +230,10 @@ export async function parseDICOMData(
 ): Promise<[number, number, number]> {
   const dockerConfig = config.docker;
 
-  if (!(await isDir(srcDir)))
+  if (!(await isDirectory(srcDir)))
     throw new Error(`Dicrectory: ${srcDir} is not exists.`);
 
-  if (!(await isDir(destDir)))
+  if (!(await isDirectory(destDir)))
     throw new Error(`Dicrectory: ${destDir} is not exists.`);
 
   const { dockerImage, volumeIn, volumeOut } = config.dicomDumpOptions;
@@ -268,10 +268,10 @@ export async function executePlugin(
   if (!(pluginId in pluginConfig))
     throw new Error(`Plugin: ${pluginId} is not defined.`);
 
-  if (!(await isDir(srcDir)))
+  if (!(await isDirectory(srcDir)))
     throw new Error(`Dicrectory: ${srcDir} is not exists.`);
 
-  if (!(await isDir(destDir)))
+  if (!(await isDirectory(destDir)))
     throw new Error(`Dicrectory: ${destDir} is not exists.`);
 
   const {

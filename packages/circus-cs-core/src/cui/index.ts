@@ -1,14 +1,12 @@
 import * as minimist from 'minimist';
 import register from './register';
 import list_queue from './list_queue';
-import up_queue_mongodb from './up_queue_mongodb';
 import check_env from './check_env';
 import { start, stop, status, pm2list, pm2killall } from './daemon';
 
 const commands: { [key: string]: (argv: any) => Promise<void> } = {
   register,
   list_queue,
-  up_queue_mongodb,
   check_env,
   start,
   stop,

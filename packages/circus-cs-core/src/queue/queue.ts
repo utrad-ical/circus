@@ -59,6 +59,10 @@ export async function craeteMongoQueue<T>(
     if (collection) return collection;
     connection = await MongoClient.connect(mongoUrl);
     collection = connection.db().collection(collectionName);
+
+    // Ensures the index exists (this does nothing if the index alraedy exists)
+    await collection.createIndex({ jobId: 1 }, { unique: true });
+
     return collection;
   };
 

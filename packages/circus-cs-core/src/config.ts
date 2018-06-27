@@ -4,11 +4,10 @@ import * as merge from 'merge';
 
 const config = require('../config/default');
 
-let env = {};
-try {
-  env = require('../config/env');
-  merge.recursive(config, env);
-} catch (e) {}
+const cosmiconfig = require('cosmiconfig');
+const explorer = cosmiconfig('circus-cs');
+const result = explorer.searchSync();
+if (result) merge.recursive(config, result);
 
 function parsePluginConfig(pluginConfigPath: string) {
   const pluginConfigContent = yaml.safeLoad(

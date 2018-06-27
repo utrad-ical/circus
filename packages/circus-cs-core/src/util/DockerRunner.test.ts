@@ -11,16 +11,14 @@ const dockerOption =
         socketPath: '/var/run/docker.sock'
       };
 
-describe('DockerRunner', () => {
-  test('run hello-world docker image', async () => {
-    const runner = new DockerRunner(dockerOption);
-    const result = await runner.run({ Image: 'hello-world' });
-    expect(result).toMatch('Hello from Docker!');
-  });
+test('run hello-world docker image', async () => {
+  const runner = new DockerRunner(dockerOption);
+  const result = await runner.run({ Image: 'hello-world' });
+  expect(result).toMatch('Hello from Docker!');
+});
 
-  test('connect to Docker public API', async () => {
-    const rode = new Dockerode(dockerOption);
-    const results = await rode.listImages();
-    expect(results.length).toBeGreaterThanOrEqual(1);
-  });
+test('connect to Docker public API', async () => {
+  const rode = new Dockerode(dockerOption);
+  const results = await rode.listImages();
+  expect(results.length).toBeGreaterThanOrEqual(1);
 });

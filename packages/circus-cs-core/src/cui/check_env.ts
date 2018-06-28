@@ -1,74 +1,51 @@
-import * as ajv from 'ajv';
 import * as fs from 'fs-extra';
+import * as path from 'path';
+import * as chalk from 'chalk';
 import { MongoClient } from 'mongodb';
+import DockerRunner from '../util/DockerRunner';
 import isDirectory from '../util/isDirectory';
 import config from '../config';
-const argumentsSchema = {
-  type: 'object'
-};
 
 export default async function check_env(argv: any) {
-  const argCheck = new ajv().compile(argumentsSchema)(argv);
+  const check = async (title: string, func: Function) => {
+    try {
+      process.stdout.write((title + ' '.repeat(30)).substr(0, 30) + ': ');
+      await func();
+      process.stdout.write(chalk.cyanBright('[OK]\n'));
+    } catch (e) {
+      process.stdout.write(chalk.redBright('[NG]\n'));
+      console.error('  ' + e.message);
+    }
+  };
 
-  if (!argCheck) {
-    console.error('Invalid argument.');
-    process.exit(1);
-  }
-
-  try {
-    await checkpluginWorkingDir();
-    await checkDocker();
-    await checkMongo('config.queue.mongoURL', config.queue.mongoURL);
-    // await checkMongo('config.webUI.mongoURL', config.webUI.mongoURL);
-  } catch (e) {
-    console.error(e.message);
-    process.exit(1);
-  }
-
-  console.log('OK');
+  await check('Plugin working directory', checkpluginWorkingDir);
+  await check('Docker connection', checkDocker);
+  await check('MongoDB connection', checkMongo);
 }
 
 async function checkpluginWorkingDir() {
   const { pluginWorkingDir } = config;
-
-  try {
-    // Create directory
-    if (!(await isDirectory(pluginWorkingDir)))
-      throw new Error(
-        `config.pluginWorkingDir: ${pluginWorkingDir} does not exist.`
-      );
-
-    await fs.mkdir(`${pluginWorkingDir}/test`);
-    await fs.remove(`${pluginWorkingDir}/test`);
-  } catch (e) {
-    throw new Error(
-      `config.pluginWorkingDir: ${pluginWorkingDir} does not exist or is not writable.`
-    );
-  }
+  await fs.ensureDir(pluginWorkingDir);
+  const tmpDir = path.join(pluginWorkingDir, 'env-check-test');
+  await fs.remove(tmpDir);
+  await fs.ensureDir(tmpDir);
+  if (!(await isDirectory(tmpDir)))
+    throw new Error('Failed to create job temporary directory.');
 }
 
 async function checkDocker() {
-  const { docker = {} } = config;
-  const dockerSocketPath =
-    docker.socketPath || process.env.DOCKER_SOCKET || '/var/run/docker.sock';
-
-  if (!fs.statSync(dockerSocketPath).isSocket())
-    throw new Error('Are you sure Docker is running?');
-
-  config.docker = docker;
+  const dr = new DockerRunner();
+  const out = await dr.run({ Image: 'hello-world' });
+  if (!/Hello from Docker/.test(out))
+    throw new Error('Docker did not respond correctly.');
 }
 
-async function checkMongo(title: string, url: string) {
-  try {
-    if (!url) throw new Error('empty');
-
-    const connection: MongoClient | null = await MongoClient.connect(url);
-    if (connection) {
-      await connection.close();
-    } else {
-      throw new Error('Cannot connect to mongodb');
-    }
-  } catch (e) {
-    throw new Error(`Error regarding ${title}`);
+async function checkMongo() {
+  const url = config.queue.mongoUrl;
+  const connection = await MongoClient.connect(url);
+  if (connection) {
+    await connection.close();
+  } else {
+    throw new Error('Cannot connect to mongodb');
   }
 }

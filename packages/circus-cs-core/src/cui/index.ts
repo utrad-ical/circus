@@ -1,5 +1,5 @@
 import * as minimist from 'minimist';
-import * as chalk from 'chalk';
+import chalk from 'chalk';
 
 const commands: { [key: string]: any } = {
   register: {
@@ -44,7 +44,7 @@ async function main() {
   if (!commandName || commandName === 'help') {
     console.log('Available commands:');
     Object.keys(commands).forEach(key =>
-      console.log(`  ${chalk.bold.cyan(key)}: ${commands[key].help}`)
+      console.log(`  ${chalk.cyan(key)}: ${commands[key].help}`)
     );
     return;
   }

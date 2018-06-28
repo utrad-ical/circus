@@ -6,6 +6,7 @@
 
 import processNextJob from './functions/process-next-job';
 import config from './config';
+import sleep from './util/sleep';
 
 const { tick, waitOnFail } = config.daemon;
 
@@ -14,8 +15,6 @@ let exec: boolean = true;
 const printLog = (message: string, isError: boolean = false) => {
   console[isError ? 'error' : 'log'](new Date().toISOString() + ' ' + message);
 };
-
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 process.on('SIGINT', function() {
   printLog('Signal SIGINT');
@@ -36,12 +35,12 @@ export async function main() {
       } else {
         lastIsEmpty = false;
         printLog(result ? 'Succeeded' : 'Failed');
-        if (!result && waitOnFail && exec) await delay(waitOnFail);
+        if (!result && waitOnFail && exec) await sleep(waitOnFail);
       }
     } catch (e) {
       printLog('Fatal ' + e.message, true);
     }
-    await delay(tick);
+    await sleep(tick);
   } while (exec);
 
   printLog('Dequeue daemon stopped.');

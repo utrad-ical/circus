@@ -18,12 +18,12 @@ const printLog = (message: string, isError: boolean = false) => {
 
 process.on('SIGINT', function() {
   printLog('Signal SIGINT');
-  printLog('Dequeue daemon will be stopped on next dequeue.');
+  printLog('CIRCUS CS Job Manager will be stopped on next dequeue.');
   exec = false;
 });
 
 export async function main() {
-  printLog(`Dequeue daemon started. pid: ${process.pid}`);
+  printLog(`CIRCUS CS Job Manager started. pid: ${process.pid}`);
 
   let lastIsEmpty = false; // Flag to avoid printing too many 'Queue empty'
   do {
@@ -43,7 +43,7 @@ export async function main() {
     await sleep(tick);
   } while (exec);
 
-  printLog('Dequeue daemon stopped.');
+  printLog('CIRCUS CS Job Manager stopped.');
   process.exit(0);
 }
 

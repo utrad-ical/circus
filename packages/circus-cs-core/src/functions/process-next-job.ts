@@ -8,7 +8,7 @@ import detectDicomeFileRepository from '../dicom-file-repository/detect';
 import * as QueueSystem from '../queue/queue';
 import DockerRunner, { DockerTimeoutError } from '../util/DockerRunner';
 import config from '../config';
-import bootstrapQueueSystem from '../bootstrapQueueSystem';
+import { bootstrapQueueSystem } from '../bootstrap';
 
 const hook = require('../web-ui-hooks');
 
@@ -166,15 +166,15 @@ export async function createTemporaryDirectories(
       .update(_)
       .digest('hex');
   })(jobId);
-  const tmpBaseDir = path.join(config.temporaryDirBase, directoryName);
-  const tmpDicomDir = path.join(config.temporaryDirBase, directoryName, 'dcm');
+  const tmpBaseDir = path.join(config.pluginWorkingDir, directoryName);
+  const tmpDicomDir = path.join(config.pluginWorkingDir, directoryName, 'dcm');
   const tmpPluginInputDir = path.join(
-    config.temporaryDirBase,
+    config.pluginWorkingDir,
     directoryName,
     'in'
   );
   const tmpPluginOutputDir = path.join(
-    config.temporaryDirBase,
+    config.pluginWorkingDir,
     directoryName,
     'out'
   );

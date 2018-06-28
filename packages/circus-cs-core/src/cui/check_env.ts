@@ -16,7 +16,7 @@ export default async function check_env(argv: any) {
   }
 
   try {
-    await checkTemporaryDirBase();
+    await checkpluginWorkingDir();
     await checkDocker();
     await checkMongo('config.queue.mongoURL', config.queue.mongoURL);
     // await checkMongo('config.webUI.mongoURL', config.webUI.mongoURL);
@@ -28,21 +28,21 @@ export default async function check_env(argv: any) {
   console.log('OK');
 }
 
-async function checkTemporaryDirBase() {
-  const { temporaryDirBase } = config;
+async function checkpluginWorkingDir() {
+  const { pluginWorkingDir } = config;
 
   try {
     // Create directory
-    if (!(await isDirectory(temporaryDirBase)))
+    if (!(await isDirectory(pluginWorkingDir)))
       throw new Error(
-        `config.temporaryDirBase: ${temporaryDirBase} does not exist.`
+        `config.pluginWorkingDir: ${pluginWorkingDir} does not exist.`
       );
 
-    await fs.mkdir(`${temporaryDirBase}/test`);
-    await fs.remove(`${temporaryDirBase}/test`);
+    await fs.mkdir(`${pluginWorkingDir}/test`);
+    await fs.remove(`${pluginWorkingDir}/test`);
   } catch (e) {
     throw new Error(
-      `config.temporaryDirBase: ${temporaryDirBase} does not exist or is not writable.`
+      `config.pluginWorkingDir: ${pluginWorkingDir} does not exist or is not writable.`
     );
   }
 }

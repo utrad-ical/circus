@@ -8,21 +8,21 @@
  */
 
 'use strict';
-var path = require('path');
+const path = require('path');
+const os = require('os');
 
 module.exports = {
-  temporaryDirBase: path.join(__dirname, '..', 'tmp', 'proc'),
+  pluginWorkingDir: path.join(os.tmpdir(), 'circus-cs'),
   pluginConfigPath: path.join(__dirname, 'plugins.yml'),
 
   queue: {
-    mongoURL: 'mongodb://localhost:27017/circus-cs-core',
-    collectionTitle: 'pluginJobQueue'
+    mongoUrl: 'mongodb://localhost:27017/circus-cs-core',
+    collectionName: 'pluginJobQueue'
   },
 
-  WebUI: {
-    mongoURL: 'mongodb://localhost:27017/circus-api',
-    collectionTitle: 'pluginJobs',
-    resultDir: path.join(__dirname, '..', 'tmp', 'result')
+  jobReporter: {
+    mongoUrl: 'mongodb://localhost:27017/circus-api',
+    collectionName: 'pluginJobs'
   },
 
   // DICOM file repository is a loader that fetches the content of a DICOM file
@@ -47,7 +47,7 @@ module.exports = {
           socketPath: '/var/run/docker.sock'
         },
 
-  dicomDumpOptions: {
+  dicomDumper: {
     dockerImage: 'circus/dicom_voxel_dump:1.0',
     volumeIn: '/data/in',
     volumeOut: '/data/out'

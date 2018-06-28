@@ -1,5 +1,5 @@
 import * as ajv from 'ajv';
-import bootstrapQueueSystem from '../bootstrapQueueSystem';
+import { bootstrapQueueSystem } from '../bootstrap';
 import { QueueState } from '../queue/queue';
 
 const argumentsSchema = {

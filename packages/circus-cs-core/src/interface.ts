@@ -12,6 +12,18 @@ export interface JobSeries {
   requiredPrivateTags?: string[];
 }
 
+export interface PluginDefinition {
+  pluginId: string;
+  version: string;
+  type: 'CAD';
+  dockerImage: string;
+  binds?: {
+    in: string;
+    out: string;
+  };
+  maxExecutionSeconds?: number;
+}
+
 export type JobState =
   | 'in_queue'
   | 'processing'

@@ -1,4 +1,4 @@
-- pluginName: Lung-CAD
+- pluginId: Lung-CAD
   version: 1.4
   type: CAD
   dockerImage: circus/lung_cad:1.4

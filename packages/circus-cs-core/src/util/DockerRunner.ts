@@ -13,6 +13,16 @@ import sleep from '../util/sleep';
 //   - timeouted
 //   - (statechange may be supported ...?)
 
+const defaultDockerOption =
+  process.platform === 'win32'
+    ? {
+        host: 'localhost',
+        port: 2375
+      }
+    : {
+        socketPath: '/var/run/docker.sock'
+      };
+
 /**
  * Dockerode wrapper.
  */
@@ -22,7 +32,7 @@ export default class DockerRunner extends EventEmitter {
   private watchInterval: number;
   private timeout: number | null;
 
-  constructor(options: Dockerode.DockerOptions = {}) {
+  constructor(options: Dockerode.DockerOptions = defaultDockerOption) {
     super();
     this.dockerOptions = options;
     this.watchInterval = 500;

@@ -1,4 +1,4 @@
-import { bootstrapDaemonController } from '../boostrap';
+import { bootstrapDaemonController } from '../bootstrap';
 
 export async function start(argv: any) {
   const daemon = bootstrapDaemonController();

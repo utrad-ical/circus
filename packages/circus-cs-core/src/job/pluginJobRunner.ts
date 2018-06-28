@@ -45,13 +45,15 @@ export default function pluginJobRunner(deps: {
     ]);
     // Fetches DICOM data from DicomFileRepository and builds raw volume
     const createdSeries: { [uid: string]: boolean } = {};
+    const inDir = workDir(jobId, 'in');
     for (let volId = 0; volId < job.series.length; volId++) {
       const seriesUid = job.series[volId].seriesUid;
+      const dicomDir = path.join(workDir(jobId, 'dicom'), seriesUid);
       if (!createdSeries[seriesUid]) {
-        const destDir = path.join(workDir(jobId, 'dicom'), seriesUid);
-        await fetchSeriesFromRepository(dicomRepository, seriesUid, destDir);
+        await fetchSeriesFromRepository(dicomRepository, seriesUid, dicomDir);
         createdSeries[seriesUid] = true;
       }
+      await buildDicomVolume(dockerRunner, dicomDir, inDir);
     }
   };
 

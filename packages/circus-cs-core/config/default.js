@@ -30,7 +30,7 @@ module.exports = {
   dicomFileRepository: {
     module: 'StaticDicomFileRepository',
     options: {
-      dataDir: path.join(__dirname, '..', '..', 'var', 'sample-dicom-data'),
+      dataDir: '/var/circus/dicom',
       useHash: false
     }
   },

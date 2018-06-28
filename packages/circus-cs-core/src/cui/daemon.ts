@@ -1,34 +1,35 @@
 import { bootstrapDaemonController } from '../bootstrap';
+import { DaemonController } from '../functions/createDaemonController';
+
+const printStatus = async (dc: DaemonController) => {
+  const status = await dc.status();
+  console.log(status);
+};
 
 export async function start(argv: any) {
-  const daemon = bootstrapDaemonController();
-  await callAndPrint(daemon.start);
-  console.log('Started');
+  const dc = bootstrapDaemonController();
+  await dc.start();
+  await printStatus(dc);
 }
 
 export async function stop(argv: any) {
-  const daemon = bootstrapDaemonController();
-  await callAndPrint(daemon.stop);
-  console.log('Stopped');
+  const dc = bootstrapDaemonController();
+  await dc.stop();
+  await printStatus(dc);
 }
 
 export async function status(argv: any) {
-  const daemon = bootstrapDaemonController();
-  await callAndPrint(daemon.status);
+  const dc = bootstrapDaemonController();
+  await printStatus(dc);
 }
 
 export async function pm2list(argv: any) {
-  const daemon = bootstrapDaemonController();
-  await callAndPrint(daemon.pm2list);
+  const dc = bootstrapDaemonController();
+  console.log(await dc.pm2list());
 }
 
 export async function pm2killall(argv: any) {
-  const daemon = bootstrapDaemonController();
-  await callAndPrint(daemon.pm2killall);
+  const dc = bootstrapDaemonController();
+  await dc.pm2killall();
   console.log('OK');
-}
-
-async function callAndPrint(func: Function) {
-  const result = await func();
-  if (result) console.log(result);
 }

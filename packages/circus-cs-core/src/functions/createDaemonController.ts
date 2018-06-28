@@ -19,28 +19,38 @@ interface Options {
   error: string;
 }
 
-export default function createDaemonController(startOptions: Options) {
+export interface DaemonController {
+  start: () => Promise<void>;
+  stop: () => Promise<void>;
+  status: () => Promise<'running' | 'stopped'>;
+  pm2list: () => Promise<void>;
+  pm2killall: () => Promise<void>;
+}
+
+export default function createDaemonController(
+  startOptions: Options
+): DaemonController {
   const execute = async (task: Function) => {
     await pm2.connect();
     try {
       return await task();
     } finally {
-      pm2.disconnect();
+      await pm2.disconnect();
     }
   };
 
   const start = async () => {
-    execute(async () => {
+    return execute(async () => {
       const processList = await pm2.describe(startOptions.name);
-      if (processList.length > 0) throw new Error('Daemon already running.');
+      if (processList.length > 0) return;
       await pm2.start(script, startOptions);
     });
   };
 
   const stop = async () => {
-    execute(async () => {
+    return execute(async () => {
       const processList = await pm2.describe(startOptions.name);
-      if (processList.length === 0) throw Error('Daemon is not running');
+      if (processList.length === 0) return;
       await pm2.delete(startOptions.name);
     });
   };
@@ -55,20 +65,20 @@ export default function createDaemonController(startOptions: Options) {
   const pm2list = async () => {
     return execute(async () => {
       const processList = (await pm2.list()) as _pm2.ProcessDescription[];
-      processList.forEach(process => {
+      return processList.map(process => {
         const { pid, name, pm_id, monit } = process;
         const { memory, cpu } = monit || { memory: null, cpu: null };
-        console.log({ pid, name, pm_id, memory, cpu });
+        return { pid, name, pm_id, memory, cpu };
       });
     });
   };
 
   const pm2killall = async () => {
-    execute(async () => {
+    return execute(async () => {
       const killAndPrint = async (r: _pm2.ProcessDescription) => {
         const { pid, name, pm_id, monit } = r;
         const { memory, cpu } = monit || { memory: null, cpu: null };
-        console.log({ pid, name, pm_id, memory, cpu });
+        // console.log({ pid, name, pm_id, memory, cpu });
         if (pid && pm_id) await pm2.delete(pm_id);
       };
       const processList = (await pm2.list()) as _pm2.ProcessDescription[];

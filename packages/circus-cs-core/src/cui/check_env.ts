@@ -1,6 +1,6 @@
 import * as fs from 'fs-extra';
 import * as path from 'path';
-import * as chalk from 'chalk';
+import chalk from 'chalk';
 import { MongoClient } from 'mongodb';
 import DockerRunner from '../util/DockerRunner';
 import isDirectory from '../util/isDirectory';

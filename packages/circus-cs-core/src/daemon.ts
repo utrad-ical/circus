@@ -9,19 +9,22 @@ import { bootstrapQueueSystem, bootstrapJobRunner } from './bootstrap';
 
 const { checkQueueInterval } = config.jobManager;
 
-let interrupted: boolean = false; // Becomes true on SIGINT
+/** The flag that becomes true on SIGINT. */
+let interrupted: boolean = false;
 
-const printLog = (message: string, isError: boolean = false) => {
-  console[isError ? 'error' : 'log'](new Date().toISOString() + ' ' + message);
-};
+type LoggerFunction = (message: string) => void;
 
+interface Logger {
+  log: LoggerFunction;
+  error: LoggerFunction;
+}
 async function cancellableSleep(ms: number) {
   const start = Date.now();
   while (start + ms > Date.now() && !interrupted) await sleep(100);
 }
 
-export async function main() {
-  printLog(`CIRCUS CS Job Manager started. pid: ${process.pid}`);
+export async function main(logger: Logger) {
+  logger.log(`CIRCUS CS Job Manager started. pid: ${process.pid}`);
 
   const jobRunner = await bootstrapJobRunner();
   const { queue, dispose } = await bootstrapQueueSystem();
@@ -34,7 +37,7 @@ export async function main() {
         try {
           if (!nextJob) {
             if (!emptyMessagePrinted) {
-              printLog('Currently the queue is empty.');
+              logger.log('Currently the queue is empty.');
               emptyMessagePrinted = true;
             }
             await cancellableSleep(checkQueueInterval);
@@ -46,7 +49,7 @@ export async function main() {
           if (nextJob) queue.settle(nextJob.jobId);
         }
       } catch (e) {
-        printLog('Fatal ' + e.message, true);
+        logger.error('Fatal ' + e.message);
       }
       await cancellableSleep(checkQueueInterval);
     }
@@ -54,14 +57,23 @@ export async function main() {
     dispose();
   }
 
-  printLog('CIRCUS CS Job Manager stopped.');
+  logger.log('CIRCUS CS Job Manager stopped.');
   process.exit(0);
 }
 
+const defaultLogger: Logger = {
+  log: (message: string) => {
+    console.log(new Date().toISOString() + ' ' + message);
+  },
+  error: (message: string) => {
+    console.error(new Date().toISOString() + ' ' + message);
+  }
+};
+
 process.on('SIGINT', function() {
-  printLog('Signal SIGINT');
-  printLog('CIRCUS CS Job Manager will be stopped on next loop.');
+  defaultLogger.log('Signal SIGINT');
+  defaultLogger.log('CIRCUS CS Job Manager will be stopped on next loop.');
   interrupted = true;
 });
 
-main();
+main(defaultLogger);

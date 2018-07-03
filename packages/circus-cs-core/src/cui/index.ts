@@ -19,6 +19,9 @@ const commands: { [key: string]: any } = {
     help: 'Stops the job manager.',
     module: './daemon'
   },
+  monitor: {
+    help: 'Monitor job status.'
+  },
   status: {
     help: 'Shows the status of the job manager.',
     module: './daemon'

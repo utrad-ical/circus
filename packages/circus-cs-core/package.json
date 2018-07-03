@@ -25,6 +25,7 @@
     "pify": "^3.0.0",
     "pm2": "^2.10.4",
     "rimraf": "^2.6.2",
+    "table": "^4.0.3",
     "ts-node": "^6.1.0",
     "tslib": "^1.9.2",
     "typescript": "^2.9.1"
@@ -32,6 +33,7 @@
   "devDependencies": {
     "@types/cosmiconfig": "^5.0.3",
     "@types/jest": "^23.1.1",
+    "@types/table": "^4.0.5",
     "jest": "^23.1.0",
     "merge": "^1.2.0",
     "prettier": "^1.13.5",

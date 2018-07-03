@@ -6,7 +6,7 @@ import DockerRunner from '../util/DockerRunner';
 import isDirectory from '../util/isDirectory';
 import config from '../config';
 
-export default async function check_env(argv: any) {
+export default async function checkEnv(argv: any) {
   const check = async (title: string, func: Function) => {
     try {
       process.stdout.write((title + ' '.repeat(30)).substr(0, 30) + ': ');

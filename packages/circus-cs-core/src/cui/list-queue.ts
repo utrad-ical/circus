@@ -28,7 +28,7 @@ const argumentsSchema = {
   }
 };
 
-export default async function list_queue(argv: any) {
+export default async function listQueue(argv: any) {
   const argCheck = new ajv().compile(argumentsSchema)(argv);
 
   if (!argCheck) {

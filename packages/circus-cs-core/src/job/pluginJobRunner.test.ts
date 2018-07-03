@@ -8,16 +8,21 @@ import * as fs from 'fs-extra';
 import * as path from 'path';
 import MockDicomFileRepository from '../dicom-file-repository/MockDicomFileRepository';
 import DockerRunner from '../util/DockerRunner';
+import StaticDicomFileRepository from '../dicom-file-repository/StaticDicomFileRepository';
+import { ENGINE_METHOD_DIGESTS } from 'constants';
+
+const seriesUid = '2.16.840.1.113662.2.1.2519.21582.2990505.2105152.2381633.20';
 
 describe('pluginJobRunner', () => {
   afterEach(async () => {
     await fs.remove(path.join(__dirname, 'abcde'));
   });
 
-  test('Normal run', async () => {
+  test.skip('Normal run', async () => {
     const jobReporter = { report: jest.fn() };
     const dockerRunner = new DockerRunner();
-    const dicomRepository = new MockDicomFileRepository({});
+    const testDir = path.resolve(__dirname, '../../test');
+    const dicomRepository = new StaticDicomFileRepository({ dataDir: 'poe' });
     const pluginList: PluginDefinition[] = [
       {
         pluginId: 'hello',
@@ -36,8 +41,8 @@ describe('pluginJobRunner', () => {
     });
 
     const job: PluginJobRequest = {
-      pluginId: 'hello',
-      series: [{ seriesUid: '1.2.3' }]
+      pluginId: 'hello-world',
+      series: [{ seriesUid }]
     };
 
     await runner.run('abcde', job);
@@ -65,7 +70,7 @@ describe('buildDicomVolume', () => {
   // If this test fails, double-check 'dicom_voxel_dump' image
   // has been correctly loaded in the Docker environment.
   test('craetes raw volume file', async () => {
-    const srcDir = path.resolve(__dirname, '../../test/dicom');
+    const srcDir = path.resolve(__dirname, '../../test/', seriesUid);
     const destDir = path.resolve(__dirname, '../../test/dicom-out');
     await fs.emptyDir(destDir);
     try {

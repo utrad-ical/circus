@@ -1,18 +1,19 @@
 import { table, TableUserConfig } from 'table';
-import { bootstrapQueueSystem } from '../bootstrap';
+import { bootstrapQueueSystem, bootstrapDaemonController } from '../bootstrap';
 import sleep from '../util/sleep';
 import chalk from 'chalk';
 
 export default async function monitor(argv: any) {
   const { queue, dispose } = await bootstrapQueueSystem();
+  const controller = await bootstrapDaemonController();
   try {
     for (;;) {
-      console.clear();
       const jobs = await queue.list('all');
-      console.log('CIRCUS CS Job Queue at ' + new Date().toLocaleTimeString());
+      console.log('CIRCUS CS Monitor at ' + new Date().toLocaleTimeString());
 
-      const item = jobs.length === 1 ? 'item' : 'items';
-      console.log(chalk.bold(`${jobs.length} ${item} in queue`));
+      const status = await controller.status();
+      const statusText =
+        status === 'running' ? chalk.green(status) : chalk.red(status);
 
       const rows = jobs.map(job => {
         return [
@@ -24,8 +25,11 @@ export default async function monitor(argv: any) {
       });
       rows.unshift(['Job ID', 'Status', 'Plugin', 'Queued At']);
 
+      console.clear();
+      console.log(`Job Manager Status: ${statusText}`);
+      console.log(`Number of Items in Queue: ${jobs.length}`);
       console.log(table(rows));
-      await sleep(1000);
+      await sleep(2000);
     }
   } finally {
     dispose();

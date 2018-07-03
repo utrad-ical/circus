@@ -1,8 +1,0 @@
-- pluginId: Lung-CAD
-  version: 1.4
-  type: CAD
-  dockerImage: circus/lung_cad:1.4
-  binds:
-    in: /circus/in
-    out: /circus/out
-  maxExecutionSeconds: 360

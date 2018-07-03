@@ -4,7 +4,11 @@ import config from './config';
 import * as path from 'path';
 import * as fs from 'fs-extra';
 
-const { mongoURL, collectionTitle, resultDir } = config.WebUI;
+const {
+  mongoUrl: mongoURL,
+  collectionName: collectionTitle
+} = config.jobReporter;
+const resultDir: string = ''; // @deprecated
 
 export async function inQueue(jobId: string): Promise<void> {
   console.log('Notice inQueue');

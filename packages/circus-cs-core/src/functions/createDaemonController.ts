@@ -12,13 +12,6 @@ const pm2: any = pify(_pm2);
 
 const script = 'daemon.js';
 
-interface Options {
-  name: string;
-  cwd: string;
-  output: string;
-  error: string;
-}
-
 export interface DaemonController {
   start: () => Promise<void>;
   stop: () => Promise<void>;
@@ -28,7 +21,7 @@ export interface DaemonController {
 }
 
 export default function createDaemonController(
-  startOptions: Options
+  startOptions: _pm2.StartOptions
 ): DaemonController {
   const execute = async (task: Function) => {
     await pm2.connect();

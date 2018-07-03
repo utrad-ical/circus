@@ -1,4 +1,4 @@
-export { default as bootstrapQueueSystem } from './bootstrapQueueSystem';
+export { bootstrapQueueSystem } from './bootstrap';
 
 // export { default as cancelJob } from "./functions/cancel-job";
 

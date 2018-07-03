@@ -9,7 +9,7 @@ import pluginJobReporter from './job/pluginJobReporter';
 import StaticDicomFileRepository from './dicom-file-repository/StaticDicomFileRepository';
 
 export function bootstrapDaemonController() {
-  const startOptions = config.daemon.startOptions;
+  const startOptions = config.jobManager.startOptions;
   const controller = createDaemonController(startOptions);
   return controller;
 }
@@ -48,7 +48,7 @@ export async function bootstrapJobRunner(): Promise<PluginJobRunner> {
     jobReporter,
     dockerRunner,
     dicomRepository,
-    pluginList: config.pluginList,
+    pluginList: config.plugins,
     workingDirectory: config.pluginWorkingDir
   });
   return jobRunner;

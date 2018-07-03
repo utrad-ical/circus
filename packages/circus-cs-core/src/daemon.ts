@@ -7,7 +7,7 @@ import config from './config';
 import sleep from './util/sleep';
 import { bootstrapQueueSystem, bootstrapJobRunner } from './bootstrap';
 
-const { tick } = config.daemon;
+const { checkQueueInterval } = config.jobManager;
 
 let interrupted: boolean = false; // Becomes true on SIGINT
 
@@ -31,25 +31,25 @@ export async function main() {
     while (!interrupted) {
       try {
         const nextJob = await queue.dequeue();
-        if (!nextJob) {
-          if (!emptyMessagePrinted) {
-            printLog('Currently the queue is empty.');
-            emptyMessagePrinted = true;
-          }
-          await cancellableSleep(tick);
-          continue;
-        } else {
-          emptyMessagePrinted = false;
-        }
         try {
+          if (!nextJob) {
+            if (!emptyMessagePrinted) {
+              printLog('Currently the queue is empty.');
+              emptyMessagePrinted = true;
+            }
+            await cancellableSleep(checkQueueInterval);
+            continue;
+          } else {
+            emptyMessagePrinted = false;
+          }
           await jobRunner.run(nextJob.jobId, nextJob.payload);
         } finally {
-          queue.settle(nextJob.jobId);
+          if (nextJob) queue.settle(nextJob.jobId);
         }
       } catch (e) {
         printLog('Fatal ' + e.message, true);
       }
-      await cancellableSleep(tick);
+      await cancellableSleep(checkQueueInterval);
     }
   } finally {
     dispose();

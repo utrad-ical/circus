@@ -5,10 +5,10 @@ const commands: { [key: string]: any } = {
   register: {
     help: 'Registeres a new job.'
   },
-  list_queue: {
+  'list-queue': {
     help: 'Lists queue items.'
   },
-  check_env: {
+  'check-env': {
     help: 'Performs a system integrity check.'
   },
   start: {

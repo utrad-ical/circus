@@ -44,12 +44,6 @@ export default async function list_queue(argv: any) {
     case argv.p:
       state = 'processing';
       break;
-    case argv.d:
-      state = 'done';
-      break;
-    case argv.e:
-      state = 'error';
-      break;
     case argv.w:
     default:
       state = 'wait';

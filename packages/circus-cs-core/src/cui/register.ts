@@ -1,6 +1,5 @@
 import * as ajv from 'ajv';
 import { bootstrapQueueSystem } from '../bootstrap';
-import { createItem } from '../queue/queue';
 
 const argumentsSchema = {
   type: 'object',
@@ -36,16 +35,12 @@ export default async function register(argv: any) {
   try {
     const newJobId = () => new Date().getTime().toString();
     const { jobId, pluginId, seriesUid, environment, priority } = argv;
-    const item = createItem(
-      jobId || newJobId(),
-      {
-        pluginId,
-        series: [{ seriesUid }],
-        environment
-      },
-      priority
-    );
-    await queue.enqueue(item);
+    const payload = {
+      pluginId,
+      series: [{ seriesUid }],
+      environment
+    };
+    await queue.enqueue(jobId || newJobId(), payload, priority);
   } finally {
     await dispose();
   }

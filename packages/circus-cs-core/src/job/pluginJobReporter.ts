@@ -18,15 +18,19 @@ export default function pluginJobReporter(
   collection: mongo.Collection
 ): PluginJobReporter {
   const report = async (jobId: string, type: string, payload?: any) => {
+    if (!jobId) throw new Error('Job ID undefined');
     console.log('Job Status', jobId, type);
     switch (type) {
       case 'processing':
       case 'finished':
       case 'error':
-        await collection.updateOne({ jobId }, { $set: { status: type } });
+        await collection.findOneAndUpdate(
+          { jobId },
+          { $set: { status: type } }
+        );
         break;
       case 'results':
-        await collection.updateOne(
+        await collection.findOneAndUpdate(
           { jobId },
           { $set: { results: payload.results } }
         );

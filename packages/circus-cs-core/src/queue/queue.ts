@@ -1,14 +1,27 @@
 import { Collection } from 'mongodb';
 
-export type QueueState = 'wait' | 'processing' | 'done' | 'error';
+export type QueueState = 'wait' | 'processing';
 
 export interface QueueSystem<T> {
+  /**
+   * Returns the list of current jobs and their status.
+   */
   list: (state?: QueueState | 'all') => Promise<Item<T>[]>;
-  enqueue: (queueItem: Item<T>) => Promise<string>;
+
+  /**
+   * Registers a ner job.
+   */
+  enqueue: (jobId: string, payload: T, priority?: number) => Promise<string>;
+
+  /**
+   * Returns the next job while marking it as 'processing'.
+   */
   dequeue: () => Promise<Item<T> | null>;
-  processing: (queueItem: Item<T>) => Promise<void>;
-  done: (queueItem: Item<T>) => Promise<void>;
-  error: (queueItem: Item<T>) => Promise<void>;
+
+  /**
+   * Removes the job from queue.
+   */
+  settle: (jobId: string) => Promise<void>;
 }
 
 export interface Item<T> {
@@ -17,27 +30,8 @@ export interface Item<T> {
   priority: number;
   payload: T;
   state: QueueState;
-  queuedAt?: string;
-  startedAt?: string;
-  finishedAt?: string;
-}
-
-/**
- * Create queue item from payload object
- */
-// TODO: Do we really have to export this?
-export function createItem<T>(
-  jobId: string,
-  payload: T,
-  priority: number = 0
-): Item<T> {
-  const queueItem: Item<T> = {
-    jobId,
-    payload,
-    priority,
-    state: 'wait'
-  };
-  return queueItem;
+  queuedAt?: Date;
+  startedAt?: Date;
 }
 
 interface QueueOptions {
@@ -58,42 +52,35 @@ export async function craeteMongoQueue<T>(
       .toArray();
   };
 
-  const enqueue = async (queueItem: Item<T>) => {
-    queueItem.queuedAt = new Date().toISOString();
-    const { insertedId } = await collection.insertOne(queueItem);
+  const enqueue = async (jobId: string, payload: T, priority: number = 0) => {
+    const item: Item<T> = {
+      jobId,
+      state: 'wait',
+      payload,
+      queuedAt: new Date(),
+      priority
+    };
+    const { insertedId } = await collection.insertOne(item);
     return insertedId.toString();
   };
 
   const dequeue = async () => {
-    return await collection.findOne<Item<T>>(
+    const result = (await collection.findOneAndUpdate(
       { state: 'wait' },
-      { sort: { priority: -1, _id: 1 }, limit: 1 }
-    );
+      { $set: { state: 'processing' } },
+      { sort: { priority: -1, _id: 1 }, returnOriginal: false }
+    )).value as Item<T> | null;
+    return result;
   };
 
-  const processing = async (queueItem: Item<T>) => {
-    const { value } = await collection.findOneAndUpdate(
-      { _id: queueItem._id, state: 'wait' },
-      { $set: { state: 'processing', startedAt: new Date().toISOString() } }
-    );
-    if (value === null) throw new Error('Queue item status error.');
+  const settle = async (jobId: string) => {
+    const result = await collection.findOneAndDelete({
+      jobId,
+      state: 'processing'
+    });
+    if (!result.value)
+      throw new Error('Tried to mark a job as done before it gets started.');
   };
 
-  const done = async (queueItem: Item<T>) => {
-    const { value, lastErrorObject, ok } = await collection.findOneAndUpdate(
-      { _id: queueItem._id, state: 'processing' },
-      { $set: { state: 'done', finishedAt: new Date().toISOString() } }
-    );
-    if (value === null) throw new Error('Queue item status error.');
-  };
-
-  const error = async (queueItem: Item<T>) => {
-    const { value, lastErrorObject, ok } = await collection.findOneAndUpdate(
-      { _id: queueItem._id },
-      { $set: { state: 'error', finishedAt: new Date().toISOString() } }
-    );
-    if (value === null) throw new Error('Queue item status error.');
-  };
-
-  return { list, enqueue, dequeue, processing, done, error };
+  return { list, enqueue, dequeue, settle };
 }

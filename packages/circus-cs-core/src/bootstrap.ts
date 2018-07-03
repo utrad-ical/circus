@@ -37,7 +37,10 @@ export async function bootstrapQueueSystem(): Promise<QueueSystemData> {
  */
 export async function bootstrapJobRunner(): Promise<PluginJobRunner> {
   const dockerRunner = new DockerRunner(config.docker);
-  const jobReporter = pluginJobReporter(config.jobReporter);
+
+  const client = await mongo.MongoClient.connect(config.jobReporter.mongoUrl);
+  const collection = client.db().collection(config.jobReporter.collectionName);
+  const jobReporter = pluginJobReporter(collection);
   const dicomRepository = new StaticDicomFileRepository(
     config.dicomFileRepository
   );

@@ -3,48 +3,66 @@
  * This program is not to meant to be invoked directly.
  * @module
  */
-
-import processNextJob from './functions/process-next-job';
 import config from './config';
 import sleep from './util/sleep';
+import { bootstrapQueueSystem, bootstrapJobRunner } from './bootstrap';
 
-const { tick, waitOnFail } = config.daemon;
+const { tick } = config.daemon;
 
-let exec: boolean = true;
+let interrupted: boolean = false; // Becomes true on SIGINT
 
 const printLog = (message: string, isError: boolean = false) => {
   console[isError ? 'error' : 'log'](new Date().toISOString() + ' ' + message);
 };
 
-process.on('SIGINT', function() {
-  printLog('Signal SIGINT');
-  printLog('CIRCUS CS Job Manager will be stopped on next dequeue.');
-  exec = false;
-});
+async function cancellableSleep(ms: number) {
+  const start = Date.now();
+  while (start + ms > Date.now() && !interrupted) await sleep(100);
+}
 
 export async function main() {
   printLog(`CIRCUS CS Job Manager started. pid: ${process.pid}`);
 
-  let lastIsEmpty = false; // Flag to avoid printing too many 'Queue empty'
-  do {
-    try {
-      const result = await processNextJob();
-      if (result === null) {
-        if (!lastIsEmpty) printLog('Queue empty');
-        lastIsEmpty = true;
-      } else {
-        lastIsEmpty = false;
-        printLog(result ? 'Succeeded' : 'Failed');
-        if (!result && waitOnFail && exec) await sleep(waitOnFail);
+  const jobRunner = await bootstrapJobRunner();
+  const { queue, dispose } = await bootstrapQueueSystem();
+  let emptyMessagePrinted = false;
+
+  try {
+    while (!interrupted) {
+      try {
+        const nextJob = await queue.dequeue();
+        if (!nextJob) {
+          if (!emptyMessagePrinted) {
+            printLog('Currently the queue is empty.');
+            emptyMessagePrinted = true;
+          }
+          await cancellableSleep(tick);
+          continue;
+        } else {
+          emptyMessagePrinted = false;
+        }
+        try {
+          await jobRunner.run(nextJob.jobId, nextJob.payload);
+        } finally {
+          queue.settle(nextJob.jobId);
+        }
+      } catch (e) {
+        printLog('Fatal ' + e.message, true);
       }
-    } catch (e) {
-      printLog('Fatal ' + e.message, true);
+      await cancellableSleep(tick);
     }
-    await sleep(tick);
-  } while (exec);
+  } finally {
+    dispose();
+  }
 
   printLog('CIRCUS CS Job Manager stopped.');
   process.exit(0);
 }
+
+process.on('SIGINT', function() {
+  printLog('Signal SIGINT');
+  printLog('CIRCUS CS Job Manager will be stopped on next loop.');
+  interrupted = true;
+});
 
 main();

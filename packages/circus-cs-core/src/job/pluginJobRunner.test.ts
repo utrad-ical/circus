@@ -9,9 +9,8 @@ import * as path from 'path';
 import MockDicomFileRepository from '../dicom-file-repository/MockDicomFileRepository';
 import DockerRunner from '../util/DockerRunner';
 import StaticDicomFileRepository from '../dicom-file-repository/StaticDicomFileRepository';
-import { ENGINE_METHOD_DIGESTS } from 'constants';
 
-const seriesUid = '2.16.840.1.113662.2.1.2519.21582.2990505.2105152.2381633.20';
+const seriesUid = 'dicom';
 
 describe('pluginJobRunner', () => {
   afterEach(async () => {

@@ -39,9 +39,8 @@ export async function main() {
             }
             await cancellableSleep(checkQueueInterval);
             continue;
-          } else {
-            emptyMessagePrinted = false;
           }
+          emptyMessagePrinted = false;
           await jobRunner.run(nextJob.jobId, nextJob.payload);
         } finally {
           if (nextJob) queue.settle(nextJob.jobId);

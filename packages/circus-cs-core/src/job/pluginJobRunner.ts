@@ -4,6 +4,7 @@ import * as path from 'path';
 import * as fs from 'fs-extra';
 import DockerRunner from '../util/DockerRunner';
 import DicomFileRepository from '../dicom-file-repository/DicomFileRepository';
+import validatePluginResults from './validatePluginResults';
 
 export interface PluginJobRunner {
   run: (jobId: string, job: PluginJobRequest) => Promise<boolean>;
@@ -17,13 +18,17 @@ export default function pluginJobRunner(deps: {
   dicomRepository: DicomFileRepository;
   pluginList: PluginDefinition[];
   workingDirectory: string;
+  resultsDirectory: string;
+  removeTemporaryDirectory?: boolean;
 }): PluginJobRunner {
   const {
     jobReporter,
     dockerRunner,
     dicomRepository,
     pluginList,
-    workingDirectory
+    workingDirectory,
+    resultsDirectory,
+    removeTemporaryDirectory = true
   } = deps;
 
   const baseDir = (jobId: string) => {
@@ -71,13 +76,15 @@ export default function pluginJobRunner(deps: {
   };
 
   const postProcess = async (jobId: string, job: PluginJobRequest) => {
-    // validation
     const outDir = workDir(jobId, 'out');
-    // const results = await fs.readFile(path.join(outDir, 'results.json'));
-    // await jobReporter.report(jobId, 'results', results);
-    // store everything to results directory
-    // await fs.copy(outDir, pluginResultsDir);
-    // await fs.remove(baseDir(jobId));
+
+    // Perform validation
+    const results = await readAndValidatePluginResults(outDir);
+    await jobReporter.report(jobId, 'results', results);
+    // Store everything to results directory
+    await fs.copy(outDir, resultsDirectory);
+    // And removes the job temp directory altogether
+    if (removeTemporaryDirectory) await fs.remove(baseDir(jobId));
   };
 
   /**
@@ -99,6 +106,19 @@ export default function pluginJobRunner(deps: {
   };
 
   return { run };
+}
+
+/**
+ * Inspects the content of the plugin output directory
+ * and returns the content of the results file.
+ */
+export async function readAndValidatePluginResults(outDir: string) {
+  const fileContent = await fs.readFile(
+    path.join(outDir, 'results.json'),
+    'utf8'
+  );
+  const results = JSON.parse(fileContent);
+  return results;
 }
 
 /**

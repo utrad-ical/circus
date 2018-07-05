@@ -36,7 +36,8 @@ describe('pluginJobRunner', () => {
       dockerRunner,
       dicomRepository,
       pluginList,
-      workingDirectory: __dirname
+      workingDirectory: __dirname,
+      resultsDirectory: path.join(__dirname, 'test-results')
     });
 
     const job: PluginJobRequest = {

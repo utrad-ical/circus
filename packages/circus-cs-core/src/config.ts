@@ -18,6 +18,11 @@ export interface Configuration {
   pluginWorkingDir: string;
 
   /**
+   * A path to the directory where the job results are permanentlly stored.
+   */
+  pluginResultsDir: string;
+
+  /**
    * Mongo Collection used as the job queue.
    */
   queue: MongoConnectionConfiguration;
@@ -60,6 +65,8 @@ export interface Configuration {
 
 const defaults: Configuration = {
   pluginWorkingDir: path.join(os.tmpdir(), 'circus-cs'),
+
+  pluginResultsDir: '/var/circus/plugin-results',
 
   queue: {
     mongoUrl: 'mongodb://localhost:27017/circus-cs-core',

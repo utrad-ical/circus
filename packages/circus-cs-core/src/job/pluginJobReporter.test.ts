@@ -1,21 +1,16 @@
 import * as mongo from 'mongodb';
 import pluginJobReporter, { PluginJobReporter } from './pluginJobReporter';
+import { getTestCollection } from '../testHelper';
 
 describe('pluginJobReporter', () => {
   let client: mongo.MongoClient;
   let collection: mongo.Collection;
   let reporter: PluginJobReporter;
 
-  const mongoUrl =
-    process.env.CIRCUS_MONGO_TEST_URL ||
-    'mongodb://localhost:27017/cs-core-test';
-  const collectionName = 'pluginJobs';
-
   const jobId = 'aabbcc';
 
   beforeAll(async () => {
-    client = await mongo.MongoClient.connect(mongoUrl);
-    collection = client.db().collection(collectionName);
+    ({ client, collection } = await getTestCollection('pluginJobs'));
     reporter = pluginJobReporter(collection);
   });
 

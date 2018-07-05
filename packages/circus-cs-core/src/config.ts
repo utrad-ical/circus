@@ -6,7 +6,7 @@ import { DockerOptions } from 'dockerode';
 import { StartOptions } from 'pm2';
 import { PluginDefinition } from './interface';
 
-interface MongoConnectionConfiguration {
+export interface MongoConnectionConfiguration {
   mongoUrl: string;
   collectionName: string;
 }

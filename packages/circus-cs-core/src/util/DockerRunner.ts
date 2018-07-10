@@ -1,17 +1,17 @@
 import { EventEmitter } from 'events';
 import * as Dockerode from 'dockerode';
 import * as memory from 'memory-streams';
-import sleep from '../util/sleep';
+import sleep from './sleep';
 
 // Supported events:
-//   - container
-//   - attached
-//   - started
-//   - inspected
-//   - disappeared
-//   - exited
-//   - timeouted
-//   - (statechange may be supported ...?)
+// - container
+// - attached
+// - started
+// - inspected
+// - disappeared
+// - exited
+// - timeouted
+// - (statechange may be supported ...?)
 
 const defaultDockerOption =
   process.platform === 'win32'

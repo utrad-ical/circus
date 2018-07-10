@@ -4,7 +4,7 @@ import * as path from 'path';
 import * as fs from 'fs-extra';
 import DockerRunner from '../util/DockerRunner';
 import DicomFileRepository from '../dicom-file-repository/DicomFileRepository';
-import validatePluginResults from './validatePluginResults';
+import { PluginResultsValidator } from './pluginResultsValidator';
 
 export interface PluginJobRunner {
   run: (jobId: string, job: PluginJobRequest) => Promise<boolean>;
@@ -19,6 +19,7 @@ export default function pluginJobRunner(deps: {
   pluginList: PluginDefinition[];
   workingDirectory: string;
   resultsDirectory: string;
+  resultsValidator?: PluginResultsValidator;
   removeTemporaryDirectory?: boolean;
 }): PluginJobRunner {
   const {
@@ -28,6 +29,7 @@ export default function pluginJobRunner(deps: {
     pluginList,
     workingDirectory,
     resultsDirectory,
+    resultsValidator,
     removeTemporaryDirectory = true
   } = deps;
 
@@ -79,7 +81,19 @@ export default function pluginJobRunner(deps: {
     const outDir = workDir(jobId, 'out');
 
     // Perform validation
-    const results = await readAndValidatePluginResults(outDir);
+    let results;
+    if (resultsValidator) {
+      try {
+        const jsonStr = await fs.readFile(
+          path.join(outDir, 'results.json'),
+          'utf8'
+        );
+        const rawResults = JSON.parse(jsonStr);
+        results = await resultsValidator.validate(rawResults, outDir);
+      } catch (e) {
+        throw new Error(`Plug-in validation failed: ${e.message}`);
+      }
+    }
     await jobReporter.report(jobId, 'results', results);
     // Store everything to results directory
     await fs.copy(outDir, resultsDirectory);

@@ -2,3 +2,4 @@
 /docker_images/
 /logs/
 /tmp/
+/coverage

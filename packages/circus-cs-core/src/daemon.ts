@@ -19,6 +19,7 @@ let interrupted: boolean = false;
 type LoggerFunction = (message: string) => void;
 
 interface Logger {
+  info: LoggerFunction;
   log: LoggerFunction;
   error: LoggerFunction;
 }
@@ -49,6 +50,7 @@ export async function main(logger: Logger) {
             continue;
           }
           emptyMessagePrinted = false;
+          logger.log(`Job ${nextJob.jobId} started.`);
           const succeed = await jobRunner.run(nextJob.jobId, nextJob.payload);
           logger.log(
             `Job ${nextJob.jobId} ${succeed ? 'finished' : 'failed'}.`
@@ -69,13 +71,17 @@ export async function main(logger: Logger) {
   process.exit(0);
 }
 
+const logTo = (logLevel: string) => {
+  return (message: string) =>
+    (console as any)[logLevel](
+      new Date().toISOString() + ' ' + message
+    ) as LoggerFunction;
+};
+
 const defaultLogger: Logger = {
-  log: (message: string) => {
-    console.log(new Date().toISOString() + ' ' + message);
-  },
-  error: (message: string) => {
-    console.error(new Date().toISOString() + ' ' + message);
-  }
+  info: logTo('info'),
+  log: logTo('log'),
+  error: logTo('error')
 };
 
 process.on('SIGINT', function() {

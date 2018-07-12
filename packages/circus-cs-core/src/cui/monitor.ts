@@ -2,6 +2,12 @@ import { table, TableUserConfig } from 'table';
 import { bootstrapQueueSystem, bootstrapDaemonController } from '../bootstrap';
 import sleep from '../util/sleep';
 import chalk from 'chalk';
+import * as moment from 'moment';
+
+const dt = (date: Date) => {
+  const m = moment(date);
+  return m.format('YY-MM-DD HH:mm:ss') + ' (' + m.fromNow() + ')';
+};
 
 export default async function monitor(argv: any) {
   const { queue, dispose } = await bootstrapQueueSystem();
@@ -16,14 +22,20 @@ export default async function monitor(argv: any) {
         status === 'running' ? chalk.green(status) : chalk.red(status);
 
       const rows = jobs.map(job => {
+        const text =
+          job.state === 'wait'
+            ? `Queued at ${dt(job.queuedAt!)}`
+            : job.state === 'processing'
+              ? `Started at ${dt(job.startedAt!)}`
+              : 'Error';
         return [
           job.jobId.substring(0, 16),
           job.state,
           job.payload.pluginId,
-          job.queuedAt
+          text
         ];
       });
-      rows.unshift(['Job ID', 'Status', 'Plugin', 'Queued At']);
+      rows.unshift(['Job ID', 'Status', 'Plugin', 'Desc']);
 
       console.clear();
       console.log(`Job Manager Status: ${statusText}`);

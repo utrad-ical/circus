@@ -6,9 +6,11 @@ import pluginJobRunner, {
 import { PluginJobRequest, PluginDefinition } from '../interface';
 import * as fs from 'fs-extra';
 import * as path from 'path';
-import MockDicomFileRepository from '../dicom-file-repository/MockDicomFileRepository';
 import DockerRunner from '../util/DockerRunner';
-import StaticDicomFileRepository from '../dicom-file-repository/StaticDicomFileRepository';
+import {
+  StaticDicomFileRepository,
+  DicomFileRepository
+} from '@utrad-ical/circus-dicom-repository';
 
 const seriesUid = 'dicom';
 
@@ -55,7 +57,14 @@ describe('fetchSeriesFromRepository', () => {
   const dir = path.join(__dirname, 'test-fetch');
 
   test('fetch DICOM data from repository', async () => {
-    const repository = new MockDicomFileRepository({});
+    const repository = ({
+      getSeries: jest.fn(uid => {
+        return {
+          images: '1-5',
+          load: () => Promise.resolve('abc')
+        };
+      })
+    } as any) as DicomFileRepository;
     await fetchSeriesFromRepository(repository, 'abc', dir);
     const files = await fs.readdir(dir);
     expect(files).toHaveLength(5);

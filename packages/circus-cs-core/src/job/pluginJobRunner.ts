@@ -3,8 +3,9 @@ import { PluginJobReporter } from './pluginJobReporter';
 import * as path from 'path';
 import * as fs from 'fs-extra';
 import DockerRunner from '../util/DockerRunner';
-import DicomFileRepository from '../dicom-file-repository/DicomFileRepository';
+import { DicomFileRepository } from '@utrad-ical/circus-dicom-repository';
 import { PluginResultsValidator } from './pluginResultsValidator';
+import { multirange, MultiRange } from 'multi-integer-range';
 
 export interface PluginJobRunner {
   run: (jobId: string, job: PluginJobRequest) => Promise<boolean>;
@@ -148,11 +149,12 @@ export async function fetchSeriesFromRepository(
   destDir: string
 ) {
   await fs.ensureDir(destDir);
-  const { seriesLoader, count } = await dicomRepository.getSeriesLoader(
-    seriesUid
-  );
-  for (let i = 1; i <= count; i++) {
-    const image = await seriesLoader(i);
+  const { load, images } = await dicomRepository.getSeries(seriesUid);
+  let it = new MultiRange(images).getIterator(),
+    next;
+  while (!(next = it.next()).done) {
+    const i: number = next.value!;
+    const image = await load(i);
     await fs.writeFile(
       path.join(destDir, ('00000000' + i).slice(-8) + '.dcm'),
       Buffer.from(image)

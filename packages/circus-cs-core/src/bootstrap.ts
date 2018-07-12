@@ -6,7 +6,7 @@ import * as mongo from 'mongodb';
 import pluginJobRunner, { PluginJobRunner } from './job/pluginJobRunner';
 import DockerRunner from './util/DockerRunner';
 import pluginJobReporter from './job/pluginJobReporter';
-import StaticDicomFileRepository from './dicom-file-repository/StaticDicomFileRepository';
+import { StaticDicomFileRepository } from '@utrad-ical/circus-dicom-repository';
 
 export function bootstrapDaemonController() {
   const startOptions = config.jobManager.startOptions;
@@ -42,14 +42,15 @@ export async function bootstrapJobRunner(): Promise<PluginJobRunner> {
   const collection = client.db().collection(config.jobReporter.collectionName);
   const jobReporter = pluginJobReporter(collection);
   const dicomRepository = new StaticDicomFileRepository(
-    config.dicomFileRepository
+    config.dicomFileRepository.options
   );
   const jobRunner = pluginJobRunner({
     jobReporter,
     dockerRunner,
     dicomRepository,
     pluginList: config.plugins,
-    workingDirectory: config.pluginWorkingDir
+    workingDirectory: config.pluginWorkingDir,
+    resultsDirectory: config.pluginResultsDir
   });
   return jobRunner;
 }

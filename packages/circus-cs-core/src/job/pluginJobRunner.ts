@@ -97,7 +97,9 @@ export default function pluginJobRunner(deps: {
     }
     await jobReporter.report(jobId, 'results', results);
     // Store everything to results directory
-    await fs.copy(outDir, resultsDirectory);
+    const resultsTarget = path.join(resultsDirectory, jobId);
+    await fs.ensureDir(resultsTarget);
+    await fs.copy(outDir, resultsTarget);
     // And removes the job temp directory altogether
     if (removeTemporaryDirectory) await fs.remove(baseDir(jobId));
   };

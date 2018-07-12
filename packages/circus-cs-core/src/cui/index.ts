@@ -66,7 +66,7 @@ async function main() {
     await callFunc(args);
   } catch (e) {
     console.log(chalk.red('Error:'));
-    console.error(e.message);
+    console.error(e);
     process.exit(1);
   }
 }

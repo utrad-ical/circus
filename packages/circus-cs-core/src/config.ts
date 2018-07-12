@@ -18,6 +18,11 @@ export interface Configuration {
   pluginWorkingDir: string;
 
   /**
+   * Determines whether to remove working directory after job has finished.
+   */
+  cleanPluginWorkingDir: boolean;
+
+  /**
    * A path to the directory where the job results are permanentlly stored.
    */
   pluginResultsDir: string;
@@ -67,6 +72,7 @@ const defaults: Configuration = {
   pluginWorkingDir: path.join(os.tmpdir(), 'circus-cs'),
 
   pluginResultsDir: '/var/circus/plugin-results',
+  cleanPluginWorkingDir: true,
 
   queue: {
     mongoUrl: 'mongodb://localhost:27017/circus-cs-core',

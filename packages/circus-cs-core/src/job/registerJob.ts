@@ -7,7 +7,7 @@ function checkSeriesImageRange(
   imagesInSeries: MultiRange,
   series: JobSeries
 ): void {
-  if (!('startImgNum' in series)) return;
+  if (typeof series.startImgNum === 'undefined') return;
   if (typeof series.startImgNum !== 'number') {
     throw new TypeError('Invalid startImgNum');
   }

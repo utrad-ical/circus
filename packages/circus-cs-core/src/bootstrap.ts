@@ -60,7 +60,8 @@ export async function bootstrapJobRunner(
     dicomRepository,
     pluginList: config.plugins,
     workingDirectory: config.pluginWorkingDir,
-    resultsDirectory: config.pluginResultsDir
+    resultsDirectory: config.pluginResultsDir,
+    removeTemporaryDirectory: config.cleanPluginWorkingDir
   });
   return jobRunner;
 }

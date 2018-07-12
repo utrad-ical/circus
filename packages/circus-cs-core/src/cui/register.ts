@@ -25,9 +25,9 @@ function parseSeries(str: string): JobSeries {
 
   return {
     seriesUid,
-    startImgNum: asInt(startImgNum),
-    endImgNum: asInt(endImgNum),
-    imageDelta: asInt(imageDelta)
+    ...(startImgNum ? { startImgNum: asInt(startImgNum) } : {}),
+    ...(endImgNum ? { endImgNum: asInt(endImgNum) } : {}),
+    ...(imageDelta ? { imageDelta: asInt(imageDelta) } : {})
   };
 }
 
@@ -56,6 +56,7 @@ export default async function register(argv: any) {
     const payload = { pluginId, series: seriesList, environment };
     const deps = { queue, pluginDefinitions, repository };
     await registerJob(jobId, payload, priority, deps);
+    console.log(`Registered Job ID: ${jobId}`);
   } finally {
     await dispose();
   }

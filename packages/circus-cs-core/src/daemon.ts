@@ -5,7 +5,11 @@
  */
 import config from './config';
 import sleep from './util/sleep';
-import { bootstrapQueueSystem, bootstrapJobRunner } from './bootstrap';
+import {
+  bootstrapQueueSystem,
+  bootstrapJobRunner,
+  bootstrapDicomFileRepository
+} from './bootstrap';
 
 const { checkQueueInterval } = config.jobManager;
 
@@ -26,7 +30,8 @@ async function cancellableSleep(ms: number) {
 export async function main(logger: Logger) {
   logger.log(`CIRCUS CS Job Manager started. pid: ${process.pid}`);
 
-  const jobRunner = await bootstrapJobRunner();
+  const dicomRepository = await bootstrapDicomFileRepository();
+  const jobRunner = await bootstrapJobRunner(dicomRepository);
   const { queue, dispose } = await bootstrapQueueSystem();
   let emptyMessagePrinted = false;
 
@@ -44,7 +49,10 @@ export async function main(logger: Logger) {
             continue;
           }
           emptyMessagePrinted = false;
-          await jobRunner.run(nextJob.jobId, nextJob.payload);
+          const succeed = await jobRunner.run(nextJob.jobId, nextJob.payload);
+          logger.log(
+            `Job ${nextJob.jobId} ${succeed ? 'finished' : 'failed'}.`
+          );
         } finally {
           if (nextJob) queue.settle(nextJob.jobId);
         }

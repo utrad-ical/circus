@@ -1,4 +1,4 @@
-import * as glob from 'glob-promise';
+import glob from 'glob-promise';
 import * as path from 'path';
 import chalk from 'chalk';
 import * as fs from 'fs-extra';
@@ -50,7 +50,8 @@ async function importSeries(db, files) {
     }
     for (const file of files) {
       console.log(`Importing: ${file}`);
-      await importer.importFromFile(file);
+      const domain = 'default';
+      await importer.importFromFile(file, domain);
       count++;
     }
   }

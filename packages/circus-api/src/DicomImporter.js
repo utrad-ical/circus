@@ -77,6 +77,7 @@ export default class DicomImporter {
 
   /**
    * @param {string} file
+   * @param {string} domain
    */
   async importFromFile(file, domain) {
     // Read the DICOM file

@@ -7,13 +7,13 @@ require('babel-register');
 // Consider removing this after the stable release of Babel 7.x,
 // which includes "typescript" preset.
 const compilerOptions = {
-	module: 'CommonJS',
-	target: 'es2017',
-	strictNullChecks: true,
+  module: 'CommonJS',
+  target: 'es2017',
+  strictNullChecks: true
 };
 
 require('ts-node').register({
-	compilerOptions,
-	disableWarnings: true,
-	ignore: false
+  compilerOptions,
+  disableWarnings: true,
+  ignore: false
 });

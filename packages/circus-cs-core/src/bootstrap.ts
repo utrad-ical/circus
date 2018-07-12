@@ -6,7 +6,10 @@ import * as mongo from 'mongodb';
 import pluginJobRunner, { PluginJobRunner } from './job/pluginJobRunner';
 import DockerRunner from './util/DockerRunner';
 import pluginJobReporter from './job/pluginJobReporter';
-import { StaticDicomFileRepository } from '@utrad-ical/circus-dicom-repository';
+import {
+  StaticDicomFileRepository,
+  DicomFileRepository
+} from '@utrad-ical/circus-dicom-repository';
 
 export function bootstrapDaemonController() {
   const startOptions = config.jobManager.startOptions;
@@ -32,18 +35,25 @@ export async function bootstrapQueueSystem(): Promise<QueueSystemData> {
   };
 }
 
+export async function bootstrapDicomFileRepository(): Promise<
+  DicomFileRepository
+> {
+  const dicomRepository = new StaticDicomFileRepository(
+    config.dicomFileRepository.options
+  );
+  return dicomRepository;
+}
 /**
  * Creates a job runner based on the current configuration.
  */
-export async function bootstrapJobRunner(): Promise<PluginJobRunner> {
+export async function bootstrapJobRunner(
+  dicomRepository: DicomFileRepository
+): Promise<PluginJobRunner> {
   const dockerRunner = new DockerRunner(config.docker);
 
   const client = await mongo.MongoClient.connect(config.jobReporter.mongoUrl);
   const collection = client.db().collection(config.jobReporter.collectionName);
   const jobReporter = pluginJobReporter(collection);
-  const dicomRepository = new StaticDicomFileRepository(
-    config.dicomFileRepository.options
-  );
   const jobRunner = pluginJobRunner({
     jobReporter,
     dockerRunner,

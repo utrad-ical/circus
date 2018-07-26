@@ -11,9 +11,9 @@ describe('Box', function() {
     it('must return 4 points with box and axial section', function() {
       function test(z, points) {
         const intersections = box.intersectionOfBoxAndPlane(cube, {
-          origin: new Vector3(0, 0, z),
-          xAxis: new Vector3(2, 0, 0),
-          yAxis: new Vector3(0, 2, 0)
+          origin: [0, 0, z],
+          xAxis: [2, 0, 0],
+          yAxis: [0, 2, 0]
         });
 
         assert.strictEqual((intersections || []).length, points.length);

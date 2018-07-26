@@ -70,16 +70,16 @@ describe('Section', function() {
   describe('should handle section transformations', function() {
     function section() {
       return {
-        origin: new Vector3(1, 3, 5),
-        xAxis: new Vector3(2, 5, 9),
-        yAxis: new Vector3(8, 8, 10)
+        origin: [1, 3, 5],
+        xAxis: [2, 5, 9],
+        yAxis: [8, 8, 10]
       };
     }
 
     it('#transform', function() {
       const s = section();
       const t = geo.translateSection(s, new Vector3(10, 11, 12));
-      assert.deepEqual(t.origin.toArray(), [11, 14, 17]);
+      assert.deepEqual(t.origin, [11, 14, 17]);
     });
   });
 });

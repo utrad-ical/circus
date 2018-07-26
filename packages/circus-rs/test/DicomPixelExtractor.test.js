@@ -25,7 +25,8 @@ describe('DicomPixelExtractor', function() {
     );
     const readArray = new pxInfo.arrayClass(data.pixelData);
 
-    const doRescale = data.rescale && typeof data.rescale.intercept === 'number';
+    const doRescale =
+      data.rescale && typeof data.rescale.intercept === 'number';
     typeof data.rescale.slope === 'number';
 
     // write PNG image
@@ -49,11 +50,13 @@ describe('DicomPixelExtractor', function() {
         arr[x + y * data.columns] = o;
       }
     }
-    encoder.write(new Buffer(arr), data.columns, data.rows).then(out => {
-      const stream = fs.createWriteStream(testdir + file + '.png');
-      out.pipe(stream);
-      stream.on('close', done);
-    });
+    encoder
+      .write(Buffer.from(arr.buffer), data.columns, data.rows)
+      .then(out => {
+        const stream = fs.createWriteStream(testdir + file + '.png');
+        out.pipe(stream);
+        stream.on('close', done);
+      });
   }
 
   function testFile(file, checks) {

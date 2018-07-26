@@ -6,7 +6,7 @@ describe('ImageEncoder', function() {
   let originalImage;
 
   before(function() {
-    originalImage = new Buffer(16 * 16);
+    originalImage = Buffer.alloc(16 * 16);
     for (let x = 0; x < 16; x++) {
       for (let y = 0; y < 16; y++) {
         originalImage.writeUInt8(x * 16 + y, y * 16 + y);

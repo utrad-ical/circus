@@ -39,7 +39,7 @@
     "log4js": "^1.1.1",
     "minimist": "^1.2.0",
     "multi-integer-range": "^4.0.3",
-    "pngjs": "^3.2.0",
+    "pngjs": "^3.3.3",
     "style-loader": "^0.19.1",
     "three": "^0.89.0",
     "tinycolor2": "^1.4.1",

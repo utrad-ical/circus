@@ -41,7 +41,7 @@ async function create(iconPath, fontName, prefix) {
   makeSvg(glyphs, fontName, prefix);
 
   function makeSvg(glyphs) {
-    let svgFont = new Buffer(0);
+    let svgFont = Buffer.alloc(0);
     const svgOptions = {
       fontName,
       fontHeight: 512,
@@ -67,9 +67,9 @@ async function create(iconPath, fontName, prefix) {
 
   function makeWoff(svgFont, glyphs) {
     const ttfBuf = svg2ttf(svgFont);
-    const ttfFont = new Buffer(ttfBuf.buffer);
+    const ttfFont = Buffer.from(ttfBuf.buffer);
     const woffBuf = ttf2woff(new Uint8Array(ttfFont));
-    const woffFont = new Buffer(woffBuf.buffer);
+    const woffFont = Buffer.from(woffBuf.buffer);
     fs.writeFileSync(path.resolve(__dirname, `${fontName}.woff`), woffFont);
 
     let css = glyphs

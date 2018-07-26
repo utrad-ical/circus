@@ -39,29 +39,29 @@ describe('Section', function() {
   it('#detectOrthogonalSection', function() {
     assert.equal(
       su.detectOrthogonalSection({
-        xAxis: new Vector3(1, 0, 0),
-        yAxis: new Vector3(0, 1, 0)
+        xAxis: [1, 0, 0],
+        yAxis: [0, 1, 0]
       }),
       'axial'
     );
     assert.equal(
       su.detectOrthogonalSection({
-        xAxis: new Vector3(0, 1, 0),
-        yAxis: new Vector3(0, 0, 1)
+        xAxis: [0, 1, 0],
+        yAxis: [0, 0, 1]
       }),
       'sagittal'
     );
     assert.equal(
       su.detectOrthogonalSection({
-        xAxis: new Vector3(1, 0, 0),
-        yAxis: new Vector3(0, 0, 1)
+        xAxis: [1, 0, 0],
+        yAxis: [0, 0, 1]
       }),
       'coronal'
     );
     assert.equal(
       su.detectOrthogonalSection({
-        xAxis: new Vector3(1, 2, 0),
-        yAxis: new Vector3(0, 1, 0)
+        xAxis: [1, 2, 0],
+        yAxis: [0, 1, 0]
       }),
       'oblique'
     );

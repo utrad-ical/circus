@@ -1,4 +1,3 @@
-import { Vector2D } from './Vector';
 import { Box2, Vector2 } from 'three';
 
 /**

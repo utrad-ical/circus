@@ -2,44 +2,52 @@
 
 const geo = require('../src/common/geometry');
 const assert = require('chai').assert;
+const { Vector2, Box2 } = require('three');
 
 describe('Rectangle', function() {
   describe('fitRectangle', function() {
     it('calculates fitting when the aspect ratio of two rects are the same', function() {
-      assert.deepEqual(geo.fitRectangle([3, 3], [3, 3]), {
-        origin: [0, 0],
-        size: [3, 3]
-      });
-      assert.deepEqual(geo.fitRectangle([1, 1], [2, 2]), {
-        origin: [0, 0],
-        size: [1, 1]
-      });
-      assert.deepEqual(geo.fitRectangle([5, 10], [1, 2]), {
-        origin: [0, 0],
-        size: [5, 10]
-      });
+      assert.isTrue(
+        geo
+          .fitRectangle(new Vector2(3, 3), new Vector2(3, 3))
+          .equals(new Box2(new Vector2(0, 0), new Vector2(3, 3)))
+      );
+      assert.isTrue(
+        geo
+          .fitRectangle(new Vector2(1, 1), new Vector2(2, 2))
+          .equals(new Box2(new Vector2(0, 0), new Vector2(1, 1)))
+      );
+      assert.isTrue(
+        geo
+          .fitRectangle(new Vector2(5, 10), new Vector2(1, 2))
+          .equals(new Box2(new Vector2(0, 0), new Vector2(5, 10)))
+      );
     });
 
     it('calculates fitting when the outer rect is wider', function() {
-      assert.deepEqual(geo.fitRectangle([3, 1], [1, 1]), {
-        origin: [1, 0],
-        size: [1, 1]
-      });
-      assert.deepEqual(geo.fitRectangle([6, 1], [4, 2]), {
-        origin: [2, 0],
-        size: [2, 1]
-      });
+      assert.isTrue(
+        geo
+          .fitRectangle(new Vector2(3, 1), new Vector2(1, 1))
+          .equals(new Box2(new Vector2(1, 0), new Vector2(2, 1)))
+      );
+      assert.isTrue(
+        geo
+          .fitRectangle(new Vector2(6, 1), new Vector2(4, 2))
+          .equals(new Box2(new Vector2(2, 0), new Vector2(4, 1)))
+      );
     });
 
     it('calculates fitting when the outer rect is taller', function() {
-      assert.deepEqual(geo.fitRectangle([1, 3], [1, 1]), {
-        origin: [0, 1],
-        size: [1, 1]
-      });
-      assert.deepEqual(geo.fitRectangle([1, 6], [2, 4]), {
-        origin: [0, 2],
-        size: [1, 2]
-      });
+      assert.isTrue(
+        geo
+          .fitRectangle(new Vector2(1, 3), new Vector2(1, 1))
+          .equals(new Box2(new Vector2(0, 1), new Vector2(1, 2)))
+      );
+      assert.isTrue(
+        geo
+          .fitRectangle(new Vector2(1, 6), new Vector2(2, 4))
+          .equals(new Box2(new Vector2(0, 2), new Vector2(1, 4)))
+      );
     });
   });
 });

@@ -13,7 +13,7 @@
 2. Run `npm install`.
 
 3. Add an environment variable `CIRCUS_MONGO_URL` which should look like
-   `mongo://localhost:27017/circus-api`.
+   `mongodb://localhost:27017/circus-api`.
 
 4. (Optional) Add another envioronment variable `CIRCUS_MONGO_TEST_URL`.
 

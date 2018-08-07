@@ -55,11 +55,10 @@ export async function api(command, options = {}) {
     ) {
       handle = true;
     }
-    if (handle) {
-      throw err;
-    } else {
+    if (!handle) {
       showErrorMessage(err);
     }
+    throw err;
   }
 }
 

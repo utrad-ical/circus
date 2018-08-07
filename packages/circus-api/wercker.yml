@@ -1,4 +1,4 @@
-box: node:latest
+box: node:8
 build:
   steps:
     - add-ssh-key:

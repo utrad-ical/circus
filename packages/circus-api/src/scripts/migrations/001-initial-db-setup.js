@@ -72,6 +72,8 @@ export async function up(db, models) {
 
   await db.collection('serverParams').insert({
     key: 'domains',
-    value: ['default']
+    value: ['default'],
+    createdAt: new Date(),
+    updatedAt: new Date()
   });
 }

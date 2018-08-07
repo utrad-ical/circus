@@ -28,6 +28,7 @@
     "babel-register": "^6.26.0",
     "chalk": "^2.3.0",
     "dashdash": "^1.14.1",
+    "dotenv": "^6.0.0",
     "fs-extra": "^4.0.2",
     "glob": "^7.1.2",
     "glob-promise": "^3.2.0",

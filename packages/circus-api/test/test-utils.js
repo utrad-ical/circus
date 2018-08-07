@@ -8,6 +8,9 @@ import EJSON from 'mongodb-extended-json';
 import createApp from '../src/createApp';
 import createLogger from '../src/createLogger';
 import * as axios from 'axios';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 /**
  * This is a helper module for tests using Koa server.

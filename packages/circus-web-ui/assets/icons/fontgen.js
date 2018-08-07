@@ -44,7 +44,7 @@ async function create(iconPath, fontName, prefix) {
   makeSvg(glyphs, fontName, prefix);
 
   function makeSvg(glyphs) {
-    let svgFont = new Buffer(0);
+    let svgFont = Buffer.alloc(0);
     const svgOptions = {
       fontName,
       fontHeight: 512,

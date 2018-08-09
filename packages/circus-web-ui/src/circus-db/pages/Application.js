@@ -2,7 +2,7 @@ import React, { Fragment } from 'react';
 import { Link } from 'react-router';
 import { connect } from 'react-redux';
 import MessageBox from './MessageBox';
-import { Button } from '../components/react-bootstrap';
+import { Button } from 'shared/components/react-bootstrap';
 import { logout } from 'shared/actions';
 import Icon from 'shared/components/Icon';
 import classnames from 'classnames';

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Tabs, Tab } from '../../components/react-bootstrap';
+import { Tabs, Tab } from 'shared/components/react-bootstrap';
 import ConditionEditor from 'rb/ConditionEditor';
 import PropertyEditor from 'rb/PropertyEditor';
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { FormControl } from './react-bootstrap';
+import { FormControl } from 'shared/components/react-bootstrap';
 
 const AgeMinMax = props => {
   const change = ev => {

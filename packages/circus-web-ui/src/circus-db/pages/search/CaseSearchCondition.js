@@ -4,7 +4,7 @@ import { modalities } from '../../modalities';
 import * as et from 'rb/editor-types';
 import ConditionFrame from './ConditionFrame';
 import { escapeRegExp } from 'shared/utils/util';
-import { ControlLabel } from '../../components/react-bootstrap';
+import { ControlLabel } from 'shared/components/react-bootstrap';
 import { connect } from 'react-redux';
 import ProjectSelectorMultiple from '../../components/ProjectSelectorMultiple';
 import { conditionToMongoQuery } from 'rb/ConditionEditor';

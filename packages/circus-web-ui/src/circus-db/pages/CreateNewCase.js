@@ -3,7 +3,7 @@ import ProjectSelector from '../components/ProjectSelector';
 import { connect } from 'react-redux';
 import IconButton from 'shared/components/IconButton';
 import MultiTagSelect from '../components/MultiTagSelect';
-import { Panel } from '../components/react-bootstrap';
+import { Panel } from 'shared/components/react-bootstrap';
 import DataGrid from '../components/DataGrid';
 import { api } from 'shared/utils/api';
 import { browserHistory } from 'react-router';

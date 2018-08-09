@@ -8,7 +8,7 @@ import {
   Col,
   ListGroup,
   ListGroupItem
-} from '../components/react-bootstrap';
+} from 'shared/components/react-bootstrap';
 import ProjectDisplay from '../components/ProjectDisplay';
 import Icon from 'shared/components/Icon';
 import TimeDisplay from '../components/TimeDisplay';

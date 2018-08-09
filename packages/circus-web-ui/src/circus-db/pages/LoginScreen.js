@@ -8,7 +8,7 @@ import {
   FormGroup,
   Button,
   Glyphicon
-} from '../components/react-bootstrap';
+} from 'shared/components/react-bootstrap';
 
 export default class LoginScreen extends React.Component {
   constructor(props) {

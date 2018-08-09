@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, Panel } from '../../components/react-bootstrap';
+import { Button, Panel } from 'shared/components/react-bootstrap';
 import IconButton from 'rb/IconButton';
 import PropertyEditor from 'rb/PropertyEditor';
 import { api } from 'shared/utils/api.js';

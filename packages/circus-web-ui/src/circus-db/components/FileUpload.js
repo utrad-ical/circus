@@ -5,7 +5,7 @@ import {
   Glyphicon,
   Well,
   ProgressBar
-} from './react-bootstrap';
+} from 'shared/components/react-bootstrap';
 import { FileDroppable } from './FileDroppable';
 import { showMessage } from 'shared/actions';
 import * as modal from 'rb/modal';

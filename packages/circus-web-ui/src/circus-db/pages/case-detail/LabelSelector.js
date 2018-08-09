@@ -8,8 +8,8 @@ import {
 import { RawData, PixelFormat, VoxelCloud } from 'circus-rs';
 import classNames from 'classnames';
 import { confirm } from 'rb/modal';
-import IconButton from '../../components/IconButton';
-import Icon from '../../components/Icon';
+import IconButton from 'shared/components/IconButton';
+import Icon from 'shared/components/Icon';
 import Slider from 'rb/Slider';
 
 const labelColors = [

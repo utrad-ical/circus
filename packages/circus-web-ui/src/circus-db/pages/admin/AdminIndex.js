@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router';
 import { Button } from '../../components/react-bootstrap';
 import AdminContainer from './AdminContainer';
-import Icon from '../../components/Icon';
+import Icon from 'shared/components/Icon';
 
 const Btn = ({ to, link, glyph }) => (
   <div className="item">

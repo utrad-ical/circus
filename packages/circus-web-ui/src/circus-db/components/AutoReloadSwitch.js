@@ -1,6 +1,6 @@
 import React, { Fragment } from 'react';
 import ShrinkSelect from 'rb/ShrinkSelect';
-import Icon from './Icon';
+import Icon from 'shared/components/Icon';
 
 const defaultOptions = {
   0: 'none',

@@ -1,6 +1,6 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import Icon from '../../components/Icon';
+import Icon from 'shared/components/Icon';
 
 const AdminContainerView = props => {
   const { title, icon, className } = props;

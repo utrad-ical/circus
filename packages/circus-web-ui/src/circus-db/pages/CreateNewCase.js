@@ -1,7 +1,7 @@
 import React, { Fragment } from 'react';
 import ProjectSelector from '../components/ProjectSelector';
 import { connect } from 'react-redux';
-import IconButton from '../components/IconButton';
+import IconButton from 'shared/components/IconButton';
 import MultiTagSelect from '../components/MultiTagSelect';
 import { Panel } from '../components/react-bootstrap';
 import DataGrid from '../components/DataGrid';

@@ -10,7 +10,7 @@ import {
 import LoadingIndicator from 'rb/LoadingIndicator';
 import { connect } from 'react-redux';
 import AutoReloadSwitch from './AutoReloadSwitch';
-import Icon from './Icon';
+import Icon from 'shared/components/Icon';
 
 export const makeSortOptions = sortKeys => {
   const options = {};

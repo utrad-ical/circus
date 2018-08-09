@@ -8,7 +8,7 @@ import PatientInfoBox from '../../components/PatientInfoBox';
 import ProjectDisplay from '../../components/ProjectDisplay';
 import Tag from '../../components/Tag';
 import TimeDisplay from '../../components/TimeDisplay';
-import IconButton from '../../components/IconButton';
+import IconButton from 'shared/components/IconButton';
 
 const Tags = props => {
   const item = props.value;

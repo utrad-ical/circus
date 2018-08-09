@@ -2,7 +2,7 @@ import React from 'react';
 import { Button } from '../components/react-bootstrap';
 import LoadingIndicator from 'rb/LoadingIndicator';
 import { api } from 'shared/utils/api';
-import Icon from '../components/Icon';
+import Icon from 'shared/components/Icon';
 
 export default class TaskList extends React.Component {
   constructor(props) {

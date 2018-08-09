@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { showMessage } from 'circus-db/actions'; // TODO: Fix
+import { showMessage } from 'shared/actions';
 import * as qs from 'querystring';
 import * as Cookies from 'js-cookie';
 

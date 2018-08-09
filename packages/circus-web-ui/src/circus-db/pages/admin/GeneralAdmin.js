@@ -1,6 +1,6 @@
 import React from 'react';
 import { api } from 'shared/utils/api';
-import { showMessage } from '../../actions';
+import { showMessage } from 'shared/actions';
 import { Button } from '../../components/react-bootstrap';
 import AdminContainer from './AdminContainer';
 import PropertyEditor from 'rb/PropertyEditor';

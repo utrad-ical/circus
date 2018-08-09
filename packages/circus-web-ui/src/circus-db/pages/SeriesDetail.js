@@ -1,7 +1,7 @@
 import React from 'react';
 import { Row, Col, Panel } from '../components/react-bootstrap';
 import { api } from 'shared/utils/api';
-import { showMessage } from '../actions';
+import { showMessage } from 'shared/actions';
 import ImageViewer from '../components/ImageViewer';
 import { store } from '../store';
 import * as rs from 'circus-rs';

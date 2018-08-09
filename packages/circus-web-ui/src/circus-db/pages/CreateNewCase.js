@@ -11,7 +11,7 @@ import { prompt } from 'rb/modal';
 import MultiRange from 'multi-integer-range';
 import classnames from 'classnames';
 import SearchResultsView from '../components/SearchResultsView';
-import { startNewSearch } from '../actions';
+import { startNewSearch } from 'shared/actions';
 
 const RelevantSeriesDataView = props => {
   const { onSeriesRegister } = props;

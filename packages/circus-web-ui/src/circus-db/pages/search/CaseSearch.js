@@ -1,7 +1,7 @@
 import React from 'react';
 import CaseSearchResults from './CaseSearchResults';
 import CaseSearchCondition from './CaseSearchCondition';
-import Icon from '../../components/Icon';
+import Icon from 'shared/components/Icon';
 
 const CaseSearch = props => (
   <div>

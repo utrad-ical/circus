@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button } from '../../components/react-bootstrap';
-import IconButton from '../../components/IconButton';
+import IconButton from 'shared/components/IconButton';
 import Collapser from '../../components/Collapser';
 
 const SearchPanel = props => {

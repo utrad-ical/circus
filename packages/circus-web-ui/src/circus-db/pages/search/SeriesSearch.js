@@ -1,7 +1,7 @@
 import React from 'react';
 import SeriesSearchCondition from './SeriesSearchCondition';
 import SeriesSearchResults from './SeriesSearchResults';
-import Icon from '../../components/Icon';
+import Icon from 'shared/components/Icon';
 
 const SeriesSearch = props => (
   <div>

@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import MessageBox from './MessageBox';
 import { Button } from '../components/react-bootstrap';
 import { logout } from 'shared/actions';
-import Icon from '../components/Icon';
+import Icon from 'shared/components/Icon';
 import classnames from 'classnames';
 
 /**

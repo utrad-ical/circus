@@ -1,5 +1,5 @@
 import React from 'react';
-import Icon from './Icon';
+import Icon from 'shared/components/Icon';
 import classnames from 'classnames';
 
 const ProjectIcon = props => {

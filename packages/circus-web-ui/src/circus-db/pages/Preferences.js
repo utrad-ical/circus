@@ -4,9 +4,9 @@ import * as et from 'rb/editor-types';
 import { api } from 'shared/utils/api';
 import { showMessage, refreshUserInfo } from 'shared/actions';
 import { Button } from 'circus-db/components/react-bootstrap';
-import IconButton from 'circus-db/components/IconButton';
+import IconButton from 'shared/components/IconButton';
+import Icon from 'shared/components/Icon';
 import { connect } from 'react-redux';
-import Icon from 'circus-db/components/Icon';
 
 const PresetDeleteEditor = props => {
   const { value, onChange } = props;

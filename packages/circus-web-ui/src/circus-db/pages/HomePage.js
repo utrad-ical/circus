@@ -10,7 +10,7 @@ import {
   ListGroupItem
 } from '../components/react-bootstrap';
 import ProjectDisplay from '../components/ProjectDisplay';
-import Icon from '../components/Icon';
+import Icon from 'shared/components/Icon';
 import TimeDisplay from '../components/TimeDisplay';
 
 const HomePage = props => (

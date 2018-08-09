@@ -1,6 +1,6 @@
 import React from 'react';
 import { FileUpload } from '../components/FileUpload';
-import Icon from '../components/Icon';
+import Icon from 'shared/components/Icon';
 
 export default class ImportCase extends React.Component {
   render() {

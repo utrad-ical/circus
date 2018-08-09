@@ -6,7 +6,7 @@ import { Link } from 'react-router';
 import DataGrid from '../../components/DataGrid';
 import PatientInfoBox from '../../components/PatientInfoBox';
 import TimeDisplay from '../../components/TimeDisplay';
-import IconButton from '../../components/IconButton';
+import IconButton from 'shared/components/IconButton';
 
 const Modality = props => {
   const series = props.value;

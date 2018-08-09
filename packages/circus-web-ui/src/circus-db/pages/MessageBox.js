@@ -1,5 +1,5 @@
 import React from 'react';
-import { dismissMessage } from '../actions';
+import { dismissMessage } from 'shared/actions';
 import { connect } from 'react-redux';
 import { Alert } from '../components/react-bootstrap';
 

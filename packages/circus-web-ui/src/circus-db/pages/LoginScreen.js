@@ -1,5 +1,5 @@
 import React from 'react';
-import { login } from 'circus-db/actions';
+import { login } from 'shared/actions';
 import {
   Row,
   Col,

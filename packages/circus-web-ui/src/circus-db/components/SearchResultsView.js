@@ -6,7 +6,7 @@ import {
   changeSearchSort,
   changeSearchLimit,
   refreshSearch
-} from '../actions';
+} from 'shared/actions';
 import LoadingIndicator from 'rb/LoadingIndicator';
 import { connect } from 'react-redux';
 import AutoReloadSwitch from './AutoReloadSwitch';

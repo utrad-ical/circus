@@ -1,5 +1,5 @@
 import React from 'react';
-import { startNewSearch, savePreset } from '../../actions';
+import { startNewSearch, savePreset } from 'shared/actions';
 import { connect } from 'react-redux';
 
 /**

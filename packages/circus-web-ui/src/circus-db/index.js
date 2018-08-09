@@ -25,7 +25,7 @@ import Preferences from './pages/Preferences';
 
 import { store } from './store';
 import { Provider } from 'react-redux';
-import { refreshUserInfo, dismissMessageOnPageChange } from './actions';
+import { refreshUserInfo, dismissMessageOnPageChange } from 'shared/actions';
 
 require('./styles/main.less');
 

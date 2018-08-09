@@ -7,7 +7,7 @@ import {
   ProgressBar
 } from './react-bootstrap';
 import { FileDroppable } from './FileDroppable';
-import { showMessage } from 'circus-db/actions';
+import { showMessage } from 'shared/actions';
 import * as modal from 'rb/modal';
 
 /**

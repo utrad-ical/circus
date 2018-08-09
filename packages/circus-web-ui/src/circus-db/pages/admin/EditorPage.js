@@ -4,7 +4,7 @@ import IconButton from 'rb/IconButton';
 import PropertyEditor from 'rb/PropertyEditor';
 import { api } from 'shared/utils/api.js';
 import AdminContainer from './AdminContainer';
-import { refreshUserInfo, startNewSearch } from '../../actions';
+import { refreshUserInfo, startNewSearch } from 'shared/actions';
 import DataGrid from '../../components/DataGrid';
 import SearchResultsView from '../../components/SearchResultsView';
 import { connect } from 'react-redux';

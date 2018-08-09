@@ -3,7 +3,7 @@ import { Link } from 'react-router';
 import { connect } from 'react-redux';
 import MessageBox from './MessageBox';
 import { Button } from '../components/react-bootstrap';
-import { logout } from '../actions';
+import { logout } from 'shared/actions';
 import Icon from '../components/Icon';
 import classnames from 'classnames';
 

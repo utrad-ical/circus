@@ -5,5 +5,5 @@ Thumbs.db
 .project
 .idea
 .vscode
-public/application.js
-public/application.js.map
+public/*.js
+public/*.js.map

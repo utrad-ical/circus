@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, Panel, ProgressBar } from './react-bootstrap';
+import { Button, Panel, ProgressBar } from 'shared/components/react-bootstrap';
 import { api } from 'utils/api';
 
 export const TaskProgress = ({

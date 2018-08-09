@@ -1,6 +1,6 @@
 import React, { Fragment } from 'react';
 import ShrinkSelect from 'rb/ShrinkSelect';
-import { Pagination } from './react-bootstrap';
+import { Pagination } from 'shared/components/react-bootstrap';
 import {
   changeSearchPage,
   changeSearchSort,

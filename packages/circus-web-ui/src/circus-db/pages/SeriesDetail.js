@@ -1,5 +1,5 @@
 import React from 'react';
-import { Row, Col, Panel } from '../components/react-bootstrap';
+import { Row, Col, Panel } from 'shared/components/react-bootstrap';
 import { api } from 'shared/utils/api';
 import { showMessage } from 'shared/actions';
 import ImageViewer from '../components/ImageViewer';

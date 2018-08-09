@@ -8,7 +8,7 @@ import {
   Glyphicon,
   SplitButton,
   MenuItem
-} from '../../components/react-bootstrap';
+} from 'shared/components/react-bootstrap';
 import LabelSelector from './LabelSelector';
 import { store } from '../../store';
 import * as rs from 'circus-rs';

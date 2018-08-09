@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button } from '../../components/react-bootstrap';
+import { Button } from 'shared/components/react-bootstrap';
 import IconButton from 'shared/components/IconButton';
 import Collapser from '../../components/Collapser';
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import classnames from 'classnames';
-import { Glyphicon } from './react-bootstrap';
+import { Glyphicon } from 'shared/components/react-bootstrap';
 
 export default class Collapser extends React.Component {
   constructor(props) {

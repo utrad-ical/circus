@@ -1,5 +1,5 @@
 import React from 'react';
-import { Alert } from '../components/react-bootstrap';
+import { Alert } from 'shared/components/react-bootstrap';
 import ShrinkSelect from 'rb/ShrinkSelect';
 import { connect } from 'react-redux';
 import { FileUpload } from '../components/FileUpload';

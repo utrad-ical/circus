@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button } from '../components/react-bootstrap';
+import { Button } from 'shared/components/react-bootstrap';
 import LoadingIndicator from 'rb/LoadingIndicator';
 import { api } from 'shared/utils/api';
 import Icon from 'shared/components/Icon';

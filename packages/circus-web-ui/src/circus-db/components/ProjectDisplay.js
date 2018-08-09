@@ -1,7 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import ProjectIcon from './ProjectIcon';
-import { OverlayTrigger, Tooltip } from './react-bootstrap';
+import { OverlayTrigger, Tooltip } from 'shared/components/react-bootstrap';
 
 const ProjectDisplayView = props => {
   const { projectId, size, withName, withDescription } = props;

@@ -4,7 +4,7 @@ import {
   Popover,
   Button,
   OverlayTrigger
-} from '../../components/react-bootstrap';
+} from 'shared/components/react-bootstrap';
 import { RawData, PixelFormat, VoxelCloud } from 'circus-rs';
 import classNames from 'classnames';
 import { confirm } from 'rb/modal';

@@ -3,7 +3,7 @@ import PropertyEditor from 'rb/PropertyEditor';
 import * as et from 'rb/editor-types';
 import { api } from 'shared/utils/api';
 import { showMessage, refreshUserInfo } from 'shared/actions';
-import { Button } from 'circus-db/components/react-bootstrap';
+import { Button } from 'shared/components/react-bootstrap';
 import IconButton from 'shared/components/IconButton';
 import Icon from 'shared/components/Icon';
 import { connect } from 'react-redux';

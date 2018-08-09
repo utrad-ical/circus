@@ -1,7 +1,7 @@
 import React from 'react';
 import { dismissMessage } from 'shared/actions';
 import { connect } from 'react-redux';
-import { Alert } from '../components/react-bootstrap';
+import { Alert } from 'shared/components/react-bootstrap';
 
 class MessageBoxView extends React.Component {
   constructor(props) {

@@ -3,7 +3,7 @@ const path = require('path');
 
 module.exports = {
   entry: {
-    'circus-db': './src/circus-db/index.js'
+    application: './src/index.js'
   },
   output: {
     path: path.join(__dirname, 'public'),

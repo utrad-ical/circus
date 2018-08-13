@@ -94,7 +94,7 @@ export function draw3DLine(
       : i => Math.floor(i);
 
   do {
-    volume.writePixelAt(value, trim_x(pi.z), trim_y(pi.y), trim_z(pi.z));
+    volume.writePixelAt(value, trim_x(pi.x), trim_y(pi.y), trim_z(pi.z));
     const step = getStepToNeighbor(pi, e);
     pi.add(step);
     walked += step.length();

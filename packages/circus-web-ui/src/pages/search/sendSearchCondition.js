@@ -73,9 +73,8 @@ const sendSearchCondition = opts => {
     const mapStateToProps = (state, ownProps) => {
       const presetKey = searchName + 'SearchPresets';
       const presets = state.loginUser.data.preferences[presetKey];
-      const matched = presets.find(
-        preset => preset.name === ownProps.presetName
-      );
+      const matched =
+        presets && presets.find(preset => preset.name === ownProps.presetName);
       if (matched) return { initialCondition: JSON.parse(matched.condition) };
       if (state.searches[searchName])
         return { initialCondition: state.searches[searchName].condition };

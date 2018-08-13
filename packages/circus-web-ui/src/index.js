@@ -12,6 +12,7 @@ import SeriesSearch from 'pages/search/SeriesSearch';
 import CreateNewCase from 'pages/CreateNewCase';
 import CaseSearch from 'pages/search/CaseSearch';
 import CaseDetail from 'pages/case-detail/CaseDetail';
+import PluginJobSearch from 'pages/search/PluginJobSearch';
 import ImportSeries from 'pages/ImportSeries';
 import ImportCase from 'pages/ImportCase';
 import SeriesDetail from 'pages/SeriesDetail';
@@ -41,6 +42,10 @@ ReactDOM.render(
         <Route path="home" component={HomePage} />
         <Route path="browse/series(/:presetName)" component={SeriesSearch} />
         <Route path="browse/case(/:presetName)" component={CaseSearch} />
+        <Route
+          path="browse/plugin-jobs(/:presetName)"
+          component={PluginJobSearch}
+        />
         <Route path="import-series" component={ImportSeries} />
         <Route path="import-case" component={ImportCase} />
         <Route path="new-case/:uid" component={CreateNewCase} />

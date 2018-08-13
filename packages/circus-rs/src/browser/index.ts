@@ -57,5 +57,8 @@ export { default as Tool } from '../browser/tool/Tool';
 export { default as createToolbar } from '../browser/createToolbar';
 
 export { registerTool, toolFactory } from '../browser/tool/tool-initializer';
-export * from '../browser/section-util';
+export {
+  orientationAwareTranslation,
+  createOrthogonalMprSection
+} from '../browser/section-util';
 export * from '../browser/volume-util';

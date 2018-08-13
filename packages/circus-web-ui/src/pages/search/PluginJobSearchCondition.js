@@ -15,8 +15,8 @@ modalities.forEach(m => (modalityOptions[m] = m));
 
 const basicConditionProperties = [
   {
-    key: 'modality',
-    caption: 'Modality',
+    key: 'plugin',
+    caption: 'Plugin',
     editor: et.shrinkSelect(modalityOptions)
   },
   { key: 'patientId', caption: 'Patient ID', editor: et.text() },
@@ -108,7 +108,7 @@ const nullCondition = () => {
 
 export default sendSearchCondition({
   searchName: 'pluginJobs',
-  resource: 'pluginJobs',
+  resource: 'plugin-jobs',
   defaultSort: '{"createdAt":-1}',
   nullCondition,
   conditionToFilter

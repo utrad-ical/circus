@@ -15,7 +15,7 @@ import TimeDisplay from 'components/TimeDisplay';
 
 const HomePage = props => (
   <div>
-    <h1>Welcome to CIRCUS DB!</h1>
+    <h1>Welcome to CIRCUS!</h1>
     <ul className="home-menu">
       <Menu
         link="/browse/case"

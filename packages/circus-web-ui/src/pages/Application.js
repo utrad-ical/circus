@@ -93,7 +93,14 @@ const NavView = props => {
               link="/import-series"
             />
           </Menu>
-          <Menu name="CAD" link="/browse/plugin-jobs" />
+          <Menu name="CAD" link="/browse/plugin-jobs">
+            <SubMenu
+              icon="search"
+              name="Plugin Job Search"
+              link="/browse/plugin-jobs"
+            />
+            <SubMenu icon="tasks" name="Show Job Queue" />
+          </Menu>
           <Menu name="Tool">
             <SubMenu icon="tasks" name="Task List" link="/task-list" />
             <SubMenu

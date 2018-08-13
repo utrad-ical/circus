@@ -6,7 +6,7 @@ import PagerTool from './state/PagerTool';
 import CelestialRotateTool from './state/CelestialRotateTool';
 import BrushTool from './cloud/BrushTool';
 import EraserTool from './cloud/EraserTool';
-import BucketTool from './cloud/BrushTool';
+import BucketTool from './cloud/BucketTool';
 import CircleTool from './annotation/CircleTool';
 import RectangleTool from './annotation/RectangleTool';
 

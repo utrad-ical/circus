@@ -2,6 +2,7 @@ import status from 'http-status';
 import performSearch from '../performSearch';
 import { generateJobId, generateFeedbackId } from '../../utils';
 import * as jobManager from '../mockJobManager';
+import * as EJSON from 'mongodb-extended-json';
 
 export const handlePost = ({ models }) => {
   return async (ctx, next) => {
@@ -52,7 +53,14 @@ export const handlePatch = ({ models }) => {
 
 export const handleSearch = ({ models }) => {
   return async (ctx, next) => {
-    await performSearch(models.pluginJob, {}, ctx);
+    const urlQuery = ctx.request.query;
+    let customFilter;
+    try {
+      customFilter = urlQuery.filter ? EJSON.parse(urlQuery.filter) : {};
+    } catch (err) {
+      ctx.throw(status.BAD_REQUEST, 'Bad filter.');
+    }
+    await performSearch(models.pluginJob, customFilter, ctx);
   };
 };
 

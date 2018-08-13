@@ -13,6 +13,7 @@ routes:
       Cancels an existing plug-in job.
   - verb: get
     path: /plugin-jobs
+    handler: handleSearch
     description: >
       Performs search for the plug-in job.
     responseSchema:

@@ -18,7 +18,10 @@
 
 4. (Optional) Add another envioronment variable `CIRCUS_MONGO_TEST_URL`.
 
-5. Run DB migration.
+5. Place dicom_utility executable to somewhere and specify its path
+   via a `DICOM_UTILITY` environment variable (or `.env` file).
+
+6. Run DB migration.
    ```
    % node circus migrate
    ```

@@ -6,6 +6,7 @@ import ViewerEvent from './ViewerEvent';
 import ViewState from '../ViewState';
 import Tool from '../tool/Tool';
 import { toolFactory } from '../tool/tool-initializer';
+import { ViewStateResizeTransformer } from '../image-source/ImageSource';
 
 /**
  * Viewer is the main component of CIRCUS RS, and wraps a HTML canvas element
@@ -57,6 +58,13 @@ export default class Viewer extends EventEmitter {
    */
   private currentRender: Promise<any> | null = null;
 
+  private observingDivSize: boolean = false;
+
+  /**
+   * Change state when viewer size is changed. This function is provided by ImageSource.
+   */
+  private viewStateResizeTransformer: ViewStateResizeTransformer | undefined;
+
   private createCanvas(): HTMLCanvasElement {
     const canvas = document.createElement('canvas');
     canvas.style.width = '100%';
@@ -102,6 +110,33 @@ export default class Viewer extends EventEmitter {
     this.boundRender = this.render.bind(this);
 
     this.setActiveTool('null');
+
+    this.activateResizeObserver(div);
+  }
+
+  /**
+   * Begin observation of wrapper element size.
+   * @param div
+   */
+  private activateResizeObserver(div: HTMLDivElement): void {
+    let wrapSize: [number, number] = [div.offsetWidth, div.offsetHeight];
+    const onNextFrame = (_frameTime: number) => {
+      if (this.observingDivSize === false) return;
+
+      if (wrapSize[0] !== div.offsetWidth || wrapSize[1] !== div.offsetHeight) {
+        wrapSize = [div.offsetWidth, div.offsetHeight];
+        this.onResize();
+      }
+
+      window.requestAnimationFrame(onNextFrame);
+    };
+
+    this.observingDivSize = true;
+    window.requestAnimationFrame(onNextFrame);
+  }
+
+  private stopResizeObserver(): void {
+    this.observingDivSize = false;
   }
 
   public getViewport(): [number, number] {
@@ -293,6 +328,7 @@ export default class Viewer extends EventEmitter {
     composition.imageSource.ready().then(() => {
       this.imageReady = true;
       this.setState(composition.imageSource.initialState(this));
+      this.viewStateResizeTransformer = composition.imageSource.getResizeTransformer();
       this.emit('imageReady');
     });
     this.composition.addListener('viewerChange', this.boundRender);
@@ -320,5 +356,36 @@ export default class Viewer extends EventEmitter {
 
   public getActiveTool(): string | undefined {
     return this.activeToolName;
+  }
+
+  /**
+   * Fit canvas size to it's wrapper element.
+   * Observer calls this.
+   */
+  public onResize(): void {
+    const transformer = this.viewStateResizeTransformer;
+    if (transformer) {
+      const div = this.canvas.parentElement as HTMLElement;
+      const newResolution: [number, number] = [
+        div.offsetWidth,
+        div.offsetHeight
+      ];
+
+      const state = this.getState();
+      const newState = transformer(state, this.getResolution(), newResolution);
+
+      if (state !== newState) {
+        this.resizeCanvas();
+        this.setState(newState);
+      }
+    }
+  }
+
+  /**
+   * Dispose viewer
+   */
+  public dispose(): void {
+    this.stopResizeObserver();
+    this.cancelNextRender();
   }
 }

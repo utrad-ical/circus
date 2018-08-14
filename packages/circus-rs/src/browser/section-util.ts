@@ -228,3 +228,55 @@ export function createOrthogonalMprSection(
   }
   return section;
 }
+
+/**
+ * Calculates the "fit-to-the-viewer" state section on resized.
+ *
+ * @param section
+ * @param oldResolution
+ * @param newResolution
+ * @returns {Section}
+ */
+export function adjustOnResized(
+  section: Section,
+  oldResolution: Vector2D,
+  newResolution: Vector2D
+): Section {
+  const oldResolutionVec: Vector2 = new Vector2().fromArray(oldResolution);
+  const newResolutionVec: Vector2 = new Vector2().fromArray(newResolution);
+
+  if (
+    (oldResolutionVec.x === newResolutionVec.x &&
+      oldResolutionVec.y === newResolutionVec.y) ||
+    oldResolutionVec.x === 0 ||
+    oldResolutionVec.y === 0 ||
+    newResolutionVec.x === 0 ||
+    newResolutionVec.y === 0
+  )
+    return section;
+
+  const newOrigin = convertScreenCoordinateToVolumeCoordinate(
+    section,
+    oldResolutionVec,
+    newResolutionVec
+      .clone()
+      .sub(oldResolutionVec)
+      .multiplyScalar(-0.5)
+  );
+
+  const newXAxis = new Vector3()
+    .fromArray(section.xAxis)
+    .multiplyScalar(newResolutionVec.x / oldResolutionVec.x);
+
+  const newYAxis = new Vector3()
+    .fromArray(section.yAxis)
+    .multiplyScalar(newResolutionVec.y / oldResolutionVec.y);
+
+  const newSection: Section = {
+    origin: newOrigin.toArray(),
+    xAxis: newXAxis.toArray(),
+    yAxis: newYAxis.toArray()
+  };
+
+  return newSection;
+}

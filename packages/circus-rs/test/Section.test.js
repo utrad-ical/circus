@@ -82,4 +82,49 @@ describe('Section', function() {
       assert.deepEqual(t.origin, [11, 14, 17]);
     });
   });
+
+  describe('adjustOnResized', function() {
+    it('#axial', function() {
+      const oldSection = {
+        origin: [0, 0, 0],
+        xAxis: [6, 0, 0],
+        yAxis: [0, 6, 0]
+      };
+      const beforeResolution = [6, 6];
+      const afterResolution = [12, 12];
+
+      const newSection = su.adjustOnResized(
+        oldSection,
+        beforeResolution,
+        afterResolution
+      );
+      assert.deepEqual(newSection, {
+        origin: [-3, -3, 0],
+        xAxis: [12, 0, 0],
+        yAxis: [0, 12, 0]
+      });
+    });
+    it('#smaller', function() {
+      const oldSection = {
+        origin: [3, 4, 0],
+        xAxis: [0, 16, 12], // length: 20
+        yAxis: [0, -12, 16] // length: 20
+        // center is [6, 14]
+        // origin to center is [0, 2, 14]
+      };
+      const beforeResolution = [20, 20];
+      const afterResolution = [10, 10];
+
+      const newSection = su.adjustOnResized(
+        oldSection,
+        beforeResolution,
+        afterResolution
+      );
+      assert.deepEqual(newSection, {
+        origin: [3, 5, 7], // origin + (origin to center) / 2
+        xAxis: [0, 8, 6], // half of before
+        yAxis: [0, -6, 8] // half of before
+      });
+    });
+  });
 });

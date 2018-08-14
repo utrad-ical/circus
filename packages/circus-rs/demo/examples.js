@@ -542,3 +542,70 @@ imageSource.ready().then(() => {
   ];
   viewer.setState(state0);
 });
+
+/*--
+@title Hide viewer 2
+--*/
+const div2 = document.getElementById('viewer2');
+div2.parentNode.removeChild(div2);
+
+/*--
+@title Resize animation functions
+@hidden
+--*/
+function resizeAnimation(totalTime, f) {
+  if (totalTime > 0) {
+    let originFrameTime = null;
+
+    const draw = frameTime => {
+      if (!originFrameTime) originFrameTime = frameTime;
+      const progress = Math.min(1.0, (frameTime - originFrameTime) / totalTime);
+      f(progress);
+      if (progress < 1.0) window.requestAnimationFrame(draw);
+    };
+    window.requestAnimationFrame(draw);
+  }
+}
+
+function resizeTicks(totalTime, tick, f) {
+  if (totalTime > 0) {
+    let originFrameTime = null;
+
+    const draw = () => {
+      let frameTime = new Date().getTime();
+      if (!originFrameTime) originFrameTime = frameTime;
+      const progress = Math.min(1.0, (frameTime - originFrameTime) / totalTime);
+      f(progress);
+      if (progress < 1.0) setTimeout(draw, tick);
+    };
+    draw();
+  }
+}
+
+/*--
+@title Resize wrapper element with requestAnimationFrame
+--*/
+
+//--@include Resize animation functions
+const div1 = document.getElementById('viewer');
+
+resizeAnimation(4000, function(progress) {
+  div1.style.width =
+    Math.floor(312 + 200 * Math.cos(2 * Math.PI * progress)).toString() + 'px';
+  div1.style.height =
+    Math.floor(312 + 200 * Math.cos(2 * Math.PI * progress)).toString() + 'px';
+});
+
+/*--
+@title Resize wrapper element with setTimeout 200[ms]
+--*/
+
+//--@include Resize animation functions
+const div1 = document.getElementById('viewer');
+
+resizeTicks(4000, 200, function(progress) {
+  div1.style.width =
+    Math.floor(312 + 200 * Math.cos(2 * Math.PI * progress)).toString() + 'px';
+  div1.style.height =
+    Math.floor(312 + 200 * Math.cos(2 * Math.PI * progress)).toString() + 'px';
+});

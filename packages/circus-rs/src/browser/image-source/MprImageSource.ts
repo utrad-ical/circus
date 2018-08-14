@@ -1,8 +1,8 @@
-import ImageSource from './ImageSource';
+import ImageSource, { ViewStateResizeTransformer } from './ImageSource';
 import ViewState from '../ViewState';
 import Viewer from '../viewer/Viewer';
-import { createOrthogonalMprSection } from '../section-util';
-import { Vector3D } from '../../common/geometry';
+import { createOrthogonalMprSection, adjustOnResized } from '../section-util';
+import { Vector3D, Vector2D } from '../../common/geometry';
 import { DicomVolumeMetadata } from './volume-loader/DicomVolumeLoader';
 
 /**
@@ -46,5 +46,26 @@ export default abstract class MprImageSource extends ImageSource {
       voxelCount[1] * voxelSize[1],
       voxelCount[2] * voxelSize[2]
     ];
+  }
+
+  /**
+   * Produce helper of change state on resizing viewer.
+   */
+  public getResizeTransformer(): ViewStateResizeTransformer {
+    return (
+      viewState: ViewState,
+      beforeSize: Vector2D,
+      afterSize: Vector2D
+    ): ViewState => {
+      if (viewState.type === 'mpr') {
+        const { section } = viewState;
+        const resizedSection = adjustOnResized(section, beforeSize, afterSize);
+        return section !== resizedSection
+          ? { ...viewState, section: resizedSection }
+          : viewState;
+      } else {
+        return viewState;
+      }
+    };
   }
 }

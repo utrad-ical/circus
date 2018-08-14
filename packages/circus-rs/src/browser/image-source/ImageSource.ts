@@ -1,6 +1,13 @@
 import { EventEmitter } from 'events';
 import ViewState from '../ViewState';
 import Viewer from '../viewer/Viewer';
+import { Vector2D } from '../../common/geometry';
+
+export type ViewStateResizeTransformer = (
+  viewState: ViewState,
+  beforeSize: Vector2D,
+  afterSize: Vector2D
+) => ViewState;
 
 /**
  * ImageSource is an abstract class which represents a
@@ -29,4 +36,8 @@ export default abstract class ImageSource extends EventEmitter {
    * when the image is firstly loaded to a viewer.
    */
   public abstract initialState(viewer: Viewer): ViewState;
+
+  public getResizeTransformer(): ViewStateResizeTransformer {
+    return v => v;
+  }
 }

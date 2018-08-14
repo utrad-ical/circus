@@ -9,28 +9,28 @@ import Router from 'koa-router';
 /**
  * Creates a series router.
  */
-export default function circusRs({ models, logger }, dicomStorage) {
-  const dicomFileRepository = {
-    getSeriesLoader: async seriesUid => {
-      const series = await models.series.findByIdOrFail(seriesUid);
-      const images = multirange(series.images);
-      if (images.min() !== 1 || images.segmentLength() !== 1) {
-        throw new Error('Incontinuous series not supported');
-      }
-      return {
-        seriesLoader: async image => {
-          const key = `${seriesUid}/${image}`;
-          const file = await dicomStorage.read(key);
-          return file;
-        },
-        count: images.length()
-      };
-    }
-  };
+export default function circusRs({ models, logger }, dicomRepository) {
+  // const dicomFileRepository = {
+  //   getSeriesLoader: async seriesUid => {
+  //     const series = await models.series.findByIdOrFail(seriesUid);
+  //     const images = multirange(series.images);
+  //     if (images.min() !== 1 || images.segmentLength() !== 1) {
+  //       throw new Error('Incontinuous series not supported');
+  //     }
+  //     return {
+  //       seriesLoader: async image => {
+  //         const key = `${seriesUid}/${image}`;
+  //         const file = await dicomStorage.read(key);
+  //         return file;
+  //       },
+  //       count: images.length()
+  //     };
+  //   }
+  // };
 
   const dicomDumper = new PureJsDicomDumper();
   const seriesReader = new createDicomReader(
-    dicomFileRepository,
+    dicomRepository,
     dicomDumper,
     2 * 1024 * 1024 * 1024
   );

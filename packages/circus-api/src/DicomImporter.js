@@ -6,10 +6,10 @@ import { exec } from './utils';
 import * as os from 'os';
 
 export default class DicomImporter {
-  constructor(storage, models, opts = {}) {
+  constructor(repository, models, opts = {}) {
     const { utility, workDir } = opts;
     this.models = models;
-    this.storage = storage;
+    this.repository = repository;
     this.utility = utility;
     this.workDir = workDir ? workDir : os.tmpdir();
   }
@@ -99,7 +99,9 @@ export default class DicomImporter {
       await this.models.series.insert(doc);
     }
 
-    const key = `${tags.seriesInstanceUID}/${tags.instanceNumber}`;
-    await this.storage.write(key, fileContent);
+    // const key = `${tags.seriesInstanceUID}/${tags.instanceNumber}`;
+    // await this.storage.save(key, fileContent);
+    const seriesLoader = await this.repository.getSeries(seriesUid);
+    await seriesLoader.save(parseInt(tags.instanceNumber), fileContent.buffer);
   }
 }

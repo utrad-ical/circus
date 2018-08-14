@@ -1,15 +1,15 @@
 import DicomImporter from '../src/DicomImporter';
 import { assert } from 'chai';
-import createStorage from '../src/storage/createStorage';
 import * as path from 'path';
 import * as test from './test-utils';
 import createModels from '../src/db/createModels';
 import createValidator from '../src/createValidator';
+import { MemoryDicomFileRepository } from '@utrad-ical/circus-dicom-repository';
 
 describe('DicomImporter', function() {
   // Skip this test if dicom_utility is not available
 
-  let storage, importer, models, db;
+  let repository, importer, models, db;
   const file = path.join(__dirname, 'dicom', 'CT-MONO2-16-brain.dcm');
 
   before(async function() {
@@ -24,9 +24,9 @@ describe('DicomImporter', function() {
 
   beforeEach(async function() {
     if (process.env.DICOM_UTILITY) {
-      storage = await createStorage('memory');
+      repository = new MemoryDicomFileRepository({});
       await test.setUpMongoFixture(db, ['series']);
-      importer = new DicomImporter(storage, models, {
+      importer = new DicomImporter(repository, models, {
         utility: process.env.DICOM_UTILITY
       });
     } else {
@@ -45,9 +45,10 @@ describe('DicomImporter', function() {
   describe('#importFromFile', function() {
     it('should import a DICOM file', async function() {
       await importer.importFromFile(file, 'someDomain');
-      const key =
-        '2.16.840.1.113662.2.1.2519.21582.2990505.2105152.2381633.20/8';
-      assert.isTrue(await storage.exists(key));
+      const seriesLoader = await repository.getSeries(
+        '2.16.840.1.113662.2.1.2519.21582.2990505.2105152.2381633.20'
+      );
+      assert.isDefined(await seriesLoader.load(8));
     });
   });
 });

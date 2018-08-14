@@ -21,6 +21,10 @@ import createModels from './db/createModels';
 import compose from 'koa-compose';
 import DicomImporter from './DicomImporter';
 import circusRs from './circusRs';
+import {
+  StaticDicomFileRepository,
+  MemoryDicomFileRepository
+} from '@utrad-ical/circus-dicom-repository';
 
 function handlerName(route) {
   if (route.handler) return route.handler;
@@ -89,15 +93,15 @@ export default async function createApp(options = {}) {
     ? await createStorage('local', { root: blobPath })
     : await createStorage('memory');
 
-  const dicomStorage = dicomPath
-    ? await createStorage('local', { root: dicomPath })
-    : await createStorage('memory');
+  const dicomRepository = dicomPath
+    ? new StaticDicomFileRepository({ dataDir: dicomPath })
+    : new MemoryDicomFileRepository({});
 
   const logger = options.logger ? options.logger : createLogger('off');
 
   const utilityEnv = process.env.DICOM_UTILITY;
   const dicomImporter = utilityEnv
-    ? new DicomImporter(dicomStorage, models, { utility: utilityEnv })
+    ? new DicomImporter(dicomRepository, models, { utility: utilityEnv })
     : undefined;
 
   // Build a router.
@@ -148,7 +152,7 @@ export default async function createApp(options = {}) {
   );
   koa.use(mount('/login', compose([bodyParser(), oauth.token()])));
 
-  koa.use(mount('/rs', circusRs({ models, logger }, dicomStorage).routes()));
+  koa.use(mount('/rs', circusRs({ models, logger }, dicomRepository).routes()));
 
   return koa;
 }

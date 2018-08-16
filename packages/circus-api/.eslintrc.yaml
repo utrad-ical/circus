@@ -17,7 +17,7 @@ rules:
     - { blankLine: 'always', prev: 'function', next: 'function' }
     - { blankLine: 'always', prev: 'import', next: '*' }
     - { blankLine: 'any', prev: 'import', next: 'import' }
-  no-unused-vars: [2, { argsIgnorePattern: '^(ctx|next)$' }]
+  no-unused-vars: [1, { argsIgnorePattern: '^(ctx|next)$' }]
   no-useless-escape: [0]
   no-constant-condition: [2, { checkLoops: false }]
   semi: [2, 'always']

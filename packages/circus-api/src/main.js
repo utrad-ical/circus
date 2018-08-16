@@ -56,7 +56,7 @@ const options = [
   },
   {
     names: ['dicom-path'],
-    env: 'CIRCUS_API_DICOM_DIR',
+    env: 'CIRCUS_DICOM_DIR',
     type: 'string',
     default: './store/dicom'
   }
@@ -115,12 +115,19 @@ async function main() {
     const koaApp = await createApp(serverOptions);
     koaApp.listen(port, host, err => {
       if (err) throw err;
+      const setupInfo = {
+        'Label path': blobPath,
+        'DICOM path': dicomPath,
+        'CORS origin': corsOrigin,
+        'Process ID': process.pid
+      };
       logger.info('CIRCUS API started.');
+      Object.keys(setupInfo).forEach(k => logger.info(`${k}: ${setupInfo[k]}`));
       logger.info(`Label path: ${blobPath}`);
       console.log(chalk.green(`Server running on port ${host}:${port}`));
-      console.log(`  Label path: ${blobPath}`);
-      console.log(`  DICOM path: ${dicomPath}`);
-      console.log(`  CORS origin: ${corsOrigin}`);
+      Object.keys(setupInfo).forEach(k =>
+        console.log(`  ${k}: ${setupInfo[k]}`)
+      );
     });
   } catch (err) {
     console.error(chalk.red('Error during the server startup.'));

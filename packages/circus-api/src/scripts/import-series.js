@@ -5,23 +5,32 @@ import * as fs from 'fs-extra';
 import connectDb from '../db/connectDb';
 import createValidator from '../createValidator';
 import createModels from '../db/createModels';
-import createStorage from '../storage/createStorage';
 import DicomImporter from '../DicomImporter';
+import {
+  StaticDicomFileRepository,
+  MemoryDicomFileRepository
+} from '@utrad-ical/circus-dicom-repository';
 
 export function help() {
   console.log('Imports DICOM series from file/directory.\n');
   console.log('Usage: node circus.js import-series [target...]');
 }
 
+function bootstrapDicomImporter(models) {
+  const dicomPath = process.env.CIRCUS_DICOM_DIR;
+  const dicomRepository = dicomPath
+    ? new StaticDicomFileRepository({ dataDir: dicomPath })
+    : new MemoryDicomFileRepository({});
+
+  return new DicomImporter(dicomRepository, models, {
+    utility: process.env.DICOM_UTILITY
+  });
+}
+
 async function importSeries(db, files) {
   const validator = await createValidator();
   const models = createModels(db, validator);
-  const storage = await createStorage('local', {
-    root: process.env.CIRCUS_DICOM_DIR
-  });
-  const importer = new DicomImporter(storage, models, {
-    utility: process.env.DICOM_UTILITY
-  });
+  const importer = bootstrapDicomImporter(models);
 
   const paths = files.map(p => path.resolve(process.cwd(), p));
   if (!paths.length) {

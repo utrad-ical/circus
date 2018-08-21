@@ -19,7 +19,8 @@ export default function loadModule(
     // Load built-in modules
     const dir = {
       [ModuleType.Logger]: './loggers/',
-      [ModuleType.DicomFileRepository]: './dicom-file-repository/',
+      [ModuleType.DicomFileRepository]:
+        '../../node_modules/@utrad-ical/circus-dicom-repository/lib/',
       [ModuleType.ImageEncoder]: './image-encoders/',
       [ModuleType.DicomDumper]: './dicom-dumpers/'
     }[moduleType];

@@ -1,12 +1,9 @@
-import DicomDumper from './DicomDumper';
+import { SeriesAccessor } from '@utrad-ical/circus-dicom-repository/lib/DicomFileRepository';
+import { multirange } from 'multi-integer-range';
 import DicomVolume from '../../common/DicomVolume';
 import { PixelFormat } from '../../common/PixelFormat';
-
+import DicomDumper from './DicomDumper';
 import { DicomInfo, DicomPixelExtractor } from './DicomPixelExtractor';
-import {
-  SeriesLoaderInfo,
-  SeriesLoader
-} from '../dicom-file-repository/DicomFileRepository';
 
 /**
  * DICOM dumper implemented in pure JS.
@@ -14,27 +11,27 @@ import {
  */
 export default class PureJsDicomDumper extends DicomDumper {
   protected async readSingleDicomImageFile(
-    seriesLoader: SeriesLoader,
+    seriesAccessor: SeriesAccessor,
     image: number
   ): Promise<DicomInfo> {
-    const buffer = await seriesLoader(image);
+    const buffer = await seriesAccessor.load(image);
     const data = new Uint8Array(buffer);
     const parser = new DicomPixelExtractor();
     return parser.extract(data);
   }
 
-  public async readDicom(
-    seriesLoaderInfo: SeriesLoaderInfo
-  ): Promise<DicomVolume> {
+  public async readDicom(seriesAccessor: SeriesAccessor): Promise<DicomVolume> {
     let lastSliceLocation: number;
     let pitch: number | undefined = undefined;
     let seriesMinValue: number = Infinity;
     let seriesMaxValue: number = -Infinity;
 
-    const { count, seriesLoader } = seriesLoaderInfo;
+    const { images, load } = seriesAccessor;
+    const range = multirange(images);
+    const count = range.max() || 1;
 
     // read first image
-    let dicom = await this.readSingleDicomImageFile(seriesLoader, 1);
+    let dicom = await this.readSingleDicomImageFile(seriesAccessor, 1);
     const raw: DicomVolume = new DicomVolume(
       [dicom.columns, dicom.rows, count],
       dicom.pixelFormat
@@ -60,7 +57,8 @@ export default class PureJsDicomDumper extends DicomDumper {
 
     // read subsequent images
     for (let i = 1; i <= count; i++) {
-      if (i !== 1) dicom = await this.readSingleDicomImageFile(seriesLoader, i);
+      if (i !== 1)
+        dicom = await this.readSingleDicomImageFile(seriesAccessor, i);
       // logger.debug(`inserting ${i} with ${result.pixelData.byteLength} bytes of data`);
       if (i > 1 && pitch === undefined) {
         pitch = Math.abs(lastSliceLocation - dicom.sliceLocation);

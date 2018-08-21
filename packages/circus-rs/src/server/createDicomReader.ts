@@ -1,8 +1,8 @@
-import DicomFileRepository from './dicom-file-repository/DicomFileRepository';
 import DicomDumper from './dicom-dumpers/DicomDumper';
 import { DicomReader } from './Server';
 import DicomVolume from '../common/DicomVolume';
 import AsyncLruCache from '../common/AsyncLruCache';
+import { DicomFileRepository } from '@utrad-ical/circus-dicom-repository';
 
 export default function createDicomReader(
   repository: DicomFileRepository,
@@ -12,7 +12,7 @@ export default function createDicomReader(
   return new AsyncLruCache<DicomVolume>(
     seriesUID => {
       return repository
-        .getSeriesLoader(seriesUID)
+        .getSeries(seriesUID)
         .then(loaderInfo => dicomDumper.readDicom(loaderInfo, 'all'));
     },
     {

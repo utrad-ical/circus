@@ -1,14 +1,14 @@
-import DicomDumper from './DicomDumper';
-import { PixelFormat } from '../../common/PixelFormat';
+import { SeriesAccessor } from '@utrad-ical/circus-dicom-repository/lib/DicomFileRepository';
 import DicomVolume from '../../common/DicomVolume';
-import { SeriesLoaderInfo } from '../dicom-file-repository/DicomFileRepository';
+import { PixelFormat } from '../../common/PixelFormat';
+import DicomDumper from './DicomDumper';
 
 /**
  * MockDicomDumper creates dummy volume data.
  */
 export default class MockDicomDumper extends DicomDumper {
   public readDicom(
-    seriesLoaderInfo: SeriesLoaderInfo,
+    seriesAccessor: SeriesAccessor,
     config: any
   ): Promise<DicomVolume> {
     let vol = this.makeMockVol();

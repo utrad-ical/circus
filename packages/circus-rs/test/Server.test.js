@@ -6,8 +6,7 @@ const supertest = require('supertest');
 const NullLogger = require('../src/server/loggers/NullLogger').default;
 const PngJsImageEncoder = require('../src/server/image-encoders/PngJsImageEncoder')
   .default;
-const MockDicomFileRepository = require('../src/server/dicom-file-repository/MockDicomFileRepository')
-  .default;
+const MemoryDicomFileRepository = require('@utrad-ical/circus-dicom-repository').MemoryDicomFileRepository;
 const MockDicomDumper = require('../src/server/dicom-dumpers/MockDicomDumper')
   .default;
 const createDicomReader = require('../src/server/createDicomReader').default;
@@ -24,7 +23,7 @@ describe('Server', function() {
 
       beforeEach(function(done) {
         const seriesReader = createDicomReader(
-          new MockDicomFileRepository(),
+          new MemoryDicomFileRepository(),
           new MockDicomDumper({ depth: 5 }),
           100000000
         );

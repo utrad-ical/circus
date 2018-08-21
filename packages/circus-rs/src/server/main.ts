@@ -1,11 +1,11 @@
-import config from './Config';
-import createServer from './Server';
-import loadModule, { ModuleType } from './ModuleLoader';
-import DicomDumper from './dicom-dumpers/DicomDumper';
-import DicomFileRepository from './dicom-file-repository/DicomFileRepository';
+import { DicomFileRepository } from '@utrad-ical/circus-dicom-repository';
 import * as http from 'http';
 import * as Koa from 'koa';
+import config from './Config';
 import createDicomReader from './createDicomReader';
+import DicomDumper from './dicom-dumpers/DicomDumper';
+import loadModule, { ModuleType } from './ModuleLoader';
+import createServer from './Server';
 
 function listen(app: Koa, ...args: any[]): Promise<http.Server> {
   return new Promise((resolve, reject) => {

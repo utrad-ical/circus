@@ -1,5 +1,5 @@
+import { SeriesAccessor } from '@utrad-ical/circus-dicom-repository/lib/DicomFileRepository';
 import DicomVolume from '../../common/DicomVolume';
-import { SeriesLoaderInfo } from '../dicom-file-repository/DicomFileRepository';
 
 /**
  * Base DICOM Dumper class.
@@ -19,11 +19,11 @@ abstract class DicomDumper {
   /**
    * read header/image from DICOM data.
    *
-   * @param seriesLoader series loader function
+   * @param seriesAccessor series accessor function
    * @param config request specific parameter (if needed)
    */
   public abstract readDicom(
-    seriesLoaderInfo: SeriesLoaderInfo,
+    seriesAccessor: SeriesAccessor,
     config: any
   ): Promise<DicomVolume>;
 }

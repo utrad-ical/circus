@@ -25,6 +25,7 @@ import {
   StaticDicomFileRepository,
   MemoryDicomFileRepository
 } from '@utrad-ical/circus-dicom-repository';
+import circusCsDeps from './circusCsDeps';
 
 function handlerName(route) {
   if (route.handler) return route.handler;
@@ -104,6 +105,8 @@ export default async function createApp(options = {}) {
     ? new DicomImporter(dicomRepository, models, { utility: utilityEnv })
     : undefined;
 
+  const cs = circusCsDeps();
+
   // Build a router.
   // Register each API endpoints to the router according YAML manifest files.
   const deps = {
@@ -113,6 +116,7 @@ export default async function createApp(options = {}) {
     models,
     blobStorage,
     dicomImporter,
+    cs,
     uploadFileSizeMax: '200mb',
     dicomImageServerUrl: 'http://localhost:8080/rs'
   };

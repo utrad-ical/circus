@@ -1,22 +1,21 @@
 import status from 'http-status';
-import * as jobManager from '../mockJobManager';
 
-export const handleGet = () => {
+export const handleGet = ({ cs: { jobManagerController } }) => {
   return async (ctx, next) => {
-    const status = await jobManager.status();
+    const status = await jobManagerController.status();
     ctx.body = { status };
   };
 };
 
-export const handlePatch = () => {
+export const handlePatch = ({ cs: { jobManagerController } }) => {
   return async (ctx, next) => {
-    const currentStatus = jobManager.status();
+    const currentStatus = jobManagerController.status();
     const newStatus = ctx.request.body.status;
     if (currentStatus !== newStatus) {
       if (newStatus === 'running') {
-        await jobManager.start();
+        await jobManagerController.start();
       } else if (newStatus === 'stopped') {
-        await jobManager.stop();
+        await jobManagerController.stop();
       } else {
         ctx.throw(status.BAD_REQUEST);
       }

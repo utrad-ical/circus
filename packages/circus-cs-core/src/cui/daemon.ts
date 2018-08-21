@@ -1,5 +1,5 @@
 import { bootstrapDaemonController } from '../bootstrap';
-import { DaemonController } from '../functions/createDaemonController';
+import { DaemonController } from '../daemon/createDaemonController';
 
 const printStatus = async (dc: DaemonController) => {
   const status = await dc.status();

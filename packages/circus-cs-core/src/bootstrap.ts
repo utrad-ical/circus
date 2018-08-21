@@ -1,6 +1,6 @@
-import createDaemonController from './functions/createDaemonController';
+import createDaemonController from './daemon/createDaemonController';
 import config from './config';
-import { QueueSystem, craeteMongoQueue } from './queue/queue';
+import { QueueSystem, createMongoQueue } from './queue/queue';
 import { PluginJobRequest } from './interface';
 import * as mongo from 'mongodb';
 import pluginJobRunner, { PluginJobRunner } from './job/pluginJobRunner';
@@ -28,7 +28,7 @@ interface QueueSystemData {
 export async function bootstrapQueueSystem(): Promise<QueueSystemData> {
   const client = await mongo.MongoClient.connect(config.queue.mongoUrl);
   const collection = client.db().collection(config.queue.collectionName);
-  const queue = await craeteMongoQueue<PluginJobRequest>({ collection });
+  const queue = await createMongoQueue<PluginJobRequest>({ collection });
   return {
     queue,
     dispose: () => client.close()
@@ -43,6 +43,7 @@ export async function bootstrapDicomFileRepository(): Promise<
   );
   return dicomRepository;
 }
+
 /**
  * Creates a job runner based on the current configuration.
  */

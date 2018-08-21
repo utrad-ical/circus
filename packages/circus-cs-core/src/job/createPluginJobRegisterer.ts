@@ -30,7 +30,7 @@ function checkSeriesImageRange(
 /**
  * Register a new job after data check for the payload
  */
-export default function pluginJobRegisterer(deps: {
+export default function createPluginJobRegisterer(deps: {
   queue: QueueSystem<PluginJobRequest>;
   pluginDefinitions: PluginDefinition[];
   repository: DicomFileRepository;

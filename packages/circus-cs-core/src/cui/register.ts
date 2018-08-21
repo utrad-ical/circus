@@ -2,7 +2,7 @@ import {
   bootstrapQueueSystem,
   bootstrapDicomFileRepository
 } from '../bootstrap';
-import pluginJobRegisterer from '../job/pluginJobRegisterer';
+import createPluginJobRegisterer from '../job/createPluginJobRegisterer';
 import config from '../config';
 import { JobSeries } from '../interface';
 import isDicomUid from '../util/isDicomUid';
@@ -55,7 +55,7 @@ export default async function register(argv: any) {
 
     const payload = { pluginId, series: seriesList, environment };
     const deps = { queue, pluginDefinitions, repository };
-    const registerer = pluginJobRegisterer(deps);
+    const registerer = createPluginJobRegisterer(deps);
     await registerer.register(jobId, payload, priority);
     console.log(`Registered Job ID: ${jobId}`);
   } finally {

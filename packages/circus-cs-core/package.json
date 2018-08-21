@@ -3,6 +3,9 @@
   "version": "0.2.0-0",
   "description": "CIRCUS CS Core: Plugin manager",
   "main": "index.js",
+  "bin": {
+    "cs-core": "./cui.js"
+  },
   "dependencies": {
     "@types/ajv": "^1.0.0",
     "@types/dockerode": "^2.5.4",

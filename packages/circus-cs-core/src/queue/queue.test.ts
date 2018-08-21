@@ -9,7 +9,7 @@ describe('Queue system: Mongo', () => {
 
   beforeAll(async () => {
     ({ client, collection } = await getTestCollection('pluginJobQueue'));
-    queue = await q.craeteMongoQueue({ collection });
+    queue = await q.createMongoQueue({ collection });
   });
 
   beforeEach(async () => {

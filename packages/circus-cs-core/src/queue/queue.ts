@@ -38,7 +38,7 @@ interface QueueOptions {
   collection: Collection;
 }
 
-export async function craeteMongoQueue<T>(
+export async function createMongoQueue<T>(
   options: QueueOptions
 ): Promise<QueueSystem<T>> {
   const { collection } = options;

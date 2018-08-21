@@ -1,7 +1,7 @@
-import registerJob from './registerJob';
+import pluginJobRegisterer from './pluginJobRegisterer';
 import { PluginJobRequest, PluginDefinition } from '../interface';
 import { QueueSystem } from '../queue/queue';
-import { DicomFileRepository } from '../../node_modules/@utrad-ical/circus-dicom-repository';
+import { DicomFileRepository } from '@utrad-ical/circus-dicom-repository';
 
 describe('registerJob', () => {
   const defaultPayload: PluginJobRequest = {
@@ -37,7 +37,8 @@ describe('registerJob', () => {
   });
 
   test('Register', async () => {
-    await registerJob('aaa', defaultPayload, undefined, deps);
+    const registerer = pluginJobRegisterer(deps);
+    await registerer.register('aaa', defaultPayload, undefined);
     expect(deps.repository.getSeries).toHaveBeenCalled();
     expect(deps.queue.enqueue).toHaveBeenCalled();
   });
@@ -45,7 +46,8 @@ describe('registerJob', () => {
   test('Invalid Job ID throws', async () => {
     // Note that we do not check a duplicate of job IDs
     // because it's not possible to block that here in the first place
-    await expect(registerJob('../', defaultPayload, 0, deps)).rejects.toThrow(
+    const registerer = pluginJobRegisterer(deps);
+    await expect(registerer.register('../', defaultPayload, 0)).rejects.toThrow(
       'Invalid Job ID'
     );
   });
@@ -55,14 +57,16 @@ describe('registerJob', () => {
       ...defaultPayload,
       pluginId: 'imaginary'
     };
-    await expect(registerJob('abc', wrongPayload, 0, deps)).rejects.toThrow(
+    const registerer = pluginJobRegisterer(deps);
+    await expect(registerer.register('abc', wrongPayload, 0)).rejects.toThrow(
       'No such plug-in installed.'
     );
   });
 
   test('Specifying no series throws', async () => {
     const wrongPayload: PluginJobRequest = { ...defaultPayload, series: [] };
-    await expect(registerJob('abc', wrongPayload, 0, deps)).rejects.toThrow(
+    const registerer = pluginJobRegisterer(deps);
+    await expect(registerer.register('abc', wrongPayload, 0)).rejects.toThrow(
       'No series specified'
     );
   });
@@ -72,7 +76,8 @@ describe('registerJob', () => {
       ...defaultPayload,
       series: [{ seriesUid: '9.9.9' }]
     };
-    await expect(registerJob('abc', wrongPayload, 0, deps)).rejects.toThrow(
+    const registerer = pluginJobRegisterer(deps);
+    await expect(registerer.register('abc', wrongPayload, 0)).rejects.toThrow(
       'Series 9.9.9 not found'
     );
   });
@@ -86,7 +91,8 @@ describe('registerJob', () => {
         ...defaultPayload,
         series: [{ seriesUid: '1.2.3', ...data }]
       };
-      await expect(registerJob('abc', wrongPayload, 0, deps)).rejects.toThrow(
+      const registerer = pluginJobRegisterer(deps);
+      await expect(registerer.register('abc', wrongPayload, 0)).rejects.toThrow(
         expectedMessage
       );
     };

@@ -1,6 +1,6 @@
 {
   "name": "circus-cs-core",
-  "version": "0.2.0-0",
+  "version": "0.2.0",
   "description": "CIRCUS CS Core: Plugin manager",
   "main": "index.js",
   "bin": {

@@ -27,6 +27,7 @@ import Preferences from 'pages/Preferences';
 import { store } from 'store';
 import { Provider } from 'react-redux';
 import { refreshUserInfo, dismissMessageOnPageChange } from 'actions';
+import PluginJobQueueSearch from './pages/search/PluginJobQueueSearch';
 
 require('./styles/main.less');
 
@@ -46,6 +47,7 @@ ReactDOM.render(
           path="browse/plugin-jobs(/:presetName)"
           component={PluginJobSearch}
         />
+        <Route path="plugin-job-queue" component={PluginJobQueueSearch} />
         <Route path="import-series" component={ImportSeries} />
         <Route path="import-case" component={ImportCase} />
         <Route path="new-case/:uid" component={CreateNewCase} />

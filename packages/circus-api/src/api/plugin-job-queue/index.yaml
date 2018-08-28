@@ -1,0 +1,9 @@
+name: PluginJobQueue
+description: >
+  Returns job queue.
+routes:
+  - verb: get
+    path: /plugin-job-queue
+    description: >
+      Returns plugin job queue.
+    responseSchema: pluginJobQueue|searchResult

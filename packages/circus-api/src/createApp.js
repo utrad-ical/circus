@@ -105,7 +105,7 @@ export default async function createApp(options = {}) {
     ? new DicomImporter(dicomRepository, models, { utility: utilityEnv })
     : undefined;
 
-  const cs = circusCsDeps();
+  const cs = await circusCsDeps(db);
 
   // Build a router.
   // Register each API endpoints to the router according YAML manifest files.

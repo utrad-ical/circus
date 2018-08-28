@@ -99,7 +99,11 @@ const NavView = props => {
               name="Plugin Job Search"
               link="/browse/plugin-jobs"
             />
-            <SubMenu icon="tasks" name="Show Job Queue" />
+            <SubMenu
+              icon="tasks"
+              name="Show Job Queue"
+              link="/plugin-job-queue"
+            />
           </Menu>
           <Menu name="Tool">
             <SubMenu icon="tasks" name="Task List" link="/task-list" />

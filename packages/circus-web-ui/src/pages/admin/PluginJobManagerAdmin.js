@@ -17,14 +17,14 @@ export default class PluginJobManagerAdmin extends React.Component {
 
   refresh = async () => {
     this.setState({ busy: true });
-    const result = await api('plugin-job-manager');
+    const result = await api('admin/plugin-job-manager');
     this.setState({ busy: false, status: result.status });
   };
 
   postSwitch = async mode => {
     this.setState({ busy: true });
     try {
-      await api('plugin-job-manager/switch', {
+      await api('admin/plugin-job-manager/switch', {
         method: 'post',
         data: { status: mode }
       });

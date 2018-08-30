@@ -35,6 +35,7 @@ const AdminIndex = props => {
       <h3>CIRCUS CS</h3>
       <div className="row">
         <Btn to="plugin-job-manager" link="Job Manager" glyph="user" />
+        <Btn to="plugins" link="CAD Plug-ins" glyph="circus-b-calc" />
       </div>
     </AdminContainer>
   );

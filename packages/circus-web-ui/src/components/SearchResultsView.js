@@ -27,6 +27,53 @@ const ItemsPerPageOptionRenderer = props => (
   <Fragment>{props.caption} items</Fragment>
 );
 
+const ResultPagination = props => {
+  const { onSelect, disabled, activePage, pages } = props;
+  const firstItem = Math.max(1, activePage - 2);
+  const lastItem = Math.min(pages, activePage + 2);
+  const pageItems = [];
+  const handleClick = selected => {
+    if (
+      typeof onSelect === 'function' &&
+      selected >= 1 &&
+      selected <= pages &&
+      selected !== activePage
+    ) {
+      onSelect(selected);
+    }
+  };
+  for (let i = firstItem; i <= lastItem; i++) pageItems.push(i);
+  return (
+    <Pagination disabled={disabled || pages <= 0 || true}>
+      <Pagination.First
+        onClick={() => handleClick(1)}
+        disabled={activePage == 1}
+      />
+      <Pagination.Prev
+        onClick={() => handleClick(activePage - 1)}
+        disabled={activePage == 1}
+      />
+      {pageItems.map(i => (
+        <Pagination.Item
+          key={i}
+          active={i == activePage}
+          onClick={() => handleClick(i)}
+        >
+          {i}
+        </Pagination.Item>
+      ))}
+      <Pagination.Next
+        onClick={() => handleClick(activePage + 1)}
+        disabled={pages <= 0 || activePage == pages}
+      />
+      <Pagination.Last
+        onClick={() => handleClick(pages)}
+        disabled={pages <= 0 || activePage == pages}
+      />
+    </Pagination>
+  );
+};
+
 /**
  * SearchResultsView is connected to `search` redux state and
  * displays the search results along with pager and sort changer.
@@ -56,6 +103,7 @@ const SearchResultsView = props => {
   }
 
   function handlePageClick(newPage) {
+    console.log('pinyaa', newPage);
     if (newPage === page) return;
     dispatch(changeSearchPage(name, newPage));
   }
@@ -111,14 +159,8 @@ const SearchResultsView = props => {
       </div>
       <DataView value={items} active={active} {...rest} />
       <div className="search-results-pager">
-        <Pagination
-          prev
-          next
-          first
-          last
-          ellipsis
-          items={pages}
-          maxButtons={10}
+        <ResultPagination
+          pages={pages}
           activePage={page}
           onSelect={handlePageClick}
           disabled={isFetching}

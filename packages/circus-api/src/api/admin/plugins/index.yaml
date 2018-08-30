@@ -1,0 +1,8 @@
+name: Plugin
+description: >
+  Manages CIRCUS CS Plug-ins
+routes:
+  - verb: get
+    path: /plugins
+    description: Gets the list of available plug-ins.
+    # responseSchema: pluginDefinition

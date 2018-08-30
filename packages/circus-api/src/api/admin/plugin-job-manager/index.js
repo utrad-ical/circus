@@ -7,7 +7,7 @@ export const handleGet = ({ cs: { jobManagerController } }) => {
   };
 };
 
-export const handlePatch = ({ cs: { jobManagerController } }) => {
+export const handlePost = ({ cs: { jobManagerController } }) => {
   return async (ctx, next) => {
     const currentStatus = jobManagerController.status();
     const newStatus = ctx.request.body.status;

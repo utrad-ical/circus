@@ -23,6 +23,7 @@ import GroupAdmin from 'pages/admin/GroupAdmin';
 import UserAdmin from 'pages/admin/UserAdmin';
 import ProjectAdmin from 'pages/admin/ProjectAdmin';
 import PluginJobManagerAdmin from 'pages/admin/PluginJobManagerAdmin';
+import PluginAdmin from 'pages/admin/PluginAdmin';
 import Preferences from 'pages/Preferences';
 
 import { store } from 'store';
@@ -59,6 +60,7 @@ ReactDOM.render(
           <Route path="user" component={UserAdmin} />
           <Route path="project" component={ProjectAdmin} />
           <Route path="plugin-job-manager" component={PluginJobManagerAdmin} />
+          <Route path="plugins" component={PluginAdmin} />
         </Route>
         <Route path="series/:uid" component={SeriesDetail} />
         <Route path="case/:caseId" component={CaseDetail} />

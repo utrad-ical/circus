@@ -176,31 +176,33 @@ class Editor extends React.Component {
       p => !this.props.excludeProperty || this.props.excludeProperty !== p.key
     );
 
-    const header = this.props.target ? (
-      <span>
-        Updating: <strong>{this.props.target}</strong>
-      </span>
-    ) : (
-      'Creating new item'
-    );
-    const footer = (
-      <div className="text-center">
-        <Button bsStyle="link" onClick={this.props.onCancelClick}>
-          Cancel
-        </Button>
-        <Button bsStyle="primary" onClick={this.handleSave}>
-          Save
-        </Button>
-      </div>
-    );
     return (
-      <Panel header={header} footer={footer} bsStyle="primary">
-        <PropertyEditor
-          value={this.state.item}
-          complaints={this.props.complaints}
-          properties={properties}
-          onChange={this.onChange.bind(this)}
-        />
+      <Panel bsStyle="primary">
+        <Panel.Heading>
+          {this.props.target ? (
+            <span>
+              Updating: <strong>{this.props.target}</strong>
+            </span>
+          ) : (
+            'Creating new item'
+          )}
+        </Panel.Heading>
+        <Panel.Body>
+          <PropertyEditor
+            value={this.state.item}
+            complaints={this.props.complaints}
+            properties={properties}
+            onChange={this.onChange.bind(this)}
+          />
+        </Panel.Body>
+        <Panel.Footer className="text-center">
+          <Button bsStyle="link" onClick={this.props.onCancelClick}>
+            Cancel
+          </Button>
+          <Button bsStyle="primary" onClick={this.handleSave}>
+            Save
+          </Button>
+        </Panel.Footer>
       </Panel>
     );
   }

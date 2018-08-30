@@ -49,15 +49,11 @@ function role2str(role) {
 
 const MyProjects = ({ user }) => {
   return (
-    <Panel
-      bsStyle="primary"
-      header={
-        <span>
-          <Glyphicon glyph="education" /> My Projects
-        </span>
-      }
-    >
-      <ListGroup fill>
+    <Panel bsStyle="primary">
+      <Panel.Heading>
+        <Glyphicon glyph="education" /> My Projects
+      </Panel.Heading>
+      <ListGroup>
         {user.accessibleProjects.map(p => (
           <ListGroupItem key={p.project.projectId}>
             <div>
@@ -78,16 +74,11 @@ const MyProjects = ({ user }) => {
 
 const MyProfile = ({ user }) => {
   return (
-    <Panel
-      bsStyle="primary"
-      className="home-profile"
-      header={
-        <span>
-          <Glyphicon glyph="user" /> Profile
-        </span>
-      }
-    >
-      <ListGroup fill>
+    <Panel bsStyle="primary" className="home-profile">
+      <Panel.Heading>
+        <Glyphicon glyph="user" /> Profile
+      </Panel.Heading>
+      <ListGroup>
         <ListGroupItem>
           You are logged in as: <b>{user.description}</b>
         </ListGroupItem>
@@ -99,24 +90,26 @@ const MyProfile = ({ user }) => {
           </ListGroupItem>
         ) : null}
       </ListGroup>
-      <ul className="list-unstyled">
-        <li>
-          <b>Login ID:</b> {user.loginId}
-        </li>
-        <li>
-          <b>Email:</b> {user.userEmail}
-        </li>
-        <li>
-          <b>Last login:</b> <TimeDisplay value={user.lastLoginTime} />
-          (from {user.lastLoginIp})
-        </li>
-        <li>
-          <b>Groups:</b> {user.groups.join(', ')}
-        </li>
-        <li>
-          <b>Domains:</b> {user.domains.join(', ')}
-        </li>
-      </ul>
+      <Panel.Body>
+        <ul className="list-unstyled">
+          <li>
+            <b>Login ID:</b> {user.loginId}
+          </li>
+          <li>
+            <b>Email:</b> {user.userEmail}
+          </li>
+          <li>
+            <b>Last login:</b> <TimeDisplay value={user.lastLoginTime} />
+            (from {user.lastLoginIp})
+          </li>
+          <li>
+            <b>Groups:</b> {user.groups.join(', ')}
+          </li>
+          <li>
+            <b>Domains:</b> {user.domains.join(', ')}
+          </li>
+        </ul>
+      </Panel.Body>
     </Panel>
   );
 };

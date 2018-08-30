@@ -47,7 +47,7 @@
     "moment": "^2.16.0",
     "prettier": "^1.9.2",
     "react": "^16.2.0",
-    "react-bootstrap": "^0.31.5",
+    "react-bootstrap": "^0.32.3",
     "react-dom": "^16.2.0",
     "react-redux": "^4.4.6",
     "react-router": "^3.0.0",

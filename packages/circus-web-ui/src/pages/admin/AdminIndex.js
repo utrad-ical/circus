@@ -24,12 +24,17 @@ const AdminIndex = props => {
       <div className="row">
         <Btn to="general" link="Server Configuration" glyph="th-large" />
       </div>
+      <h3>CIRCUS DB</h3>
       <div className="row">
         <Btn to="project" link="Projects" glyph="education" />
       </div>
       <div className="row">
         <Btn to="group" link="Groups" glyph="record" />
         <Btn to="user" link="Users" glyph="user" />
+      </div>
+      <h3>CIRCUS CS</h3>
+      <div className="row">
+        <Btn to="plugin-job-manager" link="Job Manager" glyph="user" />
       </div>
     </AdminContainer>
   );

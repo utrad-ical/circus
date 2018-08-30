@@ -85,8 +85,9 @@ export default class SeriesDetail extends React.Component {
                 defaultExpanded
               />
             ) : (
-              <Panel header="Patient Info" defaultExpanded>
-                Personal information is not shown.
+              <Panel defaultExpanded>
+                <Panel.Heading>Patient Info</Panel.Heading>
+                <Panel.Body>Personal information is not shown.</Panel.Body>
               </Panel>
             )}
             <Table
@@ -111,25 +112,24 @@ const print = data => {
 const Table = props => {
   const keys = Array.isArray(props.keys) ? props.keys : Object.keys(props.data);
   return (
-    <Panel
-      collapsible
-      defaultExpanded={props.defaultExpanded}
-      header={props.title}
-    >
-      <table fill className="table table-condensed">
-        <tbody>
-          {keys.map(k => {
-            return (
-              <tr key={k}>
-                <th>{k}</th>
-                <td style={{ wordBreak: 'break-all' }}>
-                  {print(props.data[k])}
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+    <Panel defaultExpanded={props.defaultExpanded}>
+      <Panel.Heading>{props.title}</Panel.Heading>
+      <Panel.Collapse>
+        <table className="table table-condensed">
+          <tbody>
+            {keys.map(k => {
+              return (
+                <tr key={k}>
+                  <th>{k}</th>
+                  <td style={{ wordBreak: 'break-all' }}>
+                    {print(props.data[k])}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </Panel.Collapse>
     </Panel>
   );
 };

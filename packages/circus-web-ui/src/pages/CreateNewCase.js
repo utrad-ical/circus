@@ -242,18 +242,21 @@ class CreateNewCaseView extends React.Component {
           <span className="circus-icon-case" />New Case
         </h1>
         <Panel collapsible defaultExpanded header="Series">
-          <DataGrid columns={columns} value={seriesData} />
-          <IconButton
-            icon="plus"
-            bsSize="sm"
-            onClick={this.handleAddSeriesClick}
-            active={showRelevantSeries}
-          >
-            Add Another Series
-          </IconButton>
-          {showRelevantSeries && (
-            <RelevantSeries onSeriesRegister={this.registerSeries} />
-          )}
+          <Panel.Heading>Series</Panel.Heading>
+          <Panel.Body>
+            <DataGrid columns={columns} value={seriesData} />
+            <IconButton
+              icon="plus"
+              bsSize="sm"
+              onClick={this.handleAddSeriesClick}
+              active={showRelevantSeries}
+            >
+              Add Another Series
+            </IconButton>
+            {showRelevantSeries && (
+              <RelevantSeries onSeriesRegister={this.registerSeries} />
+            )}
+          </Panel.Body>
         </Panel>
         <div>
           Project:&ensp;

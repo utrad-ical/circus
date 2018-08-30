@@ -13,9 +13,9 @@ export const handleGet = ({ models }) => {
           pluginName: 'Lung-CAD',
           pluginVersion: '2.0.1',
           icon: {
-            glyph: 'b-lung',
+            glyph: 'lung',
             color: '#ffffff',
-            backgroundColor: '#ffff00'
+            backgroundColor: '#ff5500'
           }
         },
         {
@@ -23,13 +23,13 @@ export const handleGet = ({ models }) => {
           pluginName: 'MRA-CAD',
           pluginVersion: '3.0.1',
           icon: {
-            glyph: 'b-brain',
+            glyph: 'brain',
             color: '#ffffff',
-            backgroundColor: '#ffff00'
+            backgroundColor: '#0088ff'
           }
         }
       ],
-      totalItems: 1,
+      totalItems: 2,
       page: 1
     };
   };

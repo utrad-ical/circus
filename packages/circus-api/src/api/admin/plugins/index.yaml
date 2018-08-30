@@ -3,6 +3,6 @@ description: >
   Manages CIRCUS CS Plug-ins
 routes:
   - verb: get
-    path: /plugins
+    path: /admin/plugins
     description: Gets the list of available plug-ins.
     # responseSchema: pluginDefinition

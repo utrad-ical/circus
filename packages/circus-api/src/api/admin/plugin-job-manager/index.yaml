@@ -3,11 +3,11 @@ description: >
   Manages CIRCUS CS Plug-in Job Manager.
 routes:
   - verb: get
-    path: /plugin-job-manager
+    path: /admin/plugin-job-manager
     description: Gets the status of the job manager.
     responseSchema: pluginJobManager
   - verb: post
-    path: /plugin-job-manager/switch
+    path: /admin/plugin-job-manager/switch
     description: Sets the status of the job manager.
     requestSchema: pluginJobManager
     responseSchema: pluginJobManager

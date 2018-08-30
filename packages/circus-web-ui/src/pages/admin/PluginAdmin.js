@@ -3,6 +3,7 @@ import React from 'react';
 // import { api } from 'utils/api';
 import LoadingIndicator from 'rb/LoadingIndicator';
 import ProjectIcon from 'components/ProjectIcon';
+import IconEditor from './IconEditor';
 import * as et from 'rb/editor-types';
 
 const makeEmptyItem = () => {
@@ -33,7 +34,8 @@ const listColumns = [
 ];
 
 const editorProperties = [
-  { key: 'pluginName', caption: 'Plug-in Name', editor: et.text() } // 0
+  { key: 'pluginName', caption: 'Plug-in Name', editor: et.text() }, // 0
+  { key: 'icon', caption: 'Icon', editor: IconEditor }
 ];
 
 export default class PluginAdmin extends React.Component {

@@ -1,19 +1,20 @@
 // This imports babel-register, which makes all subsequent 'require's
-// parsed by babel using the settings specified by ".babelrc".
-require('babel-register');
+// parsed by babel using the settings specified by "babel.config.js".
 
-// Similarly, this enalbes direct import of TypeScript files.
-// We register ts-node, which enables requiring *.ts files directly from Node.js.
-// Consider removing this after the stable release of Babel 7.x,
-// which includes "typescript" preset.
-const compilerOptions = {
-  module: 'CommonJS',
-  target: 'es2017',
-  strictNullChecks: true
-};
+const path = require('path');
 
-require('ts-node').register({
-  compilerOptions,
-  disableWarnings: true,
-  ignore: false
+require('@babel/register')({
+  ignore: [
+    filePath => {
+      const rel = path.relative(__dirname, filePath).replace(/\\/g, '/');
+      if (
+        /^node_modules\/@utrad-ical\/(circus-rs|circus-cs-core)\/src/.test(rel)
+      ) {
+        return false;
+      }
+      if (/^node_modules/.test(rel)) return true;
+      return false;
+    }
+  ],
+  extensions: ['.js', '.jsx', '.ts']
 });

@@ -3,38 +3,18 @@ import createDicomReader from '@utrad-ical/circus-rs/src/server/createDicomReade
 import PngJsImageEncoder from '@utrad-ical/circus-rs/src/server/image-encoders/PngJsImageEncoder';
 import PureJsDicomDumper from '@utrad-ical/circus-rs/src/server/dicom-dumpers/PureJsDicomDumper';
 import loadSeries from '@utrad-ical/circus-rs/src/server/routes/middleware/LoadSeries';
-import { multirange } from 'multi-integer-range';
 import Router from 'koa-router';
 
 /**
  * Creates a series router.
  */
-export default function circusRs({ models, logger }, dicomRepository) {
-  // const dicomFileRepository = {
-  //   getSeriesLoader: async seriesUid => {
-  //     const series = await models.series.findByIdOrFail(seriesUid);
-  //     const images = multirange(series.images);
-  //     if (images.min() !== 1 || images.segmentLength() !== 1) {
-  //       throw new Error('Incontinuous series not supported');
-  //     }
-  //     return {
-  //       seriesLoader: async image => {
-  //         const key = `${seriesUid}/${image}`;
-  //         const file = await dicomStorage.read(key);
-  //         return file;
-  //       },
-  //       count: images.length()
-  //     };
-  //   }
-  // };
-
+export default function circusRs({ logger }, dicomRepository) {
   const dicomDumper = new PureJsDicomDumper();
   const seriesReader = new createDicomReader(
     dicomRepository,
     dicomDumper,
     2 * 1024 * 1024 * 1024
   );
-
   const imageEncoder = new PngJsImageEncoder();
 
   const helpers = {

@@ -6,7 +6,7 @@
 // import * as aapm2 from '../util/aapm2';
 
 import * as _pm2 from 'pm2';
-import * as pify from 'pify';
+import pify from 'pify';
 
 const pm2: any = pify(_pm2);
 

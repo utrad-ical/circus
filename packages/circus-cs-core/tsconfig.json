@@ -5,6 +5,7 @@
     "target": "es2017",
     "outDir": "../lib",
     "strict": true,
-    "importHelpers": true
+    "importHelpers": true,
+    "esModuleInterop": true
   }
 }

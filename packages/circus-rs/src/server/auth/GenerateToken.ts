@@ -1,6 +1,6 @@
 'use strict';
 
-import * as crypt from 'crypto';
+import crypt from 'crypto';
 
 /**
  * Generate new random access token.

@@ -9,6 +9,7 @@
       "es2017"
     ],
     "strict": true,
-    "importHelpers": true
+    "importHelpers": true,
+    "esModuleInterop": true
   }
 }

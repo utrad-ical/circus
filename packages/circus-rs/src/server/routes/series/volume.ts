@@ -1,7 +1,7 @@
 import DicomVolume from '../../../common/DicomVolume';
-import * as koa from 'koa';
-import * as compose from 'koa-compose';
-import * as compress from 'koa-compress';
+import koa from 'koa';
+import compose from 'koa-compose';
+import compress from 'koa-compress';
 import { ServerHelpers } from '../../ServerHelpers';
 
 /**

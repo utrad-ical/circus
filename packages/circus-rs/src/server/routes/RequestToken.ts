@@ -1,5 +1,5 @@
-import * as koa from 'koa';
-import * as compose from 'koa-compose';
+import koa from 'koa';
+import compose from 'koa-compose';
 import { isUID } from '../../common/ValidatorRules';
 import { generateAccessToken } from '../auth/GenerateToken';
 import StatusError from './Error';

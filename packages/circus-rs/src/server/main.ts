@@ -1,6 +1,6 @@
 import { DicomFileRepository } from '@utrad-ical/circus-dicom-repository';
-import * as http from 'http';
-import * as Koa from 'koa';
+import http from 'http';
+import Koa from 'koa';
 import config from './Config';
 import createDicomReader from './createDicomReader';
 import DicomDumper from './dicom-dumpers/DicomDumper';

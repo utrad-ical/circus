@@ -1,5 +1,5 @@
-import * as koa from 'koa';
-import * as compose from 'koa-compose';
+import koa from 'koa';
+import compose from 'koa-compose';
 import {
   isTuple,
   parseTuple,
@@ -7,7 +7,7 @@ import {
 } from '../../../common/ValidatorRules';
 import { Section } from '../../../common/geometry/Section';
 import StatusError from '../Error';
-import * as compress from 'koa-compress';
+import compress from 'koa-compress';
 import validate from '../middleware/Validate';
 import { ValidatorRules } from '../../../common/Validator';
 import { ServerHelpers } from '../../ServerHelpers';

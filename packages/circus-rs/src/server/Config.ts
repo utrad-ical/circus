@@ -1,7 +1,7 @@
-import * as merge from 'merge';
+import merge from 'merge';
 import 'json5/lib/require';
-import * as minimist from 'minimist';
-import * as path from 'path';
+import minimist from 'minimist';
+import path from 'path';
 
 const config = require('../../config/default');
 

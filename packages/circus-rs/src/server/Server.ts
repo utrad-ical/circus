@@ -8,10 +8,10 @@ import Logger from './loggers/Logger';
 import AuthorizationCache from './auth/AuthorizationCache';
 import { ServerHelpers } from './ServerHelpers';
 
-import * as Koa from 'koa';
-import * as Router from 'koa-router';
-import * as compose from 'koa-compose';
-import * as koaJson from 'koa-json';
+import Koa from 'koa';
+import Router from 'koa-router';
+import compose from 'koa-compose';
+import koaJson from 'koa-json';
 import tokenAuthentication from './routes/middleware/TokenAuthorization';
 import ipBasedAccessControl from './routes/middleware/IpBasedAccessControl';
 import loadSeries from './routes/middleware/LoadSeries';

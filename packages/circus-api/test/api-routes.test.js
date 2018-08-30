@@ -538,7 +538,7 @@ describe('API', function() {
     let url;
 
     before(function() {
-      url = server.url + 'api/plugin-job-manager';
+      url = server.url + 'api/admin/plugin-job-manager';
     });
 
     it('should return the current state of a server', async function() {
@@ -550,15 +550,15 @@ describe('API', function() {
 
     it('should set the state of a server', async function() {
       const res = await axios.request({
-        method: 'patch',
-        url,
+        method: 'post',
+        url: url + '/switch',
         data: { status: 'running' }
       });
       assert.equal(res.status, 200);
       assert.deepEqual(res.data, { status: 'running' });
       const res2 = await axios.request({
-        method: 'patch',
-        url,
+        method: 'post',
+        url: url + '/switch',
         data: { status: 'stopped' }
       });
       assert.deepEqual(res2.data, { status: 'stopped' });
@@ -566,8 +566,8 @@ describe('API', function() {
 
     it('should throw for invalid status change request', async function() {
       const res = await axios.request({
-        method: 'patch',
-        url,
+        method: 'post',
+        url: url + '/switch',
         data: { status: 'going' } // invalid status
       });
       assert.equal(res.status, 400);

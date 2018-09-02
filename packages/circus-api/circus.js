@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-require('babel-register');
+require('@babel/register');
 require('dotenv').config();
 
 const fs = require('fs');

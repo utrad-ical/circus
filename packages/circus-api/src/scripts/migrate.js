@@ -1,4 +1,3 @@
-require('babel-register');
 import glob from 'glob-promise';
 import * as path from 'path';
 import chalk from 'chalk';

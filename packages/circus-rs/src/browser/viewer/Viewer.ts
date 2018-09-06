@@ -80,6 +80,14 @@ export default class Viewer extends EventEmitter {
     canvas.height = canvas.offsetHeight;
   }
 
+  private lockChangeAlert = () => {
+    if (document.pointerLockElement === this.canvas) {
+      console.log('The pointer lock status is now locked');
+    } else {
+      console.log('The pointer lock status is now unlocked');
+    }
+  };
+
   constructor(div: HTMLDivElement) {
     super();
 
@@ -90,6 +98,9 @@ export default class Viewer extends EventEmitter {
     if (div.clientWidth <= 0 || div.clientHeight <= 0) {
       throw new Error('The container div has zero width or height.');
     }
+
+    // Hook pointer lock state change events
+    document.addEventListener('pointerlockchange', this.lockChangeAlert, false);
 
     // Removes everything which was already in the div
     div.innerHTML = '';
@@ -160,21 +171,27 @@ export default class Viewer extends EventEmitter {
 
     // Emulate "drag and drop" events by swapping the event type
     if (eventType === 'mousedown') {
+      eventType = 'dragstart';
       this.isDragging = true;
+      this.canvas.requestPointerLock();
+
       // register additional mouse handlers to listen events outside of canvas while dragging
       this.canvas.removeEventListener('mouseup', this.boundEventHandler);
       this.canvas.removeEventListener('mousemove', this.boundEventHandler);
       document.documentElement.addEventListener(
-        'mousemove',
-        this.boundEventHandler
-      );
-      document.documentElement.addEventListener(
         'mouseup',
         this.boundEventHandler
       );
-      eventType = 'dragstart';
+      document.documentElement.addEventListener(
+        'mousemove',
+        this.boundEventHandler
+      );
     } else if (this.isDragging) {
       if (eventType === 'mouseup') {
+        eventType = 'dragend';
+        this.isDragging = false;
+        document.exitPointerLock();
+
         this.canvas.addEventListener('mouseup', this.boundEventHandler);
         this.canvas.addEventListener('mousemove', this.boundEventHandler);
         document.documentElement.removeEventListener(
@@ -185,11 +202,9 @@ export default class Viewer extends EventEmitter {
           'mouseup',
           this.boundEventHandler
         );
-        this.isDragging = false;
-        eventType = 'dragend';
       } else if (eventType === 'mousemove') {
-        originalEvent.preventDefault();
         eventType = 'drag';
+        originalEvent.preventDefault();
       }
     }
 

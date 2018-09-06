@@ -42,6 +42,10 @@ export default abstract class DraggableTool extends Tool {
   private prevY!: number;
   private startX!: number;
   private startY!: number;
+  private movementX!: number;
+  private movementY!: number;
+  private prevTotalX!: number;
+  private prevTotalY!: number;
 
   public dragStartHandler(ev: ViewerEvent): void {
     if (
@@ -50,6 +54,10 @@ export default abstract class DraggableTool extends Tool {
     ) {
       return;
     }
+    this.movementX = 0;
+    this.movementY = 0;
+    this.prevTotalX = 0;
+    this.prevTotalY = 0;
     this.prevX = ev.viewerX;
     this.prevY = ev.viewerY;
     this.startX = ev.viewerX;
@@ -76,13 +84,30 @@ export default abstract class DraggableTool extends Tool {
     if (typeof ev.viewerX === 'undefined' || typeof ev.viewerY === 'undefined')
       return;
 
-    this.dragInfo = {
-      dx: ev.viewerX - this.prevX,
-      dy: ev.viewerY - this.prevY,
-      totalDx: ev.viewerX - this.startX,
-      totalDy: ev.viewerY - this.startY
-    };
-    this.prevX = ev.viewerX;
-    this.prevY = ev.viewerY;
+    if (
+      typeof ev.movementX === 'undefined' ||
+      typeof ev.movementY === 'undefined'
+    ) {
+      this.dragInfo = {
+        dx: ev.viewerX - this.prevX,
+        dy: ev.viewerY - this.prevY,
+        totalDx: ev.viewerX - this.startX,
+        totalDy: ev.viewerY - this.startY
+      };
+      this.prevX = ev.viewerX;
+      this.prevY = ev.viewerY;
+    } else {
+      this.dragInfo = {
+        dx: ev.movementX!,
+        dy: ev.movementY!,
+        totalDx: this.prevTotalX + ev.movementX!,
+        totalDy: this.prevTotalY + ev.movementY!
+      };
+      this.prevX = ev.viewerX;
+      this.prevY = ev.viewerY;
+      this.prevTotalX = this.dragInfo.totalDx;
+      this.prevTotalY = this.dragInfo.totalDy;
+    }
+    console.log(ev);
   }
 }

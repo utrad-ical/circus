@@ -8,6 +8,8 @@ export default class ViewerEvent {
   public viewerY?: number;
   public viewerWidth?: number;
   public viewerHeight?: number;
+  public movementX?: number;
+  public movementY?: number;
 
   public viewer: Viewer;
 
@@ -27,6 +29,9 @@ export default class ViewerEvent {
       this.viewerY = offsetY * viewerHeight / elementHeight;
       this.viewerWidth = viewerWidth;
       this.viewerHeight = viewerHeight;
+
+      this.movementX = original.movementX;
+      this.movementY = original.movementY;
     }
 
     this.original = original;

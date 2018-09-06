@@ -108,6 +108,5 @@ export default abstract class DraggableTool extends Tool {
       this.prevTotalX = this.dragInfo.totalDx;
       this.prevTotalY = this.dragInfo.totalDy;
     }
-    console.log(ev);
   }
 }

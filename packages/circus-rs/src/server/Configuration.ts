@@ -1,6 +1,10 @@
-export interface ModuleDefinition {
-  module: string;
-  options: any;
+import Logger from './helper/logger/Logger';
+import { DicomFileRepository } from '@utrad-ical/circus-dicom-repository';
+import ImageEncoder from './helper/image-encoder/ImageEncoder';
+
+export interface ModuleDefinition<T = string> {
+  module: string | T;
+  options?: any;
 }
 
 export interface Configuration {
@@ -8,16 +12,15 @@ export interface Configuration {
 
   globalIpFilter: string;
 
-  logger: ModuleDefinition;
+  logger: ModuleDefinition<Logger>;
 
-  dicomFileRepository: ModuleDefinition;
+  dicomFileRepository: ModuleDefinition<DicomFileRepository>;
 
-  dumper: ModuleDefinition;
-
-  imageEncoder: ModuleDefinition;
+  imageEncoder: ModuleDefinition<ImageEncoder>;
 
   cache: {
     memoryThreshold: number;
+    maxAge: number;
   };
 
   authorization: {

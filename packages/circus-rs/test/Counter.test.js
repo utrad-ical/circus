@@ -1,4 +1,4 @@
-const Counter = require('../src/server/Counter').default;
+const Counter = require('../src/server/helper/Counter').default;
 const assert = require('chai').assert;
 
 describe('Counter', function() {

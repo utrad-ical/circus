@@ -1,4 +1,4 @@
-import * as extend from 'extend';
+import extend from 'extend';
 import { EventEmitter } from 'events';
 import Sprite from './Sprite';
 import Composition from '../Composition';

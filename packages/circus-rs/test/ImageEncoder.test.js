@@ -18,7 +18,7 @@ describe('ImageEncoder', function() {
     const testName = 'must encode image to PNG using ' + enc;
     let encClass;
     try {
-      encClass = require('../src/server/image-encoders/' + enc).default;
+      encClass = require('../src/server/helper/image-encoder/' + enc).default;
     } catch (e) {
       it.skip(testName);
       return;

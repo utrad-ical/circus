@@ -1,57 +1,59 @@
 'use strict';
 
-const extractor = require('../src/server/dicom-dumpers/DicomPixelExtractor');
+const dicomImageExtractor = require('../src/common/dicomImageExtractor')
+  .default;
 const fs = require('fs');
 const zlib = require('zlib');
 const assert = require('chai').assert;
 const px = require('../src/common/PixelFormat');
 
-const ImageEncoder = require('../src/server/image-encoders/PngJsImageEncoder')
+const ImageEncoder = require('../src/server/helper/image-encoder/PngJsImageEncoder')
   .default;
 
 const testdir = __dirname + '/test-dicom/';
 
-describe('DicomPixelExtractor', function() {
+describe('dicomImageExtractor', function() {
   function test(done, file, content, checks) {
-    const ex = new extractor.DicomPixelExtractor();
-    const data = ex.extract(new Uint8Array(content.buffer));
+    const extract = dicomImageExtractor();
+    const { metadata, pixelData } = extract(content.buffer);
+
     for (const key in checks) {
-      assert.deepEqual(checks[key], data[key]);
+      assert.deepEqual(checks[key], metadata[key]);
     }
-    const pxInfo = px.pixelFormatInfo(data.pixelFormat);
+    const pxInfo = px.pixelFormatInfo(metadata.pixelFormat);
     assert.equal(
-      data.columns * data.rows * pxInfo.bpp,
-      data.pixelData.byteLength
+      metadata.columns * metadata.rows * pxInfo.bpp,
+      pixelData.byteLength
     );
-    const readArray = new pxInfo.arrayClass(data.pixelData);
+    const readArray = new pxInfo.arrayClass(pixelData);
 
     const doRescale =
-      data.rescale && typeof data.rescale.intercept === 'number';
-    typeof data.rescale.slope === 'number';
+      metadata.rescale && typeof metadata.rescale.intercept === 'number';
+    typeof metadata.rescale.slope === 'number';
 
     // write PNG image
     const encoder = new ImageEncoder();
-    const arr = new Uint8ClampedArray(data.columns * data.rows);
-    const useWindow = data.window
-      ? data.window
+    const arr = new Uint8ClampedArray(metadata.columns * metadata.rows);
+    const useWindow = metadata.window
+      ? metadata.window
       : {
-          level: (data.maxValue + data.maxValue) / 2,
-          width: data.maxValue - data.minValue
+          level: (metadata.maxValue + metadata.maxValue) / 2,
+          width: metadata.maxValue - metadata.minValue
         };
     const ww = useWindow.width;
     const wl = useWindow.level;
-    for (let x = 0; x < data.columns; x++) {
-      for (let y = 0; y < data.rows; y++) {
-        let pixel = readArray[x + y * data.columns];
+    for (let x = 0; x < metadata.columns; x++) {
+      for (let y = 0; y < metadata.rows; y++) {
+        let pixel = readArray[x + y * metadata.columns];
         if (doRescale) {
-          pixel = pixel * data.rescale.slope + data.rescale.intercept;
+          pixel = pixel * metadata.rescale.slope + metadata.rescale.intercept;
         }
         const o = Math.round((pixel - wl + ww / 2) * (255 / ww));
-        arr[x + y * data.columns] = o;
+        arr[x + y * metadata.columns] = o;
       }
     }
     encoder
-      .write(Buffer.from(arr.buffer), data.columns, data.rows)
+      .write(Buffer.from(arr.buffer), metadata.columns, metadata.rows)
       .then(out => {
         const stream = fs.createWriteStream(testdir + file + '.png');
         out.pipe(stream);

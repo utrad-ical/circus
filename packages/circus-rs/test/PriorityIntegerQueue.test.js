@@ -6,7 +6,7 @@ describe('PriorityIntegerQueue', function() {
   function extract(queue) {
     const result = [];
     let i;
-    while ((i = queue.pop()) !== undefined) {
+    while ((i = queue.shift()) !== undefined) {
       result.push(i);
     }
     return result;

@@ -37,6 +37,7 @@ export default class DicomVolume extends AnisotropicRawData {
   /**
    * Append z to loadedSlices:MultiRange.
    * @param z z-coordinate
+   * @deprecated use series accessor
    */
   public markSliceAsLoaded(z: number): void {
     if (z < 0 || z >= this.size[2]) {
@@ -51,6 +52,7 @@ export default class DicomVolume extends AnisotropicRawData {
    * (i.e., little endian in x64 CPUs).
    * @param z Z coordinate of the image inserted.
    * @param imageData The inserted image data using the machine's native byte order.
+   * @deprecated use series accessor
    */
   public insertSingleImage(z: number, imageData: ArrayBuffer): void {
     super.insertSingleImage(z, imageData);

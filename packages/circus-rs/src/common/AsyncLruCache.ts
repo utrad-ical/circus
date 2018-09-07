@@ -37,6 +37,8 @@ export default class AsyncLruCache<T> {
   private options: AsyncLruCacheOptions<T>;
   private totalSize: number = 0;
 
+  private static collection: AsyncLruCache<any>[] = [];
+
   private defaultOptions(): AsyncLruCacheOptions<T> {
     return {
       maxCount: 10,
@@ -55,6 +57,7 @@ export default class AsyncLruCache<T> {
     if (this.options.maxLife > 0) {
       this.timer = setInterval(() => this.checkTtl(), 1000);
     }
+    AsyncLruCache.collection.push(this);
   }
 
   /**
@@ -62,6 +65,8 @@ export default class AsyncLruCache<T> {
    */
   public dispose(): void {
     if (this.timer) clearInterval(this.timer);
+    this.truncate();
+    AsyncLruCache.collection.splice(AsyncLruCache.collection.indexOf(this), 1);
   }
 
   /**
@@ -194,4 +199,23 @@ export default class AsyncLruCache<T> {
       this.shift();
     }
   }
+
+  /**
+   * Get total of all instance cache size.
+   */
+  public static getTotalOfTotalSize(): number {
+    return AsyncLruCache.collection.reduce((p, i) => p + i.getTotalSize(), 0);
+  }
+}
+
+type Decorate<L> = (loader: L) => L;
+export function asyncLruCachify<D>(
+  options: AsyncLruCacheOptionsParameter<D>
+): Decorate<LoaderFunc<D>> {
+  return function(reader: LoaderFunc<D>): LoaderFunc<D> {
+    const cache = new AsyncLruCache<D>(reader, options);
+    return function(key: string) {
+      return cache.get(key);
+    };
+  };
 }

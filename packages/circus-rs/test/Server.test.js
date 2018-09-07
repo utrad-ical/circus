@@ -1,169 +1,317 @@
 'use strict';
 
-const createServer = require('../src/server/Server').default;
 const supertest = require('supertest');
+const {
+  MemoryDicomFileRepository
+} = require('@utrad-ical/circus-dicom-repository');
 
-const NullLogger = require('../src/server/loggers/NullLogger').default;
-const PngJsImageEncoder = require('../src/server/image-encoders/PngJsImageEncoder')
-  .default;
-const MemoryDicomFileRepository = require('@utrad-ical/circus-dicom-repository').MemoryDicomFileRepository;
-const MockDicomDumper = require('../src/server/dicom-dumpers/MockDicomDumper')
-  .default;
-const createDicomReader = require('../src/server/createDicomReader').default;
+const createServer = require('../src/server/createServer').default;
+const {
+  default: loadHelperModules,
+  disposeHelperModules
+} = require('../src/server/helper/loadHelperModules');
 
-describe('Server', function() {
-  runServerTests('without authentication', false);
-  runServerTests('with authentication', true);
+const testConfig = {
+  port: 1024,
+  globalIpFilter: '^127.0.0.1$',
+  logger: {
+    module: 'NullLogger'
+  },
+  dicomFileRepository: {
+    module: 'MemoryDicomFileRepository',
+    options: {}
+  },
+  imageEncoder: {
+    module: 'PngJsImageEncoder',
+    options: {}
+  },
+  cache: {
+    memoryThreshold: 2147483648
+  }
+};
 
-  function runServerTests(contextText, useAuth) {
-    context(contextText, function() {
-      let app;
-      let httpServer;
-      let token;
+const fs = require('fs');
+const zlib = require('zlib');
+const testdir = __dirname + '/test-dicom/';
+const MOCK_IMAGE_COUNT = 20;
 
-      beforeEach(function(done) {
-        const seriesReader = createDicomReader(
-          new MemoryDicomFileRepository(),
-          new MockDicomDumper({ depth: 5 }),
-          100000000
-        );
-        app = createServer({
-          logger: new NullLogger(),
-          imageEncoder: new PngJsImageEncoder(),
-          seriesReader,
-          loadedModuleNames: [],
-          authorization: {
-            enabled: useAuth,
-            tokenRequestIpFilter: '^127.0.0.1$',
-            expire: 1800
-          },
-          globalIpFilter: '^127.0.0.1$'
-        });
-
-        httpServer = app.listen(1024, '0.0.0.0');
-        httpServer.on('listening', () => {
-          if (useAuth) {
-            supertest(httpServer)
-              .get('/token')
-              .query({ series: '1.2.3.4.5' })
-              .expect(200)
-              .expect(res => (token = res.body.token)) // remember token
-              .end(done);
-          } else {
-            token = null;
-            done();
-          }
-        });
-        httpServer.on('error', function(err) {
-          done(err);
-        });
+function dicomImage(file = 'CT-MONO2-16-brain') {
+  return new Promise((ok, ng) => {
+    try {
+      const zippedFileContent = fs.readFileSync(testdir + file + '.gz');
+      zlib.unzip(zippedFileContent, function(err, fileContent) {
+        if (err) throw err;
+        ok(fileContent);
       });
+    } catch (err) {
+      const fileContent = fs.readFileSync(testdir + file);
+      ok(fileContent);
+    }
+  });
+}
 
-      afterEach(function(done) {
-        httpServer.close(done);
-      });
+describe('Server', () => {
+  before(async () => {
+    const memRepository = new MemoryDicomFileRepository({});
+    const series = await memRepository.getSeries('1.2.3.4.5');
+    const image = await dicomImage();
+    for (let i = 0; i < MOCK_IMAGE_COUNT; i++) {
+      await series.save(i, image);
+    }
+    testConfig.dicomFileRepository.module = memRepository;
+  });
 
-      it('must return JSON for status', function(done) {
+  context('always', () => {
+    let app;
+    let httpServer;
+    before(async () => {
+      const { port } = testConfig;
+      const helpers = await loadHelperModules(testConfig);
+      app = createServer(testConfig, helpers);
+
+      httpServer = app.listen(port, '0.0.0.0');
+      // httpServer.on('listening', () => done());
+      // httpServer.on('error', err => done(err));
+      httpServer.on('close', () => disposeHelperModules(helpers));
+
+      return Promise.resolve();
+    });
+    after(done => httpServer.close(done));
+
+    it('must return JSON for status', function(done) {
+      supertest(httpServer)
+        .get('/status')
+        .expect(200)
+        .expect('Content-Type', /application\/json/)
+        .expect(/Running/)
+        .end(done);
+    });
+
+    it('must reject invalid access using globalIpFilter', function(done) {
+      app.proxy = true;
+      supertest(httpServer)
+        .get('/status')
+        .set('X-Forwarded-For', '127.0.0.11') // change IP
+        .expect(401)
+        .end(done);
+    });
+
+    it('must return 404 for nonexistent route', function(done) {
+      supertest(httpServer)
+        .get('/foobar')
+        .expect(404)
+        .end(done);
+    });
+
+    describe('series middleware', function() {
+      it('must return valid access-control headers', function(done) {
         supertest(httpServer)
-          .get('/status')
-          .expect(200)
-          .expect('Content-Type', /application\/json/)
-          .expect(/Running/)
+          .options('/series/1.2.3.4.5/metadata')
+          .expect(res => {
+            const { header } = res;
+            if (
+              !('access-control-allow-origin' in header) ||
+              header['access-control-allow-methods'] !== 'GET'
+            )
+              throw new Error('Invalid access-control headers');
+          })
           .end(done);
       });
 
-      it('must reject invalid access using globalIpFilter', function(done) {
-        app.proxy = true;
-        supertest(httpServer)
-          .get('/status')
-          .set('X-Forwarded-For', '127.0.0.11') // change IP
-          .expect(401)
-          .end(done);
-      });
+      it.skip('must return 404 for nonexistent series');
 
-      if (useAuth) {
-        it('must return authentication error if token not passed', function(done) {
+      describe('metadata', async () => {
+        it('must return metadata without estimated window', function(done) {
+          supertest(httpServer)
+            .get('/series/1.2.3.4.5/metadata?requireEstimatedWindow=false')
+            .expect(200)
+            .expect(res => {
+              if (res.body.estimatedWindow !== undefined)
+                throw new Error('Invalid implemention');
+            })
+            .expect('Content-Type', /application\/json/)
+            .end(done);
+        });
+
+        it('must return metadata', function(done) {
           supertest(httpServer)
             .get('/series/1.2.3.4.5/metadata')
-            .expect(401)
+            .expect(200)
+            .expect(res => {
+              if (res.body.estimatedWindow === undefined)
+                throw new Error('Invalid implemention');
+            })
+            .expect('Content-Type', /application\/json/)
             .end(done);
         });
 
-        it('must return authentication error if passed token is not matched', function(done) {
+        it('must return partial metadata', function(done) {
           supertest(httpServer)
-            .get('/series/8.8.8.8.8/metadata')
-            .set('Authorization', 'Bearer ' + token)
-            .expect(401)
+            .get('/series/1.2.3.4.5/metadata?start=5&end=15&delta=2')
+            .expect(200)
+            .expect(res => {
+              const { voxelCount } = res.body;
+              if (voxelCount[2] !== [5, 7, 9, 11, 13, 15].length)
+                throw new Error('Invalid partial metadata');
+            })
+            .expect('Content-Type', /application\/json/)
             .end(done);
         });
+      });
 
-        it('must reject token request from invalid IP', function(done) {
-          app.proxy = true;
+      describe('volume', async () => {
+        let fullVolumeSize = Infinity;
+
+        it('must return volume', function(done) {
           supertest(httpServer)
-            .get('/token')
-            .set('X-Forwarded-For', '127.0.0.2')
-            .expect(401)
+            .get('/series/1.2.3.4.5/volume')
+            .expect(200)
+            .expect(res => (fullVolumeSize = res.header['content-length']))
+            .expect('Content-Type', 'application/octet-stream')
             .end(done);
         });
-      }
 
-      it('must return metadata', function(done) {
-        const test = supertest(httpServer).get('/series/1.2.3.4.5/metadata');
-        if (token) test.set('Authorization', 'Bearer ' + token);
-        test
-          .expect(200)
-          .expect('Content-Type', /application\/json/)
-          .end(done);
+        it('must return partial volume', function(done) {
+          supertest(httpServer)
+            .get('/series/1.2.3.4.5/volume?start=5&end=15&delta=2')
+            .expect(200)
+            .expect('Content-Type', 'application/octet-stream')
+            .expect(res => {
+              const a = res.header['content-length'] / fullVolumeSize;
+              const b = [5, 7, 9, 11, 13, 15].length / MOCK_IMAGE_COUNT;
+              if (a !== b) throw new Error('Invalid implemention');
+            })
+            .end(done);
+        });
       });
 
-      it('must return volume', function(done) {
-        const test = supertest(httpServer).get('/series/1.2.3.4.5/volume');
-        if (token) test.set('Authorization', 'Bearer ' + token);
-        test
-          .expect(200)
-          .expect('Content-Type', 'application/octet-stream')
-          .end(done);
-      });
+      describe('scan', async () => {
 
-      it('must return oblique image in binary format', function(done) {
-        const test = supertest(httpServer).get('/series/1.2.3.4.5/scan');
-        if (token) test.set('Authorization', 'Bearer ' + token);
-        test
-          .query({
-            origin: '200,200,50',
-            xAxis: '512,0,0',
-            yAxis: '0,512,0',
-            size: '50,50'
-          })
-          .expect(200)
-          .expect('Content-Type', 'application/octet-stream')
-          .end(done);
-      });
+        it('must return oblique image in binary format', function(done) {
+          const test = supertest(httpServer).get('/series/1.2.3.4.5/scan');
+          // if (token) test.set('Authorization', 'Bearer ' + token);
+          test
+            .query({
+              origin: '200,200,50',
+              xAxis: '512,0,0',
+              yAxis: '0,512,0',
+              size: '50,50'
+            })
+            .expect(200)
+            .expect('Content-Type', 'application/octet-stream')
+            .end(done);
+        });
 
-      it('must return oblique image in PNG format', function(done) {
-        const test = supertest(httpServer).get('/series/1.2.3.4.5/scan');
-        if (token) test.set('Authorization', 'Bearer ' + token);
-        test
-          .query({
-            origin: '200,200,50',
-            xAxis: '512,0,0',
-            yAxis: '0,512,0',
-            size: '50,50',
-            format: 'png',
-            ww: 50,
-            wl: 50
-          })
-          .expect(200)
-          .expect('Content-Type', 'image/png')
-          .end(done);
-      });
+        it('must return oblique image from partial volume', function(done) {
+          const test = supertest(httpServer).get('/series/1.2.3.4.5/scan');
+          // if (token) test.set('Authorization', 'Bearer ' + token);
+          test
+            .query({
+              start: 5,
+              end: 15,
+              delta: 2,
 
-      it('must return 404 for nonexistent route', function(done) {
-        supertest(httpServer)
-          .get('/foobar')
-          .expect(404)
-          .end(done);
+              origin: '200,200,50',
+              xAxis: '512,0,0',
+              yAxis: '0,512,0',
+              size: '50,50'
+            })
+            .expect(200)
+            .expect('Content-Type', 'application/octet-stream')
+            .end(done);
+        });
+
+        it('must return oblique image in PNG format', function(done) {
+          const test = supertest(httpServer).get('/series/1.2.3.4.5/scan');
+          // if (token) test.set('Authorization', 'Bearer ' + token);
+          test
+            .query({
+              origin: '200,200,50',
+              xAxis: '512,0,0',
+              yAxis: '0,512,0',
+              size: '50,50',
+              format: 'png',
+              ww: 50,
+              wl: 50
+            })
+            .expect(200)
+            .expect('Content-Type', 'image/png')
+            .end(done);
+        });
       });
     });
-  }
+  });
+  context('with authentication', () => {
+    let app;
+    let httpServer;
+    before(async () => {
+      const config = {
+        ...testConfig,
+        authorization: {
+          enabled: true,
+          tokenRequestIpFilter: '^127.0.0.1$',
+          expire: 1800
+        }
+      };
+      const { port } = config;
+      const helpers = await loadHelperModules(config);
+      app = createServer(config, helpers);
+
+      httpServer = app.listen(port, '0.0.0.0');
+      // httpServer.on('listening', () => done());
+      // httpServer.on('error', err => done(err));
+      httpServer.on('close', () => disposeHelperModules(helpers));
+    });
+    after(done => httpServer.close(done));
+
+    let token;
+    it('must reject token request from invalid IP', function(done) {
+      app.proxy = true;
+      supertest(httpServer)
+        .get('/token')
+        .set('X-Forwarded-For', '127.0.0.2')
+        .expect(401)
+        .end(done);
+    });
+
+    it('must issue valid token', function(done) {
+      supertest(httpServer)
+        .get('/token')
+        .query({ series: '1.2.3.4.5' })
+        .expect(res => {
+          let result;
+          ({ result, token } = res.body);
+          if (result !== 'OK') throw new Error('Issuing token is failed');
+        })
+        .expect(200)
+        .end(done);
+    });
+
+    it('must return authentication error if token not passed', function(done) {
+      supertest(httpServer)
+        .get('/series/1.2.3.4.5/metadata')
+        .expect(401)
+        .end(done);
+    });
+
+    it('must return authentication error if passed token is not matched', function(done) {
+      supertest(httpServer)
+        .get('/series/8.8.8.8.8/metadata')
+        .set('Authorization', 'Bearer ' + token)
+        .expect(401)
+        .end(done);
+    });
+
+    it('must return content if token is valid', function(done) {
+      supertest(httpServer)
+        .get('/series/1.2.3.4.5/metadata')
+        .set('Authorization', 'Bearer ' + token)
+        .expect(200)
+        .end(done);
+    });
+  });
 });
+
+// Todo:
+// requireEstimatedWindow=false
+// partialVolume

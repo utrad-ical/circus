@@ -59,7 +59,9 @@ module.exports = {
 	// Controls how long the series data are kept in memory.
 	"cache": {
 		// threshold: upper limit of heap memory size. (in bytes)
-		"memoryThreshold": 2147483648
+    "memoryThreshold": 2147483648,
+		// upper limit seconds of heap.
+		"maxAge": 3600
 	},
 
 	// Enables token-based, oauth2-compatible authorization for image requests.

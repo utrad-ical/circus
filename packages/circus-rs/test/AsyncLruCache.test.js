@@ -220,6 +220,9 @@ describe('AsyncLruCache', function() {
         }
       });
     });
+    afterEach(function() {
+      cache.dispose();
+    });
 
     it('must not contain items above count limit', function(done) {
       const promises = [];

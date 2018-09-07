@@ -41,7 +41,7 @@ export default class PriorityIntegerQueue {
     // );
   }
 
-  public pop(): number | undefined {
+  public shift(): number | undefined {
     if (!this.entries.length) return undefined;
     const top = this.entries[this.entries.length - 1];
     const result = top.value.shift();

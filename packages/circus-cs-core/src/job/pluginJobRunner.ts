@@ -1,7 +1,7 @@
 import { PluginJobRequest, PluginDefinition } from '../interface';
 import { PluginJobReporter } from './pluginJobReporter';
-import * as path from 'path';
-import * as fs from 'fs-extra';
+import path from 'path';
+import fs from 'fs-extra';
 import DockerRunner from '../util/DockerRunner';
 import { DicomFileRepository } from '@utrad-ical/circus-dicom-repository';
 import { PluginResultsValidator } from './pluginResultsValidator';

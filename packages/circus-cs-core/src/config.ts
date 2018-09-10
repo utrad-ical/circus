@@ -1,7 +1,7 @@
-import * as merge from 'merge';
-import * as path from 'path';
-import * as os from 'os';
-import * as cosmiconfig from 'cosmiconfig';
+import merge from 'merge';
+import path from 'path';
+import os from 'os';
+import cosmiconfig from 'cosmiconfig';
 import { DockerOptions } from 'dockerode';
 import { StartOptions } from 'pm2';
 import { PluginDefinition } from './interface';

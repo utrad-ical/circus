@@ -1,4 +1,4 @@
-import * as mongo from 'mongodb';
+import mongo from 'mongodb';
 
 export async function getTestCollection(collectionName: string) {
   const mongoUrl =

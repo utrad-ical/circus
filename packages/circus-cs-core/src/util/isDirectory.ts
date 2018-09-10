@@ -1,4 +1,4 @@
-import * as fs from 'fs';
+import fs from 'fs';
 
 /**
  * Asynchronouslly checks if the path exists and is a directory.

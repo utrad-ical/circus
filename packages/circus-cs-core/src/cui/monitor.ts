@@ -2,7 +2,7 @@ import { table, TableUserConfig } from 'table';
 import { bootstrapQueueSystem, bootstrapDaemonController } from '../bootstrap';
 import sleep from '../util/sleep';
 import chalk from 'chalk';
-import * as moment from 'moment';
+import moment from 'moment';
 
 const dt = (date: Date) => {
   const m = moment(date);

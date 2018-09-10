@@ -2,7 +2,7 @@ import createDaemonController from './daemon/createDaemonController';
 import config from './config';
 import { QueueSystem, createMongoQueue } from './queue/queue';
 import { PluginJobRequest } from './interface';
-import * as mongo from 'mongodb';
+import mongo from 'mongodb';
 import pluginJobRunner, { PluginJobRunner } from './job/pluginJobRunner';
 import DockerRunner from './util/DockerRunner';
 import pluginJobReporter from './job/pluginJobReporter';

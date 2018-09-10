@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events';
-import * as Dockerode from 'dockerode';
-import * as memory from 'memory-streams';
+import Dockerode from 'dockerode';
+import memory from 'memory-streams';
 import sleep from './sleep';
 
 // Supported events:

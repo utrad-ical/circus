@@ -4,8 +4,8 @@ import pluginJobRunner, {
   executePlugin
 } from './pluginJobRunner';
 import { PluginJobRequest, PluginDefinition } from '../interface';
-import * as fs from 'fs-extra';
-import * as path from 'path';
+import fs from 'fs-extra';
+import path from 'path';
 import DockerRunner from '../util/DockerRunner';
 import {
   StaticDicomFileRepository,

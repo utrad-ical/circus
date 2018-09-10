@@ -1,4 +1,4 @@
-import * as mongo from 'mongodb';
+import mongo from 'mongodb';
 import pluginJobReporter, { PluginJobReporter } from './pluginJobReporter';
 import { getTestCollection } from '../testHelper';
 

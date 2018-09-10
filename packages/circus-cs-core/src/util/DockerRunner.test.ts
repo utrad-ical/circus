@@ -1,5 +1,5 @@
 import DockerRunner from './DockerRunner';
-import * as Dockerode from 'dockerode';
+import Dockerode from 'dockerode';
 
 test('run hello-world docker image', async () => {
   const runner = new DockerRunner();

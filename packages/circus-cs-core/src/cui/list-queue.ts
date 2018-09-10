@@ -1,4 +1,4 @@
-import * as ajv from 'ajv';
+import ajv from 'ajv';
 import { bootstrapQueueSystem } from '../bootstrap';
 import { QueueState } from '../queue/queue';
 

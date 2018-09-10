@@ -1,4 +1,4 @@
-import * as minimist from 'minimist';
+import minimist from 'minimist';
 import chalk from 'chalk';
 
 const commands: { [key: string]: any } = {

@@ -1,5 +1,5 @@
 import * as q from './queue';
-import * as mongo from 'mongodb';
+import mongo from 'mongodb';
 import { getTestCollection } from '../testHelper';
 
 describe('Queue system: Mongo', () => {

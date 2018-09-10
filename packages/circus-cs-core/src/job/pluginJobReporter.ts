@@ -1,4 +1,4 @@
-import * as mongo from 'mongodb';
+import mongo from 'mongodb';
 
 /**
  * PluginJobReporter takes responsibility of reporting the status

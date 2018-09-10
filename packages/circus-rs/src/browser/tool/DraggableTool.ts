@@ -42,8 +42,6 @@ export default abstract class DraggableTool extends Tool {
   private prevY!: number;
   private startX!: number;
   private startY!: number;
-  private movementX!: number;
-  private movementY!: number;
   private prevTotalX!: number;
   private prevTotalY!: number;
 
@@ -54,8 +52,6 @@ export default abstract class DraggableTool extends Tool {
     ) {
       return;
     }
-    this.movementX = 0;
-    this.movementY = 0;
     this.prevTotalX = 0;
     this.prevTotalY = 0;
     this.prevX = ev.viewerX;

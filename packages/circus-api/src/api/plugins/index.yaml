@@ -1,0 +1,8 @@
+name: Plugin
+description: >
+  Fetches CIRCUS CS Plug-ins
+routes:
+  - verb: get
+    path: /plugins/:pluginId
+    description: Gets the specified plug-in definition.
+    # responseSchema: pluginDefinition

@@ -70,7 +70,9 @@ export type Extractor<T> = (buffer: DicomFileBuffer) => T;
 /**
  * Extracts the pixel data from a DICOM file.
  */
-const dicomImageExtractor:(options?: ExtractOptions) => Extractor<DicomImageData> = (options = {}) => {
+const dicomImageExtractor: (
+  options?: ExtractOptions
+) => Extractor<DicomImageData> = (options = {}) => {
   const { frame = 1, skipExtractPixels = false } = options;
   if (frame !== 1) throw new Error('Multiframe images are not supported yet.');
 
@@ -93,7 +95,7 @@ const dicomImageExtractor:(options?: ExtractOptions) => Extractor<DicomImageData
       : [1, 1]);
     const rescale = determineRescale(dataset);
     const pixelFormat = determinePixelFormat(dataset);
-
+    
     if (pixelFormat === PixelFormat.Unknown)
       throw new RangeError('Unsupported pixel format detected.');
 
@@ -120,7 +122,7 @@ const dicomImageExtractor:(options?: ExtractOptions) => Extractor<DicomImageData
       sliceLocation
     };
 
-    if (!skipExtractPixels) {
+  if (!skipExtractPixels) {
       let { minValue, maxValue, pixelData } = extractPixels(
         dataset,
         transferSyntax,
@@ -133,13 +135,17 @@ const dicomImageExtractor:(options?: ExtractOptions) => Extractor<DicomImageData
         const { slope, intercept } = rescale;
         minValue = minValue * slope + intercept;
         maxValue = maxValue * slope + intercept;
-        const { read, write, length } = getPixelAccessor(
-          pixelData,
-          pixelFormat
+        const { read, length } = getPixelAccessor(pixelData, pixelFormat);
+        const convertedPixelData = new ArrayBuffer(pixelData.byteLength);
+        const { write } = getPixelAccessor(
+          convertedPixelData,
+          PixelFormat.Int16
         );
         for (let i = 0; i < length; i++) {
           write(i, read(i) * slope + intercept);
         }
+        metadata.pixelFormat = PixelFormat.Int16;
+        pixelData = convertedPixelData;
       }
 
       metadata.minValue = minValue;

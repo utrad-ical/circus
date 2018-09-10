@@ -4,7 +4,6 @@ import {
   DicomMetadata,
   DicomImageData
 } from '../../common/dicomImageExtractor';
-import LRU from 'lru-cache';
 import {
   Initializer as MultiRangeInitializer,
   MultiRange
@@ -40,7 +39,7 @@ export function createVolumeProvider(
     const imageMetadata: Map<number, DicomMetadata> = new Map();
     const fetch = async (imageNo: number) => {
       const unparsedBuffer = await load(imageNo);
-      const { metadata, pixelData } = await extractor(unparsedBuffer);
+      const { metadata, pixelData } = extractor(unparsedBuffer);
       imageMetadata.set(imageNo, metadata);
       return pixelData!;
     };

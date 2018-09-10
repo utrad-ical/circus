@@ -26,10 +26,9 @@ const ApplicationView = props => {
   return (
     <div>
       <Nav />
-      <div className={containerClass}>
+      <div className="full-container">
         <MessageBox />
-        {pageContentVisible && props.children}
-        {notLoggedIn ? (
+        {notLoggedIn && (
           <div className="alert alert-danger">
             You are not logged in, or your session has been expired.<br />
             Please log in first.
@@ -39,7 +38,10 @@ const ApplicationView = props => {
               </Link>
             </div>
           </div>
-        ) : null}
+        )}
+      </div>
+      <div className={containerClass}>
+        {pageContentVisible && props.children}
       </div>
     </div>
   );

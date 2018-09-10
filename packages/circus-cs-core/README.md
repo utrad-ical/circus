@@ -42,13 +42,15 @@ Prepare MongoDB.
 - Create a db for cs-core in your mongoDb.
 - Edit `config/default.js`
 	- queue
-- `$ node cui up_queue_mongodb` for creating collection of core queue system automatically.
+- `$ node cui up-queue-mongodb` for creating collection of core queue system automatically.
 
 ## Sample Execution
 
 ```
-$ node cui check_env
-OK
+$ node cui check-env
+Plugin working directory      : [OK]
+Docker connection             : [OK]
+MongoDB connection            : [OK]
 $ node cui register --pluginId=Lung-CAD --seriesUid=[seriesUID]
 $ node cui next
 ```

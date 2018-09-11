@@ -16,6 +16,7 @@ import PluginJobSearch from 'pages/search/PluginJobSearch';
 import ImportSeries from 'pages/ImportSeries';
 import ImportCase from 'pages/ImportCase';
 import SeriesDetail from 'pages/SeriesDetail';
+import PluginJobDetail from 'pages/plugin-job-detail/PluginJobDetail';
 import TaskList from 'pages/TaskList';
 import AdminIndex from 'pages/admin/AdminIndex';
 import GeneralAdmin from 'pages/admin/GeneralAdmin';
@@ -64,6 +65,7 @@ ReactDOM.render(
         </Route>
         <Route path="series/:uid" component={SeriesDetail} />
         <Route path="case/:caseId" component={CaseDetail} />
+        <Route path="plugin-job/:jobId" component={PluginJobDetail} />
         <Route path="task-list" component={TaskList} />
         <Route path="preference" component={Preferences} />
       </Route>

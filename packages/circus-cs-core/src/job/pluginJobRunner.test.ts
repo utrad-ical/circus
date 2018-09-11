@@ -7,9 +7,7 @@ import { PluginJobRequest, PluginDefinition } from '../interface';
 import fs from 'fs-extra';
 import path from 'path';
 import DockerRunner from '../util/DockerRunner';
-import {
-  DicomFileRepository
-} from '@utrad-ical/circus-dicom-repository';
+import { DicomFileRepository } from '@utrad-ical/circus-dicom-repository';
 
 const testDir = path.resolve(__dirname, '../../test/');
 const repositoryDir = path.join(testDir, 'repository/');
@@ -29,18 +27,15 @@ describe('pluginJobRunner', () => {
     const jobReporter = { report: jest.fn() };
     const dockerRunner = new DockerRunner();
 
+    // Mock Dicom repository
     const dicomRepository: DicomFileRepository = {
-      getSeries: async (seriesUid) => ({
-        save: async (_i: number, _data: ArrayBuffer) => void 0,
-        load: async (_i: number) => {
+      getSeries: async seriesUid => ({
+        save: async (i, data) => {},
+        load: async i => {
           const file = '00000001.dcm';
-          const buf = await fs.readFileSync(path.join(repositoryDir, seriesUid, file));
-          const ab = new ArrayBuffer(buf.length);
-          const view = new Uint8Array(ab);
-          for (let i = 0; i < buf.length; i++) {
-            view[i] = buf[i];
-          }
-          return ab;
+          return (await fs.readFileSync(
+            path.join(repositoryDir, seriesUid, file)
+          ).buffer) as ArrayBuffer;
         },
         images: '1-5'
       })

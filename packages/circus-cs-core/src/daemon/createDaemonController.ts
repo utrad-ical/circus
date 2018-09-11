@@ -28,21 +28,19 @@ export interface DaemonController {
   listPluginDefinitions: () => Promise<PluginDefinition[]>;
 }
 
-interface createDaemonControllerOptions extends _pm2.StartOptions {
-  // path to working directory to store plugin definitions. (Default: ~/.circus-cs-core/)
-  infoDir?: string;
-}
-
-export default function createDaemonController(
-  startOptions: createDaemonControllerOptions
-): DaemonController {
-  let { infoDir, ...pm2StartOptions } = startOptions;
-  if (infoDir === undefined && os.homedir() !== undefined)
-    infoDir = path.join(os.homedir(), '.circus-cs-core/');
-  if (infoDir === undefined) {
+export default function createDaemonController({
+  startOptions,
+  coreWorkingDir
+}: {
+  startOptions: _pm2.StartOptions;
+  coreWorkingDir: string;
+}): DaemonController {
+  if (coreWorkingDir === undefined && os.homedir() !== undefined)
+    coreWorkingDir = path.join(os.homedir(), '.circus-cs-core/');
+  if (coreWorkingDir === undefined) {
     throw Error('Cannot set working directory.');
   }
-  const pluginDefs = pluginDefinitionsAccessor(infoDir);
+  const pluginDefs = pluginDefinitionsAccessor(coreWorkingDir);
 
   const execute = async (task: Function) => {
     await pm2.connect();
@@ -55,23 +53,23 @@ export default function createDaemonController(
 
   const start = async () => {
     return execute(async () => {
-      const processList = await pm2.describe(pm2StartOptions.name);
+      const processList = await pm2.describe(startOptions.name);
       if (processList.length > 0) return;
-      await pm2.start(script, pm2StartOptions);
+      await pm2.start(script, startOptions);
     });
   };
 
   const stop = async () => {
     return execute(async () => {
-      const processList = await pm2.describe(pm2StartOptions.name);
+      const processList = await pm2.describe(startOptions.name);
       if (processList.length === 0) return;
-      await pm2.delete(pm2StartOptions.name);
+      await pm2.delete(startOptions.name);
     });
   };
 
   const status: () => Promise<'running' | 'stopped'> = async () => {
     return execute(async () => {
-      const processList = await pm2.describe(pm2StartOptions.name);
+      const processList = await pm2.describe(startOptions.name);
       return processList.length > 0 ? 'running' : 'stopped';
     });
   };

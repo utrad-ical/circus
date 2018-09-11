@@ -14,7 +14,8 @@ import pluginDefinitionsAccessor from './util/info';
 
 export function bootstrapDaemonController() {
   const startOptions = config.jobManager.startOptions;
-  const controller = createDaemonController(startOptions);
+  const coreWorkingDir = config.coreWorkingDir;
+  const controller = createDaemonController({startOptions, coreWorkingDir});
   return controller;
 }
 

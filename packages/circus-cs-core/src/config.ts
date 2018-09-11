@@ -15,7 +15,7 @@ export interface Configuration {
   /**
    * A path to the working directory which stores Plug-in definitions.
    */
-  infoDir: string;
+  coreWorkingDir: string;
 
   /**
    * A path to the temporary directory used as a plugin working directory.
@@ -76,7 +76,7 @@ export interface Configuration {
 const defaults: Configuration = {
   pluginWorkingDir: path.join(os.tmpdir(), 'circus-cs'),
 
-  infoDir: '/var/circus/cs-core',
+  coreWorkingDir: '/var/circus/cs-core',
 
   pluginResultsDir: '/var/circus/plugin-results',
   cleanPluginWorkingDir: true,

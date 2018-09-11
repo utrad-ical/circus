@@ -9,7 +9,7 @@ export const handleGet = ({ cs: { jobManagerController } }) => {
 
 export const handlePost = ({ cs: { jobManagerController } }) => {
   return async (ctx, next) => {
-    const currentStatus = jobManagerController.status();
+    const currentStatus = await jobManagerController.status();
     const newStatus = ctx.request.body.status;
     if (currentStatus !== newStatus) {
       if (newStatus === 'running') {

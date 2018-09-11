@@ -14,11 +14,10 @@ export default function pluginDefinitionsAccessor(
   return {
     save: async (pluginDefinitions: PluginDefinition[]) => {
       // Check duplicated pluginId.
-      const duplications = pluginDefinitions
+      const anyDuplication = pluginDefinitions
         .map(i => i.pluginId)
-        .filter((x, i, self) => self.indexOf(x) !== self.lastIndexOf(x));
-      if (duplications.length > 0)
-        throw new Error('There is duplicated pluginId.');
+        .some((x, i, self) => self.indexOf(x) !== self.lastIndexOf(x));
+      if (anyDuplication) throw new Error('There is duplicated pluginId.');
 
       // Save as file
       await fs.ensureDir(coreWorkingDir);

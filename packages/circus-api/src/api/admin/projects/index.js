@@ -1,6 +1,6 @@
 import status from 'http-status';
 import performSearch from '../../performSearch';
-import { generateProjectId } from '../../../utils';
+import { generateUniqueId } from '../../../utils';
 
 export const handleSearch = ({ models }) => {
   return async (ctx, next) => {
@@ -26,7 +26,7 @@ export const handlePut = ({ models }) => {
 
 export const handlePost = ({ models }) => {
   return async (ctx, next) => {
-    const projectId = generateProjectId();
+    const projectId = generateUniqueId();
     if ('projectId' in ctx.request.body) {
       ctx.throw(status.BAD_REQUEST, 'Project ID cannot be specified');
     }

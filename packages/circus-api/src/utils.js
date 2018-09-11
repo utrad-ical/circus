@@ -1,24 +1,15 @@
-import randomstring from 'randomstring';
 import * as cp from 'child_process';
+import { ulid } from 'ulid';
 
 export async function delay(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-export function generateProjectId() {
-  return randomstring.generate({ length: 32, charset: 'hex' });
-}
-
-export function generateCaseId() {
-  return randomstring.generate({ length: 32, charset: 'hex' });
-}
-
-export function generateJobId() {
-  return randomstring.generate({ length: 32, charset: 'hex' });
-}
-
-export function generateFeedbackId() {
-  return randomstring.generate({ length: 32, charset: 'hex' });
+/**
+ * Used as a unique ID for project, case, etc.
+ */
+export function generateUniqueId() {
+  return ulid().toLowerCase();
 }
 
 /**

@@ -1,8 +1,8 @@
-import { generateProjectId } from '../../utils';
+import { generateUniqueId } from '../../utils';
 import nodepass from 'node-php-password';
 
 export async function up(db, models) {
-  const projectId = generateProjectId();
+  const projectId = generateUniqueId();
 
   await db.collection('groups').ensureIndex({ groupId: 1 }, { unique: true });
   await db.collection('groups').insertMany([

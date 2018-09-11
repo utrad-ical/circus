@@ -1,5 +1,9 @@
 {
   "compilerOptions": {
-    "baseUrl": "./src"
+    "baseUrl": "./src",
+    "paths": {
+      "rb/*": ["./node_modules/@smikitky/rb-components/lib/*"],
+      "circus-rs/*": ["./node_modules/@utrad-ical/circus-rs/src/browser/*"]
+    }
   }
 }

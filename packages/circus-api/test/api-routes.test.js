@@ -8,12 +8,12 @@ import * as pluginJobManager from '../src/api/mockJobManager';
 describe('API', function() {
   let server, axios;
 
-  before(async function () {
+  before(async function() {
     server = await test.setUpAppForTest('trace');
     axios = server.axios.alice; // Alraedy includes access token for alice@example.com
   });
 
-  after(async function () {
+  after(async function() {
     await test.tearDownAppForTest(server);
   });
 
@@ -211,7 +211,7 @@ describe('API', function() {
   });
 
   describe('admin/server-params', function _adminServerParams() {
-    beforeEach(async function () {
+    beforeEach(async function() {
       await test.setUpMongoFixture(server.db, ['serverParams']);
     });
 
@@ -375,7 +375,7 @@ describe('API', function() {
           }
         });
         assert.equal(res.status, 200);
-        assert.equal(res.data.caseId.length, 32);
+        assert.equal(res.data.caseId.length, 26);
       });
 
       it('should throw for invalid series image range', async function _shouldThrowForInvalidSeriesImageRange() {

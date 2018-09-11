@@ -1,6 +1,6 @@
 import status from 'http-status';
 import performSearch from '../performSearch';
-import { generateCaseId } from '../../utils';
+import { generateUniqueId } from '../../utils';
 import * as EJSON from 'mongodb-extended-json';
 import MultiRange from 'multi-integer-range';
 
@@ -43,7 +43,7 @@ async function makeNewCase(
   series,
   tags
 ) {
-  const caseId = generateCaseId();
+  const caseId = generateUniqueId();
 
   let patientInfoCache = null;
   const seriesData = [];

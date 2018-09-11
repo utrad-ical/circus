@@ -1,12 +1,12 @@
 import status from 'http-status';
 import performSearch from '../performSearch';
-import { generateJobId, generateFeedbackId } from '../../utils';
+import { generateUniqueId } from '../../utils';
 import * as jobManager from '../mockJobManager';
 import * as EJSON from 'mongodb-extended-json';
 
 export const handlePost = ({ models }) => {
   return async (ctx, next) => {
-    const jobId = generateJobId();
+    const jobId = generateUniqueId();
     const { priority, ...request } = ctx.request.body;
     await jobManager.registerJob(jobId, request, priority);
     await models.pluginJob.insert({
@@ -76,7 +76,7 @@ export const handlePostFeedback = ({ models }) => {
   return async (ctx, next) => {
     const jobId = ctx.params.jobId;
     const job = await models.pluginJob.findByIdOrFail(jobId);
-    const feedbackId = generateFeedbackId();
+    const feedbackId = generateUniqueId();
     const item = {
       feedbackId,
       userEmail: ctx.user.userEmail,

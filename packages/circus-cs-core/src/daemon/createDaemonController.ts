@@ -7,8 +7,6 @@
 
 import _pm2 from 'pm2';
 import pify from 'pify';
-import path from 'path';
-import os from 'os';
 import { PluginDefinition } from '../interface';
 import pluginDefinitionsAccessor from '../util/info';
 
@@ -35,13 +33,6 @@ export default function createDaemonController({
   startOptions: _pm2.StartOptions;
   coreWorkingDir: string;
 }): DaemonController {
-  if (coreWorkingDir === undefined && os.homedir() !== undefined)
-    coreWorkingDir = path.join(os.homedir(), '.circus-cs-core/');
-  if (coreWorkingDir === undefined) {
-    throw Error('Cannot set working directory.');
-  }
-  const pluginDefs = pluginDefinitionsAccessor(coreWorkingDir);
-
   const execute = async (task: Function) => {
     await pm2.connect();
     try {
@@ -97,6 +88,8 @@ export default function createDaemonController({
       await Promise.all(processList.map(r => killAndPrint(r)));
     });
   };
+
+  const pluginDefs = pluginDefinitionsAccessor(coreWorkingDir);
 
   const updatePluginDefinitions = async (
     pluginDefinitions: PluginDefinition[]

@@ -283,7 +283,7 @@ describe('API', function() {
     });
 
     describe('uploading', function uploading() {
-      async function _uploadTest(
+      async function uploadTest(
         file,
         loginName = 'alice',
         domain = 'sirius.org'

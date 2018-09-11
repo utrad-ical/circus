@@ -52,7 +52,8 @@
     "oauth2-server": "^3.0.1",
     "pify": "^3.0.0",
     "randomstring": "^1.1.5",
-    "raw-body": "^2.3.3"
+    "raw-body": "^2.3.3",
+    "ulid": "^2.3.0"
   },
   "devDependencies": {
     "chai": "^4.1.2",

@@ -8,22 +8,43 @@ import fs from 'fs-extra';
 import path from 'path';
 import DockerRunner from '../util/DockerRunner';
 import {
-  StaticDicomFileRepository,
   DicomFileRepository
 } from '@utrad-ical/circus-dicom-repository';
+
+const testDir = path.resolve(__dirname, '../../test/');
+const repositoryDir = path.join(testDir, 'repository/');
+const workingDirectory = path.join(testDir, 'working/');
+const resultsDirectory = path.join(testDir, 'results/');
 
 const seriesUid = 'dicom';
 
 describe('pluginJobRunner', () => {
+  const jobId = '12345';
+
   afterEach(async () => {
-    await fs.remove(path.join(__dirname, 'abcde'));
+    await fs.remove(path.join(__dirname, jobId));
   });
 
-  test.skip('Normal run', async () => {
+  test('Normal run', async () => {
     const jobReporter = { report: jest.fn() };
     const dockerRunner = new DockerRunner();
-    const testDir = path.resolve(__dirname, '../../test');
-    const dicomRepository = new StaticDicomFileRepository({ dataDir: 'poe' });
+
+    const dicomRepository: DicomFileRepository = {
+      getSeries: async (seriesUid) => ({
+        save: async (_i: number, _data: ArrayBuffer) => void 0,
+        load: async (_i: number) => {
+          const file = '00000001.dcm';
+          const buf = await fs.readFileSync(path.join(repositoryDir, seriesUid, file));
+          const ab = new ArrayBuffer(buf.length);
+          const view = new Uint8Array(ab);
+          for (let i = 0; i < buf.length; i++) {
+            view[i] = buf[i];
+          }
+          return ab;
+        },
+        images: '1-5'
+      })
+    };
     const pluginList: PluginDefinition[] = [
       {
         pluginId: 'hello',
@@ -38,18 +59,20 @@ describe('pluginJobRunner', () => {
       dockerRunner,
       dicomRepository,
       pluginList,
-      workingDirectory: __dirname,
-      resultsDirectory: path.join(__dirname, 'test-results')
+      workingDirectory,
+      resultsDirectory
     });
 
-    const job: PluginJobRequest = {
-      pluginId: 'hello-world',
+    const jobRequest: PluginJobRequest = {
+      pluginId: 'hello',
       series: [{ seriesUid }]
     };
 
-    await runner.run('abcde', job);
-    expect(jobReporter.report).toHaveBeenCalledTimes(2);
-    expect(jobReporter.report.mock.calls[1][1]).toBe('finished');
+    await runner.run(jobId, jobRequest);
+    expect(jobReporter.report).toHaveBeenCalledTimes(3);
+    expect(jobReporter.report.mock.calls[0][1]).toBe('processing');
+    expect(jobReporter.report.mock.calls[1][1]).toBe('results');
+    expect(jobReporter.report.mock.calls[2][1]).toBe('finished');
   });
 });
 
@@ -79,18 +102,18 @@ describe('buildDicomVolume', () => {
   // If this test fails, double-check 'dicom_voxel_dump' image
   // has been correctly loaded in the Docker environment.
   test('craetes raw volume file', async () => {
-    const srcDir = path.resolve(__dirname, '../../test/', seriesUid);
-    const destDir = path.resolve(__dirname, '../../test/dicom-out');
-    await fs.emptyDir(destDir);
+    const srcDir = path.join(repositoryDir, seriesUid);
+    const tmpDestDir = path.resolve(__dirname, '../../test/dicom-out');
+    await fs.emptyDir(tmpDestDir);
     try {
       const runner = new DockerRunner();
-      await buildDicomVolume(runner, srcDir, destDir);
-      const files = await fs.readdir(destDir);
+      await buildDicomVolume(runner, srcDir, tmpDestDir);
+      const files = await fs.readdir(tmpDestDir);
       expect(files).toContain('0.mhd');
       expect(files).toContain('0.raw');
       expect(files).toContain('0.txt');
     } finally {
-      await fs.remove(destDir);
+      await fs.remove(tmpDestDir);
     }
   });
 });

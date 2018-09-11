@@ -20,7 +20,7 @@ describe('pluginJobRunner', () => {
   const jobId = '12345';
 
   afterEach(async () => {
-    await fs.remove(path.join(__dirname, jobId));
+    await fs.remove(path.join(resultsDirectory, jobId));
   });
 
   test('Normal run', async () => {

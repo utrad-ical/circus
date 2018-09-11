@@ -65,7 +65,9 @@ export default function pluginJobRunner(deps: {
   };
 
   const mainProcess = async (jobId: string, job: PluginJobRequest) => {
-    const plugin = (await getPluginDefinitions()).find(p => p.pluginId === job.pluginId);
+    const plugin = (await getPluginDefinitions()).find(
+      p => p.pluginId === job.pluginId
+    );
     if (!plugin) {
       throw new Error(`No such plugin: ${job.pluginId}`);
     }

@@ -8,7 +8,7 @@ import fs from 'fs-extra';
 import path from 'path';
 import DockerRunner from '../util/DockerRunner';
 import { DicomFileRepository } from '@utrad-ical/circus-dicom-repository';
-import {setInfoDir, setPluginDefinitions} from '../util/info';
+import { setInfoDir, setPluginDefinitions } from '../util/info';
 
 const testDir = path.resolve(__dirname, '../../test/');
 const repositoryDir = path.join(testDir, 'repository/');

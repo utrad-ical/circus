@@ -7,12 +7,13 @@ export const handleGet = ({ cs: { jobManagerController } }) => {
   };
 };
 
-export const handlePost = ({ cs: { jobManagerController } }) => {
+export const handlePost = ({ cs: { jobManagerController, updatePlugins } }) => {
   return async (ctx, next) => {
     const currentStatus = await jobManagerController.status();
     const newStatus = ctx.request.body.status;
     if (currentStatus !== newStatus) {
       if (newStatus === 'running') {
+        await updatePlugins();
         await jobManagerController.start();
       } else if (newStatus === 'stopped') {
         await jobManagerController.stop();

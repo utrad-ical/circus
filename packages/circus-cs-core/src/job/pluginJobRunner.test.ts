@@ -8,19 +8,29 @@ import fs from 'fs-extra';
 import path from 'path';
 import DockerRunner from '../util/DockerRunner';
 import { DicomFileRepository } from '@utrad-ical/circus-dicom-repository';
+import {setInfoDir, setPluginDefinitions} from '../util/info';
 
 const testDir = path.resolve(__dirname, '../../test/');
 const repositoryDir = path.join(testDir, 'repository/');
 const workingDirectory = path.join(testDir, 'working/');
 const resultsDirectory = path.join(testDir, 'results/');
+const infoDirectory = path.join(testDir, 'info/');
 
 const seriesUid = 'dicom';
 
 describe('pluginJobRunner', () => {
   const jobId = '12345';
 
+  beforeAll(async () => {
+    setInfoDir(infoDirectory);
+  });
+
   afterEach(async () => {
     await fs.remove(path.join(resultsDirectory, jobId));
+  });
+
+  afterAll(async () => {
+    await fs.remove(infoDirectory);
   });
 
   test('Normal run', async () => {
@@ -50,11 +60,12 @@ describe('pluginJobRunner', () => {
       }
     ];
 
+    setPluginDefinitions(pluginList);
+
     const runner = pluginJobRunner({
       jobReporter,
       dockerRunner,
       dicomRepository,
-      pluginList,
       workingDirectory,
       resultsDirectory
     });

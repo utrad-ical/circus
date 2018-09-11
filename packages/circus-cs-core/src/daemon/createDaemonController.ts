@@ -7,10 +7,20 @@
 
 import _pm2 from 'pm2';
 import pify from 'pify';
+import path from 'path';
+import { PluginDefinition } from '../interface';
+import {
+  setInfoDir,
+  setPluginDefinitions,
+  getPluginDefinitions
+} from '../util/info';
 
 const pm2: any = pify(_pm2);
 
 const script = 'daemon.js';
+
+const userHomeDir =
+  process.env[process.platform == 'win32' ? 'USERPROFILE' : 'HOME'];
 
 export interface DaemonController {
   start: () => Promise<void>;
@@ -18,11 +28,28 @@ export interface DaemonController {
   status: () => Promise<'running' | 'stopped'>;
   pm2list: () => Promise<void>;
   pm2killall: () => Promise<void>;
+  updatePluginDefinitions: (
+    pluginDefinitions: PluginDefinition[]
+  ) => Promise<void>;
+  listPluginDefinitions: () => Promise<PluginDefinition[]>;
+}
+
+interface createDaemonControllerOptions extends _pm2.StartOptions {
+  // path to working directory to store plugin definitions. (Default: ~/.circus-cs-core/)
+  infoDir?: string;
 }
 
 export default function createDaemonController(
-  startOptions: _pm2.StartOptions
+  startOptions: createDaemonControllerOptions
 ): DaemonController {
+  let { infoDir, ...pm2StartOptions } = startOptions;
+  if (infoDir === undefined && userHomeDir !== undefined)
+    infoDir = path.join(userHomeDir, '.circus-cs-core/');
+  if (infoDir === undefined) {
+    throw Error('Cannot set working directory.');
+  }
+  setInfoDir(infoDir);
+
   const execute = async (task: Function) => {
     await pm2.connect();
     try {
@@ -34,23 +61,23 @@ export default function createDaemonController(
 
   const start = async () => {
     return execute(async () => {
-      const processList = await pm2.describe(startOptions.name);
+      const processList = await pm2.describe(pm2StartOptions.name);
       if (processList.length > 0) return;
-      await pm2.start(script, startOptions);
+      await pm2.start(script, pm2StartOptions);
     });
   };
 
   const stop = async () => {
     return execute(async () => {
-      const processList = await pm2.describe(startOptions.name);
+      const processList = await pm2.describe(pm2StartOptions.name);
       if (processList.length === 0) return;
-      await pm2.delete(startOptions.name);
+      await pm2.delete(pm2StartOptions.name);
     });
   };
 
   const status: () => Promise<'running' | 'stopped'> = async () => {
     return execute(async () => {
-      const processList = await pm2.describe(startOptions.name);
+      const processList = await pm2.describe(pm2StartOptions.name);
       return processList.length > 0 ? 'running' : 'stopped';
     });
   };
@@ -79,5 +106,23 @@ export default function createDaemonController(
     });
   };
 
-  return { start, stop, status, pm2list, pm2killall };
+  const updatePluginDefinitions = async (
+    pluginDefinitions: PluginDefinition[]
+  ) => {
+    await setPluginDefinitions(pluginDefinitions);
+  };
+
+  const listPluginDefinitions = async () => {
+    return await getPluginDefinitions();
+  };
+
+  return {
+    start,
+    stop,
+    status,
+    pm2list,
+    pm2killall,
+    updatePluginDefinitions,
+    listPluginDefinitions
+  };
 }

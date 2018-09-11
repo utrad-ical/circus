@@ -23,6 +23,7 @@ describe('registerJob', () => {
     const pluginDefinitions: PluginDefinition[] = [
       {
         pluginId: 'my-plugin',
+        pluginName: 'my-plugin',
         version: '1.0.0',
         type: 'CAD',
         dockerImage: 'my-plugin'

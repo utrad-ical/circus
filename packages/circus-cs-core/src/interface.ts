@@ -16,8 +16,17 @@ export interface JobSeries {
  * Defines CIRCUS CS plug-in.
  */
 export interface PluginDefinition {
+
+  /**
+   * Plug-in id. There must not be any duplication.
+   */
   pluginId: string;
-  version: string;
+
+  /**
+   * Plug-in name and version for display.
+   */
+  pluginName: string; // for display 'MRA-CAD'
+  version: string; // '2.1.5'
 
   /**
    * Plug-in type. Currently the only accepted value is 'CAD'.

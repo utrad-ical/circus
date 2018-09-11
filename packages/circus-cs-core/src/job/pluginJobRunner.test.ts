@@ -43,6 +43,7 @@ describe('pluginJobRunner', () => {
     const pluginList: PluginDefinition[] = [
       {
         pluginId: 'hello',
+        pluginName: 'hello',
         version: '1.0',
         dockerImage: 'hello-world',
         type: 'CAD'
@@ -118,6 +119,7 @@ describe('executePlugin', () => {
     const runner = new DockerRunner();
     const plugin: PluginDefinition = {
       pluginId: 'Test',
+      pluginName: 'Test',
       version: '1.0.0',
       type: 'CAD',
       dockerImage: 'hello-world'

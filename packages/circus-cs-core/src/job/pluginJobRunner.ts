@@ -6,7 +6,7 @@ import DockerRunner from '../util/DockerRunner';
 import { DicomFileRepository } from '@utrad-ical/circus-dicom-repository';
 import { PluginResultsValidator } from './pluginResultsValidator';
 import { multirange, MultiRange } from 'multi-integer-range';
-import { getPluginDefinitions } from '../util/info';
+import { PluginDefinitionAccessor } from '../util/info';
 
 export interface PluginJobRunner {
   run: (jobId: string, job: PluginJobRequest) => Promise<boolean>;
@@ -18,6 +18,7 @@ export default function pluginJobRunner(deps: {
   jobReporter: PluginJobReporter;
   dockerRunner: DockerRunner;
   dicomRepository: DicomFileRepository;
+  pluginDefinitionsAccessor: PluginDefinitionAccessor;
   workingDirectory: string;
   resultsDirectory: string;
   resultsValidator?: PluginResultsValidator;
@@ -27,6 +28,7 @@ export default function pluginJobRunner(deps: {
     jobReporter,
     dockerRunner,
     dicomRepository,
+    pluginDefinitionsAccessor,
     workingDirectory,
     resultsDirectory,
     resultsValidator,
@@ -65,7 +67,7 @@ export default function pluginJobRunner(deps: {
   };
 
   const mainProcess = async (jobId: string, job: PluginJobRequest) => {
-    const plugin = (await getPluginDefinitions()).find(
+    const plugin = (await pluginDefinitionsAccessor.load()).find(
       p => p.pluginId === job.pluginId
     );
     if (!plugin) {

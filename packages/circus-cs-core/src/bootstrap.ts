@@ -10,7 +10,7 @@ import {
   StaticDicomFileRepository,
   DicomFileRepository
 } from '@utrad-ical/circus-dicom-repository';
-import { setInfoDir, setPluginDefinitions } from './util/info';
+import pluginDefinitionsAccessor from './util/info';
 
 export function bootstrapDaemonController() {
   const startOptions = config.jobManager.startOptions;
@@ -57,13 +57,14 @@ export async function bootstrapJobRunner(
   const collection = client.db().collection(config.jobReporter.collectionName);
   const jobReporter = pluginJobReporter(collection);
 
-  setInfoDir(config.infoDir);
-  setPluginDefinitions(config.plugins);
+  const pluginDefs = pluginDefinitionsAccessor(config.coreWorkingDir);
+  pluginDefs.save(config.plugins);
 
   const jobRunner = pluginJobRunner({
     jobReporter,
     dockerRunner,
     dicomRepository,
+    pluginDefinitionsAccessor: pluginDefs,
     workingDirectory: config.pluginWorkingDir,
     resultsDirectory: config.pluginResultsDir,
     removeTemporaryDirectory: config.cleanPluginWorkingDir

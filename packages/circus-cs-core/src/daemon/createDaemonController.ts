@@ -8,19 +8,13 @@
 import _pm2 from 'pm2';
 import pify from 'pify';
 import path from 'path';
+import os from 'os';
 import { PluginDefinition } from '../interface';
-import {
-  setInfoDir,
-  setPluginDefinitions,
-  getPluginDefinitions
-} from '../util/info';
+import pluginDefinitionsAccessor from '../util/info';
 
 const pm2: any = pify(_pm2);
 
 const script = 'daemon.js';
-
-const userHomeDir =
-  process.env[process.platform == 'win32' ? 'USERPROFILE' : 'HOME'];
 
 export interface DaemonController {
   start: () => Promise<void>;
@@ -43,12 +37,12 @@ export default function createDaemonController(
   startOptions: createDaemonControllerOptions
 ): DaemonController {
   let { infoDir, ...pm2StartOptions } = startOptions;
-  if (infoDir === undefined && userHomeDir !== undefined)
-    infoDir = path.join(userHomeDir, '.circus-cs-core/');
+  if (infoDir === undefined && os.homedir() !== undefined)
+    infoDir = path.join(os.homedir(), '.circus-cs-core/');
   if (infoDir === undefined) {
     throw Error('Cannot set working directory.');
   }
-  setInfoDir(infoDir);
+  const pluginDefs = pluginDefinitionsAccessor(infoDir);
 
   const execute = async (task: Function) => {
     await pm2.connect();
@@ -109,11 +103,11 @@ export default function createDaemonController(
   const updatePluginDefinitions = async (
     pluginDefinitions: PluginDefinition[]
   ) => {
-    await setPluginDefinitions(pluginDefinitions);
+    await pluginDefs.save(pluginDefinitions);
   };
 
   const listPluginDefinitions = async () => {
-    return await getPluginDefinitions();
+    return await pluginDefs.load();
   };
 
   return {

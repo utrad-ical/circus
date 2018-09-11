@@ -1,41 +1,19 @@
 import path from 'path';
 import fs from 'fs-extra';
-import * as info from './info';
+import pluginDefinitionAccesor, { PluginDefinitionAccessor } from './info';
 import { PluginDefinition } from '../interface';
 
-describe('before set info-dir', () => {
-  test('occur error on setPluginDefinitions', async () => {
-    const setDefs: PluginDefinition[] = [
-      {
-        pluginId: 'test01',
-        pluginName: 'test01',
-        version: '0.0.1',
-        type: 'CAD',
-        dockerImage: 'test01'
-      }
-    ];
-    await expect(info.setPluginDefinitions(setDefs)).rejects.toThrow(
-      'info-dir is not set'
-    );
-  });
-
-  test('occur error on getPluginDefinitions', async () => {
-    await expect(info.getPluginDefinitions()).rejects.toThrow(
-      'info-dir is not set'
-    );
-  });
-});
-
-describe('info', () => {
-  const testInfoDir = path.join(__dirname, '../../test/info/');
+describe('pluginDefinitionAccesor', () => {
+  let pluginDefs: PluginDefinitionAccessor;
+  const testCoreWorkingDir = path.join(__dirname, '../../test/core-tmp/');
 
   beforeAll(() => {
-    info.setInfoDir(testInfoDir);
+    pluginDefs = pluginDefinitionAccesor(testCoreWorkingDir);
   });
 
   afterAll(async () => {
-    await fs.emptyDir(testInfoDir);
-    await fs.rmdir(testInfoDir);
+    await fs.emptyDir(testCoreWorkingDir);
+    await fs.rmdir(testCoreWorkingDir);
   });
 
   test('Set and get plugin definitions', async () => {
@@ -55,9 +33,9 @@ describe('info', () => {
         dockerImage: 'test03'
       }
     ];
-    await info.setPluginDefinitions(setDefs);
+    await pluginDefs.save(setDefs);
 
-    const getDefs = await info.getPluginDefinitions();
+    const getDefs = await pluginDefs.load();
     expect(setDefs).toEqual(getDefs);
   });
 
@@ -79,7 +57,7 @@ describe('info', () => {
       }
     ];
 
-    await expect(info.setPluginDefinitions(setDefs)).rejects.toThrow(
+    await expect(pluginDefs.save(setDefs)).rejects.toThrow(
       'There is duplicated pluginId'
     );
   });

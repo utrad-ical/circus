@@ -8,21 +8,24 @@ import fs from 'fs-extra';
 import path from 'path';
 import DockerRunner from '../util/DockerRunner';
 import { DicomFileRepository } from '@utrad-ical/circus-dicom-repository';
-import { setInfoDir, setPluginDefinitions } from '../util/info';
+import pluginDefinitionsAccessor, {
+  PluginDefinitionAccessor
+} from '../util/info';
 
 const testDir = path.resolve(__dirname, '../../test/');
 const repositoryDir = path.join(testDir, 'repository/');
 const workingDirectory = path.join(testDir, 'working/');
 const resultsDirectory = path.join(testDir, 'results/');
-const infoDirectory = path.join(testDir, 'info/');
+const coreWorkingDirectory = path.join(testDir, 'coreWorking/');
 
 const seriesUid = 'dicom';
 
 describe('pluginJobRunner', () => {
   const jobId = '12345';
+  let pluginDefs: PluginDefinitionAccessor;
 
   beforeAll(async () => {
-    setInfoDir(infoDirectory);
+    pluginDefs = pluginDefinitionsAccessor(coreWorkingDirectory);
   });
 
   afterEach(async () => {
@@ -30,7 +33,7 @@ describe('pluginJobRunner', () => {
   });
 
   afterAll(async () => {
-    await fs.remove(infoDirectory);
+    await fs.remove(coreWorkingDirectory);
   });
 
   test('Normal run', async () => {
@@ -60,12 +63,13 @@ describe('pluginJobRunner', () => {
       }
     ];
 
-    setPluginDefinitions(pluginList);
+    pluginDefs.save(pluginList);
 
     const runner = pluginJobRunner({
       jobReporter,
       dockerRunner,
       dicomRepository,
+      pluginDefinitionsAccessor: pluginDefs,
       workingDirectory,
       resultsDirectory
     });

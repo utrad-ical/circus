@@ -6,7 +6,7 @@ import DockerRunner from '../util/DockerRunner';
 import { DicomFileRepository } from '@utrad-ical/circus-dicom-repository';
 import { PluginResultsValidator } from './pluginResultsValidator';
 import { multirange, MultiRange } from 'multi-integer-range';
-import { PluginDefinitionAccessor } from '../util/info';
+import { PluginDefinitionAccessor } from '../util/pluginDefinitionsAccessor';
 
 export interface PluginJobRunner {
   run: (jobId: string, job: PluginJobRequest) => Promise<boolean>;

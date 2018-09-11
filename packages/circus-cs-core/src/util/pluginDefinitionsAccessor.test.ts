@@ -1,6 +1,8 @@
 import path from 'path';
 import fs from 'fs-extra';
-import pluginDefinitionAccesor, { PluginDefinitionAccessor } from './info';
+import pluginDefinitionAccesor, {
+  PluginDefinitionAccessor
+} from './pluginDefinitionsAccessor';
 import { PluginDefinition } from '../interface';
 
 describe('pluginDefinitionAccesor', () => {

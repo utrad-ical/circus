@@ -8,7 +8,7 @@
 import _pm2 from 'pm2';
 import pify from 'pify';
 import { PluginDefinition } from '../interface';
-import pluginDefinitionsAccessor from '../util/info';
+import pluginDefinitionsAccessor from '../util/pluginDefinitionsAccessor';
 
 const pm2: any = pify(_pm2);
 

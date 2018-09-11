@@ -10,7 +10,7 @@ import DockerRunner from '../util/DockerRunner';
 import { DicomFileRepository } from '@utrad-ical/circus-dicom-repository';
 import pluginDefinitionsAccessor, {
   PluginDefinitionAccessor
-} from '../util/info';
+} from '../util/pluginDefinitionsAccessor';
 
 const testDir = path.resolve(__dirname, '../../test/');
 const repositoryDir = path.join(testDir, 'repository/');

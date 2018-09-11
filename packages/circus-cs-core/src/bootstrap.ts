@@ -10,7 +10,7 @@ import {
   StaticDicomFileRepository,
   DicomFileRepository
 } from '@utrad-ical/circus-dicom-repository';
-import pluginDefinitionsAccessor from './util/info';
+import pluginDefinitionsAccessor from './util/pluginDefinitionsAccessor';
 
 export function bootstrapDaemonController() {
   const startOptions = config.jobManager.startOptions;

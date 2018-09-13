@@ -5,7 +5,7 @@ import WindowPresetEditor from './WindowPresetEditor';
 import TagEditor, { newTagItem } from './TagEditor';
 import AttributeSchemaArrayEditor from './AttributeSchemaEditor';
 import LoadingIndicator from 'rb/LoadingIndicator';
-import ProjectIcon from 'components/ProjectIcon';
+import BodyPartIcon from 'components/BodyPartIcon';
 import IconEditor from './IconEditor';
 
 const windowPriorityOptions = [
@@ -22,7 +22,7 @@ const listColumns = [
     className: 'project-name',
     renderer: ({ value: project }) => (
       <span>
-        <ProjectIcon icon={project.icon} size="lg" />
+        <BodyPartIcon icon={project.icon} size="lg" />
         &ensp;
         {project.projectName}
       </span>

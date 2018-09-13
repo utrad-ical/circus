@@ -1,6 +1,6 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import ProjectIcon from 'components/ProjectIcon';
+import BodyPartIcon from './BodyPartIcon';
 import { OverlayTrigger, Tooltip } from 'components/react-bootstrap';
 
 const ProjectDisplayView = props => {
@@ -19,7 +19,7 @@ const ProjectDisplayView = props => {
   return (
     <OverlayTrigger overlay={toolTip} placement="top">
       <span>
-        <ProjectIcon icon={project.project.icon} size={size} />
+        <BodyPartIcon icon={project.project.icon} size={size} />
         {withName && (
           <span>
             &ensp;<b>{project.project.projectName}</b>

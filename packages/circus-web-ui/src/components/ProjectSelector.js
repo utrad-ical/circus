@@ -1,6 +1,6 @@
 import React from 'react';
 import ShrinkSelect from 'rb/ShrinkSelect';
-import ProjectIcon from './ProjectIcon';
+import BodyPartIcon from './BodyPartIcon';
 
 const ProjectSelector = props => {
   const options = {};
@@ -8,7 +8,7 @@ const ProjectSelector = props => {
     options[p.projectId] = {
       caption: (
         <span>
-          <ProjectIcon icon={p.project.icon} />&ensp;
+          <BodyPartIcon icon={p.project.icon} />&ensp;
           <b>{p.project.projectName}</b>&ensp;
           <small>{p.project.description}</small>
         </span>

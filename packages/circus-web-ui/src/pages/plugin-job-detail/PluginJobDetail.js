@@ -3,7 +3,7 @@ import PatientInfoBox from 'components/PatientInfoBox';
 import { api } from '../../utils/api';
 import LoadingIndicator from 'rb/LoadingIndicator';
 import LesionCandidates from './LesionCandidates';
-import ProjectIcon from 'components/ProjectIcon';
+import BodyPartIcon from 'components/BodyPartIcon';
 import SelectionFeedbackListener from './feedback-listener/SelectionFeedbackListener';
 import FeedbackSwitcher from './FeedbackSwitcher';
 import { connect } from 'react-redux';
@@ -30,7 +30,7 @@ const PluginJobDetailPage = props => {
     <div>
       <PatientInfoBox value={seriesData[primarySeriesUid].patientInfo} />
       <div className="project-name">
-        <ProjectIcon size="lg" icon={plugin.icon} />
+        <BodyPartIcon size="lg" icon={plugin.icon} />
         {plugin.pluginName} v{plugin.pluginVersion}
       </div>
       <FeedbackSwitcher {...props} />

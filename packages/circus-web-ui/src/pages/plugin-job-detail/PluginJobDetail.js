@@ -3,7 +3,7 @@ import PatientInfoBox from 'components/PatientInfoBox';
 import { api } from '../../utils/api';
 import LoadingIndicator from 'rb/LoadingIndicator';
 import LesionCandidates from './LesionCandidates';
-import BodyPartIcon from 'components/BodyPartIcon';
+import PluginDisplay from 'components/PluginDisplay';
 import SelectionFeedbackListener from './feedback-listener/SelectionFeedbackListener';
 import FeedbackSwitcher from './FeedbackSwitcher';
 import { connect } from 'react-redux';
@@ -28,10 +28,9 @@ const PluginJobDetailPage = props => {
   const primarySeriesUid = job.series[0].seriesUid;
   return (
     <div>
-      <PatientInfoBox value={seriesData[primarySeriesUid].patientInfo} />
-      <div className="project-name">
-        <BodyPartIcon size="lg" icon={plugin.icon} />
-        {plugin.pluginName} v{plugin.pluginVersion}
+      <div className="job-detail-header">
+        <PluginDisplay plugin={plugin} size="lg" withName />
+        <PatientInfoBox value={seriesData[primarySeriesUid].patientInfo} />
       </div>
       <FeedbackSwitcher {...props} />
     </div>

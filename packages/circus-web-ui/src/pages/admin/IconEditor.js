@@ -1,5 +1,5 @@
 import React from 'react';
-import ProjectIcon from 'components/ProjectIcon';
+import BodyPartIcon from 'components/BodyPartIcon';
 import PropertyEditor from 'rb/PropertyEditor';
 import ShrinkSelect from 'rb/ShrinkSelect';
 import ColorPicker from 'rb/ColorPicker';
@@ -33,7 +33,7 @@ const GlyphPicker = props => {
     g =>
       (options[g] = {
         caption: (
-          <ProjectIcon
+          <BodyPartIcon
             icon={{ glyph: g, color: '#000000', backgroundColor: '#ffffff' }}
             size="lg"
           />

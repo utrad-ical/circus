@@ -1,12 +1,12 @@
 import React from 'react';
 import MultiSelect from 'rb/MultiSelect';
-import ProjectIcon from './ProjectIcon';
+import BodyPartIcon from './BodyPartIcon';
 
 const Renderer = props => {
   const { renderAs, project } = props;
   return (
     <span>
-      <ProjectIcon icon={project.icon} />&ensp;
+      <BodyPartIcon icon={project.icon} />&ensp;
       <b>{project.projectName}</b>
       {renderAs === 'select' && <small>&ensp;{project.description}</small>}
     </span>

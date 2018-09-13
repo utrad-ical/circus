@@ -2,7 +2,7 @@ import EditorPage from './EditorPage';
 import React from 'react';
 // import { api } from 'utils/api';
 import LoadingIndicator from 'rb/LoadingIndicator';
-import ProjectIcon from 'components/ProjectIcon';
+import BodyPartIcon from 'components/BodyPartIcon';
 import IconEditor from './IconEditor';
 import * as et from 'rb/editor-types';
 
@@ -24,7 +24,7 @@ const listColumns = [
     caption: 'Plug-in Name',
     renderer: ({ value: plugin }) => (
       <span>
-        <ProjectIcon icon={plugin.icon} size="lg" />
+        <BodyPartIcon icon={plugin.icon} size="lg" />
         &ensp;
         {plugin.pluginName}
       </span>

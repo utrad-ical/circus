@@ -44,7 +44,7 @@
     "koa-mount": "^3.0.0",
     "koa-multer": "^1.0.2",
     "koa-router": "^7.4.0",
-    "log4js": "^2.11.0",
+    "log4js": "^3.0.5",
     "mongodb": "^2.2.36",
     "mongodb-extended-json": "^1.10.0",
     "multi-integer-range": "^4.0.6",

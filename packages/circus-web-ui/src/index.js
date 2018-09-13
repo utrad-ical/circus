@@ -1,5 +1,5 @@
 // Babel polyfill, needed for async/await and Promise support for IE
-import 'babel-polyfill';
+import '@babel/polyfill';
 
 import React from 'react';
 import ReactDOM from 'react-dom';

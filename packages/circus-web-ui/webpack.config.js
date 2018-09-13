@@ -2,6 +2,7 @@ const webpack = require('webpack');
 const path = require('path');
 
 module.exports = {
+  mode: 'development',
   entry: {
     application: './src/index.js'
   },
@@ -24,13 +25,9 @@ module.exports = {
     rules: [
       {
         test: t =>
-          /\.jsx?/.test(t) &&
-          (/rb-components/.test(t) || !/node_modules/.test(t)),
+          /\.(jsx?|tsx?)/.test(t) &&
+          (/(circus-rs|rb-components)/.test(t) || !/node_modules/.test(t)),
         use: ['babel-loader']
-      },
-      {
-        test: /\.ts$/,
-        use: ['ts-loader']
       },
       {
         test: /\.(woff|woff2|ttf|eot|svg)(\?v=\d+\.\d+\.\d+)?$/,

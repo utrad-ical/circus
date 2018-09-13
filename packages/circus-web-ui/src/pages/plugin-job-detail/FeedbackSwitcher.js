@@ -1,6 +1,32 @@
 import React from 'react';
 import { ButtonGroup } from 'components/react-bootstrap';
 import IconButton from 'components/IconButton';
+import { alert } from 'rb/modal';
+
+const PersonalConsensualSwitch = props => {
+  const { mode, onModeChange } = props;
+  const isConsensual = mode === 'consensual';
+  return (
+    <ButtonGroup>
+      <IconButton
+        icon="user"
+        bsStyle={isConsensual ? 'default' : 'primary'}
+        active={!isConsensual}
+        onClick={() => onModeChange('personal')}
+      >
+        Personal
+      </IconButton>
+      <IconButton
+        icon="tower"
+        bsStyle={isConsensual ? 'primary' : 'default'}
+        active={isConsensual}
+        onClick={() => onModeChange('consensual')}
+      >
+        Consensual
+      </IconButton>
+    </ButtonGroup>
+  );
+};
 
 export default class FeedbackSwitcher extends React.Component {
   constructor(props) {
@@ -31,12 +57,13 @@ export default class FeedbackSwitcher extends React.Component {
     this.setState({ editingFeedback: feedback });
   };
 
-  handlePersonalModeClick = () => {
-    this.setState({ isConsensual: false });
+  handleModeChange = mode => {
+    this.setState({ isConsensual: mode === 'consensual' });
   };
 
-  handleConsensualModeClick = () => {
-    this.setState({ isConsensual: true });
+  handleRegisterClick = async () => {
+    const { editingFeedback } = this.state;
+    await alert(JSON.stringify(editingFeedback));
   };
 
   render() {
@@ -44,29 +71,22 @@ export default class FeedbackSwitcher extends React.Component {
     const { isConsensual, editingFeedback } = this.state;
     return (
       <div>
-        <ButtonGroup>
-          <IconButton
-            icon="user"
-            bsStyle={isConsensual ? 'default' : 'primary'}
-            active={!isConsensual}
-            onClick={this.handlePersonalModeClick}
-          >
-            Personal
-          </IconButton>
-          <IconButton
-            icon="tower"
-            bsStyle={isConsensual ? 'primary' : 'default'}
-            active={isConsensual}
-            onClick={this.handleConsensualModeClick}
-          >
-            Consensual
-          </IconButton>
-        </ButtonGroup>
+        <div className="feedback-mode-switch">
+          <PersonalConsensualSwitch
+            mode={isConsensual ? 'consensual' : 'personal'}
+            onModeChange={this.handleModeChange}
+          />
+        </div>
         <JobRenderer
           {...this.props}
           feedback={editingFeedback}
           onFeedbackChange={this.handleFeedbackChange}
         />
+        <div className="feedback-register-panel">
+          <IconButton icon="save" onClick={this.handleRegisterClick}>
+            Regsiter feedback
+          </IconButton>
+        </div>
       </div>
     );
   }

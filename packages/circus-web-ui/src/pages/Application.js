@@ -65,19 +65,6 @@ const NavView = props => {
               <span className="circus-icon-logo" />
             </Link>
           </li>
-          <Menu name="Case" link="/browse/case">
-            <SubMenu icon="search" name="Case Search" link="/browse/case" />
-            {caseSearchPresets.map(preset => (
-              <SubMenu
-                key={preset.name}
-                sub
-                icon="chevron-right"
-                name={preset.name}
-                link={`/browse/case/${encodeURIComponent(preset.name)}`}
-              />
-            ))}
-            <SubMenu icon="open" name="Case Import" link="/import-case" />
-          </Menu>
           <Menu name="Series" link="/browse/series">
             <SubMenu icon="search" name="Series Search" link="/browse/series" />
             {seriesSearchPresets.map(preset => (
@@ -94,6 +81,19 @@ const NavView = props => {
               name="Series Import"
               link="/import-series"
             />
+          </Menu>
+          <Menu name="Case" link="/browse/case">
+            <SubMenu icon="search" name="Case Search" link="/browse/case" />
+            {caseSearchPresets.map(preset => (
+              <SubMenu
+                key={preset.name}
+                sub
+                icon="chevron-right"
+                name={preset.name}
+                link={`/browse/case/${encodeURIComponent(preset.name)}`}
+              />
+            ))}
+            <SubMenu icon="open" name="Case Import" link="/import-case" />
           </Menu>
           <Menu name="CAD" link="/browse/plugin-jobs">
             <SubMenu

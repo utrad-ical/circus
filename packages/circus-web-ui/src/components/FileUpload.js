@@ -3,12 +3,23 @@ import {
   Button,
   ButtonToolbar,
   Glyphicon,
-  Well,
   ProgressBar
 } from './react-bootstrap';
 import { FileDroppable } from './FileDroppable';
 import { showMessage } from 'actions';
 import * as modal from 'rb/modal';
+import styled from 'styled-components';
+
+const StyledDiv = styled.div`
+  input[type='file'] {
+    display: none;
+  }
+
+  table.table {
+    margin: 1em;
+    font-size: 80%;
+  }
+`;
 
 /**
  * Styled div where a user can upload one ore more files.
@@ -93,39 +104,12 @@ export class FileUpload extends React.Component {
       // console.log(err);
       throw err;
     }
-
-    // busy(true);
-    // $.ajax({
-    // 	url: $('#form').attr('action'),
-    // 	type: "POST",
-    // 	data: fd,
-    // 	method:"POST",
-    // 	processData: false,
-    // 	contentType: false,
-    // 	dataType: 'json',
-    // 	xhr: myXhr,
-    // 	success: function (data) {
-    // 		$('#task-watcher').taskWatcher(data.taskID).on('finish', function() {
-    // 			form.reset();
-    // 			busy(false);
-    // 		});
-    // 	},
-    // 	complete: function (data) {
-    // 		var res = JSON.parse(data.responseText);
-    // 		if (!res.taskID) {
-    // 			busy(false);
-    // 		}
-    // 		if (res.errors) {
-    // 			showMessage(res.errors, true);
-    // 		}
-    // 	}
-    // });
   }
 
   render() {
     return (
       <FileDroppable onDropFile={this.dropFile.bind(this)}>
-        <Well className="file-upload">
+        <StyledDiv className="well">
           {this.props.children}
           <div>
             <input
@@ -164,7 +148,7 @@ export class FileUpload extends React.Component {
           )}
           <SummaryTable files={this.state.filesSelected} />
           <p>You can drag and drop files to this box.</p>
-        </Well>
+        </StyledDiv>
       </FileDroppable>
     );
   }

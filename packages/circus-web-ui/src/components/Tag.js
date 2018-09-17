@@ -1,25 +1,37 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import tinycolor from 'tinycolor2';
+import styled from 'styled-components';
+
+const StyledSpan = styled.span`
+  display: inline-block;
+  text-align: center;
+  padding: 0 5px;
+  border-radius: 5px;
+  border-style: solid;
+  border-width: 1px;
+  font-weight: bold;
+  min-width: 70px;
+  background-color: ${props => {
+    return tinycolor(props.color || '#f00').toHexString();
+  }};
+  color: ${props => {
+    return tinycolor
+      .mostReadable(props.color || '#f00', ['#000', '#fff'])
+      .toHexString();
+  }};
+  border-color: ${props => {
+    return tinycolor(props.color || '#f00')
+      .darken()
+      .toHexString();
+  }};
+`;
 
 /**
  * Displays a tag with a color and a name.
  */
 export const PhysicalTag = props => {
-  const tagColor = props.color || '#f00';
-  const backgroundColor = tinycolor(tagColor).toHexString();
-  const color = tinycolor
-    .mostReadable(backgroundColor, ['#000', '#fff'])
-    .toHexString();
-  const borderColor = tinycolor(tagColor)
-    .darken()
-    .toHexString();
-  const style = { color, backgroundColor, borderColor };
-  return (
-    <span className="tag" style={style}>
-      {props.name}
-    </span>
-  );
+  return <StyledSpan {...props}>{props.name}</StyledSpan>;
 };
 
 /**

@@ -48,7 +48,7 @@ const theme = {
   brandDarker: tinycolor('#168477')
     .darken(20)
     .toString(),
-  highlightColor: '#ffffff'
+  highlightColor: '#fd3164'
 };
 
 ReactDOM.render(

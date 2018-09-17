@@ -11,6 +11,7 @@ import LoadingIndicator from 'rb/LoadingIndicator';
 import { connect } from 'react-redux';
 import AutoReloadSwitch from './AutoReloadSwitch';
 import Icon from 'components/Icon';
+import styled from 'styled-components';
 
 export const makeSortOptions = sortKeys => {
   const options = {};
@@ -74,6 +75,24 @@ const ResultPagination = props => {
   );
 };
 
+const StyledDiv = styled.div`
+  .search-results-header {
+    text-align: right;
+    margin: 0.5em 0 0.3em;
+  }
+
+  .search-results-pager {
+    text-align: center;
+  }
+
+  .table.data-grid {
+    tbody tr td {
+      vertical-align: middle;
+    }
+    border-bottom: 2px solid #ddd;
+  }
+`;
+
 /**
  * SearchResultsView is connected to `search` redux state and
  * displays the search results along with pager and sort changer.
@@ -103,7 +122,6 @@ const SearchResultsView = props => {
   }
 
   function handlePageClick(newPage) {
-    console.log('pinyaa', newPage);
     if (newPage === page) return;
     dispatch(changeSearchPage(name, newPage));
   }
@@ -120,7 +138,7 @@ const SearchResultsView = props => {
 
   const pages = Math.ceil(totalItems / limit);
   return (
-    <div className="search-results-container">
+    <StyledDiv>
       <div className="search-results-header">
         {totalItems + ' Result' + (totalItems > 1 ? 's' : '')}
         &emsp;
@@ -166,7 +184,7 @@ const SearchResultsView = props => {
           disabled={isFetching}
         />
       </div>
-    </div>
+    </StyledDiv>
   );
 };
 

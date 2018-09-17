@@ -1,6 +1,20 @@
 import React from 'react';
 import Icon from './Icon';
 import classnames from 'classnames';
+import styled from 'styled-components';
+
+const StyledSpan = styled.span`
+  border-radius: 5px;
+  vertical-align: middle;
+  font-size: 90%;
+  padding: 3px;
+  &.lg {
+    font-size: 150%;
+  }
+  &.xl {
+    font-size: 200%;
+  }
+`;
 
 /**
  * Renderes a body-part icon with the specified color and backgroundColor.
@@ -9,9 +23,9 @@ const BodyPartIcon = props => {
   const { size, icon: { glyph, color, backgroundColor } } = props;
   const style = { color, backgroundColor };
   return (
-    <span className={classnames('body-part-icon', size)} style={style}>
+    <StyledSpan className={classnames(size)} style={style}>
       <Icon icon={`circus-b-${glyph}`} />
-    </span>
+    </StyledSpan>
   );
 };
 

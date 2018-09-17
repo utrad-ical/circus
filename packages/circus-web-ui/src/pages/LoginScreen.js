@@ -9,6 +9,26 @@ import {
   Button,
   Glyphicon
 } from 'components/react-bootstrap';
+import styled from 'styled-components';
+
+const StyledDiv = styled.div`
+  .login-panel {
+    .panel {
+      box-shadow: 3px 3px 30px silver;
+    }
+    margin-top: 3em;
+    h1 {
+      text-shadow: 2px 2px 3px silver;
+      font-size: 36px;
+      border: none;
+    }
+    input.form-control {
+      margin: 1em 0;
+      background-color: #d0e6e4;
+      border-radius: 7px;
+    }
+  }
+`;
 
 export default class LoginScreen extends React.Component {
   constructor(props) {
@@ -39,7 +59,7 @@ export default class LoginScreen extends React.Component {
       this.state.id.length === 0 || this.state.password.length === 0;
 
     return (
-      <div className="container">
+      <StyledDiv>
         <Row className={'login-panel' + (this.state.error ? ' has-error' : '')}>
           <Col sm={6} smOffset={3}>
             <Panel bsStyle="primary">
@@ -80,7 +100,7 @@ export default class LoginScreen extends React.Component {
             </Panel>
           </Col>
         </Row>
-      </div>
+      </StyledDiv>
     );
   }
 }

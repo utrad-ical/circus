@@ -1,4 +1,12 @@
 import React from 'react';
+import styled from 'styled-components';
+
+const StyledDiv = styled.div`
+  border: 2px solid transparent;
+  &.active {
+    border-color: orange;
+  }
+`;
 
 /**
  * Simple div which accepts file drop.
@@ -33,8 +41,8 @@ export class FileDroppable extends React.Component {
 
   render() {
     return (
-      <div
-        className={'file-droppable' + (this.state.active ? ' active' : '')}
+      <StyledDiv
+        className={this.state.active ? ' active' : ''}
         onDragEnter={this.dragEnter}
         onDragOver={this.dragOver}
         onDrop={this.drop}
@@ -42,7 +50,7 @@ export class FileDroppable extends React.Component {
         onDragEnd={this.dragLeaveEnd}
       >
         {this.props.children}
-      </div>
+      </StyledDiv>
     );
   }
 }

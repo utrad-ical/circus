@@ -99,13 +99,20 @@ class ConnectedPluginJobDetail extends React.Component {
       seriesData[seriesUid] = await api(`series/${seriesUid}`);
     }
 
-    const plugin = await api(`plugins/${job.pluginId}`);
-
-    this.setState({ job, seriesData, plugin });
+    try {
+      const plugin = await api(`plugins/${job.pluginId}`);
+      this.setState({ job, seriesData, plugin });
+    } catch (e) {
+      this.setState({ errorMessage: e.message });
+    }
   }
 
   render() {
-    if (this.state.job) {
+    if (this.state.errorMessage) {
+      return (
+        <div className="alert alert-danger">{this.state.errorMessage}</div>
+      );
+    } else if (this.state.job) {
       return (
         <PluginJobDetailPage
           jobRenderer={PluginJobDetailView}

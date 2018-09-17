@@ -8,7 +8,7 @@ const StyledTable = styled.table.attrs({
       'data-grid-row-clickable': props.onItemClick
     })
 })`
-  .data-grid-row-clickable {
+  &.data-grid-row-clickable {
     tbody tr {
       cursor: pointer;
     }
@@ -35,7 +35,7 @@ const DataGrid = props => {
   };
 
   return (
-    <StyledTable>
+    <StyledTable onItemClick={onItemClick}>
       <thead>
         <tr>
           {columns.map(c => (

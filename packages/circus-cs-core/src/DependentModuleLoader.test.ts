@@ -1,7 +1,6 @@
 import DependentModuleLoader from './DependentModuleLoader';
 
 describe('ModuleLoader', () => {
-
   it('must accept loader registration', async () => {
     interface SampleModuleList {
       module1: 'module-type-1';

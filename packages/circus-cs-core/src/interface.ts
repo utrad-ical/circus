@@ -16,7 +16,6 @@ export interface JobSeries {
  * Defines CIRCUS CS plug-in.
  */
 export interface PluginDefinition {
-
   /**
    * Plug-in id. There must not be any duplication.
    */

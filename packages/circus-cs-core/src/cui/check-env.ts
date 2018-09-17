@@ -7,7 +7,6 @@ import isDirectory from '../util/isDirectory';
 import { Configuration } from '../config';
 
 export default async function checkEnv(config: Configuration, argv: any) {
-
   const check = async (title: string, func: Function) => {
     try {
       process.stdout.write((title + ' '.repeat(30)).substr(0, 30) + ': ');

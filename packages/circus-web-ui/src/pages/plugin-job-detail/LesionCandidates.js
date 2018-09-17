@@ -25,11 +25,13 @@ const Candidate = props => {
         tool="pager"
         initialTool="pager"
       />
-      <FeedbackListener
-        value={feedback}
-        options={['TP', 'FP', 'pending']}
-        onChange={val => onFeedbackChange(index, val)}
-      />
+      <div className="lesion-candidate-feedback-listener">
+        <FeedbackListener
+          value={feedback}
+          options={['TP', 'FP', 'pending']}
+          onChange={val => onFeedbackChange(index, val)}
+        />
+      </div>
     </div>
   );
 };

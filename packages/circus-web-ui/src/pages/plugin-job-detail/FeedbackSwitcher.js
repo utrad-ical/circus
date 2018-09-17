@@ -14,7 +14,7 @@ const PersonalConsensualSwitch = props => {
         active={!isConsensual}
         onClick={() => onModeChange('personal')}
       >
-        Personal
+        Personal Mode
       </IconButton>
       <IconButton
         icon="tower"
@@ -22,7 +22,7 @@ const PersonalConsensualSwitch = props => {
         active={isConsensual}
         onClick={() => onModeChange('consensual')}
       >
-        Consensual
+        Consensual Mode
       </IconButton>
     </ButtonGroup>
   );

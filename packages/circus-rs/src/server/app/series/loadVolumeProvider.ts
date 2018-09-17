@@ -9,8 +9,9 @@ import {
 import compose from 'koa-compose';
 import validate from '../middleware/validate';
 import { ValidatorRules } from '../../../common/Validator';
-import { SeriesMiddlewareState, SubVolumeDescriptor } from './seriesRoutes';
+import { SeriesMiddlewareState } from './seriesRoutes';
 import { MultiRange } from 'multi-integer-range';
+import PartialVolumeDescriptor from '../../../common/PartialVolumeDescriptor';
 
 interface loadStoreOptions {
   logger: Logger;
@@ -41,7 +42,9 @@ export default function loadVolumeProvider({
       ctx.throw(httpStatus.NOT_FOUND, 'Series could not be loaded');
     }
 
-    let subVolumeDescriptor: SubVolumeDescriptor | undefined = undefined;
+    let partialVolumeDescriptor:
+      | PartialVolumeDescriptor
+      | undefined = undefined;
     const { images } = volumeAccessor!;
     const { start, end, delta = 1 } = ctx.state.query;
     if (start !== undefined || end !== undefined) {
@@ -56,12 +59,12 @@ export default function loadVolumeProvider({
       )
         ctx.throw(httpStatus.BAD_REQUEST, 'Volume descriptor is invalid');
 
-      subVolumeDescriptor = { start, end, delta };
+      partialVolumeDescriptor = { start, end, delta };
     }
 
     (ctx.state as SeriesMiddlewareState) = {
       ...ctx.state,
-      subVolumeDescriptor,
+      partialVolumeDescriptor,
       volumeAccessor
     };
     await next();

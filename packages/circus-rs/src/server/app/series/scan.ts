@@ -5,7 +5,7 @@ import {
   parseTuple,
   parseBoolean
 } from '../../../common/ValidatorRules';
-import { Section } from '../../../common/geometry/Section';
+import { Section, vectorizeSection } from '../../../common/geometry/Section';
 import httpStatus from 'http-status';
 import compress from 'koa-compress';
 import validate from '../middleware/validate';
@@ -14,12 +14,17 @@ import ImageEncoder from '../../helper/image-encoder/ImageEncoder';
 import { SeriesMiddlewareState } from './seriesRoutes';
 import RawData from '../../../common/RawData';
 import createPartialVolume from './createPartialVolume';
+import MultiRange, {
+  Initializer as MultiRangeInitializer,
+  multirange
+} from 'multi-integer-range';
+import PartialVolumeDescriptor from '../../../common/PartialVolumeDescriptor';
 
 interface scanOptions {
   imageEncoder: ImageEncoder;
 }
 
-const PARTIAL_VOLUME_PRIORITY = 1;
+const SCAN_PRIORITY = 100;
 
 /**
  * Handles 'scan' endpoint which returns MPR image for
@@ -51,18 +56,6 @@ export default function scan({ imageEncoder }: scanOptions): koa.Middleware {
       format
     } = state.query;
 
-    let volume: RawData;
-    if (state.subVolumeDescriptor) {
-      volume = await createPartialVolume(
-        state.volumeAccessor,
-        state.subVolumeDescriptor,
-      );
-    } else {
-      const { images, load } = state.volumeAccessor;
-      await load(images);
-      volume = state.volumeAccessor.volume;
-    }
-
     const useWindow = typeof ww === 'number' && typeof wl === 'number';
     if (format === 'png' && !useWindow) {
       ctx.throw(
@@ -70,6 +63,7 @@ export default function scan({ imageEncoder }: scanOptions): koa.Middleware {
         'Window values are required for PNG output.'
       );
     }
+
     if (size[0] * size[1] > 2048 * 2048) {
       ctx.throw(httpStatus.BAD_REQUEST, 'Requested image size is too large.');
     }
@@ -77,29 +71,72 @@ export default function scan({ imageEncoder }: scanOptions): koa.Middleware {
       ctx.throw(httpStatus.BAD_REQUEST, 'Invalid image size');
     }
 
-    // Create the oblique image
-    let buf: Uint8Array; // or similar
-    if (useWindow) {
-      buf = new Uint8Array(size[0] * size[1]);
-    } else {
-      buf = new (volume.getPixelFormatInfo()).arrayClass(size[0] * size[1]);
-    }
+    const { images, load } = state.volumeAccessor;
+    const volume: RawData = state.volumeAccessor.volume;
     const section: Section = { origin, xAxis, yAxis };
-    volume.scanObliqueSection(section, size, buf, interpolation, ww, wl);
 
-    // Output
-    if (format === 'png') {
-      const out = await imageEncoder.write(
-        Buffer.from(buf.buffer as ArrayBuffer),
-        size[0],
-        size[1]
-      );
-      ctx.body = out;
-      ctx.type = imageEncoder.mimeType();
-    } else {
-      ctx.body = Buffer.from(buf.buffer as ArrayBuffer);
+    //Note: Even though the necessary image is only "2, 4, 6", get "2, 3, 4, 5, 6" (in consideration of interpolation)
+    const zAxisRange = getZRange(section);
+    const z2i = zIndexToImageNo(state.partialVolumeDescriptor);
+    const waitForImages = zAxisRange
+      .map(z => z2i(z))
+      .filter(i => images.has(i));
+
+    await load(waitForImages, SCAN_PRIORITY);
+
+    if (state.partialVolumeDescriptor)
+      volume.setPartialVolumeDescriptor(state.partialVolumeDescriptor);
+    try {
+      // Create the oblique image
+      let buf: Uint8Array; // or similar
+      if (useWindow) {
+        buf = new Uint8Array(size[0] * size[1]);
+      } else {
+        buf = new (volume.getPixelFormatInfo()).arrayClass(size[0] * size[1]);
+      }
+      const section: Section = { origin, xAxis, yAxis };
+      volume.scanObliqueSection(section, size, buf, interpolation, ww, wl);
+
+      // Output
+      if (format === 'png') {
+        const out = await imageEncoder.write(
+          Buffer.from(buf.buffer as ArrayBuffer),
+          size[0],
+          size[1]
+        );
+        ctx.body = out;
+        ctx.type = imageEncoder.mimeType();
+      } else {
+        ctx.body = Buffer.from(buf.buffer as ArrayBuffer);
+      }
+    } finally {
+      volume.clearPartialVolumeDescriptor();
     }
   };
 
   return compose([validate(rules), compress(), main]);
+}
+
+function zIndexToImageNo(
+  partialVolumeDescriptor?: PartialVolumeDescriptor
+): (z: number) => number {
+  if (partialVolumeDescriptor === undefined) {
+    return z => z + 1;
+  } else {
+    const { start, end, delta } = partialVolumeDescriptor;
+    return z => start + z * delta + 1;
+  }
+}
+
+function getZRange(section: Section): number[] {
+  const { origin, xAxis, yAxis } = vectorizeSection(section);
+  const zIndices = [
+    origin.z,
+    origin.z + xAxis.z,
+    origin.z + yAxis.z,
+    origin.z + xAxis.z + yAxis.z
+  ];
+  const zMin = Math.floor(Math.min(...zIndices));
+  const zMax = Math.ceil(Math.max(...zIndices));
+  return multirange([[zMin, zMax]]).toArray();
 }

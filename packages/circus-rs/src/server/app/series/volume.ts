@@ -17,10 +17,10 @@ export default function volume(): koa.Middleware {
     async function volume(ctx, next): Promise<void> {
       const state = ctx.state as SeriesMiddlewareState;
 
-      if (state.subVolumeDescriptor) {
+      if (state.partialVolumeDescriptor) {
         const partialVolume: DicomVolume = await createPartialVolume(
           state.volumeAccessor,
-          state.subVolumeDescriptor,
+          state.partialVolumeDescriptor,
           PARTIAL_VOLUME_PRIORITY
         );
         ctx.body = Buffer.from(partialVolume.data);

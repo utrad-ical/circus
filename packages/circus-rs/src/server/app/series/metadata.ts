@@ -41,8 +41,8 @@ export default function metadata(): koa.Middleware {
     const { imageMetadata, load, images } = state.volumeAccessor;
 
     let loadImages: number[] = [];
-    if (state.subVolumeDescriptor) {
-      const { start, end, delta } = state.subVolumeDescriptor;
+    if (state.partialVolumeDescriptor) {
+      const { start, end, delta } = state.partialVolumeDescriptor;
       for (let i = start; i <= end; i += delta) {
         loadImages.push(i);
       }

@@ -55,7 +55,7 @@ describe('Server', () => {
     const memRepository = new MemoryDicomFileRepository({});
     const series = await memRepository.getSeries('1.2.3.4.5');
     const image = await dicomImage();
-    for (let i = 0; i < MOCK_IMAGE_COUNT; i++) {
+    for (let i = 1; i <= MOCK_IMAGE_COUNT; i++) {
       await series.save(i, image);
     }
     testConfig.dicomFileRepository.module = memRepository;
@@ -186,7 +186,6 @@ describe('Server', () => {
       });
 
       describe('scan', async () => {
-
         it('must return oblique image in binary format', function(done) {
           const test = supertest(httpServer).get('/series/1.2.3.4.5/scan');
           // if (token) test.set('Authorization', 'Bearer ' + token);

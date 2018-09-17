@@ -12,7 +12,7 @@ import loadVolumeProvider from './loadVolumeProvider';
 import metadata from './metadata';
 import volume from './volume';
 import scan from './scan';
-
+import PartialVolumeDescriptor from '../../../common/PartialVolumeDescriptor';
 interface seriesRoutesOptions {
   logger: Logger;
   volumeProvider: VolumeProvider;
@@ -21,15 +21,9 @@ interface seriesRoutesOptions {
 
 export interface SeriesMiddlewareState {
   volumeAccessor: VolumeAccessor;
-  subVolumeDescriptor?: SubVolumeDescriptor;
+  partialVolumeDescriptor?: PartialVolumeDescriptor;
   query?: any;
 }
-
-export type SubVolumeDescriptor = {
-  start: number;
-  end: number;
-  delta: number;
-};
 
 export default function seriesRoutes({
   logger,

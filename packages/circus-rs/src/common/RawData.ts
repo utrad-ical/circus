@@ -1,5 +1,6 @@
 import { PixelFormat, PixelFormatInfo, pixelFormatInfo } from './PixelFormat';
 import { Vector2D, Vector3D, Section, Box } from './geometry';
+import PartialVolumeDescriptor from './PartialVolumeDescriptor';
 
 // Make sure you don't add properties
 // that heavily depends on DICOM spec!
@@ -72,6 +73,16 @@ export default class RawData {
     this.setAccessor();
   }
 
+  protected partialVolumeDescriptor?: PartialVolumeDescriptor;
+  public setPartialVolumeDescriptor(
+    partialVolumeDescriptor: PartialVolumeDescriptor
+  ) {
+    this.partialVolumeDescriptor = partialVolumeDescriptor;
+  }
+  public clearPartialVolumeDescriptor() {
+    this.partialVolumeDescriptor = undefined;
+  }
+
   /**
    * Gets pixel value at the specified location. Each parameter must be an integer.
    * @param x x-coordinate
@@ -80,6 +91,11 @@ export default class RawData {
    * @return Corresponding voxel value.
    */
   public getPixelAt(x: number, y: number, z: number): number {
+    if (this.partialVolumeDescriptor) {
+      z =
+        this.partialVolumeDescriptor.start +
+        z * this.partialVolumeDescriptor.delta;
+    }
     return this.read(x + (y + z * this.size[1]) * this.size[0]);
   }
 

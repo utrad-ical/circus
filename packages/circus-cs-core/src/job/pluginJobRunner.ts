@@ -1,12 +1,12 @@
-import { PluginJobRequest, PluginDefinition } from '../interface';
+import { PluginJobRequest, PluginDefinition, JobSeries } from '../interface';
 import { PluginJobReporter } from './pluginJobReporter';
 import path from 'path';
 import fs from 'fs-extra';
 import DockerRunner from '../util/DockerRunner';
 import { DicomFileRepository } from '@utrad-ical/circus-dicom-repository';
 import { PluginResultsValidator } from './pluginResultsValidator';
-import { multirange, MultiRange } from 'multi-integer-range';
-import { PluginDefinitionAccessor } from '../util/pluginDefinitionsAccessor';
+import { MultiRange } from 'multi-integer-range';
+import { PluginDefinitionLoader } from '../util/pluginDefinitionsAccessor';
 
 export interface PluginJobRunner {
   run: (jobId: string, job: PluginJobRequest) => Promise<boolean>;
@@ -18,20 +18,18 @@ export default function pluginJobRunner(deps: {
   jobReporter: PluginJobReporter;
   dockerRunner: DockerRunner;
   dicomRepository: DicomFileRepository;
-  pluginDefinitionsAccessor: PluginDefinitionAccessor;
+  pluginDefinitionLoader: PluginDefinitionLoader;
   workingDirectory: string;
   resultsDirectory: string;
-  resultsValidator?: PluginResultsValidator;
   removeTemporaryDirectory?: boolean;
 }): PluginJobRunner {
   const {
     jobReporter,
     dockerRunner,
     dicomRepository,
-    pluginDefinitionsAccessor,
+    pluginDefinitionLoader,
     workingDirectory,
     resultsDirectory,
-    resultsValidator,
     removeTemporaryDirectory = true
   } = deps;
 
@@ -44,7 +42,7 @@ export default function pluginJobRunner(deps: {
     return path.join(baseDir(jobId), type);
   };
 
-  const preProcess = async (jobId: string, job: PluginJobRequest) => {
+  const preProcess = async (jobId: string, series: JobSeries[]) => {
     // Prepare working directories
     await fs.ensureDir(baseDir(jobId));
     await Promise.all([
@@ -55,8 +53,8 @@ export default function pluginJobRunner(deps: {
     // Fetches DICOM data from DicomFileRepository and builds raw volume
     const createdSeries: { [uid: string]: boolean } = {};
     const inDir = workDir(jobId, 'in');
-    for (let volId = 0; volId < job.series.length; volId++) {
-      const seriesUid = job.series[volId].seriesUid;
+    for (let volId = 0; volId < series.length; volId++) {
+      const seriesUid = series[volId].seriesUid;
       const dicomDir = path.join(workDir(jobId, 'dicom'), seriesUid);
       if (!createdSeries[seriesUid]) {
         await fetchSeriesFromRepository(dicomRepository, seriesUid, dicomDir);
@@ -66,22 +64,10 @@ export default function pluginJobRunner(deps: {
     }
   };
 
-  const mainProcess = async (jobId: string, job: PluginJobRequest) => {
-    const plugin = (await pluginDefinitionsAccessor.load()).find(
-      p => p.pluginId === job.pluginId
-    );
-    if (!plugin) {
-      throw new Error(`No such plugin: ${job.pluginId}`);
-    }
-    await executePlugin(
-      dockerRunner,
-      plugin,
-      workDir(jobId, 'in'), // Plugin input dir containing volume data
-      workDir(jobId, 'out') // Plugin output dir that will have CAD results
-    );
-  };
-
-  const postProcess = async (jobId: string, job: PluginJobRequest) => {
+  const postProcess = async (
+    jobId: string,
+    resultsValidator?: PluginResultsValidator
+  ) => {
     const outDir = workDir(jobId, 'out');
 
     // Perform validation
@@ -112,10 +98,25 @@ export default function pluginJobRunner(deps: {
    */
   const run = async (jobId: string, job: PluginJobRequest) => {
     try {
+      const { pluginId, series, environment } = job;
+
+      const plugin = await pluginDefinitionLoader(pluginId);
+      if (!plugin) throw new Error(`No such plugin: ${pluginId}`);
+
+      const resultsValidator = createValidator(plugin);
+
       await jobReporter.report(jobId, 'processing');
-      await preProcess(jobId, job);
-      await mainProcess(jobId, job);
-      await postProcess(jobId, job);
+      await preProcess(jobId, series);
+
+      // mainProcess
+      await executePlugin(
+        dockerRunner,
+        plugin,
+        workDir(jobId, 'in'), // Plugin input dir containing volume data
+        workDir(jobId, 'out') // Plugin output dir that will have CAD results
+      );
+
+      await postProcess(jobId, resultsValidator);
       await jobReporter.report(jobId, 'finished');
       return true;
     } catch (e) {
@@ -223,8 +224,18 @@ export async function executePlugin(
     Image: dockerImage,
     HostConfig: {
       Binds: [`${srcDir}:${bindsIn}`, `${destDir}:${bindsOut}`],
-      AutoRemove: false
+      AutoRemove: false // Check: Is always false Intended?
     }
   });
   return result;
+}
+
+/**
+ * Create plugin result validator from plugin definition.
+ * @param pluginDefinition
+ */
+function createValidator(
+  pluginDefinition: PluginDefinition
+): PluginResultsValidator | undefined {
+  return undefined;
 }

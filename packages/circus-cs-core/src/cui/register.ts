@@ -1,11 +1,7 @@
-import {
-  bootstrapQueueSystem,
-  bootstrapDicomFileRepository
-} from '../bootstrap';
-import createPluginJobRegisterer from '../job/createPluginJobRegisterer';
-import config from '../config';
+import { Configuration } from '../config';
 import { JobSeries } from '../interface';
 import isDicomUid from '../util/isDicomUid';
+import { createModuleLoader } from '../createCsCore';
 
 function parseSeries(str: string): JobSeries {
   const [seriesUid, startImgNum, endImgNum, imageDelta] = str.split(':');
@@ -31,10 +27,13 @@ function parseSeries(str: string): JobSeries {
   };
 }
 
-export default async function register(argv: any) {
-  const { queue, dispose } = await bootstrapQueueSystem();
-  const repository = await bootstrapDicomFileRepository();
-  const pluginDefinitions = config.plugins;
+export default async function register(config: Configuration, argv: any) {
+  const moduleLoader = createModuleLoader(config);
+  const [dispose, registerer] = [
+    await moduleLoader.load('dispose'),
+    await moduleLoader.load('pluginJobRegisterer')
+  ];
+
   try {
     const newJobId = () => new Date().getTime().toString();
     const {
@@ -54,8 +53,6 @@ export default async function register(argv: any) {
     }
 
     const payload = { pluginId, series: seriesList, environment };
-    const deps = { queue, pluginDefinitions, repository };
-    const registerer = createPluginJobRegisterer(deps);
     await registerer.register(jobId, payload, priority);
     console.log(`Registered Job ID: ${jobId}`);
   } finally {

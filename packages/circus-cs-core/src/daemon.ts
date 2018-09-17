@@ -3,91 +3,110 @@
  * This program is not to meant to be invoked directly.
  * @module
  */
-import config from './config';
+import argv from 'argv';
+import { Configuration, auto } from './config';
+import { createModuleLoader } from './createCsCore';
+import { PluginJobRequest } from './interface';
+import loopRun, { LoopRunOptions } from './daemon/loopRun';
 import sleep from './util/sleep';
-import {
-  bootstrapQueueSystem,
-  bootstrapJobRunner,
-  bootstrapDicomFileRepository
-} from './bootstrap';
 
-const { checkQueueInterval } = config.jobManager;
+argv.option([
+  {
+    name: 'config-content',
+    type: 'string',
+    description: 'JSON string of config object'
+  }
+]);
 
-/** The flag that becomes true on SIGINT. */
-let interrupted: boolean = false;
+export async function main() {
+  const { targets, options } = argv.run();
 
-type LoggerFunction = (message: string) => void;
-
-interface Logger {
-  info: LoggerFunction;
-  log: LoggerFunction;
-  error: LoggerFunction;
-}
-async function cancellableSleep(ms: number) {
-  const start = Date.now();
-  while (start + ms > Date.now() && !interrupted) await sleep(100);
-}
-
-export async function main(logger: Logger) {
-  logger.log(`CIRCUS CS Job Manager started. pid: ${process.pid}`);
-
-  const dicomRepository = await bootstrapDicomFileRepository();
-  const jobRunner = await bootstrapJobRunner(dicomRepository);
-  const { queue, dispose } = await bootstrapQueueSystem();
-  let emptyMessagePrinted = false;
-
-  try {
-    while (!interrupted) {
-      try {
-        const nextJob = await queue.dequeue();
-        try {
-          if (!nextJob) {
-            if (!emptyMessagePrinted) {
-              logger.log('Currently the queue is empty.');
-              emptyMessagePrinted = true;
-            }
-            await cancellableSleep(checkQueueInterval);
-            continue;
-          }
-          emptyMessagePrinted = false;
-          logger.log(`Job ${nextJob.jobId} started.`);
-          const succeed = await jobRunner.run(nextJob.jobId, nextJob.payload);
-          logger.log(
-            `Job ${nextJob.jobId} ${succeed ? 'finished' : 'failed'}.`
-          );
-        } finally {
-          if (nextJob) queue.settle(nextJob.jobId);
-        }
-      } catch (e) {
-        logger.error('Fatal ' + e.message);
-      }
-      await cancellableSleep(checkQueueInterval);
+  let config: Configuration | undefined = undefined;
+  if (options['config-content']) {
+    try {
+      config = JSON.parse(options['config-content']);
+    } catch (err) {
+      console.error('Parsing confing-content is failed');
+      process.exit(1);
     }
-  } finally {
-    dispose();
+  }
+  // Todo: accept config-file option
+
+  if (!config) config = auto();
+
+  // Todo: validate config with utility like ajv
+
+  if (!config) {
+    console.error('Cannot get daemon config');
+    process.exit(1);
   }
 
-  logger.log('CIRCUS CS Job Manager stopped.');
-  process.exit(0);
+  let loopRunOptions: LoopRunOptions<PluginJobRequest>;
+  try {
+    loopRunOptions = await createLoopRunOptions(config);
+    await loopRun<PluginJobRequest>(loopRunOptions!, process);
+    process.exit(0);
+  } catch (e) {
+    console.error(e);
+    process.exit(1);
+  }
 }
 
-const logTo = (logLevel: string) => {
-  return (message: string) =>
-    (console as any)[logLevel](
-      new Date().toISOString() + ' ' + message
-    ) as LoggerFunction;
-};
+async function createLoopRunOptions(
+  config: Configuration
+): Promise<LoopRunOptions<PluginJobRequest>> {
+  const moduleLoader = createModuleLoader(config);
 
-const defaultLogger: Logger = {
-  info: logTo('info'),
-  log: logTo('log'),
-  error: logTo('error')
-};
+  const [logger, queue, jobRunner, dispose] = [
+    await moduleLoader.load('logger'),
+    await moduleLoader.load('queueSystem'),
+    await moduleLoader.load('jobRunner'),
+    await moduleLoader.load('dispose')
+  ];
 
-process.on('SIGINT', function() {
-  defaultLogger.log('Signal SIGINT');
-  defaultLogger.log('CIRCUS CS Job Manager will be stopped on next loop.');
-  interrupted = true;
-});
+  const intervalController = createIntervalController(config.jobManager);
 
-main(defaultLogger);
+  return {
+    logger,
+    dequeue: queue.dequeue,
+    run: jobRunner.run,
+    settle: queue.settle,
+    active: intervalController.active,
+    interval: intervalController.interval,
+    interrupt: intervalController.interrupt,
+    dispose
+  };
+}
+
+interface IntervalController {
+  active: () => boolean;
+  interrupt: () => void;
+  interval: () => Promise<void>;
+}
+
+function createIntervalController(options: {
+  checkQueueInterval: number;
+}): IntervalController {
+  const { checkQueueInterval } = options;
+
+  let interrupted: boolean = false;
+  const active = () => !interrupted;
+
+  const interrupt = () => {
+    interrupted = true;
+  };
+
+  const interval = async () => {
+    const start = Date.now();
+    while (start + checkQueueInterval > Date.now() && !interrupted)
+      await sleep(100);
+  };
+
+  return {
+    active,
+    interval,
+    interrupt
+  };
+}
+
+main();

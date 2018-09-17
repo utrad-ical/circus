@@ -1,9 +1,2 @@
-export {
-  default as createPluginJobRegisterer
-} from './job/createPluginJobRegisterer';
-
-export {
-  default as createDaemonController
-} from './daemon/createDaemonController';
-
-export { createMongoQueue } from './queue/queue';
+export {default as createCsCore} from './createCsCore';
+export {auto as csConfig} from './config';

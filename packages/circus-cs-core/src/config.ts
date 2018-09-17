@@ -11,6 +11,14 @@ export interface MongoConnectionConfiguration {
   collectionName: string;
 }
 
+export interface ModuleDefinition {
+  module: string;
+  options?: ModuleOption;
+}
+type ModuleOption = {
+  [key: string]: ModuleOption | string | number | boolean;
+};
+
 export interface Configuration {
   /**
    * A path to the working directory which stores Plug-in definitions.
@@ -46,13 +54,7 @@ export interface Configuration {
    * DICOM file repository is a loader that fetches the content of a DICOM file
    * specified by a series instance UID and an image number.
    */
-  dicomFileRepository: {
-    module: 'StaticDicomFileRepository';
-    options: {
-      dataDir: '/var/circus/dicom';
-      useHash: false;
-    };
-  };
+  dicomFileRepository: ModuleDefinition;
 
   /**
    * Parameters used by Dockerode to connect to Docker API.
@@ -71,6 +73,11 @@ export interface Configuration {
    * List of plugins installed as Docker images.
    */
   plugins: PluginDefinition[];
+
+  /**
+   * Daemon logger
+   */
+  logger: ModuleDefinition;
 }
 
 const defaults: Configuration = {
@@ -119,10 +126,18 @@ const defaults: Configuration = {
     checkQueueInterval: 1000
   },
 
-  plugins: []
+  plugins: [],
+
+  logger: {
+    module: 'DefaultLogger'
+  }
 };
 
-const explorer = cosmiconfig('circuscs');
-const result = explorer.searchSync() || { config: {} };
-const config = merge.recursive({}, defaults, result.config) as Configuration;
-export default config;
+export function auto(): Configuration {
+  const explorer = cosmiconfig('circuscs');
+  const result = explorer.searchSync() || { config: {} };
+  const config = merge.recursive({}, defaults, result.config) as Configuration;
+  return config;
+}
+
+export default auto();

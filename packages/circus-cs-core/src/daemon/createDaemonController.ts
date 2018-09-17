@@ -3,12 +3,10 @@
  * @module
  */
 
-// import * as aapm2 from '../util/aapm2';
-
 import _pm2 from 'pm2';
 import pify from 'pify';
-import { PluginDefinition } from '../interface';
-import pluginDefinitionsAccessor from '../util/pluginDefinitionsAccessor';
+import escape from 'shell-escape';
+import { Configuration } from '../config';
 
 const pm2: any = pify(_pm2);
 
@@ -20,19 +18,17 @@ export interface DaemonController {
   status: () => Promise<'running' | 'stopped'>;
   pm2list: () => Promise<void>;
   pm2killall: () => Promise<void>;
-  updatePluginDefinitions: (
-    pluginDefinitions: PluginDefinition[]
-  ) => Promise<void>;
-  listPluginDefinitions: () => Promise<PluginDefinition[]>;
 }
 
-export default function createDaemonController({
-  startOptions,
-  coreWorkingDir
-}: {
-  startOptions: _pm2.StartOptions;
-  coreWorkingDir: string;
-}): DaemonController {
+export default function createDaemonController(
+  config: Configuration
+): DaemonController {
+  const { startOptions } = config.jobManager;
+
+  // Maybe not better, but the purpose can be achieved.
+  const startScript =
+    script + ' -- --config-content=' + escape([JSON.stringify(config)]);
+
   const execute = async (task: Function) => {
     await pm2.connect();
     try {
@@ -46,7 +42,7 @@ export default function createDaemonController({
     return execute(async () => {
       const processList = await pm2.describe(startOptions.name);
       if (processList.length > 0) return;
-      await pm2.start(script, startOptions);
+      await pm2.start(startScript, startOptions);
     });
   };
 
@@ -89,25 +85,11 @@ export default function createDaemonController({
     });
   };
 
-  const pluginDefs = pluginDefinitionsAccessor(coreWorkingDir);
-
-  const updatePluginDefinitions = async (
-    pluginDefinitions: PluginDefinition[]
-  ) => {
-    await pluginDefs.save(pluginDefinitions);
-  };
-
-  const listPluginDefinitions = async () => {
-    return await pluginDefs.load();
-  };
-
   return {
     start,
     stop,
     status,
     pm2list,
-    pm2killall,
-    updatePluginDefinitions,
-    listPluginDefinitions
+    pm2killall
   };
 }

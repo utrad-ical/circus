@@ -1,9 +1,10 @@
 import minimist from 'minimist';
 import chalk from 'chalk';
+import { auto, Configuration } from '../config';
 
 const commands: { [key: string]: any } = {
   register: {
-    help: 'Registeres a new job.'
+    help: 'Registers a new job.'
   },
   'list-queue': {
     help: 'Lists queue items.'
@@ -39,36 +40,46 @@ const commands: { [key: string]: any } = {
   }
 };
 
+function boot(config: Configuration) {
+  return async (commandName: string | undefined, args: any) => {
+    if (!commandName || commandName === 'help') {
+      console.log('Available commands:');
+      Object.keys(commands).forEach(key =>
+        console.log(`  ${chalk.cyan(key)}: ${commands[key].help}`)
+      );
+      return;
+    }
+    if (!(commandName in commands)) {
+      console.error(`Unknown command: "${commandName}".`);
+      return;
+    }
+
+    const command = commands[commandName];
+
+    const callFunc: (
+      config: Configuration,
+      args: any
+    ) => Promise<void> = command.module
+      ? (await import(command.module))[commandName]
+      : (await import(`./${commandName}`)).default;
+
+    try {
+      await callFunc(config, args);
+    } catch (e) {
+      console.log(chalk.red('Error:'));
+      console.error(e);
+      process.exit(1);
+    }
+  };
+}
+
 async function main() {
   const argv = process.argv.slice(2);
   const commandName = argv.shift();
   const args = minimist(argv);
 
-  if (!commandName || commandName === 'help') {
-    console.log('Available commands:');
-    Object.keys(commands).forEach(key =>
-      console.log(`  ${chalk.cyan(key)}: ${commands[key].help}`)
-    );
-    return;
-  }
-  if (!(commandName in commands)) {
-    console.error(`Unknown command: "${commandName}".`);
-    return;
-  }
-
-  const command = commands[commandName];
-
-  const callFunc: (args: any) => Promise<void> = command.module
-    ? (await import(command.module))[commandName]
-    : (await import(`./${commandName}`)).default;
-
-  try {
-    await callFunc(args);
-  } catch (e) {
-    console.log(chalk.red('Error:'));
-    console.error(e);
-    process.exit(1);
-  }
+  const config = auto();
+  await boot(config)(commandName, args);
 }
 
 main();

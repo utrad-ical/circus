@@ -1,7 +1,8 @@
-import { PluginJobRequest, PluginDefinition, JobSeries } from '../interface';
+import { PluginJobRequest, JobSeries } from '../interface';
 import { QueueSystem } from '../queue/queue';
 import { DicomFileRepository } from '@utrad-ical/circus-dicom-repository';
 import MultiRange from 'multi-integer-range';
+import { PluginDefinitionLoader } from '../util/pluginDefinitionsAccessor';
 
 function checkSeriesImageRange(
   imagesInSeries: MultiRange,
@@ -27,15 +28,23 @@ function checkSeriesImageRange(
   }
 }
 
+export interface PluginJobRegisterer {
+  register(
+    jobId: string,
+    payload: PluginJobRequest,
+    priority?: number
+  ): Promise<void>;
+}
+
 /**
  * Register a new job after data check for the payload
  */
 export default function createPluginJobRegisterer(deps: {
   queue: QueueSystem<PluginJobRequest>;
-  pluginDefinitions: PluginDefinition[];
+  pluginDefinitionLoader: PluginDefinitionLoader;
   repository: DicomFileRepository;
-}) {
-  const { queue, pluginDefinitions, repository } = deps;
+}): PluginJobRegisterer {
+  const { queue, pluginDefinitionLoader, repository } = deps;
 
   async function register(
     jobId: string,
@@ -48,9 +57,7 @@ export default function createPluginJobRegisterer(deps: {
     }
 
     // Ensure the specified plug-in exists
-    if (!pluginDefinitions.some(p => p.pluginId === payload.pluginId)) {
-      throw new TypeError('No such plug-in installed.');
-    }
+    await pluginDefinitionLoader(payload.pluginId);
 
     // Ensure all the specified series exist and each series has
     // enough images to process

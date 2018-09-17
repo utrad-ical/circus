@@ -1,17 +1,23 @@
 import { table, TableUserConfig } from 'table';
-import { bootstrapQueueSystem, bootstrapDaemonController } from '../bootstrap';
 import sleep from '../util/sleep';
 import chalk from 'chalk';
 import moment from 'moment';
+import { Configuration } from '../config';
+import { createModuleLoader } from '../createCsCore';
 
 const dt = (date: Date) => {
   const m = moment(date);
   return m.format('YY-MM-DD HH:mm:ss') + ' (' + m.fromNow() + ')';
 };
 
-export default async function monitor(argv: any) {
-  const { queue, dispose } = await bootstrapQueueSystem();
-  const controller = await bootstrapDaemonController();
+export default async function monitor(config: Configuration, argv: any) {
+  const moduleLoader = createModuleLoader(config);
+  const [queue, dispose, controller] = [
+    await moduleLoader.load('queueSystem'),
+    await moduleLoader.load('dispose'),
+    await moduleLoader.load('daemonController')
+  ];
+
   try {
     for (;;) {
       const jobs = await queue.list('all');

@@ -1,6 +1,7 @@
 import ajv from 'ajv';
-import { bootstrapQueueSystem } from '../bootstrap';
 import { QueueState } from '../queue/queue';
+import { Configuration } from '../config';
+import { createModuleLoader } from '../createCsCore';
 
 const argumentsSchema = {
   type: 'object',
@@ -28,7 +29,7 @@ const argumentsSchema = {
   }
 };
 
-export default async function listQueue(argv: any) {
+export default async function listQueue(config: Configuration, argv: any) {
   const argCheck = new ajv().compile(argumentsSchema)(argv);
 
   if (!argCheck) {
@@ -50,7 +51,12 @@ export default async function listQueue(argv: any) {
       break;
   }
 
-  const { queue, dispose } = await bootstrapQueueSystem();
+  const moduleLoader = createModuleLoader(config);
+  const [queue, dispose] = [
+    await moduleLoader.load('queueSystem'),
+    await moduleLoader.load('dispose')
+  ];
+
   try {
     const items = await queue.list(state);
     console.log(items);

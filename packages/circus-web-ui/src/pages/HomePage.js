@@ -12,11 +12,44 @@ import {
 import ProjectDisplay from 'components/ProjectDisplay';
 import Icon from 'components/Icon';
 import TimeDisplay from 'components/TimeDisplay';
+import styled from 'styled-components';
+
+const HomeMenu = styled.ul`
+  margin: 20px 0;
+  padding: 0;
+  word-break: normal;
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: space-around;
+  align-items: flex-start;
+  > li {
+    display: block;
+    text-align: center;
+    width: 250px;
+    div.img > span {
+      font-size: 200px;
+      vertical-align: bottom;
+    }
+    > a {
+      display: block;
+      border-radius: 10px;
+      background-color: white;
+      text-decoration: none;
+      font-size: 24px;
+      font-weight: bolder;
+      padding: 16px 0;
+      &:hover {
+        color: ${props => props.theme.highlightColor};
+        background-color: #eee;
+      }
+    }
+  }
+`;
 
 const HomePage = props => (
   <div>
     <h1>Welcome to CIRCUS!</h1>
-    <ul className="home-menu">
+    <HomeMenu>
       <Menu
         link="/browse/case"
         icon="case-search"
@@ -35,7 +68,7 @@ const HomePage = props => (
         title="Series Import"
         description="Upload DICOM image files directly via the browser."
       />
-    </ul>
+    </HomeMenu>
     <Profile />
   </div>
 );

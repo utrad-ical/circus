@@ -1,4 +1,21 @@
 import React, { Fragment } from 'react';
+import styled from 'styled-components';
+
+const StyledDiv = styled.div`
+  &.masked {
+    color: silver;
+  }
+  .sub {
+    font-size: 80%;
+    color: gray;
+  }
+  .patient-id {
+    font-style: italic;
+  }
+  .patient-name {
+    font-weight: bold;
+  }
+`;
 
 const PatientInfoBox = props => {
   const pt = props.value;
@@ -6,7 +23,7 @@ const PatientInfoBox = props => {
     return <span className="patient-info-box masked">(masked)</span>;
   }
   return (
-    <div className="patient-info-box">
+    <StyledDiv>
       <div>
         <span className="patient-name">{pt.patientName}</span>&ensp;
         <span className="patient-age">{pt.age}</span>
@@ -30,7 +47,7 @@ const PatientInfoBox = props => {
           </Fragment>
         )}
       </div>
-    </div>
+    </StyledDiv>
   );
 };
 

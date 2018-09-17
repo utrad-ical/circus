@@ -1,5 +1,19 @@
 import React from 'react';
 import classnames from 'classnames';
+import styled from 'styled-components';
+
+const StyledTable = styled.table.attrs({
+  className: props =>
+    classnames('table table-hover table-condensed data-grid', {
+      'data-grid-row-clickable': props.onItemClick
+    })
+})`
+  .data-grid-row-clickable {
+    tbody tr {
+      cursor: pointer;
+    }
+  }
+`;
 
 const normalizeColumn = c => {
   const ret = typeof c === 'string' ? { key: c, caption: c } : { ...c };
@@ -13,7 +27,7 @@ const kebabCase = str => {
 };
 
 const DataGrid = props => {
-  const { value, className, onItemClick, active } = props;
+  const { value, onItemClick, active } = props;
   const columns = props.columns.map(normalizeColumn);
 
   const handleItemClick = index => {
@@ -21,13 +35,7 @@ const DataGrid = props => {
   };
 
   return (
-    <table
-      className={classnames(
-        'table table-hover table-condensed data-grid',
-        { 'data-grid-row-clickable': onItemClick },
-        className
-      )}
-    >
+    <StyledTable>
       <thead>
         <tr>
           {columns.map(c => (
@@ -55,7 +63,7 @@ const DataGrid = props => {
           </tr>
         ))}
       </tbody>
-    </table>
+    </StyledTable>
   );
 };
 

@@ -3,14 +3,14 @@ import * as test from './test-utils';
 import FormData from 'form-data';
 import * as fs from 'fs';
 import * as path from 'path';
-import * as pluginJobManager from '../src/api/mockJobManager';
 
 describe('API', function() {
-  let server, axios;
+  let server, axios, csCore;
 
   before(async function() {
     server = await test.setUpAppForTest('trace');
     axios = server.axios.alice; // Alraedy includes access token for alice@example.com
+    csCore = server.csCore;
   });
 
   after(async function() {
@@ -534,7 +534,7 @@ describe('API', function() {
     });
   });
 
-  describe('plugin-job-manager', function _pluginJobManager() {
+  describe('admin/plugin-job-manager', function _adminPluginJobManager() {
     let url;
 
     before(function() {
@@ -543,7 +543,7 @@ describe('API', function() {
 
     it('should return the current state of a server', async function _shouldReturnTheCurrentStateOfAServer() {
       const res = await axios.get(url);
-      const status = await pluginJobManager.status();
+      const status = await csCore.daemon.status();
       assert.equal(res.status, 200);
       assert.equal(res.data.status, status);
     });

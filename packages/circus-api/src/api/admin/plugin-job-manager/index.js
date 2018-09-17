@@ -1,22 +1,26 @@
 import status from 'http-status';
 
-export const handleGet = ({ cs: { jobManagerController } }) => {
+export const handleGet = ({ cs }) => {
   return async (ctx, next) => {
-    const status = await jobManagerController.status();
+    const status = await cs.daemon.status();
     ctx.body = { status };
   };
 };
 
-export const handlePost = ({ cs: { jobManagerController, updatePlugins } }) => {
+export const handlePost = ({ cs, db }) => {
   return async (ctx, next) => {
-    const currentStatus = await jobManagerController.status();
+    const currentStatus = await cs.daemon.status();
     const newStatus = ctx.request.body.status;
     if (currentStatus !== newStatus) {
       if (newStatus === 'running') {
-        await updatePlugins();
-        await jobManagerController.start();
+        const pluginDefs = await db
+          .collection('plugins')
+          .find({})
+          .toArray();
+        await cs.plugin.update(pluginDefs);
+        await cs.daemon.start();
       } else if (newStatus === 'stopped') {
-        await jobManagerController.stop();
+        await cs.daemon.stop();
       } else {
         ctx.throw(status.BAD_REQUEST);
       }

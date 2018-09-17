@@ -25,7 +25,10 @@ import {
   StaticDicomFileRepository,
   MemoryDicomFileRepository
 } from '@utrad-ical/circus-dicom-repository';
-import circusCsDeps from './circusCsDeps';
+import {
+  csConfig,
+  createCsCore
+} from '@utrad-ical/circus-cs-core';
 
 function handlerName(route) {
   if (route.handler) return route.handler;
@@ -105,7 +108,7 @@ export default async function createApp(options = {}) {
     ? new DicomImporter(dicomRepository, models, { utility: utilityEnv })
     : undefined;
 
-  const cs = await circusCsDeps(db);
+  const cs = options.cs ? options.cs : createCsCore(csConfig());
 
   // Build a router.
   // Register each API endpoints to the router according YAML manifest files.

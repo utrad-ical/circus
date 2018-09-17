@@ -51,6 +51,7 @@ export function tearDownKoa(server) {
 
 export async function setUpAppForTest(logMode = 'off') {
   const db = await connectMongo();
+
   await setUpMongoFixture(db, [
     'series',
     'clinicalCases',
@@ -63,7 +64,8 @@ export async function setUpAppForTest(logMode = 'off') {
     'pluginJobs'
   ]);
   const logger = createLogger(logMode);
-  const app = await createApp({ debug: true, db, logger });
+  const csCore = createMockCsCore();
+  const app = await createApp({ debug: true, db, logger, cs: csCore });
   const server = await listenKoa(app);
 
   const axiosInstances = {};
@@ -79,7 +81,7 @@ export async function setUpAppForTest(logMode = 'off') {
     });
   });
 
-  return { db, app, logger, axios: axiosInstances, ...server };
+  return { db, app, logger, axios: axiosInstances, csCore, ...server };
 }
 
 export async function tearDownAppForTest(testServer) {
@@ -130,4 +132,39 @@ export async function setUpMongoFixture(db, collections) {
       throw err;
     }
   }
+}
+
+function createMockCsCore() {
+  let status = 'stopped';
+  let defs = [];
+  const jobs = [];
+  const csCore = {
+    daemon: {
+      start: async () => status = 'running',
+      stop: async () => status = 'stopped',
+      status: async () => status,
+      pm2list: async () => status,
+      pm2killall: async () => status,
+    },
+    plugin: {
+      update: async (newDefs) => defs = newDefs,
+      list: async () => defs
+    },
+    job: {
+      list: async(state) => jobs,
+      register: async (
+        jobId,
+        payload,
+        priority
+      ) => {
+        jobs.push({
+          jobId,
+          payload,
+          priority
+        });
+      }
+    },
+    dispose: async ()=>{}
+  };
+  return csCore;
 }

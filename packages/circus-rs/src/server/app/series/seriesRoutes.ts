@@ -13,7 +13,7 @@ import metadata from './metadata';
 import volume from './volume';
 import scan from './scan';
 import PartialVolumeDescriptor from '../../../common/PartialVolumeDescriptor';
-interface seriesRoutesOptions {
+interface SeriesRoutesOptions {
   logger: Logger;
   volumeProvider: VolumeProvider;
   imageEncoder: ImageEncoder;
@@ -29,7 +29,7 @@ export default function seriesRoutes({
   logger,
   volumeProvider,
   imageEncoder
-}: seriesRoutesOptions): koa.Middleware {
+}: SeriesRoutesOptions): koa.Middleware {
   const router = new Router();
   const load = loadVolumeProvider({ logger, volumeProvider });
   router.use('/', load);

@@ -13,14 +13,15 @@ import { SeriesMiddlewareState } from './seriesRoutes';
 import { MultiRange } from 'multi-integer-range';
 import PartialVolumeDescriptor from '../../../common/PartialVolumeDescriptor';
 
-interface loadStoreOptions {
+interface LoadStoreOptions {
   logger: Logger;
   volumeProvider: VolumeProvider;
 }
+
 export default function loadVolumeProvider({
   logger,
   volumeProvider
-}: loadStoreOptions): koa.Middleware {
+}: LoadStoreOptions): koa.Middleware {
   const rules: ValidatorRules = {
     start: ['Start image no', undefined, 'isInt', 'toInt'],
     end: ['End image no', undefined, 'isInt', 'toInt'],

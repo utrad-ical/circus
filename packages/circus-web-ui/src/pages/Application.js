@@ -5,6 +5,7 @@ import MessageBox from './MessageBox';
 import { Button } from 'components/react-bootstrap';
 import { logout } from 'actions';
 import Icon from 'components/Icon';
+import styled from 'styled-components';
 import classnames from 'classnames';
 
 /**
@@ -54,11 +55,103 @@ const Application = connect(state => ({
 
 export default Application;
 
+const StyledHeader = styled.header`
+  margin: 0 auto;
+  position: relative;
+  background-color: ${props => props.theme.brandDark};
+  border-bottom: 1px solid ${props => props.theme.brandDarker};
+  line-height: 39px;
+  z-index: 2000;
+  color: white;
+  text-align: left;
+
+  display: flex;
+  flex-flow: row;
+  justify-content: space-between;
+`;
+
+const StyledNav = styled.nav`
+  a {
+    display: inline-block;
+    color: inherit !important;
+    text-decoration: none !important;
+  }
+
+  > ul {
+    // main navigation menu
+    margin: 0;
+    padding: 0 5px;
+    > li {
+      // main navigation item
+      padding: 0 5px;
+      display: inline-block;
+      position: relative;
+      &.icon-menu span[class^='circus-icon'] {
+        font-size: 25px;
+        vertical-align: middle;
+        margin-right: 3px;
+      }
+      &.logo:hover,
+      &.icon-menu:hover {
+        color: ${props => props.theme.highlightColor};
+        background-color: ${props => props.theme.brandPrimary};
+        > ul {
+          // show dropdown sub menu
+          display: block;
+        }
+      }
+      > ul {
+        // dropdown sub menu
+        display: none;
+        position: absolute;
+        top: 39px;
+        left: 0;
+        background-color: rgba(240, 240, 240, 0.9);
+        padding: 0;
+        border: 1px solid #bbb;
+        > li {
+          display: block;
+          width: 200px;
+          border-bottom: 1px solid #bbb;
+          color: black;
+          &:hover {
+            background-color: ${props => props.theme.brandPrimary};
+            color: white;
+          }
+          a {
+            display: block;
+            height: 40px;
+            line-height: 40px;
+            padding: 0 8px;
+          }
+          &.sub {
+            // sub-sub menu indent
+            a {
+              padding-left: 20px;
+              height: 30px;
+              line-height: 30px;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .logo {
+    text-shadow: 1px 1px 2px black;
+  }
+
+  .user-info {
+    font-weight: bold;
+    margin-right: 10px;
+  }
+`;
+
 const NavView = props => {
   const { onLogout, caseSearchPresets, seriesSearchPresets } = props;
   return (
-    <header>
-      <nav>
+    <StyledHeader>
+      <StyledNav>
         <MainMenu>
           <li className="logo">
             <Link to="/home">
@@ -128,14 +221,14 @@ const NavView = props => {
             </Menu>
           )}
         </MainMenu>
-      </nav>
-      <nav>
+      </StyledNav>
+      <StyledNav>
         <MainMenu>
           <li className="user-info hidden-xs">{props.loginUserName}</li>
           <Menu name="Logout" onClick={onLogout} />
         </MainMenu>
-      </nav>
-    </header>
+      </StyledNav>
+    </StyledHeader>
   );
 };
 

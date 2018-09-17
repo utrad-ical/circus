@@ -154,4 +154,13 @@ describe('RawData', function() {
       assert.equal(vol.getPixelAt(16 + 1, 16 + 3, 16 + 5), 9);
     }
   });
+
+  it('must handle partial volume', function() {
+    const vol = new RawData([16, 16, 16], PixelFormat.Int8);
+    vol.fillAll((x, y, z) => x + y + z);
+    vol.setPartialVolumeDescriptor({ start: 2, end: 8, delta: 2 });
+    assert.equal(vol.getPixelAt(1, 1, 2), 8);
+    vol.setPartialVolumeDescriptor(undefined);
+    assert.equal(vol.getPixelAt(1, 1, 1), 3);
+  });
 });

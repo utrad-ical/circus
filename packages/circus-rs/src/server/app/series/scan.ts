@@ -13,14 +13,10 @@ import { ValidatorRules } from '../../../common/Validator';
 import ImageEncoder from '../../helper/image-encoder/ImageEncoder';
 import { SeriesMiddlewareState } from './seriesRoutes';
 import RawData from '../../../common/RawData';
-import createPartialVolume from './createPartialVolume';
-import MultiRange, {
-  Initializer as MultiRangeInitializer,
-  multirange
-} from 'multi-integer-range';
+import { multirange } from 'multi-integer-range';
 import PartialVolumeDescriptor from '../../../common/PartialVolumeDescriptor';
 
-interface scanOptions {
+interface ScanOptions {
   imageEncoder: ImageEncoder;
 }
 
@@ -30,7 +26,7 @@ const SCAN_PRIORITY = 100;
  * Handles 'scan' endpoint which returns MPR image for
  * an arbitrary orientation.
  */
-export default function scan({ imageEncoder }: scanOptions): koa.Middleware {
+export default function scan({ imageEncoder }: ScanOptions): koa.Middleware {
   const rules: ValidatorRules = {
     'origin!': ['Origin', null, isTuple(3), parseTuple(3)],
     'xAxis!': ['Scan vector X', null, isTuple(3), parseTuple(3)],
@@ -75,7 +71,8 @@ export default function scan({ imageEncoder }: scanOptions): koa.Middleware {
     const volume: RawData = state.volumeAccessor.volume;
     const section: Section = { origin, xAxis, yAxis };
 
-    //Note: Even though the necessary image is only "2, 4, 6", get "2, 3, 4, 5, 6" (in consideration of interpolation)
+    // Note: Even though the necessary image is only "2, 4, 6",
+    // get "2, 3, 4, 5, 6" (in consideration of interpolation)
     const zAxisRange = getZRange(section);
     const z2i = zIndexToImageNo(state.partialVolumeDescriptor);
     const waitForImages = zAxisRange
@@ -110,7 +107,7 @@ export default function scan({ imageEncoder }: scanOptions): koa.Middleware {
         ctx.body = Buffer.from(buf.buffer as ArrayBuffer);
       }
     } finally {
-      volume.clearPartialVolumeDescriptor();
+      volume.setPartialVolumeDescriptor(undefined);
     }
   };
 

@@ -74,13 +74,11 @@ export default class RawData {
   }
 
   protected partialVolumeDescriptor?: PartialVolumeDescriptor;
+
   public setPartialVolumeDescriptor(
-    partialVolumeDescriptor: PartialVolumeDescriptor
-  ) {
+    partialVolumeDescriptor: PartialVolumeDescriptor | undefined
+  ): void {
     this.partialVolumeDescriptor = partialVolumeDescriptor;
-  }
-  public clearPartialVolumeDescriptor() {
-    this.partialVolumeDescriptor = undefined;
   }
 
   /**

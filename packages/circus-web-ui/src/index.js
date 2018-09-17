@@ -29,6 +29,8 @@ import Preferences from 'pages/Preferences';
 
 import { store } from 'store';
 import { Provider } from 'react-redux';
+import { ThemeProvider } from 'styled-components';
+import tinycolor from 'tinycolor2';
 import { refreshUserInfo, dismissMessageOnPageChange } from 'actions';
 import PluginJobQueueSearch from './pages/search/PluginJobQueueSearch';
 
@@ -38,38 +40,54 @@ require('bootstrap/fonts/glyphicons-halflings-regular.woff');
 require('bootstrap/fonts/glyphicons-halflings-regular.woff2');
 require('bootstrap/fonts/glyphicons-halflings-regular.ttf');
 
+const theme = {
+  brandPrimary: '#168477',
+  brandDark: tinycolor('#168477')
+    .darken(10)
+    .toString(),
+  brandDarker: tinycolor('#168477')
+    .darken(20)
+    .toString(),
+  highlightColor: '#ffffff'
+};
+
 ReactDOM.render(
   <Provider store={store}>
-    <Router history={browserHistory}>
-      <Route path="/" component={LoginScreen} onLeave={leaveLoginScreen} />
-      <Route path="/" component={Application} onChange={pageMove}>
-        <Route path="home" component={HomePage} />
-        <Route path="browse/series(/:presetName)" component={SeriesSearch} />
-        <Route path="browse/case(/:presetName)" component={CaseSearch} />
-        <Route
-          path="browse/plugin-jobs(/:presetName)"
-          component={PluginJobSearch}
-        />
-        <Route path="plugin-job-queue" component={PluginJobQueueSearch} />
-        <Route path="import-series" component={ImportSeries} />
-        <Route path="import-case" component={ImportCase} />
-        <Route path="new-case/:uid" component={CreateNewCase} />
-        <Route path="admin">
-          <IndexRoute component={AdminIndex} />
-          <Route path="general" component={GeneralAdmin} />
-          <Route path="group" component={GroupAdmin} />
-          <Route path="user" component={UserAdmin} />
-          <Route path="project" component={ProjectAdmin} />
-          <Route path="plugin-job-manager" component={PluginJobManagerAdmin} />
-          <Route path="plugins" component={PluginAdmin} />
+    <ThemeProvider theme={theme}>
+      <Router history={browserHistory}>
+        <Route path="/" component={LoginScreen} onLeave={leaveLoginScreen} />
+        <Route path="/" component={Application} onChange={pageMove}>
+          <Route path="home" component={HomePage} />
+          <Route path="browse/series(/:presetName)" component={SeriesSearch} />
+          <Route path="browse/case(/:presetName)" component={CaseSearch} />
+          <Route
+            path="browse/plugin-jobs(/:presetName)"
+            component={PluginJobSearch}
+          />
+          <Route path="plugin-job-queue" component={PluginJobQueueSearch} />
+          <Route path="import-series" component={ImportSeries} />
+          <Route path="import-case" component={ImportCase} />
+          <Route path="new-case/:uid" component={CreateNewCase} />
+          <Route path="admin">
+            <IndexRoute component={AdminIndex} />
+            <Route path="general" component={GeneralAdmin} />
+            <Route path="group" component={GroupAdmin} />
+            <Route path="user" component={UserAdmin} />
+            <Route path="project" component={ProjectAdmin} />
+            <Route
+              path="plugin-job-manager"
+              component={PluginJobManagerAdmin}
+            />
+            <Route path="plugins" component={PluginAdmin} />
+          </Route>
+          <Route path="series/:uid" component={SeriesDetail} />
+          <Route path="case/:caseId" component={CaseDetail} />
+          <Route path="plugin-job/:jobId" component={PluginJobDetail} />
+          <Route path="task-list" component={TaskList} />
+          <Route path="preference" component={Preferences} />
         </Route>
-        <Route path="series/:uid" component={SeriesDetail} />
-        <Route path="case/:caseId" component={CaseDetail} />
-        <Route path="plugin-job/:jobId" component={PluginJobDetail} />
-        <Route path="task-list" component={TaskList} />
-        <Route path="preference" component={Preferences} />
-      </Route>
-    </Router>
+      </Router>
+    </ThemeProvider>
   </Provider>,
   document.getElementById('app')
 );

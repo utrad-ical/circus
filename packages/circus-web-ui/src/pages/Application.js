@@ -1,5 +1,5 @@
 import React, { Fragment } from 'react';
-import { Link } from 'react-router';
+import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 import MessageBox from './MessageBox';
 import { Button } from 'components/react-bootstrap';
@@ -17,13 +17,7 @@ const ApplicationView = props => {
   const pageContentVisible = !props.isUserFetching && props.isLoggedIn;
   const notLoggedIn = !props.isUserFetching && !props.isLoggedIn;
 
-  const full = props.routes.some(
-    r =>
-      r.component &&
-      r.component.displayName &&
-      r.component.displayName.match(/CaseDetail/)
-  );
-  const containerClass = full ? 'full-container' : 'container';
+  const containerClass = 'container';
   return (
     <div>
       <Nav />

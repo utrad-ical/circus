@@ -2,7 +2,7 @@ import React, { Fragment } from 'react';
 import SearchResultsView, {
   makeSortOptions
 } from 'components/SearchResultsView';
-import { Link } from 'react-router';
+import { Link } from 'react-router-dom';
 import DataGrid from 'components/DataGrid';
 import PatientInfoBox from 'components/PatientInfoBox';
 import ProjectDisplay from 'components/ProjectDisplay';

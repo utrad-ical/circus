@@ -8,7 +8,7 @@ const CaseSearch = props => (
     <h1>
       <Icon icon="circus-case" /> Case Search
     </h1>
-    <CaseSearchCondition presetName={props.params.presetName} />
+    <CaseSearchCondition presetName={props.match.params.presetName} />
     <CaseSearchResults />
   </div>
 );

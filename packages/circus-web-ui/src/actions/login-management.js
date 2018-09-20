@@ -1,6 +1,6 @@
 import { api, tryAuthenticate } from 'utils/api';
-import { browserHistory } from 'react-router';
 import * as Cookies from 'js-cookie';
+import browserHistory from 'browserHistory';
 
 /**
  * Loads the user information.
@@ -27,9 +27,12 @@ export function refreshUserInfo(full = false) {
   };
 }
 
-export async function login(id, password) {
-  await tryAuthenticate(id, password);
-  browserHistory.push('/home');
+export function login(id, password) {
+  return async dispatch => {
+    await tryAuthenticate(id, password);
+    await dispatch(refreshUserInfo(true));
+    browserHistory.push('/home');
+  };
 }
 
 export function logout() {

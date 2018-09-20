@@ -9,6 +9,7 @@ import {
   Button,
   Glyphicon
 } from 'components/react-bootstrap';
+import { connect } from 'react-redux';
 import styled from 'styled-components';
 
 const StyledDiv = styled.div`
@@ -30,7 +31,7 @@ const StyledDiv = styled.div`
   }
 `;
 
-export default class LoginScreen extends React.Component {
+class LoginScreenView extends React.Component {
   constructor(props) {
     super(props);
     this.state = { id: '', password: '' };
@@ -41,11 +42,12 @@ export default class LoginScreen extends React.Component {
   }
 
   async loginClick() {
+    const { dispatch } = this.props;
     try {
-      await login(this.state.id, this.state.password);
+      await dispatch(login(this.state.id, this.state.password));
     } catch (err) {
-      if (err.status === 401) {
-        this.setState({ error: err.data.errors });
+      if (err.response && err.response.status === 400) {
+        this.setState({ error: 'Invalid user ID or password.' });
       } else {
         this.setState({
           error: 'Critical server error. Plese consult the administrator.'
@@ -83,9 +85,9 @@ export default class LoginScreen extends React.Component {
                     onKeyDown={ev => ev.keyCode == 13 && this.loginClick()}
                   />
                 </FormGroup>
-                {this.state.error ? (
+                {this.state.error && (
                   <p className="text-danger">{this.state.error}</p>
-                ) : null}
+                )}
               </Panel.Body>
               <Panel.Footer className="text-center">
                 <Button
@@ -104,3 +106,7 @@ export default class LoginScreen extends React.Component {
     );
   }
 }
+
+const LoginScreen = connect()(LoginScreenView);
+
+export default LoginScreen;

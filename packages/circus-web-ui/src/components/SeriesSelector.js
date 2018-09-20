@@ -64,6 +64,7 @@ const ImagesRenderer = props => {
 const RelevantSeriesDataView = props => {
   const { onSeriesRegister } = props;
   const columns = [
+    { key: 'seriesDescription', caption: 'Series Description' },
     { key: 'seriesUid', caption: 'Series UID' },
     {
       key: 'action',
@@ -144,7 +145,11 @@ class SeriesSelectorView extends React.PureComponent {
     const { showRelevantSeries } = this.state;
 
     const columns = [
-      { key: 'volumeId', caption: '#' },
+      {
+        key: 'volumeId',
+        caption: '#',
+        renderer: props => <Fragment>{props.index}</Fragment>
+      },
       { key: 'modality', caption: 'Modality' },
       { key: 'seriesUid', caption: 'Series' },
       { key: 'seriesDescription', caption: 'Series desc' },
@@ -154,9 +159,7 @@ class SeriesSelectorView extends React.PureComponent {
         renderer: props => (
           <ImagesRenderer
             value={props.value}
-            onRangeChange={range =>
-              this.handleRangeChange(range, props.value.volumeId)
-            }
+            onRangeChange={range => this.handleRangeChange(range, props.index)}
           />
         )
       },
@@ -183,7 +186,7 @@ class SeriesSelectorView extends React.PureComponent {
             onClick={this.handleAddSeriesClick}
             active={showRelevantSeries}
           >
-            Add Another Series
+            Add Series
           </IconButton>
           {showRelevantSeries && (
             <RelevantSeries onSeriesRegister={this.handleSeriesRegister} />

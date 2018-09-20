@@ -52,7 +52,7 @@ const DataGrid = props => {
             className={classnames({ info: active === item })}
             onClick={() => handleItemClick(i)}
           >
-            {columns.map((c, i) => {
+            {columns.map(c => {
               const Renderer = c.renderer;
               return (
                 <td key={c.className} className={c.className}>

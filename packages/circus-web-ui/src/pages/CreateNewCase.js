@@ -5,7 +5,6 @@ import IconButton from '../components/IconButton';
 import MultiTagSelect from 'components/MultiTagSelect';
 import { api } from 'utils/api';
 import browserHistory from 'browserHistory';
-
 import SeriesSelector from 'components/SeriesSelector';
 
 class CreateNewCaseView extends React.Component {
@@ -94,17 +93,16 @@ class CreateNewCaseView extends React.Component {
       p => p.projectId === this.state.selectedProject
     );
     const tags = prj.project.tags;
-    const seriesData = this.state.selectedSeries.map((s, i) => ({
-      volumeId: i,
-      ...s
-    }));
 
     return (
       <div>
         <h1>
           <span className="circus-icon-case" />New Case
         </h1>
-        <SeriesSelector value={seriesData} onChange={this.handleSeriesChange} />
+        <SeriesSelector
+          value={selectedSeries}
+          onChange={this.handleSeriesChange}
+        />
         <div>
           Project:&ensp;
           <ProjectSelector
@@ -126,7 +124,7 @@ class CreateNewCaseView extends React.Component {
             bsStyle="primary"
             onClick={this.handleCreate}
           >
-            Create
+            Create case for <b>{prj.project.projectName}</b>
           </IconButton>
         </div>
       </div>

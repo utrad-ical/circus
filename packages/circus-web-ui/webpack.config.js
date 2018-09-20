@@ -2,7 +2,7 @@ const webpack = require('webpack');
 const path = require('path');
 
 module.exports = {
-  mode: 'development',
+  mode: process.env.NODE_ENV === 'productoin' ? 'productoin' : 'development',
   entry: {
     application: './src/index.js'
   },
@@ -54,6 +54,7 @@ module.exports = {
     })
   ],
   devServer: {
+    port: process.env.CIRCUS_PORT || 8081,
     contentBase: path.join(__dirname, 'public'),
     historyApiFallback: { disableDotRule: true },
     proxy: {
@@ -62,12 +63,5 @@ module.exports = {
       '/series': 'http://localhost:8080'
     }
   },
-  devtool: '#sourcemap'
+  devtool: 'source-map'
 };
-
-if (process.env.NODE_ENV === 'production') {
-  module.exports.plugins.push(
-    new webpack.optimize.UglifyJsPlugin({ minimize: true })
-  );
-  delete module.exports.devtool;
-}

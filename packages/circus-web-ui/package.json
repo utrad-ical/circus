@@ -16,7 +16,9 @@
     "type": "git",
     "url": "git@github.com:utrad-ical/circus-db-web-ui.git"
   },
-  "keywords": ["CAD"],
+  "keywords": [
+    "CAD"
+  ],
   "author": "UTRAD ICAL Team",
   "license": "UNLICENSED",
   "devDependencies": {
@@ -64,15 +66,11 @@
     "webpack-dev-server": "^3.1.8"
   },
   "dependencies": {
-    "@utrad-ical/circus-rs":
-      "github:utrad-ical/circus-rs#5400b5d8faacf8747f9d74123bf1d9d6e5c47c8f",
+    "@utrad-ical/circus-rs": "github:utrad-ical/circus-rs#5400b5d8faacf8747f9d74123bf1d9d6e5c47c8f",
     "glob-promise": "^3.3.0",
     "js-cookie": "^2.2.0",
     "mongoose": "^4.6.8",
-    "multi-integer-range": "^4.0.2",
-    "rb-components": "^1.4.5",
-    "ts-loader": "^3.2.0",
-    "typescript": "^2.6.2"
+    "multi-integer-range": "^4.0.2"
   },
   "prettier": {
     "singleQuote": true

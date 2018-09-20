@@ -6,7 +6,7 @@ import MultiTagSelect from 'components/MultiTagSelect';
 import { Panel } from 'components/react-bootstrap';
 import DataGrid from 'components/DataGrid';
 import { api } from 'utils/api';
-import { browserHistory } from 'react-router';
+import browserHistory from 'browserHistory';
 import { prompt } from 'rb/modal';
 import MultiRange from 'multi-integer-range';
 import classnames from 'classnames';

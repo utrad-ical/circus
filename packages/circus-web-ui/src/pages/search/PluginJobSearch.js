@@ -8,7 +8,7 @@ const PluginSearch = props => (
     <h1>
       <Icon icon="circus-case" /> CAD Plugin Search
     </h1>
-    <PluginJobSearchCondition presetName={props.params.presetName} />
+    <PluginJobSearchCondition presetName={props.match.params.presetName} />
     <PluginJobSearchResults />
   </div>
 );

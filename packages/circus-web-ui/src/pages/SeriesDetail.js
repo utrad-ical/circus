@@ -35,13 +35,13 @@ export default class SeriesDetail extends React.Component {
   }
 
   componentDidMount() {
-    const uid = this.props.params.uid;
+    const uid = this.props.match.params.uid;
     this.load(uid);
   }
 
   componentWillReceiveProps(newProps) {
-    if (this.props.params.uid !== newProps.params.uid) {
-      this.load(newProps.params.uid);
+    if (this.props.match.params.uid !== newProps.match.params.uid) {
+      this.load(newProps.match.params.uid);
     }
   }
 

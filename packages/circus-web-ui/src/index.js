@@ -3,7 +3,7 @@ import '@babel/polyfill';
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Router, Route, IndexRoute, browserHistory } from 'react-router';
+import { Router, Route, Switch } from 'react-router-dom';
 import Application from 'pages/Application';
 import LoginScreen from 'pages/LoginScreen';
 import HomePage from 'pages/HomePage';
@@ -33,6 +33,7 @@ import { ThemeProvider } from 'styled-components';
 import tinycolor from 'tinycolor2';
 import { refreshUserInfo, dismissMessageOnPageChange } from 'actions';
 import PluginJobQueueSearch from './pages/search/PluginJobQueueSearch';
+import browserHistory from 'browserHistory';
 
 require('./styles/main.less');
 
@@ -55,37 +56,42 @@ ReactDOM.render(
   <Provider store={store}>
     <ThemeProvider theme={theme}>
       <Router history={browserHistory}>
-        <Route path="/" component={LoginScreen} onLeave={leaveLoginScreen} />
-        <Route path="/" component={Application} onChange={pageMove}>
-          <Route path="home" component={HomePage} />
-          <Route path="browse/series(/:presetName)" component={SeriesSearch} />
-          <Route path="browse/case(/:presetName)" component={CaseSearch} />
-          <Route
-            path="browse/plugin-jobs(/:presetName)"
-            component={PluginJobSearch}
-          />
-          <Route path="plugin-job-queue" component={PluginJobQueueSearch} />
-          <Route path="import-series" component={ImportSeries} />
-          <Route path="import-case" component={ImportCase} />
-          <Route path="new-case/:uid" component={CreateNewCase} />
-          <Route path="admin">
-            <IndexRoute component={AdminIndex} />
-            <Route path="general" component={GeneralAdmin} />
-            <Route path="group" component={GroupAdmin} />
-            <Route path="user" component={UserAdmin} />
-            <Route path="project" component={ProjectAdmin} />
+        <Switch>
+          <Route exact path="/" component={LoginScreen} />
+          <Application>
+            <Route path="/home" component={HomePage} />
             <Route
-              path="plugin-job-manager"
-              component={PluginJobManagerAdmin}
+              path="/browse/series/:presetName?"
+              component={SeriesSearch}
             />
-            <Route path="plugins" component={PluginAdmin} />
-          </Route>
-          <Route path="series/:uid" component={SeriesDetail} />
-          <Route path="case/:caseId" component={CaseDetail} />
-          <Route path="plugin-job/:jobId" component={PluginJobDetail} />
-          <Route path="task-list" component={TaskList} />
-          <Route path="preference" component={Preferences} />
-        </Route>
+            <Route path="/browse/case/:presetName?" component={CaseSearch} />
+            <Route
+              path="/browse/plugin-jobs/:presetName?"
+              component={PluginJobSearch}
+            />
+            <Route path="/plugin-job-queue" component={PluginJobQueueSearch} />
+            <Route path="/import-series" component={ImportSeries} />
+            <Route path="/import-case" component={ImportCase} />
+            <Route path="/new-case/:uid" component={CreateNewCase} />
+            <Switch>
+              <Route path="/admin/general" component={GeneralAdmin} />
+              <Route path="/admin/group" component={GroupAdmin} />
+              <Route path="/admin/user" component={UserAdmin} />
+              <Route path="/admin/project" component={ProjectAdmin} />
+              <Route
+                path="/admin/plugin-job-manager"
+                component={PluginJobManagerAdmin}
+              />
+              <Route path="/admin/plugins" component={PluginAdmin} />
+              <Route path="/admin" component={AdminIndex} />
+            </Switch>
+            <Route path="/series/:uid" component={SeriesDetail} />
+            <Route path="/case/:caseId" component={CaseDetail} />
+            <Route path="/plugin-job/:jobId" component={PluginJobDetail} />
+            <Route path="/task-list" component={TaskList} />
+            <Route path="/preference" component={Preferences} />
+          </Application>
+        </Switch>
       </Router>
     </ThemeProvider>
   </Provider>,
@@ -95,14 +101,10 @@ ReactDOM.render(
 // First-time login check
 store.dispatch(refreshUserInfo(true));
 
-function leaveLoginScreen() {
-  store.dispatch(refreshUserInfo(true));
-  dismissMessageOnPageChange();
-}
-
-function pageMove() {
+// Handles history change
+browserHistory.listen(() => {
   // Hide message boxes which should not persist upon page changes
   dismissMessageOnPageChange();
   // Load user information again to check login status
   store.dispatch(refreshUserInfo(false));
-}
+});

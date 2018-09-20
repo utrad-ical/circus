@@ -85,7 +85,7 @@ class CaseDetailView extends React.Component {
   };
 
   async loadCase() {
-    const caseId = this.props.params.caseId;
+    const caseId = this.props.match.params.caseId;
     const caseData = await api('cases/' + caseId);
     const project = this.props.accessibleProjects.find(
       p => p.projectId === caseData.projectId
@@ -184,7 +184,7 @@ class CaseDetailView extends React.Component {
 
     const { projectData: prj, caseData } = this.state;
 
-    const caseId = this.props.params.caseId;
+    const caseId = this.props.match.params.caseId;
 
     return (
       <div>

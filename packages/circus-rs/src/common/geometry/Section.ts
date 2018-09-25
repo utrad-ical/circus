@@ -64,8 +64,6 @@ export function intersectionOfLineAndPlane(
 ): Vector3 | null {
   const nv = normalVector(section);
   const origin = new Vector3().fromArray(section.origin);
-  const endA = line.start;
-  const endB = line.end;
 
   const vecPA = new Vector3().subVectors(origin, line.start);
   const vecPB = new Vector3().subVectors(origin, line.end);
@@ -124,7 +122,8 @@ export function intersectionOfLineAndSection(
  * Calculates the intersection of two (finite) sections.
  * @param base The base section, on which the target section is projected
  * @param target The target section
- * @returns The line segment which represents how the target section intersects with the base section.
+ * @returns The line segment which represents how the target section
+ * intersects with the base section.
  * The resulting line segment may extend outside the boundry of base,
  * while it does not extend outside the target.
  */
@@ -183,6 +182,8 @@ export function intersectionOfTwoSections(
 
 /**
  * Calculates the normal vector of the given section.
+ * @param section The section.
+ * @returns The calculated normal vector.
  */
 export function normalVector(section: Section): Vector3 {
   return new Vector3()
@@ -193,13 +194,13 @@ export function normalVector(section: Section): Vector3 {
 
 /**
  * Compare the contents of the two sections.
- * @param a the section with which to compare.
- * @param b the section with which to compare.
+ * @param a The section to compare.
+ * @param b The section to compare.
+ * @returns True if the two given Sections are identical.
  */
 export function sectionEquals(a: Section, b: Section): boolean {
-  const vectorEquals = (a: Array<any>, b: Array<any>) => {
-    return a.length === b.length && a.every((_, i) => a[i] === b[i]);
-  };
+  const vectorEquals = (a: Array<number>, b: Array<number>) =>
+    a.length === b.length && a.every((_, i) => a[i] === b[i]);
   return (
     vectorEquals(a.origin, b.origin) &&
     vectorEquals(a.xAxis, b.xAxis) &&

@@ -12,6 +12,7 @@ import SeriesSearch from 'pages/search/SeriesSearch';
 import CreateNewCase from 'pages/CreateNewCase';
 import CaseSearch from 'pages/search/CaseSearch';
 import CaseDetail from 'pages/case-detail/CaseDetail';
+import CreateNewJob from 'pages/CreateNewJob';
 import PluginJobSearch from 'pages/search/PluginJobSearch';
 import ImportSeries from 'pages/ImportSeries';
 import ImportCase from 'pages/ImportCase';
@@ -73,7 +74,8 @@ ReactDOM.render(
             <Route path="/plugin-job-queue" component={PluginJobQueueSearch} />
             <Route path="/import-series" component={ImportSeries} />
             <Route path="/import-case" component={ImportCase} />
-            <Route path="/new-case/:uid" component={CreateNewCase} />
+            <Route path="/new-case/:seriesUid" component={CreateNewCase} />
+            <Route path="/new-job/:seriesUid" component={CreateNewJob} />
             <Switch>
               <Route path="/admin/general" component={GeneralAdmin} />
               <Route path="/admin/group" component={GroupAdmin} />

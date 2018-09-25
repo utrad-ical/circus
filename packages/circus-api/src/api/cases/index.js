@@ -3,6 +3,7 @@ import performSearch from '../performSearch';
 import { generateUniqueId } from '../../utils';
 import * as EJSON from 'mongodb-extended-json';
 import MultiRange from 'multi-integer-range';
+import { fetchAccessibleSeries } from '../../privilegeUtils';
 
 const maskPatientInfo = ctx => {
   return caseData => {
@@ -45,8 +46,6 @@ async function makeNewCase(
 ) {
   const caseId = generateUniqueId();
 
-  let patientInfoCache = null;
-  const seriesData = [];
   const domains = {};
 
   // Check write access for the project.
@@ -57,27 +56,13 @@ async function makeNewCase(
     throw new Error('You do not have write privilege for this project.');
   }
 
-  // Check domain and image range for each series.
-  for (const seriesEntry of series) {
-    const seriesUid = seriesEntry.seriesUid;
-    const item = await models.series.findById(seriesUid);
-    if (!item) {
-      throw new Error('Nonexistent series.');
-    }
-    if (!new MultiRange(item.images).has(seriesEntry.range)) {
-      throw new Error('Specified range is invalid.');
-    }
-
-    item.range = seriesEntry.range;
-    seriesData.push(item);
-    if (userPrivileges.domains.indexOf(item.domain) < 0) {
-      throw new Error('You cannot access this series.');
-    }
-    if (!patientInfoCache) {
-      patientInfoCache = item.patientInfo;
-    }
-    domains[item.domain] = true;
-  }
+  const seriesData = await fetchAccessibleSeries(
+    models,
+    userPrivileges,
+    series
+  );
+  const anyPatientInfoEntry = seriesData.find(i => !!i.patientInfo);
+  seriesData.forEach(i => (domains[i.domain] = true));
 
   const revision = {
     creator: user.userEmail,
@@ -95,7 +80,9 @@ async function makeNewCase(
   await models.clinicalCase.insert({
     caseId,
     projectId: project.projectId,
-    patientInfoCache,
+    patientInfoCache: anyPatientInfoEntry
+      ? anyPatientInfoEntry.patientInfo
+      : null,
     tags,
     latestRevision: revision,
     revisions: [revision],

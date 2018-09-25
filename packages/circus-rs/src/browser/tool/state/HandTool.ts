@@ -1,7 +1,7 @@
 import DraggableTool from '../DraggableTool';
 import ViewerEvent from '../../viewer/ViewerEvent';
 import { MprViewState } from '../../ViewState';
-import { translateSection, equals } from '../../../common/geometry';
+import { translateSection, sectionEquals } from '../../../common/geometry';
 import { Vector2, Vector3 } from 'three';
 
 /**
@@ -65,7 +65,7 @@ export default class HandTool extends DraggableTool {
     }
 
     // If section has no changed, return state as is.
-    const hasAnyChanged = !equals(section, newSection);
+    const hasAnyChanged = !sectionEquals(section, newSection);
     return hasAnyChanged ? { ...state, section: newSection } : state;
   }
 }

@@ -127,4 +127,14 @@ describe('Section', function() {
       });
     });
   });
+
+  it('#sectionEquals', function() {
+    const a = {
+      origin: [0, 0, 1],
+      xAxis: [1, 1, 1],
+      yAxis: [2, 2, 2]
+    };
+    assert.isTrue(geo.sectionEquals(a, a));
+    assert.isFalse(geo.sectionEquals(a, { ...a, origin: [0, 1, 1] }));
+  });
 });

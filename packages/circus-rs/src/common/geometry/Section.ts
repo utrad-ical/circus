@@ -196,6 +196,13 @@ export function normalVector(section: Section): Vector3 {
  * @param a the section with which to compare.
  * @param b the section with which to compare.
  */
-export function equals(a: Section, b: Section): boolean {
-  return JSON.stringify(a) === JSON.stringify(b);
+export function sectionEquals(a: Section, b: Section): boolean {
+  const vectorEquals = (a: Array<any>, b: Array<any>) => {
+    return a.length === b.length && a.every((_, i) => a[i] === b[i]);
+  };
+  return (
+    vectorEquals(a.origin, b.origin) &&
+    vectorEquals(a.xAxis, b.xAxis) &&
+    vectorEquals(a.yAxis, b.yAxis)
+  );
 }

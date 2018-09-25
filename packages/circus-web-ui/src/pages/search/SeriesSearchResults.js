@@ -6,7 +6,9 @@ import { Link } from 'react-router-dom';
 import DataGrid from 'components/DataGrid';
 import PatientInfoBox from 'components/PatientInfoBox';
 import TimeDisplay from 'components/TimeDisplay';
+import Icon from 'components/Icon';
 import IconButton from 'components/IconButton';
+import { DropdownButton, MenuItem } from 'components/react-bootstrap';
 
 const Modality = props => {
   const series = props.value;
@@ -27,11 +29,22 @@ const Operation = props => {
         </IconButton>
       </Link>
       &thinsp;
-      <Link to={`/new-case/${series.seriesUid}`}>
-        <IconButton icon="circus-case" bsStyle="primary" bsSize="sm">
-          New
-        </IconButton>
-      </Link>
+      <DropdownButton
+        bsSize="sm"
+        bsStyle="primary"
+        title={
+          <Fragment>
+            <Icon icon="plus" />New
+          </Fragment>
+        }
+      >
+        <MenuItem eventKey="1" href={`/new-case/${series.seriesUid}`}>
+          New Case
+        </MenuItem>
+        <MenuItem eventKey="2" href={`/new-job/${series.seriesUid}`}>
+          New Job
+        </MenuItem>
+      </DropdownButton>
     </Fragment>
   );
 };

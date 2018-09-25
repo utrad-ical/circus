@@ -16,7 +16,6 @@ class CreateNewCaseView extends React.Component {
         selectedProject: writableProjects[0].projectId,
         selectedSeries: [],
         selectedTags: [],
-        showRelevantSeries: false,
         busy: false
       };
     }
@@ -24,7 +23,7 @@ class CreateNewCaseView extends React.Component {
 
   async componentDidMount() {
     this.setState({ busy: true });
-    const seriesUid = this.props.match.params.uid;
+    const seriesUid = this.props.match.params.seriesUid;
     const series = await api('series/' + seriesUid);
     this.setState({
       selectedSeries: [{ ...series, range: series.images }],

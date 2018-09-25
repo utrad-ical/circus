@@ -1,9 +1,10 @@
-name: PluginJobQueue
+name: PluginJobQueue Administration
 description: >
   Returns job queue.
 routes:
   - verb: get
-    path: /plugin-job-queue
+    path: /admin/plugin-job-queue
     description: >
       Returns plugin job queue.
+    requiredGlobalPrivilege: manageServer
     responseSchema: pluginJobQueue|searchResult

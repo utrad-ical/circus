@@ -6,7 +6,12 @@ routes:
     path: /plugin-jobs
     description: >
       Creates a new plug-in job.
-    requestSchema: pluginJob
+    responseSchema:
+      allOf:
+        - $ref: pluginJob
+        - properties:
+            priority:
+              type: integer
   - verb: patch
     path: /plugin-jobs/:jobId
     description: >

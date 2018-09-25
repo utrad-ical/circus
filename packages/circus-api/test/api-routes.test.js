@@ -5,12 +5,13 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 describe('API', function() {
-  let server, axios, csCore;
+  let server, axios, csCore, testHelper;
 
   before(async function() {
     server = await test.setUpAppForTest('trace');
     axios = server.axios.alice; // Alraedy includes access token for alice@example.com
     csCore = server.csCore;
+    testHelper = server.testHelper;
   });
 
   after(async function() {
@@ -571,6 +572,103 @@ describe('API', function() {
         data: { status: 'going' } // invalid status
       });
       assert.equal(res.status, 400);
+    });
+  });
+
+  describe('admin/plugin-job-queue', function _adminPluginJobQueue() {
+    let url;
+    before(async () => {
+      url = server.url + 'api/admin/plugin-job-queue';
+    });
+
+    const fillQueue = len =>
+      new Array(len)
+        .fill(0)
+        .reduce(
+          (p, c, i) =>
+            p.then(() =>
+              csCore.job.register(
+                'job-id-' + (1 + i).toString(),
+                {
+                  pluginId: 'plugin-' + (1 + i).toString(),
+                  series: [{
+                    seriesUid: (new Array(5)).fill((1 + i).toString()).join('.')
+                  }]
+                }
+              )
+            ),
+          Promise.resolve()
+        );
+
+    const test = async (expectedStates, params = {}) => {
+      const abbrs = {
+        w: 'wait',
+        p: 'processing'
+      };
+      const res = await axios({ method: 'GET', url, params });
+      assert.equal(res.status, 200);
+      assert.equal(res.data.items.length, expectedStates.length);
+      assert.equal(
+        res.data.items.filter(
+          (qi, idx) => qi.state !== abbrs[expectedStates[idx]]
+        ).length,
+        0
+      );
+      return res;
+    };
+
+    it('should return the current queue list', async function _shouldReturnTheCurrentQueueList() {
+      await fillQueue(3);
+      await test(['w', 'w', 'w']);
+
+      testHelper.tick();
+      await test(['p', 'w', 'w']);
+      testHelper.tack();
+      await test(['w', 'w']);
+
+      testHelper.tick();
+      await test(['p', 'w']);
+      testHelper.tack();
+      await test(['w']);
+
+      testHelper.tick();
+      await test(['p']);
+      testHelper.tack();
+      await test([]);
+
+      testHelper.tick();
+      await test([]);
+      testHelper.tack();
+      await test([]);
+
+      testHelper.flush();
+    });
+
+    it('should return the items which is specified by page and limit', async function shouldReturnTheItemsWhichIsSpecifiedByPageAndLimit() {
+      await fillQueue(50);
+      testHelper.tick();
+
+      await test(['p'].concat(new Array(9).fill('w')), { limit: 10, page: 1 });
+      await test(['w'].concat(new Array(9).fill('w')), { limit: 10, page: 2 });
+      await test(['p'].concat(new Array(29).fill('w')), { limit: 30, page: 1 });
+      const res = await test(['w'].concat(new Array(19).fill('w')), {
+        limit: 30,
+        page: 2
+      });
+      assert.equal(res.data.totalItems, 50);
+
+      testHelper.flush();
+    });
+
+    it('should return the items which is specified by state', async function _shouldReturnTheCurrentQueueList() {
+      await fillQueue(5);
+      testHelper.tick();
+
+      await test(['p', 'w'], { limit: 2, page: 1, state: 'all' });
+      await test(['w', 'w'], { limit: 2, page: 1, state: 'wait' });
+      await test(['p'], { limit: 2, page: 1, state: 'processing' });
+
+      testHelper.flush();
     });
   });
 

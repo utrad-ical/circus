@@ -64,7 +64,7 @@ export async function setUpAppForTest(logMode = 'off') {
     'pluginJobs'
   ]);
   const logger = createLogger(logMode);
-  const csCore = createMockCsCore();
+  const { csCore, ...csRest } = createMockCsCore();
   const app = await createApp({ debug: true, db, logger, cs: csCore });
   const server = await listenKoa(app);
 
@@ -81,7 +81,17 @@ export async function setUpAppForTest(logMode = 'off') {
     });
   });
 
-  return { db, app, logger, axios: axiosInstances, csCore, ...server };
+  const testHelper = { ...csRest };
+
+  return {
+    testHelper,
+    db,
+    app,
+    logger,
+    axios: axiosInstances,
+    csCore,
+    ...server
+  };
 }
 
 export async function tearDownAppForTest(testServer) {
@@ -140,31 +150,47 @@ function createMockCsCore() {
   const jobs = [];
   const csCore = {
     daemon: {
-      start: async () => status = 'running',
-      stop: async () => status = 'stopped',
+      start: async () => (status = 'running'),
+      stop: async () => (status = 'stopped'),
       status: async () => status,
       pm2list: async () => status,
-      pm2killall: async () => status,
+      pm2killall: async () => status
     },
     plugin: {
-      update: async (newDefs) => defs = newDefs,
+      update: async newDefs => (defs = newDefs),
       list: async () => defs
     },
     job: {
-      list: async(state) => jobs,
+      list: async (state = 'all') =>
+        (state === 'all' ? jobs : jobs.filter(job => job.state === state))
+          // Since api response filtering harms the original objects
+          .map(i => Object.assign({}, i)),
       register: async (
         jobId,
         payload,
-        priority
-      ) => {
+        priority = 0 // ignored
+      ) =>
         jobs.push({
           jobId,
+          priority,
           payload,
-          priority
-        });
-      }
+          state: 'wait',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          startedAt: null
+        })
     },
-    dispose: async ()=>{}
+    dispose: async () => {}
   };
-  return csCore;
+
+  const tick = () => {
+    if (jobs[0]) {
+      jobs[0].state = 'processing';
+      jobs[0].startedAt = new Date();
+    }
+  };
+  const tack = () => jobs.shift();
+  const flush = () => jobs.splice(0, jobs.length);
+
+  return { csCore, tick, tack, flush };
 }

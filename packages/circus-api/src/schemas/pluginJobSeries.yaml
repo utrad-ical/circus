@@ -20,6 +20,3 @@ properties:
 additionalProperties: false
 required:
   - seriesUid
-  - startImgNum
-  - endImgNum
-  - imageDelta

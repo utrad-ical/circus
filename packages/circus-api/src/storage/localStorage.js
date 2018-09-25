@@ -4,7 +4,7 @@ import * as path from 'path';
 export default async function localStorage(params) {
   const { root, nameToPath = n => n } = params;
 
-  if (!root || !await fs.pathExists(root)) {
+  if (!root || !(await fs.pathExists(root))) {
     throw new Error(`Root directory "${root}" does not exist.`);
   }
 

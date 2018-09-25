@@ -1,10 +1,31 @@
 $schema: 'http://json-schema.org/schema#'
 $async: true
-title: PluginJobManager
+title: PluginJobQueue
 description: >
   Represents plug-in job queue.
 type: object
 properties:
   jobId:
     type: string
+  priority:
+    type: integer
+  payload:
+    $ref: pluginJob
+  state:
+    type: string
+    enum:
+      - wait
+      - processing
+  createdAt:
+    oneOf:
+      - date: true
+      - type: 'null'
+  updatedAt:
+    oneOf:
+      - date: true
+      - type: 'null'
+  startedAt:
+    oneOf:
+      - date: true
+      - type: 'null'
 additionalProperties: false

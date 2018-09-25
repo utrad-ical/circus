@@ -1,7 +1,7 @@
 import DraggableTool from '../DraggableTool';
 import ViewerEvent from '../../viewer/ViewerEvent';
 import { MprViewState } from '../../ViewState';
-import { translateSection } from '../../../common/geometry';
+import { translateSection, equals } from '../../../common/geometry';
 import { Vector2, Vector3 } from 'three';
 
 /**
@@ -53,6 +53,19 @@ export default class HandTool extends DraggableTool {
         new Vector3().fromArray(section.yAxis).multiplyScalar(-moveScale.y)
       )
     );
-    return { ...state, section: newSection };
+
+    // Check whether new section is outside display area, and if so, reject the processing.
+    const xBoundaryAbs = Math.abs(vp.x / 2) + Math.abs(section.xAxis[0] / 2);
+    if (Math.abs(newSection.origin[0]) >= xBoundaryAbs) {
+      newSection.origin[0] = section.origin[0];
+    }
+    const yBoundaryAbs = Math.abs(vp.y / 2) + Math.abs(section.yAxis[1] / 2);
+    if (Math.abs(newSection.origin[1]) >= yBoundaryAbs) {
+      newSection.origin[1] = section.origin[1];
+    }
+
+    // If section has no changed, return state as is.
+    const hasAnyChanged = !equals(section, newSection);
+    return hasAnyChanged ? { ...state, section: newSection } : state;
   }
 }

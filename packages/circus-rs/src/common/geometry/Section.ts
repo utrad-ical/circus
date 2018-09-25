@@ -190,3 +190,12 @@ export function normalVector(section: Section): Vector3 {
     .cross(new Vector3().fromArray(section.yAxis))
     .normalize();
 }
+
+/**
+ * Compare the contents of the two sections.
+ * @param a the section with which to compare.
+ * @param b the section with which to compare.
+ */
+export function equals(a: Section, b: Section): boolean {
+  return JSON.stringify(a) === JSON.stringify(b);
+}

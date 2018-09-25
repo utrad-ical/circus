@@ -64,7 +64,9 @@ export async function setUpAppForTest(logMode = 'off') {
     'pluginJobs'
   ]);
   const logger = createLogger(logMode);
-  const { csCore, ...csRest } = createMockCsCore();
+
+  const pluginJobsCollection = db.collection('pluginJobs');
+  const { csCore, ...csRest } = createMockCsCore(pluginJobsCollection);
   const app = await createApp({ debug: true, db, logger, cs: csCore });
   const server = await listenKoa(app);
 
@@ -124,30 +126,50 @@ export async function setUpMongoFixture(db, collections) {
   for (const colName of collections) {
     const col = db.collection(colName);
     await col.deleteMany({});
-    const data = EJSON.parse(
-      JSON.stringify(
-        yaml(
-          await fs.readFile(path.join(__dirname, 'fixture', colName + '.yaml'))
-        )
-      )
+    const content = yaml(
+      await fs.readFile(path.join(__dirname, 'fixture', colName + '.yaml'))
     );
-    for (const row of data) {
-      if (!row.createdAt) row.createdAt = new Date();
-      if (!row.updatedAt) row.updatedAt = new Date();
-    }
-    try {
-      await col.insertMany(data);
-    } catch (err) {
-      console.log(err.errors);
-      throw err;
+    if (content) {
+      const data = EJSON.parse(JSON.stringify(content));
+      for (const row of data) {
+        if (!row.createdAt) row.createdAt = new Date();
+        if (!row.updatedAt) row.updatedAt = new Date();
+      }
+      try {
+        await col.insertMany(data);
+      } catch (err) {
+        console.log(err.errors);
+        throw err;
+      }
     }
   }
 }
 
-function createMockCsCore() {
+function createMockCsCore(pluginJobsCollection) {
   let status = 'stopped';
   let defs = [];
   const jobs = [];
+
+  const report = async (jobId, type, payload) => {
+    if (!jobId) throw new Error('Job ID undefined');
+    switch (type) {
+      case 'processing':
+      case 'finished':
+      case 'error':
+        await pluginJobsCollection.findOneAndUpdate(
+          { jobId },
+          { $set: { status: type } }
+        );
+        break;
+      case 'results':
+        await pluginJobsCollection.findOneAndUpdate(
+          { jobId },
+          { $set: { results: payload } }
+        );
+        break;
+    }
+  };
+
   const csCore = {
     daemon: {
       start: async () => (status = 'running'),
@@ -165,11 +187,7 @@ function createMockCsCore() {
         (state === 'all' ? jobs : jobs.filter(job => job.state === state))
           // Since api response filtering harms the original objects
           .map(i => Object.assign({}, i)),
-      register: async (
-        jobId,
-        payload,
-        priority = 0 // ignored
-      ) =>
+      register: async (jobId, payload, priority = 0) => {
         jobs.push({
           jobId,
           priority,
@@ -178,19 +196,31 @@ function createMockCsCore() {
           createdAt: new Date(),
           updatedAt: new Date(),
           startedAt: null
-        })
+        });
+      }
     },
     dispose: async () => {}
   };
 
-  const tick = () => {
+  const tick = async () => {
     if (jobs[0]) {
+      await report(jobs[0].jobId, 'processing');
       jobs[0].state = 'processing';
       jobs[0].startedAt = new Date();
     }
   };
-  const tack = () => jobs.shift();
-  const flush = () => jobs.splice(0, jobs.length);
+  const tack = async () => {
+    const job = jobs.shift();
+    if (job) {
+      await report(job.jobId, 'results', {});
+      await report(job.jobId, 'finished');
+      // await report(job.jobId, 'error');
+    }
+  };
+  const flush = () => {
+    jobs.splice(0, jobs.length);
+    pluginJobsCollection.deleteMany({});
+  };
 
   return { csCore, tick, tack, flush };
 }

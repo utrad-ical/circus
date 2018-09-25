@@ -7,4 +7,4 @@ routes:
     description: >
       Returns plugin job queue.
     requiredGlobalPrivilege: manageServer
-    responseSchema: pluginJobQueue|searchResult
+    responseSchema: pluginJob|searchResult

@@ -5,59 +5,36 @@ import { Panel } from 'components/react-bootstrap';
 import IconButton from '../components/IconButton';
 import { startNewSearch } from 'actions';
 import { connect } from 'react-redux';
-import MultiRange from 'multi-integer-range';
-import { prompt } from 'rb/modal';
-import classnames from 'classnames';
+import { modal } from 'rb/modal';
 import { api } from 'utils/api';
+import PartialVolumeDescriptorEditor from './PartialVolumeDescriptorEditor';
+import * as pvu from 'utils/partialVolumeDescriptorUtils';
 
-const ImagesRenderer = props => {
-  const { value, onRangeChange } = props;
-  const imageRange = new MultiRange(value.images);
+const PartialVolumeRenderer = props => {
+  const { index, value, onChange } = props;
 
-  const handleEditClick = async () => {
-    const validator = str => {
-      let mr;
-      const errorMessage =
-        'Please specify an inter range in the form like `3` or `1-3`.';
-      try {
-        mr = new MultiRange(str);
-      } catch (e) {
-        return errorMessage;
-      }
-      if (!str.length) return 'input something';
-      if (mr.segmentLength() !== 1) return errorMessage;
-      if (!imageRange.has(mr))
-        return 'Specified range is not included in the original image range.';
-      return null;
-    };
-
-    const ans = await prompt(
-      <span>
-        Specify a <strong>continuous</strong> image range within{' '}
-        <b>{value.images}</b>.
-      </span>,
-      value.range,
-      { validator }
-    );
-
-    if (!ans) return;
-    onRangeChange(ans);
+  const handleClick = async () => {
+    const result = await modal(props => (
+      <PartialVolumeDescriptorEditor
+        initialValue={{ start: 1, end: 10, delta: 1 }}
+        {...props}
+      />
+    ));
+    if (!result) return;
+    onChange(index, result.descriptor);
   };
 
-  const classes = classnames({
-    'text-danger': !imageRange.equals(value.range)
-  });
+  const applied = !!value;
 
   return (
-    <Fragment>
-      <span className={classes}>{value.range}</span>{' '}
-      <IconButton
-        onClick={handleEditClick}
-        bsStyle="default"
-        bsSize="xs"
-        icon="edit"
-      />
-    </Fragment>
+    <IconButton
+      icon="edit"
+      bsSize="xs"
+      onClick={handleClick}
+      bsStyle={applied ? 'success' : 'default'}
+    >
+      {applied ? pvu.describePartialVolumeDescriptor(value, 3) : 'not applied'}
+    </IconButton>
   );
 };
 
@@ -116,11 +93,11 @@ class SeriesSelectorView extends React.PureComponent {
     }
   };
 
-  handleRangeChange = (newRange, volumeId) => {
+  handlePartialVolumeChange = (volumeId, descriptor) => {
     const { value, onChange } = this.props;
     const newValue = value.map((v, i) => {
       return i === volumeId
-        ? { ...value[volumeId], range: new MultiRange(newRange).toString() }
+        ? { ...value[volumeId], partialVolumeDescriptor: descriptor }
         : v;
     });
     onChange(newValue);
@@ -155,11 +132,12 @@ class SeriesSelectorView extends React.PureComponent {
       { key: 'seriesDescription', caption: 'Series desc' },
       {
         key: 'images',
-        caption: 'Range',
+        caption: 'Partial Volume',
         renderer: props => (
-          <ImagesRenderer
-            value={props.value}
-            onRangeChange={range => this.handleRangeChange(range, props.index)}
+          <PartialVolumeRenderer
+            value={props.value.partialVolumeDescriptor}
+            index={props.index}
+            onChange={this.handlePartialVolumeChange}
           />
         )
       },

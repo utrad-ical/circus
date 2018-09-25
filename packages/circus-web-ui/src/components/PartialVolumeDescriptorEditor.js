@@ -3,40 +3,9 @@ import { Button, Modal } from 'components/react-bootstrap';
 import PropertyEditor from 'rb/PropertyEditor';
 import MultiRange from 'multi-integer-range';
 import * as et from 'rb/editor-types';
+import * as pvu from 'utils/partialVolumeDescriptorUtils';
 
-const describePartialVolumeDescriptor = descriptor => {
-  if (!isValidPartialVolumeDescriptor(descriptor)) return 'Invalid';
-  const { start, end, delta } = descriptor;
-  const count = (end - start) / delta + 1;
-  if (count >= 6) {
-    let result = '';
-    for (let i = 0; i < 3; i++) {
-      if (i > 0) result += ', ';
-      result += start + delta * i;
-    }
-    return result + ', ..., ' + end;
-  } else {
-    let result = '';
-    for (let i = 0; i <= count; i++) {
-      if (i > 0) result += ', ';
-      result += start + delta * i;
-    }
-    return result;
-  }
-};
-
-const isValidPartialVolumeDescriptor = descriptor => {
-  const { start, end, delta } = descriptor;
-  const isNatural = value => Number.isInteger(value) && value > 0;
-  if (descriptor.start > descriptor.end) return false;
-  if (!isNatural(start)) return false;
-  if (!isNatural(end)) return false;
-  if (!isNatural(delta)) return false;
-  if (!isNatural((end - start) / delta)) return false;
-  return true;
-};
-
-export default class PartialVolumeEditor extends React.PureComponent {
+export default class PartialVolumeDescriptorEditor extends React.PureComponent {
   constructor(props) {
     super(props);
     const mr = new MultiRange(props.images);
@@ -84,7 +53,8 @@ export default class PartialVolumeEditor extends React.PureComponent {
             value={descriptor}
             onChange={this.handleChange}
           />
-          Partial volume Preview: {describePartialVolumeDescriptor(descriptor)}
+          <hr />
+          <b>Preview:</b> {pvu.describePartialVolumeDescriptor(descriptor)}
         </Modal.Body>
         <Modal.Footer>
           <Button bsStyle="link" onClick={this.handleCancelClick}>
@@ -95,7 +65,7 @@ export default class PartialVolumeEditor extends React.PureComponent {
           </Button>
           <Button
             onClick={this.handleOkClick}
-            disabled={!isValidPartialVolumeDescriptor(descriptor)}
+            disabled={!pvu.isValidPartialVolumeDescriptor(descriptor)}
             bsStyle="primary"
           >
             OK

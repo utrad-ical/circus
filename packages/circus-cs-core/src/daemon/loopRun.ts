@@ -59,7 +59,7 @@ export default async function loopRun<T>(
             `Job ${nextJob.jobId} ${succeed ? 'finished' : 'failed'}.`
           );
         } finally {
-          if (nextJob) settle(nextJob.jobId);
+          if (nextJob) await settle(nextJob.jobId);
         }
       } catch (e) {
         logger.fatal(e.message);

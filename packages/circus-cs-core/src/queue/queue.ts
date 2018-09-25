@@ -30,8 +30,9 @@ export interface Item<T> {
   priority: number;
   payload: T;
   state: QueueState;
-  queuedAt?: Date;
-  startedAt?: Date;
+  createdAt: Date;
+  updatedAt: Date;
+  startedAt: Date | null;
 }
 
 interface QueueOptions {
@@ -57,7 +58,9 @@ export async function createMongoQueue<T>(
       jobId,
       state: 'wait',
       payload,
-      queuedAt: new Date(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      startedAt: null,
       priority
     };
     const { insertedId } = await collection.insertOne(item);
@@ -67,7 +70,7 @@ export async function createMongoQueue<T>(
   const dequeue = async () => {
     const result = (await collection.findOneAndUpdate(
       { state: 'wait' },
-      { $set: { state: 'processing' } },
+      { $set: { state: 'processing', startedAt: new Date() } },
       { sort: { priority: -1, _id: 1 }, returnOriginal: false }
     )).value as Item<T> | null;
     return result;

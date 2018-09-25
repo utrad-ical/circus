@@ -30,7 +30,7 @@ export default async function monitor(config: Configuration, argv: any) {
       const rows = jobs.map(job => {
         const text =
           job.state === 'wait'
-            ? `Queued at ${dt(job.queuedAt!)}`
+            ? `Queued at ${dt(job.createdAt!)}`
             : job.state === 'processing'
               ? `Started at ${dt(job.startedAt!)}`
               : 'Error';

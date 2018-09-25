@@ -1,14 +1,14 @@
 import status from 'http-status';
 import performSearch from '../performSearch';
 import { generateUniqueId } from '../../utils';
-import * as jobManager from '../mockJobManager';
 import * as EJSON from 'mongodb-extended-json';
 
-export const handlePost = ({ models }) => {
+export const handlePost = ({ models, cs }) => {
   return async (ctx, next) => {
     const jobId = generateUniqueId();
     const { priority, ...request } = ctx.request.body;
-    await jobManager.registerJob(jobId, request, priority);
+
+    await cs.job.register(jobId, request, priority);
     await models.pluginJob.insert({
       jobId,
       pluginName: request.pluginName,
@@ -29,7 +29,7 @@ export const handlePost = ({ models }) => {
 /**
  * Cancels a job.
  */
-export const handlePatch = ({ models }) => {
+export const handlePatch = ({ models, cs }) => {
   return async (ctx, next) => {
     const jobId = ctx.params.jobId;
     const job = await models.pluginJob.findByIdOrFail(jobId);
@@ -45,9 +45,10 @@ export const handlePatch = ({ models }) => {
         `You cannot cancel this job because its status is "${job.status}".`
       );
     }
-    await jobManager.cancelJob(jobId);
-    await models.pluginJob.upsert(jobId, { status: 'cancelled' });
-    ctx.body = status.NO_CONTENT;
+    ctx.throw(status.NOT_IMPLEMENTED, 'Job cancel function is not implemented on current version.' );
+    // await cs.job.cancel(jobId);
+    // await models.pluginJob.upsert(jobId, { status: 'cancelled' });
+    // ctx.body = status.NO_CONTENT;
   };
 };
 

@@ -483,24 +483,35 @@ describe('API', function() {
     const jobId = 'd4412ed0fcf1e0ab747c725f794c672a';
 
     it('should register a new plug-in job', async function _shouldRegisterANewPlugInJob() {
+      const priority = 123;
+      const pluginJobRequest = {
+        pluginName: 'MRA-CAD',
+        pluginVersion: '1.5',
+        series: [
+          {
+            seriesUid: '11.22.333',
+            startImgNum: 0,
+            endImgNum: 100,
+            imageDelta: 1
+          }
+        ]
+      };
+
       const res = await axios.request({
         method: 'post',
         url: server.url + 'api/plugin-jobs',
-        data: {
-          priority: 1,
-          pluginName: 'MRA-CAD',
-          pluginVersion: '1.5',
-          series: [
-            {
-              seriesUid: '11.22.333',
-              startImgNum: 0,
-              endImgNum: 100,
-              imageDelta: 1
-            }
-          ]
-        }
+        data: { ...pluginJobRequest, priority }
       });
+      const { jobId } = res.data;
+
       assert.equal(res.status, 200);
+
+      const lastQueueItem = (await csCore.job.list()).slice(-1)[0];
+      assert.equal(priority, lastQueueItem.priority);
+      assert.equal(jobId, lastQueueItem.jobId);
+      assert.deepEqual(lastQueueItem.payload, pluginJobRequest);
+
+      testHelper.flush();
     });
 
     it('should return a finished plug-in job', async function _shouldReturnAFinishedPlugInJob() {
@@ -582,23 +593,20 @@ describe('API', function() {
     });
 
     const fillQueue = len =>
-      new Array(len)
-        .fill(0)
-        .reduce(
-          (p, c, i) =>
-            p.then(() =>
-              csCore.job.register(
-                'job-id-' + (1 + i).toString(),
+      new Array(len).fill(0).reduce(
+        (p, c, i) =>
+          p.then(() =>
+            csCore.job.register('job-id-' + (1 + i).toString(), {
+              pluginId: 'plugin-' + (1 + i).toString(),
+              series: [
                 {
-                  pluginId: 'plugin-' + (1 + i).toString(),
-                  series: [{
-                    seriesUid: (new Array(5)).fill((1 + i).toString()).join('.')
-                  }]
+                  seriesUid: new Array(5).fill((1 + i).toString()).join('.')
                 }
-              )
-            ),
-          Promise.resolve()
-        );
+              ]
+            })
+          ),
+        Promise.resolve()
+      );
 
     const test = async (expectedStates, params = {}) => {
       const abbrs = {

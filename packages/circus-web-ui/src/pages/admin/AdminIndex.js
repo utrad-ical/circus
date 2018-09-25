@@ -37,6 +37,9 @@ const AdminIndex = props => {
         <Btn to="plugin-job-manager" link="Job Manager" glyph="user" />
         <Btn to="plugins" link="CAD Plug-ins" glyph="circus-b-calc" />
       </div>
+      <div className="row">
+        <Btn to="plugin-job-queue" link="Job Queue" glyph="list" />
+      </div>
     </AdminContainer>
   );
 };

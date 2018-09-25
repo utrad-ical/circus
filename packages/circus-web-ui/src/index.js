@@ -24,6 +24,7 @@ import GroupAdmin from 'pages/admin/GroupAdmin';
 import UserAdmin from 'pages/admin/UserAdmin';
 import ProjectAdmin from 'pages/admin/ProjectAdmin';
 import PluginJobManagerAdmin from 'pages/admin/PluginJobManagerAdmin';
+import PluginJobQueueAdmin from 'pages/admin/PluginJobQueueAdmin';
 import PluginAdmin from 'pages/admin/PluginAdmin';
 import Preferences from 'pages/Preferences';
 
@@ -83,7 +84,11 @@ ReactDOM.render(
                 component={PluginJobManagerAdmin}
               />
               <Route path="/admin/plugins" component={PluginAdmin} />
-              <Route path="/admin" component={AdminIndex} />
+              <Route
+                path="/admin/plugin-job-queue"
+                component={PluginJobQueueAdmin}
+              />
+              <Route path="/admin" exact component={AdminIndex} />
             </Switch>
             <Route path="/series/:uid" component={SeriesDetail} />
             <Route path="/case/:caseId" component={CaseDetail} />

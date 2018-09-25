@@ -1,0 +1,17 @@
+$schema: 'http://json-schema.org/schema#'
+$async: true
+title: PartialVolumeDescriptor
+type: object
+description: >
+  Defines partial volume in series images.
+properties:
+  start:
+    type: number
+  end:
+    type: number
+  delta:
+    type: number
+additionalProperties: false
+required:
+  - start
+  - end

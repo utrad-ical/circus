@@ -9,12 +9,8 @@ properties:
   seriesUid:
     type: string
     format: dicomUid
-  startImgNum:
-    type: number
-  endImgNum:
-    type: number
-  imageDelta:
-    type: number
+  partialVolumeDescriptor:
+    $ref: partialVolumeDescriptor
   requiredPrivateTags:
     type: string
 additionalProperties: false

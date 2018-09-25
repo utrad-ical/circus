@@ -490,9 +490,11 @@ describe('API', function() {
         series: [
           {
             seriesUid: '11.22.333',
-            startImgNum: 0,
-            endImgNum: 100,
-            imageDelta: 1
+            partialVolumeDescriptor: {
+              start: 0,
+              end: 100,
+              delta: 1
+            }
           }
         ]
       };

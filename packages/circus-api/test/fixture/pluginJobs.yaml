@@ -7,9 +7,10 @@
   errorMessage: null
   series:
     - seriesUid: 111.222.333.444.777
-      startImgNum: 1
-      endImgNum: 236
-      imageDelta: 1
+      partialVolumeDescriptor:
+        start: 1
+        end: 236
+        delta: 1
   feedbacks: []
   startedAt: { $date: 1405266782000 }
   finishedAt: { $date: 1405266800000 }

@@ -1,0 +1,22 @@
+$schema: 'http://json-schema.org/schema#'
+$async: true
+title: PluginDefinition
+type: object
+description: >
+  Represents a CIRCUS CS plug-in (app).
+properties:
+  pluginId:
+    type: string
+    description: >
+      :key: The unique ID of this plug-in.
+  pluginName:
+    type: string
+  version:
+    type: string
+  type:
+    enum: ['CAD']
+  description:
+    type: string
+  icon:
+    $ref: icon
+additionalProperties: false

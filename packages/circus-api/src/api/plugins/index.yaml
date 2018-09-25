@@ -5,4 +5,12 @@ routes:
   - verb: get
     path: /plugins/:pluginId
     description: Gets the specified plug-in definition.
-    # responseSchema: pluginDefinition
+    responseSchema: plugin
+  - verb: get
+    path: /plugins
+    handler: handleList
+    description: Gets the list of plug-in definitions.
+    responseSchema:
+      type: array
+      item:
+        $ref: plugin

@@ -10,6 +10,7 @@ export default function createModels(db, validator) {
     serverParam: { col: 'serverParams', pk: 'key' },
     token: { col: 'tokens', pk: 'accessToken' },
     task: { col: 'tasks', pk: 'taskId' },
+    plugin: { col: 'plugins', pk: 'pluginId' },
     pluginJob: { col: 'pluginJobs', pk: 'jobId' }
   };
 

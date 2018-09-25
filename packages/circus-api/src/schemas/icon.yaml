@@ -1,0 +1,15 @@
+$schema: 'http://json-schema.org/schema#'
+$async: true
+title: Icon
+type: object
+description: >
+  Represents an icon for projects and apps.
+properties:
+  glyph:
+    type: string
+  color:
+    type: string
+  backgroundColor:
+    type: string
+required: ['glyph', 'color', 'backgroundColor']
+additionalProperties: false

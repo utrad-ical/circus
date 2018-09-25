@@ -1,17 +1,14 @@
-// import performSearch from '../../performSearch';
-
 export const handleGet = ({ models }) => {
   return async (ctx, next) => {
-    // The following is a mock result
-    ctx.body = {
-      pluginId: 'fffggghhhiiikkk',
-      pluginName: 'MRA-CAD',
-      pluginVersion: '3.0.1',
-      icon: {
-        glyph: 'brain',
-        color: '#ffffff',
-        backgroundColor: '#0088ff'
-      }
-    };
+    const pluginId = ctx.params.pluginId;
+    const plugin = await models.plugin.findByIdOrFail(pluginId);
+    ctx.body = plugin;
+  };
+};
+
+export const handleList = ({ models }) => {
+  return async (ctx, next) => {
+    const plugins = await models.plugin.findAll();
+    ctx.body = plugins;
   };
 };

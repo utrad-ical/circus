@@ -504,7 +504,7 @@ describe('API', function() {
     //   });
     // });
     after(async () => {
-      testHelper.flush();
+      await testHelper.flush();
     });
 
     it('should register a new plug-in job', async function _shouldRegisterANewPlugInJob() {
@@ -617,73 +617,61 @@ describe('API', function() {
     let url;
     before(async () => {
       url = server.url + 'api/admin/plugin-job-queue';
-      testHelper.flush();
+      await testHelper.flush();
     });
 
     const fillQueue = len =>
       new Array(len).fill(0).reduce(
         (p, c, i) =>
           p.then(async () => {
-            const jobId = 'job-id-' + (1 + i).toString();
-            const pluginId = 'plugin-' + (1 + i).toString();
-            const pluginVersion = 'v1.0.0';
-            const series = [
-              {
-                seriesUid: new Array(5).fill((1 + i).toString()).join('.')
-              }
-            ];
-
-            await server.db.collection('pluginJobs').insert({
-              jobId,
-              pluginName: pluginId,
-              pluginVersion,
-              series,
-              userEmail: 'alice.new.mail@example.com',
-              status: 'in_queue', // 'in_queue' | 'processing' | 'finished' | 'failed' | 'invalidated' | 'cancelled'
-              errorMessage: null,
-              result: null,
-              startedAt: null,
-              feedbacks: [],
-              finishedAt: null,
-              createdAt: new Date(),
-              updatedAt: new Date()
+            await testHelper.registerJob({
+              jobId: 'job-id-' + (1 + i).toString(),
+              pluginName: 'plugin-' + (1 + i).toString(),
+              pluginVersion: 'v1.0.0',
+              userEmail: 'alice.new.mail@example.com'
             });
-
-            await csCore.job.register(jobId, { pluginId, series });
           }),
         Promise.resolve()
       );
 
     const check = async (expectedStates, params = {}) => {
       const abbrs = {
-        w: 'in_queue',
-        p: 'processing'
+        q: 'in_queue',
+        p: 'processing',
+        f: 'finished',
+        // 'failed' (called never on current version)
+        // 'invalidated' (called never on current version)
+        e: 'error'
       };
+      const flipAbbrs = {};
+      Object.keys(abbrs).forEach(a => (flipAbbrs[abbrs[a]] = a));
+
       const res = await axios({ method: 'GET', url, params });
       assert.equal(res.status, 200);
-      assert.equal(res.data.items.length, expectedStates.length);
-      assert.equal(
-        res.data.items.filter(
-          (qi, idx) => qi.status !== abbrs[expectedStates[idx]]
-        ).length,
-        0
-      );
+      const fetchedStates = res.data.items.map(i => flipAbbrs[i.status]);
+
+      const stringify = states =>
+        states.length.toString() + JSON.stringify(states);
+
+      assert.equal(stringify(expectedStates), stringify(fetchedStates));
       return res;
     };
 
     it('should return the current queue list', async function _shouldReturnTheCurrentQueueList() {
       await fillQueue(3);
-      await check(['w', 'w', 'w']);
+      await check(['q', 'q', 'q']);
 
       await testHelper.tick();
-      await check(['p', 'w', 'w']);
-      await testHelper.tack();
-      await check(['w', 'w']);
+      await check(['p', 'q', 'q']);
+      await testHelper.tack(async () => {
+        throw new Error('TEST');
+      }); // finished as error
+      await check(['q', 'q']);
 
       await testHelper.tick();
-      await check(['p', 'w']);
+      await check(['p', 'q']);
       await testHelper.tack();
-      await check(['w']);
+      await check(['q']);
 
       await testHelper.tick();
       await check(['p']);
@@ -695,37 +683,53 @@ describe('API', function() {
       await testHelper.tack();
       await check([]);
 
-      testHelper.flush();
+      await testHelper.flush();
+    });
+
+    it('should return the queues without finished states (finished, error)', async function _shouldReturnTheCurrentQueueList() {
+      await fillQueue(2);
+      await testHelper.tick();
+      await testHelper.tack(async () => {
+        throw new Error('TEST');
+      });
+
+      await testHelper.tick();
+      await testHelper.tack(async () => ({ hoge: 'piyo' }));
+
+      const queuesInMongo = await testHelper.jobListOverview();
+      assert.equal(2, queuesInMongo.length);
+      await check([]);
+      await testHelper.flush();
     });
 
     it('should return the items which is specified by page and limit', async function shouldReturnTheItemsWhichIsSpecifiedByPageAndLimit() {
       await fillQueue(50);
       await testHelper.tick();
 
-      await check(['p'].concat(new Array(9).fill('w')), { limit: 10, page: 1 });
-      await check(['w'].concat(new Array(9).fill('w')), { limit: 10, page: 2 });
-      await check(['p'].concat(new Array(29).fill('w')), {
+      await check(['p'].concat(new Array(9).fill('q')), { limit: 10, page: 1 });
+      await check(['q'].concat(new Array(9).fill('q')), { limit: 10, page: 2 });
+      await check(['p'].concat(new Array(29).fill('q')), {
         limit: 30,
         page: 1
       });
-      const res = await check(['w'].concat(new Array(19).fill('w')), {
+      const res = await check(['q'].concat(new Array(19).fill('q')), {
         limit: 30,
         page: 2
       });
       assert.equal(res.data.totalItems, 50);
 
-      testHelper.flush();
+      await testHelper.flush();
     });
 
     it('should return the items which is specified by state', async function _shouldReturnTheCurrentQueueList() {
       await fillQueue(5);
       await testHelper.tick();
 
-      await check(['p', 'w'], { limit: 2, page: 1, state: 'all' });
-      await check(['w', 'w'], { limit: 2, page: 1, state: 'wait' });
+      await check(['p', 'q'], { limit: 2, page: 1, state: 'all' });
+      await check(['q', 'q'], { limit: 2, page: 1, state: 'wait' });
       await check(['p'], { limit: 2, page: 1, state: 'processing' });
 
-      testHelper.flush();
+      await testHelper.flush();
     });
   });
 

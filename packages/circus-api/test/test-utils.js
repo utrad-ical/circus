@@ -155,16 +155,21 @@ function createMockCsCore(pluginJobsCollection) {
     switch (type) {
       case 'processing':
       case 'finished':
-      case 'error':
         await pluginJobsCollection.findOneAndUpdate(
           { jobId },
           { $set: { status: type } }
         );
         break;
+      case 'error':
+        await pluginJobsCollection.findOneAndUpdate(
+          { jobId },
+          { $set: { status: type, errorMessage: payload } }
+        );
+        break;
       case 'results':
         await pluginJobsCollection.findOneAndUpdate(
           { jobId },
-          { $set: { results: payload } }
+          { $set: { result: payload } } // result (in schema)? results (in reporter)?
         );
         break;
     }
@@ -207,20 +212,86 @@ function createMockCsCore(pluginJobsCollection) {
       await report(jobs[0].jobId, 'processing');
       jobs[0].state = 'processing';
       jobs[0].startedAt = new Date();
+      return jobs[0];
     }
   };
-  const tack = async () => {
+  const tack = async run => {
     const job = jobs.shift();
     if (job) {
-      await report(job.jobId, 'results', {});
-      await report(job.jobId, 'finished');
-      // await report(job.jobId, 'error');
+      if (run === undefined) run = async () => ({});
+      try {
+        const results = await run(job);
+        await report(job.jobId, 'results', results);
+        await report(job.jobId, 'finished');
+        return results;
+      } catch (e) {
+        await report(job.jobId, 'error', e.message);
+      }
     }
   };
-  const flush = () => {
+  const flush = async () => {
     jobs.splice(0, jobs.length);
-    pluginJobsCollection.deleteMany({});
+    await pluginJobsCollection.deleteMany({});
   };
 
-  return { csCore, tick, tack, flush };
+  const registerJob = async ({
+    jobId,
+    pluginName,
+    pluginVersion,
+    userEmail,
+    series = [],
+    priority = 0,
+    status = 'in_queue'
+  }) => {
+    // status: in_queue' | 'processing' | 'finished' | 'failed' | 'invalidated' | 'cancelled' | 'error'
+    if (series.length === 0) {
+      series = [
+        {
+          seriesUid: new Array(5)
+            .fill(0)
+            .map(i => (100 + Math.floor(Math.random() * 1000)).toString())
+            .join('.')
+        }
+      ];
+    }
+
+    await pluginJobsCollection.insert({
+      jobId,
+      pluginName,
+      pluginVersion,
+      series,
+      userEmail,
+      status,
+      errorMessage: null,
+      result: null,
+      startedAt: null,
+      feedbacks: [],
+      finishedAt: null,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    });
+
+    await csCore.job.register(
+      jobId,
+      { pluginId: pluginName, series },
+      priority
+    );
+  };
+
+  const jobListOverview = async () => {
+    const docs = await pluginJobsCollection
+      .find({})
+      // .project({ _id: 0 })
+      // .limit(10)
+      .toArray();
+
+    return docs.map(({ jobId, status, result, errorMessage }) => ({
+      jobId,
+      status,
+      result,
+      errorMessage
+    }));
+  };
+
+  return { csCore, registerJob, tick, tack, flush, jobListOverview };
 }

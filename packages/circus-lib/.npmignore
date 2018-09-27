@@ -1,5 +1,7 @@
 /src
-/sample
 /coverage
 tsconfig.json
+/testdata
 *.test.ts
+.vscode
+.editorconfig

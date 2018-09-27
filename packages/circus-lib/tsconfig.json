@@ -1,11 +1,12 @@
 {
   "compilerOptions": {
-    "module": "commonjs",
-    "sourceMap": true,
-    "target": "es2017",
-    "outDir": "../lib",
+    "outDir": "./lib",
     "strict": true,
-    "importHelpers": true,
-    "esModuleInterop": true
-  }
+    "target": "es2017",
+    "module": "commonjs",
+    "alwaysStrict": true,
+    "declaration": true
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["src/**/*.test.ts"]
 }

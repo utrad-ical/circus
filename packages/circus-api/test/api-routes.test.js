@@ -369,7 +369,10 @@ describe('API', function() {
             series: [
               {
                 seriesUid: '111.222.333.444.777',
-                range: '1-200'
+                partialVolumeDescriptor: {
+                  start: 1,
+                  end: 200
+                }
               }
             ],
             tags: []
@@ -388,7 +391,11 @@ describe('API', function() {
             series: [
               {
                 seriesUid: '111.222.333.444.777',
-                range: '1-500' // This is out of bounds!
+                // This is out of bounds!
+                partialVolumeDescriptor: {
+                  start: 1,
+                  end: 500
+                }
               }
             ],
             tags: []
@@ -507,6 +514,12 @@ describe('API', function() {
       await testHelper.flush();
     });
 
+    // (alice has sirius.org domain)
+    // 111.222.333.444.444: (  1) [sirius.org]
+    // 111.222.333.444.555: (150) [sirius.org]
+    // 111.222.333.444.666: (100) [sirius.org]
+    // 111.222.333.444.777: (236) [vega.org]
+
     it('should register a new plug-in job', async function _shouldRegisterANewPlugInJob() {
       const priority = 123;
       const pluginJobRequest = {
@@ -514,12 +527,7 @@ describe('API', function() {
         pluginVersion: '1.5',
         series: [
           {
-            seriesUid: '11.22.333',
-            partialVolumeDescriptor: {
-              start: 0,
-              end: 100,
-              delta: 1
-            }
+            seriesUid: '111.222.333.444.555'
           }
         ]
       };
@@ -537,6 +545,66 @@ describe('API', function() {
       assert.equal(priority, lastQueueItem.priority);
       assert.equal(jobId, lastQueueItem.jobId);
       assert.deepEqual(lastQueueItem.payload, pluginJobRequest);
+
+      // use partial volume
+      const { status } = await axios.request({
+        method: 'post',
+        url: server.url + 'api/plugin-jobs',
+        data: {
+          pluginName: 'MRA-CAD',
+          pluginVersion: '1.5',
+          series: [
+            {
+              seriesUid: '111.222.333.444.555',
+              partialVolumeDescriptor: {
+                start: 25,
+                end: 85,
+                delta: 3
+              }
+            }
+          ]
+        }
+      });
+      assert.equal(status, 200);
+    });
+
+    it('should reject invalid series request', async function _shouldRegisterANewPlugInJob() {
+      let { status } = await axios.request({
+        method: 'post',
+        url: server.url + 'api/plugin-jobs',
+        data: {
+          pluginName: 'MRA-CAD',
+          pluginVersion: '1.5',
+          series: [
+            {
+              seriesUid: '111.222.333.444.444',
+              partialVolumeDescriptor: {
+                start: 1,
+                end: 10,
+                delta: 2
+              }
+            }
+          ],
+          priority: 123
+        }
+      });
+      assert.equal(status, 404);
+
+      ({ status } = await axios.request({
+        method: 'post',
+        url: server.url + 'api/plugin-jobs',
+        data: {
+          pluginName: 'MRA-CAD',
+          pluginVersion: '1.5',
+          series: [
+            {
+              seriesUid: '111.222.333.444.777'
+            }
+          ],
+          priority: 123
+        }
+      }));
+      assert.equal(status, 404);
     });
 
     it('should return a finished plug-in job', async function _shouldReturnAFinishedPlugInJob() {

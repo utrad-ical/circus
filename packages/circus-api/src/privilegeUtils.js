@@ -49,24 +49,33 @@ export async function determineUserAccessInfo(models, user) {
 /**
  * Check domain and image range for each series.
  */
-export async function fetchAccessibleSeries(
-  models,
-  userPrivileges,
-  seriesUids
-) {
+export async function fetchAccessibleSeries(models, userPrivileges, series) {
   const seriesData = [];
 
-  for (const seriesEntry of seriesUids) {
-    const seriesUid = seriesEntry.seriesUid;
+  for (const seriesEntry of series) {
+    const { seriesUid, partialVolumeDescriptor } = seriesEntry;
     const item = await models.series.findById(seriesUid);
     if (!item) {
       throw new Error('Nonexistent series.');
     }
-    if (!new MultiRange(item.images).has(seriesEntry.range)) {
-      throw new Error('Specified range is invalid.');
+    if (partialVolumeDescriptor) {
+      const { start, end, delta = 1 } = partialVolumeDescriptor;
+      if (start != end) {
+        if (delta === 0) throw new Error('Specified range is invalid.');
+        const partialImages = [];
+        for (let i = start; i <= end; i += delta) {
+          partialImages.push(i);
+        }
+        if (
+          partialImages.length === 0 ||
+          !new MultiRange(item.images).has(partialImages)
+        ) {
+          throw new Error('Specified range is invalid.');
+        }
+      }
+      item.partialVolumeDescriptor = { start, end, delta };
     }
 
-    item.range = seriesEntry.range;
     seriesData.push(item);
     if (userPrivileges.domains.indexOf(item.domain) < 0) {
       throw new Error('You cannot access this series.');

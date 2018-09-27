@@ -20,8 +20,16 @@ export default class SeriesDetail extends React.Component {
       });
       this.setState({ fetching: false, series });
       const server = store.getState().loginUser.data.dicomImageServer;
-      const client = new rs.RsHttpClient(server);
-      const src = new rs.HybridImageSource({ client, series: seriesUid });
+      const rsHttpClient = new rs.RsHttpClient(server);
+      const volumeLoader = new rs.RsVolumeLoader({
+        rsHttpClient,
+        series: seriesUid
+      });
+      const src = new rs.HybridMprImageSource({
+        volumeLoader,
+        rsHttpClient,
+        series: seriesUid
+      });
       const composition = new rs.Composition(src);
       this.setState({ composition });
     } catch (err) {

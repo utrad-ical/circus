@@ -45,6 +45,10 @@ module.exports = {
       {
         test: /\.css/,
         use: ['style-laoder', 'css-loader']
+      },
+      {
+        test: /\.(frag|vert)$/,
+        use: ['webpack-glsl-loader']
       }
     ]
   },
@@ -60,7 +64,7 @@ module.exports = {
     proxy: {
       '/api': 'http://localhost:8080',
       '/login': 'http://localhost:8080',
-      '/series': 'http://localhost:8080'
+      '/rs': 'http://localhost:8080'
     }
   },
   devtool: 'source-map'

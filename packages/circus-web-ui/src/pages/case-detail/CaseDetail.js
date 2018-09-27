@@ -343,8 +343,13 @@ export class RevisionData extends React.Component {
 
   changeActiveSeries(seriesIndex) {
     const activeSeries = this.props.revision.series[seriesIndex];
-    const src = new rs.HybridImageSource({
-      client: this.client,
+    const volumeLoader = new rs.RsVolumeLoader({
+      rsHttpClient: this.client,
+      series: activeSeries.seriesUid
+    });
+    const src = new rs.HybridMprImageSource({
+      volumeLoader,
+      rsHttpClient: this.client,
       series: activeSeries.seriesUid
     });
     const composition = new rs.Composition(src);

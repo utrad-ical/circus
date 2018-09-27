@@ -86,7 +86,7 @@ async function prepareApiRouter(apiDir, deps, options) {
  * Creates a new Koa app.
  */
 export default async function createApp(options = {}) {
-  const { debug, db, fixUser, blobPath, corsOrigin, dicomPath } = options;
+  const { debug, db, fixUser, blobPath, corsOrigin, dicomPath, dicomImageServerUrl } = options;
 
   // The main Koa instance.
   const koa = new Koa();
@@ -97,7 +97,7 @@ export default async function createApp(options = {}) {
     ? await createStorage('local', { root: blobPath })
     : await createStorage('memory');
 
-  const dicomRepository = dicomPath
+  const dicomFileRepository = dicomPath
     ? new StaticDicomFileRepository({ dataDir: dicomPath })
     : new MemoryDicomFileRepository({});
 
@@ -105,7 +105,7 @@ export default async function createApp(options = {}) {
 
   const utilityEnv = process.env.DICOM_UTILITY;
   const dicomImporter = utilityEnv
-    ? new DicomImporter(dicomRepository, models, { utility: utilityEnv })
+    ? new DicomImporter(dicomFileRepository, models, { utility: utilityEnv })
     : undefined;
 
   const cs = options.cs ? options.cs : createCsCore(csConfig());
@@ -121,7 +121,7 @@ export default async function createApp(options = {}) {
     dicomImporter,
     cs,
     uploadFileSizeMax: '200mb',
-    dicomImageServerUrl: 'http://localhost:8080/rs'
+    dicomImageServerUrl
   };
 
   const apiDir = path.resolve(__dirname, 'api/**/*.yaml');
@@ -159,7 +159,7 @@ export default async function createApp(options = {}) {
   );
   koa.use(mount('/login', compose([bodyParser(), oauth.token()])));
 
-  koa.use(mount('/rs', circusRs({ models, logger }, dicomRepository).routes()));
+  koa.use(mount('/rs', await circusRs({ logger, dicomFileRepository })));
 
   return koa;
 }

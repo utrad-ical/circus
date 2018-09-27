@@ -59,6 +59,12 @@ const options = [
     env: 'CIRCUS_DICOM_DIR',
     type: 'string',
     default: './store/dicom'
+  },
+  {
+    names: ['dicom-image-server-url'],
+    env: 'DICOM_IMAGE_SERVER_URL',
+    type: 'string',
+    default: 'http://localhost:8080/rs'
   }
 ];
 
@@ -69,7 +75,8 @@ const {
   fix_user: fixUser,
   cors_origin: corsOrigin,
   blobPath,
-  dicomPath
+  dicomPath,
+  dicom_image_server_url: dicomImageServerUrl
 } = (() => {
   try {
     const parser = dashdash.createParser({ options });
@@ -108,7 +115,8 @@ async function main() {
     fixUser,
     blobPath,
     dicomPath,
-    corsOrigin
+    corsOrigin,
+    dicomImageServerUrl
   };
 
   try {

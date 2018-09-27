@@ -130,19 +130,6 @@ export default function pluginJobRunner(deps: {
 }
 
 /**
- * Inspects the content of the plugin output directory
- * and returns the content of the results file.
- */
-export async function readAndValidatePluginResults(outDir: string) {
-  const fileContent = await fs.readFile(
-    path.join(outDir, 'results.json'),
-    'utf8'
-  );
-  const results = JSON.parse(fileContent);
-  return results;
-}
-
-/**
  * Extracts the entire series from DICOM repository
  * into the speicied path on the local file system.
  * @param dicomRepository The DICOM repositoty from which the series is fetched.

@@ -23,6 +23,16 @@ import Logger from './logger/Logger';
  * cs-core facade.
  * This is returned by createCsCore().
  */
+
+type Dispose = () => Promise<void>;
+export interface CsCoreDependencies {
+  dispose: Dispose;
+  daemonController: DaemonController;
+  pluginDefinitionsAccessor: PluginDefinitionAccessor;
+  queueSystem: QueueSystem<PluginJobRequest>;
+  pluginJobRegisterer: PluginJobRegisterer;
+}
+
 export interface CsCore {
   // Daemon controller
   daemon: {
@@ -55,10 +65,19 @@ export interface CsCore {
   dispose(): Promise<void>;
 }
 
-type Dispose = () => Promise<void>;
+export function createCsCore(
+  loader: DependentModuleLoader<CsCoreDependencies>
+): CsCore {
+  const notPrepared: string[] = [
+    'dispose',
+    'daemonController',
+    'pluginDefinitionsAccessor',
+    'queueSystem',
+    'pluginJobRegisterer'
+  ].filter(i => !loader.ready(i as keyof CsCoreDependencies));
 
-export default function createCsCore(config: Configuration): CsCore {
-  const loader = createModuleLoader(config);
+  if (notPrepared.length > 0)
+    throw new Error('Requre dependency: ' + notPrepared.join(', '));
 
   const daemon: CsCore['daemon'] = {
     start: async () => (await loader.load('daemonController')).start(),
@@ -108,8 +127,7 @@ interface CsModules {
   jobRunner: PluginJobRunner;
 }
 
-export type CsModuleLoader = DependentModuleLoader<CsModules>;
-
+type CsModuleLoader = DependentModuleLoader<CsModules>;
 export function createModuleLoader(config: Configuration): CsModuleLoader {
   const depLoader: CsModuleLoader = new DependentModuleLoader();
 

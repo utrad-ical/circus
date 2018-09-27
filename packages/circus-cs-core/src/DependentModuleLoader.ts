@@ -21,6 +21,13 @@ export default class DependentModuleLoader<
     this.dependingModules[name] = depends;
   }
 
+  public ready<X extends K>(name: X): boolean {
+    return (
+      name in this.loader &&
+      !this.dependingModules[name]!.some(i => !this.ready(i))
+    );
+  }
+
   public async load<X extends K>(name: X): Promise<P[X]> {
     if (!(name in this.loader))
       throw new TypeError('Loader for ' + name + ' is not registered');

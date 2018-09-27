@@ -82,15 +82,21 @@ export function draw3DLine(
   type Trimmer = (i: number) => number;
   const trim_x: Trimmer =
     e.x < 0
-      ? i => (i === Math.floor(i) ? i - 1 : Math.floor(i))
+      ? i => {
+          return i === Math.floor(i) ? i - 1 : Math.floor(i);
+        }
       : i => Math.floor(i);
   const trim_y: Trimmer =
     e.y < 0
-      ? i => (i === Math.floor(i) ? i - 1 : Math.floor(i))
+      ? i => {
+          return i === Math.floor(i) ? i - 1 : Math.floor(i);
+        }
       : i => Math.floor(i);
   const trim_z: Trimmer =
     e.z < 0
-      ? i => (i === Math.floor(i) ? i - 1 : Math.floor(i))
+      ? i => {
+          return i === Math.floor(i) ? i - 1 : Math.floor(i);
+        }
       : i => Math.floor(i);
 
   do {

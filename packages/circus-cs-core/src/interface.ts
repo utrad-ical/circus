@@ -12,6 +12,12 @@ export interface JobSeries {
   requiredPrivateTags?: string[];
 }
 
+export interface PartialVolumeDescriptor {
+  start: number;
+  end: number;
+  delta: number;
+}
+
 /**
  * Defines CIRCUS CS plug-in.
  */

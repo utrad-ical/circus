@@ -6,11 +6,12 @@
 import _pm2 from 'pm2';
 import pify from 'pify';
 import escape from 'shell-escape';
-import { Configuration } from '../config';
+import { Configuration } from '../config/Configuration';
+import configureLoader from "../configureLoader";
 
 const pm2: any = pify(_pm2);
 
-const script = 'daemon.js';
+const startScript = 'daemon.js';
 
 export interface DaemonController {
   start: () => Promise<void>;
@@ -26,8 +27,7 @@ export default function createDaemonController(
   const { startOptions } = config.jobManager;
 
   // Maybe not better, but the purpose can be achieved.
-  const startScript =
-    script + ' -- --config-content=' + escape([JSON.stringify(config)]);
+  const args = ['--config-content', escape([JSON.stringify(config)])];
 
   const execute = async (task: Function) => {
     await pm2.connect();
@@ -39,14 +39,17 @@ export default function createDaemonController(
   };
 
   const start = async () => {
+    const loader = configureLoader(config);
+    await (await loader.load('pluginDefinitionsAccessor')).save(config.plugins);
     return execute(async () => {
       const processList = await pm2.describe(startOptions.name);
       if (processList.length > 0) return;
-      await pm2.start(startScript, startOptions);
+      await pm2.start(startScript, { ...startOptions, args });
     });
   };
 
   const stop = async () => {
+    // Todo: remove temporary plugin definition file?
     return execute(async () => {
       const processList = await pm2.describe(startOptions.name);
       if (processList.length === 0) return;

@@ -1,7 +1,7 @@
 import ajv from 'ajv';
 import { QueueState } from '../queue/queue';
-import { Configuration } from '../config';
-import { createModuleLoader } from '../createCsCore';
+import { Configuration } from '../config/Configuration';
+import configureLoader from "../configureLoader";
 
 const argumentsSchema = {
   type: 'object',
@@ -51,7 +51,7 @@ export default async function listQueue(config: Configuration, argv: any) {
       break;
   }
 
-  const moduleLoader = createModuleLoader(config);
+  const moduleLoader = configureLoader(config);
   const [queue, dispose] = [
     await moduleLoader.load('queueSystem'),
     await moduleLoader.load('dispose')

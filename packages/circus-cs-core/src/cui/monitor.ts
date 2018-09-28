@@ -2,8 +2,8 @@ import { table, TableUserConfig } from 'table';
 import sleep from '../util/sleep';
 import chalk from 'chalk';
 import moment from 'moment';
-import { Configuration } from '../config';
-import { createModuleLoader } from '../createCsCore';
+import { Configuration } from '../config/Configuration';
+import configureLoader from "../configureLoader";
 
 const dt = (date: Date) => {
   const m = moment(date);
@@ -11,7 +11,7 @@ const dt = (date: Date) => {
 };
 
 export default async function monitor(config: Configuration, argv: any) {
-  const moduleLoader = createModuleLoader(config);
+  const moduleLoader = configureLoader(config);
   const [queue, dispose, controller] = [
     await moduleLoader.load('queueSystem'),
     await moduleLoader.load('dispose'),

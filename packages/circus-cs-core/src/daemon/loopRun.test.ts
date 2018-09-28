@@ -26,20 +26,23 @@ const createMockQueueSystem = <T>(len: number = 10) => {
         return q;
       }
     },
-    enqueue: async (jobId, payload, priority?) => {
+    enqueue: async (jobId, payload, priority: number = 0) => {
       q.push({
         jobId,
         priority,
         payload,
-        state: 'wait'
+        state: 'wait',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        startedAt: null
       });
       return (++qId).toString();
     },
     dequeue: async () => {
       if (q.length > 0) {
         const job = q.shift();
-        job.state = 'processing';
-        return job;
+        job!.state = 'processing';
+        return job!;
       } else {
         return null;
       }
@@ -48,7 +51,7 @@ const createMockQueueSystem = <T>(len: number = 10) => {
   };
 
   for (let i = 1; i <= len; i++) {
-    mockQueueSystem.enqueue(i.toString(), null);
+    mockQueueSystem.enqueue(i.toString(), {} as T);
   }
 
   return mockQueueSystem;

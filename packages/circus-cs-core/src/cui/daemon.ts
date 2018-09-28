@@ -1,7 +1,7 @@
 import createDaemonController, {
   DaemonController
 } from '../daemon/createDaemonController';
-import { Configuration } from '../config';
+import { Configuration } from '../config/Configuration';
 
 const printStatus = async (dc: DaemonController) => {
   const status = await dc.status();

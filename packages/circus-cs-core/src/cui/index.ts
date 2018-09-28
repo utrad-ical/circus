@@ -1,6 +1,7 @@
 import minimist from 'minimist';
 import chalk from 'chalk';
-import { auto, Configuration } from '../config';
+import config from '../config';
+import { Configuration } from '../config/Configuration';
 
 const commands: { [key: string]: any } = {
   register: {
@@ -37,11 +38,13 @@ const commands: { [key: string]: any } = {
   },
   help: {
     help: 'Prints this help message.'
+  },
+  config: {
+    help: 'Prints this current config.'
   }
 };
 
-function boot(config: Configuration) {
-  return async (commandName: string | undefined, args: any) => {
+async function boot(commandName: string | undefined, args: any) {
     if (!commandName || commandName === 'help') {
       console.log('Available commands:');
       Object.keys(commands).forEach(key =>
@@ -71,15 +74,14 @@ function boot(config: Configuration) {
       process.exit(1);
     }
   };
-}
+
 
 async function main() {
   const argv = process.argv.slice(2);
   const commandName = argv.shift();
   const args = minimist(argv);
 
-  const config = auto();
-  await boot(config)(commandName, args);
+  await boot(commandName, args);
 }
 
 main();

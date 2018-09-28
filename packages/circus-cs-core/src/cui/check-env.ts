@@ -4,7 +4,7 @@ import chalk from 'chalk';
 import { MongoClient } from 'mongodb';
 import DockerRunner from '../util/DockerRunner';
 import isDirectory from '../util/isDirectory';
-import { Configuration } from '../config';
+import { Configuration } from '../config/Configuration';
 
 export default async function checkEnv(config: Configuration, argv: any) {
   const check = async (title: string, func: Function) => {

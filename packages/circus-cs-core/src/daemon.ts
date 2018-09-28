@@ -4,8 +4,8 @@
  * @module
  */
 import argv from 'argv';
-import { Configuration, auto } from './config';
-import { createModuleLoader } from './createCsCore';
+import { Configuration } from './config/Configuration';
+import configureLoader from "./configureLoader";
 import { PluginJobRequest } from './interface';
 import loopRun, { LoopRunOptions } from './daemon/loopRun';
 import sleep from './util/sleep';
@@ -32,7 +32,7 @@ export async function main() {
   }
   // Todo: accept config-file option
 
-  if (!config) config = auto();
+  if (!config) config = (await import('./config')).default;
 
   // Todo: validate config with utility like ajv
 
@@ -55,7 +55,7 @@ export async function main() {
 async function createLoopRunOptions(
   config: Configuration
 ): Promise<LoopRunOptions<PluginJobRequest>> {
-  const moduleLoader = createModuleLoader(config);
+  const moduleLoader = configureLoader(config);
 
   const [logger, queue, jobRunner, dispose] = [
     await moduleLoader.load('logger'),

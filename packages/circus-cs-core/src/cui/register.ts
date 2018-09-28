@@ -1,10 +1,10 @@
-import { Configuration } from '../config';
+import { Configuration } from '../config/Configuration';
 import { JobSeries } from '../interface';
 import isDicomUid from '../util/isDicomUid';
-import { createModuleLoader } from '../createCsCore';
+import configureLoader from "../configureLoader";
 
 function parseSeries(str: string): JobSeries {
-  const [seriesUid, startImgNum, endImgNum, imageDelta] = str.split(':');
+  const [seriesUid, start, end, delta = '1'] = str.split(':');
   const asInt = (str: string | undefined) => {
     if (typeof str === 'string') {
       if (/^[0-9]+$/.test(str)) return parseInt(str, 10);
@@ -19,22 +19,27 @@ function parseSeries(str: string): JobSeries {
     );
   }
 
-  return {
-    seriesUid,
-    ...(startImgNum ? { startImgNum: asInt(startImgNum) } : {}),
-    ...(endImgNum ? { endImgNum: asInt(endImgNum) } : {}),
-    ...(imageDelta ? { imageDelta: asInt(imageDelta) } : {})
-  };
+  // Todo: Use shared validators and interfaces in lib
+  const seriesEntry: any = { seriesUid };
+  if (start !== undefined && end !== undefined) {
+    seriesEntry.partialVolumeDescriptor = {
+      start: asInt(start),
+      end: asInt(end),
+      delta: asInt(delta)
+    };
+  }
+  return seriesEntry;
 }
 
 export default async function register(config: Configuration, argv: any) {
-  const moduleLoader = createModuleLoader(config);
+  const moduleLoader = configureLoader(config);
   const [dispose, registerer] = [
     await moduleLoader.load('dispose'),
     await moduleLoader.load('pluginJobRegisterer')
   ];
 
   try {
+    // Todo: use shared id creator
     const newJobId = () => new Date().getTime().toString();
     const {
       _: [pluginId, ...series],

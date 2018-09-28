@@ -1,4 +1,4 @@
-import { ModuleDefinition } from './config';
+import { ModuleDefinition } from './config/Configuration';
 
 export default async function loadModule<T>(
   title: string,

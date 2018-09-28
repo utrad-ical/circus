@@ -15,8 +15,8 @@ type ModuleOption = {
   [key: string]: ModuleOption | string | number | boolean;
 };
 
-interface DefaultLoggerDefinition extends ModuleDefinition {
-  module: 'DefaultLogger';
+interface ConsoleLoggerDefinition extends ModuleDefinition {
+  module: 'ConsoleLogger';
   options?: any;
 }
 
@@ -75,5 +75,5 @@ export interface Configuration {
   /**
    * Daemon logger
    */
-  logger: Log4JsLoggerDefinition | DefaultLoggerDefinition;
+  logger: Log4JsLoggerDefinition | ConsoleLoggerDefinition;
 }

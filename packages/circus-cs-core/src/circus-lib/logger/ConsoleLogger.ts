@@ -5,8 +5,8 @@ const logTo = (fn: string, level: string) => {
     );
 };
 
-function DefaultLogger() {}
-DefaultLogger.prototype = {
+function ConsoleLogger() {}
+ConsoleLogger.prototype = {
   trace: logTo('info', 'trace'),
   debug: logTo('info', 'debug'),
   info: logTo('info', 'info'),
@@ -15,4 +15,4 @@ DefaultLogger.prototype = {
   fatal: logTo('error', 'fatal')
 };
 
-export default DefaultLogger;
+export default ConsoleLogger;

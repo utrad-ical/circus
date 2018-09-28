@@ -17,7 +17,7 @@ import pluginJobReporter, { PluginJobReporter } from './job/pluginJobReporter';
 import DockerRunner from './util/DockerRunner';
 import DependentModuleLoader from './circus-lib/DependentModuleLoader';
 import loadModule from './loadModule';
-import Logger from './logger/Logger';
+import Logger from './circus-lib/logger/Logger';
 
 export interface CsModules {
   logger: Logger;
@@ -52,7 +52,7 @@ export default function configureLoader(
   depLoader.registerLoader(
     'logger',
     async () => {
-      return await loadModule<Logger>('logger', './logger', config.logger);
+      return await loadModule<Logger>('logger', './circus-lib/logger', config.logger);
     },
     []
   );

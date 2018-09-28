@@ -1,4 +1,4 @@
-import Logger from '../logger/Logger';
+import Logger from '../circus-lib/logger/Logger';
 import { Item } from '../queue/queue';
 
 export interface LoopRunOptions<T> {

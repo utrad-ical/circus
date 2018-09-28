@@ -51,7 +51,7 @@ const defaults: Configuration = {
   plugins: [],
 
   logger: {
-    module: 'DefaultLogger'
+    module: 'ConsoleLogger'
   }
 };
 

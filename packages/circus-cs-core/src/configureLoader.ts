@@ -9,7 +9,7 @@ import createPluginJobRegisterer, { PluginJobRegisterer } from './job/createPlug
 import { DicomFileRepository } from '@utrad-ical/circus-dicom-repository';
 import pluginJobReporter, { PluginJobReporter } from './job/pluginJobReporter';
 import DockerRunner from './util/DockerRunner';
-import DependentModuleLoader from './DependentModuleLoader';
+import DependentModuleLoader from './circus-lib/DependentModuleLoader';
 import loadModule from './loadModule';
 import Logger from './logger/Logger';
 

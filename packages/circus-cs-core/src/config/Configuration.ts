@@ -15,6 +15,18 @@ type ModuleOption = {
   [key: string]: ModuleOption | string | number | boolean;
 };
 
+interface DefaultLoggerDefinition extends ModuleDefinition {
+  module: 'DefaultLogger';
+  options?: any;
+}
+
+interface Log4JsLoggerDefinition extends ModuleDefinition {
+  module: 'Log4JsLogger';
+  options: {
+    category: string;
+  };
+}
+
 export interface Configuration {
   /**
    * A path to the working directory which stores Plug-in definitions.
@@ -63,5 +75,5 @@ export interface Configuration {
   /**
    * Daemon logger
    */
-  logger: ModuleDefinition;
+  logger: Log4JsLoggerDefinition | DefaultLoggerDefinition;
 }

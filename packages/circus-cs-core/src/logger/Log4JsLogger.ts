@@ -1,19 +1,34 @@
 import Logger from './Logger';
-import { configure, getLogger, shutdown } from 'log4js';
+import cosmiconfig from 'cosmiconfig';
+import { configure, getLogger, shutdown, Configuration } from 'log4js';
 
-type Append = (message: string, ...args: any[]) => void;
+const configTitle = 'log4js-logger';
+const explorer = cosmiconfig(configTitle);
+const result = explorer.searchSync();
+if (!result)
+  throw Error(
+    'Cannot find configuration file for log4js like log4js-logger.config.js'
+  );
+
+const { config } = result;
+configure(config as Configuration);
+
+type AppendMessage = (message: string, ...args: any[]) => void;
+interface Options {
+  category?: string;
+}
 export default class Log4jsLogger implements Logger {
-  public trace: Append;
-  public debug: Append;
-  public info: Append;
-  public warn: Append;
-  public error: Append;
-  public fatal: Append;
+  public trace: AppendMessage;
+  public debug: AppendMessage;
+  public info: AppendMessage;
+  public warn: AppendMessage;
+  public error: AppendMessage;
+  public fatal: AppendMessage;
   public shutdown: () => Promise<void>;
 
-  constructor(config: any) {
-    configure(config);
-    const logger = getLogger();
+  constructor(options: Options = {}) {
+    const { category = 'default' } = options;
+    const logger = getLogger(category);
     this.trace = logger.trace.bind(logger);
     this.debug = logger.debug.bind(logger);
     this.info = logger.info.bind(logger);

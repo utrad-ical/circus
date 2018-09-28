@@ -13,6 +13,7 @@ Clone the repository (Install from NPM is not available yet).
 ```
 $ git clone git@github.com:utrad-ical/circus-cs-core.git .
 $ npm install
+$ npm link
 ```
 
 Prepare docker and load image archives.

@@ -3,10 +3,18 @@ import cosmiconfig from 'cosmiconfig';
 import { Configuration } from './Configuration';
 import defaults from './default';
 
-export function getConfig( configTitle: string, overwrite: Partial<Configuration> = {} ): Configuration {
+export function getConfig(
+  configTitle: string,
+  overwrite: Partial<Configuration> = {}
+): Configuration {
   const explorer = cosmiconfig(configTitle);
   const result = explorer.searchSync() || { config: {} };
-  const config = merge.recursive({}, defaults, result.config, overwrite) as Configuration;
+  const config = merge.recursive(
+    {},
+    defaults,
+    result.config,
+    overwrite
+  ) as Configuration;
   return config;
 }
 

@@ -7,7 +7,7 @@ import _pm2 from 'pm2';
 import pify from 'pify';
 import escape from 'shell-escape';
 import { Configuration } from '../config/Configuration';
-import configureLoader from "../configureLoader";
+import configureLoader from '../configureLoader';
 
 const pm2: any = pify(_pm2);
 

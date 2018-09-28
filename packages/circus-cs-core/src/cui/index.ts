@@ -45,36 +45,35 @@ const commands: { [key: string]: any } = {
 };
 
 async function boot(commandName: string | undefined, args: any) {
-    if (!commandName || commandName === 'help') {
-      console.log('Available commands:');
-      Object.keys(commands).forEach(key =>
-        console.log(`  ${chalk.cyan(key)}: ${commands[key].help}`)
-      );
-      return;
-    }
-    if (!(commandName in commands)) {
-      console.error(`Unknown command: "${commandName}".`);
-      return;
-    }
+  if (!commandName || commandName === 'help') {
+    console.log('Available commands:');
+    Object.keys(commands).forEach(key =>
+      console.log(`  ${chalk.cyan(key)}: ${commands[key].help}`)
+    );
+    return;
+  }
+  if (!(commandName in commands)) {
+    console.error(`Unknown command: "${commandName}".`);
+    return;
+  }
 
-    const command = commands[commandName];
+  const command = commands[commandName];
 
-    const callFunc: (
-      config: Configuration,
-      args: any
-    ) => Promise<void> = command.module
-      ? (await import(command.module))[commandName]
-      : (await import(`./${commandName}`)).default;
+  const callFunc: (
+    config: Configuration,
+    args: any
+  ) => Promise<void> = command.module
+    ? (await import(command.module))[commandName]
+    : (await import(`./${commandName}`)).default;
 
-    try {
-      await callFunc(config, args);
-    } catch (e) {
-      console.log(chalk.red('Error:'));
-      console.error(e);
-      process.exit(1);
-    }
-  };
-
+  try {
+    await callFunc(config, args);
+  } catch (e) {
+    console.log(chalk.red('Error:'));
+    console.error(e);
+    process.exit(1);
+  }
+}
 
 async function main() {
   const argv = process.argv.slice(2);

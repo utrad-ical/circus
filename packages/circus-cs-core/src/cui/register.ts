@@ -1,7 +1,7 @@
 import { Configuration } from '../config/Configuration';
 import { JobSeries } from '../interface';
 import isDicomUid from '../util/isDicomUid';
-import configureLoader from "../configureLoader";
+import configureLoader from '../configureLoader';
 
 function parseSeries(str: string): JobSeries {
   const [seriesUid, start, end, delta = '1'] = str.split(':');

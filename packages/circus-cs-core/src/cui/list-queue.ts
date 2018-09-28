@@ -1,7 +1,7 @@
 import ajv from 'ajv';
 import { QueueState } from '../queue/queue';
 import { Configuration } from '../config/Configuration';
-import configureLoader from "../configureLoader";
+import configureLoader from '../configureLoader';
 
 const argumentsSchema = {
   type: 'object',

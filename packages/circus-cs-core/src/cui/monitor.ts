@@ -3,7 +3,7 @@ import sleep from '../util/sleep';
 import chalk from 'chalk';
 import moment from 'moment';
 import { Configuration } from '../config/Configuration';
-import configureLoader from "../configureLoader";
+import configureLoader from '../configureLoader';
 
 const dt = (date: Date) => {
   const m = moment(date);

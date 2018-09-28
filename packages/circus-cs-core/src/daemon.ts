@@ -5,10 +5,11 @@
  */
 import argv from 'argv';
 import { Configuration } from './config/Configuration';
-import configureLoader from "./configureLoader";
+import configureLoader, { CsModules } from './configureLoader';
 import { PluginJobRequest } from './interface';
 import loopRun, { LoopRunOptions } from './daemon/loopRun';
 import sleep from './util/sleep';
+import DependentModuleLoader from './circus-lib/DependentModuleLoader';
 
 argv.option([
   {
@@ -30,20 +31,22 @@ export async function main() {
       process.exit(1);
     }
   }
-  // Todo: accept config-file option
 
-  if (!config) config = (await import('./config')).default;
-
-  // Todo: validate config with utility like ajv
-
-  if (!config) {
-    console.error('Cannot get daemon config');
-    process.exit(1);
+  let moduleLoader: DependentModuleLoader<CsModules>;
+  if (config === undefined) {
+    config = (await import('./config')).default;
+    moduleLoader = configureLoader(config!);
+    await (await moduleLoader.load('pluginDefinitionsAccessor')).save(
+      config.plugins
+    );
+  } else {
+    moduleLoader = configureLoader(config!);
   }
 
+  // Todo: validate config with utility like ajv
   let loopRunOptions: LoopRunOptions<PluginJobRequest>;
   try {
-    loopRunOptions = await createLoopRunOptions(config);
+    loopRunOptions = await createLoopRunOptions(config!, moduleLoader);
     await loopRun<PluginJobRequest>(loopRunOptions!, process);
     process.exit(0);
   } catch (e) {
@@ -53,10 +56,9 @@ export async function main() {
 }
 
 async function createLoopRunOptions(
-  config: Configuration
+  config: Configuration,
+  moduleLoader: DependentModuleLoader<CsModules>
 ): Promise<LoopRunOptions<PluginJobRequest>> {
-  const moduleLoader = configureLoader(config);
-
   const [logger, queue, jobRunner, dispose] = [
     await moduleLoader.load('logger'),
     await moduleLoader.load('queueSystem'),

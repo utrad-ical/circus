@@ -16,8 +16,14 @@ export interface CsCore {
   };
   // job handler
   job: {
-    list: (state?: 'wait' | 'processing' | 'all') => Promise<Item<PluginJobRequest>[]>;
-    register: (jobId: string, payload: PluginJobRequest, priority?: number) => Promise<void>;
+    list: (
+      state?: 'wait' | 'processing' | 'all'
+    ) => Promise<Item<PluginJobRequest>[]>;
+    register: (
+      jobId: string,
+      payload: PluginJobRequest,
+      priority?: number
+    ) => Promise<void>;
   };
   // dispose
   dispose(): Promise<void>;

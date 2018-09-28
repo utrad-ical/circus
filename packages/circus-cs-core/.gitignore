@@ -3,4 +3,4 @@
 /logs/
 /tmp/
 /coverage
-/cscore.config.js
+/*.config.js

@@ -1,0 +1,35 @@
+{
+  "metadata": {
+    "displayOptions": [
+      {
+        "volumeId": 0,
+        "window": {
+          "level": -600,
+          "width": 1500
+        },
+        "crop": {
+          "origin": [76, 139, 26],
+          "size": [331, 215, 215]
+        }
+      }
+    ]
+  },
+  "results": {
+    "lesionCandidates": [
+      {
+        "rank": 1,
+        "confidence": 0.8380112051963806,
+        "volumeId": 0,
+        "location": [200, 258, 58],
+        "volumeSize": 885.4866027832031,
+        "featureVales": [
+          0.2612903118133545,
+          0.5008077621459961,
+          0.8742994070053101,
+          0.2967151403427124,
+          0.105350062251091
+        ]
+      }
+    ]
+  }
+}

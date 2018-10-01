@@ -42,13 +42,14 @@ describe('pluginJobRunner', () => {
     };
 
     const pluginDefinitionLoader = async (discardPluginId: string) => {
-      return {
-        pluginId: 'hello',
-        pluginName: 'hello',
+      const fixedDefinition: PluginDefinition = {
+        pluginId: 'circus-mock/empty',
+        pluginName: 'circus-mock/empty',
         version: '1.0',
-        dockerImage: 'hello-world',
+        dockerImage: 'circus-mock/empty:1.0',
         type: 'CAD'
-      } as PluginDefinition;
+      };
+      return fixedDefinition;
     };
 
     const runner = pluginJobRunner({
@@ -61,7 +62,7 @@ describe('pluginJobRunner', () => {
     });
 
     const jobRequest: PluginJobRequest = {
-      pluginId: 'hello',
+      pluginId: 'circus-mock/empty',
       series: [{ seriesUid }]
     };
 

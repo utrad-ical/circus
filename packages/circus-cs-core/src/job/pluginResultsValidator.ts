@@ -1,64 +1,37 @@
 import Ajv from 'ajv';
+import path from 'path';
+import fs from 'fs-extra';
+
+const resultsSchema = require('../schemas/results.json');
+const lesionCandAjv = new Ajv({ allErrors: true }).compile(resultsSchema);
 
 /**
- * PluginResultValidator detects
+ * Performs the validation.
+ * @param outDir Physycal path of plugin output directory which includes 'results.json'.
+ * @throws Throws some exception if validation failed.
+ * @returns The original `results`, or modified/filtered results.
  */
-export interface PluginResultsValidator {
-  /**
-   * Performs the validation.
-   * @param results Output from JSON.
-   * @param outDir Physycal path of plugin output directory.
-   * @throws Throws some exception if validation failed.
-   * @returns The original `results`, or modified/filtered results.
-   */
-  validate(results: any, outDir: string): Promise<any>;
-}
+export default async function pluginResultsValidator(
+  outDir: string
+): Promise<any> {
+  try {
+    const jsonStr = await fs.readFile(
+      path.join(outDir, 'results.json'),
+      'utf8'
+    );
+    const rawResults = JSON.parse(jsonStr);
 
-const schema: object = {
-  type: 'object',
-  properties: {
-    lesion_candidates: {
-      type: 'array',
-      items: {
-        type: 'object',
-        properties: {
-          location_x: { type: 'number' },
-          location_y: { type: 'number' },
-          location_z: { type: 'number' },
-          volume_size: { type: 'number' },
-          confidence: { type: 'number' }
-        },
-        required: ['location_x', 'location_y', 'location_z']
-      }
-    }
-  },
-  required: ['lesion_candidates']
-};
-
-const lesionCandAjv = new Ajv({ allErrors: true }).compile(schema);
-
-export function createLesionCandResultValidator(): PluginResultsValidator {
-  const validate = async (results: any) => {
-    // TODO: FIXME: We transform the results from old lung-cad plugin here
-    if (typeof results === 'object' && '1' in results) {
-      const numeralKeys = Object.keys(results)
-        .map(stringKey => parseInt(stringKey))
-        .sort(); // sort as number
-      results = {
-        lesion_candidates: numeralKeys.map(k => results[k.toString()])
-      };
-    }
-    // end of FIXME
-
-    const isValid = lesionCandAjv(results);
+    const isValid = lesionCandAjv(rawResults);
     if (!isValid)
       throw new Error(
-        'Result validation failed.\n' +
+        'Schema validation error for results.json file.\n' +
           lesionCandAjv
             .errors!.map(e => `${e.dataPath} ${e.message}`)
             .join('\n')
       );
-    return results;
-  };
-  return { validate };
+
+    return rawResults;
+  } catch (e) {
+    throw new Error(`Plug-in validation failed: ${e.message}`);
+  }
 }

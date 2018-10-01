@@ -1,18 +1,25 @@
-import { createLesionCandResultValidator } from './pluginResultsValidator';
+import path from 'path';
+import pluginResultsValidator from './pluginResultsValidator';
 
 describe('Validate lesion candidate plug-in results', async () => {
+  const testResultsDir = path.resolve(__dirname, '../../test/docker/results');
+
+  const checkOne = async (dirBasename: string, isValid: boolean = true) => {
+    const dir = path.join(testResultsDir, dirBasename);
+    if (isValid) {
+      await pluginResultsValidator(dir);
+    } else {
+      await expect(pluginResultsValidator(dir)).rejects.toThrow(
+        /validation failed/
+      );
+    }
+  };
+
   test('succeeds', async () => {
-    const validator = createLesionCandResultValidator();
-    const data = { lesion_candidates: [] };
-    await validator.validate(data, __dirname); // dirname is dummy
+    await checkOne('succeeds', true);
   });
 
   test('fails', async () => {
-    const validator = createLesionCandResultValidator();
-    const data = { lesion_candidates: [{ location_x: '334' }] };
-    // await validator.validate(data, __dirname);
-    await expect(validator.validate(data, __dirname)).rejects.toThrow(
-      /validation failed/
-    );
+    await checkOne('fails', false);
   });
 });

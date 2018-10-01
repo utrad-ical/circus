@@ -4,7 +4,7 @@ import path from 'path';
 import fs from 'fs-extra';
 import DockerRunner from '../util/DockerRunner';
 import { DicomFileRepository } from '@utrad-ical/circus-dicom-repository';
-import { PluginResultsValidator } from './pluginResultsValidator';
+import pluginResultsValidator from './pluginResultsValidator';
 import { MultiRange } from 'multi-integer-range';
 import { PluginDefinitionLoader } from '../util/pluginDefinitionsAccessor';
 
@@ -64,26 +64,12 @@ export default function pluginJobRunner(deps: {
     }
   };
 
-  const postProcess = async (
-    jobId: string,
-    resultsValidator?: PluginResultsValidator
-  ) => {
+  const postProcess = async (jobId: string) => {
     const outDir = workDir(jobId, 'out');
 
     // Perform validation
-    let results;
-    if (resultsValidator) {
-      try {
-        const jsonStr = await fs.readFile(
-          path.join(outDir, 'results.json'),
-          'utf8'
-        );
-        const rawResults = JSON.parse(jsonStr);
-        results = await resultsValidator.validate(rawResults, outDir);
-      } catch (e) {
-        throw new Error(`Plug-in validation failed: ${e.message}`);
-      }
-    }
+    const results = await pluginResultsValidator(outDir);
+
     await jobReporter.report(jobId, 'results', results);
     // Store everything to results directory
     const resultsTarget = path.join(resultsDirectory, jobId);
@@ -103,8 +89,6 @@ export default function pluginJobRunner(deps: {
       const plugin = await pluginDefinitionLoader(pluginId);
       if (!plugin) throw new Error(`No such plugin: ${pluginId}`);
 
-      const resultsValidator = createValidator(plugin);
-
       await jobReporter.report(jobId, 'processing');
       await preProcess(jobId, series);
 
@@ -116,12 +100,12 @@ export default function pluginJobRunner(deps: {
         workDir(jobId, 'out') // Plugin output dir that will have CAD results
       );
 
-      await postProcess(jobId, resultsValidator);
+      await postProcess(jobId);
       await jobReporter.report(jobId, 'finished');
       return true;
     } catch (e) {
       console.error(e.message);
-      await jobReporter.report(jobId, 'error');
+      await jobReporter.report(jobId, 'error', e.message);
       return false;
     }
   };
@@ -215,14 +199,4 @@ export async function executePlugin(
     }
   });
   return result;
-}
-
-/**
- * Create plugin result validator from plugin definition.
- * @param pluginDefinition
- */
-function createValidator(
-  pluginDefinition: PluginDefinition
-): PluginResultsValidator | undefined {
-  return undefined;
 }

@@ -10,14 +10,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/smikitky/circus-lib.git"
+    "url": "https://github.com/utrad-ical/circus-lib.git"
   },
   "author": "Soichiro Miki <smiki-tky@umin.ac.jp>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/smikitky/circus-lib/issues"
+    "url": "https://github.com/utrad-ical/circus-lib/issues"
   },
-  "homepage": "https://github.com/smikitky/circus-lib",
+  "homepage": "https://github.com/utrad-ical/circus-lib",
   "devDependencies": {
     "@types/fs-extra": "^5.0.4",
     "@types/jest": "^23.3.2",

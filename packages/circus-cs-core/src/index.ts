@@ -1,11 +1,4 @@
-import config from './config';
-import configureLoader from './configureLoader';
-import { makeCsCore } from './makeCsCore';
+export { default as createCsCore } from './createCsCore';
 
-/**
- * Interfaces
- */
 export { Configuration } from './config/Configuration';
-
-const deps = configureLoader(config);
-export default makeCsCore(deps);
+export { CsCore } from './CsCore';

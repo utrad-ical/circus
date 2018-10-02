@@ -9,6 +9,7 @@
   "dependencies": {
     "@types/ajv": "^1.0.0",
     "@types/argv": "0.0.4",
+    "@types/cosmiconfig": "^5.0.3",
     "@types/dockerode": "^2.5.4",
     "@types/fs-extra": "^5.0.2",
     "@types/js-yaml": "^3.11.1",
@@ -44,7 +45,6 @@
     "typescript": "^2.9.1"
   },
   "devDependencies": {
-    "@types/cosmiconfig": "^5.0.3",
     "@types/jest": "^23.1.1",
     "@types/table": "^4.0.5",
     "jest": "^23.1.0",

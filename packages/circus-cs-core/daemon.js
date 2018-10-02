@@ -1,7 +1,8 @@
 var tsOptions = require('./tsconfig').compilerOptions;
 require('ts-node').register({
   compilerOptions: tsOptions,
-  disableWarnings: true
+  ignoreDiagnostics : true,
+  ignore: /\/node_modules\/(?!@utrad-ical\/circus-cs-core)/
 });
 
 require('./src/daemon');

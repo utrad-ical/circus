@@ -1,36 +1,46 @@
 // import performSearch from '../../performSearch';
 
-export const handleGet = ({ models }) => {
+export const handleGet = ({ models, cs }) => {
   return async (ctx, next) => {
     // Should use
     // await performSearch(models.plugins, {}, ctx, {});
 
-    // The following is a mock results
+    // Fetch from cs-core
+    const csPluginList = await cs.plugin.list();
+
+    // combine icon info
+    const items = csPluginList.map( plugin => {
+      return {
+        pluginId: plugin.pluginId,
+        pluginName: plugin.pluginName,
+        pluginVersion: plugin.version,
+        icon: getIconMock(plugin.pluginId)
+      };
+    } );
+
     ctx.body = {
-      items: [
-        {
-          pluginId: 'aaabbbcccdddeee',
-          pluginName: 'Lung-CAD',
-          pluginVersion: '2.0.1',
-          icon: {
-            glyph: 'lung',
-            color: '#ffffff',
-            backgroundColor: '#ff5500'
-          }
-        },
-        {
-          pluginId: 'fffggghhhiiikkk',
-          pluginName: 'MRA-CAD',
-          pluginVersion: '3.0.1',
-          icon: {
-            glyph: 'brain',
-            color: '#ffffff',
-            backgroundColor: '#0088ff'
-          }
-        }
-      ],
-      totalItems: 2,
+      items,
+      totalItems: items.length,
       page: 1
     };
   };
 };
+
+function getIconMock(pluginId) {
+  const r = Math.random();
+  switch (true){
+    case r < 0.5:
+      return {
+        glyph: 'lung',
+        color: '#ffffff',
+        backgroundColor: '#ff5500'
+      };
+    default:
+      return {
+        glyph: 'brain',
+        color: '#ffffff',
+        backgroundColor: '#0088ff'
+      };
+  }
+
+}

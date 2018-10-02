@@ -1,14 +1,35 @@
 import Logger from './Logger';
 import * as cosmiconfig from 'cosmiconfig';
 import { configure, getLogger, shutdown, Configuration } from 'log4js';
+import * as merge from 'merge';
 
 interface Options {
   category?: string;
 }
+
+export function getRecording() {
+  const recording = require('log4js/lib/appenders/recording') as {
+    replay(): any;
+    erase(): void;
+  };
+  return recording;
+}
+
 export default class Log4jsLogger implements Logger {
 
   public static configTitle: string = 'log4js-logger';
-  private static configured: boolean = false;
+  public static configured: boolean = false;
+  private static defaults: Configuration = {
+    appenders: {
+      default: { type: 'recording' }
+    },
+    categories: {
+      default: {
+        appenders: ['default'],
+        level: 'ALL'
+      },
+    }
+  };
   private static counter: number = 0;
 
   public trace: (message: string, ...args: any[]) => void;
@@ -19,29 +40,35 @@ export default class Log4jsLogger implements Logger {
   public fatal: (message: string, ...args: any[]) => void;
   public shutdown: () => Promise<void>;
 
-  public static configure(config?: string|Configuration) {
+  public static configure(options?: string | object | null) {
 
-    if(Log4jsLogger.configured)
-      throw Error('Already configured');
+    if(options === undefined)
+      options = Log4jsLogger.configTitle;
 
-    if(config === undefined)
-      config = Log4jsLogger.configTitle;
-
-    let log4jsConfiguration: Configuration;
-    if(typeof config === 'string') {
-      const explorer = cosmiconfig(config);
+    let log4jsConfiguration: any;
+    if( options === null) {
+      log4jsConfiguration = {};
+    } else if(typeof options === 'string') {
+      const explorer = cosmiconfig(options);
       const result = explorer.searchSync();
-      if (!result)
-        throw Error(
-          'Cannot find configuration file for log4js like log4js-logger.config.js'
-        );
-        log4jsConfiguration = result.config as Configuration;
+      if (result)
+        log4jsConfiguration = result ? result.config : {}
     } else {
-      log4jsConfiguration = config;
+      log4jsConfiguration = options;
     }
 
+    const config = merge.recursive(
+      {},
+      Log4jsLogger.defaults,
+      log4jsConfiguration
+    ) as Configuration;
+
     Log4jsLogger.configured = true;
-    configure(log4jsConfiguration);
+    configure(config);
+  }
+
+  public static setDefaluts(config: Configuration) {
+    Log4jsLogger.defaults = config;
   }
 
   public static async shutdown() {

@@ -9,6 +9,23 @@ describe('pluginDefinitionAccesor', () => {
   let pluginDefs: PluginDefinitionAccessor;
   const testCoreWorkingDir = path.join(__dirname, '../../test/core-tmp/');
 
+  const setDefs: PluginDefinition[] = [
+    {
+      pluginId: 'test01',
+      pluginName: 'test01',
+      version: '0.0.1',
+      type: 'CAD',
+      dockerImage: 'test01'
+    },
+    {
+      pluginId: 'test03',
+      pluginName: 'test03',
+      version: '0.0.3',
+      type: 'CAD',
+      dockerImage: 'test03'
+    }
+  ];
+
   beforeAll(() => {
     pluginDefs = pluginDefinitionAccesor(testCoreWorkingDir);
   });
@@ -19,26 +36,7 @@ describe('pluginDefinitionAccesor', () => {
   });
 
   test('Set and get plugin definitions', async () => {
-    const setDefs: PluginDefinition[] = [
-      {
-        pluginId: 'test01',
-        pluginName: 'test01',
-        version: '0.0.1',
-        type: 'CAD',
-        dockerImage: 'test01'
-      },
-      {
-        pluginId: 'test03',
-        pluginName: 'test03',
-        version: '0.0.3',
-        type: 'CAD',
-        dockerImage: 'test03'
-      }
-    ];
     await pluginDefs.save(setDefs);
-
-    const getDefs = await pluginDefs.load();
-    expect(setDefs).toEqual(getDefs);
   });
 
   test('Plug-in id duplication error', async () => {
@@ -63,4 +61,15 @@ describe('pluginDefinitionAccesor', () => {
       'There is duplicated pluginId'
     );
   });
+
+  test('Get plugin definitions', async () => {
+    const getDefs = await pluginDefs.load();
+    expect(getDefs).toEqual(setDefs);
+  });
+
+  test('Get a plugin definition', async () => {
+    const getDef = await pluginDefs.get('test03');
+    expect(getDef).toEqual(setDefs[1]);
+  });
+
 });

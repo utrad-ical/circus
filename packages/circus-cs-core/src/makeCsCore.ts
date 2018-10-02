@@ -38,7 +38,9 @@ export function makeCsCore<T extends CsCoreDeps>(
   const plugin: CsCore['plugin'] = {
     update: async pluginDefinitions =>
       (await loader.load('pluginDefinitionsAccessor')).save(pluginDefinitions),
-    list: async () => (await loader.load('pluginDefinitionsAccessor')).load()
+    list: async () => (await loader.load('pluginDefinitionsAccessor')).load(),
+    get: async (pluginId: string) =>
+      (await loader.load('pluginDefinitionsAccessor')).get(pluginId)
   };
   const job: CsCore['job'] = {
     register: async (

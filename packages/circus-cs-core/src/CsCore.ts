@@ -13,6 +13,7 @@ export interface CsCore {
   plugin: {
     update: (pluginDefinitions: PluginDefinition[]) => Promise<void>;
     list: () => Promise<PluginDefinition[]>;
+    get: (pluginId: string) => Promise<PluginDefinition>;
   };
   // job handler
   job: {

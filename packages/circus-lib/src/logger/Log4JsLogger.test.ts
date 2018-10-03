@@ -33,7 +33,7 @@ describe('Log4JsLogger', () => {
 
     beforeAll( async () => {
       Log4JsLogger.configured = false;
-      Log4JsLogger.setDefaluts({
+      Log4JsLogger.setDefaults({
         appenders: {
           file: {
             type: "dateFile",

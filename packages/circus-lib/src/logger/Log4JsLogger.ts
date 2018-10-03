@@ -67,7 +67,7 @@ export default class Log4jsLogger implements Logger {
     configure(config);
   }
 
-  public static setDefaluts(config: Configuration) {
+  public static setDefaults(config: Configuration) {
     Log4jsLogger.defaults = config;
   }
 

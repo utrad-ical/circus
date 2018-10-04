@@ -58,7 +58,7 @@ export default class Viewer extends EventEmitter {
    */
   private currentRender: Promise<any> | null = null;
 
-  private observingDivSize: boolean = false;
+  private isObservingDivSize: boolean = false;
 
   /**
    * Change state when viewer size is changed. This function is provided by ImageSource.
@@ -80,14 +80,6 @@ export default class Viewer extends EventEmitter {
     canvas.height = canvas.offsetHeight;
   }
 
-  private lockChangeAlert = () => {
-    if (document.pointerLockElement === this.canvas) {
-      console.log('The pointer lock status is now locked');
-    } else {
-      console.log('The pointer lock status is now unlocked');
-    }
-  };
-
   constructor(div: HTMLDivElement) {
     super();
 
@@ -98,9 +90,6 @@ export default class Viewer extends EventEmitter {
     if (div.clientWidth <= 0 || div.clientHeight <= 0) {
       throw new Error('The container div has zero width or height.');
     }
-
-    // Hook pointer lock state change events
-    document.addEventListener('pointerlockchange', this.lockChangeAlert, false);
 
     // Removes everything which was already in the div
     div.innerHTML = '';
@@ -132,7 +121,7 @@ export default class Viewer extends EventEmitter {
   private activateResizeObserver(div: HTMLDivElement): void {
     let wrapSize: [number, number] = [div.offsetWidth, div.offsetHeight];
     const onNextFrame = (_frameTime: number) => {
-      if (this.observingDivSize === false) return;
+      if (this.isObservingDivSize === false) return;
 
       if (wrapSize[0] !== div.offsetWidth || wrapSize[1] !== div.offsetHeight) {
         wrapSize = [div.offsetWidth, div.offsetHeight];
@@ -142,12 +131,12 @@ export default class Viewer extends EventEmitter {
       window.requestAnimationFrame(onNextFrame);
     };
 
-    this.observingDivSize = true;
+    this.isObservingDivSize = true;
     window.requestAnimationFrame(onNextFrame);
   }
 
   private stopResizeObserver(): void {
-    this.observingDivSize = false;
+    this.isObservingDivSize = false;
   }
 
   public getViewport(): [number, number] {

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Fragment } from 'react';
 import { Helmet } from 'react-helmet';
 
 /**
@@ -6,12 +6,12 @@ import { Helmet } from 'react-helmet';
  */
 const FullSpanContainer = props => {
   return (
-    <div className={props.className}>
+    <Fragment>
       <Helmet>
         <body className="full-span-container" />
       </Helmet>
       {props.children}
-    </div>
+    </Fragment>
   );
 };
 

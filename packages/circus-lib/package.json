@@ -1,6 +1,6 @@
 {
   "name": "@utrad-ical/circus-lib",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "Shared utilities for CIRCUS projects",
   "main": "index.js",
   "scripts": {

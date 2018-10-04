@@ -2,6 +2,7 @@ import React from 'react';
 import { api } from '../../utils/api';
 import ImageViewer from '../../components/ImageViewer';
 import PropertyEditor from 'rb/PropertyEditor';
+import FullSpanContainer from 'components/FullSpanContainer';
 import LoadingIndicator from 'rb/LoadingIndicator';
 import {
   Button,
@@ -187,7 +188,7 @@ class CaseDetailView extends React.Component {
     const caseId = this.props.match.params.caseId;
 
     return (
-      <div>
+      <FullSpanContainer>
         <Collapser title="Case Info" className="case-info">
           <ProjectDisplay projectId={prj.projectId} withName size="xl" />
           <PatientInfoBox value={caseData.patientInfoCache} />
@@ -215,7 +216,7 @@ class CaseDetailView extends React.Component {
           projectData={this.state.projectData}
           onChange={this.revisionDataChange}
         />
-      </div>
+      </FullSpanContainer>
     );
   }
 }

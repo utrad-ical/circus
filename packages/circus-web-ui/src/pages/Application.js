@@ -17,9 +17,8 @@ const ApplicationView = props => {
   const pageContentVisible = !props.isUserFetching && props.isLoggedIn;
   const notLoggedIn = !props.isUserFetching && !props.isLoggedIn;
 
-  const containerClass = 'container';
   return (
-    <div>
+    <Fragment>
       <Nav />
       <div className="full-container">
         <MessageBox />
@@ -35,10 +34,8 @@ const ApplicationView = props => {
           </div>
         )}
       </div>
-      <div className={containerClass}>
-        {pageContentVisible && props.children}
-      </div>
-    </div>
+      <div className="container">{pageContentVisible && props.children}</div>
+    </Fragment>
   );
 };
 
@@ -51,6 +48,8 @@ export default Application;
 
 const StyledHeader = styled.header`
   margin: 0 auto;
+  width: 100%;
+  flex: none;
   position: relative;
   background-color: ${props => props.theme.brandDark};
   border-bottom: 1px solid ${props => props.theme.brandDarker};

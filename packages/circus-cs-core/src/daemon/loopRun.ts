@@ -1,4 +1,4 @@
-import Logger from '../circus-lib/logger/Logger';
+import Logger from '@utrad-ical/circus-lib/lib/logger/Logger';
 import { Item } from '../queue/queue';
 
 export interface LoopRunOptions<T> {

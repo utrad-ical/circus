@@ -3,7 +3,7 @@ import { PluginJobReporter } from './pluginJobReporter';
 import path from 'path';
 import fs from 'fs-extra';
 import DockerRunner from '../util/DockerRunner';
-import { DicomFileRepository } from '@utrad-ical/circus-dicom-repository';
+import { DicomFileRepository } from '@utrad-ical/circus-lib/lib/dicom-file-repository';
 import pluginResultsValidator from './pluginResultsValidator';
 import { MultiRange } from 'multi-integer-range';
 import { PluginDefinitionLoader } from '../util/pluginDefinitionsAccessor';

@@ -1,7 +1,7 @@
 import createPluginJobRegisterer from './createPluginJobRegisterer';
 import { PluginJobRequest } from '../interface';
 import { QueueSystem } from '../queue/queue';
-import { DicomFileRepository } from '@utrad-ical/circus-dicom-repository';
+import { DicomFileRepository } from '@utrad-ical/circus-lib/lib/dicom-file-repository';
 import { PluginDefinitionLoader } from '../util/pluginDefinitionsAccessor';
 
 describe('registerJob', () => {

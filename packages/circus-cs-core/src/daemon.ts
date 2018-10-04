@@ -9,7 +9,7 @@ import configureLoader, { CsModules } from './configureLoader';
 import { PluginJobRequest } from './interface';
 import loopRun, { LoopRunOptions } from './daemon/loopRun';
 import sleep from './util/sleep';
-import DependentModuleLoader from './circus-lib/DependentModuleLoader';
+import DependentModuleLoader from '@utrad-ical/circus-lib/lib/DependentModuleLoader';
 
 argv.option([
   {

@@ -1,6 +1,6 @@
 import { PluginJobRequest, JobSeries } from '../interface';
 import { QueueSystem } from '../queue/queue';
-import { DicomFileRepository } from '@utrad-ical/circus-dicom-repository';
+import { DicomFileRepository } from '@utrad-ical/circus-lib/lib/dicom-file-repository';
 import MultiRange from 'multi-integer-range';
 import { PluginDefinitionLoader } from '../util/pluginDefinitionsAccessor';
 

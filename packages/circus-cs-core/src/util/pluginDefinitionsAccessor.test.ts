@@ -71,5 +71,4 @@ describe('pluginDefinitionAccesor', () => {
     const getDef = await pluginDefs.get('test03');
     expect(getDef).toEqual(setDefs[1]);
   });
-
 });

@@ -1,5 +1,5 @@
 import { PluginJobRequest } from './interface';
-import DependentModuleLoader from './circus-lib/DependentModuleLoader';
+import DependentModuleLoader from '@utrad-ical/circus-lib/lib/DependentModuleLoader';
 import { CsCore } from './CsCore';
 import { DaemonController } from './daemon/createDaemonController';
 import { PluginDefinitionAccessor } from './util/pluginDefinitionsAccessor';

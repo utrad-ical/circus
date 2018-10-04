@@ -48,11 +48,7 @@ const defaults: Configuration = {
     checkQueueInterval: 1000
   },
 
-  plugins: [],
-
-  logger: {
-    module: 'ConsoleLogger'
-  }
+  plugins: []
 };
 
 export default defaults;

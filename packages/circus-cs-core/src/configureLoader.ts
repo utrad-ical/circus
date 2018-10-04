@@ -12,12 +12,12 @@ import pluginDefinitionsAccessor, {
 import createPluginJobRegisterer, {
   PluginJobRegisterer
 } from './job/createPluginJobRegisterer';
-import { DicomFileRepository } from '@utrad-ical/circus-dicom-repository';
+import { DicomFileRepository } from '@utrad-ical/circus-lib/lib/dicom-file-repository';
 import pluginJobReporter, { PluginJobReporter } from './job/pluginJobReporter';
 import DockerRunner from './util/DockerRunner';
-import DependentModuleLoader from './circus-lib/DependentModuleLoader';
+import DependentModuleLoader from '@utrad-ical/circus-lib/lib/DependentModuleLoader';
 import loadModule from './loadModule';
-import Logger from './circus-lib/logger/Logger';
+import Logger from '@utrad-ical/circus-lib/lib/logger/Logger';
 
 export interface CsModules {
   logger: Logger;
@@ -52,7 +52,11 @@ export default function configureLoader(
   depLoader.registerLoader(
     'logger',
     async () => {
-      return await loadModule<Logger>('logger', './circus-lib/logger', config.logger);
+      const category = config.logger || 'default';
+      return await loadModule<Logger>('logger', './logger', {
+        module: 'Log4JsLogger',
+        options: { category }
+      });
     },
     []
   );
@@ -86,7 +90,7 @@ export default function configureLoader(
     async deps => {
       return await loadModule<DicomFileRepository>(
         'dicom file repository',
-        '@utrad-ical/circus-dicom-repository/lib',
+        '@utrad-ical/circus-lib/lib/dicom-file-repository',
         config.dicomFileRepository
       );
     },

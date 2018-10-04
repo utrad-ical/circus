@@ -7,7 +7,7 @@ import { PluginJobRequest, PluginDefinition } from '../interface';
 import fs from 'fs-extra';
 import path from 'path';
 import DockerRunner from '../util/DockerRunner';
-import { DicomFileRepository } from '@utrad-ical/circus-dicom-repository';
+import { DicomFileRepository } from '@utrad-ical/circus-lib/lib/dicom-file-repository';
 
 const testDir = path.resolve(__dirname, '../../test/');
 const repositoryDir = path.join(testDir, 'repository/');

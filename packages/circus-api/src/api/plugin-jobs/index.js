@@ -12,19 +12,27 @@ export const handlePost = ({ models, cs }) => {
     try {
       await fetchAccessibleSeries(models, ctx.userPrivileges, request.series);
     } catch (err) {
-      ctx.throw(status.NOT_FOUND, err);
+      ctx.throw(status.NOT_FOUND, err); // Todo: Is status.BAD_REQUEST more better?
+    }
+
+    let plugin;
+    try {
+      plugin = await cs.plugin.get(request.pluginId);
+    } catch (err) {
+      ctx.throw(status.NOT_IMPLEMENTED, err);
     }
 
     await cs.job.register(jobId, request, priority);
     await models.pluginJob.insert({
       jobId,
-      pluginName: request.pluginName,
-      pluginVersion: request.pluginVersion,
+      pluginId: plugin.pluginId,
+      pluginName: plugin.pluginName,
+      pluginVersion: plugin.version,
       series: request.series,
       userEmail: ctx.user.userEmail,
       status: 'in_queue',
       errorMessage: null,
-      result: null,
+      results: null,
       startedAt: null,
       feedbacks: [],
       finishedAt: null

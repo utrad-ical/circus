@@ -4,7 +4,7 @@ import * as path from 'path';
 import * as test from './test-utils';
 import createModels from '../src/db/createModels';
 import createValidator from '../src/createValidator';
-import { MemoryDicomFileRepository } from '@utrad-ical/circus-dicom-repository';
+import { MemoryDicomFileRepository } from '@utrad-ical/circus-lib/lib/dicom-file-repository';
 
 describe('DicomImporter', function() {
   // Skip this test if dicom_utility is not available

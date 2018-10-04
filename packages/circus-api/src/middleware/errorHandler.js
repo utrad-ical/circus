@@ -1,18 +1,11 @@
 import Ajv from 'ajv';
 import status from 'http-status';
-import createLogger from '../createLogger';
 
 /**
  * Creates an error handler middleware that always outputs JSON
  * as a HTTP response regardless of the cause of the error.
  */
-export default function errorHandler(debugMode, logger) {
-  if (!logger) {
-    logger = createLogger('off');
-  } else if (typeof logger === 'string') {
-    logger = createLogger(logger);
-  }
-
+export default function errorHandler({ includeErrorDetails, logger }) {
   return async function errorHandler(ctx, next) {
     try {
       logger.trace('Request', ctx.request.method, ctx.request.path);
@@ -56,7 +49,7 @@ export default function errorHandler(debugMode, logger) {
           // run-time error happened outside of `ctx.throw()`.
           logger.error(err);
           ctx.status = status.INTERNAL_SERVER_ERROR;
-          if (debugMode) {
+          if (includeErrorDetails) {
             ctx.body = { error: err.message, stack: err.stack };
           } else {
             ctx.body = { error: 'Internal server error.' };

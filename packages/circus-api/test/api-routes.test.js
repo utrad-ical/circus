@@ -489,27 +489,6 @@ describe('API', function() {
   describe('plugin-jobs', function _pluginJobs() {
     let jobId;
 
-    // const jobId = 'd4412ed0fcf1e0ab747c725f794c672a';
-    // before( async()=>{
-    //   await server.db.collection('pluginJobs').insert({
-    //     jobId: 'd4412ed0fcf1e0ab747c725f794c672a',
-    //     pluginName: 'Lung-CAD',
-    //     pluginVersion: '1.4',
-    //     userEmail: 'alice@example.com',
-    //     status: 'finished',
-    //     errorMessage: null,
-    //     series: [{
-    //        seriesUid: '111.222.333.444.777',
-    //         partialVolumeDescriptor: {
-    //           start: 1,
-    //           end: 236,
-    //           delta: 1}}],
-    //     feedbacks: [],
-    //     startedAt: new Date(1405266782000),
-    //     finishedAt: new Date(1405266800000),
-    //     result: []
-    //   });
-    // });
     after(async () => {
       await testHelper.flush();
     });
@@ -523,8 +502,7 @@ describe('API', function() {
     it('should register a new plug-in job', async function _shouldRegisterANewPlugInJob() {
       const priority = 123;
       const pluginJobRequest = {
-        pluginName: 'MRA-CAD',
-        pluginVersion: '1.5',
+        pluginId: 'circus-mock/empty',
         series: [
           {
             seriesUid: '111.222.333.444.555'
@@ -551,8 +529,7 @@ describe('API', function() {
         method: 'post',
         url: server.url + 'api/plugin-jobs',
         data: {
-          pluginName: 'MRA-CAD',
-          pluginVersion: '1.5',
+          pluginId: 'circus-mock/empty',
           series: [
             {
               seriesUid: '111.222.333.444.555',
@@ -573,8 +550,7 @@ describe('API', function() {
         method: 'post',
         url: server.url + 'api/plugin-jobs',
         data: {
-          pluginName: 'MRA-CAD',
-          pluginVersion: '1.5',
+          pluginId: 'circus-mock/empty',
           series: [
             {
               seriesUid: '111.222.333.444.444',
@@ -594,8 +570,7 @@ describe('API', function() {
         method: 'post',
         url: server.url + 'api/plugin-jobs',
         data: {
-          pluginName: 'MRA-CAD',
-          pluginVersion: '1.5',
+          pluginId: 'circus-mock/empty',
           series: [
             {
               seriesUid: '111.222.333.444.777'
@@ -694,8 +669,7 @@ describe('API', function() {
           p.then(async () => {
             await testHelper.registerJob({
               jobId: 'job-id-' + (1 + i).toString(),
-              pluginName: 'plugin-' + (1 + i).toString(),
-              pluginVersion: 'v1.0.0',
+              pluginId: 'circus-mock/empty',
               userEmail: 'alice.new.mail@example.com'
             });
           }),

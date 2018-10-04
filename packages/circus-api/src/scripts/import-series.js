@@ -9,7 +9,7 @@ import DicomImporter from '../DicomImporter';
 import {
   StaticDicomFileRepository,
   MemoryDicomFileRepository
-} from '@utrad-ical/circus-dicom-repository';
+} from '@utrad-ical/circus-lib/lib/dicom-file-repository';
 
 export function help() {
   console.log('Imports DICOM series from file/directory.\n');

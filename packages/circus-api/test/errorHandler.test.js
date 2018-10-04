@@ -4,6 +4,7 @@ import Router from 'koa-router';
 import Ajv from 'ajv';
 import { assert } from 'chai';
 import * as test from './test-utils';
+import createLogger from '../src/createLogger';
 
 describe('errorHandler middleware', function() {
   let server;
@@ -46,7 +47,9 @@ describe('errorHandler middleware', function() {
         ctx.throw(403, 'no!');
       });
 
-      app.use(errorHandler(true, 'off'));
+      app.use(
+        errorHandler({ includeErrorDetails: true, logger: createLogger() })
+      );
       app.use(router.routes());
     });
     server = await test.listenKoa(app);

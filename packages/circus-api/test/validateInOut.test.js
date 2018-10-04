@@ -7,6 +7,7 @@ import Router from 'koa-router';
 import * as path from 'path';
 import * as test from './test-utils';
 import { assert } from 'chai';
+import createLogger from '../src/createLogger';
 
 describe('validateInOut middleware', function() {
   let server;
@@ -38,7 +39,9 @@ describe('validateInOut middleware', function() {
       );
 
       app.use(bodyParser());
-      app.use(errorHandler(true));
+      app.use(
+        errorHandler({ logger: createLogger(), respondErrorDetails: true })
+      );
       app.use(router.routes());
     });
     server = await test.listenKoa(app);

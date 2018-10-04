@@ -98,7 +98,7 @@ const {
 async function main() {
   // Establish db connection (shared throughout app)
   const db = await connectDb();
-  const logger = createLogger('trace');
+  const logger = createLogger();
 
   if (fixUser) {
     console.warn(chalk.red('WARNING: NO AUTHENTICATION MODE!'));

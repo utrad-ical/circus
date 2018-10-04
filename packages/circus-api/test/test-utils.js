@@ -6,11 +6,23 @@ import { safeLoad as yaml } from 'js-yaml';
 import * as path from 'path';
 import EJSON from 'mongodb-extended-json';
 import createApp from '../src/createApp';
-import createLogger from '../src/createLogger';
+import { configureLogger } from '../src/createLogger';
 import * as axios from 'axios';
 import dotenv from 'dotenv';
 
 dotenv.config();
+
+configureLogger({
+  appenders: {
+    memory: { type: 'recording' }
+  },
+  categories: {
+    default: {
+      appenders: ['memory'],
+      level: 'ALL'
+    }
+  }
+});
 
 /**
  * This is a helper module for tests using Koa server.
@@ -63,11 +75,10 @@ export async function setUpAppForTest(logMode = 'off') {
     'tasks',
     'pluginJobs'
   ]);
-  const logger = createLogger(logMode);
 
   const pluginJobsCollection = db.collection('pluginJobs');
   const { csCore, ...csRest } = createMockCsCore(pluginJobsCollection);
-  const app = await createApp({ debug: true, db, logger, cs: csCore });
+  const app = await createApp({ debug: true, db, cs: csCore });
   const server = await listenKoa(app);
 
   const axiosInstances = {};
@@ -89,7 +100,6 @@ export async function setUpAppForTest(logMode = 'off') {
     testHelper,
     db,
     app,
-    logger,
     axios: axiosInstances,
     csCore,
     ...server
@@ -147,7 +157,7 @@ export async function setUpMongoFixture(db, collections) {
 
 function createMockCsCore(pluginJobsCollection) {
   let status = 'stopped';
-  let defs = [];
+  let defs = mockPlugins();
   const jobs = [];
 
   const report = async (jobId, type, payload) => {
@@ -169,7 +179,7 @@ function createMockCsCore(pluginJobsCollection) {
       case 'results':
         await pluginJobsCollection.findOneAndUpdate(
           { jobId },
-          { $set: { result: payload } } // result (in schema)? results (in reporter)?
+          { $set: { results: payload } }
         );
         break;
     }
@@ -185,7 +195,12 @@ function createMockCsCore(pluginJobsCollection) {
     },
     plugin: {
       update: async newDefs => (defs = newDefs),
-      list: async () => defs
+      list: async () => defs,
+      get: async pluginId => {
+        const plugins = defs.filter(i => i.pluginId === pluginId);
+        if (plugins.length === 0) throw new Error('No such plugin');
+        return plugins.shift();
+      }
     },
     job: {
       list: async (state = 'all') =>
@@ -232,12 +247,12 @@ function createMockCsCore(pluginJobsCollection) {
   const flush = async () => {
     jobs.splice(0, jobs.length);
     await pluginJobsCollection.deleteMany({});
+    defs = mockPlugins();
   };
 
   const registerJob = async ({
     jobId,
-    pluginName,
-    pluginVersion,
+    pluginId,
     userEmail,
     series = [],
     priority = 0,
@@ -255,15 +270,17 @@ function createMockCsCore(pluginJobsCollection) {
       ];
     }
 
+    const plugin = await csCore.plugin.get(pluginId);
     await pluginJobsCollection.insert({
       jobId,
-      pluginName,
-      pluginVersion,
+      pluginId: plugin.pluginId,
+      pluginName: plugin.pluginName,
+      pluginVersion: plugin.version,
       series,
       userEmail,
       status,
       errorMessage: null,
-      result: null,
+      results: null,
       startedAt: null,
       feedbacks: [],
       finishedAt: null,
@@ -271,11 +288,7 @@ function createMockCsCore(pluginJobsCollection) {
       updatedAt: new Date()
     });
 
-    await csCore.job.register(
-      jobId,
-      { pluginId: pluginName, series },
-      priority
-    );
+    await csCore.job.register(jobId, { pluginId, series }, priority);
   };
 
   const jobListOverview = async () => {
@@ -285,13 +298,72 @@ function createMockCsCore(pluginJobsCollection) {
       // .limit(10)
       .toArray();
 
-    return docs.map(({ jobId, status, result, errorMessage }) => ({
+    return docs.map(({ jobId, status, results, errorMessage }) => ({
       jobId,
       status,
-      result,
+      results,
       errorMessage
     }));
   };
 
   return { csCore, registerJob, tick, tack, flush, jobListOverview };
 }
+
+const mockPlugins = () => [
+  {
+    pluginId: 'circus-mock/empty',
+    pluginName: 'MOCK-EMPTY',
+    version: '1.0',
+    type: 'CAD',
+    dockerImage:
+      'd135e1fbb368e35f940ae8e6deb171e90273958dc3938de5a8237b73bb42d9c2'
+  },
+  {
+    pluginId: 'circus-mock/fails',
+    pluginName: 'MOCK-VALIDATION-FAILURE',
+    version: '1.0',
+    type: 'CAD',
+    dockerImage:
+      '74c50a99530ef149c16bc6f0cf71b987470282c54e436e9bec6da704f1fcac9c'
+  },
+  {
+    pluginId: 'circus-mock/succeeds',
+    pluginName: 'MOCK-SUCCEEDS',
+    version: '1.0',
+    type: 'CAD',
+    dockerImage:
+      'e2cf1a5f82d62f7b3bd02db78e51008f4f11f8b31aedc96bfd50f3d7c80ba6e6'
+  },
+  {
+    pluginId: 'circus-mock/timeout',
+    pluginName: 'MOCK-SUCCEEDS',
+    version: '1.0',
+    type: 'CAD',
+    dockerImage:
+      '918ea418b82e941242d8125375c28bfafa3077108f0df8f7acc8f99d331cf502'
+  },
+  {
+    pluginId: 'circus-mock/error',
+    pluginName: 'MOCK-ERROR',
+    version: '1.0',
+    type: 'CAD',
+    dockerImage:
+      '9cc56c14129d73930007a4978c7fb60900d7a5d77a29770117a7132dc3a81eaa'
+  },
+  {
+    pluginId: 'circus/mra_cad',
+    pluginName: 'MRA-CAD',
+    version: '2.12',
+    type: 'CAD',
+    dockerImage:
+      'e3f245078d839ea804e100ada6183edf864624a2859b2a8341a0721378f13f97'
+  },
+  {
+    pluginId: 'circus/lung_cad',
+    pluginName: 'LUNG-CAD',
+    version: '1.4',
+    type: 'CAD',
+    dockerImage:
+      '4c3bbd30ee5c0ebab258523c585a64e3c62879cdae4804ab5ac2abb0848045a1'
+  }
+];

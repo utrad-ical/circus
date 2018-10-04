@@ -24,11 +24,8 @@ import circusRs from './circusRs';
 import {
   StaticDicomFileRepository,
   MemoryDicomFileRepository
-} from '@utrad-ical/circus-dicom-repository';
-import {
-  csConfig,
-  createCsCore
-} from '@utrad-ical/circus-cs-core';
+} from '@utrad-ical/circus-lib/lib/dicom-file-repository';
+import { createCsCore } from '@utrad-ical/circus-cs-core';
 
 function handlerName(route) {
   if (route.handler) return route.handler;
@@ -86,7 +83,15 @@ async function prepareApiRouter(apiDir, deps, options) {
  * Creates a new Koa app.
  */
 export default async function createApp(options = {}) {
-  const { debug, db, fixUser, blobPath, corsOrigin, dicomPath, dicomImageServerUrl } = options;
+  const {
+    debug,
+    db,
+    fixUser,
+    blobPath,
+    corsOrigin,
+    dicomPath,
+    dicomImageServerUrl
+  } = options;
 
   // The main Koa instance.
   const koa = new Koa();
@@ -101,14 +106,14 @@ export default async function createApp(options = {}) {
     ? new StaticDicomFileRepository({ dataDir: dicomPath })
     : new MemoryDicomFileRepository({});
 
-  const logger = options.logger ? options.logger : createLogger('off');
+  const logger = createLogger();
 
   const utilityEnv = process.env.DICOM_UTILITY;
   const dicomImporter = utilityEnv
     ? new DicomImporter(dicomFileRepository, models, { utility: utilityEnv })
     : undefined;
 
-  const cs = options.cs ? options.cs : createCsCore(csConfig());
+  const cs = options.cs ? options.cs : await createCsCore();
 
   // Build a router.
   // Register each API endpoints to the router according YAML manifest files.
@@ -130,7 +135,7 @@ export default async function createApp(options = {}) {
   const oauth = createOauthServer(models);
 
   // Register middleware stack to the Koa app.
-  koa.use(errorHandler(debug, logger));
+  koa.use(errorHandler({ includeErrorDetails: debug, logger }));
   koa.use(cors(corsOrigin));
   koa.use(
     mount(

@@ -9,6 +9,7 @@ import Router from 'koa-router';
 import compose from 'koa-compose';
 import axios from 'axios';
 import * as qs from 'querystring';
+import createLogger from '../src/createLogger';
 
 describe('createOauthServer', function() {
   let db, server;
@@ -29,7 +30,7 @@ describe('createOauthServer', function() {
         );
 
         app.use(bodyparser());
-        app.use(errorHandler());
+        app.use(errorHandler({ logger: createLogger() }));
         app.use(router.routes());
       })
     );

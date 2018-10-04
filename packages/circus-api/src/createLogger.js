@@ -1,36 +1,48 @@
-import * as log4js from 'log4js';
-import * as path from 'path';
+import Log4JsLogger from '@utrad-ical/circus-lib/lib/logger/Log4JsLogger';
 
+const path = require('path');
 const logDir = path.resolve(__dirname, '../store/logs');
 
-export default function createLogger(category) {
-  log4js.configure({
-    appenders: {
-      errorLog: {
-        type: 'dateFile',
-        filename: path.join(logDir, 'circus-api-error.log'),
-        keepFileExt: true
-      },
-      errorFilter: {
-        type: 'logLevelFilter',
-        appender: 'errorLog',
-        level: 'error'
-      },
-      traceLog: {
-        type: 'dateFile',
-        filename: path.join(logDir, 'circus-api-trace.log'),
-        keepFileExt: true
-      },
-      console: { type: 'console' },
-      off: { type: 'logLevelFilter', appender: 'console', level: 'off' }
+Log4JsLogger.setDefaults({
+  appenders: {
+    memory: { type: 'recording' },
+    csCoreDaemon: {
+      type: 'dateFile',
+      filename: path.join(logDir, 'cs-core-daemon.log'),
+      pattern: '-yyyyMMdd.log',
+      alwaysIncludePattern: true
     },
-    categories: {
-      default: { appenders: ['errorLog'], level: 'error' },
-      trace: { appenders: ['traceLog', 'errorFilter'], level: 'trace' },
-      off: { appenders: ['off'], level: 'off' }
+    circusApi: {
+      type: 'dateFile',
+      filename: path.join(logDir, 'circus-api.log'),
+      keepFileExt: true
     }
-  });
-  const logger = log4js.getLogger(category);
-  // logger.level = 'debug';
-  return logger;
+  },
+  categories: {
+    default: {
+      appenders: ['memory'],
+      level: 'ALL'
+    },
+    off: {
+      appenders: ['memory'],
+      level: 'off'
+    },
+    daemon: {
+      appenders: ['csCoreDaemon'],
+      level: 'ALL'
+    },
+    apiServer: {
+      appenders: ['circusApi'],
+      level: 'trace'
+    }
+  }
+});
+
+export function configureLogger(config) {
+  Log4JsLogger.setDefaults(config);
+  Log4JsLogger.configure({});
+}
+
+export default function createLogger() {
+  return new Log4JsLogger({ category: 'apiServer' });
 }

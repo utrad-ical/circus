@@ -9,9 +9,7 @@ routes:
     requestSchema:
       type: object
       properties:
-        pluginName:
-          type: string
-        pluginVersion:
+        pluginId:
           type: string
         series:
           type: array
@@ -20,7 +18,7 @@ routes:
             $ref: pluginJobSeries
         priority:
           type: integer
-      required: ['pluginName', 'pluginVersion', 'series']
+      required: ['pluginId', 'series']
     responseSchema:
       type: object
       properties:

@@ -16,6 +16,26 @@
   border-bottom: 2px solid silver;
 }
 
+html,
+body {
+  height: 100%;
+}
+
+#app {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+body.full-span-container {
+  .container {
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    flex: 1000;
+  }
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;

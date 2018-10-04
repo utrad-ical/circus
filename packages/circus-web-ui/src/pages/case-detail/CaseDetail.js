@@ -188,7 +188,7 @@ class CaseDetailView extends React.Component {
     const caseId = this.props.match.params.caseId;
 
     return (
-      <FullSpanContainer className="case-container">
+      <FullSpanContainer>
         <Collapser title="Case Info" className="case-info">
           <ProjectDisplay projectId={prj.projectId} withName size="xl" />
           <PatientInfoBox value={caseData.patientInfoCache} />

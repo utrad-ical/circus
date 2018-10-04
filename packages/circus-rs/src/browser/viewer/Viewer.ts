@@ -15,6 +15,7 @@ import { ViewStateResizeTransformer } from '../image-source/ImageSource';
  */
 export default class Viewer extends EventEmitter {
   public canvas: HTMLCanvasElement;
+  private rootDiv: HTMLDivElement;
 
   private viewState: ViewState | undefined;
 
@@ -67,17 +68,15 @@ export default class Viewer extends EventEmitter {
 
   private createCanvas(): HTMLCanvasElement {
     const canvas = document.createElement('canvas');
-    canvas.style.width = '100%';
-    canvas.style.height = '100%';
-
     return canvas;
   }
 
   public resizeCanvas(): void {
     const canvas = this.canvas;
+    const div = this.rootDiv;
     if (!canvas) throw new Error('Image viewer is not initialized');
-    canvas.width = canvas.offsetWidth;
-    canvas.height = canvas.offsetHeight;
+    canvas.width = div.offsetWidth;
+    canvas.height = div.offsetHeight;
   }
 
   constructor(div: HTMLDivElement) {
@@ -95,6 +94,7 @@ export default class Viewer extends EventEmitter {
     div.innerHTML = '';
     const canvas = this.createCanvas();
     this.canvas = canvas;
+    this.rootDiv = div;
     div.appendChild(canvas);
     this.resizeCanvas();
 
@@ -111,23 +111,23 @@ export default class Viewer extends EventEmitter {
 
     this.setActiveTool('null');
 
-    this.activateResizeObserver(div);
+    this.activateResizeObserver();
   }
 
   /**
    * Begin observation of wrapper element size.
-   * @param div
    */
-  private activateResizeObserver(div: HTMLDivElement): void {
-    let wrapSize: [number, number] = [div.offsetWidth, div.offsetHeight];
-    const onNextFrame = (_frameTime: number) => {
+  private activateResizeObserver(): void {
+    const div = this.rootDiv;
+    let prevWidth = div.offsetWidth;
+    let prevHeight = div.offsetHeight;
+    const onNextFrame = () => {
       if (this.isObservingDivSize === false) return;
-
-      if (wrapSize[0] !== div.offsetWidth || wrapSize[1] !== div.offsetHeight) {
-        wrapSize = [div.offsetWidth, div.offsetHeight];
-        this.onResize();
+      if (prevWidth !== div.offsetWidth || prevHeight !== div.offsetHeight) {
+        this.handleResize();
+        prevWidth = div.offsetWidth;
+        prevHeight = div.offsetHeight;
       }
-
       window.requestAnimationFrame(onNextFrame);
     };
 
@@ -362,27 +362,19 @@ export default class Viewer extends EventEmitter {
     return this.activeToolName;
   }
 
-  /**
-   * Fit canvas size to it's wrapper element.
-   * Observer calls this.
-   */
-  public onResize(): void {
+  public handleResize(): void {
     const transformer = this.viewStateResizeTransformer;
     if (transformer) {
-      const div = this.canvas.parentElement as HTMLElement;
+      const div = this.rootDiv;
       const newResolution: [number, number] = [
         div.offsetWidth,
         div.offsetHeight
       ];
-
       const state = this.getState();
       const newState = transformer(state, this.getResolution(), newResolution);
-
-      if (state !== newState) {
-        this.resizeCanvas();
-        this.setState(newState);
-      }
+      this.setState(newState);
     }
+    this.resizeCanvas();
   }
 
   /**

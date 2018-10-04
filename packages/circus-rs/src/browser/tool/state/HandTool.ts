@@ -1,8 +1,17 @@
-import DraggableTool from '../DraggableTool';
+import { Box3, Vector2, Vector3 } from 'three';
+import { isNullOrUndefined } from 'util';
+import {
+  intersectionOfBoxAndPlane,
+  intersectionPointWithinSection,
+  sectionEquals,
+  translateSection
+} from '../../../common/geometry';
+import MprImageSource from '../../image-source/MprImageSource';
+import { DicomVolumeMetadata } from '../../image-source/volume-loader/DicomVolumeLoader';
+import { convertSectionToIndex } from '../../section-util';
 import ViewerEvent from '../../viewer/ViewerEvent';
 import { MprViewState } from '../../ViewState';
-import { translateSection, sectionEquals } from '../../../common/geometry';
-import { Vector2, Vector3 } from 'three';
+import DraggableTool from '../DraggableTool';
 
 /**
  * HandTool is a tool which responds to a mouse drag and moves the
@@ -25,11 +34,17 @@ export default class HandTool extends DraggableTool {
 
     switch (state.type) {
       case 'mpr':
+        const comp = viewer.getComposition();
+        if (!comp) throw new Error('Composition not initialized'); // should not happen
+        const src = comp.imageSource as MprImageSource;
+        if (!(src instanceof MprImageSource)) return;
+
         viewer.setState(
           this.translateBy(
             state,
             new Vector2(dragInfo.dx, dragInfo.dy),
-            new Vector2().fromArray(vp)
+            new Vector2().fromArray(vp),
+            src.metadata!
           )
         );
         break;
@@ -42,7 +57,8 @@ export default class HandTool extends DraggableTool {
   private translateBy(
     state: MprViewState,
     move: Vector2,
-    vp: Vector2
+    vp: Vector2,
+    metadata: DicomVolumeMetadata
   ): MprViewState {
     const section = state.section;
     const moveScale = move.clone().divide(vp);
@@ -55,17 +71,29 @@ export default class HandTool extends DraggableTool {
     );
 
     // Check whether new section is outside display area, and if so, reject the processing.
-    const xBoundaryAbs = Math.abs(vp.x / 2) + Math.abs(section.xAxis[0] / 2);
-    if (Math.abs(newSection.origin[0]) >= xBoundaryAbs) {
-      newSection.origin[0] = section.origin[0];
-    }
-    const yBoundaryAbs = Math.abs(vp.y / 2) + Math.abs(section.yAxis[1] / 2);
-    if (Math.abs(newSection.origin[1]) >= yBoundaryAbs) {
-      newSection.origin[1] = section.origin[1];
+    const voxelSize = new Vector3().fromArray(metadata.voxelSize);
+    const voxelCount = metadata.voxelCount;
+    const indexNewSection = convertSectionToIndex(newSection, voxelSize);
+    const box = new Box3(
+      new Vector3(0, 0, 0),
+      new Vector3().fromArray(voxelCount)
+    );
+    const intersectionPoints = intersectionOfBoxAndPlane(box, indexNewSection);
+    if (
+      isNullOrUndefined(intersectionPoints) ||
+      intersectionPoints.every(
+        p => !intersectionPointWithinSection(indexNewSection, p)
+      )
+    ) {
+      return state;
     }
 
     // If section has no changed, return state as is.
-    const hasAnyChanged = !sectionEquals(section, newSection);
-    return hasAnyChanged ? { ...state, section: newSection } : state;
+    if (sectionEquals(section, newSection)) {
+      return state;
+    }
+
+    // Return state with new section.
+    return { ...state, section: newSection };
   }
 }

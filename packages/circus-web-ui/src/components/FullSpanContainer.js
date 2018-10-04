@@ -6,7 +6,7 @@ import { Helmet } from 'react-helmet';
  */
 const FullSpanContainer = props => {
   return (
-    <div>
+    <div className={props.className}>
       <Helmet>
         <body className="full-span-container" />
       </Helmet>

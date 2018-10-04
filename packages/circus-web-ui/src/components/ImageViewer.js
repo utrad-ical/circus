@@ -9,6 +9,7 @@ import classnames from 'classnames';
 export default class ImageViewer extends React.Component {
   constructor(props) {
     super(props);
+    this.state = {};
     this.viewer = null;
     this.container = null;
     if (this.props.stateChanger instanceof EventEmitter) {
@@ -17,6 +18,7 @@ export default class ImageViewer extends React.Component {
   }
 
   componentWillUpdate(nextProps) {
+    if (!this.viewer) return;
     if (this.props.stateChanger !== nextProps.stateChanger) {
       if (this.props.stateChanger instanceof EventEmitter) {
         this.props.stateChanger.removeAllListeners('change');
@@ -32,35 +34,39 @@ export default class ImageViewer extends React.Component {
   }
 
   componentDidMount() {
-    const setOrientation = () => {
-      const state = viewer.getState();
-      const src = this.props.composition.imageSource;
-      const mmDim = src.mmDim();
-      state.section = rs.createOrthogonalMprSection(
-        viewer.getResolution(),
-        mmDim,
-        orientation
-      );
-      viewer.setState(state);
-      viewer.removeListener('draw', setOrientation);
-    };
+    try {
+      const setOrientation = () => {
+        const state = viewer.getState();
+        const src = this.props.composition.imageSource;
+        const mmDim = src.mmDim();
+        state.section = rs.createOrthogonalMprSection(
+          viewer.getResolution(),
+          mmDim,
+          orientation
+        );
+        viewer.setState(state);
+        viewer.removeListener('draw', setOrientation);
+      };
 
-    const container = this.container;
-    const viewer = new rs.Viewer(container);
+      const container = this.container;
+      const viewer = new rs.Viewer(container);
 
-    const orientation = this.props.orientation || 'axial';
+      const orientation = this.props.orientation || 'axial';
 
-    viewer.on('imageReady', setOrientation);
+      viewer.on('imageReady', setOrientation);
 
-    if (this.props.composition) {
-      viewer.setComposition(this.props.composition);
+      if (this.props.composition) {
+        viewer.setComposition(this.props.composition);
+      }
+      const initialTool = this.props.initialTool
+        ? this.props.initialTool
+        : 'pager';
+      viewer.setActiveTool(initialTool);
+
+      this.viewer = viewer;
+    } catch (err) {
+      this.setState({ hasError: true });
     }
-    const initialTool = this.props.initialTool
-      ? this.props.initialTool
-      : 'pager';
-    viewer.setActiveTool(initialTool);
-
-    this.viewer = viewer;
   }
 
   changeState = changer => {
@@ -71,6 +77,8 @@ export default class ImageViewer extends React.Component {
 
   render() {
     const { className } = this.props;
+    const { hasError } = this.state;
+    if (hasError) return <div>Error</div>;
     return (
       <div
         className={classnames('image-viewer', className)}

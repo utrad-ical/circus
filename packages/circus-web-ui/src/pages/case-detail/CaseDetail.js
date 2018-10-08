@@ -1,6 +1,6 @@
 import React from 'react';
 import { api } from '../../utils/api';
-import ImageViewer from '../../components/ImageViewer';
+import ViewerCluster from './ViwewerCluster';
 import PropertyEditor from 'rb/PropertyEditor';
 import FullSpanContainer from 'components/FullSpanContainer';
 import LoadingIndicator from 'rb/LoadingIndicator';
@@ -563,34 +563,4 @@ const ToolButton = props => {
       </Button>
     );
   }
-};
-
-const ViewerCluster = props => {
-  const { composition, tool, stateChanger } = props;
-
-  function makeViewer(orientation, initialTool, fixTool) {
-    return (
-      <ImageViewer
-        className={`viewer-${orientation}`}
-        orientation={orientation}
-        composition={composition}
-        tool={fixTool ? fixTool : tool}
-        initialTool={initialTool}
-        stateChanger={stateChanger}
-      />
-    );
-  }
-
-  return (
-    <div className="viewer-cluster">
-      <div className="viewer-row">
-        {makeViewer('axial')}
-        {makeViewer('sagittal')}
-      </div>
-      <div className="viewer-row">
-        {makeViewer('coronal')}
-        {makeViewer('axial', 'celestialRotate', 'celestialRotate')}
-      </div>
-    </div>
-  );
 };

@@ -86,10 +86,6 @@ export default class Viewer extends EventEmitter {
       throw new Error('Tried to create a viewer without a container');
     }
 
-    if (div.clientWidth <= 0 || div.clientHeight <= 0) {
-      throw new Error('The container div has zero width or height.');
-    }
-
     // Removes everything which was already in the div
     div.innerHTML = '';
     const canvas = this.createCanvas();

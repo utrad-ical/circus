@@ -74,7 +74,7 @@ const StyledNav = styled.nav`
   }
 
   > ul {
-    // main navigation menu
+    /* main navigation menu */
     margin: 0;
     padding: 0 5px;
     > li {
@@ -92,12 +92,12 @@ const StyledNav = styled.nav`
         color: ${props => props.theme.highlightColor};
         background-color: ${props => props.theme.brandPrimary};
         > ul {
-          // show dropdown sub menu
+          /* show dropdown sub menu */
           display: block;
         }
       }
       > ul {
-        // dropdown sub menu
+        /* dropdown sub menu */
         display: none;
         position: absolute;
         top: 39px;

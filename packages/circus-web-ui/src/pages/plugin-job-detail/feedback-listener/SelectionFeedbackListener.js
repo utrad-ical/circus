@@ -1,6 +1,11 @@
 import React from 'react';
-import classnames from 'classnames';
-import { Button, ButtonGroup } from 'components/react-bootstrap';
+import { Button } from 'components/react-bootstrap';
+import styled from 'styled-components';
+
+const StyledDiv = styled.div`
+  display: flex;
+  justify-content: space-around;
+`;
 
 const SelectionFeedbackListener = props => {
   const { onChange, className, value, options } = props;
@@ -12,9 +17,7 @@ const SelectionFeedbackListener = props => {
   };
 
   return (
-    <ButtonGroup
-      className={classnames(className, 'selection-feedback-listener')}
-    >
+    <StyledDiv className={className}>
       {options.map((o, i) => (
         <Button
           key={i}
@@ -25,7 +28,7 @@ const SelectionFeedbackListener = props => {
           {o}
         </Button>
       ))}
-    </ButtonGroup>
+    </StyledDiv>
   );
 };
 

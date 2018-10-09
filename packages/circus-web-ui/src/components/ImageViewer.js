@@ -69,6 +69,10 @@ export default class ImageViewer extends React.Component {
     }
   }
 
+  componentWillUnmount() {
+    if (this.viewer) this.viewer.dispose();
+  }
+
   changeState = changer => {
     const state = this.viewer.getState();
     const newState = changer(state);

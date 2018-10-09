@@ -81,8 +81,8 @@ export default class HandTool extends DraggableTool {
     const intersectionPoints = intersectionOfBoxAndPlane(box, indexNewSection);
     if (
       isNullOrUndefined(intersectionPoints) ||
-      intersectionPoints.every(
-        p => !intersectionPointWithinSection(indexNewSection, p)
+      !intersectionPoints.some(p =>
+        intersectionPointWithinSection(indexNewSection, p)
       )
     ) {
       return state;

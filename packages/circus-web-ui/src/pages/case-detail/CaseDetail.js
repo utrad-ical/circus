@@ -2,7 +2,7 @@ import React from 'react';
 import { api } from '../../utils/api';
 import ViewerCluster from './ViwewerCluster';
 import SideContainer from './SideContainer';
-import PropertyEditor from 'rb/PropertyEditor';
+import JsonSchemaEditor from 'rb/JsonSchemaEditor';
 import FullSpanContainer from 'components/FullSpanContainer';
 import LoadingIndicator from 'rb/LoadingIndicator';
 import {
@@ -23,7 +23,6 @@ import { sha1 } from '../../utils/util.js';
 import ProjectDisplay from 'components/ProjectDisplay';
 import Collapser from '../../components/Collapser';
 import RevisionSelector from './RevisionSelector';
-import attributeSchemaToProperties from './attributeSchemaToProperties';
 import PatientInfoBox from 'components/PatientInfoBox';
 import TimeDisplay from 'components/TimeDisplay';
 import Tag from 'components/Tag';
@@ -269,13 +268,7 @@ export class RevisionData extends React.Component {
       tool: 'pager',
       showReferenceLine: false,
       composition: null,
-      lineWidth: 1,
-      caseAttributesProperties: attributeSchemaToProperties(
-        props.projectData.caseAttributesSchema
-      ),
-      labelAttributesProperties: attributeSchemaToProperties(
-        props.projectData.labelAttributesSchema
-      )
+      lineWidth: 1
     };
 
     const server = store.getState().loginUser.data.dicomImageServer;
@@ -434,8 +427,8 @@ export class RevisionData extends React.Component {
                 Label #{activeLabelIndex} of Series #{activeSeriesIndex}
               </div>
               {activeLabel && (
-                <PropertyEditor
-                  properties={this.state.labelAttributesProperties}
+                <JsonSchemaEditor
+                  schema={projectData.labelAttributesSchema}
                   value={activeLabel.attributes || {}}
                   onChange={this.labelAttributesChange}
                 />
@@ -443,8 +436,8 @@ export class RevisionData extends React.Component {
             </div>
           </Collapser>
           <Collapser title="Case Attributes" className="case-attributes">
-            <PropertyEditor
-              properties={this.state.caseAttributesProperties}
+            <JsonSchemaEditor
+              schema={projectData.caseAttributesSchema}
               value={revision.attributes}
               onChange={this.caseAttributesChange}
             />

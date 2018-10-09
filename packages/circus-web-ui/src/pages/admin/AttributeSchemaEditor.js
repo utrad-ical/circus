@@ -9,8 +9,8 @@ const SelectSpecEditor = props => {
     <div>
       Options:
       <TextArrayEditor
-        value={props.value.options}
-        onChange={v => props.onChange({ options: v })}
+        value={props.value.enum}
+        onChange={v => props.onChange({ enum: v })}
       />
     </div>
   );
@@ -18,22 +18,25 @@ const SelectSpecEditor = props => {
 
 const NullSpecEditor = props => null;
 
-const AttributeSchemaEditor = props => {
-  const { value: { key, type, spec = {} }, onChange } = props;
+const typeOptions = {
+  string: 'Text',
+  number: 'Number',
+  integer: 'Integer',
+  boolean: 'Checkbox',
+  select: 'Select'
+};
 
-  const typeOptions = {
-    text: 'Text',
-    number: 'Number',
-    select: 'Select',
-    boolean: 'Checkbox'
-  };
+const SchemaEntryEditor = props => {
+  const { value: { key, type, required, ...spec }, onChange } = props;
+  const normalizedType = Array.isArray(spec.enum) ? 'select' : type;
 
   const SpecEditor = {
-    text: NullSpecEditor,
+    string: NullSpecEditor,
     number: NullSpecEditor,
-    select: SelectSpecEditor,
-    boolean: NullSpecEditor
-  }[type];
+    integer: NullSpecEditor,
+    boolean: NullSpecEditor,
+    select: SelectSpecEditor
+  }[normalizedType];
 
   const handleKeyChange = ev => {
     const newAttribute = { ...props.value, key: ev.target.value };
@@ -42,17 +45,19 @@ const AttributeSchemaEditor = props => {
 
   const handleTypeChange = newType => {
     if (type !== newType) {
+      const normalizedNewType = newType === 'select' ? 'string' : newType;
       const newAttribute = {
         key,
-        type: newType,
-        spec: {}
+        required,
+        type: normalizedNewType
       };
+      if (newType === 'select') newAttribute.enum = [];
       onChange && onChange(newAttribute);
     }
   };
 
   const handleSpecChange = newSpec => {
-    const newAttribute = { ...props.value, spec: newSpec };
+    const newAttribute = { ...props.value, ...newSpec };
     onChange && onChange(newAttribute);
   };
 
@@ -69,7 +74,7 @@ const AttributeSchemaEditor = props => {
       <div className="attribute-schema-type">
         <BlockSelect
           options={typeOptions}
-          value={type}
+          value={normalizedType}
           onChange={handleTypeChange}
         />
       </div>
@@ -89,25 +94,46 @@ export const newAttributeItem = items => {
   }
   return {
     key: name(num),
-    type: 'text',
-    spec: {}
+    type: 'string'
   };
 };
 
-const ArrayOfAttributeSchema = et.arrayOf(
-  AttributeSchemaEditor,
-  newAttributeItem
-);
+const ArrayOfAttributeSchema = et.arrayOf(SchemaEntryEditor, newAttributeItem);
 
-const AttributeSchemaArrayEditor = props => (
-  <div>
-    <div className="attribute-schema-editor legend">
-      <div className="attribute-schema-key">Key</div>
-      <div className="attribute-schema-type">Type</div>
-      <div className="attribute-schema-spec">Spec</div>
+const AttributeSchemaEditor = props => {
+  const { value, onChange } = props;
+  const handleChange = val => {
+    const newValue = { type: 'object', properties: {} };
+    const requiredProperties = [];
+    val.forEach(entry => {
+      const { key, required, ...other } = entry;
+      newValue.properties[key] = other;
+      if (required) requiredProperties.push(key);
+    });
+    if (requiredProperties.length)
+      newValue.requiredProperties = requiredProperties;
+    onChange(newValue);
+  };
+
+  const { properties = {}, required = [] } = value;
+  const items = Object.keys(properties).map(k => {
+    return {
+      key: k,
+      ...properties[k],
+      required: required.indexOf(k) >= 0
+    };
+  });
+
+  return (
+    <div>
+      <div className="attribute-schema-editor legend">
+        <div className="attribute-schema-key">Key</div>
+        <div className="attribute-schema-type">Type</div>
+        <div className="attribute-schema-spec">Spec</div>
+      </div>
+      <ArrayOfAttributeSchema value={items} onChange={handleChange} />
     </div>
-    <ArrayOfAttributeSchema {...props} />
-  </div>
-);
+  );
+};
 
-export default AttributeSchemaArrayEditor;
+export default AttributeSchemaEditor;

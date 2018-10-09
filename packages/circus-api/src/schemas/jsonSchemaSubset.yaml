@@ -1,0 +1,22 @@
+$schema: 'http://json-schema.org/schema#'
+$async: true
+title: JsonSchemaSubset
+type: object
+properties:
+  type:
+    const: object
+  properties:
+    type: object
+    additionalProperties:
+      type: object
+      properties:
+        type: { enum: ['number', 'integer', 'string', 'boolean'] }
+        maximum: { type: 'number' }
+        minimum: { type: 'number' }
+        maximumExclusive: { type: 'number' }
+        minimumExclusive: { type: 'number' }
+        minLength: { type: 'integer' }
+        maxLength: { type: 'integer' }
+        enum: { type: 'array', items: { type: 'string' } }
+  required: { type: array, items: { type: string } }
+additionalProperties: false

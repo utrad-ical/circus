@@ -44,15 +44,13 @@ properties:
     description: >
       List of tags available in this project.
   caseAttributesSchema:
-    type: array
-    items: { $ref: 'schemaEntry' }
+    $ref: 'jsonSchemaSubset'
     description: >
-      The schema of case attributes.
+      The schema of case attributes defined as a subset of JSON Schema.
   labelAttributesSchema:
-    type: array
-    items: { $ref: 'schemaEntry' }
-    description:
-      The schema of label attributes.
+    $ref: 'jsonSchemaSubset'
+    description: >
+      The schema of label attributes defined as a subset of JSON Schema.
   windowPresets:
     type: array
     items:

@@ -1,5 +1,4 @@
--
-  projectId: 8883fdef6f5144f50eb2a83cd34baa44
+- projectId: 8883fdef6f5144f50eb2a83cd34baa44
   projectName: Lung nodules
   icon:
     glyph: lung
@@ -9,11 +8,9 @@
   windowPriority: 'dicom,auto'
   windowPresets: []
   tags:
-    -
-      caption: happy
+    - caption: happy
       color: '#ff0000'
-    -
-      caption: ufo
+    - caption: ufo
       color: '#00ff00'
-  caseAttributesSchema: []
-  labelAttributesSchema: []
+  caseAttributesSchema: {}
+  labelAttributesSchema: {}

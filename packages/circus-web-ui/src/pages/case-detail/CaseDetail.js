@@ -419,7 +419,7 @@ export class RevisionData extends React.Component {
     const activeLabel = activeSeries.labels[activeLabelIndex];
     return (
       <div className={classNames('case-revision-data', { busy })}>
-        <div className="case-revision-header">
+        <div className="case-revision-sidebar">
           <Collapser title="Series / Labels" className="labels">
             <LabelSelector
               revision={revision}
@@ -449,24 +449,26 @@ export class RevisionData extends React.Component {
             />
           </Collapser>
         </div>
-        <ToolBar
-          active={tool}
-          changeTool={this.changeTool}
-          showReferenceLine={this.state.showReferenceLine}
-          toggleReferenceLine={this.toggleReferenceLine}
-          lineWidth={this.state.lineWidth}
-          setLineWidth={this.setLineWidth}
-          windowPresets={projectData.windowPresets}
-          selectWindowPreset={this.selectWindowPreset}
-          brushEnabled={!!activeLabel}
-        />
-        <ViewerCluster
-          composition={composition}
-          labels={activeSeries.labels}
-          stateChanger={this.stateChanger}
-          activeLabel={activeLabel}
-          tool={tool}
-        />
+        <div className="case-revision-main">
+          <ToolBar
+            active={tool}
+            changeTool={this.changeTool}
+            showReferenceLine={this.state.showReferenceLine}
+            toggleReferenceLine={this.toggleReferenceLine}
+            lineWidth={this.state.lineWidth}
+            setLineWidth={this.setLineWidth}
+            windowPresets={projectData.windowPresets}
+            selectWindowPreset={this.selectWindowPreset}
+            brushEnabled={!!activeLabel}
+          />
+          <ViewerCluster
+            composition={composition}
+            labels={activeSeries.labels}
+            stateChanger={this.stateChanger}
+            activeLabel={activeLabel}
+            tool={tool}
+          />
+        </div>
       </div>
     );
   }

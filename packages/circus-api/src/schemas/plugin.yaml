@@ -17,6 +17,8 @@ properties:
     enum: ['CAD']
   description:
     type: string
+  dockerImage:
+    type: string
   icon:
     $ref: icon
 additionalProperties: false

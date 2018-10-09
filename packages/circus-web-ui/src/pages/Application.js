@@ -7,6 +7,7 @@ import { logout } from 'actions';
 import Icon from 'components/Icon';
 import styled from 'styled-components';
 import classnames from 'classnames';
+import ErrorBoundary from 'components/ErrorBoundary';
 
 /**
  * The main application container.
@@ -20,21 +21,23 @@ const ApplicationView = props => {
   return (
     <Fragment>
       <Nav />
-      <div className="full-container">
-        <MessageBox />
-        {notLoggedIn && (
-          <div className="alert alert-danger">
-            You are not logged in, or your session has been expired.<br />
-            Please log in first.
-            <div>
-              <Link to="/">
-                <Button>Login</Button>
-              </Link>
+      <ErrorBoundary>
+        <div className="full-container">
+          <MessageBox />
+          {notLoggedIn && (
+            <div className="alert alert-danger">
+              You are not logged in, or your session has been expired.<br />
+              Please log in first.
+              <div>
+                <Link to="/">
+                  <Button>Login</Button>
+                </Link>
+              </div>
             </div>
-          </div>
-        )}
-      </div>
-      <div className="container">{pageContentVisible && props.children}</div>
+          )}
+        </div>
+        <div className="container">{pageContentVisible && props.children}</div>
+      </ErrorBoundary>
     </Fragment>
   );
 };

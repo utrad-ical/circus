@@ -5,9 +5,9 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Router, Route, Switch } from 'react-router-dom';
 import Application from 'pages/Application';
+
 import LoginScreen from 'pages/LoginScreen';
 import HomePage from 'pages/HomePage';
-
 import SeriesSearch from 'pages/search/SeriesSearch';
 import CreateNewCase from 'pages/CreateNewCase';
 import CaseSearch from 'pages/search/CaseSearch';
@@ -54,50 +54,50 @@ const theme = {
   highlightColor: '#fd3164'
 };
 
+const AppRoutes = props => {
+  return (
+    <Application>
+      <Route path="/home" component={HomePage} />
+      <Route path="/browse/series/:presetName?" component={SeriesSearch} />
+      <Route path="/browse/case/:presetName?" component={CaseSearch} />
+      <Route
+        path="/browse/plugin-jobs/:presetName?"
+        component={PluginJobSearch}
+      />
+      <Route path="/plugin-job-queue" component={PluginJobQueueSearch} />
+      <Route path="/import-series" component={ImportSeries} />
+      <Route path="/import-case" component={ImportCase} />
+      <Route path="/new-case/:seriesUid" component={CreateNewCase} />
+      <Route path="/new-job/:seriesUid" component={CreateNewJob} />
+      <Switch>
+        <Route path="/admin/general" component={GeneralAdmin} />
+        <Route path="/admin/group" component={GroupAdmin} />
+        <Route path="/admin/user" component={UserAdmin} />
+        <Route path="/admin/project" component={ProjectAdmin} />
+        <Route
+          path="/admin/plugin-job-manager"
+          component={PluginJobManagerAdmin}
+        />
+        <Route path="/admin/plugins" component={PluginAdmin} />
+        <Route path="/admin/plugin-job-queue" component={PluginJobQueueAdmin} />
+        <Route path="/admin" exact component={AdminIndex} />
+      </Switch>
+      <Route path="/series/:uid" component={SeriesDetail} />
+      <Route path="/case/:caseId" component={CaseDetail} />
+      <Route path="/plugin-job/:jobId" component={PluginJobDetail} />
+      <Route path="/task-list" component={TaskList} />
+      <Route path="/preference" component={Preferences} />
+    </Application>
+  );
+};
+
 ReactDOM.render(
   <Provider store={store}>
     <ThemeProvider theme={theme}>
       <Router history={browserHistory}>
         <Switch>
           <Route exact path="/" component={LoginScreen} />
-          <Application>
-            <Route path="/home" component={HomePage} />
-            <Route
-              path="/browse/series/:presetName?"
-              component={SeriesSearch}
-            />
-            <Route path="/browse/case/:presetName?" component={CaseSearch} />
-            <Route
-              path="/browse/plugin-jobs/:presetName?"
-              component={PluginJobSearch}
-            />
-            <Route path="/plugin-job-queue" component={PluginJobQueueSearch} />
-            <Route path="/import-series" component={ImportSeries} />
-            <Route path="/import-case" component={ImportCase} />
-            <Route path="/new-case/:seriesUid" component={CreateNewCase} />
-            <Route path="/new-job/:seriesUid" component={CreateNewJob} />
-            <Switch>
-              <Route path="/admin/general" component={GeneralAdmin} />
-              <Route path="/admin/group" component={GroupAdmin} />
-              <Route path="/admin/user" component={UserAdmin} />
-              <Route path="/admin/project" component={ProjectAdmin} />
-              <Route
-                path="/admin/plugin-job-manager"
-                component={PluginJobManagerAdmin}
-              />
-              <Route path="/admin/plugins" component={PluginAdmin} />
-              <Route
-                path="/admin/plugin-job-queue"
-                component={PluginJobQueueAdmin}
-              />
-              <Route path="/admin" exact component={AdminIndex} />
-            </Switch>
-            <Route path="/series/:uid" component={SeriesDetail} />
-            <Route path="/case/:caseId" component={CaseDetail} />
-            <Route path="/plugin-job/:jobId" component={PluginJobDetail} />
-            <Route path="/task-list" component={TaskList} />
-            <Route path="/preference" component={Preferences} />
-          </Application>
+          <AppRoutes />
         </Switch>
       </Router>
     </ThemeProvider>

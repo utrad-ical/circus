@@ -1,6 +1,7 @@
 import React from 'react';
 import { api } from '../../utils/api';
 import ViewerCluster from './ViwewerCluster';
+import SideContainer from './SideContainer';
 import PropertyEditor from 'rb/PropertyEditor';
 import FullSpanContainer from 'components/FullSpanContainer';
 import LoadingIndicator from 'rb/LoadingIndicator';
@@ -419,7 +420,7 @@ export class RevisionData extends React.Component {
     const activeLabel = activeSeries.labels[activeLabelIndex];
     return (
       <div className={classNames('case-revision-data', { busy })}>
-        <div className="case-revision-sidebar">
+        <SideContainer>
           <Collapser title="Series / Labels" className="labels">
             <LabelSelector
               revision={revision}
@@ -448,7 +449,7 @@ export class RevisionData extends React.Component {
               onChange={this.caseAttributesChange}
             />
           </Collapser>
-        </div>
+        </SideContainer>
         <div className="case-revision-main">
           <ToolBar
             active={tool}

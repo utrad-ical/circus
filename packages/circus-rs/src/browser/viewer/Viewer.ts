@@ -158,7 +158,6 @@ export default class Viewer extends EventEmitter {
     if (eventType === 'mousedown') {
       eventType = 'dragstart';
       this.isDragging = true;
-      this.canvas.requestPointerLock();
 
       // register additional mouse handlers to listen events outside of canvas while dragging
       this.canvas.removeEventListener('mouseup', this.boundEventHandler);
@@ -175,7 +174,6 @@ export default class Viewer extends EventEmitter {
       if (eventType === 'mouseup') {
         eventType = 'dragend';
         this.isDragging = false;
-        document.exitPointerLock();
 
         this.canvas.addEventListener('mouseup', this.boundEventHandler);
         this.canvas.addEventListener('mousemove', this.boundEventHandler);

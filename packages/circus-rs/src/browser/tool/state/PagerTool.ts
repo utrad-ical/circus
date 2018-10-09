@@ -11,7 +11,7 @@ export default class PagerTool extends DraggableTool {
   private currentStep: number | undefined;
 
   public dragHandler(ev: ViewerEvent): void {
-    super.dragEndHandler(ev);
+    super.dragHandler(ev);
     const dragInfo = this.dragInfo;
     const viewer = ev.viewer;
     const state = viewer.getState();

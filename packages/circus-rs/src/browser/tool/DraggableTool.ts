@@ -33,6 +33,9 @@ export interface DragInfo {
  * such as the total mouse move distance from the drag start point.
  */
 export default abstract class DraggableTool extends Tool {
+
+  protected usePointerLockAPI: boolean = true;
+
   /**
    * Holds some useful drag-related variables.
    */
@@ -59,6 +62,9 @@ export default abstract class DraggableTool extends Tool {
     this.startX = ev.viewerX;
     this.startY = ev.viewerY;
     this.updateInfo(ev);
+
+    if(this.usePointerLockAPI)
+      ev.viewer.canvas.requestPointerLock();
   }
 
   public dragHandler(ev: ViewerEvent): void {
@@ -67,6 +73,8 @@ export default abstract class DraggableTool extends Tool {
 
   public dragEndHandler(ev: ViewerEvent): void {
     this.updateInfo(ev);
+    if(this.usePointerLockAPI)
+      document.exitPointerLock();
   }
 
   private updateInfo(ev: ViewerEvent): void {

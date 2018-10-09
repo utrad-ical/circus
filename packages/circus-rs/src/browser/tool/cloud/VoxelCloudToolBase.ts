@@ -12,6 +12,9 @@ import { Vector2, Vector3 } from 'three';
  * VoxelCloudToolBase is a base tool that affects VoxelCloud annotations.
  */
 export default class VoxelCloudToolBase extends DraggableTool {
+  // Disable pointer lock API
+  protected usePointerLockAPI = false;
+
   protected activeCloud: VoxelCloud | null = null;
 
   protected pX: number | undefined;

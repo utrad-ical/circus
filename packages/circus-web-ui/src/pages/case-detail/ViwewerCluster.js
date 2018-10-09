@@ -3,28 +3,16 @@ import ImageViewer from '../../components/ImageViewer';
 import styled from 'styled-components';
 
 const TwoByTwoLayout = styled.div`
-  flex: auto;
-  display: flex;
+  flex: 1 1 0;
+  display: grid;
+  grid-template: 1fr 1fr / 1fr 1fr;
+  grid-gap: 2px;
   flex-direction: column;
   background: #333;
-
-  .viewer-row {
-    flex: 1 1 0;
-    display: flex;
-    flex-direction: row;
-    justify-content: space-around;
-    &:first-child {
-      margin-bottom: 2px;
-    }
-    min-height: 30px;
-  }
 
   .image-viewer {
     flex: 1 1 0;
     overflow: hidden;
-    &:first-child {
-      margin-right: 2px;
-    }
   }
 `;
 
@@ -46,14 +34,10 @@ const ViewerCluster = props => {
 
   return (
     <TwoByTwoLayout>
-      <div className="viewer-row">
-        {makeViewer('axial')}
-        {makeViewer('sagittal')}
-      </div>
-      <div className="viewer-row">
-        {makeViewer('coronal')}
-        {makeViewer('axial', 'celestialRotate', 'celestialRotate')}
-      </div>
+      {makeViewer('axial')}
+      {makeViewer('sagittal')}
+      {makeViewer('coronal')}
+      {makeViewer('axial', 'celestialRotate', 'celestialRotate')}
     </TwoByTwoLayout>
   );
 };

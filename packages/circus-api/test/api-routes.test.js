@@ -211,6 +211,21 @@ describe('API', function() {
     });
   });
 
+  describe('admin/plugins', function _adminPlugins() {
+    beforeEach(async function() {
+      await test.setUpMongoFixture(server.db, ['pluginDefinitions']);
+    });
+
+    it('should return list of plugins', async function _shouldReturnListOfPlugins() {
+      const res = await axios.get(server.url + 'api/admin/plugins');
+      assert.equal(res.status, 200);
+      assert.isArray(res.data.items);
+      assert.isTrue(
+        res.data.items.some(p => p.pluginName === 'MOCK-VALIDATION-FAILURE')
+      );
+    });
+  });
+
   describe('admin/server-params', function _adminServerParams() {
     beforeEach(async function() {
       await test.setUpMongoFixture(server.db, ['serverParams']);
@@ -845,4 +860,24 @@ describe('API', function() {
 
     it.skip('should report task progress');
   });
+
+  describe.only('plugins', function _plugins() {
+    beforeEach(async function() {
+      await test.setUpMongoFixture(server.db, ['pluginDefinitions']);
+    });
+
+    it('should return list of all plugins', async function _shouldReturnListOfAllPlugins() {
+      const res = await axios.get(server.url + 'api/plugins');
+      assert.equal(res.status, 200);
+      assert.isArray(res.data);
+      assert.isTrue(res.data.some(p => p.pluginName === 'MOCK-VALIDATION-FAILURE'));
+    });
+
+    it('should return plugin definition specified by pluginId', async function _shouldReturnPluginDefinitionSpecifiedByPluginId() {
+      const res = await axios.get(server.url + 'api/plugins/circus-mock%2Ffails');
+      assert.equal(res.status, 200);
+      assert.equal(res.data.pluginName, 'MOCK-VALIDATION-FAILURE');
+    });
+  });
+
 });

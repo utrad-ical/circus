@@ -73,7 +73,8 @@ export async function setUpAppForTest(logMode = 'off') {
     'serverParams',
     'tokens',
     'tasks',
-    'pluginJobs'
+    'pluginJobs',
+    'pluginDefinitions'
   ]);
 
   const pluginJobsCollection = db.collection('pluginJobs');

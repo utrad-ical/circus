@@ -41,22 +41,24 @@ describe('pluginJobRunner', () => {
       })
     };
 
-    const pluginDefinitionLoader = async (discardPluginId: string) => {
-      const fixedDefinition: PluginDefinition = {
-        pluginId: 'circus-mock/empty',
-        pluginName: 'circus-mock/empty',
-        version: '1.0',
-        dockerImage: 'circus-mock/empty:1.0',
-        type: 'CAD'
-      };
-      return fixedDefinition;
+    const pluginDefinitionAccessor = {
+      get: async (discardPluginId: string) => {
+        const fixedDefinition: PluginDefinition = {
+          pluginId: 'circus-mock/empty',
+          pluginName: 'circus-mock/empty',
+          version: '1.0',
+          dockerImage: 'circus-mock/empty:1.0',
+          type: 'CAD'
+        };
+        return fixedDefinition;
+      }
     };
 
     const runner = pluginJobRunner({
       jobReporter,
       dockerRunner,
       dicomRepository,
-      pluginDefinitionLoader,
+      pluginDefinitionAccessor,
       workingDirectory,
       resultsDirectory
     });

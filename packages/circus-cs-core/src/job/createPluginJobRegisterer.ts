@@ -2,7 +2,7 @@ import { PluginJobRequest, JobSeries } from '../interface';
 import { QueueSystem } from '../queue/queue';
 import { DicomFileRepository } from '@utrad-ical/circus-lib/lib/dicom-file-repository';
 import MultiRange from 'multi-integer-range';
-import { PluginDefinitionLoader } from '../util/pluginDefinitionsAccessor';
+import { PluginDefinitionAccessor } from '../CsCore';
 
 function checkSeriesImageRange(
   imagesInSeries: MultiRange,
@@ -41,10 +41,10 @@ export interface PluginJobRegisterer {
  */
 export default function createPluginJobRegisterer(deps: {
   queue: QueueSystem<PluginJobRequest>;
-  pluginDefinitionLoader: PluginDefinitionLoader;
+  pluginDefinitionAccessor: PluginDefinitionAccessor;
   repository: DicomFileRepository;
 }): PluginJobRegisterer {
-  const { queue, pluginDefinitionLoader, repository } = deps;
+  const { queue, pluginDefinitionAccessor, repository } = deps;
 
   async function register(
     jobId: string,
@@ -57,7 +57,7 @@ export default function createPluginJobRegisterer(deps: {
     }
 
     // Ensure the specified plug-in exists
-    await pluginDefinitionLoader(payload.pluginId);
+    await pluginDefinitionAccessor.get(payload.pluginId);
 
     // Ensure all the specified series exist and each series has
     // enough images to process

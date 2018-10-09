@@ -6,7 +6,7 @@ import DockerRunner from '../util/DockerRunner';
 import { DicomFileRepository } from '@utrad-ical/circus-lib/lib/dicom-file-repository';
 import pluginResultsValidator from './pluginResultsValidator';
 import { MultiRange } from 'multi-integer-range';
-import { PluginDefinitionLoader } from '../util/pluginDefinitionsAccessor';
+import { PluginDefinitionAccessor } from '../CsCore';
 
 export interface PluginJobRunner {
   run: (jobId: string, job: PluginJobRequest) => Promise<boolean>;
@@ -18,7 +18,7 @@ export default function pluginJobRunner(deps: {
   jobReporter: PluginJobReporter;
   dockerRunner: DockerRunner;
   dicomRepository: DicomFileRepository;
-  pluginDefinitionLoader: PluginDefinitionLoader;
+  pluginDefinitionAccessor: Pick<PluginDefinitionAccessor, 'get'>;
   workingDirectory: string;
   resultsDirectory: string;
   removeTemporaryDirectory?: boolean;
@@ -27,7 +27,7 @@ export default function pluginJobRunner(deps: {
     jobReporter,
     dockerRunner,
     dicomRepository,
-    pluginDefinitionLoader,
+    pluginDefinitionAccessor,
     workingDirectory,
     resultsDirectory,
     removeTemporaryDirectory = true
@@ -86,7 +86,7 @@ export default function pluginJobRunner(deps: {
     try {
       const { pluginId, series, environment } = job;
 
-      const plugin = await pluginDefinitionLoader(pluginId);
+      const plugin = await pluginDefinitionAccessor.get(pluginId);
       if (!plugin) throw new Error(`No such plugin: ${pluginId}`);
 
       await jobReporter.report(jobId, 'processing');

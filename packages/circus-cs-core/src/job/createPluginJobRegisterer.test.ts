@@ -1,8 +1,8 @@
 import createPluginJobRegisterer from './createPluginJobRegisterer';
-import { PluginJobRequest } from '../interface';
+import { PluginJobRequest, PluginDefinition } from '../interface';
 import { QueueSystem } from '../queue/queue';
 import { DicomFileRepository } from '@utrad-ical/circus-lib/lib/dicom-file-repository';
-import { PluginDefinitionLoader } from '../util/pluginDefinitionsAccessor';
+import { PluginDefinitionAccessor } from '../CsCore';
 
 describe('registerJob', () => {
   const defaultPayload: PluginJobRequest = {
@@ -21,23 +21,28 @@ describe('registerJob', () => {
       )
     });
 
-    const pluginDefinitionLoader: PluginDefinitionLoader = async pluginId => {
-      if (pluginId === 'my-plugin') {
-        return {
-          pluginId: 'my-plugin',
-          pluginName: 'my-plugin',
-          version: '1.0.0',
-          type: 'CAD',
-          dockerImage: 'my-plugin'
-        };
-      } else {
-        throw new Error('No such plug-in installed.');
+    const pluginDefinitionAccessor: PluginDefinitionAccessor = {
+      get: async pluginId => {
+        if (pluginId === 'my-plugin') {
+          return {
+            pluginId: 'my-plugin',
+            pluginName: 'my-plugin',
+            version: '1.0.0',
+            type: 'CAD',
+            dockerImage: 'my-plugin'
+          } as PluginDefinition;
+        } else {
+          throw new Error('No such plug-in installed.');
+        }
+      },
+      list: async () => {
+        throw Error();
       }
     };
 
     deps = {
       queue,
-      pluginDefinitionLoader,
+      pluginDefinitionAccessor,
       repository
     };
   });

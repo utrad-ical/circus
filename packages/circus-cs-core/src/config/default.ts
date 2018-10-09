@@ -5,8 +5,6 @@ import { Configuration } from './Configuration';
 const defaults: Configuration = {
   pluginWorkingDir: path.join(os.tmpdir(), 'circus-cs'),
 
-  coreWorkingDir: '/var/circus/cs-core',
-
   pluginResultsDir: '/var/circus/plugin-results',
   cleanPluginWorkingDir: true,
 
@@ -48,7 +46,10 @@ const defaults: Configuration = {
     checkQueueInterval: 1000
   },
 
-  plugins: []
+  pluginDefinition: {
+    type: 'static',
+    dir: path.join(__dirname, '..', '..')
+  }
 };
 
 export default defaults;

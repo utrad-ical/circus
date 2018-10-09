@@ -6,9 +6,7 @@ import createDaemonController, {
 } from './daemon/createDaemonController';
 import { Configuration } from './config/Configuration';
 import pluginJobRunner, { PluginJobRunner } from './job/pluginJobRunner';
-import pluginDefinitionsAccessor, {
-  PluginDefinitionAccessor
-} from './util/pluginDefinitionsAccessor';
+import createStaticPluginDefinitionAccessor from './plugin/createStaticPluginDefinitionAccessor';
 import createPluginJobRegisterer, {
   PluginJobRegisterer
 } from './job/createPluginJobRegisterer';
@@ -18,17 +16,20 @@ import DockerRunner from './util/DockerRunner';
 import DependentModuleLoader from '@utrad-ical/circus-lib/lib/DependentModuleLoader';
 import loadModule from './loadModule';
 import Logger from '@utrad-ical/circus-lib/lib/logger/Logger';
+import { PluginDefinitionAccessor } from './CsCore';
+import createMongoPluginDefinitionAccessor from './plugin/createMongoPluginDefinitionAccessor';
 
 export interface CsModules {
   logger: Logger;
   dispose: () => Promise<void>;
   daemonController: DaemonController;
-  pluginDefinitionsAccessor: PluginDefinitionAccessor;
   queueSystem: QueueSystem<PluginJobRequest>;
   dicomFileRepository: DicomFileRepository;
   pluginJobRegisterer: PluginJobRegisterer;
   jobReporter: PluginJobReporter;
   jobRunner: PluginJobRunner;
+
+  pluginDefinitionAccessor: PluginDefinitionAccessor;
 }
 
 type Dispose = () => Promise<void>;
@@ -53,7 +54,7 @@ export default function configureLoader(
     'logger',
     async () => {
       const category = config.logger || 'default';
-      return await loadModule<Logger>('logger', './logger', {
+      return await loadModule<Logger>('./logger', {
         module: 'Log4JsLogger',
         options: { category }
       });
@@ -66,8 +67,26 @@ export default function configureLoader(
     []
   );
   depLoader.registerLoader(
-    'pluginDefinitionsAccessor',
-    async () => pluginDefinitionsAccessor(config.coreWorkingDir),
+    'pluginDefinitionAccessor',
+    async deps => {
+      if (config.pluginDefinition.type === 'static') {
+        return createStaticPluginDefinitionAccessor(
+          config.pluginDefinition.dir
+        );
+      }
+      if (config.pluginDefinition.type === 'mongo') {
+        const { mongoUrl, collectionName } = config.pluginDefinition.options;
+        const client = await mongo.MongoClient.connect(mongoUrl);
+        const collection = client.db().collection(collectionName);
+        const pluginDefinitionAccessor = createMongoPluginDefinitionAccessor(
+          collection
+        );
+        disposeCollection.push(() => client.close());
+        return pluginDefinitionAccessor;
+      }
+
+      throw new Error('Invalid configuration of pluginDefinition');
+    },
     []
   );
   /**
@@ -89,7 +108,6 @@ export default function configureLoader(
     'dicomFileRepository',
     async deps => {
       return await loadModule<DicomFileRepository>(
-        'dicom file repository',
         '@utrad-ical/circus-lib/lib/dicom-file-repository',
         config.dicomFileRepository
       );
@@ -102,10 +120,10 @@ export default function configureLoader(
       return createPluginJobRegisterer({
         queue: deps.queueSystem,
         repository: deps.dicomFileRepository,
-        pluginDefinitionLoader: deps.pluginDefinitionsAccessor.get
+        pluginDefinitionAccessor: deps.pluginDefinitionAccessor
       });
     },
-    ['queueSystem', 'dicomFileRepository', 'pluginDefinitionsAccessor']
+    ['queueSystem', 'dicomFileRepository', 'pluginDefinitionAccessor']
   );
   depLoader.registerLoader(
     'jobReporter',
@@ -126,13 +144,13 @@ export default function configureLoader(
         jobReporter: deps.jobReporter,
         dockerRunner: new DockerRunner(config.docker),
         dicomRepository: deps.dicomFileRepository,
-        pluginDefinitionLoader: deps.pluginDefinitionsAccessor.get,
+        pluginDefinitionAccessor: deps.pluginDefinitionAccessor,
         workingDirectory: config.pluginWorkingDir,
         resultsDirectory: config.pluginResultsDir,
         removeTemporaryDirectory: config.cleanPluginWorkingDir
       });
     },
-    ['jobReporter', 'dicomFileRepository', 'pluginDefinitionsAccessor']
+    ['jobReporter', 'dicomFileRepository', 'pluginDefinitionAccessor']
   );
   return depLoader;
 }

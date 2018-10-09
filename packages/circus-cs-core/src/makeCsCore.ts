@@ -1,15 +1,14 @@
 import { PluginJobRequest } from './interface';
 import DependentModuleLoader from '@utrad-ical/circus-lib/lib/DependentModuleLoader';
-import { CsCore } from './CsCore';
+import { CsCore, PluginDefinitionAccessor } from './CsCore';
 import { DaemonController } from './daemon/createDaemonController';
-import { PluginDefinitionAccessor } from './util/pluginDefinitionsAccessor';
 import { QueueSystem } from './queue/queue';
 import { PluginJobRegisterer } from './job/createPluginJobRegisterer';
 
 interface CsCoreDeps {
   dispose: () => Promise<void>;
   daemonController: DaemonController;
-  pluginDefinitionsAccessor: PluginDefinitionAccessor;
+  pluginDefinitionAccessor: PluginDefinitionAccessor;
   queueSystem: QueueSystem<PluginJobRequest>;
   pluginJobRegisterer: PluginJobRegisterer;
 }
@@ -20,7 +19,7 @@ export function makeCsCore<T extends CsCoreDeps>(
   const notPrepared: string[] = [
     'dispose',
     'daemonController',
-    'pluginDefinitionsAccessor',
+    'pluginDefinitionAccessor',
     'queueSystem',
     'pluginJobRegisterer'
   ].filter(i => !loader.ready(i as keyof CsCoreDeps));
@@ -36,11 +35,9 @@ export function makeCsCore<T extends CsCoreDeps>(
     pm2killall: async () => (await loader.load('daemonController')).pm2killall()
   };
   const plugin: CsCore['plugin'] = {
-    update: async pluginDefinitions =>
-      (await loader.load('pluginDefinitionsAccessor')).save(pluginDefinitions),
-    list: async () => (await loader.load('pluginDefinitionsAccessor')).load(),
+    list: async () => (await loader.load('pluginDefinitionAccessor')).list(),
     get: async (pluginId: string) =>
-      (await loader.load('pluginDefinitionsAccessor')).get(pluginId)
+      (await loader.load('pluginDefinitionAccessor')).get(pluginId)
   };
   const job: CsCore['job'] = {
     register: async (

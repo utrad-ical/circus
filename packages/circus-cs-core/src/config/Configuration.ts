@@ -8,18 +8,19 @@ interface MongoConnectionConfiguration {
 }
 
 export interface ModuleDefinition {
+  type?: 'HoF' | 'Instance';
   module: string;
   options?: ModuleOption;
 }
-type ModuleOption = {
-  [key: string]: ModuleOption | string | number | boolean;
-};
+type ModuleOption =
+  | string
+  | number
+  | boolean
+  | {
+      [key: string]: ModuleOption;
+    };
 
 export interface Configuration {
-  /**
-   * A path to the working directory which stores Plug-in definitions.
-   */
-  coreWorkingDir: string;
   /**
    * A path to the temporary directory used as a plugin working directory.
    */
@@ -56,10 +57,20 @@ export interface Configuration {
     startOptions: StartOptions;
     checkQueueInterval: number;
   };
+
   /**
-   * List of plugins installed as Docker images.
+   * Accessor of plugins installed as Docker images.
    */
-  plugins: PluginDefinition[];
+  pluginDefinition:
+    | {
+        type: 'mongo';
+        options: MongoConnectionConfiguration;
+      }
+    | {
+        type: 'static';
+        dir: string;
+      };
+
   /**
    * Category name of daemon logger (depends Log4JsLogger setting)
    */

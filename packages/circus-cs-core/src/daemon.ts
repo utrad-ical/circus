@@ -32,16 +32,11 @@ export async function main() {
     }
   }
 
-  let moduleLoader: DependentModuleLoader<CsModules>;
-  if (config === undefined) {
-    config = (await import('./config')).default;
-    moduleLoader = configureLoader(config!);
-    await (await moduleLoader.load('pluginDefinitionsAccessor')).save(
-      config.plugins
-    );
-  } else {
-    moduleLoader = configureLoader(config!);
-  }
+  if (config === undefined) config = (await import('./config')).default;
+
+  const moduleLoader: DependentModuleLoader<CsModules> = configureLoader(
+    config!
+  );
 
   // Todo: validate config with utility like ajv
   let loopRunOptions: LoopRunOptions<PluginJobRequest>;

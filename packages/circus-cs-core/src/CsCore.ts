@@ -11,7 +11,6 @@ export interface CsCore {
   };
   // plugin handler
   plugin: {
-    update: (pluginDefinitions: PluginDefinition[]) => Promise<void>;
     list: () => Promise<PluginDefinition[]>;
     get: (pluginId: string) => Promise<PluginDefinition>;
   };
@@ -28,4 +27,9 @@ export interface CsCore {
   };
   // dispose
   dispose(): Promise<void>;
+}
+
+export interface PluginDefinitionAccessor {
+  list: () => Promise<PluginDefinition[]>;
+  get: (pluginId: string) => Promise<PluginDefinition>;
 }

@@ -7,7 +7,6 @@ import _pm2 from 'pm2';
 import pify from 'pify';
 import escape from 'shell-escape';
 import { Configuration } from '../config/Configuration';
-import configureLoader from '../configureLoader';
 
 const pm2: any = pify(_pm2);
 
@@ -39,8 +38,6 @@ export default function createDaemonController(
   };
 
   const start = async () => {
-    const loader = configureLoader(config);
-    await (await loader.load('pluginDefinitionsAccessor')).save(config.plugins);
     return execute(async () => {
       const processList = await pm2.describe(startOptions.name);
       if (processList.length > 0) return;

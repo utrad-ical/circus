@@ -1,25 +1,22 @@
 import { ModuleDefinition } from './config/Configuration';
 
 export default async function loadModule<T>(
-  title: string,
   baseDir: string,
   config: ModuleDefinition
 ): Promise<T> {
-  const { module, options } = config;
+  const { module: src, options, type = 'Instance' } = config;
   let instance: T;
-  let name: string;
-  if (typeof module === 'string') {
-    name = module;
-    if (/\\/.test(module)) {
-      const { default: TheClass } = await import(`${module}`);
-      instance = new TheClass(options);
+  if (typeof src === 'string') {
+    const creator = /\\/.test(src)
+      ? (await import(`${src}`)).default
+      : (await import(`${baseDir}/${src}`)).default;
+    if (type === 'HoF') {
+      instance = await creator(options);
     } else {
-      const { default: TheClass } = await import(`${baseDir}/${module}`);
-      instance = new TheClass(options);
+      instance = new creator(options);
     }
   } else {
-    name = `(customized ${title})`;
-    instance = module;
+    instance = src;
   }
 
   return instance;

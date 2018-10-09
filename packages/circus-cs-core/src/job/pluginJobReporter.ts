@@ -22,7 +22,6 @@ export default function pluginJobReporter(
     switch (type) {
       case 'processing':
       case 'finished':
-      case 'error':
         await collection.findOneAndUpdate(
           { jobId },
           { $set: { status: type } }
@@ -32,6 +31,12 @@ export default function pluginJobReporter(
         await collection.findOneAndUpdate(
           { jobId },
           { $set: { results: payload } }
+        );
+        break;
+      case 'error':
+        await collection.findOneAndUpdate(
+          { jobId },
+          { $set: { status: type, errorMessage: payload } }
         );
         break;
     }

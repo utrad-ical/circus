@@ -3,7 +3,7 @@ import React from 'react';
 import * as et from 'rb/editor-types';
 import WindowPresetEditor from './WindowPresetEditor';
 import TagEditor, { newTagItem } from './TagEditor';
-import AttributeSchemaArrayEditor from './AttributeSchemaEditor';
+import AttributeSchemaEditor from './AttributeSchemaEditor';
 import LoadingIndicator from 'rb/LoadingIndicator';
 import BodyPartIcon from 'components/BodyPartIcon';
 import IconEditor from './IconEditor';
@@ -77,13 +77,13 @@ export default class ProjectAdmin extends React.Component {
         key: 'caseAttributesSchema',
         caption: 'Case Attribute Schema',
         className: 'attribute-schema-prop',
-        editor: AttributeSchemaArrayEditor
+        editor: AttributeSchemaEditor
       },
       {
         key: 'labelAttributesSchema',
         caption: 'Label Attribute Schema',
         className: 'attribute-schema-prop',
-        editor: AttributeSchemaArrayEditor
+        editor: AttributeSchemaEditor
       }
     ];
   }

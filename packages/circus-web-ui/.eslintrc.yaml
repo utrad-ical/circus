@@ -1,5 +1,4 @@
-parser:
-  babel-eslint
+parser: babel-eslint
 extends:
   - eslint:recommended
   - plugin:react/recommended
@@ -18,7 +17,6 @@ globals:
 plugins:
   - react
 rules:
-  indent: [2, 2, { SwitchCase: 1 }]
   quotes: [2, 'single', { avoidEscape: true }]
   jsx-quotes: [2, 'prefer-double']
   padding-line-between-statements:
@@ -27,9 +25,9 @@ rules:
     - { blankLine: 'always', prev: 'import', next: '*' }
     - { blankLine: 'any', prev: 'import', next: 'import' }
   no-unused-vars: [2, { argsIgnorePattern: 'props', ignoreRestSiblings: true }]
-  "react/prop-types": [0]
-  "react/display-name": [0]
-  "react/jsx-closing-bracket-location": [2, 'line-aligned']
+  'react/prop-types': [0]
+  'react/display-name': [0]
+  'react/jsx-closing-bracket-location': [2, 'line-aligned']
   no-useless-escape: [0]
   semi: [2, 'always']
   no-var: 'error'

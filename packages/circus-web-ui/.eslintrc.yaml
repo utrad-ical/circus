@@ -17,6 +17,7 @@ globals:
 plugins:
   - react
 rules:
+  no-console: 'warn'
   quotes: [2, 'single', { avoidEscape: true }]
   jsx-quotes: [2, 'prefer-double']
   padding-line-between-statements:

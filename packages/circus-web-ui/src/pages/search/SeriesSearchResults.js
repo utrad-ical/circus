@@ -2,6 +2,7 @@ import React, { Fragment } from 'react';
 import SearchResultsView, {
   makeSortOptions
 } from 'components/SearchResultsView';
+import styled from 'styled-components';
 import { Link } from 'react-router-dom';
 import DataGrid from 'components/DataGrid';
 import PatientInfoBox from 'components/PatientInfoBox';
@@ -10,13 +11,20 @@ import Icon from 'components/Icon';
 import IconButton from 'components/IconButton';
 import { DropdownButton, MenuItem } from 'components/react-bootstrap';
 
+const ModalitySpan = styled.span`
+  display: inline-block;
+  min-width: 50px;
+  padding: 0;
+  font-size: 110%;
+  border-radius: 3px;
+  text-align: center;
+  background-color: #777777;
+  color: white;
+`;
+
 const Modality = props => {
   const series = props.value;
-  return (
-    <span className="modality-marker label label-default">
-      {series.modality}
-    </span>
-  );
+  return <ModalitySpan>{series.modality}</ModalitySpan>;
 };
 
 const Operation = props => {
@@ -30,11 +38,12 @@ const Operation = props => {
       </Link>
       &thinsp;
       <DropdownButton
+        id="dropdown-new-item"
         bsSize="sm"
         bsStyle="primary"
         title={
           <Fragment>
-            <Icon icon="plus" />New
+            <Icon icon="plus" /> New
           </Fragment>
         }
       >

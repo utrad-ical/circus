@@ -44,9 +44,9 @@ export default class FeedbackSwitcher extends React.Component {
     // Choose which feedback to show or edit according to the following rule:
     // 1. If consensual feedback has been registered, use it
     // 2. If current user's personal feedback has been registered, use it
-    const consensual = job.feedback.find(f => f.consensual);
+    const consensual = job.feedbacks.find(f => f.consensual);
     if (consensual) return consensual.feedbackId;
-    const myPersonal = job.feedback.find(
+    const myPersonal = job.feedbacks.find(
       f => !f.consensual && f.enteredBy === props.user.userEmail
     );
     if (myPersonal) return myPersonal.feedbackId;

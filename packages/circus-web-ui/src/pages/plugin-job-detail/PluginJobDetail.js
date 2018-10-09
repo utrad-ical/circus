@@ -14,7 +14,7 @@ const PluginJobDetailView = props => {
     <div>
       <LesionCandidates
         job={job}
-        value={job.result.lesionCandidates}
+        value={job.results.results.lesionCandidates}
         feedbackListener={SelectionFeedbackListener}
         feedback={feedback}
         onFeedbackChange={onFeedbackChange}
@@ -44,48 +44,8 @@ class ConnectedPluginJobDetail extends React.Component {
   }
 
   async componentDidMount() {
-    // const { jobId } = this.props;
-    // const job = await api(`plugin-job/${jobId}`);
-
-    const job = {
-      jobId: 'aaabbbccc',
-      pluginId: 'pluginid',
-      status: 'finished',
-      userEmail: 'circus@circus.example.com',
-      series: [
-        {
-          seriesUid: (await api('series', { params: { limit: 1 } })).items[0]
-            .seriesUid,
-          start: 1,
-          end: 150,
-          delta: 1
-        }
-      ],
-      result: {
-        lesionCandidates: [
-          {
-            rank: 1,
-            location: [100, 200, 20],
-            confidence: 0.9
-          },
-          {
-            rank: 2,
-            location: [300, 350, 40],
-            confidence: 0.8
-          },
-          {
-            rank: 3,
-            location: [250, 120, 50],
-            confidence: 0.7
-          }
-        ]
-      },
-      feedback: [],
-      startedAt: new Date('2018-03-03T11:01:00Z'),
-      finishedAt: new Date('2018-03-03T11:02:00Z'),
-      createdAt: new Date('2018-03-03T11:00:30Z'),
-      updatedAt: new Date('2018-03-03T15:15:15Z')
-    };
+    const jobId = this.props.match.params.jobId;
+    const job = await api(`plugin-jobs/${jobId}`);
     const seriesData = {};
     for (const s of job.series) {
       const seriesUid = s.seriesUid;

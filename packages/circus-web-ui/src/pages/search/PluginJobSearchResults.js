@@ -12,7 +12,7 @@ const Operation = props => {
   const { value: series } = props;
   return (
     <Fragment>
-      <Link to={`/plugin-jobs/${series.seriesUid}`}>
+      <Link to={`/plugin-job/${series.jobId}`}>
         <IconButton icon="circus-series" bsSize="sm">
           View
         </IconButton>

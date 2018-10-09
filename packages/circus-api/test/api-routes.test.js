@@ -861,7 +861,7 @@ describe('API', function() {
     it.skip('should report task progress');
   });
 
-  describe.only('plugins', function _plugins() {
+  describe('plugins', function _plugins() {
     beforeEach(async function() {
       await test.setUpMongoFixture(server.db, ['pluginDefinitions']);
     });

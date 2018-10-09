@@ -1,28 +1,17 @@
 import React from 'react';
-import BodyPartIcon from './BodyPartIcon';
-import { OverlayTrigger, Tooltip } from 'components/react-bootstrap';
+import IconDisplay from './IconDisplay';
 
-const ProjectDisplay = props => {
-  const { plugin, size, withName } = props;
-  const toolTip = (
-    <Tooltip placelemnt="top" id="plugin-display-tooltip">
-      {plugin.description}
-    </Tooltip>
-  );
+const PluginDisplay = props => {
+  const { plugin, ...rest } = props;
+  const title = `${plugin.name} v${plugin.version}`;
   return (
-    <OverlayTrigger overlay={toolTip} placement="top">
-      <span>
-        <BodyPartIcon icon={plugin.icon} size={size} />
-        {withName && (
-          <span>
-            &ensp;<b>
-              {plugin.pluginName} v{plugin.pluginVersion}
-            </b>
-          </span>
-        )}
-      </span>
-    </OverlayTrigger>
+    <IconDisplay
+      title={title}
+      icon={plugin.icon}
+      toolTip={plugin.description}
+      {...rest}
+    />
   );
 };
 
-export default ProjectDisplay;
+export default PluginDisplay;

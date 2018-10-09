@@ -65,23 +65,17 @@ class ConnectedPluginJobDetail extends React.Component {
         lesionCandidates: [
           {
             rank: 1,
-            location_x: 10,
-            location_y: 20,
-            location_z: 20,
+            location: [100, 200, 20],
             confidence: 0.9
           },
           {
             rank: 2,
-            location_x: 10,
-            location_y: 20,
-            location_z: 40,
+            location: [300, 350, 40],
             confidence: 0.8
           },
           {
             rank: 3,
-            location_x: 10,
-            location_y: 20,
-            location_z: 50,
+            location: [250, 120, 50],
             confidence: 0.7
           }
         ]
@@ -100,7 +94,18 @@ class ConnectedPluginJobDetail extends React.Component {
     }
 
     try {
-      const plugin = await api(`plugins/${job.pluginId}`);
+      // const plugin = await api(`plugins/${job.pluginId}`);
+      const plugin = {
+        pluginId: 'pluginid',
+        name: 'mra-cad',
+        version: '1.0.5',
+        description: 'Detects aneurysms.',
+        icon: {
+          glyph: 'brain',
+          color: '#ffeeee',
+          backgroundColor: '#333333'
+        }
+      };
       this.setState({ job, seriesData, plugin });
     } catch (e) {
       this.setState({ errorMessage: e.message });

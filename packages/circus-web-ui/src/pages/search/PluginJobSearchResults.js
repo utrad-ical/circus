@@ -8,15 +8,6 @@ import PatientInfoBox from 'components/PatientInfoBox';
 import TimeDisplay from 'components/TimeDisplay';
 import IconButton from 'components/IconButton';
 
-const Modality = props => {
-  const series = props.value;
-  return (
-    <span className="modality-marker label label-default">
-      {series.modality}
-    </span>
-  );
-};
-
 const Operation = props => {
   const { value: series } = props;
   return (
@@ -31,7 +22,6 @@ const Operation = props => {
 };
 
 const columns = [
-  { caption: '', className: 'modality', renderer: Modality },
   {
     caption: 'Patient',
     className: 'patient',
@@ -44,6 +34,7 @@ const columns = [
   },
   {
     caption: 'Execution Time',
+    className: 'executoin-time',
     renderer: props => <TimeDisplay value={props.value.startedAt} />
   },
   {

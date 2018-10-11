@@ -19,24 +19,50 @@ export default function pluginJobReporter(
 ): PluginJobReporter {
   const report = async (jobId: string, type: string, payload?: any) => {
     if (!jobId) throw new Error('Job ID undefined');
+
     switch (type) {
       case 'processing':
+        await collection.findOneAndUpdate(
+          { jobId },
+          {
+            $set: {
+              status: 'processing',
+              startedAt: new Date()
+            }
+          }
+        );
+        break;
       case 'finished':
         await collection.findOneAndUpdate(
           { jobId },
-          { $set: { status: type } }
+          {
+            $set: {
+              status: 'finished',
+              finishedAt: new Date()
+            }
+          }
         );
         break;
       case 'results':
         await collection.findOneAndUpdate(
           { jobId },
-          { $set: { results: payload } }
+          {
+            $set: {
+              results: payload
+            }
+          }
         );
         break;
       case 'error':
         await collection.findOneAndUpdate(
           { jobId },
-          { $set: { status: type, errorMessage: payload } }
+          {
+            $set: {
+              status: 'error',
+              finishedAt: new Date(),
+              errorMessage: payload
+            }
+          }
         );
         break;
     }

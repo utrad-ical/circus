@@ -27,10 +27,25 @@ describe('pluginJobReporter', () => {
     await client.close(true);
   });
 
-  test('mark the status', async () => {
+  test('report processing', async () => {
     await reporter.report(jobId, 'processing');
     const check = await collection.findOne({ jobId });
     expect(check).toMatchObject({ status: 'processing' });
+    expect(check.startedAt).not.toBeNull();
+  });
+
+  test('report finished', async () => {
+    await reporter.report(jobId, 'finished');
+    const check = await collection.findOne({ jobId });
+    expect(check).toMatchObject({ status: 'finished' });
+    expect(check.finishedAt).not.toBeNull();
+  });
+
+  test('report error', async () => {
+    await reporter.report(jobId, 'error');
+    const check = await collection.findOne({ jobId });
+    expect(check).toMatchObject({ status: 'error' });
+    expect(check.finishedAt).not.toBeNull();
   });
 
   test('store results', async () => {

@@ -25,12 +25,12 @@ const PluginJobDetailView = props => {
 };
 
 const PluginJobDetailPage = props => {
-  const { job, seriesData, plugin } = props;
+  const { job, seriesData } = props;
   const primarySeriesUid = job.series[0].seriesUid;
   return (
     <FullSpanContainer>
       <div className="job-detail-header">
-        <PluginDisplay plugin={plugin} size="xl" withName />
+        <PluginDisplay pluginId={job.pluginId} size="xl" />
         <PatientInfoBox value={seriesData[primarySeriesUid].patientInfo} />
       </div>
       <div className="job-detail-main">
@@ -48,18 +48,16 @@ class ConnectedPluginJobDetail extends React.Component {
 
   async componentDidMount() {
     const jobId = this.props.match.params.jobId;
-    const job = await api(`plugin-jobs/${jobId}`);
-    const seriesData = {};
-    for (const s of job.series) {
-      const seriesUid = s.seriesUid;
-      if (seriesUid in seriesData) continue;
-      seriesData[seriesUid] = await api(`series/${seriesUid}`);
-    }
 
     try {
-      // const plugin = await api(`plugins/${job.pluginId}`);
-      const plugin = await api(`plugins/${job.pluginId}`);
-      this.setState({ job, seriesData, plugin });
+      const job = await api(`plugin-jobs/${jobId}`);
+      const seriesData = {};
+      for (const s of job.series) {
+        const seriesUid = s.seriesUid;
+        if (seriesUid in seriesData) continue;
+        seriesData[seriesUid] = await api(`series/${seriesUid}`);
+      }
+      this.setState({ job, seriesData });
     } catch (e) {
       this.setState({ errorMessage: e.message });
     }

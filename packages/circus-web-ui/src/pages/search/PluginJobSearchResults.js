@@ -22,6 +22,11 @@ const Operation = props => {
   );
 };
 
+const PluginRenderer = props => {
+  const { value: { pluginId } } = props;
+  return <PluginDisplay size="lg" pluginId={pluginId} />;
+};
+
 const columns = [
   {
     caption: 'Patient',
@@ -33,26 +38,13 @@ const columns = [
   {
     caption: 'Plugin',
     className: 'plugin',
-    renderer: ({ value: { pluginId } }) => {
-      return (
-        <PluginDisplay
-          size="xl"
-          plugin={{
-            pluginName: 'MRA-CAD',
-            version: '1.5',
-            icon: {
-              glyph: 'brain',
-              color: '#ff5500',
-              backgroundColor: '#ccffaa'
-            }
-          }}
-        />
-      );
-    }
+    renderer: PluginRenderer
   },
   {
     caption: 'Executed by',
-    key: 'userEmail'
+    renderer: ({ value: { userEmail } }) => {
+      return userEmail.slice(0, 10) + '...';
+    }
   },
   {
     caption: 'Execution Time',
@@ -62,7 +54,10 @@ const columns = [
   {
     caption: 'Status',
     className: 'created-at',
-    renderer: props => <Fragment>{props.value.status}</Fragment>
+    renderer: ({ value: { status } }) => {
+      const className = status === 'finished' ? 'text-success' : '';
+      return <span className={className}>{status}</span>;
+    }
   },
   { caption: '', className: 'operation', renderer: Operation }
 ];

@@ -87,10 +87,29 @@ function searches(state = {}, action) {
   return state;
 }
 
+function plugin(state = {}, action) {
+  switch (action.type) {
+    case 'LOADING_PLUGIN_INFO':
+      state = {
+        ...state,
+        [action.pluginId]: 'loading'
+      };
+      break;
+    case 'LOAD_PLUGIN_INFO':
+      state = {
+        ...state,
+        [action.pluginId]: action.data
+      };
+      break;
+  }
+  return state;
+}
+
 const reducer = combineReducers({
   loginUser,
   messages,
-  searches
+  searches,
+  plugin
 });
 
 export const store = createStore(

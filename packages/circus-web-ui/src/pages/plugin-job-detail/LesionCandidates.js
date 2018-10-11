@@ -144,9 +144,10 @@ class LesionCandidatesView extends React.Component {
 
   render() {
     const { value, feedbackListener, feedback } = this.props;
+    const truncated = value.slice(0, 3);
     return (
       <StyledDiv>
-        {value.map((cand, i) => (
+        {truncated.map((cand, i) => (
           <Candidate
             key={i}
             value={cand}

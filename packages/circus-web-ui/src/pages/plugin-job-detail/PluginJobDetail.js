@@ -1,5 +1,6 @@
 import React from 'react';
 import PatientInfoBox from 'components/PatientInfoBox';
+import FullSpanContainer from 'components/FullSpanContainer';
 import { api } from '../../utils/api';
 import LoadingIndicator from 'rb/LoadingIndicator';
 import LesionCandidates from './LesionCandidates';
@@ -27,13 +28,15 @@ const PluginJobDetailPage = props => {
   const { job, seriesData, plugin } = props;
   const primarySeriesUid = job.series[0].seriesUid;
   return (
-    <div>
+    <FullSpanContainer>
       <div className="job-detail-header">
-        <PluginDisplay plugin={plugin} size="lg" withName />
+        <PluginDisplay plugin={plugin} size="xl" withName />
         <PatientInfoBox value={seriesData[primarySeriesUid].patientInfo} />
       </div>
-      <FeedbackSwitcher {...props} />
-    </div>
+      <div className="job-detail-main">
+        <FeedbackSwitcher {...props} />
+      </div>
+    </FullSpanContainer>
   );
 };
 
@@ -55,17 +58,7 @@ class ConnectedPluginJobDetail extends React.Component {
 
     try {
       // const plugin = await api(`plugins/${job.pluginId}`);
-      const plugin = {
-        pluginId: 'pluginid',
-        name: 'mra-cad',
-        version: '1.0.5',
-        description: 'Detects aneurysms.',
-        icon: {
-          glyph: 'brain',
-          color: '#ffeeee',
-          backgroundColor: '#333333'
-        }
-      };
+      const plugin = await api(`plugins/${job.pluginId}`);
       this.setState({ job, seriesData, plugin });
     } catch (e) {
       this.setState({ errorMessage: e.message });

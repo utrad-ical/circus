@@ -1,24 +1,34 @@
-import React, { Fragment } from 'react';
+import React from 'react';
 import SearchResultsView, {
   makeSortOptions
 } from 'components/SearchResultsView';
-import { Link } from 'react-router-dom';
 import DataGrid from 'components/DataGrid';
 import PatientInfoBox from 'components/PatientInfoBox';
 import TimeDisplay from 'components/TimeDisplay';
 import PluginDisplay from 'components/PluginDisplay';
 import IconButton from 'components/IconButton';
+import { ProgressBar } from 'components/react-bootstrap';
+import browserHistory from 'browserHistory';
 
 const Operation = props => {
-  const { value: series } = props;
+  const { value: job } = props;
+
+  const handleClick = () => {
+    if (job.status !== 'finished') return;
+    const url = `/plugin-job/${job.jobId}`;
+    browserHistory.push(url);
+  };
+
   return (
-    <Fragment>
-      <Link to={`/plugin-job/${series.jobId}`}>
-        <IconButton icon="circus-series" bsSize="sm">
-          View
-        </IconButton>
-      </Link>
-    </Fragment>
+    <IconButton
+      disabled={job.status !== 'finished'}
+      icon="circus-series"
+      bsSize="sm"
+      bsStyle="primary"
+      onClick={handleClick}
+    >
+      View
+    </IconButton>
   );
 };
 
@@ -53,10 +63,26 @@ const columns = [
   },
   {
     caption: 'Status',
-    className: 'created-at',
+    className: 'status',
     renderer: ({ value: { status } }) => {
-      const className = status === 'finished' ? 'text-success' : '';
-      return <span className={className}>{status}</span>;
+      if (status === 'processing') {
+        return (
+          <ProgressBar
+            active
+            stripped
+            bsStyle="info"
+            now={100}
+            label="processing"
+          />
+        );
+      }
+      const className = {
+        in_queue: 'text-info',
+        finished: 'text-success',
+        processing: 'text-primary',
+        invalidated: 'text-muted'
+      }[status];
+      return <span className={className || 'text-danger'}>{status}</span>;
     }
   },
   { caption: '', className: 'operation', renderer: Operation }

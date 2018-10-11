@@ -59,7 +59,6 @@ export default function pluginJobReporter(
           {
             $set: {
               status: 'error',
-              finishedAt: new Date(),
               errorMessage: payload
             }
           }

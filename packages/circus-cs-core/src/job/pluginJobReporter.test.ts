@@ -31,21 +31,21 @@ describe('pluginJobReporter', () => {
     await reporter.report(jobId, 'processing');
     const check = await collection.findOne({ jobId });
     expect(check).toMatchObject({ status: 'processing' });
-    expect(check.startedAt).not.toBeNull();
+    expect(check.startedAt).not.toBeFalsy();
   });
 
   test('report finished', async () => {
     await reporter.report(jobId, 'finished');
     const check = await collection.findOne({ jobId });
     expect(check).toMatchObject({ status: 'finished' });
-    expect(check.finishedAt).not.toBeNull();
+    expect(check.finishedAt).not.toBeFalsy();
   });
 
   test('report error', async () => {
     await reporter.report(jobId, 'error');
     const check = await collection.findOne({ jobId });
     expect(check).toMatchObject({ status: 'error' });
-    expect(check.finishedAt).not.toBeNull();
+    expect(check.finishedAt).toBeFalsy();
   });
 
   test('store results', async () => {

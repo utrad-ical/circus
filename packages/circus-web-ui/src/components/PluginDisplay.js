@@ -3,7 +3,7 @@ import IconDisplay from './IconDisplay';
 
 const PluginDisplay = props => {
   const { plugin, ...rest } = props;
-  const title = `${plugin.name} v${plugin.version}`;
+  const title = `${plugin.pluginName} v${plugin.version}`;
   return (
     <IconDisplay
       title={title}

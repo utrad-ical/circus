@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 import DataGrid from 'components/DataGrid';
 import PatientInfoBox from 'components/PatientInfoBox';
 import TimeDisplay from 'components/TimeDisplay';
+import PluginDisplay from 'components/PluginDisplay';
 import IconButton from 'components/IconButton';
 
 const Operation = props => {
@@ -30,7 +31,28 @@ const columns = [
     }
   },
   {
-    caption: 'Plugin'
+    caption: 'Plugin',
+    className: 'plugin',
+    renderer: ({ value: { pluginId } }) => {
+      return (
+        <PluginDisplay
+          size="xl"
+          plugin={{
+            pluginName: 'MRA-CAD',
+            version: '1.5',
+            icon: {
+              glyph: 'brain',
+              color: '#ff5500',
+              backgroundColor: '#ccffaa'
+            }
+          }}
+        />
+      );
+    }
+  },
+  {
+    caption: 'Executed by',
+    key: 'userEmail'
   },
   {
     caption: 'Execution Time',

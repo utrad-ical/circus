@@ -13,6 +13,9 @@ const StyledTable = styled.table.attrs({
       cursor: pointer;
     }
   }
+  .progress {
+    margin: 0;
+  }
 `;
 
 const normalizeColumn = c => {

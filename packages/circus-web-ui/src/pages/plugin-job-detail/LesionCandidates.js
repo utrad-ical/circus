@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { Fragment } from 'react';
 import ImageViewer from 'components/ImageViewer';
+import { Button } from 'components/react-bootstrap';
 import styled from 'styled-components';
 import * as rs from 'circus-rs';
 import { connect } from 'react-redux';
@@ -44,7 +45,8 @@ class Candidate extends React.PureComponent {
       onFeedbackChange,
       feedbackListener: FeedbackListener,
       feedback,
-      composition
+      composition,
+      tool
     } = this.props;
 
     return (
@@ -57,7 +59,7 @@ class Candidate extends React.PureComponent {
         <ImageViewer
           className="lesion-candidate-viewer"
           composition={composition}
-          tool="pager"
+          tool={tool}
           initialTool="pager"
           stateChanger={this.stateChanger}
         />
@@ -96,7 +98,7 @@ const StyledDiv = styled.div`
 class LesionCandidatesView extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { compositoin: null };
+    this.state = { compositoin: null, tool: 'pager' };
   }
 
   async componentDidMount() {
@@ -142,23 +144,38 @@ class LesionCandidatesView extends React.Component {
     onFeedbackChange(newFeedback);
   };
 
+  handleToolChange = () => {
+    const tool = { zoom: 'hand', hand: 'pager', pager: 'zoom' }[
+      this.state.tool
+    ];
+    this.setState({ tool });
+  };
+
   render() {
     const { value, feedbackListener, feedback } = this.props;
     const truncated = value.slice(0, 3);
     return (
-      <StyledDiv>
-        {truncated.map((cand, i) => (
-          <Candidate
-            key={i}
-            value={cand}
-            feedbackListener={feedbackListener}
-            feedback={feedback[i]}
-            index={i}
-            onFeedbackChange={this.handleFeedbackChange}
-            composition={this.state.composition}
-          />
-        ))}
-      </StyledDiv>
+      <Fragment>
+        <div>
+          <Button bsSize="xs" onClick={this.handleToolChange}>
+            {this.state.tool}
+          </Button>
+        </div>
+        <StyledDiv>
+          {truncated.map((cand, i) => (
+            <Candidate
+              key={i}
+              value={cand}
+              feedbackListener={feedbackListener}
+              feedback={feedback[i]}
+              index={i}
+              onFeedbackChange={this.handleFeedbackChange}
+              composition={this.state.composition}
+              tool={this.state.tool}
+            />
+          ))}
+        </StyledDiv>
+      </Fragment>
     );
   }
 }

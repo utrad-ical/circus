@@ -96,7 +96,7 @@ const Series = props => {
     const newLabel = {
       type: 'voxel',
       data: {}, // will be filled just before actual save
-      attributes: [],
+      attributes: {},
       cloud // cloud is the primary data storage while editing
     };
     const newSeries = {

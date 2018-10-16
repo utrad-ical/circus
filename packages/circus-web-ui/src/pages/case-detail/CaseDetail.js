@@ -428,6 +428,7 @@ export class RevisionData extends React.Component {
               </div>
               {activeLabel && (
                 <JsonSchemaEditor
+                  key={activeSeriesIndex + ':' + activeLabelIndex}
                   schema={projectData.labelAttributesSchema}
                   value={activeLabel.attributes || {}}
                   onChange={this.labelAttributesChange}

@@ -211,6 +211,7 @@ class CaseDetailView extends React.Component {
           currentRevision={this.state.editingRevisionIndex}
         />
         <RevisionData
+          key={this.state.editingRevisionIndex}
           busy={this.state.busy}
           revision={this.state.editingData}
           projectData={this.state.projectData}
@@ -266,6 +267,7 @@ export class RevisionData extends React.Component {
       activeSeriesIndex: -1,
       activeLabelIndex: -1,
       tool: 'pager',
+      layout: 'twoByTwo',
       showReferenceLine: false,
       composition: null,
       lineWidth: 1
@@ -404,6 +406,7 @@ export class RevisionData extends React.Component {
     const { projectData, revision, onChange, busy } = this.props;
     const {
       tool,
+      layout,
       activeSeriesIndex,
       activeLabelIndex,
       composition
@@ -428,7 +431,7 @@ export class RevisionData extends React.Component {
               </div>
               {activeLabel && (
                 <JsonSchemaEditor
-                  key={activeSeriesIndex + ':' + activeLabelIndex}
+                  key={`${activeSeriesIndex}:${activeLabelIndex}`}
                   schema={projectData.labelAttributesSchema}
                   value={activeLabel.attributes || {}}
                   onChange={this.labelAttributesChange}
@@ -458,6 +461,7 @@ export class RevisionData extends React.Component {
           />
           <ViewerCluster
             composition={composition}
+            layout={layout}
             labels={activeSeries.labels}
             stateChanger={this.stateChanger}
             activeLabel={activeLabel}

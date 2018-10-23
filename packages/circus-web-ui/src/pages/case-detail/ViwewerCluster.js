@@ -16,8 +16,17 @@ const TwoByTwoLayout = styled.div`
   }
 `;
 
+const OneLayout = styled.div`
+  flex: 1 1 0;
+  background: #333;
+  .image-viewer {
+    width: 100%;
+    height: 100%;
+  }
+`;
+
 const ViewerCluster = props => {
-  const { composition, tool, stateChanger } = props;
+  const { composition, tool, stateChanger, layout } = props;
 
   function makeViewer(orientation, initialTool, fixTool) {
     return (
@@ -32,14 +41,20 @@ const ViewerCluster = props => {
     );
   }
 
-  return (
-    <TwoByTwoLayout>
-      {makeViewer('axial')}
-      {makeViewer('sagittal')}
-      {makeViewer('coronal')}
-      {makeViewer('axial', 'celestialRotate', 'celestialRotate')}
-    </TwoByTwoLayout>
-  );
+  switch (layout) {
+    case 'twoByTwo':
+      return (
+        <TwoByTwoLayout>
+          {makeViewer('axial')}
+          {makeViewer('sagittal')}
+          {makeViewer('coronal')}
+          {makeViewer('axial', 'celestialRotate', 'celestialRotate')}
+        </TwoByTwoLayout>
+      );
+    case 'one':
+    default:
+      return <OneLayout>{makeViewer('axial')}</OneLayout>;
+  }
 };
 
 export default ViewerCluster;

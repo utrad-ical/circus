@@ -1,6 +1,6 @@
 import path from 'path';
 import fs from 'fs-extra';
-import * as JSZip from 'jszip';
+import zipIterator from './zipIterator';
 
 /**
  * Recursively iterate over a specified directory
@@ -25,18 +25,5 @@ export default async function* directoryIterator(rootPath, pattern) {
         yield* zipIterator(zipBuf, pattern);
       }
     }
-  }
-}
-
-/**
- * Asynchronous iterator that extracts files from a zip file.
- * @param {Buffer} zipBuf The buffer that holds the content a zip file.
- */
-export async function* zipIterator(zipBuf, pattern) {
-  const archive = await JSZip.loadAsync(zipBuf);
-  const entries = archive.file(pattern); // all files, including subdirs
-  for (const entry of entries) {
-    const buffer = await entry.async('arraybuffer');
-    yield buffer;
   }
 }

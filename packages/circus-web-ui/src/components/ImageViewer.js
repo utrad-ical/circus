@@ -17,20 +17,20 @@ export default class ImageViewer extends React.Component {
     }
   }
 
-  componentWillUpdate(nextProps) {
+  componentDidUpdate(prevProps) {
     if (!this.viewer) return;
-    if (this.props.stateChanger !== nextProps.stateChanger) {
+    if (this.props.stateChanger !== prevProps.stateChanger) {
+      if (prevProps.stateChanger instanceof EventEmitter) {
+        prevProps.stateChanger.removeAllListeners('change');
+      }
       if (this.props.stateChanger instanceof EventEmitter) {
-        this.props.stateChanger.removeAllListeners('change');
-      }
-      if (nextProps.stateChanger instanceof EventEmitter) {
-        nextProps.stateChanger.on('change', this.changeState);
+        this.props.stateChanger.on('change', this.changeState);
       }
     }
-    if (this.props.composition !== nextProps.composition) {
-      this.viewer.setComposition(nextProps.composition);
+    if (this.props.composition !== prevProps.composition) {
+      this.viewer.setComposition(this.props.composition);
     }
-    this.viewer.setActiveTool(nextProps.tool);
+    this.viewer.setActiveTool(this.props.tool);
   }
 
   componentDidMount() {

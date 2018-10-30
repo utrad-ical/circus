@@ -259,7 +259,12 @@ const MenuBar = props => {
           noCaret
         >
           <MenuItem eventKey="1" onSelect={onRevertClick}>
-            Revert
+            <Icon icon="remove" />&ensp;Revert
+          </MenuItem>
+          <MenuItem divider />
+          <MenuItem header>Export</MenuItem>
+          <MenuItem disabled>
+            <Icon icon="export" />Export as MHD
           </MenuItem>
         </DropdownButton>
       </div>

@@ -2,7 +2,7 @@ import * as path from 'path';
 import randomstring from 'randomstring';
 import fs from 'fs-extra';
 import { multirange } from 'multi-integer-range';
-import { exec } from './utils';
+import exec from './utils/exec';
 import * as os from 'os';
 
 export default class DicomImporter {

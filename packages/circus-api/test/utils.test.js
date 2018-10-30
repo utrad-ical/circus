@@ -1,5 +1,6 @@
 import { assert } from 'chai';
-import { exec, generateUniqueId } from '../src/utils';
+import exec from '../src/utils/exec';
+import generateUniqueId from '../src/utils/generateUniqueId';
 
 describe('utils', function() {
   describe('exec', function() {

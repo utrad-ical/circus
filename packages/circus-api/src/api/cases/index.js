@@ -1,8 +1,7 @@
 import status from 'http-status';
 import performSearch from '../performSearch';
-import { generateUniqueId } from '../../utils';
+import generateUniqueId from '../../utils/generateUniqueId';
 import * as EJSON from 'mongodb-extended-json';
-import MultiRange from 'multi-integer-range';
 import { fetchAccessibleSeries } from '../../privilegeUtils';
 
 const maskPatientInfo = ctx => {

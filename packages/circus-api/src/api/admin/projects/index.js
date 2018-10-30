@@ -1,6 +1,6 @@
 import status from 'http-status';
 import performSearch from '../../performSearch';
-import { generateUniqueId } from '../../../utils';
+import generateUniqueId from '../../../utils/generateUniqueId';
 
 export const handleSearch = ({ models }) => {
   return async (ctx, next) => {

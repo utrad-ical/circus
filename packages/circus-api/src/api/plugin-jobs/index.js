@@ -1,6 +1,6 @@
 import status from 'http-status';
 import performSearch from '../performSearch';
-import { generateUniqueId } from '../../utils';
+import generateUniqueId from '../../utils/generateUniqueId';
 import * as EJSON from 'mongodb-extended-json';
 import { fetchAccessibleSeries } from '../../privilegeUtils';
 

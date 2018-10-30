@@ -1,4 +1,4 @@
-import { generateUniqueId } from '../../utils';
+import generateUniqueId from '../../utils/generateUniqueId';
 import nodepass from 'node-php-password';
 
 export async function up(db, models) {

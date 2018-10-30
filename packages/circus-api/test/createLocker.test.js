@@ -1,9 +1,6 @@
 import * as test from './test-utils';
 import createLocker from '../src/db/createLocker';
-
-async function delay(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
+import delay from '../src/utils/delay';
 
 describe('createLocker', function() {
   let db, locker;

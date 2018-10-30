@@ -1,5 +1,5 @@
 import { PassThrough } from 'stream';
-import { delay } from '../../utils';
+import delay from '../../utils/delay';
 
 const version = require('../../../package.json').version;
 const upSince = new Date().toISOString();

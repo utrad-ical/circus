@@ -3,22 +3,40 @@ import DicomVolumeLoader from './DicomVolumeLoader';
 import IndexedDbCache from '../../util/IndexedDbCache';
 import DicomVolume from '../../../common/DicomVolume';
 import { DicomVolumeMetadata } from './DicomVolumeLoader';
+import PartialVolumeDescriptor from '../../../common/PartialVolumeDescriptor';
 
 interface RsVolumeLoaderOptions {
   rsHttpClient: RsHttpClient;
-  series: string;
+  seriesUid: string;
+  partialVolumeDescriptor?: PartialVolumeDescriptor;
 }
 
 export default class RsVolumeLoader implements DicomVolumeLoader {
-  private client: RsHttpClient;
-  private series: string;
+  private rsHttpClient: RsHttpClient;
+  private seriesUid: string;
+  private partialVolumeDescriptor?: PartialVolumeDescriptor;
   private meta: DicomVolumeMetadata | undefined;
 
   private cache: IndexedDbCache<ArrayBuffer | DicomVolumeMetadata> | undefined;
 
-  constructor({ rsHttpClient, series }: RsVolumeLoaderOptions) {
-    this.client = rsHttpClient;
-    this.series = series;
+  constructor({
+    rsHttpClient,
+    seriesUid,
+    partialVolumeDescriptor
+  }: RsVolumeLoaderOptions) {
+    if (!seriesUid) throw new Error('SeriesUid is required.');
+
+    if (
+      partialVolumeDescriptor &&
+      (partialVolumeDescriptor.start === undefined ||
+        partialVolumeDescriptor.end === undefined)
+    ) {
+      throw new Error('Invalid partial volume descriptor specified.');
+    }
+
+    this.rsHttpClient = rsHttpClient;
+    this.seriesUid = seriesUid;
+    this.partialVolumeDescriptor = partialVolumeDescriptor;
   }
 
   public useCache(
@@ -28,39 +46,36 @@ export default class RsVolumeLoader implements DicomVolumeLoader {
   }
 
   public async loadMeta(): Promise<DicomVolumeMetadata> {
-    if (!this.series) throw new Error('Series is required');
-
     let meta: DicomVolumeMetadata | undefined;
+    const metaCacheKey = this.seriesUid + '.meta';
     if (this.cache) {
-      const cache = <Promise<DicomVolumeMetadata>>this.cache.get(
-        this.series + '.meta'
-      );
+      const cache = <Promise<DicomVolumeMetadata>>this.cache.get(metaCacheKey);
       if (cache) meta = await cache;
     }
     if (!meta) {
-      meta = (await this.client.request(
-        `series/${this.series}/metadata`,
-        {}
+      meta = (await this.rsHttpClient.request(
+        `series/${this.seriesUid}/metadata`,
+        this.createRequestParams()
       )) as DicomVolumeMetadata;
     }
     this.meta = meta;
-    if (this.cache) this.cache.put(this.series + '.meta', meta);
+    if (this.cache) this.cache.put(metaCacheKey, meta);
     return meta;
   }
 
   public async loadVolume(): Promise<DicomVolume> {
-    if (!this.series) throw new Error('Series is required');
     if (!this.meta) throw new Error('Medatadata not loaded yet');
 
+    const bufferCacheKey = this.seriesUid + '.buffer';
     let buffer: ArrayBuffer | undefined;
     if (this.cache) {
-      const cache = this.cache.get(this.series + '.buffer');
+      const cache = this.cache.get(bufferCacheKey);
       if (cache) buffer = await buffer;
     }
     if (!buffer) {
-      buffer = await this.client.request(
-        `series/${this.series}/volume`,
-        {},
+      buffer = await this.rsHttpClient.request(
+        `series/${this.seriesUid}/volume`,
+        this.createRequestParams(),
         'arraybuffer'
       );
     }
@@ -72,7 +87,20 @@ export default class RsVolumeLoader implements DicomVolumeLoader {
     if (meta.estimatedWindow) volume.estimatedWindow = meta.estimatedWindow;
     volume.assign(buffer as ArrayBuffer);
 
-    if (this.cache && buffer) this.cache.put(this.series + '.buffer', buffer);
+    if (this.cache && buffer) this.cache.put(bufferCacheKey, buffer);
     return volume;
+  }
+
+  private createRequestParams(): any {
+    if (this.partialVolumeDescriptor) {
+      const partialVolumeDescriptor = this.partialVolumeDescriptor;
+      return {
+        start: partialVolumeDescriptor.start,
+        end: partialVolumeDescriptor.end,
+        delta: partialVolumeDescriptor.delta | 1
+      };
+    } else {
+      return {};
+    }
   }
 }

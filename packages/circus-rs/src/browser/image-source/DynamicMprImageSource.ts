@@ -8,27 +8,33 @@ import drawToImageData from './drawToImageData';
 import MprImageSource from './MprImageSource';
 import { DicomVolumeMetadata } from './volume-loader/DicomVolumeLoader';
 import { Vector3 } from 'three';
+import PartialVolumeDescriptor from '../../common/PartialVolumeDescriptor';
 
 interface DynamicMprImageSourceOptions {
   rsHttpClient: RsHttpClient;
-  series: string;
+  seriesUid: string;
+  partialVolumeDescriptor?: PartialVolumeDescriptor;
 }
 
 /**
  * DynamicImageSource fetches the MPR image from RS server.
  */
 export default class DynamicMprImageSource extends MprImageSource {
-  private rsClient: RsHttpClient;
-  private series: string;
+  private rsHttpClient: RsHttpClient;
+  private seriesUid: string;
 
-  constructor({ rsHttpClient, series }: DynamicMprImageSourceOptions) {
+  constructor({
+    rsHttpClient,
+    seriesUid,
+    partialVolumeDescriptor
+  }: DynamicMprImageSourceOptions) {
     super();
-    this.rsClient = rsHttpClient;
-    this.series = series;
+    this.rsHttpClient = rsHttpClient;
+    this.seriesUid = seriesUid;
     this.loadSequence = (async () => {
       this.metadata = (await rsHttpClient.request(
-        `series/${series}/metadata`,
-        {}
+        `series/${seriesUid}/metadata`,
+        this.createRequestParams(partialVolumeDescriptor)
       )) as DicomVolumeMetadata;
     })();
   }
@@ -40,7 +46,7 @@ export default class DynamicMprImageSource extends MprImageSource {
     window: ViewWindow,
     size: Vector2D
   ): Promise<Uint8Array> {
-    const res = await this.rsClient.request(
+    const res = await this.rsHttpClient.request(
       `series/${series}/scan`,
       {
         origin: section.origin.join(','),
@@ -68,12 +74,26 @@ export default class DynamicMprImageSource extends MprImageSource {
       new Vector3().fromArray(metadata!.voxelSize)
     );
     const buffer = await this.requestScan(
-      this.series,
+      this.seriesUid,
       indexSection,
       viewState.interpolationMode === 'trilinear',
       viewWindow,
       outSize
     );
     return drawToImageData(viewer, buffer);
+  }
+
+  private createRequestParams(
+    partialVolumeDescriptor?: PartialVolumeDescriptor
+  ): any {
+    if (partialVolumeDescriptor) {
+      return {
+        start: partialVolumeDescriptor.start,
+        end: partialVolumeDescriptor.end,
+        delta: partialVolumeDescriptor.delta | 1
+      };
+    } else {
+      return {};
+    }
   }
 }

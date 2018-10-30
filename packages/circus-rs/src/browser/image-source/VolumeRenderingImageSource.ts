@@ -36,9 +36,9 @@ interface VolumeTexture {
   texture: WebGLTexture;
 }
 
-type VolumeRenderingImageSourceOption = {
+interface VolumeRenderingImageSourceOptions {
   volumeLoader: DicomVolumeLoader;
-};
+}
 
 export default class VolumeRenderingImageSource extends ImageSource {
   private metadata: DicomVolumeMetadata | undefined;
@@ -57,7 +57,7 @@ export default class VolumeRenderingImageSource extends ImageSource {
 
   private baseScale: number = 1;
 
-  constructor({ volumeLoader }: VolumeRenderingImageSourceOption) {
+  constructor({ volumeLoader }: VolumeRenderingImageSourceOptions) {
     super();
     this.loadSequence = (async () => {
       const metadata = await volumeLoader.loadMeta();

@@ -16,15 +16,40 @@ Select an individual example item for details.
 --*/
 
 // Prepare ImageSource object, using the options provided in the boxes above
+
 const rsHttpClient = new rs.RsHttpClient(config.server);
+
+function toPartialVolumeDescriptor(str) {
+  const [start, end, delta] = $.map(str.split(':'), function(value) {
+    const num = parseInt(value, 10);
+    return isNaN(num) ? undefined : num;
+  });
+
+  if (start === undefined && end === undefined && delta === undefined) {
+    return undefined;
+  } else if (start !== undefined && end !== undefined) {
+    return { start: start, end: end, delta: delta };
+  } else {
+    throw new Error(
+      'Invalid partial volume descriptor specified. ' +
+        'partial volume descriptor must be in the form of `startImgNum:endImgNum(:imageDelta)`'
+    );
+  }
+}
+const partialVolumeDescriptor = toPartialVolumeDescriptor(
+  config.partialVolumeDescriptor
+);
+
 const volumeLoader = new rs.RsVolumeLoader({
-  series: config.series,
+  seriesUid: config.seriesUid,
+  partialVolumeDescriptor: partialVolumeDescriptor,
   rsHttpClient
 });
 const imageSource = new config.sourceClass({
   volumeLoader,
   rsHttpClient,
-  series: config.series
+  seriesUid: config.seriesUid,
+  partialVolumeDescriptor: partialVolumeDescriptor
 });
 
 // Prepare composition.
@@ -238,7 +263,7 @@ comp.annotationUpdated();
 This example directly invokes various types of ImageSource and sees their performance.
 --*/
 
-const cfg = { series, client: new rs.RsHttpClient(config.server) };
+const cfg = { seriesUid, client: new rs.RsHttpClient(config.server) };
 
 const dynSrc = new rs.DynamicImageSource(cfg);
 const volSrc = new rs.RawVolumeImageSource(cfg);
@@ -405,7 +430,7 @@ const cache = new rs.IndexedDbCache();
 // prepare volume loader
 const rsHttpClient = new rs.RsHttpClient(config.server);
 const mainVolumeLoader = new rs.RsVolumeLoader({
-  series: config.series,
+  seriesUid: config.seriesUid,
   rsHttpClient
 });
 mainVolumeLoader.useCache(cache);
@@ -453,7 +478,7 @@ MRAを直接使用しています。
 
 const rsHttpClient = new rs.RsHttpClient(config.server);
 const volumeLoader = new rs.RsVolumeLoader({
-  series: config.series,
+  seriesUid: config.seriesUid,
   rsHttpClient
 });
 

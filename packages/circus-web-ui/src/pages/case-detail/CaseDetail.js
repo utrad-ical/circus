@@ -7,10 +7,12 @@ import FullSpanContainer from 'components/FullSpanContainer';
 import LoadingIndicator from 'rb/LoadingIndicator';
 import {
   Button,
+  DropdownButton,
   Glyphicon,
   SplitButton,
   MenuItem
 } from '../../components/react-bootstrap';
+import Icon from 'components/Icon';
 import LabelSelector from './LabelSelector';
 import { store } from 'store';
 import * as rs from 'circus-rs';
@@ -246,15 +248,20 @@ const MenuBar = props => {
         />
       </div>
       <div className="right">
-        <Button bsStyle="warning" onClick={onRevertClick}>
-          <Glyphicon glyph="remove-circle" />
-          Revert
-        </Button>
-        &ensp;
         <Button bsStyle="success" onClick={onSaveClick}>
           <Glyphicon glyph="save" />
           Save
         </Button>
+        <DropdownButton
+          bsStyle="link"
+          title={<Icon icon="menu-hamburger" />}
+          pullRight
+          noCaret
+        >
+          <MenuItem eventKey="1" onSelect={onRevertClick}>
+            Revert
+          </MenuItem>
+        </DropdownButton>
       </div>
     </div>
   );

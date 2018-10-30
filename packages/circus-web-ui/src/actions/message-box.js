@@ -7,7 +7,7 @@ import { store } from 'store';
  */
 export function showMessage(
   message,
-  style,
+  style = 'info',
   { tag, dismissOnPageChange = true, short = false } = {}
 ) {
   const id = Math.random().toString(); // random message id

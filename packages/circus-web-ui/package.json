@@ -71,7 +71,6 @@
   },
   "dependencies": {
     "glob-promise": "^3.3.0",
-    "js-cookie": "^2.2.0",
     "mongoose": "^4.6.8",
     "multi-integer-range": "^4.0.2",
     "webpack-glsl-loader": "^1.0.1"

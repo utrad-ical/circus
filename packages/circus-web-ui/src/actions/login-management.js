@@ -1,5 +1,4 @@
 import { api, tryAuthenticate } from 'utils/api';
-import * as Cookies from 'js-cookie';
 import browserHistory from 'browserHistory';
 
 /**
@@ -39,7 +38,7 @@ export function logout() {
   return async dispatch => {
     await api('logout');
     dispatch({ type: 'LOGGED_OUT' });
-    Cookies.remove('apiToken');
+    sessionStorage.removeItem('tokenCredentials');
     browserHistory.push('/');
   };
 }

@@ -33,7 +33,7 @@ export const handleGet = ({ models }) => {
 
 export const handlePost = ({ dicomImporter }) => {
   async function importFromBuffer(buffer, domain) {
-    const signature = buffer.readUInt32BE(0x80, true);
+    const signature = buffer.length > 0x80 && buffer.readUInt32BE(0x80);
     if (signature !== 0x4449434d) {
       return; // Non-DICOM file
     }

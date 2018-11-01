@@ -6,4 +6,5 @@ export interface SeriesAccessor {
 
 export default interface DicomFileRepository {
   getSeries(seriesUid: string): Promise<SeriesAccessor>;
+  deleteSeries(seriesUid: string): Promise<void>;
 }

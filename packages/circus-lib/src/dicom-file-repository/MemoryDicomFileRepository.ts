@@ -39,4 +39,8 @@ export default class MemoryDicomFileRepository implements DicomFileRepository {
       }
     };
   }
+
+  public async deleteSeries(seriesUid: string): Promise<void> {
+    this.storage.delete(seriesUid);
+  }
 }

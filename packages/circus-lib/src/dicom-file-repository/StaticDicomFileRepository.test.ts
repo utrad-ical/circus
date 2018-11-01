@@ -13,7 +13,7 @@ describe('StaticDicomFileRepository', () => {
     expect(image).toHaveProperty('byteLength', 6);
   });
 
-  test('save image', async () => {
+  test('save/delete image', async () => {
     const dr = new StaticDicomFileRepository({ dataDir });
     const newDir = path.join(dataDir, 'new');
     const series = await dr.getSeries('new');
@@ -23,7 +23,11 @@ describe('StaticDicomFileRepository', () => {
     await series.save(1, a.buffer as ArrayBuffer);
     const result = await fs.readFile(path.join(newDir, '00000001.dcm'), 'utf8');
     expect(result).toBe('abcde');
-    await fs.remove(newDir);
+
+    await dr.deleteSeries('new');
+    expect(await fs.pathExists(newDir)).toBe(false);
+    const series2 = await dr.getSeries('new');
+    expect(series2.images).toBe('');
   });
 
   test('return count=0 for nonexistent series', async () => {

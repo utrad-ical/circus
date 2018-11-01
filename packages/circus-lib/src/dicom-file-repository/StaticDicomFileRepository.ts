@@ -41,20 +41,22 @@ export default class StaticDicomFileRepository implements DicomFileRepository {
     }
   }
 
-  public async getSeries(seriesUid: string): Promise<SeriesAccessor> {
-    let dir: string;
+  private determinDir(seriesUid: string): string {
     if (this.options.useHash) {
       const hashStr = sha256(seriesUid);
-      dir = path.join(
+      return path.join(
         this.options.dataDir,
         hashStr.substring(0, 2),
         hashStr.substring(2, 4),
         seriesUid
       );
     } else {
-      dir = path.join(this.options.dataDir, seriesUid);
+      return path.join(this.options.dataDir, seriesUid);
     }
+  }
 
+  public async getSeries(seriesUid: string): Promise<SeriesAccessor> {
+    const dir = this.determinDir(seriesUid);
     const count = await this.scanDicomImages(dir);
 
     const load = async (image: number) => {
@@ -78,5 +80,10 @@ export default class StaticDicomFileRepository implements DicomFileRepository {
         return count.toString();
       }
     };
+  }
+
+  public async deleteSeries(seriesUid: string): Promise<void> {
+    const dir = this.determinDir(seriesUid);
+    await fs.remove(dir);
   }
 }

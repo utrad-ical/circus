@@ -16,7 +16,6 @@ export function getRecording() {
 }
 
 export default class Log4jsLogger implements Logger {
-
   public static configTitle: string = 'log4js-logger';
   public static configured: boolean = false;
   private static defaults: Configuration = {
@@ -27,7 +26,7 @@ export default class Log4jsLogger implements Logger {
       default: {
         appenders: ['default'],
         level: 'ALL'
-      },
+      }
     }
   };
   private static counter: number = 0;
@@ -41,18 +40,15 @@ export default class Log4jsLogger implements Logger {
   public shutdown: () => Promise<void>;
 
   public static configure(options?: string | object | null) {
-
-    if(options === undefined)
-      options = Log4jsLogger.configTitle;
+    if (options === undefined) options = Log4jsLogger.configTitle;
 
     let log4jsConfiguration: any;
-    if( options === null) {
+    if (options === null) {
       log4jsConfiguration = {};
-    } else if(typeof options === 'string') {
+    } else if (typeof options === 'string') {
       const explorer = cosmiconfig(options);
       const result = explorer.searchSync();
-      if (result)
-        log4jsConfiguration = result ? result.config : {}
+      if (result) log4jsConfiguration = result ? result.config : {};
     } else {
       log4jsConfiguration = options;
     }
@@ -72,13 +68,11 @@ export default class Log4jsLogger implements Logger {
   }
 
   public static async shutdown() {
-    await shutdown( e => e && console.error(e) );
+    await shutdown(e => e && console.error(e));
   }
 
   constructor(options: Options = {}) {
-
-    if(!Log4jsLogger.configured)
-      Log4jsLogger.configure();
+    if (!Log4jsLogger.configured) Log4jsLogger.configure();
 
     const { category = 'default' } = options;
     const logger = getLogger(category);
@@ -92,8 +86,7 @@ export default class Log4jsLogger implements Logger {
     this.error = logger.error.bind(logger);
     this.fatal = logger.fatal.bind(logger);
     this.shutdown = async () => {
-      if(--Log4jsLogger.counter === 0)
-        await Log4jsLogger.shutdown();
+      if (--Log4jsLogger.counter === 0) await Log4jsLogger.shutdown();
       return;
     };
   }

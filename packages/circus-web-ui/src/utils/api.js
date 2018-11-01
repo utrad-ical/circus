@@ -1,32 +1,35 @@
 import axios from 'axios';
 import { showMessage } from 'actions';
 import * as qs from 'querystring';
-import * as Cookies from 'js-cookie';
 
 export const apiServer = '/';
 
 export let api;
 
 function restoreApiCaller() {
-  const token = Cookies.get('apiToken');
-  const refreshToken = Cookies.get('refreshToken');
-  if (token) api = createApiCaller(token, refreshToken);
+  const credentials = sessionStorage.getItem('tokenCredentials');
+  if (credentials) api = createApiCaller(JSON.parse(credentials));
 }
 
 restoreApiCaller();
 
-function createApiCaller(token, refreshToken) {
+function createApiCaller(credentials) {
   return async function api(command, options = {}) {
     const params = { url: command, method: 'get', ...options };
     if (typeof params.data === 'object') {
       if (params.method === 'get') params.method = 'post';
     }
+
+    if (Date.now() > credentials.expiresAt - 60000) {
+      credentials = await tryRefreshToken(credentials.refreshToken);
+    }
+
     try {
       const res = await axios({
         baseURL: apiServer + 'api/',
         cached: false,
         withCredentials: true,
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${credentials.accessToken}` },
         ...params
       });
       return res.data;
@@ -49,6 +52,33 @@ function createApiCaller(token, refreshToken) {
   };
 }
 
+function saveCredentialData(res) {
+  const credentials = {
+    accessToken: res.data.access_token,
+    refreshToken: res.data.refresh_token,
+    expiresIn: res.data.expires_in,
+    expiresAt: Date.now() + res.data.expires_in * 1000
+  };
+  sessionStorage.setItem('tokenCredentials', JSON.stringify(credentials));
+  return credentials;
+}
+
+const tryRefreshToken = async refreshToken => {
+  const res = await axios.request({
+    method: 'post',
+    url: apiServer + 'login',
+    data: qs.stringify({
+      client_id: 'circus-front',
+      client_secret: 'not-a-secret',
+      grant_type: 'refresh_token',
+      refresh_token: refreshToken
+    })
+  });
+  const newCredentials = saveCredentialData(res);
+  createApiCaller(newCredentials);
+  return newCredentials;
+};
+
 export async function tryAuthenticate(id, password) {
   const res = await axios.request({
     method: 'post',
@@ -61,11 +91,8 @@ export async function tryAuthenticate(id, password) {
       password
     })
   });
-  const newToken = res.data.access_token;
-  const refreshToken = res.data.refresh_token;
-  Cookies.set('apiToken', newToken);
-  Cookies.set('refreshToken', refreshToken);
-  api = createApiCaller(newToken, refreshToken);
+  const credentials = saveCredentialData(res);
+  api = createApiCaller(credentials);
 }
 
 function showErrorMessage(err) {

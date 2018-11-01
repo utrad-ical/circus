@@ -9,6 +9,7 @@ import PluginDisplay from 'components/PluginDisplay';
 import IconButton from 'components/IconButton';
 import { ProgressBar } from 'components/react-bootstrap';
 import browserHistory from 'browserHistory';
+import styled from 'styled-components';
 
 const Operation = props => {
   const { value: job } = props;
@@ -37,6 +38,18 @@ const PluginRenderer = props => {
   return <PluginDisplay size="lg" pluginId={pluginId} />;
 };
 
+const StatusRenderer = ({ value: { status } }) => {
+  if (status === 'processing') {
+    return <ProgressBar active bsStyle="info" now={100} label="processing" />;
+  }
+  const className = {
+    in_queue: 'text-info',
+    finished: 'text-success',
+    invalidated: 'text-muted'
+  }[status];
+  return <span className={className || 'text-danger'}>{status}</span>;
+};
+
 const columns = [
   {
     caption: 'Patient',
@@ -52,6 +65,7 @@ const columns = [
   },
   {
     caption: 'Executed by',
+    className: 'executed-by',
     renderer: ({ value: { userEmail } }) => {
       return userEmail.slice(0, 10) + '...';
     }
@@ -64,38 +78,34 @@ const columns = [
   {
     caption: 'Status',
     className: 'status',
-    renderer: ({ value: { status } }) => {
-      if (status === 'processing') {
-        return (
-          <ProgressBar
-            active
-            stripped
-            bsStyle="info"
-            now={100}
-            label="processing"
-          />
-        );
-      }
-      const className = {
-        in_queue: 'text-info',
-        finished: 'text-success',
-        processing: 'text-primary',
-        invalidated: 'text-muted'
-      }[status];
-      return <span className={className || 'text-danger'}>{status}</span>;
-    }
+    renderer: StatusRenderer
   },
   { caption: '', className: 'operation', renderer: Operation }
 ];
 
+const DataViewContainer = styled.div`
+  .progress {
+    height: 33px;
+  }
+  .progress-bar-info {
+    line-height: 33px;
+  }
+  .status {
+    text-align: center;
+    font-weight: bold;
+  }
+`;
+
 const DataView = props => {
   const { value } = props;
   return (
-    <DataGrid
-      className="plugin-job-search-result"
-      columns={columns}
-      value={value}
-    />
+    <DataViewContainer>
+      <DataGrid
+        className="plugin-job-search-result"
+        columns={columns}
+        value={value}
+      />
+    </DataViewContainer>
   );
 };
 

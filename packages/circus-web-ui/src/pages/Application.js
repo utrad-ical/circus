@@ -184,7 +184,7 @@ const NavView = props => {
             ))}
             <SubMenu icon="open" name="Case Import" link="/import-case" />
           </Menu>
-          <Menu name="CAD" link="/browse/plugin-jobs">
+          <Menu name="CAD" icon="circus-icon-job" link="/browse/plugin-jobs">
             <SubMenu
               icon="search"
               name="Plugin Job Search"
@@ -249,17 +249,18 @@ const Nav = connect(
 const MainMenu = props => <ul>{props.children}</ul>;
 
 const Menu = props => {
-  const className = `circus-icon-${props.name.toLowerCase()}`;
+  const { name, icon, link, onClick, children } = props;
+  const className = icon ? icon : `circus-icon-${name.toLowerCase()}`;
   const caption = [
     <span className={className} key="icon" />,
     <span className="hidden-xs" key="caption">
-      {props.name}
+      {name}
     </span>
   ];
   return (
-    <li className="icon-menu" key={props.name} onClick={props.onClick}>
-      {props.link ? <Link to={props.link}>{caption}</Link> : caption}
-      <ul>{props.children}</ul>
+    <li className="icon-menu" key={name} onClick={onClick}>
+      {link ? <Link to={link}>{caption}</Link> : caption}
+      <ul>{children}</ul>
     </li>
   );
 };

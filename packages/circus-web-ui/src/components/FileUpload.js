@@ -9,6 +9,7 @@ import { FileDroppable } from './FileDroppable';
 import { showMessage } from 'actions';
 import * as modal from 'rb/modal';
 import styled from 'styled-components';
+import { api } from 'utils/api';
 
 const StyledDiv = styled.div`
   input[type='file'] {
@@ -51,7 +52,7 @@ export class FileUpload extends React.Component {
   };
 
   handleUploadClick = async () => {
-    const { apiCaller, url, onBeforeUpload, onUploaded } = this.props;
+    const { url, onBeforeUpload, onUploaded } = this.props;
 
     const files = this.state.filesSelected;
     const num = files.length;
@@ -87,7 +88,7 @@ export class FileUpload extends React.Component {
 
     try {
       this.setState({ uploading: true });
-      const res = await apiCaller(url, {
+      const res = await api(url, {
         method: 'post',
         data: fd,
         progress: this.handleUploadProgress

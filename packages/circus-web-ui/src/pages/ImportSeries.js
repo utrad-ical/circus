@@ -3,7 +3,6 @@ import { Alert } from 'components/react-bootstrap';
 import ShrinkSelect from 'rb/ShrinkSelect';
 import { connect } from 'react-redux';
 import { FileUpload } from 'components/FileUpload';
-import { apiCaller } from 'utils/api';
 import { showMessage } from 'actions';
 
 class ImportSeriesView extends React.Component {
@@ -25,7 +24,7 @@ class ImportSeriesView extends React.Component {
   }
 
   handleUploaded = async res => {
-    const count = res.data.uploaded;
+    const count = res.uploaded;
     showMessage(`Successfully uploaded ${count} DICOM instances!`, 'success', {
       short: true
     });
@@ -59,7 +58,6 @@ class ImportSeriesView extends React.Component {
           uploadFileMax={user.uploadFileMax}
           uploadFileSizeMax={user.uploadFileSizeMax}
           url={`series/domain/${encodeURIComponent(uploadDomain)}`}
-          apiCaller={apiCaller}
           onUploaded={this.handleUploaded}
         >
           <div>

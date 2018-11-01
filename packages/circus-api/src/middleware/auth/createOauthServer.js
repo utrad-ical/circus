@@ -27,7 +27,7 @@ export default function createOauthServer(models) {
       if (clientId === 'circus-front') {
         return {
           clientId: 'CIRCUS Front UI',
-          grants: ['password']
+          grants: ['password', 'refresh_token']
         };
       }
       return null;
@@ -35,7 +35,23 @@ export default function createOauthServer(models) {
     getRefreshToken: async function(refreshToken) {
       debug && console.log('getRefreshToken', arguments);
       const result = await models.token.findAll({ refreshToken });
-      return result.length ? result[0] : null;
+      if (!result.length) return null;
+      const data = result[0];
+      const user = await models.user.findById(data.userId);
+      const retVal = {
+        refreshToken: data.refreshToken,
+        refreshTokenExpiresAt: data.refreshTokenExpiresAt,
+        client: { clientId: data.clientId },
+        user
+      };
+      return retVal;
+    },
+    revokeToken: async function(token) {
+      debug && console.log('revokeToken', arguments);
+      const result = await models.token.deleteOne({
+        refreshToken: token.refreshToken
+      });
+      return result.deletedCount > 0;
     },
     getUser: async function(username, password) {
       debug && console.log('getting user', arguments);
@@ -72,7 +88,8 @@ export default function createOauthServer(models) {
 
   const oauth = new KoaOAuth2Server({
     model: oauthModel,
-    grants: ['password'],
+    grants: ['password', 'refresh_token'],
+    // accessTokenLifetime: 3600,
     onTokenIssue,
     debug
   });

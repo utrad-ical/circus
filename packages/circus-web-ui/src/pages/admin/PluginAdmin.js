@@ -53,7 +53,7 @@ export default class PluginAdmin extends React.Component {
     return (
       <EditorPage
         title="CAD Plug-ins"
-        icon="circus-b-calc"
+        icon="circus-app"
         searchName="admin-plugins"
         resource="admin/plugins"
         primaryKey="pluginId"

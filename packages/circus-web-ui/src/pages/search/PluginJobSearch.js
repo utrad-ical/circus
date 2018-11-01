@@ -6,7 +6,7 @@ import Icon from 'components/Icon';
 const PluginSearch = props => (
   <div>
     <h1>
-      <Icon icon="circus-case" /> CAD Plugin Search
+      <Icon icon="circus-job" /> Plug-in Job Search
     </h1>
     <PluginJobSearchCondition presetName={props.match.params.presetName} />
     <PluginJobSearchResults />

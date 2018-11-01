@@ -5,18 +5,48 @@ import * as Cookies from 'js-cookie';
 
 export const apiServer = '/';
 
-export let apiCaller;
+export let api;
 
-const token = Cookies.get('apiToken');
-if (token) createApiCaller(token);
+function restoreApiCaller() {
+  const token = Cookies.get('apiToken');
+  const refreshToken = Cookies.get('refreshToken');
+  if (token) api = createApiCaller(token, refreshToken);
+}
 
-function createApiCaller(token) {
-  apiCaller = axios.create({
-    baseURL: apiServer + 'api/',
-    cached: false,
-    withCredentials: true,
-    headers: { Authorization: `Bearer ${token}` }
-  });
+restoreApiCaller();
+
+function createApiCaller(token, refreshToken) {
+  return async function api(command, options = {}) {
+    const params = { url: command, method: 'get', ...options };
+    if (typeof params.data === 'object') {
+      if (params.method === 'get') params.method = 'post';
+    }
+    try {
+      const res = await axios({
+        baseURL: apiServer + 'api/',
+        cached: false,
+        withCredentials: true,
+        headers: { Authorization: `Bearer ${token}` },
+        ...params
+      });
+      return res.data;
+    } catch (err) {
+      // By default, all errors are displayed with a minimal message.
+      // Set 'handleErrors' option to supress error message for specific error types.
+      let handle = options.handleErrors === true;
+      if (
+        err.response &&
+        Array.isArray(options.handleErrors) &&
+        options.handleErrors.indexOf(err.response.status) > -1
+      ) {
+        handle = true;
+      }
+      if (!handle) {
+        showErrorMessage(err);
+      }
+      throw err;
+    }
+  };
 }
 
 export async function tryAuthenticate(id, password) {
@@ -32,34 +62,10 @@ export async function tryAuthenticate(id, password) {
     })
   });
   const newToken = res.data.access_token;
+  const refreshToken = res.data.refresh_token;
   Cookies.set('apiToken', newToken);
-  createApiCaller(newToken);
-}
-
-export async function api(command, options = {}) {
-  const params = { url: command, method: 'get', ...options };
-  if (typeof params.data === 'object') {
-    if (params.method === 'get') params.method = 'post';
-  }
-  try {
-    const res = await apiCaller(params);
-    return res.data;
-  } catch (err) {
-    // By default, all errors are displayed with a minimal message.
-    // Set 'handleErrors' option to supress error message for specific error types.
-    let handle = options.handleErrors === true;
-    if (
-      err.response &&
-      Array.isArray(options.handleErrors) &&
-      options.handleErrors.indexOf(err.response.status) > -1
-    ) {
-      handle = true;
-    }
-    if (!handle) {
-      showErrorMessage(err);
-    }
-    throw err;
-  }
+  Cookies.set('refreshToken', refreshToken);
+  api = createApiCaller(newToken, refreshToken);
 }
 
 function showErrorMessage(err) {

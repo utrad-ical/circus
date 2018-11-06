@@ -94,6 +94,7 @@ const StyledNav = styled.nav`
       }
       > a {
         color: white;
+        text-decoration: none;
       }
       &.logo,
       &.icon-menu {

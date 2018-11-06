@@ -34,7 +34,12 @@ const StyledDiv = styled.div`
 export class FileUpload extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { filesSelected: [], uploading: false, progress: 0 };
+    this.state = {
+      filesSelected: [],
+      uploading: false,
+      progress: 0,
+      progressLabel: ''
+    };
   }
 
   handleDropFile = files => {
@@ -48,7 +53,14 @@ export class FileUpload extends React.Component {
   handleUploadProgress = event => {
     const bytesSent = event.loaded;
     const bytesTotal = event.total;
-    this.setState({ progress: Math.floor(bytesSent * 100 / bytesTotal) });
+    const percent = Math.floor(bytesSent * 100 / bytesTotal);
+    this.setState({
+      progress: percent,
+      progressLabel:
+        bytesSent === bytesTotal
+          ? 'Upload done. Waiting for import...'
+          : `${percent}% Uploaded.`
+    });
   };
 
   handleUploadClick = async () => {
@@ -91,7 +103,7 @@ export class FileUpload extends React.Component {
       const res = await api(url, {
         method: 'post',
         data: fd,
-        progress: this.handleUploadProgress
+        onUploadProgress: this.handleUploadProgress
       });
       this.setState({ filesSelected: [], uploading: false });
       typeof onUploaded === 'function' && onUploaded(res);
@@ -103,6 +115,7 @@ export class FileUpload extends React.Component {
   };
 
   render() {
+    const { uploading, filesSelected, progress, progressLabel } = this.state;
     return (
       <FileDroppable onDropFile={this.handleDropFile}>
         <StyledDiv className="well">
@@ -114,7 +127,7 @@ export class FileUpload extends React.Component {
               multiple={!!this.props.multiple}
               onChange={this.handleFileSelect}
             />
-            {this.state.filesSelected.length == 0 ? (
+            {filesSelected.length == 0 ? (
               <Button bsStyle="default" onClick={() => this.fileInput.click()}>
                 <Glyphicon glyph="plus" />&ensp;Select File
               </Button>
@@ -122,13 +135,14 @@ export class FileUpload extends React.Component {
               <ButtonToolbar>
                 <Button
                   bsStyle="primary"
-                  disabled={this.state.filesSelected.length < 1}
+                  disabled={filesSelected.length < 1 || uploading}
                   onClick={this.handleUploadClick}
                 >
                   <Glyphicon glyph="upload" />&ensp;Upload
                 </Button>
                 <Button
                   bsStyle="link"
+                  disabled={uploading}
                   onClick={() => this.setState({ filesSelected: [] })}
                 >
                   Reset
@@ -136,12 +150,12 @@ export class FileUpload extends React.Component {
               </ButtonToolbar>
             )}
           </div>
-          {this.state.uploading && (
+          {uploading && (
             <div className="progress-container">
               <div className="text-primary">Uploading:</div>
               <ProgressBar
-                now={this.state.progress}
-                label={this.state.progress + '%'}
+                now={progress}
+                label={progressLabel}
                 striped
                 active
               />

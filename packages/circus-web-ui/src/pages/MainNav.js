@@ -18,8 +18,14 @@ const Menu = props => {
     </span>
   ];
   return (
-    <li className="icon-menu" key={name} onClick={onClick}>
-      {link ? <Link to={link}>{caption}</Link> : caption}
+    <li className="icon-menu" key={name}>
+      {link ? (
+        <Link to={link}>{caption}</Link>
+      ) : (
+        <a onClick={onClick} href="#">
+          {caption}
+        </a>
+      )}
       <ul>{children}</ul>
     </li>
   );
@@ -84,11 +90,11 @@ const StyledNav = styled.nav`
         vertical-align: middle;
         margin-right: 3px;
       }
+      > a {
+        color: white;
+      }
       &.logo,
       &.icon-menu {
-        > a {
-          color: white;
-        }
         &:hover {
           color: ${props => props.theme.highlightColor};
           background-color: ${props => props.theme.brandPrimary};

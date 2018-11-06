@@ -45,6 +45,19 @@ export default class DicomImporter {
     return undefined;
   }
 
+  buildDate(dateStr, timeStr) {
+    const [, year, month, day] = dateStr.match(/^(\d{4})(\d\d)(\d\d)$/);
+    const [, hour, minute, second] = timeStr.match(/^(\d\d)(\d\d)(\d\d)/);
+    return new Date(
+      parseInt(year),
+      parseInt(month) - 1, // month is zero-based
+      parseInt(day),
+      parseInt(hour),
+      parseInt(minute),
+      parseInt(second)
+    );
+  }
+
   buildNewDocument(tags, domain) {
     const doc = {
       seriesUid: tags.seriesInstanceUID,
@@ -52,7 +65,7 @@ export default class DicomImporter {
       width: parseInt(tags.width),
       height: parseInt(tags.height),
       images: tags.instanceNumber,
-      seriesDate: new Date(), // TODO: Fix this!!!
+      seriesDate: this.buildDate(tags.seriesDate, tags.seriesTime),
       modality: tags.modality,
       seriesDescription: tags.seriesDescription,
       bodyPart: tags.bodyPart,

@@ -21,10 +21,12 @@ const Menu = props => {
     <li className="icon-menu" key={name}>
       {link ? (
         <Link to={link}>{caption}</Link>
-      ) : (
+      ) : onClick ? (
         <a onClick={onClick} href="#">
           {caption}
         </a>
+      ) : (
+        caption
       )}
       <ul>{children}</ul>
     </li>

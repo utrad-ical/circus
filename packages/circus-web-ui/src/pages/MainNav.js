@@ -236,13 +236,21 @@ const MainNavView = props => {
               <MenuHeader>CIRCUS DB</MenuHeader>
               <SubMenu icon="education" name="Project" link="/admin/project" />
               <MenuHeader>CIRCUS CS</MenuHeader>
-              <SubMenu icon="list-alt" name="Job Manager" link="/admin/user" />
+              <SubMenu
+                icon="list-alt"
+                name="Job Manager"
+                link="/admin/plugin-job-manager"
+              />
               <SubMenu
                 icon="circus-app"
                 name="CAD Plug-ins"
-                link="/admin/user"
+                link="/admin/plugins"
               />
-              <SubMenu icon="list" name="Job Queue" link="/admin/user" />
+              <SubMenu
+                icon="list"
+                name="Job Queue"
+                link="/admin/plugin-job-queue"
+              />
             </Menu>
           )}
         </MainMenu>

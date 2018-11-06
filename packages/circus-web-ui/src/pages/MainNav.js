@@ -40,6 +40,14 @@ const SubMenu = props => {
   );
 };
 
+const MenuHeader = props => {
+  return (
+    <li>
+      <div className="menu-header">{props.children}</div>
+    </li>
+  );
+};
+
 const StyledHeader = styled.header`
   margin: 0 auto;
   width: 100%;
@@ -60,8 +68,6 @@ const StyledHeader = styled.header`
 const StyledNav = styled.nav`
   a {
     display: inline-block;
-    color: inherit !important;
-    text-decoration: none !important;
   }
 
   > ul {
@@ -69,7 +75,7 @@ const StyledNav = styled.nav`
     margin: 0;
     padding: 0 5px;
     > li {
-      // main navigation item
+      /* main navigation item */
       padding: 0 5px;
       display: inline-block;
       position: relative;
@@ -78,41 +84,56 @@ const StyledNav = styled.nav`
         vertical-align: middle;
         margin-right: 3px;
       }
-      &.logo:hover,
-      &.icon-menu:hover {
-        color: ${props => props.theme.highlightColor};
-        background-color: ${props => props.theme.brandPrimary};
-        > ul {
-          /* show dropdown sub menu */
-          display: block;
+      &.logo,
+      &.icon-menu {
+        > a {
+          color: white;
+        }
+        &:hover {
+          color: ${props => props.theme.highlightColor};
+          background-color: ${props => props.theme.brandPrimary};
+          > a {
+            color: inherit;
+            text-decoration: none;
+          }
+          > ul {
+            /* show dropdown sub menu */
+            display: block;
+          }
         }
       }
       > ul {
         /* dropdown sub menu */
-        display: none;
+        display: none; /* initially hidden */
         position: absolute;
         top: 39px;
         left: 0;
+        line-height: 35px;
         background-color: rgba(240, 240, 240, 0.9);
         padding: 0;
         border: 1px solid #bbb;
         > li {
           display: block;
           width: 200px;
-          border-bottom: 1px solid #bbb;
           color: black;
-          &:hover {
-            background-color: ${props => props.theme.brandPrimary};
-            color: white;
-          }
           a {
+            text-decoration: none;
             display: block;
-            height: 40px;
-            line-height: 40px;
             padding: 0 8px;
+            color: inherit;
+            &:hover {
+              background-color: ${props => props.theme.brandPrimary};
+              color: white;
+            }
+          }
+          .menu-header {
+            border-top: 1px solid #bbbbbb;
+            line-height: 20px;
+            padding: 5px 8px 0 8px;
+            color: gray;
           }
           &.sub {
-            // sub-sub menu indent
+            /* sub-sub menu indent */
             a {
               padding-left: 20px;
               height: 30px;
@@ -202,9 +223,18 @@ const MainNavView = props => {
                 name="Server Configuration"
                 link="/admin/general"
               />
-              <SubMenu icon="education" name="Project" link="/admin/project" />
               <SubMenu icon="record" name="Groups" link="/admin/group" />
               <SubMenu icon="user" name="Users" link="/admin/user" />
+              <MenuHeader>CIRCUS DB</MenuHeader>
+              <SubMenu icon="education" name="Project" link="/admin/project" />
+              <MenuHeader>CIRCUS CS</MenuHeader>
+              <SubMenu icon="list-alt" name="Job Manager" link="/admin/user" />
+              <SubMenu
+                icon="circus-app"
+                name="CAD Plug-ins"
+                link="/admin/user"
+              />
+              <SubMenu icon="list" name="Job Queue" link="/admin/user" />
             </Menu>
           )}
         </MainMenu>

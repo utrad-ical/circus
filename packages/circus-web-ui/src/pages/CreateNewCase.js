@@ -6,6 +6,7 @@ import MultiTagSelect from 'components/MultiTagSelect';
 import { api } from 'utils/api';
 import browserHistory from 'browserHistory';
 import SeriesSelector from 'components/SeriesSelector';
+import { multirange } from 'multi-integer-range';
 
 class CreateNewCaseView extends React.Component {
   constructor(props) {
@@ -55,13 +56,22 @@ class CreateNewCaseView extends React.Component {
 
   handleCreate = async () => {
     // TODO: Check if a similar case exists
+
+    const defaultPartialVolumeDescriptor = images => {
+      const mr = multirange(images);
+      const firstSegment = mr.getRanges()[0];
+      return { start: firstSegment[0], end: firstSegment[1], delta: 1 };
+    };
+
     const res = await api('cases', {
       method: 'post',
       data: {
         projectId: this.state.selectedProject,
         series: this.state.selectedSeries.map(s => ({
           seriesUid: s.seriesUid,
-          range: s.range
+          partialVolumeDescriptor: s.partialVolumeDescriptor
+            ? s.partialVolumeDescriptor
+            : defaultPartialVolumeDescriptor(s.images)
         })),
         tags: this.state.selectedTags
       }

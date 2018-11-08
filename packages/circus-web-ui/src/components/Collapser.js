@@ -45,34 +45,52 @@ const StyledDiv = styled.div`
   }
 `;
 
+export const CollapserView = props => {
+  const {
+    open,
+    onToggleClick,
+    title,
+    children,
+    className,
+    framed,
+    noPadding
+  } = props;
+  return (
+    <StyledDiv
+      className={classnames(
+        'collapser',
+        { framed, noPadding, open },
+        className
+      )}
+    >
+      <a className="collapser-header" onClick={onToggleClick}>
+        {title}
+        &ensp;
+        <Glyphicon className="triangle" glyph="triangle-right" />
+      </a>
+      {open && <div className="collapser-body">{children}</div>}
+    </StyledDiv>
+  );
+};
+
 export default class Collapser extends React.Component {
   constructor(props) {
     super(props);
     this.state = { open: !!props.defaultOpen };
   }
 
-  toggleCollapse = () => {
+  handleToggleClick = () => {
     this.setState({ open: !this.state.open });
   };
 
   render() {
-    const { title, children, className, framed, noPadding } = this.props;
     const { open } = this.state;
     return (
-      <StyledDiv
-        className={classnames(
-          'collapser',
-          { framed, noPadding, open },
-          className
-        )}
-      >
-        <a className="collapser-header" onClick={this.toggleCollapse}>
-          {title}
-          &ensp;
-          <Glyphicon className="triangle" glyph="triangle-right" />
-        </a>
-        {open && <div className="collapser-body">{children}</div>}
-      </StyledDiv>
+      <CollapserView
+        open={open}
+        onToggleClick={this.handleToggleClick}
+        {...this.props}
+      />
     );
   }
 }

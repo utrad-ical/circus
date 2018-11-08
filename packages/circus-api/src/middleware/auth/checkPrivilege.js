@@ -32,7 +32,7 @@ export default function checkPrivilege({ models }, route) {
       // Check project privilege either via caseId or directly via projectId
       if (ctx.params.caseId) {
         const caseId = ctx.params.caseId;
-        ctx.case = await models.clinicalCase.findById(caseId);
+        ctx.case = await models.clinicalCase.findByIdOrFail(caseId);
         projectId = ctx.case.projectId;
       } else if (ctx.params.projectId) {
         projectId = ctx.params.projectId;

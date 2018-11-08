@@ -341,7 +341,7 @@ describe('API', function() {
     });
   });
 
-  describe.only('cases', function _cases() {
+  describe('cases', function _cases() {
     const cid =
       'faeb503e97f918c882453fd2d789f50f4250267740a0b3fbcc85a529f2d7715b';
 
@@ -430,6 +430,13 @@ describe('API', function() {
         method: 'get'
       });
       assert.equal(res.data.projectId, '8883fdef6f5144f50eb2a83cd34baa44');
+    });
+
+    it('should return 404 for nonexistent case', async function() {
+      const res = await server.axios.bob.request({
+        url: server.url + 'api/cases/thiscaseisinvalid'
+      });
+      assert.equal(res.status, 404);
     });
 
     it('should reject revision read access from unauthorized user', async function _shouldRejectRevisionReadAccessFromUnauthorizedUser() {

@@ -182,7 +182,7 @@ class CaseDetailView extends React.Component {
       !this.state.projectData ||
       !this.state.editingData
     ) {
-      return <LoadingIndicator />;
+      return this.state.busy ? <LoadingIndicator /> : null;
     }
 
     const { projectData: prj, caseData } = this.state;

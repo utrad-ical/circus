@@ -71,7 +71,7 @@ async function makeNewCase(
     status: 'draft',
     series: seriesData.map(s => ({
       seriesUid: s.seriesUid,
-      images: s.range,
+      partialVolumeDescriptor: s.partialVolumeDescriptor,
       labels: []
     }))
   };

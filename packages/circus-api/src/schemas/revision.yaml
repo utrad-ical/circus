@@ -25,21 +25,7 @@ properties:
   series:
     type: array
     items:
-      type: object
-      properties:
-        seriesUid:
-          type: string
-          format: dicomUid
-        images:
-          type: string
-          format: multiIntegerRange
-        labels:
-          type: array
-          items:
-            $ref:
-              label
-          description: >
-            The list of labels attached to this series.
+      $ref: seriesEntry
     description: >
       The list of series entries.
 additionalProperties: false

@@ -1,0 +1,18 @@
+$schema: 'http://json-schema.org/schema#'
+$async: true
+title: SeriesEntry
+type: object
+properties:
+  seriesUid:
+    type: string
+    format: dicomUid
+  partialVolumeDescriptor:
+    $ref: partialVolumeDescriptor
+  labels:
+    type: array
+    items:
+      $ref: label
+    description: >
+      The list of labels attached to this series.
+required: ['seriesUid', 'partialVolumeDescriptor', 'labels']
+additionalProperties: false

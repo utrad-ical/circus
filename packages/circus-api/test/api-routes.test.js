@@ -341,7 +341,7 @@ describe('API', function() {
     });
   });
 
-  describe('cases', function _cases() {
+  describe.only('cases', function _cases() {
     const cid =
       'faeb503e97f918c882453fd2d789f50f4250267740a0b3fbcc85a529f2d7715b';
 
@@ -386,7 +386,8 @@ describe('API', function() {
                 seriesUid: '111.222.333.444.777',
                 partialVolumeDescriptor: {
                   start: 1,
-                  end: 200
+                  end: 200,
+                  delta: 1
                 }
               }
             ],
@@ -870,14 +871,17 @@ describe('API', function() {
       const res = await axios.get(server.url + 'api/plugins');
       assert.equal(res.status, 200);
       assert.isArray(res.data);
-      assert.isTrue(res.data.some(p => p.pluginName === 'MOCK-VALIDATION-FAILURE'));
+      assert.isTrue(
+        res.data.some(p => p.pluginName === 'MOCK-VALIDATION-FAILURE')
+      );
     });
 
     it('should return plugin definition specified by pluginId', async function _shouldReturnPluginDefinitionSpecifiedByPluginId() {
-      const res = await axios.get(server.url + 'api/plugins/circus-mock%2Ffails');
+      const res = await axios.get(
+        server.url + 'api/plugins/circus-mock%2Ffails'
+      );
       assert.equal(res.status, 200);
       assert.equal(res.data.pluginName, 'MOCK-VALIDATION-FAILURE');
     });
   });
-
 });

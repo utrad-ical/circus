@@ -96,6 +96,9 @@ export default async function createApp(options = {}) {
   // The main Koa instance.
   const koa = new Koa();
 
+  // Trust proxy headers such as X-Forwarded-For
+  koa.proxy = true;
+
   const validator = await createValidator();
   const models = createModels(db, validator);
   const blobStorage = blobPath

@@ -3,7 +3,7 @@ import { Configuration, ModuleDefinition } from '../Configuration';
 import Logger from './logger/Logger';
 import NullLogger from './logger/NullLogger';
 import ImageEncoder from './image-encoder/ImageEncoder';
-import { DicomFileRepository } from '@utrad-ical/circus-dicom-repository';
+import { DicomFileRepository } from '@utrad-ical/circus-lib/lib/dicom-file-repository';
 import Counter from './Counter';
 import createAuthorizer from './createAuthorizer';
 import {
@@ -66,7 +66,7 @@ export default async function loadHelperModules(
   if (config.dicomFileRepository) {
     repository = await loadModule<DicomFileRepository>(
       'dicom file repository',
-      '@utrad-ical/circus-dicom-repository/lib',
+      '@utrad-ical/circus-lib/lib/dicom-file-repository/lib',
       config.dicomFileRepository
     );
   }

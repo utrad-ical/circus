@@ -1,5 +1,5 @@
 import Logger from './helper/logger/Logger';
-import { DicomFileRepository } from '@utrad-ical/circus-dicom-repository';
+import { DicomFileRepository } from '@utrad-ical/circus-lib/lib/dicom-file-repository';
 import ImageEncoder from './helper/image-encoder/ImageEncoder';
 
 export interface ModuleDefinition<T = string> {

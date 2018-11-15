@@ -3,7 +3,7 @@
 const supertest = require('supertest');
 const {
   MemoryDicomFileRepository
-} = require('@utrad-ical/circus-dicom-repository');
+} = require('@utrad-ical/circus-lib/lib/dicom-file-repository');
 
 const createServer = require('../src/server/createServer').default;
 const {

@@ -1,4 +1,4 @@
-import { DicomFileRepository } from '@utrad-ical/circus-dicom-repository';
+import { DicomFileRepository } from '@utrad-ical/circus-lib/lib/dicom-file-repository';
 import {
   Extractor,
   DicomMetadata,

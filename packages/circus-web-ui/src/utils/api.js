@@ -25,12 +25,16 @@ function createApiCaller(credentials) {
     }
 
     try {
+      const headers = {
+        Authorization: `Bearer ${credentials.accessToken}`,
+        ...(params.headers || {})
+      };
       const res = await axios({
         baseURL: apiServer + 'api/',
         cached: false,
         withCredentials: true,
-        headers: { Authorization: `Bearer ${credentials.accessToken}` },
-        ...params
+        ...params,
+        headers
       });
       return res.data;
     } catch (err) {

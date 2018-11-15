@@ -25,11 +25,12 @@ export function createVolumeProvider(
   repository: DicomFileRepository,
   extractor: Extractor<DicomImageData>
 ): VolumeProvider {
-  return async seriesUID => {
-    const { load, images } = await repository.getSeries(seriesUID);
+  return async seriesUid => {
+    const { load, images } = await repository.getSeries(seriesUid);
     const imageRange = new MultiRange(images);
 
-    if (imageRange.length() === 0) throw new Error('Invalid repository');
+    if (imageRange.segmentLength() === 0)
+      throw new Error(`Series '${seriesUid}' could not be loaded.`);
 
     // Create map of image-no to data-index(as z index on the volume).
     const zIndices: Map<number, number> = new Map();

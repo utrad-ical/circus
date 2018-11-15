@@ -165,7 +165,7 @@ const StyledNav = styled.nav`
 `;
 
 const MainNavView = props => {
-  const { onLogout, caseSearchPresets, seriesSearchPresets } = props;
+  const { onLogout, caseSearchPresets = [], seriesSearchPresets = [] } = props;
   return (
     <StyledHeader>
       <StyledNav>

@@ -132,8 +132,8 @@ const MyProfile = ({ user }) => {
             <b>Email:</b> {user.userEmail}
           </li>
           <li>
-            <b>Last login:</b> <TimeDisplay value={user.lastLoginTime} />
-            (from {user.lastLoginIp})
+            <b>Last login:</b>
+            <TimeDisplay value={user.lastLoginTime} /> (from {user.lastLoginIp})
           </li>
           <li>
             <b>Groups:</b> {user.groups.join(', ')}

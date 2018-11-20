@@ -1,6 +1,6 @@
 import { DicomFileRepository } from '@utrad-ical/circus-lib/lib/dicom-file-repository';
 import {
-  Extractor,
+  DicomImageExtractor,
   DicomMetadata,
   DicomImageData
 } from '../../common/dicomImageExtractor';
@@ -23,7 +23,7 @@ export interface VolumeAccessor {
 
 export function createVolumeProvider(
   repository: DicomFileRepository,
-  extractor: Extractor<DicomImageData>
+  extractor: DicomImageExtractor
 ): VolumeProvider {
   return async seriesUid => {
     const { load, images } = await repository.getSeries(seriesUid);

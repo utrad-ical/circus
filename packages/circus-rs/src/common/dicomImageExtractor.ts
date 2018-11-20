@@ -7,10 +7,12 @@ interface RescaleParams {
   slope: number;
   intercept: number;
 }
+
 interface WindowParams {
   level: number;
   width: number;
 }
+
 type ExtractOptions = {
   skipExtractPixels?: boolean;
   frame?: number;
@@ -35,13 +37,11 @@ type ExtractPixelInfo = {
   maxValue: number;
 };
 
-type DicomFileBuffer = ArrayBuffer;
-type DicomImagePixelData = ArrayBuffer;
-
 export type DicomImageData = {
   metadata: DicomMetadata;
-  pixelData?: DicomImagePixelData; // parsed;
+  pixelData?: ArrayBuffer; // parsed;
 };
+
 export type DicomMetadata = {
   modality: string;
   columns: number;
@@ -56,7 +56,7 @@ export type DicomMetadata = {
   maxValue?: number;
 };
 
-export type Extractor<T> = (buffer: DicomFileBuffer) => T;
+export type DicomImageExtractor = (buffer: ArrayBuffer) => DicomImageData;
 
 /**
  * DICOM parser and pixel data extractor.
@@ -70,9 +70,9 @@ export type Extractor<T> = (buffer: DicomFileBuffer) => T;
 /**
  * Extracts the pixel data from a DICOM file.
  */
-const dicomImageExtractor: (
-  options?: ExtractOptions
-) => Extractor<DicomImageData> = (options = {}) => {
+const dicomImageExtractor: (options?: ExtractOptions) => DicomImageExtractor = (
+  options = {}
+) => {
   const { frame = 1, skipExtractPixels = false } = options;
   if (frame !== 1) throw new Error('Multiframe images are not supported yet.');
 
@@ -95,7 +95,7 @@ const dicomImageExtractor: (
       : [1, 1]);
     const rescale = determineRescale(dataset);
     const pixelFormat = determinePixelFormat(dataset);
-    
+
     if (pixelFormat === PixelFormat.Unknown)
       throw new RangeError('Unsupported pixel format detected.');
 
@@ -122,7 +122,7 @@ const dicomImageExtractor: (
       sliceLocation
     };
 
-  if (!skipExtractPixels) {
+    if (!skipExtractPixels) {
       let { minValue, maxValue, pixelData } = extractPixels(
         dataset,
         transferSyntax,

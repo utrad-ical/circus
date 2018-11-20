@@ -32,10 +32,7 @@ export default function metadata(): koa.Middleware {
     ]
   };
 
-  const main: koa.Middleware = async function metadata(
-    ctx,
-    _next
-  ): Promise<void> {
+  const metadata: koa.Middleware = async (ctx, next) => {
     const state = ctx.state as SeriesMiddlewareState;
     const { requireEstimatedWindow = true } = state.query;
     const { imageMetadata, load, images } = state.volumeAccessor;
@@ -73,7 +70,7 @@ export default function metadata(): koa.Middleware {
     };
   };
 
-  return compose([validate(rules), main]);
+  return compose([validate(rules), metadata]);
 }
 
 function extractMetadata(

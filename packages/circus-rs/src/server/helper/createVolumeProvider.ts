@@ -1,8 +1,7 @@
 import { DicomFileRepository } from '@utrad-ical/circus-lib/lib/dicom-file-repository';
 import {
   DicomImageExtractor,
-  DicomMetadata,
-  DicomImageData
+  DicomMetadata
 } from '../../common/dicomImageExtractor';
 import {
   Initializer as MultiRangeInitializer,
@@ -12,8 +11,12 @@ import RawData from '../../common/RawData';
 import PriorityIntegerCaller from '../../common/PriorityIntegerCaller';
 import DicomVolume from '../../common/DicomVolume';
 
-export type VolumeProvider = (seriesUID: string) => Promise<VolumeAccessor>;
+export type VolumeProvider = (seriesUid: string) => Promise<VolumeAccessor>;
 
+/**
+ * VolumeAccessor is a set of data which loadVolumeProvider middleware
+ * creates and injects to Koa's context.
+ */
 export interface VolumeAccessor {
   imageMetadata: Map<number, DicomMetadata>;
   volume: RawData;
@@ -21,6 +24,11 @@ export interface VolumeAccessor {
   images: MultiRange;
 }
 
+/**
+ * Creates a priority loader that can be injected to Koa's context.
+ * @param repository Bound DICOM file repository.
+ * @param extractor Bound DicomImageExtractor.
+ */
 export function createVolumeProvider(
   repository: DicomFileRepository,
   extractor: DicomImageExtractor

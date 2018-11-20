@@ -18,6 +18,11 @@ interface LoadStoreOptions {
   volumeProvider: VolumeProvider;
 }
 
+/**
+ * Creates a middleware that injects `VolumeAccessor` to Koa's context.
+ * A VolumeAccessor is bound to a specific series UID
+ * provided via the request URL.
+ */
 export default function loadVolumeProvider({
   logger,
   volumeProvider

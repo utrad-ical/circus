@@ -3,7 +3,6 @@ import Viewer from '../viewer/Viewer';
 import ViewState from '../ViewState';
 import Sprite from '../viewer/Sprite';
 import {
-  Box,
   Section,
   intersectionOfBoxAndPlane,
   box2GrowSubpixel
@@ -147,7 +146,7 @@ export default class VoxelCloud implements Annotation {
     this.volume.transformBoundingBox(
       {
         origin: bb.min.toArray() as [number, number, number],
-        size: bb.getSize().toArray() as [number, number, number]
+        size: bb.getSize(new Vector3()).toArray() as [number, number, number]
       },
       this.origin
     );
@@ -223,7 +222,7 @@ export default class VoxelCloud implements Annotation {
 
     // The final on-screen rectangle inside the canvas
     const outRect = screenRect.intersect(containingBox);
-    const outRectSize = outRect.getSize();
+    const outRectSize = outRect.getSize(new Vector2());
     if (outRect.isEmpty() || outRectSize.x === 0 || outRectSize.y === 0) {
       // The voxel cloud will not appear within the rectangle of the screen
       return null;
@@ -354,7 +353,7 @@ function rectangle(
 ): void {
   context.save();
   context.beginPath();
-  const size = rect.getSize();
+  const size = rect.getSize(new Vector2());
   context.rect(rect.min.x, rect.min.y, size.x, size.y);
   context.closePath();
   context.lineWidth = linewidth;

@@ -1,10 +1,15 @@
 import { Vector2, Vector3 } from 'three';
-import DraggableTool from '../DraggableTool';
-import Viewer from '../../viewer/Viewer';
-import ViewState from '../../ViewState';
-import ViewerEvent from '../../viewer/ViewerEvent';
-import { convertScreenCoordinateToVolumeCoordinate } from '../../section-util';
 import { Section, vectorizeSection } from '../../../common/geometry';
+import MprImageSource from '../../image-source/MprImageSource';
+import { DicomVolumeMetadata } from '../../image-source/volume-loader/DicomVolumeLoader';
+import {
+  convertScreenCoordinateToVolumeCoordinate,
+  sectionOverlapsVolume
+} from '../../section-util';
+import Viewer from '../../viewer/Viewer';
+import ViewerEvent from '../../viewer/ViewerEvent';
+import ViewState, { MprViewState } from '../../ViewState';
+import DraggableTool from '../DraggableTool';
 
 /**
  * ZoomTool
@@ -47,25 +52,58 @@ export default class ZoomTool extends DraggableTool {
   private zoomStep(viewer: Viewer, step: number, screenCenter?: Vector2): void {
     const stepFactor = 1.05;
     const state: ViewState = viewer.getState();
+
     switch (state.type) {
       case 'mpr':
         const section = state.section;
-        const vp = viewer.getResolution();
-        if (!screenCenter) screenCenter = new Vector2(vp[0] / 2, vp[1] / 2);
+        const resolution = viewer.getResolution();
+
+        const comp = viewer.getComposition();
+        if (!comp) throw new Error('Composition not initialized'); // should not happen
+        const src = comp.imageSource as MprImageSource;
+        if (!(src instanceof MprImageSource)) return;
+
+        if (!screenCenter)
+          screenCenter = new Vector2(resolution[0] / 2, resolution[1] / 2);
         const volumeCenter = convertScreenCoordinateToVolumeCoordinate(
           section,
-          new Vector2(vp[0], vp[1]),
+          new Vector2(resolution[0], resolution[1]),
           screenCenter
         );
-        const newState = {
-          ...state,
-          section: this.scaleSection(section, stepFactor ** step, volumeCenter)
-        };
-        viewer.setState(newState);
+
+        viewer.setState(
+          this.translateBy(
+            state,
+            stepFactor ** step,
+            volumeCenter,
+            new Vector2().fromArray(resolution),
+            src.metadata!
+          )
+        );
+
         break;
       case 'vr':
         break;
     }
+  }
+
+  private translateBy(
+    state: MprViewState,
+    scale: number,
+    volumeCenter: Vector3,
+    resolution: Vector2,
+    metadata: DicomVolumeMetadata
+  ): MprViewState {
+    const mmSection = this.scaleSection(state.section, scale, volumeCenter);
+
+    const overlap = sectionOverlapsVolume(
+      mmSection,
+      resolution,
+      new Vector3().fromArray(metadata.voxelSize),
+      new Vector3().fromArray(metadata.voxelCount)
+    );
+
+    return overlap ? { ...state, section: mmSection } : state;
   }
 
   private scaleSection(

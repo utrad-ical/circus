@@ -17,6 +17,13 @@
       "processId": "${command:PickProcess}",
       "restart": true,
       "protocol": "inspector"
-    }
+    },
+    {
+      "name": "Launch localhost",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8080/",
+      "webRoot": "${workspaceFolder}"
+    },
   ]
 }

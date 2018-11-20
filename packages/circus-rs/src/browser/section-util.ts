@@ -1,10 +1,14 @@
-import { Vector2D, Vector3D, vectorizeSection } from '../common/geometry';
-import { Box2, Vector3, Vector2 } from 'three';
+import { Box3, ShapeUtils, Triangle, Vector2, Vector3, Box2 } from 'three';
+import { isNullOrUndefined } from 'util';
 import {
+  fitRectangle,
+  intersectionOfBoxAndPlane,
+  projectPointOntoSection,
   Section,
   translateSection,
-  projectPointOntoSection,
-  fitRectangle
+  Vector2D,
+  Vector3D,
+  vectorizeSection
 } from '../common/geometry';
 
 export type OrientationString = 'axial' | 'sagittal' | 'coronal' | 'oblique';
@@ -190,7 +194,7 @@ export function createOrthogonalMprSection(
     case 'axial': {
       if (typeof position === 'undefined') position = vs.z / 2;
       const rect = fitRectangle(res, new Vector2(vs.x, vs.y));
-      const size = rect.getSize();
+      const size = rect.getSize(new Vector2());
       const mmpp = [vs.x / size.x, vs.y / size.y];
       section = {
         origin: [-rect.min.x * mmpp[0], -rect.min.y * mmpp[1], position],
@@ -202,7 +206,7 @@ export function createOrthogonalMprSection(
     case 'sagittal': {
       if (typeof position === 'undefined') position = vs.x / 2;
       const rect = fitRectangle(res, new Vector2(vs.y, vs.z));
-      const size = rect.getSize();
+      const size = rect.getSize(new Vector2());
       const mmpp = [vs.y / size.x, vs.z / size.y];
       section = {
         origin: [position, -rect.min.x * mmpp[0], -rect.min.y * mmpp[1]],
@@ -214,7 +218,7 @@ export function createOrthogonalMprSection(
     case 'coronal': {
       if (typeof position === 'undefined') position = vs.y / 2;
       const rect = fitRectangle(res, new Vector2(vs.x, vs.z));
-      const size = rect.getSize();
+      const size = rect.getSize(new Vector2());
       const mmpp = [vs.x / size.x, vs.z / size.y];
       section = {
         origin: [-rect.min.x * mmpp[0], position, -rect.min.y * mmpp[1]],
@@ -279,4 +283,91 @@ export function adjustOnResized(
   };
 
   return newSection;
+}
+
+/**
+ * Returns true if the given section overlaps the volume.
+ * @param mmSection The section in millimeters
+ * @param resolution The viewer size in screen pixels
+ * @param volumeSize The volume size in millimeters
+ * @param voxelCount The voxel count
+ */
+export function sectionOverlapsVolume(
+  mmSection: Section,
+  resolution: Vector2,
+  voxelSize: Vector3,
+  voxelCount: Vector3
+): boolean {
+  // Create the volume box (cuboid)
+  const mmVolume: Box3 = new Box3(
+    convertPointToMm(new Vector3(0, 0, 0), voxelSize),
+    convertPointToMm(voxelCount, voxelSize)
+  );
+
+  // Calculates the intersection of the volume box (cuboid) and the section treated as a plane that extends infinitely.
+  const intersections = intersectionOfBoxAndPlane(mmVolume, mmSection);
+
+  // If there is no intersection point, the section is outside the volume.
+  if (!intersections) return false;
+
+  // Calculates the vertex of the section treated as a finitely area.
+  // (v0)+-----+(v1)
+  //     |     |
+  //     |     |
+  // (v3)+-----+(v2)
+  const mmSectionVec = vectorizeSection(mmSection);
+  const sectionVertices: [Vector3, Vector3, Vector3, Vector3] = [
+    mmSectionVec.origin,
+    new Vector3().add(mmSectionVec.origin).add(mmSectionVec.xAxis),
+    new Vector3()
+      .add(mmSectionVec.origin)
+      .add(mmSectionVec.xAxis)
+      .add(mmSectionVec.yAxis),
+    new Vector3().add(mmSectionVec.origin).add(mmSectionVec.yAxis)
+  ];
+
+  // Create the section box (rectangle)
+  const mmSectionBox2: Box2 = new Box2(
+    convertVolumeCoordinateToScreenCoordinate(
+      mmSection,
+      resolution,
+      sectionVertices[0]
+    ),
+    convertVolumeCoordinateToScreenCoordinate(
+      mmSection,
+      resolution,
+      sectionVertices[2]
+    )
+  );
+
+  // Convert intersection coordinates from volume 3D coordinate to screen 2D coordinate in millimeter.
+  const shadowPolygonVerticeCoords: Vector2[] = intersections.map(p3 =>
+    convertVolumeCoordinateToScreenCoordinate(mmSection, resolution, p3)
+  );
+
+  // If the section contains an intersection point, the section overlaps the volume.
+  if (shadowPolygonVerticeCoords.some(p2 => mmSectionBox2.containsPoint(p2)))
+    return true;
+
+  // Create a polygon whose vertices are intersections.
+  // If the polygon contains a vertex of the section, the section overlaps the volume.
+  // In order to determine this, divide the polygon into triangles and use it.(because to using Three.js)
+  type VertexIndex = number;
+  type ShadowTriangle = [VertexIndex, VertexIndex, VertexIndex];
+  const shadowTriangles: ShadowTriangle[] = ShapeUtils.triangulateShape(
+    shadowPolygonVerticeCoords,
+    []
+  ) as any;
+  const shadowPolygonVertices: Vector3[] = shadowPolygonVerticeCoords.map(
+    coord =>
+      convertScreenCoordinateToVolumeCoordinate(mmSection, resolution, coord)
+  );
+  return shadowTriangles.some(([vIdx1, vIdx2, vIdx3]) => {
+    const triangle = new Triangle().set(
+      shadowPolygonVertices[vIdx1],
+      shadowPolygonVertices[vIdx2],
+      shadowPolygonVertices[vIdx3]
+    );
+    return sectionVertices.some(p => triangle.containsPoint(p));
+  });
 }

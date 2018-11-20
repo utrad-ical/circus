@@ -1,14 +1,8 @@
-import { Box3, Vector2, Vector3 } from 'three';
-import { isNullOrUndefined } from 'util';
-import {
-  intersectionOfBoxAndPlane,
-  intersectionPointWithinSection,
-  sectionEquals,
-  translateSection
-} from '../../../common/geometry';
+import { Vector2, Vector3 } from 'three';
+import { sectionEquals, translateSection } from '../../../common/geometry';
 import MprImageSource from '../../image-source/MprImageSource';
 import { DicomVolumeMetadata } from '../../image-source/volume-loader/DicomVolumeLoader';
-import { convertSectionToIndex } from '../../section-util';
+import { sectionOverlapsVolume } from '../../section-util';
 import ViewerEvent from '../../viewer/ViewerEvent';
 import { MprViewState } from '../../ViewState';
 import DraggableTool from '../DraggableTool';
@@ -31,6 +25,7 @@ export default class HandTool extends DraggableTool {
     const viewer = ev.viewer;
     const state = viewer.getState();
     const vp = viewer.getViewport();
+    const resolution = viewer.getResolution();
 
     switch (state.type) {
       case 'mpr':
@@ -38,15 +33,16 @@ export default class HandTool extends DraggableTool {
         if (!comp) throw new Error('Composition not initialized'); // should not happen
         const src = comp.imageSource as MprImageSource;
         if (!(src instanceof MprImageSource)) return;
-
         viewer.setState(
           this.translateBy(
             state,
             new Vector2(dragInfo.dx, dragInfo.dy),
             new Vector2().fromArray(vp),
+            new Vector2().fromArray(resolution),
             src.metadata!
           )
         );
+
         break;
       case 'vr':
         // TODO: Implement hand tool
@@ -58,42 +54,31 @@ export default class HandTool extends DraggableTool {
     state: MprViewState,
     move: Vector2,
     vp: Vector2,
+    resolution: Vector2,
     metadata: DicomVolumeMetadata
   ): MprViewState {
-    const section = state.section;
+    const prevSection = state.section;
     const moveScale = move.clone().divide(vp);
-    const newSection = translateSection(
-      section,
+    const mmSection = translateSection(
+      prevSection,
       new Vector3().addVectors(
-        new Vector3().fromArray(section.xAxis).multiplyScalar(-moveScale.x),
-        new Vector3().fromArray(section.yAxis).multiplyScalar(-moveScale.y)
+        new Vector3().fromArray(prevSection.xAxis).multiplyScalar(-moveScale.x),
+        new Vector3().fromArray(prevSection.yAxis).multiplyScalar(-moveScale.y)
       )
     );
 
-    // Check whether new section is outside display area, and if so, reject the processing.
-    const voxelSize = new Vector3().fromArray(metadata.voxelSize);
-    const voxelCount = metadata.voxelCount;
-    const indexNewSection = convertSectionToIndex(newSection, voxelSize);
-    const box = new Box3(
-      new Vector3(0, 0, 0),
-      new Vector3().fromArray(voxelCount)
+    // If the section has no changed, return the state as is.
+    if (sectionEquals(prevSection, mmSection)) {
+      return state;
+    }
+
+    // If the section does not overlap the volume, return the state as is (reject the processing).
+    const overlap = sectionOverlapsVolume(
+      mmSection,
+      resolution,
+      new Vector3().fromArray(metadata.voxelSize),
+      new Vector3().fromArray(metadata.voxelCount)
     );
-    const intersectionPoints = intersectionOfBoxAndPlane(box, indexNewSection);
-    if (
-      isNullOrUndefined(intersectionPoints) ||
-      !intersectionPoints.some(p =>
-        intersectionPointWithinSection(indexNewSection, p)
-      )
-    ) {
-      return state;
-    }
-
-    // If section has no changed, return state as is.
-    if (sectionEquals(section, newSection)) {
-      return state;
-    }
-
-    // Return state with new section.
-    return { ...state, section: newSection };
+    return overlap ? { ...state, section: mmSection } : state;
   }
 }

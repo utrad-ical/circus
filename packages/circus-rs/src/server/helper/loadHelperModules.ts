@@ -66,7 +66,7 @@ export default async function loadHelperModules(
   if (config.dicomFileRepository) {
     repository = await loadModule<DicomFileRepository>(
       'dicom file repository',
-      '@utrad-ical/circus-lib/lib/dicom-file-repository/lib',
+      '@utrad-ical/circus-lib/lib/dicom-file-repository',
       config.dicomFileRepository
     );
   }

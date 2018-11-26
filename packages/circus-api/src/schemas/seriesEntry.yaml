@@ -14,5 +14,5 @@ properties:
       $ref: label
     description: >
       The list of labels attached to this series.
-required: ['seriesUid', 'partialVolumeDescriptor', 'labels']
+required: ['seriesUid', 'labels']
 additionalProperties: false

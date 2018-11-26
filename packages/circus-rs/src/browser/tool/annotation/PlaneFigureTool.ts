@@ -1,13 +1,10 @@
 import { Vector2, Vector3 } from 'three';
 import DraggableTool from '../DraggableTool';
-import Viewer from '../../viewer/Viewer';
-import ViewState, { MprViewState } from '../../ViewState';
 import ViewerEvent from '../../viewer/ViewerEvent';
 import {
   convertScreenCoordinateToVolumeCoordinate,
   detectOrthogonalSection
 } from '../../section-util';
-import { Section, vectorizeSection } from '../../../common/geometry';
 import PlaneFigure, { FigureType } from '../../annotation/PlaneFigure';
 
 /**
@@ -15,6 +12,7 @@ import PlaneFigure, { FigureType } from '../../annotation/PlaneFigure';
  */
 export default class PlaneFigureTool extends DraggableTool {
   private tmpAnnotation?: PlaneFigure;
+  protected usePointerLockAPI = false;
   protected figureType: FigureType = 'circle';
 
   public dragStartHandler(ev: ViewerEvent): void {
@@ -39,7 +37,7 @@ export default class PlaneFigureTool extends DraggableTool {
     );
     fig.min = [min.x, min.y];
     fig.z = min.z;
-
+    
     comp.addAnnotation(fig);
     comp.annotationUpdated();
     this.tmpAnnotation = fig;

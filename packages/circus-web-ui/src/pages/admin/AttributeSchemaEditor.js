@@ -1,18 +1,25 @@
 import React from 'react';
 import BlockSelect from 'rb/BlockSelect';
 import * as et from 'rb/editor-types';
+import styled from 'styled-components';
 
 const TextArrayEditor = et.arrayOf(et.text(), '');
 
+const SelectSpecEditorDiv = styled.div`
+  li {
+    display: flex;
+  }
+`;
+
 const SelectSpecEditor = props => {
   return (
-    <div>
+    <SelectSpecEditorDiv>
       Options:
       <TextArrayEditor
         value={props.value.enum}
         onChange={v => props.onChange({ enum: v })}
       />
-    </div>
+    </SelectSpecEditorDiv>
   );
 };
 

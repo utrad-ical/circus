@@ -354,12 +354,12 @@ export class RevisionData extends React.Component {
     const activeSeries = this.props.revision.series[seriesIndex];
     const volumeLoader = new rs.RsVolumeLoader({
       rsHttpClient: this.client,
-      series: activeSeries.seriesUid
+      seriesUid: activeSeries.seriesUid
     });
     const src = new rs.HybridMprImageSource({
       volumeLoader,
       rsHttpClient: this.client,
-      series: activeSeries.seriesUid
+      seriesUid: activeSeries.seriesUid
     });
     const composition = new rs.Composition(src);
     src.ready().then(this.updateLabels);

@@ -23,12 +23,12 @@ export default class SeriesDetail extends React.Component {
       const rsHttpClient = new rs.RsHttpClient(server);
       const volumeLoader = new rs.RsVolumeLoader({
         rsHttpClient,
-        series: seriesUid
+        seriesUid: seriesUid
       });
       const src = new rs.HybridMprImageSource({
         volumeLoader,
         rsHttpClient,
-        series: seriesUid
+        seriesUid: seriesUid
       });
       const composition = new rs.Composition(src);
       this.setState({ composition });

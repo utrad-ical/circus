@@ -121,9 +121,9 @@ describe('Server', () => {
       it.skip('must return 404 for nonexistent series');
 
       describe('metadata', async () => {
-        it('must return metadata without estimated window', function(done) {
+        it('must return metadata without estimated window by default', function(done) {
           supertest(httpServer)
-            .get('/series/1.2.3.4.5/metadata?requireEstimatedWindow=false')
+            .get('/series/1.2.3.4.5/metadata')
             .expect(200)
             .expect(res => {
               if (res.body.estimatedWindow !== undefined)
@@ -133,9 +133,45 @@ describe('Server', () => {
             .end(done);
         });
 
-        it('must return metadata', function(done) {
+        it('must return metadata without estimated window if estimatedWindow paramator is "none"', function(done) {
           supertest(httpServer)
             .get('/series/1.2.3.4.5/metadata')
+            .expect(200)
+            .expect(res => {
+              if (res.body.estimatedWindow !== undefined)
+                throw new Error('Invalid implemention');
+            })
+            .expect('Content-Type', /application\/json/)
+            .end(done);
+        });
+
+        it('must return metadata with estimated window which was calculated by "first" algorythm', function(done) {
+          supertest(httpServer)
+            .get('/series/1.2.3.4.5/metadata?estimateWindow=first')
+            .expect(200)
+            .expect(res => {
+              if (res.body.estimatedWindow === undefined)
+                throw new Error('Invalid implemention');
+            })
+            .expect('Content-Type', /application\/json/)
+            .end(done);
+        });
+
+        it('must return metadata with estimated window which was calculated by "center" algorythm', function(done) {
+          supertest(httpServer)
+            .get('/series/1.2.3.4.5/metadata?estimateWindow=center')
+            .expect(200)
+            .expect(res => {
+              if (res.body.estimatedWindow === undefined)
+                throw new Error('Invalid implemention');
+            })
+            .expect('Content-Type', /application\/json/)
+            .end(done);
+        });
+
+        it('must return metadata with estimated window which was calculated by "full" algorythm', function(done) {
+          supertest(httpServer)
+            .get('/series/1.2.3.4.5/metadata?estimateWindow=full')
             .expect(200)
             .expect(res => {
               if (res.body.estimatedWindow === undefined)

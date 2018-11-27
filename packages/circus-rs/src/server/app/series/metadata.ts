@@ -5,18 +5,20 @@ import validate from '../middleware/validate';
 import { ViewWindow } from '../../../common/ViewWindow';
 import { PixelFormat } from '../../../common/PixelFormat';
 import { SeriesMiddlewareState } from './seriesRoutes';
-import MultiRange, {
-  Initializer as MultiRangeInitializer
-} from 'multi-integer-range';
-import { DicomMetadata } from '../../../common/dicomImageExtractor';
+import MultiRange from 'multi-integer-range';
+import { VolumeAccessor } from '../../helper/createVolumeProvider';
 
-type MetadataResponse = {
+interface MetadataQuery {
+  estimateWindow?: 'full' | 'first' | 'center' | 'none';
+}
+
+interface MetadataResponse {
   voxelCount: [number, number, number];
   voxelSize: [number, number, number];
   dicomWindow?: ViewWindow;
   pixelFormat: PixelFormat;
   estimatedWindow?: ViewWindow;
-};
+}
 
 /**
  * Handles 'metadata' endpoint which gives general information
@@ -24,19 +26,20 @@ type MetadataResponse = {
  */
 export default function metadata(): koa.Middleware {
   const rules: ValidatorRules = {
-    requireEstimatedWindow: [
-      'Require estimated window',
-      undefined,
-      'isBoolean',
-      'toBoolean'
+    estimateWindow: [
+      'estimate window',
+      'none',
+      /^(?:full|first|center|none)$/,
+      null
     ]
   };
 
   const metadata: koa.Middleware = async (ctx, next) => {
     const state = ctx.state as SeriesMiddlewareState;
-    const { requireEstimatedWindow = true } = state.query;
-    const { imageMetadata, load, images } = state.volumeAccessor;
+    const { estimateWindow = 'none' } = state.query as MetadataQuery;
+    const { images } = state.volumeAccessor;
 
+    // Modify full volume accessor to partial volume accessor
     let loadImages: number[] = [];
     if (state.partialVolumeDescriptor) {
       const { start, end, delta } = state.partialVolumeDescriptor;
@@ -47,82 +50,118 @@ export default function metadata(): koa.Middleware {
       loadImages = images.toArray();
     }
 
-    if (requireEstimatedWindow) {
-      await load(loadImages);
-    } else {
-      await load(loadImages.slice(0, 2));
-    }
+    const volumeAccessor: VolumeAccessor = {
+      ...state.volumeAccessor,
+      images: new MultiRange(loadImages)
+    };
 
     const {
       voxelCount,
       voxelSize,
       dicomWindow,
-      pixelFormat,
-      estimatedWindow
-    } = extractMetadata(imageMetadata, loadImages);
+      pixelFormat
+    } = await extractVolumeMetadata(volumeAccessor);
 
-    ctx.body = {
+    const estimatedWindow =
+      estimateWindow === 'none'
+        ? undefined
+        : await extractEstimatedWindow(volumeAccessor, estimateWindow);
+
+    const body: MetadataResponse = {
       voxelCount,
       voxelSize,
       dicomWindow,
       pixelFormat,
-      estimatedWindow: requireEstimatedWindow ? estimatedWindow : undefined
+      estimatedWindow
     };
+
+    ctx.body = body;
   };
 
   return compose([validate(rules), metadata]);
 }
 
-function extractMetadata(
-  imageMetadata: Map<number, DicomMetadata>,
-  targetRange: MultiRangeInitializer
-): MetadataResponse {
-  const range = new MultiRange(targetRange);
-  const count = range.length();
+type VolumeMetadata = {
+  voxelCount: [number, number, number];
+  voxelSize: [number, number, number];
+  dicomWindow?: ViewWindow;
+  pixelFormat: PixelFormat;
+};
+async function extractVolumeMetadata(
+  volumeAccessor: VolumeAccessor
+): Promise<VolumeMetadata> {
+  const { imageMetadata, load, images: origImages } = volumeAccessor;
+  if (origImages.segmentLength() === 0)
+    throw new TypeError('Invalid volume accessor.');
 
-  const [imageNo1, imageNo2] = range.toArray().slice(0, 2);
+  const images = origImages.clone();
+  const count = images.length();
 
-  const meta1 = imageMetadata.get(imageNo1)!;
-  const {
-    columns,
-    rows,
-    pixelFormat,
-    window: dicomWindow,
-    sliceLocation: sliceLocation1
-  } = meta1;
-  const voxelCount: [number, number, number] = [columns, rows, count];
+  const primaryImageNo = images.shift()!;
+  await load(primaryImageNo);
+  const primaryMetadata = imageMetadata.get(primaryImageNo)!;
+
   let pitch: number;
-  if (meta1.pitch) {
-    pitch = meta1.pitch;
-  } else if (1 === count) {
-    pitch = 1;
+  if (primaryMetadata.pitch) {
+    pitch = primaryMetadata.pitch;
+  } else if (count > 1) {
+    const secondaryImageNo = images.shift()!;
+    await load(secondaryImageNo);
+    const secondaryMetadata = imageMetadata.get(secondaryImageNo)!;
+
+    pitch = Math.abs(
+      secondaryMetadata.sliceLocation - primaryMetadata.sliceLocation
+    );
   } else {
-    const { sliceLocation: sliceLocation2 } = imageMetadata.get(imageNo2)!;
-    pitch = Math.abs(sliceLocation2 - sliceLocation1);
+    pitch = 1;
   }
 
-  const voxelSize: [number, number, number] = [
-    meta1.pixelSpacing[0],
-    meta1.pixelSpacing[1],
-    pitch
-  ];
+  return {
+    voxelCount: [primaryMetadata.columns, primaryMetadata.rows, count],
+    voxelSize: [
+      primaryMetadata.pixelSpacing[0],
+      primaryMetadata.pixelSpacing[1],
+      pitch
+    ],
+    dicomWindow: primaryMetadata.window,
+    pixelFormat: primaryMetadata.pixelFormat
+  };
+}
 
-  // estimatedWindow
+async function extractEstimatedWindow(
+  volumeAccessor: VolumeAccessor,
+  algo: 'full' | 'first' | 'center'
+): Promise<ViewWindow> {
+  const { imageMetadata, load, images } = volumeAccessor;
+  if (images.segmentLength() === 0)
+    throw new TypeError('Invalid volume accessor.');
+
+  let slices: number[];
+  switch (algo) {
+    case 'full':
+      slices = images.toArray();
+      break;
+    case 'first':
+      slices = [images.clone().shift()!];
+      break;
+    case 'center':
+      const centerIdx = Math.floor(images.length() / 2);
+      slices = [images.toArray()[centerIdx]];
+      break;
+    default:
+      throw new TypeError('Unsupported estimation algorithm was specified');
+  }
+
+  await load(slices);
+
   let seriesMinValue: number = Infinity;
   let seriesMaxValue: number = -Infinity;
-  imageMetadata.forEach(meta => {
+  slices.forEach(imageNo => {
+    const meta = imageMetadata.get(imageNo)!;
     seriesMinValue = Math.min(seriesMinValue, meta.minValue!);
     seriesMaxValue = Math.max(seriesMaxValue, meta.maxValue!);
   });
   const width = Math.floor(seriesMaxValue - seriesMinValue + 1);
   const level = Math.floor(seriesMinValue + width / 2);
-  const estimatedWindow = { level, width };
-
-  return {
-    voxelCount,
-    voxelSize,
-    dicomWindow,
-    pixelFormat,
-    estimatedWindow
-  };
+  return { level, width };
 }

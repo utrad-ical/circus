@@ -1,12 +1,12 @@
 import Router from 'koa-router';
-import loadHelperModules from '@utrad-ical/circus-rs/src/server/helper/loadHelperModules';
+import prepareHelperModules from '@utrad-ical/circus-rs/src/server/helper/prepareHelperModules';
 import seriesRoutes from '@utrad-ical/circus-rs/src/server/app/series/seriesRoutes';
 
 /**
  * Creates a series router.
  */
 export default async function circusRs({ logger, dicomFileRepository }) {
-  const helpers = await loadHelperModules({
+  const helpers = await prepareHelperModules({
     dicomFileRepository: {
       module: dicomFileRepository
     },

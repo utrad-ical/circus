@@ -7,9 +7,9 @@ const {
 
 const createServer = require('../src/server/createServer').default;
 const {
-  default: loadHelperModules,
+  default: prepareHelperModules,
   disposeHelperModules
-} = require('../src/server/helper/loadHelperModules');
+} = require('../src/server/helper/prepareHelperModules');
 
 const testConfig = {
   port: 1024,
@@ -66,7 +66,7 @@ describe('Server', () => {
     let httpServer;
     before(async () => {
       const { port } = testConfig;
-      const helpers = await loadHelperModules(testConfig);
+      const helpers = await prepareHelperModules(testConfig);
       app = createServer(testConfig, helpers);
 
       httpServer = app.listen(port, '0.0.0.0');
@@ -289,7 +289,7 @@ describe('Server', () => {
         }
       };
       const { port } = config;
-      const helpers = await loadHelperModules(config);
+      const helpers = await prepareHelperModules(config);
       app = createServer(config, helpers);
 
       httpServer = app.listen(port, '0.0.0.0');

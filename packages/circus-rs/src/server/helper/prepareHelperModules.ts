@@ -12,7 +12,7 @@ import {
   VolumeAccessor
 } from './createVolumeProvider';
 import dicomImageExtractor from '../../common/dicomImageExtractor';
-import LRU from 'lru-cache';
+import asyncMemoize, { AsyncCachedLoader } from './asyncMemoize';
 
 /**
  * This is a simple facade interface that aggregates helper modules
@@ -23,8 +23,7 @@ export interface AppHelpers {
   readonly counter: Counter;
   readonly repository?: DicomFileRepository;
   readonly imageEncoder?: ImageEncoder;
-  readonly volumeProvider?: VolumeProvider;
-  readonly cache?: LRU.Cache<string, VolumeAccessor>;
+  readonly volumeProvider?: VolumeProvider | AsyncCachedLoader<VolumeAccessor>;
 }
 
 export interface Authorizer {
@@ -33,12 +32,9 @@ export interface Authorizer {
   dispose?: () => Promise<void>;
 }
 
-/**
- *
- */
 const loadedModuleNames: string[] = [];
 
-export default async function loadHelperModules(
+export default async function prepareHelperModules(
   config: Configuration
 ): Promise<AppHelpers> {
   // logger
@@ -82,7 +78,10 @@ export default async function loadHelperModules(
   }
 
   // volumeProvider
-  let volumeProvider: VolumeProvider | undefined = undefined;
+  let volumeProvider:
+    | VolumeProvider
+    | AsyncCachedLoader<VolumeAccessor>
+    | undefined = undefined;
   if (repository) {
     const extractor = dicomImageExtractor();
     volumeProvider = createVolumeProvider(repository, extractor);
@@ -90,22 +89,16 @@ export default async function loadHelperModules(
   }
 
   // cache
-  let cache: LRU.Cache<string, VolumeAccessor> | undefined = undefined;
   if (volumeProvider && config.cache) {
     const { memoryThreshold = 2147483648, maxAge = 3600 } = config.cache;
-    cache = new LRU<string, VolumeAccessor>({
-      length: volumeAccessor => {
-        // In practice, metadata and so on need to be considered,
-        // but it is much smaller than the image,
-        // so it is not taken into consideration.
-        return volumeAccessor.volume.data.byteLength;
-      },
-      max: memoryThreshold,
-      maxAge: maxAge
-    });
-    loadedModuleNames.push('LRU');
 
-    volumeProvider = bindCache(cache)(volumeProvider);
+    volumeProvider = asyncMemoize<VolumeAccessor>(volumeProvider, {
+      max: memoryThreshold,
+      maxAge: maxAge * 1000,
+      length: accessor => accessor.volume.data.byteLength
+    });
+
+    loadedModuleNames.push('cache');
   }
 
   logger.info('Modules loaded: ', loadedModuleNames.join(', '));
@@ -116,8 +109,7 @@ export default async function loadHelperModules(
     counter,
     repository,
     imageEncoder,
-    volumeProvider,
-    cache
+    volumeProvider
   };
 }
 
@@ -151,17 +143,4 @@ async function loadModule<T>(
   loadedModuleNames.push(name);
 
   return instance;
-}
-
-function bindCache(
-  cache: LRU.Cache<string, VolumeAccessor>
-): (provider: VolumeProvider) => VolumeProvider {
-  return function(provider) {
-    return async (seriesUID: string) => {
-      if (cache.has(seriesUID)) return cache.get(seriesUID)!;
-      const volumeLoader = await provider(seriesUID);
-      cache.set(seriesUID, volumeLoader);
-      return volumeLoader;
-    };
-  };
 }

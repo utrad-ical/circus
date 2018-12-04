@@ -1,6 +1,7 @@
 import koa from 'koa';
-import AsyncLruCache from '../../common/AsyncLruCache';
-import { AppHelpers } from '../helper/loadHelperModules';
+import { AppHelpers } from '../helper/prepareHelperModules';
+import { AsyncCachedLoader } from '../helper/asyncMemoize';
+import { VolumeAccessor } from '../helper/createVolumeProvider';
 
 type MiddlewareOptions = {
   config: any;
@@ -12,7 +13,7 @@ export default function serverStatus(
   options: MiddlewareOptions
 ): koa.Middleware {
   const { config, modules } = options;
-  const { counter, cache } = modules;
+  const { counter, volumeProvider } = modules;
 
   return async function serverStatus(ctx, next): Promise<void> {
     const status: any = {
@@ -25,11 +26,11 @@ export default function serverStatus(
       counter: counter.getCounts(),
       config
     };
-    if(cache){
+    if (volumeProvider && (volumeProvider as any).getCount) {
       status.cache = {
-        count: cache.keys().length,
-        size: cache.length
-      }
+        count: (volumeProvider as AsyncCachedLoader<VolumeAccessor>).getCount(),
+        size: (volumeProvider as AsyncCachedLoader<VolumeAccessor>).getLength()
+      };
     }
 
     ctx.body = status;

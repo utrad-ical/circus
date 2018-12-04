@@ -1,5 +1,5 @@
 import { Configuration } from './Configuration';
-import loadHelperModules, { disposeHelperModules } from './helper/loadHelperModules';
+import prepareHelperModules, { disposeHelperModules } from './helper/prepareHelperModules';
 import createServer from './createServer';
 
 async function main(): Promise<void> {
@@ -7,7 +7,7 @@ async function main(): Promise<void> {
 
   const config = require('./config').default as Configuration;
   const { port } = config;
-  const modules = await loadHelperModules(config);
+  const modules = await prepareHelperModules(config);
   const { logger } = modules;
   const app = createServer(config, modules);
 

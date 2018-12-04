@@ -4,7 +4,7 @@ import Router from 'koa-router';
 import koaJson from 'koa-json';
 
 import { Configuration } from './Configuration';
-import { AppHelpers } from './helper/loadHelperModules';
+import { AppHelpers } from './helper/prepareHelperModules';
 
 // middleware
 import cors from './app/middleware/cors';
@@ -21,7 +21,6 @@ import checkSeriesAccessToken from './app/auth/checkSeriesAccessToken';
 
 // application
 import seriesRoutes from './app/series/seriesRoutes';
-
 
 /**
  * Main server class.

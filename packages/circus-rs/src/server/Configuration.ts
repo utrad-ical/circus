@@ -1,6 +1,7 @@
 import Logger from './helper/logger/Logger';
 import { DicomFileRepository } from '@utrad-ical/circus-lib/lib/dicom-file-repository';
 import ImageEncoder from './helper/image-encoder/ImageEncoder';
+import { VolumeAccessorCacheOptions } from './helper/createVolumeAccessorCache';
 
 export interface ModuleDefinition<T = string> {
   module: string | T;
@@ -18,10 +19,7 @@ export interface Configuration {
 
   imageEncoder: ModuleDefinition<ImageEncoder>;
 
-  cache: {
-    memoryThreshold: number;
-    maxAge: number;
-  };
+  cache?: VolumeAccessorCacheOptions;
 
   authorization: {
     enabled: boolean;

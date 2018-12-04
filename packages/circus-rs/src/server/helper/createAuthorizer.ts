@@ -1,4 +1,4 @@
-import { Authorizer } from './loadHelperModules';
+import { Authorizer } from './prepareHelperModules';
 import AuthorizationCache from './auth/AuthorizationCache';
 import { generateAccessToken } from './auth/generateAccessToken';
 

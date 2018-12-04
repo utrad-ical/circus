@@ -4,7 +4,7 @@ import { isUID } from '../../../common/ValidatorRules';
 import httpStatus from 'http-status';
 import validate from '../middleware/validate';
 import ipBasedAccessControl from '../middleware/ipBasedAccessControl';
-import { Authorizer } from '../../helper/loadHelperModules';
+import { Authorizer } from '../../helper/prepareHelperModules';
 import Logger from '../../helper/logger/Logger';
 
 type MiddlewareOptions = {

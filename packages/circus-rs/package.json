@@ -16,6 +16,7 @@
   "repository": "https://github.com/utrad-ical/circus-rs",
   "license": "MIT",
   "dependencies": {
+    "@types/async-cache": "^1.1.0",
     "@types/compression": "0.0.33",
     "@types/http-status": "^0.2.30",
     "@types/koa": "^2.0.39",
@@ -29,6 +30,7 @@
     "@types/three": "^0.93.8",
     "@types/validator": "^6.2.0",
     "@utrad-ical/circus-lib": "^0.5.0",
+    "async-cache": "^1.1.0",
     "css-loader": "^0.28.7",
     "dicom-parser": "^1.7.5",
     "forever": "^0.15.3",

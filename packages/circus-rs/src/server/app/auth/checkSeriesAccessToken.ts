@@ -1,6 +1,6 @@
 import koa from 'koa';
 import httpStatus from 'http-status';
-import { Authorizer } from '../../helper/loadHelperModules';
+import { Authorizer } from '../../helper/prepareHelperModules';
 import Logger from '../../helper/logger/Logger';
 
 type MiddlewareOptions = {

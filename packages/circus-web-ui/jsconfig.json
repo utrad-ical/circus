@@ -1,9 +1,10 @@
 {
   "compilerOptions": {
     "baseUrl": "./src",
+    "moduleResolution": "node",
     "paths": {
-      "rb/*": ["./node_modules/@smikitky/rb-components/lib/*"],
-      "circus-rs/*": ["./node_modules/@utrad-ical/circus-rs/src/browser/*"]
+      "rb/*": ["../node_modules/@smikitky/rb-components/lib/*"],
+      "circus-rs/*": ["../node_modules/@utrad-ical/circus-rs/src/browser/*"]
     }
   }
 }

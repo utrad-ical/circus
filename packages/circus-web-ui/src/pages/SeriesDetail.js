@@ -5,6 +5,7 @@ import { showMessage } from 'actions';
 import ImageViewer from 'components/ImageViewer';
 import { store } from 'store';
 import * as rs from 'circus-rs';
+import { toolFactory } from 'circus-rs/tool/tool-initializer';
 
 export default class SeriesDetail extends React.Component {
   constructor(props) {
@@ -70,6 +71,7 @@ export default class SeriesDetail extends React.Component {
       'seriesUid',
       'studyUid'
     ];
+    const pagerTool = toolFactory('pager');
     return (
       <div>
         <h1>
@@ -81,8 +83,8 @@ export default class SeriesDetail extends React.Component {
             <ImageViewer
               className="preview-series"
               composition={this.state.composition}
-              tool="pager"
-              initialTool="pager"
+              tool={pagerTool}
+              initialTool={pagerTool}
             />
           </Col>
           <Col lg={6}>

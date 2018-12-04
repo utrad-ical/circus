@@ -1,5 +1,7 @@
 import React from 'react';
-import * as rs from 'circus-rs';
+import Viewer from 'circus-rs/viewer/Viewer';
+import { createOrthogonalMprSection } from 'circus-rs/section-util';
+import { toolFactory } from 'circus-rs/tool/tool-initializer';
 import EventEmitter from 'events';
 import classnames from 'classnames';
 
@@ -39,7 +41,7 @@ export default class ImageViewer extends React.Component {
         const state = viewer.getState();
         const src = this.props.composition.imageSource;
         const mmDim = src.mmDim();
-        state.section = rs.createOrthogonalMprSection(
+        state.section = createOrthogonalMprSection(
           viewer.getResolution(),
           mmDim,
           orientation
@@ -49,7 +51,7 @@ export default class ImageViewer extends React.Component {
       };
 
       const container = this.container;
-      const viewer = new rs.Viewer(container);
+      const viewer = new Viewer(container);
 
       const orientation = this.props.orientation || 'axial';
 
@@ -60,7 +62,8 @@ export default class ImageViewer extends React.Component {
       }
       const initialTool = this.props.initialTool
         ? this.props.initialTool
-        : 'pager';
+        : toolFactory('pager');
+
       viewer.setActiveTool(initialTool);
 
       this.viewer = viewer;

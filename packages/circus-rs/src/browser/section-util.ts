@@ -1,5 +1,4 @@
 import { Box3, ShapeUtils, Triangle, Vector2, Vector3, Box2 } from 'three';
-import { isNullOrUndefined } from 'util';
 import {
   fitRectangle,
   intersectionOfBoxAndPlane,

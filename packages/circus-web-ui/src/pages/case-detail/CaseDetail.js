@@ -29,6 +29,7 @@ import PatientInfoBox from 'components/PatientInfoBox';
 import TimeDisplay from 'components/TimeDisplay';
 import Tag from 'components/Tag';
 import { connect } from 'react-redux';
+import { toolFactory } from 'circus-rs/tool/tool-initializer';
 
 class CaseDetailView extends React.Component {
   constructor(props) {
@@ -253,6 +254,7 @@ const MenuBar = props => {
           Save
         </Button>
         <DropdownButton
+          id="submenu"
           bsStyle="link"
           title={<Icon icon="menu-hamburger" />}
           pullRight
@@ -278,7 +280,6 @@ export class RevisionData extends React.Component {
     this.state = {
       activeSeriesIndex: -1,
       activeLabelIndex: -1,
-      tool: 'pager',
       layout: 'twoByTwo',
       showReferenceLine: false,
       composition: null,
@@ -311,6 +312,7 @@ export class RevisionData extends React.Component {
 
   componentWillMount() {
     const { revision } = this.props;
+    this.changeTool('pager');
     this.changeActiveSeries(0);
     const activeSeries = revision.series[this.state.activeSeriesIndex];
     if (
@@ -394,8 +396,9 @@ export class RevisionData extends React.Component {
     onChange(revision);
   };
 
-  changeTool = tool => {
-    this.setState({ tool });
+  changeTool = toolName => {
+    const tool = toolFactory(toolName);
+    this.setState({ toolName, tool });
   };
 
   toggleReferenceLine = show => {
@@ -417,6 +420,7 @@ export class RevisionData extends React.Component {
   render() {
     const { projectData, revision, onChange, busy } = this.props;
     const {
+      toolName,
       tool,
       layout,
       activeSeriesIndex,
@@ -461,7 +465,7 @@ export class RevisionData extends React.Component {
         </SideContainer>
         <div className="case-revision-main">
           <ToolBar
-            active={tool}
+            active={toolName}
             changeTool={this.changeTool}
             showReferenceLine={this.state.showReferenceLine}
             toggleReferenceLine={this.toggleReferenceLine}

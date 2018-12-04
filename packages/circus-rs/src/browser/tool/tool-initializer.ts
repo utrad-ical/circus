@@ -1,4 +1,4 @@
-import Tool from './Tool';
+import ToolBaseClass from './Tool';
 import WindowTool from './state/WindowTool';
 import HandTool from './state/HandTool';
 import ZoomTool from './state/ZoomTool';
@@ -10,10 +10,10 @@ import BucketTool from './cloud/BucketTool';
 import CircleTool from './annotation/CircleTool';
 import RectangleTool from './annotation/RectangleTool';
 
-const toolCollection: { [toolName: string]: Tool } = {};
+const toolCollection: { [toolName: string]: ToolBaseClass } = {};
 
-const defaultTools: { [toolName: string]: typeof Tool } = {
-  null: Tool, // Null tool that ignores all UI events only to show a static image
+const defaultTools: { [toolName: string]: typeof ToolBaseClass } = {
+  null: ToolBaseClass, // Null tool that ignores all UI events only to show a static image
   hand: HandTool,
   window: WindowTool,
   zoom: ZoomTool,
@@ -33,13 +33,16 @@ Object.keys(defaultTools).forEach(key => {
   toolCollection[key] = new toolClass();
 });
 
-export function registerTool(toolName: string, toolClass: typeof Tool): void {
+export function registerTool(
+  toolName: string,
+  toolClass: typeof ToolBaseClass
+): void {
   if (toolName in toolCollection) {
     throw new Error('This tool name is already assigned');
   }
   toolCollection[toolName] = new toolClass();
 }
 
-export function toolFactory(key: string): Tool {
+export function toolFactory(key: string): ToolBaseClass {
   return toolCollection[key];
 }

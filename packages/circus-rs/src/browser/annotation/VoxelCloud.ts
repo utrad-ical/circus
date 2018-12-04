@@ -1,7 +1,6 @@
 import Annotation from './Annotation';
 import Viewer from '../viewer/Viewer';
 import ViewState from '../ViewState';
-import Sprite from '../viewer/Sprite';
 import {
   Section,
   intersectionOfBoxAndPlane,
@@ -157,21 +156,21 @@ export default class VoxelCloud implements Annotation {
     // console.timeEnd('expand to maximum');
   }
 
-  public draw(viewer: Viewer, viewState: ViewState): Sprite | null {
+  public draw(viewer: Viewer, viewState: ViewState): void {
     if (
       !(this.volume instanceof RawData) ||
       !this.origin ||
       !this.color ||
       !this.alpha
     )
-      return null;
+      return;
     if (this.volume.getPixelFormat() !== PixelFormat.Binary) {
       throw new Error('The assigned volume must use binary data format.');
     }
     if (viewState.type !== 'mpr') throw new Error('Unsupported view state.');
 
     const composition = viewer.getComposition();
-    if (!composition) return null;
+    if (!composition) return;
     const imageSource = composition.imageSource as MprImageSource;
     this._voxelSize = new Vector3().fromArray(imageSource.metadata!.voxelSize);
 
@@ -197,7 +196,7 @@ export default class VoxelCloud implements Annotation {
       // The bounding box of this voxel cloud does not intersect
       // with the section.
       // No need to draw anything.
-      return null;
+      return;
     }
 
     /*
@@ -225,7 +224,7 @@ export default class VoxelCloud implements Annotation {
     const outRectSize = outRect.getSize(new Vector2());
     if (outRect.isEmpty() || outRectSize.x === 0 || outRectSize.y === 0) {
       // The voxel cloud will not appear within the rectangle of the screen
-      return null;
+      return;
     }
 
     if (this.debugPoint) rectangle(context, outRect);
@@ -322,8 +321,6 @@ export default class VoxelCloud implements Annotation {
       outRectSize.x,
       outRectSize.y // dest
     );
-
-    return null;
   }
 }
 

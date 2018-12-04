@@ -10,15 +10,25 @@ import Viewer from '../../viewer/Viewer';
 import ViewerEvent from '../../viewer/ViewerEvent';
 import ViewState, { MprViewState } from '../../ViewState';
 import DraggableTool from '../DraggableTool';
+import { sign } from "../tool-util";
+import { Tool } from '../Tool';
 
 /**
  * ZoomTool
  */
-export default class ZoomTool extends DraggableTool {
+export default class ZoomTool extends DraggableTool implements Tool {
   /**
    * Holds the current zoom step relative to the drag start time
    */
   private currentStep: number | undefined;
+
+  public activate(viewer: Viewer) {
+    viewer.backgroundEventTarget = this;
+  }
+
+  public deactivate(viewer: Viewer) {
+    viewer.backgroundEventTarget = null;
+  }
 
   public dragHandler(ev: ViewerEvent): void {
     super.dragHandler(ev);
@@ -41,7 +51,7 @@ export default class ZoomTool extends DraggableTool {
 
   public wheelHandler(ev: ViewerEvent): void {
     const speed = ev.original.shiftKey ? 3 : 1;
-    const direction = this.sign(ev.original.deltaY);
+    const direction = sign(ev.original.deltaY);
     this.zoomStep(
       ev.viewer,
       speed * direction,

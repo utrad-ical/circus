@@ -13,9 +13,12 @@ export default class ViewerEvent {
 
   public viewer: Viewer;
 
+  private propagation: boolean;
+
   constructor(viewer: Viewer, type: string, original?: any) {
     this.viewer = viewer;
     this.type = type || (original ? original.type : null);
+    this.propagation = true;
 
     if (original && 'offsetX' in original) {
       const [viewerWidth, viewerHeight] = viewer.getResolution();
@@ -39,9 +42,12 @@ export default class ViewerEvent {
 
   public stopPropagation(): void {
     this.original.stopPropagation();
+    this.propagation = false;
   }
 
   public dispatch(element: any): void {
+    if (!this.propagation) return;
+
     const normalizedEventName = this.type.replace(
       /^(mouse|drag)([a-z])/,
       (m, p1, p2) => p1 + p2.toUpperCase()

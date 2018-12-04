@@ -1,7 +1,9 @@
-import Sprite from '../../browser/viewer/Sprite';
 import ViewState from '../ViewState';
 import Viewer from '../viewer/Viewer';
 
-export default interface Annotation {
-  draw: (viewer: Viewer, viewState: ViewState) => Sprite | null;
+export interface DrawOption {
+  hover: boolean;
 }
+export default interface Annotation {
+  draw(viewer: Viewer, viewState: ViewState, options: DrawOption): void;
+};

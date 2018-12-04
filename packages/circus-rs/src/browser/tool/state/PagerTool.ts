@@ -8,12 +8,22 @@ import {
 import ViewerEvent from '../../viewer/ViewerEvent';
 import { MprViewState } from '../../ViewState';
 import DraggableTool from '../DraggableTool';
+import Viewer from '../../viewer/Viewer';
+import { Tool } from '../Tool';
 
 /**
  * PagerTool handles mouse drag and performs the paging of the stacked images.
  */
-export default class PagerTool extends DraggableTool {
+export default class PagerTool extends DraggableTool implements Tool {
   private currentStep: number | undefined;
+
+  public activate(viewer: Viewer) {
+    viewer.backgroundEventTarget = this;
+  }
+
+  public deactivate(viewer: Viewer) {
+    viewer.backgroundEventTarget = null;
+  }
 
   public dragHandler(ev: ViewerEvent): void {
     super.dragHandler(ev);

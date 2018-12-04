@@ -1,18 +1,17 @@
 import Annotation from './Annotation';
 import Viewer from '../viewer/Viewer';
 import ViewState from '../ViewState';
-import Sprite from '../viewer/Sprite';
 
 const PADDING = 10;
 
 export default class CornerText implements Annotation {
-  public draw(viewer: Viewer, viewState: ViewState): Sprite | null {
-    if (!viewer || !viewState) return null;
+  public draw(viewer: Viewer, viewState: ViewState): void {
+    if (!viewer || !viewState) return;
     const canvas = viewer.canvas;
-    if (!canvas) return null;
+    if (!canvas) return;
 
     const ctx = canvas.getContext('2d');
-    if (!ctx) return null;
+    if (!ctx) return;
 
     const state = viewer.getState();
 
@@ -33,7 +32,5 @@ export default class CornerText implements Annotation {
     } finally {
       ctx.restore();
     }
-
-    return null;
   }
 }

@@ -138,9 +138,7 @@ You can change the active tool.
 Associated toolbar (if any) will be automatically updated.
 --*/
 
-viewer.setActiveTool('hand');
-
-console.log('The current tool is ' + viewer.getActiveTool());
+viewer.setActiveTool( rs.toolFactory('hand') );
 
 /*--
 @title Add corner text annotation

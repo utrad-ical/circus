@@ -1,12 +1,11 @@
 import extend from 'extend';
 import { EventEmitter } from 'events';
-import Sprite from './Sprite';
 import Composition from '../Composition';
 import ViewerEvent from './ViewerEvent';
 import ViewState from '../ViewState';
-import Tool from '../tool/Tool';
-import { toolFactory } from '../tool/tool-initializer';
 import { ViewStateResizeTransformer } from '../image-source/ImageSource';
+import { Tool } from '../tool/Tool';
+import Annotation from '../annotation/Annotation';
 
 /**
  * Viewer is the main component of CIRCUS RS, and wraps a HTML canvas element
@@ -21,12 +20,11 @@ export default class Viewer extends EventEmitter {
 
   private composition: Composition | undefined;
 
-  private activeTool: Tool | undefined;
-  private activeToolName: string | undefined;
-
-  private sprites: Sprite[];
+  private activeTool: Tool | undefined = undefined;
 
   private cachedSourceImage: ImageData | undefined;
+
+  private hoveringAnnotation: Annotation | undefined = undefined;
 
   /**
    * primaryEventTarget captures all UI events happened within the canvas
@@ -94,8 +92,6 @@ export default class Viewer extends EventEmitter {
     div.appendChild(canvas);
     this.resizeCanvas();
 
-    this.sprites = [];
-
     this.boundEventHandler = this.canvasEventHandler.bind(this);
 
     canvas.addEventListener('mousedown', this.boundEventHandler);
@@ -104,8 +100,6 @@ export default class Viewer extends EventEmitter {
     canvas.addEventListener('wheel', this.boundEventHandler);
 
     this.boundRender = this.render.bind(this);
-
-    this.setActiveTool('null');
 
     this.activateResizeObserver();
   }
@@ -153,6 +147,7 @@ export default class Viewer extends EventEmitter {
     if (!this.composition || !this.viewState) return;
 
     let eventType = originalEvent.type;
+    const documentElement = document.documentElement as HTMLElement;
 
     // Emulate "drag and drop" events by swapping the event type
     if (eventType === 'mousedown') {
@@ -162,14 +157,8 @@ export default class Viewer extends EventEmitter {
       // register additional mouse handlers to listen events outside of canvas while dragging
       this.canvas.removeEventListener('mouseup', this.boundEventHandler);
       this.canvas.removeEventListener('mousemove', this.boundEventHandler);
-      document.documentElement.addEventListener(
-        'mouseup',
-        this.boundEventHandler
-      );
-      document.documentElement.addEventListener(
-        'mousemove',
-        this.boundEventHandler
-      );
+      documentElement.addEventListener('mouseup', this.boundEventHandler);
+      documentElement.addEventListener('mousemove', this.boundEventHandler);
     } else if (this.isDragging) {
       if (eventType === 'mouseup') {
         eventType = 'dragend';
@@ -177,14 +166,11 @@ export default class Viewer extends EventEmitter {
 
         this.canvas.addEventListener('mouseup', this.boundEventHandler);
         this.canvas.addEventListener('mousemove', this.boundEventHandler);
-        document.documentElement.removeEventListener(
+        documentElement.removeEventListener(
           'mousemove',
           this.boundEventHandler
         );
-        document.documentElement.removeEventListener(
-          'mouseup',
-          this.boundEventHandler
-        );
+        documentElement.removeEventListener('mouseup', this.boundEventHandler);
       } else if (eventType === 'mousemove') {
         eventType = 'drag';
         originalEvent.preventDefault();
@@ -199,12 +185,24 @@ export default class Viewer extends EventEmitter {
     if (this.primaryEventTarget) {
       event.dispatch(this.primaryEventTarget);
     }
-    for (let sprite of this.sprites) {
-      event.dispatch(sprite);
+    for (let annotation of [...this.composition.annotations].reverse()) {
+      event.dispatch(annotation);
     }
     if (this.backgroundEventTarget) {
       event.dispatch(this.backgroundEventTarget);
     }
+  }
+
+  public setHoveringAnnotation(anno: Annotation | undefined) {
+    this.hoveringAnnotation = anno;
+  }
+
+  public getHoveringAnnotation(): Annotation | undefined {
+    return this.hoveringAnnotation;
+  }
+
+  public setCursorStyle(cursor: string): void {
+    this.canvas.style.cursor = cursor;
   }
 
   /**
@@ -227,8 +225,9 @@ export default class Viewer extends EventEmitter {
     if (this.cachedSourceImage)
       this.renderImageDataToCanvas(this.cachedSourceImage);
     for (let annotation of comp.annotations) {
-      const sprite = annotation.draw(this, viewState);
-      if (sprite instanceof Sprite) this.sprites.push(sprite);
+      annotation.draw(this, viewState, {
+        hover: this.hoveringAnnotation === annotation
+      });
     }
   }
 
@@ -337,23 +336,18 @@ export default class Viewer extends EventEmitter {
     return this.composition;
   }
 
-  public setActiveTool(toolName: string): void {
+  public setActiveTool(tool: Tool): void {
     const before = this.activeTool;
-    const tool = toolFactory(toolName);
-    if (tool === undefined) throw new TypeError('Unknown tool: ' + toolName);
-
+    if (tool === before) return;
+    if (before) before.deactivate(this);
+    tool.activate(this);
     this.activeTool = tool;
 
-    // set this tool as the background event target
-    // which handles UI events after other sprites
-    this.backgroundEventTarget = this.activeTool;
-
-    this.activeToolName = toolName;
-    this.emit('toolchange', before, toolName);
+    this.emit('toolchanged', before, this.activeTool);
   }
 
-  public getActiveTool(): string | undefined {
-    return this.activeToolName;
+  public getActiveTool(): Tool | undefined {
+    return this.activeTool;
   }
 
   public handleResize(): void {

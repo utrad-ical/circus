@@ -11,7 +11,13 @@ import { Vector2, Vector3 } from 'three';
 /**
  * VoxelCloudToolBase is a base tool that affects VoxelCloud annotations.
  */
+interface VoxelCloudToolBaseOptions {
+  width: number;
+}
 export default class VoxelCloudToolBase extends DraggableTool {
+
+  private options: VoxelCloudToolBaseOptions;
+
   // Disable pointer lock API
   protected usePointerLockAPI = false;
 
@@ -23,6 +29,14 @@ export default class VoxelCloudToolBase extends DraggableTool {
   constructor() {
     super();
     this.options = { width: 1 };
+  }
+
+  public activate(viewer: Viewer) {
+    viewer.primaryEventTarget = this;
+  }
+
+  public deactivate(viewer: Viewer) {
+    viewer.primaryEventTarget = null;
   }
 
   protected convertViewerPoint(point: Vector2, viewer: Viewer): Vector3 {
@@ -116,7 +130,12 @@ export default class VoxelCloudToolBase extends DraggableTool {
     return activeCloud;
   }
 
+  public mouseMoveHandler(ev: ViewerEvent): void {
+    ev.stopPropagation();
+  }
+
   public dragStartHandler(ev: ViewerEvent): void {
+    ev.stopPropagation();
     super.dragStartHandler(ev);
     const comp = ev.viewer.getComposition();
     if (!comp) throw new Error('Composition not initialized'); // should not happen
@@ -126,6 +145,7 @@ export default class VoxelCloudToolBase extends DraggableTool {
   }
 
   public dragDraw(ev: ViewerEvent, value: number, width: number): void {
+    ev.stopPropagation();
     const comp = ev.viewer.getComposition();
     if (!comp) throw new Error('Composition not initialized'); // should not happen
 
@@ -147,6 +167,7 @@ export default class VoxelCloudToolBase extends DraggableTool {
   }
 
   public dragEndHandler(ev: ViewerEvent): void {
+    ev.stopPropagation();
     const comp = ev.viewer.getComposition();
     if (!comp) return;
     comp.annotationUpdated();

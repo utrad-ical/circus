@@ -6,12 +6,23 @@ import { sectionOverlapsVolume } from '../../section-util';
 import ViewerEvent from '../../viewer/ViewerEvent';
 import { MprViewState } from '../../ViewState';
 import DraggableTool from '../DraggableTool';
+import Viewer from '../../viewer/Viewer';
+import { Tool } from '../Tool';
 
 /**
  * HandTool is a tool which responds to a mouse drag and moves the
  * MprImageSource in parallel with the screen.
  */
-export default class HandTool extends DraggableTool {
+export default class HandTool extends DraggableTool implements Tool {
+
+  public activate(viewer: Viewer) {
+    viewer.backgroundEventTarget = this;
+  }
+
+  public deactivate(viewer: Viewer) {
+    viewer.backgroundEventTarget = null;
+  }
+
   public dragHandler(ev: ViewerEvent): void {
     super.dragHandler(ev);
     const dragInfo = this.dragInfo;

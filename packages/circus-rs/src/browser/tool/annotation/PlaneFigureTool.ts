@@ -1,17 +1,18 @@
 import { Vector2 } from 'three';
 import ViewerEvent from '../../viewer/ViewerEvent';
-import Tool from '../Tool';
+import ToolBaseClass, { Tool } from '../Tool';
 import { MprViewState } from '../../ViewState';
 import {
   convertScreenCoordinateToVolumeCoordinate,
   detectOrthogonalSection
 } from '../../section-util';
 import PlaneFigure, { FigureType } from '../../annotation/PlaneFigure';
+import Viewer from '../../viewer/Viewer';
 
 /**
  * PlaneFigureTool creates and edits PlaneFigure.
  */
-export default class PlaneFigureTool extends Tool {
+export default class PlaneFigureTool extends ToolBaseClass implements Tool {
   private focusedFigure?: PlaneFigure;
   protected usePointerLockAPI = false;
   protected figureType: FigureType = 'circle';
@@ -19,7 +20,18 @@ export default class PlaneFigureTool extends Tool {
   private totalMovementX: number | undefined = undefined;
   private totalMovementY: number | undefined = undefined;
 
-  public dragStartHandler(ev: ViewerEvent): void {
+  public activate(viewer: Viewer) {
+    viewer.primaryEventTarget = this;
+  }
+
+  public deactivate(viewer: Viewer) {
+    viewer.primaryEventTarget = undefined;
+  }
+
+  public mouseMoveHandler(ev: ViewerEvent) {
+    ev.stopPropagation();
+  }
+    public dragStartHandler(ev: ViewerEvent): void {
     const comp = ev.viewer.getComposition();
     if (!comp) return;
 
@@ -41,6 +53,7 @@ export default class PlaneFigureTool extends Tool {
     // Create figure
     const fig = new PlaneFigure();
     fig.type = this.figureType;
+    fig.editable = true;
     const min = convertScreenCoordinateToVolumeCoordinate(
       section,
       new Vector2().fromArray(resolution),
@@ -53,6 +66,8 @@ export default class PlaneFigureTool extends Tool {
     comp.addAnnotation(fig);
     comp.annotationUpdated();
     this.focusedFigure = fig;
+
+    ev.stopPropagation();
   }
 
   public dragHandler(ev: ViewerEvent): void {
@@ -85,6 +100,8 @@ export default class PlaneFigureTool extends Tool {
     );
     this.focusedFigure.max = [max.x, max.y];
     comp.annotationUpdated();
+
+    ev.stopPropagation();
   }
 
   public dragEndHandler(ev: ViewerEvent): void {
@@ -116,5 +133,7 @@ export default class PlaneFigureTool extends Tool {
     this.focusedFigure = undefined;
 
     comp.annotationUpdated();
+
+    ev.stopPropagation();
   }
 }

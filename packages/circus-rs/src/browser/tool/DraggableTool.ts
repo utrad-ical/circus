@@ -1,4 +1,4 @@
-import Tool from '../../browser/tool/Tool';
+import ToolBaseClass from '../../browser/tool/Tool';
 import ViewerEvent from '../../browser/viewer/ViewerEvent';
 
 /**
@@ -32,8 +32,7 @@ export interface DragInfo {
  * This class manages a protected member "dragInfo", which holds handy values
  * such as the total mouse move distance from the drag start point.
  */
-export default abstract class DraggableTool extends Tool {
-
+export default abstract class DraggableTool extends ToolBaseClass {
   protected usePointerLockAPI: boolean = true;
 
   /**
@@ -63,8 +62,7 @@ export default abstract class DraggableTool extends Tool {
     this.startY = ev.viewerY;
     this.updateInfo(ev);
 
-    if(this.usePointerLockAPI)
-      ev.viewer.canvas.requestPointerLock();
+    if (this.usePointerLockAPI) ev.viewer.canvas.requestPointerLock();
   }
 
   public dragHandler(ev: ViewerEvent): void {
@@ -73,8 +71,7 @@ export default abstract class DraggableTool extends Tool {
 
   public dragEndHandler(ev: ViewerEvent): void {
     this.updateInfo(ev);
-    if(this.usePointerLockAPI)
-      document.exitPointerLock();
+    if (this.usePointerLockAPI) document.exitPointerLock();
   }
 
   private updateInfo(ev: ViewerEvent): void {

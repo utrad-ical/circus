@@ -3,12 +3,24 @@ import DraggableTool from '../DraggableTool';
 import ViewerEvent from '../../viewer/ViewerEvent';
 import { Section, vectorizeSection } from '../../../common/geometry';
 import { MprViewState, VrViewState } from '../../ViewState';
+import { sign } from "../tool-util";
+import Viewer from '../../viewer/Viewer';
+import { Tool } from '../Tool';
 
 /**
  * CelestialRotateTool handles mouse drags and wheel moves on the Viewer and
  * rotates the MPR section accordingly.
  */
-export default class CelestialRotateTool extends DraggableTool {
+export default class CelestialRotateTool extends DraggableTool implements Tool {
+
+  public activate(viewer: Viewer) {
+    viewer.backgroundEventTarget = this;
+  }
+
+  public deactivate(viewer: Viewer) {
+    viewer.backgroundEventTarget = null;
+  }
+
   public dragHandler(ev: ViewerEvent): void {
     super.dragHandler(ev);
     const viewer = ev.viewer;
@@ -23,13 +35,13 @@ export default class CelestialRotateTool extends DraggableTool {
         if (Math.abs(dragInfo.dx)) {
           section = this.rotateAroundYAxis(
             section,
-            this.sign(dragInfo.dx) * speed
+            sign(dragInfo.dx) * speed
           );
         }
         if (Math.abs(dragInfo.dy)) {
           section = this.rotateAroundXAxis(
             section,
-            this.sign(dragInfo.dy) * speed
+            sign(dragInfo.dy) * speed
           );
         }
         const newState: MprViewState = { ...state, section };

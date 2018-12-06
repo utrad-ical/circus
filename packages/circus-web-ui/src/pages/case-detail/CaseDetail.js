@@ -457,19 +457,19 @@ export class RevisionData extends React.Component {
               activeLabel={activeLabel}
               onChangeActiveLabel={this.changeActiveLabel}
             />
-            <div className="label-attributes">
-              <div>
-                Label #{activeLabelIndex} of Series #{activeSeriesIndex}
-              </div>
-              {activeLabel && (
+            {activeLabel && (
+              <div className="label-attributes">
+                <div>
+                  Label #{activeLabelIndex} of Series #{activeSeriesIndex}
+                </div>
                 <JsonSchemaEditor
                   key={`${activeSeriesIndex}:${activeLabelIndex}`}
                   schema={projectData.labelAttributesSchema}
                   value={activeLabel.attributes || {}}
                   onChange={this.labelAttributesChange}
                 />
-              )}
-            </div>
+              </div>
+            )}
           </Collapser>
           <Collapser title="Case Attributes" className="case-attributes">
             <JsonSchemaEditor

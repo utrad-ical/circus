@@ -1,6 +1,7 @@
 import React from 'react';
 import ImageViewer from '../../components/ImageViewer';
 import styled from 'styled-components';
+import { toolFactory } from 'circus-rs/tool/tool-initializer';
 
 const TwoByTwoLayout = styled.div`
   flex: 1 1 0;
@@ -25,6 +26,8 @@ const OneLayout = styled.div`
   }
 `;
 
+const celestialRotate = toolFactory('celestialRotate');
+
 const ViewerCluster = props => {
   const { composition, tool, stateChanger, layout } = props;
 
@@ -48,7 +51,7 @@ const ViewerCluster = props => {
           {makeViewer('axial')}
           {makeViewer('sagittal')}
           {makeViewer('coronal')}
-          {makeViewer('axial', 'celestialRotate', 'celestialRotate')}
+          {makeViewer('axial', celestialRotate, celestialRotate)}
         </TwoByTwoLayout>
       );
     case 'one':

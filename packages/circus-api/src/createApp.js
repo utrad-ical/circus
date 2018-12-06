@@ -118,6 +118,11 @@ export default async function createApp(options = {}) {
 
   const cs = options.cs ? options.cs : await createCsCore();
 
+  const { rs, volumeProvider } = await circusRs({
+    logger,
+    dicomFileRepository
+  });
+
   // Build a router.
   // Register each API endpoints to the router according YAML manifest files.
   const deps = {
@@ -128,6 +133,7 @@ export default async function createApp(options = {}) {
     blobStorage,
     dicomImporter,
     cs,
+    volumeProvider,
     uploadFileSizeMax: '200mb',
     dicomImageServerUrl
   };
@@ -167,7 +173,7 @@ export default async function createApp(options = {}) {
   );
   koa.use(mount('/login', compose([bodyParser(), oauth.token()])));
 
-  koa.use(mount('/rs', await circusRs({ logger, dicomFileRepository })));
+  koa.use(mount('/rs', rs));
 
   return koa;
 }

@@ -3,6 +3,7 @@ import performSearch from '../performSearch';
 import generateUniqueId from '../../utils/generateUniqueId';
 import * as EJSON from 'mongodb-extended-json';
 import { fetchAccessibleSeries } from '../../privilegeUtils';
+import { packAsMhd } from '../../case/packAsMhd';
 
 const maskPatientInfo = ctx => {
   return caseData => {
@@ -157,5 +158,13 @@ export const handleSearch = ({ models }) => {
     };
 
     await performSearch(models.clinicalCase, filter, ctx, { transform });
+  };
+};
+
+export const handleExportAsMhd = ({ models, volumeProvider }) => {
+  return async (ctx, next) => {
+    const caseId = ctx.case.caseId;
+    ctx.type = 'application/zip';
+    ctx.body = await packAsMhd({ models, volumeProvider }, caseId);
   };
 };

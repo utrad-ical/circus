@@ -22,3 +22,8 @@ routes:
     requestSchema: revision|allRequiredExcept date,creator
     handler: handlePostRevision
     description: Creates a new revision in the specified case.
+  - verb: get
+    path: /cases/:caseId/export-mhd
+    requiredProjectPrivilege: read
+    handler: handleExportAsMhd
+    description: Exports the case data as MHD.

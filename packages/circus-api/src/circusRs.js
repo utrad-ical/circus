@@ -25,5 +25,5 @@ export default async function circusRs({ logger, dicomFileRepository }) {
 
   const router = new Router();
   router.use('/series/:sid', seriesRoutes(helpers));
-  return router.routes();
+  return { rs: router.routes(), volumeProvider: helpers.volumeProvider };
 }

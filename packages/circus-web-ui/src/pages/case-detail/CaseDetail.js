@@ -169,6 +169,20 @@ class CaseDetailView extends React.Component {
     this.selectRevision(this.state.editingRevisionIndex);
   };
 
+  exportMhd = async () => {
+    const caseId = this.state.caseData.caseId;
+    const blob = await api(`cases/${caseId}/export-mhd`, {
+      responseType: 'blob'
+    });
+    const a = document.createElement('a');
+    document.body.appendChild(a);
+    const url = window.URL.createObjectURL(blob);
+    a.href = url;
+    a.download = 'export.zip';
+    a.click();
+    window.URL.revokeObjectURL(url);
+  };
+
   revisionDataChange = revision => {
     this.setState({ editingData: revision });
   };
@@ -209,6 +223,7 @@ class CaseDetailView extends React.Component {
         <MenuBar
           onSaveClick={this.saveRevision}
           onRevertClick={this.revertRevision}
+          onExportMhdClick={this.exportMhd}
           onRevisionSelect={this.selectRevision}
           revisions={this.state.caseData.revisions}
           currentRevision={this.state.editingRevisionIndex}
@@ -234,6 +249,7 @@ const MenuBar = props => {
   const {
     onRevertClick,
     onSaveClick,
+    onExportMhdClick,
     revisions,
     onRevisionSelect,
     currentRevision
@@ -265,7 +281,7 @@ const MenuBar = props => {
           </MenuItem>
           <MenuItem divider />
           <MenuItem header>Export</MenuItem>
-          <MenuItem disabled>
+          <MenuItem onSelect={onExportMhdClick}>
             <Icon icon="export" />Export as MHD
           </MenuItem>
         </DropdownButton>

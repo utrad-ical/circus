@@ -5,6 +5,7 @@ import styled from 'styled-components';
 import * as rs from 'circus-rs';
 import { connect } from 'react-redux';
 import EventEmitter from 'events';
+import { toolFactory } from 'circus-rs/tool/tool-initializer';
 
 class Candidate extends React.PureComponent {
   constructor(props) {
@@ -60,7 +61,6 @@ class Candidate extends React.PureComponent {
           className="lesion-candidate-viewer"
           composition={composition}
           tool={tool}
-          initialTool="pager"
           stateChanger={this.stateChanger}
         />
         <div className="feedback-listener">
@@ -98,7 +98,12 @@ const StyledDiv = styled.div`
 class LesionCandidatesView extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { compositoin: null, tool: 'pager' };
+    this.tools = {
+      pager: toolFactory('pager'),
+      zoom: toolFactory('zoom'),
+      hand: toolFactory('hand')
+    };
+    this.state = { compositoin: null, toolName: 'pager' };
   }
 
   async componentDidMount() {
@@ -106,14 +111,11 @@ class LesionCandidatesView extends React.Component {
     const seriesUid = job.series[0].seriesUid;
     const server = user.data.dicomImageServer;
     const rsHttpClient = new rs.RsHttpClient(server);
-    const volumeLoader = new rs.RsVolumeLoader({
-      rsHttpClient,
-      series: seriesUid
-    });
+    const volumeLoader = new rs.RsVolumeLoader({ rsHttpClient, seriesUid });
     const src = new rs.HybridMprImageSource({
       rsHttpClient,
       volumeLoader,
-      series: seriesUid
+      seriesUid
     });
     await src.ready();
     const composition = new rs.Composition(src);
@@ -145,10 +147,10 @@ class LesionCandidatesView extends React.Component {
   };
 
   handleToolChange = () => {
-    const tool = { zoom: 'hand', hand: 'pager', pager: 'zoom' }[
-      this.state.tool
+    const toolName = { zoom: 'hand', hand: 'pager', pager: 'zoom' }[
+      this.state.toolName
     ];
-    this.setState({ tool });
+    this.setState({ toolName });
   };
 
   render() {
@@ -158,7 +160,7 @@ class LesionCandidatesView extends React.Component {
       <Fragment>
         <div>
           <Button bsSize="xs" onClick={this.handleToolChange}>
-            {this.state.tool}
+            {this.state.toolName}
           </Button>
         </div>
         <StyledDiv>
@@ -171,7 +173,7 @@ class LesionCandidatesView extends React.Component {
               index={i}
               onFeedbackChange={this.handleFeedbackChange}
               composition={this.state.composition}
-              tool={this.state.tool}
+              tool={this.tools[this.state.toolName]}
             />
           ))}
         </StyledDiv>

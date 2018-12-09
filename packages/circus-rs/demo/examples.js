@@ -423,15 +423,15 @@ if (viewer) {
 Change interpolation mode を使用して、表示の変化を確認して下さい。
 --*/
 
-const cache = new rs.IndexedDbCache();
+const cache = new rs.IndexedDbVolumeCache();
 
 // prepare volume loader
 const rsHttpClient = new rs.RsHttpClient(config.server);
 const mainVolumeLoader = new rs.RsVolumeLoader({
   seriesUid: config.seriesUid,
-  rsHttpClient
+  rsHttpClient,
+  cache
 });
-mainVolumeLoader.useCache(cache);
 
 // prepare mask loader
 const maskHost =
@@ -448,7 +448,7 @@ const maskLoader = new rs.VesselSampleLoader({
   path: maskLoadPath,
   rsHttpClient
 });
-maskLoader.useCache(cache);
+maskLoader.useCache(new rs.IndexedDbCache());
 
 // wrap loaders
 const volumeLoader = new rs.MixVolumeLoader({ mainLoader, maskLoader });
@@ -477,10 +477,9 @@ MRAを直接使用しています。
 const rsHttpClient = new rs.RsHttpClient(config.server);
 const volumeLoader = new rs.RsVolumeLoader({
   seriesUid: config.seriesUid,
-  rsHttpClient
+  rsHttpClient,
+  cache: new rs.IndexedDbVolumeCache()
 });
-
-volumeLoader.useCache(new rs.IndexedDbCache());
 
 //--@include Volume rendering common
 

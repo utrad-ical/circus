@@ -1,14 +1,15 @@
 import RsHttpClient from '../../http-client/RsHttpClient';
 import DicomVolumeLoader from './DicomVolumeLoader';
-import IndexedDbCache from '../../util/IndexedDbCache';
 import DicomVolume from '../../../common/DicomVolume';
 import { DicomVolumeMetadata } from './DicomVolumeLoader';
 import PartialVolumeDescriptor from '../../../common/PartialVolumeDescriptor';
+import VolumeCache, { nullVolumeCache } from './cache/VolumeCache';
 
 interface RsVolumeLoaderOptions {
   rsHttpClient: RsHttpClient;
   seriesUid: string;
   partialVolumeDescriptor?: PartialVolumeDescriptor;
+  cache?: VolumeCache;
 }
 
 export default class RsVolumeLoader implements DicomVolumeLoader {
@@ -16,13 +17,13 @@ export default class RsVolumeLoader implements DicomVolumeLoader {
   private seriesUid: string;
   private partialVolumeDescriptor?: PartialVolumeDescriptor;
   private meta: DicomVolumeMetadata | undefined;
-
-  private cache: IndexedDbCache<ArrayBuffer | DicomVolumeMetadata> | undefined;
+  private cache: VolumeCache;
 
   constructor({
     rsHttpClient,
     seriesUid,
-    partialVolumeDescriptor
+    partialVolumeDescriptor,
+    cache
   }: RsVolumeLoaderOptions) {
     if (!seriesUid) throw new Error('SeriesUid is required.');
 
@@ -37,41 +38,29 @@ export default class RsVolumeLoader implements DicomVolumeLoader {
     this.rsHttpClient = rsHttpClient;
     this.seriesUid = seriesUid;
     this.partialVolumeDescriptor = partialVolumeDescriptor;
-  }
-
-  public useCache(
-    cache: IndexedDbCache<ArrayBuffer | DicomVolumeMetadata>
-  ): void {
-    this.cache = cache;
+    this.cache = cache || nullVolumeCache;
   }
 
   public async loadMeta(): Promise<DicomVolumeMetadata> {
+    if (this.meta) return this.meta;
     let meta: DicomVolumeMetadata | undefined;
-    const metaCacheKey = this.seriesUid + '.meta';
-    if (this.cache) {
-      const cache = <Promise<DicomVolumeMetadata>>this.cache.get(metaCacheKey);
-      if (cache) meta = await cache;
-    }
+    meta = await this.cache.getMetadata(this.seriesUid);
     if (!meta) {
       meta = (await this.rsHttpClient.request(
         `series/${this.seriesUid}/metadata`,
         this.createRequestParams()
       )) as DicomVolumeMetadata;
+      await this.cache.putMetadata(this.seriesUid, meta);
     }
     this.meta = meta;
-    if (this.cache) this.cache.put(metaCacheKey, meta);
     return meta;
   }
 
   public async loadVolume(): Promise<DicomVolume> {
     if (!this.meta) throw new Error('Medatadata not loaded yet');
 
-    const bufferCacheKey = this.seriesUid + '.buffer';
     let buffer: ArrayBuffer | undefined;
-    if (this.cache) {
-      const cache = this.cache.get(bufferCacheKey);
-      if (cache) buffer = await buffer;
-    }
+    buffer = await this.cache.getVolume(this.seriesUid);
     if (!buffer) {
       buffer = await this.rsHttpClient.request(
         `series/${this.seriesUid}/volume`,
@@ -87,11 +76,11 @@ export default class RsVolumeLoader implements DicomVolumeLoader {
     if (meta.estimatedWindow) volume.estimatedWindow = meta.estimatedWindow;
     volume.assign(buffer as ArrayBuffer);
 
-    if (this.cache && buffer) this.cache.put(bufferCacheKey, buffer);
+    if (buffer) await this.cache.putVolume(this.seriesUid, buffer);
     return volume;
   }
 
-  private createRequestParams(): any {
+  private createRequestParams(): object {
     if (this.partialVolumeDescriptor) {
       const partialVolumeDescriptor = this.partialVolumeDescriptor;
       return {

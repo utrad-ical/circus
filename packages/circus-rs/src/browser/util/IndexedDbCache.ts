@@ -1,4 +1,5 @@
 export default class IndexedDbCache<T> {
+  // TODO: This should be named as IndexDbKvs or something like that
   private connection: IDBDatabase | undefined;
   private queue: Promise<void>;
 
@@ -37,7 +38,6 @@ export default class IndexedDbCache<T> {
         };
         openRequest.onsuccess = ev => {
           this.connection = (ev.target as any).result as IDBDatabase;
-          // console.log('OPEND');
           resolve();
         };
         openRequest.onupgradeneeded = ev => {
@@ -47,7 +47,6 @@ export default class IndexedDbCache<T> {
             keyPath: 'key'
           });
           store.transaction.oncomplete = tranev => {
-            // console.log('CREATED');
             resolve();
           };
         };
@@ -97,8 +96,6 @@ export default class IndexedDbCache<T> {
           resolve(undefined);
         };
         request.onsuccess = ev => {
-          // console.log("GET: "+key);
-          // console.log(request.result);
           resolve(request.result ? request.result.content : undefined);
         };
       });
@@ -108,18 +105,11 @@ export default class IndexedDbCache<T> {
   public drop(): void {
     this.queue = this.queue.then(() => {
       if (this.connection) this.connection.close();
-
       this.connection = undefined;
-
       const db = IndexedDbCache.detect();
-
       const request = db.deleteDatabase(this.dbName);
-      request.onerror = () => {
-        console.log('Drop failed');
-      };
-      request.onsuccess = ev => {
-        /* noop */
-      };
+      request.onerror = () => console.log('Drop failed');
+      request.onsuccess = () => undefined; // noop
     });
   }
 }

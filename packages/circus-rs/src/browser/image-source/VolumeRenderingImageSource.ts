@@ -195,13 +195,11 @@ export default class VolumeRenderingImageSource extends ImageSource {
       2.0 / (viewState.zoom || 2.0) / (viewState.quality || 1.0);
 
     const uMaxSteps = Math.ceil(
-      vec3.length(
-        [
-          this.subVolume.dimension[0] * vw,
-          this.subVolume.dimension[1] * vh,
-          this.subVolume.dimension[2] * vd
-        ]
-      ) / uRayStepLength
+      vec3.length([
+        this.subVolume.dimension[0] * vw,
+        this.subVolume.dimension[1] * vh,
+        this.subVolume.dimension[2] * vd
+      ]) / uRayStepLength
     );
     const uRayIntensityCoef = viewState.rayIntensityCoef || 0.65; // [0; 1]
     gl.uniform1i(glh.uniformIndex['uMaxSteps'], uMaxSteps);
@@ -311,7 +309,7 @@ export default class VolumeRenderingImageSource extends ImageSource {
       mat4.rotate(
         rotateCamera,
         rotateCamera,
-        Math.PI / 180.0 * viewState.horizontal,
+        (Math.PI / 180.0) * viewState.horizontal,
         horizontalRotateAxis
       );
     }
@@ -323,7 +321,7 @@ export default class VolumeRenderingImageSource extends ImageSource {
       mat4.rotate(
         rotateCamera,
         rotateCamera,
-        Math.PI / 180.0 * viewState.vertical,
+        (Math.PI / 180.0) * viewState.vertical,
         verticalRotateAxis
       );
     }
@@ -444,7 +442,7 @@ export default class VolumeRenderingImageSource extends ImageSource {
     // https://qiita.com/YVT/items/c695ab4b3cf7faa93885
     const zpow = getMinPower2(depth);
     const sliceGridSize: [number, number] = [
-      1 << (Math.floor(zpow / 2) + zpow % 2),
+      1 << (Math.floor(zpow / 2) + (zpow % 2)),
       1 << Math.floor(zpow / 2)
     ];
     const getSliceGridIndex = (z: number) => [

@@ -14,7 +14,6 @@ import { Tool } from '../Tool';
  * MprImageSource in parallel with the screen.
  */
 export default class HandTool extends DraggableTool implements Tool {
-
   public activate(viewer: Viewer) {
     viewer.backgroundEventTarget = this;
   }

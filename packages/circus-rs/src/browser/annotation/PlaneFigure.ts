@@ -26,7 +26,6 @@ type HandleType =
 const handleSize = 5;
 
 export default class PlaneFigure implements Annotation, ViewerEventTarget {
-
   public editable: boolean = false;
   private handleType: undefined | HandleType = undefined;
   private dragStartPoint: Vector2 | undefined = undefined;
@@ -123,11 +122,7 @@ export default class PlaneFigure implements Annotation, ViewerEventTarget {
     }
   }
 
-  private drawFrame(
-    ctx: CanvasRenderingContext2D,
-    min: Vector2,
-    max: Vector2
-  ) {
+  private drawFrame(ctx: CanvasRenderingContext2D, min: Vector2, max: Vector2) {
     ctx.beginPath();
     ctx.lineWidth = 1;
     ctx.strokeStyle = '#ff0000';
@@ -175,7 +170,7 @@ export default class PlaneFigure implements Annotation, ViewerEventTarget {
    * ViewerEventHandler
    */
   public mouseMoveHandler(ev: ViewerEvent) {
-    if(!this.editable) return;
+    if (!this.editable) return;
 
     const viewer = ev.viewer;
 
@@ -214,7 +209,7 @@ export default class PlaneFigure implements Annotation, ViewerEventTarget {
   }
 
   public dragStartHandler(ev: ViewerEvent) {
-    if(!this.editable) return;
+    if (!this.editable) return;
 
     const viewer = ev.viewer;
     if (viewer.getHoveringAnnotation() === this) {
@@ -247,7 +242,7 @@ export default class PlaneFigure implements Annotation, ViewerEventTarget {
   }
 
   public dragHandler(ev: ViewerEvent) {
-    if(!this.editable) return;
+    if (!this.editable) return;
 
     const viewer = ev.viewer;
 
@@ -310,7 +305,7 @@ export default class PlaneFigure implements Annotation, ViewerEventTarget {
   }
 
   public dragEndHandler(ev: ViewerEvent) {
-    if(!this.editable) return;
+    if (!this.editable) return;
 
     const viewer = ev.viewer;
     if (viewer.getHoveringAnnotation() === this) {

@@ -8,4 +8,4 @@ export default interface ViewerEventTarget {
   dragHandler?: (viewerEvent: ViewerEvent) => any;
   dragEndHandler?: (viewerEvent: ViewerEvent) => any;
   wheelHandler?: (viewerEvent: ViewerEvent) => any;
-};
+}

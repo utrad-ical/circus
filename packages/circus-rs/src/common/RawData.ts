@@ -281,10 +281,10 @@ export default class RawData {
       this.read = pos => this.view[pos];
       this.write = (value, pos) => (this.view[pos] = value);
     } else {
-      this.read = pos => (this.view[pos >> 3] >> (7 - pos % 8)) & 1;
+      this.read = pos => (this.view[pos >> 3] >> (7 - (pos % 8))) & 1;
       this.write = (value, pos) => {
         let cur = this.view[pos >> 3]; // pos => pos/8
-        cur ^= (-value ^ cur) & (1 << (7 - pos % 8)); // set n-th bit to value
+        cur ^= (-value ^ cur) & (1 << (7 - (pos % 8))); // set n-th bit to value
         this.view[pos >> 3] = cur;
       };
     }

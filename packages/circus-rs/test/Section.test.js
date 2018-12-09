@@ -303,7 +303,7 @@ describe('Section', function() {
             )
           );
         });
-        
+
         it('#sagittal-02', function() {
           const mmSection = {
             origin: [0, -1, -1],

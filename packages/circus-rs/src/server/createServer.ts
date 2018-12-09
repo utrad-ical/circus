@@ -30,13 +30,7 @@ export default function createServer(
   modules: AppHelpers
 ): Koa {
   const { authorization, globalIpFilter } = config;
-  const {
-    logger,
-    counter,
-    authorizer,
-    imageEncoder,
-    volumeProvider
-  } = modules;
+  const { logger, counter, authorizer, imageEncoder, volumeProvider } = modules;
 
   // create server process
   const app = new Koa();

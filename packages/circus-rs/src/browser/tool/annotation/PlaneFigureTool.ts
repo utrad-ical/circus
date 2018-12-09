@@ -31,7 +31,7 @@ export default class PlaneFigureTool extends ToolBaseClass implements Tool {
   public mouseMoveHandler(ev: ViewerEvent) {
     ev.stopPropagation();
   }
-    public dragStartHandler(ev: ViewerEvent): void {
+  public dragStartHandler(ev: ViewerEvent): void {
     const comp = ev.viewer.getComposition();
     if (!comp) return;
 
@@ -113,7 +113,12 @@ export default class PlaneFigureTool extends ToolBaseClass implements Tool {
     const fig = this.focusedFigure;
     if (!fig) return;
 
-    if(fig.min && fig.max && fig.min[0] !== fig.max[0] && fig.min[1] !== fig.max[1]) {
+    if (
+      fig.min &&
+      fig.max &&
+      fig.min[0] !== fig.max[0] &&
+      fig.min[1] !== fig.max[1]
+    ) {
       const newMin = [
         Math.min(fig.min[0], fig.max[0]),
         Math.min(fig.min[1], fig.max[1])

@@ -40,7 +40,7 @@ export default function checkSeriesAccessToken(
       return;
     }
 
-    if (!await authorizer.checkToken(token, ctx.params.sid)) {
+    if (!(await authorizer.checkToken(token, ctx.params.sid))) {
       logger.warn('Invalid access token.');
       invalid();
       return;

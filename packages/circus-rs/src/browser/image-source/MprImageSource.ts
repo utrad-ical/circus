@@ -19,8 +19,8 @@ export default abstract class MprImageSource extends ImageSource {
     const window = metadata.dicomWindow
       ? { ...metadata.dicomWindow }
       : metadata.estimatedWindow
-        ? { ...metadata.estimatedWindow }
-        : { level: 50, width: 100 };
+      ? { ...metadata.estimatedWindow }
+      : { level: 50, width: 100 };
     // By default, images are drawn with the axial section
     return {
       type: 'mpr',

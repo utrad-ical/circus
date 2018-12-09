@@ -1,6 +1,7 @@
 'use strict';
 
-const Log4JsLogger = require('../src/server/helper/logger/Log4JsLogger').default;
+const Log4JsLogger = require('../src/server/helper/logger/Log4JsLogger')
+  .default;
 const assert = require('chai').assert;
 const path = require('path');
 const fs = require('fs');

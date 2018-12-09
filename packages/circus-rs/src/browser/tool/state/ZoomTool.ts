@@ -10,7 +10,7 @@ import Viewer from '../../viewer/Viewer';
 import ViewerEvent from '../../viewer/ViewerEvent';
 import ViewState, { MprViewState } from '../../ViewState';
 import DraggableTool from '../DraggableTool';
-import { sign } from "../tool-util";
+import { sign } from '../tool-util';
 import { Tool } from '../Tool';
 
 /**

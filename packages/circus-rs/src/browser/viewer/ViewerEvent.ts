@@ -28,8 +28,8 @@ export default class ViewerEvent {
       const offsetX = original.pageX - rect.left - window.scrollX;
       const offsetY = original.pageY - rect.top - window.scrollY;
 
-      this.viewerX = offsetX * viewerWidth / elementWidth;
-      this.viewerY = offsetY * viewerHeight / elementHeight;
+      this.viewerX = (offsetX * viewerWidth) / elementWidth;
+      this.viewerY = (offsetY * viewerHeight) / elementHeight;
       this.viewerWidth = viewerWidth;
       this.viewerHeight = viewerHeight;
 

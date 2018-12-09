@@ -3,7 +3,7 @@ import DraggableTool from '../DraggableTool';
 import ViewerEvent from '../../viewer/ViewerEvent';
 import { Section, vectorizeSection } from '../../../common/geometry';
 import { MprViewState, VrViewState } from '../../ViewState';
-import { sign } from "../tool-util";
+import { sign } from '../tool-util';
 import Viewer from '../../viewer/Viewer';
 import { Tool } from '../Tool';
 
@@ -12,7 +12,6 @@ import { Tool } from '../Tool';
  * rotates the MPR section accordingly.
  */
 export default class CelestialRotateTool extends DraggableTool implements Tool {
-
   public activate(viewer: Viewer) {
     viewer.backgroundEventTarget = this;
   }
@@ -33,16 +32,10 @@ export default class CelestialRotateTool extends DraggableTool implements Tool {
         const speed = ev.original.ctrlKey ? 2.5 : 0.6;
         let section = state.section;
         if (Math.abs(dragInfo.dx)) {
-          section = this.rotateAroundYAxis(
-            section,
-            sign(dragInfo.dx) * speed
-          );
+          section = this.rotateAroundYAxis(section, sign(dragInfo.dx) * speed);
         }
         if (Math.abs(dragInfo.dy)) {
-          section = this.rotateAroundXAxis(
-            section,
-            sign(dragInfo.dy) * speed
-          );
+          section = this.rotateAroundXAxis(section, sign(dragInfo.dy) * speed);
         }
         const newState: MprViewState = { ...state, section };
         viewer.setState(newState);
@@ -70,7 +63,7 @@ export default class CelestialRotateTool extends DraggableTool implements Tool {
     rotCenter: Vector3,
     angle: number
   ): Section {
-    const radian = Math.PI / 180.0 * angle;
+    const radian = (Math.PI / 180.0) * angle;
     const vSection = vectorizeSection(section);
     return {
       origin: vSection.origin

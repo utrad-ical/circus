@@ -233,7 +233,7 @@ describe('AsyncLruCache', function() {
         check(done, function() {
           // only last 10 items must remain
           assert.equal(cache.length, 10);
-          assert.equal(cache.getTotalSize(), (11 + 20) * 10 / 2);
+          assert.equal(cache.getTotalSize(), ((11 + 20) * 10) / 2);
         });
       });
     });

@@ -28,7 +28,7 @@ describe('RawData', function() {
       for (let x = 0; x < w; x++) {
         for (let y = 0; y < h; y++) {
           for (let z = 0; z < d; z++) {
-            const value = (x + y + z) % (hi - lo + 1) + lo;
+            const value = ((x + y + z) % (hi - lo + 1)) + lo;
             raw.writePixelAt(value, x, y, z);
           }
         }
@@ -36,7 +36,7 @@ describe('RawData', function() {
       for (let x = 0; x < w; x++) {
         for (let y = 0; y < h; y++) {
           for (let z = 0; z < d; z++) {
-            const value = (x + y + z) % (hi - lo + 1) + lo;
+            const value = ((x + y + z) % (hi - lo + 1)) + lo;
             const px = raw.getPixelAt(x, y, z);
             assert.equal(px, value);
           }

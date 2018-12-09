@@ -40,29 +40,27 @@ class ToolbarComponent {
     const ulElement = document.createElement('ul');
     ulElement.className = 'circus-rs-toolbar';
 
-    const {toolNames, handleToolButtonClick} = this.props;
+    const { toolNames, handleToolButtonClick } = this.props;
 
-    toolNames.forEach(
-      toolName=>{
-        const button = document.createElement('button');
-        button.className = [
-          'circus-rs-toolbutton',
-          'circus-rs-tool-' + toKebabCase(toolName),
-          'rs-icon-' + toKebabCase(toolName)
-        ].join(' ');
-        button.setAttribute('type', 'button');
-    
-        button.addEventListener('click', () => handleToolButtonClick(toolName));
-    
-        const liElement = document.createElement('li');
-        liElement.className = 'circus-rs-toolbar-item';
-        liElement.appendChild(button);
-        ulElement.appendChild(liElement);
-      }
-    );
+    toolNames.forEach(toolName => {
+      const button = document.createElement('button');
+      button.className = [
+        'circus-rs-toolbutton',
+        'circus-rs-tool-' + toKebabCase(toolName),
+        'rs-icon-' + toKebabCase(toolName)
+      ].join(' ');
+      button.setAttribute('type', 'button');
+
+      button.addEventListener('click', () => handleToolButtonClick(toolName));
+
+      const liElement = document.createElement('li');
+      liElement.className = 'circus-rs-toolbar-item';
+      liElement.appendChild(button);
+      ulElement.appendChild(liElement);
+    });
 
     wrapperElement.appendChild(ulElement);
-    
+
     return ulElement;
   }
 
@@ -88,27 +86,22 @@ export default function createToolbar(
   const viewers: Viewer[] = [];
   const name2tool: Map<string, Tool> = new Map();
   const tool2name: Map<Tool, string> = new Map();
-  toolNames.forEach(
-    toolName => {
-      const tool = toolFactory(toolName);
-      name2tool.set(toolName, tool);
-      tool2name.set(tool, toolName);
-    }
-  );
+  toolNames.forEach(toolName => {
+    const tool = toolFactory(toolName);
+    name2tool.set(toolName, tool);
+    tool2name.set(tool, toolName);
+  });
 
-  const component = new ToolbarComponent(
-    wrapperElement,
-    {
-      toolNames,
-      handleToolButtonClick: (toolName) => {
-        const tool = name2tool.get(toolName)!;
-        viewers.forEach(v => v.setActiveTool(tool));
-      }
+  const component = new ToolbarComponent(wrapperElement, {
+    toolNames,
+    handleToolButtonClick: toolName => {
+      const tool = name2tool.get(toolName)!;
+      viewers.forEach(v => v.setActiveTool(tool));
     }
-  );
+  });
 
   const bindViewer = (viewer: Viewer) => {
-    viewer.on('toolchanged', (before: Tool|null, after: Tool|null) => {
+    viewer.on('toolchanged', (before: Tool | null, after: Tool | null) => {
       const toolName = (after && tool2name.get(after)) || '';
       component.setActiveToolName(toolName);
     });

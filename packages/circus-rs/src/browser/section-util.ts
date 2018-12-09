@@ -28,8 +28,8 @@ export function convertVolumeCoordinateToScreenCoordinate(
   const vSection = vectorizeSection(section);
   const projection = projectPointOntoSection(section, volumePoint);
   return new Vector2(
-    projection.x * resolution.x / vSection.xAxis.length(),
-    projection.y * resolution.y / vSection.yAxis.length()
+    (projection.x * resolution.x) / vSection.xAxis.length(),
+    (projection.y * resolution.y) / vSection.yAxis.length()
   );
 }
 

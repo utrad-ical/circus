@@ -15,7 +15,6 @@ interface VoxelCloudToolBaseOptions {
   width: number;
 }
 export default class VoxelCloudToolBase extends DraggableTool {
-
   private options: VoxelCloudToolBaseOptions;
 
   // Disable pointer lock API

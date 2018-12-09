@@ -90,9 +90,11 @@ const dicomImageExtractor: (options?: ExtractOptions) => DicomImageExtractor = (
     const columns = dataset.uint16('x00280011'); // columns
     const rows = dataset.uint16('x00280010'); // rows
     const pixelSpacingRaw = dataset.string('x00280030');
-    const pixelSpacing = <[number, number]>(pixelSpacingRaw
-      ? pixelSpacingRaw.split('\\').map(x => parseFloat(x))
-      : [1, 1]);
+    const pixelSpacing = <[number, number]>(
+      (pixelSpacingRaw
+        ? pixelSpacingRaw.split('\\').map(x => parseFloat(x))
+        : [1, 1])
+    );
     const rescale = determineRescale(dataset);
     const pixelFormat = determinePixelFormat(dataset);
 
@@ -313,10 +315,10 @@ function getPixelAccessor(
     };
   } else {
     return {
-      read: pos => (view[pos >> 3] >> (7 - pos % 8)) & 1,
+      read: pos => (view[pos >> 3] >> (7 - (pos % 8))) & 1,
       write: (pos, value) => {
         let cur = view[pos >> 3]; // pos => pos/8
-        cur ^= (-value ^ cur) & (1 << (7 - pos % 8)); // set n-th bit to value
+        cur ^= (-value ^ cur) & (1 << (7 - (pos % 8))); // set n-th bit to value
         view[pos >> 3] = cur;
       },
       length: view.length

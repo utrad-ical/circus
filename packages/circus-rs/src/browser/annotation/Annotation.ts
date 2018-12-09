@@ -6,4 +6,4 @@ export interface DrawOption {
 }
 export default interface Annotation {
   draw(viewer: Viewer, viewState: ViewState, options: DrawOption): void;
-};
+}

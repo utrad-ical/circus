@@ -357,15 +357,11 @@ export function sectionOverlapsVolume(
     shadowPolygonVerticeCoords,
     []
   ) as any;
-  const shadowPolygonVertices: Vector3[] = shadowPolygonVerticeCoords.map(
-    coord =>
-      convertScreenCoordinateToVolumeCoordinate(mmSection, resolution, coord)
-  );
   return shadowTriangles.some(([vIdx1, vIdx2, vIdx3]) => {
     const triangle = new Triangle().set(
-      shadowPolygonVertices[vIdx1],
-      shadowPolygonVertices[vIdx2],
-      shadowPolygonVertices[vIdx3]
+      intersections[vIdx1],
+      intersections[vIdx2],
+      intersections[vIdx3]
     );
     return sectionVertices.some(p => triangle.containsPoint(p));
   });

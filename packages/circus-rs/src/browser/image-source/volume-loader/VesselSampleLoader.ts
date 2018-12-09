@@ -1,9 +1,9 @@
 import RsHttpClient from '../../http-client/RsHttpClient';
 import DicomVolumeLoader from './DicomVolumeLoader';
-import IndexedDbCache from '../../util/IndexedDbCache';
 import DicomVolume from '../../../common/DicomVolume';
 import { PixelFormat } from '../../../common/PixelFormat';
 import { DicomVolumeMetadata } from './DicomVolumeLoader';
+import VolumeCache, { nullVolumeCache } from './cache/VolumeCache';
 
 export default class VesselSampleLoader implements DicomVolumeLoader {
   // [Note]
@@ -35,58 +35,43 @@ export default class VesselSampleLoader implements DicomVolumeLoader {
     estimatedWindow: { level: 200, width: 600 }
   };
 
-  private cache: IndexedDbCache<any> | undefined;
+  private cache: VolumeCache;
 
   private coef: number;
 
-  constructor({ host, path, coef }: any) {
+  constructor({ host, path, coef, cache }: any) {
     this.client = new RsHttpClient(host);
     this.path = path;
     this.coef = coef || 1;
-  }
-
-  public useCache(cache: IndexedDbCache<any>): void {
-    this.cache = cache;
+    this.cache = cache || nullVolumeCache;
   }
 
   public loadMeta(): Promise<DicomVolumeMetadata> {
     return Promise.resolve(this.meta);
   }
 
-  public loadVolume(): Promise<DicomVolume> {
-    return (this.cache
-      ? this.cache.get(this.path + '.static')
-      : Promise.resolve()
-    )
-      .then((volume?: DicomVolume | null) => {
-        return volume
-          ? volume
-          : this.client.request(this.path, {}, 'arraybuffer');
-      })
-      .then(buffer => {
-        const meta = this.meta;
-        const volume = new DicomVolume(meta.voxelCount, PixelFormat.UInt16);
-        volume.setVoxelSize(meta.voxelSize);
-        if (meta.dicomWindow) volume.dicomWindow = meta.dicomWindow;
-        if (meta.estimatedWindow) volume.estimatedWindow = meta.estimatedWindow;
+  public async loadVolume(): Promise<DicomVolume> {
+    const buffer =
+      (await this.cache.getVolume(this.path + '.static')) ||
+      (await this.client.request(this.path, {}, 'arraybuffer'));
+    if (!buffer) throw new Error();
 
-        const bufferSize =
-          meta.voxelCount[0] * meta.voxelCount[1] * meta.voxelCount[2];
-        const srcUint8BufferArray = new Uint8Array(buffer);
+    const meta = this.meta;
+    const volume = new DicomVolume(meta.voxelCount, PixelFormat.UInt16);
+    volume.setVoxelSize(meta.voxelSize);
+    if (meta.dicomWindow) volume.dicomWindow = meta.dicomWindow;
+    if (meta.estimatedWindow) volume.estimatedWindow = meta.estimatedWindow;
 
-        const destUint16BufferArray = new Uint16Array(bufferSize);
+    const bufferSize =
+      meta.voxelCount[0] * meta.voxelCount[1] * meta.voxelCount[2];
+    const srcUint8BufferArray = new Uint8Array(buffer);
+    const destUint16BufferArray = new Uint16Array(bufferSize);
 
-        for (let offset = 0; offset < bufferSize; offset++) {
-          // destUint16BufferArray[offset] = srcUint8BufferArray[offset];
-          destUint16BufferArray[offset] =
-            srcUint8BufferArray[offset] * this.coef;
-        }
-
-        volume.assign((destUint16BufferArray as any).buffer);
-
-        if (this.cache) this.cache.put(this.path + '.static', buffer);
-
-        return volume;
-      });
+    for (let offset = 0; offset < bufferSize; offset++) {
+      destUint16BufferArray[offset] = srcUint8BufferArray[offset] * this.coef;
+    }
+    volume.assign((destUint16BufferArray as any).buffer);
+    this.cache.putVolume(this.path + '.static', buffer);
+    return volume;
   }
 }

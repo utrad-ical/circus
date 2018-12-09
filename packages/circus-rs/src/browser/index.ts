@@ -51,12 +51,9 @@ export {
   default as VesselSampleLoader
 } from './image-source/volume-loader/VesselSampleLoader';
 
-// Deprecated: Use IndexDbVolumeCache instead
-export { default as IndexedDbCache } from './util/IndexedDbCache';
-
 export {
   default as IndexedDbVolumeCache
-} from './image-source/volume-loader/cache/IndexDbVolumeCache';
+} from './image-source/volume-loader/cache/IndexedDbVolumeCache';
 export {
   default as MemoryVolumeCache
 } from './image-source/volume-loader/cache/MemoryVolumeCache';

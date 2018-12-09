@@ -43,14 +43,15 @@ export default class RsVolumeLoader implements DicomVolumeLoader {
 
   public async loadMeta(): Promise<DicomVolumeMetadata> {
     if (this.meta) return this.meta;
+    const cacheKey = this.createKey('metadata');
     let meta: DicomVolumeMetadata | undefined;
-    meta = await this.cache.getMetadata(this.seriesUid);
+    meta = await this.cache.getMetadata(cacheKey);
     if (!meta) {
       meta = (await this.rsHttpClient.request(
         `series/${this.seriesUid}/metadata`,
         this.createRequestParams()
       )) as DicomVolumeMetadata;
-      await this.cache.putMetadata(this.seriesUid, meta);
+      await this.cache.putMetadata(cacheKey, meta);
     }
     this.meta = meta;
     return meta;
@@ -58,9 +59,9 @@ export default class RsVolumeLoader implements DicomVolumeLoader {
 
   public async loadVolume(): Promise<DicomVolume> {
     if (!this.meta) throw new Error('Medatadata not loaded yet');
-
+    const cacheKey = this.createKey('buffer');
     let buffer: ArrayBuffer | undefined;
-    buffer = await this.cache.getVolume(this.seriesUid);
+    buffer = await this.cache.getVolume(cacheKey);
     if (!buffer) {
       buffer = await this.rsHttpClient.request(
         `series/${this.seriesUid}/volume`,
@@ -76,8 +77,14 @@ export default class RsVolumeLoader implements DicomVolumeLoader {
     if (meta.estimatedWindow) volume.estimatedWindow = meta.estimatedWindow;
     volume.assign(buffer as ArrayBuffer);
 
-    if (buffer) await this.cache.putVolume(this.seriesUid, buffer);
+    if (buffer) await this.cache.putVolume(cacheKey, buffer);
     return volume;
+  }
+
+  private createKey(suffix: string): string {
+    const pvd = this.partialVolumeDescriptor;
+    const pvdStr = pvd ? `:${pvd.start}:${pvd.end}:${pvd.delta}` : ':full';
+    return this.seriesUid + pvdStr + '.' + suffix;
   }
 
   private createRequestParams(): object {
@@ -86,7 +93,7 @@ export default class RsVolumeLoader implements DicomVolumeLoader {
       return {
         start: partialVolumeDescriptor.start,
         end: partialVolumeDescriptor.end,
-        delta: partialVolumeDescriptor.delta | 1
+        delta: partialVolumeDescriptor.delta || 1
       };
     } else {
       return {};

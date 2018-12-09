@@ -4,6 +4,7 @@ import { DicomVolumeMetadata } from '../DicomVolumeLoader';
 /**
  * Provides a simple in-memory volume cache which is available only while the
  * browser window is open.
+ * The created cache will be injected to `RsVolumeLoader`.
  */
 export default class MemoryVolumeCache implements VolumeCache {
   private _metadata: Map<string, DicomVolumeMetadata>;
@@ -15,23 +16,23 @@ export default class MemoryVolumeCache implements VolumeCache {
   }
 
   public async getMetadata(
-    seriesUid: string
+    key: string
   ): Promise<DicomVolumeMetadata | undefined> {
-    return this._metadata.get(seriesUid);
+    return this._metadata.get(key);
   }
 
   public async putMetadata(
-    seriesUid: string,
+    key: string,
     data: DicomVolumeMetadata
   ): Promise<void> {
-    this._metadata.set(seriesUid, data);
+    await this._metadata.set(key, data);
   }
 
-  public async getVolume(seriesUid: string): Promise<ArrayBuffer | undefined> {
-    return this._volume.get(seriesUid);
+  public async getVolume(key: string): Promise<ArrayBuffer | undefined> {
+    return this._volume.get(key);
   }
 
-  public async putVolume(seriesUid: string, data: ArrayBuffer): Promise<void> {
-    this._volume.set(seriesUid, data);
+  public async putVolume(key: string, data: ArrayBuffer): Promise<void> {
+    await this._volume.set(key, data);
   }
 }

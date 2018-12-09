@@ -1,10 +1,10 @@
 import { DicomVolumeMetadata } from '../DicomVolumeLoader';
 
 export default interface VolumeCache {
-  getMetadata(seriesUid: string): Promise<DicomVolumeMetadata | undefined>;
-  putMetadata(seriesUid: string, data: DicomVolumeMetadata): Promise<void>;
-  getVolume(seriesUid: string): Promise<ArrayBuffer | undefined>;
-  putVolume(seriesUid: string, data: ArrayBuffer): Promise<void>;
+  getMetadata(key: string): Promise<DicomVolumeMetadata | undefined>;
+  putMetadata(key: string, data: DicomVolumeMetadata): Promise<void>;
+  getVolume(key: string): Promise<ArrayBuffer | undefined>;
+  putVolume(key: string, data: ArrayBuffer): Promise<void>;
 }
 
 /**

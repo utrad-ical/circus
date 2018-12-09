@@ -138,7 +138,7 @@ You can change the active tool.
 Associated toolbar (if any) will be automatically updated.
 --*/
 
-viewer.setActiveTool( rs.toolFactory('hand') );
+viewer.setActiveTool(rs.toolFactory('hand'));
 
 /*--
 @title Add corner text annotation
@@ -230,7 +230,7 @@ const [rx, ry, rz] = comp.imageSource.metadata.voxelCount; // number of voxels
 for (let x = 0; x < 10; x++) {
   for (let y = 0; y < 10; y++) {
     addCloudAnnotation({
-      origin: [Math.floor(x * rx / 10), Math.floor(y * ry / 10), 0],
+      origin: [Math.floor((x * rx) / 10), Math.floor((y * ry) / 10), 0],
       size: [Math.floor(rx * 0.08), Math.floor(rx * 0.08), rz],
       color: (x + y) % 2 ? '#ff0000' : '#00ff00'
     });
@@ -302,7 +302,7 @@ function benchmark(src) {
   }
 
   return loop().then(time => {
-    const fps = 1000 / time * iteration;
+    const fps = (1000 / time) * iteration;
     console.log(
       `${
         src.constructor.name
@@ -446,9 +446,9 @@ const maskLoadPath = 'sampledata/combined2.raw';
 
 const maskLoader = new rs.VesselSampleLoader({
   path: maskLoadPath,
-  rsHttpClient
+  rsHttpClient,
+  cache
 });
-maskLoader.useCache(new rs.IndexedDbCache());
 
 // wrap loaders
 const volumeLoader = new rs.MixVolumeLoader({ mainLoader, maskLoader });

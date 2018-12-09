@@ -3,8 +3,9 @@ import IndexedDbCache from '../../../util/IndexedDbCache';
 import { DicomVolumeMetadata } from '../DicomVolumeLoader';
 
 /**
- * Volume Cache backed by IndexedDB, which means the volume will
- * be saved to the local browser storage permanently.
+ * Volume Cache backed by IndexedDB, which means the cache data will be
+ * saved to the local browser storage permanently.
+ * The created cache will be injected to `RsVolumeLoader`.
  */
 export default class IndexedDbVolumeCache implements VolumeCache {
   private _db: IndexedDbCache<ArrayBuffer | DicomVolumeMetadata>;
@@ -14,28 +15,23 @@ export default class IndexedDbVolumeCache implements VolumeCache {
   }
 
   public async getMetadata(
-    seriesUid: string
+    key: string
   ): Promise<DicomVolumeMetadata | undefined> {
-    const key = `${seriesUid}.meta`;
     return await (this._db.get(key) as Promise<DicomVolumeMetadata>);
   }
 
   public async putMetadata(
-    seriesUid: string,
+    key: string,
     data: DicomVolumeMetadata
   ): Promise<void> {
-    const key = `${seriesUid}.meta`;
     await this._db.put(key, data);
   }
 
-  public async getVolume(seriesUid: string): Promise<ArrayBuffer | undefined> {
-    const key = `${seriesUid}.buffer`;
+  public async getVolume(key: string): Promise<ArrayBuffer | undefined> {
     return await (this._db.get(key) as Promise<ArrayBuffer>);
   }
 
-  public async putVolume(seriesUid: string, data: ArrayBuffer): Promise<void> {
-    const key = `${seriesUid}.buffer`;
-    console.log('🍣', key);
+  public async putVolume(key: string, data: ArrayBuffer): Promise<void> {
     await this._db.put(key, data);
   }
 }

@@ -301,11 +301,10 @@ export class RevisionData extends React.Component {
       composition: null,
       lineWidth: 1
     };
+    this.viewers = new Set();
 
     const server = store.getState().loginUser.data.dicomImageServer;
     this.client = new rs.RsHttpClient(server);
-    this.referenceLineAnnotation = new rs.ReferenceLine();
-    this.referenceLineAnnotation.color = '#ff0000';
 
     this.stateChanger = new EventEmitter();
   }
@@ -362,7 +361,11 @@ export class RevisionData extends React.Component {
       composition.addAnnotation(cloud);
     });
     if (this.state.showReferenceLine) {
-      composition.addAnnotation(this.referenceLineAnnotation);
+      this.viewers.forEach(v => {
+        composition.addAnnotation(
+          new rs.ReferenceLine(v, { color: '#ffff00' })
+        );
+      });
     }
     composition.annotationUpdated();
     // console.log('Annotations', composition.annotations);
@@ -433,6 +436,14 @@ export class RevisionData extends React.Component {
     rs.toolFactory('eraser').setOptions({ width: w });
   };
 
+  handleCreateViwer = viewer => {
+    this.viewers.add(viewer);
+  };
+
+  handleDestroyViewer = viewer => {
+    this.viewers.delete(viewer);
+  };
+
   render() {
     const { projectData, revision, onChange, busy } = this.props;
     const {
@@ -498,6 +509,8 @@ export class RevisionData extends React.Component {
             stateChanger={this.stateChanger}
             activeLabel={activeLabel}
             tool={tool}
+            onCreateViewer={this.handleCreateViwer}
+            onDestroyViewer={this.handleDestroyViewer}
           />
         </div>
       </div>

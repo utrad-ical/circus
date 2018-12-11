@@ -28,7 +28,7 @@
     "@babel/register": "^7.0.0",
     "@utrad-ical/circus-cs-core": "github:utrad-ical/circus-cs-core#v0.9.2",
     "@utrad-ical/circus-lib": "^0.5.0",
-    "@utrad-ical/circus-rs": "github:utrad-ical/circus-rs#v0.16.1",
+    "@utrad-ical/circus-rs": "github:utrad-ical/circus-rs#v0.17.0",
     "ajv": "^5.5.2",
     "axios": "^0.16.2",
     "babel-plugin-dynamic-import-node": "^2.1.0",

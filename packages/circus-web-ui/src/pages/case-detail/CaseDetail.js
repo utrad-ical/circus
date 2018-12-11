@@ -295,8 +295,7 @@ export class RevisionData extends React.Component {
     this.state = {
       activeSeriesIndex: -1,
       activeLabelIndex: -1,
-      layout: 'twoByTwo',
-      showReferenceLine: false,
+      viewOptions: { layout: 'twoByTwo', showReferenceLine: false },
       composition: null,
       lineWidth: 1
     };
@@ -342,7 +341,12 @@ export class RevisionData extends React.Component {
 
   updateLabels = (props, state) => {
     const { revision } = props || this.props;
-    const { composition, activeSeriesIndex, activeLabelIndex } =
+    const {
+      composition,
+      activeSeriesIndex,
+      activeLabelIndex,
+      viewOptions: { showReferenceLine }
+    } =
       state || this.state;
     const activeSeries = revision.series[activeSeriesIndex];
     const labels = activeSeries.labels;
@@ -359,7 +363,7 @@ export class RevisionData extends React.Component {
       }
       composition.addAnnotation(cloud);
     });
-    if (this.state.showReferenceLine) {
+    if (showReferenceLine) {
       this.viewers.forEach(v => {
         composition.addAnnotation(
           new rs.ReferenceLine(v, { color: '#ffff88' })
@@ -420,7 +424,10 @@ export class RevisionData extends React.Component {
   };
 
   toggleReferenceLine = show => {
-    this.setState({ showReferenceLine: show }, this.updateLabels);
+    this.setState(
+      { viewOptions: { ...this.state.viewOptions, showReferenceLine: show } },
+      this.updateLabels
+    );
   };
 
   selectWindowPreset = preset => {
@@ -448,9 +455,9 @@ export class RevisionData extends React.Component {
     const {
       toolName,
       tool,
-      layout,
       activeSeriesIndex,
       activeLabelIndex,
+      viewOptions: { layout, showReferenceLine },
       composition
     } = this.state;
     const activeSeries = revision.series[activeSeriesIndex];
@@ -493,7 +500,7 @@ export class RevisionData extends React.Component {
           <ToolBar
             active={toolName}
             changeTool={this.changeTool}
-            showReferenceLine={this.state.showReferenceLine}
+            showReferenceLine={showReferenceLine}
             toggleReferenceLine={this.toggleReferenceLine}
             lineWidth={this.state.lineWidth}
             setLineWidth={this.setLineWidth}

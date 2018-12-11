@@ -363,7 +363,7 @@ export class RevisionData extends React.Component {
     if (this.state.showReferenceLine) {
       this.viewers.forEach(v => {
         composition.addAnnotation(
-          new rs.ReferenceLine(v, { color: '#ffff00' })
+          new rs.ReferenceLine(v, { color: '#ffff88' })
         );
       });
     }
@@ -421,7 +421,7 @@ export class RevisionData extends React.Component {
   };
 
   toggleReferenceLine = show => {
-    this.setState({ showReferenceLine: show });
+    this.setState({ showReferenceLine: show }, this.updateLabels);
   };
 
   selectWindowPreset = preset => {

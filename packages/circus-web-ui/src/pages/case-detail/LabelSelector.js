@@ -40,14 +40,14 @@ const LabelSelector = props => {
     activeSeries
   } = props;
 
-  function changeSeries(index, newSeries) {
+  const changeSeries = (index, newSeries) => {
     const newRev = {
       ...revision,
       series: [...revision.series]
     };
     newRev.series[index] = newSeries;
-    onChange(newRev);
-  }
+    onChange({ revision: newRev });
+  };
 
   return (
     <ul className="case-series-list">

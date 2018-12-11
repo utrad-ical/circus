@@ -84,7 +84,7 @@ class CaseDetailView extends React.Component {
       }
     }
 
-    this.setState({ editingData: data, busy: false });
+    this.setState({ editingData: { revision: data }, busy: false });
   };
 
   async loadCase() {
@@ -99,7 +99,7 @@ class CaseDetailView extends React.Component {
   }
 
   saveRevision = async () => {
-    const data = this.state.editingData;
+    const data = this.state.editingData.revision;
 
     const desc = await prompt('Revision message', data.description);
     if (desc === null) return;
@@ -183,7 +183,11 @@ class CaseDetailView extends React.Component {
   };
 
   revisionDataChange = revision => {
-    this.setState({ editingData: revision });
+    const historyEntry = {
+      ...this.state.historyEntry,
+      revision
+    };
+    this.setState({ historyEntry });
   };
 
   async componentDidMount() {
@@ -227,10 +231,10 @@ class CaseDetailView extends React.Component {
           revisions={this.state.caseData.revisions}
           currentRevision={this.state.editingRevisionIndex}
         />
-        <RevisionData
+        <Editor
           key={this.state.editingRevisionIndex}
           busy={this.state.busy}
-          revision={this.state.editingData}
+          editingData={this.state.editingData}
           projectData={this.state.projectData}
           onChange={this.revisionDataChange}
         />
@@ -289,7 +293,7 @@ const MenuBar = props => {
   );
 };
 
-export class RevisionData extends React.Component {
+export class Editor extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -309,8 +313,10 @@ export class RevisionData extends React.Component {
 
   componentWillUpdate(nextProps, nextState) {
     if (
-      this.props.revision.series[this.state.activeSeriesIndex].seriesUid !==
-      nextProps.revision.series[this.state.activeSeriesIndex].seriesUid
+      this.props.editingData.revision.series[this.state.activeSeriesIndex]
+        .seriesUid !==
+      nextProps.editingData.revision.series[this.state.activeSeriesIndex]
+        .seriesUid
     ) {
       this.changeActiveSeries(this.state.activeSeriesIndex);
     }
@@ -324,7 +330,7 @@ export class RevisionData extends React.Component {
   }
 
   componentWillMount() {
-    const { revision } = this.props;
+    const { editingData: { revision } } = this.props;
     this.changeTool('pager');
     this.changeActiveSeries(0);
     const activeSeries = revision.series[this.state.activeSeriesIndex];
@@ -340,7 +346,7 @@ export class RevisionData extends React.Component {
   }
 
   updateLabels = (props, state) => {
-    const { revision } = props || this.props;
+    const { editingData: { revision } } = props || this.props;
     const {
       composition,
       activeSeriesIndex,
@@ -375,7 +381,8 @@ export class RevisionData extends React.Component {
   };
 
   changeActiveSeries(seriesIndex) {
-    const activeSeries = this.props.revision.series[seriesIndex];
+    const { editingData: { revision } } = this.props;
+    const activeSeries = revision.series[seriesIndex];
     const volumeLoader = new rs.RsVolumeLoader({
       rsHttpClient: this.client,
       seriesUid: activeSeries.seriesUid
@@ -403,19 +410,19 @@ export class RevisionData extends React.Component {
   };
 
   labelAttributesChange = value => {
-    const { revision, onChange } = this.props;
+    const { editingData: { revision }, onChange } = this.props;
     const { activeSeriesIndex, activeLabelIndex } = this.state;
     const activeSeries = revision.series[activeSeriesIndex];
     if (!activeSeries) return null;
     const activeLabel = activeSeries.labels[activeLabelIndex];
     activeLabel.attributes = value;
-    onChange(revision);
+    onChange({ revision });
   };
 
   caseAttributesChange = value => {
-    const { onChange, revision } = this.props;
+    const { editingData: { revision }, onChange } = this.props;
     revision.attributes = value;
-    onChange(revision);
+    onChange({ revision });
   };
 
   changeTool = toolName => {
@@ -451,7 +458,12 @@ export class RevisionData extends React.Component {
   };
 
   render() {
-    const { projectData, revision, onChange, busy } = this.props;
+    const {
+      projectData,
+      editingData: { revision },
+      onChange,
+      busy
+    } = this.props;
     const {
       toolName,
       tool,

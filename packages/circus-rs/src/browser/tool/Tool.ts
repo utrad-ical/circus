@@ -16,21 +16,27 @@ export interface Tool extends ViewerEventTarget {
  * An active tool will change the active view state of each viewer.
  */
 export default class ToolBaseClass extends EventEmitter implements Tool {
+  protected options: object = {};
+
   constructor() {
     super();
     this.wheelHandler = createPagerWheelHandler();
   }
 
-  public activate(viewer: Viewer) {}
-  public deactivate(viewer: Viewer) {}
+  public activate(viewer: Viewer): void {}
+  public deactivate(viewer: Viewer): void {}
 
-  public mouseUpHandler(viewerEvent: ViewerEvent) {}
-  public mouseDownHandler(viewerEvent: ViewerEvent) {}
-  public mouseMoveHandler(viewerEvent: ViewerEvent) {}
-  public dragStartHandler(viewerEvent: ViewerEvent) {}
-  public dragHandler(viewerEvent: ViewerEvent) {}
-  public dragEndHandler(viewerEvent: ViewerEvent) {}
-  public wheelHandler(viewerEvent: ViewerEvent) {}
+  public setOptions(options: object): void {
+    this.options = { ...this.setOptions, ...options };
+  }
+
+  public mouseUpHandler(viewerEvent: ViewerEvent): void {}
+  public mouseDownHandler(viewerEvent: ViewerEvent): void {}
+  public mouseMoveHandler(viewerEvent: ViewerEvent): void {}
+  public dragStartHandler(viewerEvent: ViewerEvent): void {}
+  public dragHandler(viewerEvent: ViewerEvent): void {}
+  public dragEndHandler(viewerEvent: ViewerEvent): void {}
+  public wheelHandler(viewerEvent: ViewerEvent): void {}
 }
 
 /**

@@ -14,11 +14,10 @@ import { Vector2, Vector3 } from 'three';
 interface VoxelCloudToolBaseOptions {
   width: number;
 }
-export default class VoxelCloudToolBase extends DraggableTool {
-  private options: VoxelCloudToolBaseOptions;
 
+export default class VoxelCloudToolBase extends DraggableTool {
   // Disable pointer lock API
-  protected usePointerLockAPI = false;
+  protected usePointerLockAPI: boolean = false;
 
   protected activeCloud: VoxelCloud | null = null;
 
@@ -30,11 +29,11 @@ export default class VoxelCloudToolBase extends DraggableTool {
     this.options = { width: 1 };
   }
 
-  public activate(viewer: Viewer) {
+  public activate(viewer: Viewer): void {
     viewer.primaryEventTarget = this;
   }
 
-  public deactivate(viewer: Viewer) {
+  public deactivate(viewer: Viewer): void {
     viewer.primaryEventTarget = null;
   }
 

@@ -1,4 +1,4 @@
-import { Vector2, Vector3, Line3 } from 'three';
+import { Vector2, Vector3, Line3, Plane } from 'three';
 
 /**
  * Section determines the MRP section of a volume.
@@ -26,6 +26,14 @@ export function vectorizeSection(section: Section): SectionVector {
     xAxis: new Vector3().fromArray(section.xAxis),
     yAxis: new Vector3().fromArray(section.yAxis)
   };
+}
+
+export function toPlane(section: Section) {
+  const nv = normalVector(section);
+  const origin = new Vector3().fromArray(section.origin);
+
+  const plane = new Plane().setFromNormalAndCoplanarPoint(nv, origin);
+  return plane;
 }
 
 export function projectPointOntoSection(
@@ -57,6 +65,7 @@ export function translateSection(section: Section, delta: Vector3): Section {
  * This does not check if the intersection is within the section
  * (i.e., section is treated as a plane that extends infinitely).
  * @return The intersection point. null if there is no intersection.
+ * @deprecated Use toPlane() and intersectLine() instead.
  */
 export function intersectionOfLineAndPlane(
   section: Section,
@@ -119,65 +128,70 @@ export function intersectionOfLineAndSection(
 }
 
 /**
- * Calculates the intersection of two (finite) sections.
- * @param base The base section, on which the target section is projected
- * @param target The target section
- * @returns The line segment which represents how the target section
- * intersects with the base section.
- * The resulting line segment may extend outside the boundry of base,
- * while it does not extend outside the target.
+ * Calculates the intersection line segment of two (finite) sections.
+ * @param section1
+ * @param section2
+ * @returns The intersection line segment
  */
 export function intersectionOfTwoSections(
-  base: Section,
-  target: Section
+  section1: Section,
+  section2: Section
 ): Line3 | null {
-  const intersections: Vector3[] = [];
-
-  // Prepare the 4 edges (line segments) of the target section.
-  const vTarget = vectorizeSection(target);
-  const tOrigin = vTarget.origin;
-
+  // [vertices]
   // 0--1
   // |  |
   // 3--2
-  //
-  // prettier-ignore
-  const vertexes: Vector3[] = [
-    tOrigin,
-    tOrigin.clone().add(vTarget.xAxis),
-    tOrigin.clone().add(vTarget.xAxis).add(vTarget.yAxis),
-    tOrigin.clone().add(vTarget.yAxis)
+  const intersectionPoints: Vector3[] = [];
+  const plane1 = toPlane(section1);
+  const vsection1 = vectorizeSection(section1);
+  const vertices1: Vector3[] = [
+    vsection1.origin,
+    vsection1.origin.clone().add(vsection1.xAxis),
+    vsection1.origin
+      .clone()
+      .add(vsection1.xAxis)
+      .add(vsection1.yAxis),
+    vsection1.origin.clone().add(vsection1.yAxis)
   ];
 
-  const edgeIndexes: number[][] = [[0, 1], [1, 2], [2, 3], [3, 0]];
+  const plane2 = toPlane(section2);
+  const vsection2 = vectorizeSection(section2);
+  const vertices2: Vector3[] = [
+    vsection2.origin.clone(),
+    vsection2.origin.clone().add(vsection2.xAxis),
+    vsection2.origin
+      .clone()
+      .add(vsection2.xAxis)
+      .add(vsection2.yAxis),
+    vsection2.origin.clone().add(vsection2.yAxis)
+  ];
 
-  for (let i = 0; i < 4; i++) {
-    const from = vertexes[edgeIndexes[i][0]];
-    const to = vertexes[edgeIndexes[i][1]];
-    const edge = new Line3(from, to);
-    const intersection = intersectionOfLineAndPlane(base, edge);
-    if (intersection !== null) intersections.push(intersection);
-  }
+  vertices1.reduce((from, to) => {
+    const edge1 = new Line3(from, to);
+    const intersection = plane2.intersectLine(edge1, new Vector3());
+    if (intersection && intersectionPointWithinSection(section2, intersection))
+      intersectionPoints.push(intersection);
+    return to;
+  }, vertices1[3]);
 
-  if (intersections.length < 2) {
-    // two sections do not intersect at all
-    return null;
-  }
-  if (intersections.every(p => !intersectionPointWithinSection(base, p))) {
-    // the target section intersects with the plane containing the base section,
-    // but somewhere outside of the boundary of the base section
-    return null;
-  }
+  vertices2.reduce((from, to) => {
+    const edge2 = new Line3(from, to);
+    const intersection = plane1.intersectLine(edge2, new Vector3());
+    if (intersection && intersectionPointWithinSection(section1, intersection))
+      intersectionPoints.push(intersection);
+    return to;
+  }, vertices2[3]);
 
   // Now intersections should normally contain 2 intersection points,
-  // but when there are more, find one which is different from the first
-  for (let i = 1; i < intersections.length; i++) {
-    if (intersections[0].distanceTo(intersections[i]) > 0.0001) {
-      return new Line3(intersections[0], intersections[i]);
-    }
-  }
+  // but when there are more, remove almost same point.
+  const [start, end] = intersectionPoints.filter(
+    (p0, i) =>
+      !intersectionPoints
+        .slice(0, i)
+        .some(p1 => p0.distanceTo(p1) < Number.EPSILON)
+  );
 
-  return null;
+  return start && end ? new Line3(start, end) : null;
 }
 
 /**

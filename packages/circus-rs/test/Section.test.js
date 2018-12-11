@@ -2,7 +2,7 @@
 
 const su = require('../src/browser/section-util');
 const geo = require('../src/common/geometry');
-const { Vector3, Vector2, Box3 } = require('three');
+const { Vector3, Vector2, Box3, Line3 } = require('three');
 const assert = require('chai').assert;
 const box = require('../src/common/geometry/Box');
 
@@ -137,6 +137,91 @@ describe('Section', function() {
     };
     assert.isTrue(geo.sectionEquals(a, a));
     assert.isFalse(geo.sectionEquals(a, { ...a, origin: [0, 1, 1] }));
+  });
+
+  describe('intersectionOfTwoSections3()', function(){
+
+    it('#intersectionOfTwoSections1', function() {
+      const section1 = {
+        origin: [0, 0, 50],
+        xAxis: [100, 0, 0],
+        yAxis: [0, 100, 0]
+      };
+      const section2 = {
+        origin: [50, 50, 0],
+        xAxis: [100, 0, 0],
+        yAxis: [0, 0, 100]
+      };
+      const result = geo.intersectionOfTwoSections(section1, section2);
+      const expected = new Line3(
+        new Vector3(100, 50, 50),
+        new Vector3(50, 50, 50)
+      );
+      assert.deepEqual(
+        [result.start.toArray(), result.end.toArray()],
+        [expected.start.toArray(), expected.end.toArray()]
+      );
+    });
+  
+    it('#intersectionOfTwoSections2', function() {
+      const section1 = {
+        origin: [0, 0, 50],
+        xAxis: [100, 0, 0],
+        yAxis: [0, 100, 0]
+      };
+      const section2 = {
+        origin: [30, 30, 30],
+        xAxis: [50, 0, 0],
+        yAxis: [0, 0, 50]
+      };
+      const result = geo.intersectionOfTwoSections(section1, section2);
+      const expected = new Line3(
+        new Vector3(30, 30, 50),
+        new Vector3(80, 30, 50)
+      );
+      assert.deepEqual(
+        [result.start.toArray(), result.end.toArray()],
+        [expected.start.toArray(), expected.end.toArray()]
+      );
+    });
+  
+    it('#intersectionOfTwoSections3', function() {
+      const section1 = {
+        origin: [0, 0, 50],
+        xAxis: [100, 0, 0],
+        yAxis: [0, 100, 0]
+      };
+      const section2 = {
+        origin: [0, 50, 0],
+        xAxis: [100, 0, 0],
+        yAxis: [0, 0, 100]
+      };
+      const result = geo.intersectionOfTwoSections(section1, section2);
+      const expected = new Line3(
+        new Vector3(0, 50, 50),
+        new Vector3(100, 50, 50)
+      );
+      assert.deepEqual(
+        [result.start.toArray(), result.end.toArray()],
+        [expected.start.toArray(), expected.end.toArray()]
+      );
+    });
+  
+    it('#intersectionOfTwoSections4', function() {
+      const section1 = {
+        origin: [0, 0, 178.75],
+        xAxis: [400, 0, 0],
+        yAxis: [0, 400, 0]
+      };
+      const section2 = {
+        origin: [61.57136522592879, 55.647954380337154, -21.25000000000001],
+        xAxis: [276.857269548143, 288.70409123932575, 0],
+        yAxis: [0, 0, 399.999999999963]
+      };
+      const result = geo.intersectionOfTwoSections(section1, section2);
+      assert.isTrue(!!result);
+    });
+  
   });
 
   describe('sectionOverlapsVolume', function() {

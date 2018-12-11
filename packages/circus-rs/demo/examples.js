@@ -81,9 +81,6 @@ This example shows minimum code to initialize CIRCUS RS.
 
 //--@include Initialize composition
 
-const referenceLine = new rs.ReferenceLine();
-comp.addAnnotation(referenceLine);
-
 const div1 = document.getElementById('viewer');
 viewer = new rs.Viewer(div1);
 viewer.setComposition(comp);
@@ -91,6 +88,29 @@ viewer.setComposition(comp);
 const div2 = document.getElementById('viewer2');
 viewer2 = new rs.Viewer(div2);
 viewer2.setComposition(comp);
+
+const referenceLine1 = new rs.ReferenceLine(viewer, {color: '#993300'});
+const referenceLine2 = new rs.ReferenceLine(viewer2, {color: '#3399ff'});
+comp.addAnnotation(referenceLine1);
+comp.addAnnotation(referenceLine2);
+
+const setOrientation = async (v, orientation) => {
+  const imageSource = comp.imageSource;
+  await imageSource.ready();
+
+  v.setState({
+    ...v.getState(),
+    section: rs.createOrthogonalMprSection(
+      v.getResolution(),
+      imageSource.mmDim(),
+      orientation
+    )
+  });
+};
+
+setOrientation(viewer, 'axial');
+setOrientation(viewer2, 'coronal');
+
 
 /*--
 @title Initialize toolbar

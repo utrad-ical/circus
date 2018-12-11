@@ -36,6 +36,12 @@ export default class ImageViewer extends React.Component {
 
   componentDidMount() {
     try {
+      const {
+        onCreateViewer,
+        orientation = 'axial',
+        composition,
+        initialTool = toolFactory('pager')
+      } = this.props;
       const setOrientation = () => {
         const state = viewer.getState();
         const src = this.props.composition.imageSource;
@@ -52,22 +58,17 @@ export default class ImageViewer extends React.Component {
       const container = this.container;
       const viewer = new Viewer(container);
       this.viewer = viewer;
+      if (typeof onCreateViewer === 'function') onCreateViewer(viewer);
 
       if (this.props.stateChanger instanceof EventEmitter) {
         this.props.stateChanger.on('change', this.changeState);
       }
 
-      const orientation = this.props.orientation || 'axial';
-
       viewer.on('imageReady', setOrientation);
 
-      if (this.props.composition) {
-        viewer.setComposition(this.props.composition);
+      if (composition) {
+        viewer.setComposition(composition);
       }
-      const initialTool = this.props.initialTool
-        ? this.props.initialTool
-        : toolFactory('pager');
-
       viewer.setActiveTool(initialTool);
     } catch (err) {
       this.setState({ hasError: true });
@@ -75,7 +76,11 @@ export default class ImageViewer extends React.Component {
   }
 
   componentWillUnmount() {
-    if (this.viewer) this.viewer.dispose();
+    const { onDestroyViewer } = this.props;
+    if (this.viewer) {
+      this.viewer.dispose();
+      if (typeof onDestroyViewer === 'function') onDestroyViewer(this.viewer);
+    }
   }
 
   changeState = changer => {

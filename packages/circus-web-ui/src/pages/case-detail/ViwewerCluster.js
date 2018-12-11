@@ -29,7 +29,14 @@ const OneLayout = styled.div`
 const celestialRotate = toolFactory('celestialRotate');
 
 const ViewerCluster = props => {
-  const { composition, tool, stateChanger, layout } = props;
+  const {
+    composition,
+    tool,
+    stateChanger,
+    layout,
+    onCreateViewer,
+    onDestroyViewer
+  } = props;
 
   function makeViewer(orientation, initialTool, fixTool) {
     return (
@@ -40,6 +47,8 @@ const ViewerCluster = props => {
         tool={fixTool ? fixTool : tool}
         initialTool={initialTool}
         stateChanger={stateChanger}
+        onCreateViewer={onCreateViewer}
+        onDestroyViewer={onDestroyViewer}
       />
     );
   }

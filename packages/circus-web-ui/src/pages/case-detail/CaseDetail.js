@@ -304,6 +304,7 @@ export class Editor extends React.Component {
       lineWidth: 1
     };
     this.viewers = new Set();
+    this.tools = {};
 
     const server = store.getState().loginUser.data.dicomImageServer;
     this.client = new rs.RsHttpClient(server);
@@ -425,9 +426,14 @@ export class Editor extends React.Component {
     onChange({ revision });
   };
 
+  getTool = toolName => {
+    const tool = this.tools[toolName] || toolFactory(toolName);
+    this.tools[toolName] = tool;
+    return tool;
+  };
+
   changeTool = toolName => {
-    const tool = toolFactory(toolName);
-    this.setState({ toolName, tool });
+    this.setState({ toolName, tool: this.getTool(toolName) });
   };
 
   toggleReferenceLine = show => {
@@ -445,8 +451,8 @@ export class Editor extends React.Component {
   setLineWidth = lineWidth => {
     const w = +lineWidth;
     this.setState({ lineWidth: w });
-    rs.toolFactory('brush').setOptions({ width: w });
-    rs.toolFactory('eraser').setOptions({ width: w });
+    this.getTool('brush').setOptions({ width: w });
+    this.getTool('eraser').setOptions({ width: w });
   };
 
   handleCreateViwer = viewer => {

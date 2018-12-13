@@ -80,11 +80,16 @@ class CaseDetailView extends React.Component {
         cloud.alpha = 'alpha' in label.data ? parseFloat(label.data.alpha) : 1;
         // cloud.debugPoint = true;
         label.cloud = cloud;
-        // console.log('Cloud loaded', cloud);
       }
     }
 
-    this.setState({ editingData: { revision: data }, busy: false });
+    const editingData = {
+      revision: data,
+      activeSeriesIndex: 0,
+      activeLabelIndex: (revision.series[0].labels || []).length > 0 ? 0 : -1
+    };
+
+    this.setState({ editingData, busy: false });
   };
 
   async loadCase() {
@@ -182,12 +187,8 @@ class CaseDetailView extends React.Component {
     window.URL.revokeObjectURL(url);
   };
 
-  revisionDataChange = revision => {
-    const historyEntry = {
-      ...this.state.historyEntry,
-      revision
-    };
-    this.setState({ historyEntry });
+  handleDataChange = newData => {
+    this.setState({ editingData: newData });
   };
 
   async componentDidMount() {
@@ -236,7 +237,7 @@ class CaseDetailView extends React.Component {
           busy={this.state.busy}
           editingData={this.state.editingData}
           projectData={this.state.projectData}
-          onChange={this.revisionDataChange}
+          onChange={this.handleDataChange}
         />
       </FullSpanContainer>
     );
@@ -297,8 +298,6 @@ export class Editor extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      activeSeriesIndex: -1,
-      activeLabelIndex: -1,
       viewOptions: { layout: 'twoByTwo', showReferenceLine: false },
       composition: null,
       lineWidth: 1
@@ -312,54 +311,41 @@ export class Editor extends React.Component {
     this.stateChanger = new EventEmitter();
   }
 
-  componentWillUpdate(nextProps, nextState) {
-    if (
-      this.props.editingData.revision.series[this.state.activeSeriesIndex]
-        .seriesUid !==
-      nextProps.editingData.revision.series[this.state.activeSeriesIndex]
-        .seriesUid
-    ) {
-      this.changeActiveSeries(this.state.activeSeriesIndex);
-    }
-
-    if (
-      this.state.activeSeriesIndex !== nextState.activeSeriesIndex ||
-      this.state.activeLabelIndex !== nextState.activeLabelIndex
-    ) {
-      this.updateLabels(nextProps, nextState);
-    }
-  }
-
-  componentWillMount() {
-    const { editingData: { revision } } = this.props;
+  componentDidMount() {
+    const { editingData: { activeSeriesIndex } } = this.props;
     this.changeTool('pager');
-    this.changeActiveSeries(0);
-    const activeSeries = revision.series[this.state.activeSeriesIndex];
+    this.changeActiveSeries(activeSeriesIndex);
+  }
+
+  componentDidUpdate(prevProps) {
+    const { editingData } = this.props;
+    const { editingData: prevData } = prevProps;
+    if (!editingData) return;
+    if (editingData === prevData) return;
     if (
-      activeSeries &&
-      activeSeries.labels instanceof Array &&
-      activeSeries.labels.length > 0
+      editingData.revision.series[editingData.activeSeriesIndex].seriesUid !==
+      prevData.revision.series[prevData.activeSeriesIndex].seriesUid
     ) {
-      this.setState({ activeLabelIndex: 0 });
-    } else {
-      this.setState({ activeLabelIndex: -1 });
+      this.changeActiveSeries(editingData.activeSeriesIndex);
+    }
+
+    if (
+      editingData.activeSeriesIndex !== prevData.activeSeriesIndex ||
+      editingData.activeLabelIndex !== prevData.activeLabelIndex
+    ) {
+      this.updateLabels();
     }
   }
 
-  updateLabels = (props, state) => {
-    const { editingData: { revision } } = props || this.props;
+  updateLabels = () => {
     const {
-      composition,
-      activeSeriesIndex,
-      activeLabelIndex,
-      viewOptions: { showReferenceLine }
-    } =
-      state || this.state;
+      editingData: { revision, activeSeriesIndex, activeLabelIndex }
+    } = this.props;
+    const { composition, viewOptions: { showReferenceLine } } = this.state;
     const activeSeries = revision.series[activeSeriesIndex];
-    const labels = activeSeries.labels;
-    const activeLabel = labels[activeLabelIndex];
+    const activeLabel = activeSeries.labels[activeLabelIndex];
     composition.removeAllAnnotations();
-    labels.forEach(label => {
+    activeSeries.labels.forEach(label => {
       if (!label.cloud) return;
       const cloud = label.cloud;
       if (activeLabel && label === activeLabel) {
@@ -378,7 +364,6 @@ export class Editor extends React.Component {
       });
     }
     composition.annotationUpdated();
-    // console.log('Annotations', composition.annotations);
   };
 
   changeActiveSeries(seriesIndex) {
@@ -402,28 +387,38 @@ export class Editor extends React.Component {
   }
 
   changeActiveLabel = (seriesIndex, labelIndex) => {
-    if (this.state.activeSeriesIndex !== seriesIndex) {
-      this.changeActiveSeries(seriesIndex);
-    }
-    this.setState({
+    const { editingData, onChange } = this.props;
+    onChange({
+      ...editingData,
+      activeSeriesIndex: seriesIndex,
       activeLabelIndex: labelIndex
     });
   };
 
   labelAttributesChange = value => {
-    const { editingData: { revision }, onChange } = this.props;
-    const { activeSeriesIndex, activeLabelIndex } = this.state;
-    const activeSeries = revision.series[activeSeriesIndex];
-    if (!activeSeries) return null;
-    const activeLabel = activeSeries.labels[activeLabelIndex];
-    activeLabel.attributes = value;
-    onChange({ revision });
+    const { editingData, onChange } = this.props;
+    const { revision, activeSeriesIndex, activeLabelIndex } = editingData;
+    const newSeries = revision.series.map(
+      (series, seriesIndex) =>
+        seriesIndex === activeSeriesIndex
+          ? {
+              ...series,
+              labels: series.labels.map(
+                (label, labelIndex) =>
+                  labelIndex === activeLabelIndex
+                    ? { ...label, attributes: value }
+                    : label
+              )
+            }
+          : series
+    );
+    onChange({ ...editingData, revision: { ...revision, series: newSeries } });
   };
 
   caseAttributesChange = value => {
-    const { editingData: { revision }, onChange } = this.props;
-    revision.attributes = value;
-    onChange({ revision });
+    const { editingData, onChange } = this.props;
+    const { revision } = editingData;
+    onChange({ ...editingData, revision: { ...revision, attributes: value } });
   };
 
   getTool = toolName => {
@@ -466,15 +461,13 @@ export class Editor extends React.Component {
   render() {
     const {
       projectData,
-      editingData: { revision },
+      editingData: { revision, activeSeriesIndex, activeLabelIndex },
       onChange,
       busy
     } = this.props;
     const {
       toolName,
       tool,
-      activeSeriesIndex,
-      activeLabelIndex,
       viewOptions: { layout, showReferenceLine },
       composition
     } = this.state;

@@ -10,7 +10,7 @@ import {
   DropdownButton,
   Glyphicon,
   MenuItem
-} from '../../components/react-bootstrap';
+} from 'components/react-bootstrap';
 import Icon from 'components/Icon';
 import LabelSelector from './LabelSelector';
 import { store } from 'store';
@@ -19,9 +19,9 @@ import { alert, prompt, confirm } from 'rb/modal';
 import merge from 'merge';
 import classNames from 'classnames';
 import EventEmitter from 'events';
-import { sha1 } from '../../utils/util.js';
+import { sha1 } from 'utils/util.js';
 import ProjectDisplay from 'components/ProjectDisplay';
-import Collapser from '../../components/Collapser';
+import Collapser from 'components/Collapser';
 import RevisionSelector from './RevisionSelector';
 import PatientInfoBox from 'components/PatientInfoBox';
 import TimeDisplay from 'components/TimeDisplay';
@@ -29,6 +29,7 @@ import Tag from 'components/Tag';
 import { connect } from 'react-redux';
 import { toolFactory } from 'circus-rs/tool/tool-initializer';
 import ToolBar from './ToolBar';
+import update from 'immutability-helper';
 
 class CaseDetailView extends React.Component {
   constructor(props) {
@@ -55,9 +56,6 @@ class CaseDetailView extends React.Component {
     for (const series of data.series) {
       for (const label of series.labels) {
         if (label.type !== 'voxel') continue;
-        const cloud = new rs.VoxelCloud();
-        cloud.volume = new rs.RawData([8, 8, 8], rs.PixelFormat.Binary);
-        cloud.origin = [0, 0, 0];
         if (label.data.voxels !== null) {
           try {
             const buffer = await api('blob/' + label.data.voxels, {
@@ -69,17 +67,11 @@ class CaseDetailView extends React.Component {
               rs.PixelFormat.Binary
             );
             volume.assign(buffer);
-            cloud.volume = volume;
-            cloud.origin = label.data.origin;
+            label.data.voxelRawData = volume;
           } catch (err) {
             await alert('Could not load label volume data: \n' + err.message);
-            label.data.cloud = null;
           }
         }
-        cloud.color = label.data.color || '#ff0000';
-        cloud.alpha = 'alpha' in label.data ? parseFloat(label.data.alpha) : 1;
-        // cloud.debugPoint = true;
-        label.cloud = cloud;
       }
     }
 
@@ -110,38 +102,48 @@ class CaseDetailView extends React.Component {
     if (desc === null) return;
     data.description = desc;
 
+    const voxelShrinkToMinimum = labelData => {
+      const cloud = new rs.VoxelCloud(); // temporary
+      cloud.origin = labelData.origin;
+      cloud.volume = labelData.voxelRawData;
+      cloud.shrinkToMinimum();
+      return { origin: cloud.origin, voxelRawData: cloud.volume };
+    };
+
     // save all label volume data
     for (const series of data.series) {
       for (const label of series.labels) {
         try {
-          label.cloud.shrinkToMinimum();
-          const bb = rs.scanBoundingBox(label.cloud.volume);
-          const newLabelData = {
-            voxels: null,
-            color: label.cloud.color,
-            alpha: label.cloud.alpha
-          };
+          const { origin, voxelRawData } = voxelShrinkToMinimum(label.data);
+          const bb = rs.scanBoundingBox(voxelRawData);
+          let voxels = null;
           if (bb !== null) {
             // save painted voxels
-            const voxels = label.cloud.volume.data;
-            const hash = sha1(voxels);
-            if (hash === label.data.voxels) {
+            voxels = sha1(voxelRawData.data);
+            if (voxels === label.data.voxels) {
               // console.log('Skipping unchanged voxel data.');
             } else {
-              // needs to save the new voxel data.
-              await api('blob/' + hash, {
+              await api('blob/' + voxels, {
                 method: 'put',
                 handleErrors: true,
-                data: voxels,
+                data: voxelRawData.data,
                 headers: { 'Content-Type': 'application/octet-stream' }
               });
             }
-            newLabelData.voxels = hash;
-            newLabelData.origin = label.cloud.origin;
-            newLabelData.size = label.cloud.volume.getDimension();
+            label.data = {
+              color: label.data.color,
+              alpha: label.data.alpha,
+              voxels,
+              origin,
+              size: voxelRawData.getDimension()
+            };
+          } else {
+            label.data = {
+              color: label.data.color,
+              alpha: label.data.alpha,
+              voxels: null
+            };
           }
-          label.data = newLabelData;
-          delete label.cloud;
         } catch (err) {
           await alert('Could not save label volume data: \n' + err.message);
           return;
@@ -152,6 +154,7 @@ class CaseDetailView extends React.Component {
     // prepare revision data
     data.status = 'approved';
     const caseId = this.state.caseData.caseId;
+    console.log('sending', data);
     try {
       await api(`cases/${caseId}/revision`, {
         method: 'post',
@@ -327,6 +330,8 @@ export class Editor extends React.Component {
       prevData.revision.series[prevData.activeSeriesIndex].seriesUid
     ) {
       this.changeActiveSeries();
+    } else if (editingData.activeLabelIndex !== prevData.activeLabelIndex) {
+      this.updateComposition();
     }
   }
 
@@ -339,15 +344,19 @@ export class Editor extends React.Component {
     const activeLabel = activeSeries.labels[activeLabelIndex];
     composition.removeAllAnnotations();
     activeSeries.labels.forEach(label => {
-      if (!label.cloud) return;
-      const cloud = label.cloud;
-      if (activeLabel && label === activeLabel) {
-        cloud.active = true;
-      } else {
-        cloud.active = false;
-        if (cloud.expanded) cloud.shrinkToMinimum();
+      switch (label.type) {
+        case 'voxel': {
+          const cloud = new rs.VoxelCloud();
+          cloud.volume = label.data.voxelRawData;
+          cloud.origin = label.data.origin;
+          cloud.color = label.data.color || '#ff0000';
+          cloud.alpha =
+            'alpha' in label.data ? parseFloat(label.data.alpha) : 1;
+          cloud.active = activeLabel && label === activeLabel;
+          composition.addAnnotation(cloud);
+          break;
+        }
       }
-      composition.addAnnotation(cloud);
     });
     if (showReferenceLine) {
       this.viewers.forEach(v => {
@@ -372,8 +381,31 @@ export class Editor extends React.Component {
       seriesUid: activeSeries.seriesUid
     });
     const composition = new rs.Composition(src);
+    composition.on('annotationChange', this.handleAnnotationChange);
     await src.ready();
     this.setState({ composition }, this.updateComposition);
+  };
+
+  handleAnnotationChange = annotation => {
+    const { editingData, onChange } = this.props;
+    const { revision, activeSeriesIndex, activeLabelIndex } = editingData;
+    if (!(annotation instanceof rs.VoxelCloud)) return;
+    onChange({
+      ...editingData,
+      revision: update(revision, {
+        series: {
+          [activeSeriesIndex]: {
+            labels: {
+              [activeLabelIndex]: {
+                data: {
+                  origin: { $set: annotation.origin }
+                }
+              }
+            }
+          }
+        }
+      })
+    });
   };
 
   changeActiveLabel = (seriesIndex, labelIndex) => {
@@ -388,21 +420,16 @@ export class Editor extends React.Component {
   labelAttributesChange = value => {
     const { editingData, onChange } = this.props;
     const { revision, activeSeriesIndex, activeLabelIndex } = editingData;
-    const newSeries = revision.series.map(
-      (series, seriesIndex) =>
-        seriesIndex === activeSeriesIndex
-          ? {
-              ...series,
-              labels: series.labels.map(
-                (label, labelIndex) =>
-                  labelIndex === activeLabelIndex
-                    ? { ...label, attributes: value }
-                    : label
-              )
-            }
-          : series
-    );
-    onChange({ ...editingData, revision: { ...revision, series: newSeries } });
+    onChange({
+      ...editingData,
+      revision: update(revision, {
+        series: {
+          [activeSeriesIndex]: {
+            labels: { [activeLabelIndex]: { attributes: { $set: value } } }
+          }
+        }
+      })
+    });
   };
 
   caseAttributesChange = value => {
@@ -447,6 +474,12 @@ export class Editor extends React.Component {
     this.viewers.delete(viewer);
   };
 
+  handleSeriesChange = newData => {
+    const { onChange } = this.props;
+    onChange(newData);
+    this.updateComposition();
+  };
+
   render() {
     const { projectData, editingData, onChange, busy } = this.props;
     const { revision, activeSeriesIndex, activeLabelIndex } = editingData;
@@ -465,7 +498,7 @@ export class Editor extends React.Component {
           <Collapser title="Series / Labels" className="labels">
             <LabelSelector
               editingData={editingData}
-              onChange={onChange}
+              onChange={this.handleSeriesChange}
               activeSeries={activeSeries}
               activeLabel={activeLabel}
               onChangeActiveLabel={this.changeActiveLabel}

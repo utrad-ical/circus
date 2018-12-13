@@ -326,18 +326,11 @@ export class Editor extends React.Component {
       editingData.revision.series[editingData.activeSeriesIndex].seriesUid !==
       prevData.revision.series[prevData.activeSeriesIndex].seriesUid
     ) {
-      this.changeActiveSeries(editingData.activeSeriesIndex);
-    }
-
-    if (
-      editingData.activeSeriesIndex !== prevData.activeSeriesIndex ||
-      editingData.activeLabelIndex !== prevData.activeLabelIndex
-    ) {
-      this.updateLabels();
+      this.changeActiveSeries();
     }
   }
 
-  updateLabels = () => {
+  updateComposition = () => {
     const {
       editingData: { revision, activeSeriesIndex, activeLabelIndex }
     } = this.props;
@@ -366,9 +359,9 @@ export class Editor extends React.Component {
     composition.annotationUpdated();
   };
 
-  changeActiveSeries(seriesIndex) {
-    const { editingData: { revision } } = this.props;
-    const activeSeries = revision.series[seriesIndex];
+  changeActiveSeries = async () => {
+    const { editingData: { revision, activeSeriesIndex } } = this.props;
+    const activeSeries = revision.series[activeSeriesIndex];
     const volumeLoader = new rs.RsVolumeLoader({
       rsHttpClient: this.client,
       seriesUid: activeSeries.seriesUid
@@ -379,12 +372,9 @@ export class Editor extends React.Component {
       seriesUid: activeSeries.seriesUid
     });
     const composition = new rs.Composition(src);
-    src.ready().then(this.updateLabels);
-    this.setState({
-      activeSeriesIndex: seriesIndex,
-      composition
-    });
-  }
+    await src.ready();
+    this.setState({ composition }, this.updateComposition);
+  };
 
   changeActiveLabel = (seriesIndex, labelIndex) => {
     const { editingData, onChange } = this.props;
@@ -434,20 +424,19 @@ export class Editor extends React.Component {
   toggleReferenceLine = show => {
     this.setState(
       { viewOptions: { ...this.state.viewOptions, showReferenceLine: show } },
-      this.updateLabels
+      this.updateComposition
     );
   };
 
-  selectWindowPreset = preset => {
+  handleSelectWindowPreset = preset => {
     const window = { level: preset.level, width: preset.width };
     this.stateChanger.emit('change', state => ({ ...state, window }));
   };
 
   setLineWidth = lineWidth => {
-    const w = +lineWidth;
-    this.setState({ lineWidth: w });
-    this.getTool('brush').setOptions({ width: w });
-    this.getTool('eraser').setOptions({ width: w });
+    this.setState({ lineWidth });
+    this.getTool('brush').setOptions({ width: lineWidth });
+    this.getTool('eraser').setOptions({ width: lineWidth });
   };
 
   handleCreateViwer = viewer => {
@@ -459,12 +448,8 @@ export class Editor extends React.Component {
   };
 
   render() {
-    const {
-      projectData,
-      editingData: { revision, activeSeriesIndex, activeLabelIndex },
-      onChange,
-      busy
-    } = this.props;
+    const { projectData, editingData, onChange, busy } = this.props;
+    const { revision, activeSeriesIndex, activeLabelIndex } = editingData;
     const {
       toolName,
       tool,
@@ -479,7 +464,7 @@ export class Editor extends React.Component {
         <SideContainer>
           <Collapser title="Series / Labels" className="labels">
             <LabelSelector
-              revision={revision}
+              editingData={editingData}
               onChange={onChange}
               activeSeries={activeSeries}
               activeLabel={activeLabel}
@@ -510,13 +495,13 @@ export class Editor extends React.Component {
         <div className="case-revision-main">
           <ToolBar
             active={toolName}
-            changeTool={this.changeTool}
+            onChangeTool={this.changeTool}
             showReferenceLine={showReferenceLine}
             toggleReferenceLine={this.toggleReferenceLine}
             lineWidth={this.state.lineWidth}
             setLineWidth={this.setLineWidth}
             windowPresets={projectData.windowPresets}
-            selectWindowPreset={this.selectWindowPreset}
+            onSelectWindowPreset={this.handleSelectWindowPreset}
             brushEnabled={!!activeLabel}
           />
           <ViewerCluster

@@ -48,7 +48,7 @@ export default class VoxelCloudToolBase extends DraggableTool {
     const resolution = viewer.getResolution();
     const src = comp.imageSource as MprImageSource;
     const voxelSize = new Vector3().fromArray(src.metadata!.voxelSize);
-    const activeCloud = <VoxelCloud>this.activeCloud; // guaranteed to be set
+    const activeCloud = this.activeCloud!; // guaranteed to be set
 
     // from screen 2D coordinate to volume coordinate in millimeter
     const mmOfVol = su.convertScreenCoordinateToVolumeCoordinate(
@@ -161,6 +161,7 @@ export default class VoxelCloudToolBase extends DraggableTool {
     this.pX = ev.viewerX;
     this.pY = ev.viewerY;
 
+    comp.dispatchAnnotationChanging(this.activeCloud!);
     comp.annotationUpdated(ev.viewer);
   }
 
@@ -168,6 +169,7 @@ export default class VoxelCloudToolBase extends DraggableTool {
     ev.stopPropagation();
     const comp = ev.viewer.getComposition();
     if (!comp) return;
+    comp.dispatchAnnotationChange(this.activeCloud!);
     comp.annotationUpdated();
   }
 }

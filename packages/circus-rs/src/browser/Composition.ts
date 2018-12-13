@@ -62,7 +62,7 @@ export default class Composition extends EventEmitter {
   public addAnnotation(annotation: Annotation): void {
     if (this.annotations.some(a => a === annotation)) return;
     this.annotations.push(annotation);
-    this.emit('annotationChange');
+    this.emit('annotationsModify');
   }
 
   /**
@@ -71,7 +71,7 @@ export default class Composition extends EventEmitter {
   public removeAnnotation(annotation: Annotation): void {
     if (this.annotations.every(a => a !== annotation)) return;
     this.annotations = this.annotations.filter(a => a !== annotation);
-    this.emit('annotationChange');
+    this.emit('annotationsModify');
   }
 
   /**
@@ -79,7 +79,7 @@ export default class Composition extends EventEmitter {
    */
   public removeAllAnnotations(): void {
     this.annotations = [];
-    this.emit('annotationChange');
+    this.emit('annotationsModify');
   }
 
   /**
@@ -95,5 +95,13 @@ export default class Composition extends EventEmitter {
         ? [viewer]
         : this.viewers;
     viewers.forEach(v => v.renderAnnotations());
+  }
+
+  public dispatchAnnotationChanging(annotation: Annotation): void {
+    this.emit('annotationChanging', annotation);
+  }
+
+  public dispatchAnnotationChange(annotation: Annotation): void {
+    this.emit('annotationChange', annotation);
   }
 }

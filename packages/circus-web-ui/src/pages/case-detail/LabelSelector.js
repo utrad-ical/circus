@@ -1,11 +1,7 @@
 import React from 'react';
 import ColorPicker from 'rb/ColorPicker';
-import {
-  Popover,
-  Button,
-  OverlayTrigger
-} from '../../components/react-bootstrap';
-import { RawData, PixelFormat, VoxelCloud } from 'circus-rs';
+import { Popover, Button, OverlayTrigger } from 'components/react-bootstrap';
+import { RawData, PixelFormat } from 'circus-rs';
 import classNames from 'classnames';
 import { confirm } from 'rb/modal';
 import IconButton from 'components/IconButton';
@@ -90,16 +86,17 @@ const Series = props => {
   }
 
   function addLabel() {
-    const cloud = new VoxelCloud();
-    cloud.color = '#ff0000';
-    cloud.alpha = 1;
-    cloud.origin = [0, 0, 0];
-    cloud.volume = new RawData([16, 16, 16], PixelFormat.Binary);
     const newLabel = {
       type: 'voxel',
-      data: {}, // will be filled just before actual save
-      attributes: {},
-      cloud // cloud is the primary data storage while editing
+      data: {
+        origin: [0, 0, 0],
+        size: [16, 16, 16],
+        color: '#ff0000',
+        alpha: 1,
+        voxels: null,
+        voxelRawData: new RawData([16, 16, 16], PixelFormat.Binary)
+      },
+      attributes: {}
     };
     const newSeries = {
       ...series,
@@ -158,12 +155,12 @@ export const Label = props => {
   const caption = label.title ? label.title : `Label #${props.index}`;
 
   function changeLabelAlpha(alpha) {
-    label.cloud.alpha = alpha;
+    label.data.alpha = alpha;
     onChange(labelIndex, label);
   }
 
   function changeLabelColor(color) {
-    label.cloud.color = color;
+    label.data.color = color;
     onChange(labelIndex, label);
   }
 
@@ -180,10 +177,10 @@ export const Label = props => {
         <Icon icon="tag" /> {caption}
       </div>
       <div>
-        <OpacityEditor value={label.cloud.alpha} onChange={changeLabelAlpha} />
+        <OpacityEditor value={label.data.alpha} onChange={changeLabelAlpha} />
         <ColorPicker
           bsSize="xs"
-          value={label.cloud.color}
+          value={label.data.color}
           colors={labelColors}
           onChange={changeLabelColor}
         />

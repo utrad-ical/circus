@@ -5,29 +5,29 @@ import ShrinkSelect from 'rb/ShrinkSelect';
 const ToolBar = props => {
   const {
     active,
-    changeTool,
     showReferenceLine,
     toggleReferenceLine,
     brushEnabled,
     lineWidth,
     setLineWidth,
     windowPresets = [],
-    selectWindowPreset
+    onChangeTool,
+    onSelectWindowPreset
   } = props;
 
   const widthOptions = [1, 3, 5, 7];
 
   return (
     <div className="case-detail-toolbar">
-      <ToolButton name="pager" changeTool={changeTool} active={active} />
-      <ToolButton name="zoom" changeTool={changeTool} active={active} />
-      <ToolButton name="hand" changeTool={changeTool} active={active} />
-      <ToolButton name="window" changeTool={changeTool} active={active}>
+      <ToolButton name="pager" changeTool={onChangeTool} active={active} />
+      <ToolButton name="zoom" changeTool={onChangeTool} active={active} />
+      <ToolButton name="hand" changeTool={onChangeTool} active={active} />
+      <ToolButton name="window" changeTool={onChangeTool} active={active}>
         {windowPresets.map((p, i) => (
           <MenuItem
             key={i + 1}
             eventKey={i + 1}
-            onClick={() => selectWindowPreset(p)}
+            onClick={() => onSelectWindowPreset(+p)}
           >
             <b>{p.label}</b> {`(L: ${p.level} / W: ${p.width})`}
           </MenuItem>
@@ -35,13 +35,13 @@ const ToolBar = props => {
       </ToolButton>
       <ToolButton
         name="brush"
-        changeTool={changeTool}
+        changeTool={onChangeTool}
         active={active}
         disabled={!brushEnabled}
       />
       <ToolButton
         name="eraser"
-        changeTool={changeTool}
+        changeTool={onChangeTool}
         active={active}
         disabled={!brushEnabled}
       />
@@ -52,7 +52,7 @@ const ToolBar = props => {
       />
       <ToolButton
         name="bucket"
-        changeTool={changeTool}
+        changeTool={onChangeTool}
         active={active}
         disabled={!brushEnabled}
       />

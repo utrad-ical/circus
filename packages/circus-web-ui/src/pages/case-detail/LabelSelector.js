@@ -33,20 +33,22 @@ const labelColors = [
 
 const LabelSelector = props => {
   const {
-    revision,
+    editingData,
     onChange,
     onChangeActiveLabel,
     activeLabel,
     activeSeries
   } = props;
+  const { revision } = editingData;
 
-  const changeSeries = (index, newSeries) => {
-    const newRev = {
+  const handleChangeSeries = (index, newSeries) => {
+    const newRevision = {
       ...revision,
-      series: [...revision.series]
+      series: revision.series.map(
+        (series, seriesIndex) => (index === seriesIndex ? newSeries : series)
+      )
     };
-    newRev.series[index] = newSeries;
-    onChange({ revision: newRev });
+    onChange({ ...editingData, revision: newRevision });
   };
 
   return (
@@ -56,7 +58,7 @@ const LabelSelector = props => {
           series={series}
           index={seriesIndex}
           key={series.seriesUid}
-          onChange={changeSeries}
+          onChange={handleChangeSeries}
           onChangeActiveLabel={onChangeActiveLabel}
           activeSeries={activeSeries}
           activeLabel={activeLabel}
@@ -78,7 +80,7 @@ const Series = props => {
     onChangeActiveLabel
   } = props;
 
-  function changeLabel(labelIndex, label) {
+  function handleChangeLabel(labelIndex, label) {
     const newSeries = {
       ...series,
       labels: [...series.labels]
@@ -129,7 +131,7 @@ const Series = props => {
             activeLabel={activeLabel}
             index={labelIndex}
             key={labelIndex}
-            onChange={changeLabel}
+            onChange={handleChangeLabel}
             onClick={() => onChangeActiveLabel(seriesIndex, labelIndex)}
             onRemoveClick={() => removeLabel(labelIndex)}
           />

@@ -3,8 +3,8 @@ import { api } from '../../utils/api';
 import ViewerCluster from './ViwewerCluster';
 import SideContainer from './SideContainer';
 import JsonSchemaEditor from 'rb/JsonSchemaEditor';
-import FullSpanContainer from 'components/FullSpanContainer';
 import LoadingIndicator from 'rb/LoadingIndicator';
+import FullSpanContainer from 'components/FullSpanContainer';
 import {
   Button,
   DropdownButton,
@@ -12,6 +12,7 @@ import {
   MenuItem
 } from 'components/react-bootstrap';
 import Icon from 'components/Icon';
+import IconButton from 'components/IconButton';
 import LabelSelector from './LabelSelector';
 import { store } from 'store';
 import * as rs from 'circus-rs';
@@ -30,6 +31,7 @@ import { connect } from 'react-redux';
 import { toolFactory } from 'circus-rs/tool/tool-initializer';
 import ToolBar from './ToolBar';
 import update from 'immutability-helper';
+import { createHistoryStore } from './revisionHistory';
 
 class CaseDetailView extends React.Component {
   constructor(props) {
@@ -41,6 +43,7 @@ class CaseDetailView extends React.Component {
       editingRevisionIndex: -1,
       editingData: null
     };
+    this.historyStore = createHistoryStore();
   }
 
   selectRevision = async index => {
@@ -62,12 +65,7 @@ class CaseDetailView extends React.Component {
               handleErrors: true,
               responseType: 'arraybuffer'
             });
-            const volume = new rs.RawData(
-              label.data.size,
-              rs.PixelFormat.Binary
-            );
-            volume.assign(buffer);
-            label.data.voxelRawData = volume;
+            label.data.volumeArrayBuffer = buffer;
           } catch (err) {
             await alert('Could not load label volume data: \n' + err.message);
           }
@@ -80,7 +78,7 @@ class CaseDetailView extends React.Component {
       activeSeriesIndex: 0,
       activeLabelIndex: (revision.series[0].labels || []).length > 0 ? 0 : -1
     };
-
+    this.historyStore.registerNew(editingData);
     this.setState({ editingData, busy: false });
   };
 
@@ -103,30 +101,32 @@ class CaseDetailView extends React.Component {
     data.description = desc;
 
     const voxelShrinkToMinimum = labelData => {
+      const volume = new rs.RawData(labelData.size, rs.PixelFormat.Binary);
+      volume.assign(labelData.volumeArrayBuffer);
       const cloud = new rs.VoxelCloud(); // temporary
       cloud.origin = labelData.origin;
-      cloud.volume = labelData.voxelRawData;
+      cloud.volume = volume;
       cloud.shrinkToMinimum();
-      return { origin: cloud.origin, voxelRawData: cloud.volume };
+      return { origin: cloud.origin, rawData: cloud.volume };
     };
 
     // save all label volume data
     for (const series of data.series) {
       for (const label of series.labels) {
         try {
-          const { origin, voxelRawData } = voxelShrinkToMinimum(label.data);
-          const bb = rs.scanBoundingBox(voxelRawData);
+          const { origin, rawData } = voxelShrinkToMinimum(label.data);
+          const bb = rs.scanBoundingBox(rawData);
           let voxels = null;
           if (bb !== null) {
             // save painted voxels
-            voxels = sha1(voxelRawData.data);
+            voxels = sha1(rawData.data);
             if (voxels === label.data.voxels) {
               // console.log('Skipping unchanged voxel data.');
             } else {
               await api('blob/' + voxels, {
                 method: 'put',
                 handleErrors: true,
-                data: voxelRawData.data,
+                data: rawData.data,
                 headers: { 'Content-Type': 'application/octet-stream' }
               });
             }
@@ -135,7 +135,7 @@ class CaseDetailView extends React.Component {
               alpha: label.data.alpha,
               voxels,
               origin,
-              size: voxelRawData.getDimension()
+              size: rawData.getDimension()
             };
           } else {
             label.data = {
@@ -154,7 +154,6 @@ class CaseDetailView extends React.Component {
     // prepare revision data
     data.status = 'approved';
     const caseId = this.state.caseData.caseId;
-    console.log('sending', data);
     try {
       await api(`cases/${caseId}/revision`, {
         method: 'post',
@@ -190,8 +189,22 @@ class CaseDetailView extends React.Component {
     window.URL.revokeObjectURL(url);
   };
 
-  handleDataChange = newData => {
+  handleDataChange = (newData, pushToHistory = false) => {
+    if (pushToHistory) {
+      this.historyStore.push(newData);
+    }
     this.setState({ editingData: newData });
+  };
+
+  handleUndoClick = () => {
+    this.historyStore.undo();
+    console.log('undo', this.historyStore.current().revision.series[0].labels);
+    this.setState({ editingData: this.historyStore.current() });
+  };
+
+  handleRedoClick = () => {
+    this.historyStore.redo();
+    this.setState({ editingData: this.historyStore.current() });
   };
 
   async componentDidMount() {
@@ -228,6 +241,9 @@ class CaseDetailView extends React.Component {
           </div>
         </Collapser>
         <MenuBar
+          historyStore={this.historyStore}
+          onUndoClick={this.handleUndoClick}
+          onRedoClick={this.handleRedoClick}
           onSaveClick={this.saveRevision}
           onRevertClick={this.revertRevision}
           onExportMhdClick={this.exportMhd}
@@ -254,6 +270,9 @@ export default CaseDetail;
 
 const MenuBar = props => {
   const {
+    historyStore,
+    onUndoClick,
+    onRedoClick,
     onRevertClick,
     onSaveClick,
     onExportMhdClick,
@@ -272,6 +291,19 @@ const MenuBar = props => {
         />
       </div>
       <div className="right">
+        <IconButton
+          bsStyle="default"
+          icon="step-backward"
+          disabled={!historyStore.canUndo()}
+          onClick={onUndoClick}
+        />
+        <IconButton
+          bsStyle="default"
+          icon="step-forward"
+          disabled={!historyStore.canRedo()}
+          onClick={onRedoClick}
+        />
+        &ensp;
         <Button bsStyle="success" onClick={onSaveClick}>
           <Glyphicon glyph="save" />
           Save
@@ -330,7 +362,7 @@ export class Editor extends React.Component {
       prevData.revision.series[prevData.activeSeriesIndex].seriesUid
     ) {
       this.changeActiveSeries();
-    } else if (editingData.activeLabelIndex !== prevData.activeLabelIndex) {
+    } else if (editingData !== prevData) {
       this.updateComposition();
     }
   }
@@ -346,13 +378,20 @@ export class Editor extends React.Component {
     activeSeries.labels.forEach(label => {
       switch (label.type) {
         case 'voxel': {
+          const isActive = activeLabel && label === activeLabel;
+          const volume = new rs.RawData(label.data.size, rs.PixelFormat.Binary);
+          volume.assign(
+            isActive
+              ? label.data.volumeArrayBuffer.slice(0)
+              : label.data.volumeArrayBuffer
+          );
           const cloud = new rs.VoxelCloud();
-          cloud.volume = label.data.voxelRawData;
           cloud.origin = label.data.origin;
+          cloud.volume = volume;
           cloud.color = label.data.color || '#ff0000';
           cloud.alpha =
             'alpha' in label.data ? parseFloat(label.data.alpha) : 1;
-          cloud.active = activeLabel && label === activeLabel;
+          cloud.active = isActive;
           composition.addAnnotation(cloud);
           break;
         }
@@ -390,52 +429,68 @@ export class Editor extends React.Component {
     const { editingData, onChange } = this.props;
     const { revision, activeSeriesIndex, activeLabelIndex } = editingData;
     if (!(annotation instanceof rs.VoxelCloud)) return;
-    onChange({
-      ...editingData,
-      revision: update(revision, {
-        series: {
-          [activeSeriesIndex]: {
-            labels: {
-              [activeLabelIndex]: {
-                data: {
-                  origin: { $set: annotation.origin }
+    onChange(
+      {
+        ...editingData,
+        revision: update(revision, {
+          series: {
+            [activeSeriesIndex]: {
+              labels: {
+                [activeLabelIndex]: {
+                  data: {
+                    $merge: {
+                      origin: annotation.origin,
+                      size: annotation.volume.getDimension(),
+                      volumeArrayBuffer: annotation.volume.data
+                    }
+                  }
                 }
               }
             }
           }
-        }
-      })
-    });
+        })
+      },
+      true
+    );
   };
 
   changeActiveLabel = (seriesIndex, labelIndex) => {
     const { editingData, onChange } = this.props;
-    onChange({
-      ...editingData,
-      activeSeriesIndex: seriesIndex,
-      activeLabelIndex: labelIndex
-    });
+    onChange(
+      {
+        ...editingData,
+        activeSeriesIndex: seriesIndex,
+        activeLabelIndex: labelIndex
+      },
+      false
+    );
   };
 
   labelAttributesChange = value => {
     const { editingData, onChange } = this.props;
     const { revision, activeSeriesIndex, activeLabelIndex } = editingData;
-    onChange({
-      ...editingData,
-      revision: update(revision, {
-        series: {
-          [activeSeriesIndex]: {
-            labels: { [activeLabelIndex]: { attributes: { $set: value } } }
+    onChange(
+      {
+        ...editingData,
+        revision: update(revision, {
+          series: {
+            [activeSeriesIndex]: {
+              labels: { [activeLabelIndex]: { attributes: { $set: value } } }
+            }
           }
-        }
-      })
-    });
+        })
+      },
+      true
+    );
   };
 
   caseAttributesChange = value => {
     const { editingData, onChange } = this.props;
     const { revision } = editingData;
-    onChange({ ...editingData, revision: { ...revision, attributes: value } });
+    onChange(
+      { ...editingData, revision: { ...revision, attributes: value } },
+      true
+    );
   };
 
   getTool = toolName => {
@@ -474,14 +529,14 @@ export class Editor extends React.Component {
     this.viewers.delete(viewer);
   };
 
-  handleSeriesChange = newData => {
+  handleSeriesChange = (newData, pushToHistory = false) => {
     const { onChange } = this.props;
-    onChange(newData);
+    onChange(newData, pushToHistory);
     this.updateComposition();
   };
 
   render() {
-    const { projectData, editingData, onChange, busy } = this.props;
+    const { projectData, editingData, busy } = this.props;
     const { revision, activeSeriesIndex, activeLabelIndex } = editingData;
     const {
       toolName,

@@ -160,12 +160,18 @@ export const Label = props => {
     onChange(labelIndex, label, true);
   };
 
+  const handleClick = ev => {
+    // Ignore click if the click happens with a dropdown
+    if (ev.target.closest('.dropdown')) return;
+    onClick();
+  };
+
   return (
     <li
       className={classNames('label-list-item', {
         active: label === activeLabel
       })}
-      onClick={onClick}
+      onClick={handleClick}
     >
       <div>
         <Icon icon="tag" /> {caption}

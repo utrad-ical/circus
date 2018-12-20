@@ -48,7 +48,7 @@ const ToolBar = props => {
       <ShrinkSelect
         options={widthOptions}
         value={'' + lineWidth}
-        onChange={setLineWidth}
+        onChange={val => setLineWidth(parseInt(val, 10))}
       />
       <ToolButton
         name="bucket"

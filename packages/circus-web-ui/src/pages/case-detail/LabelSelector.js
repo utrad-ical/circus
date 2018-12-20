@@ -73,7 +73,7 @@ const Series = props => {
     onChangeActiveLabel
   } = props;
 
-  const handleChangeLabel = (labelIndex, label, pushToHistory = false) => {
+  const handleLabelChange = (labelIndex, label, pushToHistory = false) => {
     const newSeries = update(series, {
       labels: { [labelIndex]: { $set: label } }
     });
@@ -119,7 +119,7 @@ const Series = props => {
             activeLabel={activeLabel}
             index={labelIndex}
             key={labelIndex}
-            onChange={handleChangeLabel}
+            onChange={handleLabelChange}
             onClick={() => onChangeActiveLabel(seriesIndex, labelIndex)}
             onRemoveClick={() => removeLabel(labelIndex)}
           />
@@ -145,15 +145,20 @@ export const Label = props => {
   } = props;
   const caption = label.title ? label.title : `Label #${props.index}`;
 
-  function changeLabelAlpha(alpha) {
-    label.data.alpha = alpha;
-    onChange(labelIndex, label);
-  }
+  const changeLabelAlpha = alpha => {
+    const newLabel = update(label, { data: { alpha: { $set: alpha } } });
+    onChange(labelIndex, newLabel);
+  };
 
-  function changeLabelColor(color) {
-    label.data.color = color;
-    onChange(labelIndex, label);
-  }
+  const handleChangeLabelColor = color => {
+    const newLabel = update(label, { data: { color: { $set: color } } });
+    onChange(labelIndex, newLabel);
+  };
+
+  const commitLabelChange = open => {
+    if (open) return;
+    onChange(labelIndex, label, true);
+  };
 
   return (
     <li
@@ -171,7 +176,8 @@ export const Label = props => {
           bsSize="xs"
           value={label.data.color}
           colors={labelColors}
-          onChange={changeLabelColor}
+          onChange={handleChangeLabelColor}
+          onToggle={commitLabelChange}
         />
         <IconButton icon="remove" bsSize="xs" onClick={onRemoveClick} />
       </div>

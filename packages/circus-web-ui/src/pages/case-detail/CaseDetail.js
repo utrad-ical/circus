@@ -198,7 +198,6 @@ class CaseDetailView extends React.Component {
 
   handleUndoClick = () => {
     this.historyStore.undo();
-    console.log('undo', this.historyStore.current().revision.series[0].labels);
     this.setState({ editingData: this.historyStore.current() });
   };
 

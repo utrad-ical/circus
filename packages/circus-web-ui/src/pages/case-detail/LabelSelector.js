@@ -1,12 +1,12 @@
 import React from 'react';
 import ColorPicker from 'rb/ColorPicker';
 import { Popover, Button, OverlayTrigger } from 'components/react-bootstrap';
-import { RawData, PixelFormat } from 'circus-rs';
 import classNames from 'classnames';
 import { confirm } from 'rb/modal';
 import IconButton from 'components/IconButton';
 import Icon from 'components/Icon';
 import Slider from 'rb/Slider';
+import update from 'immutability-helper';
 
 const labelColors = [
   '#ff0000',
@@ -37,14 +37,11 @@ const LabelSelector = props => {
   } = props;
   const { revision } = editingData;
 
-  const handleChangeSeries = (index, newSeries) => {
-    const newRevision = {
-      ...revision,
-      series: revision.series.map(
-        (series, seriesIndex) => (index === seriesIndex ? newSeries : series)
-      )
-    };
-    onChange({ ...editingData, revision: newRevision });
+  const handleChangeSeries = (index, newSeries, pushToHistory = false) => {
+    const newEditingData = update(editingData, {
+      revision: { series: { [index]: { $set: newSeries } } }
+    });
+    onChange(newEditingData, pushToHistory);
   };
 
   return (
@@ -76,16 +73,14 @@ const Series = props => {
     onChangeActiveLabel
   } = props;
 
-  function handleChangeLabel(labelIndex, label) {
-    const newSeries = {
-      ...series,
-      labels: [...series.labels]
-    };
-    newSeries.labels[labelIndex] = label;
-    onChange(seriesIndex, newSeries);
-  }
+  const handleChangeLabel = (labelIndex, label, pushToHistory = false) => {
+    const newSeries = update(series, {
+      labels: { [labelIndex]: { $set: label } }
+    });
+    onChange(seriesIndex, newSeries, pushToHistory);
+  };
 
-  function addLabel() {
+  const addLabel = () => {
     const newLabel = {
       type: 'voxel',
       data: {
@@ -94,24 +89,20 @@ const Series = props => {
         color: '#ff0000',
         alpha: 1,
         voxels: null,
-        voxelRawData: new RawData([16, 16, 16], PixelFormat.Binary)
+        volumeArrayBuffer: new ArrayBuffer(16 * 16 * 16 / 8)
       },
       attributes: {}
     };
-    const newSeries = {
-      ...series,
-      labels: [...series.labels, newLabel]
-    };
-    onChange(seriesIndex, newSeries);
-  }
+    const newSeries = update(series, { labels: { $push: [newLabel] } });
+    onChange(seriesIndex, newSeries, true);
+  };
 
   async function removeLabel(labelIndex) {
     if (!await confirm('Delete this label?')) return;
-    const newSeries = {
-      ...series,
-      labels: series.labels.filter((l, i) => labelIndex !== i)
-    };
-    onChange(seriesIndex, newSeries);
+    const newSeries = update(series, {
+      labels: { $splice: [[labelIndex, 1]] } // remove one item from labels
+    });
+    onChange(seriesIndex, newSeries, true);
   }
 
   return (
@@ -163,8 +154,6 @@ export const Label = props => {
     label.data.color = color;
     onChange(labelIndex, label);
   }
-
-  // console.log(`Cloud #${labelIndex}`, label.cloud);
 
   return (
     <li

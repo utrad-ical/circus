@@ -40,19 +40,28 @@ export default class ImageViewer extends React.Component {
         onCreateViewer,
         orientation = 'axial',
         composition,
+        onImageReady,
         initialTool = toolFactory('pager')
       } = this.props;
+
       const setOrientation = () => {
         const state = viewer.getState();
         const src = this.props.composition.imageSource;
         const mmDim = src.mmDim();
-        state.section = createOrthogonalMprSection(
-          viewer.getResolution(),
-          mmDim,
-          orientation
-        );
-        viewer.setState(state);
-        viewer.removeListener('draw', setOrientation);
+        let newState = {
+          ...state,
+          section: createOrthogonalMprSection(
+            viewer.getResolution(),
+            mmDim,
+            orientation
+          )
+        };
+        if (typeof onImageReady === 'function') {
+          const modifiedState = onImageReady(newState, viewer, orientation);
+          if (modifiedState) newState = modifiedState;
+        }
+        viewer.setState(newState);
+        viewer.removeListener('imageReady', setOrientation);
       };
 
       const container = this.container;

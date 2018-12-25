@@ -1,5 +1,5 @@
 import React from 'react';
-import ImageViewer from '../../components/ImageViewer';
+import ImageViewer from 'components/ImageViewer';
 import styled from 'styled-components';
 import { toolFactory } from 'circus-rs/tool/tool-initializer';
 
@@ -35,7 +35,8 @@ const ViewerCluster = props => {
     stateChanger,
     layout,
     onCreateViewer,
-    onDestroyViewer
+    onDestroyViewer,
+    onImageReady
   } = props;
 
   function makeViewer(orientation, initialTool, fixTool) {
@@ -49,6 +50,7 @@ const ViewerCluster = props => {
         stateChanger={stateChanger}
         onCreateViewer={onCreateViewer}
         onDestroyViewer={onDestroyViewer}
+        onImageReady={onImageReady}
       />
     );
   }

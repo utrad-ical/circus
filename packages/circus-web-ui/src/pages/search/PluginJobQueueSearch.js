@@ -1,6 +1,6 @@
 import React from 'react';
 import Icon from 'components/Icon';
-import { startNewSearch } from '../../actions';
+import { startNewSearch } from 'actions';
 import PluginJobQueueSearchResults from './PluginJobQueueSearchResults';
 import { connect } from 'react-redux';
 

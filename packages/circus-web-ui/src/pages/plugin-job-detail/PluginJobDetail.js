@@ -1,7 +1,7 @@
 import React from 'react';
 import PatientInfoBox from 'components/PatientInfoBox';
 import FullSpanContainer from 'components/FullSpanContainer';
-import { api } from '../../utils/api';
+import { api } from 'utils/api';
 import LoadingIndicator from 'rb/LoadingIndicator';
 import LesionCandidates from './LesionCandidates';
 import PluginDisplay from 'components/PluginDisplay';

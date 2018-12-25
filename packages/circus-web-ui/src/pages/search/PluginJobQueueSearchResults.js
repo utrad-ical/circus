@@ -1,7 +1,7 @@
 import React from 'react';
 import SearchResultsView, {
   makeSortOptions
-} from '../../components/SearchResultsView';
+} from 'components/SearchResultsView';
 
 const sortOptions = makeSortOptions({
   jobId: 'job id'

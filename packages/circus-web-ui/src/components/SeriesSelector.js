@@ -2,7 +2,7 @@ import React, { Fragment } from 'react';
 import DataGrid from 'components/DataGrid';
 import SearchResultsView from 'components/SearchResultsView';
 import { Panel } from 'components/react-bootstrap';
-import IconButton from '../components/IconButton';
+import IconButton from 'components/IconButton';
 import { startNewSearch } from 'actions';
 import { connect } from 'react-redux';
 import { modal } from 'rb/modal';

@@ -1,7 +1,7 @@
 import React from 'react';
 import IconDisplay from './IconDisplay';
 import { connect } from 'react-redux';
-import { loadPluginInfo } from '../actions';
+import { loadPluginInfo } from 'actions';
 
 const PluginDisplayView = props => {
   const { plugin, pluginId, ...rest } = props;

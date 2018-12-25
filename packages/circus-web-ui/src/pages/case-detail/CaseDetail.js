@@ -1,5 +1,5 @@
 import React from 'react';
-import { api } from '../../utils/api';
+import { api } from 'utils/api';
 import ViewerCluster from './ViwewerCluster';
 import SideContainer from './SideContainer';
 import JsonSchemaEditor from 'rb/JsonSchemaEditor';

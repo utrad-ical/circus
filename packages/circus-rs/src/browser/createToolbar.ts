@@ -31,12 +31,12 @@ class ToolbarComponent {
     this.rootElement = this.mount(rootElement);
   }
 
-  public setActiveToolName(toolName: string) {
+  public setActiveToolName(toolName: string): void {
     this.activeToolName = toolName;
     this.update();
   }
 
-  private mount(wrapperElement: HTMLElement) {
+  private mount(wrapperElement: HTMLElement): HTMLElement {
     const ulElement = document.createElement('ul');
     ulElement.className = 'circus-rs-toolbar';
 
@@ -64,7 +64,7 @@ class ToolbarComponent {
     return ulElement;
   }
 
-  private update() {
+  private update(): void {
     const toolName = this.activeToolName;
     Array.prototype.forEach.call(
       this.rootElement.querySelectorAll('.circus-rs-toolbutton'),

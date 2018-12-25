@@ -12,11 +12,11 @@ import { Tool } from '../Tool';
  * rotates the MPR section accordingly.
  */
 export default class CelestialRotateTool extends DraggableTool implements Tool {
-  public activate(viewer: Viewer) {
+  public activate(viewer: Viewer): void {
     viewer.backgroundEventTarget = this;
   }
 
-  public deactivate(viewer: Viewer) {
+  public deactivate(viewer: Viewer): void {
     viewer.backgroundEventTarget = null;
   }
 

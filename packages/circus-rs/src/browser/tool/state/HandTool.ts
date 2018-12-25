@@ -14,11 +14,11 @@ import { Tool } from '../Tool';
  * MprImageSource in parallel with the screen.
  */
 export default class HandTool extends DraggableTool implements Tool {
-  public activate(viewer: Viewer) {
+  public activate(viewer: Viewer): void {
     viewer.backgroundEventTarget = this;
   }
 
-  public deactivate(viewer: Viewer) {
+  public deactivate(viewer: Viewer): void {
     viewer.backgroundEventTarget = null;
   }
 

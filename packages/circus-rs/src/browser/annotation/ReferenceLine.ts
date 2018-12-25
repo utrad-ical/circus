@@ -6,7 +6,7 @@ import {
   convertScreenCoordinateToVolumeCoordinate
 } from '../section-util';
 import { intersectionOfTwoSections, Section } from '../../common/geometry';
-import { Vector2, ShapeUtils, Triangle, Vector3 } from 'three';
+import { Vector2, Vector3 } from 'three';
 import ViewerEventTarget from '../interface/ViewerEventTarget';
 import ViewerEvent from '../viewer/ViewerEvent';
 
@@ -34,7 +34,6 @@ export default class ReferenceLine implements Annotation, ViewerEventTarget {
   public color: string;
 
   private handleType: HandleType | undefined = undefined;
-  private dragStartPoint: Vector2 | undefined = undefined;
   private dragStartPoint3: Vector3 | undefined = undefined;
 
   public constructor(viewer: Viewer, { color = '#ff00ff' }: Options = {}) {
@@ -152,8 +151,6 @@ export default class ReferenceLine implements Annotation, ViewerEventTarget {
       const state = viewer.getState() as MprViewState;
       const resolution: [number, number] = viewer.getResolution();
 
-      this.dragStartPoint = point;
-
       this.dragStartPoint3 = convertScreenCoordinateToVolumeCoordinate(
         state.section,
         new Vector2().fromArray(resolution),
@@ -206,7 +203,6 @@ export default class ReferenceLine implements Annotation, ViewerEventTarget {
         });
       }
 
-      this.dragStartPoint = point;
       this.dragStartPoint3 = draggedPoint3;
     }
   }
@@ -215,8 +211,6 @@ export default class ReferenceLine implements Annotation, ViewerEventTarget {
     const viewer = ev.viewer;
     if (viewer.getHoveringAnnotation() === this) {
       ev.stopPropagation();
-
-      this.dragStartPoint = undefined;
       this.dragStartPoint3 = undefined;
     }
   }

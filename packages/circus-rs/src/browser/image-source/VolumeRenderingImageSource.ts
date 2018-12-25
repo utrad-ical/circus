@@ -2,11 +2,7 @@ import DicomVolume from '../../common/DicomVolume';
 import { DicomVolumeMetadata } from './volume-loader/DicomVolumeLoader';
 import ImageSource from './ImageSource';
 import Viewer from '../viewer/Viewer';
-import ViewState, {
-  VrViewState,
-  TransferFunctionEntry,
-  TransferFunction
-} from '../ViewState';
+import ViewState, { VrViewState, TransferFunction } from '../ViewState';
 import DicomVolumeLoader from './volume-loader/DicomVolumeLoader';
 
 // WebGL shader source (GLSL)

@@ -14,21 +14,21 @@ import Viewer from '../../viewer/Viewer';
  */
 export default class PlaneFigureTool extends ToolBaseClass implements Tool {
   private focusedFigure?: PlaneFigure;
-  protected usePointerLockAPI = false;
+  protected usePointerLockAPI: boolean = false;
   protected figureType: FigureType = 'circle';
 
   private totalMovementX: number | undefined = undefined;
   private totalMovementY: number | undefined = undefined;
 
-  public activate(viewer: Viewer) {
+  public activate(viewer: Viewer): void {
     viewer.primaryEventTarget = this;
   }
 
-  public deactivate(viewer: Viewer) {
+  public deactivate(viewer: Viewer): void {
     viewer.primaryEventTarget = undefined;
   }
 
-  public mouseMoveHandler(ev: ViewerEvent) {
+  public mouseMoveHandler(ev: ViewerEvent): void {
     ev.stopPropagation();
   }
   public dragStartHandler(ev: ViewerEvent): void {

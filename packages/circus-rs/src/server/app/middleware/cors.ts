@@ -19,7 +19,7 @@ export default function cors(options: CORSOptions = {}): Koa.Middleware {
     headers = ['Authorization'],
     maxAge = 86400
   } = options;
-  return async function(ctx, next) {
+  return async (ctx, next) => {
     ctx.response.set('Access-Control-Allow-Origin', origin);
     ctx.response.set('Access-Control-Allow-Methods', methods.join(', '));
     ctx.response.set('Access-Control-Allow-Credentials', 'true');

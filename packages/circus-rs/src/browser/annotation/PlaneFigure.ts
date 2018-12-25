@@ -122,7 +122,11 @@ export default class PlaneFigure implements Annotation, ViewerEventTarget {
     }
   }
 
-  private drawFrame(ctx: CanvasRenderingContext2D, min: Vector2, max: Vector2) {
+  private drawFrame(
+    ctx: CanvasRenderingContext2D,
+    min: Vector2,
+    max: Vector2
+  ): void {
     ctx.beginPath();
     ctx.lineWidth = 1;
     ctx.strokeStyle = '#ff0000';
@@ -166,10 +170,7 @@ export default class PlaneFigure implements Annotation, ViewerEventTarget {
     ctx.stroke();
   }
 
-  /**
-   * ViewerEventHandler
-   */
-  public mouseMoveHandler(ev: ViewerEvent) {
+  public mouseMoveHandler(ev: ViewerEvent): void {
     if (!this.editable) return;
 
     const viewer = ev.viewer;
@@ -177,7 +178,6 @@ export default class PlaneFigure implements Annotation, ViewerEventTarget {
     const boundingBox = this.getBoundingBox(viewer);
     if (!boundingBox) return;
 
-    const [min, max] = boundingBox;
     const point: Vector2 = new Vector2(ev.viewerX!, ev.viewerY!);
 
     const handleType = this.getHandleType(boundingBox, point);
@@ -208,7 +208,7 @@ export default class PlaneFigure implements Annotation, ViewerEventTarget {
     }
   }
 
-  public dragStartHandler(ev: ViewerEvent) {
+  public dragStartHandler(ev: ViewerEvent): void {
     if (!this.editable) return;
 
     const viewer = ev.viewer;
@@ -241,7 +241,7 @@ export default class PlaneFigure implements Annotation, ViewerEventTarget {
     }
   }
 
-  public dragHandler(ev: ViewerEvent) {
+  public dragHandler(ev: ViewerEvent): void {
     if (!this.editable) return;
 
     const viewer = ev.viewer;
@@ -304,7 +304,7 @@ export default class PlaneFigure implements Annotation, ViewerEventTarget {
     }
   }
 
-  public dragEndHandler(ev: ViewerEvent) {
+  public dragEndHandler(ev: ViewerEvent): void {
     if (!this.editable) return;
 
     const viewer = ev.viewer;

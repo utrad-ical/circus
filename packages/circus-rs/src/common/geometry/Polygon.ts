@@ -17,10 +17,7 @@ interface TriangulateShapeResult {
  * @param vertices Unsorted Vertices Coordinates Of Simple Polygon
  */
 export function sortVerticesOfSimplePolygon(vertices: Vector2[]): Vector2[] {
-  const sortedVertices: Vector2[] = vertices.sort(function(
-    a: Vector2,
-    b: Vector2
-  ) {
+  const sortedVertices: Vector2[] = vertices.sort((a: Vector2, b: Vector2) => {
     if (a.y > b.y) {
       return 1;
     } else if (a.y < b.y) {
@@ -51,17 +48,16 @@ export function sortVerticesOfSimplePolygon(vertices: Vector2[]): Vector2[] {
     });
   }
 
-  const sortedPolygonVertices: PolygonVertex[] = polygonVertices.sort(function(
-    a: PolygonVertex,
-    b: PolygonVertex
-  ) {
-    if (a.angle > b.angle) {
-      return 1;
-    } else if (a.angle < b.angle) {
-      return -1;
+  const sortedPolygonVertices: PolygonVertex[] = polygonVertices.sort(
+    (a: PolygonVertex, b: PolygonVertex) => {
+      if (a.angle > b.angle) {
+        return 1;
+      } else if (a.angle < b.angle) {
+        return -1;
+      }
+      return 0;
     }
-    return 0;
-  });
+  );
 
   return sortedPolygonVertices.map(v => v.p2);
 }
@@ -118,7 +114,7 @@ function _polygonSides(vertices: Vector2[]): DirectedSegment[] {
 function _intersectsPolygonSide(
   segmentsA: DirectedSegment[],
   segmentsB: DirectedSegment[]
-) {
+): boolean {
   return segmentsA.some(sideA =>
     segmentsB.some(sideB => intersectsDirectedSegment(sideA, sideB))
   );

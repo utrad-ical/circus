@@ -1,7 +1,3 @@
-import ViewerEvent from '../viewer/ViewerEvent';
-import { MprImageSource, orientationAwareTranslation, Viewer } from '..';
-import ViewerEventTarget from '../interface/ViewerEventTarget';
-
 /**
  * Utility method which works in the same way as Math.sign().
  * Private polyfill.

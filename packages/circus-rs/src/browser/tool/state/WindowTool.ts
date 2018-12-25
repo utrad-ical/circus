@@ -7,11 +7,11 @@ import { Tool } from '../Tool';
  * WindowTool handles mouse drag and modifies the window level/width accordingly.
  */
 export default class WindowTool extends DraggableTool implements Tool {
-  public activate(viewer: Viewer) {
+  public activate(viewer: Viewer): void {
     viewer.backgroundEventTarget = this;
   }
 
-  public deactivate(viewer: Viewer) {
+  public deactivate(viewer: Viewer): void {
     viewer.backgroundEventTarget = null;
   }
 

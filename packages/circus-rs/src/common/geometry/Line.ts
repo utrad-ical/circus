@@ -32,9 +32,9 @@ function _intersectsDirectedSegment(
   c: Vector2,
   d: Vector2
 ): boolean {
-  var ta = (c.x - d.x) * (a.y - c.y) + (c.y - d.y) * (c.x - a.x);
-  var tb = (c.x - d.x) * (b.y - c.y) + (c.y - d.y) * (c.x - b.x);
-  var tc = (a.x - b.x) * (c.y - a.y) + (a.y - b.y) * (a.x - c.x);
-  var td = (a.x - b.x) * (d.y - a.y) + (a.y - b.y) * (a.x - d.x);
+  const ta = (c.x - d.x) * (a.y - c.y) + (c.y - d.y) * (c.x - a.x);
+  const tb = (c.x - d.x) * (b.y - c.y) + (c.y - d.y) * (c.x - b.x);
+  const tc = (a.x - b.x) * (c.y - a.y) + (a.y - b.y) * (a.x - c.x);
+  const td = (a.x - b.x) * (d.y - a.y) + (a.y - b.y) * (a.x - d.x);
   return tc * td <= 0 && ta * tb <= 0;
 }

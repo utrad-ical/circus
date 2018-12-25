@@ -67,9 +67,9 @@ export function intersectionOfBoxAndPlane(
       });
   }
   const intersections: Vector3[] = _intersections
-    .filter(function(v1, i1, a1) {
+    .filter((v1, i1, a1) => {
       return (
-        a1.findIndex(function(v2) {
+        a1.findIndex(v2 => {
           return v1.key === v2.key;
         }) === i1
       );

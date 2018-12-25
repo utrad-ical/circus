@@ -22,11 +22,11 @@ export default class ZoomTool extends DraggableTool implements Tool {
    */
   private currentStep: number | undefined;
 
-  public activate(viewer: Viewer) {
+  public activate(viewer: Viewer): void {
     viewer.backgroundEventTarget = this;
   }
 
-  public deactivate(viewer: Viewer) {
+  public deactivate(viewer: Viewer): void {
     viewer.backgroundEventTarget = null;
   }
 

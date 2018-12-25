@@ -214,7 +214,7 @@ export function asyncLruCachify<D>(
 ): Decorate<LoaderFunc<D>> {
   return function(reader: LoaderFunc<D>): LoaderFunc<D> {
     const cache = new AsyncLruCache<D>(reader, options);
-    return function(key: string) {
+    return (key: string) => {
       return cache.get(key);
     };
   };

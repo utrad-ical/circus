@@ -120,7 +120,7 @@ function zIndexToImageNo(
   if (partialVolumeDescriptor === undefined) {
     return z => z + 1;
   } else {
-    const { start, end, delta } = partialVolumeDescriptor;
+    const { start, delta } = partialVolumeDescriptor;
     return z => start + z * delta + 1;
   }
 }

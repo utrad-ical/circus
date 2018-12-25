@@ -21,7 +21,7 @@ export default class AuthorizationCache {
     }, 3600 * 1000);
   }
 
-  public dispose() {
+  public dispose(): void {
     clearInterval(this.disposalTimer);
   }
 

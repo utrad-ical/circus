@@ -1,18 +1,16 @@
-import DynamicMprImageSource from './DynamicMprImageSource';
-import RawVolumeMprImageSource from './RawVolumeMprImageSource';
+import DynamicMprImageSource, {
+  DynamicMprImageSourceOptions
+} from './DynamicMprImageSource';
+import RawVolumeMprImageSource, {
+  RawVolumeMprImageSourceOptions
+} from './RawVolumeMprImageSource';
 import ViewState from '../ViewState';
 import Viewer from '../viewer/Viewer';
-import DicomVolumeLoader from './volume-loader/DicomVolumeLoader';
-import RsHttpClient from '../http-client/RsHttpClient';
 import MprImageSource from './MprImageSource';
-import PartialVolumeDescriptor from '@utrad-ical/circus-lib/lib/PartialVolumeDescriptor';
 
-interface HybridImageSourceOptions {
-  volumeLoader: DicomVolumeLoader;
-  rsHttpClient: RsHttpClient;
-  seriesUid: string;
-  partialVolumeDescriptor?: PartialVolumeDescriptor;
-}
+interface HybridImageSourceOptions
+  extends RawVolumeMprImageSourceOptions,
+    DynamicMprImageSourceOptions {}
 
 /**
  * HybridImageSource combines DynamicMprImageSource and RawVolumeMprImageSource.

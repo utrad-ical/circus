@@ -9,11 +9,16 @@ import MprImageSource from './MprImageSource';
 import { DicomVolumeMetadata } from './volume-loader/DicomVolumeLoader';
 import { Vector3 } from 'three';
 import PartialVolumeDescriptor from '@utrad-ical/circus-lib/lib/PartialVolumeDescriptor';
+import {
+  EstimateWindowType,
+  createRequestParams
+} from './volume-loader/rs-loader-utils';
 
-interface DynamicMprImageSourceOptions {
+export interface DynamicMprImageSourceOptions {
   rsHttpClient: RsHttpClient;
   seriesUid: string;
   partialVolumeDescriptor?: PartialVolumeDescriptor;
+  estimateWindowType: EstimateWindowType;
 }
 
 /**
@@ -26,7 +31,8 @@ export default class DynamicMprImageSource extends MprImageSource {
   constructor({
     rsHttpClient,
     seriesUid,
-    partialVolumeDescriptor
+    partialVolumeDescriptor,
+    estimateWindowType
   }: DynamicMprImageSourceOptions) {
     super();
     this.rsHttpClient = rsHttpClient;
@@ -34,7 +40,7 @@ export default class DynamicMprImageSource extends MprImageSource {
     this.loadSequence = (async () => {
       this.metadata = (await rsHttpClient.request(
         `series/${seriesUid}/metadata`,
-        this.createRequestParams(partialVolumeDescriptor)
+        createRequestParams(partialVolumeDescriptor, estimateWindowType)
       )) as DicomVolumeMetadata;
     })();
   }
@@ -81,19 +87,5 @@ export default class DynamicMprImageSource extends MprImageSource {
       outSize
     );
     return drawToImageData(viewer, buffer);
-  }
-
-  private createRequestParams(
-    partialVolumeDescriptor?: PartialVolumeDescriptor
-  ): any {
-    if (partialVolumeDescriptor) {
-      return {
-        start: partialVolumeDescriptor.start,
-        end: partialVolumeDescriptor.end,
-        delta: partialVolumeDescriptor.delta || 1
-      };
-    } else {
-      return {};
-    }
   }
 }

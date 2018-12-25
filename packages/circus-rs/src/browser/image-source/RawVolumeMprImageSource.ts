@@ -3,14 +3,13 @@ import DicomVolumeLoader from './volume-loader/DicomVolumeLoader';
 import ViewState from '../ViewState';
 import { convertSectionToIndex } from '../section-util';
 import { Section } from '../../common/geometry';
-// import AsyncLruCache from '../../common/AsyncLruCache';
 import setImmediate from '../util/setImmediate';
 import Viewer from '../viewer/Viewer';
 import drawToImageData from './drawToImageData';
 import MprImageSource from './MprImageSource';
 import { Vector3 } from 'three';
 
-interface RawVolumeMprImageSourceOptions {
+export interface RawVolumeMprImageSourceOptions {
   volumeLoader: DicomVolumeLoader;
 }
 
@@ -62,6 +61,5 @@ export default class RawVolumeMprImageSource extends MprImageSource {
     return new Promise(resolve => {
       setImmediate(() => resolve(imageData));
     });
-    // return Promise.resolve(imageData);
   }
 }

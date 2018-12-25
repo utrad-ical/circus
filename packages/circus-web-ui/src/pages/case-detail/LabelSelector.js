@@ -155,9 +155,13 @@ export const Label = props => {
     onChange(labelIndex, newLabel);
   };
 
-  const commitLabelChange = open => {
-    if (open) return;
+  const handleCommit = () => {
     onChange(labelIndex, label, true);
+  };
+
+  const handleToggleLabelColor = open => {
+    if (open) return;
+    handleCommit();
   };
 
   const handleClick = ev => {
@@ -177,13 +181,17 @@ export const Label = props => {
         <Icon icon="tag" /> {caption}
       </div>
       <div>
-        <OpacityEditor value={label.data.alpha} onChange={changeLabelAlpha} />
+        <OpacityEditor
+          value={label.data.alpha}
+          onChange={changeLabelAlpha}
+          onCommit={handleCommit}
+        />
         <ColorPicker
           bsSize="xs"
           value={label.data.color}
           colors={labelColors}
           onChange={handleChangeLabelColor}
-          onToggle={commitLabelChange}
+          onToggle={handleToggleLabelColor}
         />
         <IconButton icon="remove" bsSize="xs" onClick={onRemoveClick} />
       </div>
@@ -192,6 +200,8 @@ export const Label = props => {
 };
 
 const OpacityEditor = props => {
+  const { onCommit } = props;
+
   const opacityEditor = (
     <Popover id="opacity-editor">
       <OpacityPopover {...props} />
@@ -203,6 +213,7 @@ const OpacityEditor = props => {
       rootClose
       overlay={opacityEditor}
       placement="bottom"
+      onExiting={onCommit}
     >
       <Button bsStyle="default" bsSize="xs">
         {props.value * 100}%

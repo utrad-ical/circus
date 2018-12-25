@@ -1,4 +1,4 @@
-import { Box3, ShapeUtils, Triangle, Vector2, Vector3, Box2 } from 'three';
+import { Box3, Vector2, Vector3 } from 'three';
 import {
   fitRectangle,
   intersectionOfBoxAndPlane,
@@ -9,6 +9,10 @@ import {
   Vector3D,
   vectorizeSection
 } from '../common/geometry';
+import {
+  intersectsPolygon,
+  sortVerticesOfSimplePolygon
+} from '../common/geometry/Polygon';
 
 export type OrientationString = 'axial' | 'sagittal' | 'coronal' | 'oblique';
 
@@ -297,25 +301,49 @@ export function sectionOverlapsVolume(
   voxelSize: Vector3,
   voxelCount: Vector3
 ): boolean {
-  // Create the volume box (cuboid)
-  const mmVolume: Box3 = new Box3(
-    convertPointToMm(new Vector3(0, 0, 0), voxelSize),
-    convertPointToMm(voxelCount, voxelSize)
+  // Calculates the intersection of the volume box (cuboid) and the section treated as a plane that extends infinitely.
+  const mmVolumePolygonVertices = _polygonVerticesOfBoxAndSection(
+    mmSection,
+    resolution,
+    voxelSize,
+    voxelCount
   );
 
-  // Calculates the intersection of the volume box (cuboid) and the section treated as a plane that extends infinitely.
-  const intersections = intersectionOfBoxAndPlane(mmVolume, mmSection);
-
   // If there is no intersection point, the section is outside the volume.
-  if (!intersections) return false;
+  if (!mmVolumePolygonVertices) {
+    return false;
+  }
 
+  // Calculates the vertex of the section treated as a finitely area.
+  const mmSectionPolygonVertices = _polygonVerticesOfSection(
+    mmSection,
+    resolution
+  );
+
+  // Calculates the intersection of the volume box (cuboid) and the section treated as a plane that extends finitely.
+  const result = intersectsPolygon(
+    mmSectionPolygonVertices,
+    mmVolumePolygonVertices
+  );
+  return result;
+}
+
+/**
+ * Converts vertices of boundary box from volume coordinates (3D) into screen coordinates (2D).
+ * @param mmSection
+ * @param resolution
+ */
+function _polygonVerticesOfSection(
+  mmSection: Section,
+  resolution: Vector2
+): Vector2[] {
   // Calculates the vertex of the section treated as a finitely area.
   // (v0)+-----+(v1)
   //     |     |
   //     |     |
   // (v3)+-----+(v2)
   const mmSectionVec = vectorizeSection(mmSection);
-  const sectionVertices: [Vector3, Vector3, Vector3, Vector3] = [
+  const vertices = [
     mmSectionVec.origin,
     new Vector3().add(mmSectionVec.origin).add(mmSectionVec.xAxis),
     new Vector3()
@@ -323,46 +351,40 @@ export function sectionOverlapsVolume(
       .add(mmSectionVec.xAxis)
       .add(mmSectionVec.yAxis),
     new Vector3().add(mmSectionVec.origin).add(mmSectionVec.yAxis)
-  ];
-
-  // Create the section box (rectangle)
-  const mmSectionBox2: Box2 = new Box2(
-    convertVolumeCoordinateToScreenCoordinate(
-      mmSection,
-      resolution,
-      sectionVertices[0]
-    ),
-    convertVolumeCoordinateToScreenCoordinate(
-      mmSection,
-      resolution,
-      sectionVertices[2]
-    )
+  ].map(v3 =>
+    convertVolumeCoordinateToScreenCoordinate(mmSection, resolution, v3)
   );
 
-  // Convert intersection coordinates from volume 3D coordinate to screen 2D coordinate in millimeter.
-  const shadowPolygonVerticeCoords: Vector2[] = intersections.map(p3 =>
+  return vertices;
+}
+
+/**
+ * Converts vertices of volume section from volume coordinates (3D) into screen coordinates (2D).
+ * @param mmSection
+ * @param resolution
+ * @param voxelSize
+ * @param voxelCount
+ */
+function _polygonVerticesOfBoxAndSection(
+  mmSection: Section,
+  resolution: Vector2,
+  voxelSize: Vector3,
+  voxelCount: Vector3
+): Vector2[] | null {
+  // Create the volume box (cuboid)
+  const mmVolumeBox: Box3 = new Box3(
+    convertPointToMm(new Vector3(0, 0, 0), voxelSize),
+    convertPointToMm(voxelCount, voxelSize)
+  );
+
+  const intersections = intersectionOfBoxAndPlane(mmVolumeBox, mmSection);
+  if (!intersections) return null;
+
+  // Convert intersection coordinates from volume 3D coordinate to screen 2D coordinate.
+  const vertices: Vector2[] = intersections.map(p3 =>
     convertVolumeCoordinateToScreenCoordinate(mmSection, resolution, p3)
   );
 
-  // If the section contains an intersection point, the section overlaps the volume.
-  if (shadowPolygonVerticeCoords.some(p2 => mmSectionBox2.containsPoint(p2)))
-    return true;
-
-  // Create a polygon whose vertices are intersections.
-  // If the polygon contains a vertex of the section, the section overlaps the volume.
-  // In order to determine this, divide the polygon into triangles and use it.(because to using Three.js)
-  type VertexIndex = number;
-  type ShadowTriangle = [VertexIndex, VertexIndex, VertexIndex];
-  const shadowTriangles: ShadowTriangle[] = ShapeUtils.triangulateShape(
-    shadowPolygonVerticeCoords,
-    []
-  ) as any;
-  return shadowTriangles.some(([vIdx1, vIdx2, vIdx3]) => {
-    const triangle = new Triangle().set(
-      intersections[vIdx1],
-      intersections[vIdx2],
-      intersections[vIdx3]
-    );
-    return sectionVertices.some(p => triangle.containsPoint(p));
-  });
+  const sortedVertices: Vector2[] = sortVerticesOfSimplePolygon(vertices);
+  return sortedVertices;
 }

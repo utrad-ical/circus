@@ -28,10 +28,9 @@ export function vectorizeSection(section: Section): SectionVector {
   };
 }
 
-export function toPlane(section: Section) {
+export function sectionToPlane(section: Section): Plane {
   const nv = normalVector(section);
   const origin = new Vector3().fromArray(section.origin);
-
   const plane = new Plane().setFromNormalAndCoplanarPoint(nv, origin);
   return plane;
 }
@@ -142,7 +141,7 @@ export function intersectionOfTwoSections(
   // |  |
   // 3--2
   const intersectionPoints: Vector3[] = [];
-  const plane1 = toPlane(section1);
+  const plane1 = sectionToPlane(section1);
   const vsection1 = vectorizeSection(section1);
   const vertices1: Vector3[] = [
     vsection1.origin,
@@ -154,7 +153,7 @@ export function intersectionOfTwoSections(
     vsection1.origin.clone().add(vsection1.yAxis)
   ];
 
-  const plane2 = toPlane(section2);
+  const plane2 = sectionToPlane(section2);
   const vsection2 = vectorizeSection(section2);
   const vertices2: Vector3[] = [
     vsection2.origin.clone(),

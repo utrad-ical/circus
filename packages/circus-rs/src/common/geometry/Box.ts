@@ -1,6 +1,6 @@
-import { Vector3D } from './Vector';
 import { Box3, Line3, Vector3 } from 'three';
-import { Section, intersectionOfLineAndPlane } from './Section';
+import { Section, sectionToPlane } from './Section';
+import { Vector3D } from './Vector';
 
 /**
  * Represents a bounding box.
@@ -21,10 +21,6 @@ export function intersectionOfBoxAndPlane(
   box: Box3,
   section: Section
 ): Vector3[] | null {
-  const intersections: Vector3[] = [];
-  const bmin = box.min;
-  const bmax = box.max;
-
   // Prepare the 12 edges (line segments) of the box and
   // checks if at least one of them intersects the current section.
   // Top surface: t0-t1-t2-t3, Bottom surface: b0-b1-b2-b3
@@ -35,7 +31,8 @@ export function intersectionOfBoxAndPlane(
   //  |  B0 -----|- B1
   //  | /        | /
   //  B3 ------- B2
-
+  const bmin = box.min;
+  const bmax = box.max;
   const vertexes: Vector3[] = [
     new Vector3(bmin.x, bmin.y, bmin.z), // T0
     new Vector3(bmax.x, bmin.y, bmin.z), // T1
@@ -55,15 +52,29 @@ export function intersectionOfBoxAndPlane(
     [4, 5], [5, 6], [6, 7], [7, 4]  // 4 edges around B0-B3
   ];
 
+  const plane = sectionToPlane(section);
+  type Intersection = { key: string; point: Vector3 };
+  const _intersections: Intersection[] = [];
   for (let i = 0; i < 12; i++) {
     const from = vertexes[edgeIndexes[i][0]];
     const to = vertexes[edgeIndexes[i][1]];
-    const intersection = intersectionOfLineAndPlane(
-      section,
-      new Line3(from, to)
-    );
-    if (intersection !== null) intersections.push(intersection);
+    const line = new Line3(from, to);
+    const intersection = plane.intersectLine(line, new Vector3());
+    if (intersection)
+      _intersections.push({
+        key: JSON.stringify(intersection),
+        point: intersection
+      });
   }
+  const intersections: Vector3[] = _intersections
+    .filter(function(v1, i1, a1) {
+      return (
+        a1.findIndex(function(v2) {
+          return v1.key === v2.key;
+        }) === i1
+      );
+    })
+    .map(intersection => intersection.point);
 
   return intersections.length === 0 ? null : intersections;
 }

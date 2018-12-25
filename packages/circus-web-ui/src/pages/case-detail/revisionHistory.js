@@ -7,6 +7,7 @@ export const createHistoryStore = (maxHistoryLength = 10) => {
 
   const registerNew = revision => {
     history = [revision];
+    currentIndex = 0;
   };
 
   const push = revision => {

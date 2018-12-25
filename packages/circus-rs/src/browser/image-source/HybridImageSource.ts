@@ -5,7 +5,7 @@ import Viewer from '../viewer/Viewer';
 import DicomVolumeLoader from './volume-loader/DicomVolumeLoader';
 import RsHttpClient from '../http-client/RsHttpClient';
 import MprImageSource from './MprImageSource';
-import PartialVolumeDescriptor from '../../common/PartialVolumeDescriptor';
+import PartialVolumeDescriptor from '@utrad-ical/circus-lib/lib/PartialVolumeDescriptor';
 
 interface HybridImageSourceOptions {
   volumeLoader: DicomVolumeLoader;

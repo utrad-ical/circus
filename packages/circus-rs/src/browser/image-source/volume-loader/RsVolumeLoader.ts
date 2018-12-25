@@ -2,7 +2,9 @@ import RsHttpClient from '../../http-client/RsHttpClient';
 import DicomVolumeLoader from './DicomVolumeLoader';
 import DicomVolume from '../../../common/DicomVolume';
 import { DicomVolumeMetadata } from './DicomVolumeLoader';
-import PartialVolumeDescriptor from '../../../common/PartialVolumeDescriptor';
+import PartialVolumeDescriptor, {
+  isValidPartialVolumeDescriptor
+} from '@utrad-ical/circus-lib/lib/PartialVolumeDescriptor';
 import VolumeCache, { nullVolumeCache } from './cache/VolumeCache';
 
 interface RsVolumeLoaderOptions {
@@ -29,8 +31,7 @@ export default class RsVolumeLoader implements DicomVolumeLoader {
 
     if (
       partialVolumeDescriptor &&
-      (partialVolumeDescriptor.start === undefined ||
-        partialVolumeDescriptor.end === undefined)
+      !isValidPartialVolumeDescriptor(partialVolumeDescriptor)
     ) {
       throw new Error('Invalid partial volume descriptor specified.');
     }

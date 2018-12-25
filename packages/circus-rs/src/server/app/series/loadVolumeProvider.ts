@@ -11,7 +11,7 @@ import validate from '../middleware/validate';
 import { ValidatorRules } from '../../../common/Validator';
 import { SeriesMiddlewareState } from './seriesRoutes';
 import { MultiRange } from 'multi-integer-range';
-import PartialVolumeDescriptor from '../../../common/PartialVolumeDescriptor';
+import PartialVolumeDescriptor from '@utrad-ical/circus-lib/lib/PartialVolumeDescriptor';
 
 interface LoadStoreOptions {
   logger: Logger;

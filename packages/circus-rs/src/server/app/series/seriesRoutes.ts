@@ -12,7 +12,7 @@ import loadVolumeProvider from './loadVolumeProvider';
 import metadata from './metadata';
 import volume from './volume';
 import scan from './scan';
-import PartialVolumeDescriptor from '../../../common/PartialVolumeDescriptor';
+import PartialVolumeDescriptor from '@utrad-ical/circus-lib/lib/PartialVolumeDescriptor';
 interface SeriesRoutesOptions {
   logger: Logger;
   volumeProvider: VolumeProvider;

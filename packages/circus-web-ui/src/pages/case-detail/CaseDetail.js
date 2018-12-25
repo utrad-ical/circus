@@ -19,7 +19,6 @@ import * as rs from 'circus-rs';
 import { alert, prompt, confirm } from 'rb/modal';
 import classNames from 'classnames';
 import EventEmitter from 'events';
-import { sha1 } from 'utils/util.js';
 import ProjectDisplay from 'components/ProjectDisplay';
 import Collapser from 'components/Collapser';
 import RevisionSelector from './RevisionSelector';
@@ -31,7 +30,7 @@ import { toolFactory } from 'circus-rs/tool/tool-initializer';
 import ToolBar from './ToolBar';
 import update from 'immutability-helper';
 import { createHistoryStore } from './revisionHistory';
-import { loadVolumeLabelData } from './revisionData';
+import { loadVolumeLabelData, saveRevision } from './revisionData';
 
 class CaseDetailView extends React.PureComponent {
   constructor(props) {
@@ -43,6 +42,10 @@ class CaseDetailView extends React.PureComponent {
       editingRevisionIndex: -1,
       editingData: null
     };
+
+    /**
+     * Takes care of undo/redo history.
+     */
     this.historyStore = createHistoryStore();
   }
 
@@ -50,13 +53,16 @@ class CaseDetailView extends React.PureComponent {
     const { revisions } = this.state.caseData;
     const revision = revisions[index];
     this.setState({ busy: true, editingRevisionIndex: index });
-    const data = await loadVolumeLabelData(revision);
+
+    // Loads actual volume data
+    const data = await loadVolumeLabelData(revision, api);
 
     const editingData = {
       revision: data,
       activeSeriesIndex: 0,
       activeLabelIndex: (revision.series[0].labels || []).length > 0 ? 0 : -1
     };
+
     this.historyStore.registerNew(editingData);
     this.setState({ editingData, busy: false });
   };
@@ -76,77 +82,22 @@ class CaseDetailView extends React.PureComponent {
   }
 
   saveRevision = async () => {
-    const data = this.state.editingData.revision;
-
-    const desc = await prompt('Revision message', data.description);
-    if (desc === null) return;
-    data.description = desc;
-
-    const voxelShrinkToMinimum = labelData => {
-      const volume = new rs.RawData(labelData.size, rs.PixelFormat.Binary);
-      volume.assign(labelData.volumeArrayBuffer);
-      const cloud = new rs.VoxelCloud(); // temporary
-      cloud.origin = labelData.origin;
-      cloud.volume = volume;
-      cloud.shrinkToMinimum();
-      return { origin: cloud.origin, rawData: cloud.volume };
-    };
-
-    // save all label volume data
-    for (const series of data.series) {
-      for (const label of series.labels) {
-        try {
-          const { origin, rawData } = voxelShrinkToMinimum(label.data);
-          const bb = rs.scanBoundingBox(rawData);
-          let voxels = null;
-          if (bb !== null) {
-            // save painted voxels
-            voxels = sha1(rawData.data);
-            if (voxels === label.data.voxels) {
-              // console.log('Skipping unchanged voxel data.');
-            } else {
-              await api('blob/' + voxels, {
-                method: 'put',
-                handleErrors: true,
-                data: rawData.data,
-                headers: { 'Content-Type': 'application/octet-stream' }
-              });
-            }
-            label.data = {
-              color: label.data.color,
-              alpha: label.data.alpha,
-              voxels,
-              origin,
-              size: rawData.getDimension()
-            };
-          } else {
-            label.data = {
-              color: label.data.color,
-              alpha: label.data.alpha,
-              voxels: null
-            };
-          }
-        } catch (err) {
-          await alert('Could not save label volume data: \n' + err.message);
-          return;
-        }
-      }
-    }
-
-    // prepare revision data
-    data.status = 'approved';
+    const revision = this.state.editingData.revision;
     const caseId = this.state.caseData.caseId;
+
+    const desc = await prompt('Revision message', revision.description);
+    if (desc === null) return;
+
     try {
-      await api(`cases/${caseId}/revision`, {
-        method: 'post',
-        data,
-        handleErrors: true
-      });
+      await saveRevision(caseId, revision, desc, api);
       await alert('Successfully registered a revision.');
+      // For now, perform a full case reload.
+      // TODO: Optimize this
       this.setState({ caseData: null, editingData: null });
       this.loadCase();
     } catch (err) {
       await alert('Error: ' + err.message);
+      throw err;
     }
   };
 

@@ -1,4 +1,3 @@
-import { api } from 'utils/api';
 import * as rs from 'circus-rs';
 import { sha1 } from 'utils/util.js';
 import update from 'immutability-helper';
@@ -13,7 +12,7 @@ const asyncMap = async (array, callback) => {
 /**
  * Adds actual `volumeArrayBuffer` data to label.data.
  */
-const augumentLabelData = async label => {
+const augumentLabelData = async (label, api) => {
   if (label.type !== 'voxel') return label;
   const volumeArrayBuffer = await api(`blob/${label.data.voxels}`, {
     responseType: 'arraybuffer'
@@ -27,13 +26,15 @@ const augumentLabelData = async label => {
  * Asynchronously loads voxel data from API
  * and assigns it to the given label cache.
  */
-export const loadVolumeLabelData = async revision => {
+export const loadVolumeLabelData = async (revision, api) => {
   return update(revision, {
     series: {
       $set: await asyncMap(revision.series, async series => {
         return update(series, {
           labels: {
-            $set: await asyncMap(series.labels, augumentLabelData)
+            $set: await asyncMap(series.labels, label =>
+              augumentLabelData(label, api)
+            )
           }
         });
       })
@@ -41,52 +42,75 @@ export const loadVolumeLabelData = async revision => {
   });
 };
 
-/**
- * Saves revision data on the API server.
- */
-export const saveRevision = async (caseId, revision) => {
-  for (const series of revision.series) {
-    for (const label of series.labels) {
-      try {
-        label.cloud.shrinkToMinimum();
-        const bb = rs.scanBoundingBox(label.cloud.volume);
-        const newLabelData = {
-          voxels: null,
-          color: label.cloud.color,
-          alpha: label.cloud.alpha
-        };
-        if (bb !== null) {
-          // save painted voxels
-          const voxels = label.cloud.volume.data;
-          const hash = sha1(voxels);
-          if (hash === label.data.voxels) {
-            // console.log('Skipping unchanged voxel data.');
-          } else {
-            // needs to save the new voxel data.
-            await api('blob/' + hash, {
-              method: 'put',
-              handleErrors: true,
-              data: voxels,
-              headers: { 'Content-Type': 'application/octet-stream' }
-            });
-          }
-          newLabelData.voxels = hash;
-          newLabelData.origin = label.cloud.origin;
-          newLabelData.size = label.cloud.volume.getDimension();
-        }
-        label.data = newLabelData;
-        delete label.cloud;
-      } catch (err) {
-        await alert('Could not save label volume data: \n' + err.message);
-        return;
-      }
-    }
-  }
+const voxelShrinkToMinimum = labelData => {
+  const volume = new rs.RawData(labelData.size, rs.PixelFormat.Binary);
+  volume.assign(labelData.volumeArrayBuffer);
+  const cloud = new rs.VoxelCloud(); // temporary
+  cloud.origin = labelData.origin;
+  cloud.volume = volume;
+  cloud.shrinkToMinimum();
+  return { origin: cloud.origin, rawData: cloud.volume };
+};
 
-  // post new revision data
+const prepareLabelSaveData = async (label, api) => {
+  if (label.type !== 'voxel') return label;
+  const { origin, rawData } = voxelShrinkToMinimum(label.data);
+  const bb = rs.scanBoundingBox(rawData);
+  const newLabel = {
+    type: 'voxel',
+    data: {
+      color: label.data.color,
+      alpha: label.data.alpha,
+      voxels: null
+    }
+  };
+  if (bb !== null) {
+    // There are painted voxels
+    const voxels = sha1(rawData.data);
+    if (voxels === label.data.voxels) {
+      // Skipping unchanged label data
+    } else {
+      await api('blob/' + voxels, {
+        method: 'put',
+        handleErrors: true,
+        data: rawData.data,
+        headers: { 'Content-Type': 'application/octet-stream' }
+      });
+    }
+    Object.assign(newLabel.data, {
+      voxels,
+      origin,
+      size: rawData.getDimension()
+    });
+  }
+  return newLabel;
+};
+
+const prepareSeriesSaveData = async (series, api) => {
+  return update(series, {
+    labels: {
+      $set: await asyncMap(series.labels, async label =>
+        prepareLabelSaveData(label, api)
+      )
+    }
+  });
+};
+
+/**
+ * Saves a new revision data on the API server.
+ */
+export const saveRevision = async (caseId, revision, description, api) => {
+  const saveData = {
+    description,
+    attributes: revision.attributes,
+    status: 'approved',
+    series: await asyncMap(revision.series, async series =>
+      prepareSeriesSaveData(series, api)
+    )
+  };
+
   await api(`cases/${caseId}/revision`, {
     method: 'post',
-    revision,
-    handleErrors: true
+    data: saveData
   });
 };

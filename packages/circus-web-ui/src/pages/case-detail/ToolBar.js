@@ -27,7 +27,7 @@ const ToolBar = props => {
           <MenuItem
             key={i + 1}
             eventKey={i + 1}
-            onClick={() => onSelectWindowPreset(+p)}
+            onClick={() => onSelectWindowPreset(p)}
           >
             <b>{p.label}</b> {`(L: ${p.level} / W: ${p.width})`}
           </MenuItem>

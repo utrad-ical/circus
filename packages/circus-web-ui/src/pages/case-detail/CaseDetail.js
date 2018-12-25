@@ -413,12 +413,14 @@ export class Editor extends React.Component {
     const activeSeries = revision.series[activeSeriesIndex];
     const volumeLoader = new rs.RsVolumeLoader({
       rsHttpClient: this.client,
-      seriesUid: activeSeries.seriesUid
+      seriesUid: activeSeries.seriesUid,
+      estimateWindowType: 'full'
     });
     const src = new rs.HybridMprImageSource({
       volumeLoader,
       rsHttpClient: this.client,
-      seriesUid: activeSeries.seriesUid
+      seriesUid: activeSeries.seriesUid,
+      estimateWindowType: 'full'
     });
     const composition = new rs.Composition(src);
     composition.on('annotationChange', this.handleAnnotationChange);
@@ -536,6 +538,48 @@ export class Editor extends React.Component {
     this.updateComposition();
   };
 
+  handleImageReady = (viewState, viewer) => {
+    // Update the viewState.window according to the project setting
+    const { projectData } = this.props;
+    const src = viewer.composition.imageSource;
+    const windowPriority = projectData.windowPriority || 'auto';
+    const priorities = windowPriority.split(',');
+    for (const type of priorities) {
+      switch (type) {
+        case 'auto': {
+          const window = src.metadata.estimatedWindow;
+          if (window) {
+            // console.log('applying auto window', window);
+            return { ...viewState, window };
+          }
+          break;
+        }
+        case 'dicom': {
+          const window = src.metadata.dicomWindow;
+          if (window) {
+            // console.log('applying dicom window', window);
+            return { ...viewState, window };
+          }
+          break;
+        }
+        case 'preset': {
+          const window =
+            Array.isArray(projectData.windowPresets) &&
+            projectData.windowPresets[0];
+          if (window) {
+            // console.log('applying preset window', window);
+            return {
+              ...viewState,
+              window: { level: window.level, width: window.width }
+            };
+          }
+          break;
+        }
+      }
+    }
+    return undefined; // do not update view state (should not happen)
+  };
+
   render() {
     const { projectData, editingData, busy } = this.props;
     const { revision, activeSeriesIndex, activeLabelIndex } = editingData;
@@ -602,6 +646,7 @@ export class Editor extends React.Component {
             tool={tool}
             onCreateViewer={this.handleCreateViwer}
             onDestroyViewer={this.handleDestroyViewer}
+            onImageReady={this.handleImageReady}
           />
         </div>
       </div>

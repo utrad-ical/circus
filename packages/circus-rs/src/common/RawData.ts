@@ -542,7 +542,7 @@ export default class RawData {
 
     let [x, y, z] = origin;
     let imageOffset = 0;
-    let value: number;
+    let value: number | undefined;
 
     const useWindow =
       typeof windowWidth === 'number' && typeof windowLevel === 'number';
@@ -564,9 +564,10 @@ export default class RawData {
           );
         }
 
-        // A value of `undefined` will be silently converted to zero according to the TypedArray spec.
+        // A value of `undefined` will be silently converted
+        // to zero according to the TypedArray spec.
         // But Math.round is important.
-        outImage[imageOffset++] = Math.round(value);
+        outImage[imageOffset++] = Math.round(value!);
 
         pos_x += eu_x;
         pos_y += eu_y;

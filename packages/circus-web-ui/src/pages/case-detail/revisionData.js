@@ -1,8 +1,7 @@
-import React from 'react';
 import { api } from 'utils/api';
 import * as rs from 'circus-rs';
 import { sha1 } from 'utils/util.js';
-import wrapDisplayName from 'rb/utils/wrapDisplayName';
+import update from 'immutability-helper';
 
 /**
  * Like Array#map(), but works with an async function.
@@ -12,41 +11,34 @@ const asyncMap = async (array, callback) => {
 };
 
 /**
- * Storage for voxel data. Each voxel data will be idenfied by a sequential ID.
+ * Adds actual `volumeArrayBuffer` data to label.data.
  */
-export const createVoxelCache = () => {
-  const cache = new Map();
-  let nextId = 0;
-  const register = voxelData => {
-    const id = nextId++;
-    cache.set(id, voxelData);
-    return id;
-  };
-  const get = id => cache.get(id);
-  return { register, get };
+const augumentLabelData = async label => {
+  if (label.type !== 'voxel') return label;
+  const volumeArrayBuffer = await api(`blob/${label.data.voxels}`, {
+    responseType: 'arraybuffer'
+  });
+  return update(label, {
+    data: { volumeArrayBuffer: { $set: volumeArrayBuffer } }
+  });
 };
 
 /**
  * Asynchronously loads voxel data from API
  * and assigns it to the given label cache.
  */
-export const loadVoxelLabelIntoCache = async (revision, cache) => {
-  return {
-    ...revision,
-    series: await asyncMap(async series => {
-      return {
-        ...series,
-        labels: await asyncMap(async label => {
-          if (label.type !== 'voxel' || label.labelCacheId) return label;
-          const voxelData = await api(`blob/${label.data.voxels}`, {
-            responseType: 'arraybuffer'
-          });
-          const labelCacheId = cache.register(voxelData);
-          return { ...label, labelCacheId };
-        })
-      };
-    })
-  };
+export const loadVolumeLabelData = async revision => {
+  return update(revision, {
+    series: {
+      $set: await asyncMap(revision.series, async series => {
+        return update(series, {
+          labels: {
+            $set: await asyncMap(series.labels, augumentLabelData)
+          }
+        });
+      })
+    }
+  });
 };
 
 /**
@@ -97,51 +89,4 @@ export const saveRevision = async (caseId, revision) => {
     revision,
     handleErrors: true
   });
-};
-
-/**
- * An HoC that asynchronously provides voxel data.
- * @param labelCache The cache instance created via `createVoxelCache`.
- */
-export const provideVoxelData = labelCache => {
-  return Base => {
-    const Enhanced = class extends React.PureComponent {
-      constructor(props) {
-        super(props);
-        this.state = { loading: true };
-      }
-      componentDidMount() {
-        this.load();
-      }
-      componentDidUpdate(prevProps) {
-        if (this.props.revision !== prevProps.revision) {
-          this.load();
-        }
-      }
-      load = async () => {
-        const originalRevision = this.props.revision;
-        if (!originalRevision) {
-          this.setState({ revision: null, loading: false });
-          return;
-        }
-        this.setState({ loading: true });
-        const revision = await loadVoxelLabelIntoCache(
-          originalRevision,
-          labelCache
-        );
-        this.setState({ revision, loading: false });
-      };
-      render() {
-        const { revision } = this.state; // revision with voxel label data
-        const { revision: _, ...originalProps } = this.props;
-        <Base
-          {...originalProps}
-          revisionLoading={this.state.loading}
-          revision={revision}
-        />;
-      }
-    };
-    Enhanced.displayName = wrapDisplayName('provideVoxelData', Base);
-    return Enhanced;
-  };
 };

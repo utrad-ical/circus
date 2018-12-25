@@ -1,7 +1,7 @@
 import React from 'react';
-import { api } from '../../utils/api';
+import { api } from 'utils/api';
 import * as rs from 'circus-rs';
-import { sha1 } from '../../utils/util.js';
+import { sha1 } from 'utils/util.js';
 import wrapDisplayName from 'rb/utils/wrapDisplayName';
 
 /**

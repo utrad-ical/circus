@@ -1,7 +1,7 @@
 import React from 'react';
 import ProjectSelector from 'components/ProjectSelector';
 import { connect } from 'react-redux';
-import IconButton from '../components/IconButton';
+import IconButton from 'components/IconButton';
 import MultiTagSelect from 'components/MultiTagSelect';
 import { api } from 'utils/api';
 import browserHistory from 'browserHistory';

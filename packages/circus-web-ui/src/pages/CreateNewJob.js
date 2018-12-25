@@ -1,7 +1,7 @@
 import React from 'react';
 import ShrinkSelect from 'rb/ShrinkSelect';
 import { connect } from 'react-redux';
-import IconButton from '../components/IconButton';
+import IconButton from 'components/IconButton';
 import { api } from 'utils/api';
 import SeriesSelector from 'components/SeriesSelector';
 import LoadingIndicator from 'rb/LoadingIndicator';

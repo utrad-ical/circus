@@ -404,38 +404,37 @@ export class Editor extends React.Component {
   changeActiveLabel = (seriesIndex, labelIndex) => {
     const { editingData, onChange } = this.props;
     onChange(
-      {
-        ...editingData,
-        activeSeriesIndex: seriesIndex,
-        activeLabelIndex: labelIndex
-      },
+      update(editingData, {
+        $merge: {
+          activeSeriesIndex: seriesIndex,
+          activeLabelIndex: labelIndex
+        }
+      }),
       false
     );
   };
 
   labelAttributesChange = value => {
     const { editingData, onChange } = this.props;
-    const { revision, activeSeriesIndex, activeLabelIndex } = editingData;
+    const { activeSeriesIndex, activeLabelIndex } = editingData;
     onChange(
-      {
-        ...editingData,
-        revision: update(revision, {
+      update(editingData, {
+        revision: {
           series: {
             [activeSeriesIndex]: {
               labels: { [activeLabelIndex]: { attributes: { $set: value } } }
             }
           }
-        })
-      },
+        }
+      }),
       true
     );
   };
 
   caseAttributesChange = value => {
     const { editingData, onChange } = this.props;
-    const { revision } = editingData;
     onChange(
-      { ...editingData, revision: { ...revision, attributes: value } },
+      update(editingData, { revision: { attributes: { $set: value } } }),
       true
     );
   };

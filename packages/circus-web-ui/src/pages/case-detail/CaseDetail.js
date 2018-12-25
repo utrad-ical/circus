@@ -33,7 +33,7 @@ import ToolBar from './ToolBar';
 import update from 'immutability-helper';
 import { createHistoryStore } from './revisionHistory';
 
-class CaseDetailView extends React.Component {
+class CaseDetailView extends React.PureComponent {
   constructor(props) {
     super(props);
     this.state = {
@@ -88,6 +88,9 @@ class CaseDetailView extends React.Component {
     const project = this.props.accessibleProjects.find(
       p => p.projectId === caseData.projectId
     );
+    if (!project) {
+      throw new Error('You do not have access to this project.');
+    }
     this.setState({ caseData, projectData: project.project }, () => {
       this.selectRevision(caseData.revisions.length - 1);
     });
@@ -220,8 +223,7 @@ class CaseDetailView extends React.Component {
     }
 
     const { projectData: prj, caseData } = this.state;
-
-    const caseId = this.props.match.params.caseId;
+    const caseId = caseData.caseId;
 
     return (
       <FullSpanContainer>

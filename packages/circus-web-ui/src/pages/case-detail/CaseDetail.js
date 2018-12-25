@@ -126,17 +126,29 @@ class CaseDetailView extends React.PureComponent {
     if (pushToHistory) {
       this.historyStore.push(newData);
     }
-    this.setState({ editingData: newData });
+    this.setState({
+      editingData: newData,
+      canUndo: this.historyStore.canUndo(),
+      canRedo: this.historyStore.canRedo()
+    });
   };
 
   handleUndoClick = () => {
     this.historyStore.undo();
-    this.setState({ editingData: this.historyStore.current() });
+    this.setState({
+      editingData: this.historyStore.current(),
+      canUndo: this.historyStore.canUndo(),
+      canRedo: this.historyStore.canRedo()
+    });
   };
 
   handleRedoClick = () => {
     this.historyStore.redo();
-    this.setState({ editingData: this.historyStore.current() });
+    this.setState({
+      editingData: this.historyStore.current(),
+      canUndo: this.historyStore.canUndo(),
+      canRedo: this.historyStore.canRedo()
+    });
   };
 
   async componentDidMount() {
@@ -152,7 +164,7 @@ class CaseDetailView extends React.PureComponent {
       return this.state.busy ? <LoadingIndicator /> : null;
     }
 
-    const { projectData: prj, caseData } = this.state;
+    const { projectData: prj, caseData, canUndo, canRedo } = this.state;
     const caseId = caseData.caseId;
 
     return (
@@ -172,8 +184,9 @@ class CaseDetailView extends React.PureComponent {
           </div>
         </Collapser>
         <MenuBar
-          historyStore={this.historyStore}
+          canUndo={canUndo}
           onUndoClick={this.handleUndoClick}
+          canRedo={canRedo}
           onRedoClick={this.handleRedoClick}
           onSaveClick={this.saveRevision}
           onRevertClick={this.revertRevision}
@@ -201,8 +214,9 @@ export default CaseDetail;
 
 const MenuBar = props => {
   const {
-    historyStore,
+    canUndo,
     onUndoClick,
+    canRedo,
     onRedoClick,
     onRevertClick,
     onSaveClick,
@@ -225,13 +239,13 @@ const MenuBar = props => {
         <IconButton
           bsStyle="default"
           icon="step-backward"
-          disabled={!historyStore.canUndo()}
+          disabled={!canUndo}
           onClick={onUndoClick}
         />
         <IconButton
           bsStyle="default"
           icon="step-forward"
-          disabled={!historyStore.canRedo()}
+          disabled={!canRedo}
           onClick={onRedoClick}
         />
         &ensp;

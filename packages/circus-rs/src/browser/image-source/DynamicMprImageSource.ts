@@ -90,7 +90,7 @@ export default class DynamicMprImageSource extends MprImageSource {
       return {
         start: partialVolumeDescriptor.start,
         end: partialVolumeDescriptor.end,
-        delta: partialVolumeDescriptor.delta | 1
+        delta: partialVolumeDescriptor.delta || 1
       };
     } else {
       return {};

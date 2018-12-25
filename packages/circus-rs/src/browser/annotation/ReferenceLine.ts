@@ -37,10 +37,7 @@ export default class ReferenceLine implements Annotation, ViewerEventTarget {
   private dragStartPoint: Vector2 | undefined = undefined;
   private dragStartPoint3: Vector3 | undefined = undefined;
 
-  public constructor(
-    viewer: Viewer,
-    { color = '#ff00ff' }: Options = {}
-  ) {
+  public constructor(viewer: Viewer, { color = '#ff00ff' }: Options = {}) {
     this.targetViewer = viewer;
     this.color = color;
 
@@ -116,7 +113,7 @@ export default class ReferenceLine implements Annotation, ViewerEventTarget {
   /**
    * ViewerEventHandler
    */
-  public mouseMoveHandler(ev: ViewerEvent) {
+  public mouseMoveHandler(ev: ViewerEvent): void {
     const viewer = ev.viewer;
 
     if (viewer === this.targetViewer) return;
@@ -146,7 +143,7 @@ export default class ReferenceLine implements Annotation, ViewerEventTarget {
     }
   }
 
-  public dragStartHandler(ev: ViewerEvent) {
+  public dragStartHandler(ev: ViewerEvent): void {
     const viewer = ev.viewer;
     if (viewer.getHoveringAnnotation() === this) {
       ev.stopPropagation();
@@ -165,7 +162,7 @@ export default class ReferenceLine implements Annotation, ViewerEventTarget {
     }
   }
 
-  public dragHandler(ev: ViewerEvent) {
+  public dragHandler(ev: ViewerEvent): void {
     const viewer = ev.viewer;
 
     if (viewer.getHoveringAnnotation() === this) {
@@ -214,7 +211,7 @@ export default class ReferenceLine implements Annotation, ViewerEventTarget {
     }
   }
 
-  public dragEndHandler(ev: ViewerEvent) {
+  public dragEndHandler(ev: ViewerEvent): void {
     const viewer = ev.viewer;
     if (viewer.getHoveringAnnotation() === this) {
       ev.stopPropagation();

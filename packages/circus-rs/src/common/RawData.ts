@@ -556,12 +556,7 @@ export default class RawData {
       for (let i = 0; i < outWidth; i++) {
         value = voxelReader.call(this, pos_x, pos_y, pos_z); // may return `undefined`
         if (value !== undefined && useWindow) {
-          // skips failed controls-flow analysis
-          value = this.applyWindow(
-            <number>windowWidth,
-            <number>windowLevel,
-            value
-          );
+          value = this.applyWindow(windowWidth!, windowLevel!, value);
         }
 
         // A value of `undefined` will be silently converted

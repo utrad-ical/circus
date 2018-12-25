@@ -38,7 +38,7 @@ export default class Viewer extends EventEmitter {
   public backgroundEventTarget: any;
 
   private boundRender: EventListener;
-  private boundEventHandler: EventListener;
+  private boundEventHandler: (event: MouseEvent) => void;
 
   private imageReady: boolean = false;
 
@@ -193,7 +193,7 @@ export default class Viewer extends EventEmitter {
     }
   }
 
-  public setHoveringAnnotation(anno: Annotation | undefined) {
+  public setHoveringAnnotation(anno: Annotation | undefined): void {
     this.hoveringAnnotation = anno;
   }
 

@@ -7,11 +7,14 @@ import PartialVolumeDescriptor, {
 } from '@utrad-ical/circus-lib/lib/PartialVolumeDescriptor';
 import VolumeCache, { nullVolumeCache } from './cache/VolumeCache';
 
+type EstimateWindowType = 'full' | 'first' | 'center' | 'none';
+
 interface RsVolumeLoaderOptions {
   rsHttpClient: RsHttpClient;
   seriesUid: string;
   partialVolumeDescriptor?: PartialVolumeDescriptor;
   cache?: VolumeCache;
+  estimateWindowType?: EstimateWindowType;
 }
 
 export default class RsVolumeLoader implements DicomVolumeLoader {
@@ -20,12 +23,14 @@ export default class RsVolumeLoader implements DicomVolumeLoader {
   private partialVolumeDescriptor?: PartialVolumeDescriptor;
   private meta: DicomVolumeMetadata | undefined;
   private cache: VolumeCache;
+  private estimateWindowType: EstimateWindowType;
 
   constructor({
     rsHttpClient,
     seriesUid,
     partialVolumeDescriptor,
-    cache
+    cache,
+    estimateWindowType = 'none'
   }: RsVolumeLoaderOptions) {
     if (!seriesUid) throw new Error('SeriesUid is required.');
 
@@ -39,6 +44,7 @@ export default class RsVolumeLoader implements DicomVolumeLoader {
     this.rsHttpClient = rsHttpClient;
     this.seriesUid = seriesUid;
     this.partialVolumeDescriptor = partialVolumeDescriptor;
+    this.estimateWindowType = estimateWindowType;
     this.cache = cache || nullVolumeCache;
   }
 
@@ -89,15 +95,18 @@ export default class RsVolumeLoader implements DicomVolumeLoader {
   }
 
   private createRequestParams(): object {
+    const result = {};
+    if (this.estimateWindowType !== 'none') {
+      Object.assign(result, { estimateWindow: this.estimateWindowType });
+    }
     if (this.partialVolumeDescriptor) {
       const partialVolumeDescriptor = this.partialVolumeDescriptor;
-      return {
+      Object.assign(result, {
         start: partialVolumeDescriptor.start,
         end: partialVolumeDescriptor.end,
         delta: partialVolumeDescriptor.delta || 1
-      };
-    } else {
-      return {};
+      });
     }
+    return result;
   }
 }

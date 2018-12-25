@@ -17,7 +17,6 @@ import LabelSelector from './LabelSelector';
 import { store } from 'store';
 import * as rs from 'circus-rs';
 import { alert, prompt, confirm } from 'rb/modal';
-import merge from 'merge';
 import classNames from 'classnames';
 import EventEmitter from 'events';
 import { sha1 } from 'utils/util.js';
@@ -32,6 +31,7 @@ import { toolFactory } from 'circus-rs/tool/tool-initializer';
 import ToolBar from './ToolBar';
 import update from 'immutability-helper';
 import { createHistoryStore } from './revisionHistory';
+import { loadVolumeLabelData } from './revisionData';
 
 class CaseDetailView extends React.PureComponent {
   constructor(props) {
@@ -50,28 +50,7 @@ class CaseDetailView extends React.PureComponent {
     const { revisions } = this.state.caseData;
     const revision = revisions[index];
     this.setState({ busy: true, editingRevisionIndex: index });
-
-    const data = merge(true, {}, revision);
-    delete data.date;
-    delete data.creator;
-
-    // Load all label volume data in the latest revision
-    for (const series of data.series) {
-      for (const label of series.labels) {
-        if (label.type !== 'voxel') continue;
-        if (label.data.voxels !== null) {
-          try {
-            const buffer = await api('blob/' + label.data.voxels, {
-              handleErrors: true,
-              responseType: 'arraybuffer'
-            });
-            label.data.volumeArrayBuffer = buffer;
-          } catch (err) {
-            await alert('Could not load label volume data: \n' + err.message);
-          }
-        }
-      }
-    }
+    const data = await loadVolumeLabelData(revision);
 
     const editingData = {
       revision: data,

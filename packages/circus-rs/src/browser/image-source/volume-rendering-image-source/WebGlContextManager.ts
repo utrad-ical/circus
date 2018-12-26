@@ -124,7 +124,7 @@ export default class WebGlContextManager {
 
     this.buffers[name].numItems = srcData.byteLength / itemSize / typeSize;
     gl.bindBuffer(target, buffer);
-    gl.bufferData(target, srcData, usage);
+    gl.bufferData(target, srcData as any, usage); // TODO: Fix this type issue
   }
 
   public bindBufferToAttr(

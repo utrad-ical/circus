@@ -158,10 +158,10 @@ export const Label = props => {
   };
 
   const handleCommit = compareKey => {
-    onChange(labelIndex, label, (a, b) => {
+    onChange(labelIndex, label, old => {
       return (
-        a.revision.series[seriesIndex].labels[labelIndex].data[compareKey] !==
-        b.revision.series[seriesIndex].labels[labelIndex].data[compareKey]
+        old.revision.series[seriesIndex].labels[labelIndex].data[compareKey] !==
+        label.data[compareKey]
       );
     });
   };

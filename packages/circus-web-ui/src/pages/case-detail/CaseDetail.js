@@ -31,6 +31,7 @@ import ToolBar from './ToolBar';
 import update from 'immutability-helper';
 import { createHistoryStore } from './revisionHistory';
 import { loadVolumeLabelData, saveRevision } from './revisionData';
+import shallowEqual from 'utils/shallowEqual';
 
 class CaseDetailView extends React.PureComponent {
   constructor(props) {
@@ -126,7 +127,7 @@ class CaseDetailView extends React.PureComponent {
     if (pushToHistory === true) {
       this.historyStore.push(newData);
     } else if (typeof pushToHistory === 'function') {
-      if (pushToHistory(this.historyStore.current(), newData)) {
+      if (pushToHistory(this.historyStore.current())) {
         this.historyStore.push(newData);
       }
     }
@@ -418,7 +419,7 @@ export class Editor extends React.Component {
     );
   };
 
-  labelAttributesChange = value => {
+  labelAttributesChange = (value, isTextInput) => {
     const { editingData, onChange } = this.props;
     const { activeSeriesIndex, activeLabelIndex } = editingData;
     onChange(
@@ -431,16 +432,38 @@ export class Editor extends React.Component {
           }
         }
       }),
-      true
+      !isTextInput
     );
   };
 
-  caseAttributesChange = value => {
+  handleLabelAttributesTextBlur = () => {
+    const { editingData, onChange } = this.props;
+    const { revision, activeSeriesIndex, activeLabelIndex } = editingData;
+    onChange(editingData, old => {
+      return !shallowEqual(
+        old.revision.series[activeSeriesIndex].labels[activeLabelIndex]
+          .attributes,
+        revision.series[activeSeriesIndex].labels[activeLabelIndex].attributes
+      );
+    });
+  };
+
+  caseAttributesChange = (value, isTextInput) => {
     const { editingData, onChange } = this.props;
     onChange(
       update(editingData, { revision: { attributes: { $set: value } } }),
-      true
+      !isTextInput
     );
+  };
+
+  handleCaseAttributesTextBlur = () => {
+    const { editingData, onChange } = this.props;
+    onChange(editingData, old => {
+      return !shallowEqual(
+        old.revision.attributes,
+        editingData.revision.attributes
+      );
+    });
   };
 
   getTool = toolName => {
@@ -560,6 +583,7 @@ export class Editor extends React.Component {
                   schema={projectData.labelAttributesSchema}
                   value={activeLabel.attributes || {}}
                   onChange={this.labelAttributesChange}
+                  onTextBlur={this.handleLabelAttributesTextBlur}
                 />
               </div>
             )}
@@ -569,6 +593,7 @@ export class Editor extends React.Component {
               schema={projectData.caseAttributesSchema}
               value={revision.attributes}
               onChange={this.caseAttributesChange}
+              onTextBlur={this.handleCaseAttributesTextBlur}
             />
           </Collapser>
         </SideContainer>

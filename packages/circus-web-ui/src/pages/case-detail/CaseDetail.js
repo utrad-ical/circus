@@ -123,8 +123,12 @@ class CaseDetailView extends React.PureComponent {
   };
 
   handleDataChange = (newData, pushToHistory = false) => {
-    if (pushToHistory) {
+    if (pushToHistory === true) {
       this.historyStore.push(newData);
+    } else if (typeof pushToHistory === 'function') {
+      if (pushToHistory(this.historyStore.current(), newData)) {
+        this.historyStore.push(newData);
+      }
     }
     this.setState({
       editingData: newData,

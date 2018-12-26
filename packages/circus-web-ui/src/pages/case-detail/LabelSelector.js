@@ -117,6 +117,7 @@ const Series = props => {
           <Label
             label={label}
             activeLabel={activeLabel}
+            seriesIndex={seriesIndex}
             index={labelIndex}
             key={labelIndex}
             onChange={handleLabelChange}
@@ -138,12 +139,13 @@ export const Label = props => {
   const {
     label,
     index: labelIndex,
+    seriesIndex,
     activeLabel,
     onChange,
     onClick,
     onRemoveClick
   } = props;
-  const caption = label.title ? label.title : `Label #${props.index}`;
+  const caption = label.title ? label.title : `Label #${labelIndex}`;
 
   const changeLabelAlpha = alpha => {
     const newLabel = update(label, { data: { alpha: { $set: alpha } } });
@@ -155,13 +157,22 @@ export const Label = props => {
     onChange(labelIndex, newLabel);
   };
 
-  const handleCommit = () => {
-    onChange(labelIndex, label, true);
+  const handleCommit = compareKey => {
+    onChange(labelIndex, label, (a, b) => {
+      return (
+        a.revision.series[seriesIndex].labels[labelIndex].data[compareKey] !==
+        b.revision.series[seriesIndex].labels[labelIndex].data[compareKey]
+      );
+    });
   };
 
   const handleToggleLabelColor = open => {
     if (open) return;
-    handleCommit();
+    handleCommit('color');
+  };
+
+  const handleOpacityCommit = () => {
+    handleCommit('alpha');
   };
 
   const handleClick = ev => {
@@ -184,7 +195,7 @@ export const Label = props => {
         <OpacityEditor
           value={label.data.alpha}
           onChange={changeLabelAlpha}
-          onCommit={handleCommit}
+          onCommit={handleOpacityCommit}
         />
         <ColorPicker
           bsSize="xs"

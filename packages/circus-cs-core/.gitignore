@@ -4,3 +4,4 @@
 /tmp/
 /coverage
 /*.config.js
+/test/working

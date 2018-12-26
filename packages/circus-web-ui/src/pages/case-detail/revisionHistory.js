@@ -15,7 +15,7 @@ export const createHistoryStore = (maxHistoryLength = 10) => {
     history.push(revision);
     currentIndex++;
     if (history.length > maxHistoryLength) {
-      history = history.slice(0, maxHistoryLength);
+      history = history.slice(-maxHistoryLength);
       currentIndex = history.length - 1;
     }
   };

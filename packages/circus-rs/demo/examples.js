@@ -89,8 +89,8 @@ const div2 = document.getElementById('viewer2');
 viewer2 = new rs.Viewer(div2);
 viewer2.setComposition(comp);
 
-const referenceLine1 = new rs.ReferenceLine(viewer, {color: '#993300'});
-const referenceLine2 = new rs.ReferenceLine(viewer2, {color: '#3399ff'});
+const referenceLine1 = new rs.ReferenceLine(viewer, { color: '#993300' });
+const referenceLine2 = new rs.ReferenceLine(viewer2, { color: '#3399ff' });
 comp.addAnnotation(referenceLine1);
 comp.addAnnotation(referenceLine2);
 
@@ -110,7 +110,6 @@ const setOrientation = async (v, orientation) => {
 
 setOrientation(viewer, 'axial');
 setOrientation(viewer2, 'coronal');
-
 
 /*--
 @title Initialize toolbar
@@ -431,7 +430,6 @@ const toolbar = rs.createToolbar(container, ['hand', 'celestialRotate']);
 
 if (viewer) {
   toolbar.bindViewer(viewer);
-  viewer.setActiveTool('celestialRotate');
 }
 
 /*--

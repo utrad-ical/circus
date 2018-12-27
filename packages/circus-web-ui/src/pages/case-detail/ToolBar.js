@@ -2,6 +2,7 @@ import React, { Fragment } from 'react';
 import { Button, SplitButton, MenuItem } from 'components/react-bootstrap';
 import ShrinkSelect from 'rb/ShrinkSelect';
 import Icon from 'components/Icon';
+import { prompt } from 'rb/modal';
 
 const LayoutRenderer = props => {
   return (
@@ -22,7 +23,7 @@ const ToolBar = props => {
     setLineWidth,
     windowPresets = [],
     onChangeTool,
-    onSelectWindowPreset
+    onApplyWindow
   } = props;
 
   const widthOptions = [1, 3, 5, 7];
@@ -40,6 +41,17 @@ const ToolBar = props => {
       ...viewOptions,
       interpolationMode: checked ? 'trilinear' : 'nearestNeighbor'
     });
+  };
+
+  const handleApplyWindow = async selection => {
+    if ('level' in selection && 'width' in selection) {
+      onApplyWindow({ level: selection.level, width: selection.width });
+    } else {
+      const value = await prompt('Input window level/width (e.g., "20,100")');
+      const [level, width] = value.split(/\,|\//).map(s => parseInt(s, 10));
+      if (width <= 0) return;
+      onApplyWindow({ level, width });
+    }
   };
 
   const layoutOptions = {
@@ -79,11 +91,14 @@ const ToolBar = props => {
           <MenuItem
             key={i + 1}
             eventKey={i + 1}
-            onClick={() => onSelectWindowPreset(p)}
+            onClick={() => handleApplyWindow(p)}
           >
             <b>{p.label}</b> {`(L: ${p.level} / W: ${p.width})`}
           </MenuItem>
         ))}
+        <MenuItem key={99999} eventKey={99999} onClick={handleApplyWindow}>
+          Manual
+        </MenuItem>
       </ToolButton>
       <ToolButton
         name="brush"

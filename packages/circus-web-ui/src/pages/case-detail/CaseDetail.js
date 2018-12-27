@@ -505,8 +505,7 @@ export class Editor extends React.Component {
     });
   };
 
-  handleSelectWindowPreset = preset => {
-    const window = { level: preset.level, width: preset.width };
+  handleApplyWindow = window => {
     this.stateChanger.emit('change', state => ({ ...state, window }));
   };
 
@@ -624,7 +623,7 @@ export class Editor extends React.Component {
             lineWidth={this.state.lineWidth}
             setLineWidth={this.setLineWidth}
             windowPresets={projectData.windowPresets}
-            onSelectWindowPreset={this.handleSelectWindowPreset}
+            onApplyWindow={this.handleApplyWindow}
             brushEnabled={!!activeLabel}
           />
           <ViewerCluster

@@ -309,6 +309,13 @@ export default class Viewer extends EventEmitter {
     return extend(true, {}, this.viewState);
   }
 
+  private detachCurrentComposition(): void {
+    if (!this.composition) return;
+    this.composition.removeListener('viewerChange', this.boundRender);
+    this.composition.unregisterViewer(this);
+    this.composition = undefined;
+  }
+
   /**
    * ImageSource handling methods
    */
@@ -316,8 +323,7 @@ export default class Viewer extends EventEmitter {
     if (this.composition === composition) return;
     if (this.composition) {
       this.cancelNextRender();
-      this.composition.removeListener('viewerChange', this.boundRender);
-      this.composition.unregisterViewer(this);
+      this.detachCurrentComposition();
     }
     this.composition = composition;
     this.composition.registerViewer(this);
@@ -369,6 +375,8 @@ export default class Viewer extends EventEmitter {
    * Dispose viewer
    */
   public dispose(): void {
+    this.cancelNextRender();
+    this.detachCurrentComposition();
     this.stopResizeObserver();
     this.cancelNextRender();
   }

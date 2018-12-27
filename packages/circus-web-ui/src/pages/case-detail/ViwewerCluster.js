@@ -1,5 +1,5 @@
 import React from 'react';
-import ImageViewer from 'components/ImageViewer';
+import ImageViewer, { setOrthogonalOrientation } from 'components/ImageViewer';
 import styled from 'styled-components';
 import { toolFactory } from 'circus-rs/tool/tool-initializer';
 
@@ -28,6 +28,12 @@ const OneLayout = styled.div`
 
 const celestialRotate = toolFactory('celestialRotate');
 
+const orientationInitialStateSetters = {
+  axial: setOrthogonalOrientation('axial'),
+  sagittal: setOrthogonalOrientation('sagittal'),
+  coronal: setOrthogonalOrientation('coronal')
+};
+
 const ViewerCluster = props => {
   const {
     composition,
@@ -36,21 +42,26 @@ const ViewerCluster = props => {
     layout,
     onCreateViewer,
     onDestroyViewer,
-    onImageReady
+    initialWindowSetter
   } = props;
 
   function makeViewer(orientation, initialTool, fixTool) {
+    const initialStateSetter = (viewer, viewState) => {
+      const s1 = orientationInitialStateSetters[orientation](viewer, viewState);
+      const s2 = initialWindowSetter(viewer, s1);
+      return s2;
+    };
+
     return (
       <ImageViewer
         className={`viewer-${orientation}`}
-        orientation={orientation}
         composition={composition}
         tool={fixTool ? fixTool : tool}
         initialTool={initialTool}
+        initialStateSetter={initialStateSetter}
         stateChanger={stateChanger}
         onCreateViewer={onCreateViewer}
         onDestroyViewer={onDestroyViewer}
-        onImageReady={onImageReady}
       />
     );
   }

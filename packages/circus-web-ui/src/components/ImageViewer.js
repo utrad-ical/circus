@@ -1,9 +1,26 @@
 import React from 'react';
-import Viewer from 'circus-rs/viewer/Viewer';
+import * as rs from 'circus-rs';
 import { createOrthogonalMprSection } from 'circus-rs/section-util';
 import { toolFactory } from 'circus-rs/tool/tool-initializer';
 import EventEmitter from 'events';
 import classnames from 'classnames';
+
+export const setOrthogonalOrientation = orientation => {
+  return (viewer, initialViewState) => {
+    if (initialViewState.type !== 'mpr') return;
+    const src = viewer.composition.imageSource;
+    const mmDim = src.mmDim();
+    const newState = {
+      ...initialViewState,
+      section: createOrthogonalMprSection(
+        viewer.getResolution(),
+        mmDim,
+        orientation
+      )
+    };
+    return newState;
+  };
+};
 
 /**
  * Wraps CIRCUS RS Dicom Viewer.
@@ -17,13 +34,12 @@ export default class ImageViewer extends React.Component {
   }
 
   componentDidUpdate(prevProps) {
-    if (!this.viewer) return;
     if (this.props.stateChanger !== prevProps.stateChanger) {
       if (prevProps.stateChanger instanceof EventEmitter) {
-        prevProps.stateChanger.removeAllListeners('change');
+        prevProps.stateChanger.removeListener('change', this.handleChangeState);
       }
       if (this.props.stateChanger instanceof EventEmitter) {
-        this.props.stateChanger.on('change', this.changeState);
+        this.props.stateChanger.on('change', this.handleChangeState);
       }
     }
     if (this.props.composition !== prevProps.composition) {
@@ -34,49 +50,34 @@ export default class ImageViewer extends React.Component {
     }
   }
 
+  setInitialState = () => {
+    const viewer = this.viewer;
+    const { initialStateSetter } = this.props;
+    if (typeof initialStateSetter === 'function') {
+      const state = viewer.getState();
+      const newState = initialStateSetter(viewer, state);
+      viewer.setState(newState);
+    }
+  };
+
   componentDidMount() {
     try {
       const {
         onCreateViewer,
-        orientation = 'axial',
-        composition,
-        onImageReady,
-        initialTool = toolFactory('pager')
+        initialTool = toolFactory('pager'),
+        stateChanger,
+        composition
       } = this.props;
-
-      const setOrientation = () => {
-        const state = viewer.getState();
-        const src = this.props.composition.imageSource;
-        const mmDim = src.mmDim();
-        let newState = {
-          ...state,
-          section: createOrthogonalMprSection(
-            viewer.getResolution(),
-            mmDim,
-            orientation
-          )
-        };
-        if (typeof onImageReady === 'function') {
-          const modifiedState = onImageReady(newState, viewer, orientation);
-          if (modifiedState) newState = modifiedState;
-        }
-        viewer.setState(newState);
-        viewer.removeListener('imageReady', setOrientation);
-      };
-
       const container = this.container;
-      const viewer = new Viewer(container);
+      const viewer = new rs.Viewer(container);
       this.viewer = viewer;
       if (typeof onCreateViewer === 'function') onCreateViewer(viewer);
-
-      if (this.props.stateChanger instanceof EventEmitter) {
-        this.props.stateChanger.on('change', this.changeState);
+      if (stateChanger instanceof EventEmitter) {
+        stateChanger.on('change', this.handleChangeState);
       }
-
-      viewer.on('imageReady', setOrientation);
-
+      this.viewer.on('imageReady', this.setInitialState);
       if (composition) {
-        viewer.setComposition(composition);
+        this.viewer.setComposition(this.props.composition);
       }
       viewer.setActiveTool(initialTool);
     } catch (err) {
@@ -87,12 +88,13 @@ export default class ImageViewer extends React.Component {
   componentWillUnmount() {
     const { onDestroyViewer } = this.props;
     if (this.viewer) {
+      this.viewer.removeAllListeners();
       this.viewer.dispose();
       if (typeof onDestroyViewer === 'function') onDestroyViewer(this.viewer);
     }
   }
 
-  changeState = changer => {
+  handleChangeState = changer => {
     const state = this.viewer.getState();
     const newState = changer(state);
     this.viewer.setState(newState);

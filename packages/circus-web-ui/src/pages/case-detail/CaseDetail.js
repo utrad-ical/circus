@@ -508,8 +508,7 @@ export class Editor extends React.Component {
     this.updateComposition();
   };
 
-  handleImageReady = (viewState, viewer) => {
-    // Update the viewState.window according to the project setting
+  initialWindowSetter = (viewer, viewState) => {
     const { projectData } = this.props;
     const src = viewer.composition.imageSource;
     const windowPriority = projectData.windowPriority || 'auto';
@@ -618,7 +617,7 @@ export class Editor extends React.Component {
             tool={tool}
             onCreateViewer={this.handleCreateViwer}
             onDestroyViewer={this.handleDestroyViewer}
-            onImageReady={this.handleImageReady}
+            initialWindowSetter={this.initialWindowSetter}
           />
         </div>
       </div>

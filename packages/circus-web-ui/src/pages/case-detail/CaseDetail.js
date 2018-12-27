@@ -341,6 +341,9 @@ export class Editor extends React.Component {
     const { composition, viewOptions: { showReferenceLine } } = this.state;
     const activeSeries = revision.series[activeSeriesIndex];
     const activeLabel = activeSeries.labels[activeLabelIndex];
+    composition.annotations.forEach(antn => {
+      if (antn instanceof rs.ReferenceLine) antn.dispose();
+    });
     composition.removeAllAnnotations();
     activeSeries.labels.forEach(label => {
       switch (label.type) {

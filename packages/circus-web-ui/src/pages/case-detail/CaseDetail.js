@@ -482,11 +482,8 @@ export class Editor extends React.Component {
     this.setState({ toolName, tool: this.getTool(toolName) });
   };
 
-  toggleReferenceLine = show => {
-    this.setState(
-      { viewOptions: { ...this.state.viewOptions, showReferenceLine: show } },
-      this.updateComposition
-    );
+  handleChangeViewOptions = viewOptions => {
+    this.setState({ viewOptions }, this.updateComposition);
   };
 
   handleSelectWindowPreset = preset => {
@@ -505,8 +502,8 @@ export class Editor extends React.Component {
   };
 
   handleDestroyViewer = viewer => {
-    Object.keys(viewer).forEach(k => {
-      if (this.viewer[k] === viewer) delete viewer[k];
+    Object.keys(this.viewers).forEach(k => {
+      if (this.viewers[k] === viewer) delete this.viewers[k];
     });
   };
 
@@ -560,12 +557,7 @@ export class Editor extends React.Component {
   render() {
     const { projectData, editingData, busy } = this.props;
     const { revision, activeSeriesIndex, activeLabelIndex } = editingData;
-    const {
-      toolName,
-      tool,
-      viewOptions: { layout, showReferenceLine },
-      composition
-    } = this.state;
+    const { toolName, tool, viewOptions, composition } = this.state;
     const activeSeries = revision.series[activeSeriesIndex];
     if (!activeSeries) return null;
     const activeLabel = activeSeries.labels[activeLabelIndex];
@@ -608,8 +600,8 @@ export class Editor extends React.Component {
           <ToolBar
             active={toolName}
             onChangeTool={this.changeTool}
-            showReferenceLine={showReferenceLine}
-            toggleReferenceLine={this.toggleReferenceLine}
+            viewOptions={viewOptions}
+            onChangeViewOptions={this.handleChangeViewOptions}
             lineWidth={this.state.lineWidth}
             setLineWidth={this.setLineWidth}
             windowPresets={projectData.windowPresets}
@@ -618,7 +610,7 @@ export class Editor extends React.Component {
           />
           <ViewerCluster
             composition={composition}
-            layout={layout}
+            layout={viewOptions.layout}
             labels={activeSeries.labels}
             stateChanger={this.stateChanger}
             activeLabel={activeLabel}

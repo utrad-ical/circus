@@ -1,5 +1,10 @@
 import React, { Fragment } from 'react';
-import { Button, SplitButton, MenuItem } from 'components/react-bootstrap';
+import {
+  Button,
+  SplitButton,
+  MenuItem,
+  Dropdown
+} from 'components/react-bootstrap';
 import ShrinkSelect from 'rb/ShrinkSelect';
 import Icon from 'components/Icon';
 import { prompt } from 'rb/modal';
@@ -28,18 +33,24 @@ const ToolBar = props => {
 
   const widthOptions = [1, 3, 5, 7];
 
-  const handleToggleReferenceLine = checked => {
-    onChangeViewOptions({ ...viewOptions, showReferenceLine: checked });
+  const handleToggleReferenceLine = () => {
+    onChangeViewOptions({
+      ...viewOptions,
+      showReferenceLine: !viewOptions.showReferenceLine
+    });
   };
 
   const handleChangeLayout = selection => {
     onChangeViewOptions({ ...viewOptions, layout: selection });
   };
 
-  const handleToggleInterpolationMode = checked => {
+  const handleToggleInterpolationMode = () => {
     onChangeViewOptions({
       ...viewOptions,
-      interpolationMode: checked ? 'trilinear' : 'nearestNeighbor'
+      interpolationMode:
+        viewOptions.interpolationMode === 'trilinear'
+          ? 'nearestNeighbor'
+          : 'trilinear'
     });
   };
 
@@ -100,6 +111,7 @@ const ToolBar = props => {
           Manual
         </MenuItem>
       </ToolButton>
+      &thinsp;
       <ToolButton
         name="brush"
         icon="rs-brush"
@@ -127,6 +139,7 @@ const ToolBar = props => {
         active={active}
         disabled={!brushEnabled}
       />
+      &thinsp;
       <ShrinkSelect
         className="layout-shrinkselect"
         name="layout"
@@ -135,23 +148,30 @@ const ToolBar = props => {
         renderer={LayoutRenderer}
         onChange={handleChangeLayout}
       />
-      &ensp;
-      <label>
-        <input
-          type="checkbox"
-          checked={viewOptions.showReferenceLine}
-          onChange={ev => handleToggleReferenceLine(ev.target.checked)}
-        />
-        Reference line
-      </label>
-      &ensp;
-      <label>
-        <input
-          type="checkbox"
-          checked={viewOptions.interpolationMode === 'trilinear'}
-          onChange={ev => handleToggleInterpolationMode(ev.target.checked)}
-        />Trilinear
-      </label>
+      &thinsp;
+      <Dropdown id="view-options-dropdown">
+        <Dropdown.Toggle>
+          <Icon icon="circus-tool" />
+        </Dropdown.Toggle>
+        <Dropdown.Menu>
+          <MenuItem onClick={handleToggleReferenceLine}>
+            {viewOptions.showReferenceLine && (
+              <Fragment>
+                <Icon icon="glyphicon-ok" />&ensp;
+              </Fragment>
+            )}
+            Show reference line
+          </MenuItem>
+          <MenuItem onClick={handleToggleInterpolationMode}>
+            {viewOptions.interpolationMode === 'trilinear' && (
+              <Fragment>
+                <Icon icon="glyphicon-ok" />&ensp;
+              </Fragment>
+            )}
+            Trilinear filtering
+          </MenuItem>
+        </Dropdown.Menu>
+      </Dropdown>
     </div>
   );
 };

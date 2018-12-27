@@ -1,6 +1,6 @@
 {
   "name": "@utrad-ical/circus-rs",
-  "version": "0.19.1",
+  "version": "0.19.2",
   "scripts": {
     "start": "node ./server.js",
     "debug": "nodemon --inspect ./server.js",

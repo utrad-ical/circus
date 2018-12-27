@@ -35,6 +35,13 @@ const ToolBar = props => {
     onChangeViewOptions({ ...viewOptions, layout: selection });
   };
 
+  const handleToggleInterpolationMode = checked => {
+    onChangeViewOptions({
+      ...viewOptions,
+      interpolationMode: checked ? 'trilinear' : 'nearestNeighbor'
+    });
+  };
+
   const layoutOptions = {
     twoByTwo: { caption: '2 x 2', icon: 'circus-layout-four' },
     axial: { caption: 'Axial', icon: 'circus-orientation-axial' },
@@ -121,6 +128,14 @@ const ToolBar = props => {
           onChange={ev => handleToggleReferenceLine(ev.target.checked)}
         />
         Reference line
+      </label>
+      &ensp;
+      <label>
+        <input
+          type="checkbox"
+          checked={viewOptions.interpolationMode === 'trilinear'}
+          onChange={ev => handleToggleInterpolationMode(ev.target.checked)}
+        />Trilinear
       </label>
     </div>
   );

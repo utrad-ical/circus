@@ -55,6 +55,7 @@ const ViewerCluster = props => {
     return (
       <ImageViewer
         id={id}
+        key={id}
         className={`viewer-${orientation}`}
         composition={composition}
         tool={fixTool ? fixTool : tool}
@@ -77,9 +78,14 @@ const ViewerCluster = props => {
           {makeViewer('axial', 'oblique', celestialRotate, celestialRotate)}
         </TwoByTwoLayout>
       );
-    case 'one':
+    case 'axial':
+      return <OneLayout>{makeViewer('axial', 'one-axial')}</OneLayout>;
+    case 'sagittal':
+      return <OneLayout>{makeViewer('sagittal', 'one-sagittal')}</OneLayout>;
+    case 'coronal':
+      return <OneLayout>{makeViewer('coronal', 'one-coronal')}</OneLayout>;
     default:
-      return <OneLayout>{makeViewer('axial')}</OneLayout>;
+      return null;
   }
 };
 

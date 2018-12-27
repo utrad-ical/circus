@@ -1,12 +1,22 @@
-import React from 'react';
+import React, { Fragment } from 'react';
 import { Button, SplitButton, MenuItem } from 'components/react-bootstrap';
 import ShrinkSelect from 'rb/ShrinkSelect';
+import Icon from 'components/Icon';
+
+const LayoutRenderer = props => {
+  return (
+    <Fragment>
+      <Icon icon={props.icon} />
+      <span className="caption">&ensp;{props.caption}</span>
+    </Fragment>
+  );
+};
 
 const ToolBar = props => {
   const {
     active,
-    showReferenceLine,
-    toggleReferenceLine,
+    viewOptions,
+    onChangeViewOptions,
     brushEnabled,
     lineWidth,
     setLineWidth,
@@ -17,12 +27,47 @@ const ToolBar = props => {
 
   const widthOptions = [1, 3, 5, 7];
 
+  const handleToggleReferenceLine = checked => {
+    onChangeViewOptions({ ...viewOptions, showReferenceLine: checked });
+  };
+
+  const handleChangeLayout = selection => {
+    onChangeViewOptions({ ...viewOptions, layout: selection });
+  };
+
+  const layoutOptions = {
+    twoByTwo: { caption: '2 x 2', icon: 'circus-layout-four' },
+    axial: { caption: 'Axial', icon: 'circus-orientation-axial' },
+    sagittal: { caption: 'Sagittal', icon: 'circus-orientation-sagittal' },
+    coronal: { caption: 'Coronal', icon: 'circus-orientation-coronal' }
+  };
+
   return (
     <div className="case-detail-toolbar">
-      <ToolButton name="pager" changeTool={onChangeTool} active={active} />
-      <ToolButton name="zoom" changeTool={onChangeTool} active={active} />
-      <ToolButton name="hand" changeTool={onChangeTool} active={active} />
-      <ToolButton name="window" changeTool={onChangeTool} active={active}>
+      <ToolButton
+        name="pager"
+        icon="rs-pager"
+        changeTool={onChangeTool}
+        active={active}
+      />
+      <ToolButton
+        name="zoom"
+        icon="rs-zoom"
+        changeTool={onChangeTool}
+        active={active}
+      />
+      <ToolButton
+        name="hand"
+        icon="rs-hand"
+        changeTool={onChangeTool}
+        active={active}
+      />
+      <ToolButton
+        name="window"
+        icon="rs-window"
+        changeTool={onChangeTool}
+        active={active}
+      >
         {windowPresets.map((p, i) => (
           <MenuItem
             key={i + 1}
@@ -35,33 +80,45 @@ const ToolBar = props => {
       </ToolButton>
       <ToolButton
         name="brush"
+        icon="rs-brush"
         changeTool={onChangeTool}
         active={active}
         disabled={!brushEnabled}
       />
       <ToolButton
         name="eraser"
+        icon="rs-eraser"
         changeTool={onChangeTool}
         active={active}
         disabled={!brushEnabled}
       />
       <ShrinkSelect
+        className="line-width-shrinkselect"
         options={widthOptions}
         value={'' + lineWidth}
         onChange={val => setLineWidth(parseInt(val, 10))}
       />
       <ToolButton
         name="bucket"
+        icon="rs-bucket"
         changeTool={onChangeTool}
         active={active}
         disabled={!brushEnabled}
+      />
+      <ShrinkSelect
+        className="layout-shrinkselect"
+        name="layout"
+        options={layoutOptions}
+        value={viewOptions.layout}
+        renderer={LayoutRenderer}
+        onChange={handleChangeLayout}
       />
       &ensp;
       <label>
         <input
           type="checkbox"
-          checked={showReferenceLine}
-          onChange={ev => toggleReferenceLine(ev.target.checked)}
+          checked={viewOptions.showReferenceLine}
+          onChange={ev => handleToggleReferenceLine(ev.target.checked)}
         />
         Reference line
       </label>
@@ -71,15 +128,15 @@ const ToolBar = props => {
 export default ToolBar;
 
 const ToolButton = props => {
-  const { name, active, changeTool, disabled, children } = props;
+  const { name, icon, active, changeTool, disabled, children } = props;
   const style = active === name ? 'primary' : 'default';
-  const icon = <span className={'case-detail-tool-icon rs-icon-' + name} />;
+  const iconSpan = <Icon icon={icon} />;
   const onClick = () => !disabled && changeTool(name);
   if (children) {
     return (
       <SplitButton
         id={`toolbutton-${name}`}
-        title={icon}
+        title={iconSpan}
         bsStyle={style}
         onClick={onClick}
         disabled={disabled}
@@ -90,7 +147,7 @@ const ToolButton = props => {
   } else {
     return (
       <Button bsStyle={style} onClick={onClick} disabled={disabled}>
-        {icon}
+        {iconSpan}
       </Button>
     );
   }

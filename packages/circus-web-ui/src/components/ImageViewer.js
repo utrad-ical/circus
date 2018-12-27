@@ -87,7 +87,10 @@ export default class ImageViewer extends React.Component {
   }
 
   componentWillUnmount() {
-    const { onDestroyViewer } = this.props;
+    const { onDestroyViewer, stateChanger } = this.props;
+    if (stateChanger instanceof EventEmitter) {
+      stateChanger.removeListener('change', this.handleChangeState);
+    }
     if (this.viewer) {
       this.viewer.removeAllListeners();
       this.viewer.dispose();

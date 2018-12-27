@@ -49,7 +49,7 @@ const ToolBar = props => {
     } else {
       const value = await prompt('Input window level/width (e.g., "20,100")');
       const [level, width] = value.split(/\,|\//).map(s => parseInt(s, 10));
-      if (width <= 0) return;
+      if (width <= 0 || isNaN(level) || isNaN(width)) return;
       onApplyWindow({ level, width });
     }
   };

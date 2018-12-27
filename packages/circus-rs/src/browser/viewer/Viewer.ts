@@ -297,7 +297,7 @@ export default class Viewer extends EventEmitter {
   public setState(state: ViewState): void {
     let prevState = extend(true, {}, this.viewState);
     this.viewState = extend(true, {}, state);
-    this.emit('statechange', prevState, state);
+    this.emit('stateChange', prevState, state);
     this.render();
     return prevState;
   }
@@ -378,6 +378,6 @@ export default class Viewer extends EventEmitter {
     this.cancelNextRender();
     this.detachCurrentComposition();
     this.stopResizeObserver();
-    this.cancelNextRender();
+    this.removeAllListeners();
   }
 }

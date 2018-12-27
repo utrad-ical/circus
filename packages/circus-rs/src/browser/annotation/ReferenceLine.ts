@@ -37,14 +37,29 @@ export default class ReferenceLine implements Annotation, ViewerEventTarget {
   private dragStartPoint3: Vector3 | undefined = undefined;
 
   public constructor(viewer: Viewer, { color = '#ff00ff' }: Options = {}) {
+    if (!(viewer instanceof Viewer)) {
+      throw new Error('No viewer specified');
+    }
     this.targetViewer = viewer;
     this.color = color;
+    this.handleViewerStateChange = this.handleViewerStateChange.bind(this);
+    viewer.on('stateChange', this.handleViewerStateChange);
+  }
 
-    viewer.on('statechange', (prevState, state) => {
-      const comp = viewer.getComposition();
-      if (comp)
-        comp.viewers.forEach(v => v !== viewer && v.renderAnnotations());
-    });
+  private handleViewerStateChange(
+    prevState: ViewState,
+    state: ViewState
+  ): void {
+    if (
+      prevState.type !== 'mpr' ||
+      state.type !== 'mpr' ||
+      prevState.section === state.section
+    ) {
+      return;
+    }
+    const viewer = this.targetViewer;
+    const comp = viewer.getComposition();
+    if (comp) comp.viewers.forEach(v => v !== viewer && v.renderAnnotations());
   }
 
   public draw(viewer: Viewer, viewState: ViewState, option: DrawOption): void {
@@ -212,6 +227,15 @@ export default class ReferenceLine implements Annotation, ViewerEventTarget {
     if (viewer.getHoveringAnnotation() === this) {
       ev.stopPropagation();
       this.dragStartPoint3 = undefined;
+    }
+  }
+
+  public dispose(): void {
+    if (this.targetViewer) {
+      this.targetViewer.removeListener(
+        'stateChange',
+        this.handleViewerStateChange
+      );
     }
   }
 

@@ -45,7 +45,7 @@ const ViewerCluster = props => {
     initialWindowSetter
   } = props;
 
-  function makeViewer(orientation, initialTool, fixTool) {
+  function makeViewer(orientation, id, initialTool, fixTool) {
     const initialStateSetter = (viewer, viewState) => {
       const s1 = orientationInitialStateSetters[orientation](viewer, viewState);
       const s2 = initialWindowSetter(viewer, s1);
@@ -54,6 +54,7 @@ const ViewerCluster = props => {
 
     return (
       <ImageViewer
+        id={id}
         className={`viewer-${orientation}`}
         composition={composition}
         tool={fixTool ? fixTool : tool}
@@ -70,10 +71,10 @@ const ViewerCluster = props => {
     case 'twoByTwo':
       return (
         <TwoByTwoLayout>
-          {makeViewer('axial')}
-          {makeViewer('sagittal')}
-          {makeViewer('coronal')}
-          {makeViewer('axial', celestialRotate, celestialRotate)}
+          {makeViewer('axial', 'axial')}
+          {makeViewer('sagittal', 'sagittal')}
+          {makeViewer('coronal', 'coronal')}
+          {makeViewer('axial', 'oblique', celestialRotate, celestialRotate)}
         </TwoByTwoLayout>
       );
     case 'one':

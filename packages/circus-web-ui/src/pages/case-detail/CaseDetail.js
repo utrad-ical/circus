@@ -287,7 +287,7 @@ export class Editor extends React.Component {
       composition: null,
       lineWidth: 1
     };
-    this.viewers = new Set();
+    this.viewers = {};
     this.tools = {};
 
     const server = store.getState().loginUser.data.dicomImageServer;
@@ -348,9 +348,15 @@ export class Editor extends React.Component {
       }
     });
     if (showReferenceLine) {
-      this.viewers.forEach(v => {
+      const lineColors = {
+        axial: '#8888ff',
+        sagittal: '#ff6666',
+        coronal: '#88ff88',
+        oblique: '#ffff88'
+      };
+      Object.keys(this.viewers).forEach(k => {
         composition.addAnnotation(
-          new rs.ReferenceLine(v, { color: '#ffff88' })
+          new rs.ReferenceLine(this.viewers[k], { color: lineColors[k] })
         );
       });
     }
@@ -494,12 +500,14 @@ export class Editor extends React.Component {
     this.getTool('eraser').setOptions({ width: lineWidth });
   };
 
-  handleCreateViwer = viewer => {
-    this.viewers.add(viewer);
+  handleCreateViwer = (viewer, id) => {
+    this.viewers[id] = viewer;
   };
 
   handleDestroyViewer = viewer => {
-    this.viewers.delete(viewer);
+    Object.keys(viewer).forEach(k => {
+      if (this.viewer[k] === viewer) delete viewer[k];
+    });
   };
 
   handleSeriesChange = (newData, pushToHistory = false) => {

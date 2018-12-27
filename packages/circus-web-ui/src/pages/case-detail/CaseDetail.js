@@ -283,7 +283,11 @@ export class Editor extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      viewOptions: { layout: 'twoByTwo', showReferenceLine: false },
+      viewOptions: {
+        layout: 'twoByTwo',
+        showReferenceLine: false,
+        interpolationMode: 'trilinear'
+      },
       composition: null,
       lineWidth: 1
     };
@@ -302,18 +306,31 @@ export class Editor extends React.Component {
     this.changeActiveSeries(activeSeriesIndex);
   }
 
-  componentDidUpdate(prevProps) {
+  componentDidUpdate(prevProps, prevState) {
     const { editingData } = this.props;
     const { editingData: prevData } = prevProps;
     if (!editingData) return;
-    if (editingData === prevData) return;
+    if (editingData !== prevData) {
+      if (
+        editingData.revision.series[editingData.activeSeriesIndex].seriesUid !==
+        prevData.revision.series[prevData.activeSeriesIndex].seriesUid
+      ) {
+        this.changeActiveSeries();
+      } else if (editingData !== prevData) {
+        this.updateComposition();
+      }
+    }
     if (
-      editingData.revision.series[editingData.activeSeriesIndex].seriesUid !==
-      prevData.revision.series[prevData.activeSeriesIndex].seriesUid
+      this.stateChanger &&
+      prevState.viewOptions.interpolationMode !==
+        this.state.viewOptions.interpolationMode
     ) {
-      this.changeActiveSeries();
-    } else if (editingData !== prevData) {
-      this.updateComposition();
+      this.stateChanger.emit('change', viewState => {
+        return {
+          ...viewState,
+          interpolationMode: this.state.viewOptions.interpolationMode
+        };
+      });
     }
   }
 
@@ -483,7 +500,9 @@ export class Editor extends React.Component {
   };
 
   handleChangeViewOptions = viewOptions => {
-    this.setState({ viewOptions }, this.updateComposition);
+    this.setState({ viewOptions }, () => {
+      this.updateComposition();
+    });
   };
 
   handleSelectWindowPreset = preset => {

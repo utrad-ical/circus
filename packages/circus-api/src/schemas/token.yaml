@@ -13,4 +13,14 @@ properties:
     date: true
   userId:
     type: string
+  permanentTokenId:
+    oneOf:
+      - type: string
+      - type: 'null'
+    description: Optional identifier for permanent token (this is not a token itself)
+  permanentTokenDescription:
+    oneOf:
+      - type: string
+      - type: 'null'
+    maxLength: 1024
 additionalProperties: false

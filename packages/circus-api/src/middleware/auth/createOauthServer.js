@@ -4,6 +4,8 @@ import { determineUserAccessInfo } from '../../privilegeUtils';
 
 const debug = false;
 
+export const OAuthClientId = 'CIRCUS Front UI';
+
 /**
  * Creates an OAuth2 server that interacts with backend mongo.
  */
@@ -26,7 +28,7 @@ export default function createOauthServer(models) {
       debug && console.log('getClient', arguments);
       if (clientId === 'circus-front') {
         return {
-          clientId: 'CIRCUS Front UI',
+          clientId: OAuthClientId,
           grants: ['password', 'refresh_token']
         };
       }
@@ -73,7 +75,9 @@ export default function createOauthServer(models) {
         refreshToken: token.refreshToken,
         refreshTokenExpiresAt: token.refreshTokenExpiresAt,
         clientId: client.clientId,
-        userId: user.userEmail
+        userId: user.userEmail,
+        permanentTokenId: null,
+        permanentTokenDescription: null
       });
       return { ...token, client, user };
     }

@@ -10,34 +10,52 @@ const packageFile = path.join(__dirname, './package.json');
 const version = JSON.parse(fs.readFileSync(packageFile, 'utf8')).version;
 const glob = require('glob-promise');
 
+const [, , commandName, ...argv] = process.argv;
+
+async function importModule(moduleName, exportName = 'default') {
+  const modulePath = path.join(__dirname, 'src/scripts', `${moduleName}.js`);
+  return require(modulePath)[exportName];
+}
+
 async function main() {
   const commandFiles = await glob(path.join(__dirname, 'src/scripts/*.js'));
   const commands = commandFiles.map(p => path.basename(p, '.js'));
-  const command = process.argv[2];
-  console.log(`CIRCUS-API CLI version ${version}\n`);
-  if (commands.indexOf(command) >= 0) {
-    const module = require(path.join(__dirname, 'src/scripts', `${command}.js`))
-      .default;
-    module(process.argv.slice(3));
-  } else if (command === 'help') {
-    const target = process.argv[3];
-    if (commands.indexOf(target) >= 0) {
-      const module = require(path.join(
-        __dirname,
-        'src/scripts',
-        `${target}.js`
-      )).help;
-      module();
-    } else {
-      console.log('No commands for ' + target);
-    }
-  } else {
+
+  const printUsage = () => {
     console.log('Usage: circus [command]\n');
     console.log('Available commands:');
-    commands.forEach(com => {
-      console.log('  ' + com);
-    });
+    commands.forEach(command => console.log('  ' + command));
     console.log('  help [command]');
+  };
+
+  console.log(`CIRCUS-API CLI version ${version}\n`);
+  if (commands.indexOf(commandName) >= 0) {
+    const module = await importModule(commandName);
+    try {
+      await module.call(null, argv);
+    } catch (err) {
+      console.error(err.message);
+      console.error(err.errors);
+    }
+  } else if (commandName === 'help') {
+    const targetCommand = argv[0];
+    if (commands.indexOf(targetCommand) >= 0) {
+      const module = await importModule(targetCommand, 'help');
+      module();
+    } else {
+      if (targetCommand) {
+        console.error('No help for ' + targetCommand);
+      } else {
+        printUsage();
+      }
+    }
+  } else {
+    if (commandName) {
+      console.error('No command named ' + commandName);
+      process.exit(1);
+    } else {
+      printUsage();
+    }
   }
 }
 

@@ -135,6 +135,12 @@ const Series = props => {
   );
 };
 
+const labelTypeIcons = {
+  voxel: 'circus-annotation-voxels',
+  circle2: 'circus-annotation-circle',
+  rectangle2: 'circus-annotation-rectangle'
+};
+
 export const Label = props => {
   const {
     label,
@@ -145,7 +151,7 @@ export const Label = props => {
     onClick,
     onRemoveClick
   } = props;
-  const caption = label.title ? label.title : `Label #${labelIndex}`;
+  const caption = label.title ? label.title : `#${labelIndex}`;
 
   const changeLabelAlpha = alpha => {
     const newLabel = update(label, { data: { alpha: { $set: alpha } } });
@@ -189,7 +195,7 @@ export const Label = props => {
       onClick={handleClick}
     >
       <div>
-        <Icon icon="tag" /> {caption}
+        <Icon icon={labelTypeIcons[label.type]} /> {caption}
       </div>
       <div>
         <OpacityEditor

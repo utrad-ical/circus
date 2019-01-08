@@ -7,6 +7,7 @@ import chalk from 'chalk';
 import * as path from 'path';
 import createLogger from './createLogger';
 import log4js from 'log4js';
+import scanMigrationFiles from './utils/scanMigrationFiles';
 
 const options = [
   {
@@ -95,10 +96,35 @@ const {
   }
 })();
 
-async function main() {
+const getCurrentDbSchemaRevision = async db => {
+  const migrationCollection = db.collection('migration');
+  const revDoc = await migrationCollection.find({}).toArray();
+  const currentRevision = revDoc.length ? revDoc[0].revision : 0;
+  return currentRevision;
+};
+
+const getLatestDbSchemaRevision = async () => {
+  const revisions = await scanMigrationFiles();
+  return revisions.length - 1;
+};
+
+const main = async () => {
   // Establish db connection (shared throughout app)
   const db = await connectDb();
   const logger = createLogger();
+
+  const currentDbSchemaRevision = await getCurrentDbSchemaRevision(db);
+  const latestDbSchemaRevision = await getLatestDbSchemaRevision();
+  if (currentDbSchemaRevision !== latestDbSchemaRevision) {
+    console.warn(
+      chalk.red(
+        'Warning: DB Schema revision mismatch detected!\n' +
+          `Current revision: ${currentDbSchemaRevision}\n` +
+          `Required revision: ${latestDbSchemaRevision}\n` +
+          'Please run DB migration script.'
+      )
+    );
+  }
 
   if (fixUser) {
     console.warn(chalk.red('WARNING: NO AUTHENTICATION MODE!'));
@@ -150,6 +176,6 @@ async function main() {
       process.exit(err ? 1 : 0);
     });
   });
-}
+};
 
 main();

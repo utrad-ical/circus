@@ -2,9 +2,8 @@
 
 const su = require('../src/browser/section-util');
 const geo = require('../src/common/geometry');
-const { Vector3, Vector2, Box3, Line3 } = require('three');
+const { Vector3, Vector2 } = require('three');
 const assert = require('chai').assert;
-const box = require('../src/common/geometry/Box');
 
 describe('Section', function() {
   it('#parallelToX', function() {
@@ -139,5 +138,61 @@ describe('Section', function() {
     assert.isFalse(geo.sectionEquals(a, { ...a, origin: [0, 1, 1] }));
   });
 
-  describe.skip('sectionOverlapsVolume', function() {});
+  describe('sectionOverlapsVolume', function() {
+    function test(mmSection, expected) {
+      const resolution = new Vector2(10, 10);
+      const voxelSize = new Vector3(1, 1, 1);
+      const voxelCount = new Vector3(10, 10, 10);
+      const vSection = geo.vectorizeSection(mmSection);
+      assert.equal(vSection.xAxis.dot(vSection.yAxis), 0);
+
+      const actual = su.sectionOverlapsVolume(
+        mmSection,
+        resolution,
+        voxelSize,
+        voxelCount
+      );
+      assert.equal(actual, expected);
+    }
+    test(
+      {
+        origin: [10.1, 10.1, 0],
+        xAxis: [10, 0, 0],
+        yAxis: [0, 10, 0]
+      },
+      false
+    );
+    test(
+      {
+        origin: [10, 10, 0],
+        xAxis: [10, 0, 0],
+        yAxis: [0, 10, 0]
+      },
+      true
+    );
+    test(
+      {
+        origin: [0, 0, 0],
+        xAxis: [10, 0, 0],
+        yAxis: [0, 10, 0]
+      },
+      true
+    );
+    test(
+      {
+        origin: [1, 1, 1],
+        xAxis: [1, 0, 0],
+        yAxis: [0, 1, 0]
+      },
+      true
+    );
+    test(
+      {
+        origin: [-1, -1, 1],
+        xAxis: [1000, 0, 0],
+        yAxis: [0, 1000, 0]
+      },
+      true
+    );
+  });
 });

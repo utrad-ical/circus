@@ -64,14 +64,15 @@ export function sortVerticesOfSimplePolygon(vertices: Vector2[]): Vector2[] {
 
 /**
  * Returns true if the given the polygon overlaps the other polygon.
- * @param a polygon
- * @param b polygon
+ * @param a Sorted polygon vertices
+ * @param b Sorted polygon vertices
  */
 export function intersectsPolygon(a: Vector2[], b: Vector2[]): boolean {
   const polygonA: Polygon = { vertices: a, sides: _polygonSides(a) };
   const polygonB: Polygon = { vertices: b, sides: _polygonSides(b) };
 
   if (_intersectsPolygonSide(_polygonSides(a), _polygonSides(b))) {
+    // The sides of the two polygons intersect.
     return true;
   }
 
@@ -85,9 +86,11 @@ export function intersectsPolygon(a: Vector2[], b: Vector2[]): boolean {
       triangulateShapeResultA.vertices.some(v3 => triangle.containsPoint(v3))
     )
   ) {
+    // The vertex of one polygon is inside the other polygon.
     return true;
   }
 
+  // No overlap between the two polygons.
   return false;
 }
 

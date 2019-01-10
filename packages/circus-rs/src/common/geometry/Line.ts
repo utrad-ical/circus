@@ -6,9 +6,9 @@ export interface DirectedSegment {
 }
 
 /**
- * Determine whether line segment ab and line segment cd intersect. (including end points)
- * @param ab line segment ab
- * @param cd line segment cd
+ * Determine whether line segments AB and CD intersect. (including end points)
+ * @param ab line segment AB
+ * @param cd line segment CD
  * @return True if two line segments intersect.
  */
 export function intersectsDirectedSegment(
@@ -19,22 +19,31 @@ export function intersectsDirectedSegment(
 }
 
 /**
- * Determine whether line segment ab and line segment cd intersect. (including end points)
- * @param a end point of line segment ab
- * @param b end point of line segment ab
- * @param c end point of line segment cd
- * @param d end point of line segment cd
- * @return True if two line segments intersect.
+ * Determine whether line segments AB and CD intersect (including end points).
+ * Returns false if a point is given instead of a line segment.
+ * Returns false if two line segments are parallel (including collinear).
+ * @param p1 An end point of the line segment AB
+ * @param p2 An end point of the line segment AB
+ * @param p4 An end point of the line segment CD
+ * @param p3 An end point of the line segment CD
+ * @return True if the two line segments intersect.
  */
 function _intersectsDirectedSegment(
-  a: Vector2,
-  b: Vector2,
-  c: Vector2,
-  d: Vector2
+  p1: Vector2,
+  p2: Vector2,
+  p3: Vector2,
+  p4: Vector2
 ): boolean {
-  const ta = (c.x - d.x) * (a.y - c.y) + (c.y - d.y) * (c.x - a.x);
-  const tb = (c.x - d.x) * (b.y - c.y) + (c.y - d.y) * (c.x - b.x);
-  const tc = (a.x - b.x) * (c.y - a.y) + (a.y - b.y) * (a.x - c.x);
-  const td = (a.x - b.x) * (d.y - a.y) + (a.y - b.y) * (a.x - d.x);
-  return tc * td <= 0 && ta * tb <= 0;
+  const d = (p2.x - p1.x) * (p4.y - p3.y) - (p2.y - p1.y) * (p4.x - p3.x);
+  if (d === 0) {
+    return false;
+  }
+
+  const u = ((p3.x - p1.x) * (p4.y - p3.y) - (p3.y - p1.y) * (p4.x - p3.x)) / d;
+  const v = ((p3.x - p1.x) * (p2.y - p1.y) - (p3.y - p1.y) * (p2.x - p1.x)) / d;
+  if (u < 0 || u > 1 || v < 0 || v > 1) {
+    return false;
+  }
+
+  return true;
 }

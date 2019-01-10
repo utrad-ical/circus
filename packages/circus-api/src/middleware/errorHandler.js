@@ -14,7 +14,6 @@ export default function errorHandler({ includeErrorDetails, logger }) {
         ctx.throw(status.NOT_FOUND, 'Not found');
       }
     } catch (err) {
-      // console.log(err);
       logger.trace(err);
       if (err instanceof Ajv.ValidationError) {
         // JSON validation error occurred.

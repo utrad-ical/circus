@@ -9,6 +9,8 @@
     $date: 4102412399000
   clientId: CIRCUS Front UI
   userId: alice@example.com
+  permanentTokenId: null
+  permanentTokenDescription: null
 -
   accessToken: 8292766837c1901b0a6954f7bda49710316c57da
   accessTokenExpiresAt:
@@ -18,6 +20,8 @@
     $date: 4102412399000
   clientId: CIRCUS Front UI
   userId: bob@example.com
+  permanentTokenId: null
+  permanentTokenDescription: null
 -
   accessToken: 2c2fbaea8046df924b8b459879b799c111e9b7f1
   accessTokenExpiresAt:
@@ -27,3 +31,5 @@
     $date: 4102412399000
   clientId: CIRCUS Front UI
   userId: guest@example.com
+  permanentTokenId: null
+  permanentTokenDescription: null

@@ -3,7 +3,7 @@ import performSearch from '../performSearch';
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import * as JSZip from 'jszip';
-import * as EJSON from 'mongodb-extended-json';
+import * as EJSON from 'mongodb-extjson';
 
 const maskPatientInfo = ctx => {
   return series => {

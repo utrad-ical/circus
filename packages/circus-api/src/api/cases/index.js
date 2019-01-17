@@ -161,10 +161,10 @@ export const handleSearch = ({ models }) => {
   };
 };
 
-export const handleExportAsMhd = ({ models, volumeProvider }) => {
+export const handleExportAsMhd = ({ models, volumeProvider, blobStorage }) => {
   return async (ctx, next) => {
     const caseId = ctx.case.caseId;
     ctx.type = 'application/zip';
-    ctx.body = await packAsMhd({ models, volumeProvider }, caseId);
+    ctx.body = await packAsMhd({ models, volumeProvider, blobStorage }, caseId);
   };
 };

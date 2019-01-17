@@ -90,19 +90,12 @@ type VolumeMetadata = {
 async function extractVolumeMetadata(
   volumeAccessor: VolumeAccessor
 ): Promise<VolumeMetadata> {
-  const {
-    imageMetadata,
-    load,
-    images: origImages,
-    determinePitch
-  } = volumeAccessor;
-  if (origImages.segmentLength() === 0)
+  const { imageMetadata, load, images, determinePitch } = volumeAccessor;
+  if (images.segmentLength() === 0)
     throw new TypeError('Invalid volume accessor.');
 
-  const images = origImages.clone();
   const count = images.length();
-
-  const primaryImageNo = images.shift()!;
+  const primaryImageNo = images.min()!;
   await load(primaryImageNo);
   const primaryMetadata = imageMetadata.get(primaryImageNo)!;
 

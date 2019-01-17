@@ -21,6 +21,7 @@ export interface VolumeAccessor {
   imageMetadata: Map<number, DicomMetadata>;
   volume: RawData;
   load: (range: MultiRangeInitializer, priority?: number) => Promise<void>;
+  determinePitch: () => Promise<number>;
   images: MultiRange;
 }
 
@@ -77,14 +78,39 @@ export function createVolumeProvider(
     // start loading immediately
     priorityLoader.append(images);
 
+    const loadSeries = (range: MultiRangeInitializer, priority: number = 0) => {
+      if (!imageRange.has(range)) throw new RangeError('Invalid image range');
+      priorityLoader.append(range, priority);
+      return priorityLoader.waitFor(range);
+    };
+
+    const determinePitch = async () => {
+      const images = imageRange.clone();
+      const count = images.length();
+
+      const primaryImageNo = images.shift()!;
+      await load(primaryImageNo);
+      const primaryMetadata = imageMetadata.get(primaryImageNo)!;
+
+      if (primaryMetadata.pitch) {
+        return primaryMetadata.pitch;
+      } else if (count > 1) {
+        const secondaryImageNo = images.shift()!;
+        await load(secondaryImageNo);
+        const secondaryMetadata = imageMetadata.get(secondaryImageNo)!;
+        return Math.abs(
+          secondaryMetadata.sliceLocation - primaryMetadata.sliceLocation
+        );
+      } else {
+        return 1;
+      }
+    };
+
     return {
-      load: (range: MultiRangeInitializer, priority: number = 0) => {
-        if (!imageRange.has(range)) throw new RangeError('Invalid image range');
-        priorityLoader.append(range, priority);
-        return priorityLoader.waitFor(range);
-      },
       imageMetadata,
       volume,
+      load: loadSeries,
+      determinePitch,
       images: imageRange
     };
   };

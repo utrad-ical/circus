@@ -90,7 +90,12 @@ type VolumeMetadata = {
 async function extractVolumeMetadata(
   volumeAccessor: VolumeAccessor
 ): Promise<VolumeMetadata> {
-  const { imageMetadata, load, images: origImages } = volumeAccessor;
+  const {
+    imageMetadata,
+    load,
+    images: origImages,
+    determinePitch
+  } = volumeAccessor;
   if (origImages.segmentLength() === 0)
     throw new TypeError('Invalid volume accessor.');
 
@@ -101,20 +106,7 @@ async function extractVolumeMetadata(
   await load(primaryImageNo);
   const primaryMetadata = imageMetadata.get(primaryImageNo)!;
 
-  let pitch: number;
-  if (primaryMetadata.pitch) {
-    pitch = primaryMetadata.pitch;
-  } else if (count > 1) {
-    const secondaryImageNo = images.shift()!;
-    await load(secondaryImageNo);
-    const secondaryMetadata = imageMetadata.get(secondaryImageNo)!;
-
-    pitch = Math.abs(
-      secondaryMetadata.sliceLocation - primaryMetadata.sliceLocation
-    );
-  } else {
-    pitch = 1;
-  }
+  const pitch = await determinePitch();
 
   return {
     voxelCount: [primaryMetadata.columns, primaryMetadata.rows, count],

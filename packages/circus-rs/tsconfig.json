@@ -3,7 +3,7 @@
     "module": "commonjs",
     "sourceMap": true,
     "target": "es5",
-    "outDir": "../lib",
+    "outDir": "./lib",
     "lib": [
       "dom",
       "es2017"

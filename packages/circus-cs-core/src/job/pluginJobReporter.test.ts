@@ -42,9 +42,9 @@ describe('pluginJobReporter', () => {
   });
 
   test('report error', async () => {
-    await reporter.report(jobId, 'error');
+    await reporter.report(jobId, 'failed');
     const check = await collection.findOne({ jobId });
-    expect(check).toMatchObject({ status: 'error' });
+    expect(check).toMatchObject({ status: 'failed' });
     expect(check.finishedAt).toBeFalsy();
   });
 

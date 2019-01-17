@@ -105,7 +105,7 @@ export default function pluginJobRunner(deps: {
       return true;
     } catch (e) {
       console.error(e.message);
-      await jobReporter.report(jobId, 'error', e.message);
+      await jobReporter.report(jobId, 'failed', e.message);
       return false;
     }
   };

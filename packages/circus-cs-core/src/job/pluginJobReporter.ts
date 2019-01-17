@@ -53,12 +53,12 @@ export default function pluginJobReporter(
           }
         );
         break;
-      case 'error':
+      case 'failed':
         await collection.findOneAndUpdate(
           { jobId },
           {
             $set: {
-              status: 'error',
+              status: 'failed',
               errorMessage: payload
             }
           }

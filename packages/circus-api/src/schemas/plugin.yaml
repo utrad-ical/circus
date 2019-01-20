@@ -11,14 +11,20 @@ properties:
       :key: The unique ID of this plug-in.
   pluginName:
     type: string
+    description: >
+      Displayed plug-in name.
   version:
     type: string
+    description: >
+      Semver-compatible plug-in version.
   type:
     enum: ['CAD']
+    description: >
+      Plug-in type. Currently the only supported value is 'CAD'.
   description:
     type: string
-  dockerImage:
-    type: string
+    description: >
+      Short text that describes what this plug-in does.
   icon:
     $ref: icon
 additionalProperties: false

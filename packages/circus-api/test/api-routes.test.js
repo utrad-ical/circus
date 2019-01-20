@@ -885,7 +885,8 @@ describe('API', function() {
 
     it('should return plugin definition specified by pluginId', async function _shouldReturnPluginDefinitionSpecifiedByPluginId() {
       const res = await axios.get(
-        server.url + 'api/plugins/circus-mock%2Ffails'
+        server.url +
+          'api/plugins/74c50a99530ef149c16bc6f0cf71b987470282c54e436e9bec6da704f1fcac9c'
       );
       assert.equal(res.status, 200);
       assert.equal(res.data.pluginName, 'MOCK-VALIDATION-FAILURE');

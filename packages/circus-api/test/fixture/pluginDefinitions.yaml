@@ -1,30 +1,27 @@
-- pluginId: 'circus-mock/empty'
+- pluginId: 'd135e1fbb368e35f940ae8e6deb171e90273958dc3938de5a8237b73bb42d9c2'
   pluginName: 'MOCK-EMPTY'
   description: 'MOCK-EMPTY'
   icon:
     glyph: brain
     color: '#ffffff'
     backgroundColor: '#666666'
-  version: '1.0'
+  version: '1.0.0'
   type: CAD
-  dockerImage: 'd135e1fbb368e35f940ae8e6deb171e90273958dc3938de5a8237b73bb42d9c2'
-- pluginId: 'circus-mock/fails'
+- pluginId: '74c50a99530ef149c16bc6f0cf71b987470282c54e436e9bec6da704f1fcac9c'
   pluginName: 'MOCK-VALIDATION-FAILURE'
   description: 'MOCK-VALIDATION-FAILURE'
   icon:
     glyph: brain
     color: '#ffffff'
     backgroundColor: '#666666'
-  version: '1.0'
+  version: '1.0.0'
   type: CAD
-  dockerImage: '74c50a99530ef149c16bc6f0cf71b987470282c54e436e9bec6da704f1fcac9c'
-- pluginId: 'circus-mock/succeeds'
+- pluginId: 'e2cf1a5f82d62f7b3bd02db78e51008f4f11f8b31aedc96bfd50f3d7c80ba6e6'
   pluginName: 'MOCK-SUCCEEDS'
   description: 'MOCK-SUCCEEDS'
   icon:
     glyph: brain
     color: '#ffffff'
     backgroundColor: '#666666'
-  version: '1.0'
+  version: '1.0.0'
   type: CAD
-  dockerImage: 'e2cf1a5f82d62f7b3bd02db78e51008f4f11f8b31aedc96bfd50f3d7c80ba6e6'

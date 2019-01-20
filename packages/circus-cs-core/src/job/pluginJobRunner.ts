@@ -156,7 +156,7 @@ export async function buildDicomVolume(
   const result = await dockerRunner.run({
     Image: dockerImage,
     HostConfig: {
-      Binds: [`${srcDir}:/data/in`, `${destDir}:/data/out`],
+      Binds: [`${srcDir}:/circus/in`, `${destDir}:/circus/out`],
       AutoRemove: false
     }
   });
@@ -185,17 +185,17 @@ export async function executePlugin(
   destDir: string
 ): Promise<string> {
   const {
-    dockerImage,
+    pluginId,
     maxExecutionSeconds = 3000,
     binds: { in: bindsIn = '/circus/in', out: bindsOut = '/circus/out' } = {}
   } = pluginDefinition;
 
   dockerRunner.setTimeout(maxExecutionSeconds * 1000);
   const result = await dockerRunner.run({
-    Image: dockerImage,
+    Image: pluginId,
     HostConfig: {
       Binds: [`${srcDir}:${bindsIn}`, `${destDir}:${bindsOut}`],
-      AutoRemove: false // Check: Is always false Intended?
+      AutoRemove: true
     }
   });
   return result;

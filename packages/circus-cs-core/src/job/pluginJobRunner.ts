@@ -164,7 +164,7 @@ export async function buildDicomVolume(
   if (!result) {
     throw new Error('Voxel dumper did not finish correctly.');
   }
-  if (!result.match(/Export\s+result:(\d+),(\d+),(\d+)\s+Succeeded/)) {
+  if (!result.match(/Export\s+result:(\d+),(-?\d+),(\d+)\s+Succeeded/)) {
     throw new Error('Voxel dumper returned unexpected result:\n' + result);
   }
 

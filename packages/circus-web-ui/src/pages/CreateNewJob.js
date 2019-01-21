@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { Fragment } from 'react';
 import ShrinkSelect from 'rb/ShrinkSelect';
 import { connect } from 'react-redux';
 import IconButton from 'components/IconButton';
 import { api } from 'utils/api';
 import SeriesSelector from 'components/SeriesSelector';
 import LoadingIndicator from 'rb/LoadingIndicator';
+import PluginDisplay from 'components/PluginDisplay';
 
 class CreateNewJobView extends React.Component {
   constructor(props) {
@@ -64,7 +65,9 @@ class CreateNewJobView extends React.Component {
     const pluginOptions = {};
     Object.keys(plugins).forEach(k => {
       const plugin = plugins[k];
-      pluginOptions[plugin.pluginId] = { caption: plugin.pluginName };
+      pluginOptions[plugin.pluginId] = {
+        caption: <PluginDisplay pluginId={plugin.pluginId} />
+      };
     });
 
     return (

@@ -1,5 +1,5 @@
 import EditorPage from './EditorPage';
-import React from 'react';
+import React, { Fragment } from 'react';
 // import { api } from 'utils/api';
 import LoadingIndicator from 'rb/LoadingIndicator';
 import BodyPartIcon from 'components/BodyPartIcon';
@@ -11,7 +11,7 @@ const makeEmptyItem = () => {
     pluginName: 'new plugin',
     pluginVersion: '1.0.1',
     icon: {
-      glyph: 'b-calc',
+      glyph: 'calc',
       color: '#ffffff',
       backgroundColor: '#555555'
     }
@@ -19,6 +19,13 @@ const makeEmptyItem = () => {
 };
 
 const listColumns = [
+  {
+    key: 'pluginId',
+    caption: 'Plug-in ID',
+    renderer: ({ value: plugin }) => (
+      <Fragment>{plugin.pluginId.substring(0, 12)}</Fragment>
+    )
+  },
   {
     key: 'pluginName',
     caption: 'Plug-in Name',
@@ -30,11 +37,13 @@ const listColumns = [
       </span>
     )
   },
-  { key: 'pluginVersion', caption: 'Plug-in Version' }
+  { key: 'version', caption: 'Version' },
+  { key: 'description', caption: 'Description' }
 ];
 
 const editorProperties = [
   { key: 'pluginName', caption: 'Plug-in Name', editor: et.text() }, // 0
+  { key: 'version', caption: 'Version', editor: et.text() },
   { key: 'icon', caption: 'Icon', editor: IconEditor }
 ];
 
@@ -60,7 +69,7 @@ export default class PluginAdmin extends React.Component {
         editorProperties={editorProperties}
         listColumns={listColumns}
         makeEmptyItem={makeEmptyItem}
-        targetName={item => `${item.pluginName} v${item.pluginVersion}`}
+        targetName={item => `${item.pluginName} v${item.version}`}
       />
     );
   }

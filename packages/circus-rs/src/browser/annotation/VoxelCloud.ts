@@ -100,19 +100,22 @@ export default class VoxelCloud implements Annotation {
 
   /**
    * Removes zero-area along the bounding box.
+   * @returns True if the volume has at least one nonzero voxel
+   * and the minimization succeeded
    */
-  public shrinkToMinimum(): void {
+  public shrinkToMinimum(): boolean {
     if (!this.volume || !this.origin) throw new Error();
     // console.time('shrink to minimum bounding box');
     let boundingBox = scanBoundingBox(this.volume, true);
     if (boundingBox === null) {
-      boundingBox = { origin: [0, 0, 0], size: [1, 1, 1] }; // TODO: Fix this!
+      return false; // No nonzero voxel
     }
     this.origin[0] += boundingBox.origin[0];
     this.origin[1] += boundingBox.origin[1];
     this.origin[2] += boundingBox.origin[2];
     this.volume.transformBoundingBox(boundingBox);
     this._expanded = false;
+    return true;
     // console.timeEnd('shrink to minimum bounding box');
   }
 

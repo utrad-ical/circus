@@ -9,17 +9,29 @@ const asyncMap = async (array, callback) => {
   return Promise.all(array.map(async item => await callback(item)));
 };
 
+export const createEmptyVoxelLabel = () => {
+  return {
+    origin: [0, 0, 0],
+    size: [16, 16, 16],
+    volumeArrayBuffer: new ArrayBuffer(16 * 16 * 16 / 8)
+  };
+};
+
 /**
  * Adds actual `volumeArrayBuffer` data to label.data.
+ * If label is unpainted, make an empty buffer.
  */
 const augumentLabelData = async (label, api) => {
   if (label.type !== 'voxel') return label;
-  const volumeArrayBuffer = await api(`blob/${label.data.voxels}`, {
-    responseType: 'arraybuffer'
-  });
-  return update(label, {
-    data: { volumeArrayBuffer: { $set: volumeArrayBuffer } }
-  });
+  if (label.data.voxels) {
+    const volumeArrayBuffer = await api(`blob/${label.data.voxels}`, {
+      responseType: 'arraybuffer'
+    });
+    return update(label, { data: { $merge: { volumeArrayBuffer } } });
+  } else {
+    // Empty label
+    return update(label, { data: { $merge: createEmptyVoxelLabel() } });
+  }
 };
 
 /**
@@ -48,14 +60,13 @@ const voxelShrinkToMinimum = labelData => {
   const cloud = new rs.VoxelCloud(); // temporary
   cloud.origin = labelData.origin;
   cloud.volume = volume;
-  cloud.shrinkToMinimum();
-  return { origin: cloud.origin, rawData: cloud.volume };
+  const isNotEmpty = cloud.shrinkToMinimum();
+  return isNotEmpty ? { origin: cloud.origin, rawData: cloud.volume } : null;
 };
 
 const prepareLabelSaveData = async (label, api) => {
   if (label.type !== 'voxel') return label;
-  const { origin, rawData } = voxelShrinkToMinimum(label.data);
-  const bb = rs.scanBoundingBox(rawData);
+  const shrinkResult = voxelShrinkToMinimum(label.data);
   const newLabel = {
     type: 'voxel',
     data: {
@@ -64,8 +75,9 @@ const prepareLabelSaveData = async (label, api) => {
       voxels: null
     }
   };
-  if (bb !== null) {
+  if (shrinkResult !== null) {
     // There are painted voxels
+    const { origin, rawData } = shrinkResult;
     const voxels = sha1(rawData.data);
     if (voxels === label.data.voxels) {
       // Skipping unchanged label data

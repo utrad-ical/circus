@@ -7,6 +7,7 @@ import IconButton from 'components/IconButton';
 import Icon from 'components/Icon';
 import Slider from 'rb/Slider';
 import update from 'immutability-helper';
+import { createEmptyVoxelLabel } from './revisionData';
 
 const labelColors = [
   '#ff0000',
@@ -84,12 +85,10 @@ const Series = props => {
     const newLabel = {
       type: 'voxel',
       data: {
-        origin: [0, 0, 0],
-        size: [16, 16, 16],
+        ...createEmptyVoxelLabel(),
         color: '#ff0000',
         alpha: 1,
-        voxels: null,
-        volumeArrayBuffer: new ArrayBuffer(16 * 16 * 16 / 8)
+        voxels: null
       },
       attributes: {}
     };

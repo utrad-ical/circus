@@ -42,6 +42,17 @@ describe('Validator', function() {
       );
     });
 
+    it('sha1hex', async function() {
+      await testFormat(
+        'sha1hex',
+        ['7c04994483c90d718d35d3ffb147cc3a31256f8f'],
+        [
+          'zc04994483c90d718d35d3ffb147cc3a31256f8f', // invalid 'z'
+          'c04994483c90d718d35d3ffb147cc3a31256f8f' // short
+        ]
+      );
+    });
+
     it('multiIntegerRange', async function() {
       await testFormat(
         'multiIntegerRange',

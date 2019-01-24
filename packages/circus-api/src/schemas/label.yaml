@@ -12,7 +12,10 @@ properties:
     type: object
     properties:
       voxels:
-        type: string
+        oneOf:
+          - type: string
+            format: sha1hex
+          - type: 'null'
         description: >
           The hash of voxel data blob, which must be stored beforehands.
       origin:

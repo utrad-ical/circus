@@ -1,5 +1,5 @@
-import * as readline from 'readline';
-import * as password from 'node-php-password';
+import inquirer from 'inquirer';
+import password from 'node-php-password';
 
 export function help() {
   console.log(
@@ -9,13 +9,23 @@ export function help() {
 }
 
 export async function exec() {
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout
-  });
+  const res = await inquirer.prompt([
+    {
+      type: 'password',
+      name: 'pwd1',
+      message: 'Input raw password:'
+    },
+    {
+      type: 'password',
+      name: 'pwd2',
+      message: 'Retype the same password'
+    }
+  ]);
 
-  rl.question('Raw password? ', ans => {
-    console.log(password.hash(ans, undefined, undefined));
-    rl.close();
-  });
+  const { pwd1, pwd2 } = res;
+  if (pwd1 !== pwd2) {
+    throw new Error('Password mismatch.');
+  }
+
+  console.log(password.hash(pwd1, undefined, undefined));
 }

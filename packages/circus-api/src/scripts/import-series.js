@@ -16,6 +16,10 @@ export function help() {
   console.log('Usage: node circus.js import-series [target...]');
 }
 
+export function options() {
+  return [{ names: ['domain', 'd'], type: 'string' }];
+}
+
 function bootstrapDicomImporter(models) {
   const dicomPath = process.env.CIRCUS_DICOM_DIR;
   const dicomRepository = dicomPath
@@ -27,7 +31,7 @@ function bootstrapDicomImporter(models) {
   });
 }
 
-async function importSeries(db, files) {
+async function importSeries(db, files, domain) {
   const validator = await createValidator();
   const models = createModels(db, validator);
   const importer = bootstrapDicomImporter(models);
@@ -59,7 +63,6 @@ async function importSeries(db, files) {
     }
     for (const file of files) {
       console.log(`Importing: ${file}`);
-      const domain = 'default';
       await importer.importFromFile(file, domain);
       count++;
     }
@@ -68,11 +71,18 @@ async function importSeries(db, files) {
   console.log(`Imported ${count} file(s).`);
 }
 
-export default async function exec(files) {
+export async function exec(options) {
   let db;
+
+  const domain = options.domain;
+  if (!domain) throw new Error('Domain must be specified.');
+
+  const files = options._args;
+  if (!files.length) throw new Error('Import target must be specified.');
+
   try {
     db = await connectDb();
-    await importSeries(db, files);
+    await importSeries(db, files, domain);
   } catch (err) {
     console.error(err);
   } finally {

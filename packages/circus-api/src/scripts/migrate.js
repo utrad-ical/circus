@@ -48,7 +48,7 @@ async function migrate(db) {
   }
 }
 
-export default async function exec() {
+export async function exec() {
   let db;
   try {
     db = await connectDb();

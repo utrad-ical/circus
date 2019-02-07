@@ -8,7 +8,7 @@ export function help() {
   console.log('Use this to reset/modify the password of a user.');
 }
 
-export default function generatePasswordHash() {
+export async function exec() {
   const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout

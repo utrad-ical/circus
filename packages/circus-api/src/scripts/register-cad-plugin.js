@@ -8,7 +8,7 @@ export function help() {
   console.log('Interactively register a new CAD plug-in.\n');
 }
 
-export default async function exec() {
+export async function exec() {
   const res = await inquirer.prompt([
     {
       type: 'input',

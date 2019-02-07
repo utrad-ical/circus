@@ -2,6 +2,7 @@
 
 require('@babel/register');
 require('dotenv').config();
+const dashdash = require('dashdash');
 
 const fs = require('fs');
 const path = require('path');
@@ -12,9 +13,9 @@ const glob = require('glob-promise');
 
 const [, , commandName, ...argv] = process.argv;
 
-async function importModule(moduleName, exportName = 'default') {
+async function importModule(moduleName) {
   const modulePath = path.join(__dirname, 'src/scripts', `${moduleName}.js`);
-  return require(modulePath)[exportName];
+  return require(modulePath);
 }
 
 async function main() {
@@ -32,7 +33,10 @@ async function main() {
   if (commands.indexOf(commandName) >= 0) {
     const module = await importModule(commandName);
     try {
-      await module.call(null, argv);
+      const options = module.options ? module.options() : [];
+      const parser = dashdash.createParser({ options });
+      const opts = parser.parse(process.argv.slice(1));
+      await module.exec.call(null, opts);
     } catch (err) {
       console.error(err.message);
       console.error(err.errors);
@@ -40,8 +44,8 @@ async function main() {
   } else if (commandName === 'help') {
     const targetCommand = argv[0];
     if (commands.indexOf(targetCommand) >= 0) {
-      const module = await importModule(targetCommand, 'help');
-      module();
+      const module = await importModule(targetCommand);
+      module.help(argv);
     } else {
       if (targetCommand) {
         console.error('No help for ' + targetCommand);

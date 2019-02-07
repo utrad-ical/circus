@@ -7,7 +7,7 @@ export function help() {
   console.log('Usage: node circus.js clear-token');
 }
 
-export default async function exec() {
+export async function exec() {
   const db = await connectDb();
   try {
     const validator = await createValidator();

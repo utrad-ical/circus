@@ -19,8 +19,8 @@ const generateRandomToken = () => {
   return sha1.digest('hex');
 };
 
-export default async function exec(argv) {
-  const [userEmailOrName] = argv;
+export async function exec(options) {
+  const [userEmailOrName] = options._args;
   if (!userEmailOrName) {
     help();
     return;

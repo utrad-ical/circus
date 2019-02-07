@@ -69,7 +69,7 @@ const putCaseData = async (deps, caseId, zip) => {
           zip.file(
             labelFileBaseName + '.mhd',
             prepareMhdHeaderAsString(
-              PixelFormat.Binary,
+              PixelFormat.UInt8,
               dimension,
               elementSpacing,
               labelFileBaseName + '.raw'

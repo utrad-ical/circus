@@ -10,6 +10,7 @@ const path = require('path');
 const packageFile = path.join(__dirname, './package.json');
 const version = JSON.parse(fs.readFileSync(packageFile, 'utf8')).version;
 const glob = require('glob-promise');
+const chalk = require('chalk');
 
 const [, , commandName, ...argv] = process.argv;
 
@@ -29,7 +30,7 @@ async function main() {
     console.log('  help [command]');
   };
 
-  console.log(`CIRCUS-API CLI version ${version}\n`);
+  console.log(chalk.yellow(`CIRCUS-API CLI version ${version}\n`));
   if (commands.indexOf(commandName) >= 0) {
     const module = await importModule(commandName);
     try {
@@ -45,7 +46,11 @@ async function main() {
     const targetCommand = argv[0];
     if (commands.indexOf(targetCommand) >= 0) {
       const module = await importModule(targetCommand);
-      module.help(argv);
+      const options = module.options ? module.options() : [];
+      const parser = dashdash.createParser({ options });
+      const optionText =
+        options.length > 0 ? '\nOptions:\n' + parser.help({ indent: 2 }) : '';
+      module.help(optionText);
     } else {
       if (targetCommand) {
         console.error('No help for ' + targetCommand);

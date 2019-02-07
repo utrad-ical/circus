@@ -11,13 +11,23 @@ import {
   MemoryDicomFileRepository
 } from '@utrad-ical/circus-lib/lib/dicom-file-repository';
 
-export function help() {
+export function help(optionText) {
   console.log('Imports DICOM series from file/directory.\n');
-  console.log('Usage: node circus.js import-series [target...]');
+  console.log(
+    'Usage: node circus.js import-series --domain=DOMAIN [target...]'
+  );
+  console.log(optionText);
 }
 
 export function options() {
-  return [{ names: ['domain', 'd'], type: 'string' }];
+  return [
+    {
+      names: ['domain', 'd'],
+      help: 'Import domain.',
+      helpArg: 'DOMAIN',
+      type: 'string'
+    }
+  ];
 }
 
 function bootstrapDicomImporter(models) {

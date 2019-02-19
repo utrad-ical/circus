@@ -29,7 +29,7 @@ import PluginJobQueueAdmin from 'pages/admin/PluginJobQueueAdmin';
 import PluginAdmin from 'pages/admin/PluginAdmin';
 import Preferences from 'pages/Preferences';
 
-import { store } from 'store';
+import { store } from './store';
 import { Provider } from 'react-redux';
 import { ThemeProvider } from 'styled-components';
 import tinycolor from 'tinycolor2';

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { ButtonGroup } from 'components/react-bootstrap';
 import IconButton from 'components/IconButton';
 import { alert } from 'rb/modal';
@@ -28,66 +28,57 @@ const PersonalConsensualSwitch = props => {
   );
 };
 
-export default class FeedbackSwitcher extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      isConsensual: false,
-      status: 'unsaved',
-      editingFeedback: ['', '', ''],
-      feedbackId: this.selectInitialFeedback(props)
-    };
-  }
+/**
+ * Choose which feedback to show or edit according to the following rule:
+ * 1. If consensual feedback has been registered, use it
+ * 2. If current user's personal feedback has been registered, use it
+ */
+const selectInitialFeedback = props => {
+  const { job } = props;
+  const consensual = job.feedbacks.find(f => f.consensual);
+  if (consensual) return consensual.feedbackId;
+  const myPersonal = job.feedbacks.find(
+    f => !f.consensual && f.enteredBy === props.user.userEmail
+  );
+  if (myPersonal) return myPersonal.feedbackId;
+  return null;
+};
 
-  selectInitialFeedback = props => {
-    const { job } = props;
-    // Choose which feedback to show or edit according to the following rule:
-    // 1. If consensual feedback has been registered, use it
-    // 2. If current user's personal feedback has been registered, use it
-    const consensual = job.feedbacks.find(f => f.consensual);
-    if (consensual) return consensual.feedbackId;
-    const myPersonal = job.feedbacks.find(
-      f => !f.consensual && f.enteredBy === props.user.userEmail
-    );
-    if (myPersonal) return myPersonal.feedbackId;
-    return null;
+const FeedbackSwitcher = props => {
+  const [isConsensual, setIsConsensual] = useState(false);
+  const [status, setStatus] = useState('unsaved');
+  const [editingFeedback, setEditingFeedback] = useState(['', '', '']);
+  const [feedbackId, setFeedbackId] = useState(selectInitialFeedback(props));
+
+  const handleModeChange = mode => {
+    setIsConsensual(mode === 'consensual');
   };
 
-  handleFeedbackChange = feedback => {
-    this.setState({ editingFeedback: feedback });
-  };
-
-  handleModeChange = mode => {
-    this.setState({ isConsensual: mode === 'consensual' });
-  };
-
-  handleRegisterClick = async () => {
-    const { editingFeedback } = this.state;
+  const handleRegisterClick = async () => {
     await alert(JSON.stringify(editingFeedback));
   };
 
-  render() {
-    const { jobRenderer: JobRenderer } = this.props;
-    const { isConsensual, editingFeedback } = this.state;
-    return (
-      <div>
-        <div className="feedback-mode-switch">
-          <PersonalConsensualSwitch
-            mode={isConsensual ? 'consensual' : 'personal'}
-            onModeChange={this.handleModeChange}
-          />
-        </div>
-        <JobRenderer
-          {...this.props}
-          feedback={editingFeedback}
-          onFeedbackChange={this.handleFeedbackChange}
+  const { jobRenderer: JobRenderer } = props;
+  return (
+    <div>
+      <div className="feedback-mode-switch">
+        <PersonalConsensualSwitch
+          mode={isConsensual ? 'consensual' : 'personal'}
+          onModeChange={handleModeChange}
         />
-        <div className="feedback-register-panel">
-          <IconButton icon="save" onClick={this.handleRegisterClick}>
-            Regsiter feedback
-          </IconButton>
-        </div>
       </div>
-    );
-  }
-}
+      <JobRenderer
+        {...props}
+        feedback={editingFeedback}
+        onFeedbackChange={setEditingFeedback}
+      />
+      <div className="feedback-register-panel">
+        <IconButton icon="save" onClick={handleRegisterClick}>
+          Regsiter feedback
+        </IconButton>
+      </div>
+    </div>
+  );
+};
+
+export default FeedbackSwitcher;

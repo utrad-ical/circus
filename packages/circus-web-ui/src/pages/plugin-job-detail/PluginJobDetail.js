@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import PatientInfoBox from 'components/PatientInfoBox';
 import FullSpanContainer from 'components/FullSpanContainer';
 import { api } from 'utils/api';
@@ -40,15 +40,14 @@ const PluginJobDetailPage = props => {
   );
 };
 
-class ConnectedPluginJobDetail extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = { job: null };
-  }
+const ConnectedPluginJobDetail = props => {
+  const [job, setJob] = useState(null);
+  const [errorMessage, setErrorMessage] = useState(null);
+  const [seriesData, setSeriesData] = useState(null);
+  const plugin = null;
 
-  async componentDidMount() {
-    const jobId = this.props.match.params.jobId;
-
+  const fetchJob = async () => {
+    const jobId = props.match.params.jobId;
     try {
       const job = await api(`plugin-jobs/${jobId}`);
       const seriesData = {};
@@ -57,31 +56,32 @@ class ConnectedPluginJobDetail extends React.Component {
         if (seriesUid in seriesData) continue;
         seriesData[seriesUid] = await api(`series/${seriesUid}`);
       }
-      this.setState({ job, seriesData });
+      setJob(job);
+      setSeriesData(seriesData);
     } catch (e) {
-      this.setState({ errorMessage: e.message });
+      setErrorMessage(e.message);
     }
-  }
+  };
 
-  render() {
-    if (this.state.errorMessage) {
-      return (
-        <div className="alert alert-danger">{this.state.errorMessage}</div>
-      );
-    } else if (this.state.job) {
-      return (
-        <PluginJobDetailPage
-          jobRenderer={PluginJobDetailView}
-          job={this.state.job}
-          seriesData={this.state.seriesData}
-          plugin={this.state.plugin}
-        />
-      );
-    } else {
-      return <LoadingIndicator />;
-    }
+  useEffect(() => {
+    fetchJob();
+  }, []);
+
+  if (errorMessage) {
+    return <div className="alert alert-danger">{errorMessage}</div>;
+  } else if (job && seriesData) {
+    return (
+      <PluginJobDetailPage
+        jobRenderer={PluginJobDetailView}
+        job={job}
+        seriesData={seriesData}
+        plugin={plugin}
+      />
+    );
+  } else {
+    return <LoadingIndicator />;
   }
-}
+};
 
 const PluginJobDetail = connect(state => ({ user: state.loginUser.data }))(
   ConnectedPluginJobDetail

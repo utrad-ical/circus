@@ -7,7 +7,7 @@ import LesionCandidates from './LesionCandidates';
 import PluginDisplay from 'components/PluginDisplay';
 import SelectionFeedbackListener from './feedback-listener/SelectionFeedbackListener';
 import FeedbackSwitcher from './FeedbackSwitcher';
-import { connect } from 'react-redux';
+import useLoginUser from 'utils/useLoginUser';
 
 const PluginJobDetailView = props => {
   const { job, onFeedbackChange, feedback } = props;
@@ -40,10 +40,11 @@ const PluginJobDetailPage = props => {
   );
 };
 
-const ConnectedPluginJobDetail = props => {
+const PluginJobDetail = props => {
   const [job, setJob] = useState(null);
   const [errorMessage, setErrorMessage] = useState(null);
   const [seriesData, setSeriesData] = useState(null);
+  // const user = useLoginUser();
   const plugin = null;
 
   const fetchJob = async () => {
@@ -82,9 +83,5 @@ const ConnectedPluginJobDetail = props => {
     return <LoadingIndicator />;
   }
 };
-
-const PluginJobDetail = connect(state => ({ user: state.loginUser.data }))(
-  ConnectedPluginJobDetail
-);
 
 export default PluginJobDetail;

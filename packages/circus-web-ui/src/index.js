@@ -31,6 +31,7 @@ import Preferences from 'pages/Preferences';
 
 import { store } from './store';
 import { Provider } from 'react-redux';
+import { StoreContext } from 'redux-react-hook';
 import { ThemeProvider } from 'styled-components';
 import tinycolor from 'tinycolor2';
 import { refreshUserInfo, dismissMessageOnPageChange } from 'actions';
@@ -92,16 +93,18 @@ const AppRoutes = props => {
 };
 
 ReactDOM.render(
-  <Provider store={store}>
-    <ThemeProvider theme={theme}>
-      <Router history={browserHistory}>
-        <Switch>
-          <Route exact path="/" component={LoginScreen} />
-          <AppRoutes />
-        </Switch>
-      </Router>
-    </ThemeProvider>
-  </Provider>,
+  <StoreContext.Provider value={store}>
+    <Provider store={store}>
+      <ThemeProvider theme={theme}>
+        <Router history={browserHistory}>
+          <Switch>
+            <Route exact path="/" component={LoginScreen} />
+            <AppRoutes />
+          </Switch>
+        </Router>
+      </ThemeProvider>
+    </Provider>
+  </StoreContext.Provider>,
   document.getElementById('app')
 );
 

@@ -75,6 +75,7 @@
     "glob-promise": "^3.3.0",
     "mongoose": "^4.6.8",
     "multi-integer-range": "^4.0.2",
+    "redux-react-hook": "^3.2.0",
     "webpack-glsl-loader": "^1.0.1"
   },
   "prettier": {

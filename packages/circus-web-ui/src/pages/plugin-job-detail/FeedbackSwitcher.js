@@ -1,10 +1,10 @@
-import React, { useReducer } from 'react';
+import React, { useReducer, Fragment } from 'react';
 import IconButton from 'components/IconButton';
 import Icon from 'components/Icon';
 import { alert } from 'rb/modal';
 import { api } from 'utils/api';
+import styled from 'styled-components';
 import Moment from 'moment';
-import update from 'immutability-helper';
 
 const PersonalConsensualSwitch = props => {
   const { feedbackState: { isConsensual }, feedbackDispatch } = props;
@@ -33,57 +33,90 @@ const PersonalConsensualSwitch = props => {
   );
 };
 
-const fromNow = date => new Moment(date).fromNow();
+const registeredMessage = feedback => {
+  const m = new Moment(feedback.createdAt);
+  const modeStr = feedback.isConsensual ? 'Consensual' : 'Personal';
+  return (
+    <Fragment>
+      {modeStr} feedback registered{' '}
+      <span title={m.format()}>{m.fromNow()}</span>
+    </Fragment>
+  );
+};
 
 const reducer = (state, action) => {
   switch (action.type) {
-    case 'initialize': {
+    case 'reset': {
       // Choose which feedback to show or edit according to the following rule:
-      // 1. If consensual feedback is registered, show it
       const state = {
         isConsensual: false,
-        editingData: {},
+        currentData: {},
         canRegister: false,
         canEdit: false,
         message: '',
+        feedbacks: action.feedbacks,
         myUserEmail: action.myUserEmail
       };
       const consensual = action.feedbacks.find(f => f.consensual);
+      const myPersonal = action.feedbacks.find(
+        f => !f.consensual && f.enteredBy === action.myUserEmail
+      );
+      // 1. If consensual feedback is registered, show it
       if (consensual) {
         return {
           ...state,
           isConsensual: true,
-          editingData: consensual.data,
-          message:
-            'Consensual feedback registered ' + fromNow(consensual.craetedAt)
+          currentData: consensual.data,
+          message: registeredMessage(consensual)
         };
       }
       // 2. If current user's personal feedback has been registered, show it
-      const myPersonal = action.feedbacks.find(
-        f => !f.consensual && f.enteredBy === action.userEmail
-      );
       if (myPersonal) {
         return {
           ...state,
-          editingData: myPersonal.data,
-          message:
-            'Personal feedback registered ' + fromNow(myPersonal.createdAt)
+          currentData: myPersonal.data,
+          message: registeredMessage(myPersonal)
         };
       }
       // 3. Otherwise, enter personal mode and show empty feedback
-      return {
-        ...state,
-        canEdit: true
-      };
+      return { ...state, canEdit: true };
     }
     case 'changeFeedback':
-      return update(state, { editingData: { $set: action.value } });
-    case 'enterConsensualMode':
-      return update(state, { isConsensual: { $set: true } });
-    case 'enterPersonalMode':
-      return update(state, { isConsensual: { $set: false } });
+      return { ...state, currentData: action.value };
+    case 'enterConsensualMode': {
+      const consensual = state.feedbacks.find(f => f.consensual);
+      return {
+        ...state,
+        isConsensual: true,
+        canEdit: !consensual,
+        canRegister: false,
+        currentData: consensual ? consensual.data : {},
+        message: consensual ? registeredMessage(consensual) : ''
+      };
+    }
+    case 'enterPersonalMode': {
+      const myPersonal = state.feedbacks.find(
+        f => !f.consensual && f.enteredBy === state.myUserEmail
+      );
+      return {
+        ...state,
+        isConsensual: false,
+        canEdit: !myPersonal,
+        canRegister: false,
+        currentData: myPersonal ? myPersonal.data : {},
+        message: myPersonal ? registeredMessage(myPersonal) : ''
+      };
+    }
   }
 };
+
+const StyledDiv = styled.div`
+  margin: 1em 0;
+  text-align: right;
+  .feedback-regsiter-message {
+    margin-right: 1em;
+  }
+`;
 
 const FeedbackSwitcher = props => {
   const { job } = props;
@@ -92,7 +125,7 @@ const FeedbackSwitcher = props => {
   const [feedbackState, feedbackDispatch] = useReducer(reducer);
   if (!feedbackState) {
     feedbackDispatch({
-      type: 'initialize',
+      type: 'reset',
       feedbacks: job.feedbacks,
       myUserEmail: props.userEmail
     });
@@ -100,11 +133,11 @@ const FeedbackSwitcher = props => {
   }
 
   const handleRegisterClick = async () => {
-    await alert(JSON.stringify(feedbackState.editingData));
+    await alert(JSON.stringify(feedbackState.currentData));
     const mode = feedbackState.isConsensual ? 'consensual' : 'personal';
     api(`plugin-jobs/${jobId}/feedback/${mode}`, {
       method: 'POST',
-      data: feedbackState.editingData
+      data: feedbackState.currentData
     });
   };
 
@@ -122,9 +155,9 @@ const FeedbackSwitcher = props => {
         feedbackState={feedbackState}
         feedbackDispatch={feedbackDispatch}
       />
-      <div className="feedback-register-panel">
+      <StyledDiv>
         {feedbackState.message && (
-          <span className="feedback-regsiter-time">
+          <span className="feedback-regsiter-message">
             {feedbackState.message}
           </span>
         )}
@@ -136,7 +169,7 @@ const FeedbackSwitcher = props => {
           Regsiter {feedbackState.isConsensual ? 'consensual' : 'personal'}{' '}
           feedback
         </IconButton>
-      </div>
+      </StyledDiv>
     </div>
   );
 };

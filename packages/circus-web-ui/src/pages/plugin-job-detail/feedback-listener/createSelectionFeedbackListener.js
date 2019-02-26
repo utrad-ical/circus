@@ -23,16 +23,21 @@ const StyledButton = styled.button`
     color: ${props =>
       readableBlackOrWhite(props.activeColor || props.theme.brandDark)};
   }
+  &:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+  }
 `;
 
 const SelectionButton = props => {
-  const { value, def, onClick } = props;
+  const { value, def, onClick, disabled } = props;
   return (
     <StyledButton
       className={classnames({ active: value === def.value })}
       backgroundColor={props.def.backgroundColor}
       activeColor={props.def.activeColor}
       onClick={onClick}
+      disabled={disabled}
     >
       {def.caption || value}
     </StyledButton>
@@ -41,7 +46,7 @@ const SelectionButton = props => {
 
 const createSelectionFeedbackListener = options => {
   const SelectionFeedbackListener = props => {
-    const { onChange, isConsensual, value } = props;
+    const { onChange, isConsensual, value, canEdit } = props;
 
     const handleClick = selected => {
       onChange(selected);
@@ -55,6 +60,7 @@ const createSelectionFeedbackListener = options => {
           <SelectionButton
             key={i}
             value={value}
+            disabled={!canEdit}
             def={o}
             onClick={() => handleClick(o.value)}
           />

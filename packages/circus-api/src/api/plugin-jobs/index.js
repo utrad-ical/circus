@@ -95,12 +95,38 @@ export const handlePostFeedback = ({ models }) => {
   return async (ctx, next) => {
     const jobId = ctx.params.jobId;
     const job = await models.pluginJob.findByIdOrFail(jobId);
+
+    const mode = ctx.params.mode;
+    if (mode !== 'personal' && mode !== 'consensual') {
+      ctx.throw(status.BAD_REQUEST, 'Invalid feedback mode string.');
+    }
+    const isConsensual = mode === 'consensual';
+
+    const feedbacks = job.feedbacks;
+    if (feedbacks.find(f => f.isConsensual)) {
+      ctx.throw(
+        status.BAD_REQUEST,
+        'A consensual feedback has been already registered.'
+      );
+    }
+
+    if (
+      !isConsensual &&
+      feedbacks.find(f => !f.isConsensual && f.userEmail === ctx.user.userEmail)
+    ) {
+      ctx.throw(
+        status.BAD_REQUEST,
+        'Personal feedback of this user has been already registered.'
+      );
+    }
+
     const feedbackId = generateUniqueId();
     const item = {
       feedbackId,
       userEmail: ctx.user.userEmail,
+      isConsensual,
       createdAt: new Date(),
-      ...ctx.request.body
+      data: ctx.request.body
     };
     await models.pluginJob.modifyOne(jobId, {
       feedbacks: [...job.feedbacks, item]

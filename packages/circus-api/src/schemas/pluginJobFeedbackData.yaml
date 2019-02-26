@@ -1,0 +1,16 @@
+$schema: 'http://json-schema.org/schema#'
+$async: true
+title: PluginJobFeedbackData
+type: object
+description: >
+  Represents a CIRCUS CS feedback data.
+properties:
+  lesionCandidates:
+    type: array
+    items:
+      type: object
+      properties:
+        id:
+          type: integer
+      requiredProperties: ['id', 'value']
+additionalProperties: false

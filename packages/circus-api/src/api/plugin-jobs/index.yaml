@@ -47,10 +47,10 @@ routes:
       Returns the detail of the specified plug-in job.
     responseSchema: pluginJob
   - verb: post
-    path: /plugin-jobs/:jobId/feedback
+    path: /plugin-jobs/:jobId/feedback/:mode
     description: >
       Creates a new feedback entry for the specified plug-in job.
-    requestSchema: pluginJobFeedback|allRequiredExcept feedbackId,userEmail,createdAt
+    requestSchema: pluginJobFeedbackData
     handler: handlePostFeedback
   - verb: get
     path: /plugin-jobs/:jobId/feedback

@@ -11,7 +11,8 @@ properties:
     type: boolean
   userEmail:
     type: string
-  data: {} # type: any
+  data:
+    $ref: pluginJobFeedbackData
   actionLog:
     type: array
     items:

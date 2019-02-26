@@ -1,4 +1,4 @@
-import React, { Fragment } from 'react';
+import React from 'react';
 import ImageViewer from 'components/ImageViewer';
 import IconButton from 'components/IconButton';
 import styled from 'styled-components';
@@ -148,22 +148,24 @@ class LesionCandidatesView extends React.Component {
   }
 
   handleFeedbackChange = (index, selected) => {
-    const { onFeedbackChange, feedback } = this.props;
-    const newFeedback = feedback
+    const { feedbackDispatch, feedbackState } = this.props;
+    const candidateFeedback = feedbackState.editingData.lesionCandidates || [];
+    const newFeedback = candidateFeedback
       .filter(item => item.id !== index)
       .concat([{ id: index, value: selected }])
       .sort((a, b) => a.index - b.index);
-    onFeedbackChange(newFeedback);
+    feedbackDispatch({
+      type: 'changeFeedback',
+      value: {
+        ...feedbackState.editingData,
+        lesionCandidates: newFeedback
+      }
+    });
   };
 
   render() {
-    const {
-      value,
-      feedbackListener,
-      feedback,
-      isConsensual,
-      canEditFeedback
-    } = this.props;
+    const { value, feedbackListener, feedbackState } = this.props;
+    const feedback = feedbackState.editingData.lesionCandidates || [];
     const truncated = value.slice(0, 3);
     return (
       <StyledDiv>
@@ -189,8 +191,8 @@ class LesionCandidatesView extends React.Component {
                 value={cand}
                 feedbackListener={feedbackListener}
                 feedback={feedbackItem ? feedbackItem.value : undefined}
-                canEditFeedback={canEditFeedback}
-                isConsensual={isConsensual}
+                canEditFeedback={feedbackState.canEditFeedback}
+                isConsensual={feedbackState.isConsensual}
                 index={i}
                 onFeedbackChange={this.handleFeedbackChange}
                 composition={this.state.composition}

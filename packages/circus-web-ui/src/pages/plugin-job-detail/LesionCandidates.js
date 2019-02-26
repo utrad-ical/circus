@@ -15,12 +15,12 @@ class Candidate extends React.PureComponent {
 
   handleReady = () => {
     const { composition, value } = this.props;
-    const vs = composition.imageSource.metadata.voxelSize;
+    const voxelSize = composition.imageSource.metadata.voxelSize;
     this.stateChanger.emit('change', state => {
       const newOrigin = [
         state.section.origin[0],
         state.section.origin[1],
-        vs[2] * value.location[2]
+        voxelSize[2] * value.location[2]
       ];
       return {
         ...state,
@@ -47,7 +47,8 @@ class Candidate extends React.PureComponent {
       feedbackListener: FeedbackListener,
       feedback,
       composition,
-      tool
+      tool,
+      isConsensual
     } = this.props;
 
     return (
@@ -66,7 +67,7 @@ class Candidate extends React.PureComponent {
         <div className="feedback-listener">
           <FeedbackListener
             value={feedback}
-            options={['TP', 'FP', 'pending']}
+            isConsensual={isConsensual}
             onChange={val => onFeedbackChange(index, val)}
           />
         </div>
@@ -141,8 +142,10 @@ class LesionCandidatesView extends React.Component {
 
   handleFeedbackChange = (index, selected) => {
     const { onFeedbackChange, feedback } = this.props;
-    const newFeedback = feedback.slice();
-    newFeedback[index] = selected;
+    const newFeedback = feedback
+      .filter(item => item.id !== index)
+      .concat([{ id: index, value: selected }])
+      .sort((a, b) => a.index - b.index);
     onFeedbackChange(newFeedback);
   };
 
@@ -154,7 +157,7 @@ class LesionCandidatesView extends React.Component {
   };
 
   render() {
-    const { value, feedbackListener, feedback } = this.props;
+    const { value, feedbackListener, feedback, isConsensual } = this.props;
     const truncated = value.slice(0, 3);
     return (
       <Fragment>
@@ -164,18 +167,22 @@ class LesionCandidatesView extends React.Component {
           </Button>
         </div>
         <StyledDiv>
-          {truncated.map((cand, i) => (
-            <Candidate
-              key={i}
-              value={cand}
-              feedbackListener={feedbackListener}
-              feedback={feedback[i]}
-              index={i}
-              onFeedbackChange={this.handleFeedbackChange}
-              composition={this.state.composition}
-              tool={this.tools[this.state.toolName]}
-            />
-          ))}
+          {truncated.map((cand, i) => {
+            const feedbackItem = feedback.find(item => item.id === i);
+            return (
+              <Candidate
+                key={i}
+                value={cand}
+                feedbackListener={feedbackListener}
+                feedback={feedbackItem ? feedbackItem.value : undefined}
+                isConsensual={isConsensual}
+                index={i}
+                onFeedbackChange={this.handleFeedbackChange}
+                composition={this.state.composition}
+                tool={this.tools[this.state.toolName]}
+              />
+            );
+          })}
         </StyledDiv>
       </Fragment>
     );

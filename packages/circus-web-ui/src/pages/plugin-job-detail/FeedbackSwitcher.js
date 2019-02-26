@@ -47,7 +47,7 @@ const selectInitialFeedback = props => {
 const FeedbackSwitcher = props => {
   const [isConsensual, setIsConsensual] = useState(false);
   const [status, setStatus] = useState('unsaved');
-  const [editingFeedback, setEditingFeedback] = useState(['', '', '']);
+  const [editingFeedback, setEditingFeedback] = useState([]);
   const [feedbackId, setFeedbackId] = useState(selectInitialFeedback(props));
 
   const handleModeChange = mode => {
@@ -69,6 +69,7 @@ const FeedbackSwitcher = props => {
       </div>
       <JobRenderer
         {...props}
+        isConsensual={isConsensual}
         feedback={editingFeedback}
         onFeedbackChange={setEditingFeedback}
       />

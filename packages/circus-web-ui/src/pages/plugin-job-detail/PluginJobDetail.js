@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useReducer, useMemo } from 'react';
 import { useApi } from 'utils/api';
 import PatientInfoBox from 'components/PatientInfoBox';
 import FullSpanContainer from 'components/FullSpanContainer';
@@ -36,7 +36,8 @@ const StyledDiv = styled.div`
 
 const useJobDetailData = jobId => {
   const api = useApi();
-  const [data, setData] = useState(undefined);
+  const [jobData, setJobData] = useState(undefined);
+  const [counter, reloadJob] = useReducer(x => x + 1, 0); // increamenting this will rerun fetchJob
 
   const fetchJob = async () => {
     try {
@@ -48,9 +49,9 @@ const useJobDetailData = jobId => {
         seriesData[seriesUid] = await api(`series/${seriesUid}`);
       }
       const result = { job, seriesData };
-      setData(result);
+      setJobData(result);
     } catch (e) {
-      setData(e);
+      setJobData(e);
     }
   };
 
@@ -58,10 +59,10 @@ const useJobDetailData = jobId => {
     () => {
       fetchJob();
     },
-    [jobId]
+    [jobId, counter]
   );
 
-  return data;
+  return { jobData, reloadJob };
 };
 
 const createFeedbackTargets = () => {
@@ -100,7 +101,7 @@ const createFeedbackTargets = () => {
 
 const PluginJobDetail = props => {
   const jobId = props.match.params.jobId;
-  const jobData = useJobDetailData(jobId);
+  const { jobData, reloadJob } = useJobDetailData(jobId);
   const feedbackTargets = useMemo(() => createFeedbackTargets(), []);
   const [feedbackState, dispatch] = useFeedback();
   const api = useApi();
@@ -144,7 +145,9 @@ const PluginJobDetail = props => {
     if (isConsensual) {
       const value = {};
       feedbackTargets.forEach(t => {
-        const pfbs = job.feedbacks.filter(f => !f.isConsensual);
+        const pfbs = job.feedbacks
+          .filter(f => !f.isConsensual)
+          .map(f => f.data[t.feedbackKey]);
         value[t.feedbackKey] = t.createInitialConsensualFeedback(pfbs);
       });
       dispatch({ type: 'enterConsensualMode', value });
@@ -156,10 +159,11 @@ const PluginJobDetail = props => {
   const handleRegisterClick = async () => {
     await alert(JSON.stringify(feedbackState.currentData));
     const mode = feedbackState.isConsensual ? 'consensual' : 'personal';
-    api(`plugin-jobs/${jobId}/feedback/${mode}`, {
+    await api(`plugin-jobs/${jobId}/feedback/${mode}`, {
       method: 'POST',
       data: feedbackState.currentData
     });
+    reloadJob();
   };
 
   const modeText = feedbackState.isConsensual ? 'consensual' : 'personal';

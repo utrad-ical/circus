@@ -1,31 +1,32 @@
-import React, { useReducer, Fragment } from 'react';
+import React, { useReducer, Fragment, useContext } from 'react';
 import IconButton from 'components/IconButton';
 import Icon from 'components/Icon';
 import { alert } from 'rb/modal';
 import { api } from 'utils/api';
 import styled from 'styled-components';
 import Moment from 'moment';
+import FeedbackListenerContext from './FeedbackListenerContext';
 
 const PersonalConsensualSwitch = props => {
-  const { feedbackState: { isConsensual }, feedbackDispatch } = props;
+  const { feedbackState: { isConsensual }, onChange } = props;
   return (
     <div>
       <IconButton
         icon="user"
         bsStyle={isConsensual ? 'default' : 'primary'}
         active={!isConsensual}
-        onClick={() => feedbackDispatch({ type: 'enterPersonalMode' })}
+        onClick={() => onChange(false)}
       >
         Personal Mode
       </IconButton>
-      &ensp;
+      &thinsp;
       <Icon icon="chevron-right" />
-      &ensp;
+      &thinsp;
       <IconButton
         icon="tower"
         bsStyle={isConsensual ? 'primary' : 'default'}
         active={isConsensual}
-        onClick={() => feedbackDispatch({ type: 'enterConsensualMode' })}
+        onClick={() => onChange(true)}
       >
         Consensual Mode
       </IconButton>
@@ -90,7 +91,7 @@ const reducer = (state, action) => {
         isConsensual: true,
         canEdit: !consensual,
         canRegister: false,
-        currentData: consensual ? consensual.data : {},
+        currentData: consensual ? consensual.data : action.value,
         message: consensual ? registeredMessage(consensual) : ''
       };
     }
@@ -111,26 +112,52 @@ const reducer = (state, action) => {
 };
 
 const StyledDiv = styled.div`
-  margin: 1em 0;
-  text-align: right;
-  .feedback-regsiter-message {
-    margin-right: 1em;
+  .feedback-mode-switch {
+    margin: 0.5em 0;
+  }
+  .feedback-nav {
+    margin: 1em 0;
+    text-align: right;
+    .regsiter-message {
+      margin-right: 1em;
+    }
   }
 `;
 
 const FeedbackSwitcher = props => {
-  const { job } = props;
+  const { job, seriesData, jobRenderer: JobRenderer } = props;
   const { jobId } = job;
 
+  const feedbackListener = useContext(FeedbackListenerContext);
   const [feedbackState, feedbackDispatch] = useReducer(reducer);
+
   if (!feedbackState) {
     feedbackDispatch({
       type: 'reset',
       feedbacks: job.feedbacks,
-      myUserEmail: props.userEmail
+      myUserEmail: props.userEmail,
+      createInitialConsensualFeedback:
+        feedbackListener.createInitialConsensualFeedback
     });
     return;
   }
+
+  const handleChangeFeedbackMode = isConsensual => {
+    if (isConsensual) {
+      feedbackDispatch({
+        type: 'enterConsensualMode',
+        value: {
+          lesionCandidates: feedbackListener.createInitialConsensualFeedback(
+            job.feedbacks
+              .filter(f => !f.isConsensual)
+              .map(f => f.data.lesionCandidates) // TODO: fixme
+          )
+        }
+      });
+    } else {
+      feedbackDispatch({ type: 'enterPersonalMode' });
+    }
+  };
 
   const handleRegisterClick = async () => {
     await alert(JSON.stringify(feedbackState.currentData));
@@ -141,36 +168,35 @@ const FeedbackSwitcher = props => {
     });
   };
 
-  const { jobRenderer: JobRenderer } = props;
+  const modeText = feedbackState.isConsensual ? 'consensual' : 'personal';
+
   return (
-    <div>
+    <StyledDiv>
       <div className="feedback-mode-switch">
         <PersonalConsensualSwitch
           feedbackState={feedbackState}
-          feedbackDispatch={feedbackDispatch}
+          onChange={handleChangeFeedbackMode}
         />
       </div>
       <JobRenderer
-        {...props}
+        job={job}
+        seriesData={seriesData}
         feedbackState={feedbackState}
         feedbackDispatch={feedbackDispatch}
       />
-      <StyledDiv>
+      <div className="feedback-nav">
         {feedbackState.message && (
-          <span className="feedback-regsiter-message">
-            {feedbackState.message}
-          </span>
+          <span className="regsiter-message">{feedbackState.message}</span>
         )}
         <IconButton
           icon={feedbackState.isConsensual ? 'tower' : 'user'}
           disabled={!feedbackState.canRegister}
           onClick={handleRegisterClick}
         >
-          Regsiter {feedbackState.isConsensual ? 'consensual' : 'personal'}{' '}
-          feedback
+          Regsiter {modeText} feedback
         </IconButton>
-      </StyledDiv>
-    </div>
+      </div>
+    </StyledDiv>
   );
 };
 

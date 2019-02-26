@@ -8,36 +8,18 @@ import PluginDisplay from 'components/PluginDisplay';
 import createSelectionFeedbackListener from './feedback-listeners/createSelectionFeedbackListener';
 import FeedbackSwitcher from './FeedbackSwitcher';
 import styled from 'styled-components';
+import FeedbackListenerContext from './FeedbackListenerContext';
 
 const JobContent = props => {
   const { job, feedbackState, feedbackDispatch } = props;
-
-  const listenerOptions = {
-    personal: [
-      { caption: 'known TP', value: 1 },
-      { caption: 'missed TP', value: 2, consensualMapsTo: 1 },
-      { caption: 'FP', value: -1 },
-      { caption: 'pending', value: 0 }
-    ],
-    consensual: [
-      { caption: 'TP', value: 1 },
-      { caption: 'FP', value: -1 },
-      { caption: 'pending', value: 0 }
-    ]
-  };
-  const FeedbackListener = useMemo(
-    () => createSelectionFeedbackListener(listenerOptions),
-    [listenerOptions]
-  );
 
   return (
     <div>
       <LesionCandidates
         job={job}
         value={job.results.results.lesionCandidates}
-        feedbackListener={FeedbackListener}
         feedbackState={feedbackState}
-        feedbckDispatch={feedbackDispatch}
+        feedbackDispatch={feedbackDispatch}
       />
     </div>
   );
@@ -53,9 +35,6 @@ const StyledDiv = styled.div`
     display: flex;
     justify-content: space-between;
     border-bottom: 1px solid silver;
-  }
-  .feedback-mode-switch {
-    margin: 0.5em 0;
   }
 `;
 
@@ -93,6 +72,24 @@ const PluginJobDetail = props => {
   const jobId = props.match.params.jobId;
   const jobData = useJobDetailData(jobId);
 
+  const listenerOptions = {
+    personal: [
+      { caption: 'known TP', value: 1 },
+      { caption: 'missed TP', value: 2, consensualMapsTo: 1 },
+      { caption: 'FP', value: -1 },
+      { caption: 'pending', value: 0 }
+    ],
+    consensual: [
+      { caption: 'TP', value: 1 },
+      { caption: 'FP', value: -1 },
+      { caption: 'pending', value: 0 }
+    ]
+  };
+  const feedbackListener = useMemo(
+    () => createSelectionFeedbackListener(listenerOptions),
+    [listenerOptions]
+  );
+
   if (!jobData) {
     return <LoadingIndicator />;
   }
@@ -106,19 +103,21 @@ const PluginJobDetail = props => {
 
   return (
     <FullSpanContainer>
-      <StyledDiv>
-        <div className="job-detail-header">
-          <PluginDisplay pluginId={job.pluginId} size="xl" />
-          <PatientInfoBox value={seriesData[primarySeriesUid].patientInfo} />
-        </div>
-        <div className="job-detail-main">
-          <FeedbackSwitcher
-            job={job}
-            seriesData={seriesData}
-            jobRenderer={JobContent}
-          />
-        </div>
-      </StyledDiv>
+      <FeedbackListenerContext.Provider value={feedbackListener}>
+        <StyledDiv>
+          <div className="job-detail-header">
+            <PluginDisplay pluginId={job.pluginId} size="xl" />
+            <PatientInfoBox value={seriesData[primarySeriesUid].patientInfo} />
+          </div>
+          <div className="job-detail-main">
+            <FeedbackSwitcher
+              job={job}
+              seriesData={seriesData}
+              jobRenderer={JobContent}
+            />
+          </div>
+        </StyledDiv>
+      </FeedbackListenerContext.Provider>
     </FullSpanContainer>
   );
 };

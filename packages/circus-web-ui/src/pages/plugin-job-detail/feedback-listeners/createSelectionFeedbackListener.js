@@ -46,7 +46,7 @@ const SelectionButton = props => {
 
 const createSelectionFeedbackListener = options => {
   const SelectionFeedbackListener = props => {
-    const { onChange, isConsensual, value, canEdit } = props;
+    const { onChange, isConsensual, value, disabled } = props;
 
     const handleClick = selected => {
       onChange(selected);
@@ -60,7 +60,7 @@ const createSelectionFeedbackListener = options => {
           <SelectionButton
             key={i}
             value={value}
-            disabled={!canEdit}
+            disabled={disabled}
             def={o}
             onClick={() => handleClick(o.value)}
           />
@@ -68,6 +68,41 @@ const createSelectionFeedbackListener = options => {
       </StyledDiv>
     );
   };
+
+  const createInitialConsensualFeedback = personalFeedbackData => {
+    const counts = new Map();
+
+    const applyConsensualMapsTo = value => {
+      const orig = options.personal.find(o => o.value === value);
+      if (orig === undefined)
+        throw new Error('Unknown personal feedback value');
+      if ('consensualMapsTo' in orig) value = orig.consensualMapsTo;
+      if (!options.consensual.find(o => o.value === value))
+        throw new Error('Unknown consensual feedback value');
+      return value;
+    };
+
+    personalFeedbackData.forEach(f => {
+      f.forEach(({ id, value }) => {
+        const mappedValue = applyConsensualMapsTo(value);
+        const countsForId = counts.get(id) || new Map();
+        const votes = countsForId.get(mappedValue) || 0;
+        countsForId.set(mappedValue, votes + 1);
+        counts.set(id, countsForId);
+      });
+    });
+    const results = [];
+    counts.forEach((countsForId, id) => {
+      countsForId.forEach((votes, value) => {
+        if (votes === personalFeedbackData.length) {
+          results.push({ id, value });
+        }
+      });
+    });
+    return results.sort((a, b) => a.id - b.id);
+  };
+  SelectionFeedbackListener.createInitialConsensualFeedback = createInitialConsensualFeedback;
+
   return SelectionFeedbackListener;
 };
 

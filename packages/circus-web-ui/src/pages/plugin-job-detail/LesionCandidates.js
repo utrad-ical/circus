@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useContext } from 'react';
 import ImageViewer from 'components/ImageViewer';
 import IconButton from 'components/IconButton';
 import styled from 'styled-components';
@@ -6,17 +6,40 @@ import * as rs from 'circus-rs';
 import EventEmitter from 'events';
 import { toolFactory } from 'circus-rs/tool/tool-initializer';
 import useLoginUser from 'utils/useLoginUser';
+import FeedbackListenerContext from './FeedbackListenerContext';
 
-class Candidate extends React.PureComponent {
-  constructor(props) {
-    super(props);
-    this.stateChanger = new EventEmitter();
-  }
+const Candidate = props => {
+  const {
+    value,
+    index,
+    onFeedbackChange,
+    feedback,
+    canEditFeedback,
+    composition,
+    tool,
+    isConsensual
+  } = props;
 
-  handleReady = () => {
-    const { composition, value } = this.props;
+  const stateChangerRef = useRef(new EventEmitter());
+  const stateChanger = stateChangerRef.current;
+
+  const updateComposition = async () => {
+    if (composition) {
+      await composition.imageSource.ready();
+      handleReady();
+    }
+  };
+
+  useEffect(
+    () => {
+      updateComposition();
+    },
+    [composition]
+  );
+
+  const handleReady = () => {
     const voxelSize = composition.imageSource.metadata.voxelSize;
-    this.stateChanger.emit('change', state => {
+    stateChanger.emit('change', state => {
       const newOrigin = [
         state.section.origin[0],
         state.section.origin[1],
@@ -29,54 +52,32 @@ class Candidate extends React.PureComponent {
     });
   };
 
-  async componentDidUpdate(prevProps) {
-    if (this.props.composition !== prevProps.composition) {
-      const targetComp = this.props.composition;
-      if (this.props.composition) {
-        await this.props.composition.imageSource.ready();
-        if (targetComp === this.props.composition) this.handleReady();
-      }
-    }
-  }
+  const FeedbackListener = useContext(FeedbackListenerContext);
 
-  render() {
-    const {
-      value,
-      index,
-      onFeedbackChange,
-      feedbackListener: FeedbackListener,
-      feedback,
-      canEditFeedback,
-      composition,
-      tool,
-      isConsensual
-    } = this.props;
-
-    return (
-      <div className="lesion-candidate">
-        <div className="attributes">
-          <div>Rank: {value.rank}</div>
-          <div>Loc: {JSON.stringify(value.location)}</div>
-          <div>Confidence: {value.confidence}</div>
-        </div>
-        <ImageViewer
-          className="lesion-candidate-viewer"
-          composition={composition}
-          tool={tool}
-          stateChanger={this.stateChanger}
-        />
-        <div className="feedback-listener">
-          <FeedbackListener
-            value={feedback}
-            isConsensual={isConsensual}
-            canEdit={canEditFeedback}
-            onChange={val => onFeedbackChange(index, val)}
-          />
-        </div>
+  return (
+    <div className="lesion-candidate">
+      <div className="attributes">
+        <div>Rank: {value.rank}</div>
+        <div>Loc: {JSON.stringify(value.location)}</div>
+        <div>Confidence: {value.confidence}</div>
       </div>
-    );
-  }
-}
+      <ImageViewer
+        className="lesion-candidate-viewer"
+        composition={composition}
+        tool={tool}
+        stateChanger={stateChanger}
+      />
+      <div className="feedback-listener">
+        <FeedbackListener
+          value={feedback}
+          isConsensual={isConsensual}
+          disabled={!canEditFeedback}
+          onChange={val => onFeedbackChange(index, val)}
+        />
+      </div>
+    </div>
+  );
+};
 
 const StyledDiv = styled.div`
   .tools {
@@ -104,6 +105,8 @@ const StyledDiv = styled.div`
 `;
 
 const LesionCandidates = React.memo(props => {
+  const { job, value, feedbackState, feedbackDispatch } = props;
+
   const tools = useRef();
   if (!tools.current) {
     tools.current = [
@@ -118,7 +121,6 @@ const LesionCandidates = React.memo(props => {
   const user = useLoginUser();
 
   const didMount = async () => {
-    const { job, value } = props;
     const seriesUid = job.series[0].seriesUid;
     const server = user.dicomImageServer;
     const rsHttpClient = new rs.RsHttpClient(server);
@@ -158,7 +160,6 @@ const LesionCandidates = React.memo(props => {
   );
 
   const handleFeedbackChange = (index, selected) => {
-    const { feedbackDispatch, feedbackState } = this.props;
     const candidateFeedback = feedbackState.currentData.lesionCandidates || [];
     const newFeedback = candidateFeedback
       .filter(item => item.id !== index)
@@ -173,7 +174,6 @@ const LesionCandidates = React.memo(props => {
     });
   };
 
-  const { value, feedbackListener, feedbackState } = props;
   const feedback = feedbackState.currentData.lesionCandidates || [];
   const truncated = value.slice(0, 3);
   return (
@@ -196,9 +196,8 @@ const LesionCandidates = React.memo(props => {
             <Candidate
               key={i}
               value={cand}
-              feedbackListener={feedbackListener}
               feedback={feedbackItem ? feedbackItem.value : undefined}
-              canEditFeedback={feedbackState.canEditFeedback}
+              canEditFeedback={feedbackState.canEdit}
               isConsensual={feedbackState.isConsensual}
               index={i}
               onFeedbackChange={handleFeedbackChange}

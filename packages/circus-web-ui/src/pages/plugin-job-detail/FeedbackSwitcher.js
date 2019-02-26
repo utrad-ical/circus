@@ -46,9 +46,8 @@ const selectInitialFeedback = props => {
 
 const FeedbackSwitcher = props => {
   const [isConsensual, setIsConsensual] = useState(false);
-  const [status, setStatus] = useState('unsaved');
-  const [editingFeedback, setEditingFeedback] = useState([]);
-  const [feedbackId, setFeedbackId] = useState(selectInitialFeedback(props));
+  const [editingFeedback, setEditingFeedback] = useState({});
+  // const [feedbackId, setFeedbackId] = useState(selectInitialFeedback(props));
 
   const handleModeChange = mode => {
     setIsConsensual(mode === 'consensual');

@@ -25,10 +25,14 @@ const PluginJobDetailView = props => {
       { caption: 'pending', value: 0 }
     ]
   };
-  const feedbackListener = useMemo(
+  const FeedbackListener = useMemo(
     () => createSelectionFeedbackListener(listenerOptions),
     [listenerOptions]
   );
+
+  const handleFeedbackChange = feedback => {
+    onFeedbackChange({ lesionCandidates: feedback });
+  };
 
   return (
     <div>
@@ -36,9 +40,9 @@ const PluginJobDetailView = props => {
         job={job}
         value={job.results.results.lesionCandidates}
         isConsensual={isConsensual}
-        feedbackListener={feedbackListener}
-        feedback={feedback}
-        onFeedbackChange={onFeedbackChange}
+        feedbackListener={FeedbackListener}
+        feedback={feedback.lesionCandidates || []}
+        onFeedbackChange={handleFeedbackChange}
       />
     </div>
   );

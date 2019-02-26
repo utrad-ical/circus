@@ -16,6 +16,8 @@ const StyledButton = styled.button`
   color: ${props => readableBlackOrWhite(props.backgroundColor || '#ffffff')};
   padding: 0.5em 0.2em;
   border: 1px solid #cccccc;
+  flex-grow: 1;
+  margin: 0 1px;
   &.active {
     background-color: ${props => props.activeColor || props.theme.brandDark};
     color: ${props =>

@@ -10,13 +10,7 @@ import FeedbackSwitcher from './FeedbackSwitcher';
 // import useLoginUser from 'utils/useLoginUser';
 
 const PluginJobDetailView = props => {
-  const {
-    job,
-    onFeedbackChange,
-    feedback,
-    canEditFeedback,
-    isConsensual
-  } = props;
+  const { job, feedbackState, feedbackDispatch } = props;
 
   const listenerOptions = {
     personal: [
@@ -36,21 +30,14 @@ const PluginJobDetailView = props => {
     [listenerOptions]
   );
 
-  const handleFeedbackChange = feedback => {
-    if (!canEditFeedback) return;
-    onFeedbackChange({ lesionCandidates: feedback });
-  };
-
   return (
     <div>
       <LesionCandidates
         job={job}
         value={job.results.results.lesionCandidates}
-        isConsensual={isConsensual}
         feedbackListener={FeedbackListener}
-        canEditFeedback={canEditFeedback}
-        feedback={feedback.lesionCandidates || []}
-        onFeedbackChange={handleFeedbackChange}
+        feedbackState={feedbackState}
+        feedbckDispatch={feedbackDispatch}
       />
     </div>
   );

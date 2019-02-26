@@ -1,19 +1,26 @@
 import React, { Fragment } from 'react';
 import { Link } from 'react-router-dom';
-import { connect } from 'react-redux';
 import MessageBox from './MessageBox';
 import { Button } from 'components/react-bootstrap';
 import ErrorBoundary from 'components/ErrorBoundary';
 import MainNav from './MainNav';
+import { useMappedState } from 'redux-react-hook';
+
+const mapState = state => ({
+  isUserFetching: state.loginUser.isFetching,
+  isLoggedIn: state.loginUser.data !== null
+});
 
 /**
  * The main application container.
  * The navigation bar is always visible, but the main page content is
  * visible only after we confirmed the user is currently logged-in with valid session.
  */
-const ApplicationView = props => {
-  const pageContentVisible = !props.isUserFetching && props.isLoggedIn;
-  const notLoggedIn = !props.isUserFetching && !props.isLoggedIn;
+const Application = props => {
+  const { isUserFetching, isLoggedIn } = useMappedState(mapState);
+
+  const pageContentVisible = !isUserFetching && isLoggedIn;
+  const notLoggedIn = !isUserFetching && !isLoggedIn;
 
   return (
     <Fragment>
@@ -38,10 +45,5 @@ const ApplicationView = props => {
     </Fragment>
   );
 };
-
-const Application = connect(state => ({
-  isUserFetching: state.loginUser.isFetching,
-  isLoggedIn: state.loginUser.data !== null
-}))(ApplicationView);
 
 export default Application;

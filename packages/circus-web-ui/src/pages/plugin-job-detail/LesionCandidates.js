@@ -6,7 +6,6 @@ import * as rs from 'circus-rs';
 import EventEmitter from 'events';
 import { toolFactory } from 'circus-rs/tool/tool-initializer';
 import useLoginUser from 'utils/useLoginUser';
-import FeedbackListenerContext from './FeedbackListenerContext';
 
 const Candidate = props => {
   const {
@@ -14,6 +13,7 @@ const Candidate = props => {
     index,
     onFeedbackChange,
     feedback,
+    feedbackListener: FeedbackListener,
     canEditFeedback,
     composition,
     tool,
@@ -51,8 +51,6 @@ const Candidate = props => {
       };
     });
   };
-
-  const FeedbackListener = useContext(FeedbackListenerContext);
 
   return (
     <div className="lesion-candidate">
@@ -105,7 +103,15 @@ const StyledDiv = styled.div`
 `;
 
 const LesionCandidates = React.memo(props => {
-  const { job, value, feedbackState, feedbackDispatch } = props;
+  const {
+    job,
+    feedback = [],
+    feedbackState,
+    feedbackListener,
+    onChange
+  } = props;
+
+  const value = job.results.results.lesionCandidates;
 
   const tools = useRef();
   if (!tools.current) {
@@ -160,21 +166,13 @@ const LesionCandidates = React.memo(props => {
   );
 
   const handleFeedbackChange = (index, selected) => {
-    const candidateFeedback = feedbackState.currentData.lesionCandidates || [];
-    const newFeedback = candidateFeedback
+    const newFeedback = feedback
       .filter(item => item.id !== index)
       .concat([{ id: index, value: selected }])
       .sort((a, b) => a.index - b.index);
-    feedbackDispatch({
-      type: 'changeFeedback',
-      value: {
-        ...feedbackState.currentData,
-        lesionCandidates: newFeedback
-      }
-    });
+    onChange(newFeedback);
   };
 
-  const feedback = feedbackState.currentData.lesionCandidates || [];
   const truncated = value.slice(0, 3);
   return (
     <StyledDiv>
@@ -196,6 +194,7 @@ const LesionCandidates = React.memo(props => {
             <Candidate
               key={i}
               value={cand}
+              feedbackListener={feedbackListener}
               feedback={feedbackItem ? feedbackItem.value : undefined}
               canEditFeedback={feedbackState.canEdit}
               isConsensual={feedbackState.isConsensual}

@@ -50,7 +50,11 @@ const reducer = (state, action) => {
       return { ...state, canEdit: true };
     }
     case 'changeFeedback':
-      return { ...state, currentData: action.value };
+      return {
+        ...state,
+        currentData: { ...state.currentData, [action.key]: action.value },
+        canRegister: action.valid
+      };
     case 'enterConsensualMode': {
       const consensual = state.feedbacks.find(f => f.consensual);
       return {

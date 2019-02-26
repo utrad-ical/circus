@@ -5,28 +5,14 @@ import FullSpanContainer from 'components/FullSpanContainer';
 import LoadingIndicator from 'rb/LoadingIndicator';
 import LesionCandidates from './LesionCandidates';
 import PluginDisplay from 'components/PluginDisplay';
+import IconButton from 'components/IconButton';
 import createSelectionFeedbackListener from './feedback-listeners/createSelectionFeedbackListener';
-import FeedbackSwitcher from './FeedbackSwitcher';
 import styled from 'styled-components';
-import FeedbackListenerContext from './FeedbackListenerContext';
-
-const JobContent = props => {
-  const { job, feedbackState, feedbackDispatch } = props;
-
-  return (
-    <div>
-      <LesionCandidates
-        job={job}
-        value={job.results.results.lesionCandidates}
-        feedbackState={feedbackState}
-        feedbackDispatch={feedbackDispatch}
-      />
-    </div>
-  );
-};
+import useFeedback from './useFeedback';
+import PersonalConsensualSwitch from './PersonalConsensualSwitch';
 
 const StyledDiv = styled.div`
-  .job-detail-main {
+  .job-main {
     padding: 10px;
   }
   .job-detail-header {
@@ -35,6 +21,16 @@ const StyledDiv = styled.div`
     display: flex;
     justify-content: space-between;
     border-bottom: 1px solid silver;
+  }
+  .feedback-mode-switch {
+    margin: 0.5em 0;
+  }
+  .feedback-nav {
+    margin: 1em 0;
+    text-align: right;
+    .regsiter-message {
+      margin-right: 1em;
+    }
   }
 `;
 
@@ -68,10 +64,7 @@ const useJobDetailData = jobId => {
   return data;
 };
 
-const PluginJobDetail = props => {
-  const jobId = props.match.params.jobId;
-  const jobData = useJobDetailData(jobId);
-
+const createFeedbackTargets = () => {
   const listenerOptions = {
     personal: [
       { caption: 'known TP', value: 1 },
@@ -85,10 +78,32 @@ const PluginJobDetail = props => {
       { caption: 'pending', value: 0 }
     ]
   };
-  const feedbackListener = useMemo(
-    () => createSelectionFeedbackListener(listenerOptions),
-    [listenerOptions]
-  );
+  const feedbackListener = createSelectionFeedbackListener(listenerOptions);
+
+  const feedbackTarget = props => {
+    return <LesionCandidates feedbackListener={feedbackListener} {...props} />;
+  };
+
+  return [
+    {
+      feedbackKey: 'lesionCandidates',
+      render: feedbackTarget,
+      createInitialConsensualFeedback: personalFeedbacks => {
+        return feedbackListener.createInitialConsensualFeedback(
+          personalFeedbacks
+        );
+      },
+      validate: feedback => Array.isArray(feedback) && feedback.length >= 3
+    }
+  ];
+};
+
+const PluginJobDetail = props => {
+  const jobId = props.match.params.jobId;
+  const jobData = useJobDetailData(jobId);
+  const feedbackTargets = useMemo(() => createFeedbackTargets(), []);
+  const [feedbackState, dispatch] = useFeedback();
+  const api = useApi();
 
   if (!jobData) {
     return <LoadingIndicator />;
@@ -101,23 +116,97 @@ const PluginJobDetail = props => {
   const { job, seriesData } = jobData;
   const primarySeriesUid = job.series[0].seriesUid;
 
+  if (!feedbackState) {
+    dispatch({
+      type: 'reset',
+      feedbacks: job.feedbacks,
+      myUserEmail: props.userEmail
+    });
+    return;
+  }
+
+  const handleChange = (feedbackKey, value) => {
+    dispatch({
+      type: 'changeFeedback',
+      key: feedbackKey,
+      value,
+      valid: feedbackTargets.every(t => {
+        return t.validate(
+          feedbackKey === t.feedbackKey
+            ? value
+            : feedbackState.currentData[t.feedbackKey]
+        );
+      })
+    });
+  };
+
+  const handleChangeFeedbackMode = isConsensual => {
+    if (isConsensual) {
+      const value = {};
+      feedbackTargets.forEach(t => {
+        const pfbs = job.feedbacks.filter(f => !f.isConsensual);
+        value[t.feedbackKey] = t.createInitialConsensualFeedback(pfbs);
+      });
+      dispatch({ type: 'enterConsensualMode', value });
+    } else {
+      dispatch({ type: 'enterPersonalMode' });
+    }
+  };
+
+  const handleRegisterClick = async () => {
+    await alert(JSON.stringify(feedbackState.currentData));
+    const mode = feedbackState.isConsensual ? 'consensual' : 'personal';
+    api(`plugin-jobs/${jobId}/feedback/${mode}`, {
+      method: 'POST',
+      data: feedbackState.currentData
+    });
+  };
+
+  const modeText = feedbackState.isConsensual ? 'consensual' : 'personal';
+
   return (
     <FullSpanContainer>
-      <FeedbackListenerContext.Provider value={feedbackListener}>
-        <StyledDiv>
-          <div className="job-detail-header">
-            <PluginDisplay pluginId={job.pluginId} size="xl" />
-            <PatientInfoBox value={seriesData[primarySeriesUid].patientInfo} />
-          </div>
-          <div className="job-detail-main">
-            <FeedbackSwitcher
-              job={job}
-              seriesData={seriesData}
-              jobRenderer={JobContent}
+      <StyledDiv>
+        <div className="job-detail-header">
+          <PluginDisplay pluginId={job.pluginId} size="xl" />
+          <PatientInfoBox value={seriesData[primarySeriesUid].patientInfo} />
+        </div>
+        <div className="job-main">
+          <div className="feedback-mode-switch">
+            <PersonalConsensualSwitch
+              feedbackState={feedbackState}
+              onChange={handleChangeFeedbackMode}
             />
           </div>
-        </StyledDiv>
-      </FeedbackListenerContext.Provider>
+          <div className="feedback-targets">
+            {feedbackTargets.map(t => {
+              const Render = t.render;
+              const feedback = feedbackState.currentData[t.feedbackKey];
+              return (
+                <Render
+                  key={t.feedbackKey}
+                  job={job}
+                  feedback={feedback}
+                  feedbackState={feedbackState}
+                  onChange={value => handleChange(t.feedbackKey, value)}
+                />
+              );
+            })}
+          </div>
+          <div className="feedback-nav">
+            {feedbackState.message && (
+              <span className="regsiter-message">{feedbackState.message}</span>
+            )}
+            <IconButton
+              icon={feedbackState.isConsensual ? 'tower' : 'user'}
+              disabled={!feedbackState.canRegister}
+              onClick={handleRegisterClick}
+            >
+              Regsiter {modeText} feedback
+            </IconButton>
+          </div>
+        </div>
+      </StyledDiv>
     </FullSpanContainer>
   );
 };

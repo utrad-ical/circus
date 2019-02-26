@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { showMessage } from 'actions';
 import * as qs from 'querystring';
+import React, { useContext } from 'react';
 
 export const apiServer = '/';
 
@@ -120,3 +121,10 @@ function showErrorMessage(err) {
   }
   showMessage(message, 'danger', { dismissOnPageChange: true });
 }
+
+export const ApiContext = React.createContext();
+
+export const useApi = () => {
+  const api = useContext(ApiContext);
+  return api;
+};

@@ -38,6 +38,8 @@ import { refreshUserInfo, dismissMessageOnPageChange } from 'actions';
 import PluginJobQueueSearch from './pages/search/PluginJobQueueSearch';
 import browserHistory from 'browserHistory';
 
+import { api, ApiContext } from 'utils/api';
+
 require('./styles/main.less');
 
 require('bootstrap/fonts/glyphicons-halflings-regular.woff');
@@ -93,18 +95,20 @@ const AppRoutes = props => {
 };
 
 ReactDOM.render(
-  <StoreContext.Provider value={store}>
-    <Provider store={store}>
-      <ThemeProvider theme={theme}>
-        <Router history={browserHistory}>
-          <Switch>
-            <Route exact path="/" component={LoginScreen} />
-            <AppRoutes />
-          </Switch>
-        </Router>
-      </ThemeProvider>
-    </Provider>
-  </StoreContext.Provider>,
+  <ApiContext.Provider value={api}>
+    <StoreContext.Provider value={store}>
+      <Provider store={store}>
+        <ThemeProvider theme={theme}>
+          <Router history={browserHistory}>
+            <Switch>
+              <Route exact path="/" component={LoginScreen} />
+              <AppRoutes />
+            </Switch>
+          </Router>
+        </ThemeProvider>
+      </Provider>
+    </StoreContext.Provider>
+  </ApiContext.Provider>,
   document.getElementById('app')
 );
 

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import PatientInfoBox from 'components/PatientInfoBox';
 import FullSpanContainer from 'components/FullSpanContainer';
-import { api } from 'utils/api';
+import { useApi } from 'utils/api';
 import LoadingIndicator from 'rb/LoadingIndicator';
 import LesionCandidates from './LesionCandidates';
 import PluginDisplay from 'components/PluginDisplay';
@@ -68,6 +68,7 @@ const PluginJobDetail = props => {
   const [job, setJob] = useState(null);
   const [errorMessage, setErrorMessage] = useState(null);
   const [seriesData, setSeriesData] = useState(null);
+  const api = useApi();
   // const user = useLoginUser();
   const plugin = null;
 

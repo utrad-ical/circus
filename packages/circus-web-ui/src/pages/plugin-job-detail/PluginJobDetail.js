@@ -1,15 +1,15 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useApi } from 'utils/api';
 import PatientInfoBox from 'components/PatientInfoBox';
 import FullSpanContainer from 'components/FullSpanContainer';
-import { useApi } from 'utils/api';
 import LoadingIndicator from 'rb/LoadingIndicator';
 import LesionCandidates from './LesionCandidates';
 import PluginDisplay from 'components/PluginDisplay';
-import createSelectionFeedbackListener from './feedback-listener/createSelectionFeedbackListener';
+import createSelectionFeedbackListener from './feedback-listeners/createSelectionFeedbackListener';
 import FeedbackSwitcher from './FeedbackSwitcher';
 import styled from 'styled-components';
 
-const PluginJobDetailView = props => {
+const JobContent = props => {
   const { job, feedbackState, feedbackDispatch } = props;
 
   const listenerOptions = {
@@ -59,34 +59,11 @@ const StyledDiv = styled.div`
   }
 `;
 
-const PluginJobDetailPage = props => {
-  const { job, seriesData } = props;
-  const primarySeriesUid = job.series[0].seriesUid;
-  return (
-    <FullSpanContainer>
-      <StyledDiv>
-        <div className="job-detail-header">
-          <PluginDisplay pluginId={job.pluginId} size="xl" />
-          <PatientInfoBox value={seriesData[primarySeriesUid].patientInfo} />
-        </div>
-        <div className="job-detail-main">
-          <FeedbackSwitcher {...props} />
-        </div>
-      </StyledDiv>
-    </FullSpanContainer>
-  );
-};
-
-const PluginJobDetail = props => {
-  const [job, setJob] = useState(null);
-  const [errorMessage, setErrorMessage] = useState(null);
-  const [seriesData, setSeriesData] = useState(null);
+const useJobDetailData = jobId => {
   const api = useApi();
-  // const user = useLoginUser();
-  const plugin = null;
+  const [data, setData] = useState(undefined);
 
   const fetchJob = async () => {
-    const jobId = props.match.params.jobId;
     try {
       const job = await api(`plugin-jobs/${jobId}`);
       const seriesData = {};
@@ -95,31 +72,55 @@ const PluginJobDetail = props => {
         if (seriesUid in seriesData) continue;
         seriesData[seriesUid] = await api(`series/${seriesUid}`);
       }
-      setJob(job);
-      setSeriesData(seriesData);
+      const result = { job, seriesData };
+      setData(result);
     } catch (e) {
-      setErrorMessage(e.message);
+      setData(e);
     }
   };
 
-  useEffect(() => {
-    fetchJob();
-  }, []);
+  useEffect(
+    () => {
+      fetchJob();
+    },
+    [jobId]
+  );
 
-  if (errorMessage) {
-    return <div className="alert alert-danger">{errorMessage}</div>;
-  } else if (job && seriesData) {
-    return (
-      <PluginJobDetailPage
-        jobRenderer={PluginJobDetailView}
-        job={job}
-        seriesData={seriesData}
-        plugin={plugin}
-      />
-    );
-  } else {
+  return data;
+};
+
+const PluginJobDetail = props => {
+  const jobId = props.match.params.jobId;
+  const jobData = useJobDetailData(jobId);
+
+  if (!jobData) {
     return <LoadingIndicator />;
   }
+
+  if (jobData instanceof Error) {
+    return <div className="alert alert-danger">{jobData.message}</div>;
+  }
+
+  const { job, seriesData } = jobData;
+  const primarySeriesUid = job.series[0].seriesUid;
+
+  return (
+    <FullSpanContainer>
+      <StyledDiv>
+        <div className="job-detail-header">
+          <PluginDisplay pluginId={job.pluginId} size="xl" />
+          <PatientInfoBox value={seriesData[primarySeriesUid].patientInfo} />
+        </div>
+        <div className="job-detail-main">
+          <FeedbackSwitcher
+            job={job}
+            seriesData={seriesData}
+            jobRenderer={JobContent}
+          />
+        </div>
+      </StyledDiv>
+    </FullSpanContainer>
+  );
 };
 
 export default PluginJobDetail;

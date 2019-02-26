@@ -7,7 +7,7 @@ import LesionCandidates from './LesionCandidates';
 import PluginDisplay from 'components/PluginDisplay';
 import createSelectionFeedbackListener from './feedback-listener/createSelectionFeedbackListener';
 import FeedbackSwitcher from './FeedbackSwitcher';
-// import useLoginUser from 'utils/useLoginUser';
+import styled from 'styled-components';
 
 const PluginJobDetailView = props => {
   const { job, feedbackState, feedbackDispatch } = props;
@@ -43,18 +43,36 @@ const PluginJobDetailView = props => {
   );
 };
 
+const StyledDiv = styled.div`
+  .job-detail-main {
+    padding: 10px;
+  }
+  .job-detail-header {
+    flex: none;
+    padding: 5px 10px;
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px solid silver;
+  }
+  .feedback-mode-switch {
+    margin: 0.5em 0;
+  }
+`;
+
 const PluginJobDetailPage = props => {
   const { job, seriesData } = props;
   const primarySeriesUid = job.series[0].seriesUid;
   return (
     <FullSpanContainer>
-      <div className="job-detail-header">
-        <PluginDisplay pluginId={job.pluginId} size="xl" />
-        <PatientInfoBox value={seriesData[primarySeriesUid].patientInfo} />
-      </div>
-      <div className="job-detail-main">
-        <FeedbackSwitcher {...props} />
-      </div>
+      <StyledDiv>
+        <div className="job-detail-header">
+          <PluginDisplay pluginId={job.pluginId} size="xl" />
+          <PatientInfoBox value={seriesData[primarySeriesUid].patientInfo} />
+        </div>
+        <div className="job-detail-main">
+          <FeedbackSwitcher {...props} />
+        </div>
+      </StyledDiv>
     </FullSpanContainer>
   );
 };

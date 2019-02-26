@@ -1,11 +1,11 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import ImageViewer from 'components/ImageViewer';
 import IconButton from 'components/IconButton';
 import styled from 'styled-components';
 import * as rs from 'circus-rs';
-import { connect } from 'react-redux';
 import EventEmitter from 'events';
 import { toolFactory } from 'circus-rs/tool/tool-initializer';
+import useLoginUser from 'utils/useLoginUser';
 
 class Candidate extends React.PureComponent {
   constructor(props) {
@@ -87,7 +87,7 @@ const StyledDiv = styled.div`
     flex-wrap: wrap;
     justify-content: space-between;
     .lesion-candidate {
-      border: 1px solid gray;
+      border: 1px solid silver;
       padding: 1px;
       .attributes {
         font-size: 80%;
@@ -103,21 +103,24 @@ const StyledDiv = styled.div`
   }
 `;
 
-class LesionCandidatesView extends React.Component {
-  constructor(props) {
-    super(props);
-    this.tools = [
+const LesionCandidates = React.memo(props => {
+  const tools = useRef();
+  if (!tools.current) {
+    tools.current = [
       { name: 'pager', icon: 'rs-pager', tool: toolFactory('pager') },
       { name: 'zoom', icon: 'rs-zoom', tool: toolFactory('zoom') },
       { name: 'hand', icon: 'rs-hand', tool: toolFactory('hand') }
     ];
-    this.state = { composition: null, toolName: 'pager' };
   }
 
-  async componentDidMount() {
-    const { user, job, value } = this.props;
+  const [toolName, setToolName] = useState('pager');
+  const [composition, setComposition] = useState(null);
+  const user = useLoginUser();
+
+  const didMount = async () => {
+    const { job, value } = props;
     const seriesUid = job.series[0].seriesUid;
-    const server = user.data.dicomImageServer;
+    const server = user.dicomImageServer;
     const rsHttpClient = new rs.RsHttpClient(server);
     const volumeLoader = new rs.RsVolumeLoader({ rsHttpClient, seriesUid });
     const src = new rs.HybridMprImageSource({
@@ -144,12 +147,19 @@ class LesionCandidatesView extends React.Component {
       annotation.z = cand.location[2] * metadata.voxelSize[2];
       composition.addAnnotation(annotation);
     });
-    this.setState({ composition });
-  }
+    setComposition(composition);
+  };
 
-  handleFeedbackChange = (index, selected) => {
+  useEffect(
+    () => {
+      didMount();
+    },
+    [props.job]
+  );
+
+  const handleFeedbackChange = (index, selected) => {
     const { feedbackDispatch, feedbackState } = this.props;
-    const candidateFeedback = feedbackState.editingData.lesionCandidates || [];
+    const candidateFeedback = feedbackState.currentData.lesionCandidates || [];
     const newFeedback = candidateFeedback
       .filter(item => item.id !== index)
       .concat([{ id: index, value: selected }])
@@ -157,57 +167,49 @@ class LesionCandidatesView extends React.Component {
     feedbackDispatch({
       type: 'changeFeedback',
       value: {
-        ...feedbackState.editingData,
+        ...feedbackState.currentData,
         lesionCandidates: newFeedback
       }
     });
   };
 
-  render() {
-    const { value, feedbackListener, feedbackState } = this.props;
-    const feedback = feedbackState.editingData.lesionCandidates || [];
-    const truncated = value.slice(0, 3);
-    return (
-      <StyledDiv>
-        <div className="tools">
-          {this.tools.map(tool => (
-            <IconButton
-              key={tool.name}
-              bsSize="sm"
-              icon={tool.icon}
-              onClick={() => this.setState({ toolName: tool.name })}
-              bsStyle={
-                this.state.toolName === tool.name ? 'primary' : 'default'
-              }
+  const { value, feedbackListener, feedbackState } = props;
+  const feedback = feedbackState.currentData.lesionCandidates || [];
+  const truncated = value.slice(0, 3);
+  return (
+    <StyledDiv>
+      <div className="tools">
+        {tools.current.map(t => (
+          <IconButton
+            key={t.name}
+            bsSize="sm"
+            icon={t.icon}
+            onClick={() => setToolName(t.name)}
+            bsStyle={toolName === t.name ? 'primary' : 'default'}
+          />
+        ))}
+      </div>
+      <div className="entries">
+        {truncated.map((cand, i) => {
+          const feedbackItem = feedback.find(item => item.id === i);
+          return (
+            <Candidate
+              key={i}
+              value={cand}
+              feedbackListener={feedbackListener}
+              feedback={feedbackItem ? feedbackItem.value : undefined}
+              canEditFeedback={feedbackState.canEditFeedback}
+              isConsensual={feedbackState.isConsensual}
+              index={i}
+              onFeedbackChange={handleFeedbackChange}
+              composition={composition}
+              tool={tools.current.find(t => t.name === toolName).tool}
             />
-          ))}
-        </div>
-        <div className="entries">
-          {truncated.map((cand, i) => {
-            const feedbackItem = feedback.find(item => item.id === i);
-            return (
-              <Candidate
-                key={i}
-                value={cand}
-                feedbackListener={feedbackListener}
-                feedback={feedbackItem ? feedbackItem.value : undefined}
-                canEditFeedback={feedbackState.canEditFeedback}
-                isConsensual={feedbackState.isConsensual}
-                index={i}
-                onFeedbackChange={this.handleFeedbackChange}
-                composition={this.state.composition}
-                tool={this.tools.find(t => t.name === this.state.toolName).tool}
-              />
-            );
-          })}
-        </div>
-      </StyledDiv>
-    );
-  }
-}
-
-const LesionCandidates = connect(state => ({ user: state.loginUser }))(
-  LesionCandidatesView
-);
+          );
+        })}
+      </div>
+    </StyledDiv>
+  );
+});
 
 export default LesionCandidates;

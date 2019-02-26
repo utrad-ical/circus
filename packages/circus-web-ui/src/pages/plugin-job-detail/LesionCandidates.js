@@ -1,6 +1,6 @@
 import React, { Fragment } from 'react';
 import ImageViewer from 'components/ImageViewer';
-import { Button } from 'components/react-bootstrap';
+import IconButton from 'components/IconButton';
 import styled from 'styled-components';
 import * as rs from 'circus-rs';
 import { connect } from 'react-redux';
@@ -46,6 +46,7 @@ class Candidate extends React.PureComponent {
       onFeedbackChange,
       feedbackListener: FeedbackListener,
       feedback,
+      canEditFeedback,
       composition,
       tool,
       isConsensual
@@ -68,6 +69,7 @@ class Candidate extends React.PureComponent {
           <FeedbackListener
             value={feedback}
             isConsensual={isConsensual}
+            canEdit={canEditFeedback}
             onChange={val => onFeedbackChange(index, val)}
           />
         </div>
@@ -77,34 +79,39 @@ class Candidate extends React.PureComponent {
 }
 
 const StyledDiv = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  .lesion-candidate {
-    border: 1px solid gray;
-    padding: 1px;
-    .attributes {
-      font-size: 80%;
-    }
-    .image-viewer {
-      width: 300px;
-      height: 300px;
-    }
+  .tools {
+    margin-bottom: 5px;
   }
-  .feedback-listener {
-    margin: 5px;
+  .entries {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    .lesion-candidate {
+      border: 1px solid gray;
+      padding: 1px;
+      .attributes {
+        font-size: 80%;
+      }
+      .image-viewer {
+        width: 400px;
+        height: 400px;
+      }
+    }
+    .feedback-listener {
+      margin: 5px;
+    }
   }
 `;
 
 class LesionCandidatesView extends React.Component {
   constructor(props) {
     super(props);
-    this.tools = {
-      pager: toolFactory('pager'),
-      zoom: toolFactory('zoom'),
-      hand: toolFactory('hand')
-    };
-    this.state = { compositoin: null, toolName: 'pager' };
+    this.tools = [
+      { name: 'pager', icon: 'rs-pager', tool: toolFactory('pager') },
+      { name: 'zoom', icon: 'rs-zoom', tool: toolFactory('zoom') },
+      { name: 'hand', icon: 'rs-hand', tool: toolFactory('hand') }
+    ];
+    this.state = { composition: null, toolName: 'pager' };
   }
 
   async componentDidMount() {
@@ -149,24 +156,31 @@ class LesionCandidatesView extends React.Component {
     onFeedbackChange(newFeedback);
   };
 
-  handleToolChange = () => {
-    const toolName = { zoom: 'hand', hand: 'pager', pager: 'zoom' }[
-      this.state.toolName
-    ];
-    this.setState({ toolName });
-  };
-
   render() {
-    const { value, feedbackListener, feedback, isConsensual } = this.props;
+    const {
+      value,
+      feedbackListener,
+      feedback,
+      isConsensual,
+      canEditFeedback
+    } = this.props;
     const truncated = value.slice(0, 3);
     return (
-      <Fragment>
-        <div>
-          <Button bsSize="xs" onClick={this.handleToolChange}>
-            {this.state.toolName}
-          </Button>
+      <StyledDiv>
+        <div className="tools">
+          {this.tools.map(tool => (
+            <IconButton
+              key={tool.name}
+              bsSize="sm"
+              icon={tool.icon}
+              onClick={() => this.setState({ toolName: tool.name })}
+              bsStyle={
+                this.state.toolName === tool.name ? 'primary' : 'default'
+              }
+            />
+          ))}
         </div>
-        <StyledDiv>
+        <div className="entries">
           {truncated.map((cand, i) => {
             const feedbackItem = feedback.find(item => item.id === i);
             return (
@@ -175,16 +189,17 @@ class LesionCandidatesView extends React.Component {
                 value={cand}
                 feedbackListener={feedbackListener}
                 feedback={feedbackItem ? feedbackItem.value : undefined}
+                canEditFeedback={canEditFeedback}
                 isConsensual={isConsensual}
                 index={i}
                 onFeedbackChange={this.handleFeedbackChange}
                 composition={this.state.composition}
-                tool={this.tools[this.state.toolName]}
+                tool={this.tools.find(t => t.name === this.state.toolName).tool}
               />
             );
           })}
-        </StyledDiv>
-      </Fragment>
+        </div>
+      </StyledDiv>
     );
   }
 }

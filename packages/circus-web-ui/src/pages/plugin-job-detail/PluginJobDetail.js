@@ -1,22 +1,42 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import PatientInfoBox from 'components/PatientInfoBox';
 import FullSpanContainer from 'components/FullSpanContainer';
 import { api } from 'utils/api';
 import LoadingIndicator from 'rb/LoadingIndicator';
 import LesionCandidates from './LesionCandidates';
 import PluginDisplay from 'components/PluginDisplay';
-import SelectionFeedbackListener from './feedback-listener/SelectionFeedbackListener';
+import createSelectionFeedbackListener from './feedback-listener/createSelectionFeedbackListener';
 import FeedbackSwitcher from './FeedbackSwitcher';
-import useLoginUser from 'utils/useLoginUser';
+// import useLoginUser from 'utils/useLoginUser';
 
 const PluginJobDetailView = props => {
-  const { job, onFeedbackChange, feedback } = props;
+  const { job, onFeedbackChange, feedback, isConsensual } = props;
+
+  const listenerOptions = {
+    personal: [
+      { caption: 'known TP', value: 1 },
+      { caption: 'missed TP', value: 2, consensualMapsTo: 1 },
+      { caption: 'FP', value: -1 },
+      { caption: 'pending', value: 0 }
+    ],
+    consensual: [
+      { caption: 'TP', value: 1 },
+      { caption: 'FP', value: -1 },
+      { caption: 'pending', value: 0 }
+    ]
+  };
+  const feedbackListener = useMemo(
+    () => createSelectionFeedbackListener(listenerOptions),
+    [listenerOptions]
+  );
+
   return (
     <div>
       <LesionCandidates
         job={job}
         value={job.results.results.lesionCandidates}
-        feedbackListener={SelectionFeedbackListener}
+        isConsensual={isConsensual}
+        feedbackListener={feedbackListener}
         feedback={feedback}
         onFeedbackChange={onFeedbackChange}
       />

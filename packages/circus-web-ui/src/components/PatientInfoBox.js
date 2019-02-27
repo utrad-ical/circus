@@ -1,8 +1,9 @@
 import React, { Fragment } from 'react';
+import Icon from 'components/Icon';
 import styled from 'styled-components';
 
 const StyledDiv = styled.div`
-  &.masked {
+  .masked {
     color: silver;
   }
   .sub {
@@ -18,9 +19,18 @@ const StyledDiv = styled.div`
 `;
 
 const PatientInfoBox = props => {
-  const pt = props.value;
+  const { value: pt } = props;
   if (!pt) {
-    return <span className="patient-info-box masked">(masked)</span>;
+    return (
+      <StyledDiv>
+        <div className="masked">
+          <span className="patient-name">
+            <Icon icon="lock" />&ensp;(masked)
+          </span>
+        </div>
+        <div className="sub masked">&ensp;</div>
+      </StyledDiv>
+    );
   }
   return (
     <StyledDiv>

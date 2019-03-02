@@ -1,209 +1,194 @@
-import React from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Button, Panel } from 'components/react-bootstrap';
 import IconButton from 'rb/IconButton';
 import PropertyEditor from 'rb/PropertyEditor';
-import { api } from 'utils/api.js';
+import { api, useApiManager } from 'utils/api.js';
 import AdminContainer from './AdminContainer';
-import { refreshUserInfo, startNewSearch } from 'actions';
+import { startNewSearch } from 'actions';
 import DataGrid from 'components/DataGrid';
 import SearchResultsView from 'components/SearchResultsView';
 import { connect } from 'react-redux';
 
-class EditorPage extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      target: null,
-      editing: null,
-      complaints: {}
-    };
-    this.prepareGrid();
-  }
+const EditorPage = props => {
+  const [target, setTarget] = useState(null);
+  const [editing, setEditing] = useState(null);
+  const [complaints, setComplaints] = useState(null);
+  const apiManager = useApiManager();
 
-  prepareGrid() {
-    this.grid = props => (
-      <DataGrid
-        value={props.value}
-        columns={this.props.listColumns}
-        onItemClick={this.editStart}
-        active={props.active}
-      />
-    );
-  }
+  const {
+    listColumns,
+    dispatch,
+    preCommitHook,
+    primaryKey,
+    searchName,
+    resource,
+    title,
+    icon
+  } = props;
 
-  commitItem = async item => {
-    const { dispatch, preCommitHook, primaryKey } = this.props;
+  const grid = useMemo(
+    () => {
+      return props => (
+        <DataGrid
+          value={props.value}
+          columns={listColumns}
+          onItemClick={handleEditStart}
+          active={props.active}
+        />
+      );
+    },
+    [props.listColumns]
+  );
 
+  useEffect(() => {
+    loadItems();
+  }, []);
+
+  const commitItem = async item => {
     if (preCommitHook) {
-      if (!await preCommitHook(this.state.target)) return;
+      if (!await preCommitHook(target)) return;
     }
 
-    let resource = this.props.resource;
-    if (this.state.target) {
-      resource += '/' + encodeURIComponent(this.state.editing[primaryKey]);
+    let url = resource;
+    if (target) {
+      url += '/' + encodeURIComponent(editing[primaryKey]);
     }
 
-    if (this.state.target && primaryKey in item) {
+    if (target && primaryKey in item) {
       item = { ...item };
       delete item[primaryKey];
     }
 
     const args = {
-      method: this.state.target ? 'put' : 'post',
+      method: target ? 'put' : 'post',
       data: item,
       handleErrors: [400]
     };
     try {
-      await api(resource, args);
-      this.setState({ target: null, editing: null });
-      await this.loadItems();
-      dispatch(refreshUserInfo(true)); // Full user data refresh
+      await api(url, args);
+      setTarget(null);
+      setEditing(null);
+      await loadItems();
+      apiManager.refreshUserInfo(true); // Full user data refresh
     } catch (err) {
-      this.setState({ complaints: err.data.errors });
+      setComplaints(err.data.errors);
     }
   };
 
-  async loadItems() {
-    const { searchName, resource, dispatch } = this.props;
+  const loadItems = async () => {
     dispatch(startNewSearch(searchName, resource, {}, {}, {}));
-  }
-
-  componentDidMount() {
-    this.loadItems();
-  }
-
-  targetName(item) {
-    if (this.props.targetName) return this.props.targetName(item);
-    return item[this.props.primaryKey];
-  }
-
-  editStart = (index, item) => {
-    this.setState({
-      target: this.targetName(item),
-      editing: item,
-      complaints: {}
-    });
   };
 
-  cancelEditItem = () => {
-    this.setState({ editing: null, complaints: {} });
+  const targetName = item => {
+    if (props.targetName) return props.targetName(item);
+    return item[props.primaryKey];
   };
 
-  createItem = () => {
-    this.setState({
-      target: null,
-      editing: this.props.makeEmptyItem()
-    });
+  const handleEditStart = (index, item) => {
+    setTarget(targetName(item));
+    setEditing(item);
+    setComplaints({});
   };
 
-  render() {
-    const { title, icon, searchName } = this.props;
+  const handleCancelClick = () => {
+    setEditing(null);
+    setComplaints({});
+  };
 
-    return (
-      <AdminContainer title={title} icon={icon} className="admin-editor">
-        <SearchResultsView
-          name={searchName}
-          dataView={this.grid}
-          active={this.state.editing}
-          onItemClick={this.editStart}
+  const handleCreateItemClick = () => {
+    setTarget(null);
+    setEditing(props.makeEmptyItem());
+  };
+
+  return (
+    <AdminContainer title={title} icon={icon} className="admin-editor">
+      <SearchResultsView
+        name={searchName}
+        dataView={grid}
+        active={editing}
+        onItemClick={handleEditStart}
+      />
+      <p className="text-right">
+        <IconButton
+          icon="plus"
+          bsStyle="primary"
+          bsSize="small"
+          onClick={handleCreateItemClick}
+        >
+          Create new
+        </IconButton>
+      </p>
+      {editing && (
+        <Editor
+          item={editing}
+          complaints={complaints}
+          target={target}
+          properties={props.editorProperties}
+          excludeProperty={target ? props.primaryKey : null}
+          onSaveClick={commitItem}
+          onCancelClick={handleCancelClick}
         />
-        <p className="text-right">
-          <IconButton
-            icon="plus"
-            bsStyle="primary"
-            bsSize="small"
-            onClick={this.createItem}
-          >
-            Create new
-          </IconButton>
-        </p>
-        {this.state.editing && (
-          <Editor
-            item={this.state.editing}
-            complaints={this.state.complaints}
-            target={this.state.target}
-            properties={this.props.editorProperties}
-            excludeProperty={this.state.target ? this.props.primaryKey : null}
-            onSaveClick={item => this.commitItem(item)}
-            onCancelClick={this.cancelEditItem}
-          />
-        )}
-      </AdminContainer>
-    );
-  }
-}
+      )}
+    </AdminContainer>
+  );
+};
 
 export default connect()(EditorPage);
 
-class Editor extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      item: this.pickProperties(props.properties, props.item)
-    };
-  }
-
-  pickProperties(properties, item) {
+const Editor = props => {
+  const pickProperties = () => {
     // Remove keys not in the editor property list
     const result = {};
-    for (const p of properties) {
-      result[p.key] = item[p.key];
+    for (const p of props.properties) {
+      result[p.key] = props.item[p.key];
     }
     return result;
-  }
-
-  componentWillReceiveProps(nextProps) {
-    if (
-      nextProps.properies !== this.props.properties ||
-      nextProps.item !== this.props.item
-    ) {
-      this.setState({
-        item: this.pickProperties(nextProps.properties, nextProps.item)
-      });
-    }
-  }
-
-  onChange(item) {
-    this.setState({ item });
-  }
-
-  handleSave = () => {
-    this.props.onSaveClick && this.props.onSaveClick(this.state.item);
   };
 
-  render() {
-    const properties = this.props.properties.filter(
-      p => !this.props.excludeProperty || this.props.excludeProperty !== p.key
-    );
+  const [currentData, setCurrentData] = useState(() => pickProperties());
 
-    return (
-      <Panel bsStyle="primary">
-        <Panel.Heading>
-          {this.props.target ? (
-            <span>
-              Updating: <strong>{this.props.target}</strong>
-            </span>
-          ) : (
-            'Creating new item'
-          )}
-        </Panel.Heading>
-        <Panel.Body>
-          <PropertyEditor
-            value={this.state.item}
-            complaints={this.props.complaints}
-            properties={properties}
-            onChange={this.onChange.bind(this)}
-          />
-        </Panel.Body>
-        <Panel.Footer className="text-center">
-          <Button bsStyle="link" onClick={this.props.onCancelClick}>
-            Cancel
-          </Button>
-          <Button bsStyle="primary" onClick={this.handleSave}>
-            Save
-          </Button>
-        </Panel.Footer>
-      </Panel>
-    );
-  }
-}
+  useEffect(
+    () => {
+      setCurrentData(pickProperties());
+    },
+    [props.properties, props.item]
+  );
+
+  const handleSave = () => {
+    props.onSaveClick && props.onSaveClick(currentData);
+  };
+
+  const properties = props.properties.filter(
+    p => !props.excludeProperty || props.excludeProperty !== p.key
+  );
+
+  return (
+    <Panel bsStyle="primary">
+      <Panel.Heading>
+        {props.target ? (
+          <span>
+            Updating: <strong>{props.target}</strong>
+          </span>
+        ) : (
+          'Creating new item'
+        )}
+      </Panel.Heading>
+      <Panel.Body>
+        <PropertyEditor
+          value={currentData}
+          complaints={props.complaints}
+          properties={properties}
+          onChange={setCurrentData}
+        />
+      </Panel.Body>
+      <Panel.Footer className="text-center">
+        <Button bsStyle="link" onClick={props.onCancelClick}>
+          Cancel
+        </Button>
+        <Button bsStyle="primary" onClick={handleSave}>
+          Save
+        </Button>
+      </Panel.Footer>
+    </Panel>
+  );
+};

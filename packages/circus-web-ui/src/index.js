@@ -1,7 +1,7 @@
 // Babel polyfill, needed for async/await and Promise support for IE
 import '@babel/polyfill';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import { Router, Route, Switch } from 'react-router-dom';
 import Application from 'pages/Application';
@@ -34,11 +34,11 @@ import { Provider } from 'react-redux';
 import { StoreContext } from 'redux-react-hook';
 import { ThemeProvider } from 'styled-components';
 import tinycolor from 'tinycolor2';
-import { refreshUserInfo, dismissMessageOnPageChange } from 'actions';
+import { dismissMessageOnPageChange } from 'actions';
 import PluginJobQueueSearch from './pages/search/PluginJobQueueSearch';
 import browserHistory from 'browserHistory';
 
-import { api, ApiContext } from 'utils/api';
+import createApiManager, { ApiContext, ApiManagerContext } from 'utils/api';
 
 require('./styles/main.less');
 
@@ -94,31 +94,49 @@ const AppRoutes = props => {
   );
 };
 
-ReactDOM.render(
-  <ApiContext.Provider value={api}>
-    <StoreContext.Provider value={store}>
-      <Provider store={store}>
-        <ThemeProvider theme={theme}>
-          <Router history={browserHistory}>
-            <Switch>
-              <Route exact path="/" component={LoginScreen} />
-              <AppRoutes />
-            </Switch>
-          </Router>
-        </ThemeProvider>
-      </Provider>
-    </StoreContext.Provider>
-  </ApiContext.Provider>,
-  document.getElementById('app')
-);
+const TheApp = props => {
+  const [apiManager, setApiManager] = useState();
+  const [api, setApi] = useState();
 
-// First-time login check
-store.dispatch(refreshUserInfo(true));
+  useEffect(() => {
+    // First-time login management
+    const handleApiCreated = () => setApi(manager.api);
+    const manager = createApiManager('/', store.dispatch, handleApiCreated);
+    manager.restoreApiCaller();
+    setApiManager(manager);
+    manager.refreshUserInfo(true);
+  }, []);
 
-// Handles history change
-browserHistory.listen(() => {
-  // Hide message boxes which should not persist upon page changes
-  dismissMessageOnPageChange();
-  // Load user information again to check login status
-  store.dispatch(refreshUserInfo(false));
-});
+  useEffect(() => {
+    // Handles history change
+    browserHistory.listen(() => {
+      // Hide message boxes which should not persist upon page changes
+      dismissMessageOnPageChange();
+      // Load user information again to check login status
+      apiManager && apiManager.refreshUserInfo(false);
+    });
+  });
+
+  if (!apiManager) return null;
+
+  return (
+    <ApiManagerContext.Provider value={apiManager}>
+      <ApiContext.Provider value={api}>
+        <StoreContext.Provider value={store}>
+          <Provider store={store}>
+            <ThemeProvider theme={theme}>
+              <Router history={browserHistory}>
+                <Switch>
+                  <Route exact path="/" component={LoginScreen} />
+                  <AppRoutes />
+                </Switch>
+              </Router>
+            </ThemeProvider>
+          </Provider>
+        </StoreContext.Provider>
+      </ApiContext.Provider>
+    </ApiManagerContext.Provider>
+  );
+};
+
+ReactDOM.render(<TheApp />, document.getElementById('app'));

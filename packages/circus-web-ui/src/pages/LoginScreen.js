@@ -1,5 +1,5 @@
-import React from 'react';
-import { login } from 'actions';
+import React, { useState } from 'react';
+import { useApiManager } from 'utils/api';
 import {
   Row,
   Col,
@@ -11,6 +11,7 @@ import {
 } from 'components/react-bootstrap';
 import { connect } from 'react-redux';
 import styled from 'styled-components';
+import browserHistory from 'browserHistory';
 
 const StyledDiv = styled.div`
   .login-panel {
@@ -31,81 +32,75 @@ const StyledDiv = styled.div`
   }
 `;
 
-class LoginScreenView extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = { id: '', password: '' };
-  }
+const LoginScreenView = props => {
+  const [input, setInput] = useState({ id: '', password: '' });
+  const [error, setError] = useState();
+  const apiManager = useApiManager();
 
-  change(key, val) {
-    this.setState({ [key]: val });
-  }
+  const change = (key, val) => {
+    setInput({ ...input, [key]: val });
+  };
 
-  async loginClick() {
-    const { dispatch } = this.props;
+  const loginClick = async () => {
     try {
-      await dispatch(login(this.state.id, this.state.password));
+      await apiManager.tryAuthenticate(input.id, input.password);
+      await apiManager.refreshUserInfo(true);
+      browserHistory.push('/home');
     } catch (err) {
       if (err.response && err.response.status === 400) {
-        this.setState({ error: 'Invalid user ID or password.' });
+        setError('Invalid user ID or password.');
       } else {
-        this.setState({
-          error: 'Critical server error. Plese consult the administrator.'
-        });
+        setError('Critical server error. Plese consult the administrator.');
+        console.error(err);
       }
     }
-  }
+  };
 
-  render() {
-    const disabled =
-      this.state.id.length === 0 || this.state.password.length === 0;
+  const disabled = input.id.length === 0 || input.password.length === 0;
 
-    return (
-      <StyledDiv>
-        <Row className={'login-panel' + (this.state.error ? ' has-error' : '')}>
-          <Col sm={6} smOffset={3}>
-            <Panel bsStyle="primary">
-              <Panel.Body>
-                <h1 className="text-center">
-                  <span className="circus-icon-logo" />
-                  <span hidden>CIRCUS DB</span>
-                </h1>
-                <FormGroup>
-                  <FormControl
-                    placeholder="User ID or E-mail"
-                    autoFocus
-                    value={this.state.id}
-                    onChange={ev => this.change('id', ev.target.value)}
-                  />
-                  <FormControl
-                    placeholder="Password"
-                    type="password"
-                    value={this.state.password}
-                    onChange={ev => this.change('password', ev.target.value)}
-                    onKeyDown={ev => ev.keyCode == 13 && this.loginClick()}
-                  />
-                </FormGroup>
-                {this.state.error && (
-                  <p className="text-danger">{this.state.error}</p>
-                )}
-              </Panel.Body>
-              <Panel.Footer className="text-center">
-                <Button
-                  disabled={disabled}
-                  bsStyle="primary"
-                  bsSize="lg"
-                  onClick={() => this.loginClick()}
-                >
-                  <Glyphicon glyph="ok-sign" />&ensp;Login
-                </Button>
-              </Panel.Footer>
-            </Panel>
-          </Col>
-        </Row>
-      </StyledDiv>
-    );
-  }
-}
+  return (
+    <StyledDiv>
+      <Row className={'login-panel' + (error ? ' has-error' : '')}>
+        <Col sm={6} smOffset={3}>
+          <Panel bsStyle="primary">
+            <Panel.Body>
+              <h1 className="text-center">
+                <span className="circus-icon-logo" />
+                <span hidden>CIRCUS DB</span>
+              </h1>
+              <FormGroup>
+                <FormControl
+                  placeholder="User ID or E-mail"
+                  autoFocus
+                  value={input.id}
+                  onChange={ev => change('id', ev.target.value)}
+                />
+                <FormControl
+                  placeholder="Password"
+                  type="password"
+                  value={input.password}
+                  onChange={ev => change('password', ev.target.value)}
+                  onKeyDown={ev => ev.keyCode == 13 && loginClick()}
+                />
+              </FormGroup>
+              {error && <p className="text-danger">{error}</p>}
+            </Panel.Body>
+            <Panel.Footer className="text-center">
+              <Button
+                disabled={disabled}
+                bsStyle="primary"
+                bsSize="lg"
+                onClick={() => loginClick()}
+              >
+                <Glyphicon glyph="ok-sign" />&ensp;Login
+              </Button>
+            </Panel.Footer>
+          </Panel>
+        </Col>
+      </Row>
+    </StyledDiv>
+  );
+};
 
 const LoginScreen = connect()(LoginScreenView);
 

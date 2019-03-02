@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { startNewSearch, savePreset } from 'actions';
 import { connect } from 'react-redux';
+import { useApiManager } from 'utils/api';
 
 /**
  * Creates a HOC that remembers the current editing condition and
@@ -16,19 +17,16 @@ const sendSearchCondition = opts => {
   } = opts;
 
   return function(BaseComponent) {
-    class Enhanced extends React.Component {
-      constructor(props) {
-        super(props);
-        this.state = { condition: props.initialCondition };
-      }
+    const Enhanced = props => {
+      const [condition, setCondition] = useState(props.initialCondition);
+      const apiManager = useApiManager();
+      const { dispatch } = props;
 
-      handleChange = newCondition => {
-        this.setState({ condition: newCondition });
+      const handleChange = newCondition => {
+        setCondition(newCondition);
       };
 
-      handleSearchClick = () => {
-        const { dispatch } = this.props;
-        const { condition } = this.state;
+      const handleSearchClick = () => {
         dispatch(
           startNewSearch(
             searchName,
@@ -40,33 +38,29 @@ const sendSearchCondition = opts => {
         );
       };
 
-      componentDidMount() {
-        this.handleSearchClick();
-      }
+      useEffect(handleSearchClick, []);
 
-      handleSavePresetClick = async () => {
-        const { dispatch } = this.props;
-        dispatch(savePreset(searchName, this.state.condition));
+      const handleSavePresetClick = async () => {
+        await dispatch(savePreset(searchName, condition));
+        apiManager.refreshUserInfo(true);
       };
 
-      handleResetClick = () => {
-        this.setState({ condition: nullCondition() });
+      const handleResetClick = () => {
+        setCondition(nullCondition());
       };
 
-      render() {
-        const { onChange, onSearchClick, onResetClick, ...props } = this.props;
-        return (
-          <BaseComponent
-            onChange={this.handleChange}
-            onSearchClick={this.handleSearchClick}
-            onResetClick={this.handleResetClick}
-            onSavePresetClick={this.handleSavePresetClick}
-            condition={this.state.condition}
-            {...props}
-          />
-        );
-      }
-    }
+      const { onChange, onSearchClick, onResetClick, ...rest } = props;
+      return (
+        <BaseComponent
+          onChange={handleChange}
+          onSearchClick={handleSearchClick}
+          onResetClick={handleResetClick}
+          onSavePresetClick={handleSavePresetClick}
+          condition={condition}
+          {...rest}
+        />
+      );
+    };
 
     Enhanced.displayName = `searchPanel(${searchName})`;
 

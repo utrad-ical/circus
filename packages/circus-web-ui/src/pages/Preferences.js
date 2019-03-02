@@ -1,11 +1,10 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import PropertyEditor from 'rb/PropertyEditor';
 import * as et from 'rb/editor-types';
-import { api } from 'utils/api';
-import { showMessage, refreshUserInfo } from 'actions';
+import { api, useApiManager } from 'utils/api';
+import { showMessage } from 'actions';
 import { Button } from 'components/react-bootstrap';
 import IconButton from 'components/IconButton';
-import { connect } from 'react-redux';
 import Icon from 'components/Icon';
 
 const PresetDeleteEditor = props => {
@@ -41,89 +40,74 @@ const PresetDeleteEditor = props => {
   );
 };
 
-class PreferencesView extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = { settings: null };
-  }
+const Preferences = props => {
+  const [settings, setSettings] = useState(null);
+  const apiManager = useApiManager();
 
-  loadSettings = async () => {
+  const loadSettings = async () => {
     const settings = await api('preferences');
-    if (!this.unmounted) this.setState({ settings });
+    setSettings(settings);
   };
 
-  componentDidMount() {
-    this.loadSettings();
-  }
+  useEffect(() => {
+    loadSettings();
+  }, []);
 
-  propertyChange(value) {
-    this.setState({ settings: value });
-  }
-
-  componentWillUnmount() {
-    this.unmounted = true;
-  }
-
-  saveClick = async () => {
-    const { dispatch } = this.props;
+  const saveClick = async () => {
     await api('preferences', {
       method: 'patch',
-      data: this.state.settings
+      data: settings
     });
     showMessage('Your preference was saved.', 'success', { short: true });
-    this.loadSettings();
-    dispatch(refreshUserInfo(true));
+    loadSettings();
+    apiManager.refreshUserInfo(true);
   };
 
-  render() {
-    if (this.state.settings === null) return <div />;
+  if (settings === null) return <div />;
 
-    const properties = [
-      {
-        caption: 'Color Theme',
-        key: 'theme',
-        editor: et.shrinkSelect({ mode_white: 'White', mode_black: 'Black' })
-      },
-      {
-        caption: 'Show Personal Info',
-        key: 'personalInfoView',
-        editor: et.checkbox({ label: 'show' })
-      },
-      {
-        caption: 'Case Search Presets',
-        key: 'caseSearchPresets',
-        editor: PresetDeleteEditor
-      },
-      {
-        caption: 'Series Search Presets',
-        key: 'seriesSearchPresets',
-        editor: PresetDeleteEditor
-      }
-    ];
+  const properties = [
+    {
+      caption: 'Color Theme',
+      key: 'theme',
+      editor: et.shrinkSelect({ mode_white: 'White', mode_black: 'Black' })
+    },
+    {
+      caption: 'Show Personal Info',
+      key: 'personalInfoView',
+      editor: et.checkbox({ label: 'show' })
+    },
+    {
+      caption: 'Case Search Presets',
+      key: 'caseSearchPresets',
+      editor: PresetDeleteEditor
+    },
+    {
+      caption: 'Series Search Presets',
+      key: 'seriesSearchPresets',
+      editor: PresetDeleteEditor
+    }
+  ];
 
-    return (
-      <div>
-        <h1>
-          <Icon icon="circus-preference" /> Preferences
-        </h1>
-        <PropertyEditor
-          value={this.state.settings}
-          properties={properties}
-          onChange={this.propertyChange.bind(this)}
-        />
-        <p className="text-center">
-          <Button bsStyle="primary" onClick={this.saveClick}>
-            Save
-          </Button>
-          <Button bsStyle="link" onClick={this.loadSettings}>
-            Cancel
-          </Button>
-        </p>
-      </div>
-    );
-  }
-}
-
-const Preferences = connect()(PreferencesView);
+  return (
+    <div>
+      <h1>
+        <Icon icon="circus-preference" /> Preferences
+      </h1>
+      <PropertyEditor
+        value={settings}
+        properties={properties}
+        onChange={setSettings}
+      />
+      <p className="text-center">
+        <Button bsStyle="primary" onClick={saveClick}>
+          Save
+        </Button>
+        <Button bsStyle="link" onClick={loadSettings}>
+          Cancel
+        </Button>
+      </p>
+    </div>
+  );
+};
 
 export default Preferences;

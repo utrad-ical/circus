@@ -1,5 +1,4 @@
 import { api } from 'utils/api';
-import { refreshUserInfo } from './login-management';
 import { prompt, confirm } from 'rb/modal';
 
 function beginQuery(params) {
@@ -108,7 +107,6 @@ export function savePreset(name, condition) {
       method: 'patch',
       data: { [key]: newPresets }
     });
-    dispatch(refreshUserInfo(true));
     dispatch({
       type: 'SET_SEARCH_QUERY_BUSY',
       name,

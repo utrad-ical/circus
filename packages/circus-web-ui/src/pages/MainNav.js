@@ -1,10 +1,11 @@
 import React, { Fragment } from 'react';
-import { logout } from 'actions';
 import { Link } from 'react-router-dom';
 import Icon from 'components/Icon';
 import { connect } from 'react-redux';
 import styled from 'styled-components';
 import classnames from 'classnames';
+import { useApiManager } from 'utils/api';
+import browserHistory from 'browserHistory';
 
 const MainMenu = props => <ul>{props.children}</ul>;
 
@@ -165,7 +166,14 @@ const StyledNav = styled.nav`
 `;
 
 const MainNavView = props => {
-  const { onLogout, caseSearchPresets = [], seriesSearchPresets = [] } = props;
+  const { caseSearchPresets = [], seriesSearchPresets = [] } = props;
+  const apiManager = useApiManager();
+
+  const onLogout = async () => {
+    await apiManager.logout();
+    browserHistory.push('/');
+  };
+
   return (
     <StyledHeader>
       <StyledNav>
@@ -266,22 +274,17 @@ const MainNavView = props => {
   );
 };
 
-const MainNav = connect(
-  state => ({
-    loginUserName: state.loginUser.data ? state.loginUser.data.description : '',
-    isAdmin:
-      state.loginUser.data &&
-      state.loginUser.data.globalPrivileges.indexOf('manageServer') > -1,
-    caseSearchPresets: state.loginUser.data
-      ? state.loginUser.data.preferences.caseSearchPresets
-      : [],
-    seriesSearchPresets: state.loginUser.data
-      ? state.loginUser.data.preferences.seriesSearchPresets
-      : []
-  }),
-  dispatch => ({
-    onLogout: () => dispatch(logout())
-  })
-)(MainNavView);
+const MainNav = connect(state => ({
+  loginUserName: state.loginUser.data ? state.loginUser.data.description : '',
+  isAdmin:
+    state.loginUser.data &&
+    state.loginUser.data.globalPrivileges.indexOf('manageServer') > -1,
+  caseSearchPresets: state.loginUser.data
+    ? state.loginUser.data.preferences.caseSearchPresets
+    : [],
+  seriesSearchPresets: state.loginUser.data
+    ? state.loginUser.data.preferences.seriesSearchPresets
+    : []
+}))(MainNavView);
 
 export default MainNav;

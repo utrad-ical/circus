@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { startNewSearch, savePreset } from 'actions';
 import { connect } from 'react-redux';
-import { useApiManager } from 'utils/api';
+import { useLoginManager } from 'utils/loginManager';
 
 /**
  * Creates a HOC that remembers the current editing condition and
@@ -19,7 +19,7 @@ const sendSearchCondition = opts => {
   return function(BaseComponent) {
     const Enhanced = props => {
       const [condition, setCondition] = useState(props.initialCondition);
-      const apiManager = useApiManager();
+      const loginManager = useLoginManager();
       const { dispatch } = props;
 
       const handleChange = newCondition => {
@@ -42,7 +42,7 @@ const sendSearchCondition = opts => {
 
       const handleSavePresetClick = async () => {
         await dispatch(savePreset(searchName, condition));
-        apiManager.refreshUserInfo(true);
+        loginManager.refreshUserInfo(true);
       };
 
       const handleResetClick = () => {

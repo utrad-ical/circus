@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import PropertyEditor from 'rb/PropertyEditor';
 import * as et from 'rb/editor-types';
-import { api, useApiManager } from 'utils/api';
+import { useApi } from 'utils/api';
+import { useLoginManager } from 'utils/loginManager';
 import { showMessage } from 'actions';
 import { Button } from 'components/react-bootstrap';
 import IconButton from 'components/IconButton';
@@ -42,7 +43,8 @@ const PresetDeleteEditor = props => {
 
 const Preferences = props => {
   const [settings, setSettings] = useState(null);
-  const apiManager = useApiManager();
+  const loginManager = useLoginManager();
+  const api = useApi();
 
   const loadSettings = async () => {
     const settings = await api('preferences');
@@ -60,7 +62,7 @@ const Preferences = props => {
     });
     showMessage('Your preference was saved.', 'success', { short: true });
     loadSettings();
-    apiManager.refreshUserInfo(true);
+    loginManager.refreshUserInfo(true);
   };
 
   if (settings === null) return <div />;

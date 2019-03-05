@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useApiManager } from 'utils/api';
+import { useLoginManager } from 'utils/loginManager';
 import {
   Row,
   Col,
@@ -35,7 +35,7 @@ const StyledDiv = styled.div`
 const LoginScreenView = props => {
   const [input, setInput] = useState({ id: '', password: '' });
   const [error, setError] = useState();
-  const apiManager = useApiManager();
+  const loginManager = useLoginManager();
 
   const change = (key, val) => {
     setInput({ ...input, [key]: val });
@@ -43,8 +43,8 @@ const LoginScreenView = props => {
 
   const loginClick = async () => {
     try {
-      await apiManager.tryAuthenticate(input.id, input.password);
-      await apiManager.refreshUserInfo(true);
+      await loginManager.tryAuthenticate(input.id, input.password);
+      await loginManager.refreshUserInfo(true);
       browserHistory.push('/home');
     } catch (err) {
       if (err.response && err.response.status === 400) {

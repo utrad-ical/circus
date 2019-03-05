@@ -2,7 +2,8 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Button, Panel } from 'components/react-bootstrap';
 import IconButton from 'rb/IconButton';
 import PropertyEditor from 'rb/PropertyEditor';
-import { api, useApiManager } from 'utils/api.js';
+import { api } from 'utils/api.js';
+import { useLoginManager } from 'utils/loginManager';
 import AdminContainer from './AdminContainer';
 import { startNewSearch } from 'actions';
 import DataGrid from 'components/DataGrid';
@@ -13,7 +14,7 @@ const EditorPage = props => {
   const [target, setTarget] = useState(null);
   const [editing, setEditing] = useState(null);
   const [complaints, setComplaints] = useState(null);
-  const apiManager = useApiManager();
+  const loginManager = useLoginManager();
 
   const {
     listColumns,
@@ -69,7 +70,7 @@ const EditorPage = props => {
       setTarget(null);
       setEditing(null);
       await loadItems();
-      apiManager.refreshUserInfo(true); // Full user data refresh
+      loginManager.refreshUserInfo(true); // Full user data refresh
     } catch (err) {
       setComplaints(err.data.errors);
     }

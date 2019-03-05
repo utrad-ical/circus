@@ -1,6 +1,4 @@
-import { api } from 'utils/api';
-
-export function loadPluginInfo(pluginId) {
+export function loadPluginInfo(api, pluginId) {
   return async (dispatch, getState) => {
     const state = getState();
     if (state.plugin[pluginId]) return;

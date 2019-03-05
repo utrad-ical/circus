@@ -1,7 +1,5 @@
 import EditorPage from './EditorPage';
 import React, { Fragment } from 'react';
-// import { api } from 'utils/api';
-import LoadingIndicator from 'rb/LoadingIndicator';
 import BodyPartIcon from 'components/BodyPartIcon';
 import IconEditor from './IconEditor';
 import * as et from 'rb/editor-types';
@@ -47,30 +45,20 @@ const editorProperties = [
   { key: 'icon', caption: 'Icon', editor: IconEditor }
 ];
 
-export default class PluginAdmin extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = { ready: false };
-  }
+const PluginAdmin = props => {
+  return (
+    <EditorPage
+      title="CAD Plug-ins"
+      icon="circus-app"
+      searchName="admin-plugins"
+      resource="admin/plugins"
+      primaryKey="pluginId"
+      editorProperties={editorProperties}
+      listColumns={listColumns}
+      makeEmptyItem={makeEmptyItem}
+      targetName={item => `${item.pluginName} v${item.version}`}
+    />
+  );
+};
 
-  async componentDidMount() {
-    this.setState({ ready: true });
-  }
-
-  render() {
-    if (!this.state.ready) return <LoadingIndicator />;
-    return (
-      <EditorPage
-        title="CAD Plug-ins"
-        icon="circus-app"
-        searchName="admin-plugins"
-        resource="admin/plugins"
-        primaryKey="pluginId"
-        editorProperties={editorProperties}
-        listColumns={listColumns}
-        makeEmptyItem={makeEmptyItem}
-        targetName={item => `${item.pluginName} v${item.version}`}
-      />
-    );
-  }
-}
+export default PluginAdmin;

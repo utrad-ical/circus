@@ -2,23 +2,19 @@ import React from 'react';
 import { Button } from 'components/react-bootstrap';
 import IconButton from 'components/IconButton';
 import { CollapserView } from 'components/Collapser';
-import withPreference from 'components/withPreference';
+import usePreference from 'components/usePreference';
 
-const StateSavingCollapser = withPreference('searchPanelOpen', true)(props => {
-  const {
-    searchPanelOpen,
-    searchPanelOpenChange,
-    searchPanelOpenBusy,
-    ...rest
-  } = props;
+const StateSavingCollapser = props => {
+  const [open, setOpen, busy] = usePreference('searchPanelOpen', false);
+  if (busy) return null;
   return (
     <CollapserView
-      open={props.searchPanelOpen}
-      onToggleClick={() => props.searchPanelOpenChange(!props.searchPanelOpen)}
-      {...rest}
+      open={open}
+      onToggleClick={() => setOpen(!open)}
+      {...props}
     />
   );
-});
+};
 
 const SearchPanel = props => {
   const { onResetClick, onSearchClick, onSavePresetClick, children } = props;

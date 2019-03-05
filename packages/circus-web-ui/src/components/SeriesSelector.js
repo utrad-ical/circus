@@ -1,4 +1,4 @@
-import React, { Fragment } from 'react';
+import React, { useState, Fragment } from 'react';
 import DataGrid from 'components/DataGrid';
 import SearchResultsView from 'components/SearchResultsView';
 import { Panel } from 'components/react-bootstrap';
@@ -74,27 +74,23 @@ const RelevantSeries = props => {
   );
 };
 
-class SeriesSelectorView extends React.PureComponent {
-  constructor(props) {
-    super(props);
-    this.state = { showRelevantSeries: false };
-  }
+const SeriesSelectorView = props => {
+  const [showRelevantSeries, setShowRelevantSeries] = useState(false);
+  const { dispatch, value, onChange } = props;
 
-  handleAddSeriesClick = () => {
-    const { dispatch } = this.props;
-    if (!this.state.showRelevantSeries) {
+  const handleAddSeriesClick = () => {
+    if (!showRelevantSeries) {
       const filter = {
-        // studyUid: this.state.selectedSeries.map(s => s.studyUid)
+        // studyUid: value.map(s => s.studyUid)
       };
-      dispatch(startNewSearch('relevantSeries', 'series', filter, {}, {}));
-      this.setState({ showRelevantSeries: true });
+      dispatch(startNewSearch(api, 'relevantSeries', 'series', filter, {}, {}));
+      setShowRelevantSeries(true);
     } else {
-      this.setState({ showRelevantSeries: false });
+      setShowRelevantSeries(false);
     }
   };
 
-  handlePartialVolumeChange = (volumeId, descriptor) => {
-    const { value, onChange } = this.props;
+  const handlePartialVolumeChange = (volumeId, descriptor) => {
     const newValue = value.map((v, i) => {
       return i === volumeId
         ? { ...value[volumeId], partialVolumeDescriptor: descriptor }
@@ -103,77 +99,70 @@ class SeriesSelectorView extends React.PureComponent {
     onChange(newValue);
   };
 
-  handleSeriesRegister = async seriesUid => {
-    const { value, onChange } = this.props;
+  const handleSeriesRegister = async seriesUid => {
     if (value.some(s => s.seriesUid === seriesUid)) return;
     const series = await api('series/' + seriesUid);
     const newEntry = { ...series, range: series.images };
     onChange([...value, newEntry]);
   };
 
-  handleSeriesRemove = seriesUid => {
-    const { value, onChange } = this.props;
+  const handleSeriesRemove = seriesUid => {
     const newValue = value.filter(s => s.seriesUid !== seriesUid);
     onChange(newValue);
   };
 
-  render() {
-    const { value } = this.props;
-    const { showRelevantSeries } = this.state;
+  const columns = [
+    {
+      key: 'volumeId',
+      caption: '#',
+      renderer: props => <Fragment>{props.index}</Fragment>
+    },
+    { key: 'modality', caption: 'Modality' },
+    { key: 'seriesUid', caption: 'Series' },
+    { key: 'seriesDescription', caption: 'Series desc' },
+    {
+      key: 'images',
+      caption: 'Partial Volume',
+      renderer: props => (
+        <PartialVolumeRenderer
+          value={props.value.partialVolumeDescriptor}
+          index={props.index}
+          onChange={handlePartialVolumeChange}
+        />
+      )
+    },
+    {
+      className: 'delete',
+      renderer: props => (
+        <IconButton
+          bsSize="xs"
+          icon="remove"
+          onClick={() => handleSeriesRemove(props.value.seriesUid)}
+        />
+      )
+    }
+  ];
 
-    const columns = [
-      {
-        key: 'volumeId',
-        caption: '#',
-        renderer: props => <Fragment>{props.index}</Fragment>
-      },
-      { key: 'modality', caption: 'Modality' },
-      { key: 'seriesUid', caption: 'Series' },
-      { key: 'seriesDescription', caption: 'Series desc' },
-      {
-        key: 'images',
-        caption: 'Partial Volume',
-        renderer: props => (
-          <PartialVolumeRenderer
-            value={props.value.partialVolumeDescriptor}
-            index={props.index}
-            onChange={this.handlePartialVolumeChange}
-          />
-        )
-      },
-      {
-        className: 'delete',
-        renderer: props => (
-          <IconButton
-            bsSize="xs"
-            icon="remove"
-            onClick={() => this.handleSeriesRemove(props.value.seriesUid)}
-          />
-        )
-      }
-    ];
-
-    return (
-      <Panel header="Series">
-        <Panel.Heading>Series</Panel.Heading>
-        <Panel.Body>
-          <DataGrid columns={columns} value={value} />
-          <IconButton
-            icon="plus"
-            bsSize="sm"
-            onClick={this.handleAddSeriesClick}
-            active={showRelevantSeries}
-          >
-            Add Series
-          </IconButton>
-          {showRelevantSeries && (
-            <RelevantSeries onSeriesRegister={this.handleSeriesRegister} />
-          )}
-        </Panel.Body>
-      </Panel>
-    );
-  }
-}
+  return (
+    <Panel header="Series">
+      <Panel.Heading>Series</Panel.Heading>
+      <Panel.Body>
+        <DataGrid columns={columns} value={value} />
+        <IconButton
+          icon="plus"
+          bsSize="sm"
+          onClick={handleAddSeriesClick}
+          active={showRelevantSeries}
+        >
+          Add Series
+        </IconButton>
+        {showRelevantSeries && (
+          <RelevantSeries onSeriesRegister={handleSeriesRegister} />
+        )}
+      </Panel.Body>
+    </Panel>
+  );
+};
 
 const SeriesSelector = connect()(SeriesSelectorView);
 export default SeriesSelector;

@@ -1,27 +1,35 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import Icon from 'components/Icon';
 import { startNewSearch } from 'actions';
 import PluginJobQueueSearchResults from './PluginJobQueueSearchResults';
 import { connect } from 'react-redux';
+import { useApi } from 'utils/api';
 
-class PluginJobQueueSearch extends React.Component {
-  componentDidMount() {
-    const { startNewSearch } = this.props;
-    startNewSearch('pluingJobQueue', 'plugin-job-queue', {}, {}, { jobId: -1 });
-  }
+const PluginJobQueueSearch = props => {
+  const api = useApi();
 
-  render() {
-    return (
-      <div>
-        <h1>
-          <Icon icon="circus-case" /> Plug-in Job Queue
-        </h1>
-        <PluginJobQueueSearchResults />
-      </div>
+  useEffect(() => {
+    const { dispatch } = props;
+    dispatch(
+      startNewSearch(
+        api,
+        'pluingJobQueue',
+        'plugin-job-queue',
+        {},
+        {},
+        { jobId: -1 }
+      )
     );
-  }
-}
+  }, []);
 
-export default connect(null, dispatch => ({
-  startNewSearch: (...args) => dispatch(startNewSearch(...args))
-}))(PluginJobQueueSearch);
+  return (
+    <div>
+      <h1>
+        <Icon icon="circus-case" /> Plug-in Job Queue
+      </h1>
+      <PluginJobQueueSearchResults />
+    </div>
+  );
+};
+
+export default connect()(PluginJobQueueSearch);

@@ -12,6 +12,7 @@ import { connect } from 'react-redux';
 import AutoReloadSwitch from './AutoReloadSwitch';
 import Icon from 'components/Icon';
 import styled from 'styled-components';
+import { useApi } from 'utils/api';
 
 export const makeSortOptions = sortKeys => {
   const options = {};
@@ -108,6 +109,7 @@ const SearchResultsView = props => {
     refreshable,
     ...rest
   } = props;
+  const api = useApi();
   if (!search) return null;
   const { isFetching, totalItems, limit, items, page, sort } = search;
 
@@ -118,22 +120,22 @@ const SearchResultsView = props => {
 
   function handleSortChange(newSort) {
     if (newSort === sort) return;
-    dispatch(changeSearchSort(name, newSort));
+    dispatch(changeSearchSort(api, name, newSort));
   }
 
   function handlePageClick(newPage) {
     if (newPage === page) return;
-    dispatch(changeSearchPage(name, newPage));
+    dispatch(changeSearchPage(api, name, newPage));
   }
 
   function handleLimitChange(newLimit) {
     if (newLimit === limit) return;
-    dispatch(changeSearchLimit(name, newLimit));
+    dispatch(changeSearchLimit(api, name, newLimit));
   }
 
   function handleRefresh() {
     if (isFetching) return;
-    dispatch(refreshSearch(name));
+    dispatch(refreshSearch(api, name));
   }
 
   const pages = Math.ceil(totalItems / limit);

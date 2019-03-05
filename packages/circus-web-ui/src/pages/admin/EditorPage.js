@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Button, Panel } from 'components/react-bootstrap';
 import IconButton from 'rb/IconButton';
 import PropertyEditor from 'rb/PropertyEditor';
-import { api } from 'utils/api.js';
+import { useApi } from 'utils/api.js';
 import { useLoginManager } from 'utils/loginManager';
 import AdminContainer from './AdminContainer';
 import { startNewSearch } from 'actions';
@@ -15,6 +15,7 @@ const EditorPage = props => {
   const [editing, setEditing] = useState(null);
   const [complaints, setComplaints] = useState(null);
   const loginManager = useLoginManager();
+  const api = useApi();
 
   const {
     listColumns,
@@ -77,7 +78,7 @@ const EditorPage = props => {
   };
 
   const loadItems = async () => {
-    dispatch(startNewSearch(searchName, resource, {}, {}, {}));
+    dispatch(api, startNewSearch(searchName, resource, {}, {}, {}));
   };
 
   const targetName = item => {

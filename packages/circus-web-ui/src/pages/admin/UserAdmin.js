@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import EditorPage from './EditorPage';
-import { api } from 'utils/api';
+import { useApi } from 'utils/api';
 import LoadingIndicator from 'rb/LoadingIndicator';
 import MultiSelect from 'rb/MultiSelect';
 import ShrinkSelect from 'rb/ShrinkSelect';
@@ -48,13 +48,36 @@ const PreferenceEditor = props => {
   );
 };
 
-export default class UserAdmin extends React.Component {
-  constructor(props) {
-    super(props);
+const UserAdmin = props => {
+  const [editorProperties, setEditorProperties] = useState(null);
+  const [listColumns, setListColumns] = useState(null);
+  const api = useApi();
 
-    this.state = { ready: false };
+  const load = async () => {
+    const groups = (await api('admin/groups')).items;
+    const groupIdMap = {};
+    groups.forEach(g => (groupIdMap[g.groupId] = g.groupName));
+    setEditorProperties([
+      { caption: 'User Email', key: 'userEmail', editor: et.text() },
+      { caption: 'Login Name', key: 'loginId', editor: et.text() },
+      { caption: 'Description', key: 'description', editor: et.text() },
+      { caption: 'Password', key: 'password', editor: et.password() },
+      {
+        caption: 'Groups',
+        key: 'groups',
+        editor: props => (
+          <MultiSelect options={groupIdMap} numericalValue {...props} />
+        )
+      },
+      { caption: 'Preferences', key: 'preferences', editor: PreferenceEditor },
+      {
+        caption: 'Login Enabled',
+        key: 'loginEnabled',
+        editor: et.checkbox({ label: 'enabled' })
+      }
+    ]);
 
-    this.listColumns = [
+    setListColumns([
       { key: 'userEmail', caption: 'User ID (E-mail)' },
       { key: 'loginId', caption: 'Login Name' },
       { key: 'description', caption: 'Description' },
@@ -62,8 +85,7 @@ export default class UserAdmin extends React.Component {
         key: 'groups',
         renderer: ({ value: item }) => {
           return item.groups.map(groupId => {
-            if (!this.groups) return null;
-            const group = this.groups.find(g => g.groupId === groupId);
+            const group = groups.find(g => g.groupId === groupId);
             const style =
               group.privileges.indexOf('manageServer') >= 0
                 ? 'label-danger'
@@ -77,46 +99,26 @@ export default class UserAdmin extends React.Component {
         },
         caption: 'Groups'
       }
-    ];
+    ]);
+  };
 
-    this.editorProperties = [
-      { caption: 'User Email', key: 'userEmail', editor: et.text() },
-      { caption: 'Login Name', key: 'loginId', editor: et.text() },
-      { caption: 'Description', key: 'description', editor: et.text() },
-      { caption: 'Password', key: 'password', editor: et.password() },
-      { caption: 'Groups', key: 'groups', editor: null },
-      { caption: 'Preferences', key: 'preferences', editor: PreferenceEditor },
-      {
-        caption: 'Login Enabled',
-        key: 'loginEnabled',
-        editor: et.checkbox({ label: 'enabled' })
-      }
-    ];
-  }
+  useEffect(() => {
+    load();
+  }, []);
 
-  async componentDidMount() {
-    this.groups = (await api('admin/groups')).items;
-    const groupIdMap = {};
-    this.groups.forEach(g => (groupIdMap[g.groupId] = g.groupName));
-    this.editorProperties[4].editor = props => (
-      <MultiSelect options={groupIdMap} numericalValue {...props} />
-    );
-    this.setState({ ready: true });
-  }
+  if (!editorProperties || !listColumns) return <LoadingIndicator />;
+  return (
+    <EditorPage
+      title="Users"
+      icon="user"
+      searchName="admin-user"
+      resource="admin/users"
+      primaryKey="userEmail"
+      editorProperties={editorProperties}
+      listColumns={listColumns}
+      makeEmptyItem={makeEmptyItem}
+    />
+  );
+};
 
-  render() {
-    if (!this.state.ready) return <LoadingIndicator />;
-    return (
-      <EditorPage
-        title="Users"
-        icon="user"
-        searchName="admin-user"
-        resource="admin/users"
-        primaryKey="userEmail"
-        editorProperties={this.editorProperties}
-        listColumns={this.listColumns}
-        makeEmptyItem={makeEmptyItem}
-      />
-    );
-  }
-}
+export default UserAdmin;

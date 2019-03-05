@@ -1,26 +1,32 @@
-import React from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Row, Col, Panel } from 'components/react-bootstrap';
-import { api } from 'utils/api';
+import { useApi } from 'utils/api';
 import { showMessage } from 'actions';
+import LoadingIndicator from 'rb/LoadingIndicator';
 import ImageViewer from 'components/ImageViewer';
-import { store } from 'store';
 import * as rs from 'circus-rs';
 import { toolFactory } from 'circus-rs/tool/tool-initializer';
+import useLoginUser from 'utils/useLoginUser';
 
-export default class SeriesDetail extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = { fetching: false, series: null, composition: null };
-  }
+const SeriesDetail = props => {
+  const [fetching, setFetching] = useState(false);
+  const [series, setSeries] = useState(null);
+  const [composition, setComposition] = useState(null);
+  const loginUser = useLoginUser();
+  const api = useApi();
+  const pagerTool = useMemo(() => toolFactory('pager'), []);
 
-  async load(seriesUid) {
-    this.setState({ fetching: true });
+  const uid = props.match.params.uid;
+  const server = loginUser.dicomImageServer;
+
+  const load = async seriesUid => {
+    setFetching(true);
     try {
       const series = await api('series/' + seriesUid, {
         handleErrors: [401]
       });
-      this.setState({ fetching: false, series });
-      const server = store.getState().loginUser.data.dicomImageServer;
+      setFetching(false);
+      setSeries(series);
       const rsHttpClient = new rs.RsHttpClient(server);
       const volumeLoader = new rs.RsVolumeLoader({
         rsHttpClient,
@@ -32,87 +38,84 @@ export default class SeriesDetail extends React.Component {
         seriesUid: seriesUid
       });
       const composition = new rs.Composition(src);
-      this.setState({ composition });
+      setComposition(composition);
     } catch (err) {
-      this.setState({ fetching: false, series: null });
+      setFetching(false);
+      setSeries(false);
       if (err.status === 401) {
         showMessage(`You do not have access to series ${seriesUid}.`, 'danger');
       } else {
         throw err;
       }
     }
-  }
+  };
 
-  componentDidMount() {
-    const uid = this.props.match.params.uid;
-    this.load(uid);
-  }
+  useEffect(
+    () => {
+      load(uid);
+    },
+    [uid]
+  );
 
-  componentWillReceiveProps(newProps) {
-    if (this.props.match.params.uid !== newProps.match.params.uid) {
-      this.load(newProps.match.params.uid);
-    }
-  }
+  if (fetching) return <LoadingIndicator />;
+  if (!series) return null;
 
-  render() {
-    const series = this.state.series;
-    if (!series) return null;
-    const keys = [
-      'modality',
-      'bodyPart',
-      'width',
-      'height',
-      'images',
-      'manufacturer',
-      'modelName',
-      'seriesDate',
-      'updateTime',
-      'domain',
-      'seriesUid',
-      'studyUid'
-    ];
-    const pagerTool = toolFactory('pager');
-    return (
-      <div>
-        <h1>
-          <span className="circus-icon-series" />
-          Series Detail
-        </h1>
-        <Row>
-          <Col lg={6}>
-            <ImageViewer
-              className="preview-series"
-              composition={this.state.composition}
-              tool={pagerTool}
-              initialTool={pagerTool}
-            />
-          </Col>
-          <Col lg={6}>
-            {typeof series.patientInfo === 'object' ? (
-              <Table
-                data={series.patientInfo}
-                title="Patient Info"
-                defaultExpanded
-              />
-            ) : (
-              <Panel defaultExpanded>
-                <Panel.Heading>Patient Info</Panel.Heading>
-                <Panel.Body>Personal information is not shown.</Panel.Body>
-              </Panel>
-            )}
+  const keys = [
+    'modality',
+    'bodyPart',
+    'width',
+    'height',
+    'images',
+    'manufacturer',
+    'modelName',
+    'seriesDate',
+    'updateTime',
+    'domain',
+    'seriesUid',
+    'studyUid'
+  ];
+  return (
+    <div>
+      <h1>
+        <span className="circus-icon-series" />
+        Series Detail
+      </h1>
+      <Row>
+        <Col lg={6}>
+          <ImageViewer
+            className="preview-series"
+            composition={composition}
+            tool={pagerTool}
+            initialTool={pagerTool}
+          />
+        </Col>
+        <Col lg={6}>
+          {typeof series.patientInfo === 'object' ? (
             <Table
-              data={series}
-              keys={keys}
-              title="Series Detail"
+              data={series.patientInfo}
+              title="Patient Info"
               defaultExpanded
             />
-            <Table data={series.parameters} title="Parameters" />
-          </Col>
-        </Row>
-      </div>
-    );
-  }
-}
+          ) : (
+            <Panel defaultExpanded>
+              <Panel.Heading>Patient Info</Panel.Heading>
+              <Panel.Body>Personal information is not shown.</Panel.Body>
+            </Panel>
+          )}
+          <Table
+            data={series}
+            keys={keys}
+            title="Series Detail"
+            defaultExpanded
+          />
+          <Table data={series.parameters} title="Parameters" />
+        </Col>
+      </Row>
+    </div>
+  );
+};
+
+export default SeriesDetail;
 
 const print = data => {
   if (typeof data === 'object') return JSON.stringify(data);

@@ -1,38 +1,37 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from 'components/react-bootstrap';
 import LoadingIndicator from 'rb/LoadingIndicator';
-import { api } from 'utils/api';
+import { useApi } from 'utils/api';
 import Icon from 'components/Icon';
 
-export default class TaskList extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = { tasks: [] };
-  }
+const TaskList = props => {
+  const [tasks, setTasks] = useState([]);
+  const [downloadList, setDownloadList] = useState();
+  const api = useApi();
 
-  async refresh() {
+  const refresh = async () => {
     const items = (await api('tasks')).items;
-    this.setState({ downloadList: items });
-  }
+    setDownloadList(items);
+  };
 
-  componentDidMount() {
-    this.refresh();
-  }
+  useEffect(() => {
+    refresh();
+  }, []);
 
-  render() {
-    if (!Array.isArray(this.state.tasks)) {
-      return <LoadingIndicator />;
-    }
-    return (
-      <div>
-        <h1>
-          <Icon icon="tasks" /> Tasks
-        </h1>
-        <TaskItems items={this.state.tasks} />
-      </div>
-    );
+  if (!Array.isArray(tasks)) {
+    return <LoadingIndicator />;
   }
-}
+  return (
+    <div>
+      <h1>
+        <Icon icon="tasks" /> Tasks
+      </h1>
+      <TaskItems items={tasks} />
+    </div>
+  );
+};
+
+export default TaskList;
 
 const TaskItems = props => {
   const table = (

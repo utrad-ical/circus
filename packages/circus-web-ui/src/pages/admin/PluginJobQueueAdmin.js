@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import AdminContainer from './AdminContainer';
 import SearchResultsView from 'components/SearchResultsView';
 import { startNewSearch } from 'actions';
 import { connect } from 'react-redux';
 import DataGrid from 'components/DataGrid';
+import { useApi } from 'utils/api';
 
 const columns = [
   { caption: 'Created', key: 'createdAt' },
@@ -22,11 +23,14 @@ const DataView = props => {
   return <DataGrid columns={columns} value={value} />;
 };
 
-class PluginJobQueueAdminView extends React.PureComponent {
-  componentDidMount() {
-    const { dispatch } = this.props;
+const PluginJobQueueAdminView = props => {
+  const { dispatch } = props;
+  const api = useApi();
+
+  useEffect(() => {
     dispatch(
       startNewSearch(
+        api,
         'globalJobQueue',
         'admin/plugin-job-queue',
         {},
@@ -34,16 +38,14 @@ class PluginJobQueueAdminView extends React.PureComponent {
         { createdAt: -1 }
       )
     );
-  }
+  }, []);
 
-  render() {
-    return (
-      <AdminContainer title="Plugin Job Queue" icon="list">
-        <SearchResultsView name="globalJobQueue" dataView={DataView} />
-      </AdminContainer>
-    );
-  }
-}
+  return (
+    <AdminContainer title="Plugin Job Queue" icon="list">
+      <SearchResultsView name="globalJobQueue" dataView={DataView} />
+    </AdminContainer>
+  );
+};
 
 const PluginJobQueueAdmin = connect()(PluginJobQueueAdminView);
 

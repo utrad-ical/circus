@@ -1,7 +1,6 @@
-import { api } from 'utils/api';
 import { prompt, confirm } from 'rb/modal';
 
-function beginQuery(params) {
+function beginQuery(api, params) {
   return async (dispatch, getState) => {
     const state = getState();
     const name = params.name;
@@ -47,11 +46,11 @@ function beginQuery(params) {
   };
 }
 
-export function startNewSearch(name, resource, filter, condition, sort) {
+export function startNewSearch(api, name, resource, filter, condition, sort) {
   // 'filter' is a query object sent to the server.
   // 'conditon' represents a state of a search condition panel,
   // from which `filter` is constructed.
-  return beginQuery({
+  return beginQuery(api, {
     name,
     resource,
     filter,
@@ -62,23 +61,23 @@ export function startNewSearch(name, resource, filter, condition, sort) {
   });
 }
 
-export function changeSearchPage(name, page) {
-  return beginQuery({ name, page });
+export function changeSearchPage(api, name, page) {
+  return beginQuery(api, { name, page });
 }
 
-export function changeSearchSort(name, sort) {
-  return beginQuery({ name, sort });
+export function changeSearchSort(api, name, sort) {
+  return beginQuery(api, { name, sort });
 }
 
-export function changeSearchLimit(name, limit) {
-  return beginQuery({ name, limit });
+export function changeSearchLimit(api, name, limit) {
+  return beginQuery(api, { name, limit });
 }
 
-export function refreshSearch(name) {
-  return beginQuery({ name });
+export function refreshSearch(api, name) {
+  return beginQuery(api, { name });
 }
 
-export function savePreset(name, condition) {
+export function savePreset(api, name, condition) {
   return async (dispatch, getState) => {
     const state = getState();
     const user = state.loginUser.data;

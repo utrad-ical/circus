@@ -6,7 +6,7 @@ import IconButton from 'components/IconButton';
 import { startNewSearch } from 'actions';
 import { connect } from 'react-redux';
 import { modal } from 'rb/modal';
-import { api } from 'utils/api';
+import { useApi } from 'utils/api';
 import PartialVolumeDescriptorEditor from './PartialVolumeDescriptorEditor';
 import * as pv from '@utrad-ical/circus-lib/lib/PartialVolumeDescriptor';
 
@@ -76,6 +76,7 @@ const RelevantSeries = props => {
 
 const SeriesSelectorView = props => {
   const [showRelevantSeries, setShowRelevantSeries] = useState(false);
+  const api = useApi();
   const { dispatch, value, onChange } = props;
 
   const handleAddSeriesClick = () => {

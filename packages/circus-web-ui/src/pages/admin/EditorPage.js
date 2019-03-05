@@ -78,7 +78,7 @@ const EditorPage = props => {
   };
 
   const loadItems = async () => {
-    dispatch(api, startNewSearch(searchName, resource, {}, {}, {}));
+    dispatch(startNewSearch(api, searchName, resource, {}, {}, {}));
   };
 
   const targetName = item => {

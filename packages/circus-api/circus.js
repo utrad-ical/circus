@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-require('@babel/register');
+require('./register');
 require('dotenv').config();
 const dashdash = require('dashdash');
 

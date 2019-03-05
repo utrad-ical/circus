@@ -1,82 +1,66 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Alert } from 'components/react-bootstrap';
 import ShrinkSelect from 'rb/ShrinkSelect';
-import { connect } from 'react-redux';
-import { FileUpload } from 'components/FileUpload';
+import FileUpload from 'components/FileUpload';
 import { showMessage } from 'actions';
+import useLoginUser from 'utils/useLoginUser';
 
-class ImportSeriesView extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      uploadDomain: props.loginUser ? props.loginUser.domains[0] : null
-    };
+const ImportSeries = props => {
+  const loginUser = useLoginUser();
+  const domains = loginUser.domains || [];
+
+  const [uploadDomain, setUploadDomain] = useState(
+    () =>
+      loginUser.defaultDomain
+        ? loginUser.defaultDomain
+        : domains.length ? domains[0] : null
+  );
+
+  if (!Array.isArray(domains) || domains.length === 0) {
+    return (
+      <Alert bsStyle="warning">
+        You do not have any accessible domain. Uploading is not allowed.
+      </Alert>
+    );
   }
 
-  domainChange = domain => {
-    this.setState({ uploadDomain: domain });
-  };
-
-  componentWillReceiveProps(props) {
-    if (this.state.uploadDomain === '' && props.loginUser) {
-      this.setState({ uploadDomain: props.loginUser.defaultDomain });
-    }
-  }
-
-  handleUploaded = async res => {
+  const handleUploaded = async res => {
     const count = res.uploaded;
     showMessage(`Successfully uploaded ${count} DICOM instances!`, 'success', {
       short: true
     });
   };
 
-  render() {
-    const user = this.props.loginUser;
-    const { uploadDomain } = this.state;
-
-    if (!Array.isArray(user.domains) || user.domains.length === 0) {
-      return (
-        <Alert bsStyle="warning">
-          You do not belong to any domain. Uploading is not allowed.
-        </Alert>
-      );
-    }
-
-    return (
-      <div>
-        <h1>
-          <span className="circus-icon-series-import" /> Series Import
-        </h1>
-        <p>
-          Choose DICOM files to upload. (Maximum size: {user.uploadFileSizeMax},
-          up to {user.uploadFileMax} files).
-        </p>
-        <p>Zipped DICOM files are also supported.</p>
-        <FileUpload
-          multiple={true}
-          targetResource="import-series"
-          uploadFileMax={user.uploadFileMax}
-          uploadFileSizeMax={user.uploadFileSizeMax}
-          url={`series/domain/${encodeURIComponent(uploadDomain)}`}
-          onUploaded={this.handleUploaded}
-        >
-          <div>
-            Upload Domain:&ensp;
-            <ShrinkSelect
-              options={user.domains}
-              value={this.state.uploadDomain}
-              onChange={this.domainChange}
-            />
-          </div>
-          <hr />
-        </FileUpload>
-      </div>
-    );
-  }
-}
-
-const ImportSeries = connect(state => ({ loginUser: state.loginUser.data }))(
-  ImportSeriesView
-);
+  return (
+    <div>
+      <h1>
+        <span className="circus-icon-series-import" /> Series Import
+      </h1>
+      <p>
+        Choose DICOM files to upload. (Maximum size:{' '}
+        {loginUser.uploadFileSizeMax}, up to {loginUser.uploadFileMax} files).
+      </p>
+      <p>Zipped DICOM files are also supported.</p>
+      <FileUpload
+        multiple={true}
+        targetResource="import-series"
+        uploadFileMax={loginUser.uploadFileMax}
+        uploadFileSizeMax={loginUser.uploadFileSizeMax}
+        url={`series/domain/${encodeURIComponent(uploadDomain)}`}
+        onUploaded={handleUploaded}
+      >
+        <div>
+          Upload Domain:&ensp;
+          <ShrinkSelect
+            options={loginUser.domains}
+            value={uploadDomain}
+            onChange={setUploadDomain}
+          />
+        </div>
+        <hr />
+      </FileUpload>
+    </div>
+  );
+};
 
 export default ImportSeries;

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useRef } from 'react';
 import {
   Button,
   ButtonToolbar,
@@ -9,7 +9,7 @@ import { FileDroppable } from './FileDroppable';
 import { showMessage } from 'actions';
 import * as modal from 'rb/modal';
 import styled from 'styled-components';
-import { api } from 'utils/api';
+import { useApi } from 'utils/api';
 
 const StyledDiv = styled.div`
   input[type='file'] {
@@ -31,55 +31,55 @@ const StyledDiv = styled.div`
  * Upload progress is displayed using a progress bar,
  * and the response can be accessed via a Promise.
  */
-export class FileUpload extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      filesSelected: [],
-      uploading: false,
-      progress: 0,
-      progressLabel: ''
-    };
-  }
+const FileUpload = props => {
+  const [filesSelected, setFilesSelected] = useState([]);
+  const [uploading, setUploading] = useState(false);
+  const [progress, setProgress] = useState({ value: 0, label: '' });
+  const fileInput = useRef();
+  const {
+    url,
+    onBeforeUpload,
+    onUploaded,
+    children,
+    multiple,
+    uploadFileMax
+  } = props;
+  const api = useApi();
 
-  handleDropFile = files => {
-    this.setState({ filesSelected: files });
+  const handleDropFile = files => {
+    setFilesSelected(files);
   };
 
-  handleFileSelect = () => {
-    this.setState({ filesSelected: this.fileInput.files });
+  const handleFileSelect = () => {
+    setFilesSelected(fileInput.current.files);
   };
 
-  handleUploadProgress = event => {
+  const handleUploadProgress = event => {
     const bytesSent = event.loaded;
     const bytesTotal = event.total;
     const percent = Math.floor(bytesSent * 100 / bytesTotal);
-    this.setState({
-      progress: percent,
-      progressLabel:
+    setProgress({
+      value: percent,
+      label:
         bytesSent === bytesTotal
           ? 'Upload done. Waiting for import...'
           : `${percent}% Uploaded.`
     });
   };
 
-  handleUploadClick = async () => {
-    const { url, onBeforeUpload, onUploaded } = this.props;
-
-    const files = this.state.filesSelected;
-    const num = files.length;
+  const handleUploadClick = async () => {
+    const num = filesSelected.length;
     if (typeof num !== 'number' || num <= 0) return;
 
     const fd = new FormData();
     let totalBytes = 0;
 
     for (let i = 0; i < num; i++) {
-      fd.append('files', files[i]);
-      totalBytes += files[i].size;
+      fd.append('files', filesSelected[i]);
+      totalBytes += filesSelected[i].size;
     }
 
-    const fileDescription = num >= 2 ? `these ${num} files?` : 'this file?';
-    const uploadFileMax = this.props.uploadFileMax;
+    const fileDescription = num >= 2 ? `these ${num} files` : 'this file';
     if (num > uploadFileMax) {
       modal.alert(
         'Sorry, you can not upload more than ' +
@@ -91,7 +91,7 @@ export class FileUpload extends React.Component {
       return;
     }
     const confirmed = await modal.confirm(
-      `Do you want to upload ${fileDescription} (${totalBytes} bytes)`
+      `Do you want to upload ${fileDescription}? (${totalBytes} bytes)`
     );
     if (!confirmed) return;
 
@@ -99,75 +99,75 @@ export class FileUpload extends React.Component {
     typeof onBeforeUpload === 'function' && onBeforeUpload(fd);
 
     try {
-      this.setState({ uploading: true });
+      setUploading(true);
       const res = await api(url, {
         method: 'post',
         data: fd,
-        onUploadProgress: this.handleUploadProgress
+        onUploadProgress: handleUploadProgress
       });
-      this.setState({ filesSelected: [], uploading: false });
+      setFilesSelected([]);
+      setUploading(false);
       typeof onUploaded === 'function' && onUploaded(res);
     } catch (err) {
-      this.setState({ uploading: false });
+      setUploading(false);
       showMessage(`Upload failed (Error ${err.status})`, 'danger');
       throw err;
     }
   };
 
-  render() {
-    const { uploading, filesSelected, progress, progressLabel } = this.state;
-    return (
-      <FileDroppable onDropFile={this.handleDropFile}>
-        <StyledDiv className="well">
-          {this.props.children}
-          <div>
-            <input
-              ref={r => (this.fileInput = r)}
-              type="file"
-              multiple={!!this.props.multiple}
-              onChange={this.handleFileSelect}
-            />
-            {filesSelected.length == 0 ? (
-              <Button bsStyle="default" onClick={() => this.fileInput.click()}>
-                <Glyphicon glyph="plus" />&ensp;Select File
+  return (
+    <FileDroppable onDropFile={handleDropFile}>
+      <StyledDiv className="well">
+        {children}
+        <div>
+          <input
+            ref={fileInput}
+            type="file"
+            multiple={!!multiple}
+            onChange={handleFileSelect}
+          />
+          {filesSelected.length == 0 ? (
+            <Button bsStyle="default" onClick={() => fileInput.current.click()}>
+              <Glyphicon glyph="plus" />&ensp;Select File
+            </Button>
+          ) : (
+            <ButtonToolbar>
+              <Button
+                bsStyle="primary"
+                disabled={filesSelected.length < 1 || uploading}
+                onClick={handleUploadClick}
+              >
+                <Glyphicon glyph="upload" />&ensp;Upload
               </Button>
-            ) : (
-              <ButtonToolbar>
-                <Button
-                  bsStyle="primary"
-                  disabled={filesSelected.length < 1 || uploading}
-                  onClick={this.handleUploadClick}
-                >
-                  <Glyphicon glyph="upload" />&ensp;Upload
-                </Button>
-                <Button
-                  bsStyle="link"
-                  disabled={uploading}
-                  onClick={() => this.setState({ filesSelected: [] })}
-                >
-                  Reset
-                </Button>
-              </ButtonToolbar>
-            )}
-          </div>
-          {uploading && (
-            <div className="progress-container">
-              <div className="text-primary">Uploading:</div>
-              <ProgressBar
-                now={progress}
-                label={progressLabel}
-                striped
-                active
-              />
-            </div>
+              <Button
+                bsStyle="link"
+                disabled={uploading}
+                onClick={() => setFilesSelected([])}
+              >
+                Reset
+              </Button>
+            </ButtonToolbar>
           )}
-          <SummaryTable files={this.state.filesSelected} />
-          <p>You can drag and drop files to this box.</p>
-        </StyledDiv>
-      </FileDroppable>
-    );
-  }
-}
+        </div>
+        {uploading && (
+          <div className="progress-container">
+            <div className="text-primary">Uploading:</div>
+            <ProgressBar
+              now={progress.value}
+              label={progress.label}
+              striped
+              active
+            />
+          </div>
+        )}
+        <SummaryTable files={filesSelected} />
+        <p>You can drag and drop files to this box.</p>
+      </StyledDiv>
+    </FileDroppable>
+  );
+};
+
+export default FileUpload;
 
 const SummaryTable = props => {
   const files = props.files;

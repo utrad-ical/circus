@@ -1,5 +1,5 @@
 import React from 'react';
-import { FileUpload } from 'components/FileUpload';
+import FileUpload from 'components/FileUpload';
 import Icon from 'components/Icon';
 
 export default class ImportCase extends React.Component {

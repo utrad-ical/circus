@@ -1,14 +1,23 @@
 import React from 'react';
 import IconDisplay from './IconDisplay';
-import { connect } from 'react-redux';
 import { loadPluginInfo } from 'actions';
+import { useMappedState, useDispatch } from 'redux-react-hook';
+import { useApi } from 'utils/api';
 
-const PluginDisplayView = props => {
-  const { plugin, pluginId, ...rest } = props;
+const PluginDisplay = props => {
+  const { pluginId, ...rest } = props;
+  const { plugin } = useMappedState(state => ({
+    plugin: state.plugin[pluginId]
+  }));
+  const dispatch = useDispatch();
+  const api = useApi();
+
   if (!plugin) {
-    props.dispatch(loadPluginInfo(pluginId));
+    dispatch(loadPluginInfo(api, pluginId));
   }
+
   if (!plugin || plugin === 'loading') return null;
+
   const title = `${plugin.pluginName} v${plugin.version}`;
   return (
     <IconDisplay
@@ -19,9 +28,5 @@ const PluginDisplayView = props => {
     />
   );
 };
-
-const PluginDisplay = connect((state, ownProps) => ({
-  plugin: state.plugin[ownProps.pluginId]
-}))(PluginDisplayView);
 
 export default PluginDisplay;

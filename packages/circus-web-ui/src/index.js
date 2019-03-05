@@ -38,7 +38,8 @@ import { dismissMessageOnPageChange } from 'actions';
 import PluginJobQueueSearch from './pages/search/PluginJobQueueSearch';
 import browserHistory from 'browserHistory';
 
-import createApiManager, { ApiContext, ApiManagerContext } from 'utils/api';
+import { ApiContext } from 'utils/api';
+import loginManager, { LoginManagerContext } from 'utils/loginManager';
 
 require('./styles/main.less');
 
@@ -95,16 +96,16 @@ const AppRoutes = props => {
 };
 
 const TheApp = props => {
-  const [apiManager, setApiManager] = useState();
+  const [manager, setManager] = useState();
   const [api, setApi] = useState();
 
   useEffect(() => {
     // First-time login management
-    const handleApiCreated = () => setApi(manager.api);
-    const manager = createApiManager('/', store.dispatch, handleApiCreated);
-    manager.restoreApiCaller();
-    setApiManager(manager);
-    manager.refreshUserInfo(true);
+    const manager = loginManager('/', store.dispatch, api => setApi(() => api));
+    setManager(manager);
+    if (manager.restoreApiCaller()) {
+      manager.refreshUserInfo(true);
+    }
   }, []);
 
   useEffect(() => {
@@ -113,14 +114,14 @@ const TheApp = props => {
       // Hide message boxes which should not persist upon page changes
       dismissMessageOnPageChange();
       // Load user information again to check login status
-      apiManager && apiManager.refreshUserInfo(false);
+      manager && manager.refreshUserInfo(false);
     });
   });
 
-  if (!apiManager) return null;
+  if (!manager) return null;
 
   return (
-    <ApiManagerContext.Provider value={apiManager}>
+    <LoginManagerContext.Provider value={manager}>
       <ApiContext.Provider value={api}>
         <StoreContext.Provider value={store}>
           <Provider store={store}>
@@ -135,7 +136,7 @@ const TheApp = props => {
           </Provider>
         </StoreContext.Provider>
       </ApiContext.Provider>
-    </ApiManagerContext.Provider>
+    </LoginManagerContext.Provider>
   );
 };
 

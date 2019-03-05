@@ -4,7 +4,7 @@ import Icon from 'components/Icon';
 import { connect } from 'react-redux';
 import styled from 'styled-components';
 import classnames from 'classnames';
-import { useApiManager } from 'utils/api';
+import { useLoginManager } from 'utils/loginManager';
 import browserHistory from 'browserHistory';
 
 const MainMenu = props => <ul>{props.children}</ul>;
@@ -167,10 +167,10 @@ const StyledNav = styled.nav`
 
 const MainNavView = props => {
   const { caseSearchPresets = [], seriesSearchPresets = [] } = props;
-  const apiManager = useApiManager();
+  const loginManager = useLoginManager();
 
   const onLogout = async () => {
-    await apiManager.logout();
+    await loginManager.logout();
     browserHistory.push('/');
   };
 

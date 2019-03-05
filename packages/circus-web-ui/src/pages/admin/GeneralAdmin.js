@@ -1,5 +1,5 @@
-import React from 'react';
-import { api } from 'utils/api';
+import React, { useState, useEffect, useMemo } from 'react';
+import { useApi } from 'utils/api';
 import { showMessage } from 'actions';
 import { Button } from 'components/react-bootstrap';
 import AdminContainer from './AdminContainer';
@@ -7,45 +7,49 @@ import PropertyEditor from 'rb/PropertyEditor';
 import * as et from 'rb/editor-types';
 import ShrinkSelect from 'rb/ShrinkSelect';
 
-export default class GeneralAdmin extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = { settings: null, complaints: {} };
-    this.arrayOfStringsEditor = et.arrayOf(
-      et.text({ style: { width: '200px', display: 'inline' } })
-    );
-    this.domainSelector = props => (
-      <ShrinkSelect options={this.state.settings.domains} {...props} />
-    );
-  }
+const GeneralAdmin = props => {
+  const [settings, setSettings] = useState(null);
+  const [complaints, setComplaints] = useState({});
+  const api = useApi();
 
-  async loadSettings() {
-    const settings = await api('admin/server-params');
-    this.setState({ settings, complaints: {} });
-  }
+  const arrayOfStringsEditor = useMemo(
+    () => et.arrayOf(et.text({ style: { width: '200px', display: 'inline' } })),
+    []
+  );
 
-  componentDidMount() {
-    this.loadSettings();
-  }
+  const domainSelector = useMemo(
+    () => props => <ShrinkSelect options={settings.domains} {...props} />,
+    [settings && settings.domains]
+  );
 
-  propertyChange(value) {
+  const loadSettings = async () => {
+    const data = await api('admin/server-params');
+    setSettings(data);
+    setComplaints({});
+  };
+
+  useEffect(() => {
+    loadSettings();
+  }, []);
+
+  const propertyChange = value => {
     if (value.domains.indexOf(value.defaultDomain) === -1) {
       value.defaultDomain = '';
     }
     if (value.defaultDomain === '' && value.domains.length > 0) {
       value.defaultDomain = value.domains[0];
     }
-    this.setState({ settings: value });
-  }
+    setSettings(value);
+  };
 
-  async saveClick() {
+  const saveClick = async () => {
     const newSettings = {
-      ...this.state.settings,
-      domains: this.state.settings.domains
+      ...settings,
+      domains: settings.domains
         .map(d => (typeof d === 'string' ? d.trim() : ''))
         .filter(d => typeof d === 'string' && d.length > 0)
     };
-    this.setState({ settings: newSettings });
+    setSettings(newSettings);
     try {
       await api('admin/server-params', {
         method: 'put',
@@ -56,45 +60,45 @@ export default class GeneralAdmin extends React.Component {
         tag: 'general-admin',
         short: true
       });
-      this.loadSettings();
+      loadSettings();
     } catch (err) {
-      this.setState({ complaints: err.data.errors });
+      setComplaints(err.data.errors);
     }
-  }
+  };
 
-  render() {
-    if (this.state.settings === null) return <div />;
+  if (settings === null) return null;
 
-    const properties = [
-      {
-        caption: 'Domains',
-        key: 'domains',
-        editor: this.arrayOfStringsEditor
-      },
-      {
-        caption: 'Default Domain',
-        key: 'defaultDomain',
-        editor: this.domainSelector
-      }
-    ];
+  const properties = [
+    {
+      caption: 'Domains',
+      key: 'domains',
+      editor: arrayOfStringsEditor
+    },
+    {
+      caption: 'Default Domain',
+      key: 'defaultDomain',
+      editor: domainSelector
+    }
+  ];
 
-    return (
-      <AdminContainer title="General Server Configuration" icon="th-large">
-        <PropertyEditor
-          value={this.state.settings}
-          complaints={this.state.complaints}
-          properties={properties}
-          onChange={this.propertyChange.bind(this)}
-        />
-        <p className="text-center">
-          <Button bsStyle="primary" onClick={() => this.saveClick()}>
-            Save
-          </Button>
-          <Button bsStyle="link" onClick={() => this.loadSettings()}>
-            Cancel
-          </Button>
-        </p>
-      </AdminContainer>
-    );
-  }
-}
+  return (
+    <AdminContainer title="General Server Configuration" icon="th-large">
+      <PropertyEditor
+        value={settings}
+        complaints={complaints}
+        properties={properties}
+        onChange={propertyChange}
+      />
+      <p className="text-center">
+        <Button bsStyle="primary" onClick={saveClick}>
+          Save
+        </Button>
+        <Button bsStyle="link" onClick={loadSettings}>
+          Cancel
+        </Button>
+      </p>
+    </AdminContainer>
+  );
+};
+
+export default GeneralAdmin;

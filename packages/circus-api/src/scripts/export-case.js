@@ -9,7 +9,8 @@ import circusRs from '../circusRs';
 import nullLogger from '@utrad-ical/circus-rs/src/server/helper/logger/NullLogger';
 
 export const help = optionText => {
-  console.log('Export a specified DB case data as a MHD format.');
+  console.log('Export a specified DB case data in the specified format.');
+  console.log('Usage: node circus.js export-case CASEID [CASEID ...]');
   console.log(optionText);
 };
 
@@ -23,7 +24,7 @@ export const options = () => {
     },
     {
       names: ['type', 't'],
-      help: 'Export data type (default=mhd).',
+      help: 'Export data format (default=mhd).',
       helpArg: 'TYPE',
       type: 'string',
       default: 'mhd'

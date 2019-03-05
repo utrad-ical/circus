@@ -1,108 +1,91 @@
-import React, { Fragment } from 'react';
+import React, { useState, useEffect } from 'react';
 import ShrinkSelect from 'rb/ShrinkSelect';
-import { connect } from 'react-redux';
 import IconButton from 'components/IconButton';
-import { api } from 'utils/api';
+import { useApi } from 'utils/api';
 import SeriesSelector from 'components/SeriesSelector';
 import LoadingIndicator from 'rb/LoadingIndicator';
 import PluginDisplay from 'components/PluginDisplay';
+import { showMessage } from 'actions';
 
-class CreateNewJobView extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      selectedPlugin: null,
-      selectedSeries: [],
-      busy: true
-    };
-  }
+const CreateNewJob = props => {
+  const [selectedPlugin, setSelectedPlugin] = useState(null);
+  const [selectedSeries, setSelectedSeries] = useState([]);
+  const [busy, setBusy] = useState(true);
+  const [plugins, setPlugins] = useState(null);
+  const api = useApi();
+  const seriesUid = props.match.params.seriesUid;
 
-  async componentDidMount() {
-    this.setState({ busy: true });
-    const seriesUid = this.props.match.params.seriesUid;
+  const load = async () => {
+    setBusy(true);
     const series = await api('series/' + seriesUid);
     const plugins = await api('plugins');
-    this.setState({
-      selectedSeries: [{ ...series, range: series.images }],
-      plugins,
-      busy: false
-    });
-  }
+    setBusy(false);
+    setSelectedSeries([{ ...series, range: series.images }]);
+    setPlugins(plugins);
+  };
 
-  handleCreate = async () => {
+  useEffect(() => {
+    load();
+  }, []);
+
+  const handleCreate = async () => {
     const res = await api('plugin-jobs', {
       method: 'post',
       data: {
-        pluginId: this.state.selectedPlugin,
-        series: this.state.selectedSeries
+        pluginId: selectedPlugin,
+        series: selectedSeries
       }
     });
+    showMessage('Job registered.');
     console.log(res);
   };
 
-  handleSeriesChange = value => {
-    this.setState({ selectedSeries: value });
-  };
+  if (!Array.isArray(plugins)) {
+    return <LoadingIndicator />;
+  }
 
-  handlePluginSelect = selectedPlugin => {
-    this.setState({ selectedPlugin });
-  };
-
-  render() {
-    const { busy, selectedSeries, plugins, selectedPlugin } = this.state;
-
-    if (!Array.isArray(plugins)) {
-      return <LoadingIndicator />;
-    }
-    if (!plugins.length) {
-      return (
-        <div className="alert alert-danger">There is no plug-in installed.</div>
-      );
-    }
-
-    const canCreate = !busy && selectedPlugin && selectedSeries.length > 0;
-
-    const pluginOptions = {};
-    Object.keys(plugins).forEach(k => {
-      const plugin = plugins[k];
-      pluginOptions[plugin.pluginId] = {
-        caption: <PluginDisplay pluginId={plugin.pluginId} />
-      };
-    });
-
+  if (!plugins.length) {
     return (
-      <div>
-        <h1>
-          <span className="circus-icon-b-calc" />New Job
-        </h1>
-        <SeriesSelector
-          value={selectedSeries}
-          onChange={this.handleSeriesChange}
-        />
-        <div>
-          Plugin:&ensp;
-          <ShrinkSelect
-            options={pluginOptions}
-            value={this.state.selectedPlugin}
-            onChange={this.handlePluginSelect}
-          />
-        </div>
-        <div className="text-right">
-          <IconButton
-            disabled={!canCreate}
-            icon="circus-b-calc"
-            bsStyle="primary"
-            onClick={this.handleCreate}
-          >
-            Register Job
-          </IconButton>
-        </div>
-      </div>
+      <div className="alert alert-danger">There is no plug-in installed.</div>
     );
   }
-}
 
-const stateToProps = state => ({ user: state.loginUser.data });
-const CreateNewJob = connect(stateToProps)(CreateNewJobView);
+  const canCreate = !busy && selectedPlugin && selectedSeries.length > 0;
+
+  const pluginOptions = {};
+  Object.keys(plugins).forEach(k => {
+    const plugin = plugins[k];
+    pluginOptions[plugin.pluginId] = {
+      caption: <PluginDisplay pluginId={plugin.pluginId} />
+    };
+  });
+
+  return (
+    <div>
+      <h1>
+        <span className="circus-icon-b-calc" />New Job
+      </h1>
+      <SeriesSelector value={selectedSeries} onChange={setSelectedSeries} />
+      <div>
+        Plugin:&ensp;
+        <ShrinkSelect
+          options={pluginOptions}
+          value={selectedPlugin}
+          onChange={setSelectedPlugin}
+        />
+      </div>
+      <div className="text-right">
+        <IconButton
+          disabled={!canCreate}
+          icon="circus-b-calc"
+          bsStyle="primary"
+          onClick={handleCreate}
+        >
+          Register Job
+        </IconButton>
+      </div>
+    </div>
+  );
+};
 
 export default CreateNewJob;

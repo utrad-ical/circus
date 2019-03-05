@@ -79,6 +79,18 @@ async function prepareApiRouter(apiDir, deps, options) {
   return router;
 }
 
+export async function createBlobStorage(blobPath) {
+  return blobPath
+    ? await createStorage('local', { root: blobPath })
+    : await createStorage('memory');
+}
+
+export async function createDicomFileRepository(dicomPath) {
+  return dicomPath
+    ? new StaticDicomFileRepository({ dataDir: dicomPath })
+    : new MemoryDicomFileRepository({});
+}
+
 /**
  * Creates a new Koa app.
  */
@@ -101,13 +113,9 @@ export default async function createApp(options = {}) {
 
   const validator = await createValidator();
   const models = createModels(db, validator);
-  const blobStorage = blobPath
-    ? await createStorage('local', { root: blobPath })
-    : await createStorage('memory');
+  const blobStorage = await createBlobStorage(blobPath);
 
-  const dicomFileRepository = dicomPath
-    ? new StaticDicomFileRepository({ dataDir: dicomPath })
-    : new MemoryDicomFileRepository({});
+  const dicomFileRepository = await createDicomFileRepository(dicomPath);
 
   const logger = createLogger();
 

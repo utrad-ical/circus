@@ -59,6 +59,7 @@ const putCaseData = async (deps, caseId, zip) => {
         case 'voxel': {
           const labelFileBaseName = `vol${pad(volId)}-label${pad(labelId)}`;
           const hash = label.data.voxels;
+          if (!hash) break; // empty voxels
           const labelBuffer = await blobStorage.read(hash);
           const labelVolume = createLabelVolume(
             dimension,

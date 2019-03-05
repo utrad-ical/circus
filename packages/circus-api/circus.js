@@ -39,8 +39,10 @@ async function main() {
       const opts = parser.parse(process.argv.slice(1));
       await module.exec.call(null, opts);
     } catch (err) {
+      console.error(chalk.red('ERROR:'));
       console.error(err.message);
-      console.error(err.errors);
+      err.errors && console.error(err.errors);
+      err.stack && console.error(err.stack);
     }
   } else if (commandName === 'help') {
     const targetCommand = argv[0];

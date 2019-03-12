@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { CancelToken } from 'axios';
 import { showMessage } from 'actions';
 import * as qs from 'querystring';
 import React, { useContext } from 'react';
@@ -42,7 +42,7 @@ const createApiCaller = (initialCredentials, apiServer) => {
     saveCredentialData(formatCredentials(res.data));
   };
 
-  api = async (command, options = {}) => {
+  api = async (command, options = {}, cancelToken) => {
     const params = { url: command, method: 'get', ...options };
     if (typeof params.data === 'object') {
       if (params.method === 'get') params.method = 'post';
@@ -57,12 +57,21 @@ const createApiCaller = (initialCredentials, apiServer) => {
         Authorization: `Bearer ${credentials.accessToken}`,
         ...(params.headers || {})
       };
+
+      let axiosCancelToken = undefined;
+      if (cancelToken) {
+        const source = CancelToken.source();
+        cancelToken.onCancel(() => source.cancel());
+        axiosCancelToken = source.token;
+      }
+
       const res = await axios({
         baseURL: apiServer + 'api/',
         cached: false,
         withCredentials: true,
         ...params,
-        headers
+        headers,
+        cancelToken: axiosCancelToken
       });
       return res.data;
     } catch (err) {

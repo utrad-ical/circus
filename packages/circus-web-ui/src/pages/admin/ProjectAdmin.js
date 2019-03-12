@@ -4,7 +4,6 @@ import * as et from 'rb/editor-types';
 import WindowPresetEditor from './WindowPresetEditor';
 import TagEditor, { newTagItem } from './TagEditor';
 import AttributeSchemaEditor from './AttributeSchemaEditor';
-import LoadingIndicator from 'rb/LoadingIndicator';
 import BodyPartIcon from 'components/BodyPartIcon';
 import IconEditor from './IconEditor';
 
@@ -45,66 +44,56 @@ const makeEmptyItem = () => {
   };
 };
 
-export default class ProjectAdmin extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = { ready: false };
-
-    this.editorProperties = [
-      { key: 'projectName', caption: 'Project Name', editor: et.text() },
-      { key: 'description', caption: 'Description', editor: et.text() },
-      { key: 'icon', caption: 'Icon', editor: IconEditor },
-      {
-        key: 'windowPresets',
-        caption: 'Window Presets',
-        editor: et.arrayOf(WindowPresetEditor, {
-          label: '',
-          level: 0,
-          width: 0
-        })
-      },
-      {
-        key: 'windowPriority',
-        caption: 'Window Priority',
-        editor: et.shrinkSelect(windowPriorityOptions)
-      },
-      {
-        key: 'tags',
-        caption: 'Tags',
-        editor: et.arrayOf(TagEditor, newTagItem)
-      },
-      {
-        key: 'caseAttributesSchema',
-        caption: 'Case Attribute Schema',
-        className: 'attribute-schema-prop',
-        editor: AttributeSchemaEditor
-      },
-      {
-        key: 'labelAttributesSchema',
-        caption: 'Label Attribute Schema',
-        className: 'attribute-schema-prop',
-        editor: AttributeSchemaEditor
-      }
-    ];
+const editorProperties = [
+  { key: 'projectName', caption: 'Project Name', editor: et.text() },
+  { key: 'description', caption: 'Description', editor: et.text() },
+  { key: 'icon', caption: 'Icon', editor: IconEditor },
+  {
+    key: 'windowPresets',
+    caption: 'Window Presets',
+    editor: et.arrayOf(WindowPresetEditor, {
+      label: '',
+      level: 0,
+      width: 0
+    })
+  },
+  {
+    key: 'windowPriority',
+    caption: 'Window Priority',
+    editor: et.shrinkSelect(windowPriorityOptions)
+  },
+  {
+    key: 'tags',
+    caption: 'Tags',
+    editor: et.arrayOf(TagEditor, newTagItem)
+  },
+  {
+    key: 'caseAttributesSchema',
+    caption: 'Case Attribute Schema',
+    className: 'attribute-schema-prop',
+    editor: AttributeSchemaEditor
+  },
+  {
+    key: 'labelAttributesSchema',
+    caption: 'Label Attribute Schema',
+    className: 'attribute-schema-prop',
+    editor: AttributeSchemaEditor
   }
+];
 
-  async componentDidMount() {
-    this.setState({ ready: true });
-  }
+const ProjectAdmin = props => {
+  return (
+    <EditorPage
+      title="Projects"
+      icon="education"
+      searchName="admin-project"
+      resource="admin/projects"
+      primaryKey="projectId"
+      editorProperties={editorProperties}
+      listColumns={listColumns}
+      makeEmptyItem={makeEmptyItem}
+    />
+  );
+};
 
-  render() {
-    if (!this.state.ready) return <LoadingIndicator />;
-    return (
-      <EditorPage
-        title="Projects"
-        icon="education"
-        searchName="admin-project"
-        resource="admin/projects"
-        primaryKey="projectId"
-        editorProperties={this.editorProperties}
-        listColumns={listColumns}
-        makeEmptyItem={makeEmptyItem}
-      />
-    );
-  }
-}
+export default ProjectAdmin;

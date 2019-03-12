@@ -10,9 +10,10 @@ const TwoByTwoLayout = styled.div`
   grid-gap: 2px;
   flex-direction: column;
   background: #333;
+  min-height: 0;
+  min-width: 0;
 
   .image-viewer {
-    flex: 1 1 0;
     overflow: hidden;
   }
 `;

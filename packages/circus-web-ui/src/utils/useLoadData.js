@@ -1,22 +1,24 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useReducer } from 'react';
 import cancelToken from './cancelToken';
 
 /**
  * Asynchronously load data from the given async loader function.
- * To reload data, simply pass a different loader function.
- * @param {(cancelToken) => Promise<any>} loadFunc The async loader function
- * that returns the fetched data.
- * The function will be passed a cancellation token.
+ * @param {*} loadFunc The async loader function. The function will be passed
+ * a cancel token.
  */
 const useLoadData = loadFunc => {
   const [data, setData] = useState(undefined);
   const [isLoading, setIsLoading] = useState(false);
+
+  // This is used to forcibly refreshing the loading process
+  const [counter, reload] = useReducer(x => x + 1, 0);
+
   useEffect(
     () => {
       const token = cancelToken();
       let clearedUp = false;
       let loading = false;
-      (async () => {
+      const query = async () => {
         try {
           loading = true;
           setIsLoading(true);
@@ -33,15 +35,17 @@ const useLoadData = loadFunc => {
             setIsLoading(false);
           }
         }
-      })();
+      };
+      query();
       return () => {
         clearedUp = true;
         if (loading) token.cancel();
       };
     },
-    [loadFunc]
+    [loadFunc, counter]
   );
-  return [data, isLoading];
+
+  return [data, isLoading, reload];
 };
 
 export default useLoadData;

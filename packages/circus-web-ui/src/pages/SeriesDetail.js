@@ -1,64 +1,66 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Row, Col, Panel } from 'components/react-bootstrap';
 import { useApi } from 'utils/api';
-import { showMessage } from 'actions';
 import LoadingIndicator from 'rb/LoadingIndicator';
 import ImageViewer from 'components/ImageViewer';
 import * as rs from 'circus-rs';
 import { toolFactory } from 'circus-rs/tool/tool-initializer';
 import useLoginUser from 'utils/useLoginUser';
+import useLoadData from 'utils/useLoadData';
 
 const SeriesDetail = props => {
-  const [fetching, setFetching] = useState(false);
-  const [series, setSeries] = useState(null);
   const [composition, setComposition] = useState(null);
   const loginUser = useLoginUser();
   const api = useApi();
   const pagerTool = useMemo(() => toolFactory('pager'), []);
 
-  const uid = props.match.params.uid;
+  const seriesUid = props.match.params.uid;
   const server = loginUser.dicomImageServer;
 
-  const load = async seriesUid => {
-    setFetching(true);
-    try {
-      const series = await api('series/' + seriesUid, {
-        handleErrors: [401]
-      });
-      setFetching(false);
-      setSeries(series);
+  const load = useCallback(
+    async cancelToken => {
+      const resource = `series/${seriesUid}`;
+      return await api(resource, { handleErrors: true }, cancelToken);
+    },
+    [api, seriesUid]
+  );
+  const [seriesData] = useLoadData(load);
+
+  useEffect(
+    () => {
+      if (!seriesData) return;
       const rsHttpClient = new rs.RsHttpClient(server);
       const volumeLoader = new rs.RsVolumeLoader({
         rsHttpClient,
-        seriesUid: seriesUid
+        seriesUid
       });
       const src = new rs.HybridMprImageSource({
         volumeLoader,
         rsHttpClient,
-        seriesUid: seriesUid
+        seriesUid
       });
       const composition = new rs.Composition(src);
       setComposition(composition);
-    } catch (err) {
-      setFetching(false);
-      setSeries(false);
-      if (err.status === 401) {
-        showMessage(`You do not have access to series ${seriesUid}.`, 'danger');
-      } else {
-        throw err;
-      }
-    }
-  };
-
-  useEffect(
-    () => {
-      load(uid);
     },
-    [uid]
+    [seriesData, seriesUid, server]
   );
 
-  if (fetching) return <LoadingIndicator />;
-  if (!series) return null;
+  if (!seriesData) return <LoadingIndicator />;
+
+  if (seriesData instanceof Error) {
+    const message =
+      seriesData.response && seriesData.response.status === 403
+        ? `You do not have access to series ${seriesUid}.`
+        : seriesData.message;
+    return (
+      <div>
+        <h1>
+          <span className="circus-icon-series" /> Series Detail
+        </h1>
+        <div className="alert alert-danger">{message}</div>
+      </div>
+    );
+  }
 
   const keys = [
     'modality',
@@ -77,8 +79,7 @@ const SeriesDetail = props => {
   return (
     <div>
       <h1>
-        <span className="circus-icon-series" />
-        Series Detail
+        <span className="circus-icon-series" /> Series Detail
       </h1>
       <Row>
         <Col lg={6}>
@@ -90,9 +91,9 @@ const SeriesDetail = props => {
           />
         </Col>
         <Col lg={6}>
-          {typeof series.patientInfo === 'object' ? (
+          {typeof seriesData.patientInfo === 'object' ? (
             <Table
-              data={series.patientInfo}
+              data={seriesData.patientInfo}
               title="Patient Info"
               defaultExpanded
             />
@@ -103,12 +104,12 @@ const SeriesDetail = props => {
             </Panel>
           )}
           <Table
-            data={series}
+            data={seriesData}
             keys={keys}
             title="Series Detail"
             defaultExpanded
           />
-          <Table data={series.parameters} title="Parameters" />
+          <Table data={seriesData.parameters} title="Parameters" />
         </Col>
       </Row>
     </div>

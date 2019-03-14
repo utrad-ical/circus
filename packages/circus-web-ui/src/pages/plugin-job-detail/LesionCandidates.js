@@ -20,37 +20,34 @@ const Candidate = props => {
     isConsensual
   } = props;
 
-  const stateChangerRef = useRef(new EventEmitter());
-  const stateChanger = stateChangerRef.current;
-
-  const updateComposition = async () => {
-    if (composition) {
-      await composition.imageSource.ready();
-      handleReady();
-    }
-  };
+  const { current: stateChanger } = useRef(new EventEmitter());
 
   useEffect(
     () => {
+      const handleReady = () => {
+        const voxelSize = composition.imageSource.metadata.voxelSize;
+        stateChanger.emit('change', state => {
+          const newOrigin = [
+            state.section.origin[0],
+            state.section.origin[1],
+            voxelSize[2] * value.location[2]
+          ];
+          return {
+            ...state,
+            section: { ...state.section, origin: newOrigin }
+          };
+        });
+      };
+      const updateComposition = async () => {
+        if (composition) {
+          await composition.imageSource.ready();
+          handleReady();
+        }
+      };
       updateComposition();
     },
-    [composition]
+    [composition, stateChanger, value.location]
   );
-
-  const handleReady = () => {
-    const voxelSize = composition.imageSource.metadata.voxelSize;
-    stateChanger.emit('change', state => {
-      const newOrigin = [
-        state.section.origin[0],
-        state.section.origin[1],
-        voxelSize[2] * value.location[2]
-      ];
-      return {
-        ...state,
-        section: { ...state.section, origin: newOrigin }
-      };
-    });
-  };
 
   return (
     <div className="lesion-candidate">
@@ -77,31 +74,6 @@ const Candidate = props => {
   );
 };
 
-const StyledDiv = styled.div`
-  .tools {
-    margin-bottom: 5px;
-  }
-  .entries {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    .lesion-candidate {
-      border: 1px solid silver;
-      padding: 1px;
-      .attributes {
-        font-size: 80%;
-      }
-      .image-viewer {
-        width: 400px;
-        height: 400px;
-      }
-    }
-    .feedback-listener {
-      margin: 5px;
-    }
-  }
-`;
-
 const LesionCandidates = React.memo(props => {
   const {
     job,
@@ -112,6 +84,7 @@ const LesionCandidates = React.memo(props => {
   } = props;
 
   const value = job.results.results.lesionCandidates;
+  const seriesUid = job.series[0].seriesUid;
 
   const tools = useRef();
   if (!tools.current) {
@@ -125,12 +98,11 @@ const LesionCandidates = React.memo(props => {
   const [toolName, setToolName] = useState('pager');
   const [composition, setComposition] = useState(null);
   const user = useLoginUser();
+  const server = user.dicomImageServer;
 
   useEffect(
     () => {
       const load = async () => {
-        const seriesUid = job.series[0].seriesUid;
-        const server = user.dicomImageServer;
         const rsHttpClient = new rs.RsHttpClient(server);
         const volumeLoader = new rs.RsVolumeLoader({ rsHttpClient, seriesUid });
         const src = new rs.HybridMprImageSource({
@@ -161,7 +133,7 @@ const LesionCandidates = React.memo(props => {
       };
       load();
     },
-    [job]
+    [seriesUid, server, value]
   );
 
   const handleFeedbackChange = (index, selected) => {
@@ -210,3 +182,28 @@ const LesionCandidates = React.memo(props => {
 });
 
 export default LesionCandidates;
+
+const StyledDiv = styled.div`
+  .tools {
+    margin-bottom: 5px;
+  }
+  .entries {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    .lesion-candidate {
+      border: 1px solid silver;
+      padding: 1px;
+      .attributes {
+        font-size: 80%;
+      }
+      .image-viewer {
+        width: 400px;
+        height: 400px;
+      }
+    }
+    .feedback-listener {
+      margin: 5px;
+    }
+  }
+`;

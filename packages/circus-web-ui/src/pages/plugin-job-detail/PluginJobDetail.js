@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useReducer, useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { useApi } from 'utils/api';
 import PatientInfoBox from 'components/PatientInfoBox';
 import FullSpanContainer from 'components/FullSpanContainer';
@@ -10,6 +10,7 @@ import createSelectionFeedbackListener from './feedback-listeners/createSelectio
 import styled from 'styled-components';
 import useFeedback from './useFeedback';
 import PersonalConsensualSwitch from './PersonalConsensualSwitch';
+import useLoadData from 'utils/useLoadData';
 
 const StyledDiv = styled.div`
   .job-main {
@@ -33,37 +34,6 @@ const StyledDiv = styled.div`
     }
   }
 `;
-
-const useJobDetailData = jobId => {
-  const api = useApi();
-  const [jobData, setJobData] = useState(undefined);
-  const [counter, reloadJob] = useReducer(x => x + 1, 0); // increamenting this will rerun fetchJob
-
-  const fetchJob = async () => {
-    try {
-      const job = await api(`plugin-jobs/${jobId}`);
-      const seriesData = {};
-      for (const s of job.series) {
-        const seriesUid = s.seriesUid;
-        if (seriesUid in seriesData) continue;
-        seriesData[seriesUid] = await api(`series/${seriesUid}`);
-      }
-      const result = { job, seriesData };
-      setJobData(result);
-    } catch (e) {
-      setJobData(e);
-    }
-  };
-
-  useEffect(
-    () => {
-      fetchJob();
-    },
-    [jobId, counter]
-  );
-
-  return { jobData, reloadJob };
-};
 
 const createFeedbackTargets = () => {
   const listenerOptions = {
@@ -100,11 +70,27 @@ const createFeedbackTargets = () => {
 };
 
 const PluginJobDetail = props => {
+  const api = useApi();
   const jobId = props.match.params.jobId;
-  const { jobData, reloadJob } = useJobDetailData(jobId);
+
+  const loadJob = useCallback(
+    async () => {
+      const job = await api(`plugin-jobs/${jobId}`);
+      const seriesData = {};
+      for (const s of job.series) {
+        const seriesUid = s.seriesUid;
+        if (seriesUid in seriesData) continue;
+        seriesData[seriesUid] = await api(`series/${seriesUid}`);
+      }
+      return { job, seriesData };
+    },
+    [api, jobId]
+  );
+
+  const [jobData, , reloadJob] = useLoadData(loadJob);
+
   const feedbackTargets = useMemo(() => createFeedbackTargets(), []);
   const [feedbackState, dispatch] = useFeedback();
-  const api = useApi();
 
   if (!jobData) {
     return <LoadingIndicator />;

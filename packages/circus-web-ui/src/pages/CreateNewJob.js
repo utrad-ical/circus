@@ -15,29 +15,27 @@ const CreateNewJob = props => {
   const api = useApi();
   const seriesUid = props.match.params.seriesUid;
 
-  const load = async () => {
-    setBusy(true);
-    const series = await api('series/' + seriesUid);
-    const plugins = await api('plugins');
-    setBusy(false);
-    setSelectedSeries([{ ...series, range: series.images }]);
-    setPlugins(plugins);
-  };
-
-  useEffect(() => {
-    load();
-  }, []);
+  useEffect(
+    () => {
+      const load = async () => {
+        setBusy(true);
+        const series = await api('series/' + seriesUid);
+        const plugins = await api('plugins');
+        setBusy(false);
+        setSelectedSeries([{ ...series, range: series.images }]);
+        setPlugins(plugins);
+      };
+      load();
+    },
+    [api, seriesUid]
+  );
 
   const handleCreate = async () => {
-    const res = await api('plugin-jobs', {
+    await api('plugin-jobs', {
       method: 'post',
-      data: {
-        pluginId: selectedPlugin,
-        series: selectedSeries
-      }
+      data: { pluginId: selectedPlugin, series: selectedSeries }
     });
     showMessage('Job registered.');
-    console.log(res);
   };
 
   if (!Array.isArray(plugins)) {

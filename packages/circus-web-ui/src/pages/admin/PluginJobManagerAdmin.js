@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useApi } from 'utils/api';
 import AdminContainer from './AdminContainer';
 import IconButton from 'components/IconButton';
@@ -10,16 +10,22 @@ const PluginJobManagerAdmin = props => {
   const [status, setStatus] = useState(null);
   const api = useApi();
 
-  useEffect(() => {
-    refresh();
-  }, []);
+  const refresh = useCallback(
+    async () => {
+      setBusy(true);
+      const result = await api('admin/plugin-job-manager');
+      setBusy(false);
+      setStatus(result.status);
+    },
+    [api]
+  );
 
-  const refresh = async () => {
-    setBusy(true);
-    const result = await api('admin/plugin-job-manager');
-    setBusy(false);
-    setStatus(result.status);
-  };
+  useEffect(
+    () => {
+      refresh();
+    },
+    [refresh]
+  );
 
   const postSwitch = async mode => {
     setBusy(true);
@@ -28,7 +34,7 @@ const PluginJobManagerAdmin = props => {
         method: 'post',
         data: { status: mode }
       });
-      await this.refresh();
+      await refresh();
     } catch (e) {
       setBusy(false);
     }

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Button, Panel } from 'components/react-bootstrap';
 import IconButton from 'rb/IconButton';
 import PropertyEditor from 'rb/PropertyEditor';
@@ -25,8 +25,29 @@ const EditorPage = props => {
     searchName,
     resource,
     title,
+    targetName,
     icon
   } = props;
+
+  const loadItems = useCallback(
+    async () => {
+      dispatch(startNewSearch(api, searchName, resource, {}, {}, {}));
+    },
+    [api, dispatch, resource, searchName]
+  );
+
+  const handleEditStart = useCallback(
+    (index, item) => {
+      const makeTargetName = item => {
+        if (targetName) return targetName(item);
+        return item[primaryKey];
+      };
+      setTarget(makeTargetName(item));
+      setEditing(item);
+      setComplaints({});
+    },
+    [targetName, primaryKey]
+  );
 
   const grid = useMemo(
     () => {
@@ -39,12 +60,15 @@ const EditorPage = props => {
         />
       );
     },
-    [props.listColumns]
+    [listColumns, handleEditStart]
   );
 
-  useEffect(() => {
-    loadItems();
-  }, []);
+  useEffect(
+    () => {
+      loadItems();
+    },
+    [loadItems]
+  );
 
   const commitItem = async item => {
     if (preCommitHook) {
@@ -75,21 +99,6 @@ const EditorPage = props => {
     } catch (err) {
       setComplaints(err.data.errors);
     }
-  };
-
-  const loadItems = async () => {
-    dispatch(startNewSearch(api, searchName, resource, {}, {}, {}));
-  };
-
-  const targetName = item => {
-    if (props.targetName) return props.targetName(item);
-    return item[props.primaryKey];
-  };
-
-  const handleEditStart = (index, item) => {
-    setTarget(targetName(item));
-    setEditing(item);
-    setComplaints({});
   };
 
   const handleCancelClick = () => {
@@ -137,30 +146,40 @@ const EditorPage = props => {
 
 export default connect()(EditorPage);
 
-const Editor = props => {
-  const pickProperties = () => {
-    // Remove keys not in the editor property list
-    const result = {};
-    for (const p of props.properties) {
-      result[p.key] = props.item[p.key];
-    }
-    return result;
-  };
+const pickProperties = (item, properties) => {
+  // Remove keys not in the editor property list
+  const result = {};
+  for (const p of properties) {
+    result[p.key] = item[p.key];
+  }
+  return result;
+};
 
-  const [currentData, setCurrentData] = useState(() => pickProperties());
+const Editor = props => {
+  const {
+    properties,
+    item,
+    complaints,
+    onSaveClick = () => {},
+    onCancelClick = () => {}
+  } = props;
+
+  const [currentData, setCurrentData] = useState(() =>
+    pickProperties(item, properties)
+  );
 
   useEffect(
     () => {
-      setCurrentData(pickProperties());
+      setCurrentData(pickProperties(item, properties));
     },
-    [props.properties, props.item]
+    [properties, item]
   );
 
   const handleSave = () => {
-    props.onSaveClick && props.onSaveClick(currentData);
+    onSaveClick(currentData);
   };
 
-  const properties = props.properties.filter(
+  const filteredProperties = props.properties.filter(
     p => !props.excludeProperty || props.excludeProperty !== p.key
   );
 
@@ -178,13 +197,13 @@ const Editor = props => {
       <Panel.Body>
         <PropertyEditor
           value={currentData}
-          complaints={props.complaints}
-          properties={properties}
+          complaints={complaints}
+          properties={filteredProperties}
           onChange={setCurrentData}
         />
       </Panel.Body>
       <Panel.Footer className="text-center">
-        <Button bsStyle="link" onClick={props.onCancelClick}>
+        <Button bsStyle="link" onClick={onCancelClick}>
           Cancel
         </Button>
         <Button bsStyle="primary" onClick={handleSave}>

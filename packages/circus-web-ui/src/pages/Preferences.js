@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import PropertyEditor from 'rb/PropertyEditor';
 import * as et from 'rb/editor-types';
 import { useApi } from 'utils/api';
@@ -46,14 +46,20 @@ const Preferences = props => {
   const loginManager = useLoginManager();
   const api = useApi();
 
-  const loadSettings = async () => {
-    const settings = await api('preferences');
-    setSettings(settings);
-  };
+  const loadSettings = useCallback(
+    async () => {
+      const settings = await api('preferences');
+      setSettings(settings);
+    },
+    [api]
+  );
 
-  useEffect(() => {
-    loadSettings();
-  }, []);
+  useEffect(
+    () => {
+      loadSettings();
+    },
+    [loadSettings]
+  );
 
   const saveClick = async () => {
     await api('preferences', {

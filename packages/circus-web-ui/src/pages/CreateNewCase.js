@@ -23,16 +23,18 @@ const CreateNewCase = props => {
   const api = useApi();
   const seriesUid = props.match.params.seriesUid;
 
-  const load = async () => {
-    setBusy(true);
-    const series = await api('series/' + seriesUid);
-    setSelectedSeries([{ ...series, range: series.images }]);
-    setBusy(false);
-  };
-
-  useEffect(() => {
-    load();
-  }, []);
+  useEffect(
+    () => {
+      const load = async () => {
+        setBusy(true);
+        const series = await api('series/' + seriesUid);
+        setSelectedSeries([{ ...series, range: series.images }]);
+        setBusy(false);
+      };
+      load();
+    },
+    [api, seriesUid]
+  );
 
   const handleProjectSelect = projectId => {
     const prj = user.accessibleProjects.find(p => p.projectId === projectId);

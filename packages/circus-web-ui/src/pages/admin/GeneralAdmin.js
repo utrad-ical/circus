@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useApi } from 'utils/api';
 import { showMessage } from 'actions';
 import { Button } from 'components/react-bootstrap';
@@ -8,7 +8,7 @@ import * as et from 'rb/editor-types';
 import ShrinkSelect from 'rb/ShrinkSelect';
 
 const GeneralAdmin = props => {
-  const [settings, setSettings] = useState(null);
+  const [settings, setSettings] = useState({ domains: [] });
   const [complaints, setComplaints] = useState({});
   const api = useApi();
 
@@ -19,18 +19,24 @@ const GeneralAdmin = props => {
 
   const domainSelector = useMemo(
     () => props => <ShrinkSelect options={settings.domains} {...props} />,
-    [settings && settings.domains]
+    [settings.domains]
   );
 
-  const loadSettings = async () => {
-    const data = await api('admin/server-params');
-    setSettings(data);
-    setComplaints({});
-  };
+  const loadSettings = useCallback(
+    async () => {
+      const data = await api('admin/server-params');
+      setSettings(data);
+      setComplaints({});
+    },
+    [api]
+  );
 
-  useEffect(() => {
-    loadSettings();
-  }, []);
+  useEffect(
+    () => {
+      loadSettings();
+    },
+    [loadSettings]
+  );
 
   const propertyChange = value => {
     if (value.domains.indexOf(value.defaultDomain) === -1) {

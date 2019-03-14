@@ -7,20 +7,23 @@ import { useApi } from 'utils/api';
 
 const PluginJobQueueSearch = props => {
   const api = useApi();
+  const { dispatch } = props;
 
-  useEffect(() => {
-    const { dispatch } = props;
-    dispatch(
-      startNewSearch(
-        api,
-        'pluingJobQueue',
-        'plugin-job-queue',
-        {},
-        {},
-        { jobId: -1 }
-      )
-    );
-  }, []);
+  useEffect(
+    () => {
+      dispatch(
+        startNewSearch(
+          api,
+          'pluingJobQueue',
+          'plugin-job-queue',
+          {},
+          {},
+          { jobId: -1 }
+        )
+      );
+    },
+    [api, dispatch]
+  );
 
   return (
     <div>

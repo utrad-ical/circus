@@ -11,6 +11,7 @@ import styled from 'styled-components';
 import useFeedback from './useFeedback';
 import PersonalConsensualSwitch from './PersonalConsensualSwitch';
 import useLoadData from 'utils/useLoadData';
+import PieProgress from 'components/PieProgress';
 
 const StyledDiv = styled.div`
   .job-main {
@@ -51,14 +52,16 @@ const createFeedbackTargets = () => {
   };
   const feedbackListener = createSelectionFeedbackListener(listenerOptions);
 
-  const feedbackTarget = props => {
+  const lesionCandidates = props => {
     return <LesionCandidates feedbackListener={feedbackListener} {...props} />;
   };
+
+  // const fnInput = props => <div>FN Input</div>;
 
   return [
     {
       feedbackKey: 'lesionCandidates',
-      render: feedbackTarget,
+      render: lesionCandidates,
       createInitialConsensualFeedback: personalFeedbacks => {
         return feedbackListener.createInitialConsensualFeedback(
           personalFeedbacks
@@ -187,6 +190,7 @@ const PluginJobDetail = props => {
             {feedbackState.message && (
               <span className="regsiter-message">{feedbackState.message}</span>
             )}
+            <PieProgress max={5} value={2} />&ensp;
             <IconButton
               icon={feedbackState.isConsensual ? 'tower' : 'user'}
               disabled={!feedbackState.canRegister}

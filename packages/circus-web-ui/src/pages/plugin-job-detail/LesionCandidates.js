@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useContext } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import ImageViewer from 'components/ImageViewer';
 import IconButton from 'components/IconButton';
 import styled from 'styled-components';
@@ -126,43 +126,42 @@ const LesionCandidates = React.memo(props => {
   const [composition, setComposition] = useState(null);
   const user = useLoginUser();
 
-  const didMount = async () => {
-    const seriesUid = job.series[0].seriesUid;
-    const server = user.dicomImageServer;
-    const rsHttpClient = new rs.RsHttpClient(server);
-    const volumeLoader = new rs.RsVolumeLoader({ rsHttpClient, seriesUid });
-    const src = new rs.HybridMprImageSource({
-      rsHttpClient,
-      volumeLoader,
-      seriesUid
-    });
-    await src.ready();
-    const composition = new rs.Composition(src);
-    const metadata = src.metadata;
-
-    const r = 20;
-    value.forEach(cand => {
-      const annotation = new rs.PlaneFigure();
-      annotation.color = '#ff00ff';
-      annotation.min = [
-        (cand.location[0] - r) * metadata.voxelSize[0],
-        (cand.location[1] - r) * metadata.voxelSize[1]
-      ];
-      annotation.max = [
-        (cand.location[0] + r) * metadata.voxelSize[0],
-        (cand.location[1] + r) * metadata.voxelSize[1]
-      ];
-      annotation.z = cand.location[2] * metadata.voxelSize[2];
-      composition.addAnnotation(annotation);
-    });
-    setComposition(composition);
-  };
-
   useEffect(
     () => {
-      didMount();
+      const load = async () => {
+        const seriesUid = job.series[0].seriesUid;
+        const server = user.dicomImageServer;
+        const rsHttpClient = new rs.RsHttpClient(server);
+        const volumeLoader = new rs.RsVolumeLoader({ rsHttpClient, seriesUid });
+        const src = new rs.HybridMprImageSource({
+          rsHttpClient,
+          volumeLoader,
+          seriesUid
+        });
+        await src.ready();
+        const composition = new rs.Composition(src);
+        const metadata = src.metadata;
+
+        const r = 20;
+        value.forEach(cand => {
+          const annotation = new rs.PlaneFigure();
+          annotation.color = '#ff00ff';
+          annotation.min = [
+            (cand.location[0] - r) * metadata.voxelSize[0],
+            (cand.location[1] - r) * metadata.voxelSize[1]
+          ];
+          annotation.max = [
+            (cand.location[0] + r) * metadata.voxelSize[0],
+            (cand.location[1] + r) * metadata.voxelSize[1]
+          ];
+          annotation.z = cand.location[2] * metadata.voxelSize[2];
+          composition.addAnnotation(annotation);
+        });
+        setComposition(composition);
+      };
+      load();
     },
-    [props.job]
+    [job]
   );
 
   const handleFeedbackChange = (index, selected) => {

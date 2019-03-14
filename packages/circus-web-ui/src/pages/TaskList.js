@@ -5,18 +5,20 @@ import { useApi } from 'utils/api';
 import Icon from 'components/Icon';
 
 const TaskList = props => {
-  const [tasks, setTasks] = useState([]);
-  const [downloadList, setDownloadList] = useState();
+  const [tasks] = useState([]);
+  const [, setDownloadList] = useState();
   const api = useApi();
 
-  const refresh = async () => {
-    const items = (await api('tasks')).items;
-    setDownloadList(items);
-  };
-
-  useEffect(() => {
-    refresh();
-  }, []);
+  useEffect(
+    () => {
+      const refresh = async () => {
+        const items = (await api('tasks')).items;
+        setDownloadList(items);
+      };
+      refresh();
+    },
+    [api]
+  );
 
   if (!Array.isArray(tasks)) {
     return <LoadingIndicator />;

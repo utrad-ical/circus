@@ -16,6 +16,7 @@ globals:
   React: true
 plugins:
   - react
+  - react-hooks
 rules:
   no-console: 'warn'
   quotes: [2, 'single', { avoidEscape: true }]
@@ -33,3 +34,5 @@ rules:
   semi: [2, 'always']
   no-var: 'error'
   prefer-const: 'error'
+  "react-hooks/rules-of-hooks": [2]
+  "react-hooks/exhaustive-deps": [2]

@@ -53,58 +53,64 @@ const UserAdmin = props => {
   const [listColumns, setListColumns] = useState(null);
   const api = useApi();
 
-  const load = async () => {
-    const groups = (await api('admin/groups')).items;
-    const groupIdMap = {};
-    groups.forEach(g => (groupIdMap[g.groupId] = g.groupName));
-    setEditorProperties([
-      { caption: 'User Email', key: 'userEmail', editor: et.text() },
-      { caption: 'Login Name', key: 'loginId', editor: et.text() },
-      { caption: 'Description', key: 'description', editor: et.text() },
-      { caption: 'Password', key: 'password', editor: et.password() },
-      {
-        caption: 'Groups',
-        key: 'groups',
-        editor: props => (
-          <MultiSelect options={groupIdMap} numericalValue {...props} />
-        )
-      },
-      { caption: 'Preferences', key: 'preferences', editor: PreferenceEditor },
-      {
-        caption: 'Login Enabled',
-        key: 'loginEnabled',
-        editor: et.checkbox({ label: 'enabled' })
-      }
-    ]);
+  useEffect(
+    () => {
+      const load = async () => {
+        const groups = (await api('admin/groups')).items;
+        const groupIdMap = {};
+        groups.forEach(g => (groupIdMap[g.groupId] = g.groupName));
+        setEditorProperties([
+          { caption: 'User Email', key: 'userEmail', editor: et.text() },
+          { caption: 'Login Name', key: 'loginId', editor: et.text() },
+          { caption: 'Description', key: 'description', editor: et.text() },
+          { caption: 'Password', key: 'password', editor: et.password() },
+          {
+            caption: 'Groups',
+            key: 'groups',
+            editor: props => (
+              <MultiSelect options={groupIdMap} numericalValue {...props} />
+            )
+          },
+          {
+            caption: 'Preferences',
+            key: 'preferences',
+            editor: PreferenceEditor
+          },
+          {
+            caption: 'Login Enabled',
+            key: 'loginEnabled',
+            editor: et.checkbox({ label: 'enabled' })
+          }
+        ]);
 
-    setListColumns([
-      { key: 'userEmail', caption: 'User ID (E-mail)' },
-      { key: 'loginId', caption: 'Login Name' },
-      { key: 'description', caption: 'Description' },
-      {
-        key: 'groups',
-        renderer: ({ value: item }) => {
-          return item.groups.map(groupId => {
-            const group = groups.find(g => g.groupId === groupId);
-            const style =
-              group.privileges.indexOf('manageServer') >= 0
-                ? 'label-danger'
-                : 'label-default';
-            return (
-              <span className={classnames('label', style)} key={groupId}>
-                {group.groupName}
-              </span>
-            );
-          });
-        },
-        caption: 'Groups'
-      }
-    ]);
-  };
-
-  useEffect(() => {
-    load();
-  }, []);
+        setListColumns([
+          { key: 'userEmail', caption: 'User ID (E-mail)' },
+          { key: 'loginId', caption: 'Login Name' },
+          { key: 'description', caption: 'Description' },
+          {
+            key: 'groups',
+            renderer: ({ value: item }) => {
+              return item.groups.map(groupId => {
+                const group = groups.find(g => g.groupId === groupId);
+                const style =
+                  group.privileges.indexOf('manageServer') >= 0
+                    ? 'label-danger'
+                    : 'label-default';
+                return (
+                  <span className={classnames('label', style)} key={groupId}>
+                    {group.groupName}
+                  </span>
+                );
+              });
+            },
+            caption: 'Groups'
+          }
+        ]);
+      };
+      load();
+    },
+    [api]
+  );
 
   if (!editorProperties || !listColumns) return <LoadingIndicator />;
   return (

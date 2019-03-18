@@ -36,40 +36,60 @@ const StyledDiv = styled.div`
   }
 `;
 
-const createFeedbackTargets = () => {
-  const listenerOptions = {
-    personal: [
-      { caption: 'known TP', value: 1 },
-      { caption: 'missed TP', value: 2, consensualMapsTo: 1 },
-      { caption: 'FP', value: -1 },
-      { caption: 'pending', value: 0 }
-    ],
-    consensual: [
-      { caption: 'TP', value: 1 },
-      { caption: 'FP', value: -1 },
-      { caption: 'pending', value: 0 }
-    ]
-  };
-  const feedbackListener = createSelectionFeedbackListener(listenerOptions);
-
-  const lesionCandidates = props => {
-    return <LesionCandidates feedbackListener={feedbackListener} {...props} />;
-  };
-
-  // const fnInput = props => <div>FN Input</div>;
-
-  return [
-    {
-      feedbackKey: 'lesionCandidates',
-      render: lesionCandidates,
-      createInitialConsensualFeedback: personalFeedbacks => {
-        return feedbackListener.createInitialConsensualFeedback(
-          personalFeedbacks
-        );
-      },
-      validate: feedback => Array.isArray(feedback) && feedback.length >= 3
+const displayStrategy = [
+  {
+    feedbackKey: 'lesionCandidates',
+    type: 'LesionCandidates',
+    options: {
+      feedbackListener: {
+        type: 'SelectionFeedbackListener',
+        options: {
+          personal: [
+            { caption: 'known TP', value: 1 },
+            { caption: 'missed TP', value: 2, consensualMapsTo: 1 },
+            { caption: 'FP', value: -1 },
+            { caption: 'pending', value: 0 }
+          ],
+          consensual: [
+            { caption: 'TP', value: 1 },
+            { caption: 'FP', value: -1 },
+            { caption: 'pending', value: 0 }
+          ]
+        }
+      }
     }
-  ];
+  }
+  // { type: "FnInput", ... }
+];
+
+const createLesionCandidates = options => {
+  const { feedbackListener } = options;
+  const listener = createSelectionFeedbackListener(feedbackListener.options);
+  return {
+    render: props => (
+      <LesionCandidates feedbackListener={listener} {...props} />
+    ),
+    createInitialConsensualFeedback: listener.createInitialConsensualFeedback
+  };
+};
+
+const createFeedbackTargets = () => {
+  const feedbackTargets = [];
+  for (const strategy of displayStrategy) {
+    switch (strategy.type) {
+      case 'LesionCandidates': {
+        const lesionCandidates = createLesionCandidates(strategy.options);
+        feedbackTargets.push({
+          feedbackKey: strategy.feedbackKey,
+          validate: feedback => Array.isArray(feedback) && feedback.length >= 3,
+          render: lesionCandidates.render,
+          createInitialConsensualFeedback:
+            lesionCandidates.createInitialConsensualFeedback
+        });
+      }
+    }
+  }
+  return feedbackTargets;
 };
 
 const PluginJobDetail = props => {

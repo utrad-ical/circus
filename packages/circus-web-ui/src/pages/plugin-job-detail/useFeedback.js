@@ -58,12 +58,12 @@ const reducer = (state, action) => {
         canRegister: action.canRegister
       };
     case 'enterConsensualMode': {
-      const consensual = state.feedbacks.find(f => f.consensual);
+      const consensual = state.feedbacks.find(f => f.isConsensual);
       return {
         ...state,
         isConsensual: true,
         disabled: !!consensual,
-        canRegister: action.canRegister,
+        canRegister: !consensual && action.canRegister,
         registeredTargetCount: action.registeredTargetCount,
         currentData: consensual ? consensual.data : action.value,
         message: consensual ? registeredMessage(consensual) : ''

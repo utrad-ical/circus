@@ -61,15 +61,18 @@ const SelectionFeedbackListener = React.forwardRef((props, ref) => {
           throw new Error('Unknown consensual feedback value');
         return value;
       };
-      personalFeedback.forEach(f => {
-        const mappedValue = applyConsensualMapsTo(value);
+      personalFeedback.forEach(pfb => {
+        const mappedValue = applyConsensualMapsTo(pfb);
         const voteCount = votes.get(mappedValue) || 0;
         votes.set(mappedValue, voteCount + 1);
       });
       if (votes.size !== 1) return undefined;
       return [...votes.keys()][0];
     },
-    validate: value => value !== undefined
+    validate: value => {
+      if (value === undefined) return false;
+      return currentOptions.some(opt => opt.id === value);
+    }
   }));
 
   return (

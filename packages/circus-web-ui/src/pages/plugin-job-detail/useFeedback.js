@@ -26,9 +26,9 @@ const reducer = (state, action) => {
         feedbacks: action.feedbacks,
         myUserEmail: action.myUserEmail
       };
-      const consensual = action.feedbacks.find(f => f.consensual);
+      const consensual = action.feedbacks.find(f => f.isConsensual);
       const myPersonal = action.feedbacks.find(
-        f => !f.consensual && f.enteredBy === action.myUserEmail
+        f => !f.isConsensual && f.enteredBy === action.myUserEmail
       );
       // 1. If consensual feedback is registered, show it
       if (consensual) {

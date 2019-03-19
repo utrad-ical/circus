@@ -1,4 +1,10 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, {
+  useState,
+  useRef,
+  useEffect,
+  useImperativeHandle,
+  useMemo
+} from 'react';
 import ImageViewer from 'components/ImageViewer';
 import IconButton from 'components/IconButton';
 import styled from 'styled-components';
@@ -6,21 +12,23 @@ import * as rs from 'circus-rs';
 import EventEmitter from 'events';
 import { toolFactory } from 'circus-rs/tool/tool-initializer';
 import useLoginUser from 'utils/useLoginUser';
+import createDynamicComponent from '../createDynamicComponent';
 
-const Candidate = props => {
+const Candidate = React.forwardRef((props, ref) => {
   const {
+    item,
     value,
-    index,
-    onFeedbackChange,
-    feedback,
+    onChange,
+    disabled,
+    isConsensual,
     feedbackListener: FeedbackListener,
-    canEditFeedback,
     composition,
-    tool,
-    isConsensual
+    tool
   } = props;
 
-  const { current: stateChanger } = useRef(new EventEmitter());
+  const stateChangerRef = useRef(undefined);
+  if (!stateChangerRef.current) stateChangerRef.current = new EventEmitter();
+  const stateChanger = stateChangerRef.current;
 
   useEffect(
     () => {
@@ -30,7 +38,7 @@ const Candidate = props => {
           const newOrigin = [
             state.section.origin[0],
             state.section.origin[1],
-            voxelSize[2] * value.location[2]
+            voxelSize[2] * item.location[2]
           ];
           return {
             ...state,
@@ -46,15 +54,15 @@ const Candidate = props => {
       };
       updateComposition();
     },
-    [composition, stateChanger, value.location]
+    [composition, stateChanger, item.location]
   );
 
   return (
     <div className="lesion-candidate">
       <div className="attributes">
-        <div>Rank: {value.rank}</div>
-        <div>Loc: {JSON.stringify(value.location)}</div>
-        <div>Confidence: {value.confidence}</div>
+        <div>Rank: {item.rank}</div>
+        <div>Loc: {JSON.stringify(item.location)}</div>
+        <div>Confidence: {item.confidence}</div>
       </div>
       <ImageViewer
         className="lesion-candidate-viewer"
@@ -64,26 +72,45 @@ const Candidate = props => {
       />
       <div className="feedback-listener">
         <FeedbackListener
-          value={feedback}
+          ref={ref}
+          value={value}
+          onChange={onChange}
           isConsensual={isConsensual}
-          disabled={!canEditFeedback}
-          onChange={val => onFeedbackChange(index, val)}
+          disabled={disabled}
         />
       </div>
     </div>
   );
-};
+});
 
-const LesionCandidates = React.memo(props => {
+const LesionCandidates = React.forwardRef((props, ref) => {
   const {
     job,
-    feedback = [],
-    feedbackState,
-    feedbackListener,
-    onChange
+    value = [],
+    onChange,
+    isConsensual,
+    disabled,
+    options: { feedbackListener }
   } = props;
 
-  const value = job.results.results.lesionCandidates;
+  const FeedbackListener = useMemo(
+    () =>
+      createDynamicComponent(feedbackListener.type, feedbackListener.options),
+    [feedbackListener.type, feedbackListener.options]
+  );
+
+  // Keeps track of multiple refs using Map
+  /**
+   * @type React.MutableRefObject<Map<number, any>>;
+   */
+  const listenerRefs = useRef(undefined);
+  if (!listenerRefs.current) listenerRefs.current = new Map();
+  useImperativeHandle(ref, () => ({
+    mergePersonalFeedback: () => listenerRefs.current.mergePersonalFeedback()
+  }));
+
+  const candidates = job.results.results.lesionCandidates;
+  const visibleCandidates = candidates.slice(0, 3);
   const seriesUid = job.series[0].seriesUid;
 
   const tools = useRef();
@@ -100,6 +127,30 @@ const LesionCandidates = React.memo(props => {
   const user = useLoginUser();
   const server = user.dicomImageServer;
 
+  useImperativeHandle(ref, () => ({
+    mergePersonalFeedback: personalFeedback => {
+      return visibleCandidates.map(cand => {
+        const fbsOfCand = personalFeedback.map(pfb => {
+          const a = pfb.find(i => i.id === cand.rank);
+          return a ? a.value : undefined;
+        });
+        return {
+          id: cand.rank,
+          value: listenerRefs.current
+            .get(cand.rank)
+            .mergePersonalFeedback(fbsOfCand)
+        };
+      });
+    },
+    validate: value => {
+      return visibleCandidates.every(cand => {
+        const item = value.find(item => item.id === cand.rank);
+        if (!item) return false;
+        return listenerRefs.current.get(cand.rank).validate(item.value);
+      });
+    }
+  }));
+
   useEffect(
     () => {
       const load = async () => {
@@ -115,7 +166,7 @@ const LesionCandidates = React.memo(props => {
         const metadata = src.metadata;
 
         const r = 20;
-        value.forEach(cand => {
+        candidates.forEach(cand => {
           const annotation = new rs.PlaneFigure();
           annotation.color = '#ff00ff';
           annotation.min = [
@@ -133,18 +184,17 @@ const LesionCandidates = React.memo(props => {
       };
       load();
     },
-    [seriesUid, server, value]
+    [candidates, seriesUid, server]
   );
 
-  const handleFeedbackChange = (index, selected) => {
-    const newFeedback = feedback
-      .filter(item => item.id !== index)
-      .concat([{ id: index, value: selected }])
+  const handleFeedbackChange = (id, newValue) => {
+    const newFeedback = value
+      .filter(item => item.id !== id)
+      .concat([{ id, value: newValue }])
       .sort((a, b) => a.index - b.index);
     onChange(newFeedback);
   };
 
-  const truncated = value.slice(0, 3);
   return (
     <StyledDiv>
       <div className="tools">
@@ -159,18 +209,19 @@ const LesionCandidates = React.memo(props => {
         ))}
       </div>
       <div className="entries">
-        {truncated.map((cand, i) => {
-          const feedbackItem = feedback.find(item => item.id === i);
+        {visibleCandidates.map(cand => {
+          const feedbackItem = value.find(item => item.id === cand.rank);
           return (
             <Candidate
-              key={i}
-              value={cand}
-              feedbackListener={feedbackListener}
-              feedback={feedbackItem ? feedbackItem.value : undefined}
-              canEditFeedback={feedbackState.canEdit}
-              isConsensual={feedbackState.isConsensual}
-              index={i}
-              onFeedbackChange={handleFeedbackChange}
+              key={cand.rank}
+              ref={ref => listenerRefs.current.set(cand.rank, ref)}
+              item={cand}
+              feedbackListener={FeedbackListener}
+              value={feedbackItem ? feedbackItem.value : undefined}
+              disabled={disabled}
+              isConsensual={isConsensual}
+              index={cand.rank}
+              onChange={val => handleFeedbackChange(cand.rank, val)}
               composition={composition}
               tool={tools.current.find(t => t.name === toolName).tool}
             />

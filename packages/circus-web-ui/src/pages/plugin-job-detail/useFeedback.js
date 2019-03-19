@@ -19,8 +19,9 @@ const reducer = (state, action) => {
       const state = {
         isConsensual: false,
         currentData: {},
+        registeredTargetCount: 0,
         canRegister: false,
-        canEdit: false,
+        disabled: true,
         message: '',
         feedbacks: action.feedbacks,
         myUserEmail: action.myUserEmail
@@ -47,21 +48,23 @@ const reducer = (state, action) => {
         };
       }
       // 3. Otherwise, enter personal mode and show empty feedback
-      return { ...state, canEdit: true };
+      return { ...state, disabled: false };
     }
     case 'changeFeedback':
       return {
         ...state,
-        currentData: { ...state.currentData, [action.key]: action.value },
-        canRegister: action.valid
+        currentData: action.value,
+        registeredTargetCount: action.registeredTargetCount,
+        canRegister: action.canRegister
       };
     case 'enterConsensualMode': {
       const consensual = state.feedbacks.find(f => f.consensual);
       return {
         ...state,
         isConsensual: true,
-        canEdit: !consensual,
-        canRegister: false,
+        disabled: !!consensual,
+        canRegister: action.canRegister,
+        registeredTargetCount: action.registeredTargetCount,
         currentData: consensual ? consensual.data : action.value,
         message: consensual ? registeredMessage(consensual) : ''
       };
@@ -73,7 +76,7 @@ const reducer = (state, action) => {
       return {
         ...state,
         isConsensual: false,
-        canEdit: !myPersonal,
+        disabled: !!myPersonal,
         canRegister: false,
         currentData: myPersonal ? myPersonal.data : {},
         message: myPersonal ? registeredMessage(myPersonal) : ''

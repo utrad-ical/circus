@@ -1,17 +1,16 @@
-import React, { useMemo, useCallback } from 'react';
+import React, { Fragment, useMemo, useCallback, useRef } from 'react';
 import { useApi } from 'utils/api';
 import PatientInfoBox from 'components/PatientInfoBox';
 import FullSpanContainer from 'components/FullSpanContainer';
 import LoadingIndicator from 'rb/LoadingIndicator';
-import LesionCandidates from './LesionCandidates';
 import PluginDisplay from 'components/PluginDisplay';
 import IconButton from 'components/IconButton';
-import createSelectionFeedbackListener from './feedback-listeners/createSelectionFeedbackListener';
 import styled from 'styled-components';
 import useFeedback from './useFeedback';
 import PersonalConsensualSwitch from './PersonalConsensualSwitch';
 import useLoadData from 'utils/useLoadData';
 import PieProgress from 'components/PieProgress';
+import createDynamicComponent from './createDynamicComponent';
 
 const StyledDiv = styled.div`
   .job-main {
@@ -62,32 +61,14 @@ const displayStrategy = [
   // { type: "FnInput", ... }
 ];
 
-const createLesionCandidates = options => {
-  const { feedbackListener } = options;
-  const listener = createSelectionFeedbackListener(feedbackListener.options);
-  return {
-    render: props => (
-      <LesionCandidates feedbackListener={listener} {...props} />
-    ),
-    createInitialConsensualFeedback: listener.createInitialConsensualFeedback
-  };
-};
-
 const createFeedbackTargets = () => {
   const feedbackTargets = [];
   for (const strategy of displayStrategy) {
-    switch (strategy.type) {
-      case 'LesionCandidates': {
-        const lesionCandidates = createLesionCandidates(strategy.options);
-        feedbackTargets.push({
-          feedbackKey: strategy.feedbackKey,
-          validate: feedback => Array.isArray(feedback) && feedback.length >= 3,
-          render: lesionCandidates.render,
-          createInitialConsensualFeedback:
-            lesionCandidates.createInitialConsensualFeedback
-        });
-      }
-    }
+    const render = createDynamicComponent(strategy.type, strategy.options);
+    feedbackTargets.push({
+      feedbackKey: strategy.feedbackKey,
+      render
+    });
   }
   return feedbackTargets;
 };
@@ -115,6 +96,13 @@ const PluginJobDetail = props => {
   const feedbackTargets = useMemo(() => createFeedbackTargets(), []);
   const [feedbackState, dispatch] = useFeedback();
 
+  // Keeps track of multiple refs using Map
+  /**
+   * @type React.MutableRefObject<Map<string, any>>;
+   */
+  const listenerRefs = useRef(undefined);
+  if (!listenerRefs.current) listenerRefs.current = new Map();
+
   if (!jobData) {
     return <LoadingIndicator />;
   }
@@ -135,31 +123,48 @@ const PluginJobDetail = props => {
     return;
   }
 
+  const validate = value => {
+    const finished = feedbackTargets.filter(
+      t =>
+        listenerRefs.current
+          .get(t.feedbackKey)
+          .validate(value[t.feedbackKey]) === true
+    );
+    return [finished.length === feedbackTargets.length, finished.length];
+  };
+
   const handleChange = (feedbackKey, value) => {
+    const newFeedback = {
+      ...feedbackState.currentData,
+      [feedbackKey]: value
+    };
+    const [valid, registeredTargetCount] = validate(newFeedback);
     dispatch({
       type: 'changeFeedback',
-      key: feedbackKey,
-      value,
-      valid: feedbackTargets.every(t => {
-        return t.validate(
-          feedbackKey === t.feedbackKey
-            ? value
-            : feedbackState.currentData[t.feedbackKey]
-        );
-      })
+      value: newFeedback,
+      registeredTargetCount,
+      canRegister: valid
     });
   };
 
   const handleChangeFeedbackMode = isConsensual => {
     if (isConsensual) {
-      const value = {};
-      feedbackTargets.forEach(t => {
+      const mergedFeedback = {};
+      feedbackTargets.forEach(({ feedbackKey }) => {
         const pfbs = job.feedbacks
-          .filter(f => !f.isConsensual)
-          .map(f => f.data[t.feedbackKey]);
-        value[t.feedbackKey] = t.createInitialConsensualFeedback(pfbs);
+          .filter(fb => !fb.isConsensual)
+          .map(fb => fb.data[feedbackKey]);
+        mergedFeedback[feedbackKey] = listenerRefs.current
+          .get(feedbackKey)
+          .mergePersonalFeedback(pfbs);
       });
-      dispatch({ type: 'enterConsensualMode', value });
+      const [canRegister, registeredTargetCount] = validate(mergedFeedback);
+      dispatch({
+        type: 'enterConsensualMode',
+        value: mergedFeedback,
+        registeredTargetCount,
+        canRegister
+      });
     } else {
       dispatch({ type: 'enterPersonalMode' });
     }
@@ -192,16 +197,19 @@ const PluginJobDetail = props => {
             />
           </div>
           <div className="feedback-targets">
-            {feedbackTargets.map(t => {
-              const Render = t.render;
-              const feedback = feedbackState.currentData[t.feedbackKey];
+            {feedbackTargets.map(target => {
+              const Render = target.render;
+              const key = target.feedbackKey;
+              const feedback = feedbackState.currentData[key];
               return (
                 <Render
-                  key={t.feedbackKey}
+                  key={key}
+                  ref={ref => listenerRefs.current.set(key, ref)}
                   job={job}
-                  feedback={feedback}
-                  feedbackState={feedbackState}
-                  onChange={value => handleChange(t.feedbackKey, value)}
+                  value={feedback}
+                  onChange={value => handleChange(key, value)}
+                  isConsensual={feedbackState.isConsensual}
+                  disabled={feedbackState.disabled}
                 />
               );
             })}
@@ -210,7 +218,14 @@ const PluginJobDetail = props => {
             {feedbackState.message && (
               <span className="regsiter-message">{feedbackState.message}</span>
             )}
-            <PieProgress max={5} value={2} />&ensp;
+            {!feedbackState.disabled && (
+              <Fragment>
+                <PieProgress
+                  max={feedbackTargets.length}
+                  value={feedbackState.registeredTargetCount}
+                />&ensp;
+              </Fragment>
+            )}
             <IconButton
               icon={feedbackState.isConsensual ? 'tower' : 'user'}
               disabled={!feedbackState.canRegister}

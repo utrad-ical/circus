@@ -1,18 +1,16 @@
-import React, { Fragment } from 'react';
-import { Helmet } from 'react-helmet';
+import React, { useEffect, Fragment } from 'react';
 
 /**
  * This adds "full-span-container" body class from within a component.
  */
 const FullSpanContainer = props => {
-  return (
-    <Fragment>
-      <Helmet>
-        <body className="full-span-container" />
-      </Helmet>
-      {props.children}
-    </Fragment>
-  );
+  useEffect(() => {
+    document.body.classList.add('full-span-container');
+    return () => {
+      document.body.classList.remove('full-span-container');
+    };
+  }, []);
+  return <Fragment>{props.children}</Fragment>;
 };
 
 export default FullSpanContainer;

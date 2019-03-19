@@ -5,6 +5,7 @@ import cancelToken from './cancelToken';
  * Asynchronously load data from the given async loader function.
  * @param {*} loadFunc The async loader function. The function will be passed
  * a cancel token.
+ * @return {[any, ()=>void, ()=>void]}
  */
 const useLoadData = loadFunc => {
   const [data, setData] = useState(undefined);

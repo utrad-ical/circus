@@ -12,7 +12,7 @@ import {
   VolumeAccessor
 } from './createVolumeProvider';
 import dicomImageExtractor from '../../common/dicomImageExtractor';
-import asyncMemoize, { AsyncCachedLoader } from './asyncMemoize';
+import asyncMemoize, { AsyncCachedLoader } from '../../common/asyncMemoize';
 
 /**
  * This is a simple facade interface that aggregates helper modules

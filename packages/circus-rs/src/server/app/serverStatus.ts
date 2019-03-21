@@ -1,6 +1,6 @@
 import koa from 'koa';
 import { AppHelpers } from '../helper/prepareHelperModules';
-import { AsyncCachedLoader } from '../helper/asyncMemoize';
+import { AsyncCachedLoader } from '../../common/asyncMemoize';
 import { VolumeAccessor } from '../helper/createVolumeProvider';
 
 type MiddlewareOptions = {

@@ -12,7 +12,6 @@ const stringifyPartialVolumeDescriptor = d => `${d.start}:${d.end}:${d.delta}`;
 
 /**
  * Returns a cached HybridImageSource instance for the specified series.
- * This is used to recycle ImageSource's among multiple viewers.
  * The returned source may not be "ready" yet.
  */
 export const usePendingImageSource = (seriesUid, partialVolumeDescriptor) => {

@@ -14,9 +14,10 @@ import PieProgress from 'components/PieProgress';
 import createDynamicComponent from './createDynamicComponent';
 
 const StyledDiv = styled.div`
-  .job-main {
-    padding: 10px;
-  }
+  display: flex;
+  flex-direction: column;
+  flex: 1 0 auto;
+
   .job-detail-header {
     flex: none;
     padding: 5px 10px;
@@ -24,11 +25,19 @@ const StyledDiv = styled.div`
     justify-content: space-between;
     border-bottom: 1px solid silver;
   }
+  .job-detail-main {
+    min-height: 0;
+    flex: 1 1 0;
+    padding: 10px;
+    overflow-y: auto;
+  }
   .feedback-mode-switch {
     margin: 0.5em 0;
   }
-  .feedback-nav {
-    margin: 1em 0;
+  .job-detail-footer {
+    flex: none;
+    padding: 10px;
+    border-top: 1px solid silver;
     text-align: right;
     .regsiter-message {
       margin-right: 1em;
@@ -190,14 +199,14 @@ const PluginJobDetail = props => {
   const modeText = feedbackState.isConsensual ? 'consensual' : 'personal';
 
   return (
-    <FullSpanContainer>
-      <ImageSourceCacheContext.Provider value={imageSourceCache}>
+    <ImageSourceCacheContext.Provider value={imageSourceCache}>
+      <FullSpanContainer>
         <StyledDiv>
           <div className="job-detail-header">
             <PluginDisplay pluginId={job.pluginId} size="xl" />
             <PatientInfoBox value={seriesData[primarySeriesUid].patientInfo} />
           </div>
-          <div className="job-main">
+          <div className="job-detail-main">
             <div className="feedback-mode-switch">
               <PersonalConsensualSwitch
                 feedbackState={feedbackState}
@@ -222,32 +231,30 @@ const PluginJobDetail = props => {
                 );
               })}
             </div>
-            <div className="feedback-nav">
-              {feedbackState.message && (
-                <span className="regsiter-message">
-                  {feedbackState.message}
-                </span>
-              )}
-              {!feedbackState.disabled && (
-                <Fragment>
-                  <PieProgress
-                    max={feedbackTargets.length}
-                    value={feedbackState.registeredTargetCount}
-                  />&ensp;
-                </Fragment>
-              )}
-              <IconButton
-                icon={feedbackState.isConsensual ? 'tower' : 'user'}
-                disabled={!feedbackState.canRegister}
-                onClick={handleRegisterClick}
-              >
-                Regsiter {modeText} feedback
-              </IconButton>
-            </div>
+          </div>
+          <div className="job-detail-footer">
+            {feedbackState.message && (
+              <span className="regsiter-message">{feedbackState.message}</span>
+            )}
+            {!feedbackState.disabled && (
+              <Fragment>
+                <PieProgress
+                  max={feedbackTargets.length}
+                  value={feedbackState.registeredTargetCount}
+                />&ensp;
+              </Fragment>
+            )}
+            <IconButton
+              icon={feedbackState.isConsensual ? 'tower' : 'user'}
+              disabled={!feedbackState.canRegister}
+              onClick={handleRegisterClick}
+            >
+              Regsiter {modeText} feedback
+            </IconButton>
           </div>
         </StyledDiv>
-      </ImageSourceCacheContext.Provider>
-    </FullSpanContainer>
+      </FullSpanContainer>
+    </ImageSourceCacheContext.Provider>
   );
 };
 

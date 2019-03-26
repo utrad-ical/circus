@@ -4,10 +4,14 @@ import * as rs from 'circus-rs';
 // import classnames from 'classnames';
 import useImageSource from 'utils/useImageSource';
 import ImageViewer from 'components/ImageViewer';
+import { ControlledCollapser } from 'components/Collapser';
 
 const Locator = React.forwardRef((props, ref) => {
   const { job, onChange, isConsensual, value = [], disabled, options } = props;
   const { title = 'FN Input', volumeId = 0 } = options;
+
+  const [composition, setComposition] = useState(null);
+  const [open, setOpen] = useState(false);
 
   // Exports "methods" for this FB listener
   useImperativeHandle(ref, () => ({
@@ -18,7 +22,6 @@ const Locator = React.forwardRef((props, ref) => {
   }));
 
   const seriesUid = job.series[volumeId].seriesUid;
-  const [composition, setComposition] = useState(null);
   const imageSource = useImageSource(seriesUid);
 
   useEffect(
@@ -30,23 +33,32 @@ const Locator = React.forwardRef((props, ref) => {
     [imageSource]
   );
 
+  const handleToggleClick = () => {
+    setOpen(open => !open);
+  };
+
   return (
-    <StyledDiv>
-      <h3>{title}</h3>
-      <div className="side">
-        <ImageViewer className="locator" composition={composition} />
-        <div>
-          <table className="locations table">
-            <tbody>
-              <tr>
-                <th>#</th>
-                <th>Position</th>
-              </tr>
-            </tbody>
-          </table>
+    <ControlledCollapser
+      open={open}
+      title={title}
+      onToggleClick={handleToggleClick}
+    >
+      <StyledDiv>
+        <div className="side">
+          <ImageViewer className="locator" composition={composition} />
+          <div>
+            <table className="locations table">
+              <tbody>
+                <tr>
+                  <th>#</th>
+                  <th>Position</th>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
-    </StyledDiv>
+      </StyledDiv>
+    </ControlledCollapser>
   );
 });
 

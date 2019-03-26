@@ -45,7 +45,7 @@ const StyledDiv = styled.div`
   }
 `;
 
-export const CollapserView = props => {
+export const ControlledCollapser = props => {
   const {
     open,
     onToggleClick,
@@ -86,7 +86,7 @@ export default class Collapser extends React.Component {
   render() {
     const { open } = this.state;
     return (
-      <CollapserView
+      <ControlledCollapser
         open={open}
         onToggleClick={this.handleToggleClick}
         {...this.props}

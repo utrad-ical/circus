@@ -5,6 +5,8 @@ import ImageViewer from 'components/ImageViewer';
 import React, { useEffect, useImperativeHandle, useRef, useState } from 'react';
 import styled from 'styled-components';
 import useImageSource from 'utils/useImageSource';
+import IconButton from 'components/IconButton';
+import { EventEmitter } from 'events';
 
 const Locator = React.forwardRef((props, ref) => {
   const { job, onChange, isConsensual, value = [], disabled, options } = props;
@@ -17,6 +19,10 @@ const Locator = React.forwardRef((props, ref) => {
   if (!toolRef.current) {
     toolRef.current = toolFactory('point');
   }
+
+  const stateChangerRef = useRef(undefined);
+  if (!stateChangerRef.current) stateChangerRef.current = new EventEmitter();
+  const stateChanger = stateChangerRef.current;
 
   // Exports "methods" for this FB listener
   useImperativeHandle(ref, () => ({
@@ -49,6 +55,7 @@ const Locator = React.forwardRef((props, ref) => {
         point.z = item.location[2];
         composition.addAnnotation(point);
       });
+      composition.annotationUpdated();
     },
     [composition, value]
   );
@@ -68,6 +75,28 @@ const Locator = React.forwardRef((props, ref) => {
     onChange(newValue);
   };
 
+  const handleRemovePoint = index => {
+    const newValue = value.slice();
+    newValue.splice(index, 1);
+    onChange(newValue);
+  };
+
+  const handleReveal = index => {
+    const item = value[index];
+    const changer = state => {
+      const newOrigin = [
+        state.section.origin[0],
+        state.section.origin[1],
+        item.location[2]
+      ];
+      return {
+        ...state,
+        section: { ...state.section, origin: newOrigin }
+      };
+    };
+    stateChanger.emit('change', changer);
+  };
+
   return (
     <StyledDiv>
       <ControlledCollapser
@@ -79,6 +108,7 @@ const Locator = React.forwardRef((props, ref) => {
           <ImageViewer
             className="locator"
             initialTool={toolRef.current}
+            stateChanger={stateChanger}
             composition={composition}
             onMouseUp={handleMouseUp}
           />
@@ -95,7 +125,21 @@ const Locator = React.forwardRef((props, ref) => {
                 {value.map((item, i) => (
                   <tr key={i}>
                     <td>{i + 1}</td>
-                    <td>{JSON.stringify(item.location)}</td>
+                    <td>
+                      {JSON.stringify(item.location)}{' '}
+                      <IconButton
+                        icon="record"
+                        title="Reveal"
+                        bsSize="xs"
+                        onClick={() => handleReveal(i)}
+                      />
+                      <IconButton
+                        icon="remove"
+                        title="Remove"
+                        bsSize="xs"
+                        onClick={() => handleRemovePoint(i)}
+                      />
+                    </td>
                   </tr>
                 ))}
               </tbody>

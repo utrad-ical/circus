@@ -67,11 +67,16 @@ export default class ImageViewer extends React.Component {
         initialTool = toolFactory('pager'),
         stateChanger,
         composition,
-        id
+        id,
+        onMouseUp = () => {}
       } = this.props;
       const container = this.container;
+
+      container.addEventListener('mouseup', onMouseUp);
+
       const viewer = new rs.Viewer(container);
       this.viewer = viewer;
+
       if (typeof onCreateViewer === 'function') onCreateViewer(viewer, id);
       if (stateChanger instanceof EventEmitter) {
         stateChanger.on('change', this.handleChangeState);

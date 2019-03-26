@@ -53,6 +53,7 @@ const Locator = React.forwardRef((props, ref) => {
         point.x = item.location[0];
         point.y = item.location[1];
         point.z = item.location[2];
+        point.color = '#ff00ff';
         composition.addAnnotation(point);
       });
       composition.annotationUpdated();
@@ -113,20 +114,20 @@ const Locator = React.forwardRef((props, ref) => {
             onMouseUp={handleMouseUp}
           />
           <div>
-            {value.length} items.
             <table className="locations table">
               <thead>
                 <tr>
                   <th>#</th>
                   <th>Position</th>
+                  <th />
                 </tr>
               </thead>
               <tbody>
                 {value.map((item, i) => (
                   <tr key={i}>
                     <td>{i + 1}</td>
+                    <td>{JSON.stringify(item.location)}</td>
                     <td>
-                      {JSON.stringify(item.location)}{' '}
                       <IconButton
                         icon="record"
                         title="Reveal"

@@ -36,7 +36,7 @@ const StyledDiv = styled.div`
     min-height: 0;
     flex: 1 1 0;
     padding: 10px;
-    overflow-y: auto;
+    overflow-y: scroll;
   }
   .job-detail-footer {
     flex: none;

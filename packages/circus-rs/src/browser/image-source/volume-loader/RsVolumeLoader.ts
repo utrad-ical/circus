@@ -20,7 +20,9 @@ export default class RsVolumeLoader implements DicomVolumeLoader {
   private rsHttpClient: RsHttpClient;
   private seriesUid: string;
   private partialVolumeDescriptor?: PartialVolumeDescriptor;
+  private loadingMetaPromise: Promise<DicomVolumeMetadata> | undefined;
   private meta: DicomVolumeMetadata | undefined;
+  private loadingVolumePromise: Promise<DicomVolume> | undefined;
   private cache: VolumeCache;
   private estimateWindowType: EstimateWindowType;
 
@@ -47,8 +49,7 @@ export default class RsVolumeLoader implements DicomVolumeLoader {
     this.cache = cache || nullVolumeCache;
   }
 
-  public async loadMeta(): Promise<DicomVolumeMetadata> {
-    if (this.meta) return this.meta;
+  private async _doLoadMeta(): Promise<DicomVolumeMetadata> {
     const cacheKey = this.createKey('metadata');
     let meta: DicomVolumeMetadata | undefined;
     meta = await this.cache.getMetadata(cacheKey);
@@ -66,7 +67,14 @@ export default class RsVolumeLoader implements DicomVolumeLoader {
     return meta;
   }
 
-  public async loadVolume(): Promise<DicomVolume> {
+  public async loadMeta(): Promise<DicomVolumeMetadata> {
+    if (this.meta) return this.meta;
+    if (this.loadingMetaPromise) return await this.loadingMetaPromise;
+    this.loadingMetaPromise = this._doLoadMeta();
+    return await this.loadingMetaPromise;
+  }
+
+  private async _doLoadVolume(): Promise<DicomVolume> {
     if (!this.meta) throw new Error('Medatadata not loaded yet');
     const cacheKey = this.createKey('buffer');
     let buffer: ArrayBuffer | undefined;
@@ -88,6 +96,13 @@ export default class RsVolumeLoader implements DicomVolumeLoader {
 
     if (buffer) await this.cache.putVolume(cacheKey, buffer);
     return volume;
+  }
+
+  public async loadVolume(): Promise<DicomVolume> {
+    if (!this.meta) throw new Error('Medatadata not loaded yet');
+    if (this.loadingVolumePromise) return await this.loadingVolumePromise;
+    this.loadingVolumePromise = this._doLoadVolume();
+    return await this.loadingVolumePromise;
   }
 
   private createKey(suffix: string): string {

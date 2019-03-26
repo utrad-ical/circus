@@ -17,17 +17,22 @@ import useImageSource from 'utils/useImageSource';
 
 const Candidate = React.forwardRef((props, ref) => {
   const {
+    job,
     item, // candidate data
     value, // feedback value
     onChange,
     disabled,
     isConsensual,
     feedbackListener: FeedbackListener,
-    imageSource,
     tool
   } = props;
 
   const [composition, setComposition] = useState(null);
+
+  // Create image source
+  const seriesUid = job.series[item.volumeId].seriesUid;
+
+  const imageSource = useImageSource(seriesUid);
 
   const stateChangerRef = useRef(undefined);
   if (!stateChangerRef.current) stateChangerRef.current = new EventEmitter();
@@ -85,7 +90,7 @@ const Candidate = React.forwardRef((props, ref) => {
     stateChanger.emit('change', centerState);
   };
 
-  if (!composition) return null;
+  if (!imageSource || !composition) return null;
   return (
     <div className="lesion-candidate">
       <div className="header">
@@ -151,7 +156,6 @@ const LesionCandidates = React.forwardRef((props, ref) => {
 
   const candidates = job.results.results.lesionCandidates;
   const visibleCandidates = candidates.slice(0, 3);
-  const seriesUid = job.series[0].seriesUid;
 
   const tools = useRef();
   if (!tools.current) {
@@ -163,7 +167,6 @@ const LesionCandidates = React.forwardRef((props, ref) => {
   }
 
   const [toolName, setToolName] = useState('pager');
-  const [imageSource, setImageSource] = useState(null);
 
   // Exports "instance methods"
   useImperativeHandle(ref, () => ({
@@ -189,15 +192,6 @@ const LesionCandidates = React.forwardRef((props, ref) => {
       });
     }
   }));
-
-  // Create image source
-  const pendingImageSource = useImageSource(seriesUid);
-  useEffect(
-    () => {
-      pendingImageSource.ready().then(() => setImageSource(pendingImageSource));
-    },
-    [pendingImageSource]
-  );
 
   const handleFeedbackChange = (id, newValue) => {
     const newFeedback = value
@@ -225,6 +219,7 @@ const LesionCandidates = React.forwardRef((props, ref) => {
           const feedbackItem = value.find(item => item.id === cand.rank);
           return (
             <Candidate
+              job={job}
               key={cand.rank}
               ref={ref => listenerRefs.current.set(cand.rank, ref)}
               item={cand}
@@ -234,7 +229,6 @@ const LesionCandidates = React.forwardRef((props, ref) => {
               isConsensual={isConsensual}
               index={cand.rank}
               onChange={val => handleFeedbackChange(cand.rank, val)}
-              imageSource={imageSource}
               tool={tools.current.find(t => t.name === toolName).tool}
             />
           );

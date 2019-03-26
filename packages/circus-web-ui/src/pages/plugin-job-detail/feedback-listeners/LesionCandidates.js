@@ -12,8 +12,8 @@ import styled from 'styled-components';
 import * as rs from 'circus-rs';
 import EventEmitter from 'events';
 import { toolFactory } from 'circus-rs/tool/tool-initializer';
-import useLoginUser from 'utils/useLoginUser';
 import createDynamicComponent from '../createDynamicComponent';
+import useImageSource from 'utils/useImageSource';
 
 const Candidate = React.forwardRef((props, ref) => {
   const {
@@ -164,8 +164,6 @@ const LesionCandidates = React.forwardRef((props, ref) => {
 
   const [toolName, setToolName] = useState('pager');
   const [imageSource, setImageSource] = useState(null);
-  const user = useLoginUser();
-  const server = user.dicomImageServer;
 
   // Exports "instance methods"
   useImperativeHandle(ref, () => ({
@@ -193,23 +191,12 @@ const LesionCandidates = React.forwardRef((props, ref) => {
   }));
 
   // Create image source
+  const pendingImageSource = useImageSource(seriesUid);
   useEffect(
     () => {
-      const load = async () => {
-        setImageSource(null);
-        const rsHttpClient = new rs.RsHttpClient(server);
-        const volumeLoader = new rs.RsVolumeLoader({ rsHttpClient, seriesUid });
-        const src = new rs.HybridMprImageSource({
-          rsHttpClient,
-          volumeLoader,
-          seriesUid
-        });
-        await src.ready();
-        setImageSource(src);
-      };
-      load();
+      pendingImageSource.ready().then(() => setImageSource(pendingImageSource));
     },
-    [seriesUid, server]
+    [pendingImageSource]
   );
 
   const handleFeedbackChange = (id, newValue) => {

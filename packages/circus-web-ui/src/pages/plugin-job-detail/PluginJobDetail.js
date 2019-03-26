@@ -58,8 +58,12 @@ const displayStrategy = [
         }
       }
     }
+  },
+  {
+    feedbackKey: 'falseNegatives',
+    type: 'Locator',
+    options: {}
   }
-  // { type: "FnInput", ... }
 ];
 
 const createFeedbackTargets = () => {

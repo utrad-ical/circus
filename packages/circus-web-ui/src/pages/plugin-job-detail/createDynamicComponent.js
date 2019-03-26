@@ -1,10 +1,12 @@
 import React from 'react';
 import LesionCandidates from './feedback-listeners/LesionCandidates';
 import SelectionFeedbackListener from './feedback-listeners/SelectionFeedbackListener';
+import Locator from './feedback-listeners/Locator';
 
 const map = {
   LesionCandidates,
-  SelectionFeedbackListener
+  SelectionFeedbackListener,
+  Locator
 }; // This should support dynamic plugging in the future
 
 /**

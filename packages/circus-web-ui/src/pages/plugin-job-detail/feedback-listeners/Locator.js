@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useImperativeHandle } from 'react';
-import styled from 'styled-components';
 import * as rs from 'circus-rs';
-// import classnames from 'classnames';
-import useImageSource from 'utils/useImageSource';
-import ImageViewer from 'components/ImageViewer';
+import { toolFactory } from 'circus-rs/tool/tool-initializer';
 import { ControlledCollapser } from 'components/Collapser';
+import ImageViewer from 'components/ImageViewer';
+import React, { useEffect, useImperativeHandle, useRef, useState } from 'react';
+import styled from 'styled-components';
+import useImageSource from 'utils/useImageSource';
 
 const Locator = React.forwardRef((props, ref) => {
   const { job, onChange, isConsensual, value = [], disabled, options } = props;
@@ -12,6 +12,11 @@ const Locator = React.forwardRef((props, ref) => {
 
   const [composition, setComposition] = useState(null);
   const [open, setOpen] = useState(false);
+
+  const toolRef = useRef();
+  if (!toolRef.current) {
+    toolRef.current = toolFactory('point');
+  }
 
   // Exports "methods" for this FB listener
   useImperativeHandle(ref, () => ({
@@ -33,8 +38,34 @@ const Locator = React.forwardRef((props, ref) => {
     [imageSource]
   );
 
+  useEffect(
+    () => {
+      if (!composition) return;
+      composition.removeAllAnnotations();
+      value.forEach(item => {
+        const point = new rs.Point();
+        point.x = item.location[0];
+        point.y = item.location[1];
+        point.z = item.location[2];
+        composition.addAnnotation(point);
+      });
+    },
+    [composition, value]
+  );
+
   const handleToggleClick = () => {
     setOpen(open => !open);
+  };
+
+  const handleMouseUp = () => {
+    const newValue = [];
+    composition.annotations.forEach(point => {
+      newValue.push({
+        volumeId: 0,
+        location: [point.x, point.y, point.z]
+      });
+    });
+    onChange(newValue);
   };
 
   return (
@@ -45,14 +76,28 @@ const Locator = React.forwardRef((props, ref) => {
         onToggleClick={handleToggleClick}
       >
         <div className="side">
-          <ImageViewer className="locator" composition={composition} />
+          <ImageViewer
+            className="locator"
+            initialTool={toolRef.current}
+            composition={composition}
+            onMouseUp={handleMouseUp}
+          />
           <div>
+            {value.length} items.
             <table className="locations table">
-              <tbody>
+              <thead>
                 <tr>
                   <th>#</th>
                   <th>Position</th>
                 </tr>
+              </thead>
+              <tbody>
+                {value.map((item, i) => (
+                  <tr key={i}>
+                    <td>{i + 1}</td>
+                    <td>{JSON.stringify(item.location)}</td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
@@ -67,6 +112,9 @@ const StyledDiv = styled.div`
   .side {
     display: flex;
     flex-direction: row;
+    > *:first-child {
+      margin-right: 10px;
+    }
   }
   .locator {
     width: 512px;

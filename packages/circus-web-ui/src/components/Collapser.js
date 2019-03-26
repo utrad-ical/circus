@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import classnames from 'classnames';
 import { Glyphicon } from 'components/react-bootstrap';
 import styled from 'styled-components';
@@ -73,26 +73,23 @@ export const ControlledCollapser = props => {
   );
 };
 
-export default class Collapser extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = { open: !!props.defaultOpen };
-  }
+const Collapser = props => {
+  const { defaultOpen } = props;
+  const [open, setOpen] = useState(!!defaultOpen);
 
-  handleToggleClick = () => {
-    this.setState({ open: !this.state.open });
+  const handleToggleClick = () => {
+    setOpen(open => !open);
   };
 
-  render() {
-    const { open } = this.state;
-    return (
-      <ControlledCollapser
-        open={open}
-        onToggleClick={this.handleToggleClick}
-        {...this.props}
-      />
-    );
-  }
-}
+  return (
+    <ControlledCollapser
+      open={open}
+      onToggleClick={handleToggleClick}
+      {...props}
+    />
+  );
+};
 
 Collapser.defaultProps = { defaultOpen: true };
+
+export default Collapser;

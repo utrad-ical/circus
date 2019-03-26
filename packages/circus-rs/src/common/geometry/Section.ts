@@ -47,6 +47,18 @@ export function projectPointOntoSection(
   );
 }
 
+export function distanceFromPointToSection(
+  section: Section,
+  point: Vector3
+): number {
+  const normal = normalVector(section);
+  const p = new Vector3().subVectors(
+    point,
+    new Vector3().fromArray(section.origin)
+  );
+  return Math.abs(normal.dot(p));
+}
+
 /**
  * Performs a parallel translation on a given section.
  */

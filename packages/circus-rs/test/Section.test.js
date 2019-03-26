@@ -128,6 +128,17 @@ describe('Section', function() {
     });
   });
 
+  it('#distanceFromPointToSection', function() {
+    const a = {
+      origin: [0, 0, 0],
+      xAxis: [2, 0, 0],
+      yAxis: [0, 2, 0]
+    };
+    const p = new Vector3(2, 3, -5);
+    const d = geo.distanceFromPointToSection(a, p);
+    assert.strictEqual(d, 5);
+  });
+
   it('#sectionEquals', function() {
     const a = {
       origin: [0, 0, 1],

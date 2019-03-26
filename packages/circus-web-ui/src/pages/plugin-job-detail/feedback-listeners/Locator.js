@@ -38,12 +38,12 @@ const Locator = React.forwardRef((props, ref) => {
   };
 
   return (
-    <ControlledCollapser
-      open={open}
-      title={title}
-      onToggleClick={handleToggleClick}
-    >
-      <StyledDiv>
+    <StyledDiv>
+      <ControlledCollapser
+        open={open}
+        title={title}
+        onToggleClick={handleToggleClick}
+      >
         <div className="side">
           <ImageViewer className="locator" composition={composition} />
           <div>
@@ -57,12 +57,13 @@ const Locator = React.forwardRef((props, ref) => {
             </table>
           </div>
         </div>
-      </StyledDiv>
-    </ControlledCollapser>
+      </ControlledCollapser>
+    </StyledDiv>
   );
 });
 
 const StyledDiv = styled.div`
+  margin-top: 10px;
   .side {
     display: flex;
     flex-direction: row;

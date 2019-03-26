@@ -1,4 +1,4 @@
-import React, { Fragment, useMemo, useCallback, useRef } from 'react';
+import React, { Fragment, useState, useMemo, useCallback, useRef } from 'react';
 import { useApi } from 'utils/api';
 import PatientInfoBox from 'components/PatientInfoBox';
 import FullSpanContainer from 'components/FullSpanContainer';
@@ -9,6 +9,7 @@ import styled from 'styled-components';
 import useFeedback from './useFeedback';
 import PersonalConsensualSwitch from './PersonalConsensualSwitch';
 import useLoadData from 'utils/useLoadData';
+import { ImageSourceCacheContext } from 'utils/useImageSource';
 import PieProgress from 'components/PieProgress';
 import createDynamicComponent from './createDynamicComponent';
 
@@ -76,6 +77,8 @@ const createFeedbackTargets = () => {
 const PluginJobDetail = props => {
   const api = useApi();
   const jobId = props.match.params.jobId;
+
+  const [imageSourceCache] = useState(() => new Map());
 
   const loadJob = useCallback(
     async () => {
@@ -184,58 +187,62 @@ const PluginJobDetail = props => {
 
   return (
     <FullSpanContainer>
-      <StyledDiv>
-        <div className="job-detail-header">
-          <PluginDisplay pluginId={job.pluginId} size="xl" />
-          <PatientInfoBox value={seriesData[primarySeriesUid].patientInfo} />
-        </div>
-        <div className="job-main">
-          <div className="feedback-mode-switch">
-            <PersonalConsensualSwitch
-              feedbackState={feedbackState}
-              onChange={handleChangeFeedbackMode}
-            />
+      <ImageSourceCacheContext.Provider value={imageSourceCache}>
+        <StyledDiv>
+          <div className="job-detail-header">
+            <PluginDisplay pluginId={job.pluginId} size="xl" />
+            <PatientInfoBox value={seriesData[primarySeriesUid].patientInfo} />
           </div>
-          <div className="feedback-targets">
-            {feedbackTargets.map(target => {
-              const Render = target.render;
-              const key = target.feedbackKey;
-              const feedback = feedbackState.currentData[key];
-              return (
-                <Render
-                  key={key}
-                  ref={ref => listenerRefs.current.set(key, ref)}
-                  job={job}
-                  value={feedback}
-                  onChange={value => handleChange(key, value)}
-                  isConsensual={feedbackState.isConsensual}
-                  disabled={feedbackState.disabled}
-                />
-              );
-            })}
+          <div className="job-main">
+            <div className="feedback-mode-switch">
+              <PersonalConsensualSwitch
+                feedbackState={feedbackState}
+                onChange={handleChangeFeedbackMode}
+              />
+            </div>
+            <div className="feedback-targets">
+              {feedbackTargets.map(target => {
+                const Render = target.render;
+                const key = target.feedbackKey;
+                const feedback = feedbackState.currentData[key];
+                return (
+                  <Render
+                    key={key}
+                    ref={ref => listenerRefs.current.set(key, ref)}
+                    job={job}
+                    value={feedback}
+                    onChange={value => handleChange(key, value)}
+                    isConsensual={feedbackState.isConsensual}
+                    disabled={feedbackState.disabled}
+                  />
+                );
+              })}
+            </div>
+            <div className="feedback-nav">
+              {feedbackState.message && (
+                <span className="regsiter-message">
+                  {feedbackState.message}
+                </span>
+              )}
+              {!feedbackState.disabled && (
+                <Fragment>
+                  <PieProgress
+                    max={feedbackTargets.length}
+                    value={feedbackState.registeredTargetCount}
+                  />&ensp;
+                </Fragment>
+              )}
+              <IconButton
+                icon={feedbackState.isConsensual ? 'tower' : 'user'}
+                disabled={!feedbackState.canRegister}
+                onClick={handleRegisterClick}
+              >
+                Regsiter {modeText} feedback
+              </IconButton>
+            </div>
           </div>
-          <div className="feedback-nav">
-            {feedbackState.message && (
-              <span className="regsiter-message">{feedbackState.message}</span>
-            )}
-            {!feedbackState.disabled && (
-              <Fragment>
-                <PieProgress
-                  max={feedbackTargets.length}
-                  value={feedbackState.registeredTargetCount}
-                />&ensp;
-              </Fragment>
-            )}
-            <IconButton
-              icon={feedbackState.isConsensual ? 'tower' : 'user'}
-              disabled={!feedbackState.canRegister}
-              onClick={handleRegisterClick}
-            >
-              Regsiter {modeText} feedback
-            </IconButton>
-          </div>
-        </div>
-      </StyledDiv>
+        </StyledDiv>
+      </ImageSourceCacheContext.Provider>
     </FullSpanContainer>
   );
 };

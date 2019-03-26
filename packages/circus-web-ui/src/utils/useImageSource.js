@@ -1,4 +1,4 @@
-import React, { useContext, useMemo } from 'react';
+import React, { useContext, useState, useEffect, useMemo } from 'react';
 import useLoginUser from './useLoginUser';
 import * as rs from 'circus-rs';
 import { isValidPartialVolumeDescriptor } from '@utrad-ical/circus-lib/lib/PartialVolumeDescriptor';
@@ -15,7 +15,7 @@ const stringifyPartialVolumeDescriptor = d => `${d.start}:${d.end}:${d.delta}`;
  * This is used to recycle ImageSource's among multiple viewers.
  * The returned source may not be "ready" yet.
  */
-const useImageSource = (seriesUid, partialVolumeDescriptor) => {
+export const usePendingImageSource = (seriesUid, partialVolumeDescriptor) => {
   const user = useLoginUser();
   const server = user.dicomImageServer;
 
@@ -43,6 +43,28 @@ const useImageSource = (seriesUid, partialVolumeDescriptor) => {
   });
 
   map.set(key, imageSource);
+  return imageSource;
+};
+
+/**
+ * Returns a cached HybridImageSource instance for the specified series.
+ * This is used to recycle ImageSource's among multiple viewers.
+ * The hook returns null if the specified image source is not yet "ready".
+ * When it returns an actula instance, it is guaranteed to be "ready".
+ */
+export const useImageSource = (seriesUid, partialVolumeDescriptor) => {
+  const [imageSource, setImageSource] = useState();
+  const pendingImageSource = usePendingImageSource(
+    seriesUid,
+    partialVolumeDescriptor
+  );
+  useEffect(
+    () => {
+      pendingImageSource.ready().then(() => setImageSource(pendingImageSource));
+      return () => setImageSource(null);
+    },
+    [pendingImageSource]
+  );
   return imageSource;
 };
 

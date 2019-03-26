@@ -1,16 +1,16 @@
 'use strict';
 
+//
+// The following code does NOT contain actual usage examples of CIRCUS RS.
+// See example.js for demo scripts.
+//
+
 // Just for the sake of brevity, we make an alias for circusrs
 const rs = circusrs;
 
 // Make these variables available throught the demo
 let viewer = null;
 let viewer2 = null;
-
-//
-// The followings do not contain actual usage examples of CIRCUS RS.
-// See example.js for demo scripts.
-//
 
 let editor = null; // Ace editor
 let examples = [];
@@ -119,9 +119,3 @@ $('#example-run').on('click', () => {
     alert(err.message);
   }
 });
-
-// document.addEventListener('DOMContentLoaded', () => {
-// setTimeout( () => {
-// $('#example-run').click();
-// }, 200 );
-// });

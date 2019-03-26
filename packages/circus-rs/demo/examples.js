@@ -129,7 +129,8 @@ const toolbar = rs.createToolbar(container, [
   'eraser',
   'bucket',
   'circle',
-  'rectangle'
+  'rectangle',
+  'point'
 ]);
 
 if (viewer) toolbar.bindViewer(viewer);
@@ -377,13 +378,11 @@ function viewStateAnimation(viewer, state0, state1, totalTime) {
 
   const animate = () => {
     let originFrameTime = null;
-    // let prevFrameTime = null;
 
     const draw = frameTime => {
       if (!originFrameTime) originFrameTime = frameTime;
 
       const progress = Math.min(1.0, (frameTime - originFrameTime) / totalTime);
-      // prevFrameTime = frameTime;
 
       const state = viewer.getState();
 

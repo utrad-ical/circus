@@ -9,6 +9,7 @@ import EraserTool from './cloud/EraserTool';
 import BucketTool from './cloud/BucketTool';
 import CircleTool from './annotation/CircleTool';
 import RectangleTool from './annotation/RectangleTool';
+import PointTool from './annotation/PointTool';
 
 const toolCollection: { [toolName: string]: ToolBaseClass } = {};
 
@@ -22,6 +23,7 @@ const defaultTools: { [toolName: string]: typeof ToolBaseClass } = {
 
   circle: CircleTool,
   rectangle: RectangleTool,
+  point: PointTool,
 
   brush: BrushTool,
   eraser: EraserTool,

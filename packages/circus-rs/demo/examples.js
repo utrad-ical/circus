@@ -260,6 +260,21 @@ viewer.renderAnnotations();
 comp.annotationUpdated();
 
 /*--
+@title Add Point Annotation
+--*/
+
+const point = new rs.Point();
+const viewState = viewer.getState();
+const s = viewState.section;
+point.x = s.origin[0] + s.xAxis[0] / 2 + s.yAxis[0] / 2;
+point.y = s.origin[1] + s.xAxis[1] / 2 + s.yAxis[1] / 2;
+point.z = s.origin[2] + s.xAxis[2] / 2 + s.yAxis[2] / 2;
+
+const comp = viewer.getComposition();
+comp.addAnnotation(point);
+comp.annotationUpdated();
+
+/*--
 @title Add PlaneFigure Annotation
 --*/
 
@@ -272,7 +287,6 @@ fig.max = [100, 100];
 
 const comp = viewer.getComposition();
 comp.addAnnotation(fig);
-viewer.renderAnnotations();
 comp.annotationUpdated();
 
 /*--

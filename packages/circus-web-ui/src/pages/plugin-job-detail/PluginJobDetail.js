@@ -20,19 +20,23 @@ const StyledDiv = styled.div`
 
   .job-detail-header {
     flex: none;
-    padding: 5px 10px;
     display: flex;
+    flex-wrap: wrap;
     justify-content: space-between;
     border-bottom: 1px solid silver;
+    align-items: center;
+    > * {
+      padding: 5px 10px;
+    }
+  }
+  .feedback-mode-switch {
+    flex: 1 0 auto;
   }
   .job-detail-main {
     min-height: 0;
     flex: 1 1 0;
     padding: 10px;
     overflow-y: auto;
-  }
-  .feedback-mode-switch {
-    margin: 0.5em 0;
   }
   .job-detail-footer {
     flex: none;
@@ -203,16 +207,16 @@ const PluginJobDetail = props => {
       <FullSpanContainer>
         <StyledDiv>
           <div className="job-detail-header">
-            <PluginDisplay pluginId={job.pluginId} size="xl" />
-            <PatientInfoBox value={seriesData[primarySeriesUid].patientInfo} />
-          </div>
-          <div className="job-detail-main">
             <div className="feedback-mode-switch">
               <PersonalConsensualSwitch
                 feedbackState={feedbackState}
                 onChange={handleChangeFeedbackMode}
               />
             </div>
+            <PluginDisplay pluginId={job.pluginId} size="xl" />
+            <PatientInfoBox value={seriesData[primarySeriesUid].patientInfo} />
+          </div>
+          <div className="job-detail-main">
             <div className="feedback-targets">
               {feedbackTargets.map(target => {
                 const Render = target.render;

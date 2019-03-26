@@ -2,6 +2,7 @@ import React, {
   useState,
   useRef,
   useEffect,
+  useCallback,
   useImperativeHandle,
   useMemo
 } from 'react';
@@ -16,15 +17,17 @@ import createDynamicComponent from '../createDynamicComponent';
 
 const Candidate = React.forwardRef((props, ref) => {
   const {
-    item,
-    value,
+    item, // candidate data
+    value, // feedback value
     onChange,
     disabled,
     isConsensual,
     feedbackListener: FeedbackListener,
-    composition,
+    imageSource,
     tool
   } = props;
+
+  const [composition, setComposition] = useState(null);
 
   const stateChangerRef = useRef(undefined);
   if (!stateChangerRef.current) stateChangerRef.current = new EventEmitter();
@@ -32,39 +35,76 @@ const Candidate = React.forwardRef((props, ref) => {
 
   useEffect(
     () => {
-      const handleReady = () => {
-        const voxelSize = composition.imageSource.metadata.voxelSize;
-        stateChanger.emit('change', state => {
-          const newOrigin = [
-            state.section.origin[0],
-            state.section.origin[1],
-            voxelSize[2] * item.location[2]
-          ];
-          return {
-            ...state,
-            section: { ...state.section, origin: newOrigin }
-          };
-        });
-      };
-      const updateComposition = async () => {
-        if (composition) {
-          await composition.imageSource.ready();
-          handleReady();
-        }
-      };
-      updateComposition();
+      if (!imageSource) return;
+      // imageSource is guaruanteed to be "ready"
+      const comp = new rs.Composition(imageSource);
+      const metadata = imageSource.metadata;
+
+      // Add an circle annotation to this composition
+      const r = 20;
+      const annotation = new rs.PlaneFigure();
+      annotation.color = '#ff00ff';
+      annotation.min = [
+        (item.location[0] - r) * metadata.voxelSize[0],
+        (item.location[1] - r) * metadata.voxelSize[1]
+      ];
+      annotation.max = [
+        (item.location[0] + r) * metadata.voxelSize[0],
+        (item.location[1] + r) * metadata.voxelSize[1]
+      ];
+      annotation.z = item.location[2] * metadata.voxelSize[2];
+      comp.addAnnotation(annotation);
+
+      setComposition(comp);
     },
-    [composition, stateChanger, item.location]
+    [imageSource, item.location]
   );
 
+  const centerState = useCallback(
+    state => {
+      const voxelSize = composition.imageSource.metadata.voxelSize;
+      const newOrigin = [
+        state.section.origin[0],
+        state.section.origin[1],
+        voxelSize[2] * item.location[2]
+      ];
+      return {
+        ...state,
+        section: { ...state.section, origin: newOrigin }
+      };
+    },
+    [composition, item.location]
+  );
+
+  const initialStateSetter = useCallback(
+    (viewer, state) => centerState(state),
+    [centerState]
+  );
+
+  const handleCenterizeClick = () => {
+    stateChanger.emit('change', centerState);
+  };
+
+  if (!composition) return null;
   return (
     <div className="lesion-candidate">
-      <div className="attributes">
-        <div>Rank: {item.rank}</div>
-        <div>Loc: {JSON.stringify(item.location)}</div>
-        <div>Confidence: {item.confidence}</div>
+      <div className="header">
+        <div className="attributes">
+          <div>Rank: {item.rank}</div>
+          <div>Loc: {JSON.stringify(item.location)}</div>
+          <div>Confidence: {item.confidence}</div>
+        </div>
+        <div>
+          <IconButton
+            title="Reveal"
+            bsSize="xs"
+            icon="glyphicon-record"
+            onClick={handleCenterizeClick}
+          />
+        </div>
       </div>
       <ImageViewer
+        initialStateSetter={initialStateSetter}
         className="lesion-candidate-viewer"
         composition={composition}
         tool={tool}
@@ -123,10 +163,11 @@ const LesionCandidates = React.forwardRef((props, ref) => {
   }
 
   const [toolName, setToolName] = useState('pager');
-  const [composition, setComposition] = useState(null);
+  const [imageSource, setImageSource] = useState(null);
   const user = useLoginUser();
   const server = user.dicomImageServer;
 
+  // Exports "instance methods"
   useImperativeHandle(ref, () => ({
     mergePersonalFeedback: personalFeedback => {
       return visibleCandidates.map(cand => {
@@ -151,9 +192,11 @@ const LesionCandidates = React.forwardRef((props, ref) => {
     }
   }));
 
+  // Create image source
   useEffect(
     () => {
       const load = async () => {
+        setImageSource(null);
         const rsHttpClient = new rs.RsHttpClient(server);
         const volumeLoader = new rs.RsVolumeLoader({ rsHttpClient, seriesUid });
         const src = new rs.HybridMprImageSource({
@@ -162,29 +205,11 @@ const LesionCandidates = React.forwardRef((props, ref) => {
           seriesUid
         });
         await src.ready();
-        const composition = new rs.Composition(src);
-        const metadata = src.metadata;
-
-        const r = 20;
-        candidates.forEach(cand => {
-          const annotation = new rs.PlaneFigure();
-          annotation.color = '#ff00ff';
-          annotation.min = [
-            (cand.location[0] - r) * metadata.voxelSize[0],
-            (cand.location[1] - r) * metadata.voxelSize[1]
-          ];
-          annotation.max = [
-            (cand.location[0] + r) * metadata.voxelSize[0],
-            (cand.location[1] + r) * metadata.voxelSize[1]
-          ];
-          annotation.z = cand.location[2] * metadata.voxelSize[2];
-          composition.addAnnotation(annotation);
-        });
-        setComposition(composition);
+        setImageSource(src);
       };
       load();
     },
-    [candidates, seriesUid, server]
+    [seriesUid, server]
   );
 
   const handleFeedbackChange = (id, newValue) => {
@@ -222,7 +247,7 @@ const LesionCandidates = React.forwardRef((props, ref) => {
               isConsensual={isConsensual}
               index={cand.rank}
               onChange={val => handleFeedbackChange(cand.rank, val)}
-              composition={composition}
+              imageSource={imageSource}
               tool={tools.current.find(t => t.name === toolName).tool}
             />
           );
@@ -245,6 +270,11 @@ const StyledDiv = styled.div`
     .lesion-candidate {
       border: 1px solid silver;
       padding: 1px;
+      .header {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+      }
       .attributes {
         font-size: 80%;
       }

@@ -108,7 +108,7 @@ const Locator = React.forwardRef((props, ref) => {
         <div className="side">
           <ImageViewer
             className="locator"
-            initialTool={toolRef.current}
+            tool={toolRef.current}
             stateChanger={stateChanger}
             composition={composition}
             onMouseUp={handleMouseUp}

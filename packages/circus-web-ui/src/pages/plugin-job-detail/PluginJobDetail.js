@@ -12,6 +12,7 @@ import useLoadData from 'utils/useLoadData';
 import { ImageSourceCacheContext } from 'utils/useImageSource';
 import PieProgress from 'components/PieProgress';
 import createDynamicComponent from './createDynamicComponent';
+import Section from './Section';
 
 const StyledDiv = styled.div`
   display: flex;
@@ -35,7 +36,6 @@ const StyledDiv = styled.div`
   .job-detail-main {
     min-height: 0;
     flex: 1 1 0;
-    padding: 10px;
     overflow-y: scroll;
   }
   .job-detail-footer {
@@ -52,6 +52,7 @@ const StyledDiv = styled.div`
 const displayStrategy = [
   {
     feedbackKey: 'lesionCandidates',
+    caption: 'Lesion Candidates',
     type: 'LesionCandidates',
     options: {
       feedbackListener: {
@@ -74,6 +75,7 @@ const displayStrategy = [
   },
   {
     feedbackKey: 'falseNegatives',
+    caption: 'FN Input',
     type: 'Locator',
     options: {}
   }
@@ -85,6 +87,7 @@ const createFeedbackTargets = () => {
     const render = createDynamicComponent(strategy.type, strategy.options);
     feedbackTargets.push({
       feedbackKey: strategy.feedbackKey,
+      caption: strategy.caption,
       render
     });
   }
@@ -223,20 +226,22 @@ const PluginJobDetail = props => {
                 const key = target.feedbackKey;
                 const feedback = feedbackState.currentData[key];
                 return (
-                  <Render
-                    key={key}
-                    ref={ref => listenerRefs.current.set(key, ref)}
-                    job={job}
-                    value={feedback}
-                    onChange={value => handleChange(key, value)}
-                    isConsensual={feedbackState.isConsensual}
-                    disabled={feedbackState.disabled}
-                  />
+                  <Section key={key} title={target.caption}>
+                    <Render
+                      ref={ref => listenerRefs.current.set(key, ref)}
+                      job={job}
+                      value={feedback}
+                      onChange={value => handleChange(key, value)}
+                      isConsensual={feedbackState.isConsensual}
+                      disabled={feedbackState.disabled}
+                    />
+                  </Section>
                 );
               })}
             </div>
           </div>
           <div className="job-detail-footer">
+            {/* <pre>{JSON.stringify(feedbackState.currentData)}</pre> */}
             {feedbackState.message && (
               <span className="regsiter-message">{feedbackState.message}</span>
             )}

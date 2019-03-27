@@ -3,6 +3,7 @@ import * as rs from 'circus-rs';
 import { createOrthogonalMprSection } from 'circus-rs/section-util';
 import { toolFactory } from 'circus-rs/tool/tool-initializer';
 import classnames from 'classnames';
+import { EventEmitter } from 'events';
 
 export const setOrthogonalOrientation = orientation => {
   return (viewer, initialViewState) => {
@@ -118,3 +119,9 @@ const ImageViewer = props => {
 };
 
 export default ImageViewer;
+
+export const useStateChanger = () => {
+  const stateChangerRef = useRef(undefined);
+  if (!stateChangerRef.current) stateChangerRef.current = new EventEmitter();
+  return stateChangerRef.current;
+};

@@ -6,11 +6,10 @@ import React, {
   useImperativeHandle,
   useMemo
 } from 'react';
-import ImageViewer from 'components/ImageViewer';
+import ImageViewer, { useStateChanger } from 'components/ImageViewer';
 import IconButton from 'components/IconButton';
 import styled from 'styled-components';
 import * as rs from 'circus-rs';
-import EventEmitter from 'events';
 import { toolFactory } from 'circus-rs/tool/tool-initializer';
 import createDynamicComponent from '../createDynamicComponent';
 import useImageSource from 'utils/useImageSource';
@@ -34,9 +33,7 @@ const Candidate = React.forwardRef((props, ref) => {
 
   const imageSource = useImageSource(seriesUid);
 
-  const stateChangerRef = useRef(undefined);
-  if (!stateChangerRef.current) stateChangerRef.current = new EventEmitter();
-  const stateChanger = stateChangerRef.current;
+  const stateChanger = useStateChanger();
 
   useEffect(
     () => {

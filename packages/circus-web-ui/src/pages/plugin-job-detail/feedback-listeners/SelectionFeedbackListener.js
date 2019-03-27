@@ -71,7 +71,7 @@ const SelectionFeedbackListener = React.forwardRef((props, ref) => {
     },
     validate: value => {
       if (value === undefined) return false;
-      return currentOptions.some(opt => opt.id === value);
+      return currentOptions.some(opt => opt.value === value);
     }
   }));
 

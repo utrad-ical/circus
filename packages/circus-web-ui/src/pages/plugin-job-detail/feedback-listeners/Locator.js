@@ -1,7 +1,7 @@
 import * as rs from 'circus-rs';
 import { toolFactory } from 'circus-rs/tool/tool-initializer';
-import { ControlledCollapser } from 'components/Collapser';
 import ImageViewer, { useStateChanger } from 'components/ImageViewer';
+import { Button } from 'components/react-bootstrap';
 import React, { useEffect, useImperativeHandle, useRef, useState } from 'react';
 import styled from 'styled-components';
 import useImageSource from 'utils/useImageSource';
@@ -9,14 +9,18 @@ import IconButton from 'components/IconButton';
 
 const Locator = React.forwardRef((props, ref) => {
   const { job, onChange, isConsensual, value = [], disabled, options } = props;
-  const { title = 'FN Input', volumeId = 0 } = options;
+  const { volumeId = 0 } = options;
 
   const [composition, setComposition] = useState(null);
-  const [open, setOpen] = useState(false);
+  const [showViewer, setShowViewer] = useState(false);
+  const [noLocationClicked, setNoLocationClicked] = useState(false);
 
   const toolRef = useRef();
   if (!toolRef.current) {
-    toolRef.current = toolFactory('point');
+    toolRef.current = {
+      pager: toolFactory('pager'),
+      point: toolFactory('point')
+    };
   }
 
   /**
@@ -32,7 +36,9 @@ const Locator = React.forwardRef((props, ref) => {
     mergePersonalFeedback: personalFeedback => {
       return [];
     },
-    validate: value => true
+    validate: value => {
+      return noLocationClicked || (Array.isArray(value) && value.length > 0);
+    }
   }));
 
   const seriesUid = job.series[volumeId].seriesUid;
@@ -66,11 +72,8 @@ const Locator = React.forwardRef((props, ref) => {
     [composition, value]
   );
 
-  const handleToggleClick = () => {
-    setOpen(open => !open);
-  };
-
   const handleMouseUp = () => {
+    if (disabled) return;
     const newValue = [];
     const voxelSize = voxelSizeRef.current;
     composition.annotations.forEach(point => {
@@ -87,6 +90,7 @@ const Locator = React.forwardRef((props, ref) => {
   };
 
   const handleRemovePoint = index => {
+    if (disabled) return;
     const newValue = value.slice();
     newValue.splice(index, 1);
     onChange(newValue);
@@ -108,56 +112,79 @@ const Locator = React.forwardRef((props, ref) => {
     stateChanger.emit('change', changer);
   };
 
+  const handleYesClick = () => {
+    setShowViewer(true);
+  };
+
+  const handleNoClick = () => {
+    setNoLocationClicked(true);
+    onChange([]);
+  };
+
+  if (disabled && value.length === 0) {
+    return <div>No input.</div>;
+  }
+
+  if (!showViewer) {
+    return (
+      <div>
+        Input Locations <Button onClick={handleYesClick}>Yes</Button>
+        <Button
+          onClick={handleNoClick}
+          bsStyle={noLocationClicked ? 'primary' : 'default'}
+        >
+          No
+        </Button>
+      </div>
+    );
+  }
+
   return (
     <StyledDiv>
-      <ControlledCollapser
-        open={open}
-        title={title}
-        onToggleClick={handleToggleClick}
-      >
-        <div className="side">
-          <ImageViewer
-            className="locator"
-            tool={toolRef.current}
-            stateChanger={stateChanger}
-            composition={composition}
-            onMouseUp={handleMouseUp}
-          />
-          <div>
-            <table className="locations table">
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Position</th>
-                  <th />
-                </tr>
-              </thead>
-              <tbody>
-                {value.map((item, i) => (
-                  <tr key={i}>
-                    <td>{i + 1}</td>
-                    <td>{JSON.stringify(item.location)}</td>
-                    <td>
-                      <IconButton
-                        icon="record"
-                        title="Reveal"
-                        bsSize="xs"
-                        onClick={() => handleReveal(i)}
-                      />
+      <div className="side">
+        <ImageViewer
+          className="locator"
+          tool={toolRef.current[disabled ? 'pager' : 'point']}
+          stateChanger={stateChanger}
+          composition={composition}
+          onMouseUp={handleMouseUp}
+        />
+        <div>
+          <table className="locations table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Position</th>
+                <th />
+              </tr>
+            </thead>
+            <tbody>
+              {value.map((item, i) => (
+                <tr key={i}>
+                  <td>{i + 1}</td>
+                  <td>{JSON.stringify(item.location)}</td>
+                  <td>
+                    <IconButton
+                      icon="record"
+                      title="Reveal"
+                      bsSize="xs"
+                      onClick={() => handleReveal(i)}
+                    />
+                    {!disabled && (
                       <IconButton
                         icon="remove"
                         title="Remove"
                         bsSize="xs"
                         onClick={() => handleRemovePoint(i)}
                       />
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
-      </ControlledCollapser>
+      </div>
     </StyledDiv>
   );
 });

@@ -147,9 +147,6 @@ const LesionCandidates = React.forwardRef((props, ref) => {
    */
   const listenerRefs = useRef(undefined);
   if (!listenerRefs.current) listenerRefs.current = new Map();
-  useImperativeHandle(ref, () => ({
-    mergePersonalFeedback: () => listenerRefs.current.mergePersonalFeedback()
-  }));
 
   const candidates = job.results.results.lesionCandidates;
   const visibleCandidates = candidates.slice(0, 3);
@@ -182,6 +179,7 @@ const LesionCandidates = React.forwardRef((props, ref) => {
       });
     },
     validate: value => {
+      if (!Array.isArray(value)) return false;
       return visibleCandidates.every(cand => {
         const item = value.find(item => item.id === cand.rank);
         if (!item) return false;

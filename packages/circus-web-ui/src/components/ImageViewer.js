@@ -90,11 +90,11 @@ const ImageViewer = props => {
   // Handle stateChanger
   useEffect(
     () => {
-      if (!stateChanger) return;
-      const handleChangeState = () => {
+      if (!(stateChanger instanceof EventEmitter)) return;
+      const handleChangeState = changer => {
         if (!viewer) return;
         const state = viewer.getState();
-        viewer.setState(stateChanger(state));
+        viewer.setState(changer(state));
       };
       stateChanger.on('change', handleChangeState);
       return () => {

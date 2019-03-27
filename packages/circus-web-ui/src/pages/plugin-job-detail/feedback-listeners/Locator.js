@@ -1,12 +1,11 @@
 import * as rs from 'circus-rs';
 import { toolFactory } from 'circus-rs/tool/tool-initializer';
 import { ControlledCollapser } from 'components/Collapser';
-import ImageViewer from 'components/ImageViewer';
+import ImageViewer, { useStateChanger } from 'components/ImageViewer';
 import React, { useEffect, useImperativeHandle, useRef, useState } from 'react';
 import styled from 'styled-components';
 import useImageSource from 'utils/useImageSource';
 import IconButton from 'components/IconButton';
-import { EventEmitter } from 'events';
 
 const Locator = React.forwardRef((props, ref) => {
   const { job, onChange, isConsensual, value = [], disabled, options } = props;
@@ -20,9 +19,13 @@ const Locator = React.forwardRef((props, ref) => {
     toolRef.current = toolFactory('point');
   }
 
-  const stateChangerRef = useRef(undefined);
-  if (!stateChangerRef.current) stateChangerRef.current = new EventEmitter();
-  const stateChanger = stateChangerRef.current;
+  /**
+   * Remembers voxel size of the current series.
+   * @type React.MutableRefObject<number[]>
+   */
+  const voxelSizeRef = useRef();
+
+  const stateChanger = useStateChanger();
 
   // Exports "methods" for this FB listener
   useImperativeHandle(ref, () => ({
@@ -38,6 +41,7 @@ const Locator = React.forwardRef((props, ref) => {
   useEffect(
     () => {
       if (!imageSource) return;
+      voxelSizeRef.current = imageSource.metadata.voxelSize;
       const comp = new rs.Composition(imageSource);
       setComposition(comp);
     },
@@ -48,11 +52,12 @@ const Locator = React.forwardRef((props, ref) => {
     () => {
       if (!composition) return;
       composition.removeAllAnnotations();
+      const voxelSize = voxelSizeRef.current;
       value.forEach(item => {
         const point = new rs.Point();
-        point.x = item.location[0];
-        point.y = item.location[1];
-        point.z = item.location[2];
+        point.x = item.location[0] * voxelSize[0];
+        point.y = item.location[1] * voxelSize[1];
+        point.z = item.location[2] * voxelSize[2];
         point.color = '#ff00ff';
         composition.addAnnotation(point);
       });
@@ -67,10 +72,15 @@ const Locator = React.forwardRef((props, ref) => {
 
   const handleMouseUp = () => {
     const newValue = [];
+    const voxelSize = voxelSizeRef.current;
     composition.annotations.forEach(point => {
       newValue.push({
         volumeId: 0,
-        location: [point.x, point.y, point.z]
+        location: [
+          Math.round(point.x / voxelSize[0]),
+          Math.round(point.y / voxelSize[1]),
+          Math.round(point.z / voxelSize[2])
+        ]
       });
     });
     onChange(newValue);

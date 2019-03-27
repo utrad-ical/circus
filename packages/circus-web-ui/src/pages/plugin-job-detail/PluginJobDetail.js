@@ -207,6 +207,7 @@ const PluginJobDetail = props => {
       <FullSpanContainer>
         <StyledDiv>
           <div className="job-detail-header">
+            <PatientInfoBox value={seriesData[primarySeriesUid].patientInfo} />
             <div className="feedback-mode-switch">
               <PersonalConsensualSwitch
                 feedbackState={feedbackState}
@@ -214,7 +215,6 @@ const PluginJobDetail = props => {
               />
             </div>
             <PluginDisplay pluginId={job.pluginId} size="xl" />
-            <PatientInfoBox value={seriesData[primarySeriesUid].patientInfo} />
           </div>
           <div className="job-detail-main">
             <div className="feedback-targets">

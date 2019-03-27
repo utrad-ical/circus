@@ -1,8 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import * as rs from 'circus-rs';
 import { createOrthogonalMprSection } from 'circus-rs/section-util';
 import { toolFactory } from 'circus-rs/tool/tool-initializer';
-import EventEmitter from 'events';
 import classnames from 'classnames';
 
 export const setOrthogonalOrientation = orientation => {
@@ -22,102 +21,100 @@ export const setOrthogonalOrientation = orientation => {
   };
 };
 
+const defaultTool = toolFactory('pager');
+
 /**
  * Wraps CIRCUS RS Dicom Viewer.
  */
-export default class ImageViewer extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {};
-    this.viewer = null;
-    this.container = null;
-  }
+const ImageViewer = props => {
+  const {
+    className,
+    composition,
+    stateChanger,
+    tool = defaultTool,
+    id,
+    initialStateSetter,
+    onCreateViewer = () => {},
+    onDestroyViewer = () => {},
+    onMouseUp = () => {}
+  } = props;
 
-  componentDidUpdate(prevProps) {
-    if (this.props.stateChanger !== prevProps.stateChanger) {
-      if (prevProps.stateChanger instanceof EventEmitter) {
-        prevProps.stateChanger.removeListener('change', this.handleChangeState);
-      }
-      if (this.props.stateChanger instanceof EventEmitter) {
-        this.props.stateChanger.on('change', this.handleChangeState);
-      }
-    }
-    if (this.props.composition !== prevProps.composition) {
-      this.viewer.setComposition(this.props.composition);
-    }
-    if (this.props.tool !== prevProps.tool) {
-      this.viewer.setActiveTool(this.props.tool);
-    }
-  }
+  const [viewer, setViewer] = useState(null);
+  const containerRef = useRef();
 
-  setInitialState = () => {
-    const viewer = this.viewer;
-    const { initialStateSetter } = this.props;
-    if (typeof initialStateSetter === 'function') {
-      const state = viewer.getState();
-      const newState = initialStateSetter(viewer, state);
-      viewer.setState(newState);
-    }
-  };
+  // Handle creation of viewer
+  useEffect(
+    () => {
+      const viewer = new rs.Viewer(containerRef.current);
+      onCreateViewer(viewer, id);
+      setViewer(viewer);
+      viewer.on('imageReady', () => {
+        if (typeof initialStateSetter === 'function') {
+          const state = viewer.getState();
+          const newState = initialStateSetter(viewer, state);
+          viewer.setState(newState);
+        }
+      });
+      return () => {
+        onDestroyViewer(viewer);
+        viewer.removeAllListeners();
+        viewer.dispose();
+      };
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
 
-  componentDidMount() {
-    try {
-      const {
-        onCreateViewer,
-        initialTool = toolFactory('pager'),
-        stateChanger,
-        composition,
-        id,
-        onMouseUp = () => {}
-      } = this.props;
-      const container = this.container;
-
+  // Handle onMouseUp
+  useEffect(
+    () => {
+      const container = containerRef.current;
       container.addEventListener('mouseup', onMouseUp);
+      return () => {
+        container.removeEventListener('mouseup', onMouseUp);
+      };
+    },
+    [onMouseUp]
+  );
 
-      const viewer = new rs.Viewer(container);
-      this.viewer = viewer;
+  // Handle composition change
+  useEffect(
+    () => {
+      if (!viewer || !composition) return;
+      viewer.setComposition(composition);
+    },
+    [viewer, composition]
+  );
 
-      if (typeof onCreateViewer === 'function') onCreateViewer(viewer, id);
-      if (stateChanger instanceof EventEmitter) {
-        stateChanger.on('change', this.handleChangeState);
-      }
-      this.viewer.on('imageReady', this.setInitialState);
-      if (composition) {
-        this.viewer.setComposition(this.props.composition);
-      }
-      viewer.setActiveTool(initialTool);
-    } catch (err) {
-      this.setState({ hasError: true });
-    }
-  }
+  // Handle stateChanger
+  useEffect(
+    () => {
+      if (!stateChanger) return;
+      const handleChangeState = () => {
+        if (!viewer) return;
+        const state = viewer.getState();
+        viewer.setState(stateChanger(state));
+      };
+      stateChanger.on('change', handleChangeState);
+      return () => {
+        stateChanger.removeListener('change', handleChangeState);
+      };
+    },
+    [viewer, stateChanger]
+  );
 
-  componentWillUnmount() {
-    const { onDestroyViewer, stateChanger } = this.props;
-    if (stateChanger instanceof EventEmitter) {
-      stateChanger.removeListener('change', this.handleChangeState);
-    }
-    if (this.viewer) {
-      this.viewer.removeAllListeners();
-      this.viewer.dispose();
-      if (typeof onDestroyViewer === 'function') onDestroyViewer(this.viewer);
-    }
-  }
+  // Handle tool change
+  useEffect(
+    () => {
+      if (!viewer) return;
+      viewer.setActiveTool(tool);
+    },
+    [viewer, tool]
+  );
 
-  handleChangeState = changer => {
-    const state = this.viewer.getState();
-    const newState = changer(state);
-    this.viewer.setState(newState);
-  };
+  return (
+    <div className={classnames('image-viewer', className)} ref={containerRef} />
+  );
+};
 
-  render() {
-    const { className } = this.props;
-    const { hasError } = this.state;
-    if (hasError) return <div>Error</div>;
-    return (
-      <div
-        className={classnames('image-viewer', className)}
-        ref={r => (this.container = r)}
-      />
-    );
-  }
-}
+export default ImageViewer;

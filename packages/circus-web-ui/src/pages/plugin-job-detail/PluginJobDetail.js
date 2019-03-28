@@ -55,6 +55,8 @@ const displayStrategy = [
     caption: 'Lesion Candidates',
     type: 'LesionCandidates',
     options: {
+      maxDisplay: 3,
+      sortBy: ['rank', 'asc'],
       feedbackListener: {
         type: 'SelectionFeedbackListener',
         options: {

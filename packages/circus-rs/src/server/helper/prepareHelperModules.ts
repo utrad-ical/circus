@@ -11,7 +11,7 @@ import {
   createVolumeProvider,
   VolumeAccessor
 } from './createVolumeProvider';
-import dicomImageExtractor from '../../common/dicomImageExtractor';
+import dicomImageExtractor from '@utrad-ical/circus-lib/lib/image-extractor/dicomImageExtractor';
 import asyncMemoize, { AsyncCachedLoader } from '../../common/asyncMemoize';
 
 /**

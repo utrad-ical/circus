@@ -2,7 +2,7 @@ import { DicomFileRepository } from '@utrad-ical/circus-lib/lib/dicom-file-repos
 import {
   DicomImageExtractor,
   DicomMetadata
-} from '../../common/dicomImageExtractor';
+} from '@utrad-ical/circus-lib/lib/image-extractor/dicomImageExtractor';
 import {
   Initializer as MultiRangeInitializer,
   MultiRange

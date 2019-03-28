@@ -132,13 +132,22 @@ const LesionCandidates = React.forwardRef((props, ref) => {
     onChange,
     isConsensual,
     disabled,
-    options: { feedbackListener }
+    options: {
+      feedbackListener,
+      maxDisplay = 3,
+      sortBy: [sortKey, sortOrder] = ['rank', 'asc']
+    }
   } = props;
 
   const FeedbackListener = useMemo(
-    () =>
-      createDynamicComponent(feedbackListener.type, feedbackListener.options),
-    [feedbackListener.type, feedbackListener.options]
+    () => {
+      if (!feedbackListener) return undefined;
+      return createDynamicComponent(
+        feedbackListener.type,
+        feedbackListener.options
+      );
+    },
+    [feedbackListener]
   );
 
   // Keeps track of multiple refs using Map
@@ -149,7 +158,14 @@ const LesionCandidates = React.forwardRef((props, ref) => {
   if (!listenerRefs.current) listenerRefs.current = new Map();
 
   const candidates = job.results.results.lesionCandidates;
-  const visibleCandidates = candidates.slice(0, 3);
+
+  const visibleCandidates = candidates
+    .slice()
+    .sort((a, b) => {
+      const sign = sortOrder === 'desc' ? -1 : 1;
+      return (a[sortKey] - b[sortKey]) * sign;
+    })
+    .slice(0, maxDisplay);
 
   const tools = useRef();
   if (!tools.current) {

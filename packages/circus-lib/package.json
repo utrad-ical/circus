@@ -34,7 +34,9 @@
   },
   "dependencies": {
     "cosmiconfig": "^5.0.6",
+    "dicom-parser": "^1.8.3",
     "fs-extra": "^7.0.0",
+    "jpeg-lossless-decoder-js": "^2.0.4",
     "log4js": "^3.0.5",
     "merge": "^1.2.0",
     "multi-integer-range": "^4.0.6"

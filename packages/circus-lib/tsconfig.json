@@ -4,6 +4,7 @@
     "strict": true,
     "target": "es2017",
     "module": "commonjs",
+    "esModuleInterop": true,
     "alwaysStrict": true,
     "declaration": true
   },

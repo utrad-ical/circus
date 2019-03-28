@@ -1,7 +1,7 @@
 import Logger from './Logger';
-import * as cosmiconfig from 'cosmiconfig';
+import cosmiconfig from 'cosmiconfig';
 import { configure, getLogger, shutdown, Configuration } from 'log4js';
-import * as merge from 'merge';
+import merge from 'merge';
 
 interface Options {
   category?: string;

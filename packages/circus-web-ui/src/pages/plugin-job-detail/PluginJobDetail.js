@@ -13,6 +13,7 @@ import { ImageSourceCacheContext } from 'utils/useImageSource';
 import PieProgress from 'components/PieProgress';
 import createDynamicComponent from './createDynamicComponent';
 import Section from './Section';
+import useLoginUser from 'utils/useLoginUser';
 
 const StyledDiv = styled.div`
   display: flex;
@@ -69,6 +70,7 @@ const PluginJobDetail = props => {
   const [imageSourceCache] = useState(() => new Map());
   const [busy, setBusy] = useState(false);
   const [feedbackState, dispatch] = useFeedback();
+  const user = useLoginUser();
 
   const loadJob = useCallback(
     async () => {
@@ -85,14 +87,14 @@ const PluginJobDetail = props => {
         dispatch({
           type: 'reset',
           feedbacks: job.feedbacks,
-          myUserEmail: props.userEmail
+          myUserEmail: user.userEmail
         });
         return { job, pluginData, seriesData };
       } finally {
         setBusy(false);
       }
     },
-    [api, dispatch, jobId, props.userEmail]
+    [api, dispatch, jobId, user.userEmail]
   );
 
   const [jobData, , reloadJob] = useLoadData(loadJob);
@@ -202,6 +204,10 @@ const PluginJobDetail = props => {
             <div className="feedback-mode-switch">
               <PersonalConsensualSwitch
                 feedbackState={feedbackState}
+                consensualEntered={job.feedbacks.some(f => f.isConsensual)}
+                myPersonalEntered={job.feedbacks.some(
+                  f => !f.isConsensual && f.userEmail === user.userEmail
+                )}
                 onChange={handleChangeFeedbackMode}
               />
             </div>

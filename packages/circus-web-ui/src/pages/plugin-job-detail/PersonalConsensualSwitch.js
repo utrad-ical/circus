@@ -3,11 +3,16 @@ import Icon from 'components/Icon';
 import IconButton from 'components/IconButton';
 
 const PersonalConsensualSwitch = props => {
-  const { feedbackState: { isConsensual }, onChange } = props;
+  const {
+    feedbackState: { isConsensual },
+    consensualEntered,
+    myPersonalEntered,
+    onChange
+  } = props;
   return (
     <div>
       <IconButton
-        icon="user"
+        icon={myPersonalEntered ? 'check' : 'user'}
         bsStyle={isConsensual ? 'default' : 'primary'}
         active={!isConsensual}
         onClick={() => onChange(false)}
@@ -18,9 +23,10 @@ const PersonalConsensualSwitch = props => {
       <Icon icon="chevron-right" />
       &thinsp;
       <IconButton
-        icon="tower"
+        icon={consensualEntered ? 'check' : 'tower'}
         bsStyle={isConsensual ? 'primary' : 'default'}
         active={isConsensual}
+        disabled={!consensualEntered && !myPersonalEntered}
         onClick={() => onChange(true)}
       >
         Consensual Mode

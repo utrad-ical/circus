@@ -30,16 +30,16 @@ const StyledButton = styled.button`
 `;
 
 const SelectionButton = props => {
-  const { value, def, onClick, disabled } = props;
+  const { value, def, onClick, disabled, children } = props;
   return (
     <StyledButton
       className={classnames({ active: value === def.value })}
-      backgroundColor={props.def.backgroundColor}
-      activeColor={props.def.activeColor}
+      backgroundColor={def.backgroundColor}
+      activeColor={def.activeColor}
       onClick={onClick}
       disabled={disabled}
     >
-      {def.caption || value}
+      {children || value}
     </StyledButton>
   );
 };
@@ -84,7 +84,9 @@ const SelectionFeedbackListener = React.forwardRef((props, ref) => {
           disabled={disabled}
           def={o}
           onClick={() => onChange(o.value)}
-        />
+        >
+          {o.caption}
+        </SelectionButton>
       ))}
     </StyledDiv>
   );

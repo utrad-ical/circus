@@ -63,6 +63,12 @@ const HomePage = props => (
         description="Search and edit existing cases."
       />
       <Menu
+        link="/browse/plugin-jobs"
+        icon="job"
+        title="Plug-in Job"
+        description="Search and view CAD results."
+      />
+      <Menu
         link="/import-series"
         icon="series-import"
         title="Series Import"

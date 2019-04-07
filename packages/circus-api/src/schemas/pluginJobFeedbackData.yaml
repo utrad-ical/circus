@@ -13,4 +13,8 @@ properties:
         id:
           type: integer
       requiredProperties: ['id', 'value']
+  falseNegatives:
+    type: array
+    items:
+      type: object
 additionalProperties: false

@@ -44,7 +44,7 @@ const StyledDiv = styled.div`
     padding: 10px;
     border-top: 1px solid silver;
     text-align: right;
-    .regsiter-message {
+    .regisiter-message {
       margin-right: 1em;
     }
   }
@@ -241,7 +241,9 @@ const PluginJobDetail = props => {
           <div className="job-detail-footer">
             {/* <pre>{JSON.stringify(feedbackState.currentData)}</pre> */}
             {feedbackState.message && (
-              <span className="regsiter-message">{feedbackState.message}</span>
+              <span className="regisiter-message text-success">
+                {feedbackState.message}
+              </span>
             )}
             {!feedbackState.disabled && (
               <Fragment>

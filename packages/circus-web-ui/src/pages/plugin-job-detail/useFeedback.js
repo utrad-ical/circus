@@ -6,7 +6,7 @@ const registeredMessage = feedback => {
   const modeStr = feedback.isConsensual ? 'Consensual' : 'Personal';
   return (
     <Fragment>
-      {modeStr} feedback registered{' '}
+      {modeStr} feedback registered by {feedback.userEmail}{' '}
       <span title={m.format()}>{m.fromNow()}</span>
     </Fragment>
   );

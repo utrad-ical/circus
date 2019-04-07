@@ -49,41 +49,7 @@ const StyledDiv = styled.div`
   }
 `;
 
-const displayStrategy = [
-  {
-    feedbackKey: 'lesionCandidates',
-    caption: 'Lesion Candidates',
-    type: 'LesionCandidates',
-    options: {
-      maxDisplay: 3,
-      sortBy: ['rank', 'asc'],
-      feedbackListener: {
-        type: 'SelectionFeedbackListener',
-        options: {
-          personal: [
-            { caption: 'known TP', value: 1 },
-            { caption: 'missed TP', value: 2, consensualMapsTo: 1 },
-            { caption: 'FP', value: -1 },
-            { caption: 'pending', value: 0 }
-          ],
-          consensual: [
-            { caption: 'TP', value: 1 },
-            { caption: 'FP', value: -1 },
-            { caption: 'pending', value: 0 }
-          ]
-        }
-      }
-    }
-  },
-  {
-    feedbackKey: 'falseNegatives',
-    caption: 'FN Input',
-    type: 'Locator',
-    options: {}
-  }
-];
-
-const createFeedbackTargets = () => {
+const createFeedbackTargets = displayStrategy => {
   const feedbackTargets = [];
   for (const strategy of displayStrategy) {
     const render = createDynamicComponent(strategy.type, strategy.options);
@@ -105,20 +71,25 @@ const PluginJobDetail = props => {
   const loadJob = useCallback(
     async () => {
       const job = await api(`plugin-jobs/${jobId}`);
+      const pluginData = await api(`plugins/${job.pluginId}`);
       const seriesData = {};
       for (const s of job.series) {
         const seriesUid = s.seriesUid;
         if (seriesUid in seriesData) continue;
         seriesData[seriesUid] = await api(`series/${seriesUid}`);
       }
-      return { job, seriesData };
+      return { job, pluginData, seriesData };
     },
     [api, jobId]
   );
 
   const [jobData, , reloadJob] = useLoadData(loadJob);
 
-  const feedbackTargets = useMemo(() => createFeedbackTargets(), []);
+  const feedbackTargets = useMemo(
+    () => jobData && createFeedbackTargets(jobData.pluginData.displayStrategy),
+    [jobData]
+  );
+
   const [feedbackState, dispatch] = useFeedback();
 
   // Keeps track of multiple refs using Map

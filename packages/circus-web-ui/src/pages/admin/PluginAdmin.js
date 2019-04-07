@@ -2,6 +2,7 @@ import EditorPage from './EditorPage';
 import React, { Fragment } from 'react';
 import BodyPartIcon from 'components/BodyPartIcon';
 import IconEditor from './IconEditor';
+import JsonEditor from './JsonEditor';
 import * as et from 'rb/editor-types';
 
 const makeEmptyItem = () => {
@@ -40,9 +41,10 @@ const listColumns = [
 ];
 
 const editorProperties = [
-  { key: 'pluginName', caption: 'Plug-in Name', editor: et.text() }, // 0
+  { key: 'pluginName', caption: 'Plug-in Name', editor: et.text() },
   { key: 'version', caption: 'Version', editor: et.text() },
-  { key: 'icon', caption: 'Icon', editor: IconEditor }
+  { key: 'icon', caption: 'Icon', editor: IconEditor },
+  { key: 'displayStrategy', caption: 'Display Stratgy', editor: JsonEditor }
 ];
 
 const PluginAdmin = props => {

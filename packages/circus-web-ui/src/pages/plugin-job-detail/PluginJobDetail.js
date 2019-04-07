@@ -67,24 +67,30 @@ const PluginJobDetail = props => {
   const jobId = props.match.params.jobId;
 
   const [imageSourceCache] = useState(() => new Map());
+  const [busy, setBusy] = useState(false);
   const [feedbackState, dispatch] = useFeedback();
 
   const loadJob = useCallback(
     async () => {
-      const job = await api(`plugin-jobs/${jobId}`);
-      const pluginData = await api(`plugins/${job.pluginId}`);
-      const seriesData = {};
-      for (const s of job.series) {
-        const seriesUid = s.seriesUid;
-        if (seriesUid in seriesData) continue;
-        seriesData[seriesUid] = await api(`series/${seriesUid}`);
+      setBusy(true);
+      try {
+        const job = await api(`plugin-jobs/${jobId}`);
+        const pluginData = await api(`plugins/${job.pluginId}`);
+        const seriesData = {};
+        for (const s of job.series) {
+          const seriesUid = s.seriesUid;
+          if (seriesUid in seriesData) continue;
+          seriesData[seriesUid] = await api(`series/${seriesUid}`);
+        }
+        dispatch({
+          type: 'reset',
+          feedbacks: job.feedbacks,
+          myUserEmail: props.userEmail
+        });
+        return { job, pluginData, seriesData };
+      } finally {
+        setBusy(false);
       }
-      dispatch({
-        type: 'reset',
-        feedbacks: job.feedbacks,
-        myUserEmail: props.userEmail
-      });
-      return { job, pluginData, seriesData };
     },
     [api, dispatch, jobId, props.userEmail]
   );
@@ -162,12 +168,17 @@ const PluginJobDetail = props => {
   };
 
   const handleRegisterClick = async () => {
-    const mode = feedbackState.isConsensual ? 'consensual' : 'personal';
-    await api(`plugin-jobs/${jobId}/feedback/${mode}`, {
-      method: 'POST',
-      data: feedbackState.currentData
-    });
-    reloadJob();
+    setBusy(true);
+    try {
+      const mode = feedbackState.isConsensual ? 'consensual' : 'personal';
+      await api(`plugin-jobs/${jobId}/feedback/${mode}`, {
+        method: 'POST',
+        data: feedbackState.currentData
+      });
+      reloadJob();
+    } finally {
+      setBusy(false);
+    }
   };
 
   const modeText = feedbackState.isConsensual ? 'consensual' : 'personal';
@@ -236,7 +247,7 @@ const PluginJobDetail = props => {
             )}
             <IconButton
               icon={feedbackState.isConsensual ? 'tower' : 'user'}
-              disabled={!feedbackState.canRegister}
+              disabled={!feedbackState.canRegister || busy}
               onClick={handleRegisterClick}
             >
               Regsiter {modeText} feedback

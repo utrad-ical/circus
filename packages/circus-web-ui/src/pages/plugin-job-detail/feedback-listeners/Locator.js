@@ -12,7 +12,7 @@ const Locator = React.forwardRef((props, ref) => {
   const { volumeId = 0 } = options;
 
   const [composition, setComposition] = useState(null);
-  const [showViewer, setShowViewer] = useState(false);
+  const [showViewer, setShowViewer] = useState(value.length > 0);
 
   const noLocationClickedRef = useRef(false);
 
@@ -35,7 +35,13 @@ const Locator = React.forwardRef((props, ref) => {
   // Exports "methods" for this FB listener
   useImperativeHandle(ref, () => ({
     mergePersonalFeedback: personalFeedback => {
-      return [];
+      const result = [];
+      personalFeedback.forEach(f => {
+        f.forEach(loc => {
+          result.push(loc);
+        });
+      });
+      return result;
     },
     validate: value => {
       return (
@@ -103,10 +109,11 @@ const Locator = React.forwardRef((props, ref) => {
   const handleReveal = index => {
     const item = value[index];
     const changer = state => {
+      const voxelSize = voxelSizeRef.current;
       const newOrigin = [
         state.section.origin[0],
         state.section.origin[1],
-        item.location[2]
+        item.location[2] * voxelSize[2]
       ];
       return {
         ...state,

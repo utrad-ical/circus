@@ -134,12 +134,12 @@ const PluginJobDetail = props => {
       ...feedbackState.currentData,
       [feedbackKey]: value
     };
-    const [valid, registeredTargetCount] = validate(newFeedback);
+    const [isValid, registeredTargetCount] = validate(newFeedback);
     dispatch({
       type: 'changeFeedback',
       value: newFeedback,
       registeredTargetCount,
-      canRegister: valid
+      canRegister: isValid
     });
   };
 
@@ -178,6 +178,16 @@ const PluginJobDetail = props => {
 
   const modeText = feedbackState.isConsensual ? 'consensual' : 'personal';
 
+  const personalOpinionsForKey = key => {
+    if (!feedbackState.isConsensual) return undefined;
+    return job.feedbacks.filter(f => !f.isConsensual).map(f => {
+      return {
+        ...f,
+        data: f.data[key]
+      };
+    });
+  };
+
   return (
     <ImageSourceCacheContext.Provider value={imageSourceCache}>
       <FullSpanContainer>
@@ -198,12 +208,16 @@ const PluginJobDetail = props => {
                 const Render = target.render;
                 const key = target.feedbackKey;
                 const feedback = feedbackState.currentData[key];
+                const personalOpinions = feedbackState.isConsensual
+                  ? personalOpinionsForKey(key)
+                  : undefined;
                 return (
                   <Section key={key} title={target.caption}>
                     <Render
                       ref={ref => listenerRefs.current.set(key, ref)}
                       job={job}
                       value={feedback}
+                      personalOpinions={personalOpinions}
                       onChange={value => handleChange(key, value)}
                       isConsensual={feedbackState.isConsensual}
                       disabled={feedbackState.disabled}

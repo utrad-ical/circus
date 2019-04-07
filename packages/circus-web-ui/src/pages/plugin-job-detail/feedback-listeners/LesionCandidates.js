@@ -101,7 +101,7 @@ const Candidate = React.forwardRef((props, ref) => {
           <IconButton
             title="Reveal"
             bsSize="xs"
-            icon="glyphicon-record"
+            icon="circus-focus"
             onClick={handleCenterizeClick}
           />
         </div>

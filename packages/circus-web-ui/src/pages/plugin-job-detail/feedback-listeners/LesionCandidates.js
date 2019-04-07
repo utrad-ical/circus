@@ -19,6 +19,7 @@ const Candidate = React.forwardRef((props, ref) => {
     job,
     item, // candidate data
     value, // feedback value
+    personalOpinions,
     onChange,
     disabled,
     isConsensual,
@@ -116,6 +117,7 @@ const Candidate = React.forwardRef((props, ref) => {
         <FeedbackListener
           ref={ref}
           value={value}
+          personalOpinions={personalOpinions}
           onChange={onChange}
           isConsensual={isConsensual}
           disabled={disabled}
@@ -129,6 +131,7 @@ const LesionCandidates = React.forwardRef((props, ref) => {
   const {
     job,
     value = [],
+    personalOpinions,
     onChange,
     isConsensual,
     disabled,
@@ -212,6 +215,17 @@ const LesionCandidates = React.forwardRef((props, ref) => {
     onChange(newFeedback);
   };
 
+  const personalOpinionsForItem = id => {
+    if (!isConsensual) return undefined;
+    return personalOpinions.map(f => {
+      const feedbackItem = f.data.find(item => item.id === id);
+      return {
+        ...f,
+        data: feedbackItem ? feedbackItem.value : undefined
+      };
+    });
+  };
+
   return (
     <StyledDiv>
       <div className="tools">
@@ -236,6 +250,7 @@ const LesionCandidates = React.forwardRef((props, ref) => {
               item={cand}
               feedbackListener={FeedbackListener}
               value={feedbackItem ? feedbackItem.value : undefined}
+              personalOpinions={personalOpinionsForItem(cand.rank)}
               disabled={disabled}
               isConsensual={isConsensual}
               index={cand.rank}

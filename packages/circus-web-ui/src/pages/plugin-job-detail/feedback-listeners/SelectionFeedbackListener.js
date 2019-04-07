@@ -1,6 +1,7 @@
 import React, { useImperativeHandle } from 'react';
 import styled from 'styled-components';
 import classnames from 'classnames';
+import { OverlayTrigger, Tooltip } from 'components/react-bootstrap';
 import tinycolor from 'tinycolor2';
 
 const StyledDiv = styled.div`
@@ -27,11 +28,14 @@ const StyledButton = styled.button`
     opacity: 0.65;
     cursor: not-allowed;
   }
+  .label {
+    margin-left: 5px;
+  }
 `;
 
 const SelectionButton = props => {
-  const { value, def, onClick, disabled, children } = props;
-  return (
+  const { value, def, onClick, disabled, children, toolTip } = props;
+  const button = (
     <StyledButton
       className={classnames({ active: value === def.value })}
       backgroundColor={def.backgroundColor}
@@ -42,25 +46,43 @@ const SelectionButton = props => {
       {children || value}
     </StyledButton>
   );
+  if (!toolTip) return button;
+  const tip = (
+    <Tooltip placelemnt="top" id="icon-display-tooltip">
+      {toolTip}
+    </Tooltip>
+  );
+  return (
+    <OverlayTrigger overlay={tip} placement="bottom">
+      {button}
+    </OverlayTrigger>
+  );
 };
 
 const SelectionFeedbackListener = React.forwardRef((props, ref) => {
-  const { onChange, isConsensual, value, disabled, options } = props;
+  const {
+    onChange,
+    isConsensual,
+    value,
+    personalOpinions,
+    disabled,
+    options
+  } = props;
   const currentOptions = isConsensual ? options.consensual : options.personal;
+
+  const applyConsensualMapsTo = value => {
+    const orig = options.personal.find(o => o.value === value);
+    if (orig === undefined) throw new Error('Unknown personal feedback value');
+    if ('consensualMapsTo' in orig) value = orig.consensualMapsTo;
+    if (!options.consensual.find(o => o.value === value))
+      throw new Error('Unknown consensual feedback value');
+    return value;
+  };
 
   // Exports "methods" for this FB listener
   useImperativeHandle(ref, () => ({
     mergePersonalFeedback: personalFeedback => {
       const votes = new Map();
-      const applyConsensualMapsTo = value => {
-        const orig = options.personal.find(o => o.value === value);
-        if (orig === undefined)
-          throw new Error('Unknown personal feedback value');
-        if ('consensualMapsTo' in orig) value = orig.consensualMapsTo;
-        if (!options.consensual.find(o => o.value === value))
-          throw new Error('Unknown consensual feedback value');
-        return value;
-      };
       personalFeedback.forEach(pfb => {
         const mappedValue = applyConsensualMapsTo(pfb);
         const voteCount = votes.get(mappedValue) || 0;
@@ -77,17 +99,32 @@ const SelectionFeedbackListener = React.forwardRef((props, ref) => {
 
   return (
     <StyledDiv>
-      {currentOptions.map((o, i) => (
-        <SelectionButton
-          key={i}
-          value={value}
-          disabled={disabled}
-          def={o}
-          onClick={() => onChange(o.value)}
-        >
-          {o.caption}
-        </SelectionButton>
-      ))}
+      {currentOptions.map((def, i) => {
+        const voters = isConsensual
+          ? personalOpinions.filter(
+              f => applyConsensualMapsTo(f.data) === def.value
+            )
+          : [];
+        const toolTip = voters.length
+          ? voters.map(f => f.userEmail).join(', ')
+          : undefined;
+        return (
+          <SelectionButton
+            key={i}
+            value={value}
+            disabled={disabled}
+            def={def}
+            onClick={() => onChange(def.value)}
+            toolTip={toolTip}
+          >
+            {def.caption}
+            {isConsensual &&
+              voters.length && (
+                <span className="label label-default">{voters.length}</span>
+              )}
+          </SelectionButton>
+        );
+      })}
     </StyledDiv>
   );
 });

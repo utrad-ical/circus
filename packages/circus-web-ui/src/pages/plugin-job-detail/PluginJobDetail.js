@@ -67,6 +67,7 @@ const PluginJobDetail = props => {
   const jobId = props.match.params.jobId;
 
   const [imageSourceCache] = useState(() => new Map());
+  const [feedbackState, dispatch] = useFeedback();
 
   const loadJob = useCallback(
     async () => {
@@ -78,9 +79,14 @@ const PluginJobDetail = props => {
         if (seriesUid in seriesData) continue;
         seriesData[seriesUid] = await api(`series/${seriesUid}`);
       }
+      dispatch({
+        type: 'reset',
+        feedbacks: job.feedbacks,
+        myUserEmail: props.userEmail
+      });
       return { job, pluginData, seriesData };
     },
-    [api, jobId]
+    [api, dispatch, jobId, props.userEmail]
   );
 
   const [jobData, , reloadJob] = useLoadData(loadJob);
@@ -89,8 +95,6 @@ const PluginJobDetail = props => {
     () => jobData && createFeedbackTargets(jobData.pluginData.displayStrategy),
     [jobData]
   );
-
-  const [feedbackState, dispatch] = useFeedback();
 
   // Keeps track of multiple refs using Map
   /**
@@ -109,15 +113,6 @@ const PluginJobDetail = props => {
 
   const { job, seriesData } = jobData;
   const primarySeriesUid = job.series[0].seriesUid;
-
-  if (!feedbackState) {
-    dispatch({
-      type: 'reset',
-      feedbacks: job.feedbacks,
-      myUserEmail: props.userEmail
-    });
-    return;
-  }
 
   const validate = value => {
     const finished = feedbackTargets.filter(
@@ -167,7 +162,6 @@ const PluginJobDetail = props => {
   };
 
   const handleRegisterClick = async () => {
-    await alert(JSON.stringify(feedbackState.currentData));
     const mode = feedbackState.isConsensual ? 'consensual' : 'personal';
     await api(`plugin-jobs/${jobId}/feedback/${mode}`, {
       method: 'POST',

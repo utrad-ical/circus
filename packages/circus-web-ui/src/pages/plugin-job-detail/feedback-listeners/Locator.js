@@ -179,7 +179,7 @@ const Locator = React.forwardRef((props, ref) => {
                   <td>{JSON.stringify(item.location)}</td>
                   <td>
                     <IconButton
-                      icon="record"
+                      icon="circus-focus"
                       title="Reveal"
                       bsSize="xs"
                       onClick={() => handleReveal(i)}

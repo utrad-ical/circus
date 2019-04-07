@@ -64,8 +64,8 @@ const HomePage = props => (
       />
       <Menu
         link="/browse/plugin-jobs"
-        icon="job"
-        title="Plug-in Job"
+        icon="job-search"
+        title="Plug-in Job Search"
         description="Search and view CAD results."
       />
       <Menu

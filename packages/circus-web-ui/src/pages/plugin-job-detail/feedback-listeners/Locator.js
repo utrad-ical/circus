@@ -13,7 +13,8 @@ const Locator = React.forwardRef((props, ref) => {
 
   const [composition, setComposition] = useState(null);
   const [showViewer, setShowViewer] = useState(false);
-  const [noLocationClicked, setNoLocationClicked] = useState(false);
+
+  const noLocationClickedRef = useRef(false);
 
   const toolRef = useRef();
   if (!toolRef.current) {
@@ -37,7 +38,10 @@ const Locator = React.forwardRef((props, ref) => {
       return [];
     },
     validate: value => {
-      return noLocationClicked || (Array.isArray(value) && value.length > 0);
+      return (
+        noLocationClickedRef.current ||
+        (Array.isArray(value) && value.length > 0)
+      );
     }
   }));
 
@@ -113,11 +117,14 @@ const Locator = React.forwardRef((props, ref) => {
   };
 
   const handleYesClick = () => {
+    noLocationClickedRef.current = false;
     setShowViewer(true);
+    onChange([]);
   };
 
   const handleNoClick = () => {
-    setNoLocationClicked(true);
+    noLocationClickedRef.current = true;
+    setShowViewer(false);
     onChange([]);
   };
 
@@ -131,7 +138,7 @@ const Locator = React.forwardRef((props, ref) => {
         Input Locations <Button onClick={handleYesClick}>Yes</Button>
         <Button
           onClick={handleNoClick}
-          bsStyle={noLocationClicked ? 'primary' : 'default'}
+          bsStyle={noLocationClickedRef.current ? 'primary' : 'default'}
         >
           No
         </Button>
@@ -183,6 +190,11 @@ const Locator = React.forwardRef((props, ref) => {
               ))}
             </tbody>
           </table>
+          {value.length === 0 && (
+            <div>
+              <Button onClick={handleNoClick}>Confirm no input</Button>
+            </div>
+          )}
         </div>
       </div>
     </StyledDiv>

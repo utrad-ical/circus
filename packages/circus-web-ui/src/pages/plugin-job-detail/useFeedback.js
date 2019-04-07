@@ -28,7 +28,7 @@ const reducer = (state, action) => {
       };
       const consensual = action.feedbacks.find(f => f.isConsensual);
       const myPersonal = action.feedbacks.find(
-        f => !f.isConsensual && f.enteredBy === action.myUserEmail
+        f => !f.isConsensual && f.userEmail === action.myUserEmail
       );
       // 1. If consensual feedback is registered, show it
       if (consensual) {
@@ -39,7 +39,7 @@ const reducer = (state, action) => {
           message: registeredMessage(consensual)
         };
       }
-      // 2. If current user's personal feedback has been registered, show it
+      // 2. If current user's personal feedback is registered, show it
       if (myPersonal) {
         return {
           ...state,
@@ -71,7 +71,7 @@ const reducer = (state, action) => {
     }
     case 'enterPersonalMode': {
       const myPersonal = state.feedbacks.find(
-        f => !f.consensual && f.enteredBy === state.myUserEmail
+        f => !f.consensual && f.userEmail === state.myUserEmail
       );
       return {
         ...state,

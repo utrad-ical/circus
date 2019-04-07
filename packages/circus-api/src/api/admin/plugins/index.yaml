@@ -12,3 +12,8 @@ routes:
           type: array
           items:
             $ref: plugin
+  - verb: put
+    path: /admin/plugins/:pluginId
+    requestSchema: plugin
+    requiredGlobalPrivilege: manageServer
+    description: Manages plugin definition.

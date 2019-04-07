@@ -27,4 +27,8 @@ properties:
       Short text that describes what this plug-in does.
   icon:
     $ref: icon
+  displayStrategy:
+    type: array
+    description: >
+      Determines how plug-in results are displayed and how feedback is collected.
 additionalProperties: false

@@ -142,3 +142,16 @@ export const handleGetFeedback = ({ models }) => {
     ctx.body = job.feedbacks;
   };
 };
+
+export const handleDeleteFeedback = ({ models }) => {
+  return async (ctx, next) => {
+    const { jobId, feedbackId } = ctx.params;
+    const job = await models.pluginJob.findByIdOrFail(jobId);
+    const newList =
+      feedbackId === 'all'
+        ? []
+        : job.feedbacks.filter(f => feedbackId !== f.feedbackId);
+    await models.pluginJob.modifyOne(jobId, { feedbacks: newList });
+    ctx.body = null;
+  };
+};

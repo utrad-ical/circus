@@ -3,6 +3,7 @@ import { useApi } from 'utils/api';
 import PatientInfoBox from 'components/PatientInfoBox';
 import FullSpanContainer from 'components/FullSpanContainer';
 import LoadingIndicator from 'rb/LoadingIndicator';
+import * as modal from 'rb/modal';
 import PluginDisplay from 'components/PluginDisplay';
 import IconButton from 'components/IconButton';
 import styled from 'styled-components';
@@ -14,6 +15,8 @@ import PieProgress from 'components/PieProgress';
 import createDynamicComponent from './createDynamicComponent';
 import Section from './Section';
 import useLoginUser from 'utils/useLoginUser';
+import { DropdownButton, MenuItem } from 'components/react-bootstrap';
+import Icon from 'components/Icon';
 
 const StyledDiv = styled.div`
   display: flex;
@@ -63,6 +66,23 @@ const createFeedbackTargets = displayStrategy => {
   return feedbackTargets;
 };
 
+const Menu = React.memo(props => {
+  const { onMenuSelect } = props;
+  return (
+    <DropdownButton
+      id="submenu"
+      bsStyle="link"
+      title={<Icon icon="menu-hamburger" />}
+      pullRight
+      noCaret
+    >
+      <MenuItem eventKey="deleteAllFeedback" onSelect={onMenuSelect}>
+        <Icon icon="remove" />&ensp;Delete all feedback
+      </MenuItem>
+    </DropdownButton>
+  );
+});
+
 const PluginJobDetail = props => {
   const api = useApi();
   const jobId = props.match.params.jobId;
@@ -102,6 +122,33 @@ const PluginJobDetail = props => {
   const feedbackTargets = useMemo(
     () => jobData && createFeedbackTargets(jobData.pluginData.displayStrategy),
     [jobData]
+  );
+
+  const handleMenuSelect = useCallback(
+    async selected => {
+      switch (selected) {
+        case 'deleteAllFeedback': {
+          const confirm = await modal.confirm(
+            <span>
+              Do you want to remove <b>all</b> feedback data?
+            </span>
+          );
+          if (!confirm) return;
+          try {
+            setBusy(true);
+            await api(`plugin-jobs/${jobId}/feedback/all`, {
+              method: 'delete'
+            });
+            await modal.alert('All feedback data were deleted.');
+            reloadJob();
+          } finally {
+            setBusy(false);
+          }
+          break;
+        }
+      }
+    },
+    [api, jobId, reloadJob]
   );
 
   // Keeps track of multiple refs using Map
@@ -212,6 +259,7 @@ const PluginJobDetail = props => {
               />
             </div>
             <PluginDisplay pluginId={job.pluginId} size="xl" />
+            <Menu onMenuSelect={handleMenuSelect} />
           </div>
           <div className="job-detail-main">
             <div className="feedback-targets">

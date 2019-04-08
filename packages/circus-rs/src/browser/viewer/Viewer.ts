@@ -269,7 +269,7 @@ export default class Viewer extends EventEmitter {
       // It's safe to call draw() now.
       this.currentRender = p;
       this.nextRender = null;
-      const src = (<Composition>this.composition).imageSource;
+      const src = this.composition!.imageSource;
       return src.draw(this, state).then(image => {
         this.cachedSourceImage = image;
         this.currentRender = null;

@@ -86,6 +86,6 @@ export default class DynamicMprImageSource extends MprImageSource {
       viewWindow,
       outSize
     );
-    return drawToImageData(viewer, buffer);
+    return drawToImageData(viewer, outSize, buffer);
   }
 }

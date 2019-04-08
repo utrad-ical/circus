@@ -271,13 +271,14 @@ const StyledDiv = styled.div`
     margin-bottom: 5px;
   }
   .entries {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    grid-gap: 5px;
     justify-content: space-between;
     .lesion-candidate {
       border: 1px solid silver;
-      padding: 1px;
       .header {
+        padding: 2px;
         display: flex;
         flex-direction: row;
         justify-content: space-between;
@@ -286,7 +287,7 @@ const StyledDiv = styled.div`
         font-size: 80%;
       }
       .image-viewer {
-        width: 400px;
+        width: 100%;
         height: 400px;
       }
     }

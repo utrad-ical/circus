@@ -278,7 +278,7 @@ const StyledDiv = styled.div`
     .lesion-candidate {
       border: 1px solid silver;
       .header {
-        padding: 2px;
+        padding: 3px;
         display: flex;
         flex-direction: row;
         justify-content: space-between;
@@ -292,7 +292,7 @@ const StyledDiv = styled.div`
       }
     }
     .feedback-listener {
-      margin: 5px;
+      padding: 3px;
     }
   }
 `;

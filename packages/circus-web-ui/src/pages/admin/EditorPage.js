@@ -131,6 +131,7 @@ const EditorPage = props => {
       </p>
       {editing && (
         <Editor
+          key={target}
           item={editing}
           complaints={complaints}
           target={target}

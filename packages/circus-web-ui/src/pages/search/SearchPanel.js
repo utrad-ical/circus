@@ -2,11 +2,10 @@ import React from 'react';
 import { Button } from 'components/react-bootstrap';
 import IconButton from 'components/IconButton';
 import { ControlledCollapser } from 'components/Collapser';
-import usePreference from 'components/usePreference';
+import useLocalPreference from 'utils/useLocalPreference';
 
 const StateSavingCollapser = props => {
-  const [open, setOpen, busy] = usePreference('searchPanelOpen', false);
-  if (busy) return null;
+  const [open, setOpen] = useLocalPreference('searchPanelOpen', false);
   return (
     <ControlledCollapser
       open={open}

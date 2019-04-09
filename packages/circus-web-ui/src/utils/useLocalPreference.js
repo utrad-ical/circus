@@ -1,18 +1,18 @@
 import { useState } from 'react';
 
-export const usePreference = (prefName, defaultValue) => {
+/**
+ * A hook which provides access to localStorage-based preference.
+ */
+export const useLocalPreference = (prefName, defaultValue) => {
   const [value, setValue] = useState(() => {
     const savedValue = localStorage.getItem(prefName);
     return savedValue !== null ? JSON.parse(savedValue) : defaultValue;
   });
-  const [busy, setBusy] = useState(false);
   const change = async newValue => {
     setValue(newValue);
-    setBusy(true);
     localStorage.setItem(prefName, JSON.stringify(newValue));
-    setBusy(false);
   };
-  return [value, change, busy];
+  return [value, change];
 };
 
-export default usePreference;
+export default useLocalPreference;

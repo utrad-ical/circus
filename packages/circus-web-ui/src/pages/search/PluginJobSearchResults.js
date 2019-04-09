@@ -10,6 +10,8 @@ import IconButton from 'components/IconButton';
 import { ProgressBar } from 'components/react-bootstrap';
 import browserHistory from 'browserHistory';
 import styled from 'styled-components';
+import useLoginUser from 'utils/useLoginUser';
+import Icon from '@smikitky/rb-components/lib/Icon';
 
 const Operation = props => {
   const { value: job } = props;
@@ -50,6 +52,26 @@ const StatusRenderer = ({ value: { status } }) => {
   return <span className={className || 'text-danger'}>{status}</span>;
 };
 
+const FeedbackRenderer = props => {
+  const { value: { feedbacks = [] } } = props;
+  const personals = feedbacks.filter(f => !f.isConsensual).length;
+  const consensual = feedbacks.filter(f => f.isConsensual).length;
+  const title = `${personals} personal feedback ${
+    personals === 1 ? 'entry' : 'entries'
+  }`;
+  return (
+    <span title={title}>
+      {personals > 0 && (
+        <span>
+          <Icon icon="user" />
+          {personals > 0 && personals}
+        </span>
+      )}
+      {consensual > 0 && <Icon icon="tower" />}
+    </span>
+  );
+};
+
 const columns = [
   {
     caption: 'Patient',
@@ -79,6 +101,11 @@ const columns = [
     caption: 'Status',
     className: 'status',
     renderer: StatusRenderer
+  },
+  {
+    caption: 'FB',
+    className: 'feedback',
+    renderer: FeedbackRenderer
   },
   { caption: '', className: 'operation', renderer: Operation }
 ];

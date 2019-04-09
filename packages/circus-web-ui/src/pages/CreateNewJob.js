@@ -6,9 +6,11 @@ import SeriesSelector from 'components/SeriesSelector';
 import LoadingIndicator from 'rb/LoadingIndicator';
 import PluginDisplay from 'components/PluginDisplay';
 import { showMessage } from 'actions';
+import useLocalPreference from 'utils/useLocalPreference';
 
 const CreateNewJob = props => {
   const [selectedPlugin, setSelectedPlugin] = useState(null);
+  const [defaultPlugin, setDefaultPlugin] = useLocalPreference('defaultPlugin');
   const [selectedSeries, setSelectedSeries] = useState([]);
   const [busy, setBusy] = useState(true);
   const [plugins, setPlugins] = useState(null);
@@ -30,11 +32,26 @@ const CreateNewJob = props => {
     [api, seriesUid]
   );
 
+  // Pre-select previously-used plug-in
+  useEffect(
+    () => {
+      if (
+        plugins &&
+        !selectedPlugin &&
+        plugins.find(p => p.pluginId === defaultPlugin)
+      ) {
+        setSelectedPlugin(defaultPlugin);
+      }
+    },
+    [defaultPlugin, plugins, selectedPlugin]
+  );
+
   const handleCreate = async () => {
     await api('plugin-jobs', {
       method: 'post',
       data: { pluginId: selectedPlugin, series: selectedSeries }
     });
+    setDefaultPlugin(selectedPlugin);
     showMessage('Job registered.');
   };
 

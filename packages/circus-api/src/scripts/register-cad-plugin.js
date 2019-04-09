@@ -50,7 +50,8 @@ export async function exec() {
       glyph: 'calc',
       color: '#ffffff',
       backgroundColor: '#008800'
-    }
+    },
+    displayStrategy: []
   };
 
   const db = await connectDb();

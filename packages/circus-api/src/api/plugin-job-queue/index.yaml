@@ -1,0 +1,9 @@
+name: PluginJobQueue
+description: >
+  Returns job queue for the job started by the current user.
+routes:
+  - verb: get
+    path: /plugin-job-queue
+    description: >
+      Returns plugin job queue.
+    responseSchema: pluginJob|searchResult

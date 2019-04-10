@@ -2,10 +2,17 @@ import * as rs from 'circus-rs';
 import { toolFactory } from 'circus-rs/tool/tool-initializer';
 import ImageViewer, { useStateChanger } from 'components/ImageViewer';
 import { Button } from 'components/react-bootstrap';
-import React, { useEffect, useImperativeHandle, useRef, useState } from 'react';
+import React, {
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useCallback,
+  useState
+} from 'react';
 import styled from 'styled-components';
 import useImageSource from 'utils/useImageSource';
 import IconButton from 'components/IconButton';
+import applyDisplayOptions from './applyDisplayOptions';
 
 const Locator = React.forwardRef((props, ref) => {
   const { job, onChange, isConsensual, value = [], disabled, options } = props;
@@ -80,6 +87,11 @@ const Locator = React.forwardRef((props, ref) => {
       composition.annotationUpdated();
     },
     [composition, value]
+  );
+
+  const initialStateSetter = useCallback(
+    (viewer, state) => applyDisplayOptions(state, job, volumeId),
+    [volumeId, job]
   );
 
   const handleMouseUp = () => {
@@ -158,6 +170,7 @@ const Locator = React.forwardRef((props, ref) => {
       <div className="side">
         <ImageViewer
           className="locator"
+          initialStateSetter={initialStateSetter}
           tool={toolRef.current[disabled ? 'pager' : 'point']}
           stateChanger={stateChanger}
           composition={composition}
@@ -169,6 +182,7 @@ const Locator = React.forwardRef((props, ref) => {
               <tr>
                 <th>#</th>
                 <th>Position</th>
+                {isConsensual && <th>Entered By</th>}
                 <th />
               </tr>
             </thead>
@@ -177,6 +191,7 @@ const Locator = React.forwardRef((props, ref) => {
                 <tr key={i}>
                   <td>{i + 1}</td>
                   <td>{JSON.stringify(item.location)}</td>
+                  {isConsensual && <td />}
                   <td>
                     <IconButton
                       icon="circus-focus"

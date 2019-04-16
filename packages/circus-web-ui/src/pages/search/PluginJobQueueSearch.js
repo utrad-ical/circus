@@ -2,12 +2,12 @@ import React, { useEffect } from 'react';
 import Icon from 'components/Icon';
 import { startNewSearch } from 'actions';
 import PluginJobQueueSearchResults from './PluginJobQueueSearchResults';
-import { connect } from 'react-redux';
 import { useApi } from 'utils/api';
+import { useDispatch } from 'redux-react-hook';
 
 const PluginJobQueueSearch = props => {
   const api = useApi();
-  const { dispatch } = props;
+  const dispatch = useDispatch();
 
   useEffect(
     () => {
@@ -35,4 +35,4 @@ const PluginJobQueueSearch = props => {
   );
 };
 
-export default connect()(PluginJobQueueSearch);
+export default PluginJobQueueSearch;

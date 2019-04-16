@@ -1,4 +1,4 @@
-import React, { Fragment } from 'react';
+import React, { Fragment, useCallback } from 'react';
 import ShrinkSelect from 'rb/ShrinkSelect';
 import { Pagination } from 'components/react-bootstrap';
 import {
@@ -8,11 +8,12 @@ import {
   refreshSearch
 } from 'actions';
 import LoadingIndicator from 'rb/LoadingIndicator';
-import { connect } from 'react-redux';
 import AutoReloadSwitch from './AutoReloadSwitch';
 import Icon from 'components/Icon';
+import classnames from 'classnames';
 import styled from 'styled-components';
 import { useApi } from 'utils/api';
+import { useMappedState, useDispatch } from 'redux-react-hook';
 
 export const makeSortOptions = sortKeys => {
   const options = {};
@@ -92,16 +93,18 @@ const StyledDiv = styled.div`
     }
     border-bottom: 2px solid #ddd;
   }
+
+  &.busy {
+    opacity: 0.7;
+  }
 `;
 
 /**
  * SearchResultsView is connected to `search` redux state and
  * displays the search results along with pager and sort changer.
  */
-const SearchResultsView = props => {
+const SearchResults = props => {
   const {
-    dispatch,
-    search,
     name,
     sortOptions,
     dataView: DataView,
@@ -109,7 +112,12 @@ const SearchResultsView = props => {
     refreshable,
     ...rest
   } = props;
+
   const api = useApi();
+  const mapState = useCallback(state => state.searches[name], [name]);
+  const dispatch = useDispatch();
+
+  const search = useMappedState(mapState);
   if (!search) return null;
   const { isFetching, totalItems, limit, items, page, sort } = search;
 
@@ -118,29 +126,29 @@ const SearchResultsView = props => {
 
   if (!Array.isArray(items)) return null; // This should not happen
 
-  function handleSortChange(newSort) {
+  const handleSortChange = newSort => {
     if (newSort === sort) return;
     dispatch(changeSearchSort(api, name, newSort));
-  }
+  };
 
-  function handlePageClick(newPage) {
+  const handlePageClick = newPage => {
     if (newPage === page) return;
     dispatch(changeSearchPage(api, name, newPage));
-  }
+  };
 
-  function handleLimitChange(newLimit) {
+  const handleLimitChange = newLimit => {
     if (newLimit === limit) return;
     dispatch(changeSearchLimit(api, name, newLimit));
-  }
+  };
 
-  function handleRefresh() {
+  const handleRefresh = () => {
     if (isFetching) return;
     dispatch(refreshSearch(api, name));
-  }
+  };
 
   const pages = Math.ceil(totalItems / limit);
   return (
-    <StyledDiv>
+    <StyledDiv className={classnames({ busy: isFetching })}>
       <div className="search-results-header">
         {totalItems + ' Result' + (totalItems > 1 ? 's' : '')}
         &emsp;
@@ -190,6 +198,4 @@ const SearchResultsView = props => {
   );
 };
 
-export default connect((state, ownProps) => ({
-  search: state.searches[ownProps.name]
-}))(SearchResultsView);
+export default SearchResults;

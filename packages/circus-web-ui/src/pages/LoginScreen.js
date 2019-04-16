@@ -9,7 +9,6 @@ import {
   Button,
   Glyphicon
 } from 'components/react-bootstrap';
-import { connect } from 'react-redux';
 import styled from 'styled-components';
 import browserHistory from 'browserHistory';
 
@@ -32,16 +31,16 @@ const StyledDiv = styled.div`
   }
 `;
 
-const LoginScreenView = props => {
+const LoginScreen = props => {
   const [input, setInput] = useState({ id: '', password: '' });
   const [error, setError] = useState();
   const loginManager = useLoginManager();
 
-  const change = (key, val) => {
+  const handleChange = (key, val) => {
     setInput({ ...input, [key]: val });
   };
 
-  const loginClick = async () => {
+  const handleLoginClick = async () => {
     try {
       await loginManager.tryAuthenticate(input.id, input.password);
       await loginManager.refreshUserInfo(true);
@@ -73,14 +72,14 @@ const LoginScreenView = props => {
                   placeholder="User ID or E-mail"
                   autoFocus
                   value={input.id}
-                  onChange={ev => change('id', ev.target.value)}
+                  onChange={ev => handleChange('id', ev.target.value)}
                 />
                 <FormControl
                   placeholder="Password"
                   type="password"
                   value={input.password}
-                  onChange={ev => change('password', ev.target.value)}
-                  onKeyDown={ev => ev.keyCode == 13 && loginClick()}
+                  onChange={ev => handleChange('password', ev.target.value)}
+                  onKeyDown={ev => ev.keyCode == 13 && handleLoginClick()}
                 />
               </FormGroup>
               {error && <p className="text-danger">{error}</p>}
@@ -90,7 +89,7 @@ const LoginScreenView = props => {
                 disabled={disabled}
                 bsStyle="primary"
                 bsSize="lg"
-                onClick={() => loginClick()}
+                onClick={handleLoginClick}
               >
                 <Glyphicon glyph="ok-sign" />&ensp;Login
               </Button>
@@ -101,7 +100,5 @@ const LoginScreenView = props => {
     </StyledDiv>
   );
 };
-
-const LoginScreen = connect()(LoginScreenView);
 
 export default LoginScreen;

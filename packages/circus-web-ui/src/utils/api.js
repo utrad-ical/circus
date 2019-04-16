@@ -40,6 +40,7 @@ const createApiCaller = (initialCredentials, apiServer) => {
       })
     });
     saveCredentialData(formatCredentials(res.data));
+    return formatCredentials(res.data);
   };
 
   api = async (command, options = {}, cancelToken) => {

@@ -1,8 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { startNewSearch, savePreset } from 'actions';
-import { connect } from 'react-redux';
 import { useLoginManager } from 'utils/loginManager';
 import { useApi } from 'utils/api';
+import { useMappedState, useDispatch } from 'redux-react-hook';
+
+const initialCondition = (state, searchName, presetName) => {
+  const presetKey = searchName + 'SearchPresets';
+  const presets = state.loginUser.data.preferences[presetKey];
+  const matched = presets && presets.find(preset => preset.name === presetName);
+  if (matched) return JSON.parse(matched.condition);
+  if (state.searches[searchName]) return state.searches[searchName].condition;
+  return undefined;
+};
 
 /**
  * Creates a HOC that remembers the current editing condition and
@@ -19,9 +28,14 @@ const sendSearchCondition = opts => {
 
   return function(BaseComponent) {
     const Enhanced = props => {
-      const [condition, setCondition] = useState(props.initialCondition);
+      const { presetName } = props;
+      const mapToState = useCallback(state => state, []);
+      const state = useMappedState(mapToState);
+      const [condition, setCondition] = useState(
+        () => initialCondition(state, searchName, presetName) || nullCondition()
+      );
       const loginManager = useLoginManager();
-      const { dispatch } = props;
+      const dispatch = useDispatch();
       const api = useApi();
 
       const handleChange = newCondition => {
@@ -66,19 +80,7 @@ const sendSearchCondition = opts => {
     };
 
     Enhanced.displayName = `searchPanel(${searchName})`;
-
-    const mapStateToProps = (state, ownProps) => {
-      const presetKey = searchName + 'SearchPresets';
-      const presets = state.loginUser.data.preferences[presetKey];
-      const matched =
-        presets && presets.find(preset => preset.name === ownProps.presetName);
-      if (matched) return { initialCondition: JSON.parse(matched.condition) };
-      if (state.searches[searchName])
-        return { initialCondition: state.searches[searchName].condition };
-      return { initialCondition: nullCondition() };
-    };
-
-    return connect(mapStateToProps)(Enhanced);
+    return Enhanced;
   };
 };
 

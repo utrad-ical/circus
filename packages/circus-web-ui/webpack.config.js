@@ -1,8 +1,11 @@
 const webpack = require('webpack');
 const path = require('path');
 
+const nodeEnv =
+  process.env.NODE_ENV === 'production' ? 'production' : 'development';
+
 module.exports = {
-  mode: process.env.NODE_ENV === 'productoin' ? 'productoin' : 'development',
+  mode: nodeEnv,
   entry: {
     application: './src/index.js'
   },
@@ -54,7 +57,7 @@ module.exports = {
   },
   plugins: [
     new webpack.DefinePlugin({
-      'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV)
+      'process.env.NODE_ENV': JSON.stringify(nodeEnv)
     })
   ],
   devServer: {

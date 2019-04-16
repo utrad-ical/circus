@@ -29,6 +29,7 @@
     "@babel/preset-env": "^7.0.0",
     "@babel/preset-react": "^7.0.0",
     "@babel/preset-typescript": "^7.0.0",
+    "@smikitky/rb-components": "^5.4.4",
     "@utrad-ical/circus-lib": "^0.2.1",
     "@utrad-ical/circus-rs": "github:utrad-ical/circus-rs#v0.22.2",
     "axios": "^0.15.2",
@@ -71,7 +72,6 @@
     "webpack-dev-server": "^3.1.8"
   },
   "dependencies": {
-    "@smikitky/rb-components": "^5.4.2",
     "glob-promise": "^3.3.0",
     "mongoose": "^4.6.8",
     "multi-integer-range": "^4.0.2",

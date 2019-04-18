@@ -86,6 +86,29 @@ export default function createCollectionAccessor(db, validator, opts) {
   }
 
   /**
+   * Provides direct access to MongoDB's aggregation framework.
+   * Use this sparingly becuse this breaks encapsulation.
+   * Validation is not performed.
+   */
+  async function aggregate(pipeline) {
+    const cursor = await aggregateAsCursor(pipeline);
+    const array = [];
+    while (await cursor.hasNext()) {
+      array.push(await cursor.next());
+    }
+    return array;
+  }
+
+  /**
+   * Provides direct access to MongoDB's aggregation framework.
+   * Use this sparingly becuse this breaks encapsulation.
+   * Validation is not performed.
+   */
+  async function aggregateAsCursor(pipeline) {
+    return collection.aggregate(pipeline);
+  }
+
+  /**
    * Fetches the single document that matches the primary key.
    */
   async function findById(id) {
@@ -193,6 +216,7 @@ export default function createCollectionAccessor(db, validator, opts) {
     findByIdOrFail,
     insert,
     upsert,
+    aggregate,
     insertMany,
     modifyOne,
     newSequentialId,

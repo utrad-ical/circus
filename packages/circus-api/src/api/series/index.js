@@ -4,6 +4,7 @@ import * as fs from 'fs-extra';
 import * as path from 'path';
 import * as JSZip from 'jszip';
 import * as EJSON from 'mongodb-extjson';
+import checkFilter from '../../utils/checkFilter';
 
 const maskPatientInfo = ctx => {
   return series => {
@@ -88,8 +89,22 @@ export const handleSearch = ({ models }) => {
     try {
       customFilter = urlQuery.filter ? EJSON.parse(urlQuery.filter) : {};
     } catch (err) {
-      ctx.throw(status.BAD_REQUEST, 'Bad filter.');
+      ctx.throw(status.BAD_REQUEST, 'Filter string could not be parsed.');
     }
+    const fields = [
+      'modality',
+      'seriesUid',
+      'seriesDescription',
+      'patientInfo.patientId',
+      'patientInfo.patientName',
+      'patientInfo.age',
+      'patientInfo.sex',
+      'seriesDate',
+      'importDate'
+    ];
+    if (!checkFilter(customFilter, fields))
+      ctx.throw(status.BAD_REQUEST, 'Bad filter.');
+
     const domainFilter = {
       domain: { $in: ctx.userPrivileges.domains }
     };

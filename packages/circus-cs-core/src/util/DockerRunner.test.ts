@@ -7,6 +7,15 @@ test('run hello-world docker image', async () => {
   expect(result).toMatch('Hello from Docker!');
 });
 
+test('load text file from an image', async () => {
+  const runner = new DockerRunner();
+  const result = await runner.loadFromTextFile(
+    'circus-mock/succeeds:1.0',
+    '/etc/os-release'
+  );
+  expect(result).toMatch(/Alpine Linux/);
+});
+
 test('connect to Docker public API', async () => {
   const rode = new Dockerode();
   const results = await rode.listImages();

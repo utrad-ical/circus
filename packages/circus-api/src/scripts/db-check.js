@@ -19,6 +19,9 @@ export const help = optionText => {
   console.log(optionText);
 };
 
+/**
+ * @param {ReturnType<createModels>} models
+ */
 const main = async (options, models) => {
   const { target } = options;
   for (const key in models) {

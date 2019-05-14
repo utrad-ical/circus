@@ -1,5 +1,8 @@
 import createCollectionAccessor from './createCollectionAccessor';
 
+/**
+ * @returns {{ [key: string]: ReturnType<createCollectionAccessor> }}
+ */
 export default function createModels(db, validator) {
   const modelDefinitions = {
     user: { col: 'users', pk: 'userEmail' },

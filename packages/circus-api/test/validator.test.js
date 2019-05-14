@@ -84,6 +84,22 @@ describe('Validator', function() {
         ['{', 'a', '"']
       );
     });
+
+    it('dockerId', async function() {
+      await testFormat(
+        'dockerId',
+        ['3cbe016446c6d1881d729677c596c9896088841d23c979cb66d044d2e0ad84bd'],
+        ['6d1881d729677c596c9896088841d23c979cb66d044d2e0ad84bd']
+      );
+    });
+
+    it('semver', async function() {
+      await testFormat(
+        'semver',
+        ['1.2.0', '3.1.4-alpha'],
+        ['alpha', '1.2.3.4']
+      );
+    });
   });
 
   it('should work with toDate mode', async function() {
@@ -126,6 +142,19 @@ describe('Validator', function() {
     await validator.validate(
       'sample|allRequiredExcept dicomUid,intVal',
       testData
+    );
+  });
+
+  it('should handle only option', async function() {
+    const testData = { dicomUid: '1.2.3' };
+    await validator.validate('sample|only dicomUid', testData);
+    await asyncThrows(
+      validator.validate('sample|only dicomUid', { dicomUid: false }),
+      ValidationError
+    );
+    await asyncThrows(
+      validator.validate('sample|only intVal', testData),
+      ValidationError
     );
   });
 

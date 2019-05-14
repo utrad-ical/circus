@@ -2,6 +2,7 @@ import Ajv from 'ajv';
 import glob from 'glob-promise';
 import fs from 'fs-extra';
 import yaml from 'js-yaml';
+import semver from 'semver';
 import * as path from 'path';
 
 const loadSchemaFiles = async schemaRoot => {
@@ -45,7 +46,9 @@ const customFormats = {
     } catch (err) {
       return false;
     }
-  }
+  },
+  dockerId: s => /^[a-z0-9]{64}$/.test(s),
+  semver: s => semver.valid(s)
 };
 
 const defaultSchemaRoot = path.join(__dirname, 'schemas');
@@ -73,6 +76,7 @@ export default async function createValidator(schemaRoot = defaultSchemaRoot) {
       const filter = {
         allRequired: allRequiredScheama,
         allRequiredExcept: allRequiredScheama,
+        only: onlySchema,
         searchResult: searchResultSchema,
         dbEntry: dbEntrySchema
       }[filterName];
@@ -98,6 +102,28 @@ export default async function createValidator(schemaRoot = defaultSchemaRoot) {
     return {
       ...schema,
       required: props
+    };
+  };
+
+  /**
+   * Takes a JSON schema and returns its subset JSON schema
+   * which only contains the specified properties.
+   * The input JSON schema must be an object validator at the root level,
+   * and must have a `properties` keyword.
+   */
+  const onlySchema = (schema, props) => {
+    if (!schema || !schema.properties) {
+      throw new TypeError('Unsupported JSON schema');
+    }
+    const propList = props.split(',').map(s => s.trim());
+    const properties = {};
+    propList.forEach(key => {
+      properties[key] = schema.properties[key];
+    });
+    return {
+      ...schema,
+      properties,
+      additionalProperties: false
     };
   };
 

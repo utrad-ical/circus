@@ -7,14 +7,18 @@ description: >
 properties:
   pluginId:
     type: string
+    format: dockerId
     description: >
       :key: The unique ID of this plug-in.
   pluginName:
     type: string
+    minLength: 1
+    maxLength: 128
     description: >
       Displayed plug-in name.
   version:
     type: string
+    format: semver
     description: >
       Semver-compatible plug-in version.
   type:
@@ -23,12 +27,24 @@ properties:
       Plug-in type. Currently the only supported value is 'CAD'.
   description:
     type: string
+    maxLength: 128
     description: >
       Short text that describes what this plug-in does.
   icon:
     $ref: icon
   displayStrategy:
     type: array
+    items:
+      type: object
+      properties:
+        type:
+          type: string
+        feedbackKey:
+          type: string
+        caption:
+          type: string
+        options:
+          type: object
     description: >
       Determines how plug-in results are displayed and how feedback is collected.
 additionalProperties: false

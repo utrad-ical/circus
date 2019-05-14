@@ -2,8 +2,8 @@ import connectDb from '../db/connectDb';
 import createValidator from '../createValidator';
 import createModels from '../db/createModels';
 import inquirer from 'inquirer';
-import semver from 'semver';
 import DockerRunner from '@utrad-ical/circus-cs-core/src/util/DockerRunner';
+import { ValidationError } from 'ajv';
 
 export function help(optionText) {
   console.log(
@@ -19,7 +19,7 @@ export const options = () => {
   return [];
 };
 
-const main = async (options, models) => {
+const main = async (options, validator, models) => {
   const { _args: imageIds } = options;
   if (!imageIds.length) {
     throw new Error('Specify a plugin ID (Docker image hash).');
@@ -42,14 +42,18 @@ const main = async (options, models) => {
 
   const manifest = JSON.parse(manifestText);
 
-  if (!/^[a-zA-Z0-9\-_]+$/.test(manifest.pluginName)) {
-    throw new Error('The plug-in name in the manifest file is invalid.');
-  }
-
-  if (!semver.valid(manifest.version)) {
-    throw new Error(
-      'The version string in the manifest file must be semvar-compatible.'
+  try {
+    await validator.validate(
+      'plugin' +
+        '|only pluginName,version,description,icon,displayStrategy' +
+        '|allRequiredExcept icon,displayStrategy',
+      manifest
     );
+  } catch (err) {
+    if (err instanceof ValidationError) {
+      console.error('Manifest file error.');
+      throw err;
+    }
   }
 
   const data = {
@@ -67,14 +71,14 @@ const main = async (options, models) => {
   if (!confirm.ok) return;
 
   const doc = {
-    ...data,
     type: 'CAD',
     icon: {
       glyph: 'calc',
       color: '#ffffff',
       backgroundColor: '#008800'
     },
-    displayStrategy: []
+    displayStrategy: [],
+    ...data
   };
   await models.plugin.insert(doc);
   console.log(`Registered ${doc.pluginName} v${doc.version}`);
@@ -88,8 +92,8 @@ export async function exec(options) {
       .collection('pluginDefinitions')
       .ensureIndex({ pluginId: 1 }, { unique: true });
     const validator = await createValidator();
-    const models = await createModels(db, validator);
-    await main(options, models);
+    const models = createModels(db, validator);
+    await main(options, validator, models);
   } finally {
     await db.close();
   }

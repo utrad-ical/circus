@@ -55,7 +55,7 @@ export default class MockLoader implements DicomVolumeLoader {
       if (pixelFormat === PixelFormat.Binary) {
         val %= 2;
       } else {
-        val = (val % 3) * 30;
+        val = (val % 3) * 30 + 30;
       }
       return val;
     };

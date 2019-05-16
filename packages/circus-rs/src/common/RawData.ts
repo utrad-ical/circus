@@ -5,6 +5,13 @@ import PartialVolumeDescriptor from '@utrad-ical/circus-lib/lib/PartialVolumeDes
 // Make sure you don't add properties
 // that heavily depends on DICOM spec!
 
+interface PixelLocation {
+  p: number;
+  dp: number;
+  ip0: number;
+  ip1: number;
+}
+
 /**
  * Raw voxel container with MPR support.
  */
@@ -120,13 +127,17 @@ export default class RawData {
     y: number,
     z: number
   ): number | undefined {
-    const x_end = this.size[0] - 1;
-    const y_end = this.size[1] - 1;
-    const z_end = this.size[2] - 1;
-    if (x < 0.0 || y < 0.0 || z < 0.0 || x > x_end || y > y_end || z > z_end) {
+    if (
+      x < 0.0 ||
+      y < 0.0 ||
+      z < 0.0 ||
+      x >= this.size[0] ||
+      y >= this.size[1] ||
+      z >= this.size[2]
+    ) {
       return undefined;
     }
-    return this.getPixelAt(Math.round(x), Math.round(y), Math.round(z));
+    return this.getPixelAt(Math.floor(x), Math.floor(y), Math.floor(z));
   }
 
   /**
@@ -155,73 +166,90 @@ export default class RawData {
     z: number
   ): number | undefined {
     // Check values
-    const x_end = this.size[0] - 1;
-    const y_end = this.size[1] - 1;
-    const z_end = this.size[2] - 1;
-    if (x < 0.0 || y < 0.0 || z < 0.0 || x > x_end || y > y_end || z > z_end) {
+    if (
+      x < 0.0 ||
+      y < 0.0 ||
+      z < 0.0 ||
+      x >= this.size[0] ||
+      y >= this.size[1] ||
+      z >= this.size[2]
+    ) {
       return undefined;
     }
 
-    // Handle edge cases
-    let iz = Math.floor(z);
-    if (iz >= z_end) {
-      iz = z_end - 1;
-      z = z_end;
-    }
-    let ix = Math.floor(x);
-    if (ix >= x_end) {
-      ix = x_end - 1;
-      x = x_end;
-    }
-    let iy = Math.floor(y);
-    if (iy >= y_end) {
-      iy = y_end - 1;
-      y = y_end;
-    }
+    const xPixelLocation = this.getPixelLocation(x, this.size[0]);
+    const yPixelLocation = this.getPixelLocation(y, this.size[1]);
+    const zPixelLocation = this.getPixelLocation(z, this.size[2]);
+    const { dp: dz, ip0: iz0, ip1: iz1 } = zPixelLocation;
 
     // Calculate the weight of slices and determine the final value
-    const value_z1 = this.getAxialInterpolation(ix, x, iy, y, iz);
-    const value_z2 = this.getAxialInterpolation(ix, x, iy, y, iz + 1);
-    const weight_z2 = z - iz;
-    const weight_z1 = 1.0 - weight_z2;
-    return value_z1 * weight_z1 + value_z2 * weight_z2;
+    const value_z0 = this.getPixelWithBilinearInterpolation(
+      xPixelLocation,
+      yPixelLocation,
+      iz0
+    );
+    const value_z1 = this.getPixelWithBilinearInterpolation(
+      xPixelLocation,
+      yPixelLocation,
+      iz1
+    );
+    return value_z0 * (1.0 - dz) + value_z1 * dz;
   }
 
   /**
    * Do 4-neighbor pixel interpolation within a given single axial slice.
-   * @param ix {number}
-   * @param x {number}
-   * @param iy {number}
-   * @param y {number}
-   * @param intz {number}
-   * @return n {number}
+   * @param xPixelLocation
+   * @param yPixelLocation
+   * @param iz
+   * @return n Interpolated corresponding voxel value. Returns undefined if out of bounds.
    */
-  protected getAxialInterpolation(
-    ix: number,
-    x: number,
-    iy: number,
-    y: number,
-    intz: number
+  protected getPixelWithBilinearInterpolation(
+    xPixelLocation: { p: number; dp: number; ip0: number; ip1: number },
+    yPixelLocation: { p: number; dp: number; ip0: number; ip1: number },
+    iz: number
   ): number {
-    const ixp1 = ix + 1;
-    const iyp1 = iy + 1;
+    const { dp: dx, ip0: ix0, ip1: ix1 } = xPixelLocation;
+    const { dp: dy, ip0: iy0, ip1: iy1 } = yPixelLocation;
 
     // p0 p1
     // p2 p3
-    const rx = this.size[0];
-    const offset = rx * this.size[1] * intz; // offset of p0 (top-left pixel)
-    const p0 = this.read(offset + ix + iy * rx);
-    const p1 = this.read(offset + ixp1 + iy * rx);
-    const p2 = this.read(offset + ix + iyp1 * rx);
-    const p3 = this.read(offset + ixp1 + iyp1 * rx);
+    const p0 = this.getPixelAt(ix0, iy0, iz);
+    const p1 = this.getPixelAt(ix1, iy0, iz);
+    const p2 = this.getPixelAt(ix0, iy1, iz);
+    const p3 = this.getPixelAt(ix1, iy1, iz);
 
-    const weight_x2 = x - ix;
-    const weight_x1 = 1.0 - weight_x2;
-    const weight_y2 = y - iy;
-    const weight_y1 = 1.0 - weight_y2;
-    const value_y1 = p0 * weight_x1 + p1 * weight_x2;
-    const value_y2 = p2 * weight_x1 + p3 * weight_x2;
-    return value_y1 * weight_y1 + value_y2 * weight_y2;
+    const value =
+      (1 - dx) * (1 - dy) * p0 +
+      dx * (1 - dy) * p1 +
+      (1 - dx) * dy * p2 +
+      dx * dy * p3;
+
+    return value;
+  }
+
+  private getPixelLocation(p: number, size: number): PixelLocation {
+    const fp = p - Math.floor(p);
+    let dp;
+    let ip0;
+    let ip1;
+    if (p < 0.5) {
+      dp = 0.0;
+      ip0 = 0;
+      ip1 = ip0;
+    } else if (p > size - 0.5) {
+      dp = 0.0;
+      ip0 = size - 1;
+      ip1 = ip0;
+    } else if (fp < 0.5) {
+      dp = fp + 0.5;
+      ip0 = Math.floor(p) - 1;
+      ip1 = ip0 + 1;
+    } else {
+      dp = fp - 0.5;
+      ip0 = Math.floor(p);
+      ip1 = ip0 + 1;
+    }
+    return { p: p, dp: dp, ip0: ip0, ip1: ip1 };
   }
 
   /**

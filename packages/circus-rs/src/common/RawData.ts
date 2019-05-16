@@ -249,7 +249,7 @@ export default class RawData {
       ip0 = Math.floor(p);
       ip1 = ip0 + 1;
     }
-    return { p: p, dp: dp, ip0: ip0, ip1: ip1 };
+    return { p, dp, ip0, ip1 };
   }
 
   /**

@@ -63,12 +63,11 @@ const main = async (options, validator, models) => {
     description: manifest.description || ''
   };
 
-  if (
-    await models.plugin.find({
-      pluingName: manifest.pluginName,
-      version: manifest.version
-    })
-  ) {
+  const existing = await models.plugin.find({
+    pluingName: manifest.pluginName,
+    version: manifest.version
+  });
+  if (existing.length) {
     throw new Error(
       'There is a plugin registered with the same name and the same version.'
     );

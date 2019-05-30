@@ -5,13 +5,6 @@ import PartialVolumeDescriptor from '@utrad-ical/circus-lib/lib/PartialVolumeDes
 // Make sure you don't add properties
 // that heavily depends on DICOM spec!
 
-interface PixelLocation {
-  p: number;
-  dp: number;
-  ip0: number;
-  ip1: number;
-}
-
 /**
  * Raw voxel container with MPR support.
  */
@@ -180,7 +173,7 @@ export default class RawData {
     const xPixelLocation = this.getPixelLocation(x, this.size[0]);
     const yPixelLocation = this.getPixelLocation(y, this.size[1]);
     const zPixelLocation = this.getPixelLocation(z, this.size[2]);
-    const { dp: dz, ip0: iz0, ip1: iz1 } = zPixelLocation;
+    const [pz, dz, iz0, iz1] = zPixelLocation;
 
     // Calculate the weight of slices and determine the final value
     const value_z0 = this.getPixelWithBilinearInterpolation(
@@ -204,12 +197,12 @@ export default class RawData {
    * @return n Interpolated corresponding voxel value. Returns undefined if out of bounds.
    */
   protected getPixelWithBilinearInterpolation(
-    xPixelLocation: { p: number; dp: number; ip0: number; ip1: number },
-    yPixelLocation: { p: number; dp: number; ip0: number; ip1: number },
+    xPixelLocation: [number, number, number, number],
+    yPixelLocation: [number, number, number, number],
     iz: number
   ): number {
-    const { dp: dx, ip0: ix0, ip1: ix1 } = xPixelLocation;
-    const { dp: dy, ip0: iy0, ip1: iy1 } = yPixelLocation;
+    const [px, dx, ix0, ix1] = xPixelLocation;
+    const [py, dy, iy0, iy1] = yPixelLocation;
 
     // p0 p1
     // p2 p3
@@ -227,7 +220,10 @@ export default class RawData {
     return value;
   }
 
-  private getPixelLocation(p: number, size: number): PixelLocation {
+  private getPixelLocation(
+    p: number,
+    size: number
+  ): [number, number, number, number] {
     const fp = p - Math.floor(p);
     let dp;
     let ip0;
@@ -249,7 +245,7 @@ export default class RawData {
       ip0 = Math.floor(p);
       ip1 = ip0 + 1;
     }
-    return { p, dp, ip0, ip1 };
+    return [p, dp, ip0, ip1];
   }
 
   /**

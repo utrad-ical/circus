@@ -58,11 +58,11 @@ export default class VoxelCloudToolBase extends DraggableTool {
     const indexOfCloud = indexOfVol.sub(
       new Vector3().fromArray(activeCloud.origin!)
     );
-    // round
+    // floor
     return new Vector3(
-      Math.round(indexOfCloud.x),
-      Math.round(indexOfCloud.y),
-      Math.round(indexOfCloud.z)
+      Math.floor(indexOfCloud.x),
+      Math.floor(indexOfCloud.y),
+      Math.floor(indexOfCloud.z)
     );
   }
 

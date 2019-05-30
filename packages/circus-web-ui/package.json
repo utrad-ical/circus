@@ -31,7 +31,7 @@
     "@babel/preset-typescript": "^7.0.0",
     "@smikitky/rb-components": "^5.4.4",
     "@utrad-ical/circus-lib": "^0.2.1",
-    "@utrad-ical/circus-rs": "github:utrad-ical/circus-rs#v0.23.0",
+    "@utrad-ical/circus-rs": "github:utrad-ical/circus-rs#v0.23.1",
     "axios": "^0.15.2",
     "babel-core": "^6.26.3",
     "babel-eslint": "^8.1.2",

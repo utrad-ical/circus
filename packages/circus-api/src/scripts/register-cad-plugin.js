@@ -60,7 +60,9 @@ const main = async (options, validator, models) => {
     pluginId,
     pluginName: manifest.pluginName,
     version: manifest.version,
-    description: manifest.description || ''
+    description: manifest.description || '',
+    icon: manifest.icon,
+    displayStrategy: manifest.displayStrategy
   };
 
   const existing = await models.plugin.find({

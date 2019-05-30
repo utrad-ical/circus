@@ -51,10 +51,10 @@ const HomePage = props => (
     <h1>Welcome to CIRCUS!</h1>
     <HomeMenu>
       <Menu
-        link="/browse/case"
-        icon="case-search"
-        title="Case Search"
-        description="Search and edit existing cases."
+        link="/import-series"
+        icon="series-import"
+        title="Series Import"
+        description="Upload DICOM image files directly via the browser."
       />
       <Menu
         link="/browse/series"
@@ -63,16 +63,16 @@ const HomePage = props => (
         description="Search and edit existing cases."
       />
       <Menu
+        link="/browse/case"
+        icon="case-search"
+        title="Case Search"
+        description="Search and edit existing cases."
+      />
+      <Menu
         link="/browse/plugin-jobs"
         icon="job-search"
         title="Plug-in Job Search"
         description="Search and view CAD results."
-      />
-      <Menu
-        link="/import-series"
-        icon="series-import"
-        title="Series Import"
-        description="Upload DICOM image files directly via the browser."
       />
     </HomeMenu>
     <Profile />

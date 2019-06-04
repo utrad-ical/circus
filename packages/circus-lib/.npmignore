@@ -5,3 +5,4 @@ tsconfig.json
 *.test.ts
 .vscode
 .editorconfig
+.prettierignore

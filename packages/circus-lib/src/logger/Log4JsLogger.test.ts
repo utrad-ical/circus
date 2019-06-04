@@ -15,12 +15,12 @@ describe('Log4JsLogger', () => {
   });
 
   describe('defaults', () => {
-    it('must do logging to memory as default', async () => {
+    it('must do logging to memory by default', async () => {
       Log4JsLogger.configured = false;
       Log4JsLogger.configure(null);
       const logger = new Log4JsLogger();
 
-      const message = 'Something trace content';
+      const message = 'Some trace content';
       logger.trace(message);
 
       expect(
@@ -53,13 +53,11 @@ describe('Log4JsLogger', () => {
       Log4JsLogger.configure(null);
       const logger = new Log4JsLogger();
 
-      logger.info('Something info content');
-
+      logger.info('Some info content');
       await sleep(100);
 
       const log = await fs.readFile(path.join(logDir, 'default.log'), 'utf8');
-
-      expect(log).toMatch(/Something info content/);
+      expect(log).toMatch(/Some info content/);
     });
 
     it('must default with overwrite config', async () => {
@@ -70,18 +68,17 @@ describe('Log4JsLogger', () => {
         }
       });
       const logger = new Log4JsLogger();
-      const message = 'Something error content';
+      const message = 'Some error content';
       logger.error(message);
 
       await sleep(100);
 
       const log = await fs.readFile(path.join(logDir, 'default.log'), 'utf8');
-
       expect(log).not.toMatch(/error/);
     });
   });
 
-  describe('normal', () => {
+  describe('configured', () => {
     const log4jsConfig = {
       appenders: {
         off: { type: 'logLevelFilter', appender: 'console', level: 'off' },
@@ -105,22 +102,22 @@ describe('Log4JsLogger', () => {
       Log4JsLogger.configure(log4jsConfig);
       const logger = new Log4JsLogger({ category: 'file' });
 
-      logger.trace('Something trace content');
-      logger.debug('Something debug content');
-      logger.info('Something info content');
-      logger.warn('Something warn content');
-      logger.error('Something error content');
-      logger.fatal('Something fatal content');
+      logger.trace('Some trace content');
+      logger.debug('Some debug content');
+      logger.info('Some info content');
+      logger.warn('Some warn content');
+      logger.error('Some error content');
+      logger.fatal('Some fatal content');
 
       await sleep(100);
 
       const log = await fs.readFile(path.join(logDir, 'file.log'), 'utf8');
-      expect(log).toMatch(/Something trace content/);
-      expect(log).toMatch(/Something debug content/);
-      expect(log).toMatch(/Something info content/s);
-      expect(log).toMatch(/Something warn content/s);
-      expect(log).toMatch(/Something error content/s);
-      expect(log).toMatch(/Something fatal content/s);
+      expect(log).toMatch(/Some trace content/);
+      expect(log).toMatch(/Some debug content/);
+      expect(log).toMatch(/Some info content/);
+      expect(log).toMatch(/Some warn content/);
+      expect(log).toMatch(/Some error content/);
+      expect(log).toMatch(/Some fatal content/);
     });
   });
 });

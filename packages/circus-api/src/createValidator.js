@@ -4,6 +4,7 @@ import fs from 'fs-extra';
 import yaml from 'js-yaml';
 import semver from 'semver';
 import * as path from 'path';
+import { isDicomUid } from '@utrad-ical/circus-lib/lib/validation';
 
 const loadSchemaFiles = async schemaRoot => {
   // Search all the schema YAML files under the root directory
@@ -31,12 +32,7 @@ const loadSchemaFiles = async schemaRoot => {
 const intOrRange = '((0|[1-9][0-9]*)|(0|[1-9][0-9]*)-(0|[1-9][0-9]*))';
 
 const customFormats = {
-  dicomUid: s =>
-    typeof s === 'string' &&
-    s.length <= 64 &&
-    // /^(0|[1-9][0-9]*)(\.(0|[1-9][0-9]*))+$/.test(s),
-    // This loose regex allows nonstandard components like `00` to appear in a UID.
-    /^[0-9]+(\.[0-9]+)+$/.test(s),
+  dicomUid: s => isDicomUid(s, false),
   multiIntegerRange: new RegExp(`^${intOrRange}(,${intOrRange})*$`),
   color: /^\#[0-9a-f]{6}$/,
   kebab: /^([a-z0-9]+\-)*[a-z0-9]+$/,

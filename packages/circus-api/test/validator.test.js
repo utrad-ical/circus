@@ -37,7 +37,11 @@ describe('Validator', function() {
     it('dicomUid', async function() {
       await testFormat(
         'dicomUid',
-        ['1.2.840.10008.2000.11111.222.33333'],
+        [
+          '1.2.840.10008.2000.11111.222.33333',
+          // This contains nonstandard component `00`, but we'll accept this
+          '11.00.33.4444.333355'
+        ],
         ['11..22']
       );
     });

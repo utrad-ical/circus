@@ -1,6 +1,6 @@
 import koa from 'koa';
 import httpStatus from 'http-status';
-import { isUID } from '../../../common/ValidatorRules';
+import { isDicomUid } from '@utrad-ical/circus-lib/lib/validation';
 import Logger from '../../helper/logger/Logger';
 import {
   VolumeProvider,
@@ -35,7 +35,7 @@ export default function loadVolumeProvider({
 
   const main: koa.Middleware = async function(ctx, next): Promise<void> {
     const series = ctx.params.sid;
-    if (!isUID(series)) {
+    if (!isDicomUid(series)) {
       ctx.throw(httpStatus.BAD_REQUEST, 'Invalid series UID');
     }
 

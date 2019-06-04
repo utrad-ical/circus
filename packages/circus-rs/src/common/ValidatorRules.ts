@@ -1,18 +1,6 @@
 // Additional validator functions which are specific to CIRCUS RS projects
 
 /**
- * Validator function which checks the input is
- * a valid UID (eg, series instance UID)
- */
-export function isUID(input: string): boolean {
-  return (
-    typeof input === 'string' &&
-    !!input.match(/^((0|[1-9]\d*)\.)*(0|[1-9]\d*)$/) &&
-    input.length <= 64
-  );
-}
-
-/**
  * Generates a validator function which checks the input is
  * a valid number tuple (eg. '2,3,5')
  * @param count

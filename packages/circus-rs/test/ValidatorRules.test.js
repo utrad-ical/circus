@@ -4,19 +4,6 @@ const v = require('../src/common/ValidatorRules');
 const assert = require('chai').assert;
 
 describe('ValidatorRules', function() {
-  it('#isUID', function() {
-    assert.isTrue(v.isUID('0.0.1'));
-    assert.isTrue(v.isUID('2.3.231.2345.33.888'));
-    assert.isTrue(v.isUID('1111.2222.3333.4444.5555.6666.7777.8888.9999'));
-    assert.isFalse(v.isUID('0.0.1x'));
-    assert.isFalse(v.isUID('.1.2'));
-    assert.isFalse(v.isUID('1.5.'));
-    assert.isFalse(v.isUID('1111.222.333..4.5.6'));
-    const uid64 = '1.'.repeat(31) + '2';
-    assert.isTrue(v.isUID(uid64));
-    assert.isFalse(v.isUID(uid64 + '.3333'));
-  });
-
   it('#isTuple', function() {
     const t3 = v.isTuple(3);
     assert.isTrue(t3('1,2,3'));

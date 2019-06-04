@@ -1,6 +1,6 @@
 import koa from 'koa';
 import compose from 'koa-compose';
-import { isUID } from '../../../common/ValidatorRules';
+import { isDicomUid } from '@utrad-ical/circus-lib/lib/validation';
 import httpStatus from 'http-status';
 import validate from '../middleware/validate';
 import ipBasedAccessControl from '../middleware/ipBasedAccessControl';
@@ -22,7 +22,9 @@ export default function issueSeriesAccessToken(
 ): koa.Middleware {
   const { logger, authorizer, ipFilter } = options;
 
-  const validator = validate({ series: ['Series UID', null, isUID, null] });
+  const validator = validate({
+    series: ['Series UID', null, s => isDicomUid(s), null]
+  });
 
   const main: koa.Middleware = async function(ctx, next): Promise<void> {
     const series: string = ctx.request.query.series;

@@ -17,9 +17,7 @@ describe('StaticDicomFileRepository', () => {
     const dr = new StaticDicomFileRepository({ dataDir });
     const newDir = path.join(dataDir, 'new');
     const series = await dr.getSeries('new');
-    const a = new Uint8Array(
-      [].map.call('abcde', (c: string) => c.charCodeAt(0))
-    );
+    const a = new Uint8Array('abcde'.split('').map(c => c.charCodeAt(0)));
     await series.save(1, a.buffer as ArrayBuffer);
     const result = await fs.readFile(path.join(newDir, '00000001.dcm'), 'utf8');
     expect(result).toBe('abcde');

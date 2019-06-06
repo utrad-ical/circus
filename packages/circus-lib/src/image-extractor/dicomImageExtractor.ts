@@ -23,6 +23,7 @@ type DicomDataset = {
     [tag: string]: {
       dataOffset: number;
       length: number;
+      fragments: any;
     };
   };
   byteArray: Uint8Array;
@@ -246,10 +247,11 @@ function extractLosslessJpegPixels(
 
   // fetch pixel data and decompress
   const pixelDataElement = dataset.elements['x7fe00010'];
-  const frameData = parser.readEncapsulatedPixelData(
+  const frameData = parser.readEncapsulatedPixelDataFromFragments(
     dataset,
     pixelDataElement,
-    0
+    0,
+    pixelDataElement.fragments.length
   );
 
   const pxInfo = pixelFormatInfo(pixelFormat);

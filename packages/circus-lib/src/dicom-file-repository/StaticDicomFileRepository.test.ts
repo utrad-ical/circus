@@ -1,6 +1,6 @@
 import StaticDicomFileRepository from './StaticDicomFileRepository';
-import * as path from 'path';
-import * as fs from 'fs-extra';
+import path from 'path';
+import fs from 'fs-extra';
 
 describe('StaticDicomFileRepository', () => {
   const dataDir = path.resolve(__dirname, '../../testdata/sample-dicom');

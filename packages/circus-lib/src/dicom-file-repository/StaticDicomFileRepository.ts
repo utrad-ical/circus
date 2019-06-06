@@ -1,7 +1,7 @@
 import DicomFileRepository, { SeriesAccessor } from './DicomFileRepository';
-import * as path from 'path';
-import * as fs from 'fs-extra';
-import * as crypto from 'crypto';
+import path from 'path';
+import fs from 'fs-extra';
+import crypto from 'crypto';
 import MultiRange, { multirange } from 'multi-integer-range';
 
 interface Options {

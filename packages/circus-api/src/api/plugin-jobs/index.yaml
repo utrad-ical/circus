@@ -2,6 +2,7 @@ name: PluginJobs
 description: >
   Creates and manages CIRCUS CS Plug-in jobs.
 routes:
+  # Job Management
   - verb: post
     path: /plugin-jobs
     description: >
@@ -29,6 +30,7 @@ routes:
     path: /plugin-jobs/:jobId
     description: >
       Cancels an existing plug-in job.
+  # Search and Fetch Results
   - verb: get
     path: /plugin-jobs
     handler: handleSearch
@@ -52,6 +54,13 @@ routes:
       Creates a new feedback entry for the specified plug-in job.
     requestSchema: pluginJobFeedbackData
     handler: handlePostFeedback
+  # Attachment
+  - verb: get
+    path: /plugin-jobs/:job/attachment/:path+
+    description: >
+      Returns the specified file output from the plug-in.
+    handler: handleGetAttachment
+  # Feedback
   - verb: get
     path: /plugin-jobs/:jobId/feedback
     description: >

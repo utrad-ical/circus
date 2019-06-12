@@ -91,6 +91,19 @@ export const handleGet = ({ models }) => {
   };
 };
 
+export const handleGetAttachment = ({ models, csCore }) => {
+  return async (ctx, next) => {
+    const jobId = ctx.params.jobId;
+    const path = ctx.params.path;
+    if (!path || /\.\./.test(path)) {
+      ctx.throw(status.BAD_REQUEST, 'Invalid path prameter.');
+    }
+    // const job = await models.pluginJob.findByIdOrFail(jobId);
+    // ctx.body = file;
+    ctx.throw(status.NOT_IMPLEMENTED, 'Not implemented');
+  };
+};
+
 export const handlePostFeedback = ({ models }) => {
   return async (ctx, next) => {
     const jobId = ctx.params.jobId;

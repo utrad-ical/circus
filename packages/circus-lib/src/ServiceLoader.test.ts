@@ -57,3 +57,13 @@ test('create with options', async () => {
   const result = await loader.get('fighter');
   expect(result.number).toBe(50);
 });
+
+test('creawte with factory', async () => {
+  interface Services {
+    fighter: 'abc';
+  }
+  const loader = new ServiceLoader<Services>();
+  loader.registerFactory('fighter', async () => 'abc');
+  const result = await loader.get('fighter');
+  expect(result).toBe('abc');
+});

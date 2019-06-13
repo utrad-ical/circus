@@ -1,3 +1,5 @@
+import path from 'path';
+
 interface ModuleConfig {
   [key: string]: { type?: string; options?: any };
 }
@@ -68,11 +70,45 @@ export default class ModuleLoader<T extends object = any> {
     this.services[name] = { type: 'service', service };
   }
 
+  /**
+   * Register a service via a loader function.
+   * @param name The service (interface) name.
+   * @param factory The async loader function to bind.
+   */
   public registerFactory<K extends keyof T>(
     name: K,
     factory: (config: ModuleConfig) => Promise<T[K]>
   ) {
     this.services[name] = { type: 'factory', factory };
+  }
+
+  /**
+   * Register a service with directory-based autoloading.
+   * The concrete type will be determined based on the
+   * `${name}.type` parameter.
+   * For example, `this.registerDirectory('weapon', './weapons', 'Sword')`
+   * will load the deafault weapon from `'./weapons/Sword'`.
+   * If the config has `{ weapon: { type: 'Shuriken' } }`,
+   * it will load from `'./weapons/Shuriken'` instead.
+   * @param name The service (interface) name.
+   * @param directoryPath The path to the directory which holds the
+   *   concrete implementations of the corresponding interface.
+   * @param defaultModuleName The default module name used when
+   *   the `type` parameter is omitted.
+   */
+  public registerDirectory<K extends keyof T>(
+    name: K,
+    directoryPath: string,
+    defaultModuleName: string
+  ) {
+    const loader = async (config: ModuleConfig) => {
+      const module =
+        name in config
+          ? path.join(directoryPath, (config as any)[name].type)
+          : path.join(directoryPath, defaultModuleName);
+      return await this.createFromModule(name, module);
+    };
+    this.registerFactory(name, loader);
   }
 
   /**

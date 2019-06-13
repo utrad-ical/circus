@@ -67,3 +67,5 @@ test('creawte with factory', async () => {
   const result = await loader.get('fighter');
   expect(result).toBe('abc');
 });
+
+test.skip('create with directory', async () => {});

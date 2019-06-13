@@ -13,18 +13,20 @@ test('simple create', async () => {
 });
 
 test('create with dependency', async () => {
-  const fn = jest.fn();
   class Fighter {
-    constructor(deps: any) {
+    constructor(deps: { weapon?: Weapon }) {
       expect(deps.weapon instanceof Weapon).toBe(true);
     }
+    static dependencies: Array<keyof Services> = ['weapon'];
   }
-  (Fighter as any).dependencies = ['weapon'];
+
+  const fn = jest.fn();
   class Weapon {
     constructor() {
       fn();
     }
   }
+
   interface Services {
     fighter: Fighter;
     weapon: Weapon;

@@ -2,20 +2,15 @@ interface ModuleConfig {
   [key: string]: { type: string; options?: any };
 }
 
-/**
- * This is used to annotate a class or a function and
- * declare their dependencies.
- */
-export const depends = Symbol.for('depends');
-
 export interface Injectable<T> {
-  [depends]: Array<keyof T>;
+  dependencies?: Array<keyof T>;
 }
 
-interface FunctionService<T, S> extends Injectable<T> {
+export interface FunctionService<T, S> extends Injectable<T> {
   (deps: Partial<T>, options?: any): Promise<S>;
 }
-interface ClassService<T, S> extends Injectable<T> {
+
+export interface ClassService<T, S> extends Injectable<T> {
   new (deps: Partial<T>, options?: any): S;
 }
 
@@ -108,11 +103,12 @@ export default class ModuleLoader<T extends object = any> {
   }
 
   private async instanciateService<S>(service: Service<T, S>): Promise<S> {
-    const dependencies = service[depends] || [];
+    const dependencies = service.dependencies || [];
     const deps: Partial<T> = {};
     for (const d of dependencies) {
       deps[d] = await this.get(d);
     }
+
     if (isClass(service)) {
       return new (service as ClassService<T, S>)(deps);
     } else {

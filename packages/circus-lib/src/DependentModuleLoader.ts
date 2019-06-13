@@ -1,3 +1,6 @@
+/**
+ * @deprecated Use ServiceLoader instead.
+ */
 export default class DependentModuleLoader<
   P extends object = any,
   K extends keyof P = keyof P
@@ -36,9 +39,8 @@ export default class DependentModuleLoader<
 
     const counter = this.countReference(name);
     await (Object.keys(counter) as K[])
-      .sort(
-        (a, b) =>
-          counter[a] === counter[b] ? 0 : counter[a] < counter[b] ? 1 : -1
+      .sort((a, b) =>
+        counter[a] === counter[b] ? 0 : counter[a] < counter[b] ? 1 : -1
       )
       .reduce(
         (p: Promise<P[K] | void>, m) => p.then(() => this.load(m)),

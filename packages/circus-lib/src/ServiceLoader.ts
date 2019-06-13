@@ -1,5 +1,5 @@
 interface ModuleConfig {
-  [key: string]: { type: string; options?: any };
+  [key: string]: { type?: string; options?: any };
 }
 
 export interface Injectable<T> {
@@ -91,7 +91,7 @@ export default class ModuleLoader<T extends object = any> {
     const serviceOrFactory: ServiceDef<T, K> = this.services[name]!;
     const service =
       serviceOrFactory.type === 'service'
-        ? await this.instanciateService(serviceOrFactory.service)
+        ? await this.instanciateService(name, serviceOrFactory.service)
         : await serviceOrFactory.factory(this.config);
     this.loadedServices[name] = { status: 'loaded', service };
     return service;
@@ -99,20 +99,26 @@ export default class ModuleLoader<T extends object = any> {
 
   private async createFromModule<K extends keyof T>(name: K, path: string) {
     const module = (await import(path)).default as Service<T, T[K]>;
-    return await this.instanciateService(module);
+    return await this.instanciateService(name, module);
   }
 
-  private async instanciateService<S>(service: Service<T, S>): Promise<S> {
+  private async instanciateService<K extends keyof T, S>(
+    name: K,
+    service: Service<T, S>
+  ): Promise<S> {
     const dependencies = service.dependencies || [];
     const deps: Partial<T> = {};
     for (const d of dependencies) {
       deps[d] = await this.get(d);
     }
 
+    const options: any =
+      name in this.config ? (this.config as any)[name].options : undefined;
+
     if (isClass(service)) {
-      return new (service as ClassService<T, S>)(deps);
+      return new (service as ClassService<T, S>)(deps, options);
     } else {
-      return (service as FunctionService<T, S>)(deps);
+      return (service as FunctionService<T, S>)(deps, options);
     }
   }
 }

@@ -39,3 +39,21 @@ test('create with dependency', async () => {
   expect(result instanceof Fighter).toBe(true);
   expect(fn).toBeCalledTimes(1);
 });
+
+test('create with options', async () => {
+  class Fighter {
+    public number: any;
+    constructor(deps: {}, options: any) {
+      this.number = options;
+    }
+  }
+  interface Services {
+    fighter: Fighter;
+  }
+
+  const config = { fighter: { options: 50 } };
+  const loader = new ServiceLoader<Services>(config);
+  loader.register('fighter', Fighter);
+  const result = await loader.get('fighter');
+  expect(result.number).toBe(50);
+});

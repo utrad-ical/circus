@@ -28,33 +28,60 @@ test('simple creation from function', async () => {
   expect(result.shot()).toBe('bang');
 });
 
-test('create with dependency', async () => {
-  class Fighter {
-    constructor(deps: { weapon?: Weapon }) {
-      expect(deps.weapon instanceof Weapon).toBe(true);
-    }
-    static dependencies = ['weapon'];
-  }
-
-  const fn = jest.fn();
-  class Weapon {
-    constructor() {
-      fn();
-    }
-  }
-
+describe('create with dependency', () => {
+  type Fighter = { attack: () => string };
+  type Weapon = { name: () => string };
   interface Services {
     fighter: Fighter;
     weapon: Weapon;
   }
 
-  const loader = new ServiceLoader<Services>({});
-  loader.register('fighter', Fighter);
-  loader.register('weapon', Weapon);
-  const result = await loader.get('fighter');
-  expect(result).toBeInstanceOf(Fighter);
-  expect(fn).toBeCalledTimes(1);
-  expect.assertions(3);
+  test('using classes', async () => {
+    class Ninja implements Fighter {
+      constructor(deps: { weapon?: Weapon }) {
+        expect(deps.weapon instanceof Shuriken).toBe(true);
+      }
+      attack() {
+        return 'use weapon';
+      }
+      static dependencies = ['weapon'];
+    }
+
+    const fn = jest.fn();
+    class Shuriken implements Weapon {
+      constructor() {
+        fn();
+      }
+      name() {
+        return 'shuriken';
+      }
+    }
+
+    const loader = new ServiceLoader<Services>({});
+    loader.register('fighter', Ninja);
+    loader.register('weapon', Shuriken);
+    const result = await loader.get('fighter');
+    expect(result).toBeInstanceOf(Ninja);
+    expect(fn).toBeCalledTimes(1);
+    expect.assertions(3);
+  });
+
+  test('using functions', async () => {
+    const createNinja = async ({ weapon }: { weapon?: Weapon }) => {
+      return { attack: () => `attacking with my ${weapon!.name()}` };
+    };
+    createNinja.dependencies = ['weapon'];
+
+    const createShuriken = async () => {
+      return { name: () => 'shuriken' };
+    };
+
+    const loader = new ServiceLoader<Services>({});
+    loader.register('fighter', createNinja);
+    loader.register('weapon', createShuriken);
+    const result = await loader.get('fighter');
+    expect(result.attack()).toBe('attacking with my shuriken');
+  });
 });
 
 test('create with options', async () => {

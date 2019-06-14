@@ -1,5 +1,5 @@
-import ServiceLoader, { FunctionService, ClassService } from './ServiceLoader';
 import path from 'path';
+import ServiceLoader, { FunctionService } from './ServiceLoader';
 
 test('simple creation from class', async () => {
   class Fighter {}

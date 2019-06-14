@@ -118,8 +118,11 @@ export default class ModuleLoader<T extends object = any> {
   public async get<K extends keyof T>(name: K): Promise<T[K]> {
     if (name in this.loadedServices) {
       const item: LoadedService<T, K> = this.loadedServices[name]!;
-      if (item.status === 'loading') return await item.promise;
-      return item.service;
+      if (item.status === 'loading') {
+        return await item.promise;
+      } else {
+        return item.service;
+      }
     }
     if (!(name in this.services))
       throw new TypeError(`Service '${name}' is not registered`);

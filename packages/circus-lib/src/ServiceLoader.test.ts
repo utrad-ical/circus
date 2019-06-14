@@ -85,22 +85,42 @@ test('creawte with factory', async () => {
   expect(result).toBe('abc');
 });
 
-const dir = path.join(__dirname, '../testdata/autoload-modules');
-
-test('create with directory', async () => {
+describe('autoloading with registerDirectory', () => {
+  const dir = path.join(__dirname, '../testdata/autoload-modules');
   interface Services {
     food: { eat: () => string };
   }
-  const loader1 = new ServiceLoader<Services>();
-  loader1.registerDirectory('food', dir, 'Biscuit');
-  const biscuit = await loader1.get('food');
-  expect(biscuit.eat()).toBe('biscuit eaten 2 times');
 
-  const options = { food: { type: 'Pudding', options: 5 } };
-  const loader2 = new ServiceLoader<Services>(options);
-  loader2.registerDirectory('food', dir, 'Biscuit');
-  const pudding = await loader2.get('food');
-  expect(pudding.eat()).toBe('pudding eaten 5 times');
+  test('load default type', async () => {
+    const loader1 = new ServiceLoader<Services>();
+    loader1.registerDirectory('food', dir, 'Biscuit');
+    const biscuit = await loader1.get('food');
+    expect(biscuit.eat()).toBe('biscuit eaten 2 times');
+  });
+
+  test('load custom type with config', async () => {
+    const options = { food: { type: 'Pudding', options: 5 } };
+    const loader = new ServiceLoader<Services>(options);
+    loader.registerDirectory('food', dir, 'Biscuit');
+    const pudding = await loader.get('food');
+    expect(pudding.eat()).toBe('pudding eaten 5 times');
+  });
+
+  test('load from module using absolute path', async () => {
+    const typePath = path.join(dir, 'Pudding');
+    const options = { food: { type: typePath, options: 3 } };
+    const loader = new ServiceLoader<Services>(options);
+    loader.registerDirectory('food', dir, 'Biscuit');
+    const pudding = await loader.get('food');
+    expect(pudding.eat()).toBe('pudding eaten 3 times');
+  });
+
+  test('throws when no type is specified', async () => {
+    const options = { food: { options: 5 } }; // type is missing
+    const loader = new ServiceLoader<Services>(options);
+    loader.registerDirectory('food', dir, 'Biscuit');
+    await expect(loader.get('food')).rejects.toThrow(/type/);
+  });
 });
 
 test('dependencies must not be created more than once', async () => {

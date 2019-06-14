@@ -4,15 +4,18 @@ interface ModuleConfig {
   [key: string]: { type?: string; options?: any };
 }
 
-export interface Injectable<T> {
+interface Injectable {
+  // declared as string[] rather than (keyof T)[]
+  // so that implementations can specify their dependencies
+  // without referring to the whole list of services
   dependencies?: string[];
 }
 
-export interface FunctionService<T, S> extends Injectable<T> {
+export interface FunctionService<T, S> extends Injectable {
   (deps: Partial<T>, options?: any): Promise<S>;
 }
 
-export interface ClassService<T, S> extends Injectable<T> {
+export interface ClassService<T, S> extends Injectable {
   new (deps: Partial<T>, options?: any): S;
 }
 
@@ -72,6 +75,7 @@ export default class ModuleLoader<T extends object = any> {
 
   /**
    * Register a service via a loader function.
+   * Use this as a last resort; use `register` whenever possible.
    * @param name The service (interface) name.
    * @param factory The async loader function to bind.
    */
@@ -102,10 +106,17 @@ export default class ModuleLoader<T extends object = any> {
     defaultModuleName: string
   ) {
     const loader = async (config: ModuleConfig) => {
-      const module =
-        name in config
-          ? path.join(directoryPath, (config as any)[name].type)
-          : path.join(directoryPath, defaultModuleName);
+      let module: string;
+      if (name in config) {
+        const type: string | undefined = (config as any)[name].type;
+        if (!type)
+          throw new TypeError(`The type for ${name} is not specified.`);
+        module = /\//.test(type)
+          ? type // reference by absolute path
+          : path.join(directoryPath, (config as any)[name].type);
+      } else {
+        module = path.join(directoryPath, defaultModuleName);
+      }
       return await this.createFromModule(name, module);
     };
     this.registerFactory(name, loader);

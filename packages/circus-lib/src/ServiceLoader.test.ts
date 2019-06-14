@@ -33,7 +33,7 @@ test('create with dependency', async () => {
     constructor(deps: { weapon?: Weapon }) {
       expect(deps.weapon instanceof Weapon).toBe(true);
     }
-    static dependencies: Array<keyof Services> = ['weapon'];
+    static dependencies = ['weapon'];
   }
 
   const fn = jest.fn();
@@ -54,6 +54,7 @@ test('create with dependency', async () => {
   const result = await loader.get('fighter');
   expect(result).toBeInstanceOf(Fighter);
   expect(fn).toBeCalledTimes(1);
+  expect.assertions(3);
 });
 
 test('create with options', async () => {
@@ -110,7 +111,7 @@ test('dependencies must not be created more than once', async () => {
       fn();
       expect(gunlance).toBeInstanceOf(Gunlance);
     }
-    static dependencies: Array<keyof Services> = ['gunlance'];
+    static dependencies = ['gunlance'];
   }
 
   class Gunner {
@@ -118,7 +119,7 @@ test('dependencies must not be created more than once', async () => {
       fn();
       expect(gun).toBeInstanceOf(Gun);
     }
-    static dependencies: Array<keyof Services> = ['gun'];
+    static dependencies = ['gun'];
   }
 
   class Gunlance {
@@ -126,7 +127,7 @@ test('dependencies must not be created more than once', async () => {
       fn();
       expect(gun).toBeInstanceOf(Gun);
     }
-    static dependencies: Array<keyof Services> = ['gun'];
+    static dependencies = ['gun'];
   }
 
   class Gun {

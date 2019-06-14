@@ -5,7 +5,7 @@ interface ModuleConfig {
 }
 
 export interface Injectable<T> {
-  dependencies?: Array<keyof T>;
+  dependencies?: string[];
 }
 
 export interface FunctionService<T, S> extends Injectable<T> {
@@ -147,7 +147,7 @@ export default class ModuleLoader<T extends object = any> {
     name: K,
     service: Service<T, S>
   ): Promise<S> {
-    const dependencies = service.dependencies || [];
+    const dependencies = (service.dependencies as (keyof T)[]) || [];
     const deps: Partial<T> = {};
     for (const d of dependencies) {
       deps[d] = await this.get(d);

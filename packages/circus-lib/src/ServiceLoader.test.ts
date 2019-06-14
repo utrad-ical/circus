@@ -1,4 +1,4 @@
-import ServiceLoader from './ServiceLoader';
+import ServiceLoader, { FunctionService, ClassService } from './ServiceLoader';
 import path from 'path';
 
 test('simple creation from class', async () => {
@@ -14,18 +14,18 @@ test('simple creation from class', async () => {
 });
 
 test('simple creation from function', async () => {
-  type Hasher = (str: string) => string;
+  type Gun = { shot: () => string };
   interface Services {
-    hasher: Hasher;
+    gun: Gun;
   }
-  const myHash = async (deps: any) => {
+  const createGun: FunctionService<Gun, {}> = async deps => {
     expect(deps).toEqual({});
-    return (str: string) => 'abcd0123';
+    return { shot: () => 'bang' };
   };
   const loader = new ServiceLoader<Services>();
-  loader.register('hasher', myHash);
-  const result = await loader.get('hasher');
-  expect(result('a')).toBe('abcd0123');
+  loader.register('gun', createGun);
+  const result = await loader.get('gun');
+  expect(result.shot()).toBe('bang');
 });
 
 test('create with dependency', async () => {
@@ -113,13 +113,6 @@ describe('autoloading with registerDirectory', () => {
     loader.registerDirectory('food', dir, 'Biscuit');
     const pudding = await loader.get('food');
     expect(pudding.eat()).toBe('pudding eaten 3 times');
-  });
-
-  test('throws when no type is specified', async () => {
-    const options = { food: { options: 5 } }; // type is missing
-    const loader = new ServiceLoader<Services>(options);
-    loader.registerDirectory('food', dir, 'Biscuit');
-    await expect(loader.get('food')).rejects.toThrow(/type/);
   });
 });
 

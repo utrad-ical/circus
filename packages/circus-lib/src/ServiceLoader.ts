@@ -11,12 +11,12 @@ interface Injectable {
   dependencies?: string[];
 }
 
-export interface FunctionService<T, S> extends Injectable {
-  (deps: Partial<T>, options?: any): Promise<S>;
+export interface FunctionService<S, D = object> extends Injectable {
+  (deps: D, options?: any): Promise<S>;
 }
 
-export interface ClassService<T, S> extends Injectable {
-  new (deps: Partial<T>, options?: any): S;
+export interface ClassService<S, D = object> extends Injectable {
+  new (deps: D, options?: any): S;
 }
 
 /**
@@ -24,10 +24,10 @@ export interface ClassService<T, S> extends Injectable {
  * A service is provided with dependendent services
  * and the options as defined in configuration.
  */
-type Service<T, S> = FunctionService<T, S> | ClassService<T, S>;
+type Service<S, D> = FunctionService<S, D> | ClassService<S, D>;
 
 type ServiceDef<T, K extends keyof T> =
-  | { type: 'service'; service: Service<T, T[K]> }
+  | { type: 'service'; service: Service<T[K], Partial<T>> }
   | { type: 'factory'; factory: (config: ModuleConfig) => Promise<T[K]> };
 
 type LoadedService<T, K extends keyof T> =
@@ -69,7 +69,10 @@ export default class ModuleLoader<T extends object = any> {
    *   as an array of strings.
    *   These dependencies will be automatically injected.
    */
-  public register<K extends keyof T>(name: K, service: Service<T, T[K]>): void {
+  public register<K extends keyof T>(
+    name: K,
+    service: Service<T[K], Partial<T>>
+  ): void {
     this.services[name] = { type: 'service', service };
   }
 
@@ -108,9 +111,7 @@ export default class ModuleLoader<T extends object = any> {
     const loader = async (config: ModuleConfig) => {
       let module: string;
       if (name in config) {
-        const type: string | undefined = (config as any)[name].type;
-        if (!type)
-          throw new TypeError(`The type for ${name} is not specified.`);
+        const type: string = (config as any)[name].type || defaultModuleName;
         module = /\//.test(type)
           ? type // reference by absolute path
           : path.join(directoryPath, (config as any)[name].type);
@@ -150,14 +151,14 @@ export default class ModuleLoader<T extends object = any> {
   }
 
   private async createFromModule<K extends keyof T>(name: K, path: string) {
-    const module = (await import(path)).default as Service<T, T[K]>;
+    const module = (await import(path)).default as Service<T[K], Partial<T>>;
     return await this.instanciateService(name, module);
   }
 
-  private async instanciateService<K extends keyof T, S>(
+  private async instanciateService<K extends keyof T>(
     name: K,
-    service: Service<T, S>
-  ): Promise<S> {
+    service: Service<T[K], Partial<T>>
+  ): Promise<T[K]> {
     const dependencies = (service.dependencies as (keyof T)[]) || [];
     const deps: Partial<T> = {};
     for (const d of dependencies) {
@@ -168,9 +169,9 @@ export default class ModuleLoader<T extends object = any> {
       name in this.config ? (this.config as any)[name].options : undefined;
 
     if (isClass(service)) {
-      return new (service as ClassService<T, S>)(deps, options);
+      return new (service as ClassService<T[K], Partial<T>>)(deps, options);
     } else {
-      return (service as FunctionService<T, S>)(deps, options);
+      return (service as FunctionService<T[K], Partial<T>>)(deps, options);
     }
   }
 }

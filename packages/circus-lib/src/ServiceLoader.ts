@@ -125,12 +125,15 @@ export default class ModuleLoader<T extends object = any> {
     if (!(name in this.services))
       throw new TypeError(`Service '${name}' is not registered`);
     const serviceOrFactory: ServiceDef<T, K> = this.services[name]!;
-    const service =
+    const promise =
       serviceOrFactory.type === 'service'
-        ? await this.instanciateService(name, serviceOrFactory.service)
-        : await serviceOrFactory.factory(this.config);
-    this.loadedServices[name] = { status: 'loaded', service };
-    return service;
+        ? this.instanciateService(name, serviceOrFactory.service)
+        : serviceOrFactory.factory(this.config);
+    this.loadedServices[name] = { status: 'loading', promise };
+    promise.then(service => {
+      this.loadedServices[name] = { status: 'loaded', service };
+    });
+    return promise;
   }
 
   private async createFromModule<K extends keyof T>(name: K, path: string) {

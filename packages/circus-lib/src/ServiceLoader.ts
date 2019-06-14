@@ -11,11 +11,11 @@ interface Injectable {
   dependencies?: string[];
 }
 
-export interface FunctionService<S, D = object> extends Injectable {
+export interface FunctionService<S, D = any> extends Injectable {
   (deps: D, options?: any): Promise<S>;
 }
 
-export interface ClassService<S, D = object> extends Injectable {
+export interface ClassService<S, D = any> extends Injectable {
   new (deps: D, options?: any): S;
 }
 
@@ -24,17 +24,17 @@ export interface ClassService<S, D = object> extends Injectable {
  * A service is provided with dependendent services
  * and the options as defined in configuration.
  */
-type Service<S, D> = FunctionService<S, D> | ClassService<S, D>;
+type Service<S, D = any> = FunctionService<S, D> | ClassService<S, D>;
 
 type ServiceDef<T, K extends keyof T> =
-  | { type: 'service'; service: Service<T[K], Partial<T>> }
+  | { type: 'service'; service: Service<T[K]> }
   | { type: 'factory'; factory: (config: ModuleConfig) => Promise<T[K]> };
 
 type LoadedService<T, K extends keyof T> =
   | { status: 'loaded'; service: T[K] }
   | { status: 'loading'; promise: Promise<T[K]> };
 
-function isClass<T, S>(fn: any): fn is ClassService<T, S> {
+function isClass<S, D>(fn: any): fn is ClassService<S, D> {
   return /^\s*class/.test(fn.toString());
 }
 
@@ -69,10 +69,7 @@ export default class ModuleLoader<T extends object = any> {
    *   as an array of strings.
    *   These dependencies will be automatically injected.
    */
-  public register<K extends keyof T>(
-    name: K,
-    service: Service<T[K], Partial<T>>
-  ): void {
+  public register<K extends keyof T>(name: K, service: Service<T[K]>): void {
     this.services[name] = { type: 'service', service };
   }
 
@@ -151,13 +148,13 @@ export default class ModuleLoader<T extends object = any> {
   }
 
   private async createFromModule<K extends keyof T>(name: K, path: string) {
-    const module = (await import(path)).default as Service<T[K], Partial<T>>;
+    const module = (await import(path)).default as Service<T[K]>;
     return await this.instanciateService(name, module);
   }
 
   private async instanciateService<K extends keyof T>(
     name: K,
-    service: Service<T[K], Partial<T>>
+    service: Service<T[K]>
   ): Promise<T[K]> {
     const dependencies = (service.dependencies as (keyof T)[]) || [];
     const deps: Partial<T> = {};
@@ -169,9 +166,9 @@ export default class ModuleLoader<T extends object = any> {
       name in this.config ? (this.config as any)[name].options : undefined;
 
     if (isClass(service)) {
-      return new (service as ClassService<T[K], Partial<T>>)(deps, options);
+      return new (service as ClassService<T[K]>)(deps, options);
     } else {
-      return (service as FunctionService<T[K], Partial<T>>)(deps, options);
+      return (service as FunctionService<T[K]>)(deps, options);
     }
   }
 }

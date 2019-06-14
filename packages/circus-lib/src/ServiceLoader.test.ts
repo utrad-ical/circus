@@ -1,5 +1,5 @@
 import path from 'path';
-import ServiceLoader, { FunctionService } from './ServiceLoader';
+import ServiceLoader, { FunctionService, ClassService } from './ServiceLoader';
 
 test('simple creation from class', async () => {
   class Fighter {}
@@ -37,15 +37,15 @@ describe('create with dependency', () => {
   }
 
   test('using classes', async () => {
-    class Ninja implements Fighter {
-      constructor(deps: { weapon?: Weapon }) {
+    const Ninja: ClassService<Fighter> = class implements Fighter {
+      constructor(deps: { weapon: Weapon }) {
         expect(deps.weapon instanceof Shuriken).toBe(true);
       }
       attack() {
         return 'use weapon';
       }
       static dependencies = ['weapon'];
-    }
+    };
 
     const fn = jest.fn();
     class Shuriken implements Weapon {
@@ -67,12 +67,14 @@ describe('create with dependency', () => {
   });
 
   test('using functions', async () => {
-    const createNinja = async ({ weapon }: { weapon?: Weapon }) => {
-      return { attack: () => `attacking with my ${weapon!.name()}` };
+    const createNinja: FunctionService<Fighter, { weapon: Weapon }> = async ({
+      weapon
+    }) => {
+      return { attack: () => `attacking with my ${weapon.name()}` };
     };
     createNinja.dependencies = ['weapon'];
 
-    const createShuriken = async () => {
+    const createShuriken: FunctionService<Weapon> = async () => {
       return { name: () => 'shuriken' };
     };
 
@@ -147,7 +149,7 @@ test('dependencies must not be created more than once', async () => {
   const fn = jest.fn();
 
   class Gunlancer {
-    constructor({ gunlance }: Partial<Services>) {
+    constructor({ gunlance }: { gunlance: Gunlance }) {
       fn();
       expect(gunlance).toBeInstanceOf(Gunlance);
     }
@@ -155,7 +157,7 @@ test('dependencies must not be created more than once', async () => {
   }
 
   class Gunner {
-    constructor({ gun }: Partial<Services>) {
+    constructor({ gun }: { gun: Gun }) {
       fn();
       expect(gun).toBeInstanceOf(Gun);
     }
@@ -163,7 +165,7 @@ test('dependencies must not be created more than once', async () => {
   }
 
   class Gunlance {
-    constructor({ gun }: Partial<Services>) {
+    constructor({ gun }: { gun: Gun }) {
       fn();
       expect(gun).toBeInstanceOf(Gun);
     }

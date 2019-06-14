@@ -119,8 +119,7 @@ export default class ModuleLoader<T extends object = any> {
     if (name in this.loadedServices) {
       const item: LoadedService<T, K> = this.loadedServices[name]!;
       if (item.status === 'loading') return await item.promise;
-      else if (item.status === 'loaded') return item.service;
-      else throw new Error();
+      return item.service;
     }
     if (!(name in this.services))
       throw new TypeError(`Service '${name}' is not registered`);

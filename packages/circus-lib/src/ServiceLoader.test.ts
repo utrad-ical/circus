@@ -1,16 +1,31 @@
 import ServiceLoader from './ServiceLoader';
 import path from 'path';
 
-test('simple create', async () => {
+test('simple creation from class', async () => {
   class Fighter {}
   interface Services {
-    fighter: Fighter;
+    fighter: Fighter; // as class
   }
 
   const loader = new ServiceLoader<Services>({});
   loader.register('fighter', Fighter);
   const result = await loader.get('fighter');
   expect(result).toBeInstanceOf(Fighter);
+});
+
+test('simple creation from function', async () => {
+  type Hasher = (str: string) => string;
+  interface Services {
+    hasher: Hasher;
+  }
+  const myHash = async (deps: any) => {
+    expect(deps).toEqual({});
+    return (str: string) => 'abcd0123';
+  };
+  const loader = new ServiceLoader<Services>();
+  loader.register('hasher', myHash);
+  const result = await loader.get('hasher');
+  expect(result('a')).toBe('abcd0123');
 });
 
 test('create with dependency', async () => {
@@ -143,4 +158,9 @@ test('dependencies must not be created more than once', async () => {
   expect(gunner1).toBeInstanceOf(Gunner);
   expect(gunner1).toBe(gunner2);
   expect(fn).toBeCalledTimes(4);
+});
+
+test('throws for unregistered service', async () => {
+  const loader = new ServiceLoader<any>();
+  await expect(loader.get('weapon')).rejects.toThrow(/not registered/);
 });

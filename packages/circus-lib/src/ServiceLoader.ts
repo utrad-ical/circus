@@ -109,8 +109,8 @@ export default class ModuleLoader<T extends object = any> {
       let module: string;
       if (name in config) {
         const type: string = (config as any)[name].type || defaultModuleName;
-        module = /\//.test(type)
-          ? type // reference by absolute path
+        module = /\/|\\/.test(type)
+          ? type // reference by module path
           : path.join(directoryPath, (config as any)[name].type);
       } else {
         module = path.join(directoryPath, defaultModuleName);

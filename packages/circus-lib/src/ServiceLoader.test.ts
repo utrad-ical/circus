@@ -18,7 +18,7 @@ test('simple creation from function', async () => {
   interface Services {
     gun: Gun;
   }
-  const createGun: FunctionService<Gun, {}> = async deps => {
+  const createGun: FunctionService<Gun, {}> = async (options, deps) => {
     expect(deps).toEqual({});
     return { shot: () => 'bang' };
   };
@@ -38,7 +38,7 @@ describe('create with dependency', () => {
 
   test('using classes', async () => {
     const Ninja: ClassService<Fighter> = class implements Fighter {
-      constructor(deps: { weapon: Weapon }) {
+      constructor(options: any, deps: { weapon: Weapon }) {
         expect(deps.weapon instanceof Shuriken).toBe(true);
       }
       attack() {
@@ -67,9 +67,10 @@ describe('create with dependency', () => {
   });
 
   test('using functions', async () => {
-    const createNinja: FunctionService<Fighter, { weapon: Weapon }> = async ({
-      weapon
-    }) => {
+    const createNinja: FunctionService<Fighter, { weapon: Weapon }> = async (
+      options: any,
+      { weapon }
+    ) => {
       return { attack: () => `attacking with my ${weapon.name()}` };
     };
     createNinja.dependencies = ['weapon'];
@@ -89,7 +90,7 @@ describe('create with dependency', () => {
 test('create with options', async () => {
   class Fighter {
     public number: any;
-    constructor(deps: {}, options: any) {
+    constructor(options: number, deps: {}) {
       this.number = options;
     }
   }
@@ -149,7 +150,7 @@ test('dependencies must not be created more than once', async () => {
   const fn = jest.fn();
 
   class Gunlancer {
-    constructor({ gunlance }: { gunlance: Gunlance }) {
+    constructor(options: any, { gunlance }: { gunlance: Gunlance }) {
       fn();
       expect(gunlance).toBeInstanceOf(Gunlance);
     }
@@ -157,7 +158,7 @@ test('dependencies must not be created more than once', async () => {
   }
 
   class Gunner {
-    constructor({ gun }: { gun: Gun }) {
+    constructor(options: any, { gun }: { gun: Gun }) {
       fn();
       expect(gun).toBeInstanceOf(Gun);
     }
@@ -165,7 +166,7 @@ test('dependencies must not be created more than once', async () => {
   }
 
   class Gunlance {
-    constructor({ gun }: { gun: Gun }) {
+    constructor(options: any, { gun }: { gun: Gun }) {
       fn();
       expect(gun).toBeInstanceOf(Gun);
     }

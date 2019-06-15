@@ -1,5 +1,5 @@
 export default class Pudding {
-  constructor(_deps: {}, private times: number = 2) {}
+  constructor(private times: number = 2, deps: any) {}
   public eat() {
     return `pudding eaten ${this.times} times`;
   }

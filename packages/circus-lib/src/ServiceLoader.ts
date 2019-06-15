@@ -12,11 +12,11 @@ interface Injectable {
 }
 
 export interface FunctionService<S, D = any> extends Injectable {
-  (deps: D, options?: any): Promise<S>;
+  (options: any, deps: D): Promise<S>;
 }
 
 export interface ClassService<S, D = any> extends Injectable {
-  new (deps: D, options?: any): S;
+  new (options: any, deps: D): S;
 }
 
 /**
@@ -166,9 +166,9 @@ export default class ModuleLoader<T extends object = any> {
       name in this.config ? (this.config as any)[name].options : undefined;
 
     if (isClass(service)) {
-      return new (service as ClassService<T[K]>)(deps, options);
+      return new (service as ClassService<T[K]>)(options, deps);
     } else {
-      return (service as FunctionService<T[K]>)(deps, options);
+      return (service as FunctionService<T[K]>)(options, deps);
     }
   }
 }

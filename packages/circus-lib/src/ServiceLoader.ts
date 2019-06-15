@@ -24,7 +24,7 @@ export interface ClassService<S, D = any> extends Injectable {
  * A service is provided with dependendent services
  * and the options as defined in configuration.
  */
-type Service<S, D = any> = FunctionService<S, D> | ClassService<S, D>;
+export type Service<S, D = any> = FunctionService<S, D> | ClassService<S, D>;
 
 type ServiceDef<T, K extends keyof T> =
   | { type: 'service'; service: Service<T[K]> }

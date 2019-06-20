@@ -1,7 +1,7 @@
 import { FunctionService } from '@utrad-ical/circus-lib';
 import { DaemonController } from './daemon/createDaemonController';
 import { PluginJobRequest } from './interface';
-import PluginJobRegisterer from './job/registerer/PluginJobRegisterer';
+import { PluginJobRegisterer } from './job/registerer/createPluginJobRegisterer';
 import PluginDefinitionAccessor from './plugin-definition-accessor/PluginDefinitionAccessor';
 import Queue, { Item } from './queue/Queue';
 

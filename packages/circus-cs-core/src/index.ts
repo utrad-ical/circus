@@ -1,4 +1,2 @@
-export { default as createCsCore } from './createCsCore';
-
-export { Configuration } from './config/Configuration';
-export { CsCore } from './CsCore';
+export { default as createCsCore, CsCore } from './createCsCore';
+export { default as Configuration } from './config/Configuration';

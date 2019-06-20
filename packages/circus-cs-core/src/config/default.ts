@@ -1,6 +1,6 @@
 import path from 'path';
 import os from 'os';
-import { Configuration } from './Configuration';
+import Configuration from './Configuration';
 
 const defaults: Configuration = {
   jobRunner: {

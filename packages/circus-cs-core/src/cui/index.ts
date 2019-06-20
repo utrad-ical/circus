@@ -1,7 +1,6 @@
 import minimist from 'minimist';
 import chalk from 'chalk';
 import config from '../config';
-import { Configuration } from '../config/Configuration';
 
 const commands: { [key: string]: any } = {
   register: {
@@ -59,10 +58,7 @@ async function boot(commandName: string | undefined, args: any) {
 
   const command = commands[commandName];
 
-  const callFunc: (
-    config: Configuration,
-    args: any
-  ) => Promise<void> = command.module
+  const callFunc: (config: any, args: any) => Promise<void> = command.module
     ? (await import(command.module))[commandName]
     : (await import(`./${commandName}`)).default;
 

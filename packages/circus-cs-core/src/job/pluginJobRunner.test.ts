@@ -44,10 +44,9 @@ describe('pluginJobRunner', () => {
     const pluginDefinitionAccessor = {
       get: async (discardPluginId: string) => {
         const fixedDefinition: PluginDefinition = {
-          pluginId: 'circus-mock/empty',
-          pluginName: 'circus-mock/empty',
+          pluginId: 'circus-mock/empty:1.0',
+          pluginName: 'Empty',
           version: '1.0',
-          dockerImage: 'circus-mock/empty:1.0',
           type: 'CAD'
         };
         return fixedDefinition;
@@ -64,7 +63,7 @@ describe('pluginJobRunner', () => {
     });
 
     const jobRequest: PluginJobRequest = {
-      pluginId: 'circus-mock/empty',
+      pluginId: 'circus-mock/empty:1.0',
       series: [{ seriesUid }]
     };
 
@@ -122,11 +121,10 @@ describe('executePlugin', () => {
   test('runs docker', async () => {
     const runner = new DockerRunner();
     const plugin: PluginDefinition = {
-      pluginId: 'Test',
+      pluginId: 'hello-world',
       pluginName: 'Test',
       version: '1.0.0',
-      type: 'CAD',
-      dockerImage: 'hello-world'
+      type: 'CAD'
     };
     const result = await executePlugin(runner, plugin, __dirname, __dirname);
     expect(result).toContain('Hello from Docker!');

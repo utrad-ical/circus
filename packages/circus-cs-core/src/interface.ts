@@ -39,11 +39,6 @@ export interface PluginDefinition {
   type: 'CAD';
 
   /**
-   * Container identifier.
-   */
-  dockerImage: string;
-
-  /**
    * Runtime to use for this plug-in container.
    */
   runtime?: string;

@@ -8,30 +8,30 @@ import createDaemonController, {
 } from './daemon/createDaemonController';
 import { PluginJobRequest } from './interface';
 import PluginJobReporter from './job/reporter/PluginJobReporter';
-import PluginJobRegisterer from './job/registerer/PluginJobRegisterer';
+import { PluginJobRegisterer } from './job/registerer/createPluginJobRegisterer';
 import { PluginJobRunner } from './job/pluginJobRunner';
 import { MongoClientPool } from './mongoClientPool';
-import Queue from './queue/Queue';
+import Queue from './job/queue/Queue';
 import PluginDefinitionAccessor from './plugin-definition-accessor/PluginDefinitionAccessor';
 import { CsCore } from './createCsCore';
+import DockerRunner from './util/DockerRunner';
 
 /**
  * The list of all dependencies that can be created via ServiceLoader.
  */
 export interface Services {
   logger: Logger;
-  mongoClientPool: MongoClientPool;
   daemonController: DaemonController;
+  pluginDefinitionAccessor: PluginDefinitionAccessor;
+  jobReporter: PluginJobReporter;
   queue: Queue<PluginJobRequest>;
+  mongoClientPool: MongoClientPool;
   dicomFileRepository: DicomFileRepository;
   pluginJobRegisterer: PluginJobRegisterer;
-  jobReporter: PluginJobReporter;
   jobRunner: PluginJobRunner;
-  pluginDefinitionAccessor: PluginDefinitionAccessor;
+  dockerRunner: DockerRunner;
   core: CsCore;
 }
-
-type Dispose = () => Promise<void>;
 
 // Keep this module as clean and simple as possible.
 // Do not try to include any business logic here!
@@ -50,35 +50,49 @@ export default function configureServiceLoader(
     // because this needs to access the whole config content
     return createDaemonController(config as any);
   });
-  serviceLoader.registerModule(
-    'mongoClientPool',
-    path.join(__dirname, 'createMongoClientPool')
-  );
+
+  // The following three services interact with database
   serviceLoader.registerDirectory(
     'pluginDefinitionAccessor',
     path.join(__dirname, 'plugin-definition-accessor'),
     'StaticPluginDefinitionAccessor'
-  );
-  serviceLoader.registerDirectory('queue', './queue', 'MongoQueue');
-  serviceLoader.registerDirectory(
-    'dicomFileRepository',
-    '@utrad-ical/circus-lib/lib/dicom-file-repository',
-    'StaticDicomFileRepository'
-  );
-  serviceLoader.registerDirectory(
-    'pluginJobRegisterer',
-    path.join(__dirname, 'job', 'createPluginJobRegisterer'),
-    'MongoPluginJobRegisterer'
   );
   serviceLoader.registerDirectory(
     'jobReporter',
     path.join(__dirname, 'job', 'reporter'),
     'MongoPluginJobReporter'
   );
+  serviceLoader.registerDirectory('queue', './queue', 'MongoQueue');
+
+  // Used by mongodb-related services
+  serviceLoader.registerModule(
+    'mongoClientPool',
+    path.join(__dirname, 'createMongoClientPool')
+  );
+
+  // DICOM file repository
+  serviceLoader.registerDirectory(
+    'dicomFileRepository',
+    '@utrad-ical/circus-lib/lib/dicom-file-repository',
+    'StaticDicomFileRepository'
+  );
+
+  // Misc 'singleton' modules
+  serviceLoader.registerModule(
+    'pluginJobRegisterer',
+    path.join(__dirname, 'job', 'createPluginJobRegisterer')
+  );
   serviceLoader.registerModule(
     'jobRunner',
     path.join(__dirname, 'job', 'pluginJobRunner')
   );
+  serviceLoader.registerModule(
+    'dockerRunner',
+    path.join(__dirname, 'util', 'DockerRunner')
+  );
+
+  // "the facade"
   serviceLoader.registerModule('core', path.join(__dirname, 'createCsCore'));
+
   return serviceLoader;
 }

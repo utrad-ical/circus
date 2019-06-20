@@ -1,7 +1,7 @@
 import Queue from './Queue';
 import mongo from 'mongodb';
-import { testClientPool } from '../testHelper';
-import { MongoClientPool } from '../mongoClientPool';
+import { testClientPool } from '../../testHelper';
+import { MongoClientPool } from '../../mongoClientPool';
 import createMongoQueue from './MongoQueue';
 
 describe('Queue system: Mongo', () => {

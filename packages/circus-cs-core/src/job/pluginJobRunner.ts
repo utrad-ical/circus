@@ -5,9 +5,9 @@ import DockerRunner from '../util/DockerRunner';
 import { DicomFileRepository } from '@utrad-ical/circus-lib/lib/dicom-file-repository';
 import pluginResultsValidator from './pluginResultsValidator';
 import { MultiRange } from 'multi-integer-range';
-import { PluginDefinitionAccessor } from '../CsCore';
 import { FunctionService } from '@utrad-ical/circus-lib';
 import PluginJobReporter from './reporter/PluginJobReporter';
+import PluginDefinitionAccessor from '../plugin-definition-accessor/PluginDefinitionAccessor';
 
 export interface PluginJobRunner {
   run: (jobId: string, job: PluginJobRequest) => Promise<boolean>;
@@ -21,6 +21,7 @@ const pluginJobRunner: FunctionService<
     jobReporter: PluginJobReporter;
     dicomRepository: DicomFileRepository;
     pluginDefinitionAccessor: Pick<PluginDefinitionAccessor, 'get'>;
+    dockerRunner: DockerRunner;
   }
 > = async (
   options: {
@@ -28,19 +29,19 @@ const pluginJobRunner: FunctionService<
     resultsDirectory: string;
     removeTemporaryDirectory?: boolean;
   },
-  deps: {
-    jobReporter: PluginJobReporter;
-    dicomRepository: DicomFileRepository;
-    pluginDefinitionAccessor: Pick<PluginDefinitionAccessor, 'get'>;
-  }
+  deps
 ) => {
   const {
     workingDirectory,
     resultsDirectory,
     removeTemporaryDirectory
   } = options;
-  const { dicomRepository, pluginDefinitionAccessor, jobReporter } = deps;
-  const dockerRunner = new DockerRunner();
+  const {
+    dicomRepository,
+    pluginDefinitionAccessor,
+    jobReporter,
+    dockerRunner
+  } = deps;
 
   const baseDir = (jobId: string) => {
     if (typeof jobId !== 'string' || !jobId.length) throw new Error();
@@ -125,7 +126,8 @@ const pluginJobRunner: FunctionService<
 pluginJobRunner.dependencies = [
   'jobReporter',
   'dicomFileRepository',
-  'pluginDefinitionAccessor'
+  'pluginDefinitionAccessor',
+  'dockerRunner'
 ];
 export default pluginJobRunner;
 

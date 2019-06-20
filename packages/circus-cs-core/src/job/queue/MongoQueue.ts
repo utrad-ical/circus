@@ -1,6 +1,6 @@
 import Queue, { QueueState, Item } from './Queue';
 import { FunctionService } from '@utrad-ical/circus-lib/lib/ServiceLoader';
-import { MongoClientPool } from '../mongoClientPool';
+import { MongoClientPool } from '../../mongoClientPool';
 
 const createMongoQueue: FunctionService<
   Queue<any>,

@@ -1,10 +1,10 @@
-import createPluginJobRegisterer from './MongoPluginJobRegisterer';
+import createPluginJobRegisterer from './createPluginJobRegisterer';
 import { PluginJobRequest, PluginDefinition } from '../../interface';
-import Queue from '../../queue/Queue';
+import Queue from '../queue/Queue';
 import { DicomFileRepository } from '@utrad-ical/circus-lib/lib/dicom-file-repository';
-import { PluginDefinitionAccessor } from '../../CsCore';
+import PluginDefinitionAccessor from '../../plugin-definition-accessor/PluginDefinitionAccessor';
 
-describe('MongoPluginJobRegisterer', () => {
+describe('createPluginJobRegisterer', () => {
   const defaultPayload: PluginJobRequest = {
     pluginId: 'my-plugin-id',
     series: [{ seriesUid: '1.2.3' }]

@@ -1,10 +1,17 @@
 import { PluginJobRequest, JobSeries } from '../../interface';
-import Queue from '../../queue/Queue';
+import Queue from '../queue/Queue';
 import { DicomFileRepository } from '@utrad-ical/circus-lib/lib/dicom-file-repository';
 import MultiRange from 'multi-integer-range';
-import { PluginDefinitionAccessor } from '../../CsCore';
 import { FunctionService } from '@utrad-ical/circus-lib';
-import PluginJobRegisterer from './PluginJobRegisterer';
+import PluginDefinitionAccessor from '../../plugin-definition-accessor/PluginDefinitionAccessor';
+
+export interface PluginJobRegisterer {
+  register(
+    jobId: string,
+    payload: PluginJobRequest,
+    priority?: number
+  ): Promise<void>;
+}
 
 function checkSeriesImageRange(
   imagesInSeries: MultiRange,

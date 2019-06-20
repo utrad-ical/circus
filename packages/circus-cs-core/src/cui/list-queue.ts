@@ -1,7 +1,7 @@
 import ajv from 'ajv';
-import { QueueState } from '../queue/queue';
-import { Configuration } from '../config/Configuration';
-import configureLoader from '../configureLoader';
+import Queue, { QueueState } from '../job/queue/Queue';
+import { FunctionService } from '@utrad-ical/circus-lib';
+import Command from './Command';
 
 const argumentsSchema = {
   type: 'object',
@@ -29,38 +29,38 @@ const argumentsSchema = {
   }
 };
 
-export default async function listQueue(config: Configuration, argv: any) {
-  const argCheck = new ajv().compile(argumentsSchema)(argv);
+const listQueue: FunctionService<Command, { queue: Queue<any> }> = async (
+  options,
+  deps
+) => {
+  const { queue } = deps;
+  return async function listQueue(commandName, argv: any) {
+    const argCheck = new ajv().compile(argumentsSchema)(argv);
 
-  if (!argCheck) {
-    console.error('Invalid arguments.');
-    process.exit(1);
-  }
+    if (!argCheck) {
+      console.error('Invalid arguments.');
+      process.exit(1);
+    }
 
-  let state: QueueState | 'all';
-  switch (true) {
-    case argv.a:
-      state = 'all';
-      break;
-    case argv.p:
-      state = 'processing';
-      break;
-    case argv.w:
-    default:
-      state = 'wait';
-      break;
-  }
+    let state: QueueState | 'all';
+    switch (true) {
+      case argv.a:
+        state = 'all';
+        break;
+      case argv.p:
+        state = 'processing';
+        break;
+      case argv.w:
+      default:
+        state = 'wait';
+        break;
+    }
 
-  const moduleLoader = configureLoader(config);
-  const [queue, dispose] = [
-    await moduleLoader.load('queueSystem'),
-    await moduleLoader.load('dispose')
-  ];
-
-  try {
     const items = await queue.list(state);
     console.log(items);
-  } finally {
-    await dispose();
-  }
-}
+  };
+};
+
+listQueue.dependencies = ['queue'];
+
+export default listQueue;

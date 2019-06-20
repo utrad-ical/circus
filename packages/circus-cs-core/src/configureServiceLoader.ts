@@ -2,7 +2,7 @@ import { DicomFileRepository } from '@utrad-ical/circus-lib/lib/dicom-file-repos
 import Logger from '@utrad-ical/circus-lib/lib/logger/Logger';
 import ServiceLoader from '@utrad-ical/circus-lib/lib/ServiceLoader';
 import path from 'path';
-import { Configuration } from './config/Configuration';
+import Configuration from './config/Configuration';
 import createDaemonController, {
   DaemonController
 } from './daemon/createDaemonController';
@@ -62,7 +62,11 @@ export default function configureServiceLoader(
     path.join(__dirname, 'job', 'reporter'),
     'MongoPluginJobReporter'
   );
-  serviceLoader.registerDirectory('queue', './queue', 'MongoQueue');
+  serviceLoader.registerDirectory(
+    'queue',
+    path.join(__dirname, 'job', 'queue'),
+    'MongoQueue'
+  );
 
   // Used by mongodb-related services
   serviceLoader.registerModule(

@@ -6,7 +6,7 @@
 import _pm2 from 'pm2';
 import pify from 'pify';
 import escape from 'shell-escape';
-import { Configuration } from '../config/Configuration';
+import Configuration from '../config/Configuration';
 
 const pm2: any = pify(_pm2);
 
@@ -23,7 +23,7 @@ export interface DaemonController {
 export default function createDaemonController(
   config: Configuration
 ): DaemonController {
-  const { startOptions } = config.jobManager;
+  const { startOptions } = config.jobManager.options;
 
   // Maybe not better, but the purpose can be achieved.
   const args = ['--config-content', escape([JSON.stringify(config)])];

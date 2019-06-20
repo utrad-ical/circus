@@ -1,6 +1,8 @@
 import minimist from 'minimist';
 import chalk from 'chalk';
 import config from '../config';
+import path from 'path';
+import configureServiceLoader from '../configureServiceLoader';
 
 const commands: { [key: string]: any } = {
   register: {
@@ -56,14 +58,13 @@ async function boot(commandName: string | undefined, args: any) {
     return;
   }
 
-  const command = commands[commandName];
-
-  const callFunc: (config: any, args: any) => Promise<void> = command.module
-    ? (await import(command.module))[commandName]
-    : (await import(`./${commandName}`)).default;
+  const loader = configureServiceLoader(config) as any;
+  const module: string = commands[commandName].module || commandName;
+  loader.registerModule('command', path.join(__dirname, module));
 
   try {
-    await callFunc(config, args);
+    const callFunc = await loader.get('command');
+    await callFunc(commandName, args);
   } catch (e) {
     console.log(chalk.red('Error:'));
     console.error(e);

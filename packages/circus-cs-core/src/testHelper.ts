@@ -1,10 +1,13 @@
 import mongo from 'mongodb';
+import { MongoClientPool } from './mongoClientPool';
 
-export async function getTestCollection(collectionName: string) {
+export const testClientPool = async () => {
   const mongoUrl =
     process.env.CIRCUS_MONGO_TEST_URL ||
     'mongodb://localhost:27017/cs-core-test';
-  const client = await mongo.MongoClient.connect(mongoUrl);
-  const collection = client.db().collection(collectionName);
-  return { client, collection };
-}
+  const connection = await mongo.MongoClient.connect(mongoUrl);
+  return {
+    connect: async () => connection,
+    dispose: () => connection.close()
+  } as MongoClientPool;
+};

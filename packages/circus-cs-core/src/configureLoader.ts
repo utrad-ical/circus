@@ -9,7 +9,7 @@ import pluginJobRunner, { PluginJobRunner } from './job/pluginJobRunner';
 import createStaticPluginDefinitionAccessor from './plugin/createStaticPluginDefinitionAccessor';
 import createPluginJobRegisterer, {
   PluginJobRegisterer
-} from './job/createPluginJobRegisterer';
+} from './job/registerer/MongoPluginJobRegisterer';
 import { DicomFileRepository } from '@utrad-ical/circus-lib/lib/dicom-file-repository';
 import pluginJobReporter, { PluginJobReporter } from './job/pluginJobReporter';
 import DockerRunner from './util/DockerRunner';

@@ -2,10 +2,15 @@ import path from 'path';
 import fs from 'fs-extra';
 import { PluginDefinition } from '../interface';
 import { PluginDefinitionAccessor } from '../CsCore';
+import { FunctionService } from '@utrad-ical/circus-lib';
 
-export default function createStaticPluginDefinitionAccessor(
-  dir: string
-): PluginDefinitionAccessor {
+const createStaticPluginDefinitionAccessor: FunctionService<
+  PluginDefinitionAccessor,
+  {}
+> = async ({ dir }: { dir: string }) => {
+  if (typeof dir !== 'string')
+    throw new TypeError('plugin directory must be set');
+
   const filename = 'plugins.json';
 
   const list: () => Promise<PluginDefinition[]> = async () => {
@@ -22,4 +27,6 @@ export default function createStaticPluginDefinitionAccessor(
   };
 
   return { list, get };
-}
+};
+
+export default createStaticPluginDefinitionAccessor;

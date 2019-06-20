@@ -1,8 +1,10 @@
-import { PluginJobRequest, JobSeries } from '../interface';
-import { QueueSystem } from '../queue/queue';
+import { PluginJobRequest, JobSeries } from '../../interface';
+import Queue from '../../queue/Queue';
 import { DicomFileRepository } from '@utrad-ical/circus-lib/lib/dicom-file-repository';
 import MultiRange from 'multi-integer-range';
-import { PluginDefinitionAccessor } from '../CsCore';
+import { PluginDefinitionAccessor } from '../../CsCore';
+import { FunctionService } from '@utrad-ical/circus-lib';
+import PluginJobRegisterer from './PluginJobRegisterer';
 
 function checkSeriesImageRange(
   imagesInSeries: MultiRange,
@@ -28,23 +30,18 @@ function checkSeriesImageRange(
   }
 }
 
-export interface PluginJobRegisterer {
-  register(
-    jobId: string,
-    payload: PluginJobRequest,
-    priority?: number
-  ): Promise<void>;
-}
-
 /**
  * Register a new job after data check for the payload
  */
-export default function createPluginJobRegisterer(deps: {
-  queue: QueueSystem<PluginJobRequest>;
-  pluginDefinitionAccessor: PluginDefinitionAccessor;
-  repository: DicomFileRepository;
-}): PluginJobRegisterer {
-  const { queue, pluginDefinitionAccessor, repository } = deps;
+const createPluginJobRegisterer: FunctionService<
+  PluginJobRegisterer,
+  {
+    queue: Queue<PluginJobRequest>;
+    pluginDefinitionAccessor: PluginDefinitionAccessor;
+    dicomFileRepository: DicomFileRepository;
+  }
+> = async (options, deps) => {
+  const { queue, pluginDefinitionAccessor, dicomFileRepository } = deps;
 
   async function register(
     jobId: string,
@@ -66,7 +63,7 @@ export default function createPluginJobRegisterer(deps: {
       throw new TypeError('No series specified.');
     }
     for (let series of seriesList) {
-      const loader = await repository.getSeries(series.seriesUid);
+      const loader = await dicomFileRepository.getSeries(series.seriesUid);
       const imagesInSeries = new MultiRange(loader.images);
       // Check the series exists
       if (!imagesInSeries.length()) {
@@ -80,4 +77,12 @@ export default function createPluginJobRegisterer(deps: {
   }
 
   return { register };
-}
+};
+
+createPluginJobRegisterer.dependencies = [
+  'queue',
+  'pluginDefinitionAccessor',
+  'dicomFileRepository'
+];
+
+export default createPluginJobRegisterer;

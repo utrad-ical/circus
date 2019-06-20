@@ -1,23 +1,29 @@
-import * as q from './queue';
+import Queue from './Queue';
 import mongo from 'mongodb';
-import { getTestCollection } from '../testHelper';
+import { testClientPool } from '../testHelper';
+import { MongoClientPool } from '../mongoClientPool';
+import createMongoQueue from './MongoQueue';
 
 describe('Queue system: Mongo', () => {
-  let client: mongo.MongoClient;
+  let mongoClientPool: MongoClientPool;
   let collection: mongo.Collection;
-  let queue: q.QueueSystem<any>;
+  let queue: Queue<any>;
+  const collectionName = 'pluginJobQueue';
 
   beforeAll(async () => {
-    ({ client, collection } = await getTestCollection('pluginJobQueue'));
-    queue = await q.createMongoQueue({ collection });
+    mongoClientPool = await testClientPool();
   });
 
   beforeEach(async () => {
-    await collection.remove({});
+    collection = (await mongoClientPool.connect('dummy'))
+      .db()
+      .collection('pluginJobQueue');
+    await collection.deleteMany({});
+    queue = await createMongoQueue({ collectionName }, { mongoClientPool });
   });
 
   afterAll(async () => {
-    await client.close(true);
+    await mongoClientPool.dispose();
   });
 
   test('insert a job and list it', async () => {

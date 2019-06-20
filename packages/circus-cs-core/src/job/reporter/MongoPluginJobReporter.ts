@@ -1,22 +1,18 @@
-import mongo from 'mongodb';
+import PluginJobReporter from './PluginJobReporter';
+import { FunctionService } from '@utrad-ical/circus-lib';
+import { MongoClientPool } from '../../mongoClientPool';
 
 /**
- * PluginJobReporter takes responsibility of reporting the status
- * of the current job to some external source.
- */
-export interface PluginJobReporter {
-  report: (jobId: string, type: string, payload?: any) => Promise<void>;
-}
-
-/**
- * An implementation of pluginJobReporter that writes plugin status on
+ * An implementation of PluginJobReporter that writes plugin status on
  * CIRCUS CS API server.
- * @param collection The MongoDB collection to which the plugin results and
- * status are written.
  */
-export default function pluginJobReporter(
-  collection: mongo.Collection
-): PluginJobReporter {
+const createMongoPluginJobReporter: FunctionService<
+  PluginJobReporter,
+  { mongoClientPool: MongoClientPool }
+> = async (options: any, { mongoClientPool }) => {
+  const client = await mongoClientPool.connect(options.mongoUrl);
+  const collection = await client.db().collection(options.collectionName);
+
   const report = async (jobId: string, type: string, payload?: any) => {
     if (!jobId) throw new Error('Job ID undefined');
 
@@ -67,4 +63,7 @@ export default function pluginJobReporter(
     }
   };
   return { report };
-}
+};
+
+createMongoPluginJobReporter.dependencies = ['mongoClientPool'];
+export default createMongoPluginJobReporter;

@@ -61,14 +61,14 @@ export interface Configuration {
   /**
    * Accessor of plugins installed as Docker images.
    */
-  pluginDefinition:
+  pluginDefinitionAccessor:
     | {
         type: 'mongo';
         options: MongoConnectionConfiguration;
       }
     | {
         type: 'static';
-        dir: string;
+        options: { dir: string };
       };
 
   /**

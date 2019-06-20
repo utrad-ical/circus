@@ -1,21 +1,30 @@
 import mongo from 'mongodb';
-import pluginJobReporter, { PluginJobReporter } from './pluginJobReporter';
-import { getTestCollection } from '../testHelper';
+import createMongoPluginJobReporter from './MongoPluginJobReporter';
+import PluginJobReporter from './PluginJobReporter';
+import { testClientPool } from '../../testHelper';
+import { MongoClientPool } from '../../mongoClientPool';
 
 describe('pluginJobReporter', () => {
-  let client: mongo.MongoClient;
+  let mongoClientPool: MongoClientPool;
   let collection: mongo.Collection;
   let reporter: PluginJobReporter;
 
   const jobId = 'aabbcc';
+  const collectionName = 'pluginJobs';
 
   beforeAll(async () => {
-    ({ client, collection } = await getTestCollection('pluginJobs'));
-    reporter = pluginJobReporter(collection);
+    mongoClientPool = await testClientPool();
+    collection = (await mongoClientPool.connect('dummy'))
+      .db()
+      .collection(collectionName);
+    reporter = await createMongoPluginJobReporter(
+      { collectionName },
+      { mongoClientPool }
+    );
   });
 
   beforeEach(async () => {
-    await collection.remove({});
+    await collection.deleteMany({});
     await collection.insertOne({
       jobId,
       status: 'in_queue',
@@ -24,7 +33,7 @@ describe('pluginJobReporter', () => {
   });
 
   afterAll(async () => {
-    await client.close(true);
+    await mongoClientPool.dispose();
   });
 
   test('report processing', async () => {

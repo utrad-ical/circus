@@ -1,5 +1,4 @@
 import { PluginJobRequest, PluginDefinition, JobSeries } from '../interface';
-import { PluginJobReporter } from './pluginJobReporter';
 import path from 'path';
 import fs from 'fs-extra';
 import DockerRunner from '../util/DockerRunner';
@@ -7,6 +6,8 @@ import { DicomFileRepository } from '@utrad-ical/circus-lib/lib/dicom-file-repos
 import pluginResultsValidator from './pluginResultsValidator';
 import { MultiRange } from 'multi-integer-range';
 import { PluginDefinitionAccessor } from '../CsCore';
+import { FunctionService } from '@utrad-ical/circus-lib';
+import PluginJobReporter from './reporter/PluginJobReporter';
 
 export interface PluginJobRunner {
   run: (jobId: string, job: PluginJobRequest) => Promise<boolean>;
@@ -14,24 +15,32 @@ export interface PluginJobRunner {
 
 type WorkDirType = 'in' | 'out' | 'dicom';
 
-export default function pluginJobRunner(deps: {
-  jobReporter: PluginJobReporter;
-  dockerRunner: DockerRunner;
-  dicomRepository: DicomFileRepository;
-  pluginDefinitionAccessor: Pick<PluginDefinitionAccessor, 'get'>;
-  workingDirectory: string;
-  resultsDirectory: string;
-  removeTemporaryDirectory?: boolean;
-}): PluginJobRunner {
+const pluginJobRunner: FunctionService<
+  PluginJobRunner,
+  {
+    jobReporter: PluginJobReporter;
+    dicomRepository: DicomFileRepository;
+    pluginDefinitionAccessor: Pick<PluginDefinitionAccessor, 'get'>;
+  }
+> = async (
+  options: {
+    workingDirectory: string;
+    resultsDirectory: string;
+    removeTemporaryDirectory?: boolean;
+  },
+  deps: {
+    jobReporter: PluginJobReporter;
+    dicomRepository: DicomFileRepository;
+    pluginDefinitionAccessor: Pick<PluginDefinitionAccessor, 'get'>;
+  }
+) => {
   const {
-    jobReporter,
-    dockerRunner,
-    dicomRepository,
-    pluginDefinitionAccessor,
     workingDirectory,
     resultsDirectory,
-    removeTemporaryDirectory = true
-  } = deps;
+    removeTemporaryDirectory
+  } = options;
+  const { dicomRepository, pluginDefinitionAccessor, jobReporter } = deps;
+  const dockerRunner = new DockerRunner();
 
   const baseDir = (jobId: string) => {
     if (typeof jobId !== 'string' || !jobId.length) throw new Error();
@@ -111,7 +120,14 @@ export default function pluginJobRunner(deps: {
   };
 
   return { run };
-}
+};
+
+pluginJobRunner.dependencies = [
+  'jobReporter',
+  'dicomFileRepository',
+  'pluginDefinitionAccessor'
+];
+export default pluginJobRunner;
 
 /**
  * Extracts the entire series from DICOM repository

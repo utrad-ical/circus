@@ -1,6 +1,8 @@
 import path from 'path';
 import ServiceLoader, { FunctionService, ClassService } from './ServiceLoader';
 
+const dir = path.join(__dirname, '../testdata/autoload-modules');
+
 test('simple creation from class', async () => {
   class Fighter {}
   interface Services {
@@ -26,6 +28,16 @@ test('simple creation from function', async () => {
   loader.register('gun', createGun);
   const result = await loader.get('gun');
   expect(result.shot()).toBe('bang');
+});
+
+test('create from module path', async () => {
+  interface Services {
+    food: { eat: () => string };
+  }
+  const loader = new ServiceLoader<Services>({ food: { options: 5 } });
+  loader.registerModule('food', path.join(dir, 'Pudding'));
+  const pudding = await loader.get('food');
+  expect(pudding.eat()).toBe('pudding eaten 5 times');
 });
 
 describe('create with dependency', () => {
@@ -116,7 +128,6 @@ test('creawte with factory', async () => {
 });
 
 describe('autoloading with registerDirectory', () => {
-  const dir = path.join(__dirname, '../testdata/autoload-modules');
   interface Services {
     food: { eat: () => string };
   }

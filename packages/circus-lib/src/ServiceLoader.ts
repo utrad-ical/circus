@@ -28,6 +28,7 @@ export type Service<S, D = any> = FunctionService<S, D> | ClassService<S, D>;
 
 type ServiceDef<T, K extends keyof T> =
   | { type: 'service'; service: Service<T[K]> }
+  | { type: 'module'; module: string }
   | { type: 'factory'; factory: (config: ModuleConfig) => Promise<T[K]> };
 
 type LoadedService<T, K extends keyof T> =
@@ -62,7 +63,7 @@ export default class ModuleLoader<T extends object = any> {
   }
 
   /**
-   * Directly bind a new concrete service.
+   * Directly binds a new concrete service.
    * @param name The service (interface) name.
    * @param service The concrete service class/function.
    *   It can have a `depends` property that declares its dependencies
@@ -74,7 +75,16 @@ export default class ModuleLoader<T extends object = any> {
   }
 
   /**
-   * Register a service via a loader function.
+   * Registers a service using a module name.
+   * @param name THe service (interface) name.
+   * @param module The module name passed to dynamic `import()`.
+   */
+  public registerModule<K extends keyof T>(name: K, module: string): void {
+    this.services[name] = { type: 'module', module };
+  }
+
+  /**
+   * Registers a service via a loader function.
    * Use this as a last resort; use `register` whenever possible.
    * @param name The service (interface) name.
    * @param factory The async loader function to bind.
@@ -87,7 +97,7 @@ export default class ModuleLoader<T extends object = any> {
   }
 
   /**
-   * Register a service with directory-based autoloading.
+   * Registers a service with directory-based autoloading.
    * The concrete type will be determined based on the
    * `${name}.type` parameter.
    * For example, `this.registerDirectory('weapon', './weapons', 'Sword')`
@@ -136,12 +146,19 @@ export default class ModuleLoader<T extends object = any> {
     if (!(name in this.services))
       throw new TypeError(`Service '${name}' is not registered`);
     const serviceOrFactory: ServiceDef<T, K> = this.services[name]!;
-    const promise =
-      serviceOrFactory.type === 'service'
-        ? this.instanciateService(name, serviceOrFactory.service)
-        : serviceOrFactory.factory(this.config);
+    const promise = (() => {
+      switch (serviceOrFactory.type) {
+        case 'service':
+          return this.instanciateService(name, serviceOrFactory.service);
+        case 'module':
+          return this.createFromModule(name, serviceOrFactory.module);
+        case 'factory':
+          return serviceOrFactory.factory(this.config);
+      }
+    })();
     this.loadedServices[name] = { status: 'loading', promise };
     promise.then(service => {
+      // invoked before the resolved value is accecced by a service consumer
       this.loadedServices[name] = { status: 'loaded', service };
     });
     return promise;

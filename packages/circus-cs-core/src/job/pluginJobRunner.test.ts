@@ -38,7 +38,8 @@ describe('pluginJobRunner', () => {
           ).buffer) as ArrayBuffer;
         },
         images: '1-5'
-      })
+      }),
+      deleteSeries: async () => {}
     };
 
     const pluginDefinitionAccessor = {
@@ -53,14 +54,18 @@ describe('pluginJobRunner', () => {
       }
     };
 
-    const runner = pluginJobRunner({
-      jobReporter,
-      dockerRunner,
-      dicomRepository,
-      pluginDefinitionAccessor,
-      workingDirectory,
-      resultsDirectory
-    });
+    const runner = await pluginJobRunner(
+      {
+        workingDirectory,
+        resultsDirectory
+      },
+      {
+        jobReporter,
+        dockerRunner,
+        dicomRepository,
+        pluginDefinitionAccessor
+      }
+    );
 
     const jobRequest: PluginJobRequest = {
       pluginId: 'circus-mock/empty:1.0',
@@ -76,7 +81,7 @@ describe('pluginJobRunner', () => {
 });
 
 describe('fetchSeriesFromRepository', () => {
-  const dir = path.join(__dirname, 'test-fetch');
+  const dir = path.join(testDir, 'test-fetch');
 
   test('fetch DICOM data from repository', async () => {
     const repository = ({

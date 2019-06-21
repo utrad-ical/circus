@@ -31,6 +31,7 @@ export interface Services {
   jobRunner: PluginJobRunner;
   dockerRunner: DockerRunner;
   core: CsCore;
+  [key: string]: any;
 }
 
 // Keep this module as clean and simple as possible.

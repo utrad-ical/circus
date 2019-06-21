@@ -3,6 +3,7 @@ import chalk from 'chalk';
 import config from '../config';
 import path from 'path';
 import configureServiceLoader from '../configureServiceLoader';
+import Command from './Command';
 
 const commands: { [key: string]: any } = {
   register: {
@@ -58,12 +59,12 @@ async function boot(commandName: string | undefined, args: any) {
     return;
   }
 
-  const loader = configureServiceLoader(config) as any;
+  const loader = configureServiceLoader(config);
   const module: string = commands[commandName].module || commandName;
   loader.registerModule('command', path.join(__dirname, module));
 
   try {
-    const callFunc = await loader.get('command');
+    const callFunc = (await loader.get('command')) as Command;
     await callFunc(commandName, args);
   } catch (e) {
     console.log(chalk.red('Error:'));

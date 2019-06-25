@@ -1,4 +1,5 @@
 export { default as sleep } from './sleep';
+export { default as generateUniqueId } from './generateUniqueId';
 export { isDicomUid } from './validation';
 
 export {

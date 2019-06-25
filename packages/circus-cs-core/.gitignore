@@ -5,3 +5,4 @@
 /coverage
 /*.config.js
 /test/working
+/test/results

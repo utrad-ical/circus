@@ -4,7 +4,7 @@
   "description": "Shared utilities for CIRCUS projects",
   "main": "lib/index.js",
   "scripts": {
-    "prepublish": "npm run build",
+    "prepublishOnly": "npm run build",
     "build": "rimraf ./lib && tsc",
     "test": "jest",
     "prettier": "prettier --write src/**/*.ts"

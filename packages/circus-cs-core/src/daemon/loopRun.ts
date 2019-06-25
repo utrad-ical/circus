@@ -1,14 +1,12 @@
 import Logger from '@utrad-ical/circus-lib/lib/logger/Logger';
-import { Item } from '../queue/queue';
+import Queue, { Item } from '../job/queue/queue';
+import { CancellableTimer } from './createCancellableTimer';
 
 export interface LoopRunOptions<T> {
   logger: Logger;
-  active(): boolean;
-  dequeue(): Promise<Item<T> | null>;
+  queue: Queue<T>;
   run(jobId: string, job: T): Promise<boolean>;
-  settle(jobId: string): Promise<void>;
-  interval(): Promise<void>;
-  interrupt(): void;
+  cancellableTimer: CancellableTimer;
   dispose(): Promise<void>;
 }
 
@@ -21,34 +19,25 @@ export default async function loopRun<T>(
   deps: LoopRunOptions<T>,
   context: Context
 ) {
-  const {
-    logger,
-    active,
-    dequeue,
-    run,
-    settle,
-    interval,
-    dispose,
-    interrupt
-  } = deps;
+  const { logger, queue, run, cancellableTimer, dispose } = deps;
 
   logger.info(`CIRCUS CS Job Manager started. pid: ${context.pid}`);
 
   context.on('SIGINT', function() {
     logger.info('Signal SIGINT');
     logger.info('CIRCUS CS Job Manager will be stopped on next loop.');
-    interrupt();
+    cancellableTimer.cancel();
   });
 
   const once = messageOnce(logger.info);
   try {
-    while (active()) {
+    while (cancellableTimer.isActive()) {
       try {
-        const nextJob = await dequeue();
+        const nextJob = await queue.dequeue();
         try {
           if (!nextJob) {
             once.print('Currently the queue is empty.');
-            await interval();
+            await cancellableTimer.waitForNext();
             continue;
           }
           once.reset();
@@ -59,12 +48,12 @@ export default async function loopRun<T>(
             `Job ${nextJob.jobId} ${succeed ? 'finished' : 'failed'}.`
           );
         } finally {
-          if (nextJob) await settle(nextJob.jobId);
+          if (nextJob) await queue.settle(nextJob.jobId);
         }
       } catch (e) {
         logger.fatal(e.message);
       }
-      await interval();
+      await cancellableTimer.waitForNext();
     }
   } finally {
     await dispose();

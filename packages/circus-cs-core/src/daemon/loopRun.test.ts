@@ -1,5 +1,5 @@
 import loopRun, { LoopRunOptions } from './loopRun';
-import { Item, QueueSystem } from '../queue/queue';
+import Queue, { Item } from '../job/queue/queue';
 import sleep from '../util/sleep';
 import { EventEmitter } from 'events';
 
@@ -14,11 +14,11 @@ const createMockLogger = (fn: jest.Mock) => {
   };
 };
 
-const createMockQueueSystem = <T>(len: number = 10) => {
+const createMockQueueSystem = <T>(len: number = 10, fn: jest.Mock) => {
   let q: Item<T>[] = [];
   let qId: number = 0;
 
-  const mockQueueSystem: QueueSystem<T> = {
+  const mockQueueSystem: Queue<T> = {
     list: async state => {
       if (state !== 'all') {
         return q.filter(i => i.state === state);
@@ -47,7 +47,9 @@ const createMockQueueSystem = <T>(len: number = 10) => {
         return null;
       }
     },
-    settle: async (jobId: string) => {}
+    settle: async (jobId: string) => {
+      fn('Job ' + jobId + ' settled.');
+    }
   };
 
   for (let i = 1; i <= len; i++) {
@@ -64,19 +66,18 @@ class MockContext extends EventEmitter {
 describe('loopRun', () => {
   let _active: boolean = true;
   test('insert a job and list it', async () => {
-    const logger = jest.fn();
-    const q = createMockQueueSystem<null>(3);
+    const fn = jest.fn<any>();
+    const queue = createMockQueueSystem<null>(3, fn);
     const options: LoopRunOptions<null> = {
-      logger: createMockLogger(logger),
-      dequeue: q.dequeue,
-      settle: async jobId => {
-        logger('Job ' + jobId + ' settled.');
-      },
+      logger: createMockLogger(fn),
+      queue,
       run: async (jobId, job) => !!(Number(jobId) % 2), // fails on even
-      active: () => _active,
-      interrupt: () => (_active = false),
-      interval: async () => {
-        await sleep(1);
+      cancellableTimer: {
+        isActive: () => _active,
+        cancel: () => (_active = false),
+        waitForNext: async () => {
+          await sleep(1);
+        }
       },
       dispose: async () => {}
     };
@@ -86,7 +87,7 @@ describe('loopRun', () => {
     mockContext.emit('SIGINT');
     await loop;
 
-    expect(logger.mock.calls).toEqual([
+    expect(fn.mock.calls).toEqual([
       ['CIRCUS CS Job Manager started. pid: 0'],
       ['Job 1 started.'],
       ['Job 1 finished.'],

@@ -8,15 +8,17 @@ import Command from './Command';
 import config from '../config';
 import Queue from '../job/queue/Queue';
 import { PluginJobRequest } from '../interface';
+import PluginDefinitionAccessor from '../plugin-definition-accessor/PluginDefinitionAccessor';
 
 const checkEnv: FunctionService<
   Command,
   {
     dockerRunner: DockerRunner;
     queue: Queue<PluginJobRequest>;
+    pluginDefinitionAccessor: PluginDefinitionAccessor;
   }
 > = async (options, deps) => {
-  const { dockerRunner, queue } = deps;
+  const { dockerRunner, queue, pluginDefinitionAccessor } = deps;
 
   return async () => {
     const checkEntries = [
@@ -48,6 +50,12 @@ const checkEnv: FunctionService<
         fn: async () => {
           await queue.list();
         }
+      },
+      {
+        title: 'Plugin definitions',
+        fn: async () => {
+          await pluginDefinitionAccessor.list();
+        }
       }
     ];
     for (const entry of checkEntries) {
@@ -66,6 +74,6 @@ const checkEnv: FunctionService<
   };
 };
 
-checkEnv.dependencies = ['dockerRunner', 'queue'];
+checkEnv.dependencies = ['dockerRunner', 'queue', 'pluginDefinitionAccessor'];
 
 export default checkEnv;

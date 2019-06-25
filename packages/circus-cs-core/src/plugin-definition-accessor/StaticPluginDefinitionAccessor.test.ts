@@ -1,6 +1,6 @@
 import path from 'path';
 import createStaticPluginDefinitionAccessor from './StaticPluginDefinitionAccessor';
-import { PluginDefinitionAccessor } from '../CsCore';
+import PluginDefinitionAccessor from './PluginDefinitionAccessor';
 
 describe('StaticPluginDefinitionAccessor', () => {
   const pluginDir = path.join(__dirname, '../../test/plugins/');

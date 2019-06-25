@@ -12,6 +12,7 @@ const defaults: Configuration = {
   },
 
   queue: {
+    type: 'MongoQueue',
     options: {
       mongoUrl: 'mongodb://localhost:27017/circus-cs-core',
       collectionName: 'pluginJobQueue'
@@ -65,9 +66,10 @@ const defaults: Configuration = {
   },
 
   pluginDefinitionAccessor: {
-    type: 'StaticPluginDefinitionAccessor',
+    type: 'MongoPluginDefinitionAccessor',
     options: {
-      dir: 'hoge'
+      mongoUrl: 'mongodb://localhost:27017/circus-api',
+      collectionName: 'pluginDefinitions'
     }
   }
 };

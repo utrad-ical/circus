@@ -1,4 +1,4 @@
-import { PluginDefinitionAccessor } from '../CsCore';
+import PluginDefinitionAccessor from './PluginDefinitionAccessor';
 import { FunctionService } from '@utrad-ical/circus-lib';
 import { MongoClientPool } from '../mongoClientPool';
 

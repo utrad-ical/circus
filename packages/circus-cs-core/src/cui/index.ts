@@ -12,6 +12,9 @@ const commands: { [key: string]: any } = {
   'list-queue': {
     help: 'Lists queue items.'
   },
+  'list-plugins': {
+    help: 'Lists available plug-ins.'
+  },
   'check-env': {
     help: 'Performs a system integrity check.'
   },

@@ -1,4 +1,5 @@
 import path from 'path';
+import { isTemplateElement } from '@babel/types';
 
 interface ModuleConfig {
   [key: string]: { type?: string; options?: any };
@@ -9,6 +10,10 @@ interface HasDependencies {
   // so that implementations can specify their dependencies
   // without referring to the whole list of services
   dependencies?: string[];
+}
+
+interface Disposable {
+  dispose: () => Promise<void>;
 }
 
 export interface FunctionService<S, D = any> extends HasDependencies {
@@ -162,6 +167,28 @@ export default class ServiceLoader<T extends object = any> {
       this.loadedServices[name] = { status: 'loaded', service };
     });
     return promise;
+  }
+
+  /**
+   * Disposes all loaded services.
+   */
+  public async dispose(): Promise<void> {
+    const disposeTasks = Object.keys(this.loadedServices).map(async k => {
+      const item: LoadedService<T, keyof T> = this.loadedServices[
+        k as keyof T
+      ]!;
+      const disposeService = async (service: any) => {
+        if ('dispose' in service) {
+          await ((service as unknown) as Disposable).dispose();
+        }
+      };
+      if (item.status === 'loading') {
+        await disposeService(await item.promise);
+      } else {
+        await disposeService(item.service);
+      }
+    });
+    await Promise.all(disposeTasks);
   }
 
   private async createFromModule<K extends keyof T>(name: K, path: string) {

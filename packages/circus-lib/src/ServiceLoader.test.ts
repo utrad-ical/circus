@@ -117,7 +117,7 @@ test('create with options', async () => {
   expect(result.number).toBe(50);
 });
 
-test('creawte with factory', async () => {
+test('create with factory', async () => {
   interface Services {
     fighter: 'abc';
   }
@@ -125,6 +125,46 @@ test('creawte with factory', async () => {
   loader.registerFactory('fighter', async () => 'abc');
   const result = await loader.get('fighter');
   expect(result).toBe('abc');
+});
+
+describe('dispose', () => {
+  type Gun = { shot: () => string };
+  type Lance = { attack: () => string };
+  interface Services {
+    gun: Gun;
+    lance: Lance;
+  }
+
+  test('await and dispose', async () => {
+    const fn = jest.fn();
+    const loader = new ServiceLoader<Services>();
+    loader.register('gun', async () => ({
+      shot: () => 'bang',
+      dispose: async () => fn()
+    }));
+    await loader.get('gun');
+    await loader.dispose();
+    expect(fn).toHaveBeenCalledTimes(1);
+  });
+
+  test('non-await and dispose', async () => {
+    const fn = jest.fn();
+    const loader = new ServiceLoader<Services>();
+    loader.register('gun', async () => ({
+      shot: () => 'bang',
+      dispose: async () => fn()
+    }));
+    loader.get('gun'); // Do not await
+    await loader.dispose();
+    expect(fn).toHaveBeenCalledTimes(1);
+  });
+
+  test('no dispose', async () => {
+    const loader = new ServiceLoader<Services>();
+    loader.register('gun', async () => ({ shot: () => 'bang' }));
+    loader.get('gun'); // Do not await
+    await loader.dispose();
+  });
 });
 
 describe('autoloading with registerDirectory', () => {

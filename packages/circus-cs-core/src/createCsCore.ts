@@ -3,7 +3,7 @@ import { DaemonController } from './daemon/createDaemonController';
 import { PluginJobRequest } from './interface';
 import { PluginJobRegisterer } from './job/registerer/createPluginJobRegisterer';
 import PluginDefinitionAccessor from './plugin-definition-accessor/PluginDefinitionAccessor';
-import Queue, { Item } from './queue/Queue';
+import Queue, { Item } from './job/queue/Queue';
 
 /**
  * A facade interface that abstracts the complex dependencies.

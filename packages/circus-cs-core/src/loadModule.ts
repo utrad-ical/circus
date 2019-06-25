@@ -1,5 +1,8 @@
 import { ModuleDefinition } from './config/Configuration';
 
+/**
+ * @deprecated Use ServiceLoader instead.
+ */
 export default async function loadModule<T>(
   baseDir: string,
   config: ModuleDefinition

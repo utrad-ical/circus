@@ -1,9 +1,10 @@
 import Queue, { QueueState, Item } from './Queue';
-import { FunctionService } from '@utrad-ical/circus-lib/lib/ServiceLoader';
+import { FunctionService } from '@utrad-ical/circus-lib';
 import { MongoClientPool } from '../../mongoClientPool';
+import { PluginJobRequest } from '../../interface';
 
 const createMongoQueue: FunctionService<
-  Queue<any>,
+  Queue<PluginJobRequest>,
   { mongoClientPool: MongoClientPool }
 > = async (options: any, { mongoClientPool }) => {
   const connection = await mongoClientPool.connect(options.mongoUrl);
@@ -13,12 +14,16 @@ const createMongoQueue: FunctionService<
   const list = async function(state: QueueState | 'all' = 'wait') {
     const statusFilter = state === 'all' ? {} : { state };
     return await collection
-      .find<Item<T>>(statusFilter, { sort: { priority: -1, _id: 1 } })
+      .find(statusFilter, { sort: { priority: -1, _id: 1 } })
       .toArray();
   };
 
-  const enqueue = async (jobId: string, payload: T, priority: number = 0) => {
-    const item: Item<T> = {
+  const enqueue = async (
+    jobId: string,
+    payload: PluginJobRequest,
+    priority: number = 0
+  ) => {
+    const item: Item<PluginJobRequest> = {
       jobId,
       state: 'wait',
       payload,
@@ -36,7 +41,7 @@ const createMongoQueue: FunctionService<
       { state: 'wait' },
       { $set: { state: 'processing', startedAt: new Date() } },
       { sort: { priority: -1, _id: 1 }, returnOriginal: false }
-    )).value as Item<T> | null;
+    )).value as Item<PluginJobRequest> | null;
     return result;
   };
 

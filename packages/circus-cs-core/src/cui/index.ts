@@ -66,6 +66,8 @@ async function boot(commandName: string | undefined, args: any) {
   try {
     const callFunc = (await loader.get('command')) as Command;
     await callFunc(commandName, args);
+    const pool = await loader.get('mongoClientPool');
+    await pool.dispose();
   } catch (e) {
     console.log(chalk.red('Error:'));
     console.error(e);

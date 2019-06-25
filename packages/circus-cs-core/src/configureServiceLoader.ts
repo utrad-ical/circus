@@ -72,7 +72,7 @@ export default function configureServiceLoader(
   // Used by mongodb-related services
   serviceLoader.registerModule(
     'mongoClientPool',
-    path.join(__dirname, 'createMongoClientPool')
+    path.join(__dirname, 'mongoClientPool')
   );
 
   // DICOM file repository

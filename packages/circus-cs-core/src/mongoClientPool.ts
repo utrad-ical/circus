@@ -1,4 +1,4 @@
-import { FunctionService } from '@utrad-ical/circus-lib/lib/ServiceLoader';
+import { FunctionService } from '@utrad-ical/circus-lib';
 import mongo from 'mongodb';
 
 export type MongoClientPool = {
@@ -15,7 +15,11 @@ const createMongoClientPool: FunctionService<MongoClientPool> = async () => {
       pool.set(url, client);
       return client;
     },
-    dispose: async () => {}
+    dispose: async () => {
+      for (const k of pool.keys()) {
+        await pool.get(k)!.close();
+      }
+    }
   };
 };
 

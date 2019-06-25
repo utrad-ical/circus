@@ -62,6 +62,7 @@ const checkEnv: FunctionService<
         console.error('  ' + e.message);
       }
     }
+    console.log(chalk.cyanBright('All check passed.'));
   };
 };
 

@@ -1,4 +1,4 @@
-import { FunctionService } from '@utrad-ical/circus-lib';
+import { FunctionService, generateUniqueId } from '@utrad-ical/circus-lib';
 import Command from './Command';
 import { PluginJobRegisterer } from '../job/registerer/createPluginJobRegisterer';
 import parseSeries from './util/parseSeries';
@@ -10,11 +10,9 @@ const register: FunctionService<
   const { pluginJobRegisterer } = deps;
   return async (commandName, args) => {
     try {
-      // Todo: use shared id creator
-      const newJobId = () => new Date().getTime().toString();
       const {
         _: [pluginId, ...series],
-        jobId = newJobId(),
+        jobId = generateUniqueId(),
         environment = undefined,
         priority = 0
       } = args;

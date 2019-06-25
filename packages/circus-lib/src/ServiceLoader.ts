@@ -4,18 +4,18 @@ interface ModuleConfig {
   [key: string]: { type?: string; options?: any };
 }
 
-interface Injectable {
+interface HasDependencies {
   // declared as string[] rather than (keyof T)[]
   // so that implementations can specify their dependencies
   // without referring to the whole list of services
   dependencies?: string[];
 }
 
-export interface FunctionService<S, D = any> extends Injectable {
+export interface FunctionService<S, D = any> extends HasDependencies {
   (options: any, deps: D): Promise<S>;
 }
 
-export interface ClassService<S, D = any> extends Injectable {
+export interface ClassService<S, D = any> extends HasDependencies {
   new (options: any, deps: D): S;
 }
 
@@ -40,10 +40,10 @@ function isClass<S, D>(fn: any): fn is ClassService<S, D> {
 }
 
 /**
- * ModuleLoader is a small DI (IoC) container used by CIRCUS Project.
+ * ServiceLoader is a small DI (IoC) container used by CIRCUS Project.
  * A concrete service can be determined via ModuleConfig.
  */
-export default class ModuleLoader<T extends object = any> {
+export default class ServiceLoader<T extends object = any> {
   /**
    * This holds a configuration typically loaded from some configuration file.
    */

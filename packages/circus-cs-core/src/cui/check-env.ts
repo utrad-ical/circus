@@ -35,6 +35,7 @@ const checkEnv: FunctionService<
           await fs.ensureDir(tmpDir);
           if (!(await isDirectory(tmpDir)))
             throw new Error('Failed to create job temporary directory.');
+          return `Working dir: ${pWorkingDir}`;
         }
       },
       {
@@ -42,7 +43,10 @@ const checkEnv: FunctionService<
         fn: async () => {
           const out = await dockerRunner.run({ Image: 'hello-world' });
           if (!/Hello from Docker/.test(out))
-            throw new Error('Docker did not respond correctly.');
+            throw new Error(
+              'Docker did not respond correctly.\n' +
+                'Install "hello-world" image and try again.'
+            );
         }
       },
       {
@@ -62,13 +66,15 @@ const checkEnv: FunctionService<
       {
         title: 'Queue',
         fn: async () => {
-          await queue.list();
+          const list = await queue.list();
+          return `Found ${list.length} entries in the queue.`;
         }
       },
       {
         title: 'Plugin definitions',
         fn: async () => {
-          await pluginDefinitionAccessor.list();
+          const list = await pluginDefinitionAccessor.list();
+          return `Found ${list.length} plug-in entries.`;
         }
       }
     ];
@@ -78,8 +84,9 @@ const checkEnv: FunctionService<
         process.stdout.write(
           (entry.title + ' '.repeat(35)).substr(0, 35) + ': '
         );
-        await entry.fn();
+        const message = await entry.fn();
         process.stdout.write(chalk.cyanBright('[OK]\n'));
+        if (message) console.log('  ' + chalk.gray(message));
         passedCount++;
       } catch (e) {
         process.stdout.write(chalk.redBright('[NG]\n'));

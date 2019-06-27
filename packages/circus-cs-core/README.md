@@ -1,57 +1,66 @@
-# CIRCUS CS Core: Plugin Manager
+# CIRCUS CS Core: Plugin Job Manager
 
 ## Requirements
 
-- MongoDb
 - Docker
 - Node.js
+- (MongoDB) It's possible to use non-Mongo adapters, but it's not fully supported.
 
 ## Getting Started
 
-Clone the repository (Install from NPM is not available yet).
+### Install
+
+Clone the repository (Installing from NPM is not available yet).
 
 ```
 $ git clone git@github.com:utrad-ical/circus-cs-core.git .
-$ npm install
-$ npm link
+$ npm ci
 ```
 
 Prepare docker and load image archives.
 
-```
-$ docker load -i circus_lung_cad_v.1.4.tar
+```bash
+# This is a hard-coded dependency which is always required
 $ docker load -i circus_dicom_voxel_dump_1.0.tar
-$ docker images -a --format  "{{.Repository}}:{{.Tag}}"
-
-...
-circus/lung_cad:1.4
-circus/dicom_voxel_dump:1.0
-...
 ```
 
-Prepare DICOM repository.
+### Configuration
 
-- Edit `config/default.js`
-	- dicomFileRepository
-		- options
-			- dataDir
-- Put some DICOM data into the repository.
-	- A direcotry name shoud be the seriesUid.
+We use [cosmiconfig](https://github.com/davidtheclark/cosmiconfig) to configure CIRCUS CS.
 
-Prepare MongoDB.
+The config file `.circuscsrc.json` (or other supported file) will be searched
+from this directory (circus-cs-core repository root) up to your home directory.
 
-- Create a db for cs-core in your mongoDb.
-- Edit `config/default.js`
-	- queue
-- `$ node cui up-queue-mongodb` for creating collection of core queue system automatically.
+The content of this file would look like this:
 
-## Sample Execution
+```json
+{
+  "jobRunner": {
+    "options": {
+      "pluginResultsDir": "/var/circus/plugin-results",
+      "cleanPluginWorkingDir": true
+    }
+  }
+}
+```
+
+There is no full documentation yet.
+See `src/config/default.ts` for the available options.
+
+## Test
+
+The `cui.js` is a utility command-line interfact to access
+various functions of CIRCUS CS Core. The syntax is:
 
 ```
+node cui [subcommand]
+```
+
+Just do `node cui` to see all the available subcommands.
+
+```bash
 $ node cui check-env
 Plugin working directory      : [OK]
 Docker connection             : [OK]
 MongoDB connection            : [OK]
-$ node cui register --pluginId=Lung-CAD --seriesUid=[seriesUID]
-$ node cui next
 ```

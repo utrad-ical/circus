@@ -72,6 +72,7 @@ const checkEnv: FunctionService<
         }
       }
     ];
+    let passedCount = 0;
     for (const entry of checkEntries) {
       try {
         process.stdout.write(
@@ -79,12 +80,17 @@ const checkEnv: FunctionService<
         );
         await entry.fn();
         process.stdout.write(chalk.cyanBright('[OK]\n'));
+        passedCount++;
       } catch (e) {
         process.stdout.write(chalk.redBright('[NG]\n'));
         console.error('  ' + e.message);
       }
     }
-    console.log(chalk.cyanBright('All checks passed.'));
+    if (passedCount === checkEntries.length) {
+      console.log(chalk.cyanBright('All checks passed.'));
+    } else {
+      console.log(chalk.red('Check the installation guide.'));
+    }
   };
 };
 

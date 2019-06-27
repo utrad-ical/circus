@@ -8,6 +8,6 @@ export const testClientPool = async () => {
   const connection = await mongo.MongoClient.connect(mongoUrl);
   return {
     connect: async () => connection,
-    dispose: () => connection.close()
+    dispose: () => connection.close(true) // force close
   } as MongoClientPool;
 };

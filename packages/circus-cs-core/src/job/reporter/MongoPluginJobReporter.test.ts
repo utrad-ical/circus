@@ -18,7 +18,7 @@ describe('pluginJobReporter', () => {
       .db()
       .collection(collectionName);
     reporter = await createMongoPluginJobReporter(
-      { collectionName },
+      { mongoUrl: 'dummy', collectionName },
       { mongoClientPool }
     );
   });

@@ -46,6 +46,20 @@ const checkEnv: FunctionService<
         }
       },
       {
+        title: 'Docker dicom_voxel_dump Image',
+        fn: async () => {
+          const dockerImage = 'circus/dicom_voxel_dump:1.0';
+          const out = await dockerRunner.run({
+            Image: dockerImage,
+            Cmd: ['--help'],
+            HostConfig: { AutoRemove: false }
+          });
+          if (!/Usage: dicom_voxel_dump/.test(out)) {
+            throw new Error('Unexpected output from dicom_voxel_dump.');
+          }
+        }
+      },
+      {
         title: 'Queue',
         fn: async () => {
           await queue.list();
@@ -61,7 +75,7 @@ const checkEnv: FunctionService<
     for (const entry of checkEntries) {
       try {
         process.stdout.write(
-          (entry.title + ' '.repeat(30)).substr(0, 30) + ': '
+          (entry.title + ' '.repeat(35)).substr(0, 35) + ': '
         );
         await entry.fn();
         process.stdout.write(chalk.cyanBright('[OK]\n'));
@@ -70,7 +84,7 @@ const checkEnv: FunctionService<
         console.error('  ' + e.message);
       }
     }
-    console.log(chalk.cyanBright('All check passed.'));
+    console.log(chalk.cyanBright('All checks passed.'));
   };
 };
 

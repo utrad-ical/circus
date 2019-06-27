@@ -1,5 +1,5 @@
 import Logger from '@utrad-ical/circus-lib/lib/logger/Logger';
-import Queue, { Item } from '../job/queue/queue';
+import Queue from '../job/queue/Queue';
 import { CancellableTimer } from './createCancellableTimer';
 
 export interface LoopRunOptions<T> {

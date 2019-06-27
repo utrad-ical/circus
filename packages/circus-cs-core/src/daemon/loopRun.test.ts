@@ -1,5 +1,5 @@
 import loopRun, { LoopRunOptions } from './loopRun';
-import Queue, { Item } from '../job/queue/queue';
+import Queue, { Item } from '../job/queue/Queue';
 import sleep from '../util/sleep';
 import { EventEmitter } from 'events';
 

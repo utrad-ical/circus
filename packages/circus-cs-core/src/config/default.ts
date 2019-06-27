@@ -2,6 +2,14 @@ import path from 'path';
 import os from 'os';
 import Configuration from './Configuration';
 
+// We use cosmiconfig to manage settings.
+// DO NOT DIRECTLY EDIT THIS FILE!!!
+
+// Instead, make a configuration file
+// named 'circuscsrs.json' (or any other file cosmiconfig recognizes)
+// and specify the settings. Items in your setting file
+// will be merged recursively.
+
 const defaults: Configuration = {
   jobRunner: {
     options: {
@@ -14,7 +22,7 @@ const defaults: Configuration = {
   queue: {
     type: 'MongoQueue',
     options: {
-      mongoUrl: 'mongodb://localhost:27017/circus-cs-core',
+      mongoUrl: 'mongodb://localhost:27017/circus-api',
       collectionName: 'pluginJobQueue'
     }
   },

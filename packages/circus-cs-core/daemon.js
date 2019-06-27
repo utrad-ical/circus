@@ -1,8 +1,6 @@
-var tsOptions = require('./tsconfig').compilerOptions;
-require('ts-node').register({
-  compilerOptions: tsOptions,
-  ignoreDiagnostics : true,
-  ignore: /\/node_modules\/(?!@utrad-ical\/circus-cs-core)/
-});
+#!/usr/bin/env node
 
+require('@babel/register')({
+  extensions: ['.es6', '.es', '.jsx', '.js', '.mjs', '.ts']
+});
 require('./src/daemon');

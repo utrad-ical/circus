@@ -1,8 +1,7 @@
-/node_modules/
-/docker_images/
+node_modules
 /logs/
 /tmp/
 /coverage
-/*.config.js
 /test/working
 /test/results
+/lib

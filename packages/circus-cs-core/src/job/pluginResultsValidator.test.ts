@@ -1,7 +1,7 @@
 import path from 'path';
 import pluginResultsValidator from './pluginResultsValidator';
 
-describe('Validate lesion candidate plug-in results', async () => {
+describe('Validate lesion candidate plug-in results', () => {
   const testResultsDir = path.resolve(__dirname, '../../test/docker/results');
 
   const checkOne = async (dirBasename: string, isValid: boolean = true) => {

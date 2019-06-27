@@ -1,9 +1,6 @@
 #!/usr/bin/env node
 
-var tsOptions = require('./tsconfig').compilerOptions;
-require('ts-node').register({
-  compilerOptions: tsOptions,
-  disableWarnings: true
+require('@babel/register')({
+  extensions: ['.es6', '.es', '.jsx', '.js', '.mjs', '.ts']
 });
-
-require('./src/cui/');
+require('./src/cui');

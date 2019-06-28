@@ -28,7 +28,7 @@ $ docker load -i circus_dicom_voxel_dump_1.0.tar
 
 We use [cosmiconfig](https://github.com/davidtheclark/cosmiconfig) to configure CIRCUS CS.
 
-The config file `.circuscsrc.json` (or other supported file) will be searched
+The config file `.cscorerc.json` (or other supported file) will be searched
 from this directory (circus-cs-core repository root) up to your home directory.
 
 The content of this file would look like this:

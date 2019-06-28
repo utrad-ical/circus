@@ -5,3 +5,6 @@ node_modules
 /test/working
 /test/results
 /lib
+
+.cscorerc*
+cscore.config.js

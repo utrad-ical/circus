@@ -44,6 +44,9 @@ const commands: { [key: string]: any } = {
   help: {
     help: 'Prints this help message.'
   },
+  'run-plugin': {
+    help: 'Run a plug-in directly without using any queue system.'
+  },
   config: {
     help: 'Prints this current config.'
   }

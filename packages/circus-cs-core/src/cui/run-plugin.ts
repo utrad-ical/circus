@@ -1,10 +1,12 @@
 import { FunctionService } from '@utrad-ical/circus-lib';
 import Command from './Command';
 import os from 'os';
-import { buildDicomVolume, executePlugin } from '../job/pluginJobRunner';
+import { executePlugin } from '../job/pluginJobRunner';
+import buildDicomVolumes from '../job/buildDicomVolumes';
 import path from 'path';
 import fs from 'fs-extra';
 import DockerRunner from '../util/DockerRunner';
+import { PluginDefinition } from '../interface';
 
 /**
  * Directly runs the specified plug-in without using a queue system.
@@ -52,19 +54,17 @@ const runPlugin: FunctionService<
       if (d) {
         // use directory
         console.log(`Preparing volume from ${target}...`);
-        await buildDicomVolume(dockerRunner, target, inDir);
+        await buildDicomVolumes(dockerRunner, [target], inDir);
       } else {
         // use dicom file repository
         throw new Error('Not implemented');
       }
     }
-    const pluginDefinition = {
-      type: 'CAD' as 'CAD',
-      pluginId,
-      pluginName: 'dummy',
-      version: 'dummy'
-    };
+    const pluginDefinition = ({ pluginId } as unknown) as PluginDefinition;
+    console.log('Executing the plug-in...');
     await executePlugin(dockerRunner, pluginDefinition, inDir, outDir);
+
+    console.log('Copying the results...');
     await fs.copy(outDir, resultsDir, { recursive: true });
     if (!keep) {
       fs.emptyDir(workDir);

@@ -6,7 +6,6 @@ import buildDicomVolumes from '../job/buildDicomVolumes';
 import path from 'path';
 import fs from 'fs-extra';
 import DockerRunner from '../util/DockerRunner';
-import { PluginDefinition } from '../interface';
 
 /**
  * Directly runs the specified plug-in without using a queue system.
@@ -61,7 +60,9 @@ const runPlugin: FunctionService<
         throw new Error('Not implemented');
       }
     }
-    const pluginDefinition = ({ pluginId } as unknown) as PluginDefinition;
+    const pluginDefinition = ({
+      pluginId
+    } as unknown) as circus.PluginDefinition;
     console.log('Executing the plug-in...');
     await executePlugin(dockerRunner, pluginDefinition, inDir, outDir);
 

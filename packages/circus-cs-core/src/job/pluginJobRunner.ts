@@ -1,4 +1,3 @@
-import { PluginJobRequest, PluginDefinition, JobSeries } from '../interface';
 import path from 'path';
 import fs from 'fs-extra';
 import DockerRunner from '../util/DockerRunner';
@@ -11,7 +10,7 @@ import PluginDefinitionAccessor from '../plugin-definition-accessor/PluginDefini
 import buildDicomVolumes from './buildDicomVolumes';
 
 export interface PluginJobRunner {
-  run: (jobId: string, job: PluginJobRequest) => Promise<boolean>;
+  run: (jobId: string, job: circus.PluginJobRequest) => Promise<boolean>;
 }
 
 type WorkDirType = 'in' | 'out' | 'dicom';
@@ -53,7 +52,7 @@ const pluginJobRunner: FunctionService<
     return path.join(baseDir(jobId), type);
   };
 
-  const preProcess = async (jobId: string, series: JobSeries[]) => {
+  const preProcess = async (jobId: string, series: circus.JobSeries[]) => {
     // Prepare working directories
     await fs.ensureDir(baseDir(jobId));
     await Promise.all([
@@ -93,7 +92,7 @@ const pluginJobRunner: FunctionService<
   /**
    * The whole plugin job procedure.
    */
-  const run = async (jobId: string, job: PluginJobRequest) => {
+  const run = async (jobId: string, job: circus.PluginJobRequest) => {
     try {
       const { pluginId, series, environment } = job;
 
@@ -167,7 +166,7 @@ export async function fetchSeriesFromRepository(
  */
 export async function executePlugin(
   dockerRunner: DockerRunner,
-  pluginDefinition: PluginDefinition,
+  pluginDefinition: circus.PluginDefinition,
   srcDir: string,
   destDir: string
 ): Promise<string> {

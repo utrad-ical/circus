@@ -1,6 +1,5 @@
 import { FunctionService } from '@utrad-ical/circus-lib';
 import { DaemonController } from './daemon/createDaemonController';
-import { PluginJobRequest } from './interface';
 import { PluginJobRegisterer } from './job/registerer/createPluginJobRegisterer';
 import PluginDefinitionAccessor from './plugin-definition-accessor/PluginDefinitionAccessor';
 import Queue, { Item } from './job/queue/Queue';
@@ -15,10 +14,10 @@ export interface CsCore {
   plugin: PluginDefinitionAccessor;
   // job handler
   job: {
-    list: () => Promise<Item<PluginJobRequest>[]>;
+    list: () => Promise<Item<circus.PluginJobRequest>[]>;
     register: (
       jobId: string,
-      payload: PluginJobRequest,
+      payload: circus.PluginJobRequest,
       priority?: number
     ) => Promise<void>;
   };
@@ -29,7 +28,7 @@ const createCsCore: FunctionService<
   {
     daemonController: DaemonController;
     pluginDefinitionAccessor: PluginDefinitionAccessor;
-    queue: Queue<PluginJobRequest>;
+    queue: Queue<circus.PluginJobRequest>;
     pluginJobRegisterer: PluginJobRegisterer;
   }
 > = async (options, deps) => {

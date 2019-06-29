@@ -6,7 +6,6 @@ import Configuration from './config/Configuration';
 import createDaemonController, {
   DaemonController
 } from './daemon/createDaemonController';
-import { PluginJobRequest } from './interface';
 import PluginJobReporter from './job/reporter/PluginJobReporter';
 import { PluginJobRegisterer } from './job/registerer/createPluginJobRegisterer';
 import { PluginJobRunner } from './job/pluginJobRunner';
@@ -24,7 +23,7 @@ export interface Services {
   daemonController: DaemonController;
   pluginDefinitionAccessor: PluginDefinitionAccessor;
   jobReporter: PluginJobReporter;
-  queue: Queue<PluginJobRequest>;
+  queue: Queue<circus.PluginJobRequest>;
   mongoClientPool: MongoClientPool;
   dicomFileRepository: DicomFileRepository;
   pluginJobRegisterer: PluginJobRegisterer;

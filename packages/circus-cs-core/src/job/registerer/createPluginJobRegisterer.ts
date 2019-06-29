@@ -1,4 +1,3 @@
-import { PluginJobRequest, JobSeries } from '../../interface';
 import Queue from '../queue/Queue';
 import { DicomFileRepository } from '@utrad-ical/circus-lib/lib/dicom-file-repository';
 import MultiRange from 'multi-integer-range';
@@ -8,14 +7,14 @@ import PluginDefinitionAccessor from '../../plugin-definition-accessor/PluginDef
 export interface PluginJobRegisterer {
   register(
     jobId: string,
-    payload: PluginJobRequest,
+    payload: circus.PluginJobRequest,
     priority?: number
   ): Promise<void>;
 }
 
 function checkSeriesImageRange(
   imagesInSeries: MultiRange,
-  series: JobSeries
+  series: circus.JobSeries
 ): void {
   if (typeof series.startImgNum === 'undefined') return;
   if (typeof series.startImgNum !== 'number') {
@@ -43,7 +42,7 @@ function checkSeriesImageRange(
 const createPluginJobRegisterer: FunctionService<
   PluginJobRegisterer,
   {
-    queue: Queue<PluginJobRequest>;
+    queue: Queue<circus.PluginJobRequest>;
     pluginDefinitionAccessor: PluginDefinitionAccessor;
     dicomFileRepository: DicomFileRepository;
   }
@@ -52,7 +51,7 @@ const createPluginJobRegisterer: FunctionService<
 
   async function register(
     jobId: string,
-    payload: PluginJobRequest,
+    payload: circus.PluginJobRequest,
     priority: number = 0
   ): Promise<void> {
     // Ensure jobId is alphanumerical.

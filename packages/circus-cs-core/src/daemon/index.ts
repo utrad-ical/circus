@@ -7,7 +7,6 @@ import argv from 'argv';
 import Configuration from '../config/Configuration';
 import config from '../config';
 import configureServiceLoader from '../configureServiceLoader';
-import { PluginJobRequest } from '../interface';
 import loopRun, { LoopRunOptions } from './loopRun';
 import createCancellableTimer from './createCancellableTimer';
 
@@ -36,10 +35,10 @@ const main = async () => {
 
   const serviceLoader = configureServiceLoader(ourConfig!);
 
-  let loopRunOptions: LoopRunOptions<PluginJobRequest>;
+  let loopRunOptions: LoopRunOptions<circus.PluginJobRequest>;
   try {
     loopRunOptions = await createLoopRunOptions(config!, serviceLoader);
-    await loopRun<PluginJobRequest>(loopRunOptions!, process);
+    await loopRun<circus.PluginJobRequest>(loopRunOptions!, process);
     process.exit(0);
   } catch (e) {
     console.error(e);
@@ -50,7 +49,7 @@ const main = async () => {
 async function createLoopRunOptions(
   config: Configuration,
   serviceLoader: ReturnType<typeof configureServiceLoader>
-): Promise<LoopRunOptions<PluginJobRequest>> {
+): Promise<LoopRunOptions<circus.PluginJobRequest>> {
   const [logger, queue, jobRunner] = await Promise.all([
     serviceLoader.get('logger'),
     serviceLoader.get('queue'),

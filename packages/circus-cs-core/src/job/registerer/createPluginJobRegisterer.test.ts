@@ -1,11 +1,10 @@
 import createPluginJobRegisterer from './createPluginJobRegisterer';
-import { PluginJobRequest, PluginDefinition } from '../../interface';
 import Queue from '../queue/Queue';
 import { DicomFileRepository } from '@utrad-ical/circus-lib/lib/dicom-file-repository';
 import PluginDefinitionAccessor from '../../plugin-definition-accessor/PluginDefinitionAccessor';
 
 describe('createPluginJobRegisterer', () => {
-  const defaultPayload: PluginJobRequest = {
+  const defaultPayload: circus.PluginJobRequest = {
     pluginId: 'my-plugin-id',
     series: [{ seriesUid: '1.2.3' }]
   };
@@ -14,7 +13,7 @@ describe('createPluginJobRegisterer', () => {
 
   beforeEach(() => {
     const queue = ({ enqueue: jest.fn() } as unknown) as Queue<
-      PluginJobRequest
+      circus.PluginJobRequest
     >;
 
     const dicomFileRepository = ({
@@ -31,7 +30,7 @@ describe('createPluginJobRegisterer', () => {
             pluginName: 'my-plugin',
             version: '1.0.0',
             type: 'CAD'
-          } as PluginDefinition;
+          } as circus.PluginDefinition;
         } else {
           throw new Error('No such plug-in installed.');
         }
@@ -65,7 +64,7 @@ describe('createPluginJobRegisterer', () => {
   });
 
   test('Invalid plug-in ID throws', async () => {
-    const wrongPayload: PluginJobRequest = {
+    const wrongPayload: circus.PluginJobRequest = {
       ...defaultPayload,
       pluginId: 'imaginary'
     };
@@ -76,7 +75,10 @@ describe('createPluginJobRegisterer', () => {
   });
 
   test('Specifying no series throws', async () => {
-    const wrongPayload: PluginJobRequest = { ...defaultPayload, series: [] };
+    const wrongPayload: circus.PluginJobRequest = {
+      ...defaultPayload,
+      series: []
+    };
     const registerer = await createPluginJobRegisterer(undefined, deps);
     await expect(registerer.register('abc', wrongPayload, 0)).rejects.toThrow(
       'No series specified'
@@ -84,7 +86,7 @@ describe('createPluginJobRegisterer', () => {
   });
 
   test('Nonexistent series throws', async () => {
-    const wrongPayload: PluginJobRequest = {
+    const wrongPayload: circus.PluginJobRequest = {
       ...defaultPayload,
       series: [{ seriesUid: '9.9.9' }]
     };

@@ -2,7 +2,6 @@ import pluginJobRunner, {
   fetchSeriesFromRepository,
   executePlugin
 } from './pluginJobRunner';
-import { PluginJobRequest, PluginDefinition } from '../interface';
 import fs from 'fs-extra';
 import path from 'path';
 import DockerRunner from '../util/DockerRunner';
@@ -43,7 +42,7 @@ describe('pluginJobRunner', () => {
 
     const pluginDefinitionAccessor = {
       get: async (discardPluginId: string) => {
-        const fixedDefinition: PluginDefinition = {
+        const fixedDefinition: circus.PluginDefinition = {
           pluginId: 'circus-mock/empty:1.0',
           pluginName: 'Empty',
           version: '1.0',
@@ -66,7 +65,7 @@ describe('pluginJobRunner', () => {
       }
     );
 
-    const jobRequest: PluginJobRequest = {
+    const jobRequest: circus.PluginJobRequest = {
       pluginId: 'circus-mock/empty:1.0',
       series: [{ seriesUid }]
     };
@@ -104,7 +103,7 @@ describe('fetchSeriesFromRepository', () => {
 describe('executePlugin', () => {
   test('runs docker', async () => {
     const runner = new DockerRunner();
-    const plugin: PluginDefinition = {
+    const plugin: circus.PluginDefinition = {
       pluginId: 'hello-world',
       pluginName: 'Test',
       version: '1.0.0',

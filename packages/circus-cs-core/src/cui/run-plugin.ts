@@ -46,6 +46,7 @@ const runPlugin: FunctionService<
     const inDir = path.join(path.resolve(workDir), 'in');
     const outDir = path.join(path.resolve(workDir), 'out');
     await fs.ensureDir(inDir);
+    await fs.ensureDir(outDir);
     if (seriesUidOrDirectories.length !== 1) {
       throw new Error('Specify only one series.');
     }

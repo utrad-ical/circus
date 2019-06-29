@@ -4,6 +4,8 @@ import memory from 'memory-streams';
 import sleep from './sleep';
 import tar from 'tar-stream';
 import path from 'path';
+import os from 'os';
+import defaults from '../config/default';
 
 // Supported events:
 // - container
@@ -15,14 +17,14 @@ import path from 'path';
 // - timeouted
 // - (statechange may be supported ...?)
 
-const defaultDockerOption =
+const defaultDockerOption = defaults.dockerRunner.options;
+
+// Used to run containers as the current user
+const userOptions =
   process.platform === 'win32'
-    ? {
-        host: 'localhost',
-        port: 2375
-      }
+    ? {}
     : {
-        socketPath: '/var/run/docker.sock'
+        User: `${os.userInfo().uid}:${os.userInfo().gid}`
       };
 
 /**
@@ -50,7 +52,10 @@ export default class DockerRunner extends EventEmitter {
   ): Promise<string> {
     const docker = new Dockerode(this.dockerOptions);
 
-    const container = await docker.createContainer(createOptions);
+    const container = await docker.createContainer({
+      ...createOptions,
+      ...userOptions
+    });
     this.emit('container', container);
 
     const stdoutInContainer = await container.attach({

@@ -1,6 +1,5 @@
 import pluginJobRunner, {
   fetchSeriesFromRepository,
-  buildDicomVolume,
   executePlugin
 } from './pluginJobRunner';
 import { PluginJobRequest, PluginDefinition } from '../interface';
@@ -99,26 +98,6 @@ describe('fetchSeriesFromRepository', () => {
 
   afterAll(async () => {
     await fs.remove(dir);
-  });
-});
-
-describe('buildDicomVolume', () => {
-  // If this test fails, double-check 'dicom_voxel_dump' image
-  // has been correctly loaded in the Docker environment.
-  test('craetes raw volume file', async () => {
-    const srcDir = path.join(repositoryDir, seriesUid);
-    const tmpDestDir = path.resolve(__dirname, '../../test/dicom-out');
-    await fs.emptyDir(tmpDestDir);
-    try {
-      const runner = new DockerRunner();
-      await buildDicomVolume(runner, srcDir, tmpDestDir);
-      const files = await fs.readdir(tmpDestDir);
-      expect(files).toContain('0.mhd');
-      expect(files).toContain('0.raw');
-      expect(files).toContain('0.txt');
-    } finally {
-      await fs.remove(tmpDestDir);
-    }
   });
 });
 

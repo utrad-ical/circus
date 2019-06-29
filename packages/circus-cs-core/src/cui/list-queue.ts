@@ -6,26 +6,11 @@ import Command from './Command';
 const argumentsSchema = {
   type: 'object',
   properties: {
-    w: {
-      // wait (default)
-      type: 'boolean'
-    },
-    p: {
-      // processing
-      type: 'boolean'
-    },
-    e: {
-      // error
-      type: 'boolean'
-    },
-    d: {
-      // done
-      type: 'boolean'
-    },
-    a: {
-      // all
-      type: 'boolean'
-    }
+    w: { type: 'boolean' }, // wait (default)
+    p: { type: 'boolean' }, // processing
+    e: { type: 'boolean' }, // error
+    d: { type: 'boolean' }, // done
+    a: { type: 'boolean' } // all
   }
 };
 

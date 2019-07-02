@@ -71,10 +71,10 @@ describe('pluginJobRunner', () => {
     };
 
     await runner.run(jobId, jobRequest);
-    expect(jobReporter.report).toHaveBeenCalledTimes(3);
     expect(jobReporter.report.mock.calls[0][1]).toBe('processing');
     expect(jobReporter.report.mock.calls[1][1]).toBe('results');
     expect(jobReporter.report.mock.calls[2][1]).toBe('finished');
+    expect(jobReporter.report).toHaveBeenCalledTimes(3);
   });
 });
 

@@ -23,6 +23,17 @@ declare namespace circus {
   }
 
   /**
+   * Provides a simple interface to control the job manager daemon.
+   */
+  interface DaemonController {
+    start: () => Promise<void>;
+    stop: () => Promise<void>;
+    status: () => Promise<'running' | 'stopped'>;
+    pm2list: () => Promise<void>;
+    pm2killall: () => Promise<void>;
+  }
+
+  /**
    * Defines CIRCUS CS plug-in.
    */
   interface PluginDefinition {

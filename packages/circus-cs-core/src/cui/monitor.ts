@@ -5,7 +5,6 @@ import { table } from 'table';
 import sleep from '../util/sleep';
 import Command from './Command';
 import Queue from '../job/queue/Queue';
-import { DaemonController } from '../daemon/createDaemonController';
 
 const dt = (date: Date) => {
   const m = moment(date);
@@ -16,7 +15,7 @@ const monitor: FunctionService<
   Command,
   {
     queue: Queue<circus.PluginJobRequest>;
-    daemonController: DaemonController;
+    daemonController: circus.DaemonController;
   }
 > = async (options, deps) => {
   const { queue, daemonController } = deps;

@@ -3,9 +3,7 @@ import Logger from '@utrad-ical/circus-lib/lib/logger/Logger';
 import ServiceLoader from '@utrad-ical/circus-lib/lib/ServiceLoader';
 import path from 'path';
 import Configuration from './config/Configuration';
-import createDaemonController, {
-  DaemonController
-} from './daemon/createDaemonController';
+import createDaemonController from './daemon/createDaemonController';
 import PluginJobReporter from './job/reporter/PluginJobReporter';
 import { PluginJobRegisterer } from './job/registerer/createPluginJobRegisterer';
 import { PluginJobRunner } from './job/pluginJobRunner';
@@ -19,7 +17,7 @@ import DockerRunner from './util/DockerRunner';
  */
 export interface Services {
   logger: Logger;
-  daemonController: DaemonController;
+  daemonController: circus.DaemonController;
   pluginDefinitionAccessor: circus.PluginDefinitionAccessor;
   jobReporter: PluginJobReporter;
   queue: Queue<circus.PluginJobRequest>;

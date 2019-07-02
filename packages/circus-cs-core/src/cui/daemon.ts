@@ -1,10 +1,9 @@
-import { DaemonController } from '../daemon/createDaemonController';
 import { FunctionService } from '@utrad-ical/circus-lib';
 import Command from './Command';
 
 const daemon: FunctionService<
   Command,
-  { daemonController: DaemonController }
+  { daemonController: circus.DaemonController }
 > = async (options, deps) => {
   const { daemonController: dc } = deps;
   const printStatus = async () => {

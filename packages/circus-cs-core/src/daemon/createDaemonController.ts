@@ -12,17 +12,9 @@ const pm2: any = pify(_pm2);
 
 const startScript = 'daemon.js';
 
-export interface DaemonController {
-  start: () => Promise<void>;
-  stop: () => Promise<void>;
-  status: () => Promise<'running' | 'stopped'>;
-  pm2list: () => Promise<void>;
-  pm2killall: () => Promise<void>;
-}
-
 export default function createDaemonController(
   config: Configuration
-): DaemonController {
+): circus.DaemonController {
   const { startOptions } = config.jobManager.options;
 
   // Maybe not better, but the purpose can be achieved.

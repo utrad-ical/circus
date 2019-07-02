@@ -8,7 +8,6 @@ import PluginJobReporter from './job/reporter/PluginJobReporter';
 import { PluginJobRegisterer } from './job/registerer/createPluginJobRegisterer';
 import { PluginJobRunner } from './job/pluginJobRunner';
 import { MongoClientPool } from './mongoClientPool';
-import { CsCore } from './createCsCore';
 import DockerRunner from './util/DockerRunner';
 
 /**
@@ -25,8 +24,8 @@ export interface Services {
   pluginJobRegisterer: PluginJobRegisterer;
   jobRunner: PluginJobRunner;
   dockerRunner: DockerRunner;
-  core: CsCore;
-  [key: string]: any;
+  core: circus.CsCore;
+  [key: string]: any; // This allows to add services outside this file
 }
 
 // Keep this module as clean and simple as possible.

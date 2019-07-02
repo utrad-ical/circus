@@ -107,4 +107,23 @@ declare namespace circus {
     list: () => Promise<PluginDefinition[]>;
     get: (pluginId: string) => Promise<PluginDefinition>;
   }
+
+  /**
+   * A facade interface that abstracts the complex dependencies.
+   */
+  interface CsCore {
+    // Daemon controller
+    daemon: DaemonController;
+    // plugin handler
+    plugin: PluginDefinitionAccessor;
+    // job handler
+    job: {
+      list: () => Promise<QueueItem<PluginJobRequest>[]>;
+      register: (
+        jobId: string,
+        payload: PluginJobRequest,
+        priority?: number
+      ) => Promise<void>;
+    };
+  }
 }

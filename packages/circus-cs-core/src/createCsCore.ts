@@ -1,27 +1,8 @@
 import { FunctionService } from '@utrad-ical/circus-lib';
 import { PluginJobRegisterer } from './job/registerer/createPluginJobRegisterer';
 
-/**
- * A facade interface that abstracts the complex dependencies.
- */
-export interface CsCore {
-  // Daemon controller
-  daemon: circus.DaemonController;
-  // plugin handler
-  plugin: circus.PluginDefinitionAccessor;
-  // job handler
-  job: {
-    list: () => Promise<circus.QueueItem<circus.PluginJobRequest>[]>;
-    register: (
-      jobId: string,
-      payload: circus.PluginJobRequest,
-      priority?: number
-    ) => Promise<void>;
-  };
-}
-
 const createCsCore: FunctionService<
-  CsCore,
+  circus.CsCore,
   {
     daemonController: circus.DaemonController;
     pluginDefinitionAccessor: circus.PluginDefinitionAccessor;
@@ -29,6 +10,8 @@ const createCsCore: FunctionService<
     pluginJobRegisterer: PluginJobRegisterer;
   }
 > = async (options, deps) => {
+  // This is a simple facade, make it simple!
+
   const {
     daemonController,
     pluginDefinitionAccessor,

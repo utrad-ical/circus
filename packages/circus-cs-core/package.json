@@ -64,6 +64,7 @@
   },
   "author": "Soichiro Miki <smiki-tky@umin.ac.jp>",
   "license": "MIT",
+  "types": "src/interface.d.ts",
   "bugs": {
     "url": "https://github.com/utrad-ical/circus-cs-core/issues"
   },

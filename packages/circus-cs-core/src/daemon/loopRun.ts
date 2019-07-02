@@ -1,10 +1,9 @@
 import Logger from '@utrad-ical/circus-lib/lib/logger/Logger';
-import Queue from '../job/queue/Queue';
 import { CancellableTimer } from './createCancellableTimer';
 
 export interface LoopRunOptions<T> {
   logger: Logger;
-  queue: Queue<T>;
+  queue: circus.Queue<T>;
   run(jobId: string, job: T): Promise<boolean>;
   cancellableTimer: CancellableTimer;
   dispose(): Promise<void>;

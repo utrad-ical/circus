@@ -1,5 +1,4 @@
 import ajv from 'ajv';
-import Queue, { QueueState } from '../job/queue/Queue';
 import { FunctionService } from '@utrad-ical/circus-lib';
 import Command from './Command';
 
@@ -14,10 +13,10 @@ const argumentsSchema = {
   }
 };
 
-const listQueue: FunctionService<Command, { queue: Queue<any> }> = async (
-  options,
-  deps
-) => {
+const listQueue: FunctionService<
+  Command,
+  { queue: circus.PluginJobRequestQueue }
+> = async (options, deps) => {
   const { queue } = deps;
   return async function listQueue(commandName, argv: any) {
     const argCheck = new ajv().compile(argumentsSchema)(argv);
@@ -27,7 +26,7 @@ const listQueue: FunctionService<Command, { queue: Queue<any> }> = async (
       process.exit(1);
     }
 
-    let state: QueueState | 'all';
+    let state: circus.QueueState | 'all';
     switch (true) {
       case argv.a:
         state = 'all';

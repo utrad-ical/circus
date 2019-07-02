@@ -1,5 +1,4 @@
 import createPluginJobRegisterer from './createPluginJobRegisterer';
-import Queue from '../queue/Queue';
 import { DicomFileRepository } from '@utrad-ical/circus-lib/lib/dicom-file-repository';
 
 describe('createPluginJobRegisterer', () => {
@@ -11,9 +10,9 @@ describe('createPluginJobRegisterer', () => {
   let deps: any;
 
   beforeEach(() => {
-    const queue = ({ enqueue: jest.fn() } as unknown) as Queue<
-      circus.PluginJobRequest
-    >;
+    const queue = ({
+      enqueue: jest.fn()
+    } as unknown) as circus.PluginJobRequestQueue;
 
     const dicomFileRepository = ({
       getSeries: jest.fn(seriesUid =>

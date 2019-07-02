@@ -1,4 +1,3 @@
-import Queue from './Queue';
 import mongo from 'mongodb';
 import { testClientPool } from '../../testHelper';
 import { MongoClientPool } from '../../mongoClientPool';
@@ -7,7 +6,7 @@ import createMongoQueue from './MongoQueue';
 describe('Queue system: Mongo', () => {
   let mongoClientPool: MongoClientPool;
   let collection: mongo.Collection;
-  let queue: Queue<any>;
+  let queue: circus.Queue<any>;
   const collectionName = 'pluginJobQueue';
 
   beforeAll(async () => {

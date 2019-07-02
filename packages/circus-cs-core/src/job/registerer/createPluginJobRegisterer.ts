@@ -1,4 +1,3 @@
-import Queue from '../queue/Queue';
 import { DicomFileRepository } from '@utrad-ical/circus-lib/lib/dicom-file-repository';
 import MultiRange from 'multi-integer-range';
 import { FunctionService } from '@utrad-ical/circus-lib';
@@ -41,7 +40,7 @@ function checkSeriesImageRange(
 const createPluginJobRegisterer: FunctionService<
   PluginJobRegisterer,
   {
-    queue: Queue<circus.PluginJobRequest>;
+    queue: circus.PluginJobRequestQueue;
     pluginDefinitionAccessor: circus.PluginDefinitionAccessor;
     dicomFileRepository: DicomFileRepository;
   }

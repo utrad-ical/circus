@@ -6,13 +6,12 @@ import isDirectory from '../util/isDirectory';
 import { FunctionService } from '@utrad-ical/circus-lib';
 import Command from './Command';
 import config from '../config';
-import Queue from '../job/queue/Queue';
 
 const checkEnv: FunctionService<
   Command,
   {
     dockerRunner: DockerRunner;
-    queue: Queue<circus.PluginJobRequest>;
+    queue: circus.PluginJobRequestQueue;
     pluginDefinitionAccessor: circus.PluginDefinitionAccessor;
   }
 > = async (options, deps) => {

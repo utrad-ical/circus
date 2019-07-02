@@ -1,16 +1,15 @@
-import Queue, { QueueState, Item } from './Queue';
 import { FunctionService } from '@utrad-ical/circus-lib';
 import { MongoClientPool } from '../../mongoClientPool';
 
 const createMongoQueue: FunctionService<
-  Queue<circus.PluginJobRequest>,
+  circus.PluginJobRequestQueue,
   { mongoClientPool: MongoClientPool }
 > = async (options: any, { mongoClientPool }) => {
   const connection = await mongoClientPool.connect(options.mongoUrl);
   const collection = await connection.db().collection(options.collectionName);
   await collection.createIndex({ jobId: 1 }, { unique: true });
 
-  const list = async function(state: QueueState | 'all' = 'wait') {
+  const list = async function(state: circus.QueueState | 'all' = 'wait') {
     const statusFilter = state === 'all' ? {} : { state };
     return await collection
       .find(statusFilter, { sort: { priority: -1, _id: 1 } })
@@ -22,7 +21,7 @@ const createMongoQueue: FunctionService<
     payload: circus.PluginJobRequest,
     priority: number = 0
   ) => {
-    const item: Item<circus.PluginJobRequest> = {
+    const item: circus.QueueItem<circus.PluginJobRequest> = {
       jobId,
       state: 'wait',
       payload,
@@ -40,7 +39,7 @@ const createMongoQueue: FunctionService<
       { state: 'wait' },
       { $set: { state: 'processing', startedAt: new Date() } },
       { sort: { priority: -1, _id: 1 }, returnOriginal: false }
-    )).value as Item<circus.PluginJobRequest> | null;
+    )).value as circus.QueueItem<circus.PluginJobRequest> | null;
     return result;
   };
 

@@ -2,11 +2,48 @@
 // You can use them like `circus.PluginJobRequest` without `import`-ing.
 
 declare namespace circus {
+  export type QueueState = 'wait' | 'processing';
+
+  interface Queue<T> {
+    /**
+     * Returns the list of current jobs and their status.
+     */
+    list: (state?: QueueState | 'all') => Promise<QueueItem<T>[]>;
+
+    /**
+     * Registers a ner job.
+     */
+    enqueue: (jobId: string, payload: T, priority?: number) => Promise<string>;
+
+    /**
+     * Returns the next job while marking it as 'processing'.
+     */
+    dequeue: () => Promise<QueueItem<T> | null>;
+
+    /**
+     * Removes the job from queue.
+     */
+    settle: (jobId: string) => Promise<void>;
+  }
+
+  interface QueueItem<T> {
+    _id?: string;
+    jobId: string;
+    priority: number;
+    payload: T;
+    state: QueueState;
+    createdAt: Date;
+    updatedAt: Date;
+    startedAt: Date | null;
+  }
+
   interface PluginJobRequest {
     pluginId: string;
     series: JobSeries[];
     environment?: string; // deprecated
   }
+
+  type PluginJobRequestQueue = Queue<PluginJobRequest>;
 
   interface JobSeries {
     seriesUid: string;

@@ -1,5 +1,4 @@
 import loopRun, { LoopRunOptions } from './loopRun';
-import Queue, { Item } from '../job/queue/Queue';
 import sleep from '../util/sleep';
 import { EventEmitter } from 'events';
 
@@ -15,10 +14,10 @@ const createMockLogger = (fn: jest.Mock) => {
 };
 
 const createMockQueueSystem = <T>(len: number = 10, fn: jest.Mock) => {
-  let q: Item<T>[] = [];
+  let q: circus.QueueItem<T>[] = [];
   let qId: number = 0;
 
-  const mockQueueSystem: Queue<T> = {
+  const mockQueueSystem: circus.Queue<T> = {
     list: async state => {
       if (state !== 'all') {
         return q.filter(i => i.state === state);

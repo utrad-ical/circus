@@ -16,12 +16,6 @@ declare namespace circus {
     requiredPrivateTags?: string[];
   }
 
-  interface PartialVolumeDescriptor {
-    start: number;
-    end: number;
-    delta: number;
-  }
-
   /**
    * Provides a simple interface to control the job manager daemon.
    */
@@ -76,12 +70,4 @@ declare namespace circus {
     list: () => Promise<PluginDefinition[]>;
     get: (pluginId: string) => Promise<PluginDefinition>;
   }
-
-  type JobState =
-    | 'in_queue'
-    | 'processing'
-    | 'finished'
-    | 'failed'
-    | 'invalidated'
-    | 'cancelled';
 }

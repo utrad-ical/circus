@@ -6,7 +6,6 @@ import pluginResultsValidator from './pluginResultsValidator';
 import { MultiRange } from 'multi-integer-range';
 import { FunctionService } from '@utrad-ical/circus-lib';
 import PluginJobReporter from './reporter/PluginJobReporter';
-import PluginDefinitionAccessor from '../plugin-definition-accessor/PluginDefinitionAccessor';
 import buildDicomVolumes from './buildDicomVolumes';
 
 export interface PluginJobRunner {
@@ -20,7 +19,7 @@ const pluginJobRunner: FunctionService<
   {
     jobReporter: PluginJobReporter;
     dicomRepository: DicomFileRepository;
-    pluginDefinitionAccessor: Pick<PluginDefinitionAccessor, 'get'>;
+    pluginDefinitionAccessor: circus.PluginDefinitionAccessor;
     dockerRunner: DockerRunner;
   }
 > = async (

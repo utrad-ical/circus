@@ -1,10 +1,9 @@
 import path from 'path';
 import fs from 'fs-extra';
-import PluginDefinitionAccessor from './PluginDefinitionAccessor';
 import { FunctionService } from '@utrad-ical/circus-lib';
 
 const createStaticPluginDefinitionAccessor: FunctionService<
-  PluginDefinitionAccessor,
+  circus.PluginDefinitionAccessor,
   {}
 > = async ({ dir }: { dir: string }) => {
   if (typeof dir !== 'string')

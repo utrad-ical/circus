@@ -1,10 +1,9 @@
 import path from 'path';
 import createStaticPluginDefinitionAccessor from './StaticPluginDefinitionAccessor';
-import PluginDefinitionAccessor from './PluginDefinitionAccessor';
 
 describe('StaticPluginDefinitionAccessor', () => {
   const pluginDir = path.join(__dirname, '../../test/plugins/');
-  let pluginDefs: PluginDefinitionAccessor;
+  let pluginDefs: circus.PluginDefinitionAccessor;
 
   beforeAll(async () => {
     pluginDefs = await createStaticPluginDefinitionAccessor(

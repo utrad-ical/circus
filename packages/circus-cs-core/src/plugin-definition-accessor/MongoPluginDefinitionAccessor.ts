@@ -1,9 +1,8 @@
-import PluginDefinitionAccessor from './PluginDefinitionAccessor';
 import { FunctionService } from '@utrad-ical/circus-lib';
 import { MongoClientPool } from '../mongoClientPool';
 
 const createMongoPluginDefinitionAccessor: FunctionService<
-  PluginDefinitionAccessor,
+  circus.PluginDefinitionAccessor,
   { mongoClientPool: MongoClientPool }
 > = async (options: any, { mongoClientPool }) => {
   const { mongoUrl, collectionName } = options;

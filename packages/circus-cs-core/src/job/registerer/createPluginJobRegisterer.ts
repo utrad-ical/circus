@@ -2,7 +2,6 @@ import Queue from '../queue/Queue';
 import { DicomFileRepository } from '@utrad-ical/circus-lib/lib/dicom-file-repository';
 import MultiRange from 'multi-integer-range';
 import { FunctionService } from '@utrad-ical/circus-lib';
-import PluginDefinitionAccessor from '../../plugin-definition-accessor/PluginDefinitionAccessor';
 
 export interface PluginJobRegisterer {
   register(
@@ -43,7 +42,7 @@ const createPluginJobRegisterer: FunctionService<
   PluginJobRegisterer,
   {
     queue: Queue<circus.PluginJobRequest>;
-    pluginDefinitionAccessor: PluginDefinitionAccessor;
+    pluginDefinitionAccessor: circus.PluginDefinitionAccessor;
     dicomFileRepository: DicomFileRepository;
   }
 > = async (options, deps) => {

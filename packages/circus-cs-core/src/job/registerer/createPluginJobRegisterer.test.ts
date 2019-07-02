@@ -1,7 +1,6 @@
 import createPluginJobRegisterer from './createPluginJobRegisterer';
 import Queue from '../queue/Queue';
 import { DicomFileRepository } from '@utrad-ical/circus-lib/lib/dicom-file-repository';
-import PluginDefinitionAccessor from '../../plugin-definition-accessor/PluginDefinitionAccessor';
 
 describe('createPluginJobRegisterer', () => {
   const defaultPayload: circus.PluginJobRequest = {
@@ -38,7 +37,7 @@ describe('createPluginJobRegisterer', () => {
       list: async () => {
         throw Error();
       }
-    } as PluginDefinitionAccessor;
+    } as circus.PluginDefinitionAccessor;
 
     deps = {
       queue,

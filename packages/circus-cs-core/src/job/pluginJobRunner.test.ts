@@ -50,7 +50,7 @@ describe('pluginJobRunner', () => {
         };
         return fixedDefinition;
       }
-    };
+    } as circus.PluginDefinitionAccessor;
 
     const runner = await pluginJobRunner(
       {

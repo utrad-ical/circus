@@ -1,11 +1,10 @@
 import { FunctionService } from '@utrad-ical/circus-lib';
 import Command from './Command';
-import PluginDefinitionAccessor from '../plugin-definition-accessor/PluginDefinitionAccessor';
 import { table } from 'table';
 
 const listPlugins: FunctionService<
   Command,
-  { pluginDefinitionAccessor: PluginDefinitionAccessor }
+  { pluginDefinitionAccessor: circus.PluginDefinitionAccessor }
 > = async (options, deps) => {
   const { pluginDefinitionAccessor } = deps;
 

@@ -11,7 +11,6 @@ import { PluginJobRegisterer } from './job/registerer/createPluginJobRegisterer'
 import { PluginJobRunner } from './job/pluginJobRunner';
 import { MongoClientPool } from './mongoClientPool';
 import Queue from './job/queue/Queue';
-import PluginDefinitionAccessor from './plugin-definition-accessor/PluginDefinitionAccessor';
 import { CsCore } from './createCsCore';
 import DockerRunner from './util/DockerRunner';
 
@@ -21,7 +20,7 @@ import DockerRunner from './util/DockerRunner';
 export interface Services {
   logger: Logger;
   daemonController: DaemonController;
-  pluginDefinitionAccessor: PluginDefinitionAccessor;
+  pluginDefinitionAccessor: circus.PluginDefinitionAccessor;
   jobReporter: PluginJobReporter;
   queue: Queue<circus.PluginJobRequest>;
   mongoClientPool: MongoClientPool;

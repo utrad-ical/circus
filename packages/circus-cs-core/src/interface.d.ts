@@ -61,6 +61,11 @@ declare namespace circus {
     maxExecutionSeconds?: number;
   }
 
+  interface PluginDefinitionAccessor {
+    list: () => Promise<PluginDefinition[]>;
+    get: (pluginId: string) => Promise<PluginDefinition>;
+  }
+
   type JobState =
     | 'in_queue'
     | 'processing'

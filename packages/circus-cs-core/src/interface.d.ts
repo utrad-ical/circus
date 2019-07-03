@@ -4,6 +4,13 @@
 declare namespace circus {
   export type QueueState = 'wait' | 'processing';
 
+  interface Configuration {
+    [service: string]: {
+      type?: string;
+      options?: any;
+    };
+  }
+
   interface Queue<T> {
     /**
      * Returns the list of current jobs and their status.
@@ -126,4 +133,5 @@ declare namespace circus {
       ) => Promise<void>;
     };
   }
+
 }

@@ -1,6 +1,5 @@
 import path from 'path';
 import os from 'os';
-import Configuration from './Configuration';
 
 // We use cosmiconfig to manage settings.
 // DO NOT DIRECTLY EDIT THIS FILE!!!
@@ -10,7 +9,7 @@ import Configuration from './Configuration';
 // and specify the settings. Items in your setting file
 // will be merged recursively.
 
-const defaults: Configuration = {
+const defaults: circus.Configuration = {
   jobRunner: {
     options: {
       pluginWorkingDir: path.join(os.tmpdir(), 'circus-cs'),

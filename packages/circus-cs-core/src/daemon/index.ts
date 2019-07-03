@@ -4,7 +4,6 @@
  * @module
  */
 import argv from 'argv';
-import Configuration from '../config/Configuration';
 import config from '../config';
 import configureServiceLoader from '../configureServiceLoader';
 import loopRun, { LoopRunOptions } from './loopRun';
@@ -21,7 +20,7 @@ argv.option([
 const main = async () => {
   const { options } = argv.run();
 
-  let ourConfig: Configuration | undefined = undefined;
+  let ourConfig: circus.Configuration | undefined = undefined;
   if (options['config-content']) {
     try {
       ourConfig = JSON.parse(options['config-content']);
@@ -47,7 +46,7 @@ const main = async () => {
 };
 
 async function createLoopRunOptions(
-  config: Configuration,
+  config: circus.Configuration,
   serviceLoader: ReturnType<typeof configureServiceLoader>
 ): Promise<LoopRunOptions<circus.PluginJobRequest>> {
   const [logger, queue, jobRunner] = await Promise.all([

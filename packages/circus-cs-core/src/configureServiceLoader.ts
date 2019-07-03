@@ -2,7 +2,6 @@ import { DicomFileRepository } from '@utrad-ical/circus-lib/lib/dicom-file-repos
 import Logger from '@utrad-ical/circus-lib/lib/logger/Logger';
 import ServiceLoader from '@utrad-ical/circus-lib/lib/ServiceLoader';
 import path from 'path';
-import Configuration from './config/Configuration';
 import createDaemonController from './daemon/createDaemonController';
 import PluginJobReporter from './job/reporter/PluginJobReporter';
 import { PluginJobRegisterer } from './job/registerer/createPluginJobRegisterer';
@@ -25,6 +24,7 @@ export interface Services {
   jobRunner: PluginJobRunner;
   dockerRunner: DockerRunner;
   core: circus.CsCore;
+  configGetter: circus.Configuration;
   [key: string]: any; // This allows to add services outside this file
 }
 
@@ -32,7 +32,7 @@ export interface Services {
 // Do not try to include any business logic here!
 
 export default function configureServiceLoader(
-  config: Configuration
+  config: circus.Configuration
 ): ServiceLoader<Services> {
   const serviceLoader = new ServiceLoader<Services>(config as any);
   serviceLoader.registerDirectory(
@@ -89,6 +89,7 @@ export default function configureServiceLoader(
     'dockerRunner',
     path.join(__dirname, 'util', 'DockerRunner')
   );
+  serviceLoader.registerFactory('configuration', async config => config);
 
   // "the facade"
   serviceLoader.registerModule('core', path.join(__dirname, 'createCsCore'));

@@ -1,11 +1,10 @@
 import merge from 'merge';
 import cosmiconfig from 'cosmiconfig';
 import defaults from './default';
-import Configuration from './Configuration';
 
 const loadConfig = (
   configTitle: string,
-  overwrite: Partial<Configuration> = {}
+  overwrite: Partial<circus.Configuration> = {}
 ) => {
   const explorer = cosmiconfig(configTitle);
   const result = explorer.searchSync() || { config: {} };
@@ -14,7 +13,7 @@ const loadConfig = (
     defaults,
     result.config,
     overwrite
-  ) as Configuration;
+  ) as circus.Configuration;
   return config;
 };
 

@@ -1,11 +1,15 @@
 import { FunctionService } from '@utrad-ical/circus-lib';
 import Command from './Command';
-import config from '../config';
 
-const printConfig: FunctionService<Command> = async () => {
+const printConfig: FunctionService<
+  Command,
+  { configuration: circus.Configuration }
+> = async (options, { configuration }) => {
   return async () => {
-    console.log(config);
+    console.log(configuration);
   };
 };
+
+printConfig.dependencies = ['configuration'];
 
 export default printConfig;

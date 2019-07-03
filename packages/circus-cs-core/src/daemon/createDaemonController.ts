@@ -6,14 +6,13 @@
 import _pm2 from 'pm2';
 import pify from 'pify';
 import escape from 'shell-escape';
-import Configuration from '../config/Configuration';
 
 const pm2: any = pify(_pm2);
 
 const startScript = 'daemon.js';
 
 export default function createDaemonController(
-  config: Configuration
+  config: circus.Configuration
 ): circus.DaemonController {
   const { startOptions } = config.jobManager.options;
 

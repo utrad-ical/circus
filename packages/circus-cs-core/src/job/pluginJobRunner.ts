@@ -175,12 +175,15 @@ export async function executePlugin(
     binds: { in: bindsIn = '/circus/in', out: bindsOut = '/circus/out' } = {}
   } = pluginDefinition;
 
-  dockerRunner.setTimeout(maxExecutionSeconds * 1000);
-  const result = await dockerRunner.run({
-    Image: pluginId,
-    HostConfig: {
-      Binds: [`${srcDir}:${bindsIn}`, `${destDir}:${bindsOut}`]
-    }
-  });
+  const timeoutMs = maxExecutionSeconds * 1000;
+  const result = await dockerRunner.run(
+    {
+      Image: pluginId,
+      HostConfig: {
+        Binds: [`${srcDir}:${bindsIn}`, `${destDir}:${bindsOut}`]
+      }
+    },
+    timeoutMs
+  );
   return result;
 }

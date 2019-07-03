@@ -34,21 +34,16 @@ export default class DockerRunner extends EventEmitter {
   private dockerOptions: Dockerode.DockerOptions;
 
   private watchInterval: number;
-  private timeout: number | null;
 
   constructor(options: Dockerode.DockerOptions = defaultDockerOption) {
     super();
     this.dockerOptions = options;
     this.watchInterval = 500;
-    this.timeout = null;
-  }
-
-  public setTimeout(millSeconds: number) {
-    this.timeout = millSeconds;
   }
 
   public async runWithStream(
-    createOptions: Dockerode.ContainerCreateOptions
+    createOptions: Dockerode.ContainerCreateOptions,
+    timeout?: number
   ): Promise<{ stream: NodeJS.ReadableStream; promise: Promise<void> }> {
     const docker = new Dockerode(this.dockerOptions);
 
@@ -89,8 +84,9 @@ export default class DockerRunner extends EventEmitter {
         }
 
         if (
-          this.timeout !== null &&
-          new Date().getTime() > startTime + this.timeout
+          timeout &&
+          timeout > 0 &&
+          new Date().getTime() > startTime + timeout
         ) {
           this.emit('timeout', state);
           try {
@@ -110,9 +106,13 @@ export default class DockerRunner extends EventEmitter {
    * Runs a docker image and returns its output to stdout as a string.
    */
   public async run(
-    createOptions: Dockerode.ContainerCreateOptions
+    createOptions: Dockerode.ContainerCreateOptions,
+    timeout?: number
   ): Promise<string> {
-    const { stream, promise } = await this.runWithStream(createOptions);
+    const { stream, promise } = await this.runWithStream(
+      createOptions,
+      timeout
+    );
     const memStream = new memory.WritableStream();
     stream.pipe(memStream);
     await promise;

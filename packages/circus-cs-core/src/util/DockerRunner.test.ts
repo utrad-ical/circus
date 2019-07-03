@@ -5,6 +5,7 @@ import sleep from './sleep';
 if (process.env.SKIP_DOCKER_TESTS) {
   test.skip('skipping docker tests', () => {});
 } else {
+  // If this test fails, check if 'hellow-world' image is present
   test('run hello-world docker image', async () => {
     const runner = new DockerRunner();
     const result = await runner.run({ Image: 'hello-world' });

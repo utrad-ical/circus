@@ -179,8 +179,7 @@ export async function executePlugin(
   const result = await dockerRunner.run({
     Image: pluginId,
     HostConfig: {
-      Binds: [`${srcDir}:${bindsIn}`, `${destDir}:${bindsOut}`],
-      AutoRemove: true
+      Binds: [`${srcDir}:${bindsIn}`, `${destDir}:${bindsOut}`]
     }
   });
   return result;

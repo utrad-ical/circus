@@ -34,12 +34,15 @@
     "typescript": "^3.5.1"
   },
   "dependencies": {
+    "@types/tar-stream": "^1.6.1",
     "cosmiconfig": "^5.2.1",
     "dicom-parser": "^1.8.3",
     "fs-extra": "^8.0.1",
     "jpeg-lossless-decoder-js": "^2.0.4",
     "merge": "^1.2.1",
     "multi-integer-range": "^4.0.7",
+    "recursive-readdir": "^2.2.2",
+    "tar-stream": "^2.1.0",
     "ulid": "^2.3.0"
   },
   "peerDependencies": {

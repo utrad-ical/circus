@@ -8,3 +8,8 @@ export {
   FunctionService,
   Service
 } from './ServiceLoader';
+
+export {
+  putDirToWritableStream,
+  extractDirFromReadableStream
+} from './fs-stream/fs-stream';

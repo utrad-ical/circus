@@ -5,7 +5,6 @@ import DockerRunner from '../util/DockerRunner';
 import isDirectory from '../util/isDirectory';
 import { FunctionService } from '@utrad-ical/circus-lib';
 import Command from './Command';
-import config from '../config';
 
 const checkEnv: FunctionService<
   Command,
@@ -13,9 +12,15 @@ const checkEnv: FunctionService<
     dockerRunner: DockerRunner;
     queue: circus.PluginJobRequestQueue;
     pluginDefinitionAccessor: circus.PluginDefinitionAccessor;
+    configuration: circus.Configuration;
   }
 > = async (options, deps) => {
-  const { dockerRunner, queue, pluginDefinitionAccessor } = deps;
+  const {
+    dockerRunner,
+    queue,
+    pluginDefinitionAccessor,
+    configuration: config
+  } = deps;
 
   return async () => {
     const checkEntries = [
@@ -98,6 +103,11 @@ const checkEnv: FunctionService<
   };
 };
 
-checkEnv.dependencies = ['dockerRunner', 'queue', 'pluginDefinitionAccessor'];
+checkEnv.dependencies = [
+  'dockerRunner',
+  'queue',
+  'pluginDefinitionAccessor',
+  'configuration'
+];
 
 export default checkEnv;

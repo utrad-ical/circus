@@ -2,11 +2,11 @@ import path from 'path';
 import pluginResultsValidator from './pluginResultsValidator';
 
 describe('Validate lesion candidate plug-in results', () => {
-  const testResultsDir = path.resolve(__dirname, '../../test/docker/results');
+  const testResultsDir = path.resolve(__dirname, '../../test/results');
 
-  const checkOne = async (dirBasename: string, isValid: boolean = true) => {
-    const dir = path.join(testResultsDir, dirBasename);
-    if (isValid) {
+  const checkOne = async (target: string, shouldBeValid: boolean = true) => {
+    const dir = path.join(testResultsDir, target);
+    if (shouldBeValid) {
       await pluginResultsValidator(dir);
     } else {
       await expect(pluginResultsValidator(dir)).rejects.toThrow(
@@ -16,10 +16,14 @@ describe('Validate lesion candidate plug-in results', () => {
   };
 
   test('succeeds', async () => {
-    await checkOne('succeeds', true);
+    await checkOne('succeed', true);
   });
 
-  test('fails', async () => {
-    await checkOne('fails', false);
+  test('fails for invalid JSON', async () => {
+    await checkOne('invalid', false);
+  });
+
+  test('fails if there is no results.json file', async () => {
+    await checkOne('empty', false);
   });
 });

@@ -47,7 +47,7 @@ The content of this file would look like this:
 There is no full documentation yet.
 See `src/config/default.ts` for the available options.
 
-## Test
+### Run Check Command
 
 The `cui.js` is a utility command-line interfact to access
 various functions of CIRCUS CS Core. The syntax is:
@@ -63,4 +63,19 @@ $ node cui check-env
 Plugin working directory      : [OK]
 Docker connection             : [OK]
 MongoDB connection            : [OK]
+```
+
+## Unit Test
+
+```bash
+# Obtain official 'hello-world' docker image.
+# Used for some tests to check the connection with the Docker daemon.
+$ docker pull hello-world
+
+# Build several dummy plug-ins for testing docker integrations.
+$ cd test/docker
+$ node build.js
+
+# Run test scripts
+$ jest
 ```

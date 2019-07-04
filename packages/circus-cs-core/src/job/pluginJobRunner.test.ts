@@ -43,7 +43,7 @@ describe('pluginJobRunner', () => {
     const pluginDefinitionAccessor = {
       get: async (discardPluginId: string) => {
         const fixedDefinition: circus.PluginDefinition = {
-          pluginId: 'circus-mock/empty:1.0',
+          pluginId: 'circus-mock-succeed',
           pluginName: 'Empty',
           version: '1.0',
           type: 'CAD'
@@ -66,7 +66,7 @@ describe('pluginJobRunner', () => {
     );
 
     const jobRequest: circus.PluginJobRequest = {
-      pluginId: 'circus-mock/empty:1.0',
+      pluginId: 'circus-mock-succeed',
       series: [{ seriesUid }]
     };
 

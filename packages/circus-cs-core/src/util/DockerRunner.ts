@@ -41,10 +41,21 @@ export default class DockerRunner extends EventEmitter {
     this.watchInterval = 500;
   }
 
+  /**
+   * Runs the specified container and returns the attached stream.
+   * The image will be deleted after the container exits.
+   * @param createOptions ContainerCreateOptions passed to Dockerode.
+   *   Do not set `AutoRemove` to true.
+   * @param timeout Timeout in milliseconds.
+   * @returns The returned stream is attached to stdout+stderr.
+   *   The returned promise will resolve with the exit code (may be nonzero).
+   * @throws DockerTimeoutError if the container did not finish within
+   *   the specified timeout period.
+   */
   public async runWithStream(
     createOptions: Dockerode.ContainerCreateOptions,
     timeout?: number
-  ): Promise<{ stream: NodeJS.ReadableStream; promise: Promise<void> }> {
+  ): Promise<{ stream: NodeJS.ReadableStream; promise: Promise<number> }> {
     const docker = new Dockerode(this.dockerOptions);
 
     const container = await docker.createContainer({
@@ -73,12 +84,12 @@ export default class DockerRunner extends EventEmitter {
             this.emit('exit', state);
             await container.remove();
             this.emit('remove', container);
-            break; // resolves without error
+            return state.ExitCode; // resolves without error
           }
         } catch (e) {
           // This happens when the container was accidentally
           // removed from outside this class.
-          // Also ensure 'AutoRemove' is not not set to true.
+          // Also ensure 'AutoRemove' is not not set to true elsewhere.
           this.emit('disappear', container);
           throw new Error('Container disappeared.');
         }
@@ -86,24 +97,27 @@ export default class DockerRunner extends EventEmitter {
         if (
           timeout &&
           timeout > 0 &&
-          new Date().getTime() > startTime + timeout
+          new Date().getTime() - startTime > timeout
         ) {
-          this.emit('timeout', state);
           try {
-            await container.stop();
+            await container.stop({ t: 0 }); // Stops immediately
             await container.remove();
           } catch (e) {}
-          throw new DockerTimeoutError('Timeout happened.');
+          this.emit('timeout', state);
+          throw new DockerTimeoutError(
+            `The container did not finish within the timeout of ${timeout} ms.`
+          );
         }
         await this.sleep();
       }
-    })();
+    })() as Promise<number>;
 
     return { stream, promise };
   }
 
   /**
-   * Runs a docker image and returns its output to stdout as a string.
+   * Runs a docker image and captures the output to stdout as a string.
+   * This ignores the exit code. Use `runWithStream` if you need more control.
    */
   public async run(
     createOptions: Dockerode.ContainerCreateOptions,
@@ -146,21 +160,7 @@ export default class DockerRunner extends EventEmitter {
   }
 }
 
-export class DockerTimeoutError extends Error {
-  public code: string;
-  public previous: any;
-
-  constructor(message: string, code: string = '', previous?: any) {
-    super(message);
-    this.message = message;
-    this.code = code;
-    this.previous = previous;
-  }
-
-  public toString() {
-    return this.message;
-  }
-}
+export class DockerTimeoutError extends Error {}
 
 function streamToBuffer(stream: NodeJS.ReadableStream): Promise<Buffer> {
   const bufs: any[] = [];

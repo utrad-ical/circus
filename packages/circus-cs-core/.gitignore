@@ -3,6 +3,7 @@ node_modules
 /tmp/
 /coverage
 /test/working
+/test/docker/tmp
 /test/results
 /lib
 

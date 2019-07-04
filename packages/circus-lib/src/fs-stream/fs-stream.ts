@@ -15,6 +15,7 @@ export const putDirToWritableStream: (
   srcPath: string,
   destStream: Writable
 ) => Promise<void> = async (srcPath, destStream) => {
+  const resolvedSrcPath = path.resolve(srcPath);
   return (async () => {
     const tarStream = tar.pack();
     tarStream.pipe(destStream);
@@ -27,9 +28,9 @@ export const putDirToWritableStream: (
         fs.createReadStream(file).pipe(entry);
       });
     };
-    const files = await recursive(srcPath);
+    const files = await recursive(resolvedSrcPath);
     for (const file of files) {
-      const name = path.relative(srcPath, file);
+      const name = path.relative(resolvedSrcPath, file);
       const size = (await fs.stat(file)).size;
       await putNext(name, size, file);
     }

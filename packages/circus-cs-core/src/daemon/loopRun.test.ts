@@ -59,7 +59,11 @@ const createMockQueueSystem = <T>(len: number = 10, fn: jest.Mock) => {
 };
 
 class MockContext extends EventEmitter {
-  public pid: number = 0;
+  public pid: number;
+  constructor() {
+    super();
+    this.pid = 0;
+  }
 }
 
 describe('loopRun', () => {

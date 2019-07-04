@@ -5,7 +5,7 @@ describe('createCancellableTimer', () => {
     const timer = createCancellableTimer(200, { timerResolution: 50 });
     const start = new Date().getTime();
     await timer.waitForNext();
-    expect(new Date().getTime()).toBeGreaterThan(start + 200);
+    expect(new Date().getTime()).toBeGreaterThanOrEqual(start + 200);
   });
 
   test('cancel', done => {

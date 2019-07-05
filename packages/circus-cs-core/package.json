@@ -22,6 +22,7 @@
     "@types/pify": "^3.0.2",
     "@types/rimraf": "^2.0.2",
     "@types/shell-escape": "^0.2.0",
+    "@types/tar-fs": "^1.16.1",
     "@types/tar-stream": "^1.6.0",
     "@utrad-ical/circus-lib": "^0.10.1",
     "ajv": "^6.5.0",
@@ -43,6 +44,7 @@
     "rimraf": "^2.6.2",
     "shell-escape": "^0.2.0",
     "table": "^4.0.3",
+    "tar-fs": "^2.0.0",
     "tar-stream": "^2.0.1",
     "tslib": "^1.9.2",
     "typescript": "^2.9.1"

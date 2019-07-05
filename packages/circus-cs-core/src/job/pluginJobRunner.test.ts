@@ -6,24 +6,37 @@ import fs from 'fs-extra';
 import path from 'path';
 import DockerRunner from '../util/DockerRunner';
 import { DicomFileRepository } from '@utrad-ical/circus-lib/lib/dicom-file-repository';
+import tar from 'tar-stream';
 
 const testDir = path.resolve(__dirname, '../../test/');
 const repositoryDir = path.join(testDir, 'repository/');
 const workingDirectory = path.join(testDir, 'working/');
-const resultsDirectory = path.join(testDir, 'results/');
 
 const seriesUid = 'dicom';
 
 describe('pluginJobRunner', () => {
   const jobId = '12345';
 
-  afterEach(async () => {
-    await fs.remove(path.join(resultsDirectory, jobId));
-  });
-
   test('Normal run', async () => {
-    const jobReporter = { report: jest.fn() };
     const dockerRunner = new DockerRunner();
+
+    // Mock Job Reporter
+    let resultsPacked = false;
+    const jobReporter = {
+      report: jest.fn(),
+      packDir: (jobId: string, stream: NodeJS.ReadableStream) => {
+        return new Promise<void>(resolve => {
+          expect(jobId).toBe('12345');
+          const extract = tar.extract();
+          stream.pipe(extract);
+          extract.on('entry', (header: any, fStream: any, next: any) => {
+            if (header.name === 'results.json') resultsPacked = true;
+            next();
+          });
+          extract.on('finish', resolve);
+        });
+      }
+    };
 
     // Mock Dicom repository
     const dicomRepository: DicomFileRepository = {
@@ -53,10 +66,7 @@ describe('pluginJobRunner', () => {
     } as circus.PluginDefinitionAccessor;
 
     const runner = await pluginJobRunner(
-      {
-        workingDirectory,
-        resultsDirectory
-      },
+      { workingDirectory },
       {
         jobReporter,
         dockerRunner,
@@ -75,6 +85,8 @@ describe('pluginJobRunner', () => {
     expect(jobReporter.report.mock.calls[1][1]).toBe('results');
     expect(jobReporter.report.mock.calls[2][1]).toBe('finished');
     expect(jobReporter.report).toHaveBeenCalledTimes(3);
+
+    expect(resultsPacked).toBe(true);
   });
 });
 

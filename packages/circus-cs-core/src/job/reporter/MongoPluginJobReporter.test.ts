@@ -1,16 +1,19 @@
 import mongo from 'mongodb';
 import createMongoPluginJobReporter from './MongoPluginJobReporter';
-import PluginJobReporter from './PluginJobReporter';
 import { testClientPool } from '../../testHelper';
 import { MongoClientPool } from '../../mongoClientPool';
+import tar from 'tar-stream';
+import fs from 'fs-extra';
+import path from 'path';
 
 describe('pluginJobReporter', () => {
   let mongoClientPool: MongoClientPool;
   let collection: mongo.Collection;
-  let reporter: PluginJobReporter;
+  let reporter: circus.PluginJobReporter;
 
   const jobId = 'aabbcc';
   const collectionName = 'pluginJobs';
+  const resultsDirectory = path.resolve(__dirname, '../../../test');
 
   beforeAll(async () => {
     mongoClientPool = await testClientPool();
@@ -18,7 +21,7 @@ describe('pluginJobReporter', () => {
       .db()
       .collection(collectionName);
     reporter = await createMongoPluginJobReporter(
-      { mongoUrl: 'dummy', collectionName },
+      { mongoUrl: 'dummy', collectionName, resultsDirectory },
       { mongoClientPool }
     );
   });
@@ -61,5 +64,17 @@ describe('pluginJobReporter', () => {
     await reporter.report(jobId, 'results', ['a', 'b', 'c']);
     const check = await collection.findOne({ jobId });
     expect(check.results).toEqual(['a', 'b', 'c']);
+  });
+
+  test('packDir', async () => {
+    const stream = tar.pack();
+    const txt = String(Math.random());
+    const file = path.join(resultsDirectory, jobId, 'a.txt');
+    stream.entry({ name: 'a.txt' }, txt);
+    stream.finalize();
+    await reporter.packDir(jobId, stream);
+    const result = await fs.readFile(file, 'utf8');
+    expect(result).toBe(txt);
+    await fs.remove(path.join(resultsDirectory, jobId));
   });
 });

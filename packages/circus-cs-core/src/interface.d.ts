@@ -115,6 +115,33 @@ declare namespace circus {
     get: (pluginId: string) => Promise<PluginDefinition>;
   }
 
+  type PluginJobReportType = 'processing' | 'finished' | 'results' | 'failed';
+
+  /**
+   * PluginJobReporter takes responsibility of reporting/saving the
+   * current status and the result of a plug-in job
+   * into some external source.
+   */
+  interface PluginJobReporter {
+    /**
+     * Reports the current state of the job.
+     */
+    report: (
+      jobId: string,
+      type: PluginJobReportType,
+      payload?: any
+    ) => Promise<void>;
+
+    /**
+     * Provides the content plug-in output directory.
+     * @param jobId The Job ID.
+     * @param stream A `tar-stream` stream which includes all the file
+     *   output from the executed plugin. You can extract it using
+     *   `tar-fs` or `tar-stream`.
+     */
+    packDir: (jobId: string, stream: NodeJS.ReadableStream) => Promise<void>;
+  }
+
   /**
    * A facade interface that abstracts the complex dependencies.
    */
@@ -133,5 +160,4 @@ declare namespace circus {
       ) => Promise<void>;
     };
   }
-
 }

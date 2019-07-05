@@ -3,7 +3,6 @@ import Logger from '@utrad-ical/circus-lib/lib/logger/Logger';
 import ServiceLoader from '@utrad-ical/circus-lib/lib/ServiceLoader';
 import path from 'path';
 import createDaemonController from './daemon/createDaemonController';
-import PluginJobReporter from './job/reporter/PluginJobReporter';
 import { PluginJobRegisterer } from './job/registerer/createPluginJobRegisterer';
 import { PluginJobRunner } from './job/pluginJobRunner';
 import { MongoClientPool } from './mongoClientPool';
@@ -16,7 +15,7 @@ export interface Services {
   logger: Logger;
   daemonController: circus.DaemonController;
   pluginDefinitionAccessor: circus.PluginDefinitionAccessor;
-  jobReporter: PluginJobReporter;
+  jobReporter: circus.PluginJobReporter;
   queue: circus.PluginJobRequestQueue;
   mongoClientPool: MongoClientPool;
   dicomFileRepository: DicomFileRepository;

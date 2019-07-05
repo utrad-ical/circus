@@ -13,7 +13,6 @@ const defaults: circus.Configuration = {
   jobRunner: {
     options: {
       pluginWorkingDir: path.join(os.tmpdir(), 'circus-cs'),
-      pluginResultsDir: '/var/circus/plugin-results',
       cleanPluginWorkingDir: true
     }
   },
@@ -30,7 +29,8 @@ const defaults: circus.Configuration = {
     type: 'MongoPluginJobReporter',
     options: {
       mongoUrl: 'mongodb://localhost:27017/circus-api',
-      collectionName: 'pluginJobs'
+      collectionName: 'pluginJobs',
+      pluginResultsDir: '/var/circus/plugin-results'
     }
   },
 

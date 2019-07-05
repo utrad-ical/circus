@@ -5,8 +5,8 @@ import { DicomFileRepository } from '@utrad-ical/circus-lib/lib/dicom-file-repos
 import pluginResultsValidator from './pluginResultsValidator';
 import { MultiRange } from 'multi-integer-range';
 import { FunctionService } from '@utrad-ical/circus-lib';
-import PluginJobReporter from './reporter/PluginJobReporter';
 import buildDicomVolumes from './buildDicomVolumes';
+import tarfs from 'tar-fs';
 
 export interface PluginJobRunner {
   run: (jobId: string, job: circus.PluginJobRequest) => Promise<boolean>;
@@ -17,7 +17,7 @@ type WorkDirType = 'in' | 'out' | 'dicom';
 const pluginJobRunner: FunctionService<
   PluginJobRunner,
   {
-    jobReporter: PluginJobReporter;
+    jobReporter: circus.PluginJobReporter;
     dicomRepository: DicomFileRepository;
     pluginDefinitionAccessor: circus.PluginDefinitionAccessor;
     dockerRunner: DockerRunner;
@@ -30,11 +30,7 @@ const pluginJobRunner: FunctionService<
   },
   deps
 ) => {
-  const {
-    workingDirectory,
-    resultsDirectory,
-    removeTemporaryDirectory
-  } = options;
+  const { workingDirectory, removeTemporaryDirectory } = options;
   const {
     dicomRepository,
     pluginDefinitionAccessor,
@@ -80,10 +76,11 @@ const pluginJobRunner: FunctionService<
     const results = await pluginResultsValidator(outDir);
 
     await jobReporter.report(jobId, 'results', results);
-    // Store everything to results directory
-    const resultsTarget = path.join(resultsDirectory, jobId);
-    await fs.ensureDir(resultsTarget);
-    await fs.copy(outDir, resultsTarget);
+
+    // Send the contents of outDir via PluginJobReporter
+    const stream = tarfs.pack(outDir);
+    await jobReporter.packDir(jobId, stream);
+
     // And removes the job temp directory altogether
     if (removeTemporaryDirectory) await fs.remove(baseDir(jobId));
   };

@@ -99,13 +99,13 @@ const pluginJobRunner: FunctionService<
       await preProcess(jobId, series);
 
       // mainProcess
-      await executePlugin(
+      const { stream, promise } = await executePlugin(
         dockerRunner,
         plugin,
         workDir(jobId, 'in'), // Plugin input dir containing volume data
         workDir(jobId, 'out') // Plugin output dir that will have CAD results
       );
-
+      await promise;
       await postProcess(jobId);
       await jobReporter.report(jobId, 'finished');
       return true;
@@ -165,7 +165,7 @@ export async function executePlugin(
   pluginDefinition: circus.PluginDefinition,
   srcDir: string,
   destDir: string
-): Promise<string> {
+): Promise<{ stream: NodeJS.ReadableStream; promise: Promise<number> }> {
   const {
     pluginId,
     maxExecutionSeconds = 3000,
@@ -173,7 +173,7 @@ export async function executePlugin(
   } = pluginDefinition;
 
   const timeoutMs = maxExecutionSeconds * 1000;
-  const result = await dockerRunner.run(
+  return dockerRunner.runWithStream(
     {
       Image: pluginId,
       HostConfig: {
@@ -182,5 +182,4 @@ export async function executePlugin(
     },
     timeoutMs
   );
-  return result;
 }

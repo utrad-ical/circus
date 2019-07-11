@@ -6,6 +6,7 @@ import buildDicomVolumes from '../job/buildDicomVolumes';
 import path from 'path';
 import fs from 'fs-extra';
 import DockerRunner from '../util/DockerRunner';
+import chalk from 'chalk';
 
 /**
  * Directly runs the specified plug-in without using a queue system.
@@ -53,7 +54,7 @@ const runPlugin: FunctionService<
       const target = seriesUidOrDirectories[i] as string;
       if (d) {
         // use directory
-        console.log(`Preparing volume from ${target}...`);
+        console.log(chalk.yellow(`Preparing volume from ${target}...`));
         await buildDicomVolumes(dockerRunner, [target], inDir);
       } else {
         // use dicom file repository
@@ -63,10 +64,16 @@ const runPlugin: FunctionService<
     const pluginDefinition = ({
       pluginId
     } as unknown) as circus.PluginDefinition;
-    console.log('Executing the plug-in...');
-    await executePlugin(dockerRunner, pluginDefinition, inDir, outDir);
-
-    console.log('Copying the results...');
+    console.log(chalk.yellow('Executing the plug-in...'));
+    const { stream, promise } = await executePlugin(
+      dockerRunner,
+      pluginDefinition,
+      inDir,
+      outDir
+    );
+    stream.pipe(process.stdout);
+    await promise;
+    console.log(chalk.yellow('Copying the results...'));
     await fs.copy(outDir, resultsDir, { recursive: true });
     if (!keep) {
       fs.emptyDir(workDir);

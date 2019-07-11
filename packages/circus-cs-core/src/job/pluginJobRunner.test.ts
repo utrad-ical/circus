@@ -7,6 +7,7 @@ import path from 'path';
 import DockerRunner from '../util/DockerRunner';
 import { DicomFileRepository } from '@utrad-ical/circus-lib/lib/dicom-file-repository';
 import tar from 'tar-stream';
+import memory from 'memory-streams';
 
 const testDir = path.resolve(__dirname, '../../test/');
 const repositoryDir = path.join(testDir, 'repository/');
@@ -121,7 +122,15 @@ describe('executePlugin', () => {
       version: '1.0.0',
       type: 'CAD'
     };
-    const result = await executePlugin(runner, plugin, __dirname, __dirname);
-    expect(result).toContain('Hello from Docker!');
+    const { stream, promise } = await executePlugin(
+      runner,
+      plugin,
+      __dirname,
+      __dirname
+    );
+    const memStream = new memory.WritableStream();
+    stream.pipe(memStream);
+    await promise;
+    expect(memStream.toString()).toContain('Hello from Docker!');
   });
 });

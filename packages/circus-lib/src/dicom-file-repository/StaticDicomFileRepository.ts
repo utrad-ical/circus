@@ -7,6 +7,7 @@ import MultiRange, { multirange } from 'multi-integer-range';
 interface Options {
   dataDir: string;
   useHash?: boolean;
+  customUidDirMap?: (seriesUid: string) => string;
 }
 
 const sha256 = (str: string) => {
@@ -42,6 +43,8 @@ export default class StaticDicomFileRepository implements DicomFileRepository {
   }
 
   private determinDir(seriesUid: string): string {
+    if (typeof this.options.customUidDirMap === 'function')
+      return this.options.customUidDirMap(seriesUid);
     if (this.options.useHash) {
       const hashStr = sha256(seriesUid);
       return path.join(

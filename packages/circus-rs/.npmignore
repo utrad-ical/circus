@@ -3,7 +3,6 @@ node_modules
 config/*
 !/config/default.js
 /logs
-/build
 /lib
 /dist
-/pubdocs
+/docs

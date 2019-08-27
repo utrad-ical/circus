@@ -2,11 +2,13 @@ import React from 'react';
 import LesionCandidates from './feedback-listeners/LesionCandidates';
 import SelectionFeedbackListener from './feedback-listeners/SelectionFeedbackListener';
 import Locator from './feedback-listeners/Locator';
+import FatVolumetry from './feedback-listeners/FatVolumetry';
 
 const map = {
   LesionCandidates,
   SelectionFeedbackListener,
-  Locator
+  Locator,
+  FatVolumetry
 }; // This should support dynamic plugging in the future
 
 /**

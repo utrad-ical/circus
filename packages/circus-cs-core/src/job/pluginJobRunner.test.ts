@@ -81,13 +81,17 @@ describe('pluginJobRunner', () => {
       series: [{ seriesUid }]
     };
 
-    await runner.run(jobId, jobRequest);
+    const logStream = new memory.WritableStream();
+
+    await runner.run(jobId, jobRequest, logStream);
     expect(jobReporter.report.mock.calls[0][1]).toBe('processing');
     expect(jobReporter.report.mock.calls[1][1]).toBe('results');
     expect(jobReporter.report.mock.calls[2][1]).toBe('finished');
     expect(jobReporter.report).toHaveBeenCalledTimes(3);
 
     expect(resultsPacked).toBe(true);
+    const log = logStream.toString();
+    expect(log).toContain('Plug-in execution done.');
   });
 });
 

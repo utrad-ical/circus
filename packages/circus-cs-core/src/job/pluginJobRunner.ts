@@ -7,9 +7,14 @@ import { MultiRange } from 'multi-integer-range';
 import { FunctionService } from '@utrad-ical/circus-lib';
 import buildDicomVolumes from './buildDicomVolumes';
 import tarfs from 'tar-fs';
+import stream from 'stream';
 
 export interface PluginJobRunner {
-  run: (jobId: string, job: circus.PluginJobRequest) => Promise<boolean>;
+  run: (
+    jobId: string,
+    job: circus.PluginJobRequest,
+    logStream?: stream.Writable
+  ) => Promise<boolean>;
 }
 
 type WorkDirType = 'in' | 'out' | 'dicom';
@@ -25,7 +30,6 @@ const pluginJobRunner: FunctionService<
 > = async (
   options: {
     workingDirectory: string;
-    resultsDirectory: string;
     removeTemporaryDirectory?: boolean;
   },
   deps
@@ -38,6 +42,8 @@ const pluginJobRunner: FunctionService<
     dockerRunner
   } = deps;
 
+  if (!workingDirectory) throw new Error('Working directory is not set');
+
   const baseDir = (jobId: string) => {
     if (typeof jobId !== 'string' || !jobId.length) throw new Error();
     return path.join(workingDirectory, jobId);
@@ -47,8 +53,13 @@ const pluginJobRunner: FunctionService<
     return path.join(baseDir(jobId), type);
   };
 
-  const preProcess = async (jobId: string, series: circus.JobSeries[]) => {
+  const preProcess = async (
+    jobId: string,
+    series: circus.JobSeries[],
+    logStream: stream.Writable
+  ) => {
     // Prepare working directories
+    logStream.write('  Preparing working directories...\n');
     await fs.ensureDir(baseDir(jobId));
     await Promise.all([
       fs.ensureDir(workDir(jobId, 'in')),
@@ -59,6 +70,7 @@ const pluginJobRunner: FunctionService<
     const createdSeries: { [uid: string]: boolean } = {};
     const inDir = workDir(jobId, 'in');
     for (let volId = 0; volId < series.length; volId++) {
+      logStream.write(`  Building DICOM volume for vol #${volId}...\n`);
       const seriesUid = series[volId].seriesUid;
       const dicomDir = path.join(workDir(jobId, 'dicom'), seriesUid);
       if (!createdSeries[seriesUid]) {
@@ -69,15 +81,16 @@ const pluginJobRunner: FunctionService<
     }
   };
 
-  const postProcess = async (jobId: string) => {
+  const postProcess = async (jobId: string, logStream: stream.Writable) => {
     const outDir = workDir(jobId, 'out');
 
     // Perform validation
+    logStream.write('  Validating the results...\n');
     const results = await pluginResultsValidator(outDir);
-
     await jobReporter.report(jobId, 'results', results);
 
     // Send the contents of outDir via PluginJobReporter
+    logStream.write('  Copying the result files...\n');
     const stream = tarfs.pack(outDir);
     await jobReporter.packDir(jobId, stream);
 
@@ -88,7 +101,16 @@ const pluginJobRunner: FunctionService<
   /**
    * The whole plugin job procedure.
    */
-  const run = async (jobId: string, job: circus.PluginJobRequest) => {
+  const run = async (
+    jobId: string,
+    job: circus.PluginJobRequest,
+    logStream: stream.Writable = new stream.PassThrough()
+  ) => {
+    const writeLog = (log: string) => {
+      const timeStamp = '[' + new Date().toISOString() + ']';
+      logStream.write(timeStamp + ' ' + log);
+    };
+
     try {
       const { pluginId, series, environment } = job;
 
@@ -96,21 +118,31 @@ const pluginJobRunner: FunctionService<
       if (!plugin) throw new Error(`No such plugin: ${pluginId}`);
 
       await jobReporter.report(jobId, 'processing');
-      await preProcess(jobId, series);
+
+      writeLog('Starting pre-process...\n');
+      await preProcess(jobId, series, logStream);
 
       // mainProcess
+      writeLog('Executing the plug-in...\n\n');
       const { stream, promise } = await executePlugin(
         dockerRunner,
         plugin,
         workDir(jobId, 'in'), // Plugin input dir containing volume data
         workDir(jobId, 'out') // Plugin output dir that will have CAD results
       );
+      stream.pipe(
+        logStream,
+        { end: false } // Keeps the logStream open
+      );
       await promise;
-      await postProcess(jobId);
+
+      writeLog('Starting post-process...\n\n');
+      await postProcess(jobId, logStream);
       await jobReporter.report(jobId, 'finished');
+      writeLog('Plug-in execution done.\n\n');
       return true;
     } catch (e) {
-      console.error(e.message);
+      writeLog('Error happened in plug-in job runner:\n' + e.stack + '\n');
       await jobReporter.report(jobId, 'failed', e.message);
       return false;
     }

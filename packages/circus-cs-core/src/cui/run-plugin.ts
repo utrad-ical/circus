@@ -1,12 +1,14 @@
 import { FunctionService } from '@utrad-ical/circus-lib';
 import Command from './Command';
 import os from 'os';
-import { executePlugin } from '../job/pluginJobRunner';
-import buildDicomVolumes from '../job/buildDicomVolumes';
-import path from 'path';
-import fs from 'fs-extra';
-import DockerRunner from '../util/DockerRunner';
+import pluginJobRunner from '../job/pluginJobRunner';
 import chalk from 'chalk';
+import DockerRunner from '../util/DockerRunner';
+import tarfs from 'tar-fs';
+import {
+  DicomFileRepository,
+  StaticDicomFileRepository
+} from '@utrad-ical/circus-lib/lib/dicom-file-repository';
 
 /**
  * Directly runs the specified plug-in without using a queue system.
@@ -17,70 +19,91 @@ const runPlugin: FunctionService<
   Command,
   {
     dockerRunner: DockerRunner;
+    dicomFileRepository: DicomFileRepository;
+    pluginDefinitionAccessor: circus.PluginDefinitionAccessor;
   }
 > = async (options, deps) => {
-  const { dockerRunner } = deps;
+  const { dockerRunner, pluginDefinitionAccessor, dicomFileRepository } = deps;
   return async (commandName, args) => {
     const {
       _: [pluginId, ...seriesUidOrDirectories],
-      d,
+      d, // Use DICOM directory directly, instead of repository
       keep, // keep work directory
       work = os.tmpdir(),
       out: resultsDir
-    } = args;
+    } = args as {
+      _: string[];
+      d?: boolean;
+      keep?: boolean;
+      work?: string;
+      out?: string;
+    };
     if (!pluginId) {
+      console.log(
+        'Usage: node cui.js run-plugin <plugin-id> <series-or-directories>...'
+      );
       throw new Error('Plug-in ID is not specified.');
     }
     if (!resultsDir) {
-      throw new Error('An result directory must be specified.');
+      throw new Error('The result directory must be specified.');
     }
-    fs.ensureDir(resultsDir);
-
-    // Prepare working directory
-    const workDir = path.resolve(work);
-    const wStat = await fs.stat(workDir);
-    if (!wStat.isDirectory()) {
-      throw new Error('Work directory does not exist.');
+    if (!seriesUidOrDirectories.length) {
+      throw new Error('One or more series must be specified.');
     }
 
-    const inDir = path.join(path.resolve(workDir), 'in');
-    const outDir = path.join(path.resolve(workDir), 'out');
-    await fs.ensureDir(inDir);
-    await fs.ensureDir(outDir);
-    if (seriesUidOrDirectories.length !== 1) {
-      throw new Error('Specify only one series.');
-    }
-    for (let i = 0; i < seriesUidOrDirectories.length; i++) {
-      const target = seriesUidOrDirectories[i] as string;
-      if (d) {
-        // use directory
-        console.log(chalk.yellow(`Preparing volume from ${target}...`));
-        await buildDicomVolumes(dockerRunner, [target], inDir);
-      } else {
-        // use dicom file repository
-        throw new Error('Not implemented');
+    const jobReporter: circus.PluginJobReporter = {
+      report: async (jobId, type, payload) => {
+        console.log(chalk.cyan('Job status changed:', type));
+      },
+      packDir: (jobId, stream) => {
+        return new Promise((resolve, reject) => {
+          const extract = tarfs.extract(resultsDir);
+          extract.on('finish', resolve);
+          stream.pipe(extract);
+        });
       }
+    };
+
+    let dicomRepository: DicomFileRepository = dicomFileRepository;
+    if (d) {
+      // Create a temporary DicomFileRepository
+      dicomRepository = new StaticDicomFileRepository({
+        dataDir: seriesUidOrDirectories[0],
+        customUidDirMap: (indexAsSeriesUid: string) => {
+          const index = parseInt(indexAsSeriesUid);
+          return seriesUidOrDirectories[index];
+        }
+      });
     }
-    const pluginDefinition = ({
-      pluginId
-    } as unknown) as circus.PluginDefinition;
-    console.log(chalk.yellow('Executing the plug-in...'));
-    const { stream, promise } = await executePlugin(
-      dockerRunner,
-      pluginDefinition,
-      inDir,
-      outDir
+
+    const series: circus.JobSeries[] = d
+      ? seriesUidOrDirectories.map((_, i) => ({ seriesUid: `${i}` }))
+      : seriesUidOrDirectories.map(s => ({ seriesUid: s }));
+
+    const pjrDeps = {
+      jobReporter,
+      dicomRepository,
+      pluginDefinitionAccessor,
+      dockerRunner
+    };
+
+    const jobRequest: circus.PluginJobRequest = {
+      pluginId,
+      series
+    };
+
+    const runner = await pluginJobRunner(
+      { workingDirectory: work, removeTemporaryDirectory: !keep },
+      pjrDeps
     );
-    stream.pipe(process.stdout);
-    await promise;
-    console.log(chalk.yellow('Copying the results...'));
-    await fs.copy(outDir, resultsDir, { recursive: true });
-    if (!keep) {
-      fs.emptyDir(workDir);
-    }
+    runner.run('dummy', jobRequest, process.stdout);
   };
 };
 
-runPlugin.dependencies = ['dockerRunner', 'dicomFileRepository'];
+runPlugin.dependencies = [
+  'dockerRunner',
+  'dicomFileRepository',
+  'pluginDefinitionAccessor'
+];
 
 export default runPlugin;

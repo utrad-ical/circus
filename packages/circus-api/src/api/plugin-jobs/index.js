@@ -1,7 +1,7 @@
 import status from 'http-status';
 import performSearch from '../performSearch';
 import generateUniqueId from '../../utils/generateUniqueId';
-import * as EJSON from 'mongodb-extjson';
+import { EJSON } from 'bson';
 import { fetchAccessibleSeries } from '../../privilegeUtils';
 
 export const handlePost = ({ models, cs }) => {

@@ -4,7 +4,7 @@ import { MongoClient } from 'mongodb';
 import * as fs from 'fs-extra';
 import { safeLoad as yaml } from 'js-yaml';
 import * as path from 'path';
-import EJSON from 'mongodb-extjson';
+import { EJSON } from 'bson';
 import createApp from '../src/createApp';
 import { configureLogger } from '../src/createLogger';
 import * as axios from 'axios';

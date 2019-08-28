@@ -94,8 +94,10 @@ const {
       console.log('Options:\n' + parser.help({ includeEnv: true }));
       process.exit(0);
     }
-    opts.blobPath = path.resolve(path.dirname(__dirname), opts.blob_path);
-    opts.dicomPath = path.resolve(path.dirname(__dirname), opts.dicom_path);
+    const resolve = p => path.resolve(path.dirname(__dirname), p);
+    opts.blobPath = resolve(opts.blob_path);
+    opts.dicomPath = resolve(opts.dicom_path);
+    opts.pluginResultsPath = resolve(opts.plugin_results_path);
     return opts;
   } catch (e) {
     console.log(e.message);
@@ -160,6 +162,7 @@ const main = async () => {
       const setupInfo = {
         'Label path': blobPath,
         'DICOM path': dicomPath,
+        'Plug-in results path': pluginResultsPath,
         'CORS origin': corsOrigin,
         'Process ID': process.pid
       };

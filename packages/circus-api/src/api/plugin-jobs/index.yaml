@@ -56,7 +56,7 @@ routes:
     handler: handlePostFeedback
   # Attachment
   - verb: get
-    path: /plugin-jobs/:job/attachment/:path+
+    path: /plugin-jobs/:jobId/attachment/:path+
     description: >
       Returns the specified file output from the plug-in.
     handler: handleGetAttachment

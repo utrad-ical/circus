@@ -2,7 +2,7 @@
   "name": "@utrad-ical/circus-cs-core",
   "version": "0.13.0",
   "description": "CIRCUS CS Core: Plugin manager",
-  "main": "index.js",
+  "main": "src/index.ts",
   "bin": {
     "cs-core": "./cui.js"
   },

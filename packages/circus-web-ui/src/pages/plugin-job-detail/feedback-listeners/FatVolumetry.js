@@ -1,14 +1,31 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { Fragment, useState, useEffect, useRef } from 'react';
 import styled from 'styled-components';
+import { useApi } from 'utils/api';
+import classnames from 'classnames';
+import IconButton from 'components/IconButton';
 
 const StyledDiv = styled.div`
-  // display: flex;
+  display: flex;
+
+  p {
+    font-weight: bold;
+    border-left: 3px solid black;
+    padding-left: 10px;
+  }
+
+  .images {
+    display: inline-flex;
+    flex-direction: column;
+  }
 
   .image {
     border: 1px solid black;
-    width: 512px;
-    height: 512px;
     margin-right: 15px;
+    margin-bottom: 3px;
+  }
+
+  .value {
+    text-align: right;
   }
 
   .legend {
@@ -22,6 +39,9 @@ const StyledDiv = styled.div`
     }
     &.sat {
       background-color: blue;
+    }
+    &.contour {
+      background-color: lime;
     }
   }
 `;
@@ -41,82 +61,105 @@ const FatVolumetry = React.forwardRef((props, ref) => {
 
   const { jobId, results: { results } } = job;
 
-  /**
-   * @type React.MutableRefObject<HTMLImageElement>
-   */
-  const imgRef = useRef();
-  const [slice, setSlice] = useState(() => {
+  const ctImgRef = useRef();
+  const resultImgRef = useRef();
+
+  const detectedSlice = () => {
     const sliceNum = results.umbilicusPos[2];
     return results.sliceResults.find(s => s.sliceNum == sliceNum).rank;
-  });
-  const [sliceInfo, setSliceInfo] = useState(null);
+  };
+  const [slice, setSlice] = useState(detectedSlice);
+  const [sliceInfo, setSliceInfo] = useState({});
+  const api = useApi();
 
   useEffect(
     () => {
-      const file = `result${slice}.png`;
-      imgRef.current.src = `/plugin-jobs/${jobId}/attachment/${file}`;
+      const load = async (file, element) => {
+        const img = await api(`plugin-jobs/${jobId}/attachment/${file}`, {
+          responseType: 'arraybuffer'
+        });
+        const view = new Uint8Array(img);
+        const blob = new Blob([view], { type: 'image/png' });
+        const url = URL.createObjectURL(blob);
+        element.current.src = url;
+      };
+      load(`ct${slice}.png`, ctImgRef);
+      load(`result${slice}.png`, resultImgRef);
+      const sliceInfo = results.sliceResults.find(s => s.rank === slice);
+      setSliceInfo(sliceInfo || {});
     },
-    [slice, jobId]
+    [slice, jobId, api, results]
   );
 
   const handleWheel = ev => {
-    setSlice(s => {
-      if (typeof ev.deltaY !== 'number') return s;
-      let results = s + Math.sign(ev.deltaY);
-      if (results < 0) results = 0;
-      if (results > 10000) results = 10000;
-      return results;
-    });
+    if (typeof ev.deltaY !== 'number') return;
+    let newSlice = slice + Math.sign(ev.deltaY);
+    if (newSlice < 0) newSlice = 0;
+    if (newSlice > 10000) newSlice = 10000;
+    setSlice(newSlice);
   };
+
+  const handleJumpClick = () => setSlice(detectedSlice());
+
+  const row = (caption, value, etc, legend) => (
+    <tr>
+      <th>
+        <span className={classnames('legend', legend)} />
+        {caption}
+      </th>
+      <td className="value">{value}</td>
+      <td>{etc}</td>
+    </tr>
+  );
 
   return (
     <StyledDiv>
-      <div className="viewer">
-        <img className="image" ref={imgRef} onWheel={handleWheel} />
+      <div className="images">
+        <img className="image" ref={ctImgRef} onWheel={handleWheel} />
+        <img className="image" ref={resultImgRef} onWheel={handleWheel} />
       </div>
-      <p>Summary</p>
-      <table className="summary table">
-        <tbody>
-          <tr>
-            <th>Body Trunk Volume</th>
-            <td>{round(results.bodyTrunkVolume)}</td>
-          </tr>
-          <tr>
-            <th>
-              <span className="legend vat" />VAT Volume
-            </th>
-            <td>{round(results.vatVolume)}</td>
-          </tr>
-          <tr>
-            <th>
-              <span className="legend sat" />SAT Volume
-            </th>
-            <td>{round(results.satVolume)}</td>
-          </tr>
-        </tbody>
-      </table>
-      <p>Slice #{slice}</p>
-      <table className="table">
-        <tbody>
-          <tr>
-            <th>
-              <span className="legend vat" />VAT area
-            </th>
-            <td>1000</td>
-          </tr>
-          <tr>
-            <th>
-              <span className="legend sat" />SAT area
-            </th>
-            <td>1000</td>
-          </tr>
-          <tr>
-            <th>VAT volume</th>
-            <td>1000</td>
-          </tr>
-        </tbody>
-      </table>
-      <textarea value={JSON.stringify(job, null, '    ')} readOnly />
+      <div className="info">
+        <p>Summary</p>
+        <table className="summary table table-hover">
+          <tbody>
+            {row('SAT Volume', round(results.satVolume), '[cm3]', 'sat')}
+            {row('VAT Volume', round(results.vatVolume), '[cm3]', 'vat')}
+            {row('VAT volume/SAT volume', round(results.volRatio))}
+            {row('Bone volume', round(results.boneVolume), '[cm3]')}
+            {row('Muscle volume', round(results.muscleVolume), '[cm3]')}
+            {row(
+              'Detected umblicus slice',
+              results.umbilicusPos[2],
+              <IconButton
+                bsStyle="primary"
+                bsSize="xs"
+                icon="record"
+                onClick={handleJumpClick}
+              >
+                Jump
+              </IconButton>
+            )}
+          </tbody>
+        </table>
+        <p>Slice Information</p>
+        <table className="table table-hover">
+          <tbody>
+            {row('Slice number', sliceInfo.sliceNum)}
+            {row('Slice location', sliceInfo.sliceLocation)}
+            {row('SAT area', round(sliceInfo.areaSAT), '[cm2]', 'sat')}
+            {row('VAT area', round(sliceInfo.areaVAT), '[cm2]', 'vat')}
+            {row('VAT area/SAT area', round(sliceInfo.areaRatio))}
+            {row('Bone area', round(sliceInfo.areaBone), '[cm2]')}
+            {row('Muscle area', round(sliceInfo.areaMuscle), '[cm2]')}
+            {row(
+              'Body contour length',
+              round(sliceInfo.bodyContourLength),
+              '[cm]',
+              'contour'
+            )}
+          </tbody>
+        </table>
+      </div>
     </StyledDiv>
   );
 });

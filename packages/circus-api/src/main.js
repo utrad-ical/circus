@@ -62,6 +62,12 @@ const options = [
     default: './store/dicom'
   },
   {
+    names: ['plugin-results-path'],
+    env: 'CIRCUS_PLUGIN_RESULTS_DIR',
+    type: 'string',
+    default: './store/plugin-results'
+  },
+  {
     names: ['dicom-image-server-url'],
     env: 'DICOM_IMAGE_SERVER_URL',
     type: 'string',
@@ -77,6 +83,7 @@ const {
   cors_origin: corsOrigin,
   blobPath,
   dicomPath,
+  pluginResultsPath,
   dicom_image_server_url: dicomImageServerUrl
 } = (() => {
   try {
@@ -141,6 +148,7 @@ const main = async () => {
     fixUser,
     blobPath,
     dicomPath,
+    pluginResultsPath,
     corsOrigin,
     dicomImageServerUrl
   };

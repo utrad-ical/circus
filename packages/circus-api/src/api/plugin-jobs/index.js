@@ -2,6 +2,9 @@ import status from 'http-status';
 import performSearch from '../performSearch';
 import generateUniqueId from '../../utils/generateUniqueId';
 import { EJSON } from 'bson';
+import path from 'path';
+import fs from 'fs';
+import mime from 'mime';
 import { fetchAccessibleSeries } from '../../privilegeUtils';
 
 export const handlePost = ({ models, cs }) => {
@@ -91,16 +94,18 @@ export const handleGet = ({ models }) => {
   };
 };
 
-export const handleGetAttachment = ({ models, csCore }) => {
+export const handleGetAttachment = ({ models, pluginResultsPath }) => {
   return async (ctx, next) => {
     const jobId = ctx.params.jobId;
-    const path = ctx.params.path;
-    if (!path || /\.\./.test(path)) {
+    const filePath = ctx.params.path;
+    if (!filePath || /\.\./.test(filePath)) {
       ctx.throw(status.BAD_REQUEST, 'Invalid path prameter.');
     }
-    // const job = await models.pluginJob.findByIdOrFail(jobId);
-    // ctx.body = file;
-    ctx.throw(status.NOT_IMPLEMENTED, 'Not implemented');
+    await models.pluginJob.findByIdOrFail(jobId);
+    const file = path.join(pluginResultsPath, jobId, filePath);
+    const read = fs.createReadStream(file);
+    ctx.type = mime.getType(file) || 'application/octet-stream';
+    ctx.body = read;
   };
 };
 

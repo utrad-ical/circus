@@ -102,6 +102,7 @@ export default async function createApp(options = {}) {
     blobPath,
     corsOrigin,
     dicomPath,
+    pluginResultsPath,
     dicomImageServerUrl
   } = options;
 
@@ -140,6 +141,7 @@ export default async function createApp(options = {}) {
     models,
     blobStorage,
     dicomImporter,
+    pluginResultsPath,
     cs,
     volumeProvider,
     uploadFileSizeMax: '200mb',

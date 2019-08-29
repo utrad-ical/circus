@@ -35,6 +35,7 @@
    - `DICOM_UTILITY`: Path to the `dicom_utility` executable
    - `CIRCUS_DICOM_DIR`: Directory path to dicom files
    - `CIRCUS_API_BLOB_DIR`: Directory path to blob (label binary) data
+   - `CIRCUS_PLUGIN_RESULTS_DIR`: Directory path to plug-in job results data
    - `DICOM_IMAGE_SERVER_URL`: URL to CIRCUS RS instance, should look like
      `http://xxx.xx.xxx.xx/rs`. This can be a separate URL,
      or it can be a sub directory if you set up a reverse proxy.

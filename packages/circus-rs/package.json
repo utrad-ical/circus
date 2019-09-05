@@ -7,7 +7,7 @@
     "devserver": "webpack-dev-server",
     "test": "mocha",
     "build": "webpack",
-    "build-npm": "tsc",
+    "build-npm": "tsc && cp src/browser/image-source/volume-rendering-image-source/*.{vert,frag} lib/browser/image-source/volume-rendering-image-source",
     "clean": "rimraf dist",
     "docs": "jekyll build --source=./docs --dest=./docs/_site && cp -r ./dist ./docs/_site",
     "docserver": "jekyll serve --source=./docs --dest=./docs/_site",

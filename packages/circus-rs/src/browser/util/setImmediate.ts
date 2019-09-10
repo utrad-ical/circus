@@ -14,18 +14,19 @@ let handlerIndex = 1;
 const handlers: { [index: number]: Function } = {};
 let handlerInstalled = false;
 
-function receiveMessage(event: MessageEvent): any {
-  const handle = event.data.slice(prefix.length);
+const receiveMessage: (event: MessageEvent) => any = event => {
+  if (typeof event.data !== 'string' || event.data.indexOf(prefix) < 0) return;
+  const handle = parseInt(event.data.slice(prefix.length), 10);
   if (handlers[handle]) {
     handlers[handle]();
     delete handlers[handle];
   }
-}
+};
 
 export default function setImmediate(callback: Function): any {
   if ('setImmediate' in window) {
     // use native one
-    return window.setImmediate(callback);
+    return (window as any).setImmediate(callback);
   }
 
   // use polyfill using postMessage

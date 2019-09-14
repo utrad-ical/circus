@@ -43,24 +43,14 @@ export default class CelestialRotateTool extends DraggableTool implements Tool {
       }
       case 'vr': {
         const speed = ev.original.shiftKey ? 0.5 : 0.2;
-        let horizontal =
+        const horizontal =
           typeof state.horizontal !== 'undefined'
             ? state.horizontal + dragInfo.dx * speed
             : 0;
-        let vertical =
+        const vertical =
           typeof state.vertical !== 'undefined'
             ? state.vertical - dragInfo.dy * speed
             : 0;
-        // vertical must be between -90 and 90
-        if (vertical > 90) {
-          const diff = vertical - 90;
-          vertical = 90 - diff;
-          horizontal = -horizontal;
-        } else if (vertical < -90) {
-          const diff = -90 - vertical;
-          vertical = -90 + diff;
-          horizontal = -horizontal;
-        }
         const newState: VrViewState = { ...state, horizontal, vertical };
         viewer.setState(newState);
       }

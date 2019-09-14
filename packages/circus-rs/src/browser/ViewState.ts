@@ -41,6 +41,7 @@ export interface VrViewState {
 
   /**
    * Vertical rotation of the camera measured in degree.
+   * Must be between -90 and 90.
    */
   vertical: number;
 

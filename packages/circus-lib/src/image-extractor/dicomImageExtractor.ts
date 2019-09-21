@@ -2,6 +2,7 @@ import { PixelFormat, pixelFormatInfo } from '../PixelFormat';
 
 import lj from 'jpeg-lossless-decoder-js';
 import * as parser from 'dicom-parser';
+import { convertComplement } from './complementUtil';
 
 interface RescaleParams {
   slope: number;
@@ -125,13 +126,18 @@ const dicomImageExtractor: (options?: ExtractOptions) => DicomImageExtractor = (
       sliceLocation
     };
 
+    const bitsStored = dataset.uint16('x00280101'); // Bits Stored
+    const highBit = dataset.uint16('x00280102'); // High Bit
+
     if (!skipExtractPixels) {
       let { minValue, maxValue, pixelData } = extractPixels(
         dataset,
         transferSyntax,
         rows,
         columns,
-        pixelFormat
+        pixelFormat,
+        bitsStored,
+        highBit
       );
 
       if (modality === 'CT') {
@@ -210,7 +216,9 @@ function extractUncompressedPixels(
   dataset: DicomDataset,
   rows: number,
   columns: number,
-  pixelFormat: PixelFormat
+  pixelFormat: PixelFormat,
+  bitsStored: number,
+  highBit: number
 ): ExtractPixelInfo {
   const offset = dataset.elements['x7fe00010'].dataOffset; // pixel data itself
   const len = dataset.elements['x7fe00010'].length;
@@ -219,17 +227,21 @@ function extractUncompressedPixels(
   if (len !== bpp * rows * columns) {
     throw new Error('Unexpected pixel data length.');
   }
-  const buffer = new pxInfo.arrayClass(
-    dataset.byteArray.buffer,
-    offset,
-    rows * columns
-  );
+
+  const readType = pxInfo.bpp === 2 ? Uint16Array : Uint8Array;
+  const buffer = new readType(dataset.byteArray.buffer, offset, rows * columns);
   const pixelData = new ArrayBuffer(rows * columns * bpp);
   const resultArray = new pxInfo.arrayClass(pixelData);
+
   let minValue = pxInfo.maxLevel;
   let maxValue = pxInfo.minLevel;
   for (let i = 0; i < columns * rows; i++) {
-    let val = buffer[i];
+    const rawVal = buffer[i];
+    const pixelRepresentation = dataset.uint16('x00280103');
+    const val =
+      pixelRepresentation === 0
+        ? rawVal
+        : convertComplement(rawVal, bitsStored, highBit);
     resultArray[i] = val;
     if (val < minValue) minValue = val;
     if (val > maxValue) maxValue = val;
@@ -241,7 +253,9 @@ function extractLosslessJpegPixels(
   dataset: DicomDataset,
   rows: number,
   columns: number,
-  pixelFormat: PixelFormat
+  pixelFormat: PixelFormat,
+  bitsStored: number,
+  highBit: number
 ): ExtractPixelInfo {
   const decoder = new lj.lossless.Decoder();
 
@@ -278,15 +292,31 @@ function extractPixels(
   transferSyntax: string,
   rows: number,
   columns: number,
-  pixelFormat: PixelFormat
+  pixelFormat: PixelFormat,
+  bitsStored: number,
+  highBit: number
 ): ExtractPixelInfo {
   switch (transferSyntax) {
     case '1.2.840.10008.1.2': // Implicit VR Little Endian (default)
     case '1.2.840.10008.1.2.1': // Explicit VR Little Endian
-      return extractUncompressedPixels(dataset, rows, columns, pixelFormat);
+      return extractUncompressedPixels(
+        dataset,
+        rows,
+        columns,
+        pixelFormat,
+        bitsStored,
+        highBit
+      );
     case '1.2.840.10008.1.2.4.57': // JPEG Lossless, Nonhierarchical
     case '1.2.840.10008.1.2.4.70': // JPEG Lossless, Nonhierarchical
-      return extractLosslessJpegPixels(dataset, rows, columns, pixelFormat);
+      return extractLosslessJpegPixels(
+        dataset,
+        rows,
+        columns,
+        pixelFormat,
+        bitsStored,
+        highBit
+      );
     default:
       throw new Error('Unsupported transfer syntax. Maybe compressed?');
   }

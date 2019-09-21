@@ -1,26 +1,41 @@
 /**
- * Converts a given number with an arbitrary sign bit position
+ * Converts a given number with an arbitrary high bit position
  * into an ordinary Int16.
  * @param input A number using 2's complement
- * @param flagBit Position of the flat bit (between 2 and 16)
+ * @param bitsStored DICOM Bits Stored,
+ * which describes how many bits are used,
+ * counting from `highBit` (between 1 to `highBit` + 1).
+ * @param highBit DICOM High Bit,
+ * which is the position of the sign bit (between 1 and 32)
  */
-export const convertComplement16 = (input: number, flagBit: number) => {
-  if (input & (1 << (flagBit - 1))) {
+export const convertComplement = (
+  input: number,
+  bitsStored: number,
+  highBit: number
+) => {
+  // for example, if highBit == 6 and bitsStored = 5...
+  // The number is stored like 0SNNNN00, where S is the sign bit
+
+  // Remove unused low bits (0SNNNN00 => 000SNNNN)
+  input = input >> (highBit - bitsStored + 1);
+
+  // 00100000 : 1 << bitsStored
+  // 00011111 : (1 << bitsStored) - 1
+  const bitmask = (1 << bitsStored) - 1;
+
+  // Check the high (i.e., sing) bit.
+  // 000SNNNN
+  if (input & (1 << (bitsStored - 1))) {
     // input is negative
 
-    // for example, if flagBit == 5...
-    // 00000000 00100000
-    // 00000000 00011111
-    const bitmask = (1 << flagBit) - 1; // 0b11111
-
-    // 00000000 00011111 = -1
-    // 00000000 00011110 : (input - 1)
-    // 11111111 11100001 : ~(input - 1)
-    // 00000000000000001 : ~(input - 1) & bitmask
+    // 00011111 = -1
+    // 00011110 : (input - 1)
+    // 11100001 : ~(input - 1)
+    // 00000001 : ~(input - 1) & bitmask
     const abs = ~(input - 1) & bitmask;
     return -abs;
   } else {
-    // input is nonnegative
-    return input;
+    // input is non-negative
+    return input & bitmask;
   }
 };

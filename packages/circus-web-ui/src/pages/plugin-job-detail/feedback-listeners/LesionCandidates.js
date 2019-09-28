@@ -12,7 +12,7 @@ import styled from 'styled-components';
 import * as rs from 'circus-rs';
 import { toolFactory } from 'circus-rs/tool/tool-initializer';
 import createDynamicComponent from '../createDynamicComponent';
-import useImageSource from 'utils/useImageSource';
+import { useHybridImageSource } from 'utils/useImageSource';
 import applyDisplayOptions from './applyDisplayOptions';
 
 const Candidate = React.forwardRef((props, ref) => {
@@ -33,8 +33,7 @@ const Candidate = React.forwardRef((props, ref) => {
   // Create image source
   const seriesUid = job.series[item.volumeId].seriesUid;
 
-  const imageSource = useImageSource(seriesUid);
-
+  const imageSource = useHybridImageSource(seriesUid);
   const stateChanger = useStateChanger();
 
   useEffect(

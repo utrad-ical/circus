@@ -10,7 +10,8 @@ import styled from 'styled-components';
 import useFeedback from './useFeedback';
 import PersonalConsensualSwitch from './PersonalConsensualSwitch';
 import useLoadData from 'utils/useLoadData';
-import { ImageSourceCacheContext } from 'utils/useImageSource';
+import { VolumeLoaderCacheContext } from 'utils/useImageSource';
+import * as rs from 'circus-rs';
 import PieProgress from 'components/PieProgress';
 import createDynamicComponent from './createDynamicComponent';
 import Section from './Section';
@@ -87,10 +88,12 @@ const PluginJobDetail = props => {
   const api = useApi();
   const jobId = props.match.params.jobId;
 
-  const [imageSourceCache] = useState(() => new Map());
+  const user = useLoginUser();
+  const server = user.dicomImageServer;
+  const rsHttpClient = useMemo(() => new rs.RsHttpClient(server), [server]);
+  const [volumeLoaderMap] = useState(() => ({ rsHttpClient, map: new Map() }));
   const [busy, setBusy] = useState(false);
   const [feedbackState, dispatch] = useFeedback();
-  const user = useLoginUser();
 
   const loadJob = useCallback(
     async () => {
@@ -243,7 +246,7 @@ const PluginJobDetail = props => {
   };
 
   return (
-    <ImageSourceCacheContext.Provider value={imageSourceCache}>
+    <VolumeLoaderCacheContext.Provider value={volumeLoaderMap}>
       <FullSpanContainer>
         <StyledDiv>
           <div className="job-detail-header">
@@ -311,7 +314,7 @@ const PluginJobDetail = props => {
           </div>
         </StyledDiv>
       </FullSpanContainer>
-    </ImageSourceCacheContext.Provider>
+    </VolumeLoaderCacheContext.Provider>
   );
 };
 

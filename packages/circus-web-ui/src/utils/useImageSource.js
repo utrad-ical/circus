@@ -1,30 +1,29 @@
 import React, { useContext, useState, useEffect, useMemo } from 'react';
-import useLoginUser from './useLoginUser';
 import * as rs from 'circus-rs';
-import { isValidPartialVolumeDescriptor } from '@utrad-ical/circus-lib/lib/PartialVolumeDescriptor';
+import * as pvd from '@utrad-ical/circus-lib/lib/PartialVolumeDescriptor';
 
 /**
- * @type React.Context<Map<string, rs.ImageSource>
+ * @type React.Context<{
+ *    rsHttpClient: rs.RsHttpClient; map: Map<string, rs.RsVolumeLoader>>;
+ * }>
  */
-export const ImageSourceCacheContext = React.createContext(null);
+export const VolumeLoaderCacheContext = React.createContext(null);
 
 const stringifyPartialVolumeDescriptor = d => `${d.start}:${d.end}:${d.delta}`;
 
 /**
- * Returns a cached HybridImageSource instance for the specified series.
+ * Returns a cached RsVolumeLoader instance for the specified series.
  * The returned source may not be "ready" yet.
+ * @param {string} seriesUid
+ * @param {pvd.default} partialVolumeDescriptor
  */
-export const usePendingImageSource = (seriesUid, partialVolumeDescriptor) => {
-  const user = useLoginUser();
-  const server = user.dicomImageServer;
-
-  const map = useContext(ImageSourceCacheContext);
-  const rsHttpClient = useMemo(() => new rs.RsHttpClient(server), [server]);
+export const usePendingVolumeLoader = (seriesUid, partialVolumeDescriptor) => {
+  const { rsHttpClient, map } = useContext(VolumeLoaderCacheContext);
 
   const key =
     seriesUid +
     (typeof partialVolumeDescriptor === 'object' &&
-    isValidPartialVolumeDescriptor(partialVolumeDescriptor)
+    pvd.isValidPartialVolumeDescriptor(partialVolumeDescriptor)
       ? '&' + stringifyPartialVolumeDescriptor(partialVolumeDescriptor)
       : '');
 
@@ -35,36 +34,68 @@ export const usePendingImageSource = (seriesUid, partialVolumeDescriptor) => {
     seriesUid,
     partialVolumeDescriptor
   });
-  const imageSource = new rs.HybridMprImageSource({
-    rsHttpClient,
-    seriesUid,
-    volumeLoader
-  });
-
-  map.set(key, imageSource);
-  return imageSource;
+  map.set(key, volumeLoader);
+  return volumeLoader;
 };
 
 /**
- * Returns a cached HybridImageSource instance for the specified series.
- * This is used to recycle ImageSource's among multiple viewers.
- * The hook returns null if the specified image source is not yet "ready".
- * When it returns an actula instance, it is guaranteed to be "ready".
+ * Returns a cached VolumeLoader instance for the specified series.
+ * This is used to recycle volumes among multiple viewers.
+ * The hook returns null if the specified volume is not yet "ready".
+ * When this returns an actual instance, it is guaranteed to be "ready".
+ * @param {string} seriesUid
+ * @param {pvd.default} partialVolumeDescriptor
  */
-export const useImageSource = (seriesUid, partialVolumeDescriptor) => {
-  const [imageSource, setImageSource] = useState();
-  const pendingImageSource = usePendingImageSource(
+export const useVolumeLoader = (seriesUid, partialVolumeDescriptor) => {
+  const [volumeLoader, setVolumeLoader] = useState();
+  const pendingVolumeLoader = usePendingVolumeLoader(
     seriesUid,
     partialVolumeDescriptor
   );
   useEffect(
     () => {
-      pendingImageSource.ready().then(() => setImageSource(pendingImageSource));
-      return () => setImageSource(null);
+      const load = async () => {
+        await pendingVolumeLoader.loadMeta();
+        await pendingVolumeLoader.loadVolume();
+        setVolumeLoader(pendingVolumeLoader);
+      };
+      load();
+      return () => setVolumeLoader(null);
     },
-    [pendingImageSource]
+    [pendingVolumeLoader]
   );
+  return volumeLoader;
+};
+
+/**
+ * Returns a HybridImageSource that is guaranteed to be "ready".
+ */
+export const useHybridImageSource = (seriesUid, partialVolumeDescriptor) => {
+  const volumeLoader = useVolumeLoader(seriesUid, partialVolumeDescriptor);
+  const { rsHttpClient } = useContext(VolumeLoaderCacheContext);
+  const [imageSource, setImageSource] = useState();
+  const pendindImageSource = useMemo(
+    () => {
+      if (!volumeLoader) return null;
+      return new rs.HybridMprImageSource({
+        rsHttpClient,
+        seriesUid,
+        volumeLoader
+      });
+    },
+    [seriesUid, rsHttpClient, volumeLoader]
+  );
+
+  useEffect(() => {
+    const load = async () => {
+      if (!pendindImageSource) return;
+      await pendindImageSource.ready();
+      setImageSource(pendindImageSource);
+    };
+    load();
+  });
+
   return imageSource;
 };
 
-export default useImageSource;
+export default useVolumeLoader;

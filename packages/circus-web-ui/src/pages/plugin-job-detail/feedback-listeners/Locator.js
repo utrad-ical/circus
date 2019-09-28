@@ -10,7 +10,7 @@ import React, {
   useState
 } from 'react';
 import styled from 'styled-components';
-import useImageSource from 'utils/useImageSource';
+import { useHybridImageSource } from 'utils/useImageSource';
 import IconButton from 'components/IconButton';
 import applyDisplayOptions from './applyDisplayOptions';
 
@@ -59,7 +59,7 @@ const Locator = React.forwardRef((props, ref) => {
   }));
 
   const seriesUid = job.series[volumeId].seriesUid;
-  const imageSource = useImageSource(seriesUid);
+  const imageSource = useHybridImageSource(seriesUid);
 
   useEffect(
     () => {

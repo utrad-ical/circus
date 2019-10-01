@@ -86,14 +86,17 @@ export const useHybridImageSource = (seriesUid, partialVolumeDescriptor) => {
     [seriesUid, rsHttpClient, volumeLoader]
   );
 
-  useEffect(() => {
-    const load = async () => {
-      if (!pendindImageSource) return;
-      await pendindImageSource.ready();
-      setImageSource(pendindImageSource);
-    };
-    load();
-  });
+  useEffect(
+    () => {
+      const load = async () => {
+        if (!pendindImageSource) return;
+        await pendindImageSource.ready();
+        setImageSource(pendindImageSource);
+      };
+      load();
+    },
+    [pendindImageSource]
+  );
 
   return imageSource;
 };

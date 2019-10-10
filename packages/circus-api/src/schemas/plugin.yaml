@@ -30,6 +30,21 @@ properties:
     maxLength: 128
     description: >
       Short text that describes what this plug-in does.
+  runConfiguration:
+    type: object
+    description: >
+      Installation-specific configurations.
+    properties:
+      timeout:
+        type: integer
+        minValue: 0
+        description: >
+          Execution timeout in seconds. Specify 0 if there is no timeout.
+      gpus:
+        type: string
+        description: >
+          Passed to Docker container.
+    additionalProperties: false
   icon:
     $ref: icon
   displayStrategy:

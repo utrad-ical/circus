@@ -5,7 +5,7 @@ export async function up(db) {
     },
     {
       $set: {
-        runConfiguration: { timeout: 0, gpus: '' }
+        runConfiguration: { timeout: 900, gpus: '' }
       }
     }
   );

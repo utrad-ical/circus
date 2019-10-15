@@ -62,7 +62,8 @@ const main = async (options, validator, models) => {
     version: manifest.version,
     description: manifest.description || '',
     icon: manifest.icon,
-    displayStrategy: manifest.displayStrategy
+    displayStrategy: manifest.displayStrategy,
+    runConfiguration: { timeout: 900, gpus: '' }
   };
 
   const existing = await models.plugin.find({

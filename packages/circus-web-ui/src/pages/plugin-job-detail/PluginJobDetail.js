@@ -309,7 +309,7 @@ const PluginJobDetail = props => {
               disabled={!feedbackState.canRegister || busy}
               onClick={handleRegisterClick}
             >
-              Regsiter {modeText} feedback
+              Register {modeText} feedback
             </IconButton>
           </div>
         </StyledDiv>

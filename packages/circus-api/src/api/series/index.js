@@ -101,7 +101,7 @@ export const handleSearch = ({ models }) => {
       'patientInfo.age',
       'patientInfo.sex',
       'seriesDate',
-      'importDate'
+      'createdAt'
     ];
     if (!checkFilter(customFilter, fields))
       ctx.throw(status.BAD_REQUEST, 'Bad filter.');

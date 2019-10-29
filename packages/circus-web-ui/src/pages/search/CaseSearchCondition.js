@@ -30,7 +30,7 @@ const basicConditionToMongoQuery = condition => {
         break;
       default:
         if (key.match(/^(patient(.+))$/)) {
-          key = 'patientInfoCache.' + key;
+          key = 'patientInfo.' + key;
         }
         if (typeof val === 'string' && !val.length) return;
         members.push({ [key]: { $regex: escapeRegExp(val) } });
@@ -52,7 +52,10 @@ const conditionToFilter = condition => {
       );
       break;
     case 'advanced':
-      tabFilter = conditionToMongoQuery(condition.advanced);
+      tabFilter = conditionToMongoQuery(condition.advanced, [
+        'createdAt',
+        'updatedAt'
+      ]);
       break;
     default:
       throw new Error('Unknown conditoin type.');
@@ -96,15 +99,16 @@ const CaseSearchCondition = props => {
   const advancedConditionKeys = useMemo(
     () => ({
       caseId: { caption: 'case ID', type: 'text' },
-      'patientInfoCache.patientId': { caption: 'patient ID', type: 'text' },
-      'patientInfoCache.patientName': { caption: 'patient name', type: 'text' },
-      'patientInfoCache.age': { caption: 'age', type: 'number' },
-      'patientInfoCache.sex': {
+      'patientInfo.patientId': { caption: 'patient ID', type: 'text' },
+      'patientInfo.patientName': { caption: 'patient name', type: 'text' },
+      'patientInfo.age': { caption: 'age', type: 'number' },
+      'patientInfo.sex': {
         caption: 'sex',
         type: 'select',
         spec: { options: ['M', 'F', 'O'] }
       },
-      createdAt: { caption: 'import date', type: 'date' },
+      createdAt: { caption: 'create time', type: 'date' },
+      updatedAt: { caption: 'update time', type: 'date' },
       tag: {
         caption: 'Tag',
         type: 'select',

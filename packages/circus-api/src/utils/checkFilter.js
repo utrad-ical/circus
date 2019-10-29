@@ -3,20 +3,15 @@ const isPlainObject = obj =>
 
 const isScalarOrDate = val => {
   const t = typeof val;
-  if (t === 'string' || t === 'number' || t === 'boolean') return true;
-  if (isPlainObject(val)) {
-    return (
-      Object.keys(val).length === 1 &&
-      '$date' in val &&
-      typeof val.$date === 'string'
-    );
-  }
-  return false;
+  return (
+    t === 'string' || t === 'number' || t === 'boolean' || val instanceof Date
+  );
 };
 
 /**
  * Checks if the given object is an acceptable mongodb filter.
- * @param {object} filter The valie to check.
+ * The "value" part may include a `Date` object.
+ * @param {object} filter The value to check.
  * @param {string[]} fields List of accepted fields.
  * @returns {boolean} `true` if valid.
  */

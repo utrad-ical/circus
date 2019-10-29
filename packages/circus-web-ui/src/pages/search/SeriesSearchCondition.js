@@ -71,12 +71,16 @@ const advancedConditionKeys = {
   },
   seriesUid: { caption: 'series UID', type: 'text' },
   seriesDescription: { caption: 'series description', type: 'text' },
-  patientId: { caption: 'patient ID', type: 'text' },
-  patientName: { caption: 'patient name', type: 'text' },
-  age: { caption: 'age', type: 'number' },
-  sex: { caption: 'sex', type: 'select', spec: { options: ['M', 'F', 'O'] } },
+  'patientInfo.patientId': { caption: 'patient ID', type: 'text' },
+  'patientInfo.patientName': { caption: 'patient name', type: 'text' },
+  'patientInfo.age': { caption: 'age', type: 'number' },
+  'patientInfo.sex': {
+    caption: 'sex',
+    type: 'select',
+    spec: { options: ['M', 'F', 'O'] }
+  },
   seriesDate: { caption: 'series date', type: 'date' },
-  updatedAt: { caption: 'import date', type: 'date' }
+  createdAt: { caption: 'import date', type: 'date' }
 };
 
 const conditionToFilter = condition => {
@@ -84,7 +88,12 @@ const conditionToFilter = condition => {
     case 'basic':
       return basicConditionToMongoQuery(condition.basic);
     case 'advanced':
-      return conditionToMongoQuery(condition.advanced);
+      return conditionToMongoQuery(
+        condition.advanced,
+        Object.keys(advancedConditionKeys).filter(
+          k => advancedConditionKeys[k].type === 'date'
+        )
+      );
   }
   throw new Error('Unkonwn condition type');
 };

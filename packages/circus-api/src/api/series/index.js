@@ -5,6 +5,7 @@ import * as path from 'path';
 import * as JSZip from 'jszip';
 import { EJSON } from 'bson';
 import checkFilter from '../../utils/checkFilter';
+import generateUniqueId from '../../utils/generateUniqueId';
 
 const maskPatientInfo = ctx => {
   return series => {
@@ -40,7 +41,7 @@ export const handlePost = ({ dicomImporter }) => {
     }
     let tmpFile;
     try {
-      tmpFile = path.join(dicomImporter.workDir, 'import.dcm');
+      tmpFile = path.join(dicomImporter.workDir, `${generateUniqueId()}.dcm`);
       await fs.writeFile(tmpFile, buffer);
       await dicomImporter.importFromFile(tmpFile, domain);
     } finally {

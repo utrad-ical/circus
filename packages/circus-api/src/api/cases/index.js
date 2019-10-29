@@ -4,6 +4,8 @@ import generateUniqueId from '../../utils/generateUniqueId';
 import { EJSON } from 'bson';
 import { fetchAccessibleSeries } from '../../privilegeUtils';
 import { packAsMhd } from '../../case/packAsMhd';
+import checkFilter from '../../utils/checkFilter';
+import deepRenameKeys from 'deep-rename-keys';
 
 const maskPatientInfo = ctx => {
   return caseData => {
@@ -140,6 +142,22 @@ export const handleSearch = ({ models }) => {
     } catch (err) {
       ctx.throw(status.BAD_REQUEST, 'Bad filter.');
     }
+    const fields = [
+      'caseId',
+      'patientInfo.patientId',
+      'patientInfo.patientName',
+      'patientInfo.age',
+      'patientInfo.sex',
+      'tags',
+      'createdAt',
+      'updatedAt'
+    ];
+    if (!checkFilter(customFilter, fields))
+      ctx.throw(status.BAD_REQUEST, 'Bad filter.');
+    customFilter = deepRenameKeys(customFilter, k =>
+      k.replace(/^patientInfo/, 'patientInfoCache')
+    );
+
     // const domainFilter = {};
     const accessibleProjectIds = ctx.userPrivileges.accessibleProjects.map(
       p => p.projectId

@@ -96,6 +96,15 @@ const CaseSearchCondition = props => {
   const advancedConditionKeys = useMemo(
     () => ({
       caseId: { caption: 'case ID', type: 'text' },
+      'patientInfoCache.patientId': { caption: 'patient ID', type: 'text' },
+      'patientInfoCache.patientName': { caption: 'patient name', type: 'text' },
+      'patientInfoCache.age': { caption: 'age', type: 'number' },
+      'patientInfoCache.sex': {
+        caption: 'sex',
+        type: 'select',
+        spec: { options: ['M', 'F', 'O'] }
+      },
+      createdAt: { caption: 'import date', type: 'date' },
       tag: {
         caption: 'Tag',
         type: 'select',

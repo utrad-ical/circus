@@ -133,4 +133,12 @@ describe('dicomImageExtractor', () => {
       pixelSpacing: [1.5625, 1.5625]
     });
   });
+
+  test('CR-LIDC-MONOCROME1', () => {
+    // Checks MONOCHROME1 PhotometricRepresentation
+    return testFile('CR-LIDC-MONOCROME1', {
+      columns: 2140,
+      rows: 1760
+    });
+  });
 });

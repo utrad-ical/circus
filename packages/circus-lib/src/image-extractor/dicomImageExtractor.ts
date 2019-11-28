@@ -3,6 +3,7 @@ import { PixelFormat, pixelFormatInfo } from '../PixelFormat';
 import lj from 'jpeg-lossless-decoder-js';
 import * as parser from 'dicom-parser';
 import { convertComplement } from './complementUtil';
+import { invertPixelValue } from './invertPixelValue';
 
 interface RescaleParams {
   slope: number;
@@ -150,6 +151,7 @@ const dicomImageExtractor: (options?: ExtractOptions) => DicomImageExtractor = (
           convertedPixelData,
           PixelFormat.Int16
         );
+
         for (let i = 0; i < length; i++) {
           write(i, read(i) * slope + intercept);
         }
@@ -238,10 +240,13 @@ function extractUncompressedPixels(
   for (let i = 0; i < columns * rows; i++) {
     const rawVal = buffer[i];
     const pixelRepresentation = dataset.uint16('x00280103');
-    const val =
+    let val =
       pixelRepresentation === 0
         ? rawVal
         : convertComplement(rawVal, bitsStored, highBit);
+    const photometricInterpretation = dataset.string('x00280004');
+    if (photometricInterpretation === 'MONOCHROME1')
+      val = invertPixelValue(val, bitsStored, pixelRepresentation);
     resultArray[i] = val;
     if (val < minValue) minValue = val;
     if (val > maxValue) maxValue = val;

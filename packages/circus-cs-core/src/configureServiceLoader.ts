@@ -78,7 +78,7 @@ export default function configureServiceLoader(
   // Misc 'singleton' modules
   serviceLoader.registerModule(
     'pluginJobRegisterer',
-    path.join(__dirname, 'job', 'createPluginJobRegisterer')
+    path.join(__dirname, 'job', 'registerer', 'createPluginJobRegisterer')
   );
   serviceLoader.registerModule(
     'jobRunner',

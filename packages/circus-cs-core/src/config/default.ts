@@ -12,7 +12,7 @@ import os from 'os';
 const defaults: circus.Configuration = {
   jobRunner: {
     options: {
-      pluginWorkingDir: path.join(os.tmpdir(), 'circus-cs'),
+      workingDirectory: path.join(os.tmpdir(), 'circus-cs'),
       removeTemporaryDirectory: true
     }
   },

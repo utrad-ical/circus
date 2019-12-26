@@ -11,7 +11,7 @@ describe('checkFilter', function() {
     assert.isTrue(checkFilter({ valid: true }, fields));
     assert.isTrue(checkFilter({ birthday: new Date() }, fields));
     assert.isTrue(checkFilter({ birthday: { $lt: new Date() } }, fields));
-
+    assert.isTrue(checkFilter({ name: { $in: ['Alice', 'Bob'] } }, fields));
     assert.isFalse(checkFilter({ sex: 'F' }, fields));
     assert.isFalse(checkFilter({ age: { $gg: 5 } }, fields));
     assert.isFalse(checkFilter({ name: /Bob/ }, fields));

@@ -35,8 +35,8 @@ const monitor: FunctionService<
             job.state === 'wait'
               ? `Queued at ${dt(job.createdAt!)}`
               : job.state === 'processing'
-                ? `Started at ${dt(job.startedAt!)}`
-                : 'Error';
+              ? `Started at ${dt(job.startedAt!)}`
+              : 'Error';
           return [
             job.jobId.substring(0, 16),
             job.state,

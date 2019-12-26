@@ -35,11 +35,13 @@ const createMongoQueue: FunctionService<
   };
 
   const dequeue = async () => {
-    const result = (await collection.findOneAndUpdate(
-      { state: 'wait' },
-      { $set: { state: 'processing', startedAt: new Date() } },
-      { sort: { priority: -1, _id: 1 }, returnOriginal: false }
-    )).value as circus.QueueItem<circus.PluginJobRequest> | null;
+    const result = (
+      await collection.findOneAndUpdate(
+        { state: 'wait' },
+        { $set: { state: 'processing', startedAt: new Date() } },
+        { sort: { priority: -1, _id: 1 }, returnOriginal: false }
+      )
+    ).value as circus.QueueItem<circus.PluginJobRequest> | null;
     return result;
   };
 

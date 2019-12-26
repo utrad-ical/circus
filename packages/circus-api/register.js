@@ -12,7 +12,7 @@ require('@babel/register')({
       ) {
         return false;
       }
-      if (/^node_modules/.test(rel)) return true;
+      if (/node_modules/.test(rel)) return true;
       return false;
     }
   ],

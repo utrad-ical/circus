@@ -25,7 +25,9 @@ import {
   StaticDicomFileRepository,
   MemoryDicomFileRepository
 } from '@utrad-ical/circus-lib/lib/dicom-file-repository';
-import { createCsCore } from '@utrad-ical/circus-cs-core';
+import configureServiceLoader from '@utrad-ical/circus-cs-core/src/configureServiceLoader';
+import csCoreConfigDefaults from '@utrad-ical/circus-cs-core/src/config/default';
+import os from 'os';
 
 function handlerName(route) {
   if (route.handler) return route.handler;
@@ -91,6 +93,41 @@ export async function createDicomFileRepository(dicomPath) {
     : new MemoryDicomFileRepository({});
 }
 
+const makeCsCoreFromServiceLoader = async options => {
+  const mongoUrl = process.env.CIRCUS_MONGO_URL || process.env.MONGO_URL;
+  const configObj = {
+    jobRunner: {
+      options: {
+        workingDirectory: path.join(os.tmpdir(), 'circus-cs'),
+        removeTemporaryDirectory: false
+      }
+    },
+    pluginDefinitionAccessor: {
+      type: 'MongoPluginDefinitionAccessor',
+      options: { mongoUrl, collectionName: 'pluginDefinitions' }
+    },
+    queue: {
+      type: 'MongoQueue',
+      options: { mongoUrl, collectionName: 'pluginJobQueue' }
+    },
+    jobManager: csCoreConfigDefaults.jobManager,
+    jobReporter: {
+      type: 'MongoPluginJobReporter',
+      options: {
+        mongoUrl,
+        collectionName: 'pluginJobs',
+        pluginResultsDir: options.pluginResultsPath
+      }
+    },
+    dicomFileRepository: {
+      module: 'StaticDicomFileRepository',
+      options: { dataDir: options.dicomPath, useHash: false }
+    }
+  };
+  const loader = configureServiceLoader(configObj);
+  return await loader.get('core');
+};
+
 /**
  * Creates a new Koa app.
  */
@@ -125,7 +162,7 @@ export default async function createApp(options = {}) {
     ? new DicomImporter(dicomFileRepository, models, { utility: utilityEnv })
     : undefined;
 
-  const cs = options.cs ? options.cs : await createCsCore();
+  const cs = await makeCsCoreFromServiceLoader(options);
 
   const { rs, volumeProvider } = await circusRs({
     logger,

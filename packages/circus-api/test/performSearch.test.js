@@ -70,12 +70,18 @@ describe('performSearch', function() {
 
   it('should take paging', async function() {
     const res1 = await search({ page: 1, limit: 2, sort: { price: -1 } });
-    assert.deepEqual(res1.items.map(i => i.itemId), [12, 23]);
+    assert.deepEqual(
+      res1.items.map(i => i.itemId),
+      [12, 23]
+    );
     assert.equal(res1.totalItems, 30);
     assert.equal(res1.page, 1);
 
     const res2 = await search({ page: 2, limit: 2, sort: { price: -1 } });
-    assert.deepEqual(res2.items.map(i => i.itemId), [28, 15]);
+    assert.deepEqual(
+      res2.items.map(i => i.itemId),
+      [28, 15]
+    );
     assert.equal(res2.totalItems, 30);
     assert.equal(res2.page, 2);
 

@@ -16,9 +16,7 @@ const maskPatientInfo = ctx => {
     );
     if (!project) {
       throw new Error(
-        `Project ${caseData.projectId} is not accessbible by ${
-          ctx.user.userEmail
-        }.`
+        `Project ${caseData.projectId} is not accessbible by ${ctx.user.userEmail}.`
       );
     }
     const viewable = project.roles.some(r => r === 'viewPersonalInfo');

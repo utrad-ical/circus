@@ -18,9 +18,11 @@ export const handleGetFull = ({
   return async (ctx, next) => {
     const user = { ...ctx.user };
     delete user.password;
-    const groups = (await models.group.findAll({
-      groupId: { $in: user.groups }
-    })).map(g => g.groupName);
+    const groups = (
+      await models.group.findAll({
+        groupId: { $in: user.groups }
+      })
+    ).map(g => g.groupName);
     ctx.body = {
       ...user,
       ...ctx.userPrivileges,

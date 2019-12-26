@@ -24,12 +24,14 @@ const checkFilter = (filter, fields) => {
       if (fields.indexOf(key) < 0) return false;
       if (isScalarOrDate(value)) return true;
       if (isPlainObject(value)) {
-        // Checks { $gt: 5}, { $ne: 'A' }, etc.
+        // Checks { $gt: 5 }, { $ne: 'A' }, etc.
         const keys = Object.keys(value);
         return keys.every(k => {
-          const ops = ['$gt', '$gte', '$lt', '$lte', '$ne', '$regex'];
+          const ops = ['$gt', '$gte', '$lt', '$lte', '$ne', '$regex', '$in'];
           if (ops.indexOf(k) < 0) return false;
-          return isScalarOrDate(value[k]);
+          return k === '$in'
+            ? Array.isArray(value[k])
+            : isScalarOrDate(value[k]);
         });
       }
       return false;

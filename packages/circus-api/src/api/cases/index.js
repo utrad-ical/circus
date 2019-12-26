@@ -143,6 +143,7 @@ export const handleSearch = ({ models }) => {
       ctx.throw(status.BAD_REQUEST, 'Bad filter.');
     }
     const fields = [
+      'projectId',
       'caseId',
       'patientInfo.patientId',
       'patientInfo.patientName',

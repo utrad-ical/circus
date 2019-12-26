@@ -8,7 +8,8 @@ const AdminContainerView = props => {
     return (
       <div className={className}>
         <h1>
-          <Icon icon={icon} />&ensp;
+          <Icon icon={icon} />
+          &ensp;
           {title}
         </h1>
         {props.children}

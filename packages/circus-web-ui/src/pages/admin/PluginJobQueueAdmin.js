@@ -27,21 +27,18 @@ const PluginJobQueueAdminView = props => {
   const { dispatch } = props;
   const api = useApi();
 
-  useEffect(
-    () => {
-      dispatch(
-        startNewSearch(
-          api,
-          'globalJobQueue',
-          'admin/plugin-job-queue',
-          {},
-          {},
-          { createdAt: -1 }
-        )
-      );
-    },
-    [api, dispatch]
-  );
+  useEffect(() => {
+    dispatch(
+      startNewSearch(
+        api,
+        'globalJobQueue',
+        'admin/plugin-job-queue',
+        {},
+        {},
+        { createdAt: -1 }
+      )
+    );
+  }, [api, dispatch]);
 
   return (
     <AdminContainer title="Plugin Job Queue" icon="list">

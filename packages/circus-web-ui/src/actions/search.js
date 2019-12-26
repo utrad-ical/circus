@@ -88,7 +88,7 @@ export function savePreset(api, name, condition) {
     if (!presetName || !presetName.length) return;
 
     if (presets.some(preset => preset.name === presetName)) {
-      if (!await confirm(`Overwrite the existing preset "${presetName}"?`)) {
+      if (!(await confirm(`Overwrite the existing preset "${presetName}"?`))) {
         return;
       }
     }

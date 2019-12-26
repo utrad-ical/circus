@@ -13,7 +13,7 @@ export const createEmptyVoxelLabel = () => {
   return {
     origin: [0, 0, 0],
     size: [16, 16, 16],
-    volumeArrayBuffer: new ArrayBuffer(16 * 16 * 16 / 8)
+    volumeArrayBuffer: new ArrayBuffer((16 * 16 * 16) / 8)
   };
 };
 

@@ -59,7 +59,10 @@ const FatVolumetry = React.forwardRef((props, ref) => {
     options
   } = props;
 
-  const { jobId, results: { results } } = job;
+  const {
+    jobId,
+    results: { results }
+  } = job;
 
   const ctImgRef = useRef();
   const resultImgRef = useRef();
@@ -72,24 +75,21 @@ const FatVolumetry = React.forwardRef((props, ref) => {
   const [sliceInfo, setSliceInfo] = useState({});
   const api = useApi();
 
-  useEffect(
-    () => {
-      const load = async (file, element) => {
-        const img = await api(`plugin-jobs/${jobId}/attachment/${file}`, {
-          responseType: 'arraybuffer'
-        });
-        const view = new Uint8Array(img);
-        const blob = new Blob([view], { type: 'image/png' });
-        const url = URL.createObjectURL(blob);
-        element.current.src = url;
-      };
-      load(`ct${slice}.png`, ctImgRef);
-      load(`result${slice}.png`, resultImgRef);
-      const sliceInfo = results.sliceResults.find(s => s.rank === slice);
-      setSliceInfo(sliceInfo || {});
-    },
-    [slice, jobId, api, results]
-  );
+  useEffect(() => {
+    const load = async (file, element) => {
+      const img = await api(`plugin-jobs/${jobId}/attachment/${file}`, {
+        responseType: 'arraybuffer'
+      });
+      const view = new Uint8Array(img);
+      const blob = new Blob([view], { type: 'image/png' });
+      const url = URL.createObjectURL(blob);
+      element.current.src = url;
+    };
+    load(`ct${slice}.png`, ctImgRef);
+    load(`result${slice}.png`, resultImgRef);
+    const sliceInfo = results.sliceResults.find(s => s.rank === slice);
+    setSliceInfo(sliceInfo || {});
+  }, [slice, jobId, api, results]);
 
   const handleWheel = ev => {
     if (typeof ev.deltaY !== 'number') return;

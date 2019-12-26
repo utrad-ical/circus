@@ -118,10 +118,9 @@ const SelectionFeedbackListener = React.forwardRef((props, ref) => {
             toolTip={toolTip}
           >
             {def.caption}
-            {isConsensual &&
-              voters.length && (
-                <span className="label label-default">{voters.length}</span>
-              )}
+            {isConsensual && voters.length && (
+              <span className="label label-default">{voters.length}</span>
+            )}
           </SelectionButton>
         );
       })}

@@ -78,7 +78,8 @@ const Menu = React.memo(props => {
       noCaret
     >
       <MenuItem eventKey="deleteAllFeedback" onSelect={onMenuSelect}>
-        <Icon icon="remove" />&ensp;Delete all feedback
+        <Icon icon="remove" />
+        &ensp;Delete all feedback
       </MenuItem>
     </DropdownButton>
   );
@@ -95,30 +96,27 @@ const PluginJobDetail = props => {
   const [busy, setBusy] = useState(false);
   const [feedbackState, dispatch] = useFeedback();
 
-  const loadJob = useCallback(
-    async () => {
-      setBusy(true);
-      try {
-        const job = await api(`plugin-jobs/${jobId}`);
-        const pluginData = await api(`plugins/${job.pluginId}`);
-        const seriesData = {};
-        for (const s of job.series) {
-          const seriesUid = s.seriesUid;
-          if (seriesUid in seriesData) continue;
-          seriesData[seriesUid] = await api(`series/${seriesUid}`);
-        }
-        dispatch({
-          type: 'reset',
-          feedbacks: job.feedbacks,
-          myUserEmail: user.userEmail
-        });
-        return { job, pluginData, seriesData };
-      } finally {
-        setBusy(false);
+  const loadJob = useCallback(async () => {
+    setBusy(true);
+    try {
+      const job = await api(`plugin-jobs/${jobId}`);
+      const pluginData = await api(`plugins/${job.pluginId}`);
+      const seriesData = {};
+      for (const s of job.series) {
+        const seriesUid = s.seriesUid;
+        if (seriesUid in seriesData) continue;
+        seriesData[seriesUid] = await api(`series/${seriesUid}`);
       }
-    },
-    [api, dispatch, jobId, user.userEmail]
-  );
+      dispatch({
+        type: 'reset',
+        feedbacks: job.feedbacks,
+        myUserEmail: user.userEmail
+      });
+      return { job, pluginData, seriesData };
+    } finally {
+      setBusy(false);
+    }
+  }, [api, dispatch, jobId, user.userEmail]);
 
   const [jobData, , reloadJob] = useLoadData(loadJob);
 
@@ -237,12 +235,14 @@ const PluginJobDetail = props => {
 
   const personalOpinionsForKey = key => {
     if (!feedbackState.isConsensual) return undefined;
-    return job.feedbacks.filter(f => !f.isConsensual).map(f => {
-      return {
-        ...f,
-        data: f.data[key]
-      };
-    });
+    return job.feedbacks
+      .filter(f => !f.isConsensual)
+      .map(f => {
+        return {
+          ...f,
+          data: f.data[key]
+        };
+      });
   };
 
   return (
@@ -301,7 +301,8 @@ const PluginJobDetail = props => {
                 <PieProgress
                   max={feedbackTargets.length}
                   value={feedbackState.registeredTargetCount}
-                />&ensp;
+                />
+                &ensp;
               </Fragment>
             )}
             <IconButton

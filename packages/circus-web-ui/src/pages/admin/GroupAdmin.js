@@ -50,66 +50,63 @@ const GroupAdmin = props => {
   const [editorProperties, setEditorProperties] = useState(null);
   const api = useApi();
 
-  useEffect(
-    () => {
-      const didMount = async () => {
-        const domains = await api('admin/server-params/domains');
-        const privList = await api('admin/global-privileges');
-        const privileges = {};
-        for (const p of privList) privileges[p.privilege] = p.caption;
+  useEffect(() => {
+    const didMount = async () => {
+      const domains = await api('admin/server-params/domains');
+      const privList = await api('admin/global-privileges');
+      const privileges = {};
+      for (const p of privList) privileges[p.privilege] = p.caption;
 
-        const projects = (await api('admin/projects')).items;
-        const projectOptions = projects.map(project => ({
-          projectId: project.projectId,
-          project
-        }));
-        const projectSelect = props => (
-          <ProjectSelectorMultiple projects={projectOptions} {...props} />
-        );
+      const projects = (await api('admin/projects')).items;
+      const projectOptions = projects.map(project => ({
+        projectId: project.projectId,
+        project
+      }));
+      const projectSelect = props => (
+        <ProjectSelectorMultiple projects={projectOptions} {...props} />
+      );
 
-        setEditorProperties([
-          { key: 'groupName', caption: 'Group Name', editor: et.text() }, // 0
-          {
-            key: 'privileges',
-            caption: 'Privileges',
-            editor: et.multiSelect(privileges, { type: 'checkbox' })
-          },
-          {
-            key: 'domains',
-            caption: 'Accessible Domains',
-            editor: et.multiSelect(domains, { type: 'checkbox' })
-          },
-          {
-            key: 'readProjects',
-            caption: 'Readable Projects',
-            editor: projectSelect
-          },
-          {
-            key: 'writeProjects',
-            caption: 'Writable Projects',
-            editor: projectSelect
-          },
-          {
-            key: 'addSeriesProjects',
-            caption: 'Add Series Projects',
-            editor: projectSelect
-          },
-          {
-            key: 'viewPersonalInfoProjects',
-            caption: 'View Personal Info Projects',
-            editor: projectSelect
-          },
-          {
-            key: 'moderateProjects',
-            caption: 'Moderate Projects',
-            editor: projectSelect
-          }
-        ]);
-      };
-      didMount();
-    },
-    [api]
-  );
+      setEditorProperties([
+        { key: 'groupName', caption: 'Group Name', editor: et.text() }, // 0
+        {
+          key: 'privileges',
+          caption: 'Privileges',
+          editor: et.multiSelect(privileges, { type: 'checkbox' })
+        },
+        {
+          key: 'domains',
+          caption: 'Accessible Domains',
+          editor: et.multiSelect(domains, { type: 'checkbox' })
+        },
+        {
+          key: 'readProjects',
+          caption: 'Readable Projects',
+          editor: projectSelect
+        },
+        {
+          key: 'writeProjects',
+          caption: 'Writable Projects',
+          editor: projectSelect
+        },
+        {
+          key: 'addSeriesProjects',
+          caption: 'Add Series Projects',
+          editor: projectSelect
+        },
+        {
+          key: 'viewPersonalInfoProjects',
+          caption: 'View Personal Info Projects',
+          editor: projectSelect
+        },
+        {
+          key: 'moderateProjects',
+          caption: 'Moderate Projects',
+          editor: projectSelect
+        }
+      ]);
+    };
+    didMount();
+  }, [api]);
 
   if (!editorProperties) return <LoadingIndicator />;
   return (

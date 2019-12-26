@@ -30,7 +30,8 @@ const Application = props => {
           <MessageBox />
           {notLoggedIn && (
             <div className="alert alert-danger">
-              You are not logged in, or your session has been expired.<br />
+              You are not logged in, or your session has been expired.
+              <br />
               Please log in first.
               <div>
                 <Link to="/">

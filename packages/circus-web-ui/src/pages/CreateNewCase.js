@@ -23,18 +23,15 @@ const CreateNewCase = props => {
   const api = useApi();
   const seriesUid = props.match.params.seriesUid;
 
-  useEffect(
-    () => {
-      const load = async () => {
-        setBusy(true);
-        const series = await api('series/' + seriesUid);
-        setSelectedSeries([{ ...series, range: series.images }]);
-        setBusy(false);
-      };
-      load();
-    },
-    [api, seriesUid]
-  );
+  useEffect(() => {
+    const load = async () => {
+      setBusy(true);
+      const series = await api('series/' + seriesUid);
+      setSelectedSeries([{ ...series, range: series.images }]);
+      setBusy(false);
+    };
+    load();
+  }, [api, seriesUid]);
 
   const handleProjectSelect = projectId => {
     const prj = user.accessibleProjects.find(p => p.projectId === projectId);
@@ -88,7 +85,8 @@ const CreateNewCase = props => {
   return (
     <div>
       <h1>
-        <span className="circus-icon-case" />New Case
+        <span className="circus-icon-case" />
+        New Case
       </h1>
       <SeriesSelector value={selectedSeries} onChange={setSelectedSeries} />
       <div>

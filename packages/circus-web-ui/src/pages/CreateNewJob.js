@@ -17,34 +17,28 @@ const CreateNewJob = props => {
   const api = useApi();
   const seriesUid = props.match.params.seriesUid;
 
-  useEffect(
-    () => {
-      const load = async () => {
-        setBusy(true);
-        const series = await api('series/' + seriesUid);
-        const plugins = await api('plugins');
-        setBusy(false);
-        setSelectedSeries([{ ...series, range: series.images }]);
-        setPlugins(plugins);
-      };
-      load();
-    },
-    [api, seriesUid]
-  );
+  useEffect(() => {
+    const load = async () => {
+      setBusy(true);
+      const series = await api('series/' + seriesUid);
+      const plugins = await api('plugins');
+      setBusy(false);
+      setSelectedSeries([{ ...series, range: series.images }]);
+      setPlugins(plugins);
+    };
+    load();
+  }, [api, seriesUid]);
 
   // Pre-select previously-used plug-in
-  useEffect(
-    () => {
-      if (
-        plugins &&
-        !selectedPlugin &&
-        plugins.find(p => p.pluginId === defaultPlugin)
-      ) {
-        setSelectedPlugin(defaultPlugin);
-      }
-    },
-    [defaultPlugin, plugins, selectedPlugin]
-  );
+  useEffect(() => {
+    if (
+      plugins &&
+      !selectedPlugin &&
+      plugins.find(p => p.pluginId === defaultPlugin)
+    ) {
+      setSelectedPlugin(defaultPlugin);
+    }
+  }, [defaultPlugin, plugins, selectedPlugin]);
 
   const handleCreate = async () => {
     await api('plugin-jobs', {
@@ -78,7 +72,8 @@ const CreateNewJob = props => {
   return (
     <div>
       <h1>
-        <span className="circus-icon-b-calc" />New Job
+        <span className="circus-icon-b-calc" />
+        New Job
       </h1>
       <SeriesSelector value={selectedSeries} onChange={setSelectedSeries} />
       <div>

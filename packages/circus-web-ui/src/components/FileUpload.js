@@ -57,7 +57,7 @@ const FileUpload = props => {
   const handleUploadProgress = event => {
     const bytesSent = event.loaded;
     const bytesTotal = event.total;
-    const percent = Math.floor(bytesSent * 100 / bytesTotal);
+    const percent = Math.floor((bytesSent * 100) / bytesTotal);
     setProgress({
       value: percent,
       label:
@@ -128,7 +128,8 @@ const FileUpload = props => {
           />
           {filesSelected.length == 0 ? (
             <Button bsStyle="default" onClick={() => fileInput.current.click()}>
-              <Glyphicon glyph="plus" />&ensp;Select File
+              <Glyphicon glyph="plus" />
+              &ensp;Select File
             </Button>
           ) : (
             <ButtonToolbar>
@@ -137,7 +138,8 @@ const FileUpload = props => {
                 disabled={filesSelected.length < 1 || uploading}
                 onClick={handleUploadClick}
               >
-                <Glyphicon glyph="upload" />&ensp;Upload
+                <Glyphicon glyph="upload" />
+                &ensp;Upload
               </Button>
               <Button
                 bsStyle="link"

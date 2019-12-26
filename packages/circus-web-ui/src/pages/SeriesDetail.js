@@ -26,24 +26,21 @@ const SeriesDetail = props => {
   );
   const [seriesData] = useLoadData(load);
 
-  useEffect(
-    () => {
-      if (!seriesData) return;
-      const rsHttpClient = new rs.RsHttpClient(server);
-      const volumeLoader = new rs.RsVolumeLoader({
-        rsHttpClient,
-        seriesUid
-      });
-      const src = new rs.HybridMprImageSource({
-        volumeLoader,
-        rsHttpClient,
-        seriesUid
-      });
-      const composition = new rs.Composition(src);
-      setComposition(composition);
-    },
-    [seriesData, seriesUid, server]
-  );
+  useEffect(() => {
+    if (!seriesData) return;
+    const rsHttpClient = new rs.RsHttpClient(server);
+    const volumeLoader = new rs.RsVolumeLoader({
+      rsHttpClient,
+      seriesUid
+    });
+    const src = new rs.HybridMprImageSource({
+      volumeLoader,
+      rsHttpClient,
+      seriesUid
+    });
+    const composition = new rs.Composition(src);
+    setComposition(composition);
+  }, [seriesData, seriesUid, server]);
 
   if (!seriesData) return <LoadingIndicator />;
 

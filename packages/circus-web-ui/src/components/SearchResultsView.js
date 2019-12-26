@@ -174,7 +174,8 @@ const SearchResults = props => {
         {sortOptions && (
           <Fragment>
             &emsp;
-            <Icon icon="sort" />&ensp;
+            <Icon icon="sort" />
+            &ensp;
             <ShrinkSelect
               bsSize="sm"
               options={sortOptions}

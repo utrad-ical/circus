@@ -8,7 +8,8 @@ const ProjectSelector = props => {
     options[p.projectId] = {
       caption: (
         <span>
-          <BodyPartIcon icon={p.project.icon} />&ensp;
+          <BodyPartIcon icon={p.project.icon} />
+          &ensp;
           <b>{p.project.projectName}</b>&ensp;
           <small>{p.project.description}</small>
         </span>

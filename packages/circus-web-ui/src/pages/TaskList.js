@@ -9,16 +9,13 @@ const TaskList = props => {
   const [, setDownloadList] = useState();
   const api = useApi();
 
-  useEffect(
-    () => {
-      const refresh = async () => {
-        const items = (await api('tasks')).items;
-        setDownloadList(items);
-      };
-      refresh();
-    },
-    [api]
-  );
+  useEffect(() => {
+    const refresh = async () => {
+      const items = (await api('tasks')).items;
+      setDownloadList(items);
+    };
+    refresh();
+  }, [api]);
 
   if (!Array.isArray(tasks)) {
     return <LoadingIndicator />;

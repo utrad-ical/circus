@@ -38,7 +38,7 @@ export async function exec(options) {
     const accessToken = generateRandomToken();
     const refreshToken = generateRandomToken(); // dummy
     const permanentTokenId = generateRandomToken();
-    const expiresAt = new Date('9999-12-31T00:00:00');
+    const expiresAt = new Date('2100-12-31T00:00:00');
     await models.token.insert({
       accessToken,
       accessTokenExpiresAt: expiresAt,

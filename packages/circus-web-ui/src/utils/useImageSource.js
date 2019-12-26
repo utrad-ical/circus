@@ -52,18 +52,15 @@ export const useVolumeLoader = (seriesUid, partialVolumeDescriptor) => {
     seriesUid,
     partialVolumeDescriptor
   );
-  useEffect(
-    () => {
-      const load = async () => {
-        await pendingVolumeLoader.loadMeta();
-        await pendingVolumeLoader.loadVolume();
-        setVolumeLoader(pendingVolumeLoader);
-      };
-      load();
-      return () => setVolumeLoader(null);
-    },
-    [pendingVolumeLoader]
-  );
+  useEffect(() => {
+    const load = async () => {
+      await pendingVolumeLoader.loadMeta();
+      await pendingVolumeLoader.loadVolume();
+      setVolumeLoader(pendingVolumeLoader);
+    };
+    load();
+    return () => setVolumeLoader(null);
+  }, [pendingVolumeLoader]);
   return volumeLoader;
 };
 
@@ -74,29 +71,23 @@ export const useHybridImageSource = (seriesUid, partialVolumeDescriptor) => {
   const volumeLoader = useVolumeLoader(seriesUid, partialVolumeDescriptor);
   const { rsHttpClient } = useContext(VolumeLoaderCacheContext);
   const [imageSource, setImageSource] = useState();
-  const pendindImageSource = useMemo(
-    () => {
-      if (!volumeLoader) return null;
-      return new rs.HybridMprImageSource({
-        rsHttpClient,
-        seriesUid,
-        volumeLoader
-      });
-    },
-    [seriesUid, rsHttpClient, volumeLoader]
-  );
+  const pendindImageSource = useMemo(() => {
+    if (!volumeLoader) return null;
+    return new rs.HybridMprImageSource({
+      rsHttpClient,
+      seriesUid,
+      volumeLoader
+    });
+  }, [seriesUid, rsHttpClient, volumeLoader]);
 
-  useEffect(
-    () => {
-      const load = async () => {
-        if (!pendindImageSource) return;
-        await pendindImageSource.ready();
-        setImageSource(pendindImageSource);
-      };
-      load();
-    },
-    [pendindImageSource]
-  );
+  useEffect(() => {
+    const load = async () => {
+      if (!pendindImageSource) return;
+      await pendindImageSource.ready();
+      setImageSource(pendindImageSource);
+    };
+    load();
+  }, [pendindImageSource]);
 
   return imageSource;
 };

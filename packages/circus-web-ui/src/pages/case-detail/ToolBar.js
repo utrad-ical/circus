@@ -157,7 +157,8 @@ const ToolBar = props => {
           <MenuItem onClick={handleToggleReferenceLine}>
             {viewOptions.showReferenceLine && (
               <Fragment>
-                <Icon icon="glyphicon-ok" />&ensp;
+                <Icon icon="glyphicon-ok" />
+                &ensp;
               </Fragment>
             )}
             Show reference line
@@ -165,7 +166,8 @@ const ToolBar = props => {
           <MenuItem onClick={handleToggleInterpolationMode}>
             {viewOptions.interpolationMode === 'trilinear' && (
               <Fragment>
-                <Icon icon="glyphicon-ok" />&ensp;
+                <Icon icon="glyphicon-ok" />
+                &ensp;
               </Fragment>
             )}
             Trilinear filtering

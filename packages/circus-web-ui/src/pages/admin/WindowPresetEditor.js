@@ -5,7 +5,10 @@ import React from 'react';
  * Used in the "Project Administration" page.
  */
 const WindowPresetEditor = props => {
-  const { onChange, value: { label, level, width } } = props;
+  const {
+    onChange,
+    value: { label, level, width }
+  } = props;
 
   function handleChange(ev) {
     if (typeof onChange !== 'function') return;

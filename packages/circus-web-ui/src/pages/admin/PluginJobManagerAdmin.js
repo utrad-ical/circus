@@ -10,22 +10,16 @@ const PluginJobManagerAdmin = props => {
   const [status, setStatus] = useState(null);
   const api = useApi();
 
-  const refresh = useCallback(
-    async () => {
-      setBusy(true);
-      const result = await api('admin/plugin-job-manager');
-      setBusy(false);
-      setStatus(result.status);
-    },
-    [api]
-  );
+  const refresh = useCallback(async () => {
+    setBusy(true);
+    const result = await api('admin/plugin-job-manager');
+    setBusy(false);
+    setStatus(result.status);
+  }, [api]);
 
-  useEffect(
-    () => {
-      refresh();
-    },
-    [refresh]
-  );
+  useEffect(() => {
+    refresh();
+  }, [refresh]);
 
   const postSwitch = async mode => {
     setBusy(true);

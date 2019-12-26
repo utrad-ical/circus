@@ -46,20 +46,14 @@ const Preferences = props => {
   const loginManager = useLoginManager();
   const api = useApi();
 
-  const loadSettings = useCallback(
-    async () => {
-      const settings = await api('preferences');
-      setSettings(settings);
-    },
-    [api]
-  );
+  const loadSettings = useCallback(async () => {
+    const settings = await api('preferences');
+    setSettings(settings);
+  }, [api]);
 
-  useEffect(
-    () => {
-      loadSettings();
-    },
-    [loadSettings]
-  );
+  useEffect(() => {
+    loadSettings();
+  }, [loadSettings]);
 
   const saveClick = async () => {
     await api('preferences', {

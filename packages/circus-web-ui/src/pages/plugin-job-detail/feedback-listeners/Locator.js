@@ -61,33 +61,27 @@ const Locator = React.forwardRef((props, ref) => {
   const seriesUid = job.series[volumeId].seriesUid;
   const imageSource = useHybridImageSource(seriesUid);
 
-  useEffect(
-    () => {
-      if (!imageSource) return;
-      voxelSizeRef.current = imageSource.metadata.voxelSize;
-      const comp = new rs.Composition(imageSource);
-      setComposition(comp);
-    },
-    [imageSource]
-  );
+  useEffect(() => {
+    if (!imageSource) return;
+    voxelSizeRef.current = imageSource.metadata.voxelSize;
+    const comp = new rs.Composition(imageSource);
+    setComposition(comp);
+  }, [imageSource]);
 
-  useEffect(
-    () => {
-      if (!composition) return;
-      composition.removeAllAnnotations();
-      const voxelSize = voxelSizeRef.current;
-      value.forEach(item => {
-        const point = new rs.Point();
-        point.x = item.location[0] * voxelSize[0];
-        point.y = item.location[1] * voxelSize[1];
-        point.z = item.location[2] * voxelSize[2];
-        point.color = '#ff00ff';
-        composition.addAnnotation(point);
-      });
-      composition.annotationUpdated();
-    },
-    [composition, value]
-  );
+  useEffect(() => {
+    if (!composition) return;
+    composition.removeAllAnnotations();
+    const voxelSize = voxelSizeRef.current;
+    value.forEach(item => {
+      const point = new rs.Point();
+      point.x = item.location[0] * voxelSize[0];
+      point.y = item.location[1] * voxelSize[1];
+      point.z = item.location[2] * voxelSize[2];
+      point.color = '#ff00ff';
+      composition.addAnnotation(point);
+    });
+    composition.annotationUpdated();
+  }, [composition, value]);
 
   const initialStateSetter = useCallback(
     (viewer, state) => applyDisplayOptions(state, job, volumeId),

@@ -25,7 +25,8 @@ const PatientInfoBox = props => {
       <StyledDiv>
         <div className="masked">
           <span className="patient-name">
-            <Icon icon="lock" />&ensp;(masked)
+            <Icon icon="lock" />
+            &ensp;(masked)
           </span>
         </div>
         <div className="sub masked">&ensp;</div>

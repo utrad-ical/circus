@@ -9,11 +9,12 @@ const ImportSeries = props => {
   const loginUser = useLoginUser();
   const domains = loginUser.domains || [];
 
-  const [uploadDomain, setUploadDomain] = useState(
-    () =>
-      loginUser.defaultDomain
-        ? loginUser.defaultDomain
-        : domains.length ? domains[0] : null
+  const [uploadDomain, setUploadDomain] = useState(() =>
+    loginUser.defaultDomain
+      ? loginUser.defaultDomain
+      : domains.length
+      ? domains[0]
+      : null
   );
 
   if (!Array.isArray(domains) || domains.length === 0) {

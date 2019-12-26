@@ -7,7 +7,8 @@ const Renderer = props => {
   const { renderAs, project } = props;
   return (
     <span>
-      <BodyPartIcon icon={project.icon} />&ensp;
+      <BodyPartIcon icon={project.icon} />
+      &ensp;
       <b>{project.projectName}</b>
       {renderAs === 'select' && <small>&ensp;{project.description}</small>}
     </span>

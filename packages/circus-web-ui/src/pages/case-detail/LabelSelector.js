@@ -97,7 +97,7 @@ const Series = props => {
   };
 
   async function removeLabel(labelIndex) {
-    if (!await confirm('Delete this label?')) return;
+    if (!(await confirm('Delete this label?'))) return;
     const newSeries = update(series, {
       labels: { $splice: [[labelIndex, 1]] } // remove one item from labels
     });

@@ -34,7 +34,10 @@ const typeOptions = {
 };
 
 const SchemaEntryEditor = props => {
-  const { value: { key, type, required, ...spec }, onChange } = props;
+  const {
+    value: { key, type, required, ...spec },
+    onChange
+  } = props;
   const normalizedType = Array.isArray(spec.enum) ? 'select' : type;
 
   const SpecEditor = {

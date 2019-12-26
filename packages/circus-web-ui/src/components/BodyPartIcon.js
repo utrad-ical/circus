@@ -20,7 +20,10 @@ const StyledSpan = styled.span`
  * Renderes a body-part icon with the specified color and backgroundColor.
  */
 const BodyPartIcon = props => {
-  const { size, icon: { glyph, color, backgroundColor } } = props;
+  const {
+    size,
+    icon: { glyph, color, backgroundColor }
+  } = props;
   const style = { color, backgroundColor };
   return (
     <StyledSpan className={classnames(size)} style={style}>

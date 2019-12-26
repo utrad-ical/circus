@@ -36,32 +36,29 @@ const Candidate = React.forwardRef((props, ref) => {
   const imageSource = useHybridImageSource(seriesUid);
   const stateChanger = useStateChanger();
 
-  useEffect(
-    () => {
-      if (!imageSource) return;
-      // imageSource is guaruanteed to be "ready"
-      const comp = new rs.Composition(imageSource);
-      const metadata = imageSource.metadata;
+  useEffect(() => {
+    if (!imageSource) return;
+    // imageSource is guaruanteed to be "ready"
+    const comp = new rs.Composition(imageSource);
+    const metadata = imageSource.metadata;
 
-      // Add an circle annotation to this composition
-      const r = 20;
-      const annotation = new rs.PlaneFigure();
-      annotation.color = '#ff00ff';
-      annotation.min = [
-        (item.location[0] - r) * metadata.voxelSize[0],
-        (item.location[1] - r) * metadata.voxelSize[1]
-      ];
-      annotation.max = [
-        (item.location[0] + r) * metadata.voxelSize[0],
-        (item.location[1] + r) * metadata.voxelSize[1]
-      ];
-      annotation.z = item.location[2] * metadata.voxelSize[2];
-      comp.addAnnotation(annotation);
+    // Add an circle annotation to this composition
+    const r = 20;
+    const annotation = new rs.PlaneFigure();
+    annotation.color = '#ff00ff';
+    annotation.min = [
+      (item.location[0] - r) * metadata.voxelSize[0],
+      (item.location[1] - r) * metadata.voxelSize[1]
+    ];
+    annotation.max = [
+      (item.location[0] + r) * metadata.voxelSize[0],
+      (item.location[1] + r) * metadata.voxelSize[1]
+    ];
+    annotation.z = item.location[2] * metadata.voxelSize[2];
+    comp.addAnnotation(annotation);
 
-      setComposition(comp);
-    },
-    [imageSource, item.location]
-  );
+    setComposition(comp);
+  }, [imageSource, item.location]);
 
   const centerState = useCallback(
     state => {
@@ -143,16 +140,13 @@ const LesionCandidates = React.forwardRef((props, ref) => {
     }
   } = props;
 
-  const FeedbackListener = useMemo(
-    () => {
-      if (!feedbackListener) return undefined;
-      return createDynamicComponent(
-        feedbackListener.type,
-        feedbackListener.options
-      );
-    },
-    [feedbackListener]
-  );
+  const FeedbackListener = useMemo(() => {
+    if (!feedbackListener) return undefined;
+    return createDynamicComponent(
+      feedbackListener.type,
+      feedbackListener.options
+    );
+  }, [feedbackListener]);
 
   // Keeps track of multiple refs using Map
   /**

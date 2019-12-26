@@ -29,12 +29,9 @@ const EditorPage = props => {
     icon
   } = props;
 
-  const loadItems = useCallback(
-    async () => {
-      dispatch(startNewSearch(api, searchName, resource, {}, {}, {}));
-    },
-    [api, dispatch, resource, searchName]
-  );
+  const loadItems = useCallback(async () => {
+    dispatch(startNewSearch(api, searchName, resource, {}, {}, {}));
+  }, [api, dispatch, resource, searchName]);
 
   const handleEditStart = useCallback(
     (index, item) => {
@@ -49,30 +46,24 @@ const EditorPage = props => {
     [targetName, primaryKey]
   );
 
-  const grid = useMemo(
-    () => {
-      return props => (
-        <DataGrid
-          value={props.value}
-          columns={listColumns}
-          onItemClick={handleEditStart}
-          active={props.active}
-        />
-      );
-    },
-    [listColumns, handleEditStart]
-  );
+  const grid = useMemo(() => {
+    return props => (
+      <DataGrid
+        value={props.value}
+        columns={listColumns}
+        onItemClick={handleEditStart}
+        active={props.active}
+      />
+    );
+  }, [listColumns, handleEditStart]);
 
-  useEffect(
-    () => {
-      loadItems();
-    },
-    [loadItems]
-  );
+  useEffect(() => {
+    loadItems();
+  }, [loadItems]);
 
   const commitItem = async item => {
     if (preCommitHook) {
-      if (!await preCommitHook(target)) return;
+      if (!(await preCommitHook(target))) return;
     }
 
     let url = resource;
@@ -169,12 +160,9 @@ const Editor = props => {
     pickProperties(item, properties)
   );
 
-  useEffect(
-    () => {
-      setCurrentData(pickProperties(item, properties));
-    },
-    [properties, item]
-  );
+  useEffect(() => {
+    setCurrentData(pickProperties(item, properties));
+  }, [properties, item]);
 
   const handleSave = () => {
     onSaveClick(currentData);

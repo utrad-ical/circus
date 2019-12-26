@@ -103,7 +103,7 @@ class CaseDetailView extends React.PureComponent {
   };
 
   revertRevision = async () => {
-    if (!await confirm('Reload the current revision?')) {
+    if (!(await confirm('Reload the current revision?'))) {
       return;
     }
     this.selectRevision(this.state.editingRevisionIndex);
@@ -266,12 +266,14 @@ const MenuBar = props => {
           noCaret
         >
           <MenuItem eventKey="1" onSelect={onRevertClick}>
-            <Icon icon="remove" />&ensp;Revert
+            <Icon icon="remove" />
+            &ensp;Revert
           </MenuItem>
           <MenuItem divider />
           <MenuItem header>Export</MenuItem>
           <MenuItem onSelect={onExportMhdClick}>
-            <Icon icon="export" />Export as MHD
+            <Icon icon="export" />
+            Export as MHD
           </MenuItem>
         </DropdownButton>
       </div>
@@ -301,7 +303,9 @@ export class Editor extends React.Component {
   }
 
   componentDidMount() {
-    const { editingData: { activeSeriesIndex } } = this.props;
+    const {
+      editingData: { activeSeriesIndex }
+    } = this.props;
     this.changeTool('pager');
     this.changeActiveSeries(activeSeriesIndex);
   }
@@ -338,7 +342,10 @@ export class Editor extends React.Component {
     const {
       editingData: { revision, activeSeriesIndex, activeLabelIndex }
     } = this.props;
-    const { composition, viewOptions: { showReferenceLine } } = this.state;
+    const {
+      composition,
+      viewOptions: { showReferenceLine }
+    } = this.state;
     const activeSeries = revision.series[activeSeriesIndex];
     const activeLabel = activeSeries.labels[activeLabelIndex];
     composition.annotations.forEach(antn => {
@@ -384,7 +391,9 @@ export class Editor extends React.Component {
   };
 
   changeActiveSeries = async () => {
-    const { editingData: { revision, activeSeriesIndex } } = this.props;
+    const {
+      editingData: { revision, activeSeriesIndex }
+    } = this.props;
     const activeSeries = revision.series[activeSeriesIndex];
     const volumeLoader = new rs.RsVolumeLoader({
       rsHttpClient: this.client,

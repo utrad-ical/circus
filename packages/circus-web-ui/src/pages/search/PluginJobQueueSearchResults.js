@@ -12,7 +12,13 @@ const DataView = props => {
   if (!value.length) {
     return <div>No plug-in job in execution queue.</div>;
   }
-  return <ul>{value.map(item => <li key={item.jobId}>{item}</li>)}</ul>;
+  return (
+    <ul>
+      {value.map(item => (
+        <li key={item.jobId}>{item}</li>
+      ))}
+    </ul>
+  );
 };
 
 const PluginJobQueueSearchResults = props => {

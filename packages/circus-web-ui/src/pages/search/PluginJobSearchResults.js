@@ -36,7 +36,9 @@ const Operation = props => {
 };
 
 const PluginRenderer = props => {
-  const { value: { pluginId } } = props;
+  const {
+    value: { pluginId }
+  } = props;
   return <PluginDisplay size="lg" pluginId={pluginId} />;
 };
 
@@ -53,7 +55,9 @@ const StatusRenderer = ({ value: { status } }) => {
 };
 
 const FeedbackRenderer = props => {
-  const { value: { feedbacks = [] } } = props;
+  const {
+    value: { feedbacks = [] }
+  } = props;
   const personals = feedbacks.filter(f => !f.isConsensual).length;
   const consensual = feedbacks.filter(f => f.isConsensual).length;
   const title = `${personals} personal feedback ${

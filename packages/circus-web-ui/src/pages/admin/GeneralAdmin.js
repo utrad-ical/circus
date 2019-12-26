@@ -22,21 +22,15 @@ const GeneralAdmin = props => {
     [settings.domains]
   );
 
-  const loadSettings = useCallback(
-    async () => {
-      const data = await api('admin/server-params');
-      setSettings(data);
-      setComplaints({});
-    },
-    [api]
-  );
+  const loadSettings = useCallback(async () => {
+    const data = await api('admin/server-params');
+    setSettings(data);
+    setComplaints({});
+  }, [api]);
 
-  useEffect(
-    () => {
-      loadSettings();
-    },
-    [loadSettings]
-  );
+  useEffect(() => {
+    loadSettings();
+  }, [loadSettings]);
 
   const propertyChange = value => {
     if (value.domains.indexOf(value.defaultDomain) === -1) {

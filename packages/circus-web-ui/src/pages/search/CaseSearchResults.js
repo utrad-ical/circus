@@ -14,7 +14,9 @@ const Tags = props => {
   const item = props.value;
   return (
     <span className="tag-list">
-      {item.tags.map(t => <Tag key={t} projectId={item.projectId} tag={t} />)}
+      {item.tags.map(t => (
+        <Tag key={t} projectId={item.projectId} tag={t} />
+      ))}
     </span>
   );
 };

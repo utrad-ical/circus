@@ -40,7 +40,8 @@ const SubMenu = props => {
       <Link to={props.link}>
         {props.icon && (
           <Fragment>
-            <Icon icon={props.icon} />&ensp;
+            <Icon icon={props.icon} />
+            &ensp;
           </Fragment>
         )}
         {props.name}

@@ -61,7 +61,7 @@ export class TaskWatcher extends React.Component {
   async query() {
     const data = await api(`task/${this.props.taskID}`);
     const indeterminate = data.max <= 0;
-    const progress = data.value / data.max * 100;
+    const progress = (data.value / data.max) * 100;
     this.setState({ indeterminate, progress });
     if (!data.finished) {
       setTimeout(() => this.query(), 1000);

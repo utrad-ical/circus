@@ -8,7 +8,8 @@ const Btn = ({ to, link, glyph }) => (
   <div className="item">
     <Link to={`admin/${to}`}>
       <Button block bsStyle="primary" bsSize="lg">
-        <Icon icon={glyph} />&ensp;{link}
+        <Icon icon={glyph} />
+        &ensp;{link}
       </Button>
     </Link>
   </div>

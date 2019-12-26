@@ -67,51 +67,39 @@ const ImageViewer = props => {
   );
 
   // Handle onMouseUp
-  useEffect(
-    () => {
-      const container = containerRef.current;
-      container.addEventListener('mouseup', onMouseUp);
-      return () => {
-        container.removeEventListener('mouseup', onMouseUp);
-      };
-    },
-    [onMouseUp]
-  );
+  useEffect(() => {
+    const container = containerRef.current;
+    container.addEventListener('mouseup', onMouseUp);
+    return () => {
+      container.removeEventListener('mouseup', onMouseUp);
+    };
+  }, [onMouseUp]);
 
   // Handle composition change
-  useEffect(
-    () => {
-      if (!viewer || !composition) return;
-      viewer.setComposition(composition);
-    },
-    [viewer, composition]
-  );
+  useEffect(() => {
+    if (!viewer || !composition) return;
+    viewer.setComposition(composition);
+  }, [viewer, composition]);
 
   // Handle stateChanger
-  useEffect(
-    () => {
-      if (!(stateChanger instanceof EventEmitter)) return;
-      const handleChangeState = changer => {
-        if (!viewer) return;
-        const state = viewer.getState();
-        viewer.setState(changer(state));
-      };
-      stateChanger.on('change', handleChangeState);
-      return () => {
-        stateChanger.removeListener('change', handleChangeState);
-      };
-    },
-    [viewer, stateChanger]
-  );
+  useEffect(() => {
+    if (!(stateChanger instanceof EventEmitter)) return;
+    const handleChangeState = changer => {
+      if (!viewer) return;
+      const state = viewer.getState();
+      viewer.setState(changer(state));
+    };
+    stateChanger.on('change', handleChangeState);
+    return () => {
+      stateChanger.removeListener('change', handleChangeState);
+    };
+  }, [viewer, stateChanger]);
 
   // Handle tool change
-  useEffect(
-    () => {
-      if (!viewer) return;
-      viewer.setActiveTool(tool);
-    },
-    [viewer, tool]
-  );
+  useEffect(() => {
+    if (!viewer) return;
+    viewer.setActiveTool(tool);
+  }, [viewer, tool]);
 
   return (
     <div className={classnames('image-viewer', className)} ref={containerRef} />

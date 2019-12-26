@@ -39,7 +39,9 @@ const basicConditionToMongoQuery = condition => {
   });
   return members.length > 1
     ? { $and: members }
-    : members.length === 1 ? members[0] : {};
+    : members.length === 1
+    ? members[0]
+    : {};
 };
 
 const conditionToFilter = condition => {

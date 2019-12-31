@@ -59,14 +59,8 @@ const defaults: circus.Configuration = {
       startOptions: {
         name: 'circus-cs-job-manager',
         cwd: path.join(__dirname, '..', '..'),
-        output: path.join(
-          __dirname,
-          '..',
-          '..',
-          'logs',
-          'daemon-pm2-output.log'
-        ),
-        error: path.join(__dirname, '..', '..', 'logs', 'daemon-pm2-error.log')
+        output: '/var/circus/logs/daemon-pm2-output.log',
+        error: '/var/circus/logs/daemon-pm2-error.log'
       },
       checkQueueInterval: 1000
     }

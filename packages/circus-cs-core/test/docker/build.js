@@ -25,10 +25,12 @@ const build = async target => {
     version: '1.0.0'
   });
   await fs.writeFile(path.join(tmpDir, 'plugin.json'), pluginDefinitionFile);
-  await fs.copy('../results', path.join(tmpDir, 'results'), {
-    recursive: true
-  });
-  await fs.copy('main.js', path.join(tmpDir, 'main.js'));
+  await fs.copy(
+    path.join(__dirname, '..', 'results'),
+    path.join(tmpDir, 'results'),
+    { recursive: true }
+  );
+  await fs.copy(path.join(__dirname, 'main.js'), path.join(tmpDir, 'main.js'));
 
   const image = `circus-mock-${target}`;
   await passthru('docker', ['image', 'rm', image]);

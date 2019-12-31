@@ -92,7 +92,7 @@ describe('pluginJobRunner', () => {
     expect(resultsPacked).toBe(true);
     const log = logStream.toString();
     expect(log).toContain('Plug-in execution done.');
-  });
+  }, 20000);
 });
 
 describe('fetchSeriesFromRepository', () => {

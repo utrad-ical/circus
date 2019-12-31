@@ -31,9 +31,10 @@ export interface Services {
 // Do not try to include any business logic here!
 
 export default function configureServiceLoader(
+  serviceLoader: ServiceLoader,
   config: circus.Configuration
 ): ServiceLoader<Services> {
-  const serviceLoader = new ServiceLoader<Services>(config as any);
+  // const serviceLoader = new ServiceLoader<Services>(config as any);
   serviceLoader.registerDirectory(
     'logger',
     '@utrad-ical/circus-lib/lib/logger',

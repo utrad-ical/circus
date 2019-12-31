@@ -8,6 +8,7 @@ import config from '../config';
 import configureServiceLoader from '../configureServiceLoader';
 import loopRun, { LoopRunOptions } from './loopRun';
 import createCancellableTimer from './createCancellableTimer';
+import { ServiceLoader } from '@utrad-ical/circus-lib';
 
 argv.option([
   {
@@ -32,7 +33,7 @@ const main = async () => {
     ourConfig = config;
   }
 
-  const serviceLoader = configureServiceLoader(ourConfig!);
+  const serviceLoader = configureServiceLoader(new ServiceLoader(), ourConfig!);
 
   let loopRunOptions: LoopRunOptions<circus.PluginJobRequest>;
   try {

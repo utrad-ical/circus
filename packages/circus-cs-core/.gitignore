@@ -4,7 +4,6 @@ node_modules
 /coverage
 /test/working
 /test/docker/tmp
-/test/results
 /lib
 
 .cscorerc*

@@ -1,0 +1,22 @@
+{
+  "metadata": {
+    "displayOptions": [
+      {
+        "volumeId": 0,
+        "window": { "level": -600, "width": 1500 },
+        "crop": { "origin": [76, 139, 26], "size": [331, 215, 215] }
+      }
+    ]
+  },
+  "results": {
+    "lesionCandidates": [
+      {
+        "rank": 1,
+        "confidence": 0.876,
+        "volumeId": 0,
+        "location": [200, 258, 58],
+        "volumeSize": 50.4
+      }
+    ]
+  }
+}

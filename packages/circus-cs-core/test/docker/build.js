@@ -14,11 +14,10 @@ const build = async target => {
   const dockerFile = unindent(`
     FROM node:12-alpine
     LABEL description="CIRCUS Plug-in mock ${target}" version="1.0.0"
-    RUN mkdir -p /circus/in /circus/out
     ADD main.js /main.js
     ADD results /results
     ADD plugin.json /plugin.json
-    CMD [ "node", "main.js", "${target}" ]
+    CMD ["node", "main.js", "${target}"]
   `);
   await fs.writeFile(path.join(tmpDir, 'Dockerfile'), dockerFile);
   const pluginDefinitionFile = JSON.stringify({

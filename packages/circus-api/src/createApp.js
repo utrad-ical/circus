@@ -25,6 +25,7 @@ import {
   StaticDicomFileRepository,
   MemoryDicomFileRepository
 } from '@utrad-ical/circus-lib/lib/dicom-file-repository';
+import { ServiceLoader } from '@utrad-ical/circus-lib';
 import configureServiceLoader from '@utrad-ical/circus-cs-core/src/configureServiceLoader';
 import csCoreConfigDefaults from '@utrad-ical/circus-cs-core/src/config/default';
 import os from 'os';
@@ -124,7 +125,10 @@ const makeCsCoreFromServiceLoader = async options => {
       options: { dataDir: options.dicomPath, useHash: false }
     }
   };
-  const loader = configureServiceLoader(configObj);
+  const loader = configureServiceLoader(
+    new ServiceLoader(configObj),
+    configObj
+  );
   return await loader.get('core');
 };
 

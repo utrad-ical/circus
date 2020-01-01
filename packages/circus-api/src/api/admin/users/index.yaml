@@ -1,5 +1,4 @@
 name: User Administration
-scope: [severAdmin]
 description: Manages login users.
 routes:
   - verb: get

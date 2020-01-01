@@ -1,5 +1,4 @@
 name: Project Administration
-scope: [severAdmin]
 description: Manages projects.
 routes:
   - verb: get

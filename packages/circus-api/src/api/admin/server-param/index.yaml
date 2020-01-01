@@ -1,5 +1,4 @@
 name: Server Parameter
-scope: [severAdmin]
 description: Manages login users.
 routes:
   - verb: get

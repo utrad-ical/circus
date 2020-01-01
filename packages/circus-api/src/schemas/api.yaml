@@ -5,6 +5,7 @@ description: >
   This is a meta-schema that explains the format of API manifest yaml files
   under `api/*/index.yaml`.
 properties:
+  name: { type: 'string' }
   description: { type: 'string' }
   routes:
     type: array
@@ -29,20 +30,21 @@ properties:
             API description. Parsed as markdown, appears as API reference.
         requiredGlobalPrivilege:
           oneOf:
-            -
-              type: string
-            -
-              type: array
+            - type: string
+            - type: array
               items:
                 type: string
         requiredProjectPrivilege:
           oneOf:
-            -
-              type: string
-            -
-              type: array
+            - type: string
+            - type: array
               items:
                 type: string
+        forDebug:
+          type: boolean
+          description: >
+            This route will be loaded only when the API server is loaded
+            in the debug mode.
         expectedContentType:
           type: string
           default: 'application/json'

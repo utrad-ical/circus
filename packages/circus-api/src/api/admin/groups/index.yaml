@@ -1,5 +1,3 @@
-name: Group Administration
-scope: [manageServer]
 description: Manages user groups.
 routes:
   - verb: get

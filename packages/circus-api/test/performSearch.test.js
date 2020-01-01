@@ -21,7 +21,14 @@ describe('performSearch', function() {
       app.use(async (ctx, next) => {
         const q = ctx.request.query.q;
         const filter = q && q.length ? JSON.parse(q) : {};
-        await performSearch(items, filter, ctx, { defaultSort: { price: -1 } });
+        try {
+          await performSearch(items, filter, ctx, {
+            defaultSort: { price: -1 }
+          });
+        } catch (err) {
+          console.error(err.errors);
+          throw err;
+        }
       });
     });
     server = await test.listenKoa(app);

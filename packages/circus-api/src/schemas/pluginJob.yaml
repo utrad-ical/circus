@@ -21,10 +21,8 @@ properties:
     description: >
       Plug-in version which cs-core provides according to pluginId when queued.
       This has difference in case of plugin was updated in waiting.
-  # environment:
-  #  type: string
   userEmail:
-     type: string
+    type: string
   status:
     type: string
     description: >
@@ -46,13 +44,11 @@ properties:
     type: array
     minItems: 1
     items:
-      $ref:
-        pluginJobSeries
+      $ref: pluginJobSeries
   feedbacks:
     type: array
     items:
-      $ref:
-        pluginJobFeedback
+      $ref: pluginJobFeedback
   startedAt:
     description: >
       Job start time.
@@ -66,6 +62,8 @@ properties:
       - date: true
       - type: 'null'
   results:
-    description:
-      The result data of this plug-in job.
+    description: The result data of this plug-in job.
+    oneOf:
+      - type: object
+      - type: 'null'
 additionalProperties: false

@@ -512,8 +512,6 @@ describe('API', function() {
   });
 
   describe('plugin-jobs', function _pluginJobs() {
-    let jobId;
-
     after(async () => {
       await testHelper.flush();
     });
@@ -525,28 +523,6 @@ describe('API', function() {
     // 111.222.333.444.777: (236) [vega.org]
 
     it('should register a new plug-in job', async function _shouldRegisterANewPlugInJob() {
-      const priority = 123;
-      const pluginJobRequest = {
-        pluginId:
-          'd135e1fbb368e35f940ae8e6deb171e90273958dc3938de5a8237b73bb42d9c2',
-        series: [{ seriesUid: '111.222.333.444.555' }]
-      };
-
-      const res = await axios.request({
-        method: 'post',
-        url: server.url + 'api/plugin-jobs',
-        data: { ...pluginJobRequest, priority }
-      });
-      ({ jobId } = res.data);
-
-      assert.equal(res.status, 200);
-
-      const lastQueueItem = (await csCore.job.list()).slice(-1)[0];
-      assert.equal(priority, lastQueueItem.priority);
-      assert.equal(jobId, lastQueueItem.jobId);
-      assert.deepEqual(lastQueueItem.payload, pluginJobRequest);
-
-      // use partial volume
       const { status } = await axios.request({
         method: 'post',
         url: server.url + 'api/plugin-jobs',
@@ -565,7 +541,8 @@ describe('API', function() {
     });
 
     it('should reject invalid series request', async function _shouldRegisterANewPlugInJob() {
-      let { status } = await axios.request({
+      // Series image out of range
+      const res1 = await axios.request({
         method: 'post',
         url: server.url + 'api/plugin-jobs',
         data: {
@@ -573,59 +550,50 @@ describe('API', function() {
           series: [
             {
               seriesUid: '111.222.333.444.444',
-              partialVolumeDescriptor: {
-                start: 1,
-                end: 10,
-                delta: 2
-              }
+              partialVolumeDescriptor: { start: 1, end: 10, delta: 1 }
             }
           ],
           priority: 123
         }
       });
-      assert.equal(status, 404);
+      assert.equal(res1.status, 400);
 
-      ({ status } = await axios.request({
+      // Lacks partial volume descriptor
+      const res2 = await axios.request({
         method: 'post',
         url: server.url + 'api/plugin-jobs',
         data: {
           pluginId: 'circus-mock/empty',
-          series: [
-            {
-              seriesUid: '111.222.333.444.777'
-            }
-          ],
+          series: [{ seriesUid: '111.222.333.444.777' }],
           priority: 123
         }
-      }));
-      assert.equal(status, 404);
+      });
+      assert.equal(res2.status, 400);
     });
 
     it('should return a finished plug-in job', async function _shouldReturnAFinishedPlugInJob() {
       const res = await axios.request({
-        url: server.url + `api/plugin-jobs/${jobId}`
+        url: server.url + 'api/plugin-jobs/01dxgwv3k0medrvhdag4mpw9wa'
       });
-      assert.equal(res.data.jobId, jobId);
+      assert.equal(res.data.jobId, '01dxgwv3k0medrvhdag4mpw9wa');
       assert.equal(res.data.status, 'finished');
       assert.equal(res.status, 200);
     });
 
     it('should register a new feedback entry', async function _shouldRegisterANewFeedbackEntry() {
       const res = await axios.request({
-        url: server.url + `api/plugin-jobs/${jobId}/feedback`,
+        url:
+          server.url +
+          'api/plugin-jobs/01dxgwv3k0medrvhdag4mpw9wa/feedback/personal',
         method: 'post',
-        data: {
-          isConsensual: false,
-          data: { a: 100 },
-          actionLog: []
-        }
+        data: { lesionCandidates: [] }
       });
       assert.equal(res.status, 200);
     });
 
     it('should return a list of feedback entries', async function _shouldReturnAListOfFeedbackEntries() {
       const res = await axios.request({
-        url: server.url + `api/plugin-jobs/${jobId}/feedback`,
+        url: server.url + 'api/plugin-jobs/01dxgwv3k0medrvhdag4mpw9wa/feedback',
         method: 'get'
       });
       assert.equal(res.status, 200);

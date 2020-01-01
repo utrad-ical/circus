@@ -16,7 +16,7 @@ export const handlePost = ({ models, cs }) => {
     try {
       await fetchAccessibleSeries(models, ctx.userPrivileges, request.series);
     } catch (err) {
-      ctx.throw(status.NOT_FOUND, err); // Todo: Is status.BAD_REQUEST more better?
+      ctx.throw(status.BAD_REQUEST, err);
     }
 
     let plugin;

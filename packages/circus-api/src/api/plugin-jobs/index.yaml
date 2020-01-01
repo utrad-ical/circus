@@ -47,7 +47,7 @@ routes:
     path: /plugin-jobs/:jobId
     description: >
       Returns the detail of the specified plug-in job.
-    responseSchema: pluginJob
+    responseSchema: pluginJob|dbEntry
   - verb: post
     path: /plugin-jobs/:jobId/feedback/:mode
     description: >

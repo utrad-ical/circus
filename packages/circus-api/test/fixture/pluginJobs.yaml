@@ -1,5 +1,8 @@
-- jobId: abcde
+- jobId: 01dxgwv3k0medrvhdag4mpw9wa
   pluginId: abcdefghijkl
+  pluginName: foobar
+  pluginVersion: '1.2.5'
+  userEmail: circus@example.com
   status: finished
   series:
     - seriesUid: 1.2.3.4.5
@@ -12,8 +15,13 @@
         start: 10
         end: 1
         delta: -1
+  errorMessage: null
+  startedAt: { $date: '2018-01-01T12:00:00Z' }
+  finishedAt: { $date: '2018-01-01T12:01:00Z' }
+  feedbacks: []
+  results: {}
 
-- jobId: zyxwv
+- jobId: 01dxgwvcw65d9av37p2bsy57vb
   pluginId: zyxwvutsrqpo
   status: invalidated
   series:
@@ -22,8 +30,10 @@
         start: 1
         end: 10
         delta: 1
+  feedbacks: []
+  results: {}
 
-- jobId: vwxyz
+- jobId: 01dxgwvhwhyjt8hd4srsf9z4te
   pluginId: opqrstuvwxyz
   status: failed
   series:
@@ -32,3 +42,4 @@
         start: 1
         end: 10
         delta: 1
+  errorMessage: 'Something went wrong'

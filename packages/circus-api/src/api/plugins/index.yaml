@@ -5,7 +5,7 @@ routes:
   - verb: get
     path: /plugins/:pluginId
     description: Gets the specified plug-in definition.
-    responseSchema: plugin
+    responseSchema: plugin|dbEntry
   - verb: get
     path: /plugins
     handler: handleList

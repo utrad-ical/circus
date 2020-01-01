@@ -15,7 +15,6 @@ export default function errorHandler({ includeErrorDetails, logger }) {
       }
     } catch (err) {
       logger.trace(err);
-      logger.trace(err.errors);
       if (err instanceof Ajv.ValidationError) {
         // JSON validation error occurred.
         if (err.phase === 'response') {

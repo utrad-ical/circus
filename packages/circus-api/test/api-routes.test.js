@@ -512,10 +512,6 @@ describe('API', function() {
   });
 
   describe('plugin-jobs', function _pluginJobs() {
-    after(async () => {
-      await testHelper.flush();
-    });
-
     // (alice has sirius.org domain)
     // 111.222.333.444.444: (  1) [sirius.org]
     // 111.222.333.444.555: (150) [sirius.org]
@@ -642,121 +638,15 @@ describe('API', function() {
   });
 
   describe('admin/plugin-job-queue', function _adminPluginJobQueue() {
-    let url;
-    before(async () => {
-      url = server.url + 'api/admin/plugin-job-queue';
-      await testHelper.flush();
-    });
-
-    const fillQueue = len =>
-      new Array(len).fill(0).reduce(
-        (p, c, i) =>
-          p.then(async () => {
-            await testHelper.registerJob({
-              jobId: 'job-id-' + (1 + i).toString(),
-              pluginId: 'circus-mock/empty',
-              userEmail: 'alice.new.mail@example.com'
-            });
-          }),
-        Promise.resolve()
-      );
-
-    const check = async (expectedStates, params = {}) => {
-      const abbrs = {
-        q: 'in_queue',
-        p: 'processing',
-        f: 'finished',
-        // 'failed' (called never on current version)
-        // 'invalidated' (called never on current version)
-        e: 'error'
-      };
-      const flipAbbrs = {};
-      Object.keys(abbrs).forEach(a => (flipAbbrs[abbrs[a]] = a));
-
-      const res = await axios({ method: 'GET', url, params });
-      assert.equal(res.status, 200);
-      const fetchedStates = res.data.items.map(i => flipAbbrs[i.status]);
-
-      const stringify = states =>
-        states.length.toString() + JSON.stringify(states);
-
-      assert.equal(stringify(expectedStates), stringify(fetchedStates));
-      return res;
-    };
-
     it('should return the current queue list', async function _shouldReturnTheCurrentQueueList() {
-      await fillQueue(3);
-      await check(['q', 'q', 'q']);
-
-      await testHelper.tick();
-      await check(['p', 'q', 'q']);
-      await testHelper.tack(async () => {
-        throw new Error('TEST');
-      }); // finished as error
-      await check(['q', 'q']);
-
-      await testHelper.tick();
-      await check(['p', 'q']);
-      await testHelper.tack();
-      await check(['q']);
-
-      await testHelper.tick();
-      await check(['p']);
-      await testHelper.tack();
-      await check([]);
-
-      await testHelper.tick();
-      await check([]);
-      await testHelper.tack();
-      await check([]);
-
-      await testHelper.flush();
+      const res = await axios.get(server.url + 'api/admin/plugin-job-queue');
+      assert.equal(res.data.items.length, 1);
     });
-
-    it('should return the queues without finished states (finished, error)', async function _shouldReturnTheCurrentQueueList() {
-      await fillQueue(2);
-      await testHelper.tick();
-      await testHelper.tack(async () => {
-        throw new Error('TEST');
-      });
-
-      await testHelper.tick();
-      await testHelper.tack(async () => ({ hoge: 'piyo' }));
-
-      const queuesInMongo = await testHelper.jobListOverview();
-      assert.equal(2, queuesInMongo.length);
-      await check([]);
-      await testHelper.flush();
-    });
-
-    it('should return the items which is specified by page and limit', async function shouldReturnTheItemsWhichIsSpecifiedByPageAndLimit() {
-      await fillQueue(50);
-      await testHelper.tick();
-
-      await check(['p'].concat(new Array(9).fill('q')), { limit: 10, page: 1 });
-      await check(['q'].concat(new Array(9).fill('q')), { limit: 10, page: 2 });
-      await check(['p'].concat(new Array(29).fill('q')), {
-        limit: 30,
-        page: 1
-      });
-      const res = await check(['q'].concat(new Array(19).fill('q')), {
-        limit: 30,
-        page: 2
-      });
-      assert.equal(res.data.totalItems, 50);
-
-      await testHelper.flush();
-    });
-
-    it('should return the items which is specified by state', async function _shouldReturnTheCurrentQueueList() {
-      await fillQueue(5);
-      await testHelper.tick();
-
-      await check(['p', 'q'], { limit: 2, page: 1, state: 'all' });
-      await check(['q', 'q'], { limit: 2, page: 1, state: 'wait' });
-      await check(['p'], { limit: 2, page: 1, state: 'processing' });
-
-      await testHelper.flush();
+    it('should return a filtered queue list', async function _shouldReturnAFilteredQueueList() {
+      const res = await axios.get(
+        server.url + 'api/admin/plugin-job-queue?state=wait'
+      );
+      assert.equal(res.data.items.length, 0);
     });
   });
 

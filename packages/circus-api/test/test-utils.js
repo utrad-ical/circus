@@ -14,11 +14,15 @@ dotenv.config();
 
 configureLogger({
   appenders: {
-    memory: { type: 'recording' }
+    testLog: {
+      type: 'dateFile',
+      filename: path.join(__dirname, '..', 'store', 'logs', 'mocha.log'),
+      keepFileExt: true
+    }
   },
   categories: {
     default: {
-      appenders: ['memory'],
+      appenders: ['testLog'],
       level: 'ALL'
     }
   }

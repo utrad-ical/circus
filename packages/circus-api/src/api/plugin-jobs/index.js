@@ -6,6 +6,7 @@ import path from 'path';
 import fs from 'fs';
 import mime from 'mime';
 import { fetchAccessibleSeries } from '../../privilegeUtils';
+import duplicateJobExists from '../duplicateJobExists';
 
 export const handlePost = ({ models, cs }) => {
   return async (ctx, next) => {
@@ -24,6 +25,12 @@ export const handlePost = ({ models, cs }) => {
     } catch (err) {
       ctx.throw(status.NOT_FOUND, err);
     }
+
+    if (await duplicateJobExists(models, request))
+      ctx.throw(
+        status.BAD_REQUEST,
+        'There is a duplicate job that is already registered.'
+      );
 
     await cs.job.register(jobId, request, priority);
     await models.pluginJob.insert({

@@ -16,3 +16,4 @@ properties:
 additionalProperties: false
 required:
   - seriesUid
+  - partialVolumeDescriptor

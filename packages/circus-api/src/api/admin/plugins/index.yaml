@@ -5,13 +5,7 @@ routes:
   - verb: get
     path: /admin/plugins
     description: Gets the list of available plug-ins.
-    responseSchema:
-      type: object
-      properties:
-        items:
-          type: array
-          items:
-            $ref: plugin
+    responseSchema: plugin|searchResult
   - verb: put
     path: /admin/plugins/:pluginId
     requestSchema: plugin

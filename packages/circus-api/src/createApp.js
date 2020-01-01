@@ -94,7 +94,7 @@ export async function createDicomFileRepository(dicomPath) {
     : new MemoryDicomFileRepository({});
 }
 
-const makeCsCoreFromServiceLoader = async options => {
+export const makeCsCoreFromServiceLoader = async options => {
   const mongoUrl = process.env.CIRCUS_MONGO_URL || process.env.MONGO_URL;
   const configObj = {
     jobRunner: {
@@ -139,6 +139,7 @@ export default async function createApp(options = {}) {
   const {
     debug,
     db,
+    cs,
     fixUser,
     blobPath,
     corsOrigin,
@@ -165,8 +166,6 @@ export default async function createApp(options = {}) {
   const dicomImporter = utilityEnv
     ? new DicomImporter(dicomFileRepository, models, { utility: utilityEnv })
     : undefined;
-
-  const cs = await makeCsCoreFromServiceLoader(options);
 
   const { rs, volumeProvider } = await circusRs({
     logger,

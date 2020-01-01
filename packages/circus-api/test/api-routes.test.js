@@ -8,7 +8,7 @@ describe('API', function() {
   let server, axios, csCore, testHelper;
 
   before(async function() {
-    server = await test.setUpAppForTest('trace');
+    server = await test.setUpAppForTest();
     axios = server.axios.alice; // Alraedy includes access token for alice@example.com
     csCore = server.csCore;
     testHelper = server.testHelper;
@@ -73,11 +73,12 @@ describe('API', function() {
     });
 
     it('should update a group', async function _shouldUpdateAGroup() {
-      await axios.request({
+      const res1 = await axios.request({
         method: 'put',
         url: server.url + 'api/admin/groups/1',
         data: { groupName: 'root' }
       });
+      assert.equal(res1.status, 204);
       const res2 = await axios.get(server.url + 'api/admin/groups/1');
       assert.equal(res2.data.groupName, 'root');
     });
@@ -199,6 +200,7 @@ describe('API', function() {
   describe('admin/projects', function _adminProjects() {
     it('should return list of projects', async function _shouldReturnListOfProjects() {
       const res = await axios.get(server.url + 'api/admin/projects');
+      assert.equal(res.status, 200);
       assert.isArray(res.data.items);
       assert.isTrue(res.data.items.some(p => p.projectName === 'Lung nodules'));
     });
@@ -525,12 +527,9 @@ describe('API', function() {
     it('should register a new plug-in job', async function _shouldRegisterANewPlugInJob() {
       const priority = 123;
       const pluginJobRequest = {
-        pluginId: 'circus-mock/empty',
-        series: [
-          {
-            seriesUid: '111.222.333.444.555'
-          }
-        ]
+        pluginId:
+          'd135e1fbb368e35f940ae8e6deb171e90273958dc3938de5a8237b73bb42d9c2',
+        series: [{ seriesUid: '111.222.333.444.555' }]
       };
 
       const res = await axios.request({
@@ -552,15 +551,12 @@ describe('API', function() {
         method: 'post',
         url: server.url + 'api/plugin-jobs',
         data: {
-          pluginId: 'circus-mock/empty',
+          pluginId:
+            'd135e1fbb368e35f940ae8e6deb171e90273958dc3938de5a8237b73bb42d9c2',
           series: [
             {
               seriesUid: '111.222.333.444.555',
-              partialVolumeDescriptor: {
-                start: 25,
-                end: 85,
-                delta: 3
-              }
+              partialVolumeDescriptor: { start: 25, end: 85, delta: 3 }
             }
           ]
         }
@@ -606,8 +602,6 @@ describe('API', function() {
     });
 
     it('should return a finished plug-in job', async function _shouldReturnAFinishedPlugInJob() {
-      await testHelper.tick();
-      await testHelper.tack();
       const res = await axios.request({
         url: server.url + `api/plugin-jobs/${jobId}`
       });

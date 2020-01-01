@@ -10,7 +10,7 @@ routes:
     path: /admin/groups/:groupId
     requiredGlobalPrivilege: manageServer
     description: Retrieves the specified group.
-    responseSchema: group
+    responseSchema: group|dbEntry
   - verb: put
     path: /admin/groups/:groupId
     requestSchema: group

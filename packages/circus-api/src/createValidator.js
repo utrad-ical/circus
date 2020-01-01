@@ -75,6 +75,7 @@ export default async function createValidator(schemaRoot = defaultSchemaRoot) {
         allRequired: allRequiredScheama,
         allRequiredExcept: allRequiredScheama,
         only: onlySchema,
+        exclude: excludeSchema,
         searchResult: searchResultSchema,
         dbEntry: dbEntrySchema
       }[filterName];
@@ -123,6 +124,16 @@ export default async function createValidator(schemaRoot = defaultSchemaRoot) {
       properties,
       additionalProperties: false
     };
+  };
+
+  const excludeSchema = (schema, props) => {
+    if (!schema || !schema.properties) {
+      throw new TypeError('Unsupported JSON schema');
+    }
+    const propList = props.split(',').map(s => s.trim());
+    const properties = { ...schema.properties };
+    propList.forEach(key => delete properties[key]);
+    return { ...schema, properties };
   };
 
   const withDatesSchema = schema => {

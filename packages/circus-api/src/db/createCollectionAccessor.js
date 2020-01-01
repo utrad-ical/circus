@@ -165,7 +165,8 @@ export default function createCollectionAccessor(db, validator, opts) {
     }
     const updated = { ...original.value, ...updates, updatedAt: date };
     try {
-      await validator.validate(dbEntrySchema, updated);
+      const { _id, ...updatedWithoutId } = updated;
+      await validator.validate(dbEntrySchema, updatedWithoutId);
     } catch (err) {
       // validation failed, rollback
       await collection.findOneAndUpdate({ [key]: id }, original.value);

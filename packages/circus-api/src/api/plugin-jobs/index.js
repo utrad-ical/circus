@@ -22,7 +22,7 @@ export const handlePost = ({ models, cs }) => {
     try {
       plugin = await cs.plugin.get(request.pluginId);
     } catch (err) {
-      ctx.throw(status.NOT_IMPLEMENTED, err);
+      ctx.throw(status.NOT_FOUND, err);
     }
 
     await cs.job.register(jobId, request, priority);

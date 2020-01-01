@@ -66,9 +66,9 @@ export class TaskExecutor {
     return taskId;
   }
 
-  async progress(statusText, value, max) {
+  async progress(textStatus, value, max) {
     if (!this.taskId) throw new Error('Task not saved yet');
-    await this.models.task.modifyOne(this.taskId, { statusText, value, max });
+    await this.models.task.modifyOne(this.taskId, { textStatus, value, max });
   }
 
   async settle(success) {

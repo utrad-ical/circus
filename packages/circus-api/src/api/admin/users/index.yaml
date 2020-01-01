@@ -6,18 +6,12 @@ routes:
     requiredGlobalPrivilege: manageServer
     handler: handleSearch
     description: Retrieves the list of users.
-    responseSchema:
-      type: object
-      properties:
-        items:
-          type: array
-          items:
-            $ref: user
+    responseSchema: user|searchResult
   - verb: get
     path: /admin/users/:userEmail
     requiredGlobalPrivilege: manageServer
     description: Retrieves the specified user.
-    responseSchema: user
+    responseSchema: user|exclude password|dbEntry
   - verb: put
     path: /admin/users/:userEmail
     requestSchema: user

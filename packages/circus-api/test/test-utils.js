@@ -65,7 +65,7 @@ export function tearDownKoa(server) {
   });
 }
 
-export async function setUpAppForTest(logMode = 'off') {
+export async function setUpAppForTest() {
   const db = await connectMongo();
 
   await setUpMongoFixture(db, [
@@ -162,7 +162,7 @@ export async function setUpMongoFixture(db, collections) {
 
 function createMockCsCore(pluginJobsCollection) {
   let status = 'stopped';
-  let defs = mockPlugins();
+  let defs = loadMockPluginDefinitions();
   const jobs = [];
 
   const report = async (jobId, type, payload) => {
@@ -202,9 +202,9 @@ function createMockCsCore(pluginJobsCollection) {
       update: async newDefs => (defs = newDefs),
       list: async () => defs,
       get: async pluginId => {
-        const plugins = defs.filter(i => i.pluginId === pluginId);
-        if (plugins.length === 0) throw new Error('No such plugin');
-        return plugins.shift();
+        const plugin = defs.find(p => p.pluginId === pluginId);
+        if (!plugin) throw new Error('No such plugin');
+        return plugin;
       }
     },
     job: {
@@ -235,6 +235,7 @@ function createMockCsCore(pluginJobsCollection) {
       return jobs[0];
     }
   };
+
   const tack = async run => {
     const job = jobs.shift();
     if (job) {
@@ -249,10 +250,11 @@ function createMockCsCore(pluginJobsCollection) {
       }
     }
   };
+
   const flush = async () => {
     jobs.splice(0, jobs.length);
     await pluginJobsCollection.deleteMany({});
-    defs = mockPlugins();
+    defs = loadMockPluginDefinitions();
   };
 
   const registerJob = async ({
@@ -269,7 +271,7 @@ function createMockCsCore(pluginJobsCollection) {
         {
           seriesUid: new Array(5)
             .fill(0)
-            .map(i => (100 + Math.floor(Math.random() * 1000)).toString())
+            .map(() => (100 + Math.floor(Math.random() * 1000)).toString())
             .join('.')
         }
       ];
@@ -314,61 +316,7 @@ function createMockCsCore(pluginJobsCollection) {
   return { csCore, registerJob, tick, tack, flush, jobListOverview };
 }
 
-const mockPlugins = () => [
-  {
-    pluginId: 'circus-mock/empty',
-    pluginName: 'MOCK-EMPTY',
-    version: '1.0',
-    type: 'CAD',
-    dockerImage:
-      'd135e1fbb368e35f940ae8e6deb171e90273958dc3938de5a8237b73bb42d9c2'
-  },
-  {
-    pluginId: 'circus-mock/fails',
-    pluginName: 'MOCK-VALIDATION-FAILURE',
-    version: '1.0',
-    type: 'CAD',
-    dockerImage:
-      '74c50a99530ef149c16bc6f0cf71b987470282c54e436e9bec6da704f1fcac9c'
-  },
-  {
-    pluginId: 'circus-mock/succeeds',
-    pluginName: 'MOCK-SUCCEEDS',
-    version: '1.0',
-    type: 'CAD',
-    dockerImage:
-      'e2cf1a5f82d62f7b3bd02db78e51008f4f11f8b31aedc96bfd50f3d7c80ba6e6'
-  },
-  {
-    pluginId: 'circus-mock/timeout',
-    pluginName: 'MOCK-SUCCEEDS',
-    version: '1.0',
-    type: 'CAD',
-    dockerImage:
-      '918ea418b82e941242d8125375c28bfafa3077108f0df8f7acc8f99d331cf502'
-  },
-  {
-    pluginId: 'circus-mock/error',
-    pluginName: 'MOCK-ERROR',
-    version: '1.0',
-    type: 'CAD',
-    dockerImage:
-      '9cc56c14129d73930007a4978c7fb60900d7a5d77a29770117a7132dc3a81eaa'
-  },
-  {
-    pluginId: 'circus/mra_cad',
-    pluginName: 'MRA-CAD',
-    version: '2.12',
-    type: 'CAD',
-    dockerImage:
-      'e3f245078d839ea804e100ada6183edf864624a2859b2a8341a0721378f13f97'
-  },
-  {
-    pluginId: 'circus/lung_cad',
-    pluginName: 'LUNG-CAD',
-    version: '1.4',
-    type: 'CAD',
-    dockerImage:
-      '4c3bbd30ee5c0ebab258523c585a64e3c62879cdae4804ab5ac2abb0848045a1'
-  }
-];
+const loadMockPluginDefinitions = () => {
+  const fixtureFile = path.join(__dirname, 'fixture', 'pluginDefinitions.yaml');
+  return yaml(fs.readFileSync(fixtureFile, 'utf8'));
+};

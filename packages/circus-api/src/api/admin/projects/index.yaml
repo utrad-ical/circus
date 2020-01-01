@@ -6,18 +6,12 @@ routes:
     requiredGlobalPrivilege: manageServer
     handler: handleSearch
     description: Retrieves the list of projects.
-    responseSchema:
-      type: object
-      properties:
-        items:
-          type: array
-          items:
-            $ref: project
+    responseSchema: project|searchResult
   - verb: get
     path: /admin/projects/:projectId
     requiredGlobalPrivilege: manageServer
     description: Retrieves the specified project.
-    responseSchema: project
+    responseSchema: project|dbEntry
   - verb: put
     path: /admin/projects/:projectId
     requiredGlobalPrivilege: manageServer

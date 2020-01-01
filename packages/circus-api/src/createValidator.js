@@ -162,7 +162,6 @@ export default async function createValidator(schemaRoot = defaultSchemaRoot) {
 
   const sharedOpts = {
     allErrors: true,
-    removeAdditional: true,
     async: 'es7',
     format: 'full',
     formats: customFormats

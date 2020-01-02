@@ -10,5 +10,5 @@ module.exports = {
     '@babel/plugin-syntax-async-generators',
     'babel-plugin-dynamic-import-node'
   ],
-  sourceMaps: 'inline'
+  sourceMaps: true
 };

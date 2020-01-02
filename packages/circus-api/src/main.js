@@ -143,7 +143,10 @@ const main = async () => {
     logger.warn(`CIRCUS API will start using ${fixUser} as the fixed user!`);
   }
 
-  const cs = await makeCsCoreFromServiceLoader(serverOptions);
+  const cs = await makeCsCoreFromServiceLoader({
+    pluginResultsPath,
+    dicomPath
+  });
 
   const serverOptions = {
     debug: debug || process.env.NODE_ENV !== 'production',

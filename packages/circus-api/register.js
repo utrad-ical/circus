@@ -6,6 +6,8 @@ const path = require('path');
 require('@babel/register')({
   ignore: [
     filePath => {
+      // We will transpile TypeScript files
+      // in circus-rs and circus-cs-core modules
       const rel = path.relative(__dirname, filePath).replace(/\\/g, '/');
       if (
         /^node_modules\/@utrad-ical\/(circus-rs|circus-cs-core)\/src/.test(rel)

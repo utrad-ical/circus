@@ -1,15 +1,15 @@
 import glob from 'glob-promise';
 import * as path from 'path';
 
-export default async function scanMigrationFiles() {
-  const results = [];
+const scanMigrationFiles = async () => {
+  const results: string[] = [];
   const files = await glob(
     path.resolve(__dirname, '../scripts/migrations', '*')
   );
   files.forEach(file => {
     try {
       const base = path.basename(file);
-      const rev = parseInt(/^(\d+)/.exec(base)[0], 10);
+      const rev = parseInt(/^(\d+)/.exec(base)![0], 10);
       if (rev <= 0) throw new RangeError('rev: ' + rev);
       results[rev] = file;
     } catch (err) {
@@ -20,4 +20,6 @@ export default async function scanMigrationFiles() {
     throw new Error('Migration files are not named sequentially.');
   }
   return results;
-}
+};
+
+export default scanMigrationFiles;

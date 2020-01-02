@@ -64,6 +64,8 @@
     "ulid": "^2.3.0"
   },
   "devDependencies": {
+    "@types/fs-extra": "^8.0.1",
+    "@types/jszip": "^3.1.6",
     "chai": "^4.1.2",
     "eslint": "^5.7.0",
     "form-data": "^2.3.2",
@@ -71,7 +73,7 @@
     "prettier": "^1.19.1"
   },
   "nodemonConfig": {
-    "ext": "js,mjs,json,yaml"
+    "ext": "js,mjs,ts,json,yaml"
   },
   "prettier": {
     "singleQuote": true

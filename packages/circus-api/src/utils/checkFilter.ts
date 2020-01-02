@@ -1,7 +1,7 @@
-const isPlainObject = obj =>
+const isPlainObject = (obj: any): obj is { [key: string]: any } =>
   Object.prototype.toString.call(obj) === '[object Object]';
 
-const isScalarOrDate = val => {
+const isScalarOrDate = (val: any): val is string | number | boolean => {
   const t = typeof val;
   return (
     t === 'string' || t === 'number' || t === 'boolean' || val instanceof Date
@@ -11,12 +11,15 @@ const isScalarOrDate = val => {
 /**
  * Checks if the given object is an acceptable mongodb filter.
  * The "value" part may include a `Date` object.
- * @param {object} filter The value to check.
- * @param {string[]} fields List of accepted fields.
- * @returns {boolean} `true` if valid.
+ * @param filter The value to check.
+ * @param fields List of accepted fields.
+ * @returns `true` if valid.
  */
-const checkFilter = (filter, fields) => {
-  const checkKeyVal = (key, value) => {
+const checkFilter: (filter: object, fields: string[]) => boolean = (
+  filter,
+  fields
+) => {
+  const checkKeyVal = (key: string, value: any) => {
     if (key === '$and' || key === '$or') {
       if (!Array.isArray(value)) return false;
       return value.every(item => checkFilter(item, fields));

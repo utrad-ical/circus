@@ -6,10 +6,10 @@ import semver from 'semver';
 import * as path from 'path';
 import { isDicomUid } from '@utrad-ical/circus-lib/lib/validation';
 
-const loadSchemaFiles = async schemaRoot => {
+const loadSchemaFiles = async (schemaRoot: string) => {
   // Search all the schema YAML files under the root directory
   const schemaFiles = await glob(path.join(schemaRoot + '/*.yaml'));
-  const schemas = {};
+  const schemas: { [name: string]: any } = {};
   for (const schemaFile of schemaFiles) {
     const basename = path.basename(schemaFile, '.yaml');
     const schemaData = yaml.safeLoad(await fs.readFile(schemaFile, 'utf8'));
@@ -31,7 +31,9 @@ const loadSchemaFiles = async schemaRoot => {
 // Some custom formats
 const intOrRange = '((0|[1-9][0-9]*)|(0|[1-9][0-9]*)-(0|[1-9][0-9]*))';
 
-const customFormats = {
+const customFormats: {
+  [formatName: string]: ((s: string) => boolean) | RegExp;
+} = {
   dicomUid: s => isDicomUid(s, false),
   multiIntegerRange: new RegExp(`^${intOrRange}(,${intOrRange})*$`),
   color: /^\#[0-9a-f]{6}$/,
@@ -46,10 +48,12 @@ const customFormats = {
     }
   },
   dockerId: s => /^[a-z0-9]{64}$/.test(s),
-  semver: s => semver.valid(s)
+  semver: s => semver.valid(s) !== null
 };
 
 const defaultSchemaRoot = path.join(__dirname, 'schemas');
+
+type SchemaConverter = (schema: any, ...params: string[]) => any;
 
 /**
  * Creates the validator wrapping AJV instance.
@@ -61,7 +65,7 @@ export default async function createValidator(schemaRoot = defaultSchemaRoot) {
   const schemas = await loadSchemaFiles(schemaRoot);
   if (!Object.keys(schemas).length) console.warn('Schema directory is empty');
 
-  const filterSchema = schemaDef => {
+  const filterSchema = (schemaDef: string | object) => {
     if (typeof schemaDef === 'object') return schemaDef;
     if (typeof schemaDef !== 'string') throw new TypeError('Invalid schema');
 
@@ -71,14 +75,14 @@ export default async function createValidator(schemaRoot = defaultSchemaRoot) {
 
     for (const filterDef of filterDefs) {
       const [filterName, ...args] = filterDef.trim().split(/\s+/);
-      const filter = {
+      const filter = ({
         allRequired: allRequiredScheama,
         allRequiredExcept: allRequiredScheama,
         only: onlySchema,
         exclude: excludeSchema,
         searchResult: searchResultSchema,
         dbEntry: dbEntrySchema
-      }[filterName];
+      } as { [name: string]: SchemaConverter })[filterName];
       schema = filter.call(null, schema, ...args);
     }
     return schema;
@@ -90,7 +94,7 @@ export default async function createValidator(schemaRoot = defaultSchemaRoot) {
    * The input JSON schema must be an object validator at the root level,
    * and must have a `properties` keyword.
    */
-  const allRequiredScheama = (schema, except = '') => {
+  const allRequiredScheama: SchemaConverter = (schema, except = '') => {
     if (!schema || !schema.properties) {
       throw new TypeError('Unsupported JSON schema');
     }
@@ -110,12 +114,12 @@ export default async function createValidator(schemaRoot = defaultSchemaRoot) {
    * The input JSON schema must be an object validator at the root level,
    * and must have a `properties` keyword.
    */
-  const onlySchema = (schema, props) => {
+  const onlySchema: SchemaConverter = (schema, props: string) => {
     if (!schema || !schema.properties) {
       throw new TypeError('Unsupported JSON schema');
     }
     const propList = props.split(',').map(s => s.trim());
-    const properties = {};
+    const properties: any = {};
     propList.forEach(key => {
       properties[key] = schema.properties[key];
     });
@@ -126,7 +130,7 @@ export default async function createValidator(schemaRoot = defaultSchemaRoot) {
     };
   };
 
-  const excludeSchema = (schema, props) => {
+  const excludeSchema: SchemaConverter = (schema, props: string) => {
     if (!schema || !schema.properties) {
       throw new TypeError('Unsupported JSON schema');
     }
@@ -136,7 +140,7 @@ export default async function createValidator(schemaRoot = defaultSchemaRoot) {
     return { ...schema, properties };
   };
 
-  const withDatesSchema = schema => {
+  const withDatesSchema: SchemaConverter = schema => {
     if (!schema || !schema.properties) {
       throw new TypeError('Unsupported JSON schema');
     }
@@ -151,7 +155,7 @@ export default async function createValidator(schemaRoot = defaultSchemaRoot) {
     };
   };
 
-  const searchResultSchema = schema => {
+  const searchResultSchema: SchemaConverter = schema => {
     return {
       $async: true,
       type: 'object',
@@ -167,7 +171,7 @@ export default async function createValidator(schemaRoot = defaultSchemaRoot) {
     };
   };
 
-  const dbEntrySchema = schema => {
+  const dbEntrySchema: SchemaConverter = schema => {
     return withDatesSchema(allRequiredScheama(schema));
   };
 
@@ -178,40 +182,40 @@ export default async function createValidator(schemaRoot = defaultSchemaRoot) {
     formats: customFormats
   };
 
-  function toDate(
+  const toDate: Ajv.SchemaValidateFunction = (
     schema,
     data,
     parentSchema,
     path,
     parentData,
     parentDataProperty
-  ) {
+  ) => {
     const isoRegex = /(\d{4})-?(\d{2})-?(\d{2})([T ](\d{2})(:?(\d{2})(:?(\d{2}(\.\d+)?))?)?(Z|([+-])(\d{2}):?(\d{2})?)?)?/;
     if (isoRegex.test(data)) {
-      parentData[parentDataProperty] = new Date(data);
+      (parentData as any)[parentDataProperty!] = new Date(data);
       return true;
     } else {
       return false;
     }
-  }
+  };
 
-  function fromDate(
+  const fromDate: Ajv.SchemaValidateFunction = (
     schema,
     data,
     parentSchema,
     path,
     parentData,
     parentDataProperty
-  ) {
+  ) => {
     if (data instanceof Date) {
-      parentData[parentDataProperty] = data.toISOString();
+      (parentData as any)[parentDataProperty!] = data.toISOString();
       return true;
     } else {
       return false;
     }
-  }
+  };
 
-  function checkDate(schema, data) {
+  function checkDate(schema: any, data: any) {
     return data instanceof Date;
   }
 
@@ -239,18 +243,19 @@ export default async function createValidator(schemaRoot = defaultSchemaRoot) {
 
   // We return an object that wraps the two Ajv instances.
   return {
-    validate: async (schema, data, mode = 'default') => {
+    validate: async (schema: any, data: any, mode = 'default') => {
       const theSchema = filterSchema(schema);
-      const validatorToUse = {
+      const validators: { [mode: string]: Ajv.Ajv } = {
         default: validator,
         toDate: toDateValidator,
         fromDate: fromDateValidator,
         fillDefaults: fillDefaultsValidator
-      }[mode];
+      };
+      const validatorToUse = validators[mode];
       data = await validatorToUse.validate(theSchema, data);
       return data;
     },
-    getSchema: key => {
+    getSchema: (key: string) => {
       return validator.getSchema(key);
     },
     filterSchema

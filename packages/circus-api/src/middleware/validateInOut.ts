@@ -1,7 +1,18 @@
+import { Validator } from '../createValidator';
+import koa from 'koa';
+
+interface Options {
+  requestSchema?: object | string;
+  responseSchema?: object | string;
+}
+
 /**
  * Creates a Koa middleware that checks request and response with schema.
  */
-export default function validateInOut(validator, options = {}) {
+const validateInOut: (
+  validator: Validator,
+  options: Options
+) => koa.Middleware = (validator, options = {}) => {
   let { requestSchema, responseSchema } = options;
 
   if (requestSchema && typeof requestSchema === 'object') {
@@ -38,4 +49,6 @@ export default function validateInOut(validator, options = {}) {
       }
     }
   };
-}
+};
+
+export default validateInOut;

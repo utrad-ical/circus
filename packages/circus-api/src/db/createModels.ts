@@ -46,3 +46,5 @@ export default function createModels(db: mongo.Db, validator: Validator) {
     [key in CollectionNames]: CollectionAccessor;
   };
 }
+
+export type Models = ReturnType<typeof createModels>;

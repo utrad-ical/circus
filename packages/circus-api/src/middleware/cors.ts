@@ -1,7 +1,9 @@
+import koa from 'koa';
+
 /**
  * Simple middleware to append CORS response header.
  */
-export default function cors(origin = '*') {
+const cors: (origin: string) => koa.Middleware = (origin = '*') => {
   return async function cors(ctx, next) {
     ctx.response.set('Access-Control-Allow-Origin', origin);
     ctx.response.set(
@@ -16,4 +18,6 @@ export default function cors(origin = '*') {
     ctx.response.set('Access-Control-Max-Age', '86400');
     await next();
   };
-}
+};
+
+export default cors;

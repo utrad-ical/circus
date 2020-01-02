@@ -1,11 +1,20 @@
 import Ajv from 'ajv';
 import status from 'http-status';
+import koa from 'koa';
+
+interface Options {
+  includeErrorDetails: boolean;
+  logger: any;
+}
 
 /**
  * Creates an error handler middleware that always outputs JSON
  * as a HTTP response regardless of the cause of the error.
  */
-export default function errorHandler({ includeErrorDetails, logger }) {
+const errorHandler: (options: Options) => koa.Middleware = ({
+  includeErrorDetails,
+  logger
+}) => {
   return async function errorHandler(ctx, next) {
     try {
       logger.trace('Request', ctx.request.method, ctx.request.path);
@@ -65,4 +74,6 @@ export default function errorHandler({ includeErrorDetails, logger }) {
       }
     }
   };
-}
+};
+
+export default errorHandler;

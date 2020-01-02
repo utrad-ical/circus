@@ -10,4 +10,9 @@ interface Error {
    * The HTTP status code representing this error.
    */
   status?: number;
+
+  /**
+   * Indicates when a validation error happened.
+   */
+  phase?: 'response' | 'request';
 }

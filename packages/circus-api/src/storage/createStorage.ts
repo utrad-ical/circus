@@ -3,10 +3,11 @@ import memoryStorage from './memoryStorage';
 
 /**
  * Provides simple asynchronous key-value storage.
- * @param {'local'|'memory'} type
- * @param {object} params
  */
-export default async function createStorage(type, params = {}) {
+export default async function createStorage(
+  type: 'local' | 'memory',
+  params: any = {}
+) {
   switch (type) {
     case 'local':
       return await localStorage(params);

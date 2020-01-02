@@ -17,7 +17,7 @@ type CollectionNames =
   | 'plugin'
   | 'pluginJob';
 
-export default function createModels(db: mongo.Db, validator: Validator) {
+const createModels = (db: mongo.Db, validator: Validator) => {
   const modelDefinitions: {
     [key in CollectionNames]: { col: string; pk: string };
   } = {
@@ -42,9 +42,11 @@ export default function createModels(db: mongo.Db, validator: Validator) {
       primaryKey: def.pk
     });
   });
-  return models as {
-    [key in CollectionNames]: CollectionAccessor;
-  };
-}
+  return models as Models;
+};
 
-export type Models = ReturnType<typeof createModels>;
+export default createModels;
+
+export type Models = {
+  [key in CollectionNames]: CollectionAccessor;
+};

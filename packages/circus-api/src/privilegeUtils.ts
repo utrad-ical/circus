@@ -1,12 +1,16 @@
 import MultiRange from 'multi-integer-range';
+import { Models } from './db/createModels';
+import { SeriesEntry } from './typings/circus';
 
 /**
  * Calculates the set of privileges of the specified user.
  */
-export async function determineUserAccessInfo(models, user) {
-  const globalPrivileges = {};
-  const domains = {};
-  const accessibleProjects = {};
+export const determineUserAccessInfo = async (models: Models, user: any) => {
+  const globalPrivileges: { [priv: string]: boolean } = {};
+  const domains: { [domain: string]: boolean } = {};
+  const accessibleProjects: {
+    [pid: string]: { projectId: string; roles: any; project: any };
+  } = {};
   for (const groupId of user.groups) {
     const group = await models.group.findByIdOrFail(groupId);
     for (const priv of group.privileges) {
@@ -27,7 +31,8 @@ export async function determineUserAccessInfo(models, user) {
         if (!(pId in accessibleProjects)) {
           accessibleProjects[pId] = {
             projectId: pId,
-            roles: {}
+            roles: {},
+            project: null
           };
         }
         accessibleProjects[pId].roles[role] = true;
@@ -44,12 +49,16 @@ export async function determineUserAccessInfo(models, user) {
     globalPrivileges: Object.keys(globalPrivileges),
     accessibleProjects: Object.values(accessibleProjects)
   };
-}
+};
 
 /**
  * Check domain and image range for each series.
  */
-export async function fetchAccessibleSeries(models, userPrivileges, series) {
+export const fetchAccessibleSeries = async (
+  models: Models,
+  userPrivileges: any,
+  series: SeriesEntry[]
+) => {
   const seriesData = [];
 
   for (const seriesEntry of series) {
@@ -83,13 +92,11 @@ export async function fetchAccessibleSeries(models, userPrivileges, series) {
   }
 
   return seriesData;
-}
+};
 
-export function globalPrivileges() {
-  return [
-    { privilege: 'createProject', caption: 'Create Project' },
-    { privilege: 'deleteProject', caption: 'Delete Project' },
-    { privilege: 'manageServer', caption: 'Manage Server' },
-    { privilege: 'personalInfoView', caption: 'View Personal Info' }
-  ];
-}
+export const globalPrivileges = () => [
+  { privilege: 'createProject', caption: 'Create Project' },
+  { privilege: 'deleteProject', caption: 'Delete Project' },
+  { privilege: 'manageServer', caption: 'Manage Server' },
+  { privilege: 'personalInfoView', caption: 'View Personal Info' }
+];

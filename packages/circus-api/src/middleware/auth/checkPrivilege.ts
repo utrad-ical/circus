@@ -1,14 +1,19 @@
 import status from 'http-status';
+import { Models } from '../../db/createModels';
+import { CircusMiddeware } from '../../typings/middlewares';
 
-function wrap(data) {
+const wrap = (data: any) => {
   if (!data) return undefined;
   return Array.isArray(data) ? data : [data];
-}
+};
 
 /**
  * Return a middleware that checks various kinds of privilege of the current user.
  */
-export default function checkPrivilege({ models }, route) {
+const checkPrivilege: (
+  deps: { models: Models },
+  route: any
+) => CircusMiddeware = ({ models }, route) => {
   const requiredGlobalPrivilege = wrap(route.requiredGlobalPrivilege);
   const requiredProjectPrivilege = wrap(route.requiredProjectPrivilege);
 
@@ -27,7 +32,7 @@ export default function checkPrivilege({ models }, route) {
     }
 
     if (requiredProjectPrivilege) {
-      let projectId;
+      let projectId: string;
 
       // Check project privilege either via caseId or directly via projectId
       if (ctx.params.caseId) {
@@ -42,14 +47,14 @@ export default function checkPrivilege({ models }, route) {
           'No project or case specified to check project privilege.'
         );
       }
-      ctx.project = await models.project.findById(projectId);
+      ctx.project = await models.project.findById(projectId!);
 
       const { accessibleProjects } = ctx.userPrivileges;
       let ok = true;
       const project = accessibleProjects.find(p => p.projectId === projectId);
       if (project) {
         ok = requiredProjectPrivilege.every(rp =>
-          project.roles.some(r => r === rp)
+          project.roles.some((r: any) => r === rp)
         );
       } else {
         ok = false;
@@ -66,4 +71,6 @@ export default function checkPrivilege({ models }, route) {
 
     await next();
   };
-}
+};
+
+export default checkPrivilege;

@@ -114,12 +114,16 @@ export async function tearDownAppForTest(testServer) {
   if (testServer.dbConnection) await testServer.dbConnection.close();
 }
 
-export async function asyncThrows(funcOrPromise, type) {
+export async function asyncThrows(funcOrPromise, typeOrMessage) {
   try {
     await (funcOrPromise instanceof Promise ? funcOrPromise : funcOrPromise());
   } catch (err) {
-    if (type) {
-      assert.instanceOf(err, type);
+    if (typeof typeOrMessage === 'function') {
+      assert.instanceOf(err, typeOrMessage);
+    } else if (typeOrMessage instanceof RegExp) {
+      assert.match(err.message, typeOrMessage);
+    } else if (typeof typeOrMessage === 'string') {
+      assert.include(err.message, typeOrMessage);
     }
     return;
   }

@@ -1,9 +1,21 @@
 import status from 'http-status';
+import mongo from 'mongodb';
+import { Validator } from '../createValidator';
+
+type CursorOptions = {
+  sort?: object;
+  limit?: number;
+  skip?: number;
+};
 
 /**
  * Basic wrapper for Mongo collection that performs validation tasks.
  */
-export default function createCollectionAccessor(db, validator, opts) {
+const createCollectionAccessor = (
+  db: mongo.Db,
+  validator: Validator,
+  opts: { schema: object | string; collectionName: string; primaryKey: string }
+) => {
   const { schema, collectionName, primaryKey } = opts;
   const collection = db.collection(collectionName);
 
@@ -12,12 +24,12 @@ export default function createCollectionAccessor(db, validator, opts) {
   /**
    * Inserts a single document after validation succeeds.
    */
-  async function insert(data) {
+  const insert = async (data: object) => {
     const date = new Date();
     const inserting = { ...data, createdAt: date, updatedAt: date };
     await validator.validate(dbEntrySchema, inserting);
     return await collection.insertOne(inserting);
-  }
+  };
 
   /**
    * Upserts a single document after validation succeeds.
@@ -25,7 +37,7 @@ export default function createCollectionAccessor(db, validator, opts) {
    * @param {string|number} id The primary key.
    * @param {object} data The data to upsert (excluding the id)
    */
-  async function upsert(id, data) {
+  const upsert = async (id: string | number, data: object) => {
     const date = new Date();
     const upserting = { createdAt: date, updatedAt: date, ...data };
     await validator.validate(dbEntrySchema, { [primaryKey]: id, ...upserting });
@@ -34,12 +46,12 @@ export default function createCollectionAccessor(db, validator, opts) {
       { $set: upserting },
       { upsert: true }
     );
-  }
+  };
 
   /**
    * Inserts multiple documents after validation succeeds for each document.
    */
-  async function insertMany(data) {
+  const insertMany = async (data: object[]) => {
     const documents = [];
     const date = new Date();
     for (const doc of data) {
@@ -48,13 +60,13 @@ export default function createCollectionAccessor(db, validator, opts) {
       documents.push(inserting);
     }
     return await collection.insertMany(documents);
-  }
+  };
 
   /**
    * Fetches documents that matches the given query as an array.
    * The `_id` field will not be included.
    */
-  async function findAll(query, options = {}) {
+  async function findAll(query: object, options: CursorOptions = {}) {
     const cursor = findAsCursor(query, options);
     const array = [];
     while (await cursor.hasNext()) {
@@ -68,7 +80,7 @@ export default function createCollectionAccessor(db, validator, opts) {
    * Validation is performed for each document.
    * The `_id` field will not be included.
    */
-  function findAsCursor(query, options = {}) {
+  const findAsCursor = (query: object, options: CursorOptions = {}) => {
     const { sort, limit, skip } = options;
     let cursor = collection.find(query).project({ _id: 0 });
     if (sort) cursor = cursor.sort(sort);
@@ -83,14 +95,14 @@ export default function createCollectionAccessor(db, validator, opts) {
       hasNext: () => cursor.hasNext(),
       count: () => cursor.count()
     };
-  }
+  };
 
   /**
    * Provides direct access to MongoDB's aggregation framework.
    * Use this sparingly becuse this breaks encapsulation.
    * Validation is not performed.
    */
-  async function aggregate(pipeline) {
+  async function aggregate(pipeline: object[]) {
     const cursor = await aggregateAsCursor(pipeline);
     const array = [];
     while (await cursor.hasNext()) {
@@ -104,14 +116,14 @@ export default function createCollectionAccessor(db, validator, opts) {
    * Use this sparingly becuse this breaks encapsulation.
    * Validation is not performed.
    */
-  async function aggregateAsCursor(pipeline) {
+  async function aggregateAsCursor(pipeline: object[]) {
     return collection.aggregate(pipeline);
   }
 
   /**
    * Fetches the single document that matches the primary key.
    */
-  async function findById(id) {
+  async function findById(id: number | string) {
     const key = primaryKey ? primaryKey : '_id';
     const docs = await collection
       .find({ [key]: id })
@@ -129,7 +141,7 @@ export default function createCollectionAccessor(db, validator, opts) {
    * Fetches the single document by the primary key.
    * Throws an error with 404 status if nothing found.
    */
-  async function findByIdOrFail(id) {
+  async function findByIdOrFail(id: number | string) {
     const result = await findById(id);
     if (result === undefined) {
       const err = new Error(`The requested ${schema} was not found.`);
@@ -143,7 +155,7 @@ export default function createCollectionAccessor(db, validator, opts) {
   /**
    * Modifies the document by the primary key.
    */
-  async function modifyOne(id, updates) {
+  async function modifyOne(id: string, updates: object) {
     const key = primaryKey ? primaryKey : '_id';
     const date = new Date();
     if (key in updates) {
@@ -183,7 +195,7 @@ export default function createCollectionAccessor(db, validator, opts) {
       { key: collectionName },
       { $inc: { value: 1 }, $set: { updatedAt: date } },
       {
-        upsert: 1,
+        upsert: true,
         projection: { _id: false, value: true },
         returnOriginal: false
       }
@@ -202,14 +214,14 @@ export default function createCollectionAccessor(db, validator, opts) {
   }
 
   // These methods are exposed as-is for now
-  const passthrough = ['find', 'deleteMany', 'deleteOne'];
-  const boundPassthrough = {};
-  passthrough.forEach(method => {
-    boundPassthrough[method] = collection[method].bind(collection);
-  });
+  const find = collection.find.bind(collection);
+  const deleteMany = collection.deleteMany.bind(collection);
+  const deleteOne = collection.deleteOne.bind(collection);
 
   return {
-    ...boundPassthrough,
+    find,
+    deleteMany,
+    deleteOne,
     findAll,
     findAsCursor,
     findById,
@@ -220,8 +232,9 @@ export default function createCollectionAccessor(db, validator, opts) {
     insertMany,
     modifyOne,
     newSequentialId,
-    collectionName() {
-      return collectionName;
-    }
+    collectionName: () => collectionName
   };
-}
+};
+
+export default createCollectionAccessor;
+export type CollectionAccessor = ReturnType<typeof createCollectionAccessor>;

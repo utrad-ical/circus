@@ -59,9 +59,8 @@ type SchemaConverter = (schema: any, ...params: string[]) => any;
  * Creates the validator wrapping AJV instance.
  * This validator knows all the schemas under the 'schemas' directory
  * and can be used throughtout the API server.
- * The resulting object has two similar methods, `validate` and `validateWithDefaults`.
  */
-export default async function createValidator(schemaRoot = defaultSchemaRoot) {
+const createValidator = async (schemaRoot = defaultSchemaRoot) => {
   const schemas = await loadSchemaFiles(schemaRoot);
   if (!Object.keys(schemas).length) console.warn('Schema directory is empty');
 
@@ -260,4 +259,12 @@ export default async function createValidator(schemaRoot = defaultSchemaRoot) {
     },
     filterSchema
   };
-}
+};
+
+export default createValidator;
+
+export type Validator = ReturnType<typeof createValidator> extends Promise<
+  infer T
+>
+  ? T // trick to get the Promise's resolving type
+  : never;

@@ -30,7 +30,7 @@ describe('createLocker', function() {
     await test.asyncThrows(async function() {
       await locker.lock('sapphire');
       await locker.lock('sapphire');
-    });
+    }, 'Resource busy');
   });
 
   it('should not fail with a zombie lock', async function() {

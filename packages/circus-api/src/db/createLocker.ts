@@ -1,4 +1,5 @@
 import randomstring from 'randomstring';
+import mongo from 'mongodb';
 
 /**
  * Provides dummy DB locking functionality.
@@ -16,14 +17,14 @@ import randomstring from 'randomstring';
  *   await locker.unlock(id);
  * }
  */
-export default async function createLocker(
-  db,
+const createLocker = (
+  db: mongo.Db,
   collectionName = 'locks',
   timeout = 300000
-) {
+) => {
   db.collection(collectionName).createIndex({ target: 1 }, { unique: true });
 
-  async function lock(target) {
+  const lock = async (target: string) => {
     if (typeof target !== 'string' || !target.length) {
       throw new TypeError('Lock target must be string');
     }
@@ -31,32 +32,31 @@ export default async function createLocker(
     const minTime = new Date(now.getTime() - timeout);
 
     const myId = randomstring.generate({ length: 12, charset: 'hex' });
-    const res = await db
-      .collection(collectionName)
-      .bulkWrite([
-        { deleteMany: { filter: { target, createdAt: { $lt: minTime } } } },
-        { insertOne: { document: { target, myId, createdAt: now } } }
-      ]);
-    // Check the raw bulkWrite result and see if there is any error
-    const errors = res.getRawResponse().writeErrors;
-    if (errors.length) {
-      if (errors[0].code === 11000) {
+    try {
+      await db
+        .collection(collectionName)
+        .bulkWrite([
+          { deleteMany: { filter: { target, createdAt: { $lt: minTime } } } },
+          { insertOne: { document: { target, myId, createdAt: now } } }
+        ]);
+    } catch (err) {
+      if (err.code === 11000) {
         throw new Error('Resource busy.');
       } else {
-        throw new Error('BulkWrite error');
+        throw new Error('BulkWrite error.');
       }
     }
 
     return myId;
-  }
+  };
 
-  async function unlock(id) {
+  const unlock = async (id: string) =>
     await db.collection(collectionName).deleteMany({ myId: id });
-  }
 
-  async function unlockAll(target) {
+  const unlockAll = async (target: string) =>
     await db.collection(collectionName).deleteMany({ target });
-  }
 
   return { lock, unlock, unlockAll };
-}
+};
+
+export default createLocker;

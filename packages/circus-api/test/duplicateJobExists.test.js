@@ -5,17 +5,17 @@ import { assert } from 'chai';
 import duplicateJobExists from '../src/api/duplicateJobExists';
 
 describe('duplicateJobExists', () => {
-  let db, models;
+  let db, dbConnection, models;
 
   before(async () => {
-    db = await test.connectMongo();
+    ({ db, dbConnection } = await test.connectMongo());
     await test.setUpMongoFixture(db, ['pluginJobs']);
     const validator = await createValidator();
     models = createModels(db, validator);
   });
 
   after(async () => {
-    await db.close();
+    await dbConnection.close();
   });
 
   const makeBaseRequest = () => ({

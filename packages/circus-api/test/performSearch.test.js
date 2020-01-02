@@ -6,10 +6,10 @@ import { assert } from 'chai';
 import axios from 'axios';
 
 describe('performSearch', function() {
-  let db, server;
+  let db, dbConnection, server;
 
   before(async function() {
-    db = await test.connectMongo();
+    ({ db, dbConnection } = await test.connectMongo());
     await test.setUpMongoFixture(db, ['items']);
     const app = await test.setUpKoa(async app => {
       const validator = await createValidator(__dirname + '/test-schemas');
@@ -36,7 +36,7 @@ describe('performSearch', function() {
 
   after(async function() {
     await test.tearDownKoa(server);
-    await db.close();
+    await dbConnection.close();
   });
 
   async function search({ query = {}, sort, limit, page } = {}) {

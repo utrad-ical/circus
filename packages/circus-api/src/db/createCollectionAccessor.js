@@ -154,8 +154,7 @@ export default function createCollectionAccessor(db, validator, opts) {
     }
     const original = await collection.findOneAndUpdate(
       { [key]: id },
-      { $set: { ...updates, updatedAt: date } },
-      { returnOriginal: true }
+      { $set: { ...updates, updatedAt: date } }
     );
     if (original.value === null) {
       const err = new Error('The request resource was not found.');
@@ -169,7 +168,7 @@ export default function createCollectionAccessor(db, validator, opts) {
       await validator.validate(dbEntrySchema, updatedWithoutId);
     } catch (err) {
       // validation failed, rollback
-      await collection.findOneAndUpdate({ [key]: id }, original.value);
+      await collection.findOneAndReplace({ [key]: id }, original.value);
       throw err;
     }
     return updated;

@@ -5,11 +5,11 @@ import { ValidationError } from 'ajv';
 import { asyncThrows, connectMongo, setUpMongoFixture } from './test-utils';
 
 describe('createCollectionAccessor', function() {
-  let db, testCollection;
+  let db, dbConnection, testCollection;
 
   before(async function() {
     const validator = await createValidator(__dirname + '/test-schemas');
-    db = await connectMongo();
+    ({ db, dbConnection } = await connectMongo());
     testCollection = await createCollectionAccessor(db, validator, {
       validator,
       schema: 'months',
@@ -25,10 +25,10 @@ describe('createCollectionAccessor', function() {
   });
 
   after(async function() {
-    if (db) {
+    if (dbConnection) {
       const col = db.collection('months');
       await col.deleteMany({});
-      await db.close();
+      await dbConnection.close();
     }
   });
 
@@ -185,7 +185,10 @@ describe('createCollectionAccessor', function() {
     });
 
     it('should throw an error with invalid data', async function() {
-      asyncThrows(testCollection.modifyOne(3, { name: 5 }), ValidationError);
+      await asyncThrows(
+        testCollection.modifyOne(3, { name: 5 }),
+        ValidationError
+      );
     });
 
     it('should throw if not found', async function() {
@@ -207,7 +210,7 @@ describe('createCollectionAccessor', function() {
     });
 
     it('should generate new sequence', async function() {
-      await db.collection('sequences').remove({});
+      await db.collection('sequences').deleteMany({});
       const v1 = await testCollection.newSequentialId();
       assert.equal(v1, 1);
       const v2 = await testCollection.newSequentialId();

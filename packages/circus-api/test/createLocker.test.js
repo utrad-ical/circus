@@ -3,16 +3,16 @@ import createLocker from '../src/db/createLocker';
 import delay from '../src/utils/delay';
 
 describe('createLocker', function() {
-  let db, locker;
+  let db, dbConnection, locker;
 
   before(async function() {
-    db = await test.connectMongo();
+    ({ db, dbConnection } = await test.connectMongo());
     await db.collection('locks').deleteMany({});
     locker = await createLocker(db);
   });
 
   after(async function() {
-    if (db) await db.close();
+    if (dbConnection) await dbConnection.close();
   });
 
   it('should perform locking of one resource', async function() {

@@ -21,7 +21,7 @@ export default async function createLocker(
   collectionName = 'locks',
   timeout = 300000
 ) {
-  db.collection(collectionName).ensureIndex({ target: 1 }, { unique: true });
+  db.collection(collectionName).createIndex({ target: 1 }, { unique: true });
 
   async function lock(target) {
     if (typeof target !== 'string' || !target.length) {

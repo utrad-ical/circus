@@ -8,17 +8,17 @@ import {
 } from '../src/privilegeUtils';
 
 describe('checkGlobalPrivileges middleware', function() {
-  let db, models;
+  let db, dbConnection, models;
 
   before(async function() {
-    db = await test.connectMongo();
+    ({ db, dbConnection } = await test.connectMongo());
     await test.setUpMongoFixture(db, ['groups', 'users', 'series']);
     const validator = await createValidator();
     models = createModels(db, validator);
   });
 
   after(async function() {
-    if (db) await db.close();
+    await dbConnection.close();
   });
 
   it('determineUserAccessInfo', async function() {

@@ -5,16 +5,16 @@ import createModels from '../src/db/createModels';
 import createValidator from '../src/createValidator';
 
 describe('tasks', function() {
-  let db, models;
+  let db, dbConnection, models;
 
   before(async function() {
-    db = await test.connectMongo();
+    ({ db, dbConnection } = await test.connectMongo());
     const validator = await createValidator();
     models = createModels(db, validator);
   });
 
   after(async function() {
-    await db.close();
+    await dbConnection.close();
   });
 
   describe('TaskExecutor', function() {

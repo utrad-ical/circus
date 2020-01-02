@@ -12,10 +12,10 @@ import * as qs from 'querystring';
 import createLogger from '../src/createLogger';
 
 describe('createOauthServer', function() {
-  let db, server;
+  let db, dbConnection, server;
 
   before(async function() {
-    db = await test.connectMongo();
+    ({ db, dbConnection } = await test.connectMongo());
     server = await test.listenKoa(
       await test.setUpKoa(async app => {
         const validator = await createValidator();
@@ -39,7 +39,7 @@ describe('createOauthServer', function() {
 
   after(async function() {
     if (server) await test.tearDownKoa(server);
-    if (db) await db.close();
+    if (dbConnection) await dbConnection.close();
   });
 
   it('should authenticate a request with valid token', async function() {

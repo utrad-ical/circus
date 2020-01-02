@@ -119,7 +119,9 @@ const getLatestDbSchemaRevision = async () => {
 
 const main = async () => {
   // Establish db connection (shared throughout app)
-  const db = await connectDb();
+  const { db } = await connectDb(
+    process.env.CIRCUS_MONGO_URL || process.env.MONGO_URL
+  );
   const logger = createLogger();
 
   const currentDbSchemaRevision = await getCurrentDbSchemaRevision(db);

@@ -9,17 +9,17 @@ import { MemoryDicomFileRepository } from '@utrad-ical/circus-lib/lib/dicom-file
 describe('DicomImporter', function() {
   // Skip this test if dicom_utility is not available
 
-  let repository, importer, models, db;
+  let repository, importer, models, db, dbConnection;
   const file = path.join(__dirname, 'dicom', 'CT-MONO2-16-brain.dcm');
 
   before(async function() {
-    db = await test.connectMongo();
+    ({ db, dbConnection } = await test.connectMongo());
     const validator = await createValidator();
     models = createModels(db, validator);
   });
 
   after(async function() {
-    await db.close();
+    await dbConnection.close();
   });
 
   beforeEach(async function() {

@@ -75,7 +75,7 @@ export const exec = async options => {
     throw new Error("Currently the type argument must be 'mhd'.");
   }
 
-  const db = await connectDb();
+  const { db, dbConnection } = await connectDb();
   const validator = await createValidator();
   const models = await createModels(db, validator);
   const { packAsMhd } = require('../case/packAsMhd');
@@ -107,6 +107,6 @@ export const exec = async options => {
       }
     }
   } finally {
-    await db.close();
+    await dbConnection.close();
   }
 };

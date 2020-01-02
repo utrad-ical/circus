@@ -49,12 +49,12 @@ const main = async (options, models) => {
 };
 
 export const exec = async options => {
-  const db = await connectDb();
+  const { db, dbConnection } = await connectDb();
   const validator = await createValidator();
   const models = await createModels(db, validator);
   try {
     await main(options, models);
   } finally {
-    await db.close();
+    await dbConnection.close();
   }
 };

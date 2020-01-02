@@ -20,7 +20,7 @@ export const help = optionText => {
 
 export const exec = async options => {
   const { all } = options;
-  const db = await connectDb();
+  const { db, dbConnection } = await connectDb();
   try {
     const validator = await createValidator();
     const models = await createModels(db, validator);
@@ -31,6 +31,6 @@ export const exec = async options => {
       console.log('Use --all flag to also delete permanent tokens.');
     }
   } finally {
-    await db.close();
+    await dbConnection.close();
   }
 };

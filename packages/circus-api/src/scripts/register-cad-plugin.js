@@ -99,7 +99,7 @@ const main = async (options, validator, models) => {
 
 export async function exec(options) {
   // Check if there is already a plug-in
-  const db = await connectDb();
+  const { db, dbConnection } = await connectDb();
   try {
     await db
       .collection('pluginDefinitions')
@@ -108,6 +108,6 @@ export async function exec(options) {
     const models = createModels(db, validator);
     await main(options, validator, models);
   } finally {
-    await db.close();
+    await dbConnection.close();
   }
 }

@@ -1,6 +1,5 @@
 import Koa from 'koa';
 import { assert } from 'chai';
-import { MongoClient } from 'mongodb';
 import * as fs from 'fs-extra';
 import { safeLoad as yaml } from 'js-yaml';
 import * as path from 'path';
@@ -9,6 +8,7 @@ import createApp from '../src/createApp';
 import { configureLogger } from '../src/createLogger';
 import * as axios from 'axios';
 import dotenv from 'dotenv';
+import connectDb from '../src/db/connectDb';
 
 dotenv.config();
 
@@ -66,7 +66,7 @@ export function tearDownKoa(server) {
 }
 
 export async function setUpAppForTest() {
-  const db = await connectMongo();
+  const { db, dbConnection } = await connectMongo();
 
   await setUpMongoFixture(db, [
     'series',
@@ -85,6 +85,7 @@ export async function setUpAppForTest() {
   const app = await createApp({ debug: true, db, cs: csCore });
   const server = await listenKoa(app);
 
+  // Prepare axios instances that kick request as these three users
   const axiosInstances = {};
   const users = [
     ['alice', '2311aee0435c36ae14c39835539a931a6344714a'],
@@ -100,6 +101,7 @@ export async function setUpAppForTest() {
 
   return {
     db,
+    dbConnection,
     app,
     axios: axiosInstances,
     csCore,
@@ -109,7 +111,7 @@ export async function setUpAppForTest() {
 
 export async function tearDownAppForTest(testServer) {
   await tearDownKoa(testServer);
-  if (testServer.db) await testServer.db.close();
+  if (testServer.dbConnection) await testServer.dbConnection.close();
 }
 
 export async function asyncThrows(funcOrPromise, type) {
@@ -126,8 +128,8 @@ export async function asyncThrows(funcOrPromise, type) {
 
 export async function connectMongo() {
   const url = process.env.CIRCUS_MONGO_TEST_URL;
-  const db = await MongoClient.connect(url);
-  return db;
+  if (!url) throw new Error('CIRCUS_MONGO_TEST_URL must be set');
+  return await connectDb(url);
 }
 
 export async function setUpMongoFixture(db, collections) {

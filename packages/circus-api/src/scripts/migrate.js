@@ -49,13 +49,13 @@ async function migrate(db) {
 }
 
 export async function exec() {
-  let db;
+  let db, dbConnection;
   try {
-    db = await connectDb();
+    ({ db, dbConnection } = await connectDb());
     await migrate(db);
   } catch (err) {
     console.error(err);
   } finally {
-    if (db) await db.close();
+    if (dbConnection) await dbConnection.close();
   }
 }

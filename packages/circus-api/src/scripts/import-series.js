@@ -82,7 +82,7 @@ async function importSeries(db, files, domain) {
 }
 
 export async function exec(options) {
-  let db;
+  let db, dbConnection;
 
   const domain = options.domain;
   if (!domain) throw new Error('Domain must be specified.');
@@ -91,11 +91,11 @@ export async function exec(options) {
   if (!files.length) throw new Error('Import target must be specified.');
 
   try {
-    db = await connectDb();
+    ({ db, dbConnection } = await connectDb());
     await importSeries(db, files, domain);
   } catch (err) {
     console.error(err);
   } finally {
-    if (db) await db.close();
+    if (db) await dbConnection.close();
   }
 }

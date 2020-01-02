@@ -4,10 +4,10 @@ import { assert } from 'chai';
 import * as test from './test-utils';
 
 describe('Basic server behavior', function() {
-  let server, db;
+  let server, db, dbConnection;
 
   before(async function() {
-    db = await test.connectMongo();
+    ({ db, dbConnection } = await test.connectMongo());
     const koaApp = await createApp({
       debug: true,
       fixUser: 'alice@example.com',
@@ -18,7 +18,7 @@ describe('Basic server behavior', function() {
 
   after(async function() {
     if (server) await test.tearDownKoa(server);
-    if (db) await db.close();
+    if (dbConnection) await dbConnection.close();
   });
 
   it('should return server status', async function() {

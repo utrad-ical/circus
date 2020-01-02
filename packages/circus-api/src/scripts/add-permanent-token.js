@@ -25,7 +25,7 @@ export async function exec(options) {
     help();
     return;
   }
-  const db = await connectDb();
+  const { db, dbConnection } = await connectDb();
   try {
     const validator = await createValidator();
     const models = await createModels(db, validator);
@@ -51,6 +51,6 @@ export async function exec(options) {
     });
     console.log('Your permanent access token is: ' + accessToken);
   } finally {
-    await db.close();
+    await dbConnection.close();
   }
 }

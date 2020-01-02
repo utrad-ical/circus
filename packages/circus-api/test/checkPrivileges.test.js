@@ -9,11 +9,11 @@ import Router from 'koa-router';
 import compose from 'koa-compose';
 
 describe('checkPrivilege middleware', function() {
-  let server, db;
+  let server, db, dbConnection;
   let userEmail;
 
   before(async function() {
-    db = await test.connectMongo();
+    ({ db, dbConnection } = await test.connectMongo());
     await test.setUpMongoFixture(db, [
       'groups',
       'users',
@@ -63,7 +63,7 @@ describe('checkPrivilege middleware', function() {
 
   after(async function() {
     if (server) await test.tearDownKoa(server);
-    if (db) await db.close();
+    if (dbConnection) await dbConnection.close();
   });
 
   describe('global privilege checker', function() {

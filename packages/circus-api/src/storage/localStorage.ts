@@ -4,11 +4,11 @@ import Storage from './Storage';
 
 interface Options {
   root: string;
-  nameToPath: (name: string) => string;
+  nameToPath?: (name: string) => string;
 }
 
 export default async function localStorage(params: Options): Promise<Storage> {
-  const { root, nameToPath = n => n } = params;
+  const { root, nameToPath = (n: string) => n } = params;
 
   if (!root || !(await fs.pathExists(root))) {
     throw new Error(`Root directory "${root}" does not exist.`);

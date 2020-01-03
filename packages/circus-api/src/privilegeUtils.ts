@@ -1,6 +1,19 @@
 import MultiRange from 'multi-integer-range';
 import { Models } from './db/createModels';
 import { SeriesEntry } from './typings/circus';
+import { isValidPartialVolumeDescriptor } from '@utrad-ical/circus-lib/lib/PartialVolumeDescriptor';
+
+interface ProjectPrivilege {
+  projectId: string;
+  roles: string[];
+  project: any;
+}
+
+export interface UserPrivilegeInfo {
+  domains: string[];
+  globalPrivileges: string[];
+  accessibleProjects: ProjectPrivilege[];
+}
 
 /**
  * Calculates the set of privileges of the specified user.
@@ -8,9 +21,7 @@ import { SeriesEntry } from './typings/circus';
 export const determineUserAccessInfo = async (models: Models, user: any) => {
   const globalPrivileges: { [priv: string]: boolean } = {};
   const domains: { [domain: string]: boolean } = {};
-  const accessibleProjects: {
-    [pid: string]: { projectId: string; roles: any; project: any };
-  } = {};
+  const accessibleProjects: { [projectId: string]: ProjectPrivilege } = {};
   for (const groupId of user.groups) {
     const group = await models.group.findByIdOrFail(groupId);
     for (const priv of group.privileges) {
@@ -31,24 +42,25 @@ export const determineUserAccessInfo = async (models: Models, user: any) => {
         if (!(pId in accessibleProjects)) {
           accessibleProjects[pId] = {
             projectId: pId,
-            roles: {},
+            roles: [],
             project: null
           };
         }
-        accessibleProjects[pId].roles[role] = true;
+        if (accessibleProjects[pId].roles.indexOf(role) < 0) {
+          accessibleProjects[pId].roles.push(role);
+        }
       }
     }
   }
   for (const p in accessibleProjects) {
     const project = await models.project.findByIdOrFail(p);
     accessibleProjects[p].project = project;
-    accessibleProjects[p].roles = Object.keys(accessibleProjects[p].roles);
   }
   return {
     domains: Object.keys(domains),
     globalPrivileges: Object.keys(globalPrivileges),
     accessibleProjects: Object.values(accessibleProjects)
-  };
+  } as UserPrivilegeInfo;
 };
 
 /**
@@ -56,10 +68,10 @@ export const determineUserAccessInfo = async (models: Models, user: any) => {
  */
 export const fetchAccessibleSeries = async (
   models: Models,
-  userPrivileges: any,
+  userPrivileges: UserPrivilegeInfo,
   series: SeriesEntry[]
 ) => {
-  const seriesData = [];
+  const seriesData: any[] = [];
 
   for (const seriesEntry of series) {
     const { seriesUid, partialVolumeDescriptor } = seriesEntry;
@@ -67,24 +79,26 @@ export const fetchAccessibleSeries = async (
     if (!item) {
       throw new Error('Nonexistent series.');
     }
-    if (partialVolumeDescriptor) {
-      const { start, end, delta = 1 } = partialVolumeDescriptor;
-      if (start != end) {
-        if (delta === 0) throw new Error('Specified range is invalid.');
-        const partialImages = [];
-        for (let i = start; i <= end; i += delta) {
-          partialImages.push(i);
-        }
-        if (
-          partialImages.length === 0 ||
-          !new MultiRange(item.images).has(partialImages)
-        ) {
-          throw new Error('Specified range is invalid.');
-        }
-      }
-      item.partialVolumeDescriptor = { start, end, delta };
+    if (!isValidPartialVolumeDescriptor(partialVolumeDescriptor)) {
+      throw new Error(
+        'Invalid partial volume descriptor: ' +
+          JSON.stringify(partialVolumeDescriptor)
+      );
     }
-
+    const { start, end, delta } = partialVolumeDescriptor;
+    if (start != end) {
+      if (delta === 0) throw new Error('Specified range is invalid.');
+      const partialImages = [];
+      for (let i = start; i <= end; i += delta) {
+        partialImages.push(i);
+      }
+      if (
+        partialImages.length === 0 ||
+        !new MultiRange(item.images).has(partialImages)
+      ) {
+        throw new Error('Specified range is invalid.');
+      }
+    }
     seriesData.push(item);
     if (userPrivileges.domains.indexOf(item.domain) < 0) {
       throw new Error('You cannot access this series.');

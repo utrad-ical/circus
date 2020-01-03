@@ -15,7 +15,7 @@ export type TestServer = {
 export const setUpKoaTest = async (setUpFunc: (app: Koa) => Promise<void>) => {
   const koa = new Koa();
   await setUpFunc(koa);
-  const port = Number(process.env.API_TEST_PORT) || 8081;
+  const port = Number(process.env.API_TEST_PORT) || 8090;
   const host = 'localhost';
   return new Promise<TestServer>((resolve, reject) => {
     const httpd = koa.listen(port, host);

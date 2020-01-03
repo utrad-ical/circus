@@ -10,7 +10,7 @@ let db: mongo.Db,
   dbConnection: mongo.MongoClient,
   testCollection: CollectionAccessor;
 
-beforeAll(async function() {
+beforeAll(async () => {
   const validator = await createValidator(
     __dirname + '/../../test/test-schemas'
   );
@@ -22,13 +22,13 @@ beforeAll(async function() {
   });
 });
 
-beforeEach(async function() {
+beforeEach(async () => {
   if (db) {
     await setUpMongoFixture(db, ['months', 'sequences']);
   }
 });
 
-afterAll(async function() {
+afterAll(async () => {
   if (dbConnection) {
     const col = db.collection('months');
     await col.deleteMany({});
@@ -36,8 +36,8 @@ afterAll(async function() {
   }
 });
 
-describe('#insert', function() {
-  it('should insert a single document after successful validation', async function() {
+describe('#insert', () => {
+  it('should insert a single document after successful validation', async () => {
     await testCollection.insert({ month: 8, name: 'Hazuki' });
     const result = await db
       .collection('months')
@@ -50,7 +50,7 @@ describe('#insert', function() {
     expect(result[0].updatedAt).toBeInstanceOf(Date);
   });
 
-  it('should raise an error on trying to insert invalid data', async function() {
+  it('should raise an error on trying to insert invalid data', async () => {
     await expect(
       testCollection.insert({ month: 'hello', name: 10 })
     ).rejects.toThrow(ValidationError);
@@ -61,8 +61,8 @@ describe('#insert', function() {
   });
 });
 
-describe('#upsert', function() {
-  it('should insert a new document', async function() {
+describe('#upsert', () => {
+  it('should insert a new document', async () => {
     await testCollection.upsert(8, { name: 'Hazuki' });
     const result = await db
       .collection('months')
@@ -74,7 +74,7 @@ describe('#upsert', function() {
     expect(result[0].name).toBe('Hazuki');
   });
 
-  it('should update an existing document', async function() {
+  it('should update an existing document', async () => {
     await testCollection.upsert(3, { name: 'March' });
     const result = await db
       .collection('months')
@@ -86,7 +86,7 @@ describe('#upsert', function() {
     expect(result[0].name).toBe('March');
   });
 
-  it('should raise an error on trying to upsert invalid data', async function() {
+  it('should raise an error on trying to upsert invalid data', async () => {
     await expect(testCollection.upsert(3, { name: 3 })).rejects.toThrow(
       ValidationError
     );
@@ -94,8 +94,8 @@ describe('#upsert', function() {
   });
 });
 
-describe('#insertMany', function() {
-  it('should insert multiple documents after successful validation', async function() {
+describe('#insertMany', () => {
+  it('should insert multiple documents after successful validation', async () => {
     await testCollection.insertMany([
       { month: 6, name: 'Minazuki' },
       { month: 8, name: 'Hazuki' }
@@ -110,7 +110,7 @@ describe('#insertMany', function() {
     expect(result[1]).toMatchObject({ month: 8, name: 'Hazuki' });
   });
 
-  it('should throw when validation fails', async function() {
+  it('should throw when validation fails', async () => {
     await expect(
       testCollection.insertMany([
         { month: 6, name: 'Minazuki' },
@@ -120,20 +120,20 @@ describe('#insertMany', function() {
   });
 });
 
-describe('#findAll', function() {
-  it('should find an array of matched documents without _id', async function() {
+describe('#findAll', () => {
+  it('should find an array of matched documents without _id', async () => {
     const result = await testCollection.findAll({ month: 4 });
     expect(result).toHaveLength(2);
     expect(result[0]).toMatchObject({ month: 4, name: 'Uzuki' });
     expect(result[1]).toMatchObject({ month: 4, name: 'Uzuki' });
   });
 
-  it('should return an empty array if nothing matched', async function() {
+  it('should return an empty array if nothing matched', async () => {
     const result = await testCollection.findAll({ month: 13 });
     expect(result).toEqual([]);
   });
 
-  it('should perform sorting and skipping', async function() {
+  it('should perform sorting and skipping', async () => {
     const result = await testCollection.findAll(
       { month: { $lte: 4 } },
       { sort: { month: -1 }, skip: 1 }
@@ -142,7 +142,7 @@ describe('#findAll', function() {
     expect(result[2].name).toBe('Kisaragi');
   });
 
-  it('should perform row number limiting', async function() {
+  it('should perform row number limiting', async () => {
     const result = await testCollection.findAll(
       { month: { $lte: 4 } },
       { limit: 1 }
@@ -151,55 +151,55 @@ describe('#findAll', function() {
   });
 });
 
-describe('#deleteMany', function() {
-  it('should delete multiple documents at once', async function() {
+describe('#deleteMany', () => {
+  it('should delete multiple documents at once', async () => {
     await testCollection.deleteMany({ month: 4 });
     const shouldBeEmpty = await testCollection.findAll({ month: 4 });
     expect(shouldBeEmpty).toEqual([]);
   });
 });
 
-describe('#findById', function() {
-  it('should return valid data without _id for the given primary key', async function() {
+describe('#findById', () => {
+  it('should return valid data without _id for the given primary key', async () => {
     const result = await testCollection.findById(3);
     expect(result.name).toBe('Yayoi');
     expect(result._id).toBeUndefined();
   });
 
-  it('should raise an error when trying to load corrupted data', async function() {
+  it('should raise an error when trying to load corrupted data', async () => {
     await expect(testCollection.findByIdOrFail(7)).rejects.toThrow(
       ValidationError
     );
   });
 });
 
-describe('#findByIdOrFail', function() {
-  it('should return valid data when primary key is given', async function() {
+describe('#findByIdOrFail', () => {
+  it('should return valid data when primary key is given', async () => {
     const result = await testCollection.findByIdOrFail(3);
     expect(result.name).toBe('Yayoi');
     expect(result._id).toBeUndefined();
   });
 
-  it('should throw when trying to load nonexistent data', async function() {
+  it('should throw when trying to load nonexistent data', async () => {
     await expect(testCollection.findByIdOrFail(13)).rejects.toThrow();
   });
 });
 
-describe('#modifyOne', function() {
-  it('should perform mutation and returns the modified data', async function() {
+describe('#modifyOne', () => {
+  it('should perform mutation and returns the modified data', async () => {
     const original = await testCollection.modifyOne(2, { name: 'Nigatsu' });
     expect(original.name).toBe('Nigatsu');
     const modified = await testCollection.findById(2);
     expect(modified.name).toBe('Nigatsu');
   });
 
-  it('should throw an error with invalid data', async function() {
+  it('should throw an error with invalid data', async () => {
     await expect(testCollection.modifyOne(3, { name: 5 })).rejects.toThrow(
       ValidationError
     );
   });
 
-  it('should throw if not found', async function() {
+  it('should throw if not found', async () => {
     await expect(
       testCollection.modifyOne(13, {
         $set: { name: 'Pon' }
@@ -208,15 +208,15 @@ describe('#modifyOne', function() {
   });
 });
 
-describe('#newSequentialId', function() {
-  it('should generate new ID', async function() {
+describe('#newSequentialId', () => {
+  it('should generate new ID', async () => {
     const v1 = await testCollection.newSequentialId();
     expect(v1).toBe(13);
     const v2 = await testCollection.newSequentialId();
     expect(v2).toBe(14);
   });
 
-  it('should generate new sequence', async function() {
+  it('should generate new sequence', async () => {
     await db.collection('sequences').deleteMany({});
     const v1 = await testCollection.newSequentialId();
     expect(v1).toBe(1);

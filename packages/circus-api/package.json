@@ -88,6 +88,9 @@
   "jest": {
     "testPathIgnorePatterns": [
       "<rootDir>/test"
+    ],
+    "setupFiles": [
+      "dotenv/config"
     ]
   }
 }

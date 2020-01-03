@@ -28,7 +28,7 @@ export const setUpMongoFixture = async (
       )
     );
     if (content) {
-      const data = EJSON.parse(JSON.stringify(content));
+      const data: any = EJSON.parse(JSON.stringify(content));
       for (const row of data) {
         if (!row.createdAt) row.createdAt = new Date();
         if (!row.updatedAt) row.updatedAt = new Date();

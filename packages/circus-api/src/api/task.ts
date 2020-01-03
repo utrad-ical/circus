@@ -1,16 +1,22 @@
 import * as randomstring from 'randomstring';
 import { PassThrough } from 'stream';
 import status from 'http-status';
-
-const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+import delay from '../utils/delay';
+import { Models } from '../db/createModels';
+import koa from 'koa';
 
 export default class TaskReporter {
-  constructor(taskId, owner, { models }) {
+  private taskId: string;
+  private owner: string;
+  private models: Models;
+
+  constructor(taskId: string, owner: string, { models }: { models: Models }) {
     this.taskId = taskId;
+    this.owner = owner;
     this.models = models;
   }
 
-  async report(ctx) {
+  async report(ctx: koa.Context) {
     const task = await this.models.task.findByIdOrFail(this.taskId);
     if (task.owner !== this.owner) {
       ctx.throw(status.UNAUTHORIZED);
@@ -42,14 +48,22 @@ export default class TaskReporter {
 }
 
 export class TaskExecutor {
-  constructor(owner, { models, command }) {
+  private models: Models;
+  private owner: string;
+  private command: string;
+  private taskId?: string;
+
+  constructor(
+    owner: string,
+    { models, command }: { models: Models; command: string }
+  ) {
     this.models = models;
     this.owner = owner;
     this.command = command;
   }
 
   async saveNew() {
-    const taskId = randomstring.generate(32, { charset: 'hex' });
+    const taskId = randomstring.generate({ length: 32, charset: 'hex' });
     await this.models.task.insert({
       taskId,
       owner: this.owner,
@@ -66,12 +80,12 @@ export class TaskExecutor {
     return taskId;
   }
 
-  async progress(textStatus, value, max) {
+  async progress(textStatus: string, value: number, max: number) {
     if (!this.taskId) throw new Error('Task not saved yet');
     await this.models.task.modifyOne(this.taskId, { textStatus, value, max });
   }
 
-  async settle(success) {
+  async settle(success: boolean) {
     if (!this.taskId) throw new Error('Task not saved yet');
     const status = success ? 'finished' : 'error';
     await this.models.task.modifyOne(this.taskId, { status });

@@ -1,12 +1,9 @@
 import { Models } from '../db/createModels';
-import PartialVolumeDescriptor from '@utrad-ical/circus-lib/lib/PartialVolumeDescriptor';
+import { SeriesEntry } from '../typings/circus';
 
 interface PluginJobRequest {
   pluginId: string;
-  series: {
-    seriesUid: string;
-    partialVolumeDescriptor: PartialVolumeDescriptor;
-  }[];
+  series: SeriesEntry[];
 }
 
 const duplicateJobExists = async (

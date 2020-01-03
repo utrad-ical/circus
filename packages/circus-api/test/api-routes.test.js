@@ -420,7 +420,7 @@ describe('API', function() {
           }
         });
         assert.equal(res.status, 500);
-        assert.match(res.data.error, /range/);
+        assert.match(res.data.error, /invalid partial volume/i);
       });
 
       // TODO: more checks regarding security

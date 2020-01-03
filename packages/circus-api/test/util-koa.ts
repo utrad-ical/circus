@@ -1,6 +1,6 @@
 import Koa from 'koa';
 
-type TestServer = {
+export type TestServer = {
   koa: Koa;
   url: string;
   tearDown: () => Promise<void>;

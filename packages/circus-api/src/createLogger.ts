@@ -38,7 +38,7 @@ Log4JsLogger.setDefaults({
   }
 });
 
-export function configureLogger(config) {
+export function configureLogger(config: any) {
   Log4JsLogger.setDefaults(config);
   Log4JsLogger.configure({});
 }

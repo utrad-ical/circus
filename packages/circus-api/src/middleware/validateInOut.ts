@@ -11,7 +11,7 @@ interface Options {
  */
 const validateInOut: (
   validator: Validator,
-  options: Options
+  options?: Options
 ) => koa.Middleware = (validator, options = {}) => {
   let { requestSchema, responseSchema } = options;
 

@@ -92,6 +92,7 @@
     ],
     "setupFiles": [
       "dotenv/config"
-    ]
+    ],
+    "testEnvironment": "node"
   }
 }

@@ -123,7 +123,7 @@ const createCollectionAccessor = (
   /**
    * Fetches the single document that matches the primary key.
    */
-  async function findById(id: number | string) {
+  async function findById(id: string | number) {
     const key = primaryKey ? primaryKey : '_id';
     const docs = await collection
       .find({ [key]: id })
@@ -141,7 +141,7 @@ const createCollectionAccessor = (
    * Fetches the single document by the primary key.
    * Throws an error with 404 status if nothing found.
    */
-  async function findByIdOrFail(id: number | string) {
+  async function findByIdOrFail(id: string | number) {
     const result = await findById(id);
     if (result === undefined) {
       const err = new Error(`The requested ${schema} was not found.`);
@@ -155,7 +155,7 @@ const createCollectionAccessor = (
   /**
    * Modifies the document by the primary key.
    */
-  async function modifyOne(id: string, updates: object) {
+  async function modifyOne(id: string | number, updates: object) {
     const key = primaryKey ? primaryKey : '_id';
     const date = new Date();
     if (key in updates) {

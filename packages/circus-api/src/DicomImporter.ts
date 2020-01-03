@@ -4,9 +4,21 @@ import fs from 'fs-extra';
 import { multirange } from 'multi-integer-range';
 import exec from './utils/exec';
 import * as os from 'os';
+import { Models } from './db/createModels';
+import { DicomFileRepository } from '@utrad-ical/circus-lib/lib/dicom-file-repository';
+
+interface Options {
+  utility: string;
+  workDir?: string;
+}
 
 export default class DicomImporter {
-  constructor(repository, models, opts = {}) {
+  private models: Models;
+  private repository: DicomFileRepository;
+  private utility: string;
+  private workDir: string;
+
+  constructor(repository: DicomFileRepository, models: Models, opts: Options) {
     const { utility, workDir } = opts;
     this.models = models;
     this.repository = repository;
@@ -15,18 +27,15 @@ export default class DicomImporter {
   }
 
   /**
-   * @param {string} file Full path for the target file
+   * @param file Full path for the target file
    */
-  async readDicomTagsFromFile(file) {
+  async readDicomTagsFromFile(file: string): Promise<any> {
     if (!file) throw new TypeError('File not specified');
     const out = await exec(this.utility, ['dump', '--stdout', file]);
     return JSON.parse(out);
   }
 
-  /**
-   * @param {Buffer} fileContent
-   */
-  async readDicomTags(fileContent) {
+  async readDicomTags(fileContent: Buffer) {
     const tmpFile = path.join(
       this.workDir,
       randomstring.generate({ length: 32, charset: 'hex' }) + '.dcm'
@@ -39,13 +48,13 @@ export default class DicomImporter {
     }
   }
 
-  parseBirthDate(str) {
+  parseBirthDate(str: string) {
     const m = /^(\d\d\d\d)(\d\d)(\d\d)$/.exec(str);
     if (m) return `${m[1]}-${m[2]}-${m[3]}`;
     return undefined;
   }
 
-  buildDate(dateStr, timeStr) {
+  buildDate(dateStr: string, timeStr: string) {
     const [, year, month, day] = dateStr.match(/^(\d{4})(\d\d)(\d\d)$/);
     const [, hour, minute, second] = timeStr.match(/^(\d\d)(\d\d)(\d\d)/);
     return new Date(
@@ -58,7 +67,7 @@ export default class DicomImporter {
     );
   }
 
-  buildNewDocument(tags, domain) {
+  buildNewDocument(tags: any, domain: string) {
     const doc = {
       seriesUid: tags.seriesInstanceUID,
       studyUid: tags.studyInstanceUID,
@@ -88,11 +97,7 @@ export default class DicomImporter {
     return doc;
   }
 
-  /**
-   * @param {string} file
-   * @param {string} domain
-   */
-  async importFromFile(file, domain) {
+  async importFromFile(file: string, domain: string) {
     // Read the DICOM file
     const tags = await this.readDicomTagsFromFile(file);
     const fileContent = await fs.readFile(file);

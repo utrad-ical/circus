@@ -2,10 +2,10 @@ import koa from 'koa';
 
 declare module 'koa' {
   export interface Request {
-    body: any;
+    body?: any;
   }
 
-  export interface Context {
+  export interface ParametrizedContext<StateT = any, CustomT = {}> {
     user: any;
     userPrivileges: {
       globalPrivileges: string[];

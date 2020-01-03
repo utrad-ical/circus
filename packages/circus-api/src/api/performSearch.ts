@@ -1,6 +1,18 @@
 import status from 'http-status';
+import koa from 'koa';
+import { CollectionAccessor } from '../db/createCollectionAccessor';
 
-export default async function performSearch(model, filter, ctx, opts = {}) {
+interface Options {
+  transform?: (data: any) => any;
+  defaultSort?: object;
+}
+
+const performSearch = async (
+  model: CollectionAccessor,
+  filter: object,
+  ctx: koa.Context,
+  opts: Options = {}
+) => {
   const urlQuery = ctx.request.query;
   const { defaultSort = {}, transform } = opts;
 
@@ -53,4 +65,6 @@ export default async function performSearch(model, filter, ctx, opts = {}) {
       throw err;
     }
   }
-}
+};
+
+export default performSearch;

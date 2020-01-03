@@ -65,13 +65,16 @@
   },
   "devDependencies": {
     "@types/fs-extra": "^8.0.1",
+    "@types/jest": "^24.0.25",
     "@types/jszip": "^3.1.6",
     "@types/node": "^13.1.2",
     "@types/randomstring": "^1.1.6",
     "@types/semver": "^6.2.0",
+    "babel-jest": "^24.9.0",
     "chai": "^4.1.2",
     "eslint": "^5.7.0",
     "form-data": "^2.3.2",
+    "jest": "^24.9.0",
     "mocha": "^3.5.3",
     "prettier": "^1.19.1"
   },
@@ -80,5 +83,10 @@
   },
   "prettier": {
     "singleQuote": true
+  },
+  "jest": {
+    "testPathIgnorePatterns": [
+      "<rootDir>/test"
+    ]
   }
 }

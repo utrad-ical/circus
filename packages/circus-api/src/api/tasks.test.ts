@@ -18,7 +18,10 @@ afterAll(async () => {
 
 describe('TaskExecutor', () => {
   it('should create task and save its progress', async () => {
-    const task = new TaskExecutor('alice@example.com', { models });
+    const task = new TaskExecutor('alice@example.com', {
+      models,
+      command: 'long command'
+    });
     const taskId = await task.saveNew();
 
     await task.progress('executing', 50, 100);

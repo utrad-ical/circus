@@ -1,18 +1,27 @@
 import KoaOAuth2Server from './KoaOAuth2Server';
 import nodepass from 'node-php-password';
 import { determineUserAccessInfo } from '../../privilegeUtils';
+import { Models } from '../../db/createModels';
+import koa from 'koa';
 
 const debug = false;
 
 export const OAuthClientId = 'CIRCUS Front UI';
 
+interface Token {
+  accessToken: string;
+  accessTokenExpiresAt: Date;
+  refreshToken: string;
+  refreshTokenExpiresAt: Date;
+}
+
 /**
  * Creates an OAuth2 server that interacts with backend mongo.
  */
-export default function createOauthServer(models) {
+export default function createOauthServer(models: Models) {
   const oauthModel = {
-    getAccessToken: async function(bearerToken) {
-      debug && console.log('getAccessToken', arguments);
+    getAccessToken: async function(bearerToken: string) {
+      // debug && console.log('getAccessToken', arguments);
       const entry = await models.token.findById(bearerToken);
       if (!entry) return null;
       const user = await models.user.findByIdOrFail(entry.userId);
@@ -24,8 +33,8 @@ export default function createOauthServer(models) {
         user: { user, userPrivileges }
       };
     },
-    getClient: async function(clientId /* clientSecret */) {
-      debug && console.log('getClient', arguments);
+    getClient: async function(clientId: string /* clientSecret */) {
+      // debug && console.log('getClient', arguments);
       if (clientId === 'circus-front') {
         return {
           clientId: OAuthClientId,
@@ -34,8 +43,8 @@ export default function createOauthServer(models) {
       }
       return null;
     },
-    getRefreshToken: async function(refreshToken) {
-      debug && console.log('getRefreshToken', arguments);
+    getRefreshToken: async function(refreshToken: string) {
+      // debug && console.log('getRefreshToken', arguments);
       const result = await models.token.findAll({ refreshToken });
       if (!result.length) return null;
       const data = result[0];
@@ -48,15 +57,15 @@ export default function createOauthServer(models) {
       };
       return retVal;
     },
-    revokeToken: async function(token) {
-      debug && console.log('revokeToken', arguments);
+    revokeToken: async function(token: Token) {
+      // debug && console.log('revokeToken', arguments);
       const result = await models.token.deleteOne({
         refreshToken: token.refreshToken
       });
-      return result.deletedCount > 0;
+      return result.deletedCount! > 0;
     },
-    getUser: async function(username, password) {
-      debug && console.log('getting user', arguments);
+    getUser: async function(username: string, password: string) {
+      // debug && console.log('getting user', arguments);
       const users = await models.user.findAll({
         $or: [{ userEmail: username }, { loginId: username }]
       });
@@ -67,8 +76,8 @@ export default function createOauthServer(models) {
       }
       return null;
     },
-    saveToken: async function(token, client, user) {
-      debug && console.log('saveToken', arguments);
+    saveToken: async function(token: Token, client: any, user: any) {
+      // debug && console.log('saveToken', arguments);
       await models.token.insert({
         accessToken: token.accessToken,
         accessTokenExpiresAt: token.accessTokenExpiresAt,
@@ -83,7 +92,7 @@ export default function createOauthServer(models) {
     }
   };
 
-  async function onTokenIssue(ctx, token) {
+  async function onTokenIssue(ctx: koa.Context, token: any) {
     await models.user.modifyOne(token.user.userEmail, {
       lastLoginTime: new Date(),
       lastLoginIp: ctx.request.ip

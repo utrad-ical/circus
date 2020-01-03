@@ -1,11 +1,15 @@
 import NodeOAuthServer, { Request, Response } from 'oauth2-server';
 import status from 'http-status';
+import koa from 'koa';
 
 /**
  * Simple wrapper for node-oauth2-server.
  */
 export default class KoaOAuth2Server {
-  constructor(options) {
+  private server: NodeOAuthServer;
+  private options: any;
+
+  constructor(options: any) {
     if (!options.model) {
       throw new TypeError('Missing parameter: `model`');
     }
@@ -13,7 +17,7 @@ export default class KoaOAuth2Server {
     this.options = options;
   }
 
-  handleResponse(ctx, response) {
+  handleResponse(ctx: koa.Context, response: any) {
     if (response.status === status.FOUND) {
       const location = response.headers.location;
       delete response.headers.location;
@@ -26,7 +30,7 @@ export default class KoaOAuth2Server {
     }
   }
 
-  authenticate(options) {
+  authenticate(options: any): koa.Middleware {
     return async (ctx, next) => {
       const request = new Request(ctx.request);
       const response = new Response(ctx.res);
@@ -39,7 +43,7 @@ export default class KoaOAuth2Server {
     };
   }
 
-  authorize(options) {
+  authorize(options: any): koa.Middleware {
     return async (ctx, next) => {
       const request = new Request(ctx.request);
       const response = new Response(ctx.res);
@@ -49,7 +53,7 @@ export default class KoaOAuth2Server {
     };
   }
 
-  token(options) {
+  token(options: any): koa.Middleware {
     return async (ctx, next) => {
       const request = new Request(ctx.request);
       const response = new Response(ctx.res);

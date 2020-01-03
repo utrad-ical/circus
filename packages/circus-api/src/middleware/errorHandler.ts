@@ -12,7 +12,7 @@ interface Options {
  * as a HTTP response regardless of the cause of the error.
  */
 const errorHandler: (options: Options) => koa.Middleware = ({
-  includeErrorDetails,
+  includeErrorDetails = false,
   logger
 }) => {
   return async function errorHandler(ctx, next) {

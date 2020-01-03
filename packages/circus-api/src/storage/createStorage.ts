@@ -4,10 +4,7 @@ import memoryStorage from './memoryStorage';
 /**
  * Provides simple asynchronous key-value storage.
  */
-export default async function createStorage(
-  type: 'local' | 'memory',
-  params: any = {}
-) {
+const createStorage = async (type: 'local' | 'memory', params: any = {}) => {
   switch (type) {
     case 'local':
       return await localStorage(params);
@@ -15,4 +12,6 @@ export default async function createStorage(
       return await memoryStorage();
   }
   throw Error('This storage type is not supported');
-}
+};
+
+export default createStorage;

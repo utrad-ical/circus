@@ -7,7 +7,7 @@ interface Options {
   nameToPath?: (name: string) => string;
 }
 
-export default async function localStorage(params: Options): Promise<Storage> {
+const localStorage = async (params: Options) => {
   const { root, nameToPath = (n: string) => n } = params;
 
   if (!root || !(await fs.pathExists(root))) {
@@ -25,5 +25,7 @@ export default async function localStorage(params: Options): Promise<Storage> {
 
   const exists = async (key: string) => await fs.pathExists(buildPath(key));
 
-  return { read, write, remove, exists };
-}
+  return { read, write, remove, exists } as Storage;
+};
+
+export default localStorage;

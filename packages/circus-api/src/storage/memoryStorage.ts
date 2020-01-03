@@ -1,6 +1,6 @@
 import Storage from './Storage';
 
-export default async function memoryStorage(): Promise<Storage> {
+const memoryStorage = async () => {
   const store = new Map<string, Buffer>();
 
   const read = async (key: string) => {
@@ -21,5 +21,7 @@ export default async function memoryStorage(): Promise<Storage> {
 
   const exists = async (key: string) => store.has(key);
 
-  return { read, write, remove, exists };
-}
+  return { read, write, remove, exists } as Storage;
+};
+
+export default memoryStorage;

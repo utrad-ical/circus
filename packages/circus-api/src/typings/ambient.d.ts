@@ -4,3 +4,5 @@
 declare module 'merge';
 
 declare module 'dashdash';
+
+declare module 'deep-rename-keys';

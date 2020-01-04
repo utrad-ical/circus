@@ -3,6 +3,7 @@ import mongo from 'mongodb';
 import { Validator } from '../createValidator';
 import { Models } from '../db/createModels';
 import Logger from '@utrad-ical/circus-lib/lib/logger/Logger';
+import { VolumeProvider } from '@utrad-ical/circus-rs/src/server/helper/createVolumeProvider';
 import DicomImporter from '../DicomImporter';
 import Storage from '../storage/Storage';
 import { UserPrivilegeInfo } from '../privilegeUtils';
@@ -16,7 +17,7 @@ export interface Deps {
   dicomImporter?: DicomImporter;
   pluginResultsPath: string;
   cs: any;
-  volumeProvider: any;
+  volumeProvider: VolumeProvider;
   uploadFileSizeMax: string;
   dicomImageServerUrl: string;
 }

@@ -2,13 +2,16 @@ import status from 'http-status';
 import performSearch from '../performSearch';
 import generateUniqueId from '../../utils/generateUniqueId';
 import { EJSON } from 'bson';
-import { fetchAccessibleSeries } from '../../privilegeUtils';
+import { fetchAccessibleSeries, UserPrivilegeInfo } from '../../privilegeUtils';
 import { packAsMhd } from '../../case/packAsMhd';
 import checkFilter from '../../utils/checkFilter';
 import deepRenameKeys from 'deep-rename-keys';
+import { RouteMiddleware, CircusContext } from '../../typings/middlewares';
+import { Models } from '../../db/createModels';
+import { SeriesEntry } from '../../typings/circus';
 
-const maskPatientInfo = ctx => {
-  return caseData => {
+const maskPatientInfo = (ctx: CircusContext) => {
+  return (caseData: any) => {
     const wantToView = ctx.user.preferences.personalInfoView;
     const accessibleProjects = ctx.userPrivileges.accessibleProjects;
     const project = accessibleProjects.find(
@@ -28,7 +31,7 @@ const maskPatientInfo = ctx => {
   };
 };
 
-export const handleGet = () => {
+export const handleGet: RouteMiddleware = () => {
   return async (ctx, next) => {
     const aCase = ctx.case;
     delete aCase.latestRevision; // Remove redundant data
@@ -36,17 +39,17 @@ export const handleGet = () => {
   };
 };
 
-async function makeNewCase(
-  models,
-  user,
-  userPrivileges,
-  project,
-  series,
-  tags
-) {
+const makeNewCase = async (
+  models: Models,
+  user: any,
+  userPrivileges: UserPrivilegeInfo,
+  project: any,
+  series: SeriesEntry[],
+  tags: string[]
+) => {
   const caseId = generateUniqueId();
 
-  const domains = {};
+  const domains: { [domain: string]: boolean } = {};
 
   // Check write access for the project.
   const ok = userPrivileges.accessibleProjects.some(
@@ -89,9 +92,9 @@ async function makeNewCase(
     domains: Object.keys(domains)
   });
   return caseId;
-}
+};
 
-export const handlePost = ({ models }) => {
+export const handlePost: RouteMiddleware = ({ models }) => {
   return async (ctx, next) => {
     const project = await models.project.findByIdOrFail(
       ctx.request.body.projectId
@@ -108,7 +111,7 @@ export const handlePost = ({ models }) => {
   };
 };
 
-export const handlePostRevision = ({ models }) => {
+export const handlePostRevision: RouteMiddleware = ({ models }) => {
   return async (ctx, next) => {
     const aCase = ctx.case;
     const rev = ctx.request.body;
@@ -131,10 +134,10 @@ export const handlePostRevision = ({ models }) => {
   };
 };
 
-export const handleSearch = ({ models }) => {
+export const handleSearch: RouteMiddleware = ({ models }) => {
   return async (ctx, next) => {
     const urlQuery = ctx.request.query;
-    let customFilter;
+    let customFilter: object;
     try {
       customFilter = urlQuery.filter ? EJSON.parse(urlQuery.filter) : {};
     } catch (err) {
@@ -151,9 +154,9 @@ export const handleSearch = ({ models }) => {
       'createdAt',
       'updatedAt'
     ];
-    if (!checkFilter(customFilter, fields))
+    if (!checkFilter(customFilter!, fields))
       ctx.throw(status.BAD_REQUEST, 'Bad filter.');
-    customFilter = deepRenameKeys(customFilter, k =>
+    customFilter = deepRenameKeys(customFilter!, (k: string) =>
       k.replace(/^patientInfo/, 'patientInfoCache')
     );
 
@@ -169,7 +172,7 @@ export const handleSearch = ({ models }) => {
     };
 
     const mask = maskPatientInfo(ctx);
-    const transform = caseData => {
+    const transform = (caseData: any) => {
       delete caseData.revisions;
       return mask(caseData);
     };
@@ -178,10 +181,10 @@ export const handleSearch = ({ models }) => {
   };
 };
 
-export const handleExportAsMhd = ({ models, volumeProvider, blobStorage }) => {
+export const handleExportAsMhd: RouteMiddleware = deps => {
   return async (ctx, next) => {
     const caseId = ctx.case.caseId;
     ctx.type = 'application/zip';
-    ctx.body = await packAsMhd({ models, volumeProvider, blobStorage }, caseId);
+    ctx.body = await packAsMhd(deps, caseId);
   };
 };

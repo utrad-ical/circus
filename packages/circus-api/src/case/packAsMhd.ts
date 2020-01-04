@@ -2,8 +2,10 @@ import JSZip from 'jszip';
 import zeroPad from '../utils/zeroPad';
 import { PixelFormat } from '@utrad-ical/circus-rs/src/common/PixelFormat';
 import RawData from '@utrad-ical/circus-rs/src/common/RawData';
+import { Deps } from '../typings/middlewares';
+import { Vector3D } from '@utrad-ical/circus-rs/src/common/geometry';
 
-export const packAsMhd = async (deps, caseId) => {
+export const packAsMhd = async (deps: Deps, caseId: string) => {
   const zip = new JSZip();
   await putCaseData(deps, caseId, zip);
   return zip.generateNodeStream();
@@ -11,15 +13,15 @@ export const packAsMhd = async (deps, caseId) => {
 
 /**
  * Turns `3` to `'003'`, etc.
- * @param {number} num A nonnegative integer
+ * @param num A nonnegative integer
  */
-const pad = num => zeroPad(3, num);
+const pad = (num: number) => zeroPad(3, num);
 
 /**
  * Inserts a single case data into a root zip foler or a subdirectory.
  * @param {JSZip} zip The JSZip root object or a subdirectory made by `folder`
  */
-const putCaseData = async (deps, caseId, zip) => {
+const putCaseData = async (deps: Deps, caseId: string, zip: JSZip) => {
   const { models, volumeProvider, blobStorage } = deps;
   const caseData = await models.clinicalCase.findByIdOrFail(caseId);
   const rev = caseData.latestRevision;
@@ -33,13 +35,13 @@ const putCaseData = async (deps, caseId, zip) => {
     await volumeAccessor.load(volumeAccessor.images);
     const volume = volumeAccessor.volume;
     const primaryImageNo = volumeAccessor.images.min();
-    const primaryMetadata = volumeAccessor.imageMetadata.get(primaryImageNo);
+    const primaryMetadata = volumeAccessor.imageMetadata.get(primaryImageNo!)!;
     const pitch = await volumeAccessor.determinePitch();
     const elementSpacing = [
       primaryMetadata.pixelSpacing[0],
       primaryMetadata.pixelSpacing[1],
       pitch
-    ];
+    ] as Vector3D;
 
     const rawFileBaseName = `vol${pad(volId)}.raw`;
     zip.file(rawFileBaseName + '.raw', volume.data);
@@ -86,7 +88,11 @@ const putCaseData = async (deps, caseId, zip) => {
 /**
  * Converts internal label format to (large) raw format
  */
-const createLabelVolume = (dimension, labelData, labelBuffer) => {
+const createLabelVolume = (
+  dimension: Vector3D,
+  labelData: any,
+  labelBuffer: Buffer
+) => {
   const vol = new RawData(dimension, PixelFormat.UInt8);
   const labelVol = new RawData(labelData.size, PixelFormat.Binary);
   labelVol.assign(labelBuffer.buffer);
@@ -94,7 +100,7 @@ const createLabelVolume = (dimension, labelData, labelBuffer) => {
   return vol.data;
 };
 
-const pixelFormatMap = {
+const pixelFormatMap: { [format: number]: string } = {
   [PixelFormat.UInt8]: 'MET_UCHAR',
   [PixelFormat.Int8]: 'MET_CHAR',
   [PixelFormat.UInt16]: 'MET_USHORT',
@@ -102,12 +108,12 @@ const pixelFormatMap = {
 };
 
 const prepareMhdHeaderAsString = (
-  pixelFormat,
-  dimSize,
-  elementSpacing,
-  elementDataFile
+  pixelFormat: PixelFormat,
+  dimSize: Vector3D,
+  elementSpacing: Vector3D,
+  elementDataFile: string
 ) => {
-  const stringifyObjet = obj => {
+  const stringifyObjet = (obj: { [key: string]: string | number }) => {
     return (
       Object.keys(obj)
         .map(k => `${k} = ${obj[k]}`)
@@ -122,11 +128,11 @@ const prepareMhdHeaderAsString = (
     ElementSpacing: elementSpacing.join(' '),
     ElementByteOrderMSB: 'False',
     ElementDataFile: elementDataFile
-  };
+  } as { [key: string]: string | number };
   return stringifyObjet(obj);
 };
 
-const prepareExportObject = caseData => {
+const prepareExportObject = (caseData: any) => {
   return {
     caseId: caseData.caseId,
     createdAt: caseData.createdAt.toISOString(),

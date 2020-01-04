@@ -1,18 +1,48 @@
-import axios from 'axios';
+import axios, { AxiosInstance } from 'axios';
 import fs from 'fs-extra';
 import { safeLoad as yaml } from 'js-yaml';
 import path from 'path';
 import createApp from '../src/createApp';
 import { setUpKoaTestWith } from './util-koa';
 import { connectMongo, setUpMongoFixture } from './util-mongo';
-
-type ApiTestPromise = ReturnType<typeof setUpAppForRoutesTest>;
+import mongo from 'mongodb';
 
 /**
  * Holds data used for API route testing.
  * Make sure to call `tearDown()` in the `afterAll()` function.
  */
-export type ApiTest = ApiTestPromise extends Promise<infer U> ? U : never;
+export interface ApiTest {
+  /**
+   * The mongo.Db instance shared among the test file.
+   */
+  db: mongo.Db;
+  /**
+   * Holds three `AxiosInstance`s used to represent three different
+   * users with different privileges.
+   * Its `baseURL` is configured to point to the test sever,
+   * and its `validateStatus` is configured not to throw on any 4xx/5xx errors.
+   */
+  axiosInstances: {
+    /**
+     * Alice belongs to the "admin" group.
+     */
+    alice: AxiosInstance;
+    /**
+     * Bob belongs to the "power user" group.
+     */
+    bob: AxiosInstance;
+    /**
+     * Guest belongs to the "guest" group and has no explict privilege.
+     */
+    guest: AxiosInstance;
+  };
+  csCore: ReturnType<typeof createMockCsCore>; // TODO: Change this to real CsCore
+  /**
+   * Shuts down the test Koa server and the DB connection.
+   * Make sure to call this on `afterAll()`.
+   */
+  tearDown: () => void;
+}
 
 export const setUpAppForRoutesTest = async () => {
   const { db, dbConnection } = await connectMongo();
@@ -60,7 +90,7 @@ export const setUpAppForRoutesTest = async () => {
     dbConnection.close();
   };
 
-  return { db, axiosInstances, csCore, tearDown };
+  return { db, axiosInstances, csCore, tearDown } as ApiTest;
 };
 
 const createMockCsCore = () => {

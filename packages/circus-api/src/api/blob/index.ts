@@ -1,14 +1,15 @@
 import status from 'http-status';
 import rawBody from 'raw-body';
 import { createHash } from 'crypto';
+import { RouteMiddleware } from '../../typings/middlewares';
 
-const sha1 = buf => {
+const sha1 = (buf: Buffer) => {
   const sha1 = createHash('sha1');
   sha1.update(buf);
   return sha1.digest('hex');
 };
 
-export const handleGet = ({ blobStorage }) => {
+export const handleGet: RouteMiddleware = ({ blobStorage }) => {
   return async (ctx, next) => {
     const hash = ctx.params.hash;
     try {
@@ -21,7 +22,7 @@ export const handleGet = ({ blobStorage }) => {
   };
 };
 
-export const handlePut = ({ blobStorage }) => {
+export const handlePut: RouteMiddleware = ({ blobStorage }) => {
   return async (ctx, next) => {
     const file = await rawBody(ctx.req, { limit: '2mb' });
     const hash = ctx.params.hash;

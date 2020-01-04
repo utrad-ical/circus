@@ -18,43 +18,6 @@ describe('API', function() {
     await test.tearDownAppForTest(server);
   });
 
-  describe('blobs', function _blobs() {
-    const sha1 = '4e3e01b9af84f54d95f94d24eeb0583332a85268';
-
-    it('should accept uploading and downloading a blob', async function _shouldAcceptUploadingAndDownloadingABlob() {
-      const res = await axios.request({
-        method: 'put',
-        url: server.url + 'api/blob/' + sha1,
-        headers: { 'Content-Type': 'application/octet-stream' },
-        data: 'star'
-      });
-      assert.equal(res.status, 200);
-      const res2 = await axios.request({
-        method: 'get',
-        url: server.url + 'api/blob/' + sha1
-      });
-      assert.equal(res2.data, 'star');
-    });
-
-    it('should return 400 on hash mismatch', async function _shouldReturn400OnHashMismatch() {
-      const res = await axios.request({
-        method: 'put',
-        url: server.url + 'api/blob/1111222233334444aaaabbbbcccc',
-        headers: { 'Content-Type': 'application/octet-stream' },
-        data: 'star'
-      });
-      assert.equal(res.status, 400);
-    });
-
-    it('should return 404 for nonexistent hash', async function _shouldReturn404ForNonexistentHash() {
-      const res = await axios.request({
-        method: 'get',
-        url: server.url + 'api/blob/aaabbbcccdddeeefff111222333'
-      });
-      assert.equal(res.status, 404);
-    });
-  });
-
   describe('plugin-jobs', function _pluginJobs() {
     // (alice has sirius.org domain)
     // 111.222.333.444.444: (  1) [sirius.org]

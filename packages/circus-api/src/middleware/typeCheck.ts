@@ -1,7 +1,7 @@
 import status from 'http-status';
 import { Middleware } from 'koa';
 
-const typeCheck: (expectedType: string) => Middleware = (
+const typeCheck: (expectedType?: string) => Middleware = (
   expectedType = 'application/json'
 ) => {
   return async function typeCheck(ctx, next) {

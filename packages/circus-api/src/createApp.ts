@@ -1,4 +1,4 @@
-import Koa from 'koa';
+import Koa, { Middleware } from 'koa';
 import bodyParser from 'koa-bodyparser';
 import multer from 'koa-multer';
 import * as fs from 'fs-extra';
@@ -13,11 +13,11 @@ import errorHandler from './middleware/errorHandler';
 import cors from './middleware/cors';
 import checkPrivilege from './middleware/auth/checkPrivilege';
 import typeCheck from './middleware/typeCheck';
-import createValidator from './createValidator';
+import createValidator, { Validator } from './createValidator';
 import createStorage from './storage/createStorage';
 import createLogger from './createLogger';
 import validateInOut from './middleware/validateInOut';
-import createModels from './db/createModels';
+import createModels, { Models } from './db/createModels';
 import compose from 'koa-compose';
 import DicomImporter from './DicomImporter';
 import circusRs from './circusRs';
@@ -29,24 +29,60 @@ import { ServiceLoader } from '@utrad-ical/circus-lib';
 import configureServiceLoader from '@utrad-ical/circus-cs-core/src/configureServiceLoader';
 import csCoreConfigDefaults from '@utrad-ical/circus-cs-core/src/config/default';
 import os from 'os';
+import mongo from 'mongodb';
+import { ErrorObject } from 'ajv';
+import Logger from '@utrad-ical/circus-lib/lib/logger/Logger';
+import Storage from './storage/Storage';
 
-function handlerName(route) {
+function handlerName(route: Route) {
   if (route.handler) return route.handler;
   return 'handle' + route.verb[0].toUpperCase() + route.verb.substr(1);
 }
 
-function formatValidationErrors(errors) {
+const formatValidationErrors = (errors: ErrorObject[]) => {
   return errors.map(err => `${err.dataPath} ${err.message}`).join('\n');
+};
+
+interface Deps {
+  validator: Validator;
+  db: mongo.Db;
+  logger: Logger;
+  models: Models;
+  blobStorage: Storage;
+  dicomImporter?: DicomImporter;
+  pluginResultsPath: string;
+  cs: any;
+  volumeProvider: any;
+  uploadFileSizeMax: string;
+  dicomImageServerUrl: string;
 }
 
-async function prepareApiRouter(apiDir, deps, options) {
+interface ManifestFile {
+  routes: Route[];
+}
+
+interface Route {
+  verb: string;
+  path: string;
+  handler?: string;
+  forDebug?: boolean;
+  expectedContentType?: string;
+  requestSchema?: string | object;
+  responseSchema?: string | object;
+}
+
+async function prepareApiRouter(
+  apiDir: string,
+  deps: Deps,
+  options: CreateAppOptions
+) {
   const { debug } = options;
   const router = new Router();
   const validator = deps.validator;
 
   const manifestFiles = await glob(apiDir);
   for (const manifestFile of manifestFiles) {
-    const data = yaml(await fs.readFile(manifestFile, 'utf8'));
+    const data = yaml(await fs.readFile(manifestFile, 'utf8')) as ManifestFile;
     try {
       await validator.validate('api', data);
     } catch (err) {
@@ -75,26 +111,28 @@ async function prepareApiRouter(apiDir, deps, options) {
         mainHandler(deps) // The processing function itself
       ]);
       // console.log(`  Register ${route.verb.toUpperCase()} on ${route.path}`);
-      router[route.verb](route.path, middlewareStack);
+      (router as any)[route.verb](route.path, middlewareStack);
     }
   }
 
   return router;
 }
 
-export async function createBlobStorage(blobPath) {
+export async function createBlobStorage(blobPath?: string) {
   return blobPath
     ? await createStorage('local', { root: blobPath })
     : await createStorage('memory');
 }
 
-export async function createDicomFileRepository(dicomPath) {
+export async function createDicomFileRepository(dicomPath?: string) {
   return dicomPath
     ? new StaticDicomFileRepository({ dataDir: dicomPath })
     : new MemoryDicomFileRepository({});
 }
 
-export const makeCsCoreFromServiceLoader = async options => {
+export const makeCsCoreFromServiceLoader = async (
+  options: Pick<CreateAppOptions, 'pluginResultsPath' | 'dicomPath'>
+) => {
   const mongoUrl = process.env.CIRCUS_MONGO_URL || process.env.MONGO_URL;
   const configObj = {
     jobRunner: {
@@ -132,10 +170,22 @@ export const makeCsCoreFromServiceLoader = async options => {
   return await loader.get('core');
 };
 
+interface CreateAppOptions {
+  debug: boolean;
+  db: mongo.Db;
+  cs: any;
+  fixUser?: string;
+  blobPath?: string;
+  corsOrigin?: string;
+  dicomPath?: string;
+  pluginResultsPath: string;
+  dicomImageServerUrl: string;
+}
+
 /**
  * Creates a new Koa app.
  */
-export default async function createApp(options = {}) {
+export default async function createApp(options: CreateAppOptions) {
   const {
     debug,
     db,
@@ -174,7 +224,7 @@ export default async function createApp(options = {}) {
 
   // Build a router.
   // Register each API endpoints to the router according YAML manifest files.
-  const deps = {
+  const deps: Deps = {
     validator,
     db,
     logger,
@@ -200,12 +250,12 @@ export default async function createApp(options = {}) {
     mount(
       '/api',
       compose([
-        async (ctx, next) => {
+        (async (ctx, next) => {
           if (ctx.method === 'OPTIONS') {
             ctx.body = null;
             ctx.status = 200;
           } else await next();
-        },
+        }) as Middleware,
         bodyParser({
           enableTypes: ['json'],
           jsonLimit: '1mb',
@@ -214,16 +264,16 @@ export default async function createApp(options = {}) {
         }),
         multer({
           storage: multer.memoryStorage(),
-          limits: deps.uploadFileSizeMax
+          limits: deps.uploadFileSizeMax as any // TODO: update to @koa/multer
         }).array('files'),
         fixUser ? fixUserMiddleware(deps, fixUser) : oauth.authenticate(),
-        apiRouter.routes()
+        apiRouter.routes() as Middleware
       ])
     )
   );
   koa.use(mount('/login', compose([bodyParser(), oauth.token()])));
 
-  koa.use(mount('/rs', rs));
+  koa.use(mount('/rs', rs as Middleware));
 
   return koa;
 }

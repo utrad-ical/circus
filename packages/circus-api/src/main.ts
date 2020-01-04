@@ -3,6 +3,7 @@
 import dashdash from 'dashdash';
 import createApp, { makeCsCoreFromServiceLoader } from './createApp';
 import connectDb from './db/connectDb';
+import mongo from 'mongodb';
 import chalk from 'chalk';
 import * as path from 'path';
 import createLogger from './createLogger';
@@ -94,7 +95,7 @@ const {
       console.log('Options:\n' + parser.help({ includeEnv: true }));
       process.exit(0);
     }
-    const resolve = p => path.resolve(path.dirname(__dirname), p);
+    const resolve = (p: string) => path.resolve(path.dirname(__dirname), p);
     opts.blobPath = resolve(opts.blob_path);
     opts.dicomPath = resolve(opts.dicom_path);
     opts.pluginResultsPath = resolve(opts.plugin_results_path);
@@ -105,7 +106,7 @@ const {
   }
 })();
 
-const getCurrentDbSchemaRevision = async db => {
+const getCurrentDbSchemaRevision = async (db: mongo.Db) => {
   const migrationCollection = db.collection('migration');
   const revDoc = await migrationCollection.find({}).toArray();
   const currentRevision = revDoc.length ? revDoc[0].revision : 0;
@@ -119,9 +120,9 @@ const getLatestDbSchemaRevision = async () => {
 
 const main = async () => {
   // Establish db connection (shared throughout app)
-  const { db } = await connectDb(
-    process.env.CIRCUS_MONGO_URL || process.env.MONGO_URL
-  );
+  const mongoUrl = process.env.CIRCUS_MONGO_URL || process.env.MONGO_URL;
+  if (!mongoUrl) throw new Error('You must specify the MongoDB connection URL');
+  const { db } = await connectDb(mongoUrl);
   const logger = createLogger();
 
   const currentDbSchemaRevision = await getCurrentDbSchemaRevision(db);
@@ -165,9 +166,9 @@ const main = async () => {
 
   try {
     const koaApp = await createApp(serverOptions);
-    koaApp.listen(port, host, err => {
+    koaApp.listen(port, host, (err?: Error) => {
       if (err) throw err;
-      const setupInfo = {
+      const setupInfo: { [key: string]: string | number } = {
         'Label path': blobPath,
         'DICOM path': dicomPath,
         'Plug-in results path': pluginResultsPath,

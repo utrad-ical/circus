@@ -2,3 +2,5 @@
 
 // remove me when we use circus-lib's logger
 declare module 'merge';
+
+declare module 'dashdash';

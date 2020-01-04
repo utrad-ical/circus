@@ -30,7 +30,7 @@ export default class KoaOAuth2Server {
     }
   }
 
-  authenticate(options: any): koa.Middleware {
+  authenticate(options?: any): koa.Middleware {
     return async (ctx, next) => {
       const request = new Request(ctx.request);
       const response = new Response(ctx.res);
@@ -43,7 +43,7 @@ export default class KoaOAuth2Server {
     };
   }
 
-  authorize(options: any): koa.Middleware {
+  authorize(options?: any): koa.Middleware {
     return async (ctx, next) => {
       const request = new Request(ctx.request);
       const response = new Response(ctx.res);
@@ -53,7 +53,7 @@ export default class KoaOAuth2Server {
     };
   }
 
-  token(options: any): koa.Middleware {
+  token(options?: any): koa.Middleware {
     return async (ctx, next) => {
       const request = new Request(ctx.request);
       const response = new Response(ctx.res);

@@ -3,7 +3,7 @@ import koa from 'koa';
 /**
  * Simple middleware to append CORS response header.
  */
-const cors: (origin: string) => koa.Middleware = (origin = '*') => {
+const cors: (origin?: string) => koa.Middleware = (origin = '*') => {
   return async function cors(ctx, next) {
     ctx.response.set({
       'Access-Control-Allow-Origin': origin,

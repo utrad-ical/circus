@@ -4,7 +4,7 @@
   "description": "CIRCUS JSON API Server using Koa",
   "main": "server.js",
   "scripts": {
-    "test": "mocha",
+    "test": "jest",
     "lint": "eslint src test",
     "prettier": "prettier --write src/**/*.js test/*.js"
   },
@@ -73,11 +73,9 @@
     "@types/oauth2-server": "^3.0.12",
     "@types/randomstring": "^1.1.6",
     "@types/semver": "^6.2.0",
-    "chai": "^4.1.2",
     "eslint": "^5.7.0",
     "form-data": "^2.5.1",
     "jest": "^24.9.0",
-    "mocha": "^3.5.3",
     "prettier": "^1.19.1"
   },
   "nodemonConfig": {

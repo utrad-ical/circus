@@ -1,3 +1,0 @@
---require ./register
---timeout 10000
---watch-extensions yaml

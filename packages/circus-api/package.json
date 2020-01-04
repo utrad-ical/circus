@@ -5,8 +5,8 @@
   "main": "server.js",
   "scripts": {
     "test": "jest",
-    "lint": "eslint src test",
-    "prettier": "prettier --write src/**/*.js test/*.js"
+    "lint": "eslint src",
+    "prettier": "prettier --write src/**/*.{js,ts}"
   },
   "repository": {
     "type": "git",

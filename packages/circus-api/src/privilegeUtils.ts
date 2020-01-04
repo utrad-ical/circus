@@ -73,21 +73,29 @@ export const fetchAccessibleSeries = async (
 ) => {
   const seriesData: any[] = [];
 
+  const throwError = (statusCode: number, message: string) => {
+    const err = new Error(message);
+    err.expose = true;
+    err.status = statusCode;
+    throw err;
+  };
+
   for (const seriesEntry of series) {
     const { seriesUid, partialVolumeDescriptor } = seriesEntry;
     const item = await models.series.findById(seriesUid);
     if (!item) {
-      throw new Error('Nonexistent series.');
+      throwError(400, 'Nonexistent series.');
     }
     if (!isValidPartialVolumeDescriptor(partialVolumeDescriptor)) {
-      throw new Error(
+      throwError(
+        400,
         'Invalid partial volume descriptor: ' +
           JSON.stringify(partialVolumeDescriptor)
       );
     }
     const { start, end, delta } = partialVolumeDescriptor;
     if (start != end) {
-      if (delta === 0) throw new Error('Specified range is invalid.');
+      if (delta === 0) throwError(400, 'Specified range is invalid.');
       const partialImages = [];
       for (let i = start; i <= end; i += delta) {
         partialImages.push(i);
@@ -96,7 +104,7 @@ export const fetchAccessibleSeries = async (
         partialImages.length === 0 ||
         !new MultiRange(item.images).has(partialImages)
       ) {
-        throw new Error('Specified range is invalid.');
+        throwError(400, 'Specified range is invalid.');
       }
     }
     seriesData.push(item);

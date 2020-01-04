@@ -78,7 +78,7 @@ describe('create', () => {
         tags: []
       }
     });
-    expect(res.status).toBe(500);
+    expect(res.status).toBe(400);
     expect(res.data.error).toMatch(/specified range is invalid/i);
   });
 

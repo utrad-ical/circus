@@ -1,4 +1,6 @@
-export const handleGet = ({ cs, models }) => {
+import { RouteMiddleware } from '../../typings/middlewares';
+
+export const handleGet: RouteMiddleware = ({ cs, models }) => {
   return async (ctx, next) => {
     const urlQuery = ctx.request.query;
 
@@ -11,7 +13,7 @@ export const handleGet = ({ cs, models }) => {
       ? urlQuery.state
       : undefined;
 
-    const allQueueItems = await cs.job.list(state);
+    const allQueueItems = (await cs.job.list(state)) as any[]; //TODO: Fix type
     const myQueueItems = allQueueItems.filter(
       job => job.userEmail === ctx.user.userEmail
     );

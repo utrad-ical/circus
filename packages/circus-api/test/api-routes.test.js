@@ -103,17 +103,4 @@ describe('API', function() {
       assert.equal(res.data.length, 1);
     });
   });
-
-  describe('admin/plugin-job-queue', function _adminPluginJobQueue() {
-    it('should return the current queue list', async function _shouldReturnTheCurrentQueueList() {
-      const res = await axios.get(server.url + 'api/admin/plugin-job-queue');
-      assert.equal(res.data.items.length, 1);
-    });
-    it('should return a filtered queue list', async function _shouldReturnAFilteredQueueList() {
-      const res = await axios.get(
-        server.url + 'api/admin/plugin-job-queue?state=wait'
-      );
-      assert.equal(res.data.items.length, 0);
-    });
-  });
 });

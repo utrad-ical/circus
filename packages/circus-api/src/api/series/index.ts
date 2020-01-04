@@ -6,9 +6,10 @@ import * as JSZip from 'jszip';
 import { EJSON } from 'bson';
 import checkFilter from '../../utils/checkFilter';
 import generateUniqueId from '../../utils/generateUniqueId';
+import { RouteMiddleware, CircusContext } from '../../typings/middlewares';
 
-const maskPatientInfo = ctx => {
-  return series => {
+const maskPatientInfo = (ctx: CircusContext) => {
+  return (series: any) => {
     const show =
       ctx.userPrivileges.globalPrivileges.some(p => p === 'personalInfoView') &&
       ctx.user.preferences.personalInfoView;
@@ -19,7 +20,7 @@ const maskPatientInfo = ctx => {
   };
 };
 
-export const handleGet = ({ models }) => {
+export const handleGet: RouteMiddleware = ({ models }) => {
   return async (ctx, next) => {
     const uid = ctx.params.seriesUid;
     const series = await models.series.findByIdOrFail(uid);
@@ -33,21 +34,23 @@ export const handleGet = ({ models }) => {
   };
 };
 
-export const handlePost = ({ dicomImporter }) => {
-  async function importFromBuffer(buffer, domain) {
+export const handlePost: RouteMiddleware = ({ dicomImporter }) => {
+  const importFromBuffer = async (buffer: Buffer, domain: string) => {
     const signature = buffer.length > 0x80 && buffer.readUInt32BE(0x80);
     if (signature !== 0x4449434d) {
       return; // Non-DICOM file
     }
-    let tmpFile;
+    const tmpFile = path.join(
+      dicomImporter!.workDir,
+      `${generateUniqueId()}.dcm`
+    );
+    await fs.writeFile(tmpFile, buffer);
     try {
-      tmpFile = path.join(dicomImporter.workDir, `${generateUniqueId()}.dcm`);
-      await fs.writeFile(tmpFile, buffer);
-      await dicomImporter.importFromFile(tmpFile, domain);
+      await dicomImporter!.importFromFile(tmpFile, domain);
     } finally {
       await fs.unlink(tmpFile);
     }
-  }
+  };
 
   return async (ctx, next) => {
     if (!dicomImporter) {
@@ -63,11 +66,11 @@ export const handlePost = ({ dicomImporter }) => {
     const files = ctx.req.files;
     let count = 0;
     for (const entry of files) {
-      const signature = entry.buffer.readUInt32BE(0, true);
+      const signature = entry.buffer.readUInt32BE(0);
       if ([0x504b0304, 0x504b0304, 0x504b0708].some(s => s === signature)) {
         // ZIP file detected.
         const archive = await JSZip.loadAsync(entry.buffer);
-        const filesInArchive = [];
+        const filesInArchive: JSZip.JSZipObject[] = [];
         archive.forEach((r, f) => filesInArchive.push(f));
         for (const file of filesInArchive) {
           const buf = await file.async('nodebuffer');
@@ -83,10 +86,10 @@ export const handlePost = ({ dicomImporter }) => {
   };
 };
 
-export const handleSearch = ({ models }) => {
+export const handleSearch: RouteMiddleware = ({ models }) => {
   return async (ctx, next) => {
     const urlQuery = ctx.request.query;
-    let customFilter;
+    let customFilter: object;
     try {
       customFilter = urlQuery.filter ? EJSON.parse(urlQuery.filter) : {};
     } catch (err) {
@@ -103,13 +106,13 @@ export const handleSearch = ({ models }) => {
       'seriesDate',
       'createdAt'
     ];
-    if (!checkFilter(customFilter, fields))
+    if (!checkFilter(customFilter!, fields))
       ctx.throw(status.BAD_REQUEST, 'Bad filter.');
 
     const domainFilter = {
       domain: { $in: ctx.userPrivileges.domains }
     };
-    const filter = { $and: [customFilter, domainFilter] };
+    const filter = { $and: [customFilter!, domainFilter] };
 
     // Removes patient info according to the preference
     const transform = maskPatientInfo(ctx);

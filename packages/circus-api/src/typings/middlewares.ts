@@ -1,10 +1,11 @@
-import koa from 'koa';
+import koa, { ParameterizedContext } from 'koa';
 import mongo from 'mongodb';
 import { Validator } from '../createValidator';
 import { Models } from '../db/createModels';
 import Logger from '@utrad-ical/circus-lib/lib/logger/Logger';
 import DicomImporter from '../DicomImporter';
 import Storage from '../storage/Storage';
+import { UserPrivilegeInfo } from '../privilegeUtils';
 
 export interface Deps {
   validator: Validator;
@@ -22,11 +23,10 @@ export interface Deps {
 
 interface CustomCtxMembers {
   users: any;
-  userPrivileges: {
-    globalPrivileges: string[];
-    accessibleProjects: any[];
-  };
+  userPrivileges: UserPrivilegeInfo;
 }
+
+export type CircusContext = ParameterizedContext<any, CustomCtxMembers>;
 
 export type CircusMiddeware = koa.Middleware<any, CustomCtxMembers>;
 

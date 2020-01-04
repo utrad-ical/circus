@@ -16,7 +16,7 @@ export default class DicomImporter {
   private models: Models;
   private repository: DicomFileRepository;
   private utility: string;
-  private workDir: string;
+  public workDir: string;
 
   constructor(repository: DicomFileRepository, models: Models, opts: Options) {
     const { utility, workDir } = opts;

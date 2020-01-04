@@ -7,8 +7,9 @@ import fs from 'fs';
 import mime from 'mime';
 import { fetchAccessibleSeries } from '../../privilegeUtils';
 import duplicateJobExists from '../duplicateJobExists';
+import { RouteMiddleware } from '../../typings/middlewares';
 
-export const handlePost = ({ models, cs }) => {
+export const handlePost: RouteMiddleware = ({ models, cs }) => {
   return async (ctx, next) => {
     const jobId = generateUniqueId();
     const { priority, ...request } = ctx.request.body;
@@ -54,7 +55,7 @@ export const handlePost = ({ models, cs }) => {
 /**
  * Cancels a job.
  */
-export const handlePatch = ({ models, cs }) => {
+export const handlePatch: RouteMiddleware = ({ models, cs }) => {
   return async (ctx, next) => {
     const jobId = ctx.params.jobId;
     const job = await models.pluginJob.findByIdOrFail(jobId);
@@ -80,20 +81,20 @@ export const handlePatch = ({ models, cs }) => {
   };
 };
 
-export const handleSearch = ({ models }) => {
+export const handleSearch: RouteMiddleware = ({ models }) => {
   return async (ctx, next) => {
     const urlQuery = ctx.request.query;
-    let customFilter;
+    let customFilter: object;
     try {
       customFilter = urlQuery.filter ? EJSON.parse(urlQuery.filter) : {};
     } catch (err) {
       ctx.throw(status.BAD_REQUEST, 'Bad filter.');
     }
-    await performSearch(models.pluginJob, customFilter, ctx);
+    await performSearch(models.pluginJob, customFilter!, ctx);
   };
 };
 
-export const handleGet = ({ models }) => {
+export const handleGet: RouteMiddleware = ({ models }) => {
   return async (ctx, next) => {
     const jobId = ctx.params.jobId;
     const job = await models.pluginJob.findByIdOrFail(jobId);
@@ -101,7 +102,10 @@ export const handleGet = ({ models }) => {
   };
 };
 
-export const handleGetAttachment = ({ models, pluginResultsPath }) => {
+export const handleGetAttachment: RouteMiddleware = ({
+  models,
+  pluginResultsPath
+}) => {
   return async (ctx, next) => {
     const jobId = ctx.params.jobId;
     const filePath = ctx.params.path;
@@ -116,7 +120,7 @@ export const handleGetAttachment = ({ models, pluginResultsPath }) => {
   };
 };
 
-export const handlePostFeedback = ({ models }) => {
+export const handlePostFeedback: RouteMiddleware = ({ models }) => {
   return async (ctx, next) => {
     const jobId = ctx.params.jobId;
     const job = await models.pluginJob.findByIdOrFail(jobId);
@@ -127,7 +131,7 @@ export const handlePostFeedback = ({ models }) => {
     }
     const isConsensual = mode === 'consensual';
 
-    const feedbacks = job.feedbacks;
+    const feedbacks = job.feedbacks as any[]; // TODO: Fix typing
     if (feedbacks.find(f => f.isConsensual)) {
       ctx.throw(
         status.BAD_REQUEST,
@@ -160,7 +164,7 @@ export const handlePostFeedback = ({ models }) => {
   };
 };
 
-export const handleGetFeedback = ({ models }) => {
+export const handleGetFeedback: RouteMiddleware = ({ models }) => {
   return async (ctx, next) => {
     const jobId = ctx.params.jobId;
     const job = await models.pluginJob.findByIdOrFail(jobId);
@@ -168,14 +172,14 @@ export const handleGetFeedback = ({ models }) => {
   };
 };
 
-export const handleDeleteFeedback = ({ models }) => {
+export const handleDeleteFeedback: RouteMiddleware = ({ models }) => {
   return async (ctx, next) => {
     const { jobId, feedbackId } = ctx.params;
     const job = await models.pluginJob.findByIdOrFail(jobId);
     const newList =
       feedbackId === 'all'
         ? []
-        : job.feedbacks.filter(f => feedbackId !== f.feedbackId);
+        : job.feedbacks.filter((f: any) => feedbackId !== f.feedbackId); // TODO: fix type
     await models.pluginJob.modifyOne(jobId, { feedbacks: newList });
     ctx.body = null;
   };

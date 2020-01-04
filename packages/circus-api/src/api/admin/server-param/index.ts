@@ -1,13 +1,15 @@
-export const handleSearch = ({ models }) => {
+import { RouteMiddleware } from '../../../typings/middlewares';
+
+export const handleSearch: RouteMiddleware = ({ models }) => {
   return async (ctx, next) => {
     const params = await models.serverParam.findAll();
-    const results = {};
+    const results: any = {};
     params.forEach(p => (results[p.key] = p.value));
     ctx.body = results;
   };
 };
 
-export const handleGet = ({ models }) => {
+export const handleGet: RouteMiddleware = ({ models }) => {
   return async (ctx, next) => {
     const key = ctx.params.key;
     const param = await models.serverParam.findByIdOrFail(key);
@@ -15,7 +17,7 @@ export const handleGet = ({ models }) => {
   };
 };
 
-export const handlePutOne = ({ models }) => {
+export const handlePutOne: RouteMiddleware = ({ models }) => {
   return async (ctx, next) => {
     const key = ctx.params.key;
     const value = ctx.request.body;
@@ -24,7 +26,7 @@ export const handlePutOne = ({ models }) => {
   };
 };
 
-export const handlePutAll = ({ models }) => {
+export const handlePutAll: RouteMiddleware = ({ models }) => {
   return async (ctx, next) => {
     const values = ctx.request.body;
     for (const key in values) {

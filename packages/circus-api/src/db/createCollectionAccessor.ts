@@ -66,7 +66,7 @@ const createCollectionAccessor = (
    * Fetches documents that matches the given query as an array.
    * The `_id` field will not be included.
    */
-  async function findAll(query: object, options: CursorOptions = {}) {
+  async function findAll(query: object = {}, options: CursorOptions = {}) {
     const cursor = findAsCursor(query, options);
     const array = [];
     while (await cursor.hasNext()) {

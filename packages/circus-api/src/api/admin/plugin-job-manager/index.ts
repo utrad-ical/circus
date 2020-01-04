@@ -1,13 +1,14 @@
 import status from 'http-status';
+import { RouteMiddleware } from '../../../typings/middlewares';
 
-export const handleGet = ({ cs }) => {
+export const handleGet: RouteMiddleware = ({ cs }) => {
   return async (ctx, next) => {
     const status = await cs.daemon.status();
     ctx.body = { status };
   };
 };
 
-export const handlePost = ({ cs }) => {
+export const handlePost: RouteMiddleware = ({ cs }) => {
   return async (ctx, next) => {
     const currentStatus = await cs.daemon.status();
     const newStatus = ctx.request.body.status;

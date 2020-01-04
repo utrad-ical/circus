@@ -1,14 +1,15 @@
 import status from 'http-status';
 import performSearch from '../../performSearch';
 import { globalPrivileges } from '../../../privilegeUtils';
+import { RouteMiddleware } from '../../../typings/middlewares';
 
-export const handleSearch = ({ models }) => {
+export const handleSearch: RouteMiddleware = ({ models }) => {
   return async (ctx, next) => {
     await performSearch(models.group, {}, ctx, { defaultSort: { groupId: 1 } });
   };
 };
 
-export const handleGet = ({ models }) => {
+export const handleGet: RouteMiddleware = ({ models }) => {
   return async (ctx, next) => {
     const groupId = parseInt(ctx.params.groupId);
     const group = await models.group.findByIdOrFail(groupId);
@@ -16,7 +17,7 @@ export const handleGet = ({ models }) => {
   };
 };
 
-export const handlePut = ({ models }) => {
+export const handlePut: RouteMiddleware = ({ models }) => {
   return async (ctx, next) => {
     const groupId = parseInt(ctx.params.groupId);
     await models.group.modifyOne(groupId, ctx.request.body);
@@ -24,7 +25,7 @@ export const handlePut = ({ models }) => {
   };
 };
 
-export const handlePost = ({ models }) => {
+export const handlePost: RouteMiddleware = ({ models }) => {
   return async (ctx, next) => {
     const groupId = await models.group.newSequentialId();
     if ('groupId' in ctx.request.body) {
@@ -36,7 +37,7 @@ export const handlePost = ({ models }) => {
   };
 };
 
-export const listGlobalPrivileges = () => {
+export const listGlobalPrivileges: RouteMiddleware = () => {
   return async (ctx, next) => {
     ctx.body = globalPrivileges();
   };

@@ -1,20 +1,21 @@
 import status from 'http-status';
 import performSearch from '../../performSearch';
 import nodepass from 'node-php-password';
+import { RouteMiddleware } from '../../../typings/middlewares';
 
-const removePassword = input => {
+const removePassword = (input: any) => {
   const output = { ...input };
   delete output.password;
   return output;
 };
 
-export const handleSearch = ({ models }) => {
+export const handleSearch: RouteMiddleware = ({ models }) => {
   return async (ctx, next) => {
     await performSearch(models.user, {}, ctx, { transform: removePassword });
   };
 };
 
-export const handleGet = ({ models }) => {
+export const handleGet: RouteMiddleware = ({ models }) => {
   return async (ctx, next) => {
     const user = removePassword(
       await models.user.findByIdOrFail(ctx.params.userEmail)
@@ -23,7 +24,7 @@ export const handleGet = ({ models }) => {
   };
 };
 
-export const handlePut = ({ models }) => {
+export const handlePut: RouteMiddleware = ({ models }) => {
   return async (ctx, next) => {
     const userEmail = ctx.params.userEmail;
     const updating = { ...ctx.request.body };
@@ -38,7 +39,7 @@ export const handlePut = ({ models }) => {
   };
 };
 
-export const handlePost = ({ models }) => {
+export const handlePost: RouteMiddleware = ({ models }) => {
   return async (ctx, next) => {
     const body = ctx.request.body;
     if ('lastLoginIp' in body || 'lastLoginTime' in body) {

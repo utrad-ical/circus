@@ -13,11 +13,11 @@ import errorHandler from './middleware/errorHandler';
 import cors from './middleware/cors';
 import checkPrivilege from './middleware/auth/checkPrivilege';
 import typeCheck from './middleware/typeCheck';
-import createValidator, { Validator } from './createValidator';
+import createValidator from './createValidator';
 import createStorage from './storage/createStorage';
 import createLogger from './createLogger';
 import validateInOut from './middleware/validateInOut';
-import createModels, { Models } from './db/createModels';
+import createModels from './db/createModels';
 import compose from 'koa-compose';
 import DicomImporter from './DicomImporter';
 import circusRs from './circusRs';
@@ -31,8 +31,7 @@ import csCoreConfigDefaults from '@utrad-ical/circus-cs-core/src/config/default'
 import os from 'os';
 import mongo from 'mongodb';
 import { ErrorObject } from 'ajv';
-import Logger from '@utrad-ical/circus-lib/lib/logger/Logger';
-import Storage from './storage/Storage';
+import { Deps } from './typings/middlewares';
 
 function handlerName(route: Route) {
   if (route.handler) return route.handler;
@@ -42,20 +41,6 @@ function handlerName(route: Route) {
 const formatValidationErrors = (errors: ErrorObject[]) => {
   return errors.map(err => `${err.dataPath} ${err.message}`).join('\n');
 };
-
-interface Deps {
-  validator: Validator;
-  db: mongo.Db;
-  logger: Logger;
-  models: Models;
-  blobStorage: Storage;
-  dicomImporter?: DicomImporter;
-  pluginResultsPath: string;
-  cs: any;
-  volumeProvider: any;
-  uploadFileSizeMax: string;
-  dicomImageServerUrl: string;
-}
 
 interface ManifestFile {
   routes: Route[];

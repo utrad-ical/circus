@@ -104,46 +104,6 @@ describe('API', function() {
     });
   });
 
-  describe('admin/plugin-job-manager', function _adminPluginJobManager() {
-    let url;
-
-    before(function() {
-      url = server.url + 'api/admin/plugin-job-manager';
-    });
-
-    it('should return the current state of a server', async function _shouldReturnTheCurrentStateOfAServer() {
-      const res = await axios.get(url);
-      const status = await csCore.daemon.status();
-      assert.equal(res.status, 200);
-      assert.equal(res.data.status, status);
-    });
-
-    it('should set the state of a server', async function _shouldSetTheStateOfAServer() {
-      const res = await axios.request({
-        method: 'post',
-        url: url + '/switch',
-        data: { status: 'running' }
-      });
-      assert.equal(res.status, 200);
-      assert.deepEqual(res.data, { status: 'running' });
-      const res2 = await axios.request({
-        method: 'post',
-        url: url + '/switch',
-        data: { status: 'stopped' }
-      });
-      assert.deepEqual(res2.data, { status: 'stopped' });
-    });
-
-    it('should throw for invalid status change request', async function _shouldThrowForInvalidStatusChangeRequest() {
-      const res = await axios.request({
-        method: 'post',
-        url: url + '/switch',
-        data: { status: 'going' } // invalid status
-      });
-      assert.equal(res.status, 400);
-    });
-  });
-
   describe('admin/plugin-job-queue', function _adminPluginJobQueue() {
     it('should return the current queue list', async function _shouldReturnTheCurrentQueueList() {
       const res = await axios.get(server.url + 'api/admin/plugin-job-queue');

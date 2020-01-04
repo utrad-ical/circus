@@ -42,6 +42,11 @@ export interface ApiTest {
    * Make sure to call this on `afterAll()`.
    */
   tearDown: () => void;
+  /**
+   * The URL of the test Koa endpoint server.
+   * The members of `axiosInstances` are configured to use this by default.
+   */
+  url: string;
 }
 
 export const setUpAppForRoutesTest = async () => {
@@ -90,7 +95,13 @@ export const setUpAppForRoutesTest = async () => {
     dbConnection.close();
   };
 
-  return { db, axiosInstances, csCore, tearDown } as ApiTest;
+  return {
+    db,
+    axiosInstances,
+    csCore,
+    tearDown,
+    url: testServer.url
+  } as ApiTest;
 };
 
 const createMockCsCore = () => {

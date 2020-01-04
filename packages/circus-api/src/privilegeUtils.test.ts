@@ -1,5 +1,4 @@
-import { connectMongo, setUpMongoFixture } from '../test/util-mongo';
-import mongo from 'mongodb';
+import { setUpMongoFixture, usingMongo } from '../test/util-mongo';
 import createValidator from './createValidator';
 import createModels, { Models } from './db/createModels';
 import {
@@ -9,17 +8,15 @@ import {
 } from './privilegeUtils';
 import { SeriesEntry } from './typings/circus';
 
-let db: mongo.Db, dbConnection: mongo.MongoClient, models: Models;
+let models: Models;
+
+const dbPromise = usingMongo();
 
 beforeAll(async () => {
-  ({ db, dbConnection } = await connectMongo());
+  const db = await dbPromise;
   await setUpMongoFixture(db, ['groups', 'users', 'series']);
   const validator = await createValidator();
   models = createModels(db, validator);
-});
-
-afterAll(async () => {
-  await dbConnection.close();
 });
 
 const sameMembers = (test: string[], members: string[]) => {

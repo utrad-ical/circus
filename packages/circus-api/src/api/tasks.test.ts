@@ -1,19 +1,16 @@
-import { connectMongo } from '../../test/util-mongo';
-import mongo from 'mongodb';
-import { TaskExecutor } from './task';
-import createModels, { Models } from '../db/createModels';
+import { usingMongo } from '../../test/util-mongo';
 import createValidator from '../createValidator';
+import createModels, { Models } from '../db/createModels';
+import { TaskExecutor } from './task';
 
-let db: mongo.Db, dbConnection: mongo.MongoClient, models: Models;
+let models: Models;
+
+const dbPromise = usingMongo();
 
 beforeAll(async () => {
-  ({ db, dbConnection } = await connectMongo());
+  const db = await dbPromise;
   const validator = await createValidator();
   models = createModels(db, validator);
-});
-
-afterAll(async () => {
-  await dbConnection.close();
 });
 
 describe('TaskExecutor', () => {

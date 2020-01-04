@@ -1,23 +1,21 @@
-import createValidator from '../../createValidator';
-import { setUpKoaTest, TestServer } from '../../../test/util-koa';
-import { connectMongo, setUpMongoFixture } from '../../../test/util-mongo';
-import mongo from 'mongodb';
-import createModels from '../../db/createModels';
-import createOauthServer from './createOauthServer';
-import errorHandler from '../errorHandler';
+import axios, { AxiosInstance } from 'axios';
 import bodyparser from 'koa-bodyparser';
 import Router from 'koa-router';
-import axios, { AxiosInstance } from 'axios';
 import * as qs from 'querystring';
+import { setUpKoaTest, TestServer } from '../../../test/util-koa';
+import { setUpMongoFixture, usingMongo } from '../../../test/util-mongo';
 import createLogger from '../../createLogger';
+import createValidator from '../../createValidator';
+import createModels from '../../db/createModels';
+import errorHandler from '../errorHandler';
+import createOauthServer from './createOauthServer';
 
-let db: mongo.Db,
-  dbConnection: mongo.MongoClient,
-  testServer: TestServer,
-  ax: AxiosInstance;
+let testServer: TestServer, ax: AxiosInstance;
+
+const dbPromise = usingMongo();
 
 beforeAll(async () => {
-  ({ db, dbConnection } = await connectMongo());
+  const db = await dbPromise;
   testServer = await setUpKoaTest(async app => {
     const validator = await createValidator();
     const models = createModels(db, validator);
@@ -43,7 +41,6 @@ beforeAll(async () => {
 
 afterAll(async () => {
   testServer.tearDown();
-  if (dbConnection) await dbConnection.close();
 });
 
 it('should authenticate a request with valid token', async () => {

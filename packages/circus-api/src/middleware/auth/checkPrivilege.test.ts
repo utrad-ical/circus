@@ -1,21 +1,18 @@
 import axios, { AxiosInstance } from 'axios';
+import Router from 'koa-router';
 import { setUpKoaTest, TestServer } from '../../../test/util-koa';
-import { connectMongo, setUpMongoFixture } from '../../../test/util-mongo';
-import mongo from 'mongodb';
-import checkPrivilege from './checkPrivilege';
+import { setUpMongoFixture, usingMongo } from '../../../test/util-mongo';
 import createValidator from '../../createValidator';
 import createModels from '../../db/createModels';
 import { determineUserAccessInfo } from '../../privilegeUtils';
-import Router from 'koa-router';
+import checkPrivilege from './checkPrivilege';
 
-let testServer: TestServer,
-  db: mongo.Db,
-  dbConnection: mongo.MongoClient,
-  userEmail: string,
-  ax: AxiosInstance;
+let testServer: TestServer, userEmail: string, ax: AxiosInstance;
+
+const dbPromise = usingMongo();
 
 beforeAll(async () => {
-  ({ db, dbConnection } = await connectMongo());
+  const db = await dbPromise;
   await setUpMongoFixture(db, ['groups', 'users', 'projects', 'clinicalCases']);
   const validator = await createValidator();
   const models = createModels(db, validator);
@@ -51,7 +48,6 @@ beforeAll(async () => {
 
 afterAll(async () => {
   await testServer.tearDown();
-  await dbConnection.close();
 });
 
 describe('global privilege checker', () => {

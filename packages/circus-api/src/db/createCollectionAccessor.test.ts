@@ -1,20 +1,20 @@
+import { ValidationError } from 'ajv';
+import mongo from 'mongodb';
+import { setUpMongoFixture, usingMongo } from '../../test/util-mongo';
 import createValidator from '../createValidator';
 import createCollectionAccessor, {
   CollectionAccessor
 } from './createCollectionAccessor';
-import { ValidationError } from 'ajv';
-import { connectMongo, setUpMongoFixture } from '../../test/util-mongo';
-import mongo from 'mongodb';
 
-let db: mongo.Db,
-  dbConnection: mongo.MongoClient,
-  testCollection: CollectionAccessor;
+let testCollection: CollectionAccessor, db: mongo.Db;
+
+const dbPromise = usingMongo();
 
 beforeAll(async () => {
+  db = await dbPromise;
   const validator = await createValidator(
     __dirname + '/../../test/test-schemas'
   );
-  ({ db, dbConnection } = await connectMongo());
   testCollection = await createCollectionAccessor(db, validator, {
     schema: 'months',
     collectionName: 'months',
@@ -23,17 +23,12 @@ beforeAll(async () => {
 });
 
 beforeEach(async () => {
-  if (db) {
-    await setUpMongoFixture(db, ['months', 'sequences']);
-  }
+  await setUpMongoFixture(db, ['months', 'sequences']);
 });
 
 afterAll(async () => {
-  if (dbConnection) {
-    const col = db.collection('months');
-    await col.deleteMany({});
-    await dbConnection.close();
-  }
+  const col = db.collection('months');
+  await col.deleteMany({});
 });
 
 describe('#insert', () => {

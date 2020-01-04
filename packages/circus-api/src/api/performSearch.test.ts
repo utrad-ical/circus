@@ -1,6 +1,5 @@
 import { setUpKoaTest, TestServer } from '../../test/util-koa';
-import { connectMongo, setUpMongoFixture } from '../../test/util-mongo';
-import mongo from 'mongodb';
+import { setUpMongoFixture, usingMongo } from '../../test/util-mongo';
 
 import performSearch from './performSearch';
 import createCollectionAccessor from '../db/createCollectionAccessor';
@@ -8,10 +7,12 @@ import createValidator from '../createValidator';
 import path from 'path';
 import axios from 'axios';
 
-let db: mongo.Db, dbConnection: mongo.MongoClient, testServer: TestServer;
+let testServer: TestServer;
+
+const dbPromise = usingMongo();
 
 beforeAll(async () => {
-  ({ db, dbConnection } = await connectMongo());
+  const db = await dbPromise;
   await setUpMongoFixture(db, ['items']);
   testServer = await setUpKoaTest(async app => {
     const validator = await createValidator(
@@ -39,7 +40,6 @@ beforeAll(async () => {
 
 afterAll(async () => {
   await testServer.tearDown();
-  await dbConnection.close();
 });
 
 const search = async ({

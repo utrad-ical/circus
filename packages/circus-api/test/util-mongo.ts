@@ -5,6 +5,11 @@ import * as fs from 'fs-extra';
 import { EJSON } from 'bson';
 import mongo from 'mongodb';
 
+/**
+ * Connects to a test MongoDB instance.
+ * Consider using `usingMongo()` instead, which takes care of closing the
+ * connection by implicitly calling `afterAll()`.
+ */
 export const connectMongo = async () => {
   const url = process.env.CIRCUS_MONGO_TEST_URL;
   if (!url) throw new Error('CIRCUS_MONGO_TEST_URL must be set');
@@ -41,4 +46,23 @@ export const setUpMongoFixture = async (
       }
     }
   }
+};
+
+/**
+ * Initializes a test Mongo database.
+ * The return value must be `await`-ed inside `test`, `beforeEach`, etc.
+ * This internally calls `afterAll()` and thus automatically closes
+ * the connection after the tests have finished.
+ */
+export const usingMongo = () => {
+  return new Promise<mongo.Db>(resolve => {
+    let db: mongo.Db, dbConnection: mongo.MongoClient;
+    beforeAll(async () => {
+      ({ db, dbConnection } = await connectMongo());
+      resolve(db);
+    });
+    afterAll(async () => {
+      await dbConnection.close();
+    });
+  });
 };

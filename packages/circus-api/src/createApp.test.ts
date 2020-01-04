@@ -1,16 +1,14 @@
-import createApp from './createApp';
 import axios, { AxiosInstance } from 'axios';
-import mongo from 'mongodb';
 import { setUpKoaTestWith, TestServer } from '../test/util-koa';
-import { connectMongo } from '../test/util-mongo';
+import { usingMongo } from '../test/util-mongo';
+import createApp from './createApp';
 
-let testServer: TestServer,
-  db: mongo.Db,
-  dbConnection: mongo.MongoClient,
-  ax: AxiosInstance;
+let testServer: TestServer, ax: AxiosInstance;
+
+const dbPromise = usingMongo();
 
 beforeAll(async function() {
-  ({ db, dbConnection } = await connectMongo());
+  const db = await dbPromise;
   const koaApp = await createApp({
     debug: true,
     fixUser: 'alice@example.com',
@@ -25,7 +23,6 @@ beforeAll(async function() {
 
 afterAll(async function() {
   await testServer.tearDown();
-  await dbConnection.close();
 });
 
 it('should return server status', async function() {

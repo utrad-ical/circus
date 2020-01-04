@@ -1,20 +1,16 @@
-import { connectMongo } from '../../test/util-mongo';
 import mongo from 'mongodb';
-import createLocker from './createLocker';
+import { usingMongo } from '../../test/util-mongo';
 import delay from '../utils/delay';
+import createLocker from './createLocker';
 
-let db: mongo.Db,
-  dbConnection: mongo.MongoClient,
-  locker: ReturnType<typeof createLocker>;
+let db: mongo.Db, locker: ReturnType<typeof createLocker>;
+
+const dbPromise = usingMongo();
 
 beforeAll(async () => {
-  ({ db, dbConnection } = await connectMongo());
+  db = await dbPromise;
   await db.collection('locks').deleteMany({});
   locker = await createLocker(db);
-});
-
-afterAll(async () => {
-  if (dbConnection) await dbConnection.close();
 });
 
 it('should perform locking of one resource', async () => {

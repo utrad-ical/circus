@@ -1,34 +1,30 @@
-import DicomImporter from './DicomImporter';
-import * as path from 'path';
-import { connectMongo, setUpMongoFixture } from '../test/util-mongo';
-import mongo from 'mongodb';
-import createModels, { Models } from './db/createModels';
-import createValidator from './createValidator';
 import { MemoryDicomFileRepository } from '@utrad-ical/circus-lib/lib/dicom-file-repository';
+import * as path from 'path';
+import { setUpMongoFixture, usingMongo } from '../test/util-mongo';
+import createValidator from './createValidator';
+import createModels, { Models } from './db/createModels';
+import DicomImporter from './DicomImporter';
 
 if (!process.env.DICOM_UTILITY) {
   // Skip this test if dicom_utility is not available
   describe.skip('DicomImporter', () => {});
 } else {
   describe('DicomImporter', function() {
+    const dbPromise = usingMongo();
+
     let repository: MemoryDicomFileRepository,
       importer: DicomImporter,
-      models: Models,
-      db: mongo.Db,
-      dbConnection: mongo.MongoClient;
+      models: Models;
     const file = path.join(__dirname, '../test/dicom/CT-MONO2-16-brain.dcm');
 
     beforeAll(async () => {
-      ({ db, dbConnection } = await connectMongo());
+      const db = await dbPromise;
       const validator = await createValidator();
       models = createModels(db, validator);
     });
 
-    afterAll(async () => {
-      await dbConnection.close();
-    });
-
     beforeEach(async () => {
+      const db = await dbPromise;
       repository = new MemoryDicomFileRepository({});
       await setUpMongoFixture(db, ['series']);
       importer = new DicomImporter(repository, models, {

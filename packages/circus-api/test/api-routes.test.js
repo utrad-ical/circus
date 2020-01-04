@@ -117,51 +117,6 @@ describe('API', function() {
     });
   });
 
-  describe('preference', function _preference() {
-    it('should return the preference of the current user', async function _shouldReturnThePreferenceOfTheCurrentUser() {
-      const res = await axios.get(server.url + 'api/preferences');
-      assert.equal(res.data.theme, 'mode_white');
-    });
-
-    it('should modify the preference of the current user using PUT', async function _shouldModifyThePreferenceOfTheCurrentUserUsingPUT() {
-      const res1 = await axios.request({
-        url: server.url + 'api/preferences',
-        method: 'put',
-        data: {
-          theme: 'mode_black',
-          personalInfoView: false,
-          seriesSearchPresets: [],
-          caseSearchPresets: []
-        }
-      });
-      assert.equal(res1.status, 204);
-      const res2 = await axios.get(server.url + 'api/preferences');
-      assert.equal(res2.data.theme, 'mode_black');
-    });
-
-    it('should modify the preference of the current user using PATCH', async function _shouldModifyThePreferenceOfTheCurrentUserUsingPATCH() {
-      const res1 = await axios.request({
-        url: server.url + 'api/preferences',
-        method: 'patch',
-        data: {
-          theme: 'mode_black'
-        }
-      });
-      assert.equal(res1.status, 204);
-      const res2 = await axios.get(server.url + 'api/preferences');
-      assert.equal(res2.data.theme, 'mode_black');
-    });
-
-    it('should reject invalid preference update', async function _shouldRejectInvalidPreferenceUpdate() {
-      const res = await axios.request({
-        url: server.url + 'api/preferences',
-        method: 'put',
-        data: { theme: 'mode_pink', personalInfoView: false }
-      });
-      assert.equal(res.status, 400);
-    });
-  });
-
   describe('tasks', function _tasks() {
     it('should return the list of tasks of the user', async function _shouldReturnTheListOfTasksOfTheUser() {
       const res = await axios.get(server.url + 'api/tasks');

@@ -18,37 +18,6 @@ describe('API', function() {
     await test.tearDownAppForTest(server);
   });
 
-  describe('admin', function _admin() {
-    it('should return unauthorized error for unauthorized user', async function _shouldReturnUnauthorizedErrorForUnauthorizedUser() {
-      const targets = [
-        'groups',
-        'groups/1',
-        'PUT groups/1',
-        'users',
-        'users/alice@example.com',
-        'PUT users/alice@example.com',
-        'projects',
-        'server-params'
-      ];
-      for (const target of targets) {
-        let [method, url] = target.split(' ');
-        if (!url) {
-          method = 'GET';
-          url = target;
-        }
-        // console.log(method, target);
-        const data = method.match(/GET|PUT/) ? { a: 10 } : undefined;
-        const res = await server.axios.bob.request({
-          url: server.url + 'api/admin/' + url,
-          method,
-          data
-        });
-        assert.equal(res.status, 401);
-        assert.match(res.data.error, /privilege/);
-      }
-    });
-  });
-
   describe('admin/groups', function _adminGroups() {
     beforeEach(async function() {
       await test.setUpMongoFixture(server.db, ['groups']);

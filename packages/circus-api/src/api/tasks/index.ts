@@ -1,8 +1,9 @@
 import performSearch from '../performSearch';
 import TaskReporter from '../task';
 import status from 'http-status';
+import { RouteMiddleware } from '../../typings/middlewares';
 
-export const handleSearch = ({ models }) => {
+export const handleSearch: RouteMiddleware = ({ models }) => {
   return async (ctx, next) => {
     const userEmail = ctx.user.userEmail;
     const filter = { owner: userEmail };
@@ -13,7 +14,7 @@ export const handleSearch = ({ models }) => {
   };
 };
 
-export const handleGet = ({ models }) => {
+export const handleGet: RouteMiddleware = ({ models }) => {
   return async (ctx, next) => {
     const taskId = ctx.params.taskId;
     const task = await models.task.findByIdOrFail(taskId);
@@ -24,7 +25,7 @@ export const handleGet = ({ models }) => {
   };
 };
 
-export const handleProgress = ({ models }) => {
+export const handleProgress: RouteMiddleware = ({ models }) => {
   return async (ctx, next) => {
     const taskId = ctx.params.taskId;
     const userEmail = ctx.user.userEmail;

@@ -117,32 +117,6 @@ describe('API', function() {
     });
   });
 
-  describe('tasks', function _tasks() {
-    it('should return the list of tasks of the user', async function _shouldReturnTheListOfTasksOfTheUser() {
-      const res = await axios.get(server.url + 'api/tasks');
-      assert.equal(res.status, 200);
-      assert.deepEqual(res.data.items.length, 1);
-    });
-
-    it('should return the information of the specified task', async function _shouldReturnTheInformationOfTheSpecifiedTask() {
-      const res = await axios.get(server.url + 'api/tasks/aaaabbbbcccc1111');
-      assert.equal(res.status, 200);
-      assert.equal(res.data.owner, 'alice@example.com');
-    });
-
-    it('should return 404 for nonexistent task', async function _shouldReturn404ForNonexistentTask() {
-      const res = await axios.get(server.url + 'api/tasks/aaaabbbbcccc0000');
-      assert.equal(res.status, 404);
-    });
-
-    it("should return unauthorized for someone else's task", async function _shouldReturnUnauthorizedForSomeoneElsesTask() {
-      const res = await axios.get(server.url + 'api/tasks/aaaabbbbcccc2222');
-      assert.equal(res.status, 403);
-    });
-
-    it.skip('should report task progress');
-  });
-
   describe('plugins', function _plugins() {
     beforeEach(async function() {
       await test.setUpMongoFixture(server.db, ['pluginDefinitions']);

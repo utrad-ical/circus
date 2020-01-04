@@ -116,28 +116,4 @@ describe('API', function() {
       assert.equal(res.data.items.length, 0);
     });
   });
-
-  describe('plugins', function _plugins() {
-    beforeEach(async function() {
-      await test.setUpMongoFixture(server.db, ['pluginDefinitions']);
-    });
-
-    it('should return list of all plugins', async function _shouldReturnListOfAllPlugins() {
-      const res = await axios.get(server.url + 'api/plugins');
-      assert.equal(res.status, 200);
-      assert.isArray(res.data);
-      assert.isTrue(
-        res.data.some(p => p.pluginName === 'MOCK-VALIDATION-FAILURE')
-      );
-    });
-
-    it('should return plugin definition specified by pluginId', async function _shouldReturnPluginDefinitionSpecifiedByPluginId() {
-      const res = await axios.get(
-        server.url +
-          'api/plugins/74c50a99530ef149c16bc6f0cf71b987470282c54e436e9bec6da704f1fcac9c'
-      );
-      assert.equal(res.status, 200);
-      assert.equal(res.data.pluginName, 'MOCK-VALIDATION-FAILURE');
-    });
-  });
 });

@@ -11,7 +11,9 @@ const createMongoClientPool: FunctionService<MongoClientPool> = async () => {
   return {
     connect: async (url: string) => {
       if (pool.has(url)) return pool.get(url)!;
-      const client = await mongo.MongoClient.connect(url);
+      const client = await mongo.MongoClient.connect(url, {
+        useUnifiedTopology: true
+      });
       pool.set(url, client);
       return client;
     },

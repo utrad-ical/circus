@@ -1,5 +1,6 @@
 import { FunctionService } from '@utrad-ical/circus-lib';
 import { MongoClientPool } from '../../mongoClientPool';
+import * as circus from '../../interface';
 
 const createMongoQueue: FunctionService<
   circus.PluginJobRequestQueue,

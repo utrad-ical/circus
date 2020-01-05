@@ -1,5 +1,6 @@
 import { FunctionService } from '@utrad-ical/circus-lib';
 import { PluginJobRegisterer } from './job/registerer/createPluginJobRegisterer';
+import * as circus from './interface';
 
 const createCsCore: FunctionService<
   circus.CsCore,

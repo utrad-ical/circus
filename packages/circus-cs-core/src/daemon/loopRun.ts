@@ -1,5 +1,6 @@
 import Logger from '@utrad-ical/circus-lib/lib/logger/Logger';
 import { CancellableTimer } from './createCancellableTimer';
+import * as circus from '../interface';
 
 export interface LoopRunOptions<T> {
   logger: Logger;

@@ -1,6 +1,7 @@
 import merge from 'merge';
 import cosmiconfig from 'cosmiconfig';
 import defaults from './default';
+import * as circus from '../interface';
 
 const loadConfig = (
   configTitle: string,

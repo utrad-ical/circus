@@ -5,6 +5,7 @@ import { MongoClientPool } from '../../mongoClientPool';
 import tar from 'tar-stream';
 import fs from 'fs-extra';
 import path from 'path';
+import * as circus from '../../interface';
 
 describe('pluginJobReporter', () => {
   let mongoClientPool: MongoClientPool;

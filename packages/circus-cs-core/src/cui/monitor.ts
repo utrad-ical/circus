@@ -4,6 +4,7 @@ import moment from 'moment';
 import { table } from 'table';
 import sleep from '../util/sleep';
 import Command from './Command';
+import * as circus from '../interface';
 
 const dt = (date: Date) => {
   const m = moment(date);

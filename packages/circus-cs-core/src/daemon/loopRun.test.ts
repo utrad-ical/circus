@@ -1,6 +1,7 @@
 import loopRun, { LoopRunOptions } from './loopRun';
 import sleep from '../util/sleep';
 import { EventEmitter } from 'events';
+import * as circus from '../interface';
 
 const createMockLogger = (fn: jest.Mock) => {
   return {

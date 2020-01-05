@@ -1,5 +1,6 @@
 import path from 'path';
 import os from 'os';
+import * as circus from '../interface';
 
 // We use cosmiconfig to manage settings.
 // DO NOT DIRECTLY EDIT THIS FILE!!!

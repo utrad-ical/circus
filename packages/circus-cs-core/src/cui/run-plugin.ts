@@ -9,6 +9,7 @@ import {
   DicomFileRepository,
   StaticDicomFileRepository
 } from '@utrad-ical/circus-lib/lib/dicom-file-repository';
+import * as circus from '../interface';
 
 /**
  * Directly runs the specified plug-in without using a queue system.

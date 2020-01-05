@@ -9,6 +9,7 @@ import configureServiceLoader from '../configureServiceLoader';
 import loopRun, { LoopRunOptions } from './loopRun';
 import createCancellableTimer from './createCancellableTimer';
 import { ServiceLoader } from '@utrad-ical/circus-lib';
+import * as circus from '../interface';
 
 argv.option([
   {

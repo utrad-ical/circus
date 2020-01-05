@@ -1,6 +1,7 @@
 import ajv from 'ajv';
 import { FunctionService } from '@utrad-ical/circus-lib';
 import Command from './Command';
+import * as circus from '../interface';
 
 const argumentsSchema = {
   type: 'object',

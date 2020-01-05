@@ -2,6 +2,7 @@ import mongo from 'mongodb';
 import { testClientPool } from '../../testHelper';
 import { MongoClientPool } from '../../mongoClientPool';
 import createMongoQueue from './MongoQueue';
+import * as circus from '../../interface';
 
 describe('Queue system: Mongo', () => {
   let mongoClientPool: MongoClientPool;

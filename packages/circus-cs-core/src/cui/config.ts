@@ -1,5 +1,6 @@
 import { FunctionService } from '@utrad-ical/circus-lib';
 import Command from './Command';
+import * as circus from '../interface';
 
 const printConfig: FunctionService<
   Command,

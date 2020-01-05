@@ -8,6 +8,7 @@ import { FunctionService } from '@utrad-ical/circus-lib';
 import buildDicomVolumes from './buildDicomVolumes';
 import tarfs from 'tar-fs';
 import stream from 'stream';
+import * as circus from '../interface';
 
 export interface PluginJobRunner {
   run: (

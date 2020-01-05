@@ -1,6 +1,7 @@
 import path from 'path';
 import fs from 'fs-extra';
 import { FunctionService } from '@utrad-ical/circus-lib';
+import * as circus from '../interface';
 
 const createStaticPluginDefinitionAccessor: FunctionService<
   circus.PluginDefinitionAccessor,

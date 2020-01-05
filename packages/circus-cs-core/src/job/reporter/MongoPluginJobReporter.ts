@@ -2,6 +2,7 @@ import { FunctionService } from '@utrad-ical/circus-lib';
 import { MongoClientPool } from '../../mongoClientPool';
 import tarfs from 'tar-fs';
 import path from 'path';
+import * as circus from '../../interface';
 
 /**
  * An implementation of PluginJobReporter that writes plugin status on

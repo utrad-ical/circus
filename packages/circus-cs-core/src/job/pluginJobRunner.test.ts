@@ -8,6 +8,7 @@ import DockerRunner from '../util/DockerRunner';
 import { DicomFileRepository } from '@utrad-ical/circus-lib/lib/dicom-file-repository';
 import tar from 'tar-stream';
 import memory from 'memory-streams';
+import * as circus from '../interface';
 
 const testDir = path.resolve(__dirname, '../../test/');
 const repositoryDir = path.join(testDir, 'repository/');

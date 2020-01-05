@@ -6,6 +6,7 @@
 import _pm2 from 'pm2';
 import pify from 'pify';
 import escape from 'shell-escape';
+import * as circus from '../interface';
 
 const pm2: any = pify(_pm2);
 

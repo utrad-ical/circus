@@ -5,6 +5,7 @@ import DockerRunner from '../util/DockerRunner';
 import isDirectory from '../util/isDirectory';
 import { FunctionService } from '@utrad-ical/circus-lib';
 import Command from './Command';
+import * as circus from '../interface';
 
 const checkEnv: FunctionService<
   Command,

@@ -7,6 +7,7 @@ import { PluginJobRegisterer } from './job/registerer/createPluginJobRegisterer'
 import { PluginJobRunner } from './job/pluginJobRunner';
 import { MongoClientPool } from './mongoClientPool';
 import DockerRunner from './util/DockerRunner';
+import * as circus from './interface';
 
 /**
  * The list of all dependencies that can be created via ServiceLoader.

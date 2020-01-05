@@ -52,12 +52,14 @@ describe('#insert', () => {
 
   it('should raise an error on trying to insert invalid data', async () => {
     await expect(
-      testCollection.insert({ month: 'hello', name: 10 })
+      testCollection.insert({ month: 'hello', name: 10 } as any)
     ).rejects.toThrow(ValidationError);
-    await expect(testCollection.insert({ month: 5 })).rejects.toThrow(
+    await expect(testCollection.insert({ month: 5 } as any)).rejects.toThrow(
       ValidationError
     );
-    await expect(testCollection.insert({})).rejects.toThrow(ValidationError);
+    await expect(testCollection.insert({} as any)).rejects.toThrow(
+      ValidationError
+    );
   });
 });
 
@@ -87,7 +89,7 @@ describe('#upsert', () => {
   });
 
   it('should raise an error on trying to upsert invalid data', async () => {
-    await expect(testCollection.upsert(3, { name: 3 })).rejects.toThrow(
+    await expect(testCollection.upsert(3, { name: 3 } as any)).rejects.toThrow(
       ValidationError
     );
     await expect(testCollection.upsert(7, {})).rejects.toThrow(ValidationError);
@@ -114,7 +116,7 @@ describe('#insertMany', () => {
     await expect(
       testCollection.insertMany([
         { month: 6, name: 'Minazuki' },
-        { month: 8, name: 17 }
+        { month: 8, name: 17 } as any
       ])
     ).rejects.toThrow(ValidationError);
   });
@@ -161,7 +163,7 @@ describe('#deleteMany', () => {
 
 describe('#findById', () => {
   it('should return valid data without _id for the given primary key', async () => {
-    const result = await testCollection.findById(3);
+    const result = (await testCollection.findById(3)) as any;
     expect(result.name).toBe('Yayoi');
     expect(result._id).toBeUndefined();
   });
@@ -175,7 +177,7 @@ describe('#findById', () => {
 
 describe('#findByIdOrFail', () => {
   it('should return valid data when primary key is given', async () => {
-    const result = await testCollection.findByIdOrFail(3);
+    const result = (await testCollection.findByIdOrFail(3)) as any;
     expect(result.name).toBe('Yayoi');
     expect(result._id).toBeUndefined();
   });

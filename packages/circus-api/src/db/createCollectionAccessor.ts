@@ -34,7 +34,7 @@ export interface CollectionAccessor<T> {
   findById: (id: string | number) => Promise<WithDates<T>>;
   findByIdOrFail: (id: string | number) => Promise<WithDates<T>>;
   insert: (data: T) => Promise<any>;
-  upsert: (id: string | number, data: T) => Promise<any>;
+  upsert: (id: string | number, data: Partial<T>) => Promise<any>;
   aggregate: (pipeline: object[]) => Promise<any[]>;
   insertMany: (data: T[]) => Promise<any>;
   modifyOne: (id: string | number, updates: object) => Promise<any>;
@@ -57,6 +57,7 @@ const createCollectionAccessor = <T = any>(
 
   /**
    * Inserts a single document after validation succeeds.
+   * @param data The data to insert (excluding _id)
    */
   const insert = async (data: T) => {
     const date = new Date();
@@ -75,13 +76,13 @@ const createCollectionAccessor = <T = any>(
    * @param id The primary key.
    * @param data The data to upsert (excluding _id)
    */
-  const upsert = async (id: string | number, data: T) => {
+  const upsert = async (id: string | number, data: Partial<T>) => {
     const date = new Date();
     const upserting = { createdAt: date, updatedAt: date, ...data };
     await validator.validate(dbEntrySchema, { [primaryKey]: id, ...upserting });
     return await collection.updateOne(
       { [primaryKey]: id } as mongo.FilterQuery<WithDates<T>>,
-      { $set: upserting },
+      { $set: upserting } as mongo.UpdateQuery<WithDates<T>>,
       { upsert: true }
     );
   };

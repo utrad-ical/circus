@@ -11,17 +11,3 @@ declare module 'koa' {
     userPrivileges: UserPrivilegeInfo;
   }
 }
-
-declare module 'http' {
-  interface IncomingMessage {
-    // koa-multer adds files here
-    // https://github.com/expressjs/multer
-    files: {
-      encoding: string;
-      mimetype: string;
-      size: number;
-      originalname: string;
-      buffer: Buffer;
-    }[];
-  }
-}

@@ -17,7 +17,7 @@ export interface ApiTest {
    */
   db: mongo.Db;
   /**
-   * Holds three `AxiosInstance`s used to represent three different
+   * Holds three `AxiosInstance`s that represent three API
    * users with different privileges.
    * Its `baseURL` is configured to point to the test sever,
    * and its `validateStatus` is configured not to throw on any 4xx/5xx errors.

@@ -1,6 +1,6 @@
 import Koa, { Middleware } from 'koa';
 import bodyParser from 'koa-bodyparser';
-import multer from 'koa-multer';
+import multer from '@koa/multer';
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import { safeLoad as yaml } from 'js-yaml';

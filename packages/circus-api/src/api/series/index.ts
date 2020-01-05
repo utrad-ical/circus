@@ -62,8 +62,7 @@ export const handlePost: RouteMiddleware = ({ dicomImporter }) => {
       ctx.throw(status.FORBIDDEN, 'You cannot upload to this domain.');
     }
 
-    // koa-multer sets loaded files to ctx.req, not ctx.request
-    const files = ctx.req.files;
+    const files = ctx.request.files;
     let count = 0;
     for (const entry of files) {
       const signature = entry.buffer.readUInt32BE(0);

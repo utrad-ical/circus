@@ -8,41 +8,79 @@ type CursorOptions = {
   skip?: number;
 };
 
+type WithDates<T> = T & { createdAt: Date; updatedAt: Date };
+
+interface Options<T> {
+  schema: object | string;
+  collectionName: string;
+  primaryKey: keyof T;
+}
+
+interface CursorLike<T> {
+  next: () => Promise<T>;
+  hasNext: () => Promise<boolean>;
+  count: () => Promise<number>;
+}
+
+export interface CollectionAccessor<T> {
+  find: mongo.Collection['find'];
+  deleteMany: mongo.Collection['deleteMany'];
+  deleteOne: mongo.Collection['deleteOne'];
+  findAll: (query?: object, options?: CursorOptions) => Promise<WithDates<T>[]>;
+  findAsCursor: (
+    query: object,
+    options: CursorOptions
+  ) => CursorLike<WithDates<T>>;
+  findById: (id: string | number) => Promise<WithDates<T>>;
+  findByIdOrFail: (id: string | number) => Promise<WithDates<T>>;
+  insert: (data: T) => Promise<any>;
+  upsert: (id: string | number, data: T) => Promise<any>;
+  aggregate: (pipeline: object[]) => Promise<any[]>;
+  insertMany: (data: T[]) => Promise<any>;
+  modifyOne: (id: string | number, updates: object) => Promise<any>;
+  newSequentialId: () => Promise<number>;
+  collectionName: () => string;
+}
+
 /**
  * Basic wrapper for Mongo collection that performs validation tasks.
  */
-const createCollectionAccessor = (
+const createCollectionAccessor = <T = any>(
   db: mongo.Db,
   validator: Validator,
-  opts: { schema: object | string; collectionName: string; primaryKey: string }
+  opts: Options<T>
 ) => {
   const { schema, collectionName, primaryKey } = opts;
-  const collection = db.collection(collectionName);
+  const collection = db.collection<WithDates<T>>(collectionName);
 
   const dbEntrySchema = schema + '|dbEntry';
 
   /**
    * Inserts a single document after validation succeeds.
    */
-  const insert = async (data: object) => {
+  const insert = async (data: T) => {
     const date = new Date();
-    const inserting = { ...data, createdAt: date, updatedAt: date };
+    const inserting: WithDates<T> = {
+      ...data,
+      createdAt: date,
+      updatedAt: date
+    };
     await validator.validate(dbEntrySchema, inserting);
-    return await collection.insertOne(inserting);
+    return await collection.insertOne(inserting as any);
   };
 
   /**
    * Upserts a single document after validation succeeds.
    * Partial update is not supported; you need to provide the whole document.
-   * @param {string|number} id The primary key.
-   * @param {object} data The data to upsert (excluding the id)
+   * @param id The primary key.
+   * @param data The data to upsert (excluding _id)
    */
-  const upsert = async (id: string | number, data: object) => {
+  const upsert = async (id: string | number, data: T) => {
     const date = new Date();
     const upserting = { createdAt: date, updatedAt: date, ...data };
     await validator.validate(dbEntrySchema, { [primaryKey]: id, ...upserting });
     return await collection.updateOne(
-      { [primaryKey]: id },
+      { [primaryKey]: id } as mongo.FilterQuery<WithDates<T>>,
       { $set: upserting },
       { upsert: true }
     );
@@ -51,29 +89,29 @@ const createCollectionAccessor = (
   /**
    * Inserts multiple documents after validation succeeds for each document.
    */
-  const insertMany = async (data: object[]) => {
-    const documents = [];
+  const insertMany = async (data: T[]) => {
+    const documents: WithDates<T>[] = [];
     const date = new Date();
     for (const doc of data) {
       const inserting = { ...doc, createdAt: date, updatedAt: date };
       await validator.validate(dbEntrySchema, inserting);
       documents.push(inserting);
     }
-    return await collection.insertMany(documents);
+    return await collection.insertMany(documents as any);
   };
 
   /**
    * Fetches documents that matches the given query as an array.
    * The `_id` field will not be included.
    */
-  async function findAll(query: object = {}, options: CursorOptions = {}) {
+  const findAll = async (query: object = {}, options: CursorOptions = {}) => {
     const cursor = findAsCursor(query, options);
-    const array = [];
+    const array: WithDates<T>[] = [];
     while (await cursor.hasNext()) {
-      array.push(await cursor.next());
+      array.push((await cursor.next())!);
     }
     return array;
-  }
+  };
 
   /**
    * Executes find and returns the matched documents as a cursor-like object.
@@ -94,7 +132,7 @@ const createCollectionAccessor = (
       },
       hasNext: () => cursor.hasNext(),
       count: () => cursor.count()
-    };
+    } as CursorLike<WithDates<T>>;
   };
 
   /**
@@ -102,31 +140,31 @@ const createCollectionAccessor = (
    * Use this sparingly becuse this breaks encapsulation.
    * Validation is not performed.
    */
-  async function aggregate(pipeline: object[]) {
+  const aggregate = async (pipeline: object[]) => {
     const cursor = await aggregateAsCursor(pipeline);
     const array = [];
     while (await cursor.hasNext()) {
       array.push(await cursor.next());
     }
     return array;
-  }
+  };
 
   /**
    * Provides direct access to MongoDB's aggregation framework.
    * Use this sparingly becuse this breaks encapsulation.
    * Validation is not performed.
    */
-  async function aggregateAsCursor(pipeline: object[]) {
+  const aggregateAsCursor = async (pipeline: object[]) => {
     return collection.aggregate(pipeline);
-  }
+  };
 
   /**
    * Fetches the single document that matches the primary key.
    */
-  async function findById(id: string | number) {
+  const findById = async (id: string | number) => {
     const key = primaryKey ? primaryKey : '_id';
     const docs = await collection
-      .find({ [key]: id })
+      .find({ [key]: id } as mongo.FilterQuery<WithDates<T>>)
       .project({ _id: 0 })
       .limit(1)
       .toArray();
@@ -135,13 +173,13 @@ const createCollectionAccessor = (
       await validator.validate(dbEntrySchema, result);
     }
     return result;
-  }
+  };
 
   /**
    * Fetches the single document by the primary key.
    * Throws an error with 404 status if nothing found.
    */
-  async function findByIdOrFail(id: string | number) {
+  const findByIdOrFail = async (id: string | number) => {
     const result = await findById(id);
     if (result === undefined) {
       const err = new Error(`The requested ${schema} was not found.`);
@@ -150,12 +188,12 @@ const createCollectionAccessor = (
       throw err;
     }
     return result;
-  }
+  };
 
   /**
    * Modifies the document by the primary key.
    */
-  async function modifyOne(id: string | number, updates: object) {
+  const modifyOne = async (id: string | number, updates: object) => {
     const key = primaryKey ? primaryKey : '_id';
     const date = new Date();
     if (key in updates) {
@@ -165,8 +203,10 @@ const createCollectionAccessor = (
       throw err;
     }
     const original = await collection.findOneAndUpdate(
-      { [key]: id },
-      { $set: { ...updates, updatedAt: date } }
+      { [key]: id } as mongo.FilterQuery<WithDates<T>>,
+      { $set: { ...updates, updatedAt: date } } as mongo.UpdateQuery<
+        WithDates<T>
+      >
     );
     if (original.value === null) {
       const err = new Error('The request resource was not found.');
@@ -174,22 +214,26 @@ const createCollectionAccessor = (
       err.expose = true;
       throw err;
     }
-    const updated = { ...original.value, ...updates, updatedAt: date };
+    const updated: WithDates<T> & { _id: any } = {
+      ...original.value,
+      ...updates,
+      updatedAt: date
+    } as any;
     try {
       const { _id, ...updatedWithoutId } = updated;
       await validator.validate(dbEntrySchema, updatedWithoutId);
     } catch (err) {
       // validation failed, rollback
-      await collection.findOneAndReplace({ [key]: id }, original.value);
+      await collection.findOneAndReplace(
+        { [key]: id } as mongo.FilterQuery<WithDates<T>>,
+        original.value!
+      );
       throw err;
     }
     return updated;
-  }
+  };
 
-  /**
-   * @returns {number}
-   */
-  async function newSequentialId() {
+  const newSequentialId = async () => {
     const date = new Date();
     const doc = await db.collection('sequences').findOneAndUpdate(
       { key: collectionName },
@@ -201,7 +245,7 @@ const createCollectionAccessor = (
       }
     );
     if (doc.value !== null) {
-      return doc.value.value;
+      return doc.value.value as number;
     } else {
       await db.collection('sequences').insertOne({
         key: collectionName,
@@ -211,7 +255,7 @@ const createCollectionAccessor = (
       });
       return 1;
     }
-  }
+  };
 
   // These methods are exposed as-is for now
   const find = collection.find.bind(collection);
@@ -233,8 +277,7 @@ const createCollectionAccessor = (
     modifyOne,
     newSequentialId,
     collectionName: () => collectionName
-  };
+  } as CollectionAccessor<T>;
 };
 
 export default createCollectionAccessor;
-export type CollectionAccessor = ReturnType<typeof createCollectionAccessor>;

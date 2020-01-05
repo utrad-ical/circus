@@ -5,21 +5,26 @@ import createCollectionAccessor, {
 import mongo from 'mongodb';
 import { Validator } from '../createValidator';
 
-type CollectionNames =
-  | 'user'
-  | 'group'
-  | 'project'
-  | 'series'
-  | 'clinicalCase'
-  | 'serverParam'
-  | 'token'
-  | 'task'
-  | 'plugin'
-  | 'pluginJob';
+interface ModelEntries {
+  user: any;
+  group: any;
+  project: any;
+  series: any;
+  clinicalCase: any;
+  serverParam: any;
+  token: any;
+  task: any;
+  plugin: any;
+  pluginJob: any;
+}
+
+export type Models = {
+  [key in keyof ModelEntries]: CollectionAccessor<ModelEntries[key]>;
+};
 
 const createModels = (db: mongo.Db, validator: Validator) => {
   const modelDefinitions: {
-    [key in CollectionNames]: { col: string; pk: string };
+    [key in keyof ModelEntries]: { col: string; pk: string };
   } = {
     user: { col: 'users', pk: 'userEmail' },
     group: { col: 'groups', pk: 'groupId' },
@@ -34,7 +39,7 @@ const createModels = (db: mongo.Db, validator: Validator) => {
   };
 
   const models: any = {};
-  (Object.keys(modelDefinitions) as CollectionNames[]).forEach(k => {
+  (Object.keys(modelDefinitions) as (keyof ModelEntries)[]).forEach(k => {
     const def = modelDefinitions[k];
     models[k] = createCollectionAccessor(db, validator, {
       schema: k,
@@ -46,7 +51,3 @@ const createModels = (db: mongo.Db, validator: Validator) => {
 };
 
 export default createModels;
-
-export type Models = {
-  [key in CollectionNames]: CollectionAccessor;
-};

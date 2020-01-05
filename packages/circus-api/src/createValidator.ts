@@ -55,6 +55,12 @@ const defaultSchemaRoot = path.join(__dirname, 'schemas');
 
 type SchemaConverter = (schema: any, ...params: string[]) => any;
 
+export interface Validator {
+  validate: (schema: any, data: any, mode?: string) => Promise<any>;
+  getSchema: (key: string) => any;
+  filterSchema: (schemaDef: string | object) => any;
+}
+
 /**
  * Creates the validator wrapping AJV instance.
  * This validator knows all the schemas under the 'schemas' directory
@@ -258,13 +264,7 @@ const createValidator = async (schemaRoot = defaultSchemaRoot) => {
       return validator.getSchema(key);
     },
     filterSchema
-  };
+  } as Validator;
 };
 
 export default createValidator;
-
-export type Validator = ReturnType<typeof createValidator> extends Promise<
-  infer T
->
-  ? T // trick to get the Promise's resolving type
-  : never;

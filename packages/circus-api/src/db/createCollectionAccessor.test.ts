@@ -6,7 +6,12 @@ import createCollectionAccessor, {
   CollectionAccessor
 } from './createCollectionAccessor';
 
-let testCollection: CollectionAccessor, db: mongo.Db;
+interface MonthData {
+  month: number;
+  name: string;
+}
+
+let testCollection: CollectionAccessor<MonthData>, db: mongo.Db;
 
 const dbPromise = usingMongo();
 
@@ -15,7 +20,7 @@ beforeAll(async () => {
   const validator = await createValidator(
     __dirname + '/../../test/test-schemas'
   );
-  testCollection = await createCollectionAccessor(db, validator, {
+  testCollection = await createCollectionAccessor<MonthData>(db, validator, {
     schema: 'months',
     collectionName: 'months',
     primaryKey: 'month'

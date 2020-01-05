@@ -1,6 +1,8 @@
+import { RouteMiddleware } from '../../typings/middlewares';
+
 // import status from 'http-status';
 
-export const handleGet = () => {
+export const handleGet: RouteMiddleware = () => {
   return async (ctx, next) => {
     const user = ctx.user;
     ctx.body = {
@@ -10,7 +12,7 @@ export const handleGet = () => {
   };
 };
 
-export const handleGetFull = ({
+export const handleGetFull: RouteMiddleware = ({
   models,
   dicomImageServerUrl,
   uploadFileSizeMax

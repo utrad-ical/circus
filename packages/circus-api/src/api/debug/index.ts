@@ -1,10 +1,11 @@
 import { PassThrough } from 'stream';
 import delay from '../../utils/delay';
+import { RouteMiddleware } from '../../typings/middlewares';
 
 const version = require('../../../package.json').version;
 const upSince = new Date().toISOString();
 
-export const handleGet = () => {
+export const handleGet: RouteMiddleware = () => {
   return async (ctx, next) => {
     ctx.body = {
       status: 'running',
@@ -19,13 +20,13 @@ export const handleGet = () => {
   };
 };
 
-export const handleEcho = () => {
+export const handleEcho: RouteMiddleware = () => {
   return async (ctx, next) => {
     ctx.body = ctx.request.body;
   };
 };
 
-export const handleDummyProgress = () => {
+export const handleDummyProgress: RouteMiddleware = () => {
   return async (ctx, next) => {
     const stream = new PassThrough();
     ctx.body = stream;

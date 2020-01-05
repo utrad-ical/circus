@@ -1,6 +1,7 @@
 import status from 'http-status';
+import { RouteMiddleware } from '../../typings/middlewares';
 
-export const handleGet = ({ models }) => {
+export const handleGet: RouteMiddleware = ({ models }) => {
   return async (ctx, next) => {
     if (!ctx.user) {
       ctx.throw(status.UNAUTHORIZED);

@@ -3,6 +3,8 @@ import prepareHelperModules from '@utrad-ical/circus-rs/src/server/helper/prepar
 import seriesRoutes from '@utrad-ical/circus-rs/src/server/app/series/seriesRoutes';
 import Logger from '@utrad-ical/circus-lib/lib/logger/Logger';
 import { DicomFileRepository } from '@utrad-ical/circus-lib/lib/dicom-file-repository';
+import koa from 'koa';
+import { VolumeProvider } from '@utrad-ical/circus-rs/src/server/helper/createVolumeProvider';
 
 /**
  * Creates a series router.
@@ -29,7 +31,10 @@ const circusRs = async ({
 
   const router = new Router();
   router.use('/series/:sid', seriesRoutes(helpers as any));
-  return { rs: router.routes(), volumeProvider: helpers.volumeProvider };
+  return {
+    rs: router.routes() as koa.Middleware,
+    volumeProvider: helpers.volumeProvider as VolumeProvider
+  };
 };
 
 export default circusRs;

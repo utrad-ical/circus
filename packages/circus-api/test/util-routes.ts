@@ -6,6 +6,7 @@ import createApp from '../src/createApp';
 import { setUpKoaTestWith } from './util-koa';
 import { connectMongo, setUpMongoFixture } from './util-mongo';
 import mongo from 'mongodb';
+import * as cscore from '@utrad-ical/circus-cs-core';
 
 /**
  * Holds data used for API route testing.
@@ -36,7 +37,7 @@ export interface ApiTest {
      */
     guest: AxiosInstance;
   };
-  csCore: ReturnType<typeof createMockCsCore>; // TODO: Change this to real CsCore
+  csCore: cscore.CsCore;
   /**
    * Shuts down the test Koa server and the DB connection.
    * Make sure to call this on `afterAll()`.
@@ -105,28 +106,28 @@ export const setUpAppForRoutesTest = async () => {
 };
 
 const createMockCsCore = () => {
-  let status = 'stopped';
+  let status: 'running' | 'stopped' = 'stopped';
   const pluginDefinitions = yaml(
     fs.readFileSync(
       path.join(__dirname, 'fixture/pluginDefinitions.yaml'),
       'utf8'
     )
-  ) as any[];
+  ) as cscore.PluginDefinition[];
 
-  const queue = [
+  const queue = ([
     {
-      status: 'finished',
+      state: 'finished',
       jobId: '01dxgwv3k0medrvhdag4mpw9wa'
     }
-  ];
+  ] as any) as cscore.QueueItem<cscore.PluginJobRequest>[];
 
   const csCore = {
     daemon: {
-      start: async () => (status = 'running'),
-      stop: async () => (status = 'stopped'),
+      start: async () => ((status = 'running'), undefined),
+      stop: async () => ((status = 'stopped'), undefined),
       status: async () => status,
-      pm2list: async () => status,
-      pm2killall: async () => status
+      pm2list: async () => {},
+      pm2killall: async () => {}
     },
     plugin: {
       list: async () => pluginDefinitions,
@@ -140,12 +141,12 @@ const createMockCsCore = () => {
       list: async (state = 'all') =>
         (state === 'all'
           ? queue
-          : queue.filter(job => job.status === state)
+          : queue.filter(job => job.state === state)
         ).map(item => Object.assign({}, item)),
       register: async (jobId: string, payload: any, priority = 0) =>
         Promise.resolve()
     }
-  };
+  } as cscore.CsCore;
 
   return csCore;
 };

@@ -22,14 +22,14 @@ interface CursorLike<T> {
   count: () => Promise<number>;
 }
 
-export interface CollectionAccessor<T> {
+export interface CollectionAccessor<T = any> {
   find: mongo.Collection['find'];
   deleteMany: mongo.Collection['deleteMany'];
   deleteOne: mongo.Collection['deleteOne'];
   findAll: (query?: object, options?: CursorOptions) => Promise<WithDates<T>[]>;
   findAsCursor: (
     query: object,
-    options: CursorOptions
+    options?: CursorOptions
   ) => CursorLike<WithDates<T>>;
   findById: (id: string | number) => Promise<WithDates<T>>;
   findByIdOrFail: (id: string | number) => Promise<WithDates<T>>;

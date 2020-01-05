@@ -1,7 +1,7 @@
 - jobId: 01dxgwv3k0medrvhdag4mpw9wa
-  pluginId: abcdefghijkl
-  pluginName: foobar
-  pluginVersion: '1.2.5'
+  pluginId: d135e1fbb368e35f940ae8e6deb171e90273958dc3938de5a8237b73bb42d9c2
+  pluginName: MOCK-SUCCEEDS
+  pluginVersion: '1.0.0'
   userEmail: circus@example.com
   status: finished
   series:
@@ -22,7 +22,10 @@
   results: {}
 
 - jobId: 01dxgwvcw65d9av37p2bsy57vb
-  pluginId: zyxwvutsrqpo
+  pluginId: 74c50a99530ef149c16bc6f0cf71b987470282c54e436e9bec6da704f1fcac9c
+  pluginName: MOCK-VALIDATION-FAILURE
+  pluginVersion: '1.0.0'
+  userEmail: circus@example.com
   status: invalidated
   series:
     - seriesUid: 9.8.7.6.5
@@ -30,11 +33,17 @@
         start: 1
         end: 10
         delta: 1
+  errorMessage: null
+  startedAt: { $date: '2018-01-07T12:00:00Z' }
+  finishedAt: { $date: '2018-01-07T12:01:00Z' }
   feedbacks: []
   results: {}
 
 - jobId: 01dxgwvhwhyjt8hd4srsf9z4te
-  pluginId: opqrstuvwxyz
+  pluginId: d135e1fbb368e35f940ae8e6deb171e90273958dc3938de5a8237b73bb42d9c2
+  pluginName: MOCK-EMPTY
+  pluginVersion: '1.0.0'
+  userEmail: circus@example.com
   status: failed
   series:
     - seriesUid: 5.6.7.8.9
@@ -43,3 +52,7 @@
         end: 10
         delta: 1
   errorMessage: 'Something went wrong'
+  startedAt: { $date: '2018-01-04T12:00:00Z' }
+  finishedAt: { $date: '2018-01-04T12:01:00Z' }
+  feedbacks: []
+  results: {}

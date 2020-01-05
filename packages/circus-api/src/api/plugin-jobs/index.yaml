@@ -36,13 +36,7 @@ routes:
     handler: handleSearch
     description: >
       Performs search for the plug-in job.
-    responseSchema:
-      type: object
-      properties:
-        items:
-          type: array
-          items:
-            $ref: pluginJob
+    responseSchema: pluginJob|searchResult
   - verb: get
     path: /plugin-jobs/:jobId
     description: >

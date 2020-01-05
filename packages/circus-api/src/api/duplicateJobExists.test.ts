@@ -14,7 +14,7 @@ beforeAll(async () => {
 });
 
 const makeBaseRequest = () => ({
-  pluginId: 'abcdefghijkl',
+  pluginId: 'd135e1fbb368e35f940ae8e6deb171e90273958dc3938de5a8237b73bb42d9c2',
   series: [
     {
       seriesUid: '1.2.3.4.5',

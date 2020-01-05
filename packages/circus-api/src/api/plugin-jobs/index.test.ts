@@ -32,6 +32,14 @@ it('should register a new plug-in job', async () => {
   expect(res.status).toBe(200);
 });
 
+it('should return a list of plug-in jobs', async () => {
+  const res = await axios.request({
+    method: 'get',
+    url: 'api/plugin-jobs'
+  });
+  expect(res.status).toBe(200);
+});
+
 it('should reject invalid series request', async () => {
   // Series image out of range
   const res1 = await axios.request({

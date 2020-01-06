@@ -2,11 +2,17 @@ import axios, { AxiosInstance } from 'axios';
 import fs from 'fs-extra';
 import { safeLoad as yaml } from 'js-yaml';
 import path from 'path';
-import createApp from '../src/createApp';
+import { createKoa } from '../src/createApp';
 import { setUpKoaTestWith } from './util-koa';
 import { connectMongo, setUpMongoFixture } from './util-mongo';
 import mongo from 'mongodb';
 import * as cscore from '@utrad-ical/circus-cs-core';
+import createTestLogger from './util-logger';
+import createValidator from '../src/createValidator';
+import createModels from '../src/db/createModels';
+import createStorage from '../src/storage/createStorage';
+import DicomImporter from '../src/DicomImporter';
+import { MemoryDicomFileRepository } from '@utrad-ical/circus-lib/lib/dicom-file-repository';
 
 /**
  * Holds data used for API route testing.
@@ -66,15 +72,34 @@ export const setUpAppForRoutesTest = async () => {
     'pluginDefinitions'
   ]);
 
+  const validator = await createValidator();
+  const models = createModels(db, validator);
   const csCore = createMockCsCore();
+  const logger = await createTestLogger();
 
-  const app = await createApp({
-    debug: true,
-    db,
-    cs: csCore,
-    pluginResultsPath: '', // dummy
-    dicomImageServerUrl: '' // dummy
-  });
+  const dicomImporter = process.env.DICOM_UTILITY
+    ? new DicomImporter(new MemoryDicomFileRepository({}), models, {
+        utility: process.env.DICOM_UTILITY
+      })
+    : undefined;
+
+  const app = await createKoa(
+    {
+      validator,
+      db,
+      logger,
+      models,
+      blobStorage: await createStorage('memory'),
+      dicomImporter,
+      pluginResultsPath: '', // dummy
+      cs: csCore,
+      volumeProvider: null as any, // dummy
+      uploadFileSizeMax: '200mb',
+      dicomImageServerUrl: '' // dummy
+    },
+    { debug: true },
+    async () => {}
+  );
   const testServer = await setUpKoaTestWith(app);
 
   // Prepare axios instances that kick HTTP requests as these users

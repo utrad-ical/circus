@@ -1,7 +1,7 @@
 // main server bootstrapping
 
 import dashdash from 'dashdash';
-import createApp, { makeCsCoreFromServiceLoader } from './createApp';
+import createApp from './createApp';
 import connectDb from './db/connectDb';
 import mongo from 'mongodb';
 import chalk from 'chalk';
@@ -146,11 +146,6 @@ const main = async () => {
     logger.warn(`CIRCUS API will start using ${fixUser} as the fixed user!`);
   }
 
-  const cs = await makeCsCoreFromServiceLoader({
-    pluginResultsPath,
-    dicomPath
-  });
-
   const serverOptions = {
     debug: debug || process.env.NODE_ENV !== 'production',
     db,
@@ -160,8 +155,7 @@ const main = async () => {
     dicomPath,
     pluginResultsPath,
     corsOrigin,
-    dicomImageServerUrl,
-    cs
+    dicomImageServerUrl
   };
 
   try {

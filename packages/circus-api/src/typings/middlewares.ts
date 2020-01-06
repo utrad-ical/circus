@@ -7,6 +7,7 @@ import { VolumeProvider } from '@utrad-ical/circus-rs/src/server/helper/createVo
 import DicomImporter from '../DicomImporter';
 import Storage from '../storage/Storage';
 import { UserPrivilegeInfo } from '../privilegeUtils';
+import { CsCore } from '@utrad-ical/circus-cs-core';
 
 export interface Deps {
   validator: Validator;
@@ -14,9 +15,9 @@ export interface Deps {
   logger: Logger;
   models: Models;
   blobStorage: Storage;
-  dicomImporter?: DicomImporter;
+  dicomImporter?: DicomImporter; // Optional!
   pluginResultsPath: string;
-  cs: any;
+  cs: CsCore;
   volumeProvider: VolumeProvider;
   uploadFileSizeMax: string;
   dicomImageServerUrl: string;

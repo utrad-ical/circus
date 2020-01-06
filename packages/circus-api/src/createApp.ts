@@ -56,12 +56,7 @@ interface Route {
   responseSchema?: string | object;
 }
 
-async function prepareApiRouter(
-  apiDir: string,
-  deps: Deps,
-  options: CreateAppOptions
-) {
-  const { debug } = options;
+async function prepareApiRouter(apiDir: string, deps: Deps, debug: boolean) {
   const router = new Router();
   const validator = deps.validator;
 
@@ -158,7 +153,6 @@ export const makeCsCoreFromServiceLoader = async (
 interface CreateAppOptions {
   debug: boolean;
   db: mongo.Db;
-  cs: any;
   fixUser?: string;
   blobPath?: string;
   corsOrigin?: string;
@@ -168,65 +162,26 @@ interface CreateAppOptions {
 }
 
 /**
- * Creates a new Koa app.
+ * Builds a Koa app and sets up the router.
+ * Register each API endpoints to the router according YAML manifest files.
  */
-export default async function createApp(options: CreateAppOptions) {
-  const {
-    debug,
-    db,
-    cs,
-    fixUser,
-    blobPath,
-    corsOrigin,
-    dicomPath,
-    pluginResultsPath,
-    dicomImageServerUrl
-  } = options;
-
+export const createKoa = async (
+  deps: Deps,
+  options: Pick<CreateAppOptions, 'fixUser' | 'debug' | 'corsOrigin'>,
+  rs: Middleware
+) => {
+  const { fixUser, debug, corsOrigin } = options;
+  const { models, logger } = deps;
   // The main Koa instance.
   const koa = new Koa();
 
-  // Trust proxy headers such as X-Forwarded-For
-  koa.proxy = true;
-
-  const validator = await createValidator();
-  const models = createModels(db, validator);
-  const blobStorage = await createBlobStorage(blobPath);
-
-  const dicomFileRepository = await createDicomFileRepository(dicomPath);
-
-  const logger = createLogger();
-
-  const utilityEnv = process.env.DICOM_UTILITY;
-  const dicomImporter = utilityEnv
-    ? new DicomImporter(dicomFileRepository, models, { utility: utilityEnv })
-    : undefined;
-
-  const { rs, volumeProvider } = await circusRs({
-    logger,
-    dicomFileRepository
-  });
-
-  // Build a router.
-  // Register each API endpoints to the router according YAML manifest files.
-  const deps: Deps = {
-    validator,
-    db,
-    logger,
-    models,
-    blobStorage,
-    dicomImporter,
-    pluginResultsPath,
-    cs,
-    volumeProvider,
-    uploadFileSizeMax: '200mb',
-    dicomImageServerUrl
-  };
-
   const apiDir = path.resolve(__dirname, 'api/**/*.yaml');
-  const apiRouter = await prepareApiRouter(apiDir, deps, options);
+  const apiRouter = await prepareApiRouter(apiDir, deps, debug);
 
   const oauth = createOauthServer(models);
+
+  // Trust proxy headers such as X-Forwarded-For
+  koa.proxy = true;
 
   // Register middleware stack to the Koa app.
   koa.use(errorHandler({ includeErrorDetails: debug, logger }));
@@ -257,8 +212,58 @@ export default async function createApp(options: CreateAppOptions) {
     )
   );
   koa.use(mount('/login', compose([bodyParser(), oauth.token()])));
-
-  koa.use(mount('/rs', rs as Middleware));
+  koa.use(mount('/rs', rs));
 
   return koa;
-}
+};
+
+/**
+ * Creates a new Koa app.
+ */
+const createApp = async (options: CreateAppOptions) => {
+  const {
+    db,
+    blobPath,
+    dicomPath,
+    pluginResultsPath,
+    dicomImageServerUrl
+  } = options;
+
+  const validator = await createValidator();
+  const models = createModels(db, validator);
+  const blobStorage = await createBlobStorage(blobPath);
+  const dicomFileRepository = await createDicomFileRepository(dicomPath);
+  const logger = createLogger();
+  const cs = await makeCsCoreFromServiceLoader({
+    pluginResultsPath,
+    dicomPath
+  });
+
+  const utilityEnv = process.env.DICOM_UTILITY;
+  const dicomImporter = utilityEnv
+    ? new DicomImporter(dicomFileRepository, models, { utility: utilityEnv })
+    : undefined;
+
+  const { rs, volumeProvider } = await circusRs({
+    logger,
+    dicomFileRepository
+  });
+
+  const deps: Deps = {
+    validator,
+    db,
+    logger,
+    models,
+    blobStorage,
+    dicomImporter,
+    pluginResultsPath,
+    cs,
+    volumeProvider,
+    uploadFileSizeMax: '200mb',
+    dicomImageServerUrl
+  };
+
+  return await createKoa(deps, options, rs);
+};
+
+export default createApp;

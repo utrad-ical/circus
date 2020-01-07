@@ -1,5 +1,4 @@
 import path from 'path';
-import { isTemplateElement } from '@babel/types';
 
 interface ModuleConfig {
   [key: string]: { type?: string; options?: any };

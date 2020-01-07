@@ -26,20 +26,18 @@ test('file logger', async () => {
     await logger.shutdown();
   };
 
-  const check = async () => {
-    const files = await fs.readdir(logDir);
-    for (const file of files) {
-      const log = await fs.readFile(path.join(logDir, file), 'utf8');
-      expect(log).toMatch(/Something trivial happened/);
-      expect(log).toMatch(/price: 150/);
-      expect(log).toMatch(/stock: true/);
-      expect(log).toMatch(/This is bad/);
-      expect(log).toMatch(/true false true/);
-    }
-  };
-
   await write('apple');
   await write('banana');
-  await sleep(100);
-  await check();
+  await sleep(50);
+
+  const files = await fs.readdir(logDir);
+  expect(files).toHaveLength(2);
+  for (const file of files) {
+    const log = await fs.readFile(path.join(logDir, file), 'utf8');
+    expect(log).toMatch(/Something trivial happened/);
+    expect(log).toMatch(/price: 150/);
+    expect(log).toMatch(/stock: true/);
+    expect(log).toMatch(/This is bad/);
+    expect(log).toMatch(/true false true/);
+  }
 });

@@ -6,6 +6,20 @@ export interface DirectedSegment {
 }
 
 /**
+ * Determine center of line.
+ * @param ab line segment AB
+ * @return center of line
+ */
+export function centerDirectedSegment(ab: DirectedSegment): Vector2 {
+  return ab.from.clone().add(
+    ab.to
+      .clone()
+      .sub(ab.from)
+      .multiplyScalar(0.5)
+  );
+}
+
+/**
  * Determine whether line segments AB and CD intersect. (including end points)
  * @param ab line segment AB
  * @param cd line segment CD

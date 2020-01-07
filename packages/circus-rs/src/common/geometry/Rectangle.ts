@@ -39,3 +39,18 @@ export function fitRectangle(outer: Vector2, inner: Vector2): Box2 {
     );
   }
 }
+
+/**
+ * Determine the vertices of the box.
+ * @param box target Box2.
+ */
+export function verticesOfBox(box: Box2): Vector2[] {
+  var vertices: Vector2[] = [];
+  vertices.push(box.min);
+  if (!box.isEmpty()) {
+    vertices.push(new Vector2(box.max.x, box.min.y));
+    vertices.push(box.max);
+    vertices.push(new Vector2(box.min.x, box.max.y));
+   }
+  return vertices;
+}

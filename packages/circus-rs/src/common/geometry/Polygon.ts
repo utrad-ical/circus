@@ -13,6 +13,18 @@ interface TriangulateShapeResult {
 }
 
 /**
+ * Convert sorted vertices of simple polygon to Polygon or Line or Point
+ * @param sortedVertices sorted Vertices Coordinates Of Simple Polygon
+ */
+export function toPolygon(sortedVertices: Vector2[]): Polygon | undefined {
+  if (!sortedVertices) return;
+  return {
+    vertices: sortedVertices,
+    sides: _polygonSides(sortedVertices)
+  };
+}
+
+/**
  * Sort the coordinates so that it becomes the vertex of a simple polygon if connect.
  * @param vertices Unsorted Vertices Coordinates Of Simple Polygon
  */

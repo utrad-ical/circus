@@ -329,6 +329,91 @@ export function sectionOverlapsVolume(
 }
 
 /**
+ * Returns true if the given section overlaps the box.
+ * @param mmSection The section in millimeters
+ * @param resolution The viewer size in screen pixels
+ * @param box The box in millimeters
+ */
+export function sectionOverlapsBox(
+  mmSection: Section,
+  resolution: Vector2,
+  box: Box3
+): boolean {
+  // Calculates the intersection of cuboid and the section treated as a plane that extends infinitely.
+  const mmBoxPolygonVertices = polygonVerticesOfBoxAndSection(
+    resolution,
+    mmSection,
+    box
+  );
+
+  // If there is no intersection point, the section is outside the box.
+  if (!mmBoxPolygonVertices) {
+    return false;
+  }
+
+  // Calculates the vertex of the section treated as a finitely area.
+  const mmSectionPolygonVertices = _polygonVerticesOfSection(
+    mmSection,
+    resolution
+  );
+
+  // Calculates the intersection of the cuboid and the section treated as a plane that extends finitely.
+  const result = intersectsPolygon(
+    mmSectionPolygonVertices,
+    mmBoxPolygonVertices
+  );
+  return result;
+}
+
+/**
+ * Calculates the intersection of the cuboid and the section treated as a plane that extends infinitely.
+ * converts them from volume coordinates (3D) to screen coordinates (2D) and returns them.
+ * @param resolution
+ * @param mmSection
+ * @param mmBox3
+ */
+export function polygonVerticesOfBoxAndSection(
+  resolution: Vector2,
+  mmSection: Section,
+  mmBox3: Box3
+): Vector2[] | null {
+  const intersections = intersectionOfBoxAndPlane(mmBox3, mmSection);
+  if (!intersections) return null;
+
+  // Convert intersection coordinates from volume 3D coordinate to screen 2D coordinate.
+  const vertices: Vector2[] = intersections.map(p3 =>
+    convertVolumeCoordinateToScreenCoordinate(mmSection, resolution, p3)
+  );
+
+  const sortedVertices: Vector2[] = sortVerticesOfSimplePolygon(vertices);
+  return sortedVertices;
+}
+
+/**
+ * Returns true if the given section overlaps the polygon.
+ * @param resolution The viewer size in screen pixels
+ * @param mmSection The section in millimeters
+ * @param polygonVertices The volume size in millimeters
+ */
+export function sectionOverlapsPolygon(
+  resolution: Vector2,
+  mmSection: Section,
+  polygonVertices: Vector2[]
+): boolean {
+  if (!polygonVertices) return false;
+
+  // Calculates the vertex of the section treated as a finitely area.
+  const mmSectionPolygonVertices = _polygonVerticesOfSection(
+    mmSection,
+    resolution
+  );
+
+  // Calculates the intersection of the cuboid and the section treated as a plane that extends finitely.
+  const overlaps = intersectsPolygon(mmSectionPolygonVertices, polygonVertices);
+  return overlaps;
+}
+
+/**
  * Converts vertices of boundary box from volume coordinates (3D) into screen coordinates (2D).
  * @param mmSection
  * @param resolution

@@ -45,7 +45,9 @@
     "multi-integer-range": "^4.0.7",
     "recursive-readdir": "^2.2.2",
     "tar-stream": "^2.1.0",
-    "ulid": "^2.3.0"
+    "ulid": "^2.3.0",
+    "winston": "^3.2.1",
+    "winston-daily-rotate-file": "^4.4.1"
   },
   "peerDependencies": {
     "log4js": ">3.0.0"

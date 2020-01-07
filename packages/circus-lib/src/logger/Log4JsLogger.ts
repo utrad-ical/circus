@@ -15,6 +15,9 @@ export function getRecording() {
   return recording;
 }
 
+/**
+ * @deprecated Use createFileLogger instead.
+ */
 export default class Log4jsLogger implements Logger {
   public static configTitle: string = 'log4js-logger';
   public static configured: boolean = false;

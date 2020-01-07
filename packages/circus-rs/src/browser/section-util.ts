@@ -301,12 +301,17 @@ export function sectionOverlapsVolume(
   voxelSize: Vector3,
   voxelCount: Vector3
 ): boolean {
+  // Create the volume box (cuboid)
+  const mmVolumeBox: Box3 = new Box3(
+    convertPointToMm(new Vector3(0, 0, 0), voxelSize),
+    convertPointToMm(voxelCount, voxelSize)
+  );
+
   // Calculates the intersection of the volume box (cuboid) and the section treated as a plane that extends infinitely.
-  const mmVolumePolygonVertices = _polygonVerticesOfBoxAndSection(
-    mmSection,
+  const mmVolumePolygonVertices = polygonVerticesOfBoxAndSection(
     resolution,
-    voxelSize,
-    voxelCount
+    mmSection,
+    mmVolumeBox
   );
 
   // If there is no intersection point, the section is outside the volume.
@@ -441,35 +446,4 @@ function _polygonVerticesOfSection(
   );
 
   return vertices;
-}
-
-/**
- * Converts vertices of volume section from volume coordinates (3D) into screen coordinates (2D).
- * @param mmSection
- * @param resolution
- * @param voxelSize
- * @param voxelCount
- */
-function _polygonVerticesOfBoxAndSection(
-  mmSection: Section,
-  resolution: Vector2,
-  voxelSize: Vector3,
-  voxelCount: Vector3
-): Vector2[] | null {
-  // Create the volume box (cuboid)
-  const mmVolumeBox: Box3 = new Box3(
-    convertPointToMm(new Vector3(0, 0, 0), voxelSize),
-    convertPointToMm(voxelCount, voxelSize)
-  );
-
-  const intersections = intersectionOfBoxAndPlane(mmVolumeBox, mmSection);
-  if (!intersections) return null;
-
-  // Convert intersection coordinates from volume 3D coordinate to screen 2D coordinate.
-  const vertices: Vector2[] = intersections.map(p3 =>
-    convertVolumeCoordinateToScreenCoordinate(mmSection, resolution, p3)
-  );
-
-  const sortedVertices: Vector2[] = sortVerticesOfSimplePolygon(vertices);
-  return sortedVertices;
 }

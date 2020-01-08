@@ -53,6 +53,15 @@ const main = async () => {
         await fs.writeFile(outDir + '/data.txt', 'An arbitrary result file.');
         console.log('Job successfully finished.');
         break;
+      case 'check-network':
+        const http = require('http');
+        console.log('Making an outgoing HTTP request...');
+        const req = http.request({ hostname: 'www.google.com' }, res =>
+          console.log(`Status: ${res.statusCode}`)
+        );
+        req.on('error', e => console.log('Error', e.message));
+        req.end();
+        break;
     }
   } catch (err) {
     console.error(err.stack || err.message);

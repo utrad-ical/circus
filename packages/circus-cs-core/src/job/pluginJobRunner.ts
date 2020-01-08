@@ -209,6 +209,7 @@ export async function executePlugin(
   return dockerRunner.runWithStream(
     {
       Image: pluginId,
+      NetworkDisabled: true,
       HostConfig: {
         Binds: [`${srcDir}:${bindsIn}`, `${destDir}:${bindsOut}`]
       }

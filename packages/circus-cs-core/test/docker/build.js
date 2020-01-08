@@ -65,7 +65,7 @@ const passthru = (cmd, args) => {
 };
 
 const main = async () => {
-  const targets = ['succeed', 'error', 'timeout'];
+  const targets = ['succeed', 'error', 'timeout', 'check-network'];
   for (target of targets) {
     try {
       await build(target);
@@ -73,7 +73,9 @@ const main = async () => {
       console.error(err.message);
     }
   }
-  console.log('\nRun "docker images" to check if all mock images are created.');
+  console.log(
+    '\nRun "docker image list" to check if all images have been created.'
+  );
 };
 
 main();

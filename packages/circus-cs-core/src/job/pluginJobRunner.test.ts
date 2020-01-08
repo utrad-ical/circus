@@ -119,14 +119,8 @@ describe('fetchSeriesFromRepository', () => {
 });
 
 describe('executePlugin', () => {
-  test('runs docker', async () => {
+  const t = async (plugin: circus.PluginDefinition) => {
     const runner = new DockerRunner();
-    const plugin: circus.PluginDefinition = {
-      pluginId: 'hello-world',
-      pluginName: 'Test',
-      version: '1.0.0',
-      type: 'CAD'
-    };
     const { stream, promise } = await executePlugin(
       runner,
       plugin,
@@ -136,6 +130,29 @@ describe('executePlugin', () => {
     const memStream = new memory.WritableStream();
     stream.pipe(memStream);
     await promise;
-    expect(memStream.toString()).toContain('Hello from Docker!');
+    return memStream.toString();
+  };
+
+  test('runs docker', async () => {
+    const plugin: circus.PluginDefinition = {
+      pluginId: 'hello-world',
+      pluginName: 'Test',
+      version: '1.0.0',
+      type: 'CAD'
+    };
+    const result = await t(plugin);
+    expect(result).toContain('Hello from Docker!');
   });
+
+  // Skipping this test because it's slow, but should work
+  test.skip('network blocked', async () => {
+    const plugin: circus.PluginDefinition = {
+      pluginId: 'circus-mock-check-network',
+      pluginName: 'Test',
+      version: '1.0.0',
+      type: 'CAD'
+    };
+    const result = await t(plugin);
+    expect(result).toContain('EAI_AGAIN'); // Network unavailable
+  }, 99999);
 });

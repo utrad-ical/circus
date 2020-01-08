@@ -18,6 +18,6 @@ const loadConfig = (
   return config;
 };
 
-const config = loadConfig('cscore');
+const config = loadConfig('circus');
 
 export default config;

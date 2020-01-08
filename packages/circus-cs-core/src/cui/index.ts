@@ -66,7 +66,7 @@ async function boot(commandName: string | undefined, args: any) {
     return;
   }
 
-  const loader = configureServiceLoader(new ServiceLoader(), config);
+  const loader = configureServiceLoader(new ServiceLoader(config));
   const module: string = commands[commandName].module || commandName;
   loader.registerModule('command', path.join(__dirname, module));
 

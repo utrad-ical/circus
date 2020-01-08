@@ -2,6 +2,7 @@ import loopRun, { LoopRunOptions } from './loopRun';
 import sleep from '../util/sleep';
 import { EventEmitter } from 'events';
 import * as circus from '../interface';
+import Logger from '@utrad-ical/circus-lib/lib/logger/Logger';
 
 const createMockLogger = (fn: jest.Mock) => {
   return {
@@ -10,8 +11,9 @@ const createMockLogger = (fn: jest.Mock) => {
     info: fn,
     warn: fn,
     error: fn,
-    fatal: fn
-  };
+    fatal: fn,
+    shutdown: fn
+  } as Logger;
 };
 
 const createMockQueueSystem = <T>(len: number = 10, fn: jest.Mock) => {

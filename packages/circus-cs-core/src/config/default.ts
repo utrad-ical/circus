@@ -6,7 +6,7 @@ import * as circus from '../interface';
 // DO NOT DIRECTLY EDIT THIS FILE!!!
 
 // Instead, make a configuration file
-// named 'circuscsrs.json' (or any other file cosmiconfig recognizes)
+// named 'circus.config.js' (or any other file cosmiconfig recognizes)
 // and specify the settings. Items in your setting file
 // will be merged recursively.
 
@@ -73,6 +73,11 @@ const defaults: circus.Configuration = {
       mongoUrl: 'mongodb://localhost:27017/circus-api',
       collectionName: 'pluginDefinitions'
     }
+  },
+
+  csCoreDaemonLogger: {
+    type: 'NullLogger',
+    options: {}
   }
 };
 

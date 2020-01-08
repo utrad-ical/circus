@@ -32,14 +32,13 @@ export interface Services {
 // Do not try to include any business logic here!
 
 export default function configureServiceLoader(
-  serviceLoader: ServiceLoader,
-  config: circus.Configuration
+  serviceLoader: ServiceLoader
 ): ServiceLoader<Services> {
   // const serviceLoader = new ServiceLoader<Services>(config as any);
   serviceLoader.registerDirectory(
-    'logger',
+    'csCoreDaemonLogger',
     '@utrad-ical/circus-lib/lib/logger',
-    'Log4JsLogger'
+    'StdoutLogger'
   );
   serviceLoader.registerFactory('daemonController', async config => {
     // will register as factory

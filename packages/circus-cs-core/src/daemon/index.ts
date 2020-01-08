@@ -34,11 +34,14 @@ const main = async () => {
     ourConfig = config;
   }
 
-  const serviceLoader = configureServiceLoader(new ServiceLoader(), ourConfig!);
+  const serviceLoader = configureServiceLoader(new ServiceLoader(ourConfig));
 
   let loopRunOptions: LoopRunOptions<circus.PluginJobRequest>;
   try {
     loopRunOptions = await createLoopRunOptions(config!, serviceLoader);
+    // The following line will be output to stdout (thus pm2's log)
+    console.log('CIRCUS CS Core Daemon started up.');
+    console.log('Logs are output using:', config.csCoreDaemonLogger);
     await loopRun<circus.PluginJobRequest>(loopRunOptions!, process);
     process.exit(0);
   } catch (e) {
@@ -52,7 +55,7 @@ async function createLoopRunOptions(
   serviceLoader: ReturnType<typeof configureServiceLoader>
 ): Promise<LoopRunOptions<circus.PluginJobRequest>> {
   const [logger, queue, jobRunner] = await Promise.all([
-    serviceLoader.get('logger'),
+    serviceLoader.get('csCoreDaemonLogger'),
     serviceLoader.get('queue'),
     serviceLoader.get('jobRunner')
   ]);

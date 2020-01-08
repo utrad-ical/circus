@@ -342,11 +342,11 @@ export default class Viewer extends EventEmitter {
     return this.composition;
   }
 
-  public setActiveTool(tool: Tool): void {
+  public setActiveTool(tool: Tool | undefined): void {
     const before = this.activeTool;
     if (tool === before) return;
     if (before) before.deactivate(this);
-    tool.activate(this);
+    if (tool) tool.activate(this);
     this.activeTool = tool;
 
     this.emit('toolchanged', before, this.activeTool);

@@ -14,6 +14,9 @@ export { default as VoxelCloud } from './annotation/VoxelCloud';
 export { default as ReferenceLine } from './annotation/ReferenceLine';
 export { default as PlaneFigure } from './annotation/PlaneFigure';
 export { default as Point } from './annotation/Point';
+export { default as SolidFigure } from './annotation/SolidFigure';
+export { default as Cuboid } from './annotation/Cuboid';
+export { default as Ellipsoid } from './annotation/Ellipsoid';
 
 export { default as RawData } from '../common/RawData';
 export { default as AnisotropicRawData } from '../common/AnisotropicRawData';
@@ -62,9 +65,19 @@ export {
 export { default as Tool } from '../browser/tool/Tool';
 export { default as createToolbar } from '../browser/createToolbar';
 
-export { registerTool, toolFactory } from '../browser/tool/tool-initializer';
+export {
+  registerTool,
+  registerToolInstance,
+  toolFactory
+} from '../browser/tool/tool-initializer';
 export {
   orientationAwareTranslation,
   createOrthogonalMprSection
 } from '../browser/section-util';
 export * from '../browser/volume-util';
+
+// Debugger tools
+export { default as ResetPlanesTool } from './tool/state/ResetPlanes';
+export { createStaticRotationTool } from './tool/state/StaticRotationTool';
+export { createDumpStateTool } from './tool/state/DumpStateTool';
+export { createDumpAnnotationTool } from './tool/state/DumpAnnotationTool';

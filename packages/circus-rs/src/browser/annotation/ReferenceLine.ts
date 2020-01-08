@@ -86,7 +86,7 @@ export default class ReferenceLine implements Annotation, ViewerEventTarget {
       ctx.save();
       ctx.beginPath();
       if (option.hover) {
-        ctx.strokeStyle = '#ff0000';
+        ctx.strokeStyle = this.color;
         ctx.lineWidth = 3;
       } else {
         ctx.strokeStyle = this.color;

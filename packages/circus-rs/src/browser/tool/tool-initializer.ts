@@ -9,6 +9,8 @@ import EraserTool from './cloud/EraserTool';
 import BucketTool from './cloud/BucketTool';
 import CircleTool from './annotation/CircleTool';
 import RectangleTool from './annotation/RectangleTool';
+import EllipsoidTool from './annotation/EllipsoidTool';
+import CuboidTool from './annotation/CuboidTool';
 import PointTool from './annotation/PointTool';
 
 const toolCollection: { [toolName: string]: ToolBaseClass } = {};
@@ -24,6 +26,9 @@ const defaultTools: { [toolName: string]: typeof ToolBaseClass } = {
   circle: CircleTool,
   rectangle: RectangleTool,
   point: PointTool,
+
+  ellipsoid: EllipsoidTool,
+  cuboid: CuboidTool,
 
   brush: BrushTool,
   eraser: EraserTool,
@@ -47,4 +52,14 @@ export function registerTool(
 
 export function toolFactory(key: string): ToolBaseClass {
   return toolCollection[key];
+}
+
+export function registerToolInstance(
+  toolName: string,
+  toolInstance: ToolBaseClass
+) {
+  if (toolName in toolCollection) {
+    throw new Error('This tool name is already assigned');
+  }
+  toolCollection[toolName] = toolInstance;
 }

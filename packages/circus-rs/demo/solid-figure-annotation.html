@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compataible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>CIRCUS RS Demo</title>
+
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css"
+      integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS"
+      crossorigin="anonymous"
+    />
+    <style>
+      #viewer1,
+      #viewer2,
+      #viewer3,
+      #viewer4 {
+        width: 312px;
+        height: 312px;
+        background-color: gray;
+      }
+      #wrap1 {
+        padding: 3px;
+        background-color: #993300;
+      }
+      #wrap2 {
+        padding: 3px;
+        background-color: #3399ff;
+      }
+      #wrap3 {
+        padding: 3px;
+        background-color: #33ffee;
+      }
+      #wrap4 {
+        padding: 3px;
+        background-color: #ff6600;
+      }
+      .rs-icon-reset-planes:after {
+        content: '-';
+      }
+      .rs-icon-rotx-plus30:after {
+        content: 'x+30';
+        font-size: 50%;
+      }
+      .rs-icon-rotx-minus30:after {
+        content: 'x-30';
+        font-size: 50%;
+      }
+      .rs-icon-roty-plus30:after {
+        content: 'y+30';
+        font-size: 50%;
+      }
+      .rs-icon-roty-minus30:after {
+        content: 'y-30';
+        font-size: 50%;
+      }
+      .rs-icon-dump-state:after {
+        content: 'D/S';
+        font-size: 40%;
+      }
+      .rs-icon-dump-annotation:after {
+        content: 'D/A';
+        font-size: 40%;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="container">
+      <h1>Solid Figure Annotation</h1>
+      <hr />
+
+      <!-- This is where our toolbar is created -->
+      <div id="toolbar" class="m-1"></div>
+
+      <!-- This is where our viewers are initialized -->
+      <div style="display: flex;">
+        <div id="wrap1"><div id="viewer1"></div></div>
+        <div id="wrap2"><div id="viewer2"></div></div>
+      </div>
+      <div style="display: flex;">
+        <div id="wrap3"><div id="viewer3"></div></div>
+        <div id="wrap4"><div id="viewer4"></div></div>
+      </div>
+    </div>
+
+    <!-- cdn scripts -->
+    <script
+      src="https://code.jquery.com/jquery-3.3.1.min.js"
+      integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+      crossorigin="anonymous"
+    ></script>
+
+    <!-- circusrs script -->
+    <script src="/circus-rs-client.js"></script>
+
+    <!-- demo script -->
+    <script src="./solid-figure-annotation.js"></script>
+  </body>
+</html>

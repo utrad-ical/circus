@@ -130,7 +130,9 @@ const toolbar = rs.createToolbar(container, [
   'bucket',
   'circle',
   'rectangle',
-  'point'
+  'point',
+  'ellipsoid',
+  'cuboid'
 ]);
 
 if (viewer) toolbar.bindViewer(viewer);
@@ -285,6 +287,44 @@ fig.type = 'circle';
 fig.width = 3;
 fig.min = [10, 10];
 fig.max = [100, 100];
+
+const comp = viewer.getComposition();
+comp.addAnnotation(fig);
+comp.annotationUpdated();
+
+/*--
+@title Add SolidFigure Cuboid Annotation
+--*/
+
+const fig = new rs.Cuboid();
+fig.editable = true;
+fig.color = '#ff0000';
+fig.width = 3;
+fig.min = [10, 10];
+fig.max = [100, 100];
+fig.guideDrawStyle.boundingBoxOutline.isDraw = false;
+fig.guideDrawStyle.boundingBoxBones.isDraw = false;
+
+const comp = viewer.getComposition();
+comp.addAnnotation(fig);
+comp.annotationUpdated();
+
+/*--
+@title Add SolidFigure Ellipsoid Annotation
+--*/
+
+const fig = new rs.Cuboid();
+fig.editable = true;
+fig.color = '#ff0000';
+fig.width = 3;
+fig.min = [10, 10];
+fig.max = [100, 100];
+fig.guideDrawStyle.boundingBoxOutline.isDraw = true;
+fig.guideDrawStyle.boundingBoxBones.isDraw = true;
+fig.guideDrawStyle.boundingBoxCrossSectionalShape.isDraw = true;
+fig.figureDrawStyle.muddyWay = true;
+fig.figureDrawStyle.using5Points = true;
+fig.figureDrawStyle.muddyWayFillStyle = 'rgba(102, 205, 170, 0.3)'; // #66cdaa mediumaquamarine
 
 const comp = viewer.getComposition();
 comp.addAnnotation(fig);

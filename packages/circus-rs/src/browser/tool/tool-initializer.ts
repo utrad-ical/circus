@@ -53,13 +53,3 @@ export function registerTool(
 export function toolFactory(key: string): ToolBaseClass {
   return toolCollection[key];
 }
-
-export function registerToolInstance(
-  toolName: string,
-  toolInstance: ToolBaseClass
-) {
-  if (toolName in toolCollection) {
-    throw new Error('This tool name is already assigned');
-  }
-  toolCollection[toolName] = toolInstance;
-}

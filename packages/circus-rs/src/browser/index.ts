@@ -65,19 +65,9 @@ export {
 export { default as Tool } from '../browser/tool/Tool';
 export { default as createToolbar } from '../browser/createToolbar';
 
-export {
-  registerTool,
-  registerToolInstance,
-  toolFactory
-} from '../browser/tool/tool-initializer';
+export { registerTool, toolFactory } from '../browser/tool/tool-initializer';
 export {
   orientationAwareTranslation,
   createOrthogonalMprSection
 } from '../browser/section-util';
 export * from '../browser/volume-util';
-
-// Debugger tools
-export { default as ResetPlanesTool } from './tool/state/ResetPlanes';
-export { createStaticRotationTool } from './tool/state/StaticRotationTool';
-export { createDumpStateTool } from './tool/state/DumpStateTool';
-export { createDumpAnnotationTool } from './tool/state/DumpAnnotationTool';

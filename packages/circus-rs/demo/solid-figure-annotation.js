@@ -99,26 +99,6 @@ document.addEventListener('DOMContentLoaded', () => {
   // Initialize toolbar
   const container = document.getElementById('toolbar');
 
-  rs.registerTool('resetPlanes', rs.ResetPlanesTool);
-  rs.registerToolInstance(
-    'rotxPlus30',
-    rs.createStaticRotationTool([30, 0], 3)
-  );
-  rs.registerToolInstance(
-    'rotxMinus30',
-    rs.createStaticRotationTool([-30, 0], 3)
-  );
-  rs.registerToolInstance(
-    'rotyPlus30',
-    rs.createStaticRotationTool([0, 30], 3)
-  );
-  rs.registerToolInstance(
-    'rotyMinus30',
-    rs.createStaticRotationTool([0, -30], 3)
-  );
-  rs.registerToolInstance('dumpState', rs.createDumpStateTool(3));
-  rs.registerToolInstance('dumpAnnotation', rs.createDumpAnnotationTool(3));
-
   const toolbar = rs.createToolbar(container, [
     'hand',
     // 'window',
@@ -132,14 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // 'rectangle',
     'point',
     'ellipsoid',
-    'cuboid',
-    'resetPlanes',
-    'rotxPlus30',
-    'rotxMinus30',
-    'rotyPlus30',
-    'rotyMinus30',
-    'dumpState',
-    'dumpAnnotation'
+    'cuboid'
   ]);
 
   toolbar.bindViewer(viewer1);

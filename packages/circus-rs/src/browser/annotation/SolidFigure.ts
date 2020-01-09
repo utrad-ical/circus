@@ -23,9 +23,6 @@ import resize from './helper/resize';
 
 export type FigureType = 'cuboid' | 'ellipsoid';
 
-const defaultLineWidth = 3;
-const defaultStrokeStyle = '#ff88ff';
-
 export interface LineDrawStyle {
   width: number;
   color: string;
@@ -44,8 +41,8 @@ export default abstract class SolidFigure
    */
   public max?: number[];
 
-  public color: string = defaultStrokeStyle;
-  public width: number = defaultLineWidth;
+  public color: string = '#ff88ff';
+  public width: number = 3;
   public editable: boolean = false;
   public resetDepthOfBoundingBox: boolean | undefined = undefined;
 

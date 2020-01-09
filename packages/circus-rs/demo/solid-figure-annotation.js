@@ -128,7 +128,7 @@ document.addEventListener('DOMContentLoaded', () => {
     fig.min = [93.58974358974362, 152.56410256410254, 67.21153846153844];
     fig.max = [306.41025641025647, 243.5897435897436, 286.44230769230774];
     fig.boundingBoxOutline = { width: 1, color: '#ff0000' };
-    fig.boundingBoxBones = { width: 1, color: '#ffff00' };
+    fig.boundingBoxCrossHair = { width: 1, color: '#ffff00' };
     fig.boundingBoxCrossSectionalShape = { width: 1, color: '#00ffff' };
 
     comp.addAnnotation(fig);

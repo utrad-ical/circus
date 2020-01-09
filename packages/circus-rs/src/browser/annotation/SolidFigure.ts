@@ -12,7 +12,7 @@ import Viewer from '../viewer/Viewer';
 import ViewerEvent from '../viewer/ViewerEvent';
 import ViewState, { MprViewState } from '../ViewState';
 import Annotation, { DrawOption } from './Annotation';
-import drawBoundingBoxBones from './helper/drawBoundingBoxBones';
+import drawBoundingBoxCrossHair from './helper/drawBoundingBoxCrossHair';
 import drawBoundingBoxOutline from './helper/drawBoundingBoxOutline';
 import drawHandleFrame from './helper/drawHandleFrame';
 import getHandleType, {
@@ -54,7 +54,7 @@ export default abstract class SolidFigure
     color: 'rgba(255,255,255,0.5)'
   };
 
-  public boundingBoxBones?: LineDrawStyle = {
+  public boundingBoxCrossHair?: LineDrawStyle = {
     width: 2,
     color: 'rgba(255,255,255,0.8)'
   };
@@ -225,15 +225,15 @@ export default abstract class SolidFigure
         );
       }
 
-      // draw bounding box bones
-      const drawBoundingBoxBonesStyle = this.boundingBoxBones;
-      if (drawBoundingBoxBonesStyle) {
-        drawBoundingBoxBones(
+      // draw bounding box cross hair
+      const drawBoundingBoxCrossHairStyle = this.boundingBoxCrossHair;
+      if (drawBoundingBoxCrossHairStyle) {
+        drawBoundingBoxCrossHair(
           ctx,
           boundingBox3,
           resolution,
           section,
-          drawBoundingBoxBonesStyle
+          drawBoundingBoxCrossHairStyle
         );
       }
 

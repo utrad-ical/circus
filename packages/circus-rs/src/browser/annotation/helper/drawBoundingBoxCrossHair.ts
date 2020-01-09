@@ -3,7 +3,7 @@ import { Section } from '../../../common/geometry/Section';
 import { convertVolumeCoordinateToScreenCoordinate } from '../../section-util';
 import { LineDrawStyle } from '../SolidFigure';
 
-export default function drawBoundingBoxBones(
+export default function drawBoundingBoxCrossHair(
   ctx: CanvasRenderingContext2D,
   boundingBox3: Box3,
   resolution: Vector2, // new Vector2().fromArray(viewer.getResolution())
@@ -15,7 +15,7 @@ export default function drawBoundingBoxBones(
   const map2vp = (p3: Vector3) =>
     convertVolumeCoordinateToScreenCoordinate(section, resolution, p3);
 
-  const { min, max } = boundingBox3;
+  const { min } = boundingBox3;
   const size = boundingBox3.getSize(new Vector3());
 
   const x = [

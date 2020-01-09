@@ -43,6 +43,9 @@ export default abstract class SolidFigure
 
   public color: string = '#ff88ff';
   public width: number = 3;
+
+  public fillColor: string | undefined = undefined;
+
   public editable: boolean = false;
   public resetDepthOfBoundingBox: boolean | undefined = undefined;
 

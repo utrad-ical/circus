@@ -13,12 +13,12 @@ import SolidFigure, { FigureType, LineDrawStyle } from './SolidFigure';
 export default class Ellipsoid extends SolidFigure {
   public type: FigureType = 'ellipsoid';
 
-  private debugFill: string | undefined = undefined; // 'rgba(255, 255, 0, 0.3)';
-
   public boundingBoxCrossSectionalShape: LineDrawStyle = {
     width: 1,
     color: 'rgba(0, 0, 255, 0.8)'
   };
+
+  private debugFill: string | undefined = undefined; // 'rgba(255, 255, 0, 0.3)';
 
   protected drawFigure(): void {
     const ctx = this.drawFigureParams!.ctx;

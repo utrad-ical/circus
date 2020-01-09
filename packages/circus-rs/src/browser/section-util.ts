@@ -420,8 +420,8 @@ export function sectionOverlapsPolygon(
 
 /**
  * Converts vertices of boundary box from volume coordinates (3D) into screen coordinates (2D).
- * @param mmSection
- * @param resolution
+ * @param mmSection The section in millimeters
+ * @param resolution The viewer size in screen pixels
  */
 function _polygonVerticesOfSection(
   mmSection: Section,

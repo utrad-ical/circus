@@ -3,10 +3,6 @@ import { DirectedSegment } from '../../../common/geometry/Line';
 
 /**
  * Draw a point.
- * @param ctx
- * @param point
- * @param radius
- * @param option
  */
 export function drawPoint(
   ctx: CanvasRenderingContext2D,
@@ -32,9 +28,6 @@ export function drawPoint(
 
 /**
  * Draw a line.
- * @param ctx
- * @param directedSegment
- * @param option
  */
 export function drawLine(
   ctx: CanvasRenderingContext2D,
@@ -60,9 +53,6 @@ export function drawLine(
 
 /**
  * Draw a polygon.
- * @param ctx 
- * @param vertices 
- * @param option 
  */
 export function drawPolygon(
   ctx: CanvasRenderingContext2D,
@@ -91,9 +81,6 @@ export function drawPolygon(
 
 /**
  * Draw a rectangle.
- * @param ctx 
- * @param vertices 
- * @param option 
  */
 export function drawRectangle(
   ctx: CanvasRenderingContext2D,
@@ -130,9 +117,6 @@ export function drawRectangle(
 
 /**
  * Draw a ellipse.
- * @param ctx 
- * @param vertices 
- * @param option 
  */
 export function drawEllipse(
   ctx: CanvasRenderingContext2D,
@@ -173,9 +157,6 @@ export function drawEllipse(
 
 /**
  * Draw a square araund the point.
- * @param ctx 
- * @param vertices 
- * @param option 
  */
 export function drawSquareAroundPoint(
   ctx: CanvasRenderingContext2D,
@@ -210,9 +191,6 @@ export function drawSquareAroundPoint(
 
 /**
  * Draw an outlines (polygon, line, or point)
- * @param ctx 
- * @param vertices 
- * @param style 
  */
 export function drawOutline(
   ctx: CanvasRenderingContext2D,

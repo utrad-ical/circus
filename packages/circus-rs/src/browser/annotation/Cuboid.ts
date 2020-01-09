@@ -1,5 +1,5 @@
 import { drawOutline } from './helper/drawObject';
-import SolidFigure, { FigureType, LineDrawStyle } from './SolidFigure';
+import SolidFigure, { FigureType } from './SolidFigure';
 
 /**
  * Cuboid annotation

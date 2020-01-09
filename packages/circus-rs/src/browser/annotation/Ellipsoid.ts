@@ -13,7 +13,7 @@ import SolidFigure, { FigureType, LineDrawStyle } from './SolidFigure';
 export default class Ellipsoid extends SolidFigure {
   public type: FigureType = 'ellipsoid';
 
-  public figureDrawStyle: {
+  private figureDrawStyle: {
     muddyWay: boolean;
     using5Points: boolean;
     muddyWayFillStyle?: string;

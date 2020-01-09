@@ -299,11 +299,11 @@ comp.annotationUpdated();
 const fig = new rs.Cuboid();
 fig.editable = true;
 fig.color = '#ff0000';
-fig.width = 3;
-fig.min = [10, 10];
-fig.max = [100, 100];
-fig.guideDrawStyle.boundingBoxOutline.isDraw = false;
-fig.guideDrawStyle.boundingBoxBones.isDraw = false;
+fig.width = 2;
+fig.min = [90, 150, 70];
+fig.max = [300, 250, 280];
+fig.boundingBoxOutline = { width: 1, color: 'rgba(255,255,255,0.3)' };
+fig.boundingBoxCrossHair = { width: 2, color: 'rgba(255,255,255,0.8)' };
 
 const comp = viewer.getComposition();
 comp.addAnnotation(fig);
@@ -313,18 +313,15 @@ comp.annotationUpdated();
 @title Add SolidFigure Ellipsoid Annotation
 --*/
 
-const fig = new rs.Cuboid();
+const fig = new rs.Ellipsoid();
 fig.editable = true;
 fig.color = '#ff0000';
-fig.width = 3;
-fig.min = [10, 10];
-fig.max = [100, 100];
-fig.guideDrawStyle.boundingBoxOutline.isDraw = true;
-fig.guideDrawStyle.boundingBoxBones.isDraw = true;
-fig.guideDrawStyle.boundingBoxCrossSectionalShape.isDraw = true;
-fig.figureDrawStyle.muddyWay = true;
-fig.figureDrawStyle.using5Points = true;
-fig.figureDrawStyle.muddyWayFillStyle = 'rgba(102, 205, 170, 0.3)'; // #66cdaa mediumaquamarine
+fig.width = 2;
+fig.min = [90, 150, 70];
+fig.max = [300, 250, 280];
+fig.boundingBoxOutline = { width: 1, color: 'rgba(255,255,255,0.3)' };
+fig.boundingBoxCrossHair = { width: 2, color: 'rgba(255,255,255,0.8)' };
+fig.boundingBoxCrossSectionalShape = { width: 1, color: '#ff00ff' };
 
 const comp = viewer.getComposition();
 comp.addAnnotation(fig);

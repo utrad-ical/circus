@@ -1,16 +1,11 @@
 import { drawOutline } from './helper/drawObject';
-import SolidFigure, { FigureType } from './SolidFigure';
+import SolidFigure, { FigureType, LineDrawStyle } from './SolidFigure';
 
 /**
  * Cuboid annotation
  */
 export default class Cuboid extends SolidFigure {
   public type: FigureType = 'cuboid';
-
-  constructor() {
-    super();
-    this.guideDrawStyle.boundingBoxCrossSectionalShape.isDraw = false;
-  }
 
   protected drawFigure(): void {
     const ctx = this.drawFigureParams!.ctx;

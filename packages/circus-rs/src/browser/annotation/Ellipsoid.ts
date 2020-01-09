@@ -5,7 +5,7 @@ import {
 import drawEllipseWithMuddyWay from './helper/drawEllipseWithMuddyWay';
 import { drawEllipse, drawOutline } from './helper/drawObject';
 import intersectEllipsoidAndSection from './helper/getEllipseUsing5Points';
-import SolidFigure, { FigureType } from './SolidFigure';
+import SolidFigure, { FigureType, LineDrawStyle } from './SolidFigure';
 
 /**
  * Ellipsoid annotation
@@ -19,8 +19,30 @@ export default class Ellipsoid extends SolidFigure {
     muddyWayFillStyle?: string;
   } = { muddyWay: true, using5Points: true };
 
+  public boundingBoxCrossSectionalShape: LineDrawStyle = {
+    width: 1,
+    color: 'rgba(0, 0, 255, 0.8)'
+  };
+
   protected drawFigure(): void {
     const ctx = this.drawFigureParams!.ctx;
+    const crossSectionalShapeVertices2 = this.drawFigureParams!
+      .crossSectionalShapeVertices2;
+
+    // draw bounding box cross-sectional shape
+    const drawBoundingBoxCrossSectionalShape = this
+      .boundingBoxCrossSectionalShape;
+    if (drawBoundingBoxCrossSectionalShape) {
+      const {
+        color: strokeStyle,
+        width: lineWidth
+      } = drawBoundingBoxCrossSectionalShape;
+
+      drawOutline(ctx, crossSectionalShapeVertices2, {
+        lineWidth,
+        strokeStyle
+      });
+    }
 
     if (this.resetDepthOfBoundingBox) {
       const crossSectionalShapeBoundingBox2 = this.drawFigureParams!
@@ -64,8 +86,7 @@ export default class Ellipsoid extends SolidFigure {
         const ellipse = intersectEllipsoidAndSection(
           epllipsoid,
           section,
-          resolution,
-          ctx
+          resolution
         );
         drawEllipse(ctx, ellipse, {
           strokeStyle: this.color,

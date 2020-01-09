@@ -15,7 +15,6 @@ import Annotation, { DrawOption } from './Annotation';
 import drawBoundingBoxBones from './helper/drawBoundingBoxBones';
 import drawBoundingBoxOutline from './helper/drawBoundingBoxOutline';
 import drawHandleFrame from './helper/drawHandleFrame';
-import { drawOutline } from './helper/drawObject';
 import getHandleType, {
   cursorSettableHandleType,
   HandleType
@@ -27,8 +26,10 @@ export type FigureType = 'cuboid' | 'ellipsoid';
 const defaultLineWidth = 3;
 const defaultStrokeStyle = '#ff88ff';
 
-const defaultBoundingBoxCrossSectionalShapeLineWidth = 1;
-const defaultBoundingBoxCrossSectionalShapeStrokeStyle = 'rgba(0, 0, 255, 0.8)'; // #0000ff blue
+export interface LineDrawStyle {
+  width: number;
+  color: string;
+}
 
 export default abstract class SolidFigure
   implements Annotation, ViewerEventTarget {
@@ -48,32 +49,14 @@ export default abstract class SolidFigure
   public editable: boolean = false;
   public resetDepthOfBoundingBox: boolean | undefined = undefined;
 
-  public guideDrawStyle: {
-    boundingBoxOutline: {
-      isDraw: boolean;
-      lineWidth?: number;
-      strokeStyle?: string;
-    };
-    boundingBoxBones: {
-      isDraw: boolean;
-      lineWidth?: number;
-      strokeStyle?: string;
-    };
-    boundingBoxCrossSectionalShape: {
-      isDraw: boolean;
-      lineWidth?: number;
-      strokeStyle?: string;
-    };
-  } = {
-    boundingBoxOutline: {
-      isDraw: true
-    },
-    boundingBoxBones: {
-      isDraw: true
-    },
-    boundingBoxCrossSectionalShape: {
-      isDraw: true
-    }
+  public boundingBoxOutline?: LineDrawStyle = {
+    width: 1,
+    color: 'rgba(255,255,255,0.5)'
+  };
+
+  public boundingBoxBones?: LineDrawStyle = {
+    width: 2,
+    color: 'rgba(255,255,255,0.8)'
   };
 
   // dragInfo
@@ -231,9 +214,8 @@ export default abstract class SolidFigure
         .intersect(crossSectionalShapeBoundingBox2);
 
       // draw bounding box outline
-      const drawBoundingBoxOutlineStyle = this.guideDrawStyle
-        .boundingBoxOutline;
-      if (drawBoundingBoxOutlineStyle.isDraw) {
+      const drawBoundingBoxOutlineStyle = this.boundingBoxOutline;
+      if (drawBoundingBoxOutlineStyle) {
         drawBoundingBoxOutline(
           ctx,
           boundingBox3,
@@ -244,8 +226,8 @@ export default abstract class SolidFigure
       }
 
       // draw bounding box bones
-      const drawBoundingBoxBonesStyle = this.guideDrawStyle.boundingBoxBones;
-      if (drawBoundingBoxBonesStyle.isDraw) {
+      const drawBoundingBoxBonesStyle = this.boundingBoxBones;
+      if (drawBoundingBoxBonesStyle) {
         drawBoundingBoxBones(
           ctx,
           boundingBox3,
@@ -268,23 +250,6 @@ export default abstract class SolidFigure
         drawingTargetBoundingBox2
       };
       this.drawFigure();
-
-      // draw bounding box cross-sectional shape
-      const drawBoundingBoxCrossSectionalShape = this.guideDrawStyle
-        .boundingBoxCrossSectionalShape;
-      if (drawBoundingBoxCrossSectionalShape.isDraw) {
-        const lineWidth = drawBoundingBoxCrossSectionalShape.lineWidth
-          ? drawBoundingBoxCrossSectionalShape.lineWidth
-          : defaultBoundingBoxCrossSectionalShapeLineWidth;
-        const strokeStyle = drawBoundingBoxCrossSectionalShape.strokeStyle
-          ? drawBoundingBoxCrossSectionalShape.strokeStyle
-          : defaultBoundingBoxCrossSectionalShapeStrokeStyle;
-
-        drawOutline(ctx, crossSectionalShapeVertices2, {
-          lineWidth,
-          strokeStyle
-        });
-      }
 
       // draw handle frame
       const orientation = detectOrthogonalSection(section);

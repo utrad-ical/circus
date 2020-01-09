@@ -14,8 +14,7 @@ import {
 export default function intersectEllipsoidAndSection(
   ellipsoid: Ellipsoid,
   section: Section,
-  resolution: Vector2,
-  ctx: CanvasRenderingContext2D
+  resolution: Vector2
 ):
   | {
       origin: Vector2;
@@ -27,7 +26,6 @@ export default function intersectEllipsoidAndSection(
   const plane = sectionToPlane(section);
   const S_nv = plane.normal;
   const S_u = new Vector3().fromArray(section.xAxis).normalize();
-  const S_v = new Vector3().fromArray(section.yAxis).normalize();
 
   const p3to2 = (p3: Vector3) =>
     convertVolumeCoordinateToScreenCoordinate(section, resolution, p3);
@@ -37,14 +35,10 @@ export default function intersectEllipsoidAndSection(
 
   const ES_o = getIntersectedEllipseOrigin(ellipsoid, plane);
 
-  const points = get5PointsOnEllipseOutline(
-    ellipsoid,
-    S_nv,
-    S_u,
-    S_v,
-    ES_o,
-    (p3: Vector3) =>
-      convertVolumeCoordinateToScreenCoordinate(section, resolution, p3)
+  const points3 = get5PointsOnEllipseOutline(ellipsoid, ES_o, S_u, S_nv);
+
+  const points = points3.map((p3: Vector3) =>
+    convertVolumeCoordinateToScreenCoordinate(section, resolution, p3)
   );
 
   const { A, B, C } = getParameters(points);
@@ -88,25 +82,20 @@ export default function intersectEllipsoidAndSection(
 
 function get5PointsOnEllipseOutline(
   E: Ellipsoid,
-  S_nv: Vector3,
-  S_u: Vector3,
-  S_v: Vector3,
   ES_o: Vector3,
-  mapper: (p3: Vector3) => Vector2
+  S_u: Vector3,
+  S_nv: Vector3
 ) {
-  const points: Vector2[] = [];
+  const points: Vector3[] = [];
 
-  [
-    S_v,
-    S_u,
-    S_v.clone().applyAxisAngle(S_nv, 180 / Math.PI),
-    S_u.clone().applyAxisAngle(S_nv, 180 / Math.PI)
-  ].forEach(v => {
+  const r = (Math.PI * 2) / 72;
+
+  for (let i = 0; i < 5; i++) {
+    const v = S_u.clone().applyAxisAngle(S_nv, r * i);
     const L = new Line3().set(ES_o, ES_o.clone().add(v));
-    const [p1, p2] = intersectionOfEllipsoidAndLine(E, L);
-    if (p1 && points.length < 5) points.push(mapper(p1));
-    if (p2 && points.length < 5) points.push(mapper(p2));
-  });
+    const [p1] = intersectionOfEllipsoidAndLine(E, L);
+    if (p1 && points.length < 5) points.push(p1);
+  }
 
   return points;
 }

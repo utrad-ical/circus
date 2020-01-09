@@ -151,14 +151,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const fig = new rs.Ellipsoid();
     fig.editable = true;
     fig.color = '#ff0000';
+    fig.width = 3;
     fig.min = [93.58974358974362, 152.56410256410254, 67.21153846153844];
     fig.max = [306.41025641025647, 243.5897435897436, 286.44230769230774];
-    fig.guideDrawStyle.boundingBoxOutline.isDraw = true;
-    fig.guideDrawStyle.boundingBoxBones.isDraw = true;
-    fig.guideDrawStyle.boundingBoxCrossSectionalShape.isDraw = true;
-    fig.figureDrawStyle.muddyWay = true;
-    fig.figureDrawStyle.using5Points = true;
-    fig.figureDrawStyle.muddyWayFillStyle = 'rgba(102, 205, 170, 0.3)'; // #66cdaa mediumaquamarine
+    fig.boundingBoxOutline = { width: 1, color: '#ff0000' };
+    fig.boundingBoxBones = { width: 1, color: '#ffff00' };
+    fig.boundingBoxCrossSectionalShape = { width: 1, color: '#00ffff' };
 
     comp.addAnnotation(fig);
     comp.annotationUpdated();

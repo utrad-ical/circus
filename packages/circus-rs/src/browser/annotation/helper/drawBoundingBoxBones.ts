@@ -1,21 +1,16 @@
 import { Box3, Vector2, Vector3 } from 'three';
 import { Section } from '../../../common/geometry/Section';
 import { convertVolumeCoordinateToScreenCoordinate } from '../../section-util';
-
-const defaultLineWidth = 1;
-const defaultStrokeStyle = 'rgba(0, 255, 0, 0.8)'; // #00ff00 lime
+import { LineDrawStyle } from '../SolidFigure';
 
 export default function drawBoundingBoxBones(
   ctx: CanvasRenderingContext2D,
   boundingBox3: Box3,
   resolution: Vector2, // new Vector2().fromArray(viewer.getResolution())
   section: Section,
-  option: { lineWidth?: number; strokeStyle?: string } = {}
+  option: LineDrawStyle
 ): void {
-  const lineWidth = option.lineWidth ? option.lineWidth : defaultLineWidth;
-  const strokeStyle = option.strokeStyle
-    ? option.strokeStyle
-    : defaultStrokeStyle;
+  const { width: lineWidth, color: strokeStyle } = option;
 
   const map2vp = (p3: Vector3) =>
     convertVolumeCoordinateToScreenCoordinate(section, resolution, p3);

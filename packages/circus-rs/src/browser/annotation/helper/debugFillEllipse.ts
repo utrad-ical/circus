@@ -5,21 +5,15 @@ import { Section } from '../../../common/geometry/Section';
 import { convertScreenCoordinateToVolumeCoordinate } from '../../section-util';
 import getShadowCanvas from './getShadowCanvas';
 
-const defaultFillStyle = 'rgba(255, 255, 0, 0.3)'; // #ffff00 yellow
-
-export default function drawEllipseWithMuddyWay(
+export default function debugFillEllipse(
   ctx: CanvasRenderingContext2D,
   epllipsoid: Ellipsoid,
   resolution: Vector2,
   section: Section,
   outBox2: Box2,
-  option: {
-    fillStyle?: string;
-  }
+  fillColor: string
 ): void {
-  const color = parseStyle(
-    option.fillStyle ? option.fillStyle : defaultFillStyle
-  );
+  const color = parseStyle(fillColor);
   const origin = epllipsoid.origin;
   const a = epllipsoid.radiusX;
   const b = epllipsoid.radiusY;

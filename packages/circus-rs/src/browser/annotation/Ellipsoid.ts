@@ -2,7 +2,7 @@ import {
   getInscribedEllipse,
   getInscribedEllipsoid
 } from '../../common/geometry/Ellipsoid';
-import drawEllipseWithMuddyWay from './helper/drawEllipseWithMuddyWay';
+import debugFillEllipse from './helper/debugFillEllipse';
 import { drawEllipse, drawOutline } from './helper/drawObject';
 import intersectEllipsoidAndSection from './helper/getEllipseUsing5Points';
 import SolidFigure, { FigureType, LineDrawStyle } from './SolidFigure';
@@ -13,11 +13,7 @@ import SolidFigure, { FigureType, LineDrawStyle } from './SolidFigure';
 export default class Ellipsoid extends SolidFigure {
   public type: FigureType = 'ellipsoid';
 
-  private figureDrawStyle: {
-    muddyWay: boolean;
-    using5Points: boolean;
-    muddyWayFillStyle?: string;
-  } = { muddyWay: true, using5Points: true };
+  private debugFill = 'rgba(255, 255, 0, 0.3)';
 
   public boundingBoxCrossSectionalShape: LineDrawStyle = {
     width: 1,
@@ -68,31 +64,26 @@ export default class Ellipsoid extends SolidFigure {
       const resolution = this.drawFigureParams!.resolution;
       const section = this.drawFigureParams!.section;
 
-      if (this.figureDrawStyle.muddyWay) {
-        const drawingTargetAreaBoundingBox2 = this.drawFigureParams!
-          .drawingTargetBoundingBox2;
-        const fillStyle = this.figureDrawStyle.muddyWayFillStyle;
-        drawEllipseWithMuddyWay(
+      if (this.debugFill) {
+        debugFillEllipse(
           ctx,
           epllipsoid,
           resolution,
           section,
-          drawingTargetAreaBoundingBox2,
-          { fillStyle }
+          this.drawFigureParams!.drawingTargetBoundingBox2,
+          this.debugFill
         );
       }
 
-      if (this.figureDrawStyle.using5Points) {
-        const ellipse = intersectEllipsoidAndSection(
-          epllipsoid,
-          section,
-          resolution
-        );
-        drawEllipse(ctx, ellipse, {
-          strokeStyle: this.color,
-          lineWidth: this.width
-        });
-      }
+      const ellipse = intersectEllipsoidAndSection(
+        epllipsoid,
+        section,
+        resolution
+      );
+      drawEllipse(ctx, ellipse, {
+        strokeStyle: this.color,
+        lineWidth: this.width
+      });
     }
   }
 }

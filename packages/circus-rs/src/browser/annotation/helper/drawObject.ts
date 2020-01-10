@@ -7,17 +7,17 @@ import { DirectedSegment } from '../../../common/geometry/Line';
 export function drawPoint(
   ctx: CanvasRenderingContext2D,
   point: Vector2 | undefined,
-  radius: number,
-  option: { fillStyle: string }
+  style: { radius: number; color: string }
 ) {
   if (!point) return;
+  if (style.radius <= 0) return;
 
   ctx.save();
   try {
-    ctx.fillStyle = option.fillStyle;
+    ctx.fillStyle = style.color;
 
     ctx.beginPath();
-    ctx.arc(point.x, point.y, radius, 0, Math.PI * 2);
+    ctx.arc(point.x, point.y, style.radius, 0, Math.PI * 2);
     ctx.closePath();
 
     ctx.fill();
@@ -32,13 +32,15 @@ export function drawPoint(
 export function drawLine(
   ctx: CanvasRenderingContext2D,
   directedSegment: DirectedSegment | undefined,
-  option: { lineWidth?: number; strokeStyle?: string }
+  style: { lineWidth: number; strokeStyle: string }
 ): void {
   if (!directedSegment) return;
+  if (style.lineWidth <= 0) return;
+
   ctx.save();
   try {
-    if (option.lineWidth) ctx.lineWidth = option.lineWidth;
-    if (option.strokeStyle) ctx.strokeStyle = option.strokeStyle;
+    ctx.lineWidth = style.lineWidth;
+    ctx.strokeStyle = style.strokeStyle;
 
     ctx.beginPath();
     ctx.moveTo(directedSegment.from.x, directedSegment.from.y);
@@ -57,23 +59,26 @@ export function drawLine(
 export function drawPolygon(
   ctx: CanvasRenderingContext2D,
   vertices: Vector2[] | undefined,
-  option: { lineWidth?: number; strokeStyle?: string; fillStyle?: string }
+  style: { lineWidth: number; strokeStyle: string; fillStyle?: string }
 ): void {
   if (!vertices) return;
+
   ctx.save();
   try {
-    if (option.lineWidth) ctx.lineWidth = option.lineWidth;
-    if (option.strokeStyle) ctx.strokeStyle = option.strokeStyle;
-    if (option.fillStyle) ctx.fillStyle = option.fillStyle;
-
     ctx.beginPath();
     ctx.moveTo(vertices[0].x, vertices[0].y);
     vertices.forEach(p => ctx.lineTo(p.x, p.y));
     ctx.closePath();
 
-    if (option.strokeStyle || (!option.strokeStyle && !option.fillStyle))
+    if (style.lineWidth > 0) {
+      ctx.lineWidth = style.lineWidth;
+      ctx.strokeStyle = style.strokeStyle;
       ctx.stroke();
-    if (option.fillStyle) ctx.fill();
+    }
+    if (style.fillStyle) {
+      ctx.fillStyle = style.fillStyle;
+      ctx.fill();
+    }
   } finally {
     ctx.restore();
   }
@@ -85,9 +90,9 @@ export function drawPolygon(
 export function drawRectangle(
   ctx: CanvasRenderingContext2D,
   box: Box2 | undefined,
-  option: {
-    strokeStyle?: string;
-    lineWidth?: number;
+  style: {
+    lineWidth: number;
+    strokeStyle: string;
     fillStyle?: string;
   }
 ) {
@@ -95,10 +100,6 @@ export function drawRectangle(
 
   ctx.save();
   try {
-    if (option.lineWidth) ctx.lineWidth = option.lineWidth;
-    if (option.strokeStyle) ctx.strokeStyle = option.strokeStyle;
-    if (option.fillStyle) ctx.fillStyle = option.fillStyle;
-
     ctx.beginPath();
     ctx.moveTo(box.min.x, box.min.y);
     ctx.lineTo(box.min.x, box.max.y);
@@ -107,9 +108,15 @@ export function drawRectangle(
     ctx.lineTo(box.min.x, box.min.y);
     ctx.closePath();
 
-    if (option.strokeStyle || (!option.strokeStyle && !option.fillStyle))
+    if (style.lineWidth > 0) {
+      ctx.lineWidth = style.lineWidth;
+      ctx.strokeStyle = style.strokeStyle;
       ctx.stroke();
-    if (option.fillStyle) ctx.fill();
+    }
+    if (style.fillStyle) {
+      ctx.fillStyle = style.fillStyle;
+      ctx.fill();
+    }
   } finally {
     ctx.restore();
   }
@@ -128,9 +135,9 @@ export function drawEllipse(
         rotate: number;
       }
     | undefined,
-  option: {
-    strokeStyle?: string;
-    lineWidth?: number;
+  style: {
+    lineWidth: number;
+    strokeStyle: string;
     fillStyle?: string;
   }
 ) {
@@ -139,17 +146,19 @@ export function drawEllipse(
 
   ctx.save();
   try {
-    if (option.lineWidth) ctx.lineWidth = option.lineWidth;
-    if (option.strokeStyle) ctx.strokeStyle = option.strokeStyle;
-    if (option.fillStyle) ctx.fillStyle = option.fillStyle;
-
     ctx.beginPath();
     ctx.ellipse(origin.x, origin.y, xRadius, yRadius, rotate, 0, 2 * Math.PI);
     ctx.closePath();
 
-    if (option.strokeStyle || (!option.strokeStyle && !option.fillStyle))
+    if (style.lineWidth > 0) {
+      ctx.lineWidth = style.lineWidth;
+      ctx.strokeStyle = style.strokeStyle;
       ctx.stroke();
-    if (option.fillStyle) ctx.fill();
+    }
+    if (style.fillStyle) {
+      ctx.fillStyle = style.fillStyle;
+      ctx.fill();
+    }
   } finally {
     ctx.restore();
   }
@@ -162,16 +171,12 @@ export function drawSquareAroundPoint(
   ctx: CanvasRenderingContext2D,
   point: Vector2 | undefined,
   squareSize: number,
-  option: { lineWidth?: number; strokeStyle?: string; fillStyle?: string }
+  style: { lineWidth: number; strokeStyle: string; fillStyle?: string }
 ): void {
   if (!point) return;
 
   ctx.save();
   try {
-    if (option.lineWidth) ctx.lineWidth = option.lineWidth;
-    if (option.strokeStyle) ctx.strokeStyle = option.strokeStyle;
-    if (option.fillStyle) ctx.fillStyle = option.fillStyle;
-
     ctx.beginPath();
     ctx.rect(
       point.x - squareSize,
@@ -181,23 +186,30 @@ export function drawSquareAroundPoint(
     );
     ctx.closePath();
 
-    if (option.strokeStyle || (!option.strokeStyle && !option.fillStyle))
+    if (style.lineWidth > 0) {
+      ctx.lineWidth = style.lineWidth;
+      ctx.strokeStyle = style.strokeStyle;
       ctx.stroke();
-    if (option.fillStyle) ctx.fill();
+    }
+    if (style.fillStyle) {
+      ctx.fillStyle = style.fillStyle;
+      ctx.fill();
+    }
   } finally {
     ctx.restore();
   }
 }
 
 /**
- * Draw an outlines (polygon, line, or point)
+ * Draw an simple figure of polygon, line, or point
  */
-export function drawOutline(
+export function drawSimpleFigure(
   ctx: CanvasRenderingContext2D,
   vertices: Vector2[] | undefined,
-  style: { strokeStyle: string; lineWidth: number }
+  style: { lineWidth: number; strokeStyle: string; fillStyle?: string }
 ): void {
   if (!vertices) return;
+  if (style.lineWidth <= 0 && !style.fillStyle) return;
 
   switch (vertices.length) {
     case 0:
@@ -206,8 +218,11 @@ export function drawOutline(
     case 1:
       // draw Point
       const radius = style.lineWidth;
-      const pointStyle = { fillStyle: style.strokeStyle };
-      drawPoint(ctx, vertices[0], radius, pointStyle);
+      const color =
+        style.lineWidth > 0 || !style.fillStyle
+          ? style.strokeStyle
+          : style.fillStyle;
+      drawPoint(ctx, vertices[0], { radius, color });
       return;
 
     case 2:

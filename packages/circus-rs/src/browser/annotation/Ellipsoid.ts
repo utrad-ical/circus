@@ -3,7 +3,7 @@ import {
   getInscribedEllipsoid
 } from '../../common/geometry/Ellipsoid';
 import debugFillEllipse from './helper/debugFillEllipse';
-import { drawEllipse, drawOutline } from './helper/drawObject';
+import { drawEllipse, drawSimpleFigure } from './helper/drawObject';
 import intersectEllipsoidAndSection from './helper/getEllipseUsing5Points';
 import SolidFigure, { FigureType, LineDrawStyle } from './SolidFigure';
 
@@ -34,7 +34,7 @@ export default class Ellipsoid extends SolidFigure {
         width: lineWidth
       } = drawBoundingBoxCrossSectionalShape;
 
-      drawOutline(ctx, crossSectionalShapeVertices2, {
+      drawSimpleFigure(ctx, crossSectionalShapeVertices2, {
         lineWidth,
         strokeStyle
       });
@@ -53,8 +53,9 @@ export default class Ellipsoid extends SolidFigure {
           rotate: 0
         },
         {
+          lineWidth: this.width,
           strokeStyle: this.color,
-          lineWidth: this.width
+          fillStyle: this.fillColor
         }
       );
     } else {
@@ -81,8 +82,9 @@ export default class Ellipsoid extends SolidFigure {
         resolution
       );
       drawEllipse(ctx, ellipse, {
+        lineWidth: this.width,
         strokeStyle: this.color,
-        lineWidth: this.width
+        fillStyle: this.fillColor
       });
     }
   }

@@ -1,4 +1,4 @@
-import { drawOutline } from './helper/drawObject';
+import { drawSimpleFigure } from './helper/drawObject';
 import SolidFigure, { FigureType } from './SolidFigure';
 
 /**
@@ -12,9 +12,10 @@ export default class Cuboid extends SolidFigure {
     const crossSectionalShapeVertices2 = this.drawFigureParams!
       .crossSectionalShapeVertices2;
 
-    drawOutline(ctx, crossSectionalShapeVertices2, {
+    drawSimpleFigure(ctx, crossSectionalShapeVertices2, {
+      lineWidth: this.width,
       strokeStyle: this.color,
-      lineWidth: this.width
+      fillStyle: this.fillColor
     });
   }
 }

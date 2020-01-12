@@ -4,7 +4,7 @@ import pluginJobRunner, {
 } from './pluginJobRunner';
 import fs from 'fs-extra';
 import path from 'path';
-import DockerRunner from '../util/DockerRunner';
+import DockerRunner from '@utrad-ical/circus-lib/lib/docker-runner/DockerRunner';
 import { DicomFileRepository } from '@utrad-ical/circus-lib/lib/dicom-file-repository';
 import tar from 'tar-stream';
 import memory from 'memory-streams';
@@ -20,7 +20,7 @@ describe('pluginJobRunner', () => {
   const jobId = '12345';
 
   test('Normal run', async () => {
-    const dockerRunner = new DockerRunner();
+    const dockerRunner = new DockerRunner({});
 
     // Mock Job Reporter
     let resultsPacked = false;
@@ -120,7 +120,7 @@ describe('fetchSeriesFromRepository', () => {
 
 describe('executePlugin', () => {
   const t = async (plugin: circus.PluginDefinition) => {
-    const runner = new DockerRunner();
+    const runner = new DockerRunner({});
     const { stream, promise } = await executePlugin(
       runner,
       plugin,

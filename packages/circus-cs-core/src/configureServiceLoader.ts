@@ -6,7 +6,7 @@ import createDaemonController from './daemon/createDaemonController';
 import { PluginJobRegisterer } from './job/registerer/createPluginJobRegisterer';
 import { PluginJobRunner } from './job/pluginJobRunner';
 import { MongoClientPool } from './mongoClientPool';
-import DockerRunner from './util/DockerRunner';
+import DockerRunner from '@utrad-ical/circus-lib/lib/docker-runner/DockerRunner';
 import * as circus from './interface';
 
 /**
@@ -87,7 +87,7 @@ export default function configureServiceLoader(
   );
   serviceLoader.registerModule(
     'dockerRunner',
-    path.join(__dirname, 'util', 'DockerRunner')
+    '@utrad-ical/circus-lib/lib/docker-runner/DockerRunner'
   );
   serviceLoader.registerFactory('configuration', async config => config);
 

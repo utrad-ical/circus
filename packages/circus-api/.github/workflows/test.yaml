@@ -33,6 +33,9 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
       - name: npm ci
         run: npm ci
+      - name: Pull dicom_utility from Docker Hub
+        run: |
+          docker pull circuscad/dicom_utility:1.0.0
       - name: npm test
         run: npm test
         env:

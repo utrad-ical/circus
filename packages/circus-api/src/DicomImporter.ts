@@ -31,7 +31,19 @@ export default class DicomImporter {
    */
   async readDicomTagsFromFile(file: string): Promise<any> {
     if (!file) throw new TypeError('File not specified');
-    const out = await exec(this.utility, ['dump', '--stdout', file]);
+    const dockerImage = 'circuscad/dicom_utility:1.0.0';
+    const dir = path.dirname(file);
+    const fileName = path.basename(file);
+    const out = await exec('docker', [
+      'run',
+      '--rm',
+      '-v',
+      dir + ':/circus',
+      dockerImage,
+      'dump',
+      '--stdout',
+      '/circus/' + fileName
+    ]);
     return JSON.parse(out);
   }
 

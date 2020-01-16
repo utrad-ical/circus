@@ -1,5 +1,5 @@
 import path from 'path';
-import DockerRunner from '@utrad-ical/circus-lib/lib/docker-runner/DockerRunner';
+import DockerRunner from '../util/DockerRunner';
 import fs from 'fs-extra';
 import buildDicomVolumes from './buildDicomVolumes';
 

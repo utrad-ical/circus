@@ -123,7 +123,7 @@ const main = async () => {
   const mongoUrl = process.env.CIRCUS_MONGO_URL || process.env.MONGO_URL;
   if (!mongoUrl) throw new Error('You must specify the MongoDB connection URL');
   const { db } = await connectDb(mongoUrl);
-  const logger = createLogger();
+  const logger = await createLogger();
 
   const currentDbSchemaRevision = await getCurrentDbSchemaRevision(db);
   const latestDbSchemaRevision = await getLatestDbSchemaRevision();

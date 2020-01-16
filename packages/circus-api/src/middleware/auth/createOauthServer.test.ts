@@ -4,11 +4,11 @@ import Router from 'koa-router';
 import * as qs from 'querystring';
 import { setUpKoaTest, TestServer } from '../../../test/util-koa';
 import { setUpMongoFixture, usingMongo } from '../../../test/util-mongo';
-import createLogger from '../../createLogger';
 import createValidator from '../../createValidator';
 import createModels from '../../db/createModels';
 import errorHandler from '../errorHandler';
 import createOauthServer from './createOauthServer';
+import createNullLogger from '@utrad-ical/circus-lib/lib/logger/NullLogger';
 
 let testServer: TestServer, ax: AxiosInstance;
 
@@ -31,7 +31,10 @@ beforeAll(async () => {
 
     app.use(bodyparser());
     app.use(
-      errorHandler({ includeErrorDetails: false, logger: createLogger() })
+      errorHandler({
+        includeErrorDetails: false,
+        logger: await createNullLogger(null, {})
+      })
     );
     app.use(router.routes());
   });

@@ -3,7 +3,7 @@ import axios, { AxiosInstance } from 'axios';
 import Router from 'koa-router';
 import Ajv from 'ajv';
 import { setUpKoaTest, TestServer } from '../../test/util-koa';
-import createLogger from '../createLogger';
+import createNullLogger from '@utrad-ical/circus-lib/lib/logger/NullLogger';
 
 let testServer: TestServer, ax: AxiosInstance;
 
@@ -46,7 +46,10 @@ beforeAll(async () => {
     });
 
     app.use(
-      errorHandler({ includeErrorDetails: true, logger: createLogger() })
+      errorHandler({
+        includeErrorDetails: true,
+        logger: await createNullLogger(null, {})
+      })
     );
     app.use(router.routes());
   });

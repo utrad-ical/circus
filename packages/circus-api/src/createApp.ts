@@ -15,7 +15,6 @@ import checkPrivilege from './middleware/auth/checkPrivilege';
 import typeCheck from './middleware/typeCheck';
 import createValidator from './createValidator';
 import createStorage from './storage/createStorage';
-import createLogger from './createLogger';
 import validateInOut from './middleware/validateInOut';
 import createModels from './db/createModels';
 import compose from 'koa-compose';
@@ -32,6 +31,7 @@ import os from 'os';
 import mongo from 'mongodb';
 import { ErrorObject } from 'ajv';
 import { Deps } from './typings/middlewares';
+import Logger from '@utrad-ical/circus-lib/lib/logger/Logger';
 
 function handlerName(route: Route) {
   if (route.handler) return route.handler;
@@ -153,6 +153,7 @@ export const makeCsCoreFromServiceLoader = async (
 interface CreateAppOptions {
   debug: boolean;
   db: mongo.Db;
+  logger: Logger;
   fixUser?: string;
   blobPath?: string;
   corsOrigin?: string;
@@ -223,6 +224,7 @@ export const createKoa = async (
 const createApp = async (options: CreateAppOptions) => {
   const {
     db,
+    logger,
     blobPath,
     dicomPath,
     pluginResultsPath,
@@ -233,7 +235,6 @@ const createApp = async (options: CreateAppOptions) => {
   const models = createModels(db, validator);
   const blobStorage = await createBlobStorage(blobPath);
   const dicomFileRepository = await createDicomFileRepository(dicomPath);
-  const logger = createLogger();
   const cs = await makeCsCoreFromServiceLoader({
     pluginResultsPath,
     dicomPath

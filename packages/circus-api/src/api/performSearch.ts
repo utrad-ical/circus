@@ -1,11 +1,7 @@
 import status from 'http-status';
 import koa from 'koa';
+import mongo from 'mongodb';
 import { CollectionAccessor } from '../db/createCollectionAccessor';
-
-interface Options {
-  transform?: (data: any) => any;
-  defaultSort?: object;
-}
 
 interface SearchQuery {
   sort: object;
@@ -56,13 +52,102 @@ const extractSearchOptions = (ctx: koa.Context, defaultSort: object) => {
   return { sort, limit, page, skip } as SearchQuery;
 };
 
+interface RunAggregationOptions {
+  filter?: object;
+  lookupStages?: object[];
+  modifyStages?: object[];
+  sort?: object;
+  skip?: number;
+  limit?: number;
+  transform?: (data: any) => any;
+}
+
+export const runAggregation = async (
+  model: CollectionAccessor,
+  options: RunAggregationOptions
+) => {
+  const {
+    filter,
+    lookupStages = [],
+    modifyStages = [],
+    sort,
+    skip,
+    limit,
+    transform
+  } = options;
+  const count = await model.aggregate([
+    ...lookupStages,
+    ...(filter ? [{ $match: filter }] : []),
+    { $count: 'count' }
+  ]);
+  const totalItems = count[0].count as number;
+
+  const rawItems = await model.aggregate([
+    ...lookupStages,
+    ...(filter ? [{ $match: filter }] : []),
+    ...(sort ? [{ $sort: sort }] : []),
+    ...(skip ? [{ $skip: skip }] : []),
+    ...(limit ? [{ $limit: limit }] : []),
+    ...modifyStages
+  ]);
+
+  const items = transform ? rawItems.map(transform) : rawItems;
+  return { items, totalItems };
+};
+
+/**
+ * Performs a search using Mongo's aggregation framework.
+ * @param model The collection accessor that represents the main collection.
+ * @param filter The filter object passed to a `$match` stage.
+ * @param ctx The Koa context.
+ * @param lookupStages Pipeline stages passed before `$match`.
+ *   Used to "join" other collections or perform other preprocessing tasks.
+ * @param modifyStages Pipeline stages passed after `$limit`, `$sort`, etc.
+ *   Used to define the shape of the result array.
+ * @param opts
+ */
+export const performAggregationSearch = async (
+  model: CollectionAccessor,
+  filter: object,
+  ctx: koa.Context,
+  lookupStages: object[],
+  modifyStages: object[],
+  opts: Options
+) => {
+  const { defaultSort } = opts;
+  const query = extractSearchOptions(ctx, defaultSort);
+  try {
+    const { items, totalItems } = await runAggregation(model, {
+      filter,
+      lookupStages,
+      modifyStages,
+      sort: query.sort,
+      skip: query.skip,
+      limit: query.limit,
+      transform: opts.transform
+    });
+    ctx.body = { items, totalItems, page: query.page };
+  } catch (err) {
+    if (err.code === 2) {
+      ctx.throw(status.BAD_REQUEST, 'Invalid query');
+    } else {
+      throw err;
+    }
+  }
+};
+
+interface Options {
+  transform?: (data: any) => any;
+  defaultSort: object;
+}
+
 const performSearch = async (
   model: CollectionAccessor,
   filter: object,
   ctx: koa.Context,
-  opts: Options = {}
+  opts: Options
 ) => {
-  const { defaultSort = {}, transform } = opts;
+  const { defaultSort, transform } = opts;
   const { sort, limit, page, skip } = extractSearchOptions(ctx, defaultSort);
 
   try {

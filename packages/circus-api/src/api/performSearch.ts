@@ -7,14 +7,18 @@ interface Options {
   defaultSort?: object;
 }
 
-const performSearch = async (
-  model: CollectionAccessor,
-  filter: object,
-  ctx: koa.Context,
-  opts: Options = {}
-) => {
+interface SearchQuery {
+  sort: object;
+  limit: number;
+  page: number;
+  skip: number;
+}
+
+/**
+ * Parses URL parameter strings and add defaults if necessary.
+ */
+const extractSearchOptions = (ctx: koa.Context, defaultSort: object) => {
   const urlQuery = ctx.request.query;
-  const { defaultSort = {}, transform } = opts;
 
   let sort;
   if (urlQuery.sort) {
@@ -49,15 +53,23 @@ const performSearch = async (
   const page = parseInt(urlQuery.page || '1', 10);
   const skip = limit * (page - 1);
 
+  return { sort, limit, page, skip } as SearchQuery;
+};
+
+const performSearch = async (
+  model: CollectionAccessor,
+  filter: object,
+  ctx: koa.Context,
+  opts: Options = {}
+) => {
+  const { defaultSort = {}, transform } = opts;
+  const { sort, limit, page, skip } = extractSearchOptions(ctx, defaultSort);
+
   try {
     const rawResults = await model.findAll(filter, { limit, skip, sort });
     const totalItems = await model.findAsCursor(filter).count();
     const results = transform ? rawResults.map(transform) : rawResults;
-    ctx.body = {
-      items: results,
-      totalItems,
-      page
-    };
+    ctx.body = { items: results, totalItems, page };
   } catch (err) {
     if (err.code === 2) {
       ctx.throw(status.BAD_REQUEST, 'Invalid query');

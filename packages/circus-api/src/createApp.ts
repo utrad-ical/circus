@@ -143,10 +143,7 @@ export const makeCsCoreFromServiceLoader = async (
       options: { dataDir: options.dicomPath, useHash: false }
     }
   };
-  const loader = configureServiceLoader(
-    new ServiceLoader(configObj),
-    configObj
-  );
+  const loader = configureServiceLoader(new ServiceLoader(configObj));
   return await loader.get('core');
 };
 

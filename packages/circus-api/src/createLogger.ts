@@ -4,8 +4,8 @@ const path = require('path');
 const logDir = path.resolve(__dirname, '../store/logs');
 
 const createLogger = () => {
-  const filename = path.join(logDir, 'circus-api');
-  return FileLogger({ filename }, {});
+  const fileName = path.join(logDir, 'circus-api');
+  return FileLogger({ fileName }, {});
 };
 
 export default createLogger;

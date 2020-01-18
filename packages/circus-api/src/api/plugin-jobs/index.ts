@@ -97,6 +97,7 @@ export const handleSearch: RouteMiddleware = ({ models }) => {
       ctx,
       [
         {
+          // Performs the 'JOIN'.
           $lookup: {
             from: 'series',
             localField: 'series.seriesUid',
@@ -104,9 +105,31 @@ export const handleSearch: RouteMiddleware = ({ models }) => {
             as: 'seriesDetail'
           }
         },
-        { $unwind: '$seriesDetail' }
+        {
+          $unwind: {
+            path: '$seriesDetail',
+            includeArrayIndex: 'volId'
+          }
+        },
+        {
+          // Removes results from non-primary (volId > 0) series
+          $match: { volId: 0 }
+        },
+        {
+          // Appends "patientInfo" field
+          $addFields: { patientInfo: '$seriesDetail.patientInfo' }
+        }
       ],
-      [{ $project: { _id: false, seriesDetail: false } }],
+      [
+        {
+          $project: {
+            _id: false,
+            volId: false,
+            primarySeries: false,
+            seriesDetail: false
+          }
+        }
+      ],
       { defaultSort: { createdAt: -1 } }
     );
   };

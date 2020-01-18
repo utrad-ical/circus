@@ -85,6 +85,7 @@ const createValidator = async (schemaRoot = defaultSchemaRoot) => {
         allRequiredExcept: allRequiredScheama,
         only: onlySchema,
         exclude: excludeSchema,
+        addProperty: addPropertySchema,
         searchResult: searchResultSchema,
         dbEntry: dbEntrySchema
       } as { [name: string]: SchemaConverter })[filterName];
@@ -142,6 +143,15 @@ const createValidator = async (schemaRoot = defaultSchemaRoot) => {
     const propList = props.split(',').map(s => s.trim());
     const properties = { ...schema.properties };
     propList.forEach(key => delete properties[key]);
+    return { ...schema, properties };
+  };
+
+  const addPropertySchema: SchemaConverter = (
+    schema,
+    name: string,
+    ref: string
+  ) => {
+    const properties = { ...schema.properties, [name]: { $ref: ref } };
     return { ...schema, properties };
   };
 

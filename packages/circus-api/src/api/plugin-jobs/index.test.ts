@@ -14,15 +14,26 @@ afterAll(async () => await apiTest.tearDown());
 // 111.222.333.444.666: (100) [sirius.org]
 // 111.222.333.444.777: (236) [vega.org]
 
-test('List plug-in jobs', async () => {
-  const res = await axios.request({
-    method: 'get',
-    url: 'api/plugin-jobs'
+describe('plugin-job search', () => {
+  test('List plug-in jobs', async () => {
+    const res = await axios.get('api/plugin-jobs');
+    expect(res.status).toBe(200);
+    expect(Array.isArray(res.data.items)).toBe(true);
   });
-  expect(res.status).toBe(200);
+
+  test('Filter by patientInfo', async () => {
+    const res = await axios.get('api/plugin-jobs', {
+      params: {
+        filter: JSON.stringify({ 'patientInfo.patientName': 'Sakura' })
+      }
+    });
+    expect(res.status).toBe(200);
+    expect(res.data.items).toHaveLength(1);
+    expect(res.data.items[0].patientInfo.age).toBe(20);
+  });
 });
 
-describe('registering plugin-job', () => {
+describe('plugin-job registration', () => {
   test('should register a new plug-in job', async () => {
     const res = await axios.request({
       method: 'post',

@@ -20,6 +20,7 @@ routes:
         priority:
           type: integer
       required: ['pluginId', 'series']
+      additionalProperties: false
     responseSchema:
       type: object
       properties:
@@ -36,7 +37,7 @@ routes:
     handler: handleSearch
     description: >
       Performs search for the plug-in job.
-    responseSchema: pluginJob|searchResult
+    responseSchema: pluginJob|addProperty patientInfo patientInfo|searchResult
   - verb: get
     path: /plugin-jobs/:jobId
     description: >

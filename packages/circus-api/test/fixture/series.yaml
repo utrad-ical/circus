@@ -1,5 +1,4 @@
--
-  seriesUid: 111.222.333.444.444
+- seriesUid: 111.222.333.444.444
   studyUid: 111.222.333.888.999.999
   width: 1024
   height: 1024
@@ -12,11 +11,10 @@
   modelName: Radiko Ace
   manufacturer: RadikoSystems
   storageId: 0
-  patientInfo: {}
+  patientInfo: { patientId: '015', patientName: 'Sakura', age: 20 }
   parameters: {}
   domain: sirius.org
--
-  seriesUid: 111.222.333.444.555
+- seriesUid: 111.222.333.444.555
   studyUid: 111.222.333.888.999.1000
   width: 512
   height: 512
@@ -29,11 +27,10 @@
   modelName: LightSpeed
   manufacturer: GE
   storageId: 0
-  patientInfo: {}
+  patientInfo: { patientId: '017', patientName: 'Koume', age: 70 }
   parameters: {}
   domain: sirius.org
--
-  seriesUid: 111.222.333.444.666
+- seriesUid: 111.222.333.444.666
   studyUid: 111.222.333.888.999.1001
   width: 512
   height: 512
@@ -46,11 +43,10 @@
   modelName: BBB
   manufacturer: Hatsushiba
   storageId: 0
-  patientInfo: {}
+  patientInfo: { patientId: '003', patientName: 'Anzu', weight: 20, sex: 'F' }
   parameters: {}
   domain: sirius.org
--
-  seriesUid: 111.222.333.444.777
+- seriesUid: 111.222.333.444.777
   studyUid: 111.222.333.888.999.1002
   width: 512
   height: 512

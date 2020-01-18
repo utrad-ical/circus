@@ -1,5 +1,5 @@
 import status from 'http-status';
-import performSearch from '../performSearch';
+import performSearch, { performAggregationSearch } from '../performSearch';
 import generateUniqueId from '../../utils/generateUniqueId';
 import { EJSON } from 'bson';
 import path from 'path';
@@ -8,7 +8,6 @@ import mime from 'mime';
 import { fetchAccessibleSeries } from '../../privilegeUtils';
 import duplicateJobExists from '../duplicateJobExists';
 import { RouteMiddleware } from '../../typings/middlewares';
-import { PluginDefinition } from '@utrad-ical/circus-cs-core';
 
 export const handlePost: RouteMiddleware = ({ models, cs }) => {
   return async (ctx, next) => {
@@ -92,9 +91,24 @@ export const handleSearch: RouteMiddleware = ({ models }) => {
     } catch (err) {
       ctx.throw(status.BAD_REQUEST, 'Bad filter.');
     }
-    await performSearch(models.pluginJob, customFilter!, ctx, {
-      defaultSort: { pluginId: 1 }
-    });
+    await performAggregationSearch(
+      models.pluginJob,
+      customFilter!,
+      ctx,
+      [
+        {
+          $lookup: {
+            from: 'series',
+            localField: 'series.seriesUid',
+            foreignField: 'seriesUid',
+            as: 'seriesDetail'
+          }
+        },
+        { $unwind: '$seriesDetail' }
+      ],
+      [{ $project: { _id: false, seriesDetail: false } }],
+      { defaultSort: { createdAt: -1 } }
+    );
   };
 };
 

@@ -80,7 +80,7 @@ export const runAggregation = async (
     ...(filter ? [{ $match: filter }] : []),
     { $count: 'count' }
   ]);
-  const totalItems = count[0].count as number;
+  const totalItems = count.length ? (count[0].count as number) : 0;
 
   const rawItems = await model.aggregate([
     ...lookupStages,

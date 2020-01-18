@@ -17,7 +17,7 @@ const makeBaseRequest = () => ({
   pluginId: 'd135e1fbb368e35f940ae8e6deb171e90273958dc3938de5a8237b73bb42d9c2',
   series: [
     {
-      seriesUid: '1.2.3.4.5',
+      seriesUid: '111.222.333.444.555',
       partialVolumeDescriptor: {
         start: 1,
         end: 10,
@@ -25,7 +25,7 @@ const makeBaseRequest = () => ({
       }
     },
     {
-      seriesUid: '2.3.4.5.6',
+      seriesUid: '111.222.333.444.666',
       partialVolumeDescriptor: {
         start: 10,
         end: 1,

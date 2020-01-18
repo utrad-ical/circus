@@ -5,12 +5,12 @@
   userEmail: circus@example.com
   status: finished
   series:
-    - seriesUid: 1.2.3.4.5
+    - seriesUid: 111.222.333.444.555
       partialVolumeDescriptor:
         start: 1
         end: 10
         delta: 1
-    - seriesUid: 2.3.4.5.6
+    - seriesUid: 111.222.333.444.666
       partialVolumeDescriptor:
         start: 10
         end: 1
@@ -28,7 +28,7 @@
   userEmail: circus@example.com
   status: invalidated
   series:
-    - seriesUid: 9.8.7.6.5
+    - seriesUid: 111.222.333.444.777
       partialVolumeDescriptor:
         start: 1
         end: 10
@@ -46,7 +46,7 @@
   userEmail: circus@example.com
   status: failed
   series:
-    - seriesUid: 5.6.7.8.9
+    - seriesUid: 111.222.333.444.444
       partialVolumeDescriptor:
         start: 1
         end: 10

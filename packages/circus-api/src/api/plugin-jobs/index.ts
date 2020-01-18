@@ -8,6 +8,7 @@ import mime from 'mime';
 import { fetchAccessibleSeries } from '../../privilegeUtils';
 import duplicateJobExists from '../duplicateJobExists';
 import { RouteMiddleware } from '../../typings/middlewares';
+import { PluginDefinition } from '@utrad-ical/circus-cs-core';
 
 export const handlePost: RouteMiddleware = ({ models, cs }) => {
   return async (ctx, next) => {
@@ -20,12 +21,13 @@ export const handlePost: RouteMiddleware = ({ models, cs }) => {
       ctx.throw(status.BAD_REQUEST, err);
     }
 
-    let plugin;
-    try {
-      plugin = await cs.plugin.get(request.pluginId);
-    } catch (err) {
-      ctx.throw(status.NOT_FOUND, err);
-    }
+    const plugin = await (() => {
+      try {
+        return cs.plugin.get(request.pluginId);
+      } catch (err) {
+        ctx.throw(status.NOT_FOUND, err);
+      }
+    })()!;
 
     if (await duplicateJobExists(models, request))
       ctx.throw(
@@ -90,7 +92,9 @@ export const handleSearch: RouteMiddleware = ({ models }) => {
     } catch (err) {
       ctx.throw(status.BAD_REQUEST, 'Bad filter.');
     }
-    await performSearch(models.pluginJob, customFilter!, ctx);
+    await performSearch(models.pluginJob, customFilter!, ctx, {
+      defaultSort: { pluginId: 1 }
+    });
   };
 };
 

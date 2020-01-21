@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { modalities } from 'modalities';
 import ConditionFrame from './ConditionFrame';
 import { escapeRegExp } from 'utils/util';
@@ -8,23 +8,12 @@ import AgeMinMax from 'components/AgeMinMax';
 import { conditionToMongoQuery } from 'rb/ConditionEditor';
 import SearchPanel from 'pages/search/SearchPanel';
 import sendSearchCondition from 'pages/search/sendSearchCondition';
+import { useApi } from 'utils/api';
+import PluginDisplay from 'components/PluginDisplay';
 
 const sexOptions = { all: 'All', M: 'male', F: 'female', O: 'other' };
 const modalityOptions = { all: 'All' };
 modalities.forEach(m => (modalityOptions[m] = m));
-
-const basicConditionProperties = [
-  {
-    key: 'plugin',
-    caption: 'Plugin',
-    editor: et.shrinkSelect(modalityOptions)
-  },
-  { key: 'patientId', caption: 'Patient ID', editor: et.text() },
-  { key: 'patientName', caption: 'Patient Name', editor: et.text() },
-  { key: 'age', caption: 'Age', editor: AgeMinMax },
-  { key: 'sex', caption: 'Sex', editor: et.shrinkSelect(sexOptions) },
-  { key: 'seriesDate', caption: 'Series Date', editor: DateRangePicker }
-];
 
 const basicConditionToMongoQuery = condition => {
   const members = [];
@@ -37,9 +26,13 @@ const basicConditionToMongoQuery = condition => {
         if (typeof val.max === 'number')
           members.push({ 'patientInfo.age': { $lte: val.max } });
         break;
-      case 'seriesDate': {
-        const q = dateRangeToMongoQuery(val, 'seriesDate');
+      case 'createdAt': {
+        const q = dateRangeToMongoQuery(val, 'createdAt');
         if (q) members.push(q);
+        break;
+      }
+      case 'pluginId': {
+        if (val !== 'all') members.push({ pluginId: val });
         break;
       }
       default:
@@ -87,6 +80,37 @@ const conditionToFilter = condition => {
 
 const PluginSearchCondition = props => {
   const { condition, onChange } = props;
+  const api = useApi();
+  const [pluginOptions, setPluginOptions] = useState({ all: 'All' });
+  useEffect(() => {
+    const load = async () => {
+      const plugins = await api('/plugins');
+      const opts = { all: 'All' };
+      plugins.forEach(p => (opts[p.pluginId] = p.pluginId));
+      setPluginOptions(opts);
+    };
+    load();
+  }, [api]);
+
+  const basicConditionProperties = useMemo(() => {
+    return [
+      {
+        key: 'pluginId',
+        caption: 'Plugin',
+        editor: et.shrinkSelect(pluginOptions, {
+          renderer: v => {
+            if (v.caption === 'All') return 'All';
+            return <PluginDisplay pluginId={v.caption} />;
+          }
+        })
+      },
+      { key: 'patientId', caption: 'Patient ID', editor: et.text() },
+      { key: 'patientName', caption: 'Patient Name', editor: et.text() },
+      { key: 'age', caption: 'Age', editor: AgeMinMax },
+      { key: 'sex', caption: 'Sex', editor: et.shrinkSelect(sexOptions) },
+      { key: 'createdAt', caption: 'Job Date', editor: DateRangePicker }
+    ];
+  }, [pluginOptions]);
 
   return (
     <SearchPanel {...props}>
@@ -103,7 +127,7 @@ const PluginSearchCondition = props => {
 const nullCondition = () => {
   return {
     type: 'basic',
-    basic: { modality: 'all', sex: 'all' },
+    basic: { pluginId: 'all', sex: 'all' },
     advanced: { $and: [{ keyName: 'modality', op: '==', value: 'CT' }] }
   };
 };

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Fragment } from 'react';
 import SearchResultsView, {
   makeSortOptions
 } from 'components/SearchResultsView';
@@ -10,7 +10,6 @@ import IconButton from 'components/IconButton';
 import { ProgressBar } from 'components/react-bootstrap';
 import browserHistory from 'browserHistory';
 import styled from 'styled-components';
-import useLoginUser from 'utils/useLoginUser';
 import Icon from '@smikitky/rb-components/lib/Icon';
 
 const Operation = props => {
@@ -97,9 +96,15 @@ const columns = [
     }
   },
   {
-    caption: 'Execution Time',
+    caption: 'Register/Finish',
     className: 'executoin-time',
-    renderer: props => <TimeDisplay value={props.value.startedAt} />
+    renderer: props => (
+      <Fragment>
+        <TimeDisplay value={props.value.createdAt} />
+        <br />
+        <TimeDisplay value={props.value.finishedAt} invalidLabel="-" />
+      </Fragment>
+    )
   },
   {
     caption: 'Status',

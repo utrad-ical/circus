@@ -77,6 +77,11 @@ const FeedbackRenderer = props => {
 
 const columns = [
   {
+    caption: 'Plugin',
+    className: 'plugin',
+    renderer: PluginRenderer
+  },
+  {
     caption: 'Patient',
     className: 'patient',
     renderer: ({ value: { patientInfo } }) => {
@@ -84,20 +89,15 @@ const columns = [
     }
   },
   {
-    caption: 'Plugin',
-    className: 'plugin',
-    renderer: PluginRenderer
-  },
-  {
     caption: 'Executed by',
     className: 'executed-by',
     renderer: ({ value: { userEmail } }) => {
-      return userEmail.slice(0, 10) + '...';
+      return userEmail;
     }
   },
   {
     caption: 'Register/Finish',
-    className: 'executoin-time',
+    className: 'execution-time',
     renderer: props => (
       <Fragment>
         <TimeDisplay value={props.value.createdAt} />

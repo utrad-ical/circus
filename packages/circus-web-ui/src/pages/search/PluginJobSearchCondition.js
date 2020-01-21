@@ -52,30 +52,22 @@ const basicConditionToMongoQuery = condition => {
     : {};
 };
 
-const advancedConditionKeys = {
-  modality: {
-    caption: 'modality',
-    type: 'select',
-    spec: { options: modalities }
-  },
-  seriesUid: { caption: 'series UID', type: 'text' },
-  seriesDescription: { caption: 'series description', type: 'text' },
-  patientId: { caption: 'patient ID', type: 'text' },
-  patientName: { caption: 'patient name', type: 'text' },
-  age: { caption: 'age', type: 'number' },
-  sex: { caption: 'sex', type: 'select', spec: { options: ['M', 'F', 'O'] } },
-  seriesDate: { caption: 'series date', type: 'date' },
-  updatedAt: { caption: 'import date', type: 'date' }
-};
-
 const conditionToFilter = condition => {
   switch (condition.type) {
     case 'basic':
       return basicConditionToMongoQuery(condition.basic);
     case 'advanced':
-      return conditionToMongoQuery(condition.advanced);
+      return conditionToMongoQuery(condition.advanced, [
+        'createdAt',
+        'finishedAt'
+      ]);
   }
   throw new Error('Unkonwn condition type');
+};
+
+const PluginRenderer = props => {
+  if (props.caption === 'All') return 'All';
+  return <PluginDisplay pluginId={props.caption} />;
 };
 
 const PluginSearchCondition = props => {
@@ -92,25 +84,42 @@ const PluginSearchCondition = props => {
     load();
   }, [api]);
 
-  const basicConditionProperties = useMemo(() => {
-    return [
+  const basicConditionProperties = useMemo(
+    () => [
       {
         key: 'pluginId',
         caption: 'Plugin',
-        editor: et.shrinkSelect(pluginOptions, {
-          renderer: v => {
-            if (v.caption === 'All') return 'All';
-            return <PluginDisplay pluginId={v.caption} />;
-          }
-        })
+        editor: et.shrinkSelect(pluginOptions, { renderer: PluginRenderer })
       },
       { key: 'patientId', caption: 'Patient ID', editor: et.text() },
-      { key: 'patientName', caption: 'Patient Name', editor: et.text() },
+      { key: 'patientName', caption: 'Pt. Name', editor: et.text() },
       { key: 'age', caption: 'Age', editor: AgeMinMax },
       { key: 'sex', caption: 'Sex', editor: et.shrinkSelect(sexOptions) },
       { key: 'createdAt', caption: 'Job Date', editor: DateRangePicker }
-    ];
-  }, [pluginOptions]);
+    ],
+    [pluginOptions]
+  );
+
+  const advancedConditionKeys = useMemo(
+    () => ({
+      pluginId: {
+        caption: 'plugin',
+        type: 'select',
+        spec: { options: pluginOptions }
+      },
+      'patientInfo.patientId': { caption: 'patient ID', type: 'text' },
+      'patientInfo.patientName': { caption: 'patient name', type: 'text' },
+      'patientInfo.age': { caption: 'age', type: 'number' },
+      'patientInfo.sex': {
+        caption: 'sex',
+        type: 'select',
+        spec: { options: ['M', 'F', 'O'] }
+      },
+      createdAt: { caption: 'job register date', type: 'date' },
+      finishedAt: { caption: 'job finish date', type: 'date' }
+    }),
+    [pluginOptions]
+  );
 
   return (
     <SearchPanel {...props}>
@@ -128,7 +137,7 @@ const nullCondition = () => {
   return {
     type: 'basic',
     basic: { pluginId: 'all', sex: 'all' },
-    advanced: { $and: [{ keyName: 'modality', op: '==', value: 'CT' }] }
+    advanced: { $and: [{ keyName: 'pluginId', op: '==', value: 'all' }] }
   };
 };
 

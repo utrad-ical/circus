@@ -193,7 +193,7 @@ const createApp = async (
   const logger = await loader.get('apiLogger');
   const cs = await loader.get('core');
   const validator = await createValidator(undefined);
-  const models = createModels(db, validator);
+  const models = await createModels(undefined, { db, validator });
   const blobStorage = await createBlobStorage(blobPath);
   const dicomFileRepository = await createDicomFileRepository(dicomPath);
 

@@ -8,6 +8,7 @@ import mongo from 'mongodb';
 import path from 'path';
 import connectDb from './db/connectDb';
 import createLogger from './createLogger';
+import createValidator from './createValidator';
 
 interface Db {
   db: mongo.Db;
@@ -63,6 +64,8 @@ const createServiceLoader = async (options: any) => {
   // Register our modules
   loader.register('db', connectDb);
   loader.register('apiLogger', createLogger);
+  loader.register('validator', createValidator);
+  // loader.register('models', createModels);
   return loader as ApiServiceLoader;
 };
 

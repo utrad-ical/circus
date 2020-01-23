@@ -18,7 +18,7 @@ beforeAll(async () => {
   const db = await dbPromise;
   testServer = await setUpKoaTest(async app => {
     const validator = await createValidator(undefined);
-    const models = createModels(db, validator);
+    const models = await createModels(undefined, { db, validator });
     const oauth = createOauthServer(models);
 
     const router = new Router();

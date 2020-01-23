@@ -1,9 +1,9 @@
 import createCollectionAccessor, {
   CollectionAccessor
 } from './createCollectionAccessor';
-
 import mongo from 'mongodb';
 import { Validator } from '../createValidator';
+import { FunctionService } from '@utrad-ical/circus-lib';
 
 interface ModelEntries {
   user: any;
@@ -22,7 +22,10 @@ export type Models = {
   [key in keyof ModelEntries]: CollectionAccessor<ModelEntries[key]>;
 };
 
-const createModels = (db: mongo.Db, validator: Validator) => {
+const createModels: FunctionService<
+  Models,
+  { db: mongo.Db; validator: Validator }
+> = async (options, { db, validator }) => {
   const modelDefinitions: {
     [key in keyof ModelEntries]: { col: string; pk: string };
   } = {
@@ -49,5 +52,7 @@ const createModels = (db: mongo.Db, validator: Validator) => {
   });
   return models as Models;
 };
+
+createModels.dependencies = ['db', 'validator'];
 
 export default createModels;

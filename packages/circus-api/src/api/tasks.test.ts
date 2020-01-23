@@ -10,7 +10,7 @@ const dbPromise = usingMongo();
 beforeAll(async () => {
   const db = await dbPromise;
   const validator = await createValidator(undefined);
-  models = createModels(db, validator);
+  models = await createModels(undefined, { db, validator });
 });
 
 describe('TaskExecutor', () => {

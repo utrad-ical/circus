@@ -16,7 +16,7 @@ beforeAll(async () => {
   const db = await dbPromise;
   await setUpMongoFixture(db, ['groups', 'users', 'series']);
   const validator = await createValidator(undefined);
-  models = createModels(db, validator);
+  models = await createModels(undefined, { db, validator });
 });
 
 const sameMembers = (test: string[], members: string[]) => {

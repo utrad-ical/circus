@@ -15,7 +15,7 @@ beforeAll(async () => {
   const db = await dbPromise;
   await setUpMongoFixture(db, ['groups', 'users', 'projects', 'clinicalCases']);
   const validator = await createValidator(undefined);
-  const models = createModels(db, validator);
+  const models = await createModels(undefined, { db, validator });
   testServer = await setUpKoaTest(async app => {
     app.use(async (ctx, next) => {
       ctx.user = await models.user.findByIdOrFail(userEmail);

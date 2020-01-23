@@ -105,7 +105,7 @@ export async function exec(options) {
       .collection('pluginDefinitions')
       .ensureIndex({ pluginId: 1 }, { unique: true });
     const validator = await createValidator();
-    const models = createModels(db, validator);
+    const models = await createModels(undefined, { db, validator });
     await main(options, validator, models);
   } finally {
     await dbConnection.close();

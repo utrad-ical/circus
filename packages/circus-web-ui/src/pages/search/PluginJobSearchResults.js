@@ -155,7 +155,7 @@ const PluginSearchResults = props => {
       sortOptions={sortOptions}
       dataView={DataView}
       refreshable
-      name="pluginJobs"
+      name="pluginJob"
     />
   );
 };

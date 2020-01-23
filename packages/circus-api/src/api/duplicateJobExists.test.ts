@@ -1,16 +1,14 @@
-import { usingMongo, setUpMongoFixture } from '../../test/util-mongo';
-import createValidator from '../createValidator';
-import createModels, { Models } from '../db/createModels';
+import { usingModels, setUpMongoFixture } from '../../test/util-mongo';
+import { Models } from '../db/createModels';
 import duplicateJobExists from './duplicateJobExists';
 
 let models: Models;
-const dbPromise = usingMongo();
+const modelsPromise = usingModels();
 
 beforeAll(async () => {
-  const db = await dbPromise;
+  const { db, models: m } = await modelsPromise;
   await setUpMongoFixture(db, ['pluginJobs']);
-  const validator = await createValidator(undefined);
-  models = await createModels(undefined, { db, validator });
+  models = m;
 });
 
 const makeBaseRequest = () => ({

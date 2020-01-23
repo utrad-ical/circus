@@ -1,19 +1,15 @@
 import axios, { AxiosInstance } from 'axios';
 import { setUpKoaTestWith, TestServer } from '../test/util-koa';
-import { usingMongo } from '../test/util-mongo';
-import { createKoa } from './createApp';
-import createValidator from './createValidator';
-import createModels from './db/createModels';
 import createTestLogger from '../test/util-logger';
+import { usingModels } from '../test/util-mongo';
+import { createKoa } from './createApp';
 
 let testServer: TestServer, ax: AxiosInstance;
 
-const dbPromise = usingMongo();
+const modelsPromise = usingModels();
 
 beforeAll(async () => {
-  const db = await dbPromise;
-  const validator = await createValidator(undefined);
-  const models = await createModels(undefined, { db, validator });
+  const { db, validator, models } = await modelsPromise;
   const logger = await createTestLogger();
 
   const koaApp = await createKoa(

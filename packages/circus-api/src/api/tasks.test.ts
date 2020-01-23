@@ -1,16 +1,13 @@
-import { usingMongo } from '../../test/util-mongo';
-import createValidator from '../createValidator';
-import createModels, { Models } from '../db/createModels';
+import { usingModels } from '../../test/util-mongo';
+import { Models } from '../db/createModels';
 import { TaskExecutor } from './task';
 
 let models: Models;
 
-const dbPromise = usingMongo();
+const modelsPromise = usingModels();
 
 beforeAll(async () => {
-  const db = await dbPromise;
-  const validator = await createValidator(undefined);
-  models = await createModels(undefined, { db, validator });
+  models = (await modelsPromise).models;
 });
 
 describe('TaskExecutor', () => {

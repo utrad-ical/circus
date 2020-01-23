@@ -1,21 +1,17 @@
 import axios, { AxiosInstance } from 'axios';
 import Router from 'koa-router';
 import { setUpKoaTest, TestServer } from '../../../test/util-koa';
-import { setUpMongoFixture, usingMongo } from '../../../test/util-mongo';
-import createValidator from '../../createValidator';
-import createModels from '../../db/createModels';
+import { setUpMongoFixture, usingModels } from '../../../test/util-mongo';
 import { determineUserAccessInfo } from '../../privilegeUtils';
 import checkPrivilege from './checkPrivilege';
 
 let testServer: TestServer, userEmail: string, ax: AxiosInstance;
 
-const dbPromise = usingMongo();
+const modelsPromise = usingModels();
 
 beforeAll(async () => {
-  const db = await dbPromise;
+  const { db, models } = await modelsPromise;
   await setUpMongoFixture(db, ['groups', 'users', 'projects', 'clinicalCases']);
-  const validator = await createValidator(undefined);
-  const models = await createModels(undefined, { db, validator });
   testServer = await setUpKoaTest(async app => {
     app.use(async (ctx, next) => {
       ctx.user = await models.user.findByIdOrFail(userEmail);

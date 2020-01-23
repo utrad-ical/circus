@@ -1,8 +1,7 @@
 import { MemoryDicomFileRepository } from '@utrad-ical/circus-lib/lib/dicom-file-repository';
 import * as path from 'path';
-import { setUpMongoFixture, usingMongo } from '../test/util-mongo';
-import createValidator from './createValidator';
-import createModels, { Models } from './db/createModels';
+import { setUpMongoFixture, usingModels } from '../test/util-mongo';
+import { Models } from './db/createModels';
 import DicomImporter from './DicomImporter';
 
 describe('DicomImporter', () => {
@@ -12,7 +11,7 @@ describe('DicomImporter', () => {
     return;
   }
 
-  const dbPromise = usingMongo();
+  const modelsPromise = usingModels();
 
   let repository: MemoryDicomFileRepository,
     importer: DicomImporter,
@@ -20,13 +19,11 @@ describe('DicomImporter', () => {
   const file = path.join(__dirname, '../test/dicom/CT-MONO2-16-brain.dcm');
 
   beforeAll(async () => {
-    const db = await dbPromise;
-    const validator = await createValidator(undefined);
-    models = await createModels(undefined, { db, validator });
+    models = (await modelsPromise).models;
   });
 
   beforeEach(async () => {
-    const db = await dbPromise;
+    const { db } = await modelsPromise;
     repository = new MemoryDicomFileRepository({});
     await setUpMongoFixture(db, ['series']);
     importer = new DicomImporter(repository, models, {

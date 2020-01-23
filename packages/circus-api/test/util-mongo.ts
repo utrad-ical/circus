@@ -4,6 +4,8 @@ import { safeLoad as yaml } from 'js-yaml';
 import * as fs from 'fs-extra';
 import { EJSON } from 'bson';
 import mongo from 'mongodb';
+import createValidator, { Validator } from '../src/createValidator';
+import createModels, { Models } from '../src/db/createModels';
 
 /**
  * Connects to a test MongoDB instance.
@@ -65,4 +67,24 @@ export const usingMongo = () => {
       await dbConnection.close();
     });
   });
+};
+
+/**
+ * Initializes a test Mongo database, a validator and a models instance.
+ */
+export const usingModels = () => {
+  return new Promise<{ db: mongo.Db; validator: Validator; models: Models }>(
+    resolve => {
+      let db: mongo.Db, dbConnection: mongo.MongoClient;
+      beforeAll(async () => {
+        ({ db, dbConnection } = await connectMongo());
+        const validator = await createValidator(undefined);
+        const models = await createModels(undefined, { db, validator });
+        resolve({ db, validator, models });
+      });
+      afterAll(async () => {
+        await dbConnection.close();
+      });
+    }
+  );
 };

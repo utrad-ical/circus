@@ -3,22 +3,18 @@ import bodyparser from 'koa-bodyparser';
 import Router from 'koa-router';
 import * as qs from 'querystring';
 import { setUpKoaTest, TestServer } from '../../../test/util-koa';
-import { setUpMongoFixture, usingMongo } from '../../../test/util-mongo';
-import createValidator from '../../createValidator';
-import createModels from '../../db/createModels';
+import { setUpMongoFixture, usingModels } from '../../../test/util-mongo';
 import errorHandler from '../errorHandler';
 import createOauthServer from './createOauthServer';
 import createNullLogger from '@utrad-ical/circus-lib/lib/logger/NullLogger';
 
 let testServer: TestServer, ax: AxiosInstance;
 
-const dbPromise = usingMongo();
+const modelsPromise = usingModels();
 
 beforeAll(async () => {
-  const db = await dbPromise;
+  const { db, models } = await modelsPromise;
   testServer = await setUpKoaTest(async app => {
-    const validator = await createValidator(undefined);
-    const models = await createModels(undefined, { db, validator });
     const oauth = createOauthServer(models);
 
     const router = new Router();

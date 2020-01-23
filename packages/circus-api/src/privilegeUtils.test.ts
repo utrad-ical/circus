@@ -1,6 +1,5 @@
-import { setUpMongoFixture, usingMongo } from '../test/util-mongo';
-import createValidator from './createValidator';
-import createModels, { Models } from './db/createModels';
+import { setUpMongoFixture, usingModels } from '../test/util-mongo';
+import { Models } from './db/createModels';
 import {
   determineUserAccessInfo,
   fetchAccessibleSeries,
@@ -10,13 +9,12 @@ import { SeriesEntry } from './typings/circus';
 
 let models: Models;
 
-const dbPromise = usingMongo();
+const modelsPromise = usingModels();
 
 beforeAll(async () => {
-  const db = await dbPromise;
+  const { db, models: m } = await modelsPromise;
   await setUpMongoFixture(db, ['groups', 'users', 'series']);
-  const validator = await createValidator(undefined);
-  models = await createModels(undefined, { db, validator });
+  models = m;
 });
 
 const sameMembers = (test: string[], members: string[]) => {

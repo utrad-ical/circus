@@ -24,7 +24,7 @@
     "@types/shell-escape": "^0.2.0",
     "@types/tar-fs": "^1.16.1",
     "@types/tar-stream": "^1.6.0",
-    "@utrad-ical/circus-lib": "^0.12.1",
+    "@utrad-ical/circus-lib": "^0.14.0",
     "ajv": "^6.5.0",
     "argv": "0.0.2",
     "chalk": "^2.4.1",

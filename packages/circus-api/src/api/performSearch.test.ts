@@ -17,9 +17,9 @@ beforeAll(async () => {
   const db = await dbPromise;
   await setUpMongoFixture(db, ['items']);
   testServer = await setUpKoaTest(async app => {
-    const validator = await createValidator(
-      path.join(__dirname, '../../test/test-schemas')
-    );
+    const validator = await createValidator({
+      schemaRoot: path.join(__dirname, '../../test/test-schemas')
+    });
     items = createCollectionAccessor(db, validator, {
       schema: 'item',
       collectionName: 'items',

@@ -17,7 +17,7 @@ const dbPromise = usingMongo();
 beforeAll(async () => {
   const db = await dbPromise;
   testServer = await setUpKoaTest(async app => {
-    const validator = await createValidator();
+    const validator = await createValidator(undefined);
     const models = createModels(db, validator);
     const oauth = createOauthServer(models);
 

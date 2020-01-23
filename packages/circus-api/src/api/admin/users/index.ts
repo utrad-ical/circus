@@ -11,7 +11,10 @@ const removePassword = (input: any) => {
 
 export const handleSearch: RouteMiddleware = ({ models }) => {
   return async (ctx, next) => {
-    await performSearch(models.user, {}, ctx, { transform: removePassword });
+    await performSearch(models.user, {}, ctx, {
+      transform: removePassword,
+      defaultSort: { createdAt: -1 }
+    });
   };
 };
 

@@ -1,7 +1,7 @@
 import configureCsCoreServiceLoader, {
   Services as CsCoreServices
 } from '@utrad-ical/circus-cs-core/src/configureServiceLoader';
-import { ServiceLoader, Service } from '@utrad-ical/circus-lib';
+import { ServiceLoader } from '@utrad-ical/circus-lib';
 import os from 'os';
 import csCoreConfigDefaults from '@utrad-ical/circus-cs-core/src/config/default';
 import mongo from 'mongodb';

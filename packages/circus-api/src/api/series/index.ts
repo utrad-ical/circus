@@ -116,6 +116,9 @@ export const handleSearch: RouteMiddleware = ({ models }) => {
     // Removes patient info according to the preference
     const transform = maskPatientInfo(ctx);
 
-    await performSearch(models.series, filter, ctx, { transform });
+    await performSearch(models.series, filter, ctx, {
+      transform,
+      defaultSort: { createdAt: -1 }
+    });
   };
 };

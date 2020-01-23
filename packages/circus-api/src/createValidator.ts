@@ -5,6 +5,7 @@ import yaml from 'js-yaml';
 import semver from 'semver';
 import * as path from 'path';
 import { isDicomUid } from '@utrad-ical/circus-lib/lib/validation';
+import { FunctionService } from '@utrad-ical/circus-lib';
 
 const loadSchemaFiles = async (schemaRoot: string) => {
   // Search all the schema YAML files under the root directory
@@ -66,7 +67,13 @@ export interface Validator {
  * This validator knows all the schemas under the 'schemas' directory
  * and can be used throughtout the API server.
  */
-const createValidator = async (schemaRoot = defaultSchemaRoot) => {
+const createValidator: FunctionService<
+  Validator,
+  any,
+  { schemaRoot: string } | undefined
+> = async opts => {
+  const schemaRoot =
+    opts && opts.schemaRoot ? opts.schemaRoot : defaultSchemaRoot;
   const schemas = await loadSchemaFiles(schemaRoot);
   if (!Object.keys(schemas).length) console.warn('Schema directory is empty');
 

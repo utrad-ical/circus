@@ -9,7 +9,7 @@ const dbPromise = usingMongo();
 beforeAll(async () => {
   const db = await dbPromise;
   await setUpMongoFixture(db, ['pluginJobs']);
-  const validator = await createValidator();
+  const validator = await createValidator(undefined);
   models = createModels(db, validator);
 });
 

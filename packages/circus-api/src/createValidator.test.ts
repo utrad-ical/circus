@@ -5,9 +5,9 @@ import { ValidationError } from 'ajv';
 let validator: Validator;
 
 beforeAll(async () => {
-  validator = await createValidator(
-    path.join(__dirname, '../test/test-schemas')
-  );
+  validator = await createValidator({
+    schemaRoot: path.join(__dirname, '../test/test-schemas')
+  });
 });
 
 it('should validate correct partial data', async () => {

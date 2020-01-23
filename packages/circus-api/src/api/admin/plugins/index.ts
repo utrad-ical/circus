@@ -3,7 +3,9 @@ import { RouteMiddleware } from '../../../typings/middlewares';
 
 export const handleGet: RouteMiddleware = ({ models }) => {
   return async (ctx, next) => {
-    await performSearch(models.plugin, {}, ctx, {});
+    await performSearch(models.plugin, {}, ctx, {
+      defaultSort: { createdAt: -1 }
+    });
   };
 };
 

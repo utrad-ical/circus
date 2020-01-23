@@ -21,7 +21,7 @@ describe('DicomImporter', () => {
 
   beforeAll(async () => {
     const db = await dbPromise;
-    const validator = await createValidator();
+    const validator = await createValidator(undefined);
     models = createModels(db, validator);
   });
 

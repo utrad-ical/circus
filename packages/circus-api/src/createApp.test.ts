@@ -12,7 +12,7 @@ const dbPromise = usingMongo();
 
 beforeAll(async () => {
   const db = await dbPromise;
-  const validator = await createValidator();
+  const validator = await createValidator(undefined);
   const models = createModels(db, validator);
   const logger = await createTestLogger();
 

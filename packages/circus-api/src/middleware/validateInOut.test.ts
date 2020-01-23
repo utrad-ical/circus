@@ -12,9 +12,9 @@ let testServer: TestServer;
 
 beforeEach(async () => {
   testServer = await setUpKoaTest(async app => {
-    const validator = await createValidator(
-      path.join(__dirname, '../../test/test-schemas')
-    );
+    const validator = await createValidator({
+      schemaRoot: path.join(__dirname, '../../test/test-schemas')
+    });
     const router = new Router();
 
     router.post(

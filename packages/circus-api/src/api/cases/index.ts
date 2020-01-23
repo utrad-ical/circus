@@ -177,7 +177,10 @@ export const handleSearch: RouteMiddleware = ({ models }) => {
       return mask(caseData);
     };
 
-    await performSearch(models.clinicalCase, filter, ctx, { transform });
+    await performSearch(models.clinicalCase, filter, ctx, {
+      transform,
+      defaultSort: { createdAt: -1 }
+    });
   };
 };
 

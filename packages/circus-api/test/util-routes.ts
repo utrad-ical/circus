@@ -72,7 +72,7 @@ export const setUpAppForRoutesTest = async () => {
     'pluginDefinitions'
   ]);
 
-  const validator = await createValidator();
+  const validator = await createValidator(undefined);
   const models = createModels(db, validator);
   const csCore = createMockCsCore();
   const logger = await createTestLogger();

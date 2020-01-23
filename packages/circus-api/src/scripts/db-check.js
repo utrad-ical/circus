@@ -1,4 +1,4 @@
-import connectDb from '../db/connectDb';
+import { connectProdDb } from '../db/connectDb';
 import createValidator from '../createValidator';
 import createModels from '../db/createModels';
 import { ValidationError } from 'ajv';
@@ -49,7 +49,7 @@ const main = async (options, models) => {
 };
 
 export const exec = async options => {
-  const { db, dbConnection } = await connectDb();
+  const { db, dbConnection } = await connectProdDb();
   const validator = await createValidator();
   const models = await createModels(db, validator);
   try {

@@ -1,4 +1,4 @@
-import connectDb from '../db/connectDb';
+import { connectProdDb } from '../db/connectDb';
 import createValidator from '../createValidator';
 import createModels from '../db/createModels';
 import { createHash } from 'crypto';
@@ -25,7 +25,7 @@ export async function exec(options) {
     help();
     return;
   }
-  const { db, dbConnection } = await connectDb();
+  const { db, dbConnection } = await connectProdDb();
   try {
     const validator = await createValidator();
     const models = await createModels(db, validator);

@@ -1,4 +1,4 @@
-import connectDb from '../db/connectDb';
+import { connectProdDb } from '../db/connectDb';
 import createValidator from '../createValidator';
 import createModels from '../db/createModels';
 import inquirer from 'inquirer';
@@ -99,7 +99,7 @@ const main = async (options, validator, models) => {
 
 export async function exec(options) {
   // Check if there is already a plug-in
-  const { db, dbConnection } = await connectDb();
+  const { db, dbConnection } = await connectProdDb();
   try {
     await db
       .collection('pluginDefinitions')

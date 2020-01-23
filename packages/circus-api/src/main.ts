@@ -2,7 +2,7 @@
 
 import dashdash from 'dashdash';
 import createApp from './createApp';
-import connectDb from './db/connectDb';
+import { connectProdDb } from './db/connectDb';
 import mongo from 'mongodb';
 import chalk from 'chalk';
 import * as path from 'path';
@@ -120,9 +120,7 @@ const getLatestDbSchemaRevision = async () => {
 
 const main = async () => {
   // Establish db connection (shared throughout app)
-  const mongoUrl = process.env.CIRCUS_MONGO_URL || process.env.MONGO_URL;
-  if (!mongoUrl) throw new Error('You must specify the MongoDB connection URL');
-  const { db } = await connectDb(mongoUrl);
+  const { db } = await connectProdDb();
   const logger = await createLogger();
 
   const currentDbSchemaRevision = await getCurrentDbSchemaRevision(db);

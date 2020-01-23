@@ -1,6 +1,5 @@
 import status from 'http-status';
 import koa from 'koa';
-import mongo from 'mongodb';
 import { CollectionAccessor } from '../db/createCollectionAccessor';
 
 interface SearchQuery {

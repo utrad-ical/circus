@@ -2,7 +2,7 @@ import glob from 'glob-promise';
 import * as path from 'path';
 import chalk from 'chalk';
 import * as fs from 'fs-extra';
-import connectDb from '../db/connectDb';
+import { connectProdDb } from '../db/connectDb';
 import createValidator from '../createValidator';
 import createModels from '../db/createModels';
 import DicomImporter from '../DicomImporter';
@@ -91,7 +91,7 @@ export async function exec(options) {
   if (!files.length) throw new Error('Import target must be specified.');
 
   try {
-    ({ db, dbConnection } = await connectDb());
+    ({ db, dbConnection } = await connectProdDb());
     await importSeries(db, files, domain);
   } catch (err) {
     console.error(err);

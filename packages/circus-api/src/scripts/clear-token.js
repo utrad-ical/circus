@@ -1,4 +1,4 @@
-import connectDb from '../db/connectDb';
+import { connectProdDb } from '../db/connectDb';
 import createValidator from '../createValidator';
 import createModels from '../db/createModels';
 
@@ -20,7 +20,7 @@ export const help = optionText => {
 
 export const exec = async options => {
   const { all } = options;
-  const { db, dbConnection } = await connectDb();
+  const { db, dbConnection } = await connectProdDb();
   try {
     const validator = await createValidator();
     const models = await createModels(db, validator);

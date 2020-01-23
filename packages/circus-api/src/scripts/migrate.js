@@ -1,7 +1,7 @@
 import * as path from 'path';
 import chalk from 'chalk';
 
-import connectDb from '../db/connectDb';
+import { connectProdDb } from '../db/connectDb';
 import createValidator from '../createValidator';
 import createModels from '../db/createModels';
 import scanMigrationFiles from '../utils/scanMigrationFiles';
@@ -51,7 +51,7 @@ async function migrate(db) {
 export async function exec() {
   let db, dbConnection;
   try {
-    ({ db, dbConnection } = await connectDb());
+    ({ db, dbConnection } = await connectProdDb());
     await migrate(db);
   } catch (err) {
     console.error(err);

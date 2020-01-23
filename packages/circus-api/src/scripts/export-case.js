@@ -1,4 +1,4 @@
-import connectDb from '../db/connectDb';
+import { connectProdDb } from '../db/connectDb';
 import createValidator from '../createValidator';
 import createModels from '../db/createModels';
 import path from 'path';
@@ -75,7 +75,7 @@ export const exec = async options => {
     throw new Error("Currently the type argument must be 'mhd'.");
   }
 
-  const { db, dbConnection } = await connectDb();
+  const { db, dbConnection } = await connectProdDb();
   const validator = await createValidator();
   const models = await createModels(db, validator);
   const { packAsMhd } = require('../case/packAsMhd');

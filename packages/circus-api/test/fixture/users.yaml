@@ -1,8 +1,7 @@
--
-  userEmail: alice@example.com
+- userEmail: alice@example.com
   loginId: alice
   # password is 'aliceSecret'
-  password: "$2y$10$CbR.aTjvI8bQdap3mbt1R.jEhHmgWTxpEd9y9AcWLCQ2B74D/ybAe"
+  password: '$2y$10$CbR.aTjvI8bQdap3mbt1R.jEhHmgWTxpEd9y9AcWLCQ2B74D/ybAe'
   description: Alice
   lastLoginTime: { $date: 1405266782008 }
   lastLoginIp: '0.0.0.0'
@@ -11,13 +10,13 @@
     personalInfoView: false
     seriesSearchPresets: []
     caseSearchPresets: []
+    pluginJobSearchPresets: []
   loginEnabled: true
   groups: [1] # admin
--
-  userEmail: bob@example.com
+- userEmail: bob@example.com
   loginId: bob
   # password is 'bobSecret'
-  password: "$2y$10$V220aoElBuLlvx0PNdYmGueD9ke.d9ini5OgZSpxLOYO/oJtfUPOW"
+  password: '$2y$10$V220aoElBuLlvx0PNdYmGueD9ke.d9ini5OgZSpxLOYO/oJtfUPOW'
   description: Bob
   lastLoginTime: { $date: 1405266782000 }
   lastLoginIp: '0.0.0.0'
@@ -26,13 +25,13 @@
     personalInfoView: false
     seriesSearchPresets: []
     caseSearchPresets: []
+    pluginJobSearchPresets: []
   loginEnabled: true
   groups: [2] # power user
--
-  userEmail: guest@example.com
+- userEmail: guest@example.com
   loginId: guest
   # password is 'guestSecret'
-  password: "$2y$10$vlacVOAjHZ9EbxLKsXSjre0Ut5NBBKhHxJt49plNna56aB6Qa/Nny"
+  password: '$2y$10$vlacVOAjHZ9EbxLKsXSjre0Ut5NBBKhHxJt49plNna56aB6Qa/Nny'
   description: Guest who has no privilege
   lastLoginTime: { $date: 1405266782000 }
   lastLoginIp: '0.0.0.0'
@@ -41,5 +40,6 @@
     personalInfoView: false
     seriesSearchPresets: []
     caseSearchPresets: []
+    pluginJobSearchPresets: []
   loginEnabled: true
   groups: [3] # guests

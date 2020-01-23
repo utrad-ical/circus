@@ -1,5 +1,11 @@
 import { MongoClient } from 'mongodb';
 
+export const connectProdDb = async () => {
+  const mongoUrl = process.env.CIRCUS_MONGO_URL || process.env.MONGO_URL;
+  if (!mongoUrl) throw new Error('You must specify the MongoDB connection URL');
+  return connectDb(mongoUrl);
+};
+
 /**
  * Establishes a new connection to a MongoDB server.
  * @param connectionString The Mongo connection URL with database,

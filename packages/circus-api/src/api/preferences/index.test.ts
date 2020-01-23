@@ -21,7 +21,8 @@ it('should modify the preference of the current user using PUT', async () => {
       theme: 'mode_black',
       personalInfoView: false,
       seriesSearchPresets: [],
-      caseSearchPresets: []
+      caseSearchPresets: [],
+      pluginJobSearchPresets: []
     }
   });
   expect(res1.status).toBe(204);

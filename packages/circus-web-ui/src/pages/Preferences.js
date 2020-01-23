@@ -87,6 +87,11 @@ const Preferences = props => {
       caption: 'Series Search Presets',
       key: 'seriesSearchPresets',
       editor: PresetDeleteEditor
+    },
+    {
+      caption: 'Plug-in Job Search Presets',
+      key: 'pluginJobSearchPresets',
+      editor: PresetDeleteEditor
     }
   ];
 

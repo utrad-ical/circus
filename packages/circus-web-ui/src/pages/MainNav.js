@@ -167,7 +167,11 @@ const StyledNav = styled.nav`
 `;
 
 const MainNavView = props => {
-  const { caseSearchPresets = [], seriesSearchPresets = [] } = props;
+  const {
+    caseSearchPresets = [],
+    seriesSearchPresets = [],
+    pluginJobSearchPresets = []
+  } = props;
   const loginManager = useLoginManager();
 
   const onLogout = async () => {
@@ -220,6 +224,15 @@ const MainNavView = props => {
               name="Plugin Job Search"
               link="/browse/plugin-jobs"
             />
+            {pluginJobSearchPresets.map(preset => (
+              <SubMenu
+                key={preset.name}
+                sub
+                icon="chevron-right"
+                name={preset.name}
+                link={`/browse/plugin-jobs/${encodeURIComponent(preset.name)}`}
+              />
+            ))}
             <SubMenu
               icon="tasks"
               name="Show Job Queue"
@@ -285,6 +298,9 @@ const MainNav = connect(state => ({
     : [],
   seriesSearchPresets: state.loginUser.data
     ? state.loginUser.data.preferences.seriesSearchPresets
+    : [],
+  pluginJobSearchPresets: state.loginUser.data
+    ? state.loginUser.data.preferences.pluginJobSearchPresets
     : []
 }))(MainNavView);
 

@@ -74,6 +74,7 @@ const PluginSearchCondition = props => {
   const { condition, onChange } = props;
   const api = useApi();
   const [plugins, setPlugins] = useState([]);
+
   useEffect(() => {
     const load = async () => {
       setPlugins(await api('/plugins'));
@@ -146,7 +147,7 @@ const nullCondition = () => {
 };
 
 export default sendSearchCondition({
-  searchName: 'pluginJobs',
+  searchName: 'pluginJob',
   resource: 'plugin-jobs',
   defaultSort: '{"createdAt":-1}',
   nullCondition,

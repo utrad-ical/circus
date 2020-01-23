@@ -6,5 +6,6 @@ export {
   default as ServiceLoader,
   ClassService,
   FunctionService,
+  NoDepFunctionService,
   Service
 } from './ServiceLoader';

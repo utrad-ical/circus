@@ -16,11 +16,15 @@ interface Disposable {
 }
 
 export interface FunctionService<S, D = any, O = any> extends HasDependencies {
-  (options: O, deps?: D): Promise<S>;
+  (options: O, deps: D): Promise<S>;
+}
+
+export interface NoDepFunctionService<S, O = any> extends HasDependencies {
+  (options: O): Promise<S>;
 }
 
 export interface ClassService<S, D = any, O = any> extends HasDependencies {
-  new (options: O, deps?: D): S;
+  new (options: O, deps: D): S;
 }
 
 /**
@@ -28,7 +32,10 @@ export interface ClassService<S, D = any, O = any> extends HasDependencies {
  * A service is provided with dependendent services
  * and the options as defined in configuration.
  */
-export type Service<S, D = any> = FunctionService<S, D> | ClassService<S, D>;
+export type Service<S, D = any> =
+  | FunctionService<S, D>
+  | NoDepFunctionService<S, any>
+  | ClassService<S, D>;
 
 type ServiceDef<T, K extends keyof T> =
   | { type: 'service'; service: Service<T[K]> }

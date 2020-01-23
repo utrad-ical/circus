@@ -15,12 +15,12 @@ interface Disposable {
   dispose: () => Promise<void>;
 }
 
-export interface FunctionService<S, D = any> extends HasDependencies {
-  (options: any, deps: D): Promise<S>;
+export interface FunctionService<S, D = any, O = any> extends HasDependencies {
+  (options: O, deps?: D): Promise<S>;
 }
 
-export interface ClassService<S, D = any> extends HasDependencies {
-  new (options: any, deps: D): S;
+export interface ClassService<S, D = any, O = any> extends HasDependencies {
+  new (options: O, deps?: D): S;
 }
 
 /**

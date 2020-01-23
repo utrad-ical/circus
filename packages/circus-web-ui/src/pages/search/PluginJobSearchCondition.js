@@ -73,19 +73,18 @@ const PluginRenderer = props => {
 const PluginSearchCondition = props => {
   const { condition, onChange } = props;
   const api = useApi();
-  const [pluginOptions, setPluginOptions] = useState({ all: 'All' });
+  const [plugins, setPlugins] = useState([]);
   useEffect(() => {
     const load = async () => {
-      const plugins = await api('/plugins');
-      const opts = { all: 'All' };
-      plugins.forEach(p => (opts[p.pluginId] = p.pluginId));
-      setPluginOptions(opts);
+      setPlugins(await api('/plugins'));
     };
     load();
   }, [api]);
 
-  const basicConditionProperties = useMemo(
-    () => [
+  const basicConditionProperties = useMemo(() => {
+    const pluginOptions = { all: 'All' };
+    plugins.forEach(p => (pluginOptions[p.pluginId] = p.pluginId));
+    return [
       {
         key: 'pluginId',
         caption: 'Plugin',
@@ -96,12 +95,18 @@ const PluginSearchCondition = props => {
       { key: 'age', caption: 'Age', editor: AgeMinMax },
       { key: 'sex', caption: 'Sex', editor: et.shrinkSelect(sexOptions) },
       { key: 'createdAt', caption: 'Job Date', editor: DateRangePicker }
-    ],
-    [pluginOptions]
-  );
+    ];
+  }, [plugins]);
 
-  const advancedConditionKeys = useMemo(
-    () => ({
+  const advancedConditionKeys = useMemo(() => {
+    const pluginOptions = { all: 'All' };
+    plugins.forEach(
+      p =>
+        (pluginOptions[p.pluginId] = {
+          caption: `${p.pluginName} v.${p.version}`
+        })
+    );
+    return {
       pluginId: {
         caption: 'plugin',
         type: 'select',
@@ -117,9 +122,8 @@ const PluginSearchCondition = props => {
       },
       createdAt: { caption: 'job register date', type: 'date' },
       finishedAt: { caption: 'job finish date', type: 'date' }
-    }),
-    [pluginOptions]
-  );
+    };
+  }, [plugins]);
 
   return (
     <SearchPanel {...props}>

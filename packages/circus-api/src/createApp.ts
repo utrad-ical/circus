@@ -25,13 +25,12 @@ import {
   MemoryDicomFileRepository
 } from '@utrad-ical/circus-lib/lib/dicom-file-repository';
 import { ServiceLoader } from '@utrad-ical/circus-lib';
-import configureServiceLoader from '@utrad-ical/circus-cs-core/src/configureServiceLoader';
-import csCoreConfigDefaults from '@utrad-ical/circus-cs-core/src/config/default';
-import os from 'os';
 import mongo from 'mongodb';
 import { ErrorObject } from 'ajv';
 import { Deps } from './typings/middlewares';
 import Logger from '@utrad-ical/circus-lib/lib/logger/Logger';
+import { CsCore } from '@utrad-ical/circus-cs-core';
+import { ApiServiceLoader } from './createServiceLoader';
 
 function handlerName(route: Route) {
   if (route.handler) return route.handler;
@@ -110,47 +109,8 @@ export async function createDicomFileRepository(dicomPath?: string) {
     : new MemoryDicomFileRepository({});
 }
 
-export const makeCsCoreFromServiceLoader = async (
-  options: Pick<CreateAppOptions, 'pluginResultsPath' | 'dicomPath'>
-) => {
-  const mongoUrl = process.env.CIRCUS_MONGO_URL || process.env.MONGO_URL;
-  const configObj = {
-    jobRunner: {
-      options: {
-        workingDirectory: path.join(os.tmpdir(), 'circus-cs'),
-        removeTemporaryDirectory: false
-      }
-    },
-    pluginDefinitionAccessor: {
-      type: 'MongoPluginDefinitionAccessor',
-      options: { mongoUrl, collectionName: 'pluginDefinitions' }
-    },
-    queue: {
-      type: 'MongoQueue',
-      options: { mongoUrl, collectionName: 'pluginJobQueue' }
-    },
-    jobManager: csCoreConfigDefaults.jobManager,
-    jobReporter: {
-      type: 'MongoPluginJobReporter',
-      options: {
-        mongoUrl,
-        collectionName: 'pluginJobs',
-        pluginResultsDir: options.pluginResultsPath
-      }
-    },
-    dicomFileRepository: {
-      module: 'StaticDicomFileRepository',
-      options: { dataDir: options.dicomPath, useHash: false }
-    }
-  };
-  const loader = configureServiceLoader(new ServiceLoader(configObj));
-  return await loader.get('core');
-};
-
 interface CreateAppOptions {
   debug: boolean;
-  db: mongo.Db;
-  logger: Logger;
   fixUser?: string;
   blobPath?: string;
   corsOrigin?: string;
@@ -218,24 +178,24 @@ export const createKoa = async (
 /**
  * Creates a new Koa app.
  */
-const createApp = async (options: CreateAppOptions) => {
+const createApp = async (
+  options: CreateAppOptions,
+  loader: ApiServiceLoader
+) => {
   const {
-    db,
-    logger,
     blobPath,
     dicomPath,
     pluginResultsPath,
     dicomImageServerUrl
   } = options;
 
+  const { db } = await loader.get('db');
+  const logger = await loader.get('apiLogger');
+  const cs = await loader.get('core');
   const validator = await createValidator();
   const models = createModels(db, validator);
   const blobStorage = await createBlobStorage(blobPath);
   const dicomFileRepository = await createDicomFileRepository(dicomPath);
-  const cs = await makeCsCoreFromServiceLoader({
-    pluginResultsPath,
-    dicomPath
-  });
 
   const utilityEnv = process.env.DICOM_UTILITY;
   const dicomImporter = utilityEnv
@@ -247,7 +207,7 @@ const createApp = async (options: CreateAppOptions) => {
     dicomFileRepository
   });
 
-  const deps: Deps = {
+  const koaDeps: Deps = {
     validator,
     db,
     logger,
@@ -261,7 +221,7 @@ const createApp = async (options: CreateAppOptions) => {
     dicomImageServerUrl
   };
 
-  return await createKoa(deps, options, rs);
+  return await createKoa(koaDeps, options, rs);
 };
 
 export default createApp;

@@ -2,13 +2,14 @@
 
 import dashdash from 'dashdash';
 import createApp from './createApp';
-import { connectProdDb } from './db/connectDb';
+import connectDb, { connectProdDb } from './db/connectDb';
 import mongo from 'mongodb';
 import chalk from 'chalk';
 import * as path from 'path';
 import createLogger from './createLogger';
 import log4js from 'log4js';
 import scanMigrationFiles from './utils/scanMigrationFiles';
+import createServiceLoader, { Services } from './createServiceLoader';
 
 const options = [
   {
@@ -119,9 +120,20 @@ const getLatestDbSchemaRevision = async () => {
 };
 
 const main = async () => {
+  const serverOptions = {
+    debug: debug || process.env.NODE_ENV !== 'production',
+    fixUser,
+    blobPath,
+    dicomPath,
+    pluginResultsPath,
+    corsOrigin,
+    dicomImageServerUrl
+  };
+  const loader = await createServiceLoader(serverOptions);
+  const { db } = await loader.get('db');
+  const logger = await loader.get('apiLogger');
+
   // Establish db connection (shared throughout app)
-  const { db } = await connectProdDb();
-  const logger = await createLogger();
 
   const currentDbSchemaRevision = await getCurrentDbSchemaRevision(db);
   const latestDbSchemaRevision = await getLatestDbSchemaRevision();
@@ -144,20 +156,8 @@ const main = async () => {
     logger.warn(`CIRCUS API will start using ${fixUser} as the fixed user!`);
   }
 
-  const serverOptions = {
-    debug: debug || process.env.NODE_ENV !== 'production',
-    db,
-    logger,
-    fixUser,
-    blobPath,
-    dicomPath,
-    pluginResultsPath,
-    corsOrigin,
-    dicomImageServerUrl
-  };
-
   try {
-    const koaApp = await createApp(serverOptions);
+    const koaApp = await createApp(serverOptions, loader);
     koaApp.listen(port, host, (err?: Error) => {
       if (err) throw err;
       const setupInfo: { [key: string]: string | number } = {

@@ -13,7 +13,7 @@ import mongo from 'mongodb';
 export const connectMongo = async () => {
   const url = process.env.CIRCUS_MONGO_TEST_URL;
   if (!url) throw new Error('CIRCUS_MONGO_TEST_URL must be set');
-  return await connectDb(url);
+  return await connectDb({ mongoUrl: url }, null);
 };
 
 export const setUpMongoFixture = async (

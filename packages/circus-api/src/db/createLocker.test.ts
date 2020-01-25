@@ -1,9 +1,9 @@
-import mongo from 'mongodb';
 import { usingMongo } from '../../test/util-mongo';
 import delay from '../utils/delay';
 import createLocker from './createLocker';
+import { DisposableDb } from './connectDb';
 
-let db: mongo.Db, locker: ReturnType<typeof createLocker>;
+let db: DisposableDb, locker: ReturnType<typeof createLocker>;
 
 const dbPromise = usingMongo();
 

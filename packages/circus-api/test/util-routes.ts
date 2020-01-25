@@ -57,7 +57,7 @@ export interface ApiTest {
 }
 
 export const setUpAppForRoutesTest = async () => {
-  const { db, dbConnection } = await connectMongo();
+  const db = await connectMongo();
 
   await setUpMongoFixture(db, [
     'series',
@@ -118,7 +118,7 @@ export const setUpAppForRoutesTest = async () => {
 
   const tearDown = async () => {
     testServer.tearDown();
-    dbConnection.close();
+    await db.dispose();
   };
 
   return {

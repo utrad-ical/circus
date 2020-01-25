@@ -1,10 +1,10 @@
-import * as path from 'path';
-import connectDb from '../src/db/connectDb';
-import { safeLoad as yaml } from 'js-yaml';
-import * as fs from 'fs-extra';
 import { EJSON } from 'bson';
+import * as fs from 'fs-extra';
+import { safeLoad as yaml } from 'js-yaml';
 import mongo from 'mongodb';
+import * as path from 'path';
 import createValidator, { Validator } from '../src/createValidator';
+import connectDb, { DisposableDb } from '../src/db/connectDb';
 import createModels, { Models } from '../src/db/createModels';
 
 /**
@@ -57,14 +57,14 @@ export const setUpMongoFixture = async (
  * the connection after the tests have finished.
  */
 export const usingMongo = () => {
-  return new Promise<mongo.Db>(resolve => {
-    let db: mongo.Db, dbConnection: mongo.MongoClient;
+  return new Promise<DisposableDb>(resolve => {
+    let db: DisposableDb;
     beforeAll(async () => {
-      ({ db, dbConnection } = await connectMongo());
+      db = await connectMongo();
       resolve(db);
     });
     afterAll(async () => {
-      await dbConnection.close();
+      await db.dispose();
     });
   });
 };
@@ -73,18 +73,20 @@ export const usingMongo = () => {
  * Initializes a test Mongo database, a validator and a models instance.
  */
 export const usingModels = () => {
-  return new Promise<{ db: mongo.Db; validator: Validator; models: Models }>(
-    resolve => {
-      let db: mongo.Db, dbConnection: mongo.MongoClient;
-      beforeAll(async () => {
-        ({ db, dbConnection } = await connectMongo());
-        const validator = await createValidator(undefined);
-        const models = await createModels(undefined, { db, validator });
-        resolve({ db, validator, models });
-      });
-      afterAll(async () => {
-        await dbConnection.close();
-      });
-    }
-  );
+  return new Promise<{
+    db: DisposableDb;
+    validator: Validator;
+    models: Models;
+  }>(resolve => {
+    let db: DisposableDb;
+    beforeAll(async () => {
+      db = await connectMongo();
+      const validator = await createValidator(undefined);
+      const models = await createModels(undefined, { db, validator });
+      resolve({ db, validator, models });
+    });
+    afterAll(async () => {
+      await db.dispose();
+    });
+  });
 };

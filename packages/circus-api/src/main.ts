@@ -1,15 +1,13 @@
 // main server bootstrapping
 
-import dashdash from 'dashdash';
-import createApp from './createApp';
-import connectDb, { connectProdDb } from './db/connectDb';
-import mongo from 'mongodb';
 import chalk from 'chalk';
-import * as path from 'path';
-import createLogger from './createLogger';
+import dashdash from 'dashdash';
 import log4js from 'log4js';
+import mongo from 'mongodb';
+import * as path from 'path';
+import createApp from './createApp';
+import createServiceLoader from './createServiceLoader';
 import scanMigrationFiles from './utils/scanMigrationFiles';
-import createServiceLoader, { Services } from './createServiceLoader';
 
 const options = [
   {
@@ -130,7 +128,7 @@ const main = async () => {
     dicomImageServerUrl
   };
   const loader = await createServiceLoader(serverOptions);
-  const { db } = await loader.get('db');
+  const db = await loader.get('db');
   const logger = await loader.get('apiLogger');
 
   // Establish db connection (shared throughout app)

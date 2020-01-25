@@ -35,12 +35,6 @@ export const options = () => {
       names: ['continue', 'c'],
       help: 'Do not stop on error.',
       type: 'bool'
-    },
-    {
-      names: ['blob-path'],
-      env: 'CIRCUS_API_BLOB_DIR',
-      type: 'string',
-      default: './store/blobs'
     }
   ];
 };
@@ -63,7 +57,6 @@ export const command: Command<{
     const {
       out: outDir = path.join(process.cwd(), 'case-exports'),
       type,
-      blob_path: blobPath,
       continue: continueOnError = false,
       _args: caseIds
     } = options;

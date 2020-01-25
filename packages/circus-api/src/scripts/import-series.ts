@@ -1,25 +1,23 @@
-import glob from 'glob-promise';
-import * as path from 'path';
+import {
+  MemoryDicomFileRepository,
+  StaticDicomFileRepository
+} from '@utrad-ical/circus-lib/lib/dicom-file-repository';
 import chalk from 'chalk';
 import * as fs from 'fs-extra';
-import { connectProdDb } from '../db/connectDb';
-import createValidator from '../createValidator';
-import createModels from '../db/createModels';
+import glob from 'glob-promise';
+import * as path from 'path';
+import { Models } from '../db/createModels';
 import DicomImporter from '../DicomImporter';
-import {
-  StaticDicomFileRepository,
-  MemoryDicomFileRepository
-} from '@utrad-ical/circus-lib/lib/dicom-file-repository';
+import Command from './Command';
 
-export function help(optionText) {
-  console.log('Imports DICOM series from file/directory.\n');
-  console.log(
+export const help = () => {
+  return (
+    'Imports DICOM series from file/directory.\n' +
     'Usage: node circus.js import-series --domain=DOMAIN [target...]'
   );
-  console.log(optionText);
-}
+};
 
-export function options() {
+export const options = () => {
   return [
     {
       names: ['domain', 'd'],
@@ -28,9 +26,12 @@ export function options() {
       type: 'string'
     }
   ];
-}
+};
 
-function bootstrapDicomImporter(models) {
+function bootstrapDicomImporter(models: Models) {
+  if (!process.env.DICOM_UTILITY)
+    throw new Error('DICOM_UTILITY env is not set');
+
   const dicomPath = process.env.CIRCUS_DICOM_DIR;
   const dicomRepository = dicomPath
     ? new StaticDicomFileRepository({ dataDir: dicomPath })
@@ -41,9 +42,11 @@ function bootstrapDicomImporter(models) {
   });
 }
 
-async function importSeries(db, files, domain) {
-  const validator = await createValidator();
-  const models = createModels(db, validator);
+const importSeries = async (
+  models: Models,
+  files: string[],
+  domain: string
+) => {
   const importer = bootstrapDicomImporter(models);
 
   const paths = files.map(p => path.resolve(process.cwd(), p));
@@ -65,13 +68,13 @@ async function importSeries(db, files, domain) {
       console.error(chalk.red(message));
       continue;
     }
-    let files;
+    let files: string[];
     if (stat.isFile()) {
       files = [pathArg];
     } else if (stat.isDirectory()) {
       files = await glob(path.join(pathArg, '**/*.dcm'));
     }
-    for (const file of files) {
+    for (const file of files!) {
       console.log(`Importing: ${file}`);
       await importer.importFromFile(file, domain);
       count++;
@@ -79,23 +82,16 @@ async function importSeries(db, files, domain) {
   }
   console.log(chalk.green('Import finished.'));
   console.log(`Imported ${count} file(s).`);
-}
+};
 
-export async function exec(options) {
-  let db, dbConnection;
+export const command: Command<{ models: Models }> = async (opt, { models }) => {
+  return async (options: any) => {
+    const domain = options.domain;
+    if (!domain) throw new Error('Domain must be specified.');
+    const files = options._args;
+    if (!files.length) throw new Error('Import target must be specified.');
+    await importSeries(models, files, domain);
+  };
+};
 
-  const domain = options.domain;
-  if (!domain) throw new Error('Domain must be specified.');
-
-  const files = options._args;
-  if (!files.length) throw new Error('Import target must be specified.');
-
-  try {
-    ({ db, dbConnection } = await connectProdDb());
-    await importSeries(db, files, domain);
-  } catch (err) {
-    console.error(err);
-  } finally {
-    if (db) await dbConnection.close();
-  }
-}
+command.dependencies = ['models'];

@@ -28,7 +28,7 @@ export interface CollectionAccessor<T = any> {
   deleteOne: mongo.Collection['deleteOne'];
   findAll: (query?: object, options?: CursorOptions) => Promise<WithDates<T>[]>;
   findAsCursor: (
-    query: object,
+    query?: object,
     options?: CursorOptions
   ) => CursorLike<WithDates<T>>;
   findById: (id: string | number) => Promise<WithDates<T>>;
@@ -119,7 +119,7 @@ const createCollectionAccessor = <T = any>(
    * Validation is performed for each document.
    * The `_id` field will not be included.
    */
-  const findAsCursor = (query: object, options: CursorOptions = {}) => {
+  const findAsCursor = (query: object = {}, options: CursorOptions = {}) => {
     const { sort, limit, skip } = options;
     let cursor = collection.find(query).project({ _id: 0 });
     if (sort) cursor = cursor.sort(sort);

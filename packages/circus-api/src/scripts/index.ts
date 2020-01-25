@@ -23,7 +23,8 @@ const prepareLoader = () => {
   const pluginResultsPath = resolve(
     process.env.CIRCUS_PLUGIN_RESULTS_DIR || './store/plugin-results'
   );
-  const createLoaderOptions = { pluginResultsPath, dicomPath };
+  const blobPath = resolve(process.env.CIRCUS_API_BLOB_DIR || './store/blobs');
+  const createLoaderOptions = { pluginResultsPath, dicomPath, blobPath };
   return createServiceLoader(createLoaderOptions);
 };
 

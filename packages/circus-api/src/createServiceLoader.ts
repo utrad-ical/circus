@@ -6,10 +6,12 @@ import os from 'os';
 import csCoreConfigDefaults from '@utrad-ical/circus-cs-core/src/config/default';
 import mongo from 'mongodb';
 import path from 'path';
-import connectDb from './db/connectDb';
+import connectDb, { DisposableDb } from './db/connectDb';
 import createLogger from './createLogger';
-import createValidator from './createValidator';
-import createModels from './db/createModels';
+import createValidator, { Validator } from './createValidator';
+import createModels, { Models } from './db/createModels';
+import Logger from '@utrad-ical/circus-lib/lib/logger/Logger';
+import Storage from './storage/Storage';
 
 interface Db {
   db: mongo.Db;
@@ -17,7 +19,11 @@ interface Db {
 }
 
 export type Services = CsCoreServices & {
-  apiDb: Db;
+  db: DisposableDb;
+  apiLogger: Logger;
+  validator: Validator;
+  models: Models;
+  blobStorage: Storage;
 };
 
 export type ApiServiceLoader = ServiceLoader<Services>;
@@ -30,6 +36,10 @@ const createServiceLoader = async (options: any) => {
     },
     apiLogger: {
       options: { logDir: path.resolve(__dirname, '../store/logs') }
+    },
+    labelStorage: {
+      type: 'LocalStorage',
+      options: { root: options.blobPath }
     },
     jobRunner: {
       options: {
@@ -67,6 +77,11 @@ const createServiceLoader = async (options: any) => {
   loader.register('apiLogger', createLogger);
   loader.register('validator', createValidator);
   loader.register('models', createModels);
+  loader.registerDirectory(
+    'blobStorage',
+    path.join(__dirname, 'storage'),
+    'MemoryStorage'
+  );
   return loader as ApiServiceLoader;
 };
 

@@ -1,36 +1,29 @@
+import multer from '@koa/multer';
+import {
+  MemoryDicomFileRepository,
+  StaticDicomFileRepository
+} from '@utrad-ical/circus-lib/lib/dicom-file-repository';
+import { ErrorObject } from 'ajv';
+import * as fs from 'fs-extra';
+import glob from 'glob-promise';
+import { safeLoad as yaml } from 'js-yaml';
 import Koa, { Middleware } from 'koa';
 import bodyParser from 'koa-bodyparser';
-import multer from '@koa/multer';
-import * as fs from 'fs-extra';
-import * as path from 'path';
-import { safeLoad as yaml } from 'js-yaml';
-import glob from 'glob-promise';
-import Router from 'koa-router';
+import compose from 'koa-compose';
 import mount from 'koa-mount';
+import Router from 'koa-router';
+import * as path from 'path';
+import circusRs from './circusRs';
+import { ApiServiceLoader } from './createServiceLoader';
+import DicomImporter from './DicomImporter';
+import checkPrivilege from './middleware/auth/checkPrivilege';
 import createOauthServer from './middleware/auth/createOauthServer';
 import fixUserMiddleware from './middleware/auth/fixUser';
-import errorHandler from './middleware/errorHandler';
 import cors from './middleware/cors';
-import checkPrivilege from './middleware/auth/checkPrivilege';
+import errorHandler from './middleware/errorHandler';
 import typeCheck from './middleware/typeCheck';
-import createValidator from './createValidator';
-import createStorage from './storage/createStorage';
 import validateInOut from './middleware/validateInOut';
-import createModels from './db/createModels';
-import compose from 'koa-compose';
-import DicomImporter from './DicomImporter';
-import circusRs from './circusRs';
-import {
-  StaticDicomFileRepository,
-  MemoryDicomFileRepository
-} from '@utrad-ical/circus-lib/lib/dicom-file-repository';
-import { ServiceLoader } from '@utrad-ical/circus-lib';
-import mongo from 'mongodb';
-import { ErrorObject } from 'ajv';
 import { Deps } from './typings/middlewares';
-import Logger from '@utrad-ical/circus-lib/lib/logger/Logger';
-import { CsCore } from '@utrad-ical/circus-cs-core';
-import { ApiServiceLoader } from './createServiceLoader';
 
 function handlerName(route: Route) {
   if (route.handler) return route.handler;
@@ -95,12 +88,6 @@ async function prepareApiRouter(apiDir: string, deps: Deps, debug: boolean) {
   }
 
   return router;
-}
-
-export async function createBlobStorage(blobPath?: string) {
-  return blobPath
-    ? await createStorage('local', { root: blobPath })
-    : await createStorage('memory');
 }
 
 export async function createDicomFileRepository(dicomPath?: string) {
@@ -182,20 +169,15 @@ const createApp = async (
   options: CreateAppOptions,
   loader: ApiServiceLoader
 ) => {
-  const {
-    blobPath,
-    dicomPath,
-    pluginResultsPath,
-    dicomImageServerUrl
-  } = options;
+  const { pluginResultsPath, dicomImageServerUrl } = options;
 
-  const { db } = await loader.get('db');
+  const db = await loader.get('db');
   const logger = await loader.get('apiLogger');
   const cs = await loader.get('core');
   const validator = await loader.get('validator');
   const models = await loader.get('models');
-  const blobStorage = await createBlobStorage(blobPath);
-  const dicomFileRepository = await createDicomFileRepository(dicomPath);
+  const blobStorage = await loader.get('blobStorage');
+  const dicomFileRepository = await loader.get('dicomFileRepository');
 
   const utilityEnv = process.env.DICOM_UTILITY;
   const dicomImporter = utilityEnv

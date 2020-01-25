@@ -10,7 +10,7 @@ import * as cscore from '@utrad-ical/circus-cs-core';
 import createTestLogger from './util-logger';
 import createValidator from '../src/createValidator';
 import createModels from '../src/db/createModels';
-import createStorage from '../src/storage/createStorage';
+import createMemoryStorage from '../src/storage/MemoryStorage';
 import DicomImporter from '../src/DicomImporter';
 import { MemoryDicomFileRepository } from '@utrad-ical/circus-lib/lib/dicom-file-repository';
 
@@ -89,7 +89,7 @@ export const setUpAppForRoutesTest = async () => {
       db,
       logger,
       models,
-      blobStorage: await createStorage('memory'),
+      blobStorage: await createMemoryStorage(undefined),
       dicomImporter,
       pluginResultsPath: '', // dummy
       cs: csCore,

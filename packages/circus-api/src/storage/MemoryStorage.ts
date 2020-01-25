@@ -1,6 +1,7 @@
 import Storage from './Storage';
+import { NoDepFunctionService } from '@utrad-ical/circus-lib';
 
-const memoryStorage = async () => {
+const createMemoryStorage: NoDepFunctionService<Storage> = async () => {
   const store = new Map<string, Buffer>();
 
   const read = async (key: string) => {
@@ -24,4 +25,4 @@ const memoryStorage = async () => {
   return { read, write, remove, exists } as Storage;
 };
 
-export default memoryStorage;
+export default createMemoryStorage;

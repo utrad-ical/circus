@@ -5,9 +5,9 @@ import fs from 'fs-extra';
 import path from 'path';
 import stream from 'stream';
 import circusRs from '../circusRs';
-import { createBlobStorage } from '../createApp';
 import { Models } from '../db/createModels';
 import Command from './Command';
+import Storage from '../storage/Storage';
 
 export const help = () => {
   return (
@@ -57,7 +57,8 @@ const writeStreamToFile = (file: string, stream: stream.Readable) => {
 export const command: Command<{
   models: Models;
   dicomFileRepository: DicomFileRepository;
-}> = async (opts, { models, dicomFileRepository }) => {
+  blobStorage: Storage;
+}> = async (opts, { models, dicomFileRepository, blobStorage }) => {
   return async (options: any) => {
     const {
       out: outDir = path.join(process.cwd(), 'case-exports'),
@@ -75,7 +76,6 @@ export const command: Command<{
     }
 
     const { packAsMhd } = require('../case/packAsMhd');
-    const blobStorage = await createBlobStorage(blobPath);
     const logger = (await nullLogger()) as any;
     const { volumeProvider } = await circusRs({ logger, dicomFileRepository });
 
@@ -103,4 +103,4 @@ export const command: Command<{
   };
 };
 
-command.dependencies = ['models', 'dicomFileRepository'];
+command.dependencies = ['models', 'dicomFileRepository', 'blobStorage'];

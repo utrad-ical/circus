@@ -8,7 +8,7 @@ import { VolumeProvider } from '@utrad-ical/circus-rs/src/server/helper/createVo
 import { FunctionService } from '@utrad-ical/circus-lib';
 
 export interface CircusRs {
-  rs: koa.Middleware;
+  routes: koa.Middleware;
   volumeProvider: VolumeProvider;
 }
 
@@ -38,7 +38,7 @@ const createCircusRs: FunctionService<
   const router = new Router();
   router.use('/series/:sid', seriesRoutes(helpers as any));
   return {
-    rs: router.routes() as koa.Middleware,
+    routes: router.routes() as koa.Middleware,
     volumeProvider: helpers.volumeProvider as VolumeProvider
   };
 };

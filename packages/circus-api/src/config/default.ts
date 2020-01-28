@@ -16,6 +16,16 @@ export interface Configuration {
 }
 
 const defaults: Configuration = {
+  app: {
+    options: {
+      host: 'localhost',
+      port: 8080,
+      pluginResultsDir: '/var/circus/plugin-results',
+      dicomImageServerUrl: 'http://localhost:8080/rs',
+      debug: false,
+      uploadFileSizeMaxBytes: 200 * 1024 * 1024
+    }
+  },
   db: {
     options: { mongoUrl: 'mongodb://localhost:27017/circus-api' }
   },

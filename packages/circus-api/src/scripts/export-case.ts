@@ -1,13 +1,12 @@
 import { DicomFileRepository } from '@utrad-ical/circus-lib/lib/dicom-file-repository';
-import nullLogger from '@utrad-ical/circus-rs/src/server/helper/logger/NullLogger';
 import chalk from 'chalk';
 import fs from 'fs-extra';
 import path from 'path';
 import stream from 'stream';
-import circusRs from '../circusRs';
 import { Models } from '../db/createModels';
 import Command from './Command';
 import Storage from '../storage/Storage';
+import { CircusRs } from '../createCircusRs';
 
 export const help = () => {
   return (
@@ -52,7 +51,8 @@ export const command: Command<{
   models: Models;
   dicomFileRepository: DicomFileRepository;
   blobStorage: Storage;
-}> = async (opts, { models, dicomFileRepository, blobStorage }) => {
+  rs: CircusRs;
+}> = async (opts, { models, blobStorage, rs: { volumeProvider } }) => {
   return async (options: any) => {
     const {
       out: outDir = path.join(process.cwd(), 'case-exports'),
@@ -69,8 +69,6 @@ export const command: Command<{
     }
 
     const { packAsMhd } = require('../case/packAsMhd');
-    const logger = (await nullLogger()) as any;
-    const { volumeProvider } = await circusRs({ logger, dicomFileRepository });
 
     await fs.ensureDir(outDir);
     for (const caseId of caseIds) {
@@ -96,4 +94,4 @@ export const command: Command<{
   };
 };
 
-command.dependencies = ['models', 'dicomFileRepository', 'blobStorage'];
+command.dependencies = ['models', 'dicomFileRepository', 'rs', 'blobStorage'];

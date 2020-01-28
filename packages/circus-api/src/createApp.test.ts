@@ -2,7 +2,7 @@ import axios, { AxiosInstance } from 'axios';
 import { setUpKoaTestWith, TestServer } from '../test/util-koa';
 import createTestLogger from '../test/util-logger';
 import { usingModels } from '../test/util-mongo';
-import { createKoa } from './createApp';
+import createApp from './createApp';
 
 let testServer: TestServer, ax: AxiosInstance;
 
@@ -10,23 +10,25 @@ const modelsPromise = usingModels();
 
 beforeAll(async () => {
   const { db, validator, models } = await modelsPromise;
-  const logger = await createTestLogger();
-
-  const koaApp = await createKoa(
+  const apiLogger = await createTestLogger();
+  const koaApp = await createApp(
+    {
+      debug: true,
+      fixUser: 'alice@example.com',
+      uploadFileSizeMaxBytes: 200 * 1024 * 1024,
+      pluginResultsPath: '', // dummy
+      dicomImageServerUrl: '' // dummy
+    },
     {
       validator,
       db,
       models,
-      logger,
-      volumeProvider: null as any, // dummy
+      apiLogger,
       blobStorage: null as any, // dummy
-      uploadFileSizeMaxBytes: 200 * 1024 * 1024,
-      cs: null as any, // dummy
-      pluginResultsPath: '', // dummy
-      dicomImageServerUrl: '' // dummy
-    },
-    { debug: true, fixUser: 'alice@example.com' },
-    async (ctx, next) => {} // dummy
+      dicomImporter: null as any,
+      rs: { routes: async () => {}, volumeProvider: null as any }, // dummy
+      core: null as any // dummy
+    }
   );
   testServer = await setUpKoaTestWith(koaApp);
   ax = axios.create({ baseURL: testServer.url, validateStatus: () => true });

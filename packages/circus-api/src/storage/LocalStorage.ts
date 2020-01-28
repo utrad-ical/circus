@@ -28,7 +28,7 @@ const createLocalStorage: NoDepFunctionService<Storage> = async (
 
   const exists = async (key: string) => await fs.pathExists(buildPath(key));
 
-  const toString = () => `LocalStorage(${dataDir})`;
+  const toString = () => `LocalStorage { dataDir: '${dataDir}' }`;
 
   return { read, write, remove, exists, toString } as Storage;
 };

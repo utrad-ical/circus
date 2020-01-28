@@ -2,7 +2,7 @@ import axios, { AxiosInstance } from 'axios';
 import fs from 'fs-extra';
 import { safeLoad as yaml } from 'js-yaml';
 import path from 'path';
-import { createKoa } from '../src/createApp';
+import createApp from '../src/createApp';
 import { setUpKoaTestWith } from './util-koa';
 import { connectMongo, setUpMongoFixture } from './util-mongo';
 import mongo from 'mongodb';
@@ -75,28 +75,29 @@ export const setUpAppForRoutesTest = async () => {
   const validator = await createValidator(undefined);
   const models = await createModels(undefined, { db, validator });
   const csCore = createMockCsCore();
-  const logger = await createTestLogger();
+  const apiLogger = await createTestLogger();
   const dicomImporter = await createDicomImporter(
     {},
     { dicomFileRepository: new MemoryDicomFileRepository({}), models }
   );
 
-  const app = await createKoa(
+  const app = await createApp(
     {
-      validator,
-      db,
-      logger,
-      models,
-      blobStorage: await createMemoryStorage(undefined),
-      dicomImporter,
+      debug: true,
       pluginResultsPath: '', // dummy
-      cs: csCore,
-      volumeProvider: null as any, // dummy
       uploadFileSizeMaxBytes: 200 * 1024 * 1024,
       dicomImageServerUrl: '' // dummy
     },
-    { debug: true },
-    async () => {}
+    {
+      validator,
+      db,
+      apiLogger,
+      models,
+      blobStorage: await createMemoryStorage(undefined),
+      dicomImporter,
+      core: csCore,
+      rs: { routes: async () => {}, volumeProvider: null as any } // dummy
+    }
   );
   const testServer = await setUpKoaTestWith(app);
 

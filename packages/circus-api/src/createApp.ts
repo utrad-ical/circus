@@ -1,4 +1,7 @@
 import multer from '@koa/multer';
+import { CsCore } from '@utrad-ical/circus-cs-core';
+import { FunctionService } from '@utrad-ical/circus-lib';
+import Logger from '@utrad-ical/circus-lib/lib/logger/Logger';
 import { ErrorObject } from 'ajv';
 import * as fs from 'fs-extra';
 import glob from 'glob-promise';
@@ -9,7 +12,11 @@ import compose from 'koa-compose';
 import mount from 'koa-mount';
 import Router from 'koa-router';
 import * as path from 'path';
-import { ApiServiceLoader } from './createServiceLoader';
+import { CircusRs } from './createCircusRs';
+import { DicomImporter } from './createDicomImporter';
+import { Validator } from './createValidator';
+import { DisposableDb } from './db/connectDb';
+import { Models } from './db/createModels';
 import checkPrivilege from './middleware/auth/checkPrivilege';
 import createOauthServer from './middleware/auth/createOauthServer';
 import fixUserMiddleware from './middleware/auth/fixUser';
@@ -17,6 +24,7 @@ import cors from './middleware/cors';
 import errorHandler from './middleware/errorHandler';
 import typeCheck from './middleware/typeCheck';
 import validateInOut from './middleware/validateInOut';
+import Storage from './storage/Storage';
 import { Deps } from './typings/middlewares';
 
 function handlerName(route: Route) {
@@ -90,21 +98,63 @@ interface CreateAppOptions {
   corsOrigin?: string;
   pluginResultsPath: string;
   dicomImageServerUrl: string;
+  uploadFileSizeMaxBytes: number;
 }
 
 /**
  * Builds a Koa app and sets up the router.
  * Register each API endpoints to the router according YAML manifest files.
  */
-export const createKoa = async (
-  deps: Deps,
-  options: Pick<CreateAppOptions, 'fixUser' | 'debug' | 'corsOrigin'>,
-  rs: Middleware
+export const createApp: FunctionService<
+  Koa,
+  {
+    db: DisposableDb;
+    validator: Validator;
+    apiLogger: Logger;
+    models: Models;
+    blobStorage: Storage;
+    core: CsCore;
+    rs: CircusRs;
+    dicomImporter: DicomImporter;
+  },
+  CreateAppOptions
+> = async (
+  options,
+  {
+    db,
+    validator,
+    apiLogger: logger,
+    models,
+    blobStorage,
+    core,
+    rs,
+    dicomImporter
+  }
 ) => {
-  const { fixUser, debug, corsOrigin } = options;
-  const { models, logger } = deps;
+  const {
+    fixUser,
+    debug,
+    corsOrigin,
+    pluginResultsPath,
+    uploadFileSizeMaxBytes,
+    dicomImageServerUrl
+  } = options;
   // The main Koa instance.
   const koa = new Koa();
+
+  const deps: Deps = {
+    db,
+    validator,
+    logger,
+    models,
+    blobStorage,
+    dicomImporter,
+    pluginResultsPath,
+    cs: core,
+    volumeProvider: rs.volumeProvider,
+    uploadFileSizeMaxBytes,
+    dicomImageServerUrl
+  };
 
   const apiDir = path.resolve(__dirname, 'api/**/*.yaml');
   const apiRouter = await prepareApiRouter(apiDir, deps, debug);
@@ -143,44 +193,20 @@ export const createKoa = async (
     )
   );
   koa.use(mount('/login', compose([bodyParser(), oauth.token()])));
-  koa.use(mount('/rs', rs));
+  koa.use(mount('/rs', rs.routes));
 
   return koa;
 };
 
-/**
- * Creates a new Koa app.
- */
-const createApp = async (
-  options: CreateAppOptions,
-  loader: ApiServiceLoader
-) => {
-  const { pluginResultsPath, dicomImageServerUrl } = options;
-
-  const db = await loader.get('db');
-  const logger = await loader.get('apiLogger');
-  const cs = await loader.get('core');
-  const validator = await loader.get('validator');
-  const models = await loader.get('models');
-  const blobStorage = await loader.get('blobStorage');
-  const dicomImporter = await loader.get('dicomImporter');
-  const { rs, volumeProvider } = await loader.get('rs');
-
-  const koaDeps: Deps = {
-    validator,
-    db,
-    logger,
-    models,
-    blobStorage,
-    dicomImporter,
-    cs,
-    volumeProvider,
-    pluginResultsPath,
-    uploadFileSizeMaxBytes: 200 * 1024 * 1024,
-    dicomImageServerUrl
-  };
-
-  return await createKoa(koaDeps, options, rs);
-};
+createApp.dependencies = [
+  'db',
+  'validator',
+  'apiLogger',
+  'models',
+  'blobStorage',
+  'core',
+  'rs',
+  'dicomImporter'
+];
 
 export default createApp;

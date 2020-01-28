@@ -7,6 +7,7 @@ import * as os from 'os';
 import { Models } from './db/createModels';
 import { DicomFileRepository } from '@utrad-ical/circus-lib/lib/dicom-file-repository';
 import { FunctionService } from '@utrad-ical/circus-lib';
+import Logger from '@utrad-ical/circus-rs/src/server/helper/logger/Logger';
 
 interface Options {
   dockerImage?: string;
@@ -25,6 +26,7 @@ const createDicomImporter: FunctionService<
   {
     dicomFileRepository: DicomFileRepository;
     models: Models;
+    apiLogger: Logger;
   }
 > = async (options: Options = {}, { dicomFileRepository, models }) => {
   const {
@@ -139,5 +141,11 @@ const createDicomImporter: FunctionService<
 
   return { importFromFile, readDicomTags, readDicomTagsFromFile, workDir };
 };
+
+createDicomImporter.dependencies = [
+  'dicomFileRepository',
+  'models',
+  'apiLogger'
+];
 
 export default createDicomImporter;

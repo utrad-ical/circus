@@ -11,8 +11,11 @@ import Logger from '@utrad-ical/circus-lib/lib/logger/Logger';
 import Storage from './storage/Storage';
 import createDicomImporter, { DicomImporter } from './createDicomImporter';
 import createCircusRs, { CircusRs } from './createCircusRs';
+import createApp from './createApp';
+import Koa from 'koa';
 
 export type Services = CsCoreServices & {
+  app: Koa;
   db: DisposableDb;
   apiLogger: Logger;
   validator: Validator;
@@ -29,6 +32,7 @@ const createServiceLoader = async (config: any) => {
   // Register modules related to CS Core
   configureCsCoreServiceLoader(loader);
   // Register our modules
+  loader.register('app', createApp);
   loader.register('db', connectDb);
   loader.register('apiLogger', createLogger);
   loader.register('validator', createValidator);

@@ -27,7 +27,7 @@
     "@babel/preset-typescript": "^7.1.0",
     "@babel/register": "^7.0.0",
     "@koa/multer": "^2.0.2",
-    "@utrad-ical/circus-cs-core": "github:utrad-ical/circus-cs-core#v0.17.2",
+    "@utrad-ical/circus-cs-core": "github:utrad-ical/circus-cs-core#v0.17.3",
     "@utrad-ical/circus-lib": "^0.14.1",
     "@utrad-ical/circus-rs": "github:utrad-ical/circus-rs#v0.23.2",
     "ajv": "^6.10.2",

@@ -9,7 +9,6 @@ import compose from 'koa-compose';
 import mount from 'koa-mount';
 import Router from 'koa-router';
 import * as path from 'path';
-import circusRs from './circusRs';
 import { ApiServiceLoader } from './createServiceLoader';
 import checkPrivilege from './middleware/auth/checkPrivilege';
 import createOauthServer from './middleware/auth/createOauthServer';
@@ -164,13 +163,8 @@ const createApp = async (
   const validator = await loader.get('validator');
   const models = await loader.get('models');
   const blobStorage = await loader.get('blobStorage');
-  const dicomFileRepository = await loader.get('dicomFileRepository');
   const dicomImporter = await loader.get('dicomImporter');
-
-  const { rs, volumeProvider } = await circusRs({
-    logger,
-    dicomFileRepository
-  });
+  const { rs, volumeProvider } = await loader.get('rs');
 
   const koaDeps: Deps = {
     validator,

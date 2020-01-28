@@ -10,6 +10,7 @@ import createModels, { Models } from './db/createModels';
 import Logger from '@utrad-ical/circus-lib/lib/logger/Logger';
 import Storage from './storage/Storage';
 import createDicomImporter, { DicomImporter } from './createDicomImporter';
+import createCircusRs, { CircusRs } from './createCircusRs';
 
 export type Services = CsCoreServices & {
   db: DisposableDb;
@@ -17,6 +18,7 @@ export type Services = CsCoreServices & {
   validator: Validator;
   models: Models;
   dicomImporter: DicomImporter;
+  rs: CircusRs;
   blobStorage: Storage;
 };
 
@@ -32,6 +34,7 @@ const createServiceLoader = async (config: any) => {
   loader.register('validator', createValidator);
   loader.register('models', createModels);
   loader.register('dicomImporter', createDicomImporter);
+  loader.register('rs', createCircusRs);
   loader.registerDirectory(
     'blobStorage',
     path.join(__dirname, 'storage'),

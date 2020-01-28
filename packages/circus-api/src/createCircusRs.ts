@@ -5,20 +5,26 @@ import Logger from '@utrad-ical/circus-lib/lib/logger/Logger';
 import { DicomFileRepository } from '@utrad-ical/circus-lib/lib/dicom-file-repository';
 import koa from 'koa';
 import { VolumeProvider } from '@utrad-ical/circus-rs/src/server/helper/createVolumeProvider';
+import { FunctionService } from '@utrad-ical/circus-lib';
+
+export interface CircusRs {
+  rs: koa.Middleware;
+  volumeProvider: VolumeProvider;
+}
 
 /**
  * Creates a series router.
  */
-const circusRs = async ({
-  logger,
-  dicomFileRepository
-}: {
-  logger: Logger;
-  dicomFileRepository: DicomFileRepository;
-}) => {
+const createCircusRs: FunctionService<
+  CircusRs,
+  {
+    apiLogger: Logger;
+    dicomFileRepository: DicomFileRepository;
+  }
+> = async (options, { apiLogger, dicomFileRepository }) => {
   const helpers = await prepareHelperModules({
     dicomFileRepository: { module: dicomFileRepository },
-    logger: { module: logger },
+    logger: { module: apiLogger },
     imageEncoder: {
       module: 'PngJsImageEncoder',
       options: {}
@@ -37,4 +43,6 @@ const circusRs = async ({
   };
 };
 
-export default circusRs;
+createCircusRs.dependencies = ['apiLogger', 'dicomFileRepository'];
+
+export default createCircusRs;

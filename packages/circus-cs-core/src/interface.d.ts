@@ -155,7 +155,9 @@ export interface CsCore {
   plugin: PluginDefinitionAccessor;
   // job handler
   job: {
-    list: () => Promise<QueueItem<PluginJobRequest>[]>;
+    list: (
+      state?: QueueState | 'all'
+    ) => Promise<QueueItem<PluginJobRequest>[]>;
     register: (
       jobId: string,
       payload: PluginJobRequest,

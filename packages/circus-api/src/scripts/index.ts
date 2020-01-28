@@ -5,6 +5,7 @@ import glob from 'glob-promise';
 import chalk from 'chalk';
 import Command, { CommandFunc } from './Command';
 import createServiceLoader from '../createServiceLoader';
+import config from '../config';
 
 const packageFile = path.join(__dirname, '../../package.json');
 const version = JSON.parse(fs.readFileSync(packageFile, 'utf8')).version;
@@ -16,17 +17,6 @@ interface CommandModule {
   help: () => string;
   command: Command<any>;
 }
-
-const prepareLoader = () => {
-  const resolve = (p: string) => path.resolve(path.dirname(__dirname), p);
-  const dicomPath = resolve(process.env.CIRCUS_DICOM_DIR || './store/dicom');
-  const pluginResultsPath = resolve(
-    process.env.CIRCUS_PLUGIN_RESULTS_DIR || './store/plugin-results'
-  );
-  const blobPath = resolve(process.env.CIRCUS_API_BLOB_DIR || './store/blobs');
-  const createLoaderOptions = { pluginResultsPath, dicomPath, blobPath };
-  return createServiceLoader(createLoaderOptions);
-};
 
 const importCommand = async (moduleName: string) => {
   const modulePath = path.join(__dirname, `${moduleName}.ts`);
@@ -54,7 +44,7 @@ const main = async () => {
       const parser = dashdash.createParser({ options });
       const opts = parser.parse(process.argv.slice(1)) as object;
 
-      const loader = await prepareLoader();
+      const loader = await createServiceLoader(config);
       const commandService = await module.command;
       loader.register('theCommand', commandService);
       const commandFunc = (await loader.get('theCommand')) as CommandFunc;

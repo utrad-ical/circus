@@ -4,20 +4,20 @@ import Storage from './Storage';
 import { NoDepFunctionService } from '@utrad-ical/circus-lib';
 
 interface Options {
-  root: string;
+  dataDir: string;
   nameToPath?: (name: string) => string;
 }
 
 const createLocalStorage: NoDepFunctionService<Storage> = async (
   options: Options
 ) => {
-  const { root, nameToPath = (n: string) => n } = options;
+  const { dataDir, nameToPath = (n: string) => n } = options;
 
-  if (!root || !(await fs.pathExists(root))) {
-    throw new Error(`Root directory "${root}" does not exist.`);
+  if (!dataDir || !(await fs.pathExists(dataDir))) {
+    throw new Error(`Root directory "${dataDir}" does not exist.`);
   }
 
-  const buildPath = (key: string) => path.join(root, nameToPath(key));
+  const buildPath = (key: string) => path.join(dataDir, nameToPath(key));
 
   const read = async (key: string) => await fs.readFile(buildPath(key));
 
@@ -28,7 +28,9 @@ const createLocalStorage: NoDepFunctionService<Storage> = async (
 
   const exists = async (key: string) => await fs.pathExists(buildPath(key));
 
-  return { read, write, remove, exists } as Storage;
+  const toString = () => `LocalStorage(${dataDir})`;
+
+  return { read, write, remove, exists, toString } as Storage;
 };
 
 export default createLocalStorage;

@@ -35,6 +35,7 @@
     "babel-plugin-dynamic-import-node": "^2.1.0",
     "bson": "^4.0.2",
     "chalk": "^2.4.1",
+    "cosmiconfig": "^6.0.0",
     "dashdash": "^1.14.1",
     "deep-rename-keys": "^0.2.1",
     "dotenv": "^6.0.0",

@@ -99,9 +99,7 @@ export async function createDicomFileRepository(dicomPath?: string) {
 interface CreateAppOptions {
   debug: boolean;
   fixUser?: string;
-  blobPath?: string;
   corsOrigin?: string;
-  dicomPath?: string;
   pluginResultsPath: string;
   dicomImageServerUrl: string;
 }

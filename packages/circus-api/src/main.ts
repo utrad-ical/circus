@@ -4,10 +4,12 @@ import chalk from 'chalk';
 import dashdash from 'dashdash';
 import log4js from 'log4js';
 import mongo from 'mongodb';
-import * as path from 'path';
+import path from 'path';
 import createApp from './createApp';
 import createServiceLoader from './createServiceLoader';
 import scanMigrationFiles from './utils/scanMigrationFiles';
+import config from './config';
+import util from 'util';
 
 const options = [
   {
@@ -50,24 +52,6 @@ const options = [
     help: 'force debug mode'
   },
   {
-    names: ['blob-path'],
-    env: 'CIRCUS_API_BLOB_DIR',
-    type: 'string',
-    default: './store/blobs'
-  },
-  {
-    names: ['dicom-path'],
-    env: 'CIRCUS_DICOM_DIR',
-    type: 'string',
-    default: './store/dicom'
-  },
-  {
-    names: ['plugin-results-path'],
-    env: 'CIRCUS_PLUGIN_RESULTS_DIR',
-    type: 'string',
-    default: './store/plugin-results'
-  },
-  {
     names: ['dicom-image-server-url'],
     env: 'DICOM_IMAGE_SERVER_URL',
     type: 'string',
@@ -81,9 +65,6 @@ const {
   port,
   fix_user: fixUser,
   cors_origin: corsOrigin,
-  blobPath,
-  dicomPath,
-  pluginResultsPath,
   dicom_image_server_url: dicomImageServerUrl
 } = (() => {
   try {
@@ -94,10 +75,6 @@ const {
       console.log('Options:\n' + parser.help({ includeEnv: true }));
       process.exit(0);
     }
-    const resolve = (p: string) => path.resolve(path.dirname(__dirname), p);
-    opts.blobPath = resolve(opts.blob_path);
-    opts.dicomPath = resolve(opts.dicom_path);
-    opts.pluginResultsPath = resolve(opts.plugin_results_path);
     return opts;
   } catch (e) {
     console.log(e.message);
@@ -121,15 +98,16 @@ const main = async () => {
   const serverOptions = {
     debug: debug || process.env.NODE_ENV !== 'production',
     fixUser,
-    blobPath,
-    dicomPath,
-    pluginResultsPath,
+    pluginResultsPath: config.jobReporter.options.pluginResultsDir,
     corsOrigin,
     dicomImageServerUrl
   };
-  const loader = await createServiceLoader(serverOptions);
+
+  const loader = await createServiceLoader(config);
   const db = await loader.get('db');
   const logger = await loader.get('apiLogger');
+  const blobStorage = await loader.get('blobStorage');
+  const dicomFileRepository = await loader.get('dicomFileRepository');
 
   // Establish db connection (shared throughout app)
 
@@ -159,19 +137,16 @@ const main = async () => {
     koaApp.listen(port, host, (err?: Error) => {
       if (err) throw err;
       const setupInfo: { [key: string]: string | number } = {
-        'Label path': blobPath,
-        'DICOM path': dicomPath,
-        'Plug-in results path': pluginResultsPath,
+        'Label storage': blobStorage.toString(),
+        'DICOM storage': util.inspect(dicomFileRepository),
+        'Plug-in results path': serverOptions.pluginResultsPath,
         'CORS origin': corsOrigin,
         'Process ID': process.pid
       };
       logger.info('CIRCUS API started.');
       Object.keys(setupInfo).forEach(k => logger.info(`${k}: ${setupInfo[k]}`));
-      logger.info(`Label path: ${blobPath}`);
+      Object.keys(setupInfo).forEach(k => console.log(`${k}: ${setupInfo[k]}`));
       console.log(chalk.green(`Server running on port ${host}:${port}`));
-      Object.keys(setupInfo).forEach(k =>
-        console.log(`  ${k}: ${setupInfo[k]}`)
-      );
     });
   } catch (err) {
     console.error(chalk.red('Error during the server startup.'));

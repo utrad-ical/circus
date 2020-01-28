@@ -22,7 +22,9 @@ const createMemoryStorage: NoDepFunctionService<Storage> = async () => {
 
   const exists = async (key: string) => store.has(key);
 
-  return { read, write, remove, exists } as Storage;
+  const toString = () => 'MemoryStorage';
+
+  return { read, write, remove, exists, toString } as Storage;
 };
 
 export default createMemoryStorage;

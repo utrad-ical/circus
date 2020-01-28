@@ -10,7 +10,7 @@ const tmpDir = path.join(__dirname, 'tmp-dir');
 beforeAll(async function() {
   await fs.emptyDir(tmpDir);
   store = await createLocalStorage({
-    root: tmpDir,
+    dataDir: tmpDir,
     nameToPath: (p: string) => path.join(p.substr(0, 2), p + '.txt')
   });
 });

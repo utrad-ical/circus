@@ -136,7 +136,7 @@ export const createKoa = async (
         }),
         multer({
           storage: multer.memoryStorage(),
-          limits: deps.uploadFileSizeMax as any // TODO: update to @koa/multer
+          limits: { fileSize: deps.uploadFileSizeMaxBytes }
         }).array('files'),
         fixUser ? fixUserMiddleware(deps, fixUser) : oauth.authenticate(),
         apiRouter.routes() as Middleware
@@ -179,10 +179,10 @@ const createApp = async (
     models,
     blobStorage,
     dicomImporter,
-    pluginResultsPath,
     cs,
     volumeProvider,
-    uploadFileSizeMax: '200mb',
+    pluginResultsPath,
+    uploadFileSizeMaxBytes: 200 * 1024 * 1024,
     dicomImageServerUrl
   };
 

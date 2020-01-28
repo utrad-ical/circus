@@ -20,7 +20,7 @@ beforeAll(async () => {
       logger,
       volumeProvider: null as any, // dummy
       blobStorage: null as any, // dummy
-      uploadFileSizeMax: '200mb',
+      uploadFileSizeMaxBytes: 200 * 1024 * 1024,
       cs: null as any, // dummy
       pluginResultsPath: '', // dummy
       dicomImageServerUrl: '' // dummy

@@ -92,7 +92,7 @@ export const setUpAppForRoutesTest = async () => {
       pluginResultsPath: '', // dummy
       cs: csCore,
       volumeProvider: null as any, // dummy
-      uploadFileSizeMax: '200mb',
+      uploadFileSizeMaxBytes: 200 * 1024 * 1024,
       dicomImageServerUrl: '' // dummy
     },
     { debug: true },

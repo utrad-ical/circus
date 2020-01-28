@@ -19,7 +19,7 @@ export interface Deps {
   pluginResultsPath: string;
   cs: CsCore;
   volumeProvider: VolumeProvider;
-  uploadFileSizeMax: string;
+  uploadFileSizeMaxBytes: number;
   dicomImageServerUrl: string;
 }
 

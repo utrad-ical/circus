@@ -1,8 +1,4 @@
 import multer from '@koa/multer';
-import {
-  MemoryDicomFileRepository,
-  StaticDicomFileRepository
-} from '@utrad-ical/circus-lib/lib/dicom-file-repository';
 import { ErrorObject } from 'ajv';
 import * as fs from 'fs-extra';
 import glob from 'glob-promise';
@@ -15,7 +11,6 @@ import Router from 'koa-router';
 import * as path from 'path';
 import circusRs from './circusRs';
 import { ApiServiceLoader } from './createServiceLoader';
-import DicomImporter from './DicomImporter';
 import checkPrivilege from './middleware/auth/checkPrivilege';
 import createOauthServer from './middleware/auth/createOauthServer';
 import fixUserMiddleware from './middleware/auth/fixUser';
@@ -88,12 +83,6 @@ async function prepareApiRouter(apiDir: string, deps: Deps, debug: boolean) {
   }
 
   return router;
-}
-
-export async function createDicomFileRepository(dicomPath?: string) {
-  return dicomPath
-    ? new StaticDicomFileRepository({ dataDir: dicomPath })
-    : new MemoryDicomFileRepository({});
 }
 
 interface CreateAppOptions {
@@ -176,11 +165,7 @@ const createApp = async (
   const models = await loader.get('models');
   const blobStorage = await loader.get('blobStorage');
   const dicomFileRepository = await loader.get('dicomFileRepository');
-
-  const utilityEnv = process.env.DICOM_UTILITY;
-  const dicomImporter = utilityEnv
-    ? new DicomImporter(dicomFileRepository, models, { utility: utilityEnv })
-    : undefined;
+  const dicomImporter = await loader.get('dicomImporter');
 
   const { rs, volumeProvider } = await circusRs({
     logger,

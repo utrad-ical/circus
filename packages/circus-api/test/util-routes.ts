@@ -11,7 +11,7 @@ import createTestLogger from './util-logger';
 import createValidator from '../src/createValidator';
 import createModels from '../src/db/createModels';
 import createMemoryStorage from '../src/storage/MemoryStorage';
-import DicomImporter from '../src/DicomImporter';
+import createDicomImporter from '../src/createDicomImporter';
 import { MemoryDicomFileRepository } from '@utrad-ical/circus-lib/lib/dicom-file-repository';
 
 /**
@@ -76,12 +76,10 @@ export const setUpAppForRoutesTest = async () => {
   const models = await createModels(undefined, { db, validator });
   const csCore = createMockCsCore();
   const logger = await createTestLogger();
-
-  const dicomImporter = process.env.DICOM_UTILITY
-    ? new DicomImporter(new MemoryDicomFileRepository({}), models, {
-        utility: process.env.DICOM_UTILITY
-      })
-    : undefined;
+  const dicomImporter = await createDicomImporter(
+    {},
+    { dicomFileRepository: new MemoryDicomFileRepository({}), models }
+  );
 
   const app = await createKoa(
     {

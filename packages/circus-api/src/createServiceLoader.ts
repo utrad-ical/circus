@@ -9,12 +9,14 @@ import createValidator, { Validator } from './createValidator';
 import createModels, { Models } from './db/createModels';
 import Logger from '@utrad-ical/circus-lib/lib/logger/Logger';
 import Storage from './storage/Storage';
+import createDicomImporter, { DicomImporter } from './createDicomImporter';
 
 export type Services = CsCoreServices & {
   db: DisposableDb;
   apiLogger: Logger;
   validator: Validator;
   models: Models;
+  dicomImporter: DicomImporter;
   blobStorage: Storage;
 };
 
@@ -29,6 +31,7 @@ const createServiceLoader = async (config: any) => {
   loader.register('apiLogger', createLogger);
   loader.register('validator', createValidator);
   loader.register('models', createModels);
+  loader.register('dicomImporter', createDicomImporter);
   loader.registerDirectory(
     'blobStorage',
     path.join(__dirname, 'storage'),

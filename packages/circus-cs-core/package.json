@@ -1,6 +1,6 @@
 {
   "name": "@utrad-ical/circus-cs-core",
-  "version": "0.17.2",
+  "version": "0.17.3",
   "description": "CIRCUS CS Core: Plugin manager",
   "main": "src/index.ts",
   "bin": {

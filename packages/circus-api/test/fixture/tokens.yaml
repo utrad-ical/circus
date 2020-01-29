@@ -1,7 +1,6 @@
 # Fixed access tokens which the test users can log-in with.
 # 4102412399000 is calculatet as `new Date('2099-12-31 23:59:59').valueOf()`
--
-  accessToken: 2311aee0435c36ae14c39835539a931a6344714a
+- accessToken: 2311aee0435c36ae14c39835539a931a6344714a
   accessTokenExpiresAt:
     $date: 4102412399000
   refreshToken: 9fdc40d3d005ae075a0b209ab36d6b1af450e56d
@@ -11,8 +10,7 @@
   userId: alice@example.com
   permanentTokenId: null
   permanentTokenDescription: null
--
-  accessToken: 8292766837c1901b0a6954f7bda49710316c57da
+- accessToken: 8292766837c1901b0a6954f7bda49710316c57da
   accessTokenExpiresAt:
     $date: 4102412399000
   refreshToken: 9a7c0cd392127030b95eb4d1845f1f9ac26585c8
@@ -22,8 +20,7 @@
   userId: bob@example.com
   permanentTokenId: null
   permanentTokenDescription: null
--
-  accessToken: 2c2fbaea8046df924b8b459879b799c111e9b7f1
+- accessToken: 2c2fbaea8046df924b8b459879b799c111e9b7f1
   accessTokenExpiresAt:
     $date: 4102412399000
   refreshToken: da71701f273044304e543404f032233e2cafdd3f
@@ -33,3 +30,13 @@
   userId: guest@example.com
   permanentTokenId: null
   permanentTokenDescription: null
+- accessToken: 459879b7996df924b8bc111e9b7f12c2fbaea804
+  accessTokenExpiresAt:
+    $date: 4102412399000
+  refreshToken: 4304e543404f032da71701f27304233e2cafdd3f
+  refreshTokenExpiresAt:
+    $date: 4102412399000
+  clientId: CIRCUS Front UI
+  userId: guest@example.com
+  permanentTokenId: 01dzrsqnzep54g0s1afph4zxn2
+  permanentTokenDescription: A permanent token for API access

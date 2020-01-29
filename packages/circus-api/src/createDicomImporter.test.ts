@@ -3,6 +3,7 @@ import * as path from 'path';
 import { setUpMongoFixture, usingModels } from '../test/util-mongo';
 import { Models } from './db/createModels';
 import createDicomImporter, { DicomImporter } from './createDicomImporter';
+import createTestLogger from '../test/util-logger';
 
 const modelsPromise = usingModels();
 
@@ -19,7 +20,11 @@ beforeEach(async () => {
   const { db } = await modelsPromise;
   await setUpMongoFixture(db, ['series']);
   dicomFileRepository = new MemoryDicomFileRepository({});
-  importer = await createDicomImporter({}, { dicomFileRepository, models });
+  const apiLogger = await createTestLogger();
+  importer = await createDicomImporter(
+    {},
+    { dicomFileRepository, models, apiLogger }
+  );
 });
 
 describe('#readDicomTagsFromFile', () => {

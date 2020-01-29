@@ -46,3 +46,21 @@ const createCircusRs: FunctionService<
 createCircusRs.dependencies = ['apiLogger', 'dicomFileRepository'];
 
 export default createCircusRs;
+
+export const createRsRoutes: FunctionService<
+  koa.Middleware,
+  { rs: CircusRs }
+> = async (options, { rs }) => {
+  return rs.routes;
+};
+
+createRsRoutes.dependencies = ['rs'];
+
+export const createVolumeProvider: FunctionService<
+  VolumeProvider,
+  { rs: CircusRs }
+> = async (options, { rs }) => {
+  return rs.volumeProvider;
+};
+
+createVolumeProvider.dependencies = ['rs'];

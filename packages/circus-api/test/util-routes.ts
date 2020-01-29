@@ -78,7 +78,11 @@ export const setUpAppForRoutesTest = async () => {
   const apiLogger = await createTestLogger();
   const dicomImporter = await createDicomImporter(
     {},
-    { dicomFileRepository: new MemoryDicomFileRepository({}), models }
+    {
+      dicomFileRepository: new MemoryDicomFileRepository({}),
+      apiLogger,
+      models
+    }
   );
 
   const app = await createApp(
@@ -96,7 +100,8 @@ export const setUpAppForRoutesTest = async () => {
       blobStorage: await createMemoryStorage(undefined),
       dicomImporter,
       core: csCore,
-      rs: { routes: async () => {}, volumeProvider: null as any } // dummy
+      rsRoutes: async () => {},
+      volumeProvider: null as any // dummy
     }
   );
   const testServer = await setUpKoaTestWith(app);

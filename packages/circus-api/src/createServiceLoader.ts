@@ -10,9 +10,14 @@ import createModels, { Models } from './db/createModels';
 import Logger from '@utrad-ical/circus-lib/lib/logger/Logger';
 import Storage from './storage/Storage';
 import createDicomImporter, { DicomImporter } from './createDicomImporter';
-import createCircusRs, { CircusRs } from './createCircusRs';
+import createCircusRs, {
+  CircusRs,
+  createVolumeProvider,
+  createRsRoutes
+} from './createCircusRs';
 import createApp from './createApp';
 import Koa from 'koa';
+import { VolumeProvider } from '@utrad-ical/circus-rs/src/server/helper/createVolumeProvider';
 
 export type Services = CsCoreServices & {
   app: Koa;
@@ -22,6 +27,8 @@ export type Services = CsCoreServices & {
   models: Models;
   dicomImporter: DicomImporter;
   rs: CircusRs;
+  rsRoutes: Koa.Middleware;
+  volumeProvider: VolumeProvider;
   blobStorage: Storage;
 };
 
@@ -39,6 +46,9 @@ const createServiceLoader = async (config: any) => {
   loader.register('models', createModels);
   loader.register('dicomImporter', createDicomImporter);
   loader.register('rs', createCircusRs);
+  loader.register('volumeProvider', createVolumeProvider);
+  loader.register('rsRoutes', createRsRoutes);
+
   loader.registerDirectory(
     'blobStorage',
     path.join(__dirname, 'storage'),

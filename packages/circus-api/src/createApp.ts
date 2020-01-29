@@ -12,7 +12,6 @@ import compose from 'koa-compose';
 import mount from 'koa-mount';
 import Router from 'koa-router';
 import * as path from 'path';
-import { CircusRs } from './createCircusRs';
 import { DicomImporter } from './createDicomImporter';
 import { Validator } from './createValidator';
 import { DisposableDb } from './db/connectDb';
@@ -26,6 +25,7 @@ import typeCheck from './middleware/typeCheck';
 import validateInOut from './middleware/validateInOut';
 import Storage from './storage/Storage';
 import { Deps } from './typings/middlewares';
+import { VolumeProvider } from '@utrad-ical/circus-rs/src/server/helper/createVolumeProvider';
 
 function handlerName(route: Route) {
   if (route.handler) return route.handler;
@@ -114,7 +114,8 @@ export const createApp: FunctionService<
     models: Models;
     blobStorage: Storage;
     core: CsCore;
-    rs: CircusRs;
+    rsRoutes: Koa.Middleware;
+    volumeProvider: VolumeProvider;
     dicomImporter: DicomImporter;
   },
   CreateAppOptions
@@ -127,7 +128,8 @@ export const createApp: FunctionService<
     models,
     blobStorage,
     core,
-    rs,
+    rsRoutes,
+    volumeProvider,
     dicomImporter
   }
 ) => {
@@ -151,7 +153,7 @@ export const createApp: FunctionService<
     dicomImporter,
     pluginResultsPath,
     cs: core,
-    volumeProvider: rs.volumeProvider,
+    volumeProvider,
     uploadFileSizeMaxBytes,
     dicomImageServerUrl
   };
@@ -193,7 +195,7 @@ export const createApp: FunctionService<
     )
   );
   koa.use(mount('/login', compose([bodyParser(), oauth.token()])));
-  koa.use(mount('/rs', rs.routes));
+  koa.use(mount('/rs', rsRoutes));
 
   return koa;
 };
@@ -205,7 +207,8 @@ createApp.dependencies = [
   'models',
   'blobStorage',
   'core',
-  'rs',
+  'rsRoutes',
+  'volumeProvider',
   'dicomImporter'
 ];
 

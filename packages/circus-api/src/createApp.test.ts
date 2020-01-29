@@ -26,7 +26,8 @@ beforeAll(async () => {
       apiLogger,
       blobStorage: null as any, // dummy
       dicomImporter: null as any,
-      rs: { routes: async () => {}, volumeProvider: null as any }, // dummy
+      rsRoutes: async () => {},
+      volumeProvider: null as any, // dummy
       core: null as any // dummy
     }
   );

@@ -2,7 +2,7 @@ import { command } from './ulid';
 
 test('ulid', async () => {
   const commandFunc = await command(undefined, {});
-  const consoleSpy = jest.spyOn(console, 'log');
+  const spy = jest.spyOn(console, 'log').mockImplementation(() => {});
   await commandFunc({});
-  expect(consoleSpy.mock.calls[0][0]).toMatch(/[a-z0-9]{26}/);
+  expect(spy.mock.calls[0][0]).toMatch(/[a-z0-9]{26}/);
 });

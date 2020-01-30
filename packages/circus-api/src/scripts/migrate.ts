@@ -23,7 +23,7 @@ export const command: Command<{ db: DisposableDb; models: Models }> = async (
     console.log('Current Revision: ' + currentRevision);
 
     if (currentRevision === migrations.length - 1) {
-      console.log('Up to date.');
+      console.log('Already up to date.');
       return;
     }
 
@@ -45,6 +45,7 @@ export const command: Command<{ db: DisposableDb; models: Models }> = async (
         if (err.errors) console.error(err.errors);
         break;
       }
+      console.log('The database is now up to date.');
     }
   };
 };

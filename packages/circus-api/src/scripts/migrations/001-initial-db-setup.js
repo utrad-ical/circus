@@ -4,7 +4,7 @@ import nodepass from 'node-php-password';
 export async function up(db, models) {
   const projectId = generateUniqueId();
 
-  await db.collection('groups').ensureIndex({ groupId: 1 }, { unique: true });
+  await db.collection('groups').createIndex({ groupId: 1 }, { unique: true });
   await db.collection('groups').insertMany([
     {
       groupId: await models.group.newSequentialId(),
@@ -39,8 +39,8 @@ export async function up(db, models) {
     }
   ]);
 
-  await db.collection('users').ensureIndex({ userEmail: 1 }, { unique: true });
-  await db.collection('users').insert({
+  await db.collection('users').createIndex({ userEmail: 1 }, { unique: true });
+  await db.collection('users').insertOne({
     userEmail: 'circus@circus.example.com',
     loginId: 'circus',
     password: nodepass.hash('circus'),
@@ -56,8 +56,8 @@ export async function up(db, models) {
 
   await db
     .collection('projects')
-    .ensureIndex({ projectId: 1 }, { unique: true });
-  await db.collection('projects').insert({
+    .createIndex({ projectId: 1 }, { unique: true });
+  await db.collection('projects').insertOne({
     projectId,
     projectName: 'default',
     description: 'The default DB project',
@@ -70,7 +70,7 @@ export async function up(db, models) {
     updatedAt: new Date()
   });
 
-  await db.collection('serverParams').insert({
+  await db.collection('serverParams').insertOne({
     key: 'domains',
     value: ['default'],
     createdAt: new Date(),

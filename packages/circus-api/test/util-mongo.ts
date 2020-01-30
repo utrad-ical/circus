@@ -50,6 +50,13 @@ export const setUpMongoFixture = async (
   }
 };
 
+export const deleteAllCollections = async (db: mongo.Db) => {
+  const collections = await db.listCollections().toArray();
+  for (const { name } of collections) {
+    await db.dropCollection(name);
+  }
+};
+
 /**
  * Initializes a test Mongo database.
  * The return value must be `await`-ed inside `test`, `beforeEach`, etc.

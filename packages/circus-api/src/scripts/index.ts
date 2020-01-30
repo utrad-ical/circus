@@ -25,7 +25,7 @@ const importCommand = async (moduleName: string) => {
 
 const main = async () => {
   const commandFiles = (await glob(path.join(__dirname, '*.ts'))).filter(
-    name => !/(index|Command)\.ts$/.test(name)
+    name => !/(index|Command|test)\.ts$/.test(name)
   );
   const commands = commandFiles.map(p => path.basename(p, '.ts'));
 

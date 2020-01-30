@@ -8,3 +8,5 @@ declare module 'dashdash';
 declare module 'deep-rename-keys';
 
 declare module 'inquirer';
+
+declare module 'dicom-parser';

@@ -1,12 +1,11 @@
 import { command } from './generate-password-hash';
 
 jest.mock('inquirer', () => {
-  let i = 0;
   return {
-    prompt: () => {
-      if (i++ == 0) return { pwd1: 'mypassword', pwd2: 'mypassword' };
-      else return { pwd1: 'mypassword', pwd2: 'unmatched' };
-    }
+    prompt: jest
+      .fn()
+      .mockReturnValueOnce({ pwd1: 'mypassword', pwd2: 'mypassword' })
+      .mockReturnValueOnce({ pwd1: 'mypassword', pwd2: 'unmatched' })
   };
 });
 

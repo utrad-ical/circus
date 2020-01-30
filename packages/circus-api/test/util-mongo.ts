@@ -46,6 +46,15 @@ export const setUpMongoFixture = async (
         console.log(err.errors);
         throw err;
       }
+      if (['groups'].indexOf(colName) >= 0) {
+        await db
+          .collection('sequences')
+          .updateOne(
+            { key: colName },
+            { $set: { updatedAt: new Date(), value: data.length + 1 } },
+            { upsert: true }
+          );
+      }
     }
   }
 };

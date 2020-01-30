@@ -1,10 +1,10 @@
-import DockerRunner from '@utrad-ical/circus-cs-core/src/util/DockerRunner';
 import { ValidationError } from 'ajv';
 import inquirer from 'inquirer';
 import { DisposableDb } from '../db/connectDb';
 import { Models } from '../db/createModels';
 import Command from './Command';
 import { Validator } from '../createValidator';
+import DockerRunner from '@utrad-ical/circus-cs-core/src/util/DockerRunner';
 
 export const help = () => {
   return (
@@ -19,7 +19,8 @@ export const command: Command<{
   db: DisposableDb;
   validator: Validator;
   models: Models;
-}> = async (opts, { db, validator, models }) => {
+  dockerRunner: DockerRunner;
+}> = async (opts, { db, validator, models, dockerRunner }) => {
   return async (options: any) => {
     await db
       .collection('pluginDefinitions')
@@ -42,8 +43,7 @@ export const command: Command<{
       throw new Error('This plug-in is already installed.');
     }
 
-    const runner = new DockerRunner();
-    const manifestText = await runner.loadFromTextFile(
+    const manifestText = await dockerRunner.loadFromTextFile(
       pluginId,
       '/plugin.json'
     );
@@ -59,18 +59,27 @@ export const command: Command<{
       );
     } catch (err) {
       if (err instanceof ValidationError) {
-        console.error('Manifest file error.');
+        const message =
+          'Manifest file validation failed.\n\n' +
+          err.errors.map(e => e.message).join('\n');
+        throw new Error(message);
+      } else {
         throw err;
       }
     }
 
-    const data = {
+    const doc = {
+      type: 'CAD',
       pluginId,
       pluginName: manifest.pluginName,
       version: manifest.version,
       description: manifest.description || '',
-      icon: manifest.icon,
-      displayStrategy: manifest.displayStrategy,
+      icon: manifest.icon || {
+        glyph: 'calc',
+        color: '#ffffff',
+        backgroundColor: '#008800'
+      },
+      displayStrategy: manifest.displayStrategy || [],
       runConfiguration: { timeout: 900, gpus: '' }
     };
 
@@ -84,26 +93,16 @@ export const command: Command<{
       );
     }
 
-    console.log('\n', data, '\n');
+    console.log('\n', doc, '\n');
 
     const confirm = await inquirer.prompt([
       { type: 'confirm', name: 'ok', message: 'Is this OK?' }
     ]);
     if (!confirm.ok) return;
 
-    const doc = {
-      type: 'CAD',
-      icon: {
-        glyph: 'calc',
-        color: '#ffffff',
-        backgroundColor: '#008800'
-      },
-      displayStrategy: [],
-      ...data
-    };
     await models.plugin.insert(doc);
     console.log(`Registered ${doc.pluginName} v${doc.version}`);
   };
 };
 
-command.dependencies = ['db', 'validator', 'models'];
+command.dependencies = ['db', 'validator', 'models', 'dockerRunner'];

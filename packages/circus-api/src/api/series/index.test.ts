@@ -44,11 +44,12 @@ describe('Uploading', () => {
     domain = 'sirius.org'
   ) => {
     const formData = new FormData();
-    formData.append('files', fs.createReadStream(file));
+    const fileData = await fs.readFile(file);
+    formData.append('files', fileData, { filename: file });
     const res = await axios.request({
       method: 'post',
-      headers: formData.getHeaders(),
       url: `api/series/domain/${domain}`,
+      headers: formData.getHeaders(),
       data: formData
     });
     if (res.status === 503) {

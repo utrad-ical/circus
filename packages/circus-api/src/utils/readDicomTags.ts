@@ -12,8 +12,8 @@ type DicomDataset = {
   byteArray: Uint8Array;
   string: (tag: string) => string | undefined;
   uint16: (tag: string) => number | undefined;
-  floatString: (tag: string) => number | undefined;
-  intString: (tag: string) => number | undefined;
+  floatString: (tag: string, index?: number) => number | undefined;
+  intString: (tag: string, index?: number) => number | undefined;
 };
 
 /**
@@ -98,8 +98,68 @@ const extractAge = (
   }
 };
 
+export interface Parameters {
+  pixelSpacingX?: number;
+  pixelSpacingY?: number;
+  kVP?: number;
+  dataCollectionDiameter?: number;
+  reconstructionDiameter?: number;
+  exposureTime?: number;
+  xRayTubeCurrent?: number;
+  filterType?: string;
+  convolutionKernel?: string;
+  scanningSequence?: string;
+  sequenceVariant?: string;
+  mrAcquisitionType?: string;
+  repetitionTime?: number;
+  echoTime?: number;
+  inversionTime?: number;
+  numberOfAverages?: number;
+  imagingFrequency?: number;
+  echoNumber?: number;
+  magneticFieldStrength?: number;
+  echoTrainLength?: number;
+  flipAngle?: number;
+  radiopharmaceutical?: string;
+  radionuclideTotalDose?: number;
+  pixelValueUnits?: string;
+}
+
 const extractParameters = (dataset: DicomDataset) => {
-  return {};
+  const data = {
+    pixelSpacingX: dataset.floatString('x00280030', 0),
+    pixelSpacingY: dataset.floatString('x00280030', 1),
+    // CT related values
+    kVP: dataset.floatString('x00180060'),
+    dataCollectionDiameter: dataset.floatString('x00180090'),
+    reconstructionDiameter: dataset.floatString('x00181100'),
+    exposureTime: dataset.floatString('x00181150'), // IS
+    xRayTubeCurrent: dataset.floatString('x00181151'), // IS
+    filterType: dataset.string('x00181160'), // SH
+    convolutionKernel: dataset.string('x00181210'), // SH
+    // MR related values
+    scanningSequence: dataset.string('x00180020'), // CS
+    sequenceVariant: dataset.string('x00180021'), // CS
+    mrAcquisitionType: dataset.string('x00180023'), // CS
+    repetitionTime: dataset.floatString('x00180080'),
+    echoTime: dataset.floatString('x00180081'),
+    inversionTime: dataset.floatString('x00180082'),
+    numberOfAverages: dataset.floatString('x00180083'),
+    imagingFrequency: dataset.floatString('x00180084'),
+    echoNumber: dataset.floatString('x00180086'),
+    magneticFieldStrength: dataset.floatString('x00180087'),
+    echoTrainLength: dataset.floatString('x00180091'), // IS
+    flipAngle: dataset.floatString('x00181314'), // DS
+    // PT/NM related values
+    radiopharmaceutical: dataset.string('x00180031'), // LO
+    radionuclideTotalDose: dataset.floatString('x00181074'),
+    // Misc
+    pixelValueUnits: dataset.string('x00541001') // CS
+  } as Parameters;
+  Object.keys(data).forEach(k => {
+    if ((data as any)[k] === undefined) delete (data as any)[k];
+  });
+  return data;
 };
 
 const prepareEncConverter = async (charSet: string | undefined) => {

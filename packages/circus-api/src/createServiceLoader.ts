@@ -18,6 +18,9 @@ import createCircusRs, {
 import createApp from './createApp';
 import Koa from 'koa';
 import { VolumeProvider } from '@utrad-ical/circus-rs/src/server/helper/createVolumeProvider';
+import createDicomTagReader, {
+  DicomTagReader
+} from './utils/createDicomTagReader';
 
 export type Services = CsCoreServices & {
   app: Koa;
@@ -30,6 +33,7 @@ export type Services = CsCoreServices & {
   rsRoutes: Koa.Middleware;
   volumeProvider: VolumeProvider;
   blobStorage: Storage;
+  dicomTagReader: DicomTagReader;
 };
 
 export type ApiServiceLoader = ServiceLoader<Services>;
@@ -48,6 +52,7 @@ const createServiceLoader = async (config: any) => {
   loader.register('rs', createCircusRs);
   loader.register('volumeProvider', createVolumeProvider);
   loader.register('rsRoutes', createRsRoutes);
+  loader.register('dicomTagReader', createDicomTagReader);
 
   loader.registerDirectory(
     'blobStorage',

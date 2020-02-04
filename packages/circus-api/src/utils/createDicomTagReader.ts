@@ -1,5 +1,6 @@
+import { NoDepFunctionService } from '@utrad-ical/circus-lib';
 import parser from 'dicom-parser';
-import { EncConverter, createEncConverter } from './encConverter';
+import { createEncConverter, EncConverter } from './encConverter';
 
 type DicomDataset = {
   elements: {
@@ -126,7 +127,7 @@ export interface Parameters {
 }
 
 const extractParameters = (dataset: DicomDataset) => {
-  const data = {
+  const data: Parameters = {
     pixelSpacingX: dataset.floatString('x00280030', 0),
     pixelSpacingY: dataset.floatString('x00280030', 1),
     // CT related values
@@ -155,7 +156,7 @@ const extractParameters = (dataset: DicomDataset) => {
     radionuclideTotalDose: dataset.floatString('x00181074'),
     // Misc
     pixelValueUnits: dataset.string('x00541001') // CS
-  } as Parameters;
+  };
   Object.keys(data).forEach(k => {
     if ((data as any)[k] === undefined) delete (data as any)[k];
   });
@@ -193,6 +194,7 @@ const extractTzOffset = (
 
 interface Options {
   defaultTzOffset?: number;
+  defaultEncoding?: string;
 }
 
 const readDicomTags = async (data: ArrayBuffer, options: Options = {}) => {
@@ -236,6 +238,15 @@ const readDicomTags = async (data: ArrayBuffer, options: Options = {}) => {
   };
 };
 
-// TODO: extract various parameters
+export type DicomTagReader = (
+  data: ArrayBuffer
+) => ReturnType<typeof readDicomTags>;
 
-export default readDicomTags;
+const createDicomTagReader: NoDepFunctionService<
+  DicomTagReader,
+  Options
+> = async options => {
+  return (data: ArrayBuffer) => readDicomTags(data, options);
+};
+
+export default createDicomTagReader;

@@ -35,6 +35,9 @@ const defaults: Configuration = {
   blobStorage: {
     type: 'LocalStorage',
     options: { root: '/var/circus/blobs' }
+  },
+  dicomTagReader: {
+    options: {}
   }
 };
 

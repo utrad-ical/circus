@@ -1,6 +1,6 @@
 import Command from './Command';
-import readDicomTags from '../utils/readDicomTags';
 import fs from 'fs-extra';
+import { DicomTagReader } from '../utils/createDicomTagReader';
 
 export const help = () => {
   return (
@@ -11,25 +11,16 @@ export const help = () => {
   );
 };
 
-export const options = () => {
-  return [
-    {
-      names: ['tz-offset', 't'],
-      help:
-        'Default timezone offset from UTC, in minutes, ' +
-        'if this is undefined as a tag',
-      type: 'number'
-    }
-  ];
-};
-
-export const command: Command<{}> = async () => {
+export const command: Command<{
+  dicomTagReader: DicomTagReader;
+}> = async (opts, { dicomTagReader }) => {
   return async (options: any) => {
     if (!Array.isArray(options._args) || options._args.length !== 1)
       throw new Error('Specify one DICOM file.');
-    const defaultTzOffset = options.tz_offset || 0;
     const buf = await fs.readFile(options._args[0]);
-    const result = await readDicomTags(buf.buffer, { defaultTzOffset });
+    const result = await dicomTagReader(buf.buffer);
     console.log(result);
   };
 };
+
+command.dependencies = ['dicomTagReader'];

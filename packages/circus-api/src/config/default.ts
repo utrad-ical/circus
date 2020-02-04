@@ -30,7 +30,10 @@ const defaults: Configuration = {
     options: { mongoUrl: 'mongodb://localhost:27017/circus-api' }
   },
   apiLogger: {
-    options: { logDir: path.resolve(__dirname, '../../store/logs') }
+    type: 'FileLogger',
+    options: {
+      fileName: path.resolve(__dirname, '../../store/logs/circus-api')
+    }
   },
   blobStorage: {
     type: 'LocalStorage',

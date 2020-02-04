@@ -4,7 +4,6 @@ import configureCsCoreServiceLoader, {
 import { ServiceLoader } from '@utrad-ical/circus-lib';
 import path from 'path';
 import connectDb, { DisposableDb } from './db/connectDb';
-import createLogger from './createLogger';
 import createValidator, { Validator } from './createValidator';
 import createModels, { Models } from './db/createModels';
 import Logger from '@utrad-ical/circus-lib/lib/logger/Logger';
@@ -45,7 +44,11 @@ const createServiceLoader = async (config: any) => {
   // Register our modules
   loader.register('app', createApp);
   loader.register('db', connectDb);
-  loader.register('apiLogger', createLogger);
+  loader.registerDirectory(
+    'apiLogger',
+    '@utrad-ical/circus-lib/lib/logger',
+    'NullLogger'
+  );
   loader.register('validator', createValidator);
   loader.register('models', createModels);
   loader.register('dicomImporter', createDicomImporter);

@@ -158,8 +158,8 @@ const readDicomTags = async (data: ArrayBuffer, options: Options = {}) => {
       tzOffset
     ),
     modality: dataset.string('x00080060'),
-    seriesDescription: dataset.string('') || '',
-    bodyPart: dataset.string('') || '',
+    seriesDescription: dataset.string('x0008103e') || '',
+    bodyPart: dataset.string('x00180015') || '',
     stationName: dataset.string('x00081010') || '',
     modelName: dataset.string('x00081090') || '',
     manufacturer: dataset.string('x00080070') || '',
@@ -168,7 +168,7 @@ const readDicomTags = async (data: ArrayBuffer, options: Options = {}) => {
       patientName: extractPatientName(dataset, encConverter),
       age: extractAge(dataset.string('x00101010'), dataset.string('x00100030')),
       birthDate: parseDate(dataset.string('x00100030')), // Ignores tzOffset
-      sex: dataset.string('00100040'),
+      sex: dataset.string('x00100040'),
       size: dataset.floatString('x00101020'),
       weight: dataset.floatString('x00101030')
     },

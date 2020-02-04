@@ -6,6 +6,7 @@ import createDicomImporter from '../createDicomImporter';
 import { Models } from '../db/createModels';
 import { CommandFunc } from './Command';
 import { command } from './import-series';
+import createDicomTagReader from '../utils/createDicomTagReader';
 
 const modelsPromise = usingModels(),
   domain = 'default';
@@ -19,9 +20,10 @@ beforeAll(async () => {
   await setUpMongoFixture(db, ['series']);
   const apiLogger = await createTestLogger();
   dicomFileRepository = new MemoryDicomFileRepository({});
+  const dicomTagReader = await createDicomTagReader({});
   const dicomImporter = await createDicomImporter(
     {},
-    { dicomFileRepository, models, apiLogger }
+    { dicomFileRepository, models, apiLogger, dicomTagReader }
   );
   commandFunc = await command(null, { dicomImporter });
 });

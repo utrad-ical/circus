@@ -1,20 +1,12 @@
 import { NoDepFunctionService } from '@utrad-ical/circus-lib';
-import parser from 'dicom-parser';
+import parser, { DicomDataset } from 'dicom-parser';
 import { createEncConverter, EncConverter } from './encConverter';
 
-type DicomDataset = {
-  elements: {
-    [tag: string]: {
-      dataOffset: number;
-      length: number;
-      fragments: any;
-    };
-  };
-  byteArray: Uint8Array;
-  string: (tag: string) => string | undefined;
-  uint16: (tag: string) => number | undefined;
-  floatString: (tag: string, index?: number) => number | undefined;
-  intString: (tag: string, index?: number) => number | undefined;
+const stripUndefined: <T extends object>(input: T) => Partial<T> = input => {
+  Object.keys(input).forEach(k => {
+    if ((input as any)[k] === undefined) delete (input as any)[k];
+  });
+  return input;
 };
 
 /**
@@ -157,10 +149,7 @@ const extractParameters = (dataset: DicomDataset) => {
     // Misc
     pixelValueUnits: dataset.string('x00541001') // CS
   };
-  Object.keys(data).forEach(k => {
-    if ((data as any)[k] === undefined) delete (data as any)[k];
-  });
-  return data;
+  return stripUndefined(data);
 };
 
 const prepareEncConverter = async (charSet: string | undefined) => {
@@ -198,7 +187,14 @@ interface Options {
 }
 
 const readDicomTags = async (data: ArrayBuffer, options: Options = {}) => {
-  const dataset = parser.parseDicom(new Uint8Array(data)) as DicomDataset;
+  const dataset = (() => {
+    try {
+      return parser.parseDicom(new Uint8Array(data));
+    } catch (err) {
+      if (typeof err === 'string') throw new Error(err);
+      else throw err;
+    }
+  })();
   const { defaultTzOffset = 0 } = options;
   const tzOffset = extractTzOffset(
     dataset.string('x00080201'),
@@ -209,8 +205,8 @@ const readDicomTags = async (data: ArrayBuffer, options: Options = {}) => {
   const encConverter = await prepareEncConverter(specificCharacterSet);
 
   return {
-    seriesUid: dataset.string('x0020000e'),
-    studyUid: dataset.string('x0020000d'),
+    seriesUid: dataset.string('x0020000e')!,
+    studyUid: dataset.string('x0020000d')!,
     width: dataset.uint16('x00280011'), // columns
     height: dataset.uint16('x00280010'), // rows
     instanceNumber: dataset.intString('x00200013'),
@@ -225,7 +221,7 @@ const readDicomTags = async (data: ArrayBuffer, options: Options = {}) => {
     stationName: dataset.string('x00081010') || '',
     modelName: dataset.string('x00081090') || '',
     manufacturer: dataset.string('x00080070') || '',
-    patientInfo: {
+    patientInfo: stripUndefined({
       patientId: dataset.string('x00100020'),
       patientName: extractPatientName(dataset, encConverter),
       age: extractAge(dataset.string('x00101010'), dataset.string('x00100030')),
@@ -233,7 +229,7 @@ const readDicomTags = async (data: ArrayBuffer, options: Options = {}) => {
       sex: dataset.string('x00100040'),
       size: dataset.floatString('x00101020'),
       weight: dataset.floatString('x00101030')
-    },
+    }),
     parameters: extractParameters(dataset)
   };
 };

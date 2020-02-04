@@ -15,7 +15,7 @@ export interface Deps {
   logger: Logger;
   models: Models;
   blobStorage: Storage;
-  dicomImporter?: DicomImporter; // Optional!
+  dicomImporter: DicomImporter;
   pluginResultsPath: string;
   cs: CsCore;
   volumeProvider: VolumeProvider;

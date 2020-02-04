@@ -4,6 +4,8 @@ import { setUpMongoFixture, usingModels } from '../test/util-mongo';
 import { Models } from './db/createModels';
 import createDicomImporter, { DicomImporter } from './createDicomImporter';
 import createTestLogger from '../test/util-logger';
+import createDicomTagReader from './utils/createDicomTagReader';
+import fs from 'fs-extra';
 
 const modelsPromise = usingModels();
 
@@ -19,28 +21,32 @@ beforeAll(async () => {
 beforeEach(async () => {
   const { db } = await modelsPromise;
   await setUpMongoFixture(db, ['series']);
+  const dicomTagReader = await createDicomTagReader({});
   dicomFileRepository = new MemoryDicomFileRepository({});
   const apiLogger = await createTestLogger();
   importer = await createDicomImporter(
     {},
-    { dicomFileRepository, models, apiLogger }
+    { dicomFileRepository, models, apiLogger, dicomTagReader }
   );
 });
 
-describe('#readDicomTagsFromFile', () => {
-  it('should correctly read DICOM tags', async () => {
-    const tags = await importer.readDicomTagsFromFile(file);
-    expect(tags.patientName).toBe('Anonymized');
-    expect(tags.instanceNumber).toBe('8');
-  });
+test('import a DICOM file', async () => {
+  const fileContent = await fs.readFile(file);
+  const seriesUid =
+    '2.16.840.1.113662.2.1.2519.21582.2990505.2105152.2381633.20';
+  await importer.importDicom(fileContent.buffer, 'someDomain');
+
+  const seriesLoader = await dicomFileRepository.getSeries(seriesUid);
+  expect((await seriesLoader.load(8)) instanceof ArrayBuffer).toBe(true);
+  const series = await models.series.findByIdOrFail(seriesUid);
+  expect(series.seriesUid).toBe(seriesUid);
+  expect(series.domain).toBe('someDomain');
+  expect(series.images).toBe('8');
 });
 
-describe('#importFromFile', () => {
-  it('should import a DICOM file', async () => {
-    await importer.importFromFile(file, 'someDomain');
-    const seriesLoader = await dicomFileRepository.getSeries(
-      '2.16.840.1.113662.2.1.2519.21582.2990505.2105152.2381633.20'
-    );
-    expect((await seriesLoader.load(8)) instanceof ArrayBuffer).toBe(true);
-  });
+test('rejects a broken file', async () => {
+  const fileContent = new ArrayBuffer(512);
+  await expect(importer.importDicom(fileContent, 'domain')).rejects.toThrow(
+    /not a valid DICOM P10 file/
+  );
 });

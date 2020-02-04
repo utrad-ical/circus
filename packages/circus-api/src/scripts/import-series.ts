@@ -58,7 +58,8 @@ export const command: Command<{
       }
       for (const file of files!) {
         console.log(`Importing: ${file}`);
-        await dicomImporter.importFromFile(file, domain);
+        const fileContent = await fs.readFile(file);
+        await dicomImporter.importDicom(fileContent.buffer, domain);
         count++;
       }
 
@@ -67,6 +68,5 @@ export const command: Command<{
     }
   };
 };
-
 
 command.dependencies = ['dicomImporter'];

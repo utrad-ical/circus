@@ -13,6 +13,7 @@ import createModels from '../src/db/createModels';
 import createMemoryStorage from '../src/storage/MemoryStorage';
 import createDicomImporter from '../src/createDicomImporter';
 import { MemoryDicomFileRepository } from '@utrad-ical/circus-lib/lib/dicom-file-repository';
+import createDicomTagReader from '../src/utils/createDicomTagReader';
 
 /**
  * Holds data used for API route testing.
@@ -76,12 +77,14 @@ export const setUpAppForRoutesTest = async () => {
   const models = await createModels(undefined, { db, validator });
   const csCore = createMockCsCore();
   const apiLogger = await createTestLogger();
+  const dicomTagReader = await createDicomTagReader({});
   const dicomImporter = await createDicomImporter(
     {},
     {
       dicomFileRepository: new MemoryDicomFileRepository({}),
       apiLogger,
-      models
+      models,
+      dicomTagReader
     }
   );
 

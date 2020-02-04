@@ -40,16 +40,7 @@ export const handlePost: RouteMiddleware = ({ dicomImporter }) => {
     if (signature !== 0x4449434d) {
       return; // Non-DICOM file
     }
-    const tmpFile = path.join(
-      dicomImporter!.workDir,
-      `${generateUniqueId()}.dcm`
-    );
-    await fs.writeFile(tmpFile, buffer);
-    try {
-      await dicomImporter!.importFromFile(tmpFile, domain);
-    } finally {
-      await fs.unlink(tmpFile);
-    }
+    await dicomImporter.importDicom(buffer.buffer, domain);
   };
 
   return async (ctx, next) => {

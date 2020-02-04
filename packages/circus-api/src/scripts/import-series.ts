@@ -4,6 +4,7 @@ import glob from 'glob-promise';
 import * as path from 'path';
 import { DicomImporter } from '../createDicomImporter';
 import Command from './Command';
+import zipIterator from '../utils/zipIterator';
 
 export const help = () => {
   return (
@@ -59,8 +60,23 @@ export const command: Command<{
       for (const file of files!) {
         console.log(`Importing: ${file}`);
         const fileContent = await fs.readFile(file);
-        await dicomImporter.importDicom(fileContent.buffer, domain);
-        count++;
+
+        const isZip =
+          fileContent
+            .slice(0, 4)
+            .compare(new Uint8Array([0x50, 0x4b, 0x03, 0x04])) === 0;
+
+        if (isZip) {
+          const zip = zipIterator(fileContent, /./);
+          for await (const fileInZip of zip) {
+            await dicomImporter.importDicom(fileInZip, domain);
+            count++;
+          }
+        } else {
+          // Import as a regular file
+          await dicomImporter.importDicom(fileContent.buffer, domain);
+          count++;
+        }
       }
 
       console.log(chalk.green('Import finished.'));

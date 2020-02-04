@@ -32,7 +32,6 @@ const createDicomImporter: FunctionService<
     if (typeof instanceNumber !== 'number') {
       throw new Error('Instance number not set');
     }
-
     // Check if there is already a series with the same series UID
     const seriesUid = tags.seriesUid;
     const series = await models.series.findById(seriesUid);

@@ -57,7 +57,7 @@ export const handlePost: RouteMiddleware = ({ dicomImporter }) => {
     let count = 0;
     for (const entry of files) {
       const signature = entry.buffer.readUInt32BE(0);
-      if ([0x504b0304, 0x504b0304, 0x504b0708].some(s => s === signature)) {
+      if ([0x504b0304, 0x504b0708].some(s => s === signature)) {
         // ZIP file detected.
         const archive = await JSZip.loadAsync(entry.buffer);
         const filesInArchive: JSZip.JSZipObject[] = [];

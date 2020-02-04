@@ -8,7 +8,10 @@ export default async function* zipIterator(zipBuf: Buffer, pattern: RegExp) {
   const archive = await JSZip.loadAsync(zipBuf);
   const entries = archive.file(pattern); // all files, including subdirs
   for (const entry of entries) {
-    const buffer = await entry.async('arraybuffer');
+    // We use the *copy* of the returned buffer
+    // because `async('arraybuffer') instanceof ArrayBuffer` somehow
+    // evaluates to false
+    const buffer = Buffer.from(await entry.async('nodebuffer')).buffer;
     yield buffer;
   }
 }

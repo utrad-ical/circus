@@ -6,6 +6,7 @@ test('readDicomTags', async () => {
   const content = await fs.readFile(
     path.join(__dirname, '../../test/dicom/CT-MONO2-16-brain.dcm')
   );
-  const result = readDicomTags(content);
-  // console.log(result);
+  const result = await readDicomTags(content);
+  expect(result.modality).toBe('CT');
+  expect(result.patientInfo.patientName).toBe('Anonymized');
 });

@@ -16,7 +16,7 @@ export const command: Command<{}> = async () => {
     if (!Array.isArray(options._args) || options._args.length !== 1)
       throw new Error('Specify one DICOM file.');
     const buf = await fs.readFile(options._args[0]);
-    const result = readDicomTags(buf.buffer);
+    const result = await readDicomTags(buf.buffer);
     console.log(result);
   };
 };

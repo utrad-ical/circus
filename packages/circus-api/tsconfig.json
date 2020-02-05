@@ -1,6 +1,8 @@
 {
   "compilerOptions": {
     "strict": true,
+    "target": "es2018",
+    "module": "commonjs",
     "noEmit": true,
     "esModuleInterop": true,
     "downlevelIteration": true

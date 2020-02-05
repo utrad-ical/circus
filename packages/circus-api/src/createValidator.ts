@@ -37,8 +37,8 @@ const customFormats: {
 } = {
   dicomUid: s => isDicomUid(s, false),
   multiIntegerRange: new RegExp(`^${intOrRange}(,${intOrRange})*$`),
-  color: /^\#[0-9a-f]{6}$/,
-  kebab: /^([a-z0-9]+\-)*[a-z0-9]+$/,
+  color: /^#[0-9a-f]{6}$/,
+  kebab: /^([a-z0-9]+-)*[a-z0-9]+$/,
   sha1hex: /^[a-f0-9]{40}$/,
   jsonString: s => {
     try {

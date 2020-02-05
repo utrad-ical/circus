@@ -10,13 +10,15 @@ export interface EncConverter {
 
 type Decoder = (input: Buffer) => string;
 
+/* eslint no-control-regex: 0 */
+
 /**
  * A higher-order function that returns a new function,
  * which in turn returns a Decoder.
  * We use HoF because we want to load external modules as late as possible.
  * @param encoding
  */
-const iconvLite: (encoding: string) => (() => Promise<Decoder>) = encoding => {
+const iconvLite: (encoding: string) => () => Promise<Decoder> = encoding => {
   return async () => {
     const iconv = await import('iconv-lite');
     return buffer => iconv.decode(buffer, encoding);
@@ -91,7 +93,7 @@ export async function createEncConverter(
 
   // Now asynchronously create decoders that corresponds to each value.
   // External modules required for conversion will be lazily-loaded here.
-  for (let cs of charSets) {
+  for (const cs of charSets) {
     const enc = Object.keys(encMap).find(k => cs.endsWith(k));
     if (!enc) return undefined;
     const decoder = createdDecoders.get(enc) || (await encMap[enc]());

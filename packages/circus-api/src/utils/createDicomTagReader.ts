@@ -170,10 +170,7 @@ const extractTzOffset = (
   tzOffsetString: string | undefined,
   defaultTzOffset: number
 ) => {
-  if (
-    typeof tzOffsetString !== 'string' ||
-    !/^[+\-]\d{4}$/.test(tzOffsetString)
-  )
+  if (typeof tzOffsetString !== 'string' || !/^[+-]\d{4}$/.test(tzOffsetString))
     return defaultTzOffset;
   const sign = tzOffsetString[0] === '-' ? -1 : 1;
   const hourOffset = Number(tzOffsetString.substr(1, 2));

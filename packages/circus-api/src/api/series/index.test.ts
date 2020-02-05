@@ -69,7 +69,7 @@ describe('Uploading', () => {
     if (res.status === 503) return;
     expect(res.status).toBe(200);
     expect(res.data).toMatchObject({ uploaded: 1 });
-  }, 15000);
+  });
 
   it('should upload zipped DICOM files', async () => {
     const file = path.join(__dirname, '../../../test/dicom/test.zip');
@@ -77,7 +77,7 @@ describe('Uploading', () => {
     if (res.status === 503) return;
     expect(res.status).toBe(200);
     expect(res.data).toMatchObject({ uploaded: 1 });
-  }, 15000);
+  });
 
   it('should reject series upload into innaccessible domain', async () => {
     const file = path.join(
@@ -88,5 +88,5 @@ describe('Uploading', () => {
     if (res.status === 503) return;
     expect(res.status).toBe(403);
     expect(res.data.error).toMatch(/You cannot upload to this domain/);
-  }, 15000);
+  });
 });

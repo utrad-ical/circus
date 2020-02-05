@@ -34,7 +34,7 @@ test('import from a DICOM file', async () => {
   const spy = jest.spyOn(console, 'log').mockImplementation(() => {});
   const file = path.join(__dirname, '../../test/dicom/CT-MONO2-16-brain.dcm');
   await commandFunc({ domain, _args: [file] });
-  expect(spy).toHaveBeenCalledWith('Imported 1 file(s).');
+  expect(spy).toHaveBeenCalledWith('Imported 1 file.');
   const seriesAccessor = await dicomFileRepository.getSeries(seriesUid);
   expect(seriesAccessor.images).toBe('8');
   expect((await seriesAccessor.load(8)) instanceof ArrayBuffer).toBe(true);
@@ -46,7 +46,7 @@ test('import from a zip file', async () => {
   const spy = jest.spyOn(console, 'log').mockImplementation(() => {});
   const file = path.join(__dirname, '../../test/dicom/test.zip');
   await commandFunc({ domain, _args: [file] });
-  expect(spy).toHaveBeenCalledWith('Imported 1 file(s).');
+  expect(spy).toHaveBeenCalledWith('Imported 1 file.');
   const seriesAccessor = await dicomFileRepository.getSeries(seriesUid);
   expect(seriesAccessor.images).toBe('8');
   expect((await seriesAccessor.load(8)) instanceof ArrayBuffer).toBe(true);

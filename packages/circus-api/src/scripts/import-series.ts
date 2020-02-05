@@ -1,10 +1,8 @@
 import chalk from 'chalk';
-import * as fs from 'fs-extra';
-import glob from 'glob-promise';
 import * as path from 'path';
 import { DicomImporter } from '../createDicomImporter';
 import Command from './Command';
-import zipIterator from '../utils/zipIterator';
+import directoryIterator from '../utils/directoryIterator';
 
 export const help = () => {
   return (
@@ -40,9 +38,16 @@ export const command: Command<{
 
     let count = 0;
     for (const pathArg of paths) {
-      let stat;
       try {
-        stat = await fs.stat(pathArg);
+        for await (const entry of directoryIterator(pathArg)) {
+          if (entry.type === 'fs') {
+            console.log(`Importing: ${entry.name}`);
+          } else {
+            console.log(`Importing ${entry.name} in ${entry.zipName}`);
+          }
+          await dicomImporter.importDicom(entry.buffer, domain);
+          count++;
+        }
       } catch (err) {
         const message =
           err.code === 'ENOENT'
@@ -51,36 +56,10 @@ export const command: Command<{
         console.error(chalk.red(message));
         continue;
       }
-      let files: string[];
-      if (stat.isFile()) {
-        files = [pathArg];
-      } else if (stat.isDirectory()) {
-        files = await glob(path.join(pathArg, '**/*.dcm'));
-      }
-      for (const file of files!) {
-        console.log(`Importing: ${file}`);
-        const fileContent = await fs.readFile(file);
-
-        const isZip =
-          fileContent
-            .slice(0, 4)
-            .compare(new Uint8Array([0x50, 0x4b, 0x03, 0x04])) === 0;
-
-        if (isZip) {
-          const zip = zipIterator(fileContent, /./);
-          for await (const fileInZip of zip) {
-            await dicomImporter.importDicom(fileInZip, domain);
-            count++;
-          }
-        } else {
-          // Import as a regular file
-          await dicomImporter.importDicom(fileContent.buffer, domain);
-          count++;
-        }
-      }
 
       console.log(chalk.green('Import finished.'));
-      console.log(`Imported ${count} file(s).`);
+      const fStr = count === 1 ? 'file' : 'files';
+      console.log(`Imported ${count} ${fStr}.`);
     }
   };
 };

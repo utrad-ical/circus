@@ -1,12 +1,9 @@
-import status from 'http-status';
-import performSearch from '../performSearch';
-import * as fs from 'fs-extra';
-import * as path from 'path';
-import * as JSZip from 'jszip';
 import { EJSON } from 'bson';
+import status from 'http-status';
+import { CircusContext, RouteMiddleware } from '../../typings/middlewares';
 import checkFilter from '../../utils/checkFilter';
-import generateUniqueId from '../../utils/generateUniqueId';
-import { RouteMiddleware, CircusContext } from '../../typings/middlewares';
+import { fileOrZipIterator } from '../../utils/directoryIterator';
+import performSearch from '../performSearch';
 
 const maskPatientInfo = (ctx: CircusContext) => {
   return (series: any) => {
@@ -35,14 +32,6 @@ export const handleGet: RouteMiddleware = ({ models }) => {
 };
 
 export const handlePost: RouteMiddleware = ({ dicomImporter }) => {
-  const importFromBuffer = async (buffer: Buffer, domain: string) => {
-    const signature = buffer.length > 0x80 && buffer.readUInt32BE(0x80);
-    if (signature !== 0x4449434d) {
-      return; // Non-DICOM file
-    }
-    await dicomImporter.importDicom(buffer.buffer, domain);
-  };
-
   return async (ctx, next) => {
     if (!dicomImporter) {
       ctx.throw(status.SERVICE_UNAVAILABLE);
@@ -53,22 +42,20 @@ export const handlePost: RouteMiddleware = ({ dicomImporter }) => {
       ctx.throw(status.FORBIDDEN, 'You cannot upload to this domain.');
     }
 
-    const files = ctx.request.files;
+    const sentFiles = ctx.request.files;
     let count = 0;
-    for (const entry of files) {
-      const signature = entry.buffer.readUInt32BE(0);
-      if ([0x504b0304, 0x504b0708].some(s => s === signature)) {
-        // ZIP file detected.
-        const archive = await JSZip.loadAsync(entry.buffer);
-        const filesInArchive: JSZip.JSZipObject[] = [];
-        archive.forEach((r, f) => filesInArchive.push(f));
-        for (const file of filesInArchive) {
-          const buf = await file.async('nodebuffer');
-          await importFromBuffer(buf, domain);
-          count++;
+    for (const file of sentFiles) {
+      for await (const entry of fileOrZipIterator(
+        file.buffer.buffer,
+        file.filename
+      )) {
+        const signature =
+          entry.buffer.byteLength > 0x80 &&
+          new DataView(entry.buffer).getUint32(0x80, false);
+        if (signature !== 0x4449434d) {
+          continue; // Non-DICOM file
         }
-      } else {
-        await importFromBuffer(entry.buffer, domain);
+        await dicomImporter.importDicom(Buffer.from(entry.buffer), domain);
         count++;
       }
     }

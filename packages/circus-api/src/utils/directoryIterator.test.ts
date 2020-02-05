@@ -4,9 +4,7 @@ import path from 'path';
 const testDir = path.join(__dirname, '../../test/dicom');
 const dicomName = 'CT-MONO2-16-brain.dcm';
 
-const toArray: <T>(
-  generator: AsyncGenerator<T>
-) => Promise<T[]> = async generator => {
+const toArray = async <T>(generator: AsyncGenerator<T>) => {
   const results: T[] = [];
   for await (const item of generator) results.push(item);
   return results;

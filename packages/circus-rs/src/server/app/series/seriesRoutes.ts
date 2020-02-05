@@ -36,5 +36,5 @@ export default function seriesRoutes({
   router.get('/metadata', metadata());
   router.get('/volume', volume());
   router.get('/scan', scan({ imageEncoder }));
-  return router.routes();
+  return (router.routes() as any) as koa.Middleware;
 }

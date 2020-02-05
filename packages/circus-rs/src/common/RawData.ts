@@ -17,7 +17,7 @@ export default class RawData {
   /**
    * Pixel format.
    */
-  protected pixelFormat: PixelFormat = PixelFormat.Unknown;
+  protected pixelFormat: PixelFormat;
 
   /**
    * Bytes per voxel [byte/voxel]

@@ -40,6 +40,11 @@ const parseDate = (
   return date;
 };
 
+const parseBirthDate = (da: string | undefined) => {
+  if (da === undefined || da.length !== 8) return undefined;
+  return da.substr(0, 4) + '-' + da.substr(4, 2) + '-' + da.substr(6, 2);
+};
+
 const extractPatientName = (
   dataset: DicomDataset,
   encConverter: EncConverter
@@ -222,7 +227,7 @@ const readDicomTags = async (data: ArrayBuffer, options: Options = {}) => {
       patientId: dataset.string('x00100020'),
       patientName: extractPatientName(dataset, encConverter),
       age: extractAge(dataset.string('x00101010'), dataset.string('x00100030')),
-      birthDate: parseDate(dataset.string('x00100030')), // Ignores tzOffset
+      birthDate: parseBirthDate(dataset.string('x00100030')), // Ignores tzOffset
       sex: dataset.string('x00100040'),
       size: dataset.floatString('x00101020'),
       weight: dataset.floatString('x00101030')

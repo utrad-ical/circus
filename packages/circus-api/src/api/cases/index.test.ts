@@ -18,6 +18,16 @@ it('should perform search', async () => {
   expect(res.data.items).toHaveLength(1);
 });
 
+it('should perform search with patient name', async () => {
+  const res = await ax.bob.get('api/cases', {
+    params: {
+      filter: JSON.stringify({ 'patientInfo.patientName': 'Anzu' })
+    }
+  });
+  expect(res.status).toBe(200);
+  expect(res.data.items).toHaveLength(1);
+});
+
 it('should throw 400 for wrong request', async () => {
   const res1 = await ax.alice.get('api/cases', {
     params: { filter: 'invalid-json' }

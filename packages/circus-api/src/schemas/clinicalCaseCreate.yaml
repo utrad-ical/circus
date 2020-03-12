@@ -1,0 +1,24 @@
+$schema: 'http://json-schema.org/schema#'
+$async: true
+title: Case
+type: object
+properties:
+  projectId:
+    type: string
+  series:
+    type: array
+    items:
+      type: object
+      properties:
+        seriesUid:
+          type: string
+          format: dicomUid
+        partialVolumeDescriptor:
+          $ref: partialVolumeDescriptor
+      required: ['seriesUid', 'partialVolumeDescriptor']
+    minLength: 1
+  tags:
+    type: array
+    items:
+      type: string
+additionalProperties: false

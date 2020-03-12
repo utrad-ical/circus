@@ -107,7 +107,7 @@ export const fetchAccessibleSeries = async (
         throwError(400, 'Specified range is invalid.');
       }
     }
-    seriesData.push(item);
+    seriesData.push({ ...item, partialVolumeDescriptor });
     if (userPrivileges.domains.indexOf(item.domain) < 0) {
       throw new Error('You cannot access this series.');
     }

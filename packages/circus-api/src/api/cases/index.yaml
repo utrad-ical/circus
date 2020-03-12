@@ -11,6 +11,7 @@ routes:
     path: /cases
     # TODO: Security: Determine how to detect target project
     # requiredProjectPrivilege: write
+    requestSchema: clinicalCaseCreate
     description: Creates a new case.
   - verb: get
     path: /cases/:caseId

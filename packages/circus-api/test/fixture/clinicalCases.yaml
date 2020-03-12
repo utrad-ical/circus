@@ -1,7 +1,10 @@
--
-  caseId: faeb503e97f918c882453fd2d789f50f4250267740a0b3fbcc85a529f2d7715b
+- caseId: faeb503e97f918c882453fd2d789f50f4250267740a0b3fbcc85a529f2d7715b
   projectId: 8883fdef6f5144f50eb2a83cd34baa44
-  patientInfoCache: {}
+  # patientInfoCache:
+  #   patientId: '003'
+  #   patientName: 'Anzu'
+  #   weight: 20
+  #   sex: 'F'
   latestRevision:
     creator: alice@example.com
     date: { $date: '2015-01-01T12:00:00Z' }
@@ -9,23 +12,20 @@
     attributes: {}
     status: draft
     series:
-      -
-        seriesUid: 111.222.333.444.666
+      - seriesUid: 111.222.333.444.666
         partialVolumeDescriptor:
           start: 1
           end: 100
           delta: 1
         labels: []
   revisions:
-    -
-      creator: alice@example.com
+    - creator: alice@example.com
       date: { $date: '2015-01-01T12:00:00Z' }
       description: Created
       attributes: {}
       status: draft
       series:
-        -
-          seriesUid: 111.222.333.444.666
+        - seriesUid: 111.222.333.444.666
           partialVolumeDescriptor:
             start: 1
             end: 100

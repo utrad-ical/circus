@@ -16,6 +16,9 @@ import Storage from './storage/Storage';
 import { createVolumeProvider, createRsRoutes } from './createCircusRs';
 import Koa from 'koa';
 import { VolumeProvider } from '@utrad-ical/circus-rs/src/server/helper/createVolumeProvider';
+import createDicomUtilityRunner, {
+  DicomUtilityRunner
+} from './utils/createDicomUtilityRunner';
 
 export type Services = CsCoreServices & {
   app: Koa;
@@ -29,6 +32,7 @@ export type Services = CsCoreServices & {
   volumeProvider: VolumeProvider;
   blobStorage: Storage;
   dicomTagReader: DicomTagReader;
+  dicomUtilityRunner: DicomUtilityRunner;
 };
 
 export type ApiServiceLoader = ServiceLoader<Services>;
@@ -58,6 +62,7 @@ const createServiceLoader = async (config: any) => {
     'dicomTagReader',
     path.join(__dirname, './utils/createDicomTagReader')
   );
+  loader.register('dicomUtilityRunner', createDicomUtilityRunner);
 
   loader.registerDirectory(
     'blobStorage',

@@ -3,10 +3,14 @@ import { DicomFileRepository } from '@utrad-ical/circus-lib/lib/dicom-file-repos
 import Logger from '@utrad-ical/circus-rs/src/server/helper/logger/Logger';
 import { multirange } from 'multi-integer-range';
 import { DicomImporter, Models, DicomTagReader } from './interface';
+import { DicomUtilityRunner } from './utils/createDicomUtilityRunner';
 
 interface Options {
-  dockerImage?: string;
-  workDir?: string;
+  /**
+   * Whether to compress the input file. `compress` means always
+   * trying to compress the input DICOM file using the lossless JPEG algorithm.
+   */
+  compression: 'compress' | 'pass';
 }
 
 const createDicomImporter: FunctionService<
@@ -16,14 +20,20 @@ const createDicomImporter: FunctionService<
     models: Models;
     apiLogger: Logger;
     dicomTagReader: DicomTagReader;
+    dicomUtilityRunner: DicomUtilityRunner;
   }
 > = async (
-  options: Options = {},
-  { dicomFileRepository, models, apiLogger, dicomTagReader }
+  options: Options,
+  { dicomFileRepository, models, apiLogger, dicomTagReader, dicomUtilityRunner }
 ) => {
   const importDicom = async (fileContent: ArrayBuffer, domain: string) => {
     // Read the DICOM file
     const { instanceNumber, ...tags } = await dicomTagReader(fileContent);
+
+    if (options.compression === 'compress') {
+      fileContent = await dicomUtilityRunner.compress(fileContent);
+    }
+
     if (typeof instanceNumber !== 'number') {
       throw new Error('Instance number not set');
     }
@@ -60,7 +70,8 @@ createDicomImporter.dependencies = [
   'dicomFileRepository',
   'models',
   'apiLogger',
-  'dicomTagReader'
+  'dicomTagReader',
+  'dicomUtilityRunner'
 ];
 
 export default createDicomImporter;

@@ -41,6 +41,17 @@ const defaults: Configuration = {
   },
   dicomTagReader: {
     options: {}
+  },
+  dicomImporter: {
+    options: {
+      compression: 'pass'
+    }
+  },
+  dicomUtilityRunner: {
+    options: {
+      maxConcurrency: 4,
+      dockerImage: 'circuscad/dicom_utility:2.0.0-beta3'
+    }
   }
 };
 

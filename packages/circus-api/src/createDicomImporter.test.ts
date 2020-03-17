@@ -6,6 +6,7 @@ import { DicomImporter, Models } from './interface';
 import createTestLogger from '../test/util-logger';
 import createDicomTagReader from './utils/createDicomTagReader';
 import fs from 'fs-extra';
+import createDicomUtilityRunner from './utils/createDicomUtilityRunner';
 
 const modelsPromise = usingModels();
 
@@ -24,9 +25,19 @@ beforeEach(async () => {
   const dicomTagReader = await createDicomTagReader({});
   dicomFileRepository = new MemoryDicomFileRepository({});
   const apiLogger = await createTestLogger();
+  const dicomUtilityRunner = {
+    compress: async (buf: ArrayBuffer) => buf,
+    dispose: async () => {}
+  }; // mock
   importer = await createDicomImporter(
     {},
-    { dicomFileRepository, models, apiLogger, dicomTagReader }
+    {
+      dicomFileRepository,
+      models,
+      apiLogger,
+      dicomTagReader,
+      dicomUtilityRunner
+    }
   );
 });
 

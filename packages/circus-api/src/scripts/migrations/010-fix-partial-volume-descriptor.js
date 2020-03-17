@@ -13,15 +13,21 @@ export async function up(db) {
 
     for (let volId = 0; volId < pluginJobDoc.series.length; volId++) {
       const seriesUid = pluginJobDoc.series[volId].seriesUid;
-      const seriesDoc = await db.collection('series').findOne({ seriesUid });
-      if (!seriesDoc)
-        throw new Error(
-          `Series ${seriesUid} defined in job ${jobId} (volId #${volId}) was not found.`
-        );
-      const images = multirange(seriesDoc.images);
-      const start = images.min();
-      const end = images.max();
-      const partialVolumeDescriptor = { start, end, delta: 1 };
+      let partialVolumeDescriptor = null;
+      if (pluginJobDoc.series[volId].partialVolumeDescriptor) {
+        partialVolumeDescriptor =
+          pluginJobDoc.series[volId].partialVolumeDescriptor;
+      } else {
+        const seriesDoc = await db.collection('series').findOne({ seriesUid });
+        if (!seriesDoc)
+          throw new Error(
+            `Series ${seriesUid} defined in job ${jobId} (volId #${volId}) was not found.`
+          );
+        const images = multirange(seriesDoc.images);
+        const start = images.min();
+        const end = images.max();
+        partialVolumeDescriptor = { start, end, delta: 1 };
+      }
       const series = { seriesUid, partialVolumeDescriptor };
       newSeriesList.push(series);
     }

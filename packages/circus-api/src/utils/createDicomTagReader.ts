@@ -17,7 +17,7 @@ const stripUndefined: <T extends object>(input: T) => Partial<T> = input => {
  * @param tm DICOM 'TM' (Time) string (`HHMMSS.FFFFFF`)
  * @param tzOffset Timezone offset represented in minutes (e.g., UTC+9 = 540)
  */
-const parseDate = (
+export const parseDate = (
   da: string | undefined,
   tm?: string,
   tzOffset: number = 0
@@ -28,22 +28,22 @@ const parseDate = (
   tm = tm ? tm.replace(/[: ]/g, '') : '000000.000000';
   const date = new Date();
   date.setUTCFullYear(
-    Number(da.substr(0, 4)),
-    Number(da.substr(4, 2)) - 1, // month is zero-based
-    Number(da.substr(6, 2))
+    Number(da.substring(0, 4)),
+    Number(da.substring(4, 6)) - 1, // month is zero-based
+    Number(da.substring(6))
   );
   date.setUTCHours(
-    Number(tm.substr(0, 2)),
-    Number(tm.substr(2, 2)) - tzOffset,
-    Number(tm.substr(4, 2)),
-    Math.floor(Number((tm.substr(7) + '000000').substr(0, 6)) / 1000)
+    Number(tm.substring(0, 2)),
+    Number(tm.substring(2, 4)) - tzOffset,
+    Number(tm.substring(4, 6)),
+    Math.floor(Number((tm.substring(7) + '000000').substring(0, 6)) / 1000)
   );
   return date;
 };
 
 const parseBirthDate = (da: string | undefined) => {
   if (da === undefined || da.length !== 8) return undefined;
-  return da.substr(0, 4) + '-' + da.substr(4, 2) + '-' + da.substr(6, 2);
+  return da.substring(0, 4) + '-' + da.substring(4, 6) + '-' + da.substring(6);
 };
 
 const extractPatientName = (
@@ -78,8 +78,8 @@ const extractAge = (
   birthDateStr: string | undefined
 ) => {
   if (typeof ageStr === 'string' && /^(\d\d\d)([DWMY])$/.test(ageStr || '')) {
-    const nnn = Number(ageStr.substr(0, 3));
-    const unit = ageStr.substr(3);
+    const nnn = Number(ageStr.substring(0, 3));
+    const unit = ageStr.substring(3);
     switch (unit) {
       case 'Y':
         return nnn;
@@ -179,8 +179,8 @@ const extractTzOffset = (
   if (typeof tzOffsetString !== 'string' || !/^[+-]\d{4}$/.test(tzOffsetString))
     return defaultTzOffset;
   const sign = tzOffsetString[0] === '-' ? -1 : 1;
-  const hourOffset = Number(tzOffsetString.substr(1, 2));
-  const minuteOffset = Number(tzOffsetString.substr(3, 2));
+  const hourOffset = Number(tzOffsetString.substring(1, 3));
+  const minuteOffset = Number(tzOffsetString.substring(3));
   return sign * (hourOffset * 60) * minuteOffset;
 };
 

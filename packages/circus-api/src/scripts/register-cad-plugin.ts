@@ -1,9 +1,9 @@
 import { ValidationError } from 'ajv';
 import inquirer from 'inquirer';
-import { DisposableDb } from '../db/connectDb';
-import { Models } from '../db/createModels';
+import { DisposableDb } from '../interface';
+import { Models } from '../interface';
 import Command from './Command';
-import { Validator } from '../createValidator';
+import { Validator } from '../interface';
 import DockerRunner from '@utrad-ical/circus-cs-core/src/util/DockerRunner';
 
 export const help = () => {

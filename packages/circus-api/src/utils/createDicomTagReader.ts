@@ -1,6 +1,7 @@
-import { NoDepFunctionService } from '@utrad-ical/circus-lib';
+import { NoDepFunctionService } from '@utrad-ical/circus-lib/lib/ServiceLoader';
 import parser, { DicomDataset } from 'dicom-parser';
 import { createEncConverter, EncConverter } from './encConverter';
+import { DicomTagReader } from '../interface';
 
 const stripUndefined: <T extends object>(input: T) => Partial<T> = input => {
   Object.keys(input).forEach(k => {
@@ -188,7 +189,10 @@ interface Options {
   defaultEncoding?: string;
 }
 
-const readDicomTags = async (data: ArrayBuffer, options: Options = {}) => {
+export const readDicomTags = async (
+  data: ArrayBuffer,
+  options: Options = {}
+) => {
   const dataset = (() => {
     try {
       return parser.parseDicom(new Uint8Array(data));
@@ -235,10 +239,6 @@ const readDicomTags = async (data: ArrayBuffer, options: Options = {}) => {
     parameters: extractParameters(dataset)
   };
 };
-
-export type DicomTagReader = (
-  data: ArrayBuffer
-) => ReturnType<typeof readDicomTags>;
 
 const createDicomTagReader: NoDepFunctionService<
   DicomTagReader,

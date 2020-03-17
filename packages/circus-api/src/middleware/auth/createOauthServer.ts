@@ -1,7 +1,7 @@
 import KoaOAuth2Server from './KoaOAuth2Server';
 import nodepass from 'node-php-password';
 import { determineUserAccessInfo } from '../../privilegeUtils';
-import { Models } from '../../db/createModels';
+import { Models } from '../../interface';
 import koa from 'koa';
 
 const debug = false;

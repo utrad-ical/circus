@@ -6,6 +6,7 @@ import semver from 'semver';
 import * as path from 'path';
 import { isDicomUid } from '@utrad-ical/circus-lib/lib/validation';
 import { NoDepFunctionService } from '@utrad-ical/circus-lib';
+import { Validator } from './interface';
 
 const loadSchemaFiles = async (schemaRoot: string) => {
   // Search all the schema YAML files under the root directory
@@ -55,12 +56,6 @@ const customFormats: {
 const defaultSchemaRoot = path.join(__dirname, 'schemas');
 
 type SchemaConverter = (schema: any, ...params: string[]) => any;
-
-export interface Validator {
-  validate: (schema: any, data: any, mode?: string) => Promise<any>;
-  getSchema: (key: string) => any;
-  filterSchema: (schemaDef: string | object) => any;
-}
 
 /**
  * Creates the validator wrapping AJV instance.

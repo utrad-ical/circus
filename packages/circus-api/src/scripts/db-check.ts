@@ -1,6 +1,6 @@
 import { ValidationError } from 'ajv';
 import { CollectionAccessor } from '../db/createCollectionAccessor';
-import { Models } from '../db/createModels';
+import { Models } from '../interface';
 import Command from './Command';
 
 export const options = () => {

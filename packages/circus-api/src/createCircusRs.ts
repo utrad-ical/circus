@@ -6,11 +6,7 @@ import { DicomFileRepository } from '@utrad-ical/circus-lib/lib/dicom-file-repos
 import koa from 'koa';
 import { VolumeProvider } from '@utrad-ical/circus-rs/src/server/helper/createVolumeProvider';
 import { FunctionService } from '@utrad-ical/circus-lib';
-
-export interface CircusRs {
-  routes: koa.Middleware;
-  volumeProvider: VolumeProvider;
-}
+import { CircusRs } from './interface';
 
 /**
  * Creates a series router.

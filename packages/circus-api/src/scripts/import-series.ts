@@ -1,6 +1,6 @@
 import chalk from 'chalk';
 import * as path from 'path';
-import { DicomImporter } from '../createDicomImporter';
+import { DicomImporter } from '../interface';
 import Command from './Command';
 import directoryIterator from '../utils/directoryIterator';
 

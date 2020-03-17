@@ -1,5 +1,5 @@
 import { createHash } from 'crypto';
-import { Models } from '../db/createModels';
+import { Models } from '../interface';
 import { OAuthClientId } from '../middleware/auth/createOauthServer';
 import Command from './Command';
 

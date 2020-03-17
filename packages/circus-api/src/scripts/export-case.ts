@@ -3,10 +3,10 @@ import chalk from 'chalk';
 import fs from 'fs-extra';
 import path from 'path';
 import stream from 'stream';
-import { Models } from '../db/createModels';
+import { Models } from '../interface';
 import Command from './Command';
 import Storage from '../storage/Storage';
-import { CircusRs } from '../createCircusRs';
+import { CircusRs } from '../interface';
 
 export const help = () => {
   return (

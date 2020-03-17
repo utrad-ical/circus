@@ -1,4 +1,5 @@
-import createValidator, { Validator } from './createValidator';
+import createValidator from './createValidator';
+import { Validator } from './interface';
 import * as path from 'path';
 import { ValidationError } from 'ajv';
 

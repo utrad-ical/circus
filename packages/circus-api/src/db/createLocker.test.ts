@@ -1,7 +1,7 @@
 import { usingMongo } from '../../test/util-mongo';
 import delay from '../utils/delay';
 import createLocker from './createLocker';
-import { DisposableDb } from './connectDb';
+import { DisposableDb } from '../interface';
 
 let db: DisposableDb, locker: ReturnType<typeof createLocker>;
 

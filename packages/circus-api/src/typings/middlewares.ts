@@ -1,10 +1,9 @@
 import koa, { ParameterizedContext } from 'koa';
 import mongo from 'mongodb';
-import { Validator } from '../createValidator';
-import { Models } from '../db/createModels';
+import { Validator, DicomImporter } from '../interface';
+import { Models } from '../interface';
 import Logger from '@utrad-ical/circus-lib/lib/logger/Logger';
 import { VolumeProvider } from '@utrad-ical/circus-rs/src/server/helper/createVolumeProvider';
-import { DicomImporter } from '../createDicomImporter';
 import Storage from '../storage/Storage';
 import { UserPrivilegeInfo } from '../privilegeUtils';
 import { CsCore } from '@utrad-ical/circus-cs-core';

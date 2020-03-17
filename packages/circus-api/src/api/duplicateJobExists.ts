@@ -1,4 +1,4 @@
-import { Models } from '../db/createModels';
+import { Models } from '../interface';
 import { SeriesEntry } from '../typings/circus';
 
 interface PluginJobRequest {

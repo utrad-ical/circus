@@ -1,6 +1,6 @@
 import Command from './Command';
 import fs from 'fs-extra';
-import { DicomTagReader } from '../utils/createDicomTagReader';
+import { DicomTagReader } from '../interface';
 
 export const help = () => {
   return (

@@ -3,7 +3,7 @@ import path from 'path';
 import createTestLogger from '../../test/util-logger';
 import { setUpMongoFixture, usingModels } from '../../test/util-mongo';
 import createDicomImporter from '../createDicomImporter';
-import { Models } from '../db/createModels';
+import { Models } from '../interface';
 import { CommandFunc } from './Command';
 import { command } from './import-series';
 import createDicomTagReader from '../utils/createDicomTagReader';

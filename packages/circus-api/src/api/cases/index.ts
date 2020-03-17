@@ -7,7 +7,7 @@ import { packAsMhd } from '../../case/packAsMhd';
 import checkFilter from '../../utils/checkFilter';
 import deepRenameKeys from 'deep-rename-keys';
 import { RouteMiddleware, CircusContext } from '../../typings/middlewares';
-import { Models } from '../../db/createModels';
+import { Models } from '../../interface';
 import { SeriesEntry } from '../../typings/circus';
 
 const maskPatientInfo = (ctx: CircusContext) => {

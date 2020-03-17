@@ -1,8 +1,8 @@
 import { MemoryDicomFileRepository } from '@utrad-ical/circus-lib/lib/dicom-file-repository';
 import * as path from 'path';
 import { setUpMongoFixture, usingModels } from '../test/util-mongo';
-import { Models } from './db/createModels';
-import createDicomImporter, { DicomImporter } from './createDicomImporter';
+import createDicomImporter from './createDicomImporter';
+import { DicomImporter, Models } from './interface';
 import createTestLogger from '../test/util-logger';
 import createDicomTagReader from './utils/createDicomTagReader';
 import fs from 'fs-extra';

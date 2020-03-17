@@ -3,9 +3,10 @@ import * as fs from 'fs-extra';
 import { safeLoad as yaml } from 'js-yaml';
 import mongo from 'mongodb';
 import * as path from 'path';
-import createValidator, { Validator } from '../src/createValidator';
-import connectDb, { DisposableDb } from '../src/db/connectDb';
-import createModels, { Models } from '../src/db/createModels';
+import createValidator from '../src/createValidator';
+import { DisposableDb, Validator, Models } from '../src/interface';
+import connectDb from '../src/db/connectDb';
+import createModels from '../src/db/createModels';
 
 /**
  * Connects to a test MongoDB instance.

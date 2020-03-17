@@ -1,5 +1,5 @@
 import MultiRange from 'multi-integer-range';
-import { Models } from './db/createModels';
+import { Models } from './interface';
 import { SeriesEntry } from './typings/circus';
 import { isValidPartialVolumeDescriptor } from '@utrad-ical/circus-lib/lib/PartialVolumeDescriptor';
 

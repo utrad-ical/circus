@@ -2,16 +2,11 @@ import { FunctionService } from '@utrad-ical/circus-lib';
 import { DicomFileRepository } from '@utrad-ical/circus-lib/lib/dicom-file-repository';
 import Logger from '@utrad-ical/circus-rs/src/server/helper/logger/Logger';
 import { multirange } from 'multi-integer-range';
-import { Models } from './db/createModels';
-import { DicomTagReader } from './utils/createDicomTagReader';
+import { DicomImporter, Models, DicomTagReader } from './interface';
 
 interface Options {
   dockerImage?: string;
   workDir?: string;
-}
-
-export interface DicomImporter {
-  importDicom: (fileContent: ArrayBuffer, domain: string) => Promise<void>;
 }
 
 const createDicomImporter: FunctionService<

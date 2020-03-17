@@ -1,5 +1,5 @@
 import status from 'http-status';
-import { Models } from '../../db/createModels';
+import { Models } from '../../interface';
 import { CircusMiddeware } from '../../typings/middlewares';
 
 const wrap = (data: any) => {

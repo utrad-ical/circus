@@ -1,4 +1,4 @@
-import { Validator } from '../createValidator';
+import { Validator } from '../interface';
 import koa from 'koa';
 
 interface Options {

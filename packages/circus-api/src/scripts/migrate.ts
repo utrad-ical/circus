@@ -1,7 +1,6 @@
 import * as path from 'path';
 import chalk from 'chalk';
-import { DisposableDb } from '../db/connectDb';
-import { Models } from '../db/createModels';
+import { DisposableDb, Models } from '../interface';
 import scanMigrationFiles from '../utils/scanMigrationFiles';
 import Command from './Command';
 

@@ -1,5 +1,6 @@
 import mongo from 'mongodb';
 import { FunctionService } from '@utrad-ical/circus-lib';
+import { DisposableDb } from '../interface';
 
 /**
  * @deprecated
@@ -9,11 +10,6 @@ export const connectProdDb = async () => {
   if (!mongoUrl) throw new Error('You must specify the MongoDB connection URL');
   return connectDb({ mongoUrl }, {});
 };
-
-/**
- * mongo.Db instance with `dispose()` method attached for disconnecting.
- */
-export type DisposableDb = mongo.Db & { dispose: () => Promise<void> };
 
 /**
  * Establishes a new connection to a MongoDB server.

@@ -1,6 +1,6 @@
 import status from 'http-status';
 import mongo from 'mongodb';
-import { Validator } from '../createValidator';
+import { Validator } from '../interface';
 
 type CursorOptions = {
   sort?: object;

@@ -1,5 +1,5 @@
 import { usingModels } from '../../test/util-mongo';
-import { Models } from '../db/createModels';
+import { Models } from '../interface';
 import { TaskExecutor } from './task';
 
 let models: Models;

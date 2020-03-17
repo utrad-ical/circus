@@ -1,5 +1,5 @@
 import { setUpMongoFixture, usingModels } from '../test/util-mongo';
-import { Models } from './db/createModels';
+import { Models } from './interface';
 import {
   determineUserAccessInfo,
   fetchAccessibleSeries,

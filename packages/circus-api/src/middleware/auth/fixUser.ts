@@ -1,6 +1,6 @@
 import { determineUserAccessInfo } from '../../privilegeUtils';
 import { Middleware } from 'koa';
-import { Models } from '../../db/createModels';
+import { Models } from '../../interface';
 
 /**
  * This middleware is used in place of createOauthServer when "fix-user" mode

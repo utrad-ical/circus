@@ -1,26 +1,8 @@
-import createCollectionAccessor, {
-  CollectionAccessor
-} from './createCollectionAccessor';
+import createCollectionAccessor from './createCollectionAccessor';
 import mongo from 'mongodb';
-import { Validator } from '../createValidator';
+import { Validator } from '../interface';
 import { FunctionService } from '@utrad-ical/circus-lib';
-
-interface ModelEntries {
-  user: any;
-  group: any;
-  project: any;
-  series: any;
-  clinicalCase: any;
-  serverParam: any;
-  token: any;
-  task: any;
-  plugin: any;
-  pluginJob: any;
-}
-
-export type Models = {
-  [key in keyof ModelEntries]: CollectionAccessor<ModelEntries[key]>;
-};
+import { Models, ModelEntries } from '../interface';
 
 const createModels: FunctionService<
   Models,

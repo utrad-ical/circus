@@ -2,7 +2,7 @@ import * as randomstring from 'randomstring';
 import { PassThrough } from 'stream';
 import status from 'http-status';
 import delay from '../utils/delay';
-import { Models } from '../db/createModels';
+import { Models } from '../interface';
 import koa from 'koa';
 
 export default class TaskReporter {

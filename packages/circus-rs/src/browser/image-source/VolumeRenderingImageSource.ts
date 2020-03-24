@@ -1,99 +1,178 @@
-import DicomVolume from '../../common/DicomVolume';
-import { DicomVolumeMetadata } from './volume-loader/DicomVolumeLoader';
-import ImageSource from './ImageSource';
+import { Vector3, Vector2 } from 'three';
 import Viewer from '../viewer/Viewer';
 import ViewState, { VrViewState, TransferFunction } from '../ViewState';
 import DicomVolumeLoader from './volume-loader/DicomVolumeLoader';
+import VRGLProgram, {
+  Camera
+} from './volume-rendering-image-source/VRGLProgram';
+import RawData from '../../common/RawData';
+import { LabelLoader } from './volume-loader/interface';
+import { windowToTransferFunction } from './volume-rendering-image-source/transfer-function-util';
+import MprImageSource from './MprImageSource';
+import { Section, vectorizeSection } from '../../common/geometry/Section';
+import { createOrthogonalMprSection } from '../section-util';
 
-// WebGL shader source (GLSL)
-const vertexShaderSource = require('./volume-rendering-image-source/vertex-shader.vert');
-const fragmentShaderSource = require('./volume-rendering-image-source/fragment-shader.frag');
-
-import { vec3, vec4, mat4 } from 'gl-matrix';
-
-import WebGlContextManager from './volume-rendering-image-source/WebGlContextManager';
-
-import buildTransferFunctionMap from './volume-rendering-image-source/buildTransferFunctionMap';
-
-interface Camera {
-  position: number[];
-  target: number[];
-  up: number[];
-  zoom: number;
+interface SubVolume {
+  offset: [number, number, number];
+  dimension: [number, number, number];
 }
 
-/**
- * Container for a WebGL texture.
- */
-interface VolumeTexture {
-  textureSize: [number, number];
-  sliceGridSize: [number, number];
-  sliceSize: [number, number];
-  texture: WebGLTexture;
+interface VolumeLoader {
+  loadVolume(): Promise<RawData>;
 }
 
-interface VolumeRenderingImageSourceOptions {
-  volumeLoader: DicomVolumeLoader;
-}
+export default class VolumeRenderingImageSource extends MprImageSource {
+  private backCanvas: HTMLCanvasElement;
 
-export default class VolumeRenderingImageSource extends ImageSource {
-  private metadata: DicomVolumeMetadata | undefined;
-  private volume: DicomVolume | undefined;
+  private vrProgram: VRGLProgram;
+  private labelLoader?: LabelLoader;
+  private loadingLabelData: Record<number, Promise<void>> = {};
 
-  private glHandler: WebGlContextManager | undefined;
-  private volumeTexture: VolumeTexture | undefined;
+  // Cache for checking update something.
+  private lastTransferFunction?: TransferFunction;
+  private lastSubVolume?: SubVolume;
+  private lastWidth?: number;
+  private lastHeight?: number;
+  private lastEnableMask?: boolean;
+  private lastHighlightedLabelIndex?: number;
 
-  private loadSequence: Promise<void>;
+  /**
+   * For debugging
+   */
+  public static readyBeforeVolumeLoaded: boolean = false;
+  public static defaultDebugMode: number = 0;
+  public static backCanvasElement?: HTMLDivElement;
 
-  // viewState cache for checking update something on WegGL
-  private transferFunction: TransferFunction | undefined;
-  private subVolume: any;
-
-  private transferFunctionTexture: WebGLTexture | undefined;
-
-  private baseScale: number = 1;
-
-  constructor({ volumeLoader }: VolumeRenderingImageSourceOptions) {
+  constructor({
+    volumeLoader,
+    maskLoader,
+    labelLoader
+  }: {
+    volumeLoader: DicomVolumeLoader;
+    maskLoader?: VolumeLoader;
+    labelLoader?: LabelLoader;
+  }) {
     super();
-    this.loadSequence = (async () => {
-      const metadata = await volumeLoader.loadMeta();
-      this.metadata = metadata;
-      const [mmVolumeWidth, mmVolumeHeight] = this.metadata.voxelCount;
-      this.baseScale = 2.0 / Math.max(mmVolumeWidth, mmVolumeHeight);
-      const volume = await volumeLoader.loadVolume();
-      this.volume = volume;
-    })();
+
+    const backCanvas = this.initializeBackCanvas();
+    const glContext = this.getWebGLContext(backCanvas);
+
+    this.backCanvas = backCanvas;
+    this.vrProgram = new VRGLProgram(glContext);
+    this.loadSequence = this.load({ volumeLoader, maskLoader });
+    this.labelLoader = labelLoader;
   }
 
-  public ready(): Promise<void> {
-    return this.loadSequence;
+  /**
+   * @todo Implements webglcontextlost/webglcontextrestored
+   */
+  private initializeBackCanvas() {
+    const backCanvas = document.createElement('canvas');
+    backCanvas.width = 1;
+    backCanvas.height = 1;
+
+    // backCanvas.addEventListener('webglcontextlost', _ev => {}, false);
+    // backCanvas.addEventListener('webglcontextrestored', _ev => {}, false);
+
+    // Show the background canvas for debugging
+    if (VolumeRenderingImageSource.backCanvasElement) {
+      VolumeRenderingImageSource.backCanvasElement.insertBefore(
+        backCanvas,
+        VolumeRenderingImageSource.backCanvasElement.firstChild
+      );
+    }
+
+    return backCanvas;
+  }
+
+  private getWebGLContext(
+    backCanvas: HTMLCanvasElement
+  ): WebGLRenderingContext {
+    const gl =
+      backCanvas.getContext('webgl') ||
+      backCanvas.getContext('experimental-webgl');
+    if (!gl) throw new Error('Failed to get WegGL context');
+    return gl as WebGLRenderingContext;
+  }
+
+  private async load({
+    volumeLoader,
+    maskLoader
+  }: {
+    volumeLoader: DicomVolumeLoader;
+    maskLoader?: VolumeLoader;
+  }) {
+    const metadata = await volumeLoader.loadMeta();
+    this.metadata = metadata;
+
+    // Set world coordinates length 1.0 as in mm
+    const { voxelCount, voxelSize } = metadata;
+    const mmDimension: [number, number, number] = [
+      voxelCount[0] * voxelSize[0],
+      voxelCount[1] * voxelSize[1],
+      voxelCount[2] * voxelSize[2]
+    ];
+    const maxSideLength = Math.max(...mmDimension);
+    this.vrProgram.setWorldCoordsBaseLength(maxSideLength);
+
+    // Load volume data and transfer as texture
+    const loadingVolumes = Promise.all([
+      volumeLoader.loadVolume() as Promise<RawData>,
+      maskLoader ? maskLoader.loadVolume() : Promise.resolve(undefined)
+    ]).then(([volume, mask]) => this.vrProgram.setVolume(volume!, mask));
+
+    // For debugging
+    if (VolumeRenderingImageSource.readyBeforeVolumeLoaded) return;
+
+    return loadingVolumes;
   }
 
   public initialState(viewer: Viewer): ViewState {
-    const meta = this.metadata!;
-    const [dx, dy, dz] = meta.voxelCount;
+    if (!this.metadata) throw new Error('Metadata now loaded');
+    const metadata = this.metadata;
+    const window = metadata.dicomWindow
+      ? { ...metadata.dicomWindow }
+      : metadata.estimatedWindow
+      ? { ...metadata.estimatedWindow }
+      : { level: 50, width: 100 };
+
+    // Create initial section as axial section watched from head to toe.
+    const section = createOrthogonalMprSection(
+      viewer.getResolution(),
+      this.mmDim(),
+      'axial',
+      undefined,
+      true
+    );
 
     const state: VrViewState = {
       type: 'vr',
-      background: [0.0, 0.0, 0.0, 1.0],
-      zoom: 2.0,
-      horizontal: 0,
-      vertical: 0,
-      // Target is optional and is used only in special cases
-      // target: [dx * 0.5 * vw, dy * 0.5 * vh, dz * 0.5 * vd],
-      subVolume: {
-        offset: [0, 0, 0],
-        dimension: [dx, dy, dz]
-      },
-      transferFunction: [
-        { position: 0, color: '#000000ff' },
-        { position: 1, color: '#ffffffff' }
-      ],
-      quality: 1.0,
-      interpolationMode: 'trilinear'
+      section,
+      interpolationMode: 'trilinear',
+      background: this.defaultBackground(),
+      subVolume: this.defaultSubVolume(),
+      transferFunction: windowToTransferFunction(window),
+      rayIntensity: 1.0,
+      quality: 2.0
     };
 
     return state;
+  }
+
+  /**
+   * Create whole of volume as initial subVolue.
+   */
+  private defaultSubVolume() {
+    const { voxelCount } = this.metadata!;
+    const subVolume: SubVolume = {
+      offset: [0, 0, 0] as [number, number, number],
+      dimension: voxelCount
+    };
+    return subVolume;
+  }
+
+  private defaultBackground(): [number, number, number, number] {
+    return [0, 0, 0, 0xff];
   }
 
   /**
@@ -103,669 +182,174 @@ export default class VolumeRenderingImageSource extends ImageSource {
    * @returns {Promise<ImageData>}
    */
   public async draw(viewer: Viewer, viewState: ViewState): Promise<ImageData> {
-    const [viewportWidth, viewportHeight] = viewer.getResolution();
-    const volume = this.volume!;
-    const [vw, vh, vd] = volume.getVoxelSize();
+    const { voxelSize } = this.metadata!;
 
     if (viewState.type !== 'vr') throw new Error('Unsupported view state.');
 
-    if (!this.glHandler) {
-      this.glHandler = new WebGlContextManager({
-        width: viewportWidth,
-        height: viewportHeight
-      });
-      this.glSetup();
+    const {
+      section,
+      interpolationMode = 'nearestNeighbor',
+      highlightedLabelIndex = -1,
+      rayIntensity = 1.0,
+      quality = 2.0,
+      subVolume = this.defaultSubVolume(),
+      background = this.defaultBackground()
+    } = viewState;
+
+    // At the first label highlighting, load and create the texture.
+    // Since this process involves asynchronous processing,
+    // it must be performed at the beginning of drawing.
+    if (this.labelLoader && -1 < highlightedLabelIndex) {
+      if (!(highlightedLabelIndex in this.loadingLabelData)) {
+        this.loadingLabelData[highlightedLabelIndex] = this.labelLoader
+          .load(highlightedLabelIndex)
+          .then(label => {
+            label &&
+              this.vrProgram.appendLabelData(highlightedLabelIndex, label);
+          });
+      }
+      await this.loadingLabelData[highlightedLabelIndex];
     }
 
-    const glh = this.glHandler;
-    const gl = glh.gl;
-
-    /* Prepare boundary box vertexes */
-    if (this.subVolume !== viewState.subVolume) {
-      glh.registerBuffer(
-        'VolumeVertexPositionBuffer',
-        gl.ARRAY_BUFFER,
-        gl.FLOAT,
-        3
-      );
-      glh.registerBuffer(
-        'VolumeVertexPositionIndex',
-        gl.ELEMENT_ARRAY_BUFFER,
-        gl.UNSIGNED_SHORT,
-        1
-      );
-      glh.registerBuffer(
-        'VolumeVertexColorBuffer',
-        gl.ARRAY_BUFFER,
-        gl.FLOAT,
-        4
-      );
-
-      const subVolume = viewState.subVolume || {
-        offset: [0, 0, 0],
-        dimension: volume.getDimension()
-      };
-      this.updateVolumeBoxBuffer(subVolume);
-
-      gl.uniform3fv(glh.uniformIndex['uVolumeOffset'], subVolume.offset);
-      gl.uniform3fv(glh.uniformIndex['uVolumeDimension'], subVolume.dimension);
-      gl.uniform3fv(glh.uniformIndex['uVoxelSizeInverse'], [
-        1.0 / vw,
-        1.0 / vh,
-        1.0 / vd
-      ]);
-
-      this.subVolume = subVolume;
+    // set debug
+    if (typeof viewState.debugMode !== 'undefined') {
+      this.vrProgram.setDebugMode(viewState.debugMode);
+    } else if (VolumeRenderingImageSource.defaultDebugMode) {
+      this.vrProgram.setDebugMode(VolumeRenderingImageSource.defaultDebugMode);
     }
 
-    // background setup
-    const [r, g, b, a] = viewState.background as number[];
-    gl.clearColor(r, g, b, a);
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-    gl.uniform4fv(glh.uniformIndex['uBackground'], [r, b, g, a]);
-
-    // interpolation mode
-    switch (viewState.interpolationMode) {
-      case 'trilinear':
-        gl.uniform1i(glh.uniformIndex['uInterpolationMode'], 1);
-        break;
-      case 'vr-mask-custom':
-        gl.uniform1i(glh.uniformIndex['uInterpolationMode'], 2);
-        break;
-      case 'nearestNeighbor':
-      default:
-        gl.uniform1i(glh.uniformIndex['uInterpolationMode'], 0);
-        break;
-    }
-
-    /* Prepare camera */
-    const camera = this.createCamera(viewState);
-
-    /* Ray configration */
-    const ray = vec3.create();
-    vec3.subtract(ray, camera.target, camera.position);
-    vec3.normalize(ray, ray);
-    gl.uniform3fv(glh.uniformIndex['uRayDirection'], ray);
-
-    const uRayStepLength =
-      2.0 / (viewState.zoom || 2.0) / (viewState.quality || 1.0);
-
-    const uMaxSteps = Math.ceil(
-      vec3.length([
-        this.subVolume.dimension[0] * vw,
-        this.subVolume.dimension[1] * vh,
-        this.subVolume.dimension[2] * vd
-      ]) / uRayStepLength
-    );
-    const uRayIntensityCoef = viewState.rayIntensityCoef || 0.65; // [0; 1]
-    gl.uniform1i(glh.uniformIndex['uMaxSteps'], uMaxSteps);
-    gl.uniform1f(glh.uniformIndex['uRayStepLength'], uRayStepLength);
-    gl.uniform1f(glh.uniformIndex['uRayIntensityCoef'], uRayIntensityCoef);
-
-    /* Projection matrix */
-    const near = 0.001;
-    const far = 100; // far 1.5
-
-    const projectionMatrix = mat4.create();
-    mat4.ortho(projectionMatrix, -1.0, 1.0, -1.0, 1.0, near, far);
-
-    gl.uniformMatrix4fv(glh.uniformIndex['uPMatrix'], false, projectionMatrix);
-
-    /* Prepare texture */
-
-    // transfer function texture
+    // set back-canvas-size
+    const [viewportWidth, viewportHeight] = viewer.getResolution();
     if (
-      viewState.transferFunction !== this.transferFunction &&
+      this.lastWidth !== viewportWidth ||
+      this.lastHeight !== viewportHeight
+    ) {
+      this.setCanvasSize(viewportWidth, viewportHeight);
+      this.lastWidth = viewportWidth;
+      this.lastHeight = viewportHeight;
+    }
+
+    // Boundary box vertexes
+    if (this.lastSubVolume !== subVolume) {
+      this.vrProgram.setDrawingBoundary({
+        offset: subVolume.offset,
+        dimension: subVolume.dimension,
+        voxelSize
+      });
+      this.lastSubVolume = subVolume;
+    }
+
+    // Transfer function
+    if (
+      this.lastTransferFunction !== viewState.transferFunction &&
       viewState.transferFunction
     ) {
-      this.updateTransferFunction(viewState.transferFunction);
-      this.transferFunction = viewState.transferFunction;
+      this.vrProgram.setTransferFunction(viewState.transferFunction);
+      this.lastTransferFunction = viewState.transferFunction;
     }
 
-    gl.uniform1i(glh.uniformIndex['uTransferFunctionSampler'], 0);
-    gl.activeTexture(gl.TEXTURE0);
-    gl.bindTexture(gl.TEXTURE_2D, this.transferFunctionTexture!);
+    // Vessel mask
+    if (this.lastEnableMask !== viewState.enableMask) {
+      this.vrProgram.toggleMask(!!viewState.enableMask);
+      this.lastEnableMask = viewState.enableMask;
+    }
 
-    // volume texture
-    const { textureSize, sliceGridSize, texture } = this.volumeTexture!;
-    gl.uniform1i(glh.uniformIndex['uVolumeTextureSampler'], 1);
-    gl.activeTexture(gl.TEXTURE1);
-    gl.uniform2fv(glh.uniformIndex['uTextureSize'], textureSize);
-    gl.uniform2fv(glh.uniformIndex['uSliceGridSize'], sliceGridSize);
-    // gl.uniform2fv( glh.uniformIndex["uSliceSize"], sliceSize );
-    gl.bindTexture(gl.TEXTURE_2D, texture);
+    // Highlight label
+    if (this.lastHighlightedLabelIndex !== highlightedLabelIndex) {
+      this.vrProgram.setHighlightLabel(highlightedLabelIndex);
+    }
 
-    this.glDrawVolumeBox(camera, viewState);
+    // Background
+    this.vrProgram.setBackground(background);
 
-    /**
-     * Resolve image data
-     */
+    // Interporation
+    this.vrProgram.setInterporationMode(interpolationMode);
 
-    const pixels = new Uint8Array(
-      gl.drawingBufferWidth * gl.drawingBufferHeight * 4
-    );
-    gl.readPixels(
-      0,
-      0,
-      gl.drawingBufferWidth,
-      gl.drawingBufferHeight,
-      gl.RGBA,
-      gl.UNSIGNED_BYTE,
-      pixels
-    );
+    // Camera
+    const camera = this.createCamera(section, subVolume);
+    this.vrProgram.setCamera(camera);
 
-    const imageData = new ImageData(
-      Uint8ClampedArray.from(pixels),
-      gl.drawingBufferWidth,
-      gl.drawingBufferHeight
-    );
+    // Ray configuration
+    this.configureRay(camera, { quality, rayIntensity });
 
-    return imageData;
+    this.vrProgram.run();
+
+    return this.vrProgram.resolveImageData();
   }
 
-  private createCamera(viewState: VrViewState): Camera {
-    const [
-      mmVolumeWidth,
-      mmVolumeHeight,
-      mmVolumeDepth
-    ] = this.volume!.getMmDimension();
-
-    const camera: Camera = {
-      // These are using homogenous coordinates (Vector4);
-      // the fourth elements are important
-      position: [
-        mmVolumeWidth * 0.5,
-        mmVolumeHeight * 0.5,
-        // Make this far enough
-        mmVolumeDepth * 0.5 +
-          Math.max(mmVolumeWidth, mmVolumeHeight, mmVolumeDepth) * 100,
-        1
-      ],
-      target: [
-        mmVolumeWidth * 0.5,
-        mmVolumeHeight * 0.5,
-        mmVolumeDepth * 0.5,
-        1
-      ],
-      up: [0, 1, 0, 0],
-
-      zoom: 1.0
-    };
-
-    const rotateCamera = mat4.create();
-
-    // rotate camera
-    mat4.translate(rotateCamera, rotateCamera, [
-      camera.target[0],
-      camera.target[1],
-      camera.target[2]
-    ]);
-    if (Math.floor(viewState.horizontal) !== 0) {
-      const horizontalRotateAxis = camera.up;
-      mat4.rotate(
-        rotateCamera,
-        rotateCamera,
-        (Math.PI / 180.0) * viewState.horizontal,
-        horizontalRotateAxis
-      );
-    }
-    if (Math.floor(viewState.vertical) !== 0) {
-      const eyeLine = vec3.create();
-      vec3.subtract(eyeLine, camera.target, camera.position);
-      const verticalRotateAxis = vec3.create();
-      vec3.cross(verticalRotateAxis, eyeLine, camera.up);
-      mat4.rotate(
-        rotateCamera,
-        rotateCamera,
-        (Math.PI / 180.0) * viewState.vertical,
-        verticalRotateAxis
-      );
-    }
-    mat4.translate(rotateCamera, rotateCamera, [
-      -camera.target[0],
-      -camera.target[1],
-      -camera.target[2]
-    ]);
-    vec4.transformMat4(camera.position, camera.position, rotateCamera);
-
-    // zoom
-    camera.zoom = viewState.zoom || 1.0;
-
-    // ---------------------------
-    // - prepare default camera
-    // ---------------------------
-    const baseMatrix = this.baseMatrix();
-    vec4.transformMat4(camera.position, camera.position, baseMatrix);
-    vec4.transformMat4(camera.target, camera.target, baseMatrix);
-
-    // --------------------
-
-    return camera;
+  private setCanvasSize(width: number, height: number) {
+    this.backCanvas.width = width;
+    this.backCanvas.height = height;
+    this.vrProgram.setViewport(0, 0, width, height);
   }
 
-  private baseMatrix(m?: any): any {
-    m = m || mat4.create();
+  private createCamera(section: Section, subVolume: SubVolume): Camera {
+    const { origin, xAxis, yAxis } = vectorizeSection(section);
+    const offset = new Vector3().fromArray(subVolume.offset);
+    const dim = new Vector3().fromArray(subVolume.dimension);
 
-    // 2. scale to world coords
-    mat4.scale(m, m, [this.baseScale, this.baseScale, this.baseScale]);
+    // The camera target is The center of the section.
+    const target = origin
+      .clone()
+      .addScaledVector(xAxis, 0.5)
+      .addScaledVector(yAxis, 0.5);
 
-    // 1. move to center(0,0,0) @ model coords system
-    const [
-      mmVolumeWidth,
-      mmVolumeHeight,
-      mmVolumeDepth
-    ] = this.volume!.getMmDimension();
-    mat4.translate(m, m, [
-      -mmVolumeWidth / 2,
-      -mmVolumeHeight / 2,
-      -mmVolumeDepth / 2
-    ]);
+    // Ensure the camera position is outside the (sub)volume.
+    // And the position is preferably close to the volume to reduce the cost in the fragment shader.
+    const distancesToEachVertex = [
+      offset,
+      new Vector3().addVectors(offset, new Vector3(dim.x, 0, 0)),
+      new Vector3().addVectors(offset, new Vector3(0, dim.y, 0)),
+      new Vector3().addVectors(offset, new Vector3(0, 0, dim.z)),
+      new Vector3().addVectors(offset, new Vector3(dim.x, dim.y, 0)),
+      new Vector3().addVectors(offset, new Vector3(0, dim.y, dim.z)),
+      new Vector3().addVectors(offset, new Vector3(dim.x, 0, dim.z)),
+      new Vector3().addVectors(offset, dim)
+    ].map(v => v.distanceTo(target));
 
-    return m;
-  }
-
-  /**
-   * Prepare a color mapping texture from the given transfer function
-   * and send it to GPU. Each texel in the texture corresponds to
-   * each intensity value in the original image represented as a Uint16 value.
-   * The texture size is 256 x 256 x 4bpp (fixed) or 240KiB.
-   */
-  protected updateTransferFunction(transferFunction: TransferFunction): void {
-    const glh = this.glHandler!;
-    const gl = glh.gl;
-
-    if (!this.transferFunctionTexture) {
-      const texture = gl.createTexture();
-      if (!texture)
-        throw new Error('Failed to craete transfer function texture');
-      this.transferFunctionTexture = texture;
-    }
-
-    gl.bindTexture(gl.TEXTURE_2D, this.transferFunctionTexture);
-
-    const buffer = buildTransferFunctionMap(transferFunction, 65536);
-    gl.texImage2D(
-      gl.TEXTURE_2D,
-      0,
-      gl.RGBA,
-      256,
-      256,
-      0,
-      gl.RGBA,
-      gl.UNSIGNED_BYTE,
-      buffer
+    // const farEnough = Math.max(...distancesToEachVertex);
+    const farEnough = distancesToEachVertex.reduce(
+      (dist, d) => (dist < d ? d : dist),
+      0
     );
 
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    const eyeLine = new Vector3()
+      .crossVectors(xAxis, yAxis)
+      .normalize()
+      .multiplyScalar(farEnough);
 
-    // unbind texture
-    gl.bindTexture(gl.TEXTURE_2D, null);
+    const position = new Vector3().addVectors(target, eyeLine);
+
+    const up = yAxis.clone().normalize();
+
+    // Determine camera zoom from viewport diagonal length
+    const [mmOrigX, mmOrigY] = this.mmDim();
+    const origDiagonalLength = new Vector2(mmOrigX, mmOrigY).length();
+    const currentDiagonalLength = new Vector3()
+      .addVectors(xAxis, yAxis)
+      .length();
+
+    const zoom = origDiagonalLength / currentDiagonalLength;
+
+    // Return the camera which is adjusted the coordinate system to gl coodinate system.
+    return { position, target, up, zoom };
   }
 
-  /**
-   * Packs the original volume into a (large) texture and send it to GPU.
-   * Each Z-slice of the volume will be arranged as a tile.
-   * As of WegGL 1.0, there is no straightforward texture format
-   * to store 2-byte integers.
-   * As a workaround, we use gl.LUMINANCE_ALPHA format
-   * which is 16bit per texel. (We absolutely need to disable interpolation!)
-   */
-  public bufferVolumeTexture(
-    gl: WebGLRenderingContext,
-    volume: DicomVolume
-  ): VolumeTexture {
-    const [width, height, depth] = volume.getDimension();
-
-    // Calculates the number of tile rows and columns required to store the
-    // entire volume.
-
-    // Returns ceil(log2(n)).
-    const getMinPower2 = (n: number) => {
-      let m = 0;
-      while (1 << ++m < n);
-      return m;
-    };
-
-    const sliceSize: [number, number] = [
-      1 << getMinPower2(width),
-      1 << getMinPower2(height)
-    ];
-
-    // Calculates the number of tile rows and columns.
-    // https://qiita.com/YVT/items/c695ab4b3cf7faa93885
-    const zpow = getMinPower2(depth);
-    const sliceGridSize: [number, number] = [
-      1 << (Math.floor(zpow / 2) + (zpow % 2)),
-      1 << Math.floor(zpow / 2)
-    ];
-    const getSliceGridIndex = (z: number) => [
-      z % sliceGridSize[0],
-      Math.floor(z / sliceGridSize[0])
-    ];
-
-    // The actual size in texels
-    const textureSize: [number, number] = [
-      sliceSize[0] * sliceGridSize[0],
-      sliceSize[1] * sliceGridSize[1]
-    ];
-
-    const texture = gl.createTexture();
-    if (!texture) throw new Error('Failed to create volume texture');
-
-    gl.bindTexture(gl.TEXTURE_2D, texture);
-
-    const texBuffer = new Uint8Array((textureSize[0] * textureSize[1]) << 1);
-    const volumeRaw = new Uint16Array(volume.data);
-
-    // Copy volume data into the tiled texture
-    for (let z = 0; z < depth; z++) {
-      const gridIndex = getSliceGridIndex(z);
-      const ox = gridIndex[0] * sliceSize[0];
-      const oy = gridIndex[1] * sliceSize[1];
-
-      for (let y = 0; y < height; y++) {
-        const o = (oy + y) * textureSize[0] + ox;
-
-        for (let x = 0; x < width; x++) {
-          const srcOffset = x + (y + z * height) * width;
-          const pixel = volumeRaw[srcOffset];
-
-          const texOffset = (o + x) << 1;
-          texBuffer[texOffset] = pixel & 0xff;
-          texBuffer[texOffset + 1] = pixel >> 8;
-        }
-      }
+  private configureRay(
+    camera: Camera,
+    {
+      quality,
+      rayIntensity
+    }: {
+      quality: number;
+      rayIntensity: number;
     }
+  ) {
+    this.vrProgram.setRay(camera, {
+      voxelSize: this.metadata!.voxelSize!,
 
-    gl.texImage2D(
-      gl.TEXTURE_2D,
-      0,
-      gl.LUMINANCE_ALPHA,
-      textureSize[0],
-      textureSize[1],
-      0,
-      gl.LUMINANCE_ALPHA,
-      gl.UNSIGNED_BYTE,
-      texBuffer
-    );
-
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-
-    gl.bindTexture(gl.TEXTURE_2D, null);
-
-    return { textureSize, sliceGridSize, sliceSize, texture };
-  }
-
-  private glSetup(): void {
-    const glh = this.glHandler!;
-    const gl = glh.gl;
-    const volume = this.volume!;
-
-    glh.registerVertexShader(vertexShaderSource);
-    glh.registerFragmentShader(fragmentShaderSource);
-
-    glh.registerAttr('aVertexPosition');
-    glh.registerAttr('aVertexColor');
-    glh.registerUniform('uMVMatrix');
-    glh.registerUniform('uPMatrix');
-
-    glh.registerUniform('uVoxelSizeInverse');
-    glh.registerUniform('uVolumeDimension');
-    glh.registerUniform('uVolumeOffset');
-
-    glh.registerUniform('uVolumeTextureSampler');
-    glh.registerUniform('uTextureSize');
-    glh.registerUniform('uSliceGridSize');
-
-    glh.registerUniform('uTransferFunctionSampler');
-
-    glh.registerUniform('uRayDirection');
-    glh.registerUniform('uRayStepLength');
-    glh.registerUniform('uRayIntensityCoef');
-    glh.registerUniform('uMaxSteps');
-
-    glh.registerUniform('uBackground');
-    glh.registerUniform('uInterpolationMode');
-
-    glh.setupShaders();
-
-    this.volumeTexture = this.bufferVolumeTexture(glh.gl, volume);
-
-    gl.enable(gl.DEPTH_TEST);
-  }
-
-  private updateVolumeBoxBuffer({
-    dimension,
-    offset
-  }: {
-    dimension: number[];
-    offset: number[];
-  }): void {
-    // calculated in world-coords
-
-    const glh = this.glHandler!;
-    const gl = glh.gl;
-
-    const [vw, vh, vd] = this.volume!.getVoxelSize();
-    const [ox, oy, oz] = [offset[0] * vw, offset[1] * vh, offset[2] * vd];
-    const [w, h, d] = [dimension[0] * vw, dimension[1] * vh, dimension[2] * vd];
-
-    //
-    //             1.0 y
-    //              ^  -1.0
-    //              | / z
-    //              |/       x
-    // -1.0 -----------------> +1.0
-    //            / |
-    //      +1.0 /  |
-    //           -1.0
-    //
-    //         [7]------[6]
-    //        / |      / |
-    //      [3]------[2] |
-    //       |  |     |  |
-    //       | [4]----|-[5]
-    //       |/       |/
-    //      [0]------[1]
-    //
-
-    // prettier-ignore
-    const volumeVertexPosition = [
-      // Front face
-      ox, oy, oz + d, // v0
-      ox + w, oy, oz + d, // v1
-      ox + w, oy + h, oz + d, // v2
-      ox, oy + h, oz + d, // v3
-      // Back face
-      ox, oy, oz, // v4
-      ox + w, oy, oz, // v5
-      ox + w, oy + h, oz, // v6
-      ox, oy + h, oz, // v7
-      // Top face
-      ox + w, oy + h, oz + d, // v2
-      ox, oy + h, oz + d, // v3
-      ox, oy + h, oz, // v7
-      ox + w, oy + h, oz, // v6
-      // Bottom face
-      ox, oy, oz + d, // v0
-      ox + w, oy, oz + d, // v1
-      ox + w, oy, oz, // v5
-      ox, oy, oz, // v4
-      // Right face
-      ox + w, oy, oz + d, // v1
-      ox + w, oy + h, oz + d, // v2
-      ox + w, oy + h, oz, // v6
-      ox + w, oy, oz, // v5
-      // Left face
-      ox, oy, oz + d, // v0
-      ox, oy + h, oz + d, // v3
-      ox, oy + h, oz, // v7
-      ox, oy, oz // v4
-    ];
-    glh.bufferData(
-      'VolumeVertexPositionBuffer',
-      new Float32Array(volumeVertexPosition),
-      gl.STATIC_DRAW
-    );
-
-    // Vertex index buffer array
-    // prettier-ignore
-    const volumeVertexIndices = [
-      0, 1, 2, 0, 2, 3, // Front face
-      4, 5, 6, 4, 6, 7, // Back face
-      8, 9, 10, 8, 10, 11, // Top face
-      12, 13, 14, 12, 14, 15, // Bottom face
-      16, 17, 18, 16, 18, 19, // Right face
-      20, 21, 22, 20, 22, 23 // Left face
-    ];
-    glh.bufferData(
-      'VolumeVertexPositionIndex',
-      new Uint16Array(volumeVertexIndices),
-      gl.STATIC_DRAW
-    );
-
-    // Vertex color array (for debugging purpose)
-    const colors = [
-      [1.0, 0.0, 0.0, 1.0], // Front face ... RED
-      [1.0, 1.0, 0.0, 1.0], // Back face  ... YELLOW
-      [0.0, 1.0, 0.0, 1.0], // Top face   ... GREEN
-      [0.0, 0.5, 0.5, 1.0], // Bottom face .. CYAN
-      [1.0, 0.0, 1.0, 1.0], // Right face ... PURPLE
-      [0.0, 0.0, 1.0, 1.0] // Left face  ... BLUE
-    ];
-    let volumeVertexColors: number[] = [];
-    for (let i in colors) {
-      let color = colors[i];
-      for (let j = 0; j < 4; j++) {
-        volumeVertexColors = volumeVertexColors.concat(color);
-      }
-    }
-    glh.bufferData(
-      'VolumeVertexColorBuffer',
-      new Float32Array(volumeVertexColors),
-      gl.STATIC_DRAW
-    );
-  }
-
-  private glDrawVolumeBox(camera: Camera, viewState: VrViewState): void {
-    const glh = this.glHandler!;
-    const gl = glh.gl;
-    const volume = this.volume!;
-    const baseScale = this.baseScale!;
-
-    const [
-      mmVolumeWidth,
-      mmVolumeHeight,
-      mmVolumeDepth
-    ] = volume.getMmDimension();
-
-    // Prepare model matrix
-    const modelMatrix = mat4.create();
-    mat4.scale(modelMatrix, modelMatrix, [
-      baseScale * camera.zoom,
-      baseScale * camera.zoom,
-      baseScale * camera.zoom
-    ]);
-
-    // Place the box representing the (sub)volume at the target
-    let target = vec3.create() as any;
-    if (viewState.target) {
-      target.set([...viewState.target]);
-    } else if (viewState.subVolume) {
-      const [w, h, d] = volume.getVoxelSize();
-      target.set([
-        (viewState.subVolume.offset[0] +
-          viewState.subVolume.dimension[0] * 0.5) *
-          w,
-        (viewState.subVolume.offset[1] +
-          viewState.subVolume.dimension[1] * 0.5) *
-          h,
-        (viewState.subVolume.offset[2] +
-          viewState.subVolume.dimension[2] * 0.5) *
-          d
-      ]);
-    } else {
-      target.set([
-        mmVolumeWidth * 0.5,
-        mmVolumeHeight * 0.5,
-        mmVolumeDepth * 0.5
-      ]);
-    }
-    vec3.scale(target, target, -1);
-    mat4.translate(modelMatrix, modelMatrix, target);
-
-    // Prepare view matrix
-    const viewMatrix = mat4.create();
-
-    try {
-      mat4.lookAt(viewMatrix, camera.position, camera.target, camera.up);
-    } catch (e) {
-      mat4.identity(viewMatrix);
-    }
-
-    // Model view
-    const modelViewMatrix = mat4.create();
-    mat4.multiply(modelViewMatrix, viewMatrix, modelMatrix);
-    gl.uniformMatrix4fv(glh.uniformIndex['uMVMatrix'], false, modelViewMatrix);
-
-    // Bind vertex and color buffers
-    glh.bindBufferToAttr('VolumeVertexPositionBuffer', 'aVertexPosition');
-    glh.bindBufferToAttr('VolumeVertexColorBuffer', 'aVertexColor');
-
-    // Draw
-    glh.drawBuffer('VolumeVertexPositionIndex', gl.TRIANGLES);
+      intensity: rayIntensity,
+      quality
+    });
   }
 }
-
-/*
-function bufferVolumeTextureDebugger(
-  textureSize,
-  texBuffer,
-  ox = 0,
-  oy = 0,
-  sliceSize = [512, 512]
-): void {
-  const backCanvas: HTMLCanvasElement = document.createElement('canvas');
-  [backCanvas.width, backCanvas.height] = sliceSize;
-  backCanvas.style.border = '3px solid #f00';
-  const wrapper: HTMLElement | null = document.querySelector('#back-canvas');
-  if (wrapper) wrapper.insertBefore(backCanvas, wrapper.firstChild);
-
-  const applyWindow = (width: number, level: number, pixel: number): number => {
-    let value = Math.round((pixel - level + width / 2) * (255 / width));
-    if (value > 255) {
-      value = 255;
-    } else if (value < 0) {
-      value = 0;
-    }
-    return value;
-  };
-
-  const sliceBuf = new Uint8ClampedArray(512 * 512 * 4);
-  for (let yy = 0; yy < 512; yy++) {
-    for (let xx = 0; xx < 512; xx++) {
-      const o = (512 * yy + xx) << 2;
-      const texOffset = ((oy + yy) * textureSize[0] + (ox + xx)) << 1;
-
-      const v = texBuffer[texOffset] + (texBuffer[texOffset + 1] << 8);
-
-      const pixel = applyWindow(600, 300, v);
-
-      sliceBuf[o] = pixel;
-      sliceBuf[o + 1] = pixel;
-      sliceBuf[o + 2] = pixel;
-      sliceBuf[o + 3] = 0xff;
-    }
-  }
-
-  const slice = new ImageData(sliceBuf, 512, 512);
-  const ctx = backCanvas.getContext('2d');
-  if (ctx && slice) ctx.putImageData(slice, 0, 0);
-}
-*/

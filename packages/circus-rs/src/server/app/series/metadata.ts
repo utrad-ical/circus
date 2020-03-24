@@ -34,7 +34,10 @@ export default function metadata(): koa.Middleware {
     ]
   };
 
-  const metadata: koa.Middleware = async (ctx, next) => {
+  const metadata: koa.Middleware = async (
+    ctx: koa.DefaultContext,
+    next: koa.Next
+  ) => {
     const state = ctx.state as SeriesMiddlewareState;
     const { estimateWindow = 'none' } = state.query as MetadataQuery;
     const { images } = state.volumeAccessor;

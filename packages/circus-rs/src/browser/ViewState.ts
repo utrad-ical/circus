@@ -1,81 +1,101 @@
 import { Section } from '../common/geometry';
 import { ViewWindow } from '../common/ViewWindow';
 
-export type InterpolationMode =
-  | 'trilinear'
-  | 'nearestNeighbor'
-  | 'vr-mask-custom';
-
-export interface TransferFunctionEntry {
-  color: string;
-  position: number;
-}
-
-export type TransferFunction = Array<TransferFunctionEntry>;
-
-export interface MprViewState {
-  type: 'mpr';
-  section: Section;
-  window: ViewWindow;
-  interpolationMode?: InterpolationMode;
-}
-
-export interface VrViewState {
-  type: 'vr';
-  interpolationMode?: InterpolationMode;
-
-  /**
-   * Affects global alpha of each voxel.
-   */
-  rayIntensityCoef?: number; // [0.0; 1.0]
-
-  /**
-   * Zoom value.
-   */
-  zoom: number;
-
-  /**
-   * Horizontal rotation of the camera measured in degree.
-   */
-  horizontal: number;
-
-  /**
-   * Vertical rotation of the camera measured in degree.
-   */
-  vertical: number;
-
-  /**
-   * Sub-volume
-   */
-  subVolume?: {
-    offset: [number, number, number];
-    dimension: [number, number, number];
-  };
-
-  transferFunction: TransferFunction;
-
-  /**
-   * Where for the camera to look at.
-   * If omitted, the default is the center of the (sub)volume,
-   * which is the required behavior in almost all cases.
-   */
-  target?: [number, number, number];
-
-  /**
-   * Background fill color for outside of the volume boundary.
-   */
-  background: [number, number, number, number];
-
-  /**
-   * Controls the rendering quality. Higher is better and slower.
-   * The default value is 1.0.
-   */
-  quality?: number;
-}
-
 /**
  * ViewState determines how an ImageSource is displayed on each Viewer.
  */
 type ViewState = MprViewState | VrViewState;
+
+interface SectionDrawingViewState {
+  section: Section;
+  interpolationMode?: InterpolationMode;
+}
+
+export interface MprViewState extends SectionDrawingViewState {
+  type: 'mpr';
+  window: ViewWindow;
+}
+
+export interface VrViewState extends SectionDrawingViewState {
+  type: 'vr';
+
+  /**
+   * Sub-volume
+   */
+  subVolume?: SubVolume;
+
+  /**
+   * Controls the rendering quality. Higher is better and slower.
+   * The default value is 2.0. (Get value 2 times per ray step)
+   */
+  quality?: number;
+
+  /**
+   * Penetration of ray.
+   * As you set higher, refer to deeper voxels.
+   * [0.0; 1.0]
+   */
+  rayIntensity?: number;
+
+  /**
+   * Define color of each voxel value via "transfer function".
+   */
+  transferFunction?: TransferFunction;
+
+  /**
+   * Background fill color(RGBA) for outside of the volume boundary.
+   * Each element range is 0-255.
+   */
+  background?: [number, number, number, number];
+
+  /**
+   * Enable mask (ex. blood vessel extraction).
+   */
+  enableMask?: boolean;
+
+  /**
+   * Highlighted label index from 0. Undefined(or "-1") means disabled.
+   */
+  highlightedLabelIndex?: number;
+
+  /**
+   * For Debugging
+   * 0: disabled
+   * 1: draw only volume box
+   * 2: draw vr and volume box
+   */
+  debugMode?: number;
+}
+
+/**
+ * Supports interporation.
+ * trilinear: multivariate interpolation on a 3-dimensional regular grid.
+ * nearestNeighbor: disable interporation(use nearest neighbor search).
+ */
+export type InterpolationMode = 'trilinear' | 'nearestNeighbor';
+
+/**
+ * Transfer function defines each voxel color.
+ * This is defined as array of TransferFunctionEntry.
+ * "position" of the first item must be 0 and last one must be 1.
+ * Colors ​​between entries are linearly interpolated.
+ */
+export type TransferFunction = Array<TransferFunctionEntry>;
+
+/**
+ * To map voxel value to color.
+ * "position" range is 0.0 to 1.0.
+ * Map voxel values (-32,768 to 32,768) to it.
+ * ex) position is 0.5 if value is 0.
+ */
+interface TransferFunctionEntry {
+  position: number;
+  color: string;
+}
+
+export interface SubVolume {
+  offset: [number, number, number];
+  dimension: [number, number, number];
+}
 
 export default ViewState;

@@ -2,9 +2,9 @@ import { EventEmitter } from 'events';
 import ViewerEvent from '../../browser/viewer/ViewerEvent';
 import ViewerEventTarget from '../interface/ViewerEventTarget';
 import { sign } from './tool-util';
-import MprImageSource from '../image-source/MprImageSource';
-import { orientationAwareTranslation } from '../section-util';
 import Viewer from '../viewer/Viewer';
+import handlePageBy from './state/handlePageBy';
+import handleZoomBy from './state/handleZoomBy';
 
 export interface Tool extends ViewerEventTarget {
   activate(viewer: Viewer): void;
@@ -50,25 +50,14 @@ function createPagerWheelHandler(): (viewerEvent: ViewerEvent) => any {
     switch (state.type) {
       case 'mpr':
         const step = -sign(ev.original.deltaY) * (ev.original.ctrlKey ? 5 : 1);
-        const comp = viewer.getComposition();
-        if (!comp) throw new Error('Composition not initialized'); // should not happen
-        const src = comp.imageSource as MprImageSource;
-        if (!src.metadata) return;
-        const voxelSize = src.metadata.voxelSize;
-        state.section = orientationAwareTranslation(
-          state.section,
-          voxelSize,
-          step
-        );
-        viewer.setState(state);
+        handlePageBy(ev.viewer, step);
         break;
       case 'vr':
-        const speed = ev.original.shiftKey ? 0.005 : 0.002;
-        const zoom =
-          typeof state.zoom !== 'undefined'
-            ? state.zoom + ev.original.deltaY * speed * -1
-            : 1.0;
-        viewer.setState({ ...state, zoom });
+        const speed = ev.original.shiftKey ? 0.05 : 0.01;
+        handleZoomBy(viewer, -ev.original.deltaY * speed, [
+          ev.viewerX!,
+          ev.viewerY!
+        ]);
         break;
     }
   };

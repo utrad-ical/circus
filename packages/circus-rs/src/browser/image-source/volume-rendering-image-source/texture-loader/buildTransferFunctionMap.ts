@@ -1,5 +1,5 @@
 import tinycolor from 'tinycolor2';
-import { TransferFunction } from '../../ViewState';
+import { TransferFunction } from '../../../ViewState';
 
 interface RgbaColor {
   r: number;

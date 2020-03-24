@@ -13,7 +13,10 @@ export default function errorHandler(
   options: MiddlewareOptions
 ): koa.Middleware {
   const { logger } = options;
-  return async function(ctx: koa.Context, next): Promise<void> {
+  return async function(
+    ctx: koa.DefaultContext,
+    next: koa.Next
+  ): Promise<void> {
     try {
       await next();
     } catch (err) {

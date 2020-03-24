@@ -181,13 +181,14 @@ export function calculateScaleFactor(section: Section, mmDim: Vector3): number {
  * @param volumeSize The target volume size in millimeters
  * @param orientation The orthogonal section
  * @param position The position in the axis orthogonal to the screen
- * @returns {Section}
+ * @param flip Inverts sections as if the camera were looking from the back to the front
  */
 export function createOrthogonalMprSection(
   resolution: Vector2D,
   volumeSize: Vector3D,
   orientation: OrientationString = 'axial',
-  position?: number
+  position?: number,
+  flip?: boolean
 ): Section {
   // const aspect = resolution[0] / resolution[1];
   const res = new Vector2().fromArray(resolution);
@@ -233,6 +234,17 @@ export function createOrthogonalMprSection(
     default:
       throw new TypeError('Unsupported orientation');
   }
+
+  if (flip) {
+    const origin = [
+      section.origin[0] + section.xAxis[0],
+      section.origin[1],
+      section.origin[2]
+    ];
+    const xAxis = [-section.xAxis[0], section.xAxis[1], section.xAxis[2]];
+    section = {...section, origin, xAxis};
+  }
+
   return section;
 }
 

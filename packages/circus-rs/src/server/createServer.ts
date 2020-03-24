@@ -1,4 +1,4 @@
-import Koa from 'koa';
+import koa from 'koa';
 import httpStatus from 'http-status';
 import Router from 'koa-router';
 import koaJson from 'koa-json';
@@ -28,12 +28,12 @@ import seriesRoutes from './app/series/seriesRoutes';
 export default function createServer(
   config: Configuration,
   modules: AppHelpers
-): Koa {
+): koa {
   const { authorization, globalIpFilter } = config;
   const { logger, counter, authorizer, imageEncoder, volumeProvider } = modules;
 
   // create server process
-  const app = new Koa();
+  const app = new koa();
 
   // Set up global IP filter
   if (typeof globalIpFilter === 'string') {
@@ -83,7 +83,7 @@ export default function createServer(
   app.use(router.routes());
 
   // This is a default handler to catch all unknown requests of all types of verbs
-  app.use(async (ctx, next) => {
+  app.use(async (ctx: koa.DefaultContext, next: koa.Next) => {
     ctx.throw(httpStatus.NOT_FOUND);
   });
 

@@ -19,23 +19,6 @@ Select an individual example item for details.
 
 const rsHttpClient = new rs.RsHttpClient(config.server);
 
-function toPartialVolumeDescriptor(str) {
-  const [start, end, delta] = $.map(str.split(':'), function(value) {
-    const num = parseInt(value, 10);
-    return isNaN(num) ? undefined : num;
-  });
-
-  if (start === undefined && end === undefined && delta === undefined) {
-    return undefined;
-  } else if (start !== undefined && end !== undefined) {
-    return { start: start, end: end, delta: delta };
-  } else {
-    throw new Error(
-      'Invalid partial volume descriptor specified. ' +
-        'partial volume descriptor must be in the form of `startImgNum:endImgNum(:imageDelta)`'
-    );
-  }
-}
 const partialVolumeDescriptor = toPartialVolumeDescriptor(
   config.partialVolumeDescriptor
 );
@@ -384,255 +367,214 @@ function benchmark(src) {
     return time;
   });
 }
+
 /*--
-@title Volume rendering common
+@title VR common
 @hidden
 --*/
-const transferFunctionSample = {
-  vessel: [
-    { position: 0.0 / 65536.0, color: '#00000000' },
-    { position: 0.1 / 65536.0, color: '#ff0000ff' },
-    { position: 1.5 / 65536.0, color: '#ff0000ff' },
-    { position: 65536.0 / 65536.0, color: '#ff0000ff' }
-  ],
-  masked: [
-    // upper range [0;32767] is not hilited pixels
-    { position: 0.0 / 65536.0, color: '#00000000' },
-    { position: 336.0 / 65536.0, color: '#00000000' },
-    { position: 336.1 / 65536.0, color: '#660000ff' },
-    { position: 658.0 / 65536.0, color: '#ff0000ff' },
-    { position: 32767.9 / 65536.0, color: '#000000ff' },
-    // under range [32768;65536] is hilited pixels
-    // But if interpolationMode is "vr-mask-custom", not used.
-    { position: (0.0 + 32768.0) / 65536.0, color: '#00000000' },
-    { position: (336.0 + 32768.0) / 65536.0, color: '#00000000' },
-    { position: (336.1 + 32768.0) / 65536.0, color: '#666600ff' },
-    { position: (658.0 + 32768.0) / 65536.0, color: '#ff6600ff' },
-    { position: (32768.0 + 32768.0) / 65536.0, color: '#000000ff' }
-  ]
-};
 
-function viewStateAnimation(viewer, state0, state1, totalTime) {
-  viewer.setState(state0);
+// Initialize viewer.
+const viewer = new rs.Viewer(document.getElementById('viewer'));
+const tool = new rs.toolFactory('celestialRotate');
+viewer.setActiveTool(tool);
 
-  const animate = () => {
-    let originFrameTime = null;
+// Hide right viewer.
+const div2 = document.getElementById('viewer2');
+div2.style.display = 'none';
+const vrControl =
+  document.querySelector('#vr-controls') || document.createElement('div');
+vrControl.setAttribute('id', 'vr-controls');
+$(vrControl)
+  .children()
+  .remove();
+div2.parentNode.appendChild(vrControl);
 
-    const draw = frameTime => {
-      if (!originFrameTime) originFrameTime = frameTime;
+// Setup volume loader
+const rsHttpClient = new rs.RsHttpClient(config.server);
+const cache = new rs.IndexedDbVolumeCache();
+const volumeLoader = new rs.RsVolumeLoader({
+  rsHttpClient,
+  seriesUid: config.seriesUid,
+  partialVolumeDescriptor: toPartialVolumeDescriptor(
+    config.partialVolumeDescriptor
+  ),
+  cache
+});
 
-      const progress = Math.min(1.0, (frameTime - originFrameTime) / totalTime);
+// Create transfer function (ex. extracting blood vessels)
+const vesselTransferFunction = rs.createTransferFunction([
+  [470, '#66000000'],
+  [700, '#ff0000ff']
+]);
 
-      const state = viewer.getState();
+/*--
+@title Prepare demo client
+@hidden
+--*/
 
-      if (state1.subVolume) {
-        const subVolume = { ...state.subVolume };
-        const sv0 = state0.subVolume;
-        const sv1 = state1.subVolume;
+const demoHost =
+  window.location.protocol +
+  '//' +
+  window.location.hostname +
+  '' +
+  (window.location.port && window.location.port !== '80'
+    ? ':' + window.location.port
+    : '');
+const demoHttpClient = new rs.RsHttpClient(demoHost);
 
-        if (state1.subVolume.offset)
-          subVolume.offset = [
-            sv0.offset[0] + (sv1.offset[0] - sv0.offset[0]) * progress,
-            sv0.offset[1] + (sv1.offset[1] - sv0.offset[1]) * progress,
-            sv0.offset[2] + (sv1.offset[2] - sv0.offset[2]) * progress
-          ];
-        if (state1.subVolume.dimension)
-          subVolume.dimension = [
-            sv0.dimension[0] + (sv1.dimension[0] - sv0.dimension[0]) * progress,
-            sv0.dimension[1] + (sv1.dimension[1] - sv0.dimension[1]) * progress,
-            sv0.dimension[2] + (sv1.dimension[2] - sv0.dimension[2]) * progress
-          ];
-        state.subVolume = subVolume;
-      }
+/*--
+@title VR
+@color #ffffdd
+@viewerNotRequired
+--*/
 
-      if (state1.zoom)
-        state.zoom = state0.zoom + (state1.zoom - state0.zoom) * progress;
+//--@include VR common
 
-      if (state1.rayIntensityCoef)
-        state.rayIntensityCoef =
-          state0.rayIntensityCoef +
-          (state1.rayIntensityCoef - state0.rayIntensityCoef) * progress;
-
-      viewer.setState(state);
-
-      if (progress < 1.0) window.requestAnimationFrame(draw);
-    };
-
-    window.requestAnimationFrame(draw);
-  };
-
-  if (totalTime > 0) animate();
-}
-
-const imageSource = new rs.VolumeRenderingImageSource({ volumeLoader });
-
-// Prepare composition.
-const comp = new rs.Composition(imageSource);
-
-// Initialize viewer
-const div = document.getElementById('viewer');
-viewer = new rs.Viewer(div);
+// Initialize image source
+const vrImageSource = new rs.VolumeRenderingImageSource({ volumeLoader });
+const comp = new rs.Composition(vrImageSource);
 viewer.setComposition(comp);
 
-// Initialize toolbar
-const container = document.getElementById('toolbar');
-container.innerHTML = ''; // Clear existing tool bar
+// Activate external sample utilities.
+vrImageSource.ready().then(() => {
+  const { transferFunction: defaultTransferFunction } = viewer.getState();
 
-const toolbar = rs.createToolbar(container, ['hand', 'celestialRotate']);
+  // Some functions which changes view state.
+  let enableBloodVesselsExtraction = false;
+  const toggleTransferFunction = () =>
+    viewer.setState({
+      ...viewer.getState(),
+      transferFunction: (enableBloodVesselsExtraction = !enableBloodVesselsExtraction)
+        ? vesselTransferFunction
+        : defaultTransferFunction
+    });
 
-if (viewer) {
-  toolbar.bindViewer(viewer);
-}
+  let enableInterporation = false;
+  const toggleInterporation = () =>
+    viewer.setState({
+      ...viewer.getState(),
+      interpolationMode: (enableInterporation = !enableInterporation)
+        ? 'trilinear'
+        : 'nearestNeighbor'
+    });
 
-/*--
-@title VR w/WebGL(1) ボリュームデータとマスクデータを合成して描画
-@color #ffffdd
-@viewerNotRequired
+  const appendVrControlButton = (title, fn) => {
+    $(vrControl).append(
+      $(document.createElement('button'))
+        .addClass('btn btn-sm btn-block btn-default')
+        .css({ textAlign: 'left' })
+        .on('click', fn)
+        .append(title)
+    );
+  };
 
-特殊なインターポレーション(vr-mask-custom)を使用しています。
-Change interpolation mode を使用して、表示の変化を確認して下さい。
---*/
+  appendVrControlButton(
+    'Toggle transfer function (which extracts blood vessels)',
+    toggleTransferFunction
+  );
 
-const cache = new rs.IndexedDbVolumeCache();
-
-// prepare volume loader
-const rsHttpClient = new rs.RsHttpClient(config.server);
-const mainVolumeLoader = new rs.RsVolumeLoader({
-  seriesUid: config.seriesUid,
-  rsHttpClient,
-  cache
+  appendVrControlButton(
+    'Toggle (trilinear) interporation enabled',
+    toggleInterporation
+  );
 });
 
-// prepare mask loader
-const maskHost =
-  window.location.protocol +
-  '//' +
-  window.location.hostname +
-  '' +
-  (window.location.port && window.location.port != 80
-    ? ':' + window.location.port
-    : '');
-const maskLoadPath = 'sampledata/combined2.raw';
+/*--
+@title VR with mask and label
+@color #ffffdd
+@viewerNotRequired
+--*/
 
+//--@include VR common
+
+//--@include Prepare demo client
+
+// Prepare label loader
+const labelLoader = new rs.CsLabelLoader({
+  rsHttpClient: demoHttpClient,
+  basePath: 'sampledata'
+  // demo/sampledata/candidates.json
+  // demo/sampledata/cand1.raw
+  // demo/sampledata/cand2.raw
+  // demo/sampledata/cand3.raw
+});
+
+// Prepare mask loader
 const maskLoader = new rs.VesselSampleLoader({
-  path: maskLoadPath,
-  rsHttpClient,
-  cache
+  host: demoHost,
+  path: 'sampledata/vessel_mask.raw'
+  // demo/sampledata/vessel_mask.raw
 });
 
-// wrap loaders
-const volumeLoader = new rs.MixVolumeLoader({ mainLoader, maskLoader });
-
-//--@include Volume rendering common
-
-imageSource.ready().then(() => {
-  const state0 = viewer.getState();
-  state0.transferFunction = transferFunctionSample.masked;
-  state0.horizontal = -64.6;
-  state0.vertical = -58;
-  state0.zoom = 8;
-  state0.interpolationMode = 'vr-mask-custom';
-
-  viewer.setState(state0);
+// Initialize image source
+const vrImageSource = new rs.VolumeRenderingImageSource({
+  volumeLoader,
+  labelLoader,
+  maskLoader
 });
+const comp = new rs.Composition(vrImageSource);
+viewer.setComposition(comp);
 
-/*--
-@title VR w/WebGL(2) MRA画像からのボリュームレンダリングとアニメーション
-@color #ffffdd
-@viewerNotRequired
+vrImageSource.ready().then(() => {
+  const defaultState = viewer.getState();
+  let highlightedLabelIndex = 0;
+  viewer.setState({
+    ...defaultState,
+    transferFunction: vesselTransferFunction,
+    interpolationMode: 'trilinear',
+    highlightedLabelIndex
+  });
 
-MRAを直接使用しています。
---*/
+  let enableInterporation = false;
+  const toggleInterporation = () =>
+    viewer.setState({
+      ...viewer.getState(),
+      interpolationMode: (enableInterporation = !enableInterporation)
+        ? 'trilinear'
+        : 'nearestNeighbor'
+    });
 
-const rsHttpClient = new rs.RsHttpClient(config.server);
-const volumeLoader = new rs.RsVolumeLoader({
-  seriesUid: config.seriesUid,
-  rsHttpClient,
-  cache: new rs.IndexedDbVolumeCache()
-});
+  const toggleHighlightedLabelIndex = () =>
+    viewer.setState({
+      ...viewer.getState(),
+      highlightedLabelIndex: (highlightedLabelIndex =
+        ++highlightedLabelIndex % 3)
+    });
 
-//--@include Volume rendering common
+  const disableLabelHighlight = () =>
+    viewer.setState({
+      ...viewer.getState(),
+      highlightedLabelIndex: undefined
+    });
 
-imageSource.ready().then(() => {
-  const state0 = viewer.getState();
-  state0.transferFunction = transferFunctionSample.masked;
-  // state0.interpolationMode = 'trilinear';
+  let enableMask = false;
+  const toggleMaskEnabled = () =>
+    viewer.setState({
+      ...viewer.getState(),
+      enableMask: (enableMask = !enableMask)
+    });
 
-  state0.subVolume = {
-    offset: [0, 0, 0],
-    dimension: [512, 512, 132]
+  const appendVrControlButton = (title, fn) => {
+    $(vrControl).append(
+      $(document.createElement('button'))
+        .addClass('btn btn-sm btn-block btn-default')
+        .css({ textAlign: 'left' })
+        .on('click', fn)
+        .append(title)
+    );
   };
-  state0.zoom = 1.0;
-  state0.rayIntensityCoef = 1.0;
-  // state0.target = [112, 120, 39.6];
 
-  const state1 = {};
-  state1.subVolume = {
-    offset: [290, 180, 32],
-    dimension: [50, 50, 100]
-  };
-  state1.zoom = 13.6;
-  // state1.rayIntensityCoef = 0.2;
+  appendVrControlButton(
+    'Toggle (trilinear) interporation enabled',
+    toggleInterporation
+  );
+  appendVrControlButton(
+    'Change highlighted label',
+    toggleHighlightedLabelIndex
+  );
+  appendVrControlButton('Disable label highlight', disableLabelHighlight);
 
-  viewStateAnimation(viewer, state0, state1, 16000);
-});
-
-/*--
-@title VR w/WebGL(3) マスク用データからの直接描画
-@color #ffffdd
-@viewerNotRequired
-
-sampledata/vessel_mask.raw を使用しています。
---*/
-
-const sampleHost =
-  window.location.protocol +
-  '//' +
-  window.location.hostname +
-  '' +
-  (window.location.port && window.location.port != 80
-    ? ':' + window.location.port
-    : '');
-const samplePath = 'sampledata/vessel_mask.raw';
-
-const volumeLoader = new rs.VesselSampleLoader({
-  host: sampleHost,
-  path: samplePath,
-  coef: 65536 * 0.5
-});
-
-//--@include Volume rendering common
-
-imageSource.ready().then(() => {
-  const state0 = viewer.getState();
-  state0.transferFunction = [
-    { position: 0.0 / 65536.0, color: '#00000000' },
-    { position: 32728.0 / 65536.0, color: '#880000ff' },
-    { position: 65536.0 / 65536.0, color: '#88ff00ff' }
-  ];
-  viewer.setState(state0);
-});
-
-/*--
-@title VR w/WebGL(4) モックを使用した描画
-@color #ffffdd
-@viewerNotRequired
-
-モック
---*/
-
-const volumeLoader = new rs.MockVolumeLoader();
-
-//--@include Volume rendering common
-
-imageSource.ready().then(() => {
-  const state0 = viewer.getState();
-  state0.transferFunction = [
-    { position: 0.0 / 65536.0, color: '#00000000' },
-    { position: 40.0 / 65536.0, color: '#00ffffff' },
-    { position: 65536.0 / 65536.0, color: '#00ffffff' }
-  ];
-  viewer.setState(state0);
+  appendVrControlButton('Toggle mask enabled', toggleMaskEnabled);
 });
 
 /*--

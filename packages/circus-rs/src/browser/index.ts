@@ -7,6 +7,13 @@ import './assets/icons/circus-rs-font-glyphs.less';
 import 'tslib';
 
 export { default as Viewer } from './viewer/Viewer';
+export {
+  default as ViewState,
+  MprViewState,
+  VrViewState,
+  TransferFunction,
+  SubVolume
+} from './ViewState';
 export { default as Composition } from './Composition';
 
 export { default as CornerText } from './annotation/CornerText';
@@ -41,7 +48,7 @@ export {
 
 export {
   default as DicomVolumeLoader
-} from '../browser/image-source/volume-loader/DicomVolumeLoader';
+} from './image-source/volume-loader/DicomVolumeLoader';
 export {
   default as MockVolumeLoader
 } from './image-source/volume-loader/MockVolumeLoader';
@@ -54,6 +61,9 @@ export {
 export {
   default as VesselSampleLoader
 } from './image-source/volume-loader/VesselSampleLoader';
+export {
+  default as CsLabelLoader
+} from './image-source/volume-loader/CsLabelLoader';
 
 export {
   default as IndexedDbVolumeCache
@@ -62,12 +72,21 @@ export {
   default as MemoryVolumeCache
 } from './image-source/volume-loader/cache/MemoryVolumeCache';
 
-export { default as Tool } from '../browser/tool/Tool';
-export { default as createToolbar } from '../browser/createToolbar';
+export { default as Tool } from './tool/Tool';
+export { default as createToolbar } from './createToolbar';
 
-export { registerTool, toolFactory } from '../browser/tool/tool-initializer';
+export { registerTool, toolFactory } from './tool/tool-initializer';
 export {
   orientationAwareTranslation,
   createOrthogonalMprSection
-} from '../browser/section-util';
-export * from '../browser/volume-util';
+} from './section-util';
+export * from './volume-util';
+
+export { default as moveBy } from './tool/state/handleMoveBy';
+export { default as pageBy } from './tool/state/handlePageBy';
+export { default as zoomBy } from './tool/state/handleZoomBy';
+export { default as rotateBy } from './tool/state/handleRotationBy';
+export * from './image-source/volume-rendering-image-source/transfer-function-util';
+export {
+  default as buildTransferFunctionMap
+} from './image-source/volume-rendering-image-source/texture-loader/buildTransferFunctionMap';

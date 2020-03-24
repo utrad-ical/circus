@@ -8,6 +8,7 @@ module.exports = {
   output: {
     path: path.join(__dirname, 'dist'),
     library: 'circusrs',
+    libraryTarget: 'umd',
     filename: '[name].js'
   },
   resolve: {
@@ -26,7 +27,7 @@ module.exports = {
       },
       {
         test: /\.css$/,
-        use: ['style-laoder', 'css-loader']
+        use: ['style-loader', 'css-loader']
       },
       {
         test: /\.woff$/,
@@ -44,7 +45,8 @@ module.exports = {
     })
   ],
   devServer: {
-    contentBase: path.join(__dirname, 'demo')
+    contentBase: path.join(__dirname, 'demo'),
+    disableHostCheck: true
   },
   devtool: '#sourcemap'
 };

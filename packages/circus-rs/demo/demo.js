@@ -119,3 +119,21 @@ $('#example-run').on('click', () => {
     alert(err.message);
   }
 });
+
+function toPartialVolumeDescriptor(str) {
+  const [start, end, delta] = $.map(str.split(':'), function(value) {
+    const num = parseInt(value, 10);
+    return isNaN(num) ? undefined : num;
+  });
+
+  if (start === undefined && end === undefined && delta === undefined) {
+    return undefined;
+  } else if (start !== undefined && end !== undefined) {
+    return { start: start, end: end, delta: delta };
+  } else {
+    throw new Error(
+      'Invalid partial volume descriptor specified. ' +
+        'partial volume descriptor must be in the form of `startImgNum:endImgNum(:imageDelta)`'
+    );
+  }
+}

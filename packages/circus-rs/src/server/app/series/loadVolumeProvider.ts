@@ -33,7 +33,10 @@ export default function loadVolumeProvider({
     delta: ['delta', undefined, 'isInt', 'toInt']
   };
 
-  const main: koa.Middleware = async function(ctx, next): Promise<void> {
+  const main: koa.Middleware = async function(
+    ctx: koa.DefaultContext,
+    next: koa.Next
+  ): Promise<void> {
     const series = ctx.params.sid;
     if (!isDicomUid(series)) {
       ctx.throw(httpStatus.BAD_REQUEST, 'Invalid series UID');

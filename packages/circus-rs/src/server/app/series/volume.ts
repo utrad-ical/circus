@@ -14,7 +14,10 @@ const PARTIAL_VOLUME_PRIORITY = 1;
 export default function volume(): koa.Middleware {
   return compose([
     compress(),
-    async function volume(ctx, next): Promise<void> {
+    async function volume(
+      ctx: koa.DefaultContext,
+      next: koa.Next
+    ): Promise<void> {
       const state = ctx.state as SeriesMiddlewareState;
 
       if (state.partialVolumeDescriptor) {

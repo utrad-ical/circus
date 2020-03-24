@@ -15,7 +15,10 @@ export default function serverStatus(
   const { config, modules } = options;
   const { counter, volumeProvider } = modules;
 
-  return async function serverStatus(ctx, next): Promise<void> {
+  return async function serverStatus(
+    ctx: koa.DefaultContext,
+    next: koa.Next
+  ): Promise<void> {
     const status: any = {
       status: 'Running',
       process: {

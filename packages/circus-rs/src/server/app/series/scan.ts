@@ -38,7 +38,10 @@ export default function scan({ imageEncoder }: ScanOptions): koa.Middleware {
     format: ['Output type', 'arraybuffer', s => s === 'png', () => 'png']
   };
 
-  const main: koa.Middleware = async function scan(ctx, next): Promise<void> {
+  const main: koa.Middleware = async function scan(
+    ctx: koa.DefaultContext,
+    next: koa.Next
+  ): Promise<void> {
     const state = ctx.state as SeriesMiddlewareState;
 
     const {

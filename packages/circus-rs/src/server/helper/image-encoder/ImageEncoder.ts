@@ -5,20 +5,11 @@ import stream from 'stream';
  * image from Buffer and writes common image file data (e.g., PNG)
  * into a given stream.
  */
-export default abstract class ImageEncoder {
-  protected config: any = null;
-
-  constructor(config?: any) {
-    this.config = config || null;
-  }
-
-  public mimeType(): string {
-    return 'image/png';
-  }
-
-  public abstract write(
+export default interface ImageEncoder {
+  mimeType: () => string;
+  write: (
     image: Buffer,
     width: number,
     height: number
-  ): Promise<stream.Readable>;
+  ) => Promise<stream.Readable>;
 }

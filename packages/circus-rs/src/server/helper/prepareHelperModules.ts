@@ -138,10 +138,9 @@ async function loadModule<T>(
       instance = new TheClass(options);
     } else {
       const { default: TheClass } = await import(`${baseDir}/${module}`);
-      instance =
-        title === 'logger'
-          ? await TheClass(options, {})
-          : new TheClass(options);
+      instance = /logger|encoder/.test(title)
+        ? await TheClass(options, {})
+        : new TheClass(options);
     }
   } else {
     name = `(customized ${title})`;

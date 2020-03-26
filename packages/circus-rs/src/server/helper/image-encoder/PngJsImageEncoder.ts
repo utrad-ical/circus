@@ -1,3 +1,4 @@
+import { NoDepFunctionService } from '@utrad-ical/circus-lib';
 import ImageEncoder from './ImageEncoder';
 import stream from 'stream';
 import { PNG } from 'pngjs';
@@ -6,12 +7,8 @@ import { PNG } from 'pngjs';
  * An ImageEncoder implementation which uses 'pngjs' module,
  * a pure-JS encoding solution.
  */
-export default class PngJsImageEncoder extends ImageEncoder {
-  public async write(
-    image: Buffer,
-    width: number,
-    height: number
-  ): Promise<stream.Readable> {
+const PngJsImageEncoder: NoDepFunctionService<ImageEncoder, {}> = async () => {
+  const write = async (image: Buffer, width: number, height: number) => {
     const png = new PNG({ width, height });
     const out = new stream.PassThrough();
     for (let y = 0; y < png.height; y++) {
@@ -26,6 +23,12 @@ export default class PngJsImageEncoder extends ImageEncoder {
       }
     }
     png.pack().pipe(out);
-    return out;
-  }
-}
+    return out as stream.Readable;
+  };
+  return {
+    mimeType: () => 'image/png',
+    write
+  };
+};
+
+export default PngJsImageEncoder;

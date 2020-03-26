@@ -49,9 +49,6 @@
     "winston": "^3.2.1",
     "winston-daily-rotate-file": "^4.4.1"
   },
-  "peerDependencies": {
-    "log4js": ">3.0.0"
-  },
   "prettier": {
     "singleQuote": true
   },

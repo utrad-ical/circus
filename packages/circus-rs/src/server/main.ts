@@ -4,7 +4,7 @@ import prepareHelperModules, {
 } from './helper/prepareHelperModules';
 import createServer from './createServer';
 
-async function main(): Promise<void> {
+const main = async () => {
   console.log('CIRCUS RS is starting up...');
 
   const config = require('./config').default as Configuration;
@@ -30,6 +30,6 @@ async function main(): Promise<void> {
     await disposeHelperModules(modules);
     process.exit(1);
   }
-}
+};
 
 main();

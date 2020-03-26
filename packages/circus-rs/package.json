@@ -34,6 +34,7 @@
     "@types/validator": "^6.2.0",
     "@utrad-ical/circus-lib": "^0.14.1",
     "async-cache": "^1.1.0",
+    "cosmiconfig": "^6.0.0",
     "css-loader": "^0.28.7",
     "dicom-parser": "^1.7.5",
     "forever": "^0.15.3",
@@ -56,7 +57,8 @@
     "tinycolor2": "^1.4.1",
     "ts-loader": "^3.2.0",
     "ts-node": "^3.3.0",
-    "validator": "^7.0.0"
+    "validator": "^7.0.0",
+    "winston": "^3.2.1"
   },
   "devDependencies": {
     "@types/minimist": "^1.2.0",

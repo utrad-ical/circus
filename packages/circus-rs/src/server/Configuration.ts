@@ -1,4 +1,4 @@
-import Logger from './helper/logger/Logger';
+import Logger from '@utrad-ical/circus-lib/lib/logger/Log4JsLogger';
 import { DicomFileRepository } from '@utrad-ical/circus-lib/lib/dicom-file-repository';
 import ImageEncoder from './helper/image-encoder/ImageEncoder';
 

@@ -1,7 +1,7 @@
 import { Configuration, ModuleDefinition } from '../Configuration';
 
-import Logger from './logger/Logger';
-import NullLogger from './logger/NullLogger';
+import Logger from '@utrad-ical/circus-lib/lib/logger/Logger';
+import NullLogger from '@utrad-ical/circus-lib/lib/logger/NullLogger';
 import ImageEncoder from './image-encoder/ImageEncoder';
 import { DicomFileRepository } from '@utrad-ical/circus-lib/lib/dicom-file-repository';
 import Counter from './Counter';
@@ -40,10 +40,14 @@ export default async function prepareHelperModules(
   // logger
   let logger: Logger;
   if (config.logger) {
-    logger = await loadModule<Logger>('logger', './logger', config.logger);
+    logger = await loadModule<Logger>(
+      'logger',
+      '@utrad-ical/circus-lib/lib/logger',
+      config.logger
+    );
   } else {
     loadedModuleNames.push('(default null logger)');
-    logger = NullLogger();
+    logger = await NullLogger({}, {});
   }
 
   // authorizer
@@ -134,7 +138,10 @@ async function loadModule<T>(
       instance = new TheClass(options);
     } else {
       const { default: TheClass } = await import(`${baseDir}/${module}`);
-      instance = new TheClass(options);
+      instance =
+        title === 'logger'
+          ? await TheClass(options, {})
+          : new TheClass(options);
     }
   } else {
     name = `(customized ${title})`;

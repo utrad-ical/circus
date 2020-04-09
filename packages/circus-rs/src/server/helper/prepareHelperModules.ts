@@ -5,13 +5,14 @@ import ImageEncoder from './image-encoder/ImageEncoder';
 import { DicomFileRepository } from '@utrad-ical/circus-lib/lib/dicom-file-repository';
 import { Counter } from './createCounter';
 import createAuthorizer from './createAuthorizer';
-import {
+import createVolumeProvider, {
   VolumeProvider,
-  createVolumeProvider,
   VolumeAccessor
 } from './createVolumeProvider';
 import path from 'path';
-import dicomImageExtractor from '@utrad-ical/circus-lib/lib/image-extractor/dicomImageExtractor';
+import dicomImageExtractor, {
+  DicomImageExtractor
+} from '@utrad-ical/circus-lib/lib/image-extractor/dicomImageExtractor';
 import asyncMemoize, { AsyncCachedLoader } from '../../common/asyncMemoize';
 import ServiceLoader from '@utrad-ical/circus-lib/lib/ServiceLoader';
 
@@ -41,7 +42,9 @@ export default async function prepareHelperModules(
   const loader = new ServiceLoader<{
     rsLogger: Logger;
     imageEncoder: ImageEncoder;
+    dicomImageExtractor: DicomImageExtractor;
     dicomFileRepository: DicomFileRepository;
+    volumeProvider: VolumeProvider;
     counter: Counter;
   }>(config as any);
   loader.registerDirectory(
@@ -59,9 +62,15 @@ export default async function prepareHelperModules(
     path.join(__dirname, './image-encoder'),
     'PngJsImageEncoder'
   );
-  loader.registerModule('counter', path.join(__dirname, './createCounter'));
+  loader.registerModule('counter', path.join(__dirname, 'createCounter'));
+  loader.registerFactory('dicomImageExtractor', async () =>
+    dicomImageExtractor()
+  );
+  loader.registerModule(
+    'volumeProvider',
+    path.join(__dirname, 'createVolumeProvider')
+  );
 
-  // logger
   const logger = await loader.get('rsLogger');
 
   // authorizer
@@ -74,37 +83,19 @@ export default async function prepareHelperModules(
     loadedModuleNames.push('authorizer');
   }
 
-  // counter
-  let counter = await loader.get('counter');
-
-  // dicomFileRepository
+  const counter = await loader.get('counter');
   const repository = await loader.get('dicomFileRepository');
-
-  // imageEncoder
   const imageEncoder = await loader.get('imageEncoder');
-
-  // volumeProvider
-  let volumeProvider:
-    | VolumeProvider
-    | AsyncCachedLoader<VolumeAccessor>
-    | undefined = undefined;
-  if (repository) {
-    const extractor = dicomImageExtractor();
-    volumeProvider = createVolumeProvider(repository, extractor);
-    loadedModuleNames.push('volumeProvider');
-  }
+  let volumeProvider = await loader.get('volumeProvider');
 
   // cache
   if (volumeProvider && config.cache) {
     const { memoryThreshold = 2147483648, maxAge = 3600 } = config.cache;
-
     volumeProvider = asyncMemoize<VolumeAccessor>(volumeProvider, {
       max: memoryThreshold,
       maxAge: maxAge * 1000,
       length: accessor => accessor.volume.data.byteLength
     });
-
-    loadedModuleNames.push('cache');
   }
 
   logger.info('Modules loaded: ', loadedModuleNames.join(', '));

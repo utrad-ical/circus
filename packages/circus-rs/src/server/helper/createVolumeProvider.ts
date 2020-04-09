@@ -10,6 +10,7 @@ import {
 import RawData from '../../common/RawData';
 import PriorityIntegerCaller from '../../common/PriorityIntegerCaller';
 import DicomVolume from '../../common/DicomVolume';
+import { FunctionService } from '@utrad-ical/circus-lib';
 
 export type VolumeProvider = (seriesUid: string) => Promise<VolumeAccessor>;
 
@@ -27,15 +28,17 @@ export interface VolumeAccessor {
 
 /**
  * Creates a priority loader that can be injected to Koa's context.
- * @param repository Bound DICOM file repository.
- * @param extractor Bound DicomImageExtractor.
  */
-export function createVolumeProvider(
-  repository: DicomFileRepository,
-  extractor: DicomImageExtractor
-): VolumeProvider {
+const createVolumeProvider: FunctionService<
+  VolumeProvider,
+  {
+    dicomFileRepository: DicomFileRepository;
+    dicomImageExtractor: DicomImageExtractor;
+  }
+> = async (opts, deps) => {
+  const { dicomFileRepository, dicomImageExtractor } = deps;
   return async seriesUid => {
-    const { load, images } = await repository.getSeries(seriesUid);
+    const { load, images } = await dicomFileRepository.getSeries(seriesUid);
     const imageRange = new MultiRange(images);
 
     if (imageRange.segmentLength() === 0)
@@ -49,7 +52,7 @@ export function createVolumeProvider(
     const imageMetadata: Map<number, DicomMetadata> = new Map();
     const fetch = async (imageNo: number) => {
       const unparsedBuffer = await load(imageNo);
-      const { metadata, pixelData } = extractor(unparsedBuffer);
+      const { metadata, pixelData } = dicomImageExtractor(unparsedBuffer);
       imageMetadata.set(imageNo, metadata);
       return pixelData!;
     };
@@ -114,4 +117,11 @@ export function createVolumeProvider(
       images: imageRange
     };
   };
-}
+};
+
+createVolumeProvider.dependencies = [
+  'dicomFileRepository',
+  'dicomImageExtractor'
+];
+
+export default createVolumeProvider;

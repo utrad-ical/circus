@@ -5,12 +5,11 @@ import ImageEncoder from './image-encoder/ImageEncoder';
 import { DicomFileRepository } from '@utrad-ical/circus-lib/lib/dicom-file-repository';
 import { Counter } from './createCounter';
 import createAuthorizer from './createAuthorizer';
-import { VolumeProvider, VolumeAccessor } from './createVolumeProvider';
+import { VolumeProvider } from './createVolumeProvider';
 import path from 'path';
 import dicomImageExtractor, {
   DicomImageExtractor
 } from '@utrad-ical/circus-lib/lib/image-extractor/dicomImageExtractor';
-import asyncMemoize, { AsyncCachedLoader } from '../../common/asyncMemoize';
 import ServiceLoader from '@utrad-ical/circus-lib/lib/ServiceLoader';
 
 /**
@@ -22,7 +21,7 @@ export interface AppHelpers {
   readonly counter: Counter;
   readonly repository?: DicomFileRepository;
   readonly imageEncoder?: ImageEncoder;
-  readonly volumeProvider?: VolumeProvider | AsyncCachedLoader<VolumeAccessor>;
+  readonly volumeProvider?: VolumeProvider;
 }
 
 export interface Authorizer {

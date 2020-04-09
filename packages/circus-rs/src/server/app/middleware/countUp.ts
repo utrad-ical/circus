@@ -1,5 +1,5 @@
 import koa from 'koa';
-import { Counter } from '../../helper/Counter';
+import { Counter } from '../../helper/createCounter';
 
 type MiddlewareOptions = {
   counter: Counter;

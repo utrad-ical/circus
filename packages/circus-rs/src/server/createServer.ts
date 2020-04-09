@@ -29,7 +29,7 @@ export default function createServer(
   config: Configuration,
   modules: AppHelpers
 ): koa {
-  const { authorization, globalIpFilter } = config;
+  const { authorization, globalIpFilter } = config.rsServer.options;
   const { logger, counter, authorizer, imageEncoder, volumeProvider } = modules;
 
   // create server process

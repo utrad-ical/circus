@@ -1,4 +1,4 @@
-import Logger from '@utrad-ical/circus-lib/lib/logger/Log4JsLogger';
+import Logger from '@utrad-ical/circus-lib/lib/logger/Logger';
 import { DicomFileRepository } from '@utrad-ical/circus-lib/lib/dicom-file-repository';
 import ImageEncoder from './helper/image-encoder/ImageEncoder';
 
@@ -13,9 +13,17 @@ interface CacheOptions {
 }
 
 export interface Configuration {
-  port: number;
-
-  globalIpFilter: string;
+  rsServer: {
+    options: {
+      port: number;
+      globalIpFilter: string;
+      authorization: {
+        enabled: boolean;
+        expire: number;
+        tokenRequestIpFilter: string;
+      };
+    };
+  };
 
   logger: ModuleDefinition<Logger>;
 
@@ -24,10 +32,4 @@ export interface Configuration {
   imageEncoder: ModuleDefinition<ImageEncoder>;
 
   cache?: CacheOptions;
-
-  authorization: {
-    enabled: boolean;
-    expire: number;
-    tokenRequestIpFilter: string;
-  };
 }

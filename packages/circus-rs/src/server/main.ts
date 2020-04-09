@@ -8,7 +8,7 @@ const main = async () => {
   console.log('CIRCUS RS is starting up...');
 
   const config = require('./config').default as Configuration;
-  const { port } = config;
+  const { port } = config.rsServer.options;
   const modules = await prepareHelperModules(config);
   const { logger } = modules;
   const app = createServer(config, modules);

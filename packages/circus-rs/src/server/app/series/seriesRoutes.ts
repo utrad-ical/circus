@@ -1,7 +1,7 @@
 import koa from 'koa';
 import Router from 'koa-router';
 
-import Logger from '../../helper/logger/Logger';
+import Logger from '@utrad-ical/circus-lib/lib/logger/Logger';
 import ImageEncoder from '../../helper/image-encoder/ImageEncoder';
 import {
   VolumeProvider,

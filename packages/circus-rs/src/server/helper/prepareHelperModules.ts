@@ -52,8 +52,11 @@ export default async function prepareHelperModules(
 
   // authorizer
   let authorizer: Authorizer | undefined = undefined;
-  if (config.authorization && config.authorization.enabled) {
-    authorizer = createAuthorizer(config.authorization);
+  if (
+    config.rsServer.options.authorization &&
+    config.rsServer.options.authorization.enabled
+  ) {
+    authorizer = createAuthorizer(config.rsServer.options.authorization);
     loadedModuleNames.push('authorizer');
   }
 
@@ -128,23 +131,23 @@ async function loadModule<T>(
   baseDir: string,
   config: ModuleDefinition<T>
 ): Promise<T> {
-  const { module, options } = config;
+  const { type, options } = config;
   let instance: T;
   let name: string;
-  if (typeof module === 'string') {
-    name = module;
-    if (/\\/.test(module)) {
-      const { default: TheClass } = await import(`${module}`);
+  if (typeof type === 'string') {
+    name = type;
+    if (/\\/.test(type)) {
+      const { default: TheClass } = await import(`${type}`);
       instance = new TheClass(options);
     } else {
-      const { default: TheClass } = await import(`${baseDir}/${module}`);
+      const { default: TheClass } = await import(`${baseDir}/${type}`);
       instance = /logger|encoder/.test(title)
         ? await TheClass(options, {})
         : new TheClass(options);
     }
   } else {
     name = `(customized ${title})`;
-    instance = module;
+    instance = type;
   }
   loadedModuleNames.push(name);
 

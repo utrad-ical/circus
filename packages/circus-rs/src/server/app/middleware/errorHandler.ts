@@ -1,5 +1,5 @@
 import koa from 'koa';
-import Logger from '../../helper/logger/Logger';
+import Logger from '@utrad-ical/circus-lib/lib/logger/Logger';
 
 type MiddlewareOptions = {
   logger: Logger;

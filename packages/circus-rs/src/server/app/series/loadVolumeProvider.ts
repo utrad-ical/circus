@@ -1,7 +1,8 @@
 import koa from 'koa';
 import httpStatus from 'http-status';
 import { isDicomUid } from '@utrad-ical/circus-lib/lib/validation';
-import Logger from '../../helper/logger/Logger';
+import Logger from '@utrad-ical/circus-lib/lib/logger/Logger';
+
 import {
   VolumeProvider,
   VolumeAccessor

@@ -1,10 +1,9 @@
 import { Configuration, ModuleDefinition } from '../Configuration';
 
 import Logger from '@utrad-ical/circus-lib/lib/logger/Logger';
-import NullLogger from '@utrad-ical/circus-lib/lib/logger/NullLogger';
 import ImageEncoder from './image-encoder/ImageEncoder';
 import { DicomFileRepository } from '@utrad-ical/circus-lib/lib/dicom-file-repository';
-import Counter from './Counter';
+import { Counter } from './Counter';
 import createAuthorizer from './createAuthorizer';
 import {
   VolumeProvider,
@@ -43,6 +42,7 @@ export default async function prepareHelperModules(
     rsLogger: Logger;
     imageEncoder: ImageEncoder;
     dicomFileRepository: DicomFileRepository;
+    counter: Counter;
   }>(config as any);
   loader.registerDirectory(
     'rsLogger',
@@ -59,6 +59,7 @@ export default async function prepareHelperModules(
     path.join(__dirname, './image-encoder'),
     'PngJsImageEncoder'
   );
+  loader.registerModule('counter', path.join(__dirname, './Counter'));
 
   // logger
   const logger = await loader.get('rsLogger');
@@ -74,8 +75,7 @@ export default async function prepareHelperModules(
   }
 
   // counter
-  let counter = new Counter();
-  loadedModuleNames.push('Counter');
+  let counter = await loader.get('counter');
 
   // dicomFileRepository
   const repository = await loader.get('dicomFileRepository');

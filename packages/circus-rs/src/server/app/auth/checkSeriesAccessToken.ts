@@ -4,7 +4,7 @@ import { Authorizer } from '../../helper/prepareHelperModules';
 import Logger from '@utrad-ical/circus-lib/lib/logger/Logger';
 
 type MiddlewareOptions = {
-  logger: Logger;
+  rsLogger: Logger;
   authorizer: Authorizer;
 };
 
@@ -14,7 +14,7 @@ type MiddlewareOptions = {
 export default function checkSeriesAccessToken(
   options: MiddlewareOptions
 ): koa.Middleware {
-  const { logger, authorizer } = options;
+  const { rsLogger, authorizer } = options;
 
   return async function(
     ctx: koa.DefaultContext,
@@ -30,7 +30,7 @@ export default function checkSeriesAccessToken(
     const authorization = request.headers.authorization;
 
     if (!authorization || typeof authorization !== 'string') {
-      logger.warn('Tried to access data without authorization header.');
+      rsLogger.warn('Tried to access data without authorization header.');
       invalid();
       return;
     }
@@ -38,13 +38,13 @@ export default function checkSeriesAccessToken(
     const [bearer, token] = authorization.split(' ');
 
     if (typeof bearer !== 'string' || bearer.toLowerCase() !== 'bearer') {
-      logger.warn('Invalid authorization header.');
+      rsLogger.warn('Invalid authorization header.');
       invalid();
       return;
     }
 
     if (!(await authorizer.checkToken(token, ctx.params.sid))) {
-      logger.warn('Invalid access token.');
+      rsLogger.warn('Invalid access token.');
       invalid();
       return;
     }

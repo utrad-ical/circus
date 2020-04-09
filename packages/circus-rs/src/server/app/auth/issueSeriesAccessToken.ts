@@ -8,7 +8,7 @@ import { Authorizer } from '../../helper/prepareHelperModules';
 import Logger from '@utrad-ical/circus-lib/lib/logger/Logger';
 
 type MiddlewareOptions = {
-  logger: Logger;
+  rsLogger: Logger;
   authorizer: Authorizer;
   ipFilter?: string;
 };
@@ -20,7 +20,7 @@ type MiddlewareOptions = {
 export default function issueSeriesAccessToken(
   options: MiddlewareOptions
 ): koa.Middleware {
-  const { logger, authorizer, ipFilter } = options;
+  const { rsLogger: logger, authorizer, ipFilter } = options;
 
   const validator = validate({
     series: ['Series UID', null, s => isDicomUid(s), null]
@@ -46,7 +46,7 @@ export default function issueSeriesAccessToken(
   const middlewares = [validator, main];
   if (ipFilter) {
     middlewares.unshift(
-      ipBasedAccessControl({ logger, allowPattern: ipFilter })
+      ipBasedAccessControl({ rsLogger: logger, allowPattern: ipFilter })
     );
   }
 

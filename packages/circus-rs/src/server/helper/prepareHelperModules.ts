@@ -16,7 +16,7 @@ import ServiceLoader from '@utrad-ical/circus-lib/lib/ServiceLoader';
  * This is a simple facade interface that aggregates helper modules
  */
 export interface AppHelpers {
-  readonly logger: Logger;
+  readonly rsLogger: Logger;
   readonly authorizer?: Authorizer;
   readonly counter: Counter;
   readonly repository?: DicomFileRepository;
@@ -29,8 +29,6 @@ export interface Authorizer {
   checkToken: (token: string, target?: string) => Promise<boolean>;
   dispose?: () => Promise<void>;
 }
-
-const loadedModuleNames: string[] = [];
 
 export default async function prepareHelperModules(
   config: Configuration
@@ -67,7 +65,7 @@ export default async function prepareHelperModules(
     path.join(__dirname, 'createVolumeProvider')
   );
 
-  const logger = await loader.get('rsLogger');
+  const rsLogger = await loader.get('rsLogger');
 
   // authorizer
   let authorizer: Authorizer | undefined = undefined;
@@ -76,7 +74,6 @@ export default async function prepareHelperModules(
     config.rsServer.options.authorization.enabled
   ) {
     authorizer = createAuthorizer(config.rsServer.options.authorization);
-    loadedModuleNames.push('authorizer');
   }
 
   const counter = await loader.get('counter');
@@ -85,7 +82,7 @@ export default async function prepareHelperModules(
   let volumeProvider = await loader.get('volumeProvider');
 
   return {
-    logger,
+    rsLogger,
     authorizer,
     counter,
     repository,
@@ -97,5 +94,6 @@ export default async function prepareHelperModules(
 export async function disposeHelperModules(modules: AppHelpers): Promise<void> {
   if (modules.authorizer && modules.authorizer.dispose !== undefined)
     modules.authorizer.dispose();
-  if (modules.logger.shutdown !== undefined) await modules.logger.shutdown();
+  if (modules.rsLogger.shutdown !== undefined)
+    await modules.rsLogger.shutdown();
 }

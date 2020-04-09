@@ -30,21 +30,27 @@ export default function createServer(
   modules: AppHelpers
 ): koa {
   const { authorization, globalIpFilter } = config.rsServer.options;
-  const { logger, counter, authorizer, imageEncoder, volumeProvider } = modules;
+  const {
+    rsLogger,
+    counter,
+    authorizer,
+    imageEncoder,
+    volumeProvider
+  } = modules;
 
   // create server process
   const app = new koa();
 
   // Set up global IP filter
   if (typeof globalIpFilter === 'string') {
-    app.use(ipBasedAccessControl({ logger, allowPattern: globalIpFilter }));
+    app.use(ipBasedAccessControl({ rsLogger, allowPattern: globalIpFilter }));
   }
 
   // // Pretty-pring JSON output
   app.use(koaJson());
 
   // Adds an error handler which outputs all errors in JSON format
-  app.use(errorHandler({ logger }));
+  app.use(errorHandler({ rsLogger }));
 
   // Add global request handler
   app.use(cors());
@@ -60,12 +66,15 @@ export default function createServer(
     router.get(
       '/token',
       issueSeriesAccessToken({
-        logger,
+        rsLogger,
         authorizer,
         ipFilter: authorization.tokenRequestIpFilter
       })
     );
-    router.use('/series/:sid', checkSeriesAccessToken({ logger, authorizer }));
+    router.use(
+      '/series/:sid',
+      checkSeriesAccessToken({ rsLogger, authorizer })
+    );
   }
 
   // series
@@ -73,7 +82,7 @@ export default function createServer(
     router.use(
       '/series/:sid',
       seriesRoutes({
-        logger,
+        logger: rsLogger,
         volumeProvider,
         imageEncoder
       })

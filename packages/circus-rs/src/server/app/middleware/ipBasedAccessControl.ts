@@ -3,7 +3,7 @@ import httpStatus from 'http-status';
 import Logger from '@utrad-ical/circus-lib/lib/logger/Logger';
 
 type MiddlewareOptions = {
-  logger: Logger;
+  rsLogger: Logger;
   allowPattern: string;
 };
 
@@ -13,7 +13,7 @@ type MiddlewareOptions = {
 export default function ipBasedAccessControl(
   options: MiddlewareOptions
 ): koa.Middleware {
-  const { logger, allowPattern } = options;
+  const { rsLogger, allowPattern } = options;
   return async function(
     ctx: koa.DefaultContext,
     next: koa.Next
@@ -21,7 +21,7 @@ export default function ipBasedAccessControl(
     const req = ctx.request;
     const ip: string = req.ip;
     if (!ip.match(allowPattern)) {
-      logger.warn(
+      rsLogger.warn(
         `Denied access from unauthorized IP: ${req.ip} for ${req.url}`
       );
       ctx.throw(httpStatus.UNAUTHORIZED, 'Access unauthorized');

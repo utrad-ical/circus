@@ -2,17 +2,16 @@ import koa from 'koa';
 import Logger from '@utrad-ical/circus-lib/lib/logger/Logger';
 
 type MiddlewareOptions = {
-  logger: Logger;
+  rsLogger: Logger;
 };
 
 /**
  * Global error handler which always output errors in JSON format
- * @param logger Logger to inject
  */
 export default function errorHandler(
   options: MiddlewareOptions
 ): koa.Middleware {
-  const { logger } = options;
+  const { rsLogger: logger } = options;
   return async function(
     ctx: koa.DefaultContext,
     next: koa.Next

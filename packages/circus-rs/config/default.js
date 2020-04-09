@@ -14,7 +14,7 @@ module.exports.default = {
   // DICOM file repository is a loader that fetches the content of a DICOM file
   // specified by a series instance UID and an image number.
   dicomFileRepository: {
-    module: 'StaticDicomFileRepository',
+    type: 'StaticDicomFileRepository',
     options: {
       dataDir: '/var/dicom-data',
       useHash: false
@@ -45,7 +45,7 @@ module.exports.default = {
   // Logger configurations. By default, we make use of log4js library,
   // so see the documentation for that project.
   logger: {
-    module: 'FileLogger',
+    type: 'FileLogger',
     options: {
       fileName: path.resolve(__dirname, '../logs/circus-rs')
     }
@@ -53,13 +53,13 @@ module.exports.default = {
 
   // DICOM loader
   dumper: {
-    module: 'PureJsDicomDumper',
+    type: 'PureJsDicomDumper',
     options: {}
   },
 
   // Image encoder is used by some request types
   imageEncoder: {
-    module: 'PngJsImageEncoder',
+    type: 'PngJsImageEncoder',
     options: {}
   },
 

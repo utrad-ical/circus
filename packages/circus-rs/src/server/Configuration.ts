@@ -3,7 +3,7 @@ import { DicomFileRepository } from '@utrad-ical/circus-lib/lib/dicom-file-repos
 import ImageEncoder from './helper/image-encoder/ImageEncoder';
 
 export interface ModuleDefinition<T = string> {
-  module: string | T;
+  type: string | T;
   options?: any;
 }
 

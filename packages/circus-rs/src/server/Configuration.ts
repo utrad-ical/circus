@@ -25,7 +25,7 @@ export interface Configuration {
     };
   };
 
-  logger: ModuleDefinition<Logger>;
+  rsLogger: ModuleDefinition<Logger>;
 
   dicomFileRepository: ModuleDefinition<DicomFileRepository>;
 

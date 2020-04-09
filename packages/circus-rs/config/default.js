@@ -44,7 +44,7 @@ module.exports.default = {
 
   // Logger configurations. By default, we make use of log4js library,
   // so see the documentation for that project.
-  logger: {
+  rsLogger: {
     type: 'FileLogger',
     options: {
       fileName: path.resolve(__dirname, '../logs/circus-rs')

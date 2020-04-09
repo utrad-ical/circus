@@ -11,8 +11,10 @@ import {
   createVolumeProvider,
   VolumeAccessor
 } from './createVolumeProvider';
+import path from 'path';
 import dicomImageExtractor from '@utrad-ical/circus-lib/lib/image-extractor/dicomImageExtractor';
 import asyncMemoize, { AsyncCachedLoader } from '../../common/asyncMemoize';
+import ServiceLoader from '@utrad-ical/circus-lib/lib/ServiceLoader';
 
 /**
  * This is a simple facade interface that aggregates helper modules
@@ -37,18 +39,29 @@ const loadedModuleNames: string[] = [];
 export default async function prepareHelperModules(
   config: Configuration
 ): Promise<AppHelpers> {
+  const loader = new ServiceLoader<{
+    rsLogger: Logger;
+    imageEncoder: ImageEncoder;
+    dicomFileRepository: DicomFileRepository;
+  }>(config as any);
+  loader.registerDirectory(
+    'rsLogger',
+    '@utrad-ical/circus-lib/lib/logger',
+    'NullLogger'
+  );
+  loader.registerDirectory(
+    'dicomFileRepository',
+    '@utrad-ical/circus-lib/lib/dicom-file-repository',
+    'MemoryDicomFileRepository'
+  );
+  loader.registerDirectory(
+    'imageEncoder',
+    path.join(__dirname, './image-encoder'),
+    'PngJsImageEncoder'
+  );
+
   // logger
-  let logger: Logger;
-  if (config.logger) {
-    logger = await loadModule<Logger>(
-      'logger',
-      '@utrad-ical/circus-lib/lib/logger',
-      config.logger
-    );
-  } else {
-    loadedModuleNames.push('(default null logger)');
-    logger = await NullLogger({}, {});
-  }
+  const logger = await loader.get('rsLogger');
 
   // authorizer
   let authorizer: Authorizer | undefined = undefined;
@@ -65,24 +78,10 @@ export default async function prepareHelperModules(
   loadedModuleNames.push('Counter');
 
   // dicomFileRepository
-  let repository: DicomFileRepository | undefined = undefined;
-  if (config.dicomFileRepository) {
-    repository = await loadModule<DicomFileRepository>(
-      'dicom file repository',
-      '@utrad-ical/circus-lib/lib/dicom-file-repository',
-      config.dicomFileRepository
-    );
-  }
+  const repository = await loader.get('dicomFileRepository');
 
   // imageEncoder
-  let imageEncoder: ImageEncoder | undefined = undefined;
-  if (config.imageEncoder) {
-    imageEncoder = await loadModule<ImageEncoder>(
-      'image encoder',
-      './image-encoder',
-      config.imageEncoder
-    );
-  }
+  const imageEncoder = await loader.get('imageEncoder');
 
   // volumeProvider
   let volumeProvider:
@@ -124,32 +123,4 @@ export async function disposeHelperModules(modules: AppHelpers): Promise<void> {
   if (modules.authorizer && modules.authorizer.dispose !== undefined)
     modules.authorizer.dispose();
   if (modules.logger.shutdown !== undefined) await modules.logger.shutdown();
-}
-
-async function loadModule<T>(
-  title: string,
-  baseDir: string,
-  config: ModuleDefinition<T>
-): Promise<T> {
-  const { type, options } = config;
-  let instance: T;
-  let name: string;
-  if (typeof type === 'string') {
-    name = type;
-    if (/\\/.test(type)) {
-      const { default: TheClass } = await import(`${type}`);
-      instance = new TheClass(options);
-    } else {
-      const { default: TheClass } = await import(`${baseDir}/${type}`);
-      instance = /logger|encoder/.test(title)
-        ? await TheClass(options, {})
-        : new TheClass(options);
-    }
-  } else {
-    name = `(customized ${title})`;
-    instance = type;
-  }
-  loadedModuleNames.push(name);
-
-  return instance;
 }

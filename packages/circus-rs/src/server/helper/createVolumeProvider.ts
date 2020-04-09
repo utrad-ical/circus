@@ -11,6 +11,7 @@ import RawData from '../../common/RawData';
 import PriorityIntegerCaller from '../../common/PriorityIntegerCaller';
 import DicomVolume from '../../common/DicomVolume';
 import { FunctionService } from '@utrad-ical/circus-lib';
+import asyncMemoize from '../../common/asyncMemoize';
 
 export type VolumeProvider = (seriesUid: string) => Promise<VolumeAccessor>;
 
@@ -29,7 +30,7 @@ export interface VolumeAccessor {
 /**
  * Creates a priority loader that can be injected to Koa's context.
  */
-const createVolumeProvider: FunctionService<
+const createUncachedVolumeProvider: FunctionService<
   VolumeProvider,
   {
     dicomFileRepository: DicomFileRepository;
@@ -41,10 +42,14 @@ const createVolumeProvider: FunctionService<
     const { load, images } = await dicomFileRepository.getSeries(seriesUid);
     const imageRange = new MultiRange(images);
 
-    if (imageRange.segmentLength() === 0)
-      throw new Error(`Series '${seriesUid}' could not be loaded.`);
+    if (imageRange.segmentLength() === 0) {
+      const err = new Error(`Series '${seriesUid}' could not be loaded.`);
+      err.status = 404;
+      err.expose = true;
+      throw err;
+    }
 
-    // Create map of image-no to data-index(as z index on the volume).
+    // Create map of image-no to data-index (as z index on the volume).
     const zIndices: Map<number, number> = new Map();
     imageRange.toArray().forEach((no, idx) => zIndices.set(no, idx));
 
@@ -115,8 +120,29 @@ const createVolumeProvider: FunctionService<
       load: loadSeries,
       determinePitch,
       images: imageRange
-    };
+    } as VolumeAccessor;
   };
+};
+
+const createVolumeProvider: FunctionService<
+  VolumeProvider,
+  {
+    dicomFileRepository: DicomFileRepository;
+    dicomImageExtractor: DicomImageExtractor;
+  }
+> = async (opts, deps) => {
+  const { cache: cacheOpts, ...restOpts } = opts || { cache: {} };
+  const rawVolumeProvider = await createUncachedVolumeProvider(restOpts, deps);
+  if (cacheOpts) {
+    const { memoryThreshold = 2147483648, maxAge = 3600 } = cacheOpts;
+    return asyncMemoize(rawVolumeProvider, {
+      max: memoryThreshold,
+      maxAge: maxAge * 1000,
+      length: accessor => accessor.volume.data.byteLength
+    });
+  } else {
+    return rawVolumeProvider;
+  }
 };
 
 createVolumeProvider.dependencies = [

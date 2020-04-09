@@ -29,8 +29,10 @@ const testConfig = {
     type: 'PngJsImageEncoder',
     options: {}
   },
-  cache: {
-    memoryThreshold: 2147483648
+  volumeProvider: {
+    options: {
+      cache: { memoryThreshold: 2147483648 }
+    }
   }
 };
 

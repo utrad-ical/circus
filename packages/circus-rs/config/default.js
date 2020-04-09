@@ -63,11 +63,15 @@ module.exports.default = {
     options: {}
   },
 
-  // Controls how long the series data are kept in memory.
-  cache: {
-    // threshold: upper limit of heap memory size. (in bytes)
-    memoryThreshold: 2147483648,
-    // upper limit seconds of heap.
-    maxAge: 3600
+  volumeProvider: {
+    options: {
+      // Controls how long the series data are kept in memory.
+      cache: {
+        // threshold: upper limit of heap memory size. (in bytes)
+        memoryThreshold: 2147483648,
+        // upper limit seconds of heap.
+        maxAge: 3600
+      }
+    }
   }
 };

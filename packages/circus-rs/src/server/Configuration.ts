@@ -1,9 +1,5 @@
-import Logger from '@utrad-ical/circus-lib/lib/logger/Logger';
-import { DicomFileRepository } from '@utrad-ical/circus-lib/lib/dicom-file-repository';
-import ImageEncoder from './helper/image-encoder/ImageEncoder';
-
-export interface ModuleDefinition<T = string> {
-  type: string | T;
+export interface ModuleDefinition {
+  type: string;
   options?: any;
 }
 
@@ -25,11 +21,15 @@ export interface Configuration {
     };
   };
 
-  rsLogger: ModuleDefinition<Logger>;
+  volumeProvider: {
+    options: {
+      cache?: CacheOptions;
+    };
+  };
 
-  dicomFileRepository: ModuleDefinition<DicomFileRepository>;
+  rsLogger: ModuleDefinition;
 
-  imageEncoder: ModuleDefinition<ImageEncoder>;
+  dicomFileRepository: ModuleDefinition;
 
-  cache?: CacheOptions;
+  imageEncoder: ModuleDefinition;
 }

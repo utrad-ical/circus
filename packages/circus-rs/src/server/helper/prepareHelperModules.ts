@@ -1,14 +1,11 @@
-import { Configuration, ModuleDefinition } from '../Configuration';
+import { Configuration } from '../Configuration';
 
 import Logger from '@utrad-ical/circus-lib/lib/logger/Logger';
 import ImageEncoder from './image-encoder/ImageEncoder';
 import { DicomFileRepository } from '@utrad-ical/circus-lib/lib/dicom-file-repository';
 import { Counter } from './createCounter';
 import createAuthorizer from './createAuthorizer';
-import createVolumeProvider, {
-  VolumeProvider,
-  VolumeAccessor
-} from './createVolumeProvider';
+import { VolumeProvider, VolumeAccessor } from './createVolumeProvider';
 import path from 'path';
 import dicomImageExtractor, {
   DicomImageExtractor
@@ -87,18 +84,6 @@ export default async function prepareHelperModules(
   const repository = await loader.get('dicomFileRepository');
   const imageEncoder = await loader.get('imageEncoder');
   let volumeProvider = await loader.get('volumeProvider');
-
-  // cache
-  if (volumeProvider && config.cache) {
-    const { memoryThreshold = 2147483648, maxAge = 3600 } = config.cache;
-    volumeProvider = asyncMemoize<VolumeAccessor>(volumeProvider, {
-      max: memoryThreshold,
-      maxAge: maxAge * 1000,
-      length: accessor => accessor.volume.data.byteLength
-    });
-  }
-
-  logger.info('Modules loaded: ', loadedModuleNames.join(', '));
 
   return {
     logger,

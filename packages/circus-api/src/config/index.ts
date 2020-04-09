@@ -1,20 +1,9 @@
-import csCoreDefaults from '@utrad-ical/circus-cs-core/src/config/default';
-import { cosmiconfigSync } from 'cosmiconfig';
-import merge from 'merge';
-import defaults, { Configuration } from './default';
+import loadConfig from '@utrad-ical/circus-lib/lib/config/loadConfig';
+import path from 'path';
 
-const loadConfig = (configTitle: string) => {
-  const explorer = cosmiconfigSync(configTitle);
-  const result = explorer.search() || { config: {} };
-  const config = merge.recursive(
-    {},
-    csCoreDefaults,
-    defaults,
-    result.config
-  ) as Configuration;
-  return config;
-};
-
-const config = loadConfig('circus');
+const config = loadConfig([
+  '@utrad-ical/circus-cs-core/src/config/default', // CS Core Defaults
+  path.join(__dirname, 'default') // API server defaults
+]);
 
 export default config;

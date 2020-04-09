@@ -12,17 +12,21 @@ const {
 } = require('../src/server/helper/prepareHelperModules');
 
 const testConfig = {
-  port: 1024,
-  globalIpFilter: '^127.0.0.1$',
-  logger: {
-    module: 'NullLogger'
+  rsServer: {
+    options: {
+      port: 1024,
+      globalIpFilter: '^127.0.0.1$'
+    }
+  },
+  rsLogger: {
+    type: 'NullLogger'
   },
   dicomFileRepository: {
-    module: 'MemoryDicomFileRepository',
+    type: 'MemoryDicomFileRepository',
     options: {}
   },
   imageEncoder: {
-    module: 'PngJsImageEncoder',
+    type: 'PngJsImageEncoder',
     options: {}
   },
   cache: {
@@ -50,23 +54,22 @@ function dicomImage(file = 'CT-MONO2-16-brain') {
   });
 }
 
-describe('Server', () => {
-  before(async () => {
-    const memRepository = new MemoryDicomFileRepository({});
-    const series = await memRepository.getSeries('1.2.3.4.5');
-    const image = await dicomImage();
-    for (let i = 1; i <= MOCK_IMAGE_COUNT; i++) {
-      await series.save(i, image);
-    }
-    testConfig.dicomFileRepository.module = memRepository;
-  });
+async function fillMockImages(repository) {
+  const series = await repository.getSeries('1.2.3.4.5');
+  const image = await dicomImage();
+  for (let i = 1; i <= MOCK_IMAGE_COUNT; i++) {
+    await series.save(i, image);
+  }
+}
 
+describe('Server', () => {
   context('always', () => {
     let app;
     let httpServer;
     before(async () => {
       const { port } = testConfig;
       const helpers = await prepareHelperModules(testConfig);
+      await fillMockImages(helpers.repository);
       app = createServer(testConfig, helpers);
 
       httpServer = app.listen(port, '0.0.0.0');
@@ -282,14 +285,20 @@ describe('Server', () => {
     before(async () => {
       const config = {
         ...testConfig,
-        authorization: {
-          enabled: true,
-          tokenRequestIpFilter: '^127.0.0.1$',
-          expire: 1800
+        rsServer: {
+          options: {
+            ...testConfig.rsServer.options,
+            authorization: {
+              enabled: true,
+              tokenRequestIpFilter: '^127.0.0.1$',
+              expire: 1800
+            }
+          }
         }
       };
       const { port } = config;
       const helpers = await prepareHelperModules(config);
+      await fillMockImages(helpers.repository);
       app = createServer(config, helpers);
 
       httpServer = app.listen(port, '0.0.0.0');

@@ -1,9 +1,9 @@
-const Counter = require('../src/server/helper/Counter').default;
+const createCounter = require('../src/server/helper/Counter').default;
 const assert = require('chai').assert;
 
 describe('Counter', function() {
-  it('must count up', function() {
-    const counter = new Counter();
+  it('must count up', async function() {
+    const counter = await createCounter();
     assert.strictEqual(counter.getCount('foo'), 0);
     assert.strictEqual(counter.getCount('bar'), 0);
     counter.countUp('foo');
@@ -11,8 +11,8 @@ describe('Counter', function() {
     assert.strictEqual(counter.getCount('bar'), 0);
   });
 
-  it('must return set of counters', function() {
-    const counter = new Counter();
+  it('must return set of counters', async function() {
+    const counter = await createCounter();
     counter.countUp('foo');
     counter.countUp('bar');
     counter.countUp('bar');

@@ -1,6 +1,6 @@
 const assert = require('chai').assert;
 
-const encoders = ['PngJsImageEncoder', 'NodePngImageEncoder'];
+const encoders = ['PngJsImageEncoder' /*'NodePngImageEncoder'*/];
 
 describe('ImageEncoder', function() {
   let originalImage;
@@ -16,23 +16,24 @@ describe('ImageEncoder', function() {
 
   encoders.forEach(function(enc) {
     const testName = 'must encode image to PNG using ' + enc;
-    let encClass;
+    let encModule;
     try {
-      encClass = require('../src/server/helper/image-encoder/' + enc).default;
+      encModule = require('../src/server/helper/image-encoder/' + enc).default;
     } catch (e) {
       it.skip(testName);
       return;
     }
     it(testName, function(done) {
-      const encoder = new encClass();
-      encoder.write(originalImage, 16, 16).then(out => {
-        out.on('finish', function() {
-          const hdr = out.read(8).toString('hex');
-          // The fixed 10-byte PNG header
-          assert.equal(hdr, '89504e470d0a1a0a');
-          done();
-        });
-      });
+      encModule().then(encoder =>
+        encoder.write(originalImage, 16, 16).then(out => {
+          out.on('finish', function() {
+            const hdr = out.read(8).toString('hex');
+            // The fixed 10-byte PNG header
+            assert.equal(hdr, '89504e470d0a1a0a');
+            done();
+          });
+        })
+      );
     });
   });
 });

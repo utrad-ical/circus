@@ -29,7 +29,7 @@
     "@types/koa-router": "^7.0.23",
     "@types/log4js": "0.0.32",
     "@types/lru-cache": "^4.1.1",
-    "@types/node": "^10.12.12",
+    "@types/node": "^13.11.1",
     "@types/three": "^0.93.15",
     "@types/validator": "^6.2.0",
     "@utrad-ical/circus-lib": "^0.15.2",

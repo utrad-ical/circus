@@ -5,7 +5,6 @@
     "target": "es2017",
     "outDir": "./lib",
     "declaration": true,
-    "lib": ["dom", "es2017"],
     "strict": true,
     "importHelpers": true,
     "esModuleInterop": true

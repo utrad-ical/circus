@@ -77,7 +77,7 @@ export default function debugFillEllipse(
 function parseStyle(fillStyle: string) {
   if (
     fillStyle.match(
-      /rgba\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*([\d\.]+)\s*\)/
+      /rgba\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*([\d.]+)\s*\)/
     )
   ) {
     return [

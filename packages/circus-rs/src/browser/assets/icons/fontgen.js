@@ -30,7 +30,7 @@ async function create(iconPath, fontName, prefix) {
   files.forEach(file => {
     const [, codepoint, name] = path
       .basename(file, '.svg')
-      .match(/^u([0-9A-F]+)-([a-z\-]+)$/);
+      .match(/^u([0-9A-F]+)-([a-z-]+)$/);
     glyphs.push({
       file,
       name,

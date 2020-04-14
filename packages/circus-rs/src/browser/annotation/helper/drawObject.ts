@@ -215,7 +215,7 @@ export function drawSimpleFigure(
     case 0:
       return;
 
-    case 1:
+    case 1: {
       // draw Point
       const radius = style.lineWidth;
       const color =
@@ -224,7 +224,7 @@ export function drawSimpleFigure(
           : style.fillStyle;
       drawPoint(ctx, vertices[0], { radius, color });
       return;
-
+    }
     case 2:
       // draw Line
       drawLine(

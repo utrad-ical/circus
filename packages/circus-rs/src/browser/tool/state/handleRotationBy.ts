@@ -10,7 +10,7 @@ export default function handleRotationBy(
   const prevState = viewer.getState();
   switch (prevState.type) {
     case 'mpr':
-    case 'vr':
+    case 'vr': {
       let section = prevState.section;
       if (Math.abs(dhDeg)) {
         section = rotateAroundYAxis(section, -dhDeg);
@@ -20,6 +20,7 @@ export default function handleRotationBy(
       }
       viewer.setState({ ...prevState, section });
       break;
+    }
   }
 }
 

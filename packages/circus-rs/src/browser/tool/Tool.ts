@@ -48,17 +48,19 @@ function createPagerWheelHandler(): (viewerEvent: ViewerEvent) => any {
     const state = viewer.getState();
 
     switch (state.type) {
-      case 'mpr':
+      case 'mpr': {
         const step = -sign(ev.original.deltaY) * (ev.original.ctrlKey ? 5 : 1);
         handlePageBy(ev.viewer, step);
         break;
-      case 'vr':
+      }
+      case 'vr': {
         const speed = ev.original.shiftKey ? 0.05 : 0.01;
         handleZoomBy(viewer, -ev.original.deltaY * speed, [
           ev.viewerX!,
           ev.viewerY!
         ]);
         break;
+      }
     }
   };
 }

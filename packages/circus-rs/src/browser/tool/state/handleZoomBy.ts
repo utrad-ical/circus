@@ -25,7 +25,7 @@ export default function handleZoomBy(
 
   switch (prevState.type) {
     case 'mpr':
-    case 'vr':
+    case 'vr': {
       const section = scaleSectionBy(
         prevState.section,
         1 / stepFactor ** step,
@@ -44,6 +44,7 @@ export default function handleZoomBy(
 
       viewer.setState({ ...prevState, section });
       break;
+    }
   }
 }
 

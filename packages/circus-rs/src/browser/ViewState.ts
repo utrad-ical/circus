@@ -1,19 +1,14 @@
 import { Section } from '../common/geometry';
 import { ViewWindow } from '../common/ViewWindow';
 
-/**
- * ViewState determines how an ImageSource is displayed on each Viewer.
- */
-type ViewState = MprViewState | VrViewState;
-
 interface SectionDrawingViewState {
   section: Section;
-  interpolationMode?: InterpolationMode;
 }
 
 export interface MprViewState extends SectionDrawingViewState {
   type: 'mpr';
   window: ViewWindow;
+  interpolationMode?: InterpolationMode;
 }
 
 export interface VrViewState extends SectionDrawingViewState {
@@ -58,6 +53,8 @@ export interface VrViewState extends SectionDrawingViewState {
    */
   highlightedLabelIndex?: number;
 
+  interpolationMode?: InterpolationMode;
+
   /**
    * For Debugging
    * 0: disabled
@@ -78,7 +75,7 @@ export type InterpolationMode = 'trilinear' | 'nearestNeighbor';
  * Transfer function defines each voxel color.
  * This is defined as array of TransferFunctionEntry.
  * "position" of the first item must be 0 and last one must be 1.
- * Colors ​​between entries are linearly interpolated.
+ * Colors between entries are linearly interpolated.
  */
 export type TransferFunction = Array<TransferFunctionEntry>;
 
@@ -98,4 +95,10 @@ export interface SubVolume {
   dimension: [number, number, number];
 }
 
+/**
+ * ViewState determines how an ImageSource is displayed on each Viewer.
+ */
+type ViewState = MprViewState | VrViewState;
+
+// eslint-disable-next-line no-undef
 export default ViewState;

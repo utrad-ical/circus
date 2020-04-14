@@ -25,7 +25,7 @@ export default function handleMoveBy(
 
   switch (prevState.type) {
     case 'mpr':
-    case 'vr':
+    case 'vr': {
       const moveScale = move.clone().divide(vp);
       const section = translateSection(
         prevState.section,
@@ -53,5 +53,6 @@ export default function handleMoveBy(
 
       viewer.setState({ ...prevState, section });
       break;
+    }
   }
 }

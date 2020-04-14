@@ -132,10 +132,11 @@ async function extractEstimatedWindow(
     case 'first':
       slices = [images.clone().shift()!];
       break;
-    case 'center':
+    case 'center': {
       const centerIdx = Math.floor(images.length() / 2);
       slices = [images.toArray()[centerIdx]];
       break;
+    }
     default:
       throw new TypeError('Unsupported estimation algorithm was specified');
   }

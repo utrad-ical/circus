@@ -34,7 +34,7 @@ export class Validator {
       const spec = this.rules[key];
       const [, /*description*/ defaultValue, rule, normalizer] = spec;
       let required: boolean = false;
-      if (/\!$/.test(key)) {
+      if (/!$/.test(key)) {
         key = key.slice(0, -1);
         required = true;
       }

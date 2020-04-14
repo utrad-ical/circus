@@ -11,22 +11,22 @@ export function getInverse(matrix: number[][]): number[][] {
   const inv: number[][] = new Array(n);
 
   // Create identity matrix
-  for (var i = 0; i < n; i++) {
+  for (let i = 0; i < n; i++) {
     a[i] = matrix[i].concat();
     inv[i] = new Array(n);
-    for (var j = 0; j < n; j++) {
+    for (let j = 0; j < n; j++) {
       inv[i][j] = i == j ? 1.0 : 0.0;
     }
   }
 
   // Sweep method
-  for (var i = 0; i < n; i++) {
+  for (let i = 0; i < n; i++) {
     const buf = 1 / a[i][i];
-    for (j = 0; j < n; j++) {
+    for (let j = 0; j < n; j++) {
       a[i][j] *= buf;
       inv[i][j] *= buf;
     }
-    for (var j = 0; j < n; j++) {
+    for (let j = 0; j < n; j++) {
       if (i != j) {
         const buf = a[j][i];
         for (let k = 0; k < n; k++) {

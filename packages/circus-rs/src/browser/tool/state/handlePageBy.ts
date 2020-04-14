@@ -14,7 +14,7 @@ export default function handlePageBy(viewer: Viewer, step: number): void {
   const src = comp.imageSource as MprImageSource;
   if (!(src instanceof MprImageSource)) return;
   switch (prevState.type) {
-    case 'mpr':
+    case 'mpr': {
       const section = orientationAwareTranslation(
         prevState.section,
         src.metadata!.voxelSize,
@@ -30,5 +30,6 @@ export default function handlePageBy(viewer: Viewer, step: number): void {
       if (!overlap) return;
       viewer.setState({ ...prevState, section });
       return;
+    }
   }
 }

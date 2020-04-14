@@ -2,6 +2,7 @@
 // Project: http://glmatrix.net/
 // Definitions by: chuntaro <https://github.com/chuntaro/>
 // Definitions: https://github.com/chuntaro/gl-matrix.d.ts
+/* eslint-disable */
 
 interface glMatrix {
   EPSILON: number;

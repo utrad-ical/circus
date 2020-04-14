@@ -9,9 +9,9 @@ const main = async () => {
 
   const config = require('./config').default as Configuration;
   const { port } = config.rsServer.options;
-  const modules = await prepareHelperModules(config);
-  const { rsLogger } = modules;
-  const app = createServer(config, modules);
+  const deps = await prepareHelperModules(config);
+  const { rsLogger } = deps;
+  const app = await createServer(config, deps);
 
   try {
     const server = app.listen(port, '0.0.0.0');
@@ -21,13 +21,13 @@ const main = async () => {
       console.log(message);
     });
     server.on('close', async () => {
-      await disposeHelperModules(modules);
+      // await disposeHelperModules(deps);
     });
   } catch (e) {
     console.error('Server failed to start');
     console.error(e);
     rsLogger.error(e);
-    await disposeHelperModules(modules);
+    // await disposeHelperModules(deps);
     process.exit(1);
   }
 };

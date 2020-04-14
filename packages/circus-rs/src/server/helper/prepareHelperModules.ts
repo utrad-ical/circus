@@ -4,7 +4,6 @@ import Logger from '@utrad-ical/circus-lib/lib/logger/Logger';
 import ImageEncoder from './image-encoder/ImageEncoder';
 import { DicomFileRepository } from '@utrad-ical/circus-lib/lib/dicom-file-repository';
 import { Counter } from './createCounter';
-import createAuthorizer from './createAuthorizer';
 import { VolumeProvider } from './createVolumeProvider';
 import path from 'path';
 import dicomImageExtractor, {
@@ -17,7 +16,6 @@ import ServiceLoader from '@utrad-ical/circus-lib/lib/ServiceLoader';
  */
 export interface AppHelpers {
   readonly rsLogger: Logger;
-  readonly authorizer?: Authorizer;
   readonly counter: Counter;
   readonly repository?: DicomFileRepository;
   readonly imageEncoder?: ImageEncoder;
@@ -67,15 +65,6 @@ export default async function prepareHelperModules(
 
   const rsLogger = await loader.get('rsLogger');
 
-  // authorizer
-  let authorizer: Authorizer | undefined = undefined;
-  if (
-    config.rsServer.options.authorization &&
-    config.rsServer.options.authorization.enabled
-  ) {
-    authorizer = createAuthorizer(config.rsServer.options.authorization);
-  }
-
   const counter = await loader.get('counter');
   const repository = await loader.get('dicomFileRepository');
   const imageEncoder = await loader.get('imageEncoder');
@@ -83,17 +72,9 @@ export default async function prepareHelperModules(
 
   return {
     rsLogger,
-    authorizer,
     counter,
     repository,
     imageEncoder,
     volumeProvider
   };
-}
-
-export async function disposeHelperModules(modules: AppHelpers): Promise<void> {
-  if (modules.authorizer && modules.authorizer.dispose !== undefined)
-    modules.authorizer.dispose();
-  if (modules.rsLogger.shutdown !== undefined)
-    await modules.rsLogger.shutdown();
 }

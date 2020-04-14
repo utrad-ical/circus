@@ -21,22 +21,18 @@ import checkSeriesAccessToken from './app/auth/checkSeriesAccessToken';
 
 // application
 import seriesRoutes from './app/series/seriesRoutes';
+import { FunctionService } from '@utrad-ical/circus-lib';
+import createAuthorizer from './helper/createAuthorizer';
 
 /**
- * Main server class.
+ * Create Koa App.
  */
-export default function createServer(
-  config: Configuration,
-  modules: AppHelpers
-): koa {
-  const { authorization, globalIpFilter } = config.rsServer.options;
-  const {
-    rsLogger,
-    counter,
-    authorizer,
-    imageEncoder,
-    volumeProvider
-  } = modules;
+const createServer: FunctionService<koa> = async (
+  options: Configuration,
+  deps: AppHelpers
+) => {
+  const { authorization, globalIpFilter } = options.rsServer.options;
+  const { rsLogger, counter, imageEncoder, volumeProvider } = deps;
 
   // create server process
   const app = new koa();
@@ -59,10 +55,11 @@ export default function createServer(
   app.use(countUp({ counter }));
 
   const router = new Router();
-  router.get('/status', serverStatus({ config, modules }));
+  router.get('/status', serverStatus({ config: options, modules: deps }));
 
   // authorization
-  if (authorizer) {
+  if (authorization && authorization.enabled) {
+    const authorizer = createAuthorizer(authorization);
     router.get(
       '/token',
       issueSeriesAccessToken({
@@ -75,6 +72,8 @@ export default function createServer(
       '/series/:sid',
       checkSeriesAccessToken({ rsLogger, authorizer })
     );
+    (app as any).dispose = async () =>
+      authorizer.dispose && (await authorizer.dispose());
   }
 
   // series
@@ -97,4 +96,6 @@ export default function createServer(
   });
 
   return app;
-}
+};
+
+export default createServer;

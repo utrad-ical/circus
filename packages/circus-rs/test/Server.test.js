@@ -72,14 +72,8 @@ describe('Server', () => {
       const { port } = testConfig;
       const helpers = await prepareHelperModules(testConfig);
       await fillMockImages(helpers.repository);
-      app = createServer(testConfig, helpers);
-
+      app = await createServer(testConfig, helpers);
       httpServer = app.listen(port, '0.0.0.0');
-      // httpServer.on('listening', () => done());
-      // httpServer.on('error', err => done(err));
-      httpServer.on('close', () => disposeHelperModules(helpers));
-
-      return Promise.resolve();
     });
     after(done => httpServer.close(done));
 
@@ -301,12 +295,9 @@ describe('Server', () => {
       const { port } = config;
       const helpers = await prepareHelperModules(config);
       await fillMockImages(helpers.repository);
-      app = createServer(config, helpers);
+      app = await createServer(config, helpers);
 
       httpServer = app.listen(port, '0.0.0.0');
-      // httpServer.on('listening', () => done());
-      // httpServer.on('error', err => done(err));
-      httpServer.on('close', () => disposeHelperModules(helpers));
     });
     after(done => httpServer.close(done));
 

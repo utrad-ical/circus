@@ -12,8 +12,8 @@ export default class AuthorizationCache {
 
     this.disposalTimer = setInterval(() => {
       const now: Date = new Date();
-      for (let x in this.cache) {
-        let limit: Date = this.cache[x];
+      for (const x in this.cache) {
+        const limit: Date = this.cache[x];
         if (limit.getTime() <= now.getTime()) {
           delete this.cache[x];
         }
@@ -31,7 +31,7 @@ export default class AuthorizationCache {
    * @param token The token previously issued.
    */
   public update(series: string, token: string): void {
-    let currentDate: Date = new Date();
+    const currentDate: Date = new Date();
     currentDate.setTime(currentDate.getTime() + this.config.expire * 1000);
     this.cache[token + '_' + series] = currentDate;
   }

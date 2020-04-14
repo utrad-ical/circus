@@ -9,6 +9,7 @@ plugins:
   - '@typescript-eslint'
 env:
   es6: true
+  browser: true
   node: true
   'jest/globals': true
 rules:

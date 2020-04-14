@@ -44,8 +44,8 @@ export default function drawHandleFrame(
       const lines: DirectedSegment[] = [];
       for (let i = 0; i < drawHandlePoints.length; i++) {
         const handleSize = drawStyle.handleSize;
-        var from = drawHandlePoints[i].clone();
-        var to =
+        const from = drawHandlePoints[i].clone();
+        const to =
           i + 1 < drawHandlePoints.length
             ? drawHandlePoints[i + 1].clone()
             : drawHandlePoints[0].clone();

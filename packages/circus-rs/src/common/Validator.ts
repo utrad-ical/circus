@@ -25,14 +25,14 @@ export class Validator {
   }
 
   public validate(input: any): { result: any; errors: string[] } {
-    let result: any = {};
-    let errors: string[] = [];
+    const result: any = {};
+    const errors: string[] = [];
 
     let value: any;
     // iterates over the rules object
     for (let key in this.rules) {
-      let spec = this.rules[key];
-      let [, /*description*/ defaultValue, rule, normalizer] = spec;
+      const spec = this.rules[key];
+      const [, /*description*/ defaultValue, rule, normalizer] = spec;
       let required: boolean = false;
       if (/\!$/.test(key)) {
         key = key.slice(0, -1);
@@ -58,7 +58,7 @@ export class Validator {
         // The rule is a set of rules delimited by the pipe character
         // (e.g. "isLength:2:5|isJSON")
         ok = rule.split(/\s?\|\s?/).every(cond => {
-          let [funcName, ...rest] = cond.split(':');
+          const [funcName, ...rest] = cond.split(':');
           return (validator as any)[funcName](value, ...rest);
         });
       } else if (rule instanceof Function) {
@@ -76,7 +76,7 @@ export class Validator {
       if (ok) {
         if (typeof normalizer === 'string') {
           normalizer.split(/\s?\|\s?/).forEach(norm => {
-            let [funcName, ...rest] = norm.split(':');
+            const [funcName, ...rest] = norm.split(':');
             value = (validator as any)[funcName](value, ...rest);
           });
         } else if (normalizer instanceof Function) {

@@ -130,7 +130,7 @@ export default class SolidFigureTool extends ToolBaseClass implements Tool {
       ? new Vector3().fromArray(max)
       : new Vector3().fromArray(min);
 
-    var fig: SolidFigure;
+    let fig: SolidFigure;
     switch (this.figureType) {
       case 'ellipsoid':
         fig = new Ellipsoid();

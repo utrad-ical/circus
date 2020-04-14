@@ -25,7 +25,7 @@ interface glMatrix {
    */
   toRadian(a: number): number;
 }
-declare var glMatrix: glMatrix;
+declare let glMatrix: glMatrix;
 
 declare module 'gl-matrix' {
   type floats = number[];

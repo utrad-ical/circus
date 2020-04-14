@@ -12,8 +12,8 @@ export default function resize(
     new Vector3().fromArray(originalBoundingBox3[0]),
     new Vector3().fromArray(originalBoundingBox3[1])
   ];
-  var newMin: Vector3;
-  var newMax: Vector3;
+  let newMin: Vector3;
+  let newMax: Vector3;
 
   switch (handleType) {
     case 'nw-resize':

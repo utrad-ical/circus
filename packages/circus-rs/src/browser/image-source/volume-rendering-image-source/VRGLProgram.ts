@@ -344,8 +344,8 @@ export default class VRGLProgram extends GLProgramBase {
       [0.0, 0.0, 1.0, 1.0] // Left face  ... BLUE
     ];
     let volumeVertexColors: number[] = [];
-    for (let i in colors) {
-      let color = colors[i];
+    for (const i in colors) {
+      const color = colors[i];
       for (let j = 0; j < 4; j++) {
         volumeVertexColors = volumeVertexColors.concat(color);
       }

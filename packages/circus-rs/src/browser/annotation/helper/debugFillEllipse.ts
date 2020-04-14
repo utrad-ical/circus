@@ -36,7 +36,7 @@ export default function debugFillEllipse(
       new Vector2().set(x + outBox2.min.x, y + outBox2.min.y)
     );
 
-  let imageData = ctx.createImageData(outSize.x, outSize.y);
+  const imageData = ctx.createImageData(outSize.x, outSize.y);
   let srcidx = 0,
     dstidx;
   for (let y = 0; y < outSize.y; y++) {

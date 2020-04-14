@@ -29,7 +29,7 @@ export function getInverse(matrix: number[][]): number[][] {
     for (var j = 0; j < n; j++) {
       if (i != j) {
         const buf = a[j][i];
-        for (var k = 0; k < n; k++) {
+        for (let k = 0; k < n; k++) {
           a[j][k] -= a[i][k] * buf;
           inv[j][k] -= inv[i][k] * buf;
         }

@@ -8,7 +8,7 @@ export default async function createPartialVolume(
   loadPriority: number = 0
 ): Promise<DicomVolume> {
   const { volume, imageMetadata, load } = volumeAccessor;
-  let loadImages: number[] = [];
+  const loadImages: number[] = [];
   const { start, end, delta } = partialVolumeDescriptor;
   for (let i = start; i <= end; i += delta) {
     loadImages.push(i);

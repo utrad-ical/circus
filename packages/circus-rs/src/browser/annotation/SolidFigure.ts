@@ -96,9 +96,9 @@ export default abstract class SolidFigure
   ): Box3 {
     const min = penddingBoundingBox.min;
     const max = penddingBoundingBox.max;
-    var newMin: Vector3;
-    var newMax: Vector3;
-    var adjustedValue;
+    let newMin: Vector3;
+    let newMax: Vector3;
+    let adjustedValue;
     switch (orientation) {
       case 'axial':
         adjustedValue = Math.min(max.x - min.x, max.y - min.y) / 2;
@@ -149,7 +149,7 @@ export default abstract class SolidFigure
     const penddingBoundingBox = new Box3()
       .expandByPoint(new Vector3().fromArray(min))
       .expandByPoint(new Vector3().fromArray(max));
-    var concreateBoundingBox: Box3;
+    let concreateBoundingBox: Box3;
     if (this.resetDepthOfBoundingBox && orientation) {
       concreateBoundingBox = SolidFigure.getBoundingBoxWithResetDepth(
         orientation,

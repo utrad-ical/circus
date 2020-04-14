@@ -9,7 +9,7 @@
 export function isTuple(count: number = 3): (input: string) => boolean {
   return (s: string) => {
     if (typeof s !== 'string') return false;
-    let toks = s.split(',');
+    const toks = s.split(',');
     if (toks.length !== count) return false;
     return !toks.some(tok => isNaN(parseFloat(tok)));
   };

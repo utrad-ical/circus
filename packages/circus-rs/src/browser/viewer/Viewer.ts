@@ -185,7 +185,7 @@ export default class Viewer extends EventEmitter {
     if (this.primaryEventTarget) {
       event.dispatch(this.primaryEventTarget);
     }
-    for (let annotation of [...this.composition.annotations].reverse()) {
+    for (const annotation of [...this.composition.annotations].reverse()) {
       event.dispatch(annotation);
     }
     if (this.backgroundEventTarget) {
@@ -224,7 +224,7 @@ export default class Viewer extends EventEmitter {
     if (!viewState || !comp) return;
     if (this.cachedSourceImage)
       this.renderImageDataToCanvas(this.cachedSourceImage);
-    for (let annotation of comp.annotations) {
+    for (const annotation of comp.annotations) {
       annotation.draw(this, viewState, {
         hover: this.hoveringAnnotation === annotation
       });
@@ -295,7 +295,7 @@ export default class Viewer extends EventEmitter {
    * Sets the view state and re-renders the viewer.
    */
   public setState(state: ViewState): void {
-    let prevState = extend(true, {}, this.viewState);
+    const prevState = extend(true, {}, this.viewState);
     this.viewState = extend(true, {}, state);
     this.emit('stateChange', prevState, state);
     this.render();

@@ -106,7 +106,7 @@ export default class VoxelCloud implements Annotation {
   public shrinkToMinimum(): boolean {
     if (!this.volume || !this.origin) throw new Error();
     // console.time('shrink to minimum bounding box');
-    let boundingBox = scanBoundingBox(this.volume, true);
+    const boundingBox = scanBoundingBox(this.volume, true);
     if (boundingBox === null) {
       return false; // No nonzero voxel
     }
@@ -287,7 +287,7 @@ export default class VoxelCloud implements Annotation {
       sectionImage
     );
 
-    let imageData = context.createImageData(outRectSize.x, outRectSize.y);
+    const imageData = context.createImageData(outRectSize.x, outRectSize.y);
     let srcidx = 0,
       pixel,
       dstidx;

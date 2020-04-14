@@ -4,12 +4,9 @@ const supertest = require('supertest');
 const {
   MemoryDicomFileRepository
 } = require('@utrad-ical/circus-lib/lib/dicom-file-repository');
-
 const createServer = require('../src/server/createServer').default;
-const {
-  default: prepareHelperModules,
-  disposeHelperModules
-} = require('../src/server/helper/prepareHelperModules');
+const createServiceLoader = require('../src/server/helper/createServiceLoader')
+  .default;
 
 const testConfig = {
   rsServer: {
@@ -70,9 +67,10 @@ describe('Server', () => {
     let httpServer;
     before(async () => {
       const { port } = testConfig;
-      const helpers = await prepareHelperModules(testConfig);
-      await fillMockImages(helpers.dicomFileRepository);
-      app = await createServer(testConfig, helpers);
+      const loader = createServiceLoader(testConfig);
+      const dicomFileRepository = await loader.get('dicomFileRepository');
+      await fillMockImages(dicomFileRepository);
+      app = await loader.get('rsServer');
       httpServer = app.listen(port, '0.0.0.0');
     });
     after(done => httpServer.close(done));
@@ -293,10 +291,10 @@ describe('Server', () => {
         }
       };
       const { port } = config;
-      const helpers = await prepareHelperModules(config);
-      await fillMockImages(helpers.dicomFileRepository);
-      app = await createServer(config, helpers);
-
+      const loader = createServiceLoader(config);
+      const dicomFileRepository = await loader.get('dicomFileRepository');
+      await fillMockImages(dicomFileRepository);
+      app = await loader.get('rsServer');
       httpServer = app.listen(port, '0.0.0.0');
     });
     after(done => httpServer.close(done));

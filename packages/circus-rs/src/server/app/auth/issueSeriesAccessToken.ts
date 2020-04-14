@@ -4,7 +4,7 @@ import { isDicomUid } from '@utrad-ical/circus-lib/lib/validation';
 import httpStatus from 'http-status';
 import validate from '../middleware/validate';
 import ipBasedAccessControl from '../middleware/ipBasedAccessControl';
-import { Authorizer } from '../../helper/prepareHelperModules';
+import { Authorizer } from '../../helper/createAuthorizer';
 import Logger from '@utrad-ical/circus-lib/lib/logger/Logger';
 
 type MiddlewareOptions = {

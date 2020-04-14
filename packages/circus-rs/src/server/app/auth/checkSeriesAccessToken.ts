@@ -1,6 +1,6 @@
 import koa from 'koa';
 import httpStatus from 'http-status';
-import { Authorizer } from '../../helper/prepareHelperModules';
+import { Authorizer } from '../../helper/createAuthorizer';
 import Logger from '@utrad-ical/circus-lib/lib/logger/Logger';
 
 type MiddlewareOptions = {

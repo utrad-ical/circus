@@ -1,15 +1,12 @@
-import { Configuration } from './Configuration';
-import prepareHelperModules from './helper/prepareHelperModules';
-import createServer from './createServer';
+import createServiceLoader from './helper/createServiceLoader';
+import config from './config';
 
 const main = async () => {
   console.log('CIRCUS RS is starting up...');
-
-  const config = require('./config').default as Configuration;
+  const loader = createServiceLoader(config);
   const { port } = config.rsServer.options;
-  const deps = await prepareHelperModules(config);
-  const { rsLogger } = deps;
-  const app = await createServer(config, deps);
+  const rsLogger = await loader.get('rsLogger');
+  const app = await loader.get('rsServer');
 
   try {
     const server = app.listen(port, '0.0.0.0');
@@ -19,13 +16,13 @@ const main = async () => {
       console.log(message);
     });
     server.on('close', async () => {
-      // await disposeHelperModules(deps);
+      await loader.dispose();
     });
   } catch (e) {
     console.error('Server failed to start');
     console.error(e);
     rsLogger.error(e);
-    // await disposeHelperModules(deps);
+    await loader.dispose();
     process.exit(1);
   }
 };

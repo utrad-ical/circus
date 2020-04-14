@@ -1,0 +1,55 @@
+import { DicomFileRepository } from '@utrad-ical/circus-lib/lib/dicom-file-repository';
+import dicomImageExtractor, {
+  DicomImageExtractor
+} from '@utrad-ical/circus-lib/lib/image-extractor/dicomImageExtractor';
+import Logger from '@utrad-ical/circus-lib/lib/logger/Logger';
+import ServiceLoader from '@utrad-ical/circus-lib/lib/ServiceLoader';
+import path from 'path';
+import { Configuration } from '../Configuration';
+import { Counter } from './createCounter';
+import { VolumeProvider } from './createVolumeProvider';
+import ImageEncoder from './image-encoder/ImageEncoder';
+import Koa from 'koa';
+
+export interface RsServices {
+  readonly rsServer: Koa;
+  readonly rsLogger: Logger;
+  readonly counter: Counter;
+  readonly dicomFileRepository: DicomFileRepository;
+  readonly dicomImageExtractor: DicomImageExtractor;
+  readonly imageEncoder: ImageEncoder;
+  readonly volumeProvider: VolumeProvider;
+}
+
+const createServiceLoader = (
+  config: Configuration
+): ServiceLoader<RsServices> => {
+  const loader = new ServiceLoader<RsServices>(config as any);
+  loader.registerDirectory(
+    'rsLogger',
+    '@utrad-ical/circus-lib/lib/logger',
+    'NullLogger'
+  );
+  loader.registerDirectory(
+    'dicomFileRepository',
+    '@utrad-ical/circus-lib/lib/dicom-file-repository',
+    'MemoryDicomFileRepository'
+  );
+  loader.registerDirectory(
+    'imageEncoder',
+    path.join(__dirname, './image-encoder'),
+    'PngJsImageEncoder'
+  );
+  loader.registerModule('counter', path.join(__dirname, 'createCounter'));
+  loader.registerFactory('dicomImageExtractor', async () =>
+    dicomImageExtractor()
+  );
+  loader.registerModule(
+    'volumeProvider',
+    path.join(__dirname, 'createVolumeProvider')
+  );
+  loader.registerModule('rsServer', path.join(__dirname, '../createServer'));
+  return loader;
+};
+
+export default createServiceLoader;

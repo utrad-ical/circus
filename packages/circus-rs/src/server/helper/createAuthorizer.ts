@@ -1,6 +1,11 @@
-import { Authorizer } from './prepareHelperModules';
 import AuthorizationCache from './auth/AuthorizationCache';
 import { generateAccessToken } from './auth/generateAccessToken';
+
+export interface Authorizer {
+  issueToken: (target: string) => Promise<string | void>;
+  checkToken: (token: string, target?: string) => Promise<boolean>;
+  dispose?: () => Promise<void>;
+}
 
 export default function createAuthorizer(config: any): Authorizer {
   const authorizationCache = new AuthorizationCache(config);

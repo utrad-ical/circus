@@ -56,8 +56,8 @@ function dicomImage(file = 'CT-MONO2-16-brain') {
   });
 }
 
-async function fillMockImages(repository) {
-  const series = await repository.getSeries('1.2.3.4.5');
+async function fillMockImages(dicomFileRepository) {
+  const series = await dicomFileRepository.getSeries('1.2.3.4.5');
   const image = await dicomImage();
   for (let i = 1; i <= MOCK_IMAGE_COUNT; i++) {
     await series.save(i, image);
@@ -71,7 +71,7 @@ describe('Server', () => {
     before(async () => {
       const { port } = testConfig;
       const helpers = await prepareHelperModules(testConfig);
-      await fillMockImages(helpers.repository);
+      await fillMockImages(helpers.dicomFileRepository);
       app = await createServer(testConfig, helpers);
       httpServer = app.listen(port, '0.0.0.0');
     });
@@ -294,7 +294,7 @@ describe('Server', () => {
       };
       const { port } = config;
       const helpers = await prepareHelperModules(config);
-      await fillMockImages(helpers.repository);
+      await fillMockImages(helpers.dicomFileRepository);
       app = await createServer(config, helpers);
 
       httpServer = app.listen(port, '0.0.0.0');

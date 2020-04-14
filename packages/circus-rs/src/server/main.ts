@@ -1,7 +1,5 @@
 import { Configuration } from './Configuration';
-import prepareHelperModules, {
-  disposeHelperModules
-} from './helper/prepareHelperModules';
+import prepareHelperModules from './helper/prepareHelperModules';
 import createServer from './createServer';
 
 const main = async () => {

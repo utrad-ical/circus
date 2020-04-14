@@ -14,12 +14,12 @@ import ServiceLoader from '@utrad-ical/circus-lib/lib/ServiceLoader';
 /**
  * This is a simple facade interface that aggregates helper modules
  */
-export interface AppHelpers {
+export interface RsServices {
   readonly rsLogger: Logger;
   readonly counter: Counter;
-  readonly repository?: DicomFileRepository;
-  readonly imageEncoder?: ImageEncoder;
-  readonly volumeProvider?: VolumeProvider;
+  readonly dicomFileRepository: DicomFileRepository;
+  readonly imageEncoder: ImageEncoder;
+  readonly volumeProvider: VolumeProvider;
 }
 
 export interface Authorizer {
@@ -30,7 +30,7 @@ export interface Authorizer {
 
 export default async function prepareHelperModules(
   config: Configuration
-): Promise<AppHelpers> {
+): Promise<RsServices> {
   const loader = new ServiceLoader<{
     rsLogger: Logger;
     imageEncoder: ImageEncoder;
@@ -64,16 +64,15 @@ export default async function prepareHelperModules(
   );
 
   const rsLogger = await loader.get('rsLogger');
-
   const counter = await loader.get('counter');
-  const repository = await loader.get('dicomFileRepository');
+  const dicomFileRepository = await loader.get('dicomFileRepository');
   const imageEncoder = await loader.get('imageEncoder');
-  let volumeProvider = await loader.get('volumeProvider');
+  const volumeProvider = await loader.get('volumeProvider');
 
   return {
     rsLogger,
     counter,
-    repository,
+    dicomFileRepository,
     imageEncoder,
     volumeProvider
   };

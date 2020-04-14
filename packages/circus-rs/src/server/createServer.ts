@@ -4,7 +4,7 @@ import Router from 'koa-router';
 import koaJson from 'koa-json';
 
 import { Configuration } from './Configuration';
-import { AppHelpers } from './helper/prepareHelperModules';
+import { RsServices } from './helper/prepareHelperModules';
 
 // middleware
 import cors from './app/middleware/cors';
@@ -29,7 +29,7 @@ import createAuthorizer from './helper/createAuthorizer';
  */
 const createServer: FunctionService<koa> = async (
   options: Configuration,
-  deps: AppHelpers
+  deps: RsServices
 ) => {
   const { authorization, globalIpFilter } = options.rsServer.options;
   const { rsLogger, counter, imageEncoder, volumeProvider } = deps;

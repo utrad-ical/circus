@@ -1,11 +1,11 @@
 import koa from 'koa';
-import { AppHelpers } from '../helper/prepareHelperModules';
+import { RsServices } from '../helper/prepareHelperModules';
 import { AsyncCachedLoader } from '../../common/asyncMemoize';
 import { VolumeAccessor } from '../helper/createVolumeProvider';
 
 type MiddlewareOptions = {
   config: any;
-  modules: AppHelpers;
+  modules: RsServices;
 };
 const startUpTime: Date = new Date(); // The time this module was loaded
 

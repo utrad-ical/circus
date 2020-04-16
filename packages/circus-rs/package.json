@@ -5,7 +5,7 @@
     "start": "node ./server.js",
     "debug": "nodemon --inspect ./server.js",
     "devserver": "webpack-dev-server",
-    "test": "mocha",
+    "test": "jest",
     "build": "webpack",
     "watch": "webpack --watch",
     "build-npm": "tsc && cp src/browser/image-source/volume-rendering-image-source/*.{vert,frag} lib/browser/image-source/volume-rendering-image-source",

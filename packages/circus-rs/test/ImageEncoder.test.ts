@@ -1,11 +1,10 @@
-const assert = require('chai').assert;
-
 const encoders = ['PngJsImageEncoder' /*'NodePngImageEncoder'*/];
+import ImageEncoder from '../src/server/helper/image-encoder/ImageEncoder';
 
-describe('ImageEncoder', function() {
-  let originalImage;
+describe('ImageEncoder', () => {
+  let originalImage: Buffer;
 
-  before(function() {
+  beforeEach(() => {
     originalImage = Buffer.alloc(16 * 16);
     for (let x = 0; x < 16; x++) {
       for (let y = 0; y < 16; y++) {
@@ -14,22 +13,22 @@ describe('ImageEncoder', function() {
     }
   });
 
-  encoders.forEach(function(enc) {
+  encoders.forEach(enc => {
     const testName = 'must encode image to PNG using ' + enc;
-    let encModule;
+    let encModule: any;
     try {
       encModule = require('../src/server/helper/image-encoder/' + enc).default;
     } catch (e) {
       it.skip(testName);
       return;
     }
-    it(testName, function(done) {
-      encModule().then(encoder =>
+    test(testName, done => {
+      encModule().then((encoder: ImageEncoder) =>
         encoder.write(originalImage, 16, 16).then(out => {
-          out.on('finish', function() {
+          out.on('finish', () => {
             const hdr = out.read(8).toString('hex');
             // The fixed 10-byte PNG header
-            assert.equal(hdr, '89504e470d0a1a0a');
+            expect(hdr).toBe('89504e470d0a1a0a');
             done();
           });
         })

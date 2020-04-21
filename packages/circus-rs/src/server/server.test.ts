@@ -26,7 +26,7 @@ const axios = _axios.create({
   adapter // Makes Axios use Node's http, instead of DOM XHR
 });
 
-const testdir = path.join(__dirname, '../../test/test-dicom/');
+const testdir = path.join(__dirname, '../../test-data/dicom/');
 
 const dicomImage = (file = 'CT-MONO2-16-brain') => {
   return new Promise<Buffer>(resolve => {

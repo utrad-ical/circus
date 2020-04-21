@@ -1,10 +1,14 @@
 import supertest from 'supertest';
-import createServiceLoader from '../src/server/helper/createServiceLoader';
+import createServiceLoader, {
+  RsServices
+} from '../src/server/helper/createServiceLoader';
 import fs from 'fs';
 import zlib from 'zlib';
 import _axios from 'axios';
 import adapter from 'axios/lib/adapters/http';
 import { Server } from 'http';
+import { ServiceLoader } from '@utrad-ical/circus-lib';
+import { DicomFileRepository } from '@utrad-ical/circus-lib/lib/dicom-file-repository';
 
 const port = 1024;
 
@@ -25,8 +29,8 @@ const axios = _axios.create({
 const testdir = __dirname + '/test-dicom/';
 const MOCK_IMAGE_COUNT = 20;
 
-function dicomImage(file = 'CT-MONO2-16-brain') {
-  return new Promise((resolve, ng) => {
+const dicomImage = (file = 'CT-MONO2-16-brain') => {
+  return new Promise<Buffer>(resolve => {
     try {
       const zippedFileContent = fs.readFileSync(testdir + file + '.gz');
       zlib.unzip(zippedFileContent, function(err, fileContent) {
@@ -38,22 +42,22 @@ function dicomImage(file = 'CT-MONO2-16-brain') {
       resolve(fileContent);
     }
   });
-}
+};
 
-async function fillMockImages(dicomFileRepository) {
+const fillMockImages = async (dicomFileRepository: DicomFileRepository) => {
   const series = await dicomFileRepository.getSeries('1.2.3.4.5');
   const image = await dicomImage();
   for (let i = 1; i <= MOCK_IMAGE_COUNT; i++) {
     await series.save(i, image);
   }
-}
+};
 
 describe('always', () => {
   /** @type Server */
-  let httpServer;
-  let loader;
+  let httpServer: Server;
+  let loader: ServiceLoader<RsServices>;
   beforeAll(async () => {
-    loader = createServiceLoader(testConfig);
+    loader = createServiceLoader(testConfig as any);
     const dicomFileRepository = await loader.get('dicomFileRepository');
     await fillMockImages(dicomFileRepository);
     const app = await loader.get('rsServer');
@@ -78,7 +82,7 @@ describe('always', () => {
     expect(res.data).toMatchObject({ status: 'Running' });
   });
 
-  it('must reject invalid access using globalIpFilter', function(done) {
+  it('must reject invalid access using globalIpFilter', function(done: Function) {
     supertest(httpServer)
       .get('/status')
       .set('X-Forwarded-For', '127.0.0.11') // change IP
@@ -86,7 +90,7 @@ describe('always', () => {
       .end(done);
   });
 
-  it('must return 404 for nonexistent route', function(done) {
+  it('must return 404 for nonexistent route', function(done: Function) {
     supertest(httpServer)
       .get('/foobar')
       .expect(404)
@@ -94,10 +98,10 @@ describe('always', () => {
   });
 
   describe('series middleware', function() {
-    it('must return valid access-control headers', function(done) {
+    it('must return valid access-control headers', function(done: Function) {
       supertest(httpServer)
         .options('/series/1.2.3.4.5/metadata')
-        .expect(res => {
+        .expect((res: any) => {
           const { header } = res;
           if (
             !('access-control-allow-origin' in header) ||
@@ -118,7 +122,7 @@ describe('always', () => {
         // supertest(httpServer)
         //   .get('/series/1.2.3.4.5/metadata')
         //   .expect(200)
-        //   .expect(res => {
+        //   .expect((res: any) => {
         //     if (res.body.estimatedWindow !== undefined)
         //       throw new Error('Invalid implemention');
         //   })
@@ -126,11 +130,11 @@ describe('always', () => {
         //   .end(done);
       });
 
-      test('must return metadata without estimated window if estimatedWindow paramator is "none"', function(done) {
+      test('must return metadata without estimated window if estimatedWindow paramator is "none"', function(done: Function) {
         supertest(httpServer)
           .get('/series/1.2.3.4.5/metadata')
           .expect(200)
-          .expect(res => {
+          .expect((res: any) => {
             if (res.body.estimatedWindow !== undefined)
               throw new Error('Invalid implemention');
           })
@@ -138,11 +142,11 @@ describe('always', () => {
           .end(done);
       });
 
-      it('must return metadata with estimated window which was calculated by "first" algorythm', function(done) {
+      it('must return metadata with estimated window which was calculated by "first" algorythm', function(done: Function) {
         supertest(httpServer)
           .get('/series/1.2.3.4.5/metadata?estimateWindow=first')
           .expect(200)
-          .expect(res => {
+          .expect((res: any) => {
             if (res.body.estimatedWindow === undefined)
               throw new Error('Invalid implemention');
           })
@@ -150,11 +154,11 @@ describe('always', () => {
           .end(done);
       });
 
-      it('must return metadata with estimated window which was calculated by "center" algorythm', function(done) {
+      it('must return metadata with estimated window which was calculated by "center" algorythm', function(done: Function) {
         supertest(httpServer)
           .get('/series/1.2.3.4.5/metadata?estimateWindow=center')
           .expect(200)
-          .expect(res => {
+          .expect((res: any) => {
             if (res.body.estimatedWindow === undefined)
               throw new Error('Invalid implemention');
           })
@@ -162,11 +166,11 @@ describe('always', () => {
           .end(done);
       });
 
-      it('must return metadata with estimated window which was calculated by "full" algorythm', function(done) {
+      it('must return metadata with estimated window which was calculated by "full" algorythm', function(done: Function) {
         supertest(httpServer)
           .get('/series/1.2.3.4.5/metadata?estimateWindow=full')
           .expect(200)
-          .expect(res => {
+          .expect((res: any) => {
             if (res.body.estimatedWindow === undefined)
               throw new Error('Invalid implemention');
           })
@@ -174,11 +178,11 @@ describe('always', () => {
           .end(done);
       });
 
-      it('must return partial metadata', function(done) {
+      it('must return partial metadata', function(done: Function) {
         supertest(httpServer)
           .get('/series/1.2.3.4.5/metadata?start=5&end=15&delta=2')
           .expect(200)
-          .expect(res => {
+          .expect((res: any) => {
             const { voxelCount } = res.body;
             if (voxelCount[2] !== [5, 7, 9, 11, 13, 15].length)
               throw new Error('Invalid partial metadata');
@@ -191,21 +195,21 @@ describe('always', () => {
     describe('volume', () => {
       let fullVolumeSize = Infinity;
 
-      it('must return volume', function(done) {
+      it('must return volume', function(done: Function) {
         supertest(httpServer)
           .get('/series/1.2.3.4.5/volume')
           .expect(200)
-          .expect(res => (fullVolumeSize = res.header['content-length']))
+          .expect((res: any) => (fullVolumeSize = res.header['content-length']))
           .expect('Content-Type', 'application/octet-stream')
           .end(done);
       });
 
-      it('must return partial volume', function(done) {
+      it('must return partial volume', function(done: Function) {
         supertest(httpServer)
           .get('/series/1.2.3.4.5/volume?start=5&end=15&delta=2')
           .expect(200)
           .expect('Content-Type', 'application/octet-stream')
-          .expect(res => {
+          .expect((res: any) => {
             const a = res.header['content-length'] / fullVolumeSize;
             const b = [5, 7, 9, 11, 13, 15].length / MOCK_IMAGE_COUNT;
             if (a !== b) throw new Error('Invalid implemention');
@@ -215,7 +219,7 @@ describe('always', () => {
     });
 
     describe('scan', () => {
-      it('must return oblique image in binary format', function(done) {
+      it('must return oblique image in binary format', function(done: Function) {
         const test = supertest(httpServer).get('/series/1.2.3.4.5/scan');
         // if (token) test.set('Authorization', 'Bearer ' + token);
         test
@@ -230,7 +234,7 @@ describe('always', () => {
           .end(done);
       });
 
-      it('must return oblique image from partial volume', function(done) {
+      it('must return oblique image from partial volume', function(done: Function) {
         const test = supertest(httpServer).get('/series/1.2.3.4.5/scan');
         // if (token) test.set('Authorization', 'Bearer ' + token);
         test
@@ -249,7 +253,7 @@ describe('always', () => {
           .end(done);
       });
 
-      it('must return oblique image in PNG format', function(done) {
+      it('must return oblique image in PNG format', function(done: Function) {
         const test = supertest(httpServer).get('/series/1.2.3.4.5/scan');
         // if (token) test.set('Authorization', 'Bearer ' + token);
         test
@@ -271,8 +275,8 @@ describe('always', () => {
 });
 
 describe('with authentication', () => {
-  let httpServer;
-  let loader;
+  let httpServer: Server;
+  let loader: ServiceLoader<RsServices>;
   beforeAll(async () => {
     const config = {
       ...testConfig,
@@ -305,8 +309,8 @@ describe('with authentication', () => {
     await loader.dispose();
   });
 
-  let token;
-  it('must reject token request from invalid IP', function(done) {
+  let token: string;
+  it('must reject token request from invalid IP', function(done: Function) {
     supertest(httpServer)
       .get('/token')
       .set('X-Forwarded-For', '127.0.0.2')
@@ -314,11 +318,11 @@ describe('with authentication', () => {
       .end(done);
   });
 
-  it('must issue valid token', function(done) {
+  it('must issue valid token', function(done: Function) {
     supertest(httpServer)
       .get('/token')
       .query({ series: '1.2.3.4.5' })
-      .expect(res => {
+      .expect((res: any) => {
         let result;
         ({ result, token } = res.body);
         if (result !== 'OK') throw new Error('Issuing token failed');
@@ -327,14 +331,14 @@ describe('with authentication', () => {
       .end(done);
   });
 
-  it('must return authentication error if token not passed', function(done) {
+  it('must return authentication error if token not passed', function(done: Function) {
     supertest(httpServer)
       .get('/series/1.2.3.4.5/metadata')
       .expect(401)
       .end(done);
   });
 
-  it('must return authentication error if passed token is not matched', function(done) {
+  it('must return authentication error if passed token is not matched', function(done: Function) {
     supertest(httpServer)
       .get('/series/8.8.8.8.8/metadata')
       .set('Authorization', 'Bearer ' + token)
@@ -342,7 +346,7 @@ describe('with authentication', () => {
       .end(done);
   });
 
-  it('must return content if token is valid', function(done) {
+  it('must return content if token is valid', function(done: Function) {
     supertest(httpServer)
       .get('/series/1.2.3.4.5/metadata')
       .set('Authorization', 'Bearer ' + token)

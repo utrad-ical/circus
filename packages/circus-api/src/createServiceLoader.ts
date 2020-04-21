@@ -1,6 +1,9 @@
 import configureCsCoreServiceLoader, {
   Services as CsCoreServices
 } from '@utrad-ical/circus-cs-core/src/configureServiceLoader';
+import configureRsServiceLoader, {
+  RsServices
+} from '@utrad-ical/circus-rs/src/server/configureServiceLoader';
 import ServiceLoader from '@utrad-ical/circus-lib/lib/ServiceLoader';
 import path from 'path';
 import {
@@ -20,27 +23,29 @@ import createDicomUtilityRunner, {
   DicomUtilityRunner
 } from './utils/createDicomUtilityRunner';
 
-export type Services = CsCoreServices & {
-  app: Koa;
-  db: DisposableDb;
-  apiLogger: Logger;
-  validator: Validator;
-  models: Models;
-  dicomImporter: DicomImporter;
-  rs: CircusRs;
-  rsRoutes: Koa.Middleware;
-  volumeProvider: VolumeProvider;
-  blobStorage: Storage;
-  dicomTagReader: DicomTagReader;
-  dicomUtilityRunner: DicomUtilityRunner;
-};
+export type Services = CsCoreServices &
+  RsServices & {
+    app: Koa;
+    db: DisposableDb;
+    apiLogger: Logger;
+    validator: Validator;
+    models: Models;
+    dicomImporter: DicomImporter;
+    rs: CircusRs;
+    rsRoutes: Koa.Middleware;
+    volumeProvider: VolumeProvider;
+    blobStorage: Storage;
+    dicomTagReader: DicomTagReader;
+    dicomUtilityRunner: DicomUtilityRunner;
+  };
 
 export type ApiServiceLoader = ServiceLoader<Services>;
 
 const createServiceLoader = async (config: any) => {
   const loader = new ServiceLoader<Services>(config);
   // Register modules related to CS Core
-  configureCsCoreServiceLoader(loader);
+  configureCsCoreServiceLoader(loader as any);
+  configureRsServiceLoader(loader);
   // Register our modules
   loader.registerModule('app', path.join(__dirname, '/createApp'));
   loader.registerModule('db', path.join(__dirname, './db/connectDb'));

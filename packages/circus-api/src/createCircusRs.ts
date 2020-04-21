@@ -1,12 +1,11 @@
 import Router from 'koa-router';
-import prepareHelperModules from '@utrad-ical/circus-rs/src/server/helper/prepareHelperModules';
 import seriesRoutes from '@utrad-ical/circus-rs/src/server/app/series/seriesRoutes';
 import Logger from '@utrad-ical/circus-lib/lib/logger/Logger';
-import { DicomFileRepository } from '@utrad-ical/circus-lib/lib/dicom-file-repository';
 import koa from 'koa';
 import { VolumeProvider } from '@utrad-ical/circus-rs/src/server/helper/createVolumeProvider';
 import { FunctionService } from '@utrad-ical/circus-lib';
 import { CircusRs } from './interface';
+import ImageEncoder from '@utrad-ical/circus-rs/src/server/helper/image-encoder/ImageEncoder';
 
 /**
  * Creates a series router.
@@ -15,31 +14,26 @@ const createCircusRs: FunctionService<
   CircusRs,
   {
     apiLogger: Logger;
-    dicomFileRepository: DicomFileRepository;
+    volumeProvider: VolumeProvider;
+    imageEncoder: ImageEncoder;
   }
-> = async (options, { apiLogger, dicomFileRepository }) => {
-  const helpers = await prepareHelperModules({
-    dicomFileRepository: { module: dicomFileRepository },
-    logger: { module: apiLogger },
-    imageEncoder: {
-      module: 'PngJsImageEncoder',
-      options: {}
-    },
-    cache: {
-      memoryThreshold: 2147483648,
-      maxAge: 3600
-    }
-  } as any);
-
+> = async (options, { apiLogger, volumeProvider, imageEncoder }) => {
   const router = new Router();
-  router.use('/series/:sid', seriesRoutes(helpers as any));
+  router.use(
+    '/series/:sid',
+    seriesRoutes({
+      logger: apiLogger,
+      volumeProvider,
+      imageEncoder
+    }) as any
+  );
   return {
-    routes: router.routes() as koa.Middleware,
-    volumeProvider: helpers.volumeProvider as VolumeProvider
+    routes: (router.routes() as any) as koa.Middleware,
+    volumeProvider
   };
 };
 
-createCircusRs.dependencies = ['apiLogger', 'dicomFileRepository'];
+createCircusRs.dependencies = ['volumeProvider', 'apiLogger', 'imageEncoder'];
 
 export default createCircusRs;
 

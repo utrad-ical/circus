@@ -237,15 +237,16 @@ function extractUncompressedPixels(
 
   let minValue = pxInfo.maxLevel;
   let maxValue = pxInfo.minLevel;
+  const pixelRepresentation = dataset.uint16('x00280103');
+  const photometricInterpretation = dataset.string('x00280004');
+  const isMonochrome1 = photometricInterpretation === 'MONOCHROME1';
   for (let i = 0; i < columns * rows; i++) {
     const rawVal = buffer[i];
-    const pixelRepresentation = dataset.uint16('x00280103');
     let val =
       pixelRepresentation === 0
         ? rawVal
         : convertComplement(rawVal, bitsStored, highBit);
-    const photometricInterpretation = dataset.string('x00280004');
-    if (photometricInterpretation === 'MONOCHROME1')
+    if (isMonochrome1)
       val = invertPixelValue(val, bitsStored, pixelRepresentation);
     resultArray[i] = val;
     if (val < minValue) minValue = val;

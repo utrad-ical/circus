@@ -14,10 +14,7 @@ export default function ipBasedAccessControl(
   options: MiddlewareOptions
 ): koa.Middleware {
   const { rsLogger, allowPattern } = options;
-  return async function(
-    ctx: koa.DefaultContext,
-    next: koa.Next
-  ): Promise<void> {
+  return async (ctx, next) => {
     const req = ctx.request;
     const ip: string = req.ip;
     if (!ip.match(allowPattern)) {

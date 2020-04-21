@@ -72,8 +72,9 @@ const createServer: FunctionService<koa> = async (
       '/series/:sid',
       checkSeriesAccessToken({ rsLogger, authorizer })
     );
-    (app as any).dispose = async () =>
-      authorizer.dispose && (await authorizer.dispose());
+    (app as any).dispose = async () => {
+      await authorizer.dispose!();
+    };
   }
 
   // series

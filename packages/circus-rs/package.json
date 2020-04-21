@@ -37,7 +37,7 @@
     "@types/pngjs": "^3.4.2",
     "@types/three": "^0.93.15",
     "@types/validator": "^6.2.0",
-    "@utrad-ical/circus-lib": "^0.15.2",
+    "@utrad-ical/circus-lib": "^0.15.3",
     "async-cache": "^1.1.0",
     "cosmiconfig": "^6.0.0",
     "css-loader": "^0.28.7",

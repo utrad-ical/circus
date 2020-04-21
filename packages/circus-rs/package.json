@@ -86,7 +86,6 @@
     "mocha": "^4.0.1",
     "prettier": "^1.15.3",
     "rimraf": "^2.6.2",
-    "supertest": "^3.0.0",
     "svg2ttf": "^4.1.0",
     "svgicons2svgfont": "^5.0.2",
     "tslib": "^1.9.3",

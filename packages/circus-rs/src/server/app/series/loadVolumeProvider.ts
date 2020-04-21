@@ -48,7 +48,6 @@ export default function loadVolumeProvider({
       volumeAccessor = await volumeProvider(series);
     } catch (err) {
       logger.error(err);
-      console.error(err);
       ctx.throw(httpStatus.NOT_FOUND, 'Series could not be loaded');
     }
 

@@ -1,4 +1,4 @@
-import AsyncPriorityCaller from '../src/common/PriorityIntegerCaller';
+import AsyncPriorityCaller from './PriorityIntegerCaller';
 import { multirange } from 'multi-integer-range';
 
 const sleep = () => new Promise(resolve => setTimeout(resolve, 10));

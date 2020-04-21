@@ -1,8 +1,8 @@
-import RawData from '../src/common/RawData';
-import { PixelFormat } from '../src/common/PixelFormat';
-import * as vu from '../src/browser/volume-util';
+import RawData from '../common/RawData';
+import { PixelFormat } from '../common/PixelFormat';
+import * as vu from './volume-util';
 
-describe('scanBoundingBox()', () => {
+describe('scanBoundingBox', () => {
   test('should return null for volume with all zeros', () => {
     const vol = new RawData([8, 8, 8], PixelFormat.Int8);
     const box = vu.scanBoundingBox(vol);

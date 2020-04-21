@@ -237,7 +237,7 @@ describe('with authentication', () => {
   let stopServer: Function;
   beforeAll(async () => {
     const config = testConfig();
-    config.rsServer.options.authorization = {
+    config.rsServer!.options!.authorization = {
       enabled: true,
       tokenRequestIpFilter: '(^|:?)127.0.0.1$',
       expire: 1800

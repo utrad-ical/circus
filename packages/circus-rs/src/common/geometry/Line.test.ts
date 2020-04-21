@@ -1,7 +1,4 @@
-import {
-  intersectsDirectedSegment,
-  DirectedSegment
-} from '../src/common/geometry/Line';
+import { intersectsDirectedSegment, DirectedSegment } from './Line';
 import { Vector2 } from 'three';
 
 describe('intersectsDirectedSegment', () => {

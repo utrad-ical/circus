@@ -1,4 +1,4 @@
-import * as polygon from '../src/common/geometry/Polygon';
+import * as polygon from './Polygon';
 import { Vector2 } from 'three';
 
 describe('intersectsPolygon', () => {

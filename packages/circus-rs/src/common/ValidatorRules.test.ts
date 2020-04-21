@@ -1,6 +1,6 @@
-import * as vr from '../src/common/ValidatorRules';
+import * as vr from './ValidatorRules';
 
-it('#isTuple', () => {
+it('isTuple', () => {
   const t3 = vr.isTuple(3);
   expect(t3('1,2,3')).toBe(true);
   expect(t3('1.1,2.5,-3.8')).toBe(true);
@@ -10,7 +10,7 @@ it('#isTuple', () => {
   expect(t3('')).toBe(false);
 });
 
-it('#parseTuple', () => {
+it('parseTuple', () => {
   let p3 = vr.parseTuple(3, true);
   expect(p3('1,3,5')).toEqual([1, 3, 5]);
   expect(p3('1,-3,5.7')).toEqual([1, -3, 5]);
@@ -19,7 +19,7 @@ it('#parseTuple', () => {
   expect(p3('1.3,-3,5.7')).toEqual([1.3, -3, 5.7]);
 });
 
-it('#parseBoolean', () => {
+it('parseBoolean', () => {
   const b = vr.parseBoolean;
   expect(b('yes')).toBe(true);
   expect(b('1')).toBe(true);

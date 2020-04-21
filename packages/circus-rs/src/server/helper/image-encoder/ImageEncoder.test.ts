@@ -1,5 +1,5 @@
 const encoders = ['PngJsImageEncoder' /*'NodePngImageEncoder'*/];
-import ImageEncoder from '../src/server/helper/image-encoder/ImageEncoder';
+import ImageEncoder from './ImageEncoder';
 
 describe('ImageEncoder', () => {
   let originalImage: Buffer;
@@ -17,7 +17,7 @@ describe('ImageEncoder', () => {
     const testName = 'must encode image to PNG using ' + enc;
     let encModule: any;
     try {
-      encModule = require('../src/server/helper/image-encoder/' + enc).default;
+      encModule = require('./' + enc).default;
     } catch (e) {
       it.skip(testName);
       return;

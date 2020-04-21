@@ -1,5 +1,5 @@
-import RawData from '../src/common/RawData';
-import { PixelFormat } from '../src/common/PixelFormat';
+import RawData from './RawData';
+import { PixelFormat } from './PixelFormat';
 
 test('create binary data', () => {
   const raw = new RawData([8, 8, 8], PixelFormat.Binary);

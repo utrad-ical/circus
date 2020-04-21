@@ -1,4 +1,4 @@
-import { Validator } from '../src/common/Validator';
+import { Validator } from './Validator';
 
 describe('Validator', () => {
   test('must process string rule', () => {

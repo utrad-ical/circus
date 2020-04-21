@@ -1,5 +1,5 @@
 import { Vector3, Box3 } from 'three';
-import * as box from '../src/common/geometry/Box';
+import * as box from './Box';
 
 describe('intersectionOfBoxAndPlane', () => {
   const cube = new Box3(new Vector3(0, 0, 0), new Vector3(2, 2, 2));

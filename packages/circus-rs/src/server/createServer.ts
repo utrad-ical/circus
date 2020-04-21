@@ -3,7 +3,7 @@ import httpStatus from 'http-status';
 import Router from 'koa-router';
 import koaJson from 'koa-json';
 
-import { Configuration } from './Configuration';
+import { RsServerOptions } from './Configuration';
 import { RsServices } from './configureServiceLoader';
 
 // middleware
@@ -28,7 +28,7 @@ import createAuthorizer from './helper/createAuthorizer';
  * Create Koa App.
  */
 const createServer: FunctionService<koa> = async (
-  options: Configuration['rsServer']['options'],
+  options: RsServerOptions,
   deps: RsServices
 ) => {
   const { authorization, globalIpFilter } = options;
@@ -48,7 +48,7 @@ const createServer: FunctionService<koa> = async (
   // Adds an error handler which outputs all errors in JSON format
   app.use(errorHandler({ rsLogger }));
 
-  // Add global request handler
+  // Add global CORS handler
   app.use(cors());
 
   // Counts the number of requests
@@ -81,11 +81,7 @@ const createServer: FunctionService<koa> = async (
   if (volumeProvider && imageEncoder) {
     router.use(
       '/series/:sid',
-      seriesRoutes({
-        logger: rsLogger,
-        volumeProvider,
-        imageEncoder
-      })
+      seriesRoutes({ logger: rsLogger, volumeProvider, imageEncoder })
     );
   }
 

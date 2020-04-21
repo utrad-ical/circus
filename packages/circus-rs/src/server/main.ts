@@ -1,9 +1,11 @@
-import createServiceLoader from './helper/createServiceLoader';
+import { ServiceLoader } from '@utrad-ical/circus-lib';
 import config from './config';
+import configureServiceLoader, { RsServices } from './configureServiceLoader';
 
 const main = async () => {
   console.log('CIRCUS RS is starting up...');
-  const loader = createServiceLoader(config);
+  const loader = new ServiceLoader<RsServices>(config);
+  configureServiceLoader(loader);
   const { port } = config.rsServer.options;
   const rsLogger = await loader.get('rsLogger');
   const app = await loader.get('rsServer');

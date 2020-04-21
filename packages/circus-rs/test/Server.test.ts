@@ -1,6 +1,6 @@
-import createServiceLoader, {
+import configureServiceLoader, {
   RsServices
-} from '../src/server/helper/createServiceLoader';
+} from '../src/server/configureServiceLoader';
 import fs from 'fs';
 import zlib from 'zlib';
 import _axios from 'axios';
@@ -58,7 +58,8 @@ interface TestServer {
 }
 
 const startTestServer = async (config: any) => {
-  const loader = createServiceLoader(config);
+  const loader = new ServiceLoader<RsServices>(config);
+  configureServiceLoader(loader);
   const dicomFileRepository = await loader.get('dicomFileRepository');
   await fillMockImages(dicomFileRepository);
   const app = await loader.get('rsServer');

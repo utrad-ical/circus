@@ -4,7 +4,7 @@ import Router from 'koa-router';
 import koaJson from 'koa-json';
 
 import { Configuration } from './Configuration';
-import { RsServices } from './helper/createServiceLoader';
+import { RsServices } from './configureServiceLoader';
 
 // middleware
 import cors from './app/middleware/cors';

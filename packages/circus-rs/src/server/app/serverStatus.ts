@@ -1,5 +1,5 @@
 import koa from 'koa';
-import { RsServices } from '../helper/createServiceLoader';
+import { RsServices } from '../configureServiceLoader';
 import { AsyncCachedLoader } from '../../common/asyncMemoize';
 import { VolumeAccessor } from '../helper/createVolumeProvider';
 

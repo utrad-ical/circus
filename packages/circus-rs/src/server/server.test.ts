@@ -1,6 +1,4 @@
-import configureServiceLoader, {
-  RsServices
-} from '../src/server/configureServiceLoader';
+import configureServiceLoader, { RsServices } from './configureServiceLoader';
 import fs from 'fs';
 import zlib from 'zlib';
 import _axios from 'axios';
@@ -8,7 +6,8 @@ import adapter from 'axios/lib/adapters/http';
 import { Server } from 'http';
 import { ServiceLoader } from '@utrad-ical/circus-lib';
 import status from 'http-status';
-import { Configuration } from '../src/server/Configuration';
+import { Configuration } from './Configuration';
+import path from 'path';
 
 const port = 1024;
 
@@ -27,7 +26,7 @@ const axios = _axios.create({
   adapter // Makes Axios use Node's http, instead of DOM XHR
 });
 
-const testdir = __dirname + '/test-dicom/';
+const testdir = path.join(__dirname, '../../test/test-dicom/');
 
 const dicomImage = (file = 'CT-MONO2-16-brain') => {
   return new Promise<Buffer>(resolve => {

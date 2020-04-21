@@ -7,18 +7,19 @@ import _axios from 'axios';
 import adapter from 'axios/lib/adapters/http';
 import { Server } from 'http';
 import { ServiceLoader } from '@utrad-ical/circus-lib';
-import { DicomFileRepository } from '@utrad-ical/circus-lib/lib/dicom-file-repository';
 import status from 'http-status';
+import { Configuration } from '../src/server/Configuration';
 
 const port = 1024;
 
-const testConfig = {
-  rsServer: { options: { port, globalIpFilter: '(^|:?)127.0.0.1$' } },
-  rsLogger: { type: 'NullLogger' },
-  dicomFileRepository: { type: 'MemoryDicomFileRepository', options: {} },
-  imageEncoder: { type: 'PngJsImageEncoder', options: {} },
-  volumeProvider: { options: { cache: { memoryThreshold: 2147483648 } } }
-};
+const testConfig = () =>
+  ({
+    rsServer: { options: { port, globalIpFilter: '(^|:?)127.0.0.1$' } },
+    rsLogger: { type: 'NullLogger' },
+    dicomFileRepository: { type: 'MemoryDicomFileRepository', options: {} },
+    imageEncoder: { type: 'PngJsImageEncoder', options: {} },
+    volumeProvider: { options: { cache: { memoryThreshold: 2147483648 } } }
+  } as Configuration);
 
 const axios = _axios.create({
   baseURL: `http://localhost:${port}`,
@@ -27,7 +28,6 @@ const axios = _axios.create({
 });
 
 const testdir = __dirname + '/test-dicom/';
-const MOCK_IMAGE_COUNT = 20;
 
 const dicomImage = (file = 'CT-MONO2-16-brain') => {
   return new Promise<Buffer>(resolve => {
@@ -44,53 +44,39 @@ const dicomImage = (file = 'CT-MONO2-16-brain') => {
   });
 };
 
-const fillMockImages = async (dicomFileRepository: DicomFileRepository) => {
-  const series = await dicomFileRepository.getSeries('1.2.3.4.5');
-  const image = await dicomImage();
-  for (let i = 1; i <= MOCK_IMAGE_COUNT; i++) {
-    await series.save(i, image);
-  }
-};
-
-interface TestServer {
-  loader: ServiceLoader<RsServices>;
-  server: Server;
-}
-
 const startTestServer = async (config: any) => {
   const loader = new ServiceLoader<RsServices>(config);
   configureServiceLoader(loader);
+
+  // Fill mock images to dicom file repository
   const dicomFileRepository = await loader.get('dicomFileRepository');
-  await fillMockImages(dicomFileRepository);
+  const series = await dicomFileRepository.getSeries('1.2.3.4.5');
+  const image = await dicomImage();
+  for (let i = 1; i <= 20; i++) await series.save(i, image);
+
+  // Start app
   const app = await loader.get('rsServer');
   app.proxy = true;
-  return new Promise<TestServer>(resolve => {
+  const server = await new Promise<Server>(resolve => {
     const server = app.listen(port);
-    server.on('listening', () => resolve({ loader, server }));
+    server.on('listening', () => resolve(server));
   });
-};
 
-const stopHttpd = (server: Server) => {
-  return new Promise<void>(resolve => {
-    server.on('close', () => {
-      server.off('close', resolve);
-      resolve();
+  const stop = async () => {
+    await new Promise(resolve => {
+      server.on('close', resolve);
+      server.close();
     });
-    server.close();
-  });
-};
+    await loader.dispose();
+  };
 
-const stopTestServer = async (testServer: TestServer) => {
-  await stopHttpd(testServer.server);
-  await testServer.loader.dispose();
+  return stop;
 };
 
 describe('without auth', () => {
-  let testServer: TestServer;
-
-  beforeAll(async () => (testServer = await startTestServer(testConfig)));
-
-  afterAll(() => stopTestServer(testServer));
+  let stopServer: Function;
+  beforeAll(async () => (stopServer = await startTestServer(testConfig())));
+  afterAll(() => stopServer());
 
   test('status', async () => {
     const res = await axios.get('/status');
@@ -248,26 +234,19 @@ describe('without auth', () => {
 });
 
 describe('with authentication', () => {
-  let testServer: TestServer;
+  let stopServer: Function;
   beforeAll(async () => {
-    const config = {
-      ...testConfig,
-      rsServer: {
-        options: {
-          ...testConfig.rsServer.options,
-          authorization: {
-            enabled: true,
-            tokenRequestIpFilter: '(^|:?)127.0.0.1$',
-            expire: 1800
-          }
-        }
-      }
+    const config = testConfig();
+    config.rsServer.options.authorization = {
+      enabled: true,
+      tokenRequestIpFilter: '(^|:?)127.0.0.1$',
+      expire: 1800
     };
-    testServer = await startTestServer(config);
+    stopServer = await startTestServer(config);
   });
-  afterAll(() => stopTestServer(testServer));
+  afterAll(() => stopServer());
 
-  let tokenHeader: any;
+  let tokenHeader: { Authorization: string };
 
   test('reject token request from invalid IP', async () => {
     const res = await axios.get('/token', {
@@ -304,6 +283,3 @@ describe('with authentication', () => {
     expect(res.status).toBe(status.OK);
   });
 });
-
-// Todo:
-// requireEstimatedWindow=false

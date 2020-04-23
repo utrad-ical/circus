@@ -192,7 +192,10 @@ export const createApp: FunctionService<
     )
   );
   koa.use(mount('/login', compose([bodyParser(), oauth.token()])));
-  koa.use(mount('/rs', rsSeriesRoutes));
+
+  const rs = new Router();
+  rs.use('/series/:sid', rsSeriesRoutes as any);
+  koa.use(mount('/rs', rs.routes() as any));
 
   return koa;
 };

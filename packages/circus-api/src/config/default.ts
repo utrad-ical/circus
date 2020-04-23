@@ -1,5 +1,3 @@
-import path from 'path';
-
 // We use cosmiconfig to manage settings.
 // DO NOT DIRECTLY EDIT THIS FILE!!!
 
@@ -23,7 +21,7 @@ const defaults: Configuration = {
     options: {
       host: 'localhost',
       port: 8080,
-      pluginResultsDir: '/var/circus/plugin-results',
+      pluginResultsDir: '/var/circus/data/plugin-results',
       dicomImageServerUrl: 'http://localhost:8080/rs',
       debug: false,
       uploadFileSizeMaxBytes: 200 * 1024 * 1024
@@ -34,25 +32,19 @@ const defaults: Configuration = {
   },
   apiLogger: {
     type: 'FileLogger',
-    options: {
-      fileName: path.resolve(__dirname, '../../store/logs/circus-api')
-    }
+    options: { fileName: '/var/circus/data/logs/circus-api' }
   },
   blobStorage: {
     type: 'LocalStorage',
-    options: { root: '/var/circus/blobs' }
+    options: { root: '/var/circus/data/labels' }
   },
-  dicomTagReader: {
-    options: {}
-  },
+  dicomTagReader: { options: {} },
   dicomImporter: {
-    options: {
-      compression: 'pass'
-    }
+    options: { compression: 'pass' }
   },
   dicomUtilityRunner: {
     options: {
-      maxConcurrency: 4,
+      maxConcurrency: 3,
       dockerImage: dicomUtilityRunnerDockerImage
     }
   }

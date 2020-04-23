@@ -1,7 +1,7 @@
 import koa from 'koa';
 import compose from 'koa-compose';
 import compress from 'koa-compress';
-import { SeriesMiddlewareState } from './seriesRoutes';
+import { SeriesMiddlewareState } from './createSeriesRoutes';
 import DicomVolume from '../../../common/DicomVolume';
 import createPartialVolume from './createPartialVolume';
 

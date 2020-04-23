@@ -4,7 +4,7 @@ import { ValidatorRules } from '../../../common/Validator';
 import validate from '../middleware/validate';
 import { ViewWindow } from '../../../common/ViewWindow';
 import { PixelFormat } from '../../../common/PixelFormat';
-import { SeriesMiddlewareState } from './seriesRoutes';
+import { SeriesMiddlewareState } from './createSeriesRoutes';
 import MultiRange from 'multi-integer-range';
 import { VolumeAccessor } from '../../helper/createVolumeProvider';
 

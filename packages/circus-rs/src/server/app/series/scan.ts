@@ -11,7 +11,7 @@ import compress from 'koa-compress';
 import validate from '../middleware/validate';
 import { ValidatorRules } from '../../../common/Validator';
 import ImageEncoder from '../../helper/image-encoder/ImageEncoder';
-import { SeriesMiddlewareState } from './seriesRoutes';
+import { SeriesMiddlewareState } from './createSeriesRoutes';
 import RawData from '../../../common/RawData';
 import { multirange } from 'multi-integer-range';
 import PartialVolumeDescriptor from '@utrad-ical/circus-lib/lib/PartialVolumeDescriptor';

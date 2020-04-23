@@ -1,5 +1,3 @@
-import koa from 'koa';
-import { VolumeProvider } from '@utrad-ical/circus-rs/src/server/helper/createVolumeProvider';
 import { readDicomTags } from './utils/createDicomTagReader';
 import { CollectionAccessor } from './db/createCollectionAccessor';
 import mongo from 'mongodb';
@@ -12,11 +10,6 @@ export interface Validator {
 
 export interface DicomImporter {
   importDicom: (fileContent: ArrayBuffer, domain: string) => Promise<void>;
-}
-
-export interface CircusRs {
-  routes: koa.Middleware;
-  volumeProvider: VolumeProvider;
 }
 
 export type DicomTagReader = (

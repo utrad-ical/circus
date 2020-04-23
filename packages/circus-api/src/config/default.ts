@@ -15,6 +15,9 @@ export interface Configuration {
   };
 }
 
+export const dicomUtilityRunnerDockerImage =
+  'circuscad/dicom_utility:2.0.0-beta3';
+
 const defaults: Configuration = {
   app: {
     options: {
@@ -50,7 +53,7 @@ const defaults: Configuration = {
   dicomUtilityRunner: {
     options: {
       maxConcurrency: 4,
-      dockerImage: 'circuscad/dicom_utility:2.0.0-beta3'
+      dockerImage: dicomUtilityRunnerDockerImage
     }
   }
 };

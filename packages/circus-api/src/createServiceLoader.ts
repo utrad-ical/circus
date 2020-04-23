@@ -10,15 +10,12 @@ import {
   DisposableDb,
   Validator,
   DicomImporter,
-  CircusRs,
   DicomTagReader,
   Models
 } from './interface';
 import Logger from '@utrad-ical/circus-lib/lib/logger/Logger';
 import Storage from './storage/Storage';
-import { createVolumeProvider, createRsRoutes } from './createCircusRs';
 import Koa from 'koa';
-import { VolumeProvider } from '@utrad-ical/circus-rs/src/server/helper/createVolumeProvider';
 import createDicomUtilityRunner, {
   DicomUtilityRunner
 } from './utils/createDicomUtilityRunner';
@@ -31,9 +28,6 @@ export type Services = CsCoreServices &
     validator: Validator;
     models: Models;
     dicomImporter: DicomImporter;
-    rs: CircusRs;
-    rsRoutes: Koa.Middleware;
-    volumeProvider: VolumeProvider;
     blobStorage: Storage;
     dicomTagReader: DicomTagReader;
     dicomUtilityRunner: DicomUtilityRunner;
@@ -61,8 +55,6 @@ const createServiceLoader = async (config: any) => {
     path.join(__dirname, './createDicomImporter')
   );
   loader.registerModule('rs', path.join(__dirname, './createCircusRs'));
-  loader.register('volumeProvider', createVolumeProvider);
-  loader.register('rsRoutes', createRsRoutes);
   loader.registerModule(
     'dicomTagReader',
     path.join(__dirname, './utils/createDicomTagReader')

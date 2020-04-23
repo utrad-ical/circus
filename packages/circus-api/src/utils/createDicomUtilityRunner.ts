@@ -1,10 +1,12 @@
-import { Pool, TimeoutError } from 'tarn';
+import { Pool } from 'tarn';
 import cp, { ChildProcessWithoutNullStreams } from 'child_process';
 import split from 'split';
+import { NoDepFunctionService } from '@utrad-ical/circus-lib';
+import { dicomUtilityRunnerDockerImage } from '../config/default';
 
 interface Options {
-  maxConcurrency: number;
-  dockerImage: string;
+  maxConcurrency?: number;
+  dockerImage?: string;
 }
 
 export interface DicomUtilityRunner {
@@ -12,13 +14,18 @@ export interface DicomUtilityRunner {
   dispose: () => Promise<void>;
 }
 
-const createDicomUtilityRunner = async (options: Options) => {
+const createDicomUtilityRunner: NoDepFunctionService<DicomUtilityRunner> = async (
+  options: Options = {}
+) => {
   const finishedMap = new WeakMap<cp.ChildProcessWithoutNullStreams, boolean>();
+  const {
+    maxConcurrency = 3,
+    dockerImage = dicomUtilityRunnerDockerImage // use defaults
+  } = options;
 
   const pool = new Pool({
     create: () => {
       return new Promise<ChildProcessWithoutNullStreams>((resolve, reject) => {
-        const dockerImage = options.dockerImage;
         const childProcess = cp.spawn('docker', [
           'run',
           // '--pull=never', enable this in the future
@@ -33,11 +40,11 @@ const createDicomUtilityRunner = async (options: Options) => {
         };
         childProcess.on('error', errorHandler);
         childProcess.on('close', () => finishedMap.set(childProcess, true));
-        childProcess.stderr.pipe(split()).on('data', line => {
+        childProcess.stderr.pipe(split()).on('data', (line: string) => {
           childProcess.kill();
           reject(new Error(line));
         });
-        childProcess.stdout.pipe(split()).on('data', line => {
+        childProcess.stdout.pipe(split()).on('data', (line: string) => {
           if (line !== 'Ready') {
             // Sends SIGTERM, which is the default of `kill` command
             childProcess.kill();
@@ -56,7 +63,7 @@ const createDicomUtilityRunner = async (options: Options) => {
       childProcess.stdin.end();
     },
     min: 0,
-    max: options.maxConcurrency,
+    max: maxConcurrency,
     acquireTimeoutMillis: 30000,
     createTimeoutMillis: 3000,
     idleTimeoutMillis: 30000,

@@ -14,6 +14,7 @@ import createMemoryStorage from '../src/storage/MemoryStorage';
 import createDicomImporter from '../src/createDicomImporter';
 import { MemoryDicomFileRepository } from '@utrad-ical/circus-lib/lib/dicom-file-repository';
 import createDicomTagReader from '../src/utils/createDicomTagReader';
+import createDicomUtilityRunner from '../src/utils/createDicomUtilityRunner';
 
 /**
  * Holds data used for API route testing.
@@ -78,12 +79,14 @@ export const setUpAppForRoutesTest = async () => {
   const csCore = createMockCsCore();
   const apiLogger = await createTestLogger();
   const dicomTagReader = await createDicomTagReader({});
+  const dicomUtilityRunner = await createDicomUtilityRunner({});
   const dicomImporter = await createDicomImporter(
     {},
     {
       dicomFileRepository: new MemoryDicomFileRepository({}),
       apiLogger,
       models,
+      dicomUtilityRunner,
       dicomTagReader
     }
   );
@@ -103,7 +106,7 @@ export const setUpAppForRoutesTest = async () => {
       blobStorage: await createMemoryStorage(undefined),
       dicomImporter,
       core: csCore,
-      rsRoutes: async () => {},
+      rsSeriesRoutes: async () => {}, // dummy
       volumeProvider: null as any // dummy
     }
   );

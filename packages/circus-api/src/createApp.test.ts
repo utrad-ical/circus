@@ -26,7 +26,7 @@ beforeAll(async () => {
       apiLogger,
       blobStorage: null as any, // dummy
       dicomImporter: null as any,
-      rsRoutes: async () => {},
+      rsSeriesRoutes: async () => {},
       volumeProvider: null as any, // dummy
       core: null as any // dummy
     }
@@ -37,12 +37,6 @@ beforeAll(async () => {
 
 afterAll(async () => {
   await testServer.tearDown();
-});
-
-it('should return server status', async () => {
-  const result = await ax.get('api/status');
-  expect(result.status).toBe(200);
-  expect(result.data.status).toBe('running');
 });
 
 it('should return 404 for root path', async () => {

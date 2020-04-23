@@ -111,7 +111,7 @@ export const createApp: FunctionService<
     models: Models;
     blobStorage: Storage;
     core: CsCore;
-    rsRoutes: Koa.Middleware;
+    rsSeriesRoutes: Koa.Middleware;
     volumeProvider: VolumeProvider;
     dicomImporter: DicomImporter;
   },
@@ -125,7 +125,7 @@ export const createApp: FunctionService<
     models,
     blobStorage,
     core,
-    rsRoutes,
+    rsSeriesRoutes,
     volumeProvider,
     dicomImporter
   }
@@ -187,12 +187,12 @@ export const createApp: FunctionService<
           limits: { fileSize: deps.uploadFileSizeMaxBytes }
         }).array('files'),
         fixUser ? fixUserMiddleware(deps, fixUser) : oauth.authenticate(),
-        apiRouter.routes() as Middleware
+        (apiRouter.routes() as any) as Middleware
       ])
     )
   );
   koa.use(mount('/login', compose([bodyParser(), oauth.token()])));
-  koa.use(mount('/rs', rsRoutes));
+  koa.use(mount('/rs', rsSeriesRoutes));
 
   return koa;
 };
@@ -204,7 +204,7 @@ createApp.dependencies = [
   'models',
   'blobStorage',
   'core',
-  'rsRoutes',
+  'rsSeriesRoutes',
   'volumeProvider',
   'dicomImporter'
 ];

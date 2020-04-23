@@ -23,7 +23,9 @@ export interface Deps {
 }
 
 interface CustomCtxMembers {
+  params: { [key: string]: string };
   users: any;
+  project: any;
   userPrivileges: UserPrivilegeInfo;
 }
 

@@ -17,7 +17,7 @@ it('should perform search', async () => {
     method: 'get'
   });
   expect(res.status).toBe(200);
-  expect(res.data.items).toHaveLength(3);
+  expect(res.data.items).toHaveLength(5);
 });
 
 it('should return single series information', async () => {

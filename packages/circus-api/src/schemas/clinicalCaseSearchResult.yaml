@@ -9,6 +9,8 @@ properties:
       Randomly-generated case ID.
   projectId:
     type: string
+  patientInfo:
+    type: object
   tags:
     type: array
     items:

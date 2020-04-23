@@ -1,10 +1,5 @@
 - caseId: faeb503e97f918c882453fd2d789f50f4250267740a0b3fbcc85a529f2d7715b
   projectId: 8883fdef6f5144f50eb2a83cd34baa44
-  patientInfoCache:
-    patientId: '003'
-    patientName: 'Anzu'
-    weight: 20
-    sex: 'F'
   latestRevision:
     creator: alice@example.com
     date: { $date: '2015-01-01T12:00:00Z' }
@@ -29,6 +24,48 @@
           partialVolumeDescriptor:
             start: 1
             end: 100
+            delta: 1
+          labels: []
+  tags: []
+  domains: []
+- caseId: jtrf54sd6a576hfas5h76fah547as4h7j7as808wruit43yt98g09r8yp43ytg93
+  projectId: 8883fdef6f5144f50eb2a83cd34baa44
+  latestRevision:
+    creator: alice@example.com
+    date: { $date: '2020-01-01T12:00:00Z' }
+    description: Created
+    attributes: {}
+    status: draft
+    series:
+      - seriesUid: 111.222.333.444.888
+        partialVolumeDescriptor:
+          start: 1
+          end: 100
+          delta: 1
+        labels: []
+  revisions:
+    - creator: alice@example.com
+      date: { $date: '2020-01-01T12:00:00Z' }
+      description: Created
+      attributes: {}
+      status: draft
+      series:
+        - seriesUid: 111.222.333.444.888
+          partialVolumeDescriptor:
+            start: 1
+            end: 100
+            delta: 1
+          labels: []
+    - creator: alice@example.com
+      date: { $date: '2015-01-01T12:00:00Z' }
+      description: Created
+      attributes: {}
+      status: draft
+      series:
+        - seriesUid: 111.222.333.444.999
+          partialVolumeDescriptor:
+            start: 1
+            end: 255
             delta: 1
           labels: []
   tags: []

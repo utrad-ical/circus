@@ -1,11 +1,10 @@
 import status from 'http-status';
-import performSearch from '../performSearch';
+import { performAggregationSearch } from '../performSearch';
 import generateUniqueId from '../../utils/generateUniqueId';
 import { EJSON } from 'bson';
 import { fetchAccessibleSeries, UserPrivilegeInfo } from '../../privilegeUtils';
 import { packAsMhd } from '../../case/packAsMhd';
 import checkFilter from '../../utils/checkFilter';
-import deepRenameKeys from 'deep-rename-keys';
 import { RouteMiddleware, CircusContext } from '../../typings/middlewares';
 import { Models } from '../../interface';
 import { SeriesEntry } from '../../typings/circus';
@@ -64,7 +63,6 @@ const makeNewCase = async (
     userPrivileges,
     series
   );
-  const anyPatientInfoEntry = seriesData.find(i => !!i.patientInfo);
   seriesData.forEach(i => (domains[i.domain] = true));
 
   const revision = {
@@ -83,9 +81,6 @@ const makeNewCase = async (
   await models.clinicalCase.insert({
     caseId,
     projectId: project.projectId,
-    patientInfoCache: anyPatientInfoEntry
-      ? anyPatientInfoEntry.patientInfo
-      : null,
     tags,
     latestRevision: revision,
     revisions: [revision],
@@ -141,7 +136,7 @@ export const handleSearch: RouteMiddleware = ({ models }) => {
     try {
       customFilter = urlQuery.filter ? EJSON.parse(urlQuery.filter) : {};
     } catch (err) {
-      ctx.throw(status.BAD_REQUEST, 'Bad filter.');
+      ctx.throw(status.BAD_REQUEST, 'Invalid JSON was passed as the filter.');
     }
     const fields = [
       'projectId',
@@ -156,9 +151,6 @@ export const handleSearch: RouteMiddleware = ({ models }) => {
     ];
     if (!checkFilter(customFilter!, fields))
       ctx.throw(status.BAD_REQUEST, 'Bad filter.');
-    customFilter = deepRenameKeys(customFilter!, (k: string) =>
-      k.replace(/^patientInfo/, 'patientInfoCache')
-    );
 
     // const domainFilter = {};
     const accessibleProjectIds = ctx.userPrivileges.accessibleProjects.map(
@@ -168,19 +160,46 @@ export const handleSearch: RouteMiddleware = ({ models }) => {
       projectId: { $in: accessibleProjectIds }
     };
     const filter = {
-      $and: [customFilter, accessibleProjectFilter /* domainFilter */]
+      $and: [customFilter!, accessibleProjectFilter /* domainFilter */]
     };
 
-    const mask = maskPatientInfo(ctx);
-    const transform = (caseData: any) => {
-      delete caseData.revisions;
-      return mask(caseData);
-    };
-
-    await performSearch(models.clinicalCase, filter, ctx, {
-      transform,
-      defaultSort: { createdAt: -1 }
-    });
+    await performAggregationSearch(
+      models.clinicalCase,
+      filter,
+      ctx,
+      [
+        {
+          $lookup: {
+            from: 'series',
+            localField: 'revisions.series.seriesUid',
+            foreignField: 'seriesUid',
+            as: 'seriesDetail'
+          }
+        },
+        {
+          $unwind: {
+            path: '$seriesDetail',
+            includeArrayIndex: 'volId'
+          }
+        },
+        {
+          $match: { volId: 0 }
+        },
+        {
+          $addFields: { patientInfo: '$seriesDetail.patientInfo' }
+        }
+      ],
+      [
+        {
+          $project: {
+            _id: false,
+            seriesDetail: false,
+            volId: false
+          }
+        }
+      ],
+      { defaultSort: { createdAt: -1 } }
+    );
   };
 };
 

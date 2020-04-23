@@ -1,10 +1,21 @@
-const isPlainObject = (obj: any): obj is { [key: string]: any } =>
-  Object.prototype.toString.call(obj) === '[object Object]';
+import { BSONRegExp } from 'bson';
 
-const isScalarOrDate = (val: any): val is string | number | boolean => {
+const isPlainObject = (obj: any): obj is { [key: string]: any } =>
+  obj !== null &&
+  typeof obj === 'object' &&
+  'constructor' in obj &&
+  obj.constructor.name === 'Object';
+
+const isScalarOrDate = (
+  val: any
+): val is string | number | boolean | Date | BSONRegExp => {
   const t = typeof val;
   return (
-    t === 'string' || t === 'number' || t === 'boolean' || val instanceof Date
+    t === 'string' ||
+    t === 'number' ||
+    t === 'boolean' ||
+    val instanceof Date ||
+    val instanceof BSONRegExp
   );
 };
 
@@ -30,7 +41,7 @@ const checkFilter: (filter: object, fields: string[]) => boolean = (
         // Checks { $gt: 5 }, { $ne: 'A' }, etc.
         const keys = Object.keys(value);
         return keys.every(k => {
-          const ops = ['$gt', '$gte', '$lt', '$lte', '$ne', '$regex', '$in'];
+          const ops = ['$gt', '$gte', '$lt', '$lte', '$ne', '$in'];
           if (ops.indexOf(k) < 0) return false;
           return k === '$in'
             ? Array.isArray(value[k])

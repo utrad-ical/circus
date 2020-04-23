@@ -15,10 +15,10 @@ it('should perform search', async () => {
     method: 'get'
   });
   expect(res.status).toBe(200);
-  expect(res.data.items).toHaveLength(1);
+  expect(res.data.items).toHaveLength(2);
 });
 
-it('should perform search with patient name', async () => {
+it('search with patient name', async () => {
   const res = await ax.bob.get('api/cases', {
     params: {
       filter: JSON.stringify({ 'patientInfo.patientName': 'Anzu' })
@@ -26,6 +26,19 @@ it('should perform search with patient name', async () => {
   });
   expect(res.status).toBe(200);
   expect(res.data.items).toHaveLength(1);
+  expect(res.data.items[0].patientInfo.patientName).toBe('Anzu');
+});
+
+it('search with patient name in regex', async () => {
+  const res = await ax.bob.get('api/cases', {
+    params: {
+      filter: JSON.stringify({ 'patientInfo.patientName': { $regex: '^An' } })
+    }
+  });
+  expect(res.status).toBe(200);
+  expect(res.data.items).toHaveLength(2);
+  expect(res.data.items[0].patientInfo.patientName).toMatch(/^An/);
+  expect(res.data.items[1].patientInfo.patientName).toMatch(/^An/);
 });
 
 it('should throw 400 for wrong request', async () => {
@@ -33,7 +46,7 @@ it('should throw 400 for wrong request', async () => {
     params: { filter: 'invalid-json' }
   });
   expect(res1.status).toBe(400);
-  expect(res1.data.error).toMatch(/bad filter/i);
+  expect(res1.data.error).toMatch('Invalid JSON was passed as the filter.');
 
   const res2 = await ax.alice.get('api/cases', {
     params: { sort: 'invalid-json' }

@@ -62,3 +62,35 @@
   patientInfo: {}
   parameters: {}
   domain: vega.org
+- seriesUid: 111.222.333.444.888
+  studyUid: 111.222.333.888.999.1003
+  width: 512
+  height: 512
+  images: '1-100'
+  seriesDate: { $date: '2020-01-01T12:00:00Z' }
+  modality: MR
+  seriesDescription: Brain MRA 1mm
+  bodyPart: Head
+  stationName: AAA
+  modelName: BBB
+  manufacturer: Hatsushiba
+  storageId: 0
+  patientInfo: { patientId: '020', patientName: 'Anna', sex: 'F' }
+  parameters: {}
+  domain: sirius.org
+- seriesUid: 111.222.333.444.999
+  studyUid: 111.222.333.888.999.1003
+  width: 512
+  height: 512
+  images: '1-255'
+  seriesDate: { $date: '2020-01-01T12:00:00Z' }
+  modality: MR
+  seriesDescription: Brain MRA 1mm
+  bodyPart: Head
+  stationName: AAA
+  modelName: BBB
+  manufacturer: Hatsushiba
+  storageId: 0
+  patientInfo: { patientId: '020', patientName: 'Anna', sex: 'F' }
+  parameters: {}
+  domain: sirius.org

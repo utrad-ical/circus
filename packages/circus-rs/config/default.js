@@ -16,7 +16,7 @@ module.exports.default = {
   dicomFileRepository: {
     type: 'StaticDicomFileRepository',
     options: {
-      dataDir: '/var/dicom-data',
+      dataDir: '/var/circus/data/dicom',
       useHash: false
     }
   },
@@ -47,14 +47,8 @@ module.exports.default = {
   rsLogger: {
     type: 'FileLogger',
     options: {
-      fileName: path.resolve(__dirname, '../logs/circus-rs')
+      fileName: '/var/circus/data/logs/circus-rs'
     }
-  },
-
-  // DICOM loader
-  dumper: {
-    type: 'PureJsDicomDumper',
-    options: {}
   },
 
   // Image encoder is used by some request types

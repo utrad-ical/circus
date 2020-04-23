@@ -1,5 +1,5 @@
 {
-  "name": "circus-api",
+  "name": "@utrad-ical/circus-api",
   "version": "0.4.0",
   "description": "CIRCUS JSON API Server using Koa",
   "main": "server.js",

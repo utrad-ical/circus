@@ -4,6 +4,10 @@ const path = require('path');
 const nodeEnv =
   process.env.NODE_ENV === 'production' ? 'production' : 'development';
 
+const rsPath = path.dirname(
+  require.resolve('@utrad-ical/circus-rs/package.json')
+);
+
 module.exports = {
   mode: nodeEnv,
   entry: {
@@ -17,10 +21,7 @@ module.exports = {
     modules: [path.join(__dirname, 'src'), 'node_modules'],
     alias: {
       rb: '@smikitky/rb-components/lib',
-      'circus-rs': path.resolve(
-        __dirname,
-        'node_modules/@utrad-ical/circus-rs/src/browser'
-      )
+      'circus-rs': rsPath + '/src/browser'
     },
     extensions: ['.js', '.jsx', '.ts']
   },

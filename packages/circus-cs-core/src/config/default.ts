@@ -38,7 +38,7 @@ const defaults: circus.Configuration = {
   dicomFileRepository: {
     type: 'StaticDicomFileRepository',
     options: {
-      dataDir: '/var/circus/dicom',
+      dataDir: '/var/circus/data/dicom',
       useHash: false
     }
   },
@@ -60,8 +60,8 @@ const defaults: circus.Configuration = {
       startOptions: {
         name: 'circus-cs-job-manager',
         cwd: path.join(__dirname, '..', '..'),
-        output: '/var/circus/logs/daemon-pm2-output.log',
-        error: '/var/circus/logs/daemon-pm2-error.log'
+        output: '/var/circus/data/logs/daemon-pm2-output.log',
+        error: '/var/circus/data/logs/daemon-pm2-error.log'
       },
       checkQueueInterval: 1000
     }

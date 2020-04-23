@@ -20,19 +20,24 @@ import issueSeriesAccessToken from './app/auth/issueSeriesAccessToken';
 import checkSeriesAccessToken from './app/auth/checkSeriesAccessToken';
 
 // application
-import seriesRoutes from './app/series/seriesRoutes';
 import { FunctionService } from '@utrad-ical/circus-lib';
 import createAuthorizer from './helper/createAuthorizer';
 
 /**
  * Create Koa App.
  */
-const createServer: FunctionService<koa> = async (
-  options: RsServerOptions,
-  deps: RsServices
+const createServer: FunctionService<koa, RsServices, RsServerOptions> = async (
+  options,
+  deps
 ) => {
   const { authorization, globalIpFilter } = options;
-  const { rsLogger, counter, imageEncoder, volumeProvider } = deps;
+  const {
+    rsLogger,
+    counter,
+    imageEncoder,
+    volumeProvider,
+    rsSeriesRoutes
+  } = deps;
 
   // create server process
   const app = new koa();
@@ -79,10 +84,7 @@ const createServer: FunctionService<koa> = async (
 
   // series
   if (volumeProvider && imageEncoder) {
-    router.use(
-      '/series/:sid',
-      seriesRoutes({ logger: rsLogger, volumeProvider, imageEncoder })
-    );
+    router.use('/series/:sid', rsSeriesRoutes);
   }
 
   app.use(router.routes());
@@ -99,7 +101,8 @@ createServer.dependencies = [
   'rsLogger',
   'counter',
   'imageEncoder',
-  'volumeProvider'
+  'volumeProvider',
+  'rsSeriesRoutes'
 ];
 
 export default createServer;

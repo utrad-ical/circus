@@ -17,6 +17,7 @@ export interface RsServices {
   dicomFileRepository: DicomFileRepository;
   dicomImageExtractor: DicomImageExtractor;
   imageEncoder: ImageEncoder;
+  rsSeriesRoutes: Koa.Middleware;
   volumeProvider: VolumeProvider;
 }
 
@@ -42,6 +43,10 @@ const configureServiceLoader = (loader: ServiceLoader<any>): void => {
   );
   loader.registerFactory('dicomImageExtractor', async () =>
     dicomImageExtractor()
+  );
+  loader.registerModule(
+    'rsSeriesRoutes',
+    path.join(__dirname, 'app/series/createSeriesRoutes.ts')
   );
   loader.registerModule(
     'volumeProvider',

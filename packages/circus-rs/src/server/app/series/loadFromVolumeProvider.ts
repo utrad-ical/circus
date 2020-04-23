@@ -10,7 +10,7 @@ import {
 import compose from 'koa-compose';
 import validate from '../middleware/validate';
 import { ValidatorRules } from '../../../common/Validator';
-import { SeriesMiddlewareState } from './seriesRoutes';
+import { SeriesMiddlewareState } from './createSeriesRoutes';
 import { MultiRange } from 'multi-integer-range';
 import PartialVolumeDescriptor from '@utrad-ical/circus-lib/lib/PartialVolumeDescriptor';
 

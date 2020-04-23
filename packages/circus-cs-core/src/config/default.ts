@@ -76,8 +76,10 @@ const defaults: circus.Configuration = {
   },
 
   csCoreDaemonLogger: {
-    type: 'NullLogger',
-    options: {}
+    type: 'FileLogger',
+    options: {
+      fileName: '/var/circus/data/logs/cscore-daemon'
+    }
   }
 };
 

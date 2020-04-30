@@ -4,7 +4,6 @@
   "description": "Medical lesion database for CAD research",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "webpack-dev-server",
     "fontgen": "node assets/icons/fontgen.js",
     "build": "cross-env NODE_ENV=production webpack --mode=production",

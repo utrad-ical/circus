@@ -198,6 +198,7 @@ export default class ServiceLoader<T extends object = any> {
   }
 
   private async createFromModule<K extends keyof T>(name: K, path: string) {
+    path = path.replace('<circus-lib>', __dirname);
     const module = (await import(path)).default as Service<T[K]>;
     return await this.instanciateService(name, module);
   }

@@ -22,14 +22,10 @@ export interface RsServices {
 }
 
 const configureServiceLoader = (loader: ServiceLoader<any>): void => {
-  loader.registerDirectory(
-    'rsLogger',
-    '@utrad-ical/circus-lib/lib/logger',
-    'NullLogger'
-  );
+  loader.registerDirectory('rsLogger', '<circus-lib>/logger', 'NullLogger');
   loader.registerDirectory(
     'dicomFileRepository',
-    '@utrad-ical/circus-lib/lib/dicom-file-repository',
+    '<circus-lib>/dicom-file-repository',
     'MemoryDicomFileRepository'
   );
   loader.registerDirectory(

@@ -43,11 +43,7 @@ const createServiceLoader = async (config: any) => {
   // Register our modules
   loader.registerModule('app', path.join(__dirname, '/createApp'));
   loader.registerModule('db', path.join(__dirname, './db/connectDb'));
-  loader.registerDirectory(
-    'apiLogger',
-    '@utrad-ical/circus-lib/lib/logger',
-    'NullLogger'
-  );
+  loader.registerDirectory('apiLogger', '<circus-lib>/logger', 'NullLogger');
   loader.registerModule('validator', path.join(__dirname, '/createValidator'));
   loader.registerModule('models', path.join(__dirname, './db/createModels'));
   loader.registerModule(

@@ -37,7 +37,7 @@ export default function configureServiceLoader(
   // const serviceLoader = new ServiceLoader<Services>(config as any);
   serviceLoader.registerDirectory(
     'csCoreDaemonLogger',
-    '@utrad-ical/circus-lib/lib/logger',
+    '<circus-lib>/logger',
     'StdoutLogger'
   );
   serviceLoader.registerFactory('daemonController', async config => {
@@ -72,7 +72,7 @@ export default function configureServiceLoader(
   // DICOM file repository
   serviceLoader.registerDirectory(
     'dicomFileRepository',
-    '@utrad-ical/circus-lib/lib/dicom-file-repository',
+    '<circus-lib>/dicom-file-repository',
     'StaticDicomFileRepository'
   );
 

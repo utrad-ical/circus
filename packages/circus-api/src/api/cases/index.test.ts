@@ -36,9 +36,8 @@ it('search with patient name in regex', async () => {
     }
   });
   expect(res.status).toBe(200);
-  expect(res.data.items).toHaveLength(2);
-  expect(res.data.items[0].patientInfo.patientName).toMatch(/^An/);
-  expect(res.data.items[1].patientInfo.patientName).toMatch(/^An/);
+  expect(res.data.items).toHaveLength(1);
+  expect(res.data.items[0].patientInfo.patientName).toBe('Anzu');
 });
 
 it('should throw 400 for wrong request', async () => {

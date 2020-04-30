@@ -16,3 +16,5 @@ routes:
   - verb: get
     path: /series/:seriesUid
     description: Returns information about the specified series.
+  - verb: delete
+    path: /series/:seriesUid

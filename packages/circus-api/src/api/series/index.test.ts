@@ -17,7 +17,7 @@ it('should perform search', async () => {
     method: 'get'
   });
   expect(res.status).toBe(200);
-  expect(res.data.items).toHaveLength(5);
+  expect(res.data.items).toHaveLength(4);
 });
 
 it('should return single series information', async () => {
@@ -88,5 +88,58 @@ describe('Uploading', () => {
     if (res.status === 503) return;
     expect(res.status).toBe(403);
     expect(res.data.error).toMatch(/You cannot upload to this domain/);
+  });
+});
+
+describe('Delete', () => {
+  it('should delete single series', async () => {
+    const res = await axios.request({
+      url: 'api/series/222.333.444.555.666',
+      method: 'delete'
+    });
+    expect(res.status).toBe(204);
+    const series = await apiTest.db
+      .collection('series')
+      .findOne({ seriesUid: '222.333.444.555.666' });
+    expect(series).toStrictEqual(null);
+  });
+
+  it('should fail with 404 for nonexistent series', async () => {
+    const res = await axios.request({
+      url: 'api/series/222.222.222.222.222',
+      method: 'delete'
+    });
+    expect(res.status).toBe(404);
+  });
+
+  it('should fail with 400 if series is used in a plugin-job', async () => {
+    const res = await axios.request({
+      url: 'api/series/111.222.333.444.555',
+      method: 'delete'
+    });
+    expect(res.status).toBe(400);
+  });
+
+  it('should fail with 400 if series is used in a clinical-case', async () => {
+    const res = await axios.request({
+      url: 'api/series/111.222.333.444.888',
+      method: 'delete'
+    });
+    expect(res.status).toBe(400);
+  });
+});
+
+describe('Delete file', () => {
+  it('should delete single DICOM file', async () => {
+    const dicomFileRepository = apiTest.dicomFileRepository;
+    const series = await dicomFileRepository.getSeries('222.333.444.555.666');
+    const input = new Uint8Array('abcde'.split('').map(c => c.charCodeAt(0)));
+    await series.save(1, input.buffer as ArrayBuffer);
+    await axios.request({
+      url: 'api/series/222.333.444.555.666',
+      method: 'delete'
+    });
+    const series2 = await dicomFileRepository.getSeries('222.333.444.555.666');
+    expect(series2.images).toBe('');
   });
 });

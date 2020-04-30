@@ -23,6 +23,7 @@ import validateInOut from './middleware/validateInOut';
 import Storage from './storage/Storage';
 import { Deps } from './typings/middlewares';
 import { VolumeProvider } from '@utrad-ical/circus-rs/src/server/helper/createVolumeProvider';
+import { DicomFileRepository } from '@utrad-ical/circus-lib/lib/dicom-file-repository';
 
 function handlerName(route: Route) {
   if (route.handler) return route.handler;
@@ -113,6 +114,7 @@ export const createApp: FunctionService<
     core: CsCore;
     rsSeriesRoutes: Koa.Middleware;
     volumeProvider: VolumeProvider;
+    dicomFileRepository: DicomFileRepository;
     dicomImporter: DicomImporter;
   },
   CreateAppOptions
@@ -127,7 +129,8 @@ export const createApp: FunctionService<
     core,
     rsSeriesRoutes,
     volumeProvider,
-    dicomImporter
+    dicomImporter,
+    dicomFileRepository
   }
 ) => {
   const {
@@ -147,6 +150,7 @@ export const createApp: FunctionService<
     logger,
     models,
     blobStorage,
+    dicomFileRepository,
     dicomImporter,
     pluginResultsPath,
     cs: core,
@@ -209,6 +213,7 @@ createApp.dependencies = [
   'core',
   'rsSeriesRoutes',
   'volumeProvider',
+  'dicomFileRepository',
   'dicomImporter'
 ];
 

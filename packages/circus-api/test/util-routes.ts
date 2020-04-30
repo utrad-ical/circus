@@ -12,7 +12,10 @@ import createValidator from '../src/createValidator';
 import createModels from '../src/db/createModels';
 import createMemoryStorage from '../src/storage/MemoryStorage';
 import createDicomImporter from '../src/createDicomImporter';
-import { MemoryDicomFileRepository } from '@utrad-ical/circus-lib/lib/dicom-file-repository';
+import {
+  MemoryDicomFileRepository,
+  DicomFileRepository
+} from '@utrad-ical/circus-lib/lib/dicom-file-repository';
 import createDicomTagReader from '../src/utils/createDicomTagReader';
 import createDicomUtilityRunner from '../src/utils/createDicomUtilityRunner';
 
@@ -46,6 +49,7 @@ export interface ApiTest {
     guest: AxiosInstance;
   };
   csCore: cscore.CsCore;
+  dicomFileRepository: DicomFileRepository;
   /**
    * Shuts down the test Koa server and the DB connection.
    * Make sure to call this on `afterAll()`.
@@ -80,10 +84,11 @@ export const setUpAppForRoutesTest = async () => {
   const apiLogger = await createTestLogger();
   const dicomTagReader = await createDicomTagReader({});
   const dicomUtilityRunner = await createDicomUtilityRunner({});
+  const dicomFileRepository = new MemoryDicomFileRepository({});
   const dicomImporter = await createDicomImporter(
     {},
     {
-      dicomFileRepository: new MemoryDicomFileRepository({}),
+      dicomFileRepository,
       apiLogger,
       models,
       dicomUtilityRunner,
@@ -104,6 +109,7 @@ export const setUpAppForRoutesTest = async () => {
       apiLogger,
       models,
       blobStorage: await createMemoryStorage(undefined),
+      dicomFileRepository,
       dicomImporter,
       core: csCore,
       rsSeriesRoutes: async () => {}, // dummy
@@ -136,7 +142,8 @@ export const setUpAppForRoutesTest = async () => {
     axiosInstances,
     csCore,
     tearDown,
-    url: testServer.url
+    url: testServer.url,
+    dicomFileRepository
   } as ApiTest;
 };
 

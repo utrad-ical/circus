@@ -7,6 +7,7 @@ import { VolumeProvider } from '@utrad-ical/circus-rs/src/server/helper/createVo
 import Storage from '../storage/Storage';
 import { UserPrivilegeInfo } from '../privilegeUtils';
 import { CsCore } from '@utrad-ical/circus-cs-core';
+import { DicomFileRepository } from '@utrad-ical/circus-lib/lib/dicom-file-repository';
 
 export interface Deps {
   validator: Validator;
@@ -14,6 +15,7 @@ export interface Deps {
   logger: Logger;
   models: Models;
   blobStorage: Storage;
+  dicomFileRepository: DicomFileRepository;
   dicomImporter: DicomImporter;
   pluginResultsPath: string;
   cs: CsCore;

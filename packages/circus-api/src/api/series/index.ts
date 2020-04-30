@@ -100,3 +100,34 @@ export const handleSearch: RouteMiddleware = ({ models }) => {
     });
   };
 };
+
+export const handleDelete: RouteMiddleware = ({
+  models,
+  dicomFileRepository
+}) => {
+  return async (ctx, next) => {
+    const uid = ctx.params.seriesUid;
+
+    const pluginJob = models.pluginJob.find({ 'series.seriesUid': uid });
+    if (await pluginJob.hasNext())
+      ctx.throw(
+        status.BAD_REQUEST,
+        'There is a plug-in job associated with this series.'
+      );
+
+    const clinicalCase = models.clinicalCase.find({
+      'revisions.series.seriesUid': uid
+    });
+    if (await clinicalCase.hasNext())
+      ctx.throw(
+        status.BAD_REQUEST,
+        'There is a case associated with this series.'
+      );
+
+    await dicomFileRepository.deleteSeries(uid);
+
+    const result = await models.series.deleteOne({ seriesUid: uid });
+    if (result.deletedCount !== 1) ctx.throw(status.NOT_FOUND);
+    ctx.body = null;
+  };
+};

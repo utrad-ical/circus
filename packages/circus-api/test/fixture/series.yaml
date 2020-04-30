@@ -66,31 +66,31 @@
   studyUid: 111.222.333.888.999.1003
   width: 512
   height: 512
-  images: '1-100'
-  seriesDate: { $date: '2020-01-01T12:00:00Z' }
-  modality: MR
-  seriesDescription: Brain MRA 1mm
-  bodyPart: Head
-  stationName: AAA
-  modelName: BBB
-  manufacturer: Hatsushiba
+  images: '1-150'
+  seriesDate: { $date: '2020-04-15T00:11:22' }
+  modality: CT
+  seriesDescription: chest 2mm
+  bodyPart: Chest
+  stationName: LightSpeed
+  modelName: LightSpeed
+  manufacturer: GE
   storageId: 0
-  patientInfo: { patientId: '020', patientName: 'Anna', sex: 'F' }
+  patientInfo: { patientId: '017', patientName: 'Koume', age: 70 }
   parameters: {}
-  domain: sirius.org
-- seriesUid: 111.222.333.444.999
-  studyUid: 111.222.333.888.999.1003
-  width: 512
-  height: 512
-  images: '1-255'
-  seriesDate: { $date: '2020-01-01T12:00:00Z' }
-  modality: MR
-  seriesDescription: Brain MRA 1mm
-  bodyPart: Head
-  stationName: AAA
-  modelName: BBB
-  manufacturer: Hatsushiba
+  domain: vega.org
+- seriesUid: 222.333.444.555.666
+  studyUid: 222.333.444.555.666.777
+  width: 1024
+  height: 1024
+  images: '1'
+  seriesDate: { $date: '2020-04-10T00:11:11' }
+  modality: CR
+  seriesDescription: chest PA
+  bodyPart: Chest
+  stationName: Radiko123
+  modelName: Radiko Ace
+  manufacturer: RadikoSystems
   storageId: 0
-  patientInfo: { patientId: '020', patientName: 'Anna', sex: 'F' }
+  patientInfo: { patientId: '015', patientName: 'Sakura', age: 20 }
   parameters: {}
   domain: sirius.org

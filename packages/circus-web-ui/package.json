@@ -36,7 +36,6 @@
     "glob-promise": "^3.4.0",
     "less": "^3.11.1",
     "less-loader": "^6.0.0",
-    "prettier": "^1.19.1",
     "style-loader": "^1.2.1",
     "svg2ttf": "^4.0.2",
     "svgicons2svgfont": "^5.0.0",

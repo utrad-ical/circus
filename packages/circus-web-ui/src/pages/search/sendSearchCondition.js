@@ -26,7 +26,7 @@ const sendSearchCondition = opts => {
     defaultSort
   } = opts;
 
-  return function(BaseComponent) {
+  return function (BaseComponent) {
     const Enhanced = props => {
       const { presetName } = props;
       const mapToState = useCallback(state => state, []);

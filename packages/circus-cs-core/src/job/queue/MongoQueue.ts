@@ -10,7 +10,7 @@ const createMongoQueue: FunctionService<
   const collection = await connection.db().collection(options.collectionName);
   await collection.createIndex({ jobId: 1 }, { unique: true });
 
-  const list = async function(state: circus.QueueState | 'all' = 'wait') {
+  const list = async function (state: circus.QueueState | 'all' = 'wait') {
     const statusFilter = state === 'all' ? {} : { state };
     return await collection
       .find(statusFilter, { sort: { priority: -1, _id: 1 } })

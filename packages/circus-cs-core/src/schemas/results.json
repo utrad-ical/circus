@@ -1,7 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "description":
-    "This schema defines the shape of results.json file recognized by CIRCUS CS apps.",
+  "description": "This schema defines the shape of results.json file recognized by CIRCUS CS apps.",
   "type": "object",
   "definitions": {
     "vector3": {
@@ -24,8 +23,7 @@
             "type": "object",
             "properties": {
               "volumeId": {
-                "description":
-                  "Volume ID that corresponds to this lesion candidate.",
+                "description": "Volume ID that corresponds to this lesion candidate.",
                 "type": "integer",
                 "minimum": 0
               },
@@ -34,14 +32,12 @@
                 "$ref": "#/definitions/vector3"
               },
               "rank": {
-                "description":
-                  "(Optional) Rank of this lesion candidate, starting from 1 (highest confidence). It can be optional, but when present, it must match the order indicated by `confidence`. Each rank must be unique.",
+                "description": "(Optional) Rank of this lesion candidate, starting from 1 (highest confidence). It can be optional, but when present, it must match the order indicated by `confidence`. Each rank must be unique.",
                 "type": "integer",
                 "minimum": 1
               },
               "volumeSize": {
-                "description":
-                  "(Optional) Volume size of this lesion candidate.",
+                "description": "(Optional) Volume size of this lesion candidate.",
                 "type": "number"
               }
             },
@@ -51,8 +47,7 @@
       }
     },
     "metadata": {
-      "description":
-        "Holds the metadata of the app. Most of the data are optinal",
+      "description": "Holds the metadata of the app. Most of the data are optinal",
       "type": "object",
       "properties": {
         "displayOptions": {

@@ -1,4 +1,4 @@
-import loadConfig from '@utrad-ical/circus-lib/lib/config/loadConfig';
+import loadConfig from '@utrad-ical/circus-lib/src/config/loadConfig';
 import path from 'path';
 
 const csDefault = require.resolve(

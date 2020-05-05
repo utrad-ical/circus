@@ -4,8 +4,7 @@ import fs from 'fs-extra';
 import yaml from 'js-yaml';
 import semver from 'semver';
 import * as path from 'path';
-import { isDicomUid } from '@utrad-ical/circus-lib/lib/validation';
-import { NoDepFunctionService } from '@utrad-ical/circus-lib';
+import { isDicomUid, NoDepFunctionService } from '@utrad-ical/circus-lib';
 import { Validator } from './interface';
 
 const loadSchemaFiles = async (schemaRoot: string) => {

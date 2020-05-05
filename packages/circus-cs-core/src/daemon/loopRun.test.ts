@@ -2,7 +2,7 @@ import loopRun, { LoopRunOptions } from './loopRun';
 import sleep from '../util/sleep';
 import { EventEmitter } from 'events';
 import * as circus from '../interface';
-import Logger from '@utrad-ical/circus-lib/lib/logger/Logger';
+import { Logger } from '@utrad-ical/circus-lib';
 
 const createMockLogger = (fn: jest.Mock) => {
   return {

@@ -1,5 +1,5 @@
 import path from 'path';
-import createFileLogger from '@utrad-ical/circus-lib/lib/logger/FileLogger';
+import createFileLogger from '@utrad-ical/circus-lib/src/logger/FileLogger';
 
 const fileName = path.join(__dirname, '../store/logs/test');
 

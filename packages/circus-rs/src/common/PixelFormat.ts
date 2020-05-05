@@ -5,6 +5,6 @@ import {
   PixelFormat,
   PixelFormatInfo,
   pixelFormatInfo
-} from '@utrad-ical/circus-lib/lib/PixelFormat';
+} from '@utrad-ical/circus-lib';
 
 export { PixelFormat, PixelFormatInfo, pixelFormatInfo };

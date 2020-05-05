@@ -1,7 +1,10 @@
 import koa from 'koa';
 import httpStatus from 'http-status';
-import { isDicomUid } from '@utrad-ical/circus-lib/lib/validation';
-import Logger from '@utrad-ical/circus-lib/lib/logger/Logger';
+import {
+  isDicomUid,
+  Logger,
+  PartialVolumeDescriptor
+} from '@utrad-ical/circus-lib';
 
 import {
   VolumeProvider,
@@ -12,7 +15,6 @@ import validate from '../middleware/validate';
 import { ValidatorRules } from '../../../common/Validator';
 import { SeriesMiddlewareState } from './createSeriesRoutes';
 import { MultiRange } from 'multi-integer-range';
-import PartialVolumeDescriptor from '@utrad-ical/circus-lib/lib/PartialVolumeDescriptor';
 
 interface LoadStoreOptions {
   logger: Logger;

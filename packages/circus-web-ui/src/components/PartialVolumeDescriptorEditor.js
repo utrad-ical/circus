@@ -3,7 +3,10 @@ import { Button, Modal } from 'components/react-bootstrap';
 import PropertyEditor from 'rb/PropertyEditor';
 import MultiRange from 'multi-integer-range';
 import * as et from 'rb/editor-types';
-import * as pv from '@utrad-ical/circus-lib/lib/PartialVolumeDescriptor';
+import {
+  describePartialVolumeDescriptor,
+  isValidPartialVolumeDescriptor
+} from '@utrad-ical/circus-lib';
 
 export default class PartialVolumeDescriptorEditor extends React.PureComponent {
   constructor(props) {
@@ -54,7 +57,7 @@ export default class PartialVolumeDescriptorEditor extends React.PureComponent {
             onChange={this.handleChange}
           />
           <hr />
-          <b>Preview:</b> {pv.describePartialVolumeDescriptor(descriptor)}
+          <b>Preview:</b> {describePartialVolumeDescriptor(descriptor)}
         </Modal.Body>
         <Modal.Footer>
           <Button bsStyle="link" onClick={this.handleCancelClick}>
@@ -65,7 +68,7 @@ export default class PartialVolumeDescriptorEditor extends React.PureComponent {
           </Button>
           <Button
             onClick={this.handleOkClick}
-            disabled={!pv.isValidPartialVolumeDescriptor(descriptor)}
+            disabled={!isValidPartialVolumeDescriptor(descriptor)}
             bsStyle="primary"
           >
             OK

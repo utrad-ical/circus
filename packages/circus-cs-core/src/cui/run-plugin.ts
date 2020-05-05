@@ -5,10 +5,8 @@ import pluginJobRunner from '../job/pluginJobRunner';
 import chalk from 'chalk';
 import DockerRunner from '../util/DockerRunner';
 import tarfs from 'tar-fs';
-import {
-  DicomFileRepository,
-  StaticDicomFileRepository
-} from '@utrad-ical/circus-lib/lib/dicom-file-repository';
+import { DicomFileRepository } from '@utrad-ical/circus-lib';
+import StaticDicomFileRepository from '@utrad-ical/circus-lib/src/dicom-file-repository/StaticDicomFileRepository';
 import * as circus from '../interface';
 
 /**

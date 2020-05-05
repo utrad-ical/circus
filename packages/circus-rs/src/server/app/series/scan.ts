@@ -14,7 +14,7 @@ import ImageEncoder from '../../helper/image-encoder/ImageEncoder';
 import { SeriesMiddlewareState } from './createSeriesRoutes';
 import RawData from '../../../common/RawData';
 import { multirange } from 'multi-integer-range';
-import PartialVolumeDescriptor from '@utrad-ical/circus-lib/lib/PartialVolumeDescriptor';
+import { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
 
 interface ScanOptions {
   imageEncoder: ImageEncoder;

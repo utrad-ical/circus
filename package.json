@@ -2,7 +2,9 @@
   "name": "root",
   "private": true,
   "scripts": {
-    "test": "lerna run test --no-bail --stream --no-prefix"
+    "test": "lerna run test --no-bail --stream --no-prefix",
+    "lint": "eslint \"packages/*/src/**/*.{js,ts}\"",
+    "lint-fix": "eslint --fix \"packages/*/src/**/*.{js,ts}\""
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^2.31.0",

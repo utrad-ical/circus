@@ -5,8 +5,6 @@
   "main": "server.js",
   "scripts": {
     "test": "jest",
-    "lint": "eslint --ext .js,.ts src",
-    "lint-fix": "eslint --ext .js,.ts --fix src",
     "prettier": "prettier --write src/**/*.{js,ts}"
   },
   "repository": {

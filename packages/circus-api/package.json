@@ -4,8 +4,7 @@
   "description": "CIRCUS JSON API Server using Koa",
   "main": "server.js",
   "scripts": {
-    "test": "jest",
-    "prettier": "prettier --write src/**/*.{js,ts}"
+    "test": "jest"
   },
   "repository": {
     "type": "git",

@@ -6,8 +6,7 @@
   "scripts": {
     "prepublishOnly": "npm run build",
     "build": "rimraf ./lib && tsc",
-    "test": "jest",
-    "prettier": "prettier --write src/**/*.ts"
+    "test": "jest"
   },
   "repository": {
     "type": "git",

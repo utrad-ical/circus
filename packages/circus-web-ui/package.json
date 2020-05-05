@@ -6,8 +6,7 @@
   "scripts": {
     "start": "webpack-dev-server",
     "fontgen": "node assets/icons/fontgen.js",
-    "build": "cross-env NODE_ENV=production webpack --mode=production",
-    "prettier": "prettier src/**/*.{js,less} --write"
+    "build": "cross-env NODE_ENV=production webpack --mode=production"
   },
   "repository": {
     "type": "git",

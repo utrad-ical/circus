@@ -54,8 +54,7 @@
     "typescript": "^3.8.3"
   },
   "scripts": {
-    "test": "jest",
-    "prettier": "prettier --write src/**/*.ts"
+    "test": "jest"
   },
   "repository": {
     "type": "git",

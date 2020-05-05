@@ -23,7 +23,13 @@ beforeEach(async () => {
   const dicomTagReader = await createDicomTagReader({});
   const dicomImporter = await createDicomImporter(
     {},
-    { dicomFileRepository, models, apiLogger, dicomTagReader }
+    {
+      dicomFileRepository,
+      models,
+      apiLogger,
+      dicomTagReader,
+      dicomUtilityRunner: null as any // Dummy
+    }
   );
   commandFunc = await command(null, { dicomImporter });
 });

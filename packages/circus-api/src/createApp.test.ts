@@ -24,6 +24,7 @@ beforeAll(async () => {
       db,
       models,
       apiLogger,
+      dicomFileRepository: null as any, // dummy
       blobStorage: null as any, // dummy
       dicomImporter: null as any,
       rsSeriesRoutes: async () => {},

@@ -18,7 +18,7 @@ beforeAll(async () => {
     const oauth = createOauthServer(models);
 
     const router = new Router();
-    router.post('/token', oauth.token(null));
+    router.post('/token', oauth.token(null) as any);
     router.get(
       '/data',
       oauth.authenticate(null),

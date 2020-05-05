@@ -29,7 +29,7 @@ beforeAll(async () => {
       const q = ctx.request.query.q;
       const filter = q && q.length ? JSON.parse(q) : {};
       try {
-        await performSearch(items, filter, ctx, {
+        await performSearch(items, filter, ctx as any, {
           defaultSort: { price: -1 }
         });
       } catch (err) {

@@ -2,7 +2,7 @@
   "name": "root",
   "private": true,
   "scripts": {
-    "test": "lerna run test --no-bail --stream --no-prefix",
+    "test": "jest",
     "lint": "eslint \"packages/*/src/**/*.{js,ts}\"",
     "lint-fix": "eslint --fix \"packages/*/src/**/*.{js,ts}\"",
     "prettier": "prettier --write \"packages/*/src/**/*.{js,ts,less,json,yaml,yml}\""

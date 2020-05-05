@@ -5,8 +5,7 @@
   "main": "lib/index.js",
   "scripts": {
     "prepublishOnly": "npm run build",
-    "build": "rimraf ./lib && tsc",
-    "test": "jest"
+    "build": "rimraf ./lib && tsc"
   },
   "repository": {
     "type": "git",

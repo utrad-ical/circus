@@ -49,12 +49,7 @@
     "@types/table": "^4.0.5",
     "@types/tar-fs": "^1.16.3",
     "@types/tar-stream": "^1.6.2",
-    "babel-jest": "^24.8.0",
-    "jest": "^24.8.0",
     "typescript": "^3.8.3"
-  },
-  "scripts": {
-    "test": "jest"
   },
   "repository": {
     "type": "git",
@@ -66,16 +61,5 @@
   "bugs": {
     "url": "https://github.com/utrad-ical/circus-cs-core/issues"
   },
-  "homepage": "https://github.com/utrad-ical/circus-cs-core#readme",
-  "jest": {
-    "testRegex": "\\.test\\.(jsx?|tsx?)$",
-    "moduleFileExtensions": [
-      "ts",
-      "tsx",
-      "js",
-      "jsx",
-      "json",
-      "node"
-    ]
-  }
+  "homepage": "https://github.com/utrad-ical/circus-cs-core#readme"
 }

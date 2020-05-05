@@ -55,7 +55,9 @@
   },
   "scripts": {
     "test": "jest",
-    "prettier": "prettier --write src/**/*.ts"
+    "prettier": "prettier --write src/**/*.ts",
+    "lint": "eslint --ext .js,.ts src",
+    "lint-fix": "eslint --ext .js,.ts --fix src"
   },
   "repository": {
     "type": "git",

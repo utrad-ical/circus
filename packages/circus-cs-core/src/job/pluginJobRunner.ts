@@ -174,8 +174,8 @@ export async function fetchSeriesFromRepository(
 ) {
   await fs.ensureDir(destDir);
   const { load, images } = await dicomRepository.getSeries(seriesUid);
-  let it = new MultiRange(images).getIterator(),
-    next;
+  const it = new MultiRange(images).getIterator();
+  let next;
   while (!(next = it.next()).done) {
     const i: number = next.value!;
     const image = await load(i);

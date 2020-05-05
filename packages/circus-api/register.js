@@ -4,6 +4,7 @@
 const path = require('path');
 
 require('@babel/register')({
+  rootMode: 'upward',
   ignore: [
     filePath => {
       // We will transpile TypeScript files

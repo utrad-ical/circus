@@ -115,7 +115,7 @@ const dicomImageExtractor: (options?: ExtractOptions) => DicomImageExtractor = (
     }
     // let invert = (photometricInterpretation === 'MONOCHROME1');
 
-    let metadata: DicomMetadata = {
+    const metadata: DicomMetadata = {
       modality,
       columns,
       rows,
@@ -285,7 +285,7 @@ function extractLosslessJpegPixels(
   let minValue = pxInfo.maxLevel;
   let maxValue = pxInfo.minLevel;
   for (let i = 0; i < columns * rows; i++) {
-    let val = resultArray[i];
+    const val = resultArray[i];
     if (val < minValue) minValue = val;
     if (val > maxValue) maxValue = val;
   }

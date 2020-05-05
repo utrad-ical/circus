@@ -242,7 +242,7 @@ export function createOrthogonalMprSection(
       section.origin[2]
     ];
     const xAxis = [-section.xAxis[0], section.xAxis[1], section.xAxis[2]];
-    section = {...section, origin, xAxis};
+    section = { ...section, origin, xAxis };
   }
 
   return section;

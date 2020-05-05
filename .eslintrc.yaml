@@ -7,6 +7,8 @@ parserOptions:
 plugins:
   - jest
   - '@typescript-eslint'
+  - react
+  - react-hooks
 env:
   es6: true
   browser: true
@@ -20,3 +22,8 @@ rules:
   prefer-const: 'error'
   no-console: [0]
   no-empty-pattern: [0]
+  'react-hooks/rules-of-hooks': [2]
+  'react-hooks/exhaustive-deps': [2]
+  'react/prop-types': [0]
+  'react/display-name': [0]
+  'react/jsx-closing-bracket-location': [2, 'line-aligned']

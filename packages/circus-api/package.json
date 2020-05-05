@@ -3,9 +3,7 @@
   "version": "0.4.0",
   "description": "CIRCUS JSON API Server using Koa",
   "main": "server.js",
-  "scripts": {
-    "test": "jest"
-  },
+  "scripts": {},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/utrad-ical/circus-api.git"
@@ -82,18 +80,5 @@
   },
   "nodemonConfig": {
     "ext": "js,mjs,ts,json,yaml"
-  },
-  "jest": {
-    "testPathIgnorePatterns": [
-      "<rootDir>/test"
-    ],
-    "transformIgnorePatterns": [
-      "<rootDir>/node_modules/(?!@utrad-ical/(circus-rs|circus-cs-core)/src)"
-    ],
-    "setupFiles": [
-      "dotenv/config",
-      "./register"
-    ],
-    "testEnvironment": "node"
   }
 }

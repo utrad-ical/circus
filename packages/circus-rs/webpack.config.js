@@ -19,7 +19,8 @@ module.exports = {
     rules: [
       {
         test: /\.ts$/,
-        use: ['babel-loader']
+        loader: 'babel-loader',
+        options: { rootMode: 'upward' }
       },
       {
         test: /\.less$/,

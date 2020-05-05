@@ -85,7 +85,6 @@
     "eslint-plugin-jest": "^23.6.0",
     "form-data": "^3.0.0",
     "jest": "^24.9.0",
-    "prettier": "^1.19.1",
     "typescript": "^3.7.5"
   },
   "nodemonConfig": {

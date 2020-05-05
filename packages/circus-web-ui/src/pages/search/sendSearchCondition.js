@@ -26,7 +26,7 @@ const sendSearchCondition = opts => {
     defaultSort
   } = opts;
 
-  return function (BaseComponent) {
+  return function(BaseComponent) {
     const Enhanced = props => {
       const { presetName } = props;
       const mapToState = useCallback(state => state, []);
@@ -55,7 +55,7 @@ const sendSearchCondition = opts => {
         );
       };
 
-      useEffect(handleSearchClick, []);
+      useEffect(handleSearchClick, [dispatch, api, condition]);
 
       const handleSavePresetClick = async () => {
         await dispatch(savePreset(api, searchName, condition));

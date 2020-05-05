@@ -4,7 +4,7 @@ import winston from 'winston';
 import { format } from 'logform';
 
 const localIsoTime = () => {
-  var tzOffset = new Date().getTimezoneOffset() * 60000;
+  const tzOffset = new Date().getTimezoneOffset() * 60000;
   return new Date(Date.now() - tzOffset).toISOString().slice(0, -1);
 };
 

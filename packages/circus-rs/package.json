@@ -11,8 +11,7 @@
     "build-npm": "tsc && cp src/browser/image-source/volume-rendering-image-source/*.{vert,frag} lib/browser/image-source/volume-rendering-image-source",
     "clean": "rimraf dist",
     "docs": "jekyll build --source=./docs --dest=./docs/_site && cp -r ./dist ./docs/_site",
-    "docserver": "jekyll serve --source=./docs --dest=./docs/_site",
-    "prettier": "prettier src/**/*.{ts,js,less} --write"
+    "docserver": "jekyll serve --source=./docs --dest=./docs/_site"
   },
   "repository": "https://github.com/utrad-ical/circus-rs",
   "license": "MIT",

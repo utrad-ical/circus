@@ -251,18 +251,9 @@ export default class VoxelCloud implements Annotation {
     );
 
     const cloudSection: Section = {
-      origin: boundingOrigin
-        .clone()
-        .sub(mmOrigin)
-        .toArray(),
-      xAxis: boundingXAxisEnd
-        .clone()
-        .sub(boundingOrigin)
-        .toArray(),
-      yAxis: boundingYAxisEnd
-        .clone()
-        .sub(boundingOrigin)
-        .toArray()
+      origin: boundingOrigin.clone().sub(mmOrigin).toArray(),
+      xAxis: boundingXAxisEnd.clone().sub(boundingOrigin).toArray(),
+      yAxis: boundingYAxisEnd.clone().sub(boundingOrigin).toArray()
     };
     const indexCloudSection: Section = convertSectionToIndex(
       cloudSection,

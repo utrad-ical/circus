@@ -5,6 +5,12 @@
     "test": "lerna run test --no-bail --stream --no-prefix"
   },
   "devDependencies": {
-    "lerna": "^3.20.2"
+    "lerna": "^3.20.2",
+    "prettier": "^2.0.5"
+  },
+  "prettier": {
+    "singleQuote": true,
+    "trailingComma": "none",
+    "arrowParens": "avoid"
   }
 }

@@ -16,7 +16,7 @@ export default function checkSeriesAccessToken(
 ): koa.Middleware {
   const { rsLogger, authorizer } = options;
 
-  return async function(
+  return async function (
     ctx: koa.DefaultContext,
     next: koa.Next
   ): Promise<void> {

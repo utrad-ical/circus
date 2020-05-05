@@ -23,7 +23,7 @@ export default async function loopRun<T>(
 
   logger.info(`CIRCUS CS Job Manager started. pid: ${context.pid}`);
 
-  context.on('SIGINT', function() {
+  context.on('SIGINT', function () {
     logger.info('Signal SIGINT');
     logger.info('CIRCUS CS Job Manager will be stopped on next loop.');
     cancellableTimer.cancel();

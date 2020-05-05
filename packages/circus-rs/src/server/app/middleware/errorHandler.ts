@@ -12,7 +12,7 @@ export default function errorHandler(
   options: MiddlewareOptions
 ): koa.Middleware {
   const { rsLogger: logger } = options;
-  return async function(
+  return async function (
     ctx: koa.DefaultContext,
     next: koa.Next
   ): Promise<void> {

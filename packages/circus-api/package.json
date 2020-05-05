@@ -91,9 +91,6 @@
   "nodemonConfig": {
     "ext": "js,mjs,ts,json,yaml"
   },
-  "prettier": {
-    "singleQuote": true
-  },
   "jest": {
     "testPathIgnorePatterns": [
       "<rootDir>/test"

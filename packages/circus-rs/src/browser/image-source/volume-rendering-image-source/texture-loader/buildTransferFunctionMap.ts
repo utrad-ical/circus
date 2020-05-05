@@ -8,7 +8,7 @@ interface RgbaColor {
   a: number;
 }
 
-const mix = function(
+const mix = function (
   color1: RgbaColor,
   color2: RgbaColor,
   p: number

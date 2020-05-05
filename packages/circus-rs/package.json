@@ -13,7 +13,7 @@
     "docs": "jekyll build --source=./docs --dest=./docs/_site && cp -r ./dist ./docs/_site",
     "docserver": "jekyll serve --source=./docs --dest=./docs/_site",
     "lint": "eslint --ext .js,.ts src",
-    "prettier": "prettier src/**/*.{ts,js,less} test/**/*.{ts,js} --write"
+    "prettier": "prettier src/**/*.{ts,js,less} --write"
   },
   "repository": "https://github.com/utrad-ical/circus-rs",
   "license": "MIT",
@@ -80,7 +80,6 @@
     "less": "^2.7.3",
     "less-loader": "^4.0.5",
     "merge": "^1.2.0",
-    "prettier": "^1.15.3",
     "rimraf": "^2.6.2",
     "svg2ttf": "^4.1.0",
     "svgicons2svgfont": "^5.0.2",
@@ -93,8 +92,5 @@
   },
   "nodemonConfig": {
     "ext": "ts,js,json"
-  },
-  "prettier": {
-    "singleQuote": true
   }
 }

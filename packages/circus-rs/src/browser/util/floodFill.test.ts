@@ -8,7 +8,10 @@ const t = (
   expectedFillCount: number
 ) => {
   const rows = pattern.replace(/\n$/, '').split(/\n/);
-  const width = Math.max.apply(Math, rows.map(r => r.length));
+  const width = Math.max.apply(
+    Math,
+    rows.map(r => r.length)
+  );
   const arr = new BinaryArray2D(width, rows.length);
   for (let y = 0; y < rows.length; y++) {
     for (let x = 0; x < width; x++) {

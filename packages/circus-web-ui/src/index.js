@@ -49,12 +49,8 @@ require('bootstrap/fonts/glyphicons-halflings-regular.ttf');
 
 const theme = {
   brandPrimary: '#168477',
-  brandDark: tinycolor('#168477')
-    .darken(10)
-    .toString(),
-  brandDarker: tinycolor('#168477')
-    .darken(20)
-    .toString(),
+  brandDark: tinycolor('#168477').darken(10).toString(),
+  brandDarker: tinycolor('#168477').darken(20).toString(),
   highlightColor: '#fd3164'
 };
 

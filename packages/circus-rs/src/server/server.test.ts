@@ -32,7 +32,7 @@ const dicomImage = (file = 'CT-MONO2-16-brain') => {
   return new Promise<Buffer>(resolve => {
     try {
       const zippedFileContent = fs.readFileSync(testdir + file + '.gz');
-      zlib.unzip(zippedFileContent, function(err, fileContent) {
+      zlib.unzip(zippedFileContent, function (err, fileContent) {
         if (err) throw err;
         resolve(fileContent);
       });

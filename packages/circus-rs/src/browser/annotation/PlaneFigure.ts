@@ -131,12 +131,7 @@ export default class PlaneFigure implements Annotation, ViewerEventTarget {
     ctx.lineWidth = 1;
     ctx.strokeStyle = '#ff0000';
 
-    const center = min.clone().add(
-      max
-        .clone()
-        .sub(min)
-        .multiplyScalar(0.5)
-    );
+    const center = min.clone().add(max.clone().sub(min).multiplyScalar(0.5));
     const drawHandle = (x: number, y: number) => {
       ctx.rect(x - handleSize, y - handleSize, handleSize * 2, handleSize * 2);
     };

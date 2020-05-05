@@ -20,7 +20,7 @@ interface Token {
  */
 export default function createOauthServer(models: Models) {
   const oauthModel = {
-    getAccessToken: async function(bearerToken: string) {
+    getAccessToken: async function (bearerToken: string) {
       // debug && console.log('getAccessToken', arguments);
       const entry = await models.token.findById(bearerToken);
       if (!entry) return null;
@@ -33,7 +33,7 @@ export default function createOauthServer(models: Models) {
         user: { user, userPrivileges }
       };
     },
-    getClient: async function(clientId: string /* clientSecret */) {
+    getClient: async function (clientId: string /* clientSecret */) {
       // debug && console.log('getClient', arguments);
       if (clientId === 'circus-front') {
         return {
@@ -43,7 +43,7 @@ export default function createOauthServer(models: Models) {
       }
       return null;
     },
-    getRefreshToken: async function(refreshToken: string) {
+    getRefreshToken: async function (refreshToken: string) {
       // debug && console.log('getRefreshToken', arguments);
       const result = await models.token.findAll({ refreshToken });
       if (!result.length) return null;
@@ -57,14 +57,14 @@ export default function createOauthServer(models: Models) {
       };
       return retVal;
     },
-    revokeToken: async function(token: Token) {
+    revokeToken: async function (token: Token) {
       // debug && console.log('revokeToken', arguments);
       const result = await models.token.deleteOne({
         refreshToken: token.refreshToken
       });
       return result.deletedCount! > 0;
     },
-    getUser: async function(username: string, password: string) {
+    getUser: async function (username: string, password: string) {
       // debug && console.log('getting user', arguments);
       const users = await models.user.findAll({
         $or: [{ userEmail: username }, { loginId: username }]
@@ -76,7 +76,7 @@ export default function createOauthServer(models: Models) {
       }
       return null;
     },
-    saveToken: async function(token: Token, client: any, user: any) {
+    saveToken: async function (token: Token, client: any, user: any) {
       // debug && console.log('saveToken', arguments);
       await models.token.insert({
         accessToken: token.accessToken,

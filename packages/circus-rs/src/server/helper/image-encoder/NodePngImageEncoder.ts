@@ -15,7 +15,7 @@ const NodePngImageEncoder: NoDepFunctionService<
     const png = new Png(image, width, height, 'gray', 8);
     const out = new stream.PassThrough();
     return new Promise<stream.Readable>(resolve => {
-      png.encode(function(png_data: any): void {
+      png.encode(function (png_data: any): void {
         out.end(png_data);
         resolve(out);
       });

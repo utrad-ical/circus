@@ -55,7 +55,7 @@ describe('basic read/write', () => {
 
 test('#convert', () => {
   const raw = new RawData([4, 4, 4], PixelFormat.Int16);
-  raw.convert(PixelFormat.Int8, function(v) {
+  raw.convert(PixelFormat.Int8, function (v) {
     return v + 5;
   });
   expect(raw.getPixelFormat()).toBe(PixelFormat.Int8);

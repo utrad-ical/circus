@@ -10,7 +10,7 @@ beforeAll(async () => {
 afterAll(async () => await apiTest.tearDown());
 
 describe('admin/plugins', function _adminPlugins() {
-  beforeEach(async function() {
+  beforeEach(async function () {
     await setUpMongoFixture(apiTest.db, ['pluginDefinitions']);
   });
 

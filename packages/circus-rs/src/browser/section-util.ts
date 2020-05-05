@@ -277,10 +277,7 @@ export function adjustOnResized(
   const newOrigin = convertScreenCoordinateToVolumeCoordinate(
     section,
     oldResolutionVec,
-    newResolutionVec
-      .clone()
-      .sub(oldResolutionVec)
-      .multiplyScalar(-0.5)
+    newResolutionVec.clone().sub(oldResolutionVec).multiplyScalar(-0.5)
   );
 
   const newXAxis = new Vector3()

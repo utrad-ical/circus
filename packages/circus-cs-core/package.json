@@ -51,7 +51,6 @@
     "@types/tar-stream": "^1.6.2",
     "babel-jest": "^24.8.0",
     "jest": "^24.8.0",
-    "prettier": "^1.19.1",
     "typescript": "^3.8.3"
   },
   "scripts": {
@@ -69,9 +68,6 @@
     "url": "https://github.com/utrad-ical/circus-cs-core/issues"
   },
   "homepage": "https://github.com/utrad-ical/circus-cs-core#readme",
-  "prettier": {
-    "singleQuote": true
-  },
   "jest": {
     "testRegex": "\\.test\\.(jsx?|tsx?)$",
     "moduleFileExtensions": [

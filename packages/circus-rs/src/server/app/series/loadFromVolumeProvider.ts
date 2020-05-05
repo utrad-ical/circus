@@ -34,7 +34,7 @@ export default function loadVolumeProvider({
     delta: ['delta', undefined, 'isInt', 'toInt']
   };
 
-  const main: koa.Middleware = async function(
+  const main: koa.Middleware = async function (
     ctx: koa.DefaultContext,
     next: koa.Next
   ): Promise<void> {

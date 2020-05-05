@@ -26,7 +26,7 @@ export default function issueSeriesAccessToken(
     series: ['Series UID', null, s => isDicomUid(s), null]
   });
 
-  const main: koa.Middleware = async function(
+  const main: koa.Middleware = async function (
     ctx: koa.DefaultContext,
     next: koa.Next
   ): Promise<void> {

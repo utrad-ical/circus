@@ -4,7 +4,7 @@ import configureCsCoreServiceLoader, {
 import configureRsServiceLoader, {
   RsServices
 } from '@utrad-ical/circus-rs/src/server/configureServiceLoader';
-import ServiceLoader from '@utrad-ical/circus-lib/lib/ServiceLoader';
+import { ServiceLoader, Logger } from '@utrad-ical/circus-lib';
 import path from 'path';
 import {
   DisposableDb,
@@ -13,7 +13,6 @@ import {
   DicomTagReader,
   Models
 } from './interface';
-import Logger from '@utrad-ical/circus-lib/lib/logger/Logger';
 import Storage from './storage/Storage';
 import Koa from 'koa';
 import createDicomUtilityRunner, {

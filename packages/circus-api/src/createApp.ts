@@ -1,7 +1,10 @@
 import multer from '@koa/multer';
 import { CsCore } from '@utrad-ical/circus-cs-core';
-import { FunctionService } from '@utrad-ical/circus-lib';
-import Logger from '@utrad-ical/circus-lib/lib/logger/Logger';
+import {
+  FunctionService,
+  Logger,
+  DicomFileRepository
+} from '@utrad-ical/circus-lib';
 import { ErrorObject } from 'ajv';
 import * as fs from 'fs-extra';
 import glob from 'glob-promise';
@@ -23,7 +26,6 @@ import validateInOut from './middleware/validateInOut';
 import Storage from './storage/Storage';
 import { Deps } from './typings/middlewares';
 import { VolumeProvider } from '@utrad-ical/circus-rs/src/server/helper/createVolumeProvider';
-import { DicomFileRepository } from '@utrad-ical/circus-lib/lib/dicom-file-repository';
 
 function handlerName(route: Route) {
   if (route.handler) return route.handler;

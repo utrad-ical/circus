@@ -1,4 +1,4 @@
-import { DicomFileRepository } from '@utrad-ical/circus-lib/lib/dicom-file-repository';
+import { DicomFileRepository } from '@utrad-ical/circus-lib';
 import MultiRange from 'multi-integer-range';
 import { FunctionService } from '@utrad-ical/circus-lib';
 import * as circus from '../../interface';

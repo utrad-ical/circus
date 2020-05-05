@@ -1,7 +1,6 @@
 import koa from 'koa';
 import Router from 'koa-router';
 
-import Logger from '@utrad-ical/circus-lib/lib/logger/Logger';
 import ImageEncoder from '../../helper/image-encoder/ImageEncoder';
 import {
   VolumeProvider,
@@ -12,8 +11,11 @@ import loadFromVolumeProvider from './loadFromVolumeProvider';
 import metadata from './metadata';
 import volume from './volume';
 import scan from './scan';
-import PartialVolumeDescriptor from '@utrad-ical/circus-lib/lib/PartialVolumeDescriptor';
-import { FunctionService } from '@utrad-ical/circus-lib';
+import {
+  PartialVolumeDescriptor,
+  FunctionService,
+  Logger
+} from '@utrad-ical/circus-lib';
 
 export interface SeriesMiddlewareState {
   volumeAccessor: VolumeAccessor;

@@ -1,4 +1,4 @@
-import Logger from '@utrad-ical/circus-lib/lib/logger/Logger';
+import { Logger } from '@utrad-ical/circus-lib';
 import { CancellableTimer } from './createCancellableTimer';
 import * as circus from '../interface';
 

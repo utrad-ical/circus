@@ -1,4 +1,4 @@
-import { DicomFileRepository } from '@utrad-ical/circus-lib/lib/dicom-file-repository';
+import { DicomFileRepository } from '@utrad-ical/circus-lib';
 import chalk from 'chalk';
 import fs from 'fs-extra';
 import path from 'path';

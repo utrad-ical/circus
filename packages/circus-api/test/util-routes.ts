@@ -15,7 +15,7 @@ import createDicomImporter from '../src/createDicomImporter';
 import {
   MemoryDicomFileRepository,
   DicomFileRepository
-} from '@utrad-ical/circus-lib/lib/dicom-file-repository';
+} from '@utrad-ical/circus-lib';
 import createDicomTagReader from '../src/utils/createDicomTagReader';
 import createDicomUtilityRunner from '../src/utils/createDicomUtilityRunner';
 

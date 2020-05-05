@@ -1,10 +1,9 @@
 import path from 'path';
 import fs from 'fs-extra';
 import DockerRunner from '../util/DockerRunner';
-import { DicomFileRepository } from '@utrad-ical/circus-lib/lib/dicom-file-repository';
+import { DicomFileRepository, FunctionService } from '@utrad-ical/circus-lib';
 import pluginResultsValidator from './pluginResultsValidator';
 import { MultiRange } from 'multi-integer-range';
-import { FunctionService } from '@utrad-ical/circus-lib';
 import buildDicomVolumes from './buildDicomVolumes';
 import tarfs from 'tar-fs';
 import stream from 'stream';

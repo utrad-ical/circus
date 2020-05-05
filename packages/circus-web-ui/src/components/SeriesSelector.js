@@ -8,7 +8,7 @@ import { connect } from 'react-redux';
 import { modal } from 'rb/modal';
 import { useApi } from 'utils/api';
 import PartialVolumeDescriptorEditor from './PartialVolumeDescriptorEditor';
-import * as pv from '@utrad-ical/circus-lib/lib/PartialVolumeDescriptor';
+import { describePartialVolumeDescriptor } from '@utrad-ical/circus-lib';
 
 const PartialVolumeRenderer = props => {
   const { index, value, onChange } = props;
@@ -33,7 +33,7 @@ const PartialVolumeRenderer = props => {
       onClick={handleClick}
       bsStyle={applied ? 'success' : 'default'}
     >
-      {applied ? pv.describePartialVolumeDescriptor(value, 3) : 'not applied'}
+      {applied ? describePartialVolumeDescriptor(value, 3) : 'not applied'}
     </IconButton>
   );
 };

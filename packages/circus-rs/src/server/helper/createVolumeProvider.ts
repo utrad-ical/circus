@@ -1,8 +1,9 @@
-import { DicomFileRepository } from '@utrad-ical/circus-lib/lib/dicom-file-repository';
 import {
+  DicomFileRepository,
   DicomImageExtractor,
-  DicomMetadata
-} from '@utrad-ical/circus-lib/lib/image-extractor/dicomImageExtractor';
+  DicomMetadata,
+  FunctionService
+} from '@utrad-ical/circus-lib';
 import {
   Initializer as MultiRangeInitializer,
   MultiRange
@@ -10,7 +11,6 @@ import {
 import RawData from '../../common/RawData';
 import PriorityIntegerCaller from '../../common/PriorityIntegerCaller';
 import DicomVolume from '../../common/DicomVolume';
-import { FunctionService } from '@utrad-ical/circus-lib';
 import asyncMemoize from '../../common/asyncMemoize';
 
 export type VolumeProvider = (seriesUid: string) => Promise<VolumeAccessor>;

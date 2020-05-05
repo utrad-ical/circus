@@ -5,7 +5,7 @@ import pluginJobRunner, {
 import fs from 'fs-extra';
 import path from 'path';
 import DockerRunner from '../util/DockerRunner';
-import { DicomFileRepository } from '@utrad-ical/circus-lib/lib/dicom-file-repository';
+import { DicomFileRepository } from '@utrad-ical/circus-lib';
 import tar from 'tar-stream';
 import memory from 'memory-streams';
 import * as circus from '../interface';

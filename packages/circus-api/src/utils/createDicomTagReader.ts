@@ -1,4 +1,4 @@
-import { NoDepFunctionService } from '@utrad-ical/circus-lib/lib/ServiceLoader';
+import { NoDepFunctionService } from '@utrad-ical/circus-lib';
 import parser, { DicomDataset } from 'dicom-parser';
 import { createEncConverter, EncConverter } from './encConverter';
 import { DicomTagReader } from '../interface';

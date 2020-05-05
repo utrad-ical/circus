@@ -1,7 +1,7 @@
 import koa from 'koa';
 import httpStatus from 'http-status';
 import { Authorizer } from '../../helper/createAuthorizer';
-import Logger from '@utrad-ical/circus-lib/lib/logger/Logger';
+import { Logger } from '@utrad-ical/circus-lib';
 
 type MiddlewareOptions = {
   rsLogger: Logger;

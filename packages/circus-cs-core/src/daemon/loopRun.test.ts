@@ -17,7 +17,7 @@ const createMockLogger = (fn: jest.Mock) => {
 };
 
 const createMockQueueSystem = <T>(len: number = 10, fn: jest.Mock) => {
-  let q: circus.QueueItem<T>[] = [];
+  const q: circus.QueueItem<T>[] = [];
   let qId: number = 0;
 
   const mockQueueSystem: circus.Queue<T> = {

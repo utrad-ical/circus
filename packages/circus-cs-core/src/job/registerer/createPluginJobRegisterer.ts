@@ -67,7 +67,7 @@ const createPluginJobRegisterer: FunctionService<
     if (!Array.isArray(seriesList) || !seriesList.length) {
       throw new TypeError('No series specified.');
     }
-    for (let series of seriesList) {
+    for (const series of seriesList) {
       const loader = await dicomFileRepository.getSeries(series.seriesUid);
       const imagesInSeries = new MultiRange(loader.images);
       // Check the series exists

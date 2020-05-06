@@ -13,7 +13,7 @@ env:
   es6: true
   browser: true
   node: true
-  'jest/globals': true
+  jest: true
 rules:
   no-unused-vars: [0]
   no-useless-escape: [1]

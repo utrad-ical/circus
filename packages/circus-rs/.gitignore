@@ -1,7 +1,4 @@
 node_modules
 /logs
 /lib
-/config/*
-!/config/default.js
 /dist
-/docs/_site

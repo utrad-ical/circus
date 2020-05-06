@@ -1,17 +1,12 @@
--
-  month: 2
+- month: 2
   name: Kisaragi
--
-  month: 3
+- month: 3
   name: Yayoi
--
-  month: 4
+- month: 4
   name: Uzuki
 # ducplicated data!
--
-  month: 4
+- month: 4
   name: Uzuki
 # invalid data!
--
-  month: 7
+- month: 7
   name: true

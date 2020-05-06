@@ -3,7 +3,7 @@ import * as rs from 'circus-rs';
 import {
   isValidPartialVolumeDescriptor,
   PartialVolumeDescriptor
-} from '@utrad-ical/circus-lib';
+} from '@utrad-ical/circus-lib/src/PartialVolumeDescriptor';
 
 /**
  * @type React.Context<{

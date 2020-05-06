@@ -8,7 +8,7 @@ import { connect } from 'react-redux';
 import { modal } from 'rb/modal';
 import { useApi } from 'utils/api';
 import PartialVolumeDescriptorEditor from './PartialVolumeDescriptorEditor';
-import { describePartialVolumeDescriptor } from '@utrad-ical/circus-lib';
+import { describePartialVolumeDescriptor } from '@utrad-ical/circus-lib/src/PartialVolumeDescriptor';
 
 const PartialVolumeRenderer = props => {
   const { index, value, onChange } = props;

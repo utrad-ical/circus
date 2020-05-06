@@ -7,9 +7,9 @@
   },
   "scripts": {
     "test": "jest",
-    "lint": "eslint \"packages/*/src/**/*.{js,ts}\"",
-    "lint-fix": "eslint --fix \"packages/*/src/**/*.{js,ts}\"",
-    "prettier": "prettier --write \"packages/*/src/**/*.{js,ts,less,json,yaml,yml}\""
+    "lint": "eslint \"packages/*/{src,test}/**/*.{js,ts}\"",
+    "lint-fix": "eslint --fix \"packages/*/{src,test}/**/*.{js,ts}\"",
+    "prettier": "prettier --write \"packages/*/{src,test}/**/*.{js,ts,less,json,yaml,yml}\""
   },
   "devDependencies": {
     "@babel/core": "^7.9.6",

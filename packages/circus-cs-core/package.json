@@ -3,6 +3,10 @@
   "version": "0.18.0",
   "description": "CIRCUS CS Core: Plugin manager",
   "main": "src/index.ts",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/utrad-ical/circus.git"
+  },
   "bin": {
     "cs-core": "./cui.js"
   },
@@ -50,10 +54,6 @@
     "@types/tar-fs": "^1.16.3",
     "@types/tar-stream": "^1.6.2",
     "typescript": "^3.8.3"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/utrad-ical/circus-cs-core.git"
   },
   "author": "Soichiro Miki <smiki-tky@umin.ac.jp>",
   "license": "MIT",

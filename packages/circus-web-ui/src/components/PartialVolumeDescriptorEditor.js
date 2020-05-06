@@ -6,7 +6,7 @@ import * as et from 'rb/editor-types';
 import {
   describePartialVolumeDescriptor,
   isValidPartialVolumeDescriptor
-} from '@utrad-ical/circus-lib';
+} from '@utrad-ical/circus-lib/src/PartialVolumeDescriptor';
 
 export default class PartialVolumeDescriptorEditor extends React.PureComponent {
   constructor(props) {

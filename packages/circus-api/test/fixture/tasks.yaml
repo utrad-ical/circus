@@ -1,5 +1,4 @@
--
-  taskId: aaaabbbbcccc1111
+- taskId: aaaabbbbcccc1111
   owner: alice@example.com
   status: running
   command: ''
@@ -9,8 +8,7 @@
   logs: []
   value: 30
   max: 100
--
-  taskId: aaaabbbbcccc2222
+- taskId: aaaabbbbcccc2222
   owner: bob@example.com
   status: finished
   command: ''

@@ -1,179 +1,149 @@
--
-  itemId: 1
+- itemId: 1
   name: digital system
   color: plum
   stock: false
   price: 438
--
-  itemId: 2
+- itemId: 2
   name: multi-byte program
   color: blue
   stock: false
   price: 193
--
-  itemId: 3
+- itemId: 3
   name: multi-byte capacitor
   color: yellow
   stock: true
   price: 160
--
-  itemId: 4
+- itemId: 4
   name: redundant firewall
   color: azure
   stock: true
   price: 170
--
-  itemId: 5
+- itemId: 5
   name: mobile monitor
   color: lime
   stock: true
   price: 573
--
-  itemId: 6
+- itemId: 6
   name: 1080p system
   color: fuchsia
   stock: true
   price: 709
--
-  itemId: 7
+- itemId: 7
   name: bluetooth pixel
   color: tan
   stock: true
   price: 53
--
-  itemId: 8
+- itemId: 8
   name: multi-byte feed
   color: mint green
   stock: true
   price: 373
--
-  itemId: 9
+- itemId: 9
   name: mobile monitor
   color: maroon
   stock: true
   price: 721
--
-  itemId: 10
+- itemId: 10
   name: 1080p matrix
   color: tan
   stock: true
   price: 225
--
-  itemId: 11
+- itemId: 11
   name: solid state interface
   color: violet
   stock: true
   price: 88
--
-  itemId: 12
+- itemId: 12
   name: digital firewall
   color: blue
   stock: true
   price: 959
--
-  itemId: 13
+- itemId: 13
   name: back-end alarm
   color: white
   stock: false
   price: 574
--
-  itemId: 14
+- itemId: 14
   name: primary microchip
   color: plum
   stock: true
   price: 616
--
-  itemId: 15
+- itemId: 15
   name: mobile bandwidth
   color: purple
   stock: true
   price: 870
--
-  itemId: 16
+- itemId: 16
   name: cross-platform feed
   color: salmon
   stock: true
   price: 264
--
-  itemId: 17
+- itemId: 17
   name: open-source array
   color: azure
   stock: true
   price: 479
--
-  itemId: 18
+- itemId: 18
   name: open-source interface
   color: green
   stock: true
   price: 776
--
-  itemId: 19
+- itemId: 19
   name: neural bandwidth
   color: tan
   stock: true
   price: 852
--
-  itemId: 20
+- itemId: 20
   name: neural alarm
   color: magenta
   stock: true
   price: 520
--
-  itemId: 21
+- itemId: 21
   name: open-source driver
   color: tan
   stock: true
   price: 714
--
-  itemId: 22
+- itemId: 22
   name: mobile feed
   color: mint green
   stock: true
   price: 708
--
-  itemId: 23
+- itemId: 23
   name: cross-platform bandwidth
   color: sky blue
   stock: true
   price: 949
--
-  itemId: 24
+- itemId: 24
   name: optical interface
   color: silver
   stock: true
   price: 432
--
-  itemId: 25
+- itemId: 25
   name: redundant array
   color: salmon
   stock: true
   price: 137
--
-  itemId: 26
+- itemId: 26
   name: digital hard drive
   color: blue
   stock: true
   price: 108
--
-  itemId: 27
+- itemId: 27
   name: 1080p interface
   color: salmon
   stock: true
   price: 204
--
-  itemId: 28
+- itemId: 28
   name: 1080p monitor
   color: indigo
   stock: false
   price: 911
--
-  itemId: 29
+- itemId: 29
   name: redundant bus
   color: olive
   stock: true
   price: 831
--
-  itemId: 30
+- itemId: 30
   name: primary monitor
   color: sky blue
   stock: true

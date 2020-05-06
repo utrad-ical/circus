@@ -1,5 +1,4 @@
--
-  groupId: 1
+- groupId: 1
   groupName: admin
   privileges: ['manageServer', 'personalInfoView']
   domains: ['sirius.org']
@@ -8,8 +7,7 @@
   addSeriesProjects: []
   viewPersonalInfoProjects: []
   moderateProjects: []
--
-  groupId: 2
+- groupId: 2
   groupName: powerUser
   privileges: ['personalInfoView']
   domains: ['vega.org', 'altair.org']
@@ -18,8 +16,7 @@
   addSeriesProjects: []
   viewPersonalInfoProjects: []
   moderateProjects: []
--
-  groupId: 3
+- groupId: 3
   groupName: guests
   privileges: []
   domains: []

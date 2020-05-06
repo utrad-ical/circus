@@ -1,9 +1,3 @@
 /node_modules
-.DS_Store
-Thumbs.db
-.buildpath
-.project
-.idea
-.vscode
 public/*.js
 public/*.js.map

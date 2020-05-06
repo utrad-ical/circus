@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/utrad-ical/circus-lib.git"
+    "url": "https://github.com/utrad-ical/circus.git"
   },
   "author": "Soichiro Miki <smiki-tky@umin.ac.jp>",
   "license": "MIT",

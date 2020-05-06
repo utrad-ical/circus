@@ -12,7 +12,10 @@
     "docs": "jekyll build --source=./docs --dest=./docs/_site && cp -r ./dist ./docs/_site",
     "docserver": "jekyll serve --source=./docs --dest=./docs/_site"
   },
-  "repository": "https://github.com/utrad-ical/circus-rs",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/utrad-ical/circus.git"
+  },
   "license": "MIT",
   "main": "lib/browser/index.js",
   "dependencies": {

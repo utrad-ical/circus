@@ -37,7 +37,7 @@ routes:
     handler: handleSearch
     description: >
       Performs search for the plug-in job.
-    responseSchema: pluginJob|addProperty patientInfo patientInfo|searchResult
+    responseSchema: pluginJobSearchResult|addProperty patientInfo patientInfo|searchResult
   - verb: get
     path: /plugin-jobs/:jobId
     description: >

@@ -31,7 +31,7 @@ const createSeriesRoutes: FunctionService<
     imageEncoder: ImageEncoder;
   }
 > = async (opts, { rsLogger, volumeProvider, imageEncoder }) => {
-  const router = new Router();
+  const router = new Router<SeriesMiddlewareState, any>();
   const load = loadFromVolumeProvider({ logger: rsLogger, volumeProvider });
   router.use('/', load);
   router.get('/metadata', metadata());

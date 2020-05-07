@@ -28,7 +28,7 @@
     "pngjs": "^3.4.0",
     "rimraf": "^2.6.3",
     "tslib": "^1.9.3",
-    "typescript": "^3.5.1"
+    "typescript": "^3.8.3"
   },
   "dependencies": {
     "cosmiconfig": "^6.0.0",

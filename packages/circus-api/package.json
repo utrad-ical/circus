@@ -75,7 +75,7 @@
     "@types/semver": "^6.2.1",
     "@types/split": "^1.0.0",
     "form-data": "^3.0.0",
-    "typescript": "^3.7.5"
+    "typescript": "^3.8.3"
   },
   "nodemonConfig": {
     "ext": "js,mjs,ts,json,yaml"

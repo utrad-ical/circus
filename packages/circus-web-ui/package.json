@@ -10,7 +10,8 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/utrad-ical/circus.git"
+    "url": "https://github.com/utrad-ical/circus.git",
+    "directory": "packages/circus-web-ui"
   },
   "keywords": [
     "CAD"

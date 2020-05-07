@@ -1,4 +1,4 @@
-import axios, { AxiosRequestConfig } from 'axios';
+import axios, { AxiosRequestConfig, ResponseType } from 'axios';
 
 /**
  * Simple HTTP wrapper that connects to the CIRCUS RS server and returns the response
@@ -23,7 +23,7 @@ export default class RsHttpClient {
   public request(
     command: string,
     params: any,
-    responseType: string = 'json'
+    responseType: ResponseType = 'json'
   ): Promise<any> {
     const url = `${this.host}/${command}`;
 

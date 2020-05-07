@@ -30,7 +30,6 @@
     "dashdash": "^1.14.1",
     "deep-rename-keys": "^0.2.1",
     "dicom-parser": "^1.8.4",
-    "dotenv": "^6.2.0",
     "fs-extra": "^9.0.0",
     "generic-pool": "^3.7.1",
     "glob": "^7.1.6",

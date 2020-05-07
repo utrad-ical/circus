@@ -59,7 +59,7 @@ const createServer: FunctionService<koa, RsServices, RsServerOptions> = async (
   // Counts the number of requests
   app.use(countUp({ counter }));
 
-  const router = new Router();
+  const router = new Router<any, any>();
   router.get('/status', serverStatus({ config: options, modules: deps }));
 
   // authorization

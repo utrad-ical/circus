@@ -12,10 +12,10 @@
     "cs-core": "./cui.js"
   },
   "dependencies": {
-    "@babel/core": "^7.4.5",
-    "@babel/preset-env": "^7.4.5",
-    "@babel/preset-typescript": "^7.3.3",
-    "@babel/register": "^7.4.4",
+    "@babel/core": "^7.9.6",
+    "@babel/preset-env": "^7.9.6",
+    "@babel/preset-typescript": "^7.9.0",
+    "@babel/register": "^7.9.0",
     "@utrad-ical/circus-lib": "^0.15.2",
     "ajv": "^6.5.0",
     "argv": "0.0.2",

@@ -55,7 +55,7 @@
     "merge": "^1.2.1",
     "moment": "^2.24.0",
     "mongoose": "^4.6.8",
-    "multi-integer-range": "^4.0.2",
+    "multi-integer-range": "^4.0.8",
     "react": "^16.13.1",
     "react-bootstrap": "^0.32.4",
     "react-dom": "^16.13.1",

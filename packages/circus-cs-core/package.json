@@ -6,7 +6,8 @@
   "types": "src/interface.d.ts",
   "repository": {
     "type": "git",
-    "url": "https://github.com/utrad-ical/circus.git"
+    "url": "https://github.com/utrad-ical/circus.git",
+    "directory": "packages/circus-cs-core"
   },
   "bin": {
     "cs-core": "./cui.js"
@@ -56,9 +57,5 @@
     "typescript": "^3.8.3"
   },
   "author": "Soichiro Miki <smiki-tky@umin.ac.jp>",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/utrad-ical/circus-cs-core/issues"
-  },
-  "homepage": "https://github.com/utrad-ical/circus-cs-core#readme"
+  "license": "MIT"
 }

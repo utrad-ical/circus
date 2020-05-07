@@ -1,18 +1,15 @@
 {
   "name": "@utrad-ical/circus-api",
   "version": "0.4.0",
-  "description": "CIRCUS JSON API Server using Koa",
+  "description": "CIRCUS JSON API Server",
   "main": "server.js",
   "scripts": {},
   "repository": {
     "type": "git",
-    "url": "https://github.com/utrad-ical/circus.git"
+    "url": "https://github.com/utrad-ical/circus.git",
+    "directory": "packages/circus-api"
   },
   "license": "UNLICENSED",
-  "bugs": {
-    "url": "https://github.com/utrad-ical/circus-api/issues"
-  },
-  "homepage": "https://github.com/utrad-ical/circus-api#readme",
   "dependencies": {
     "@babel/core": "^7.9.6",
     "@babel/preset-env": "^7.9.6",

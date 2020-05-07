@@ -9,26 +9,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/utrad-ical/circus.git"
+    "url": "https://github.com/utrad-ical/circus.git",
+    "directory": "packages/circus-lib"
   },
   "author": "Soichiro Miki <smiki-tky@umin.ac.jp>",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/utrad-ical/circus-lib/issues"
-  },
-  "homepage": "https://github.com/utrad-ical/circus-lib",
-  "devDependencies": {
-    "@types/cosmiconfig": "^5.0.3",
-    "@types/fs-extra": "^8.1.0",
-    "@types/node": "^13.13.5",
-    "@types/pngjs": "^3.4.2",
-    "@types/tar-stream": "^1.6.2",
-    "log4js": "^4.3.1",
-    "pngjs": "^3.4.0",
-    "rimraf": "^2.6.3",
-    "tslib": "^1.11.2",
-    "typescript": "^3.8.3"
-  },
   "dependencies": {
     "cosmiconfig": "^6.0.0",
     "dicom-parser": "^1.8.4",
@@ -41,5 +26,17 @@
     "ulid": "^2.3.0",
     "winston": "^3.2.1",
     "winston-daily-rotate-file": "^4.4.1"
+  },
+  "devDependencies": {
+    "@types/cosmiconfig": "^5.0.3",
+    "@types/fs-extra": "^8.1.0",
+    "@types/node": "^13.13.5",
+    "@types/pngjs": "^3.4.2",
+    "@types/tar-stream": "^1.6.2",
+    "log4js": "^4.3.1",
+    "pngjs": "^3.4.0",
+    "rimraf": "^2.6.3",
+    "tslib": "^1.11.2",
+    "typescript": "^3.8.3"
   }
 }

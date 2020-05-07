@@ -1,5 +1,5 @@
 import { NoDepFunctionService } from '@utrad-ical/circus-lib';
-import parser, { DicomDataset } from 'dicom-parser';
+import parser from 'dicom-parser';
 import { createEncConverter, EncConverter } from './encConverter';
 import { DicomTagReader } from '../interface';
 
@@ -47,7 +47,7 @@ const parseBirthDate = (da: string | undefined) => {
 };
 
 const extractPatientName = (
-  dataset: DicomDataset,
+  dataset: parser.DicomDataset,
   encConverter: EncConverter
 ) => {
   const element = dataset.elements['x00100010'];
@@ -124,7 +124,7 @@ export interface Parameters {
   pixelValueUnits?: string;
 }
 
-const extractParameters = (dataset: DicomDataset) => {
+const extractParameters = (dataset: parser.DicomDataset) => {
   const data: Parameters = {
     pixelSpacingX: dataset.floatString('x00280030', 0),
     pixelSpacingY: dataset.floatString('x00280030', 1),

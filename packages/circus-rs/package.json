@@ -52,7 +52,6 @@
     "@types/async-cache": "^1.1.0",
     "@types/compression": "0.0.33",
     "@types/http-status": "^0.2.30",
-    "@types/jest": "^25.2.1",
     "@types/koa": "^2.11.3",
     "@types/koa-compress": "^2.0.9",
     "@types/koa-json": "^2.0.18",

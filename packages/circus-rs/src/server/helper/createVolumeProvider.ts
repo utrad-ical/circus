@@ -107,7 +107,7 @@ const createUncachedVolumeProvider: FunctionService<
         await load(secondaryImageNo);
         const secondaryMetadata = imageMetadata.get(secondaryImageNo)!;
         return Math.abs(
-          secondaryMetadata.sliceLocation - primaryMetadata.sliceLocation
+          secondaryMetadata.sliceLocation! - primaryMetadata.sliceLocation!
         );
       } else {
         return 1;

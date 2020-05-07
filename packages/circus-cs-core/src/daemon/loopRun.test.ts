@@ -72,7 +72,7 @@ class MockContext extends EventEmitter {
 describe('loopRun', () => {
   let _active: boolean = true;
   test('insert a job and list it', async () => {
-    const fn = jest.fn<any>();
+    const fn = jest.fn();
     const queue = createMockQueueSystem<null>(3, fn);
     const options: LoopRunOptions<null> = {
       logger: createMockLogger(fn),

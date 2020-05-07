@@ -2,7 +2,8 @@
   "name": "@utrad-ical/circus-cs-core",
   "version": "0.18.0",
   "description": "CIRCUS CS Core: Plugin manager",
-  "main": "src/index.ts",
+  "main": "lib",
+  "types": "src/interface.d.ts",
   "repository": {
     "type": "git",
     "url": "https://github.com/utrad-ical/circus.git"
@@ -42,7 +43,6 @@
     "@types/cosmiconfig": "^5.0.3",
     "@types/dockerode": "^2.5.28",
     "@types/fs-extra": "^5.1.0",
-    "@types/jest": "^23.1.1",
     "@types/js-yaml": "^3.12.3",
     "@types/minimist": "^1.2.0",
     "@types/mongodb": "^3.5.14",
@@ -57,7 +57,6 @@
   },
   "author": "Soichiro Miki <smiki-tky@umin.ac.jp>",
   "license": "MIT",
-  "types": "src/interface.d.ts",
   "bugs": {
     "url": "https://github.com/utrad-ical/circus-cs-core/issues"
   },

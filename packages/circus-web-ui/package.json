@@ -24,17 +24,17 @@
     "@babel/preset-env": "^7.9.6",
     "@babel/preset-react": "^7.0.0",
     "@babel/preset-typescript": "^7.9.0",
-    "babel-loader": "^8.0.2",
+    "babel-loader": "^8.1.0",
     "cross-env": "^5.2.0",
     "css-loader": "^3.5.3",
-    "file-loader": "^0.11.2",
+    "file-loader": "^1.1.6",
     "glob": "^7.1.6",
     "glob-promise": "^3.4.0",
     "less": "^3.11.1",
     "less-loader": "^6.0.0",
     "style-loader": "^1.2.1",
-    "svg2ttf": "^4.0.2",
-    "svgicons2svgfont": "^5.0.0",
+    "svg2ttf": "^4.1.0",
+    "svgicons2svgfont": "^5.0.2",
     "ttf2woff": "^2.0.1",
     "url-loader": "^1.1.1",
     "webpack": "^4.43.0",
@@ -65,6 +65,6 @@
     "redux-thunk": "^2.3.0",
     "styled-components": "^3.4.10",
     "tinycolor2": "^1.4.1",
-    "tslib": "^1.11.1"
+    "tslib": "^1.11.2"
   }
 }

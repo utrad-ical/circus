@@ -17,7 +17,7 @@
     "@babel/preset-typescript": "^7.9.0",
     "@babel/register": "^7.9.0",
     "@utrad-ical/circus-lib": "^0.15.2",
-    "ajv": "^6.5.0",
+    "ajv": "^6.11.0",
     "argv": "0.0.2",
     "chalk": "^3.0.0",
     "dockerode": "^2.5.8",
@@ -27,7 +27,7 @@
     "merge": "^1.2.1",
     "minimist": "^1.2.0",
     "moment": "^2.24.0",
-    "mongodb": "^3.4.1",
+    "mongodb": "^3.5.2",
     "multi-integer-range": "^4.0.8",
     "pify": "^3.0.0",
     "pm2": "^2.10.4",
@@ -35,8 +35,8 @@
     "shell-escape": "^0.2.0",
     "table": "^4.0.3",
     "tar-fs": "^2.0.0",
-    "tar-stream": "^2.0.1",
-    "tslib": "^1.9.2"
+    "tar-stream": "^2.1.0",
+    "tslib": "^1.11.2"
   },
   "devDependencies": {
     "@types/argv": "0.0.4",

@@ -23,7 +23,7 @@ export default class MockLoader implements DicomVolumeLoader {
       voxelCount: [512, 512, 132],
       estimatedWindow: { level: 200, width: 600 },
       dicomWindow: { level: 200, width: 600 },
-      pixelFormat: PixelFormat.UInt16
+      pixelFormat: 'uint16'
     };
 
     this.meta = meta;
@@ -52,7 +52,7 @@ export default class MockLoader implements DicomVolumeLoader {
         Math.floor(x / gridSize) +
         Math.floor(y / gridSize) +
         Math.floor(z / gridSize);
-      if (pixelFormat === PixelFormat.Binary) {
+      if (pixelFormat === 'binary') {
         val %= 2;
       } else {
         val = (val % 3) * 30 + 30;

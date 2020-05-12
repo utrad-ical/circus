@@ -1,11 +1,13 @@
-export enum PixelFormat {
-  Unknown = -1,
-  UInt8 = 0,
-  Int8 = 1,
-  UInt16 = 2,
-  Int16 = 3,
-  Binary = 4
-}
+const formats = {
+  unknown: -1,
+  uint8: 0,
+  int8: 1,
+  uint16: 2,
+  int16: 3,
+  binary: 4
+} as const;
+
+export type PixelFormat = keyof typeof formats;
 
 export interface PixelFormatInfo {
   /**
@@ -22,7 +24,7 @@ export interface PixelFormatInfo {
 
 export function pixelFormatInfo(type: PixelFormat): PixelFormatInfo {
   switch (type) {
-    case PixelFormat.UInt8:
+    case 'uint8':
       return {
         bpp: 1,
         minWidth: 1,
@@ -31,7 +33,7 @@ export function pixelFormatInfo(type: PixelFormat): PixelFormatInfo {
         maxLevel: 255,
         arrayClass: Uint8Array
       };
-    case PixelFormat.Int8:
+    case 'int8':
       return {
         bpp: 1,
         minWidth: 1,
@@ -40,7 +42,7 @@ export function pixelFormatInfo(type: PixelFormat): PixelFormatInfo {
         maxLevel: 127,
         arrayClass: Int8Array
       };
-    case PixelFormat.UInt16:
+    case 'uint16':
       return {
         bpp: 2,
         minWidth: 1,
@@ -49,7 +51,7 @@ export function pixelFormatInfo(type: PixelFormat): PixelFormatInfo {
         maxLevel: 65535,
         arrayClass: Uint16Array
       };
-    case PixelFormat.Int16:
+    case 'int16':
       return {
         bpp: 2,
         minWidth: 1,
@@ -58,7 +60,7 @@ export function pixelFormatInfo(type: PixelFormat): PixelFormatInfo {
         maxLevel: 32767,
         arrayClass: Int16Array
       };
-    case PixelFormat.Binary:
+    case 'binary':
       return {
         bpp: 0.125,
         minWidth: 1,

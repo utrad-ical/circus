@@ -87,7 +87,7 @@ const dicomImageExtractor: (options?: ExtractOptions) => DicomImageExtractor = (
     const rescale = determineRescale(dataset);
     const pixelFormat = determinePixelFormat(dataset);
 
-    if (pixelFormat === PixelFormat.Unknown)
+    if (pixelFormat === 'unknown')
       throw new RangeError('Unsupported pixel format detected.');
 
     const window = determineWindow(dataset);
@@ -133,15 +133,12 @@ const dicomImageExtractor: (options?: ExtractOptions) => DicomImageExtractor = (
         maxValue = maxValue * slope + intercept;
         const { read, length } = getPixelAccessor(pixelData, pixelFormat);
         const convertedPixelData = new ArrayBuffer(pixelData.byteLength);
-        const { write } = getPixelAccessor(
-          convertedPixelData,
-          PixelFormat.Int16
-        );
+        const { write } = getPixelAccessor(convertedPixelData, 'int16');
 
         for (let i = 0; i < length; i++) {
           write(i, read(i) * slope + intercept);
         }
-        metadata.pixelFormat = PixelFormat.Int16;
+        metadata.pixelFormat = 'int16';
         pixelData = convertedPixelData;
       }
 
@@ -161,15 +158,15 @@ function determinePixelFormat(dataset: parser.DicomDataset): PixelFormat {
   const pixelRepresentation = dataset.uint16('x00280103');
   const bitsAllocated = dataset.uint16('x00280100');
   if (pixelRepresentation === 0 && bitsAllocated === 8) {
-    return PixelFormat.UInt8;
+    return 'uint8';
   } else if (pixelRepresentation === 1 && bitsAllocated === 8) {
-    return PixelFormat.Int8; // This should be rare
+    return 'int8'; // This should be rare
   } else if (pixelRepresentation === 0 && bitsAllocated === 16) {
-    return PixelFormat.UInt16; // unsigned 16 bit
+    return 'uint16'; // unsigned 16 bit
   } else if (pixelRepresentation === 1 && bitsAllocated === 16) {
-    return PixelFormat.Int16; // signed 16 bit data
+    return 'int16'; // signed 16 bit data
   }
-  return PixelFormat.Unknown;
+  return 'unknown';
 }
 
 function determineRescale(dataset: parser.DicomDataset): RescaleParams {
@@ -325,6 +322,7 @@ interface PixelAccessor {
   write: (pos: number, value: number) => void;
   length: number;
 }
+
 function getPixelAccessor(
   data: ArrayBuffer,
   pixelFormat: PixelFormat
@@ -333,7 +331,7 @@ function getPixelAccessor(
 
   const view = new arrayClass(data);
 
-  if (pixelFormat !== PixelFormat.Binary) {
+  if (pixelFormat !== 'binary') {
     return {
       read: pos => view[pos],
       write: (pos, value) => (view[pos] = value),

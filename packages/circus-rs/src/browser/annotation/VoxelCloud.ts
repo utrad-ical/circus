@@ -6,7 +6,6 @@ import {
   intersectionOfBoxAndPlane,
   box2GrowSubpixel
 } from '../../common/geometry';
-import { PixelFormat } from '../../common/PixelFormat';
 import {
   convertScreenCoordinateToVolumeCoordinate,
   convertVolumeCoordinateToScreenCoordinate
@@ -167,7 +166,7 @@ export default class VoxelCloud implements Annotation {
       !this.alpha
     )
       return;
-    if (this.volume.getPixelFormat() !== PixelFormat.Binary) {
+    if (this.volume.getPixelFormat() !== 'binary') {
       throw new Error('The assigned volume must use binary data format.');
     }
     if (viewState.type !== 'mpr') throw new Error('Unsupported view state.');

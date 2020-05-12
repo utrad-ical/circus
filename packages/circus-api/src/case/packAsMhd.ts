@@ -72,7 +72,7 @@ const putCaseData = async (deps: Deps, caseId: string, zip: JSZip) => {
           zip.file(
             labelFileBaseName + '.mhd',
             prepareMhdHeaderAsString(
-              PixelFormat.UInt8,
+              'uint8',
               dimension,
               elementSpacing,
               labelFileBaseName + '.raw'
@@ -93,18 +93,18 @@ const createLabelVolume = (
   labelData: any,
   labelBuffer: Buffer
 ) => {
-  const vol = new RawData(dimension, PixelFormat.UInt8);
-  const labelVol = new RawData(labelData.size, PixelFormat.Binary);
+  const vol = new RawData(dimension, 'uint8');
+  const labelVol = new RawData(labelData.size, 'binary');
   labelVol.assign(labelBuffer.buffer);
   vol.copy(labelVol, undefined, labelData.origin);
   return vol.data;
 };
 
-const pixelFormatMap: { [format: number]: string } = {
-  [PixelFormat.UInt8]: 'MET_UCHAR',
-  [PixelFormat.Int8]: 'MET_CHAR',
-  [PixelFormat.UInt16]: 'MET_USHORT',
-  [PixelFormat.Int16]: 'MET_SHORT'
+const pixelFormatMap: { [format: string]: string } = {
+  uint8: 'MET_UCHAR',
+  int8: 'MET_CHAR',
+  uint16: 'MET_USHORT',
+  int16: 'MET_SHORT'
 };
 
 const prepareMhdHeaderAsString = (

@@ -55,7 +55,7 @@ export const loadVolumeLabelData = async (revision, api) => {
 };
 
 const voxelShrinkToMinimum = labelData => {
-  const volume = new rs.RawData(labelData.size, rs.PixelFormat.Binary);
+  const volume = new rs.RawData(labelData.size, 'binary');
   volume.assign(labelData.volumeArrayBuffer);
   const cloud = new rs.VoxelCloud(); // temporary
   cloud.origin = labelData.origin;

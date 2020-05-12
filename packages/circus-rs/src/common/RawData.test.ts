@@ -2,7 +2,7 @@ import RawData from './RawData';
 import { PixelFormat } from './PixelFormat';
 
 test('create binary data', () => {
-  const raw = new RawData([8, 8, 8], PixelFormat.Binary);
+  const raw = new RawData([8, 8, 8], 'binary');
   const array = new Uint8Array(8); // 64 bits in a slice
   array[0] = 0xaa; // 0b10101010
   raw.insertSingleImage(0, array.buffer);
@@ -46,26 +46,26 @@ const readWriteTest = (
 };
 
 describe('basic read/write', () => {
-  test('UInt8 volume', readWriteTest(PixelFormat.UInt8, 32, 32, 10));
-  test('Int8 volume', readWriteTest(PixelFormat.Int8, 32, 32, 10));
-  test('UInt16 volume', readWriteTest(PixelFormat.UInt16, 32, 32, 10));
-  test('Int16 volume', readWriteTest(PixelFormat.Int16, 32, 32, 10));
-  test('Binary volume', readWriteTest(PixelFormat.Binary, 32, 32, 10));
+  test('UInt8 volume', readWriteTest('uint8', 32, 32, 10));
+  test('Int8 volume', readWriteTest('int8', 32, 32, 10));
+  test('UInt16 volume', readWriteTest('uint16', 32, 32, 10));
+  test('Int16 volume', readWriteTest('int16', 32, 32, 10));
+  test('Binary volume', readWriteTest('binary', 32, 32, 10));
 });
 
 test('#convert', () => {
-  const raw = new RawData([4, 4, 4], PixelFormat.Int16);
-  raw.convert(PixelFormat.Int8, function (v) {
+  const raw = new RawData([4, 4, 4], 'int16');
+  raw.convert('int8', function (v) {
     return v + 5;
   });
-  expect(raw.getPixelFormat()).toBe(PixelFormat.Int8);
+  expect(raw.getPixelFormat()).toBe('int8');
   expect(raw.getPixelAt(2, 2, 2)).toBe(5);
 });
 
 test('#copy', () => {
-  const src = new RawData([16, 16, 16], PixelFormat.Int8);
+  const src = new RawData([16, 16, 16], 'int8');
   src.fillAll((x, y, z) => x + y + z);
-  const dest = new RawData([16, 16, 16], PixelFormat.Int8);
+  const dest = new RawData([16, 16, 16], 'int8');
   dest.copy(src);
   expect(dest.getPixelAt(3, 10, 7)).toBe(20);
 
@@ -90,7 +90,7 @@ test('#copy', () => {
 
 test('#transformBoundingBox', () => {
   const newVol = () => {
-    const vol = new RawData([16, 16, 16], PixelFormat.Int8);
+    const vol = new RawData([16, 16, 16], 'int8');
     vol.fillAll((x, y, z) => x + y + z);
     return vol;
   };
@@ -137,7 +137,7 @@ test('#transformBoundingBox', () => {
 });
 
 test('#setPartialVolumeDescriptor', () => {
-  const vol = new RawData([16, 16, 16], PixelFormat.Int8);
+  const vol = new RawData([16, 16, 16], 'int8');
   vol.fillAll((x, y, z) => x + y + z);
   vol.setPartialVolumeDescriptor({ start: 2, end: 8, delta: 2 });
   expect(vol.getPixelAt(1, 1, 2)).toBe(8);

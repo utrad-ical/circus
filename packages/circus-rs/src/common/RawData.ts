@@ -1,6 +1,10 @@
-import { PixelFormat, PixelFormatInfo, pixelFormatInfo } from './PixelFormat';
-import { Vector2D, Vector3D, Section, Box } from './geometry';
-import { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
+import PartialVolumeDescriptor from '@utrad-ical/circus-lib/src/PartialVolumeDescriptor';
+import {
+  PixelFormat,
+  PixelFormatInfo,
+  pixelFormatInfo
+} from '@utrad-ical/circus-lib/src/PixelFormat';
+import { Box, Section, Vector2D, Vector3D } from './geometry';
 
 // Make sure you don't add properties
 // that heavily depends on DICOM spec!

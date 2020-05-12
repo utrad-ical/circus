@@ -27,7 +27,7 @@ export { default as Ellipsoid } from './annotation/Ellipsoid';
 
 export { default as RawData } from '../common/RawData';
 export { default as AnisotropicRawData } from '../common/AnisotropicRawData';
-export * from '../common/PixelFormat';
+export * from '@utrad-ical/circus-lib/src/PixelFormat';
 export * from '../common/geometry';
 
 export { default as RsHttpClient } from './http-client/RsHttpClient';

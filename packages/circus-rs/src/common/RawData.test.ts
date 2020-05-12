@@ -1,5 +1,5 @@
 import RawData from './RawData';
-import { PixelFormat } from './PixelFormat';
+import { PixelFormat } from '@utrad-ical/circus-lib/src/PixelFormat';
 
 test('create binary data', () => {
   const raw = new RawData([8, 8, 8], 'binary');

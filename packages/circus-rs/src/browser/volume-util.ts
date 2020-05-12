@@ -1,6 +1,5 @@
 import { Box } from '../common/geometry';
 import RawData from '../common/RawData';
-import { PixelFormat } from '../common/PixelFormat';
 import floodFill, { BinaryArrayView2D } from './util/floodFill';
 import { OrientationString } from './section-util';
 import { Vector3, Vector2 } from 'three';

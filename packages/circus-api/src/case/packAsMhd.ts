@@ -1,6 +1,6 @@
 import JSZip from 'jszip';
 import zeroPad from '../utils/zeroPad';
-import { PixelFormat } from '@utrad-ical/circus-rs/src/common/PixelFormat';
+import { PixelFormat } from '@utrad-ical/circus-lib/src/PixelFormat';
 import RawData from '@utrad-ical/circus-rs/src/common/RawData';
 import { Deps } from '../typings/middlewares';
 import { Vector3D } from '@utrad-ical/circus-rs/src/common/geometry';

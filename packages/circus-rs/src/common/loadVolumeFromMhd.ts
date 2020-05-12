@@ -1,5 +1,5 @@
 import DicomVolume from './DicomVolume';
-import { PixelFormat } from './PixelFormat';
+import { PixelFormat } from '@utrad-ical/circus-lib/src/PixelFormat';
 
 /**
  * Parses the header file as a list of key-value pairs.

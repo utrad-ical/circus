@@ -1,7 +1,6 @@
 import RsHttpClient from '../../http-client/RsHttpClient';
 import DicomVolumeLoader from './DicomVolumeLoader';
 import DicomVolume from '../../../common/DicomVolume';
-import { PixelFormat } from '../../../common/PixelFormat';
 import { DicomVolumeMetadata } from './DicomVolumeLoader';
 import VolumeCache, { nullVolumeCache } from './cache/VolumeCache';
 

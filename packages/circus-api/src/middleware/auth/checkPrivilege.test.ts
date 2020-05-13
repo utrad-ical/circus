@@ -11,7 +11,13 @@ const modelsPromise = usingModels();
 
 beforeAll(async () => {
   const { db, models } = await modelsPromise;
-  await setUpMongoFixture(db, ['groups', 'users', 'projects', 'clinicalCases']);
+  await setUpMongoFixture(db, [
+    'groups',
+    'users',
+    'projects',
+    'clinicalCases',
+    'pluginJobs'
+  ]);
   testServer = await setUpKoaTest(async app => {
     app.use(async (ctx, next) => {
       ctx.user = await models.user.findByIdOrFail(userEmail);
@@ -35,6 +41,11 @@ beforeAll(async () => {
     router.get(
       '/project/:projectId',
       checkPrivilege({ models }, { requiredProjectPrivilege: 'read' }),
+      async (ctx, next) => (ctx.body = 'Protected Area')
+    );
+    router.get(
+      '/plugin-jobs/:jobId',
+      checkPrivilege({ models }, { requiredSeriesDomainCheck: true }),
       async (ctx, next) => (ctx.body = 'Protected Area')
     );
     app.use(router.routes());
@@ -87,6 +98,22 @@ describe('project privilege checker', () => {
   it('should fail for user without a projectprivilege', async () => {
     const resource = 'project/8883fdef6f5144f50eb2a83cd34baa44';
     userEmail = 'alice@example.com';
+    const res = await ax.get(resource);
+    expect(res.status).toBe(401);
+  });
+});
+
+describe('plugin-job privilege checker', () => {
+  it('should pass for user with good plugin-job privilege', async () => {
+    const resource = 'plugin-jobs/01dxgwv3k0medrvhdag4mpw9wa';
+    userEmail = 'alice@example.com';
+    const res = await ax.get(resource);
+    expect(res.data).toBe('Protected Area');
+  });
+
+  it('should fail for user without a privilege', async () => {
+    const resource = 'plugin-jobs/01dxgwv3k0medrvhdag4mpw9wa';
+    userEmail = 'bob@example.com';
     const res = await ax.get(resource);
     expect(res.status).toBe(401);
   });

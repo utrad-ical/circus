@@ -16,6 +16,7 @@ const checkPrivilege: (
 ) => CircusMiddeware = ({ models }, route) => {
   const requiredGlobalPrivilege = wrap(route.requiredGlobalPrivilege);
   const requiredProjectPrivilege = wrap(route.requiredProjectPrivilege);
+  const requiredSeriesDomainCheck = wrap(route.requiredSeriesDomainCheck);
 
   return async function checkPrivilege(ctx, next) {
     if (requiredGlobalPrivilege) {
@@ -65,6 +66,48 @@ const checkPrivilege: (
           `You do not have "${requiredProjectPrivilege.join(
             ','
           )}" privilege of this project.`
+        );
+      }
+    }
+
+    if (requiredSeriesDomainCheck) {
+      if (!ctx.params.jobId)
+        ctx.throw(
+          status.BAD_REQUEST,
+          'No plugin-job specified to check project privilege.'
+        );
+      const jobId = ctx.params.jobId;
+      const jobDoc = await models.pluginJob.findByIdOrFail(jobId);
+      ctx.job = jobDoc;
+
+      const uid = [];
+      for (let i = 0; i < jobDoc.series.length; i++) {
+        uid.push(jobDoc.series[i].seriesUid);
+      }
+
+      const { domains } = ctx.userPrivileges;
+
+      const aggregateDomains = await models.series.aggregate([
+        { $match: { seriesUid: { $in: uid } } },
+        {
+          $group: {
+            _id: '$domain'
+          }
+        }
+      ]);
+
+      const seriesDomains = [];
+      for (let d = 0; d < aggregateDomains.length; d++) {
+        seriesDomains.push(...Object.values(aggregateDomains[d]));
+      }
+
+      const domainCheck = seriesDomains.every(sd =>
+        domains.some(d => d === sd)
+      );
+      if (!domainCheck) {
+        ctx.throw(
+          status.UNAUTHORIZED,
+          'You do not have privilege of this plugin-job.'
         );
       }
     }

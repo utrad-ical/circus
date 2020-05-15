@@ -47,7 +47,7 @@ routes:
     responseSchema: pluginJob|dbEntry
   - verb: post
     path: /plugin-jobs/:jobId/feedback/:mode
-    # requiredSeriesDomainCheck: true
+    requiredSeriesDomainCheck: true
     description: >
       Creates a new feedback entry for the specified plug-in job.
     requestSchema: pluginJobFeedbackData

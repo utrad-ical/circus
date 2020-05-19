@@ -2,12 +2,11 @@ import React from 'react';
 import classnames from 'classnames';
 import styled from 'styled-components';
 
-const StyledTable = styled.table.attrs({
-  className: props =>
-    classnames('table table-hover table-condensed data-grid', {
-      'data-grid-row-clickable': props.onItemClick
-    })
-})`
+const StyledTable = styled.table.attrs(props => ({
+  className: classnames('table table-hover table-condensed data-grid', {
+    'data-grid-row-clickable': props.onItemClick
+  })
+}))`
   &.data-grid-row-clickable {
     tbody tr {
       cursor: pointer;
@@ -38,7 +37,7 @@ const DataGrid = props => {
   };
 
   return (
-    <StyledTable onItemClick={onItemClick}>
+    <StyledTable>
       <thead>
         <tr>
           {columns.map(c => (

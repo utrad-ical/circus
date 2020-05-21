@@ -44,7 +44,7 @@
     "webpack-glsl-loader": "^1.0.1"
   },
   "dependencies": {
-    "@smikitky/rb-components": "^5.5.1",
+    "@smikitky/rb-components": "^5.6.0",
     "@utrad-ical/circus-lib": "^0.15.3",
     "@utrad-ical/circus-rs": "^0.26.0-alpha.6",
     "axios": "^0.19.2",
@@ -57,7 +57,7 @@
     "mongoose": "^4.6.8",
     "multi-integer-range": "^4.0.8",
     "react": "^16.13.1",
-    "react-bootstrap": "^0.32.4",
+    "react-bootstrap": "^0.33.1",
     "react-dom": "^16.13.1",
     "react-redux": "^6.0.1",
     "react-router-dom": "^5.2.0",

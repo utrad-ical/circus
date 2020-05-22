@@ -10,13 +10,36 @@ This is a monorepo that contains all CIRCUS projects.
 
 ## Installing and Building
 
-We use lerna to manage the repository.
+We use lerna to manage the repository. First, clone the repository:
 
 ```bash
 git clone git@github.com:utrad-ical/circus
 cd circus
+```
+
+Dependency installation for development:
+
+```bash
 npm ci
-lerna bootstrap --hoist
+npx lerna bootstrap --hoist --ci
+```
+
+(Try removing the `--ci` option if something went wrong)
+
+Build for deployment:
+
+```bash
+npm ci
+npx lerna bootstrap --hoist --ci
+npx run build
+```
+
+Automated test, lint, code formatting:
+
+```bash
+npm test
+npm run prettier
+npm run lint
 ```
 
 For more information, visit the official CIRCUS website.

@@ -1,15 +1,20 @@
-import axios, { CancelToken } from 'axios';
+import axios, { AxiosResponse } from 'axios';
+import { CancelToken } from './cancelToken';
 import { showMessage } from 'actions';
 import * as qs from 'querystring';
-import React, { useContext } from 'react';
+import { useContext, createContext } from 'react';
 
-export let api; // TODO: eventually remove this in favor of context
+interface ApiCaller {
+  (command: string, options: any, cancelToken: CancelToken): Promise<any>;
+}
+
+export let api: ApiCaller; // TODO: eventually remove this in favor of context
 
 /**
  * Forms a credential data from an Axios OAuth response.
- * @param {*} res Axios response
+ * @param res Axios response
  */
-export const formatCredentials = responseData => ({
+export const formatCredentials = (responseData: any) => ({
   accessToken: responseData.access_token,
   refreshToken: responseData.refresh_token,
   expiresIn: responseData.expires_in,
@@ -18,17 +23,15 @@ export const formatCredentials = responseData => ({
 
 /**
  * Creates CIRCUS API accessor.
- * @param {object} initialCredentials
- * @param {string} apiServer
  */
-const createApiCaller = (initialCredentials, apiServer) => {
+const createApiCaller = (initialCredentials: any, apiServer: string) => {
   let credentials = initialCredentials;
 
-  const saveCredentialData = credentials => {
+  const saveCredentialData = (credentials: any) => {
     sessionStorage.setItem('tokenCredentials', JSON.stringify(credentials));
   };
 
-  const tryRefreshToken = async refreshToken => {
+  const tryRefreshToken = async (refreshToken: string) => {
     const res = await axios.request({
       method: 'post',
       url: apiServer + 'login',
@@ -43,8 +46,8 @@ const createApiCaller = (initialCredentials, apiServer) => {
     return formatCredentials(res.data);
   };
 
-  api = async (command, options = {}, cancelToken) => {
-    const params = { url: command, method: 'get', ...options };
+  api = async (command: string, options = {}, cancelToken: CancelToken) => {
+    const params: any = { url: command, method: 'get', ...options };
     if (typeof params.data === 'object') {
       if (params.method === 'get') params.method = 'post';
     }
@@ -61,7 +64,7 @@ const createApiCaller = (initialCredentials, apiServer) => {
 
       let axiosCancelToken = undefined;
       if (cancelToken) {
-        const source = CancelToken.source();
+        const source = axios.CancelToken.source();
         cancelToken.onCancel(() => source.cancel());
         axiosCancelToken = source.token;
       }
@@ -96,12 +99,12 @@ const createApiCaller = (initialCredentials, apiServer) => {
   return api;
 };
 
-const showErrorMessage = err => {
+const showErrorMessage = (err: { response: AxiosResponse }) => {
   let message = '';
 
   if (err.response && typeof err.response.status === 'number') {
     const status = err.response.status;
-    const messages = {
+    const messages: { [status: number]: string } = {
       400: 'Bad request.',
       404: 'Not found.',
       401: 'Authorization error. Please log-in again.',
@@ -115,12 +118,15 @@ const showErrorMessage = err => {
   } else {
     message = 'The server did not respond.';
   }
-  showMessage(message, 'danger', { dismissOnPageChange: true });
+  showMessage(message, 'danger', {
+    tag: 'apiResult',
+    dismissOnPageChange: true
+  });
 };
 
 export default createApiCaller;
 
-export const ApiContext = React.createContext();
+export const ApiContext = createContext<ApiCaller | undefined>(undefined);
 
 export const useApi = () => {
   return useContext(ApiContext);

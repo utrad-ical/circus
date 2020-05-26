@@ -2,10 +2,14 @@ import React from 'react';
 import IconDisplay from 'components/IconDisplay';
 import useLoginUser from 'utils/useLoginUser';
 
-const ProjectDisplay = props => {
+const ProjectDisplay: React.FC<{
+  projectId: string;
+  withName: boolean;
+  withDescription: boolean;
+}> = props => {
   const { projectId, withName, withDescription, ...rest } = props;
 
-  const user = useLoginUser();
+  const user = useLoginUser()!;
 
   const project = user.accessibleProjects.find(p => p.projectId === projectId);
   if (!project) {

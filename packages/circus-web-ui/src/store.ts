@@ -1,4 +1,10 @@
-import { createStore, combineReducers, compose, applyMiddleware } from 'redux';
+import {
+  createStore,
+  combineReducers,
+  compose,
+  applyMiddleware,
+  Reducer
+} from 'redux';
 import thunk from 'redux-thunk';
 
 // The redux store should contain only information shared across pages,
@@ -7,7 +13,10 @@ import thunk from 'redux-thunk';
 /**
  * Reducer for login user.
  */
-function loginUser(state = { isFetching: false, data: null }, action) {
+const loginUser: Reducer = (
+  state = { isFetching: false, data: null },
+  action
+) => {
   switch (action.type) {
     case 'LOAD_FULL_LOGIN_INFO':
       return { isFetching: false, data: action.loginUser };
@@ -19,12 +28,20 @@ function loginUser(state = { isFetching: false, data: null }, action) {
       return { isFetching: false, data: null };
   }
   return state;
+};
+
+interface MessageBox {
+  id: string;
+  message: string;
+  tag: string | null;
+  style: string;
+  dismissOnPageChange: boolean;
 }
 
 /**
  * Reducer for message boxes.
  */
-function messages(state = [], action) {
+const messages: Reducer<MessageBox[]> = (state = [], action) => {
   switch (action.type) {
     case 'MESSAGE_ADD': {
       let boxes;
@@ -37,7 +54,8 @@ function messages(state = [], action) {
         id: action.id,
         message: action.message,
         tag: typeof action.tag === 'string' ? action.tag : null,
-        style: action.style ? action.style : 'info'
+        style: action.style ? action.style : 'info',
+        dismissOnPageChange: !!action.dismissOnPageChange
       });
       return boxes;
     }
@@ -47,12 +65,23 @@ function messages(state = [], action) {
       return state.filter(box => box.id !== action.id);
   }
   return state;
+};
+
+interface Searches {
+  [name: string]: {
+    isFetching: boolean;
+    resource: string;
+    filter: any;
+    condition: any;
+    sort: object;
+    page: number;
+    limit: number;
+    items: any[];
+    totalItems: number;
+  };
 }
 
-/**
- * Reducer for search results and queries.
- */
-function searches(state = {}, action) {
+const searches: Reducer<Searches> = (state = {}, action) => {
   switch (action.type) {
     case 'SET_SEARCH_QUERY_BUSY':
       state = {
@@ -85,9 +114,17 @@ function searches(state = {}, action) {
       break;
   }
   return state;
+};
+
+interface Plugins {
+  [pluginId: string]:
+    | 'loading'
+    | {
+        icon: string;
+      };
 }
 
-function plugin(state = {}, action) {
+const plugin: Reducer<Plugins> = (state = {}, action) => {
   switch (action.type) {
     case 'LOADING_PLUGIN_INFO':
       state = {
@@ -103,7 +140,7 @@ function plugin(state = {}, action) {
       break;
   }
   return state;
-}
+};
 
 const reducer = combineReducers({
   loginUser,
@@ -112,7 +149,9 @@ const reducer = combineReducers({
   plugin
 });
 
-const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
+const composeEnhancers =
+  (window as any).__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
+
 export const store = createStore(
   reducer,
   composeEnhancers(applyMiddleware(thunk))

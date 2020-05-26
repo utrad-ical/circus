@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 /**
  * This adds the specified class to the `<body>` while the component is mounted.
  */
-const useBodyClass = bodyClass => {
+const useBodyClass = (bodyClass: string) => {
   useEffect(() => {
     document.body.classList.add(bodyClass);
     return () => {

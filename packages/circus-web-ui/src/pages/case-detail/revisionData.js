@@ -1,13 +1,7 @@
 import * as rs from 'circus-rs';
-import { sha1 } from 'utils/util.js';
+import { sha1 } from 'utils/util';
 import update from 'immutability-helper';
-
-/**
- * Like Array#map(), but works with an async function.
- */
-const asyncMap = async (array, callback) => {
-  return Promise.all(array.map(async item => await callback(item)));
-};
+import asyncMap from '../../utils/asyncMap';
 
 export const createEmptyVoxelLabel = () => {
   return {

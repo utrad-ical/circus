@@ -54,7 +54,7 @@
     "@types/table": "^4.0.5",
     "@types/tar-fs": "^1.16.3",
     "@types/tar-stream": "^1.6.2",
-    "typescript": "^3.8.3"
+    "typescript": "^3.9.3"
   },
   "author": "Soichiro Miki <smiki-tky@umin.ac.jp>",
   "license": "MIT"

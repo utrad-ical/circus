@@ -22,6 +22,7 @@ const ProjectDisplay: React.FC<{
       icon={project.project.icon}
       title={withName && project.project.projectName}
       description={withDescription && project.project.description}
+      size="lg"
       {...rest}
     />
   );

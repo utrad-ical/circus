@@ -1,6 +1,7 @@
-import { createIconComponent } from 'rb/Icon';
+import React from 'react';
+import { createIconComponent } from '@smikitky/rb-components/lib/Icon';
 
-const Icon = createIconComponent({
+const Icon: React.FC<any> = createIconComponent({
   'glyphicon-': 'glyphicon glyphicon-',
   'circus-': 'circus-icon circus-icon-',
   'rs-': 'rs-icon-',

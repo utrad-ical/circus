@@ -1,5 +1,5 @@
 import React from 'react';
-import BodyPartIcon from './BodyPartIcon';
+import BodyPartIcon, { IconDefinition } from './BodyPartIcon';
 import styled from 'styled-components';
 import { OverlayTrigger, Tooltip } from 'components/react-bootstrap';
 
@@ -7,7 +7,13 @@ const StyledSpan = styled.span`
   display: inline-block;
 `;
 
-const IconDisplay = props => {
+const IconDisplay: React.FC<{
+  size: string;
+  icon: IconDefinition;
+  title: React.ReactNode;
+  description: React.ReactNode;
+  toolTip: any;
+}> = props => {
   const { size, icon, title, description, toolTip } = props;
 
   const content = (

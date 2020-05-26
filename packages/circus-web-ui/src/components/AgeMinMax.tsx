@@ -1,8 +1,11 @@
 import React from 'react';
 import { FormControl } from 'components/react-bootstrap';
 
-const AgeMinMax = props => {
-  const change = ev => {
+const AgeMinMax: React.FC<{
+  value: { min: number; max: number };
+  onChange: (value: { min: number; max: number }) => void;
+}> = props => {
+  const change = (ev: any) => {
     const newValue = {
       ...props.value,
       [ev.target.name]: parseInt(ev.target.value, 10)

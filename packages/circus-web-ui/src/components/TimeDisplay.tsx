@@ -1,7 +1,13 @@
 import React from 'react';
 import moment from 'moment';
 
-const TimeDisplay = props => {
+const TimeDisplay: React.FC<{
+  /**
+   * ISO Time string.
+   */
+  value: string;
+  invalidLabel: string;
+}> = props => {
   const { value, invalidLabel = '' } = props;
   const m = moment(value);
   if (!m.isValid()) return <span>{invalidLabel}</span>;

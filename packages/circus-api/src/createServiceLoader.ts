@@ -40,7 +40,7 @@ const createServiceLoader = async (config: any) => {
   configureCsCoreServiceLoader(loader as any);
   configureRsServiceLoader(loader);
   // Register our modules
-  loader.registerModule('app', path.join(__dirname, '/createApp'));
+  loader.registerModule('apiServer', path.join(__dirname, '/createApp'));
   loader.registerModule('db', path.join(__dirname, './db/connectDb'));
   loader.registerDirectory('apiLogger', '<circus-lib>/logger', 'NullLogger');
   loader.registerModule('validator', path.join(__dirname, '/createValidator'));

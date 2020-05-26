@@ -100,7 +100,7 @@ const main = async () => {
     );
   }
 
-  const appOptions = patchedConfig.app.options;
+  const appOptions = patchedConfig.apiServer.options;
 
   if (appOptions.fixUser) {
     console.warn(chalk.red('WARNING: NO AUTHENTICATION MODE!'));
@@ -115,7 +115,7 @@ const main = async () => {
   }
 
   try {
-    const koaApp = await loader.get('app');
+    const koaApp = await loader.get('apiServer');
     koaApp.listen(appOptions.port, appOptions.host, (err?: Error) => {
       if (err) throw err;
       const setupInfo: { [key: string]: string | number } = {

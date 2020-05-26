@@ -37,6 +37,6 @@
     "pngjs": "^3.4.0",
     "rimraf": "^2.6.3",
     "tslib": "^1.11.2",
-    "typescript": "^3.8.3"
+    "typescript": "^3.9.3"
   }
 }

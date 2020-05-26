@@ -3,6 +3,12 @@ import Icon from './Icon';
 import classnames from 'classnames';
 import styled from 'styled-components';
 
+export interface IconDefinition {
+  glyph: string;
+  color: string;
+  backgroundColor: string;
+}
+
 const StyledSpan = styled.span`
   border-radius: 5px;
   vertical-align: middle;
@@ -19,7 +25,10 @@ const StyledSpan = styled.span`
 /**
  * Renderes a body-part icon with the specified color and backgroundColor.
  */
-const BodyPartIcon = props => {
+const BodyPartIcon: React.FC<{
+  size: string;
+  icon: IconDefinition;
+}> = props => {
   const {
     size,
     icon: { glyph, color, backgroundColor }

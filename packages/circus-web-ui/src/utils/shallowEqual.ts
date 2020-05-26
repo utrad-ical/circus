@@ -1,4 +1,4 @@
-const shallowEqual = (objA, objB) => {
+const shallowEqual = (objA: any, objB: any) => {
   if (Object.is(objA, objB)) {
     return true;
   }

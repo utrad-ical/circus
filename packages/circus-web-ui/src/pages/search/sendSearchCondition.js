@@ -55,7 +55,13 @@ const sendSearchCondition = opts => {
         );
       };
 
-      useEffect(handleSearchClick, [dispatch, api, condition]);
+      useEffect(() => {
+        console.log('changed');
+      }, [condition]);
+
+      // The following is invoked only on first-time render
+      // eslint-disable-next-line
+      useEffect(handleSearchClick, [dispatch, api]);
 
       const handleSavePresetClick = async () => {
         await dispatch(savePreset(api, searchName, condition));

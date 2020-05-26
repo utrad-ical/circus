@@ -1,10 +1,8 @@
-import { useMappedState } from 'redux-react-hook';
-
-const mapState = state => state.loginUser.data;
+import { useSelector } from 'react-redux';
 
 /**
  * A React cutsom hook to fetch login user from redux store.
  */
-const useLoginUser = () => useMappedState(mapState);
+const useLoginUser = () => useSelector(state => state.loginUser.data);
 
 export default useLoginUser;

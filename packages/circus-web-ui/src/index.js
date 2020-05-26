@@ -31,7 +31,6 @@ import Preferences from 'pages/Preferences';
 
 import { store } from './store';
 import { Provider } from 'react-redux';
-import { StoreContext } from 'redux-react-hook';
 import { ThemeProvider } from 'styled-components';
 import tinycolor from 'tinycolor2';
 import { dismissMessageOnPageChange } from 'actions';
@@ -119,18 +118,16 @@ const TheApp = props => {
   return (
     <LoginManagerContext.Provider value={manager}>
       <ApiContext.Provider value={api}>
-        <StoreContext.Provider value={store}>
-          <Provider store={store}>
-            <ThemeProvider theme={theme}>
-              <Router history={browserHistory}>
-                <Switch>
-                  <Route exact path="/" component={LoginScreen} />
-                  <AppRoutes />
-                </Switch>
-              </Router>
-            </ThemeProvider>
-          </Provider>
-        </StoreContext.Provider>
+        <Provider store={store}>
+          <ThemeProvider theme={theme}>
+            <Router history={browserHistory}>
+              <Switch>
+                <Route exact path="/" component={LoginScreen} />
+                <AppRoutes />
+              </Switch>
+            </Router>
+          </ThemeProvider>
+        </Provider>
       </ApiContext.Provider>
     </LoginManagerContext.Provider>
   );

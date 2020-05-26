@@ -3,7 +3,7 @@ import Icon from 'components/Icon';
 import { startNewSearch } from 'actions';
 import PluginJobQueueSearchResults from './PluginJobQueueSearchResults';
 import { useApi } from 'utils/api';
-import { useDispatch } from 'redux-react-hook';
+import { useDispatch } from 'react-redux';
 
 const PluginJobQueueSearch = props => {
   const api = useApi();

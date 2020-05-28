@@ -5,7 +5,7 @@ import * as qs from 'querystring';
 import { useContext, createContext } from 'react';
 
 interface ApiCaller {
-  (command: string, options: any, cancelToken: CancelToken): Promise<any>;
+  (command: string, options?: any, cancelToken?: CancelToken): Promise<any>;
 }
 
 export let api: ApiCaller; // TODO: eventually remove this in favor of context
@@ -46,7 +46,7 @@ const createApiCaller = (initialCredentials: any, apiServer: string) => {
     return formatCredentials(res.data);
   };
 
-  api = async (command: string, options = {}, cancelToken: CancelToken) => {
+  api = async (command: string, options = {}, cancelToken?: CancelToken) => {
     const params: any = { url: command, method: 'get', ...options };
     if (typeof params.data === 'object') {
       if (params.method === 'get') params.method = 'post';
@@ -129,5 +129,5 @@ export default createApiCaller;
 export const ApiContext = createContext<ApiCaller | undefined>(undefined);
 
 export const useApi = () => {
-  return useContext(ApiContext);
+  return useContext(ApiContext)!;
 };

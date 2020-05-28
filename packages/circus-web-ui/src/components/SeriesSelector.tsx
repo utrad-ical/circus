@@ -1,20 +1,26 @@
 import React, { useState, Fragment } from 'react';
-import DataGrid from 'components/DataGrid';
+import DataGrid, { DataGridColumnDefinition } from 'components/DataGrid';
 import SearchResultsView from 'components/SearchResultsView';
 import { Panel } from 'components/react-bootstrap';
 import IconButton from 'components/IconButton';
 import { startNewSearch } from 'actions';
-import { connect } from 'react-redux';
-import { modal } from 'rb/modal';
+import { connect, useDispatch } from 'react-redux';
+import { modal } from '@smikitky/rb-components/lib/modal';
 import { useApi } from 'utils/api';
 import PartialVolumeDescriptorEditor from './PartialVolumeDescriptorEditor';
-import { describePartialVolumeDescriptor } from '@utrad-ical/circus-lib/src/PartialVolumeDescriptor';
+import PartialVolumeDescriptor, {
+  describePartialVolumeDescriptor
+} from '@utrad-ical/circus-lib/src/PartialVolumeDescriptor';
 
-const PartialVolumeRenderer = props => {
+const PartialVolumeRenderer: React.FC<{
+  index: number;
+  value: PartialVolumeDescriptor | undefined;
+  onChange: (index: number, value: PartialVolumeDescriptor | undefined) => void;
+}> = props => {
   const { index, value, onChange } = props;
 
   const handleClick = async () => {
-    const result = await modal(props => (
+    const result = await modal((props: any) => (
       <PartialVolumeDescriptorEditor
         initialValue={{ start: 1, end: 10, delta: 1 }}
         {...props}
@@ -33,20 +39,20 @@ const PartialVolumeRenderer = props => {
       onClick={handleClick}
       bsStyle={applied ? 'success' : 'default'}
     >
-      {applied ? describePartialVolumeDescriptor(value, 3) : 'not applied'}
+      {applied ? describePartialVolumeDescriptor(value!, 3) : 'not applied'}
     </IconButton>
   );
 };
 
-const RelevantSeriesDataView = props => {
-  const { onSeriesRegister } = props;
+const RelevantSeriesDataView: React.FC<any> = props => {
+  const { onSeriesRegister, value } = props;
   const columns = [
     { key: 'seriesDescription', caption: 'Series Description' },
     { key: 'seriesUid', caption: 'Series UID' },
     {
       key: 'action',
       caption: '',
-      renderer: ({ value }) => (
+      renderer: ({ value }: { value: any }) => (
         <IconButton
           icon="chevron-up"
           bsSize="xs"
@@ -56,11 +62,13 @@ const RelevantSeriesDataView = props => {
         </IconButton>
       )
     }
-  ];
-  return <DataGrid value={props.value} columns={columns} />;
+  ] as DataGridColumnDefinition<any>[];
+  return <DataGrid value={value} columns={columns} />;
 };
 
-const RelevantSeries = props => {
+const RelevantSeries: React.FC<{
+  onSeriesRegister: Function;
+}> = props => {
   const { onSeriesRegister } = props;
   return (
     <div>
@@ -74,10 +82,19 @@ const RelevantSeries = props => {
   );
 };
 
-const SeriesSelectorView = props => {
+interface SeriesEntry {
+  partialVolumeDescriptor: PartialVolumeDescriptor | undefined;
+  [key: string]: any;
+}
+
+const SeriesSelectorView: React.FC<{
+  value: SeriesEntry[];
+  onChange: any;
+}> = props => {
   const [showRelevantSeries, setShowRelevantSeries] = useState(false);
   const api = useApi();
-  const { dispatch, value, onChange } = props;
+  const dispatch = useDispatch();
+  const { value, onChange } = props;
 
   const handleAddSeriesClick = () => {
     if (!showRelevantSeries) {
@@ -91,7 +108,10 @@ const SeriesSelectorView = props => {
     }
   };
 
-  const handlePartialVolumeChange = (volumeId, descriptor) => {
+  const handlePartialVolumeChange = (
+    volumeId: number,
+    descriptor: PartialVolumeDescriptor | undefined
+  ) => {
     const newValue = value.map((v, i) => {
       return i === volumeId
         ? { ...value[volumeId], partialVolumeDescriptor: descriptor }
@@ -100,14 +120,14 @@ const SeriesSelectorView = props => {
     onChange(newValue);
   };
 
-  const handleSeriesRegister = async seriesUid => {
+  const handleSeriesRegister = async (seriesUid: string) => {
     if (value.some(s => s.seriesUid === seriesUid)) return;
     const series = await api('series/' + seriesUid);
     const newEntry = { ...series, range: series.images };
     onChange([...value, newEntry]);
   };
 
-  const handleSeriesRemove = seriesUid => {
+  const handleSeriesRemove = (seriesUid: string) => {
     const newValue = value.filter(s => s.seriesUid !== seriesUid);
     onChange(newValue);
   };
@@ -116,7 +136,7 @@ const SeriesSelectorView = props => {
     {
       key: 'volumeId',
       caption: '#',
-      renderer: props => <Fragment>{props.index}</Fragment>
+      renderer: (props: { index: number }) => <Fragment>{props.index}</Fragment>
     },
     { key: 'modality', caption: 'Modality' },
     { key: 'seriesUid', caption: 'Series' },
@@ -142,7 +162,7 @@ const SeriesSelectorView = props => {
         />
       )
     }
-  ];
+  ] as DataGridColumnDefinition<SeriesEntry>[];
 
   return (
     <Panel header="Series">

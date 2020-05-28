@@ -14,6 +14,7 @@ test('default', async () => {
   const reader = await createDicomTagReader({});
   const result = await reader(content);
   expect(result.modality).toBe('CT');
+  expect(result.ImagePositionPatientZ).toBe(-280);
   expect(result.seriesDate).toEqual(new Date('1999-05-05T10:52:34.530Z'));
   expect(result.patientInfo.patientName).toBe('Anonymized');
 });

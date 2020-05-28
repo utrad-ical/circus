@@ -41,9 +41,13 @@ const CreateNewJob = props => {
   }, [defaultPlugin, plugins, selectedPlugin]);
 
   const handleCreate = async () => {
+    const series = selectedSeries.map(s => ({
+      seriesUid: s.seriesUid,
+      partialVolumeDesciptor: s.partialVolumeDesciptor
+    }));
     await api('plugin-jobs', {
       method: 'post',
-      data: { pluginId: selectedPlugin, series: selectedSeries }
+      data: { pluginId: selectedPlugin, series }
     });
     setDefaultPlugin(selectedPlugin);
     showMessage('Job registered.');

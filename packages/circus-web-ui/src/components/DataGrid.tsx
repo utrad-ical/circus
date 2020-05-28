@@ -2,9 +2,9 @@ import React from 'react';
 import classnames from 'classnames';
 import styled from 'styled-components';
 
-const StyledTable = styled.table.attrs(props => ({
+const StyledTable = styled.table.attrs((props: any) => ({
   className: classnames('table table-hover table-condensed data-grid', {
-    'data-grid-row-clickable': !!(props as any).onItemClick
+    'data-grid-row-clickable': !!props.onItemClick
   })
 }))`
   &.data-grid-row-clickable {

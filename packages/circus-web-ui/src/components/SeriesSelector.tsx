@@ -49,8 +49,12 @@ const PartialVolumeRenderer: React.FC<{
 const RelevantSeriesDataView: React.FC<any> = props => {
   const { onSeriesRegister, value } = props;
   const columns = [
-    { key: 'seriesDescription', caption: 'Series Description' },
-    { key: 'seriesUid', caption: 'Series UID' },
+    { key: 'seriesDescription', caption: 'Series Desc' },
+    {
+      key: 'seriesUid',
+      caption: 'Series UID',
+      renderer: ({ value }) => <SeriesUidSpan>{value.seriesUid}</SeriesUidSpan>
+    },
     {
       key: 'action',
       caption: '',
@@ -153,14 +157,11 @@ const SeriesSelector: React.FC<{
     {
       key: 'modality',
       caption: 'Modality',
-      renderer: ({ value }) => {
-        console.log('VV', value);
-        return <>{value.data.modality}</>;
-      }
+      renderer: ({ value }) => <>{value.data.modality}</>
     },
     {
       key: 'seriesDescription',
-      caption: 'Series desc',
+      caption: 'Series Desc',
       renderer: ({ value }) => <>{value.data.seriesDescription}</>
     },
     {

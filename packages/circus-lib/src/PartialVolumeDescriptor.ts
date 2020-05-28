@@ -46,8 +46,15 @@ export const isValidPartialVolumeDescriptor = (
 ) => {
   const { start, end, delta } = descriptor;
   const isNatural = (value: any) => Number.isInteger(value) && value > 0;
-  if (descriptor.start > descriptor.end) return false;
-  if (!isNatural(start) || !isNatural(end) || !isNatural(delta)) return false;
+  if (
+    !isNatural(start) ||
+    !isNatural(end) ||
+    !Number.isInteger(delta) ||
+    delta === 0
+  )
+    return false;
+  if ((start > end && delta > 0) || (start < end && delta < 0)) return false;
   if (!isNatural((end - start) / delta + 1)) return false;
+  if (start === end && delta === -1) return false;
   return true;
 };

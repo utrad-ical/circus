@@ -3,29 +3,38 @@ import PartialVolumeDescriptor, {
   isValidPartialVolumeDescriptor
 } from './PartialVolumeDescriptor';
 
-test('describePartialVolumeDescriptor', () => {
+describe('describePartialVolumeDescriptor', () => {
   const a: PartialVolumeDescriptor = { start: 1, end: 11, delta: 2 };
-  expect(describePartialVolumeDescriptor(a)).toBe('1, 3, 5, ..., 11');
-  expect(describePartialVolumeDescriptor(a, 3)).toBe('1, 3, ..., 11');
-  expect(describePartialVolumeDescriptor(a, 5)).toBe('1, 3, 5, 7, ..., 11');
-  expect(describePartialVolumeDescriptor(a, 10)).toBe('1, 3, 5, 7, 9, 11');
-  expect(describePartialVolumeDescriptor({ start: 1, end: 0, delta: 1 })).toBe(
-    'Invalid'
-  );
+  const b: PartialVolumeDescriptor = { start: 5, end: 1, delta: -1 };
+  test.each([
+    [a, undefined, '1, 3, 5, ..., 11'],
+    [a, 3, '1, 3, ..., 11'],
+    [a, 5, '1, 3, 5, 7, ..., 11'],
+    [a, 10, '1, 3, 5, 7, 9, 11'],
+    [b, 3, '5, 4, ..., 1'],
+    [b, 10, '5, 4, 3, 2, 1'],
+    [{ start: 1, end: 0, delta: 1 }, undefined, 'Invalid']
+  ])('%s, %s -> %s', (pvd, count, expected) => {
+    expect(describePartialVolumeDescriptor(pvd, count)).toBe(expected);
+  });
 });
 
-test('isValidPartialVolumeDescriptor', () => {
-  const c = (bool: boolean, start: number, end: number, delta: number) => {
-    expect(isValidPartialVolumeDescriptor({ start, end, delta })).toBe(bool);
-  };
-  const shouldBeTrue = c.bind(null, true);
-  const shouldBeFalse = c.bind(null, false);
-  shouldBeFalse(3, 1, 1);
-  shouldBeFalse(0, 6, 1);
-  shouldBeFalse(2, 0, 2);
-  shouldBeFalse(3, 6, 0);
-  shouldBeFalse(1, 6, 2);
-  shouldBeTrue(1, 3, 1);
-  shouldBeTrue(1, 11, 5);
-  shouldBeTrue(5, 5, 1);
+describe('isValidPartialVolumeDescriptor', () => {
+  test.each([
+    [1, 3, 1, true],
+    [1, 11, 5, true],
+    [5, 5, 1, true],
+    [5, 1, -1, true],
+    [3, 1, 1, false],
+    [0, 6, 1, false],
+    [2, 0, 2, false],
+    [3, 6, 0, false],
+    [1, 6, 2, false],
+    [6, 1, -2, false],
+    [7, 7, -1, false]
+  ])('(%p, %p, %p) should be %p', (start, end, delta, expected) => {
+    expect(isValidPartialVolumeDescriptor({ start, end, delta })).toBe(
+      expected
+    );
+  });
 });

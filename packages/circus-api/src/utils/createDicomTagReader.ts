@@ -236,7 +236,8 @@ export const readDicomTags = async (
       size: dataset.floatString('x00101020'),
       weight: dataset.floatString('x00101030')
     }),
-    parameters: extractParameters(dataset)
+    parameters: extractParameters(dataset),
+    ImagePositionPatientZ: dataset.floatString('x00200032', 2)
   };
 };
 

@@ -6,7 +6,7 @@ const TimeDisplay: React.FC<{
    * ISO Time string.
    */
   value: string;
-  invalidLabel: string;
+  invalidLabel?: string;
 }> = props => {
   const { value, invalidLabel = '' } = props;
   const m = moment(value);

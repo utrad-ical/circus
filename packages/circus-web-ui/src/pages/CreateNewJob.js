@@ -23,7 +23,9 @@ const CreateNewJob = props => {
       const series = await api('series/' + seriesUid);
       const plugins = await api('plugins');
       setBusy(false);
-      setSelectedSeries([{ ...series, range: series.images }]);
+      setSelectedSeries([
+        { seriesUid, partialVolumeDesciptor: undefined, data: series }
+      ]);
       setPlugins(plugins);
     };
     load();

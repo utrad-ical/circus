@@ -42,21 +42,21 @@ type DataGridRenderer<T> = React.FC<{
  * Defined how to render a column of a DataGrid.
  * You have to set `key`, or `renderer`, or both.
  */
-export interface DataGridColumnDefinition<T extends object = any> {
-  key?: keyof T;
+export interface DataGridColumnDefinition<T extends {} = any> {
+  key?: string;
   caption?: string;
   className?: string;
   renderer?: DataGridRenderer<T>;
 }
 
-export interface DataGridProps<T extends object> {
+export interface DataGridProps<T extends {}> {
   value: T[];
   onItemClick?: (index: number, item: T) => void;
   active?: T;
   columns: DataGridColumnDefinition<T>[];
 }
 
-const DataGrid: <T extends object>(
+const DataGrid: <T extends {}>(
   props: DataGridProps<T>
 ) => React.ReactElement<any, any> = props => {
   const { value, onItemClick, active } = props;
@@ -91,7 +91,7 @@ const DataGrid: <T extends object>(
                   {Renderer ? (
                     <Renderer value={item} index={i} />
                   ) : (
-                    item[c.key!]
+                    (item as any)[c.key!]
                   )}
                 </td>
               );

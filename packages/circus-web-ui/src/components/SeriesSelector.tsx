@@ -1,16 +1,18 @@
-import React, { useState, Fragment } from 'react';
+import React, { useState } from 'react';
 import DataGrid, { DataGridColumnDefinition } from 'components/DataGrid';
 import SearchResultsView from 'components/SearchResultsView';
 import { Panel } from 'components/react-bootstrap';
 import IconButton from 'components/IconButton';
 import { startNewSearch } from 'actions';
-import { connect, useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { modal } from '@smikitky/rb-components/lib/modal';
 import { useApi } from 'utils/api';
 import PartialVolumeDescriptorEditor from './PartialVolumeDescriptorEditor';
 import PartialVolumeDescriptor, {
   describePartialVolumeDescriptor
 } from '@utrad-ical/circus-lib/src/PartialVolumeDescriptor';
+import TimeDisplay from './TimeDisplay';
+import styled from 'styled-components';
 
 const PartialVolumeRenderer: React.FC<{
   index: number;
@@ -83,11 +85,17 @@ const RelevantSeries: React.FC<{
 };
 
 interface SeriesEntry {
+  seriesUid: string;
   partialVolumeDescriptor: PartialVolumeDescriptor | undefined;
-  [key: string]: any;
+  data: {
+    modality: string;
+    seriesDescription: string;
+    images: string;
+    seriesDate: string;
+  };
 }
 
-const SeriesSelectorView: React.FC<{
+const SeriesSelector: React.FC<{
   value: SeriesEntry[];
   onChange: any;
 }> = props => {
@@ -123,7 +131,11 @@ const SeriesSelectorView: React.FC<{
   const handleSeriesRegister = async (seriesUid: string) => {
     if (value.some(s => s.seriesUid === seriesUid)) return;
     const series = await api('series/' + seriesUid);
-    const newEntry = { ...series, range: series.images };
+    const newEntry = {
+      seriesUid,
+      partialVolumeDescriptor: undefined,
+      data: series
+    };
     onChange([...value, newEntry]);
   };
 
@@ -136,29 +148,54 @@ const SeriesSelectorView: React.FC<{
     {
       key: 'volumeId',
       caption: '#',
-      renderer: (props: { index: number }) => <Fragment>{props.index}</Fragment>
+      renderer: props => <>{props.index}</>
     },
-    { key: 'modality', caption: 'Modality' },
-    { key: 'seriesUid', caption: 'Series' },
-    { key: 'seriesDescription', caption: 'Series desc' },
+    {
+      key: 'modality',
+      caption: 'Modality',
+      renderer: ({ value }) => {
+        console.log('VV', value);
+        return <>{value.data.modality}</>;
+      }
+    },
+    {
+      key: 'seriesDescription',
+      caption: 'Series desc',
+      renderer: ({ value }) => <>{value.data.seriesDescription}</>
+    },
+    {
+      key: 'seriesUid',
+      caption: 'Series UID',
+      renderer: ({ value }) => <SeriesUidSpan>{value.seriesUid}</SeriesUidSpan>
+    },
+    {
+      key: 'seriesDate',
+      caption: 'Series Date',
+      renderer: ({ value }) => <TimeDisplay value={value.data.seriesDate} />
+    },
     {
       key: 'images',
+      caption: 'Images',
+      renderer: ({ value }) => <>{value.data.images}</>
+    },
+    {
+      key: 'pvd',
       caption: 'Partial Volume',
-      renderer: props => (
+      renderer: ({ value, index }) => (
         <PartialVolumeRenderer
-          value={props.value.partialVolumeDescriptor}
-          index={props.index}
+          value={value.partialVolumeDescriptor}
+          index={index}
           onChange={handlePartialVolumeChange}
         />
       )
     },
     {
       className: 'delete',
-      renderer: props => (
+      renderer: ({ value }) => (
         <IconButton
           bsSize="xs"
           icon="remove"
-          onClick={() => handleSeriesRemove(props.value.seriesUid)}
+          onClick={() => handleSeriesRemove(value.seriesUid)}
         />
       )
     }
@@ -185,5 +222,9 @@ const SeriesSelectorView: React.FC<{
   );
 };
 
-const SeriesSelector = connect()(SeriesSelectorView);
+const SeriesUidSpan = styled.span`
+  font-size: 80%;
+  word-break: break-all;
+`;
+
 export default SeriesSelector;

@@ -27,7 +27,9 @@ const CreateNewCase = props => {
     const load = async () => {
       setBusy(true);
       const series = await api('series/' + seriesUid);
-      setSelectedSeries([{ ...series, range: series.images }]);
+      setSelectedSeries([
+        { seriesUid, partialVolumeDescriptor: undefined, data: series }
+      ]);
       setBusy(false);
     };
     load();
@@ -43,8 +45,6 @@ const CreateNewCase = props => {
   };
 
   const handleCreate = async () => {
-    // TODO: Check if a similar case exists
-
     const defaultPartialVolumeDescriptor = images => {
       const mr = multirange(images);
       const firstSegment = mr.getRanges()[0];

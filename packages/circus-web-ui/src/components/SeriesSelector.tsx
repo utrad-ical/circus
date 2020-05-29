@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import DataGrid, { DataGridColumnDefinition } from 'components/DataGrid';
 import SearchResultsView from 'components/SearchResultsView';
 import { Panel } from 'components/react-bootstrap';
@@ -13,22 +13,26 @@ import PartialVolumeDescriptor, {
 } from '@utrad-ical/circus-lib/src/PartialVolumeDescriptor';
 import TimeDisplay from './TimeDisplay';
 import styled from 'styled-components';
+import { multirange } from 'multi-integer-range';
 
 const PartialVolumeRenderer: React.FC<{
   index: number;
   value: PartialVolumeDescriptor | undefined;
+  images: string; // multi-integer-range string (eg '1-20,30')
   onChange: (index: number, value: PartialVolumeDescriptor | undefined) => void;
 }> = props => {
-  const { index, value, onChange } = props;
+  const { index, value, images, onChange } = props;
+  const mr = useMemo(() => multirange(images), [images]);
 
   const handleClick = async () => {
     const result = await modal((props: any) => (
       <PartialVolumeDescriptorEditor
-        initialValue={{ start: 1, end: 10, delta: 1 }}
+        initialValue={value ?? { start: mr.min(), end: mr.max(), delta: 1 }}
+        images={mr}
         {...props}
       />
     ));
-    if (!result) return;
+    if (!result) return; // cancelled
     onChange(index, result.descriptor);
   };
 
@@ -41,7 +45,7 @@ const PartialVolumeRenderer: React.FC<{
       onClick={handleClick}
       bsStyle={applied ? 'success' : 'default'}
     >
-      {applied ? describePartialVolumeDescriptor(value!, 3) : 'not applied'}
+      {applied ? describePartialVolumeDescriptor(value!, 3) : 'full'}
     </IconButton>
   );
 };
@@ -54,6 +58,12 @@ const RelevantSeriesDataView: React.FC<any> = props => {
       key: 'seriesUid',
       caption: 'Series UID',
       renderer: ({ value }) => <SeriesUidSpan>{value.seriesUid}</SeriesUidSpan>
+    },
+    { key: 'images', caption: 'Images' },
+    {
+      key: 'seriesDate',
+      caption: 'Series Date',
+      renderer: ({ value }) => <TimeDisplay value={value.seriesDate} />
     },
     {
       key: 'action',
@@ -181,10 +191,11 @@ const SeriesSelector: React.FC<{
     },
     {
       key: 'pvd',
-      caption: 'Partial Volume',
+      caption: 'Range',
       renderer: ({ value, index }) => (
         <PartialVolumeRenderer
           value={value.partialVolumeDescriptor}
+          images={value.data.images}
           index={index}
           onChange={handlePartialVolumeChange}
         />

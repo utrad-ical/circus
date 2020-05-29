@@ -26,15 +26,15 @@ const resolveOrientation = async (
   if (series.images === '1') {
     return { start, end, delta: 1 } as PartialVolumeDescriptor;
   }
-  const image0 = await series.load(0);
   const image1 = await series.load(1);
-  const image0Tags = await dicomTagReader(image0);
+  const image2 = await series.load(2);
   const image1Tags = await dicomTagReader(image1);
+  const image2Tags = await dicomTagReader(image2);
 
-  if (!image0Tags.ImagePositionPatientZ) {
+  if (!image1Tags.ImagePositionPatientZ) {
     return { start, end, delta: 1 } as PartialVolumeDescriptor;
   }
-  if (image0Tags.ImagePositionPatientZ < image1Tags.ImagePositionPatientZ!) {
+  if (image1Tags.ImagePositionPatientZ > image2Tags.ImagePositionPatientZ!) {
     return { start, end, delta: 1 } as PartialVolumeDescriptor;
   } else {
     return { start: end, end: start, delta: -1 } as PartialVolumeDescriptor;

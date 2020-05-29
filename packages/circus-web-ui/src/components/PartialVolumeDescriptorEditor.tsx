@@ -5,23 +5,31 @@ import * as et from '@smikitky/rb-components/lib/editor-types';
 import MultiRange from 'multi-integer-range';
 import PartialVolumeDescriptor, {
   describePartialVolumeDescriptor,
-  isValidPartialVolumeDescriptor
+  rangeHasPartialVolume
 } from '@utrad-ical/circus-lib/src/PartialVolumeDescriptor';
 
 const PartialVolumeDescriptorEditor: React.FC<{
   onResolve: (
     result: null | { descriptor: PartialVolumeDescriptor | null }
   ) => void;
-  initialValue?: PartialVolumeDescriptor;
-  images: string;
+  initialValue: PartialVolumeDescriptor;
+  images: MultiRange;
 }> = props => {
-  const { onResolve, images } = props;
+  const { onResolve, images, initialValue } = props;
+  console.log('I', initialValue);
   const [descriptor, setDescriptor] = useState<PartialVolumeDescriptor>(() => {
-    const mr = new MultiRange(images);
-    return props.initialValue
-      ? props.initialValue
-      : { start: mr.min()!, end: mr.max()!, delta: 1 };
+    return (
+      initialValue ?? { start: images.min()!, end: images.max()!, delta: 1 }
+    );
   });
+
+  const isValid = useMemo(() => {
+    try {
+      return rangeHasPartialVolume(images, descriptor);
+    } catch (e) {
+      return false;
+    }
+  }, [descriptor, images]);
 
   const properties = useMemo(() => {
     const mr = new MultiRange(images);
@@ -35,6 +43,9 @@ const PartialVolumeDescriptorEditor: React.FC<{
   return (
     <>
       <Modal.Body>
+        <p>
+          <b>Uploaded images:</b> {images.toString()}
+        </p>
         <PropertyEditor
           properties={properties}
           value={descriptor}
@@ -52,7 +63,7 @@ const PartialVolumeDescriptorEditor: React.FC<{
         </Button>
         <Button
           onClick={() => onResolve({ descriptor })}
-          disabled={!isValidPartialVolumeDescriptor(descriptor)}
+          disabled={!isValid}
           bsStyle="primary"
         >
           OK

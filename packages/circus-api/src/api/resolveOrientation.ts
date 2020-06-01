@@ -31,10 +31,13 @@ const resolveOrientation = async (
   const image1Tags = await dicomTagReader(image1);
   const image2Tags = await dicomTagReader(image2);
 
-  if (!image1Tags.ImagePositionPatientZ) {
+  if (!image1Tags.parameters.imagePositionPatientZ) {
     return { start, end, delta: 1 } as PartialVolumeDescriptor;
   }
-  if (image1Tags.ImagePositionPatientZ > image2Tags.ImagePositionPatientZ!) {
+  if (
+    image1Tags.parameters.imagePositionPatientZ >
+    image2Tags.parameters.imagePositionPatientZ!
+  ) {
     return { start, end, delta: 1 } as PartialVolumeDescriptor;
   } else {
     return { start: end, end: start, delta: -1 } as PartialVolumeDescriptor;

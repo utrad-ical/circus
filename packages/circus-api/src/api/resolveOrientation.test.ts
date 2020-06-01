@@ -62,7 +62,7 @@ it('foot-first', async () => {
   expect(result).toEqual({ start: 10, end: 1, delta: -1 });
 });
 
-it('should single image series return head-first', async () => {
+it('should return head-first if single image series', async () => {
   const dicomTagReader = await createDicomTagReader({});
   const series = await dicomFileRepository.getSeries(
     '2.16.840.1.113662.2.1.2519.21582.2990505.2105152.2381633.20'
@@ -74,11 +74,11 @@ it('should single image series return head-first', async () => {
   const result = await resolveOrientation(
     '2.16.840.1.113662.2.1.2519.21582.2990505.2105152.2381633.20',
     1,
-    10,
+    1,
     {
       dicomFileRepository,
       dicomTagReader
     }
   );
-  expect(result).toEqual({ start: 1, end: 10, delta: 1 });
+  expect(result).toEqual({ start: 1, end: 1, delta: 1 });
 });

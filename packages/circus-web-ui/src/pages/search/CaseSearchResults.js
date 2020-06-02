@@ -50,8 +50,8 @@ const columns = [
   {
     caption: 'Patient',
     className: 'patient',
-    renderer: ({ value: { patientInfoCache } }) => {
-      return <PatientInfoBox value={patientInfoCache} />;
+    renderer: ({ value: { patientInfo } }) => {
+      return <PatientInfoBox value={patientInfo} />;
     }
   },
   {

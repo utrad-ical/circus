@@ -51,6 +51,6 @@ export function verticesOfBox(box: Box2): Vector2[] {
     vertices.push(new Vector2(box.max.x, box.min.y));
     vertices.push(box.max);
     vertices.push(new Vector2(box.min.x, box.max.y));
-   }
+  }
   return vertices;
 }

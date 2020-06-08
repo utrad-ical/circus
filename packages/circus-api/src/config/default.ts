@@ -17,7 +17,7 @@ export const dicomUtilityRunnerDockerImage =
   'circuscad/dicom_utility:2.0.0-beta3';
 
 const defaults: Configuration = {
-  app: {
+  apiServer: {
     options: {
       host: 'localhost',
       port: 8080,

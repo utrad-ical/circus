@@ -23,7 +23,9 @@ const CreateNewJob = props => {
       const series = await api('series/' + seriesUid);
       const plugins = await api('plugins');
       setBusy(false);
-      setSelectedSeries([{ ...series, range: series.images }]);
+      setSelectedSeries([
+        { seriesUid, partialVolumeDesciptor: undefined, data: series }
+      ]);
       setPlugins(plugins);
     };
     load();
@@ -41,9 +43,13 @@ const CreateNewJob = props => {
   }, [defaultPlugin, plugins, selectedPlugin]);
 
   const handleCreate = async () => {
+    const series = selectedSeries.map(s => ({
+      seriesUid: s.seriesUid,
+      partialVolumeDesciptor: s.partialVolumeDesciptor
+    }));
     await api('plugin-jobs', {
       method: 'post',
-      data: { pluginId: selectedPlugin, series: selectedSeries }
+      data: { pluginId: selectedPlugin, series }
     });
     setDefaultPlugin(selectedPlugin);
     showMessage('Job registered.');

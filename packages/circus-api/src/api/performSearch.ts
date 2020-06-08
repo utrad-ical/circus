@@ -1,6 +1,6 @@
 import status from 'http-status';
-import koa from 'koa';
 import { CollectionAccessor } from '../db/createCollectionAccessor';
+import { CircusContext } from '../typings/middlewares';
 
 interface SearchQuery {
   sort: object;
@@ -12,7 +12,7 @@ interface SearchQuery {
 /**
  * Parses URL parameter strings and add defaults if necessary.
  */
-const extractSearchOptions = (ctx: koa.Context, defaultSort: object) => {
+const extractSearchOptions = (ctx: CircusContext, defaultSort: object) => {
   const urlQuery = ctx.request.query;
 
   let sort;
@@ -108,7 +108,7 @@ export const runAggregation = async (
 export const performAggregationSearch = async (
   model: CollectionAccessor,
   filter: object,
-  ctx: koa.Context,
+  ctx: CircusContext,
   lookupStages: object[],
   modifyStages: object[],
   opts: Options
@@ -143,7 +143,7 @@ interface Options {
 const performSearch = async (
   model: CollectionAccessor,
   filter: object,
-  ctx: koa.Context,
+  ctx: CircusContext,
   opts: Options
 ) => {
   const { defaultSort, transform } = opts;

@@ -3,7 +3,7 @@ import compose from 'koa-compose';
 import { ValidatorRules } from '../../../common/Validator';
 import validate from '../middleware/validate';
 import { ViewWindow } from '../../../common/ViewWindow';
-import { PixelFormat } from '../../../common/PixelFormat';
+import { PixelFormat } from '@utrad-ical/circus-lib/src/PixelFormat';
 import { SeriesMiddlewareState } from './createSeriesRoutes';
 import MultiRange from 'multi-integer-range';
 import { VolumeAccessor } from '../../helper/createVolumeProvider';

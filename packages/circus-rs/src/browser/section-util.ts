@@ -242,7 +242,7 @@ export function createOrthogonalMprSection(
       section.origin[2]
     ];
     const xAxis = [-section.xAxis[0], section.xAxis[1], section.xAxis[2]];
-    section = {...section, origin, xAxis};
+    section = { ...section, origin, xAxis };
   }
 
   return section;
@@ -277,10 +277,7 @@ export function adjustOnResized(
   const newOrigin = convertScreenCoordinateToVolumeCoordinate(
     section,
     oldResolutionVec,
-    newResolutionVec
-      .clone()
-      .sub(oldResolutionVec)
-      .multiplyScalar(-0.5)
+    newResolutionVec.clone().sub(oldResolutionVec).multiplyScalar(-0.5)
   );
 
   const newXAxis = new Vector3()

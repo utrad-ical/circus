@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { startNewSearch, savePreset } from 'actions';
 import { useLoginManager } from 'utils/loginManager';
 import { useApi } from 'utils/api';
-import { useMappedState, useDispatch } from 'redux-react-hook';
+import { useSelector, useDispatch } from 'react-redux';
 
 const initialCondition = (state, searchName, presetName) => {
   const presetKey = searchName + 'SearchPresets';
@@ -26,11 +26,10 @@ const sendSearchCondition = opts => {
     defaultSort
   } = opts;
 
-  return function(BaseComponent) {
+  return function (BaseComponent) {
     const Enhanced = props => {
       const { presetName } = props;
-      const mapToState = useCallback(state => state, []);
-      const state = useMappedState(mapToState);
+      const state = useSelector(state => state);
       const [condition, setCondition] = useState(
         () => initialCondition(state, searchName, presetName) || nullCondition()
       );
@@ -55,7 +54,9 @@ const sendSearchCondition = opts => {
         );
       };
 
-      useEffect(handleSearchClick, []);
+      // The following is invoked only on first-time render
+      // eslint-disable-next-line
+      useEffect(handleSearchClick, [dispatch, api]);
 
       const handleSavePresetClick = async () => {
         await dispatch(savePreset(api, searchName, condition));

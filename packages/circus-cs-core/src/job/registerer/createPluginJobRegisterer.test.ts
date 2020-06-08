@@ -1,5 +1,5 @@
 import createPluginJobRegisterer from './createPluginJobRegisterer';
-import { DicomFileRepository } from '@utrad-ical/circus-lib/lib/dicom-file-repository';
+import { DicomFileRepository } from '@utrad-ical/circus-lib';
 import * as circus from '../../interface';
 
 describe('createPluginJobRegisterer', () => {

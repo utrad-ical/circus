@@ -1,4 +1,4 @@
-import { DicomFileRepository } from '@utrad-ical/circus-lib/lib/dicom-file-repository';
+import { DicomFileRepository } from '@utrad-ical/circus-lib';
 import chalk from 'chalk';
 import fs from 'fs-extra';
 import path from 'path';
@@ -6,7 +6,7 @@ import stream from 'stream';
 import { Models } from '../interface';
 import Command from './Command';
 import Storage from '../storage/Storage';
-import { CircusRs } from '../interface';
+import { VolumeProvider } from '@utrad-ical/circus-rs/src/server/helper/createVolumeProvider';
 
 export const help = () => {
   return (
@@ -51,8 +51,8 @@ export const command: Command<{
   models: Models;
   dicomFileRepository: DicomFileRepository;
   blobStorage: Storage;
-  rs: CircusRs;
-}> = async (opts, { models, blobStorage, rs: { volumeProvider } }) => {
+  volumeProvider: VolumeProvider;
+}> = async (opts, { models, blobStorage, volumeProvider }) => {
   return async (options: any) => {
     const {
       out: outDir = path.join(process.cwd(), 'case-exports'),
@@ -94,4 +94,9 @@ export const command: Command<{
   };
 };
 
-command.dependencies = ['models', 'dicomFileRepository', 'rs', 'blobStorage'];
+command.dependencies = [
+  'models',
+  'dicomFileRepository',
+  'volumeProvider',
+  'blobStorage'
+];

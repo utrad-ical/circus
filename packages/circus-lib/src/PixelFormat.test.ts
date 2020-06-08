@@ -1,6 +1,6 @@
 import { PixelFormat, pixelFormatInfo } from './PixelFormat';
 
 test('pixelFormatInfo', () => {
-  const result = pixelFormatInfo(PixelFormat.Int16);
+  const result = pixelFormatInfo('int16');
   expect(result.bpp).toBe(2);
 });

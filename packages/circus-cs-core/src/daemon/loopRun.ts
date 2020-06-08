@@ -1,4 +1,4 @@
-import Logger from '@utrad-ical/circus-lib/lib/logger/Logger';
+import { Logger } from '@utrad-ical/circus-lib';
 import { CancellableTimer } from './createCancellableTimer';
 import * as circus from '../interface';
 
@@ -23,7 +23,7 @@ export default async function loopRun<T>(
 
   logger.info(`CIRCUS CS Job Manager started. pid: ${context.pid}`);
 
-  context.on('SIGINT', function() {
+  context.on('SIGINT', function () {
     logger.info('Signal SIGINT');
     logger.info('CIRCUS CS Job Manager will be stopped on next loop.');
     cancellableTimer.cancel();

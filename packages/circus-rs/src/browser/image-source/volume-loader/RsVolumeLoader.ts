@@ -4,7 +4,7 @@ import DicomVolume from '../../../common/DicomVolume';
 import { DicomVolumeMetadata } from './DicomVolumeLoader';
 import PartialVolumeDescriptor, {
   isValidPartialVolumeDescriptor
-} from '@utrad-ical/circus-lib/lib/PartialVolumeDescriptor';
+} from '@utrad-ical/circus-lib/src/PartialVolumeDescriptor';
 import VolumeCache, { nullVolumeCache } from './cache/VolumeCache';
 import { EstimateWindowType, createRequestParams } from './rs-loader-utils';
 

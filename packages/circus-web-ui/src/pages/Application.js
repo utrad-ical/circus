@@ -4,12 +4,7 @@ import MessageBox from './MessageBox';
 import { Button } from 'components/react-bootstrap';
 import ErrorBoundary from 'components/ErrorBoundary';
 import MainNav from './MainNav';
-import { useMappedState } from 'redux-react-hook';
-
-const mapState = state => ({
-  isUserFetching: state.loginUser.isFetching,
-  isLoggedIn: state.loginUser.data !== null
-});
+import { useSelector } from 'react-redux';
 
 /**
  * The main application container.
@@ -17,7 +12,10 @@ const mapState = state => ({
  * visible only after we confirmed the user is currently logged-in with valid session.
  */
 const Application = props => {
-  const { isUserFetching, isLoggedIn } = useMappedState(mapState);
+  const { isUserFetching, isLoggedIn } = useSelector(state => ({
+    isUserFetching: state.loginUser.isFetching,
+    isLoggedIn: state.loginUser.data !== null
+  }));
 
   const pageContentVisible = !isUserFetching && isLoggedIn;
   const notLoggedIn = !isUserFetching && !isLoggedIn;

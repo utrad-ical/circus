@@ -59,10 +59,7 @@ describe('dicomImageExtractor', () => {
     }
     const outFile = path.join(testdir, `${file}.png`);
     return new Promise(resolve => {
-      png
-        .pack()
-        .pipe(fs.createWriteStream(outFile))
-        .on('finish', resolve);
+      png.pack().pipe(fs.createWriteStream(outFile)).on('finish', resolve);
     });
   };
 
@@ -71,9 +68,7 @@ describe('dicomImageExtractor', () => {
     return new Promise((resolve, reject) => {
       zlib.unzip(zippedFileContent, (err, fileContent) => {
         if (err) throw reject();
-        exec(file, fileContent, checks)
-          .then(resolve)
-          .catch(reject);
+        exec(file, fileContent, checks).then(resolve).catch(reject);
       });
     });
   };

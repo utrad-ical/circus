@@ -1,11 +1,10 @@
 import koa from 'koa';
 import compose from 'koa-compose';
-import { isDicomUid } from '@utrad-ical/circus-lib/lib/validation';
+import { isDicomUid, Logger } from '@utrad-ical/circus-lib';
 import httpStatus from 'http-status';
 import validate from '../middleware/validate';
 import ipBasedAccessControl from '../middleware/ipBasedAccessControl';
 import { Authorizer } from '../../helper/createAuthorizer';
-import Logger from '@utrad-ical/circus-lib/lib/logger/Logger';
 
 type MiddlewareOptions = {
   rsLogger: Logger;
@@ -26,7 +25,7 @@ export default function issueSeriesAccessToken(
     series: ['Series UID', null, s => isDicomUid(s), null]
   });
 
-  const main: koa.Middleware = async function(
+  const main: koa.Middleware = async function (
     ctx: koa.DefaultContext,
     next: koa.Next
   ): Promise<void> {

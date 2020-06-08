@@ -1,12 +1,12 @@
 import React from 'react';
 import { dismissMessage } from 'actions';
 import { Alert } from 'components/react-bootstrap';
-import { useMappedState } from 'redux-react-hook';
+import { useSelector } from 'react-redux';
 
 const mapState = state => state.messages;
 
 const MessageBox = props => {
-  const messages = useMappedState(mapState);
+  const messages = useSelector(mapState);
 
   return (
     <div className="message-boxes">

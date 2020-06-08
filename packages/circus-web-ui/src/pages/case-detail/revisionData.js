@@ -1,13 +1,7 @@
 import * as rs from 'circus-rs';
-import { sha1 } from 'utils/util.js';
+import { sha1 } from 'utils/util';
 import update from 'immutability-helper';
-
-/**
- * Like Array#map(), but works with an async function.
- */
-const asyncMap = async (array, callback) => {
-  return Promise.all(array.map(async item => await callback(item)));
-};
+import asyncMap from '../../utils/asyncMap';
 
 export const createEmptyVoxelLabel = () => {
   return {
@@ -55,7 +49,7 @@ export const loadVolumeLabelData = async (revision, api) => {
 };
 
 const voxelShrinkToMinimum = labelData => {
-  const volume = new rs.RawData(labelData.size, rs.PixelFormat.Binary);
+  const volume = new rs.RawData(labelData.size, 'binary');
   volume.assign(labelData.volumeArrayBuffer);
   const cloud = new rs.VoxelCloud(); // temporary
   cloud.origin = labelData.origin;

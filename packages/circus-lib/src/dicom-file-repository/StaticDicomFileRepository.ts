@@ -28,7 +28,7 @@ export default class StaticDicomFileRepository implements DicomFileRepository {
     const result = multirange();
     try {
       const files = await fs.readdir(dirPath);
-      for (let file of files) {
+      for (const file of files) {
         const num = parseInt(path.basename(file), 10);
         result.append(num);
       }

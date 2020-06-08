@@ -13,7 +13,7 @@ import Icon from 'components/Icon';
 import classnames from 'classnames';
 import styled from 'styled-components';
 import { useApi } from 'utils/api';
-import { useMappedState, useDispatch } from 'redux-react-hook';
+import { useSelector, useDispatch } from 'react-redux';
 
 export const makeSortOptions = sortKeys => {
   const options = {};
@@ -114,10 +114,9 @@ const SearchResults = props => {
   } = props;
 
   const api = useApi();
-  const mapState = useCallback(state => state.searches[name], [name]);
   const dispatch = useDispatch();
+  const search = useSelector(state => state.searches[name]);
 
-  const search = useMappedState(mapState);
   if (!search) return null;
   const { isFetching, totalItems, limit, items, page, sort } = search;
 

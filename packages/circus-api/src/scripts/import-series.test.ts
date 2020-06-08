@@ -1,4 +1,4 @@
-import { MemoryDicomFileRepository } from '@utrad-ical/circus-lib/lib/dicom-file-repository';
+import { MemoryDicomFileRepository } from '@utrad-ical/circus-lib';
 import path from 'path';
 import createTestLogger from '../../test/util-logger';
 import { setUpMongoFixture, usingModels } from '../../test/util-mongo';
@@ -23,7 +23,13 @@ beforeEach(async () => {
   const dicomTagReader = await createDicomTagReader({});
   const dicomImporter = await createDicomImporter(
     {},
-    { dicomFileRepository, models, apiLogger, dicomTagReader }
+    {
+      dicomFileRepository,
+      models,
+      apiLogger,
+      dicomTagReader,
+      dicomUtilityRunner: null as any // Dummy
+    }
   );
   commandFunc = await command(null, { dicomImporter });
 });

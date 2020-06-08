@@ -7,7 +7,7 @@ type MiddlewareOptions = {
 
 export default function countUp(options: MiddlewareOptions): koa.Middleware {
   const { counter } = options;
-  return async function(
+  return async function (
     ctx: koa.DefaultContext,
     next: koa.Next
   ): Promise<void> {

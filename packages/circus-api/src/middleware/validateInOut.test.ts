@@ -6,7 +6,7 @@ import axios from 'axios';
 import Router from 'koa-router';
 import * as path from 'path';
 import { setUpKoaTest, TestServer } from '../../test/util-koa';
-import createNullLogger from '@utrad-ical/circus-lib/lib/logger/NullLogger';
+import createNullLogger from '@utrad-ical/circus-lib/src/logger/NullLogger';
 
 let testServer: TestServer;
 
@@ -46,11 +46,11 @@ beforeEach(async () => {
   });
 });
 
-afterEach(async function() {
+afterEach(async function () {
   await testServer.tearDown();
 });
 
-test('should pass input validation', async function() {
+test('should pass input validation', async function () {
   const res = await axios.request({
     url: testServer.url + 'in-check',
     method: 'post',
@@ -59,7 +59,7 @@ test('should pass input validation', async function() {
   expect(res.data.foo).toBe('2015-05-05T00:11:22.000Z');
 });
 
-test('should fail input validation', async function() {
+test('should fail input validation', async function () {
   const res = await axios.request({
     url: testServer.url + 'in-check',
     method: 'post',
@@ -69,7 +69,7 @@ test('should fail input validation', async function() {
   expect(res.status).toBe(400);
 });
 
-test('should pass output validation', async function() {
+test('should pass output validation', async function () {
   await axios.request({
     url: testServer.url + 'out-check',
     method: 'post',
@@ -77,7 +77,7 @@ test('should pass output validation', async function() {
   });
 });
 
-test('should fail output validation', async function() {
+test('should fail output validation', async function () {
   const res = await axios.request({
     url: testServer.url + 'out-check',
     method: 'post',

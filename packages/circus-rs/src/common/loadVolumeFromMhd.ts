@@ -1,5 +1,5 @@
 import DicomVolume from './DicomVolume';
-import { PixelFormat } from './PixelFormat';
+import { PixelFormat } from '@utrad-ical/circus-lib/src/PixelFormat';
 
 /**
  * Parses the header file as a list of key-value pairs.
@@ -16,10 +16,10 @@ export function parseMhdHeader(text: string): Map<string, string> {
 }
 
 const formats: { [key: string]: PixelFormat } = {
-  MET_UCHAR: PixelFormat.UInt8,
-  MET_CHAR: PixelFormat.Int8,
-  MET_USHORT: PixelFormat.UInt16,
-  MET_SHORT: PixelFormat.Int16
+  MET_UCHAR: 'uint8',
+  MET_CHAR: 'int8',
+  MET_USHORT: 'uint16',
+  MET_SHORT: 'int16'
 };
 
 const normalizeTo3D = (input: number[]) => {

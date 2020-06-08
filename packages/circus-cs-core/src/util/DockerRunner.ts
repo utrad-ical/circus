@@ -102,7 +102,9 @@ export default class DockerRunner extends EventEmitter {
           try {
             await container.stop({ t: 0 }); // Stops immediately
             await container.remove();
-          } catch (e) {}
+          } catch (e) {
+            /* empty */
+          }
           this.emit('timeout', state);
           throw new DockerTimeoutError(
             `The container did not finish within the timeout of ${timeout} ms.`

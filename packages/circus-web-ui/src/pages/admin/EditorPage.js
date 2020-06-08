@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Button, Panel } from 'components/react-bootstrap';
 import IconButton from 'rb/IconButton';
 import PropertyEditor from 'rb/PropertyEditor';
-import { useApi } from 'utils/api.js';
+import { useApi } from 'utils/api';
 import { useLoginManager } from 'utils/loginManager';
 import AdminContainer from './AdminContainer';
 import { startNewSearch } from 'actions';

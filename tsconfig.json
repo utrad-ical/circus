@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "noEmit": true,
+    // "outDir": "./lib",
+    // "declaration": true,
+    "strict": true,
+    "target": "es2018",
+    "module": "commonjs",
+    "esModuleInterop": true,
+    "downlevelIteration": true,
+    "baseUrl": "./packages",
+    "paths": {
+      "@utrad-ical/*": ["*/src"]
+    }
+  }
+  // "include": ["src/**/*.ts"],
+  // "exclude": ["src/**/*.test.ts"]
+}

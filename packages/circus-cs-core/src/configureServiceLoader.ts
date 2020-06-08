@@ -1,6 +1,8 @@
-import { DicomFileRepository } from '@utrad-ical/circus-lib/lib/dicom-file-repository';
-import Logger from '@utrad-ical/circus-lib/lib/logger/Logger';
-import ServiceLoader from '@utrad-ical/circus-lib/lib/ServiceLoader';
+import {
+  DicomFileRepository,
+  Logger,
+  ServiceLoader
+} from '@utrad-ical/circus-lib';
 import path from 'path';
 import createDaemonController from './daemon/createDaemonController';
 import { PluginJobRegisterer } from './job/registerer/createPluginJobRegisterer';

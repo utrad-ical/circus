@@ -1,6 +1,5 @@
 import { Box } from '../common/geometry';
 import RawData from '../common/RawData';
-import { PixelFormat } from '../common/PixelFormat';
 import floodFill, { BinaryArrayView2D } from './util/floodFill';
 import { OrientationString } from './section-util';
 import { Vector3, Vector2 } from 'three';
@@ -49,7 +48,7 @@ export function scanBoundingBox(
     size: [maxX - minX + 1, maxY - minY + 1, maxZ - minZ + 1]
   };
 
-  if (snap && volume.getPixelFormat() === PixelFormat.Binary) {
+  if (snap && volume.getPixelFormat() === 'binary') {
     result.size[0] = Math.ceil(result.size[0] / 8) * 8;
   }
 
@@ -68,7 +67,7 @@ export function draw3DLine(
   p1: Vector3, // offset (not mm!)
   value: number = 1
 ): void {
-  if (volume.getPixelFormat() !== PixelFormat.Binary) {
+  if (volume.getPixelFormat() !== 'binary') {
     throw new Error('This function only supports binary format.');
   }
 

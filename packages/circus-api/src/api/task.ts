@@ -4,6 +4,7 @@ import status from 'http-status';
 import delay from '../utils/delay';
 import { Models } from '../interface';
 import koa from 'koa';
+import { CircusContext } from '../typings/middlewares';
 
 export default class TaskReporter {
   private taskId: string;
@@ -16,7 +17,7 @@ export default class TaskReporter {
     this.models = models;
   }
 
-  async report(ctx: koa.Context) {
+  async report(ctx: CircusContext) {
     const task = await this.models.task.findByIdOrFail(this.taskId);
     if (task.owner !== this.owner) {
       ctx.throw(status.UNAUTHORIZED);

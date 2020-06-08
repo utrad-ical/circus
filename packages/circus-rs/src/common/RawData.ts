@@ -1,6 +1,10 @@
-import { PixelFormat, PixelFormatInfo, pixelFormatInfo } from './PixelFormat';
-import { Vector2D, Vector3D, Section, Box } from './geometry';
-import PartialVolumeDescriptor from '@utrad-ical/circus-lib/lib/PartialVolumeDescriptor';
+import PartialVolumeDescriptor from '@utrad-ical/circus-lib/src/PartialVolumeDescriptor';
+import {
+  PixelFormat,
+  PixelFormatInfo,
+  pixelFormatInfo
+} from '@utrad-ical/circus-lib/src/PixelFormat';
+import { Box, Section, Vector2D, Vector3D } from './geometry';
 
 // Make sure you don't add properties
 // that heavily depends on DICOM spec!
@@ -57,7 +61,7 @@ export default class RawData {
     if (x * y * z > 1024 * 1024 * 1024) {
       throw new RangeError('Maximum voxel limit exceeded.');
     }
-    if (pixelFormat === PixelFormat.Binary && x % 8 !== 0) {
+    if (pixelFormat === 'binary' && x % 8 !== 0) {
       // image area must be multiple of 8
       throw new Error(
         'Number of pixels along the x axis must be a multiple of 8.'
@@ -301,7 +305,7 @@ export default class RawData {
     this.bpp = pxInfo.bpp;
     this.view = new pxInfo.arrayClass(this.data);
 
-    if (this.pixelFormat !== PixelFormat.Binary) {
+    if (this.pixelFormat !== 'binary') {
       this.read = pos => this.view[pos];
       this.write = (value, pos) => (this.view[pos] = value);
     } else {

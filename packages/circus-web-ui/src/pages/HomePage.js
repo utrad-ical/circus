@@ -87,6 +87,7 @@ function role2str(role) {
 }
 
 const MyProjects = ({ user }) => {
+  if (!user) return null;
   return (
     <Panel bsStyle="primary">
       <Panel.Heading>
@@ -112,6 +113,7 @@ const MyProjects = ({ user }) => {
 };
 
 const MyProfile = ({ user }) => {
+  if (!user) return null;
   return (
     <Panel bsStyle="primary" className="home-profile">
       <Panel.Heading>

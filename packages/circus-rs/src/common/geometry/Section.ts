@@ -158,10 +158,7 @@ export function intersectionOfTwoSections(
   const vertices1: Vector3[] = [
     vsection1.origin,
     vsection1.origin.clone().add(vsection1.xAxis),
-    vsection1.origin
-      .clone()
-      .add(vsection1.xAxis)
-      .add(vsection1.yAxis),
+    vsection1.origin.clone().add(vsection1.xAxis).add(vsection1.yAxis),
     vsection1.origin.clone().add(vsection1.yAxis)
   ];
 
@@ -170,10 +167,7 @@ export function intersectionOfTwoSections(
   const vertices2: Vector3[] = [
     vsection2.origin.clone(),
     vsection2.origin.clone().add(vsection2.xAxis),
-    vsection2.origin
-      .clone()
-      .add(vsection2.xAxis)
-      .add(vsection2.yAxis),
+    vsection2.origin.clone().add(vsection2.xAxis).add(vsection2.yAxis),
     vsection2.origin.clone().add(vsection2.yAxis)
   ];
 

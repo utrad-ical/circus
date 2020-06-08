@@ -8,7 +8,7 @@ import drawToImageData from './drawToImageData';
 import MprImageSource from './MprImageSource';
 import { DicomVolumeMetadata } from './volume-loader/DicomVolumeLoader';
 import { Vector3 } from 'three';
-import PartialVolumeDescriptor from '@utrad-ical/circus-lib/lib/PartialVolumeDescriptor';
+import { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
 import {
   EstimateWindowType,
   createRequestParams

@@ -23,7 +23,7 @@ module.exports = {
       rb: '@smikitky/rb-components/lib',
       'circus-rs': rsPath + '/src/browser'
     },
-    extensions: ['.js', '.jsx', '.ts']
+    extensions: ['.js', '.jsx', '.ts', '.tsx']
   },
   module: {
     rules: [

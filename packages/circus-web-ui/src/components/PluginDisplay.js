@@ -1,20 +1,18 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import IconDisplay from './IconDisplay';
 import { loadPluginInfo } from 'actions';
-import { useMappedState, useDispatch } from 'redux-react-hook';
+import { useSelector, useDispatch } from 'react-redux';
 import { useApi } from 'utils/api';
 
 const PluginDisplay = props => {
   const { pluginId, ...rest } = props;
-  const { plugin } = useMappedState(state => ({
-    plugin: state.plugin[pluginId]
-  }));
+  const plugin = useSelector(state => state.plugin[pluginId]);
   const dispatch = useDispatch();
   const api = useApi();
 
-  if (!plugin) {
-    dispatch(loadPluginInfo(api, pluginId));
-  }
+  useEffect(() => {
+    if (!plugin) dispatch(loadPluginInfo(api, pluginId));
+  }, [api, dispatch, plugin, pluginId]);
 
   if (!plugin || plugin === 'loading') return null;
 

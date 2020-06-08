@@ -11,12 +11,7 @@ export interface DirectedSegment {
  * @return center of line
  */
 export function centerDirectedSegment(ab: DirectedSegment): Vector2 {
-  return ab.from.clone().add(
-    ab.to
-      .clone()
-      .sub(ab.from)
-      .multiplyScalar(0.5)
-  );
+  return ab.from.clone().add(ab.to.clone().sub(ab.from).multiplyScalar(0.5));
 }
 
 /**

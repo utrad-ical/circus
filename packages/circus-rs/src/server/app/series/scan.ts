@@ -14,7 +14,7 @@ import ImageEncoder from '../../helper/image-encoder/ImageEncoder';
 import { SeriesMiddlewareState } from './createSeriesRoutes';
 import RawData from '../../../common/RawData';
 import { multirange } from 'multi-integer-range';
-import PartialVolumeDescriptor from '@utrad-ical/circus-lib/lib/PartialVolumeDescriptor';
+import { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
 
 interface ScanOptions {
   imageEncoder: ImageEncoder;
@@ -92,7 +92,7 @@ export default function scan({ imageEncoder }: ScanOptions): koa.Middleware {
       if (useWindow) {
         buf = new Uint8Array(size[0] * size[1]);
       } else {
-        buf = new (volume.getPixelFormatInfo()).arrayClass(size[0] * size[1]);
+        buf = new (volume.getPixelFormatInfo().arrayClass)(size[0] * size[1]);
       }
       const section: Section = { origin, xAxis, yAxis };
       volume.scanObliqueSection(section, size, buf, interpolation, ww, wl);

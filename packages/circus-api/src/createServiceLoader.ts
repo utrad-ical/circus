@@ -4,7 +4,7 @@ import configureCsCoreServiceLoader, {
 import configureRsServiceLoader, {
   RsServices
 } from '@utrad-ical/circus-rs/src/server/configureServiceLoader';
-import ServiceLoader from '@utrad-ical/circus-lib/lib/ServiceLoader';
+import { ServiceLoader, Logger } from '@utrad-ical/circus-lib';
 import path from 'path';
 import {
   DisposableDb,
@@ -13,7 +13,6 @@ import {
   DicomTagReader,
   Models
 } from './interface';
-import Logger from '@utrad-ical/circus-lib/lib/logger/Logger';
 import Storage from './storage/Storage';
 import Koa from 'koa';
 import createDicomUtilityRunner, {
@@ -41,7 +40,7 @@ const createServiceLoader = async (config: any) => {
   configureCsCoreServiceLoader(loader as any);
   configureRsServiceLoader(loader);
   // Register our modules
-  loader.registerModule('app', path.join(__dirname, '/createApp'));
+  loader.registerModule('apiServer', path.join(__dirname, '/createApp'));
   loader.registerModule('db', path.join(__dirname, './db/connectDb'));
   loader.registerDirectory('apiLogger', '<circus-lib>/logger', 'NullLogger');
   loader.registerModule('validator', path.join(__dirname, '/createValidator'));

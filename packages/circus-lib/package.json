@@ -2,48 +2,41 @@
   "name": "@utrad-ical/circus-lib",
   "version": "0.15.3",
   "description": "Shared utilities for CIRCUS projects",
-  "main": "lib/index.js",
+  "main": "src/index.ts",
   "scripts": {
     "prepublishOnly": "npm run build",
-    "build": "rimraf ./lib && tsc",
-    "test": "jest",
-    "prettier": "prettier --write src/**/*.ts"
+    "build": "rimraf ./lib && tsc"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/utrad-ical/circus-lib.git"
+    "url": "https://github.com/utrad-ical/circus.git",
+    "directory": "packages/circus-lib"
   },
   "author": "Soichiro Miki <smiki-tky@umin.ac.jp>",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/utrad-ical/circus-lib/issues"
-  },
-  "homepage": "https://github.com/utrad-ical/circus-lib",
   "dependencies": {
     "cosmiconfig": "^6.0.0",
-    "dicom-parser": "^1.8.3",
-    "fs-extra": "^8.0.1",
+    "dicom-parser": "^1.8.4",
+    "fs-extra": "^9.0.0",
     "jpeg-lossless-decoder-js": "^2.0.4",
     "merge": "^1.2.1",
-    "multi-integer-range": "^4.0.7",
+    "multi-integer-range": "^4.0.8",
     "recursive-readdir": "^2.2.2",
     "tar-stream": "^2.1.0",
     "ulid": "^2.3.0",
     "winston": "^3.2.1",
     "winston-daily-rotate-file": "^4.4.1"
   },
-  "prettier": {
-    "singleQuote": true
-  },
-  "jest": {
-    "transform": {
-      "^.+\\.tsx?$": "ts-jest"
-    },
-    "moduleFileExtensions": [
-      "ts",
-      "js",
-      "json",
-      "node"
-    ]
+  "devDependencies": {
+    "@types/cosmiconfig": "^5.0.3",
+    "@types/fs-extra": "^8.1.0",
+    "@types/node": "^13.13.5",
+    "@types/pngjs": "^3.4.2",
+    "@types/tar-stream": "^1.6.2",
+    "log4js": "^4.3.1",
+    "pngjs": "^3.4.0",
+    "rimraf": "^2.6.3",
+    "tslib": "^1.11.2",
+    "typescript": "^3.9.3"
   }
 }

@@ -1,10 +1,9 @@
 import path from 'path';
 import fs from 'fs-extra';
 import DockerRunner from '../util/DockerRunner';
-import { DicomFileRepository } from '@utrad-ical/circus-lib/lib/dicom-file-repository';
+import { DicomFileRepository, FunctionService } from '@utrad-ical/circus-lib';
 import pluginResultsValidator from './pluginResultsValidator';
 import { MultiRange } from 'multi-integer-range';
-import { FunctionService } from '@utrad-ical/circus-lib';
 import buildDicomVolumes from './buildDicomVolumes';
 import tarfs from 'tar-fs';
 import stream from 'stream';
@@ -174,8 +173,8 @@ export async function fetchSeriesFromRepository(
 ) {
   await fs.ensureDir(destDir);
   const { load, images } = await dicomRepository.getSeries(seriesUid);
-  let it = new MultiRange(images).getIterator(),
-    next;
+  const it = new MultiRange(images).getIterator();
+  let next;
   while (!(next = it.next()).done) {
     const i: number = next.value!;
     const image = await load(i);

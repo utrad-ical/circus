@@ -1,6 +1,5 @@
 import { FunctionService } from '@utrad-ical/circus-lib';
-import { DicomFileRepository } from '@utrad-ical/circus-lib/lib/dicom-file-repository';
-import Logger from '@utrad-ical/circus-rs/src/server/helper/logger/Logger';
+import { DicomFileRepository, Logger } from '@utrad-ical/circus-lib';
 import { multirange } from 'multi-integer-range';
 import { DicomImporter, Models, DicomTagReader } from './interface';
 import { DicomUtilityRunner } from './utils/createDicomUtilityRunner';

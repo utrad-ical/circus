@@ -22,7 +22,7 @@ describe('Validator', () => {
       fruit: [
         'Fruit',
         null,
-        function(t) {
+        function (t) {
           return /a/.test(t);
         },
         null

@@ -1,12 +1,3 @@
 {
-  "compilerOptions": {
-    "module": "commonjs",
-    "sourceMap": true,
-    "target": "es2017",
-    "outDir": "./lib",
-    "declaration": true,
-    "strict": true,
-    "importHelpers": true,
-    "esModuleInterop": true
-  }
+  "extends": "../../tsconfig.json"
 }

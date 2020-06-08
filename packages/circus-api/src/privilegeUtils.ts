@@ -1,7 +1,7 @@
 import MultiRange from 'multi-integer-range';
 import { Models } from './interface';
 import { SeriesEntry } from './typings/circus';
-import { isValidPartialVolumeDescriptor } from '@utrad-ical/circus-lib/lib/PartialVolumeDescriptor';
+import { isValidPartialVolumeDescriptor } from '@utrad-ical/circus-lib';
 
 interface ProjectPrivilege {
   projectId: string;

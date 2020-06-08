@@ -65,8 +65,7 @@ properties:
     description: >
       The storage ID. **May be removed in the near future.**
   patientInfo:
-    $ref:
-      patientInfo
+    $ref: patientInfo
   parameters:
     type: object
     description: >

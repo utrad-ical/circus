@@ -1,6 +1,9 @@
 import React, { useContext, useState, useEffect, useMemo } from 'react';
 import * as rs from 'circus-rs';
-import * as pvd from '@utrad-ical/circus-lib/lib/PartialVolumeDescriptor';
+import {
+  isValidPartialVolumeDescriptor,
+  PartialVolumeDescriptor
+} from '@utrad-ical/circus-lib/src/PartialVolumeDescriptor';
 
 /**
  * @type React.Context<{
@@ -15,7 +18,7 @@ const stringifyPartialVolumeDescriptor = d => `${d.start}:${d.end}:${d.delta}`;
  * Returns a cached RsVolumeLoader instance for the specified series.
  * The returned source may not be "ready" yet.
  * @param {string} seriesUid
- * @param {pvd.default} partialVolumeDescriptor
+ * @param {PartialVolumeDescriptor} partialVolumeDescriptor
  */
 export const usePendingVolumeLoader = (seriesUid, partialVolumeDescriptor) => {
   const { rsHttpClient, map } = useContext(VolumeLoaderCacheContext);
@@ -23,7 +26,7 @@ export const usePendingVolumeLoader = (seriesUid, partialVolumeDescriptor) => {
   const key =
     seriesUid +
     (typeof partialVolumeDescriptor === 'object' &&
-    pvd.isValidPartialVolumeDescriptor(partialVolumeDescriptor)
+    isValidPartialVolumeDescriptor(partialVolumeDescriptor)
       ? '&' + stringifyPartialVolumeDescriptor(partialVolumeDescriptor)
       : '');
 

@@ -27,50 +27,26 @@ export { default as Ellipsoid } from './annotation/Ellipsoid';
 
 export { default as RawData } from '../common/RawData';
 export { default as AnisotropicRawData } from '../common/AnisotropicRawData';
-export * from '../common/PixelFormat';
+export * from '@utrad-ical/circus-lib/src/PixelFormat';
 export * from '../common/geometry';
 
 export { default as RsHttpClient } from './http-client/RsHttpClient';
 
 export { default as MprImageSource } from './image-source/MprImageSource';
-export {
-  default as DynamicMprImageSource
-} from './image-source/DynamicMprImageSource';
-export {
-  default as RawVolumeMprImageSource
-} from './image-source/RawVolumeMprImageSource';
-export {
-  default as HybridMprImageSource
-} from './image-source/HybridImageSource';
-export {
-  default as VolumeRenderingImageSource
-} from './image-source/VolumeRenderingImageSource';
+export { default as DynamicMprImageSource } from './image-source/DynamicMprImageSource';
+export { default as RawVolumeMprImageSource } from './image-source/RawVolumeMprImageSource';
+export { default as HybridMprImageSource } from './image-source/HybridImageSource';
+export { default as VolumeRenderingImageSource } from './image-source/VolumeRenderingImageSource';
 
-export {
-  default as DicomVolumeLoader
-} from './image-source/volume-loader/DicomVolumeLoader';
-export {
-  default as MockVolumeLoader
-} from './image-source/volume-loader/MockVolumeLoader';
-export {
-  default as MixVolumeLoader
-} from './image-source/volume-loader/MixVolumeLoader';
-export {
-  default as RsVolumeLoader
-} from './image-source/volume-loader/RsVolumeLoader';
-export {
-  default as VesselSampleLoader
-} from './image-source/volume-loader/VesselSampleLoader';
-export {
-  default as CsLabelLoader
-} from './image-source/volume-loader/CsLabelLoader';
+export { default as DicomVolumeLoader } from './image-source/volume-loader/DicomVolumeLoader';
+export { default as MockVolumeLoader } from './image-source/volume-loader/MockVolumeLoader';
+export { default as MixVolumeLoader } from './image-source/volume-loader/MixVolumeLoader';
+export { default as RsVolumeLoader } from './image-source/volume-loader/RsVolumeLoader';
+export { default as VesselSampleLoader } from './image-source/volume-loader/VesselSampleLoader';
+export { default as CsLabelLoader } from './image-source/volume-loader/CsLabelLoader';
 
-export {
-  default as IndexedDbVolumeCache
-} from './image-source/volume-loader/cache/IndexedDbVolumeCache';
-export {
-  default as MemoryVolumeCache
-} from './image-source/volume-loader/cache/MemoryVolumeCache';
+export { default as IndexedDbVolumeCache } from './image-source/volume-loader/cache/IndexedDbVolumeCache';
+export { default as MemoryVolumeCache } from './image-source/volume-loader/cache/MemoryVolumeCache';
 
 export { default as Tool } from './tool/Tool';
 export { default as createToolbar } from './createToolbar';
@@ -87,6 +63,4 @@ export { default as pageBy } from './tool/state/handlePageBy';
 export { default as zoomBy } from './tool/state/handleZoomBy';
 export { default as rotateBy } from './tool/state/handleRotationBy';
 export * from './image-source/volume-rendering-image-source/transfer-function-util';
-export {
-  default as buildTransferFunctionMap
-} from './image-source/volume-rendering-image-source/texture-loader/buildTransferFunctionMap';
+export { default as buildTransferFunctionMap } from './image-source/volume-rendering-image-source/texture-loader/buildTransferFunctionMap';

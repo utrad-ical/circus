@@ -25,7 +25,12 @@ properties:
           The origin of the voxel data.
       size:
         type: array
-        items: [{ type: 'integer', multipleOf: 8 }, { type: 'integer' }, { type: 'integer' }]
+        items:
+          [
+            { type: 'integer', multipleOf: 8 },
+            { type: 'integer' },
+            { type: 'integer' },
+          ]
         description: >
           The size of the voxel data. The size along the x-axis must be a multiple of 8.
       color:

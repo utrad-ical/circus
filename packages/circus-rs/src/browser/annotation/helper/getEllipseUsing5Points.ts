@@ -65,12 +65,8 @@ export default function intersectEllipsoidAndSection(
   // get rotate radian
   const origin = p3to2(ES_o);
   const rotate = Math.atan(B / (A - C)) / 2;
-  const radiusX = p3to2(a)
-    .sub(origin)
-    .length();
-  const radiusY = p3to2(b)
-    .sub(origin)
-    .length();
+  const radiusX = p3to2(a).sub(origin).length();
+  const radiusY = p3to2(b).sub(origin).length();
 
   return {
     origin,
@@ -125,7 +121,10 @@ function getEigenvectors(A: number, B: number, C: number): Vector2[] {
   const n12 = B / 2;
   const n21 = B / 2;
   const n22 = C;
-  const matrix = [[n11, n12], [n21, n22]];
+  const matrix = [
+    [n11, n12],
+    [n21, n22]
+  ];
 
   const [eigenVector1, eigenVector2] = getEigenvectorsOf2x2(matrix);
 

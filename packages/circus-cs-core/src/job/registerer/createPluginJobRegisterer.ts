@@ -1,4 +1,4 @@
-import { DicomFileRepository } from '@utrad-ical/circus-lib/lib/dicom-file-repository';
+import { DicomFileRepository } from '@utrad-ical/circus-lib';
 import MultiRange from 'multi-integer-range';
 import { FunctionService } from '@utrad-ical/circus-lib';
 import * as circus from '../../interface';
@@ -67,7 +67,7 @@ const createPluginJobRegisterer: FunctionService<
     if (!Array.isArray(seriesList) || !seriesList.length) {
       throw new TypeError('No series specified.');
     }
-    for (let series of seriesList) {
+    for (const series of seriesList) {
       const loader = await dicomFileRepository.getSeries(series.seriesUid);
       const imagesInSeries = new MultiRange(loader.images);
       // Check the series exists

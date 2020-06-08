@@ -1,7 +1,6 @@
 import RsHttpClient from '../../http-client/RsHttpClient';
 import DicomVolumeLoader from './DicomVolumeLoader';
 import DicomVolume from '../../../common/DicomVolume';
-import { PixelFormat } from '../../../common/PixelFormat';
 import { DicomVolumeMetadata } from './DicomVolumeLoader';
 import VolumeCache, { nullVolumeCache } from './cache/VolumeCache';
 
@@ -30,7 +29,7 @@ export default class VesselSampleLoader implements DicomVolumeLoader {
   private meta: DicomVolumeMetadata = {
     voxelSize: [0.4688, 0.4688, 0.6],
     voxelCount: [512, 512, 132],
-    pixelFormat: PixelFormat.UInt16,
+    pixelFormat: 'uint16',
     dicomWindow: { level: 200, width: 600 },
     estimatedWindow: { level: 200, width: 600 }
   };
@@ -57,7 +56,7 @@ export default class VesselSampleLoader implements DicomVolumeLoader {
     if (!buffer) throw new Error();
 
     const meta = this.meta;
-    const volume = new DicomVolume(meta.voxelCount, PixelFormat.UInt16);
+    const volume = new DicomVolume(meta.voxelCount, 'uint16');
     volume.setVoxelSize(meta.voxelSize);
     if (meta.dicomWindow) volume.dicomWindow = meta.dicomWindow;
     if (meta.estimatedWindow) volume.estimatedWindow = meta.estimatedWindow;

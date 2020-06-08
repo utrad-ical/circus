@@ -1,10 +1,6 @@
 node_modules
 /logs/
 /tmp/
-/coverage
 /test/working
 /test/docker/tmp
 /lib
-
-.cscorerc*
-cscore.config.js

@@ -1,3 +1,5 @@
+import MultiRange from 'multi-integer-range';
+
 /**
  * Defines a set of integers to construct a partial volume
  * from a DICOM series.
@@ -46,8 +48,36 @@ export const isValidPartialVolumeDescriptor = (
 ) => {
   const { start, end, delta } = descriptor;
   const isNatural = (value: any) => Number.isInteger(value) && value > 0;
-  if (descriptor.start > descriptor.end) return false;
-  if (!isNatural(start) || !isNatural(end) || !isNatural(delta)) return false;
+  if (
+    !isNatural(start) ||
+    !isNatural(end) ||
+    !Number.isInteger(delta) ||
+    delta === 0
+  )
+    return false;
+  if ((start > end && delta > 0) || (start < end && delta < 0)) return false;
   if (!isNatural((end - start) / delta + 1)) return false;
+  if (start === end && delta === -1) return false;
   return true;
+};
+
+/**
+ * Returns true if the partial volume described with `descriptor`
+ * is includd in the images described sith `range`.
+ * @param range The image range to check.
+ * @param desciptor The
+ */
+export const rangeHasPartialVolume = (
+  range: MultiRange,
+  descriptor: PartialVolumeDescriptor
+) => {
+  if (!isValidPartialVolumeDescriptor(descriptor))
+    throw new Error('Invalid partial volume descriptor');
+  const { start, end, delta } = descriptor;
+  if (range.has([[Math.min(start, end), Math.max(start, end)]])) return true;
+  if (delta !== 1 && delta !== -1) {
+    for (let i = start; i !== end; i += delta) if (!range.has(i)) return false;
+    return true;
+  }
+  return false;
 };

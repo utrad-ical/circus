@@ -39,10 +39,7 @@ afterAll(async () => {
 describe('#insert', () => {
   it('should insert a single document after successful validation', async () => {
     await testCollection.insert({ month: 8, name: 'Hazuki' });
-    const result = await db
-      .collection('months')
-      .find({ month: 8 })
-      .toArray();
+    const result = await db.collection('months').find({ month: 8 }).toArray();
     expect(result).toBeInstanceOf(Array);
     expect(result).toHaveLength(1);
     expect(result[0]).toMatchObject({ month: 8, name: 'Hazuki' });
@@ -66,10 +63,7 @@ describe('#insert', () => {
 describe('#upsert', () => {
   it('should insert a new document', async () => {
     await testCollection.upsert(8, { name: 'Hazuki' });
-    const result = await db
-      .collection('months')
-      .find({ month: 8 })
-      .toArray();
+    const result = await db.collection('months').find({ month: 8 }).toArray();
     expect(result).toHaveLength(1);
     expect(result[0].createdAt).toBeInstanceOf(Date);
     expect(result[0].updatedAt).toBeInstanceOf(Date);
@@ -78,10 +72,7 @@ describe('#upsert', () => {
 
   it('should update an existing document', async () => {
     await testCollection.upsert(3, { name: 'March' });
-    const result = await db
-      .collection('months')
-      .find({ month: 3 })
-      .toArray();
+    const result = await db.collection('months').find({ month: 3 }).toArray();
     expect(result).toHaveLength(1);
     expect(result[0].createdAt).toBeInstanceOf(Date);
     expect(result[0].updatedAt).toBeInstanceOf(Date);

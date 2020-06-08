@@ -66,7 +66,7 @@ const passthru = (cmd, args) => {
 
 const main = async () => {
   const targets = ['succeed', 'error', 'timeout', 'check-network'];
-  for (target of targets) {
+  for (const target of targets) {
     try {
       await build(target);
     } catch (err) {

@@ -356,7 +356,7 @@ export class Editor extends React.Component {
       switch (label.type) {
         case 'voxel': {
           const isActive = activeLabel && label === activeLabel;
-          const volume = new rs.RawData(label.data.size, rs.PixelFormat.Binary);
+          const volume = new rs.RawData(label.data.size, 'binary');
           volume.assign(
             isActive
               ? label.data.volumeArrayBuffer.slice(0)

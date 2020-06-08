@@ -2,7 +2,7 @@ import loopRun, { LoopRunOptions } from './loopRun';
 import sleep from '../util/sleep';
 import { EventEmitter } from 'events';
 import * as circus from '../interface';
-import Logger from '@utrad-ical/circus-lib/lib/logger/Logger';
+import { Logger } from '@utrad-ical/circus-lib';
 
 const createMockLogger = (fn: jest.Mock) => {
   return {
@@ -17,7 +17,7 @@ const createMockLogger = (fn: jest.Mock) => {
 };
 
 const createMockQueueSystem = <T>(len: number = 10, fn: jest.Mock) => {
-  let q: circus.QueueItem<T>[] = [];
+  const q: circus.QueueItem<T>[] = [];
   let qId: number = 0;
 
   const mockQueueSystem: circus.Queue<T> = {
@@ -72,7 +72,7 @@ class MockContext extends EventEmitter {
 describe('loopRun', () => {
   let _active: boolean = true;
   test('insert a job and list it', async () => {
-    const fn = jest.fn<any>();
+    const fn = jest.fn();
     const queue = createMockQueueSystem<null>(3, fn);
     const options: LoopRunOptions<null> = {
       logger: createMockLogger(fn),

@@ -95,7 +95,9 @@ export const intersectionOfEllipsoidAndLine = (
   );
 
   const A =
-    Math.pow(Lv.x / radius.x, 2) + Math.pow(Lv.y / radius.y, 2) + Math.pow(Lv.z / radius.z, 2);
+    Math.pow(Lv.x / radius.x, 2) +
+    Math.pow(Lv.y / radius.y, 2) +
+    Math.pow(Lv.z / radius.z, 2);
   const B =
     (Lo.x * Lv.x * 2) / Math.pow(radius.x, 2) +
     (Lo.y * Lv.y * 2) / Math.pow(radius.y, 2) +

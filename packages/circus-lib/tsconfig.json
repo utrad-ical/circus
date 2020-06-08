@@ -1,13 +1,7 @@
 {
+  "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "outDir": "./lib",
-    "strict": true,
-    "target": "es2017",
-    "module": "commonjs",
-    "esModuleInterop": true,
-    "alwaysStrict": true,
-    "declaration": true
+    "outDir": "./lib"
   },
-  "include": ["src/**/*.ts"],
-  "exclude": ["src/**/*.test.ts"]
+  "include": ["./src/**/*.ts"]
 }

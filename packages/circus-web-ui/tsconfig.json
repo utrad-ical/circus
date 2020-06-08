@@ -1,0 +1,17 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "lib": ["dom"],
+    "baseUrl": "./src",
+    "jsx": "react",
+    "allowJs": true,
+    "paths": {
+      "rb/*": ["@smikitky/rb-components/lib/*"],
+      "circus-rs/*": ["@utrad-ical/circus-rs/src/browser/*"],
+      "components/*": ["components/*"],
+      "pages/*": ["pages/*"],
+      "utils/*": ["utils/*"],
+      "actions/*": ["actions/*"]
+    }
+  }
+}

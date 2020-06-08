@@ -1,6 +1,6 @@
 import { VolumeAccessor } from '../../helper/createVolumeProvider';
 import DicomVolume from '../../../common/DicomVolume';
-import PartialVolumeDescriptor from '@utrad-ical/circus-lib/lib/PartialVolumeDescriptor';
+import { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
 
 export default async function createPartialVolume(
   volumeAccessor: VolumeAccessor,

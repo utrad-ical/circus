@@ -76,38 +76,28 @@ const checkPrivilege: (
           status.BAD_REQUEST,
           'No plugin-job specified to check project privilege.'
         );
+
       const jobId = ctx.params.jobId;
       const jobDoc = await models.pluginJob.findByIdOrFail(jobId);
+      // Assign jobDoc to ctx for future reference
       ctx.job = jobDoc;
 
-      const uid = [];
-      for (let i = 0; i < jobDoc.series.length; i++) {
-        uid.push(jobDoc.series[i].seriesUid);
-      }
+      const jobSeriesUids = jobDoc.series.map((s: any) => s.seriesUid);
+      const { domains: accessibleDomains } = ctx.userPrivileges;
+      const jobSeriesDomains = (
+        await models.series.aggregate([
+          { $match: { seriesUid: { $in: jobSeriesUids } } },
+          { $group: { _id: '$domain' } }
+        ])
+      ).map(doc => doc._id);
 
-      const { domains } = ctx.userPrivileges;
-
-      const aggregateDomains = await models.series.aggregate([
-        { $match: { seriesUid: { $in: uid } } },
-        {
-          $group: {
-            _id: '$domain'
-          }
-        }
-      ]);
-
-      const seriesDomains = [];
-      for (let d = 0; d < aggregateDomains.length; d++) {
-        seriesDomains.push(...Object.values(aggregateDomains[d]));
-      }
-
-      const domainCheck = seriesDomains.every(sd =>
-        domains.some(d => d === sd)
+      const domainCheck = jobSeriesDomains.every(sd =>
+        accessibleDomains.some(d => d === sd)
       );
       if (!domainCheck) {
         ctx.throw(
           status.UNAUTHORIZED,
-          'You do not have privilege of this plugin-job.'
+          'You do not have privilege to access this plugin-job.'
         );
       }
     }

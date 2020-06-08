@@ -8,7 +8,7 @@ import PartialVolumeDescriptor from '@utrad-ical/circus-lib/src/PartialVolumeDes
  * PartialVolumeDescriptor.
  */
 
-const resolveOrientation = async (
+const resolveSeriesOrientation = async (
   seriesUid: string,
   start: number,
   end: number,
@@ -44,4 +44,4 @@ const resolveOrientation = async (
   }
 };
 
-export default resolveOrientation;
+export default resolveSeriesOrientation;

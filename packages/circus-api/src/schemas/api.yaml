@@ -40,6 +40,10 @@ properties:
             - type: array
               items:
                 type: string
+        requiredSeriesDomainCheck:
+          oneOf:
+            - type: string
+            - type: boolean
         forDebug:
           type: boolean
           description: >

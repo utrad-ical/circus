@@ -29,6 +29,7 @@ routes:
       required: ['jobId']
   - verb: patch
     path: /plugin-jobs/:jobId
+    requiredSeriesDomainCheck: true
     description: >
       Cancels an existing plug-in job.
   # Search and Fetch Results
@@ -37,14 +38,16 @@ routes:
     handler: handleSearch
     description: >
       Performs search for the plug-in job.
-    responseSchema: pluginJob|addProperty patientInfo patientInfo|searchResult
+    responseSchema: pluginJobSearchResult|addProperty patientInfo patientInfo|searchResult
   - verb: get
     path: /plugin-jobs/:jobId
+    requiredSeriesDomainCheck: true
     description: >
       Returns the detail of the specified plug-in job.
     responseSchema: pluginJob|dbEntry
   - verb: post
     path: /plugin-jobs/:jobId/feedback/:mode
+    requiredSeriesDomainCheck: true
     description: >
       Creates a new feedback entry for the specified plug-in job.
     requestSchema: pluginJobFeedbackData
@@ -52,12 +55,14 @@ routes:
   # Attachment
   - verb: get
     path: /plugin-jobs/:jobId/attachment/:path+
+    requiredSeriesDomainCheck: true
     description: >
       Returns the specified file output from the plug-in.
     handler: handleGetAttachment
   # Feedback
   - verb: get
     path: /plugin-jobs/:jobId/feedback
+    requiredSeriesDomainCheck: true
     description: >
       Lists feedback entries for the specified plug-in job.
     responseSchema:
@@ -69,5 +74,6 @@ routes:
     handler: handleDeleteFeedback
     requiredGlobalPrivilege: manageServer
     path: /plugin-jobs/:jobId/feedback/:feedbackId
+    requiredSeriesDomainCheck: true
     description: >
       Removes feedback items.

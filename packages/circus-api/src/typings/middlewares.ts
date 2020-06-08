@@ -28,6 +28,7 @@ interface CustomCtxMembers {
   user: any;
   project: any;
   case: any;
+  job: any;
   userPrivileges: UserPrivilegeInfo;
 }
 

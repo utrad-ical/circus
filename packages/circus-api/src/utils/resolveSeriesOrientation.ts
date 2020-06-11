@@ -26,17 +26,17 @@ const resolveSeriesOrientation = async (
   if (series.images === '1') {
     return { start, end, delta: 1 } as PartialVolumeDescriptor;
   }
-  const image1 = await series.load(1);
-  const image2 = await series.load(2);
-  const image1Tags = await dicomTagReader(image1);
-  const image2Tags = await dicomTagReader(image2);
+  const startImage = await series.load(start);
+  const endImage = await series.load(end - start + 1);
+  const startImageTags = await dicomTagReader(startImage);
+  const endImageTags = await dicomTagReader(endImage);
 
-  if (!image1Tags.parameters.imagePositionPatientZ) {
+  if (!startImageTags.parameters.imagePositionPatientZ) {
     return { start, end, delta: 1 } as PartialVolumeDescriptor;
   }
   if (
-    image1Tags.parameters.imagePositionPatientZ >
-    image2Tags.parameters.imagePositionPatientZ!
+    startImageTags.parameters.imagePositionPatientZ >
+    endImageTags.parameters.imagePositionPatientZ!
   ) {
     return { start, end, delta: 1 } as PartialVolumeDescriptor;
   } else {

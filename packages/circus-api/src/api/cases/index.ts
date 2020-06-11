@@ -24,7 +24,7 @@ const maskPatientInfo = (ctx: CircusContext) => {
     const viewable = project.roles.some(r => r === 'viewPersonalInfo');
     const view = viewable && wantToView;
     if (!view) {
-      delete caseData.patientInfoCache;
+      delete caseData.patientInfo;
     }
     return caseData;
   };
@@ -153,9 +153,9 @@ export const handleSearch: RouteMiddleware = ({ models }) => {
       ctx.throw(status.BAD_REQUEST, 'Bad filter.');
 
     // const domainFilter = {};
-    const accessibleProjectIds = ctx.userPrivileges.accessibleProjects.map(
-      p => p.projectId
-    );
+    const accessibleProjectIds = ctx.userPrivileges.accessibleProjects
+      .filter(p => p.roles.find(r => r === 'read'))
+      .map(p => p.projectId);
     const accessibleProjectFilter = {
       projectId: { $in: accessibleProjectIds }
     };
@@ -198,7 +198,10 @@ export const handleSearch: RouteMiddleware = ({ models }) => {
           }
         }
       ],
-      { defaultSort: { createdAt: -1 } }
+      {
+        defaultSort: { createdAt: -1 },
+        transform: data => maskPatientInfo(ctx)(data)
+      }
     );
   };
 };

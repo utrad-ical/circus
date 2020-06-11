@@ -18,7 +18,7 @@ it('should perform search', async () => {
   expect(res.data.items).toHaveLength(2);
 });
 
-it('search with patient name', async () => {
+it.skip('search with patient name', async () => {
   const res = await ax.bob.get('api/cases', {
     params: {
       filter: JSON.stringify({ 'patientInfo.patientName': 'Anzu' })
@@ -29,7 +29,7 @@ it('search with patient name', async () => {
   expect(res.data.items[0].patientInfo.patientName).toBe('Anzu');
 });
 
-it('search with patient name in regex', async () => {
+it.skip('search with patient name in regex', async () => {
   const res = await ax.bob.get('api/cases', {
     params: {
       filter: JSON.stringify({ 'patientInfo.patientName': { $regex: '^An' } })

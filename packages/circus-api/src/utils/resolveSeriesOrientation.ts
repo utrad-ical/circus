@@ -27,7 +27,7 @@ const resolveSeriesOrientation = async (
     return { start, end, delta: 1 } as PartialVolumeDescriptor;
   }
   const startImage = await series.load(start);
-  const endImage = await series.load(end - start + 1);
+  const endImage = await series.load(end);
   const startImageTags = await dicomTagReader(startImage);
   const endImageTags = await dicomTagReader(endImage);
 

@@ -100,6 +100,7 @@ const extractAge = (
 export interface Parameters {
   pixelSpacingX?: number;
   pixelSpacingY?: number;
+  imagePositionPatientZ?: number;
   kVP?: number;
   dataCollectionDiameter?: number;
   reconstructionDiameter?: number;
@@ -128,6 +129,7 @@ const extractParameters = (dataset: parser.DicomDataset) => {
   const data: Parameters = {
     pixelSpacingX: dataset.floatString('x00280030', 0),
     pixelSpacingY: dataset.floatString('x00280030', 1),
+    imagePositionPatientZ: dataset.floatString('x00200032', 2),
     // CT related values
     kVP: dataset.floatString('x00180060'),
     dataCollectionDiameter: dataset.floatString('x00180090'),

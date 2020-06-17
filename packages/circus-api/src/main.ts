@@ -98,6 +98,7 @@ const main = async () => {
           'Please run DB migration script.'
       )
     );
+    process.exit(1);
   }
 
   const appOptions = patchedConfig.apiServer.options;

@@ -59,7 +59,7 @@ const CreateNewCase = props => {
           seriesUid: s.seriesUid,
           partialVolumeDescriptor: s.partialVolumeDescriptor
             ? s.partialVolumeDescriptor
-            : defaultPartialVolumeDescriptor(s.images)
+            : defaultPartialVolumeDescriptor(s.data.images)
         })),
         tags: selectedTags
       }

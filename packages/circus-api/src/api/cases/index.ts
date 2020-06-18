@@ -65,6 +65,9 @@ const makeNewCase = async (
   );
   seriesData.forEach(i => (domains[i.domain] = true));
 
+  if (seriesData.slice(1).some(s => s.domain !== seriesData[0].domain))
+    throw new Error('Series must be the same domain.');
+
   const revision = {
     creator: user.userEmail,
     date: new Date(),

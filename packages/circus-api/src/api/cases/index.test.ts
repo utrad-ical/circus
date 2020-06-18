@@ -84,6 +84,36 @@ describe('create', () => {
     expect(res.data.caseId).toHaveLength(26);
   });
 
+  it('should throw error for different domains in one series', async () => {
+    const res = await ax.bob.request({
+      url: 'api/cases/',
+      method: 'post',
+      data: {
+        projectId: '8883fdef6f5144f50eb2a83cd34baa44',
+        series: [
+          {
+            seriesUid: '111.222.333.444.777',
+            partialVolumeDescriptor: {
+              start: 1,
+              end: 200,
+              delta: 1
+            }
+          },
+          {
+            seriesUid: '222.222.333.444.777',
+            partialVolumeDescriptor: {
+              start: 1,
+              end: 200,
+              delta: 1
+            }
+          }
+        ],
+        tags: []
+      }
+    });
+    expect(res.data.error).toMatch('Series must be the same domain.');
+  });
+
   it('should throw for invalid series image range', async () => {
     const res = await ax.bob.request({
       url: 'api/cases/',

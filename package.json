@@ -42,6 +42,7 @@
     "setupFiles": [
       "dotenv/config"
     ],
-    "testEnvironment": "node"
+    "testEnvironment": "node",
+    "testTimeout": 10000
   }
 }

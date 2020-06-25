@@ -3,12 +3,20 @@ import { useApi } from 'utils/api';
 import { showMessage } from 'actions';
 import { Button } from 'components/react-bootstrap';
 import AdminContainer from './AdminContainer';
-import PropertyEditor from 'rb/PropertyEditor';
-import * as et from 'rb/editor-types';
-import ShrinkSelect from 'rb/ShrinkSelect';
+import PropertyEditor from '@smikitky/rb-components/lib/PropertyEditor';
+import * as et from '@smikitky/rb-components/lib/editor-types';
+import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
 
-const GeneralAdmin = props => {
-  const [settings, setSettings] = useState({ domains: [] });
+interface Settings {
+  domains: string[];
+  defaultDomain: string;
+}
+
+const GeneralAdmin: React.FC<{}> = props => {
+  const [settings, setSettings] = useState<Settings>({
+    domains: [],
+    defaultDomain: ''
+  });
   const [complaints, setComplaints] = useState({});
   const api = useApi();
 
@@ -18,12 +26,14 @@ const GeneralAdmin = props => {
   );
 
   const domainSelector = useMemo(
-    () => props => <ShrinkSelect options={settings.domains} {...props} />,
+    () => (props: any) => (
+      <ShrinkSelect options={settings.domains} {...props} />
+    ),
     [settings.domains]
   );
 
   const loadSettings = useCallback(async () => {
-    const data = await api('admin/server-params');
+    const data = (await api('admin/server-params')) as Settings;
     setSettings(data);
     setComplaints({});
   }, [api]);
@@ -32,7 +42,7 @@ const GeneralAdmin = props => {
     loadSettings();
   }, [loadSettings]);
 
-  const propertyChange = value => {
+  const handlePropertyChange = (value: Settings) => {
     if (value.domains.indexOf(value.defaultDomain) === -1) {
       value.defaultDomain = '';
     }
@@ -42,8 +52,8 @@ const GeneralAdmin = props => {
     setSettings(value);
   };
 
-  const saveClick = async () => {
-    const newSettings = {
+  const handleSaveClick = async () => {
+    const newSettings: Settings = {
       ...settings,
       domains: settings.domains
         .map(d => (typeof d === 'string' ? d.trim() : ''))
@@ -87,10 +97,10 @@ const GeneralAdmin = props => {
         value={settings}
         complaints={complaints}
         properties={properties}
-        onChange={propertyChange}
+        onChange={handlePropertyChange}
       />
       <p className="text-center">
-        <Button bsStyle="primary" onClick={saveClick}>
+        <Button bsStyle="primary" onClick={handleSaveClick}>
           Save
         </Button>
         <Button bsStyle="link" onClick={loadSettings}>

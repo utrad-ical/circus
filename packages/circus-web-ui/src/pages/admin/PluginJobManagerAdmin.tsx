@@ -3,11 +3,11 @@ import { useApi } from 'utils/api';
 import AdminContainer from './AdminContainer';
 import IconButton from 'components/IconButton';
 import { Panel } from 'components/react-bootstrap';
-import LoadingIndicator from 'rb/LoadingIndicator';
+import LoadingIndicator from '@smikitky/rb-components/lib/LoadingIndicator';
 
-const PluginJobManagerAdmin = props => {
+const PluginJobManagerAdmin: React.FC<{}> = props => {
   const [busy, setBusy] = useState(true);
-  const [status, setStatus] = useState(null);
+  const [status, setStatus] = useState<any>(null);
   const api = useApi();
 
   const refresh = useCallback(async () => {
@@ -21,7 +21,7 @@ const PluginJobManagerAdmin = props => {
     refresh();
   }, [refresh]);
 
-  const postSwitch = async mode => {
+  const postSwitch = async (mode: string) => {
     setBusy(true);
     try {
       await api('admin/plugin-job-manager/switch', {

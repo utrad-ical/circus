@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import EditorPage from './EditorPage';
 import { useApi } from 'utils/api';
-import LoadingIndicator from 'rb/LoadingIndicator';
-import MultiSelect from 'rb/MultiSelect';
-import ShrinkSelect from 'rb/ShrinkSelect';
+import LoadingIndicator from '@smikitky/rb-components/lib/LoadingIndicator';
+import MultiSelect from '@smikitky/rb-components/lib/MultiSelect';
+import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
 import classnames from 'classnames';
-import * as et from 'rb/editor-types';
+import * as et from '@smikitky/rb-components/lib/editor-types';
+import { DataGridColumnDefinition } from 'components/DataGrid';
 
 const makeEmptyItem = () => {
   return {
@@ -19,7 +20,15 @@ const makeEmptyItem = () => {
   };
 };
 
-const PreferenceEditor = props => {
+interface Preferences {
+  theme: string;
+  personalInfoView: boolean;
+}
+
+const PreferenceEditor: React.FC<{
+  value: Preferences;
+  onChange: (newValue: Preferences) => void;
+}> = props => {
   return (
     <div>
       <label>
@@ -27,7 +36,7 @@ const PreferenceEditor = props => {
         <ShrinkSelect
           options={{ mode_white: 'White', mode_black: 'Black' }}
           value={props.value.theme}
-          onChange={v => props.onChange({ ...props.value, theme: v })}
+          onChange={(v: string) => props.onChange({ ...props.value, theme: v })}
         />
       </label>
       <br />
@@ -48,15 +57,21 @@ const PreferenceEditor = props => {
   );
 };
 
-const UserAdmin = props => {
-  const [editorProperties, setEditorProperties] = useState(null);
-  const [listColumns, setListColumns] = useState(null);
+const UserAdmin: React.FC<any> = props => {
+  const [editorProperties, setEditorProperties] = useState<any>(null);
+  const [listColumns, setListColumns] = useState<DataGridColumnDefinition[]>(
+    []
+  );
   const api = useApi();
 
   useEffect(() => {
     const load = async () => {
-      const groups = (await api('admin/groups')).items;
-      const groupIdMap = {};
+      const groups = (await api('admin/groups')).items as {
+        groupId: string;
+        groupName: string;
+        privileges: string[];
+      }[];
+      const groupIdMap: any = {};
       groups.forEach(g => (groupIdMap[g.groupId] = g.groupName));
       setEditorProperties([
         { caption: 'User Email', key: 'userEmail', editor: et.text() },
@@ -66,7 +81,7 @@ const UserAdmin = props => {
         {
           caption: 'Groups',
           key: 'groups',
-          editor: props => (
+          editor: (props: any) => (
             <MultiSelect options={groupIdMap} numericalValue {...props} />
           )
         },
@@ -89,8 +104,8 @@ const UserAdmin = props => {
         {
           key: 'groups',
           renderer: ({ value: item }) => {
-            return item.groups.map(groupId => {
-              const group = groups.find(g => g.groupId === groupId);
+            return item.groups.map((groupId: string) => {
+              const group = groups.find(g => g.groupId === groupId)!;
               const style =
                 group.privileges.indexOf('manageServer') >= 0
                   ? 'label-danger'

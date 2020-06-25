@@ -4,6 +4,7 @@ declare module 'styled-components';
 
 declare module 'react-bootstrap/lib/Button';
 declare module '@smikitky/rb-components';
+declare module '@smikitky/rb-components/lib/BlockSelect';
 declare module '@smikitky/rb-components/lib/ColorPicker';
 declare module '@smikitky/rb-components/lib/Icon';
 declare module '@smikitky/rb-components/lib/IconButton';

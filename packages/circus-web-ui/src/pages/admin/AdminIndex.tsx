@@ -4,7 +4,11 @@ import { Button } from 'components/react-bootstrap';
 import AdminContainer from './AdminContainer';
 import Icon from 'components/Icon';
 
-const Btn = ({ to, link, glyph }) => (
+const Btn: React.FC<{
+  to: string;
+  link: string;
+  glyph: string;
+}> = ({ to, link, glyph }) => (
   <div className="item">
     <Link to={`admin/${to}`}>
       <Button block bsStyle="primary" bsSize="lg">
@@ -15,7 +19,7 @@ const Btn = ({ to, link, glyph }) => (
   </div>
 );
 
-const AdminIndex = props => {
+const AdminIndex: React.FC = () => {
   return (
     <AdminContainer
       title="Administration"

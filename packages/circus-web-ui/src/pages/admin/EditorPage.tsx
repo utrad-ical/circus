@@ -1,32 +1,47 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Button, Panel } from 'components/react-bootstrap';
-import IconButton from 'rb/IconButton';
-import PropertyEditor from 'rb/PropertyEditor';
+import IconButton from '@smikitky/rb-components/lib/IconButton';
+import PropertyEditor from '@smikitky/rb-components/lib/PropertyEditor';
 import { useApi } from 'utils/api';
 import { useLoginManager } from 'utils/loginManager';
 import AdminContainer from './AdminContainer';
 import { startNewSearch } from 'actions';
-import DataGrid from 'components/DataGrid';
+import DataGrid, { DataGridColumnDefinition } from 'components/DataGrid';
 import SearchResultsView from 'components/SearchResultsView';
-import { connect } from 'react-redux';
+import { useDispatch } from 'react-redux';
 
-const EditorPage = props => {
-  const [target, setTarget] = useState(null);
-  const [editing, setEditing] = useState(null);
-  const [complaints, setComplaints] = useState(null);
+const EditorPage: React.FC<{
+  listColumns: DataGridColumnDefinition[];
+  preCommitHook?: (target: any) => Promise<boolean | void>;
+  primaryKey: string;
+  searchName: string;
+  resource: string;
+  title: string;
+  targetName?: (item: any) => string;
+  icon: string;
+  makeEmptyItem: () => any;
+  editorProperties: any;
+}> = props => {
+  const [target, setTarget] = useState<any | null>(null);
+  const [editing, setEditing] = useState<any>(null);
+  const [complaints, setComplaints] = useState<{
+    [key: string]: string;
+  } | null>(null);
   const loginManager = useLoginManager();
   const api = useApi();
+  const dispatch = useDispatch();
 
   const {
     listColumns,
-    dispatch,
     preCommitHook,
     primaryKey,
     searchName,
     resource,
     title,
     targetName,
-    icon
+    icon,
+    makeEmptyItem,
+    editorProperties
   } = props;
 
   const loadItems = useCallback(async () => {
@@ -35,7 +50,7 @@ const EditorPage = props => {
 
   const handleEditStart = useCallback(
     (index, item) => {
-      const makeTargetName = item => {
+      const makeTargetName = (item: any) => {
         if (targetName) return targetName(item);
         return item[primaryKey];
       };
@@ -47,21 +62,21 @@ const EditorPage = props => {
   );
 
   const grid = useMemo(() => {
-    return props => (
+    return (props => (
       <DataGrid
         value={props.value}
         columns={listColumns}
         onItemClick={handleEditStart}
         active={props.active}
       />
-    );
+    )) as React.FC<any>;
   }, [listColumns, handleEditStart]);
 
   useEffect(() => {
     loadItems();
   }, [loadItems]);
 
-  const commitItem = async item => {
+  const commitItem = async (item: any) => {
     if (preCommitHook) {
       if (!(await preCommitHook(target))) return;
     }
@@ -99,7 +114,7 @@ const EditorPage = props => {
 
   const handleCreateItemClick = () => {
     setTarget(null);
-    setEditing(props.makeEmptyItem());
+    setEditing(makeEmptyItem());
   };
 
   return (
@@ -126,8 +141,8 @@ const EditorPage = props => {
           item={editing}
           complaints={complaints}
           target={target}
-          properties={props.editorProperties}
-          excludeProperty={target ? props.primaryKey : null}
+          properties={editorProperties}
+          excludeProperty={target ? props.primaryKey : undefined}
           onSaveClick={commitItem}
           onCancelClick={handleCancelClick}
         />
@@ -136,24 +151,34 @@ const EditorPage = props => {
   );
 };
 
-export default connect()(EditorPage);
+export default EditorPage;
 
-const pickProperties = (item, properties) => {
+const pickProperties = (item: any, properties: any[]): any => {
   // Remove keys not in the editor property list
-  const result = {};
+  const result: any = {};
   for (const p of properties) {
     result[p.key] = item[p.key];
   }
   return result;
 };
 
-const Editor = props => {
+const Editor: React.FC<{
+  target: string;
+  properties: any;
+  item: any;
+  complaints: any;
+  onSaveClick: any;
+  onCancelClick: any;
+  excludeProperty?: string;
+}> = props => {
   const {
+    target,
     properties,
     item,
     complaints,
     onSaveClick = () => {},
-    onCancelClick = () => {}
+    onCancelClick = () => {},
+    excludeProperty
   } = props;
 
   const [currentData, setCurrentData] = useState(() =>
@@ -168,8 +193,8 @@ const Editor = props => {
     onSaveClick(currentData);
   };
 
-  const filteredProperties = props.properties.filter(
-    p => !props.excludeProperty || props.excludeProperty !== p.key
+  const filteredProperties = properties.filter(
+    (p: any) => !excludeProperty || excludeProperty !== p.key
   );
 
   return (

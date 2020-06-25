@@ -2,30 +2,30 @@ import React, { useEffect } from 'react';
 import AdminContainer from './AdminContainer';
 import SearchResultsView from 'components/SearchResultsView';
 import { startNewSearch } from 'actions';
-import { connect } from 'react-redux';
-import DataGrid from 'components/DataGrid';
+import { useDispatch } from 'react-redux';
+import DataGrid, { DataGridColumnDefinition } from 'components/DataGrid';
 import { useApi } from 'utils/api';
 
-const columns = [
+const columns: DataGridColumnDefinition[] = [
   { caption: 'Created', key: 'createdAt' },
   {
     caption: 'Data',
     className: 'data',
-    renderer: props => JSON.stringify(props.value)
+    renderer: props => <>{JSON.stringify(props.value)}</>
   }
 ];
 
-const DataView = props => {
+const DataView: React.FC<{ value: any }> = props => {
   const { value } = props;
   if (!value.length) {
-    // return <div className="alert alert-info">No items in global queue.</div>;
+    return <div className="alert alert-info">No items in global queue.</div>;
   }
   return <DataGrid columns={columns} value={value} />;
 };
 
-const PluginJobQueueAdminView = props => {
-  const { dispatch } = props;
+const PluginJobQueueAdmin: React.FC<{}> = props => {
   const api = useApi();
+  const dispatch = useDispatch();
 
   useEffect(() => {
     dispatch(
@@ -46,7 +46,5 @@ const PluginJobQueueAdminView = props => {
     </AdminContainer>
   );
 };
-
-const PluginJobQueueAdmin = connect()(PluginJobQueueAdminView);
 
 export default PluginJobQueueAdmin;

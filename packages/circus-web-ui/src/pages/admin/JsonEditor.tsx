@@ -2,12 +2,15 @@ import styled from 'styled-components';
 import classnames from 'classnames';
 import React, { useState } from 'react';
 
-const JsonEditor = props => {
+const JsonEditor: React.FC<{
+  value: any;
+  onChange: (value: any) => void;
+}> = props => {
   const { value, onChange } = props;
   const [input, setInput] = useState(() => JSON.stringify(value, null, '  '));
-  const [hasError, setHasError] = useState();
+  const [hasError, setHasError] = useState(false);
 
-  const handleChange = ev => {
+  const handleChange = (ev: React.ChangeEvent<HTMLTextAreaElement>) => {
     try {
       setInput(ev.target.value);
       const parsed = JSON.parse(ev.target.value);

@@ -3,8 +3,9 @@ import React, { Fragment } from 'react';
 import BodyPartIcon from 'components/BodyPartIcon';
 import IconEditor from './IconEditor';
 import JsonEditor from './JsonEditor';
-import * as et from 'rb/editor-types';
+import * as et from '@smikitky/rb-components/lib/editor-types';
 import PropertyEditor from '@smikitky/rb-components/lib/PropertyEditor';
+import { DataGridColumnDefinition } from 'components/DataGrid';
 
 const makeEmptyItem = () => {
   return {
@@ -22,7 +23,7 @@ const makeEmptyItem = () => {
   };
 };
 
-const listColumns = [
+const listColumns: DataGridColumnDefinition[] = [
   {
     key: 'pluginId',
     caption: 'Plug-in ID',
@@ -50,7 +51,7 @@ const runConfigurationProperties = [
   { key: 'timeout', caption: 'Timeout (sec)', editor: et.number({ min: 0 }) }
 ];
 
-const RunConfigurationEditor = props => {
+const RunConfigurationEditor: React.FC<any> = props => {
   const { value, onChange } = props;
   return (
     <PropertyEditor
@@ -73,7 +74,7 @@ const editorProperties = [
   { key: 'displayStrategy', caption: 'Display Stratgy', editor: JsonEditor }
 ];
 
-const PluginAdmin = props => {
+const PluginAdmin: React.FC<{}> = props => {
   return (
     <EditorPage
       title="CAD Plug-ins"

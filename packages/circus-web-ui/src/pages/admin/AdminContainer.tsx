@@ -5,7 +5,7 @@ import useLoginUser from 'utils/useLoginUser';
 const AdminContainer: React.FC<{
   title: string;
   icon: string;
-  className: string;
+  className?: string;
 }> = props => {
   const { title, icon, className } = props;
 

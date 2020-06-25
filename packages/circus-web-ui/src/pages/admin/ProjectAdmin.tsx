@@ -1,11 +1,12 @@
 import EditorPage from './EditorPage';
 import React from 'react';
-import * as et from 'rb/editor-types';
+import * as et from '@smikitky/rb-components/lib/editor-types';
 import WindowPresetEditor from './WindowPresetEditor';
 import TagEditor, { newTagItem } from './TagEditor';
 import AttributeSchemaEditor from './AttributeSchemaEditor';
 import BodyPartIcon from 'components/BodyPartIcon';
 import IconEditor from './IconEditor';
+import { DataGridColumnDefinition } from 'components/DataGrid';
 
 const windowPriorityOptions = [
   'dicom,preset,auto',
@@ -15,7 +16,7 @@ const windowPriorityOptions = [
   'auto'
 ];
 
-const listColumns = [
+const listColumns: DataGridColumnDefinition[] = [
   {
     caption: 'Project Name',
     className: 'project-name',
@@ -39,8 +40,8 @@ const makeEmptyItem = () => {
     windowPresets: [],
     windowPriority: 'dicom,preset,auto',
     tags: [],
-    caseAttributesSchema: [],
-    labelAttributesSchema: []
+    caseAttributesSchema: { type: 'object', properties: {}, required: [] },
+    labelAttributesSchema: { type: 'object', properties: {}, required: [] }
   };
 };
 
@@ -81,7 +82,7 @@ const editorProperties = [
   }
 ];
 
-const ProjectAdmin = props => {
+const ProjectAdmin: React.FC<{}> = props => {
   return (
     <EditorPage
       title="Projects"

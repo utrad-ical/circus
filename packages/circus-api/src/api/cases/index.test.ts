@@ -40,6 +40,16 @@ it.skip('search with patient name in regex', async () => {
   expect(res.data.items[0].patientInfo.patientName).toBe('Anzu');
 });
 
+it('should not search result when patientInfo is used.', async () => {
+  const res = await ax.bob.get('api/cases', {
+    params: {
+      filter: JSON.stringify({ 'patientInfo.patientName': { $regex: '^An' } })
+    }
+  });
+  expect(res.status).toBe(200);
+  expect(res.data.items).toHaveLength(0);
+});
+
 it('should throw 400 for wrong request', async () => {
   const res1 = await ax.alice.get('api/cases', {
     params: { filter: 'invalid-json' }

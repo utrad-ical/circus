@@ -30,6 +30,16 @@ const maskPatientInfo = (ctx: CircusContext) => {
   };
 };
 
+const isPatientInfoInFilter = (customFilter: object) => {
+  const keys = Object.keys(customFilter);
+  let results = [];
+  for (let i = 0; i < keys.length; i++) {
+    results.push(/^patientInfo/.test(keys[i]));
+  }
+  if (results.length === 0) return false;
+  return results.every(r => r === true);
+};
+
 export const handleGet: RouteMiddleware = () => {
   return async (ctx, next) => {
     const aCase = ctx.case;
@@ -159,8 +169,16 @@ export const handleSearch: RouteMiddleware = ({ models }) => {
     const accessibleProjectIds = ctx.userPrivileges.accessibleProjects
       .filter(p => p.roles.find(r => r === 'read'))
       .map(p => p.projectId);
+    const unsearchableByPatientInfoIds = isPatientInfoInFilter(customFilter!)
+      ? ctx.userPrivileges.accessibleProjects
+          .filter(p => p.roles.every(r => r !== 'viewPersonalInfo'))
+          .map(p => p.projectId)
+      : [];
     const accessibleProjectFilter = {
-      projectId: { $in: accessibleProjectIds }
+      projectId: {
+        $in: accessibleProjectIds,
+        $nin: unsearchableByPatientInfoIds
+      }
     };
     const filter = {
       $and: [customFilter!, accessibleProjectFilter /* domainFilter */]

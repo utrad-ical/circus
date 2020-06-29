@@ -40,10 +40,10 @@ it.skip('search with patient name in regex', async () => {
   expect(res.data.items[0].patientInfo.patientName).toBe('Anzu');
 });
 
-it('should not search result when patientInfo is used.', async () => {
+it('should not search result when patientInfo is used by unauthorized user.', async () => {
   const res = await ax.bob.get('api/cases', {
     params: {
-      filter: JSON.stringify({ 'patientInfo.patientName': { $regex: '^An' } })
+      filter: JSON.stringify({ 'patientInfo.patientName': 'Anzu' })
     }
   });
   expect(res.status).toBe(200);

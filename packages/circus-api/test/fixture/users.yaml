@@ -22,7 +22,7 @@
   lastLoginIp: '0.0.0.0'
   preferences:
     theme: mode_white
-    personalInfoView: false
+    personalInfoView: true
     seriesSearchPresets: []
     caseSearchPresets: []
     pluginJobSearchPresets: []

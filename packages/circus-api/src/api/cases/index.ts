@@ -32,12 +32,8 @@ const maskPatientInfo = (ctx: CircusContext) => {
 
 const isPatientInfoInFilter = (customFilter: object) => {
   const keys = Object.keys(customFilter);
-  let results = [];
-  for (let i = 0; i < keys.length; i++) {
-    results.push(/^patientInfo/.test(keys[i]));
-  }
-  if (results.length === 0) return false;
-  return results.every(r => r === true);
+  const results = keys.map(k => /^patientInfo/.test(k));
+  return results.some(r => r === true);
 };
 
 export const handleGet: RouteMiddleware = () => {

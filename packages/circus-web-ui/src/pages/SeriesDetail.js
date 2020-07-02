@@ -7,6 +7,12 @@ import * as rs from 'circus-rs';
 import { toolFactory } from 'circus-rs/tool/tool-initializer';
 import useLoginUser from 'utils/useLoginUser';
 import useLoadData from 'utils/useLoadData';
+import styled from 'styled-components';
+
+const StyledImageViewer = styled(ImageViewer)`
+  width: 512px;
+  height: 512px;
+`;
 
 const SeriesDetail = props => {
   const [composition, setComposition] = useState(null);
@@ -80,8 +86,7 @@ const SeriesDetail = props => {
       </h1>
       <Row>
         <Col lg={6}>
-          <ImageViewer
-            className="preview-series"
+          <StyledImageViewer
             composition={composition}
             tool={pagerTool}
             initialTool={pagerTool}

@@ -47,6 +47,10 @@ export interface ApiTest {
      * Guest belongs to the "guest" group and has no explict privilege.
      */
     guest: AxiosInstance;
+    /**
+     * Carol belongs to the "power user 2" group.
+     */
+    carol: AxiosInstance;
   };
   csCore: cscore.CsCore;
   dicomFileRepository: DicomFileRepository;
@@ -129,7 +133,8 @@ export const setUpAppForRoutesTest = async () => {
   const axiosInstances = {
     alice: createAxios('2311aee0435c36ae14c39835539a931a6344714a'),
     bob: createAxios('8292766837c1901b0a6954f7bda49710316c57da'),
-    guest: createAxios('2c2fbaea8046df924b8b459879b799c111e9b7f1')
+    guest: createAxios('2c2fbaea8046df924b8b459879b799c111e9b7f1'),
+    carol: createAxios('m47mvv02x2yer00gjroc0za00dger4f455cvedfh')
   };
 
   const tearDown = async () => {

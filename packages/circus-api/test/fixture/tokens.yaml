@@ -40,3 +40,13 @@
   userId: guest@example.com
   permanentTokenId: 01dzrsqnzep54g0s1afph4zxn2
   permanentTokenDescription: A permanent token for API access
+- accessToken: m47mvv02x2yer00gjroc0za00dger4f455cvedfh
+  accessTokenExpiresAt:
+    $date: 4102412399000
+  refreshToken: lfkgt4u89u4ugfrlvmoio5uyu93i8pw899bthjcs
+  refreshTokenExpiresAt:
+    $date: 4102412399000
+  clientId: CIRCUS Front UI
+  userId: carol@example.com
+  permanentTokenId: null
+  permanentTokenDescription: null

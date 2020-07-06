@@ -30,10 +30,19 @@ const maskPatientInfo = (ctx: CircusContext) => {
   };
 };
 
-const isPatientInfoInFilter = (customFilter: object) => {
-  const keys = Object.keys(customFilter);
-  const results = keys.map(k => /^patientInfo/.test(k));
-  return results.some(r => r === true);
+const isPatientInfoInFilter = (customFilter: { [key: string]: any }) => {
+  const checkKeyVal = (key: string, value: any) => {
+    if (key === '$and' || key === '$or') {
+      return value.some((item: object) => isPatientInfoInFilter(item));
+    } else {
+      return /^patientInfo/.test(key);
+    }
+  };
+
+  if (Object.keys(customFilter).length === 0) return false;
+  return Object.keys(customFilter).every(key =>
+    checkKeyVal(key, customFilter[key])
+  );
 };
 
 export const handleGet: RouteMiddleware = () => {
@@ -71,8 +80,11 @@ const makeNewCase = async (
   );
   seriesData.forEach(i => (domains[i.domain] = true));
 
-  if (seriesData.slice(1).some(s => s.domain !== seriesData[0].domain))
-    throw new Error('Series must be the same domain.');
+  if (seriesData.slice(1).some(s => s.domain !== seriesData[0].domain)) {
+    const error = new Error('All series must belong to the same domain.');
+    error.status = 400;
+    throw error;
+  }
 
   const revision = {
     creator: user.userEmail,

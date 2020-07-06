@@ -43,7 +43,15 @@ it('search with patient name in regex', async () => {
 it('should not search result when patientInfo is used by unauthorized user.', async () => {
   const res = await ax.bob.get('api/cases', {
     params: {
-      filter: JSON.stringify({ 'patientInfo.patientName': 'Anzu' })
+      filter: JSON.stringify({
+        $and: [
+          {
+            caseId:
+              'faeb503e97f918c882453fd2d789f50f4250267740a0b3fbcc85a529f2d7715b'
+          },
+          { 'patientInfo.patientName': 'Anzu' }
+        ]
+      })
     }
   });
   expect(res.status).toBe(200);
@@ -121,7 +129,10 @@ describe('create', () => {
         tags: []
       }
     });
-    expect(res.data.error).toMatch('Series must be the same domain.');
+    expect(res.status).toBe(400);
+    expect(res.data.error).toMatch(
+      'All series must belong to the same domain.'
+    );
   });
 
   it('should throw for invalid series image range', async () => {

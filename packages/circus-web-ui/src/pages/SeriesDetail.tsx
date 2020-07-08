@@ -1,22 +1,31 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Row, Col, Panel } from 'components/react-bootstrap';
 import { useApi } from 'utils/api';
-import LoadingIndicator from 'rb/LoadingIndicator';
+import LoadingIndicator from '@smikitky/rb-components/lib/LoadingIndicator';
 import ImageViewer from 'components/ImageViewer';
 import * as rs from 'circus-rs';
 import { toolFactory } from 'circus-rs/tool/tool-initializer';
 import useLoginUser from 'utils/useLoginUser';
 import useLoadData from 'utils/useLoadData';
 import styled from 'styled-components';
+import { Link } from 'react-router-dom';
+import IconButton from 'components/IconButton';
 
 const StyledImageViewer = styled(ImageViewer)`
   width: 512px;
   height: 512px;
 `;
 
-const SeriesDetail = props => {
-  const [composition, setComposition] = useState(null);
-  const loginUser = useLoginUser();
+const StyledMenu = styled.div`
+  text-align: right;
+  margin-bottom: 1em;
+`;
+
+const SeriesDetail: React.FC<{
+  match: any;
+}> = props => {
+  const [composition, setComposition] = useState<rs.Composition | null>(null);
+  const loginUser = useLoginUser()!;
   const api = useApi();
   const pagerTool = useMemo(() => toolFactory('pager'), []);
 
@@ -30,7 +39,7 @@ const SeriesDetail = props => {
     },
     [api, seriesUid]
   );
-  const [seriesData] = useLoadData(load);
+  const [seriesData] = useLoadData<any | Error>(load);
 
   useEffect(() => {
     if (!seriesData) return;
@@ -42,7 +51,8 @@ const SeriesDetail = props => {
     const src = new rs.HybridMprImageSource({
       volumeLoader,
       rsHttpClient,
-      seriesUid
+      seriesUid,
+      estimateWindowType: 'center'
     });
     const composition = new rs.Composition(src);
     setComposition(composition);
@@ -50,7 +60,7 @@ const SeriesDetail = props => {
 
   if (!seriesData) return <LoadingIndicator />;
 
-  if (seriesData instanceof Error) {
+  if (seriesData.response instanceof Error) {
     const message =
       seriesData.response && seriesData.response.status === 403
         ? `You do not have access to series ${seriesUid}.`
@@ -93,6 +103,19 @@ const SeriesDetail = props => {
           />
         </Col>
         <Col lg={6}>
+          <StyledMenu>
+            <Link to={`/new-case/${seriesUid}`}>
+              <IconButton icon="circus-case" bsStyle="primary">
+                New Case
+              </IconButton>
+            </Link>
+            &ensp;
+            <Link to={`/new-job/${seriesUid}`}>
+              <IconButton icon="circus-job" bsStyle="primary">
+                New Job
+              </IconButton>
+            </Link>
+          </StyledMenu>
           {typeof seriesData.patientInfo === 'object' ? (
             <Table
               data={seriesData.patientInfo}
@@ -102,7 +125,7 @@ const SeriesDetail = props => {
           ) : (
             <Panel defaultExpanded>
               <Panel.Heading>Patient Info</Panel.Heading>
-              <Panel.Body>Personal information is not shown.</Panel.Body>
+              <Panel.Body>Personal information is masked.</Panel.Body>
             </Panel>
           )}
           <Table
@@ -120,12 +143,17 @@ const SeriesDetail = props => {
 
 export default SeriesDetail;
 
-const print = data => {
+const print = (data: any) => {
   if (typeof data === 'object') return JSON.stringify(data);
   return data;
 };
 
-const Table = props => {
+const Table: React.FC<{
+  data: { [key: string]: any };
+  title: string;
+  defaultExpanded?: boolean;
+  keys?: string[];
+}> = props => {
   const keys = Array.isArray(props.keys) ? props.keys : Object.keys(props.data);
   return (
     <Panel defaultExpanded={props.defaultExpanded}>

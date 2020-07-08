@@ -40,6 +40,7 @@ export interface LoginUser {
     craetedAt: string;
     updatedAt: string;
     description: string;
+    dicomImageServer: string;
     domains: string[];
     globalPrivileges: string[];
     groups: string[];

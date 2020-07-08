@@ -1,16 +1,21 @@
 import axios from 'axios';
 import React, { useContext } from 'react';
-import createApiCaller, { formatCredentials } from './api';
+import createApiCaller, { ApiCaller, formatCredentials } from './api';
+import { Dispatch } from 'redux';
 import * as qs from 'querystring';
 
 /**
- * Creates a loginManager that
- * @param {string} apiServer API server root string
- * @param {*} dispatch The redux store's dispatch object
- * @param {(api) => void} onApiChange
+ * Creates a loginManager.
+ * @param apiServer API server root string
+ * @param dispatch The redux store's dispatch object
+ * @param onApiChange Notification callback
  */
-const loginManager = (apiServer, dispatch, onApiChange) => {
-  let api = null;
+const loginManager = (
+  apiServer: string,
+  dispatch: Dispatch,
+  onApiChange: (api: ApiCaller | null) => void
+) => {
+  let api: ApiCaller | null = null;
 
   const restoreApiCaller = () => {
     const credentials = sessionStorage.getItem('tokenCredentials');
@@ -21,7 +26,7 @@ const loginManager = (apiServer, dispatch, onApiChange) => {
     }
   };
 
-  const tryAuthenticate = async (id, password) => {
+  const tryAuthenticate = async (id: string, password: string) => {
     const res = await axios.request({
       method: 'post',
       url: apiServer + 'login',
@@ -42,6 +47,7 @@ const loginManager = (apiServer, dispatch, onApiChange) => {
    * Loads the user information.
    */
   const refreshUserInfo = async (full = false) => {
+    if (!api) throw new Error('Not logged in');
     dispatch({ type: 'REQUEST_LOGIN_INFO' });
     try {
       const result = await api('login-info' + (full ? '/full' : ''), {
@@ -61,6 +67,7 @@ const loginManager = (apiServer, dispatch, onApiChange) => {
   };
 
   const logout = async () => {
+    if (!api) throw new Error('Not logged in');
     await api('logout');
     dispatch({ type: 'LOGGED_OUT' });
     sessionStorage.removeItem('tokenCredentials');
@@ -78,8 +85,10 @@ const loginManager = (apiServer, dispatch, onApiChange) => {
 
 export default loginManager;
 
-export const LoginManagerContext = React.createContext();
+export const LoginManagerContext = React.createContext<ReturnType<
+  typeof loginManager
+> | null>(null);
 
 export const useLoginManager = () => {
-  return useContext(LoginManagerContext);
+  return useContext(LoginManagerContext)!;
 };

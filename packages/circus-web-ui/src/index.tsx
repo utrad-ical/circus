@@ -37,7 +37,7 @@ import { dismissMessageOnPageChange } from 'actions';
 import PluginJobQueueSearch from './pages/search/PluginJobQueueSearch';
 import browserHistory from 'browserHistory';
 
-import { ApiContext } from 'utils/api';
+import { ApiContext, ApiCaller } from 'utils/api';
 import loginManager, { LoginManagerContext } from 'utils/loginManager';
 
 require('./styles/main.less');
@@ -53,7 +53,7 @@ const theme = {
   highlightColor: '#fd3164'
 };
 
-const AppRoutes = props => {
+const AppRoutes: React.FC<{}> = () => {
   return (
     <Application>
       <Route path="/home" component={HomePage} />
@@ -90,13 +90,15 @@ const AppRoutes = props => {
   );
 };
 
-const TheApp = props => {
-  const [manager, setManager] = useState();
-  const [api, setApi] = useState();
+const TheApp: React.FC<{}> = () => {
+  const [manager, setManager] = useState<ReturnType<typeof loginManager>>();
+  const [api, setApi] = useState<ApiCaller>();
 
   useEffect(() => {
     // First-time login management
-    const manager = loginManager('/', store.dispatch, api => setApi(() => api));
+    const manager = loginManager('/', store.dispatch, api =>
+      setApi(() => api!)
+    );
     setManager(manager);
     if (manager.restoreApiCaller()) {
       manager.refreshUserInfo(true);

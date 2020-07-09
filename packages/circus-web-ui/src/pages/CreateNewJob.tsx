@@ -1,32 +1,37 @@
-import React, { useState, useEffect } from 'react';
-import ShrinkSelect from 'rb/ShrinkSelect';
-import IconButton from 'components/IconButton';
-import { useApi } from 'utils/api';
-import SeriesSelector from 'components/SeriesSelector';
-import LoadingIndicator from 'rb/LoadingIndicator';
-import PluginDisplay from 'components/PluginDisplay';
+import LoadingIndicator from '@smikitky/rb-components/lib/LoadingIndicator';
+import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
 import { showMessage } from 'actions';
+import IconButton from 'components/IconButton';
+import PluginDisplay from 'components/PluginDisplay';
+import SeriesSelector, { SeriesEntry } from 'components/SeriesSelector';
+import React, { useEffect, useState } from 'react';
+import { useApi } from 'utils/api';
 import useLocalPreference from 'utils/useLocalPreference';
+import { useParams } from 'react-router-dom';
+import Plugin from '../types/Plugin';
 
-const CreateNewJob = props => {
-  const [selectedPlugin, setSelectedPlugin] = useState(null);
-  const [defaultPlugin, setDefaultPlugin] = useLocalPreference('defaultPlugin');
-  const [selectedSeries, setSelectedSeries] = useState([]);
+const CreateNewJob: React.FC<{}> = props => {
+  const [selectedPlugin, setSelectedPlugin] = useState<string | null>(null);
+  const [defaultPlugin, setDefaultPlugin] = useLocalPreference(
+    'defaultPlugin',
+    ''
+  );
+  const [selectedSeries, setSelectedSeries] = useState<SeriesEntry[]>([]);
   const [busy, setBusy] = useState(true);
-  const [plugins, setPlugins] = useState(null);
+  const [plugins, setPlugins] = useState<Plugin[]>([]);
   const api = useApi();
-  const seriesUid = props.match.params.seriesUid;
+  const seriesUid = useParams<any>().seriesUid;
 
   useEffect(() => {
     const load = async () => {
       setBusy(true);
       const series = await api('series/' + seriesUid);
-      const plugins = await api('plugins');
-      setBusy(false);
-      setSelectedSeries([
-        { seriesUid, partialVolumeDesciptor: undefined, data: series }
-      ]);
+      const plugins = (await api('plugins')) as Plugin[];
       setPlugins(plugins);
+      setSelectedSeries([
+        { seriesUid, partialVolumeDescriptor: undefined, data: series }
+      ]);
+      setBusy(false);
     };
     load();
   }, [api, seriesUid]);
@@ -36,6 +41,7 @@ const CreateNewJob = props => {
     if (
       plugins &&
       !selectedPlugin &&
+      defaultPlugin &&
       plugins.find(p => p.pluginId === defaultPlugin)
     ) {
       setSelectedPlugin(defaultPlugin);
@@ -43,9 +49,10 @@ const CreateNewJob = props => {
   }, [defaultPlugin, plugins, selectedPlugin]);
 
   const handleCreate = async () => {
+    if (!selectedPlugin) return;
     const series = selectedSeries.map(s => ({
       seriesUid: s.seriesUid,
-      partialVolumeDesciptor: s.partialVolumeDesciptor
+      partialVolumeDesciptor: s.partialVolumeDescriptor
     }));
     await api('plugin-jobs', {
       method: 'post',
@@ -67,9 +74,8 @@ const CreateNewJob = props => {
 
   const canCreate = !busy && selectedPlugin && selectedSeries.length > 0;
 
-  const pluginOptions = {};
-  Object.keys(plugins).forEach(k => {
-    const plugin = plugins[k];
+  const pluginOptions: { [pluginId: string]: any } = {};
+  plugins.forEach(plugin => {
     pluginOptions[plugin.pluginId] = {
       caption: <PluginDisplay pluginId={plugin.pluginId} />
     };

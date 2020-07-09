@@ -102,7 +102,7 @@ const RelevantSeries: React.FC<{
   );
 };
 
-interface SeriesEntry {
+export interface SeriesEntry {
   seriesUid: string;
   partialVolumeDescriptor: PartialVolumeDescriptor | undefined;
   data: {

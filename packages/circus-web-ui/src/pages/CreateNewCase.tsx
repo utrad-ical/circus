@@ -1,15 +1,16 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import ProjectSelector from 'components/ProjectSelector';
+import browserHistory from 'browserHistory';
 import IconButton from 'components/IconButton';
 import MultiTagSelect from 'components/MultiTagSelect';
+import ProjectSelector from 'components/ProjectSelector';
+import SeriesSelector, { SeriesEntry } from 'components/SeriesSelector';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import { useApi } from 'utils/api';
-import browserHistory from 'browserHistory';
-import SeriesSelector from 'components/SeriesSelector';
-import { multirange } from 'multi-integer-range';
+import defaultPartialVolumeDescriptor from 'utils/defaultPartialVolumeDescriptor';
 import useLoginUser from 'utils/useLoginUser';
 
-const CreateNewCase = props => {
-  const user = useLoginUser();
+const CreateNewCase: React.FC<{}> = props => {
+  const user = useLoginUser()!;
   const writableProjects = useMemo(
     () => user.accessibleProjects.filter(p => p.roles.indexOf('write') >= 0),
     [user]
@@ -17,11 +18,11 @@ const CreateNewCase = props => {
   const [selectedProject, setSelectedProject] = useState(
     writableProjects[0].projectId
   );
-  const [selectedSeries, setSelectedSeries] = useState([]);
+  const [selectedSeries, setSelectedSeries] = useState<SeriesEntry[]>([]);
   const [selectedTags, setSelectedTags] = useState([]);
   const [busy, setBusy] = useState(false);
   const api = useApi();
-  const seriesUid = props.match.params.seriesUid;
+  const seriesUid = useParams<any>().seriesUid as string;
 
   useEffect(() => {
     const load = async () => {
@@ -35,8 +36,8 @@ const CreateNewCase = props => {
     load();
   }, [api, seriesUid]);
 
-  const handleProjectSelect = projectId => {
-    const prj = user.accessibleProjects.find(p => p.projectId === projectId);
+  const handleProjectSelect = (projectId: string) => {
+    const prj = user.accessibleProjects.find(p => p.projectId === projectId)!;
     const newTags = selectedTags.filter(t =>
       prj.project.tags.find(tt => tt.name === t)
     );
@@ -45,12 +46,6 @@ const CreateNewCase = props => {
   };
 
   const handleCreate = async () => {
-    const defaultPartialVolumeDescriptor = images => {
-      const mr = multirange(images);
-      const firstSegment = mr.getRanges()[0];
-      return { start: firstSegment[0], end: firstSegment[1], delta: 1 };
-    };
-
     const res = await api('cases', {
       method: 'post',
       data: {
@@ -79,7 +74,7 @@ const CreateNewCase = props => {
     );
   }
 
-  const prj = writableProjects.find(p => p.projectId === selectedProject);
+  const prj = writableProjects.find(p => p.projectId === selectedProject)!;
   const tags = prj.project.tags;
 
   return (

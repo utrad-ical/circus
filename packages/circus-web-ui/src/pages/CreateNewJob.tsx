@@ -5,9 +5,10 @@ import IconButton from 'components/IconButton';
 import PluginDisplay from 'components/PluginDisplay';
 import SeriesSelector, { SeriesEntry } from 'components/SeriesSelector';
 import React, { useEffect, useState } from 'react';
-import { useApi } from 'utils/api';
-import useLocalPreference from 'utils/useLocalPreference';
 import { useParams } from 'react-router-dom';
+import { useApi } from 'utils/api';
+import defaultPartialVolumeDescriptor from 'utils/defaultPartialVolumeDescriptor';
+import useLocalPreference from 'utils/useLocalPreference';
 import Plugin from '../types/Plugin';
 
 const CreateNewJob: React.FC<{}> = props => {
@@ -52,7 +53,9 @@ const CreateNewJob: React.FC<{}> = props => {
     if (!selectedPlugin) return;
     const series = selectedSeries.map(s => ({
       seriesUid: s.seriesUid,
-      partialVolumeDesciptor: s.partialVolumeDescriptor
+      partialVolumeDescriptor: s.partialVolumeDescriptor
+        ? s.partialVolumeDescriptor
+        : defaultPartialVolumeDescriptor(s.data.images)
     }));
     await api('plugin-jobs', {
       method: 'post',

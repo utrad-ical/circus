@@ -28,11 +28,18 @@ interface Project {
   windowPriority: any[];
 }
 
-type ProjectRoles =
+type GlobalPrivileges =
   | 'createProject'
   | 'deleteProject'
   | 'manageServer'
   | 'personalInfoView';
+
+type ProjectRoles =
+  | 'read'
+  | 'write'
+  | 'addSeries'
+  | 'viewPersonalInfo'
+  | 'moderate';
 
 interface SearchPreset {
   name: string;
@@ -46,7 +53,7 @@ export interface LoginUser {
     description: string;
     dicomImageServer: string;
     domains: string[];
-    globalPrivileges: string[];
+    globalPrivileges: GlobalPrivileges[];
     groups: string[];
     lastLoginIp: string;
     lastLoginTime: string;

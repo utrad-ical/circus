@@ -1,15 +1,15 @@
 import React, { Fragment } from 'react';
 import { Link } from 'react-router-dom';
 import Icon from 'components/Icon';
-import { connect } from 'react-redux';
 import styled from 'styled-components';
 import classnames from 'classnames';
 import { useLoginManager } from 'utils/loginManager';
 import browserHistory from 'browserHistory';
+import useLoginUser from 'utils/useLoginUser';
 
-const MainMenu = props => <ul>{props.children}</ul>;
+const MainMenu: React.FC<{}> = props => <ul>{props.children}</ul>;
 
-const Menu = props => {
+const Menu: React.FC<any> = props => {
   const { name, icon, link, onClick, children } = props;
   const className = icon ? icon : `circus-icon-${name.toLowerCase()}`;
   const caption = [
@@ -34,7 +34,12 @@ const Menu = props => {
   );
 };
 
-const SubMenu = props => {
+const SubMenu: React.FC<{
+  link: string;
+  icon: string;
+  name: string;
+  sub?: boolean;
+}> = props => {
   return (
     <li className={classnames({ sub: props.sub })}>
       <Link to={props.link}>
@@ -50,7 +55,7 @@ const SubMenu = props => {
   );
 };
 
-const MenuHeader = props => {
+const MenuHeader: React.FC<{}> = props => {
   return (
     <li>
       <div className="menu-header">{props.children}</div>
@@ -63,8 +68,8 @@ const StyledHeader = styled.header`
   width: 100%;
   flex: none;
   position: relative;
-  background-color: ${props => props.theme.brandDark};
-  border-bottom: 1px solid ${props => props.theme.brandDarker};
+  background-color: ${(props: any) => props.theme.brandDark};
+  border-bottom: 1px solid ${(props: any) => props.theme.brandDarker};
   line-height: 39px;
   z-index: 2000;
   color: white;
@@ -101,8 +106,8 @@ const StyledNav = styled.nav`
       &.logo,
       &.icon-menu {
         &:hover {
-          color: ${props => props.theme.highlightColor};
-          background-color: ${props => props.theme.brandPrimary};
+          color: ${(props: any) => props.theme.highlightColor};
+          background-color: ${(props: any) => props.theme.brandPrimary};
           > a {
             color: inherit;
             text-decoration: none;
@@ -133,7 +138,7 @@ const StyledNav = styled.nav`
             padding: 0 8px;
             color: inherit;
             &:hover {
-              background-color: ${props => props.theme.brandPrimary};
+              background-color: ${(props: any) => props.theme.brandPrimary};
               color: white;
             }
           }
@@ -166,13 +171,17 @@ const StyledNav = styled.nav`
   }
 `;
 
-const MainNavView = props => {
-  const {
-    caseSearchPresets = [],
-    seriesSearchPresets = [],
-    pluginJobSearchPresets = []
-  } = props;
+const MainNav: React.FC<{}> = props => {
+  const user = useLoginUser();
   const loginManager = useLoginManager();
+
+  if (!user) return null;
+
+  const loginUserName = user.description;
+  const isAdmin = user.globalPrivileges.indexOf('manageServer') > -1;
+  const caseSearchPresets = user.preferences?.caseSearchPresets ?? [];
+  const seriesSearchPresets = user.preferences?.seriesSearchPresets ?? [];
+  const pluginJobSearchPresets = user.preferences?.pluginJobSearchPresets ?? [];
 
   const onLogout = async () => {
     await loginManager.logout();
@@ -247,7 +256,7 @@ const MainNavView = props => {
               link="/preference"
             />
           </Menu>
-          {props.isAdmin && (
+          {isAdmin && (
             <Menu name="Administration" link="/admin">
               <SubMenu
                 icon="th-large"
@@ -280,28 +289,12 @@ const MainNavView = props => {
       </StyledNav>
       <StyledNav>
         <MainMenu>
-          <li className="user-info hidden-xs">{props.loginUserName}</li>
+          <li className="user-info hidden-xs">{loginUserName}</li>
           <Menu name="Logout" onClick={onLogout} />
         </MainMenu>
       </StyledNav>
     </StyledHeader>
   );
 };
-
-const MainNav = connect(state => ({
-  loginUserName: state.loginUser.data ? state.loginUser.data.description : '',
-  isAdmin:
-    state.loginUser.data &&
-    state.loginUser.data.globalPrivileges.indexOf('manageServer') > -1,
-  caseSearchPresets: state.loginUser.data
-    ? state.loginUser.data.preferences.caseSearchPresets
-    : [],
-  seriesSearchPresets: state.loginUser.data
-    ? state.loginUser.data.preferences.seriesSearchPresets
-    : [],
-  pluginJobSearchPresets: state.loginUser.data
-    ? state.loginUser.data.preferences.pluginJobSearchPresets
-    : []
-}))(MainNavView);
 
 export default MainNav;

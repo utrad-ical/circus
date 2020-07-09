@@ -75,6 +75,7 @@ export const handleSearch: RouteMiddleware = ({ models }) => {
     const fields = [
       'modality',
       'seriesUid',
+      'studyUid',
       'seriesDescription',
       'patientInfo.patientId',
       'patientInfo.patientName',

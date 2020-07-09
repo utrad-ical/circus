@@ -6,6 +6,7 @@ const ProjectDisplay: React.FC<{
   projectId: string;
   withName: boolean;
   withDescription: boolean;
+  [key: string]: any;
 }> = props => {
   const { projectId, withName, withDescription, ...rest } = props;
 

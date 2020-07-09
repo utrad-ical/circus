@@ -1,5 +1,5 @@
-import React, { Fragment, useCallback } from 'react';
-import ShrinkSelect from 'rb/ShrinkSelect';
+import React, { Fragment } from 'react';
+import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
 import { Pagination } from 'components/react-bootstrap';
 import {
   changeSearchPage,
@@ -7,7 +7,7 @@ import {
   changeSearchLimit,
   refreshSearch
 } from 'actions';
-import LoadingIndicator from 'rb/LoadingIndicator';
+import LoadingIndicator from '@smikitky/rb-components/lib/LoadingIndicator';
 import AutoReloadSwitch from './AutoReloadSwitch';
 import Icon from 'components/Icon';
 import classnames from 'classnames';
@@ -15,8 +15,8 @@ import styled from 'styled-components';
 import { useApi } from 'utils/api';
 import { useSelector, useDispatch } from 'react-redux';
 
-export const makeSortOptions = sortKeys => {
-  const options = {};
+export const makeSortOptions = (sortKeys: { [key: string]: string }) => {
+  const options: { [key: string]: string } = {};
   Object.keys(sortKeys).forEach(k => {
     options[`{"${k}":-1}`] = `${sortKeys[k]} desc`;
     options[`{"${k}":1}`] = `${sortKeys[k]} asc`;
@@ -26,22 +26,22 @@ export const makeSortOptions = sortKeys => {
 
 const limitOptions = [10, 20, 50, 100, 200];
 
-const ItemsPerPageOptionRenderer = props => (
+const ItemsPerPageOptionRenderer: React.FC<{ caption: number }> = props => (
   <Fragment>{props.caption} items</Fragment>
 );
 
-const ResultPagination = props => {
+const ResultPagination: React.FC<{
+  onSelect: (selected: number) => void;
+  disabled?: boolean;
+  activePage: number;
+  pages: number;
+}> = props => {
   const { onSelect, disabled, activePage, pages } = props;
   const firstItem = Math.max(1, activePage - 2);
   const lastItem = Math.min(pages, activePage + 2);
   const pageItems = [];
-  const handleClick = selected => {
-    if (
-      typeof onSelect === 'function' &&
-      selected >= 1 &&
-      selected <= pages &&
-      selected !== activePage
-    ) {
+  const handleClick = (selected: number) => {
+    if (selected >= 1 && selected <= pages && selected !== activePage) {
       onSelect(selected);
     }
   };
@@ -100,18 +100,19 @@ const StyledDiv = styled.div`
 `;
 
 /**
- * SearchResultsView is connected to `search` redux state and
- * displays the search results along with pager and sort changer.
+ * SearchResults displays the search results along with pager and sort changer.
  */
-const SearchResults = props => {
-  const {
-    name,
-    sortOptions,
-    dataView: DataView,
-    active,
-    refreshable,
-    ...rest
-  } = props;
+const SearchResultsView: React.FC<{
+  name: string;
+  sortOptions?: any;
+  dataView: React.FC<{
+    value: any[];
+    active: any;
+  }>;
+  active?: any;
+  refreshable?: boolean;
+}> = props => {
+  const { name, sortOptions, dataView: DataView, active, refreshable } = props;
 
   const api = useApi();
   const dispatch = useDispatch();
@@ -125,17 +126,17 @@ const SearchResults = props => {
 
   if (!Array.isArray(items)) return null; // This should not happen
 
-  const handleSortChange = newSort => {
+  const handleSortChange = (newSort: object) => {
     if (newSort === sort) return;
     dispatch(changeSearchSort(api, name, newSort));
   };
 
-  const handlePageClick = newPage => {
+  const handlePageClick = (newPage: number) => {
     if (newPage === page) return;
     dispatch(changeSearchPage(api, name, newPage));
   };
 
-  const handleLimitChange = newLimit => {
+  const handleLimitChange = (newLimit: number) => {
     if (newLimit === limit) return;
     dispatch(changeSearchLimit(api, name, newLimit));
   };
@@ -185,7 +186,7 @@ const SearchResults = props => {
           </Fragment>
         )}
       </div>
-      <DataView value={items} active={active} {...rest} />
+      <DataView value={items} active={active} />
       <div className="search-results-pager">
         <ResultPagination
           pages={pages}
@@ -198,4 +199,4 @@ const SearchResults = props => {
   );
 };
 
-export default SearchResults;
+export default SearchResultsView;

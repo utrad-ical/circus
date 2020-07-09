@@ -14,6 +14,7 @@ import PartialVolumeDescriptor, {
 import TimeDisplay from './TimeDisplay';
 import styled from 'styled-components';
 import { multirange } from 'multi-integer-range';
+import { confirm } from '@smikitky/rb-components/lib/modal';
 
 const PartialVolumeRenderer: React.FC<{
   index: number;
@@ -51,7 +52,7 @@ const PartialVolumeRenderer: React.FC<{
 };
 
 const RelevantSeries: React.FC<{
-  onSeriesRegister: Function;
+  onSeriesRegister: (seriesUid: string) => void;
 }> = props => {
   const { onSeriesRegister } = props;
 
@@ -80,6 +81,7 @@ const RelevantSeries: React.FC<{
             <IconButton
               icon="chevron-up"
               bsSize="xs"
+              bsStyle="primary"
               onClick={() => onSeriesRegister(value.seriesUid)}
             >
               Add
@@ -93,13 +95,10 @@ const RelevantSeries: React.FC<{
   );
 
   return (
-    <div>
-      <h4>Series from the same study</h4>
-      <SearchResultsView
-        name="relevantSeries"
-        dataView={RelevantSeriesDataView}
-      />
-    </div>
+    <SearchResultsView
+      name="relevantSeries"
+      dataView={RelevantSeriesDataView}
+    />
   );
 };
 
@@ -108,6 +107,7 @@ interface SeriesEntry {
   partialVolumeDescriptor: PartialVolumeDescriptor | undefined;
   data: {
     modality: string;
+    studyUid: string;
     seriesDescription: string;
     images: string;
     seriesDate: string;
@@ -125,9 +125,7 @@ const SeriesSelector: React.FC<{
 
   const handleAddSeriesClick = () => {
     if (!showRelevantSeries) {
-      const filter = {
-        // studyUid: value.map(s => s.studyUid)
-      };
+      const filter = { studyUid: value[0].data.studyUid };
       dispatch(startNewSearch(api, 'relevantSeries', 'series', filter, {}, {}));
       setShowRelevantSeries(true);
     } else {
@@ -148,7 +146,9 @@ const SeriesSelector: React.FC<{
   };
 
   const handleSeriesRegister = async (seriesUid: string) => {
-    if (value.some(s => s.seriesUid === seriesUid)) return;
+    if (value.some(s => s.seriesUid === seriesUid)) {
+      if (!(await confirm('Add the same series?'))) return;
+    }
     const series = await api('series/' + seriesUid);
     const newEntry = {
       seriesUid,
@@ -158,8 +158,10 @@ const SeriesSelector: React.FC<{
     onChange([...value, newEntry]);
   };
 
-  const handleSeriesRemove = (seriesUid: string) => {
-    const newValue = value.filter(s => s.seriesUid !== seriesUid);
+  const handleSeriesRemove = (index: number) => {
+    if (value.length <= 1) return;
+    const newValue = [...value];
+    newValue.splice(index, 1);
     onChange(newValue);
   };
 
@@ -208,11 +210,11 @@ const SeriesSelector: React.FC<{
     },
     {
       className: 'delete',
-      renderer: ({ value }) => (
+      renderer: ({ value, index }) => (
         <IconButton
           bsSize="xs"
           icon="remove"
-          onClick={() => handleSeriesRemove(value.seriesUid)}
+          onClick={() => handleSeriesRemove(index)}
         />
       )
     }
@@ -223,14 +225,17 @@ const SeriesSelector: React.FC<{
       <Panel.Heading>Series</Panel.Heading>
       <Panel.Body>
         <DataGrid columns={columns} value={value} />
-        <IconButton
-          icon="plus"
-          bsSize="sm"
-          onClick={handleAddSeriesClick}
-          active={showRelevantSeries}
-        >
-          Add Series
-        </IconButton>
+        <div>
+          <IconButton
+            icon="plus"
+            bsSize="sm"
+            onClick={handleAddSeriesClick}
+            active={showRelevantSeries}
+          >
+            Add Series
+          </IconButton>
+          {showRelevantSeries && ' Showing series from the same study'}
+        </div>
         {showRelevantSeries && (
           <RelevantSeries onSeriesRegister={handleSeriesRegister} />
         )}

@@ -1,6 +1,5 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { connect } from 'react-redux';
 import {
   Panel,
   Glyphicon,
@@ -13,6 +12,7 @@ import ProjectDisplay from 'components/ProjectDisplay';
 import Icon from 'components/Icon';
 import TimeDisplay from 'components/TimeDisplay';
 import styled from 'styled-components';
+import useLoginUser from 'utils/useLoginUser';
 
 const HomeMenu = styled.ul`
   margin: 20px 0;
@@ -39,14 +39,14 @@ const HomeMenu = styled.ul`
       font-weight: bolder;
       padding: 16px 0;
       &:hover {
-        color: ${props => props.theme.highlightColor};
+        color: ${(props: any) => props.theme.highlightColor};
         background-color: #eee;
       }
     }
   }
 `;
 
-const HomePage = props => (
+const HomePage: React.FC<{}> = props => (
   <div>
     <h1>Welcome to CIRCUS!</h1>
     <HomeMenu>
@@ -80,14 +80,14 @@ const HomePage = props => (
 );
 export default HomePage;
 
-function role2str(role) {
+const role2str = (role: string) => {
   return role
     .replace(/Groups$/, '')
     .replace(/([A-Z])/g, (m, s) => ' ' + s.toLowerCase());
-}
+};
 
-const MyProjects = ({ user }) => {
-  if (!user) return null;
+const MyProjects: React.FC<{}> = props => {
+  const user = useLoginUser()!;
   return (
     <Panel bsStyle="primary">
       <Panel.Heading>
@@ -112,8 +112,8 @@ const MyProjects = ({ user }) => {
   );
 };
 
-const MyProfile = ({ user }) => {
-  if (!user) return null;
+const MyProfile: React.FC<{}> = props => {
+  const user = useLoginUser()!;
   return (
     <Panel bsStyle="primary" className="home-profile">
       <Panel.Heading>
@@ -155,29 +155,35 @@ const MyProfile = ({ user }) => {
   );
 };
 
-const ProfileView = ({ user }) => {
+const Profile: React.FC<{}> = props => {
   return (
     <Row>
       <Col md={7}>
-        <MyProjects user={user} />
+        <MyProjects />
       </Col>
       <Col md={5}>
-        <MyProfile user={user} />
+        <MyProfile />
       </Col>
     </Row>
   );
 };
 
-const Profile = connect(state => ({ user: state.loginUser.data }))(ProfileView);
-
-const Menu = ({ link, icon, title, description }) => (
-  <li>
-    <Link to={link}>
-      <div className="img">
-        <span className={'circus-icon circus-icon-' + icon} />
-      </div>
-      <p>{title}</p>
-    </Link>
-    <p>{description}</p>
-  </li>
-);
+const Menu: React.FC<{
+  link: string;
+  icon: string;
+  title: string;
+  description: string;
+}> = props => {
+  const { link, icon, title, description } = props;
+  return (
+    <li>
+      <Link to={link}>
+        <div className="img">
+          <span className={'circus-icon circus-icon-' + icon} />
+        </div>
+        <p>{title}</p>
+      </Link>
+      <p>{description}</p>
+    </li>
+  );
+};

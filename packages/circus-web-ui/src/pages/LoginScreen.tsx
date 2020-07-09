@@ -31,12 +31,12 @@ const StyledDiv = styled.div`
   }
 `;
 
-const LoginScreen = props => {
+const LoginScreen: React.FC<{}> = props => {
   const [input, setInput] = useState({ id: '', password: '' });
-  const [error, setError] = useState();
+  const [error, setError] = useState<string>();
   const loginManager = useLoginManager();
 
-  const handleChange = (key, val) => {
+  const handleChange = (key: string, val: string) => {
     setInput({ ...input, [key]: val });
   };
 
@@ -70,14 +70,20 @@ const LoginScreen = props => {
               placeholder="User ID or E-mail"
               autoFocus
               value={input.id}
-              onChange={ev => handleChange('id', ev.target.value)}
+              onChange={(ev: React.ChangeEvent<HTMLInputElement>) =>
+                handleChange('id', ev.target.value)
+              }
             />
             <FormControl
               placeholder="Password"
               type="password"
               value={input.password}
-              onChange={ev => handleChange('password', ev.target.value)}
-              onKeyDown={ev => ev.keyCode == 13 && handleLoginClick()}
+              onChange={(ev: React.ChangeEvent<HTMLInputElement>) =>
+                handleChange('password', ev.target.value)
+              }
+              onKeyDown={(ev: React.KeyboardEvent) =>
+                ev.keyCode == 13 && handleLoginClick()
+              }
             />
           </FormGroup>
           {error && <p className="text-danger">{error}</p>}

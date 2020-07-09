@@ -11,7 +11,7 @@ import { useSelector } from 'react-redux';
  * The navigation bar is always visible, but the main page content is
  * visible only after we confirmed the user is currently logged-in with valid session.
  */
-const Application = props => {
+const Application: React.FC<{}> = props => {
   const { isUserFetching, isLoggedIn } = useSelector(state => ({
     isUserFetching: state.loginUser.isFetching,
     isLoggedIn: state.loginUser.data !== null

@@ -119,12 +119,7 @@ const EditorPage: React.FC<{
 
   return (
     <AdminContainer title={title} icon={icon} className="admin-editor">
-      <SearchResultsView
-        name={searchName}
-        dataView={grid}
-        active={editing}
-        onItemClick={handleEditStart}
-      />
+      <SearchResultsView name={searchName} dataView={grid} active={editing} />
       <p className="text-right">
         <IconButton
           icon="plus"

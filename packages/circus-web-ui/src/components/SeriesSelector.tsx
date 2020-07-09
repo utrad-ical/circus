@@ -50,49 +50,54 @@ const PartialVolumeRenderer: React.FC<{
   );
 };
 
-const RelevantSeriesDataView: React.FC<any> = props => {
-  const { onSeriesRegister, value } = props;
-  const columns = [
-    { key: 'seriesDescription', caption: 'Series Desc' },
-    {
-      key: 'seriesUid',
-      caption: 'Series UID',
-      renderer: ({ value }) => <SeriesUidSpan>{value.seriesUid}</SeriesUidSpan>
-    },
-    { key: 'images', caption: 'Images' },
-    {
-      key: 'seriesDate',
-      caption: 'Series Date',
-      renderer: ({ value }) => <TimeDisplay value={value.seriesDate} />
-    },
-    {
-      key: 'action',
-      caption: '',
-      renderer: ({ value }: { value: any }) => (
-        <IconButton
-          icon="chevron-up"
-          bsSize="xs"
-          onClick={() => onSeriesRegister(value.seriesUid)}
-        >
-          Add
-        </IconButton>
-      )
-    }
-  ] as DataGridColumnDefinition<any>[];
-  return <DataGrid value={value} columns={columns} />;
-};
-
 const RelevantSeries: React.FC<{
   onSeriesRegister: Function;
 }> = props => {
   const { onSeriesRegister } = props;
+
+  const RelevantSeriesDataView: React.FC<any> = useMemo(
+    () => props => {
+      const { value } = props;
+      const columns: DataGridColumnDefinition<any>[] = [
+        { key: 'seriesDescription', caption: 'Series Desc' },
+        {
+          key: 'seriesUid',
+          caption: 'Series UID',
+          renderer: ({ value }) => (
+            <SeriesUidSpan>{value.seriesUid}</SeriesUidSpan>
+          )
+        },
+        { key: 'images', caption: 'Images' },
+        {
+          key: 'seriesDate',
+          caption: 'Series Date',
+          renderer: ({ value }) => <TimeDisplay value={value.seriesDate} />
+        },
+        {
+          key: 'action',
+          caption: '',
+          renderer: ({ value }) => (
+            <IconButton
+              icon="chevron-up"
+              bsSize="xs"
+              onClick={() => onSeriesRegister(value.seriesUid)}
+            >
+              Add
+            </IconButton>
+          )
+        }
+      ];
+      return <DataGrid value={value} columns={columns} />;
+    },
+    [onSeriesRegister]
+  );
+
   return (
     <div>
       <h4>Series from the same study</h4>
       <SearchResultsView
         name="relevantSeries"
         dataView={RelevantSeriesDataView}
-        onSeriesRegister={onSeriesRegister}
       />
     </div>
   );
@@ -158,7 +163,7 @@ const SeriesSelector: React.FC<{
     onChange(newValue);
   };
 
-  const columns = [
+  const columns: DataGridColumnDefinition<SeriesEntry>[] = [
     {
       key: 'volumeId',
       caption: '#',
@@ -211,7 +216,7 @@ const SeriesSelector: React.FC<{
         />
       )
     }
-  ] as DataGridColumnDefinition<SeriesEntry>[];
+  ];
 
   return (
     <Panel header="Series">

@@ -34,6 +34,10 @@ type ProjectRoles =
   | 'manageServer'
   | 'personalInfoView';
 
+interface SearchPreset {
+  name: string;
+}
+
 export interface LoginUser {
   isFetching: boolean;
   data: null | {
@@ -51,6 +55,13 @@ export interface LoginUser {
     uploadFileMax: number;
     uploadFileSizeMax: string;
     userEmail: string;
+    preferences: {
+      seriesSearchPresets?: SearchPreset[];
+      caseSearchPresets?: SearchPreset[];
+      pluginJobSearchPresets?: SearchPreset[];
+      personalInfoView?: boolean;
+      theme?: string;
+    };
     accessibleProjects: Array<{
       projectId: string;
       project: Project;

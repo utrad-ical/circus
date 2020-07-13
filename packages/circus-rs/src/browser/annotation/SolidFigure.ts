@@ -1,5 +1,5 @@
 import { Box2, Box3, Vector2, Vector3 } from 'three';
-import { Section } from '../../common/geometry';
+import { Section, Vector3D, sectionCenter } from '../../common/geometry';
 import ViewerEventTarget from '../interface/ViewerEventTarget';
 import {
   convertScreenCoordinateToVolumeCoordinate,
@@ -58,6 +58,8 @@ export default abstract class SolidFigure
     width: 2,
     color: 'rgba(255,255,255,0.8)'
   };
+
+  public id?: string;
 
   // dragInfo
   private dragInfo:
@@ -125,6 +127,50 @@ export default abstract class SolidFigure
     }
 
     return new Box3().expandByPoint(newMin).expandByPoint(newMax);
+  }
+
+  public static calculateBoundingBoxWithDefaultDepth(
+    viewer: Viewer
+  ): { min: Vector3D; max: Vector3D } {
+    const ratio = 0.25;
+    const section = viewer.getState().section;
+    const orientation = detectOrthogonalSection(section);
+    const resolution = new Vector2().fromArray(viewer.getResolution());
+
+    const halfLength = Math.min(resolution.x, resolution.y) * ratio * 0.5;
+
+    const screenCenter = new Vector2().fromArray([
+      resolution.x * 0.5,
+      resolution.y * 0.5
+    ]);
+
+    const min = convertScreenCoordinateToVolumeCoordinate(
+      section,
+      resolution,
+      new Vector2().fromArray([
+        screenCenter.x - halfLength,
+        screenCenter.y - halfLength
+      ])
+    );
+
+    const max = convertScreenCoordinateToVolumeCoordinate(
+      section,
+      resolution,
+      new Vector2().fromArray([
+        screenCenter.x + halfLength,
+        screenCenter.y + halfLength
+      ])
+    );
+
+    const boundingBox = SolidFigure.getBoundingBoxWithResetDepth(
+      orientation,
+      new Box3().expandByPoint(min).expandByPoint(max)
+    );
+
+    return {
+      min: [boundingBox.min.x, boundingBox.min.y, boundingBox.min.z],
+      max: [boundingBox.max.x, boundingBox.max.y, boundingBox.max.z]
+    };
   }
 
   public validate(): boolean | undefined {
@@ -376,7 +422,9 @@ export default abstract class SolidFigure
       this.max = newBoundingBox3[1];
 
       const comp = viewer.getComposition();
-      if (comp) comp.annotationUpdated();
+      if (!comp) return;
+      comp.dispatchAnnotationChanging(this);
+      comp.annotationUpdated();
     }
   }
 
@@ -388,17 +436,17 @@ export default abstract class SolidFigure
 
     if (viewer.getHoveringAnnotation() === this) {
       ev.stopPropagation();
+      viewer.setCursorStyle('');
+      this.concreate();
 
       const comp = viewer.getComposition();
-
+      if (!comp) return;
       if (this.validate()) {
-        this.concreate();
+        comp.dispatchAnnotationChange(this);
+        comp.annotationUpdated();
       } else {
-        if (comp) comp.removeAnnotation(this);
+        comp.removeAnnotation(this);
       }
-      if (comp) comp.annotationUpdated();
-
-      viewer.setCursorStyle('');
     }
   }
 }

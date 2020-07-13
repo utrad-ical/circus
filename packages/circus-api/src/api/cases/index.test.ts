@@ -1,4 +1,5 @@
 import { setUpAppForRoutesTest, ApiTest } from '../../../test/util-routes';
+import { SeriesEntry } from 'circus-api/src/typings/circus';
 
 let apiTest: ApiTest, ax: typeof apiTest.axiosInstances;
 beforeAll(async () => {
@@ -181,28 +182,117 @@ it('should reject revision read access from unauthorized user', async () => {
   expect(res.data.error).toMatch(/read/);
 });
 
-it('should add a revision', async () => {
-  const res = await ax.bob.request({
-    url: `api/cases/${cid}/revision`,
-    method: 'post',
-    data: {
-      description: 'Add something',
-      attributes: {},
-      status: 'for-review',
-      series: []
-    }
+describe('add revision', () => {
+  it('should add a revision', async () => {
+    const res = await ax.bob.request({
+      url: `api/cases/${cid}/revision`,
+      method: 'post',
+      data: {
+        description: 'Add something',
+        attributes: {},
+        status: 'for-review',
+        series: []
+      }
+    });
+    expect(res.status).toBe(204);
+    const res2 = await ax.bob.get(`api/cases/${cid}`);
+    expect(res2.data.revisions[1].creator).toBe('bob@example.com');
   });
-  expect(res.status).toBe(204);
-  const res2 = await ax.bob.get(`api/cases/${cid}`);
-  expect(res2.data.revisions[1].creator).toBe('bob@example.com');
-});
 
-it('should reject revision addition from unauthorized user', async () => {
-  const res = await ax.guest.request({
-    url: `api/cases/${cid}/revision`,
-    method: 'post',
-    data: { anything: 'can be used' }
+  it('should add a revision with labels', async () => {
+    const res = await ax.bob.request({
+      url: `api/cases/${cid}/revision`,
+      method: 'post',
+      data: {
+        description: 'Add labels',
+        attributes: {},
+        status: 'for-review',
+        series: [
+          {
+            seriesUid: '111.222.333.444.777',
+            labels: [
+              {
+                type: 'voxel',
+                data: {
+                  voxels: '5a616841a4fdd6066ee5c7e2d3118e0963ec1fc6',
+                  color: '#00ff00',
+                  alpha: 1,
+                  origin: [224, 183, 50],
+                  size: [64, 47, 17]
+                },
+                attributes: {
+                  fusiform: false,
+                  location: 'A-com',
+                  laterality: 'Right'
+                }
+              },
+              {
+                type: 'cuboid',
+                data: {
+                  color: '#00ff00',
+                  alpha: 0,
+                  min: [1, 3, 5],
+                  max: [7, 11, 13]
+                },
+                name: 'cuboid 1'
+              },
+              {
+                type: 'rectangle',
+                data: {
+                  color: '#00ff00',
+                  alpha: 0,
+                  min: [1, 3],
+                  max: [7, 11],
+                  z: 5
+                },
+                name: ''
+              }
+            ]
+          }
+        ]
+      }
+    });
+
+    expect(res.status).toBe(204);
   });
-  expect(res.status).toBe(401);
-  expect(res.data.error).toMatch(/write/);
+
+  it('should reject revision addition with invalid labels', async () => {
+    const res = await ax.bob.request({
+      url: `api/cases/${cid}/revision`,
+      method: 'post',
+      data: {
+        description: 'Add labels',
+        attributes: {},
+        status: 'for-review',
+        series: [
+          {
+            seriesUid: '111.222.333.444.777',
+            labels: [
+              {
+                type: 'rectangle',
+                data: {
+                  voxels: '5a616841a4fdd6066ee5c7e2d3118e0963ec1fc6',
+                  color: '#00ff00',
+                  alpha: 0,
+                  min: [1, 3, 5],
+                  max: [7, 11, 13]
+                }
+              }
+            ]
+          }
+        ]
+      }
+    });
+    expect(res.status).toBe(400);
+  });
+
+  it('should reject revision addition from unauthorized user', async () => {
+    const res = await ax.guest.request({
+      url: `api/cases/${cid}/revision`,
+      method: 'post',
+      data: { anything: 'can be used' }
+    });
+    expect(res.status).toBe(401);
+    expect(res.data.error).toMatch(/write/);
+  });
 });

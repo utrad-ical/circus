@@ -456,3 +456,27 @@ function _polygonVerticesOfSection(
 
   return vertices;
 }
+
+/**
+ * Translate the section origin to center.
+ * @param mmSection The section in millimeters
+ * @param resolution The viewer size in screen pixels
+ */
+export function translateOriginToCenter(
+  mmSection: Section,
+  resolution: Vector2
+): Section {
+  const focus = new Vector3().fromArray(mmSection.origin);
+  const max = convertScreenCoordinateToVolumeCoordinate(
+    mmSection,
+    resolution,
+    resolution.clone().multiplyScalar(0.5)
+  );
+  const diff = new Vector3().subVectors(max, focus);
+  const origin = new Vector3().subVectors(focus, diff);
+  return {
+    origin: origin.toArray(),
+    xAxis: mmSection.xAxis,
+    yAxis: mmSection.yAxis
+  };
+}

@@ -6,9 +6,10 @@ const ProjectDisplay: React.FC<{
   projectId: string;
   withName: boolean;
   withDescription?: boolean;
+  size?: string;
   [key: string]: any;
 }> = props => {
-  const { projectId, withName, withDescription, ...rest } = props;
+  const { projectId, withName, withDescription, size = 'lg', ...rest } = props;
 
   const user = useLoginUser()!;
 
@@ -23,7 +24,7 @@ const ProjectDisplay: React.FC<{
       icon={project.project.icon}
       title={withName && project.project.projectName}
       description={withDescription && project.project.description}
-      size="lg"
+      size={size}
       {...rest}
     />
   );

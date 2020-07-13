@@ -226,3 +226,16 @@ export function sectionEquals(a: Section, b: Section): boolean {
     vectorEquals(a.yAxis, b.yAxis)
   );
 }
+
+/**
+ * Calculates the center point of the given the section.
+ * @param section the section
+ * @returns the center point of the given the section.
+ */
+export function sectionCenter(section: Section): Vector3 {
+  return new Vector3(
+    section.origin[0] + section.xAxis[0] / 2 + section.yAxis[0] / 2,
+    section.origin[1] + section.xAxis[1] / 2 + section.yAxis[1] / 2,
+    section.origin[2] + section.xAxis[2] / 2 + section.yAxis[2] / 2
+  );
+}

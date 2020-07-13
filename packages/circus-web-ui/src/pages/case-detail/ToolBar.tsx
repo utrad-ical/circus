@@ -1,15 +1,20 @@
-import React, { Fragment } from 'react';
+import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
+import Icon from 'components/Icon';
 import {
   Button,
-  SplitButton,
+  Dropdown,
   MenuItem,
-  Dropdown
+  SplitButton
 } from 'components/react-bootstrap';
-import ShrinkSelect from 'rb/ShrinkSelect';
-import Icon from 'components/Icon';
-import { prompt } from 'rb/modal';
+import React, { Fragment } from 'react';
 
-const LayoutRenderer = props => {
+interface windowPreset {
+  label: number;
+  level: number;
+  width: number;
+}
+
+const LayoutRenderer = (props: { icon: any; caption: React.ReactNode }) => {
   return (
     <Fragment>
       <Icon icon={props.icon} />
@@ -18,7 +23,17 @@ const LayoutRenderer = props => {
   );
 };
 
-const ToolBar = props => {
+const ToolBar = (props: {
+  active: string;
+  viewOptions: any;
+  onChangeViewOptions: any;
+  brushEnabled: boolean;
+  lineWidth: number;
+  setLineWidth: any;
+  windowPresets?: windowPreset[] | undefined;
+  onChangeTool: any;
+  onApplyWindow: any;
+}) => {
   const {
     active,
     viewOptions,
@@ -40,7 +55,7 @@ const ToolBar = props => {
     });
   };
 
-  const handleChangeLayout = selection => {
+  const handleChangeLayout = (selection: any) => {
     onChangeViewOptions({ ...viewOptions, layout: selection });
   };
 
@@ -54,12 +69,14 @@ const ToolBar = props => {
     });
   };
 
-  const handleApplyWindow = async selection => {
+  const handleApplyWindow = async (selection: windowPreset) => {
     if ('level' in selection && 'width' in selection) {
       onApplyWindow({ level: selection.level, width: selection.width });
     } else {
       const value = await prompt('Input window level/width (e.g., "20,100")');
-      const [level, width] = value.split(/,|\//).map(s => parseInt(s, 10));
+      const [level, width] = (value ? value : '0,0')
+        .split(/,|\//)
+        .map(s => parseInt(s, 10));
       if (width <= 0 || isNaN(level) || isNaN(width)) return;
       onApplyWindow({ level, width });
     }
@@ -72,33 +89,39 @@ const ToolBar = props => {
     coronal: { caption: 'Coronal', icon: 'circus-orientation-coronal' }
   };
 
+  const brushTools = ['brush', 'eraser', 'bucket'];
+  const activeTool =
+    !brushEnabled && brushTools.some(tool => tool === active)
+      ? 'pager'
+      : active;
+
   return (
     <div className="case-detail-toolbar">
       <ToolButton
         name="pager"
         icon="rs-pager"
         changeTool={onChangeTool}
-        active={active}
+        active={activeTool}
       />
       <ToolButton
         name="zoom"
         icon="rs-zoom"
         changeTool={onChangeTool}
-        active={active}
+        active={activeTool}
       />
       <ToolButton
         name="hand"
         icon="rs-hand"
         changeTool={onChangeTool}
-        active={active}
+        active={activeTool}
       />
       <ToolButton
         name="window"
         icon="rs-window"
         changeTool={onChangeTool}
-        active={active}
+        active={activeTool}
       >
-        {windowPresets.map((p, i) => (
+        {windowPresets.map((p: windowPreset, i) => (
           <MenuItem
             key={i + 1}
             eventKey={i + 1}
@@ -116,27 +139,28 @@ const ToolBar = props => {
         name="brush"
         icon="rs-brush"
         changeTool={onChangeTool}
-        active={active}
+        active={activeTool}
         disabled={!brushEnabled}
       />
       <ToolButton
         name="eraser"
         icon="rs-eraser"
         changeTool={onChangeTool}
-        active={active}
+        active={activeTool}
         disabled={!brushEnabled}
       />
       <ShrinkSelect
         className="line-width-shrinkselect"
         options={widthOptions}
         value={'' + lineWidth}
-        onChange={val => setLineWidth(parseInt(val, 10))}
+        onChange={(val: string) => setLineWidth(parseInt(val, 10))}
+        disabled={!brushEnabled}
       />
       <ToolButton
         name="bucket"
         icon="rs-bucket"
         changeTool={onChangeTool}
-        active={active}
+        active={activeTool}
         disabled={!brushEnabled}
       />
       &thinsp;
@@ -179,7 +203,14 @@ const ToolBar = props => {
 };
 export default ToolBar;
 
-const ToolButton = props => {
+const ToolButton = (props: {
+  name: string;
+  icon: string;
+  active: string;
+  changeTool: any;
+  disabled?: boolean;
+  children?: any;
+}) => {
   const { name, icon, active, changeTool, disabled, children } = props;
   const style = active === name ? 'primary' : 'default';
   const iconSpan = <Icon icon={icon} />;

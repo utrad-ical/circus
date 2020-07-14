@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { modalities } from 'modalities';
-import ConditionFrame from './ConditionFrame';
+import ConditionFrame, { Condition } from './ConditionFrame';
 import { escapeRegExp } from 'utils/util';
 import * as et from '@smikitky/rb-components/lib/editor-types';
 import DateRangePicker, {
@@ -9,7 +9,6 @@ import DateRangePicker, {
 import AgeMinMax from 'components/AgeMinMax';
 import { conditionToMongoQuery } from '@smikitky/rb-components/lib/ConditionEditor';
 import SearchPanel from 'pages/search/SearchPanel';
-import sendSearchCondition from 'pages/search/sendSearchCondition';
 import { useApi } from 'utils/api';
 import PluginDisplay from 'components/PluginDisplay';
 
@@ -72,11 +71,12 @@ const PluginRenderer: React.FC<any> = props => {
   return <PluginDisplay pluginId={props.caption} />;
 };
 
-const PluginSearchCondition: React.FC<{
-  condition: any;
-  onChange: (condition: any) => void;
+const ConditionEditor: React.FC<{
+  value: Condition;
+  onChange: (value: Condition) => void;
 }> = props => {
-  const { condition, onChange } = props;
+  const { value, onChange } = props;
+
   const api = useApi();
   const [plugins, setPlugins] = useState<any[]>([]);
 
@@ -132,18 +132,16 @@ const PluginSearchCondition: React.FC<{
   }, [plugins]);
 
   return (
-    <SearchPanel {...props}>
-      <ConditionFrame
-        condition={condition}
-        onChange={onChange}
-        basicConditionProperties={basicConditionProperties}
-        advancedConditionKeys={advancedConditionKeys}
-      />
-    </SearchPanel>
+    <ConditionFrame
+      condition={value}
+      onChange={onChange}
+      basicConditionProperties={basicConditionProperties}
+      advancedConditionKeys={advancedConditionKeys}
+    />
   );
 };
 
-const nullCondition = () => {
+const nullCondition = (): Condition => {
   return {
     type: 'basic',
     basic: { pluginId: 'all', sex: 'all' },
@@ -151,10 +149,17 @@ const nullCondition = () => {
   };
 };
 
-export default sendSearchCondition({
-  searchName: 'pluginJob',
-  resource: 'plugin-jobs',
-  defaultSort: '{"createdAt":-1}',
-  nullCondition,
-  conditionToFilter
-})(PluginSearchCondition);
+const PluginSearchCondition: React.FC<{}> = props => {
+  return (
+    <SearchPanel
+      searchName="pluginJob"
+      resource="plugin-jobs"
+      defaultSort='{"createdAt":-1}'
+      nullCondition={nullCondition}
+      conditionToFilter={conditionToFilter}
+      conditionEditor={ConditionEditor}
+    />
+  );
+};
+
+export default PluginSearchCondition;

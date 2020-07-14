@@ -10,17 +10,14 @@ import { ControlLabel } from 'components/react-bootstrap';
 import ProjectSelectorMultiple from 'components/ProjectSelectorMultiple';
 import { conditionToMongoQuery } from '@smikitky/rb-components/lib/ConditionEditor';
 import SearchPanel from 'pages/search/SearchPanel';
-import sendSearchCondition from 'pages/search/sendSearchCondition';
 import useLoginUser from 'utils/useLoginUser';
+import { Condition as BaseCondition } from './ConditionFrame';
 
 const modalityOptions: { [key: string]: string } = { all: 'All' };
 modalities.forEach(m => (modalityOptions[m] = m));
 
-interface Condition {
+interface Condition extends BaseCondition {
   projects: string[];
-  type: 'basic' | 'advanced';
-  basic: { tags: string[]; [key: string]: any };
-  advanced: object;
 }
 
 const basicConditionToMongoQuery = (condition: Condition['basic']) => {
@@ -78,12 +75,11 @@ const conditionToFilter = (condition: Condition) => {
   }
 };
 
-const CaseSearchCondition: React.FC<{
-  condition: Condition;
-  onChange: any;
+const ConditionEditor: React.FC<{
+  value: Condition;
+  onChange: (value: Condition) => void;
 }> = props => {
-  const { condition, onChange } = props;
-
+  const { value, onChange } = props;
   const [availableTags, setAvailableTags] = useState<any>({});
   const { accessibleProjects } = useLoginUser()!;
 
@@ -145,45 +141,45 @@ const CaseSearchCondition: React.FC<{
     [accessibleProjects]
   );
 
-  useEffect(() => updateTagList(condition.projects), [
-    condition.projects,
+  useEffect(() => updateTagList(value.projects), [
+    value.projects,
     updateTagList
   ]);
 
   const handleSelectedProjectsChange = (projectIds: string[]) => {
     updateTagList(projectIds);
-    const newTags = condition.basic.tags.filter(t => availableTags[t]);
+    const newTags = value.basic.tags.filter((t: string) => availableTags[t]);
 
     onChange({
-      ...condition,
+      ...value,
       projects: projectIds,
-      basic: { ...condition.basic, tags: newTags },
+      basic: { ...value.basic, tags: newTags },
       advanced: { $and: [] }
     });
   };
 
   return (
-    <SearchPanel {...props}>
+    <>
       <div style={{ marginBottom: '10px' }}>
         <ControlLabel>Project:&ensp;</ControlLabel>
         <ProjectSelectorMultiple
           projects={accessibleProjects}
           noneText="(All projects)"
-          value={condition.projects}
+          value={value.projects}
           onChange={handleSelectedProjectsChange}
         />
       </div>
       <ConditionFrame
-        condition={condition}
+        condition={value}
         onChange={onChange}
         basicConditionProperties={basicConditionProperties}
         advancedConditionKeys={advancedConditionKeys}
       />
-    </SearchPanel>
+    </>
   );
 };
 
-const nullCondition = () => {
+const nullCondition = (): Condition => {
   return {
     type: 'basic',
     projects: [],
@@ -192,10 +188,17 @@ const nullCondition = () => {
   };
 };
 
-export default sendSearchCondition({
-  searchName: 'case',
-  resource: 'cases',
-  defaultSort: '{"createdAt":-1}',
-  nullCondition,
-  conditionToFilter
-})(CaseSearchCondition);
+const CaseSearchCondition: React.FC<{}> = props => {
+  return (
+    <SearchPanel
+      searchName="case"
+      resource="cases"
+      defaultSort='{"createdAt":-1}'
+      nullCondition={nullCondition}
+      conditionToFilter={conditionToFilter}
+      conditionEditor={ConditionEditor}
+    />
+  );
+};
+
+export default CaseSearchCondition;

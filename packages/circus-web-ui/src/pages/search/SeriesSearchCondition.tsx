@@ -8,8 +8,8 @@ import DateRangePicker, {
 } from '@smikitky/rb-components/lib/DateRangePicker';
 import AgeMinMax from 'components/AgeMinMax';
 import { conditionToMongoQuery } from '@smikitky/rb-components/lib/ConditionEditor';
-import SearchPanel from 'pages/search/SearchPanel';
-import sendSearchCondition from 'pages/search/sendSearchCondition';
+import SearchPanel from './SearchPanel';
+import { Condition } from './ConditionFrame';
 
 const sexOptions = { all: 'All', M: 'male', F: 'female', O: 'other' };
 const modalityOptions: { [key: string]: string } = { all: 'All' };
@@ -33,12 +33,6 @@ const basicConditionProperties = [
   { key: 'sex', caption: 'Sex', editor: et.shrinkSelect(sexOptions) },
   { key: 'seriesDate', caption: 'Series Date', editor: DateRangePicker }
 ];
-
-interface Condition {
-  type: 'basic' | 'advanced';
-  basic: any;
-  advanced: any;
-}
 
 const basicConditionToMongoQuery = (condition: Condition['basic']) => {
   const members: any[] = [];
@@ -108,25 +102,7 @@ const conditionToFilter = (condition: Condition) => {
   throw new Error('Unkonwn condition type');
 };
 
-const SeriesSearchCondition: React.FC<{
-  condition: Condition;
-  onChange: (condition: Condition) => void;
-}> = props => {
-  const { condition, onChange } = props;
-
-  return (
-    <SearchPanel {...props}>
-      <ConditionFrame
-        condition={condition}
-        onChange={onChange}
-        basicConditionProperties={basicConditionProperties}
-        advancedConditionKeys={advancedConditionKeys}
-      />
-    </SearchPanel>
-  );
-};
-
-const nullCondition = () => {
+const nullCondition = (): Condition => {
   return {
     type: 'basic',
     basic: { modality: 'all', sex: 'all' },
@@ -134,10 +110,32 @@ const nullCondition = () => {
   };
 };
 
-export default sendSearchCondition({
-  searchName: 'series',
-  resource: 'series',
-  defaultSort: '{"createdAt":-1}',
-  nullCondition,
-  conditionToFilter
-})(SeriesSearchCondition);
+const ConditionEditor: React.FC<{
+  value: Condition;
+  onChange: (value: Condition) => void;
+}> = props => {
+  const { value, onChange } = props;
+  return (
+    <ConditionFrame
+      condition={value}
+      onChange={onChange}
+      basicConditionProperties={basicConditionProperties}
+      advancedConditionKeys={advancedConditionKeys}
+    />
+  );
+};
+
+const SeriesSearchCondition: React.FC<{}> = props => {
+  return (
+    <SearchPanel
+      searchName="series"
+      resource="series"
+      defaultSort='{"createdAt":-1}'
+      nullCondition={nullCondition}
+      conditionToFilter={conditionToFilter}
+      conditionEditor={ConditionEditor}
+    />
+  );
+};
+
+export default SeriesSearchCondition;

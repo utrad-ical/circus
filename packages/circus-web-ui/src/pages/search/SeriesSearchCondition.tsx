@@ -2,15 +2,17 @@ import React from 'react';
 import { modalities } from 'modalities';
 import ConditionFrame from './ConditionFrame';
 import { escapeRegExp } from 'utils/util';
-import * as et from 'rb/editor-types';
-import DateRangePicker, { dateRangeToMongoQuery } from 'rb/DateRangePicker';
+import * as et from '@smikitky/rb-components/lib/editor-types';
+import DateRangePicker, {
+  dateRangeToMongoQuery
+} from '@smikitky/rb-components/lib/DateRangePicker';
 import AgeMinMax from 'components/AgeMinMax';
-import { conditionToMongoQuery } from 'rb/ConditionEditor';
+import { conditionToMongoQuery } from '@smikitky/rb-components/lib/ConditionEditor';
 import SearchPanel from 'pages/search/SearchPanel';
 import sendSearchCondition from 'pages/search/sendSearchCondition';
 
 const sexOptions = { all: 'All', M: 'male', F: 'female', O: 'other' };
-const modalityOptions = { all: 'All' };
+const modalityOptions: { [key: string]: string } = { all: 'All' };
 modalities.forEach(m => (modalityOptions[m] = m));
 
 const basicConditionProperties = [
@@ -32,8 +34,14 @@ const basicConditionProperties = [
   { key: 'seriesDate', caption: 'Series Date', editor: DateRangePicker }
 ];
 
-const basicConditionToMongoQuery = condition => {
-  const members = [];
+interface Condition {
+  type: 'basic' | 'advanced';
+  basic: any;
+  advanced: any;
+}
+
+const basicConditionToMongoQuery = (condition: Condition['basic']) => {
+  const members: any[] = [];
   Object.keys(condition).forEach(key => {
     const val = condition[key];
     switch (key) {
@@ -65,7 +73,7 @@ const basicConditionToMongoQuery = condition => {
     : {};
 };
 
-const advancedConditionKeys = {
+const advancedConditionKeys: any = {
   modality: {
     caption: 'modality',
     type: 'select',
@@ -85,7 +93,7 @@ const advancedConditionKeys = {
   createdAt: { caption: 'import date', type: 'date' }
 };
 
-const conditionToFilter = condition => {
+const conditionToFilter = (condition: Condition) => {
   switch (condition.type) {
     case 'basic':
       return basicConditionToMongoQuery(condition.basic);
@@ -100,7 +108,10 @@ const conditionToFilter = condition => {
   throw new Error('Unkonwn condition type');
 };
 
-const SeriesSearchCondition = props => {
+const SeriesSearchCondition: React.FC<{
+  condition: Condition;
+  onChange: (condition: Condition) => void;
+}> = props => {
   const { condition, onChange } = props;
 
   return (

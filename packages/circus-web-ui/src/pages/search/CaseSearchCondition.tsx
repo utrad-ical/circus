@@ -1,21 +1,30 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import DateRangePicker, { dateRangeToMongoQuery } from 'rb/DateRangePicker';
+import DateRangePicker, {
+  dateRangeToMongoQuery
+} from '@smikitky/rb-components/lib/DateRangePicker';
 import { modalities } from 'modalities';
-import * as et from 'rb/editor-types';
+import * as et from '@smikitky/rb-components/lib/editor-types';
 import ConditionFrame from './ConditionFrame';
 import { escapeRegExp } from 'utils/util';
 import { ControlLabel } from 'components/react-bootstrap';
 import ProjectSelectorMultiple from 'components/ProjectSelectorMultiple';
-import { conditionToMongoQuery } from 'rb/ConditionEditor';
+import { conditionToMongoQuery } from '@smikitky/rb-components/lib/ConditionEditor';
 import SearchPanel from 'pages/search/SearchPanel';
 import sendSearchCondition from 'pages/search/sendSearchCondition';
 import useLoginUser from 'utils/useLoginUser';
 
-const modalityOptions = { all: 'All' };
+const modalityOptions: { [key: string]: string } = { all: 'All' };
 modalities.forEach(m => (modalityOptions[m] = m));
 
-const basicConditionToMongoQuery = condition => {
-  const members = [];
+interface Condition {
+  projects: string[];
+  type: 'basic' | 'advanced';
+  basic: { tags: string[]; [key: string]: any };
+  advanced: object;
+}
+
+const basicConditionToMongoQuery = (condition: Condition['basic']) => {
+  const members: any[] = [];
   Object.keys(condition).forEach(key => {
     const val = condition[key];
     switch (key) {
@@ -44,14 +53,11 @@ const basicConditionToMongoQuery = condition => {
     : {};
 };
 
-const conditionToFilter = condition => {
+const conditionToFilter = (condition: Condition) => {
   let tabFilter;
   switch (condition.type) {
     case 'basic':
-      tabFilter = basicConditionToMongoQuery(
-        condition.basic,
-        condition.projects
-      );
+      tabFilter = basicConditionToMongoQuery(condition.basic);
       break;
     case 'advanced':
       tabFilter = conditionToMongoQuery(condition.advanced, [
@@ -72,11 +78,14 @@ const conditionToFilter = condition => {
   }
 };
 
-const CaseSearchCondition = props => {
+const CaseSearchCondition: React.FC<{
+  condition: Condition;
+  onChange: any;
+}> = props => {
   const { condition, onChange } = props;
 
-  const [availableTags, setAvailableTags] = useState({});
-  const { accessibleProjects } = useLoginUser();
+  const [availableTags, setAvailableTags] = useState<any>({});
+  const { accessibleProjects } = useLoginUser()!;
 
   const basicConditionProperties = useMemo(
     () => [
@@ -121,10 +130,11 @@ const CaseSearchCondition = props => {
   );
 
   const updateTagList = useCallback(
-    projectIds => {
-      const tags = {};
+    (projectIds: string[]) => {
+      const tags: any = {};
       for (const pid of projectIds) {
         const p = accessibleProjects.find(p => p.projectId === pid);
+        if (!p) continue;
         p.project.tags.forEach(t => {
           if (tags[t.name]) return;
           tags[t.name] = { caption: t.name, color: t.color };
@@ -140,7 +150,7 @@ const CaseSearchCondition = props => {
     updateTagList
   ]);
 
-  const handleSelectedProjectsChange = projectIds => {
+  const handleSelectedProjectsChange = (projectIds: string[]) => {
     updateTagList(projectIds);
     const newTags = condition.basic.tags.filter(t => availableTags[t]);
 

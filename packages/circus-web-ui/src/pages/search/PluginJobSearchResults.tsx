@@ -2,7 +2,10 @@ import React, { Fragment } from 'react';
 import SearchResultsView, {
   makeSortOptions
 } from 'components/SearchResultsView';
-import DataGrid from 'components/DataGrid';
+import DataGrid, {
+  DataGridRenderer,
+  DataGridColumnDefinition
+} from 'components/DataGrid';
 import PatientInfoBox from 'components/PatientInfoBox';
 import TimeDisplay from 'components/TimeDisplay';
 import PluginDisplay from 'components/PluginDisplay';
@@ -12,7 +15,7 @@ import browserHistory from 'browserHistory';
 import styled from 'styled-components';
 import Icon from '@smikitky/rb-components/lib/Icon';
 
-const Operation = props => {
+const Operation: DataGridRenderer<any> = props => {
   const { value: job } = props;
 
   const handleClick = () => {
@@ -34,14 +37,17 @@ const Operation = props => {
   );
 };
 
-const PluginRenderer = props => {
+const PluginRenderer: DataGridRenderer<any> = props => {
   const {
     value: { pluginId }
   } = props;
   return <PluginDisplay size="lg" pluginId={pluginId} />;
 };
 
-const StatusRenderer = ({ value: { status } }) => {
+const StatusRenderer: DataGridRenderer<any> = props => {
+  const {
+    value: { status }
+  } = props;
   if (status === 'processing') {
     return <ProgressBar active bsStyle="info" now={100} label="processing" />;
   }
@@ -49,16 +55,16 @@ const StatusRenderer = ({ value: { status } }) => {
     in_queue: 'text-info',
     finished: 'text-success',
     invalidated: 'text-muted'
-  }[status];
+  }[status as 'in_queue' | 'finished' | 'invalidated'];
   return <span className={className || 'text-danger'}>{status}</span>;
 };
 
-const FeedbackRenderer = props => {
+const FeedbackRenderer: DataGridRenderer<any> = props => {
   const {
     value: { feedbacks = [] }
   } = props;
-  const personals = feedbacks.filter(f => !f.isConsensual).length;
-  const consensual = feedbacks.filter(f => f.isConsensual).length;
+  const personals = feedbacks.filter((f: any) => !f.isConsensual).length;
+  const consensual = feedbacks.filter((f: any) => f.isConsensual).length;
   const title = `${personals} personal feedback ${
     personals === 1 ? 'entry' : 'entries'
   }`;
@@ -75,7 +81,7 @@ const FeedbackRenderer = props => {
   );
 };
 
-const columns = [
+const columns: DataGridColumnDefinition<any>[] = [
   {
     caption: 'Plugin',
     className: 'plugin',
@@ -132,7 +138,7 @@ const DataViewContainer = styled.div`
   }
 `;
 
-const DataView = props => {
+const DataView: React.FC<{ value: any[] }> = props => {
   const { value } = props;
   return (
     <DataViewContainer>
@@ -149,7 +155,7 @@ const sortOptions = makeSortOptions({
   createdAt: 'job date'
 });
 
-const PluginSearchResults = props => {
+const PluginSearchResults: React.FC<{}> = props => {
   return (
     <SearchResultsView
       sortOptions={sortOptions}

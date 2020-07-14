@@ -29,7 +29,7 @@ rules:
     ]
 
 overrides:
-  - files: packages/circus-web-ui/src/**/*.{js,ts}
+  - files: packages/circus-web-ui/src/**/*.{js,ts,tsx}
     plugins:
       - react
       - react-hooks

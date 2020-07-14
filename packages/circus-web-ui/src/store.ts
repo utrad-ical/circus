@@ -41,8 +41,9 @@ type ProjectRoles =
   | 'viewPersonalInfo'
   | 'moderate';
 
-interface SearchPreset {
+export interface SearchPreset {
   name: string;
+  condition: any;
 }
 
 export interface LoginUser {

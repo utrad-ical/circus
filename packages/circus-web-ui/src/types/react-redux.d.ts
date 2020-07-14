@@ -5,7 +5,7 @@ declare module 'react-redux' {
   interface DefaultRootState {
     loginUser: LoginUser;
     messages: MessageBox[];
-    searches: { [name: string]: Search };
+    searches: { [name: string]: Search<any> };
     plugin: Plugins;
   }
 }

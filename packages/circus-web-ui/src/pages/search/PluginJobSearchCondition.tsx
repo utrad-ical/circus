@@ -2,21 +2,23 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { modalities } from 'modalities';
 import ConditionFrame from './ConditionFrame';
 import { escapeRegExp } from 'utils/util';
-import * as et from 'rb/editor-types';
-import DateRangePicker, { dateRangeToMongoQuery } from 'rb/DateRangePicker';
+import * as et from '@smikitky/rb-components/lib/editor-types';
+import DateRangePicker, {
+  dateRangeToMongoQuery
+} from '@smikitky/rb-components/lib/DateRangePicker';
 import AgeMinMax from 'components/AgeMinMax';
-import { conditionToMongoQuery } from 'rb/ConditionEditor';
+import { conditionToMongoQuery } from '@smikitky/rb-components/lib/ConditionEditor';
 import SearchPanel from 'pages/search/SearchPanel';
 import sendSearchCondition from 'pages/search/sendSearchCondition';
 import { useApi } from 'utils/api';
 import PluginDisplay from 'components/PluginDisplay';
 
 const sexOptions = { all: 'All', M: 'male', F: 'female', O: 'other' };
-const modalityOptions = { all: 'All' };
+const modalityOptions: { [key: string]: string } = { all: 'All' };
 modalities.forEach(m => (modalityOptions[m] = m));
 
-const basicConditionToMongoQuery = condition => {
-  const members = [];
+const basicConditionToMongoQuery = (condition: any) => {
+  const members: any[] = [];
   Object.keys(condition).forEach(key => {
     const val = condition[key];
     switch (key) {
@@ -52,7 +54,7 @@ const basicConditionToMongoQuery = condition => {
     : {};
 };
 
-const conditionToFilter = condition => {
+const conditionToFilter = (condition: any) => {
   switch (condition.type) {
     case 'basic':
       return basicConditionToMongoQuery(condition.basic);
@@ -65,15 +67,18 @@ const conditionToFilter = condition => {
   throw new Error('Unkonwn condition type');
 };
 
-const PluginRenderer = props => {
-  if (props.caption === 'All') return 'All';
+const PluginRenderer: React.FC<any> = props => {
+  if (props.caption === 'All') return <>All</>;
   return <PluginDisplay pluginId={props.caption} />;
 };
 
-const PluginSearchCondition = props => {
+const PluginSearchCondition: React.FC<{
+  condition: any;
+  onChange: (condition: any) => void;
+}> = props => {
   const { condition, onChange } = props;
   const api = useApi();
-  const [plugins, setPlugins] = useState([]);
+  const [plugins, setPlugins] = useState<any[]>([]);
 
   useEffect(() => {
     const load = async () => {
@@ -83,7 +88,7 @@ const PluginSearchCondition = props => {
   }, [api]);
 
   const basicConditionProperties = useMemo(() => {
-    const pluginOptions = { all: 'All' };
+    const pluginOptions: { [key: string]: any } = { all: 'All' };
     plugins.forEach(p => (pluginOptions[p.pluginId] = p.pluginId));
     return [
       {
@@ -100,7 +105,7 @@ const PluginSearchCondition = props => {
   }, [plugins]);
 
   const advancedConditionKeys = useMemo(() => {
-    const pluginOptions = { all: 'All' };
+    const pluginOptions: { [key: string]: any } = { all: 'All' };
     plugins.forEach(
       p =>
         (pluginOptions[p.pluginId] = {

@@ -3,14 +3,19 @@ import SearchResultsView, {
   makeSortOptions
 } from 'components/SearchResultsView';
 import { Link } from 'react-router-dom';
-import DataGrid from 'components/DataGrid';
+import DataGrid, { DataGridColumnDefinition } from 'components/DataGrid';
 import PatientInfoBox from 'components/PatientInfoBox';
 import ProjectDisplay from 'components/ProjectDisplay';
 import Tag from 'components/Tag';
 import TimeDisplay from 'components/TimeDisplay';
 import IconButton from 'components/IconButton';
 
-const Tags = props => {
+const Tags: React.FC<{
+  value: {
+    tags: string[];
+    projectId: string;
+  };
+}> = props => {
   const item = props.value;
   return (
     <span className="tag-list">
@@ -21,7 +26,9 @@ const Tags = props => {
   );
 };
 
-const Operation = props => {
+const Operation: React.FC<{
+  value: any;
+}> = props => {
   const item = props.value;
   return (
     <div className="register">
@@ -34,17 +41,21 @@ const Operation = props => {
   );
 };
 
-const Project = props => {
+const Project: React.FC<{
+  value: any;
+}> = props => {
   const item = props.value;
   return <ProjectDisplay projectId={item.projectId} size="xl" withName />;
 };
 
-const CaseId = props => {
+const CaseId: React.FC<{
+  value: any;
+}> = props => {
   const item = props.value;
   return <Fragment>{item.caseId.substr(0, 8)}</Fragment>;
 };
 
-const columns = [
+const columns: DataGridColumnDefinition<any>[] = [
   { caption: 'Project', className: 'project', renderer: Project },
   { caption: 'Case ID', className: 'caseId', renderer: CaseId },
   {
@@ -69,7 +80,7 @@ const columns = [
   { caption: '', className: 'operation', renderer: Operation }
 ];
 
-const DataView = props => {
+const DataView: React.FC<{ value: any[] }> = props => {
   const { value } = props;
   return (
     <DataGrid
@@ -86,7 +97,7 @@ const sortOptions = makeSortOptions({
   projectId: 'project'
 });
 
-const CaseSearchResultsView = props => {
+const CaseSearchResultsView: React.FC<{}> = props => {
   return (
     <SearchResultsView
       sortOptions={sortOptions}

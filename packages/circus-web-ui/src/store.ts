@@ -134,7 +134,7 @@ const messages: Reducer<MessageBox[]> = (state = [], action) => {
   return state;
 };
 
-export interface Search {
+export interface Search<T> {
   isFetching: boolean;
   resource: string;
   filter: any;
@@ -142,11 +142,14 @@ export interface Search {
   sort: object;
   page: number;
   limit: number;
-  items: any[];
+  items: T[];
   totalItems: number;
 }
 
-const searches: Reducer<{ [name: string]: Search }> = (state = {}, action) => {
+const searches: Reducer<{ [name: string]: Search<any> }> = (
+  state = {},
+  action
+) => {
   switch (action.type) {
     case 'SET_SEARCH_QUERY_BUSY':
       state = {

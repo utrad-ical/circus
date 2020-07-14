@@ -54,12 +54,13 @@ export interface DataGridProps<T extends {}> {
   onItemClick?: (index: number, item: T) => void;
   active?: T;
   columns: DataGridColumnDefinition<T>[];
+  className?: string;
 }
 
 const DataGrid: <T extends {}>(
   props: DataGridProps<T>
 ) => React.ReactElement<any, any> = props => {
-  const { value, onItemClick, active } = props;
+  const { value, onItemClick, active, className } = props;
   const columns = props.columns.map(normalizeColumn);
 
   const handleItemClick = (index: number) => {
@@ -67,7 +68,7 @@ const DataGrid: <T extends {}>(
   };
 
   return (
-    <StyledTable>
+    <StyledTable className={className}>
       <thead>
         <tr>
           {columns.map(c => (

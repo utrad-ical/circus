@@ -14,3 +14,5 @@ declare module '@smikitky/rb-components/lib/ShrinkSelect';
 declare module '@smikitky/rb-components/lib/PropertyEditor';
 declare module '@smikitky/rb-components/lib/editor-types';
 declare module '@smikitky/rb-components/lib/modal';
+declare module '@smikitky/rb-components/lib/ConditionEditor';
+declare module '@smikitky/rb-components/lib/DateRangePicker';

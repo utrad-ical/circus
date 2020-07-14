@@ -33,7 +33,7 @@ const kebabCase = (str: string) => {
   return str.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
 };
 
-type DataGridRenderer<T> = React.FC<{
+export type DataGridRenderer<T> = React.FC<{
   value: T;
   index: number;
 }>;

@@ -4,7 +4,10 @@ import SearchResultsView, {
 } from 'components/SearchResultsView';
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
-import DataGrid from 'components/DataGrid';
+import DataGrid, {
+  DataGridColumnDefinition,
+  DataGridRenderer
+} from 'components/DataGrid';
 import PatientInfoBox from 'components/PatientInfoBox';
 import TimeDisplay from 'components/TimeDisplay';
 import Icon from 'components/Icon';
@@ -22,12 +25,12 @@ const ModalitySpan = styled.span`
   color: white;
 `;
 
-const Modality = props => {
+const Modality: DataGridRenderer<any> = props => {
   const series = props.value;
   return <ModalitySpan>{series.modality}</ModalitySpan>;
 };
 
-const Operation = props => {
+const Operation: DataGridRenderer<any> = props => {
   const { value: series } = props;
   return (
     <Fragment>
@@ -58,7 +61,7 @@ const Operation = props => {
   );
 };
 
-const columns = [
+const columns: DataGridColumnDefinition<any>[] = [
   { caption: '', className: 'modality', renderer: Modality },
   {
     caption: 'Patient',
@@ -81,7 +84,7 @@ const columns = [
   { caption: '', className: 'operation', renderer: Operation }
 ];
 
-const DataView = props => {
+const DataView: React.FC<{ value: any[] }> = props => {
   const { value } = props;
   return (
     <DataGrid
@@ -99,7 +102,7 @@ const sortOptions = makeSortOptions({
   modality: 'modality'
 });
 
-const SeriesSearchResults = props => {
+const SeriesSearchResults: React.FC<{}> = props => {
   return (
     <SearchResultsView
       sortOptions={sortOptions}

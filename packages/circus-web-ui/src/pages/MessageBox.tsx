@@ -3,10 +3,8 @@ import { dismissMessage } from 'actions';
 import { Alert } from 'components/react-bootstrap';
 import { useSelector } from 'react-redux';
 
-const mapState = state => state.messages;
-
-const MessageBox = props => {
-  const messages = useSelector(mapState);
+const MessageBox: React.FC<{}> = props => {
+  const messages = useSelector(state => state.messages);
 
   return (
     <div className="message-boxes">

@@ -1,17 +1,21 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import PropertyEditor from 'rb/PropertyEditor';
-import * as et from 'rb/editor-types';
+import PropertyEditor from '@smikitky/rb-components/lib/PropertyEditor';
+import * as et from '@smikitky/rb-components/lib/editor-types';
 import { useApi } from 'utils/api';
 import { useLoginManager } from 'utils/loginManager';
 import { showMessage } from 'actions';
 import { Button } from 'components/react-bootstrap';
 import IconButton from 'components/IconButton';
 import Icon from 'components/Icon';
+import { SearchPreset } from 'store';
 
-const PresetDeleteEditor = props => {
+const PresetDeleteEditor: React.FC<{
+  value: SearchPreset[];
+  onChange: (value: SearchPreset[]) => void;
+}> = props => {
   const { value, onChange } = props;
 
-  const handleDeleteClick = presetName => {
+  const handleDeleteClick = (presetName: string) => {
     const newValue = value.filter(preset => preset.name !== presetName);
     onChange(newValue);
   };
@@ -41,7 +45,7 @@ const PresetDeleteEditor = props => {
   );
 };
 
-const Preferences = props => {
+const Preferences: React.FC<{}> = props => {
   const [settings, setSettings] = useState(null);
   const loginManager = useLoginManager();
   const api = useApi();

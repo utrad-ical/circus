@@ -55,7 +55,6 @@ const SearchPanel: <T extends {}>(props: {
     const presetKey = searchName + 'SearchPresets';
     if (presetName) {
       // Use preset condition
-      debugger;
       const presets =
         ((user.preferences as any)[presetKey] as SearchPreset[]) ?? [];
       const matched = presets.find(preset => preset.name === presetName);

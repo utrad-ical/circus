@@ -7,7 +7,7 @@ const sortOptions = makeSortOptions({
   jobId: 'job id'
 });
 
-const DataView = props => {
+const DataView: React.FC<{ value: any[] }> = props => {
   const { value } = props;
   if (!value.length) {
     return <div>No plug-in job in execution queue.</div>;
@@ -21,7 +21,7 @@ const DataView = props => {
   );
 };
 
-const PluginJobQueueSearchResults = props => {
+const PluginJobQueueSearchResults: React.FC<{}> = props => {
   return (
     <div>
       <SearchResultsView

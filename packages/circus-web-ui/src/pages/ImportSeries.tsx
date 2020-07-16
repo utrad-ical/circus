@@ -30,11 +30,21 @@ const ImportSeries: React.FC<{}> = props => {
   }
 
   const handleUploaded = async (res: any) => {
-    setDomainPreference(uploadDomain);
     const count = res.uploaded;
-    showMessage(`Successfully uploaded ${count} DICOM instances!`, 'success', {
-      short: true
-    });
+    if (count > 0) {
+      setDomainPreference(uploadDomain);
+      showMessage(
+        `Successfully uploaded ${count} DICOM instances!`,
+        'success',
+        { short: true }
+      );
+    } else {
+      showMessage(
+        'No DICOM instance was imported from the uploaded file(s). ' +
+          'Check if you have uploaded correct files.',
+        'warning'
+      );
+    }
   };
 
   return (

@@ -7,7 +7,7 @@ import {
 } from './react-bootstrap';
 import { FileDroppable } from './FileDroppable';
 import { showMessage } from 'actions';
-import * as modal from 'rb/modal';
+import * as modal from '@smikitky/rb-components/lib/modal';
 import styled from 'styled-components';
 import { useApi } from 'utils/api';
 
@@ -31,11 +31,13 @@ const StyledDiv = styled.div`
  * Upload progress is displayed using a progress bar,
  * and the response can be accessed via a Promise.
  */
-const FileUpload = props => {
-  const [filesSelected, setFilesSelected] = useState([]);
-  const [uploading, setUploading] = useState(false);
-  const [progress, setProgress] = useState({ value: 0, label: '' });
-  const fileInput = useRef();
+const FileUpload: React.FC<{
+  url: string;
+  onBeforeUpload?: (fd: FormData) => void;
+  onUploaded?: (res: any) => void;
+  multiple?: boolean;
+  uploadFileMax?: number;
+}> = props => {
   const {
     url,
     onBeforeUpload,
@@ -44,17 +46,22 @@ const FileUpload = props => {
     multiple,
     uploadFileMax
   } = props;
+
+  const [filesSelected, setFilesSelected] = useState<FileList | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [progress, setProgress] = useState({ value: 0, label: '' });
+  const fileInput = useRef<HTMLInputElement>(null);
   const api = useApi();
 
-  const handleDropFile = files => {
+  const handleDropFile = (files: FileList) => {
     setFilesSelected(files);
   };
 
   const handleFileSelect = () => {
-    setFilesSelected(fileInput.current.files);
+    setFilesSelected(fileInput.current!.files);
   };
 
-  const handleUploadProgress = event => {
+  const handleUploadProgress = (event: ProgressEvent) => {
     const bytesSent = event.loaded;
     const bytesTotal = event.total;
     const percent = Math.floor((bytesSent * 100) / bytesTotal);
@@ -68,6 +75,7 @@ const FileUpload = props => {
   };
 
   const handleUploadClick = async () => {
+    if (!filesSelected) return;
     const num = filesSelected.length;
     if (typeof num !== 'number' || num <= 0) return;
 
@@ -80,7 +88,7 @@ const FileUpload = props => {
     }
 
     const fileDescription = num >= 2 ? `these ${num} files` : 'this file';
-    if (num > uploadFileMax) {
+    if (typeof uploadFileMax === 'number' && num > uploadFileMax) {
       modal.alert(
         'Sorry, you can not upload more than ' +
           uploadFileMax +
@@ -105,7 +113,7 @@ const FileUpload = props => {
         data: fd,
         onUploadProgress: handleUploadProgress
       });
-      setFilesSelected([]);
+      setFilesSelected(null);
       setUploading(false);
       typeof onUploaded === 'function' && onUploaded(res);
     } catch (err) {
@@ -126,8 +134,11 @@ const FileUpload = props => {
             multiple={!!multiple}
             onChange={handleFileSelect}
           />
-          {filesSelected.length == 0 ? (
-            <Button bsStyle="default" onClick={() => fileInput.current.click()}>
+          {!filesSelected || filesSelected.length == 0 ? (
+            <Button
+              bsStyle="default"
+              onClick={() => fileInput.current!.click()}
+            >
               <Glyphicon glyph="plus" />
               &ensp;Select File
             </Button>
@@ -135,7 +146,7 @@ const FileUpload = props => {
             <ButtonToolbar>
               <Button
                 bsStyle="primary"
-                disabled={filesSelected.length < 1 || uploading}
+                disabled={(filesSelected || []).length < 1 || uploading}
                 onClick={handleUploadClick}
               >
                 <Glyphicon glyph="upload" />
@@ -144,7 +155,7 @@ const FileUpload = props => {
               <Button
                 bsStyle="link"
                 disabled={uploading}
-                onClick={() => setFilesSelected([])}
+                onClick={() => setFilesSelected(null)}
               >
                 Reset
               </Button>
@@ -171,11 +182,13 @@ const FileUpload = props => {
 
 export default FileUpload;
 
-const SummaryTable = props => {
-  const files = props.files;
-  const show = 10;
+const SummaryTable: React.FC<{
+  files: FileList | null;
+  showMax?: number;
+}> = props => {
+  const { files, showMax = 10 } = props;
   let totalSize = 0;
-  if (files.length < 1) return null;
+  if (!files || files.length < 1) return null;
   return (
     <table className="table table-condensed">
       <thead>
@@ -187,7 +200,7 @@ const SummaryTable = props => {
       <tbody>
         {Array.prototype.slice.call(files).map((f, i) => {
           totalSize += f.size;
-          if (i >= show) return null;
+          if (i >= showMax) return null;
           return (
             <tr key={i}>
               <td>{f.name}</td>
@@ -195,10 +208,10 @@ const SummaryTable = props => {
             </tr>
           );
         })}
-        {files.length > show && (
+        {files.length > showMax && (
           <tr>
             <td>
-              <i>And {files.length - show} file(s)</i>
+              <i>And {files.length - showMax} file(s)</i>
             </td>
             <td />
           </tr>

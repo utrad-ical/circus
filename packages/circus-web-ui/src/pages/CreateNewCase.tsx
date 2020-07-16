@@ -19,7 +19,7 @@ const CreateNewCase: React.FC<{}> = props => {
     writableProjects[0].projectId
   );
   const [selectedSeries, setSelectedSeries] = useState<SeriesEntry[]>([]);
-  const [selectedTags, setSelectedTags] = useState([]);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
   const api = useApi();
   const seriesUid = useParams<any>().seriesUid as string;

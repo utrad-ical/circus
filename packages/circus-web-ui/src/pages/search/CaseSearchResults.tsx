@@ -6,25 +6,9 @@ import { Link } from 'react-router-dom';
 import DataGrid, { DataGridColumnDefinition } from 'components/DataGrid';
 import PatientInfoBox from 'components/PatientInfoBox';
 import ProjectDisplay from 'components/ProjectDisplay';
-import Tag from 'components/Tag';
+import { TagList } from 'components/Tag';
 import TimeDisplay from 'components/TimeDisplay';
 import IconButton from 'components/IconButton';
-
-const Tags: React.FC<{
-  value: {
-    tags: string[];
-    projectId: string;
-  };
-}> = props => {
-  const item = props.value;
-  return (
-    <span className="tag-list">
-      {item.tags.map(t => (
-        <Tag key={t} projectId={item.projectId} tag={t} />
-      ))}
-    </span>
-  );
-};
 
 const Operation: React.FC<{
   value: any;
@@ -76,7 +60,13 @@ const columns: DataGridColumnDefinition<any>[] = [
       </Fragment>
     )
   },
-  { caption: 'Tags', className: 'tags', renderer: Tags },
+  {
+    caption: 'Tags',
+    className: 'tags',
+    renderer: ({ value: item }) => {
+      return <TagList tags={item.tags} projectId={item.projectId} />;
+    }
+  },
   { caption: '', className: 'operation', renderer: Operation }
 ];
 

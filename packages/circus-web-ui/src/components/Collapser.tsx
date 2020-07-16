@@ -10,11 +10,11 @@ const StyledDiv = styled.div`
     user-select: none;
     color: white;
     padding: 2px 5px;
-    background-color: ${props => props.theme.brandPrimary};
+    background-color: ${(props: any) => props.theme.brandPrimary};
     font-weight: bold;
     cursor: pointer;
     &:hover {
-      background-color: ${props => props.theme.brandDark};
+      background-color: ${(props: any) => props.theme.brandDark};
     }
     .triangle {
       transition: transform 0.1s linear;
@@ -35,7 +35,7 @@ const StyledDiv = styled.div`
   }
 
   &.framed {
-    border: 1px solid ${props => props.theme.brandDark};
+    border: 1px solid ${(props: any) => props.theme.brandDark};
   }
 
   &.no-padding {
@@ -45,7 +45,19 @@ const StyledDiv = styled.div`
   }
 `;
 
-export const ControlledCollapser = props => {
+interface Props {
+  onToggleClick?: () => void;
+  title: React.ReactElement<any>;
+  className?: string;
+  framed?: boolean;
+  noPadding?: boolean;
+}
+
+export const ControlledCollapser: React.FC<
+  Props & {
+    open?: boolean;
+  }
+> = props => {
   const {
     open,
     onToggleClick,
@@ -73,23 +85,26 @@ export const ControlledCollapser = props => {
   );
 };
 
-const Collapser = props => {
-  const { defaultOpen } = props;
+const Collapser: React.FC<
+  Props & {
+    defaultOpen?: boolean;
+  }
+> = props => {
+  const { defaultOpen = true, onToggleClick, ...rest } = props;
   const [open, setOpen] = useState(!!defaultOpen);
 
   const handleToggleClick = () => {
     setOpen(open => !open);
+    onToggleClick && onToggleClick();
   };
 
   return (
     <ControlledCollapser
       open={open}
       onToggleClick={handleToggleClick}
-      {...props}
+      {...rest}
     />
   );
 };
-
-Collapser.defaultProps = { defaultOpen: true };
 
 export default Collapser;

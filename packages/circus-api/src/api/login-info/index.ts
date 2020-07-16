@@ -30,7 +30,9 @@ export const handleGetFull: RouteMiddleware = ({
       await models.serverParam.findById('defaultDomain')
     )?.value;
     const defaultDomain =
-      user.domains.indexOf(defaultDomainValue) >= 0 ? defaultDomainValue : null;
+      ctx.userPrivileges.domains.indexOf(defaultDomainValue) >= 0
+        ? defaultDomainValue
+        : null;
     ctx.body = {
       ...user,
       ...ctx.userPrivileges,

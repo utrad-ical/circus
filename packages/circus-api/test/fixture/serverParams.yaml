@@ -2,3 +2,5 @@
   value: bar
 - key: color
   value: ['green', 'black', 'blue']
+- key: defaultDomain
+  value: default

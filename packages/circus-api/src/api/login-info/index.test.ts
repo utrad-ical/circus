@@ -20,6 +20,7 @@ test('full', async () => {
   const res = await axios.get('api/login-info/full');
   expect(res.data).toMatchObject({
     userEmail: 'alice@example.com',
-    loginId: 'alice'
+    loginId: 'alice',
+    description: 'Alice'
   });
 });

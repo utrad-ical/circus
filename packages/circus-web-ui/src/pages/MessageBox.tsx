@@ -6,6 +6,7 @@ import { useSelector } from 'react-redux';
 const MessageBox: React.FC<{}> = props => {
   const messages = useSelector(state => state.messages);
 
+  if (!messages.length) return null;
   return (
     <div className="message-boxes">
       {messages.map(m => {

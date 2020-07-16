@@ -54,6 +54,7 @@ export interface LoginUser {
     description: string;
     dicomImageServer: string;
     domains: string[];
+    defaultDomain: string | null;
     globalPrivileges: GlobalPrivileges[];
     groups: string[];
     lastLoginIp: string;

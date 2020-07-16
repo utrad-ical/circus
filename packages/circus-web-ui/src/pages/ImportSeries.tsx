@@ -1,20 +1,24 @@
-import React, { useState } from 'react';
-import { Alert } from 'components/react-bootstrap';
-import ShrinkSelect from 'rb/ShrinkSelect';
-import FileUpload from 'components/FileUpload';
+import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
 import { showMessage } from 'actions';
+import FileUpload from 'components/FileUpload';
+import { Alert } from 'components/react-bootstrap';
+import React, { useState } from 'react';
+import useLocalPreference from 'utils/useLocalPreference';
 import useLoginUser from 'utils/useLoginUser';
 
-const ImportSeries = props => {
-  const loginUser = useLoginUser();
+const ImportSeries: React.FC<{}> = props => {
+  const loginUser = useLoginUser()!;
   const domains = loginUser.domains || [];
 
-  const [uploadDomain, setUploadDomain] = useState(() =>
-    loginUser.defaultDomain
-      ? loginUser.defaultDomain
-      : domains.length
-      ? domains[0]
-      : null
+  const [domainPreference, setDomainPreference] = useLocalPreference<
+    string | null
+  >('domain', null);
+
+  const [uploadDomain, setUploadDomain] = useState(
+    () =>
+      domainPreference ??
+      loginUser.defaultDomain ??
+      (domains.length ? domains[0] : null)
   );
 
   if (!Array.isArray(domains) || domains.length === 0) {
@@ -25,7 +29,8 @@ const ImportSeries = props => {
     );
   }
 
-  const handleUploaded = async res => {
+  const handleUploaded = async (res: any) => {
+    setDomainPreference(uploadDomain);
     const count = res.uploaded;
     showMessage(`Successfully uploaded ${count} DICOM instances!`, 'success', {
       short: true
@@ -47,7 +52,7 @@ const ImportSeries = props => {
         targetResource="import-series"
         uploadFileMax={loginUser.uploadFileMax}
         uploadFileSizeMax={loginUser.uploadFileSizeMax}
-        url={`series/domain/${encodeURIComponent(uploadDomain)}`}
+        url={`series/domain/${encodeURIComponent(uploadDomain || '')}`}
         onUploaded={handleUploaded}
       >
         <div>

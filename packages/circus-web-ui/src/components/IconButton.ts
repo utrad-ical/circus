@@ -1,4 +1,4 @@
-import { createIconButtonComponent } from 'rb/IconButton';
+import { createIconButtonComponent } from '@smikitky/rb-components/lib/IconButton';
 import Icon from './Icon';
 
 const IconButton = createIconButtonComponent(Icon);

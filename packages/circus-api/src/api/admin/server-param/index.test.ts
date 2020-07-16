@@ -15,7 +15,11 @@ beforeEach(async () => {
 
 it('should return parameters', async () => {
   const res = await axios.get('api/admin/server-params');
-  expect(res.data).toEqual({ foo: 'bar', color: ['green', 'black', 'blue'] });
+  expect(res.data).toEqual({
+    foo: 'bar',
+    color: ['green', 'black', 'blue'],
+    defaultDomain: 'default'
+  });
 });
 
 it('should return one parameter', async () => {
@@ -45,6 +49,7 @@ it('should bulk-update parametes', async () => {
   expect(res2.data).toEqual({
     foo: 'buz',
     color: ['green', 'black', 'blue'],
+    defaultDomain: 'default',
     price: 1980
   });
 });

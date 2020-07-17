@@ -41,6 +41,13 @@ test('parseDate', () => {
 
 test('extractParameters', async () => {
   const dicomTags = await readDicomTags(content);
-  expect(dicomTags.parameters.TransferSyntaxUID).toBe('1.2.840.10008.1.2.1');
-  expect(dicomTags.parameters.PhotometricInterpretation).toBe('MONOCHROME2');
+  expect(dicomTags.parameters.TransferSyntaxUID).toBe('1.2.840.10008.1.2.1'); //UI
+  expect(dicomTags.parameters.PhotometricInterpretation).toBe('MONOCHROME2'); //CS
+  expect(dicomTags.parameters.InstanceNumber).toBe(8); //IS
+  expect(dicomTags.parameters.ImagePositionPatient).toEqual([
+    -119.7656,
+    -399.7656,
+    -280
+  ]); //DS
+  expect(dicomTags.parameters.SliceLocation).toBe(280); //DS
 });

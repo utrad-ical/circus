@@ -121,8 +121,6 @@ const elementToText = (
   vr: string,
   rootDataSet: parser.DicomDataset
 ): { desc?: string; text?: string } => {
-  const element = dataSet.elements[key];
-
   if (vr.indexOf('|') >= 0) {
     // This means the true VR type depends on other DICOM element.
     const vrs = vr.split('|');
@@ -136,38 +134,11 @@ const elementToText = (
           return elementToText(dataSet, key, 'US', rootDataSet);
         case 1:
           return elementToText(dataSet, key, 'SS', rootDataSet);
-        default:
-          return { desc: 'error: could not determine pixel representation' };
       }
-    } else {
-      return { desc: 'error: could not guess VR of this tag' };
     }
   }
 
-  const asHexDump = () => {
-    const bin = Buffer.from(
-      dataSet.byteArray.buffer,
-      element.dataOffset,
-      element.length
-    );
-    return `bin: 0x${bin.toString('hex')}`;
-  };
-
   switch (vr) {
-    case 'OB': // Other Byte String
-    case 'OW': // Other Word String
-    case 'OD': // Other Double String
-    case 'OF': // Other Float String
-    case '??': // VR not provided at all. Should not happen.
-      return element.length <= 16
-        ? { desc: asHexDump() }
-        : { desc: `binary data of length: ${element.length}` };
-    case 'SQ': {
-      if (Array.isArray(element.items)) {
-        const len = element.items.length;
-        return { desc: `sequence of ${len} item${len !== 1 ? 's' : ''}` };
-      } else return { desc: 'error: broken sequence' }; // should not happen
-    }
     case 'AT': {
       // Attribute Tag
       const group = dataSet.uint16(key) as number;
@@ -188,28 +159,9 @@ const elementToText = (
       return numberListToText(dataSet, key, 'uint16', 2);
     case 'SS':
       return numberListToText(dataSet, key, 'int16', 2);
-    case 'UN': {
-      // "Unknown" VR. We do not know how to stringify this value,
-      // but tries to interpret as an ASCII string.
-      const str = dataSet.string(key);
-      const isAscii = typeof str === 'string' && /^[\x20-\x7E]+$/.test(str);
-      if (isAscii) return { text: str };
-      return element.length <= 16
-        ? { desc: asHexDump() }
-        : { desc: `seemengly binary data (UN) of length: ${element.length}` };
-    }
-    case 'SH':
-    case 'LO':
-    case 'ST':
-    case 'LT':
-    case 'PN':
-    case 'UT': {
-    }
     default: {
       // Other string VRs which use ASCII chars, such as DT
       const text = dataSet.string(key);
-      if (typeof text === 'undefined') return { desc: 'undefined' };
-      if (!text.length) return { desc: 'empty string' };
       return { text };
     }
   }
@@ -236,14 +188,24 @@ const extractParameters = (dataset: parser.DicomDataset) => {
   for (const element in dataset.elements) {
     const key = element.substring(1, 9).toUpperCase();
     if (key in standardDataElements) {
-      if (/^0018/ || /^0020/ || /^0028/.test(key)) {
+      const saveGroups = [/^0018/, /^0020/, /^0028/];
+      if (saveGroups.some(g => g.test(key))) {
         const name = standardDataElements[key].name;
-        data[name] = elementToText(
+        const vr = standardDataElements[key].vr;
+        const text = elementToText(
           dataset,
           element,
           standardDataElements[key].vr,
           dataset
         ).text;
+        data[name] = text;
+        if (vr === 'DS' || vr === 'IS') {
+          data[name] = text !== undefined ? Number(text) : undefined;
+          if (text?.includes('\\')) {
+            const array = text.split('\\').map(Number);
+            data[name] = array;
+          }
+        }
       }
     }
   }

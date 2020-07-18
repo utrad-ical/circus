@@ -4,8 +4,11 @@ import { loadPluginInfo } from 'actions';
 import { useSelector, useDispatch } from 'react-redux';
 import { useApi } from 'utils/api';
 
-const PluginDisplay = props => {
-  const { pluginId, ...rest } = props;
+const PluginDisplay: React.FC<{
+  pluginId: string;
+  size: string;
+}> = props => {
+  const { pluginId, size } = props;
   const plugin = useSelector(state => state.plugin[pluginId]);
   const dispatch = useDispatch();
   const api = useApi();
@@ -22,7 +25,7 @@ const PluginDisplay = props => {
       title={title}
       icon={plugin.icon}
       toolTip={plugin.description}
-      {...rest}
+      size={size}
     />
   );
 };

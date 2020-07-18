@@ -1,9 +1,14 @@
 import React from 'react';
-import ShrinkSelect from 'rb/ShrinkSelect';
+import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
 import BodyPartIcon from './BodyPartIcon';
+import Project from 'types/Project';
 
-const ProjectSelector = props => {
-  const options = {};
+const ProjectSelector: React.FC<{
+  value: string;
+  onChange: (value: string) => void;
+  projects: { projectId: string; project: Project }[];
+}> = props => {
+  const options: { [key: string]: any } = {};
   props.projects.forEach(p => {
     options[p.projectId] = {
       caption: (

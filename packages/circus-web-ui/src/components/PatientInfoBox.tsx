@@ -1,6 +1,7 @@
 import React, { Fragment } from 'react';
 import Icon from 'components/Icon';
 import styled from 'styled-components';
+import PatientInfo from 'types/PatientInfo';
 
 const StyledDiv = styled.div`
   .masked {
@@ -18,7 +19,9 @@ const StyledDiv = styled.div`
   }
 `;
 
-const PatientInfoBox = props => {
+const PatientInfoBox: React.FC<{
+  value: PatientInfo | undefined;
+}> = props => {
   const { value: pt } = props;
   if (!pt) {
     return (
@@ -47,12 +50,12 @@ const PatientInfoBox = props => {
             &ensp;<span className="patient-birthdate">DOB: {pt.birthDate}</span>
           </Fragment>
         )}
-        {pt.size > 0 && (
+        {typeof pt.size === 'number' && pt.size > 0 && (
           <Fragment>
             &ensp;<span className="patient-size">Ht: {pt.size}</span>
           </Fragment>
         )}
-        {pt.weight > 0 && (
+        {typeof pt.weight === 'number' && pt.weight > 0 && (
           <Fragment>
             &ensp;<span className="patient-weight">Wt: {pt.weight}</span>
           </Fragment>

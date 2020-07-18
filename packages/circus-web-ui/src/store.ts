@@ -6,40 +6,17 @@ import {
   Reducer
 } from 'redux';
 import thunk from 'redux-thunk';
+import Plugin from 'types/Plugin';
+import Project, { ProjectRoles } from 'types/Project';
 
 // The redux store should contain only information shared across pages,
 // such as the login user information.
-
-interface IconDefinition {
-  glyph: string;
-  color: string;
-  backgroundColor: string;
-}
-
-interface Project {
-  projectId: string;
-  createdAt: string;
-  updatedAt: string;
-  icon: IconDefinition;
-  projectName: string;
-  description: string;
-  tags: any[];
-  windowPresets: any[];
-  windowPriority: any[];
-}
 
 type GlobalPrivileges =
   | 'createProject'
   | 'deleteProject'
   | 'manageServer'
   | 'personalInfoView';
-
-type ProjectRoles =
-  | 'read'
-  | 'write'
-  | 'addSeries'
-  | 'viewPersonalInfo'
-  | 'moderate';
 
 export interface SearchPreset {
   name: string;
@@ -187,11 +164,7 @@ const searches: Reducer<{ [name: string]: Search<any> }> = (
 };
 
 export interface Plugins {
-  [pluginId: string]:
-    | 'loading'
-    | {
-        icon: string;
-      };
+  [pluginId: string]: 'loading' | Plugin;
 }
 
 const plugin: Reducer<Plugins> = (state = {}, action) => {

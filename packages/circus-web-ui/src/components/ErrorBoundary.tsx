@@ -1,12 +1,15 @@
 import React from 'react';
 
-export default class ErrorBoundary extends React.Component {
-  constructor(props) {
+export default class ErrorBoundary extends React.Component<
+  {},
+  { error?: Error }
+> {
+  constructor(props: any) {
     super(props);
     this.state = { error: undefined };
   }
 
-  componentDidCatch(error, info) {
+  componentDidCatch(error: Error, info: React.ErrorInfo) {
     this.setState({ error });
     console.error(error, info);
   }

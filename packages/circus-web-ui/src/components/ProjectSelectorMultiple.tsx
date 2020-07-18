@@ -1,10 +1,14 @@
 import React from 'react';
-import MultiSelect from 'rb/MultiSelect';
+import MultiSelect from '@smikitky/rb-components/lib/MultiSelect';
 import BodyPartIcon from './BodyPartIcon';
 import styled from 'styled-components';
+import Project from 'types/Project';
 
-const Renderer = props => {
-  const { renderAs, project } = props;
+const Renderer: React.FC<{
+  renderAs: 'select' | 'list';
+  project: Project;
+}> = props => {
+  const { renderAs = 'dropdown', project } = props;
   return (
     <span>
       <BodyPartIcon icon={project.icon} />
@@ -23,12 +27,14 @@ const StyledMultiSelect = styled(MultiSelect)`
   }
 `;
 
-const ProjectSelectorMultiple = props => {
+const ProjectSelectorMultiple: React.FC<{
+  projects: { projectId: string; project: Project }[];
+}> = props => {
   const { projects } = props;
-  const options = {};
+  const options: { [key: string]: any } = {};
   projects.forEach(p => {
     options[p.projectId] = {
-      caption: p.project.projecName,
+      caption: p.project.projectName,
       project: p.project
     };
   });

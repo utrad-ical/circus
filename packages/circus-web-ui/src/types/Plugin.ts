@@ -1,4 +1,4 @@
-import { IconDefinition } from 'components/BodyPartIcon';
+import { CircusIconDefinition } from 'components/BodyPartIcon';
 
 interface Plugin {
   pluginId: string;
@@ -10,7 +10,7 @@ interface Plugin {
     timeout?: number;
     gpus?: string;
   };
-  icon: IconDefinition;
+  icon: CircusIconDefinition;
   displayStrategy: any[];
 }
 

@@ -6,8 +6,8 @@ const MultiTagSelect: React.FC<{
   tags: { name: string; color: string }[];
   value: string[];
   onChange: (value: string[]) => void;
-  bsSize: any;
-  bsStyle: string;
+  bsSize?: any;
+  bsStyle?: string;
 }> = props => {
   const { value, onChange, tags, bsSize, bsStyle } = props;
 

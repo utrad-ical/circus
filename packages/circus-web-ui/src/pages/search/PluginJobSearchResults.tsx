@@ -77,6 +77,7 @@ const FeedbackRenderer: DataGridRenderer<any> = props => {
         </span>
       )}
       {consensual > 0 && <Icon icon="tower" />}
+      {!personals && !consensual && <span className="feedback-none">none</span>}
     </span>
   );
 };
@@ -125,7 +126,7 @@ const columns: DataGridColumnDefinition<any>[] = [
   { caption: '', className: 'operation', renderer: Operation }
 ];
 
-const DataViewContainer = styled.div`
+const StyledDataGrid = styled(DataGrid)`
   .progress {
     height: 33px;
   }
@@ -141,13 +142,11 @@ const DataViewContainer = styled.div`
 const DataView: React.FC<{ value: any[] }> = props => {
   const { value } = props;
   return (
-    <DataViewContainer>
-      <DataGrid
-        className="plugin-job-search-result"
-        columns={columns}
-        value={value}
-      />
-    </DataViewContainer>
+    <StyledDataGrid
+      className="plugin-job-search-result"
+      columns={columns}
+      value={value}
+    />
   );
 };
 

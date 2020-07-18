@@ -6,6 +6,7 @@ import PatientInfo from 'types/PatientInfo';
 const StyledDiv = styled.div`
   .masked {
     color: silver;
+    line-height: 2.2;
   }
   .sub {
     font-size: 80%;
@@ -32,13 +33,12 @@ const PatientInfoBox: React.FC<{
             &ensp;(masked)
           </span>
         </div>
-        <div className="sub masked">&ensp;</div>
       </StyledDiv>
     );
   }
   return (
     <StyledDiv>
-      <div>
+      <div className="main">
         <span className="patient-name">{pt.patientName}</span>&ensp;
         <span className="patient-age">{pt.age}</span>
         <span className="patient-sex">{pt.sex}</span>

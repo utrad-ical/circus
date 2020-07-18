@@ -12,8 +12,14 @@ const StyledTable = styled.table.attrs((props: any) => ({
       cursor: pointer;
     }
   }
+  .operation {
+    text-align: right;
+  }
   .progress {
     margin: 0;
+  }
+  .feedback-none {
+    color: silver;
   }
 `;
 

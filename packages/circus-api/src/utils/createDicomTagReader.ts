@@ -103,37 +103,36 @@ const numberListToText = (
   key: string,
   accessor: string,
   valueBytes: number
-): { desc?: string; text?: string } => {
+): string => {
   // Each numerical value field may contain more than one number value
   // due to the value multiplicity (VM) mechanism.
   const numElements = dataSet.elements[key].length / valueBytes;
-  if (!numElements) return { desc: 'empty value' };
   const numbers: number[] = [];
   for (let i = 0; i < numElements; i++) {
     numbers.push((<any>dataSet)[accessor](key, i) as number);
   }
-  return { text: numbers.join('\\') };
+  return numbers.join('\\');
 };
 
-const elementToText = (
+const readElement = (
   dataSet: parser.DicomDataset,
   key: string,
   vr: string,
   rootDataSet: parser.DicomDataset
-): { desc?: string; text?: string } => {
+): string | number | number[] | undefined => {
   if (vr.indexOf('|') >= 0) {
     // This means the true VR type depends on other DICOM element.
     const vrs = vr.split('|');
     if (vrs.every(v => ['OB', 'OW', 'OD', 'OF'].indexOf(v) >= 0)) {
       // This is a binary data, anyway, so treat it as such
-      return elementToText(dataSet, key, 'OB', rootDataSet);
+      return readElement(dataSet, key, 'OB', rootDataSet);
     } else if (vrs.every(v => ['US', 'SS'].indexOf(v) >= 0)) {
       const pixelRepresentation = rootDataSet.uint16('x00280103');
       switch (pixelRepresentation) {
         case 0:
-          return elementToText(dataSet, key, 'US', rootDataSet);
+          return readElement(dataSet, key, 'US', rootDataSet);
         case 1:
-          return elementToText(dataSet, key, 'SS', rootDataSet);
+          return readElement(dataSet, key, 'SS', rootDataSet);
       }
     }
   }
@@ -145,7 +144,7 @@ const elementToText = (
       const groupHexStr = ('0000' + group.toString(16)).substr(-4);
       const element = dataSet.uint16(key) as number;
       const elementHexStr = ('0000' + element.toString(16)).substr(-4);
-      return { text: '0x' + groupHexStr + elementHexStr };
+      return '0x' + groupHexStr + elementHexStr;
     }
     case 'FL':
       return numberListToText(dataSet, key, 'float', 4);
@@ -159,10 +158,17 @@ const elementToText = (
       return numberListToText(dataSet, key, 'uint16', 2);
     case 'SS':
       return numberListToText(dataSet, key, 'int16', 2);
+    case 'DS':
+    case 'IS':
+      const text = dataSet.string(key);
+      if (text?.includes('\\')) {
+        return text.split('\\').map(Number);
+      }
+      return text !== undefined ? Number(text) : undefined;
     default: {
       // Other string VRs which use ASCII chars, such as DT
       const text = dataSet.string(key);
-      return { text };
+      return text;
     }
   }
 };
@@ -188,24 +194,15 @@ const extractParameters = (dataset: parser.DicomDataset) => {
   for (const element in dataset.elements) {
     const key = element.substring(1, 9).toUpperCase();
     if (key in standardDataElements) {
-      const saveGroups = [/^0018/, /^0020/, /^0028/];
-      if (saveGroups.some(g => g.test(key))) {
+      if (/^(0018|0020|0028)/.test(key)) {
         const name = standardDataElements[key].name;
-        const vr = standardDataElements[key].vr;
-        const text = elementToText(
+        const value = readElement(
           dataset,
           element,
           standardDataElements[key].vr,
           dataset
-        ).text;
-        data[name] = text;
-        if (vr === 'DS' || vr === 'IS') {
-          data[name] = text !== undefined ? Number(text) : undefined;
-          if (text?.includes('\\')) {
-            const array = text.split('\\').map(Number);
-            data[name] = array;
-          }
-        }
+        );
+        data[name] = value;
       }
     }
   }

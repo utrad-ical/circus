@@ -218,6 +218,11 @@ export const readDicomTags = async (
     width: dataset.uint16('x00280011'), // columns
     height: dataset.uint16('x00280010'), // rows
     instanceNumber: dataset.intString('x00200013'),
+    studyDate: parseDate(
+      dataset.string('x00080020'), // study date
+      dataset.string('x00080030'), // study time
+      tzOffset
+    ),
     seriesDate: parseDate(
       dataset.string('x00080021'), // series date
       dataset.string('x00080031'), // series time

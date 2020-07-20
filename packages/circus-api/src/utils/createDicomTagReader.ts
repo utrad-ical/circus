@@ -193,17 +193,15 @@ const extractParameters = (dataset: parser.DicomDataset) => {
 
   for (const element in dataset.elements) {
     const key = element.substring(1, 9).toUpperCase();
-    if (key in standardDataElements) {
-      if (/^(0018|0020|0028)/.test(key)) {
-        const name = standardDataElements[key].name;
-        const value = readElement(
-          dataset,
-          element,
-          standardDataElements[key].vr,
-          dataset
-        );
-        data[name] = value;
-      }
+    if (key in standardDataElements && /^(0018|0020|0028)/.test(key)) {
+      const name = standardDataElements[key].name;
+      const value = readElement(
+        dataset,
+        element,
+        standardDataElements[key].vr,
+        dataset
+      );
+      data[name] = value;
     }
   }
   return stripUndefined(data);

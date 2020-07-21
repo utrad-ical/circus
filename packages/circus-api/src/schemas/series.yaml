@@ -32,7 +32,9 @@ properties:
       The list of instance numbers which this series consists of,
       described as a string in `multi-integer-range` format.
   seriesDate:
-    date: true
+    oneOf:
+      - date: true
+      - type: 'null'
     description: >
       The "series date", as written in the DICOM file.
   modality:

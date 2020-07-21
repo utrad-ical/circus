@@ -174,19 +174,16 @@ export const handleSearch: RouteMiddleware = ({ models }) => {
       ctx.throw(status.BAD_REQUEST, 'Bad filter.');
 
     // const domainFilter = {};
+    const patientInfoInFilter = isPatientInfoInFilter(customFilter!);
     const accessibleProjectIds = ctx.userPrivileges.accessibleProjects
-      .filter(p => p.roles.find(r => r === 'read'))
+      .filter(
+        p =>
+          p.roles.indexOf('read') >= 0 &&
+          (!patientInfoInFilter || p.roles.indexOf('viewPersonalInfo') >= 0)
+      )
       .map(p => p.projectId);
-    const unsearchableByPatientInfoIds = isPatientInfoInFilter(customFilter!)
-      ? ctx.userPrivileges.accessibleProjects
-          .filter(p => p.roles.every(r => r !== 'viewPersonalInfo'))
-          .map(p => p.projectId)
-      : [];
     const accessibleProjectFilter = {
-      projectId: {
-        $in: accessibleProjectIds,
-        $nin: unsearchableByPatientInfoIds
-      }
+      projectId: { $in: accessibleProjectIds }
     };
     const filter = {
       $and: [customFilter!, accessibleProjectFilter /* domainFilter */]
@@ -229,7 +226,7 @@ export const handleSearch: RouteMiddleware = ({ models }) => {
       ],
       {
         defaultSort: { createdAt: -1 },
-        transform: data => maskPatientInfo(ctx)(data)
+        transform: maskPatientInfo(ctx)
       }
     );
   };

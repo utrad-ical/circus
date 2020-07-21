@@ -31,12 +31,6 @@ properties:
     description: >
       The list of instance numbers which this series consists of,
       described as a string in `multi-integer-range` format.
-  studyDate:
-    oneOf:
-      - date: true
-      - type: 'null'
-    description: >
-      The "study date", as written in the DICOM file.
   seriesDate:
     oneOf:
       - date: true

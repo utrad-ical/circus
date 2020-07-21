@@ -49,14 +49,14 @@ const createDicomImporter: FunctionService<
       await models.series.modifyOne(seriesUid, { images: mr.toString() });
     } else {
       // Insert as a new series
-      const determineSeriesDateToImport = tags => {
+      const determineSeriesDateToImport = (): Date | null => {
         if (tags.seriesDate) return tags.seriesDate;
         if (tags.studyDate) return tags.studyDate;
         return null;
       };
       const doc = {
         ...tags,
-        seriesDate: determineSeriesDateToImport(tags),
+        seriesDate: determineSeriesDateToImport(),
         images: String(instanceNumber),
         domain,
         storageId: 0

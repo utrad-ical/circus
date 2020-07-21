@@ -3,7 +3,7 @@ import Icon from './Icon';
 import classnames from 'classnames';
 import styled from 'styled-components';
 
-export interface IconDefinition {
+export interface CircusIconDefinition {
   glyph: string;
   color: string;
   backgroundColor: string;
@@ -26,8 +26,8 @@ const StyledSpan = styled.span`
  * Renderes a body-part icon with the specified color and backgroundColor.
  */
 const BodyPartIcon: React.FC<{
-  size: string;
-  icon: IconDefinition;
+  size?: string;
+  icon: CircusIconDefinition;
 }> = props => {
   const {
     size,

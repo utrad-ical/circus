@@ -31,6 +31,22 @@ describe('plugin-job search', () => {
     expect(res.data.items).toHaveLength(1);
     expect(res.data.items[0].patientInfo.age).toBe(20);
   });
+
+  test('Filter by power user domain', async () => {
+    axios = apiTest.axiosInstances.bob;
+    const res = await axios.get('api/plugin-jobs');
+    expect(res.status).toBe(200);
+    expect(res.data.items).toHaveLength(1);
+    axios = apiTest.axiosInstances.alice;
+  });
+
+  test('Filter by guest domain', async () => {
+    axios = apiTest.axiosInstances.guest;
+    const res = await axios.get('api/plugin-jobs');
+    expect(res.status).toBe(200);
+    expect(res.data.items).toHaveLength(0);
+    axios = apiTest.axiosInstances.alice;
+  });
 });
 
 describe('plugin-job registration', () => {

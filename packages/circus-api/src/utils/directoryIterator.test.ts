@@ -12,7 +12,7 @@ const toArray = async <T>(generator: AsyncGenerator<T>) => {
 
 test('directory', async () => {
   const entries = await toArray(directoryIterator(testDir));
-  expect(entries).toHaveLength(2);
+  expect(entries).toHaveLength(22);
   expect(entries.find(e => e.type === 'fs')).toBeTruthy();
   expect(entries.find(e => e.type === 'zip')).toBeTruthy();
 });

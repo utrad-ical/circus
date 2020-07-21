@@ -11,7 +11,7 @@ const rsPath = path.dirname(
 module.exports = {
   mode: nodeEnv,
   entry: {
-    application: './src/index.js'
+    application: './src/index.tsx'
   },
   output: {
     path: path.join(__dirname, 'public'),

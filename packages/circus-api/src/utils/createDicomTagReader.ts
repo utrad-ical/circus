@@ -98,12 +98,12 @@ const extractAge = (
   }
 };
 
-const numberListToText = (
+const readNumberList = (
   dataSet: parser.DicomDataset,
   key: string,
   accessor: string,
   valueBytes: number
-): string => {
+): number | number[] => {
   // Each numerical value field may contain more than one number value
   // due to the value multiplicity (VM) mechanism.
   const numElements = dataSet.elements[key].length / valueBytes;
@@ -111,7 +111,7 @@ const numberListToText = (
   for (let i = 0; i < numElements; i++) {
     numbers.push((<any>dataSet)[accessor](key, i) as number);
   }
-  return numbers.join('\\');
+  return numbers.length > 1 ? numbers : numbers[0];
 };
 
 const readElement = (
@@ -147,17 +147,17 @@ const readElement = (
       return '0x' + groupHexStr + elementHexStr;
     }
     case 'FL':
-      return numberListToText(dataSet, key, 'float', 4);
+      return readNumberList(dataSet, key, 'float', 4);
     case 'FD':
-      return numberListToText(dataSet, key, 'double', 8);
+      return readNumberList(dataSet, key, 'double', 8);
     case 'UL':
-      return numberListToText(dataSet, key, 'uint32', 4);
+      return readNumberList(dataSet, key, 'uint32', 4);
     case 'SL':
-      return numberListToText(dataSet, key, 'int32', 4);
+      return readNumberList(dataSet, key, 'int32', 4);
     case 'US':
-      return numberListToText(dataSet, key, 'uint16', 2);
+      return readNumberList(dataSet, key, 'uint16', 2);
     case 'SS':
-      return numberListToText(dataSet, key, 'int16', 2);
+      return readNumberList(dataSet, key, 'int16', 2);
     case 'DS':
     case 'IS':
       const text = dataSet.string(key);

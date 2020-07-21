@@ -22,7 +22,7 @@
   lastLoginIp: '0.0.0.0'
   preferences:
     theme: mode_white
-    personalInfoView: false
+    personalInfoView: true
     seriesSearchPresets: []
     caseSearchPresets: []
     pluginJobSearchPresets: []
@@ -43,3 +43,18 @@
     pluginJobSearchPresets: []
   loginEnabled: true
   groups: [3] # guests
+- userEmail: carol@example.com
+  loginId: carol
+  # password is 'carolSecret'
+  password: '$2y$10$n6w8Um2GiKANrUsYq5oDt.h1wNC6fV2QzPzjl27dWaBdzLw.CgPqq'
+  description: Carol
+  lastLoginTime: { $date: 1405266782000 }
+  lastLoginIp: '0.0.0.0'
+  preferences:
+    theme: mode_white
+    personalInfoView: true
+    seriesSearchPresets: []
+    caseSearchPresets: []
+    pluginJobSearchPresets: []
+  loginEnabled: true
+  groups: [4] # power user 2

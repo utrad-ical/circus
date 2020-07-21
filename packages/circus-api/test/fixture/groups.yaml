@@ -25,3 +25,12 @@
   addSeriesProjects: []
   viewPersonalInfoProjects: []
   moderateProjects: []
+- groupId: 4
+  groupName: powerUser2
+  privileges: ['personalInfoView']
+  domains: ['vega.org', 'altair.org']
+  readProjects: ['8883fdef6f5144f50eb2a83cd34baa44']
+  writeProjects: ['8883fdef6f5144f50eb2a83cd34baa44']
+  addSeriesProjects: []
+  viewPersonalInfoProjects: ['8883fdef6f5144f50eb2a83cd34baa44']
+  moderateProjects: []

@@ -70,7 +70,7 @@ describe('plugin-job registration', () => {
 
   test('should reject if series image out of range', async () => {
     // Series image out of range
-    const res1 = await axios.request({
+    const res = await axios.request({
       method: 'post',
       url: 'api/plugin-jobs',
       data: {
@@ -84,12 +84,12 @@ describe('plugin-job registration', () => {
         priority: 123
       }
     });
-    expect(res1.status).toBe(400);
+    expect(res.status).toBe(400);
   });
 
   test('should reject if series lacks PVD', async () => {
     // Lacks partial volume descriptor
-    const res2 = await axios.request({
+    const res = await axios.request({
       method: 'post',
       url: 'api/plugin-jobs',
       data: {
@@ -98,16 +98,39 @@ describe('plugin-job registration', () => {
         priority: 123
       }
     });
-    expect(res2.status).toBe(400);
+    expect(res.status).toBe(400);
+  });
+
+  test('should reject if difference series domain', async () => {
+    const bob = apiTest.axiosInstances.bob;
+    const res = await bob.request({
+      method: 'post',
+      url: 'api/plugin-jobs',
+      data: {
+        pluginId:
+          'd135e1fbb368e35f940ae8e6deb171e90273958dc3938de5a8237b73bb42d9c2',
+        series: [
+          {
+            seriesUid: '111.222.333.444.777',
+            partialVolumeDescriptor: { start: 1, end: 10, delta: 1 }
+          },
+          {
+            seriesUid: '222.222.333.444.777',
+            partialVolumeDescriptor: { start: 1, end: 10, delta: 1 }
+          }
+        ]
+      }
+    });
+    expect(res.data.error).toMatch('Series must be the same domain.');
   });
 
   test('should return a finished plug-in job', async () => {
     const res = await axios.request({
       url: 'api/plugin-jobs/01dxgwv3k0medrvhdag4mpw9wa'
     });
+    expect(res.status).toBe(200);
     expect(res.data.jobId).toBe('01dxgwv3k0medrvhdag4mpw9wa');
     expect(res.data.status).toBe('finished');
-    expect(res.status).toBe(200);
   });
 });
 

@@ -50,4 +50,5 @@ test('extractParameters', async () => {
     -280
   ]); //DS
   expect(dicomTags.parameters.SliceLocation).toBe(280); //DS
+  expect(dicomTags.parameters.BitsAllocated).toBe(16); //US
 });

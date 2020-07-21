@@ -9,7 +9,7 @@ afterAll(async () => await apiTest.tearDown());
 
 const cid = 'faeb503e97f918c882453fd2d789f50f4250267740a0b3fbcc85a529f2d7715b';
 
-it('should perform search', async () => {
+it('search all', async () => {
   const res = await ax.bob.request({
     url: 'api/cases',
     method: 'get'
@@ -40,7 +40,9 @@ it('search with patient name in regex', async () => {
   expect(res.data.items[0].patientInfo.patientName).toBe('Anzu');
 });
 
-it('should not search result when patientInfo is used by unauthorized user.', async () => {
+it('search from user with no showPatientInfo privilege', async () => {
+  // Bob has no `showPatientInfo` priviledge for the default project,
+  // so the results from this project will be excluded.
   const res = await ax.bob.get('api/cases', {
     params: {
       filter: JSON.stringify({

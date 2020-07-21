@@ -1,4 +1,7 @@
-import createDicomTagReader, { parseDate } from './createDicomTagReader';
+import createDicomTagReader, {
+  parseDate,
+  readDicomTags
+} from './createDicomTagReader';
 import fs from 'fs-extra';
 import path from 'path';
 
@@ -34,4 +37,18 @@ test('parseDate', () => {
   expect(parseDate('19870430', '235959.999')).toEqual(
     new Date('1987-04-30T23:59:59.999Z')
   );
+});
+
+test('extractParameters', async () => {
+  const dicomTags = await readDicomTags(content);
+  expect(dicomTags.parameters.TransferSyntaxUID).toBe('1.2.840.10008.1.2.1'); //UI
+  expect(dicomTags.parameters.PhotometricInterpretation).toBe('MONOCHROME2'); //CS
+  expect(dicomTags.parameters.InstanceNumber).toBe(8); //IS
+  expect(dicomTags.parameters.ImagePositionPatient).toEqual([
+    -119.7656,
+    -399.7656,
+    -280
+  ]); //DS
+  expect(dicomTags.parameters.SliceLocation).toBe(280); //DS
+  expect(dicomTags.parameters.BitsAllocated).toBe(16); //US
 });

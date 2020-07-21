@@ -15,7 +15,13 @@ export const handlePost: RouteMiddleware = ({ models, cs }) => {
     const { priority, ...request } = ctx.request.body;
 
     try {
-      await fetchAccessibleSeries(models, ctx.userPrivileges, request.series);
+      const seriesData = await fetchAccessibleSeries(
+        models,
+        ctx.userPrivileges,
+        request.series
+      );
+      if (seriesData.slice(1).some(s => s.domain !== seriesData[0].domain))
+        throw new Error('Series must be the same domain.');
     } catch (err) {
       ctx.throw(status.BAD_REQUEST, err);
     }

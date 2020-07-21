@@ -24,10 +24,25 @@ const maskPatientInfo = (ctx: CircusContext) => {
     const viewable = project.roles.some(r => r === 'viewPersonalInfo');
     const view = viewable && wantToView;
     if (!view) {
-      delete caseData.patientInfoCache;
+      delete caseData.patientInfo;
     }
     return caseData;
   };
+};
+
+const isPatientInfoInFilter = (customFilter: { [key: string]: any }) => {
+  const checkKeyVal = (key: string, value: any) => {
+    if (key === '$and' || key === '$or') {
+      return value.some((item: object) => isPatientInfoInFilter(item));
+    } else {
+      return /^patientInfo/.test(key);
+    }
+  };
+
+  if (Object.keys(customFilter).length === 0) return false;
+  return Object.keys(customFilter).every(key =>
+    checkKeyVal(key, customFilter[key])
+  );
 };
 
 export const handleGet: RouteMiddleware = () => {
@@ -64,6 +79,12 @@ const makeNewCase = async (
     series
   );
   seriesData.forEach(i => (domains[i.domain] = true));
+
+  if (seriesData.slice(1).some(s => s.domain !== seriesData[0].domain)) {
+    const error = new Error('All series must belong to the same domain.');
+    error.status = 400;
+    throw error;
+  }
 
   const revision = {
     creator: user.userEmail,
@@ -153,9 +174,14 @@ export const handleSearch: RouteMiddleware = ({ models }) => {
       ctx.throw(status.BAD_REQUEST, 'Bad filter.');
 
     // const domainFilter = {};
-    const accessibleProjectIds = ctx.userPrivileges.accessibleProjects.map(
-      p => p.projectId
-    );
+    const patientInfoInFilter = isPatientInfoInFilter(customFilter!);
+    const accessibleProjectIds = ctx.userPrivileges.accessibleProjects
+      .filter(
+        p =>
+          p.roles.indexOf('read') >= 0 &&
+          (!patientInfoInFilter || p.roles.indexOf('viewPersonalInfo') >= 0)
+      )
+      .map(p => p.projectId);
     const accessibleProjectFilter = {
       projectId: { $in: accessibleProjectIds }
     };
@@ -198,7 +224,10 @@ export const handleSearch: RouteMiddleware = ({ models }) => {
           }
         }
       ],
-      { defaultSort: { createdAt: -1 } }
+      {
+        defaultSort: { createdAt: -1 },
+        transform: maskPatientInfo(ctx)
+      }
     );
   };
 };

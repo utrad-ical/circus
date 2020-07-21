@@ -9,7 +9,7 @@ afterAll(async () => await apiTest.tearDown());
 
 const cid = 'faeb503e97f918c882453fd2d789f50f4250267740a0b3fbcc85a529f2d7715b';
 
-it('should perform search', async () => {
+it('search all', async () => {
   const res = await ax.bob.request({
     url: 'api/cases',
     method: 'get'
@@ -19,7 +19,7 @@ it('should perform search', async () => {
 });
 
 it('search with patient name', async () => {
-  const res = await ax.bob.get('api/cases', {
+  const res = await ax.carol.get('api/cases', {
     params: {
       filter: JSON.stringify({ 'patientInfo.patientName': 'Anzu' })
     }
@@ -30,7 +30,7 @@ it('search with patient name', async () => {
 });
 
 it('search with patient name in regex', async () => {
-  const res = await ax.bob.get('api/cases', {
+  const res = await ax.carol.get('api/cases', {
     params: {
       filter: JSON.stringify({ 'patientInfo.patientName': { $regex: '^An' } })
     }
@@ -38,6 +38,26 @@ it('search with patient name in regex', async () => {
   expect(res.status).toBe(200);
   expect(res.data.items).toHaveLength(1);
   expect(res.data.items[0].patientInfo.patientName).toBe('Anzu');
+});
+
+it('search from user with no showPatientInfo privilege', async () => {
+  // Bob has no `showPatientInfo` priviledge for the default project,
+  // so the results from this project will be excluded.
+  const res = await ax.bob.get('api/cases', {
+    params: {
+      filter: JSON.stringify({
+        $and: [
+          {
+            caseId:
+              'faeb503e97f918c882453fd2d789f50f4250267740a0b3fbcc85a529f2d7715b'
+          },
+          { 'patientInfo.patientName': 'Anzu' }
+        ]
+      })
+    }
+  });
+  expect(res.status).toBe(200);
+  expect(res.data.items).toHaveLength(0);
 });
 
 it('should throw 400 for wrong request', async () => {
@@ -82,6 +102,39 @@ describe('create', () => {
     });
     expect(res.status).toBe(200);
     expect(res.data.caseId).toHaveLength(26);
+  });
+
+  it('should throw error for different domains in one series', async () => {
+    const res = await ax.bob.request({
+      url: 'api/cases/',
+      method: 'post',
+      data: {
+        projectId: '8883fdef6f5144f50eb2a83cd34baa44',
+        series: [
+          {
+            seriesUid: '111.222.333.444.777',
+            partialVolumeDescriptor: {
+              start: 1,
+              end: 200,
+              delta: 1
+            }
+          },
+          {
+            seriesUid: '222.222.333.444.777',
+            partialVolumeDescriptor: {
+              start: 1,
+              end: 200,
+              delta: 1
+            }
+          }
+        ],
+        tags: []
+      }
+    });
+    expect(res.status).toBe(400);
+    expect(res.data.error).toMatch(
+      'All series must belong to the same domain.'
+    );
   });
 
   it('should throw for invalid series image range', async () => {

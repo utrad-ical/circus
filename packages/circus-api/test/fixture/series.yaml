@@ -94,3 +94,19 @@
   patientInfo: { patientId: '015', patientName: 'Sakura', age: 20 }
   parameters: {}
   domain: sirius.org
+- seriesUid: 222.222.333.444.777
+  studyUid: 222.222.333.888.999.1002
+  width: 512
+  height: 512
+  images: '1-236'
+  seriesDate: { $date: '2017-10-12T00:11:00' }
+  modality: CT
+  seriesDescription: chest 2mm
+  bodyPart: Chest
+  stationName: LightSpeed
+  modelName: LightSpeed
+  manufacturer: GE
+  storageId: 0
+  patientInfo: {}
+  parameters: {}
+  domain: altair.org

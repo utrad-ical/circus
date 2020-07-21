@@ -27,7 +27,12 @@ const createDicomImporter: FunctionService<
 ) => {
   const importDicom = async (fileContent: ArrayBuffer, domain: string) => {
     // Read the DICOM file
-    const { instanceNumber, ...tags } = await dicomTagReader(fileContent);
+    const {
+      instanceNumber,
+      studyDate,
+      seriesDate,
+      ...tags
+    } = await dicomTagReader(fileContent);
 
     if (options.compression === 'compress') {
       fileContent = await dicomUtilityRunner.compress(fileContent);
@@ -49,14 +54,9 @@ const createDicomImporter: FunctionService<
       await models.series.modifyOne(seriesUid, { images: mr.toString() });
     } else {
       // Insert as a new series
-      const determineSeriesDateToImport = (): Date | null => {
-        if (tags.seriesDate) return tags.seriesDate;
-        if (tags.studyDate) return tags.studyDate;
-        return null;
-      };
       const doc = {
         ...tags,
-        seriesDate: determineSeriesDateToImport(),
+        seriesDate: seriesDate || studyDate || null,
         images: String(instanceNumber),
         domain,
         storageId: 0

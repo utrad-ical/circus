@@ -1,5 +1,5 @@
 import React from 'react';
-import BodyPartIcon, { IconDefinition } from './BodyPartIcon';
+import BodyPartIcon, { CircusIconDefinition } from './BodyPartIcon';
 import styled from 'styled-components';
 import { OverlayTrigger, Tooltip } from 'components/react-bootstrap';
 
@@ -9,9 +9,9 @@ const StyledSpan = styled.span`
 
 const IconDisplay: React.FC<{
   size: string;
-  icon: IconDefinition;
+  icon: CircusIconDefinition;
   title: React.ReactNode;
-  description: React.ReactNode;
+  description?: React.ReactNode;
   toolTip: any;
 }> = props => {
   const { size, icon, title, description, toolTip } = props;

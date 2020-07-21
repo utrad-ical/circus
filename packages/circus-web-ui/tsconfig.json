@@ -7,7 +7,8 @@
     "allowJs": true,
     "paths": {
       "rb/*": ["@smikitky/rb-components/lib/*"],
-      "circus-rs/*": ["@utrad-ical/circus-rs/src/browser/*"],
+      "circus-rs": ["../../circus-rs/src/browser"],
+      "circus-rs/*": ["../../circus-rs/src/browser/*"],
       "components/*": ["components/*"],
       "pages/*": ["pages/*"],
       "utils/*": ["utils/*"],

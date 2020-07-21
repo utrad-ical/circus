@@ -4,7 +4,7 @@ import { showMessage } from 'actions';
 import * as qs from 'querystring';
 import { useContext, createContext } from 'react';
 
-interface ApiCaller {
+export interface ApiCaller {
   (command: string, options?: any, cancelToken?: CancelToken): Promise<any>;
 }
 

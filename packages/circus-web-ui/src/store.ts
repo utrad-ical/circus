@@ -6,33 +6,22 @@ import {
   Reducer
 } from 'redux';
 import thunk from 'redux-thunk';
+import Plugin from 'types/Plugin';
+import Project, { ProjectRoles } from 'types/Project';
 
 // The redux store should contain only information shared across pages,
 // such as the login user information.
 
-interface IconDefinition {
-  glyph: string;
-  color: string;
-  backgroundColor: string;
-}
-
-interface Project {
-  projectId: string;
-  createdAt: string;
-  updatedAt: string;
-  icon: IconDefinition;
-  projectName: string;
-  description: string;
-  tags: any[];
-  windowPresets: any[];
-  windowPriority: any[];
-}
-
-type ProjectRoles =
+type GlobalPrivileges =
   | 'createProject'
   | 'deleteProject'
   | 'manageServer'
   | 'personalInfoView';
+
+export interface SearchPreset {
+  name: string;
+  condition: any;
+}
 
 export interface LoginUser {
   isFetching: boolean;
@@ -40,8 +29,10 @@ export interface LoginUser {
     craetedAt: string;
     updatedAt: string;
     description: string;
+    dicomImageServer: string;
     domains: string[];
-    globalPrivileges: string[];
+    defaultDomain: string | null;
+    globalPrivileges: GlobalPrivileges[];
     groups: string[];
     lastLoginIp: string;
     lastLoginTime: string;
@@ -50,6 +41,13 @@ export interface LoginUser {
     uploadFileMax: number;
     uploadFileSizeMax: string;
     userEmail: string;
+    preferences: {
+      seriesSearchPresets?: SearchPreset[];
+      caseSearchPresets?: SearchPreset[];
+      pluginJobSearchPresets?: SearchPreset[];
+      personalInfoView?: boolean;
+      theme?: string;
+    };
     accessibleProjects: Array<{
       projectId: string;
       project: Project;
@@ -115,7 +113,7 @@ const messages: Reducer<MessageBox[]> = (state = [], action) => {
   return state;
 };
 
-export interface Search {
+export interface Search<T> {
   isFetching: boolean;
   resource: string;
   filter: any;
@@ -123,11 +121,14 @@ export interface Search {
   sort: object;
   page: number;
   limit: number;
-  items: any[];
+  items: T[];
   totalItems: number;
 }
 
-const searches: Reducer<{ [name: string]: Search }> = (state = {}, action) => {
+const searches: Reducer<{ [name: string]: Search<any> }> = (
+  state = {},
+  action
+) => {
   switch (action.type) {
     case 'SET_SEARCH_QUERY_BUSY':
       state = {
@@ -163,11 +164,7 @@ const searches: Reducer<{ [name: string]: Search }> = (state = {}, action) => {
 };
 
 export interface Plugins {
-  [pluginId: string]:
-    | 'loading'
-    | {
-        icon: string;
-      };
+  [pluginId: string]: 'loading' | Plugin;
 }
 
 const plugin: Reducer<Plugins> = (state = {}, action) => {

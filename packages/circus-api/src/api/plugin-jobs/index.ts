@@ -97,9 +97,13 @@ export const handleSearch: RouteMiddleware = ({ models }) => {
     } catch (err) {
       ctx.throw(status.BAD_REQUEST, 'Bad filter.');
     }
+    const domainFilter = {
+      domain: { $in: ctx.userPrivileges.domains }
+    };
+    const filter = { $and: [customFilter!, domainFilter] };
     await performAggregationSearch(
       models.pluginJob,
-      customFilter!,
+      filter,
       ctx,
       [
         {
@@ -123,7 +127,10 @@ export const handleSearch: RouteMiddleware = ({ models }) => {
         },
         {
           // Appends "patientInfo" field
-          $addFields: { patientInfo: '$seriesDetail.patientInfo' }
+          $addFields: {
+            patientInfo: '$seriesDetail.patientInfo',
+            domain: '$seriesDetail.domain'
+          }
         }
       ],
       [

@@ -26,10 +26,18 @@ export const handleGetFull: RouteMiddleware = ({
         groupId: { $in: user.groups }
       })
     ).map(g => g.groupName);
+    const defaultDomainValue = (
+      await models.serverParam.findById('defaultDomain')
+    )?.value;
+    const defaultDomain =
+      ctx.userPrivileges.domains.indexOf(defaultDomainValue) >= 0
+        ? defaultDomainValue
+        : null;
     ctx.body = {
       ...user,
       ...ctx.userPrivileges,
       groups,
+      defaultDomain,
       dicomImageServer: dicomImageServerUrl,
       uploadFileMax: 30,
       uploadFileSizeMax: bytes(uploadFileSizeMaxBytes)

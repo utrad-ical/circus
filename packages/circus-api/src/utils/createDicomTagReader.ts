@@ -2,6 +2,7 @@ import { NoDepFunctionService } from '@utrad-ical/circus-lib';
 import parser from 'dicom-parser';
 import { createEncConverter, EncConverter } from './encConverter';
 import { DicomTagReader } from '../interface';
+import { standardDataElements } from 'dicom-data-dictionary';
 
 const stripUndefined: <T extends object>(input: T) => Partial<T> = input => {
   Object.keys(input).forEach(k => {
@@ -97,64 +98,112 @@ const extractAge = (
   }
 };
 
+const readNumberList = (
+  dataSet: parser.DicomDataset,
+  key: string,
+  accessor: string,
+  valueBytes: number
+): number | number[] => {
+  // Each numerical value field may contain more than one number value
+  // due to the value multiplicity (VM) mechanism.
+  const numElements = dataSet.elements[key].length / valueBytes;
+  const numbers: number[] = [];
+  for (let i = 0; i < numElements; i++) {
+    numbers.push((<any>dataSet)[accessor](key, i) as number);
+  }
+  return numbers.length > 1 ? numbers : numbers[0];
+};
+
+const readElement = (
+  dataSet: parser.DicomDataset,
+  key: string,
+  vr: string,
+  rootDataSet: parser.DicomDataset
+): string | number | number[] | undefined => {
+  if (vr.indexOf('|') >= 0) {
+    // This means the true VR type depends on other DICOM element.
+    const vrs = vr.split('|');
+    if (vrs.every(v => ['OB', 'OW', 'OD', 'OF'].indexOf(v) >= 0)) {
+      // This is a binary data, anyway, so treat it as such
+      return readElement(dataSet, key, 'OB', rootDataSet);
+    } else if (vrs.every(v => ['US', 'SS'].indexOf(v) >= 0)) {
+      const pixelRepresentation = rootDataSet.uint16('x00280103');
+      switch (pixelRepresentation) {
+        case 0:
+          return readElement(dataSet, key, 'US', rootDataSet);
+        case 1:
+          return readElement(dataSet, key, 'SS', rootDataSet);
+      }
+    }
+  }
+
+  switch (vr) {
+    case 'AT': {
+      // Attribute Tag
+      const group = dataSet.uint16(key) as number;
+      const groupHexStr = ('0000' + group.toString(16)).substr(-4);
+      const element = dataSet.uint16(key) as number;
+      const elementHexStr = ('0000' + element.toString(16)).substr(-4);
+      return '0x' + groupHexStr + elementHexStr;
+    }
+    case 'FL':
+      return readNumberList(dataSet, key, 'float', 4);
+    case 'FD':
+      return readNumberList(dataSet, key, 'double', 8);
+    case 'UL':
+      return readNumberList(dataSet, key, 'uint32', 4);
+    case 'SL':
+      return readNumberList(dataSet, key, 'int32', 4);
+    case 'US':
+      return readNumberList(dataSet, key, 'uint16', 2);
+    case 'SS':
+      return readNumberList(dataSet, key, 'int16', 2);
+    case 'DS':
+    case 'IS':
+      const text = dataSet.string(key);
+      if (text?.includes('\\')) {
+        return text.split('\\').map(Number);
+      }
+      return text !== undefined ? Number(text) : undefined;
+    default: {
+      // Other string VRs which use ASCII chars, such as DT
+      const text = dataSet.string(key);
+      return text;
+    }
+  }
+};
+
 export interface Parameters {
+  [key: string]: any;
+  TransferSyntaxUID?: string;
   pixelSpacingX?: number;
   pixelSpacingY?: number;
-  kVP?: number;
-  dataCollectionDiameter?: number;
-  reconstructionDiameter?: number;
-  exposureTime?: number;
-  xRayTubeCurrent?: number;
-  filterType?: string;
-  convolutionKernel?: string;
-  scanningSequence?: string;
-  sequenceVariant?: string;
-  mrAcquisitionType?: string;
-  repetitionTime?: number;
-  echoTime?: number;
-  inversionTime?: number;
-  numberOfAverages?: number;
-  imagingFrequency?: number;
-  echoNumber?: number;
-  magneticFieldStrength?: number;
-  echoTrainLength?: number;
-  flipAngle?: number;
-  radiopharmaceutical?: string;
-  radionuclideTotalDose?: number;
-  pixelValueUnits?: string;
+  imagePositionPatientZ?: number;
+  PixelValueUnits?: string;
 }
 
 const extractParameters = (dataset: parser.DicomDataset) => {
   const data: Parameters = {
+    TransferSyntaxUID: dataset.string('x00020010'),
     pixelSpacingX: dataset.floatString('x00280030', 0),
     pixelSpacingY: dataset.floatString('x00280030', 1),
-    // CT related values
-    kVP: dataset.floatString('x00180060'),
-    dataCollectionDiameter: dataset.floatString('x00180090'),
-    reconstructionDiameter: dataset.floatString('x00181100'),
-    exposureTime: dataset.floatString('x00181150'), // IS
-    xRayTubeCurrent: dataset.floatString('x00181151'), // IS
-    filterType: dataset.string('x00181160'), // SH
-    convolutionKernel: dataset.string('x00181210'), // SH
-    // MR related values
-    scanningSequence: dataset.string('x00180020'), // CS
-    sequenceVariant: dataset.string('x00180021'), // CS
-    mrAcquisitionType: dataset.string('x00180023'), // CS
-    repetitionTime: dataset.floatString('x00180080'),
-    echoTime: dataset.floatString('x00180081'),
-    inversionTime: dataset.floatString('x00180082'),
-    numberOfAverages: dataset.floatString('x00180083'),
-    imagingFrequency: dataset.floatString('x00180084'),
-    echoNumber: dataset.floatString('x00180086'),
-    magneticFieldStrength: dataset.floatString('x00180087'),
-    echoTrainLength: dataset.floatString('x00180091'), // IS
-    flipAngle: dataset.floatString('x00181314'), // DS
-    // PT/NM related values
-    radiopharmaceutical: dataset.string('x00180031'), // LO
-    radionuclideTotalDose: dataset.floatString('x00181074'),
-    // Misc
-    pixelValueUnits: dataset.string('x00541001') // CS
+    imagePositionPatientZ: dataset.floatString('x00200032', 2),
+    PixelValueUnits: dataset.string('x00541001') // CS
   };
+
+  for (const element in dataset.elements) {
+    const key = element.substring(1, 9).toUpperCase();
+    if (key in standardDataElements && /^(0018|0020|0028)/.test(key)) {
+      const name = standardDataElements[key].name;
+      const value = readElement(
+        dataset,
+        element,
+        standardDataElements[key].vr,
+        dataset
+      );
+      data[name] = value;
+    }
+  }
   return stripUndefined(data);
 };
 
@@ -216,6 +265,11 @@ export const readDicomTags = async (
     width: dataset.uint16('x00280011'), // columns
     height: dataset.uint16('x00280010'), // rows
     instanceNumber: dataset.intString('x00200013'),
+    studyDate: parseDate(
+      dataset.string('x00080020'), // study date
+      dataset.string('x00080030'), // study time
+      tzOffset
+    ),
     seriesDate: parseDate(
       dataset.string('x00080021'), // series date
       dataset.string('x00080031'), // series time

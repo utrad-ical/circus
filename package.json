@@ -7,8 +7,8 @@
   },
   "scripts": {
     "test": "jest",
-    "lint": "eslint \"packages/*/{src,test}/**/*.{js,ts}\"",
-    "lint-fix": "eslint --fix \"packages/*/{src,test}/**/*.{js,ts}\"",
+    "lint": "eslint \"packages/*/{src,test}/**/*.{js,ts,tsx}\"",
+    "lint-fix": "eslint --fix \"packages/*/{src,test}/**/*.{js,ts,tsx}\"",
     "prettier": "prettier --write \"packages/*/{src,test}/**/*.{js,ts,less,json,yaml,yml}\""
   },
   "devDependencies": {
@@ -42,6 +42,7 @@
     "setupFiles": [
       "dotenv/config"
     ],
-    "testEnvironment": "node"
+    "testEnvironment": "node",
+    "testTimeout": 10000
   }
 }

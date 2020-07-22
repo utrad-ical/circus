@@ -7,7 +7,7 @@ import * as modal from '@smikitky/rb-components/lib/modal';
 import PluginDisplay from 'components/PluginDisplay';
 import IconButton from 'components/IconButton';
 import styled from 'styled-components';
-import useFeedback from './useFeedback';
+import useFeedback, { actions } from './useFeedback';
 import PersonalConsensualSwitch from './PersonalConsensualSwitch';
 import useLoadData from 'utils/useLoadData';
 import { VolumeLoaderCacheContext } from 'utils/useImageSource';
@@ -126,11 +126,9 @@ const PluginJobDetail: React.FC<any> = props => {
         if (seriesUid in seriesData) continue;
         seriesData[seriesUid] = await api(`series/${seriesUid}`);
       }
-      dispatch({
-        type: 'reset',
-        feedbacks: job.feedbacks,
-        myUserEmail: user.userEmail
-      });
+      dispatch(
+        actions.reset({ feedbacks: job.feedbacks, myUserEmail: user.userEmail })
+      );
       return { job, pluginData, seriesData };
     } finally {
       setBusy(false);
@@ -185,7 +183,7 @@ const PluginJobDetail: React.FC<any> = props => {
   const { job, seriesData } = jobData;
   const primarySeriesUid = job.series[0].seriesUid;
 
-  const validate = (value: any) => {
+  const validate = (value: any): [boolean, number] => {
     const finished = feedbackTargets.filter(
       t =>
         listenerRefs.current
@@ -201,12 +199,13 @@ const PluginJobDetail: React.FC<any> = props => {
       [feedbackKey]: value
     };
     const [isValid, registeredTargetCount] = validate(newFeedback);
-    dispatch({
-      type: 'changeFeedback',
-      value: newFeedback,
-      registeredTargetCount,
-      canRegister: isValid
-    });
+    dispatch(
+      actions.changeFeedback({
+        value: newFeedback,
+        registeredTargetCount,
+        canRegister: isValid
+      })
+    );
   };
 
   const handleChangeFeedbackMode = (isConsensual: boolean) => {
@@ -221,14 +220,15 @@ const PluginJobDetail: React.FC<any> = props => {
           .mergePersonalFeedback(pfbs);
       });
       const [canRegister, registeredTargetCount] = validate(mergedFeedback);
-      dispatch({
-        type: 'enterConsensualMode',
-        value: mergedFeedback,
-        registeredTargetCount,
-        canRegister
-      });
+      dispatch(
+        actions.enterConsensualMode({
+          value: mergedFeedback,
+          registeredTargetCount,
+          canRegister
+        })
+      );
     } else {
-      dispatch({ type: 'enterPersonalMode' });
+      dispatch(actions.enterPersonalMode());
     }
   };
 

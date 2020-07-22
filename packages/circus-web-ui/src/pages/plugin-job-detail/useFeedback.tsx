@@ -1,8 +1,9 @@
 import React, { useReducer, Fragment } from 'react';
-import Moment from 'moment';
+import { FeedbackEntry } from './types';
+import moment from 'moment';
 
-const registeredMessage = feedback => {
-  const m = new Moment(feedback.createdAt);
+const registeredMessage = (feedback: FeedbackEntry<any>) => {
+  const m = moment(feedback.createdAt);
   const modeStr = feedback.isConsensual ? 'Consensual' : 'Personal';
   return (
     <Fragment>
@@ -12,7 +13,23 @@ const registeredMessage = feedback => {
   );
 };
 
-const reducer = (state, action) => {
+interface FeedbackState {
+  isConsensual: boolean;
+  currentData: { [feedbackKey: string]: any };
+  registeredTargetCount: number;
+  canRegister: boolean;
+  disabled: boolean;
+  message?: string | React.ReactElement<any>;
+  feedbacks: FeedbackEntry<any>[];
+  myUserEmail: any;
+}
+
+type Action = {
+  type: string;
+  [key: string]: any;
+};
+
+const reducer: React.Reducer<FeedbackState, Action> = (state, action) => {
   switch (action.type) {
     case 'reset': {
       // Choose which feedback to show or edit according to the following rule:
@@ -26,9 +43,12 @@ const reducer = (state, action) => {
         feedbacks: action.feedbacks,
         myUserEmail: action.myUserEmail
       };
-      const consensual = action.feedbacks.find(f => f.isConsensual);
+      const consensual = action.feedbacks.find(
+        (f: FeedbackEntry<any>) => f.isConsensual
+      );
       const myPersonal = action.feedbacks.find(
-        f => !f.isConsensual && f.userEmail === action.myUserEmail
+        (f: FeedbackEntry<any>) =>
+          !f.isConsensual && f.userEmail === action.myUserEmail
       );
       // 1. If consensual feedback is registered, show it
       if (consensual) {
@@ -71,7 +91,7 @@ const reducer = (state, action) => {
     }
     case 'enterPersonalMode': {
       const myPersonal = state.feedbacks.find(
-        f => !f.consensual && f.userEmail === state.myUserEmail
+        f => !f.isConsensual && f.userEmail === state.myUserEmail
       );
       return {
         ...state,
@@ -82,11 +102,13 @@ const reducer = (state, action) => {
         message: myPersonal ? registeredMessage(myPersonal) : ''
       };
     }
+    default:
+      throw new Error('Undefined action type');
   }
 };
 
 const useFeedback = () => {
-  return useReducer(reducer);
+  return useReducer(reducer, undefined as any);
 };
 
 export default useFeedback;

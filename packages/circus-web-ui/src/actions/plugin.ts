@@ -1,6 +1,6 @@
 import { ApiCaller } from 'utils/api';
 
-const loadPluginInfo = (api: ApiCaller, pluginId: string) => {
+export const loadPluginInfo = (api: ApiCaller, pluginId: string) => {
   return async (dispatch: any, getState: any) => {
     const state = getState();
     if (state.plugin[pluginId]) return;

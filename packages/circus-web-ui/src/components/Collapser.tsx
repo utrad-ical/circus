@@ -47,7 +47,7 @@ const StyledDiv = styled.div`
 
 interface Props {
   onToggleClick?: () => void;
-  title: React.ReactElement<any>;
+  title: React.ReactNode;
   className?: string;
   framed?: boolean;
   noPadding?: boolean;

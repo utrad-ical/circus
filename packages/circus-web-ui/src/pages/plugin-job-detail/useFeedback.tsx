@@ -22,7 +22,7 @@ interface FeedbackState {
   disabled: boolean;
   message?: React.ReactNode;
   feedbacks: FeedbackEntry<any>[];
-  myUserEmail: any;
+  myUserEmail: string;
 }
 
 const initialState: FeedbackState = {
@@ -31,7 +31,7 @@ const initialState: FeedbackState = {
   registeredTargetCount: 0,
   canRegister: false,
   disabled: true,
-  message: '',
+  message: null,
   feedbacks: [],
   myUserEmail: ''
 };
@@ -105,7 +105,7 @@ const slice = createSlice({
 });
 
 const useFeedback = () => {
-  return useReducer(slice.reducer, undefined as any);
+  return useReducer(slice.reducer, initialState);
 };
 
 export const actions = slice.actions;

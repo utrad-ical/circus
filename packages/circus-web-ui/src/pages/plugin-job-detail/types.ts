@@ -55,7 +55,7 @@ export interface FeedbackListenerProps<T, O> {
   options: O;
 
   /**
-   * @deprecated
+   * The Job data.
    */
   job: Job;
 }

@@ -2,8 +2,8 @@ import React, { Fragment, useState, useMemo, useCallback, useRef } from 'react';
 import { useApi } from 'utils/api';
 import PatientInfoBox from 'components/PatientInfoBox';
 import FullSpanContainer from 'components/FullSpanContainer';
-import LoadingIndicator from 'rb/LoadingIndicator';
-import * as modal from 'rb/modal';
+import LoadingIndicator from '@smikitky/rb-components/lib/LoadingIndicator';
+import * as modal from '@smikitky/rb-components/lib/modal';
 import PluginDisplay from 'components/PluginDisplay';
 import IconButton from 'components/IconButton';
 import styled from 'styled-components';
@@ -18,6 +18,9 @@ import Section from './Section';
 import useLoginUser from 'utils/useLoginUser';
 import { DropdownButton, MenuItem } from 'components/react-bootstrap';
 import Icon from 'components/Icon';
+import { useParams } from 'react-router-dom';
+import { SeriesEntry } from 'components/SeriesSelector';
+import { FeedbackEntry } from './types';
 
 const StyledDiv = styled.div`
   display: flex;
@@ -54,7 +57,14 @@ const StyledDiv = styled.div`
   }
 `;
 
-const createFeedbackTargets = displayStrategy => {
+interface DisplayStrategy {
+  feedbackKey: string;
+  caption: string;
+  type: string;
+  options: any;
+}
+
+const createFeedbackTargets = (displayStrategy: DisplayStrategy[]) => {
   const feedbackTargets = [];
   for (const strategy of displayStrategy) {
     const render = createDynamicComponent(strategy.type, strategy.options);
@@ -67,7 +77,9 @@ const createFeedbackTargets = displayStrategy => {
   return feedbackTargets;
 };
 
-const Menu = React.memo(props => {
+const Menu: React.FC<{
+  onMenuSelect: (selected: string) => void;
+}> = React.memo(props => {
   const { onMenuSelect } = props;
   return (
     <DropdownButton
@@ -85,9 +97,16 @@ const Menu = React.memo(props => {
   );
 });
 
-const PluginJobDetail = props => {
+interface Job {
+  jobId: string;
+  pluginId: string;
+  series: SeriesEntry[];
+  feedbacks: FeedbackEntry<any>[];
+}
+
+const PluginJobDetail: React.FC<any> = props => {
   const api = useApi();
-  const jobId = props.match.params.jobId;
+  const jobId: string = useParams<any>().jobId;
 
   const user = useLoginUser();
   const server = user.dicomImageServer;
@@ -99,9 +118,9 @@ const PluginJobDetail = props => {
   const loadJob = useCallback(async () => {
     setBusy(true);
     try {
-      const job = await api(`plugin-jobs/${jobId}`);
+      const job = (await api(`plugin-jobs/${jobId}`)) as Job;
       const pluginData = await api(`plugins/${job.pluginId}`);
-      const seriesData = {};
+      const seriesData: { [seriesUid: string]: any } = {};
       for (const s of job.series) {
         const seriesUid = s.seriesUid;
         if (seriesUid in seriesData) continue;
@@ -153,11 +172,7 @@ const PluginJobDetail = props => {
   );
 
   // Keeps track of multiple refs using Map
-  /**
-   * @type React.MutableRefObject<Map<string, any>>;
-   */
-  const listenerRefs = useRef(undefined);
-  if (!listenerRefs.current) listenerRefs.current = new Map();
+  const listenerRefs = useRef<Map<string, any>>(new Map());
 
   if (!jobData) {
     return <LoadingIndicator />;
@@ -170,7 +185,7 @@ const PluginJobDetail = props => {
   const { job, seriesData } = jobData;
   const primarySeriesUid = job.series[0].seriesUid;
 
-  const validate = value => {
+  const validate = (value: any) => {
     const finished = feedbackTargets.filter(
       t =>
         listenerRefs.current
@@ -180,7 +195,7 @@ const PluginJobDetail = props => {
     return [finished.length === feedbackTargets.length, finished.length];
   };
 
-  const handleChange = (feedbackKey, value) => {
+  const handleChange = (feedbackKey: string, value: any) => {
     const newFeedback = {
       ...feedbackState.currentData,
       [feedbackKey]: value
@@ -194,9 +209,9 @@ const PluginJobDetail = props => {
     });
   };
 
-  const handleChangeFeedbackMode = isConsensual => {
+  const handleChangeFeedbackMode = (isConsensual: boolean) => {
     if (isConsensual) {
-      const mergedFeedback = {};
+      const mergedFeedback: { [feedbackKey: string]: any } = {};
       feedbackTargets.forEach(({ feedbackKey }) => {
         const pfbs = job.feedbacks
           .filter(fb => !fb.isConsensual)
@@ -233,7 +248,9 @@ const PluginJobDetail = props => {
 
   const modeText = feedbackState.isConsensual ? 'consensual' : 'personal';
 
-  const personalOpinionsForKey = key => {
+  const personalOpinionsForKey = (
+    key: string
+  ): FeedbackEntry<any>[] | undefined => {
     if (!feedbackState.isConsensual) return undefined;
     return job.feedbacks
       .filter(f => !f.isConsensual)
@@ -276,11 +293,11 @@ const PluginJobDetail = props => {
                 return (
                   <Section key={key} title={target.caption}>
                     <Render
-                      ref={ref => listenerRefs.current.set(key, ref)}
+                      ref={(ref: any) => listenerRefs.current.set(key, ref)}
                       job={job}
                       value={feedback}
                       personalOpinions={personalOpinions}
-                      onChange={value => handleChange(key, value)}
+                      onChange={(value: any) => handleChange(key, value)}
                       isConsensual={feedbackState.isConsensual}
                       disabled={feedbackState.disabled}
                     />

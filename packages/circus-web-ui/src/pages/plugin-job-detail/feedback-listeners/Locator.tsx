@@ -13,17 +13,25 @@ import styled from 'styled-components';
 import { useHybridImageSource } from 'utils/useImageSource';
 import IconButton from 'components/IconButton';
 import applyDisplayOptions from './applyDisplayOptions';
+import { FeedbackListenerProps, ImperativeFeedbackRef } from '../types';
 
-const Locator = React.forwardRef((props, ref) => {
+type Location = { volumeId: number; location: number[] };
+
+const Locator = React.forwardRef<
+  any,
+  FeedbackListenerProps<Location[], { volumeId: number }>
+>((props, ref) => {
   const { job, onChange, isConsensual, value = [], disabled, options } = props;
   const { volumeId = 0 } = options;
 
-  const [composition, setComposition] = useState(null);
+  const [composition, setComposition] = useState<rs.Composition | undefined>(
+    undefined
+  );
   const [showViewer, setShowViewer] = useState(value.length > 0);
 
   const noLocationClickedRef = useRef(false);
 
-  const toolRef = useRef();
+  const toolRef = useRef<{ pager: any; point: any }>();
   if (!toolRef.current) {
     toolRef.current = {
       pager: toolFactory('pager'),
@@ -33,16 +41,15 @@ const Locator = React.forwardRef((props, ref) => {
 
   /**
    * Remembers voxel size of the current series.
-   * @type React.MutableRefObject<number[]>
    */
-  const voxelSizeRef = useRef();
+  const voxelSizeRef = useRef<number[]>();
 
   const stateChanger = useStateChanger();
 
   // Exports "methods" for this FB listener
-  useImperativeHandle(ref, () => ({
+  useImperativeHandle<any, ImperativeFeedbackRef<Location[]>>(ref, () => ({
     mergePersonalFeedback: personalFeedback => {
-      const result = [];
+      const result: Location[] = [];
       personalFeedback.forEach(f => {
         f.forEach(loc => {
           result.push(loc);
@@ -63,7 +70,7 @@ const Locator = React.forwardRef((props, ref) => {
 
   useEffect(() => {
     if (!imageSource) return;
-    voxelSizeRef.current = imageSource.metadata.voxelSize;
+    voxelSizeRef.current = imageSource.metadata!.voxelSize;
     const comp = new rs.Composition(imageSource);
     setComposition(comp);
   }, [imageSource]);
@@ -71,7 +78,7 @@ const Locator = React.forwardRef((props, ref) => {
   useEffect(() => {
     if (!composition) return;
     composition.removeAllAnnotations();
-    const voxelSize = voxelSizeRef.current;
+    const voxelSize = voxelSizeRef.current!;
     value.forEach(item => {
       const point = new rs.Point();
       point.x = item.location[0] * voxelSize[0];
@@ -89,10 +96,10 @@ const Locator = React.forwardRef((props, ref) => {
   );
 
   const handleMouseUp = () => {
-    if (disabled) return;
-    const newValue = [];
-    const voxelSize = voxelSizeRef.current;
-    composition.annotations.forEach(point => {
+    if (disabled || !composition) return;
+    const newValue: Location[] = [];
+    const voxelSize = voxelSizeRef.current!;
+    composition.annotations.forEach((point: any) => {
       newValue.push({
         volumeId: 0,
         location: [
@@ -105,17 +112,17 @@ const Locator = React.forwardRef((props, ref) => {
     onChange(newValue);
   };
 
-  const handleRemovePoint = index => {
+  const handleRemovePoint = (index: number) => {
     if (disabled) return;
     const newValue = value.slice();
     newValue.splice(index, 1);
     onChange(newValue);
   };
 
-  const handleReveal = index => {
+  const handleReveal = (index: number) => {
     const item = value[index];
-    const changer = state => {
-      const voxelSize = voxelSizeRef.current;
+    const changer = (state: rs.MprViewState) => {
+      const voxelSize = voxelSizeRef.current!;
       const newOrigin = [
         state.section.origin[0],
         state.section.origin[1],

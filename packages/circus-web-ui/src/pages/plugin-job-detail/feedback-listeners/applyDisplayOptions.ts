@@ -1,8 +1,17 @@
-const applyDisplayOptions = (state, job, volumeId) => {
+import { Job } from '../types';
+import * as rs from 'circus-rs';
+
+const applyDisplayOptions = (
+  state: rs.MprViewState,
+  job: Job,
+  volumeId: number
+) => {
   const displayOptions =
     job.results.metadata &&
     Array.isArray(job.results.metadata.displayOptions) &&
-    job.results.metadata.displayOptions.find(o => o.volumeId === volumeId);
+    job.results.metadata.displayOptions.find(
+      (o: any) => o.volumeId === volumeId
+    );
   if (!displayOptions) return state;
   if (displayOptions.window) {
     state = { ...state, window: { ...displayOptions.window } };

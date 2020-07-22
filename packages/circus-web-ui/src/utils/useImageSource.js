@@ -69,6 +69,7 @@ export const useVolumeLoader = (seriesUid, partialVolumeDescriptor) => {
 
 /**
  * Returns a HybridImageSource that is guaranteed to be "ready".
+ * @returns {rs.HybridMprImageSource | undefined}
  */
 export const useHybridImageSource = (seriesUid, partialVolumeDescriptor) => {
   const volumeLoader = useVolumeLoader(seriesUid, partialVolumeDescriptor);

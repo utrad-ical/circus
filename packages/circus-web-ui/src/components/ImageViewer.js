@@ -108,6 +108,9 @@ const ImageViewer = props => {
 
 export default ImageViewer;
 
+/**
+ * @returns {EventEmitter}
+ */
 export const useStateChanger = () => {
   const stateChangerRef = useRef(undefined);
   if (!stateChangerRef.current) stateChangerRef.current = new EventEmitter();

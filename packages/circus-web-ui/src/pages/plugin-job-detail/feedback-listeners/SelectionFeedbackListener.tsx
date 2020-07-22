@@ -3,25 +3,28 @@ import styled from 'styled-components';
 import classnames from 'classnames';
 import { OverlayTrigger, Tooltip } from 'components/react-bootstrap';
 import tinycolor from 'tinycolor2';
+import { ImperativeFeedbackRef, FeedbackListenerProps } from '../types';
 
 const StyledDiv = styled.div`
   display: flex;
   justify-content: space-around;
 `;
 
-const readableBlackOrWhite = backgroundColor =>
+const readableBlackOrWhite = (backgroundColor: string) =>
   tinycolor.mostReadable(backgroundColor, ['#ffffff', '#333333']).toHexString();
 
 const StyledButton = styled.button`
-  background-color: ${props => props.backgroundColor || '#ffffff'};
-  color: ${props => readableBlackOrWhite(props.backgroundColor || '#ffffff')};
+  background-color: ${(props: any) => props.backgroundColor || '#ffffff'};
+  color: ${(props: any) =>
+    readableBlackOrWhite(props.backgroundColor || '#ffffff')};
   padding: 0.5em 0.2em;
   border: 1px solid #cccccc;
   flex-grow: 1;
   margin: 0 1px;
   &.active {
-    background-color: ${props => props.activeColor || props.theme.brandDark};
-    color: ${props =>
+    background-color: ${(props: any) =>
+      props.activeColor || props.theme.brandDark};
+    color: ${(props: any) =>
       readableBlackOrWhite(props.activeColor || props.theme.brandDark)};
   }
   &:disabled {
@@ -33,7 +36,17 @@ const StyledButton = styled.button`
   }
 `;
 
-const SelectionButton = props => {
+const SelectionButton: React.FC<{
+  value: string | number;
+  def: {
+    value: string | number;
+    backgroundColor: string;
+    activeColor: string;
+  };
+  onClick: () => void;
+  disabled?: boolean;
+  toolTip: React.ReactNode;
+}> = props => {
   const { value, def, onClick, disabled, children, toolTip } = props;
   const button = (
     <StyledButton
@@ -59,7 +72,23 @@ const SelectionButton = props => {
   );
 };
 
-const SelectionFeedbackListener = React.forwardRef((props, ref) => {
+interface BasicChoiceOptions {
+  value: any;
+  caption: string;
+  backgroundColor: string;
+  activeColor: string;
+}
+
+const SelectionFeedbackListener = React.forwardRef<
+  any,
+  FeedbackListenerProps<
+    string | number,
+    {
+      personal: (BasicChoiceOptions & { consensualMapsTo: string | number })[];
+      consensual: BasicChoiceOptions[];
+    }
+  >
+>((props, ref) => {
   const {
     onChange,
     isConsensual,
@@ -70,7 +99,7 @@ const SelectionFeedbackListener = React.forwardRef((props, ref) => {
   } = props;
   const currentOptions = isConsensual ? options.consensual : options.personal;
 
-  const applyConsensualMapsTo = value => {
+  const applyConsensualMapsTo = (value: string | number) => {
     const orig = options.personal.find(o => o.value === value);
     if (orig === undefined) throw new Error('Unknown personal feedback value');
     if ('consensualMapsTo' in orig) value = orig.consensualMapsTo;
@@ -80,7 +109,7 @@ const SelectionFeedbackListener = React.forwardRef((props, ref) => {
   };
 
   // Exports "methods" for this FB listener
-  useImperativeHandle(ref, () => ({
+  useImperativeHandle<any, ImperativeFeedbackRef<string | number>>(ref, () => ({
     mergePersonalFeedback: personalFeedback => {
       const votes = new Map();
       personalFeedback.forEach(pfb => {
@@ -101,7 +130,7 @@ const SelectionFeedbackListener = React.forwardRef((props, ref) => {
     <StyledDiv>
       {currentOptions.map((def, i) => {
         const voters = isConsensual
-          ? personalOpinions.filter(
+          ? personalOpinions!.filter(
               f => applyConsensualMapsTo(f.data) === def.value
             )
           : [];

@@ -1,15 +1,16 @@
-import React, { useReducer, Fragment } from 'react';
+import React, { useReducer } from 'react';
 import { FeedbackEntry } from './types';
 import moment from 'moment';
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 const registeredMessage = (feedback: FeedbackEntry<any>) => {
   const m = moment(feedback.createdAt);
   const modeStr = feedback.isConsensual ? 'Consensual' : 'Personal';
   return (
-    <Fragment>
+    <>
       {modeStr} feedback registered by {feedback.userEmail}{' '}
       <span title={m.format()}>{m.fromNow()}</span>
-    </Fragment>
+    </>
   );
 };
 
@@ -19,96 +20,94 @@ interface FeedbackState {
   registeredTargetCount: number;
   canRegister: boolean;
   disabled: boolean;
-  message?: string | React.ReactElement<any>;
+  message?: React.ReactNode;
   feedbacks: FeedbackEntry<any>[];
   myUserEmail: any;
 }
 
-type Action = {
-  type: string;
-  [key: string]: any;
+const initialState: FeedbackState = {
+  isConsensual: false,
+  currentData: {},
+  registeredTargetCount: 0,
+  canRegister: false,
+  disabled: true,
+  message: '',
+  feedbacks: [],
+  myUserEmail: ''
 };
 
-const reducer: React.Reducer<FeedbackState, Action> = (state, action) => {
-  switch (action.type) {
-    case 'reset': {
-      // Choose which feedback to show or edit according to the following rule:
-      const state = {
-        isConsensual: false,
-        currentData: {},
-        registeredTargetCount: 0,
-        canRegister: false,
-        disabled: true,
-        message: '',
-        feedbacks: action.feedbacks,
-        myUserEmail: action.myUserEmail
-      };
-      const consensual = action.feedbacks.find(
-        (f: FeedbackEntry<any>) => f.isConsensual
-      );
-      const myPersonal = action.feedbacks.find(
-        (f: FeedbackEntry<any>) =>
-          !f.isConsensual && f.userEmail === action.myUserEmail
+const slice = createSlice({
+  name: 'feedback',
+  initialState,
+  reducers: {
+    reset: (
+      state,
+      action: PayloadAction<{
+        feedbacks: FeedbackEntry<any>[];
+        myUserEmail: string;
+      }>
+    ) => {
+      const { feedbacks, myUserEmail } = action.payload;
+      state.feedbacks = feedbacks;
+      state.myUserEmail = myUserEmail;
+      const consensual = action.payload.feedbacks.find(f => f.isConsensual);
+      const myPersonal = feedbacks.find(
+        f => !f.isConsensual && f.userEmail === myUserEmail
       );
       // 1. If consensual feedback is registered, show it
       if (consensual) {
-        return {
-          ...state,
-          isConsensual: true,
-          currentData: consensual.data,
-          message: registeredMessage(consensual)
-        };
+        state.isConsensual = true;
+        state.currentData = consensual.data;
+        state.message = registeredMessage(consensual);
+        return;
       }
       // 2. If current user's personal feedback is registered, show it
       if (myPersonal) {
-        return {
-          ...state,
-          currentData: myPersonal.data,
-          message: registeredMessage(myPersonal)
-        };
+        state.currentData = myPersonal.data;
+        state.message = registeredMessage(myPersonal);
+        return;
       }
       // 3. Otherwise, enter personal mode and show empty feedback
-      return { ...state, disabled: false };
-    }
-    case 'changeFeedback':
-      return {
-        ...state,
-        currentData: action.value,
-        registeredTargetCount: action.registeredTargetCount,
-        canRegister: action.canRegister
-      };
-    case 'enterConsensualMode': {
+      state.disabled = false;
+    },
+    changeFeedback: (state, action: PayloadAction<any>) => {
+      state.currentData = action.payload.value;
+      state.registeredTargetCount = action.payload.registeredTargetCount;
+      state.canRegister = action.payload.canRegister;
+    },
+    enterConsensualMode: (
+      state,
+      action: PayloadAction<{
+        canRegister: boolean;
+        registeredTargetCount: number;
+        value: any;
+      }>
+    ) => {
       const consensual = state.feedbacks.find(f => f.isConsensual);
-      return {
-        ...state,
-        isConsensual: true,
-        disabled: !!consensual,
-        canRegister: !consensual && action.canRegister,
-        registeredTargetCount: action.registeredTargetCount,
-        currentData: consensual ? consensual.data : action.value,
-        message: consensual ? registeredMessage(consensual) : ''
-      };
-    }
-    case 'enterPersonalMode': {
+      state.isConsensual = true;
+      state.disabled = !!consensual;
+      state.canRegister = !consensual && action.payload.canRegister;
+      state.registeredTargetCount = action.payload.registeredTargetCount;
+      state.currentData = consensual ? consensual.data : action.payload.value;
+      state.message = consensual ? registeredMessage(consensual) : '';
+    },
+    enterPersonalMode: state => {
       const myPersonal = state.feedbacks.find(
         f => !f.isConsensual && f.userEmail === state.myUserEmail
       );
-      return {
-        ...state,
-        isConsensual: false,
-        disabled: !!myPersonal,
-        canRegister: false,
-        currentData: myPersonal ? myPersonal.data : {},
-        message: myPersonal ? registeredMessage(myPersonal) : ''
-      };
+      state.isConsensual = false;
+      state.disabled = !!myPersonal;
+      state.canRegister = false;
+      state.currentData = myPersonal ? myPersonal.data : {};
+      state.message = myPersonal ? registeredMessage(myPersonal) : '';
     }
-    default:
-      throw new Error('Undefined action type');
   }
-};
+});
 
 const useFeedback = () => {
-  return useReducer(reducer, undefined as any);
+  return useReducer(slice.reducer, undefined as any);
 };
+
+export const actions = slice.actions;
 
 export default useFeedback;

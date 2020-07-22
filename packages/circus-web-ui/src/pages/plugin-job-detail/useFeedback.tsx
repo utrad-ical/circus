@@ -2,13 +2,15 @@ import React, { useReducer } from 'react';
 import { FeedbackEntry } from './types';
 import moment from 'moment';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import UserDisplay from 'components/UserDisplay';
 
 const registeredMessage = (feedback: FeedbackEntry<any>) => {
   const m = moment(feedback.createdAt);
   const modeStr = feedback.isConsensual ? 'Consensual' : 'Personal';
   return (
     <>
-      {modeStr} feedback registered by {feedback.userEmail}{' '}
+      {modeStr} feedback registered by{' '}
+      <UserDisplay userEmail={feedback.userEmail} />{' '}
       <span title={m.format()}>{m.fromNow()}</span>
     </>
   );

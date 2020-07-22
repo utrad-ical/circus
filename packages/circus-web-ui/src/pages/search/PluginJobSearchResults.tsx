@@ -14,6 +14,7 @@ import { ProgressBar } from 'components/react-bootstrap';
 import browserHistory from 'browserHistory';
 import styled from 'styled-components';
 import Icon from '@smikitky/rb-components/lib/Icon';
+import UserDisplay from 'components/UserDisplay';
 
 const Operation: DataGridRenderer<any> = props => {
   const { value: job } = props;
@@ -99,7 +100,7 @@ const columns: DataGridColumnDefinition<any>[] = [
     caption: 'Executed by',
     className: 'executed-by',
     renderer: ({ value: { userEmail } }) => {
-      return userEmail;
+      return <UserDisplay userEmail={userEmail} />;
     }
   },
   {

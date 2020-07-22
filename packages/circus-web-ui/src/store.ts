@@ -170,17 +170,35 @@ export interface Plugins {
 const plugin: Reducer<Plugins> = (state = {}, action) => {
   switch (action.type) {
     case 'LOADING_PLUGIN_INFO':
-      state = {
+      return {
         ...state,
         [action.pluginId]: 'loading'
       };
-      break;
     case 'LOAD_PLUGIN_INFO':
-      state = {
+      return {
         ...state,
         [action.pluginId]: action.data
       };
-      break;
+  }
+  return state;
+};
+
+export interface Users {
+  [userEmail: string]: 'loading' | { userEmail: string; description: string };
+}
+
+const user: Reducer<Users> = (state = {}, action) => {
+  switch (action.type) {
+    case 'LOADING_USER_INFO':
+      return {
+        ...state,
+        [action.userEmail]: 'loading'
+      };
+    case 'LOAD_USER_INFO':
+      return {
+        ...state,
+        [action.userEmail]: action.data
+      };
   }
   return state;
 };
@@ -189,7 +207,8 @@ const reducer = combineReducers({
   loginUser,
   messages,
   searches,
-  plugin
+  plugin,
+  user
 });
 
 const composeEnhancers =

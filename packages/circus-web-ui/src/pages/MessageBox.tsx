@@ -1,5 +1,5 @@
 import React from 'react';
-import { dismissMessage } from 'store/message-box';
+import { dismissMessage } from 'store/messages';
 import { Alert } from 'components/react-bootstrap';
 import { useSelector, useDispatch } from 'react-redux';
 

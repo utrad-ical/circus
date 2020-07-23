@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import Icon from 'components/Icon';
-import { startNewSearch } from 'actions';
+import { newSearch } from 'store/searches';
 import { useApi } from 'utils/api';
 import { useDispatch } from 'react-redux';
 import SearchResultsView, {
@@ -42,14 +42,12 @@ const PluginJobQueueSearch: React.FC<{}> = props => {
 
   useEffect(() => {
     dispatch(
-      startNewSearch(
-        api,
-        'pluingJobQueue',
-        'plugin-job-queue',
-        {},
-        {},
-        { jobId: -1 }
-      )
+      newSearch(api, 'pluingJobQueue', {
+        resource: 'plugin-job-queue',
+        condition: {},
+        filter: {},
+        sort: '{"jobId":-1}'
+      })
     );
   }, [api, dispatch]);
 

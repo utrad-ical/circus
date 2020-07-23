@@ -5,10 +5,10 @@ import { ControlledCollapser } from 'components/Collapser';
 import useLocalPreference from 'utils/useLocalPreference';
 import { useApi } from 'utils/api';
 import { useDispatch, useSelector } from 'react-redux';
-import { startNewSearch, savePreset } from 'actions';
 import { useLoginManager } from 'utils/loginManager';
 import useLoginUser from 'utils/useLoginUser';
-import { SearchPreset } from 'store';
+import { SearchPreset } from 'store/loginUser';
+import * as searches from 'store/searches';
 import { useParams } from 'react-router-dom';
 
 const StateSavingCollapser: React.FC<any> = props => {
@@ -64,7 +64,7 @@ const SearchPanel: <T extends {}>(props: {
     }
     if (search) {
       // Use the saved condition of the existing search
-      return search.condition;
+      return search.params.condition;
     }
     return nullCondition();
   });
@@ -75,31 +75,29 @@ const SearchPanel: <T extends {}>(props: {
 
   const handleSearchClick = useCallback(() => {
     dispatch(
-      startNewSearch(
-        api,
-        searchName,
+      searches.newSearch(api, searchName, {
         resource,
-        conditionToFilter(condition),
         condition,
-        defaultSort
-      )
+        filter: conditionToFilter(condition),
+        sort: defaultSort
+      })
     );
   }, [
     api,
-    dispatch,
-    searchName,
-    resource,
     condition,
     conditionToFilter,
-    defaultSort
+    defaultSort,
+    dispatch,
+    resource,
+    searchName
   ]);
 
   // The following is invoked only on first-time render
   // eslint-disable-next-line
-  useEffect(handleSearchClick, [dispatch, api]);
+  useEffect(handleSearchClick, []);
 
   const handleSavePresetClick = useCallback(async () => {
-    await dispatch(savePreset(api, searchName, condition));
+    await dispatch(searches.savePreset(api, searchName, condition));
     loginManager.refreshUserInfo(true);
   }, [api, condition, dispatch, loginManager, searchName]);
 

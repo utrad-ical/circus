@@ -1,12 +1,6 @@
 import React, { Fragment } from 'react';
 import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
 import { Pagination } from 'components/react-bootstrap';
-import {
-  changeSearchPage,
-  changeSearchSort,
-  changeSearchLimit,
-  refreshSearch
-} from 'actions';
 import LoadingIndicator from '@smikitky/rb-components/lib/LoadingIndicator';
 import AutoReloadSwitch from './AutoReloadSwitch';
 import Icon from 'components/Icon';
@@ -14,6 +8,7 @@ import classnames from 'classnames';
 import styled from 'styled-components';
 import { useApi } from 'utils/api';
 import { useSelector, useDispatch } from 'react-redux';
+import * as searches from 'store/searches';
 
 export const makeSortOptions = (sortKeys: { [key: string]: string }) => {
   const options: { [key: string]: string } = {};
@@ -119,31 +114,37 @@ const SearchResultsView: React.FC<{
   const search = useSelector(state => state.searches[name]);
 
   if (!search) return null;
-  const { isFetching, totalItems, limit, items, page, sort } = search;
+  const {
+    isFetching,
+    params: { limit, page, sort },
+    results
+  } = search;
 
-  if (isFetching && !Array.isArray(items))
+  if (isFetching && !Array.isArray(results?.items))
     return <LoadingIndicator delay={1000} />;
 
-  if (!Array.isArray(items)) return null; // This should not happen
+  if (!results || !Array.isArray(results.items)) return null; // Should not happen
 
-  const handleSortChange = (newSort: object) => {
+  const { items, totalItems } = results;
+
+  const handleSortChange = (newSort: string) => {
     if (newSort === sort) return;
-    dispatch(changeSearchSort(api, name, newSort));
+    dispatch(searches.updateSearch(api, name, { sort: newSort }));
   };
 
   const handlePageClick = (newPage: number) => {
     if (newPage === page) return;
-    dispatch(changeSearchPage(api, name, newPage));
+    dispatch(searches.updateSearch(api, name, { page: newPage }));
   };
 
   const handleLimitChange = (newLimit: number) => {
     if (newLimit === limit) return;
-    dispatch(changeSearchLimit(api, name, newLimit));
+    dispatch(searches.updateSearch(api, name, { limit: newLimit }));
   };
 
   const handleRefresh = () => {
     if (isFetching) return;
-    dispatch(refreshSearch(api, name));
+    dispatch(searches.updateSearch(api, name, {}));
   };
 
   const pages = Math.ceil(totalItems / limit);

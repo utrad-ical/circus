@@ -12,9 +12,10 @@ const defaultOptions = {
 
 const AutoReloadSwitch: React.FC<{
   onRefresh: () => void;
-  options: any;
+  options?: any;
   bsSize: any;
-  bsStyle: string;
+  bsStyle?: string;
+  disabled?: boolean;
 }> = props => {
   const { onRefresh, options = defaultOptions, children, ...rest } = props;
 

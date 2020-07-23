@@ -1,6 +1,6 @@
 import { useDispatch } from 'react-redux';
 import React from 'react';
-import { showMessage } from 'store/message-box';
+import { showMessage } from 'store/messages';
 
 interface Options {
   /**

@@ -31,7 +31,7 @@ const slice = createSlice({
       boxes.push({
         id: action.payload.id,
         message: action.payload.message,
-        tag: typeof action.payload.tag === 'string' ? action.tag : null,
+        tag: typeof action.payload.tag === 'string' ? action.payload.tag : null,
         style: action.payload.style ?? 'info',
         dismissOnPageChange: !!action.payload.dismissOnPageChange
       });

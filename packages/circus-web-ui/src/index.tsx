@@ -33,7 +33,7 @@ import { store } from './store';
 import { Provider } from 'react-redux';
 import { ThemeProvider } from 'styled-components';
 import tinycolor from 'tinycolor2';
-import { dismissMessageOnPageChange } from 'actions';
+import { dismissMessageOnPageChange } from 'store/message-box';
 import PluginJobQueueSearch from './pages/search/PluginJobQueueSearch';
 import browserHistory from 'browserHistory';
 
@@ -109,7 +109,7 @@ const TheApp: React.FC<{}> = () => {
     // Handles history change
     browserHistory.listen(() => {
       // Hide message boxes which should not persist upon page changes
-      dismissMessageOnPageChange();
+      store.dispatch(dismissMessageOnPageChange());
       // Load user information again to check login status
       manager && manager.refreshUserInfo(false);
     });

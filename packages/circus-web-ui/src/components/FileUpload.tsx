@@ -6,7 +6,7 @@ import {
   ProgressBar
 } from './react-bootstrap';
 import { FileDroppable } from './FileDroppable';
-import { showMessage } from 'actions';
+import useShowMessage from 'utils/useShowMessage';
 import * as modal from '@smikitky/rb-components/lib/modal';
 import styled from 'styled-components';
 import { useApi } from 'utils/api';
@@ -52,6 +52,7 @@ const FileUpload: React.FC<{
   const [progress, setProgress] = useState({ value: 0, label: '' });
   const fileInput = useRef<HTMLInputElement>(null);
   const api = useApi();
+  const showMessage = useShowMessage();
 
   const handleDropFile = (files: FileList) => {
     setFilesSelected(files);

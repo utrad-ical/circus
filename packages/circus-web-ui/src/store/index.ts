@@ -1,9 +1,11 @@
+import { Action, configureStore } from '@reduxjs/toolkit';
 import { combineReducers, Reducer } from 'redux';
-import { configureStore } from '@reduxjs/toolkit';
-import Plugin from 'types/Plugin';
-import Project, { ProjectRoles } from 'types/Project';
+import { ThunkAction } from 'redux-thunk';
+import Plugin from '../types/Plugin';
+import Project, { ProjectRoles } from '../types/Project';
+import messages from './message-box';
 
-// The redux store should contain only information shared across pages,
+// The redux store will contain only "global" information shared across pages,
 // such as the login user information.
 
 type GlobalPrivileges =
@@ -66,43 +68,6 @@ const loginUser: Reducer<LoginUser> = (
       return { ...state, isFetching: true };
     case 'LOGGED_OUT':
       return { isFetching: false, data: null };
-  }
-  return state;
-};
-
-export interface MessageBox {
-  id: string;
-  message: string;
-  tag: string | null;
-  style: string;
-  dismissOnPageChange: boolean;
-}
-
-/**
- * Reducer for message boxes.
- */
-const messages: Reducer<MessageBox[]> = (state = [], action) => {
-  switch (action.type) {
-    case 'MESSAGE_ADD': {
-      let boxes;
-      if (typeof action.tag === 'string') {
-        boxes = state.filter(box => box.tag !== action.tag);
-      } else {
-        boxes = [...state];
-      }
-      boxes.push({
-        id: action.id,
-        message: action.message,
-        tag: typeof action.tag === 'string' ? action.tag : null,
-        style: action.style ? action.style : 'info',
-        dismissOnPageChange: !!action.dismissOnPageChange
-      });
-      return boxes;
-    }
-    case 'MESSAGE_DISMISS_PAGE_CHANGE':
-      return state.filter(box => box.dismissOnPageChange === true);
-    case 'MESSAGE_DISMISS':
-      return state.filter(box => box.id !== action.id);
   }
   return state;
 };
@@ -206,3 +171,16 @@ const reducer = combineReducers({
 });
 
 export const store = configureStore({ reducer });
+export const dispatch = store.dispatch;
+
+export type RootState = ReturnType<typeof reducer>;
+
+/**
+ * The thunk action type. See the advanced tutorial of Redux Toolkit.
+ */
+export type AppThunk = ThunkAction<
+  void, // the thunk doesn't return anything
+  RootState, // state type for getState
+  unknown, // no extra argument
+  Action<string> // dispatch will accept this action type
+>;

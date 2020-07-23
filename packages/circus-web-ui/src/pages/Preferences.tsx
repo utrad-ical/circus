@@ -3,11 +3,11 @@ import PropertyEditor from '@smikitky/rb-components/lib/PropertyEditor';
 import * as et from '@smikitky/rb-components/lib/editor-types';
 import { useApi } from 'utils/api';
 import { useLoginManager } from 'utils/loginManager';
-import { showMessage } from 'actions';
 import { Button } from 'components/react-bootstrap';
 import IconButton from 'components/IconButton';
 import Icon from 'components/Icon';
 import { SearchPreset } from 'store';
+import useShowMessage from 'utils/useShowMessage';
 
 const PresetDeleteEditor: React.FC<{
   value: SearchPreset[];
@@ -49,6 +49,7 @@ const Preferences: React.FC<{}> = props => {
   const [settings, setSettings] = useState(null);
   const loginManager = useLoginManager();
   const api = useApi();
+  const showMessage = useShowMessage();
 
   const loadSettings = useCallback(async () => {
     const settings = await api('preferences');

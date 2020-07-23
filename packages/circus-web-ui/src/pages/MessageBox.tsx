@@ -1,10 +1,11 @@
 import React from 'react';
-import { dismissMessage } from 'actions';
+import { dismissMessage } from 'store/message-box';
 import { Alert } from 'components/react-bootstrap';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 
-const MessageBox: React.FC<{}> = props => {
+const MessageBox: React.FC<{}> = React.memo(props => {
   const messages = useSelector(state => state.messages);
+  const dispatch = useDispatch();
 
   if (!messages.length) return null;
   return (
@@ -15,7 +16,7 @@ const MessageBox: React.FC<{}> = props => {
           <Alert
             key={m.id}
             bsStyle={style}
-            onDismiss={() => dismissMessage(m.id)}
+            onDismiss={() => dispatch(dismissMessage({ id: m.id }))}
           >
             {m.message}
           </Alert>
@@ -23,6 +24,6 @@ const MessageBox: React.FC<{}> = props => {
       })}
     </div>
   );
-};
+});
 
 export default MessageBox;

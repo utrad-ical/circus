@@ -1,6 +1,6 @@
 import LoadingIndicator from '@smikitky/rb-components/lib/LoadingIndicator';
 import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
-import { showMessage } from 'actions';
+import useShowMessage from 'utils/useShowMessage';
 import IconButton from 'components/IconButton';
 import PluginDisplay from 'components/PluginDisplay';
 import SeriesSelector, { SeriesEntry } from 'components/SeriesSelector';
@@ -21,6 +21,7 @@ const CreateNewJob: React.FC<{}> = props => {
   const [busy, setBusy] = useState(true);
   const [plugins, setPlugins] = useState<Plugin[]>([]);
   const api = useApi();
+  const showMessage = useShowMessage();
   const seriesUid = useParams<any>().seriesUid;
 
   useEffect(() => {

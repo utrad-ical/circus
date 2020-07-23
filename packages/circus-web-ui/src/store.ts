@@ -1,11 +1,5 @@
-import {
-  createStore,
-  combineReducers,
-  compose,
-  applyMiddleware,
-  Reducer
-} from 'redux';
-import thunk from 'redux-thunk';
+import { combineReducers, Reducer } from 'redux';
+import { configureStore } from '@reduxjs/toolkit';
 import Plugin from 'types/Plugin';
 import Project, { ProjectRoles } from 'types/Project';
 
@@ -211,10 +205,4 @@ const reducer = combineReducers({
   user
 });
 
-const composeEnhancers =
-  (window as any).__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
-
-export const store = createStore(
-  reducer,
-  composeEnhancers(applyMiddleware(thunk))
-);
+export const store = configureStore({ reducer });

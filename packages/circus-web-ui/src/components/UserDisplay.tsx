@@ -1,10 +1,10 @@
 import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useApi } from 'utils/api';
-import { loadUserInfo } from 'actions';
+import { loadUserInfo } from 'store/users';
 
 const useUserInfo = (userEmail: string) => {
-  const user = useSelector(state => state.user[userEmail]);
+  const user = useSelector(state => state.users[userEmail]);
   const dispatch = useDispatch();
   const api = useApi();
   useEffect(() => {

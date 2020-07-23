@@ -33,7 +33,7 @@ import { store } from './store';
 import { Provider } from 'react-redux';
 import { ThemeProvider } from 'styled-components';
 import tinycolor from 'tinycolor2';
-import { dismissMessageOnPageChange } from 'store/message-box';
+import { dismissMessageOnPageChange } from 'store/messages';
 import PluginJobQueueSearch from './pages/search/PluginJobQueueSearch';
 import browserHistory from 'browserHistory';
 

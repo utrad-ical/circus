@@ -1,7 +1,7 @@
 import axios, { AxiosResponse } from 'axios';
 import { CancelToken } from './cancelToken';
 import { dispatch } from 'store';
-import { showMessage } from 'store/message-box';
+import { showMessage } from 'store/messages';
 import * as qs from 'querystring';
 import { useContext, createContext } from 'react';
 

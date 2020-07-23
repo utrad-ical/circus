@@ -5,7 +5,7 @@ import PropertyEditor from '@smikitky/rb-components/lib/PropertyEditor';
 import { useApi } from 'utils/api';
 import { useLoginManager } from 'utils/loginManager';
 import AdminContainer from './AdminContainer';
-import { startNewSearch } from 'actions';
+import { newSearch } from 'store/searches';
 import DataGrid, { DataGridColumnDefinition } from 'components/DataGrid';
 import SearchResultsView from 'components/SearchResultsView';
 import { useDispatch } from 'react-redux';
@@ -45,7 +45,14 @@ const EditorPage: React.FC<{
   } = props;
 
   const loadItems = useCallback(async () => {
-    dispatch(startNewSearch(api, searchName, resource, {}, {}, {}));
+    dispatch(
+      newSearch(api, searchName, {
+        filter: {},
+        condition: {},
+        sort: '{}',
+        resource
+      })
+    );
   }, [api, dispatch, resource, searchName]);
 
   const handleEditStart = useCallback(

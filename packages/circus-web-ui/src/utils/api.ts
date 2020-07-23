@@ -1,6 +1,7 @@
 import axios, { AxiosResponse } from 'axios';
 import { CancelToken } from './cancelToken';
-import { showMessage } from 'actions';
+import { dispatch } from 'store';
+import { showMessage } from 'store/message-box';
 import * as qs from 'querystring';
 import { useContext, createContext } from 'react';
 
@@ -118,10 +119,12 @@ const showErrorMessage = (err: { response: AxiosResponse }) => {
   } else {
     message = 'The server did not respond.';
   }
-  showMessage(message, 'danger', {
-    tag: 'apiResult',
-    dismissOnPageChange: true
-  });
+  dispatch(
+    showMessage(message, 'danger', {
+      tag: 'apiResult',
+      dismissOnPageChange: true
+    })
+  );
 };
 
 export default createApiCaller;

@@ -1,5 +1,5 @@
 import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
-import { showMessage } from 'actions';
+import useShowMessage from 'utils/useShowMessage';
 import FileUpload from 'components/FileUpload';
 import { Alert } from 'components/react-bootstrap';
 import React, { useState } from 'react';
@@ -8,6 +8,7 @@ import useLoginUser from 'utils/useLoginUser';
 
 const ImportSeries: React.FC<{}> = props => {
   const loginUser = useLoginUser()!;
+  const showMessage = useShowMessage();
   const domains = loginUser.domains || [];
 
   const [domainPreference, setDomainPreference] = useLocalPreference<

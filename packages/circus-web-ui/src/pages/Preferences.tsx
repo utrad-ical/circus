@@ -6,7 +6,7 @@ import { useLoginManager } from 'utils/loginManager';
 import { Button } from 'components/react-bootstrap';
 import IconButton from 'components/IconButton';
 import Icon from 'components/Icon';
-import { SearchPreset } from 'store';
+import { SearchPreset } from 'store/loginUser';
 import useShowMessage from 'utils/useShowMessage';
 
 const PresetDeleteEditor: React.FC<{

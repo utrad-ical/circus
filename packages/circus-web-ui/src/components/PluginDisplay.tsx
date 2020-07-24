@@ -6,7 +6,7 @@ import { useApi } from 'utils/api';
 
 const PluginDisplay: React.FC<{
   pluginId: string;
-  size: string;
+  size?: string;
 }> = props => {
   const { pluginId, size } = props;
   const plugin = useSelector(state => state.plugins[pluginId]);

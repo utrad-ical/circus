@@ -1,5 +1,4 @@
 import { RouteMiddleware } from '../../typings/middlewares';
-import bytes from 'bytes';
 
 // import status from 'http-status';
 
@@ -40,7 +39,7 @@ export const handleGetFull: RouteMiddleware = ({
       defaultDomain,
       dicomImageServer: dicomImageServerUrl,
       uploadFileMax: 30,
-      uploadFileSizeMax: bytes(uploadFileSizeMaxBytes)
+      uploadFileSizeMaxBytes
     };
   };
 };

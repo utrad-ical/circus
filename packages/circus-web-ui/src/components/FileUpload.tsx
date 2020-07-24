@@ -10,6 +10,7 @@ import useShowMessage from 'utils/useShowMessage';
 import * as modal from '@smikitky/rb-components/lib/modal';
 import styled from 'styled-components';
 import { useApi } from 'utils/api';
+import bytes from 'bytes';
 
 const StyledDiv = styled.div`
   input[type='file'] {
@@ -37,6 +38,7 @@ const FileUpload: React.FC<{
   onUploaded?: (res: any) => void;
   multiple?: boolean;
   uploadFileMax?: number;
+  uploadFileSizeMaxBytes?: number;
 }> = props => {
   const {
     url,
@@ -44,7 +46,8 @@ const FileUpload: React.FC<{
     onUploaded,
     children,
     multiple,
-    uploadFileMax
+    uploadFileMax,
+    uploadFileSizeMaxBytes
   } = props;
 
   const [filesSelected, setFilesSelected] = useState<FileList | null>(null);
@@ -98,6 +101,14 @@ const FileUpload: React.FC<{
           'if they can modify the current limitation.'
       );
       return;
+    }
+    if (
+      typeof uploadFileSizeMaxBytes === 'number' &&
+      totalBytes > uploadFileSizeMaxBytes
+    ) {
+      modal.alert(
+        `Sorry, the maximum file size is ${uploadFileSizeMaxBytes} bytes.`
+      );
     }
     const confirmed = await modal.confirm(
       `Do you want to upload ${fileDescription}? (${totalBytes} bytes)`

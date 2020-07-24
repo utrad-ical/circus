@@ -30,7 +30,7 @@ const PluginJobQueueAdmin: React.FC<{}> = props => {
   useEffect(() => {
     dispatch(
       newSearch(api, 'globalJobQueue', {
-        resource: 'admin/plugin-job-queue',
+        resource: { endPoint: 'admin/plugin-job-queue', primaryKey: 'jobId' },
         filter: {},
         condition: {},
         sort: '{ createdAt: -1 }'

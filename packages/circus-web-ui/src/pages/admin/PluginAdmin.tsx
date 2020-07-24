@@ -80,8 +80,7 @@ const PluginAdmin: React.FC<{}> = props => {
       title="CAD Plug-ins"
       icon="circus-app"
       searchName="admin-plugins"
-      resource="admin/plugins"
-      primaryKey="pluginId"
+      resource={{ endPoint: 'admin/plugins', primaryKey: 'pluginId' }}
       editorProperties={editorProperties}
       listColumns={listColumns}
       makeEmptyItem={makeEmptyItem}

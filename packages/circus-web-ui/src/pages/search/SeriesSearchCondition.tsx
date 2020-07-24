@@ -129,7 +129,7 @@ const SeriesSearchCondition: React.FC<{}> = props => {
   return (
     <SearchPanel
       searchName="series"
-      resource="series"
+      resource={{ endPoint: 'series', primaryKey: 'seriesUid' }}
       defaultSort='{"createdAt":-1}'
       nullCondition={nullCondition}
       conditionToFilter={conditionToFilter}

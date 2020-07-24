@@ -130,8 +130,7 @@ const UserAdmin: React.FC<any> = props => {
       title="Users"
       icon="user"
       searchName="admin-user"
-      resource="admin/users"
-      primaryKey="userEmail"
+      resource={{ endPoint: 'admin/users', primaryKey: 'userEmail' }}
       editorProperties={editorProperties}
       listColumns={listColumns}
       makeEmptyItem={makeEmptyItem}

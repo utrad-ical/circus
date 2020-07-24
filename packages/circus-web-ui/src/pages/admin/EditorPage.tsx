@@ -5,7 +5,7 @@ import PropertyEditor from '@smikitky/rb-components/lib/PropertyEditor';
 import { useApi } from 'utils/api';
 import { useLoginManager } from 'utils/loginManager';
 import AdminContainer from './AdminContainer';
-import { newSearch } from 'store/searches';
+import { newSearch, SearchResource } from 'store/searches';
 import DataGrid, { DataGridColumnDefinition } from 'components/DataGrid';
 import SearchResultsView from 'components/SearchResultsView';
 import { useDispatch } from 'react-redux';
@@ -21,9 +21,8 @@ const StyledDataGrid = styled(DataGrid)`
 const EditorPage: React.FC<{
   listColumns: DataGridColumnDefinition[];
   preCommitHook?: (target: any) => Promise<boolean | void>;
-  primaryKey: string;
   searchName: string;
-  resource: string;
+  resource: SearchResource;
   title: string;
   targetName?: (item: any) => string;
   icon: string;
@@ -42,7 +41,6 @@ const EditorPage: React.FC<{
   const {
     listColumns,
     preCommitHook,
-    primaryKey,
     searchName,
     resource,
     title,
@@ -58,22 +56,25 @@ const EditorPage: React.FC<{
         filter: {},
         condition: {},
         sort: '{}',
-        resource
+        resource: {
+          endPoint: resource.endPoint,
+          primaryKey: resource.primaryKey
+        }
       })
     );
-  }, [api, dispatch, resource, searchName]);
+  }, [api, dispatch, resource.endPoint, resource.primaryKey, searchName]);
 
   const handleEditStart = useCallback(
     (index, item) => {
       const makeTargetName = (item: any) => {
         if (targetName) return targetName(item);
-        return item[primaryKey];
+        return item[resource.primaryKey];
       };
       setTarget(makeTargetName(item));
       setEditing(item);
       setComplaints({});
     },
-    [targetName, primaryKey]
+    [targetName, resource.primaryKey]
   );
 
   const grid = useMemo(() => {
@@ -96,14 +97,15 @@ const EditorPage: React.FC<{
       if (!(await preCommitHook(target))) return;
     }
 
-    let url = resource;
-    if (target) {
-      url += '/' + encodeURIComponent(editing[primaryKey]);
-    }
+    const url = target
+      ? resource.endPoint +
+        '/' +
+        encodeURIComponent(editing[resource.primaryKey]) // Update
+      : resource.endPoint; // Create new
 
-    if (target && primaryKey in item) {
+    if (target && resource.primaryKey in item) {
       item = { ...item };
-      delete item[primaryKey];
+      delete item[resource.primaryKey];
     }
 
     const args = {
@@ -152,7 +154,7 @@ const EditorPage: React.FC<{
           complaints={complaints}
           target={target}
           properties={editorProperties}
-          excludeProperty={target ? props.primaryKey : undefined}
+          excludeProperty={target ? resource.primaryKey : undefined}
           onSaveClick={commitItem}
           onCancelClick={handleCancelClick}
         />

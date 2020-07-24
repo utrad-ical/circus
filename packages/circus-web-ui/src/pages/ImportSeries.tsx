@@ -60,7 +60,6 @@ const ImportSeries: React.FC<{}> = props => {
       <p>Zipped DICOM files are also supported.</p>
       <FileUpload
         multiple={true}
-        targetResource="import-series"
         uploadFileMax={loginUser.uploadFileMax}
         uploadFileSizeMax={loginUser.uploadFileSizeMax}
         url={`series/domain/${encodeURIComponent(uploadDomain || '')}`}

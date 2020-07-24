@@ -28,7 +28,7 @@ export interface LoginUser {
     loginEnabled: boolean;
     loginId: string;
     uploadFileMax: number;
-    uploadFileSizeMax: string;
+    uploadFileSizeMaxBytes: number;
     userEmail: string;
     preferences: {
       seriesSearchPresets?: SearchPreset[];

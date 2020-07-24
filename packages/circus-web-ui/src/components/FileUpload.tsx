@@ -10,7 +10,8 @@ import useShowMessage from 'utils/useShowMessage';
 import * as modal from '@smikitky/rb-components/lib/modal';
 import styled from 'styled-components';
 import { useApi } from 'utils/api';
-import bytes from 'bytes';
+import { withCommas } from 'utils/util';
+import IconButton from './IconButton';
 
 const StyledDiv = styled.div`
   input[type='file'] {
@@ -26,6 +27,12 @@ const StyledDiv = styled.div`
     margin: 10px 0;
   }
 `;
+
+const dedupeFiles = (files: File[]) => {
+  const map = new Map<string, File>();
+  files.forEach(f => !map.has(f.name) && map.set(f.name, f));
+  return Array.from(map.values());
+};
 
 /**
  * Renderes a div with which a user can upload one ore more files.
@@ -50,19 +57,19 @@ const FileUpload: React.FC<{
     uploadFileSizeMaxBytes
   } = props;
 
-  const [filesSelected, setFilesSelected] = useState<FileList | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState({ value: 0, label: '' });
   const fileInput = useRef<HTMLInputElement>(null);
   const api = useApi();
   const showMessage = useShowMessage();
 
-  const handleDropFile = (files: FileList) => {
-    setFilesSelected(files);
+  const handleDropFile = (newFiles: FileList) => {
+    setFiles(dedupeFiles([...files, ...Array.from(newFiles)]));
   };
 
   const handleFileSelect = () => {
-    setFilesSelected(fileInput.current!.files);
+    setFiles(dedupeFiles([...files, ...Array.from(fileInput.current!.files!)]));
   };
 
   const handleUploadProgress = (event: ProgressEvent) => {
@@ -78,42 +85,26 @@ const FileUpload: React.FC<{
     });
   };
 
+  const totalBytes = files.reduce((sum, f) => (sum += f.size), 0);
+
+  const canUpload =
+    !uploading &&
+    files.length > 0 &&
+    !(files.length > (uploadFileMax ?? Infinity)) &&
+    !(totalBytes > (uploadFileSizeMaxBytes ?? Infinity));
+
   const handleUploadClick = async () => {
-    if (!filesSelected) return;
-    const num = filesSelected.length;
-    if (typeof num !== 'number' || num <= 0) return;
+    if (!files.length) return;
 
-    const fd = new FormData();
-    let totalBytes = 0;
-
-    for (let i = 0; i < num; i++) {
-      fd.append('files', filesSelected[i]);
-      totalBytes += filesSelected[i].size;
-    }
-
-    const fileDescription = num >= 2 ? `these ${num} files` : 'this file';
-    if (typeof uploadFileMax === 'number' && num > uploadFileMax) {
-      modal.alert(
-        'Sorry, you can not upload more than ' +
-          uploadFileMax +
-          ' files at the same time.\n' +
-          'Use a zipped file, or consult the server administrator ' +
-          'if they can modify the current limitation.'
-      );
-      return;
-    }
-    if (
-      typeof uploadFileSizeMaxBytes === 'number' &&
-      totalBytes > uploadFileSizeMaxBytes
-    ) {
-      modal.alert(
-        `Sorry, the maximum file size is ${uploadFileSizeMaxBytes} bytes.`
-      );
-    }
     const confirmed = await modal.confirm(
-      `Do you want to upload ${fileDescription}? (${totalBytes} bytes)`
+      `Do you want to upload ${
+        files.length >= 2 ? `these ${files.length} files` : 'this file'
+      }? (${withCommas(totalBytes)} bytes)`
     );
     if (!confirmed) return;
+
+    const fd = new FormData();
+    files.forEach(f => fd.append('files', f));
 
     // Allow the component user to access the FormData and modify it
     typeof onBeforeUpload === 'function' && onBeforeUpload(fd);
@@ -125,7 +116,7 @@ const FileUpload: React.FC<{
         data: fd,
         onUploadProgress: handleUploadProgress
       });
-      setFilesSelected(null);
+      setFiles([]);
       setUploading(false);
       typeof onUploaded === 'function' && onUploaded(res);
     } catch (err) {
@@ -146,33 +137,45 @@ const FileUpload: React.FC<{
             multiple={!!multiple}
             onChange={handleFileSelect}
           />
-          {!filesSelected || filesSelected.length == 0 ? (
-            <Button
-              bsStyle="default"
-              onClick={() => fileInput.current!.click()}
-            >
-              <Glyphicon glyph="plus" />
-              &ensp;Select File
-            </Button>
-          ) : (
-            <ButtonToolbar>
-              <Button
-                bsStyle="primary"
-                disabled={(filesSelected || []).length < 1 || uploading}
-                onClick={handleUploadClick}
-              >
-                <Glyphicon glyph="upload" />
-                &ensp;Upload
-              </Button>
-              <Button
-                bsStyle="link"
-                disabled={uploading}
-                onClick={() => setFilesSelected(null)}
-              >
-                Reset
-              </Button>
-            </ButtonToolbar>
+          {files.length > 0 && (
+            <>
+              <ButtonToolbar>
+                <Button
+                  bsStyle="primary"
+                  disabled={!canUpload}
+                  onClick={handleUploadClick}
+                >
+                  <Glyphicon glyph="upload" />
+                  &ensp;Upload
+                </Button>
+                <Button
+                  bsStyle="link"
+                  disabled={uploading}
+                  onClick={() => setFiles([])}
+                >
+                  Reset
+                </Button>
+              </ButtonToolbar>
+              {files.length > (uploadFileMax ?? Infinity) && (
+                <div className="alert alert-danger">
+                  You cannot upload more than {uploadFileMax} files at the same
+                  time. Use a zipped file.
+                </div>
+              )}
+              {totalBytes > (uploadFileSizeMaxBytes ?? Infinity) && (
+                <div className="alert alert-danger">
+                  You cannot upload more than{' '}
+                  {withCommas(uploadFileSizeMaxBytes!)} bytes of data at the
+                  same time.
+                </div>
+              )}
+            </>
           )}
+          <SummaryTable files={files} onChange={setFiles} />
+          <Button bsStyle="default" onClick={() => fileInput.current!.click()}>
+            <Glyphicon glyph="plus" />
+            &ensp;{files.length > 0 ? 'Add More file' : 'Select File'}
+          </Button>
         </div>
         {uploading && (
           <div className="progress-container">
@@ -185,7 +188,6 @@ const FileUpload: React.FC<{
             />
           </div>
         )}
-        <SummaryTable files={filesSelected} />
         <p>You can drag and drop files to this box.</p>
       </StyledDiv>
     </FileDroppable>
@@ -195,36 +197,52 @@ const FileUpload: React.FC<{
 export default FileUpload;
 
 const SummaryTable: React.FC<{
-  files: FileList | null;
+  files: File[];
+  onChange: (files: File[]) => void;
   showMax?: number;
 }> = props => {
-  const { files, showMax = 10 } = props;
-  let totalSize = 0;
-  if (!files || files.length < 1) return null;
+  const { files, onChange, showMax = 10 } = props;
+  if (files.length < 1) return null;
+  const totalBytes = files.reduce((sum, f) => (sum += f.size), 0);
+
+  const handleDelete = (index: number) => {
+    onChange(files.filter((f, i) => i !== index));
+  };
+
   return (
     <table className="table table-condensed">
       <thead>
         <tr>
-          <th>File</th>
+          <th style={{ width: '100%' }}>File</th>
           <th className="text-right">Size</th>
+          <th></th>
         </tr>
       </thead>
       <tbody>
-        {Array.prototype.slice.call(files).map((f, i) => {
-          totalSize += f.size;
+        {files.map((f, i) => {
           if (i >= showMax) return null;
           return (
             <tr key={i}>
               <td>{f.name}</td>
-              <td className="text-right">{f.size}</td>
+              <td className="text-right">{withCommas(f.size)}</td>
+              <td>
+                <IconButton
+                  icon="remove"
+                  bsSize="xs"
+                  onClick={() => handleDelete(i)}
+                />
+              </td>
             </tr>
           );
         })}
         {files.length > showMax && (
           <tr>
             <td>
-              <i>And {files.length - showMax} file(s)</i>
+              <i>
+                And <b>{files.length - showMax}</b> more file(s)
+              </i>
             </td>
+            <td />
             <td />
           </tr>
         )}
@@ -233,7 +251,8 @@ const SummaryTable: React.FC<{
         <tfoot>
           <tr className="info">
             <th>Total: {files.length} files</th>
-            <th className="text-right">{totalSize}</th>
+            <th className="text-right">{withCommas(totalBytes)}</th>
+            <th />
           </tr>
         </tfoot>
       )}

@@ -10,3 +10,7 @@ export const sha1 = (arrayBuf: ArrayBuffer) => {
   sha.update(Buffer.from(arrayBuf));
   return sha.digest('hex');
 };
+
+export const withCommas = (x: number) => {
+  return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+};

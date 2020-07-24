@@ -37,7 +37,7 @@ const SearchPanel: <T extends {}>(props: {
   }>;
   searchName: string;
   presetName?: string;
-  resource: string;
+  resource: searches.SearchResource;
   defaultSort: string;
 }) => React.ReactElement<any> = props => {
   const {

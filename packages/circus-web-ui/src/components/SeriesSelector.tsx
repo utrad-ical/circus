@@ -128,7 +128,7 @@ const SeriesSelector: React.FC<{
       const filter = { studyUid: value[0].data.studyUid };
       dispatch(
         newSearch(api, 'relevantSeries', {
-          resource: 'series',
+          resource: { endPoint: 'series', primaryKey: 'seriesUid' },
           filter,
           condition: {},
           sort: '{}'

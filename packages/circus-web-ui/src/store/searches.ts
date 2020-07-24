@@ -3,8 +3,13 @@ import { confirm, prompt } from '@smikitky/rb-components/lib/modal';
 import { AppThunk } from 'store';
 import { ApiCaller } from 'utils/api';
 
+export interface SearchResource {
+  endPoint: string;
+  primaryKey: string;
+}
+
 interface SearchParams {
-  resource: string;
+  resource: SearchResource;
   /**
    * Query object sent to the server.
    */
@@ -23,7 +28,8 @@ type NewSearchParams = Partial<Pick<SearchParams, 'page' | 'limit'>> &
   Omit<SearchParams, 'page' | 'limit'>;
 
 interface SearchResults<T> {
-  items: T[];
+  items: { [key: string]: T };
+  indexes: string[];
   totalItems: number;
 }
 
@@ -31,6 +37,7 @@ export interface Search<T> {
   params: SearchParams;
   isFetching: boolean;
   results?: SearchResults<T>;
+  selected: string[];
 }
 
 interface Searches {
@@ -43,11 +50,14 @@ const slice = createSlice({
   reducers: {
     startSearch: (
       state,
-      action: PayloadAction<{ searchName: string; params: SearchParams }>
+      action: PayloadAction<{
+        searchName: string;
+        params: SearchParams;
+      }>
     ) => {
       const { searchName, params } = action.payload;
       if (!(searchName in state))
-        state[searchName] = { isFetching: true, params };
+        state[searchName] = { params, isFetching: true, selected: [] };
       state[searchName].isFetching = true;
       state[searchName].params = params;
     },
@@ -58,18 +68,34 @@ const slice = createSlice({
       const { searchName, isFetching } = action.payload;
       state[searchName].isFetching = isFetching;
     },
+    changeSelection: (
+      state,
+      action: PayloadAction<{ searchName: string; ids: string[] }>
+    ) => {
+      state[action.payload.searchName].selected = action.payload.ids;
+    },
     searchResultLoaded: (
       state,
       action: PayloadAction<{
         searchName: string;
-        page: number;
-        results: SearchResults<unknown>;
+        data: { items: any[]; page: number; totalItems: number };
       }>
     ) => {
-      const { searchName, page, results } = action.payload;
-      state[searchName].isFetching = false;
-      state[searchName].params.page = page;
-      state[searchName].results = results;
+      const {
+        searchName,
+        data: { items: rawItems, page, totalItems }
+      } = action.payload;
+      const search = state[searchName]!;
+      search.isFetching = false;
+      search.params.page = page;
+      const items: { [key: string]: any } = {};
+      const primaryKey = search.params.resource.primaryKey;
+      rawItems.forEach(i => (items[i[primaryKey] + ''] = i));
+      search.results = {
+        items,
+        indexes: rawItems.map(i => i[primaryKey]),
+        totalItems
+      };
     },
     deleteSearch: (state, action: PayloadAction<string>) => {
       const searchName = action.payload;
@@ -81,7 +107,7 @@ const slice = createSlice({
 // We will not export these "primitive" actions for now
 const { startSearch, setBusy, searchResultLoaded } = slice.actions;
 // But we export this one
-export const { deleteSearch } = slice.actions;
+export const { changeSelection, deleteSearch } = slice.actions;
 
 export default slice.reducer;
 
@@ -94,7 +120,7 @@ const executeQuery = async (
 ) => {
   try {
     dispatch(startSearch({ searchName, params }));
-    const result = await api(params.resource, {
+    const data = await api(params.resource.endPoint, {
       params: {
         filter: params.filter,
         sort: params.sort,
@@ -102,13 +128,7 @@ const executeQuery = async (
         limit: params.limit
       }
     });
-    dispatch(
-      searchResultLoaded({
-        searchName,
-        page: result.page,
-        results: { items: result.items, totalItems: result.totalItems }
-      })
-    );
+    dispatch(searchResultLoaded({ searchName, data }));
   } finally {
     dispatch(setBusy({ searchName, isFetching: false }));
   }

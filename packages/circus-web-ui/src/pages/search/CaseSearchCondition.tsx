@@ -192,7 +192,7 @@ const CaseSearchCondition: React.FC<{}> = props => {
   return (
     <SearchPanel
       searchName="case"
-      resource="cases"
+      resource={{ endPoint: 'cases', primaryKey: 'caseId' }}
       defaultSort='{"createdAt":-1}'
       nullCondition={nullCondition}
       conditionToFilter={conditionToFilter}

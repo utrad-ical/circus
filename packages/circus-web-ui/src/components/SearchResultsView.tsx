@@ -120,12 +120,11 @@ const SearchResultsView: React.FC<{
     results
   } = search;
 
-  if (isFetching && !Array.isArray(results?.items))
-    return <LoadingIndicator delay={1000} />;
+  if (isFetching && results?.items) return <LoadingIndicator delay={1000} />;
+  if (!results?.items) return null; // Should not happen
 
-  if (!results || !Array.isArray(results.items)) return null; // Should not happen
-
-  const { items, totalItems } = results;
+  const { items: dic, indexes, totalItems } = results;
+  const items = indexes.map(index => dic[index]);
 
   const handleSortChange = (newSort: string) => {
     if (newSort === sort) return;

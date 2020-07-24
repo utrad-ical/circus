@@ -43,7 +43,7 @@ const PluginJobQueueSearch: React.FC<{}> = props => {
   useEffect(() => {
     dispatch(
       newSearch(api, 'pluingJobQueue', {
-        resource: 'plugin-job-queue',
+        resource: { endPoint: 'plugin-job-queue', primaryKey: 'jobId' },
         condition: {},
         filter: {},
         sort: '{"jobId":-1}'

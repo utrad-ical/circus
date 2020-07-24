@@ -10,6 +10,7 @@ import useLoginUser from 'utils/useLoginUser';
 import { SearchPreset } from 'store/loginUser';
 import * as searches from 'store/searches';
 import { useParams } from 'react-router-dom';
+import styled from 'styled-components';
 
 const StateSavingCollapser: React.FC<any> = props => {
   const [open, setOpen] = useLocalPreference('searchPanelOpen', false);
@@ -21,6 +22,11 @@ const StateSavingCollapser: React.FC<any> = props => {
     />
   );
 };
+
+const ButtonBar = styled.div`
+  text-align: center;
+  margin-top: 1em;
+`;
 
 const SearchPanel: <T extends {}>(props: {
   nullCondition: () => T;
@@ -104,7 +110,7 @@ const SearchPanel: <T extends {}>(props: {
   return (
     <StateSavingCollapser title="Search Condition" framed>
       <ConditionEditor value={condition} onChange={setCondition} />
-      <div className="search-buttons">
+      <ButtonBar>
         <IconButton bsStyle="link" icon="save" onClick={handleSavePresetClick}>
           Save
         </IconButton>
@@ -116,7 +122,7 @@ const SearchPanel: <T extends {}>(props: {
         <IconButton bsStyle="primary" icon="search" onClick={handleSearchClick}>
           Search
         </IconButton>
-      </div>
+      </ButtonBar>
     </StateSavingCollapser>
   );
 };

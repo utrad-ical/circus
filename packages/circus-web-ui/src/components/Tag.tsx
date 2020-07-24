@@ -80,7 +80,7 @@ export const TagList: React.FC<{
           ? project.project.tags.find(t => t.name === tag)?.color ??
             defaultTagColor
           : defaultTagColor;
-        return <PhysicalTag color={color} name={tag} />;
+        return <PhysicalTag key={tag} name={tag} color={color} />;
       })}
     </StyledTagListSpan>
   );

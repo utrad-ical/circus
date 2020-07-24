@@ -9,6 +9,14 @@ import { newSearch } from 'store/searches';
 import DataGrid, { DataGridColumnDefinition } from 'components/DataGrid';
 import SearchResultsView from 'components/SearchResultsView';
 import { useDispatch } from 'react-redux';
+import styled from 'styled-components';
+
+const StyledDataGrid = styled(DataGrid)`
+  .label {
+    margin-left: 1px;
+    margin-right: 1px;
+  }
+`;
 
 const EditorPage: React.FC<{
   listColumns: DataGridColumnDefinition[];
@@ -70,7 +78,7 @@ const EditorPage: React.FC<{
 
   const grid = useMemo(() => {
     return (props => (
-      <DataGrid
+      <StyledDataGrid
         value={props.value}
         columns={listColumns}
         onItemClick={handleEditStart}

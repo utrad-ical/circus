@@ -18,7 +18,7 @@ export interface DynamicMprImageSourceOptions {
   rsHttpClient: RsHttpClient;
   seriesUid: string;
   partialVolumeDescriptor?: PartialVolumeDescriptor;
-  estimateWindowType: EstimateWindowType;
+  estimateWindowType?: EstimateWindowType;
 }
 
 /**

@@ -74,7 +74,10 @@ export const useHybridImageSource = (
   seriesUid: string,
   partialVolumeDescriptor: PartialVolumeDescriptor
 ) => {
-  const volumeLoader = useVolumeLoader(seriesUid, partialVolumeDescriptor);
+  const volumeLoader = usePendingVolumeLoader(
+    seriesUid,
+    partialVolumeDescriptor
+  );
   const { rsHttpClient } = useContext(VolumeLoaderCacheContext)!;
   const [imageSource, setImageSource] = useState<rs.HybridMprImageSource>();
   const pendindImageSource = useMemo(() => {

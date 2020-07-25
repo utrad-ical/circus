@@ -11,16 +11,6 @@ properties:
       :key: The unique ID of the job.
   pluginId:
     type: string
-  pluginName:
-    type: string
-    description: >
-      Plug-in name which cs-core provides according to pluginId when queued.
-      This has difference in case of plugin was updated in waiting.
-  pluginVersion:
-    type: string
-    description: >
-      Plug-in version which cs-core provides according to pluginId when queued.
-      This has difference in case of plugin was updated in waiting.
   userEmail:
     type: string
   status:
@@ -60,11 +50,6 @@ properties:
       Job finish time.
     oneOf:
       - date: true
-      - type: 'null'
-  results:
-    description: The result data of this plug-in job.
-    oneOf:
-      - type: object
       - type: 'null'
   domain:
     type: string

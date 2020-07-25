@@ -44,8 +44,6 @@ export const handlePost: RouteMiddleware = ({ models, cs }) => {
     await models.pluginJob.insert({
       jobId,
       pluginId: plugin.pluginId,
-      pluginName: plugin.pluginName,
-      pluginVersion: plugin.version,
       series: request.series,
       userEmail: ctx.user.userEmail,
       status: 'in_queue',
@@ -138,6 +136,7 @@ export const handleSearch: RouteMiddleware = ({ models }) => {
           $project: {
             _id: false,
             volId: false,
+            results: false,
             primarySeries: false,
             seriesDetail: false
           }

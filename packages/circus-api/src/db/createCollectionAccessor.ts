@@ -205,7 +205,7 @@ const createCollectionAccessor = <T = any>(
     }
     const original = await collection.findOneAndUpdate(
       { [key]: id } as mongo.FilterQuery<WithDates<T>>,
-      { $set: { ...updates, updatedAt: date } } as mongo.UpdateQuery<
+      { $set: { updatedAt: date, ...updates } } as mongo.UpdateQuery<
         WithDates<T>
       >
     );

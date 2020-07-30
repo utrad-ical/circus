@@ -8,7 +8,7 @@ import { toolFactory } from 'circus-rs/tool/tool-initializer';
 import useLoginUser from 'utils/useLoginUser';
 import useLoadData from 'utils/useLoadData';
 import styled from 'styled-components';
-import { Link } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import IconButton from 'components/IconButton';
 
 const StyledImageViewer = styled(ImageViewer)`
@@ -21,15 +21,12 @@ const StyledMenu = styled.div`
   margin-bottom: 1em;
 `;
 
-const SeriesDetail: React.FC<{
-  match: any;
-}> = props => {
+const SeriesDetail: React.FC<{}> = props => {
+  const seriesUid = useParams<any>().uid as string;
   const [composition, setComposition] = useState<rs.Composition | null>(null);
   const loginUser = useLoginUser()!;
   const api = useApi();
   const pagerTool = useMemo(() => toolFactory('pager'), []);
-
-  const seriesUid = props.match.params.uid;
   const server = loginUser.dicomImageServer;
 
   const load = useCallback(

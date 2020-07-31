@@ -46,6 +46,29 @@ const labelTypeOptions = {
   ellipse: { caption: 'ellipse', icon: 'circus-annotation-ellipse' }
 };
 
+const convertlabelTypeMenuOptions = {
+  cuboid: {
+    convertTo: 'ellipsoid' as LabelType,
+    caption: 'Convert to ellipsoid',
+    icon: 'circus-annotation-ellipsoid'
+  },
+  ellipsoid: {
+    convertTo: 'cuboid' as LabelType,
+    caption: 'Convert to cuboid',
+    icon: 'circus-annotation-cuboid'
+  },
+  rectangle: {
+    convertTo: 'ellipse' as LabelType,
+    caption: 'Convert to ellipse',
+    icon: 'circus-annotation-ellipse'
+  },
+  ellipse: {
+    convertTo: 'rectangle' as LabelType,
+    caption: 'Convert to rectangle',
+    icon: 'circus-annotation-rectangle'
+  }
+};
+
 const LabelSelector: React.FC<{
   editingData: any;
   composition: Composition;
@@ -291,20 +314,9 @@ const Series: React.FC<{
     setChangeActiveLabelKey(activeLabel.temporarykey);
   };
 
-  const convertLabelType2d = (labelIndex: number, label: LabelEntry) => {
-    if (label.type !== 'rectangle' && label.type !== 'ellipse') return;
-    const newLabelType = label.type === 'rectangle' ? 'ellipse' : 'rectangle';
-    const newSeries = update(series, {
-      labels: {
-        [labelIndex]: { type: { $set: newLabelType } }
-      }
-    });
-    onChange(seriesIndex, newSeries, true);
-  };
-
-  const convertLabelType3d = (labelIndex: number, label: LabelEntry) => {
-    if (label.type !== 'cuboid' && label.type !== 'ellipsoid') return;
-    const newLabelType = label.type === 'cuboid' ? 'ellipsoid' : 'cuboid';
+  const convertLabelType = (labelIndex: number, label: LabelEntry) => {
+    if (label.type === 'voxel') return;
+    const newLabelType = convertlabelTypeMenuOptions[label.type].convertTo;
     const newSeries = update(series, {
       labels: {
         [labelIndex]: { type: { $set: newLabelType } }
@@ -388,8 +400,7 @@ const Series: React.FC<{
             onRemoveClick={() => removeLabel(labelIndex)}
             onMoveUpClick={() => moveUpLabel(labelIndex)}
             onMoveDownClick={() => moveDownLabel(labelIndex)}
-            onConvertType2dClick={() => convertLabelType2d(labelIndex, label)}
-            onConvertType3dClick={() => convertLabelType3d(labelIndex, label)}
+            onConvertTypeClick={() => convertLabelType(labelIndex, label)}
             onRevealInViewerClick={() => revealInViewer(label)}
           />
         ))}
@@ -435,8 +446,7 @@ export const Label: React.FC<{
   onRemoveClick: any;
   onMoveUpClick: any;
   onMoveDownClick: any;
-  onConvertType2dClick: any;
-  onConvertType3dClick: any;
+  onConvertTypeClick: any;
   onRevealInViewerClick: any;
 }> = props => {
   const {
@@ -451,8 +461,7 @@ export const Label: React.FC<{
     onRemoveClick,
     onMoveUpClick,
     onMoveDownClick,
-    onConvertType2dClick,
-    onConvertType3dClick,
+    onConvertTypeClick,
     onRevealInViewerClick
   } = props;
 
@@ -567,31 +576,13 @@ export const Label: React.FC<{
               &ensp;Move down
             </MenuItem>
           )}
-          {label.type === 'ellipse' && (
-            <MenuItem eventKey="5" onSelect={onConvertType2dClick}>
-              <Icon icon="circus-annotation-rectangle" />
-              &ensp;Convert to rectangle
+          {label.type !== 'voxel' && (
+            <MenuItem eventKey="5" onSelect={onConvertTypeClick}>
+              <Icon icon={convertlabelTypeMenuOptions[label.type].icon} />
+              &ensp;{convertlabelTypeMenuOptions[label.type].caption}
             </MenuItem>
           )}
-          {label.type === 'rectangle' && (
-            <MenuItem eventKey="6" onSelect={onConvertType2dClick}>
-              <Icon icon="circus-annotation-circle" />
-              &ensp;Convert to ellipse
-            </MenuItem>
-          )}
-          {label.type === 'ellipsoid' && (
-            <MenuItem eventKey="7" onSelect={onConvertType3dClick}>
-              <Icon icon="circus-annotation-cuboid" />
-              &ensp;Convert to cuboid
-            </MenuItem>
-          )}
-          {label.type === 'cuboid' && (
-            <MenuItem eventKey="8" onSelect={onConvertType3dClick}>
-              <Icon icon="circus-annotation-ellipsoid" />
-              &ensp;Convert to ellipsoid
-            </MenuItem>
-          )}
-          <MenuItem eventKey="9" onSelect={onRevealInViewerClick}>
+          <MenuItem eventKey="6" onSelect={onRevealInViewerClick}>
             <Icon icon="map-marker" />
             &ensp;Reveal in Viewer
           </MenuItem>

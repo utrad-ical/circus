@@ -74,9 +74,10 @@ const calcAge = (birthDay: Date, today: Date = new Date()) => {
   return years;
 };
 
-const extractAge = (
+export const extractAge = (
   ageStr: string | undefined,
-  birthDateStr: string | undefined
+  birthDateStr: string | undefined,
+  referenceDate: Date | undefined
 ) => {
   if (typeof ageStr === 'string' && /^(\d\d\d)([DWMY])$/.test(ageStr || '')) {
     const nnn = Number(ageStr.substring(0, 3));
@@ -93,8 +94,8 @@ const extractAge = (
     }
   } else {
     const birthDate = parseDate(birthDateStr);
-    if (!birthDate) return undefined;
-    return calcAge(birthDate, new Date());
+    if (!birthDate || !referenceDate) return undefined;
+    return calcAge(birthDate, referenceDate);
   }
 };
 
@@ -259,22 +260,25 @@ export const readDicomTags = async (
   const specificCharacterSet = dataset.string('x00080005');
   const encConverter = await prepareEncConverter(specificCharacterSet);
 
+  const studyDate = parseDate(
+    dataset.string('x00080020'), // study date
+    dataset.string('x00080030'), // study time
+    tzOffset
+  );
+  const seriesDate = parseDate(
+    dataset.string('x00080021'),
+    dataset.string('x00080031'),
+    tzOffset
+  );
+
   return {
     seriesUid: dataset.string('x0020000e')!,
     studyUid: dataset.string('x0020000d')!,
     width: dataset.uint16('x00280011'), // columns
     height: dataset.uint16('x00280010'), // rows
     instanceNumber: dataset.intString('x00200013'),
-    studyDate: parseDate(
-      dataset.string('x00080020'), // study date
-      dataset.string('x00080030'), // study time
-      tzOffset
-    ),
-    seriesDate: parseDate(
-      dataset.string('x00080021'), // series date
-      dataset.string('x00080031'), // series time
-      tzOffset
-    ),
+    studyDate,
+    seriesDate,
     modality: dataset.string('x00080060'),
     seriesDescription: dataset.string('x0008103e') || '',
     bodyPart: dataset.string('x00180015') || '',
@@ -284,7 +288,11 @@ export const readDicomTags = async (
     patientInfo: stripUndefined({
       patientId: dataset.string('x00100020'),
       patientName: extractPatientName(dataset, encConverter),
-      age: extractAge(dataset.string('x00101010'), dataset.string('x00100030')),
+      age: extractAge(
+        dataset.string('x00101010'),
+        dataset.string('x00100030'),
+        studyDate ?? seriesDate // Use study date first
+      ),
       birthDate: parseBirthDate(dataset.string('x00100030')), // Ignores tzOffset
       sex: dataset.string('x00100040'),
       size: dataset.floatString('x00101020'),

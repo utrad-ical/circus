@@ -10,3 +10,5 @@ declare module 'deep-rename-keys';
 declare module 'inquirer';
 
 declare module 'jconv';
+
+declare module 'dicom-data-dictionary';

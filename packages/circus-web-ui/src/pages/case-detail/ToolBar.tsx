@@ -8,6 +8,8 @@ import {
 } from 'components/react-bootstrap';
 import React, { Fragment } from 'react';
 
+export type Layout = 'twoByTwo' | 'axial' | 'sagittal' | 'coronal';
+
 interface windowPreset {
   label: number;
   level: number;

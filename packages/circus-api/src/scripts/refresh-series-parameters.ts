@@ -7,14 +7,15 @@ export const options = () => {
   return [
     {
       names: ['maxDate'],
-      help: 'Add parameters before the specified date.',
+      help: 'Updates series only before this date.',
+      helpArg: 'ISO_DATE',
       type: 'string'
     }
   ];
 };
 
 export const help = () => {
-  return 'Scans imported DICOM files and add parameters to the database.';
+  return 'Scans imported DICOM files and adds parameters to the database.';
 };
 
 export const command: Command<{

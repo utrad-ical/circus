@@ -43,7 +43,7 @@ import {
 import { createHistoryStore } from './revisionHistory';
 import RevisionSelector from './RevisionSelector';
 import SideContainer from './SideContainer';
-import ToolBar from './ToolBar';
+import ToolBar, { Layout } from './ToolBar';
 import ViewerCluster from './ViwewerCluster';
 
 interface EditingData {
@@ -73,13 +73,13 @@ class CaseDetailView extends React.PureComponent<
   CaseDetailViewState
 > {
   historyStore: {
-    registerNew: (revision: any) => void;
-    push: (revision: any) => void;
+    registerNew: (revision: EditingData) => void;
+    push: (revision: EditingData) => void;
     canUndo: () => boolean;
     undo: () => void;
     canRedo: () => boolean;
     redo: () => void;
-    current: () => any;
+    current: () => EditingData;
     getHistoryLength: () => number;
   };
 
@@ -279,16 +279,16 @@ const CaseDetail = connect(state => ({
 export default CaseDetail;
 
 const MenuBar = (props: {
-  canUndo: any;
-  onUndoClick: any;
-  canRedo: any;
-  onRedoClick: any;
-  onRevertClick: any;
-  onSaveClick: any;
-  onExportMhdClick: any;
-  revisions: any;
-  onRevisionSelect: any;
-  currentRevision: any;
+  canUndo: boolean;
+  onUndoClick: () => void;
+  canRedo: boolean;
+  onRedoClick: () => void;
+  onRevertClick: () => void;
+  onSaveClick: () => void;
+  onExportMhdClick: () => void;
+  revisions: Revision[];
+  onRevisionSelect: (index: number) => Promise<void>;
+  currentRevision: number;
 }) => {
   const {
     canUndo,
@@ -361,10 +361,10 @@ interface EditorProps {
 }
 
 interface EditorState {
-  toolName: any;
-  tool: any;
+  toolName: string;
+  tool: ToolBaseClass | null;
   viewOptions: {
-    layout: any;
+    layout: Layout;
     showReferenceLine: boolean;
     interpolationMode: InterpolationMode;
   };
@@ -387,7 +387,7 @@ export class Editor extends React.Component<EditorProps, EditorState> {
       },
       composition: null,
       lineWidth: 1,
-      toolName: null,
+      toolName: '',
       tool: null
     };
     this.viewers = {};
@@ -405,7 +405,7 @@ export class Editor extends React.Component<EditorProps, EditorState> {
   }
 
   componentDidUpdate(
-    prevProps: { editingData: any },
+    prevProps: { editingData: EditingData },
     prevState: { viewOptions: { interpolationMode: InterpolationMode } }
   ) {
     const { editingData } = this.props;
@@ -426,7 +426,7 @@ export class Editor extends React.Component<EditorProps, EditorState> {
       prevState.viewOptions.interpolationMode !==
         this.state.viewOptions.interpolationMode
     ) {
-      this.stateChanger.emit('change', (viewState: any) => {
+      this.stateChanger.emit('change', (viewState: rs.ViewState) => {
         return {
           ...viewState,
           interpolationMode: this.state.viewOptions.interpolationMode
@@ -692,7 +692,7 @@ export class Editor extends React.Component<EditorProps, EditorState> {
     );
   };
 
-  labelAttributesChange = (value: any, isTextInput: any) => {
+  labelAttributesChange = (value: any, isTextInput: boolean) => {
     const { editingData, onChange } = this.props;
     const { activeSeriesIndex, activeLabelIndex } = editingData;
     onChange(
@@ -730,7 +730,7 @@ export class Editor extends React.Component<EditorProps, EditorState> {
     );
   };
 
-  caseAttributesChange = (value: any, isTextInput: any) => {
+  caseAttributesChange = (value: any, isTextInput: boolean) => {
     const { editingData, onChange } = this.props;
     onChange(
       update(editingData, { revision: { attributes: { $set: value } } }),
@@ -774,23 +774,23 @@ export class Editor extends React.Component<EditorProps, EditorState> {
     this.getTool('eraser').setOptions({ width: lineWidth });
   };
 
-  handleCreateViwer = (viewer: any, id: string | number) => {
+  handleCreateViwer = (viewer: Viewer, id: string | number) => {
     this.viewers[id] = viewer;
   };
 
-  handleDestroyViewer = (viewer: any) => {
+  handleDestroyViewer = (viewer: Viewer) => {
     Object.keys(this.viewers).forEach(k => {
       if (this.viewers[k] === viewer) delete this.viewers[k];
     });
   };
 
-  handleSeriesChange = (newData: any, pushToHistory: any = false) => {
+  handleSeriesChange = (newData: EditingData, pushToHistory: any = false) => {
     const { onChange } = this.props;
     onChange(newData, pushToHistory);
     this.updateComposition();
   };
 
-  initialWindowSetter = (viewer: any, viewState: any) => {
+  initialWindowSetter = (viewer: any, viewState: rs.ViewState) => {
     const { projectData } = this.props;
     const src = viewer.composition.imageSource;
     const windowPriority = projectData.windowPriority || 'auto';

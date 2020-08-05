@@ -2,7 +2,12 @@ import React from 'react';
 import Icon from 'components/Icon';
 import IconButton from 'components/IconButton';
 
-const PersonalConsensualSwitch = props => {
+const PersonalConsensualSwitch: React.FC<{
+  feedbackState: { isConsensual: boolean };
+  consensualEntered: boolean;
+  myPersonalEntered: boolean;
+  onChange: (value: boolean) => void;
+}> = props => {
   const {
     feedbackState: { isConsensual },
     consensualEntered,

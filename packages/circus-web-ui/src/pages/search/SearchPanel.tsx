@@ -5,11 +5,12 @@ import { ControlledCollapser } from 'components/Collapser';
 import useLocalPreference from 'utils/useLocalPreference';
 import { useApi } from 'utils/api';
 import { useDispatch, useSelector } from 'react-redux';
-import { startNewSearch, savePreset } from 'actions';
 import { useLoginManager } from 'utils/loginManager';
 import useLoginUser from 'utils/useLoginUser';
-import { SearchPreset } from 'store';
+import { SearchPreset } from 'store/loginUser';
+import * as searches from 'store/searches';
 import { useParams } from 'react-router-dom';
+import styled from 'styled-components';
 
 const StateSavingCollapser: React.FC<any> = props => {
   const [open, setOpen] = useLocalPreference('searchPanelOpen', false);
@@ -22,6 +23,11 @@ const StateSavingCollapser: React.FC<any> = props => {
   );
 };
 
+const ButtonBar = styled.div`
+  text-align: center;
+  margin-top: 1em;
+`;
+
 const SearchPanel: <T extends {}>(props: {
   nullCondition: () => T;
   conditionToFilter: (condition: T) => any;
@@ -31,7 +37,7 @@ const SearchPanel: <T extends {}>(props: {
   }>;
   searchName: string;
   presetName?: string;
-  resource: string;
+  resource: searches.SearchResource;
   defaultSort: string;
 }) => React.ReactElement<any> = props => {
   const {
@@ -64,7 +70,7 @@ const SearchPanel: <T extends {}>(props: {
     }
     if (search) {
       // Use the saved condition of the existing search
-      return search.condition;
+      return search.params.condition;
     }
     return nullCondition();
   });
@@ -75,38 +81,36 @@ const SearchPanel: <T extends {}>(props: {
 
   const handleSearchClick = useCallback(() => {
     dispatch(
-      startNewSearch(
-        api,
-        searchName,
+      searches.newSearch(api, searchName, {
         resource,
-        conditionToFilter(condition),
         condition,
-        defaultSort
-      )
+        filter: conditionToFilter(condition),
+        sort: defaultSort
+      })
     );
   }, [
     api,
-    dispatch,
-    searchName,
-    resource,
     condition,
     conditionToFilter,
-    defaultSort
+    defaultSort,
+    dispatch,
+    resource,
+    searchName
   ]);
 
   // The following is invoked only on first-time render
   // eslint-disable-next-line
-  useEffect(handleSearchClick, [dispatch, api]);
+  useEffect(handleSearchClick, []);
 
   const handleSavePresetClick = useCallback(async () => {
-    await dispatch(savePreset(api, searchName, condition));
+    await dispatch(searches.savePreset(api, searchName, condition));
     loginManager.refreshUserInfo(true);
   }, [api, condition, dispatch, loginManager, searchName]);
 
   return (
     <StateSavingCollapser title="Search Condition" framed>
       <ConditionEditor value={condition} onChange={setCondition} />
-      <div className="search-buttons">
+      <ButtonBar>
         <IconButton bsStyle="link" icon="save" onClick={handleSavePresetClick}>
           Save
         </IconButton>
@@ -118,7 +122,7 @@ const SearchPanel: <T extends {}>(props: {
         <IconButton bsStyle="primary" icon="search" onClick={handleSearchClick}>
           Search
         </IconButton>
-      </div>
+      </ButtonBar>
     </StateSavingCollapser>
   );
 };

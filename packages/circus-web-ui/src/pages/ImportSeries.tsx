@@ -1,13 +1,15 @@
 import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
-import { showMessage } from 'actions';
+import useShowMessage from 'utils/useShowMessage';
 import FileUpload from 'components/FileUpload';
 import { Alert } from 'components/react-bootstrap';
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import useLocalPreference from 'utils/useLocalPreference';
 import useLoginUser from 'utils/useLoginUser';
+import bytes from 'bytes';
 
 const ImportSeries: React.FC<{}> = props => {
   const loginUser = useLoginUser()!;
+  const showMessage = useShowMessage();
   const domains = loginUser.domains || [];
 
   const [domainPreference, setDomainPreference] = useLocalPreference<
@@ -20,6 +22,10 @@ const ImportSeries: React.FC<{}> = props => {
       loginUser.defaultDomain ??
       (domains.length ? domains[0] : null)
   );
+
+  const maxBytes = useMemo(() => bytes(loginUser.uploadFileSizeMaxBytes), [
+    loginUser.uploadFileSizeMaxBytes
+  ]);
 
   if (!Array.isArray(domains) || domains.length === 0) {
     return (
@@ -53,15 +59,14 @@ const ImportSeries: React.FC<{}> = props => {
         <span className="circus-icon-series-import" /> Series Import
       </h1>
       <p>
-        Choose DICOM files to upload. (Maximum size:{' '}
-        {loginUser.uploadFileSizeMax}, up to {loginUser.uploadFileMax} files).
+        Choose DICOM files to upload. (Maximum size: {maxBytes}, up to{' '}
+        {loginUser.uploadFileMax} files).
       </p>
       <p>Zipped DICOM files are also supported.</p>
       <FileUpload
         multiple={true}
-        targetResource="import-series"
         uploadFileMax={loginUser.uploadFileMax}
-        uploadFileSizeMax={loginUser.uploadFileSizeMax}
+        uploadFileSizeMaxBytes={loginUser.uploadFileSizeMaxBytes}
         url={`series/domain/${encodeURIComponent(uploadDomain || '')}`}
         onUploaded={handleUploaded}
       >

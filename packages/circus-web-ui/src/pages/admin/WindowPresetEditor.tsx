@@ -1,10 +1,17 @@
 import React from 'react';
+import styled from 'styled-components';
 
 interface WindowAndLabel {
   label: string;
   level: number;
   width: number;
 }
+
+const StyledSpan = styled.span`
+  input[type='number'] {
+    width: 100px;
+  }
+`;
 
 /**
  * Renderes a 'window preset' editor with 'label', 'level' and 'width' fields.
@@ -28,7 +35,7 @@ const WindowPresetEditor: React.FC<{
   };
 
   return (
-    <span className="window-preset-editor form-inline">
+    <StyledSpan className="form-inline">
       <input
         className="form-control"
         value={value.label}
@@ -54,7 +61,7 @@ const WindowPresetEditor: React.FC<{
         name="width"
         onChange={handleChange}
       />
-    </span>
+    </StyledSpan>
   );
 };
 

@@ -2,12 +2,35 @@ import React from 'react';
 import { Tabs, Tab } from 'components/react-bootstrap';
 import ConditionEditor from '@smikitky/rb-components/lib/ConditionEditor';
 import PropertyEditor from '@smikitky/rb-components/lib/PropertyEditor';
+import styled from 'styled-components';
 
 export interface Condition {
   type: 'basic' | 'advanced';
   basic: any;
   advanced: any;
 }
+
+const StyledDiv = styled.div`
+  .condition-basic-filter {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    > .row {
+      flex: 0 0 50%;
+      @media screen and (max-width: 768px) {
+        & {
+          flex: 0 0 100%;
+        }
+      }
+    }
+  }
+
+  .age-minmax.form-inline {
+    input.form-control {
+      width: 80px;
+    }
+  }
+`;
 
 const ConditionFrame: <T extends Condition>(props: {
   condition: T;
@@ -38,7 +61,7 @@ const ConditionFrame: <T extends Condition>(props: {
   const activeKey = condition.type === 'advanced' ? 2 : 1;
 
   return (
-    <div>
+    <StyledDiv>
       <Tabs
         animation={false}
         id="search-condition-tabs"
@@ -61,7 +84,7 @@ const ConditionFrame: <T extends Condition>(props: {
           />
         </Tab>
       </Tabs>
-    </div>
+    </StyledDiv>
   );
 };
 

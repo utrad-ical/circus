@@ -65,7 +65,7 @@ const createDicomUtilityRunner: NoDepFunctionService<DicomUtilityRunner> = async
     min: 0,
     max: maxConcurrency,
     acquireTimeoutMillis: 30000,
-    createTimeoutMillis: 3000,
+    createTimeoutMillis: 10000,
     idleTimeoutMillis: 30000,
     createRetryIntervalMillis: 200,
     propagateCreateError: true

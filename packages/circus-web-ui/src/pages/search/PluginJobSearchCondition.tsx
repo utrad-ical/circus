@@ -153,7 +153,7 @@ const PluginSearchCondition: React.FC<{}> = props => {
   return (
     <SearchPanel
       searchName="pluginJob"
-      resource="plugin-jobs"
+      resource={{ endPoint: 'plugin-jobs', primaryKey: 'jobId' }}
       defaultSort='{"createdAt":-1}'
       nullCondition={nullCondition}
       conditionToFilter={conditionToFilter}

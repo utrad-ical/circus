@@ -4,7 +4,7 @@ import SelectionFeedbackListener from './feedback-listeners/SelectionFeedbackLis
 import Locator from './feedback-listeners/Locator';
 import FatVolumetry from './feedback-listeners/FatVolumetry';
 
-const map = {
+const map: { [key: string]: any } = {
   LesionCandidates,
   SelectionFeedbackListener,
   Locator,
@@ -15,10 +15,10 @@ const map = {
  * Make a new composable component from a string `type` and `options`.
  * The returned value should be memoized using React.useMemo().
  */
-const createDynamicComponent = (type, options) => {
+const createDynamicComponent = (type: string, options: any) => {
   const Component = map[type];
   if (!Component) throw new Error(`Component ${type} is not defined.`);
-  return React.forwardRef((props, ref) => (
+  return React.forwardRef<any, any>((props, ref) => (
     <Component ref={ref} options={options} {...props} />
   ));
 };

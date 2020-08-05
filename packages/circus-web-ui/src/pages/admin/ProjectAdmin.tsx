@@ -88,8 +88,7 @@ const ProjectAdmin: React.FC<{}> = props => {
       title="Projects"
       icon="education"
       searchName="admin-project"
-      resource="admin/projects"
-      primaryKey="projectId"
+      resource={{ endPoint: 'admin/projects', primaryKey: 'projectId' }}
       editorProperties={editorProperties}
       listColumns={listColumns}
       makeEmptyItem={makeEmptyItem}

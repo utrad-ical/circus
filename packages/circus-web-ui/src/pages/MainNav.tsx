@@ -266,7 +266,7 @@ const MainNav: React.FC<{}> = props => {
               <SubMenu icon="record" name="Groups" link="/admin/group" />
               <SubMenu icon="user" name="Users" link="/admin/user" />
               <MenuHeader>CIRCUS DB</MenuHeader>
-              <SubMenu icon="education" name="Project" link="/admin/project" />
+              <SubMenu icon="education" name="Projects" link="/admin/project" />
               <MenuHeader>CIRCUS CS</MenuHeader>
               <SubMenu
                 icon="list-alt"

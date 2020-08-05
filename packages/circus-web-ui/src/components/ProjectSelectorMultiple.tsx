@@ -29,8 +29,11 @@ const StyledMultiSelect = styled(MultiSelect)`
 
 const ProjectSelectorMultiple: React.FC<{
   projects: { projectId: string; project: Project }[];
+  noneText?: string;
+  value: string[];
+  onChange: (value: string[]) => void;
 }> = props => {
-  const { projects } = props;
+  const { projects, ...rest } = props;
   const options: { [key: string]: any } = {};
   projects.forEach(p => {
     options[p.projectId] = {
@@ -38,7 +41,7 @@ const ProjectSelectorMultiple: React.FC<{
       project: p.project
     };
   });
-  return <StyledMultiSelect {...props} options={options} renderer={Renderer} />;
+  return <StyledMultiSelect {...rest} options={options} renderer={Renderer} />;
 };
 
 export default ProjectSelectorMultiple;

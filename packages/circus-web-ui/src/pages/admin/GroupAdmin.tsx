@@ -127,8 +127,7 @@ const GroupAdmin: React.FC<any> = props => {
       title="User Groups"
       icon="record"
       searchName="admin-group"
-      resource="admin/groups"
-      primaryKey="groupId"
+      resource={{ endPoint: 'admin/groups', primaryKey: 'groupId' }}
       editorProperties={editorProperties}
       listColumns={listColumns}
       makeEmptyItem={makeEmptyItem}

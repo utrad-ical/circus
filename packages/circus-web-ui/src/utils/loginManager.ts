@@ -2,6 +2,7 @@ import axios from 'axios';
 import React, { useContext } from 'react';
 import createApiCaller, { ApiCaller, formatCredentials } from './api';
 import { Dispatch } from 'redux';
+import * as actions from 'store/loginUser';
 import * as qs from 'querystring';
 
 /**
@@ -48,7 +49,7 @@ const loginManager = (
    */
   const refreshUserInfo = async (full = false) => {
     if (!api) throw new Error('Not logged in');
-    dispatch({ type: 'REQUEST_LOGIN_INFO' });
+    dispatch(actions.loginInfoRequest());
     try {
       const result = await api('login-info' + (full ? '/full' : ''), {
         handleErrors: [401]
@@ -57,19 +58,19 @@ const loginManager = (
         throw Error('Server did not respond with valid user data');
       }
       if (full) {
-        dispatch({ type: 'LOAD_FULL_LOGIN_INFO', loginUser: result });
+        dispatch(actions.fullLoginInfoLoaded(result));
       } else {
-        dispatch({ type: 'CONFIRM_LOGIN_INFO' });
+        dispatch(actions.loginInfoConfirmed());
       }
     } catch (err) {
-      dispatch({ type: 'LOGGED_OUT' });
+      dispatch(actions.loggedOut());
     }
   };
 
   const logout = async () => {
     if (!api) throw new Error('Not logged in');
     await api('logout');
-    dispatch({ type: 'LOGGED_OUT' });
+    dispatch(actions.loggedOut());
     sessionStorage.removeItem('tokenCredentials');
     api = null;
     onApiChange(null);

@@ -1,27 +1,26 @@
 import React, { useContext, useState, useEffect, useMemo } from 'react';
 import * as rs from 'circus-rs';
-import {
-  isValidPartialVolumeDescriptor,
-  PartialVolumeDescriptor
+import PartialVolumeDescriptor, {
+  isValidPartialVolumeDescriptor
 } from '@utrad-ical/circus-lib/src/PartialVolumeDescriptor';
 
-/**
- * @type React.Context<{
- *    rsHttpClient: rs.RsHttpClient; map: Map<string, rs.RsVolumeLoader>>;
- * }>
- */
-export const VolumeLoaderCacheContext = React.createContext(null);
+export const VolumeLoaderCacheContext = React.createContext<{
+  rsHttpClient: rs.RsHttpClient;
+  map: Map<string, rs.RsVolumeLoader>;
+} | null>(null);
 
-const stringifyPartialVolumeDescriptor = d => `${d.start}:${d.end}:${d.delta}`;
+const stringifyPartialVolumeDescriptor = (d: PartialVolumeDescriptor) =>
+  `${d.start}:${d.end}:${d.delta}`;
 
 /**
  * Returns a cached RsVolumeLoader instance for the specified series.
  * The returned source may not be "ready" yet.
- * @param {string} seriesUid
- * @param {PartialVolumeDescriptor} partialVolumeDescriptor
  */
-export const usePendingVolumeLoader = (seriesUid, partialVolumeDescriptor) => {
-  const { rsHttpClient, map } = useContext(VolumeLoaderCacheContext);
+export const usePendingVolumeLoader = (
+  seriesUid: string,
+  partialVolumeDescriptor: PartialVolumeDescriptor
+) => {
+  const { rsHttpClient, map } = useContext(VolumeLoaderCacheContext)!;
 
   const key =
     seriesUid +
@@ -30,7 +29,7 @@ export const usePendingVolumeLoader = (seriesUid, partialVolumeDescriptor) => {
       ? '&' + stringifyPartialVolumeDescriptor(partialVolumeDescriptor)
       : '');
 
-  if (map.has(key)) return map.get(key);
+  if (map.has(key)) return map.get(key)!;
 
   const volumeLoader = new rs.RsVolumeLoader({
     rsHttpClient,
@@ -46,11 +45,12 @@ export const usePendingVolumeLoader = (seriesUid, partialVolumeDescriptor) => {
  * This is used to recycle volumes among multiple viewers.
  * The hook returns null if the specified volume is not yet "ready".
  * When this returns an actual instance, it is guaranteed to be "ready".
- * @param {string} seriesUid
- * @param {pvd.default} partialVolumeDescriptor
  */
-export const useVolumeLoader = (seriesUid, partialVolumeDescriptor) => {
-  const [volumeLoader, setVolumeLoader] = useState();
+export const useVolumeLoader = (
+  seriesUid: string,
+  partialVolumeDescriptor: PartialVolumeDescriptor
+) => {
+  const [volumeLoader, setVolumeLoader] = useState<rs.RsVolumeLoader>();
   const pendingVolumeLoader = usePendingVolumeLoader(
     seriesUid,
     partialVolumeDescriptor
@@ -62,7 +62,7 @@ export const useVolumeLoader = (seriesUid, partialVolumeDescriptor) => {
       setVolumeLoader(pendingVolumeLoader);
     };
     load();
-    return () => setVolumeLoader(null);
+    return () => setVolumeLoader(undefined);
   }, [pendingVolumeLoader]);
   return volumeLoader;
 };
@@ -70,10 +70,16 @@ export const useVolumeLoader = (seriesUid, partialVolumeDescriptor) => {
 /**
  * Returns a HybridImageSource that is guaranteed to be "ready".
  */
-export const useHybridImageSource = (seriesUid, partialVolumeDescriptor) => {
-  const volumeLoader = useVolumeLoader(seriesUid, partialVolumeDescriptor);
-  const { rsHttpClient } = useContext(VolumeLoaderCacheContext);
-  const [imageSource, setImageSource] = useState();
+export const useHybridImageSource = (
+  seriesUid: string,
+  partialVolumeDescriptor: PartialVolumeDescriptor
+) => {
+  const volumeLoader = usePendingVolumeLoader(
+    seriesUid,
+    partialVolumeDescriptor
+  );
+  const { rsHttpClient } = useContext(VolumeLoaderCacheContext)!;
+  const [imageSource, setImageSource] = useState<rs.HybridMprImageSource>();
   const pendindImageSource = useMemo(() => {
     if (!volumeLoader) return null;
     return new rs.HybridMprImageSource({

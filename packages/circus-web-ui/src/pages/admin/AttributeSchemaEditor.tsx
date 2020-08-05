@@ -54,6 +54,29 @@ interface SchemaEntryEditorValue {
   schema: SchemaEntry;
 }
 
+const StyledSpan = styled.span`
+  &.legend {
+    font-weight: bolder;
+  }
+  width: 95%;
+  display: inline-flex;
+  flex-direction: row;
+  .attribute-schema-key {
+    width: 25%;
+    margin-right: 3px;
+  }
+  .attribute-schema-type {
+    width: 20%;
+    margin-right: 3px;
+  }
+  .attribute-schema-spec {
+    flex-grow: 1;
+    input {
+      display: inline;
+    }
+  }
+`;
+
 const SchemaEntryEditor: React.FC<{
   value: SchemaEntryEditorValue;
   onChange: (value: SchemaEntryEditorValue) => void;
@@ -104,7 +127,7 @@ const SchemaEntryEditor: React.FC<{
   };
 
   return (
-    <span className="attribute-schema-editor">
+    <StyledSpan>
       <div className="attribute-schema-key">
         <input
           className="form-control"
@@ -123,7 +146,7 @@ const SchemaEntryEditor: React.FC<{
       <div className="attribute-schema-spec">
         <SpecEditor value={schema} onChange={handleSpecChange} />
       </div>
-    </span>
+    </StyledSpan>
   );
 };
 
@@ -169,11 +192,11 @@ const AttributeSchemaEditor: React.FC<{
 
   return (
     <div>
-      <div className="attribute-schema-editor legend">
+      <StyledSpan className="legend">
         <div className="attribute-schema-key">Key</div>
         <div className="attribute-schema-type">Type</div>
         <div className="attribute-schema-spec">Spec</div>
-      </div>
+      </StyledSpan>
       <ArrayOfAttributeSchema value={items} onChange={handleChange} />
     </div>
   );

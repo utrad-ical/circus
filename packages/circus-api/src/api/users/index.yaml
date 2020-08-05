@@ -1,0 +1,8 @@
+name: Plugin
+description: >
+  Fetches CIRCUS CS Users.
+routes:
+  - verb: get
+    path: /users/:userEmail
+    description: Gets the specified user.
+    responseSchema: user|only userEmail,description|dbEntry

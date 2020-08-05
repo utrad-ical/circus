@@ -12,7 +12,7 @@
       "components/*": ["components/*"],
       "pages/*": ["pages/*"],
       "utils/*": ["utils/*"],
-      "actions/*": ["actions/*"]
+      "store/*": ["store/*"]
     }
   }
 }

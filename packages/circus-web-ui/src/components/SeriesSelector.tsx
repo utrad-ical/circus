@@ -3,7 +3,7 @@ import DataGrid, { DataGridColumnDefinition } from 'components/DataGrid';
 import SearchResultsView from 'components/SearchResultsView';
 import { Panel } from 'components/react-bootstrap';
 import IconButton from 'components/IconButton';
-import { startNewSearch } from 'actions';
+import { newSearch } from 'store/searches';
 import { useDispatch } from 'react-redux';
 import { modal } from '@smikitky/rb-components/lib/modal';
 import { useApi } from 'utils/api';
@@ -126,7 +126,14 @@ const SeriesSelector: React.FC<{
   const handleAddSeriesClick = () => {
     if (!showRelevantSeries) {
       const filter = { studyUid: value[0].data.studyUid };
-      dispatch(startNewSearch(api, 'relevantSeries', 'series', filter, {}, {}));
+      dispatch(
+        newSearch(api, 'relevantSeries', {
+          resource: { endPoint: 'series', primaryKey: 'seriesUid' },
+          filter,
+          condition: {},
+          sort: '{}'
+        })
+      );
       setShowRelevantSeries(true);
     } else {
       setShowRelevantSeries(false);

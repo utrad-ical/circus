@@ -10,7 +10,7 @@ const ImportCase: React.FC<{}> = props => {
         <Icon icon="open" /> Case Import
       </h1>
       <Alert bsStyle="danger">This function is not implemented.</Alert>
-      <FileUpload multiple={false}>
+      <FileUpload multiple={false} url={''}>
         <p>Upload a case archive file.</p>
       </FileUpload>
     </div>

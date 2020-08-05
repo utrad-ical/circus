@@ -1,15 +1,15 @@
 import React, { useEffect } from 'react';
 import IconDisplay from './IconDisplay';
-import { loadPluginInfo } from 'actions';
+import { loadPluginInfo } from 'store/plugins';
 import { useSelector, useDispatch } from 'react-redux';
 import { useApi } from 'utils/api';
 
 const PluginDisplay: React.FC<{
   pluginId: string;
-  size: string;
+  size?: string;
 }> = props => {
   const { pluginId, size } = props;
-  const plugin = useSelector(state => state.plugin[pluginId]);
+  const plugin = useSelector(state => state.plugins[pluginId]);
   const dispatch = useDispatch();
   const api = useApi();
 

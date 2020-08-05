@@ -1,7 +1,9 @@
 import React from 'react';
 import styled from 'styled-components';
 
-const Section = props => {
+const Section: React.FC<{
+  title: string | React.ReactElement<any>;
+}> = props => {
   const { title, children } = props;
   return (
     <StyledSection>
@@ -19,7 +21,7 @@ const StyledSection = styled.section`
     margin-top: 0px;
   }
   .section-header {
-    background-color: ${props => props.theme.brandPrimary};
+    background-color: ${(props: any) => props.theme.brandPrimary};
     color: white;
     height: 30px;
     padding: 0 10px;

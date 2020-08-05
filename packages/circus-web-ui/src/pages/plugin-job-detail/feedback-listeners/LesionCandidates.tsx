@@ -14,8 +14,27 @@ import { toolFactory } from 'circus-rs/tool/tool-initializer';
 import createDynamicComponent from '../createDynamicComponent';
 import { useHybridImageSource } from 'utils/useImageSource';
 import applyDisplayOptions from './applyDisplayOptions';
+import {
+  FeedbackListenerProps,
+  ImperativeFeedbackRef,
+  Job,
+  FeedbackEntry
+} from '../types';
 
-const Candidate = React.forwardRef((props, ref) => {
+const Candidate = React.forwardRef<
+  any,
+  {
+    job: Job;
+    item: any;
+    value: any;
+    personalOpinions?: any[];
+    onChange: (value: any) => void;
+    disabled?: boolean;
+    isConsensual: boolean;
+    feedbackListener: any;
+    tool: rs.Tool;
+  }
+>((props, ref) => {
   const {
     job,
     item, // candidate data
@@ -28,7 +47,7 @@ const Candidate = React.forwardRef((props, ref) => {
     tool
   } = props;
 
-  const [composition, setComposition] = useState(null);
+  const [composition, setComposition] = useState<rs.Composition | null>(null);
 
   // Create image source
   const seriesUid = job.series[item.volumeId].seriesUid;
@@ -40,7 +59,7 @@ const Candidate = React.forwardRef((props, ref) => {
     if (!imageSource) return;
     // imageSource is guaruanteed to be "ready"
     const comp = new rs.Composition(imageSource);
-    const metadata = imageSource.metadata;
+    const metadata = imageSource.metadata!;
 
     // Add an circle annotation to this composition
     const r = 20;
@@ -62,7 +81,7 @@ const Candidate = React.forwardRef((props, ref) => {
 
   const centerState = useCallback(
     state => {
-      const voxelSize = composition.imageSource.metadata.voxelSize;
+      const voxelSize = (composition!.imageSource as any).metadata.voxelSize;
       const newOrigin = [
         state.section.origin[0],
         state.section.origin[1],
@@ -125,7 +144,19 @@ const Candidate = React.forwardRef((props, ref) => {
   );
 });
 
-const LesionCandidates = React.forwardRef((props, ref) => {
+type LesionCandidateFeedback = { id: number; value: any }[];
+
+const LesionCandidates = React.forwardRef<
+  any,
+  FeedbackListenerProps<
+    LesionCandidateFeedback,
+    {
+      feedbackListener: { type: string; options: any };
+      maxDisplay?: number;
+      sortBy?: [string, string];
+    }
+  >
+>((props, ref) => {
   const {
     job,
     value = [],
@@ -149,13 +180,10 @@ const LesionCandidates = React.forwardRef((props, ref) => {
   }, [feedbackListener]);
 
   // Keeps track of multiple refs using Map
-  /**
-   * @type React.MutableRefObject<Map<number, any>>;
-   */
-  const listenerRefs = useRef(undefined);
-  if (!listenerRefs.current) listenerRefs.current = new Map();
+  const listenerRefs = useRef<Map<any, any>>(new Map());
+  // if (!listenerRefs.current) listenerRefs.current = new Map();
 
-  const candidates = job.results.results.lesionCandidates;
+  const candidates = job.results.results.lesionCandidates as any[];
 
   const visibleCandidates = candidates
     .slice()
@@ -165,7 +193,7 @@ const LesionCandidates = React.forwardRef((props, ref) => {
     })
     .slice(0, maxDisplay);
 
-  const tools = useRef();
+  const tools = useRef<any[]>();
   if (!tools.current) {
     tools.current = [
       { name: 'pager', icon: 'rs-pager', tool: toolFactory('pager') },
@@ -177,42 +205,47 @@ const LesionCandidates = React.forwardRef((props, ref) => {
   const [toolName, setToolName] = useState('pager');
 
   // Exports "instance methods"
-  useImperativeHandle(ref, () => ({
-    mergePersonalFeedback: personalFeedback => {
-      return visibleCandidates.map(cand => {
-        const fbsOfCand = personalFeedback.map(pfb => {
-          const a = pfb.find(i => i.id === cand.rank);
-          return a ? a.value : undefined;
+  useImperativeHandle<any, ImperativeFeedbackRef<LesionCandidateFeedback>>(
+    ref,
+    () => ({
+      mergePersonalFeedback: personalFeedback => {
+        return visibleCandidates.map(cand => {
+          const fbsOfCand = personalFeedback.map(pfb => {
+            const a = pfb.find(i => i.id === cand.rank);
+            return a ? a.value : undefined;
+          });
+          return {
+            id: cand.rank,
+            value: listenerRefs.current
+              .get(cand.rank)
+              .mergePersonalFeedback(fbsOfCand)
+          };
         });
-        return {
-          id: cand.rank,
-          value: listenerRefs.current
-            .get(cand.rank)
-            .mergePersonalFeedback(fbsOfCand)
-        };
-      });
-    },
-    validate: value => {
-      if (!Array.isArray(value)) return false;
-      return visibleCandidates.every(cand => {
-        const item = value.find(item => item.id === cand.rank);
-        if (!item) return false;
-        return listenerRefs.current.get(cand.rank).validate(item.value);
-      });
-    }
-  }));
+      },
+      validate: value => {
+        if (!Array.isArray(value)) return false;
+        return visibleCandidates.every(cand => {
+          const item = value.find(item => item.id === cand.rank);
+          if (!item) return false;
+          return listenerRefs.current.get(cand.rank).validate(item.value);
+        });
+      }
+    })
+  );
 
-  const handleFeedbackChange = (id, newValue) => {
+  const handleFeedbackChange = (id: number, newValue: any) => {
     const newFeedback = value
       .filter(item => item.id !== id)
       .concat([{ id, value: newValue }])
-      .sort((a, b) => a.index - b.index);
+      .sort((a, b) => a.id - b.id);
     onChange(newFeedback);
   };
 
-  const personalOpinionsForItem = id => {
+  const personalOpinionsForItem = (
+    id: number
+  ): FeedbackEntry<any>[] | undefined => {
     if (!isConsensual) return undefined;
-    return personalOpinions.map(f => {
+    return personalOpinions!.map(f => {
       const feedbackItem = f.data.find(item => item.id === id);
       return {
         ...f,
@@ -248,9 +281,8 @@ const LesionCandidates = React.forwardRef((props, ref) => {
               personalOpinions={personalOpinionsForItem(cand.rank)}
               disabled={disabled}
               isConsensual={isConsensual}
-              index={cand.rank}
               onChange={val => handleFeedbackChange(cand.rank, val)}
-              tool={tools.current.find(t => t.name === toolName).tool}
+              tool={tools.current!.find(t => t.name === toolName).tool}
             />
           );
         })}

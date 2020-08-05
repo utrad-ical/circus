@@ -1,4 +1,5 @@
 import createDicomTagReader, {
+  extractAge,
   parseDate,
   readDicomTags
 } from './createDicomTagReader';
@@ -37,6 +38,16 @@ test('parseDate', () => {
   expect(parseDate('19870430', '235959.999')).toEqual(
     new Date('1987-04-30T23:59:59.999Z')
   );
+});
+
+test('extractAge', () => {
+  expect(extractAge('020Y', '19700505', new Date('1980-08-30T00:00:00Z'))).toBe(
+    20
+  );
+  expect(
+    extractAge(undefined, '19700505', new Date('1980-08-30T00:00:00Z'))
+  ).toBe(10);
+  expect(extractAge(undefined, '19700505', undefined)).toBe(undefined);
 });
 
 test('extractParameters', async () => {

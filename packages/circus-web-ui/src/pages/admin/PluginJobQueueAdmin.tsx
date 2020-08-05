@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import AdminContainer from './AdminContainer';
 import SearchResultsView from 'components/SearchResultsView';
-import { startNewSearch } from 'actions';
+import { newSearch } from 'store/searches';
 import { useDispatch } from 'react-redux';
 import DataGrid, { DataGridColumnDefinition } from 'components/DataGrid';
 import { useApi } from 'utils/api';
@@ -29,14 +29,12 @@ const PluginJobQueueAdmin: React.FC<{}> = props => {
 
   useEffect(() => {
     dispatch(
-      startNewSearch(
-        api,
-        'globalJobQueue',
-        'admin/plugin-job-queue',
-        {},
-        {},
-        { createdAt: -1 }
-      )
+      newSearch(api, 'globalJobQueue', {
+        resource: { endPoint: 'admin/plugin-job-queue', primaryKey: 'jobId' },
+        filter: {},
+        condition: {},
+        sort: '{ createdAt: -1 }'
+      })
     );
   }, [api, dispatch]);
 

@@ -8,7 +8,7 @@ const StyledSpan = styled.span`
 `;
 
 const IconDisplay: React.FC<{
-  size: string;
+  size?: string;
   icon: CircusIconDefinition;
   title: React.ReactNode;
   description?: React.ReactNode;

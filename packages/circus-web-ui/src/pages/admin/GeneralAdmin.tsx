@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useApi } from 'utils/api';
-import { showMessage } from 'actions';
+import useShowMessage from 'utils/useShowMessage';
 import { Button } from 'components/react-bootstrap';
 import AdminContainer from './AdminContainer';
 import PropertyEditor from '@smikitky/rb-components/lib/PropertyEditor';
@@ -19,6 +19,7 @@ const GeneralAdmin: React.FC<{}> = props => {
   });
   const [complaints, setComplaints] = useState({});
   const api = useApi();
+  const showMessage = useShowMessage();
 
   const arrayOfStringsEditor = useMemo(
     () => et.arrayOf(et.text({ style: { width: '200px', display: 'inline' } })),

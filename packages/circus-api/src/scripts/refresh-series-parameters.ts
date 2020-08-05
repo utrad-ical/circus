@@ -24,7 +24,7 @@ export const command: Command<{
 }> = async (_, { models, dicomTagReader, dicomFileRepository }) => {
   return async options => {
     const filter = options.maxDate
-      ? { createdAt: { $lte: options.maxDate } }
+      ? { createdAt: { $lte: new Date(options.maxDate) } }
       : {};
     const cursor = models.series.findAsCursor(filter);
     while (await cursor.hasNext()) {

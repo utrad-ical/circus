@@ -30,6 +30,7 @@ export const command: Command<{
     const cursor = models.series.findAsCursor(filter);
     while (await cursor.hasNext()) {
       const series = await cursor.next();
+      console.log(`Updating ${series.seriesUid}`);
       const repoSeries = await dicomFileRepository.getSeries(series.seriesUid);
       const firstImage = await repoSeries.load(
         multirange(series.images).min()!

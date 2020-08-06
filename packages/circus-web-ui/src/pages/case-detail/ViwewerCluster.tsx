@@ -2,6 +2,7 @@ import React from 'react';
 import ImageViewer, { setOrthogonalOrientation } from 'components/ImageViewer';
 import styled from 'styled-components';
 import { toolFactory } from 'circus-rs/tool/tool-initializer';
+import { Tool, Viewer, ViewState, Composition } from 'circus-rs';
 
 const TwoByTwoLayout = styled.div`
   flex: 1 1 0;
@@ -29,13 +30,25 @@ const OneLayout = styled.div`
 
 const celestialRotate = toolFactory('celestialRotate');
 
-const orientationInitialStateSetters = {
+const orientationInitialStateSetters: {
+  [orientatin: string]: ReturnType<typeof setOrthogonalOrientation>;
+} = {
   axial: setOrthogonalOrientation('axial'),
   sagittal: setOrthogonalOrientation('sagittal'),
   coronal: setOrthogonalOrientation('coronal')
 };
 
-const ViewerCluster = props => {
+export type Layout = 'twoByTwo' | 'axial' | 'sagittal' | 'coronal';
+
+const ViewerCluster: React.FC<{
+  composition: Composition;
+  tool: Tool;
+  stateChanger: any;
+  layout: Layout;
+  onCreateViewer: any;
+  onDestroyViewer: any;
+  initialWindowSetter: any;
+}> = props => {
   const {
     composition,
     tool,
@@ -46,8 +59,13 @@ const ViewerCluster = props => {
     initialWindowSetter
   } = props;
 
-  function makeViewer(orientation, id, initialTool, fixTool) {
-    const initialStateSetter = (viewer, viewState) => {
+  const makeViewer = (
+    orientation: string,
+    id: string,
+    initialTool?: Tool,
+    fixTool?: Tool
+  ) => {
+    const initialStateSetter = (viewer: Viewer, viewState: ViewState) => {
       const s1 = orientationInitialStateSetters[orientation](viewer, viewState);
       const s2 = initialWindowSetter(viewer, s1);
       return s2;
@@ -67,7 +85,7 @@ const ViewerCluster = props => {
         onDestroyViewer={onDestroyViewer}
       />
     );
-  }
+  };
 
   switch (layout) {
     case 'twoByTwo':

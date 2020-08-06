@@ -8,8 +8,6 @@ import {
 } from 'components/react-bootstrap';
 import React, { Fragment } from 'react';
 
-export type Layout = 'twoByTwo' | 'axial' | 'sagittal' | 'coronal';
-
 interface windowPreset {
   label: number;
   level: number;
@@ -25,7 +23,7 @@ const LayoutRenderer = (props: { icon: any; caption: React.ReactNode }) => {
   );
 };
 
-const ToolBar = (props: {
+const ToolBar: React.FC<{
   active: string;
   viewOptions: any;
   onChangeViewOptions: any;
@@ -35,7 +33,7 @@ const ToolBar = (props: {
   windowPresets?: windowPreset[] | undefined;
   onChangeTool: any;
   onApplyWindow: any;
-}) => {
+}> = props => {
   const {
     active,
     viewOptions,
@@ -205,14 +203,13 @@ const ToolBar = (props: {
 };
 export default ToolBar;
 
-const ToolButton = (props: {
+const ToolButton: React.FC<{
   name: string;
   icon: string;
   active: string;
   changeTool: any;
   disabled?: boolean;
-  children?: any;
-}) => {
+}> = props => {
   const { name, icon, active, changeTool, disabled, children } = props;
   const style = active === name ? 'primary' : 'default';
   const iconSpan = <Icon icon={icon} />;

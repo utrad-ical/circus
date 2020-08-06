@@ -43,8 +43,8 @@ import {
 import { createHistoryStore } from './revisionHistory';
 import RevisionSelector from './RevisionSelector';
 import SideContainer from './SideContainer';
-import ToolBar, { Layout } from './ToolBar';
-import ViewerCluster from './ViwewerCluster';
+import ToolBar from './ToolBar';
+import ViewerCluster, { Layout } from './ViwewerCluster';
 
 interface EditingData {
   revision: Revision;
@@ -897,10 +897,8 @@ export class Editor extends React.Component<EditorProps, EditorState> {
           <ViewerCluster
             composition={composition}
             layout={viewOptions.layout}
-            labels={activeSeries.labels}
             stateChanger={this.stateChanger}
-            activeLabel={activeLabel}
-            tool={tool}
+            tool={tool!}
             onCreateViewer={this.handleCreateViwer}
             onDestroyViewer={this.handleDestroyViewer}
             initialWindowSetter={this.initialWindowSetter}

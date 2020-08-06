@@ -1,20 +1,24 @@
-import Annotation from './Annotation';
-import Viewer from '../viewer/Viewer';
-import ViewState from '../ViewState';
+import { Box2, Box3, Vector2, Vector3 } from 'three';
+import { Composition } from '..';
 import {
-  Section,
+  box2GrowSubpixel,
+  getBoxOutline,
   intersectionOfBoxAndPlane,
-  box2GrowSubpixel
+  Section,
+  Vector3D
 } from '../../common/geometry';
+import RawData from '../../common/RawData';
+import MprImageSource from '../image-source/MprImageSource';
 import {
+  convertPointToMm,
   convertScreenCoordinateToVolumeCoordinate,
+  convertSectionToIndex,
   convertVolumeCoordinateToScreenCoordinate
 } from '../section-util';
+import Viewer from '../viewer/Viewer';
+import ViewState from '../ViewState';
 import { scanBoundingBox } from '../volume-util';
-import { convertSectionToIndex } from '../section-util';
-import MprImageSource from '../image-source/MprImageSource';
-import RawData from '../../common/RawData';
-import { Box2, Box3, Vector2, Vector3 } from 'three';
+import Annotation from './Annotation';
 
 /**
  * VoxelCloud is a type of Annotation that can be registered to a Composition.
@@ -56,6 +60,8 @@ export default class VoxelCloud implements Annotation {
    * cloud manipulation tools (e.g., BrushTool, EraserTool).
    */
   public active: boolean = true;
+
+  public id?: string;
 
   /**
    * If set to true, draws some additional marks useful for debugging.
@@ -315,8 +321,30 @@ export default class VoxelCloud implements Annotation {
       outRectSize.y // dest
     );
   }
-}
 
+  public static getBoundingBox(
+    composition: Composition,
+    data: {
+      origin?: Vector3D;
+      size?: Vector3D;
+    }
+  ): { min: Vector3D; max: Vector3D } | undefined {
+    if (!data.origin || !data.size) return;
+
+    const src = composition.imageSource as MprImageSource;
+
+    const voxelSize = new Vector3().fromArray(src.metadata!.voxelSize);
+    const box = getBoxOutline({ origin: data.origin, size: data.size });
+
+    const min = convertPointToMm(new Vector3().fromArray(box.min), voxelSize);
+    const max = convertPointToMm(new Vector3().fromArray(box.max), voxelSize);
+
+    return {
+      min: [min.x, min.y, min.z],
+      max: [max.x, max.y, max.z]
+    };
+  }
+}
 /**
  * For debugging
  */

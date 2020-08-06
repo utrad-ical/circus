@@ -5,34 +5,17 @@ type: object
 description: >
   Label represents information stored in `ClinicalCase.revisions[n].series[m].labels`.
   It holds information that attaches to a certain series in a case.
+required: ['type', 'data']
 properties:
-  type:
-    constant: 'voxel' # In the future other types will be introduced
+  name:
+    oneOf:
+      - type: string
+      - type: 'null'
+    description: >
+      The name of this label.
   data:
     type: object
     properties:
-      voxels:
-        oneOf:
-          - type: string
-            format: sha1hex
-          - type: 'null'
-        description: >
-          The hash of voxel data blob, which must be stored beforehands.
-      origin:
-        type: array
-        items: [{ type: 'integer' }, { type: 'integer' }, { type: 'integer' }]
-        description: >
-          The origin of the voxel data.
-      size:
-        type: array
-        items:
-          [
-            { type: 'integer', multipleOf: 8 },
-            { type: 'integer' },
-            { type: 'integer' },
-          ]
-        description: >
-          The size of the voxel data. The size along the x-axis must be a multiple of 8.
       color:
         type: string
         pattern: '^#[0-9a-f]{6,6}$'
@@ -47,4 +30,87 @@ properties:
   attributes:
     type: object
     description: An object that represents label attributes.
+  type:
+    type: 'string'
+oneOf:
+  - properties:
+      type:
+        enum: ['voxel']
+      data:
+        type: object
+        properties:
+          voxels:
+            oneOf:
+              - type: string
+                format: sha1hex
+              - type: 'null'
+            description: >
+              The hash of voxel data blob, which must be stored beforehands.
+          origin:
+            type: array
+            items:
+              [{ type: 'integer' }, { type: 'integer' }, { type: 'integer' }]
+            description: >
+              The origin of the voxel data.
+          size:
+            type: array
+            items:
+              [
+                { type: 'integer', multipleOf: 8 },
+                { type: 'integer' },
+                { type: 'integer' },
+              ]
+            description: >
+              The size of the voxel data. The size along the x-axis must be a multiple of 8.
+        required: ['voxels']
+  - properties:
+      type:
+        enum: ['cuboid', 'ellipsoid']
+      data:
+        type: object
+        properties:
+          min:
+            type: array
+            items:
+              type: 'number'
+            minItems: 3
+            maxItems: 3
+            description: >
+              Boundary of the outline, the volume Coordinates (measured in mm).
+          max:
+            type: array
+            items:
+              type: 'number'
+            minItems: 3
+            maxItems: 3
+            description: >
+              Boundary of the outline, the volume Coordinates (measured in mm).
+        required: ['min', 'max']
+  - properties:
+      type:
+        enum: ['rectangle', 'ellipse']
+      data:
+        type: object
+        properties:
+          min:
+            type: array
+            items:
+              type: 'number'
+            minItems: 2
+            maxItems: 2
+            description: >
+              Boundary of the outline, the volume Coordinates (measured in mm).
+          max:
+            type: array
+            items:
+              type: 'number'
+            minItems: 2
+            maxItems: 2
+            description: >
+              Boundary of the outline, the volume Coordinates (measured in mm).
+          z:
+            type: number
+            description: >
+              The Z coordinate of the outline.
+        required: ['min', 'max', 'z']
 additionalProperties: false

@@ -197,3 +197,15 @@ test('sectionOverlapsVolume', () => {
     true
   );
 });
+
+test('sectionCenter', () => {
+  const section = {
+    origin: [3, 4, 0],
+    xAxis: [0, 16, 12], // length: 20
+    yAxis: [0, -12, 16] // length: 20
+    // center is [6, 14]
+    // origin to center is [0, 2, 14]
+  };
+  const center = sect.sectionCenter(section);
+  expect(center).toEqual(new Vector3(3, 6, 14));
+});

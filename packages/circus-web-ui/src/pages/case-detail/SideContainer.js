@@ -13,7 +13,9 @@ const StyledSideBar = styled.div`
     text-align: right;
   }
   &.open {
-    flex: 0 0 250px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    flex: 1 1 auto;
     > .bar > .triangle {
       transform: rotate(180deg);
     }

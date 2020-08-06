@@ -40,7 +40,7 @@ import {
   VoxelLabel,
   VoxelLabelData
 } from './revisionData';
-import { createHistoryStore } from './revisionHistory';
+import { createHistoryStore, HistoryStore } from './revisionHistory';
 import RevisionSelector from './RevisionSelector';
 import SideContainer from './SideContainer';
 import ToolBar from './ToolBar';
@@ -72,7 +72,7 @@ class CaseDetailView extends React.PureComponent<
   CaseDetailViewProps,
   CaseDetailViewState
 > {
-  historyStore: ReturnType<typeof createHistoryStore>;
+  historyStore: HistoryStore<EditingData>;
 
   constructor(props: Readonly<CaseDetailViewProps>) {
     super(props);

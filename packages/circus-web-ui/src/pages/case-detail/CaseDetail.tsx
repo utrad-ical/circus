@@ -843,46 +843,45 @@ export class Editor extends React.Component<EditorProps, EditorState> {
 
     return (
       <div className={classNames('case-revision-data', { busy })}>
-        <div className="case-revision-sidebar">
-          <SideContainer>
-            <Collapser title="Series / Labels" className="labels">
-              <LabelSelector
-                editingData={editingData}
-                composition={composition}
-                onChange={this.handleSeriesChange}
-                activeSeries={activeSeries}
-                activeLabel={activeLabel}
-                onChangeActiveLabel={this.changeActiveLabel}
-                viewers={this.viewers}
-              />
-              {activeLabel && (
-                <div className="label-attributes">
-                  <div>
-                    Label #{activeLabelIndex} of Series #{activeSeriesIndex}
-                    <br />
-                  </div>
-                  <div className="label-name">{activeLabel.name}</div>
-
-                  <JsonSchemaEditor
-                    key={`${activeSeriesIndex}:${activeLabelIndex}`}
-                    schema={projectData.labelAttributesSchema}
-                    value={activeLabel.attributes || {}}
-                    onChange={this.labelAttributesChange}
-                    onTextBlur={this.handleLabelAttributesTextBlur}
-                  />
+        <SideContainer>
+          <Collapser title="Series / Labels" className="labels">
+            <LabelSelector
+              editingData={editingData}
+              composition={composition}
+              onChange={this.handleSeriesChange}
+              activeSeries={activeSeries}
+              activeLabel={activeLabel}
+              onChangeActiveLabel={this.changeActiveLabel}
+              viewers={this.viewers}
+            />
+            {activeLabel && (
+              <div className="label-attributes">
+                <div>
+                  Label #{activeLabelIndex} of Series #{activeSeriesIndex}
+                  <br />
                 </div>
-              )}
-            </Collapser>
-            <Collapser title="Case Attributes" className="case-attributes">
-              <JsonSchemaEditor
-                schema={projectData.caseAttributesSchema}
-                value={revision.attributes}
-                onChange={this.caseAttributesChange}
-                onTextBlur={this.handleCaseAttributesTextBlur}
-              />
-            </Collapser>
-          </SideContainer>
-        </div>
+                <div className="label-name">{activeLabel.name}</div>
+
+                <JsonSchemaEditor
+                  key={`${activeSeriesIndex}:${activeLabelIndex}`}
+                  schema={projectData.labelAttributesSchema}
+                  value={activeLabel.attributes || {}}
+                  onChange={this.labelAttributesChange}
+                  onTextBlur={this.handleLabelAttributesTextBlur}
+                />
+              </div>
+            )}
+          </Collapser>
+          <Collapser title="Case Attributes" className="case-attributes">
+            <JsonSchemaEditor
+              schema={projectData.caseAttributesSchema}
+              value={revision.attributes}
+              onChange={this.caseAttributesChange}
+              onTextBlur={this.handleCaseAttributesTextBlur}
+            />
+          </Collapser>
+        </SideContainer>
+
         <div className="case-revision-main">
           <ToolBar
             active={toolName}

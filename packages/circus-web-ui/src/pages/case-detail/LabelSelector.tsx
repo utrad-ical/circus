@@ -38,7 +38,7 @@ import {
   voxelShrinkToMinimum
 } from './revisionData';
 
-const labelTypeOptions = {
+const labelTypeOptions: { [key: string]: { caption: string; icon: string } } = {
   voxel: { caption: 'voxel', icon: 'circus-annotation-voxel' },
   cuboid: { caption: 'cuboid', icon: 'circus-annotation-cuboid' },
   ellipsoid: { caption: 'ellipsoid', icon: 'circus-annotation-ellipsoid' },
@@ -46,27 +46,46 @@ const labelTypeOptions = {
   ellipse: { caption: 'ellipse', icon: 'circus-annotation-ellipse' }
 };
 
-const convertlabelTypeMenuOptions = {
+const convertLabelTypeMenuOptions: {
+  [type: string]: {
+    convertTo: LabelType;
+    caption: string;
+    icon: string;
+  };
+} = {
   cuboid: {
-    convertTo: 'ellipsoid' as LabelType,
+    convertTo: 'ellipsoid',
     caption: 'Convert to ellipsoid',
     icon: 'circus-annotation-ellipsoid'
   },
   ellipsoid: {
-    convertTo: 'cuboid' as LabelType,
+    convertTo: 'cuboid',
     caption: 'Convert to cuboid',
     icon: 'circus-annotation-cuboid'
   },
   rectangle: {
-    convertTo: 'ellipse' as LabelType,
+    convertTo: 'ellipse',
     caption: 'Convert to ellipse',
     icon: 'circus-annotation-ellipse'
   },
   ellipse: {
-    convertTo: 'rectangle' as LabelType,
+    convertTo: 'rectangle',
     caption: 'Convert to rectangle',
     icon: 'circus-annotation-rectangle'
   }
+};
+
+const LabelTypeRenderer: React.FC<{
+  icon: string;
+  caption: string;
+}> = props => {
+  return (
+    <Fragment>
+      <Icon icon={props.icon} />
+      &ensp;
+      <span className="caption">{props.caption}</span>
+    </Fragment>
+  );
 };
 
 const LabelSelector: React.FC<{
@@ -222,7 +241,7 @@ const Series: React.FC<{
       return {
         temporarykey: temporarykey,
         type: newLabelType,
-        name: getUniqueLabelName('3D shapes'),
+        name: getUniqueLabelName('3D Shape'),
         data: {
           ...createDefaultSolidFigureLabelData(viewers),
           color: color,
@@ -236,7 +255,7 @@ const Series: React.FC<{
       return {
         temporarykey: temporarykey,
         type: newLabelType,
-        name: getUniqueLabelName('2D shapes'),
+        name: getUniqueLabelName('2D Shape'),
         data: {
           ...createDefaultPlaneFigureLabelData(viewers),
           color: color,
@@ -316,7 +335,7 @@ const Series: React.FC<{
 
   const convertLabelType = (labelIndex: number, label: LabelEntry) => {
     if (label.type === 'voxel') return;
-    const newLabelType = convertlabelTypeMenuOptions[label.type].convertTo;
+    const newLabelType = convertLabelTypeMenuOptions[label.type].convertTo;
     const newSeries = update(series, {
       labels: {
         [labelIndex]: { type: { $set: newLabelType } }
@@ -366,18 +385,6 @@ const Series: React.FC<{
     Object.values(viewers).map(viewer => focusBy(viewer, center));
   };
 
-  const LabelTypeRenderer: React.FC<{
-    icon: string;
-    caption: string;
-  }> = props => {
-    return (
-      <Fragment>
-        <Icon icon={props.icon} />
-        <span className="caption">{props.caption}</span>
-      </Fragment>
-    );
-  };
-
   return (
     <li
       className={classNames('case-series-list-item', {
@@ -416,7 +423,7 @@ const Series: React.FC<{
           onChange={setNewLabelType}
           renderer={LabelTypeRenderer}
         />
-        <IconButton icon="plus" bsSize="xs" onClick={() => addLabel()}>
+        <IconButton icon="plus" bsSize="xs" onClick={addLabel}>
           Add Label
         </IconButton>
       </div>
@@ -578,8 +585,8 @@ export const Label: React.FC<{
           )}
           {label.type !== 'voxel' && (
             <MenuItem eventKey="5" onSelect={onConvertTypeClick}>
-              <Icon icon={convertlabelTypeMenuOptions[label.type].icon} />
-              &ensp;{convertlabelTypeMenuOptions[label.type].caption}
+              <Icon icon={convertLabelTypeMenuOptions[label.type].icon} />
+              &ensp;{convertLabelTypeMenuOptions[label.type].caption}
             </MenuItem>
           )}
           <MenuItem eventKey="6" onSelect={onRevealInViewerClick}>

@@ -78,3 +78,38 @@ export function intersectionOfBoxAndPlane(
 
   return intersections.length === 0 ? null : intersections;
 }
+
+/**
+ * Calculates the center of the given box outline (cuboid).
+ * @param outline The cuboid outline
+ * @returns center point
+ */
+export function getBoxCenter(
+  outline:
+    | {
+        min: Vector3D;
+        max: Vector3D;
+      }
+    | undefined
+): Vector3D | undefined {
+  if (!outline) return;
+  const box = new Box3()
+    .expandByPoint(new Vector3().fromArray(outline.min))
+    .expandByPoint(new Vector3().fromArray(outline.max));
+  const center = box.getCenter(new Vector3());
+  return [center.x, center.y, center.z];
+}
+
+export function getBoxOutline(
+  box: Box
+): {
+  min: Vector3D;
+  max: Vector3D;
+} {
+  const min = new Vector3().fromArray(box.origin);
+  const max = new Vector3().addVectors(min, new Vector3().fromArray(box.size));
+  return {
+    min: [min.x, min.y, min.z],
+    max: [max.x, max.y, max.z]
+  };
+}

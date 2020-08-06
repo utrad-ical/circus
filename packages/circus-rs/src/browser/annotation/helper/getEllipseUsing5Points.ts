@@ -36,6 +36,7 @@ export default function intersectEllipsoidAndSection(
   const ES_o = getIntersectedEllipseOrigin(ellipsoid, plane);
 
   const points3 = get5PointsOnEllipseOutline(ellipsoid, ES_o, S_u, S_nv);
+  if (points3.length < 5) return;
 
   const points = points3.map((p3: Vector3) =>
     convertVolumeCoordinateToScreenCoordinate(section, resolution, p3)

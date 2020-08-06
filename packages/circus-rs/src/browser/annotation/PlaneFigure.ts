@@ -1,14 +1,16 @@
-import Annotation, { DrawOption } from './Annotation';
-import Viewer from '../viewer/Viewer';
-import ViewState, { MprViewState } from '../ViewState';
+import { Vector3D } from 'circus-rs/src/common/geometry';
 import { Vector2, Vector3 } from 'three';
-import {
-  convertVolumeCoordinateToScreenCoordinate,
-  detectOrthogonalSection,
-  convertScreenCoordinateToVolumeCoordinate
-} from '../section-util';
+import { Vector2D } from '..';
 import ViewerEventTarget from '../interface/ViewerEventTarget';
+import {
+  convertScreenCoordinateToVolumeCoordinate,
+  convertVolumeCoordinateToScreenCoordinate,
+  detectOrthogonalSection
+} from '../section-util';
+import Viewer from '../viewer/Viewer';
 import ViewerEvent from '../viewer/ViewerEvent';
+import ViewState, { MprViewState } from '../ViewState';
+import Annotation, { DrawOption } from './Annotation';
 
 export type FigureType = 'rectangle' | 'circle';
 
@@ -67,6 +69,8 @@ export default class PlaneFigure implements Annotation, ViewerEventTarget {
   public zDimmedThreshold: number = 3;
 
   public type: FigureType = 'circle';
+
+  public id?: string;
 
   public draw(viewer: Viewer, viewState: ViewState, option: DrawOption): void {
     if (!viewer || !viewState) return;
@@ -295,7 +299,9 @@ export default class PlaneFigure implements Annotation, ViewerEventTarget {
       }
 
       const comp = viewer.getComposition();
-      if (comp) comp.annotationUpdated();
+      if (!comp) return;
+      comp.dispatchAnnotationChanging(this);
+      comp.annotationUpdated();
     }
   }
 
@@ -326,6 +332,7 @@ export default class PlaneFigure implements Annotation, ViewerEventTarget {
       } else {
         if (comp) comp.removeAnnotation(this);
       }
+      if (comp) comp.dispatchAnnotationChange(this);
       if (comp) comp.annotationUpdated();
 
       this.handleType = undefined;
@@ -418,5 +425,77 @@ export default class PlaneFigure implements Annotation, ViewerEventTarget {
       default:
         return undefined;
     }
+  }
+
+  public static calculateBoundingBoxAndDepth(
+    viewer: Viewer
+  ): { min: Vector2D; max: Vector2D; z: number } {
+    const ratio = 0.25;
+    const section = viewer.getState().section;
+    const orientation = detectOrthogonalSection(section);
+    if (orientation !== 'axial') {
+      return {
+        min: [0, 0],
+        max: [0, 0],
+        z: 0
+      };
+    }
+
+    const resolution = new Vector2().fromArray(viewer.getResolution());
+
+    const halfLength = Math.min(resolution.x, resolution.y) * ratio * 0.5;
+
+    const screenCenter = new Vector2().fromArray([
+      resolution.x * 0.5,
+      resolution.y * 0.5
+    ]);
+
+    const min = convertScreenCoordinateToVolumeCoordinate(
+      section,
+      resolution,
+      new Vector2().fromArray([
+        screenCenter.x - halfLength,
+        screenCenter.y - halfLength
+      ])
+    );
+
+    const max = convertScreenCoordinateToVolumeCoordinate(
+      section,
+      resolution,
+      new Vector2().fromArray([
+        screenCenter.x + halfLength,
+        screenCenter.y + halfLength
+      ])
+    );
+
+    return {
+      min: [min.x, min.y],
+      max: [max.x, max.y],
+      z: min.z
+    };
+  }
+
+  public static getOutline(data: {
+    min: Vector2D | number[];
+    max: Vector2D | number[];
+    z: number;
+  }): { min: Vector3D; max: Vector3D } {
+    return {
+      min: [data.min[0], data.min[1], data.z],
+      max: [data.max[0], data.max[1], data.z]
+    };
+  }
+
+  public validate(): boolean | undefined {
+    const min = this.min;
+    const max = this.max;
+
+    return (
+      min &&
+      max &&
+      min.some((value, index) => {
+        return value !== max[index];
+      })
+    );
   }
 }

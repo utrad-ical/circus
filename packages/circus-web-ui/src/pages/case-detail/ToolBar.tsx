@@ -8,17 +8,21 @@ import {
 } from 'components/react-bootstrap';
 import React, { Fragment } from 'react';
 
-interface windowPreset {
-  label: number;
+interface WindowPreset {
+  label: string;
   level: number;
   width: number;
 }
 
-const LayoutRenderer = (props: { icon: any; caption: React.ReactNode }) => {
+const LayoutRenderer: React.FC<{
+  icon: any;
+  caption: React.ReactChild;
+}> = props => {
   return (
     <Fragment>
       <Icon icon={props.icon} />
-      <span className="caption">&ensp;{props.caption}</span>
+      &ensp;
+      <span className="caption">{props.caption}</span>
     </Fragment>
   );
 };
@@ -30,7 +34,7 @@ const ToolBar: React.FC<{
   brushEnabled: boolean;
   lineWidth: number;
   setLineWidth: any;
-  windowPresets?: windowPreset[] | undefined;
+  windowPresets?: WindowPreset[];
   onChangeTool: any;
   onApplyWindow: any;
 }> = props => {
@@ -69,7 +73,7 @@ const ToolBar: React.FC<{
     });
   };
 
-  const handleApplyWindow = async (selection: windowPreset) => {
+  const handleApplyWindow = async (selection: WindowPreset) => {
     if ('level' in selection && 'width' in selection) {
       onApplyWindow({ level: selection.level, width: selection.width });
     } else {
@@ -121,7 +125,7 @@ const ToolBar: React.FC<{
         changeTool={onChangeTool}
         active={activeTool}
       >
-        {windowPresets.map((p: windowPreset, i) => (
+        {windowPresets.map((p: WindowPreset, i) => (
           <MenuItem
             key={i + 1}
             eventKey={i + 1}

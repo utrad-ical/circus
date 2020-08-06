@@ -72,16 +72,7 @@ class CaseDetailView extends React.PureComponent<
   CaseDetailViewProps,
   CaseDetailViewState
 > {
-  historyStore: {
-    registerNew: (revision: EditingData) => void;
-    push: (revision: EditingData) => void;
-    canUndo: () => boolean;
-    undo: () => void;
-    canRedo: () => boolean;
-    redo: () => void;
-    current: () => EditingData;
-    getHistoryLength: () => number;
-  };
+  historyStore: ReturnType<typeof createHistoryStore>;
 
   constructor(props: Readonly<CaseDetailViewProps>) {
     super(props);
@@ -278,7 +269,7 @@ const CaseDetail = connect(state => ({
 }))(CaseDetailView);
 export default CaseDetail;
 
-const MenuBar = (props: {
+const MenuBar: React.FC<{
   canUndo: boolean;
   onUndoClick: () => void;
   canRedo: boolean;
@@ -289,7 +280,7 @@ const MenuBar = (props: {
   revisions: Revision[];
   onRevisionSelect: (index: number) => Promise<void>;
   currentRevision: number;
-}) => {
+}> = props => {
   const {
     canUndo,
     onUndoClick,

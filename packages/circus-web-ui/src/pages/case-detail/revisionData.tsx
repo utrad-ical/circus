@@ -5,6 +5,7 @@ import { Vector2D, Vector3D } from '@utrad-ical/circus-rs/src/browser';
 import update from 'immutability-helper';
 import { sha1 } from 'utils/util';
 import asyncMap from '../../utils/asyncMap';
+import { ApiCaller } from 'utils/api';
 export interface Revision {
   description: string;
   attributes: any;
@@ -186,7 +187,7 @@ export const voxelShrinkToMinimum = (data: {
 
 const prepareLabelSaveData = async (
   label: LabelEntry,
-  api: any
+  api: ApiCaller
 ): Promise<LabelEntry> => {
   switch (label.type) {
     case 'voxel':
@@ -204,7 +205,7 @@ const prepareLabelSaveData = async (
 
 const prepareLabelSaveDataOfVoxel = async (
   label: VoxelLabel,
-  api: any
+  api: ApiCaller
 ): Promise<VoxelLabel> => {
   if (label.type !== 'voxel') return label;
   const shrinkResult = voxelShrinkToMinimum(label.data);
@@ -242,7 +243,7 @@ const prepareLabelSaveDataOfVoxel = async (
 
 const prepareLabelSaveDataOfSolidFigure = async (
   label: SolidFigureLabel,
-  api: any
+  api: ApiCaller
 ): Promise<SolidFigureLabel> => {
   if (label.type !== 'cuboid' && label.type !== 'ellipsoid') return label;
   const newLabel = {
@@ -260,7 +261,7 @@ const prepareLabelSaveDataOfSolidFigure = async (
 
 const prepareLabelSaveDataOfPlaneFigure = async (
   label: PlaneFigureLabel,
-  api: any
+  api: ApiCaller
 ): Promise<PlaneFigureLabel> => {
   if (label.type !== 'rectangle' && label.type !== 'ellipse') return label;
   const newLabel = {
@@ -294,7 +295,7 @@ export const saveRevision = async (
   caseId: string,
   revision: Revision,
   description: string,
-  api: any
+  api: ApiCaller
 ) => {
   const saveData = {
     description,

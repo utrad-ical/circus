@@ -1,16 +1,27 @@
+export interface HistoryStore<T> {
+  registerNew: (revision: T) => void;
+  push: (revision: T) => void;
+  canUndo: () => boolean;
+  undo: () => void;
+  canRedo: () => boolean;
+  redo: () => void;
+  current: () => T;
+  getHistoryLength: () => number;
+}
+
 /**
  * Creates a container that handles undo/redo.
  */
-export const createHistoryStore = (maxHistoryLength = 10) => {
-  let history = [];
+export const createHistoryStore = <T>(maxHistoryLength = 10) => {
+  let history: T[] = [];
   let currentIndex = 0;
 
-  const registerNew = revision => {
+  const registerNew = (revision: T) => {
     history = [revision];
     currentIndex = 0;
   };
 
-  const push = revision => {
+  const push = (revision: T) => {
     history = history.slice(0, currentIndex + 1);
     history.push(revision);
     currentIndex++;
@@ -53,5 +64,5 @@ export const createHistoryStore = (maxHistoryLength = 10) => {
     redo,
     current,
     getHistoryLength
-  };
+  } as HistoryStore<T>;
 };

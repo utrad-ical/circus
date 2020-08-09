@@ -22,7 +22,7 @@ import Tag from 'components/Tag';
 import TimeDisplay from 'components/TimeDisplay';
 import { EventEmitter } from 'events';
 import update from 'immutability-helper';
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useEffect, useReducer } from 'react';
 import { useSelector } from 'react-redux';
 import { store } from 'store';
 import { api } from 'utils/api';
@@ -41,51 +41,34 @@ import {
   VoxelLabel,
   VoxelLabelData
 } from './revisionData';
-import { createHistoryStore, HistoryStore } from './revisionHistory';
 import RevisionSelector from './RevisionSelector';
 import SideContainer from './SideContainer';
 import ToolBar from './ToolBar';
 import ViewerCluster, { Layout } from './ViwewerCluster';
-import Project from 'types/Project';
 import { useParams } from 'react-router-dom';
+import caseStoreReducer, * as c from './caseStore';
 
 const CaseDetail: React.FC<{}> = props => {
-  const [busy, setBusy] = useState(false);
-  const [caseData, setCaseData] = useState<any>(null);
-  const [editingRevisionIndex, setEditingRevisionIndex] = useState(-1);
-  const [editingData, setEditingData] = useState<EditingData | null>(null);
-  const [projectData, setProjectData] = useState<Project | null>(null);
-  const [canUndo, setCanUndo] = useState(false);
-  const [canRedo, setCanRedo] = useState(false);
   const caseId = useParams<any>().caseId;
+  const [caseStore, caseDispatch] = useReducer(
+    caseStoreReducer,
+    caseStoreReducer(undefined as any, { type: 'dummy' }) // gets initial state
+  );
 
-  /**
-   * Takes care of undo/redo history.
-   */
-  const historyStore = useRef<HistoryStore<EditingData>>();
-  if (!historyStore.current) historyStore.current = createHistoryStore();
-  const history = historyStore.current;
+  const { busy, caseData, projectData, editingRevisionIndex } = caseStore;
+  const editingData = c.current(caseStore);
 
   const accessibleProjects = useSelector(
     state => state.loginUser.data!.accessibleProjects
   );
 
-  const loadRevisionData = async (revision: Revision) => {
-    setBusy(true);
-    // setEditingRevisionIndex(index);
-
+  const loadRevisionData = async (revisions: Revision[], index: number) => {
+    const revision = revisions[index];
+    caseDispatch(c.setBusy(true));
     // Loads actual volume data and adds label temporary key.
     const data = await loadLabels(revision, api);
-
-    const editingData: EditingData = {
-      revision: data,
-      activeSeriesIndex: 0,
-      activeLabelIndex: (revision.series[0].labels || []).length > 0 ? 0 : -1
-    };
-
-    historyStore.current!.registerNew(editingData);
-    setEditingData(editingData);
-    setBusy(false);
+    caseDispatch(c.startEditing({ revision: data, revisionIndex: index }));
+    caseDispatch(c.setBusy(false));
   };
 
   const loadCase = async () => {
@@ -96,10 +79,8 @@ const CaseDetail: React.FC<{}> = props => {
     if (!project) {
       throw new Error('You do not have access to this project.');
     }
-    setCaseData(caseData);
-    setProjectData(project.project);
-    await loadRevisionData(caseData.revisions[caseData.revisions.length - 1]);
-    setEditingRevisionIndex(caseData.revisions.length - 1);
+    caseDispatch(c.loadCaseData({ caseData, projectData: project.project }));
+    await loadRevisionData(caseData.revisions, caseData.revisions.length - 1);
   };
 
   useEffect(() => {
@@ -108,44 +89,29 @@ const CaseDetail: React.FC<{}> = props => {
   }, []);
 
   const handleRevisionSelect = async (index: number) => {
-    await loadRevisionData(caseData.revisions[index]);
+    await loadRevisionData(caseData.revisions, index);
   };
 
   const handleDataChange = (
     newData: EditingData,
     pushToHistory: any = false
   ) => {
-    if (pushToHistory === true) {
-      history.push(newData);
-    } else if (typeof pushToHistory === 'function') {
-      if (pushToHistory(history.current())) {
-        history.push(newData);
-      }
-    }
-    setEditingData(newData);
-    setCanUndo(history.canUndo());
-    setCanRedo(history.canRedo());
+    caseDispatch(c.change({ newData, pushToHistory }));
   };
 
   const handleMenuBarCommand = async (command: MenuBarCommand) => {
     switch (command) {
       case 'undo':
-        history.undo();
-        setEditingData(history.current());
-        setCanUndo(history.canUndo());
-        setCanRedo(history.canRedo());
+        caseDispatch(c.undo());
         break;
       case 'redo':
-        history.redo();
-        setEditingData(history.current());
-        setCanUndo(history.canUndo());
-        setCanRedo(history.canRedo());
+        caseDispatch(c.redo());
         break;
       case 'revert': {
         if (!(await confirm('Reload the current revision?'))) {
           return;
         }
-        loadRevisionData(caseData.revisions[editingRevisionIndex]);
+        loadRevisionData(caseData.revisions, editingRevisionIndex);
         break;
       }
       case 'save': {
@@ -158,8 +124,6 @@ const CaseDetail: React.FC<{}> = props => {
           await alert('Successfully registered a revision.');
           // For now, perform a full case reload.
           // TODO: Optimize this
-          setCaseData(null);
-          setEditingData(null);
           loadCase();
         } catch (err) {
           await alert('Error: ' + err.message);
@@ -216,8 +180,8 @@ const CaseDetail: React.FC<{}> = props => {
         onCommand={handleMenuBarCommand}
         onRevisionSelect={handleRevisionSelect}
         revisions={caseData.revisions}
-        canUndo={canUndo}
-        canRedo={canRedo}
+        canUndo={c.canUndo(caseStore)}
+        canRedo={c.canRedo(caseStore)}
         currentRevision={editingRevisionIndex}
       />
       <Editor

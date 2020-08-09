@@ -22,13 +22,14 @@ import Tag from 'components/Tag';
 import TimeDisplay from 'components/TimeDisplay';
 import { EventEmitter } from 'events';
 import update from 'immutability-helper';
-import React from 'react';
-import { connect } from 'react-redux';
+import React, { useState, useRef, useEffect } from 'react';
+import { useSelector } from 'react-redux';
 import { store } from 'store';
 import { api } from 'utils/api';
 import shallowEqual from 'utils/shallowEqual';
 import LabelSelector from './LabelSelector';
 import {
+  EditingData,
   LabelEntry,
   loadLabels,
   PlaneFigureLabel,
@@ -45,57 +46,33 @@ import RevisionSelector from './RevisionSelector';
 import SideContainer from './SideContainer';
 import ToolBar from './ToolBar';
 import ViewerCluster, { Layout } from './ViwewerCluster';
+import Project from 'types/Project';
+import { useParams } from 'react-router-dom';
 
-interface EditingData {
-  revision: Revision;
-  activeSeriesIndex: number;
-  activeLabelIndex: number;
-}
+const CaseDetail: React.FC<{}> = props => {
+  const [busy, setBusy] = useState(false);
+  const [caseData, setCaseData] = useState<any>(null);
+  const [editingRevisionIndex, setEditingRevisionIndex] = useState(-1);
+  const [editingData, setEditingData] = useState<EditingData | null>(null);
+  const [projectData, setProjectData] = useState<Project | null>(null);
+  const [canUndo, setCanUndo] = useState(false);
+  const [canRedo, setCanRedo] = useState(false);
+  const caseId = useParams<any>().caseId;
 
-interface CaseDetailViewProps {
-  accessibleProjects: any;
-  editingData: EditingData;
-  match: any;
-}
+  /**
+   * Takes care of undo/redo history.
+   */
+  const historyStore = useRef<HistoryStore<EditingData>>();
+  if (!historyStore.current) historyStore.current = createHistoryStore();
+  const history = historyStore.current;
 
-interface CaseDetailViewState {
-  busy: boolean;
-  projectData?: any;
-  caseData?: any;
-  editingRevisionIndex: number;
-  editingData?: EditingData | null;
-  canUndo: boolean;
-  canRedo: boolean;
-}
+  const accessibleProjects = useSelector(
+    state => state.loginUser.data!.accessibleProjects
+  );
 
-class CaseDetailView extends React.PureComponent<
-  CaseDetailViewProps,
-  CaseDetailViewState
-> {
-  historyStore: HistoryStore<EditingData>;
-
-  constructor(props: Readonly<CaseDetailViewProps>) {
-    super(props);
-    this.state = {
-      busy: false,
-      projectData: null,
-      caseData: null,
-      editingRevisionIndex: -1,
-      editingData: null,
-      canUndo: false,
-      canRedo: false
-    };
-
-    /**
-     * Takes care of undo/redo history.
-     */
-    this.historyStore = createHistoryStore();
-  }
-
-  selectRevision = async (index: number) => {
-    const { revisions } = this.state.caseData;
-    const revision = revisions[index];
-    this.setState({ busy: true, editingRevisionIndex: index });
+  const loadRevisionData = async (revision: Revision) => {
+    setBusy(true);
+    // setEditingRevisionIndex(index);
 
     // Loads actual volume data and adds label temporary key.
     const data = await loadLabels(revision, api);
@@ -106,189 +83,170 @@ class CaseDetailView extends React.PureComponent<
       activeLabelIndex: (revision.series[0].labels || []).length > 0 ? 0 : -1
     };
 
-    this.historyStore.registerNew(editingData);
-    this.setState({ editingData, busy: false });
+    historyStore.current!.registerNew(editingData);
+    setEditingData(editingData);
+    setBusy(false);
   };
 
-  async loadCase() {
-    const caseId = this.props.match.params.caseId;
+  const loadCase = async () => {
     const caseData = await api('cases/' + caseId);
-    const project = this.props.accessibleProjects.find(
+    const project = accessibleProjects.find(
       (p: { projectId: string }) => p.projectId === caseData.projectId
     );
     if (!project) {
       throw new Error('You do not have access to this project.');
     }
-    this.setState({ caseData, projectData: project.project }, () => {
-      this.selectRevision(caseData.revisions.length - 1);
-    });
-  }
-
-  saveRevision = async () => {
-    if (!this.state.editingData) return;
-    const revision = this.state.editingData.revision;
-    const caseId = this.state.caseData.caseId;
-
-    const desc = await prompt('Revision message', revision.description);
-    if (desc === null) return;
-
-    try {
-      await saveRevision(caseId, revision, desc, api);
-      await alert('Successfully registered a revision.');
-      // For now, perform a full case reload.
-      // TODO: Optimize this
-      this.setState({ caseData: null, editingData: null });
-      this.loadCase();
-    } catch (err) {
-      await alert('Error: ' + err.message);
-      throw err;
-    }
+    setCaseData(caseData);
+    setProjectData(project.project);
+    await loadRevisionData(caseData.revisions[caseData.revisions.length - 1]);
+    setEditingRevisionIndex(caseData.revisions.length - 1);
   };
 
-  revertRevision = async () => {
-    if (!(await confirm('Reload the current revision?'))) {
-      return;
-    }
-    this.selectRevision(this.state.editingRevisionIndex);
+  useEffect(() => {
+    loadCase();
+    // eslint-disable-next-line
+  }, []);
+
+  const handleRevisionSelect = async (index: number) => {
+    await loadRevisionData(caseData.revisions[index]);
   };
 
-  exportMhd = async () => {
-    const caseId = this.state.caseData.caseId;
-    const blob = await api(`cases/${caseId}/export-mhd`, {
-      responseType: 'blob'
-    });
-    const a = document.createElement('a');
-    document.body.appendChild(a);
-    const url = window.URL.createObjectURL(blob);
-    a.href = url;
-    a.download = 'export.zip';
-    a.click();
-    window.URL.revokeObjectURL(url);
-  };
-
-  handleDataChange = (newData: EditingData, pushToHistory: any = false) => {
+  const handleDataChange = (
+    newData: EditingData,
+    pushToHistory: any = false
+  ) => {
     if (pushToHistory === true) {
-      this.historyStore.push(newData);
+      history.push(newData);
     } else if (typeof pushToHistory === 'function') {
-      if (pushToHistory(this.historyStore.current())) {
-        this.historyStore.push(newData);
+      if (pushToHistory(history.current())) {
+        history.push(newData);
       }
     }
-    this.setState({
-      editingData: newData,
-      canUndo: this.historyStore.canUndo(),
-      canRedo: this.historyStore.canRedo()
-    });
+    setEditingData(newData);
+    setCanUndo(history.canUndo());
+    setCanRedo(history.canRedo());
   };
 
-  handleUndoClick = () => {
-    this.historyStore.undo();
-    this.setState({
-      editingData: this.historyStore.current(),
-      canUndo: this.historyStore.canUndo(),
-      canRedo: this.historyStore.canRedo()
-    });
-  };
-
-  handleRedoClick = () => {
-    this.historyStore.redo();
-    this.setState({
-      editingData: this.historyStore.current(),
-      canUndo: this.historyStore.canUndo(),
-      canRedo: this.historyStore.canRedo()
-    });
-  };
-
-  async componentDidMount() {
-    await this.loadCase();
-  }
-
-  render() {
-    if (
-      !this.state.caseData ||
-      !this.state.projectData ||
-      !this.state.editingData
-    ) {
-      return this.state.busy ? <LoadingIndicator /> : null;
+  const handleMenuBarCommand = async (command: MenuBarCommand) => {
+    switch (command) {
+      case 'undo':
+        history.undo();
+        setEditingData(history.current());
+        setCanUndo(history.canUndo());
+        setCanRedo(history.canRedo());
+        break;
+      case 'redo':
+        history.redo();
+        setEditingData(history.current());
+        setCanUndo(history.canUndo());
+        setCanRedo(history.canRedo());
+        break;
+      case 'revert': {
+        if (!(await confirm('Reload the current revision?'))) {
+          return;
+        }
+        loadRevisionData(caseData.revisions[editingRevisionIndex]);
+        break;
+      }
+      case 'save': {
+        if (!editingData) return;
+        const revision = editingData.revision;
+        const desc = await prompt('Revision message', revision.description);
+        if (desc === null) return;
+        try {
+          await saveRevision(caseId, revision, desc, api);
+          await alert('Successfully registered a revision.');
+          // For now, perform a full case reload.
+          // TODO: Optimize this
+          setCaseData(null);
+          setEditingData(null);
+          loadCase();
+        } catch (err) {
+          await alert('Error: ' + err.message);
+          throw err;
+        }
+        break;
+      }
+      case 'exportMhd': {
+        const blob = await api(`cases/${caseId}/export-mhd`, {
+          responseType: 'blob'
+        });
+        const a = document.createElement('a');
+        document.body.appendChild(a);
+        const url = window.URL.createObjectURL(blob);
+        a.href = url;
+        a.download = 'export.zip';
+        a.click();
+        window.URL.revokeObjectURL(url);
+        break;
+      }
     }
+  };
 
-    const { projectData: prj, caseData, canUndo, canRedo } = this.state;
-    const caseId = caseData.caseId;
-
-    return (
-      <FullSpanContainer>
-        <Collapser title="Case Info" className="case-info">
-          <ProjectDisplay
-            projectId={prj.projectId}
-            withName
-            withDescription
-            size="xl"
-          />
-          <PatientInfoBox value={caseData.patientInfoCache} />
-          <div className="tag-list">
-            {caseData.tags.map((t: string | number | undefined) => (
-              <Tag
-                projectId={prj.projectId}
-                tag={!t ? '' : t.toString()}
-                key={t}
-              />
-            ))}
-          </div>
-          <div>
-            Case: {caseId}
-            <br />
-            (Create: <TimeDisplay value={caseData.createdAt} />)
-          </div>
-        </Collapser>
-        <MenuBar
-          canUndo={canUndo}
-          onUndoClick={this.handleUndoClick}
-          canRedo={canRedo}
-          onRedoClick={this.handleRedoClick}
-          onSaveClick={this.saveRevision}
-          onRevertClick={this.revertRevision}
-          onExportMhdClick={this.exportMhd}
-          onRevisionSelect={this.selectRevision}
-          revisions={this.state.caseData.revisions}
-          currentRevision={this.state.editingRevisionIndex}
-        />
-        <Editor
-          key={this.state.editingRevisionIndex}
-          busy={this.state.busy}
-          editingData={this.state.editingData}
-          projectData={this.state.projectData}
-          onChange={this.handleDataChange}
-        />
-      </FullSpanContainer>
-    );
+  if (!caseData || !projectData || !editingData) {
+    return busy ? <LoadingIndicator /> : null;
   }
-}
 
-const CaseDetail = connect(state => ({
-  accessibleProjects: state.loginUser.data!.accessibleProjects
-}))(CaseDetailView);
+  return (
+    <FullSpanContainer>
+      <Collapser title="Case Info" className="case-info">
+        <ProjectDisplay
+          projectId={projectData.projectId}
+          withName
+          withDescription
+          size="xl"
+        />
+        <PatientInfoBox value={caseData.patientInfoCache} />
+        <div className="tag-list">
+          {caseData.tags.map((t: string | number | undefined) => (
+            <Tag
+              projectId={projectData.projectId}
+              tag={!t ? '' : t.toString()}
+              key={t}
+            />
+          ))}
+        </div>
+        <div>
+          Case: {caseId}
+          <br />
+          (Create: <TimeDisplay value={caseData.createdAt} />)
+        </div>
+      </Collapser>
+      <MenuBar
+        onCommand={handleMenuBarCommand}
+        onRevisionSelect={handleRevisionSelect}
+        revisions={caseData.revisions}
+        canUndo={canUndo}
+        canRedo={canRedo}
+        currentRevision={editingRevisionIndex}
+      />
+      <Editor
+        key={editingRevisionIndex}
+        busy={busy}
+        editingData={editingData}
+        projectData={projectData}
+        onChange={handleDataChange}
+      />
+    </FullSpanContainer>
+  );
+};
+
 export default CaseDetail;
+
+type MenuBarCommand = 'undo' | 'redo' | 'revert' | 'save' | 'exportMhd';
 
 const MenuBar: React.FC<{
   canUndo: boolean;
-  onUndoClick: () => void;
   canRedo: boolean;
-  onRedoClick: () => void;
-  onRevertClick: () => void;
-  onSaveClick: () => void;
-  onExportMhdClick: () => void;
+  onCommand: (command: MenuBarCommand, ...args: any[]) => void;
   revisions: Revision[];
   onRevisionSelect: (index: number) => Promise<void>;
   currentRevision: number;
 }> = props => {
   const {
     canUndo,
-    onUndoClick,
     canRedo,
-    onRedoClick,
-    onRevertClick,
-    onSaveClick,
-    onExportMhdClick,
+    onCommand,
     revisions,
     onRevisionSelect,
     currentRevision
@@ -308,16 +266,16 @@ const MenuBar: React.FC<{
           bsStyle="default"
           icon="step-backward"
           disabled={!canUndo}
-          onClick={onUndoClick}
+          onClick={() => onCommand('undo')}
         />
         <IconButton
           bsStyle="default"
           icon="step-forward"
           disabled={!canRedo}
-          onClick={onRedoClick}
+          onClick={() => onCommand('redo')}
         />
         &ensp;
-        <Button bsStyle="success" onClick={onSaveClick}>
+        <Button bsStyle="success" onClick={() => onCommand('save')}>
           <Glyphicon glyph="save" />
           Save
         </Button>
@@ -328,13 +286,13 @@ const MenuBar: React.FC<{
           pullRight
           noCaret
         >
-          <MenuItem eventKey="1" onSelect={onRevertClick}>
+          <MenuItem eventKey="1" onSelect={() => onCommand('revert')}>
             <Icon icon="remove" />
             &ensp;Revert
           </MenuItem>
           <MenuItem divider />
           <MenuItem header>Export</MenuItem>
-          <MenuItem onSelect={onExportMhdClick}>
+          <MenuItem onSelect={() => onCommand('exportMhd')}>
             <Icon icon="export" />
             Export as MHD
           </MenuItem>

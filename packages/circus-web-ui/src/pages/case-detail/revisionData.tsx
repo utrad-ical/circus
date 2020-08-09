@@ -12,6 +12,12 @@ export interface Revision {
   series: SeriesEntry[];
 }
 
+export interface EditingData {
+  revision: Revision;
+  activeSeriesIndex: number;
+  activeLabelIndex: number;
+}
+
 export interface SeriesEntry {
   seriesUid: string;
   partialVolumeDescriptor: PartialVolumeDescriptor;

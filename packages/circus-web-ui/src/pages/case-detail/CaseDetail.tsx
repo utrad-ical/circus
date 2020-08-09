@@ -177,12 +177,9 @@ const CaseDetail: React.FC<{}> = props => {
         </div>
       </Collapser>
       <MenuBar
+        caseStore={caseStore}
         onCommand={handleMenuBarCommand}
         onRevisionSelect={handleRevisionSelect}
-        revisions={caseData.revisions}
-        canUndo={c.canUndo(caseStore)}
-        canRedo={c.canRedo(caseStore)}
-        currentRevision={editingRevisionIndex}
       />
       <Editor
         key={editingRevisionIndex}
@@ -200,28 +197,18 @@ export default CaseDetail;
 type MenuBarCommand = 'undo' | 'redo' | 'revert' | 'save' | 'exportMhd';
 
 const MenuBar: React.FC<{
-  canUndo: boolean;
-  canRedo: boolean;
+  caseStore: c.CaseDetailState;
   onCommand: (command: MenuBarCommand, ...args: any[]) => void;
-  revisions: Revision[];
   onRevisionSelect: (index: number) => Promise<void>;
-  currentRevision: number;
 }> = props => {
-  const {
-    canUndo,
-    canRedo,
-    onCommand,
-    revisions,
-    onRevisionSelect,
-    currentRevision
-  } = props;
+  const { caseStore, onCommand, onRevisionSelect } = props;
   return (
     <div className="case-detail-menu">
       <div className="left">
         Revision:&ensp;
         <RevisionSelector
-          revisions={revisions}
-          selected={currentRevision}
+          revisions={caseStore.caseData.revisions}
+          selected={caseStore.editingRevisionIndex}
           onSelect={onRevisionSelect}
         />
       </div>
@@ -229,13 +216,13 @@ const MenuBar: React.FC<{
         <IconButton
           bsStyle="default"
           icon="step-backward"
-          disabled={!canUndo}
+          disabled={!c.canUndo(caseStore)}
           onClick={() => onCommand('undo')}
         />
         <IconButton
           bsStyle="default"
           icon="step-forward"
-          disabled={!canRedo}
+          disabled={!c.canRedo(caseStore)}
           onClick={() => onCommand('redo')}
         />
         &ensp;
@@ -354,7 +341,7 @@ export class Editor extends React.Component<EditorProps, EditorState> {
     } = this.props;
     const {
       composition,
-      viewOptions: { layout, showReferenceLine }
+      viewOptions: { showReferenceLine }
     } = this.state;
     const activeSeries = revision.series[activeSeriesIndex];
     const activeLabel = activeSeries.labels[activeLabelIndex];

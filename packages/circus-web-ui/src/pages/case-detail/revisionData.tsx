@@ -29,7 +29,7 @@ export interface LabelEntry {
   temporarykey?: string;
   type: LabelType;
   data: LabelData;
-  attributes?: any;
+  attributes?: object;
   name?: string;
 }
 
@@ -88,7 +88,6 @@ export const createDefaultSolidFigureLabelData = (viewers: {
   );
   if (index) {
     const viewer = viewers[index];
-    const viewState = viewer.getState();
     return rs.SolidFigure.calculateBoundingBoxWithDefaultDepth(viewer);
   } else {
     return {
@@ -199,7 +198,7 @@ const prepareLabelSaveData = async (
     case 'ellipse':
       return prepareLabelSaveDataOfPlaneFigure(label as PlaneFigureLabel, api);
     default:
-      return label;
+      throw new Error('Unsupported label type');
   }
 };
 

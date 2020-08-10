@@ -22,10 +22,16 @@ import Tag from 'components/Tag';
 import TimeDisplay from 'components/TimeDisplay';
 import { EventEmitter } from 'events';
 import produce from 'immer';
-import React, { useEffect, useReducer } from 'react';
+import React, {
+  useEffect,
+  useReducer,
+  useRef,
+  useMemo,
+  useState,
+  useCallback
+} from 'react';
 import { useSelector } from 'react-redux';
-import { store } from 'store';
-import { api } from 'utils/api';
+import { useApi } from 'utils/api';
 import shallowEqual from 'utils/shallowEqual';
 import LabelSelector from './LabelSelector';
 import {
@@ -44,6 +50,7 @@ import ToolBar from './ToolBar';
 import ViewerCluster, { Layout } from './ViwewerCluster';
 import { useParams } from 'react-router-dom';
 import caseStoreReducer, * as c from './caseStore';
+import Project from 'types/Project';
 
 const CaseDetail: React.FC<{}> = props => {
   const caseId = useParams<any>().caseId;
@@ -51,6 +58,7 @@ const CaseDetail: React.FC<{}> = props => {
     caseStoreReducer,
     caseStoreReducer(undefined as any, { type: 'dummy' }) // gets initial state
   );
+  const api = useApi();
 
   const { busy, caseData, projectData, editingRevisionIndex } = caseStore;
   const editingData = c.current(caseStore);
@@ -89,12 +97,12 @@ const CaseDetail: React.FC<{}> = props => {
     await loadRevisionData(caseData.revisions, index);
   };
 
-  const handleDataChange = (
-    newData: EditingData,
-    pushToHistory: any = false
-  ) => {
-    caseDispatch(c.change({ newData, pushToHistory }));
-  };
+  const handleDataChange = useCallback(
+    (newData: EditingData, pushToHistory: any = false) => {
+      caseDispatch(c.change({ newData, pushToHistory }));
+    },
+    []
+  );
 
   const handleMenuBarCommand = async (command: MenuBarCommand) => {
     switch (command) {
@@ -250,99 +258,122 @@ const MenuBar: React.FC<{
   );
 };
 
-interface EditorProps {
+interface ViewOptions {
+  layout: Layout;
+  showReferenceLine: boolean;
+  interpolationMode: InterpolationMode;
+}
+
+const Editor: React.FC<{
   editingData: EditingData;
-  onChange: (revision: EditingData, series: any) => void;
-  projectData: any;
+  onChange: (newData: EditingData, pushToHistory?: any) => void;
+  projectData: Project;
   busy: boolean;
-}
+}> = props => {
+  const { editingData, onChange, projectData, busy } = props;
 
-interface EditorState {
-  toolName: string;
-  tool: ToolBaseClass | null;
-  viewOptions: {
-    layout: Layout;
-    showReferenceLine: boolean;
-    interpolationMode: InterpolationMode;
-  };
-  composition: any;
-  lineWidth: number;
-}
+  const viewersRef = useRef<{ [key: string]: Viewer }>({});
+  const viewers = viewersRef.current;
+  const server = useSelector(state => state.loginUser.data!.dicomImageServer);
+  const rsHttpClient = useMemo(() => new rs.RsHttpClient(server), [server]);
+  const toolsRef = useRef<{ [key: string]: ToolBaseClass }>({});
+  const tools = toolsRef.current;
+  const stateChanger = useMemo(() => new EventEmitter(), []);
 
-export class Editor extends React.Component<EditorProps, EditorState> {
-  viewers: { [index: string]: Viewer };
-  tools: { [index: string]: ToolBaseClass };
-  client: any;
-  stateChanger: EventEmitter;
-  constructor(props: Readonly<EditorProps>) {
-    super(props);
-    this.state = {
-      viewOptions: {
-        layout: 'twoByTwo',
-        showReferenceLine: false,
-        interpolationMode: 'trilinear'
-      },
-      composition: null,
-      lineWidth: 1,
-      toolName: '',
-      tool: null
-    };
-    this.viewers = {};
-    this.tools = {};
+  const [viewOptions, setViewOptions] = useState<ViewOptions>({
+    layout: 'twoByTwo',
+    showReferenceLine: false,
+    interpolationMode: 'trilinear'
+  });
+  const [composition, setComposition] = useState<Composition | null>(null);
+  const [lineWidth, setLineWidth] = useState(1);
+  const [toolName, setToolName] = useState('');
+  const [tool, setTool] = useState<any>(null);
+  const [activeSeriesUid, setActiveSeriesUid] = useState<string | null>(
+    editingData.revision.series[editingData.activeSeriesIndex].seriesUid
+  );
 
-    const server = store.getState().loginUser.data!.dicomImageServer;
-    this.client = new rs.RsHttpClient(server);
+  const handleAnnotationChange = (
+    annotation: rs.VoxelCloud | rs.SolidFigure | rs.PlaneFigure
+  ) => {
+    const { revision, activeSeriesIndex } = editingData;
+    const labelIndex = revision.series[activeSeriesIndex].labels.findIndex(
+      v => v.temporarykey === annotation.id
+    );
 
-    this.stateChanger = new EventEmitter();
-  }
-
-  componentDidMount() {
-    this.changeTool('pager');
-    this.changeActiveSeries();
-  }
-
-  componentDidUpdate(
-    prevProps: { editingData: EditingData },
-    prevState: { viewOptions: { interpolationMode: InterpolationMode } }
-  ) {
-    const { editingData } = this.props;
-    const { editingData: prevData } = prevProps;
-    if (!editingData) return;
-    if (editingData !== prevData) {
-      if (
-        editingData.revision.series[editingData.activeSeriesIndex].seriesUid !==
-        prevData.revision.series[prevData.activeSeriesIndex].seriesUid
+    const newLabel = () => {
+      const label = revision.series[activeSeriesIndex].labels[labelIndex];
+      if (annotation instanceof rs.VoxelCloud && annotation.volume) {
+        return produce(label, (l: any) => {
+          l.data.origin = annotation.origin;
+          l.data.size = annotation.volume!.getDimension();
+          l.data.volumeArrayBuffer = annotation.volume!.data;
+        });
+      } else if (
+        annotation instanceof rs.SolidFigure &&
+        annotation.validate()
       ) {
-        this.changeActiveSeries();
-      } else if (editingData !== prevData) {
-        this.updateComposition();
+        return produce(label, (l: any) => {
+          l.data.min = annotation.min;
+          l.data.max = annotation.max;
+        });
+      } else if (
+        annotation instanceof rs.PlaneFigure &&
+        annotation.validate()
+      ) {
+        return produce(label, (l: any) => {
+          l.data.min = annotation.min;
+          l.data.max = annotation.max;
+          l.data.z = annotation.z;
+        });
+      } else {
+        return label;
       }
-    }
-    if (
-      this.stateChanger &&
-      prevState.viewOptions.interpolationMode !==
-        this.state.viewOptions.interpolationMode
-    ) {
-      this.stateChanger.emit('change', (viewState: rs.ViewState) => {
-        return {
-          ...viewState,
-          interpolationMode: this.state.viewOptions.interpolationMode
-        };
-      });
-    }
-  }
+    };
 
-  updateComposition = () => {
-    const {
-      editingData: { revision, activeSeriesIndex, activeLabelIndex }
-    } = this.props;
-    const {
-      composition,
-      viewOptions: { showReferenceLine }
-    } = this.state;
+    onChange(
+      produce(editingData, d => {
+        d.revision.series[activeSeriesIndex].labels[labelIndex] = newLabel();
+      }),
+      true
+    );
+  };
+
+  const latestHandleAnnotationChange = useRef<any>();
+  useEffect(() => {
+    latestHandleAnnotationChange.current = handleAnnotationChange;
+  });
+  useEffect(() => {
+    if (!activeSeriesUid) return;
+    const changeActiveSeries = async () => {
+      const volumeLoader = new rs.RsVolumeLoader({
+        rsHttpClient,
+        seriesUid: activeSeriesUid,
+        estimateWindowType: 'none'
+      });
+      const src = new rs.HybridMprImageSource({
+        volumeLoader,
+        rsHttpClient,
+        seriesUid: activeSeriesUid,
+        estimateWindowType: 'none'
+      });
+      const composition = new Composition(src);
+      composition.on('annotationChange', () =>
+        latestHandleAnnotationChange.current()
+      );
+      await src.ready();
+      setComposition(composition);
+    };
+    changeActiveSeries();
+  }, [rsHttpClient, activeSeriesUid]);
+
+  useEffect(() => {
+    if (!composition) return;
+    const { revision, activeSeriesIndex, activeLabelIndex } = editingData;
     const activeSeries = revision.series[activeSeriesIndex];
     const activeLabel = activeSeries.labels[activeLabelIndex];
-    composition.annotations.forEach((antn: { dispose: () => void }) => {
+
+    composition.annotations.forEach(antn => {
       if (antn instanceof rs.ReferenceLine) antn.dispose();
     });
     composition.removeAllAnnotations();
@@ -448,93 +479,30 @@ export class Editor extends React.Component<EditorProps, EditorState> {
         }
       }
     });
-    if (showReferenceLine) {
+    if (viewOptions.showReferenceLine) {
       const lineColors: { [index: string]: string } = {
         axial: '#8888ff',
         sagittal: '#ff6666',
         coronal: '#88ff88',
         oblique: '#ffff88'
       };
-      Object.keys(this.viewers).forEach(k => {
+      Object.keys(viewers).forEach(k => {
         composition.addAnnotation(
-          new rs.ReferenceLine(this.viewers[k], { color: lineColors[k] })
+          new rs.ReferenceLine(viewers[k], { color: lineColors[k] })
         );
       });
     }
     composition.annotationUpdated();
-  };
+  }, [composition, editingData, viewOptions.showReferenceLine, viewers]);
 
-  changeActiveSeries = async () => {
-    const {
-      editingData: { revision, activeSeriesIndex }
-    } = this.props;
-    const activeSeries = revision.series[activeSeriesIndex];
-    const volumeLoader = new rs.RsVolumeLoader({
-      rsHttpClient: this.client,
-      seriesUid: activeSeries.seriesUid,
-      estimateWindowType: 'full'
-    });
-    const src = new rs.HybridMprImageSource({
-      volumeLoader,
-      rsHttpClient: this.client,
-      seriesUid: activeSeries.seriesUid,
-      estimateWindowType: 'full'
-    });
-    const composition = new Composition(src);
-    composition.on('annotationChange', this.handleAnnotationChange);
-    await src.ready();
-    this.setState({ composition }, this.updateComposition);
-  };
+  useEffect(() => {
+    stateChanger.emit('change', (viewState: rs.ViewState) => ({
+      ...viewState,
+      interpolationMode: viewOptions.interpolationMode
+    }));
+  }, [stateChanger, viewOptions.interpolationMode]);
 
-  handleAnnotationChange = (
-    annotation: rs.VoxelCloud | rs.SolidFigure | rs.PlaneFigure
-  ) => {
-    const { editingData, onChange } = this.props;
-    const { revision, activeSeriesIndex } = editingData;
-    const labelIndex = revision.series[activeSeriesIndex].labels.findIndex(
-      v => v.temporarykey === annotation.id
-    );
-
-    const newLabel = () => {
-      const label = revision.series[activeSeriesIndex].labels[labelIndex];
-      if (annotation instanceof rs.VoxelCloud && annotation.volume) {
-        return produce(label, (l: any) => {
-          l.data.origin = annotation.origin;
-          l.data.size = annotation.volume!.getDimension();
-          l.data.volumeArrayBuffer = annotation.volume!.data;
-        });
-      } else if (
-        annotation instanceof rs.SolidFigure &&
-        annotation.validate()
-      ) {
-        return produce(label, (l: any) => {
-          l.data.min = annotation.min;
-          l.data.max = annotation.max;
-        });
-      } else if (
-        annotation instanceof rs.PlaneFigure &&
-        annotation.validate()
-      ) {
-        return produce(label, (l: any) => {
-          l.data.min = annotation.min;
-          l.data.max = annotation.max;
-          l.data.z = annotation.z;
-        });
-      } else {
-        return label;
-      }
-    };
-
-    onChange(
-      produce(editingData, d => {
-        d.revision.series[activeSeriesIndex].labels[labelIndex] = newLabel();
-      }),
-      true
-    );
-  };
-
-  changeActiveLabel = (seriesIndex: number, labelIndex: number) => {
-    const { editingData, onChange } = this.props;
+  const changeActiveLabel = (seriesIndex: number, labelIndex: number) => {
     onChange(
       produce(editingData, d => {
         d.activeLabelIndex = seriesIndex;
@@ -544,8 +512,7 @@ export class Editor extends React.Component<EditorProps, EditorState> {
     );
   };
 
-  labelAttributesChange = (value: any, isTextInput: boolean) => {
-    const { editingData, onChange } = this.props;
+  const labelAttributesChange = (value: any, isTextInput: boolean) => {
     const { activeSeriesIndex, activeLabelIndex } = editingData;
     onChange(
       produce(editingData, d => {
@@ -557,8 +524,7 @@ export class Editor extends React.Component<EditorProps, EditorState> {
     );
   };
 
-  handleLabelAttributesTextBlur = () => {
-    const { editingData, onChange } = this.props;
+  const handleLabelAttributesTextBlur = () => {
     const { revision, activeSeriesIndex, activeLabelIndex } = editingData;
     onChange(
       editingData,
@@ -578,8 +544,7 @@ export class Editor extends React.Component<EditorProps, EditorState> {
     );
   };
 
-  caseAttributesChange = (value: any, isTextInput: boolean) => {
-    const { editingData, onChange } = this.props;
+  const caseAttributesChange = (value: any, isTextInput: boolean) => {
     onChange(
       produce(editingData, d => {
         d.revision.attributes = value;
@@ -588,8 +553,7 @@ export class Editor extends React.Component<EditorProps, EditorState> {
     );
   };
 
-  handleCaseAttributesTextBlur = () => {
-    const { editingData, onChange } = this.props;
+  const handleCaseAttributesTextBlur = () => {
     onChange(editingData, (old: { revision: { attributes: any } }) => {
       return !shallowEqual(
         old.revision.attributes,
@@ -598,50 +562,49 @@ export class Editor extends React.Component<EditorProps, EditorState> {
     });
   };
 
-  getTool = (toolName: string): ToolBaseClass => {
-    const tool = this.tools[toolName] || rs.toolFactory(toolName);
-    this.tools[toolName] = tool;
+  const getTool = (toolName: string): ToolBaseClass => {
+    const tool = tools[toolName] || rs.toolFactory(toolName);
+    tools[toolName] = tool;
     return tool;
   };
 
-  changeTool = (toolName: string) => {
-    this.setState({ toolName, tool: this.getTool(toolName) });
+  const changeTool = (toolName: string) => {
+    setToolName(toolName);
+    setTool(getTool(toolName));
   };
 
-  handleChangeViewOptions = (viewOptions: any) => {
-    this.setState({ viewOptions }, () => {
-      this.updateComposition();
+  const handleChangeViewOptions = (viewOptions: ViewOptions) => {
+    setViewOptions(viewOptions);
+  };
+
+  const handleApplyWindow = (window: any) => {
+    stateChanger.emit('change', (state: any) => ({ ...state, window }));
+  };
+
+  const handleSetLineWidth = (lineWidth: number) => {
+    setLineWidth(lineWidth);
+    getTool('brush').setOptions({ width: lineWidth });
+    getTool('eraser').setOptions({ width: lineWidth });
+  };
+
+  const handleCreateViwer = (viewer: Viewer, id: string | number) => {
+    viewers[id] = viewer;
+  };
+
+  const handleDestroyViewer = (viewer: Viewer) => {
+    Object.keys(viewers).forEach(k => {
+      if (viewers[k] === viewer) delete viewers[k];
     });
   };
 
-  handleApplyWindow = (window: any) => {
-    this.stateChanger.emit('change', (state: any) => ({ ...state, window }));
-  };
-
-  setLineWidth = (lineWidth: number) => {
-    this.setState({ lineWidth });
-    this.getTool('brush').setOptions({ width: lineWidth });
-    this.getTool('eraser').setOptions({ width: lineWidth });
-  };
-
-  handleCreateViwer = (viewer: Viewer, id: string | number) => {
-    this.viewers[id] = viewer;
-  };
-
-  handleDestroyViewer = (viewer: Viewer) => {
-    Object.keys(this.viewers).forEach(k => {
-      if (this.viewers[k] === viewer) delete this.viewers[k];
-    });
-  };
-
-  handleSeriesChange = (newData: EditingData, pushToHistory: any = false) => {
-    const { onChange } = this.props;
+  const handleSeriesChange = (
+    newData: EditingData,
+    pushToHistory: boolean = false
+  ) => {
     onChange(newData, pushToHistory);
-    this.updateComposition();
   };
 
-  initialWindowSetter = (viewer: any, viewState: rs.ViewState) => {
-    const { projectData } = this.props;
+  const initialWindowSetter = (viewer: any, viewState: rs.ViewState) => {
     const src = viewer.composition.imageSource;
     const windowPriority = projectData.windowPriority || 'auto';
     const priorities = windowPriority.split(',');
@@ -650,7 +613,6 @@ export class Editor extends React.Component<EditorProps, EditorState> {
         case 'auto': {
           const window = src.metadata.estimatedWindow;
           if (window) {
-            // console.log('applying auto window', window);
             return { ...viewState, window };
           }
           break;
@@ -658,7 +620,6 @@ export class Editor extends React.Component<EditorProps, EditorState> {
         case 'dicom': {
           const window = src.metadata.dicomWindow;
           if (window) {
-            // console.log('applying dicom window', window);
             return { ...viewState, window };
           }
           break;
@@ -668,7 +629,6 @@ export class Editor extends React.Component<EditorProps, EditorState> {
             Array.isArray(projectData.windowPresets) &&
             projectData.windowPresets[0];
           if (window) {
-            // console.log('applying preset window', window);
             return {
               ...viewState,
               window: { level: window.level, width: window.width }
@@ -681,80 +641,76 @@ export class Editor extends React.Component<EditorProps, EditorState> {
     return undefined; // do not update view state (should not happen)
   };
 
-  render() {
-    const { projectData, editingData, busy } = this.props;
-    const { revision, activeSeriesIndex, activeLabelIndex } = editingData;
-    const { toolName, tool, viewOptions, composition } = this.state;
-    const activeSeries = revision.series[activeSeriesIndex];
+  const { revision, activeSeriesIndex, activeLabelIndex } = editingData;
+  const activeSeries = revision.series[activeSeriesIndex];
 
-    if (!activeSeries) return null;
-    const activeLabel = activeSeries.labels[activeLabelIndex];
-    const brushEnabled = activeLabel ? activeLabel.type === 'voxel' : false;
+  if (!activeSeries || !composition) return null;
+  const activeLabel = activeSeries.labels[activeLabelIndex];
+  const brushEnabled = activeLabel ? activeLabel.type === 'voxel' : false;
 
-    return (
-      <div className={classNames('case-revision-data', { busy })}>
-        <SideContainer>
-          <Collapser title="Series / Labels" className="labels">
-            <LabelSelector
-              editingData={editingData}
-              composition={composition}
-              onChange={this.handleSeriesChange}
-              activeSeries={activeSeries}
-              activeLabel={activeLabel}
-              onChangeActiveLabel={this.changeActiveLabel}
-              viewers={this.viewers}
-            />
-            {activeLabel && (
-              <div className="label-attributes">
-                <div>
-                  Label #{activeLabelIndex} of Series #{activeSeriesIndex}
-                  <br />
-                </div>
-                <div className="label-name">{activeLabel.name}</div>
-
-                <JsonSchemaEditor
-                  key={`${activeSeriesIndex}:${activeLabelIndex}`}
-                  schema={projectData.labelAttributesSchema}
-                  value={activeLabel.attributes || {}}
-                  onChange={this.labelAttributesChange}
-                  onTextBlur={this.handleLabelAttributesTextBlur}
-                />
-              </div>
-            )}
-          </Collapser>
-          <Collapser title="Case Attributes" className="case-attributes">
-            <JsonSchemaEditor
-              schema={projectData.caseAttributesSchema}
-              value={revision.attributes}
-              onChange={this.caseAttributesChange}
-              onTextBlur={this.handleCaseAttributesTextBlur}
-            />
-          </Collapser>
-        </SideContainer>
-
-        <div className="case-revision-main">
-          <ToolBar
-            active={toolName}
-            onChangeTool={this.changeTool}
-            viewOptions={viewOptions}
-            onChangeViewOptions={this.handleChangeViewOptions}
-            lineWidth={this.state.lineWidth}
-            setLineWidth={this.setLineWidth}
-            windowPresets={projectData.windowPresets}
-            onApplyWindow={this.handleApplyWindow}
-            brushEnabled={brushEnabled}
-          />
-          <ViewerCluster
+  return (
+    <div className={classNames('case-revision-data', { busy })}>
+      <SideContainer>
+        <Collapser title="Series / Labels" className="labels">
+          <LabelSelector
+            editingData={editingData}
             composition={composition}
-            layout={viewOptions.layout}
-            stateChanger={this.stateChanger}
-            tool={tool!}
-            onCreateViewer={this.handleCreateViwer}
-            onDestroyViewer={this.handleDestroyViewer}
-            initialWindowSetter={this.initialWindowSetter}
+            onChange={handleSeriesChange}
+            activeSeries={activeSeries}
+            activeLabel={activeLabel}
+            onChangeActiveLabel={changeActiveLabel}
+            viewers={viewers}
           />
-        </div>
+          {activeLabel && (
+            <div className="label-attributes">
+              <div>
+                Label #{activeLabelIndex} of Series #{activeSeriesIndex}
+                <br />
+              </div>
+              <div className="label-name">{activeLabel.name}</div>
+
+              <JsonSchemaEditor
+                key={`${activeSeriesIndex}:${activeLabelIndex}`}
+                schema={projectData.labelAttributesSchema}
+                value={activeLabel.attributes || {}}
+                onChange={labelAttributesChange}
+                onTextBlur={handleLabelAttributesTextBlur}
+              />
+            </div>
+          )}
+        </Collapser>
+        <Collapser title="Case Attributes" className="case-attributes">
+          <JsonSchemaEditor
+            schema={projectData.caseAttributesSchema}
+            value={revision.attributes}
+            onChange={caseAttributesChange}
+            onTextBlur={handleCaseAttributesTextBlur}
+          />
+        </Collapser>
+      </SideContainer>
+
+      <div className="case-revision-main">
+        <ToolBar
+          active={toolName}
+          onChangeTool={changeTool}
+          viewOptions={viewOptions}
+          onChangeViewOptions={handleChangeViewOptions}
+          lineWidth={lineWidth}
+          setLineWidth={handleSetLineWidth}
+          windowPresets={projectData.windowPresets}
+          onApplyWindow={handleApplyWindow}
+          brushEnabled={brushEnabled}
+        />
+        <ViewerCluster
+          composition={composition}
+          layout={viewOptions.layout}
+          stateChanger={stateChanger}
+          tool={tool!}
+          onCreateViewer={handleCreateViwer}
+          onDestroyViewer={handleDestroyViewer}
+          initialWindowSetter={initialWindowSetter}
+        />
       </div>
-    );
-  }
-}
+    </div>
+  );
+};

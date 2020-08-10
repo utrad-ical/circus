@@ -16,5 +16,7 @@ export default interface Project {
   description: string;
   tags: any[];
   windowPresets: any[];
-  windowPriority: any[];
+  windowPriority: string;
+  caseAttributesSchema: any[];
+  labelAttributesSchema: any[];
 }

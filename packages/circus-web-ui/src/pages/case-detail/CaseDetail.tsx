@@ -21,7 +21,7 @@ import {
 import Tag from 'components/Tag';
 import TimeDisplay from 'components/TimeDisplay';
 import { EventEmitter } from 'events';
-import update from 'immutability-helper';
+import produce from 'immer';
 import React, { useEffect, useReducer } from 'react';
 import { useSelector } from 'react-redux';
 import { store } from 'store';
@@ -33,13 +33,10 @@ import {
   LabelEntry,
   loadLabels,
   PlaneFigureLabel,
-  PlaneFigureLabelData,
   Revision,
   saveRevision,
   SolidFigureLabel,
-  SolidFigureLabelData,
-  VoxelLabel,
-  VoxelLabelData
+  VoxelLabel
 } from './revisionData';
 import RevisionSelector from './RevisionSelector';
 import SideContainer from './SideContainer';
@@ -276,7 +273,7 @@ export class Editor extends React.Component<EditorProps, EditorState> {
   viewers: { [index: string]: Viewer };
   tools: { [index: string]: ToolBaseClass };
   client: any;
-  stateChanger: any;
+  stateChanger: EventEmitter;
   constructor(props: Readonly<EditorProps>) {
     super(props);
     this.state = {
@@ -501,39 +498,27 @@ export class Editor extends React.Component<EditorProps, EditorState> {
     const newLabel = () => {
       const label = revision.series[activeSeriesIndex].labels[labelIndex];
       if (annotation instanceof rs.VoxelCloud && annotation.volume) {
-        return update(label, {
-          data: {
-            $merge: {
-              origin: annotation.origin,
-              size: annotation.volume.getDimension(),
-              volumeArrayBuffer: annotation.volume.data
-            } as VoxelLabelData
-          }
+        return produce(label, (l: any) => {
+          l.data.origin = annotation.origin;
+          l.data.size = annotation.volume!.getDimension();
+          l.data.volumeArrayBuffer = annotation.volume!.data;
         });
       } else if (
         annotation instanceof rs.SolidFigure &&
         annotation.validate()
       ) {
-        return update(label, {
-          data: {
-            $merge: {
-              min: annotation.min,
-              max: annotation.max
-            } as SolidFigureLabelData
-          }
+        return produce(label, (l: any) => {
+          l.data.min = annotation.min;
+          l.data.max = annotation.max;
         });
       } else if (
         annotation instanceof rs.PlaneFigure &&
         annotation.validate()
       ) {
-        return update(label, {
-          data: {
-            $merge: {
-              min: annotation.min,
-              max: annotation.max,
-              z: annotation.z
-            } as PlaneFigureLabelData
-          }
+        return produce(label, (l: any) => {
+          l.data.min = annotation.min;
+          l.data.max = annotation.max;
+          l.data.z = annotation.z;
         });
       } else {
         return label;
@@ -541,20 +526,9 @@ export class Editor extends React.Component<EditorProps, EditorState> {
     };
 
     onChange(
-      {
-        ...editingData,
-        revision: update(revision, {
-          series: {
-            [activeSeriesIndex]: {
-              labels: {
-                [labelIndex]: {
-                  $set: newLabel()
-                }
-              }
-            }
-          }
-        })
-      },
+      produce(editingData, d => {
+        d.revision.series[activeSeriesIndex].labels[labelIndex] = newLabel();
+      }),
       true
     );
   };
@@ -562,11 +536,9 @@ export class Editor extends React.Component<EditorProps, EditorState> {
   changeActiveLabel = (seriesIndex: number, labelIndex: number) => {
     const { editingData, onChange } = this.props;
     onChange(
-      update(editingData, {
-        $merge: {
-          activeSeriesIndex: seriesIndex,
-          activeLabelIndex: labelIndex
-        }
+      produce(editingData, d => {
+        d.activeLabelIndex = seriesIndex;
+        d.activeLabelIndex = labelIndex;
       }),
       false
     );
@@ -576,14 +548,10 @@ export class Editor extends React.Component<EditorProps, EditorState> {
     const { editingData, onChange } = this.props;
     const { activeSeriesIndex, activeLabelIndex } = editingData;
     onChange(
-      update(editingData, {
-        revision: {
-          series: {
-            [activeSeriesIndex]: {
-              labels: { [activeLabelIndex]: { attributes: { $set: value } } }
-            }
-          }
-        }
+      produce(editingData, d => {
+        d.revision.series[activeSeriesIndex].labels[
+          activeLabelIndex
+        ].attributes = value;
       }),
       !isTextInput
     );
@@ -613,7 +581,9 @@ export class Editor extends React.Component<EditorProps, EditorState> {
   caseAttributesChange = (value: any, isTextInput: boolean) => {
     const { editingData, onChange } = this.props;
     onChange(
-      update(editingData, { revision: { attributes: { $set: value } } }),
+      produce(editingData, d => {
+        d.revision.attributes = value;
+      }),
       !isTextInput
     );
   };

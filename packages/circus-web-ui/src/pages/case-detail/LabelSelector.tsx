@@ -22,6 +22,7 @@ import {
   Popover
 } from 'components/react-bootstrap';
 import update from 'immutability-helper';
+import produce from 'immer';
 import React, { Fragment, useLayoutEffect, useState } from 'react';
 import styled from 'styled-components';
 import useLocalPreference from 'utils/useLocalPreference';
@@ -308,26 +309,27 @@ const Series: React.FC<{
 
   const moveUpLabel = (labelIndex: number) => {
     if (labelIndex === 0) return;
-    const labels = series.labels;
-    labels.splice(
-      labelIndex - 1,
-      2,
-      labels[labelIndex],
-      labels[labelIndex - 1]
-    );
-    const newSeries = update(series, {
-      labels: { $set: labels }
+    const newSeries = produce(series, s => {
+      s.labels.splice(
+        labelIndex - 1,
+        2,
+        s.labels[labelIndex],
+        s.labels[labelIndex - 1]
+      );
     });
     onChange(seriesIndex, newSeries, true);
     setChangeActiveLabelKey(activeLabel.temporarykey);
   };
 
   const moveDownLabel = (labelIndex: number) => {
-    const labels = series.labels;
-    if (labelIndex === labels.length - 1) return;
-    labels.splice(labelIndex, 2, labels[labelIndex + 1], labels[labelIndex]);
-    const newSeries = update(series, {
-      labels: { $set: labels }
+    if (labelIndex === series.labels.length - 1) return;
+    const newSeries = produce(series, s => {
+      s.labels.splice(
+        labelIndex,
+        2,
+        s.labels[labelIndex + 1],
+        s.labels[labelIndex]
+      );
     });
     onChange(seriesIndex, newSeries, true);
     setChangeActiveLabelKey(activeLabel.temporarykey);

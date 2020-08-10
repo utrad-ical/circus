@@ -198,7 +198,7 @@ type MenuBarCommand = 'undo' | 'redo' | 'revert' | 'save' | 'exportMhd';
 
 const MenuBar: React.FC<{
   caseStore: c.CaseDetailState;
-  onCommand: (command: MenuBarCommand, ...args: any[]) => void;
+  onCommand: (command: MenuBarCommand) => void;
   onRevisionSelect: (index: number) => Promise<void>;
 }> = props => {
   const { caseStore, onCommand, onRevisionSelect } = props;
@@ -350,18 +350,11 @@ export class Editor extends React.Component<EditorProps, EditorState> {
     });
     composition.removeAllAnnotations();
 
-    const rgbaColor = (rgb: string, alpha: number): string => {
-      return (
-        'rgba(' +
-        [
-          parseInt(rgb.substr(1, 2), 16),
-          parseInt(rgb.substr(3, 2), 16),
-          parseInt(rgb.substr(5, 2), 16),
-          alpha
-        ].join(',') +
-        ')'
-      );
-    };
+    const rgbaColor = (rgb: string, alpha: number): string =>
+      rgb +
+      Math.floor(alpha * 255)
+        .toString(16)
+        .padStart(2, '0');
 
     const createVoxelCloud = (
       label: VoxelLabel,
@@ -395,19 +388,9 @@ export class Editor extends React.Component<EditorProps, EditorState> {
         label.type === 'ellipsoid' ? new rs.Ellipsoid() : new rs.Cuboid();
       fig.editable = true;
       fig.color = rgbaColor(color, alpha);
-      // fig.fillColor = rgbaColor(color, alpha);
       fig.min = label.data.min;
       fig.max = label.data.max;
       fig.id = label.temporarykey;
-      // fig.width = 3;
-      // fig.boundingBoxOutline = {
-      //   width: 1,
-      //   color: 'rgba(255,255,255,0.3)'
-      // };
-      // fig.boundingBoxCrossHair = {
-      //   width: 2,
-      //   color: 'rgba(255,255,255,0.8)'
-      // };
       return fig;
     };
 
@@ -425,14 +408,13 @@ export class Editor extends React.Component<EditorProps, EditorState> {
       fig.max = label.data.max;
       fig.z = label.data.z;
       fig.id = label.temporarykey;
-      // fig.width = 3;
       return fig;
     };
 
     activeSeries.labels.forEach((label: LabelEntry) => {
       const isActive = activeLabel && label === activeLabel;
-      const alpha = label.data.alpha !== undefined ? label.data.alpha : 1;
-      const color = label.data.color || '#ff0000';
+      const alpha = label.data.alpha ?? 1;
+      const color = label.data.color ?? '#ff0000';
 
       switch (label.type) {
         case 'voxel': {
@@ -454,7 +436,6 @@ export class Editor extends React.Component<EditorProps, EditorState> {
             isActive
           );
           composition.addAnnotation(fig);
-          composition.annotationUpdated();
           break;
         }
         case 'rectangle':
@@ -466,7 +447,6 @@ export class Editor extends React.Component<EditorProps, EditorState> {
             isActive
           );
           composition.addAnnotation(fig);
-          composition.annotationUpdated();
           break;
         }
       }

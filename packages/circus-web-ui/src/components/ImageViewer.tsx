@@ -1,16 +1,20 @@
 import React, { useState, useEffect, useRef } from 'react';
 import * as rs from 'circus-rs';
-import { createOrthogonalMprSection } from 'circus-rs/section-util';
+import {
+  createOrthogonalMprSection,
+  OrientationString
+} from 'circus-rs/section-util';
 import { toolFactory } from 'circus-rs/tool/tool-initializer';
 import classnames from 'classnames';
 import { EventEmitter } from 'events';
+import ToolBaseClass from '@utrad-ical/circus-rs/src/browser/tool/Tool';
 
-export const setOrthogonalOrientation = orientation => {
-  return (viewer, initialViewState) => {
+export const setOrthogonalOrientation = (orientation: OrientationString) => {
+  return (viewer: rs.Viewer, initialViewState: rs.MprViewState) => {
     if (initialViewState.type !== 'mpr') return;
-    const src = viewer.composition.imageSource;
+    const src = viewer.getComposition()!.imageSource as rs.MprImageSource;
     const mmDim = src.mmDim();
-    const newState = {
+    const newState: rs.MprViewState = {
       ...initialViewState,
       section: createOrthogonalMprSection(
         viewer.getResolution(),
@@ -24,10 +28,27 @@ export const setOrthogonalOrientation = orientation => {
 
 const defaultTool = toolFactory('pager');
 
+type StateChangerFunc<T extends rs.ViewState> = (state: T) => T;
+
+interface StateChanger<T extends rs.ViewState> extends EventEmitter {
+  on(event: 'change', listener: (changer: StateChangerFunc<T>) => void): this;
+  emit(event: 'change', changer: StateChangerFunc<T>): boolean;
+}
+
 /**
  * Wraps CIRCUS RS Dicom Viewer.
  */
-const ImageViewer = props => {
+const ImageViewer: React.FC<{
+  className?: string;
+  composition: rs.Composition;
+  stateChanger?: EventEmitter;
+  tool: ToolBaseClass;
+  id: string | number;
+  initialStateSetter: any;
+  onCreateViewer: (viewer: rs.Viewer, id: string | number) => void;
+  onDestroyViewer: (viewer: rs.Viewer) => void;
+  onMouseUp: () => void;
+}> = props => {
   const {
     className,
     composition,
@@ -40,13 +61,13 @@ const ImageViewer = props => {
     onMouseUp = () => {}
   } = props;
 
-  const [viewer, setViewer] = useState(null);
-  const containerRef = useRef();
+  const [viewer, setViewer] = useState<rs.Viewer | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   // Handle creation of viewer
   useEffect(
     () => {
-      const viewer = new rs.Viewer(containerRef.current);
+      const viewer = new rs.Viewer(containerRef.current!);
       onCreateViewer(viewer, id);
       setViewer(viewer);
       viewer.on('imageReady', () => {
@@ -68,7 +89,7 @@ const ImageViewer = props => {
 
   // Handle onMouseUp
   useEffect(() => {
-    const container = containerRef.current;
+    const container = containerRef.current!;
     container.addEventListener('mouseup', onMouseUp);
     return () => {
       container.removeEventListener('mouseup', onMouseUp);
@@ -84,7 +105,7 @@ const ImageViewer = props => {
   // Handle stateChanger
   useEffect(() => {
     if (!(stateChanger instanceof EventEmitter)) return;
-    const handleChangeState = changer => {
+    const handleChangeState = (changer: StateChangerFunc<rs.ViewState>) => {
       if (!viewer) return;
       const state = viewer.getState();
       viewer.setState(changer(state));
@@ -108,11 +129,8 @@ const ImageViewer = props => {
 
 export default ImageViewer;
 
-/**
- * @returns {EventEmitter}
- */
-export const useStateChanger = () => {
-  const stateChangerRef = useRef(undefined);
+export const useStateChanger = <T extends rs.ViewState>() => {
+  const stateChangerRef = useRef<StateChanger<T>>();
   if (!stateChangerRef.current) stateChangerRef.current = new EventEmitter();
-  return stateChangerRef.current;
+  return stateChangerRef.current!;
 };

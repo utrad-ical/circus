@@ -14,6 +14,7 @@ const seriesUid = '111.222.333.444.555';
 const overMaxDateSeriesUid = '111.222.333.444.444';
 
 beforeAll(async () => {
+  const spy = jest.spyOn(console, 'log').mockImplementation(() => {});
   const ab = new Uint8Array(10);
 
   dicomFileRepository = {

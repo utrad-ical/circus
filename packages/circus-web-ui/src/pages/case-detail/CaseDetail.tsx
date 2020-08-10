@@ -51,6 +51,7 @@ import ViewerCluster, { Layout } from './ViwewerCluster';
 import { useParams } from 'react-router-dom';
 import caseStoreReducer, * as c from './caseStore';
 import Project from 'types/Project';
+import { useStateChanger } from 'components/ImageViewer';
 
 const CaseDetail: React.FC<{}> = props => {
   const caseId = useParams<any>().caseId;
@@ -278,7 +279,7 @@ const Editor: React.FC<{
   const rsHttpClient = useMemo(() => new rs.RsHttpClient(server), [server]);
   const toolsRef = useRef<{ [key: string]: ToolBaseClass }>({});
   const tools = toolsRef.current;
-  const stateChanger = useMemo(() => new EventEmitter(), []);
+  const stateChanger = useStateChanger<rs.MprViewState>();
 
   const [viewOptions, setViewOptions] = useState<ViewOptions>({
     layout: 'twoByTwo',
@@ -496,7 +497,7 @@ const Editor: React.FC<{
   }, [composition, editingData, viewOptions.showReferenceLine, viewers]);
 
   useEffect(() => {
-    stateChanger.emit('change', (viewState: rs.ViewState) => ({
+    stateChanger.emit('change', viewState => ({
       ...viewState,
       interpolationMode: viewOptions.interpolationMode
     }));
@@ -578,7 +579,7 @@ const Editor: React.FC<{
   };
 
   const handleApplyWindow = (window: any) => {
-    stateChanger.emit('change', (state: any) => ({ ...state, window }));
+    stateChanger.emit('change', state => ({ ...state, window }));
   };
 
   const handleSetLineWidth = (lineWidth: number) => {

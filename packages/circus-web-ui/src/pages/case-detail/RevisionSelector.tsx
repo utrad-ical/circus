@@ -1,6 +1,7 @@
 import React from 'react';
 import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
 import TimeDisplay from 'components/TimeDisplay';
+import UserDisplay from 'components/UserDisplay';
 
 const Item: React.FC<{
   value: any;
@@ -13,7 +14,9 @@ const Item: React.FC<{
       </span>
       <span className="status label label-default">{revision.status}</span>
       <span className="description">{revision.description}</span>
-      <span className="creator">{revision.creator}</span>
+      <span className="creator">
+        <UserDisplay userEmail={revision.creator} />
+      </span>
     </span>
   );
 };

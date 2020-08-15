@@ -1,8 +1,11 @@
 import React from 'react';
-import ImageViewer, { setOrthogonalOrientation } from 'components/ImageViewer';
+import ImageViewer, {
+  setOrthogonalOrientation,
+  StateChanger
+} from 'components/ImageViewer';
 import styled from 'styled-components';
 import { toolFactory } from 'circus-rs/tool/tool-initializer';
-import { Tool, Viewer, ViewState, Composition } from 'circus-rs';
+import { Tool, Viewer, ViewState, Composition, MprViewState } from 'circus-rs';
 
 const TwoByTwoLayout = styled.div`
   flex: 1 1 0;
@@ -43,7 +46,7 @@ export type Layout = 'twoByTwo' | 'axial' | 'sagittal' | 'coronal';
 const ViewerCluster: React.FC<{
   composition: Composition;
   tool: Tool;
-  stateChanger: any;
+  stateChanger: StateChanger<MprViewState>;
   layout: Layout;
   onCreateViewer: any;
   onDestroyViewer: any;

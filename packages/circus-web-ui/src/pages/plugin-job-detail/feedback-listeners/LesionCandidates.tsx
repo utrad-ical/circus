@@ -6,7 +6,7 @@ import React, {
   useImperativeHandle,
   useMemo
 } from 'react';
-import ImageViewer, { useStateChanger } from 'components/ImageViewer';
+import ImageViewer, { createStateChanger } from 'components/ImageViewer';
 import IconButton from 'components/IconButton';
 import styled from 'styled-components';
 import * as rs from 'circus-rs';
@@ -50,10 +50,12 @@ const Candidate = React.forwardRef<
   const [composition, setComposition] = useState<rs.Composition | null>(null);
 
   // Create image source
-  const seriesUid = job.series[item.volumeId].seriesUid;
-
-  const imageSource = useHybridImageSource(seriesUid);
-  const stateChanger = useStateChanger();
+  const series = job.series[item.volumeId];
+  const imageSource = useHybridImageSource(
+    series.seriesUid,
+    series.partialVolumeDescriptor
+  );
+  const stateChanger = useMemo(() => createStateChanger(), []);
 
   useEffect(() => {
     if (!imageSource) return;
@@ -102,7 +104,7 @@ const Candidate = React.forwardRef<
   );
 
   const handleCenterizeClick = () => {
-    stateChanger.emit('change', centerState);
+    stateChanger(centerState);
   };
 
   if (!imageSource || !composition) return null;

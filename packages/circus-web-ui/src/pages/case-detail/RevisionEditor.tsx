@@ -5,7 +5,7 @@ import ToolBaseClass from '@utrad-ical/circus-rs/src/browser/tool/Tool';
 import { InterpolationMode } from '@utrad-ical/circus-rs/src/browser/ViewState';
 import classNames from 'classnames';
 import Collapser from 'components/Collapser';
-import { useStateChanger } from 'components/ImageViewer';
+import { createStateChanger } from 'components/ImageViewer';
 import produce from 'immer';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
@@ -43,7 +43,7 @@ const RevisionEditor: React.FC<{
   const rsHttpClient = useMemo(() => new rs.RsHttpClient(server), [server]);
   const toolsRef = useRef<{ [key: string]: ToolBaseClass }>({});
   const tools = toolsRef.current;
-  const stateChanger = useStateChanger<rs.MprViewState>();
+  const stateChanger = useMemo(() => createStateChanger<rs.MprViewState>(), []);
 
   const [viewOptions, setViewOptions] = useState<ViewOptions>({
     layout: 'twoByTwo',
@@ -261,7 +261,7 @@ const RevisionEditor: React.FC<{
   }, [composition, editingData, viewOptions.showReferenceLine, viewers]);
 
   useEffect(() => {
-    stateChanger.emit('change', viewState => ({
+    stateChanger(viewState => ({
       ...viewState,
       interpolationMode: viewOptions.interpolationMode
     }));
@@ -343,7 +343,7 @@ const RevisionEditor: React.FC<{
   };
 
   const handleApplyWindow = (window: any) => {
-    stateChanger.emit('change', state => ({ ...state, window }));
+    stateChanger(state => ({ ...state, window }));
   };
 
   const handleSetLineWidth = (lineWidth: number) => {

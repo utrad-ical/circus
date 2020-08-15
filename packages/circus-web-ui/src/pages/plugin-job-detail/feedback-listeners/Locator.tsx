@@ -1,9 +1,13 @@
 import * as rs from 'circus-rs';
 import { toolFactory } from 'circus-rs/tool/tool-initializer';
-import ImageViewer, { useStateChanger } from 'components/ImageViewer';
+import ImageViewer, {
+  createStateChanger,
+  StateChangerFunc
+} from 'components/ImageViewer';
 import { Button } from 'components/react-bootstrap';
 import React, {
   useEffect,
+  useMemo,
   useImperativeHandle,
   useRef,
   useCallback,
@@ -44,7 +48,7 @@ const Locator = React.forwardRef<
    */
   const voxelSizeRef = useRef<number[]>();
 
-  const stateChanger = useStateChanger();
+  const stateChanger = useMemo(() => createStateChanger<rs.MprViewState>(), []);
 
   // Exports "methods" for this FB listener
   useImperativeHandle<any, ImperativeFeedbackRef<Location[]>>(ref, () => ({
@@ -65,8 +69,11 @@ const Locator = React.forwardRef<
     }
   }));
 
-  const seriesUid = job.series[volumeId].seriesUid;
-  const imageSource = useHybridImageSource(seriesUid);
+  const series = job.series[volumeId];
+  const imageSource = useHybridImageSource(
+    series.seriesUid,
+    series.partialVolumeDescriptor
+  );
 
   useEffect(() => {
     if (!imageSource) return;
@@ -121,7 +128,7 @@ const Locator = React.forwardRef<
 
   const handleReveal = (index: number) => {
     const item = value[index];
-    const changer = (state: rs.MprViewState) => {
+    const changer: StateChangerFunc<rs.MprViewState> = state => {
       const voxelSize = voxelSizeRef.current!;
       const newOrigin = [
         state.section.origin[0],
@@ -133,7 +140,7 @@ const Locator = React.forwardRef<
         section: { ...state.section, origin: newOrigin }
       };
     };
-    stateChanger.emit('change', changer);
+    stateChanger(changer);
   };
 
   const handleYesClick = () => {

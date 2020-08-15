@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import * as rs from 'circus-rs';
 import {
   createOrthogonalMprSection,
@@ -28,26 +28,40 @@ export const setOrthogonalOrientation = (orientation: OrientationString) => {
 
 const defaultTool = toolFactory('pager');
 
-type StateChangerFunc<T extends rs.ViewState> = (state: T) => T;
+export type StateChangerFunc<T extends rs.ViewState> = (state: T) => T;
 
-interface StateChanger<T extends rs.ViewState> extends EventEmitter {
-  on(event: 'change', listener: (changer: StateChangerFunc<T>) => void): this;
-  emit(event: 'change', changer: StateChangerFunc<T>): boolean;
+/**
+ * StateChanger is used to change the view state of a Viewer imperatively.
+ */
+export interface StateChanger<T extends rs.ViewState> {
+  (changeFunc: StateChangerFunc<T>): void;
+  on: (cb: (changeFunc: StateChangerFunc<T>) => void) => void;
+  off: (cb: (changeFunc: StateChangerFunc<T>) => void) => void;
 }
+
+export const createStateChanger = <T extends rs.ViewState = rs.ViewState>() => {
+  const emitter = new EventEmitter();
+  const changer: StateChanger<T> = changeFunc => {
+    emitter.emit('change', changeFunc);
+  };
+  changer.on = cb => emitter.on('change', cb);
+  changer.off = cb => emitter.off('change', cb);
+  return changer;
+};
 
 /**
  * Wraps CIRCUS RS Dicom Viewer.
  */
 const ImageViewer: React.FC<{
   className?: string;
-  composition: rs.Composition;
-  stateChanger?: EventEmitter;
+  composition?: rs.Composition;
+  stateChanger?: StateChanger<any>;
   tool: ToolBaseClass;
-  id: string | number;
   initialStateSetter: any;
-  onCreateViewer: (viewer: rs.Viewer, id: string | number) => void;
-  onDestroyViewer: (viewer: rs.Viewer) => void;
-  onMouseUp: () => void;
+  id?: string | number;
+  onCreateViewer?: (viewer: rs.Viewer, id?: string | number) => void;
+  onDestroyViewer?: (viewer: rs.Viewer) => void;
+  onMouseUp?: () => void;
 }> = props => {
   const {
     className,
@@ -104,15 +118,15 @@ const ImageViewer: React.FC<{
 
   // Handle stateChanger
   useEffect(() => {
-    if (!(stateChanger instanceof EventEmitter)) return;
+    if (!stateChanger) return;
     const handleChangeState = (changer: StateChangerFunc<rs.ViewState>) => {
       if (!viewer) return;
       const state = viewer.getState();
       viewer.setState(changer(state));
     };
-    stateChanger.on('change', handleChangeState);
+    stateChanger.on(handleChangeState);
     return () => {
-      stateChanger.removeListener('change', handleChangeState);
+      stateChanger.off(handleChangeState);
     };
   }, [viewer, stateChanger]);
 
@@ -128,9 +142,3 @@ const ImageViewer: React.FC<{
 };
 
 export default ImageViewer;
-
-export const useStateChanger = <T extends rs.ViewState>() => {
-  const stateChangerRef = useRef<StateChanger<T>>();
-  if (!stateChangerRef.current) stateChangerRef.current = new EventEmitter();
-  return stateChangerRef.current!;
-};

@@ -31,7 +31,7 @@ Build for deployment:
 ```bash
 npm ci
 npx lerna bootstrap --hoist --ci
-npx run build
+npx lerna run build
 ```
 
 Automated test, lint, code formatting:

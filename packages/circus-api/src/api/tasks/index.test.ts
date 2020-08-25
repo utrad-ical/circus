@@ -8,13 +8,13 @@ beforeAll(async () => {
 });
 afterAll(async () => await apiTest.tearDown());
 
-it('should return the list of tasks of the user', async () => {
+it.skip('should return the list of tasks of the user', async () => {
   const res = await axios.get('api/tasks');
   expect(res.status).toBe(200);
   expect(res.data.items).toHaveLength(1);
 });
 
-it('should return the information of the specified task', async () => {
+it.skip('should return the information of the specified task', async () => {
   const res = await axios.get('api/tasks/aaaabbbbcccc1111');
   expect(res.status).toBe(200);
   expect(res.data.owner).toBe('alice@example.com');
@@ -25,7 +25,7 @@ it('should return 404 for nonexistent task', async () => {
   expect(res.status).toBe(404);
 });
 
-it("should return unauthorized for someone else's task", async () => {
+it.skip("should return unauthorized for someone else's task", async () => {
   const res = await axios.get('api/tasks/aaaabbbbcccc2222');
   expect(res.status).toBe(403);
 });

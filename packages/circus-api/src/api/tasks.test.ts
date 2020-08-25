@@ -11,7 +11,7 @@ beforeAll(async () => {
 });
 
 describe('TaskExecutor', () => {
-  it('should create task and save its progress', async () => {
+  it.skip('should create task and save its progress', async () => {
     const task = new TaskExecutor('alice@example.com', {
       models,
       command: 'long command'

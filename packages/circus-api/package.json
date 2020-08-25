@@ -55,6 +55,7 @@
     "raw-body": "^2.4.1",
     "semver": "^5.7.1",
     "split": "^1.0.1",
+    "strict-event-emitter-types": "^2.0.0",
     "tarn": "^2.0.0",
     "ulid": "^2.3.0",
     "winston": "^3.2.1"

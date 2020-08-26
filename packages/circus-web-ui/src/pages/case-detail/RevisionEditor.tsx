@@ -123,8 +123,8 @@ const RevisionEditor: React.FC<{
         estimateWindowType: 'none'
       });
       const composition = new Composition(src);
-      composition.on('annotationChange', () =>
-        latestHandleAnnotationChange.current()
+      composition.on('annotationChange', annotation =>
+        latestHandleAnnotationChange.current(annotation)
       );
       await src.ready();
       setComposition(composition);

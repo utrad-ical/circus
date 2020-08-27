@@ -7,7 +7,13 @@ import classNames from 'classnames';
 import Collapser from 'components/Collapser';
 import { createStateChanger } from 'components/ImageViewer';
 import produce from 'immer';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useCallback
+} from 'react';
 import { useSelector } from 'react-redux';
 import Project from 'types/Project';
 import shallowEqual from 'utils/shallowEqual';
@@ -267,6 +273,22 @@ const RevisionEditor: React.FC<{
     }));
   }, [stateChanger, viewOptions.interpolationMode]);
 
+  const getTool = useCallback(
+    (toolName: string): ToolBaseClass => {
+      const tool = tools[toolName] || rs.toolFactory(toolName);
+      tools[toolName] = tool;
+      return tool;
+    },
+    [tools]
+  );
+
+  useEffect(() => {
+    if (composition && !tool) {
+      setToolName('pager');
+      setTool(getTool('pager'));
+    }
+  }, [composition, getTool, tool]);
+
   const changeActiveLabel = (seriesIndex: number, labelIndex: number) => {
     onChange(
       produce(editingData, d => {
@@ -325,12 +347,6 @@ const RevisionEditor: React.FC<{
         editingData.revision.attributes
       );
     });
-  };
-
-  const getTool = (toolName: string): ToolBaseClass => {
-    const tool = tools[toolName] || rs.toolFactory(toolName);
-    tools[toolName] = tool;
-    return tool;
   };
 
   const changeTool = (toolName: string) => {

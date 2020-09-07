@@ -7,14 +7,15 @@ export default async function createPartialVolume(
   partialVolumeDescriptor: PartialVolumeDescriptor,
   loadPriority: number = 0
 ): Promise<DicomVolume> {
-  const { volume, imageMetadata, load } = volumeAccessor;
   const loadImages: number[] = [];
   const { start, end, delta } = partialVolumeDescriptor;
   for (let i = start; i <= end; i += delta) {
     loadImages.push(i);
   }
-  await load(loadImages, loadPriority); // set higher priority and wait for loaded.
-  const { columns, rows, pixelFormat } = imageMetadata.get(start)!;
+  await volumeAccessor.load(loadImages, loadPriority); // set higher priority and wait for loaded.
+  const { columns, rows, pixelFormat } = volumeAccessor.imageMetadata.get(
+    start
+  )!;
   const partialVolume = new DicomVolume(
     [columns, rows, loadImages.length],
     pixelFormat
@@ -22,7 +23,10 @@ export default async function createPartialVolume(
 
   let z = 0;
   loadImages.forEach(i =>
-    partialVolume.insertSingleImage(z++, volume.getSingleImage(i))
+    partialVolume.insertSingleImage(
+      z++,
+      volumeAccessor.volume.getSingleImage(volumeAccessor.zIndices.get(i)!)
+    )
   );
 
   return partialVolume;

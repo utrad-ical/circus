@@ -22,12 +22,11 @@ export const usePendingVolumeLoader = (
 ) => {
   const { rsHttpClient, map } = useContext(VolumeLoaderCacheContext)!;
 
+  if (!isValidPartialVolumeDescriptor(partialVolumeDescriptor))
+    throw new Error('Invalid partial volume descriptor');
+
   const key =
-    seriesUid +
-    (typeof partialVolumeDescriptor === 'object' &&
-    isValidPartialVolumeDescriptor(partialVolumeDescriptor)
-      ? '&' + stringifyPartialVolumeDescriptor(partialVolumeDescriptor)
-      : '');
+    seriesUid + '&' + stringifyPartialVolumeDescriptor(partialVolumeDescriptor);
 
   if (map.has(key)) return map.get(key)!;
 
@@ -41,34 +40,8 @@ export const usePendingVolumeLoader = (
 };
 
 /**
- * Returns a cached VolumeLoader instance for the specified series.
- * This is used to recycle volumes among multiple viewers.
- * The hook returns null if the specified volume is not yet "ready".
- * When this returns an actual instance, it is guaranteed to be "ready".
- */
-export const useVolumeLoader = (
-  seriesUid: string,
-  partialVolumeDescriptor: PartialVolumeDescriptor
-) => {
-  const [volumeLoader, setVolumeLoader] = useState<rs.RsVolumeLoader>();
-  const pendingVolumeLoader = usePendingVolumeLoader(
-    seriesUid,
-    partialVolumeDescriptor
-  );
-  useEffect(() => {
-    const load = async () => {
-      await pendingVolumeLoader.loadMeta();
-      await pendingVolumeLoader.loadVolume();
-      setVolumeLoader(pendingVolumeLoader);
-    };
-    load();
-    return () => setVolumeLoader(undefined);
-  }, [pendingVolumeLoader]);
-  return volumeLoader;
-};
-
-/**
  * Returns a HybridImageSource that is guaranteed to be "ready".
+ * (This "ready" means the metadata has been loaded)
  */
 export const useHybridImageSource = (
   seriesUid: string,
@@ -80,6 +53,7 @@ export const useHybridImageSource = (
   );
   const { rsHttpClient } = useContext(VolumeLoaderCacheContext)!;
   const [imageSource, setImageSource] = useState<rs.HybridMprImageSource>();
+
   const pendindImageSource = useMemo(() => {
     if (!volumeLoader) return null;
     return new rs.HybridMprImageSource({
@@ -100,5 +74,3 @@ export const useHybridImageSource = (
 
   return imageSource;
 };
-
-export default useVolumeLoader;

@@ -1,4 +1,5 @@
 import JsonSchemaEditor from '@smikitky/rb-components/lib/JsonSchemaEditor';
+import { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
 import * as rs from '@utrad-ical/circus-rs/src/browser';
 import { Composition, Viewer } from '@utrad-ical/circus-rs/src/browser';
 import ToolBaseClass from '@utrad-ical/circus-rs/src/browser/tool/Tool';
@@ -8,15 +9,19 @@ import Collapser from 'components/Collapser';
 import { createStateChanger } from 'components/ImageViewer';
 import produce from 'immer';
 import React, {
+  useCallback,
+  useContext,
   useEffect,
   useMemo,
   useRef,
-  useState,
-  useCallback
+  useState
 } from 'react';
-import { useSelector } from 'react-redux';
 import Project from 'types/Project';
 import shallowEqual from 'utils/shallowEqual';
+import {
+  usePendingVolumeLoader,
+  VolumeLoaderCacheContext
+} from 'utils/useImageSource';
 import LabelSelector from './LabelSelector';
 import {
   EditingData,
@@ -35,6 +40,32 @@ interface ViewOptions {
   interpolationMode: InterpolationMode;
 }
 
+const useComposition = (
+  seriesUid: string,
+  partialVolumeDescriptor: PartialVolumeDescriptor
+): Composition | undefined => {
+  const { rsHttpClient } = useContext(VolumeLoaderCacheContext)!;
+
+  const volumeLoader = usePendingVolumeLoader(
+    seriesUid,
+    partialVolumeDescriptor
+  );
+
+  const composition = useMemo(() => {
+    const imageSource = new rs.HybridMprImageSource({
+      rsHttpClient,
+      seriesUid,
+      partialVolumeDescriptor,
+      volumeLoader,
+      estimateWindowType: 'none'
+    });
+    const composition = new Composition(imageSource);
+    return composition;
+  }, [rsHttpClient, seriesUid, partialVolumeDescriptor, volumeLoader]);
+
+  return composition;
+};
+
 const RevisionEditor: React.FC<{
   editingData: EditingData;
   onChange: (newData: EditingData, pushToHistory?: any) => void;
@@ -45,8 +76,6 @@ const RevisionEditor: React.FC<{
 
   const viewersRef = useRef<{ [key: string]: Viewer }>({});
   const viewers = viewersRef.current;
-  const server = useSelector(state => state.loginUser.data!.dicomImageServer);
-  const rsHttpClient = useMemo(() => new rs.RsHttpClient(server), [server]);
   const toolsRef = useRef<{ [key: string]: ToolBaseClass }>({});
   const tools = toolsRef.current;
   const stateChanger = useMemo(() => createStateChanger<rs.MprViewState>(), []);
@@ -56,12 +85,15 @@ const RevisionEditor: React.FC<{
     showReferenceLine: false,
     interpolationMode: 'trilinear'
   });
-  const [composition, setComposition] = useState<Composition | null>(null);
   const [lineWidth, setLineWidth] = useState(1);
   const [toolName, setToolName] = useState('');
   const [tool, setTool] = useState<any>(null);
-  const [activeSeriesUid, setActiveSeriesUid] = useState<string | null>(
-    editingData.revision.series[editingData.activeSeriesIndex].seriesUid
+
+  const editingSeries =
+    editingData.revision.series[editingData.activeSeriesIndex];
+  const composition = useComposition(
+    editingSeries.seriesUid,
+    editingSeries.partialVolumeDescriptor
   );
 
   const handleAnnotationChange = (
@@ -114,32 +146,14 @@ const RevisionEditor: React.FC<{
   useEffect(() => {
     latestHandleAnnotationChange.current = handleAnnotationChange;
   });
-  useEffect(() => {
-    if (!activeSeriesUid) return;
-    const changeActiveSeries = async () => {
-      const volumeLoader = new rs.RsVolumeLoader({
-        rsHttpClient,
-        seriesUid: activeSeriesUid,
-        estimateWindowType: 'none'
-      });
-      const src = new rs.HybridMprImageSource({
-        volumeLoader,
-        rsHttpClient,
-        seriesUid: activeSeriesUid,
-        estimateWindowType: 'none'
-      });
-      const composition = new Composition(src);
-      composition.on('annotationChange', annotation =>
-        latestHandleAnnotationChange.current(annotation)
-      );
-      await src.ready();
-      setComposition(composition);
-    };
-    changeActiveSeries();
-  }, [rsHttpClient, activeSeriesUid]);
 
   useEffect(() => {
     if (!composition) return;
+
+    composition.on('annotationChange', annotation =>
+      latestHandleAnnotationChange.current(annotation)
+    );
+
     const { revision, activeSeriesIndex, activeLabelIndex } = editingData;
     const activeSeries = revision.series[activeSeriesIndex];
     const activeLabel = activeSeries.labels[activeLabelIndex];
@@ -264,6 +278,10 @@ const RevisionEditor: React.FC<{
       });
     }
     composition.annotationUpdated();
+
+    return () => {
+      composition.removeAllListeners('annotationChange');
+    };
   }, [composition, editingData, viewOptions.showReferenceLine, viewers]);
 
   useEffect(() => {

@@ -1,7 +1,7 @@
 // Babel polyfill, needed for async/await and Promise support for IE
 import '@babel/polyfill';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import ReactDOM from 'react-dom';
 import { Router, Route, Switch } from 'react-router-dom';
 import Application from 'pages/Application';
@@ -30,15 +30,17 @@ import PluginAdmin from 'pages/admin/PluginAdmin';
 import Preferences from 'pages/Preferences';
 
 import { store } from './store';
-import { Provider } from 'react-redux';
+import { Provider, useSelector } from 'react-redux';
 import { ThemeProvider } from 'styled-components';
 import tinycolor from 'tinycolor2';
 import { dismissMessageOnPageChange } from 'store/messages';
 import PluginJobQueueSearch from './pages/search/PluginJobQueueSearch';
 import browserHistory from 'browserHistory';
+import * as rs from 'circus-rs';
 
 import { ApiContext, ApiCaller } from 'utils/api';
 import loginManager, { LoginManagerContext } from 'utils/loginManager';
+import { VolumeLoaderCacheContext } from 'utils/useImageSource';
 
 require('./styles/main.less');
 
@@ -90,6 +92,25 @@ const AppRoutes: React.FC<{}> = () => {
   );
 };
 
+/**
+ * Provides a shared cache mechanism for volume loaders.
+ */
+const VolumeCacheProvider: React.FC = props => {
+  const server = useSelector(state => state.loginUser.data?.dicomImageServer);
+
+  const volumeLoaderCache = useMemo(() => {
+    if (!server) return null;
+    const rsHttpClient = new rs.RsHttpClient(server);
+    return { rsHttpClient, map: new Map<string, rs.RsVolumeLoader>() };
+  }, [server]);
+
+  return (
+    <VolumeLoaderCacheContext.Provider value={volumeLoaderCache}>
+      {props.children}
+    </VolumeLoaderCacheContext.Provider>
+  );
+};
+
 const TheApp: React.FC<{}> = () => {
   const [manager, setManager] = useState<ReturnType<typeof loginManager>>();
   const [api, setApi] = useState<ApiCaller>();
@@ -108,7 +129,7 @@ const TheApp: React.FC<{}> = () => {
   useEffect(() => {
     // Handles history change
     browserHistory.listen(() => {
-      // Hide message boxes which should not persist upon page changes
+      // Hide message boxes which should not persist across page changes
       store.dispatch(dismissMessageOnPageChange());
       // Load user information again to check login status
       manager && manager.refreshUserInfo(false);
@@ -121,14 +142,16 @@ const TheApp: React.FC<{}> = () => {
     <LoginManagerContext.Provider value={manager}>
       <ApiContext.Provider value={api}>
         <Provider store={store}>
-          <ThemeProvider theme={theme}>
-            <Router history={browserHistory}>
-              <Switch>
-                <Route exact path="/" component={LoginScreen} />
-                <AppRoutes />
-              </Switch>
-            </Router>
-          </ThemeProvider>
+          <VolumeCacheProvider>
+            <ThemeProvider theme={theme}>
+              <Router history={browserHistory}>
+                <Switch>
+                  <Route exact path="/" component={LoginScreen} />
+                  <AppRoutes />
+                </Switch>
+              </Router>
+            </ThemeProvider>
+          </VolumeCacheProvider>
         </Provider>
       </ApiContext.Provider>
     </LoginManagerContext.Provider>

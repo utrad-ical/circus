@@ -23,6 +23,10 @@ export interface VolumeAccessor {
   imageMetadata: Map<number, DicomMetadata>;
   volume: RawData;
   load: (range: MultiRangeInitializer, priority?: number) => Promise<void>;
+  /**
+   * Maps an image number to the corresponding zero-based volume z-index
+   */
+  zIndices: Map<number, number>;
   determinePitch: () => Promise<number>;
   images: MultiRange;
 }
@@ -38,7 +42,7 @@ const createUncachedVolumeProvider: FunctionService<
   }
 > = async (opts, deps) => {
   const { dicomFileRepository, dicomImageExtractor } = deps;
-  return async seriesUid => {
+  return async (seriesUid): Promise<VolumeAccessor> => {
     const { load, images } = await dicomFileRepository.getSeries(seriesUid);
     const imageRange = new MultiRange(images);
 
@@ -117,10 +121,11 @@ const createUncachedVolumeProvider: FunctionService<
     return {
       imageMetadata,
       volume,
+      zIndices,
       load: loadSeries,
       determinePitch,
       images: imageRange
-    } as VolumeAccessor;
+    };
   };
 };
 

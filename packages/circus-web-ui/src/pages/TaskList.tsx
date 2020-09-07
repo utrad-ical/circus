@@ -1,10 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from 'components/react-bootstrap';
-import LoadingIndicator from 'rb/LoadingIndicator';
+import LoadingIndicator from '@smikitky/rb-components/lib/LoadingIndicator';
 import { useApi } from 'utils/api';
 import Icon from 'components/Icon';
 
-const TaskList = props => {
+interface Task {
+  taskId: string;
+  status: string;
+  publicDownload: string;
+  createdAt: Date;
+}
+
+const TaskList: React.FC = props => {
   const [tasks] = useState([]);
   const [, setDownloadList] = useState();
   const api = useApi();
@@ -32,7 +39,7 @@ const TaskList = props => {
 
 export default TaskList;
 
-const TaskItems = props => {
+const TaskItems: React.FC<{ items: Task[] }> = props => {
   const table = (
     <table className="table">
       <thead>
@@ -52,7 +59,7 @@ const TaskItems = props => {
             <td>{item.publicDownload ? 'Yes' : '-'}</td>
             <td>{item.createdAt}</td>
             <td>
-              <a href={'download/' + item.taskID}>
+              <a href={'download/' + item.taskId}>
                 <Button>Download</Button>
               </a>
             </td>

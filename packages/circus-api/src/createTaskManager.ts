@@ -6,25 +6,26 @@ import { Models } from './interface';
 import generateUniqueId from '../src/utils/generateUniqueId';
 import { Writable, PassThrough } from 'stream';
 import fs from 'fs';
+import _ from 'lodash';
 
-interface TaskManager {
+export interface TaskManager {
   register: (
     ctx: koa.Context,
     options: {
       name: string;
       userEmail: string;
-      downloadable?: string; // mime type if downloadable
+      downloadFileType?: string; // mime type if downloadable
     }
   ) => Promise<{
     taskId: string;
     emitter: EventEmitter;
-    downloadFile?: Writable;
+    downloadFileStream?: Writable;
   }>;
-  report: (ctx: koa.Context, taskId: string) => Promise<void>;
+  report: (ctx: koa.Context, taskId: string) => void;
   isTaskInProgress: (taskId: string) => boolean;
 }
 
-interface Events {
+interface TaskEvents {
   // Notifies the progress.
   progress: (message: string, finished?: number, total?: number) => void;
   // Notifies that an error happened.
@@ -33,11 +34,19 @@ interface Events {
   finish: (message: string) => void;
 }
 
+interface AggregatedEvents {
+  taskEvent: (
+    taskId: string,
+    type: 'progress' | 'finish' | 'error',
+    task: Task
+  ) => void;
+}
+
 interface Task {
+  userEmail: string;
   finished?: number;
   total?: number;
   message: string;
-  emitter: StrictEventEmitter<EventEmitter, Events>;
 }
 
 interface Options {
@@ -52,6 +61,10 @@ const createTaskManager: FunctionService<
 > = async (opt, deps) => {
   // In-memory storage of ongoing tasks
   const tasks = new Map<string, Task>();
+  const aggregatedEmitter = new EventEmitter() as StrictEventEmitter<
+    EventEmitter,
+    AggregatedEvents
+  >;
 
   const register = async (
     ctx: koa.Context,
@@ -67,26 +80,24 @@ const createTaskManager: FunctionService<
       name: options.name,
       userEmail: options.userEmail,
       status: 'processing',
-      downloadFileType: null
+      downloadFileType: options.downloadFileType ?? null
     });
     const emitter = new EventEmitter() as StrictEventEmitter<
       EventEmitter,
-      Events
+      TaskEvents
     >;
 
     ctx.body = { taskId };
 
     // Prepare write fs stream for downloadable files (if exists)
-    const stream =
+    const downloadFileStream =
       typeof options.downloadFileType === 'string'
         ? fs.createWriteStream(`${opt.downloadFileDirectory}/${taskId}`)
         : undefined;
 
-    stream?.on('error', error => ctx.throw(error));
-
     const task: Task = {
-      message: '',
-      emitter
+      userEmail: options.userEmail,
+      message: ''
     };
 
     const handleProgress = (
@@ -97,18 +108,21 @@ const createTaskManager: FunctionService<
       task.message = message;
       task.finished = finished;
       task.total = total;
+      aggregatedEmitter.emit('taskEvent', taskId, 'progress', task);
     };
 
     const handleError = async () => {
-      await deps.models.task.modifyOne(taskId, { $set: { status: 'error' } });
-      tasks.delete(taskId);
       removeHandlers();
+      aggregatedEmitter.emit('taskEvent', taskId, 'error', task);
+      tasks.delete(taskId);
+      await deps.models.task.modifyOne(taskId, { status: 'error' });
     };
 
     const handleFinish = async () => {
-      await deps.models.task.modifyOne(taskId, { $set: { status: 'finish' } });
-      tasks.delete(taskId);
       removeHandlers();
+      aggregatedEmitter.emit('taskEvent', taskId, 'finish', task);
+      tasks.delete(taskId);
+      await deps.models.task.modifyOne(taskId, { status: 'finished' });
     };
 
     const removeHandlers = () => {
@@ -122,60 +136,59 @@ const createTaskManager: FunctionService<
     emitter.on('error', handleError);
     emitter.on('finish', handleFinish);
 
-    return { taskId, emitter, stream };
+    return { taskId, emitter, downloadFileStream };
   };
 
-  const report = async (ctx: koa.Context, taskId: string) => {
-    const task = tasks.get(taskId);
-    const taskInDb = await deps.models.task.findById(taskId);
-
-    switch (taskInDb.status) {
-      case 'error':
-        ctx.throw(404, 'error task');
-      case 'finish':
-        ctx.throw(404, 'finished task');
-    }
-
-    if (!task) ctx.throw(404, 'Non-existent task ID');
-
+  const report = (ctx: koa.Context, userEmail: string) => {
     ctx.type = 'text/event-stream';
     const stream = new PassThrough();
     ctx.body = stream;
 
-    const taskToString = () =>
+    const taskToString = (taskId: string, task: Task) =>
       JSON.stringify({
+        taskId,
         message: task.message,
         finished: task.finished,
         total: task.total
       });
 
-    stream.write('event: progress\n');
-    stream.write(`data: ${taskToString()}\n\n`);
+    for (const [taskId, task] of tasks.entries()) {
+      if (task.userEmail === userEmail) {
+        stream.write('event: progress\n');
+        stream.write(`data: ${taskToString(taskId, task)}\n\n`);
+      }
+    }
 
-    const handleProgress = () => {
-      stream.write('event: progress\n');
-      stream.write(`data: ${taskToString()}\n\n`);
+    const handleTaskEvent = (
+      taskId: string,
+      type: 'progress' | 'finish' | 'error',
+      task: Task
+    ) => {
+      if (userEmail !== task.userEmail) return;
+      switch (type) {
+        case 'progress':
+          if (!tasks.has(taskId)) return;
+          stream.write('event: progress\n');
+          stream.write(`data: ${taskToString(taskId, task)}\n\n`);
+          break;
+        case 'finish':
+          stream.write('event: finish\n');
+          stream.write(`data: ${taskToString(taskId, task)}\n\n`);
+          break;
+        case 'error':
+          stream.write('event: error\n');
+          stream.write(`data: ${taskToString(taskId, task)}\n\n`);
+          break;
+      }
     };
 
-    const handleError = async (message: string) => {
-      stream.write('event: error\n');
-      stream.write(`data: ${JSON.stringify({ message })}\n\n`);
-    };
-
-    const handleFinish = async (message: string) => {
-      stream.write('event: finish\n');
-      stream.write(`data: ${JSON.stringify({ message })}\n\n`);
-    };
+    const throttledHandleTaskEvent = _.throttle(handleTaskEvent, 150);
 
     stream.on('close', () => {
-      task.emitter.off('progress', handleProgress);
-      task.emitter.off('error', handleError);
-      task.emitter.off('finish', handleFinish);
+      aggregatedEmitter.off('taskEvent', throttledHandleTaskEvent);
     });
 
-    task.emitter.on('progress', handleProgress);
-    task.emitter.on('error', handleError);
-    task.emitter.on('finish', handleFinish);
+    aggregatedEmitter.on('taskEvent', throttledHandleTaskEvent);
   };
 
   const isTaskInProgress = (taskId: string) => {

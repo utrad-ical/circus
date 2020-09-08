@@ -1,9 +1,16 @@
-import createTaskManager from './createTaskManager';
+import createTaskManager, { TaskManager } from './createTaskManager';
 import { Models } from './interface';
 import { setUpMongoFixture, usingModels } from '../test/util-mongo';
+import { Readable } from 'stream';
+import { EventEmitter } from 'events';
+import path from 'path';
+import fs from 'fs-extra';
 
 const modelsPromise = usingModels();
 let models: Models;
+let manager: TaskManager;
+const userEmail = 'alice@example.com';
+const downloadTestDir = path.join(__dirname, '../test/download-test');
 
 beforeAll(async () => {
   const { db, models: m } = await modelsPromise;
@@ -11,12 +18,162 @@ beforeAll(async () => {
   models = m;
 });
 
-test('taskManager', async () => {
-  const manager = await createTaskManager({}, { models });
-  const ctx = { body: null } as any;
+beforeEach(async () => {
+  manager = await createTaskManager(
+    { downloadFileDirectory: downloadTestDir, timeoutMs: 10000 },
+    { models }
+  );
+});
+
+afterAll(async () => {
+  await fs.remove(downloadTestDir);
+});
+
+const readFromStream = async (
+  stream: Readable,
+  until: RegExp = /error|finish/
+): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    let data = '';
+    stream.on('data', chunk => {
+      data += chunk;
+      if (until.test(data)) {
+        stream.destroy();
+        resolve(data);
+      }
+    });
+    stream.on('end', () => resolve(data));
+    stream.on('error', error => reject(error));
+  });
+};
+
+const newDummyCtx = () => ({ body: null } as any);
+
+describe('register', () => {
+  test('without download file', async () => {
+    const ctx = newDummyCtx();
+    const { taskId, emitter } = await manager.register(ctx, {
+      name: 'Importing DICOM files',
+      userEmail
+    });
+    expect(ctx.body).toEqual({ taskId });
+
+    const task = await models.task.findById(taskId);
+    expect(task.name).toBe('Importing DICOM files');
+    expect(task.status).toBe('processing');
+    expect(task.userEmail).toBe('alice@example.com');
+    expect(emitter.eventNames()).toEqual(['progress', 'error', 'finish']);
+  });
+
+  test('with download file', async () => {
+    await fs.mkdir(downloadTestDir);
+    const ctx = newDummyCtx();
+    const { taskId, emitter, downloadFileStream } = await manager.register(
+      ctx,
+      {
+        name: 'Exporting case',
+        userEmail,
+        downloadFileType: 'application/zip'
+      }
+    );
+    const fileContent = Math.random().toString();
+
+    downloadFileStream!.end(fileContent);
+    expect(ctx.body).toEqual({ taskId });
+    emitter.emit('finish');
+
+    const task = await models.task.findById(taskId);
+    expect(task.downloadFileType).toMatch(/application\/zip/);
+    expect(await fs.readFile(path.join(downloadTestDir, taskId), 'utf8')).toBe(
+      fileContent
+    );
+  });
+});
+
+describe('report', () => {
+  let taskId: string;
+  let emitter: EventEmitter;
+
+  beforeEach(async () => {
+    ({ taskId, emitter } = await manager.register(newDummyCtx(), {
+      name: 'Importing DICOM files',
+      userEmail
+    }));
+  });
+
+  test('report progress of one task', async () => {
+    const ctx = newDummyCtx();
+    manager.report(ctx, userEmail);
+
+    const readStream = ctx.body;
+
+    emitter.emit('progress', 'Importing 10 files...', 1, 10);
+    emitter.emit('finish');
+
+    const sentData = await readFromStream(readStream);
+    expect(sentData).toMatch(/progress/);
+    expect(sentData).toMatch(/finish/);
+    expect(sentData).toMatch(/taskId/);
+
+    const finishedTask = await models.task.findById(taskId);
+    expect(finishedTask.status).toBe('finished');
+  });
+
+  test("report only the given user's progress", async () => {
+    const userEmail2 = 'bob@example.com';
+    const { taskId: taskIdBob, emitter: emitterBob } = await manager.register(
+      newDummyCtx(),
+      {
+        name: 'Importing DICOM files',
+        userEmail: userEmail2
+      }
+    );
+
+    const ctx = newDummyCtx();
+    manager.report(ctx, userEmail2);
+
+    const readStream = ctx.body;
+
+    emitter.emit('progress', 'Importing 10 files...', 1, 10);
+    emitter.emit('finish');
+
+    emitterBob.emit('progress', 'Importing 10 files...', 1, 10);
+    emitterBob.emit('finish');
+
+    const sentData = await readFromStream(readStream, /finish\ndata/s);
+    expect(sentData).not.toMatch(taskId); // no Alice's task
+    expect(sentData).toMatch(new RegExp(`finish\n.+${taskIdBob}`));
+  });
+
+  test('report error of one task', async () => {
+    const ctx = newDummyCtx();
+    manager.report(ctx, userEmail);
+    const readStream = ctx.body;
+
+    emitter.emit('error');
+
+    const event = await readFromStream(readStream);
+    expect(event).toMatch(/error/);
+
+    const task = await models.task.findById(taskId);
+    expect(task.status).toBe('error');
+  });
+});
+
+test('isTaskInProgress', async () => {
+  expect(manager.isTaskInProgress('dummy')).toBe(false);
+
+  const ctx = newDummyCtx();
   const { taskId, emitter } = await manager.register(ctx, {
     name: 'Importing DICOM files',
-    userEmail: 'alice@example.com'
+    userEmail
   });
-  expect(ctx.body).toEqual({ taskId });
+
+  expect(manager.isTaskInProgress(taskId)).toBe(true);
+
+  emitter.emit('progress', 'Importing 10 files...', 1, 10);
+  expect(manager.isTaskInProgress(taskId)).toBe(true);
+
+  emitter.emit('finish');
+  expect(manager.isTaskInProgress(taskId)).toBe(false);
 });

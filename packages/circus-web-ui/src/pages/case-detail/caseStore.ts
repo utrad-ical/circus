@@ -8,6 +8,7 @@ export interface CaseDetailState {
   editingRevisionIndex: number;
   projectData?: Project;
   history: EditingData[];
+  historyTag?: string;
   currentHistoryIndex: number;
 }
 
@@ -65,24 +66,26 @@ const slice = createSlice({
       s,
       action: PayloadAction<{
         newData: EditingData;
-        pushToHistory?: boolean | ((current: EditingData) => boolean);
+        /**
+         * Tag is used to avoid pushing too many history items.
+         * Changes with the same tag will be fused to one history item.
+         */
+        tag?: string;
       }>
     ) => {
-      const { pushToHistory, newData } = action.payload;
-      const push =
-        pushToHistory === true ||
-        (typeof pushToHistory === 'function' && pushToHistory(current(s)));
-      if (push) {
-        s.history = s.history.slice(0, s.currentHistoryIndex + 1);
-        s.history.push(newData);
-        s.currentHistoryIndex++;
-        if (history.length > maxHistoryLength) {
-          s.history = s.history.slice(-maxHistoryLength);
-          s.currentHistoryIndex = s.history.length - 1;
-        }
-      } else {
-        s.history[s.currentHistoryIndex] = newData;
+      const { tag, newData } = action.payload;
+      s.history = s.history.slice(0, s.currentHistoryIndex + 1);
+      if (typeof tag === 'string' && tag.length > 0 && tag === s.historyTag) {
+        s.history.pop();
+        s.currentHistoryIndex--;
       }
+      s.history.push(newData);
+      s.currentHistoryIndex++;
+      if (history.length > maxHistoryLength) {
+        s.history = s.history.slice(-maxHistoryLength);
+        s.currentHistoryIndex = s.history.length - 1;
+      }
+      s.historyTag = tag;
     },
     undo: s => {
       if (s.currentHistoryIndex > 0) {

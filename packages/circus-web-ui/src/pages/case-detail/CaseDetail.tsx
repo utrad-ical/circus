@@ -19,11 +19,13 @@ import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { useApi } from 'utils/api';
 import caseStoreReducer, * as c from './caseStore';
+import produce from 'immer';
 import {
-  EditingData,
-  loadLabels,
+  ExternalLabel,
+  externalRevisionToInternal,
   Revision,
-  saveRevision
+  saveRevision,
+  EditingDataUpdater
 } from './revisionData';
 import RevisionEditor from './RevisionEditor';
 import RevisionSelector from './RevisionSelector';
@@ -43,11 +45,14 @@ const CaseDetail: React.FC<{}> = props => {
     state => state.loginUser.data!.accessibleProjects
   );
 
-  const loadRevisionData = async (revisions: Revision[], index: number) => {
+  const loadRevisionData = async (
+    revisions: Revision<ExternalLabel>[],
+    index: number
+  ) => {
     const revision = revisions[index];
     caseDispatch(c.setBusy(true));
     // Loads actual volume data and adds label temporary key.
-    const data = await loadLabels(revision, api);
+    const data = await externalRevisionToInternal(revision, api);
     caseDispatch(c.startEditing({ revision: data, revisionIndex: index }));
     caseDispatch(c.setBusy(false));
   };
@@ -73,11 +78,12 @@ const CaseDetail: React.FC<{}> = props => {
     await loadRevisionData(caseData.revisions, index);
   };
 
-  const handleDataChange = useCallback(
-    (newData: EditingData, pushToHistory: any = false) => {
-      caseDispatch(c.change({ newData, pushToHistory }));
+  const handleDataChange = useCallback<EditingDataUpdater>(
+    (updater, tag) => {
+      const newData = produce(editingData, updater);
+      caseDispatch(c.change({ newData, tag }));
     },
-    []
+    [editingData]
   );
 
   const handleMenuBarCommand = async (command: MenuBarCommand) => {

@@ -13,7 +13,14 @@ import asyncMap from '../../utils/asyncMap';
 
 export interface EditingData {
   revision: Revision;
+  /**
+   * The index of the active series. Always >= 0.
+   */
   activeSeriesIndex: number;
+  /**
+   * The index of the active label in the active series.
+   * May be `-1`, which means the current series has no label.
+   */
   activeLabelIndex: number;
 }
 

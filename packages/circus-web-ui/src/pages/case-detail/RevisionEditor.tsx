@@ -17,13 +17,17 @@ import React, {
   useState
 } from 'react';
 import Project from 'types/Project';
-import shallowEqual from 'utils/shallowEqual';
 import {
   usePendingVolumeLoader,
   VolumeLoaderCacheContext
 } from 'utils/useImageSource';
 import LabelSelector from './LabelSelector';
-import { EditingData, InternalLabel, buildAnnotation } from './revisionData';
+import {
+  buildAnnotation,
+  EditingData,
+  EditingDataUpdater,
+  InternalLabel
+} from './revisionData';
 import SideContainer from './SideContainer';
 import ToolBar from './ToolBar';
 import ViewerCluster, { Layout } from './ViwewerCluster';
@@ -62,7 +66,7 @@ const useComposition = (
 
 const RevisionEditor: React.FC<{
   editingData: EditingData;
-  onChange: (newData: EditingData, pushToHistory?: any) => void;
+  onChange: EditingDataUpdater;
   projectData: Project;
   busy: boolean;
 }> = props => {
@@ -128,12 +132,9 @@ const RevisionEditor: React.FC<{
       }
     };
 
-    onChange(
-      produce(editingData, d => {
-        d.revision.series[activeSeriesIndex].labels[labelIndex] = newLabel();
-      }),
-      true
-    );
+    onChange(d => {
+      d.revision.series[activeSeriesIndex].labels[labelIndex] = newLabel();
+    });
   };
 
   const latestHandleAnnotationChange = useRef<any>();
@@ -215,63 +216,31 @@ const RevisionEditor: React.FC<{
   }, [composition, getTool, tool]);
 
   const changeActiveLabel = (seriesIndex: number, labelIndex: number) => {
-    onChange(
-      produce(editingData, d => {
-        d.activeLabelIndex = seriesIndex;
-        d.activeLabelIndex = labelIndex;
-      }),
-      false
-    );
+    onChange(d => {
+      d.activeLabelIndex = seriesIndex;
+      d.activeLabelIndex = labelIndex;
+    }, 'change active label');
   };
 
   const labelAttributesChange = (value: any, isTextInput: boolean) => {
     const { activeSeriesIndex, activeLabelIndex } = editingData;
     onChange(
-      produce(editingData, d => {
+      d => {
         d.revision.series[activeSeriesIndex].labels[
           activeLabelIndex
         ].attributes = value;
-      }),
-      !isTextInput
-    );
-  };
-
-  const handleLabelAttributesTextBlur = () => {
-    const { revision, activeSeriesIndex, activeLabelIndex } = editingData;
-    onChange(
-      editingData,
-      (old: {
-        revision: {
-          series: {
-            [x: string]: { labels: { [x: string]: { attributes: any } } };
-          };
-        };
-      }) => {
-        return !shallowEqual(
-          old.revision.series[activeSeriesIndex].labels[activeLabelIndex]
-            .attributes,
-          revision.series[activeSeriesIndex].labels[activeLabelIndex].attributes
-        );
-      }
+      },
+      isTextInput ? 'Label Text Input' : undefined
     );
   };
 
   const caseAttributesChange = (value: any, isTextInput: boolean) => {
     onChange(
-      produce(editingData, d => {
+      d => {
         d.revision.attributes = value;
-      }),
-      !isTextInput
+      },
+      isTextInput ? 'Label Text Input' : undefined
     );
-  };
-
-  const handleCaseAttributesTextBlur = () => {
-    onChange(editingData, (old: { revision: { attributes: any } }) => {
-      return !shallowEqual(
-        old.revision.attributes,
-        editingData.revision.attributes
-      );
-    });
   };
 
   const changeTool = (toolName: string) => {
@@ -301,13 +270,6 @@ const RevisionEditor: React.FC<{
     Object.keys(viewers).forEach(k => {
       if (viewers[k] === viewer) delete viewers[k];
     });
-  };
-
-  const handleSeriesChange = (
-    newData: EditingData,
-    pushToHistory: boolean = false
-  ) => {
-    onChange(newData, pushToHistory);
   };
 
   const initialWindowSetter = (viewer: any, viewState: rs.ViewState) => {
@@ -361,9 +323,7 @@ const RevisionEditor: React.FC<{
           <LabelSelector
             editingData={editingData}
             composition={composition}
-            onChange={handleSeriesChange}
-            activeSeries={activeSeries}
-            activeLabel={activeLabel}
+            onChange={onChange}
             onChangeActiveLabel={changeActiveLabel}
             viewers={viewers}
           />
@@ -380,7 +340,6 @@ const RevisionEditor: React.FC<{
                 schema={projectData.labelAttributesSchema}
                 value={activeLabel.attributes || {}}
                 onChange={labelAttributesChange}
-                onTextBlur={handleLabelAttributesTextBlur}
               />
             </div>
           )}
@@ -390,7 +349,6 @@ const RevisionEditor: React.FC<{
             schema={projectData.caseAttributesSchema}
             value={revision.attributes}
             onChange={caseAttributesChange}
-            onTextBlur={handleCaseAttributesTextBlur}
           />
         </Collapser>
       </SideContainer>

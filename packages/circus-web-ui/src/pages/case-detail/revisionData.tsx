@@ -2,10 +2,10 @@ import { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
 import generateUniqueId from '@utrad-ical/circus-lib/src/generateUniqueId';
 import * as rs from '@utrad-ical/circus-rs/src/browser';
 import { Vector2D, Vector3D } from '@utrad-ical/circus-rs/src/browser';
-import produce, { Draft } from 'immer';
+import produce from 'immer';
+import { ApiCaller } from 'utils/api';
 import { sha1 } from 'utils/util';
 import asyncMap from '../../utils/asyncMap';
-import { ApiCaller } from 'utils/api';
 
 export interface EditingData {
   revision: Revision;
@@ -19,6 +19,7 @@ export interface Revision<
   description: string;
   attributes: any;
   series: SeriesEntry<L>[];
+  status: string;
 }
 
 export interface SeriesEntry<
@@ -89,16 +90,19 @@ type TaggedLabelData =
     };
 
 /**
- * InternalLabelData resresents one label data stored in browser memory.
+ * InternalLabel resresents one label data stored in browser memory.
  */
 export type InternalLabel = {
   name?: string;
   attributes: object;
+  /**
+   * A string unique ID (used in web-ui only; not saved on DB)
+   */
   temporaryKey: string;
 } & TaggedLabelData;
 
 /**
- * ExternalLabelData resresents the label data
+ * ExternalLabel resresents the label data
  * transferred from/to the API sever.
  */
 export type ExternalLabel = {
@@ -120,6 +124,17 @@ export type ExternalLabel = {
 );
 
 ////////////////////////////////////////////////////////////////////////////////
+
+export const voxelShrinkToMinimum = (data: InternalVoxelLabelData) => {
+  if (!data.origin || !data.size || !data.volumeArrayBuffer) return null;
+  const volume = new rs.RawData(data.size, 'binary');
+  volume.assign(data.volumeArrayBuffer);
+  const cloud = new rs.VoxelCloud(); // temporary
+  cloud.origin = [...data.origin];
+  cloud.volume = volume;
+  const isNotEmpty = cloud.shrinkToMinimum();
+  return isNotEmpty ? { origin: cloud.origin, rawData: cloud.volume } : null;
+};
 
 const emptyVoxelLabelData = (
   appearance: LabelAppearance
@@ -143,7 +158,7 @@ export const createNewLabelData = (
       return { type, data: emptyVoxelLabelData(appearance) };
     case 'cuboid':
     case 'ellipsoid': {
-      // Find first visible viewer key
+      // Find the key of the first visible viewer, on which a new label is based
       const key = Object.keys(viewers).find(index =>
         /^(axial|sagittal|coronal)$/.test(index)
       );
@@ -152,7 +167,7 @@ export const createNewLabelData = (
         data: {
           ...(key
             ? rs.SolidFigure.calculateBoundingBoxWithDefaultDepth(viewers[key])
-            : { min: [0, 0, 0], max: [0, 0, 0] }),
+            : { min: [0, 0, 0], max: [10, 10, 10] }),
           ...appearance
         }
       };
@@ -164,7 +179,7 @@ export const createNewLabelData = (
         data: {
           ...(viewers.axial
             ? rs.PlaneFigure.calculateBoundingBoxAndDepth(viewers.axial)
-            : { min: [0, 0], max: [0, 0], z: 0 }),
+            : { min: [0, 0], max: [10, 10], z: 0 }),
           ...appearance
         }
       };
@@ -172,9 +187,9 @@ export const createNewLabelData = (
 };
 
 /**
- * Adds temporary label key.
- * Adds actual `volumeArrayBuffer` data to label.data.
- * If label is unpainted, make an empty buffer or an default annotation.
+ * Takes label data fetched from API and do preparation tasks.
+ * 1. Adds `temporaryKey` for identify each label.
+ * 2. Loads and assigns an array buffer for each voxel label.
  */
 const externalLabelToInternal = async (
   label: ExternalLabel,
@@ -203,6 +218,43 @@ const externalLabelToInternal = async (
   }
 };
 
+const internalLabelToExternal = async (
+  label: InternalLabel,
+  api: ApiCaller
+): Promise<ExternalLabel> => {
+  const saveVoxels = async (): Promise<ExternalVoxelLabelData> => {
+    const data = label.data as InternalVoxelLabelData;
+    const shrinkResult = voxelShrinkToMinimum(data);
+    if (shrinkResult === null) {
+      return { voxels: null, alpha: data.alpha, color: data.color };
+    } else {
+      const hash = sha1(shrinkResult.rawData.data);
+      if (hash !== data.voxels) {
+        // Voxel data has changed
+        await api('blob/' + hash, {
+          method: 'put',
+          handleErrors: true,
+          data: shrinkResult.rawData.data,
+          headers: { 'Content-Type': 'application/octet-stream' }
+        });
+      }
+      return {
+        voxels: hash,
+        origin: shrinkResult.origin,
+        size: shrinkResult.rawData.getDimension(),
+        alpha: data.alpha,
+        color: data.color
+      };
+    }
+  };
+
+  return produce(label, async label => {
+    if (label.type === 'voxel') label.data = await saveVoxels();
+    delete label.temporaryKey;
+    return label as ExternalLabel;
+  });
+};
+
 /**
  * Adds temporary label key
  * and asynchronously loads voxel data from API
@@ -220,68 +272,6 @@ export const externalRevisionToInternal = async (
     }
     return revision as Revision<InternalLabel>;
   });
-};
-
-export const voxelShrinkToMinimum = (data: InternalVoxelLabelData) => {
-  if (!data.origin || !data.size || !data.volumeArrayBuffer) return null;
-  const volume = new rs.RawData(data.size, 'binary');
-  volume.assign(data.volumeArrayBuffer);
-  const cloud = new rs.VoxelCloud(); // temporary
-  cloud.origin = [...data.origin];
-  cloud.volume = volume;
-  const isNotEmpty = cloud.shrinkToMinimum();
-  return isNotEmpty ? { origin: cloud.origin, rawData: cloud.volume } : null;
-};
-
-const internalLabelToExternal = async (
-  label: InternalLabel,
-  api: ApiCaller
-): Promise<ExternalLabel> => {
-  const newData =
-    label.type === 'voxel'
-      ? prepareLabelSaveDataOfVoxel(label.data, api)
-      : label.data;
-  return produce<InternalLabel, any, ExternalLabel>(label, label => {
-    label.data = newData;
-    delete label.temporaryKey;
-    return label;
-  });
-};
-
-const prepareLabelSaveDataOfVoxel = async (
-  labelData: InternalVoxelLabelData,
-  api: ApiCaller
-): Promise<ExternalVoxelLabelData> => {
-  const shrinkResult = voxelShrinkToMinimum(labelData);
-  if (shrinkResult === null) {
-    // No painted voxels
-    return {
-      voxels: null,
-      alpha: labelData.alpha,
-      color: labelData.color
-    };
-  } else {
-    // There are painted voxels
-    const { origin, rawData } = shrinkResult;
-    const voxels = sha1(rawData.data);
-    if (voxels === labelData.voxels) {
-      // Skipping unchanged label data
-    } else {
-      await api('blob/' + voxels, {
-        method: 'put',
-        handleErrors: true,
-        data: rawData.data,
-        headers: { 'Content-Type': 'application/octet-stream' }
-      });
-    }
-    return {
-      voxels,
-      origin,
-      size: rawData.getDimension(),
-      alpha: labelData.alpha,
-      color: labelData.color
-    };
-  }
 };
 
 const internalSeriesToExternal = async (
@@ -309,17 +299,71 @@ export const saveRevision = async (
   description: string,
   api: ApiCaller
 ) => {
-  const saveData = {
+  const saveData: Revision<ExternalLabel> = {
     description,
     attributes: revision.attributes,
-    status: 'approved',
     series: await asyncMap(revision.series, async series =>
       internalSeriesToExternal(series, api)
-    )
+    ),
+    status: 'approved'
   };
 
   await api(`cases/${caseId}/revision`, {
     method: 'post',
     data: saveData
   });
+};
+
+const rgbaColor = (rgb: string, alpha: number): string =>
+  rgb +
+  Math.floor(alpha * 255)
+    .toString(16)
+    .padStart(2, '0');
+
+export const buildAnnotation = (
+  label: InternalLabel,
+  appearance: LabelAppearance,
+  isActive: boolean
+): rs.Annotation => {
+  switch (label.type) {
+    case 'voxel': {
+      const volume = new rs.RawData(label.data.size!, 'binary');
+      volume.assign(
+        isActive
+          ? label.data.volumeArrayBuffer!.slice(0)
+          : label.data.volumeArrayBuffer!
+      );
+      const cloud = new rs.VoxelCloud();
+      cloud.origin = label.data.origin;
+      cloud.volume = volume;
+      cloud.color = appearance.color;
+      cloud.alpha = appearance.alpha;
+      cloud.active = isActive;
+      cloud.id = label.temporaryKey;
+      return cloud;
+    }
+    case 'ellipsoid':
+    case 'cuboid': {
+      const fig =
+        label.type === 'ellipsoid' ? new rs.Ellipsoid() : new rs.Cuboid();
+      fig.editable = true;
+      fig.color = rgbaColor(appearance.color, appearance.alpha);
+      fig.min = label.data.min;
+      fig.max = label.data.max;
+      fig.id = label.temporaryKey;
+      return fig;
+    }
+    case 'ellipse':
+    case 'rectangle': {
+      const fig = new rs.PlaneFigure();
+      fig.type = label.type === 'ellipse' ? 'circle' : 'rectangle';
+      fig.editable = true;
+      fig.color = rgbaColor(appearance.color, appearance.alpha);
+      fig.min = label.data.min;
+      fig.max = label.data.max;
+      fig.z = label.data.z;
+      fig.id = label.temporaryKey;
+      return fig;
+    }
+  }
 };

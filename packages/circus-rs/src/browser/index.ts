@@ -16,6 +16,7 @@ export {
 } from './ViewState';
 export { default as Composition } from './Composition';
 
+export { default as Annotation } from './annotation/Annotation';
 export { default as CornerText } from './annotation/CornerText';
 export { default as VoxelCloud } from './annotation/VoxelCloud';
 export { default as ReferenceLine } from './annotation/ReferenceLine';

@@ -21,7 +21,8 @@ import { useApi } from 'utils/api';
 import caseStoreReducer, * as c from './caseStore';
 import {
   EditingData,
-  loadLabels,
+  ExternalLabel,
+  externalRevisionToInternal,
   Revision,
   saveRevision
 } from './revisionData';
@@ -43,11 +44,14 @@ const CaseDetail: React.FC<{}> = props => {
     state => state.loginUser.data!.accessibleProjects
   );
 
-  const loadRevisionData = async (revisions: Revision[], index: number) => {
+  const loadRevisionData = async (
+    revisions: Revision<ExternalLabel>[],
+    index: number
+  ) => {
     const revision = revisions[index];
     caseDispatch(c.setBusy(true));
     // Loads actual volume data and adds label temporary key.
-    const data = await loadLabels(revision, api);
+    const data = await externalRevisionToInternal(revision, api);
     caseDispatch(c.startEditing({ revision: data, revisionIndex: index }));
     caseDispatch(c.setBusy(false));
   };

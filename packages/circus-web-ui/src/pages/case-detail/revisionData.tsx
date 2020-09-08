@@ -2,15 +2,10 @@ import { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
 import generateUniqueId from '@utrad-ical/circus-lib/src/generateUniqueId';
 import * as rs from '@utrad-ical/circus-rs/src/browser';
 import { Vector2D, Vector3D } from '@utrad-ical/circus-rs/src/browser';
-import update from 'immutability-helper';
+import produce, { Draft } from 'immer';
 import { sha1 } from 'utils/util';
 import asyncMap from '../../utils/asyncMap';
 import { ApiCaller } from 'utils/api';
-export interface Revision {
-  description: string;
-  attributes: any;
-  series: SeriesEntry[];
-}
 
 export interface EditingData {
   revision: Revision;
@@ -18,10 +13,20 @@ export interface EditingData {
   activeLabelIndex: number;
 }
 
-export interface SeriesEntry {
+export interface Revision<
+  L extends InternalLabel | ExternalLabel = InternalLabel
+> {
+  description: string;
+  attributes: any;
+  series: SeriesEntry<L>[];
+}
+
+export interface SeriesEntry<
+  L extends InternalLabel | ExternalLabel = InternalLabel
+> {
   seriesUid: string;
   partialVolumeDescriptor: PartialVolumeDescriptor;
-  labels: LabelEntry[];
+  labels: L[];
 }
 
 export type LabelType =
@@ -31,91 +36,138 @@ export type LabelType =
   | 'rectangle'
   | 'ellipse';
 
-export interface LabelEntry {
-  temporarykey?: string;
-  type: LabelType;
-  data: LabelData;
-  attributes?: object;
-  name?: string;
-}
-
-export interface VoxelLabel extends LabelEntry {
-  data: VoxelLabelData;
-}
-
-export interface SolidFigureLabel extends LabelEntry {
-  data: SolidFigureLabelData;
-}
-
-export interface PlaneFigureLabel extends LabelEntry {
-  data: PlaneFigureLabelData;
-}
-
-export interface LabelData {
-  color?: string;
-  alpha?: number;
-}
-
-export interface VoxelLabelData extends LabelData {
+interface InternalVoxelLabelData {
+  /**
+   * Contains hash. In an InternalVoxelLabel, this is used to keep track of
+   * a modification. When a paint/erase happens, voxels must be set to null.
+   */
   voxels: string | null;
+  volumeArrayBuffer?: ArrayBuffer;
   origin?: Vector3D;
   size?: Vector3D;
-  volumeArrayBuffer?: ArrayBuffer;
+  color: string;
+  alpha: number;
 }
 
-export interface SolidFigureLabelData extends LabelData {
+export interface LabelAppearance {
+  /**
+   * Hexadeciaml string like '#ff00ff'.
+   */
+  color: string;
+  /**
+   * A float from 0 (transparent) to 1.0 (opaque).
+   */
+  alpha: number;
+}
+
+type ExternalVoxelLabelData = LabelAppearance &
+  ({ voxels: null } | { voxels: string; origin: Vector3D; size: Vector3D });
+
+type SolidFigureLabelData = LabelAppearance & {
   min: Vector3D;
   max: Vector3D;
-}
+};
 
-export interface PlaneFigureLabelData extends LabelData {
+type PlaneFigureLabelData = LabelAppearance & {
   min: Vector2D;
   max: Vector2D;
   z: number;
-}
+};
 
-export const createEmptyVoxelLabelData = (): VoxelLabelData => {
+type TaggedLabelData =
+  | {
+      type: 'voxel';
+      data: InternalVoxelLabelData;
+    }
+  | {
+      type: 'rectangle' | 'ellipse';
+      data: PlaneFigureLabelData;
+    }
+  | {
+      type: 'cuboid' | 'ellipsoid';
+      data: SolidFigureLabelData;
+    };
+
+/**
+ * InternalLabelData resresents one label data stored in browser memory.
+ */
+export type InternalLabel = {
+  name?: string;
+  attributes: object;
+  temporaryKey: string;
+} & TaggedLabelData;
+
+/**
+ * ExternalLabelData resresents the label data
+ * transferred from/to the API sever.
+ */
+export type ExternalLabel = {
+  name?: string;
+  attributes: object;
+} & (
+  | {
+      type: 'voxel';
+      data: ExternalVoxelLabelData;
+    }
+  | {
+      type: 'rectangle' | 'ellipse';
+      data: PlaneFigureLabelData;
+    }
+  | {
+      type: 'cuboid' | 'ellipsoid';
+      data: SolidFigureLabelData;
+    }
+);
+
+////////////////////////////////////////////////////////////////////////////////
+
+const emptyVoxelLabelData = (
+  appearance: LabelAppearance
+): InternalVoxelLabelData => {
   return {
-    voxels: null,
     origin: [0, 0, 0],
     size: [16, 16, 16],
-    volumeArrayBuffer: new ArrayBuffer((16 * 16 * 16) / 8)
+    voxels: '',
+    volumeArrayBuffer: new ArrayBuffer((16 * 16 * 16) / 8),
+    ...appearance
   };
 };
 
-export const createDefaultSolidFigureLabelData = (viewers: {
-  [index: string]: rs.Viewer;
-}): SolidFigureLabelData => {
-  const index = Object.keys(viewers).find(
-    index =>
-      index.includes('axial') ||
-      index.includes('sagittal') ||
-      index.includes('coronal')
-  );
-  if (index) {
-    const viewer = viewers[index];
-    return rs.SolidFigure.calculateBoundingBoxWithDefaultDepth(viewer);
-  } else {
-    return {
-      min: [0, 0, 0],
-      max: [0, 0, 0]
-    };
-  }
-};
-
-export const createDefaultPlaneFigureLabelData = (viewers: {
-  [index: string]: rs.Viewer;
-}): PlaneFigureLabelData => {
-  const index = Object.keys(viewers).find(index => index.includes('axial'));
-  if (index) {
-    const viewer = viewers[index];
-    return rs.PlaneFigure.calculateBoundingBoxAndDepth(viewer);
-  } else {
-    return {
-      min: [0, 0],
-      max: [0, 0],
-      z: 0
-    };
+export const createNewLabelData = (
+  type: LabelType,
+  appearance: LabelAppearance,
+  viewers: { [index: string]: rs.Viewer }
+): TaggedLabelData => {
+  switch (type) {
+    case 'voxel':
+      return { type, data: emptyVoxelLabelData(appearance) };
+    case 'cuboid':
+    case 'ellipsoid': {
+      // Find first visible viewer key
+      const key = Object.keys(viewers).find(index =>
+        /^(axial|sagittal|coronal)$/.test(index)
+      );
+      return {
+        type,
+        data: {
+          ...(key
+            ? rs.SolidFigure.calculateBoundingBoxWithDefaultDepth(viewers[key])
+            : { min: [0, 0, 0], max: [0, 0, 0] }),
+          ...appearance
+        }
+      };
+    }
+    case 'ellipse':
+    case 'rectangle':
+      return {
+        type,
+        data: {
+          ...(viewers.axial
+            ? rs.PlaneFigure.calculateBoundingBoxAndDepth(viewers.axial)
+            : { min: [0, 0], max: [0, 0], z: 0 }),
+          ...appearance
+        }
+      };
   }
 };
 
@@ -124,33 +176,30 @@ export const createDefaultPlaneFigureLabelData = (viewers: {
  * Adds actual `volumeArrayBuffer` data to label.data.
  * If label is unpainted, make an empty buffer or an default annotation.
  */
-const augumentLabelEntry = async (label: LabelEntry, api: any) => {
-  const temporarykey =
-    label.temporarykey && label.temporarykey.length > 0
-      ? label.temporarykey
-      : generateUniqueId();
+const externalLabelToInternal = async (
+  label: ExternalLabel,
+  api: ApiCaller
+): Promise<InternalLabel> => {
+  const temporaryKey = generateUniqueId();
+  const internalLabel = { ...label, temporaryKey } as InternalLabel;
 
-  if (label.type === 'voxel') {
-    const voxelLabel = label as VoxelLabel;
-    if (voxelLabel.data.voxels) {
-      const volumeArrayBuffer = await api(`blob/${voxelLabel.data.voxels}`, {
+  if (label.type === 'voxel' && internalLabel.type === 'voxel') {
+    // The condition above is redundant but used to satisfy type check
+    if (label.data.voxels) {
+      const volumeArrayBuffer = await api(`blob/${label.data.voxels}`, {
         responseType: 'arraybuffer'
       });
-      return update(voxelLabel, {
-        temporarykey: { $set: temporarykey },
-        data: { $merge: { volumeArrayBuffer } }
+      return produce(internalLabel, label => {
+        label.data.volumeArrayBuffer = volumeArrayBuffer;
       });
     } else {
       // Empty label
-      return update(voxelLabel, {
-        temporarykey: { $set: temporarykey },
-        data: { $merge: createEmptyVoxelLabelData() }
+      return produce(internalLabel, label => {
+        label.data = emptyVoxelLabelData(label.data);
       });
     }
   } else {
-    return update(label, {
-      temporarykey: { $set: temporarykey }
-    });
+    return internalLabel;
   }
 };
 
@@ -159,27 +208,21 @@ const augumentLabelEntry = async (label: LabelEntry, api: any) => {
  * and asynchronously loads voxel data from API
  * and assigns it to the given label cache.
  */
-export const loadLabels = async (revision: Revision, api: any) => {
-  return update(revision, {
-    series: {
-      $set: await asyncMap(revision.series, async series => {
-        return update(series, {
-          labels: {
-            $set: await asyncMap(series.labels, label =>
-              augumentLabelEntry(label, api)
-            )
-          }
-        });
-      })
+export const externalRevisionToInternal = async (
+  revision: Revision<ExternalLabel>,
+  api: any
+): Promise<Revision<InternalLabel>> => {
+  return await produce(revision, async revision => {
+    for (const series of revision.series) {
+      (series as any).labels = await asyncMap(series.labels, label =>
+        externalLabelToInternal(label, api)
+      );
     }
+    return revision as Revision<InternalLabel>;
   });
 };
 
-export const voxelShrinkToMinimum = (data: {
-  origin?: Vector3D;
-  size?: Vector3D;
-  volumeArrayBuffer?: ArrayBuffer;
-}) => {
+export const voxelShrinkToMinimum = (data: InternalVoxelLabelData) => {
   if (!data.origin || !data.size || !data.volumeArrayBuffer) return null;
   const volume = new rs.RawData(data.size, 'binary');
   volume.assign(data.volumeArrayBuffer);
@@ -190,44 +233,38 @@ export const voxelShrinkToMinimum = (data: {
   return isNotEmpty ? { origin: cloud.origin, rawData: cloud.volume } : null;
 };
 
-const prepareLabelSaveData = async (
-  label: LabelEntry,
+const internalLabelToExternal = async (
+  label: InternalLabel,
   api: ApiCaller
-): Promise<LabelEntry> => {
-  switch (label.type) {
-    case 'voxel':
-      return prepareLabelSaveDataOfVoxel(label as VoxelLabel, api);
-    case 'cuboid':
-    case 'ellipsoid':
-      return prepareLabelSaveDataOfSolidFigure(label as SolidFigureLabel, api);
-    case 'rectangle':
-    case 'ellipse':
-      return prepareLabelSaveDataOfPlaneFigure(label as PlaneFigureLabel, api);
-    default:
-      throw new Error('Unsupported label type');
-  }
+): Promise<ExternalLabel> => {
+  const newData =
+    label.type === 'voxel'
+      ? prepareLabelSaveDataOfVoxel(label.data, api)
+      : label.data;
+  return produce<InternalLabel, any, ExternalLabel>(label, label => {
+    label.data = newData;
+    delete label.temporaryKey;
+    return label;
+  });
 };
 
 const prepareLabelSaveDataOfVoxel = async (
-  label: VoxelLabel,
+  labelData: InternalVoxelLabelData,
   api: ApiCaller
-): Promise<VoxelLabel> => {
-  if (label.type !== 'voxel') return label;
-  const shrinkResult = voxelShrinkToMinimum(label.data);
-  const newLabel = {
-    type: label.type,
-    name: label.name,
-    data: {
-      color: label.data.color,
-      alpha: label.data.alpha,
-      voxels: null
-    }
-  };
-  if (shrinkResult !== null) {
+): Promise<ExternalVoxelLabelData> => {
+  const shrinkResult = voxelShrinkToMinimum(labelData);
+  if (shrinkResult === null) {
+    // No painted voxels
+    return {
+      voxels: null,
+      alpha: labelData.alpha,
+      color: labelData.color
+    };
+  } else {
     // There are painted voxels
     const { origin, rawData } = shrinkResult;
     const voxels = sha1(rawData.data);
-    if (voxels === label.data.voxels) {
+    if (voxels === labelData.voxels) {
       // Skipping unchanged label data
     } else {
       await api('blob/' + voxels, {
@@ -237,60 +274,30 @@ const prepareLabelSaveDataOfVoxel = async (
         headers: { 'Content-Type': 'application/octet-stream' }
       });
     }
-    Object.assign(newLabel.data, {
+    return {
       voxels,
       origin,
-      size: rawData.getDimension()
-    });
+      size: rawData.getDimension(),
+      alpha: labelData.alpha,
+      color: labelData.color
+    };
   }
-  return newLabel;
 };
 
-const prepareLabelSaveDataOfSolidFigure = async (
-  label: SolidFigureLabel,
-  api: ApiCaller
-): Promise<SolidFigureLabel> => {
-  if (label.type !== 'cuboid' && label.type !== 'ellipsoid') return label;
-  const newLabel = {
-    type: label.type,
-    name: label.name,
-    data: {
-      color: label.data.color,
-      alpha: label.data.alpha,
-      min: label.data.min,
-      max: label.data.max
+const internalSeriesToExternal = async (
+  series: SeriesEntry<InternalLabel>,
+  api: any
+): Promise<SeriesEntry<ExternalLabel>> => {
+  const newLabels = await asyncMap(series.labels, async label =>
+    internalLabelToExternal(label, api)
+  );
+  return produce<SeriesEntry<InternalLabel>, any, SeriesEntry<ExternalLabel>>(
+    series,
+    series => {
+      series.labels = newLabels;
+      return series;
     }
-  };
-  return newLabel;
-};
-
-const prepareLabelSaveDataOfPlaneFigure = async (
-  label: PlaneFigureLabel,
-  api: ApiCaller
-): Promise<PlaneFigureLabel> => {
-  if (label.type !== 'rectangle' && label.type !== 'ellipse') return label;
-  const newLabel = {
-    type: label.type,
-    name: label.name,
-    data: {
-      color: label.data.color,
-      alpha: label.data.alpha,
-      min: label.data.min,
-      max: label.data.max,
-      z: label.data.z
-    }
-  };
-  return newLabel;
-};
-
-const prepareSeriesSaveData = async (series: SeriesEntry, api: any) => {
-  return update(series, {
-    labels: {
-      $set: await asyncMap(series.labels, async label =>
-        prepareLabelSaveData(label, api)
-      )
-    }
-  });
+  );
 };
 
 /**
@@ -307,7 +314,7 @@ export const saveRevision = async (
     attributes: revision.attributes,
     status: 'approved',
     series: await asyncMap(revision.series, async series =>
-      prepareSeriesSaveData(series, api)
+      internalSeriesToExternal(series, api)
     )
   };
 

@@ -19,12 +19,13 @@ import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { useApi } from 'utils/api';
 import caseStoreReducer, * as c from './caseStore';
+import produce from 'immer';
 import {
-  EditingData,
   ExternalLabel,
   externalRevisionToInternal,
   Revision,
-  saveRevision
+  saveRevision,
+  EditingDataUpdater
 } from './revisionData';
 import RevisionEditor from './RevisionEditor';
 import RevisionSelector from './RevisionSelector';
@@ -77,11 +78,12 @@ const CaseDetail: React.FC<{}> = props => {
     await loadRevisionData(caseData.revisions, index);
   };
 
-  const handleDataChange = useCallback(
-    (newData: EditingData, pushToHistory: any = false) => {
-      caseDispatch(c.change({ newData, pushToHistory }));
+  const handleDataChange = useCallback<EditingDataUpdater>(
+    (updater, tag) => {
+      const newData = produce(editingData, updater);
+      caseDispatch(c.change({ newData, tag }));
     },
-    []
+    [editingData]
   );
 
   const handleMenuBarCommand = async (command: MenuBarCommand) => {

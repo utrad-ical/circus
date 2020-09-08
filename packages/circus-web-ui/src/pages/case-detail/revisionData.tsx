@@ -1,7 +1,11 @@
 import { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
 import generateUniqueId from '@utrad-ical/circus-lib/src/generateUniqueId';
 import * as rs from '@utrad-ical/circus-rs/src/browser';
-import { Vector2D, Vector3D } from '@utrad-ical/circus-rs/src/browser';
+import {
+  getBoxCenter,
+  Vector2D,
+  Vector3D
+} from '@utrad-ical/circus-rs/src/browser';
 import produce from 'immer';
 import { ApiCaller } from 'utils/api';
 import { sha1 } from 'utils/util';
@@ -12,6 +16,11 @@ export interface EditingData {
   activeSeriesIndex: number;
   activeLabelIndex: number;
 }
+
+export type EditingDataUpdater = (
+  updater: (current: EditingData) => EditingData | void,
+  tag?: string
+) => void;
 
 export interface Revision<
   L extends InternalLabel | ExternalLabel = InternalLabel
@@ -365,5 +374,30 @@ export const buildAnnotation = (
       fig.id = label.temporaryKey;
       return fig;
     }
+  }
+};
+
+export const getCenterOfLabel = (
+  composition: rs.Composition,
+  label: InternalLabel
+) => {
+  switch (label.type) {
+    case 'voxel': {
+      const shrinkResult = voxelShrinkToMinimum(label.data);
+      if (shrinkResult === null) return;
+      const origin = shrinkResult.origin;
+      const size = shrinkResult.rawData.getDimension();
+      return getBoxCenter(
+        rs.VoxelCloud.getBoundingBox(composition, { origin, size })
+      );
+    }
+    case 'cuboid':
+    case 'ellipsoid':
+      return getBoxCenter(label.data);
+    case 'rectangle':
+    case 'ellipse':
+      return getBoxCenter(rs.PlaneFigure.getOutline(label.data));
+    default:
+      return;
   }
 };

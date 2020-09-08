@@ -71,9 +71,10 @@ const LabelSelector: React.FC<{
   } = props;
   const { revision, activeLabelIndex, activeSeriesIndex } = editingData;
   const activeSeries = revision.series[activeSeriesIndex];
-  const activeLabel = activeSeries.labels[activeLabelIndex];
+  const activeLabel =
+    activeLabelIndex >= 0 ? activeSeries.labels[activeLabelIndex] : null;
 
-  const handleChangeSeries = (
+  const changeSeries = (
     index: number,
     newSeries: SeriesEntry,
     tag?: string
@@ -86,20 +87,26 @@ const LabelSelector: React.FC<{
   const handleCommand = async (command: LabelCommand) => {
     switch (command) {
       case 'rename': {
+        if (!activeLabel) return;
         const newName = await prompt('Label name', activeLabel.name);
         if (newName === null || activeLabel.name === newName) return;
         const newSeries = produce(activeSeries, series => {
           series.labels[activeLabelIndex].name = newName;
         });
-        handleChangeSeries(activeSeriesIndex, newSeries);
+        changeSeries(activeSeriesIndex, newSeries);
         break;
       }
       case 'remove': {
         if (!(await confirm('Delete this label?'))) return;
-        const newSeries = produce(activeSeries, series => {
+        onChange(editingData => {
+          const series = editingData.revision.series[activeSeriesIndex];
           series.labels.splice(activeLabelIndex, 1);
+          if (series.labels.length === 0) {
+            editingData.activeLabelIndex = -1;
+          } else if (activeLabelIndex >= series.labels.length) {
+            editingData.activeLabelIndex = series.labels.length - 1;
+          }
         });
-        handleChangeSeries(activeSeriesIndex, newSeries);
         break;
       }
       case 'moveUp': {
@@ -131,15 +138,17 @@ const LabelSelector: React.FC<{
         break;
       }
       case 'convertType': {
+        if (!activeLabel) return;
         const newLabelType = convertLabelTypeMap[activeLabel.type];
         if (!newLabelType) return;
         const newSeries = produce(activeSeries, series => {
           series.labels[activeLabelIndex].type = newLabelType;
         });
-        handleChangeSeries(activeSeriesIndex, newSeries);
+        changeSeries(activeSeriesIndex, newSeries);
         break;
       }
       case 'reveal': {
+        if (!activeLabel) return;
         const center = getCenterOfLabel(composition, activeLabel);
         Object.values(viewers).forEach(viewer => focusBy(viewer, center));
       }
@@ -156,18 +165,25 @@ const LabelSelector: React.FC<{
     }, 'Change appearance');
   };
 
-  const convertTitle = convertLabelTypeMap[activeLabel.type]
-    ? 'Convert to ' + convertLabelTypeMap[activeLabel.type]
-    : 'Convert';
+  const convertTitle = activeLabel
+    ? convertLabelTypeMap[activeLabel.type]
+      ? 'Convert to ' + convertLabelTypeMap[activeLabel.type]
+      : 'Convert'
+    : '';
 
   return (
     <>
       <div className="buttons">
         <AppearanceEditor
-          value={{
-            color: activeLabel.data.color,
-            alpha: activeLabel.data.alpha
-          }}
+          value={
+            activeLabel
+              ? {
+                  color: activeLabel.data.color,
+                  alpha: activeLabel.data.alpha
+                }
+              : undefined
+          }
+          disabled={!activeLabel}
           onChange={handleAppearanceChange}
         />
         &ensp;
@@ -175,39 +191,44 @@ const LabelSelector: React.FC<{
           bsSize="xs"
           title="Move Up"
           icon="chevron-up"
-          disabled={activeLabelIndex <= 0}
+          disabled={!activeLabel || activeLabelIndex <= 0}
           onClick={() => handleCommand('moveUp')}
         />
         <IconButton
           bsSize="xs"
           title="Move Down"
           icon="chevron-down"
-          disabled={activeLabelIndex >= activeSeries.labels.length - 1}
+          disabled={
+            !activeLabel || activeLabelIndex >= activeSeries.labels.length - 1
+          }
           onClick={() => handleCommand('moveDown')}
         />
         <IconButton
           bsSize="xs"
           title="Rename"
           icon="font"
+          disabled={!activeLabel}
           onClick={() => handleCommand('rename')}
         />
         <IconButton
           bsSize="xs"
           title={convertTitle}
           icon="random"
-          disabled={activeLabel.type === 'voxel'}
+          disabled={!activeLabel || activeLabel.type === 'voxel'}
           onClick={() => handleCommand('convertType')}
         />
         <IconButton
           bsSize="xs"
           title="Reveal in Viewer"
           icon="map-marker"
+          disabled={!activeLabel}
           onClick={() => handleCommand('reveal')}
         />
         <IconButton
           bsSize="xs"
           title="Remove"
           icon="trash"
+          disabled={!activeLabel}
           onClick={() => handleCommand('remove')}
         />
       </div>
@@ -217,7 +238,7 @@ const LabelSelector: React.FC<{
             series={series}
             index={seriesIndex}
             key={series.seriesUid}
-            onChange={handleChangeSeries}
+            onChange={changeSeries}
             onChangeActiveLabel={onChangeActiveLabel}
             activeSeries={activeSeries}
             activeLabel={activeLabel}
@@ -243,7 +264,7 @@ const Series: React.FC<{
   index: number;
   series: SeriesEntry;
   activeSeries: SeriesEntry;
-  activeLabel: InternalLabel;
+  activeLabel: InternalLabel | null;
   onChange: (seriesIndex: number, newSeries: SeriesEntry, tag?: string) => void;
   onChangeActiveLabel: (seriesIndex: number, labelIndex: number) => void;
   viewers: { [index: string]: Viewer };
@@ -343,7 +364,7 @@ export const Label: React.FC<{
   label: InternalLabel;
   index: number;
   seriesIndex: number;
-  activeLabel: InternalLabel;
+  activeLabel: InternalLabel | null;
   onClick: () => void;
 }> = props => {
   const { label, activeLabel, onClick } = props;
@@ -396,15 +417,25 @@ const labelColors = [
 ];
 
 const AppearanceEditor: React.FC<{
-  value: LabelAppearance;
+  value: LabelAppearance | undefined;
+  disabled?: boolean;
   onChange: (value: LabelAppearance) => void;
 }> = props => {
-  const { value } = props;
+  const { value, disabled, onChange } = props;
+  if (disabled) {
+    return (
+      <Button bsSize="xs" style={{ backgroundColor: 'silver' }}>
+        -
+      </Button>
+    );
+  }
+
   const appearanceEditor = (
     <Popover id="appearance-editor">
-      <AppearancePopover {...props} />
+      <AppearancePopover value={value!} onChange={onChange} />
     </Popover>
   );
+
   return (
     <OverlayTrigger
       trigger="click"
@@ -413,13 +444,14 @@ const AppearanceEditor: React.FC<{
       placement="bottom"
     >
       <Button
+        className="color-editor-button"
         bsSize="xs"
         style={{
-          backgroundColor: value.color,
-          color: tinyColor.mostReadable(value.color, ['#ffffff', '#000000'])
+          backgroundColor: value!.color,
+          color: tinyColor.mostReadable(value!.color, ['#ffffff', '#000000'])
         }}
       >
-        {value.alpha * 100}%
+        {value!.alpha * 100}%
       </Button>
     </OverlayTrigger>
   );

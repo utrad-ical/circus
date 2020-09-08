@@ -319,7 +319,7 @@ const RevisionEditor: React.FC<{
   return (
     <div className={classNames('case-revision-data', { busy })}>
       <SideContainer>
-        <Collapser title="Series / Labels" className="labels">
+        <Collapser title="Series / Labels" className="labels" noPadding>
           <LabelSelector
             editingData={editingData}
             composition={composition}

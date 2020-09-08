@@ -71,7 +71,7 @@ export const ControlledCollapser: React.FC<
     <StyledDiv
       className={classnames(
         'collapser',
-        { framed, noPadding, open },
+        { framed, 'no-padding': noPadding, open },
         className
       )}
     >

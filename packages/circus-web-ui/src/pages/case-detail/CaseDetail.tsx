@@ -14,18 +14,19 @@ import {
 } from 'components/react-bootstrap';
 import Tag from 'components/Tag';
 import TimeDisplay from 'components/TimeDisplay';
+import produce from 'immer';
 import React, { useCallback, useEffect, useReducer } from 'react';
 import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
+import styled from 'styled-components';
 import { useApi } from 'utils/api';
 import caseStoreReducer, * as c from './caseStore';
-import produce from 'immer';
 import {
+  EditingDataUpdater,
   ExternalLabel,
   externalRevisionToInternal,
   Revision,
-  saveRevision,
-  EditingDataUpdater
+  saveRevision
 } from './revisionData';
 import RevisionEditor from './RevisionEditor';
 import RevisionSelector from './RevisionSelector';
@@ -190,7 +191,7 @@ const MenuBar: React.FC<{
 }> = props => {
   const { caseStore, onCommand, onRevisionSelect } = props;
   return (
-    <div className="case-detail-menu">
+    <StyledMenuBarDiv>
       <div className="left">
         Revision:&ensp;
         <RevisionSelector
@@ -236,6 +237,23 @@ const MenuBar: React.FC<{
           </MenuItem>
         </DropdownButton>
       </div>
-    </div>
+    </StyledMenuBarDiv>
   );
 };
+
+const StyledMenuBarDiv = styled.div`
+  border-bottom: 1px solid silver;
+  border-top: 1px solid silver;
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: space-between;
+  flex: none;
+  .left {
+    padding: 3px;
+  }
+  .right {
+    flex: 1000;
+    text-align: right;
+    padding: 3px;
+  }
+`;

@@ -8,7 +8,13 @@ import focusBy from '@utrad-ical/circus-rs/src/browser/tool/state/focusBy';
 import classNames from 'classnames';
 import Icon from 'components/Icon';
 import IconButton from 'components/IconButton';
-import { Button, OverlayTrigger, Popover } from 'components/react-bootstrap';
+import {
+  Button,
+  OverlayTrigger,
+  Popover,
+  SplitButton,
+  MenuItem
+} from 'components/react-bootstrap';
 import produce from 'immer';
 import React, { Fragment } from 'react';
 import styled from 'styled-components';
@@ -69,6 +75,12 @@ const LabelSelector: React.FC<{
     onChangeActiveLabel,
     viewers
   } = props;
+
+  const [newLabelType, setNewLabelType] = useLocalPreference<LabelType>(
+    'newLabelType',
+    'voxel'
+  );
+
   const { revision, activeLabelIndex, activeSeriesIndex } = editingData;
   const activeSeries = revision.series[activeSeriesIndex];
   const activeLabel =
@@ -165,6 +177,41 @@ const LabelSelector: React.FC<{
     }, 'Change appearance');
   };
 
+  const getUniqueLabelName = (name: string) => {
+    const nameExists = (name: string) =>
+      activeSeries.labels.some(label => label.name === name);
+    if (!nameExists(name)) return name;
+    for (let index = 2; ; index++) {
+      const newName = name + ' ' + index;
+      if (!nameExists(newName)) return newName;
+    }
+  };
+
+  const createNewLabel = (type: LabelType): InternalLabel => {
+    const color = '#ff0000';
+    const alpha = 1;
+    const temporaryKey = generateUniqueId();
+    const labelNames: { [key in LabelType]: string } = {
+      voxel: 'Voxels',
+      ellipsoid: '3D Shape',
+      cuboid: '3D Shape',
+      ellipse: '2D Shape',
+      rectangle: '2D Shape'
+    };
+    const name = getUniqueLabelName(labelNames[type]);
+    const data = createNewLabelData(type, { color, alpha }, viewers);
+    return { temporaryKey, name, ...data, attributes: {} };
+  };
+
+  const addLabel = (type: LabelType) => {
+    setNewLabelType(type);
+    const newLabel = createNewLabel(type);
+    const newSeries = produce(activeSeries, series => {
+      series.labels.push(newLabel);
+    });
+    changeSeries(activeSeriesIndex, newSeries);
+  };
+
   const convertTitle = activeLabel
     ? convertLabelTypeMap[activeLabel.type]
       ? 'Convert to ' + convertLabelTypeMap[activeLabel.type]
@@ -173,7 +220,7 @@ const LabelSelector: React.FC<{
 
   return (
     <>
-      <div className="buttons">
+      <StyledButtonsDiv>
         <AppearanceEditor
           value={
             activeLabel
@@ -186,7 +233,7 @@ const LabelSelector: React.FC<{
           disabled={!activeLabel}
           onChange={handleAppearanceChange}
         />
-        &ensp;
+        &thinsp;
         <IconButton
           bsSize="xs"
           title="Move Up"
@@ -231,24 +278,103 @@ const LabelSelector: React.FC<{
           disabled={!activeLabel}
           onClick={() => handleCommand('remove')}
         />
-      </div>
-      <ul className="case-series-list">
+        &thinsp;
+        <SplitButton
+          bsSize="xs"
+          bsStyle="primary"
+          title={
+            <span>
+              Add <Icon icon={labelTypeOptions[newLabelType].icon} />
+            </span>
+          }
+          onClick={() => addLabel(newLabelType)}
+          pullRight
+        >
+          {Object.keys(labelTypeOptions).map((type, i) => {
+            const { caption, icon } = labelTypeOptions[type as LabelType];
+            return (
+              <MenuItem
+                key={type}
+                eventKey={i}
+                onClick={() => addLabel(type as LabelType)}
+              >
+                <Icon icon={icon} /> Add {caption}
+              </MenuItem>
+            );
+          })}
+        </SplitButton>
+      </StyledButtonsDiv>
+      <StyledSeriesUl>
         {revision.series.map((series: SeriesEntry, seriesIndex: number) => (
           <Series
             series={series}
             index={seriesIndex}
             key={series.seriesUid}
-            onChange={changeSeries}
             onChangeActiveLabel={onChangeActiveLabel}
             activeSeries={activeSeries}
             activeLabel={activeLabel}
-            viewers={viewers}
           />
         ))}
-      </ul>
+      </StyledSeriesUl>
     </>
   );
 };
+
+const StyledButtonsDiv = styled.div`
+  margin: 3px 10px;
+`;
+
+const StyledSeriesUl = styled.ul`
+  padding: 0;
+  > li {
+    margin-top: 10px;
+    list-style-type: none;
+    &.active .series-head {
+      font-weight: bold;
+    }
+  }
+
+  .case-label-list {
+    margin: 0;
+    padding-left: 0;
+    &.active {
+      background-color: silver;
+    }
+  }
+
+  .label-list-item {
+    list-style-type: none;
+    white-space: nowrap;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 3px 0px 3px 10px;
+    border-bottom: 1px solid silver;
+    cursor: pointer;
+    .color-preview {
+      display: block;
+      flex: 0 0 25px;
+      height: 20px;
+      text-align: center;
+      border: 1px solid silver;
+    }
+    .caption {
+      .circus-icon {
+        font-size: 130%;
+      }
+      flex-grow: 1;
+      margin-left: 5px;
+      overflow: hidden;
+    }
+    &:hover {
+      background-color: #eeeeee;
+    }
+    &.active {
+      background-color: silver;
+      font-weight: bold;
+    }
+  }
+`;
 
 export default LabelSelector;
 
@@ -265,66 +391,21 @@ const Series: React.FC<{
   series: SeriesEntry;
   activeSeries: SeriesEntry;
   activeLabel: InternalLabel | null;
-  onChange: (seriesIndex: number, newSeries: SeriesEntry, tag?: string) => void;
   onChangeActiveLabel: (seriesIndex: number, labelIndex: number) => void;
-  viewers: { [index: string]: Viewer };
 }> = props => {
   const {
     index: seriesIndex,
     series,
     activeSeries,
     activeLabel,
-    onChange,
-    onChangeActiveLabel,
-    viewers
+    onChangeActiveLabel
   } = props;
 
-  const [newLabelType, setNewLabelType] = useLocalPreference<LabelType>(
-    'newLabelType',
-    'voxel'
-  );
-
-  const getUniqueLabelName = (name: string) => {
-    const nameExists = (name: string) =>
-      activeSeries.labels.some(label => label.name === name);
-    if (!nameExists(name)) return name;
-    for (let index = 2; ; index++) {
-      const newName = name + ' ' + index;
-      if (!nameExists(newName)) return newName;
-    }
-  };
-
-  const createNewLabel = (): InternalLabel => {
-    const color = '#ff0000';
-    const alpha = 1;
-    const temporaryKey = generateUniqueId();
-    const labelNames: { [key in LabelType]: string } = {
-      voxel: 'Voxels',
-      ellipsoid: '3D Shape',
-      cuboid: '3D Shape',
-      ellipse: '2D Shape',
-      rectangle: '2D Shape'
-    };
-    const name = getUniqueLabelName(labelNames[newLabelType]);
-    const data = createNewLabelData(newLabelType, { color, alpha }, viewers);
-    return { temporaryKey, name, ...data, attributes: {} };
-  };
-
-  const addLabel = () => {
-    const newLabel = createNewLabel();
-    const newSeries = produce(series, series => {
-      series.labels.push(newLabel);
-    });
-    onChange(seriesIndex, newSeries);
-  };
-
   return (
-    <li
-      className={classNames('case-series-list-item', {
-        active: series === activeSeries
-      })}
-    >
-      <Icon icon="circus-series" /> Series #{seriesIndex}
+    <li className={classNames({ active: series === activeSeries })}>
+      <span className="series-head">
+        <Icon icon="circus-series" /> Series #{seriesIndex}
+      </span>
       <ul className="case-label-list">
         {series.labels.map((label, labelIndex) => (
           <Label
@@ -337,21 +418,6 @@ const Series: React.FC<{
           />
         ))}
       </ul>
-      <div className="case-label-buttons">
-        <ShrinkSelect
-          className="label-type-shrinkselect"
-          name="label-type"
-          bsSize="xs"
-          defaultSelect={newLabelType}
-          options={labelTypeOptions}
-          value={newLabelType}
-          onChange={setNewLabelType}
-          renderer={LabelTypeRenderer}
-        />
-        <IconButton icon="plus" bsSize="xs" onClick={addLabel}>
-          Add Label
-        </IconButton>
-      </div>
     </li>
   );
 };
@@ -388,7 +454,6 @@ export const Label: React.FC<{
       >
         {label.data.alpha === 0 && <Icon icon="eye-close" />}
       </div>
-
       <div className="caption">
         <Icon icon={labelTypeOptions[label.type].icon} />
         &nbsp;{caption}
@@ -415,6 +480,10 @@ const labelColors = [
   '#aaffaa',
   '#ff88ff'
 ];
+
+const ColorEditorButton = styled(Button)`
+  min-width: 50px;
+`;
 
 const AppearanceEditor: React.FC<{
   value: LabelAppearance | undefined;
@@ -443,7 +512,7 @@ const AppearanceEditor: React.FC<{
       overlay={appearanceEditor}
       placement="bottom"
     >
-      <Button
+      <ColorEditorButton
         className="color-editor-button"
         bsSize="xs"
         style={{
@@ -452,7 +521,7 @@ const AppearanceEditor: React.FC<{
         }}
       >
         {value!.alpha * 100}%
-      </Button>
+      </ColorEditorButton>
     </OverlayTrigger>
   );
 };
@@ -466,30 +535,21 @@ const AppearancePopover: React.FC<{
     value: { color, alpha }
   } = props;
   return (
-    <div className="label-list-color-dropdown">
+    <StyledAppearancePopoverDiv>
       <ColorPalette
         value={color}
         onChange={(color: string) => onChange({ color, alpha })}
         colors={labelColors}
       />
-      <div className="label-list-opacity-dropdown">
-        {alpha === 0 ? (
-          <IconButton
-            icon="eye-close"
-            bsStyle="link"
-            bsSize="sm"
-            onClick={() => onChange({ color, alpha: 1 })}
-          />
-        ) : (
-          <IconButton
-            icon="eye-open"
-            bsStyle="link"
-            bsSize="sm"
-            onClick={() => onChange({ color, alpha: 0 })}
-          />
-        )}
+      <div className="alpha-pane">
+        <IconButton
+          icon={alpha === 0 ? 'eye-close' : 'eye-open'}
+          bsStyle="link"
+          bsSize="sm"
+          onClick={() => onChange({ color, alpha: alpha === 0 ? 1 : 0 })}
+        />
         <Slider
-          className="opacity-slider"
+          className="alpha-slider"
           min={0}
           max={100}
           step={10}
@@ -497,6 +557,16 @@ const AppearancePopover: React.FC<{
           onChange={(v: number) => onChange({ color, alpha: v / 100 })}
         />
       </div>
-    </div>
+    </StyledAppearancePopoverDiv>
   );
 };
+
+const StyledAppearancePopoverDiv = styled.div`
+  .alpha-pane {
+    display: flex;
+    align-items: center;
+  }
+  .alpha-slider {
+    width: 85px;
+  }
+`;

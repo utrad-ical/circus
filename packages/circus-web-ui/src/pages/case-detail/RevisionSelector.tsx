@@ -2,6 +2,7 @@ import React from 'react';
 import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
 import TimeDisplay from 'components/TimeDisplay';
 import UserDisplay from 'components/UserDisplay';
+import styled from 'styled-components';
 
 const Item: React.FC<{
   value: any;
@@ -42,7 +43,18 @@ const RevisionSelector: React.FC<{
       opts[`rev${originalIndex}`] = { caption: <Item value={r} /> };
     });
   const sel = `rev${selected}`;
-  return <ShrinkSelect options={opts} value={sel} onChange={handleSelect} />;
+  return (
+    <StyledShrinkSelect options={opts} value={sel} onChange={handleSelect} />
+  );
 });
+
+const StyledShrinkSelect = styled(ShrinkSelect)`
+  .revision-selector-item > span {
+    margin: 0 3px;
+  }
+  .description {
+    font-weight: bold;
+  }
+`;
 
 export default RevisionSelector;

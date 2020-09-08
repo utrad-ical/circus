@@ -27,16 +27,11 @@ import React, { Fragment, useLayoutEffect, useState } from 'react';
 import styled from 'styled-components';
 import useLocalPreference from 'utils/useLocalPreference';
 import {
-  createDefaultPlaneFigureLabelData,
-  createDefaultSolidFigureLabelData,
-  createEmptyVoxelLabelData,
-  LabelEntry,
   LabelType,
-  PlaneFigureLabel,
   SeriesEntry,
-  SolidFigureLabel,
-  VoxelLabel,
-  voxelShrinkToMinimum
+  voxelShrinkToMinimum,
+  InternalLabel,
+  createNewLabelData
 } from './revisionData';
 
 const labelTypeOptions: { [key: string]: { caption: string; icon: string } } = {
@@ -94,7 +89,7 @@ const LabelSelector: React.FC<{
   composition: Composition;
   onChange: (newEditingData: any, pushToHistory: boolean) => void;
   onChangeActiveLabel: (seriesIndex: number, labelIndex: number) => void;
-  activeLabel: LabelEntry;
+  activeLabel: InternalLabel;
   activeSeries: SeriesEntry;
   viewers: { [index: string]: Viewer };
 }> = props => {
@@ -146,7 +141,7 @@ const Series: React.FC<{
   index: number;
   series: SeriesEntry;
   activeSeries: SeriesEntry;
-  activeLabel: LabelEntry;
+  activeLabel: InternalLabel;
   onChange: (
     seriesIndex: number,
     newSeries: SeriesEntry,
@@ -178,7 +173,7 @@ const Series: React.FC<{
   useLayoutEffect(() => {
     if (changeActiveLabelKey !== undefined) {
       const newActiveLabelIndex = series.labels.findIndex(
-        v => v.temporarykey === changeActiveLabelKey
+        v => v.temporaryKey === changeActiveLabelKey
       );
       onChangeActiveLabel(seriesIndex, newActiveLabelIndex);
     }
@@ -193,7 +188,7 @@ const Series: React.FC<{
 
   const handleLabelChange = (
     labelIndex: number,
-    label: LabelEntry,
+    label: InternalLabel,
     pushToHistory: boolean = false
   ) => {
     const newSeries = update(series, {
@@ -219,76 +214,30 @@ const Series: React.FC<{
     }
   };
 
-  const createNewLabel = (): LabelEntry => {
+  const createNewLabel = (): InternalLabel => {
     const color = '#ff0000';
     const alpha = 1;
-    const temporarykey = generateUniqueId();
-
-    const createNewVoxelLabel = (): VoxelLabel => {
-      return {
-        temporarykey: temporarykey,
-        type: newLabelType,
-        name: getUniqueLabelName('Voxels'),
-        data: {
-          ...createEmptyVoxelLabelData(),
-          color: color,
-          alpha: alpha
-        },
-        attributes: {}
-      };
+    const temporaryKey = generateUniqueId();
+    const labelNames: { [key in LabelType]: string } = {
+      voxel: 'Voxels',
+      ellipsoid: '3D Shape',
+      cuboid: '3D Shape',
+      ellipse: '2D Shape',
+      rectangle: '2D Shape'
     };
-
-    const createNewSolidFigureLabel = (): SolidFigureLabel => {
-      return {
-        temporarykey: temporarykey,
-        type: newLabelType,
-        name: getUniqueLabelName('3D Shape'),
-        data: {
-          ...createDefaultSolidFigureLabelData(viewers),
-          color: color,
-          alpha: alpha
-        },
-        attributes: {}
-      };
-    };
-
-    const createNewPlaneFigureLabel = (): PlaneFigureLabel => {
-      return {
-        temporarykey: temporarykey,
-        type: newLabelType,
-        name: getUniqueLabelName('2D Shape'),
-        data: {
-          ...createDefaultPlaneFigureLabelData(viewers),
-          color: color,
-          alpha: alpha
-        },
-        attributes: {}
-      };
-    };
-
-    switch (newLabelType) {
-      case 'cuboid':
-      case 'ellipsoid':
-        return createNewSolidFigureLabel();
-
-      case 'rectangle':
-      case 'ellipse':
-        return createNewPlaneFigureLabel();
-
-      case 'voxel':
-      default:
-        return createNewVoxelLabel();
-    }
+    const name = getUniqueLabelName(labelNames[newLabelType]);
+    const data = createNewLabelData(newLabelType, { color, alpha }, viewers);
+    return { temporaryKey, name, ...data, attributes: {} } as InternalLabel;
   };
 
   const addLabel = () => {
     const newLabel = createNewLabel();
     const newSeries = update(series, { labels: { $push: [newLabel] } });
     onChange(seriesIndex, newSeries, true);
-    setChangeActiveLabelKey(newLabel.temporarykey);
+    setChangeActiveLabelKey(newLabel.temporaryKey);
   };
 
-  const renameLabel = async (labelIndex: number, label: LabelEntry) => {
+  const renameLabel = async (labelIndex: number, label: InternalLabel) => {
     const newLabelName = await prompt('Label name', label.name);
     if (newLabelName === null || label.name === newLabelName) return;
     const newSeries = update(series, {
@@ -318,7 +267,7 @@ const Series: React.FC<{
       );
     });
     onChange(seriesIndex, newSeries, true);
-    setChangeActiveLabelKey(activeLabel.temporarykey);
+    setChangeActiveLabelKey(activeLabel.temporaryKey);
   };
 
   const moveDownLabel = (labelIndex: number) => {
@@ -332,59 +281,43 @@ const Series: React.FC<{
       );
     });
     onChange(seriesIndex, newSeries, true);
-    setChangeActiveLabelKey(activeLabel.temporarykey);
+    setChangeActiveLabelKey(activeLabel.temporaryKey);
   };
 
-  const convertLabelType = (labelIndex: number, label: LabelEntry) => {
+  const convertLabelType = (labelIndex: number, label: InternalLabel) => {
     if (label.type === 'voxel') return;
     const newLabelType = convertLabelTypeMenuOptions[label.type].convertTo;
-    const newSeries = update(series, {
-      labels: {
-        [labelIndex]: { type: { $set: newLabelType } }
-      }
+    const newSeries = produce(series, series => {
+      series.labels[labelIndex].type = newLabelType;
     });
     onChange(seriesIndex, newSeries, true);
   };
 
-  const revealInViewer = (label: LabelEntry) => {
-    const getVoxelLabelCenter = (
-      composition: Composition,
-      voxelLabel: VoxelLabel
-    ) => {
-      const shrinkResult = voxelShrinkToMinimum(voxelLabel.data);
-      if (shrinkResult === null) return;
-      const origin = shrinkResult.origin;
-      const size = shrinkResult.rawData.getDimension();
-      return getBoxCenter(
-        VoxelCloud.getBoundingBox(composition, { origin, size })
-      );
-    };
-
-    const getSolidFigureLabelCenter = (solidFigureLabel: SolidFigureLabel) => {
-      return getBoxCenter(solidFigureLabel.data);
-    };
-
-    const getPlaneFigureLabelCenter = (planeFigureLabel: PlaneFigureLabel) => {
-      return getBoxCenter(PlaneFigure.getOutline(planeFigureLabel.data));
-    };
-
-    const getCenter = (composition: Composition, label: LabelEntry) => {
+  const revealInViewer = (label: InternalLabel) => {
+    const getCenter = (composition: Composition, label: InternalLabel) => {
       switch (label.type) {
-        case 'voxel':
-          return getVoxelLabelCenter(composition, label as VoxelLabel);
+        case 'voxel': {
+          const shrinkResult = voxelShrinkToMinimum(label.data);
+          if (shrinkResult === null) return;
+          const origin = shrinkResult.origin;
+          const size = shrinkResult.rawData.getDimension();
+          return getBoxCenter(
+            VoxelCloud.getBoundingBox(composition, { origin, size })
+          );
+        }
         case 'cuboid':
         case 'ellipsoid':
-          return getSolidFigureLabelCenter(label as SolidFigureLabel);
+          return getBoxCenter(label.data);
         case 'rectangle':
         case 'ellipse':
-          return getPlaneFigureLabelCenter(label as PlaneFigureLabel);
+          return getBoxCenter(PlaneFigure.getOutline(label.data));
         default:
           return;
       }
     };
 
     const center = getCenter(composition, label);
-    Object.values(viewers).map(viewer => focusBy(viewer, center));
+    Object.values(viewers).forEach(viewer => focusBy(viewer, center));
   };
 
   return (
@@ -395,14 +328,14 @@ const Series: React.FC<{
     >
       <Icon icon="circus-series" /> Series #{seriesIndex}
       <ul className="case-label-list">
-        {series.labels.map((label: LabelEntry, labelIndex: number) => (
+        {series.labels.map((label, labelIndex) => (
           <Label
             label={label}
             labelCount={series.labels.length}
             activeLabel={activeLabel}
             seriesIndex={seriesIndex}
             index={labelIndex}
-            key={label.temporarykey!}
+            key={label.temporaryKey}
             onChange={handleLabelChange}
             onClick={() => onChangeActiveLabel(seriesIndex, labelIndex)}
             onRenameClick={() => renameLabel(labelIndex, label)}
@@ -447,7 +380,7 @@ export const Label: React.FC<{
   index: number;
   key: string;
   seriesIndex: number;
-  activeLabel: LabelEntry;
+  activeLabel: InternalLabel;
   labelCount: number;
   onChange: any;
   onClick: any;

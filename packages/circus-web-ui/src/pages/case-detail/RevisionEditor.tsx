@@ -23,13 +23,7 @@ import {
   VolumeLoaderCacheContext
 } from 'utils/useImageSource';
 import LabelSelector from './LabelSelector';
-import {
-  EditingData,
-  LabelEntry,
-  PlaneFigureLabel,
-  SolidFigureLabel,
-  VoxelLabel
-} from './revisionData';
+import { EditingData, InternalLabel } from './revisionData';
 import SideContainer from './SideContainer';
 import ToolBar from './ToolBar';
 import ViewerCluster, { Layout } from './ViwewerCluster';
@@ -101,7 +95,7 @@ const RevisionEditor: React.FC<{
   ) => {
     const { revision, activeSeriesIndex } = editingData;
     const labelIndex = revision.series[activeSeriesIndex].labels.findIndex(
-      v => v.temporarykey === annotation.id
+      v => v.temporaryKey === annotation.id
     );
 
     const newLabel = () => {
@@ -170,11 +164,12 @@ const RevisionEditor: React.FC<{
         .padStart(2, '0');
 
     const createVoxelCloud = (
-      label: VoxelLabel,
+      label: InternalLabel,
       color: string,
       alpha: number,
       isActive: boolean
     ): rs.VoxelCloud => {
+      if (label.type !== 'voxel') throw new Error();
       const volume = new rs.RawData(label.data.size!, 'binary');
       volume.assign(
         isActive
@@ -187,32 +182,36 @@ const RevisionEditor: React.FC<{
       cloud.color = color;
       cloud.alpha = alpha;
       cloud.active = isActive;
-      cloud.id = label.temporarykey;
+      cloud.id = label.temporaryKey;
       return cloud;
     };
 
     const createSolidFigure = (
-      label: SolidFigureLabel,
+      label: InternalLabel,
       color: string,
       alpha: number,
       isActive: boolean
     ): rs.SolidFigure => {
+      if (label.type !== 'ellipsoid' && label.type !== 'cuboid')
+        throw new Error();
       const fig =
         label.type === 'ellipsoid' ? new rs.Ellipsoid() : new rs.Cuboid();
       fig.editable = true;
       fig.color = rgbaColor(color, alpha);
       fig.min = label.data.min;
       fig.max = label.data.max;
-      fig.id = label.temporarykey;
+      fig.id = label.temporaryKey;
       return fig;
     };
 
     const createPlaneFigure = (
-      label: PlaneFigureLabel,
+      label: InternalLabel,
       color: string,
       alpha: number,
       isActive: boolean
     ): rs.PlaneFigure => {
+      if (label.type !== 'ellipse' && label.type !== 'rectangle')
+        throw new Error();
       const fig = new rs.PlaneFigure();
       fig.type = label.type === 'ellipse' ? 'circle' : 'rectangle';
       fig.editable = true;
@@ -220,45 +219,30 @@ const RevisionEditor: React.FC<{
       fig.min = label.data.min;
       fig.max = label.data.max;
       fig.z = label.data.z;
-      fig.id = label.temporarykey;
+      fig.id = label.temporaryKey;
       return fig;
     };
 
-    activeSeries.labels.forEach((label: LabelEntry) => {
+    activeSeries.labels.forEach((label: InternalLabel) => {
       const isActive = activeLabel && label === activeLabel;
       const alpha = label.data.alpha ?? 1;
       const color = label.data.color ?? '#ff0000';
 
       switch (label.type) {
         case 'voxel': {
-          const cloud = createVoxelCloud(
-            label as VoxelLabel,
-            color,
-            alpha,
-            isActive
-          );
+          const cloud = createVoxelCloud(label, color, alpha, isActive);
           composition.addAnnotation(cloud);
           break;
         }
         case 'cuboid':
         case 'ellipsoid': {
-          const fig = createSolidFigure(
-            label as SolidFigureLabel,
-            color,
-            alpha,
-            isActive
-          );
+          const fig = createSolidFigure(label, color, alpha, isActive);
           composition.addAnnotation(fig);
           break;
         }
         case 'rectangle':
         case 'ellipse': {
-          const fig = createPlaneFigure(
-            label as PlaneFigureLabel,
-            color,
-            alpha,
-            isActive
-          );
+          const fig = createPlaneFigure(label, color, alpha, isActive);
           composition.addAnnotation(fig);
           break;
         }

@@ -44,35 +44,6 @@ const labelTypeOptions: {
   ellipse: { caption: 'ellipse', icon: 'circus-annotation-ellipse' }
 };
 
-const convertLabelTypeMenuOptions: {
-  [type: string]: {
-    convertTo: LabelType;
-    caption: string;
-    icon: string;
-  };
-} = {
-  cuboid: {
-    convertTo: 'ellipsoid',
-    caption: 'Convert to ellipsoid',
-    icon: 'circus-annotation-ellipsoid'
-  },
-  ellipsoid: {
-    convertTo: 'cuboid',
-    caption: 'Convert to cuboid',
-    icon: 'circus-annotation-cuboid'
-  },
-  rectangle: {
-    convertTo: 'ellipse',
-    caption: 'Convert to ellipse',
-    icon: 'circus-annotation-ellipse'
-  },
-  ellipse: {
-    convertTo: 'rectangle',
-    caption: 'Convert to rectangle',
-    icon: 'circus-annotation-rectangle'
-  }
-};
-
 const LabelTypeRenderer: React.FC<{
   icon: string;
   caption: string;
@@ -137,6 +108,14 @@ const LabelSelector: React.FC<{
 };
 
 export default LabelSelector;
+
+type LabelCommand =
+  | 'rename'
+  | 'remove'
+  | 'moveUp'
+  | 'moveDown'
+  | 'convertType'
+  | 'reveal';
 
 const Series: React.FC<{
   composition: Composition;
@@ -241,6 +220,21 @@ const Series: React.FC<{
     setChangeActiveLabelKey(newLabel.temporaryKey);
   };
 
+  const handleCommand = (command: LabelCommand, labelIndex: number) => {
+    const label = series.labels[labelIndex];
+    const handlers: {
+      [c in LabelCommand]: (labelIndex: number, label: InternalLabel) => void;
+    } = {
+      rename: renameLabel,
+      remove: removeLabel,
+      moveUp: moveUpLabel,
+      moveDown: moveDownLabel,
+      convertType: convertLabelType,
+      reveal: revealInViewer
+    };
+    handlers[command](labelIndex, label);
+  };
+
   const renameLabel = async (labelIndex: number, label: InternalLabel) => {
     const newLabelName = await prompt('Label name', label.name);
     if (newLabelName === null || label.name === newLabelName) return;
@@ -260,12 +254,12 @@ const Series: React.FC<{
 
   const moveUpLabel = (labelIndex: number) => {
     if (labelIndex === 0) return;
-    const newSeries = produce(series, s => {
-      s.labels.splice(
+    const newSeries = produce(series, series => {
+      series.labels.splice(
         labelIndex - 1,
         2,
-        s.labels[labelIndex],
-        s.labels[labelIndex - 1]
+        series.labels[labelIndex],
+        series.labels[labelIndex - 1]
       );
     });
     onChange(seriesIndex, newSeries, true);
@@ -274,12 +268,12 @@ const Series: React.FC<{
 
   const moveDownLabel = (labelIndex: number) => {
     if (labelIndex === series.labels.length - 1) return;
-    const newSeries = produce(series, s => {
-      s.labels.splice(
+    const newSeries = produce(series, series => {
+      series.labels.splice(
         labelIndex,
         2,
-        s.labels[labelIndex + 1],
-        s.labels[labelIndex]
+        series.labels[labelIndex + 1],
+        series.labels[labelIndex]
       );
     });
     onChange(seriesIndex, newSeries, true);
@@ -287,15 +281,15 @@ const Series: React.FC<{
   };
 
   const convertLabelType = (labelIndex: number, label: InternalLabel) => {
-    if (label.type === 'voxel') return;
-    const newLabelType = convertLabelTypeMenuOptions[label.type].convertTo;
+    const newLabelType = convertLabelTypeMap[label.type];
+    if (!newLabelType) return;
     const newSeries = produce(series, series => {
       series.labels[labelIndex].type = newLabelType;
     });
     onChange(seriesIndex, newSeries, true);
   };
 
-  const revealInViewer = (label: InternalLabel) => {
+  const revealInViewer = (labelIndex: number, label: InternalLabel) => {
     const getCenter = (composition: Composition, label: InternalLabel) => {
       switch (label.type) {
         case 'voxel': {
@@ -317,7 +311,6 @@ const Series: React.FC<{
           return;
       }
     };
-
     const center = getCenter(composition, label);
     Object.values(viewers).forEach(viewer => focusBy(viewer, center));
   };
@@ -340,12 +333,7 @@ const Series: React.FC<{
             key={label.temporaryKey}
             onChange={handleLabelChange}
             onClick={() => onChangeActiveLabel(seriesIndex, labelIndex)}
-            onRenameClick={() => renameLabel(labelIndex, label)}
-            onRemoveClick={() => removeLabel(labelIndex)}
-            onMoveUpClick={() => moveUpLabel(labelIndex)}
-            onMoveDownClick={() => moveDownLabel(labelIndex)}
-            onConvertTypeClick={() => convertLabelType(labelIndex, label)}
-            onRevealInViewerClick={() => revealInViewer(label)}
+            onCommand={command => handleCommand(command, labelIndex)}
           />
         ))}
       </ul>
@@ -372,6 +360,13 @@ const StyledLabelNameNone = styled.span`
   color: gray;
 `;
 
+const convertLabelTypeMap: { [type in LabelType]?: LabelType } = {
+  cuboid: 'ellipsoid',
+  ellipsoid: 'cuboid',
+  rectangle: 'ellipse',
+  ellipse: 'rectangle'
+};
+
 export const Label: React.FC<{
   label: InternalLabel;
   index: number;
@@ -379,14 +374,13 @@ export const Label: React.FC<{
   seriesIndex: number;
   activeLabel: InternalLabel;
   labelCount: number;
-  onChange: any;
-  onClick: any;
-  onRenameClick: any;
-  onRemoveClick: any;
-  onMoveUpClick: any;
-  onMoveDownClick: any;
-  onConvertTypeClick: any;
-  onRevealInViewerClick: any;
+  onChange: (
+    labelIndex: number,
+    label: InternalLabel,
+    pushToHistory?: any
+  ) => void;
+  onClick: () => void;
+  onCommand: (command: LabelCommand) => void;
 }> = props => {
   const {
     label,
@@ -396,12 +390,7 @@ export const Label: React.FC<{
     labelCount,
     onChange,
     onClick,
-    onRenameClick,
-    onRemoveClick,
-    onMoveUpClick,
-    onMoveDownClick,
-    onConvertTypeClick,
-    onRevealInViewerClick
+    onCommand
   } = props;
 
   const caption = label.name ? (
@@ -499,33 +488,35 @@ export const Label: React.FC<{
           pullRight
           noCaret
         >
-          <MenuItem eventKey="1" onSelect={onRenameClick}>
+          <MenuItem eventKey="1" onSelect={() => onCommand('rename')}>
             <Icon icon="header" />
             &ensp;Rename
           </MenuItem>
-          <MenuItem eventKey="2" onSelect={onRemoveClick}>
+          <MenuItem eventKey="2" onSelect={() => onCommand('remove')}>
             <Icon icon="remove" />
             &ensp;Remove
           </MenuItem>
           {labelIndex !== 0 && (
-            <MenuItem eventKey="3" onSelect={onMoveUpClick}>
+            <MenuItem eventKey="3" onSelect={() => onCommand('moveUp')}>
               <Icon icon="chevron-up" />
               &ensp;Move up
             </MenuItem>
           )}
           {labelIndex < labelCount - 1 && (
-            <MenuItem eventKey="4" onSelect={onMoveDownClick}>
+            <MenuItem eventKey="4" onSelect={() => onCommand('moveDown')}>
               <Icon icon="chevron-down" />
               &ensp;Move down
             </MenuItem>
           )}
           {label.type !== 'voxel' && (
-            <MenuItem eventKey="5" onSelect={onConvertTypeClick}>
-              <Icon icon={convertLabelTypeMenuOptions[label.type].icon} />
-              &ensp;{convertLabelTypeMenuOptions[label.type].caption}
+            <MenuItem eventKey="5" onSelect={() => onCommand('convertType')}>
+              <Icon
+                icon={'circus-annotation-' + convertLabelTypeMap[label.type]}
+              />
+              &ensp;Convert to {convertLabelTypeMap[label.type]}
             </MenuItem>
           )}
-          <MenuItem eventKey="6" onSelect={onRevealInViewerClick}>
+          <MenuItem eventKey="6" onSelect={() => onCommand('reveal')}>
             <Icon icon="map-marker" />
             &ensp;Reveal in Viewer
           </MenuItem>

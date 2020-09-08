@@ -34,7 +34,9 @@ import {
   createNewLabelData
 } from './revisionData';
 
-const labelTypeOptions: { [key: string]: { caption: string; icon: string } } = {
+const labelTypeOptions: {
+  [key in LabelType]: { caption: string; icon: string };
+} = {
   voxel: { caption: 'voxel', icon: 'circus-annotation-voxel' },
   cuboid: { caption: 'cuboid', icon: 'circus-annotation-cuboid' },
   ellipsoid: { caption: 'ellipsoid', icon: 'circus-annotation-ellipsoid' },
@@ -232,7 +234,9 @@ const Series: React.FC<{
 
   const addLabel = () => {
     const newLabel = createNewLabel();
-    const newSeries = update(series, { labels: { $push: [newLabel] } });
+    const newSeries = produce(series, series => {
+      series.labels.push(newLabel);
+    });
     onChange(seriesIndex, newSeries, true);
     setChangeActiveLabelKey(newLabel.temporaryKey);
   };

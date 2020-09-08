@@ -1,5 +1,5 @@
 import ColorPicker from '@smikitky/rb-components/lib/ColorPicker';
-import { confirm } from '@smikitky/rb-components/lib/modal';
+import { confirm, prompt } from '@smikitky/rb-components/lib/modal';
 import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
 import Slider from '@smikitky/rb-components/lib/Slider';
 import generateUniqueId from '@utrad-ical/circus-lib/src/generateUniqueId';
@@ -21,7 +21,6 @@ import {
   OverlayTrigger,
   Popover
 } from 'components/react-bootstrap';
-import update from 'immutability-helper';
 import produce from 'immer';
 import React, { Fragment, useLayoutEffect, useState } from 'react';
 import styled from 'styled-components';
@@ -31,7 +30,8 @@ import {
   SeriesEntry,
   voxelShrinkToMinimum,
   InternalLabel,
-  createNewLabelData
+  createNewLabelData,
+  EditingData
 } from './revisionData';
 
 const labelTypeOptions: {
@@ -87,7 +87,7 @@ const LabelTypeRenderer: React.FC<{
 };
 
 const LabelSelector: React.FC<{
-  editingData: any;
+  editingData: EditingData;
   composition: Composition;
   onChange: (newEditingData: any, pushToHistory: boolean) => void;
   onChangeActiveLabel: (seriesIndex: number, labelIndex: number) => void;
@@ -111,8 +111,8 @@ const LabelSelector: React.FC<{
     newSeries: SeriesEntry,
     pushToHistory: boolean = false
   ) => {
-    const newEditingData = update(editingData, {
-      revision: { series: { [index]: { $set: newSeries } } }
+    const newEditingData = produce(editingData, editingData => {
+      editingData.revision.series[index] = newSeries;
     });
     onChange(newEditingData, pushToHistory);
   };
@@ -193,8 +193,8 @@ const Series: React.FC<{
     label: InternalLabel,
     pushToHistory: boolean = false
   ) => {
-    const newSeries = update(series, {
-      labels: { [labelIndex]: { $set: label } }
+    const newSeries = produce(series, series => {
+      series.labels[labelIndex] = label;
     });
     onChange(seriesIndex, newSeries, pushToHistory);
   };
@@ -244,18 +244,16 @@ const Series: React.FC<{
   const renameLabel = async (labelIndex: number, label: InternalLabel) => {
     const newLabelName = await prompt('Label name', label.name);
     if (newLabelName === null || label.name === newLabelName) return;
-    const newSeries = update(series, {
-      labels: {
-        [labelIndex]: { name: { $set: newLabelName } }
-      }
+    const newSeries = produce(series, series => {
+      series.labels[labelIndex].name = newLabelName;
     });
     onChange(seriesIndex, newSeries, true);
   };
 
   const removeLabel = async (labelIndex: number) => {
     if (!(await confirm('Delete this label?'))) return;
-    const newSeries = update(series, {
-      labels: { $splice: [[labelIndex, 1]] }
+    const newSeries = produce(series, series => {
+      series.labels.splice(labelIndex, 1);
     });
     onChange(seriesIndex, newSeries, true);
   };
@@ -375,12 +373,7 @@ const StyledLabelNameNone = styled.span`
 `;
 
 export const Label: React.FC<{
-  label: {
-    temporarykey?: string;
-    type: LabelType;
-    data: any;
-    name?: string;
-  };
+  label: InternalLabel;
   index: number;
   key: string;
   seriesIndex: number;
@@ -437,16 +430,20 @@ export const Label: React.FC<{
   ];
 
   const changeLabelAlpha = (alpha: number) => {
-    const newLabel = update(label, { data: { alpha: { $set: alpha } } });
+    const newLabel = produce(label, label => {
+      label.data.alpha = alpha;
+    });
     onChange(labelIndex, newLabel);
   };
 
   const handleChangeLabelColor = (color: string): void => {
-    const newLabel = update(label, { data: { color: { $set: color } } });
+    const newLabel = produce(label, label => {
+      label.data.color = color;
+    });
     onChange(labelIndex, newLabel);
   };
 
-  const handleCommit = (compareKey: string): void => {
+  const handleCommit = (compareKey: 'alpha' | 'color'): void => {
     onChange(labelIndex, label, (old: any) => {
       return (
         old.revision.series[seriesIndex].labels[labelIndex].data[compareKey] !==
@@ -475,7 +472,7 @@ export const Label: React.FC<{
       className={classNames('label-list-item', {
         active: label === activeLabel
       })}
-      key={label.temporarykey}
+      key={label.temporaryKey}
       onClick={handleClick}
     >
       <div>

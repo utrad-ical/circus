@@ -66,11 +66,11 @@ const useComposition = (
 
 const RevisionEditor: React.FC<{
   editingData: EditingData;
-  onChange: EditingDataUpdater;
+  updateEditingData: EditingDataUpdater;
   projectData: Project;
   busy: boolean;
 }> = props => {
-  const { editingData, onChange, projectData, busy } = props;
+  const { editingData, updateEditingData, projectData, busy } = props;
 
   const viewersRef = useRef<{ [key: string]: Viewer }>({});
   const viewers = viewersRef.current;
@@ -132,7 +132,7 @@ const RevisionEditor: React.FC<{
       }
     };
 
-    onChange(d => {
+    updateEditingData(d => {
       d.revision.series[activeSeriesIndex].labels[labelIndex] = newLabel();
     });
   };
@@ -215,16 +215,9 @@ const RevisionEditor: React.FC<{
     }
   }, [composition, getTool, tool]);
 
-  const changeActiveLabel = (seriesIndex: number, labelIndex: number) => {
-    onChange(d => {
-      d.activeLabelIndex = seriesIndex;
-      d.activeLabelIndex = labelIndex;
-    }, 'change active label');
-  };
-
   const labelAttributesChange = (value: any, isTextInput: boolean) => {
     const { activeSeriesIndex, activeLabelIndex } = editingData;
-    onChange(
+    updateEditingData(
       d => {
         d.revision.series[activeSeriesIndex].labels[
           activeLabelIndex
@@ -235,7 +228,7 @@ const RevisionEditor: React.FC<{
   };
 
   const caseAttributesChange = (value: any, isTextInput: boolean) => {
-    onChange(
+    updateEditingData(
       d => {
         d.revision.attributes = value;
       },
@@ -323,8 +316,7 @@ const RevisionEditor: React.FC<{
           <LabelSelector
             editingData={editingData}
             composition={composition}
-            onChange={onChange}
-            onChangeActiveLabel={changeActiveLabel}
+            updateEditingData={updateEditingData}
             viewers={viewers}
           />
           {activeLabel && (

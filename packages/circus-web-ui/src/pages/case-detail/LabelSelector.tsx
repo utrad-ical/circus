@@ -215,6 +215,7 @@ const LabelSelector: React.FC<{
         />
         &thinsp;
         <SplitButton
+          id="add-label"
           bsSize="xs"
           bsStyle="primary"
           title={

@@ -3,7 +3,6 @@ import { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
 import * as rs from '@utrad-ical/circus-rs/src/browser';
 import { Composition, Viewer } from '@utrad-ical/circus-rs/src/browser';
 import ToolBaseClass from '@utrad-ical/circus-rs/src/browser/tool/Tool';
-import { InterpolationMode } from '@utrad-ical/circus-rs/src/browser/ViewState';
 import classNames from 'classnames';
 import Collapser from 'components/Collapser';
 import { createStateChanger } from 'components/ImageViewer';
@@ -29,14 +28,8 @@ import {
   InternalLabel
 } from './revisionData';
 import SideContainer from './SideContainer';
-import ToolBar from './ToolBar';
-import ViewerCluster, { Layout } from './ViwewerCluster';
-
-interface ViewOptions {
-  layout: Layout;
-  showReferenceLine: boolean;
-  interpolationMode: InterpolationMode;
-}
+import ToolBar, { ViewOptions } from './ToolBar';
+import ViewerCluster from './ViwewerCluster';
 
 const useComposition = (
   seriesUid: string,
@@ -236,24 +229,27 @@ const RevisionEditor: React.FC<{
     );
   };
 
-  const changeTool = (toolName: string) => {
-    setToolName(toolName);
-    setTool(getTool(toolName));
-  };
+  const changeTool = useCallback(
+    (toolName: string) => {
+      setToolName(toolName);
+      setTool(getTool(toolName));
+    },
+    [getTool]
+  );
 
-  const handleChangeViewOptions = (viewOptions: ViewOptions) => {
-    setViewOptions(viewOptions);
-  };
+  const handleApplyWindow = useCallback(
+    (window: any) => stateChanger(state => ({ ...state, window })),
+    [stateChanger]
+  );
 
-  const handleApplyWindow = (window: any) => {
-    stateChanger(state => ({ ...state, window }));
-  };
-
-  const handleSetLineWidth = (lineWidth: number) => {
-    setLineWidth(lineWidth);
-    getTool('brush').setOptions({ width: lineWidth });
-    getTool('eraser').setOptions({ width: lineWidth });
-  };
+  const handleSetLineWidth = useCallback(
+    (lineWidth: number) => {
+      setLineWidth(lineWidth);
+      getTool('brush').setOptions({ width: lineWidth });
+      getTool('eraser').setOptions({ width: lineWidth });
+    },
+    [getTool]
+  );
 
   const handleCreateViwer = (viewer: Viewer, id: string | number) => {
     viewers[id] = viewer;
@@ -350,7 +346,7 @@ const RevisionEditor: React.FC<{
           active={toolName}
           onChangeTool={changeTool}
           viewOptions={viewOptions}
-          onChangeViewOptions={handleChangeViewOptions}
+          onChangeViewOptions={setViewOptions}
           lineWidth={lineWidth}
           setLineWidth={handleSetLineWidth}
           windowPresets={projectData.windowPresets}

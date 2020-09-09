@@ -1,4 +1,5 @@
 import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
+import { InterpolationMode } from '@utrad-ical/circus-rs/src/browser/ViewState';
 import Icon from 'components/Icon';
 import {
   Button,
@@ -6,7 +7,9 @@ import {
   MenuItem,
   SplitButton
 } from 'components/react-bootstrap';
-import React, { Fragment } from 'react';
+import React from 'react';
+import styled from 'styled-components';
+import { Layout } from './ViwewerCluster';
 
 interface WindowPreset {
   label: string;
@@ -14,30 +17,30 @@ interface WindowPreset {
   width: number;
 }
 
-const LayoutRenderer: React.FC<{
-  icon: any;
-  caption: React.ReactChild;
-}> = props => {
-  return (
-    <Fragment>
-      <Icon icon={props.icon} />
-      &ensp;
-      <span className="caption">{props.caption}</span>
-    </Fragment>
-  );
-};
+export interface ViewOptions {
+  layout: Layout;
+  showReferenceLine: boolean;
+  interpolationMode: InterpolationMode;
+}
+
+const layoutOptions = [
+  { key: 'twoByTwo', caption: '2 x 2', icon: 'circus-layout-four' },
+  { key: 'axial', caption: 'Axial', icon: 'circus-orientation-axial' },
+  { key: 'sagittal', caption: 'Sagittal', icon: 'circus-orientation-sagittal' },
+  { key: 'coronal', caption: 'Coronal', icon: 'circus-orientation-coronal' }
+];
 
 const ToolBar: React.FC<{
   active: string;
-  viewOptions: any;
-  onChangeViewOptions: any;
+  viewOptions: ViewOptions;
+  onChangeViewOptions: (viewOptions: ViewOptions) => void;
   brushEnabled: boolean;
   lineWidth: number;
   setLineWidth: any;
   windowPresets?: WindowPreset[];
-  onChangeTool: any;
-  onApplyWindow: any;
-}> = props => {
+  onChangeTool: (toolName: string) => void;
+  onApplyWindow: (window: any) => void;
+}> = React.memo(props => {
   const {
     active,
     viewOptions,
@@ -59,7 +62,7 @@ const ToolBar: React.FC<{
     });
   };
 
-  const handleChangeLayout = (selection: any) => {
+  const handleChangeLayout = (selection: Layout) => {
     onChangeViewOptions({ ...viewOptions, layout: selection });
   };
 
@@ -86,13 +89,6 @@ const ToolBar: React.FC<{
     }
   };
 
-  const layoutOptions = {
-    twoByTwo: { caption: '2 x 2', icon: 'circus-layout-four' },
-    axial: { caption: 'Axial', icon: 'circus-orientation-axial' },
-    sagittal: { caption: 'Sagittal', icon: 'circus-orientation-sagittal' },
-    coronal: { caption: 'Coronal', icon: 'circus-orientation-coronal' }
-  };
-
   const brushTools = ['brush', 'eraser', 'bucket'];
   const activeTool =
     !brushEnabled && brushTools.some(tool => tool === active)
@@ -100,7 +96,7 @@ const ToolBar: React.FC<{
       : active;
 
   return (
-    <div className="case-detail-toolbar">
+    <StyledDiv>
       <ToolButton
         name="pager"
         icon="rs-pager"
@@ -168,14 +164,28 @@ const ToolBar: React.FC<{
         disabled={!brushEnabled}
       />
       &thinsp;
-      <ShrinkSelect
-        className="layout-shrinkselect"
-        name="layout"
-        options={layoutOptions}
-        value={viewOptions.layout}
-        renderer={LayoutRenderer}
-        onChange={handleChangeLayout}
-      />
+      <Dropdown id="layout-dropdown">
+        <Dropdown.Toggle>
+          <Icon
+            icon={layoutOptions.find(l => l.key === viewOptions.layout)?.icon}
+          />
+        </Dropdown.Toggle>
+        <Dropdown.Menu>
+          {layoutOptions.map(l => {
+            return (
+              <MenuItem
+                key={l.key}
+                eventKey={l.key}
+                onSelect={handleChangeLayout}
+              >
+                <CheckMark checked={viewOptions.layout === l.key} />
+                <Icon icon={l.icon} />
+                {l.caption}
+              </MenuItem>
+            );
+          })}
+        </Dropdown.Menu>
+      </Dropdown>
       &thinsp;
       <Dropdown id="view-options-dropdown">
         <Dropdown.Toggle>
@@ -183,29 +193,48 @@ const ToolBar: React.FC<{
         </Dropdown.Toggle>
         <Dropdown.Menu>
           <MenuItem onClick={handleToggleReferenceLine}>
-            {viewOptions.showReferenceLine && (
-              <Fragment>
-                <Icon icon="glyphicon-ok" />
-                &ensp;
-              </Fragment>
-            )}
+            <CheckMark checked={viewOptions.showReferenceLine} />
             Show reference line
           </MenuItem>
           <MenuItem onClick={handleToggleInterpolationMode}>
-            {viewOptions.interpolationMode === 'trilinear' && (
-              <Fragment>
-                <Icon icon="glyphicon-ok" />
-                &ensp;
-              </Fragment>
-            )}
+            <CheckMark
+              checked={viewOptions.interpolationMode === 'trilinear'}
+            />
             Trilinear filtering
           </MenuItem>
         </Dropdown.Menu>
       </Dropdown>
-    </div>
+    </StyledDiv>
   );
-};
+});
+
+const StyledDiv = styled.div`
+  flex: none;
+  background-color: #333;
+  button {
+    height: 40px;
+    padding: 0 7px;
+    font-size: 170%;
+  }
+  .line-width-shrinkselect > button {
+    font-size: 100%;
+  }
+  .layout-shrinkselect .dropdown-toggle .caption {
+    display: none;
+  }
+  .checkmark {
+    display: inline-block;
+    width: 25px;
+  }
+`;
+
 export default ToolBar;
+
+const CheckMark: React.FC<{ checked: boolean }> = props => (
+  <span className="checkmark">
+    {props.checked && <Icon icon="glyphicon-ok" />}
+  </span>
+);
 
 const ToolButton: React.FC<{
   name: string;

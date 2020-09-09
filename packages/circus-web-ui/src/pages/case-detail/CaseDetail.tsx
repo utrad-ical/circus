@@ -79,7 +79,7 @@ const CaseDetail: React.FC<{}> = props => {
     await loadRevisionData(caseData.revisions, index);
   };
 
-  const handleDataChange = useCallback<EditingDataUpdater>(
+  const updateEditingData = useCallback<EditingDataUpdater>(
     (updater, tag) => {
       const newData = produce(editingData, updater);
       caseDispatch(c.change({ newData, tag }));
@@ -174,7 +174,7 @@ const CaseDetail: React.FC<{}> = props => {
         busy={busy}
         editingData={editingData}
         projectData={projectData}
-        onChange={handleDataChange}
+        updateEditingData={updateEditingData}
       />
     </FullSpanContainer>
   );

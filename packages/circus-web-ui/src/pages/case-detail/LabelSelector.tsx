@@ -1,6 +1,5 @@
 import { ColorPalette } from '@smikitky/rb-components/lib/ColorPicker';
 import { confirm, prompt } from '@smikitky/rb-components/lib/modal';
-import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
 import Slider from '@smikitky/rb-components/lib/Slider';
 import generateUniqueId from '@utrad-ical/circus-lib/src/generateUniqueId';
 import { Composition, Viewer } from '@utrad-ical/circus-rs/src/browser';
@@ -16,7 +15,7 @@ import {
   MenuItem
 } from 'components/react-bootstrap';
 import produce from 'immer';
-import React, { Fragment } from 'react';
+import React, { Fragment, useState, useRef } from 'react';
 import styled from 'styled-components';
 import useLocalPreference from 'utils/useLocalPreference';
 import tinyColor from 'tinycolor2';
@@ -41,19 +40,6 @@ const labelTypeOptions: {
   ellipse: { caption: 'ellipse', icon: 'circus-annotation-ellipse' }
 };
 
-const LabelTypeRenderer: React.FC<{
-  icon: string;
-  caption: string;
-}> = props => {
-  return (
-    <Fragment>
-      <Icon icon={props.icon} />
-      &ensp;
-      <span className="caption">{props.caption}</span>
-    </Fragment>
-  );
-};
-
 const convertLabelTypeMap: { [type in LabelType]?: LabelType } = {
   cuboid: 'ellipsoid',
   ellipsoid: 'cuboid',
@@ -64,17 +50,10 @@ const convertLabelTypeMap: { [type in LabelType]?: LabelType } = {
 const LabelSelector: React.FC<{
   editingData: EditingData;
   composition: Composition;
-  onChange: EditingDataUpdater;
-  onChangeActiveLabel: (seriesIndex: number, labelIndex: number) => void;
+  updateEditingData: EditingDataUpdater;
   viewers: { [index: string]: Viewer };
 }> = props => {
-  const {
-    editingData,
-    composition,
-    onChange,
-    onChangeActiveLabel,
-    viewers
-  } = props;
+  const { editingData, composition, updateEditingData, viewers } = props;
 
   const [newLabelType, setNewLabelType] = useLocalPreference<LabelType>(
     'newLabelType',
@@ -91,7 +70,7 @@ const LabelSelector: React.FC<{
     newSeries: SeriesEntry,
     tag?: string
   ) => {
-    onChange(editingData => {
+    updateEditingData(editingData => {
       editingData.revision.series[index] = newSeries;
     }, tag);
   };
@@ -110,7 +89,7 @@ const LabelSelector: React.FC<{
       }
       case 'remove': {
         if (!(await confirm('Delete this label?'))) return;
-        onChange(editingData => {
+        updateEditingData(editingData => {
           const series = editingData.revision.series[activeSeriesIndex];
           series.labels.splice(activeLabelIndex, 1);
           if (series.labels.length === 0) {
@@ -119,34 +98,6 @@ const LabelSelector: React.FC<{
             editingData.activeLabelIndex = series.labels.length - 1;
           }
         });
-        break;
-      }
-      case 'moveUp': {
-        if (activeLabelIndex <= 0) return;
-        onChange(editingData => {
-          const series = editingData.revision.series[activeSeriesIndex];
-          series.labels.splice(
-            activeLabelIndex - 1,
-            2,
-            series.labels[activeLabelIndex],
-            series.labels[activeLabelIndex - 1]
-          );
-          editingData.activeLabelIndex--;
-        }, 'Move label position');
-        break;
-      }
-      case 'moveDown': {
-        if (activeLabelIndex >= activeSeries.labels.length - 1) return;
-        onChange(editingData => {
-          const series = editingData.revision.series[activeSeriesIndex];
-          series.labels.splice(
-            activeLabelIndex,
-            2,
-            series.labels[activeLabelIndex + 1],
-            series.labels[activeLabelIndex]
-          );
-          editingData.activeLabelIndex++;
-        }, 'Move label position');
         break;
       }
       case 'convertType': {
@@ -168,7 +119,7 @@ const LabelSelector: React.FC<{
   };
 
   const handleAppearanceChange = (value: LabelAppearance) => {
-    onChange(editingData => {
+    updateEditingData(editingData => {
       const data =
         editingData.revision.series[activeSeriesIndex].labels[activeLabelIndex]
           .data;
@@ -236,22 +187,6 @@ const LabelSelector: React.FC<{
         &thinsp;
         <IconButton
           bsSize="xs"
-          title="Move Up"
-          icon="chevron-up"
-          disabled={!activeLabel || activeLabelIndex <= 0}
-          onClick={() => handleCommand('moveUp')}
-        />
-        <IconButton
-          bsSize="xs"
-          title="Move Down"
-          icon="chevron-down"
-          disabled={
-            !activeLabel || activeLabelIndex >= activeSeries.labels.length - 1
-          }
-          onClick={() => handleCommand('moveDown')}
-        />
-        <IconButton
-          bsSize="xs"
           title="Rename"
           icon="font"
           disabled={!activeLabel}
@@ -307,10 +242,10 @@ const LabelSelector: React.FC<{
       <StyledSeriesUl>
         {revision.series.map((series: SeriesEntry, seriesIndex: number) => (
           <Series
+            updateEditingData={updateEditingData}
             series={series}
             index={seriesIndex}
             key={series.seriesUid}
-            onChangeActiveLabel={onChangeActiveLabel}
             activeSeries={activeSeries}
             activeLabel={activeLabel}
           />
@@ -373,32 +308,35 @@ const StyledSeriesUl = styled.ul`
       background-color: silver;
       font-weight: bold;
     }
+    &.drag-top {
+      border-top: 3px solid gray;
+    }
+    &.drag-bottom {
+      border-bottom: 3px solid gray;
+    }
+    * {
+      pointer-events: none; /* Needed for drag & drop */
+    }
   }
 `;
 
 export default LabelSelector;
 
-type LabelCommand =
-  | 'rename'
-  | 'remove'
-  | 'moveUp'
-  | 'moveDown'
-  | 'convertType'
-  | 'reveal';
+type LabelCommand = 'rename' | 'remove' | 'convertType' | 'reveal';
 
 const Series: React.FC<{
   index: number;
   series: SeriesEntry;
   activeSeries: SeriesEntry;
   activeLabel: InternalLabel | null;
-  onChangeActiveLabel: (seriesIndex: number, labelIndex: number) => void;
+  updateEditingData: EditingDataUpdater;
 }> = props => {
   const {
     index: seriesIndex,
     series,
     activeSeries,
     activeLabel,
-    onChangeActiveLabel
+    updateEditingData
   } = props;
 
   return (
@@ -413,8 +351,8 @@ const Series: React.FC<{
             label={label}
             activeLabel={activeLabel}
             seriesIndex={seriesIndex}
-            index={labelIndex}
-            onClick={() => onChangeActiveLabel(seriesIndex, labelIndex)}
+            labelIndex={labelIndex}
+            updateEditingData={updateEditingData}
           />
         ))}
       </ul>
@@ -426,14 +364,27 @@ const StyledLabelNameNone = styled.span`
   color: gray;
 `;
 
+// We cannot access drag data during the drag, so we rely on global var here
+// https://stackoverflow.com/q/11927309/1209240
+let dragData: { seriesIndex: number; labelIndex: number };
+
 export const Label: React.FC<{
   label: InternalLabel;
-  index: number;
+  labelIndex: number;
   seriesIndex: number;
   activeLabel: InternalLabel | null;
-  onClick: () => void;
+  updateEditingData: EditingDataUpdater;
 }> = props => {
-  const { label, activeLabel, onClick } = props;
+  const {
+    label,
+    activeLabel,
+    seriesIndex,
+    labelIndex,
+    updateEditingData
+  } = props;
+
+  const [isDragOver, setIsDragOver] = useState<false | 'top' | 'bottom'>(false);
+  const liRef = useRef<HTMLLIElement>(null);
 
   const caption = label.name ? (
     <>{label.name}</>
@@ -441,12 +392,77 @@ export const Label: React.FC<{
     <StyledLabelNameNone>Label</StyledLabelNameNone>
   );
 
+  const handleClick = () => {
+    updateEditingData(editingData => {
+      editingData.activeSeriesIndex = seriesIndex;
+      editingData.activeLabelIndex = labelIndex;
+    });
+  };
+
+  const handleDragStart = (ev: React.DragEvent) => {
+    ev.dataTransfer.setData('text/x-circusdb-label', '');
+    dragData = { seriesIndex, labelIndex };
+    ev.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleDragOver = (ev: React.DragEvent) => {
+    if (
+      ev.dataTransfer.types.indexOf('text/x-circusdb-label') < 0 ||
+      dragData.seriesIndex !== seriesIndex ||
+      dragData.labelIndex === labelIndex
+    )
+      return;
+
+    const li = ev.target as HTMLLIElement;
+    const rect = li.getBoundingClientRect();
+    const y = ev.clientY - rect.top; // y position within the element
+    if (y < li.clientHeight / 2) {
+      if (labelIndex === dragData.labelIndex + 1) return;
+      setIsDragOver('top');
+    } else {
+      if (labelIndex === dragData.labelIndex - 1) return;
+      setIsDragOver('bottom');
+    }
+    ev.preventDefault(); // accept drag
+  };
+
+  const handleDragLeave = (ev: React.DragEvent) => {
+    setIsDragOver(false);
+  };
+
+  const handleDrop = (ev: React.DragEvent) => {
+    if (
+      ev.dataTransfer.types.indexOf('text/x-circusdb-label') < 0 ||
+      seriesIndex !== dragData.seriesIndex
+    )
+      return;
+    ev.preventDefault();
+    updateEditingData(d => {
+      const series = d.revision.series[dragData.seriesIndex];
+      const label = series.labels[dragData.labelIndex];
+      const insertIndex = labelIndex + (isDragOver === 'top' ? 0 : 1);
+      const dragUp = labelIndex <= dragData.labelIndex;
+      series.labels.splice(insertIndex, 0, label);
+      series.labels.splice(dragData.labelIndex + (dragUp ? 1 : 0), 1);
+      d.activeLabelIndex = insertIndex + (dragUp ? 0 : -1);
+    }, 'Sort label');
+    setIsDragOver(false);
+  };
+
   return (
     <li
+      ref={liRef}
       className={classNames('label-list-item', {
-        active: label === activeLabel
+        active: label === activeLabel,
+        'drag-top': isDragOver === 'top',
+        'drag-bottom': isDragOver === 'bottom'
       })}
-      onClick={onClick}
+      onClick={handleClick}
+      draggable
+      onDragStart={handleDragStart}
+      onDrop={handleDrop}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
     >
       <div
         className="color-preview"

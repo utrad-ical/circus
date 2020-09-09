@@ -1,10 +1,20 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { EditingData, Revision } from './revisionData';
+import { EditingData, Revision, ExternalLabel } from './revisionData';
 import Project from 'types/Project';
+
+interface CaseData {
+  caseId: string;
+  revisions: Revision<ExternalLabel>[];
+  patientInfo: any; // TODO: remove this
+  projectId: string;
+  createdAt: string;
+  updatedAt: string;
+  tags: string[];
+}
 
 export interface CaseDetailState {
   busy: boolean;
-  caseData: any;
+  caseData: CaseData | null;
   editingRevisionIndex: number;
   projectData?: Project;
   history: EditingData[];
@@ -31,9 +41,6 @@ const slice = createSlice({
     currentHistoryIndex: 0
   } as CaseDetailState,
   reducers: {
-    setBusy: (s, action: PayloadAction<boolean>) => {
-      s.busy = action.payload;
-    },
     loadCaseData: (
       s,
       action: PayloadAction<{
@@ -45,22 +52,26 @@ const slice = createSlice({
       s.caseData = caseData;
       s.projectData = projectData;
     },
-    startEditing: (
+    startLoadRevision: (
       s,
-      action: PayloadAction<{
-        revision: Revision;
-        revisionIndex: number;
-      }>
+      action: PayloadAction<{ revisionIndex: number }>
     ) => {
-      const { revision, revisionIndex } = action.payload;
+      const { revisionIndex } = action.payload;
+      if (s.editingRevisionIndex !== revisionIndex) {
+        s.editingRevisionIndex = revisionIndex;
+        s.busy = true;
+      }
+    },
+    loadRevision: (s, action: PayloadAction<{ revision: Revision }>) => {
+      const { revision } = action.payload;
       const editingData: EditingData = {
         revision,
         activeSeriesIndex: 0,
         activeLabelIndex: (revision.series[0].labels || []).length > 0 ? 0 : -1
       };
       s.history = [editingData];
-      s.editingRevisionIndex = revisionIndex;
       s.currentHistoryIndex = 0;
+      s.busy = false;
     },
     change: (
       s,
@@ -69,6 +80,7 @@ const slice = createSlice({
         /**
          * Tag is used to avoid pushing too many history items.
          * Changes with the same tag will be fused to one history item.
+         * Pass nothing if each history item is important!
          */
         tag?: string;
       }>
@@ -106,9 +118,9 @@ export default slice.reducer as (
 ) => CaseDetailState;
 
 export const {
-  setBusy,
   loadCaseData,
-  startEditing,
+  startLoadRevision,
+  loadRevision,
   change,
   undo,
   redo

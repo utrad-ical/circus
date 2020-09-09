@@ -9,7 +9,7 @@ export const VolumeLoaderCacheContext = React.createContext<{
   map: Map<string, rs.RsVolumeLoader>;
 } | null>(null);
 
-const stringifyPartialVolumeDescriptor = (d: PartialVolumeDescriptor) =>
+export const stringifyPartialVolumeDescriptor = (d: PartialVolumeDescriptor) =>
   `${d.start}:${d.end}:${d.delta}`;
 
 /**

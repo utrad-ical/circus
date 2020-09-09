@@ -17,6 +17,7 @@ import React, {
 } from 'react';
 import Project from 'types/Project';
 import {
+  stringifyPartialVolumeDescriptor,
   usePendingVolumeLoader,
   VolumeLoaderCacheContext
 } from 'utils/useImageSource';
@@ -29,7 +30,7 @@ import {
 } from './revisionData';
 import SideContainer from './SideContainer';
 import ToolBar, { ViewOptions } from './ToolBar';
-import ViewerCluster from './ViwewerCluster';
+import ViewerCluster from './ViewerCluster';
 
 const useComposition = (
   seriesUid: string,
@@ -42,17 +43,23 @@ const useComposition = (
     partialVolumeDescriptor
   );
 
-  const composition = useMemo(() => {
-    const imageSource = new rs.HybridMprImageSource({
-      rsHttpClient,
-      seriesUid,
-      partialVolumeDescriptor,
-      volumeLoader,
-      estimateWindowType: 'none'
-    });
-    const composition = new Composition(imageSource);
-    return composition;
-  }, [rsHttpClient, seriesUid, partialVolumeDescriptor, volumeLoader]);
+  const pvdStr = stringifyPartialVolumeDescriptor(partialVolumeDescriptor);
+
+  const composition = useMemo(
+    () => {
+      const imageSource = new rs.HybridMprImageSource({
+        rsHttpClient,
+        seriesUid,
+        partialVolumeDescriptor,
+        volumeLoader,
+        estimateWindowType: 'none'
+      });
+      const composition = new Composition(imageSource);
+      return composition;
+    },
+    // eslint-disable-next-line
+    [rsHttpClient, seriesUid, pvdStr, volumeLoader]
+  );
 
   return composition;
 };

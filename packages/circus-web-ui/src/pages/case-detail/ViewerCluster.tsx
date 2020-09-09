@@ -1,11 +1,11 @@
-import React from 'react';
+import { Composition, MprViewState, Tool, Viewer } from 'circus-rs';
+import { toolFactory } from 'circus-rs/tool/tool-initializer';
 import ImageViewer, {
   setOrthogonalOrientation,
   StateChanger
 } from 'components/ImageViewer';
+import React, { useEffect } from 'react';
 import styled from 'styled-components';
-import { toolFactory } from 'circus-rs/tool/tool-initializer';
-import { Tool, Viewer, ViewState, Composition, MprViewState } from 'circus-rs';
 
 const TwoByTwoLayout = styled.div`
   flex: 1 1 0;
@@ -62,13 +62,8 @@ const ViewerCluster: React.FC<{
     initialWindowSetter
   } = props;
 
-  const makeViewer = (
-    orientation: string,
-    id: string,
-    initialTool?: Tool,
-    fixTool?: Tool
-  ) => {
-    const initialStateSetter = (viewer: Viewer, viewState: ViewState) => {
+  const makeViewer = (orientation: string, id: string, fixTool?: Tool) => {
+    const initialStateSetter = (viewer: Viewer, viewState: MprViewState) => {
       const s1 = orientationInitialStateSetters[orientation](viewer, viewState);
       const s2 = initialWindowSetter(viewer, s1);
       return s2;
@@ -81,7 +76,6 @@ const ViewerCluster: React.FC<{
         className={`viewer-${orientation}`}
         composition={composition}
         tool={fixTool ? fixTool : tool}
-        initialTool={initialTool}
         initialStateSetter={initialStateSetter}
         stateChanger={stateChanger}
         onCreateViewer={onCreateViewer}
@@ -97,7 +91,7 @@ const ViewerCluster: React.FC<{
           {makeViewer('axial', 'axial')}
           {makeViewer('sagittal', 'sagittal')}
           {makeViewer('coronal', 'coronal')}
-          {makeViewer('axial', 'oblique', celestialRotate, celestialRotate)}
+          {makeViewer('axial', 'oblique', celestialRotate)}
         </TwoByTwoLayout>
       );
     case 'axial':

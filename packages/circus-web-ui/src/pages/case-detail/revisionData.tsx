@@ -32,6 +32,8 @@ export type EditingDataUpdater = (
 export interface Revision<
   L extends InternalLabel | ExternalLabel = InternalLabel
 > {
+  creator: string;
+  date: string;
   description: string;
   attributes: any;
   series: SeriesEntry<L>[];
@@ -315,7 +317,7 @@ export const saveRevision = async (
   description: string,
   api: ApiCaller
 ) => {
-  const saveData: Revision<ExternalLabel> = {
+  const saveData: Partial<Revision<ExternalLabel>> = {
     description,
     attributes: revision.attributes,
     series: await asyncMap(revision.series, async series =>

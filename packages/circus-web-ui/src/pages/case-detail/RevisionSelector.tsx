@@ -3,10 +3,11 @@ import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
 import TimeDisplay from 'components/TimeDisplay';
 import UserDisplay from 'components/UserDisplay';
 import styled from 'styled-components';
+import { Revision } from './revisionData';
 
 const Item: React.FC<{
-  value: any;
-}> = props => {
+  value: Revision;
+}> = React.memo(props => {
   const revision = props.value;
   return (
     <span className="revision-selector-item">
@@ -20,10 +21,10 @@ const Item: React.FC<{
       </span>
     </span>
   );
-};
+});
 
 const RevisionSelector: React.FC<{
-  revisions: any[];
+  revisions: Revision[];
   selected: number;
   onSelect: (index: number) => void;
 }> = React.memo(props => {

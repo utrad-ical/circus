@@ -30,21 +30,14 @@ import {
   SeriesEntry
 } from './revisionData';
 
-const labelTypeOptions: {
-  [key in LabelType]: { caption: string; icon: string };
+const labelTypes: {
+  [key in LabelType]: { icon: string; canConvertTo?: LabelType };
 } = {
-  voxel: { caption: 'voxel', icon: 'circus-annotation-voxel' },
-  cuboid: { caption: 'cuboid', icon: 'circus-annotation-cuboid' },
-  ellipsoid: { caption: 'ellipsoid', icon: 'circus-annotation-ellipsoid' },
-  rectangle: { caption: 'rectangle', icon: 'circus-annotation-rectangle' },
-  ellipse: { caption: 'ellipse', icon: 'circus-annotation-ellipse' }
-};
-
-const convertLabelTypeMap: { [type in LabelType]?: LabelType } = {
-  cuboid: 'ellipsoid',
-  ellipsoid: 'cuboid',
-  rectangle: 'ellipse',
-  ellipse: 'rectangle'
+  voxel: { icon: 'circus-annotation-voxel' },
+  cuboid: { icon: 'circus-annotation-cuboid', canConvertTo: 'ellipsoid' },
+  ellipsoid: { icon: 'circus-annotation-ellipsoid', canConvertTo: 'cuboid' },
+  rectangle: { icon: 'circus-annotation-rectangle', canConvertTo: 'ellipse' },
+  ellipse: { icon: 'circus-annotation-ellipse', canConvertTo: 'rectangle' }
 };
 
 const LabelSelector: React.FC<{
@@ -100,7 +93,7 @@ const LabelSelector: React.FC<{
       }
       case 'convertType': {
         if (!activeLabel) return;
-        const newLabelType = convertLabelTypeMap[activeLabel.type];
+        const newLabelType = labelTypes[activeLabel.type].canConvertTo;
         if (!newLabelType) return;
         updateCurrentLabels(labels => {
           labels[activeLabelIndex].type = newLabelType;
@@ -159,12 +152,6 @@ const LabelSelector: React.FC<{
     });
   };
 
-  const convertTitle = activeLabel
-    ? convertLabelTypeMap[activeLabel.type]
-      ? 'Convert to ' + convertLabelTypeMap[activeLabel.type]
-      : 'Convert'
-    : '';
-
   return (
     <>
       <StyledButtonsDiv>
@@ -180,20 +167,22 @@ const LabelSelector: React.FC<{
           disabled={!activeLabel}
           onChange={handleAppearanceChange}
         />
-        &thinsp;
+        <div className="spacer" />
+        {activeLabel && labelTypes[activeLabel.type].canConvertTo && (
+          <IconButton
+            bsSize="xs"
+            title={'Convert to ' + labelTypes[activeLabel.type].canConvertTo}
+            icon={labelTypes[labelTypes[activeLabel.type].canConvertTo!].icon}
+            disabled={!activeLabel || activeLabel.type === 'voxel'}
+            onClick={() => handleCommand('convertType')}
+          />
+        )}
         <IconButton
           bsSize="xs"
           title="Rename"
           icon="font"
           disabled={!activeLabel}
           onClick={() => handleCommand('rename')}
-        />
-        <IconButton
-          bsSize="xs"
-          title={convertTitle}
-          icon="random"
-          disabled={!activeLabel || activeLabel.type === 'voxel'}
-          onClick={() => handleCommand('convertType')}
         />
         <IconButton
           bsSize="xs"
@@ -216,21 +205,21 @@ const LabelSelector: React.FC<{
           bsStyle="primary"
           title={
             <span>
-              Add <Icon icon={labelTypeOptions[newLabelType].icon} />
+              Add <Icon icon={labelTypes[newLabelType].icon} />
             </span>
           }
           onClick={() => addLabel(newLabelType)}
           pullRight
         >
-          {Object.keys(labelTypeOptions).map((type, i) => {
-            const { caption, icon } = labelTypeOptions[type as LabelType];
+          {Object.keys(labelTypes).map((type, i) => {
+            const { icon } = labelTypes[type as LabelType];
             return (
               <MenuItem
                 key={type}
                 eventKey={i}
                 onClick={() => addLabel(type as LabelType)}
               >
-                <Icon icon={icon} /> Add {caption}
+                <Icon icon={icon} /> Add {type}
               </MenuItem>
             );
           })}
@@ -253,7 +242,11 @@ const LabelSelector: React.FC<{
 };
 
 const StyledButtonsDiv = styled.div`
+  display: flex;
   margin: 3px 10px;
+  .spacer {
+    flex-grow: 1;
+  }
 `;
 
 const StyledSeriesUl = styled.ul`
@@ -468,7 +461,7 @@ export const Label: React.FC<{
         {label.data.alpha === 0 && <Icon icon="eye-close" />}
       </div>
       <div className="caption">
-        <Icon icon={labelTypeOptions[label.type].icon} />
+        <Icon icon={labelTypes[label.type].icon} />
         &nbsp;{caption}
       </div>
     </li>

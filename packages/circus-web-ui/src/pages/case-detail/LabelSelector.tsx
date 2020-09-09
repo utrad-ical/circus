@@ -9,25 +9,25 @@ import Icon from 'components/Icon';
 import IconButton from 'components/IconButton';
 import {
   Button,
+  MenuItem,
   OverlayTrigger,
   Popover,
-  SplitButton,
-  MenuItem
+  SplitButton
 } from 'components/react-bootstrap';
 import produce from 'immer';
-import React, { Fragment, useState, useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import styled from 'styled-components';
-import useLocalPreference from 'utils/useLocalPreference';
 import tinyColor from 'tinycolor2';
+import useLocalPreference from 'utils/useLocalPreference';
 import {
   createNewLabelData,
   EditingData,
   EditingDataUpdater,
   getCenterOfLabel,
   InternalLabel,
+  LabelAppearance,
   LabelType,
-  SeriesEntry,
-  LabelAppearance
+  SeriesEntry
 } from './revisionData';
 
 const labelTypeOptions: {
@@ -65,14 +65,13 @@ const LabelSelector: React.FC<{
   const activeLabel =
     activeLabelIndex >= 0 ? activeSeries.labels[activeLabelIndex] : null;
 
-  const changeSeries = (
-    index: number,
-    newSeries: SeriesEntry,
-    tag?: string
-  ) => {
+  const updateCurrentLabels = (updater: (laels: InternalLabel[]) => void) => {
+    // Small wrapper around updateEditingData
+    const labels = editingData.revision.series[activeSeriesIndex].labels;
+    const newLabels = produce(labels, updater);
     updateEditingData(editingData => {
-      editingData.revision.series[index] = newSeries;
-    }, tag);
+      editingData.revision.series[activeSeriesIndex].labels = newLabels;
+    });
   };
 
   const handleCommand = async (command: LabelCommand) => {
@@ -81,10 +80,9 @@ const LabelSelector: React.FC<{
         if (!activeLabel) return;
         const newName = await prompt('Label name', activeLabel.name);
         if (newName === null || activeLabel.name === newName) return;
-        const newSeries = produce(activeSeries, series => {
-          series.labels[activeLabelIndex].name = newName;
+        updateCurrentLabels(labels => {
+          labels[activeLabelIndex].name = newName;
         });
-        changeSeries(activeSeriesIndex, newSeries);
         break;
       }
       case 'remove': {
@@ -104,10 +102,9 @@ const LabelSelector: React.FC<{
         if (!activeLabel) return;
         const newLabelType = convertLabelTypeMap[activeLabel.type];
         if (!newLabelType) return;
-        const newSeries = produce(activeSeries, series => {
-          series.labels[activeLabelIndex].type = newLabelType;
+        updateCurrentLabels(labels => {
+          labels[activeLabelIndex].type = newLabelType;
         });
-        changeSeries(activeSeriesIndex, newSeries);
         break;
       }
       case 'reveal': {
@@ -157,10 +154,9 @@ const LabelSelector: React.FC<{
   const addLabel = (type: LabelType) => {
     setNewLabelType(type);
     const newLabel = createNewLabel(type);
-    const newSeries = produce(activeSeries, series => {
-      series.labels.push(newLabel);
+    updateCurrentLabels(labels => {
+      labels.push(newLabel);
     });
-    changeSeries(activeSeriesIndex, newSeries);
   };
 
   const convertTitle = activeLabel
@@ -397,7 +393,7 @@ export const Label: React.FC<{
     updateEditingData(editingData => {
       editingData.activeSeriesIndex = seriesIndex;
       editingData.activeLabelIndex = labelIndex;
-    });
+    }, 'Change active label');
   };
 
   const handleDragStart = (ev: React.DragEvent) => {

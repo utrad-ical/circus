@@ -1,11 +1,11 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { EditingData, Revision, ExternalLabel } from './revisionData';
+import PatientInfo from '../../types/PatientInfo';
 import Project from 'types/Project';
 
 interface CaseData {
   caseId: string;
   revisions: Revision<ExternalLabel>[];
-  patientInfo: any; // TODO: remove this
   projectId: string;
   createdAt: string;
   updatedAt: string;
@@ -15,6 +15,7 @@ interface CaseData {
 export interface CaseDetailState {
   busy: boolean;
   caseData: CaseData | null;
+  patientInfo?: PatientInfo;
   editingRevisionIndex: number;
   projectData?: Project;
   history: EditingData[];
@@ -36,6 +37,7 @@ const slice = createSlice({
   initialState: {
     busy: false,
     caseData: null,
+    patientInfo: undefined,
     editingRevisionIndex: -1,
     history: [],
     currentHistoryIndex: 0
@@ -44,15 +46,17 @@ const slice = createSlice({
     setBusy: (s, action: PayloadAction<boolean>) => {
       s.busy = action.payload;
     },
-    loadCaseData: (
+    loadInitialCaseData: (
       s,
       action: PayloadAction<{
         caseData: any;
+        patientInfo?: PatientInfo;
         projectData: Project;
       }>
     ) => {
-      const { caseData, projectData } = action.payload;
+      const { caseData, patientInfo, projectData } = action.payload;
       s.caseData = caseData;
+      s.patientInfo = patientInfo;
       s.projectData = projectData;
     },
     loadRevisions: (s, action: PayloadAction<Revision<ExternalLabel>[]>) => {
@@ -125,7 +129,7 @@ export default slice.reducer as (
 
 export const {
   setBusy,
-  loadCaseData,
+  loadInitialCaseData,
   loadRevisions,
   startLoadRevision,
   loadRevision,

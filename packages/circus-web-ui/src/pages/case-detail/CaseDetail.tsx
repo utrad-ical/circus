@@ -37,7 +37,7 @@ const CaseDetail: React.FC<{}> = props => {
   );
   const api = useApi();
 
-  const { busy, caseData, projectData, editingRevisionIndex } = caseStore;
+  const { busy, caseData, projectData } = caseStore;
   const editingData = c.current(caseStore);
 
   const accessibleProjects = useSelector(
@@ -50,10 +50,20 @@ const CaseDetail: React.FC<{}> = props => {
       const project = accessibleProjects.find(
         (p: { projectId: string }) => p.projectId === caseData.projectId
       );
+      const seriesUid =
+        caseData.revisions[caseData.revisions.length - 1].series[0].seriesUid;
+      const firstSeries = await api('series/' + seriesUid);
+      const patientInfo = firstSeries.patientInfo;
       if (!project) {
         throw new Error('You do not have access to this project.');
       }
-      caseDispatch(c.loadCaseData({ caseData, projectData: project.project }));
+      caseDispatch(
+        c.loadInitialCaseData({
+          caseData,
+          patientInfo,
+          projectData: project.project
+        })
+      );
       caseDispatch(
         c.startLoadRevision({ revisionIndex: caseData.revisions.length - 1 })
       );
@@ -151,7 +161,7 @@ const CaseDetail: React.FC<{}> = props => {
           withDescription
           size="xl"
         />
-        <PatientInfoBox value={caseData.patientInfo} />
+        <PatientInfoBox value={caseStore.patientInfo} />
         <div className="tag-list">
           {caseData.tags.map((t: string | number | undefined) => (
             <Tag

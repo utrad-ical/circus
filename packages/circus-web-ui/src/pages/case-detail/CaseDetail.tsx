@@ -23,9 +23,7 @@ import { useApi } from 'utils/api';
 import caseStoreReducer, * as c from './caseStore';
 import {
   EditingDataUpdater,
-  ExternalLabel,
   externalRevisionToInternal,
-  Revision,
   saveRevision
 } from './revisionData';
 import RevisionEditor from './RevisionEditor';
@@ -46,18 +44,6 @@ const CaseDetail: React.FC<{}> = props => {
     state => state.loginUser.data!.accessibleProjects
   );
 
-  const loadRevisionData = async (
-    revisions: Revision<ExternalLabel>[],
-    index: number
-  ) => {
-    const revision = revisions[index];
-    caseDispatch(c.setBusy(true));
-    // Loads actual volume data and adds label temporary key.
-    const data = await externalRevisionToInternal(revision, api);
-    caseDispatch(c.startEditing({ revision: data, revisionIndex: index }));
-    caseDispatch(c.setBusy(false));
-  };
-
   const loadCase = async () => {
     const caseData = await api('cases/' + caseId);
     const project = accessibleProjects.find(
@@ -67,7 +53,9 @@ const CaseDetail: React.FC<{}> = props => {
       throw new Error('You do not have access to this project.');
     }
     caseDispatch(c.loadCaseData({ caseData, projectData: project.project }));
-    await loadRevisionData(caseData.revisions, caseData.revisions.length - 1);
+    caseDispatch(
+      c.startLoadRevision({ revisionIndex: caseData.revisions.length - 1 })
+    );
   };
 
   useEffect(() => {
@@ -75,8 +63,19 @@ const CaseDetail: React.FC<{}> = props => {
     // eslint-disable-next-line
   }, []);
 
+  useEffect(() => {
+    const loadRevisionData = async () => {
+      if (!caseStore.caseData || caseStore.editingRevisionIndex < 0) return;
+      const revision =
+        caseStore.caseData.revisions[caseStore.editingRevisionIndex];
+      const data = await externalRevisionToInternal(revision, api);
+      caseDispatch(c.loadRevision({ revision: data }));
+    };
+    loadRevisionData();
+  }, [api, caseStore.caseData, caseStore.editingRevisionIndex]);
+
   const handleRevisionSelect = async (index: number) => {
-    await loadRevisionData(caseData.revisions, index);
+    caseDispatch(c.startLoadRevision({ revisionIndex: index }));
   };
 
   const updateEditingData = useCallback<EditingDataUpdater>(
@@ -99,7 +98,8 @@ const CaseDetail: React.FC<{}> = props => {
         if (!(await confirm('Reload the current revision?'))) {
           return;
         }
-        loadRevisionData(caseData.revisions, editingRevisionIndex);
+        // TODO
+        // loadRevisionData(caseData.revisions, editingRevisionIndex);
         break;
       }
       case 'save': {
@@ -148,7 +148,7 @@ const CaseDetail: React.FC<{}> = props => {
           withDescription
           size="xl"
         />
-        <PatientInfoBox value={caseData.patientInfoCache} />
+        <PatientInfoBox value={caseData.patientInfo} />
         <div className="tag-list">
           {caseData.tags.map((t: string | number | undefined) => (
             <Tag
@@ -170,7 +170,6 @@ const CaseDetail: React.FC<{}> = props => {
         onRevisionSelect={handleRevisionSelect}
       />
       <RevisionEditor
-        key={editingRevisionIndex}
         busy={busy}
         editingData={editingData}
         projectData={projectData}
@@ -188,14 +187,14 @@ const MenuBar: React.FC<{
   caseStore: c.CaseDetailState;
   onCommand: (command: MenuBarCommand) => void;
   onRevisionSelect: (index: number) => Promise<void>;
-}> = props => {
+}> = React.memo(props => {
   const { caseStore, onCommand, onRevisionSelect } = props;
   return (
     <StyledMenuBarDiv>
       <div className="left">
         Revision:&ensp;
         <RevisionSelector
-          revisions={caseStore.caseData.revisions}
+          revisions={caseStore.caseData!.revisions}
           selected={caseStore.editingRevisionIndex}
           onSelect={onRevisionSelect}
         />
@@ -239,7 +238,7 @@ const MenuBar: React.FC<{
       </div>
     </StyledMenuBarDiv>
   );
-};
+});
 
 const StyledMenuBarDiv = styled.div`
   border-bottom: 1px solid silver;

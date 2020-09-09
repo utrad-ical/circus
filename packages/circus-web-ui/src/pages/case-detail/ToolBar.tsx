@@ -9,7 +9,7 @@ import {
 } from 'components/react-bootstrap';
 import React from 'react';
 import styled from 'styled-components';
-import { Layout } from './ViwewerCluster';
+import { Layout } from './ViewerCluster';
 
 interface WindowPreset {
   label: string;

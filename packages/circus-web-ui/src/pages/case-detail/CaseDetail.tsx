@@ -44,26 +44,26 @@ const CaseDetail: React.FC<{}> = props => {
     state => state.loginUser.data!.accessibleProjects
   );
 
-  const loadCase = async () => {
-    const caseData = await api('cases/' + caseId);
-    const project = accessibleProjects.find(
-      (p: { projectId: string }) => p.projectId === caseData.projectId
-    );
-    if (!project) {
-      throw new Error('You do not have access to this project.');
-    }
-    caseDispatch(c.loadCaseData({ caseData, projectData: project.project }));
-    caseDispatch(
-      c.startLoadRevision({ revisionIndex: caseData.revisions.length - 1 })
-    );
-  };
-
   useEffect(() => {
+    const loadCase = async () => {
+      const caseData = await api('cases/' + caseId);
+      const project = accessibleProjects.find(
+        (p: { projectId: string }) => p.projectId === caseData.projectId
+      );
+      if (!project) {
+        throw new Error('You do not have access to this project.');
+      }
+      caseDispatch(c.loadCaseData({ caseData, projectData: project.project }));
+      caseDispatch(
+        c.startLoadRevision({ revisionIndex: caseData.revisions.length - 1 })
+      );
+    };
     loadCase();
-    // eslint-disable-next-line
-  }, []);
+  }, [accessibleProjects, api, caseId]); // should not re-render after mount
 
+  const [f, forceLoadRevision] = useReducer(x => x + 1, 0);
   useEffect(() => {
+    caseDispatch(c.setBusy(true));
     const loadRevisionData = async () => {
       if (!caseStore.caseData || caseStore.editingRevisionIndex < 0) return;
       const revision =
@@ -72,7 +72,7 @@ const CaseDetail: React.FC<{}> = props => {
       caseDispatch(c.loadRevision({ revision: data }));
     };
     loadRevisionData();
-  }, [api, caseStore.caseData, caseStore.editingRevisionIndex]);
+  }, [api, caseStore.caseData, caseStore.editingRevisionIndex, f]);
 
   const handleRevisionSelect = async (index: number) => {
     caseDispatch(c.startLoadRevision({ revisionIndex: index }));
@@ -98,8 +98,7 @@ const CaseDetail: React.FC<{}> = props => {
         if (!(await confirm('Reload the current revision?'))) {
           return;
         }
-        // TODO
-        // loadRevisionData(caseData.revisions, editingRevisionIndex);
+        forceLoadRevision();
         break;
       }
       case 'save': {
@@ -110,9 +109,13 @@ const CaseDetail: React.FC<{}> = props => {
         try {
           await saveRevision(caseId, revision, desc, api);
           await alert('Successfully registered a revision.');
-          // For now, perform a full case reload.
-          // TODO: Optimize this
-          loadCase();
+          const caseData = await api('cases/' + caseId);
+          caseDispatch(c.loadRevisions(caseData.revisions));
+          caseDispatch(
+            c.startLoadRevision({
+              revisionIndex: caseData.revisions.length - 1
+            })
+          );
         } catch (err) {
           await alert('Error: ' + err.message);
           throw err;

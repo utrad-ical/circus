@@ -41,6 +41,9 @@ const slice = createSlice({
     currentHistoryIndex: 0
   } as CaseDetailState,
   reducers: {
+    setBusy: (s, action: PayloadAction<boolean>) => {
+      s.busy = action.payload;
+    },
     loadCaseData: (
       s,
       action: PayloadAction<{
@@ -51,6 +54,9 @@ const slice = createSlice({
       const { caseData, projectData } = action.payload;
       s.caseData = caseData;
       s.projectData = projectData;
+    },
+    loadRevisions: (s, action: PayloadAction<Revision<ExternalLabel>[]>) => {
+      s.caseData!.revisions = action.payload;
     },
     startLoadRevision: (
       s,
@@ -118,7 +124,9 @@ export default slice.reducer as (
 ) => CaseDetailState;
 
 export const {
+  setBusy,
   loadCaseData,
+  loadRevisions,
   startLoadRevision,
   loadRevision,
   change,

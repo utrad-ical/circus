@@ -1,9 +1,13 @@
 import React from 'react';
 import BlockSelect from '@smikitky/rb-components/lib/BlockSelect';
 import * as et from '@smikitky/rb-components/lib/editor-types';
+import {
+  Schema,
+  PropSchema
+} from '@smikitky/rb-components/lib/JsonSchemaEditor';
 import styled from 'styled-components';
 
-const TextArrayEditor = et.arrayOf(et.text(), '');
+const TextArrayEditor = et.arrayOf(et.text(), () => '');
 
 const SelectSpecEditorDiv = styled.div`
   li {
@@ -38,20 +42,9 @@ const typeOptions = {
 
 type SchemaEntryType = 'string' | 'number' | 'integer' | 'boolean';
 
-interface SchemaEntry {
-  type: SchemaEntryType;
-  enum?: string[];
-}
-
-interface Schema {
-  type: 'object';
-  properties: { [key: string]: SchemaEntry };
-  required: string[];
-}
-
 interface SchemaEntryEditorValue {
   key: string;
-  schema: SchemaEntry;
+  schema: PropSchema;
 }
 
 const StyledSpan = styled.span`
@@ -106,7 +99,8 @@ const SchemaEntryEditor: React.FC<{
     onChange(newAttribute);
   };
 
-  const handleTypeChange = (newType: SchemaEntryType | 'select') => {
+  const handleTypeChange = (value: string | number) => {
+    const newType = value as SchemaEntryType | 'select';
     if (normalizedType !== newType) {
       const normalizedNewType = newType === 'select' ? 'string' : newType;
       const newAttribute: SchemaEntryEditorValue = {
@@ -118,7 +112,7 @@ const SchemaEntryEditor: React.FC<{
     }
   };
 
-  const handleSpecChange = (newSpec: SchemaEntry) => {
+  const handleSpecChange = (newSpec: PropSchema) => {
     const newAttribute: SchemaEntryEditorValue = {
       ...props.value,
       schema: newSpec

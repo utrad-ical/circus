@@ -4,7 +4,9 @@ import BodyPartIcon from 'components/BodyPartIcon';
 import IconEditor from './IconEditor';
 import JsonEditor from './JsonEditor';
 import * as et from '@smikitky/rb-components/lib/editor-types';
-import PropertyEditor from '@smikitky/rb-components/lib/PropertyEditor';
+import PropertyEditor, {
+  PropertyEditorProperties
+} from '@smikitky/rb-components/lib/PropertyEditor';
 import { DataGridColumnDefinition } from 'components/DataGrid';
 
 const makeEmptyItem = () => {
@@ -49,7 +51,7 @@ const listColumns: DataGridColumnDefinition[] = [
 const runConfigurationProperties = [
   { key: 'gpus', caption: 'GPUs', editor: et.text() },
   { key: 'timeout', caption: 'Timeout (sec)', editor: et.number({ min: 0 }) }
-];
+] as any;
 
 const RunConfigurationEditor: React.FC<any> = props => {
   const { value, onChange } = props;

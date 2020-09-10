@@ -48,7 +48,7 @@ const ToolBar: React.FC<{
     onApplyWindow
   } = props;
 
-  const widthOptions = [1, 3, 5, 7];
+  const widthOptions = ['1', '3', '5', '7'];
 
   const handleToggleReferenceLine = () => {
     onChangeViewOptions({
@@ -145,10 +145,11 @@ const ToolBar: React.FC<{
         disabled={!brushEnabled}
       />
       <ShrinkSelect
+        numericalValue
         className="line-width-shrinkselect"
         options={widthOptions}
         value={'' + lineWidth}
-        onChange={(val: string) => setLineWidth(parseInt(val, 10))}
+        onChange={val => setLineWidth(val as number)}
         disabled={!brushEnabled}
       />
       <ToolButton

@@ -36,7 +36,9 @@ const PreferenceEditor: React.FC<{
         <ShrinkSelect
           options={{ mode_white: 'White', mode_black: 'Black' }}
           value={props.value.theme}
-          onChange={(v: string) => props.onChange({ ...props.value, theme: v })}
+          onChange={(v: string | number) =>
+            props.onChange({ ...props.value, theme: v as string })
+          }
         />
       </label>
       <br />

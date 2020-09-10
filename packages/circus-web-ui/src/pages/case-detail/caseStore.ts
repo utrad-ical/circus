@@ -21,6 +21,8 @@ export interface CaseDetailState {
   history: EditingData[];
   historyTag?: string;
   currentHistoryIndex: number;
+  caseAttributesAreValid: boolean;
+  labelAttributesAreValid: boolean;
 }
 
 const maxHistoryLength = 10;
@@ -40,7 +42,9 @@ const slice = createSlice({
     patientInfo: undefined,
     editingRevisionIndex: -1,
     history: [],
-    currentHistoryIndex: 0
+    currentHistoryIndex: 0,
+    caseAttributesAreValid: false,
+    labelAttributesAreValid: false
   } as CaseDetailState,
   reducers: {
     setBusy: (s, action: PayloadAction<boolean>) => {
@@ -118,6 +122,14 @@ const slice = createSlice({
       if (s.currentHistoryIndex < s.history.length - 1) {
         s.currentHistoryIndex++;
       }
+    },
+    validateCaseAttributes: (s, action: PayloadAction<boolean>) => {
+      const valid = action.payload;
+      s.caseAttributesAreValid = valid;
+    },
+    validateLabelAttributes: (s, action: PayloadAction<boolean>) => {
+      const valid = action.payload;
+      s.labelAttributesAreValid = valid;
     }
   }
 });
@@ -135,5 +147,7 @@ export const {
   loadRevision,
   change,
   undo,
-  redo
+  redo,
+  validateCaseAttributes,
+  validateLabelAttributes
 } = slice.actions;

@@ -20,6 +20,7 @@ import styled from 'styled-components';
 import tinyColor from 'tinycolor2';
 import useLocalPreference from 'utils/useLocalPreference';
 import {
+  labelTypes,
   createNewLabelData,
   EditingData,
   EditingDataUpdater,
@@ -29,16 +30,6 @@ import {
   LabelType,
   SeriesEntry
 } from './revisionData';
-
-const labelTypes: {
-  [key in LabelType]: { icon: string; canConvertTo?: LabelType };
-} = {
-  voxel: { icon: 'circus-annotation-voxel' },
-  cuboid: { icon: 'circus-annotation-cuboid', canConvertTo: 'ellipsoid' },
-  ellipsoid: { icon: 'circus-annotation-ellipsoid', canConvertTo: 'cuboid' },
-  rectangle: { icon: 'circus-annotation-rectangle', canConvertTo: 'ellipse' },
-  ellipse: { icon: 'circus-annotation-ellipse', canConvertTo: 'rectangle' }
-};
 
 const LabelSelector: React.FC<{
   editingData: EditingData;
@@ -71,7 +62,7 @@ const LabelSelector: React.FC<{
     switch (command) {
       case 'rename': {
         if (!activeLabel) return;
-        const newName = await prompt('Label name', activeLabel.name);
+        const newName = await prompt('Label name', activeLabel.name || '');
         if (newName === null || activeLabel.name === newName) return;
         updateCurrentLabels(labels => {
           labels[activeLabelIndex].name = newName;

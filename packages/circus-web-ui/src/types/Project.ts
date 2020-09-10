@@ -1,4 +1,5 @@
 import { CircusIconDefinition } from 'components/BodyPartIcon';
+import { Schema } from '@smikitky/rb-components/lib/JsonSchemaEditor';
 
 export type ProjectRoles =
   | 'read'
@@ -23,6 +24,6 @@ export default interface Project {
   tags: any[];
   windowPresets: WindowPreset[];
   windowPriority: string;
-  caseAttributesSchema: any[];
-  labelAttributesSchema: any[];
+  caseAttributesSchema: Schema;
+  labelAttributesSchema: Schema;
 }

@@ -33,7 +33,7 @@ const RevisionSelector: React.FC<{
     onSelect(index);
   };
 
-  const opts: { [key: string]: any } = {};
+  const opts: { [key: string]: { caption: React.ReactChild } } = {};
   revisions
     .slice()
     .reverse()

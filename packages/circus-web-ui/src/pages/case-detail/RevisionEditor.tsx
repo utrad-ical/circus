@@ -85,7 +85,7 @@ const RevisionEditor: React.FC<{
   });
   const [lineWidth, setLineWidth] = useState(1);
   const [toolName, setToolName] = useState('');
-  const [tool, setTool] = useState<any>(null);
+  const [tool, setTool] = useState<ToolBaseClass | null>(null);
 
   const editingSeries =
     editingData.revision.series[editingData.activeSeriesIndex];
@@ -245,7 +245,7 @@ const RevisionEditor: React.FC<{
   );
 
   const handleApplyWindow = useCallback(
-    (window: any) => stateChanger(state => ({ ...state, window })),
+    (window: rs.ViewWindow) => stateChanger(state => ({ ...state, window })),
     [stateChanger]
   );
 
@@ -258,8 +258,8 @@ const RevisionEditor: React.FC<{
     [getTool]
   );
 
-  const handleCreateViwer = (viewer: Viewer, id: string | number) => {
-    viewers[id] = viewer;
+  const handleCreateViwer = (viewer: Viewer, id?: string | number) => {
+    viewers[id!] = viewer;
   };
 
   const handleDestroyViewer = (viewer: Viewer) => {
@@ -268,8 +268,12 @@ const RevisionEditor: React.FC<{
     });
   };
 
-  const initialWindowSetter = (viewer: any, viewState: rs.ViewState) => {
-    const src = viewer.composition.imageSource;
+  const initialWindowSetter = (
+    viewer: Viewer,
+    viewState: rs.ViewState
+  ): rs.MprViewState => {
+    const src = viewer.getComposition()!.imageSource as rs.MprImageSource;
+    if (!src.metadata || viewState.type !== 'mpr') throw new Error();
     const windowPriority = projectData.windowPriority || 'auto';
     const priorities = windowPriority.split(',');
     for (const type of priorities) {
@@ -302,7 +306,7 @@ const RevisionEditor: React.FC<{
         }
       }
     }
-    return undefined; // do not update view state (should not happen)
+    return viewState; // do not update view state (should not happen)
   };
 
   const { revision, activeSeriesIndex, activeLabelIndex } = editingData;

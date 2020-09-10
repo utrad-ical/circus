@@ -35,7 +35,7 @@ export interface Revision<
   creator: string;
   date: string;
   description: string;
-  attributes: any;
+  attributes: object;
   series: SeriesEntry<L>[];
   status: string;
 }
@@ -274,13 +274,12 @@ const internalLabelToExternal = async (
 };
 
 /**
- * Adds temporary label key
- * and asynchronously loads voxel data from API
- * and assigns it to the given label cache.
+ * Takes the revision data fetched from the API server and converts them
+ * to the internal representation with temporary keys and array buffers.
  */
 export const externalRevisionToInternal = async (
   revision: Revision<ExternalLabel>,
-  api: any
+  api: ApiCaller
 ): Promise<Revision<InternalLabel>> => {
   return await produce(revision, async revision => {
     for (const series of revision.series) {
@@ -294,18 +293,15 @@ export const externalRevisionToInternal = async (
 
 const internalSeriesToExternal = async (
   series: SeriesEntry<InternalLabel>,
-  api: any
+  api: ApiCaller
 ): Promise<SeriesEntry<ExternalLabel>> => {
   const newLabels = await asyncMap(series.labels, async label =>
     internalLabelToExternal(label, api)
   );
-  return produce<SeriesEntry<InternalLabel>, any, SeriesEntry<ExternalLabel>>(
-    series,
-    series => {
-      series.labels = newLabels;
-      return series;
-    }
-  );
+  return produce(series, series => {
+    (series as any).labels = newLabels;
+    return series as SeriesEntry<ExternalLabel>;
+  });
 };
 
 /**

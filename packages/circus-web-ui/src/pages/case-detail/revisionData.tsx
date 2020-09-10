@@ -24,6 +24,13 @@ export interface EditingData {
   activeLabelIndex: number;
 }
 
+/**
+ * Immer-backed update function used to modify the current EditingData.
+ * @param update The updater function that takes the 'draft' state.
+ * @param tag Used for history handling. If similar small operations happen
+ * many times, giving the same string as a tag will make them coalesce.
+ * Don't give tags for important operations that can be undone individually.
+ */
 export type EditingDataUpdater = (
   updater: (current: EditingData) => EditingData | void,
   tag?: string
@@ -140,6 +147,16 @@ export type ExternalLabel = {
       data: SolidFigureLabelData;
     }
 );
+
+export const labelTypes: {
+  [key in LabelType]: { icon: string; canConvertTo?: LabelType };
+} = {
+  voxel: { icon: 'circus-annotation-voxel' },
+  cuboid: { icon: 'circus-annotation-cuboid', canConvertTo: 'ellipsoid' },
+  ellipsoid: { icon: 'circus-annotation-ellipsoid', canConvertTo: 'cuboid' },
+  rectangle: { icon: 'circus-annotation-rectangle', canConvertTo: 'ellipse' },
+  ellipse: { icon: 'circus-annotation-ellipse', canConvertTo: 'rectangle' }
+};
 
 ////////////////////////////////////////////////////////////////////////////////
 

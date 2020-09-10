@@ -184,6 +184,7 @@ const CaseDetail: React.FC<{}> = props => {
       />
       <RevisionEditor
         busy={busy}
+        caseDispatch={caseDispatch}
         editingData={editingData}
         projectData={projectData}
         updateEditingData={updateEditingData}

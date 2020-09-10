@@ -5,6 +5,7 @@ import { Composition, Viewer } from '@utrad-ical/circus-rs/src/browser';
 import ToolBaseClass from '@utrad-ical/circus-rs/src/browser/tool/Tool';
 import classNames from 'classnames';
 import Collapser from 'components/Collapser';
+import Icon from 'components/Icon';
 import { createStateChanger } from 'components/ImageViewer';
 import produce from 'immer';
 import React, {
@@ -21,12 +22,14 @@ import {
   usePendingVolumeLoader,
   VolumeLoaderCacheContext
 } from 'utils/useImageSource';
+import * as c from './caseStore';
 import LabelSelector from './LabelSelector';
 import {
   buildAnnotation,
   EditingData,
   EditingDataUpdater,
-  InternalLabel
+  InternalLabel,
+  labelTypes
 } from './revisionData';
 import SideContainer from './SideContainer';
 import ToolBar, { ViewOptions } from './ToolBar';
@@ -67,10 +70,17 @@ const useComposition = (
 const RevisionEditor: React.FC<{
   editingData: EditingData;
   updateEditingData: EditingDataUpdater;
+  caseDispatch: React.Dispatch<any>;
   projectData: Project;
   busy: boolean;
 }> = props => {
-  const { editingData, updateEditingData, projectData, busy } = props;
+  const {
+    editingData,
+    updateEditingData,
+    caseDispatch,
+    projectData,
+    busy
+  } = props;
 
   const viewersRef = useRef<{ [key: string]: Viewer }>({});
   const viewers = viewersRef.current;
@@ -215,25 +225,19 @@ const RevisionEditor: React.FC<{
     }
   }, [composition, getTool, tool]);
 
-  const labelAttributesChange = (value: any, isTextInput: boolean) => {
+  const labelAttributesChange = (value: any) => {
     const { activeSeriesIndex, activeLabelIndex } = editingData;
-    updateEditingData(
-      d => {
-        d.revision.series[activeSeriesIndex].labels[
-          activeLabelIndex
-        ].attributes = value;
-      },
-      isTextInput ? 'Label Text Input' : undefined
-    );
+    updateEditingData(d => {
+      d.revision.series[activeSeriesIndex].labels[
+        activeLabelIndex
+      ].attributes = value;
+    }, `Change label attributes: ${activeLabel.temporaryKey}`);
   };
 
-  const caseAttributesChange = (value: any, isTextInput: boolean) => {
-    updateEditingData(
-      d => {
-        d.revision.attributes = value;
-      },
-      isTextInput ? 'Label Text Input' : undefined
-    );
+  const caseAttributesChange = (value: any) => {
+    updateEditingData(d => {
+      d.revision.attributes = value;
+    }, 'Change case attributes');
   };
 
   const changeTool = useCallback(
@@ -328,17 +332,17 @@ const RevisionEditor: React.FC<{
           />
           {activeLabel && (
             <div className="label-attributes">
-              <div>
-                Label #{activeLabelIndex} of Series #{activeSeriesIndex}
-                <br />
-              </div>
-              <div className="label-name">{activeLabel.name}</div>
-
+              <b>Attributes for</b>:{' '}
+              <Icon icon={labelTypes[activeLabel.type].icon} />{' '}
+              <span className="label-name">{activeLabel.name}</span>
               <JsonSchemaEditor
-                key={`${activeSeriesIndex}:${activeLabelIndex}`}
+                key={activeLabel.temporaryKey}
                 schema={projectData.labelAttributesSchema}
                 value={activeLabel.attributes || {}}
                 onChange={labelAttributesChange}
+                onValidate={valid =>
+                  caseDispatch(c.validateLabelAttributes(valid))
+                }
               />
             </div>
           )}
@@ -348,6 +352,7 @@ const RevisionEditor: React.FC<{
             schema={projectData.caseAttributesSchema}
             value={revision.attributes}
             onChange={caseAttributesChange}
+            onValidate={valid => caseDispatch(c.validateCaseAttributes(valid))}
           />
         </Collapser>
       </SideContainer>

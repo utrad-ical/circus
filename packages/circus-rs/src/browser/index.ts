@@ -14,6 +14,7 @@ export {
   TransferFunction,
   SubVolume
 } from './ViewState';
+export { ViewWindow } from '../common/ViewWindow';
 export { default as Composition } from './Composition';
 
 export { default as Annotation } from './annotation/Annotation';

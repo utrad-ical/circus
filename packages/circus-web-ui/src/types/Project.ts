@@ -7,6 +7,12 @@ export type ProjectRoles =
   | 'viewPersonalInfo'
   | 'moderate';
 
+export interface WindowPreset {
+  label: string;
+  level: number;
+  width: number;
+}
+
 export default interface Project {
   projectId: string;
   createdAt: string;
@@ -15,7 +21,7 @@ export default interface Project {
   projectName: string;
   description: string;
   tags: any[];
-  windowPresets: any[];
+  windowPresets: WindowPreset[];
   windowPriority: string;
   caseAttributesSchema: any[];
   labelAttributesSchema: any[];

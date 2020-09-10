@@ -10,12 +10,7 @@ import {
 import React from 'react';
 import styled from 'styled-components';
 import { Layout } from './ViewerCluster';
-
-interface WindowPreset {
-  label: string;
-  level: number;
-  width: number;
-}
+import { WindowPreset } from 'types/Project';
 
 export interface ViewOptions {
   layout: Layout;
@@ -36,7 +31,7 @@ const ToolBar: React.FC<{
   onChangeViewOptions: (viewOptions: ViewOptions) => void;
   brushEnabled: boolean;
   lineWidth: number;
-  setLineWidth: any;
+  setLineWidth: (lineWidth: number) => void;
   windowPresets?: WindowPreset[];
   onChangeTool: (toolName: string) => void;
   onApplyWindow: (window: any) => void;

@@ -87,7 +87,7 @@ const GeneralAdmin: React.FC<{}> = props => {
             <ShrinkSelect options={settings.domains} {...props} />
           )
         }
-      ] as any,
+      ] as PropertyEditorProperties<Settings>,
     [settings.domains]
   );
 

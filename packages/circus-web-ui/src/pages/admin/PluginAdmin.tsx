@@ -1,6 +1,6 @@
 import EditorPage from './EditorPage';
 import React, { Fragment } from 'react';
-import BodyPartIcon from 'components/BodyPartIcon';
+import BodyPartIcon, { CircusIconDefinition } from 'components/BodyPartIcon';
 import IconEditor from './IconEditor';
 import JsonEditor from './JsonEditor';
 import * as et from '@smikitky/rb-components/lib/editor-types';
@@ -48,12 +48,17 @@ const listColumns: DataGridColumnDefinition[] = [
   { key: 'description', caption: 'Description' }
 ];
 
-const runConfigurationProperties = [
+interface RunConfiguration {
+  gpus: string;
+  timeout: number;
+}
+
+const runConfigurationProperties: PropertyEditorProperties<RunConfiguration> = [
   { key: 'gpus', caption: 'GPUs', editor: et.text() },
   { key: 'timeout', caption: 'Timeout (sec)', editor: et.number({ min: 0 }) }
-] as any;
+];
 
-const RunConfigurationEditor: React.FC<any> = props => {
+const RunConfigurationEditor: et.Editor<RunConfiguration> = props => {
   const { value, onChange } = props;
   return (
     <PropertyEditor
@@ -63,6 +68,14 @@ const RunConfigurationEditor: React.FC<any> = props => {
     />
   );
 };
+
+interface PluginEditorProperties {
+  pluginName: string;
+  version: string;
+  icon: CircusIconDefinition;
+  runConfiguration: RunConfiguration;
+  displayStrategy: any;
+}
 
 const editorProperties = [
   { key: 'pluginName', caption: 'Plug-in Name', editor: et.text() },
@@ -74,7 +87,7 @@ const editorProperties = [
     editor: RunConfigurationEditor
   },
   { key: 'displayStrategy', caption: 'Display Stratgy', editor: JsonEditor }
-];
+] as PropertyEditorProperties<PluginEditorProperties>;
 
 const PluginAdmin: React.FC<{}> = props => {
   return (

@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Button, Panel } from 'components/react-bootstrap';
 import IconButton from '@smikitky/rb-components/lib/IconButton';
-import PropertyEditor from '@smikitky/rb-components/lib/PropertyEditor';
+import PropertyEditor, {
+  PropertyEditorProperties
+} from '@smikitky/rb-components/lib/PropertyEditor';
 import { useApi } from 'utils/api';
 import { useLoginManager } from 'utils/loginManager';
 import AdminContainer from './AdminContainer';
@@ -27,7 +29,7 @@ const EditorPage: React.FC<{
   targetName?: (item: any) => string;
   icon: string;
   makeEmptyItem: () => any;
-  editorProperties: any;
+  editorProperties: PropertyEditorProperties<any>;
 }> = props => {
   const [target, setTarget] = useState<any | null>(null);
   const [editing, setEditing] = useState<any>(null);
@@ -212,9 +214,9 @@ const Editor: React.FC<{
   return (
     <Panel bsStyle="primary">
       <Panel.Heading>
-        {props.target ? (
+        {target ? (
           <span>
-            Updating: <strong>{props.target}</strong>
+            Updating: <strong>{target}</strong>
           </span>
         ) : (
           'Creating new item'

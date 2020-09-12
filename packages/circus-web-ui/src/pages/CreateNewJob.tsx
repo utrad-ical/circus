@@ -96,7 +96,7 @@ const CreateNewJob: React.FC<{}> = props => {
         Plugin:&ensp;
         <ShrinkSelect
           options={pluginOptions}
-          value={selectedPlugin}
+          value={selectedPlugin!}
           onChange={setSelectedPlugin}
         />
       </div>

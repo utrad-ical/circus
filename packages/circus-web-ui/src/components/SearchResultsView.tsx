@@ -19,7 +19,7 @@ export const makeSortOptions = (sortKeys: { [key: string]: string }) => {
   return options;
 };
 
-const limitOptions = [10, 20, 50, 100, 200];
+const limitOptions = [10, 20, 50, 100, 200].map(String);
 
 const ItemsPerPageOptionRenderer: React.FC<{ caption: number }> = props => (
   <Fragment>{props.caption} items</Fragment>
@@ -155,7 +155,7 @@ const SearchResultsView: React.FC<{
         <ShrinkSelect
           bsSize="sm"
           options={limitOptions}
-          value={limit + ''}
+          value={limit}
           onChange={handleLimitChange}
           disabled={isFetching}
           renderer={ItemsPerPageOptionRenderer}

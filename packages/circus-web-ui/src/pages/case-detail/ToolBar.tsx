@@ -148,8 +148,8 @@ const ToolBar: React.FC<{
         numericalValue
         className="line-width-shrinkselect"
         options={widthOptions}
-        value={'' + lineWidth}
-        onChange={val => setLineWidth(val as number)}
+        value={lineWidth}
+        onChange={setLineWidth}
         disabled={!brushEnabled}
       />
       <ToolButton

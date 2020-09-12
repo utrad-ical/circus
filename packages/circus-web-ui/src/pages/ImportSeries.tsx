@@ -74,7 +74,7 @@ const ImportSeries: React.FC<{}> = props => {
           Upload Domain:&ensp;
           <ShrinkSelect
             options={loginUser.domains}
-            value={uploadDomain}
+            value={uploadDomain!}
             onChange={setUploadDomain}
           />
         </div>

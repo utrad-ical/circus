@@ -12,6 +12,14 @@ export interface SearchPreset {
   condition: any;
 }
 
+export interface UserPreferences {
+  seriesSearchPresets?: SearchPreset[];
+  caseSearchPresets?: SearchPreset[];
+  pluginJobSearchPresets?: SearchPreset[];
+  personalInfoView?: boolean;
+  theme?: string;
+}
+
 export interface LoginUser {
   isFetching: boolean;
   data: null | {
@@ -30,13 +38,7 @@ export interface LoginUser {
     uploadFileMax: number;
     uploadFileSizeMaxBytes: number;
     userEmail: string;
-    preferences: {
-      seriesSearchPresets?: SearchPreset[];
-      caseSearchPresets?: SearchPreset[];
-      pluginJobSearchPresets?: SearchPreset[];
-      personalInfoView?: boolean;
-      theme?: string;
-    };
+    preferences: UserPreferences;
     accessibleProjects: Array<{
       projectId: string;
       project: Project;

@@ -420,6 +420,6 @@ export const getCenterOfLabel = (
     case 'ellipse':
       return getBoxCenter(rs.PlaneFigure.getOutline(label.data));
     default:
-      return;
+      throw new Error('Undefined label type');
   }
 };

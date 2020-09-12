@@ -1,19 +1,18 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import PropertyEditor from '@smikitky/rb-components/lib/PropertyEditor';
+import PropertyEditor, {
+  PropertyEditorProperties
+} from '@smikitky/rb-components/lib/PropertyEditor';
 import * as et from '@smikitky/rb-components/lib/editor-types';
 import { useApi } from 'utils/api';
 import { useLoginManager } from 'utils/loginManager';
 import { Button } from 'components/react-bootstrap';
 import IconButton from 'components/IconButton';
 import Icon from 'components/Icon';
-import { SearchPreset } from 'store/loginUser';
+import { SearchPreset, UserPreferences } from 'store/loginUser';
 import useShowMessage from 'utils/useShowMessage';
 
-const PresetDeleteEditor: React.FC<{
-  value: SearchPreset[];
-  onChange: (value: SearchPreset[]) => void;
-}> = props => {
-  const { value, onChange } = props;
+const PresetDeleteEditor: et.Editor<SearchPreset[] | undefined> = props => {
+  const { value = [], onChange } = props;
 
   const handleDeleteClick = (presetName: string) => {
     const newValue = value.filter(preset => preset.name !== presetName);
@@ -45,8 +44,39 @@ const PresetDeleteEditor: React.FC<{
   );
 };
 
+const properties: PropertyEditorProperties<UserPreferences> = [
+  {
+    key: 'theme',
+    caption: 'Color Theme',
+    editor: et.shrinkSelect({
+      mode_white: 'White',
+      mode_black: 'Black'
+    }) as et.Editor<string | undefined>
+  },
+  {
+    key: 'personalInfoView',
+    caption: 'Show Personal Info',
+    editor: et.checkbox({ label: 'show' }) as et.Editor<boolean | undefined>
+  },
+  {
+    key: 'caseSearchPresets',
+    caption: 'Case Search Presets',
+    editor: PresetDeleteEditor
+  },
+  {
+    key: 'seriesSearchPresets',
+    caption: 'Series Search Presets',
+    editor: PresetDeleteEditor
+  },
+  {
+    key: 'pluginJobSearchPresets',
+    caption: 'Plug-in Job Search Presets',
+    editor: PresetDeleteEditor
+  }
+];
+
 const Preferences: React.FC<{}> = props => {
-  const [settings, setSettings] = useState(null);
+  const [settings, setSettings] = useState<UserPreferences | null>(null);
   const loginManager = useLoginManager();
   const api = useApi();
   const showMessage = useShowMessage();
@@ -71,34 +101,6 @@ const Preferences: React.FC<{}> = props => {
   };
 
   if (settings === null) return <div />;
-
-  const properties = [
-    {
-      caption: 'Color Theme',
-      key: 'theme',
-      editor: et.shrinkSelect({ mode_white: 'White', mode_black: 'Black' })
-    },
-    {
-      caption: 'Show Personal Info',
-      key: 'personalInfoView',
-      editor: et.checkbox({ label: 'show' })
-    },
-    {
-      caption: 'Case Search Presets',
-      key: 'caseSearchPresets',
-      editor: PresetDeleteEditor
-    },
-    {
-      caption: 'Series Search Presets',
-      key: 'seriesSearchPresets',
-      editor: PresetDeleteEditor
-    },
-    {
-      caption: 'Plug-in Job Search Presets',
-      key: 'pluginJobSearchPresets',
-      editor: PresetDeleteEditor
-    }
-  ];
 
   return (
     <div>

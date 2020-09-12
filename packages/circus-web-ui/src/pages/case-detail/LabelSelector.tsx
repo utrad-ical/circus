@@ -506,9 +506,9 @@ const AppearanceEditor: React.FC<{
   const { value, disabled, onChange } = props;
   if (disabled) {
     return (
-      <Button bsSize="xs" style={{ backgroundColor: 'silver' }}>
+      <ColorEditorButton bsSize="xs" style={{ backgroundColor: 'silver' }}>
         -
-      </Button>
+      </ColorEditorButton>
     );
   }
 

@@ -1,14 +1,15 @@
 import LoadingIndicator from '@smikitky/rb-components/lib/LoadingIndicator';
 import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
-import useShowMessage from 'utils/useShowMessage';
 import IconButton from 'components/IconButton';
 import PluginDisplay from 'components/PluginDisplay';
 import SeriesSelector, { SeriesEntry } from 'components/SeriesSelector';
 import React, { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { useApi } from 'utils/api';
-import defaultPartialVolumeDescriptor from 'utils/defaultPartialVolumeDescriptor';
+import fillPartialVolumeDescriptors from 'utils/defaultPartialVolumeDescriptor';
 import useLocalPreference from 'utils/useLocalPreference';
+import useShowMessage from 'utils/useShowMessage';
 import Plugin from '../types/Plugin';
 
 const CreateNewJob: React.FC<{}> = props => {
@@ -21,18 +22,16 @@ const CreateNewJob: React.FC<{}> = props => {
   const [busy, setBusy] = useState(true);
   const [plugins, setPlugins] = useState<Plugin[]>([]);
   const api = useApi();
+  const appState = useSelector(state => state);
   const showMessage = useShowMessage();
   const seriesUid = useParams<any>().seriesUid;
 
   useEffect(() => {
     const load = async () => {
       setBusy(true);
-      const series = await api('series/' + seriesUid);
       const plugins = (await api('plugins')) as Plugin[];
       setPlugins(plugins);
-      setSelectedSeries([
-        { seriesUid, partialVolumeDescriptor: undefined, data: series }
-      ]);
+      setSelectedSeries([{ seriesUid, partialVolumeDescriptor: undefined }]);
       setBusy(false);
     };
     load();
@@ -52,15 +51,16 @@ const CreateNewJob: React.FC<{}> = props => {
 
   const handleCreate = async () => {
     if (!selectedPlugin) return;
-    const series = selectedSeries.map(s => ({
-      seriesUid: s.seriesUid,
-      partialVolumeDescriptor: s.partialVolumeDescriptor
-        ? s.partialVolumeDescriptor
-        : defaultPartialVolumeDescriptor(s.data.images)
-    }));
     await api('plugin-jobs', {
       method: 'post',
-      data: { pluginId: selectedPlugin, series }
+      data: {
+        pluginId: selectedPlugin,
+        series: await fillPartialVolumeDescriptors(
+          selectedSeries,
+          api,
+          appState
+        )
+      }
     });
     setDefaultPlugin(selectedPlugin);
     showMessage('Job registered.');

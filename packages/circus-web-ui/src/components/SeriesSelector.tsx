@@ -1,20 +1,21 @@
-import React, { useState, useMemo } from 'react';
-import DataGrid, { DataGridColumnDefinition } from 'components/DataGrid';
-import SearchResultsView from 'components/SearchResultsView';
-import { Panel } from 'components/react-bootstrap';
-import IconButton from 'components/IconButton';
-import { newSearch } from 'store/searches';
-import { useDispatch } from 'react-redux';
-import { modal } from '@smikitky/rb-components/lib/modal';
-import { useApi } from 'utils/api';
-import PartialVolumeDescriptorEditor from './PartialVolumeDescriptorEditor';
+import { confirm, modal } from '@smikitky/rb-components/lib/modal';
 import PartialVolumeDescriptor, {
   describePartialVolumeDescriptor
 } from '@utrad-ical/circus-lib/src/PartialVolumeDescriptor';
-import TimeDisplay from './TimeDisplay';
-import styled from 'styled-components';
+import DataGrid, { DataGridColumnDefinition } from 'components/DataGrid';
+import IconButton from 'components/IconButton';
+import { Panel } from 'components/react-bootstrap';
+import SearchResultsView from 'components/SearchResultsView';
+import produce from 'immer';
 import { multirange } from 'multi-integer-range';
-import { confirm } from '@smikitky/rb-components/lib/modal';
+import React, { useMemo, useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { newSearch } from 'store/searches';
+import styled from 'styled-components';
+import Series from 'types/Series';
+import { useApi } from 'utils/api';
+import PartialVolumeDescriptorEditor from './PartialVolumeDescriptorEditor';
+import TimeDisplay from './TimeDisplay';
 
 const PartialVolumeRenderer: React.FC<{
   index: number;
@@ -26,13 +27,16 @@ const PartialVolumeRenderer: React.FC<{
   const mr = useMemo(() => multirange(images), [images]);
 
   const handleClick = async () => {
-    const result = await modal((props: any) => (
-      <PartialVolumeDescriptorEditor
-        initialValue={value ?? { start: mr.min(), end: mr.max(), delta: 1 }}
-        images={mr}
-        {...props}
-      />
-    ));
+    const result = (await modal(
+      (props: any) => (
+        <PartialVolumeDescriptorEditor
+          initialValue={value ?? { start: mr.min(), end: mr.max(), delta: 1 }}
+          images={mr}
+          {...props}
+        />
+      ),
+      {}
+    )) as { descriptor: PartialVolumeDescriptor };
     if (!result) return; // cancelled
     onChange(index, result.descriptor);
   };
@@ -105,27 +109,58 @@ const RelevantSeries: React.FC<{
 export interface SeriesEntry {
   seriesUid: string;
   partialVolumeDescriptor: PartialVolumeDescriptor | undefined;
-  data: {
-    modality: string;
-    studyUid: string;
-    seriesDescription: string;
-    images: string;
-    seriesDate: string;
-  };
 }
 
 const SeriesSelector: React.FC<{
   value: SeriesEntry[];
   onChange: any;
+  alwaysShowRelevaltSeries?: boolean;
 }> = props => {
-  const [showRelevantSeries, setShowRelevantSeries] = useState(false);
+  const { value, onChange, alwaysShowRelevaltSeries } = props;
+  const [showRelevantSeries, setShowRelevantSeries] = useState(
+    !!alwaysShowRelevaltSeries
+  );
   const api = useApi();
   const dispatch = useDispatch();
-  const { value, onChange } = props;
+  const searches = useSelector(state => state.searches);
+
+  const [seriesData, setSeriesData] = useState<{
+    [seriesUid: string]: Series | null; // null means "now loading"
+  }>({});
+
+  useEffect(() => {
+    const loadSeriesData = async (seriesUid: string) => {
+      if (seriesUid in seriesData) return;
+      const data =
+        searches?.series?.results?.items?.[seriesUid] ??
+        searches?.relevantSeries?.results?.items?.[seriesUid];
+      if (data) {
+        setSeriesData(
+          produce(seriesData, seriesData => {
+            seriesData[seriesUid] = data;
+          })
+        );
+      } else {
+        setSeriesData(
+          produce(seriesData, seriesData => {
+            seriesData[seriesUid] = null; // "now loading"
+          })
+        );
+        const data = (await api('series/' + seriesUid)) as Series;
+        setSeriesData(
+          produce(seriesData, seriesData => {
+            seriesData[seriesUid] = data;
+          })
+        );
+      }
+    };
+    value.forEach(value => loadSeriesData(value.seriesUid));
+  }, [api, searches, seriesData, value]);
 
   const handleAddSeriesClick = () => {
     if (!showRelevantSeries) {
-      const filter = { studyUid: value[0].data.studyUid };
+      const studyUid = (seriesData[value[0].seriesUid] as Series).studyUid;
+      const filter = { studyUid };
       dispatch(
         newSearch(api, 'relevantSeries', {
           resource: { endPoint: 'series', primaryKey: 'seriesUid' },
@@ -144,10 +179,8 @@ const SeriesSelector: React.FC<{
     volumeId: number,
     descriptor: PartialVolumeDescriptor | undefined
   ) => {
-    const newValue = value.map((v, i) => {
-      return i === volumeId
-        ? { ...value[volumeId], partialVolumeDescriptor: descriptor }
-        : v;
+    const newValue = produce(value, value => {
+      value[volumeId].partialVolumeDescriptor = descriptor;
     });
     onChange(newValue);
   };
@@ -156,20 +189,20 @@ const SeriesSelector: React.FC<{
     if (value.some(s => s.seriesUid === seriesUid)) {
       if (!(await confirm('Add the same series?'))) return;
     }
-    const series = await api('series/' + seriesUid);
-    const newEntry = {
+    const newEntry: SeriesEntry = {
       seriesUid,
-      partialVolumeDescriptor: undefined,
-      data: series
+      partialVolumeDescriptor: undefined
     };
     onChange([...value, newEntry]);
   };
 
   const handleSeriesRemove = (index: number) => {
     if (value.length <= 1) return;
-    const newValue = [...value];
-    newValue.splice(index, 1);
-    onChange(newValue);
+    onChange(
+      produce(value, value => {
+        value.splice(index, 1);
+      })
+    );
   };
 
   const columns: DataGridColumnDefinition<SeriesEntry>[] = [
@@ -181,12 +214,14 @@ const SeriesSelector: React.FC<{
     {
       key: 'modality',
       caption: 'Modality',
-      renderer: ({ value }) => <>{value.data.modality}</>
+      renderer: ({ value }) => <>{seriesData[value.seriesUid]?.modality}</>
     },
     {
       key: 'seriesDescription',
       caption: 'Series Desc',
-      renderer: ({ value }) => <>{value.data.seriesDescription}</>
+      renderer: ({ value }) => (
+        <>{seriesData[value.seriesUid]?.seriesDescription}</>
+      )
     },
     {
       key: 'seriesUid',
@@ -196,24 +231,28 @@ const SeriesSelector: React.FC<{
     {
       key: 'seriesDate',
       caption: 'Series Date',
-      renderer: ({ value }) => <TimeDisplay value={value.data.seriesDate} />
+      renderer: ({ value }) =>
+        seriesData[value.seriesUid] ? (
+          <TimeDisplay value={seriesData[value.seriesUid]!.seriesDate} />
+        ) : null
     },
     {
       key: 'images',
       caption: 'Images',
-      renderer: ({ value }) => <>{value.data.images}</>
+      renderer: ({ value }) => <>{seriesData[value.seriesUid]?.images}</>
     },
     {
       key: 'pvd',
       caption: 'Range',
-      renderer: ({ value, index }) => (
-        <PartialVolumeRenderer
-          value={value.partialVolumeDescriptor}
-          images={value.data.images}
-          index={index}
-          onChange={handlePartialVolumeChange}
-        />
-      )
+      renderer: ({ value, index }) =>
+        seriesData[value.seriesUid] ? (
+          <PartialVolumeRenderer
+            value={value.partialVolumeDescriptor}
+            images={seriesData[value.seriesUid]!.images}
+            index={index}
+            onChange={handlePartialVolumeChange}
+          />
+        ) : null
     },
     {
       className: 'delete',
@@ -233,14 +272,15 @@ const SeriesSelector: React.FC<{
       <Panel.Body>
         <DataGrid columns={columns} value={value} />
         <div>
-          <IconButton
-            icon="plus"
-            bsSize="sm"
-            onClick={handleAddSeriesClick}
-            active={showRelevantSeries}
-          >
-            Add Series
-          </IconButton>
+          {!alwaysShowRelevaltSeries && (
+            <IconButton
+              icon={showRelevantSeries ? 'chevron-up' : 'plus'}
+              bsSize="sm"
+              onClick={handleAddSeriesClick}
+            >
+              {showRelevantSeries ? 'Close' : 'Add Series'}
+            </IconButton>
+          )}
           {showRelevantSeries && ' Showing series from the same study'}
         </div>
         {showRelevantSeries && (

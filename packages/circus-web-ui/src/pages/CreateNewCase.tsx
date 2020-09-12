@@ -4,9 +4,10 @@ import MultiTagSelect from 'components/MultiTagSelect';
 import ProjectSelector from 'components/ProjectSelector';
 import SeriesSelector, { SeriesEntry } from 'components/SeriesSelector';
 import React, { useEffect, useMemo, useState } from 'react';
+import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { useApi } from 'utils/api';
-import defaultPartialVolumeDescriptor from 'utils/defaultPartialVolumeDescriptor';
+import fillPartialVolumeDescriptors from 'utils/defaultPartialVolumeDescriptor';
 import useLoginUser from 'utils/useLoginUser';
 
 const CreateNewCase: React.FC<{}> = props => {
@@ -20,18 +21,13 @@ const CreateNewCase: React.FC<{}> = props => {
   );
   const [selectedSeries, setSelectedSeries] = useState<SeriesEntry[]>([]);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const [busy, setBusy] = useState(false);
   const api = useApi();
+  const appState = useSelector(state => state);
   const seriesUid = useParams<any>().seriesUid as string;
 
   useEffect(() => {
     const load = async () => {
-      setBusy(true);
-      const series = await api('series/' + seriesUid);
-      setSelectedSeries([
-        { seriesUid, partialVolumeDescriptor: undefined, data: series }
-      ]);
-      setBusy(false);
+      setSelectedSeries([{ seriesUid, partialVolumeDescriptor: undefined }]);
     };
     load();
   }, [api, seriesUid]);
@@ -50,13 +46,12 @@ const CreateNewCase: React.FC<{}> = props => {
       method: 'post',
       data: {
         projectId: selectedProject,
-        series: selectedSeries.map(s => ({
-          seriesUid: s.seriesUid,
-          partialVolumeDescriptor: s.partialVolumeDescriptor
-            ? s.partialVolumeDescriptor
-            : defaultPartialVolumeDescriptor(s.data.images)
-        })),
-        tags: selectedTags
+        tags: selectedTags,
+        series: await fillPartialVolumeDescriptors(
+          selectedSeries,
+          api,
+          appState
+        )
       }
     });
     if (res.caseId) {
@@ -64,7 +59,7 @@ const CreateNewCase: React.FC<{}> = props => {
     }
   };
 
-  const canCreate = !busy && selectedSeries.length;
+  const canCreate = selectedSeries.length;
 
   if (!writableProjects.length) {
     return (

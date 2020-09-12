@@ -329,6 +329,7 @@ const RevisionEditor: React.FC<{
             composition={composition}
             updateEditingData={updateEditingData}
             viewers={viewers}
+            disabled={busy}
           />
           {activeLabel && (
             <div className="label-attributes">
@@ -343,6 +344,7 @@ const RevisionEditor: React.FC<{
                 onValidate={valid =>
                   caseDispatch(c.validateLabelAttributes(valid))
                 }
+                disabled={busy}
               />
             </div>
           )}
@@ -353,6 +355,7 @@ const RevisionEditor: React.FC<{
             value={revision.attributes}
             onChange={caseAttributesChange}
             onValidate={valid => caseDispatch(c.validateCaseAttributes(valid))}
+            disabled={busy}
           />
         </Collapser>
       </SideContainer>
@@ -368,6 +371,7 @@ const RevisionEditor: React.FC<{
           windowPresets={projectData.windowPresets}
           onApplyWindow={handleApplyWindow}
           brushEnabled={brushEnabled}
+          disabled={busy}
         />
         <ViewerCluster
           composition={composition}

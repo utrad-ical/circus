@@ -25,14 +25,16 @@ const RevisionSelector: React.FC<{
   revisions: Revision<ExternalLabel>[];
   selected: number;
   onSelect: (index: number) => void;
+  disabled?: boolean;
 }> = React.memo(props => {
-  const { onSelect, revisions = [], selected } = props;
+  const { onSelect, revisions = [], selected, disabled } = props;
 
   const handleSelect = (value: string) => {
     const index = parseInt(/(\d+)$/.exec(value)![1]);
     onSelect(index);
   };
 
+  // We have to use string keys to preserve item order
   const opts: { [key: string]: { caption: React.ReactChild } } = {};
   revisions
     .slice()
@@ -43,7 +45,12 @@ const RevisionSelector: React.FC<{
     });
   const sel = `rev${selected}`;
   return (
-    <StyledShrinkSelect options={opts} value={sel} onChange={handleSelect} />
+    <StyledShrinkSelect
+      options={opts}
+      value={sel}
+      onChange={handleSelect}
+      disabled={disabled}
+    />
   );
 });
 

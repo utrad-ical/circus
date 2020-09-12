@@ -1,6 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import { Button, Modal } from 'components/react-bootstrap';
-import PropertyEditor from '@smikitky/rb-components/lib/PropertyEditor';
+import PropertyEditor, {
+  PropertyEditorProperties
+} from '@smikitky/rb-components/lib/PropertyEditor';
 import * as et from '@smikitky/rb-components/lib/editor-types';
 import MultiRange from 'multi-integer-range';
 import PartialVolumeDescriptor, {
@@ -37,7 +39,7 @@ const PartialVolumeDescriptorEditor: React.FC<{
       { key: 'start', editor: et.number({ min: 1, max: mr.max() }) },
       { key: 'end', editor: et.number({ min: 1, max: mr.max() }) },
       { key: 'delta', editor: et.number({ min: -10, max: 10 }) }
-    ];
+    ] as PropertyEditorProperties<PartialVolumeDescriptor>;
   }, [images]);
 
   return (

@@ -35,6 +35,7 @@ const ToolBar: React.FC<{
   windowPresets?: WindowPreset[];
   onChangeTool: (toolName: string) => void;
   onApplyWindow: (window: any) => void;
+  disabled?: boolean;
 }> = React.memo(props => {
   const {
     active,
@@ -45,7 +46,8 @@ const ToolBar: React.FC<{
     setLineWidth,
     windowPresets = [],
     onChangeTool,
-    onApplyWindow
+    onApplyWindow,
+    disabled
   } = props;
 
   const widthOptions = ['1', '3', '5', '7'];
@@ -97,24 +99,28 @@ const ToolBar: React.FC<{
         icon="rs-pager"
         changeTool={onChangeTool}
         active={activeTool}
+        disabled={disabled}
       />
       <ToolButton
         name="zoom"
         icon="rs-zoom"
         changeTool={onChangeTool}
         active={activeTool}
+        disabled={disabled}
       />
       <ToolButton
         name="hand"
         icon="rs-hand"
         changeTool={onChangeTool}
         active={activeTool}
+        disabled={disabled}
       />
       <ToolButton
         name="window"
         icon="rs-window"
         changeTool={onChangeTool}
         active={activeTool}
+        disabled={disabled}
       >
         {windowPresets.map((p: WindowPreset, i) => (
           <MenuItem
@@ -135,14 +141,14 @@ const ToolBar: React.FC<{
         icon="rs-brush"
         changeTool={onChangeTool}
         active={activeTool}
-        disabled={!brushEnabled}
+        disabled={!brushEnabled || disabled}
       />
       <ToolButton
         name="eraser"
         icon="rs-eraser"
         changeTool={onChangeTool}
         active={activeTool}
-        disabled={!brushEnabled}
+        disabled={!brushEnabled || disabled}
       />
       <ShrinkSelect
         numericalValue
@@ -150,17 +156,17 @@ const ToolBar: React.FC<{
         options={widthOptions}
         value={lineWidth}
         onChange={setLineWidth}
-        disabled={!brushEnabled}
+        disabled={!brushEnabled || disabled}
       />
       <ToolButton
         name="bucket"
         icon="rs-bucket"
         changeTool={onChangeTool}
         active={activeTool}
-        disabled={!brushEnabled}
+        disabled={!brushEnabled || disabled}
       />
       &thinsp;
-      <Dropdown id="layout-dropdown">
+      <Dropdown id="layout-dropdown" disabled={disabled}>
         <Dropdown.Toggle>
           <Icon
             icon={layoutOptions.find(l => l.key === viewOptions.layout)?.icon}
@@ -183,7 +189,7 @@ const ToolBar: React.FC<{
         </Dropdown.Menu>
       </Dropdown>
       &thinsp;
-      <Dropdown id="view-options-dropdown">
+      <Dropdown id="view-options-dropdown" disabled={disabled}>
         <Dropdown.Toggle>
           <Icon icon="circus-tool" />
         </Dropdown.Toggle>

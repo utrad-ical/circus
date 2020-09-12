@@ -99,6 +99,7 @@ const slice = createSlice({
         tag?: string;
       }>
     ) => {
+      if (s.busy) throw new Error('Tried to change revision while loading');
       const { tag, newData } = action.payload;
       s.history = s.history.slice(0, s.currentHistoryIndex + 1);
       if (typeof tag === 'string' && tag.length > 0 && tag === s.historyTag) {

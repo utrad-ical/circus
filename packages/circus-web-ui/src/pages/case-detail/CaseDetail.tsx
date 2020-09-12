@@ -181,6 +181,7 @@ const CaseDetail: React.FC<{}> = props => {
         caseStore={caseStore}
         onCommand={handleMenuBarCommand}
         onRevisionSelect={handleRevisionSelect}
+        busy={busy}
       />
       <RevisionEditor
         busy={busy}
@@ -201,8 +202,9 @@ const MenuBar: React.FC<{
   caseStore: c.CaseDetailState;
   onCommand: (command: MenuBarCommand) => void;
   onRevisionSelect: (index: number) => Promise<void>;
+  busy: boolean;
 }> = React.memo(props => {
-  const { caseStore, onCommand, onRevisionSelect } = props;
+  const { caseStore, onCommand, onRevisionSelect, busy } = props;
   return (
     <StyledMenuBarDiv>
       <div className="left">
@@ -211,23 +213,34 @@ const MenuBar: React.FC<{
           revisions={caseStore.caseData!.revisions}
           selected={caseStore.editingRevisionIndex}
           onSelect={onRevisionSelect}
+          disabled={busy}
         />
+        {busy && (
+          <>
+            &ensp;
+            <LoadingIndicator delay={500} />
+          </>
+        )}
       </div>
       <div className="right">
         <IconButton
           bsStyle="default"
           icon="step-backward"
-          disabled={!c.canUndo(caseStore)}
+          disabled={!c.canUndo(caseStore) || busy}
           onClick={() => onCommand('undo')}
         />
         <IconButton
           bsStyle="default"
           icon="step-forward"
-          disabled={!c.canRedo(caseStore)}
+          disabled={!c.canRedo(caseStore) || busy}
           onClick={() => onCommand('redo')}
         />
         &ensp;
-        <Button bsStyle="success" onClick={() => onCommand('save')}>
+        <Button
+          bsStyle="success"
+          onClick={() => onCommand('save')}
+          disabled={busy}
+        >
           <Glyphicon glyph="save" />
           Save
         </Button>
@@ -237,6 +250,7 @@ const MenuBar: React.FC<{
           title={<Icon icon="menu-hamburger" />}
           pullRight
           noCaret
+          disabled={busy}
         >
           <MenuItem eventKey="1" onSelect={() => onCommand('revert')}>
             <Icon icon="remove" />

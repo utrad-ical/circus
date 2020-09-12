@@ -36,8 +36,15 @@ const LabelSelector: React.FC<{
   composition: Composition;
   updateEditingData: EditingDataUpdater;
   viewers: { [index: string]: Viewer };
+  disabled?: boolean;
 }> = props => {
-  const { editingData, composition, updateEditingData, viewers } = props;
+  const {
+    editingData,
+    composition,
+    updateEditingData,
+    viewers,
+    disabled
+  } = props;
 
   const [newLabelType, setNewLabelType] = useLocalPreference<LabelType>(
     'newLabelType',
@@ -59,6 +66,7 @@ const LabelSelector: React.FC<{
   };
 
   const handleCommand = async (command: LabelCommand) => {
+    if (disabled) return;
     switch (command) {
       case 'rename': {
         if (!activeLabel) return;
@@ -155,7 +163,7 @@ const LabelSelector: React.FC<{
                 }
               : undefined
           }
-          disabled={!activeLabel}
+          disabled={!activeLabel || disabled}
           onChange={handleAppearanceChange}
         />
         <div className="spacer" />
@@ -172,21 +180,21 @@ const LabelSelector: React.FC<{
           bsSize="xs"
           title="Rename"
           icon="font"
-          disabled={!activeLabel}
+          disabled={!activeLabel || disabled}
           onClick={() => handleCommand('rename')}
         />
         <IconButton
           bsSize="xs"
           title="Reveal in Viewer"
           icon="map-marker"
-          disabled={!activeLabel}
+          disabled={!activeLabel || disabled}
           onClick={() => handleCommand('reveal')}
         />
         <IconButton
           bsSize="xs"
           title="Remove"
           icon="trash"
-          disabled={!activeLabel}
+          disabled={!activeLabel || disabled}
           onClick={() => handleCommand('remove')}
         />
         &thinsp;
@@ -201,6 +209,7 @@ const LabelSelector: React.FC<{
           }
           onClick={() => addLabel(newLabelType)}
           pullRight
+          disabled={disabled}
         >
           {Object.keys(labelTypes).map((type, i) => {
             const { icon } = labelTypes[type as LabelType];
@@ -225,6 +234,7 @@ const LabelSelector: React.FC<{
             key={series.seriesUid}
             activeSeries={activeSeries}
             activeLabel={activeLabel}
+            disabled={disabled}
           />
         ))}
       </StyledSeriesUl>
@@ -311,13 +321,15 @@ const Series: React.FC<{
   activeSeries: SeriesEntry;
   activeLabel: InternalLabel | null;
   updateEditingData: EditingDataUpdater;
+  disabled?: boolean;
 }> = props => {
   const {
     index: seriesIndex,
     series,
     activeSeries,
     activeLabel,
-    updateEditingData
+    updateEditingData,
+    disabled
   } = props;
 
   return (
@@ -334,6 +346,7 @@ const Series: React.FC<{
             seriesIndex={seriesIndex}
             labelIndex={labelIndex}
             updateEditingData={updateEditingData}
+            disabled={disabled}
           />
         ))}
       </ul>
@@ -355,13 +368,15 @@ export const Label: React.FC<{
   seriesIndex: number;
   activeLabel: InternalLabel | null;
   updateEditingData: EditingDataUpdater;
+  disabled?: boolean;
 }> = props => {
   const {
     label,
     activeLabel,
     seriesIndex,
     labelIndex,
-    updateEditingData
+    updateEditingData,
+    disabled
   } = props;
 
   const [isDragOver, setIsDragOver] = useState<false | 'top' | 'bottom'>(false);
@@ -374,6 +389,7 @@ export const Label: React.FC<{
   );
 
   const handleClick = () => {
+    if (disabled) return;
     updateEditingData(editingData => {
       editingData.activeSeriesIndex = seriesIndex;
       editingData.activeLabelIndex = labelIndex;

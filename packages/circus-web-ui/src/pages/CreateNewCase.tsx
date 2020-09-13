@@ -7,7 +7,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { useApi } from 'utils/api';
-import fillPartialVolumeDescriptors from 'utils/defaultPartialVolumeDescriptor';
+import fillPartialVolumeDescriptors from 'utils/partialVolumeDescriptor';
 import useLoginUser from 'utils/useLoginUser';
 
 const CreateNewCase: React.FC<{}> = props => {

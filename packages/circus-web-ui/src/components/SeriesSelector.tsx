@@ -21,33 +21,16 @@ const PartialVolumeRenderer: React.FC<{
   index: number;
   value: PartialVolumeDescriptor | undefined;
   images: string; // multi-integer-range string (eg '1-20,30')
-  onChange: (index: number, value: PartialVolumeDescriptor | undefined) => void;
+  onClick: () => void;
 }> = props => {
-  const { index, value, images, onChange } = props;
-  const mr = useMemo(() => multirange(images), [images]);
-
-  const handleClick = async () => {
-    const result = (await modal(
-      (props: any) => (
-        <PartialVolumeDescriptorEditor
-          initialValue={value ?? { start: mr.min(), end: mr.max(), delta: 1 }}
-          images={mr}
-          {...props}
-        />
-      ),
-      {}
-    )) as { descriptor: PartialVolumeDescriptor };
-    if (!result) return; // cancelled
-    onChange(index, result.descriptor);
-  };
-
+  const { value, images, onClick } = props;
   const applied = !!value;
 
   return (
     <IconButton
       icon="edit"
       bsSize="xs"
-      onClick={handleClick}
+      onClick={onClick}
       bsStyle={applied ? 'success' : 'default'}
     >
       {applied ? describePartialVolumeDescriptor(value!, 3) : 'full'}
@@ -108,15 +91,23 @@ const RelevantSeries: React.FC<{
 
 export interface SeriesEntry {
   seriesUid: string;
-  partialVolumeDescriptor: PartialVolumeDescriptor | undefined;
+  partialVolumeDescriptor?: PartialVolumeDescriptor;
 }
 
 const SeriesSelector: React.FC<{
   value: SeriesEntry[];
   onChange: any;
+  onRemoving?: (index: number) => Promise<boolean>;
+  onPvdEditing?: (index: number) => Promise<boolean>;
   alwaysShowRelevaltSeries?: boolean;
 }> = props => {
-  const { value, onChange, alwaysShowRelevaltSeries } = props;
+  const {
+    value,
+    onChange,
+    onRemoving,
+    onPvdEditing,
+    alwaysShowRelevaltSeries
+  } = props;
   const [showRelevantSeries, setShowRelevantSeries] = useState(
     !!alwaysShowRelevaltSeries
   );
@@ -127,6 +118,8 @@ const SeriesSelector: React.FC<{
   const [seriesData, setSeriesData] = useState<{
     [seriesUid: string]: Series | null; // null means "now loading"
   }>({});
+
+  const primarySeries = seriesData[value[0].seriesUid];
 
   useEffect(() => {
     const loadSeriesData = async (seriesUid: string) => {
@@ -157,32 +150,50 @@ const SeriesSelector: React.FC<{
     value.forEach(value => loadSeriesData(value.seriesUid));
   }, [api, searches, seriesData, value]);
 
+  useEffect(() => {
+    if (!showRelevantSeries || !primarySeries) return;
+    const filter = { studyUid: primarySeries.studyUid };
+    dispatch(
+      newSearch(api, 'relevantSeries', {
+        resource: { endPoint: 'series', primaryKey: 'seriesUid' },
+        filter,
+        condition: {},
+        sort: '{}'
+      })
+    );
+  }, [api, dispatch, primarySeries, showRelevantSeries]);
+
   const handleAddSeriesClick = () => {
-    if (!showRelevantSeries) {
-      const studyUid = (seriesData[value[0].seriesUid] as Series).studyUid;
-      const filter = { studyUid };
-      dispatch(
-        newSearch(api, 'relevantSeries', {
-          resource: { endPoint: 'series', primaryKey: 'seriesUid' },
-          filter,
-          condition: {},
-          sort: '{}'
-        })
-      );
-      setShowRelevantSeries(true);
-    } else {
-      setShowRelevantSeries(false);
-    }
+    setShowRelevantSeries(s => !s);
   };
 
-  const handlePartialVolumeChange = (
-    volumeId: number,
-    descriptor: PartialVolumeDescriptor | undefined
-  ) => {
-    const newValue = produce(value, value => {
-      value[volumeId].partialVolumeDescriptor = descriptor;
-    });
-    onChange(newValue);
+  const handlePvdButtonClick = async (index: number) => {
+    if (onPvdEditing && !(await onPvdEditing(index))) return;
+    const seriesUid = value[index].seriesUid;
+    const mr = multirange(seriesData[seriesUid]?.images);
+    const result = (await modal(
+      (props: any) => (
+        <PartialVolumeDescriptorEditor
+          initialValue={
+            value[index].partialVolumeDescriptor ?? {
+              start: mr.min(),
+              end: mr.max(),
+              delta: 1
+            }
+          }
+          images={mr}
+          {...props}
+        />
+      ),
+      {}
+    )) as { descriptor: PartialVolumeDescriptor | null } | null;
+    if (!result) return; // dialog cancelled
+
+    onChange(
+      produce(value, value => {
+        value[index].partialVolumeDescriptor = result.descriptor || undefined;
+      })
+    );
   };
 
   const handleSeriesRegister = async (seriesUid: string) => {
@@ -196,8 +207,9 @@ const SeriesSelector: React.FC<{
     onChange([...value, newEntry]);
   };
 
-  const handleSeriesRemove = (index: number) => {
+  const handleSeriesRemove = async (index: number) => {
     if (value.length <= 1) return;
+    if (onRemoving && !(await onRemoving(index))) return;
     onChange(
       produce(value, value => {
         value.splice(index, 1);
@@ -250,7 +262,7 @@ const SeriesSelector: React.FC<{
             value={value.partialVolumeDescriptor}
             images={seriesData[value.seriesUid]!.images}
             index={index}
-            onChange={handlePartialVolumeChange}
+            onClick={() => handlePvdButtonClick(index)}
           />
         ) : null
     },

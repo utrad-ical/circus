@@ -69,6 +69,7 @@ export default class RawData {
     }
 
     this.size = [x, y, z];
+    this.virtualZSize = z;
     this.pixelFormat = pixelFormat;
     const pxInfo = this.getPixelFormatInfo(this.pixelFormat);
     this.data = new ArrayBuffer(
@@ -78,11 +79,16 @@ export default class RawData {
   }
 
   protected partialVolumeDescriptor?: PartialVolumeDescriptor;
+  protected virtualZSize: number;
 
   public setPartialVolumeDescriptor(
     partialVolumeDescriptor: PartialVolumeDescriptor | undefined
   ): void {
     this.partialVolumeDescriptor = partialVolumeDescriptor;
+    this.virtualZSize = partialVolumeDescriptor
+      ? (partialVolumeDescriptor.end - partialVolumeDescriptor.start) /
+        partialVolumeDescriptor.delta
+      : this.size[2];
   }
 
   /**
@@ -130,7 +136,7 @@ export default class RawData {
       z < 0.0 ||
       x >= this.size[0] ||
       y >= this.size[1] ||
-      z >= this.size[2]
+      z >= this.virtualZSize
     ) {
       return undefined;
     }
@@ -169,7 +175,7 @@ export default class RawData {
       z < 0.0 ||
       x >= this.size[0] ||
       y >= this.size[1] ||
-      z >= this.size[2]
+      z >= this.virtualZSize
     ) {
       return undefined;
     }

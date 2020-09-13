@@ -27,6 +27,7 @@ export interface DynamicMprImageSourceOptions {
 export default class DynamicMprImageSource extends MprImageSource {
   private rsHttpClient: RsHttpClient;
   private seriesUid: string;
+  private partialVolumeDescriptor?: PartialVolumeDescriptor;
 
   constructor({
     rsHttpClient,
@@ -37,6 +38,7 @@ export default class DynamicMprImageSource extends MprImageSource {
     super();
     this.rsHttpClient = rsHttpClient;
     this.seriesUid = seriesUid;
+    this.partialVolumeDescriptor = partialVolumeDescriptor;
     this.loadSequence = (async () => {
       this.metadata = (await rsHttpClient.request(
         `series/${seriesUid}/metadata`,
@@ -55,6 +57,7 @@ export default class DynamicMprImageSource extends MprImageSource {
     const res = await this.rsHttpClient.request(
       `series/${series}/scan`,
       {
+        ...(this.partialVolumeDescriptor ?? {}),
         origin: section.origin.join(','),
         xAxis: section.xAxis.join(','),
         yAxis: section.yAxis.join(','),

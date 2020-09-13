@@ -385,6 +385,7 @@ const RevisionEditor: React.FC<{
         </Collapser>
         <Collapser title="Case Attributes" className="case-attributes">
           <JsonSchemaEditor
+            key={revision.date}
             schema={projectData.caseAttributesSchema}
             value={revision.attributes}
             onChange={caseAttributesChange}

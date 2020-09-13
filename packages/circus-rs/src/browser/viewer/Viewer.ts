@@ -6,6 +6,8 @@ import ViewState from '../ViewState';
 import { ViewStateResizeTransformer } from '../image-source/ImageSource';
 import { Tool } from '../tool/Tool';
 import Annotation from '../annotation/Annotation';
+import LoadingIndicator from '../interface/LoadingIndicator';
+import defaultLoadingIndicator from './defaultLoadingIndicator';
 
 /**
  * Viewer is the main component of CIRCUS RS, and wraps a HTML canvas element
@@ -26,6 +28,8 @@ export default class Viewer extends EventEmitter {
 
   private hoveringAnnotation: Annotation | undefined = undefined;
 
+  private loadingIndicator: LoadingIndicator;
+
   /**
    * primaryEventTarget captures all UI events happened within the canvas
    * before other elements handle this, typically while dragging.
@@ -41,6 +45,7 @@ export default class Viewer extends EventEmitter {
   private boundEventHandler: (event: MouseEvent) => void;
 
   private imageReady: boolean = false;
+  private firstImageDrawn: boolean = false;
 
   private isDragging: boolean = false;
 
@@ -100,6 +105,8 @@ export default class Viewer extends EventEmitter {
     canvas.addEventListener('wheel', this.boundEventHandler);
 
     this.boundRender = this.render.bind(this);
+
+    this.loadingIndicator = defaultLoadingIndicator;
 
     this.activateResizeObserver();
   }
@@ -274,6 +281,7 @@ export default class Viewer extends EventEmitter {
         this.cachedSourceImage = image;
         this.currentRender = null;
         this.renderAnnotations(state);
+        this.firstImageDrawn = true;
         this.emit('draw', this.viewState);
         return true;
       });
@@ -317,6 +325,14 @@ export default class Viewer extends EventEmitter {
   }
 
   /**
+   * Sets the loading indicator.
+   * @param indicator The loading indicator.
+   */
+  public setLoadingIndicator(indicator: LoadingIndicator) {
+    this.loadingIndicator = indicator;
+  }
+
+  /**
    * ImageSource handling methods
    */
   public setComposition(composition: Composition): void {
@@ -328,6 +344,18 @@ export default class Viewer extends EventEmitter {
     this.composition = composition;
     this.composition.registerViewer(this);
     this.imageReady = false;
+    this.firstImageDrawn = false;
+
+    // Loading indicator
+    const drawLoadingIndicator = (time: number) => {
+      if (this.firstImageDrawn) return;
+      const ctx = this.canvas.getContext('2d')!;
+      this.loadingIndicator(ctx, time);
+      requestAnimationFrame(drawLoadingIndicator);
+    };
+    requestAnimationFrame(drawLoadingIndicator);
+
+    // Wait for image source to be ready
     composition.imageSource.ready().then(() => {
       this.imageReady = true;
       this.setState(composition.imageSource.initialState(this));

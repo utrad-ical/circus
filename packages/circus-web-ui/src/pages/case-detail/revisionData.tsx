@@ -43,11 +43,11 @@ export interface Revision<
   date: string;
   description: string;
   attributes: object;
-  series: SeriesEntry<L>[];
+  series: SeriesEntryWithLabels<L>[];
   status: string;
 }
 
-export interface SeriesEntry<
+export interface SeriesEntryWithLabels<
   L extends InternalLabel | ExternalLabel = InternalLabel
 > {
   seriesUid: string;
@@ -309,15 +309,15 @@ export const externalRevisionToInternal = async (
 };
 
 const internalSeriesToExternal = async (
-  series: SeriesEntry<InternalLabel>,
+  series: SeriesEntryWithLabels<InternalLabel>,
   api: ApiCaller
-): Promise<SeriesEntry<ExternalLabel>> => {
+): Promise<SeriesEntryWithLabels<ExternalLabel>> => {
   const newLabels = await asyncMap(series.labels, async label =>
     internalLabelToExternal(label, api)
   );
   return produce(series, series => {
     (series as any).labels = newLabels;
-    return series as SeriesEntry<ExternalLabel>;
+    return series as SeriesEntryWithLabels<ExternalLabel>;
   });
 };
 

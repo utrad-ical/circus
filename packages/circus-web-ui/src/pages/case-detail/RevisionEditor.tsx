@@ -29,11 +29,16 @@ import {
   EditingData,
   EditingDataUpdater,
   InternalLabel,
-  labelTypes
+  labelTypes,
+  SeriesEntryWithLabels
 } from './revisionData';
 import SideContainer from './SideContainer';
 import ToolBar, { ViewOptions } from './ToolBar';
 import ViewerCluster from './ViewerCluster';
+import IconButton from '@smikitky/rb-components/lib/IconButton';
+import { Modal } from '../../components/react-bootstrap';
+import SeriesSelectorDialog from './SeriesSelectorDialog';
+import styled from 'styled-components';
 
 const useComposition = (
   seriesUid: string,
@@ -87,6 +92,7 @@ const RevisionEditor: React.FC<{
   const toolsRef = useRef<{ [key: string]: ToolBaseClass }>({});
   const tools = toolsRef.current;
   const stateChanger = useMemo(() => createStateChanger<rs.MprViewState>(), []);
+  const [seriesDialogOpen, setSeriesDialogOpen] = useState(false);
 
   const [viewOptions, setViewOptions] = useState<ViewOptions>({
     layout: 'twoByTwo',
@@ -240,6 +246,22 @@ const RevisionEditor: React.FC<{
     }, 'Change case attributes');
   };
 
+  const handleModifySeries = () => {
+    setSeriesDialogOpen(true);
+  };
+
+  const handleSeriesDialogResolve = (
+    result: SeriesEntryWithLabels[] | null
+  ) => {
+    if (busy) return;
+    setSeriesDialogOpen(false);
+    if (result === null) return;
+    console.log('r', result);
+    updateEditingData(d => {
+      d.revision.series = result;
+    });
+  };
+
   const changeTool = useCallback(
     (toolName: string) => {
       setToolName(toolName);
@@ -321,7 +343,7 @@ const RevisionEditor: React.FC<{
   const brushEnabled = activeLabel ? activeLabel.type === 'voxel' : false;
 
   return (
-    <div className={classNames('case-revision-data', { busy })}>
+    <StyledDiv className={classNames('case-revision-data', { busy })}>
       <SideContainer>
         <Collapser title="Series / Labels" className="labels" noPadding>
           <LabelSelector
@@ -331,6 +353,18 @@ const RevisionEditor: React.FC<{
             viewers={viewers}
             disabled={busy}
           />
+
+          <div className="add-series-pane">
+            <IconButton
+              bsSize="xs"
+              icon="plus"
+              onClick={handleModifySeries}
+              disabled={busy}
+            >
+              Add series
+            </IconButton>
+          </div>
+
           {activeLabel && (
             <div className="label-attributes">
               <b>Attributes for</b>:{' '}
@@ -359,7 +393,6 @@ const RevisionEditor: React.FC<{
           />
         </Collapser>
       </SideContainer>
-
       <div className="case-revision-main">
         <ToolBar
           active={toolName}
@@ -383,8 +416,29 @@ const RevisionEditor: React.FC<{
           initialWindowSetter={initialWindowSetter}
         />
       </div>
-    </div>
+      <Modal show={seriesDialogOpen} bsSize="lg">
+        <SeriesSelectorDialog
+          onResolve={handleSeriesDialogResolve}
+          initialValue={editingData.revision.series}
+        />
+      </Modal>
+    </StyledDiv>
   );
 };
+
+const StyledDiv = styled.div`
+  .add-series-pane {
+    margin: 15px;
+    text-align: right;
+  }
+
+  .label-attributes {
+    margin: 15px;
+    .label-name {
+      overflow: visible;
+      word-break: break-all;
+    }
+  }
+`;
 
 export default RevisionEditor;

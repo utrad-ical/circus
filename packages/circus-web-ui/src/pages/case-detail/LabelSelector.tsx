@@ -28,7 +28,7 @@ import {
   InternalLabel,
   LabelAppearance,
   LabelType,
-  SeriesEntry
+  SeriesEntryWithLabels
 } from './revisionData';
 
 const LabelSelector: React.FC<{
@@ -226,17 +226,19 @@ const LabelSelector: React.FC<{
         </SplitButton>
       </StyledButtonsDiv>
       <StyledSeriesUl>
-        {revision.series.map((series: SeriesEntry, seriesIndex: number) => (
-          <Series
-            updateEditingData={updateEditingData}
-            series={series}
-            index={seriesIndex}
-            key={series.seriesUid}
-            activeSeries={activeSeries}
-            activeLabel={activeLabel}
-            disabled={disabled}
-          />
-        ))}
+        {revision.series.map(
+          (series: SeriesEntryWithLabels, seriesIndex: number) => (
+            <Series
+              key={`${seriesIndex}:${series.seriesUid}`}
+              updateEditingData={updateEditingData}
+              series={series}
+              seriesIndex={seriesIndex}
+              activeSeries={activeSeries}
+              activeLabel={activeLabel}
+              disabled={disabled}
+            />
+          )
+        )}
       </StyledSeriesUl>
     </>
   );
@@ -252,9 +254,15 @@ const StyledButtonsDiv = styled.div`
 
 const StyledSeriesUl = styled.ul`
   padding: 0;
+  border-top: 1px solid silver;
+
   > li {
     margin-top: 10px;
+    padding-left: 10px;
     list-style-type: none;
+    .series-head .circus-icon {
+      font-size: 130%;
+    }
     &.active .series-head {
       font-weight: bold;
     }
@@ -262,14 +270,18 @@ const StyledSeriesUl = styled.ul`
 
   .case-label-list {
     margin: 0;
-    padding-left: 0;
+    padding-left: 10px;
     &.active {
       background-color: silver;
     }
   }
 
-  .label-list-item {
+  .no-labels {
     list-style-type: none;
+    color: gray;
+  }
+
+  .label-list-item {
     white-space: nowrap;
     display: flex;
     flex-direction: row;
@@ -289,7 +301,7 @@ const StyledSeriesUl = styled.ul`
         font-size: 130%;
       }
       flex-grow: 1;
-      margin-left: 5px;
+      margin-left: 15px;
       overflow: hidden;
     }
     &:hover {
@@ -316,15 +328,15 @@ export default LabelSelector;
 type LabelCommand = 'rename' | 'remove' | 'convertType' | 'reveal';
 
 const Series: React.FC<{
-  index: number;
-  series: SeriesEntry;
-  activeSeries: SeriesEntry;
+  seriesIndex: number;
+  series: SeriesEntryWithLabels;
+  activeSeries: SeriesEntryWithLabels;
   activeLabel: InternalLabel | null;
   updateEditingData: EditingDataUpdater;
   disabled?: boolean;
 }> = props => {
   const {
-    index: seriesIndex,
+    seriesIndex,
     series,
     activeSeries,
     activeLabel,
@@ -332,8 +344,21 @@ const Series: React.FC<{
     disabled
   } = props;
 
+  const handleClick = () => {
+    if (disabled) return;
+    updateEditingData(editingData => {
+      if (editingData.activeSeriesIndex !== seriesIndex) {
+        editingData.activeSeriesIndex = seriesIndex;
+        editingData.activeLabelIndex = series.labels.length ? 0 : -1;
+      }
+    }, 'Change active label');
+  };
+
   return (
-    <li className={classNames({ active: series === activeSeries })}>
+    <li
+      className={classNames({ active: series === activeSeries })}
+      onClick={handleClick}
+    >
       <span className="series-head">
         <Icon icon="circus-series" /> Series #{seriesIndex}
       </span>
@@ -349,6 +374,7 @@ const Series: React.FC<{
             disabled={disabled}
           />
         ))}
+        {!series.labels.length && <li className="no-labels">No labels.</li>}
       </ul>
     </li>
   );
@@ -388,7 +414,8 @@ export const Label: React.FC<{
     <StyledLabelNameNone>Label</StyledLabelNameNone>
   );
 
-  const handleClick = () => {
+  const handleClick = (ev: React.MouseEvent) => {
+    ev.stopPropagation();
     if (disabled) return;
     updateEditingData(editingData => {
       editingData.activeSeriesIndex = seriesIndex;
@@ -506,7 +533,7 @@ const AppearanceEditor: React.FC<{
   const { value, disabled, onChange } = props;
   if (disabled) {
     return (
-      <ColorEditorButton bsSize="xs" style={{ backgroundColor: 'silver' }}>
+      <ColorEditorButton bsSize="xs" style={{ backgroundColor: '#eeeeee' }}>
         -
       </ColorEditorButton>
     );

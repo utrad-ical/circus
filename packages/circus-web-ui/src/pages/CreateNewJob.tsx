@@ -7,7 +7,7 @@ import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { useApi } from 'utils/api';
-import fillPartialVolumeDescriptors from 'utils/defaultPartialVolumeDescriptor';
+import fillPartialVolumeDescriptors from 'utils/partialVolumeDescriptor';
 import useLocalPreference from 'utils/useLocalPreference';
 import useShowMessage from 'utils/useShowMessage';
 import Plugin from '../types/Plugin';

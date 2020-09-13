@@ -2,6 +2,7 @@ import koa from 'koa';
 import httpStatus from 'http-status';
 import {
   isDicomUid,
+  isValidPartialVolumeDescriptor,
   Logger,
   PartialVolumeDescriptor
 } from '@utrad-ical/circus-lib';
@@ -53,23 +54,18 @@ export default function loadVolumeProvider({
       ctx.throw(httpStatus.NOT_FOUND, 'Series could not be loaded');
     }
 
-    let partialVolumeDescriptor:
-      | PartialVolumeDescriptor
-      | undefined = undefined;
+    let partialVolumeDescriptor: PartialVolumeDescriptor | undefined;
     const { images } = volumeAccessor!;
-    const { start, end, delta = 1 } = ctx.state.query;
-    if (start !== undefined || end !== undefined) {
+    const { start, end, delta } = ctx.state.query;
+    if (start !== undefined || end !== undefined || delta !== undefined) {
       const imageRange = new MultiRange(images);
-
-      // Check if the descriptor is valid.
       if (
-        start === undefined ||
-        end === undefined ||
+        !isValidPartialVolumeDescriptor({ start, end, delta }) ||
         !imageRange.has(start) ||
         !imageRange.has(end)
-      )
+      ) {
         ctx.throw(httpStatus.BAD_REQUEST, 'Volume descriptor is invalid');
-
+      }
       partialVolumeDescriptor = { start, end, delta };
     }
 

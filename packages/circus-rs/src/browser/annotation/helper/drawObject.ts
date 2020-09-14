@@ -94,6 +94,7 @@ export function drawRectangle(
     lineWidth: number;
     strokeStyle: string;
     fillStyle?: string;
+    lineDash?: number[];
   }
 ) {
   if (!box) return;
@@ -101,6 +102,7 @@ export function drawRectangle(
   ctx.save();
   try {
     ctx.beginPath();
+    if (style.lineDash) ctx.setLineDash(style.lineDash);
     ctx.moveTo(box.min.x, box.min.y);
     ctx.lineTo(box.min.x, box.max.y);
     ctx.lineTo(box.max.x, box.max.y);

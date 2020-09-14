@@ -20,23 +20,26 @@ export default class ViewerEvent {
     this.type = type || (original ? original.type : null);
     this.propagation = true;
 
-    if (original && 'offsetX' in original) {
+    const isTouchEvent = original instanceof TouchEvent;
+    if (original && ('offsetX' in original || isTouchEvent)) {
       const [viewerWidth, viewerHeight] = viewer.getResolution();
       const [elementWidth, elementHeight] = viewer.getViewport();
-
+      const { pageX, pageY } = isTouchEvent
+        ? original.changedTouches[0]
+        : original;
       const rect = viewer.canvas.getBoundingClientRect(); // in window coordinate
-      const offsetX = original.pageX - rect.left - window.scrollX;
-      const offsetY = original.pageY - rect.top - window.scrollY;
+      const offsetX = pageX - rect.left - window.scrollX;
+      const offsetY = pageY - rect.top - window.scrollY;
 
       this.viewerX = (offsetX * viewerWidth) / elementWidth;
       this.viewerY = (offsetY * viewerHeight) / elementHeight;
       this.viewerWidth = viewerWidth;
       this.viewerHeight = viewerHeight;
-
-      this.movementX = original.movementX;
-      this.movementY = original.movementY;
+      if (!isTouchEvent) {
+        this.movementX = original.movementX;
+        this.movementY = original.movementY;
+      }
     }
-
     this.original = original;
   }
 

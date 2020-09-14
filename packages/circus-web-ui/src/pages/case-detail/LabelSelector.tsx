@@ -158,6 +158,15 @@ export const Label: React.FC<{
   );
   const liRef = useRef<HTMLLIElement>(null);
 
+  const handleColorPreviewClick = (ev: React.MouseEvent) => {
+    ev.stopPropagation();
+    if (disabled) return;
+    updateEditingData(editingData => {
+      const label = editingData.revision.series[seriesIndex].labels[labelIndex];
+      label.hidden = !label.hidden;
+    }, 'Label visibility ' + label.temporaryKey);
+  };
+
   const handleClick = (ev: React.MouseEvent) => {
     ev.stopPropagation();
     if (disabled) return;
@@ -213,7 +222,7 @@ export const Label: React.FC<{
       series.labels.splice(insertIndex, 0, label);
       series.labels.splice(dragData.labelIndex + (draggingUp ? 1 : 0), 1);
       d.activeLabelIndex = insertIndex + (draggingUp ? 0 : -1);
-    }, 'Sort label');
+    });
     setIsDragingOver(false);
   };
 
@@ -234,9 +243,10 @@ export const Label: React.FC<{
     >
       <div
         className="color-preview"
+        onClick={handleColorPreviewClick}
         style={{ backgroundColor: label.data.color }}
       >
-        {label.data.alpha === 0 && <Icon icon="eye-close" />}
+        {label.hidden && <Icon icon="eye-close" />}
       </div>
       <div className="caption">
         <Icon icon={labelTypes[label.type].icon} />
@@ -262,6 +272,7 @@ const StyledLabelLi = styled.li`
     border: 1px solid silver;
   }
   .caption {
+    pointer-events: none; /* Needed for drag & drop */
     .circus-icon {
       font-size: 130%;
     }
@@ -284,8 +295,5 @@ const StyledLabelLi = styled.li`
   }
   &.draggging-bottom {
     border-bottom: 3px solid gray;
-  }
-  * {
-    pointer-events: none; /* Needed for drag & drop */
   }
 `;

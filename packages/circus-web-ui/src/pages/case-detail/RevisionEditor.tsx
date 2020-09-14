@@ -177,6 +177,7 @@ const RevisionEditor: React.FC<{
 
     activeSeries.labels.forEach((label: InternalLabel) => {
       const isActive = activeLabel && label === activeLabel;
+      if (label.hidden) return;
       composition.addAnnotation(
         buildAnnotation(
           label,

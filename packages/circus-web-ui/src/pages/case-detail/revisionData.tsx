@@ -11,8 +11,12 @@ import { ApiCaller } from 'utils/api';
 import { sha1 } from 'utils/util';
 import asyncMap from '../../utils/asyncMap';
 
+/**
+ * EditingData represents one revision data with some meta data,
+ * and forms the unit for history handling.
+ */
 export interface EditingData {
-  revision: Revision;
+  revision: Revision<InternalLabel>;
   /**
    * The index of the active series. Always >= 0.
    */
@@ -124,6 +128,7 @@ export type InternalLabel = {
    * A string unique ID (used in web-ui only; not saved on DB)
    */
   temporaryKey: string;
+  hidden: boolean;
 } & TaggedLabelData;
 
 /**
@@ -231,7 +236,11 @@ const externalLabelToInternal = async (
   api: ApiCaller
 ): Promise<InternalLabel> => {
   const temporaryKey = generateUniqueId();
-  const internalLabel = { ...label, temporaryKey } as InternalLabel;
+  const internalLabel = {
+    ...label,
+    temporaryKey,
+    hidden: false
+  } as InternalLabel;
 
   if (label.type === 'voxel' && internalLabel.type === 'voxel') {
     // The condition above is redundant but used to satisfy type check
@@ -285,7 +294,8 @@ const internalLabelToExternal = async (
 
   return produce(label, async label => {
     if (label.type === 'voxel') label.data = await saveVoxels();
-    delete label.temporaryKey;
+    delete (label as any).temporaryKey;
+    delete (label as any).hidden;
     return label as ExternalLabel;
   });
 };

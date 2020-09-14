@@ -107,13 +107,18 @@ const LabelMenu: React.FC<{
     }
   };
 
-  const handleAppearanceChange = (value: LabelAppearance) => {
+  const handleAppearanceChange = (
+    appearance: LabelAppearance,
+    hidden: boolean
+  ) => {
     updateEditingData(editingData => {
-      const data =
-        editingData.revision.series[activeSeriesIndex].labels[activeLabelIndex]
-          .data;
-      data.color = value.color;
-      data.alpha = value.alpha;
+      const label =
+        editingData.revision.series[activeSeriesIndex].labels[activeLabelIndex];
+      if (label.data.color !== appearance.color)
+        label.data.color = appearance.color;
+      if (label.data.alpha !== appearance.alpha)
+        label.data.alpha = appearance.alpha;
+      if (label.hidden !== hidden) label.hidden = hidden;
     }, 'Change appearance');
   };
 
@@ -140,7 +145,7 @@ const LabelMenu: React.FC<{
     };
     const name = getUniqueLabelName(labelNames[type]);
     const data = createNewLabelData(type, { color, alpha }, viewers);
-    return { temporaryKey, name, ...data, attributes: {} };
+    return { temporaryKey, name, ...data, attributes: {}, hidden: false };
   };
 
   const addLabel = (type: LabelType) => {
@@ -154,7 +159,7 @@ const LabelMenu: React.FC<{
   return (
     <StyledButtonsDiv>
       <AppearanceEditor
-        value={
+        appearance={
           activeLabel
             ? {
                 color: activeLabel.data.color,
@@ -162,6 +167,7 @@ const LabelMenu: React.FC<{
               }
             : undefined
         }
+        hidden={!!activeLabel?.hidden}
         disabled={!activeLabel || disabled}
         onChange={handleAppearanceChange}
       />
@@ -263,12 +269,13 @@ const ColorEditorButton = styled(Button)`
 `;
 
 const AppearanceEditor: React.FC<{
-  value: LabelAppearance | undefined;
+  appearance: LabelAppearance | undefined;
+  hidden: boolean;
   disabled?: boolean;
-  onChange: (value: LabelAppearance) => void;
+  onChange: (appearance: LabelAppearance, hidden: boolean) => void;
 }> = props => {
-  const { value, disabled, onChange } = props;
-  if (disabled) {
+  const { appearance, hidden, disabled, onChange } = props;
+  if (disabled || !appearance) {
     return (
       <ColorEditorButton bsSize="xs" style={{ backgroundColor: '#eeeeee' }}>
         -
@@ -278,7 +285,11 @@ const AppearanceEditor: React.FC<{
 
   const appearanceEditor = (
     <Popover id="appearance-editor">
-      <AppearancePopover value={value!} onChange={onChange} />
+      <AppearancePopover
+        appearance={appearance}
+        hidden={hidden}
+        onChange={onChange}
+      />
     </Popover>
   );
 
@@ -293,37 +304,40 @@ const AppearanceEditor: React.FC<{
         className="color-editor-button"
         bsSize="xs"
         style={{
-          backgroundColor: value!.color,
-          color: tinyColor.mostReadable(value!.color, ['#ffffff', '#000000'])
+          backgroundColor: appearance.color,
+          color: tinyColor.mostReadable(appearance.color, [
+            '#ffffff',
+            '#000000'
+          ])
         }}
       >
-        {value!.alpha * 100}%
+        {appearance.alpha * 100}%
       </ColorEditorButton>
     </OverlayTrigger>
   );
 };
 
 const AppearancePopover: React.FC<{
-  value: LabelAppearance;
-  onChange: (value: LabelAppearance) => void;
+  appearance: LabelAppearance;
+  hidden: boolean;
+  onChange: (apperance: LabelAppearance, hidden: boolean) => void;
 }> = props => {
-  const {
-    onChange,
-    value: { color, alpha }
-  } = props;
+  const { onChange, appearance, hidden } = props;
+  const { color, alpha } = appearance;
+
   return (
     <StyledAppearancePopoverDiv>
       <ColorPalette
         value={color}
-        onChange={(color: string) => onChange({ color, alpha })}
+        onChange={(color: string) => onChange({ color, alpha }, hidden)}
         colors={labelColors}
       />
       <div className="alpha-pane">
         <IconButton
-          icon={alpha === 0 ? 'eye-close' : 'eye-open'}
+          icon={hidden ? 'eye-close' : 'eye-open'}
           bsStyle="link"
           bsSize="sm"
-          onClick={() => onChange({ color, alpha: alpha === 0 ? 1 : 0 })}
+          onClick={() => onChange(appearance, !hidden)}
         />
         <Slider
           className="alpha-slider"
@@ -331,7 +345,7 @@ const AppearancePopover: React.FC<{
           max={100}
           step={10}
           value={alpha * 100}
-          onChange={(v: number) => onChange({ color, alpha: v / 100 })}
+          onChange={(v: number) => onChange({ color, alpha: v / 100 }, hidden)}
         />
       </div>
     </StyledAppearancePopoverDiv>

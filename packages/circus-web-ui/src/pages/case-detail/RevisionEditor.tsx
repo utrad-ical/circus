@@ -39,6 +39,7 @@ import IconButton from '@smikitky/rb-components/lib/IconButton';
 import { Modal } from '../../components/react-bootstrap';
 import SeriesSelectorDialog from './SeriesSelectorDialog';
 import styled from 'styled-components';
+import LabelMenu from './LabelMenu';
 
 const useComposition = (
   seriesUid: string,
@@ -346,11 +347,16 @@ const RevisionEditor: React.FC<{
     <StyledDiv className={classNames('case-revision-data', { busy })}>
       <SideContainer>
         <Collapser title="Series / Labels" className="labels" noPadding>
-          <LabelSelector
+          <LabelMenu
             editingData={editingData}
             composition={composition}
             updateEditingData={updateEditingData}
             viewers={viewers}
+            disabled={busy}
+          />
+          <LabelSelector
+            editingData={editingData}
+            updateEditingData={updateEditingData}
             disabled={busy}
           />
 

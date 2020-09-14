@@ -12,3 +12,12 @@ export type Vector2D = [number, number];
 export function vector2ToVector3(target: Vector2): Vector3 {
   return new Vector3(target.x, target.y, 0);
 }
+
+export function vector2ToPerpendicularClockwise(
+  target: Vector2,
+  counter: boolean = false
+): Vector2 {
+  return counter
+    ? new Vector2(-target.y, target.x)
+    : new Vector2(target.y, -target.x);
+}

@@ -45,7 +45,7 @@ export default class Viewer extends EventEmitter {
   public backgroundEventTarget: any;
 
   private boundRender: EventListener;
-  private boundEventHandler: (event: MouseEvent) => void;
+  private boundEventHandler: (event: MouseEvent | TouchEvent) => void;
 
   private imageReady: boolean = false;
   private firstImageDrawn: boolean = false;
@@ -106,6 +106,9 @@ export default class Viewer extends EventEmitter {
     canvas.addEventListener('mouseup', this.boundEventHandler);
     canvas.addEventListener('mousemove', this.boundEventHandler);
     canvas.addEventListener('wheel', this.boundEventHandler);
+    canvas.addEventListener('touchstart', this.boundEventHandler);
+    canvas.addEventListener('touchend', this.boundEventHandler);
+    canvas.addEventListener('touchmove', this.boundEventHandler);
 
     this.boundRender = this.render.bind(this);
 
@@ -152,7 +155,7 @@ export default class Viewer extends EventEmitter {
     this.canvas.height = height;
   }
 
-  private canvasEventHandler(originalEvent: MouseEvent): void {
+  private canvasEventHandler(originalEvent: MouseEvent | TouchEvent): void {
     // Suppress all event when the viewer is not initialized
     if (!this.composition || !this.viewState) return;
 
@@ -160,28 +163,38 @@ export default class Viewer extends EventEmitter {
     const documentElement = document.documentElement as HTMLElement;
 
     // Emulate "drag and drop" events by swapping the event type
-    if (eventType === 'mousedown') {
+    if (eventType === 'mousedown' || eventType === 'touchstart') {
       eventType = 'dragstart';
       this.isDragging = true;
 
       // register additional mouse handlers to listen events outside of canvas while dragging
+      this.canvas.removeEventListener('touchend', this.boundEventHandler);
+      this.canvas.removeEventListener('touchmove', this.boundEventHandler);
       this.canvas.removeEventListener('mouseup', this.boundEventHandler);
       this.canvas.removeEventListener('mousemove', this.boundEventHandler);
+      documentElement.addEventListener('touchend', this.boundEventHandler);
+      documentElement.addEventListener('touchmove', this.boundEventHandler);
       documentElement.addEventListener('mouseup', this.boundEventHandler);
       documentElement.addEventListener('mousemove', this.boundEventHandler);
     } else if (this.isDragging) {
-      if (eventType === 'mouseup') {
+      if (eventType === 'mouseup' || eventType === 'touchend') {
         eventType = 'dragend';
         this.isDragging = false;
-
+        this.canvas.addEventListener('touchend', this.boundEventHandler);
+        this.canvas.addEventListener('touchmove', this.boundEventHandler);
         this.canvas.addEventListener('mouseup', this.boundEventHandler);
         this.canvas.addEventListener('mousemove', this.boundEventHandler);
+        documentElement.removeEventListener('touchend', this.boundEventHandler);
+        documentElement.removeEventListener(
+          'touchmove',
+          this.boundEventHandler
+        );
         documentElement.removeEventListener(
           'mousemove',
           this.boundEventHandler
         );
         documentElement.removeEventListener('mouseup', this.boundEventHandler);
-      } else if (eventType === 'mousemove') {
+      } else if (eventType === 'mousemove' || eventType === 'touchmove') {
         eventType = 'drag';
         originalEvent.preventDefault();
       }

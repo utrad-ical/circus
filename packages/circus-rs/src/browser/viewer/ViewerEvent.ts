@@ -55,7 +55,7 @@ export default class ViewerEvent {
     const handler = normalizedEventName + 'Handler';
     if (typeof element[handler] === 'function') {
       const retVal = element[handler](this);
-      if (retVal === false) this.original.preventDefault();
+      if (retVal === undefined) this.original.preventDefault();
     }
   }
 }

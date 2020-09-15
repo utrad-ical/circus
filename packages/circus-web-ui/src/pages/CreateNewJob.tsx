@@ -20,7 +20,7 @@ const CreateNewJob: React.FC<{}> = props => {
   );
   const [selectedSeries, setSelectedSeries] = useState<SeriesEntry[]>([]);
   const [busy, setBusy] = useState(true);
-  const [plugins, setPlugins] = useState<Plugin[]>([]);
+  const [plugins, setPlugins] = useState<Plugin[] | null>(null);
   const api = useApi();
   const appState = useSelector(state => state);
   const showMessage = useShowMessage();

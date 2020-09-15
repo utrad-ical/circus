@@ -2,6 +2,7 @@ import classNames from 'classnames';
 import Icon from 'components/Icon';
 import React, { useRef, useState } from 'react';
 import styled from 'styled-components';
+import { mostReadable } from 'tinycolor2';
 import {
   EditingData,
   EditingDataUpdater,
@@ -244,7 +245,13 @@ export const Label: React.FC<{
       <div
         className="color-preview"
         onClick={handleColorPreviewClick}
-        style={{ backgroundColor: label.data.color }}
+        style={{
+          backgroundColor: label.data.color,
+          color: mostReadable(label.data.color, [
+            '#000000',
+            '#ffffff'
+          ]).toHexString()
+        }}
       >
         {label.hidden && <Icon icon="eye-close" />}
       </div>

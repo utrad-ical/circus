@@ -1,7 +1,7 @@
 import createTaskManager, { TaskManager } from './createTaskManager';
 import { Models } from './interface';
 import { setUpMongoFixture, usingModels } from '../test/util-mongo';
-import { Readable } from 'stream';
+import { readFromStream } from '../test/util-stream';
 import { EventEmitter } from 'events';
 import path from 'path';
 import fs from 'fs-extra';
@@ -28,24 +28,6 @@ beforeEach(async () => {
 afterAll(async () => {
   await fs.remove(downloadTestDir);
 });
-
-const readFromStream = async (
-  stream: Readable,
-  until: RegExp = /error|finish/
-): Promise<string> => {
-  return new Promise((resolve, reject) => {
-    let data = '';
-    stream.on('data', chunk => {
-      data += chunk;
-      if (until.test(data)) {
-        stream.destroy();
-        resolve(data);
-      }
-    });
-    stream.on('end', () => resolve(data));
-    stream.on('error', error => reject(error));
-  });
-};
 
 const newDummyCtx = () => ({ body: null } as any);
 
@@ -80,7 +62,7 @@ describe('register', () => {
 
     downloadFileStream!.end(fileContent);
     expect(ctx.body).toEqual({ taskId });
-    emitter.emit('finish');
+    emitter.emit('finish', 'Finished.');
 
     const task = await models.task.findById(taskId);
     expect(task.downloadFileType).toMatch(/application\/zip/);
@@ -106,11 +88,12 @@ describe('report', () => {
     manager.report(ctx, userEmail);
 
     const readStream = ctx.body;
+    const streamFinish = readFromStream(readStream);
 
     emitter.emit('progress', 'Importing 10 files...', 1, 10);
     emitter.emit('finish');
 
-    const sentData = await readFromStream(readStream);
+    const sentData = await streamFinish();
     expect(sentData).toMatch(/progress/);
     expect(sentData).toMatch(/finish/);
     expect(sentData).toMatch(/taskId/);
@@ -133,14 +116,15 @@ describe('report', () => {
     manager.report(ctx, userEmail2);
 
     const readStream = ctx.body;
+    const streamFinish = readFromStream(readStream);
 
     emitter.emit('progress', 'Importing 10 files...', 1, 10);
     emitter.emit('finish');
 
     emitterBob.emit('progress', 'Importing 10 files...', 1, 10);
-    emitterBob.emit('finish');
+    emitterBob.emit('finish', 'Import finished.');
 
-    const sentData = await readFromStream(readStream, /finish\ndata/s);
+    const sentData = await streamFinish();
     expect(sentData).not.toMatch(taskId); // no Alice's task
     expect(sentData).toMatch(new RegExp(`finish\n.+${taskIdBob}`));
   });
@@ -149,11 +133,12 @@ describe('report', () => {
     const ctx = newDummyCtx();
     manager.report(ctx, userEmail);
     const readStream = ctx.body;
+    const streamFinish = readFromStream(readStream);
 
     emitter.emit('error');
 
-    const event = await readFromStream(readStream);
-    expect(event).toMatch(/error/);
+    const sentData = await streamFinish();
+    expect(sentData).toMatch(/error/);
 
     const task = await models.task.findById(taskId);
     expect(task.status).toBe('error');
@@ -174,6 +159,6 @@ test('isTaskInProgress', async () => {
   emitter.emit('progress', 'Importing 10 files...', 1, 10);
   expect(manager.isTaskInProgress(taskId)).toBe(true);
 
-  emitter.emit('finish');
+  emitter.emit('finish', 'Importing finished.');
   expect(manager.isTaskInProgress(taskId)).toBe(false);
 });

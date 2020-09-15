@@ -305,10 +305,9 @@ const AppearanceEditor: React.FC<{
         bsSize="xs"
         style={{
           backgroundColor: appearance.color,
-          color: tinyColor.mostReadable(appearance.color, [
-            '#ffffff',
-            '#000000'
-          ])
+          color: tinyColor
+            .mostReadable(appearance.color, ['#ffffff', '#000000'])
+            .toHex8String()
         }}
       >
         {appearance.alpha * 100}%

@@ -1,16 +1,16 @@
 import { FunctionService } from '@utrad-ical/circus-lib';
 import StrictEventEmitter from 'strict-event-emitter-types';
 import { EventEmitter } from 'events';
-import koa from 'koa';
 import { Models } from './interface';
 import generateUniqueId from '../src/utils/generateUniqueId';
 import { Writable, PassThrough } from 'stream';
 import fs from 'fs';
 import _ from 'lodash';
+import { CircusContext } from './typings/middlewares';
 
 export interface TaskManager {
   register: (
-    ctx: koa.Context,
+    ctx: CircusContext,
     options: {
       name: string;
       userEmail: string;
@@ -18,10 +18,10 @@ export interface TaskManager {
     }
   ) => Promise<{
     taskId: string;
-    emitter: EventEmitter;
+    emitter: StrictEventEmitter<EventEmitter, TaskEvents>;
     downloadFileStream?: Writable;
   }>;
-  report: (ctx: koa.Context, taskId: string) => void;
+  report: (ctx: CircusContext, userEmail: string) => void;
   isTaskInProgress: (taskId: string) => boolean;
 }
 
@@ -67,7 +67,7 @@ const createTaskManager: FunctionService<
   >;
 
   const register = async (
-    ctx: koa.Context,
+    ctx: CircusContext,
     options: {
       name: string;
       userEmail: string;
@@ -139,10 +139,15 @@ const createTaskManager: FunctionService<
     return { taskId, emitter, downloadFileStream };
   };
 
-  const report = (ctx: koa.Context, userEmail: string) => {
+  const report = (ctx: CircusContext, userEmail: string) => {
     ctx.type = 'text/event-stream';
     const stream = new PassThrough();
     ctx.body = stream;
+    stream.write('\n'); // send first byte to ensure the stream is live
+
+    const timerId = setInterval(() => {
+      stream.write(':\n'); // keeps the connection alive
+    }, 10000);
 
     const taskToString = (taskId: string, task: Task) =>
       JSON.stringify({
@@ -182,13 +187,12 @@ const createTaskManager: FunctionService<
       }
     };
 
-    const throttledHandleTaskEvent = _.throttle(handleTaskEvent, 150);
-
     stream.on('close', () => {
-      aggregatedEmitter.off('taskEvent', throttledHandleTaskEvent);
+      clearInterval(timerId);
+      aggregatedEmitter.off('taskEvent', handleTaskEvent);
     });
 
-    aggregatedEmitter.on('taskEvent', throttledHandleTaskEvent);
+    aggregatedEmitter.on('taskEvent', handleTaskEvent);
   };
 
   const isTaskInProgress = (taskId: string) => {

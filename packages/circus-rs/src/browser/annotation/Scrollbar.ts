@@ -99,12 +99,12 @@ export default class Scrollbar implements Annotation, ViewerEventTarget {
   public constructor(
     viewer: Viewer,
     {
-      color = '#ff00ff',
-      lineWidth = 2,
-      size = 30,
-      position = 'left',
+      color = '#ffffaa',
+      lineWidth = 1,
+      size = 20,
+      position = 'right',
       marginHorizontal = 15,
-      marginVertical = 20,
+      marginVertical = 15,
       visibility = 'always',
       visibilityThreshold = 30
     }: Options = {}

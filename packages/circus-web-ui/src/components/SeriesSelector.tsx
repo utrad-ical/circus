@@ -1,3 +1,4 @@
+import LoadingIndicator from '@smikitky/rb-components/lib/LoadingIndicator';
 import { confirm, modal } from '@smikitky/rb-components/lib/modal';
 import PartialVolumeDescriptor, {
   describePartialVolumeDescriptor
@@ -119,7 +120,9 @@ const SeriesSelector: React.FC<{
     [seriesUid: string]: Series | null; // null means "now loading"
   }>({});
 
-  const primarySeries = seriesData[value[0].seriesUid];
+  const primarySeries = value.length
+    ? seriesData[value[0].seriesUid]
+    : undefined;
 
   useEffect(() => {
     const loadSeriesData = async (seriesUid: string) => {
@@ -226,13 +229,19 @@ const SeriesSelector: React.FC<{
     {
       key: 'modality',
       caption: 'Modality',
-      renderer: ({ value }) => <>{seriesData[value.seriesUid]?.modality}</>
+      renderer: ({ value }) => (
+        <>{seriesData[value.seriesUid]?.modality ?? <LoadingIndicator />}</>
+      )
     },
     {
       key: 'seriesDescription',
       caption: 'Series Desc',
       renderer: ({ value }) => (
-        <>{seriesData[value.seriesUid]?.seriesDescription}</>
+        <>
+          {seriesData[value.seriesUid]?.seriesDescription ?? (
+            <LoadingIndicator />
+          )}
+        </>
       )
     },
     {
@@ -246,12 +255,16 @@ const SeriesSelector: React.FC<{
       renderer: ({ value }) =>
         seriesData[value.seriesUid] ? (
           <TimeDisplay value={seriesData[value.seriesUid]!.seriesDate} />
-        ) : null
+        ) : (
+          <LoadingIndicator />
+        )
     },
     {
       key: 'images',
       caption: 'Images',
-      renderer: ({ value }) => <>{seriesData[value.seriesUid]?.images}</>
+      renderer: ({ value }) => (
+        <>{seriesData[value.seriesUid]?.images ?? <LoadingIndicator />}</>
+      )
     },
     {
       key: 'pvd',

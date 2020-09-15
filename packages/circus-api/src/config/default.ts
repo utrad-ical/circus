@@ -47,6 +47,12 @@ const defaults: Configuration = {
       maxConcurrency: 3,
       dockerImage: dicomUtilityRunnerDockerImage
     }
+  },
+  taskManager: {
+    options: {
+      downloadFileDirectory: '/var/circus/data/downloads',
+      timeoutMs: 60 * 60 * 1000 // 1 hour
+    }
   }
 };
 

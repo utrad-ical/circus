@@ -8,9 +8,9 @@ routes:
     description: Retrieves the list of tasks of the current user.
     responseSchema: task|searchResult
   - verb: get
-    path: /tasks/:taskId
-    description: Returns information about the specified task.
+    path: /tasks/report
+    handler: handleReport
+    description: Reports the current user's task progress using server-sent events.
   - verb: get
-    path: /tasks/:taskId/progress
-    description: Reports the progress of the specified task as an event stream.
-    handler: handleProgress
+    path: /tasks/:taskId/download
+    description: Allowing the current user to download files that are available for download.

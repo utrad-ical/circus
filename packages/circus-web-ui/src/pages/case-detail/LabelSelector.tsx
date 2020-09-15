@@ -293,7 +293,7 @@ const StyledLabelLi = styled.li`
   &.dragging-top {
     border-top: 3px solid gray;
   }
-  &.draggging-bottom {
+  &.dragging-bottom {
     border-bottom: 3px solid gray;
   }
 `;

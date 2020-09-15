@@ -18,6 +18,7 @@ import {
 } from '@utrad-ical/circus-lib';
 import createDicomTagReader from '../src/utils/createDicomTagReader';
 import createDicomUtilityRunner from '../src/utils/createDicomUtilityRunner';
+import createTaskManager, { TaskManager } from '../src/createTaskManager';
 
 /**
  * Holds data used for API route testing.
@@ -64,6 +65,7 @@ export interface ApiTest {
    * The members of `axiosInstances` are configured to use this by default.
    */
   url: string;
+  taskManager: TaskManager;
 }
 
 export const setUpAppForRoutesTest = async () => {
@@ -99,6 +101,13 @@ export const setUpAppForRoutesTest = async () => {
       dicomTagReader
     }
   );
+  const taskManager = await createTaskManager(
+    {
+      downloadFileDirectory: path.join(__dirname, 'download-test'),
+      timeoutMs: 3600 * 1000
+    },
+    { models }
+  );
 
   const app = await createApp(
     {
@@ -117,7 +126,8 @@ export const setUpAppForRoutesTest = async () => {
       dicomImporter,
       core: csCore,
       rsSeriesRoutes: async () => {}, // dummy
-      volumeProvider: null as any // dummy
+      volumeProvider: null as any, // dummy
+      taskManager
     }
   );
   const testServer = await setUpKoaTestWith(app);
@@ -148,7 +158,8 @@ export const setUpAppForRoutesTest = async () => {
     csCore,
     tearDown,
     url: testServer.url,
-    dicomFileRepository
+    dicomFileRepository,
+    taskManager
   } as ApiTest;
 };
 

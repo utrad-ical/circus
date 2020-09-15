@@ -3,3 +3,13 @@
   name: Importing DICOM files
   status: processing
   downloadFileType: null
+- taskId: aaaabbbbcccc2222
+  userEmail: alice@example.com
+  name: Importing DICOM files
+  status: finished
+  downloadFileType: null
+- taskId: bbbbccccdddd1111
+  userEmail: bob@example.com
+  name: Importing DICOM files
+  status: processing
+  downloadFileType: null

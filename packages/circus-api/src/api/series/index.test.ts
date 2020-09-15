@@ -3,6 +3,7 @@ import { AxiosInstance } from 'axios';
 import path from 'path';
 import fs from 'fs-extra';
 import FormData from 'form-data';
+import delay from '../../utils/delay';
 
 let apiTest: ApiTest, axios: AxiosInstance;
 beforeAll(async () => {
@@ -68,7 +69,15 @@ describe('Uploading', () => {
     const res = await uploadTest(file);
     if (res.status === 503) return;
     expect(res.status).toBe(200);
-    expect(res.data).toMatchObject({ uploaded: 1 });
+    expect(res.data?.taskId).toHaveLength(26);
+    const taskId = res.data.taskId;
+    while (apiTest.taskManager.isTaskInProgress(taskId)) {
+      await delay(10);
+    }
+    const doc = await apiTest.db.collection('series').findOne({
+      seriesUid: '2.16.840.1.113662.2.1.2519.21582.2990505.2105152.2381633.20'
+    });
+    expect(doc?.images).toBe('8');
   });
 
   it('should upload zipped DICOM files', async () => {
@@ -76,7 +85,7 @@ describe('Uploading', () => {
     const res = await uploadTest(file);
     if (res.status === 503) return;
     expect(res.status).toBe(200);
-    expect(res.data).toMatchObject({ uploaded: 1 });
+    expect(res.data?.taskId).toHaveLength(26);
   });
 
   it('should reject series upload into innaccessible domain', async () => {

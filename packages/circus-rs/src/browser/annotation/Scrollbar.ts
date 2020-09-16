@@ -8,7 +8,7 @@ import Annotation, { DrawOption } from './Annotation';
 import {
   drawScrollbar,
   drawVisibilityThresholdBox,
-  getHandleType,
+  handleType,
   getStepDifference,
   HandleType,
   isVisible,
@@ -178,7 +178,7 @@ export default class Scrollbar implements Annotation, ViewerEventTarget {
     this.visible = isVisible(point, viewer, this.settings);
 
     this.handleType = this.visible
-      ? getHandleType(viewer, point, this.settings)
+      ? handleType(viewer, point, this.settings)
       : undefined;
 
     if (this.handleType) {
@@ -203,7 +203,7 @@ export default class Scrollbar implements Annotation, ViewerEventTarget {
     this.visible = isVisible(point, viewer, this.settings);
 
     this.handleType = this.visible
-      ? getHandleType(viewer, point, this.settings)
+      ? handleType(viewer, point, this.settings)
       : undefined;
 
     if (this.handleType) {
@@ -231,8 +231,8 @@ export default class Scrollbar implements Annotation, ViewerEventTarget {
     if ('thumbDrag' === type) {
       const point = new Vector2(ev.viewerX!, ev.viewerY!);
       this.dragStartPoint2 = point;
-    } else if (['arrowUp', 'arrowDown'].some(t => t === type)) {
-      const step = type === 'arrowDown' ? 1 : -1;
+    } else if (['arrowInc', 'arrowDec'].some(t => t === type)) {
+      const step = type === 'arrowDec' ? 1 : -1;
       const option = ev.original.ctrlKey ? 5 : 1;
       handlePageBy(viewer, step * option);
     }

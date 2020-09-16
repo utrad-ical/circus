@@ -7,16 +7,15 @@ import {
   Viewer
 } from '../..';
 import { dotFromPointToSection } from '../../../common/geometry';
-import { getIsoscelesTriangle } from '../../../common/geometry/Triangle';
-import { divide, round } from '../../../common/math/FloatingPoint';
+import { round } from '../../../common/math/FloatingPoint';
 import {
   convertPointToMm,
   convertSectionToIndex,
   detectOrthogonalSection,
   OrientationString
 } from '../../section-util';
-import { getOppositeColor } from './color';
-import { drawPolygon, drawRectangle } from './drawObject';
+import { getComplementaryColor } from './color';
+import { drawPoint, drawRectangle } from './drawObject';
 
 export type Position = 'right' | 'left' | 'top' | 'bottom';
 export type Visibility = 'always' | 'hover';
@@ -34,17 +33,65 @@ export interface Settings {
 
 export interface ScrollbarContainer {
   outerFrameBox: Box2;
-  arrowUpBox: Box2;
-  arrowDownBox: Box2;
-  arrowUpTriangle: Vector2[];
-  arrowDownTriangle: Vector2[];
+  arrowIncBox: Box2;
+  arrowDecBox: Box2;
   scrollableBox: Box2;
   thumbBox: Box2;
   thumbScale: number;
-  steps: { current: number; end: number };
+  steps: {
+    current: number;
+    sumCount: number;
+  };
 }
 
-function getOuterFrameBox(resolution: Vector2, settings: Settings): Box2 {
+export function createScrollbar(
+  viewer: Viewer,
+  settings: Settings
+): ScrollbarContainer | undefined {
+  const viewState = viewer.getState();
+  if (viewState.type !== 'mpr') return;
+
+  const comp = viewer.getComposition();
+  if (!comp) throw new Error('Composition not initialized'); // should not happen
+
+  const section = viewState.section;
+  const orientation = detectOrthogonalSection(section);
+  const resolution = new Vector2().fromArray(viewer.getResolution());
+
+  const { size } = settings;
+
+  const outerFrameBox = createOuterFrameBox(resolution, settings);
+
+  const arrowIncBox = new Box2(
+    outerFrameBox.min,
+    new Vector2(outerFrameBox.min.x + size, outerFrameBox.min.y + size)
+  );
+
+  const arrowDecBox = new Box2(
+    new Vector2(outerFrameBox.max.x - size, outerFrameBox.max.y - size),
+    outerFrameBox.max
+  );
+
+  const scrollableBox = new Box2()
+    .expandByPoint(arrowIncBox.max)
+    .expandByPoint(arrowDecBox.min);
+
+  const steps = calcSteps(section, comp, orientation);
+  const thumb = createThumb(settings, scrollableBox, steps);
+  const scrollbar = {
+    outerFrameBox,
+    arrowIncBox,
+    arrowDecBox,
+    scrollableBox,
+    thumbBox: thumb.box,
+    thumbScale: thumb.scale,
+    steps
+  };
+
+  return scrollbar;
+}
+
+function createOuterFrameBox(resolution: Vector2, settings: Settings): Box2 {
   const { size, position, marginHorizontal, marginVertical } = settings;
 
   switch (position) {
@@ -80,7 +127,7 @@ function getOuterFrameBox(resolution: Vector2, settings: Settings): Box2 {
   }
 }
 
-function getVisibilityThresholdBox(
+function createVisibilityThresholdBox(
   resolution: Vector2,
   settings: Settings
 ): Box2 {
@@ -89,7 +136,7 @@ function getVisibilityThresholdBox(
     marginVertical,
     visibilityThreshold: distanceThreshold
   } = settings;
-  const outerFrameBox = getOuterFrameBox(resolution, settings);
+  const outerFrameBox = createOuterFrameBox(resolution, settings);
   return outerFrameBox
     .clone()
     .expandByPoint(
@@ -111,145 +158,45 @@ function getVisibilityThresholdBox(
       )
     );
 }
-
-function getArrowBox(
-  settings: Settings,
-  outerFrameBox: Box2,
-  isArrowUp: boolean
-): Box2 {
-  const { size } = settings;
-  return isArrowUp
-    ? new Box2(
-        outerFrameBox.min,
-        new Vector2(outerFrameBox.min.x + size, outerFrameBox.min.y + size)
-      )
-    : new Box2(
-        new Vector2(outerFrameBox.max.x - size, outerFrameBox.max.y - size),
-        outerFrameBox.max
-      );
-}
-
-function getArrowTriangle(
-  settings: Settings,
-  frameBox: Box2,
-  isArrowUp: boolean
-): Vector2[] {
-  const { position, size } = settings;
-  const baseLength = size * 0.75;
-  const p = (x: number, y: number) => {
-    return isArrowUp
-      ? frameBox.min.clone().add(new Vector2(x, y))
-      : frameBox.max.clone().sub(new Vector2(x, y));
-  };
-  const apexAngleBisector = () => {
-    switch (position) {
-      case 'top':
-      case 'bottom':
-        return {
-          from: p(size * 0.2, size * 0.5),
-          to: p(size * 0.8, size * 0.5)
-        };
-      case 'left':
-      case 'right':
-        return {
-          from: p(size * 0.5, size * 0.2),
-          to: p(size * 0.5, size * 0.8)
-        };
-      default:
-        throw new Error('Unsupported Scrollbar position');
-    }
-  };
-  return getIsoscelesTriangle(apexAngleBisector(), baseLength);
-}
-
-function getSteps(
-  mmSection: Section,
-  comp: Composition,
-  orientation: OrientationString
-): { current: number; end: number } {
-  const src = comp.imageSource as MprImageSource;
-  const voxelCount = new Vector3().fromArray(src.metadata?.voxelCount!);
-  const voxelSize = new Vector3().fromArray(src.metadata?.voxelSize!);
-
-  const voxelSteps = () => {
-    const indexSection = convertSectionToIndex(mmSection, voxelSize);
-    switch (orientation) {
-      case 'axial':
-        return {
-          current: indexSection.origin[2],
-          end: voxelCount.z
-        };
-      case 'coronal':
-        return {
-          current: indexSection.origin[1],
-          end: voxelCount.y
-        };
-      case 'sagittal':
-        return {
-          current: indexSection.origin[0],
-          end: voxelCount.x
-        };
-      default:
-        throw new Error('Unsupported orientation');
-    }
-  };
-
-  const mmSteps = () => {
-    const mmVolumeBox = new Box3(
-      convertPointToMm(new Vector3(0, 0, 0), voxelSize),
-      convertPointToMm(voxelCount, voxelSize)
-    );
-    const nv = normalVector(mmSection).cross(new Vector3());
-    const min = mmVolumeBox.min.clone().add(nv);
-    const max = mmVolumeBox.max.clone().add(nv);
-    const center = mmVolumeBox.getCenter(new Vector3()).add(nv);
-    const delta = dotFromPointToSection(mmSection, center);
-    const length = min.distanceTo(max);
-    return {
-      current: delta + divide(length, 2),
-      end: length
-    };
-  };
-
-  switch (orientation) {
-    case 'axial':
-    case 'coronal':
-    case 'sagittal':
-      return voxelSteps();
-    default:
-      return mmSteps();
-  }
-}
-
-function getThumb(
+function createThumb(
   settings: Settings,
   scrollableBox: Box2,
-  steps: { current: number; end: number }
+  steps: {
+    current: number;
+    sumCount: number;
+  }
 ): { box: Box2; scale: number } {
   const { position, size } = settings;
 
-  const [shortSide, longSide] = [
-    scrollableBox.max.x - scrollableBox.min.x,
-    scrollableBox.max.y - scrollableBox.min.y
-  ].sort((a, b) => a - b);
+  const scrollableLength = (() => {
+    switch (position) {
+      case 'top':
+      case 'bottom':
+        return scrollableBox.max.x - scrollableBox.min.x;
 
-  const scale = divide(longSide, steps.end);
-  const thumbLength = size > scale ? size : scale;
-  const thumbScale = divide(longSide - thumbLength, steps.end);
+      case 'left':
+      case 'right':
+        return scrollableBox.max.y - scrollableBox.min.y;
+    }
+  })();
 
+  const thumbLength = Math.max(size, scrollableLength / (steps.sumCount + 1));
+  const thumbScale = (scrollableLength - thumbLength) / steps.sumCount;
+  const thumbLocation = round(steps.current, 2) * thumbScale;
+  // console.log(JSON.stringify(steps));
   const min = (() => {
     switch (position) {
       case 'top':
       case 'bottom':
         return new Vector2(
-          scrollableBox.min.x + steps.current * thumbScale,
+          scrollableBox.min.x + thumbLocation,
           scrollableBox.min.y
         );
       case 'left':
       case 'right':
         return new Vector2(
           scrollableBox.min.x,
-          scrollableBox.min.y + steps.current * thumbScale
+          scrollableBox.min.y + thumbLocation
         );
       default:
         throw new Error('Unsupported');
@@ -260,92 +207,84 @@ function getThumb(
     switch (position) {
       case 'top':
       case 'bottom':
-        return new Vector2(min.x + thumbLength, min.y + shortSide);
+        return new Vector2(min.x + thumbLength, min.y + size);
       case 'left':
       case 'right':
-        return new Vector2(min.x + shortSide, min.y + thumbLength);
+        return new Vector2(min.x + size, min.y + thumbLength);
       default:
         throw new Error('Unsupported');
     }
   })();
-  const box = new Box2(min, max);
 
-  return { box, scale };
-}
-
-function getScrollbar(
-  viewer: Viewer,
-  settings: Settings
-): ScrollbarContainer | undefined {
-  const viewState = viewer.getState();
-  if (viewState.type !== 'mpr') return;
-
-  const comp = viewer.getComposition();
-  if (!comp) throw new Error('Composition not initialized'); // should not happen
-
-  const section = viewState.section;
-  const orientation = detectOrthogonalSection(section);
-  const resolution = new Vector2().fromArray(viewer.getResolution());
-
-  const outerFrameBox = getOuterFrameBox(resolution, settings);
-
-  const arrowUpBox = getArrowBox(settings, outerFrameBox, true);
-  const arrowUpTriangle = getArrowTriangle(settings, arrowUpBox, true);
-
-  const arrowDownBox = getArrowBox(settings, outerFrameBox, false);
-  const arrowDownTriangle = getArrowTriangle(settings, arrowDownBox, false);
-
-  const scrollableBox = new Box2()
-    .expandByPoint(arrowUpBox.max)
-    .expandByPoint(arrowDownBox.min);
-
-  const steps = getSteps(section, comp, orientation);
-  const thumb = getThumb(settings, scrollableBox, steps);
-
-  const scrollbar = {
-    outerFrameBox,
-    arrowUpBox,
-    arrowDownBox,
-    arrowUpTriangle,
-    arrowDownTriangle,
-    scrollableBox,
-    thumbBox: thumb.box,
-    thumbScale: thumb.scale,
-    steps
+  return {
+    box: new Box2(min, max),
+    scale: thumbScale
   };
+}
+function calcSteps(
+  mmSection: Section,
+  comp: Composition,
+  orientation: OrientationString
+): {
+  current: number;
+  sumCount: number;
+} {
+  const src = comp.imageSource as MprImageSource;
+  const voxelSize = new Vector3().fromArray(src.metadata?.voxelSize!);
 
-  return scrollbar;
+  switch (orientation) {
+    case 'axial':
+    case 'coronal':
+    case 'sagittal': {
+      const voxelCount = src.metadata?.voxelCount!;
+      const indexSection = convertSectionToIndex(mmSection, voxelSize);
+      const i = orientation === 'axial' ? 2 : orientation === 'coronal' ? 1 : 0;
+      const current = indexSection.origin[i];
+      const sumCount = voxelCount[i];
+      const steps = {
+        current,
+        sumCount
+      };
+      return steps;
+    }
+    default: {
+      const voxelCount = new Vector3().fromArray(src.metadata?.voxelCount!);
+      const mmVolumeBox = new Box3(
+        convertPointToMm(new Vector3(0, 0, 0), voxelSize),
+        convertPointToMm(voxelCount, voxelSize)
+      );
+      const nv = normalVector(mmSection).cross(new Vector3());
+      const min = mmVolumeBox.min.clone().add(nv);
+      const max = mmVolumeBox.max.clone().add(nv);
+      const center = mmVolumeBox.getCenter(new Vector3()).add(nv);
+      const delta = dotFromPointToSection(mmSection, center);
+      const sumCount = min.distanceTo(max);
+      const current = delta + sumCount / 2;
+
+      return {
+        current,
+        sumCount
+      };
+    }
+  }
 }
 
-export type HandleType = 'arrowUp' | 'arrowDown' | 'thumbDrag';
-export function getHandleType(
+export type HandleType = 'arrowInc' | 'arrowDec' | 'thumbDrag';
+export function handleType(
   viewer: Viewer,
   point: Vector2,
   settings: Settings
 ): HandleType | undefined {
-  const scrollbar = getScrollbar(viewer, settings);
+  const scrollbar = createScrollbar(viewer, settings);
   if (!scrollbar) return;
 
-  if (scrollbar.arrowUpBox.containsPoint(point)) return 'arrowUp';
+  if (scrollbar.arrowIncBox.containsPoint(point)) return 'arrowInc';
 
-  if (scrollbar.arrowDownBox.containsPoint(point)) return 'arrowDown';
+  if (scrollbar.arrowDecBox.containsPoint(point)) return 'arrowDec';
 
   if (scrollbar.thumbBox.containsPoint(point)) return 'thumbDrag';
 
   return;
-}
-
-function isInVisibilityThreshold(
-  point: Vector2,
-  viewer: Viewer,
-  settings: Settings
-): boolean {
-  const resolution = new Vector2().fromArray(viewer.getResolution());
-  const visibilityThresholdBox = getVisibilityThresholdBox(
-    resolution,
-    settings
-  );
-  return visibilityThresholdBox.containsPoint(point);
 }
 
 export function isVisible(
@@ -353,10 +292,13 @@ export function isVisible(
   viewer: Viewer,
   settings: Settings
 ): boolean {
-  return (
-    settings.visibility === 'always' ||
-    isInVisibilityThreshold(point, viewer, settings)
+  if (settings.visibility === 'always') return true;
+  const resolution = new Vector2().fromArray(viewer.getResolution());
+  const visibilityThresholdBox = createVisibilityThresholdBox(
+    resolution,
+    settings
   );
+  return visibilityThresholdBox.containsPoint(point);
 }
 
 export function drawVisibilityThresholdBox(viewer: Viewer, settings: Settings) {
@@ -365,16 +307,15 @@ export function drawVisibilityThresholdBox(viewer: Viewer, settings: Settings) {
   const ctx = canvas.getContext('2d');
   if (!ctx) return;
   const resolution = new Vector2().fromArray(viewer.getResolution());
-
   const styleFrame = {
     lineWidth: Math.max(1, lineWidth / 2),
-    strokeStyle: getOppositeColor(color),
+    strokeStyle: getComplementaryColor(color),
     lineDash: [2, 3]
   };
 
   drawRectangle(
     ctx,
-    getVisibilityThresholdBox(resolution, settings),
+    createVisibilityThresholdBox(resolution, settings),
     styleFrame
   );
 }
@@ -383,9 +324,9 @@ export function drawScrollbar(
   viewer: Viewer,
   settings: Settings
 ): ScrollbarContainer | undefined {
-  const { lineWidth, color } = settings;
+  const { lineWidth, color, size, position } = settings;
 
-  const scrollbar = getScrollbar(viewer, settings);
+  const scrollbar = createScrollbar(viewer, settings);
   if (!scrollbar) {
     return;
   }
@@ -404,14 +345,52 @@ export function drawScrollbar(
     fillStyle: color
   };
 
+  const drawArrowTriangle = (box: Box2, isInc: boolean) => {
+    const center = box.getCenter(new Vector2());
+    const marginX = size * 0.15;
+    const marginY = size * 0.2;
+    const angle = (() => {
+      switch (position) {
+        case 'top':
+        case 'bottom':
+          return (isInc === true ? -1 : 1) * (Math.PI / 180) * 90;
+        case 'left':
+        case 'right':
+          return isInc === true ? 0 : (Math.PI / 180) * 180;
+      }
+    })();
+    ctx.save();
+    try {
+      ctx.translate(center.x, center.y);
+      ctx.rotate(angle);
+      ctx.translate(-center.x, -center.y);
+      ctx.beginPath();
+      ctx.moveTo(box.min.x + size * 0.5, box.min.y + marginY);
+      ctx.lineTo(box.max.x - marginX, box.max.y - marginY);
+      ctx.lineTo(box.min.x + marginX, box.max.y - marginY);
+      ctx.closePath();
+      ctx.fillStyle = color;
+      ctx.fill();
+      ctx.lineWidth = styleFill.lineWidth;
+      ctx.strokeStyle = styleFill.strokeStyle;
+      ctx.stroke();
+    } finally {
+      ctx.restore();
+    }
+  };
+
   try {
     ctx.save();
     drawRectangle(ctx, scrollbar.outerFrameBox, styleFrame);
-    drawRectangle(ctx, scrollbar.arrowUpBox, styleFrame);
-    drawRectangle(ctx, scrollbar.arrowDownBox, styleFrame);
-    drawPolygon(ctx, scrollbar.arrowUpTriangle, styleFill);
-    drawPolygon(ctx, scrollbar.arrowDownTriangle, styleFill);
+    drawRectangle(ctx, scrollbar.arrowIncBox, styleFrame);
+    drawRectangle(ctx, scrollbar.arrowDecBox, styleFrame);
+    drawArrowTriangle(scrollbar.arrowIncBox, true);
+    drawArrowTriangle(scrollbar.arrowDecBox, false);
     drawRectangle(ctx, scrollbar.thumbBox, styleFill);
+    drawPoint(ctx, scrollbar.thumbBox.getCenter(new Vector2()), {
+      color: getComplementaryColor(color),
+      radius: 2
+    });
   } finally {
     ctx.restore();
   }
@@ -439,6 +418,6 @@ export function getStepDifference(
         return v.y;
     }
   })();
-  const step = round(divide(dist, scrollbar.thumbScale), 2);
+  const step = round(dist / scrollbar.thumbScale, 2);
   return step;
 }

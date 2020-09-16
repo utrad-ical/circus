@@ -120,7 +120,7 @@ const SearchResultsView: React.FC<{
     results
   } = search;
 
-  if (isFetching && results?.items) return <LoadingIndicator delay={1000} />;
+  if (isFetching && !results?.items) return <LoadingIndicator delay={1000} />;
   if (!results?.items) return null; // Should not happen
 
   const { items: dic, indexes, totalItems } = results;

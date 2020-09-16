@@ -3,6 +3,6 @@
  * to grayscale values on screens.
  */
 export interface ViewWindow {
-  level: number;
-  width: number;
+  readonly level: number;
+  readonly width: number;
 }

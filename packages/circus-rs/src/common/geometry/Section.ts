@@ -4,9 +4,9 @@ import { Vector2, Vector3, Line3, Plane } from 'three';
  * Section determines the MRP section of a volume.
  */
 export interface Section {
-  origin: number[];
-  xAxis: number[]; // in millimeters
-  yAxis: number[]; // in millimeters
+  readonly origin: number[];
+  readonly xAxis: number[]; // in millimeters
+  readonly yAxis: number[]; // in millimeters
 }
 
 interface SectionVector {

@@ -2,58 +2,58 @@ import { Section } from '../common/geometry';
 import { ViewWindow } from '../common/ViewWindow';
 
 interface SectionDrawingViewState {
-  section: Section;
+  readonly section: Section;
 }
 
 export interface MprViewState extends SectionDrawingViewState {
-  type: 'mpr';
-  window: ViewWindow;
-  interpolationMode?: InterpolationMode;
+  readonly type: 'mpr';
+  readonly window: ViewWindow;
+  readonly interpolationMode?: InterpolationMode;
 }
 
 export interface VrViewState extends SectionDrawingViewState {
-  type: 'vr';
+  readonly type: 'vr';
 
   /**
    * Sub-volume
    */
-  subVolume?: SubVolume;
+  readonly subVolume?: SubVolume;
 
   /**
    * Controls the rendering quality. Higher is better and slower.
    * The default value is 2.0. (Get value 2 times per ray step)
    */
-  quality?: number;
+  readonly quality?: number;
 
   /**
    * Penetration of ray.
    * As you set higher, refer to deeper voxels.
    * [0.0; 1.0]
    */
-  rayIntensity?: number;
+  readonly rayIntensity?: number;
 
   /**
    * Define color of each voxel value via "transfer function".
    */
-  transferFunction?: TransferFunction;
+  readonly transferFunction?: TransferFunction;
 
   /**
    * Background fill color(RGBA) for outside of the volume boundary.
    * Each element range is 0-255.
    */
-  background?: [number, number, number, number];
+  readonly background?: [number, number, number, number];
 
   /**
    * Enable mask (ex. blood vessel extraction).
    */
-  enableMask?: boolean;
+  readonly enableMask?: boolean;
 
   /**
    * Highlighted label index from 0. Undefined(or "-1") means disabled.
    */
-  highlightedLabelIndex?: number;
+  readonly highlightedLabelIndex?: number;
 
-  interpolationMode?: InterpolationMode;
+  readonly interpolationMode?: InterpolationMode;
 
   /**
    * For Debugging
@@ -61,7 +61,7 @@ export interface VrViewState extends SectionDrawingViewState {
    * 1: draw only volume box
    * 2: draw vr and volume box
    */
-  debugMode?: number;
+  readonly debugMode?: number;
 }
 
 /**
@@ -86,17 +86,18 @@ export type TransferFunction = Array<TransferFunctionEntry>;
  * ex) position is 0.5 if value is 0.
  */
 interface TransferFunctionEntry {
-  position: number;
-  color: string;
+  readonly position: number;
+  readonly color: string;
 }
 
 export interface SubVolume {
-  offset: [number, number, number];
-  dimension: [number, number, number];
+  readonly offset: [number, number, number];
+  readonly dimension: [number, number, number];
 }
 
 /**
  * ViewState determines how an ImageSource is displayed on each Viewer.
+ * This is an immutable object whose identity can be checked using `===`.
  */
 type ViewState = MprViewState | VrViewState;
 

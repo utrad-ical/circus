@@ -303,18 +303,19 @@ export default class Viewer extends EventEmitter {
    * Sets the view state and re-renders the viewer.
    */
   public setState(state: ViewState): void {
-    const prevState = extend(true, {}, this.viewState);
-    this.viewState = extend(true, {}, state);
+    if (this.viewState === state) return;
+    const prevState = this.viewState;
+    this.viewState = state;
     this.emit('stateChange', prevState, state);
     this.render();
-    return prevState;
   }
 
   /**
    * Returns the current view state.
    */
   public getState(): ViewState {
-    return extend(true, {}, this.viewState);
+    if (!this.viewState) throw new Error('View state not initialized');
+    return this.viewState;
   }
 
   private detachCurrentComposition(): void {

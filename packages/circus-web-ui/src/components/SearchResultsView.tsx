@@ -188,12 +188,14 @@ const SearchResultsView: React.FC<{
       </div>
       <DataView value={items} active={active} />
       <div className="search-results-pager">
-        <ResultPagination
-          pages={pages}
-          activePage={page}
-          onSelect={handlePageClick}
-          disabled={isFetching}
-        />
+        {pages >= 2 && (
+          <ResultPagination
+            pages={pages}
+            activePage={page}
+            onSelect={handlePageClick}
+            disabled={isFetching}
+          />
+        )}
       </div>
     </StyledDiv>
   );

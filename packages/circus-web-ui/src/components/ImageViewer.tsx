@@ -61,6 +61,7 @@ const ImageViewer: React.FC<{
   id?: string | number;
   onCreateViewer?: (viewer: rs.Viewer, id?: string | number) => void;
   onDestroyViewer?: (viewer: rs.Viewer) => void;
+  onViewStateChange?: (viewer: rs.Viewer, id?: string | number) => void;
   onMouseUp?: () => void;
 }> = props => {
   const {
@@ -72,11 +73,13 @@ const ImageViewer: React.FC<{
     initialStateSetter,
     onCreateViewer = () => {},
     onDestroyViewer = () => {},
+    onViewStateChange = () => {},
     onMouseUp = () => {}
   } = props;
 
   const [viewer, setViewer] = useState<rs.Viewer | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const initialStateSet = useRef<boolean>(false);
 
   // Handle creation of viewer
   useEffect(
@@ -90,6 +93,7 @@ const ImageViewer: React.FC<{
           const newState = initialStateSetter(viewer, state);
           viewer.setState(newState);
         }
+        initialStateSet.current = true;
       });
       return () => {
         onDestroyViewer(viewer);
@@ -100,6 +104,18 @@ const ImageViewer: React.FC<{
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
+
+  // Handle view state change
+  useEffect(() => {
+    if (!viewer) return;
+    const handler = () => {
+      if (initialStateSet.current) onViewStateChange(viewer, id);
+    };
+    viewer.on('stateChange', handler);
+    return () => {
+      viewer.off('stageChange', handler);
+    };
+  }, [viewer, onViewStateChange, id]);
 
   // Handle onMouseUp
   useEffect(() => {
@@ -113,7 +129,9 @@ const ImageViewer: React.FC<{
   // Handle composition change
   useEffect(() => {
     if (!viewer || !composition) return;
+    if (viewer.getComposition() === composition) return;
     viewer.setComposition(composition);
+    initialStateSet.current = false;
   }, [viewer, composition]);
 
   // Handle stateChanger

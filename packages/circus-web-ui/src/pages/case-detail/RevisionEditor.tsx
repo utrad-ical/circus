@@ -40,6 +40,7 @@ import { Modal } from '../../components/react-bootstrap';
 import SeriesSelectorDialog from './SeriesSelectorDialog';
 import styled from 'styled-components';
 import LabelMenu from './LabelMenu';
+import { debounce } from 'lodash';
 
 const useComposition = (
   seriesUid: string,
@@ -90,6 +91,9 @@ const RevisionEditor: React.FC<{
 
   const viewersRef = useRef<{ [key: string]: Viewer }>({});
   const viewers = viewersRef.current;
+
+  const viewWindows = useRef<{ [seriesUid: string]: rs.ViewWindow }>({});
+
   const toolsRef = useRef<{ [key: string]: ToolBaseClass }>({});
   const tools = toolsRef.current;
   const stateChanger = useMemo(() => createStateChanger<rs.MprViewState>(), []);
@@ -104,12 +108,13 @@ const RevisionEditor: React.FC<{
   const [toolName, setToolName] = useState('');
   const [tool, setTool] = useState<ToolBaseClass | null>(null);
 
-  const editingSeries =
+  const activeSeries =
     editingData.revision.series[editingData.activeSeriesIndex];
   const composition = useComposition(
-    editingSeries.seriesUid,
-    editingSeries.partialVolumeDescriptor
+    activeSeries.seriesUid,
+    activeSeries.partialVolumeDescriptor
   );
+  const { revision, activeLabelIndex } = editingData;
 
   const handleAnnotationChange = (
     annotation: rs.VoxelCloud | rs.SolidFigure | rs.PlaneFigure
@@ -258,7 +263,6 @@ const RevisionEditor: React.FC<{
     if (busy) return;
     setSeriesDialogOpen(false);
     if (result === null) return;
-    console.log('r', result);
     updateEditingData(d => {
       d.revision.series = result;
     });
@@ -296,6 +300,34 @@ const RevisionEditor: React.FC<{
     });
   };
 
+  const propagateWindowState = useMemo(
+    () =>
+      debounce((viewer: Viewer) => {
+        const window = (viewer.getState() as rs.MprViewState).window;
+        stateChanger(state => {
+          if (
+            state.window.width !== window.width ||
+            state.window.level !== window.level
+          ) {
+            return { ...state, window };
+          } else {
+            return state;
+          }
+        });
+      }, 500),
+    [stateChanger]
+  );
+
+  const handleViewStateChange = useCallback(
+    (viewer: Viewer) => {
+      viewWindows.current[
+        activeSeries.seriesUid
+      ] = (viewer.getState() as rs.MprViewState).window;
+      propagateWindowState(viewer);
+    },
+    [propagateWindowState, activeSeries.seriesUid, viewWindows]
+  );
+
   const initialWindowSetter = (
     viewer: Viewer,
     viewState: rs.ViewState
@@ -303,12 +335,19 @@ const RevisionEditor: React.FC<{
     const src = viewer.getComposition()!.imageSource as rs.MprImageSource;
     if (!src.metadata || viewState.type !== 'mpr') throw new Error();
     const windowPriority = projectData.windowPriority || 'auto';
+    if (viewWindows.current[activeSeries.seriesUid]) {
+      return {
+        ...viewState,
+        window: viewWindows.current[activeSeries.seriesUid]
+      };
+    }
     const priorities = windowPriority.split(',');
     for (const type of priorities) {
       switch (type) {
         case 'auto': {
           const window = src.metadata.estimatedWindow;
           if (window) {
+            viewWindows.current[activeSeries.seriesUid] = window;
             return { ...viewState, window };
           }
           break;
@@ -316,6 +355,7 @@ const RevisionEditor: React.FC<{
         case 'dicom': {
           const window = src.metadata.dicomWindow;
           if (window) {
+            viewWindows.current[activeSeries.seriesUid] = window;
             return { ...viewState, window };
           }
           break;
@@ -325,6 +365,7 @@ const RevisionEditor: React.FC<{
             Array.isArray(projectData.windowPresets) &&
             projectData.windowPresets[0];
           if (window) {
+            viewWindows.current[activeSeries.seriesUid] = window;
             return {
               ...viewState,
               window: { level: window.level, width: window.width }
@@ -336,9 +377,6 @@ const RevisionEditor: React.FC<{
     }
     return viewState; // do not update view state (should not happen)
   };
-
-  const { revision, activeSeriesIndex, activeLabelIndex } = editingData;
-  const activeSeries = revision.series[activeSeriesIndex];
 
   if (!activeSeries || !composition) return null;
   const activeLabel = activeSeries.labels[activeLabelIndex];
@@ -422,6 +460,7 @@ const RevisionEditor: React.FC<{
           onCreateViewer={handleCreateViwer}
           onDestroyViewer={handleDestroyViewer}
           initialWindowSetter={initialWindowSetter}
+          onViewStateChange={handleViewStateChange}
         />
       </div>
       <Modal show={seriesDialogOpen} bsSize="lg">

@@ -51,6 +51,7 @@ const ViewerCluster: React.FC<{
   onCreateViewer: (viewer: Viewer, id?: string | number) => void;
   onDestroyViewer: (viewer: Viewer) => void;
   initialWindowSetter: (viewer: Viewer, viewState: ViewState) => ViewState;
+  onViewStateChange: (viewer: Viewer, id?: string | number) => void;
 }> = props => {
   const {
     composition,
@@ -59,6 +60,7 @@ const ViewerCluster: React.FC<{
     layout,
     onCreateViewer,
     onDestroyViewer,
+    onViewStateChange,
     initialWindowSetter
   } = props;
 
@@ -80,6 +82,7 @@ const ViewerCluster: React.FC<{
         stateChanger={stateChanger}
         onCreateViewer={onCreateViewer}
         onDestroyViewer={onDestroyViewer}
+        onViewStateChange={onViewStateChange}
       />
     );
   };

@@ -1,7 +1,7 @@
 import createTaskManager, { TaskManager } from './createTaskManager';
 import { Models } from './interface';
 import { setUpMongoFixture, usingModels } from '../test/util-mongo';
-import { readFromStream } from '../test/util-stream';
+import { readFromStream, readFromStreamTillEnd } from '../test/util-stream';
 import { EventEmitter } from 'events';
 import path from 'path';
 import fs from 'fs-extra';
@@ -13,6 +13,7 @@ const userEmail = 'alice@example.com';
 const downloadTestDir = path.join(__dirname, '../test/download-test');
 
 beforeAll(async () => {
+  await fs.mkdir(downloadTestDir);
   const { db, models: m } = await modelsPromise;
   await setUpMongoFixture(db, ['tasks']);
   models = m;
@@ -48,7 +49,6 @@ describe('register', () => {
   });
 
   test('with download file', async () => {
-    await fs.mkdir(downloadTestDir);
     const ctx = newDummyCtx();
     const { taskId, emitter, downloadFileStream } = await manager.register(
       ctx,
@@ -161,4 +161,20 @@ test('isTaskInProgress', async () => {
 
   emitter.emit('finish', 'Importing finished.');
   expect(manager.isTaskInProgress(taskId)).toBe(false);
+});
+
+describe('download', () => {
+  test('normal download', async () => {
+    const ctx = newDummyCtx();
+    const taskId = 'aaaabbbbcccc2222';
+    await fs.writeFile(path.join(downloadTestDir, taskId), 'test');
+    await manager.download(ctx, taskId, userEmail);
+    expect(ctx.type).toBe('application/zip');
+    const string = await readFromStreamTillEnd(ctx.body);
+    expect(string).toBe('test');
+  });
+
+  test('Returns 400 when task has no downloadable file', () => {});
+  test('Returns 409 when a task is still in progress', () => {});
+  test('Returns 401 for unauthorized task', () => {});
 });

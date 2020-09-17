@@ -12,3 +12,13 @@ export const readFromStream = (stream: Readable): (() => Promise<string>) => {
     return data;
   };
 };
+
+export const readFromStreamTillEnd = (stream: Readable) => {
+  return new Promise<string>(resolve => {
+    let data = '';
+    stream.on('data', chunk => {
+      data += chunk;
+    });
+    stream.on('end', () => resolve(data));
+  });
+};

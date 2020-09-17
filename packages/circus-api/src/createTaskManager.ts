@@ -7,6 +7,7 @@ import { Writable, PassThrough } from 'stream';
 import fs from 'fs';
 import _ from 'lodash';
 import { CircusContext } from './typings/middlewares';
+import httpStatus from 'http-status';
 
 export interface TaskManager {
   register: (
@@ -23,6 +24,11 @@ export interface TaskManager {
   }>;
   report: (ctx: CircusContext, userEmail: string) => void;
   isTaskInProgress: (taskId: string) => boolean;
+  download: (
+    ctx: CircusContext,
+    taskId: string,
+    userEmail: string
+  ) => Promise<void>;
 }
 
 interface TaskEvents {
@@ -66,6 +72,10 @@ const createTaskManager: FunctionService<
     AggregatedEvents
   >;
 
+  const downloadFileName = (taskId: string) => {
+    return `${opt.downloadFileDirectory}/${taskId}`;
+  };
+
   const register = async (
     ctx: CircusContext,
     options: {
@@ -92,7 +102,7 @@ const createTaskManager: FunctionService<
     // Prepare write fs stream for downloadable files (if exists)
     const downloadFileStream =
       typeof options.downloadFileType === 'string'
-        ? fs.createWriteStream(`${opt.downloadFileDirectory}/${taskId}`)
+        ? fs.createWriteStream(downloadFileName(taskId))
         : undefined;
 
     const task: Task = {
@@ -199,7 +209,28 @@ const createTaskManager: FunctionService<
     return tasks.has(taskId);
   };
 
-  return { register, report, isTaskInProgress };
+  const download = async (
+    ctx: CircusContext,
+    taskId: string,
+    userEmail: string
+  ) => {
+    const task = await deps.models.task.findByIdOrFail(taskId);
+    if (userEmail !== task.userEmail)
+      ctx.throw(httpStatus.UNAUTHORIZED, 'You cannot access this task.');
+    if (task.status !== 'finished')
+      ctx.throw(httpStatus.CONFLICT, 'This task has not finished.');
+    if (!task.downloadFileType)
+      ctx.throw(
+        httpStatus.BAD_REQUEST,
+        'This task is not associated with a downloadable file.'
+      );
+    const fileName = downloadFileName(taskId);
+    const stream = fs.createReadStream(fileName);
+    ctx.type = task.downloadFileType;
+    ctx.body = stream;
+  };
+
+  return { register, report, isTaskInProgress, download };
 };
 
 createTaskManager.dependencies = ['models'];

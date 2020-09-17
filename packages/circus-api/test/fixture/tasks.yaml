@@ -7,7 +7,7 @@
   userEmail: alice@example.com
   name: Importing DICOM files
   status: finished
-  downloadFileType: null
+  downloadFileType: application/zip
 - taskId: bbbbccccdddd1111
   userEmail: bob@example.com
   name: Importing DICOM files

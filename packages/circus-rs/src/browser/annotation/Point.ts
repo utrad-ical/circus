@@ -34,6 +34,8 @@ export default class Point implements Annotation {
    */
   public z: number = 0;
 
+  public id?: string;
+
   /**
    * The marker cirlce will be drawn when the distance between the point
    * and the section is smaller than this value.

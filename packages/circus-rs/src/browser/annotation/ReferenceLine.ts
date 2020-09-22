@@ -36,6 +36,8 @@ export default class ReferenceLine implements Annotation, ViewerEventTarget {
   private handleType: HandleType | undefined = undefined;
   private dragStartPoint3: Vector3 | undefined = undefined;
 
+  public id?: string;
+
   public constructor(viewer: Viewer, { color = '#ff00ff' }: Options = {}) {
     if (!(viewer instanceof Viewer)) {
       throw new Error('No viewer specified');

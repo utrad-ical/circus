@@ -45,6 +45,7 @@ type SchemaEntryType = 'string' | 'number' | 'integer' | 'boolean';
 interface SchemaEntryEditorValue {
   key: string;
   schema: PropSchema;
+  required: boolean;
 }
 
 const StyledSpan = styled.span`
@@ -57,6 +58,14 @@ const StyledSpan = styled.span`
   .attribute-schema-key {
     width: 25%;
     margin-right: 3px;
+  }
+  .attribute-schema-required {
+    width: 15%;
+    margin-right: 3px;
+    text-align: center;
+    input {
+      height: 30px;
+    }
   }
   .attribute-schema-type {
     width: 20%;
@@ -75,7 +84,7 @@ const SchemaEntryEditor: React.FC<{
   onChange: (value: SchemaEntryEditorValue) => void;
 }> = props => {
   const {
-    value: { key, schema },
+    value: { key, schema, required },
     onChange
   } = props;
   const normalizedType = Array.isArray(schema.enum) ? 'select' : schema.type;
@@ -112,6 +121,12 @@ const SchemaEntryEditor: React.FC<{
     }
   };
 
+  const handleRequiredChange = (ev: React.ChangeEvent<HTMLInputElement>) => {
+    const required = !!ev.target.checked;
+    console.log(required, 'desu');
+    onChange({ ...props.value, required });
+  };
+
   const handleSpecChange = (newSpec: PropSchema) => {
     const newAttribute: SchemaEntryEditorValue = {
       ...props.value,
@@ -128,6 +143,14 @@ const SchemaEntryEditor: React.FC<{
           placeholder="Attribute key"
           value={key}
           onChange={handleKeyChange}
+        />
+      </div>
+      <div className="attribute-schema-required">
+        <input
+          type="checkbox"
+          checked={required}
+          onChange={handleRequiredChange}
+          title="Required"
         />
       </div>
       <div className="attribute-schema-type">
@@ -169,25 +192,24 @@ const AttributeSchemaEditor: React.FC<{
     const newValue: Schema = {
       type: 'object',
       properties: {},
-      required: val.map(v => v.key)
+      required: val.filter(v => v.required).map(v => v.key)
     };
     val.forEach(entry => (newValue.properties[entry.key] = entry.schema));
     onChange(newValue);
   };
 
   const { properties = {}, required = [] } = value;
-  const items: SchemaEntryEditorValue[] = Object.keys(properties).map(k => {
-    return {
-      key: k,
-      required: required.indexOf(k) >= 0,
-      schema: properties[k]
-    };
-  });
+  const items: SchemaEntryEditorValue[] = Object.keys(properties).map(k => ({
+    key: k,
+    required: required.indexOf(k) >= 0,
+    schema: properties[k]
+  }));
 
   return (
     <div>
       <StyledSpan className="legend">
         <div className="attribute-schema-key">Key</div>
+        <div className="attribute-schema-required">Required</div>
         <div className="attribute-schema-type">Type</div>
         <div className="attribute-schema-spec">Spec</div>
       </StyledSpan>

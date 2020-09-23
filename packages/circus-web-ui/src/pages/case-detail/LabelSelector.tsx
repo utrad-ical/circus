@@ -29,10 +29,9 @@ const LabelSelector: React.FC<{
         (series: SeriesEntryWithLabels, seriesIndex: number) => (
           <SeriesItem
             key={`${seriesIndex}:${series.seriesUid}`}
+            editingData={editingData}
             updateEditingData={updateEditingData}
-            series={series}
             seriesIndex={seriesIndex}
-            activeSeries={activeSeries}
             activeLabel={activeLabel}
             disabled={disabled}
           />
@@ -65,37 +64,50 @@ export default LabelSelector;
 ////////////////////////////////////////////////////////////////////////////////
 
 const SeriesItem: React.FC<{
-  seriesIndex: number;
-  series: SeriesEntryWithLabels;
-  activeSeries: SeriesEntryWithLabels;
-  activeLabel: InternalLabel | null;
+  editingData: EditingData;
   updateEditingData: EditingDataUpdater;
+  seriesIndex: number;
+  activeLabel: InternalLabel | null;
   disabled?: boolean;
 }> = props => {
   const {
     seriesIndex,
-    series,
-    activeSeries,
-    activeLabel,
+    editingData,
     updateEditingData,
+    activeLabel,
     disabled
   } = props;
+  const series = editingData.revision.series[seriesIndex];
 
-  const handleClick = () => {
+  const changeLabel = async (seriesIndex: number, labelIndex: number) => {
+    if (
+      editingData.activeSeriesIndex !== seriesIndex ||
+      editingData.activeLabelIndex !== labelIndex
+    ) {
+      updateEditingData(editingData => {
+        editingData.activeSeriesIndex = seriesIndex;
+        editingData.activeLabelIndex = labelIndex;
+      }, 'Change active series');
+    }
+  };
+
+  const handleSeriesClick = () => {
     // Change active series and select the first labe if exists
     if (disabled) return;
-    updateEditingData(editingData => {
-      if (editingData.activeSeriesIndex !== seriesIndex) {
-        editingData.activeSeriesIndex = seriesIndex;
-        editingData.activeLabelIndex = series.labels.length ? 0 : -1;
-      }
-    }, 'Change active label');
+    if (editingData.activeSeriesIndex === seriesIndex) return;
+    changeLabel(seriesIndex, series.labels.length ? 0 : -1);
+  };
+
+  const handleLabelClick = (labelIndex: number) => {
+    changeLabel(seriesIndex, labelIndex);
   };
 
   return (
     <StyledSeriesLi
-      className={classNames({ active: series === activeSeries })}
-      onClick={handleClick}
+      className={classNames({
+        active: seriesIndex === editingData.activeLabelIndex
+      })}
+      onClick={handleSeriesClick}
     >
       <span className="series-head">
         <Icon icon="circus-series" /> Series #{seriesIndex}
@@ -110,6 +122,7 @@ const SeriesItem: React.FC<{
             labelIndex={labelIndex}
             updateEditingData={updateEditingData}
             disabled={disabled}
+            onClick={handleLabelClick}
           />
         ))}
         {!series.labels.length && <li className="no-labels">No labels</li>}
@@ -144,6 +157,7 @@ export const Label: React.FC<{
   activeLabel: InternalLabel | null;
   updateEditingData: EditingDataUpdater;
   disabled?: boolean;
+  onClick: (labelIndex: number) => void;
 }> = props => {
   const {
     label,
@@ -151,7 +165,8 @@ export const Label: React.FC<{
     labelIndex,
     activeLabel,
     updateEditingData,
-    disabled
+    disabled,
+    onClick
   } = props;
 
   const [isDraggingOver, setIsDragingOver] = useState<false | 'top' | 'bottom'>(
@@ -171,10 +186,7 @@ export const Label: React.FC<{
   const handleClick = (ev: React.MouseEvent) => {
     ev.stopPropagation();
     if (disabled) return;
-    updateEditingData(editingData => {
-      editingData.activeSeriesIndex = seriesIndex;
-      editingData.activeLabelIndex = labelIndex;
-    }, 'Change active label');
+    onClick(labelIndex);
   };
 
   const handleDragStart = (ev: React.DragEvent) => {

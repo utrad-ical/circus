@@ -1,5 +1,6 @@
 import RawData from './RawData';
 import { PixelFormat } from '@utrad-ical/circus-lib/src/PixelFormat';
+import { Vector3D } from './geometry';
 
 test('create binary data', () => {
   const raw = new RawData([8, 8, 8], 'binary');
@@ -10,6 +11,228 @@ test('create binary data', () => {
   expect(raw.getPixelAt(1, 0, 0)).toBe(0);
   expect(raw.getPixelAt(2, 0, 0)).toBe(1);
   expect(raw.getPixelAt(3, 0, 0)).toBe(0);
+});
+
+describe('create binary data (various sizes)', () => {
+  const createBuffer = (binary: string) => {
+    const value: any[] = [...binary];
+    const data = value.reduce(
+      (prev, cur, i) =>
+        i % 8 ? prev : [...prev, parseInt(value.slice(i, i + 8).join(''), 2)],
+      []
+    );
+    return new Uint8Array(data).buffer;
+  };
+
+  const checkPixelAtFull = (
+    size: Vector3D,
+    raw: RawData,
+    value: number | ((x: number, y: number, z: number) => number)
+  ) => {
+    const [rx, ry, rz] = size;
+    for (let z = 0; z < rz; z++) {
+      for (let y = 0; y < ry; y++) {
+        for (let x = 0; x < rx; x++) {
+          if (typeof value === 'number') {
+            expect(raw.getPixelAt(x, y, z)).toBe(value);
+          } else {
+            expect(raw.getPixelAt(x, y, z)).toBe(value(x, y, z));
+          }
+        }
+      }
+    }
+  };
+
+  const checkPixelAtZ = (
+    size: Vector3D,
+    raw: RawData,
+    value: number | ((x: number, y: number, z: number) => number),
+    z: number
+  ) => {
+    const [rx, ry, rz] = size;
+    for (let y = 0; y < ry; y++) {
+      for (let x = 0; x < rx; x++) {
+        if (typeof value === 'number') {
+          expect(raw.getPixelAt(x, y, z)).toBe(value);
+        } else {
+          expect(raw.getPixelAt(x, y, z)).toBe(value(x, y, z));
+        }
+      }
+    }
+  };
+
+  const checkSingleImage = (
+    actualData: ArrayBuffer,
+    expectData: ArrayBuffer
+  ) => {
+    const actualSrc = new Uint8Array(actualData);
+    const expectSrc = new Uint8Array(expectData);
+    actualSrc.forEach((value, idx) => {
+      expect(value).toEqual(expectSrc[idx]);
+    });
+  };
+
+  test('not affect other images with different depths', () => {
+    for (let i = 3; i < 16; i++) {
+      const size: Vector3D = [i, i, i];
+      const [rx, ry, rz] = size;
+      const bits = rx * ry; // bits in a slice
+      const bytes = Math.ceil(bits / 8);
+
+      const fullData = (() => {
+        return createBuffer(''.padEnd(bits, '1').padEnd(bytes * 8, '0'));
+      })();
+
+      const emptyData = (() => {
+        return createBuffer(''.padEnd(bits, '0').padEnd(bytes * 8, '0'));
+      })();
+
+      for (let z = 0; z < rz; z++) {
+        const raw = new RawData(size, 'binary');
+
+        const check = (
+          exec: () => void,
+          expect: {
+            current: ArrayBuffer;
+            prev: ArrayBuffer;
+            next: ArrayBuffer;
+            valuePixelAt:
+              | number
+              | ((x: number, y: number, z: number) => number);
+          }
+        ) => {
+          exec();
+          checkSingleImage(raw.getSingleImage(z), expect.current);
+          checkPixelAtZ(size, raw, expect.valuePixelAt, z);
+
+          if (z > 0) {
+            checkSingleImage(raw.getSingleImage(z - 1), expect.prev);
+            checkPixelAtZ(size, raw, expect.valuePixelAt, z - 1);
+          }
+
+          if (z < rz - 1) {
+            checkSingleImage(raw.getSingleImage(z + 1), expect.next);
+            checkPixelAtZ(size, raw, expect.valuePixelAt, z + 1);
+          }
+        };
+
+        check(
+          () => {
+            raw.fillAll(1);
+          },
+          {
+            current: fullData,
+            prev: fullData,
+            next: fullData,
+            valuePixelAt: 1
+          }
+        );
+
+        check(
+          () => {
+            raw.clearSingleImage(z);
+          },
+          {
+            current: emptyData,
+            prev: fullData,
+            next: fullData,
+            valuePixelAt: (px: number, py: number, pz: number) => {
+              return pz === z ? 0 : 1;
+            }
+          }
+        );
+
+        check(
+          () => {
+            raw.insertSingleImage(z, fullData);
+          },
+          {
+            current: fullData,
+            prev: fullData,
+            next: fullData,
+            valuePixelAt: 1
+          }
+        );
+
+        check(
+          () => {
+            raw.fillAll(0);
+          },
+          {
+            current: emptyData,
+            prev: emptyData,
+            next: emptyData,
+            valuePixelAt: 0
+          }
+        );
+
+        check(
+          () => {
+            raw.insertSingleImage(z, fullData);
+          },
+          {
+            current: fullData,
+            prev: emptyData,
+            next: emptyData,
+            valuePixelAt: (px: number, py: number, pz: number) => {
+              return pz === z ? 1 : 0;
+            }
+          }
+        );
+      }
+    }
+  });
+
+  test('shift bits correctly', () => {
+    const size: Vector3D = [6, 6, 6];
+    const raw = new RawData(size, 'binary');
+
+    const [rx, ry, rz] = size;
+    const bits = rx * ry; // bits in a slice
+    const bytes = Math.ceil(bits / 8);
+
+    const slices = new Array(
+      ''.padEnd(bits, '100001'),
+      ''.padEnd(bits, '110011'),
+      ''.padEnd(bits, '101010'),
+      ''.padEnd(bits, '010101'),
+      ''.padEnd(bits, '101101'),
+      ''.padEnd(bits, '011110')
+    );
+
+    const pixelValue = (px: number, py: number, pz: number) => {
+      if (pz === 0) {
+        return px === 0 || px === 5 ? 1 : 0;
+      } else if (pz === 1) {
+        return px === 2 || px === 3 ? 0 : 1;
+      } else if (pz === 2) {
+        return px % 2 === 0 ? 1 : 0;
+      } else if (pz === 3) {
+        return px % 2 === 0 ? 0 : 1;
+      } else if (pz === 4) {
+        return px === 1 || px === 4 ? 0 : 1;
+      } else {
+        return px === 0 || px === 5 ? 0 : 1;
+      }
+    };
+
+    const slice = (i: number) => {
+      return createBuffer(slices[i].padEnd(bytes * 8, '0'));
+    };
+
+    raw.fillAll(0);
+    for (let z = 0; z < rz; z++) {
+      const expect = slice(z);
+      raw.insertSingleImage(z, expect);
+    }
+
+    for (let z = 0; z < rz; z++) {
+      const expect = slice(z);
+      const actual = raw.getSingleImage(z);
+      checkSingleImage(actual, expect);
+      checkPixelAtFull(size, raw, pixelValue);
+    }
+  });
 });
 
 const readWriteTest = (

@@ -154,7 +154,7 @@ const CaseDetail: React.FC<{}> = props => {
 
   return (
     <FullSpanContainer>
-      <Collapser title="Case Info" className="case-info">
+      <CaseInfoCollapser title="Case Info">
         <ProjectDisplay
           projectId={projectData.projectId}
           withName
@@ -176,7 +176,7 @@ const CaseDetail: React.FC<{}> = props => {
           <br />
           (Create: <TimeDisplay value={caseData.createdAt} />)
         </div>
-      </Collapser>
+      </CaseInfoCollapser>
       <MenuBar
         caseStore={caseStore}
         onCommand={handleMenuBarCommand}
@@ -193,6 +193,16 @@ const CaseDetail: React.FC<{}> = props => {
     </FullSpanContainer>
   );
 };
+
+const CaseInfoCollapser = styled(Collapser)`
+  .collapser-body {
+    padding: 3px;
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: space-between;
+    align-items: center;
+  }
+`;
 
 export default CaseDetail;
 

@@ -7,9 +7,8 @@ import { useContext, createContext } from 'react';
 
 export interface ApiCaller {
   (command: string, options?: any, cancelToken?: CancelToken): Promise<any>;
+  getToken: () => string;
 }
-
-export let api: ApiCaller; // TODO: eventually remove this in favor of context
 
 /**
  * Forms a credential data from an Axios OAuth response.
@@ -47,7 +46,11 @@ const createApiCaller = (initialCredentials: any, apiServer: string) => {
     return formatCredentials(res.data);
   };
 
-  api = async (command: string, options = {}, cancelToken?: CancelToken) => {
+  const api: ApiCaller = async (
+    command: string,
+    options = {},
+    cancelToken?: CancelToken
+  ) => {
     const params: any = { url: command, method: 'get', ...options };
     if (typeof params.data === 'object') {
       if (params.method === 'get') params.method = 'post';
@@ -96,6 +99,7 @@ const createApiCaller = (initialCredentials: any, apiServer: string) => {
       throw err;
     }
   };
+  api.getToken = () => credentials.accessToken;
   saveCredentialData(credentials);
   return api;
 };

@@ -474,6 +474,23 @@ const RevisionEditor: React.FC<{
 };
 
 const StyledDiv = styled.div`
+  height: 0px; // recalculated by flexbox
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: row;
+
+  .case-revision-main {
+    // tool bar and viewer grid
+    height: 100%;
+    width: 0px;
+    flex: 1 0 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  &.busy {
+    opacity: 0.5;
+  }
   .add-series-pane {
     margin: 15px;
     text-align: right;

@@ -6,19 +6,39 @@ import { Glyphicon } from 'components/react-bootstrap';
 const StyledSideBar = styled.div`
   overflow: hidden;
   height: 100%;
-  flex: 0 0 30px;
+  flex: 0 0 20px; // collapsed side bar width
   display: flex;
   flex-direction: column;
   .bar {
-    text-align: right;
+    text-align: center;
+    cursor: pointer;
+    flex: 1 0 auto;
+    background: ${(props: any) => props.theme.brandDark};
+    &:hover {
+      background: ${(props: any) => props.theme.brandPrimary};
+    }
+    color: white;
   }
   &.open {
+    flex: 0 0 320px; // side bar width
+    > .bar {
+      text-align: right;
+      flex: 0 0 auto;
+      color: ${(props: any) => props.theme.brandPrimary};
+      background: white;
+      .triangle {
+        transform: rotate(180deg);
+      }
+    }
+  }
+  .scrollable {
     overflow-x: hidden;
     overflow-y: auto;
-    flex: 0 0 320px;
-    > .bar > .triangle {
-      transform: rotate(180deg);
-    }
+    flex: 1 1 auto;
+    min-height: 1px;
+  }
+  .collapser {
+    margin-bottom: 1px;
   }
 `;
 
@@ -34,7 +54,7 @@ const SideContainer: React.FC<{}> = React.memo(props => {
       <div className="bar" onClick={handleToggle}>
         <Glyphicon className="triangle" glyph="triangle-right" />
       </div>
-      {open && props.children}
+      {open && <div className="scrollable">{props.children}</div>}
     </StyledSideBar>
   );
 });

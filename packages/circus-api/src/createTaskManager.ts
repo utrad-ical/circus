@@ -1,4 +1,4 @@
-import { FunctionService } from '@utrad-ical/circus-lib';
+import { FunctionService, Logger } from '@utrad-ical/circus-lib';
 import StrictEventEmitter from 'strict-event-emitter-types';
 import { EventEmitter } from 'events';
 import { Models } from './interface';
@@ -7,7 +7,8 @@ import { Writable, PassThrough } from 'stream';
 import fs from 'fs';
 import _ from 'lodash';
 import { CircusContext } from './typings/middlewares';
-import httpStatus from 'http-status';
+
+export type TaskEventEmitter = StrictEventEmitter<EventEmitter, TaskEvents>;
 
 export interface TaskManager {
   register: (
@@ -19,16 +20,12 @@ export interface TaskManager {
     }
   ) => Promise<{
     taskId: string;
-    emitter: StrictEventEmitter<EventEmitter, TaskEvents>;
+    emitter: TaskEventEmitter;
     downloadFileStream?: Writable;
   }>;
   report: (ctx: CircusContext, userEmail: string) => void;
   isTaskInProgress: (taskId: string) => boolean;
-  download: (
-    ctx: CircusContext,
-    taskId: string,
-    userEmail: string
-  ) => Promise<void>;
+  download: (ctx: CircusContext, taskId: string) => Promise<void>;
 }
 
 interface TaskEvents {
@@ -37,7 +34,7 @@ interface TaskEvents {
   // Notifies that an error happened.
   error: (message: string) => void;
   // Notifies that tha task has finished successfully.
-  finish: (message: string) => void;
+  finish: () => void;
 }
 
 interface AggregatedEvents {
@@ -62,9 +59,11 @@ interface Options {
 
 const createTaskManager: FunctionService<
   TaskManager,
-  { models: Models },
+  { models: Models; apiLogger: Logger },
   Options
 > = async (opt, deps) => {
+  const { models, apiLogger } = deps;
+
   // In-memory storage of ongoing tasks
   const tasks = new Map<string, Task>();
   const aggregatedEmitter = new EventEmitter() as StrictEventEmitter<
@@ -85,17 +84,16 @@ const createTaskManager: FunctionService<
     }
   ) => {
     const taskId = generateUniqueId();
-    await deps.models.task.insert({
+    await models.task.insert({
       taskId,
       name: options.name,
       userEmail: options.userEmail,
       status: 'processing',
-      downloadFileType: options.downloadFileType ?? null
+      errorMessage: '',
+      downloadFileType: options.downloadFileType ?? null,
+      dismissed: false
     });
-    const emitter = new EventEmitter() as StrictEventEmitter<
-      EventEmitter,
-      TaskEvents
-    >;
+    const emitter = new EventEmitter() as TaskEventEmitter;
 
     ctx.body = { taskId };
 
@@ -121,30 +119,45 @@ const createTaskManager: FunctionService<
       aggregatedEmitter.emit('taskEvent', taskId, 'progress', task);
     };
 
-    const handleError = async () => {
+    const throttleHandleProgress = _.throttle(handleProgress, 150);
+
+    const handleError = async (message: string) => {
       removeHandlers();
       aggregatedEmitter.emit('taskEvent', taskId, 'error', task);
       tasks.delete(taskId);
-      await deps.models.task.modifyOne(taskId, { status: 'error' });
+      await models.task.modifyOne(taskId, {
+        status: 'error',
+        errorMessage: message
+      });
+    };
+
+    const handleStreamError = (err: Error) => {
+      apiLogger.error(`Filesystem write stream error (taskId: ${taskId})`);
+      apiLogger.error(err.message);
+      handleError(
+        'Internal file system error happened while creating the download file.'
+      );
     };
 
     const handleFinish = async () => {
       removeHandlers();
       aggregatedEmitter.emit('taskEvent', taskId, 'finish', task);
       tasks.delete(taskId);
-      await deps.models.task.modifyOne(taskId, { status: 'finished' });
+      await models.task.modifyOne(taskId, { status: 'finished' });
     };
 
     const removeHandlers = () => {
-      emitter.off('progress', handleProgress);
+      emitter.off('progress', throttleHandleProgress);
       emitter.off('error', handleError);
       emitter.off('finish', handleFinish);
+      downloadFileStream?.off?.('error', handleStreamError);
     };
 
     tasks.set(taskId, task);
-    emitter.on('progress', handleProgress);
+    emitter.on('progress', throttleHandleProgress);
     emitter.on('error', handleError);
     emitter.on('finish', handleFinish);
+    downloadFileStream?.on?.('error', handleStreamError);
 
     return { taskId, emitter, downloadFileStream };
   };
@@ -209,21 +222,8 @@ const createTaskManager: FunctionService<
     return tasks.has(taskId);
   };
 
-  const download = async (
-    ctx: CircusContext,
-    taskId: string,
-    userEmail: string
-  ) => {
-    const task = await deps.models.task.findByIdOrFail(taskId);
-    if (userEmail !== task.userEmail)
-      ctx.throw(httpStatus.UNAUTHORIZED, 'You cannot access this task.');
-    if (task.status !== 'finished')
-      ctx.throw(httpStatus.CONFLICT, 'This task has not finished.');
-    if (!task.downloadFileType)
-      ctx.throw(
-        httpStatus.BAD_REQUEST,
-        'This task is not associated with a downloadable file.'
-      );
+  const download = async (ctx: CircusContext, taskId: string) => {
+    const task = await models.task.findByIdOrFail(taskId);
     const fileName = downloadFileName(taskId);
     const stream = fs.createReadStream(fileName);
     ctx.type = task.downloadFileType;
@@ -233,6 +233,6 @@ const createTaskManager: FunctionService<
   return { register, report, isTaskInProgress, download };
 };
 
-createTaskManager.dependencies = ['models'];
+createTaskManager.dependencies = ['models', 'apiLogger'];
 
 export default createTaskManager;

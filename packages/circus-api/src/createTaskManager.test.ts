@@ -1,10 +1,13 @@
-import createTaskManager, { TaskManager } from './createTaskManager';
+import createTaskManager, {
+  TaskEventEmitter,
+  TaskManager
+} from './createTaskManager';
 import { Models } from './interface';
 import { setUpMongoFixture, usingModels } from '../test/util-mongo';
 import { readFromStream, readFromStreamTillEnd } from '../test/util-stream';
-import { EventEmitter } from 'events';
 import path from 'path';
 import fs from 'fs-extra';
+import createNullLogger from '@utrad-ical/circus-lib/src/logger/NullLogger';
 
 const modelsPromise = usingModels();
 let models: Models;
@@ -22,7 +25,7 @@ beforeAll(async () => {
 beforeEach(async () => {
   manager = await createTaskManager(
     { downloadFileDirectory: downloadTestDir, timeoutMs: 10000 },
-    { models }
+    { models, apiLogger: await createNullLogger(null, {}) }
   );
 });
 
@@ -62,7 +65,7 @@ describe('register', () => {
 
     downloadFileStream!.end(fileContent);
     expect(ctx.body).toEqual({ taskId });
-    emitter.emit('finish', 'Finished.');
+    emitter.emit('finish');
 
     const task = await models.task.findById(taskId);
     expect(task.downloadFileType).toMatch(/application\/zip/);
@@ -74,7 +77,7 @@ describe('register', () => {
 
 describe('report', () => {
   let taskId: string;
-  let emitter: EventEmitter;
+  let emitter: TaskEventEmitter;
 
   beforeEach(async () => {
     ({ taskId, emitter } = await manager.register(newDummyCtx(), {
@@ -122,7 +125,7 @@ describe('report', () => {
     emitter.emit('finish');
 
     emitterBob.emit('progress', 'Importing 10 files...', 1, 10);
-    emitterBob.emit('finish', 'Import finished.');
+    emitterBob.emit('finish');
 
     const sentData = await streamFinish();
     expect(sentData).not.toMatch(taskId); // no Alice's task
@@ -135,7 +138,7 @@ describe('report', () => {
     const readStream = ctx.body;
     const streamFinish = readFromStream(readStream);
 
-    emitter.emit('error');
+    emitter.emit('error', 'Some error happened.');
 
     const sentData = await streamFinish();
     expect(sentData).toMatch(/error/);
@@ -159,22 +162,16 @@ test('isTaskInProgress', async () => {
   emitter.emit('progress', 'Importing 10 files...', 1, 10);
   expect(manager.isTaskInProgress(taskId)).toBe(true);
 
-  emitter.emit('finish', 'Importing finished.');
+  emitter.emit('finish');
   expect(manager.isTaskInProgress(taskId)).toBe(false);
 });
 
-describe('download', () => {
-  test('normal download', async () => {
-    const ctx = newDummyCtx();
-    const taskId = 'aaaabbbbcccc2222';
-    await fs.writeFile(path.join(downloadTestDir, taskId), 'test');
-    await manager.download(ctx, taskId, userEmail);
-    expect(ctx.type).toBe('application/zip');
-    const string = await readFromStreamTillEnd(ctx.body);
-    expect(string).toBe('test');
-  });
-
-  test('Returns 400 when task has no downloadable file', () => {});
-  test('Returns 409 when a task is still in progress', () => {});
-  test('Returns 401 for unauthorized task', () => {});
+test('download', async () => {
+  const ctx = newDummyCtx();
+  const taskId = 'aaaabbbbcccc2222';
+  await fs.writeFile(path.join(downloadTestDir, taskId), 'test');
+  await manager.download(ctx, taskId);
+  expect(ctx.type).toBe('application/zip');
+  const string = await readFromStreamTillEnd(ctx.body);
+  expect(string).toBe('test');
 });

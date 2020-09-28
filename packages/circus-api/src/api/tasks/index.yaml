@@ -13,4 +13,5 @@ routes:
     description: Reports the current user's task progress using server-sent events.
   - verb: get
     path: /tasks/:taskId/download
+    handler: handleDownload
     description: Allowing the current user to download files that are available for download.

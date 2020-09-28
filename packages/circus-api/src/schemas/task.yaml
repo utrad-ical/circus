@@ -17,9 +17,13 @@ properties:
     type: string
     enum: ['finished', 'error', 'processing']
     description: The task status.
+  errorMessage:
+    type: string
   downloadFileType:
     oneOf:
       - type: string
       - type: 'null'
     description: MIME type when the result can be downloaded after the task is completed.
+  dismissed:
+    type: boolean
 additionalProperties: false

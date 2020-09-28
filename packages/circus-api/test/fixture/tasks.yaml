@@ -2,14 +2,27 @@
   userEmail: alice@example.com
   name: Importing DICOM files
   status: processing
+  errorMessage: ''
   downloadFileType: null
+  dismissed: false
 - taskId: aaaabbbbcccc2222
   userEmail: alice@example.com
-  name: Importing DICOM files
+  name: Export case
   status: finished
+  errorMessage: ''
   downloadFileType: application/zip
+  dismissed: false
+- taskId: aaaabbbbcccc3333
+  userEmail: alice@example.com
+  name: Export case
+  status: processing
+  errorMessage: ''
+  downloadFileType: application/zip
+  dismissed: false
 - taskId: bbbbccccdddd1111
   userEmail: bob@example.com
   name: Importing DICOM files
   status: processing
+  errorMessage: ''
   downloadFileType: null
+  dismissed: false

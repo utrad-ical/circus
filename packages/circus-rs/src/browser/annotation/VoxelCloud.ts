@@ -111,7 +111,7 @@ export default class VoxelCloud implements Annotation {
   public shrinkToMinimum(): boolean {
     if (!this.volume || !this.origin) throw new Error();
     // console.time('shrink to minimum bounding box');
-    const boundingBox = scanBoundingBox(this.volume, true);
+    const boundingBox = scanBoundingBox(this.volume);
     if (boundingBox === null) {
       return false; // No nonzero voxel
     }

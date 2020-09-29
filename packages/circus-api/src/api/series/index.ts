@@ -31,7 +31,7 @@ export const handleGet: RouteMiddleware = ({ models }) => {
   };
 };
 
-export const handlePost: RouteMiddleware = ({ dicomImporter }) => {
+export const handlePost: RouteMiddleware = ({ dicomImporter, taskManager }) => {
   return async (ctx, next) => {
     if (!dicomImporter) {
       ctx.throw(status.SERVICE_UNAVAILABLE);
@@ -42,24 +42,50 @@ export const handlePost: RouteMiddleware = ({ dicomImporter }) => {
       ctx.throw(status.FORBIDDEN, 'You cannot upload to this domain.');
     }
 
+    const { emitter } = await taskManager.register(ctx, {
+      name: 'Importing DICOM files',
+      userEmail: ctx.user.userEmail
+    });
+
     const sentFiles = ctx.request.files;
-    let count = 0;
-    for (const file of sentFiles) {
-      for await (const entry of fileOrZipIterator(
-        file.buffer.buffer,
-        file.filename
-      )) {
-        const signature =
-          entry.buffer.byteLength > 0x80 &&
-          new DataView(entry.buffer).getUint32(0x80, false);
-        if (signature !== 0x4449434d) {
-          continue; // Non-DICOM file
+
+    // The following code will keep running after this middleware returns
+    (async () => {
+      let fileCount = 0;
+      let dicomCount = 0;
+      try {
+        for (const file of sentFiles) {
+          for await (const entry of fileOrZipIterator(
+            file.buffer.buffer,
+            file.filename
+          )) {
+            const signature =
+              entry.buffer.byteLength > 0x80 &&
+              new DataView(entry.buffer).getUint32(0x80, false);
+            if (signature !== 0x4449434d) {
+              continue; // Non-DICOM file
+            }
+            await dicomImporter.importDicom(Buffer.from(entry.buffer), domain);
+            dicomCount++;
+            emitter.emit(
+              'progress',
+              `Imported ${dicomCount} entities...`,
+              fileCount,
+              sentFiles.length
+            );
+          }
+          fileCount++;
         }
-        await dicomImporter.importDicom(Buffer.from(entry.buffer), domain);
-        count++;
+        emitter.emit('finish', 'Import finished.');
+      } catch (err) {
+        emitter.emit(
+          'error',
+          `Error while processing file #${fileCount + 1}, entity #${
+            dicomCount + 1
+          }`
+        );
       }
-    }
-    ctx.body = { uploaded: count };
+    })();
   };
 };
 

@@ -7,6 +7,7 @@ import Storage from '../storage/Storage';
 import { UserPrivilegeInfo } from '../privilegeUtils';
 import { CsCore } from '@utrad-ical/circus-cs-core';
 import { Logger, DicomFileRepository } from '@utrad-ical/circus-lib';
+import { TaskManager } from '../createTaskManager';
 
 export interface Deps {
   validator: Validator;
@@ -21,6 +22,7 @@ export interface Deps {
   volumeProvider: VolumeProvider;
   uploadFileSizeMaxBytes: number;
   dicomImageServerUrl: string;
+  taskManager: TaskManager;
 }
 
 interface CustomCtxMembers {

@@ -44,10 +44,10 @@ export interface ScrollbarContainer {
   };
 }
 
-export function createScrollbar(
+export const createScrollbar = (
   viewer: Viewer,
   settings: Settings
-): ScrollbarContainer | undefined {
+): ScrollbarContainer | undefined => {
   const viewState = viewer.getState();
   if (viewState.type !== 'mpr') return;
 
@@ -89,9 +89,9 @@ export function createScrollbar(
   };
 
   return scrollbar;
-}
+};
 
-function createOuterFrameBox(resolution: Vector2, settings: Settings): Box2 {
+const createOuterFrameBox = (resolution: Vector2, settings: Settings): Box2 => {
   const { size, position, marginHorizontal, marginVertical } = settings;
 
   switch (position) {
@@ -125,12 +125,12 @@ function createOuterFrameBox(resolution: Vector2, settings: Settings): Box2 {
         )
       );
   }
-}
+};
 
-function createVisibilityThresholdBox(
+const createVisibilityThresholdBox = (
   resolution: Vector2,
   settings: Settings
-): Box2 {
+): Box2 => {
   const {
     marginHorizontal,
     marginVertical,
@@ -157,15 +157,13 @@ function createVisibilityThresholdBox(
         )
       )
     );
-}
-function createThumb(
+};
+
+const createThumb = (
   settings: Settings,
   scrollableBox: Box2,
-  steps: {
-    current: number;
-    sumCount: number;
-  }
-): { box: Box2; scale: number } {
+  steps: { current: number; sumCount: number }
+): { box: Box2; scale: number } => {
   const { position, size } = settings;
 
   const scrollableLength = (() => {
@@ -173,7 +171,6 @@ function createThumb(
       case 'top':
       case 'bottom':
         return scrollableBox.max.x - scrollableBox.min.x;
-
       case 'left':
       case 'right':
         return scrollableBox.max.y - scrollableBox.min.y;
@@ -183,7 +180,7 @@ function createThumb(
   const thumbLength = Math.max(size, scrollableLength / (steps.sumCount + 1));
   const thumbScale = (scrollableLength - thumbLength) / steps.sumCount;
   const thumbLocation = round(steps.current, 2) * thumbScale;
-  // console.log(JSON.stringify(steps));
+
   const min = (() => {
     switch (position) {
       case 'top':
@@ -220,15 +217,13 @@ function createThumb(
     box: new Box2(min, max),
     scale: thumbScale
   };
-}
-function calcSteps(
+};
+
+const calcSteps = (
   mmSection: Section,
   comp: Composition,
   orientation: OrientationString
-): {
-  current: number;
-  sumCount: number;
-} {
+): { current: number; sumCount: number } => {
   const src = comp.imageSource as MprImageSource;
   const voxelSize = new Vector3().fromArray(src.metadata?.voxelSize!);
 
@@ -267,14 +262,15 @@ function calcSteps(
       };
     }
   }
-}
+};
 
 export type HandleType = 'arrowInc' | 'arrowDec' | 'thumbDrag';
-export function handleType(
+
+export const handleType = (
   viewer: Viewer,
   point: Vector2,
   settings: Settings
-): HandleType | undefined {
+): HandleType | undefined => {
   const scrollbar = createScrollbar(viewer, settings);
   if (!scrollbar) return;
 
@@ -285,13 +281,13 @@ export function handleType(
   if (scrollbar.thumbBox.containsPoint(point)) return 'thumbDrag';
 
   return;
-}
+};
 
-export function isVisible(
+export const isVisible = (
   point: Vector2,
   viewer: Viewer,
   settings: Settings
-): boolean {
+): boolean => {
   if (settings.visibility === 'always') return true;
   const resolution = new Vector2().fromArray(viewer.getResolution());
   const visibilityThresholdBox = createVisibilityThresholdBox(
@@ -299,9 +295,12 @@ export function isVisible(
     settings
   );
   return visibilityThresholdBox.containsPoint(point);
-}
+};
 
-export function drawVisibilityThresholdBox(viewer: Viewer, settings: Settings) {
+export const drawVisibilityThresholdBox = (
+  viewer: Viewer,
+  settings: Settings
+) => {
   const { lineWidth, color } = settings;
   const canvas = viewer.canvas;
   const ctx = canvas.getContext('2d');
@@ -318,12 +317,12 @@ export function drawVisibilityThresholdBox(viewer: Viewer, settings: Settings) {
     createVisibilityThresholdBox(resolution, settings),
     styleFrame
   );
-}
+};
 
-export function drawScrollbar(
+export const drawScrollbar = (
   viewer: Viewer,
   settings: Settings
-): ScrollbarContainer | undefined {
+): ScrollbarContainer | undefined => {
   const { lineWidth, color, size, position } = settings;
 
   const scrollbar = createScrollbar(viewer, settings);
@@ -395,14 +394,14 @@ export function drawScrollbar(
     ctx.restore();
   }
   return scrollbar;
-}
+};
 
-export function getStepDifference(
+export const getStepDifference = (
   origin: Vector2,
   point: Vector2,
   settings: Settings,
   scrollbar: ScrollbarContainer | undefined
-) {
+) => {
   const { position } = settings;
 
   if (!scrollbar) return 0;
@@ -420,4 +419,4 @@ export function getStepDifference(
   })();
   const step = round(dist / scrollbar.thumbScale, 2);
   return step;
-}
+};

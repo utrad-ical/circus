@@ -1,25 +1,26 @@
-import React, { useState, useEffect } from 'react';
-import { Button } from 'components/react-bootstrap';
 import LoadingIndicator from '@smikitky/rb-components/lib/LoadingIndicator';
-import { useApi } from 'utils/api';
 import Icon from 'components/Icon';
+import { Button } from 'components/react-bootstrap';
+import TimeDisplay from 'components/TimeDisplay';
+import React, { useEffect, useState } from 'react';
+import { useApi } from 'utils/api';
 
 interface Task {
   taskId: string;
+  name: string;
   status: string;
-  publicDownload: string;
-  createdAt: Date;
+  downloadFileType?: string;
+  createdAt: string;
 }
 
 const TaskList: React.FC = props => {
-  const [tasks] = useState([]);
-  const [, setDownloadList] = useState();
+  const [tasks, setTasks] = useState([]);
   const api = useApi();
 
   useEffect(() => {
     const refresh = async () => {
       const items = (await api('tasks')).items;
-      setDownloadList(items);
+      setTasks(items);
     };
     refresh();
   }, [api]);
@@ -45,8 +46,8 @@ const TaskItems: React.FC<{ items: Task[] }> = props => {
       <thead>
         <tr>
           <th>Task ID</th>
+          <th>Name</th>
           <th>Status</th>
-          <th>Public</th>
           <th>Date</th>
           <th>Download</th>
         </tr>
@@ -55,13 +56,19 @@ const TaskItems: React.FC<{ items: Task[] }> = props => {
         {props.items.map(item => (
           <tr key={item.taskId}>
             <td>{item.taskId}</td>
+            <td>{item.name}</td>
             <td>{item.status}</td>
-            <td>{item.publicDownload ? 'Yes' : '-'}</td>
-            <td>{item.createdAt}</td>
             <td>
-              <a href={'download/' + item.taskId}>
-                <Button>Download</Button>
-              </a>
+              <TimeDisplay value={item.createdAt} />
+            </td>
+            <td>
+              {item.downloadFileType ? (
+                <a href={`tasks/${item.taskId}/download`}>
+                  <Button>Download</Button>
+                </a>
+              ) : (
+                '-'
+              )}
             </td>
           </tr>
         ))}

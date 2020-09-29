@@ -18,6 +18,7 @@ import Koa from 'koa';
 import createDicomUtilityRunner, {
   DicomUtilityRunner
 } from './utils/createDicomUtilityRunner';
+import { TaskManager } from './createTaskManager';
 
 export type Services = CsCoreServices &
   RsServices & {
@@ -30,6 +31,7 @@ export type Services = CsCoreServices &
     blobStorage: Storage;
     dicomTagReader: DicomTagReader;
     dicomUtilityRunner: DicomUtilityRunner;
+    taskManager: TaskManager;
   };
 
 export type ApiServiceLoader = ServiceLoader<Services>;
@@ -60,6 +62,10 @@ const createServiceLoader = async (config: any) => {
     'blobStorage',
     path.join(__dirname, 'storage'),
     'MemoryStorage'
+  );
+  loader.registerModule(
+    'taskManager',
+    path.join(__dirname, './createTaskManager')
   );
   return loader as ApiServiceLoader;
 };

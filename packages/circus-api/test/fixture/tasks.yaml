@@ -1,20 +1,28 @@
 - taskId: aaaabbbbcccc1111
-  owner: alice@example.com
-  status: running
-  command: ''
-  download: ''
-  publicDownload: false
-  textStatus: Processing something.
-  logs: []
-  value: 30
-  max: 100
+  userEmail: alice@example.com
+  name: Importing DICOM files
+  status: processing
+  errorMessage: ''
+  downloadFileType: null
+  dismissed: false
 - taskId: aaaabbbbcccc2222
-  owner: bob@example.com
+  userEmail: alice@example.com
+  name: Export case
   status: finished
-  command: ''
-  download: ''
-  publicDownload: false
-  textStatus: Import complete.
-  logs: []
-  value: 100
-  max: 100
+  errorMessage: ''
+  downloadFileType: application/zip
+  dismissed: false
+- taskId: aaaabbbbcccc3333
+  userEmail: alice@example.com
+  name: Export case
+  status: processing
+  errorMessage: ''
+  downloadFileType: application/zip
+  dismissed: false
+- taskId: bbbbccccdddd1111
+  userEmail: bob@example.com
+  name: Importing DICOM files
+  status: processing
+  errorMessage: ''
+  downloadFileType: null
+  dismissed: false

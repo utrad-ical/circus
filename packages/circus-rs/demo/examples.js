@@ -132,15 +132,7 @@ const toolbar = rs.createToolbar(container, [
 
 if (viewer) toolbar.bindViewer(viewer);
 if (viewer2) toolbar.bindViewer(viewer2);
-const scrollbar = new rs.Scrollbar(viewer, {
-  position: 'top',
-  visibility: 'hover',
-  visibilityThreshold: 50,
-  marginHorizontal: 10,
-  marginVertical: 5,
-  size: 30
-});
-scrollbar.drawVisibilityThreshold = true;
+const scrollbar = new rs.Scrollbar(viewer, {});
 comp.addAnnotation(scrollbar);
 // setInterval( function(){ viewer.render(); }, 30 );
 

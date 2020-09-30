@@ -172,13 +172,14 @@ const CaseDetail: React.FC<{}> = props => {
   return (
     <FullSpanContainer>
       <CaseInfoCollapser title="Case Info">
+        <PatientInfoBox value={caseStore.patientInfo} />
         <ProjectDisplay
           projectId={projectData.projectId}
           withName
           withDescription
           size="xl"
         />
-        <PatientInfoBox value={caseStore.patientInfo} />
+        <div className="spacer" />
         <div className="tag-list">
           <b>Tags:</b>
           {tags.map((t: string | number | undefined) => (
@@ -222,9 +223,15 @@ const CaseInfoCollapser = styled(Collapser)`
   .collapser-body {
     padding: 3px;
     display: flex;
+    > * {
+      margin: 0 10px;
+    }
     flex-flow: row wrap;
     justify-content: space-between;
     align-items: center;
+  }
+  .spacer {
+    flex-grow: 1;
   }
   .tag-list {
     > .tag {

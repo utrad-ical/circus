@@ -58,12 +58,12 @@ function makeTable(width: number, height: number, NSlice: number) {
 
 /**
  * Return labeled image
- * @param array: input binary image
- * @param width: width of array
- * @param height: height of array
- * @param NSlice: slice number of array
- * @param neighbors: 6 | 26
- * @param threshold: voxel value of threshold
+ * @param array input binary image
+ * @param width width of array
+ * @param height height of array
+ * @param NSlice slice number of array
+ * @param neighbors 6 | 26
+ * @param threshold voxel value of threshold
  */
 export default function labeling(
   array: Uint8Array | Uint16Array,

@@ -5,6 +5,17 @@ import { OverlayTrigger, Tooltip } from 'components/react-bootstrap';
 
 const StyledSpan = styled.span`
   display: inline-block;
+  .name {
+    display: inline-block;
+    vertical-align: middle;
+    margin-left: 5px;
+  }
+  .title {
+    font-weight: bolder;
+  }
+  .description {
+    font-size: 90%;
+  }
 `;
 
 const IconDisplay: React.FC<{
@@ -12,23 +23,17 @@ const IconDisplay: React.FC<{
   icon: CircusIconDefinition;
   title: React.ReactNode;
   description?: React.ReactNode;
-  toolTip: any;
+  toolTip?: React.ReactChild;
 }> = props => {
   const { size, icon, title, description, toolTip } = props;
 
   const content = (
-    <StyledSpan>
+    <StyledSpan className="icon-display">
       <BodyPartIcon icon={icon} size={size} />
-      {title && (
-        <span>
-          &ensp;<b>{title}</b>
-        </span>
-      )}
-      {description && (
-        <span>
-          &ensp;<small>{description}</small>
-        </span>
-      )}
+      <div className="name">
+        {title && <div className="title">{title}</div>}
+        {description && <div className="description"> {description}</div>}
+      </div>
     </StyledSpan>
   );
 

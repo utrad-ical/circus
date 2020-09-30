@@ -5,6 +5,8 @@ import {
   Button,
   Dropdown,
   MenuItem,
+  OverlayTrigger,
+  Tooltip,
   SplitButton
 } from 'components/react-bootstrap';
 import React from 'react';
@@ -268,23 +270,35 @@ const ToolButton: React.FC<{
 
   const style = active === name ? 'primary' : 'default';
   const iconSpan = <Icon icon={icon} />;
+  const toolTip = (
+    <Tooltip>
+      {name[0].toUpperCase() +
+        name.slice(1) +
+        (shortcut ? ' (' + shortcut[3] + ')' : '')}
+    </Tooltip>
+  );
+
   if (children) {
     return (
-      <SplitButton
-        id={`toolbutton-${name}`}
-        title={iconSpan}
-        bsStyle={style}
-        onClick={handleClick}
-        disabled={disabled}
-      >
-        {children}
-      </SplitButton>
+      <OverlayTrigger overlay={toolTip} placement="top" delayShow={200}>
+        <SplitButton
+          id={`toolbutton-${name}`}
+          title={iconSpan}
+          bsStyle={style}
+          onClick={handleClick}
+          disabled={disabled}
+        >
+          {children}
+        </SplitButton>
+      </OverlayTrigger>
     );
   } else {
     return (
-      <Button bsStyle={style} onClick={handleClick} disabled={disabled}>
-        {iconSpan}
-      </Button>
+      <OverlayTrigger overlay={toolTip} placement="top" delayShow={200}>
+        <Button bsStyle={style} onClick={handleClick} disabled={disabled}>
+          {iconSpan}
+        </Button>
+      </OverlayTrigger>
     );
   }
 };

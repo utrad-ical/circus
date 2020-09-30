@@ -21,7 +21,7 @@ export default interface Project {
   icon: CircusIconDefinition;
   projectName: string;
   description: string;
-  tags: any[];
+  tags: { name: string; color: string }[];
   windowPresets: WindowPreset[];
   windowPriority: string;
   caseAttributesSchema: Schema;

@@ -15,7 +15,7 @@ import {
 import Tag from 'components/Tag';
 import TimeDisplay from 'components/TimeDisplay';
 import produce from 'immer';
-import React, { useCallback, useEffect, useReducer } from 'react';
+import React, { useCallback, useEffect, useReducer, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
@@ -28,6 +28,7 @@ import {
 } from './revisionData';
 import RevisionEditor from './RevisionEditor';
 import RevisionSelector from './RevisionSelector';
+import TagEditor from './TagEditor';
 
 const CaseDetail: React.FC<{}> = props => {
   const caseId = useParams<any>().caseId;
@@ -40,6 +41,8 @@ const CaseDetail: React.FC<{}> = props => {
   const { busy, caseData, projectData } = caseStore;
   const editingData = c.current(caseStore);
 
+  const [tags, setTags] = useState<string[]>([]);
+
   const accessibleProjects = useSelector(
     state => state.loginUser.data!.accessibleProjects
   );
@@ -47,6 +50,7 @@ const CaseDetail: React.FC<{}> = props => {
   useEffect(() => {
     const loadCase = async () => {
       const caseData = await api('cases/' + caseId);
+      setTags(caseData.tags ?? []);
       const project = accessibleProjects.find(
         (p: { projectId: string }) => p.projectId === caseData.projectId
       );
@@ -95,6 +99,19 @@ const CaseDetail: React.FC<{}> = props => {
     },
     [editingData]
   );
+
+  const handleTagChange = async (value: string[]) => {
+    try {
+      await api(`cases/${caseData!.caseId}/tags`, {
+        method: 'put',
+        data: value,
+        handleErrors: true
+      });
+    } catch (err) {
+      await alert('Error: ' + err.message);
+    }
+    setTags(value);
+  };
 
   const handleMenuBarCommand = async (command: MenuBarCommand) => {
     switch (command) {
@@ -163,13 +180,20 @@ const CaseDetail: React.FC<{}> = props => {
         />
         <PatientInfoBox value={caseStore.patientInfo} />
         <div className="tag-list">
-          {caseData.tags.map((t: string | number | undefined) => (
+          <b>Tags:</b>
+          {tags.map((t: string | number | undefined) => (
             <Tag
               projectId={projectData.projectId}
               tag={!t ? '' : t.toString()}
               key={t}
             />
           ))}
+          {tags.length === 0 && <span>(none)</span>}
+          <TagEditor
+            projectData={projectData}
+            value={tags}
+            onChange={handleTagChange}
+          />
         </div>
         <div>
           Case: {caseId}
@@ -201,6 +225,11 @@ const CaseInfoCollapser = styled(Collapser)`
     flex-flow: row wrap;
     justify-content: space-between;
     align-items: center;
+  }
+  .tag-list {
+    > .tag {
+      margin-left: 3px;
+    }
   }
 `;
 

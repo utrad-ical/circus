@@ -20,7 +20,7 @@ const ProjectDisplay: React.FC<{
 
   return (
     <IconDisplay
-      toolTip={project.project.description}
+      toolTip={withDescription ? undefined : project.project.description}
       icon={project.project.icon}
       title={withName && project.project.projectName}
       description={withDescription && project.project.description}

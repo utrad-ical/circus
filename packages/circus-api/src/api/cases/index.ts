@@ -239,3 +239,12 @@ export const handleExportAsMhd: RouteMiddleware = deps => {
     ctx.body = await packAsMhd(deps, caseId);
   };
 };
+
+export const handlePutTags: RouteMiddleware = ({ models }) => {
+  return async (ctx, next) => {
+    const aCase = ctx.case;
+    const tags = ctx.request.body;
+    await models.clinicalCase.modifyOne(aCase.caseId, { tags });
+    ctx.body = null; // No Content
+  };
+};

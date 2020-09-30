@@ -28,3 +28,11 @@ routes:
     requiredProjectPrivilege: read
     handler: handleExportAsMhd
     description: Exports the case data as MHD.
+  - verb: put
+    path: /cases/:caseId/tags
+    requiredProjectPrivilege: write
+    requestSchema:
+      type: array
+      items:
+        type: string
+    handler: handlePutTags

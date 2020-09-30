@@ -1,5 +1,3 @@
-import { dirxml } from 'console';
-
 function makeBinaryImg(
   array: Uint8Array | Uint16Array,
   threshold: number,
@@ -18,12 +16,12 @@ function makeBinaryImg(
 
 /**
  * Return labeled image
- * @param array: input binary image
- * @param width: width of array
- * @param height: height of array
- * @param NSlice: slice number of array
- * @param neighbors: 6 | 26
- * @param threshold: voxel value of threshold
+ * @param array input binary image
+ * @param width width of array
+ * @param height height of array
+ * @param NSlice slice number of array
+ * @param neighbors 6 | 26
+ * @param threshold voxel value of threshold
  */
 export default function labeling3D(
   array: Uint8Array | Uint16Array,
@@ -102,12 +100,12 @@ export default function labeling3D(
 }
 
 /**
- * Return labeled image
- * @param array: input binary image
- * @param width: width of array
- * @param height: height of array
- * @param neighbors: 4 | 8
- * @param background: voxel value of background
+ * @param array input binary image
+ * @param width width of array
+ * @param height height of array
+ * @param neighbors 4 | 8
+ * @param background voxel value of background
+ * @returns Labeled image
  */
 export function labeling2D(
   array: Uint8Array | Uint16Array,
@@ -122,7 +120,7 @@ export function labeling2D(
 
   const [dx, dy] = mask(neighbors);
   const binaryImg = makeBinaryImg(array, threshold, width, height, 1);
-  let labelImg = new Uint16Array(width * height).map(() => {
+  const labelImg = new Uint16Array(width * height).map(() => {
     return 0;
   });
   const table = new Uint16Array(Math.ceil((width * height) / 2) + 1);

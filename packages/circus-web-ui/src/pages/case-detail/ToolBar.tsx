@@ -11,6 +11,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { Layout } from './ViewerCluster';
 import { WindowPreset } from 'types/Project';
+import useKeyboardShortcut from 'utils/useKeyboardShortcut';
 
 export interface ViewOptions {
   layout: Layout;
@@ -99,6 +100,7 @@ const ToolBar: React.FC<{
         icon="rs-pager"
         changeTool={onChangeTool}
         active={activeTool}
+        shortcut="KeyP"
         disabled={disabled}
       />
       <ToolButton
@@ -106,6 +108,7 @@ const ToolBar: React.FC<{
         icon="rs-zoom"
         changeTool={onChangeTool}
         active={activeTool}
+        shortcut="KeyZ"
         disabled={disabled}
       />
       <ToolButton
@@ -113,6 +116,7 @@ const ToolBar: React.FC<{
         icon="rs-hand"
         changeTool={onChangeTool}
         active={activeTool}
+        shortcut="KeyH"
         disabled={disabled}
       />
       <ToolButton
@@ -120,6 +124,7 @@ const ToolBar: React.FC<{
         icon="rs-window"
         changeTool={onChangeTool}
         active={activeTool}
+        shortcut="KeyW"
         disabled={disabled}
       >
         {windowPresets.map((p: WindowPreset, i) => (
@@ -141,6 +146,7 @@ const ToolBar: React.FC<{
         icon="rs-brush"
         changeTool={onChangeTool}
         active={activeTool}
+        shortcut="KeyB"
         disabled={!brushEnabled || disabled}
       />
       <ToolButton
@@ -148,6 +154,7 @@ const ToolBar: React.FC<{
         icon="rs-eraser"
         changeTool={onChangeTool}
         active={activeTool}
+        shortcut="KeyE"
         disabled={!brushEnabled || disabled}
       />
       <ShrinkSelect
@@ -243,19 +250,31 @@ const ToolButton: React.FC<{
   icon: string;
   active: string;
   changeTool: any;
+  shortcut?: string;
   disabled?: boolean;
 }> = props => {
-  const { name, icon, active, changeTool, disabled, children } = props;
+  const {
+    name,
+    icon,
+    active,
+    changeTool,
+    disabled,
+    shortcut,
+    children
+  } = props;
+
+  const handleClick = () => !disabled && changeTool(name);
+  useKeyboardShortcut(shortcut, handleClick);
+
   const style = active === name ? 'primary' : 'default';
   const iconSpan = <Icon icon={icon} />;
-  const onClick = () => !disabled && changeTool(name);
   if (children) {
     return (
       <SplitButton
         id={`toolbutton-${name}`}
         title={iconSpan}
         bsStyle={style}
-        onClick={onClick}
+        onClick={handleClick}
         disabled={disabled}
       >
         {children}
@@ -263,7 +282,7 @@ const ToolButton: React.FC<{
     );
   } else {
     return (
-      <Button bsStyle={style} onClick={onClick} disabled={disabled}>
+      <Button bsStyle={style} onClick={handleClick} disabled={disabled}>
         {iconSpan}
       </Button>
     );

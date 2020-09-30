@@ -6,13 +6,15 @@ import loginUser from './loginUser';
 import messages from './messages';
 import plugins from './plugins';
 import users from './users';
+import taskProgress from './taskProgress';
 
 const reducer = combineReducers({
   searches,
   loginUser,
   messages,
   plugins,
-  users
+  users,
+  taskProgress
 });
 
 export const store = configureStore({ reducer });

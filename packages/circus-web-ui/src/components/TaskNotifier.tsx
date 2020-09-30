@@ -1,30 +1,35 @@
-import React, { useEffect, useState } from 'react';
-import { useApi } from 'utils/api';
-import fetchEventSource, { Event } from 'utils/fetchEventSource';
+import { OverlayTrigger, Popover } from 'components/react-bootstrap';
+import React from 'react';
+import { useSelector } from 'react-redux';
+import Icon from './Icon';
 
 const TaskNotifier: React.FC<{}> = props => {
-  const [data, setData] = useState<Event[]>([]);
-  const api = useApi();
-  const token = api.getToken();
+  const taskProgress = useSelector(state => state.taskProgress);
 
-  useEffect(() => {
-    const abortController = new AbortController();
-    const load = async () => {
-      const generator = fetchEventSource('/api/tasks/report', {
-        headers: { Authorization: `Bearer ${token}` },
-        signal: abortController.signal
-      });
-      for await (const event of generator) {
-        setData(data => [...data, event]);
-      }
-    };
-    load();
-    return () => {
-      abortController.abort();
-    };
-  }, [token]);
+  if (!Object.values(taskProgress).some(v => v.status === 'processing')) {
+    return null;
+  }
 
-  return <div>{JSON.stringify(data)}</div>;
+  const overlay = (
+    <Popover id="task-progress">
+      <ul>
+        {Object.entries(taskProgress).map(([taskId, task]) => {
+          return <li>{taskId}</li>;
+        })}
+      </ul>
+    </Popover>
+  );
+
+  return (
+    <OverlayTrigger
+      trigger="click"
+      rootClose
+      overlay={overlay}
+      placement="bottom"
+    >
+      <Icon icon="glyphicon-bell" />
+    </OverlayTrigger>
+  );
 };
 
 export default TaskNotifier;

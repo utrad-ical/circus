@@ -30,7 +30,7 @@ import PluginAdmin from 'pages/admin/PluginAdmin';
 import Preferences from 'pages/Preferences';
 
 import { store } from './store';
-import { Provider, useSelector } from 'react-redux';
+import { Provider as ReduxStoreProvider, useSelector } from 'react-redux';
 import { ThemeProvider } from 'styled-components';
 import tinycolor from 'tinycolor2';
 import { dismissMessageOnPageChange } from 'store/messages';
@@ -141,7 +141,7 @@ const TheApp: React.FC<{}> = () => {
   return (
     <LoginManagerContext.Provider value={manager}>
       <ApiContext.Provider value={api}>
-        <Provider store={store}>
+        <ReduxStoreProvider store={store}>
           <VolumeCacheProvider>
             <ThemeProvider theme={theme}>
               <Router history={browserHistory}>
@@ -152,7 +152,7 @@ const TheApp: React.FC<{}> = () => {
               </Router>
             </ThemeProvider>
           </VolumeCacheProvider>
-        </Provider>
+        </ReduxStoreProvider>
       </ApiContext.Provider>
     </LoginManagerContext.Provider>
   );

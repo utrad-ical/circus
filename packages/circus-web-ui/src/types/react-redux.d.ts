@@ -8,5 +8,6 @@ declare module 'react-redux' {
     searches: RootState['searches'];
     plugins: RootState['plugins'];
     users: RootState['users'];
+    taskProgress: RootState['taskProgress'];
   }
 }

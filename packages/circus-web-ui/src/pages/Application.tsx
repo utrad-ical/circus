@@ -1,10 +1,56 @@
-import React, { Fragment } from 'react';
+import React, { Fragment, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import MessageBox from './MessageBox';
 import { Button } from 'components/react-bootstrap';
 import ErrorBoundary from 'components/ErrorBoundary';
 import MainNav from './MainNav';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { useApi } from 'utils/api';
+import fetchEventSource from 'utils/fetchEventSource';
+import { taskUpdate, taskFinish, taskError } from '../store/taskProgress';
+
+const useTaskProgress = () => {
+  const api = useApi();
+  const token = api.getToken();
+  const dispatch = useDispatch();
+  // Listens to the SSE and updates the redux store
+  // during the lifecycle of this component.
+  useEffect(() => {
+    const abortController = new AbortController();
+    const load = async () => {
+      const generator = fetchEventSource('/api/tasks/report', {
+        headers: { Authorization: `Bearer ${token}` },
+        signal: abortController.signal
+      });
+      for await (const event of generator) {
+        switch (event.type) {
+          case 'progress':
+            dispatch(
+              taskUpdate({
+                taskId: event.taskId,
+                updates: {
+                  value: event.value,
+                  max: event.max,
+                  message: event.message
+                }
+              })
+            );
+            break;
+          case 'finish':
+            dispatch(taskFinish(event.taskId));
+            break;
+          case 'error':
+            dispatch(taskError(event.taskId));
+            break;
+        }
+      }
+    };
+    load();
+    return () => {
+      abortController.abort();
+    };
+  }, [dispatch, token]);
+};
 
 /**
  * The main application container.
@@ -19,6 +65,9 @@ const Application: React.FC<{}> = props => {
 
   const pageContentVisible = !isUserFetching && isLoggedIn;
   const notLoggedIn = !isUserFetching && !isLoggedIn;
+
+  // Listens to the task progress reporter while the application is active
+  useTaskProgress();
 
   return (
     <Fragment>

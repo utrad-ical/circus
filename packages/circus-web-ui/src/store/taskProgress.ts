@@ -5,10 +5,10 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
  * not an task stored on the database.
  */
 interface TaskProgress {
-  taskId: string;
-  value: number;
-  max: number;
-  message: string;
+  status: 'processing' | 'finished' | 'error';
+  value?: number;
+  max?: number;
+  message?: string;
 }
 
 export interface Tasks {
@@ -19,12 +19,7 @@ const slice = createSlice({
   name: 'taskProgress',
   initialState: {} as Tasks,
   reducers: {
-    newTask: (state, action: PayloadAction<{ task: TaskProgress }>) => {
-      const { task } = action.payload;
-      const taskId = task.taskId;
-      state[taskId] = task;
-    },
-    updateTask: (
+    taskUpdate: (
       state,
       action: PayloadAction<{
         taskId: string;
@@ -32,15 +27,20 @@ const slice = createSlice({
       }>
     ) => {
       const { taskId, updates } = action.payload;
-      if (!state[taskId]) return;
+      if (!state[taskId]) state[taskId] = { status: 'processing' };
       state[taskId] = { ...state[taskId], ...updates };
     },
-    deleteTask: (state, action: PayloadAction<string>) => {
-      delete state[action.payload];
+    taskFinish: (state, action: PayloadAction<string>) => {
+      const taskId = action.payload;
+      state[taskId] = { status: 'finished' };
+    },
+    taskError: (state, action: PayloadAction<string>) => {
+      const taskId = action.payload;
+      state[taskId] = { status: 'error' };
     }
   }
 });
 
 export default slice.reducer;
 
-export const { newTask, updateTask, deleteTask } = slice.actions;
+export const { taskUpdate, taskFinish, taskError } = slice.actions;

@@ -6,6 +6,7 @@ import classnames from 'classnames';
 import { useLoginManager } from 'utils/loginManager';
 import browserHistory from 'browserHistory';
 import useLoginUser from 'utils/useLoginUser';
+import TaskNotifier from 'components/TaskNotifier';
 
 const MainMenu: React.FC<{}> = props => <ul>{props.children}</ul>;
 
@@ -289,6 +290,7 @@ const MainNav: React.FC<{}> = props => {
       </StyledNav>
       <StyledNav>
         <MainMenu>
+          <TaskNotifier />
           <li className="user-info hidden-xs">{loginUserName}</li>
           <Menu name="Logout" onClick={onLogout} />
         </MainMenu>

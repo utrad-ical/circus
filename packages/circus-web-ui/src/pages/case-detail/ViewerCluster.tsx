@@ -50,7 +50,7 @@ const ViewerCluster: React.FC<{
   layout: Layout;
   onCreateViewer: (viewer: Viewer, id?: string | number) => void;
   onDestroyViewer: (viewer: Viewer) => void;
-  initialWindowSetter: (viewer: Viewer, viewState: ViewState) => ViewState;
+  initialStateSetter: (viewer: Viewer, viewState: ViewState) => ViewState;
   onViewStateChange: (viewer: Viewer, id?: string | number) => void;
 }> = props => {
   const {
@@ -61,13 +61,16 @@ const ViewerCluster: React.FC<{
     onCreateViewer,
     onDestroyViewer,
     onViewStateChange,
-    initialWindowSetter
+    initialStateSetter
   } = props;
 
   const makeViewer = (orientation: string, id: string, fixTool?: Tool) => {
-    const initialStateSetter = (viewer: Viewer, viewState: MprViewState) => {
+    const combinedInitialStateSetter = (
+      viewer: Viewer,
+      viewState: MprViewState
+    ) => {
       const s1 = orientationInitialStateSetters[orientation](viewer, viewState);
-      const s2 = initialWindowSetter(viewer, s1!);
+      const s2 = initialStateSetter(viewer, s1!);
       return s2;
     };
 
@@ -78,7 +81,7 @@ const ViewerCluster: React.FC<{
         className={`viewer-${orientation}`}
         composition={composition}
         tool={fixTool ? fixTool : tool}
-        initialStateSetter={initialStateSetter}
+        initialStateSetter={combinedInitialStateSetter}
         stateChanger={stateChanger}
         onCreateViewer={onCreateViewer}
         onDestroyViewer={onDestroyViewer}

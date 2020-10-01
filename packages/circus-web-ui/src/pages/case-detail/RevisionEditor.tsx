@@ -41,6 +41,7 @@ import SeriesSelectorDialog from './SeriesSelectorDialog';
 import styled from 'styled-components';
 import LabelMenu from './LabelMenu';
 import { debounce } from 'lodash';
+import useLocalPreference from 'utils/useLocalPreference';
 
 const useComposition = (
   seriesUid: string,
@@ -99,11 +100,15 @@ const RevisionEditor: React.FC<{
   const stateChanger = useMemo(() => createStateChanger<rs.MprViewState>(), []);
   const [seriesDialogOpen, setSeriesDialogOpen] = useState(false);
 
-  const [viewOptions, setViewOptions] = useState<ViewOptions>({
-    layout: 'twoByTwo',
-    showReferenceLine: false,
-    interpolationMode: 'trilinear'
-  });
+  const [viewOptions, setViewOptions] = useLocalPreference<ViewOptions>(
+    'dbViewOptions',
+    {
+      layout: 'twoByTwo',
+      showReferenceLine: false,
+      interpolationMode: 'nearestNeighbor'
+    }
+  );
+
   const [lineWidth, setLineWidth] = useState(1);
   const [toolName, setToolName] = useState('');
   const [tool, setTool] = useState<ToolBaseClass | null>(null);
@@ -218,7 +223,7 @@ const RevisionEditor: React.FC<{
   useEffect(() => {
     stateChanger(viewState => ({
       ...viewState,
-      interpolationMode: viewOptions.interpolationMode
+      interpolationMode: viewOptions.interpolationMode ?? 'nearestNeighbor'
     }));
   }, [stateChanger, viewOptions.interpolationMode]);
 
@@ -328,52 +333,50 @@ const RevisionEditor: React.FC<{
     [propagateWindowState, activeSeries.seriesUid, viewWindows]
   );
 
-  const initialWindowSetter = (
+  const initialStateSetter = (
     viewer: Viewer,
     viewState: rs.ViewState
   ): rs.MprViewState => {
     const src = viewer.getComposition()!.imageSource as rs.MprImageSource;
     if (!src.metadata || viewState.type !== 'mpr') throw new Error();
     const windowPriority = projectData.windowPriority || 'auto';
+    const interpolationMode =
+      viewOptions.interpolationMode ?? 'nearestNeighbor';
     if (viewWindows.current[activeSeries.seriesUid]) {
       return {
         ...viewState,
-        window: viewWindows.current[activeSeries.seriesUid]
+        window: viewWindows.current[activeSeries.seriesUid],
+        interpolationMode
       };
     }
-    const priorities = windowPriority.split(',');
-    for (const type of priorities) {
-      switch (type) {
-        case 'auto': {
-          const window = src.metadata.estimatedWindow;
-          if (window) {
-            viewWindows.current[activeSeries.seriesUid] = window;
-            return { ...viewState, window };
+    const window = (() => {
+      const priorities = windowPriority.split(',');
+      for (const type of priorities) {
+        switch (type) {
+          case 'auto': {
+            const window = src.metadata.estimatedWindow;
+            if (window) return window;
+            break;
           }
-          break;
-        }
-        case 'dicom': {
-          const window = src.metadata.dicomWindow;
-          if (window) {
-            viewWindows.current[activeSeries.seriesUid] = window;
-            return { ...viewState, window };
+          case 'dicom': {
+            const window = src.metadata.dicomWindow;
+            if (window) return window;
+            break;
           }
-          break;
-        }
-        case 'preset': {
-          const window =
-            Array.isArray(projectData.windowPresets) &&
-            projectData.windowPresets[0];
-          if (window) {
-            viewWindows.current[activeSeries.seriesUid] = window;
-            return {
-              ...viewState,
-              window: { level: window.level, width: window.width }
-            };
+          case 'preset': {
+            const window =
+              Array.isArray(projectData.windowPresets) &&
+              projectData.windowPresets[0];
+            if (window) return { level: window.level, width: window.width };
+            break;
           }
-          break;
         }
       }
+      return undefined;
+    })();
+    if (window) {
+      viewWindows.current[activeSeries.seriesUid] = window;
+      return { ...viewState, window, interpolationMode };
     }
     return viewState; // do not update view state (should not happen)
   };
@@ -454,12 +457,12 @@ const RevisionEditor: React.FC<{
         />
         <ViewerCluster
           composition={composition}
-          layout={viewOptions.layout}
+          layout={viewOptions.layout ?? 'twoByTwo'}
           stateChanger={stateChanger}
           tool={tool!}
           onCreateViewer={handleCreateViwer}
           onDestroyViewer={handleDestroyViewer}
-          initialWindowSetter={initialWindowSetter}
+          initialStateSetter={initialStateSetter}
           onViewStateChange={handleViewStateChange}
         />
       </div>

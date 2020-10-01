@@ -53,7 +53,7 @@ export default class ReferenceLine implements Annotation, ViewerEventTarget {
     state: ViewState
   ): void {
     if (
-      prevState.type !== 'mpr' ||
+      prevState?.type !== 'mpr' ||
       state.type !== 'mpr' ||
       prevState.section === state.section
     ) {
@@ -67,8 +67,15 @@ export default class ReferenceLine implements Annotation, ViewerEventTarget {
   public draw(viewer: Viewer, viewState: ViewState, option: DrawOption): void {
     if (viewer === this.targetViewer) return;
 
-    const targetState = this.targetViewer.getState();
-    if (viewState.type !== 'mpr' || targetState.type !== 'mpr') return;
+    const targetState = (() => {
+      try {
+        return this.targetViewer.getState(); // this may be uninitialized
+      } catch (err) {
+        return null;
+      }
+    })();
+    if (viewState.type !== 'mpr' || !targetState || targetState.type !== 'mpr')
+      return;
 
     const section = viewState.section;
     const targetSection = targetState.section;

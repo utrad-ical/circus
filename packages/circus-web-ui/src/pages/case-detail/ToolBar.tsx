@@ -16,9 +16,9 @@ import { WindowPreset } from 'types/Project';
 import useKeyboardShortcut from 'utils/useKeyboardShortcut';
 
 export interface ViewOptions {
-  layout: Layout;
-  showReferenceLine: boolean;
-  interpolationMode: InterpolationMode;
+  layout?: Layout;
+  showReferenceLine?: boolean;
+  interpolationMode?: InterpolationMode;
 }
 
 const layoutOptions = [
@@ -204,7 +204,7 @@ const ToolBar: React.FC<{
         </Dropdown.Toggle>
         <Dropdown.Menu>
           <MenuItem onClick={handleToggleReferenceLine}>
-            <CheckMark checked={viewOptions.showReferenceLine} />
+            <CheckMark checked={!!viewOptions.showReferenceLine} />
             Show reference line
           </MenuItem>
           <MenuItem onClick={handleToggleInterpolationMode}>

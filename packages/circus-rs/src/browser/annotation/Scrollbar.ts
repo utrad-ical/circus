@@ -1,22 +1,22 @@
 import { Vector2 } from 'three';
 import ViewerEventTarget from '../interface/ViewerEventTarget';
-import handlePageBy from '../tool/state/handlePageBy';
+import { handlePageByScrollbar } from '../tool/state/handlePageBy';
 import Viewer from '../viewer/Viewer';
 import ViewerEvent from '../viewer/ViewerEvent';
 import ViewState from '../ViewState';
 import Annotation, { DrawOption } from './Annotation';
 import {
+  calcThumbSteps,
+  createScrollbar,
   drawScrollbar,
-  drawVisibilityThresholdBox,
-  handleType,
-  getStepDifference,
+  drawVisibilityThreshold,
   HandleType,
-  isVisible,
   Position,
   ScrollbarContainer,
   Settings,
+  updateThumb,
   Visibility
-} from './helper/getScrollbar';
+} from './helper/scrollbar';
 
 interface Options {
   color?: string;
@@ -30,13 +30,9 @@ interface Options {
 }
 
 /**
- * Scrollbar is a type of annotation which draws how the sections.
- * It supports paging of stacked images on devices that do not have a mouse (wheel),
- * such as LCD tablets and other touch devices.
+ * Scrollbar is a type of annotation which draws a scroll bar on a viewer.
  */
 export default class Scrollbar implements Annotation, ViewerEventTarget {
-  private targetViewer: Viewer;
-
   /**
    * Scrollbar outline width
    */
@@ -77,11 +73,19 @@ export default class Scrollbar implements Annotation, ViewerEventTarget {
    */
   public drawVisibilityThreshold: boolean = false;
 
+  private targetViewer: Viewer;
   private visible: boolean;
   private visibilityThreshold: number;
   private handleType: HandleType | undefined;
   private dragStartPoint2: Vector2 | undefined;
   private scrollbar: ScrollbarContainer | undefined;
+  private createScrollbar: (viewState: ViewState) => ScrollbarContainer;
+  private judgeHandleType:
+    | ((p: Vector2) => HandleType | undefined)
+    | undefined = undefined;
+  private visibilityThresholdBoxHitTest:
+    | ((p: Vector2) => boolean)
+    | undefined = undefined;
 
   private get settings(): Settings {
     return {
@@ -92,7 +96,8 @@ export default class Scrollbar implements Annotation, ViewerEventTarget {
       marginHorizontal: this.marginHorizontal,
       marginVertical: this.marginVertical,
       visibility: this.visibility,
-      visibilityThreshold: this.visibilityThreshold
+      visibilityThreshold: this.visibilityThreshold,
+      drawVisibilityThreshold: this.drawVisibilityThreshold
     };
   }
 
@@ -112,6 +117,7 @@ export default class Scrollbar implements Annotation, ViewerEventTarget {
     if (!(viewer instanceof Viewer)) {
       throw new Error('No viewer specified');
     }
+
     this.targetViewer = viewer;
     this.color = color;
     this.lineWidth = lineWidth;
@@ -122,17 +128,23 @@ export default class Scrollbar implements Annotation, ViewerEventTarget {
     this.visibility = visibility;
     this.visible = visibility === 'always';
     this.visibilityThreshold = visibilityThreshold;
+    this.scrollbar = undefined;
+
     this.handleViewerStateChange = this.handleViewerStateChange.bind(this);
     viewer.on('stateChange', this.handleViewerStateChange);
+
+    this.createScrollbar = (viewState: ViewState) => {
+      return createScrollbar(viewer, viewState, this.settings);
+    };
   }
 
   public dispose(): void {
-    if (this.targetViewer) {
-      this.targetViewer.removeListener(
-        'stateChange',
-        this.handleViewerStateChange
-      );
-    }
+    if (!this.targetViewer) return;
+
+    this.targetViewer.removeListener(
+      'stateChange',
+      this.handleViewerStateChange
+    );
   }
 
   private handleViewerStateChange(
@@ -140,80 +152,95 @@ export default class Scrollbar implements Annotation, ViewerEventTarget {
     state: ViewState
   ): void {
     if (
+      !prevState ||
       prevState.type !== 'mpr' ||
       state.type !== 'mpr' ||
       prevState.section === state.section
     ) {
       return;
     }
-    const viewer = this.targetViewer;
-    const comp = viewer.getComposition();
-    if (comp) comp.viewers.forEach(v => v !== viewer && v.renderAnnotations());
+    this.scrollbar = this.createScrollbar(state);
   }
 
-  public draw(viewer: Viewer, viewState: ViewState, option: DrawOption): void {
+  private handleAnnotationChange(viewer: Viewer): void {
+    viewer.renderAnnotations();
+    const composition = viewer.getComposition();
+    if (!composition) return;
+    const viewState = viewer.getState();
+    const section = viewState.section;
+    const sectionStep = calcThumbSteps(composition, section).thumbStep;
+    if (!this.scrollbar)
+      this.scrollbar = createScrollbar(viewer, viewState, this.settings);
+    const drawnStep = this.scrollbar.thumbStep;
+    const stepDiff = drawnStep - sectionStep;
+    if (stepDiff != 0) {
+      handlePageByScrollbar(viewer, stepDiff);
+    }
+  }
+
+  public draw(viewer: Viewer, viewState: ViewState, _option: DrawOption): void {
     if (viewer !== this.targetViewer) return;
 
     const targetState = this.targetViewer.getState();
     if (viewState.type !== 'mpr' || targetState.type !== 'mpr') return;
 
+    if (!this.scrollbar) this.scrollbar = this.createScrollbar(viewState);
+
     if (this.visible) {
-      this.scrollbar = drawScrollbar(viewer, this.settings);
+      const { judgeHandleType } = drawScrollbar(
+        viewer,
+        this.settings,
+        this.scrollbar
+      );
+      this.judgeHandleType = judgeHandleType;
     }
 
-    if (this.drawVisibilityThreshold) {
-      drawVisibilityThresholdBox(viewer, this.settings);
-    }
+    const { visibilityThresholdBoxHitTest } = drawVisibilityThreshold(
+      viewer,
+      this.settings,
+      this.scrollbar
+    );
+    this.visibilityThresholdBoxHitTest = visibilityThresholdBoxHitTest;
   }
 
   /**
    * ViewerEventHandler
    */
   public mouseMoveHandler(ev: ViewerEvent): void {
-    const viewer = ev.viewer;
-    if (viewer !== this.targetViewer) return;
-
-    const point = new Vector2(ev.viewerX!, ev.viewerY!);
-    const prevVisible = this.visible;
-    this.visible = isVisible(point, viewer, this.settings);
-
-    this.handleType = this.visible
-      ? handleType(viewer, point, this.settings)
-      : undefined;
-
-    if (this.handleType) {
-      viewer.setHoveringAnnotation(this);
-      viewer.setCursorStyle('pointer');
-      viewer.renderAnnotations();
-    } else if (viewer.getHoveringAnnotation() === this) {
-      viewer.setHoveringAnnotation(undefined);
-      viewer.setCursorStyle('');
-      viewer.renderAnnotations();
-    } else if (this.visible !== prevVisible) {
-      viewer.renderAnnotations();
-    }
+    this._pointerMoveHandler(ev);
   }
 
   public touchMoveHandler(ev: ViewerEvent): void {
+    this._pointerMoveHandler(ev);
+  }
+
+  private _pointerMoveHandler(ev: ViewerEvent): void {
     const viewer = ev.viewer;
     if (viewer !== this.targetViewer) return;
 
     const point = new Vector2(ev.viewerX!, ev.viewerY!);
     const prevVisible = this.visible;
-    this.visible = isVisible(point, viewer, this.settings);
+    this.visible =
+      this.settings.visibility === 'always' ||
+      (this.visibilityThresholdBoxHitTest
+        ? this.visibilityThresholdBoxHitTest(point)
+        : false);
 
-    this.handleType = this.visible
-      ? handleType(viewer, point, this.settings)
-      : undefined;
+    const prevHandleType = this.handleType;
+    if (!this.scrollbar)
+      this.scrollbar = this.createScrollbar(viewer.getState());
 
-    if (this.handleType) {
+    this.handleType =
+      !this.visible || !this.judgeHandleType
+        ? undefined
+        : this.judgeHandleType(point);
+
+    if (this.handleType && this.handleType !== prevHandleType) {
       viewer.setHoveringAnnotation(this);
       viewer.setCursorStyle('pointer');
-      viewer.renderAnnotations();
-    } else if (viewer.getHoveringAnnotation() === this) {
+    } else if (!this.handleType && viewer.getHoveringAnnotation() === this) {
       viewer.setHoveringAnnotation(undefined);
       viewer.setCursorStyle('');
-      viewer.renderAnnotations();
     } else if (this.visible !== prevVisible) {
       viewer.renderAnnotations();
     }
@@ -221,11 +248,16 @@ export default class Scrollbar implements Annotation, ViewerEventTarget {
 
   public dragStartHandler(ev: ViewerEvent): void {
     const viewer = ev.viewer;
+    if (viewer !== this.targetViewer) return;
+
     if (viewer.getHoveringAnnotation() !== this) return;
-    if (this.visible === false) return;
+    if (!this.visible) return;
     if (!this.handleType) return;
 
     ev.stopPropagation();
+
+    if (!this.scrollbar)
+      this.scrollbar = this.createScrollbar(viewer.getState());
 
     const type = this.handleType;
     if ('thumbDrag' === type) {
@@ -234,7 +266,9 @@ export default class Scrollbar implements Annotation, ViewerEventTarget {
     } else if (['arrowInc', 'arrowDec'].some(t => t === type)) {
       const step = type === 'arrowDec' ? 1 : -1;
       const option = ev.original.ctrlKey ? 5 : 1;
-      handlePageBy(viewer, step * option);
+      const stepDiff = step * option;
+      this.scrollbar = updateThumb(this.scrollbar, 'step-diff', stepDiff);
+      this.handleAnnotationChange(viewer);
     }
   }
 
@@ -242,23 +276,32 @@ export default class Scrollbar implements Annotation, ViewerEventTarget {
     const viewer = ev.viewer;
 
     if (viewer.getHoveringAnnotation() !== this) return;
-    if (this.visible === false) return;
+    if (!this.visible) return;
 
     ev.stopPropagation();
 
-    const type = this.handleType;
-    if ('thumbDrag' === type) {
+    if (!this.scrollbar)
+      this.scrollbar = this.createScrollbar(viewer.getState());
+
+    if ('thumbDrag' === this.handleType) {
       const point: Vector2 = new Vector2(ev.viewerX!, ev.viewerY!);
-      const step = getStepDifference(
-        this.dragStartPoint2!,
-        point,
-        this.settings,
-        this.scrollbar
-      );
-      if (step !== 0) {
-        this.dragStartPoint2 = point;
-        handlePageBy(ev.viewer, step);
-      }
+      const dist = (() => {
+        const v = point.clone().sub(this.dragStartPoint2!);
+        switch (this.position) {
+          case 'top':
+          case 'bottom':
+            return v.x;
+          case 'left':
+          case 'right':
+            return v.y;
+        }
+      })();
+
+      const prevStep = this.scrollbar.thumbStep;
+      this.scrollbar = updateThumb(this.scrollbar, 'position-diff', dist);
+      const thumbStep = this.scrollbar.thumbStep;
+      if (thumbStep != prevStep) this.dragStartPoint2 = point;
+      this.handleAnnotationChange(viewer);
     }
   }
 

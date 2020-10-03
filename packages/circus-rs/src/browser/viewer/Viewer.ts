@@ -285,7 +285,6 @@ export default class Viewer extends EventEmitter {
           abortController.abort();
           this.currentRender = null;
         }
-        console.log('render');
         this.renderAnnotations(state);
         this.firstImageDrawn = true;
         this.emit('draw', state);

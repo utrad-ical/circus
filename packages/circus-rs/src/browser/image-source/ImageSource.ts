@@ -9,6 +9,10 @@ export type ViewStateResizeTransformer = (
   afterSize: Vector2D
 ) => ViewState;
 
+export type DrawResult =
+  | ImageData
+  | { draft: ImageData; next: Promise<DrawResult> };
+
 /**
  * ImageSource is an abstract class which represents a
  * 2D or 3D image from any source and draws it onto a given canvas.
@@ -16,12 +20,20 @@ export type ViewStateResizeTransformer = (
 export default abstract class ImageSource extends EventEmitter {
   /**
    * Draws an image according to the current view state.
-   * @return A promise which resolves with ImageData (of canvas).
+   * @param viewer The Viewer.
+   * @param viewState The view state.
+   * @param abortSignal Used to cancel this draw.
+   *   A draw will not be aborted until the initial DrawReslut,
+   *   but it may be aborted after a draft was returned.
+   *   Thus this signal can be safely ignored if an implementation of `draw()`
+   *   does not return any draft.
+   * @returns The final image as an ImageData, or a draft image.
    */
   public abstract draw(
     viewer: Viewer,
-    viewState: ViewState
-  ): Promise<ImageData>;
+    viewState: ViewState,
+    abortSignal: AbortSignal
+  ): Promise<DrawResult>;
 
   /**
    * Returns a Promise instance which resolves when

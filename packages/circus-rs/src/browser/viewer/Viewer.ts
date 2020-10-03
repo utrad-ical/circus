@@ -3,7 +3,10 @@ import { EventEmitter } from 'events';
 import Composition from '../Composition';
 import ViewerEvent from './ViewerEvent';
 import ViewState from '../ViewState';
-import { ViewStateResizeTransformer } from '../image-source/ImageSource';
+import {
+  DrawResult,
+  ViewStateResizeTransformer
+} from '../image-source/ImageSource';
 import { Tool } from '../tool/Tool';
 import Annotation from '../annotation/Annotation';
 import LoadingIndicator from '../interface/LoadingIndicator';
@@ -215,17 +218,13 @@ export default class Viewer extends EventEmitter {
   /**
    * Synchronously draws the image fetched from the image source, along with
    * all the annotations associated with the composition.
-   * This function is automatically called when ImageSource.draw() has finished,
+   * This function is automatically called when ImageSource.draw() has
+   * returned an image (either draft or final),
    * but can be called arbitrary times when annotations are updated.
    * This function does nothing when ImageSource.draw() is in progress
    * (i.e., this.currentRender is not empty).
    */
   public renderAnnotations(viewState: ViewState | null = null): void {
-    if (this.currentRender) {
-      // Re-drawing annotations should be done when we are not waiting
-      // for the image source to draw.
-      return;
-    }
     if (!viewState) viewState = this.viewState || null;
     const comp = this.composition;
     if (!viewState || !comp) return;
@@ -255,7 +254,7 @@ export default class Viewer extends EventEmitter {
    */
   public render(): Promise<boolean> {
     // Wait only if there is another render() in progress
-    let waiter: Promise<any> = Promise.resolve();
+    let waiter: Promise<void> = Promise.resolve();
     if (!this.composition) {
       return Promise.reject(new Error('Composition not set'));
     }
@@ -264,11 +263,37 @@ export default class Viewer extends EventEmitter {
     }
     if (!this.imageReady) waiter = this.composition.imageSource.ready();
     if (this.currentRender) waiter = waiter.then(() => this.currentRender);
+    const src = this.composition!.imageSource;
+
     const p: Promise<boolean> = waiter.then(() => {
       const state = this.viewState;
       if (!state) throw new Error('View state not initialized');
+
+      // Used to cancel the subsequent results after intial result
+      const abortController = new AbortController();
+
+      const handleImageDraw = (state: ViewState, drawResult: DrawResult) => {
+        if (this.currentRender !== p) return true; // happens on subsequent results
+        const drawImage = 'draft' in drawResult ? drawResult.draft : drawResult;
+        this.cachedSourceImage = drawImage;
+        if ('next' in drawResult && !this.nextRender) {
+          drawResult.next.then(drawResult =>
+            handleImageDraw(state, drawResult)
+          );
+          this.emit('drawDraft', state);
+        } else {
+          abortController.abort();
+          this.currentRender = null;
+        }
+        console.log('render');
+        this.renderAnnotations(state);
+        this.firstImageDrawn = true;
+        this.emit('draw', state);
+        return true;
+      };
+
       // Now there is no rendering in progress.
-      if (p !== this.nextRender) {
+      if (this.nextRender !== p) {
         // I am expired because another render() method was called after this
         return false;
       }
@@ -276,15 +301,9 @@ export default class Viewer extends EventEmitter {
       // It's safe to call draw() now.
       this.currentRender = p;
       this.nextRender = null;
-      const src = this.composition!.imageSource;
-      return src.draw(this, state).then(image => {
-        this.cachedSourceImage = image;
-        this.currentRender = null;
-        this.renderAnnotations(state);
-        this.firstImageDrawn = true;
-        this.emit('draw', this.viewState);
-        return true;
-      });
+      return src
+        .draw(this, state, abortController.signal)
+        .then(drawResult => handleImageDraw(state, drawResult));
     });
     // Remember this render() call as the most recent one,
     // possibly overwriting and expiring the previous nextRender

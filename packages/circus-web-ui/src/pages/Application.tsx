@@ -23,24 +23,29 @@ const useTaskProgress = () => {
         signal: abortController.signal
       });
       for await (const event of generator) {
+        console.log(event);
         switch (event.type) {
           case 'progress':
             dispatch(
               taskUpdate({
                 taskId: event.taskId,
                 updates: {
-                  value: event.value,
-                  max: event.max,
+                  finished: event.finished,
+                  total: event.total,
                   message: event.message
                 }
               })
             );
             break;
           case 'finish':
-            dispatch(taskFinish(event.taskId));
+            dispatch(
+              taskFinish({ taskId: event.taskId, message: event.message })
+            );
             break;
           case 'error':
-            dispatch(taskError(event.taskId));
+            dispatch(
+              taskError({ taskId: event.taskId, message: event.message })
+            );
             break;
         }
       }

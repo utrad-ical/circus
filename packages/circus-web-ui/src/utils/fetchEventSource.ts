@@ -10,18 +10,14 @@ export type Event =
   | {
       type: 'progress';
       taskId: string;
-      value?: number;
-      max?: number;
+      finished?: number;
+      total?: number;
       message?: string;
     }
   | {
-      type: 'finish';
+      type: 'error' | 'finish';
       taskId: string;
-    }
-  | {
-      type: 'error';
-      taskId: string;
-      message?: string;
+      message: string;
     };
 
 /**

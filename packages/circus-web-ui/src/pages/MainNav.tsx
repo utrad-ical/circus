@@ -10,7 +10,12 @@ import TaskNotifier from 'components/TaskNotifier';
 
 const MainMenu: React.FC<{}> = props => <ul>{props.children}</ul>;
 
-const Menu: React.FC<any> = props => {
+const Menu: React.FC<{
+  name: string;
+  icon?: string;
+  link?: string;
+  onClick?: () => void;
+}> = props => {
   const { name, icon, link, onClick, children } = props;
   const className = icon ? icon : `circus-icon-${name.toLowerCase()}`;
   const caption = [
@@ -129,9 +134,13 @@ const StyledNav = styled.nav`
         background-color: rgba(240, 240, 240, 0.9);
         padding: 0;
         border: 1px solid #bbb;
+        &.pull-left {
+          right: 0;
+          left: auto;
+        }
         > li {
           display: block;
-          width: 200px;
+          min-width: 200px;
           color: black;
           a {
             text-decoration: none;

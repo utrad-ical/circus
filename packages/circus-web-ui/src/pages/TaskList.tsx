@@ -8,9 +8,13 @@ import { useApi } from 'utils/api';
 interface Task {
   taskId: string;
   name: string;
-  status: string;
-  downloadFileType?: string;
   createdAt: string;
+  updatedAt: string;
+  endedAt: string;
+  errorMessage: string | null;
+  finishedMessage: string | null;
+  status: 'finished' | 'error' | 'processing';
+  downloadFileType?: string;
 }
 
 const TaskList: React.FC = props => {
@@ -45,22 +49,24 @@ const TaskItems: React.FC<{ items: Task[] }> = props => {
     <table className="table">
       <thead>
         <tr>
-          <th>Task ID</th>
           <th>Name</th>
           <th>Status</th>
-          <th>Date</th>
+          <th>Message</th>
+          <th>Started at</th>
+          <th>Ended at</th>
           <th>Download</th>
         </tr>
       </thead>
       <tbody>
         {props.items.map(item => (
           <tr key={item.taskId}>
-            <td>{item.taskId}</td>
             <td>{item.name}</td>
             <td>{item.status}</td>
+            <td>{item.finishedMessage ?? item.errorMessage}</td>
             <td>
               <TimeDisplay value={item.createdAt} />
             </td>
+            <td>{item.endedAt ? <TimeDisplay value={item.endedAt} /> : '-'}</td>
             <td>
               {item.downloadFileType ? (
                 <a href={`tasks/${item.taskId}/download`}>

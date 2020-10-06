@@ -65,7 +65,7 @@ describe('register', () => {
 
     downloadFileStream!.end(fileContent);
     expect(ctx.body).toEqual({ taskId });
-    emitter.emit('finish');
+    emitter.emit('finish', 'Export finished.');
 
     const task = await models.task.findById(taskId);
     expect(task.downloadFileType).toMatch(/application\/zip/);
@@ -94,7 +94,7 @@ describe('report', () => {
     const streamFinish = readFromStream(readStream);
 
     emitter.emit('progress', 'Importing 10 files...', 1, 10);
-    emitter.emit('finish');
+    emitter.emit('finish', 'Imported.');
 
     const sentData = await streamFinish();
     expect(sentData).toMatch(/progress/);

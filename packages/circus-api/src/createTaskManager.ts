@@ -34,7 +34,7 @@ interface TaskEvents {
   // Notifies that an error happened.
   error: (message: string) => void;
   // Notifies that tha task has finished successfully.
-  finish: () => void;
+  finish: (message?: string) => void;
 }
 
 interface AggregatedEvents {
@@ -89,7 +89,9 @@ const createTaskManager: FunctionService<
       name: options.name,
       userEmail: options.userEmail,
       status: 'processing',
-      errorMessage: '',
+      errorMessage: null,
+      finishedMessage: null,
+      endedAt: null,
       downloadFileType: options.downloadFileType ?? null,
       dismissed: false
     });
@@ -119,14 +121,18 @@ const createTaskManager: FunctionService<
       aggregatedEmitter.emit('taskEvent', taskId, 'progress', task);
     };
 
-    const throttleHandleProgress = _.throttle(handleProgress, 150);
+    const throttledHandleProgress = _.throttle(handleProgress, 150);
 
     const handleError = async (message: string) => {
       removeHandlers();
+      task.message = message;
+      task.finished = undefined;
+      task.total = undefined;
       aggregatedEmitter.emit('taskEvent', taskId, 'error', task);
       tasks.delete(taskId);
       await models.task.modifyOne(taskId, {
         status: 'error',
+        endedAt: new Date(),
         errorMessage: message
       });
     };
@@ -139,25 +145,36 @@ const createTaskManager: FunctionService<
       );
     };
 
-    const handleFinish = async () => {
+    const handleFinish = async (message?: string) => {
       removeHandlers();
+      task.message = message ?? 'Finished.';
+      task.finished = undefined;
+      task.total = undefined;
       aggregatedEmitter.emit('taskEvent', taskId, 'finish', task);
       tasks.delete(taskId);
-      await models.task.modifyOne(taskId, { status: 'finished' });
+      await models.task.modifyOne(taskId, {
+        status: 'finished',
+        endedAt: new Date(),
+        finishedMessage: task.message
+      });
     };
 
     const removeHandlers = () => {
-      emitter.off('progress', throttleHandleProgress);
+      emitter.off('progress', throttledHandleProgress);
       emitter.off('error', handleError);
       emitter.off('finish', handleFinish);
       downloadFileStream?.off?.('error', handleStreamError);
     };
 
     tasks.set(taskId, task);
-    emitter.on('progress', throttleHandleProgress);
+    emitter.on('progress', throttledHandleProgress);
     emitter.on('error', handleError);
     emitter.on('finish', handleFinish);
-    downloadFileStream?.on?.('error', handleStreamError);
+
+    // At least one progress event must be emitted
+    throttledHandleProgress('Starting the task.');
+
+    downloadFileStream?.on('error', handleStreamError);
 
     return { taskId, emitter, downloadFileStream };
   };

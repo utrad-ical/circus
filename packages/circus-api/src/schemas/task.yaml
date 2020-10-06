@@ -18,7 +18,17 @@ properties:
     enum: ['finished', 'error', 'processing']
     description: The task status.
   errorMessage:
-    type: string
+    oneOf:
+      - type: string
+      - type: 'null'
+  finishedMessage:
+    oneOf:
+      - type: string
+      - type: 'null'
+  endedAt:
+    oneOf:
+      - date: true
+      - type: 'null'
   downloadFileType:
     oneOf:
       - type: string

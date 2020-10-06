@@ -43,7 +43,7 @@ export const handlePost: RouteMiddleware = ({ dicomImporter, taskManager }) => {
     }
 
     const { emitter } = await taskManager.register(ctx, {
-      name: 'Importing DICOM files',
+      name: 'Series import',
       userEmail: ctx.user.userEmail
     });
 
@@ -67,16 +67,14 @@ export const handlePost: RouteMiddleware = ({ dicomImporter, taskManager }) => {
             }
             await dicomImporter.importDicom(Buffer.from(entry.buffer), domain);
             dicomCount++;
-            emitter.emit(
-              'progress',
-              `Imported ${dicomCount} entities...`,
-              fileCount,
-              sentFiles.length
-            );
+            emitter.emit('progress', `Imported ${dicomCount} entities...`);
           }
           fileCount++;
         }
-        emitter.emit('finish', 'Import finished.');
+        emitter.emit(
+          'finish',
+          `Imported ${dicomCount} entities from ${fileCount} files.`
+        );
       } catch (err) {
         emitter.emit(
           'error',

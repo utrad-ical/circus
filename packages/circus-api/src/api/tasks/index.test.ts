@@ -58,7 +58,7 @@ test('report', async () => {
   const streamFinish = readFromStream(stream);
   const data = await streamFinish();
   expect(data).toMatch(taskId);
-  expect(data).toMatch('Working!');
+  expect(data).toMatch('Starting the task');
   emitter.emit('finish');
 });
 

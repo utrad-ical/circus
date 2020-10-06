@@ -15,3 +15,6 @@ routes:
     path: /tasks/:taskId/download
     handler: handleDownload
     description: Allowing the current user to download files that are available for download.
+  - verb: patch
+    path: /tasks/:taskId
+    handler: handlePatch

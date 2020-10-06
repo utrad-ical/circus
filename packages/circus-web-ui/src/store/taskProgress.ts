@@ -4,10 +4,10 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
  * This represents an ongoing task (managed by API's taskManager),
  * not an task stored on the database.
  */
-interface TaskProgress {
+export interface TaskProgress {
   status: 'processing' | 'finished' | 'error';
-  value?: number;
-  max?: number;
+  finished?: number;
+  total?: number;
   message?: string;
 }
 
@@ -30,13 +30,20 @@ const slice = createSlice({
       if (!state[taskId]) state[taskId] = { status: 'processing' };
       state[taskId] = { ...state[taskId], ...updates };
     },
-    taskFinish: (state, action: PayloadAction<string>) => {
-      const taskId = action.payload;
-      state[taskId] = { status: 'finished' };
+    taskFinish: (
+      state,
+      action: PayloadAction<{ taskId: string; message: string }>
+    ) => {
+      console.log(action);
+      const { taskId, message } = action.payload;
+      state[taskId] = { status: 'finished', message };
     },
-    taskError: (state, action: PayloadAction<string>) => {
-      const taskId = action.payload;
-      state[taskId] = { status: 'error' };
+    taskError: (
+      state,
+      action: PayloadAction<{ taskId: string; message: string }>
+    ) => {
+      const { taskId, message } = action.payload;
+      state[taskId] = { status: 'error', message };
     }
   }
 });

@@ -2,14 +2,18 @@
   userEmail: alice@example.com
   name: Importing DICOM files
   status: processing
-  errorMessage: ''
+  errorMessage: null
+  finishedMessage: null
+  endedAt: null
   downloadFileType: null
   dismissed: false
 - taskId: aaaabbbbcccc2222
   userEmail: alice@example.com
   name: Export case
   status: finished
-  errorMessage: ''
+  errorMessage: null
+  finishedMessage: 'Export finished.'
+  endedAt: { $date: '2020-01-01T00:00:00Z' }
   downloadFileType: application/zip
   dismissed: false
 - taskId: aaaabbbbcccc3333
@@ -17,12 +21,16 @@
   name: Export case
   status: processing
   errorMessage: ''
+  finishedMessage: null
+  endedAt: null
   downloadFileType: application/zip
   dismissed: false
 - taskId: bbbbccccdddd1111
   userEmail: bob@example.com
   name: Importing DICOM files
   status: processing
-  errorMessage: ''
+  errorMessage: null
+  finishedMessage: null
+  endedAt: null
   downloadFileType: null
   dismissed: false

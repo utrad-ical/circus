@@ -18,7 +18,7 @@ export const handleSearch: RouteMiddleware = ({
     } catch (err) {
       ctx.throw(httpStatus.BAD_REQUEST, 'Filter string could not be parsed.');
     }
-    const fields = ['taskId', 'status'];
+    const fields = ['taskId', 'status', 'dismissed'];
     if (!checkFilter(customFilter!, fields))
       ctx.throw(httpStatus.BAD_REQUEST, 'Bad filter.');
     const userEmail = ctx.user.userEmail;
@@ -69,5 +69,25 @@ export const handleDownload: RouteMiddleware = ({ models, taskManager }) => {
     if (task.status !== 'finished')
       ctx.throw(httpStatus.CONFLICT, 'This task has not finished.');
     taskManager.download(ctx, taskId);
+  };
+};
+
+export const handlePatch: RouteMiddleware = ({ models }) => {
+  return async (ctx, next) => {
+    const userEmail = ctx.user.userEmail;
+    const taskId = ctx.params.taskId;
+    const task = await models.task.findByIdOrFail(taskId);
+    if (userEmail !== task.userEmail) {
+      ctx.throw(httpStatus.UNAUTHORIZED, 'You cannot access this task.');
+    }
+    const body = ctx.request.body;
+    if (
+      Object.keys(body).length !== 1 ||
+      (body?.dismissed !== true && body?.dismissed !== false)
+    )
+      ctx.throw(httpStatus.BAD_REQUEST);
+
+    await models.task.modifyOne(taskId, { dismissed: body.dismissed });
+    ctx.body = null;
   };
 };

@@ -34,6 +34,11 @@ const options = [
     env: 'CIRCUS_API_FIX_USER',
     type: 'string',
     help: 'skips authentication and use this user as the current user'
+  },
+  {
+    names: ['debug', 'd'],
+    type: 'bool',
+    help: 'enables debug mode endpoints'
   }
 ];
 
@@ -75,7 +80,7 @@ const main = async () => {
   const patchedConfig = merge({}, config);
   Object.keys(parsedArgs).forEach(k => {
     if ((parsedArgs as any)[k] !== undefined) {
-      patchedConfig.app.options[k] = (parsedArgs as any)[k];
+      patchedConfig.apiServer.options[k] = (parsedArgs as any)[k];
     }
   });
 

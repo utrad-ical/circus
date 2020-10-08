@@ -14,3 +14,7 @@ export const sha1 = (arrayBuf: ArrayBuffer) => {
 export const withCommas = (x: number) => {
   return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 };
+
+export const capitalize = (str: string) => {
+  return str[0].toUpperCase() + str.slice(1);
+};

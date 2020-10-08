@@ -23,7 +23,6 @@ const useTaskProgress = () => {
         signal: abortController.signal
       });
       for await (const event of generator) {
-        console.log(event);
         switch (event.type) {
           case 'progress':
             dispatch(

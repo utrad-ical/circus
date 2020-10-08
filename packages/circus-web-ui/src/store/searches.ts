@@ -3,6 +3,7 @@ import { confirm, prompt } from '@smikitky/rb-components/lib/modal';
 import { AppThunk } from 'store';
 import { ApiCaller } from 'utils/api';
 import Series from 'types/Series';
+import Task from 'types/Task';
 
 export interface SearchResource {
   endPoint: string;
@@ -34,6 +35,7 @@ interface SearchState {
   };
   items: {
     series: SearchedResource<Series>;
+    tasks: SearchedResource<Task>;
     [resourceName: string]: SearchedResource<any>;
   };
 }
@@ -109,6 +111,11 @@ const slice = createSlice({
     deleteSearch: (state, action: PayloadAction<string>) => {
       const searchName = action.payload;
       delete state.searches[searchName];
+    },
+    dismissTask: (state, action: PayloadAction<string>) => {
+      const taskId = action.payload;
+      if (!state.items.tasks || !state.items.tasks[taskId]) return;
+      state.items.tasks[taskId].dismissed = true;
     }
   }
 });
@@ -116,7 +123,7 @@ const slice = createSlice({
 // We will not export these "primitive" actions for now
 const { startSearch, setBusy, searchResultLoaded } = slice.actions;
 // But we export this one
-export const { changeSelection, deleteSearch } = slice.actions;
+export const { changeSelection, deleteSearch, dismissTask } = slice.actions;
 
 export default slice.reducer;
 

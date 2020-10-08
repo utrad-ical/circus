@@ -6,61 +6,53 @@ import SearchResultsView, {
 } from 'components/SearchResultsView';
 import TimeDisplay from 'components/TimeDisplay';
 import React, { useEffect, useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 import { useApi } from 'utils/api';
 import { newSearch } from '../store/searches';
-
-interface Task {
-  taskId: string;
-  name: string;
-  createdAt: string;
-  updatedAt: string;
-  endedAt: string;
-  errorMessage: string | null;
-  finishedMessage: string | null;
-  status: 'finished' | 'error' | 'processing';
-  downloadFileType?: string;
-}
+import Task from 'types/Task';
+import useTaskDismisser from 'utils/useTaskDismisser';
+import { capitalize } from 'utils/util';
 
 const sortOptions = makeSortOptions({
   createdAt: 'task create time',
   name: 'name'
 });
 
-const useDismiss = (taskId: string) => {
-  const api = useApi();
-  const [dismissed, setDismissed] = useState(false);
-  const dismiss = async () => {
-    await api(`/tasks/${taskId}`, {
-      method: 'patch',
-      data: { dismissed: true }
-    });
-    setDismissed(true);
-  };
-  return [dismiss, dismissed];
+const useTaskProgress = (taskId: string) => {
+  return useSelector(state => state.taskProgress[taskId]);
+};
+
+const StatusRenderer: React.FC<{ value: Task }> = ({ value }) => {
+  // Takes the real-time task progress into consideration
+  const progress = useTaskProgress(value.taskId);
+  const status = progress?.status ?? value.status;
+  return <span className={status}>{capitalize(status)}</span>;
+};
+
+const MessageRenderer: React.FC<{ value: Task }> = ({ value }) => {
+  // Takes the real-time task progress into consideration
+  const progress = useTaskProgress(value.taskId);
+  const status = progress?.status ?? value.status;
+  const message =
+    progress?.message ?? value.errorMessage ?? value.finishedMessage;
+  const number =
+    typeof progress?.finished === 'number' &&
+    typeof progress?.total === 'number'
+      ? `(${progress.finished}/${progress.total})`
+      : '';
+  return (
+    <span className={status}>
+      {number && <>{number} </>}
+      {message}
+    </span>
+  );
 };
 
 const columns: DataGridColumnDefinition<Task>[] = [
   { caption: 'Name', key: 'name' },
-  {
-    caption: 'Status',
-    key: 'status',
-    renderer: ({ value }) => (
-      <span className={value.status}>{value.status}</span>
-    )
-  },
-  {
-    caption: 'Message',
-    key: 'message',
-    renderer: ({ value }) => {
-      return value.errorMessage ? (
-        <span className="text-danger">{value.errorMessage}</span>
-      ) : (
-        <span>{value.finishedMessage}</span>
-      );
-    }
-  },
+  { caption: 'Status', key: 'status', renderer: StatusRenderer },
+  { caption: 'Message', key: 'message', renderer: MessageRenderer },
   {
     caption: 'Start / End',
     key: 'createdAt',
@@ -79,9 +71,7 @@ const columns: DataGridColumnDefinition<Task>[] = [
     key: 'download',
     renderer: ({ value }) => {
       return value.status === 'finished' && value.downloadFileType ? (
-        <a href={``}>
-          <Icon icon="glyphicon-download" />
-        </a>
+        <IconButton bsStyle="success" bsSize="sm" icon="glyphicon-download" />
       ) : (
         <>-</>
       );
@@ -91,12 +81,13 @@ const columns: DataGridColumnDefinition<Task>[] = [
     caption: 'Dismiss',
     key: 'dismiss',
     renderer: (({ value }) => {
-      const [dismiss, dismissed] = useDismiss(value.taskId);
-      return value.dismissed ? null : (
+      const dismissTask = useTaskDismisser();
+      return (
         <IconButton
-          disabled={dismissed}
+          disabled={value.dismissed}
+          bsSize="sm"
           bsStyle="primary"
-          onClick={dismiss}
+          onClick={() => dismissTask(value.taskId)}
           icon="glyphicon-check"
         >
           Done
@@ -119,19 +110,55 @@ const DataView: React.FC<{ value: Task[] }> = props => {
 };
 
 const StyledDataGrid = styled(DataGrid)`
-  .finished {
-    color: green;
+  .status {
+    .error {
+      color: red;
+      font-weight: bold;
+    }
+    .processing {
+      color: blue;
+      font-weight: bold;
+    }
+    .finished {
+      color: green;
+    }
   }
-  .error {
-    color: red;
-    font-size: bold;
+  .message {
+    .error {
+      color: red;
+    }
+    .processing {
+      color: blue;
+    }
+  }
+  .download {
+    text-align: center;
   }
   .dismiss {
     text-align: right;
   }
 `;
 
-const TaskList: React.FC = props => {
+const DebugTaskLauncher: React.FC = props => {
+  const api = useApi();
+
+  const handleClick = () => {
+    api('/tasks/debug-task', {
+      method: 'post',
+      data: { fails: false, dl: true }
+    });
+  };
+
+  return (
+    <div>
+      <IconButton icon="glyphicon-plus" onClick={handleClick}>
+        Run debug task
+      </IconButton>
+    </div>
+  );
+};
+
+const TaskList: React.FC<{}> = props => {
   const [showDismissed, setShowDismissed] = useState(false);
   const dispatch = useDispatch();
   const api = useApi();
@@ -166,6 +193,7 @@ const TaskList: React.FC = props => {
         refreshable
         name="task"
       />
+      {process.env.NODE_ENV === 'development' && <DebugTaskLauncher />}
     </div>
   );
 };

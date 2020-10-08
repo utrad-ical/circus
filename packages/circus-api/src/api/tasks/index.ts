@@ -91,3 +91,33 @@ export const handlePatch: RouteMiddleware = ({ models }) => {
     ctx.body = null;
   };
 };
+
+export const handlePostDebugTask: RouteMiddleware = ({ taskManager }) => {
+  return async (ctx, next) => {
+    const {
+      steps: _steps = '10',
+      tick: _tick = '1000',
+      dl,
+      fails
+    } = ctx.request.body;
+    const steps = Number(_steps);
+    const tick = Number(_tick);
+    const { emitter, downloadFileStream } = await taskManager.register(ctx, {
+      name: 'Debug Task',
+      userEmail: ctx.user.userEmail,
+      downloadFileType: dl ? 'application/octet-stream' : undefined
+    });
+
+    const delay = (ms: number) =>
+      new Promise(resolve => setTimeout(resolve, ms));
+
+    (async () => {
+      downloadFileStream?.end('Hello.');
+      for (let i = 0; i < steps; i++) {
+        await delay(tick);
+        emitter.emit('progress', 'Magic happening', i, steps);
+      }
+      emitter.emit(fails ? 'error' : 'finish', 'This is a result message.');
+    })();
+  };
+};

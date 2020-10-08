@@ -62,10 +62,8 @@ const useTaskProgress = () => {
  * visible only after we confirmed the user is currently logged-in with valid session.
  */
 const Application: React.FC<{}> = props => {
-  const { isUserFetching, isLoggedIn } = useSelector(state => ({
-    isUserFetching: state.loginUser.isFetching,
-    isLoggedIn: state.loginUser.data !== null
-  }));
+  const isUserFetching = useSelector(state => state.loginUser.isFetching);
+  const isLoggedIn = useSelector(state => state.loginUser.data !== null);
 
   const pageContentVisible = !isUserFetching && isLoggedIn;
   const notLoggedIn = !isUserFetching && !isLoggedIn;

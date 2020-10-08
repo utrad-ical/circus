@@ -14,7 +14,13 @@ routes:
   - verb: get
     path: /tasks/:taskId/download
     handler: handleDownload
-    description: Allowing the current user to download files that are available for download.
+    description: Lets the current user download the created file.
   - verb: patch
     path: /tasks/:taskId
     handler: handlePatch
+    description: Changes the dismissed state.
+  - verb: post
+    path: /tasks/debug-task
+    forDebug: true
+    handler: handlePostDebugTask
+    description: Runs a dummy task for debugging.

@@ -84,11 +84,12 @@ const EditorPage: React.FC<{
       <StyledDataGrid
         value={props.value}
         columns={listColumns}
+        itemPrimaryKey={resource.primaryKey}
         onItemClick={handleEditStart}
         active={props.active}
       />
     )) as React.FC<any>;
-  }, [listColumns, handleEditStart]);
+  }, [listColumns, handleEditStart, resource.primaryKey]);
 
   useEffect(() => {
     loadItems();

@@ -74,7 +74,8 @@ const DataView: React.FC<{ value: any[] }> = props => {
   const { value } = props;
   return (
     <DataGrid
-      className="series-search-result"
+      className="case-search-result"
+      itemPrimaryKey="caseId"
       columns={columns}
       value={value}
     />

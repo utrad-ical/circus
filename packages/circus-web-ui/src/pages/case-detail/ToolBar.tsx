@@ -271,7 +271,7 @@ const ToolButton: React.FC<{
   const style = active === name ? 'primary' : 'default';
   const iconSpan = <Icon icon={icon} />;
   const toolTip = (
-    <Tooltip>
+    <Tooltip id="case-detail-toolbar-tooltip">
       {name[0].toUpperCase() +
         name.slice(1) +
         (shortcut ? ' (' + shortcut[3] + ')' : '')}

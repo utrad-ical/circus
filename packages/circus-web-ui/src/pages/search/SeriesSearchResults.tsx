@@ -90,6 +90,7 @@ const DataView: React.FC<{ value: any[] }> = props => {
     <DataGrid
       className="series-search-result"
       columns={columns}
+      itemPrimaryKey="seriesUid"
       value={value}
     />
   );

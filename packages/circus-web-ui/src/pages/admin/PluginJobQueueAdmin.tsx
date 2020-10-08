@@ -20,7 +20,7 @@ const DataView: React.FC<{ value: any }> = props => {
   if (!value.length) {
     return <div className="alert alert-info">No items in global queue.</div>;
   }
-  return <DataGrid columns={columns} value={value} />;
+  return <DataGrid columns={columns} itemPrimaryKey="jobId" value={value} />;
 };
 
 const PluginJobQueueAdmin: React.FC<{}> = props => {

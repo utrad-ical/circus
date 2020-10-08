@@ -111,19 +111,29 @@ const SearchResultsView: React.FC<{
 
   const api = useApi();
   const dispatch = useDispatch();
-  const search = useSelector(state => state.searches[name]);
+  const [search, dic] = useSelector(state => {
+    const search = state.searches.searches[name];
+    if (!search) return [undefined, undefined];
+    const resourceName = search.params.resource.endPoint;
+    const dic = state.searches.items[resourceName];
+    return [search, dic];
+  }) as [
+    searches.SearchResult | undefined,
+    searches.SearchedResource<any> | undefined
+  ];
 
   if (!search) return null;
+
   const {
     isFetching,
     params: { limit, page, sort },
     results
   } = search;
 
-  if (isFetching && !results?.items) return <LoadingIndicator delay={1000} />;
-  if (!results?.items) return null; // Should not happen
+  if (isFetching && !dic) return <LoadingIndicator delay={1000} />;
+  if (!dic || !results) return null; // Should not happen
 
-  const { items: dic, indexes, totalItems } = results;
+  const { indexes, totalItems } = results;
   const items = indexes.map(index => dic[index]);
 
   const handleSortChange = (newSort: string) => {

@@ -111,16 +111,10 @@ const SearchResultsView: React.FC<{
 
   const api = useApi();
   const dispatch = useDispatch();
-  const [search, dic] = useSelector(state => {
-    const search = state.searches.searches[name];
-    if (!search) return [undefined, undefined];
-    const resourceName = search.params.resource.endPoint;
-    const dic = state.searches.items[resourceName];
-    return [search, dic];
-  }) as [
-    searches.SearchResult | undefined,
-    searches.SearchedResource<any> | undefined
-  ];
+  const search = useSelector(state => state.searches.searches[name]);
+  const dic = useSelector(state =>
+    search ? state.searches.items[search.params.resource.endPoint] : undefined
+  );
 
   if (!search) return null;
 

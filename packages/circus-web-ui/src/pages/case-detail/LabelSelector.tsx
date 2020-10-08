@@ -105,7 +105,7 @@ const SeriesItem: React.FC<{
   return (
     <StyledSeriesLi
       className={classNames({
-        active: seriesIndex === editingData.activeLabelIndex
+        active: seriesIndex === editingData.activeSeriesIndex
       })}
       onClick={handleSeriesClick}
     >

@@ -1,56 +1,54 @@
-import React, { useCallback, useEffect } from 'react';
-import { useSelector } from 'react-redux';
-import { Link } from 'react-router-dom';
-import { useApi } from 'utils/api';
-import { CancelToken } from 'utils/cancelToken';
-import useLoadData from 'utils/useLoadData';
-import Icon from './Icon';
-import { TaskProgress } from '../store/taskProgress';
-import styled, { keyframes } from 'styled-components';
+import classNames from 'classnames';
 import IconButton from 'components/IconButton';
 import moment from 'moment';
-import classNames from 'classnames';
-
-interface Task {
-  taskId: string;
-  name: string;
-  createdAt: string;
-  updatedAt: string;
-  endedAt: string;
-  errorMessage: string | null;
-  finishedMessage: string | null;
-  status: 'finished' | 'error' | 'processing';
-  downloadFileType?: string;
-}
+import React, { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { Link } from 'react-router-dom';
+import { newSearch, updateSearch } from 'store/searches';
+import styled, { keyframes } from 'styled-components';
+import Task from 'types/Task';
+import { useApi } from 'utils/api';
+import useTaskDismisser from 'utils/useTaskDismisser';
+import { TaskProgress } from '../store/taskProgress';
+import Icon from './Icon';
 
 const TaskNotifier: React.FC<{}> = props => {
   const api = useApi();
-
-  const loadTaskData = useCallback(
-    async (token: CancelToken) => {
-      const filter = { filter: { dismissed: false } };
-      return (await api('/tasks', { params: filter })).items;
-    },
-    [api]
-  );
-
-  // This contains task search results
-  const [tasks, isTaskLoading, reloadTask] = useLoadData<Task[]>(loadTaskData);
+  const dismissTask = useTaskDismisser();
+  const dispatch = useDispatch();
 
   // This contains task progress sent from the SSE endpoint
   const taskProgress = useSelector(state => state.taskProgress);
+  const taskDic = useSelector(state => state.searches.items.tasks);
+  const taskSearch = useSelector(
+    state => state.searches.searches.undismissedTasks
+  );
+  const tasks = taskSearch?.results?.indexes
+    .map(taskId => taskDic[taskId])
+    .filter(task => !task.dismissed);
+
+  useEffect(() => {
+    dispatch(
+      newSearch(api, 'undismissedTasks', {
+        filter: { dismissed: false },
+        condition: { dismissed: false },
+        resource: { endPoint: 'tasks', primaryKey: 'taskId' },
+        sort: '{"createdAt":-1}'
+      })
+    );
+  }, [api, dispatch]);
 
   useEffect(() => {
     if (
       tasks &&
-      !isTaskLoading &&
+      !taskSearch.isFetching &&
       Object.entries(taskProgress).some(
         ([taskId, task]) =>
           task.status === 'processing' && !tasks.find(t => t.taskId === taskId)
       )
     ) {
       // A new task has been registered
-      reloadTask();
+      dispatch(updateSearch(api, 'undismissedTasks', {}));
     }
   });
 
@@ -61,21 +59,18 @@ const TaskNotifier: React.FC<{}> = props => {
   );
 
   const handleDismissClick = async (taskId: string) => {
-    await api(`/tasks/${taskId}`, {
-      method: 'patch',
-      data: { dismissed: true }
-    });
-    reloadTask();
+    await dismissTask(taskId);
+    dispatch(updateSearch(api, 'undismissedTasks', {}));
   };
 
   return (
-    <li className="icon-menu">
+    <StyledLi className="icon-menu">
       <Link to="/task-list">
-        <StyledIconSpan className={classNames({ 'in-progress': inProgress })}>
+        <span className={classNames({ 'in-progress': inProgress })}>
           <Icon icon="glyphicon-bell" />
-        </StyledIconSpan>
+        </span>
       </Link>
-      <ul className="pull-left">
+      <ul className="dropdown pull-left">
         {tasks.map(task => {
           const progress = taskProgress[task.taskId];
           return (
@@ -88,12 +83,16 @@ const TaskNotifier: React.FC<{}> = props => {
           );
         })}
       </ul>
-    </li>
+    </StyledLi>
   );
 };
 
-const StyledIconSpan = styled.span`
-  &.in-progress {
+const StyledLi = styled.li`
+  .dropdown {
+    max-height: 500px;
+    overflow-y: auto;
+  }
+  .in-progress {
     color: yellow;
   }
   .glyphicon-bell {
@@ -122,6 +121,13 @@ const TaskDisplay: React.FC<{
   return (
     <StyledTaskDisplay className={status}>
       <div className="task-main">
+        <div className="task-info">
+          <div className="task-name">{task.name}</div>
+          <div className="task-message">{message}</div>
+        </div>
+        {task.downloadFileType && task.status === 'finished' && (
+          <IconButton bsSize="sm" bsStyle="success" icon="glyphicon-download" />
+        )}
         <IconButton
           title="Dismiss"
           onClick={onDismissClick}
@@ -129,15 +135,6 @@ const TaskDisplay: React.FC<{
           bsStyle="primary"
           icon="glyphicon-check"
         />
-        <div className="task-info">
-          <div className="task-name">{task.name}</div>
-          <div className="task-message">{message}</div>
-        </div>
-        {task.downloadFileType && task.status === 'finished' && (
-          <a href={`/tasks/${task.taskId}/download`}>
-            <IconButton bsSize="sm" bsStyle="link" icon="glyphicon-download" />
-          </a>
-        )}
       </div>
       <TaskProgressBar
         status={status}

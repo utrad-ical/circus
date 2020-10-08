@@ -100,21 +100,23 @@ const SeriesSelector: React.FC<{
   onChange: any;
   onRemoving?: (index: number) => Promise<boolean>;
   onPvdEditing?: (index: number) => Promise<boolean>;
-  alwaysShowRelevaltSeries?: boolean;
+  alwaysShowRelevantSeries?: boolean;
 }> = props => {
   const {
     value,
     onChange,
     onRemoving,
     onPvdEditing,
-    alwaysShowRelevaltSeries
+    alwaysShowRelevantSeries
   } = props;
   const [showRelevantSeries, setShowRelevantSeries] = useState(
-    !!alwaysShowRelevaltSeries
+    !!alwaysShowRelevantSeries
   );
   const api = useApi();
   const dispatch = useDispatch();
-  const searches = useSelector(state => state.searches);
+  const searchedSeries = useSelector(
+    state => state.searches.items.series ?? {}
+  );
 
   const [seriesData, setSeriesData] = useState<{
     [seriesUid: string]: Series | null; // null means "now loading"
@@ -127,9 +129,7 @@ const SeriesSelector: React.FC<{
   useEffect(() => {
     const loadSeriesData = async (seriesUid: string) => {
       if (seriesUid in seriesData) return;
-      const data =
-        searches?.series?.results?.items?.[seriesUid] ??
-        searches?.relevantSeries?.results?.items?.[seriesUid];
+      const data = searchedSeries[seriesUid];
       if (data) {
         setSeriesData(
           produce(seriesData, seriesData => {
@@ -151,7 +151,7 @@ const SeriesSelector: React.FC<{
       }
     };
     value.forEach(value => loadSeriesData(value.seriesUid));
-  }, [api, searches, seriesData, value]);
+  }, [api, searchedSeries, seriesData, value]);
 
   useEffect(() => {
     if (!showRelevantSeries || !primarySeries) return;
@@ -224,7 +224,7 @@ const SeriesSelector: React.FC<{
     {
       key: 'volumeId',
       caption: '#',
-      renderer: props => <>{props.index}</>
+      renderer: ({ index }) => <>{index}</>
     },
     {
       key: 'modality',
@@ -297,7 +297,7 @@ const SeriesSelector: React.FC<{
       <Panel.Body>
         <DataGrid columns={columns} value={value} />
         <div>
-          {!alwaysShowRelevaltSeries && (
+          {!alwaysShowRelevantSeries && (
             <IconButton
               icon={showRelevantSeries ? 'chevron-up' : 'plus'}
               bsSize="sm"

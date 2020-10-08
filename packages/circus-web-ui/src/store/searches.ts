@@ -28,28 +28,33 @@ interface SearchParams {
 type NewSearchParams = Partial<Pick<SearchParams, 'page' | 'limit'>> &
   Omit<SearchParams, 'page' | 'limit'>;
 
-interface SearchResults<T> {
-  items: { [key: string]: T };
-  indexes: string[];
-  totalItems: number;
+interface SearchState {
+  searches: {
+    [searchName: string]: SearchResult;
+  };
+  items: {
+    series: SearchedResource<Series>;
+    [resourceName: string]: SearchedResource<any>;
+  };
 }
 
-export interface Search<T> {
+export interface SearchResult {
   params: SearchParams;
   isFetching: boolean;
-  results?: SearchResults<T>;
+  results?: {
+    indexes: string[];
+    totalItems: number;
+  };
   selected: string[];
 }
 
-interface Searches {
-  series: Search<Series>;
-  relevantSeries: Search<Series>;
-  [searchName: string]: Search<unknown>;
+export interface SearchedResource<T> {
+  [id: string]: T;
 }
 
 const slice = createSlice({
   name: 'searches',
-  initialState: {} as Searches,
+  initialState: { searches: {}, items: {} } as SearchState,
   reducers: {
     startSearch: (
       state,
@@ -59,23 +64,24 @@ const slice = createSlice({
       }>
     ) => {
       const { searchName, params } = action.payload;
-      if (!(searchName in state))
-        state[searchName] = { params, isFetching: true, selected: [] };
-      state[searchName].isFetching = true;
-      state[searchName].params = params;
+      if (!(searchName in state.searches))
+        state.searches[searchName] = { params, isFetching: true, selected: [] };
+      state.searches[searchName].isFetching = true;
+      state.searches[searchName].params = params;
     },
     setBusy: (
       state,
       action: PayloadAction<{ searchName: string; isFetching: boolean }>
     ) => {
       const { searchName, isFetching } = action.payload;
-      state[searchName].isFetching = isFetching;
+      state.searches[searchName].isFetching = isFetching;
     },
     changeSelection: (
       state,
       action: PayloadAction<{ searchName: string; ids: string[] }>
     ) => {
-      state[action.payload.searchName].selected = action.payload.ids;
+      const { searchName, ids } = action.payload;
+      state.searches[searchName].selected = ids;
     },
     searchResultLoaded: (
       state,
@@ -88,21 +94,21 @@ const slice = createSlice({
         searchName,
         data: { items: rawItems, page, totalItems }
       } = action.payload;
-      const search = state[searchName]!;
+      const search = state.searches[searchName]!;
+      const { endPoint, primaryKey } = search.params.resource;
       search.isFetching = false;
       search.params.page = page;
-      const items: { [key: string]: any } = {};
-      const primaryKey = search.params.resource.primaryKey;
-      rawItems.forEach(i => (items[i[primaryKey] + ''] = i));
+      const items = state.items[endPoint] ?? {};
+      state.items[endPoint] = items;
+      rawItems.forEach(i => (items[String(i[primaryKey])] = i));
       search.results = {
-        items,
         indexes: rawItems.map(i => i[primaryKey]),
         totalItems
       };
     },
     deleteSearch: (state, action: PayloadAction<string>) => {
       const searchName = action.payload;
-      delete state[searchName];
+      delete state.searches[searchName];
     }
   }
 });
@@ -145,7 +151,7 @@ export const newSearch = (
   const useParams: SearchParams = { limit: 20, page: 1, ...params };
   return async (dispatch, getState) => {
     const state = getState();
-    if (state.searches[searchName]?.isFetching)
+    if (state.searches.searches[searchName]?.isFetching)
       throw new Error('Previous search has not finished.');
     await executeQuery(dispatch, api, searchName, useParams);
   };
@@ -158,7 +164,7 @@ export const updateSearch = (
 ): AppThunk => {
   return async (dispatch, getState) => {
     const state = getState();
-    const search = state.searches[searchName];
+    const search = state.searches.searches[searchName];
     if (!search) throw new Error('There is no previous search.');
     if (search.isFetching) throw new Error('Previous search has not finished.');
     const newParams = { ...search.params, ...partialParams };

@@ -18,6 +18,7 @@ import useKeyboardShortcut from 'utils/useKeyboardShortcut';
 export interface ViewOptions {
   layout?: Layout;
   showReferenceLine?: boolean;
+  showScrollbar?: boolean;
   interpolationMode?: InterpolationMode;
 }
 
@@ -59,6 +60,13 @@ const ToolBar: React.FC<{
     onChangeViewOptions({
       ...viewOptions,
       showReferenceLine: !viewOptions.showReferenceLine
+    });
+  };
+
+  const handleToggleScrollbar = () => {
+    onChangeViewOptions({
+      ...viewOptions,
+      showScrollbar: !viewOptions.showScrollbar
     });
   };
 
@@ -206,6 +214,10 @@ const ToolBar: React.FC<{
           <MenuItem onClick={handleToggleReferenceLine}>
             <CheckMark checked={!!viewOptions.showReferenceLine} />
             Show reference line
+          </MenuItem>
+          <MenuItem onClick={handleToggleScrollbar}>
+            <CheckMark checked={!!viewOptions.showScrollbar} />
+            Show scrollbar
           </MenuItem>
           <MenuItem onClick={handleToggleInterpolationMode}>
             <CheckMark

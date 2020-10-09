@@ -105,6 +105,7 @@ const RevisionEditor: React.FC<{
     {
       layout: 'twoByTwo',
       showReferenceLine: false,
+      showScrollbar: false,
       interpolationMode: 'nearestNeighbor'
     }
   );
@@ -182,6 +183,7 @@ const RevisionEditor: React.FC<{
 
     composition.annotations.forEach(antn => {
       if (antn instanceof rs.ReferenceLine) antn.dispose();
+      if (antn instanceof rs.Scrollbar) antn.dispose();
     });
     composition.removeAllAnnotations();
 
@@ -214,11 +216,31 @@ const RevisionEditor: React.FC<{
       });
     }
 
+    if (viewOptions.showScrollbar) {
+      const lineColors: { [index: string]: string } = {
+        axial: '#8888ff',
+        sagittal: '#ff6666',
+        coronal: '#88ff88',
+        oblique: '#ffffaa'
+      };
+      Object.keys(viewers).forEach(k => {
+        composition.addAnnotation(
+          new rs.Scrollbar(viewers[k], { color: lineColors[k] })
+        );
+      });
+    }
+
     composition.annotationUpdated();
     return () => {
       composition.removeAllListeners('annotationChange');
     };
-  }, [composition, editingData, viewOptions.showReferenceLine, viewers]);
+  }, [
+    composition,
+    editingData,
+    viewOptions.showReferenceLine,
+    viewOptions.showScrollbar,
+    viewers
+  ]);
 
   useEffect(() => {
     stateChanger(viewState => ({

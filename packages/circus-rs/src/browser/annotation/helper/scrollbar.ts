@@ -32,9 +32,11 @@ export interface Settings {
   drawVisibilityThreshold: boolean;
 }
 
-export interface ScrollbarContainer extends ScrollbarBase, ScrollbarThumb {}
+export interface ScrollbarContainer extends ScrollbarBase {
+  thumbPosition: number;
+}
 
-interface ScrollbarBase {
+interface ScrollbarBase extends ScrollbarParam {
   scrollbarTranslate: Vector2D;
   scrollbarLength: number;
   scrollableLength: number;
@@ -42,9 +44,8 @@ interface ScrollbarBase {
   thumbScale: number;
 }
 
-interface ScrollbarThumb {
+export interface ScrollbarParam {
   thumbStep: number;
-  thumbPosition: number;
 }
 
 const updateThumbByPosition = (
@@ -91,7 +92,8 @@ export const updateThumb = (
 export const createScrollbar = (
   viewer: Viewer,
   viewState: ViewState,
-  settings: Settings
+  settings: Settings,
+  param?: ScrollbarParam
 ): ScrollbarContainer => {
   const composition = viewer.getComposition();
   if (!composition) throw new Error('Composition not initialized'); // should not happen
@@ -127,7 +129,11 @@ export const createScrollbar = (
 
   const scrollableLength = scrollbarLength - size * 2;
 
-  const { thumbStep, divideCount } = calcThumbSteps(composition, mmSection);
+  const { thumbStep, divideCount } = calcThumbSteps(
+    composition,
+    mmSection,
+    param
+  );
   const thumbLength = Math.max(size, scrollableLength / divideCount);
   const thumbScale = (scrollableLength - thumbLength) / (divideCount - 1);
   const thumbPosition = thumbStep * thumbScale;
@@ -136,17 +142,21 @@ export const createScrollbar = (
     scrollbarLength,
     scrollableLength,
     thumbLength,
-    thumbScale
+    thumbScale,
+    thumbStep
   };
   return updateThumbByPosition(scrollbarBase, thumbPosition);
 };
 
 export const calcThumbSteps = (
   composition: Composition,
-  mmSection: Section
+  mmSection: Section,
+  param?: ScrollbarParam
 ): { thumbStep: number; divideCount: number } => {
   const steps = calcSectionSteps(composition, mmSection);
-  return { thumbStep: steps.current + 1, divideCount: steps.sumCount + 2 };
+  const divideCount = steps.sumCount + 2;
+  const thumbStep = !param ? steps.current + 1 : param.thumbStep;
+  return { thumbStep, divideCount };
 };
 
 const calcSectionSteps = (

@@ -13,6 +13,7 @@ import {
   HandleType,
   Position,
   ScrollbarContainer,
+  ScrollbarParam,
   Settings,
   updateThumb,
   Visibility
@@ -79,7 +80,10 @@ export default class Scrollbar implements Annotation, ViewerEventTarget {
   private handleType: HandleType | undefined;
   private dragStartPoint2: Vector2 | undefined;
   private scrollbar: ScrollbarContainer | undefined;
-  private createScrollbar: (viewState: ViewState) => ScrollbarContainer;
+  private createScrollbar: (
+    viewState: ViewState,
+    param?: ScrollbarParam
+  ) => ScrollbarContainer;
   private judgeHandleType:
     | ((p: Vector2) => HandleType | undefined)
     | undefined = undefined;
@@ -133,8 +137,8 @@ export default class Scrollbar implements Annotation, ViewerEventTarget {
     this.handleViewerStateChange = this.handleViewerStateChange.bind(this);
     viewer.on('stateChange', this.handleViewerStateChange);
 
-    this.createScrollbar = (viewState: ViewState) => {
-      return createScrollbar(viewer, viewState, this.settings);
+    this.createScrollbar = (viewState: ViewState, param?: ScrollbarParam) => {
+      return createScrollbar(viewer, viewState, this.settings, param);
     };
   }
 
@@ -184,7 +188,7 @@ export default class Scrollbar implements Annotation, ViewerEventTarget {
     const targetState = this.targetViewer.getState();
     if (viewState.type !== 'mpr' || targetState.type !== 'mpr') return;
 
-    if (!this.scrollbar) this.scrollbar = this.createScrollbar(viewState);
+    this.scrollbar = this.createScrollbar(viewState, this.scrollbar);
 
     if (this.visible) {
       const { judgeHandleType } = drawScrollbar(

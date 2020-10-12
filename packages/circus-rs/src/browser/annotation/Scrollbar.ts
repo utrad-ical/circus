@@ -166,15 +166,15 @@ export default class Scrollbar implements Annotation, ViewerEventTarget {
     this.scrollbar = this.createScrollbar(state);
   }
 
-  private handleAnnotationChange(viewer: Viewer): void {
+  private handleAnnotationChange(): void {
+    const viewer = this.targetViewer;
     viewer.renderAnnotations();
     const composition = viewer.getComposition();
     if (!composition) return;
     const viewState = viewer.getState();
     const section = viewState.section;
     const sectionStep = calcThumbSteps(composition, section).thumbStep;
-    if (!this.scrollbar)
-      this.scrollbar = createScrollbar(viewer, viewState, this.settings);
+    if (!this.scrollbar) this.scrollbar = this.createScrollbar(viewState);
     const drawnStep = this.scrollbar.thumbStep;
     const stepDiff = drawnStep - sectionStep;
     if (stepDiff != 0) {
@@ -272,7 +272,7 @@ export default class Scrollbar implements Annotation, ViewerEventTarget {
       const option = ev.original.ctrlKey ? 5 : 1;
       const stepDiff = step * option;
       this.scrollbar = updateThumb(this.scrollbar, 'step-diff', stepDiff);
-      this.handleAnnotationChange(viewer);
+      this.handleAnnotationChange();
     }
   }
 
@@ -305,7 +305,7 @@ export default class Scrollbar implements Annotation, ViewerEventTarget {
       this.scrollbar = updateThumb(this.scrollbar, 'position-diff', dist);
       const thumbStep = this.scrollbar.thumbStep;
       if (thumbStep != prevStep) this.dragStartPoint2 = point;
-      this.handleAnnotationChange(viewer);
+      this.handleAnnotationChange();
     }
   }
 

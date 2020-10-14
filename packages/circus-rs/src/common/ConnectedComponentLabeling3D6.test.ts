@@ -1,4 +1,4 @@
-import CCL from './ConnectedComponentLabeling3D26';
+import CCL from './ConnectedComponentLabeling3D6';
 import { mosaic, white, black, sampleImg } from './CCL_sampleImg';
 
 function CCLTest(
@@ -48,10 +48,9 @@ function CCLTest(
     expect(flag).toBe(false);
   };
 }
-
 test('<Exception handling> number of tentative label > 8 bit', () => {
   const width = 512;
-  const neighbor = 26;
+  const neighbor = 6;
   const [img, label, num, volume, UL, LR] = mosaic(
     width,
     width,
@@ -64,8 +63,8 @@ test('<Exception handling> number of tentative label > 8 bit', () => {
 });
 
 describe('labeling: Mosaic', () => {
-  const width = 40;
-  const neighbor = 26;
+  const width = 7;
+  const neighbor = 6;
   const [img, label, num, volume, UL, LR] = mosaic(
     width,
     width,
@@ -73,7 +72,7 @@ describe('labeling: Mosaic', () => {
     neighbor
   );
   test(
-    '3D 26-neighbor',
+    '3D 6-neighbor',
     CCLTest(img, width, width, width, label, num, volume, UL, LR)
   );
 });
@@ -84,7 +83,7 @@ describe('labeling: black', () => {
   const UL = new Uint16Array([0, 0, 0]);
   const LR = new Uint16Array([width - 1, width - 1, width - 1]);
   test(
-    '3D 26-neighbor',
+    '3D 6-neighbor',
     CCLTest(
       black(width, width, width),
       width,
@@ -105,7 +104,7 @@ describe('labeling: white', () => {
   const UL = new Uint16Array([width, width, width, 0, 0, 0]);
   const LR = new Uint16Array([0, 0, 0, width - 1, width - 1, width - 1]);
   test(
-    '3D white 26-neighbor',
+    '3D white 6-neighbor',
     CCLTest(
       white(width, width, width),
       width,
@@ -122,16 +121,16 @@ describe('labeling: white', () => {
 
 describe('labeling: sampleImg', () => {
   const [width, height, NSlice] = [10, 10, 3];
-  const str = `3D sampleImg 26-neighbor`;
-  const [img, label, num, volume, UL, LR] = sampleImg(26);
+  const str = `3D sampleImg 6-neighbor`;
+  const [img, label, num, volume, UL, LR] = sampleImg(6);
   test(str, CCLTest(img, width, height, NSlice, label, num, volume, UL, LR));
 });
 
 describe('3D labeling: 1 slice', () => {
   const [width, height, NSlice] = [16, 16, 1];
-  let [img, label, num, volume, UL, LR] = sampleImg(8);
+  let [img, label, num, volume, UL, LR] = sampleImg(4);
   test(
-    `3D sampleImg 26-neighbor`,
+    `3D sampleImg 6-neighbor`,
     CCLTest(img, width, height, NSlice, label, num, volume, UL, LR)
   );
 });

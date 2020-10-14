@@ -1,6 +1,16 @@
 import { dirxml } from 'console';
 import { resolve } from 'path';
 
+export interface LabelingResults {
+  labelMap: Uint8Array;
+  labelnum: number;
+  labels: Array<{
+    volume: number;
+    min: [number, number, number];
+    max: [number, number, number];
+  }>;
+}
+
 /**
  * 何立風, et al. "三次元 2 値画像における高速ラベル付けアルゴリズム." 電子情報通信学会論文誌 D 92.12 (2009): 2261-2269.
  * Return Connected-component labeling image
@@ -17,7 +27,7 @@ export default function CCL(
   height: number,
   NSlice: number,
   threshold = 0
-): [Uint16Array, number, Uint32Array, Uint16Array, Uint16Array] {
+): LabelingResults {
   const [dx, dy, dz] = [
     [-1, -1, 0, 1, -1, 0, 1, -1, 0, 1, -1, 0, 1],
     [0, -1, -1, -1, -1, -1, -1, 0, 0, 0, 1, 1, 1],
@@ -57,389 +67,371 @@ export default function CCL(
     substituteLabels[label * num_maxCCL] = 1;
   };
 
-  const val = (
-    array: Uint8Array | Uint16Array,
-    x: number,
-    y: number,
-    z: number
-  ) => {
+  const val0 = (x: number, y: number, z: number) => {
     return x < 0 || width <= x || y < 0 || height <= y || z < 0 || NSlice <= z
       ? -1
       : array[x + width * (y + z * height)];
   };
 
-  const labelImg = new Uint16Array(width * height * NSlice);
+  const labelImg = new Uint8Array(width * height * NSlice);
+
+  const val = (x: number, y: number, z: number) => {
+    return x < 0 || width <= x || y < 0 || height <= y || z < 0 || NSlice <= z
+      ? -1
+      : labelImg[x + width * (y + z * height)];
+  };
 
   let label = 0;
   for (let k = 0; k < NSlice; k++) {
     for (let j = 0; j < height; j++) {
       for (let i = 0; i < width; i++) {
-        if (val(array, i, j, k) <= threshold) {
+        if (val0(i, j, k) <= threshold) {
           continue;
         }
-        if (val(labelImg, i + dx[8], j + dy[8], k + dz[8]) > 0) {
+        if (val(i + dx[8], j + dy[8], k + dz[8]) > 0) {
           labelImg[i + width * (j + k * height)] = val(
-            labelImg,
             i + dx[8],
             j + dy[8],
             k + dz[8]
           );
-        } else if (val(labelImg, i + dx[2], j + dy[2], k + dz[2]) > 0) {
+        } else if (val(i + dx[2], j + dy[2], k + dz[2]) > 0) {
           labelImg[i + width * (j + k * height)] = val(
-            labelImg,
             i + dx[2],
             j + dy[2],
             k + dz[2]
           );
           if (
-            val(labelImg, i + dx[11], j + dy[11], k + dz[11]) > 0 &&
-            val(labelImg, i + dx[7], j + dy[7], k + dz[7]) <= 0 &&
-            val(labelImg, i + dx[9], j + dy[9], k + dz[9]) <= 0
+            val(i + dx[11], j + dy[11], k + dz[11]) > 0 &&
+            val(i + dx[7], j + dy[7], k + dz[7]) <= 0 &&
+            val(i + dx[9], j + dy[9], k + dz[9]) <= 0
           ) {
             resolve(
-              val(labelImg, i + dx[2], j + dy[2], k + dz[2]),
-              val(labelImg, i + dx[11], j + dy[11], k + dz[11])
+              val(i + dx[2], j + dy[2], k + dz[2]),
+              val(i + dx[11], j + dy[11], k + dz[11])
             );
           } else {
             if (
-              val(labelImg, i + dx[10], j + dy[10], k + dz[10]) > 0 &&
-              val(labelImg, i + dx[7], j + dy[7], k + dz[7]) <= 0
+              val(i + dx[10], j + dy[10], k + dz[10]) > 0 &&
+              val(i + dx[7], j + dy[7], k + dz[7]) <= 0
             ) {
               resolve(
-                val(labelImg, i + dx[2], j + dy[2], k + dz[2]),
-                val(labelImg, i + dx[10], j + dy[10], k + dz[10])
+                val(i + dx[2], j + dy[2], k + dz[2]),
+                val(i + dx[10], j + dy[10], k + dz[10])
               );
             }
             if (
-              val(labelImg, i + dx[12], j + dy[12], k + dz[12]) > 0 &&
-              val(labelImg, i + dx[9], j + dy[9], k + dz[9]) <= 0
+              val(i + dx[12], j + dy[12], k + dz[12]) > 0 &&
+              val(i + dx[9], j + dy[9], k + dz[9]) <= 0
             ) {
               resolve(
-                val(labelImg, i + dx[2], j + dy[2], k + dz[2]),
-                val(labelImg, i + dx[12], j + dy[12], k + dz[12])
+                val(i + dx[2], j + dy[2], k + dz[2]),
+                val(i + dx[12], j + dy[12], k + dz[12])
               );
             }
           }
-        } else if (val(labelImg, i + dx[5], j + dy[5], k + dz[5]) > 0) {
+        } else if (val(i + dx[5], j + dy[5], k + dz[5]) > 0) {
           labelImg[i + width * (j + k * height)] = val(
-            labelImg,
             i + dx[5],
             j + dy[5],
             k + dz[5]
           );
           if (
-            val(labelImg, i + dx[11], j + dy[11], k + dz[11]) > 0 &&
-            val(labelImg, i + dx[7], j + dy[7], k + dz[7]) <= 0 &&
-            val(labelImg, i + dx[9], j + dy[9], k + dz[9]) <= 0
+            val(i + dx[11], j + dy[11], k + dz[11]) > 0 &&
+            val(i + dx[7], j + dy[7], k + dz[7]) <= 0 &&
+            val(i + dx[9], j + dy[9], k + dz[9]) <= 0
           ) {
             resolve(
-              val(labelImg, i + dx[5], j + dy[5], k + dz[5]),
-              val(labelImg, i + dx[11], j + dy[11], k + dz[11])
+              val(i + dx[5], j + dy[5], k + dz[5]),
+              val(i + dx[11], j + dy[11], k + dz[11])
             );
           } else {
             if (
-              val(labelImg, i + dx[10], j + dy[10], k + dz[10]) > 0 &&
-              val(labelImg, i + dx[7], j + dy[7], k + dz[7]) <= 0
+              val(i + dx[10], j + dy[10], k + dz[10]) > 0 &&
+              val(i + dx[7], j + dy[7], k + dz[7]) <= 0
             ) {
               resolve(
-                val(labelImg, i + dx[5], j + dy[5], k + dz[5]),
-                val(labelImg, i + dx[10], j + dy[10], k + dz[10])
+                val(i + dx[5], j + dy[5], k + dz[5]),
+                val(i + dx[10], j + dy[10], k + dz[10])
               );
             }
             if (
-              val(labelImg, i + dx[12], j + dy[12], k + dz[12]) > 0 &&
-              val(labelImg, i + dx[9], j + dy[9], k + dz[9]) <= 0
+              val(i + dx[12], j + dy[12], k + dz[12]) > 0 &&
+              val(i + dx[9], j + dy[9], k + dz[9]) <= 0
             ) {
               resolve(
-                val(labelImg, i + dx[5], j + dy[5], k + dz[5]),
-                val(labelImg, i + dx[12], j + dy[12], k + dz[12])
+                val(i + dx[5], j + dy[5], k + dz[5]),
+                val(i + dx[12], j + dy[12], k + dz[12])
               );
             }
           }
-        } else if (val(labelImg, i + dx[0], j + dy[0], k + dz[0]) > 0) {
+        } else if (val(i + dx[0], j + dy[0], k + dz[0]) > 0) {
           labelImg[i + j * width + k * width * height] = val(
-            labelImg,
             i + dx[0],
             j + dy[0],
             k + dz[0]
           );
           if (
-            val(labelImg, i + dx[9], j + dy[9], k + dz[9]) > 0 &&
-            val(labelImg, i + dx[11], j + dy[11], k + dz[11]) <= 0
+            val(i + dx[9], j + dy[9], k + dz[9]) > 0 &&
+            val(i + dx[11], j + dy[11], k + dz[11]) <= 0
           ) {
             resolve(
-              val(labelImg, i + dx[0], j + dy[0], k + dz[0]),
-              val(labelImg, i + dx[9], j + dy[9], k + dz[9])
+              val(i + dx[0], j + dy[0], k + dz[0]),
+              val(i + dx[9], j + dy[9], k + dz[9])
             );
-          } else if (val(labelImg, i + dx[6], j + dy[6], k + dz[6]) > 0) {
+          } else if (val(i + dx[6], j + dy[6], k + dz[6]) > 0) {
             resolve(
-              val(labelImg, i + dx[0], j + dy[0], k + dz[0]),
-              val(labelImg, i + dx[6], j + dy[6], k + dz[6])
+              val(i + dx[0], j + dy[0], k + dz[0]),
+              val(i + dx[6], j + dy[6], k + dz[6])
             );
-            if (val(labelImg, i + dx[12], j + dy[12], k + dz[12]) > 0) {
+            if (val(i + dx[12], j + dy[12], k + dz[12]) > 0) {
               resolve(
-                val(labelImg, i + dx[0], j + dy[0], k + dz[0]),
-                val(labelImg, i + dx[12], j + dy[12], k + dz[12])
+                val(i + dx[0], j + dy[0], k + dz[0]),
+                val(i + dx[12], j + dy[12], k + dz[12])
               );
             }
-          } else if (val(labelImg, i + dx[3], j + dy[3], k + dz[3]) > 0) {
+          } else if (val(i + dx[3], j + dy[3], k + dz[3]) > 0) {
             resolve(
-              val(labelImg, i + dx[0], j + dy[0], k + dz[0]),
-              val(labelImg, i + dx[3], j + dy[3], k + dz[3])
+              val(i + dx[0], j + dy[0], k + dz[0]),
+              val(i + dx[3], j + dy[3], k + dz[3])
             );
-            if (val(labelImg, i + dx[12], j + dy[12], k + dz[12]) > 0) {
+            if (val(i + dx[12], j + dy[12], k + dz[12]) > 0) {
               resolve(
-                val(labelImg, i + dx[0], j + dy[0], k + dz[0]),
-                val(labelImg, i + dx[12], j + dy[12], k + dz[12])
+                val(i + dx[0], j + dy[0], k + dz[0]),
+                val(i + dx[12], j + dy[12], k + dz[12])
               );
             }
           } else if (
-            val(labelImg, i + dx[12], j + dy[12], k + dz[12]) > 0 &&
-            val(labelImg, i + dx[11], j + dy[11], k + dz[11]) <= 0
+            val(i + dx[12], j + dy[12], k + dz[12]) > 0 &&
+            val(i + dx[11], j + dy[11], k + dz[11]) <= 0
           ) {
             resolve(
-              val(labelImg, i + dx[0], j + dy[0], k + dz[0]),
-              val(labelImg, i + dx[12], j + dy[12], k + dz[12])
+              val(i + dx[0], j + dy[0], k + dz[0]),
+              val(i + dx[12], j + dy[12], k + dz[12])
             );
           }
-        } else if (val(labelImg, i + dx[7], j + dy[7], k + dz[7]) > 0) {
+        } else if (val(i + dx[7], j + dy[7], k + dz[7]) > 0) {
           labelImg[i + j * width + k * width * height] = val(
-            labelImg,
             i + dx[7],
             j + dy[7],
             k + dz[7]
           );
           if (
-            val(labelImg, i + dx[9], j + dy[9], k + dz[9]) > 0 &&
-            val(labelImg, i + dx[11], j + dy[11], k + dz[11]) <= 0
+            val(i + dx[9], j + dy[9], k + dz[9]) > 0 &&
+            val(i + dx[11], j + dy[11], k + dz[11]) <= 0
           ) {
             resolve(
-              val(labelImg, i + dx[7], j + dy[7], k + dz[7]),
-              val(labelImg, i + dx[9], j + dy[9], k + dz[9])
+              val(i + dx[7], j + dy[7], k + dz[7]),
+              val(i + dx[9], j + dy[9], k + dz[9])
             );
-          } else if (val(labelImg, i + dx[6], j + dy[6], k + dz[6]) > 0) {
+          } else if (val(i + dx[6], j + dy[6], k + dz[6]) > 0) {
             resolve(
-              val(labelImg, i + dx[7], j + dy[7], k + dz[7]),
-              val(labelImg, i + dx[6], j + dy[6], k + dz[6])
+              val(i + dx[7], j + dy[7], k + dz[7]),
+              val(i + dx[6], j + dy[6], k + dz[6])
             );
-            if (val(labelImg, i + dx[12], j + dy[12], k + dz[12]) > 0) {
+            if (val(i + dx[12], j + dy[12], k + dz[12]) > 0) {
               resolve(
-                val(labelImg, i + dx[7], j + dy[7], k + dz[7]),
-                val(labelImg, i + dx[12], j + dy[12], k + dz[12])
+                val(i + dx[7], j + dy[7], k + dz[7]),
+                val(i + dx[12], j + dy[12], k + dz[12])
               );
             }
-          } else if (val(labelImg, i + dx[3], j + dy[3], k + dz[3]) > 0) {
+          } else if (val(i + dx[3], j + dy[3], k + dz[3]) > 0) {
             resolve(
-              val(labelImg, i + dx[7], j + dy[7], k + dz[7]),
-              val(labelImg, i + dx[3], j + dy[3], k + dz[3])
+              val(i + dx[7], j + dy[7], k + dz[7]),
+              val(i + dx[3], j + dy[3], k + dz[3])
             );
-            if (val(labelImg, i + dx[12], j + dy[12], k + dz[12]) > 0) {
+            if (val(i + dx[12], j + dy[12], k + dz[12]) > 0) {
               resolve(
-                val(labelImg, i + dx[7], j + dy[7], k + dz[7]),
-                val(labelImg, i + dx[12], j + dy[12], k + dz[12])
+                val(i + dx[7], j + dy[7], k + dz[7]),
+                val(i + dx[12], j + dy[12], k + dz[12])
               );
             }
           } else if (
-            val(labelImg, i + dx[12], j + dy[12], k + dz[12]) > 0 &&
-            val(labelImg, i + dx[11], j + dy[11], k + dz[11]) <= 0
+            val(i + dx[12], j + dy[12], k + dz[12]) > 0 &&
+            val(i + dx[11], j + dy[11], k + dz[11]) <= 0
           ) {
             resolve(
-              val(labelImg, i + dx[7], j + dy[7], k + dz[7]),
-              val(labelImg, i + dx[12], j + dy[12], k + dz[12])
+              val(i + dx[7], j + dy[7], k + dz[7]),
+              val(i + dx[12], j + dy[12], k + dz[12])
             );
           }
-        } else if (val(labelImg, i + dx[9], j + dy[9], k + dz[9]) > 0) {
+        } else if (val(i + dx[9], j + dy[9], k + dz[9]) > 0) {
           labelImg[i + width * (j + k * height)] = val(
-            labelImg,
             i + dx[9],
             j + dy[9],
             k + dz[9]
           );
           if (
-            val(labelImg, i + dx[10], j + dy[10], k + dz[10]) > 0 &&
-            val(labelImg, i + dx[11], j + dy[11], k + dz[11]) <= 0
+            val(i + dx[10], j + dy[10], k + dz[10]) > 0 &&
+            val(i + dx[11], j + dy[11], k + dz[11]) <= 0
           ) {
             resolve(
-              val(labelImg, i + dx[9], j + dy[9], k + dz[9]),
-              val(labelImg, i + dx[10], j + dy[10], k + dz[10])
+              val(i + dx[9], j + dy[9], k + dz[9]),
+              val(i + dx[10], j + dy[10], k + dz[10])
             );
           }
-          if (val(labelImg, i + dx[4], j + dy[4], k + dz[4]) > 0) {
+          if (val(i + dx[4], j + dy[4], k + dz[4]) > 0) {
             resolve(
-              val(labelImg, i + dx[9], j + dy[9], k + dz[9]),
-              val(labelImg, i + dx[4], j + dy[4], k + dz[4])
+              val(i + dx[9], j + dy[9], k + dz[9]),
+              val(i + dx[4], j + dy[4], k + dz[4])
             );
-          } else if (val(labelImg, i + dx[1], j + dy[1], k + dz[1]) > 0) {
+          } else if (val(i + dx[1], j + dy[1], k + dz[1]) > 0) {
             resolve(
-              val(labelImg, i + dx[9], j + dy[9], k + dz[9]),
-              val(labelImg, i + dx[1], j + dy[1], k + dz[1])
+              val(i + dx[9], j + dy[9], k + dz[9]),
+              val(i + dx[1], j + dy[1], k + dz[1])
             );
           }
-        } else if (val(labelImg, i + dx[11], j + dy[11], k + dz[11]) > 0) {
+        } else if (val(i + dx[11], j + dy[11], k + dz[11]) > 0) {
           labelImg[i + width * (j + k * height)] = val(
-            labelImg,
             i + dx[11],
             j + dy[11],
             k + dz[11]
           );
-          if (val(labelImg, i + dx[3], j + dy[3], k + dz[3]) > 0) {
+          if (val(i + dx[3], j + dy[3], k + dz[3]) > 0) {
             resolve(
-              val(labelImg, i + dx[11], j + dy[11], k + dz[11]),
-              val(labelImg, i + dx[3], j + dy[3], k + dz[3])
+              val(i + dx[11], j + dy[11], k + dz[11]),
+              val(i + dx[3], j + dy[3], k + dz[3])
             );
-          } else if (val(labelImg, i + dx[6], j + dy[6], k + dz[6]) > 0) {
+          } else if (val(i + dx[6], j + dy[6], k + dz[6]) > 0) {
             resolve(
-              val(labelImg, i + dx[11], j + dy[11], k + dz[11]),
-              val(labelImg, i + dx[6], j + dy[6], k + dz[6])
-            );
-          }
-          if (val(labelImg, i + dx[1], j + dy[1], k + dz[1]) > 0) {
-            resolve(
-              val(labelImg, i + dx[11], j + dy[11], k + dz[11]),
-              val(labelImg, i + dx[1], j + dy[1], k + dz[1])
-            );
-          } else if (val(labelImg, i + dx[4], j + dy[4], k + dz[4]) > 0) {
-            resolve(
-              val(labelImg, i + dx[11], j + dy[11], k + dz[11]),
-              val(labelImg, i + dx[4], j + dy[4], k + dz[4])
+              val(i + dx[11], j + dy[11], k + dz[11]),
+              val(i + dx[6], j + dy[6], k + dz[6])
             );
           }
-        } else if (val(labelImg, i + dx[4], j + dy[4], k + dz[4]) > 0) {
+          if (val(i + dx[1], j + dy[1], k + dz[1]) > 0) {
+            resolve(
+              val(i + dx[11], j + dy[11], k + dz[11]),
+              val(i + dx[1], j + dy[1], k + dz[1])
+            );
+          } else if (val(i + dx[4], j + dy[4], k + dz[4]) > 0) {
+            resolve(
+              val(i + dx[11], j + dy[11], k + dz[11]),
+              val(i + dx[4], j + dy[4], k + dz[4])
+            );
+          }
+        } else if (val(i + dx[4], j + dy[4], k + dz[4]) > 0) {
           labelImg[i + width * (j + k * height)] = val(
-            labelImg,
             i + dx[4],
             j + dy[4],
             k + dz[4]
           );
-          if (val(labelImg, i + dx[3], j + dy[3], k + dz[3]) > 0) {
+          if (val(i + dx[3], j + dy[3], k + dz[3]) > 0) {
             resolve(
-              val(labelImg, i + dx[4], j + dy[4], k + dz[4]),
-              val(labelImg, i + dx[3], j + dy[3], k + dz[3])
+              val(i + dx[4], j + dy[4], k + dz[4]),
+              val(i + dx[3], j + dy[3], k + dz[3])
             );
-          } else if (val(labelImg, i + dx[6], j + dy[6], k + dz[6]) > 0) {
+          } else if (val(i + dx[6], j + dy[6], k + dz[6]) > 0) {
             resolve(
-              val(labelImg, i + dx[4], j + dy[4], k + dz[4]),
-              val(labelImg, i + dx[6], j + dy[6], k + dz[6])
-            );
-          }
-          if (val(labelImg, i + dx[10], j + dy[10], k + dz[10]) > 0) {
-            resolve(
-              val(labelImg, i + dx[4], j + dy[4], k + dz[4]),
-              val(labelImg, i + dx[10], j + dy[10], k + dz[10])
+              val(i + dx[4], j + dy[4], k + dz[4]),
+              val(i + dx[6], j + dy[6], k + dz[6])
             );
           }
-          if (val(labelImg, i + dx[12], j + dy[12], k + dz[12]) > 0) {
+          if (val(i + dx[10], j + dy[10], k + dz[10]) > 0) {
             resolve(
-              val(labelImg, i + dx[4], j + dy[4], k + dz[4]),
-              val(labelImg, i + dx[12], j + dy[12], k + dz[12])
+              val(i + dx[4], j + dy[4], k + dz[4]),
+              val(i + dx[10], j + dy[10], k + dz[10])
             );
           }
-        } else if (val(labelImg, i + dx[1], j + dy[1], k + dz[1]) > 0) {
+          if (val(i + dx[12], j + dy[12], k + dz[12]) > 0) {
+            resolve(
+              val(i + dx[4], j + dy[4], k + dz[4]),
+              val(i + dx[12], j + dy[12], k + dz[12])
+            );
+          }
+        } else if (val(i + dx[1], j + dy[1], k + dz[1]) > 0) {
           labelImg[i + width * (j + k * height)] = val(
-            labelImg,
             i + dx[1],
             j + dy[1],
             k + dz[1]
           );
-          if (val(labelImg, i + dx[3], j + dy[3], k + dz[3]) > 0) {
+          if (val(i + dx[3], j + dy[3], k + dz[3]) > 0) {
             resolve(
-              val(labelImg, i + dx[1], j + dy[1], k + dz[1]),
-              val(labelImg, i + dx[3], j + dy[3], k + dz[3])
+              val(i + dx[1], j + dy[1], k + dz[1]),
+              val(i + dx[3], j + dy[3], k + dz[3])
             );
-          } else if (val(labelImg, i + dx[6], j + dy[6], k + dz[6]) > 0) {
+          } else if (val(i + dx[6], j + dy[6], k + dz[6]) > 0) {
             resolve(
-              val(labelImg, i + dx[1], j + dy[1], k + dz[1]),
-              val(labelImg, i + dx[6], j + dy[6], k + dz[6])
-            );
-          }
-          if (val(labelImg, i + dx[10], j + dy[10], k + dz[10]) > 0) {
-            resolve(
-              val(labelImg, i + dx[1], j + dy[1], k + dz[1]),
-              val(labelImg, i + dx[10], j + dy[10], k + dz[10])
+              val(i + dx[1], j + dy[1], k + dz[1]),
+              val(i + dx[6], j + dy[6], k + dz[6])
             );
           }
-          if (val(labelImg, i + dx[12], j + dy[12], k + dz[12]) > 0) {
+          if (val(i + dx[10], j + dy[10], k + dz[10]) > 0) {
             resolve(
-              val(labelImg, i + dx[1], j + dy[1], k + dz[1]),
-              val(labelImg, i + dx[12], j + dy[12], k + dz[12])
+              val(i + dx[1], j + dy[1], k + dz[1]),
+              val(i + dx[10], j + dy[10], k + dz[10])
             );
           }
-        } else if (val(labelImg, i + dx[3], j + dy[3], k + dz[3]) > 0) {
+          if (val(i + dx[12], j + dy[12], k + dz[12]) > 0) {
+            resolve(
+              val(i + dx[1], j + dy[1], k + dz[1]),
+              val(i + dx[12], j + dy[12], k + dz[12])
+            );
+          }
+        } else if (val(i + dx[3], j + dy[3], k + dz[3]) > 0) {
           labelImg[i + width * (j + k * height)] = val(
-            labelImg,
             i + dx[3],
             j + dy[3],
             k + dz[3]
           );
-          if (val(labelImg, i + dx[10], j + dy[10], k + dz[10]) > 0) {
+          if (val(i + dx[10], j + dy[10], k + dz[10]) > 0) {
             resolve(
-              val(labelImg, i + dx[3], j + dy[3], k + dz[3]),
-              val(labelImg, i + dx[10], j + dy[10], k + dz[10])
+              val(i + dx[3], j + dy[3], k + dz[3]),
+              val(i + dx[10], j + dy[10], k + dz[10])
             );
           }
-          if (val(labelImg, i + dx[12], j + dy[12], k + dz[12]) > 0) {
+          if (val(i + dx[12], j + dy[12], k + dz[12]) > 0) {
             resolve(
-              val(labelImg, i + dx[3], j + dy[3], k + dz[3]),
-              val(labelImg, i + dx[12], j + dy[12], k + dz[12])
+              val(i + dx[3], j + dy[3], k + dz[3]),
+              val(i + dx[12], j + dy[12], k + dz[12])
             );
           }
-        } else if (val(labelImg, i + dx[6], j + dy[6], k + dz[6]) > 0) {
+        } else if (val(i + dx[6], j + dy[6], k + dz[6]) > 0) {
           labelImg[i + width * (j + k * height)] = val(
-            labelImg,
             i + dx[6],
             j + dy[6],
             k + dz[6]
           );
-          if (val(labelImg, i + dx[10], j + dy[10], k + dz[10]) > 0) {
+          if (val(i + dx[10], j + dy[10], k + dz[10]) > 0) {
             resolve(
-              val(labelImg, i + dx[6], j + dy[6], k + dz[6]),
-              val(labelImg, i + dx[10], j + dy[10], k + dz[10])
+              val(i + dx[6], j + dy[6], k + dz[6]),
+              val(i + dx[10], j + dy[10], k + dz[10])
             );
           }
-          if (val(labelImg, i + dx[12], j + dy[12], k + dz[12]) > 0) {
+          if (val(i + dx[12], j + dy[12], k + dz[12]) > 0) {
             resolve(
-              val(labelImg, i + dx[6], j + dy[6], k + dz[6]),
-              val(labelImg, i + dx[12], j + dy[12], k + dz[12])
+              val(i + dx[6], j + dy[6], k + dz[6]),
+              val(i + dx[12], j + dy[12], k + dz[12])
             );
           }
-        } else if (val(labelImg, i + dx[10], j + dy[10], k + dz[10]) > 0) {
+        } else if (val(i + dx[10], j + dy[10], k + dz[10]) > 0) {
           labelImg[i + width * (j + k * height)] = val(
-            labelImg,
             i + dx[10],
             j + dy[10],
             k + dz[10]
           );
-          if (val(labelImg, i + dx[12], j + dy[12], k + dz[12]) > 0) {
+          if (val(i + dx[12], j + dy[12], k + dz[12]) > 0) {
             resolve(
-              val(labelImg, i + dx[10], j + dy[10], k + dz[10]),
-              val(labelImg, i + dx[12], j + dy[12], k + dz[12])
+              val(i + dx[10], j + dy[10], k + dz[10]),
+              val(i + dx[12], j + dy[12], k + dz[12])
             );
           }
-        } else if (val(labelImg, i + dx[12], j + dy[12], k + dz[12]) > 0) {
+        } else if (val(i + dx[12], j + dy[12], k + dz[12]) > 0) {
           labelImg[i + width * (j + k * height)] = val(
-            labelImg,
             i + dx[12],
             j + dy[12],
             k + dz[12]
           );
         } else {
           ++label;
-          // if (2 ** 8 <= label) {
-          //   throw new Error(`${label} is not 8 bit.`);
-          // }
+          if (num_maxCCL <= label) {
+            throw new Error(`number of tentative label is not in 8 bit.`);
+          }
           labelImg[i + width * (j + k * height)] = label;
           setNewLabel(label);
         }
       }
     }
   }
-  // for (let i = 0; i < num_maxCCL; i++) {
-  //   let moji = `${i}`;
-  //   for (let j = 0; j <= substituteLabels[i * num_maxCCL]; j++) {
-  //     moji += ` ${substituteLabels[i * num_maxCCL + j]}`;
-  //   }
-  //   console.log(moji);
-  // }
+
   let newLabel = 0;
 
   for (let i = 1; i < num_maxCCL; i++) {
@@ -454,7 +446,6 @@ export default function CCL(
       }
     }
   }
-
   const volume = new Uint32Array(newLabel + 1);
   const max =
     width < height
@@ -471,32 +462,45 @@ export default function CCL(
     for (let j = 0; j < height; j++) {
       for (let i = 0; i < width; i++) {
         const pos = i + width * (j + k * height);
-        labelImg[pos] = chiefLabelTable[labelImg[pos]];
+        const labeltmp = chiefLabelTable[labelImg[pos]];
+        const labeltmp3 = labeltmp * 3;
+        labelImg[pos] = labeltmp;
+        //labeltmp
+        if (i < UL[labeltmp3]) {
+          UL[labeltmp3] = i;
+        }
+        if (LR[labeltmp3] < i) {
+          LR[labeltmp3] = i;
+        }
+        if (j < UL[labeltmp3 + 1]) {
+          UL[labeltmp3 + 1] = j;
+        }
+        if (LR[labeltmp3 + 1] < j) {
+          LR[labeltmp3 + 1] = j;
+        }
+        if (k < UL[labeltmp3 + 2]) {
+          UL[labeltmp3 + 2] = k;
+        }
+        if (LR[labeltmp3 + 2] < k) {
+          LR[labeltmp3 + 2] = k;
+        }
 
-        if (i < UL[labelImg[pos] * 3]) {
-          UL[labelImg[pos] * 3] = i;
-        }
-        if (LR[labelImg[pos] * 3] < i) {
-          LR[labelImg[pos] * 3] = i;
-        }
-        if (j < UL[labelImg[pos] * 3 + 1]) {
-          UL[labelImg[pos] * 3 + 1] = j;
-        }
-        if (LR[labelImg[pos] * 3 + 1] < j) {
-          LR[labelImg[pos] * 3 + 1] = j;
-        }
-        if (k < UL[labelImg[pos] * 3 + 2]) {
-          UL[labelImg[pos] * 3 + 2] = k;
-        }
-        if (LR[labelImg[pos] * 3 + 2] < k) {
-          LR[labelImg[pos] * 3 + 2] = k;
-        }
-
-        volume[labelImg[pos]]++;
+        volume[labeltmp]++;
       }
     }
   }
-  return [labelImg, newLabel, volume, UL, LR];
+
+  const labels = new Array(newLabel + 1);
+  for (let i = 0; i <= newLabel; i++) {
+    const pos = [i * 3, i * 3 + 1, i * 3 + 2];
+    labels[i] = {
+      volume: volume[i],
+      min: [UL[pos[0]], UL[pos[1]], UL[pos[2]]],
+      max: [LR[pos[0]], LR[pos[1]], LR[pos[2]]]
+    };
+  }
+
+  return { labelMap: labelImg, labelnum: newLabel, labels: labels };
 }
 
 function mosaic(
@@ -790,29 +794,29 @@ function sampleImg(
 //   26
 // );
 // //const [array, label, sum, _volume, _UL, _LR] = sampleImg(26);
-// const [labeledImg, no, volume, UL, LR] = CCL(array, width, height, NSlice);
+// const results = CCL(array, width, height, NSlice);
 
 // for (let k = 0; k < NSlice; k++) {
 //   for (let j = 0; j < height; j++) {
 //     let moji = '';
 //     for (let i = 0; i < width; i++) {
 //       const pos = i + j * width + k * width * height;
-//       moji += ` ${array[pos]}(${labeledImg[pos]})${label[pos]}|`;
+//       moji += ` ${array[pos]}(${results.labelMap[pos]})${label[pos]}|`;
 //     }
 //     console.log(moji);
 //   }
 //   console.log('===================');
 // }
 
-// console.log(no, sum);
-// for (let i = 0; i <= no; i++) {
+// console.log(results.labelnum, sum, results.labels);
+// for (let i = 0; i <= results.labelnum; i++) {
 //   console.log(
-//     `${i} ${volume[i]}(${_volume[i]}) [${UL[i * 3]}(${_UL[i * 3]}), ${
-//       UL[i * 3 + 1]
-//     }(${_UL[i * 3 + 1]}), ${UL[i * 3 + 2]}(${_UL[i * 3 + 2]})]-[${LR[i * 3]}(${
-//       _LR[i * 3]
-//     }), ${LR[i * 3 + 1]}(${_LR[i * 3 + 1]}), ${LR[i * 3 + 2]}(${
-//       _LR[i * 3 + 2]
-//     })]`
+//     `${i} ${results.labels[i].volume}(${_volume[i]}) [${
+//       results.labels[i].min[0]
+//     }(${_UL[i * 3]}), ${results.labels[i].min[1]}(${_UL[i * 3 + 1]}), ${
+//       results.labels[i].min[2]
+//     }(${_UL[i * 3 + 2]})]-[${results.labels[i].max[0]}(${_LR[i * 3]}), ${
+//       results.labels[i].max[1]
+//     }(${_LR[i * 3 + 1]}), ${results.labels[i].max[2]}(${_LR[i * 3 + 2]})]`
 //   );
 // }

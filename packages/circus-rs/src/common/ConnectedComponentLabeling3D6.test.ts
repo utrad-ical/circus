@@ -16,29 +16,25 @@ function CCLTest(
     const labelingResults = CCL(array, width, height, NSlice);
     let flag = labelingResults.labelnum !== labelNo ? true : false;
     if (flag === false) {
-      for (let k = 0; k < NSlice; k++) {
-        for (let j = 0; j < height; j++) {
-          for (let i = 0; i < width; i++) {
-            const pos = i + width * (j + k * height);
-            if (labelingResults.labelMap[pos] !== answer[pos]) {
-              flag = true;
-              break;
-            }
-          }
+      for (let i = 0; i < width * height * NSlice; i++) {
+        if (labelingResults.labelMap[i] !== answer[i]) {
+          flag = true;
+          break;
         }
       }
       for (let i = 0; i <= labelingResults.labelnum; i++) {
         if (i === 0 && volume[i] === 0) {
           continue;
         }
+        const pos = [i * 3, i * 3 + 1, i * 3 + 2];
         if (
           volume[i] != labelingResults.labels[i].volume ||
-          UL[i * 3] != labelingResults.labels[i].min[0] ||
-          LR[i * 3] != labelingResults.labels[i].max[0] ||
-          UL[i * 3 + 1] != labelingResults.labels[i].min[1] ||
-          LR[i * 3 + 1] != labelingResults.labels[i].max[1] ||
-          UL[i * 3 + 2] != labelingResults.labels[i].min[2] ||
-          LR[i * 3 + 2] != labelingResults.labels[i].max[2]
+          UL[pos[0]] != labelingResults.labels[i].min[0] ||
+          LR[pos[0]] != labelingResults.labels[i].max[0] ||
+          UL[pos[1]] != labelingResults.labels[i].min[1] ||
+          LR[pos[1]] != labelingResults.labels[i].max[1] ||
+          UL[pos[2]] != labelingResults.labels[i].min[2] ||
+          LR[pos[2]] != labelingResults.labels[i].max[2]
         ) {
           flag = true;
           break;

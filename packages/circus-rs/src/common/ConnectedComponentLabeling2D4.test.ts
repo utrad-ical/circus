@@ -15,13 +15,10 @@ function CCLTest(
     const labelingResults = CCL(array, width, height);
     let flag = labelingResults.labelnum !== labelNo ? true : false;
     if (flag === false) {
-      for (let j = 0; j < height; j++) {
-        for (let i = 0; i < width; i++) {
-          const pos = i + width * j;
-          if (labelingResults.labelMap[pos] !== answer[pos]) {
-            flag = true;
-            break;
-          }
+      for (let i = 0; i < width * height; i++) {
+        if (labelingResults.labelMap[i] !== answer[i]) {
+          flag = true;
+          break;
         }
       }
 
@@ -29,12 +26,13 @@ function CCLTest(
         if (i === 0 && volume[i] === 0) {
           continue;
         }
+        const pos = [i * 3, i * 3 + 1];
         if (
           volume[i] !== labelingResults.labels[i].volume ||
-          UL[i * 3] !== labelingResults.labels[i].min[0] ||
-          LR[i * 3] !== labelingResults.labels[i].max[0] ||
-          UL[i * 3 + 1] !== labelingResults.labels[i].min[1] ||
-          LR[i * 3 + 1] !== labelingResults.labels[i].max[1]
+          UL[pos[0]] !== labelingResults.labels[i].min[0] ||
+          LR[pos[0]] !== labelingResults.labels[i].max[0] ||
+          UL[pos[1]] !== labelingResults.labels[i].min[1] ||
+          LR[pos[1]] !== labelingResults.labels[i].max[1]
         ) {
           flag = true;
           break;
@@ -104,8 +102,7 @@ describe('labeling: white', () => {
 describe('labeling: sampleImg', () => {
   let width, height, str;
   [width, height] = [16, 16];
-  str = `2D`;
-  str = `${str} sampleImg 8-neighbor`;
+  str = `2D sampleImg 4-neighbor`;
   const [img, label, num, volume, UL, LR] = sampleImg(4);
   test(str, CCLTest(img, width, height, label, num, volume, UL, LR));
 });

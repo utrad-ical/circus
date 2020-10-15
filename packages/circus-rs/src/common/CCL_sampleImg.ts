@@ -31,46 +31,50 @@ export function mosaic(
         }
 
         if (num === 1) {
-          label[pos] = img[pos] === 1 ? 1 : 0;
-          volume[img[pos]]++;
-          if (i < UL[img[pos] * 3]) {
-            UL[img[pos] * 3] = i;
+          const p = img[pos];
+          const p3 = p * 3;
+          label[pos] = p === 1 ? 1 : 0;
+          volume[p]++;
+          if (i < UL[p3]) {
+            UL[p3] = i;
           }
-          if (LR[img[pos] * 3] < i) {
-            LR[img[pos] * 3] = i;
+          if (LR[p3] < i) {
+            LR[p3] = i;
           }
-          if (j < UL[img[pos] * 3 + 1]) {
-            UL[img[pos] * 3 + 1] = j;
+          if (j < UL[p3 + 1]) {
+            UL[p3 + 1] = j;
           }
-          if (LR[img[pos] * 3 + 1] < j) {
-            LR[img[pos] * 3 + 1] = j;
+          if (LR[p3 + 1] < j) {
+            LR[p3 + 1] = j;
           }
-          if (k < UL[img[pos] * 3 + 2]) {
-            UL[img[pos] * 3 + 2] = k;
+          if (k < UL[p3 + 2]) {
+            UL[p3 + 2] = k;
           }
-          if (LR[img[pos] * 3 + 2] < k) {
-            LR[img[pos] * 3 + 2] = k;
+          if (LR[p3 + 2] < k) {
+            LR[p3 + 2] = k;
           }
         } else {
           label[pos] = img[pos] === 1 ? ++sum : 0;
-          volume[label[pos]]++;
-          if (i < UL[label[pos] * 3]) {
-            UL[label[pos] * 3] = i;
+          const p = label[pos];
+          const p3 = p * 3;
+          volume[p]++;
+          if (i < UL[p3]) {
+            UL[p3] = i;
           }
-          if (LR[label[pos] * 3] < i) {
-            LR[label[pos] * 3] = i;
+          if (LR[p3] < i) {
+            LR[p3] = i;
           }
-          if (j < UL[label[pos] * 3 + 1]) {
-            UL[label[pos] * 3 + 1] = j;
+          if (j < UL[p3 + 1]) {
+            UL[p3 + 1] = j;
           }
-          if (LR[label[pos] * 3 + 1] < j) {
-            LR[label[pos] * 3 + 1] = j;
+          if (LR[p3 + 1] < j) {
+            LR[p3 + 1] = j;
           }
-          if (k < UL[label[pos] * 3 + 2]) {
-            UL[label[pos] * 3 + 2] = k;
+          if (k < UL[p3 + 2]) {
+            UL[p3 + 2] = k;
           }
-          if (LR[label[pos] * 3 + 2] < k) {
-            LR[label[pos] * 3 + 2] = k;
+          if (LR[p3 + 2] < k) {
+            LR[p3 + 2] = k;
           }
         }
       }
@@ -80,17 +84,13 @@ export function mosaic(
 }
 
 export function white(width: number, height: number, NSlice: number) {
-  const img = new Uint8Array(width * height * NSlice).map(_ => {
+  return new Uint8Array(width * height * NSlice).map(_ => {
     return 1;
   });
-  return img;
 }
 
 export function black(width: number, height: number, NSlice: number) {
-  const img = new Uint8Array(width * height * NSlice).map(_ => {
-    return 0;
-  });
-  return img;
+  return new Uint8Array(width * height * NSlice);
 }
 
 export function sampleImg(

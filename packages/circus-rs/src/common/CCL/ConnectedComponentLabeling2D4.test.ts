@@ -53,14 +53,14 @@ test('<Exception handling> number of tentative label > 8 bit', () => {
 });
 
 describe('labeling: Mosaic', () => {
-  const width = 22;
+  const width = 16;
   const neighbor = 6;
   const [img, label, num, volume, UL, LR] = mosaic(width, width, 1, neighbor);
   test('2D 4-neighbor', CCLTest(img, width, width, label, num, volume, UL, LR));
 });
 
 describe('labeling: black', () => {
-  const width = 1024;
+  const width = 16;
   const volume = new Uint32Array([width ** 2]);
   const UL = new Uint16Array([0, 0, 0]);
   const LR = new Uint16Array([width - 1, width - 1, 0]);
@@ -80,7 +80,7 @@ describe('labeling: black', () => {
 });
 
 describe('labeling: white', () => {
-  const width = 1024;
+  const width = 16;
   const volume = new Uint32Array([0, width ** 2]);
   const UL = new Uint16Array([width, width, 0, 0, 0, 0]);
   const LR = new Uint16Array([0, 0, 0, width - 1, width - 1, 0]);

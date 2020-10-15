@@ -75,7 +75,7 @@ describe('labeling: Mosaic', () => {
 });
 
 describe('labeling: black', () => {
-  const width = 512;
+  const width = 16;
   const volume = new Uint32Array([width ** 3]);
   const UL = new Uint16Array([0, 0, 0]);
   const LR = new Uint16Array([width - 1, width - 1, width - 1]);
@@ -96,7 +96,7 @@ describe('labeling: black', () => {
 });
 
 describe('labeling: white', () => {
-  const width = 512;
+  const width = 16;
   const volume = new Uint32Array([0, width ** 3]);
   const UL = new Uint16Array([width, width, width, 0, 0, 0]);
   const LR = new Uint16Array([0, 0, 0, width - 1, width - 1, width - 1]);

@@ -170,6 +170,15 @@ const RevisionEditor: React.FC<{
     latestHandleAnnotationChange.current = handleAnnotationChange;
   });
 
+  const orientationColor = (id: string) => {
+    const orientationColors: { [index: string]: string } = {
+      axial: '#8888ff',
+      sagittal: '#ff6666',
+      coronal: '#88ff88',
+      oblique: '#ffff88'
+    };
+    return orientationColors[id.replace(/one-/, '')];
+  };
   useEffect(() => {
     if (!composition) return;
 
@@ -203,32 +212,19 @@ const RevisionEditor: React.FC<{
     });
 
     if (viewOptions.showReferenceLine) {
-      const lineColors: { [index: string]: string } = {
-        axial: '#8888ff',
-        sagittal: '#ff6666',
-        coronal: '#88ff88',
-        oblique: '#ffff88'
-      };
       Object.keys(viewers).forEach(k => {
         composition.addAnnotation(
-          new rs.ReferenceLine(viewers[k], { color: lineColors[k] })
+          new rs.ReferenceLine(viewers[k], { color: orientationColor(k) })
         );
       });
     }
 
     if (viewOptions.showScrollbar !== 'none') {
-      const lineColors: { [index: string]: string } = {
-        axial: '#8888ff',
-        sagittal: '#ff6666',
-        coronal: '#88ff88',
-        oblique: '#ffffaa'
-      };
-      const size = viewOptions.showScrollbar === 'large' ? 30 : 20;
       Object.keys(viewers).forEach(k => {
         composition.addAnnotation(
           new rs.Scrollbar(viewers[k], {
-            color: lineColors[k.replace(/one-/, '')],
-            size
+            color: orientationColor(k),
+            size: viewOptions.showScrollbar === 'large' ? 30 : 20
           })
         );
       });

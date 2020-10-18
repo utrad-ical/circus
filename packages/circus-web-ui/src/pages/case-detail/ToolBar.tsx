@@ -229,7 +229,7 @@ const ToolBar: React.FC<{
             Trilinear filtering
           </MenuItem>
           <MenuItem divider />
-          <MenuItem header>Show scrollbar</MenuItem>
+          <MenuItem header>Show scroll bar</MenuItem>
           {scrollbarOptions.map(l => {
             return (
               <MenuItem

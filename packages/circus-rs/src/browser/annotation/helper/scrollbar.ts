@@ -288,9 +288,9 @@ export const drawScrollbar = (
     };
 
     const judgeHandleType = (p: Vector2): HandleType | undefined => {
-      if (thumbBoxHitTest && thumbBoxHitTest(p)) return 'thumbDrag';
-      if (arrowIncBoxHitTest && arrowIncBoxHitTest(p)) return 'arrowInc';
-      if (arrowDecBoxHitTest && arrowDecBoxHitTest(p)) return 'arrowDec';
+      if (thumbBoxHitTest(p)) return 'thumbDrag';
+      if (arrowIncBoxHitTest(p)) return 'arrowInc';
+      if (arrowDecBoxHitTest(p)) return 'arrowDec';
       return undefined;
     };
     return { judgeHandleType };

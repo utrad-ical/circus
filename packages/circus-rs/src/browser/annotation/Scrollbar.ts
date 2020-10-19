@@ -239,6 +239,8 @@ export default class Scrollbar implements Annotation, ViewerEventTarget {
         ? undefined
         : this.judgeHandleType(point);
 
+    if (this.handleType) ev.stopPropagation();
+
     if (this.handleType && this.handleType !== prevHandleType) {
       viewer.setHoveringAnnotation(this);
       viewer.setCursorStyle('pointer');

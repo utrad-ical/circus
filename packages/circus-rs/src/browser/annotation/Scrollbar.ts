@@ -282,7 +282,7 @@ export default class Scrollbar implements Annotation, ViewerEventTarget {
       this.scrollbar = this.createScrollbar(viewer.getState());
 
     if ('thumbDrag' === this.handleType) {
-      const point: Vector2 = new Vector2(ev.viewerX!, ev.viewerY!);
+      const point = new Vector2(ev.viewerX!, ev.viewerY!);
       const dist = (() => {
         const v = point.clone().sub(this.dragStartPoint2!);
         switch (this.position) {

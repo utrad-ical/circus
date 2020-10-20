@@ -2,6 +2,7 @@ import generateUniqueId from '../utils/generateUniqueId';
 import { fetchAccessibleSeries, UserPrivilegeInfo } from '../privilegeUtils';
 import { Models } from '../interface';
 import { SeriesEntry } from '../typings/circus';
+import { isValidPartialVolumeDescriptor } from '@utrad-ical/circus-lib';
 
 const makeNewCase = async (
   models: Models,
@@ -21,6 +22,12 @@ const makeNewCase = async (
   );
   if (!ok) {
     throw new Error('You do not have write privilege for this project.');
+  }
+
+  if (
+    series.some(s => !isValidPartialVolumeDescriptor(s.partialVolumeDescriptor))
+  ) {
+    throw new Error('Invalid partial volume descriptor.');
   }
 
   const seriesData = await fetchAccessibleSeries(

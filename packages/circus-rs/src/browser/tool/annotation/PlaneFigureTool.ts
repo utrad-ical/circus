@@ -17,9 +17,6 @@ export default class PlaneFigureTool extends ToolBaseClass implements Tool {
   protected usePointerLockAPI: boolean = false;
   protected figureType: FigureType = 'circle';
 
-  private totalMovementX: number | undefined = undefined;
-  private totalMovementY: number | undefined = undefined;
-
   public activate(viewer: Viewer): void {
     viewer.primaryEventTarget = this;
   }
@@ -42,13 +39,8 @@ export default class PlaneFigureTool extends ToolBaseClass implements Tool {
     const orientation = detectOrthogonalSection(section);
     if (orientation !== 'axial') return;
 
-    ev.viewer.canvas.requestPointerLock();
-
     const resolution: [number, number] = ev.viewer.getResolution();
     const screenPoint: [number, number] = [ev.viewerX!, ev.viewerY!];
-
-    this.totalMovementX = 0;
-    this.totalMovementY = 0;
 
     // Create figure
     const fig = new PlaneFigure();
@@ -84,13 +76,7 @@ export default class PlaneFigureTool extends ToolBaseClass implements Tool {
     if (!this.focusedFigure) return;
 
     const resolution: [number, number] = ev.viewer.getResolution();
-    const screenPoint: [number, number] = [
-      ev.viewerX! + this.totalMovementX!,
-      ev.viewerY! + this.totalMovementY!
-    ];
-
-    this.totalMovementX += ev.original.movementX;
-    this.totalMovementY += ev.original.movementY;
+    const screenPoint: [number, number] = [ev.viewerX!, ev.viewerY!];
 
     // Update figure
     const max = convertScreenCoordinateToVolumeCoordinate(
@@ -133,8 +119,6 @@ export default class PlaneFigureTool extends ToolBaseClass implements Tool {
       comp.removeAnnotation(fig);
     }
 
-    this.totalMovementX = undefined;
-    this.totalMovementY = undefined;
     this.focusedFigure = undefined;
 
     comp.annotationUpdated();

@@ -20,13 +20,10 @@ export default class ViewerEvent {
     this.type = type || (original ? original.type : null);
     this.propagation = true;
 
-    const isTouchEvent = original instanceof TouchEvent;
-    if (original && ('offsetX' in original || isTouchEvent)) {
+    if (original && 'offsetX' in original) {
       const [viewerWidth, viewerHeight] = viewer.getResolution();
       const [elementWidth, elementHeight] = viewer.getViewport();
-      const { pageX, pageY } = isTouchEvent
-        ? original.changedTouches[0]
-        : original;
+      const { pageX, pageY } = original;
       const rect = viewer.canvas.getBoundingClientRect(); // in window coordinate
       const offsetX = pageX - rect.left - window.scrollX;
       const offsetY = pageY - rect.top - window.scrollY;
@@ -35,9 +32,24 @@ export default class ViewerEvent {
       this.viewerY = (offsetY * viewerHeight) / elementHeight;
       this.viewerWidth = viewerWidth;
       this.viewerHeight = viewerHeight;
-      if (!isTouchEvent) {
-        this.movementX = original.movementX;
-        this.movementY = original.movementY;
+
+      this.movementX = original.movementX;
+      this.movementY = original.movementY;
+    }
+    if (original && original instanceof TouchEvent) {
+      const touch: Touch = original.changedTouches[0];
+      if (touch) {
+        const [viewerWidth, viewerHeight] = viewer.getResolution();
+        const [elementWidth, elementHeight] = viewer.getViewport();
+        const { pageX, pageY } = touch;
+        const rect = viewer.canvas.getBoundingClientRect(); // in window coordinate
+        const offsetX = pageX - rect.left - window.scrollX;
+        const offsetY = pageY - rect.top - window.scrollY;
+
+        this.viewerX = (offsetX * viewerWidth) / elementWidth;
+        this.viewerY = (offsetY * viewerHeight) / elementHeight;
+        this.viewerWidth = viewerWidth;
+        this.viewerHeight = viewerHeight;
       }
     }
     this.original = original;
@@ -52,7 +64,7 @@ export default class ViewerEvent {
     if (!this.propagation) return;
 
     const normalizedEventName = this.type.replace(
-      /^(mouse|drag)([a-z])/,
+      /^(mouse|drag|touch)([a-z])/,
       (m, p1, p2) => p1 + p2.toUpperCase()
     );
     const handler = normalizedEventName + 'Handler';

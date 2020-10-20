@@ -211,14 +211,6 @@ export default class Scrollbar implements Annotation, ViewerEventTarget {
    * ViewerEventHandler
    */
   public mouseMoveHandler(ev: ViewerEvent): void {
-    this._pointerMoveHandler(ev);
-  }
-
-  public touchMoveHandler(ev: ViewerEvent): void {
-    this._pointerMoveHandler(ev);
-  }
-
-  private _pointerMoveHandler(ev: ViewerEvent): void {
     const viewer = ev.viewer;
     if (viewer !== this.targetViewer) return;
 

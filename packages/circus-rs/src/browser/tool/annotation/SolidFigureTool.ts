@@ -18,9 +18,6 @@ export default class SolidFigureTool extends ToolBaseClass implements Tool {
   protected usePointerLockAPI: boolean = false;
   protected figureType: FigureType = 'cuboid';
 
-  private totalMovementX: number | undefined = undefined;
-  private totalMovementY: number | undefined = undefined;
-
   public activate(viewer: Viewer): void {
     viewer.primaryEventTarget = this;
   }
@@ -40,14 +37,8 @@ export default class SolidFigureTool extends ToolBaseClass implements Tool {
     if (!viewState || viewState.type !== 'mpr') return;
     const section = viewState.section;
     const orientation = detectOrthogonalSection(section);
-
-    ev.viewer.canvas.requestPointerLock();
-
     const resolution: [number, number] = ev.viewer.getResolution();
     const screenPoint: [number, number] = [ev.viewerX!, ev.viewerY!];
-
-    this.totalMovementX = 0;
-    this.totalMovementY = 0;
 
     // Create figure
     if (!SolidFigure.editableOrientation.some(o => o === orientation)) return;
@@ -56,6 +47,7 @@ export default class SolidFigureTool extends ToolBaseClass implements Tool {
       new Vector2().fromArray(resolution),
       new Vector2().fromArray(screenPoint)
     );
+
     const fig = this.createFigure(min.toArray());
 
     comp.addAnnotation(fig);
@@ -75,13 +67,7 @@ export default class SolidFigureTool extends ToolBaseClass implements Tool {
     if (!this.focusedFigure) return;
 
     const resolution: [number, number] = ev.viewer.getResolution();
-    const screenPoint: [number, number] = [
-      ev.viewerX! + this.totalMovementX!,
-      ev.viewerY! + this.totalMovementY!
-    ];
-
-    this.totalMovementX += ev.original.movementX;
-    this.totalMovementY += ev.original.movementY;
+    const screenPoint: [number, number] = [ev.viewerX!, ev.viewerY!];
 
     // Update figure
     const max = convertScreenCoordinateToVolumeCoordinate(
@@ -91,6 +77,8 @@ export default class SolidFigureTool extends ToolBaseClass implements Tool {
     );
 
     this.focusedFigure.max = max.toArray();
+
+    console.log({ min: this.focusedFigure.min, max: this.focusedFigure.max });
     comp.annotationUpdated();
 
     ev.stopPropagation();
@@ -115,8 +103,6 @@ export default class SolidFigureTool extends ToolBaseClass implements Tool {
       comp.removeAnnotation(fig);
     }
 
-    this.totalMovementX = undefined;
-    this.totalMovementY = undefined;
     this.focusedFigure = undefined;
 
     comp.annotationUpdated();

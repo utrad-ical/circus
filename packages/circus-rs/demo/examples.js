@@ -9,6 +9,7 @@ Select an individual example item for details.
 
 //--@include Initialize viewer
 //--@include Initialize toolbar
+//--@include Add scrollbar annotation
 
 /*--
 @title Initialize composition
@@ -94,17 +95,29 @@ const setOrientation = async (v, orientation) => {
 setOrientation(viewer, 'axial');
 setOrientation(viewer2, 'coronal');
 
-const scrollbar = new rs.Scrollbar(viewer, {
+/*--
+@title Initialize two viewers with cross reference line, scrollbar, and toolbar
+@viewerNotRequired
+
+Before jumping in to other examples, you must create a viewer.
+This example shows minimum code to initialize CIRCUS RS.
+--*/
+
+//--@include Initialize two viewers with cross reference line
+
+const scrollbar1 = new rs.Scrollbar(viewer, {
   position: 'right',
   color: '#993300'
 });
-comp.addAnnotation(scrollbar);
+comp.addAnnotation(scrollbar1);
 
 const scrollbar2 = new rs.Scrollbar(viewer2, {
   position: 'left',
-  color: '#339900'
+  color: '#3399ff'
 });
 comp.addAnnotation(scrollbar2);
+
+//--@include Initialize toolbar
 
 /*--
 @title Initialize toolbar
@@ -132,8 +145,6 @@ const toolbar = rs.createToolbar(container, [
 
 if (viewer) toolbar.bindViewer(viewer);
 if (viewer2) toolbar.bindViewer(viewer2);
-const scrollbar = new rs.Scrollbar(viewer, {});
-comp.addAnnotation(scrollbar);
 // setInterval( function(){ viewer.render(); }, 30 );
 
 /*--
@@ -200,6 +211,13 @@ viewState.window = {
   level: 10
 };
 viewer.setState(viewState);
+
+/*--
+@title Add scrollbar annotation
+Adds an scrollbar annotation to the viewer.
+--*/
+const scrollbar = new rs.Scrollbar(viewer, {});
+comp.addAnnotation(scrollbar);
 
 /*--
 @title AddCloudAnnotation

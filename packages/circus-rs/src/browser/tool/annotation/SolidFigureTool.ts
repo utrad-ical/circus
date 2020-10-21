@@ -78,7 +78,6 @@ export default class SolidFigureTool extends ToolBaseClass implements Tool {
 
     this.focusedFigure.max = max.toArray();
 
-    console.log({ min: this.focusedFigure.min, max: this.focusedFigure.max });
     comp.annotationUpdated();
 
     ev.stopPropagation();

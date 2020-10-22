@@ -240,6 +240,7 @@ const RevisionEditor: React.FC<{
     editingData,
     viewOptions.showReferenceLine,
     viewOptions.scrollbar,
+    viewOptions.layout,
     viewers
   ]);
 

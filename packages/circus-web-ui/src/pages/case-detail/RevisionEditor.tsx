@@ -42,6 +42,7 @@ import styled from 'styled-components';
 import LabelMenu from './LabelMenu';
 import { debounce } from 'lodash';
 import useLocalPreference from 'utils/useLocalPreference';
+import isTouchDevice from 'utils/isTouchDevice';
 
 const useComposition = (
   seriesUid: string,
@@ -95,6 +96,7 @@ const RevisionEditor: React.FC<{
 
   const viewWindows = useRef<{ [seriesUid: string]: rs.ViewWindow }>({});
 
+  const [touchDevice] = useState(() => isTouchDevice());
   const toolsRef = useRef<{ [key: string]: ToolBaseClass }>({});
   const tools = toolsRef.current;
   const stateChanger = useMemo(() => createStateChanger<rs.MprViewState>(), []);
@@ -225,11 +227,14 @@ const RevisionEditor: React.FC<{
         composition.addAnnotation(
           new rs.Scrollbar(viewers[k], {
             color: orientationColor(k),
-            size: viewOptions.scrollbar === 'large' ? 30 : 20
+            size: viewOptions.scrollbar === 'large' ? 30 : 20,
+            visibility: touchDevice ? 'always' : 'hover'
           })
         );
       });
     }
+
+    console.log('isT', touchDevice);
 
     composition.annotationUpdated();
     return () => {
@@ -241,6 +246,7 @@ const RevisionEditor: React.FC<{
     viewOptions.showReferenceLine,
     viewOptions.scrollbar,
     viewOptions.layout,
+    touchDevice,
     viewers
   ]);
 

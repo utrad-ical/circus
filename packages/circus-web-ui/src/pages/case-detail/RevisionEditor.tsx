@@ -105,7 +105,7 @@ const RevisionEditor: React.FC<{
     {
       layout: 'twoByTwo',
       showReferenceLine: false,
-      showScrollbar: 'none',
+      scrollbar: 'none',
       interpolationMode: 'nearestNeighbor'
     }
   );
@@ -179,6 +179,7 @@ const RevisionEditor: React.FC<{
     };
     return orientationColors[id.replace(/one-/, '')];
   };
+
   useEffect(() => {
     if (!composition) return;
 
@@ -219,12 +220,12 @@ const RevisionEditor: React.FC<{
       });
     }
 
-    if (viewOptions.showScrollbar !== 'none') {
+    if (viewOptions.scrollbar !== 'none') {
       Object.keys(viewers).forEach(k => {
         composition.addAnnotation(
           new rs.Scrollbar(viewers[k], {
             color: orientationColor(k),
-            size: viewOptions.showScrollbar === 'large' ? 30 : 20
+            size: viewOptions.scrollbar === 'large' ? 30 : 20
           })
         );
       });
@@ -238,7 +239,7 @@ const RevisionEditor: React.FC<{
     composition,
     editingData,
     viewOptions.showReferenceLine,
-    viewOptions.showScrollbar,
+    viewOptions.scrollbar,
     viewers
   ]);
 

@@ -234,8 +234,6 @@ const RevisionEditor: React.FC<{
       });
     }
 
-    console.log('isT', touchDevice);
-
     composition.annotationUpdated();
     return () => {
       composition.removeAllListeners('annotationChange');

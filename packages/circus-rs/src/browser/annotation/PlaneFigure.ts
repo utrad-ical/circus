@@ -30,8 +30,6 @@ const handleSize = 5;
 export default class PlaneFigure implements Annotation, ViewerEventTarget {
   public editable: boolean = false;
   private handleType: undefined | HandleType = undefined;
-  private dragStartPoint: Vector2 | undefined = undefined;
-  private dragTotalMovement: [number, number] | undefined = undefined;
   private dragStartPoint3: Vector3 | undefined = undefined;
   private originalBoundingBox3: [Vector3, Vector3] | undefined = undefined;
 
@@ -221,8 +219,6 @@ export default class PlaneFigure implements Annotation, ViewerEventTarget {
       const handleType = this.getHandleType(boundingBox, point);
 
       if (handleType) {
-        this.dragStartPoint = point;
-        this.dragTotalMovement = [0, 0];
         this.handleType = handleType;
 
         const state = viewer.getState() as MprViewState;
@@ -247,13 +243,7 @@ export default class PlaneFigure implements Annotation, ViewerEventTarget {
 
     if (viewer.getHoveringAnnotation() === this) {
       ev.stopPropagation();
-      this.dragTotalMovement![0] += ev.original.movementX;
-      this.dragTotalMovement![1] += ev.original.movementY;
-
-      const screenPoint: [number, number] = [
-        this.dragStartPoint!.x + this.dragTotalMovement![0],
-        this.dragStartPoint!.y + this.dragTotalMovement![1]
-      ];
+      const screenPoint: [number, number] = [ev.viewerX!, ev.viewerY!];
       const state = viewer.getState() as MprViewState;
       const resolution: [number, number] = viewer.getResolution();
       const draggedPoint3 = convertScreenCoordinateToVolumeCoordinate(
@@ -336,8 +326,6 @@ export default class PlaneFigure implements Annotation, ViewerEventTarget {
       if (comp) comp.annotationUpdated();
 
       this.handleType = undefined;
-      this.dragStartPoint = undefined;
-      this.dragTotalMovement = undefined;
       viewer.setCursorStyle('');
     }
   }

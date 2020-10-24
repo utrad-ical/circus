@@ -21,6 +21,7 @@ export { default as Annotation } from './annotation/Annotation';
 export { default as CornerText } from './annotation/CornerText';
 export { default as VoxelCloud } from './annotation/VoxelCloud';
 export { default as ReferenceLine } from './annotation/ReferenceLine';
+export { default as Scrollbar } from './annotation/Scrollbar';
 export { default as PlaneFigure } from './annotation/PlaneFigure';
 export { default as Point } from './annotation/Point';
 export { default as SolidFigure } from './annotation/SolidFigure';

@@ -1,5 +1,5 @@
 import { Box2, Box3, Vector2, Vector3 } from 'three';
-import { Section, Vector3D, sectionCenter } from '../../common/geometry';
+import { Section, Vector3D } from '../../common/geometry';
 import ViewerEventTarget from '../interface/ViewerEventTarget';
 import {
   convertScreenCoordinateToVolumeCoordinate,
@@ -65,9 +65,7 @@ export default abstract class SolidFigure
   private dragInfo:
     | {
         originalBoundingBox3: [number[], number[]];
-        dragStartScreenPoint: number[];
         dragStartVolumePoint3: number[];
-        dragTotalMovement: [number, number];
       }
     | undefined;
 
@@ -368,13 +366,11 @@ export default abstract class SolidFigure
         this.handleType = handleType;
         this.dragInfo = {
           originalBoundingBox3: [min.concat(), max.concat()],
-          dragStartScreenPoint: point.toArray(),
           dragStartVolumePoint3: convertScreenCoordinateToVolumeCoordinate(
             state.section,
             new Vector2().fromArray(resolution),
             point.clone()
-          ).toArray(),
-          dragTotalMovement: [0, 0]
+          ).toArray()
         };
       }
     }
@@ -388,15 +384,7 @@ export default abstract class SolidFigure
 
     if (viewer.getHoveringAnnotation() === this) {
       ev.stopPropagation();
-
-      this.dragInfo!.dragTotalMovement![0] += ev.original.movementX;
-      this.dragInfo!.dragTotalMovement![1] += ev.original.movementY;
-      const draggedPoint: [number, number] = [
-        this.dragInfo!.dragStartScreenPoint![0] +
-          this.dragInfo!.dragTotalMovement![0],
-        this.dragInfo!.dragStartScreenPoint![1] +
-          this.dragInfo!.dragTotalMovement![1]
-      ];
+      const draggedPoint: [number, number] = [ev.viewerX!, ev.viewerY!];
 
       const viewState = viewer.getState() as MprViewState;
       const resolution: [number, number] = viewer.getResolution();

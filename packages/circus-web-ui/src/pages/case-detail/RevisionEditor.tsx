@@ -42,6 +42,7 @@ import styled from 'styled-components';
 import LabelMenu from './LabelMenu';
 import { debounce } from 'lodash';
 import useLocalPreference from 'utils/useLocalPreference';
+import isTouchDevice from 'utils/isTouchDevice';
 
 const useComposition = (
   seriesUid: string,
@@ -95,6 +96,7 @@ const RevisionEditor: React.FC<{
 
   const viewWindows = useRef<{ [seriesUid: string]: rs.ViewWindow }>({});
 
+  const [touchDevice] = useState(() => isTouchDevice());
   const toolsRef = useRef<{ [key: string]: ToolBaseClass }>({});
   const tools = toolsRef.current;
   const stateChanger = useMemo(() => createStateChanger<rs.MprViewState>(), []);
@@ -105,6 +107,7 @@ const RevisionEditor: React.FC<{
     {
       layout: 'twoByTwo',
       showReferenceLine: false,
+      scrollbar: 'none',
       interpolationMode: 'nearestNeighbor'
     }
   );
@@ -169,6 +172,16 @@ const RevisionEditor: React.FC<{
     latestHandleAnnotationChange.current = handleAnnotationChange;
   });
 
+  const orientationColor = (id: string) => {
+    const orientationColors: { [index: string]: string } = {
+      axial: '#8888ff',
+      sagittal: '#ff6666',
+      coronal: '#88ff88',
+      oblique: '#ffff88'
+    };
+    return orientationColors[id.replace(/one-/, '')];
+  };
+
   useEffect(() => {
     if (!composition) return;
 
@@ -182,6 +195,7 @@ const RevisionEditor: React.FC<{
 
     composition.annotations.forEach(antn => {
       if (antn instanceof rs.ReferenceLine) antn.dispose();
+      if (antn instanceof rs.Scrollbar) antn.dispose();
     });
     composition.removeAllAnnotations();
 
@@ -201,15 +215,21 @@ const RevisionEditor: React.FC<{
     });
 
     if (viewOptions.showReferenceLine) {
-      const lineColors: { [index: string]: string } = {
-        axial: '#8888ff',
-        sagittal: '#ff6666',
-        coronal: '#88ff88',
-        oblique: '#ffff88'
-      };
       Object.keys(viewers).forEach(k => {
         composition.addAnnotation(
-          new rs.ReferenceLine(viewers[k], { color: lineColors[k] })
+          new rs.ReferenceLine(viewers[k], { color: orientationColor(k) })
+        );
+      });
+    }
+
+    if (viewOptions.scrollbar !== 'none') {
+      Object.keys(viewers).forEach(k => {
+        composition.addAnnotation(
+          new rs.Scrollbar(viewers[k], {
+            color: orientationColor(k),
+            size: viewOptions.scrollbar === 'large' ? 30 : 20,
+            visibility: touchDevice ? 'always' : 'hover'
+          })
         );
       });
     }
@@ -218,7 +238,15 @@ const RevisionEditor: React.FC<{
     return () => {
       composition.removeAllListeners('annotationChange');
     };
-  }, [composition, editingData, viewOptions.showReferenceLine, viewers]);
+  }, [
+    composition,
+    editingData,
+    viewOptions.showReferenceLine,
+    viewOptions.scrollbar,
+    viewOptions.layout,
+    touchDevice,
+    viewers
+  ]);
 
   useEffect(() => {
     stateChanger(viewState => ({

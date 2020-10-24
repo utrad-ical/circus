@@ -33,3 +33,24 @@ export default function handlePageBy(viewer: Viewer, step: number): void {
     }
   }
 }
+
+export function handlePageByScrollbar(viewer: Viewer, step: number): void {
+  const prevState = viewer.getState();
+  const comp = viewer.getComposition();
+  if (!comp) throw new Error('Composition not initialized'); // should not happen
+  const src = comp.imageSource as MprImageSource;
+  if (!(src instanceof MprImageSource)) return;
+
+  switch (prevState.type) {
+    case 'mpr': {
+      const section = orientationAwareTranslation(
+        prevState.section,
+        src.metadata!.voxelSize,
+        step
+      );
+      const viewState = { ...prevState, section };
+      viewer.setState(viewState);
+      return;
+    }
+  }
+}

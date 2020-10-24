@@ -18,8 +18,17 @@ import useKeyboardShortcut from 'utils/useKeyboardShortcut';
 export interface ViewOptions {
   layout?: Layout;
   showReferenceLine?: boolean;
+  scrollbar?: ScrollbarOptions;
   interpolationMode?: InterpolationMode;
 }
+
+type ScrollbarOptions = 'none' | 'large' | 'small';
+
+const scrollbarOptions: { key: ScrollbarOptions; caption: string }[] = [
+  { key: 'none', caption: 'None' },
+  { key: 'small', caption: 'Small' },
+  { key: 'large', caption: 'Large' }
+];
 
 const layoutOptions = [
   { key: 'twoByTwo', caption: '2 x 2', icon: 'circus-layout-four' },
@@ -59,6 +68,13 @@ const ToolBar: React.FC<{
     onChangeViewOptions({
       ...viewOptions,
       showReferenceLine: !viewOptions.showReferenceLine
+    });
+  };
+
+  const handleToggleScrollbar = (selection: ScrollbarOptions) => {
+    onChangeViewOptions({
+      ...viewOptions,
+      scrollbar: selection
     });
   };
 
@@ -213,6 +229,20 @@ const ToolBar: React.FC<{
             />
             Trilinear filtering
           </MenuItem>
+          <MenuItem divider />
+          <MenuItem header>Scroll bars</MenuItem>
+          {scrollbarOptions.map(l => {
+            return (
+              <MenuItem
+                key={l.key}
+                eventKey={l.key}
+                onSelect={handleToggleScrollbar}
+              >
+                <CheckMark checked={viewOptions.scrollbar === l.key} />
+                {l.caption}
+              </MenuItem>
+            );
+          })}
         </Dropdown.Menu>
       </Dropdown>
     </StyledDiv>

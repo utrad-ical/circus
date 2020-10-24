@@ -9,6 +9,7 @@ Select an individual example item for details.
 
 //--@include Initialize viewer
 //--@include Initialize toolbar
+//--@include Add scrollbar annotation
 
 /*--
 @title Initialize composition
@@ -95,6 +96,30 @@ setOrientation(viewer, 'axial');
 setOrientation(viewer2, 'coronal');
 
 /*--
+@title Initialize two viewers with cross reference line, scrollbar, and toolbar
+@viewerNotRequired
+
+Before jumping in to other examples, you must create a viewer.
+This example shows minimum code to initialize CIRCUS RS.
+--*/
+
+//--@include Initialize two viewers with cross reference line
+
+const scrollbar1 = new rs.Scrollbar(viewer, {
+  position: 'right',
+  color: '#993300'
+});
+comp.addAnnotation(scrollbar1);
+
+const scrollbar2 = new rs.Scrollbar(viewer2, {
+  position: 'left',
+  color: '#3399ff'
+});
+comp.addAnnotation(scrollbar2);
+
+//--@include Initialize toolbar
+
+/*--
 @title Initialize toolbar
 CIRCUS RS comes with a built-in tool bar.
 --*/
@@ -120,7 +145,6 @@ const toolbar = rs.createToolbar(container, [
 
 if (viewer) toolbar.bindViewer(viewer);
 if (viewer2) toolbar.bindViewer(viewer2);
-
 // setInterval( function(){ viewer.render(); }, 30 );
 
 /*--
@@ -187,6 +211,13 @@ viewState.window = {
   level: 10
 };
 viewer.setState(viewState);
+
+/*--
+@title Add scrollbar annotation
+Adds an scrollbar annotation to the viewer.
+--*/
+const scrollbar = new rs.Scrollbar(viewer, {});
+comp.addAnnotation(scrollbar);
 
 /*--
 @title AddCloudAnnotation
@@ -360,9 +391,7 @@ function benchmark(src) {
   return loop().then(time => {
     const fps = (1000 / time) * iteration;
     console.log(
-      `${
-        src.constructor.name
-      } took ${time} ms for ${iteration} iterations (${fps} fps)`
+      `${src.constructor.name} took ${time} ms for ${iteration} iterations (${fps} fps)`
     );
     return time;
   });
@@ -384,9 +413,7 @@ div2.style.display = 'none';
 const vrControl =
   document.querySelector('#vr-controls') || document.createElement('div');
 vrControl.setAttribute('id', 'vr-controls');
-$(vrControl)
-  .children()
-  .remove();
+$(vrControl).children().remove();
 div2.parentNode.appendChild(vrControl);
 
 // Setup volume loader
@@ -623,7 +650,7 @@ function resizeTicks(totalTime, tick, f) {
 //--@include Resize animation functions
 const div1 = document.getElementById('viewer');
 
-resizeAnimation(4000, function(progress) {
+resizeAnimation(4000, function (progress) {
   div1.style.width =
     Math.floor(312 + 200 * Math.cos(2 * Math.PI * progress)).toString() + 'px';
   div1.style.height =
@@ -637,7 +664,7 @@ resizeAnimation(4000, function(progress) {
 //--@include Resize animation functions
 const div1 = document.getElementById('viewer');
 
-resizeTicks(4000, 200, function(progress) {
+resizeTicks(4000, 200, function (progress) {
   div1.style.width =
     Math.floor(312 + 200 * Math.cos(2 * Math.PI * progress)).toString() + 'px';
   div1.style.height =

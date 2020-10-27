@@ -2,7 +2,7 @@ import Command from './Command';
 import { Models } from '../interface';
 import makeNewCase from '../case/makeNewCase';
 import { determineUserAccessInfo } from '../privilegeUtils';
-import MultiRange from 'multi-integer-range';
+import { toEntry } from './toEntry';
 
 export const options = () => {
   return [
@@ -26,27 +26,6 @@ export const help = () => {
     'Create a new clinical case to DB.\n' +
     'Usage: node circus register-case ProjectIdOrName --user=UesrNameOrEmail {--tags=tag1,tag2} SeriesUid1 [SeriesUid2 ...]'
   );
-};
-
-const toEntry = async (uidStr: string, models: Models) => {
-  const [seriesUid, ...pvdStrs] = uidStr.split(':');
-  const partialVolumeDescriptor =
-    pvdStrs.length === 3
-      ? {
-          start: Number(pvdStrs[0]),
-          end: Number(pvdStrs[1]),
-          delta: Number(pvdStrs[2])
-        }
-      : await (async () => {
-          const seriesData = await models.series.findByIdOrFail(seriesUid);
-          const firstSegment = new MultiRange(seriesData.images).getRanges()[0];
-          return {
-            start: firstSegment[0],
-            end: firstSegment[1],
-            delta: 1
-          };
-        })();
-  return { seriesUid, partialVolumeDescriptor };
 };
 
 interface Args {

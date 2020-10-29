@@ -267,13 +267,13 @@ export default class RawData {
       throw new RangeError('z-index out of bounds');
     }
 
-    const bits = rx * ry;
-    const bytes = bits * this.bpp;
+    const pixelsInSlice = rx * ry;
+    const bytes = pixelsInSlice * this.bpp;
     if (bytes > imageData.byteLength) {
       throw new Error('Not enough buffer length');
     }
 
-    if (this.pixelFormat !== 'binary' || bits % 8 === 0) {
+    if (this.pixelFormat !== 'binary' || pixelsInSlice % 8 === 0) {
       const byteLength = bytes; // len:byte of surface
       const byteOffset = byteLength * z;
       const src = new Uint8Array(imageData, 0, byteLength);
@@ -284,9 +284,9 @@ export default class RawData {
       const byteOffset = Math.floor(bytes * z);
       const src = new Uint8Array(imageData, 0, byteLength);
       const dst = new Uint8Array(this.data, byteOffset, byteLength);
-      const bitOffset1 = (bits * z) % 8;
+      const bitOffset1 = (pixelsInSlice * z) % 8;
       const bitOffset2 = 8 - bitOffset1;
-      const bitOffset3 = 8 - ((bits * (z + 1)) % 8);
+      const bitOffset3 = 8 - ((pixelsInSlice * (z + 1)) % 8);
       const containsPrev = bitOffset1 > 0;
       const containsNext = bitOffset3 !== 8;
       for (let i = 0; i < dst.length; i++) {
@@ -318,10 +318,10 @@ export default class RawData {
    */
   public clearSingleImage(z: number): void {
     const [rx, ry, rz] = this.size;
-    const bits = rx * ry;
-    const bytes = bits * this.bpp;
+    const pixelsInSlice = rx * ry;
+    const bytes = pixelsInSlice * this.bpp;
     const byteLength =
-      this.pixelFormat !== 'binary' || bits % 8 === 0
+      this.pixelFormat !== 'binary' || pixelsInSlice % 8 === 0
         ? bytes
         : Math.ceil(bytes);
     const src = new Uint8Array(byteLength);
@@ -339,8 +339,8 @@ export default class RawData {
       throw new RangeError('z-index out of bounds');
     }
 
-    const bits = rx * ry;
-    const bytes = bits * this.bpp;
+    const pixelsInSlice = rx * ry;
+    const bytes = pixelsInSlice * this.bpp;
     const byteLength = Math.ceil(bytes);
     const byteOffset = Math.floor(bytes * z);
 
@@ -351,13 +351,13 @@ export default class RawData {
       return buffer;
     };
 
-    if (this.pixelFormat !== 'binary' || bits % 8 === 0) {
+    if (this.pixelFormat !== 'binary' || pixelsInSlice % 8 === 0) {
       return getData();
     } else {
       const work = new Uint8Array(getData());
-      const bitOffset1 = (bits * z) % 8;
+      const bitOffset1 = (pixelsInSlice * z) % 8;
       const bitOffset2 = 8 - bitOffset1;
-      const bitOffset3 = 8 - ((bits * (z + 1)) % 8);
+      const bitOffset3 = 8 - ((pixelsInSlice * (z + 1)) % 8);
       const containsNext = bitOffset3 !== 8;
       const src = new Uint8Array(byteLength);
       for (let i = 0; i < work.length; i++) {

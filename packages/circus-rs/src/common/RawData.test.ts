@@ -73,7 +73,7 @@ describe('create binary data (various sizes)', () => {
   };
 
   test('not affect other images with different depths', () => {
-    for (let i = 3; i < 16; i++) {
+    for (let i = 3; i < 9; i++) {
       const size: Vector3D = [i, i, i];
       const [rx, ry, rz] = size;
       const bits = rx * ry; // bits in a slice

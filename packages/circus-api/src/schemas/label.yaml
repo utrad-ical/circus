@@ -55,13 +55,9 @@ oneOf:
           size:
             type: array
             items:
-              [
-                { type: 'integer', multipleOf: 8 },
-                { type: 'integer' },
-                { type: 'integer' },
-              ]
+              [{ type: 'integer' }, { type: 'integer' }, { type: 'integer' }]
             description: >
-              The size of the voxel data. The size along the x-axis must be a multiple of 8.
+              The size of the voxel data.
         required: ['voxels']
   - properties:
       type:

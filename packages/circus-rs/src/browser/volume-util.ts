@@ -14,7 +14,7 @@ import { Vector3, Vector2 } from 'three';
  */
 export function scanBoundingBox(
   volume: RawData,
-  snap: boolean = true
+  snap: boolean = false
 ): Box | null {
   // TODO: Optimization!
   const [rx, ry, rz] = volume.getDimension();
@@ -48,10 +48,15 @@ export function scanBoundingBox(
     size: [maxX - minX + 1, maxY - minY + 1, maxZ - minZ + 1]
   };
 
-  if (snap && volume.getPixelFormat() === 'binary') {
-    result.size[0] = Math.ceil(result.size[0] / 8) * 8;
+  if (volume.getPixelFormat() === 'binary') {
+    if (snap) {
+      result.size[0] = Math.ceil(result.size[0] / 8) * 8;
+    }
+    if (result.size[0] * result.size[1] < 8) {
+      result.size[0] = Math.max(3, result.size[0]);
+      result.size[1] = Math.max(3, result.size[1]);
+    }
   }
-
   return result;
 }
 

@@ -1,5 +1,5 @@
 import CCL from './ConnectedComponentLabeling3D26';
-import { mosaic, white, black, sampleImg } from './TestUtl_CCLsampleImg';
+import { mosaic, white, black, sampleImg } from './ccl-test-utils';
 
 function CCLTest(
   array: Uint8Array,

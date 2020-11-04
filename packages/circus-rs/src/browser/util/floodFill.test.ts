@@ -5,7 +5,8 @@ const t = (
   pattern: string,
   start: number[],
   expectedPattern: string,
-  expectedFillCount: number
+  expectedFillCount: number,
+  erase = false
 ) => {
   const rows = pattern.replace(/\n$/, '').split(/\n/);
   const width = Math.max.apply(
@@ -18,7 +19,7 @@ const t = (
       if (rows[y][x] === '*') arr.set(true, new Vector2(x, y));
     }
   }
-  const filled = floodFill(arr, new Vector2().fromArray(start));
+  const filled = floodFill(arr, new Vector2().fromArray(start), erase);
   expect(arr.toString()).toBe(expectedPattern);
   expect(filled).toBe(expectedFillCount);
 };
@@ -26,6 +27,7 @@ const t = (
 test('must flood-fill a closed area correctly', () => {
   const pat = '*****\n' + '*   *\n'.repeat(3) + '*****';
   t(pat, [3, 3], '*****\n'.repeat(5), 9);
+  t(pat, [0, 0], '     \n'.repeat(5), 16, true);
 });
 
 test('must flood-fill a complexed cloed area', () => {
@@ -41,6 +43,10 @@ test('must flood-fill a complexed cloed area', () => {
   t(pat, [1, 1], '*******\n'.repeat(7), 18);
   t(pat, [1, 5], '*******\n'.repeat(7), 18);
   t(pat, [1, 6], '*******\n'.repeat(7), 18);
+  t(pat, [0, 0], '       \n'.repeat(7), 31, true);
+  t(pat, [4, 4], '       \n'.repeat(7), 31, true);
+  t(pat, [6, 0], '       \n'.repeat(7), 31, true);
+  t(pat, [6, 6], '       \n'.repeat(7), 31, true);
 });
 
 test('must flood-fill a ring-like closed area', () => {
@@ -68,13 +74,38 @@ test('must flood-fill a ring-like closed area', () => {
     '* **** *\n' +
     '*      *\n' +
     '********\n';
+  const outErased =
+    '        \n' +
+    '        \n' +
+    '  ****  \n' +
+    '  *  *  \n' +
+    '  ****  \n' +
+    '        \n' +
+    '        \n';
+  const inErased =
+    '********\n' +
+    '*      *\n' +
+    '*      *\n' +
+    '*      *\n' +
+    '*      *\n' +
+    '*      *\n' +
+    '********\n';
 
   t(pat, [3, 3], inFilled, 2);
   t(pat, [1, 1], outFilled, 18);
   t(pat, [3, 1], outFilled, 18);
+  t(pat, [2, 2], inErased, 10, true);
+  t(pat, [0, 0], outErased, 26, true);
+  t(pat, [0, 4], outErased, 26, true);
 });
 
 test('must flood-fill an empty area', () => {
   const blank = '     \n'.repeat(5);
   t(blank, [3, 3], '*****\n'.repeat(5), 25);
+  t(blank, [3, 3], '     \n'.repeat(5), 0, true);
+});
+
+test('must erase a filled area', () => {
+  const filled = '*****\n'.repeat(5);
+  t(filled, [3, 3], '     \n'.repeat(5), 25, true);
 });

@@ -11,10 +11,10 @@ export interface LabelingResults {
 /**
  * Return labeled image
  * 何立風, et al. "ラスタ走査型ラベル付けアルゴリズムにおける新しい第 1 走査手法." 情報処理学会論文誌: 論文誌ジャーナル 52.4 (2011): 1813-1819.
- * @param array: input binary image
- * @param width: width of array
- * @param height: height of array
- * @param threshold: voxel value of threshold
+ * @param array input binary image
+ * @param width width of array
+ * @param height height of array
+ * @param threshold voxel value of threshold
  */
 export default function CCL(
   array: Uint8Array | Uint16Array,

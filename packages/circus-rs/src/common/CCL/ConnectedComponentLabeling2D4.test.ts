@@ -13,7 +13,7 @@ function CCLTest(
 ) {
   return () => {
     const labelingResults = CCL(array, width, height);
-    let flag = labelingResults.labelnum !== labelNo ? true : false;
+    let flag = labelingResults.labelNum !== labelNo ? true : false;
     if (flag === false) {
       for (let i = 0; i < width * height; i++) {
         if (labelingResults.labelMap[i] !== answer[i]) {
@@ -22,7 +22,7 @@ function CCLTest(
         }
       }
 
-      for (let i = 0; i <= labelingResults.labelnum; i++) {
+      for (let i = 0; i <= labelingResults.labelNum; i++) {
         if (i === 0 && volume[i] === 0) {
           continue;
         }

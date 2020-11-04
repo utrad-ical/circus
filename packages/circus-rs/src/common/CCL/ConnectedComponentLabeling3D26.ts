@@ -1,22 +1,13 @@
-import { LabelingResults3D } from './LabelingResults';
+import { CCL3D } from './ccl-types';
 
 /**
- * 何立風, et al. "三次元 2 値画像における高速ラベル付けアルゴリズム." 電子情報通信学会論文誌 D 92.12 (2009): 2261-2269.
- * Return Connected-component labeling image
  * @param array input binary image
  * @param width width of array
  * @param height height of array
  * @param NSlice slice number of array
- * @param neighbors 6 | 26
  * @param threshold voxel value of threshold
  */
-export default function CCL(
-  array: Uint8Array | Uint16Array,
-  width: number,
-  height: number,
-  NSlice: number,
-  threshold = 0
-): LabelingResults3D {
+const CCL: CCL3D = (array, width, height, NSlice, threshold = 0) => {
   const [dx, dy, dz] = [
     [-1, -1, 0, 1, -1, 0, 1, -1, 0, 1, -1, 0, 1],
     [0, -1, -1, -1, -1, -1, -1, 0, 0, 0, 1, 1, 1],
@@ -490,4 +481,6 @@ export default function CCL(
   }
 
   return { labelMap: labelImg, labelNum: newLabel, labels };
-}
+};
+
+export default CCL;

@@ -2,11 +2,11 @@ import { LabelingResults } from './ConnectedComponentLabeling3D26';
 
 /**
  * Return labeled image
- * @param array: input binary image
- * @param width: width of array
- * @param height: height of array
- * @param NSlice: slice number of array
- * @param threshold: voxel value of threshold
+ * @param array input binary image
+ * @param width width of array
+ * @param height height of array
+ * @param NSlice slice number of array
+ * @param threshold voxel value of threshold
  */
 export default function CCL(
   array: Uint8Array | Uint16Array,

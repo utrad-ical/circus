@@ -1,20 +1,13 @@
-import { LabelingResults3D } from './LabelingResults';
+import { CCL3D } from './ccl-types';
 
 /**
- * Return labeled image
  * @param array input binary image
  * @param width width of array
  * @param height height of array
  * @param NSlice slice number of array
  * @param threshold voxel value of threshold
  */
-export default function CCL(
-  array: Uint8Array | Uint16Array,
-  width: number,
-  height: number,
-  NSlice: number,
-  threshold = 0
-): LabelingResults3D {
+const CCL: CCL3D = (array, width, height, NSlice, threshold = 0) => {
   const [dx, dy, dz] = [
     [0, -1, 0],
     [0, 0, -1],
@@ -192,4 +185,6 @@ export default function CCL(
   }
 
   return { labelMap: labelImg, labelNum: newLabel, labels };
-}
+};
+
+export default CCL;

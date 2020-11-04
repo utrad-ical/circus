@@ -100,9 +100,9 @@ describe('labeling: white', () => {
 });
 
 describe('labeling: sampleImg', () => {
-  let width, height, str;
-  [width, height] = [16, 16];
-  str = `2D sampleImg 4-neighbor`;
+  const width = 16;
+  const height = 16;
+  const str = `2D sampleImg 4-neighbor`;
   const [img, label, num, volume, UL, LR] = sampleImg(4);
   test(str, CCLTest(img, width, height, label, num, volume, UL, LR));
 });

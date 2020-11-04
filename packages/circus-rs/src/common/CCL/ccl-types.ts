@@ -31,6 +31,6 @@ export type CCL3D = (
   array: Uint8Array | Uint16Array,
   width: number,
   height: number,
-  NSlice: number,
+  nSlices: number,
   threshold?: number
 ) => LabelingResults3D;

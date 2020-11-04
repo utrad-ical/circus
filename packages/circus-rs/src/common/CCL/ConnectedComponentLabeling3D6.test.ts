@@ -124,7 +124,7 @@ describe('labeling: sampleImg', () => {
 
 describe('3D labeling: 1 slice', () => {
   const [width, height, NSlice] = [16, 16, 1];
-  let [img, label, num, volume, UL, LR] = sampleImg(4);
+  const [img, label, num, volume, UL, LR] = sampleImg(4);
   test(
     `3D sampleImg 6-neighbor`,
     CCLTest(img, width, height, NSlice, label, num, volume, UL, LR)

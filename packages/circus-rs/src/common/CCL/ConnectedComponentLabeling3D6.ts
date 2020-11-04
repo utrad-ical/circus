@@ -1,4 +1,4 @@
-import { LabelingResults } from './ConnectedComponentLabeling3D26';
+import { LabelingResults3D } from './LabelingResults';
 
 /**
  * Return labeled image
@@ -14,7 +14,7 @@ export default function CCL(
   height: number,
   NSlice: number,
   threshold = 0
-): LabelingResults {
+): LabelingResults3D {
   const [dx, dy, dz] = [
     [0, -1, 0],
     [0, 0, -1],
@@ -191,5 +191,5 @@ export default function CCL(
     };
   }
 
-  return { labelMap: labelImg, labelnum: newLabel, labels: labels };
+  return { labelMap: labelImg, labelNum: newLabel, labels };
 }

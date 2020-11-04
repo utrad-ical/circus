@@ -1,12 +1,4 @@
-export interface LabelingResults {
-  labelMap: Uint8Array;
-  labelnum: number;
-  labels: Array<{
-    volume: number;
-    min: [number, number];
-    max: [number, number];
-  }>;
-}
+import { LabelingResults2D } from './LabelingResults';
 
 /**
  * Return labeled image
@@ -21,7 +13,7 @@ export default function CCL(
   width: number,
   height: number,
   threshold = 0
-): LabelingResults {
+): LabelingResults2D {
   const num_maxCCL = 2 ** 8;
   const chiefLabelTable = new Uint8Array(num_maxCCL);
   const substituteLabels = new Uint8Array(num_maxCCL ** 2);
@@ -179,5 +171,5 @@ export default function CCL(
       max: [LR[pos[0]], LR[pos[1]]]
     };
   }
-  return { labelMap: labelImg, labelnum: newLabel, labels: labels };
+  return { labelMap: labelImg, labelNum: newLabel, labels };
 }

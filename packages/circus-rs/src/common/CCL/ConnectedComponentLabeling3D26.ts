@@ -1,15 +1,4 @@
-import { dirxml } from 'console';
-import { resolve } from 'path';
-
-export interface LabelingResults {
-  labelMap: Uint8Array;
-  labelnum: number;
-  labels: Array<{
-    volume: number;
-    min: [number, number, number];
-    max: [number, number, number];
-  }>;
-}
+import { LabelingResults3D } from './LabelingResults';
 
 /**
  * 何立風, et al. "三次元 2 値画像における高速ラベル付けアルゴリズム." 電子情報通信学会論文誌 D 92.12 (2009): 2261-2269.
@@ -27,7 +16,7 @@ export default function CCL(
   height: number,
   NSlice: number,
   threshold = 0
-): LabelingResults {
+): LabelingResults3D {
   const [dx, dy, dz] = [
     [-1, -1, 0, 1, -1, 0, 1, -1, 0, 1, -1, 0, 1],
     [0, -1, -1, -1, -1, -1, -1, 0, 0, 0, 1, 1, 1],
@@ -500,5 +489,5 @@ export default function CCL(
     };
   }
 
-  return { labelMap: labelImg, labelnum: newLabel, labels: labels };
+  return { labelMap: labelImg, labelNum: newLabel, labels };
 }

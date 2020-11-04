@@ -1,6 +1,7 @@
 import { Box } from '../common/geometry';
 import RawData from '../common/RawData';
 import floodFill, { BinaryArrayView2D } from './util/floodFill';
+import bucketErase from './util/bucketErase';
 import { OrientationString } from './section-util';
 import { Vector3, Vector2 } from 'three';
 
@@ -199,4 +200,57 @@ export function floodFillOnSlice(
   // Applies the generic flood-fill function on a volume
   const filledPixels = floodFill(view, start);
   return filledPixels;
+}
+
+/**
+ * Performs a bucket erase on a given orthogonal MPR section of the volume.
+ * @param volume The target volume to erase.
+ * @param center The starting point to start erasing.
+ * @param orientation The orientation of the orthogonal MPR section.
+ * @return The number of voxels affected (erased).
+ */
+export function bucketEraseOnSlice(
+  volume: RawData,
+  center: Vector3,
+  orientation: OrientationString
+): number {
+  let view: BinaryArrayView2D;
+  let start: Vector2;
+  const dim = volume.getDimension();
+
+  // Prepares something like a 2D DataView on the volume.
+  if (orientation === 'axial') {
+    view = {
+      width: dim[0],
+      height: dim[1],
+      get: pos => volume.getPixelAt(pos.x, pos.y, center.z) > 0,
+      set: (val, pos) =>
+        volume.writePixelAt(val ? 1 : 0, pos.x, pos.y, center.z)
+    };
+    start = new Vector2(center.x, center.y);
+  } else if (orientation === 'sagittal') {
+    view = {
+      width: dim[1],
+      height: dim[2],
+      get: pos => volume.getPixelAt(center.x, pos.x, pos.y) > 0,
+      set: (val, pos) =>
+        volume.writePixelAt(val ? 1 : 0, center.x, pos.x, pos.y)
+    };
+    start = new Vector2(center.y, center.z);
+  } else if (orientation === 'coronal') {
+    view = {
+      width: dim[1],
+      height: dim[2],
+      get: pos => volume.getPixelAt(pos.x, center.y, pos.y) > 0,
+      set: (val, pos) =>
+        volume.writePixelAt(val ? 1 : 0, pos.x, center.y, pos.y)
+    };
+    start = new Vector2(center.x, center.z);
+  } else {
+    throw new TypeError('Invalid orientation');
+  }
+
+  // Applies the generic bucketErase function on a volume
+  const erasedPixels = bucketErase(view, start);
+  return erasedPixels;
 }

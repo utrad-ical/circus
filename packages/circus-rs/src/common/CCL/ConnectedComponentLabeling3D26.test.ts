@@ -1,5 +1,5 @@
 import CCL from './ConnectedComponentLabeling3D26';
-import { mosaic, white, black, sampleImg } from './TestUtl_CCLsampleImg';
+import { mosaic, white, black, sampleImg } from './ccl-test-utils';
 
 function CCLTest(
   array: Uint8Array,
@@ -14,7 +14,7 @@ function CCLTest(
 ) {
   return () => {
     const labelingResults = CCL(array, width, height, NSlice);
-    let flag = labelingResults.labelnum !== labelNo ? true : false;
+    let flag = labelingResults.labelNum !== labelNo ? true : false;
     if (flag === false) {
       for (let i = 0; i < width * height * NSlice; i++) {
         if (labelingResults.labelMap[i] !== answer[i]) {
@@ -22,7 +22,7 @@ function CCLTest(
           break;
         }
       }
-      for (let i = 0; i <= labelingResults.labelnum; i++) {
+      for (let i = 0; i <= labelingResults.labelNum; i++) {
         if (i === 0 && volume[i] === 0) {
           continue;
         }
@@ -125,7 +125,7 @@ describe('labeling: sampleImg', () => {
 
 describe('3D labeling: 1 slice', () => {
   const [width, height, NSlice] = [16, 16, 1];
-  let [img, label, num, volume, UL, LR] = sampleImg(8);
+  const [img, label, num, volume, UL, LR] = sampleImg(8);
   test(
     `3D sampleImg 26-neighbor`,
     CCLTest(img, width, height, NSlice, label, num, volume, UL, LR)

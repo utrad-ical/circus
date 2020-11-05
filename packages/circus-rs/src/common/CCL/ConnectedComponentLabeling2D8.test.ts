@@ -1,5 +1,5 @@
 import CCL from './ConnectedComponentLabeling2D8';
-import { mosaic, white, black, sampleImg } from './TestUtl_CCLsampleImg';
+import { mosaic, white, black, sampleImg } from './ccl-test-utils';
 
 function CCLTest(
   array: Uint8Array,
@@ -13,7 +13,7 @@ function CCLTest(
 ) {
   return () => {
     const labelingResults = CCL(array, width, height);
-    let flag = labelingResults.labelnum !== labelNo ? true : false;
+    let flag = labelingResults.labelNum !== labelNo ? true : false;
     if (flag === false) {
       for (let i = 0; i < width * height; i++) {
         if (labelingResults.labelMap[i] !== answer[i]) {
@@ -22,7 +22,7 @@ function CCLTest(
         }
       }
 
-      for (let i = 0; i <= labelingResults.labelnum; i++) {
+      for (let i = 0; i <= labelingResults.labelNum; i++) {
         if (i === 0 && volume[i] === 0) {
           continue;
         }
@@ -100,9 +100,9 @@ describe('labeling: white', () => {
 });
 
 describe('labeling: sampleImg', () => {
-  let width, height, str;
-  [width, height] = [16, 16];
-  str = `2D sampleImg 8-neighbor`;
+  const width = 16;
+  const height = 16;
+  const str = `2D sampleImg 8-neighbor`;
   const [img, label, num, volume, UL, LR] = sampleImg(8);
   test(str, CCLTest(img, width, height, label, num, volume, UL, LR));
 });

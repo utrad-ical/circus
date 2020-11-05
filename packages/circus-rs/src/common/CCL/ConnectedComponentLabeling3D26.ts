@@ -1,33 +1,13 @@
-import { dirxml } from 'console';
-import { resolve } from 'path';
-
-export interface LabelingResults {
-  labelMap: Uint8Array;
-  labelnum: number;
-  labels: Array<{
-    volume: number;
-    min: [number, number, number];
-    max: [number, number, number];
-  }>;
-}
+import { CCL3D } from './ccl-types';
 
 /**
- * 何立風, et al. "三次元 2 値画像における高速ラベル付けアルゴリズム." 電子情報通信学会論文誌 D 92.12 (2009): 2261-2269.
- * Return Connected-component labeling image
  * @param array input binary image
  * @param width width of array
  * @param height height of array
- * @param NSlice slice number of array
- * @param neighbors 6 | 26
+ * @param nSlices slice number of array
  * @param threshold voxel value of threshold
  */
-export default function CCL(
-  array: Uint8Array | Uint16Array,
-  width: number,
-  height: number,
-  NSlice: number,
-  threshold = 0
-): LabelingResults {
+const CCL: CCL3D = (array, width, height, nSlices, threshold = 0) => {
   const [dx, dy, dz] = [
     [-1, -1, 0, 1, -1, 0, 1, -1, 0, 1, -1, 0, 1],
     [0, -1, -1, -1, -1, -1, -1, 0, 0, 0, 1, 1, 1],
@@ -68,21 +48,21 @@ export default function CCL(
   };
 
   const val0 = (x: number, y: number, z: number) => {
-    return x < 0 || width <= x || y < 0 || height <= y || z < 0 || NSlice <= z
+    return x < 0 || width <= x || y < 0 || height <= y || z < 0 || nSlices <= z
       ? -1
       : array[x + width * (y + z * height)];
   };
 
-  const labelImg = new Uint8Array(width * height * NSlice);
+  const labelImg = new Uint8Array(width * height * nSlices);
 
   const val = (x: number, y: number, z: number) => {
-    return x < 0 || width <= x || y < 0 || height <= y || z < 0 || NSlice <= z
+    return x < 0 || width <= x || y < 0 || height <= y || z < 0 || nSlices <= z
       ? -1
       : labelImg[x + width * (y + z * height)];
   };
 
   let label = 0;
-  for (let k = 0; k < NSlice; k++) {
+  for (let k = 0; k < nSlices; k++) {
     for (let j = 0; j < height; j++) {
       for (let i = 0; i < width; i++) {
         if (val0(i, j, k) <= threshold) {
@@ -449,16 +429,16 @@ export default function CCL(
   const volume = new Uint32Array(newLabel + 1);
   const max =
     width < height
-      ? height < NSlice
-        ? NSlice
+      ? height < nSlices
+        ? nSlices
         : height
-      : width < NSlice
-      ? NSlice
+      : width < nSlices
+      ? nSlices
       : width;
   const UL = new Uint16Array((newLabel + 1) * 3).map(() => max);
   const LR = new Uint16Array((newLabel + 1) * 3);
 
-  for (let k = 0; k < NSlice; k++) {
+  for (let k = 0; k < nSlices; k++) {
     for (let j = 0; j < height; j++) {
       for (let i = 0; i < width; i++) {
         const pos = i + width * (j + k * height);
@@ -500,5 +480,7 @@ export default function CCL(
     };
   }
 
-  return { labelMap: labelImg, labelnum: newLabel, labels: labels };
-}
+  return { labelMap: labelImg, labelNum: newLabel, labels };
+};
+
+export default CCL;

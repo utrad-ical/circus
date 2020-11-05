@@ -84,9 +84,7 @@ export function mosaic(
 }
 
 export function white(width: number, height: number, NSlice: number) {
-  return new Uint8Array(width * height * NSlice).map(_ => {
-    return 1;
-  });
+  return new Uint8Array(width * height * NSlice).fill(1);
 }
 
 export function black(width: number, height: number, NSlice: number) {

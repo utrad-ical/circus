@@ -1,13 +1,16 @@
+import IconButton from '@smikitky/rb-components/lib/IconButton';
 import JsonSchemaEditor from '@smikitky/rb-components/lib/JsonSchemaEditor';
 import { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
 import * as rs from '@utrad-ical/circus-rs/src/browser';
 import { Composition, Viewer } from '@utrad-ical/circus-rs/src/browser';
+import WandTool from '@utrad-ical/circus-rs/src/browser/tool/cloud/WandTool';
 import ToolBaseClass from '@utrad-ical/circus-rs/src/browser/tool/Tool';
 import classNames from 'classnames';
 import Collapser from 'components/Collapser';
 import Icon from 'components/Icon';
 import { createStateChanger } from 'components/ImageViewer';
 import produce from 'immer';
+import { debounce } from 'lodash';
 import React, {
   useCallback,
   useContext,
@@ -16,13 +19,18 @@ import React, {
   useRef,
   useState
 } from 'react';
+import styled from 'styled-components';
 import Project from 'types/Project';
+import isTouchDevice from 'utils/isTouchDevice';
 import {
   stringifyPartialVolumeDescriptor,
   usePendingVolumeLoader,
   VolumeLoaderCacheContext
 } from 'utils/useImageSource';
+import useLocalPreference from 'utils/useLocalPreference';
+import { Modal } from '../../components/react-bootstrap';
 import * as c from './caseStore';
+import LabelMenu from './LabelMenu';
 import LabelSelector from './LabelSelector';
 import {
   buildAnnotation,
@@ -32,17 +40,10 @@ import {
   labelTypes,
   SeriesEntryWithLabels
 } from './revisionData';
+import SeriesSelectorDialog from './SeriesSelectorDialog';
 import SideContainer from './SideContainer';
 import ToolBar, { ViewOptions } from './ToolBar';
 import ViewerCluster from './ViewerCluster';
-import IconButton from '@smikitky/rb-components/lib/IconButton';
-import { Modal } from '../../components/react-bootstrap';
-import SeriesSelectorDialog from './SeriesSelectorDialog';
-import styled from 'styled-components';
-import LabelMenu from './LabelMenu';
-import { debounce } from 'lodash';
-import useLocalPreference from 'utils/useLocalPreference';
-import isTouchDevice from 'utils/isTouchDevice';
 
 const useComposition = (
   seriesUid: string,
@@ -50,6 +51,7 @@ const useComposition = (
 ): Composition | undefined => {
   const { rsHttpClient } = useContext(VolumeLoaderCacheContext)!;
 
+  // TODO: doramari
   const volumeLoader = usePendingVolumeLoader(
     seriesUid,
     partialVolumeDescriptor
@@ -113,6 +115,12 @@ const RevisionEditor: React.FC<{
   );
 
   const [lineWidth, setLineWidth] = useState(1);
+  const [wandMode, setWandMode] = useState(WandTool.defaultMode);
+  const [wandThreshold, setWandThreshold] = useState(WandTool.defaultThreshold);
+  const [wandMaxDistance, setWandMaxDistance] = useState(
+    WandTool.defaultMaxDistance
+  );
+
   const [toolName, setToolName] = useState('');
   const [tool, setTool] = useState<ToolBaseClass | null>(null);
 
@@ -323,6 +331,57 @@ const RevisionEditor: React.FC<{
     [getTool]
   );
 
+  const handleSetWandMode = useCallback(
+    (wandMode: string) => {
+      setWandMode(wandMode);
+      getTool('wand').setOptions({
+        mode: wandMode,
+        threshold: wandThreshold,
+        maxDistance: wandMaxDistance
+      });
+      getTool('wandEraser').setOptions({
+        mode: wandMode,
+        threshold: wandThreshold,
+        maxDistance: wandMaxDistance
+      });
+    },
+    [getTool, wandMaxDistance, wandThreshold]
+  );
+
+  const handleSetWandThreshold = useCallback(
+    (wandThreshold: number) => {
+      setWandThreshold(wandThreshold);
+      getTool('wand').setOptions({
+        mode: wandMode,
+        threshold: wandThreshold,
+        maxDistance: wandMaxDistance
+      });
+      getTool('wandEraser').setOptions({
+        mode: wandMode,
+        threshold: wandThreshold,
+        maxDistance: wandMaxDistance
+      });
+    },
+    [getTool, wandMaxDistance, wandMode]
+  );
+
+  const handleSetWandMaxDistance = useCallback(
+    (wandMaxDistance: number) => {
+      setWandMaxDistance(wandMaxDistance);
+      getTool('wand').setOptions({
+        mode: wandMode,
+        threshold: wandThreshold,
+        maxDistance: wandMaxDistance
+      });
+      getTool('wandEraser').setOptions({
+        mode: wandMode,
+        threshold: wandThreshold,
+        maxDistance: wandMaxDistance
+      });
+    },
+    [getTool, wandMode, wandThreshold]
+  );
+
   const handleCreateViwer = (viewer: Viewer, id?: string | number) => {
     viewers[id!] = viewer;
   };
@@ -478,6 +537,12 @@ const RevisionEditor: React.FC<{
           onChangeViewOptions={setViewOptions}
           lineWidth={lineWidth}
           setLineWidth={handleSetLineWidth}
+          wandMode={wandMode}
+          setWandMode={handleSetWandMode}
+          wandMaxDistance={wandMaxDistance}
+          setWandMaxDistance={handleSetWandMaxDistance}
+          wandThreshold={wandThreshold}
+          setWandThreshold={handleSetWandThreshold}
           windowPresets={projectData.windowPresets}
           onApplyWindow={handleApplyWindow}
           brushEnabled={brushEnabled}

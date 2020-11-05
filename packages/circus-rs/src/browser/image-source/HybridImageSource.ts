@@ -1,12 +1,13 @@
+import DicomVolume from 'circus-rs/src/common/DicomVolume';
+import Viewer from '../viewer/Viewer';
+import ViewState from '../ViewState';
 import DynamicMprImageSource, {
   DynamicMprImageSourceOptions
 } from './DynamicMprImageSource';
+import MprImageSource from './MprImageSource';
 import RawVolumeMprImageSource, {
   RawVolumeMprImageSourceOptions
 } from './RawVolumeMprImageSource';
-import ViewState from '../ViewState';
-import Viewer from '../viewer/Viewer';
-import MprImageSource from './MprImageSource';
 
 interface HybridImageSourceOptions
   extends RawVolumeMprImageSourceOptions,
@@ -32,6 +33,10 @@ export default class HybridMprImageSource extends MprImageSource {
     this.dynSource.ready().then(() => {
       this.metadata = this.dynSource.metadata;
     });
+  }
+
+  public getDicomVolume(): DicomVolume {
+    return this.volSource.getDicomVolume();
   }
 
   public draw(viewer: Viewer, viewState: ViewState): Promise<ImageData> {

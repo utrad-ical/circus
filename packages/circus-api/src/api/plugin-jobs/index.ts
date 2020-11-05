@@ -1,58 +1,26 @@
 import status from 'http-status';
-import performSearch, { performAggregationSearch } from '../performSearch';
+import { performAggregationSearch } from '../performSearch';
 import generateUniqueId from '../../utils/generateUniqueId';
 import { EJSON } from 'bson';
 import path from 'path';
 import fs from 'fs';
 import mime from 'mime';
-import { fetchAccessibleSeries } from '../../privilegeUtils';
-import duplicateJobExists from '../duplicateJobExists';
 import { RouteMiddleware } from '../../typings/middlewares';
+import makeNewPluginJob from '../../plugin-job/makeNewPluginJob';
 
 export const handlePost: RouteMiddleware = ({ models, cs }) => {
   return async (ctx, next) => {
-    const jobId = generateUniqueId();
     const { priority, ...request } = ctx.request.body;
 
-    try {
-      const seriesData = await fetchAccessibleSeries(
-        models,
-        ctx.userPrivileges,
-        request.series
-      );
-      if (seriesData.slice(1).some(s => s.domain !== seriesData[0].domain))
-        throw new Error('Series must be the same domain.');
-    } catch (err) {
-      ctx.throw(status.BAD_REQUEST, err);
-    }
+    const jobId = await makeNewPluginJob(
+      models,
+      request,
+      ctx.userPrivileges,
+      ctx.user.userEmail,
+      cs,
+      priority
+    );
 
-    const plugin = await (() => {
-      try {
-        return cs.plugin.get(request.pluginId);
-      } catch (err) {
-        ctx.throw(status.NOT_FOUND, err);
-      }
-    })()!;
-
-    if (await duplicateJobExists(models, request))
-      ctx.throw(
-        status.BAD_REQUEST,
-        'There is a duplicate job that is already registered.'
-      );
-
-    await cs.job.register(jobId, request, priority);
-    await models.pluginJob.insert({
-      jobId,
-      pluginId: plugin.pluginId,
-      series: request.series,
-      userEmail: ctx.user.userEmail,
-      status: 'in_queue',
-      errorMessage: null,
-      results: null,
-      startedAt: null,
-      feedbacks: [],
-      finishedAt: null
-    });
     ctx.body = { jobId };
   };
 };

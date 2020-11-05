@@ -6,14 +6,14 @@ import {
   Dropdown,
   MenuItem,
   OverlayTrigger,
-  Tooltip,
-  SplitButton
+  SplitButton,
+  Tooltip
 } from 'components/react-bootstrap';
 import React from 'react';
 import styled from 'styled-components';
-import { Layout } from './ViewerCluster';
 import { WindowPreset } from 'types/Project';
 import useKeyboardShortcut from 'utils/useKeyboardShortcut';
+import { Layout } from './ViewerCluster';
 
 export interface ViewOptions {
   layout?: Layout;
@@ -44,6 +44,12 @@ const ToolBar: React.FC<{
   brushEnabled: boolean;
   lineWidth: number;
   setLineWidth: (lineWidth: number) => void;
+  wandMode: string;
+  setWandMode: (wandMode: string) => void;
+  wandThreshold: number;
+  setWandThreshold: (wandThreshold: number) => void;
+  wandMaxDistance: number;
+  setWandMaxDistance: (wandMaxDistance: number) => void;
   windowPresets?: WindowPreset[];
   onChangeTool: (toolName: string) => void;
   onApplyWindow: (window: any) => void;
@@ -56,6 +62,12 @@ const ToolBar: React.FC<{
     brushEnabled,
     lineWidth,
     setLineWidth,
+    wandMode,
+    setWandMode,
+    wandThreshold,
+    setWandThreshold,
+    wandMaxDistance,
+    setWandMaxDistance,
     windowPresets = [],
     onChangeTool,
     onApplyWindow,
@@ -63,6 +75,7 @@ const ToolBar: React.FC<{
   } = props;
 
   const widthOptions = ['1', '3', '5', '7'];
+  const wandModeOptions = ['3d', '2d'];
 
   const handleToggleReferenceLine = () => {
     onChangeViewOptions({
@@ -92,6 +105,20 @@ const ToolBar: React.FC<{
     });
   };
 
+  const handleToggleWandMode = () => {
+    setWandMode(wandMode === '3d' ? '2d' : '3d');
+  };
+
+  const handleWandThreshold = (ev: React.ChangeEvent<HTMLInputElement>) => {
+    const threshold = ev.target.valueAsNumber;
+    setWandThreshold(threshold);
+  };
+
+  const handleWandMaxDistance = (ev: React.ChangeEvent<HTMLInputElement>) => {
+    const maxDistance = ev.target.valueAsNumber;
+    setWandMaxDistance(maxDistance);
+  };
+
   const handleApplyWindow = async (selection: WindowPreset) => {
     if ('level' in selection && 'width' in selection) {
       onApplyWindow({ level: selection.level, width: selection.width });
@@ -105,7 +132,7 @@ const ToolBar: React.FC<{
     }
   };
 
-  const brushTools = ['brush', 'eraser', 'bucket'];
+  const brushTools = ['brush', 'eraser', 'bucket', 'wand', 'wandEraser'];
   const activeTool =
     !brushEnabled && brushTools.some(tool => tool === active)
       ? 'pager'
@@ -190,6 +217,20 @@ const ToolBar: React.FC<{
         active={activeTool}
         disabled={!brushEnabled || disabled}
       />
+      <ToolButton
+        name="wand"
+        icon="rs-wand"
+        changeTool={onChangeTool}
+        active={activeTool}
+        disabled={!brushEnabled || disabled}
+      />
+      <ToolButton
+        name="wandEraser"
+        icon="rs-wand-eraser"
+        changeTool={onChangeTool}
+        active={activeTool}
+        disabled={!brushEnabled || disabled}
+      />
       &thinsp;
       <Dropdown id="layout-dropdown" disabled={disabled}>
         <Dropdown.Toggle>
@@ -245,6 +286,43 @@ const ToolBar: React.FC<{
           })}
         </Dropdown.Menu>
       </Dropdown>
+      {(activeTool === 'wand' || activeTool === 'wandEraser') && (
+        <StyledSpanWandOption>
+          &emsp;
+          <>
+            <label>threshold: </label>
+            <input
+              className="wand-threshold-input"
+              type="number"
+              name="threshold"
+              min="0"
+              value={wandThreshold}
+              onChange={handleWandThreshold}
+            />
+          </>
+          <>
+            <label>max distance: </label>
+            <input
+              className="wand-max-distance-input"
+              type="number"
+              name="maxDistance"
+              min="0"
+              placeholder="mm"
+              value={wandMaxDistance}
+              onChange={handleWandMaxDistance}
+            />
+          </>
+          <>
+            <label>mode: </label>
+            <ShrinkSelect
+              className="wand-option-shrinkselect"
+              options={wandModeOptions}
+              value={wandMode}
+              onChange={handleToggleWandMode}
+            />
+          </>
+        </StyledSpanWandOption>
+      )}
     </StyledDiv>
   );
 });
@@ -266,6 +344,32 @@ const StyledDiv = styled.div`
   .checkmark {
     display: inline-block;
     width: 25px;
+  }
+`;
+
+const StyledSpanWandOption = styled.span`
+  label {
+    color: #fff;
+    margin: 0px 4px 0px 20px;
+  }
+
+  input {
+    font-size: 100%;
+    height: 28.4px;
+    paddiing: 1px 2px;
+  }
+
+  .wand-threshold-input {
+    width: 4em;
+  }
+
+  .wand-max-distance-input {
+    width: 4em;
+  }
+  .wand-option-shrinkselect > button {
+    font-size: 100%;
+    height: 28.4px;
+    paddiing: 1px 2px;
   }
 `;
 

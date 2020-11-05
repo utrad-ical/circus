@@ -136,6 +136,8 @@ const toolbar = rs.createToolbar(container, [
   'brush',
   'eraser',
   'bucket',
+  'wand',
+  'wandEraser',
   'circle',
   'rectangle',
   'point',
@@ -234,7 +236,7 @@ function addCloudAnnotation({
   debugPoint = false
 } = {}) {
   const cloud = new rs.VoxelCloud();
-  const volume = new rs.RawData(size, rs.PixelFormat.Binary);
+  const volume = new rs.RawData(size, 'binary');
   volume.fillAll(1);
   cloud.volume = volume;
   cloud.origin = origin;

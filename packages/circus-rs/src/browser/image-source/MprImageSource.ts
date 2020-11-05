@@ -1,8 +1,9 @@
-import ImageSource, { ViewStateResizeTransformer } from './ImageSource';
-import ViewState from '../ViewState';
+import DicomVolume from 'circus-rs/src/common/DicomVolume';
+import { Vector2D, Vector3D } from '../../common/geometry';
+import { adjustOnResized, createOrthogonalMprSection } from '../section-util';
 import Viewer from '../viewer/Viewer';
-import { createOrthogonalMprSection, adjustOnResized } from '../section-util';
-import { Vector3D, Vector2D } from '../../common/geometry';
+import ViewState from '../ViewState';
+import ImageSource, { ViewStateResizeTransformer } from './ImageSource';
 import { DicomVolumeMetadata } from './volume-loader/DicomVolumeLoader';
 
 /**
@@ -32,6 +33,10 @@ export default abstract class MprImageSource extends ImageSource {
 
   public async ready(): Promise<void> {
     await this.loadSequence;
+  }
+
+  public getDicomVolume(): DicomVolume {
+    throw new Error('Method not implemented.');
   }
 
   /**

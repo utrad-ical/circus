@@ -1,17 +1,19 @@
-import ToolBaseClass from './Tool';
-import WindowTool from './state/WindowTool';
-import HandTool from './state/HandTool';
-import ZoomTool from './state/ZoomTool';
-import PagerTool from './state/PagerTool';
-import CelestialRotateTool from './state/CelestialRotateTool';
-import BrushTool from './cloud/BrushTool';
-import EraserTool from './cloud/EraserTool';
-import BucketTool from './cloud/BucketTool';
 import CircleTool from './annotation/CircleTool';
-import RectangleTool from './annotation/RectangleTool';
-import EllipsoidTool from './annotation/EllipsoidTool';
 import CuboidTool from './annotation/CuboidTool';
+import EllipsoidTool from './annotation/EllipsoidTool';
 import PointTool from './annotation/PointTool';
+import RectangleTool from './annotation/RectangleTool';
+import BrushTool from './cloud/BrushTool';
+import BucketTool from './cloud/BucketTool';
+import EraserTool from './cloud/EraserTool';
+import WandEraserTool from './cloud/WandEraserTool';
+import WandTool from './cloud/WandTool';
+import CelestialRotateTool from './state/CelestialRotateTool';
+import HandTool from './state/HandTool';
+import PagerTool from './state/PagerTool';
+import WindowTool from './state/WindowTool';
+import ZoomTool from './state/ZoomTool';
+import ToolBaseClass from './Tool';
 
 const toolCollection: { [toolName: string]: ToolBaseClass } = {};
 
@@ -32,7 +34,9 @@ const defaultTools: { [toolName: string]: typeof ToolBaseClass } = {
 
   brush: BrushTool,
   eraser: EraserTool,
-  bucket: BucketTool
+  bucket: BucketTool,
+  wand: WandTool,
+  wandEraser: WandEraserTool
 };
 
 Object.keys(defaultTools).forEach(key => {

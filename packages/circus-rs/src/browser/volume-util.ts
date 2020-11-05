@@ -1,8 +1,8 @@
+import { Vector2, Vector3 } from 'three';
 import { Box } from '../common/geometry';
 import RawData from '../common/RawData';
-import floodFill, { BinaryArrayView2D } from './util/floodFill';
 import { OrientationString } from './section-util';
-import { Vector3, Vector2 } from 'three';
+import floodFill, { BinaryArrayView2D } from './util/floodFill';
 
 /**
  * Scans all the voxels in the given volume and

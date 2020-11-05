@@ -412,21 +412,21 @@ const CCL: CCL3D = (array, width, height, nSlices, threshold = 0) => {
     }
   }
 
-  let newLabel = 0;
+  let labelCount = 0;
 
   for (let i = 1; i < num_maxCCL; i++) {
     if (substituteLabels[i * num_maxCCL] != 0) {
-      newLabel++;
+      labelCount++;
       for (
         let j = i * num_maxCCL + 1;
         j <= i * num_maxCCL + substituteLabels[i * num_maxCCL];
         j++
       ) {
-        chiefLabelTable[substituteLabels[j]] = newLabel;
+        chiefLabelTable[substituteLabels[j]] = labelCount;
       }
     }
   }
-  const volume = new Uint32Array(newLabel + 1);
+  const volume = new Uint32Array(labelCount + 1);
   const max =
     width < height
       ? height < nSlices
@@ -435,8 +435,8 @@ const CCL: CCL3D = (array, width, height, nSlices, threshold = 0) => {
       : width < nSlices
       ? nSlices
       : width;
-  const UL = new Uint16Array((newLabel + 1) * 3).map(() => max);
-  const LR = new Uint16Array((newLabel + 1) * 3);
+  const UL = new Uint16Array((labelCount + 1) * 3).map(() => max);
+  const LR = new Uint16Array((labelCount + 1) * 3);
 
   for (let k = 0; k < nSlices; k++) {
     for (let j = 0; j < height; j++) {
@@ -470,8 +470,8 @@ const CCL: CCL3D = (array, width, height, nSlices, threshold = 0) => {
     }
   }
 
-  const labels = new Array(newLabel + 1);
-  for (let i = 0; i <= newLabel; i++) {
+  const labels = new Array(labelCount + 1);
+  for (let i = 0; i <= labelCount; i++) {
     const pos = [i * 3, i * 3 + 1, i * 3 + 2];
     labels[i] = {
       volume: volume[i],
@@ -480,7 +480,7 @@ const CCL: CCL3D = (array, width, height, nSlices, threshold = 0) => {
     };
   }
 
-  return { labelMap: labelImg, labelNum: newLabel, labels };
+  return { labelMap: labelImg, labelNum: labelCount, labels };
 };
 
 export default CCL;

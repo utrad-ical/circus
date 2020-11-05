@@ -62,7 +62,7 @@ export default function CCL(
   let label = 0;
 
   for (let j = 0; j < height; j++) {
-    for (let i = 0; i < width; i += 2) {
+    for (let i = 0; i < width; i++) {
       if (val0(i, j) > threshold) {
         if (val(i, j - 1) > 0) {
           labelImg[i + j * width] = val(i, j - 1);
@@ -79,16 +79,6 @@ export default function CCL(
           labelImg[i + j * width] = label;
           setNewLabel(label);
         }
-        if (val0(i + 1, j) > threshold) {
-          labelImg[i + 1 + j * width] = labelImg[i + j * width];
-        }
-      } else if (val0(i + 1, j) > threshold) {
-        ++label;
-        if (num_maxCCL <= label) {
-          throw new Error(`number of tentative label is not in 8 bit.`);
-        }
-        labelImg[i + 1 + j * width] = label;
-        setNewLabel(label);
       }
     }
   }

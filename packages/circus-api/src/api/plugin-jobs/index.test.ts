@@ -74,7 +74,8 @@ describe('plugin-job registration', () => {
       method: 'post',
       url: 'api/plugin-jobs',
       data: {
-        pluginId: 'circus-mock/empty',
+        pluginId:
+          'd135e1fbb368e35f940ae8e6deb171e90273958dc3938de5a8237b73bb42d9c2',
         series: [
           {
             seriesUid: '111.222.333.444.444',
@@ -93,7 +94,8 @@ describe('plugin-job registration', () => {
       method: 'post',
       url: 'api/plugin-jobs',
       data: {
-        pluginId: 'circus-mock/empty',
+        pluginId:
+          'd135e1fbb368e35f940ae8e6deb171e90273958dc3938de5a8237b73bb42d9c2',
         series: [{ seriesUid: '111.222.333.444.777' }],
         priority: 123
       }
@@ -121,6 +123,7 @@ describe('plugin-job registration', () => {
         ]
       }
     });
+    expect(res.status).toBe(400);
     expect(res.data.error).toMatch('Series must be the same domain.');
   });
 

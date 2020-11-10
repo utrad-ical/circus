@@ -33,7 +33,7 @@ const makeNewPluginJob = async (
   }
 
   const jobId = generateUniqueId();
-  // await cs.job.register(jobId, request, priority);
+  await cs.job.register(jobId, request, priority);
   await models.pluginJob.insert({
     jobId,
     pluginId: plugin.pluginId,

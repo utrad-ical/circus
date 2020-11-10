@@ -66,7 +66,12 @@ export const command: Command<{ models: Models; cs: CsCore }> = async (
 
     const userPrivileges = await determineUserAccessInfo(models, user);
 
-    const request = { series, pluginId: pluginDocs[0].pluginId };
+    const priority = options.priority ?? 0;
+
+    const request = {
+      pluginId: pluginDocs[0].pluginId,
+      series
+    };
 
     const jobId = await makeNewPluginJob(
       models,
@@ -74,7 +79,7 @@ export const command: Command<{ models: Models; cs: CsCore }> = async (
       userPrivileges,
       user.userEmail,
       cs,
-      options.priority
+      priority
     );
 
     console.log(jobId);

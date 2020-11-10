@@ -55,7 +55,7 @@ describe('throw error when necessary arguments do not exist', () => {
       user: 'bob'
     });
     await expect(command).rejects.toThrow(
-      new Error('Specified porject does not exist.')
+      new Error('Specified project does not exist.')
     );
   });
 

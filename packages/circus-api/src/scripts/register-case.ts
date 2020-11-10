@@ -48,7 +48,7 @@ export const command: Command<{ models: Models }> = async (_, { models }) => {
       $or: [{ projectId: projectIdOrName }, { projectName: projectIdOrName }]
     });
     if (!projectDocs.length)
-      throw new Error('Specified porject does not exist.');
+      throw new Error('Specified project does not exist.');
     const project = projectDocs[0];
 
     const series = await Promise.all(seriesUids.map(s => toEntry(s, models)));

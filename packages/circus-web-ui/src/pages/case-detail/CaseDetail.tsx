@@ -286,7 +286,11 @@ const MenuBar: React.FC<{
         <Button
           bsStyle="success"
           onClick={() => onCommand('save')}
-          disabled={busy}
+          disabled={
+            busy ||
+            !caseStore.caseAttributesAreValid ||
+            !caseStore.labelAttributesAreValid
+          }
         >
           <Glyphicon glyph="save" />
           Save

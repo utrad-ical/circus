@@ -38,7 +38,7 @@ const CaseDetail: React.FC<{}> = props => {
   );
   const api = useApi();
 
-  const { busy, caseData, projectData } = caseStore;
+  const { busy, caseData, projectData, refreshCounter } = caseStore;
   const editingData = c.current(caseStore);
 
   const [tags, setTags] = useState<string[]>([]);
@@ -213,6 +213,7 @@ const CaseDetail: React.FC<{}> = props => {
         caseDispatch={caseDispatch}
         editingData={editingData}
         projectData={projectData}
+        refreshCounter={refreshCounter}
         updateEditingData={updateEditingData}
       />
     </FullSpanContainer>

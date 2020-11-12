@@ -1,18 +1,13 @@
-import { Vector2, Vector3 } from 'three';
-import {
-  AnisotropicRawData,
-  MprImageSource,
-  RawData,
-  RawVolumeMprImageSource,
-  Vector3D,
-  Viewer,
-  ViewState
-} from '../..';
-import { convertPointToMm, detectOrthogonalSection } from '../../section-util';
+import DicomVolume from 'circus-rs/src/common/DicomVolume';
+import { Vector3D } from 'circus-rs/src/common/geometry';
+import { Vector2 } from 'three';
+import { MprImageSource, RawData } from '../..';
+import { detectOrthogonalSection } from '../../section-util';
 import fuzzySelect from '../../util/fuzzySelect';
 import ViewerEvent from '../../viewer/ViewerEvent';
 import VoxelCloudToolBase from './VoxelCloudToolBase';
 
+export type SelectDataMode = '2d' | '3d';
 export default class WandTool extends VoxelCloudToolBase {
   // TODO: define default values
   public static defaultMode = '3d';
@@ -29,200 +24,109 @@ export default class WandTool extends VoxelCloudToolBase {
       maxDistance: WandTool.defaultMaxDistance
     };
   }
+
+  protected getOptions() {
+    const options = this.options as any;
+    const mode: SelectDataMode = options.mode;
+    const threshold: number = options.threshold;
+    const maxDistance: number = options.maxDistance;
+    return { mode, threshold, maxDistance };
+  }
+
   public dragStartHandler(ev: ViewerEvent): void {
     super.dragStartHandler(ev);
-
     ev.stopPropagation();
 
     const viewer = ev.viewer;
+    const comp = viewer.getComposition();
+    if (!comp) throw new Error('Composition not initialized'); // should not happen
+
     const state = viewer.getState();
     if (state.type !== 'mpr') throw new Error('Unsupported view state');
-    const section = state.section;
-    const comp = viewer.getComposition();
-    if (!comp) throw new Error('Composition not initialized'); // should not happen
-
-    if (!section) return;
-    const orientation = detectOrthogonalSection(section);
-    if (orientation === 'oblique') {
-      alert('You cannot use Wand tool on oblique MPR image.');
-      return;
-    }
-
-    const src = comp.imageSource as RawVolumeMprImageSource;
-    if (!src) return;
-
-    this.activeCloud = this.getActiveCloud(comp);
-
-    this.draw(viewer, src);
-
-    comp.annotationUpdated(ev.viewer);
-  }
-
-  protected draw(viewer: Viewer, src: RawVolumeMprImageSource): void {
-    if (!this.activeCloud) return; // no cloud to paint on
-
-    // convert mouse cursor location to cloud's local coordinate
-    const viewerPoint = new Vector2(this.pX, this.pY);
-    const mode = (this.options as any).mode;
-    const threshold = (this.options as any).threshold;
-    const maxDistance = (this.options as any).maxDistance;
-    const value = this.value;
-    const option = {
-      mode,
-      threshold,
-      maxDistance,
-      value
-    };
-    this.drawApproximatePixelWithValue(viewer, viewerPoint, option);
-  }
-
-  private drawApproximatePixelWithValue(
-    viewer: Viewer,
-    viewerPoint: Vector2,
-    option: {
-      mode: ImageDataMode;
-      threshold: number;
-      maxDistance: number;
-      value: number;
-    }
-  ): void {
-    const comp = viewer.getComposition();
-    if (!comp) throw new Error('Composition not initialized'); // should not happen
 
     const src = comp.imageSource as MprImageSource;
     if (!src) throw new Error('Unsupported image source');
-    const volume = src.getDicomVolume();
+    const dicomVolumeRawData = src.getDicomVolume();
 
     if (!this.activeCloud) return; // no cloud to paint on
 
-    // Expand the target volume so that it covers the source image
-    const activeCloud = this.activeCloud;
-    activeCloud.expandToMaximum(src);
-
-    const viewState = viewer.getState();
-    const center = this.convertViewerPoint(viewerPoint, viewer);
-    const approximatePixelsRawData = createApproximatePixelsRawData(
-      viewState,
-      volume,
-      center,
-      option
+    const viewerPoint = this.convertViewerPoint(
+      new Vector2(this.pX, this.pY),
+      viewer
     );
-    if (!approximatePixelsRawData) return;
-    const fuzzySelectRawData = fuzzySelect(approximatePixelsRawData, [
-      center.x,
-      center.y,
-      center.z
-    ]);
-    if (!fuzzySelectRawData) return;
 
-    // draw a 3D points over a volume
-    const [xmax, ymax, zmax] = activeCloud.volume!.getDimension();
-    for (let z = 0; z < zmax; z++) {
-      for (let y = 0; y < ymax; y++) {
-        for (let x = 0; x < xmax; x++) {
-          if (fuzzySelectRawData.getPixelAt(x, y, z) === 1) {
-            activeCloud.volume!.writePixelAt(
-              option.value,
-              Math.floor(x),
-              Math.floor(y),
-              Math.floor(z)
-            );
-          }
+    const options = this.getOptions();
+
+    const section = state.section;
+    if (!section) return;
+    const orientation = detectOrthogonalSection(section);
+    if (orientation === 'oblique' && options.mode === '2d') {
+      alert('You cannot use Wand tool 2D on oblique MPR image.');
+      return;
+    }
+
+    const detectMaxDistance = () => {
+      const maxDistance = dicomVolumeRawData
+        .getVoxelSize()
+        .map(v => Math.floor(options.maxDistance / v));
+      if (options.mode === '2d') {
+        if (orientation === 'axial') {
+          maxDistance[2] = 0;
+        } else if (orientation === 'sagittal') {
+          maxDistance[0] = 0;
+        } else if (orientation === 'coronal') {
+          maxDistance[1] = 0;
+        }
+      }
+      return maxDistance;
+    };
+
+    const params = {
+      startPoint: viewerPoint.toArray() as Vector3D,
+      maxDistance: detectMaxDistance() as Vector3D,
+      threshold: options.threshold,
+      value: this.value
+    };
+
+    this.activeCloud.expandToMaximum(src);
+    applyMagicWand(this.activeCloud.volume!, dicomVolumeRawData, params);
+
+    comp.annotationUpdated(ev.viewer);
+  }
+}
+
+function applyMagicWand(
+  voxelCloudRawData: RawData,
+  dicomVolumeRawData: DicomVolume,
+  params: {
+    startPoint: Vector3D; // control point (not mm!)
+    maxDistance: Vector3D; // maximum distance from the startPoint (not mm!)
+    threshold: number;
+    value: number;
+  }
+): void {
+  const { startPoint, maxDistance, threshold, value } = params;
+
+  const selectedOffset = startPoint.map((v, i) =>
+    Math.max(0, v - maxDistance[i])
+  );
+  const selectedRawData = fuzzySelect(
+    dicomVolumeRawData,
+    startPoint,
+    maxDistance,
+    threshold
+  );
+  const selectedSize = selectedRawData.getDimension();
+
+  const [xmin, ymin, zmin] = selectedOffset;
+  const [xmax, ymax, zmax] = selectedOffset.map((v, i) => v + selectedSize[i]);
+  for (let z = zmin; z < zmax; z++) {
+    for (let y = ymin; y < ymax; y++) {
+      for (let x = xmin; x < xmax; x++) {
+        if (selectedRawData.getPixelAt(x - xmin, y - ymin, z - zmin) === 1) {
+          voxelCloudRawData.writePixelAt(value, x, y, z);
         }
       }
     }
   }
-}
-export type ImageDataMode = '2d' | '3d';
-export function createApproximatePixelsRawData(
-  viewState: ViewState,
-  rawData: AnisotropicRawData,
-  center: Vector3, // control point (not mm!)
-  option: {
-    mode: ImageDataMode;
-    threshold: number;
-    maxDistance: number;
-  }
-): RawData | undefined {
-  if (viewState.type !== 'mpr') throw new Error('Unsupported view state');
-
-  const pixelAt = (pos: Vector3D) => {
-    const [x, y, z] = pos;
-    return rawData.getPixelNearestNeighbor(x, y, z);
-  };
-
-  const basisPixel = pixelAt([center.x, center.y, center.z]);
-  if (!basisPixel) return;
-
-  const pixelRange = (() => {
-    const { threshold } = option;
-    const min = Math.max(0, basisPixel - threshold);
-    const max = basisPixel + threshold;
-    return { min, max };
-  })();
-
-  const withinThreshold = (pixel?: number): boolean => {
-    return pixel ? pixelRange.min <= pixel && pixel <= pixelRange.max : false;
-  };
-
-  const voxelSize = new Vector3().fromArray(rawData.getVoxelSize());
-  const mmCenter = convertPointToMm(center, voxelSize);
-
-  const [minX, maxX, minY, maxY, minZ, maxZ] = (() => {
-    const { mode, maxDistance } = option;
-    const size = rawData.getDimension();
-    const voxelSize = rawData.getVoxelSize();
-
-    const min = [mmCenter.x, mmCenter.y, mmCenter.z].map((v, i) =>
-      Math.max(0, Math.floor((v - maxDistance) / voxelSize[i]))
-    );
-    const max = [mmCenter.x, mmCenter.y, mmCenter.z].map((v, i) =>
-      Math.min(size[i] - 1, Math.floor((v + maxDistance) / voxelSize[i]))
-    );
-
-    const orientation = detectOrthogonalSection(viewState.section);
-    switch (orientation) {
-      case 'axial':
-        return [
-          min[0],
-          max[0],
-          min[1],
-          max[1],
-          mode === '2d' ? center.z : min[2],
-          mode === '2d' ? center.z : max[2]
-        ];
-      case 'sagittal':
-        return [
-          mode === '2d' ? center.x : min[0],
-          mode === '2d' ? center.x : max[0],
-          min[1],
-          max[1],
-          min[2],
-          max[2]
-        ];
-      case 'coronal':
-        return [
-          min[0],
-          max[0],
-          mode === '2d' ? center.y : min[1],
-          mode === '2d' ? center.y : max[1],
-          min[2],
-          max[2]
-        ];
-      default:
-        return [min[0], max[0], min[1], max[1], min[2], max[2]];
-    }
-  })();
-
-  const dst = new RawData(rawData.getDimension(), 'binary');
-  for (let z = minZ; z <= maxZ; z++) {
-    for (let y = minY; y <= maxY; y++) {
-      for (let x = minX; x <= maxX; x++) {
-        const pos: Vector3D = [x, y, z];
-        const value = pixelAt(pos);
-        if (withinThreshold(value)) dst.writePixelAt(1, x, y, z);
-      }
-    }
-  }
-  return dst;
 }

@@ -1,43 +1,52 @@
 import { RawData, Vector3D } from '..';
 
 export default function fuzzySelect(
-  src: RawData,
-  center: Vector3D
-): RawData | undefined {
-  const refVal = src.getPixelAt(...center);
-  const size = src.getDimension();
+  volume: RawData,
+  startPoint: Vector3D, // index (not mm!)
+  maxDistance: Vector3D, // index (not mm!)
+  threshold: number
+): RawData {
+  const specifiedPixel = volume.getPixelAt(
+    startPoint[0],
+    startPoint[1],
+    startPoint[2]
+  );
 
-  const check = (x: number, y: number, z: number) => {
-    return (
-      x >= 0 && y >= 0 && z >= 0 && x < size[0] && y < size[1] && z < size[2]
-    );
+  const minPixel = specifiedPixel - threshold;
+  const maxPixel = specifiedPixel + threshold;
+  const select = (x: number, y: number, z: number): boolean => {
+    const pixel = volume.getPixelAt(x, y, z);
+    return minPixel <= pixel && pixel <= maxPixel;
   };
 
-  const dst = new RawData(size, 'binary');
+  //TODO: Improve to select only approximate pixels within a continuous range
+  const maxSize = volume.getDimension();
+  const offset = startPoint.map((v, i) => Math.max(0, v - maxDistance[i]));
 
-  const stack: Vector3D[] = [center];
-  const done: Vector3D[] = [];
-  while (stack.length > 0) {
-    const cur = <Vector3D>stack.pop();
-    const [x, y, z] = cur;
-    dst.writePixelAt(1, x, y, z);
-    const prev: Vector3D = [x - 1, y, z];
-    const next: Vector3D = [x + 1, y, z];
-    const east: Vector3D = [x, y + 1, z];
-    const west: Vector3D = [x, y - 1, z];
-    const north: Vector3D = [x, y, z - 1];
-    const south: Vector3D = [x, y, z + 1];
-    [prev, next, east, west, north, south].forEach(pos => {
-      const [x, y, z] = pos;
-      if (
-        check(x, y, z) &&
-        src.getPixelAt(x, y, z) === refVal &&
-        !done.find(e => e.every((v, i) => v === pos[i]))
-      ) {
-        stack.push(pos);
+  const size = offset.map((v, i) =>
+    Math.min(maxSize[i], v + 1 + maxDistance[i] * 2)
+  ) as Vector3D;
+
+  const _size =
+    size[0] % 8 === 0
+      ? size
+      : ([
+          Math.min(maxSize[0], Math.ceil(size[0] / 8) * 8),
+          size[1],
+          size[2]
+        ] as Vector3D);
+
+  const rawData = new RawData(_size, 'binary');
+  const [xmin, ymin, zmin] = offset;
+  const [xmax, ymax, zmax] = offset.map((v, i) => v + size[i]);
+  for (let z = zmin; z < zmax; z++) {
+    for (let y = ymin; y < ymax; y++) {
+      for (let x = xmin; x < xmax; x++) {
+        if (select(x, y, z)) {
+          rawData.writePixelAt(1, x - offset[0], y - offset[1], z - offset[2]);
+        }
       }
-    });
-    done.push(cur);
+    }
   }
-  return dst;
+  return rawData;
 }

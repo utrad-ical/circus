@@ -50,6 +50,10 @@ export default class HybridMprImageSource extends MprImageSource {
     return this.dynSource.ready();
   }
 
+  public readyVolume(): Promise<any> {
+    return this.volSource.ready();
+  }
+
   public initialState(viewer: Viewer): ViewState {
     return this.dynSource.initialState(viewer);
   }

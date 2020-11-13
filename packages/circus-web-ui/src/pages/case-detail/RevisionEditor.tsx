@@ -15,6 +15,7 @@ import React, {
   useCallback,
   useContext,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState
@@ -51,7 +52,6 @@ const useComposition = (
 ): Composition | undefined => {
   const { rsHttpClient } = useContext(VolumeLoaderCacheContext)!;
 
-  // TODO: doramari
   const volumeLoader = usePendingVolumeLoader(
     seriesUid,
     partialVolumeDescriptor
@@ -131,6 +131,13 @@ const RevisionEditor: React.FC<{
     activeSeries.partialVolumeDescriptor
   );
   const { revision, activeLabelIndex } = editingData;
+
+  const [volumeLoaded, setVolumeLoaded] = useState<boolean>(false);
+  useLayoutEffect(() => {
+    if (!composition) return;
+    const imageSource = composition.imageSource as rs.HybridMprImageSource;
+    imageSource.readyVolume().then(() => setVolumeLoaded(true));
+  }, [composition]);
 
   const handleAnnotationChange = (
     annotation: rs.VoxelCloud | rs.SolidFigure | rs.PlaneFigure
@@ -471,6 +478,7 @@ const RevisionEditor: React.FC<{
   if (!activeSeries || !composition) return null;
   const activeLabel = activeSeries.labels[activeLabelIndex];
   const brushEnabled = activeLabel ? activeLabel.type === 'voxel' : false;
+  const wandEnabled = volumeLoaded;
 
   return (
     <StyledDiv className={classNames('case-revision-data', { busy })}>
@@ -537,6 +545,7 @@ const RevisionEditor: React.FC<{
           onChangeViewOptions={setViewOptions}
           lineWidth={lineWidth}
           setLineWidth={handleSetLineWidth}
+          wandEnabled={wandEnabled}
           wandMode={wandMode}
           setWandMode={handleSetWandMode}
           wandMaxDistance={wandMaxDistance}

@@ -44,6 +44,7 @@ const ToolBar: React.FC<{
   brushEnabled: boolean;
   lineWidth: number;
   setLineWidth: (lineWidth: number) => void;
+  wandEnabled: boolean;
   wandMode: string;
   setWandMode: (wandMode: string) => void;
   wandThreshold: number;
@@ -62,6 +63,7 @@ const ToolBar: React.FC<{
     brushEnabled,
     lineWidth,
     setLineWidth,
+    wandEnabled,
     wandMode,
     setWandMode,
     wandThreshold,
@@ -222,14 +224,14 @@ const ToolBar: React.FC<{
         icon="rs-wand"
         changeTool={onChangeTool}
         active={activeTool}
-        disabled={!brushEnabled || disabled}
+        disabled={!brushEnabled || !wandEnabled || disabled}
       />
       <ToolButton
         name="wandEraser"
         icon="rs-wand-eraser"
         changeTool={onChangeTool}
         active={activeTool}
-        disabled={!brushEnabled || disabled}
+        disabled={!brushEnabled || !wandEnabled || disabled}
       />
       &thinsp;
       <Dropdown id="layout-dropdown" disabled={disabled}>

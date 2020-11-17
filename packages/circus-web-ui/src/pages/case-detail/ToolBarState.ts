@@ -1,26 +1,35 @@
 import WandTool from '@utrad-ical/circus-rs/src/browser/tool/cloud/WandTool';
+import { createSelector } from 'reselect';
 
-export interface VoxelCloudToolState {
+export const brushTools = ['brush', 'eraser', 'bucket', 'wand', 'wandEraser'];
+
+export interface State {
   activeTool: string;
   lineWidth: number;
   wandMode: '2d' | '3d';
   wandThreshold: number;
   wandMaxDistance: number;
+  volumeLoaded: boolean;
+  enableVoxelCloudEditor: boolean;
 }
 
-type Actions =
+export type Actions =
   | SetActiveToolAction
   | SetLineWidthAction
   | SetWandModeAction
   | SetWandThresholdAction
-  | SetMaxDistanceAction;
+  | SetMaxDistanceAction
+  | SetVolumeLoadedAction
+  | SetEnableVoxelCloudEditorAction;
 
-export const initialState = (): VoxelCloudToolState => ({
-  activeTool: '',
+export const initialState = (): State => ({
+  activeTool: 'pager',
   lineWidth: 1,
   wandMode: WandTool.defaultMode,
   wandThreshold: WandTool.defaultThreshold,
-  wandMaxDistance: WandTool.defaultMaxDistance
+  wandMaxDistance: WandTool.defaultMaxDistance,
+  volumeLoaded: false,
+  enableVoxelCloudEditor: false
 });
 
 type SetActiveToolAction = ReturnType<typeof setActiveTool>;
@@ -53,10 +62,21 @@ export const setWandMaxDistance = (wandMaxDistance: number) => ({
   wandMaxDistance
 });
 
-export function reducer<S extends VoxelCloudToolState = VoxelCloudToolState>(
-  state: S,
-  action: Actions
-): S {
+type SetVolumeLoadedAction = ReturnType<typeof setVolumeLoaded>;
+export const setVolumeLoaded = (volumeLoaded: boolean) => ({
+  type: 'setVolumeLoaded' as 'setVolumeLoaded',
+  volumeLoaded
+});
+
+type SetEnableVoxelCloudEditorAction = ReturnType<
+  typeof setEnableVoxelCloudEditor
+>;
+export const setEnableVoxelCloudEditor = (enableVoxelCloudEditor: boolean) => ({
+  type: 'setEnableVoxelCloudEditor' as 'setEnableVoxelCloudEditor',
+  enableVoxelCloudEditor
+});
+
+export function reducer<S extends State = State>(state: S, action: Actions): S {
   switch (action.type) {
     case 'setActiveTool':
       return state.activeTool !== action.activeTool
@@ -78,6 +98,36 @@ export function reducer<S extends VoxelCloudToolState = VoxelCloudToolState>(
       return state.wandMaxDistance !== action.wandMaxDistance
         ? { ...state, wandMaxDistance: action.wandMaxDistance }
         : state;
+    case 'setVolumeLoaded':
+      return state.volumeLoaded !== action.volumeLoaded
+        ? { ...state, volumeLoaded: action.volumeLoaded }
+        : state;
+    case 'setEnableVoxelCloudEditor':
+      return state.enableVoxelCloudEditor !== action.enableVoxelCloudEditor
+        ? {
+            ...state,
+            enableVoxelCloudEditor: action.enableVoxelCloudEditor
+            // activeTool: brushTools.some(t => t === state.activeTool)
+            //   ? 'pager'
+            //   : state.activeTool
+          }
+        : state;
   }
   return state;
 }
+
+const baseSelector = (i: State): State => i;
+export const getHighlightTool = createSelector(baseSelector, state =>
+  !state.enableVoxelCloudEditor &&
+  brushTools.some(tool => tool === state.activeTool)
+    ? 'pager'
+    : state.activeTool
+);
+export const getBrushToolIsEnabled = createSelector(
+  baseSelector,
+  state => state.enableVoxelCloudEditor
+);
+export const getWandToolIsEnabled = createSelector(
+  baseSelector,
+  state => state.enableVoxelCloudEditor && state.volumeLoaded
+);

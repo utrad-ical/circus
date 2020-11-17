@@ -9,11 +9,12 @@ import {
   SplitButton,
   Tooltip
 } from 'components/react-bootstrap';
-import React from 'react';
+import React, { useCallback } from 'react';
 import styled from 'styled-components';
 import { WindowPreset } from 'types/Project';
 import useKeyboardShortcut from 'utils/useKeyboardShortcut';
 import { Layout } from './ViewerCluster';
+import * as ToolBarState from './ToolBarState';
 
 export interface ViewOptions {
   layout?: Layout;
@@ -38,46 +39,36 @@ const layoutOptions = [
 ];
 
 const ToolBar: React.FC<{
-  active: string;
+  tbState: ToolBarState.State;
+  tbDispatch: React.Dispatch<ToolBarState.Actions>;
+
   viewOptions: ViewOptions;
   onChangeViewOptions: (viewOptions: ViewOptions) => void;
-  brushEnabled: boolean;
-  lineWidth: number;
-  setLineWidth: (lineWidth: number) => void;
-  wandEnabled: boolean;
-  wandMode: string;
-  setWandMode: (wandMode: '2d' | '3d') => void;
-  wandThreshold: number;
-  setWandThreshold: (wandThreshold: number) => void;
-  wandMaxDistance: number;
-  setWandMaxDistance: (wandMaxDistance: number) => void;
   windowPresets?: WindowPreset[];
-  onChangeTool: (toolName: string) => void;
   onApplyWindow: (window: any) => void;
   disabled?: boolean;
 }> = React.memo(props => {
   const {
-    active,
+    tbState,
+    tbDispatch,
+
     viewOptions,
     onChangeViewOptions,
-    brushEnabled,
-    lineWidth,
-    setLineWidth,
-    wandEnabled,
-    wandMode,
-    setWandMode,
-    wandThreshold,
-    setWandThreshold,
-    wandMaxDistance,
-    setWandMaxDistance,
     windowPresets = [],
-    onChangeTool,
     onApplyWindow,
     disabled
   } = props;
 
   const widthOptions = ['1', '3', '5', '7'];
-  const wandModeOptions = ['3d', '2d'];
+
+  const activeTool = ToolBarState.getHighlightTool(tbState);
+  const wandToolIsEnabled = ToolBarState.getWandToolIsEnabled(tbState);
+  const brushToolIsEnabled = ToolBarState.getWandToolIsEnabled(tbState);
+
+  const onChangeTool = useCallback(
+    (toolName: string) => tbDispatch(ToolBarState.setActiveTool(toolName)),
+    [tbDispatch]
+  );
 
   const handleToggleReferenceLine = () => {
     onChangeViewOptions({
@@ -107,20 +98,6 @@ const ToolBar: React.FC<{
     });
   };
 
-  const handleToggleWandMode = () => {
-    setWandMode(wandMode === '3d' ? '2d' : '3d');
-  };
-
-  const handleWandThreshold = (ev: React.ChangeEvent<HTMLInputElement>) => {
-    const threshold = ev.target.valueAsNumber;
-    setWandThreshold(threshold);
-  };
-
-  const handleWandMaxDistance = (ev: React.ChangeEvent<HTMLInputElement>) => {
-    const maxDistance = ev.target.valueAsNumber;
-    setWandMaxDistance(maxDistance);
-  };
-
   const handleApplyWindow = async (selection: WindowPreset) => {
     if ('level' in selection && 'width' in selection) {
       onApplyWindow({ level: selection.level, width: selection.width });
@@ -133,12 +110,6 @@ const ToolBar: React.FC<{
       onApplyWindow({ level, width });
     }
   };
-
-  const brushTools = ['brush', 'eraser', 'bucket', 'wand', 'wandEraser'];
-  const activeTool =
-    !brushEnabled && brushTools.some(tool => tool === active)
-      ? 'pager'
-      : active;
 
   return (
     <StyledDiv>
@@ -194,7 +165,7 @@ const ToolBar: React.FC<{
         changeTool={onChangeTool}
         active={activeTool}
         shortcut="KeyB"
-        disabled={!brushEnabled || disabled}
+        disabled={!brushToolIsEnabled || disabled}
       />
       <ToolButton
         name="eraser"
@@ -202,36 +173,36 @@ const ToolBar: React.FC<{
         changeTool={onChangeTool}
         active={activeTool}
         shortcut="KeyE"
-        disabled={!brushEnabled || disabled}
+        disabled={!brushToolIsEnabled || disabled}
       />
       <ShrinkSelect
         numericalValue
         className="line-width-shrinkselect"
         options={widthOptions}
-        value={lineWidth}
-        onChange={setLineWidth}
-        disabled={!brushEnabled || disabled}
+        value={tbState.lineWidth}
+        onChange={(value) => tbDispatch(ToolBarState.setLineWidth(value))}
+        disabled={!brushToolIsEnabled || disabled}
       />
       <ToolButton
         name="bucket"
         icon="rs-bucket"
         changeTool={onChangeTool}
         active={activeTool}
-        disabled={!brushEnabled || disabled}
+        disabled={!brushToolIsEnabled || disabled}
       />
       <ToolButton
         name="wand"
         icon="rs-wand"
         changeTool={onChangeTool}
         active={activeTool}
-        disabled={!brushEnabled || !wandEnabled || disabled}
+        disabled={!wandToolIsEnabled || disabled}
       />
       <ToolButton
         name="wandEraser"
         icon="rs-wand-eraser"
         changeTool={onChangeTool}
         active={activeTool}
-        disabled={!brushEnabled || !wandEnabled || disabled}
+        disabled={!wandToolIsEnabled || disabled}
       />
       &thinsp;
       <Dropdown id="layout-dropdown" disabled={disabled}>
@@ -289,45 +260,61 @@ const ToolBar: React.FC<{
         </Dropdown.Menu>
       </Dropdown>
       {(activeTool === 'wand' || activeTool === 'wandEraser') && (
-        <StyledSpanWandOption>
-          &emsp;
-          <>
-            <label>threshold: </label>
-            <input
-              className="wand-threshold-input"
-              type="number"
-              name="threshold"
-              min="0"
-              value={wandThreshold}
-              onChange={handleWandThreshold}
-            />
-          </>
-          <>
-            <label>max distance: </label>
-            <input
-              className="wand-max-distance-input"
-              type="number"
-              name="maxDistance"
-              min="0"
-              placeholder="mm"
-              value={wandMaxDistance}
-              onChange={handleWandMaxDistance}
-            />
-          </>
-          <>
-            <label>mode: </label>
-            <ShrinkSelect
-              className="wand-option-shrinkselect"
-              options={wandModeOptions}
-              value={wandMode}
-              onChange={handleToggleWandMode}
-            />
-          </>
-        </StyledSpanWandOption>
+        <WondOptions tbDispatch={tbDispatch} tbState={tbState}></WondOptions>
       )}
     </StyledDiv>
   );
 });
+
+const WondOptions: React.FC<{
+  tbDispatch: React.Dispatch<ToolBarState.Actions>;
+  tbState: ToolBarState.State;
+}> = ({
+  tbDispatch,
+  tbState
+}) => {
+    const wandModeOptions = ['3d', '2d'];
+    const { wandThreshold, wandMaxDistance, wandMode } = tbState;
+
+    return (
+      <StyledSpanWandOption>
+        &emsp;
+        <>
+          <label>threshold: </label>
+          <input
+            className="wand-threshold-input"
+            type="number"
+            name="threshold"
+            min="0"
+            value={wandThreshold}
+            onChange={(ev) => tbDispatch(ToolBarState.setWandThreshold(ev.target.valueAsNumber))}
+          />
+        </>
+        <>
+          <label>max distance: </label>
+          <input
+            className="wand-max-distance-input"
+            type="number"
+            name="maxDistance"
+            min="0"
+            placeholder="mm"
+            value={wandMaxDistance}
+            onChange={(ev) => tbDispatch(ToolBarState.setWandMaxDistance(ev.target.valueAsNumber))}
+          />
+        </>
+        <>
+          <label>mode: </label>
+          <ShrinkSelect
+            className="wand-option-shrinkselect"
+            options={wandModeOptions}
+            value={wandMode}
+            onChange={(value) => tbDispatch(ToolBarState.setWandMode(value))}
+          />
+        </>
+      </StyledSpanWandOption>
+    )
+  }
+
 
 const StyledDiv = styled.div`
   flex: none;

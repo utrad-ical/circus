@@ -2,9 +2,7 @@ import IconButton from '@smikitky/rb-components/lib/IconButton';
 import JsonSchemaEditor from '@smikitky/rb-components/lib/JsonSchemaEditor';
 import { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
 import * as rs from '@utrad-ical/circus-rs/src/browser';
-import { Composition, Viewer } from '@utrad-ical/circus-rs/src/browser';
-import WandTool from '@utrad-ical/circus-rs/src/browser/tool/cloud/WandTool';
-import ToolBaseClass from '@utrad-ical/circus-rs/src/browser/tool/Tool';
+import { Composition, MprImageSource, Viewer } from '@utrad-ical/circus-rs/src/browser';
 import classNames from 'classnames';
 import Collapser from 'components/Collapser';
 import Icon from 'components/Icon';
@@ -17,7 +15,6 @@ import React, {
   useEffect,
   useLayoutEffect,
   useMemo,
-  useReducer,
   useRef,
   useState
 } from 'react';
@@ -47,6 +44,7 @@ import SideContainer from './SideContainer';
 import ToolBar, { ViewOptions } from './ToolBar';
 import useToolBar from './useToolBar';
 import ViewerCluster from './ViewerCluster';
+import * as ToolBarState from './ToolBarState';
 
 const useComposition = (
   seriesUid: string,
@@ -114,9 +112,6 @@ const RevisionEditor: React.FC<{
     }
   );
 
-  // const [toolName, setToolName] = useState('');
-  // const [tool, setTool] = useState<ToolBaseClass | null>(null);
-
   const activeSeries =
     editingData.revision.series[editingData.activeSeriesIndex];
   const composition = useComposition(
@@ -125,12 +120,26 @@ const RevisionEditor: React.FC<{
   );
   const { revision, activeLabelIndex } = editingData;
 
-  const [volumeLoaded, setVolumeLoaded] = useState<boolean>(false);
+  if (!activeSeries || !composition) return null;
+  const activeLabel = activeSeries.labels[activeLabelIndex];
+
+  const [tbState, tbDispatch, tool] = useToolBar();
+
   useLayoutEffect(() => {
-    if (!composition) return;
-    const imageSource = composition.imageSource as rs.HybridMprImageSource;
-    imageSource.readyVolume().then(() => setVolumeLoaded(true));
+    const imageSource = composition?.imageSource;
+    if (!imageSource || !(imageSource instanceof rs.HybridMprImageSource)) return;
+    tbDispatch(ToolBarState.setVolumeLoaded(false));
+    imageSource.readyVolume().then(
+      () => tbDispatch(ToolBarState.setVolumeLoaded(true))
+    );
   }, [composition]);
+
+  // Update state from props
+  const enableVoxelCloudEditor = activeLabel ? activeLabel.type === 'voxel' : false;
+  useLayoutEffect(
+    () => tbDispatch(ToolBarState.setEnableVoxelCloudEditor(enableVoxelCloudEditor)),
+    [enableVoxelCloudEditor]
+  );
 
   const handleAnnotationChange = (
     annotation: rs.VoxelCloud | rs.SolidFigure | rs.PlaneFigure
@@ -293,30 +302,6 @@ const RevisionEditor: React.FC<{
     });
   };
 
-  const {
-    vctState,
-    dispatchVctState,
-
-    toolName,
-    setToolName,
-    tool,
-    setTool,
-    getTool,
-    changeTool,
-    handleSetLineWidth,
-    handleSetWandMode,
-    handleSetWandThreshold,
-    handleSetWandMaxDistance,
-    lineWidth, wandMode, wandThreshold, wandMaxDistance
-  } = useToolBar();
-
-  useEffect(() => {
-    if (composition && !tool) {
-      setToolName('pager');
-      setTool(getTool('pager'));
-    }
-  }, [composition, getTool, tool]);
-
   const handleApplyWindow = useCallback(
     (window: rs.ViewWindow) => stateChanger(state => ({ ...state, window })),
     [stateChanger]
@@ -408,10 +393,7 @@ const RevisionEditor: React.FC<{
     return viewState; // do not update view state (should not happen)
   };
 
-  if (!activeSeries || !composition) return null;
-  const activeLabel = activeSeries.labels[activeLabelIndex];
-  const brushEnabled = activeLabel ? activeLabel.type === 'voxel' : false;
-  const wandEnabled = volumeLoaded;
+  console.count('Rendering RevisionEditor');
 
   return (
     <StyledDiv className={classNames('case-revision-data', { busy })}>
@@ -472,22 +454,13 @@ const RevisionEditor: React.FC<{
       </SideContainer>
       <div className="case-revision-main">
         <ToolBar
-          active={toolName}
-          onChangeTool={changeTool}
+          tbState={tbState}
+          tbDispatch={tbDispatch}
+
           viewOptions={viewOptions}
           onChangeViewOptions={setViewOptions}
-          lineWidth={lineWidth}
-          setLineWidth={handleSetLineWidth}
-          wandEnabled={wandEnabled}
-          wandMode={wandMode}
-          setWandMode={handleSetWandMode}
-          wandMaxDistance={wandMaxDistance}
-          setWandMaxDistance={handleSetWandMaxDistance}
-          wandThreshold={wandThreshold}
-          setWandThreshold={handleSetWandThreshold}
           windowPresets={projectData.windowPresets}
           onApplyWindow={handleApplyWindow}
-          brushEnabled={brushEnabled}
           disabled={busy}
         />
         <ViewerCluster

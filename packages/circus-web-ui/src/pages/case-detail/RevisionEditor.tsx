@@ -45,8 +45,8 @@ import {
 import SeriesSelectorDialog from './SeriesSelectorDialog';
 import SideContainer from './SideContainer';
 import ToolBar, { ViewOptions } from './ToolBar';
+import useToolBar from './useToolBar';
 import ViewerCluster from './ViewerCluster';
-import * as VoxelCloudToolState from './VoxelCloudToolState';
 
 const useComposition = (
   seriesUid: string,
@@ -101,8 +101,6 @@ const RevisionEditor: React.FC<{
   const viewWindows = useRef<{ [seriesUid: string]: rs.ViewWindow }>({});
 
   const [touchDevice] = useState(() => isTouchDevice());
-  const toolsRef = useRef<{ [key: string]: ToolBaseClass }>({});
-  const tools = toolsRef.current;
   const stateChanger = useMemo(() => createStateChanger<rs.MprViewState>(), []);
   const [seriesDialogOpen, setSeriesDialogOpen] = useState(false);
 
@@ -116,8 +114,8 @@ const RevisionEditor: React.FC<{
     }
   );
 
-  const [toolName, setToolName] = useState('');
-  const [tool, setTool] = useState<ToolBaseClass | null>(null);
+  // const [toolName, setToolName] = useState('');
+  // const [tool, setTool] = useState<ToolBaseClass | null>(null);
 
   const activeSeries =
     editingData.revision.series[editingData.activeSeriesIndex];
@@ -295,14 +293,22 @@ const RevisionEditor: React.FC<{
     });
   };
 
-  const getTool = useCallback(
-    (toolName: string): ToolBaseClass => {
-      const tool = tools[toolName] || rs.toolFactory(toolName);
-      tools[toolName] = tool;
-      return tool;
-    },
-    [tools]
-  );
+  const {
+    vctState,
+    dispatchVctState,
+
+    toolName,
+    setToolName,
+    tool,
+    setTool,
+    getTool,
+    changeTool,
+    handleSetLineWidth,
+    handleSetWandMode,
+    handleSetWandThreshold,
+    handleSetWandMaxDistance,
+    lineWidth, wandMode, wandThreshold, wandMaxDistance
+  } = useToolBar();
 
   useEffect(() => {
     if (composition && !tool) {
@@ -311,53 +317,10 @@ const RevisionEditor: React.FC<{
     }
   }, [composition, getTool, tool]);
 
-  const changeTool = useCallback(
-    (toolName: string) => {
-      setToolName(toolName);
-      setTool(getTool(toolName));
-    },
-    [getTool]
-  );
-
   const handleApplyWindow = useCallback(
     (window: rs.ViewWindow) => stateChanger(state => ({ ...state, window })),
     [stateChanger]
   );
-
-  // handle options for voxel cloud tools
-  const [vctState, dispatchVctState] = useReducer(
-    VoxelCloudToolState.reducer,
-    VoxelCloudToolState.initialState()
-  );
-  const { lineWidth, wandMode, wandThreshold, wandMaxDistance } = vctState;
-  const handleSetLineWidth = (lineWidth: number) => dispatchVctState(
-    VoxelCloudToolState.setLineWidth(lineWidth)
-  );
-  const handleSetWandMode = (wandMode: '2d' | '3d') => dispatchVctState(
-    VoxelCloudToolState.setWandMode(wandMode)
-  );
-  const handleSetWandThreshold = (wandThreshold: number) => dispatchVctState(
-    VoxelCloudToolState.setWandThreshold(wandThreshold)
-  );
-  const handleSetWandMaxDistance = (wandMaxDistance: number) => dispatchVctState(
-    VoxelCloudToolState.setWandMaxDistance(wandMaxDistance)
-  );
-  useLayoutEffect(() => {
-    getTool('brush').setOptions({ width: lineWidth });
-    getTool('eraser').setOptions({ width: lineWidth });
-  }, [getTool, lineWidth]);
-  useLayoutEffect(() => {
-    getTool('wand').setOptions({
-      mode: wandMode,
-      threshold: wandThreshold,
-      maxDistance: wandMaxDistance
-    });
-    getTool('wandEraser').setOptions({
-      mode: wandMode,
-      threshold: wandThreshold,
-      maxDistance: wandMaxDistance
-    });
-  }, [getTool, wandMode, wandThreshold, wandMaxDistance]);
 
   const handleCreateViwer = (viewer: Viewer, id?: string | number) => {
     viewers[id!] = viewer;

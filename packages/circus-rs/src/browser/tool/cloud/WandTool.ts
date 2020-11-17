@@ -9,9 +9,9 @@ import VoxelCloudToolBase from './VoxelCloudToolBase';
 export type SelectDataMode = '2d' | '3d';
 export default class WandTool extends VoxelCloudToolBase {
   // TODO: define default values
-  public static defaultMode = '3d';
-  public static defaultThreshold = 0;
-  public static defaultMaxDistance = 15;
+  public static defaultMode: SelectDataMode = '3d';
+  public static defaultThreshold: number = 0;
+  public static defaultMaxDistance: number = 15;
   protected value = 1;
 
   constructor() {

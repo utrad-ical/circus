@@ -46,7 +46,7 @@ const ToolBar: React.FC<{
   setLineWidth: (lineWidth: number) => void;
   wandEnabled: boolean;
   wandMode: string;
-  setWandMode: (wandMode: string) => void;
+  setWandMode: (wandMode: '2d' | '3d') => void;
   wandThreshold: number;
   setWandThreshold: (wandThreshold: number) => void;
   wandMaxDistance: number;

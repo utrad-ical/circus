@@ -74,6 +74,8 @@ export default class WandTool extends VoxelCloudToolBase {
       new Vector3().fromArray(dicomVolumeRawData.getDimension()).subScalar(1)
     );
 
+    if (!volumeBoundingBox.containsPoint(startPoint)) return;
+
     const maxDistanceBox = new Box3(
       new Vector3(
         startPoint.x - maxDistancesInIndex.x,

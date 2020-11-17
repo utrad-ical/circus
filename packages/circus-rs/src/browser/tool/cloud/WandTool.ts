@@ -71,7 +71,7 @@ export default class WandTool extends VoxelCloudToolBase {
 
     const volumeBoundingBox = new Box3(
       new Vector3(0, 0, 0),
-      new Vector3().fromArray(dicomVolumeRawData.getDimension())
+      new Vector3().fromArray(dicomVolumeRawData.getDimension()).subScalar(1)
     );
 
     const maxDistanceBox = new Box3(
@@ -89,21 +89,16 @@ export default class WandTool extends VoxelCloudToolBase {
 
     const boundingBox = maxDistanceBox.intersect(volumeBoundingBox);
 
-    // Todo: Remove this code (and the function) if the requirement
-    // that the size must be divisible by 8 is removed.
-    adjustBoundingBoxSizeToDivisible8(boundingBox);
-
     const selectedRawData = fuzzySelect(
       dicomVolumeRawData,
       startPoint,
       boundingBox,
-      threshold,
-      this.value
+      threshold
     );
 
     // Apply changes to active cloud by merging selectedRawData.
     if (!this.activeCloud.expanded) this.activeCloud.expandToMaximum(src);
-    applyChanges(this.activeCloud, 1, selectedRawData, boundingBox);
+    applyChanges(this.activeCloud, this.value, selectedRawData, boundingBox);
 
     comp.annotationUpdated(ev.viewer);
   }
@@ -127,14 +122,6 @@ function adjustMaxDistancesAs2D(
   }
 }
 
-function adjustBoundingBoxSizeToDivisible8(bounding: Box3) {
-  const w0 = bounding.getSize(new Vector3()).add(new Vector3(1, 1, 1)).x;
-  if (w0 % 8 !== 0) {
-    const w1 = Math.ceil(w0 / 8) * 8;
-    bounding.max.x += w1 - w0;
-  }
-}
-
 /**
  * Apply fuzzy select result to a cloud.
  * @todo implement this function(now this is stub)
@@ -142,7 +129,7 @@ function adjustBoundingBoxSizeToDivisible8(bounding: Box3) {
 function applyChanges(
   cloud: VoxelCloud, // must be expanded to ensure including "boundingBox".
   applyValue: number,
-  applyRawData: RawData,
+  applyRawData: RawData, // might have different size of boundingBox. (because the div 8 issue)
   boundingBox: Box3
 ) {
   const { min: min3, max: max3 } = boundingBox;

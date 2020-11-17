@@ -339,7 +339,7 @@ const RevisionEditor: React.FC<{
   );
 
   const handleSetWandMode = useCallback(
-    (wandMode: string) => {
+    (wandMode: '2d' | '3d') => {
       setWandMode(wandMode);
       getTool('wand').setOptions({
         mode: wandMode,

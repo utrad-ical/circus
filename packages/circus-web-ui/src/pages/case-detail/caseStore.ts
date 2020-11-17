@@ -19,8 +19,17 @@ export interface CaseDetailState {
   editingRevisionIndex: number;
   projectData?: Project;
   history: EditingData[];
+  /**
+   * Used to remember the type of the last operation and
+   * coalesce similar history items.
+   */
   historyTag?: string;
   currentHistoryIndex: number;
+  /**
+   * This counter is incremented for each redu/undo.
+   * Used to "refresh" the two attributes editors.
+   */
+  refreshCounter: number;
   caseAttributesAreValid: boolean;
   labelAttributesAreValid: boolean;
 }
@@ -43,6 +52,7 @@ const slice = createSlice({
     editingRevisionIndex: -1,
     history: [],
     currentHistoryIndex: 0,
+    refreshCounter: 0,
     caseAttributesAreValid: false,
     labelAttributesAreValid: false
   } as CaseDetailState,
@@ -85,6 +95,7 @@ const slice = createSlice({
       };
       s.history = [editingData];
       s.currentHistoryIndex = 0;
+      s.refreshCounter++;
       s.busy = false;
     },
     change: (
@@ -92,8 +103,8 @@ const slice = createSlice({
       action: PayloadAction<{
         newData: EditingData;
         /**
-         * Tag is used to avoid pushing too many history items.
-         * Changes with the same tag will be fused to one history item.
+         * Tag is used to avoid pushing too many similar history items.
+         * Changes with the same tag will be coalesced into one history item.
          * Pass nothing if each history item is important!
          */
         tag?: string;
@@ -117,11 +128,13 @@ const slice = createSlice({
     undo: s => {
       if (s.currentHistoryIndex > 0) {
         s.currentHistoryIndex--;
+        s.refreshCounter++;
       }
     },
     redo: s => {
       if (s.currentHistoryIndex < s.history.length - 1) {
         s.currentHistoryIndex++;
+        s.refreshCounter++;
       }
     },
     validateCaseAttributes: (s, action: PayloadAction<boolean>) => {

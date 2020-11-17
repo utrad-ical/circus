@@ -83,6 +83,7 @@ const RevisionEditor: React.FC<{
   updateEditingData: EditingDataUpdater;
   caseDispatch: React.Dispatch<any>;
   projectData: Project;
+  refreshCounter: number;
   busy: boolean;
 }> = props => {
   const {
@@ -90,6 +91,7 @@ const RevisionEditor: React.FC<{
     updateEditingData,
     caseDispatch,
     projectData,
+    refreshCounter,
     busy
   } = props;
 
@@ -514,7 +516,7 @@ const RevisionEditor: React.FC<{
               <Icon icon={labelTypes[activeLabel.type].icon} />{' '}
               <span className="label-name">{activeLabel.name}</span>
               <JsonSchemaEditor
-                key={activeLabel.temporaryKey}
+                key={activeLabel.temporaryKey + ':' + refreshCounter}
                 schema={projectData.labelAttributesSchema}
                 value={activeLabel.attributes || {}}
                 onChange={labelAttributesChange}
@@ -528,7 +530,7 @@ const RevisionEditor: React.FC<{
         </Collapser>
         <Collapser title="Case Attributes" className="case-attributes">
           <JsonSchemaEditor
-            key={revision.date}
+            key={refreshCounter}
             schema={projectData.caseAttributesSchema}
             value={revision.attributes}
             onChange={caseAttributesChange}

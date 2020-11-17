@@ -1,7 +1,6 @@
-import DicomVolume from 'circus-rs/src/common/DicomVolume';
-import { Vector3D } from 'circus-rs/src/common/geometry';
-import { Vector2 } from 'three';
-import { MprImageSource, RawData } from '../..';
+import { Section } from 'circus-rs/src/common/geometry';
+import { Box3, Vector2, Vector3 } from 'three';
+import { MprImageSource, RawData, VoxelCloud } from '../..';
 import { detectOrthogonalSection } from '../../section-util';
 import fuzzySelect from '../../util/fuzzySelect';
 import ViewerEvent from '../../viewer/ViewerEvent';
@@ -36,95 +35,128 @@ export default class WandTool extends VoxelCloudToolBase {
   public dragStartHandler(ev: ViewerEvent): void {
     super.dragStartHandler(ev);
     ev.stopPropagation();
+    if (!this.activeCloud) return; // no cloud to paint on
 
     const viewer = ev.viewer;
     const comp = viewer.getComposition();
     if (!comp) throw new Error('Composition not initialized'); // should not happen
 
-    const state = viewer.getState();
-    if (state.type !== 'mpr') throw new Error('Unsupported view state');
+    const src = comp.imageSource;
+    if (!(src instanceof MprImageSource))
+      throw new Error('Unsupported image source');
 
-    const src = comp.imageSource as MprImageSource;
-    if (!src) throw new Error('Unsupported image source');
+    const voxelSize = new Vector3().fromArray(src.metadata!.voxelSize);
     const dicomVolumeRawData = src.getDicomVolume();
 
-    if (!this.activeCloud) return; // no cloud to paint on
+    const { type, section } = viewer.getState();
+    if (type !== 'mpr') throw new Error('Unsupported view state');
 
-    const viewerPoint = this.convertViewerPoint(
+    const startPoint = this.convertViewerPoint(
       new Vector2(this.pX, this.pY),
       viewer
     );
 
-    const options = this.getOptions();
+    const { mode, threshold, maxDistance } = this.getOptions();
 
-    const section = state.section;
-    if (!section) return;
-    const orientation = detectOrthogonalSection(section);
-    if (orientation === 'oblique' && options.mode === '2d') {
-      alert('You cannot use Wand tool 2D on oblique MPR image.');
-      return;
-    }
+    const maxDistancesInIndex = new Vector3(
+      maxDistance,
+      maxDistance,
+      maxDistance
+    )
+      .clone()
+      .divide(voxelSize)
+      .round();
 
-    const detectMaxDistance = () => {
-      const maxDistance = dicomVolumeRawData
-        .getVoxelSize()
-        .map(v => Math.floor(options.maxDistance / v));
-      if (options.mode === '2d') {
-        if (orientation === 'axial') {
-          maxDistance[2] = 0;
-        } else if (orientation === 'sagittal') {
-          maxDistance[0] = 0;
-        } else if (orientation === 'coronal') {
-          maxDistance[1] = 0;
-        }
-      }
-      return maxDistance;
-    };
+    if (mode === '2d') adjustMaxDistancesAs2D(maxDistancesInIndex, section);
 
-    const params = {
-      startPoint: viewerPoint.toArray() as Vector3D,
-      maxDistance: detectMaxDistance() as Vector3D,
-      threshold: options.threshold,
-      value: this.value
-    };
+    const volumeBoundingBox = new Box3(
+      new Vector3(0, 0, 0),
+      new Vector3().fromArray(dicomVolumeRawData.getDimension())
+    );
 
-    this.activeCloud.expandToMaximum(src);
-    applyMagicWand(this.activeCloud.volume!, dicomVolumeRawData, params);
+    const maxDistanceBox = new Box3(
+      new Vector3(
+        startPoint.x - maxDistancesInIndex.x,
+        startPoint.y - maxDistancesInIndex.y,
+        startPoint.z - maxDistancesInIndex.z
+      ),
+      new Vector3(
+        startPoint.x + maxDistancesInIndex.x,
+        startPoint.y + maxDistancesInIndex.y,
+        startPoint.z + maxDistancesInIndex.z
+      )
+    );
+
+    const boundingBox = maxDistanceBox.intersect(volumeBoundingBox);
+
+    // Todo: Remove this code (and the function) if the requirement
+    // that the size must be divisible by 8 is removed.
+    adjustBoundingBoxSizeToDivisible8(boundingBox);
+
+    const selectedRawData = fuzzySelect(
+      dicomVolumeRawData,
+      startPoint,
+      boundingBox,
+      threshold,
+      this.value
+    );
+
+    // Apply changes to active cloud by merging selectedRawData.
+    if (!this.activeCloud.expanded) this.activeCloud.expandToMaximum(src);
+    applyChanges(this.activeCloud, 1, selectedRawData, boundingBox);
 
     comp.annotationUpdated(ev.viewer);
   }
 }
 
-function applyMagicWand(
-  voxelCloudRawData: RawData,
-  dicomVolumeRawData: DicomVolume,
-  params: {
-    startPoint: Vector3D; // control point (not mm!)
-    maxDistance: Vector3D; // maximum distance from the startPoint (not mm!)
-    threshold: number;
-    value: number;
+function adjustMaxDistancesAs2D(
+  maxDistancesInIndex: Vector3,
+  section: Section
+) {
+  const orientation = detectOrthogonalSection(section);
+  if (orientation === 'oblique') {
+    throw new Error('You cannot use Wand tool 2D on oblique MPR image.');
   }
-): void {
-  const { startPoint, maxDistance, threshold, value } = params;
 
-  const selectedOffset = startPoint.map((v, i) =>
-    Math.max(0, v - maxDistance[i])
-  );
-  const selectedRawData = fuzzySelect(
-    dicomVolumeRawData,
-    startPoint,
-    maxDistance,
-    threshold
-  );
-  const selectedSize = selectedRawData.getDimension();
+  if (orientation === 'axial') {
+    maxDistancesInIndex.z = 0;
+  } else if (orientation === 'sagittal') {
+    maxDistancesInIndex.x = 0;
+  } else if (orientation === 'coronal') {
+    maxDistancesInIndex.y = 0;
+  }
+}
 
-  const [xmin, ymin, zmin] = selectedOffset;
-  const [xmax, ymax, zmax] = selectedOffset.map((v, i) => v + selectedSize[i]);
-  for (let z = zmin; z < zmax; z++) {
-    for (let y = ymin; y < ymax; y++) {
-      for (let x = xmin; x < xmax; x++) {
-        if (selectedRawData.getPixelAt(x - xmin, y - ymin, z - zmin) === 1) {
-          voxelCloudRawData.writePixelAt(value, x, y, z);
+function adjustBoundingBoxSizeToDivisible8(bounding: Box3) {
+  const w0 = bounding.getSize(new Vector3()).add(new Vector3(1, 1, 1)).x;
+  if (w0 % 8 !== 0) {
+    const w1 = Math.ceil(w0 / 8) * 8;
+    bounding.max.x += w1 - w0;
+  }
+}
+
+/**
+ * Apply fuzzy select result to a cloud.
+ * @todo implement this function(now this is stub)
+ */
+function applyChanges(
+  cloud: VoxelCloud, // must be expanded to ensure including "boundingBox".
+  applyValue: number,
+  applyRawData: RawData,
+  boundingBox: Box3
+) {
+  const { min: min3, max: max3 } = boundingBox;
+  const [xmin, ymin, zmin] = min3.toArray();
+  const [xmax, ymax, zmax] = max3.toArray();
+
+  const selected = (x: number, y: number, z: number) =>
+    applyRawData.getPixelAt(x - xmin, y - ymin, z - zmin) === 1;
+
+  for (let z = zmin; z <= zmax; z++) {
+    for (let y = ymin; y <= ymax; y++) {
+      for (let x = xmin; x <= xmax; x++) {
+        if (selected(x, y, z)) {
+          cloud.volume!.writePixelAt(applyValue, x, y, z);
         }
       }
     }

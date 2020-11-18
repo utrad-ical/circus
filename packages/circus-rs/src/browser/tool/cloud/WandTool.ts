@@ -51,12 +51,25 @@ export default class WandTool extends VoxelCloudToolBase {
     const { type, section } = viewer.getState();
     if (type !== 'mpr') throw new Error('Unsupported view state');
 
-    const startPoint = this.convertViewerPoint(
-      new Vector2(this.pX, this.pY),
-      viewer
-    );
+    console.error('=========================');
+    console.error('Truncate cloud data for debug');
+    console.error('=========================');
+    this.activeCloud.volume?.fillAll(0);
 
-    const { mode, threshold, maxDistance } = this.getOptions();
+    // const startPoint = this.convertViewerPoint(
+    //   new Vector2(this.pX, this.pY),
+    //   viewer
+    // );
+
+    // const { mode, threshold, maxDistance } = this.getOptions();
+
+    const { startPoint, mode, threshold, maxDistance } = pickDebugArgs({
+      startPoint: this.convertViewerPoint(
+        new Vector2(this.pX, this.pY),
+        viewer
+      ),
+      ...this.getOptions()
+    });
 
     const maxDistancesInIndex = new Vector3(
       maxDistance,
@@ -90,6 +103,22 @@ export default class WandTool extends VoxelCloudToolBase {
     );
 
     const boundingBox = maxDistanceBox.intersect(volumeBoundingBox);
+    console.log(
+      JSON.stringify(
+        {
+          startPoint,
+          mode,
+          threshold,
+          maxDistance,
+          boundingBox: {
+            ...boundingBox,
+            size: boundingBox.getSize(new Vector3()).addScalar(1)
+          }
+        },
+        null,
+        2
+      )
+    );
 
     const selectedRawData = fuzzySelect(
       dicomVolumeRawData,
@@ -151,3 +180,22 @@ function applyChanges(
     }
   }
 }
+
+let debugArgs = [
+  {
+    title: 'axial表示中心の白いところ 450/9999',
+    startPoint: new Vector3(254, 250, 66),
+    mode: '3d',
+    threshold: 450,
+    maxDistance: 9999
+  }
+];
+const pickDebugArgs = (interactiveArg: any) => {
+  if (debugArgs.length > 0) {
+    // alert(debugArgs[0].title);
+    return debugArgs.shift();
+  } else {
+    console.log(interactiveArg);
+    return interactiveArg;
+  }
+};

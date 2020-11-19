@@ -3,7 +3,6 @@ import JsonSchemaEditor from '@smikitky/rb-components/lib/JsonSchemaEditor';
 import { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
 import * as rs from '@utrad-ical/circus-rs/src/browser';
 import { Composition, Viewer } from '@utrad-ical/circus-rs/src/browser';
-import WandTool from '@utrad-ical/circus-rs/src/browser/tool/cloud/WandTool';
 import ToolBaseClass from '@utrad-ical/circus-rs/src/browser/tool/Tool';
 import classNames from 'classnames';
 import Collapser from 'components/Collapser';
@@ -117,11 +116,9 @@ const RevisionEditor: React.FC<{
   );
 
   const [lineWidth, setLineWidth] = useState(1);
-  const [wandMode, setWandMode] = useState(WandTool.defaultMode);
-  const [wandThreshold, setWandThreshold] = useState(WandTool.defaultThreshold);
-  const [wandMaxDistance, setWandMaxDistance] = useState(
-    WandTool.defaultMaxDistance
-  );
+  const [wandMode, setWandMode] = useState('3d');
+  const [wandThreshold, setWandThreshold] = useState(450);
+  const [wandMaxDistance, setWandMaxDistance] = useState(9999);
 
   const [toolName, setToolName] = useState('');
   const [tool, setTool] = useState<ToolBaseClass | null>(null);

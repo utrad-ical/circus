@@ -1,11 +1,9 @@
+import { FigureType } from '../../annotation/SolidFigure';
 import SolidFigureTool from './SolidFigureTool';
 
 /**
  * CuboidTool
  */
 export default class CuboidTool extends SolidFigureTool {
-  constructor() {
-    super();
-    this.figureType = 'cuboid';
-  }
+  protected figureType: FigureType = 'cuboid';
 }

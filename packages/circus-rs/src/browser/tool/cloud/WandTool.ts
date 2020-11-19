@@ -3,33 +3,22 @@ import { MprImageSource } from '../..';
 import { detectOrthogonalSection } from '../../section-util';
 import fuzzySelect from '../../util/fuzzySelect';
 import ViewerEvent from '../../viewer/ViewerEvent';
+import { ToolOptions } from '../Tool';
 import VoxelCloudToolBase from './VoxelCloudToolBase';
 
-export type SelectDataMode = '2d' | '3d';
-export default class WandTool extends VoxelCloudToolBase {
-  // TODO: define default values
-  public static defaultMode: SelectDataMode = '3d';
-  public static defaultThreshold: number = 450;
-  public static defaultMaxDistance: number = 500;
+export interface WandToolOptions extends ToolOptions {
+  mode: '2d' | '3d';
+  threshold: number;
+  maxDistance: number;
+}
+
+export default class WandTool extends VoxelCloudToolBase<WandToolOptions> {
   protected value = 1;
-
-  constructor() {
-    super();
-    this.options = {
-      ...this.options,
-      mode: WandTool.defaultMode,
-      threshold: WandTool.defaultThreshold,
-      maxDistance: WandTool.defaultMaxDistance
-    };
-  }
-
-  protected getOptions() {
-    const options = this.options as any;
-    const mode: SelectDataMode = options.mode;
-    const threshold: number = options.threshold;
-    const maxDistance: number = options.maxDistance;
-    return { mode, threshold, maxDistance };
-  }
+  protected options = {
+    mode: '3d' as '2d' | '3d',
+    threshold: 450,
+    maxDistance: 500
+  };
 
   public dragStartHandler(ev: ViewerEvent): void {
     super.dragStartHandler(ev);
@@ -52,7 +41,7 @@ export default class WandTool extends VoxelCloudToolBase {
       viewer
     );
 
-    const { mode, threshold, maxDistance } = this.getOptions();
+    const { mode, threshold, maxDistance } = this.options;
 
     const mprRawData = src.getDicomVolume();
     const cloudRawData = this.activeCloud.volume!;

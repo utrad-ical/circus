@@ -1,12 +1,8 @@
-import ViewerEvent from '../../viewer/ViewerEvent';
-import VoxelCloudToolBase from './VoxelCloudToolBase';
+import BrushTool from './BrushTool';
 
 /**
  * EraserTool is a tool with which one can paint on an active voxel cloud.
  */
-export default class EraserTool extends VoxelCloudToolBase {
-  public dragHandler(ev: ViewerEvent): void {
-    super.dragHandler(ev);
-    this.dragDraw(ev, 0, 3);
-  }
+export default class EraserTool extends BrushTool {
+  protected value = 0;
 }

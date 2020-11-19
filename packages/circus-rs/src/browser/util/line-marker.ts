@@ -1,4 +1,3 @@
-import { write } from 'fs';
 import { Vector3, Box3 } from 'three';
 
 interface LineMarker {

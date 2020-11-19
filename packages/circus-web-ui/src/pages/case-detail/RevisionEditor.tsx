@@ -4,6 +4,7 @@ import { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
 import * as rs from '@utrad-ical/circus-rs/src/browser';
 import { Composition, Viewer } from '@utrad-ical/circus-rs/src/browser';
 import ToolBaseClass from '@utrad-ical/circus-rs/src/browser/tool/Tool';
+import { ToolCollection } from '@utrad-ical/circus-rs/src/browser/tool/tool-initializer';
 import classNames from 'classnames';
 import Collapser from 'components/Collapser';
 import Icon from 'components/Icon';
@@ -116,7 +117,7 @@ const RevisionEditor: React.FC<{
   );
 
   const [lineWidth, setLineWidth] = useState(1);
-  const [wandMode, setWandMode] = useState('3d');
+  const [wandMode, setWandMode] = useState('3d' as '2d'|'3d');
   const [wandThreshold, setWandThreshold] = useState(450);
   const [wandMaxDistance, setWandMaxDistance] = useState(9999);
 
@@ -270,7 +271,7 @@ const RevisionEditor: React.FC<{
   }, [stateChanger, viewOptions.interpolationMode]);
 
   const getTool = useCallback(
-    (toolName: string): ToolBaseClass => {
+    <T extends keyof ToolCollection>(toolName: T): ToolCollection[T] => {
       const tool = tools[toolName] || rs.toolFactory(toolName);
       tools[toolName] = tool;
       return tool;

@@ -28,7 +28,7 @@ export default function fuzzySelect(
   const maxValue = baseValue + threshold;
   const minValue = baseValue - threshold;
 
-  const binarize = (p: Vector3) => {
+  const binarizer = (p: Vector3) => {
     const value = mprRawData.getPixelAt(p.x, p.y, p.z);
     return minValue <= value && value <= maxValue;
   };
@@ -39,7 +39,7 @@ export default function fuzzySelect(
     }
   };
 
-  return fuzzySelectWithFloodFill3D(startPoint, offsetBox, binarize, fillLine);
+  return fuzzySelectWithFloodFill3D(startPoint, offsetBox, binarizer, fillLine);
 }
 
 /**
@@ -101,10 +101,10 @@ function detectOffsetBox(
 function fuzzySelectWithFloodFill3D(
   startPoint: Vector3,
   offsetBox: Box3,
-  binarize: (p: Vector3) => boolean,
+  binarizer: (p: Vector3) => boolean,
   fillLine: (p1: Vector3, p2: Vector3) => void
 ) {
-  if (!binarize(startPoint)) return;
+  if (!binarizer(startPoint)) return;
 
   const report = {
     _start: () => (report.start = new Date().getTime()),
@@ -142,7 +142,7 @@ function fuzzySelectWithFloodFill3D(
   const stackPoints = (walker: Vector3, xend: number) => {
     let isScanLine = false;
     for (; walker.x <= xend; walker.x++) {
-      const mustStack = !marked(walker) && binarize(walker);
+      const mustStack = !marked(walker) && binarizer(walker);
       if (!isScanLine && mustStack) {
         stack.push(walker.clone());
         isScanLine = true;
@@ -164,11 +164,11 @@ function fuzzySelectWithFloodFill3D(
     // find start of scan-line
     do {
       left.x--;
-    } while (min.x <= left.x && !marked(left) && binarize(left));
+    } while (min.x <= left.x && !marked(left) && binarizer(left));
     // find start of scan-line
     do {
       right.x++;
-    } while (right.x <= max.x && !marked(right) && binarize(right));
+    } while (right.x <= max.x && !marked(right) && binarizer(right));
 
     // adjust the points to endpoint from theirs neighbor.
     left.x++;
